@@ -7,8 +7,8 @@ import java.util.Objects;
 
 import org.springframework.util.CollectionUtils;
 
-import esa.s1pdgs.cpoc.appcatalog.common.rest.model.job.AppDataJobDto;
-import esa.s1pdgs.cpoc.appcatalog.common.rest.model.job.AppDataJobGenerationDto;
+import esa.s1pdgs.cpoc.appcatalog.server.job.db.AppDataJob;
+import esa.s1pdgs.cpoc.appcatalog.server.job.db.AppDataJobGeneration;
 import esa.s1pdgs.cpoc.jobgenerator.model.joborder.JobOrder;
 import esa.s1pdgs.cpoc.jobgenerator.model.metadata.SearchMetadataResult;
 
@@ -27,12 +27,12 @@ public class JobGeneration {
     /**
      * Applicative data job
      */
-    private AppDataJobDto appDataJob;
+    private AppDataJob appDataJob;
 
     /**
      * Job generation
      */
-    private AppDataJobGenerationDto generation;
+    private AppDataJobGeneration generation;
 
     /**
      * Job order to send to the wrapper (object used to map a job order in the
@@ -53,15 +53,15 @@ public class JobGeneration {
      * @param stopTime
      * @param product
      */
-    public JobGeneration(final AppDataJobDto appDataJob, final String taskTable) {
+    public JobGeneration(final AppDataJob appDataJob, final String taskTable) {
         this.appDataJob = appDataJob;
         this.metadataQueries = new HashMap<>();
-        List<AppDataJobGenerationDto> generations = appDataJob.getGenerations();
+        List<AppDataJobGeneration> generations = appDataJob.getGenerations();
         if (CollectionUtils.isEmpty(generations)) {
-            generation = new AppDataJobGenerationDto();
+            generation = new AppDataJobGeneration();
             generation.setTaskTable(taskTable);
         } else {
-            for (AppDataJobGenerationDto jobGen : generations) {
+            for (AppDataJobGeneration jobGen : generations) {
                 if (taskTable.equals(jobGen.getTaskTable())) {
                     generation = jobGen;
                     break;
@@ -70,14 +70,14 @@ public class JobGeneration {
         }
     }
     
-    public void updateAppDataJob(final AppDataJobDto appDataJob, final String taskTable) {
+    public void updateAppDataJob(final AppDataJob appDataJob, final String taskTable) {
         this.appDataJob = appDataJob;
-        List<AppDataJobGenerationDto> generations = appDataJob.getGenerations();
+        List<AppDataJobGeneration> generations = appDataJob.getGenerations();
         if (CollectionUtils.isEmpty(generations)) {
-            generation = new AppDataJobGenerationDto();
+            generation = new AppDataJobGeneration();
             generation.setTaskTable(taskTable);
         } else {
-            for (AppDataJobGenerationDto jobGen : generations) {
+            for (AppDataJobGeneration jobGen : generations) {
                 if (taskTable.equals(jobGen.getTaskTable())) {
                     generation = jobGen;
                     break;
@@ -89,7 +89,7 @@ public class JobGeneration {
     /**
      * @return the appDataJob
      */
-    public AppDataJobDto getAppDataJob() {
+    public AppDataJob getAppDataJob() {
         return appDataJob;
     }
 
@@ -97,14 +97,14 @@ public class JobGeneration {
      * @param appDataJob
      *            the appDataJob to set
      */
-    public void setAppDataJob(final AppDataJobDto appDataJob) {
+    public void setAppDataJob(final AppDataJob appDataJob) {
         this.appDataJob = appDataJob;
     }
 
     /**
      * @return the generation
      */
-    public AppDataJobGenerationDto getGeneration() {
+    public AppDataJobGeneration getGeneration() {
         return generation;
     }
 
@@ -112,7 +112,7 @@ public class JobGeneration {
      * @param generation
      *            the generation to set
      */
-    public void setGeneration(final AppDataJobGenerationDto generation) {
+    public void setGeneration(final AppDataJobGeneration generation) {
         this.generation = generation;
     }
 

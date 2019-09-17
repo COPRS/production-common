@@ -19,9 +19,9 @@ import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 
 import esa.s1pdgs.cpoc.appcatalog.client.job.AppCatalogJobClient;
-import esa.s1pdgs.cpoc.appcatalog.common.rest.model.job.AppDataJobDto;
-import esa.s1pdgs.cpoc.appcatalog.common.rest.model.job.AppDataJobDtoState;
-import esa.s1pdgs.cpoc.appcatalog.common.rest.model.job.AppDataJobProductDto;
+import esa.s1pdgs.cpoc.appcatalog.server.job.db.AppDataJob;
+import esa.s1pdgs.cpoc.appcatalog.server.job.db.AppDataJobProduct;
+import esa.s1pdgs.cpoc.appcatalog.server.job.db.AppDataJobState;
 import esa.s1pdgs.cpoc.common.ApplicationLevel;
 import esa.s1pdgs.cpoc.common.ApplicationMode;
 import esa.s1pdgs.cpoc.common.ProductFamily;
@@ -254,15 +254,15 @@ public class L1AppConsumerTest {
     @Test
     public void testReceiveAlreadyExistOtherPod()
             throws AbstractCodedException, ParseException {
-        AppDataJobDto<ProductDto> job1 = new AppDataJobDto<>();
+        AppDataJob job1 = new AppDataJob();
         job1.setIdentifier(12L);
         job1.setPod("i-hostname");
-        job1.setProduct(new AppDataJobProductDto());
+        job1.setProduct(new AppDataJobProduct());
         job1.getProduct().setProductName("p1");
-        AppDataJobDto<ProductDto> job2 = new AppDataJobDto<>();
+        AppDataJob job2 = new AppDataJob();
         job2.setIdentifier(24L);
         job2.setPod("other-hostname");
-        job2.setProduct(new AppDataJobProductDto());
+        job2.setProduct(new AppDataJobProduct());
         job2.getProduct().setProductName("p2");
         doReturn(message1).when(mqiService).next(Mockito.any());
         doReturn(Arrays.asList(job1, job2)).when(appDataService)
@@ -288,15 +288,15 @@ public class L1AppConsumerTest {
     @Test
     public void testReceiveAlreadyExistSamePodWaiting()
             throws AbstractCodedException, ParseException {
-        AppDataJobDto<ProductDto> job1 = new AppDataJobDto<>();
+        AppDataJob job1 = new AppDataJob();
         job1.setIdentifier(12L);
         job1.setPod("hostname");
-        job1.setProduct(new AppDataJobProductDto());
+        job1.setProduct(new AppDataJobProduct());
         job1.getProduct().setProductName("p1");
-        AppDataJobDto<ProductDto> job2 = new AppDataJobDto<>();
+        AppDataJob job2 = new AppDataJob();
         job2.setIdentifier(24L);
         job2.setPod("other-hostname");
-        job2.setProduct(new AppDataJobProductDto());
+        job2.setProduct(new AppDataJobProduct());
         job2.getProduct().setProductName("p2");
         doReturn(message1).when(mqiService).next(Mockito.any());
         doReturn(Arrays.asList(job1, job2)).when(appDataService)
@@ -322,16 +322,16 @@ public class L1AppConsumerTest {
     @Test
     public void testReceiveAlreadyExistSamePodGenerating()
             throws AbstractCodedException, ParseException {
-        AppDataJobDto<ProductDto> job1 = new AppDataJobDto<>();
+        AppDataJob job1 = new AppDataJob();
         job1.setIdentifier(12L);
         job1.setPod("hostname");
-        job1.setState(AppDataJobDtoState.DISPATCHING);
-        job1.setProduct(new AppDataJobProductDto());
+        job1.setState(AppDataJobState.DISPATCHING);
+        job1.setProduct(new AppDataJobProduct());
         job1.getProduct().setProductName("p1");
-        AppDataJobDto<ProductDto> job2 = new AppDataJobDto<>();
+        AppDataJob job2 = new AppDataJob();
         job2.setIdentifier(24L);
         job2.setPod("other-hostname");
-        job2.setProduct(new AppDataJobProductDto());
+        job2.setProduct(new AppDataJobProduct());
         job2.getProduct().setProductName("p1");
         doReturn(message1).when(mqiService).next(Mockito.any());
         doReturn(Arrays.asList(job1, job2)).when(appDataService)

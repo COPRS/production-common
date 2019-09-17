@@ -54,8 +54,8 @@ public class LevelReportDto extends AbstractDto {
      */
     @Override
     public String toString() {
-        return String.format("{productName: %s, content: %s, family: %s}",
-                getProductName(), content, getFamily());
+        return String.format("{productName: %s, content: %s, family: %s, hostname: %s, creationDate: %s}",
+                getProductName(), content, getFamily(), getHostname(), getCreationDate());
     }
 
     /**

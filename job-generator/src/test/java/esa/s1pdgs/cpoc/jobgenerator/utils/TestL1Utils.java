@@ -3,11 +3,11 @@ package esa.s1pdgs.cpoc.jobgenerator.utils;
 import java.util.Arrays;
 import java.util.Calendar;
 
-import esa.s1pdgs.cpoc.appcatalog.common.rest.model.job.AppDataJobDto;
-import esa.s1pdgs.cpoc.appcatalog.common.rest.model.job.AppDataJobDtoState;
-import esa.s1pdgs.cpoc.appcatalog.common.rest.model.job.AppDataJobGenerationDto;
-import esa.s1pdgs.cpoc.appcatalog.common.rest.model.job.AppDataJobGenerationDtoState;
-import esa.s1pdgs.cpoc.appcatalog.common.rest.model.job.AppDataJobProductDto;
+import esa.s1pdgs.cpoc.appcatalog.server.job.db.AppDataJob;
+import esa.s1pdgs.cpoc.appcatalog.server.job.db.AppDataJobGeneration;
+import esa.s1pdgs.cpoc.appcatalog.server.job.db.AppDataJobGenerationState;
+import esa.s1pdgs.cpoc.appcatalog.server.job.db.AppDataJobProduct;
+import esa.s1pdgs.cpoc.appcatalog.server.job.db.AppDataJobState;
 import esa.s1pdgs.cpoc.common.ApplicationLevel;
 import esa.s1pdgs.cpoc.common.ProductFamily;
 import esa.s1pdgs.cpoc.common.errors.InternalErrorException;
@@ -62,11 +62,11 @@ public class TestL1Utils {
         return r;
     }
 
-    public static  AppDataJobDto<ProductDto> buildJobGeneration(
+    public static  AppDataJob buildJobGeneration(
             boolean preSearchInfo) throws InternalErrorException {
-        AppDataJobDto<ProductDto> ret = new AppDataJobDto<>();
+        AppDataJob ret = new AppDataJob();
         ret.setIdentifier(123);
-        ret.setState(AppDataJobDtoState.GENERATING);
+        ret.setState(AppDataJobState.GENERATING);
         ret.setPod("hostname");
         ret.setLevel(ApplicationLevel.L0);
 
@@ -82,7 +82,7 @@ public class TestL1Utils {
         start1.set(2017, Calendar.DECEMBER, 13, 14, 59, 48);
         Calendar stop1 = Calendar.getInstance();
         stop1.set(2017, Calendar.DECEMBER, 13, 15, 17, 25);
-        AppDataJobProductDto product = new AppDataJobProductDto();
+        AppDataJobProduct product = new AppDataJobProduct();
         product.setMissionId("S1");
         product.setProductName(
                 "S1A_IW_RAW__0SDV_20171213T142312_20171213T142344_019685_02173E_07F5.SAFE");
@@ -102,18 +102,18 @@ public class TestL1Utils {
         }
         ret.setProduct(product);
 
-        AppDataJobGenerationDto gen1 = new AppDataJobGenerationDto();
+        AppDataJobGeneration gen1 = new AppDataJobGeneration();
         gen1.setTaskTable("IW_RAW__0_GRDH_1.xml");
-        gen1.setState(AppDataJobGenerationDtoState.INITIAL);
-        AppDataJobGenerationDto gen2 = new AppDataJobGenerationDto();
+        gen1.setState(AppDataJobGenerationState.INITIAL);
+        AppDataJobGeneration gen2 = new AppDataJobGeneration();
         gen2.setTaskTable("IW_RAW__0_GRDM_1.xml");
-        gen2.setState(AppDataJobGenerationDtoState.READY);
-        AppDataJobGenerationDto gen3 = new AppDataJobGenerationDto();
+        gen2.setState(AppDataJobGenerationState.READY);
+        AppDataJobGeneration gen3 = new AppDataJobGeneration();
         gen3.setTaskTable("IW_RAW__0_SLC__1.xml");
-        gen3.setState(AppDataJobGenerationDtoState.PRIMARY_CHECK);
-        AppDataJobGenerationDto gen4 = new AppDataJobGenerationDto();
+        gen3.setState(AppDataJobGenerationState.PRIMARY_CHECK);
+        AppDataJobGeneration gen4 = new AppDataJobGeneration();
         gen4.setTaskTable("IW_RAW__0_SLC__1_GRDH_1.xml");
-        gen4.setState(AppDataJobGenerationDtoState.SENT);
+        gen4.setState(AppDataJobGenerationState.SENT);
         ret.setGenerations(Arrays.asList(gen1, gen2, gen3, gen4));
 
         return ret;

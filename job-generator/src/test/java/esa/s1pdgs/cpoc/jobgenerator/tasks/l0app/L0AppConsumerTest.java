@@ -20,7 +20,7 @@ import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 
 import esa.s1pdgs.cpoc.appcatalog.client.job.AppCatalogJobClient;
-import esa.s1pdgs.cpoc.appcatalog.common.rest.model.job.AppDataJobDto;
+import esa.s1pdgs.cpoc.appcatalog.server.job.db.AppDataJob;
 import esa.s1pdgs.cpoc.common.ApplicationLevel;
 import esa.s1pdgs.cpoc.common.ApplicationMode;
 import esa.s1pdgs.cpoc.common.EdrsSessionFileType;
@@ -290,7 +290,7 @@ public class L0AppConsumerTest {
         GenericMessageDto<EdrsSessionDto> message =
                 new GenericMessageDto<EdrsSessionDto>(123, "", dto);
 
-        AppDataJobDto<EdrsSessionDto> expected = TestL0Utils.buildAppDataEdrsSession(false);
+        AppDataJob expected = TestL0Utils.buildAppDataEdrsSession(false);
 
         doReturn(Arrays.asList(expected)).when(appDataService)
                 .findByMessagesIdentifier(Mockito.anyLong());
@@ -299,7 +299,7 @@ public class L0AppConsumerTest {
                 processSettings, mqiService, mqiStatusService, appDataService,
                 errorAppender, appStatus, metadataService);
 
-        AppDataJobDto<EdrsSessionDto> result = edrsSessionsConsumer.buildJob(message);
+        AppDataJob result = edrsSessionsConsumer.buildJob(message);
         verify(appDataService, never()).patchJob(Mockito.anyLong(),
                 Mockito.any(), Mockito.anyBoolean(), Mockito.anyBoolean(),
                 Mockito.anyBoolean());
@@ -315,9 +315,9 @@ public class L0AppConsumerTest {
         GenericMessageDto<EdrsSessionDto> message =
                 new GenericMessageDto<EdrsSessionDto>(123, "", dto);
 
-        AppDataJobDto<EdrsSessionDto> expected =
+        AppDataJob expected =
                 TestL0Utils.buildAppDataEdrsSession(true);
-        AppDataJobDto<EdrsSessionDto> returned =
+        AppDataJob returned =
                 TestL0Utils.buildAppDataEdrsSession(true);
         returned.setPod("other-pod");
 
@@ -328,7 +328,7 @@ public class L0AppConsumerTest {
                 processSettings, mqiService, mqiStatusService, appDataService,
                 errorAppender, appStatus, metadataService);
 
-        AppDataJobDto<EdrsSessionDto> result =
+        AppDataJob result =
                 edrsSessionsConsumer.buildJob(message);
         verify(appDataService, times(1)).patchJob(Mockito.eq(123L),
                 Mockito.any(), Mockito.eq(false), Mockito.eq(false),
@@ -344,9 +344,9 @@ public class L0AppConsumerTest {
         GenericMessageDto<EdrsSessionDto> message =
                 new GenericMessageDto<EdrsSessionDto>(123, "", dto);
 
-        AppDataJobDto<EdrsSessionDto> expected =
+        AppDataJob expected =
                 TestL0Utils.buildAppDataEdrsSession(true);
-        AppDataJobDto<EdrsSessionDto> returned =
+        AppDataJob returned =
                 TestL0Utils.buildAppDataEdrsSessionWithRaw2(true);
 
         doReturn(null).when(appDataService)
@@ -358,7 +358,7 @@ public class L0AppConsumerTest {
                 processSettings, mqiService, mqiStatusService, appDataService,
                 errorAppender, appStatus, metadataService);
 
-        AppDataJobDto<EdrsSessionDto> result =
+        AppDataJob result =
                 edrsSessionsConsumer.buildJob(message);
         verify(appDataService, times(1)).patchJob(Mockito.eq(123L),
                 Mockito.any(), Mockito.eq(true), Mockito.eq(true),
@@ -379,9 +379,9 @@ public class L0AppConsumerTest {
         GenericMessageDto<EdrsSessionDto> message =
                 new GenericMessageDto<EdrsSessionDto>(123, "", dto);
 
-        AppDataJobDto<EdrsSessionDto> expected =
+        AppDataJob expected =
                 TestL0Utils.buildAppDataEdrsSession(true);
-        AppDataJobDto<EdrsSessionDto> returned =
+        AppDataJob returned =
                 TestL0Utils.buildAppDataEdrsSession(true);
         returned.setPod("other-pod");
 
@@ -394,7 +394,7 @@ public class L0AppConsumerTest {
                 processSettings, mqiService, mqiStatusService, appDataService,
                 errorAppender, appStatus, metadataService);
 
-        AppDataJobDto<EdrsSessionDto> result =
+        AppDataJob result =
                 edrsSessionsConsumer.buildJob(message);
         verify(appDataService, times(1)).patchJob(Mockito.eq(123L),
                 Mockito.any(), Mockito.eq(false), Mockito.eq(false),

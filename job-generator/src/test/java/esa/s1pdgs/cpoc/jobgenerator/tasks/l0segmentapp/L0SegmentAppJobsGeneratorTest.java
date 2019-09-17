@@ -36,8 +36,8 @@
 //import com.fasterxml.jackson.databind.ObjectMapper;
 //
 //import esa.s1pdgs.cpoc.appcatalog.client.job.AppCatalogJobClient;
-//import esa.s1pdgs.cpoc.appcatalog.common.rest.model.job.AppDataJobDto;
-//import esa.s1pdgs.cpoc.appcatalog.common.rest.model.job.AppDataJobProductDto;
+//import esa.s1pdgs.cpoc.appcatalog.server.job.db.AppDataJob;
+//import esa.s1pdgs.cpoc.appcatalog.server.job.db.AppDataJobProduct;
 //import esa.s1pdgs.cpoc.common.ApplicationLevel;
 //import esa.s1pdgs.cpoc.common.ProductFamily;
 //import esa.s1pdgs.cpoc.common.errors.AbstractCodedException;
@@ -101,7 +101,7 @@
 //    @Before
 //    public void init() throws Exception {
 //
-//        AppDataJobDto<ProductDto> appDataJob =
+//        AppDataJob appDataJob =
 //                TestL0SegmentUtils.buildAppData();
 //        job = new JobGeneration(appDataJob, "TaskTable.L0ASP.xml");
 //
@@ -588,7 +588,7 @@
 //
 //    @Test
 //    public void testCustomJobDto() {
-//        AppDataJobDto<ProductDto> appDataJob =
+//        AppDataJob appDataJob =
 //                TestL0SegmentUtils.buildAppData();
 //        JobGeneration job =
 //                new JobGeneration(appDataJob, "TaskTable.L0ASP.xml");
@@ -601,7 +601,7 @@
 //    @Test
 //    public void testCustomJobOrder() {
 //        JobOrder jobOrder = TestL0Utils.buildJobOrderL20171109175634707000125();
-//        AppDataJobDto<ProductDto> appDataJob =
+//        AppDataJob appDataJob =
 //                TestL0SegmentUtils.buildAppData();
 //        appDataJob.getProduct().setSatelliteId("B");
 //        appDataJob.getProduct().setMissionId("S1");
@@ -726,30 +726,30 @@
 //
 //        assertEquals("2018-10-05T12:55:00.000000Z",
 //                generator.getStartSensingDate(listSortedFull,
-//                        AppDataJobProductDto.TIME_FORMATTER));
+//                        AppDataJobProduct.TIME_FORMATTER));
 //        assertEquals("20181005_125500_000000",
 //                generator.getStartSensingDate(listSortedFull,
 //                        DateTimeFormatter.ofPattern("yyyyMMdd_HHmmss_SSSSSS")));
 //        assertEquals("2018-10-12T18:58:06.985621Z",
 //                generator.getStopSensingDate(listSortedFull,
-//                        AppDataJobProductDto.TIME_FORMATTER));
+//                        AppDataJobProduct.TIME_FORMATTER));
 //
 //        assertEquals("2018-10-05T12:55:00.000000Z",
 //                generator.getStartSensingDate(listSortedFull,
-//                        AppDataJobProductDto.TIME_FORMATTER));
+//                        AppDataJobProduct.TIME_FORMATTER));
 //        assertEquals("2018-10-12T18:55:00.124356Z",
 //                generator.getStopSensingDate(listSortedOne,
-//                        AppDataJobProductDto.TIME_FORMATTER));
+//                        AppDataJobProduct.TIME_FORMATTER));
 //
 //        assertNull(generator.getStartSensingDate(new ArrayList<>(),
-//                AppDataJobProductDto.TIME_FORMATTER));
+//                AppDataJobProduct.TIME_FORMATTER));
 //        assertNull(generator.getStopSensingDate(new ArrayList<>(),
-//                AppDataJobProductDto.TIME_FORMATTER));
+//                AppDataJobProduct.TIME_FORMATTER));
 //
 //        assertNull(generator.getStartSensingDate(null,
-//                AppDataJobProductDto.TIME_FORMATTER));
+//                AppDataJobProduct.TIME_FORMATTER));
 //        assertNull(generator.getStopSensingDate(null,
-//                AppDataJobProductDto.TIME_FORMATTER));
+//                AppDataJobProduct.TIME_FORMATTER));
 //
 //    }
 //
@@ -760,26 +760,26 @@
 //        String date3 = "2017-10-24T12:11:02.123456Z";
 //
 //        assertEquals(date1, generator.least(date1, date2,
-//                AppDataJobProductDto.TIME_FORMATTER));
+//                AppDataJobProduct.TIME_FORMATTER));
 //        assertEquals(date1, generator.least(date2, date1,
-//                AppDataJobProductDto.TIME_FORMATTER));
+//                AppDataJobProduct.TIME_FORMATTER));
 //        assertEquals(date3, generator.least(date1, date3,
-//                AppDataJobProductDto.TIME_FORMATTER));
+//                AppDataJobProduct.TIME_FORMATTER));
 //        assertEquals(date3, generator.least(date2, date3,
-//                AppDataJobProductDto.TIME_FORMATTER));
+//                AppDataJobProduct.TIME_FORMATTER));
 //        assertEquals(date1, generator.least(date1, date1,
-//                AppDataJobProductDto.TIME_FORMATTER));
+//                AppDataJobProduct.TIME_FORMATTER));
 //
 //        assertEquals(date2, generator.more(date1, date2,
-//                AppDataJobProductDto.TIME_FORMATTER));
+//                AppDataJobProduct.TIME_FORMATTER));
 //        assertEquals(date2, generator.more(date2, date1,
-//                AppDataJobProductDto.TIME_FORMATTER));
+//                AppDataJobProduct.TIME_FORMATTER));
 //        assertEquals(date1, generator.more(date1, date3,
-//                AppDataJobProductDto.TIME_FORMATTER));
+//                AppDataJobProduct.TIME_FORMATTER));
 //        assertEquals(date2, generator.more(date2, date3,
-//                AppDataJobProductDto.TIME_FORMATTER));
+//                AppDataJobProduct.TIME_FORMATTER));
 //        assertEquals(date1, generator.more(date1, date1,
-//                AppDataJobProductDto.TIME_FORMATTER));
+//                AppDataJobProduct.TIME_FORMATTER));
 //
 //    }
 //

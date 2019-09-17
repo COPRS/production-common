@@ -22,11 +22,9 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import esa.s1pdgs.cpoc.appcatalog.common.rest.model.job.AppDataJobDto;
-import esa.s1pdgs.cpoc.appcatalog.common.rest.model.job.AppDataJobGenerationDto;
-import esa.s1pdgs.cpoc.appcatalog.common.rest.model.job.AppDataJobGenerationDtoState;
-import esa.s1pdgs.cpoc.appcatalog.server.job.converter.JobConverter;
 import esa.s1pdgs.cpoc.appcatalog.server.job.db.AppDataJob;
+import esa.s1pdgs.cpoc.appcatalog.server.job.db.AppDataJobGeneration;
+import esa.s1pdgs.cpoc.appcatalog.server.job.db.AppDataJobGenerationState;
 import esa.s1pdgs.cpoc.appcatalog.server.job.db.AppDataJobService;
 import esa.s1pdgs.cpoc.appcatalog.server.job.exception.AppCatalogJobGenerationInvalidStateException;
 import esa.s1pdgs.cpoc.appcatalog.server.job.exception.AppCatalogJobGenerationInvalidTransitionStateException;
@@ -39,7 +37,6 @@ import esa.s1pdgs.cpoc.common.ProductCategory;
 import esa.s1pdgs.cpoc.common.errors.InternalErrorException;
 import esa.s1pdgs.cpoc.common.filter.FilterCriterion;
 import esa.s1pdgs.cpoc.common.filter.FilterUtils;
-import esa.s1pdgs.cpoc.mqi.model.queue.AbstractDto;
 
 /**
  * @author Viveris Technologies
@@ -50,8 +47,6 @@ public class JobController {
     private static final Logger LOGGER = LogManager.getLogger(JobController.class);
 
     private final AppDataJobService appDataJobService;
-
-    private final JobConverter jobConverter;
 
     private final static String PK_ORDER_BY_ASC = "[orderByAsc]";
     private final static String PK_ORDER_BY_DESC = "[orderByDesc]";
@@ -72,11 +67,9 @@ public class JobController {
      */
     public JobController(
     		final AppDataJobService appDataJobService,
-            final JobConverter jobConverter,
             final JobControllerConfiguration config
     ) {
         this.appDataJobService = appDataJobService;
-        this.jobConverter = jobConverter;
         this.config = config;
     }
 
@@ -91,7 +84,7 @@ public class JobController {
      * @throws InternalErrorException
      */
     @RequestMapping(method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_UTF8_VALUE, path = "/{category}/jobs/search")
-    public List<AppDataJobDto> search(
+    public List<AppDataJob> search(
     		@PathVariable(name = "category") final String categoryName,
             @RequestParam Map<String, String> params)
             throws AppCatalogJobNotFoundException,
@@ -135,13 +128,7 @@ public class JobController {
             }
         }
         // Search
-        List<AppDataJob> jobsDb = appDataJobService.search(filters, category, sort);
-        // Convert into DTO
-        List<AppDataJobDto> jobsDto = new ArrayList<>();
-        for (AppDataJob jobDb : jobsDb) {
-            jobsDto.add(jobConverter.convertJobFromDbToDto(jobDb, category));
-        }
-        return jobsDto;
+        return appDataJobService.search(filters, category, sort);
     }
 
     /**
@@ -154,15 +141,13 @@ public class JobController {
      * @throws AppCatalogJobInvalidStateException
      */
     @RequestMapping(method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_UTF8_VALUE, path = "/{category}/jobs/{jobId}")
-    public AppDataJobDto one(
+    public AppDataJob one(
     		@PathVariable(name = "category") final String categoryName,
     		@PathVariable(name = "jobId") final Long jobId)
             throws AppCatalogJobNotFoundException,
             AppCatalogJobInvalidStateException,
             AppCatalogJobGenerationInvalidStateException {
-    	final ProductCategory category = ProductCategory.valueOf(categoryName.toUpperCase());
-        return jobConverter
-                .convertJobFromDbToDto(appDataJobService.getJob(jobId), category);
+        return appDataJobService.getJob(jobId);
     }
 
     /**
@@ -174,20 +159,15 @@ public class JobController {
      * @throws AppCatalogJobGenerationInvalidStateException
      */
     @RequestMapping(method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE, path = "/{category}/jobs")
-    public AppDataJobDto newJob(
+    public AppDataJob newJob(
     		@PathVariable(name = "category") final String categoryName,
-    		@RequestBody final AppDataJobDto newJob)
+    		@RequestBody final AppDataJob newJob)
             throws AppCatalogJobInvalidStateException,
             AppCatalogJobGenerationInvalidStateException {
     	LOGGER.debug ("== newJob {}",newJob.toString());
-    	final ProductCategory category = ProductCategory.valueOf(categoryName.toUpperCase());
-        // Convert into database message
-        AppDataJob newJobDb = jobConverter.convertJobFromDtoToDb(newJob, category);
-    	LOGGER.debug ("== newJobDb {}",newJobDb.toString());
 
     	// Create it
-    	AppDataJobDto<AbstractDto> jobResult = jobConverter
-        .convertJobFromDbToDto(appDataJobService.newJob(newJobDb), category);
+    	AppDataJob jobResult = appDataJobService.newJob(newJob);
     	LOGGER.debug ("== jobResult {}", jobResult.toString());
 
         return jobResult;
@@ -214,16 +194,14 @@ public class JobController {
      * @throws AppCatalogJobGenerationInvalidStateException
      */
     @RequestMapping(method = RequestMethod.PATCH, produces = MediaType.APPLICATION_JSON_UTF8_VALUE, path = "/{category}/jobs/{jobId}")
-    public AppDataJobDto patchJob(
+    public AppDataJob patchJob(
     		@PathVariable(name = "category") final String categoryName,
             @PathVariable(name = "jobId") final Long jobId,
-            @RequestBody final AppDataJobDto patchJob)
+            @RequestBody final AppDataJob patchJob)
             throws AppCatalogJobInvalidStateException,
             AppCatalogJobNotFoundException,
             AppCatalogJobGenerationInvalidStateException {
-    	final ProductCategory category = ProductCategory.valueOf(categoryName.toUpperCase());
-        return jobConverter.convertJobFromDbToDto(appDataJobService
-                .patchJob(jobId, jobConverter.convertJobFromDtoToDb(patchJob, category)), category);
+        return appDataJobService.patchJob(jobId,patchJob);
     }
 
     /**
@@ -239,24 +217,21 @@ public class JobController {
      * @throws AppCatalogJobGenerationInvalidTransitionStateException
      */
     @RequestMapping(method = RequestMethod.PATCH, produces = MediaType.APPLICATION_JSON_UTF8_VALUE, path = "/{category}/jobs/{jobId}/generations/{taskTable}")
-    public AppDataJobDto patchGenerationOfJob(
+    public AppDataJob patchGenerationOfJob(
     		@PathVariable(name = "category") final String categoryName,
             @PathVariable(name = "jobId") final Long jobId,
             @PathVariable(name = "taskTable") final String taskTable,
-            @RequestBody final AppDataJobGenerationDto generation)
+            @RequestBody final AppDataJobGeneration generation)
             throws AppCatalogJobInvalidStateException,
             AppCatalogJobGenerationInvalidStateException,
             AppCatalogJobNotFoundException,
             AppCatalogJobGenerationInvalidTransitionStateException,
             AppCatalogJobGenerationNotFoundException {
     	final ProductCategory category = ProductCategory.valueOf(categoryName.toUpperCase());
-        AppDataJobDto ret = null;
+        AppDataJob ret = null;
         try {
-            ret = jobConverter.convertJobFromDbToDto(
-                    appDataJobService.patchGenerationToJob(jobId, taskTable,
-                            jobConverter.convertJobGenerationFromDtoToDb(
-                                    generation),
-                            getFor(category, generation.getState())), category);
+            ret = appDataJobService.patchGenerationToJob(jobId, taskTable, generation,
+                            getFor(category, generation.getState()));
         } catch (AppCatalogJobGenerationTerminatedException e) {
             LOGGER.error("[jobId {}] [taskTable {}] [code {}] {}", jobId,
                     taskTable, e.getCode().getCode(), e.getLogMessage());
@@ -275,11 +250,11 @@ public class JobController {
 		}
     }
     
-    private final int getFor(ProductCategory category, AppDataJobGenerationDtoState state)
+    private final int getFor(ProductCategory category, AppDataJobGenerationState state)
     {
     	try {
 			final Generations gen = config.getFor(category);
-			if (state == AppDataJobGenerationDtoState.INITIAL)
+			if (state == AppDataJobGenerationState.INITIAL)
 			{
 				return gen.getMaxErrorsInitial();
 			}

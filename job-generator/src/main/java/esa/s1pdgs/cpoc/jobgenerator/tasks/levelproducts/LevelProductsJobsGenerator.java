@@ -4,7 +4,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import esa.s1pdgs.cpoc.appcatalog.client.job.AppCatalogJobClient;
-import esa.s1pdgs.cpoc.appcatalog.common.rest.model.job.AppDataJobProductDto;
+import esa.s1pdgs.cpoc.appcatalog.server.job.db.AppDataJobProduct;
 import esa.s1pdgs.cpoc.common.errors.processing.JobGenInputsMissingException;
 import esa.s1pdgs.cpoc.common.errors.processing.JobGenMetadataException;
 import esa.s1pdgs.cpoc.common.utils.DateUtils;
@@ -83,9 +83,9 @@ public class LevelProductsJobsGenerator extends AbstractJobsGenerator<ProductDto
 	protected void customJobOrder(JobGeneration job) {
 		// Rewrite job order sensing time
 		String jobOrderStart = DateUtils.convertToAnotherFormat(job.getAppDataJob().getProduct().getSegmentStartDate(),
-				AppDataJobProductDto.TIME_FORMATTER, JobOrderSensingTime.DATETIME_FORMATTER);
+				AppDataJobProduct.TIME_FORMATTER, JobOrderSensingTime.DATETIME_FORMATTER);
 		String jobOrderStop = DateUtils.convertToAnotherFormat(job.getAppDataJob().getProduct().getSegmentStopDate(),
-				AppDataJobProductDto.TIME_FORMATTER, JobOrderSensingTime.DATETIME_FORMATTER);
+				AppDataJobProduct.TIME_FORMATTER, JobOrderSensingTime.DATETIME_FORMATTER);
 		job.getJobOrder().getConf().setSensingTime(new JobOrderSensingTime(jobOrderStart, jobOrderStop));
 
 		this.updateProcParam(job.getJobOrder(), "Mission_Id",

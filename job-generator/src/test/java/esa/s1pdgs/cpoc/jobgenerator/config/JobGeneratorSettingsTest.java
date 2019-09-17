@@ -95,18 +95,6 @@ public class JobGeneratorSettingsTest {
 		settings.initMaps();
 		assertTrue("Map outputfamilies should be empty", settings.getOutputfamilies().size() == 0);
 	}
-
-	@Test
-	public void testInvalidMapMapping() {
-		JobGeneratorSettings settings = new JobGeneratorSettings();
-		
-		// Test map when invalid key value separator
-		settings.setOutputfamiliesstr("o1:f1||o2");
-		
-		// Reinit maps
-		settings.initMaps();
-		assertTrue("Map outputfamilies should be empty", settings.getOutputfamilies().size() == 1);
-	}
 	
 	@Test
 	public void testToString() {

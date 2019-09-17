@@ -27,6 +27,7 @@ public interface ObsClient {
      * @return result of the search
      * @throws SdkClientException
      * @throws ObsServiceException
+     * @throws IllegalArgumentException
      */
     boolean exists(ObsObject object)
             throws SdkClientException, ObsServiceException;
@@ -39,6 +40,7 @@ public interface ObsClient {
      * @return
      * @throws SdkClientException
      * @throws ObsServiceException
+     * @throws IllegalArgumentException
      */
     boolean prefixExists(ObsObject object)
             throws SdkClientException, ObsServiceException;
@@ -52,6 +54,7 @@ public interface ObsClient {
 	 * @return list of ObsObject's, never null
 	 * @throws SdkClientException
 	 * @throws ObsServiceException
+	 * @throws IllegalArgumentException
 	 */
 	List<ObsObject> getObsObjectsOfFamilyWithinTimeFrame(ProductFamily obsFamily, Date timeFrameBegin, Date timeFrameEnd)
 			throws SdkClientException, ObsServiceException;
@@ -74,7 +77,8 @@ public interface ObsClient {
      * @throws ObsServiceException
      * If a consistency issue is found an exception is raised providing the product name it occured
      * and the violation being found
-     * @throws ObsValidationException 
+     * @throws ObsValidationException
+     * @throws IllegalArgumentException
      */
     void validate(ObsObject object) throws ObsServiceException, ObsValidationException;
 }

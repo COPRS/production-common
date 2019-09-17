@@ -4,12 +4,13 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
 import java.util.List;
+import java.util.stream.Collectors;
 
-import esa.s1pdgs.cpoc.appcatalog.common.rest.model.job.AppDataJobDto;
-import esa.s1pdgs.cpoc.appcatalog.common.rest.model.job.AppDataJobDtoState;
-import esa.s1pdgs.cpoc.appcatalog.common.rest.model.job.AppDataJobGenerationDto;
-import esa.s1pdgs.cpoc.appcatalog.common.rest.model.job.AppDataJobGenerationDtoState;
-import esa.s1pdgs.cpoc.appcatalog.common.rest.model.job.AppDataJobProductDto;
+import esa.s1pdgs.cpoc.appcatalog.server.job.db.AppDataJob;
+import esa.s1pdgs.cpoc.appcatalog.server.job.db.AppDataJobGeneration;
+import esa.s1pdgs.cpoc.appcatalog.server.job.db.AppDataJobGenerationState;
+import esa.s1pdgs.cpoc.appcatalog.server.job.db.AppDataJobProduct;
+import esa.s1pdgs.cpoc.appcatalog.server.job.db.AppDataJobState;
 import esa.s1pdgs.cpoc.common.ApplicationLevel;
 import esa.s1pdgs.cpoc.common.ProductFamily;
 import esa.s1pdgs.cpoc.jobgenerator.model.joborder.JobOrder;
@@ -76,10 +77,10 @@ public class TestL0SegmentUtils {
         return template;
     }
 
-    public static AppDataJobDto<ProductDto> buildAppData() {
-        AppDataJobDto<ProductDto> ret = new AppDataJobDto<>();
+    public static AppDataJob buildAppData() {
+        AppDataJob ret = new AppDataJob();
         ret.setIdentifier(123);
-        ret.setState(AppDataJobDtoState.GENERATING);
+        ret.setState(AppDataJobState.GENERATING);
         ret.setPod("hostname");
         ret.setLevel(ApplicationLevel.L0_SEGMENT);
 
@@ -90,28 +91,28 @@ public class TestL0SegmentUtils {
                                 "S1A_WV_RAW__0SSV_20180913T234452_20180913T235538_023686_0294FC_1BDE.SAFE",
                                 "kobs", ProductFamily.L0_SEGMENT, "FAST"));
         messages.add(message1);
-        ret.setMessages(messages);
+        ret.setMessages(messages.stream().collect(Collectors.toList()));
 
         Calendar start1 = Calendar.getInstance();
         start1.set(2017, Calendar.DECEMBER, 13, 14, 59, 48);
         Calendar stop1 = Calendar.getInstance();
         stop1.set(2017, Calendar.DECEMBER, 13, 15, 17, 25);
-        AppDataJobProductDto product = new AppDataJobProductDto();
+        AppDataJobProduct product = new AppDataJobProduct();
         product.setMissionId("S1");
         product.setProductName("l0_segments_of_0294FC");
         product.setSatelliteId("A");
         product.setAcquisition("IW");
         ret.setProduct(product);
 
-        AppDataJobGenerationDto gen1 = new AppDataJobGenerationDto();
+        AppDataJobGeneration gen1 = new AppDataJobGeneration();
         gen1.setTaskTable("TaskTable.L0ASP.xml");
-        gen1.setState(AppDataJobGenerationDtoState.INITIAL);
+        gen1.setState(AppDataJobGenerationState.INITIAL);
         ret.setGenerations(Arrays.asList(gen1));
 
         return ret;
     }
 
-    public static void setMessageToBuildData(AppDataJobDto job,
+    public static void setMessageToBuildData(AppDataJob job,
             List<String> segmentNames) {
         job.setMessages(new ArrayList<>());
         int id = 1;

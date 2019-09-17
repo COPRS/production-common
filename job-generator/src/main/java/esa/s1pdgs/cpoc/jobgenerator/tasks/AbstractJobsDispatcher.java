@@ -13,9 +13,9 @@ import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
 import org.springframework.util.CollectionUtils;
 
 import esa.s1pdgs.cpoc.appcatalog.client.job.AppCatalogJobClient;
-import esa.s1pdgs.cpoc.appcatalog.common.rest.model.job.AppDataJobDto;
-import esa.s1pdgs.cpoc.appcatalog.common.rest.model.job.AppDataJobDtoState;
-import esa.s1pdgs.cpoc.appcatalog.common.rest.model.job.AppDataJobGenerationDto;
+import esa.s1pdgs.cpoc.appcatalog.server.job.db.AppDataJob;
+import esa.s1pdgs.cpoc.appcatalog.server.job.db.AppDataJobGeneration;
+import esa.s1pdgs.cpoc.appcatalog.server.job.db.AppDataJobState;
 import esa.s1pdgs.cpoc.common.ApplicationMode;
 import esa.s1pdgs.cpoc.common.errors.AbstractCodedException;
 import esa.s1pdgs.cpoc.common.errors.processing.JobGenMaxNumberTaskTablesReachException;
@@ -135,11 +135,11 @@ public abstract class AbstractJobsDispatcher<T extends AbstractDto> {
 
         // Dispatch existing job with current task table configuration
         if (processSettings.getMode() != ApplicationMode.TEST) {
-            List<AppDataJobDto<T>> generatingJobs = appDataService
+            List<AppDataJob> generatingJobs = appDataService
                     .findByPodAndState(processSettings.getHostname(),
-                            AppDataJobDtoState.GENERATING);
+                            AppDataJobState.GENERATING);
             if (!CollectionUtils.isEmpty(generatingJobs)) {
-                for (AppDataJobDto<T> generation : generatingJobs) {
+                for (AppDataJob generation : generatingJobs) {
                     // TODO ask if bypass error
                     dispatch(generation);
                 }
@@ -171,7 +171,7 @@ public abstract class AbstractJobsDispatcher<T extends AbstractDto> {
      * @param job
      * @throws AbstractCodedException
      */
-    public void dispatch(final AppDataJobDto<T> job)
+    public void dispatch(final AppDataJob job)
             throws AbstractCodedException {
     	LOGGER.debug ("== dispatch job {}", job.toString());
         String productName = job.getProduct().getProductName();
@@ -187,7 +187,7 @@ public abstract class AbstractJobsDispatcher<T extends AbstractDto> {
              LOGGER.info("Nothing to do as no TaskTables found for {}.",productName);
             }
             List<String> notDealTaskTables = new ArrayList<>(taskTables);
-            List<AppDataJobGenerationDto> jobGens = job.getGenerations();
+            List<AppDataJobGeneration> jobGens = job.getGenerations();
             LOGGER.debug ("== job.getGenerations() {}", jobGens.toString());
 
             // Build the new job generations
@@ -196,17 +196,17 @@ public abstract class AbstractJobsDispatcher<T extends AbstractDto> {
                 // No current generation, add the new ones
                 for (String table : taskTables) {
                     needUpdate = true;
-                    AppDataJobGenerationDto jobGen =
-                            new AppDataJobGenerationDto();
+                    AppDataJobGeneration jobGen =
+                            new AppDataJobGeneration();
                     jobGen.setTaskTable(table);
                     job.getGenerations().add(jobGen);
                 }
             } else {
                 // Some generation already exists, update or delete the useless
                 // ones
-                for (Iterator<AppDataJobGenerationDto> iterator =
+                for (Iterator<AppDataJobGeneration> iterator =
                         jobGens.iterator(); iterator.hasNext();) {
-                    AppDataJobGenerationDto jobGen = iterator.next();
+                    AppDataJobGeneration jobGen = iterator.next();
                     if (taskTables.contains(jobGen.getTaskTable())) {
                         notDealTaskTables.remove(jobGen.getTaskTable());
                     } else {
@@ -217,8 +217,8 @@ public abstract class AbstractJobsDispatcher<T extends AbstractDto> {
                 // Create the new ones
                 for (String taskTable : notDealTaskTables) {
                     needUpdate = true;
-                    AppDataJobGenerationDto jobGen =
-                            new AppDataJobGenerationDto();
+                    AppDataJobGeneration jobGen =
+                            new AppDataJobGeneration();
                     jobGen.setTaskTable(taskTable);
                     job.getGenerations().add(jobGen);
                 }
@@ -226,7 +226,7 @@ public abstract class AbstractJobsDispatcher<T extends AbstractDto> {
 
             // Update task tables
             if (needUpdate) {
-                job.setState(AppDataJobDtoState.GENERATING);
+                job.setState(AppDataJobState.GENERATING);
                 appDataService.patchJob(job.getIdentifier(), job, false, false,
                         true);
             }
@@ -243,7 +243,7 @@ public abstract class AbstractJobsDispatcher<T extends AbstractDto> {
     /**
      * Get task tables to generate for given job
      */
-    protected abstract List<String> getTaskTables(final AppDataJobDto<T> job)
+    protected abstract List<String> getTaskTables(final AppDataJob job)
             throws AbstractCodedException;
 
     protected abstract String getTaskForFunctionalLog();

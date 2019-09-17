@@ -28,6 +28,7 @@ import esa.s1pdgs.cpoc.obs_sdk.ObsObject;
 import esa.s1pdgs.cpoc.obs_sdk.ObsServiceException;
 import esa.s1pdgs.cpoc.obs_sdk.ObsUploadObject;
 import esa.s1pdgs.cpoc.obs_sdk.SdkClientException;
+import esa.s1pdgs.cpoc.obs_sdk.ValidArgumentAssertion;
 
 /**
  * <p>
@@ -90,6 +91,7 @@ public class S3ObsClient extends AbstractObsClient {
 	 */
 	@Override
 	public boolean exists(final ObsObject object) throws SdkClientException, ObsServiceException {
+		ValidArgumentAssertion.assertValidArgument(object);
 		return s3Services.exist(getBucketFor(object.getFamily()), object.getKey());
 	}
 
@@ -98,6 +100,7 @@ public class S3ObsClient extends AbstractObsClient {
 	 */
 	@Override
 	public boolean prefixExists(final ObsObject object) throws SdkClientException, ObsServiceException {
+		ValidArgumentAssertion.assertValidArgument(object);
 		return s3Services.getNbObjects(getBucketFor(object.getFamily()), object.getKey()) > 0;
 	}
 
@@ -174,6 +177,8 @@ public class S3ObsClient extends AbstractObsClient {
 
 	@Override
 	public void move(ObsObject from, ProductFamily to) throws ObsException {
+		ValidArgumentAssertion.assertValidArgument(from);
+		ValidArgumentAssertion.assertValidArgument(to);
 		try {
 			s3Services.moveFile(new CopyObjectRequest(getBucketFor(from.getFamily()), from.getKey(),
 					getBucketFor(to), from.getKey()));
@@ -188,7 +193,10 @@ public class S3ObsClient extends AbstractObsClient {
 	@Override
 	public List<ObsObject> getObsObjectsOfFamilyWithinTimeFrame(final ProductFamily family, final Date timeFrameBegin, final Date timeFrameEnd)
 			throws SdkClientException, ObsServiceException {
-
+		ValidArgumentAssertion.assertValidArgument(family);
+		ValidArgumentAssertion.assertValidArgument(timeFrameBegin);
+		ValidArgumentAssertion.assertValidArgument(timeFrameEnd);
+		
 		long methodStartTime = System.currentTimeMillis();
 		List<ObsObject> objectsOfTimeFrame = new ArrayList<>();
 		String bucket = getBucketFor(family);
@@ -237,6 +245,8 @@ public class S3ObsClient extends AbstractObsClient {
 
 	@Override
 	public Map<String, InputStream> getAllAsInputStream(ProductFamily family, String keyPrefix) throws SdkClientException {
+		ValidArgumentAssertion.assertValidArgument(family);
+		ValidArgumentAssertion.assertValidPrefixArgument(keyPrefix);
 		final String bucket = getBucketFor(family);
 		LOGGER.debug("Getting all files in bucket {} with prefix {}", bucket, keyPrefix);
 		final Map<String, InputStream> result = s3Services.getAllAsInputStream(bucket, keyPrefix);

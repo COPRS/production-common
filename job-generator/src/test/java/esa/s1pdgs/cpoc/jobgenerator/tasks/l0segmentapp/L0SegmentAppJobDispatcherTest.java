@@ -24,8 +24,8 @@ import org.mockito.MockitoAnnotations;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
 
 import esa.s1pdgs.cpoc.appcatalog.client.job.AppCatalogJobClient;
-import esa.s1pdgs.cpoc.appcatalog.common.rest.model.job.AppDataJobDto;
-import esa.s1pdgs.cpoc.appcatalog.common.rest.model.job.AppDataJobGenerationDtoState;
+import esa.s1pdgs.cpoc.appcatalog.server.job.db.AppDataJob;
+import esa.s1pdgs.cpoc.appcatalog.server.job.db.AppDataJobGenerationState;
 import esa.s1pdgs.cpoc.common.ApplicationLevel;
 import esa.s1pdgs.cpoc.common.ApplicationMode;
 import esa.s1pdgs.cpoc.common.errors.AbstractCodedException;
@@ -35,7 +35,6 @@ import esa.s1pdgs.cpoc.jobgenerator.config.JobGeneratorSettings;
 import esa.s1pdgs.cpoc.jobgenerator.config.ProcessSettings;
 import esa.s1pdgs.cpoc.jobgenerator.tasks.JobsGeneratorFactory;
 import esa.s1pdgs.cpoc.jobgenerator.utils.TestL0SegmentUtils;
-import esa.s1pdgs.cpoc.mqi.model.queue.ProductDto;
 
 /**
  * Test the class JobDispatcher
@@ -155,30 +154,30 @@ public class L0SegmentAppJobDispatcherTest {
                 .when(appDataService)
                 .findNByPodAndGenerationTaskTableWithNotSentGeneration(
                         Mockito.anyString(), Mockito.anyString());
-        AppDataJobDto<ProductDto> primaryCheckAppJob =
+        AppDataJob primaryCheckAppJob =
                 TestL0SegmentUtils.buildAppData();
         primaryCheckAppJob.getGenerations().get(0)
-                .setState(AppDataJobGenerationDtoState.PRIMARY_CHECK);
-        AppDataJobDto<ProductDto> readyAppJob =
+                .setState(AppDataJobGenerationState.PRIMARY_CHECK);
+        AppDataJob readyAppJob =
                 TestL0SegmentUtils.buildAppData();
         readyAppJob.getGenerations().get(0)
-                .setState(AppDataJobGenerationDtoState.READY);
-        AppDataJobDto<ProductDto> sentAppJob =
+                .setState(AppDataJobGenerationState.READY);
+        AppDataJob sentAppJob =
                 TestL0SegmentUtils.buildAppData();
         sentAppJob.getGenerations().get(0)
-                .setState(AppDataJobGenerationDtoState.SENT);
+                .setState(AppDataJobGenerationState.SENT);
         doReturn(TestL0SegmentUtils.buildAppData()).when(appDataService)
                 .patchJob(Mockito.eq(123L), Mockito.any(), Mockito.anyBoolean(),
                         Mockito.anyBoolean(), Mockito.anyBoolean());
         doReturn(primaryCheckAppJob).when(appDataService).patchTaskTableOfJob(
                 Mockito.eq(123L), Mockito.eq("TaskTable.L0ASP.xml"),
-                Mockito.eq(AppDataJobGenerationDtoState.PRIMARY_CHECK));
+                Mockito.eq(AppDataJobGenerationState.PRIMARY_CHECK));
         doReturn(readyAppJob).when(appDataService).patchTaskTableOfJob(
                 Mockito.eq(123L), Mockito.eq("TaskTable.L0ASP.xml"),
-                Mockito.eq(AppDataJobGenerationDtoState.READY));
+                Mockito.eq(AppDataJobGenerationState.READY));
         doReturn(sentAppJob).when(appDataService).patchTaskTableOfJob(
                 Mockito.eq(123L), Mockito.eq("TaskTable.L0ASP.xml"),
-                Mockito.eq(AppDataJobGenerationDtoState.SENT));
+                Mockito.eq(AppDataJobGenerationState.SENT));
     }
 
     @Test
@@ -235,7 +234,7 @@ public class L0SegmentAppJobDispatcherTest {
     @Test
     public void testGetTaskTable() throws JobGenMissingRoutingEntryException {
 
-        AppDataJobDto<ProductDto> appData =
+        AppDataJob appData =
                 TestL0SegmentUtils.buildAppData();
 
         // Init dispatcher

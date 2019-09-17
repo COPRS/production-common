@@ -30,8 +30,8 @@ import org.springframework.context.annotation.AnnotationConfigApplicationContext
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import esa.s1pdgs.cpoc.appcatalog.client.job.AppCatalogJobClient;
-import esa.s1pdgs.cpoc.appcatalog.common.rest.model.job.AppDataJobDto;
-import esa.s1pdgs.cpoc.appcatalog.common.rest.model.job.AppDataJobGenerationDtoState;
+import esa.s1pdgs.cpoc.appcatalog.server.job.db.AppDataJob;
+import esa.s1pdgs.cpoc.appcatalog.server.job.db.AppDataJobGenerationState;
 import esa.s1pdgs.cpoc.common.ApplicationLevel;
 import esa.s1pdgs.cpoc.common.ProductFamily;
 import esa.s1pdgs.cpoc.common.errors.AbstractCodedException;
@@ -60,7 +60,6 @@ import esa.s1pdgs.cpoc.metadata.model.L0AcnMetadata;
 import esa.s1pdgs.cpoc.metadata.model.L0SliceMetadata;
 import esa.s1pdgs.cpoc.metadata.model.SearchMetadata;
 import esa.s1pdgs.cpoc.mqi.model.queue.LevelJobDto;
-import esa.s1pdgs.cpoc.mqi.model.queue.ProductDto;
 
 public class L1AppJobsGeneratorTest {
 
@@ -97,9 +96,9 @@ public class L1AppJobsGeneratorTest {
 
     private JobGeneration jobA;
 
-    private AppDataJobDto<ProductDto> appDataJob;
+    private AppDataJob appDataJob;
 
-    private AppDataJobDto<ProductDto> appDataJobComplete;
+    private AppDataJob appDataJobComplete;
 
     private LevelJobDto publishedJob;
 
@@ -362,31 +361,31 @@ public class L1AppJobsGeneratorTest {
                 .when(appDataPService)
                 .findNByPodAndGenerationTaskTableWithNotSentGeneration(
                         Mockito.anyString(), Mockito.anyString());
-        AppDataJobDto<ProductDto> primaryCheckAppJob =
+        AppDataJob primaryCheckAppJob =
                 TestL1Utils.buildJobGeneration(true);
         primaryCheckAppJob.getGenerations().get(0)
-                .setState(AppDataJobGenerationDtoState.PRIMARY_CHECK);
-        AppDataJobDto<ProductDto> readyAppJob =
+                .setState(AppDataJobGenerationState.PRIMARY_CHECK);
+        AppDataJob readyAppJob =
                 TestL1Utils.buildJobGeneration(true);
         readyAppJob.getGenerations().get(0)
-                .setState(AppDataJobGenerationDtoState.READY);
-        AppDataJobDto<ProductDto> sentAppJob =
+                .setState(AppDataJobGenerationState.READY);
+        AppDataJob sentAppJob =
                 TestL1Utils.buildJobGeneration(true);
         sentAppJob.getGenerations().get(0)
-                .setState(AppDataJobGenerationDtoState.SENT);
+                .setState(AppDataJobGenerationState.SENT);
         doReturn(TestL1Utils.buildJobGeneration(true)).when(appDataPService)
                 .patchJob(Mockito.eq(123L), Mockito.any(), Mockito.anyBoolean(),
                         Mockito.anyBoolean(), Mockito.anyBoolean());
 
         doReturn(primaryCheckAppJob).when(appDataPService).patchTaskTableOfJob(
                 Mockito.eq(123L), Mockito.eq("IW_RAW__0_GRDH_1.xml"),
-                Mockito.eq(AppDataJobGenerationDtoState.PRIMARY_CHECK));
+                Mockito.eq(AppDataJobGenerationState.PRIMARY_CHECK));
         doReturn(readyAppJob).when(appDataPService).patchTaskTableOfJob(
                 Mockito.eq(123L), Mockito.eq("IW_RAW__0_GRDH_1.xml"),
-                Mockito.eq(AppDataJobGenerationDtoState.READY));
+                Mockito.eq(AppDataJobGenerationState.READY));
         doReturn(sentAppJob).when(appDataPService).patchTaskTableOfJob(
                 Mockito.eq(123L), Mockito.eq("IW_RAW__0_GRDH_1.xml"),
-                Mockito.eq(AppDataJobGenerationDtoState.SENT));
+                Mockito.eq(AppDataJobGenerationState.SENT));
     }
 
     @Test
