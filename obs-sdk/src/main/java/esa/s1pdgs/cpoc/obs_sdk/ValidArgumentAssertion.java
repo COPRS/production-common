@@ -10,7 +10,10 @@ public class ValidArgumentAssertion {
 
 	public static void assertValidArgument(Collection<? extends ObsObject> collection) {
     	if (null == collection) {
-    		throw new IllegalArgumentException();
+    		throw new IllegalArgumentException("Invalid object: null");
+    	}
+    	if (collection.size() == 0) {
+    		throw new IllegalArgumentException("Invalid collection (empty)");
     	}
     	collection.stream().forEach(e -> assertValidArgument(e));
 	}
