@@ -12,6 +12,9 @@ public class ValidArgumentAssertion {
     	if (null == collection) {
     		throw new IllegalArgumentException("Invalid object: null");
     	}
+    	if (collection.size() == 0) {
+    		throw new IllegalArgumentException("Invalid collection (empty)");
+    	}
     	collection.stream().forEach(e -> assertValidArgument(e));
 	}
 
