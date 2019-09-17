@@ -400,45 +400,42 @@ public class MessageConsumptionControllerTest {
     }
 
     @Test
-    @Ignore
     public void testAckWhenStopNotAskButTopicUnknown()
             throws AbstractCodedException, InterruptedException {
 
-        LevelJobDto dto = new LevelJobDto(ProductFamily.L1_JOB, "product-name", "NRT",
-                "work-dir", "job-order");
-        AppCatMessageDto<LevelJobDto> message =
-                new AppCatMessageDto<LevelJobDto>(
-                        ProductCategory.LEVEL_JOBS, 123, "topic-unknown", 1, 22,
-                        dto);
+        LevelJobDto dto = new LevelJobDto(ProductFamily.L1_JOB, "product-name", "NRT", "work-dir", "job-order");
+        AppCatMessageDto<LevelJobDto> message = new AppCatMessageDto<LevelJobDto>(
+        		ProductCategory.LEVEL_JOBS, 
+        		123, 
+        		"topic-unknown", 
+        		1, 
+        		22,
+        		dto
+        );
 
-        doReturn(true).when(service).ack(Mockito.eq(ProductCategory.LEVEL_JOBS),Mockito.eq(123L),
-                Mockito.any());
+        doReturn(true).when(service).ack(Mockito.eq(ProductCategory.LEVEL_JOBS),Mockito.eq(123L),Mockito.any());
         doReturn(message).when(service).get(Mockito.eq(ProductCategory.LEVEL_JOBS),Mockito.eq(123L));
-        doReturn(0).when(service)
-                .getNbReadingMessages(Mockito.anyString(), Mockito.anyString());
+        doReturn(0).when(service).getNbReadingMessages(Mockito.anyString(), Mockito.anyString());
 
-        ResumeDetails expectedRd = new ResumeDetails("topic-unknown", dto);
+        final ResumeDetails expectedRd = new ResumeDetails("topic-unknown", dto);
 
         final GenericConsumer<?> consi = manager.consumers.get(ProductCategory.LEVEL_JOBS).get("topic");
-        
-        Thread.sleep(2000);
         consi.pause();
-
-        Thread.sleep(2500);
+        
+        while (!consi.isPaused());
+        
         assertTrue(consi.isPaused());
-        ResumeDetails rd = manager.ackMessage(ProductCategory.LEVEL_JOBS, 123,
-                Ack.OK, false);
+        final ResumeDetails rd = manager.ackMessage(ProductCategory.LEVEL_JOBS, 123, Ack.OK, false);        
         assertEquals(expectedRd, rd);
 
         // Check resume call
-        Thread.sleep(2000);
         assertTrue(consi.isPaused());
-
         consi.resume();
+        
+        while (consi.isPaused());        
     }
 
     @Test
-    @Ignore
     public void testAckWhenStopAsk()
             throws AbstractCodedException, InterruptedException {
 
@@ -448,64 +445,43 @@ public class MessageConsumptionControllerTest {
                 new AppCatMessageDto<LevelJobDto>(
                         ProductCategory.LEVEL_JOBS, 123, "topic4", 1, 22, dto);
 
-        doReturn(true).when(service).ack(Mockito.eq(ProductCategory.LEVEL_JOBS),Mockito.eq(123L),
-                Mockito.any());
+        doReturn(true).when(service).ack(Mockito.eq(ProductCategory.LEVEL_JOBS),Mockito.eq(123L),Mockito.any());
         doReturn(message).when(service).get(Mockito.eq(ProductCategory.LEVEL_JOBS),Mockito.eq(123L));
-        doReturn(0).when(service)
-                .getNbReadingMessages(Mockito.anyString(), Mockito.anyString());
+        doReturn(0).when(service).getNbReadingMessages(Mockito.anyString(), Mockito.anyString());
 
-        ResumeDetails expectedRd = new ResumeDetails("topic4", dto);
+        final ResumeDetails expectedRd = new ResumeDetails("topic4", dto);
+        final GenericConsumer<?> consi = manager.consumers.get(ProductCategory.LEVEL_JOBS).get("topic");
 
-        Thread.sleep(2000);
-        manager.consumers.get(ProductCategory.LEVEL_JOBS).get("topic").pause();
-
-        Thread.sleep(2000);
-        assertTrue(manager.consumers.get(ProductCategory.LEVEL_JOBS)
-                .get("topic").isPaused());
-        ResumeDetails rd = manager.ackMessage(ProductCategory.LEVEL_JOBS, 123,
-                Ack.OK, true);
+        consi.pause();
+        while (!consi.isPaused());
+        
+        final ResumeDetails rd = manager.ackMessage(ProductCategory.LEVEL_JOBS, 123, Ack.OK, true);
         assertEquals(expectedRd, rd);
-
-        // Check resume call
-        Thread.sleep(2000);
-        assertTrue(manager.consumers.get(ProductCategory.LEVEL_JOBS)
-                .get("topic").isPaused());
+        assertTrue(consi.isPaused());
     }
 
     
     @Test
-    @Ignore
-    public void testAckWhenStopAskL2()
-            throws AbstractCodedException, InterruptedException {
-
-        LevelJobDto dto = new LevelJobDto(ProductFamily.L2_JOB, "product-name", "NRT",
-                "work-dir", "job-order");
+    public void testAckWhenStopAskL2() throws AbstractCodedException, InterruptedException {
+        LevelJobDto dto = new LevelJobDto(ProductFamily.L2_JOB, "product-name", "NRT", "work-dir", "job-order");
         AppCatMessageDto<LevelJobDto> message =
                 new AppCatMessageDto<LevelJobDto>(
                         ProductCategory.LEVEL_JOBS, 123, "topic5", 1, 22, dto);
 
-        doReturn(true).when(service).ack(Mockito.eq(ProductCategory.LEVEL_JOBS),Mockito.eq(123L),
-                Mockito.any());
+        doReturn(true).when(service).ack(Mockito.eq(ProductCategory.LEVEL_JOBS),Mockito.eq(123L), Mockito.any());
         doReturn(message).when(service).get(Mockito.eq(ProductCategory.LEVEL_JOBS),Mockito.eq(123L));
-        doReturn(0).when(service)
-                .getNbReadingMessages(Mockito.anyString(), Mockito.anyString());
+        doReturn(0).when(service).getNbReadingMessages(Mockito.anyString(), Mockito.anyString());
 
-        ResumeDetails expectedRd = new ResumeDetails("topic5", dto);
+        final ResumeDetails expectedRd = new ResumeDetails("topic5", dto);
+        
+        final GenericConsumer<?> consi = manager.consumers.get(ProductCategory.LEVEL_JOBS).get("topic");
+        consi.pause();
+        while (!consi.isPaused());
 
-        Thread.sleep(2000);
-        manager.consumers.get(ProductCategory.LEVEL_JOBS).get("topic").pause();
-
-        Thread.sleep(2000);
-        assertTrue(manager.consumers.get(ProductCategory.LEVEL_JOBS)
-                .get("topic").isPaused());
-        ResumeDetails rd = manager.ackMessage(ProductCategory.LEVEL_JOBS, 123,
-                Ack.OK, true);
+        assertTrue(consi.isPaused());
+        final ResumeDetails rd = manager.ackMessage(ProductCategory.LEVEL_JOBS, 123, Ack.OK, true);
         assertEquals(expectedRd, rd);
-
-        // Check resume call
-        Thread.sleep(2000);
-        assertTrue(manager.consumers.get(ProductCategory.LEVEL_JOBS)
-                .get("topic").isPaused());
+        assertTrue(consi.isPaused());
     }
     
     /**
