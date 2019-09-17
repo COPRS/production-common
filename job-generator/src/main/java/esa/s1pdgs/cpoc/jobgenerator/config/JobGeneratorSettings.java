@@ -12,7 +12,6 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.messaging.core.MessageSendingOperations;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
 import org.springframework.util.StringUtils;
 
@@ -169,7 +168,7 @@ public class JobGeneratorSettings {
 			if (tmp != null && tmp.length == 2) {
 				String key = tmp[0];
 				String valStr = tmp[1];
-				inputfamilies.put(key, ProductFamily.fromValue(valStr));
+				inputfamilies.put(key, ProductFamily.valueOf(valStr));
 			}
 		}
 	}
@@ -187,7 +186,7 @@ public class JobGeneratorSettings {
 			if (tmp != null && tmp.length == 2) {
 				String key = tmp[0];
 				String valStr = tmp[1];
-				outputfamilies.put(key, ProductFamily.fromValue(valStr));
+				outputfamilies.put(key, ProductFamily.valueOf(valStr));
 			}
 		}
 	}
