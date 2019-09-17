@@ -113,8 +113,8 @@ public class SwiftObsClientIT {
 	}
 
 	@Test
-	public void uploadAndValidationOfDirectoryTest() throws IOException, SdkClientException, AbstractCodedException, ObsValidationException {	
-		// upload
+	public void uploadAndValidationOfCompleteDirectoryTest() throws IOException, SdkClientException, AbstractCodedException, ObsValidationException {	
+		// upload directory
 		assertFalse(uut.exists(new ObsObject(auxiliaryFiles, testDirectoryName + "/" + testFileName1)));
 		assertFalse(uut.exists(new ObsObject(auxiliaryFiles, testDirectoryName + "/" + testFileName2)));
 		assertFalse(uut.exists(new ObsObject(auxiliaryFiles, testDirectoryName + "/" + testUnexptectedFileName)));
@@ -126,31 +126,78 @@ public class SwiftObsClientIT {
 
 		// validate complete directory
 		uut.validate(new ObsObject(auxiliaryFiles, testDirectoryName));
+	}
+	
+	@Test
+	public void uploadAndValidationOfDirectoryWithUnexpectedObejectTest() throws IOException, SdkClientException, AbstractCodedException, ObsValidationException {	
+		// upload directory
+		assertFalse(uut.exists(new ObsObject(auxiliaryFiles, testDirectoryName + "/" + testFileName1)));
+		assertFalse(uut.exists(new ObsObject(auxiliaryFiles, testDirectoryName + "/" + testFileName2)));
+		assertFalse(uut.exists(new ObsObject(auxiliaryFiles, testDirectoryName + "/" + testUnexptectedFileName)));
+		assertFalse(uut.exists(new ObsObject(auxiliaryFiles, testDirectoryName + ".md5sum")));
+		uut.upload(Arrays.asList(new ObsUploadObject(auxiliaryFiles, testDirectoryName, testDirectory)));
+		assertTrue(uut.exists(new ObsObject(auxiliaryFiles, testDirectoryName + "/" + testFileName1)));
+		assertTrue(uut.exists(new ObsObject(auxiliaryFiles, testDirectoryName + "/" + testFileName2)));
+		assertTrue(uut.exists(new ObsObject(auxiliaryFiles, testDirectoryName + ".md5sum")));
 
-		// validate directory with unexpected file
+		// upload unexpected obkect
 		uut.uploadFile(auxiliaryFiles, testDirectoryName + "/" + testUnexptectedFileName, testFile1);		
 		assertTrue(uut.exists(new ObsObject(auxiliaryFiles, testDirectoryName + "/" + testUnexptectedFileName)));
+
+		// validate directory with unexpected object
 		exception.expect(ObsValidationException.class);
 		exception.expectMessage("Unexpected object found: " + testDirectoryName + "/" + testUnexptectedFileName + " for " + testDirectoryName  + " of family " + auxiliaryFiles); 
 		uut.validate(new ObsObject(auxiliaryFiles, testDirectoryName));				
-		((SwiftObsClient)uut).deleteObject(auxiliaryFiles, testDirectoryName + "/" + testUnexptectedFileName);
+	}
+	
+	@Test
+	public void uploadAndValidationOfIncompleteDirectoryTest() throws IOException, SdkClientException, AbstractCodedException, ObsValidationException {	
+		// upload
+		assertFalse(uut.exists(new ObsObject(auxiliaryFiles, testDirectoryName + "/" + testFileName1)));
+		assertFalse(uut.exists(new ObsObject(auxiliaryFiles, testDirectoryName + "/" + testFileName2)));
 		assertFalse(uut.exists(new ObsObject(auxiliaryFiles, testDirectoryName + "/" + testUnexptectedFileName)));
-		
-		// validate incomplete directory
+		assertFalse(uut.exists(new ObsObject(auxiliaryFiles, testDirectoryName + ".md5sum")));
+		uut.upload(Arrays.asList(new ObsUploadObject(auxiliaryFiles, testDirectoryName, testDirectory)));
+		assertTrue(uut.exists(new ObsObject(auxiliaryFiles, testDirectoryName + "/" + testFileName1)));
+		assertTrue(uut.exists(new ObsObject(auxiliaryFiles, testDirectoryName + "/" + testFileName2)));
+		assertTrue(uut.exists(new ObsObject(auxiliaryFiles, testDirectoryName + ".md5sum")));
+
+		// remove object from directory
 		((SwiftObsClient)uut).deleteObject(auxiliaryFiles, testDirectoryName + "/" + testFileName1);
 		assertFalse(uut.exists(new ObsObject(auxiliaryFiles, testDirectoryName + "/" + testFileName1)));
+
+		// validate incomplete directory
 		exception.expect(ObsValidationException.class);
 		exception.expectMessage("Object not found: " + testDirectoryName + "/" + testFileName1 + " of family " + auxiliaryFiles); 
 		uut.validate(new ObsObject(auxiliaryFiles, testDirectoryName));
-		
-		// validate wrong checksum situation
+	}
+	
+	@Test
+	public void uploadAndValidationOfDirectoryWithWrongChecksumTest() throws IOException, SdkClientException, AbstractCodedException, ObsValidationException {	
+		// upload
+		assertFalse(uut.exists(new ObsObject(auxiliaryFiles, testDirectoryName + "/" + testFileName1)));
 		assertFalse(uut.exists(new ObsObject(auxiliaryFiles, testDirectoryName + "/" + testFileName2)));
-		uut.uploadFile(auxiliaryFiles, testDirectoryName + "/" + testFileName1, testFile1);		
+		assertFalse(uut.exists(new ObsObject(auxiliaryFiles, testDirectoryName + "/" + testUnexptectedFileName)));
+		assertFalse(uut.exists(new ObsObject(auxiliaryFiles, testDirectoryName + ".md5sum")));
+		uut.upload(Arrays.asList(new ObsUploadObject(auxiliaryFiles, testDirectoryName, testDirectory)));
 		assertTrue(uut.exists(new ObsObject(auxiliaryFiles, testDirectoryName + "/" + testFileName1)));
+		assertTrue(uut.exists(new ObsObject(auxiliaryFiles, testDirectoryName + "/" + testFileName2)));
+		assertTrue(uut.exists(new ObsObject(auxiliaryFiles, testDirectoryName + ".md5sum")));
+
+		// replace object with bad one
+		((SwiftObsClient)uut).deleteObject(auxiliaryFiles, testDirectoryName + "/" + testFileName1);
+		assertFalse(uut.exists(new ObsObject(auxiliaryFiles, testDirectoryName + "/" + testFileName1)));
+		uut.uploadFile(auxiliaryFiles, testDirectoryName + "/" + testFileName1, testFile2);		
+		assertTrue(uut.exists(new ObsObject(auxiliaryFiles, testDirectoryName + "/" + testFileName1)));
+
+		// validate wrong checksum situation
 		exception.expect(ObsValidationException.class);
 		exception.expectMessage("Checksum is wrong for object: " + testDirectoryName + "/" + testFileName1 + " of family " + auxiliaryFiles); 
 		uut.validate(new ObsObject(auxiliaryFiles, testDirectoryName));
-		
+	}
+	
+	@Test
+	public void uploadAndValidationOfDirectoryWithNonexistentChecksumTest() throws IOException, SdkClientException, AbstractCodedException, ObsValidationException {	
 		// validate not existing checksum file
 		assertFalse(uut.exists(new ObsObject(auxiliaryFiles, "not-existing.md5sum")));
 		exception.expect(ObsValidationException.class);
