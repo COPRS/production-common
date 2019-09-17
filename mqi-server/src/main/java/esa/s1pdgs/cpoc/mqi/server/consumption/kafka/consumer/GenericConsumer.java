@@ -2,6 +2,7 @@ package esa.s1pdgs.cpoc.mqi.server.consumption.kafka.consumer;
 
 import java.util.Collections;
 import java.util.Map;
+import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 
 import org.apache.kafka.clients.consumer.ConsumerConfig;
@@ -73,6 +74,8 @@ public class GenericConsumer<T> {
     private final Class<T> consumedMsgClass;
     
     private final ProductCategory category;
+    
+    private final String consumerId;
 
     /**
      * 
@@ -98,6 +101,7 @@ public class GenericConsumer<T> {
         this.topic = topic;
         this.priority = priority;
         this.consumedMsgClass = consumedMsgClass;
+        this.consumerId = properties.getClientId() + "-" + UUID.randomUUID().toString();
     }
 
     /**
@@ -134,8 +138,10 @@ public class GenericConsumer<T> {
         		appStatus
         );
 
-        container = new ConcurrentMessageListenerContainer<>(consumerFactory(),
-                containerProperties(topic, messageListener));
+        container = new ConcurrentMessageListenerContainer<>(
+        		consumerFactory(),
+                containerProperties(topic, messageListener)
+        );
 
         container.start();
     }
@@ -183,13 +189,14 @@ public class GenericConsumer<T> {
             final MessageListener<String, T> messageListener) {
         ContainerProperties containerProp = new ContainerProperties(topic);
         containerProp.setMessageListener(messageListener);
-        containerProp
-                .setPollTimeout(properties.getListener().getPollTimeoutMs());
+        containerProp.setPollTimeout(properties.getListener().getPollTimeoutMs());
         containerProp.setAckMode(AckMode.MANUAL_IMMEDIATE);
         containerProp.setConsumerRebalanceListener(
-                new MemoryConsumerAwareRebalanceListener(service,
+                new MemoryConsumerAwareRebalanceListener(
+                		service,
                         properties.getConsumer().getGroupId(),
-                        properties.getConsumer().getOffsetDftMode()));
+                        properties.getConsumer().getOffsetDftMode())
+                );
         return containerProp;
     }
 
@@ -221,7 +228,7 @@ public class GenericConsumer<T> {
         
         props.put(ConsumerConfig.PARTITION_ASSIGNMENT_STRATEGY_CONFIG,
                 Collections.singletonList(RoundRobinAssignor.class));
-        props.put(ConsumerConfig.CLIENT_ID_CONFIG, properties.getClientId());
+        props.put(ConsumerConfig.CLIENT_ID_CONFIG, consumerId);
         props.put(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG,
                 properties.getConsumer().getAutoOffsetReset());
         return props;
