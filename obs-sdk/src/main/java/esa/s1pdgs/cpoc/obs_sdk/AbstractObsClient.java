@@ -39,31 +39,39 @@ import esa.s1pdgs.cpoc.report.ReportingMessage;
  * @author Viveris Technologies
  */
 public abstract class AbstractObsClient implements ObsClient {
-
 	public static final String MD5SUM_SUFFIX = ".md5sum";
 	
-	protected abstract String getBucketFor(ProductFamily family) throws ObsServiceException;
+	private final ObsConfigurationProperties configuration;
 	
-    /**
-     * Get the timeout for waiting threads termination in seconds
-     * @return
-     * @throws ObsServiceException
-     */
-	protected abstract int getShutdownTimeoutS() throws ObsServiceException;
+	public AbstractObsClient(ObsConfigurationProperties configuration) {
+		this.configuration = configuration;
+	}
+
+	protected final String getBucketFor(ProductFamily family) throws ObsServiceException {
+		return configuration.getBucket().get(family);
+	}
 
     /**
-     * Get the timeout for download execution in seconds
-     * @return
-     * @throws ObsServiceException
+     * @return the timeout for waiting threads termination in seconds
      */
-	protected abstract int getDownloadExecutionTimeoutS() throws ObsServiceException;
+	private int getShutdownTimeoutS() throws ObsServiceException {
+		return configuration.getTimeoutShutdown();
+	}
 
     /**
-     * Get the timeout for upload execution in seconds
-     * @return
-     * @throws ObsServiceException
+     * @return the timeout for download execution in seconds
      */
-	protected abstract int getUploadExecutionTimeoutS() throws ObsServiceException;
+	private int getDownloadExecutionTimeoutS() throws ObsServiceException {
+		return configuration.getTimeoutDownExec();
+	}
+
+    /**
+     * @return the timeout for upload execution in seconds
+     */
+	private int getUploadExecutionTimeoutS() throws ObsServiceException {
+		return configuration.getTimeoutUpExec();
+	}
+
 	
     /**
      * @throws ExecutionException 

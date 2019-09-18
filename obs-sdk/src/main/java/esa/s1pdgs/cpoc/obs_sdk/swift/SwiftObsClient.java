@@ -10,9 +10,10 @@ import java.util.Collection;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
+import java.util.regex.Pattern;
 
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import org.javaswift.joss.client.factory.AccountConfig;
+import org.javaswift.joss.client.factory.AccountFactory;
 import org.javaswift.joss.model.Account;
 import org.javaswift.joss.model.StoredObject;
 
@@ -20,6 +21,7 @@ import esa.s1pdgs.cpoc.common.ProductFamily;
 import esa.s1pdgs.cpoc.common.errors.obs.ObsException;
 import esa.s1pdgs.cpoc.obs_sdk.AbstractObsClient;
 import esa.s1pdgs.cpoc.obs_sdk.ObsClient;
+import esa.s1pdgs.cpoc.obs_sdk.ObsConfigurationProperties;
 import esa.s1pdgs.cpoc.obs_sdk.ObsDownloadObject;
 import esa.s1pdgs.cpoc.obs_sdk.ObsObject;
 import esa.s1pdgs.cpoc.obs_sdk.ObsServiceException;
@@ -28,45 +30,78 @@ import esa.s1pdgs.cpoc.obs_sdk.SdkClientException;
 import esa.s1pdgs.cpoc.obs_sdk.ValidArgumentAssertion;
 
 public class SwiftObsClient extends AbstractObsClient {
+	public static final class Factory implements ObsClient.Factory {
 
-    protected final SwiftConfiguration configuration;
-    protected final SwiftObsServices swiftObsServices;
-    
-    private static final Logger LOGGER =
-            LogManager.getLogger(SwiftObsClient.class);
-        
-	/**
-     * Default constructor
-     * 
-     * @throws ObsServiceException
-     */
-    public SwiftObsClient() throws ObsServiceException {
-        super();
-        configuration = new SwiftConfiguration();
-        Account client = configuration.defaultClient();
-        swiftObsServices = new SwiftObsServices(client,
-        		configuration.getIntOfConfiguration("retry-policy.condition.max-retries"),
-        		configuration.getIntOfConfiguration("retry-policy.backoff.throttled-base-delay-ms"));
-    }
-    
-    @Override
-	protected String getBucketFor(ProductFamily family) throws ObsServiceException {
-		return configuration.getContainerForFamily(family);
+		@Override
+		public final ObsClient newObsClient(ObsConfigurationProperties config) {
+	    	final AccountConfig accConf = new AccountConfig();
+	    	accConf.setUsername(config.getUserId());
+	        accConf.setPassword(config.getUserSecret());
+	        accConf.setAuthUrl(config.getEndpoint());
+	        accConf.setAuthenticationMethod(config.getAuthMethod());
+	        
+	        // either tenant id or tenant name must be supplied
+	        if (!config.getTenantId().equals(ObsConfigurationProperties.UNDEFINED)) {
+	        	accConf.setTenantId(config.getTenantId());
+	        }	        
+	        if (!config.getTenantName().equals(ObsConfigurationProperties.UNDEFINED)) {
+	        	accConf.setTenantName(config.getTenantName());
+	        }	        
+	        if (!config.getEndpointRegion().equals(ObsConfigurationProperties.UNDEFINED)) {
+	        	accConf.setPreferredRegion(config.getEndpointRegion());
+	        }
+	        
+	        // set proxy if defined in environmental
+	        final String proxyConfig = System.getenv("https_proxy");
+	        
+			if (proxyConfig != null && !proxyConfig.equals("")) {
+				final String removedProtocol = proxyConfig
+						.replaceAll(Pattern.quote("http://"), "")
+						.replaceAll(Pattern.quote("https://"), "")
+						.replaceAll(Pattern.quote("/"), ""); // remove trailing slash
+
+				final String host = removedProtocol.substring(0, removedProtocol.indexOf(':'));
+				final int port = Integer.parseInt(removedProtocol.substring(removedProtocol.indexOf(':') + 1, 
+						removedProtocol.length()));
+				accConf.setProxyHost(host);
+		        accConf.setProxyPort(port);
+		        accConf.setUseProxy(true);
+			}
+			
+//			TODO: Translate the following S3 Retry Policy setup code to some JOSS equivalent 
+//			RetryPolicy retryPolicy = new RetryPolicy(
+//	                new SDKCustomDefaultRetryCondition(
+//	                        configuration.getInt(RETRY_POLICY_MAX_RETRIES)),
+//	                new PredefinedBackoffStrategies.SDKDefaultBackoffStrategy(
+//	                        configuration.getInt(RETRY_POLICY_BASE_DELAY_MS),
+//	                        configuration
+//	                                .getInt(RETRY_POLICY_THROTTLED_BASE_DELAY_MS),
+//	                        configuration.getInt(RETRY_POLICY_MAX_BACKOFF_MS)),
+//	                configuration.getInt(RETRY_POLICY_MAX_RETRIES), true);
+//	        client.setRetryPolicy(retryPolicy);
+			
+			Account account = new AccountFactory(accConf).createAccount();
+			
+			if (null != account.getPreferredRegion() && !"".equals(account.getPreferredRegion())) {
+				account.getAccess().setPreferredRegion(account.getPreferredRegion());
+			}			
+			final SwiftObsServices services = new SwiftObsServices(
+					account,
+					config.getMaxRetries(),
+					config.getBackoffThrottledBaseDelay()
+			);
+			return new SwiftObsClient(config, services);
+		}		
 	}
+	
+	public static final String BACKEND_NAME = "swift";
 
-	/**
-     * Constructor using fields
-     * 
-     * @param configuration
-     * @param swiftObsServices
-     * @throws ObsServiceException
-     */
-    protected SwiftObsClient(final SwiftConfiguration configuration,
-            final SwiftObsServices swiftObsServices) throws ObsServiceException {
-        super();
-        this.configuration = configuration;
-        this.swiftObsServices = swiftObsServices;
-    }
+    protected final SwiftObsServices swiftObsServices;
+     
+	SwiftObsClient(final ObsConfigurationProperties configuration, final SwiftObsServices swiftObsServices) {
+		super(configuration);
+		this.swiftObsServices = swiftObsServices;
+	}
 
 	public boolean containerExists(ProductFamily family) throws ObsServiceException {
 		return swiftObsServices.containerExist(getBucketFor(family));
@@ -121,7 +156,7 @@ public class SwiftObsClient extends AbstractObsClient {
 				}
 			}
 		} catch (IOException e) {
-			throw new SwiftObsServiceException(configuration.getContainerForFamily(object.getFamily()), object.getKey(), "Could not store md5sum temp file", e);
+			throw new SwiftObsServiceException(getBucketFor(object.getFamily()), object.getKey(), "Could not store md5sum temp file", e);
 		}
 		swiftObsServices.uploadFile(getBucketFor(object.getFamily()), object.getKey() + AbstractObsClient.MD5SUM_SUFFIX, file);
 		
@@ -146,30 +181,6 @@ public class SwiftObsClient extends AbstractObsClient {
 	public void deleteObject(final ProductFamily family, final String key) throws SwiftSdkClientException, ObsServiceException {
 		swiftObsServices.delete(getBucketFor(family), key);
 	}
-
-	/**
-     * @see ObsClient#getShutdownTimeoutS()
-     */
-    public int getShutdownTimeoutS() throws ObsServiceException {
-        return configuration
-                .getIntOfConfiguration(SwiftConfiguration.TM_S_SHUTDOWN);
-    }
-
-    /**
-     * @see ObsClient#getDownloadExecutionTimeoutS()
-     */
-    public int getDownloadExecutionTimeoutS() throws ObsServiceException {
-        return configuration
-                .getIntOfConfiguration(SwiftConfiguration.TM_S_DOWN_EXEC);
-    }
-
-    /**
-     * @see ObsClient#getUploadExecutionTimeoutS()
-     */
-    public int getUploadExecutionTimeoutS() throws ObsServiceException {
-        return configuration
-                .getIntOfConfiguration(SwiftConfiguration.TM_S_UP_EXEC);
-    }
 
 	@Override
 	public List<ObsObject> getObsObjectsOfFamilyWithinTimeFrame(ProductFamily family, Date timeFrameBegin, Date timeFrameEnd)

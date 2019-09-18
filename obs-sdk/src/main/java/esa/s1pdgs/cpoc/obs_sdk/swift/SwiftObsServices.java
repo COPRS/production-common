@@ -10,22 +10,22 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.javaswift.joss.instructions.UploadInstructions;
 import org.javaswift.joss.model.Account;
 import org.javaswift.joss.model.Container;
 import org.javaswift.joss.model.StoredObject;
 
 import esa.s1pdgs.cpoc.obs_sdk.AbstractObsClient;
-import esa.s1pdgs.cpoc.obs_sdk.ObsObject;
+import esa.s1pdgs.cpoc.obs_sdk.s3.S3ObsServices;
 
 public class SwiftObsServices {
 
 	/**
      * Logger
      */
-    private static final Log LOGGER = LogFactory.getLog(SwiftObsServices.class);
+    private static final Logger LOGGER = LogManager.getLogger(S3ObsServices.class);
 
     /**
      * Swift client

@@ -1,7 +1,8 @@
 package esa.s1pdgs.cpoc.obs_sdk.s3.retry;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import com.amazonaws.AmazonClientException;
 import com.amazonaws.AmazonWebServiceRequest;
@@ -21,7 +22,7 @@ public class SDKCustomDefaultRetryCondition
 	/**
      * Logger
      */
-    private static final Log LOGGER = LogFactory.getLog(SDKCustomDefaultRetryCondition.class);
+    private static final Logger LOGGER = LogManager.getLogger(SDKCustomDefaultRetryCondition.class);
 
     /**
      * Maximal number of retries

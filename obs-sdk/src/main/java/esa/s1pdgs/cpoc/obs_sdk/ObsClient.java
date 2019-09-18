@@ -6,6 +6,9 @@ import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
 import esa.s1pdgs.cpoc.common.ProductFamily;
 import esa.s1pdgs.cpoc.common.errors.AbstractCodedException;
 import esa.s1pdgs.cpoc.common.errors.obs.ObsException;
@@ -18,6 +21,12 @@ import esa.s1pdgs.cpoc.common.errors.obs.ObsException;
  * @author Viveris Technologies
  */
 public interface ObsClient {
+	
+	static interface Factory {
+		ObsClient newObsClient(ObsConfigurationProperties config);
+	}
+	
+	static final Logger LOGGER = LogManager.getLogger(ObsClient.class);
 
     /**
      * @param object

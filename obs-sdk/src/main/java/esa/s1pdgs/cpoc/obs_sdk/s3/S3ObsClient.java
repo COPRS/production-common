@@ -9,26 +9,35 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
+import java.util.regex.Pattern;
 
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-
+import com.amazonaws.ClientConfiguration;
+import com.amazonaws.Protocol;
+import com.amazonaws.auth.AWSStaticCredentialsProvider;
+import com.amazonaws.auth.BasicAWSCredentials;
+import com.amazonaws.client.builder.AwsClientBuilder.EndpointConfiguration;
+import com.amazonaws.retry.PredefinedBackoffStrategies;
+import com.amazonaws.retry.RetryPolicy;
 import com.amazonaws.services.s3.AmazonS3;
+import com.amazonaws.services.s3.AmazonS3ClientBuilder;
 import com.amazonaws.services.s3.model.CopyObjectRequest;
 import com.amazonaws.services.s3.model.ObjectListing;
 import com.amazonaws.services.s3.model.S3ObjectSummary;
 import com.amazonaws.services.s3.transfer.TransferManager;
+import com.amazonaws.services.s3.transfer.TransferManagerBuilder;
 
 import esa.s1pdgs.cpoc.common.ProductFamily;
 import esa.s1pdgs.cpoc.common.errors.obs.ObsException;
 import esa.s1pdgs.cpoc.obs_sdk.AbstractObsClient;
 import esa.s1pdgs.cpoc.obs_sdk.ObsClient;
+import esa.s1pdgs.cpoc.obs_sdk.ObsConfigurationProperties;
 import esa.s1pdgs.cpoc.obs_sdk.ObsDownloadObject;
 import esa.s1pdgs.cpoc.obs_sdk.ObsObject;
 import esa.s1pdgs.cpoc.obs_sdk.ObsServiceException;
 import esa.s1pdgs.cpoc.obs_sdk.ObsUploadObject;
 import esa.s1pdgs.cpoc.obs_sdk.SdkClientException;
 import esa.s1pdgs.cpoc.obs_sdk.ValidArgumentAssertion;
+import esa.s1pdgs.cpoc.obs_sdk.s3.retry.SDKCustomDefaultRetryCondition;
 
 /**
  * <p>
@@ -39,51 +48,73 @@ import esa.s1pdgs.cpoc.obs_sdk.ValidArgumentAssertion;
  * @author Viveris Technologies
  */
 public class S3ObsClient extends AbstractObsClient {
-
-	private static final Logger LOGGER = LogManager.getLogger(S3ObsClient.class);
 	
-	/**
-	 * Configuration
-	 */
-	protected final S3Configuration configuration;
+	public static final class Factory implements ObsClient.Factory {
+		@Override
+		public final ObsClient newObsClient(ObsConfigurationProperties config) {
+	        final BasicAWSCredentials awsCreds = new BasicAWSCredentials(config.getUserId(),config.getUserSecret());
+	        final ClientConfiguration clientConfig = new ClientConfiguration();
+	        clientConfig.setProtocol(Protocol.HTTP);
+	       
+	        // set proxy if defined in environmental
+	        final String proxyConfig = System.getenv("https_proxy");
+	        
+			if (proxyConfig != null && !proxyConfig.equals("")) {
+				final String removedProtocol = proxyConfig
+						.replaceAll(Pattern.quote("http://"), "")
+						.replaceAll(Pattern.quote("https://"), "")
+						.replaceAll(Pattern.quote("/"), ""); // remove trailing slash
 
-	/**
-	 * Amazon S3 client
-	 */
-	protected final S3ObsServices s3Services;
+				final String host = removedProtocol.substring(0, removedProtocol.indexOf(':'));
+				final int port = Integer.parseInt(removedProtocol.substring(removedProtocol.indexOf(':') + 1, 
+						removedProtocol.length()));
+				clientConfig.setProxyHost(host);
+		        clientConfig.setProxyPort(port);			
+			}
+			
+	        final RetryPolicy retryPolicy = new RetryPolicy(
+	                new SDKCustomDefaultRetryCondition(config.getMaxRetries()),
+	                new PredefinedBackoffStrategies.SDKDefaultBackoffStrategy(
+	                		config.getBackoffBaseDelay(),
+	                		config.getBackoffThrottledBaseDelay(),
+	                		config.getBackoffMaxDelay()
+	                ),
+	                config.getMaxRetries(), 
+	                true
+	        );
+	        clientConfig.setRetryPolicy(retryPolicy);
 
-	/**
-	 * Default constructor
-	 * 
-	 * @throws ObsServiceException
-	 */
-	public S3ObsClient() throws ObsServiceException {
-		super();
-		configuration = new S3Configuration();
-		AmazonS3 client = configuration.defaultS3Client();
-		TransferManager manager = configuration.defaultS3TransferManager(client);
-		s3Services = new S3ObsServices(client, manager,
-				configuration.getIntOfConfiguration("retry-policy.condition.max-retries"),
-				configuration.getIntOfConfiguration("retry-policy.backoff.throttled-base-delay-ms"));
+	        final AmazonS3 client = AmazonS3ClientBuilder.standard()
+	                .withClientConfiguration(clientConfig)
+	                .withEndpointConfiguration(new EndpointConfiguration(
+	                        config.getEndpoint(),
+	                        config.getEndpointRegion()))
+	                .withCredentials(new AWSStaticCredentialsProvider(awsCreds))
+	                .build();
+	        
+	        final TransferManager manager = TransferManagerBuilder.standard()
+	                .withMinimumUploadPartSize(config.getMinUploadPartSize() * 1024 * 1024)
+	                .withMultipartUploadThreshold(config.getMultipartUploadThreshold() * 1024 * 1024)
+	                .withS3Client(client)
+	                .build();
+
+	        final S3ObsServices s3Services = new S3ObsServices(
+	        		client, 
+	        		manager,
+	        		config.getMaxRetries(),
+	        		config.getBackoffThrottledBaseDelay()
+	        );	        
+	        return new S3ObsClient(config, s3Services);	
+		}		
 	}
-
-	/**
-	 * Constructor using fields
-	 * 
-	 * @param configuration
-	 * @param s3Services
-	 * @throws ObsServiceException
-	 */
-	protected S3ObsClient(final S3Configuration configuration, final S3ObsServices s3Services)
-			throws ObsServiceException {
-		super();
-		this.configuration = configuration;
+	
+	public static final String BACKEND_NAME = "aws-s3";
+	
+	private final S3ObsServices s3Services;
+	
+	S3ObsClient(final ObsConfigurationProperties configuration, final S3ObsServices s3Services) {
+		super(configuration);
 		this.s3Services = s3Services;
-	}
-	
-	@Override
-	protected String getBucketFor(ProductFamily family) throws ObsServiceException {
-		return configuration.getBucketForFamily(family);
 	}
 
 	/**
@@ -140,7 +171,7 @@ public class S3ObsClient extends AbstractObsClient {
 				}
 			}
 		} catch (IOException e) {
-			throw new S3ObsServiceException(configuration.getBucketForFamily(object.getFamily()), object.getKey(), "Could not store md5sum temp file", e);
+			throw new S3ObsServiceException(getBucketFor(object.getFamily()), object.getKey(), "Could not store md5sum temp file", e);
 		}
 		s3Services.uploadFile(getBucketFor(object.getFamily()), object.getKey() + MD5SUM_SUFFIX, file);
 		
@@ -151,29 +182,6 @@ public class S3ObsClient extends AbstractObsClient {
 		}
 	}
 
-	/**
-	 * @see ObsClient#getShutdownTimeoutS()
-	 */
-	@Override
-	public int getShutdownTimeoutS() throws ObsServiceException {
-		return configuration.getIntOfConfiguration(S3Configuration.TM_S_SHUTDOWN);
-	}
-
-	/**
-	 * @see ObsClient#getDownloadExecutionTimeoutS()
-	 */
-	@Override
-	public int getDownloadExecutionTimeoutS() throws ObsServiceException {
-		return configuration.getIntOfConfiguration(S3Configuration.TM_S_DOWN_EXEC);
-	}
-
-	/**
-	 * @see ObsClient#getUploadExecutionTimeoutS()
-	 */
-	@Override
-	public int getUploadExecutionTimeoutS() throws ObsServiceException {
-		return configuration.getIntOfConfiguration(S3Configuration.TM_S_UP_EXEC);
-	}
 
 	@Override
 	public void move(ObsObject from, ProductFamily to) throws ObsException {

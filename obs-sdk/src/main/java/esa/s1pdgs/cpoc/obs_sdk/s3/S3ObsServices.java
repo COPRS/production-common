@@ -9,8 +9,8 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.springframework.util.CollectionUtils;
 
 import com.amazonaws.event.ProgressEvent;
@@ -62,7 +62,7 @@ public class S3ObsServices {
     /**
      * Logger
      */
-    private static final Log LOGGER = LogFactory.getLog(S3ObsServices.class);
+    private static final Logger LOGGER = LogManager.getLogger(S3ObsServices.class);
 
     /**
      * Amazon S3 client
