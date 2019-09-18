@@ -164,8 +164,8 @@ public class JobController {
     		@RequestBody final AppDataJob newJob)
             throws AppCatalogJobInvalidStateException,
             AppCatalogJobGenerationInvalidStateException {
+    	newJob.setCategory(ProductCategory.valueOf(categoryName.toUpperCase()));
     	LOGGER.debug ("== newJob {}",newJob.toString());
-
     	// Create it
     	AppDataJob jobResult = appDataJobService.newJob(newJob);
     	LOGGER.debug ("== jobResult {}", jobResult.toString());
@@ -201,7 +201,9 @@ public class JobController {
             throws AppCatalogJobInvalidStateException,
             AppCatalogJobNotFoundException,
             AppCatalogJobGenerationInvalidStateException {
-        return appDataJobService.patchJob(jobId,patchJob);
+    	AppDataJob job = appDataJobService.patchJob(jobId,patchJob);
+    	job.setCategory(ProductCategory.valueOf(categoryName.toUpperCase()));
+    	return job;
     }
 
     /**
