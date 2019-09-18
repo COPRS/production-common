@@ -220,7 +220,9 @@ public class L0AppConsumer extends AbstractGenericConsumer<EdrsSessionDto> {
                     jobDto.setPod(processSettings.getHostname());
                     update = true;
                 }
-                final List<GenericMessageDto<EdrsSessionDto>> mess = jobDto.getMessages().stream().map(s -> (GenericMessageDto<EdrsSessionDto>)s).collect(Collectors.toList());
+                final List<GenericMessageDto<EdrsSessionDto>> mess = jobDto.getMessages().stream()
+                		.map(s -> (GenericMessageDto<EdrsSessionDto>)s)
+                		.collect(Collectors.toList());
                 
                 LOGGER.debug ("== existing message {}",mess.toString());
                 

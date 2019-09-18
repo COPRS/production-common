@@ -7,6 +7,8 @@ import java.util.Objects;
 
 import esa.s1pdgs.cpoc.common.ApplicationLevel;
 import esa.s1pdgs.cpoc.common.ProductCategory;
+import esa.s1pdgs.cpoc.mqi.model.queue.AbstractDto;
+import esa.s1pdgs.cpoc.mqi.model.rest.GenericMessageDto;
 
 /**
  * Class used for exchanging applicative data of a job
@@ -54,7 +56,7 @@ public class AppDataJob {
     /**
      * MQI messages linked to this job
      */
-    private List<Object> messages;
+    private List<GenericMessageDto<? extends AbstractDto>> messages;
 
     /**
      * Product of this job
@@ -184,7 +186,7 @@ public class AppDataJob {
     /**
      * @return the messages
      */
-    public List<Object> getMessages() {
+    public List<GenericMessageDto<? extends AbstractDto>> getMessages() {
         return messages;
     }
 
@@ -192,7 +194,7 @@ public class AppDataJob {
      * @param messages
      *            the messages to set
      */
-    public void setMessages(final List<Object> messages) {
+    public void setMessages(final List<GenericMessageDto<? extends AbstractDto>> messages) {
         this.messages = messages;
     }
 
