@@ -51,39 +51,6 @@ public abstract class AbstractObsClient implements ObsClient {
 		return configuration.getBucket().get(family);
 	}
 
-    /**
-     * @return the timeout for waiting threads termination in seconds
-     */
-	private int getShutdownTimeoutS() throws ObsServiceException {
-		return configuration.getTimeoutShutdown();
-	}
-
-    /**
-     * @return the timeout for download execution in seconds
-     */
-	private int getDownloadExecutionTimeoutS() throws ObsServiceException {
-		return configuration.getTimeoutDownExec();
-	}
-
-    /**
-     * @return the timeout for upload execution in seconds
-     */
-	private int getUploadExecutionTimeoutS() throws ObsServiceException {
-		return configuration.getTimeoutUpExec();
-	}
-
-	
-    /**
-     * @throws ExecutionException 
-     * @throws InterruptedException 
-     * @see ObsClient#downloadObjects(List)
-     * @see #downloadObjects(List, boolean)
-     */
-    public List<File> downloadObjects(final List<ObsDownloadObject> objects)
-            throws SdkClientException, ObsServiceException, ObsException {
-        return downloadObjects(objects, false);
-    }
-
     protected abstract List<File> downloadObject(ObsDownloadObject object) throws SdkClientException, ObsServiceException;
     
     protected abstract void uploadObject(ObsUploadObject object) throws SdkClientException, ObsServiceException, ObsException;
@@ -108,8 +75,7 @@ public abstract class AbstractObsClient implements ObsClient {
             	futures.add(service.submit(new ObsDownloadCallable(this, object)));
             }
             
-            waitForCompletion(workerThread, service, objects.size(),
-            		getDownloadExecutionTimeoutS());
+            waitForCompletion(workerThread, service, objects.size(),configuration.getTimeoutDownExec());
 
             for (Future<List<File>> future : futures) {
 	            try {
@@ -146,14 +112,6 @@ public abstract class AbstractObsClient implements ObsClient {
     }
 
     /**
-     * @see ObsClient#uploadFiles(List)
-     */
-    public void uploadObjects(final List<ObsUploadObject> objects)
-            throws SdkClientException, ObsServiceException, ObsException {
-        uploadObjects(objects, false);
-    }
-
-    /**
      * @see ObsClient#uploadFiles(List, boolean)
      */
     public void uploadObjects(final List<ObsUploadObject> objects,
@@ -169,8 +127,7 @@ public abstract class AbstractObsClient implements ObsClient {
             for (ObsUploadObject object : objects) {
                 service.submit(new ObsUploadCallable(this, object));
             }
-            waitForCompletion(workerThread, service, objects.size(),
-                    getUploadExecutionTimeoutS());
+            waitForCompletion(workerThread, service, objects.size(), configuration.getTimeoutUpExec());
 
         } else {
         	final Reporting reporting = new LoggerReporting.Factory("Write")
@@ -224,47 +181,12 @@ public abstract class AbstractObsClient implements ObsClient {
             } finally {
                 // Shutdown thread in case of raised exceptions
                 workerThread.shutdownNow();
-                workerThread.awaitTermination(getShutdownTimeoutS(),
-                        TimeUnit.SECONDS);
+                workerThread.awaitTermination(configuration.getTimeoutShutdown(),TimeUnit.SECONDS);
             }
         } catch (InterruptedException | TimeoutException e) {
             throw new ObsServiceException(e.getMessage(), e);
         }
     }    
-
-	/**
-	 * Download a file
-	 * 
-	 * @param key
-	 * @param family
-	 * @param targetDir
-	 * @return
-	 * @throws ObsException
-	 * @throws ObsUnknownObject
-	 */
-	public File downloadFile(final ProductFamily family, final String key, final String targetDir)
-			throws ObsException, ObsUnknownObject {
-		// If case of session we ignore folder in the key
-		String id = key;
-		if (family == ProductFamily.EDRS_SESSION) {
-			int lastIndex = key.lastIndexOf('/');
-			if (lastIndex != -1 && lastIndex < key.length() - 1) {
-				id = key.substring(lastIndex + 1);
-			}
-		}
-		// Download object
-		ObsDownloadObject object = new ObsDownloadObject(family, key, targetDir);
-		try {
-			final List<File> obj = downloadObject(object);
-			if (obj.size() <= 0) {
-				throw new ObsUnknownObject(family, key);
-			}
-		} catch (SdkClientException exc) {
-			throw new ObsException(family, key, exc);
-		}
-		// Get file
-		return new File(targetDir + id);
-	}
 	
 	/**
      * Download files per batch
@@ -281,24 +203,7 @@ public abstract class AbstractObsClient implements ObsClient {
             throw new ObsParallelAccessException(exc);
         }
     }
-    
-	/**
-	 * Upload a file in object storage
-	 * 
-	 * @param family
-	 * @param key
-	 * @param file
-	 * @throws ObsException
-	 */
-	public void uploadFile(final ProductFamily family, final String key, final File file) throws ObsException {
-		ObsUploadObject object = new ObsUploadObject(family, key, file);
-		try {
-			uploadObject(object);
-		} catch (SdkClientException exc) {
-			throw new ObsException(family, key, exc);
-		}
-	}
-	
+
 	/**
      * Upload files per batch
      * 
@@ -326,16 +231,6 @@ public abstract class AbstractObsClient implements ObsClient {
     	    	
     	return map;
     }
-
-	@Override
-	public void move(ObsObject from, ProductFamily to) throws ObsException, ObsServiceException {
-		throw new UnsupportedOperationException();
-	}
-	
-	@Override
-	public Map<String, InputStream> getAllAsInputStream(ProductFamily family, String keyPrefix)  throws SdkClientException {
-		throw new UnsupportedOperationException();
-	}
 	
 	@Override
     public void validate(ObsObject object) throws ObsServiceException, ObsValidationException {
