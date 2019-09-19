@@ -10,7 +10,7 @@ Configuration:
         Pattern: "%d{yyyy-MM-dd'T'HH:mm:ss.SSS} | %-5level | %logger{1.} [%thread]: %msg %n"
   Loggers:
     logger:
-      - name: fr.viveris.s1pdgs
+      - name: esa.s1pdgs.cpoc.scaler
         level: debug
         additivity: false
         AppenderRef:
