@@ -14,28 +14,18 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 
-import esa.s1pdgs.cpoc.mdcatalog.extraction.files.ExtractMetadata;
-import esa.s1pdgs.cpoc.mdcatalog.extraction.files.MetadataBuilder;
-import esa.s1pdgs.cpoc.mdcatalog.extraction.model.ConfigFileDescriptor;
-import esa.s1pdgs.cpoc.mdcatalog.extraction.model.EdrsSessionFileDescriptor;
-import esa.s1pdgs.cpoc.mdcatalog.extraction.model.OutputFileDescriptor;
-import esa.s1pdgs.cpoc.mdcatalog.extraction.xml.XmlConverter;
 import esa.s1pdgs.cpoc.common.EdrsSessionFileType;
 import esa.s1pdgs.cpoc.common.FileExtension;
 import esa.s1pdgs.cpoc.common.ProductFamily;
 import esa.s1pdgs.cpoc.common.errors.AbstractCodedException;
 import esa.s1pdgs.cpoc.common.errors.processing.MetadataExtractionException;
 import esa.s1pdgs.cpoc.common.errors.processing.MetadataMalformedException;
-
-import org.apache.logging.log4j.Logger;
-import org.apache.logging.log4j.LogManager;
+import esa.s1pdgs.cpoc.mdcatalog.extraction.model.ConfigFileDescriptor;
+import esa.s1pdgs.cpoc.mdcatalog.extraction.model.EdrsSessionFileDescriptor;
+import esa.s1pdgs.cpoc.mdcatalog.extraction.model.OutputFileDescriptor;
+import esa.s1pdgs.cpoc.mdcatalog.extraction.xml.XmlConverter;
 
 public class MetadataBuilderTest {
-
-	/**
-	 * Logger
-	 */
-	private static final Logger LOGGER = LogManager.getLogger(MetadataBuilderTest.class);
 
 	@Mock
 	private ExtractMetadata extractor;
@@ -49,118 +39,6 @@ public class MetadataBuilderTest {
 	public void init() {
 		MockitoAnnotations.initMocks(this);
 	}
-
-	private void mockExtractorProcessEOFFIle(JSONObject result) throws MetadataExtractionException, MetadataMalformedException {
-		Mockito.doAnswer(i -> {
-			try {
-				Thread.sleep(500);
-			} catch (InterruptedException e) {
-				LOGGER.error(e.getMessage());
-			}
-			return result;
-		}).when(extractor).processEOFFile(Mockito.any(ConfigFileDescriptor.class), Mockito.any(File.class));
-	}
-
-	private void mockExtractorprocessEOFFileWithoutNamespace(JSONObject result) throws MetadataExtractionException, MetadataMalformedException {
-		Mockito.doAnswer(i -> {
-			try {
-				Thread.sleep(500);
-			} catch (InterruptedException e) {
-				LOGGER.error(e.getMessage());
-			}
-			return result;
-		}).when(extractor).processEOFFileWithoutNamespace(Mockito.any(ConfigFileDescriptor.class),
-				Mockito.any(File.class));
-	}
-
-	private void mockExtractorprocessXMLFile(JSONObject result) throws MetadataExtractionException, MetadataMalformedException {
-		Mockito.doAnswer(i -> {
-			try {
-				Thread.sleep(500);
-			} catch (InterruptedException e) {
-				LOGGER.error(e.getMessage());
-			}
-			return result;
-		}).when(extractor).processXMLFile(Mockito.any(ConfigFileDescriptor.class), Mockito.any(File.class));
-	}
-
-	private void mockExtractorprocessSAFEFile(JSONObject result) throws MetadataExtractionException, MetadataMalformedException {
-		Mockito.doAnswer(i -> {
-			try {
-				Thread.sleep(500);
-			} catch (InterruptedException e) {
-				LOGGER.error(e.getMessage());
-			}
-			return result;
-		}).when(extractor).processSAFEFile(Mockito.any(ConfigFileDescriptor.class), Mockito.any(File.class));
-	}
-
-	private void mockExtractorprocessRAWFile(JSONObject result) throws MetadataExtractionException {
-		Mockito.doAnswer(i -> {
-			try {
-				Thread.sleep(500);
-			} catch (InterruptedException e) {
-				LOGGER.error(e.getMessage());
-			}
-			return result;
-		}).when(extractor).processRAWFile(Mockito.any(EdrsSessionFileDescriptor.class));
-	}
-
-	private void mockExtractorprocessSESSIONFile(JSONObject result) throws MetadataExtractionException {
-		Mockito.doAnswer(i -> {
-			try {
-				Thread.sleep(500);
-			} catch (InterruptedException e) {
-				LOGGER.error(e.getMessage());
-			}
-			return result;
-		}).when(extractor).processSESSIONFile(Mockito.any(EdrsSessionFileDescriptor.class));
-	}
-	
-	private void mockExtractorprocessL0SliceFile(JSONObject result) throws MetadataExtractionException, MetadataMalformedException {
-		Mockito.doAnswer(i -> {
-			try {
-				Thread.sleep(500);
-			} catch (InterruptedException e) {
-				LOGGER.error(e.getMessage());
-			}
-			return result;
-		}).when(extractor).processProduct(Mockito.any(OutputFileDescriptor.class), Mockito.eq(ProductFamily.L0_SLICE), Mockito.any(File.class));
-	}
-	
-	private void mockExtractorprocessL0ACNFile(JSONObject result) throws MetadataExtractionException, MetadataMalformedException {
-		Mockito.doAnswer(i -> {
-			try {
-				Thread.sleep(500);
-			} catch (InterruptedException e) {
-				LOGGER.error(e.getMessage());
-			}
-			return result;
-		}).when(extractor).processProduct(Mockito.any(OutputFileDescriptor.class), Mockito.eq(ProductFamily.L0_ACN), Mockito.any(File.class));
-	}
-	
-	private void mockExtractorprocessL1SliceFile(JSONObject result) throws MetadataExtractionException, MetadataMalformedException {
-		Mockito.doAnswer(i -> {
-			try {
-				Thread.sleep(500);
-			} catch (InterruptedException e) {
-				LOGGER.error(e.getMessage());
-			}
-			return result;
-		}).when(extractor).processProduct(Mockito.any(OutputFileDescriptor.class), Mockito.eq(ProductFamily.L1_SLICE), Mockito.any(File.class));
-	}
-	
-	private void mockExtractorprocessL1ACNFile(JSONObject result) throws MetadataExtractionException, MetadataMalformedException {
-		Mockito.doAnswer(i -> {
-			try {
-				Thread.sleep(500);
-			} catch (InterruptedException e) {
-				LOGGER.error(e.getMessage());
-			}
-			return result;
-		}).when(extractor).processProduct(Mockito.any(OutputFileDescriptor.class), Mockito.eq(ProductFamily.L1_ACN), Mockito.any(File.class));
-	}
-
 	@Test
 	public void testBuildConfigFileMetadataXml() throws JSONException, MetadataExtractionException, MetadataMalformedException {
 		
@@ -177,7 +55,8 @@ public class MetadataBuilderTest {
 
 		JSONObject expectedResult = new JSONObject("{\"productName\": \"S1A_OPER_AUX_OBMEMC_PDMC_20140201T000000.xml\"}");
 
-		this.mockExtractorprocessXMLFile(expectedResult);
+		Mockito.doAnswer(i ->expectedResult)
+			.when(extractor).processXMLFile(Mockito.any(ConfigFileDescriptor.class), Mockito.any(File.class));
 
 		File file = new File("workDir/S1A_OPER_AUX_OBMEMC_PDMC_20140201T000000.xml");
 
@@ -207,15 +86,15 @@ public class MetadataBuilderTest {
 		descriptor.setRelativePath("S1A_OPER_MPL_ORBSCT_20140507T150704_99999999T999999_0020.EOF");
 
 		JSONObject expectedResult = new JSONObject("{\"validityStopTime\":\"9999-12-31T23:59:59\",\"productClass\":\"OPER\",\"missionid\":\"S1\",\"creationTime\":\"2017-01-23T16:38:09\",\"insertionTime\":\"2018-05-30T11:40:06\",\"satelliteid\":\"A\",\"validityStartTime\":\"2014-04-03T22:46:09\",\"version\":\"0020\",\"productName\":\"S1A_OPER_MPL_ORBSCT_20140507T150704_99999999T999999_0020.EOF\",\"productType\":\"MPL_ORBSCT\"}");
-
-		this.mockExtractorProcessEOFFIle(expectedResult);
+		
+		Mockito.doAnswer(i -> expectedResult)
+			.when(extractor).processEOFFile(Mockito.any(ConfigFileDescriptor.class), Mockito.any(File.class));
 
 		File file = new File("workDir/S1A_OPER_MPL_ORBSCT_20140507T150704_99999999T999999_0020.EOF");
 
 		try {
 			MetadataBuilder metadataBuilder = new MetadataBuilder(extractor, xmlConverter, LOCAL_DIRECTORY);
 			JSONObject dto = metadataBuilder.buildConfigFileMetadata(descriptor, file);
-
 			assertNotNull("Metadata should not be null", dto);
 			assertEquals("Metadata are not equals", expectedResult.toString(), dto.toString());
 		} catch (AbstractCodedException fe) {
@@ -239,7 +118,8 @@ public class MetadataBuilderTest {
 
 		JSONObject expectedResult = new JSONObject("{\"validityStopTime\":\"2017-12-13T13:45:07\",\"productClass\":\"OPER\",\"missionid\":\"S1\",\"creationTime\":\"2017-12-13T14:38:38\",\"insertionTime\":\"2018-05-30T11:40:06\",\"satelliteid\":\"A\",\"validityStartTime\":\"2017-12-13T10:27:37\",\"version\":\"0001\",\"productType\":\"AUX_RESORB\",\"productName\":\"S1A_OPER_AUX_RESORB_OPOD_20171213T143838_V20171213T102737_20171213T134507.EOF\"}");
 
-		this.mockExtractorprocessEOFFileWithoutNamespace(expectedResult);
+		Mockito.doAnswer(i -> expectedResult)
+			.when(extractor).processEOFFileWithoutNamespace(Mockito.any(ConfigFileDescriptor.class),Mockito.any(File.class));
 
 		File file = new File("workDir/S1A_OPER_AUX_RESORB_OPOD_20171213T143838_V20171213T102737_20171213T134507.EOF");
 
@@ -270,7 +150,9 @@ public class MetadataBuilderTest {
 
 		JSONObject expectedResult = new JSONObject("{\"validityStopTime\":\"9999-12-31T23:59:59\",\"site\":\"CLS-Brest\",\"missionid\":\"S1\",\"creationTime\":\"2017-10-13T10:12:16.000000\",\"insertionTime\":\"2018-05-30T11:40:06\",\"satelliteid\":\"A\",\"instrumentConfigurationId\":\"6\",\"validityStartTime\":\"2017-10-17T08:00:00.000000\",\"productName\":\"S1A_AUX_INS_V20171017T080000_G20171013T101216.SAFE\",\"productType\":\"AUX_INS\"}");
 
-		this.mockExtractorprocessSAFEFile(expectedResult);
+		Mockito.doAnswer(i -> expectedResult)
+			.when(extractor).processSAFEFile(Mockito.any(ConfigFileDescriptor.class), Mockito.any(File.class));
+
 
 		File file = new File("workDir/S1A_AUX_INS_V20171017T080000_G20171013T101216.SAFE/manifest.safe");
 
@@ -347,7 +229,8 @@ public class MetadataBuilderTest {
 		JSONObject expectedResult = new JSONObject(
 				"{\"insertionTime\":\"2018-02-07T13:26:12\",\"missionId\":\"S1\",\"sessionId\":\"707000180\",\"productName\":\"DCS_02_L20171109175634707000180_ch1_DSDB_00001.raw\",\"satelliteId\":\"A\",\"productType\":\"RAW\",\"url\":\"SESSION1/DCS_02_SESSION1_ch1_DSIB.xml\"}");
 		
-		this.mockExtractorprocessRAWFile(expectedResult);
+		Mockito.doAnswer(i ->expectedResult)
+			.when(extractor).processRAWFile(Mockito.any(EdrsSessionFileDescriptor.class));
 
 		// Build the parameters
 		EdrsSessionFileDescriptor descriptor = new EdrsSessionFileDescriptor();
@@ -379,8 +262,9 @@ public class MetadataBuilderTest {
 		JSONObject expectedResult = new JSONObject(
 				"{\"insertionTime\":\"2018-02-07T13:26:12\",\"missionId\":\"S1\",\"sessionId\":\"SESSION1\",\"productName\":\"DCS_02_SESSION1_ch1_DSIB.xml\",\"satelliteId\":\"A\",\"productType\":\"SESSION\",\"url\":\"SESSION1/DCS_02_SESSION1_ch1_DSIB.xml\"}");
 		
-		this.mockExtractorprocessSESSIONFile(expectedResult);
-
+		Mockito.doAnswer(i -> expectedResult)
+			.when(extractor).processSESSIONFile(Mockito.any(EdrsSessionFileDescriptor.class));
+	
 		// Build the parameters
 		EdrsSessionFileDescriptor descriptor = new EdrsSessionFileDescriptor();
 		descriptor.setExtension(FileExtension.XML);
@@ -411,7 +295,8 @@ public class MetadataBuilderTest {
 		JSONObject expectedResult = new JSONObject(
 				"{\"missionDataTakeId\":\"137013\",\"theoreticalSliceLength\":\"25\",\"sliceCoordinates\":{\"coordinates\":[[[86.8273,36.7787],[86.4312,38.7338],[83.6235,38.4629],[84.0935,36.5091],[86.8273,36.7787]]],\"type\":\"Polygon\"},\"insertionTime\":\"2018-05-30T14:27:43\",\"polarisation\":\"DV\",\"sliceNumber\":\"13\",\"absoluteStopOrbit\":\"19684\",\"resolution\":\"_\",\"circulationFlag\":\"13\",\"productName\":\"S1A_IW_RAW__0SDV_20171213T121623_20171213T121656_019684_021735_C6DB.SAFE\",\"dataTakeId\":\"021735\",\"productConsolidation\":\"SLICE\",\"absoluteStartOrbit\":\"19684\",\"instrumentConfigurationId\":\"6\",\"relativeStopOrbit\":\"12\",\"relativeStartOrbit\":\"12\",\"startTime\":\"2017-12-13T12:16:23.685188Z\",\"stopTime\":\"2017-12-13T12:16:56.085136Z\",\"productType\":\"IW_RAW__0S\",\"productClass\":\"S\",\"missionId\":\"S1\",\"swathtype\":\"IW\",\"pass\":\"ASCENDING\",\"satelliteId\":\"A\",\"stopTimeANX\":628491.556,\"sliceOverlap\":\"7.4\",\"startTimeANX\":\"596091.6080\"}");
 		
-		this.mockExtractorprocessL0SliceFile(expectedResult);
+		Mockito.doAnswer(i -> expectedResult)
+			.when(extractor).processProduct(Mockito.any(OutputFileDescriptor.class), Mockito.eq(ProductFamily.L0_SLICE), Mockito.any(File.class));
 
 		// Build the parameters
 		OutputFileDescriptor descriptor = new OutputFileDescriptor();
@@ -448,7 +333,8 @@ public class MetadataBuilderTest {
 		JSONObject expectedResult = new JSONObject(
 				"{\"missionDataTakeId\":\"137013\",\"totalNumberOfSlice\":20.159704,\"sliceCoordinates\":{\"coordinates\":[[[90.3636,18.6541],[84.2062,49.0506],[80.8613,48.7621],[88.0584,18.3765],[90.3636,18.6541]]],\"type\":\"Polygon\"},\"insertionTime\":\"2018-05-30T14:27:43\",\"polarisation\":\"DV\",\"absoluteStopOrbit\":\"19684\",\"resolution\":\"_\",\"circulationFlag\":\"13\",\"productName\":\"S1A_IW_RAW__0ADV_20171213T121123_20171213T121947_019684_021735_51B1.SAFE\",\"dataTakeId\":\"021735\",\"productConsolidation\":\"FULL\",\"absoluteStartOrbit\":\"19684\",\"instrumentConfigurationId\":\"6\",\"relativeStopOrbit\":\"12\",\"relativeStartOrbit\":\"12\",\"startTime\":\"2017-12-13T12:11:23.682488Z\",\"stopTime\":\"2017-12-13T12:19:47.264351Z\",\"productType\":\"IW_RAW__0A\",\"productClass\":\"A\",\"missionId\":\"S1\",\"swathtype\":\"IW\",\"pass\":\"ASCENDING\",\"satelliteId\":\"A\",\"stopTimeANX\":799670.769,\"startTimeANX\":\"296088.9120\"}");
 		
-		this.mockExtractorprocessL0ACNFile(expectedResult);
+		Mockito.doAnswer(i -> expectedResult)
+			.when(extractor).processProduct(Mockito.any(OutputFileDescriptor.class), Mockito.eq(ProductFamily.L0_ACN), Mockito.any(File.class));
 
 		// Build the parameters
 		OutputFileDescriptor descriptor = new OutputFileDescriptor();
@@ -485,7 +371,8 @@ public class MetadataBuilderTest {
 		JSONObject expectedResult = new JSONObject(
 				"{\"missionDataTakeId\":\"137013\",\"theoreticalSliceLength\":\"25\",\"sliceCoordinates\":{\"coordinates\":[[[86.8273,36.7787],[86.4312,38.7338],[83.6235,38.4629],[84.0935,36.5091],[86.8273,36.7787]]],\"type\":\"Polygon\"},\"insertionTime\":\"2018-05-30T14:27:43\",\"polarisation\":\"DV\",\"sliceNumber\":\"13\",\"absoluteStopOrbit\":\"19684\",\"resolution\":\"_\",\"circulationFlag\":\"13\",\"productName\":\"S1A_IW_RAW__0SDV_20171213T121623_20171213T121656_019684_021735_C6DB.SAFE\",\"dataTakeId\":\"021735\",\"productConsolidation\":\"SLICE\",\"absoluteStartOrbit\":\"19684\",\"instrumentConfigurationId\":\"6\",\"relativeStopOrbit\":\"12\",\"relativeStartOrbit\":\"12\",\"startTime\":\"2017-12-13T12:16:23.685188Z\",\"stopTime\":\"2017-12-13T12:16:56.085136Z\",\"productType\":\"IW_RAW__0S\",\"productClass\":\"S\",\"missionId\":\"S1\",\"swathtype\":\"IW\",\"pass\":\"ASCENDING\",\"satelliteId\":\"A\",\"stopTimeANX\":628491.556,\"sliceOverlap\":\"7.4\",\"startTimeANX\":\"596091.6080\"}");
 		
-		this.mockExtractorprocessL1SliceFile(expectedResult);
+		Mockito.doAnswer(i -> expectedResult)
+			.when(extractor).processProduct(Mockito.any(OutputFileDescriptor.class), Mockito.eq(ProductFamily.L1_SLICE), Mockito.any(File.class));
 
 		// Build the parameters
 		OutputFileDescriptor descriptor = new OutputFileDescriptor();
@@ -522,7 +409,8 @@ public class MetadataBuilderTest {
 		JSONObject expectedResult = new JSONObject(
 				"{\"missionDataTakeId\":\"137013\",\"totalNumberOfSlice\":20.159704,\"sliceCoordinates\":{\"coordinates\":[[[90.3636,18.6541],[84.2062,49.0506],[80.8613,48.7621],[88.0584,18.3765],[90.3636,18.6541]]],\"type\":\"Polygon\"},\"insertionTime\":\"2018-05-30T14:27:43\",\"polarisation\":\"DV\",\"absoluteStopOrbit\":\"19684\",\"resolution\":\"_\",\"circulationFlag\":\"13\",\"productName\":\"S1A_IW_RAW__0ADV_20171213T121123_20171213T121947_019684_021735_51B1.SAFE\",\"dataTakeId\":\"021735\",\"productConsolidation\":\"FULL\",\"absoluteStartOrbit\":\"19684\",\"instrumentConfigurationId\":\"6\",\"relativeStopOrbit\":\"12\",\"relativeStartOrbit\":\"12\",\"startTime\":\"2017-12-13T12:11:23.682488Z\",\"stopTime\":\"2017-12-13T12:19:47.264351Z\",\"productType\":\"IW_RAW__0A\",\"productClass\":\"A\",\"missionId\":\"S1\",\"swathtype\":\"IW\",\"pass\":\"ASCENDING\",\"satelliteId\":\"A\",\"stopTimeANX\":799670.769,\"startTimeANX\":\"296088.9120\"}");
 		
-		this.mockExtractorprocessL1ACNFile(expectedResult);
+		Mockito.doAnswer(i -> expectedResult)
+			.when(extractor).processProduct(Mockito.any(OutputFileDescriptor.class), Mockito.eq(ProductFamily.L1_ACN), Mockito.any(File.class));
 
 		// Build the parameters
 		OutputFileDescriptor descriptor = new OutputFileDescriptor();

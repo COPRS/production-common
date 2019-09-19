@@ -31,16 +31,6 @@ public class AppStatusTest {
         appStatus.setShallBeStopped(true);
         assertEquals(true, appStatus.isShallBeStopped());
     }
-    
-    /**
-     * Test force stopping not executed if not needed
-     * @throws InterruptedException
-     */
-    @Test
-    public void testForceStopping() throws InterruptedException {
-        appStatus.forceStopping();
-        Thread.sleep(1000);
-    }
 
     /**
      * Test set stopping
