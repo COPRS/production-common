@@ -139,7 +139,7 @@ public class L0SegmentAppConsumerTest {
 		doReturn(new ArrayList<>()).when(appDataService).findByProductDataTakeId(anyString());
 		Mockito.doAnswer(i -> {
 			return i.getArgument(0);
-		}).when(appDataService).newJob(Mockito.any());
+		}).when(appDataService).newJob(Mockito.any(),Mockito.any());
 		Mockito.doAnswer(i -> {
 			return i.getArgument(1);
 		}).when(appDataService).patchJob(Mockito.anyLong(), Mockito.any(), Mockito.anyBoolean(), Mockito.anyBoolean(),
@@ -178,7 +178,7 @@ public class L0SegmentAppConsumerTest {
 		assertEquals(expectedData, result);
 		verify(appDataService, times(1)).findByMessagesIdentifier(eq(1L));
 		verify(appDataService, times(1)).findByProductDataTakeId(eq("00F9CD"));
-		verify(appDataService, times(1)).newJob(eq(expectedData));
+		verify(appDataService, times(1)).newJob(eq(expectedData), Mockito.eq(ProductDto.class));
 	}
 
 	@Test
@@ -212,7 +212,7 @@ public class L0SegmentAppConsumerTest {
 
 		verify(appDataService, times(1)).findByMessagesIdentifier(eq(1L));
 		verify(appDataService, times(1)).findByProductDataTakeId(eq("00F9CD"));
-		verify(appDataService, times(1)).newJob(any());
+		verify(appDataService, times(1)).newJob(any(), Mockito.eq(ProductDto.class));
 		verify(appDataService, times(1)).patchJob(anyLong(), any(), eq(false), eq(false), eq(false));
 		verify(jobsDispatcher).dispatch(eq(expectedData));
 	}

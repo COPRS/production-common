@@ -155,7 +155,7 @@ public class L0AppConsumer extends AbstractGenericConsumer<EdrsSessionDto> {
             throws AbstractCodedException {
     	
     	// Check if a job is already created for message identifier
-        List<AppDataJob> existingJobs = appDataService
+        List<AppDataJob<?>> existingJobs = appDataService
                 .findByMessagesIdentifier(mqiMessage.getIdentifier());
 
         if (CollectionUtils.isEmpty(existingJobs)) {
@@ -206,7 +206,7 @@ public class L0AppConsumer extends AbstractGenericConsumer<EdrsSessionDto> {
                 jobDto.setProduct(productDto);
                
                 LOGGER.debug ("== jobDTO {}",jobDto.toString());
-                AppDataJob<EdrsSessionDto> newJobDto = appDataService.newJob(jobDto);
+                AppDataJob<EdrsSessionDto> newJobDto = appDataService.newJob(jobDto, EdrsSessionDto.class);
                 LOGGER.debug ("== newJobDto {}",newJobDto.toString());
                 return newJobDto;
             } else {

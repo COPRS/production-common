@@ -196,7 +196,7 @@ public class AppCatalogJobClientTest {
 	                Mockito.any(HttpEntity.class),
 	                Mockito.any(ParameterizedTypeReference.class)
 	    );
-        client.newJob(buildJob());
+        client.newJob(buildJob(), ProductDto.class);
     }
 
     @SuppressWarnings("unchecked")
@@ -210,7 +210,7 @@ public class AppCatalogJobClientTest {
 	                Mockito.any(HttpEntity.class),
 	                Mockito.any(ParameterizedTypeReference.class)
 	    );
-        final AppDataJob<ProductDto> result = client.newJob(job);
+        final AppDataJob<ProductDto> result = client.newJob(job, ProductDto.class);
         assertEquals(job, result);
         verify(restTemplate, times(1)).exchange(
                 Mockito.eq("http://localhost:8080/level_products/jobs"),

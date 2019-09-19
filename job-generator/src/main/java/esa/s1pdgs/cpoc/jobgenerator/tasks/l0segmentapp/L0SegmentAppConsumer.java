@@ -111,7 +111,7 @@ public class L0SegmentAppConsumer
                     "[MONITOR] [step 1] [productName {}] Creating/updating job",
                     productName);
             reporting.begin(new ReportingMessage("Start job generation using {}", mqiMessage.getBody().getProductName()));
-            AppDataJob appDataJob = buildJob(mqiMessage);
+            AppDataJob<ProductDto> appDataJob = buildJob(mqiMessage);
             productName = appDataJob.getProduct().getProductName();
 
             // Dispatch job
@@ -156,13 +156,13 @@ public class L0SegmentAppConsumer
         reporting.end(new ReportingMessage("End job generation using {}", mqiMessage.getBody().getProductName()));
     }
 
-    protected AppDataJob buildJob(
+    protected AppDataJob<ProductDto> buildJob(
             GenericMessageDto<ProductDto> mqiMessage)
             throws AbstractCodedException {
         ProductDto leveldto = mqiMessage.getBody();
 
         // Check if a job is already created for message identifier
-        List<AppDataJob> existingJobs = appDataService
+        List<AppDataJob<?>> existingJobs = appDataService
                 .findByMessagesIdentifier(mqiMessage.getIdentifier());
 
         if (CollectionUtils.isEmpty(existingJobs)) {
@@ -180,13 +180,13 @@ public class L0SegmentAppConsumer
             String datatakeID = m.group(this.patternGroups.get("datatakeId"));
 
             // Search job for given datatake id
-            List<AppDataJob> existingJobsForDatatake =
+            List<AppDataJob<?>> existingJobsForDatatake =
                     appDataService.findByProductDataTakeId(datatakeID);
 
             if (CollectionUtils.isEmpty(existingJobsForDatatake)) {
 
                 // Create the JOB
-                AppDataJob jobDto = new AppDataJob();
+                AppDataJob<ProductDto> jobDto = new AppDataJob<>();
                 // General details
                 jobDto.setLevel(processSettings.getLevel());
                 jobDto.setPod(processSettings.getHostname());
@@ -202,9 +202,10 @@ public class L0SegmentAppConsumer
                 productDto.setSatelliteId(satelliteId);
                 jobDto.setProduct(productDto);
 
-                return appDataService.newJob(jobDto);
+                return appDataService.newJob(jobDto, ProductDto.class);
             } else {
-                AppDataJob jobDto = existingJobsForDatatake.get(0);
+                @SuppressWarnings("unchecked")
+				AppDataJob<ProductDto> jobDto = (AppDataJob<ProductDto>) existingJobsForDatatake.get(0);
 
                 if (!jobDto.getPod().equals(processSettings.getHostname())) {
                     jobDto.setPod(processSettings.getHostname());
@@ -217,7 +218,8 @@ public class L0SegmentAppConsumer
 
         } else {
             // Update pod if needed
-            AppDataJob jobDto = existingJobs.get(0);
+            @SuppressWarnings("unchecked")
+			AppDataJob<ProductDto> jobDto = (AppDataJob<ProductDto>) existingJobs.get(0);
 
             if (!jobDto.getPod().equals(processSettings.getHostname())) {
                 jobDto.setPod(processSettings.getHostname());
