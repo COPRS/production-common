@@ -188,7 +188,7 @@ public class AppDataJobServiceTest {
         AppDataJobGeneration newGen = new AppDataJobGeneration();
         newGen.setTaskTable("task-table-1");
         newGen.setState(AppDataJobGenerationState.PRIMARY_CHECK);
-        AppDataJob newJob = this.appDataJobService.patchGenerationToJob(123L,"task-table-1" , newGen, 3);
+        AppDataJob<?> newJob = this.appDataJobService.patchGenerationToJob(123L,"task-table-1" , newGen, 3);
         verify(appDataJobDao, times(1)).findById(Mockito.eq(123L));
         verify(appDataJobDao, never()).save(Mockito.any());
         verify(appDataJobDao, times(1)).udpateJobGeneration(Mockito.eq(123L), Mockito.any());
@@ -200,7 +200,7 @@ public class AppDataJobServiceTest {
     
     @Test
     public void patchGenerationToJobGen4Test() throws AppCatalogJobNotFoundException, AppCatalogJobGenerationTerminatedException, AppCatalogJobGenerationInvalidTransitionStateException, AppCatalogJobGenerationNotFoundException {
-        AppDataJob obj = new AppDataJob();
+        AppDataJob<ProductDto> obj = new AppDataJob<>();
         AppDataJobProduct product = new AppDataJobProduct();
         product.setSessionId("session-id");
         AppDataJobGeneration gen1 = new AppDataJobGeneration();
@@ -229,7 +229,7 @@ public class AppDataJobServiceTest {
         doReturn(Optional.of(obj)).when(appDataJobDao).findById(Mockito.any());
         doReturn(obj).when(appDataJobDao).save(Mockito.any());
         doNothing().when(appDataJobDao).udpateJobGeneration(Mockito.anyLong(), Mockito.any());
-        AppDataJob newJob = this.appDataJobService.patchGenerationToJob(123L,"task-table-1" ,gen4, 3);
+        AppDataJob<?> newJob = this.appDataJobService.patchGenerationToJob(123L,"task-table-1" ,gen4, 3);
         verify(appDataJobDao, times(1)).findById(Mockito.eq(123L));
         verify(appDataJobDao, never()).save(Mockito.any());
         verify(appDataJobDao, times(1)).udpateJobGeneration(Mockito.eq(123L), Mockito.any());
@@ -241,7 +241,7 @@ public class AppDataJobServiceTest {
     
     @Test(expected = AppCatalogJobGenerationInvalidTransitionStateException.class)
     public void patchGenerationToJobGen4InvalidTransitionTest() throws AppCatalogJobNotFoundException, AppCatalogJobGenerationTerminatedException, AppCatalogJobGenerationInvalidTransitionStateException, AppCatalogJobGenerationNotFoundException {
-        AppDataJob obj = new AppDataJob();
+        AppDataJob<ProductDto> obj = new AppDataJob<>();
         AppDataJobProduct product = new AppDataJobProduct();
         product.setSessionId("session-id");
         AppDataJobGeneration gen1 = new AppDataJobGeneration();
@@ -276,7 +276,7 @@ public class AppDataJobServiceTest {
     
     @Test
     public void patchGenerationToJobGen5Test() throws AppCatalogJobNotFoundException, AppCatalogJobGenerationTerminatedException, AppCatalogJobGenerationInvalidTransitionStateException, AppCatalogJobGenerationNotFoundException {
-        AppDataJob obj = new AppDataJob();
+        AppDataJob<ProductDto> obj = new AppDataJob<>();
         AppDataJobProduct product = new AppDataJobProduct();
         product.setSessionId("session-id");
         AppDataJobGeneration gen1 = new AppDataJobGeneration();
@@ -306,7 +306,7 @@ public class AppDataJobServiceTest {
         doReturn(Optional.of(obj)).when(appDataJobDao).findById(Mockito.any());
         doReturn(obj).when(appDataJobDao).save(Mockito.any());
         doNothing().when(appDataJobDao).udpateJobGeneration(Mockito.anyLong(), Mockito.any());
-        AppDataJob newJob = this.appDataJobService.patchGenerationToJob(123L,"task-table-1" ,gen5, 3);
+        AppDataJob<?> newJob = this.appDataJobService.patchGenerationToJob(123L,"task-table-1" ,gen5, 3);
         verify(appDataJobDao, times(1)).findById(Mockito.eq(123L));
         verify(appDataJobDao, never()).save(Mockito.any());
         verify(appDataJobDao, times(1)).udpateJobGeneration(Mockito.eq(123L), Mockito.any());
@@ -318,7 +318,7 @@ public class AppDataJobServiceTest {
     
     @Test(expected = AppCatalogJobGenerationInvalidTransitionStateException.class)
     public void patchGenerationToJobGen5InvalidTransitionTest() throws AppCatalogJobNotFoundException, AppCatalogJobGenerationTerminatedException, AppCatalogJobGenerationInvalidTransitionStateException, AppCatalogJobGenerationNotFoundException {
-        AppDataJob obj = new AppDataJob();
+        AppDataJob<ProductDto> obj = new AppDataJob<>();
         AppDataJobProduct product = new AppDataJobProduct();
         product.setSessionId("session-id");
         AppDataJobGeneration gen1 = new AppDataJobGeneration();
@@ -353,7 +353,7 @@ public class AppDataJobServiceTest {
     
     @Test
     public void patchGenerationToJobGen6Test() throws AppCatalogJobNotFoundException, AppCatalogJobGenerationTerminatedException, AppCatalogJobGenerationInvalidTransitionStateException, AppCatalogJobGenerationNotFoundException {
-        AppDataJob obj = new AppDataJob();
+        AppDataJob<ProductDto> obj = new AppDataJob<>();
         AppDataJobProduct product = new AppDataJobProduct();
         product.setSessionId("session-id");
         AppDataJobGeneration gen1 = new AppDataJobGeneration();
@@ -383,7 +383,7 @@ public class AppDataJobServiceTest {
         doReturn(Optional.of(obj)).when(appDataJobDao).findById(Mockito.any());
         doReturn(obj).when(appDataJobDao).save(Mockito.any());
         doNothing().when(appDataJobDao).udpateJobGeneration(Mockito.anyLong(), Mockito.any());
-        AppDataJob newJob = this.appDataJobService.patchGenerationToJob(123L,"task-table-1" ,gen6, 3);
+        AppDataJob<?> newJob = this.appDataJobService.patchGenerationToJob(123L,"task-table-1" ,gen6, 3);
         verify(appDataJobDao, times(2)).findById(Mockito.eq(123L));
         verify(appDataJobDao, never()).save(Mockito.any());
         verify(appDataJobDao, times(1)).udpateJobGeneration(Mockito.eq(123L), Mockito.any());
@@ -395,7 +395,7 @@ public class AppDataJobServiceTest {
     
     @Test
     public void patchGenerationToJobGenAllSent() throws AppCatalogJobNotFoundException, AppCatalogJobGenerationTerminatedException, AppCatalogJobGenerationInvalidTransitionStateException, AppCatalogJobGenerationNotFoundException {
-        AppDataJob obj = new AppDataJob();
+        AppDataJob<ProductDto> obj = new AppDataJob<>();
         AppDataJobProduct product = new AppDataJobProduct();
         product.setSessionId("session-id");
         AppDataJobGeneration gen1 = new AppDataJobGeneration();
@@ -427,7 +427,7 @@ public class AppDataJobServiceTest {
         doReturn(Optional.of(obj)).when(appDataJobDao).findById(Mockito.any());
         doReturn(obj).when(appDataJobDao).save(Mockito.any());
         doNothing().when(appDataJobDao).udpateJobGeneration(Mockito.anyLong(), Mockito.any());
-        AppDataJob newJob = this.appDataJobService.patchGenerationToJob(123L,"task-table-1" ,gen6, 3);
+        AppDataJob<?> newJob = this.appDataJobService.patchGenerationToJob(123L,"task-table-1" ,gen6, 3);
         verify(appDataJobDao, times(2)).findById(Mockito.eq(123L));
         verify(appDataJobDao, times(1)).save(Mockito.any());
         verify(appDataJobDao, times(1)).udpateJobGeneration(Mockito.eq(123L), Mockito.any());
@@ -440,7 +440,7 @@ public class AppDataJobServiceTest {
     
     @Test(expected = AppCatalogJobGenerationInvalidTransitionStateException.class)
     public void patchGenerationToJobGen6InvalidTransitionTest() throws AppCatalogJobNotFoundException, AppCatalogJobGenerationTerminatedException, AppCatalogJobGenerationInvalidTransitionStateException, AppCatalogJobGenerationNotFoundException {
-        AppDataJob obj = new AppDataJob();
+        AppDataJob<ProductDto> obj = new AppDataJob<>();
         AppDataJobProduct product = new AppDataJobProduct();
         product.setSessionId("session-id");
         AppDataJobGeneration gen1 = new AppDataJobGeneration();
@@ -475,7 +475,7 @@ public class AppDataJobServiceTest {
     
     @Test(expected = AppCatalogJobGenerationTerminatedException.class)
     public void patchGenerationToJobErrorTest() throws AppCatalogJobNotFoundException, AppCatalogJobGenerationTerminatedException, AppCatalogJobGenerationInvalidTransitionStateException, AppCatalogJobGenerationNotFoundException {
-        AppDataJob obj = new AppDataJob();
+        AppDataJob<ProductDto> obj = new AppDataJob<>();
         AppDataJobProduct product = new AppDataJobProduct();
         product.setSessionId("session-id");
         AppDataJobGeneration gen1 = new AppDataJobGeneration();
@@ -505,7 +505,7 @@ public class AppDataJobServiceTest {
     
     @Test(expected = AppCatalogJobGenerationNotFoundException.class)
     public void patchGenerationToJobNoTaskTableTest() throws AppCatalogJobNotFoundException, AppCatalogJobGenerationTerminatedException, AppCatalogJobGenerationInvalidTransitionStateException, AppCatalogJobGenerationNotFoundException {
-        AppDataJob obj = new AppDataJob();
+        AppDataJob<ProductDto> obj = new AppDataJob<>();
         AppDataJobProduct product = new AppDataJobProduct();
         product.setSessionId("session-id");
         AppDataJobGeneration gen1 = new AppDataJobGeneration();

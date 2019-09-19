@@ -1,6 +1,7 @@
 package esa.s1pdgs.cpoc.jobgenerator.tasks.l0app;
 
 import java.io.File;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
@@ -103,7 +104,7 @@ public class L0AppConsumer extends AbstractGenericConsumer<EdrsSessionDto> {
                 		new ReportingMessage("Start job generation using  {}", mqiMessage.getBody().getKeyObjectStorage())
                 );
                 
-                AppDataJob appDataJob = buildJob(mqiMessage);
+                AppDataJob<EdrsSessionDto> appDataJob = buildJob(mqiMessage);
                 
                 LOGGER.debug ("== appDataJob(1) {}",appDataJob.toString());
                 productName = appDataJob.getProduct().getProductName();
@@ -150,15 +151,15 @@ public class L0AppConsumer extends AbstractGenericConsumer<EdrsSessionDto> {
 
     }
 
-    protected AppDataJob buildJob(GenericMessageDto<EdrsSessionDto> mqiMessage)
+    protected AppDataJob<EdrsSessionDto> buildJob(GenericMessageDto<EdrsSessionDto> mqiMessage)
             throws AbstractCodedException {
     	
-        // Check if a job is already created for message identifier
+    	// Check if a job is already created for message identifier
         List<AppDataJob> existingJobs = appDataService
                 .findByMessagesIdentifier(mqiMessage.getIdentifier());
 
         if (CollectionUtils.isEmpty(existingJobs)) {
-        	final EdrsSessionDto sessionDto = mqiMessage.getBody();        	
+        	final EdrsSessionDto sessionDto = mqiMessage.getBody();
         	final String productType = sessionDto.getProductType().name();
         	final String productName = new File(sessionDto.getProductName()).getName();
         	LOGGER.debug("Querying metadata for product {} of type {}", productName, productType); 
@@ -166,13 +167,14 @@ public class L0AppConsumer extends AbstractGenericConsumer<EdrsSessionDto> {
            	LOGGER.debug ("Got result {}", edrsSessionMetadata); 
         	
             // Search if session is already in progress
-            List<AppDataJob> existingJobsForSession =
-                    appDataService.findByProductSessionId(sessionDto.getSessionId());
+            List<AppDataJob<EdrsSessionDto>> existingJobsForSession =
+                    appDataService.findByProductSessionId(sessionDto.getSessionId()).stream()
+                    .map(s -> (AppDataJob<EdrsSessionDto>) s).collect(Collectors.toList());
 
             if (CollectionUtils.isEmpty(existingJobsForSession)) {
             	LOGGER.debug ("== creating jobDTO from {}",mqiMessage ); 
                 // Create the JOB
-                AppDataJob jobDto = new AppDataJob();
+                AppDataJob<EdrsSessionDto> jobDto = new AppDataJob<>();
                 // General details
                 jobDto.setLevel(processSettings.getLevel());
                 jobDto.setPod(processSettings.getHostname());
@@ -204,7 +206,7 @@ public class L0AppConsumer extends AbstractGenericConsumer<EdrsSessionDto> {
                 jobDto.setProduct(productDto);
                
                 LOGGER.debug ("== jobDTO {}",jobDto.toString());
-                AppDataJob newJobDto = appDataService.newJob(jobDto);
+                AppDataJob<EdrsSessionDto> newJobDto = appDataService.newJob(jobDto);
                 LOGGER.debug ("== newJobDto {}",newJobDto.toString());
                 return newJobDto;
             } else {
@@ -213,16 +215,19 @@ public class L0AppConsumer extends AbstractGenericConsumer<EdrsSessionDto> {
                 boolean update = false;
                 boolean updateMessage = false;
                 boolean updateProduct = false;
-                AppDataJob jobDto = existingJobsForSession.get(0);
+                AppDataJob<EdrsSessionDto> jobDto = (AppDataJob<EdrsSessionDto>) existingJobsForSession.get(0);
                 LOGGER.debug ("== existingJobsForSession.get(0) jobDto {}", jobDto.toString());
                 
                 if (!jobDto.getPod().equals(processSettings.getHostname())) {
                     jobDto.setPod(processSettings.getHostname());
                     update = true;
                 }
-                final List<GenericMessageDto<EdrsSessionDto>> mess = jobDto.getMessages().stream().map(s -> (GenericMessageDto<EdrsSessionDto>)s).collect(Collectors.toList());
                 
-                LOGGER.debug ("== existing message {}",mess.toString());
+                final List<GenericMessageDto<EdrsSessionDto>> mess = jobDto.getMessages().stream()
+                		.map(s -> (GenericMessageDto<EdrsSessionDto>)s)
+                		.collect(Collectors.toList());
+                
+                LOGGER.debug ("== existing message {}", jobDto.getMessages().toString());
                 
 				final GenericMessageDto<EdrsSessionDto> firstMess = (GenericMessageDto<EdrsSessionDto>) jobDto.getMessages().get(0);
                 

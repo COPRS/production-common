@@ -22,6 +22,7 @@ import org.springframework.util.StringUtils;
 
 import esa.s1pdgs.cpoc.appcatalog.client.job.AppCatalogJobClient;
 import esa.s1pdgs.cpoc.appcatalog.server.job.db.AppDataJob;
+import esa.s1pdgs.cpoc.appcatalog.server.job.db.AppDataJobGeneration;
 import esa.s1pdgs.cpoc.appcatalog.server.job.db.AppDataJobGenerationState;
 import esa.s1pdgs.cpoc.appcatalog.server.job.db.AppDataJobProduct;
 import esa.s1pdgs.cpoc.appcatalog.server.job.db.AppDataJobState;
@@ -62,6 +63,7 @@ import esa.s1pdgs.cpoc.metadata.client.SearchMetadataQuery;
 import esa.s1pdgs.cpoc.metadata.model.AbstractMetadata;
 import esa.s1pdgs.cpoc.metadata.model.SearchMetadata;
 import esa.s1pdgs.cpoc.mqi.model.queue.AbstractDto;
+import esa.s1pdgs.cpoc.mqi.model.queue.EdrsSessionDto;
 import esa.s1pdgs.cpoc.mqi.model.queue.LevelJobDto;
 import esa.s1pdgs.cpoc.mqi.model.queue.LevelJobInputDto;
 import esa.s1pdgs.cpoc.mqi.model.queue.LevelJobOutputDto;
@@ -558,10 +560,8 @@ public abstract class AbstractJobsGenerator<T extends AbstractDto> implements Ru
     	
         // Log functional logs, not clear when this is called
         if (job.getAppDataJob().getState() == AppDataJobState.TERMINATED) {
-        	
         	@SuppressWarnings("unchecked")
-			final AppDataJob jobDto = job.getAppDataJob();
-        	
+			final AppDataJob<?> jobDto = job.getAppDataJob();
             final List<String> taskTables =  jobDto.getGenerations().stream()
             	.map(g -> g.getTaskTable())
             	.collect(Collectors.toList());

@@ -13,6 +13,7 @@ import org.springframework.stereotype.Service;
 
 import esa.s1pdgs.cpoc.common.ProductFamily;
 import esa.s1pdgs.cpoc.common.errors.InternalErrorException;
+import esa.s1pdgs.cpoc.ingestion.config.IngestionServiceConfigurationProperties;
 import esa.s1pdgs.cpoc.ingestion.obs.ObsAdapter;
 import esa.s1pdgs.cpoc.mqi.model.queue.AbstractDto;
 import esa.s1pdgs.cpoc.mqi.model.queue.IngestionDto;
@@ -23,10 +24,13 @@ public class ProductServiceImpl implements ProductService {
 	static final Logger LOG = LogManager.getLogger(ProductServiceImpl.class);
 	
     private final ObsClient obsClient;
+    
+    private final String hostname;
 	
 	@Autowired
-	public ProductServiceImpl(ObsClient obsClient) {
+	public ProductServiceImpl(final ObsClient obsClient, final IngestionServiceConfigurationProperties ingestionServiceConfigurationProperties) {
 		this.obsClient = obsClient;
+		this.hostname = ingestionServiceConfigurationProperties.getHostname();
 	}
 	
 	@Override
@@ -34,7 +38,7 @@ public class ProductServiceImpl implements ProductService {
 			throws ProductException, InternalErrorException {
 		final File file = toFile(ingestion);		
 		assertPermissions(ingestion, file);
-		final ProductFactory<AbstractDto> productFactory = ProductFactory.newProductFactoryFor(family);
+		final ProductFactory<AbstractDto> productFactory = ProductFactory.newProductFactoryFor(family, hostname);
 		LOG.debug("Using {} for {}", productFactory, family);
 		
 		final ObsAdapter obsAdapter = newObsAdapterFor(Paths.get(ingestion.getPickupPath()));

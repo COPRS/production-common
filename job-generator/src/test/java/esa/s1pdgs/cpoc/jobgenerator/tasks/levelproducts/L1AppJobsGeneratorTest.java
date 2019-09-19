@@ -361,15 +361,15 @@ public class L1AppJobsGeneratorTest {
                 .when(appDataPService)
                 .findNByPodAndGenerationTaskTableWithNotSentGeneration(
                         Mockito.anyString(), Mockito.anyString());
-        AppDataJob primaryCheckAppJob =
+        AppDataJob<?> primaryCheckAppJob =
                 TestL1Utils.buildJobGeneration(true);
         primaryCheckAppJob.getGenerations().get(0)
                 .setState(AppDataJobGenerationState.PRIMARY_CHECK);
-        AppDataJob readyAppJob =
+        AppDataJob<?> readyAppJob =
                 TestL1Utils.buildJobGeneration(true);
         readyAppJob.getGenerations().get(0)
                 .setState(AppDataJobGenerationState.READY);
-        AppDataJob sentAppJob =
+        AppDataJob<?> sentAppJob =
                 TestL1Utils.buildJobGeneration(true);
         sentAppJob.getGenerations().get(0)
                 .setState(AppDataJobGenerationState.SENT);
