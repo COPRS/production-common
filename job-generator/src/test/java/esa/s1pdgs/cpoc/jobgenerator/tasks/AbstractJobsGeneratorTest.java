@@ -48,14 +48,14 @@ import esa.s1pdgs.cpoc.jobgenerator.config.JobGeneratorSettings;
 import esa.s1pdgs.cpoc.jobgenerator.config.JobGeneratorSettings.WaitTempo;
 import esa.s1pdgs.cpoc.jobgenerator.config.ProcessSettings;
 import esa.s1pdgs.cpoc.jobgenerator.model.ProductMode;
-import esa.s1pdgs.cpoc.jobgenerator.model.metadata.SearchMetadataQuery;
 import esa.s1pdgs.cpoc.jobgenerator.model.tasktable.TaskTable;
 import esa.s1pdgs.cpoc.jobgenerator.service.XmlConverter;
-import esa.s1pdgs.cpoc.jobgenerator.service.metadata.MetadataService;
 import esa.s1pdgs.cpoc.jobgenerator.service.mqi.OutputProducerFactory;
 import esa.s1pdgs.cpoc.jobgenerator.tasks.levelproducts.LevelProductsJobsGenerator;
 import esa.s1pdgs.cpoc.jobgenerator.utils.TestGenericUtils;
 import esa.s1pdgs.cpoc.jobgenerator.utils.TestL1Utils;
+import esa.s1pdgs.cpoc.metadata.client.MetadataClient;
+import esa.s1pdgs.cpoc.metadata.client.SearchMetadataQuery;
 import esa.s1pdgs.cpoc.metadata.model.SearchMetadata;
 import esa.s1pdgs.cpoc.mqi.model.queue.ProductDto;
 
@@ -71,7 +71,7 @@ public class AbstractJobsGeneratorTest {
     private XmlConverter xmlConverter;
 
     @Mock
-    private MetadataService metadataService;
+    private MetadataClient metadataClient;
 
     @Mock
     private ProcessSettings processSettings;
@@ -120,7 +120,7 @@ public class AbstractJobsGeneratorTest {
 
         this.mockAppDataService();
 
-        generator = new LevelProductsJobsGenerator(xmlConverter, metadataService,
+        generator = new LevelProductsJobsGenerator(xmlConverter, metadataClient,
                 processSettings, jobGeneratorSettings, JobsSender,
                 appDataPService);
         generator.initialize(new File(
@@ -206,7 +206,7 @@ public class AbstractJobsGeneratorTest {
         try {
             Mockito.doAnswer(i -> {
                 return null;
-            }).when(this.metadataService).getEdrsSession(Mockito.anyString(),
+            }).when(this.metadataClient).getEdrsSession(Mockito.anyString(),
                     Mockito.anyString());
             Mockito.doAnswer(i -> {
                 if (this.nbLoopMetadata >= maxLoop2) {
@@ -294,7 +294,7 @@ public class AbstractJobsGeneratorTest {
                     }
                 }
                 return null;
-            }).when(this.metadataService).search(Mockito.any(), Mockito.any(),
+            }).when(this.metadataClient).search(Mockito.any(), Mockito.any(),
                     Mockito.any(), Mockito.anyString(), Mockito.anyInt(),
                     Mockito.anyString());
         } catch (JobGenMetadataException e) {
@@ -350,7 +350,7 @@ public class AbstractJobsGeneratorTest {
         doThrow(new IOException("IO exception raised")).when(xmlConverter)
                 .convertFromXMLToObject(Mockito.anyString());
         AbstractJobsGenerator<ProductDto> gen = new LevelProductsJobsGenerator(
-                xmlConverter, metadataService, processSettings,
+                xmlConverter, metadataClient, processSettings,
                 jobGeneratorSettings, JobsSender, appDataPService);
         generator.setMode(ProductMode.SLICING);
 
@@ -368,7 +368,7 @@ public class AbstractJobsGeneratorTest {
         doThrow(new JAXBException("JAXB exception raised")).when(xmlConverter)
                 .convertFromXMLToObject(Mockito.anyString());
         AbstractJobsGenerator<ProductDto> gen = new LevelProductsJobsGenerator(
-                xmlConverter, metadataService, processSettings,
+                xmlConverter, metadataClient, processSettings,
                 jobGeneratorSettings, JobsSender, appDataPService);
         generator.setMode(ProductMode.SLICING);
 
@@ -398,7 +398,7 @@ public class AbstractJobsGeneratorTest {
                 .findNByPodAndGenerationTaskTableWithNotSentGeneration(
                         Mockito.eq("hostname"),
                         Mockito.eq("IW_RAW__0_GRDH_1.xml"));
-        verifyNoMoreInteractions(appDataPService, JobsSender, metadataService);
+        verifyNoMoreInteractions(appDataPService, JobsSender, metadataClient);
         verify(jobGeneratorSettings, never()).getWaitprimarycheck();
         verify(jobGeneratorSettings, never()).getWaitmetadatainput();
     }
@@ -414,7 +414,7 @@ public class AbstractJobsGeneratorTest {
                 .findNByPodAndGenerationTaskTableWithNotSentGeneration(
                         Mockito.eq("hostname"),
                         Mockito.eq("IW_RAW__0_GRDH_1.xml"));
-        verifyNoMoreInteractions(appDataPService, JobsSender, metadataService);
+        verifyNoMoreInteractions(appDataPService, JobsSender, metadataClient);
         verify(jobGeneratorSettings, never()).getWaitprimarycheck();
         verify(jobGeneratorSettings, never()).getWaitmetadatainput();
     }
@@ -430,7 +430,7 @@ public class AbstractJobsGeneratorTest {
                 .findNByPodAndGenerationTaskTableWithNotSentGeneration(
                         Mockito.eq("hostname"),
                         Mockito.eq("IW_RAW__0_GRDH_1.xml"));
-        verifyNoMoreInteractions(appDataPService, JobsSender, metadataService);
+        verifyNoMoreInteractions(appDataPService, JobsSender, metadataClient);
         verify(jobGeneratorSettings, never()).getWaitprimarycheck();
         verify(jobGeneratorSettings, never()).getWaitmetadatainput();
     }
@@ -462,7 +462,7 @@ public class AbstractJobsGeneratorTest {
                         Mockito.eq("IW_RAW__0_GRDH_1.xml"));
         verify(jobGeneratorSettings, times(1)).getWaitprimarycheck();
         verify(jobGeneratorSettings, never()).getWaitmetadatainput();
-        verifyNoMoreInteractions(appDataPService, JobsSender, metadataService);
+        verifyNoMoreInteractions(appDataPService, JobsSender, metadataClient);
     }
 
     @Test
@@ -499,6 +499,6 @@ public class AbstractJobsGeneratorTest {
                         Mockito.eq("IW_RAW__0_GRDH_1.xml"));
         verify(jobGeneratorSettings, times(1)).getWaitprimarycheck();
         verify(jobGeneratorSettings, times(1)).getWaitmetadatainput();
-        verifyNoMoreInteractions(appDataPService, JobsSender, metadataService);
+        verifyNoMoreInteractions(appDataPService, JobsSender, metadataClient);
     }
 }

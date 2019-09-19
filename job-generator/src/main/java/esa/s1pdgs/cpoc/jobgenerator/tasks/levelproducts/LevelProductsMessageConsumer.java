@@ -21,10 +21,10 @@ import esa.s1pdgs.cpoc.errorrepo.ErrorRepoAppender;
 import esa.s1pdgs.cpoc.errorrepo.model.rest.FailedProcessingDto;
 import esa.s1pdgs.cpoc.jobgenerator.config.L0SlicePatternSettings;
 import esa.s1pdgs.cpoc.jobgenerator.config.ProcessSettings;
-import esa.s1pdgs.cpoc.jobgenerator.service.metadata.MetadataService;
 import esa.s1pdgs.cpoc.jobgenerator.status.AppStatus;
 import esa.s1pdgs.cpoc.jobgenerator.tasks.AbstractGenericConsumer;
 import esa.s1pdgs.cpoc.jobgenerator.tasks.AbstractJobsDispatcher;
+import esa.s1pdgs.cpoc.metadata.client.MetadataClient;
 import esa.s1pdgs.cpoc.mqi.client.GenericMqiClient;
 import esa.s1pdgs.cpoc.mqi.client.StatusService;
 import esa.s1pdgs.cpoc.mqi.model.queue.ProductDto;
@@ -56,7 +56,7 @@ public class LevelProductsMessageConsumer extends AbstractGenericConsumer<Produc
      */
     private String taskForFunctionalLog;
     
-    private final MetadataService metadataService;
+    private final MetadataClient metadataClient;
 
   
     public LevelProductsMessageConsumer(
@@ -68,14 +68,14 @@ public class LevelProductsMessageConsumer extends AbstractGenericConsumer<Produc
             final AppCatalogJobClient appDataService,
             final ErrorRepoAppender errorRepoAppender,
             final AppStatus appStatus,
-            final MetadataService metadataService) {
+            final MetadataClient metadataClient) {
         super(jobsDispatcher, processSettings, mqiService, mqiStatusService,
                 appDataService, appStatus, errorRepoAppender, ProductCategory.LEVEL_PRODUCTS);
         this.patternSettings = patternSettings;
         this.l0SLicesPattern = Pattern.compile(this.patternSettings.getRegexp(),
                 Pattern.CASE_INSENSITIVE);
         this.seaCoverageCheckPattern = Pattern.compile(patternSettings.getSeaCoverageCheckPattern());
-        this.metadataService = metadataService;
+        this.metadataClient = metadataClient;
     }
 
     /**
@@ -111,7 +111,7 @@ public class LevelProductsMessageConsumer extends AbstractGenericConsumer<Produc
             if (seaCoverageCheckPattern.matcher(productName).matches()) {
             	final Reporting reportingSeaCheck = reportingFactory.newReporting(1);
             	reportingSeaCheck.begin(new ReportingMessage("Start checking if {} is over sea", productName));            	
-            	if (metadataService.getSeaCoverage(family, productName) <= processSettings.getMinSeaCoveragePercentage()) {
+            	if (metadataClient.getSeaCoverage(family, productName) <= processSettings.getMinSeaCoveragePercentage()) {
             		reportingSeaCheck.end(new ReportingMessage("Skip job generation using {} (not over ocean)", productName));
                     ackPositively(appStatus.getStatus().isStopping(), mqiMessage, productName);
                     reporting.end(new ReportingMessage("End job generation using {}", productName));

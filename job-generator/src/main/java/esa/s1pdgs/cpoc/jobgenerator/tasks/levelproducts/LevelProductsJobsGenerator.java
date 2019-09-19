@@ -15,9 +15,9 @@ import esa.s1pdgs.cpoc.jobgenerator.model.joborder.JobOrder;
 import esa.s1pdgs.cpoc.jobgenerator.model.joborder.JobOrderProcParam;
 import esa.s1pdgs.cpoc.jobgenerator.model.joborder.JobOrderSensingTime;
 import esa.s1pdgs.cpoc.jobgenerator.service.XmlConverter;
-import esa.s1pdgs.cpoc.jobgenerator.service.metadata.MetadataService;
 import esa.s1pdgs.cpoc.jobgenerator.service.mqi.OutputProducerFactory;
 import esa.s1pdgs.cpoc.jobgenerator.tasks.AbstractJobsGenerator;
+import esa.s1pdgs.cpoc.metadata.client.MetadataClient;
 import esa.s1pdgs.cpoc.metadata.model.L0AcnMetadata;
 import esa.s1pdgs.cpoc.metadata.model.L0SliceMetadata;
 import esa.s1pdgs.cpoc.mqi.model.queue.LevelJobDto;
@@ -33,16 +33,16 @@ public class LevelProductsJobsGenerator extends AbstractJobsGenerator<ProductDto
 
 	/**
 	 * @param xmlConverter
-	 * @param metadataService
+	 * @param metadataClient
 	 * @param processSettings
 	 * @param taskTablesSettings
 	 * @param outputFactory
 	 * @param appDataService
 	 */
-	public LevelProductsJobsGenerator(XmlConverter xmlConverter, MetadataService metadataService, ProcessSettings processSettings,
+	public LevelProductsJobsGenerator(XmlConverter xmlConverter, MetadataClient metadataClient, ProcessSettings processSettings,
 			JobGeneratorSettings taskTablesSettings, OutputProducerFactory outputFactory,
 			AppCatalogJobClient appDataService) {
-		super(xmlConverter, metadataService, processSettings, taskTablesSettings, outputFactory, appDataService);
+		super(xmlConverter, metadataClient, processSettings, taskTablesSettings, outputFactory, appDataService);
 	}
 
 	/**
@@ -53,7 +53,7 @@ public class LevelProductsJobsGenerator extends AbstractJobsGenerator<ProductDto
 		Map<String, String> missingMetadata = new HashMap<>();
 		// Retrieve instrument configuration id and slice number
 		try {
-			L0SliceMetadata file = this.metadataService.getL0Slice(job.getAppDataJob().getProduct().getProductName());
+			L0SliceMetadata file = this.metadataClient.getL0Slice(job.getAppDataJob().getProduct().getProductName());
 			job.getAppDataJob().getProduct().setProductType(file.getProductType());
 			job.getAppDataJob().getProduct().setInsConfId(file.getInstrumentConfigurationId());
 			job.getAppDataJob().getProduct().setNumberSlice(file.getNumberSlice());
@@ -64,7 +64,7 @@ public class LevelProductsJobsGenerator extends AbstractJobsGenerator<ProductDto
 		}
 		// Retrieve Total_Number_Of_Slices
 		try {
-			L0AcnMetadata acn = this.metadataService.getFirstACN(job.getAppDataJob().getProduct().getProductName(),
+			L0AcnMetadata acn = this.metadataClient.getFirstACN(job.getAppDataJob().getProduct().getProductName(),
 					job.getAppDataJob().getProduct().getProcessMode());
 			job.getAppDataJob().getProduct().setTotalNbOfSlice(acn.getNumberOfSlices());
 			job.getAppDataJob().getProduct().setSegmentStartDate(acn.getValidityStart());

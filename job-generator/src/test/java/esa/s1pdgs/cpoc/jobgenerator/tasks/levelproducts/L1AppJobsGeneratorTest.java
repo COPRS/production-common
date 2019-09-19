@@ -48,14 +48,14 @@ import esa.s1pdgs.cpoc.jobgenerator.model.joborder.AbstractJobOrderConf;
 import esa.s1pdgs.cpoc.jobgenerator.model.joborder.JobOrder;
 import esa.s1pdgs.cpoc.jobgenerator.model.joborder.JobOrderProcParam;
 import esa.s1pdgs.cpoc.jobgenerator.model.joborder.L0JobOrderConf;
-import esa.s1pdgs.cpoc.jobgenerator.model.metadata.SearchMetadataQuery;
 import esa.s1pdgs.cpoc.jobgenerator.model.tasktable.TaskTable;
 import esa.s1pdgs.cpoc.jobgenerator.service.XmlConverter;
-import esa.s1pdgs.cpoc.jobgenerator.service.metadata.MetadataService;
 import esa.s1pdgs.cpoc.jobgenerator.service.mqi.OutputProducerFactory;
 import esa.s1pdgs.cpoc.jobgenerator.tasks.JobsGeneratorFactory;
 import esa.s1pdgs.cpoc.jobgenerator.utils.TestGenericUtils;
 import esa.s1pdgs.cpoc.jobgenerator.utils.TestL1Utils;
+import esa.s1pdgs.cpoc.metadata.client.MetadataClient;
+import esa.s1pdgs.cpoc.metadata.client.SearchMetadataQuery;
 import esa.s1pdgs.cpoc.metadata.model.L0AcnMetadata;
 import esa.s1pdgs.cpoc.metadata.model.L0SliceMetadata;
 import esa.s1pdgs.cpoc.metadata.model.SearchMetadata;
@@ -73,7 +73,7 @@ public class L1AppJobsGeneratorTest {
     private XmlConverter xmlConverter;
 
     @Mock
-    private MetadataService metadataService;
+    private MetadataClient metadataClient;
 
     @Mock
     private ProcessSettings processSettings;
@@ -124,7 +124,7 @@ public class L1AppJobsGeneratorTest {
 
         JobsGeneratorFactory factory =
                 new JobsGeneratorFactory(processSettings, jobGeneratorSettings,
-                		aiopProperties, xmlConverter, metadataService, JobsSender);
+                		aiopProperties, xmlConverter, metadataClient, JobsSender);
         generator = (LevelProductsJobsGenerator) factory.createJobGeneratorForL0Slice(
                 new File(
                         "./test/data/generic_config/task_tables/IW_RAW__0_GRDH_1.xml"),
@@ -229,7 +229,7 @@ public class L1AppJobsGeneratorTest {
         try {
             Mockito.doAnswer(i -> {
                 return null;
-            }).when(this.metadataService).getEdrsSession(Mockito.anyString(),
+            }).when(this.metadataClient).getEdrsSession(Mockito.anyString(),
                     Mockito.anyString());
             Mockito.doAnswer(i -> {
                 return new L0SliceMetadata(
@@ -242,7 +242,7 @@ public class L1AppJobsGeneratorTest {
                         "A",
                         "WILE",
                         6, 3, "021735");
-            }).when(this.metadataService).getL0Slice(Mockito.anyString());
+            }).when(this.metadataClient).getL0Slice(Mockito.anyString());
             Mockito.doAnswer(i -> {
                 return new L0AcnMetadata(
                         "S1A_IW_RAW__0ADV_20171213T121123_20171213T121947_019684_021735_51B1.SAFE",
@@ -253,7 +253,7 @@ public class L1AppJobsGeneratorTest {
                         "S1",
                         "A",
                         "WILE", 6, 10, "021735");
-            }).when(this.metadataService).getFirstACN(Mockito.anyString(),
+            }).when(this.metadataClient).getFirstACN(Mockito.anyString(),
                     Mockito.anyString());
             Mockito.doAnswer(i -> {
                 SearchMetadataQuery query = i.getArgument(0);
@@ -335,7 +335,7 @@ public class L1AppJobsGeneratorTest {
                             "WILE"));
                 }
                 return null;
-            }).when(this.metadataService).search(Mockito.any(), Mockito.any(),
+            }).when(this.metadataClient).search(Mockito.any(), Mockito.any(),
                     Mockito.any(), Mockito.anyString(), Mockito.anyInt(),
                     Mockito.anyString());
         } catch (JobGenMetadataException e) {
@@ -392,7 +392,7 @@ public class L1AppJobsGeneratorTest {
     public void testPresearchWhenSliceMissing()
             throws JobGenInputsMissingException, JobGenMetadataException {
         doThrow(new JobGenMetadataException("test ex"))
-                .when(this.metadataService).getL0Slice(Mockito.anyString());
+                .when(this.metadataClient).getL0Slice(Mockito.anyString());
 
         thrown.expect(JobGenInputsMissingException.class);
         thrown.expectMessage("Missing inputs");
@@ -407,7 +407,7 @@ public class L1AppJobsGeneratorTest {
     public void testPresearchWhenAcnMissing()
             throws JobGenInputsMissingException, JobGenMetadataException {
         doThrow(new JobGenMetadataException("test ex"))
-                .when(this.metadataService)
+                .when(this.metadataClient)
                 .getFirstACN(Mockito.anyString(), Mockito.anyString());
 
         thrown.expect(JobGenInputsMissingException.class);
