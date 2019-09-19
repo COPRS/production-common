@@ -38,13 +38,13 @@ import esa.s1pdgs.cpoc.jobgenerator.config.JobGeneratorSettings;
 import esa.s1pdgs.cpoc.jobgenerator.config.JobGeneratorSettings.WaitTempo;
 import esa.s1pdgs.cpoc.jobgenerator.config.ProcessSettings;
 import esa.s1pdgs.cpoc.jobgenerator.model.JobGeneration;
-import esa.s1pdgs.cpoc.jobgenerator.model.metadata.SearchMetadataQuery;
 import esa.s1pdgs.cpoc.jobgenerator.model.tasktable.TaskTable;
 import esa.s1pdgs.cpoc.jobgenerator.service.XmlConverter;
-import esa.s1pdgs.cpoc.jobgenerator.service.metadata.MetadataService;
 import esa.s1pdgs.cpoc.jobgenerator.service.mqi.OutputProducerFactory;
 import esa.s1pdgs.cpoc.jobgenerator.tasks.JobsGeneratorFactory;
 import esa.s1pdgs.cpoc.jobgenerator.utils.TestL0Utils;
+import esa.s1pdgs.cpoc.metadata.client.MetadataClient;
+import esa.s1pdgs.cpoc.metadata.client.SearchMetadataQuery;
 import esa.s1pdgs.cpoc.metadata.model.EdrsSessionMetadata;
 import esa.s1pdgs.cpoc.metadata.model.SearchMetadata;
 import esa.s1pdgs.cpoc.mqi.model.queue.LevelJobDto;
@@ -61,7 +61,7 @@ public class L0AppJobsGeneratorTest {
     private XmlConverter xmlConverter;
 
     @Mock
-    private MetadataService metadataService;
+    private MetadataClient metadataClient;
 
     @Mock
     private ProcessSettings l0ProcessSettings;
@@ -106,7 +106,7 @@ public class L0AppJobsGeneratorTest {
 
         JobsGeneratorFactory factory = new JobsGeneratorFactory(
                 l0ProcessSettings, jobGeneratorSettings, aiopProperties,
-                xmlConverter, metadataService, jobsSender);
+                xmlConverter, metadataClient, jobsSender);
         generator = (L0AppJobsGenerator) factory
                 .createJobGeneratorForEdrsSession(new File(
                         "./test/data/generic_config/task_tables/TaskTable.AIOP.xml"),
@@ -282,7 +282,7 @@ public class L0AppJobsGeneratorTest {
                             "WILE",
                             Collections.emptyList());
                 }
-            }).when(this.metadataService).getEdrsSession(Mockito.anyString(),
+            }).when(this.metadataClient).getEdrsSession(Mockito.anyString(),
                     Mockito.anyString());
             Mockito.doAnswer(i -> {
                 SearchMetadataQuery query = i.getArgument(0);
@@ -317,7 +317,7 @@ public class L0AppJobsGeneratorTest {
                             "WILE"));
                 }
                 return null;
-            }).when(this.metadataService).search(Mockito.any(), Mockito.any(),
+            }).when(this.metadataClient).search(Mockito.any(), Mockito.any(),
                     Mockito.any(), Mockito.anyString(), Mockito.anyInt(),
                     Mockito.anyString());
         } catch (JobGenMetadataException e) {
@@ -406,7 +406,7 @@ public class L0AppJobsGeneratorTest {
     public void testPreSearchMissingRaw() throws JobGenMetadataException {
         Mockito.doAnswer(i -> {
             return null;
-        }).when(this.metadataService).getEdrsSession(Mockito.anyString(),
+        }).when(this.metadataClient).getEdrsSession(Mockito.anyString(),
                 Mockito.anyString());
 
         AppDataJob appDataJob =

@@ -12,11 +12,11 @@ import esa.s1pdgs.cpoc.jobgenerator.config.JobGeneratorSettings;
 import esa.s1pdgs.cpoc.jobgenerator.config.ProcessSettings;
 import esa.s1pdgs.cpoc.jobgenerator.model.ProductMode;
 import esa.s1pdgs.cpoc.jobgenerator.service.XmlConverter;
-import esa.s1pdgs.cpoc.jobgenerator.service.metadata.MetadataService;
 import esa.s1pdgs.cpoc.jobgenerator.service.mqi.OutputProducerFactory;
 import esa.s1pdgs.cpoc.jobgenerator.tasks.l0app.L0AppJobsGenerator;
 import esa.s1pdgs.cpoc.jobgenerator.tasks.l0segmentapp.L0SegmentAppJobsGenerator;
 import esa.s1pdgs.cpoc.jobgenerator.tasks.levelproducts.LevelProductsJobsGenerator;
+import esa.s1pdgs.cpoc.metadata.client.MetadataClient;
 import esa.s1pdgs.cpoc.mqi.model.queue.EdrsSessionDto;
 import esa.s1pdgs.cpoc.mqi.model.queue.ProductDto;
 
@@ -46,7 +46,7 @@ public class JobsGeneratorFactory {
 	/**
 	 * 
 	 */
-	private final MetadataService metadataService;
+	private final MetadataClient metadataClient;
 
 	/**
 	 * Producer in topic
@@ -64,13 +64,13 @@ public class JobsGeneratorFactory {
 	@Autowired
 	public JobsGeneratorFactory(final ProcessSettings l0ProcessSettings,
 			final JobGeneratorSettings jobGeneratorSettings, final AiopProperties aiopProperties,
-			final XmlConverter xmlConverter, final MetadataService metadataService,
+			final XmlConverter xmlConverter, final MetadataClient metadataClient,
 			final OutputProducerFactory outputFactory) {
 		this.l0ProcessSettings = l0ProcessSettings;
 		this.jobGeneratorSettings = jobGeneratorSettings;
 		this.aiopProperties = aiopProperties;
 		this.xmlConverter = xmlConverter;
-		this.metadataService = metadataService;
+		this.metadataClient = metadataClient;
 		this.outputFactory = outputFactory;
 	}
 
@@ -84,7 +84,7 @@ public class JobsGeneratorFactory {
 	public AbstractJobsGenerator<EdrsSessionDto> createJobGeneratorForEdrsSession(final File xmlFile,
 			final AppCatalogJobClient appDataService) throws JobGenBuildTaskTableException {
 		AbstractJobsGenerator<EdrsSessionDto> processor = new L0AppJobsGenerator(this.xmlConverter,
-				this.metadataService, this.l0ProcessSettings, this.jobGeneratorSettings, this.outputFactory,
+				this.metadataClient, this.l0ProcessSettings, this.jobGeneratorSettings, this.outputFactory,
 				appDataService, aiopProperties);
 		processor.setMode(ProductMode.SLICING);
 		processor.initialize(xmlFile);
@@ -102,7 +102,7 @@ public class JobsGeneratorFactory {
 			final AppCatalogJobClient appDataService)
 			throws JobGenBuildTaskTableException {
 
-		AbstractJobsGenerator<ProductDto> processor = new LevelProductsJobsGenerator(this.xmlConverter, this.metadataService,
+		AbstractJobsGenerator<ProductDto> processor = new LevelProductsJobsGenerator(this.xmlConverter, this.metadataClient,
 				this.l0ProcessSettings, this.jobGeneratorSettings, this.outputFactory, appDataService);
 		processor.setMode(ProductMode.SLICING);
 		processor.initialize(xmlFile);
@@ -121,7 +121,7 @@ public class JobsGeneratorFactory {
 			final AppCatalogJobClient appDataService) throws JobGenBuildTaskTableException {
 		
 		AbstractJobsGenerator<ProductDto> processor = new L0SegmentAppJobsGenerator(this.xmlConverter,
-				this.metadataService, this.l0ProcessSettings, this.jobGeneratorSettings, this.outputFactory,
+				this.metadataClient, this.l0ProcessSettings, this.jobGeneratorSettings, this.outputFactory,
 				appDataService);
 		processor.setMode(ProductMode.SLICING);
 		processor.initialize(xmlFile);

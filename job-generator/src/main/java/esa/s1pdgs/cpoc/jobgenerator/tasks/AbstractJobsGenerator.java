@@ -48,7 +48,6 @@ import esa.s1pdgs.cpoc.jobgenerator.model.joborder.JobOrderSensingTime;
 import esa.s1pdgs.cpoc.jobgenerator.model.joborder.JobOrderTimeInterval;
 import esa.s1pdgs.cpoc.jobgenerator.model.joborder.enums.JobOrderDestination;
 import esa.s1pdgs.cpoc.jobgenerator.model.joborder.enums.JobOrderFileNameType;
-import esa.s1pdgs.cpoc.jobgenerator.model.metadata.SearchMetadataQuery;
 import esa.s1pdgs.cpoc.jobgenerator.model.metadata.SearchMetadataResult;
 import esa.s1pdgs.cpoc.jobgenerator.model.tasktable.TaskTable;
 import esa.s1pdgs.cpoc.jobgenerator.model.tasktable.TaskTableInput;
@@ -58,12 +57,12 @@ import esa.s1pdgs.cpoc.jobgenerator.model.tasktable.TaskTableTask;
 import esa.s1pdgs.cpoc.jobgenerator.model.tasktable.enums.TaskTableInputOrigin;
 import esa.s1pdgs.cpoc.jobgenerator.model.tasktable.enums.TaskTableMandatoryEnum;
 import esa.s1pdgs.cpoc.jobgenerator.service.XmlConverter;
-import esa.s1pdgs.cpoc.jobgenerator.service.metadata.MetadataService;
 import esa.s1pdgs.cpoc.jobgenerator.service.mqi.OutputProducerFactory;
+import esa.s1pdgs.cpoc.metadata.client.MetadataClient;
+import esa.s1pdgs.cpoc.metadata.client.SearchMetadataQuery;
 import esa.s1pdgs.cpoc.metadata.model.AbstractMetadata;
 import esa.s1pdgs.cpoc.metadata.model.SearchMetadata;
 import esa.s1pdgs.cpoc.mqi.model.queue.AbstractDto;
-import esa.s1pdgs.cpoc.mqi.model.queue.EdrsSessionDto;
 import esa.s1pdgs.cpoc.mqi.model.queue.LevelJobDto;
 import esa.s1pdgs.cpoc.mqi.model.queue.LevelJobInputDto;
 import esa.s1pdgs.cpoc.mqi.model.queue.LevelJobOutputDto;
@@ -106,7 +105,7 @@ public abstract class AbstractJobsGenerator<T extends AbstractDto> implements Ru
     /**
      * 
      */
-    protected final MetadataService metadataService;
+    protected final MetadataClient metadataClient;
 
     /**
      * 
@@ -153,13 +152,13 @@ public abstract class AbstractJobsGenerator<T extends AbstractDto> implements Ru
      * @param xmlConverter
      */
     public AbstractJobsGenerator(final XmlConverter xmlConverter,
-            final MetadataService metadataService,
+            final MetadataClient metadataClient,
             final ProcessSettings l0ProcessSettings,
             final JobGeneratorSettings taskTablesSettings,
             final OutputProducerFactory outputFactory,
             final AppCatalogJobClient appDataService) {
         this.xmlConverter = xmlConverter;
-        this.metadataService = metadataService;
+        this.metadataClient = metadataClient;
         this.l0ProcessSettings = l0ProcessSettings;
         this.jobGeneratorSettings = taskTablesSettings;
         this.metadataSearchQueries = new HashMap<>();
@@ -586,7 +585,7 @@ public abstract class AbstractJobsGenerator<T extends AbstractDto> implements Ru
             if (v != null && v.getResult() == null) {
                 try {
                     List<SearchMetadata> file =
-                            this.metadataService.search(v.getQuery(),
+                            this.metadataClient.search(v.getQuery(),
                                     DateUtils.convertToAnotherFormat(
                                             job.getAppDataJob().getProduct()
                                                     .getStartTime(),

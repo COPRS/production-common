@@ -1,4 +1,4 @@
-package esa.s1pdgs.cpoc.jobgenerator.service.metadata;
+package esa.s1pdgs.cpoc.metadata.client;
 
 import static org.hamcrest.CoreMatchers.isA;
 import static org.junit.Assert.assertEquals;
@@ -30,14 +30,13 @@ import org.springframework.web.util.UriComponentsBuilder;
 
 import esa.s1pdgs.cpoc.common.ProductFamily;
 import esa.s1pdgs.cpoc.common.errors.processing.JobGenMetadataException;
-import esa.s1pdgs.cpoc.jobgenerator.model.metadata.SearchMetadataQuery;
 import esa.s1pdgs.cpoc.metadata.model.EdrsSessionMetadata;
 import esa.s1pdgs.cpoc.metadata.model.L0AcnMetadata;
 import esa.s1pdgs.cpoc.metadata.model.L0SliceMetadata;
 import esa.s1pdgs.cpoc.metadata.model.LevelSegmentMetadata;
 import esa.s1pdgs.cpoc.metadata.model.SearchMetadata;
 
-public class MetadataServiceTest {
+public class MetadataClientTest {
 
     @Rule
     public ExpectedException thrown = ExpectedException.none();
@@ -47,7 +46,7 @@ public class MetadataServiceTest {
 
     private final static String METADATA_HOST = "localhost:8082";
 
-    private MetadataService service;
+    private MetadataClient service;
 
     private int nbRetry = 3;
     private int tempoRetry = 3;
@@ -62,7 +61,7 @@ public class MetadataServiceTest {
         // Mcokito
         MockitoAnnotations.initMocks(this);
 
-        service = new MetadataService(restTemplate, METADATA_HOST, nbRetry,
+        service = new MetadataClient(restTemplate, METADATA_HOST, nbRetry,
                 tempoRetry);
     }
     

@@ -3,6 +3,7 @@ package esa.s1pdgs.cpoc.jobgenerator.model.metadata;
 import java.util.List;
 import java.util.Objects;
 
+import esa.s1pdgs.cpoc.metadata.client.SearchMetadataQuery;
 import esa.s1pdgs.cpoc.metadata.model.SearchMetadata;
 
 /**

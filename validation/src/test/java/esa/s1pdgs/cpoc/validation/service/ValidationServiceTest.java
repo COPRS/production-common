@@ -21,20 +21,20 @@ import org.mockito.MockitoAnnotations;
 import esa.s1pdgs.cpoc.common.ProductFamily;
 import esa.s1pdgs.cpoc.common.errors.processing.MetadataQueryException;
 import esa.s1pdgs.cpoc.common.utils.DateUtils;
+import esa.s1pdgs.cpoc.metadata.client.MetadataClient;
 import esa.s1pdgs.cpoc.metadata.model.SearchMetadata;
 import esa.s1pdgs.cpoc.obs_sdk.ObsClient;
 import esa.s1pdgs.cpoc.obs_sdk.ObsObject;
 import esa.s1pdgs.cpoc.obs_sdk.SdkClientException;
 import esa.s1pdgs.cpoc.report.LoggerReporting;
 import esa.s1pdgs.cpoc.report.Reporting;
-import esa.s1pdgs.cpoc.validation.service.metadata.MetadataService;
 
 public class ValidationServiceTest {
 
 	private static final Logger LOGGER = LogManager.getLogger(ValidationServiceTest.class);
 
 	@Mock
-	private MetadataService metadataService;
+	private MetadataClient metadataClient;
 
 	@Mock
 	private ObsClient obsClient;
@@ -50,7 +50,7 @@ public class ValidationServiceTest {
 	public void setUp() {
 		MockitoAnnotations.initMocks(this);
 
-		validationService = new ValidationService(metadataService, obsClient);
+		validationService = new ValidationService(metadataClient, obsClient);
 	}
 
 	@Test
@@ -108,7 +108,7 @@ public class ValidationServiceTest {
 				ob5);
 		obsResults.put("IAMNOTINTHEMETADATA", ob6);
 
-		doReturn(metadataResults).when(metadataService).query(ProductFamily.AUXILIARY_FILE, localDateTimeStart,
+		doReturn(metadataResults).when(metadataClient).query(ProductFamily.AUXILIARY_FILE, localDateTimeStart,
 				localDateTimeStop);
 		doReturn(obsResults).when(obsClient).listInterval(ProductFamily.AUXILIARY_FILE,
 				Date.from(localDateTimeStart.atZone(ZoneId.of("UTC")).toInstant()),

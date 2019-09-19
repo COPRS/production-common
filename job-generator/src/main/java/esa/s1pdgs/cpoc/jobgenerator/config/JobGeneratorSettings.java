@@ -19,7 +19,6 @@ import esa.s1pdgs.cpoc.appcatalog.client.job.AppCatalogJobClient;
 import esa.s1pdgs.cpoc.common.ProductFamily;
 import esa.s1pdgs.cpoc.errorrepo.ErrorRepoAppender;
 import esa.s1pdgs.cpoc.jobgenerator.service.XmlConverter;
-import esa.s1pdgs.cpoc.jobgenerator.service.metadata.MetadataService;
 import esa.s1pdgs.cpoc.jobgenerator.status.AppStatus;
 import esa.s1pdgs.cpoc.jobgenerator.tasks.AbstractGenericConsumer;
 import esa.s1pdgs.cpoc.jobgenerator.tasks.AbstractJobsDispatcher;
@@ -30,6 +29,7 @@ import esa.s1pdgs.cpoc.jobgenerator.tasks.l0segmentapp.L0SegmentAppConsumer;
 import esa.s1pdgs.cpoc.jobgenerator.tasks.l0segmentapp.L0SegmentAppJobDispatcher;
 import esa.s1pdgs.cpoc.jobgenerator.tasks.levelproducts.LevelProductsJobDispatcher;
 import esa.s1pdgs.cpoc.jobgenerator.tasks.levelproducts.LevelProductsMessageConsumer;
+import esa.s1pdgs.cpoc.metadata.client.MetadataClient;
 import esa.s1pdgs.cpoc.mqi.client.GenericMqiClient;
 import esa.s1pdgs.cpoc.mqi.client.StatusService;
 import esa.s1pdgs.cpoc.mqi.model.queue.AbstractDto;
@@ -499,7 +499,7 @@ public class JobGeneratorSettings {
 			@Qualifier("appCatalogServiceForLevelProducts") final AppCatalogJobClient appDataServiceLevelProducts,
 			@Qualifier("appCatalogServiceForEdrsSessions") final AppCatalogJobClient appDataServiceErdsSettions,
 			@Qualifier("appCatalogServiceForLevelSegments") final AppCatalogJobClient appDataServiceLevelSegments,
-			final ErrorRepoAppender errorRepoAppender, final AppStatus appStatus, final MetadataService metadataService) {
+			final ErrorRepoAppender errorRepoAppender, final AppStatus appStatus, final MetadataClient metadataClient) {
 
 		AbstractGenericConsumer<? extends AbstractDto> messageConsumer;
 
@@ -507,7 +507,7 @@ public class JobGeneratorSettings {
 		case L0:
 			messageConsumer = new L0AppConsumer((AbstractJobsDispatcher<EdrsSessionDto>) jobsDispatcher,
 					processSettings, mqiService, mqiStatusService, appDataServiceErdsSettions,
-					errorRepoAppender, appStatus, metadataService);
+					errorRepoAppender, appStatus, metadataClient);
 			break;
 		case L0_SEGMENT:
 			messageConsumer = new L0SegmentAppConsumer((AbstractJobsDispatcher<ProductDto>) jobsDispatcher,
@@ -518,7 +518,7 @@ public class JobGeneratorSettings {
 		case L2:
 			messageConsumer = new LevelProductsMessageConsumer((AbstractJobsDispatcher<ProductDto>) jobsDispatcher,
 					patternSettings, processSettings, mqiService, mqiStatusService, appDataServiceLevelProducts,
-					errorRepoAppender, appStatus, metadataService);
+					errorRepoAppender, appStatus, metadataClient);
 			break;
 		default:
 			throw new IllegalArgumentException("Unsupported Application Level");
