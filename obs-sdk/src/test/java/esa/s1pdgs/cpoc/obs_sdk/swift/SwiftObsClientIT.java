@@ -44,7 +44,7 @@ public class SwiftObsClientIT {
 	@Rule
 	public final ExpectedException exception = ExpectedException.none();
 	
-	AbstractObsClient uut;
+	private SwiftObsClient uut;
 	
 	public static File getResource(String fileName) {
 		try {

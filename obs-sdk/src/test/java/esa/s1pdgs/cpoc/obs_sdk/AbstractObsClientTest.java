@@ -4,10 +4,13 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.doThrow;
 
 import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.InputStream;
+import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
@@ -16,14 +19,20 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
 
+import org.assertj.core.util.Arrays;
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
+import org.mockito.Mock;
+import org.mockito.Mockito;
+import org.mockito.MockitoAnnotations;
 
 import esa.s1pdgs.cpoc.common.ProductFamily;
 import esa.s1pdgs.cpoc.common.errors.AbstractCodedException;
 import esa.s1pdgs.cpoc.common.errors.obs.ObsException;
+import esa.s1pdgs.cpoc.common.utils.FileUtils;
 
 /**
  * Test the class AbstractObsClientImpl
@@ -31,63 +40,71 @@ import esa.s1pdgs.cpoc.common.errors.obs.ObsException;
  * @author Viveris Technologies
  */
 public class AbstractObsClientTest {
+	
+	private final File tmpDir = FileUtils.createTmpDir();
 
-	AbstractObsClientIncrementImpl uut;
+	@Mock
+	AbstractObsClient uut;
 	
 	/**
      * To check the raised custom exceptions
      */
     @Rule
     public ExpectedException thrown = ExpectedException.none();
-
+    
+    private final ObsObject errExistObject  = new ObsObject(ProductFamily.AUXILIARY_FILE, "error-key");
+    private final ObsObject errExistObject2 = new ObsObject(ProductFamily.EDRS_SESSION, "error-key");
+    private final ObsObject existsObject 	= new ObsObject(ProductFamily.AUXILIARY_FILE, "test-key");
+    private final ObsObject absentObject 	= new ObsObject(ProductFamily.EDRS_SESSION, "test-key");
+    
+    private final ObsUploadObject ulErrObj	= new ObsUploadObject(ProductFamily.AUXILIARY_FILE,"error-key",new File("foo"));
+    private final ObsUploadObject ulErrObj2	= new ObsUploadObject(ProductFamily.EDRS_SESSION,"error-key",new File("foo"));
+    
 	@Before
-	public void before() throws ObsServiceException, SdkClientException {
-      uut = new AbstractObsClientIncrementImpl();
-      
-      /*
+	public void before() throws Exception {
       MockitoAnnotations.initMocks(this);
 
-      doThrow(new ObsServiceException("error 1 message")).when(uut)
-              .doesObjectExist(Mockito.eq(
-                      new ObsObject("error-key", ProductFamily.AUXILIARY_FILE)));
-      doThrow(new SdkClientException("error 2 message")).when(uut)
-              .doesObjectExist(Mockito.eq(
-                      new ObsObject("error-key", ProductFamily.EDRS_SESSION)));
-      doReturn(true).when(uut).doesObjectExist(Mockito
-              .eq(new ObsObject("test-key", ProductFamily.AUXILIARY_FILE)));
-      doReturn(false).when(uut).doesObjectExist(
-              Mockito.eq(new ObsObject("test-key", ProductFamily.EDRS_SESSION)));
+      doThrow(new ObsServiceException("error 1 message"))
+      	.when(uut).exists(Mockito.eq(errExistObject));
+      
+      doThrow(new SdkClientException("error 2 message"))
+      	.when(uut).exists(Mockito.eq(errExistObject2));
+      
+      doReturn(true)
+      	.when(uut).exists(Mockito.eq(existsObject));
+      
+      doReturn(false)
+      	.when(uut).exists(Mockito.eq(absentObject));
 
-      doThrow(new ObsServiceException("error 1 message")).when(uut)
-              .uploadObject(Mockito.eq(new ObsUploadObject("error-key",
-                      ProductFamily.AUXILIARY_FILE, new File("pom.xml"))));
-      doThrow(new SdkClientException("error 2 message")).when(uut)
-              .uploadObject(Mockito.eq(new ObsUploadObject("error-key",
-                      ProductFamily.EDRS_SESSION, new File("pom.xml"))));
-      doReturn(2).when(uut)
-              .uploadObject(Mockito.eq(new ObsUploadObject("test-key",
-                      ProductFamily.AUXILIARY_FILE, new File("pom.xml"))));
-      doReturn(1).when(uut)
-              .uploadObject(Mockito.eq(new ObsUploadObject("test-key",
-                      ProductFamily.EDRS_SESSION, new File("pom.xml"))));
+      doThrow(new ObsServiceException("error 1 message"))
+      	.when(uut).uploadObject(Mockito.eq(ulErrObj));
+      
+      doThrow(new SdkClientException("error 2 message"))
+      	.when(uut).uploadObject(Mockito.eq(ulErrObj2));
 
-      doThrow(new ObsServiceException("error 1 message")).when(uut)
-              .downloadObject(Mockito.eq(new ObsDownloadObject("error-key",
-                      ProductFamily.AUXILIARY_FILE, "test/")));
-      doThrow(new SdkClientException("error 2 message")).when(uut)
-              .downloadObject(Mockito.eq(new ObsDownloadObject("error-key",
-                      ProductFamily.EDRS_SESSION, "test/")));
-      doReturn(0).when(uut)
-              .downloadObject(Mockito.eq(new ObsDownloadObject("test-key",
-                      ProductFamily.AUXILIARY_FILE, "test/")));
-      doReturn(1).when(uut)
-              .downloadObject(Mockito.eq(new ObsDownloadObject("test-key",
-                      ProductFamily.EDRS_SESSION, "test/")));
-      doReturn(2).when(uut).downloadObject(
-              Mockito.eq(new ObsDownloadObject("test-key/key2",
-                      ProductFamily.EDRS_SESSION, "test/")));
-      */
+      doThrow(new ObsServiceException("error 1 message"))
+      	.when(uut).downloadObject(Mockito.eq(new ObsDownloadObject(ProductFamily.AUXILIARY_FILE,"error-key", "test/")));
+      
+      doThrow(new SdkClientException("error 2 message"))
+      	.when(uut).downloadObject(Mockito.eq(new ObsDownloadObject(ProductFamily.EDRS_SESSION,"error-key", "test/")));
+      
+      doReturn(Collections.emptyList())
+      	.when(uut).downloadObject(Mockito.eq(new ObsDownloadObject(ProductFamily.AUXILIARY_FILE,"test-key", "test/")));
+      
+      doReturn(Collections.singletonList(new File("0")))
+      	.when(uut).downloadObject(Mockito.eq(new ObsDownloadObject(ProductFamily.EDRS_SESSION,"test-key", "test/")));
+      
+      doReturn(Arrays.asList(new File[] {new File("1"), new File("2")}))
+      	.when(uut).downloadObject(Mockito.eq(new ObsDownloadObject(ProductFamily.EDRS_SESSION,"test-key/key2", "test/")));
 	}
+	
+	@After
+	public final void tearDown() {
+		FileUtils.delete(tmpDir.getPath());
+	}
+	
+	
+	
 	
     /**
      * Test downloadObjects
@@ -106,12 +123,6 @@ public class AbstractObsClientTest {
         objects.add(new ObsDownloadObject(ProductFamily.AUXILIARY_FILE, "key3", "target-dir"));
         objects.add(new ObsDownloadObject(ProductFamily.EDRS_SESSION, "key/key4", "target-dir"));
         uut.downloadObjects(objects);
-
-        assertEquals(4, uut.getCounterDownload().get());
-        assertEquals(0, uut.getCounterUpload().get());
-        assertEquals(0, uut.getCounterGetShutdownTm().get());
-        assertEquals(0, uut.getCounterGetDownloadTm().get());
-        assertEquals(0, uut.getCounterGetUploadTm().get());
         //TODO check file creation
     }
 
@@ -133,11 +144,7 @@ public class AbstractObsClientTest {
         	uut.downloadObjects(objects);
             fail("SdkClientException should be raised");
         } catch (SdkClientException sdkE) {
-            assertEquals(1, uut.getCounterDownload().get());
-            assertEquals(0, uut.getCounterUpload().get());
-            assertEquals(0, uut.getCounterGetShutdownTm().get());
-            assertEquals(0, uut.getCounterGetDownloadTm().get());
-            assertEquals(0, uut.getCounterGetUploadTm().get());
+            
         }
     }
 
@@ -519,143 +526,4 @@ public class AbstractObsClientTest {
     	assertThatThrownBy(() -> uut.listInterval(ProductFamily.AUXILIARY_FILE, new Date(), null)).isInstanceOf(IllegalArgumentException.class).hasMessageContaining("Invalid date: null");
     }
 
-}
-
-class AbstractObsClientIncrementImpl extends AbstractObsClient {
-
-    private final AtomicInteger counterUpload;
-    private final AtomicInteger counterDownload;
-    private final AtomicInteger counterGetShutdownTm;
-    private final AtomicInteger counterGetDownloadTm;
-    private final AtomicInteger counterGetUploadTm;
-    
-    private Map<String,String> resultOfCollectMd5Sums;
-    public void onCollectMd5SumsReturn(Map<String,String> resultOfCollectMd5Sums) {
-    	this.resultOfCollectMd5Sums = resultOfCollectMd5Sums;
-    }
-    
-    private Map<String,InputStream> resultOfGetAllAsInputStream;
-    public void onGetAllAsInputStreamReturn(Map<String,InputStream> resultOfGetAllAsInputStream) {
-    	this.resultOfGetAllAsInputStream = resultOfGetAllAsInputStream;
-    }
-
-    public AbstractObsClientIncrementImpl() {
-        counterUpload = new AtomicInteger();
-        counterDownload = new AtomicInteger();
-        counterGetShutdownTm = new AtomicInteger();
-        counterGetDownloadTm = new AtomicInteger();
-        counterGetUploadTm = new AtomicInteger();
-    }
-
-    /**
-     * @return the counterUpload
-     */
-    public AtomicInteger getCounterUpload() {
-        return counterUpload;
-    }
-
-    /**
-     * @return the counterDownload
-     */
-    public AtomicInteger getCounterDownload() {
-        return counterDownload;
-    }
-
-    /**
-     * @return the counterGetShutdownTm
-     */
-    public AtomicInteger getCounterGetShutdownTm() {
-        return counterGetShutdownTm;
-    }
-
-    /**
-     * @return the counterGetDownloadTm
-     */
-    public AtomicInteger getCounterGetDownloadTm() {
-        return counterGetDownloadTm;
-    }
-
-    /**
-     * @return the counterGetUploadTm
-     */
-    public AtomicInteger getCounterGetUploadTm() {
-        return counterGetUploadTm;
-    }
-
-    @Override
-    public boolean exists(ObsObject object)
-            throws SdkClientException, ObsServiceException {
-        throw new ObsServiceException("Method not implemented");
-    }
-
-    @Override
-    public boolean prefixExists(ObsObject object)
-            throws SdkClientException, ObsServiceException {
-        throw new ObsServiceException("Method not implemented");
-    }
-
-    @Override
-    public List<File> downloadObject(ObsDownloadObject object)
-            throws SdkClientException, ObsServiceException {
-        if (object.getKey().equals("key-sdk")) {
-            throw new SdkClientException("Method not implemented");
-        } else if (object.getKey().equals("key-aws")) {
-            throw new ObsServiceException("Method not implemented");
-        } else {
-            counterDownload.incrementAndGet();
-        }
-        List<File> files = new ArrayList<>();
-        files.add(new File("dummy"));
-        return files;
-    }
-
-    @Override
-    public void uploadObject(ObsUploadObject object)
-            throws SdkClientException, ObsServiceException {
-        if (object.getKey().equals("key-sdk")) {
-            throw new SdkClientException("Method not implemented");
-        } else if (object.getKey().equals("key-aws")) {
-            throw new ObsServiceException("Method not implemented");
-        } else {
-            counterUpload.incrementAndGet();
-        }
-    }
-
-    @Override
-    public int getShutdownTimeoutS() throws ObsServiceException {
-        return counterGetShutdownTm.incrementAndGet();
-    }
-
-    @Override
-    public int getDownloadExecutionTimeoutS() throws ObsServiceException {
-        return counterGetDownloadTm.incrementAndGet();
-    }
-
-    @Override
-    public int getUploadExecutionTimeoutS() throws ObsServiceException {
-        return counterGetUploadTm.incrementAndGet();
-    }
-
-	@Override
-	public List<ObsObject> getObsObjectsOfFamilyWithinTimeFrame(ProductFamily obsFamily,
-			Date timeFrameBegin, Date timeFrameEnd) throws SdkClientException, ObsServiceException {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	@Override
-	public Map<String,String> collectMd5Sums(ObsObject object) throws ObsServiceException, ObsException {
-		return resultOfCollectMd5Sums;
-	}
-
-	@Override
-	protected String getBucketFor(ProductFamily family) throws ObsServiceException {
-		// TODO Auto-generated method stub
-		return null;
-	}
-	
-	@Override
-	public Map<String, InputStream> getAllAsInputStream(ProductFamily family, String keyPrefix)  throws SdkClientException {
-		return resultOfGetAllAsInputStream;
-	}
 }

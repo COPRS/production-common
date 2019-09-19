@@ -2,6 +2,7 @@ package esa.s1pdgs.cpoc.disseminator;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.context.annotation.ComponentScan;
 
 /**
  * Ingestor application
@@ -9,6 +10,7 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
  *
  */
 @SpringBootApplication
+@ComponentScan(basePackages = {"esa.s1pdgs.cpoc.obs_sdk"})
 public class Application {
 	
     /**

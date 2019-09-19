@@ -48,17 +48,14 @@ public abstract class AbstractObsClient implements ObsClient {
 	}
 
 	protected final String getBucketFor(ProductFamily family) throws ObsServiceException {
-		return configuration.getBucket().get(family);
+		return configuration.getBucketFor(family);
 	}
 
     protected abstract List<File> downloadObject(ObsDownloadObject object) throws SdkClientException, ObsServiceException;
     
     protected abstract void uploadObject(ObsUploadObject object) throws SdkClientException, ObsServiceException, ObsException;
-    
-    /**
-     * @see ObsClient#downloadObjects(List, boolean)
-     */
-    public List<File> downloadObjects(final List<ObsDownloadObject> objects,
+
+    private final List<File> downloadObjects(final List<ObsDownloadObject> objects,
             final boolean parallel)
             throws SdkClientException, ObsServiceException, ObsException {
     	
@@ -111,10 +108,7 @@ public abstract class AbstractObsClient implements ObsClient {
         return files;
     }
 
-    /**
-     * @see ObsClient#uploadFiles(List, boolean)
-     */
-    public void uploadObjects(final List<ObsUploadObject> objects,
+    private final void uploadObjects(final List<ObsUploadObject> objects,
             final boolean parallel)
             throws SdkClientException, ObsServiceException, ObsException {
         if (objects.size() > 1 && parallel) {

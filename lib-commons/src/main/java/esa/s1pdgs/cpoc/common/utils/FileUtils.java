@@ -104,12 +104,16 @@ public class FileUtils {
      * @param path
      * @throws IOException
      */
-    public static void delete(final String path) throws IOException {
-        Path pathObj = Paths.get(path);
-        Files.walk(pathObj, FileVisitOption.FOLLOW_LINKS)
-                .sorted(Comparator.reverseOrder())
-                .map(Path::toFile)
-                .forEach(File::delete);
+    public static void delete(final String path){
+        try {
+			Path pathObj = Paths.get(path);
+			Files.walk(pathObj, FileVisitOption.FOLLOW_LINKS)
+			        .sorted(Comparator.reverseOrder())
+			        .map(Path::toFile)
+			        .forEach(File::delete);
+		} catch (IOException e) {
+			throw new RuntimeException(e);
+		}
     }
     
     public static final long size(final Collection<File> files) {
@@ -120,5 +124,13 @@ public class FileUtils {
     
     public static final long size(final File ... files) {
     	return size(Arrays.asList(files));
+    }
+    
+    public static final File createTmpDir() {
+    	try {
+			return Files.createTempDirectory("tmp").toFile();
+		} catch (IOException e) {
+			throw new RuntimeException(e);
+		}
     }
 }

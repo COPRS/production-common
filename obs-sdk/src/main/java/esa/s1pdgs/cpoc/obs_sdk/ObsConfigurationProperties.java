@@ -69,6 +69,10 @@ public class ObsConfigurationProperties {
 	private int timeoutUpExec;
 
 	private Map<ProductFamily, String> bucket = new HashMap<>();
+	
+	public String getBucketFor(final ProductFamily family) {
+		return bucket.get(family);
+	}
 
 	public String getUserId() {
 		return userId;

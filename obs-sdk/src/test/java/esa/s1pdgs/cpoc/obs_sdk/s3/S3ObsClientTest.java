@@ -3,7 +3,6 @@ package esa.s1pdgs.cpoc.obs_sdk.s3;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.never;
@@ -28,6 +27,7 @@ import com.amazonaws.services.s3.model.S3ObjectSummary;
 import esa.s1pdgs.cpoc.common.ProductFamily;
 import esa.s1pdgs.cpoc.common.errors.AbstractCodedException;
 import esa.s1pdgs.cpoc.common.errors.obs.ObsException;
+import esa.s1pdgs.cpoc.obs_sdk.ObsConfigurationProperties;
 import esa.s1pdgs.cpoc.obs_sdk.ObsDownloadObject;
 import esa.s1pdgs.cpoc.obs_sdk.ObsObject;
 import esa.s1pdgs.cpoc.obs_sdk.ObsServiceException;
@@ -45,7 +45,7 @@ public class S3ObsClientTest {
      * Mock configuration
      */
     @Mock
-    private S3Configuration configuration;
+    private ObsConfigurationProperties configuration;
 
     /**
      * Mock service
@@ -95,72 +95,24 @@ public class S3ObsClientTest {
 
         // Mock configuration
         doReturn("auxiliary-files").when(configuration)
-                .getBucketForFamily(Mockito.eq(ProductFamily.AUXILIARY_FILE));
+        		.getBucketFor(Mockito.eq(ProductFamily.AUXILIARY_FILE));
         doReturn("edrs-sessions").when(configuration)
-                .getBucketForFamily(Mockito.eq(ProductFamily.EDRS_SESSION));
+                .getBucketFor(Mockito.eq(ProductFamily.EDRS_SESSION));
         doReturn("l0-slices").when(configuration)
-                .getBucketForFamily(Mockito.eq(ProductFamily.L0_SLICE));
+                .getBucketFor(Mockito.eq(ProductFamily.L0_SLICE));
         doReturn("l0-acns").when(configuration)
-                .getBucketForFamily(Mockito.eq(ProductFamily.L0_ACN));
+                .getBucketFor(Mockito.eq(ProductFamily.L0_ACN));
         doReturn("l1-slices").when(configuration)
-                .getBucketForFamily(Mockito.eq(ProductFamily.L1_SLICE));
+                .getBucketFor(Mockito.eq(ProductFamily.L1_SLICE));
         doReturn("l1-acns").when(configuration)
-                .getBucketForFamily(Mockito.eq(ProductFamily.L1_ACN));
+                .getBucketFor(Mockito.eq(ProductFamily.L1_ACN));
         doReturn("l0-segments").when(configuration)
-        .getBucketForFamily(Mockito.eq(ProductFamily.L0_SEGMENT));
+        		.getBucketFor(Mockito.eq(ProductFamily.L0_SEGMENT));
         doReturn("l0-blanks").when(configuration)
-        .getBucketForFamily(Mockito.eq(ProductFamily.L0_BLANK));
-        doReturn(22).when(configuration).getIntOfConfiguration(
-                Mockito.eq(S3Configuration.TM_S_SHUTDOWN));
-        doReturn(8).when(configuration).getIntOfConfiguration(
-                Mockito.eq(S3Configuration.TM_S_DOWN_EXEC));
-        doReturn(109).when(configuration).getIntOfConfiguration(
-                Mockito.eq(S3Configuration.TM_S_UP_EXEC));
+        		.getBucketFor(Mockito.eq(ProductFamily.L0_BLANK));
 
         // Build client
         client = new S3ObsClient(configuration, service);
-    }
-
-    /**
-     * Test default constructor
-     * 
-     * @throws ObsServiceException
-     */
-    @Test
-    public void testDefaultConstrutor() throws ObsServiceException {
-        S3ObsClient defaultClient = new S3ObsClient();
-        assertNotNull(defaultClient.configuration);
-        assertNotNull(defaultClient.s3Services);
-    }
-
-    /**
-     * Test getShutdownTimeoutS
-     * 
-     * @throws ObsServiceException
-     */
-    @Test
-    public void testShutdownTm() throws ObsServiceException {
-        assertEquals(22, client.getShutdownTimeoutS());
-    }
-
-    /**
-     * Test getShutdownTimeoutS
-     * 
-     * @throws ObsServiceException
-     */
-    @Test
-    public void testUploadExecTm() throws ObsServiceException {
-        assertEquals(109, client.getUploadExecutionTimeoutS());
-    }
-
-    /**
-     * Test getDownloadExecutionTimeoutS
-     * 
-     * @throws ObsServiceException
-     */
-    @Test
-    public void testDownloadExecTm() throws ObsServiceException {
-        assertEquals(8, client.getDownloadExecutionTimeoutS());
     }
 
     /**
@@ -170,18 +122,14 @@ public class S3ObsClientTest {
      * @throws SdkClientException
      */
     @Test
-    public void testExist()
-            throws ObsServiceException, SdkClientException {
-        boolean ret = client
-                .exists(new ObsObject(ProductFamily.L0_ACN, "key-exist"));
+    public void testExist() throws ObsServiceException, SdkClientException {
+        boolean ret = client.exists(new ObsObject(ProductFamily.L0_ACN, "key-exist"));
         assertTrue(ret);
         verify(service, times(1)).exist(Mockito.eq("l0-acns"), Mockito.eq("key-exist"));
 
-        ret = client.exists(
-                new ObsObject(ProductFamily.L1_SLICE, "key-not-exist"));
+        ret = client.exists( new ObsObject(ProductFamily.L1_SLICE, "key-not-exist"));
         assertFalse(ret);
-        verify(service, times(1)).exist(Mockito.eq("l1-slices"),
-                Mockito.eq("key-not-exist"));
+        verify(service, times(1)).exist(Mockito.eq("l1-slices"), Mockito.eq("key-not-exist"));
     }
 
     /**
@@ -191,19 +139,15 @@ public class S3ObsClientTest {
      * @throws SdkClientException
      */
     @Test
-    public void testPrefixExist()
-            throws ObsServiceException, SdkClientException {
-        boolean ret = client.prefixExists(
-                new ObsObject(ProductFamily.L0_SLICE, "key-exist"));
+    public void testPrefixExist() throws ObsServiceException, SdkClientException {
+        boolean ret = client.prefixExists(new ObsObject(ProductFamily.L0_SLICE, "key-exist"));
         assertTrue(ret);
         verify(service, times(1)).getNbObjects(Mockito.eq("l0-slices"),
                 Mockito.eq("key-exist"));
 
-        ret = client.prefixExists(
-                new ObsObject(ProductFamily.L1_SLICE, "key-not-exist"));
+        ret = client.prefixExists(new ObsObject(ProductFamily.L1_SLICE, "key-not-exist"));
         assertFalse(ret);
-        verify(service, times(1)).getNbObjects(Mockito.eq("l1-slices"),
-                Mockito.eq("key-not-exist"));
+        verify(service, times(1)).getNbObjects(Mockito.eq("l1-slices"),Mockito.eq("key-not-exist"));
     }
 
     /**
@@ -252,8 +196,8 @@ public class S3ObsClientTest {
     @Test
     public void testUploadObjectFile() throws ObsServiceException, SdkClientException, ObsException {
         client.uploadObject(new ObsUploadObject(ProductFamily.L0_ACN, "key-exist", new File("pom.xml")));
-        verify(service, times(1)).uploadFile(Mockito.eq("l0-acns"),
-                Mockito.eq("key-exist"), Mockito.eq(new File("pom.xml")));
+        verify(service, times(1))
+        	.uploadFile(Mockito.eq("l0-acns"), Mockito.eq("key-exist"), Mockito.eq(new File("pom.xml")));
         verify(service, never()).uploadDirectory(Mockito.anyString(),
                 Mockito.anyString(), Mockito.any());
     }
