@@ -17,7 +17,7 @@ public class EdrsSessionFactoryTest {
 	@Test
 	public void extractChannelId() {
 
-		EdrsSessionFactory uut = new EdrsSessionFactory();
+		EdrsSessionFactory uut = new EdrsSessionFactory("hostname");
 		Assert.assertEquals(1, uut.extractChannelId(RELATIVE_PATH_1));
 		Assert.assertEquals(1, uut.extractChannelId(RELATIVE_PATH_2));
 		Assert.assertEquals(2, uut.extractChannelId(RELATIVE_PATH_3));
@@ -26,7 +26,7 @@ public class EdrsSessionFactoryTest {
 
 	@Test
 	public void extractEdrsSessionFileType() {
-		EdrsSessionFactory uut = new EdrsSessionFactory();
+		EdrsSessionFactory uut = new EdrsSessionFactory("hostname");
 		Assert.assertEquals(EdrsSessionFileType.RAW, uut.extractEdrsSessionFileType(RELATIVE_PATH_1));
 		Assert.assertEquals(EdrsSessionFileType.SESSION, uut.extractEdrsSessionFileType(RELATIVE_PATH_2));
 		Assert.assertEquals(EdrsSessionFileType.RAW, uut.extractEdrsSessionFileType(RELATIVE_PATH_3));
@@ -36,7 +36,7 @@ public class EdrsSessionFactoryTest {
 	@Test
 	public void extractSessionId() {
 
-		EdrsSessionFactory uut = new EdrsSessionFactory();
+		EdrsSessionFactory uut = new EdrsSessionFactory("hostname");
 		Assert.assertEquals("L20180724144436762001030", uut.extractSessionId(RELATIVE_PATH_1));
 		Assert.assertEquals("L20180724144436762001030", uut.extractSessionId(RELATIVE_PATH_2));
 		Assert.assertEquals("L20180724144436762001030", uut.extractSessionId(RELATIVE_PATH_3));
