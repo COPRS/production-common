@@ -217,7 +217,6 @@ public class JobProcessorTest extends MockPropertiesTest {
                 new ExecutorCompletionService<>(
                         Executors.newSingleThreadExecutor());
         procCompletionSrvTmp.submit(procExecutor);
-        Thread.sleep(500);
 
         thrown.expect(WrapperProcessTimeoutException.class);
         thrown.expectMessage("timeout exception");
@@ -239,7 +238,6 @@ public class JobProcessorTest extends MockPropertiesTest {
                 new ExecutorCompletionService<>(
                         Executors.newSingleThreadExecutor());
         procCompletionSrvTmp.submit(procExecutor);
-        Thread.sleep(500);
 
         thrown.expect(InternalErrorException.class);
         processor.waitForPoolProcessesEnding(procCompletionSrvTmp);

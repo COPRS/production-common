@@ -92,14 +92,7 @@ public class L1AppConsumerTest {
         MockitoAnnotations.initMocks(this);
 
         // Mock the dispatcher
-        Mockito.doAnswer(i -> {
-            try {
-                Thread.sleep(500);
-            } catch (InterruptedException e) {
-
-            }
-            return true;
-        }).when(l0SliceJobsDispatcher).dispatch(Mockito.any());
+        Mockito.doAnswer(i ->  true).when(l0SliceJobsDispatcher).dispatch(Mockito.any());
 
         // Mock the settings
         Mockito.doReturn(

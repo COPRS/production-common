@@ -77,7 +77,6 @@ public class PoolExecutorCallableTest extends MockPropertiesTest {
         CompletionService<Boolean> completionService =
                 new ExecutorCompletionService<>(service);
         completionService.submit(callable);
-        Thread.sleep(1500);
         service.shutdownNow();
 
         thrown.expect(ExecutionException.class);
@@ -93,7 +92,6 @@ public class PoolExecutorCallableTest extends MockPropertiesTest {
         CompletionService<Boolean> completionService =
                 new ExecutorCompletionService<>(service);
         completionService.submit(callable);
-        Thread.sleep(500);
         service.shutdownNow();
 
         thrown.expect(ExecutionException.class);
@@ -120,7 +118,6 @@ public class PoolExecutorCallableTest extends MockPropertiesTest {
         CompletionService<Boolean> completionService =
                 new ExecutorCompletionService<>(service);
         completionService.submit(callable);
-        Thread.sleep(500);
         callable.setActive(true);
 
         boolean ret = completionService.take().get();

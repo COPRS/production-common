@@ -98,14 +98,7 @@ public class L0AppConsumerTest {
         this.mockProcessSettings();
 
         // Mock the dispatcher
-        Mockito.doAnswer(i -> {
-            try {
-                Thread.sleep(500);
-            } catch (InterruptedException e) {
-
-            }
-            return true;
-        }).when(jobsDispatcher).dispatch(Mockito.any());
+        Mockito.doAnswer(i -> true).when(jobsDispatcher).dispatch(Mockito.any());
 
         // Mock the MQI service
         doReturn(message1, message2, message3, message4).when(mqiService)
