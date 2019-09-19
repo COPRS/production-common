@@ -121,7 +121,7 @@ public class LevelProductsMessageConsumer extends AbstractGenericConsumer<Produc
             }        	
         	
             // Check if a job is already created for message identifier
-            AppDataJob appDataJob = buildJob(mqiMessage);
+            AppDataJob<ProductDto> appDataJob = buildJob(mqiMessage);
             productName = appDataJob.getProduct().getProductName();
 
             // Dispatch job
@@ -157,12 +157,12 @@ public class LevelProductsMessageConsumer extends AbstractGenericConsumer<Produc
         reporting.end(new ReportingMessage("End job generation using {}", productName));
     }
 
-    protected AppDataJob buildJob(GenericMessageDto<ProductDto> mqiMessage)
+    protected AppDataJob<ProductDto> buildJob(GenericMessageDto<ProductDto> mqiMessage)
             throws AbstractCodedException {
         ProductDto leveldto = mqiMessage.getBody();
 
         // Check if a job is already created for message identifier
-        List<AppDataJob> existingJobs = appDataService
+        List<AppDataJob<?>> existingJobs = appDataService
                 .findByMessagesIdentifier(mqiMessage.getIdentifier());
 
         if (CollectionUtils.isEmpty(existingJobs)) {
@@ -181,7 +181,7 @@ public class LevelProductsMessageConsumer extends AbstractGenericConsumer<Produc
             final String stopTime = m.group(this.patternSettings.getMGroupStopTime());
 
             // Create the JOB
-            AppDataJob jobDto = new AppDataJob();
+            AppDataJob<ProductDto> jobDto = new AppDataJob<>();
             // General details
             jobDto.setLevel(processSettings.getLevel());
             jobDto.setPod(processSettings.getHostname());
@@ -206,11 +206,12 @@ public class LevelProductsMessageConsumer extends AbstractGenericConsumer<Produc
                 
             jobDto.setProduct(productDto);
 
-            return appDataService.newJob(jobDto);
+            return appDataService.newJob(jobDto, ProductDto.class);
 
         } else {
             // Update pod if needed
-            AppDataJob jobDto = existingJobs.get(0);
+            @SuppressWarnings("unchecked")
+			AppDataJob<ProductDto> jobDto = (AppDataJob<ProductDto>) existingJobs.get(0);
 
             if (!jobDto.getPod().equals(processSettings.getHostname())) {
                 jobDto.setPod(processSettings.getHostname());

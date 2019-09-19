@@ -168,7 +168,7 @@ public class AppCatalogJobClient {
      * @return
      * @throws AbstractCodedException
      */
-    public List<AppDataJob> search(final Map<String, String> filters)
+    public List<AppDataJob<?>> search(final Map<String, String> filters)
             throws AbstractCodedException {
         int retries = 0;
         while (true) {
@@ -183,7 +183,7 @@ public class AppCatalogJobClient {
             final URI uri = builder.build().toUri();
             LogUtils.traceLog(LOGGER, String.format("[uri %s]", uri));
             try {
-                final ResponseEntity<List<AppDataJob>> response = restTemplate.exchange(
+                final ResponseEntity<List<AppDataJob<?>>> response = restTemplate.exchange(
                 		uri, 
                 		HttpMethod.GET, 
                 		null,
@@ -226,7 +226,7 @@ public class AppCatalogJobClient {
      * @return
      * @throws AbstractCodedException
      */
-    public List<AppDataJob> findByMessagesIdentifier(final long messageId)
+    public List<AppDataJob<?>> findByMessagesIdentifier(final long messageId)
             throws AbstractCodedException {   	
         return search(Collections.singletonMap("messages.identifier", Long.toString(messageId)));        
     }
@@ -238,7 +238,7 @@ public class AppCatalogJobClient {
      * @return
      * @throws AbstractCodedException
      */
-    public List<AppDataJob> findByProductSessionId(final String sessionId)
+    public List<AppDataJob<?>> findByProductSessionId(final String sessionId)
             throws AbstractCodedException {
         return search(Collections.singletonMap("product.sessionId", sessionId));
     }
@@ -250,7 +250,7 @@ public class AppCatalogJobClient {
      * @return
      * @throws AbstractCodedException
      */
-    public List<AppDataJob> findByProductDataTakeId(final String dataTakeId)
+    public List<AppDataJob<?>> findByProductDataTakeId(final String dataTakeId)
             throws AbstractCodedException {
         return search(Collections.singletonMap("product.dataTakeId", dataTakeId));
     }
@@ -263,7 +263,7 @@ public class AppCatalogJobClient {
      * @return
      * @throws AbstractCodedException
      */
-    public List<AppDataJob> findByPodAndState(final String pod,
+    public List<AppDataJob<?>> findByPodAndState(final String pod,
             final AppDataJobState state) throws AbstractCodedException {
     	final Map<String, String> filters = new HashMap<>();
     	filters.put("state", state.name());
@@ -279,7 +279,7 @@ public class AppCatalogJobClient {
      * @return
      * @throws AbstractCodedException
      */
-    public List<AppDataJob> findNByPodAndGenerationTaskTableWithNotSentGeneration(
+    public List<AppDataJob<?>> findNByPodAndGenerationTaskTableWithNotSentGeneration(
             final String pod, final String taskTable)
             throws AbstractCodedException {       
     	final Map<String, String> filters = new HashMap<>();  
@@ -297,7 +297,7 @@ public class AppCatalogJobClient {
      * @return
      * @throws AbstractCodedException
      */
-    public <E extends AbstractDto> AppDataJob<E> newJob(final AppDataJob<E> job)
+    public <E extends AbstractDto> AppDataJob<E> newJob(final AppDataJob<E> job, final Class<E> dtoClass)
             throws AbstractCodedException {
         int retries = 0;
         while (true) {
@@ -305,8 +305,8 @@ public class AppCatalogJobClient {
             String uri = hostUri + "/" + category.name().toLowerCase() + "/jobs";
             LogUtils.traceLog(LOGGER, String.format("[uri %s]", uri));
             try {
-        		final ResolvableType appCatMessageType = ResolvableType.forClass(AppDataJob.class);               	
-                final ResponseEntity<AppDataJob> response = restTemplate.exchange(
+        		final ResolvableType appCatMessageType = ResolvableType.forClass(AppDataJob.class, dtoClass);               	
+                final ResponseEntity<AppDataJob<E>> response = restTemplate.exchange(
                 		uri, 
                 		HttpMethod.POST,
                 		new HttpEntity<AppDataJob<E>>(job),
@@ -367,7 +367,7 @@ public class AppCatalogJobClient {
         				category.getDtoClass()
         		);  
             	
-                final ResponseEntity<AppDataJob> response = restTemplate.exchange(
+                final ResponseEntity<AppDataJob<?>> response = restTemplate.exchange(
                 		uri, 
                 		HttpMethod.PATCH,
                 		new HttpEntity<AppDataJob<?>>(job),
@@ -428,7 +428,7 @@ public class AppCatalogJobClient {
         				AppDataJob.class, 
         				category.getDtoClass()
         		);              	
-                final ResponseEntity<AppDataJob> response = restTemplate.exchange(
+                final ResponseEntity<AppDataJob<?>> response = restTemplate.exchange(
                 		uri, 
                 		HttpMethod.PATCH,
                 		new HttpEntity<AppDataJobGeneration>(body),

@@ -339,9 +339,8 @@ public abstract class AbstractJobsGenerator<T extends AbstractDto> implements Ru
         final Reporting.Factory reportingFactory = new LoggerReporting.Factory("JobGenerator");
         final Reporting reporting = reportingFactory.newReporting(0);
         
-        try {
-        	
-            List<AppDataJob> jobs = appDataService
+        try {        	
+            List<AppDataJob<?>> jobs = appDataService
                     .findNByPodAndGenerationTaskTableWithNotSentGeneration(
                             l0ProcessSettings.getHostname(), taskTableXmlName);
             

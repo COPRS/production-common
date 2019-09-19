@@ -135,11 +135,10 @@ public abstract class AbstractJobsDispatcher<T extends AbstractDto> {
 
         // Dispatch existing job with current task table configuration
         if (processSettings.getMode() != ApplicationMode.TEST) {
-            List<AppDataJob> generatingJobs = appDataService
-                    .findByPodAndState(processSettings.getHostname(),
-                            AppDataJobState.GENERATING);
+            List<AppDataJob<?>> generatingJobs = appDataService
+                    .findByPodAndState(processSettings.getHostname(), AppDataJobState.GENERATING);
             if (!CollectionUtils.isEmpty(generatingJobs)) {
-                for (AppDataJob generation : generatingJobs) {
+                for (AppDataJob<?> generation : generatingJobs) {
                     // TODO ask if bypass error
                     dispatch(generation);
                 }
@@ -171,7 +170,7 @@ public abstract class AbstractJobsDispatcher<T extends AbstractDto> {
      * @param job
      * @throws AbstractCodedException
      */
-    public void dispatch(final AppDataJob job)
+    public void dispatch(final AppDataJob<?> job)
             throws AbstractCodedException {
     	LOGGER.debug ("== dispatch job {}", job.toString());
         String productName = job.getProduct().getProductName();
@@ -243,7 +242,7 @@ public abstract class AbstractJobsDispatcher<T extends AbstractDto> {
     /**
      * Get task tables to generate for given job
      */
-    protected abstract List<String> getTaskTables(final AppDataJob job)
+    protected abstract List<String> getTaskTables(final AppDataJob<?> job)
             throws AbstractCodedException;
 
     protected abstract String getTaskForFunctionalLog();
