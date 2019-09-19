@@ -22,6 +22,7 @@ COPY inbox-ingestion/ /app/inbox-ingestion
 COPY job-generator/ /app/job-generator
 COPY lib-commons/ /app/lib-commons
 COPY metadata-catalog/ /app/metadata-catalog
+COPY metadata-client/ /app/metadata-client
 COPY mqi-client/ /app/mqi-client
 COPY mqi-server/ /app/mqi-server
 COPY obs-sdk/ /app/obs-sdk
@@ -55,6 +56,7 @@ COPY --from=buildenv /app/inbox-polling/target /app/inbox-polling/target
 COPY --from=buildenv /app/inbox-ingestion/target /app/inbox-ingestion/target
 COPY --from=buildenv /app/job-generator/target /app/job-generator/target
 COPY --from=buildenv /app/metadata-catalog /app/metadata-catalog
+COPY --from=buildenv /app/metadata-client /app/metadata-client
 COPY --from=buildenv /app/mqi-server/target /app/mqi-server/target
 COPY --from=buildenv /app/scaler/target /app/scaler/target
 COPY --from=buildenv /app/wrapper/target /app/wrapper/target
