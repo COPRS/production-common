@@ -371,7 +371,7 @@ public class SwiftObsServices {
             }
         }		
 	}
-	
+
 	public final void move(final String obsKey, final String sourceContainer, final String targetContainer) {
 		final Container source = client.getContainer(sourceContainer);
 		final StoredObject object = source.getObject(obsKey);
@@ -506,16 +506,16 @@ public class SwiftObsServices {
 		}
 		return result;		
 	}
-	
-    public final Map<String, InputStream> getAllAsInputStream(final String bucketName, final String prefix) {       	
+
+	public final Map<String, InputStream> getAllAsInputStream(final String bucketName, final String prefix) {       	
     	final Map<String, InputStream> result = new LinkedHashMap<>();    	
     	for (final StoredObject object : getAll(bucketName, prefix)) {
 			result.put(object.getName(), object.getAsObject().downloadObjectAsInputStream());			
     	}
     	return result; 
     }
-    
-    public final Map<String,String> collectMd5Sums(final String bucketName, final String prefix) throws SwiftObsServiceException, SwiftSdkClientException {
+
+	public final Map<String,String> collectMd5Sums(final String bucketName, final String prefix) throws SwiftObsServiceException, SwiftSdkClientException {
     	Map<String,String> result;
     	for (int retryCount = 1;; retryCount++) {
     		result = new HashMap<>();

@@ -62,10 +62,8 @@ public abstract class AbstractObsClient implements ObsClient {
     	List<File> files = new ArrayList<>();
         if (objects.size() > 1 && parallel) {
             // Download objects in parallel
-            ExecutorService workerThread =
-                    Executors.newFixedThreadPool(objects.size());
-            CompletionService<List<File>> service =
-                    new ExecutorCompletionService<>(workerThread);
+            ExecutorService workerThread = Executors.newFixedThreadPool(objects.size());
+            CompletionService<List<File>> service = new ExecutorCompletionService<>(workerThread);
             // Launch all downloads
             List<Future<List<File>>> futures = new ArrayList<>();
             for (ObsDownloadObject object : objects) {

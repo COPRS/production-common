@@ -24,7 +24,6 @@ import org.javaswift.joss.model.Container;
 import org.javaswift.joss.model.StoredObject;
 import org.javaswift.joss.swift.Swift;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.mockito.Mock;
 import org.mockito.Mockito;
@@ -33,6 +32,7 @@ import org.mockito.MockitoAnnotations;
 import esa.s1pdgs.cpoc.common.ProductFamily;
 import esa.s1pdgs.cpoc.common.errors.AbstractCodedException;
 import esa.s1pdgs.cpoc.common.errors.obs.ObsException;
+import esa.s1pdgs.cpoc.obs_sdk.ObsConfigurationProperties;
 import esa.s1pdgs.cpoc.obs_sdk.ObsDownloadObject;
 import esa.s1pdgs.cpoc.obs_sdk.ObsObject;
 import esa.s1pdgs.cpoc.obs_sdk.ObsServiceException;
@@ -45,7 +45,7 @@ public class SwiftObsClientTest {
      * Mock configuration
      */
     @Mock
-    private SwiftConfiguration configuration;
+    private ObsConfigurationProperties configuration;
 
     /**
      * Mock service
@@ -89,60 +89,24 @@ public class SwiftObsClientTest {
 
         // Mock configuration
         doReturn("auxiliary-files").when(configuration)
-                .getContainerForFamily(Mockito.eq(ProductFamily.AUXILIARY_FILE));
+                .getBucketFor(Mockito.eq(ProductFamily.AUXILIARY_FILE));
         doReturn("edrs-sessions").when(configuration)
-                .getContainerForFamily(Mockito.eq(ProductFamily.EDRS_SESSION));
+                .getBucketFor(Mockito.eq(ProductFamily.EDRS_SESSION));
         doReturn("l0-slices").when(configuration)
-                .getContainerForFamily(Mockito.eq(ProductFamily.L0_SLICE));
+                .getBucketFor(Mockito.eq(ProductFamily.L0_SLICE));
         doReturn("l0-acns").when(configuration)
-                .getContainerForFamily(Mockito.eq(ProductFamily.L0_ACN));
+                .getBucketFor(Mockito.eq(ProductFamily.L0_ACN));
         doReturn("l1-slices").when(configuration)
-                .getContainerForFamily(Mockito.eq(ProductFamily.L1_SLICE));
+                .getBucketFor(Mockito.eq(ProductFamily.L1_SLICE));
         doReturn("l1-acns").when(configuration)
-                .getContainerForFamily(Mockito.eq(ProductFamily.L1_ACN));
+                .getBucketFor(Mockito.eq(ProductFamily.L1_ACN));
         doReturn("l0-segments").when(configuration)
-        .getContainerForFamily(Mockito.eq(ProductFamily.L0_SEGMENT));
+        	.getBucketFor(Mockito.eq(ProductFamily.L0_SEGMENT));
         doReturn("l0-blanks").when(configuration)
-        .getContainerForFamily(Mockito.eq(ProductFamily.L0_BLANK));
-        doReturn(22).when(configuration).getIntOfConfiguration(
-                Mockito.eq(SwiftConfiguration.TM_S_SHUTDOWN));
-        doReturn(8).when(configuration).getIntOfConfiguration(
-                Mockito.eq(SwiftConfiguration.TM_S_DOWN_EXEC));
-        doReturn(109).when(configuration).getIntOfConfiguration(
-                Mockito.eq(SwiftConfiguration.TM_S_UP_EXEC));
-
+        	.getBucketFor(Mockito.eq(ProductFamily.L0_BLANK));
+        
         // Build client
         client = new SwiftObsClient(configuration, service);
-    }
-
-    /**
-     * Test getShutdownTimeoutS
-     * 
-     * @throws ObsServiceException
-     */
-    @Test
-    public void testShutdownTm() throws ObsServiceException {
-        assertEquals(22, client.getShutdownTimeoutS());
-    }
-
-    /**
-     * Test getShutdownTimeoutS
-     * 
-     * @throws ObsServiceException
-     */
-    @Test
-    public void testUploadExecTm() throws ObsServiceException {
-        assertEquals(109, client.getUploadExecutionTimeoutS());
-    }
-
-    /**
-     * Test getDownloadExecutionTimeoutS
-     * 
-     * @throws ObsServiceException
-     */
-    @Test
-    public void testDownloadExecTm() throws ObsServiceException {
-        assertEquals(8, client.getDownloadExecutionTimeoutS());
     }
 
     /**
@@ -154,13 +118,11 @@ public class SwiftObsClientTest {
     @Test
     public void testExist()
             throws ObsServiceException, SdkClientException {
-        boolean ret = client
-                .exists(new ObsObject(ProductFamily.L0_ACN, "key-exist"));
+        boolean ret = client.exists(new ObsObject(ProductFamily.L0_ACN, "key-exist"));
         assertTrue(ret);
         verify(service, times(1)).exist(Mockito.eq("l0-acns"), Mockito.eq("key-exist"));
 
-        ret = client.exists(
-                new ObsObject(ProductFamily.L1_SLICE, "key-not-exist"));
+        ret = client.exists(new ObsObject(ProductFamily.L1_SLICE, "key-not-exist"));
         assertFalse(ret);
         verify(service, times(1)).exist(Mockito.eq("l1-slices"),
                 Mockito.eq("key-not-exist"));

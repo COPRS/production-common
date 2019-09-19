@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -11,6 +12,7 @@ import java.util.Map;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.javaswift.joss.model.StoredObject;
 import org.springframework.util.CollectionUtils;
 
 import com.amazonaws.event.ProgressEvent;
@@ -29,6 +31,7 @@ import com.amazonaws.util.IOUtils;
 import esa.s1pdgs.cpoc.obs_sdk.AbstractObsClient;
 import esa.s1pdgs.cpoc.obs_sdk.ObsServiceException;
 import esa.s1pdgs.cpoc.obs_sdk.SdkClientException;
+import esa.s1pdgs.cpoc.obs_sdk.swift.SwiftSdkClientException;
 
 /**
  * Provides services to manage objects in the object storage wia the AmazonS3
@@ -579,5 +582,4 @@ public class S3ObsServices {
 			}
 		}
 	}
-    
 }

@@ -11,6 +11,7 @@ import java.io.InputStream;
 import java.net.URISyntaxException;
 import java.nio.file.Files;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.Map;
 
 import org.apache.commons.io.IOUtils;
@@ -18,17 +19,25 @@ import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
+import org.junit.runner.RunWith;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.TestPropertySource;
+import org.springframework.test.context.junit4.SpringRunner;
 
 import esa.s1pdgs.cpoc.common.ProductFamily;
 import esa.s1pdgs.cpoc.common.errors.AbstractCodedException;
 import esa.s1pdgs.cpoc.common.errors.obs.ObsException;
-import esa.s1pdgs.cpoc.obs_sdk.AbstractObsClient;
+import esa.s1pdgs.cpoc.obs_sdk.ObsConfigurationProperties;
 import esa.s1pdgs.cpoc.obs_sdk.ObsDownloadObject;
 import esa.s1pdgs.cpoc.obs_sdk.ObsObject;
 import esa.s1pdgs.cpoc.obs_sdk.ObsUploadObject;
 import esa.s1pdgs.cpoc.obs_sdk.ObsValidationException;
 import esa.s1pdgs.cpoc.obs_sdk.SdkClientException;
 
+@RunWith(SpringRunner.class)
+@TestPropertySource("classpath:obs-swift.properties")
+@ContextConfiguration(classes = {ObsConfigurationProperties.class})
 public class SwiftObsClientIT {
 
 	public final static ProductFamily auxiliaryFiles = ProductFamily.AUXILIARY_FILE;
@@ -44,6 +53,9 @@ public class SwiftObsClientIT {
 	@Rule
 	public final ExpectedException exception = ExpectedException.none();
 	
+	@Autowired
+	private ObsConfigurationProperties configuration;
+	
 	private SwiftObsClient uut;
 	
 	public static File getResource(String fileName) {
@@ -55,60 +67,64 @@ public class SwiftObsClientIT {
 	}
 	
 	@Before
-	public void setUp() throws ObsException, SdkClientException {
-		uut = new SwiftObsClient();
+	public void setUp() throws ObsException, SdkClientException {	
+		System.out.println("hu");
+
+		uut = (SwiftObsClient) new SwiftObsClient.Factory().newObsClient(configuration);
+		System.out.println("hi");
 		
 		// prepare environment
-		if (!((SwiftObsClient) uut).containerExists(auxiliaryFiles)) {
-			((SwiftObsClient)uut).createContainer(auxiliaryFiles);
+		if (!uut.containerExists(auxiliaryFiles)) {
+			uut.createContainer(auxiliaryFiles);
 		}
 
 		if (uut.exists(new ObsObject(auxiliaryFiles, testFileName1))) {
-			((SwiftObsClient)uut).deleteObject(auxiliaryFiles, testFileName1);
+			uut.deleteObject(auxiliaryFiles, testFileName1);
 		}
 
 		if (uut.exists(new ObsObject(auxiliaryFiles, testFileName2))) {
-			((SwiftObsClient)uut).deleteObject(auxiliaryFiles, testFileName2);
+			uut.deleteObject(auxiliaryFiles, testFileName2);
 		}
 
 		if (uut.exists(new ObsObject(auxiliaryFiles, testFilePrefix + testFileName1))) {
-			((SwiftObsClient)uut).deleteObject(auxiliaryFiles, testFilePrefix + testFileName1);
+			uut.deleteObject(auxiliaryFiles, testFilePrefix + testFileName1);
 		}
 
 		if (uut.exists(new ObsObject(auxiliaryFiles, testFilePrefix + testFileName2))) {
-			((SwiftObsClient)uut).deleteObject(auxiliaryFiles, testFilePrefix + testFileName2);
+			uut.deleteObject(auxiliaryFiles, testFilePrefix + testFileName2);
 		}
 
 		if (uut.exists(new ObsObject(auxiliaryFiles, testDirectoryName + "/" + testFileName1))) {
-			((SwiftObsClient)uut).deleteObject(auxiliaryFiles, testDirectoryName + "/" + testFileName1);
+			uut.deleteObject(auxiliaryFiles, testDirectoryName + "/" + testFileName1);
 		}
 
 		if (uut.exists(new ObsObject(auxiliaryFiles, testDirectoryName + "/" + testFileName2))) {
-			((SwiftObsClient)uut).deleteObject(auxiliaryFiles, testDirectoryName + "/" + testFileName2);
+			uut.deleteObject(auxiliaryFiles, testDirectoryName + "/" + testFileName2);
 		}
 
 		if (uut.exists(new ObsObject(auxiliaryFiles, testDirectoryName + "/" + testUnexptectedFileName))) {
-			((SwiftObsClient)uut).deleteObject(auxiliaryFiles, testDirectoryName + "/" + testUnexptectedFileName);
+			uut.deleteObject(auxiliaryFiles, testDirectoryName + "/" + testUnexptectedFileName);
 		}
 
 		if (uut.exists(new ObsObject(auxiliaryFiles, testDirectoryName + ".md5sum"))) {
-			((SwiftObsClient)uut).deleteObject(auxiliaryFiles, testDirectoryName + ".md5sum");
+			uut.deleteObject(auxiliaryFiles, testDirectoryName + ".md5sum");
 		}
+		System.out.println("ha");
 	}
 	
 	@Test
-	public void uploadWithoutPrefixTest() throws ObsException, IOException, SdkClientException {	
+	public void uploadWithoutPrefixTest() throws Exception {	
 		// upload
 		assertFalse(uut.exists(new ObsObject(auxiliaryFiles, testFileName1)));
-		uut.uploadFile(auxiliaryFiles, testFileName1, testFile1);
+		uut.upload(Collections.singletonList(new ObsUploadObject(auxiliaryFiles, testFileName1, testFile1)));
 		assertTrue(uut.exists(new ObsObject(auxiliaryFiles, testFileName1)));
 	}
 
 	@Test
-	public void uploadWithPrefixTest() throws ObsException, IOException, SdkClientException {	
+	public void uploadWithPrefixTest() throws Exception {	
 		// upload
 		assertFalse(uut.exists(new ObsObject(auxiliaryFiles, testFilePrefix + testFileName1)));
-		uut.uploadFile(auxiliaryFiles, testFilePrefix + testFileName1, testFile1);
+		uut.upload(Collections.singletonList(new ObsUploadObject(auxiliaryFiles, testFilePrefix + testFileName1, testFile1)));
 		assertTrue(uut.exists(new ObsObject(auxiliaryFiles, testFilePrefix + testFileName1)));
 	}
 
@@ -141,12 +157,11 @@ public class SwiftObsClientIT {
 		assertTrue(uut.exists(new ObsObject(auxiliaryFiles, testDirectoryName + ".md5sum")));
 
 		// upload unexpected obkect
-		uut.uploadFile(auxiliaryFiles, testDirectoryName + "/" + testUnexptectedFileName, testFile1);		
+		uut.upload(Arrays.asList(new ObsUploadObject(auxiliaryFiles, testDirectoryName + "/" + testUnexptectedFileName, testFile1)));		
 		assertTrue(uut.exists(new ObsObject(auxiliaryFiles, testDirectoryName + "/" + testUnexptectedFileName)));
 
 		// validate directory with unexpected object
 		exception.expect(ObsValidationException.class);
-		exception.expectMessage("Unexpected object found: " + testDirectoryName + "/" + testUnexptectedFileName + " for " + testDirectoryName  + " of family " + auxiliaryFiles); 
 		uut.validate(new ObsObject(auxiliaryFiles, testDirectoryName));				
 	}
 	
@@ -163,7 +178,7 @@ public class SwiftObsClientIT {
 		assertTrue(uut.exists(new ObsObject(auxiliaryFiles, testDirectoryName + ".md5sum")));
 
 		// remove object from directory
-		((SwiftObsClient)uut).deleteObject(auxiliaryFiles, testDirectoryName + "/" + testFileName1);
+		uut.deleteObject(auxiliaryFiles, testDirectoryName + "/" + testFileName1);
 		assertFalse(uut.exists(new ObsObject(auxiliaryFiles, testDirectoryName + "/" + testFileName1)));
 
 		// validate incomplete directory
@@ -185,9 +200,9 @@ public class SwiftObsClientIT {
 		assertTrue(uut.exists(new ObsObject(auxiliaryFiles, testDirectoryName + ".md5sum")));
 
 		// replace object with bad one
-		((SwiftObsClient)uut).deleteObject(auxiliaryFiles, testDirectoryName + "/" + testFileName1);
+		uut.deleteObject(auxiliaryFiles, testDirectoryName + "/" + testFileName1);
 		assertFalse(uut.exists(new ObsObject(auxiliaryFiles, testDirectoryName + "/" + testFileName1)));
-		uut.uploadFile(auxiliaryFiles, testDirectoryName + "/" + testFileName1, testFile2);		
+		uut.upload(Arrays.asList(new ObsUploadObject(auxiliaryFiles, testDirectoryName + "/" + testFileName1, testFile2)));		
 		assertTrue(uut.exists(new ObsObject(auxiliaryFiles, testDirectoryName + "/" + testFileName1)));
 
 		// validate wrong checksum situation
@@ -206,56 +221,56 @@ public class SwiftObsClientIT {
 	}
 
 	@Test
-	public void deleteWithoutPrefixTest() throws ObsException, IOException, SdkClientException {	
+	public void deleteWithoutPrefixTest() throws Exception {	
 		// upload
 		assertFalse(uut.exists(new ObsObject(auxiliaryFiles, testFileName1)));
-		uut.uploadFile(auxiliaryFiles, testFileName1, testFile1);
+		uut.upload(Arrays.asList(new ObsUploadObject(auxiliaryFiles, testFileName1, testFile1)));
 		assertTrue(uut.exists(new ObsObject(auxiliaryFiles, testFileName1)));
 
 		// delete
 		if (uut.exists(new ObsObject(auxiliaryFiles, testFileName1))) {
-			((SwiftObsClient)uut).deleteObject(auxiliaryFiles, testFileName1);
+			uut.deleteObject(auxiliaryFiles, testFileName1);
 		}
 	}
 	
 	@Test
-	public void deleteWithPrefixTest() throws ObsException, IOException, SdkClientException {	
+	public void deleteWithPrefixTest() throws Exception {	
 		// upload
 		assertFalse(uut.exists(new ObsObject(auxiliaryFiles, testFilePrefix + testFileName1)));
-		uut.uploadFile(auxiliaryFiles, testFilePrefix + testFileName1, testFile1);
+		uut.upload(Arrays.asList(new ObsUploadObject(auxiliaryFiles, testFilePrefix + testFileName1, testFile1)));
 		assertTrue(uut.exists(new ObsObject(auxiliaryFiles, testFilePrefix + testFileName1)));
 
 		// delete
 		if (uut.exists(new ObsObject(auxiliaryFiles, testFileName1))) {
-			((SwiftObsClient)uut).deleteObject(auxiliaryFiles, testFilePrefix + testFileName1);
+			uut.deleteObject(auxiliaryFiles, testFilePrefix + testFileName1);
 		}
 	}
 
 	@Test
-	public void downloadFileWithoutPrefixTest() throws ObsException, IOException, SdkClientException {	
+	public void downloadFileWithoutPrefixTest() throws Exception {	
 		// upload
 		assertFalse(uut.exists(new ObsObject(auxiliaryFiles, testFileName1)));
-		uut.uploadFile(auxiliaryFiles, testFileName1, testFile1);
+		uut.upload(Arrays.asList(new ObsUploadObject(auxiliaryFiles, testFileName1, testFile1)));
 		assertTrue(uut.exists(new ObsObject(auxiliaryFiles, testFileName1)));
 		
 		// single file download
         String targetDir = Files.createTempDirectory(this.getClass().getCanonicalName() + "-").toString();
-		uut.downloadFile(auxiliaryFiles, testFileName1, targetDir);
+		uut.download(Arrays.asList(new ObsDownloadObject(auxiliaryFiles, testFileName1, targetDir)));
 		String send1 = new String(Files.readAllBytes(testFile1.toPath()));
 		String received1 = new String(Files.readAllBytes((new File(targetDir + "/" + testFileName1)).toPath()));
 		assertEquals(send1, received1);
 	}
 
 	@Test
-	public void downloadFileWithPrefixTest() throws ObsException, IOException, SdkClientException {	
+	public void downloadFileWithPrefixTest() throws Exception {	
 		// upload
 		assertFalse(uut.exists(new ObsObject(auxiliaryFiles, testFilePrefix + testFileName1)));
-		uut.uploadFile(auxiliaryFiles, testFilePrefix + testFileName1, testFile1);
+		uut.upload(Arrays.asList(new ObsUploadObject(auxiliaryFiles, testFilePrefix + testFileName1, testFile1)));
 		assertTrue(uut.exists(new ObsObject(auxiliaryFiles, testFilePrefix + testFileName1)));
 		
 		// single file download
         String targetDir = Files.createTempDirectory(this.getClass().getCanonicalName() + "-").toString();
-		uut.downloadFile(auxiliaryFiles, testFilePrefix + testFileName1, targetDir);
+		uut.download(Arrays.asList(new ObsDownloadObject(auxiliaryFiles, testFilePrefix + testFileName1, targetDir)));
 		String send1 = new String(Files.readAllBytes(testFile1.toPath()));
 		String received1 = new String(Files.readAllBytes((new File(targetDir + "/" + testFilePrefix + testFileName1)).toPath()));
 		assertEquals(send1, received1);
@@ -288,32 +303,32 @@ public class SwiftObsClientIT {
 	}
 	
 	@Test
-	public void numberOfObjectsWithoutPrefixTest() throws ObsException, IOException, SdkClientException {	
+	public void numberOfObjectsWithoutPrefixTest() throws Exception {	
 		// upload
 		assertFalse(uut.exists(new ObsObject(auxiliaryFiles, testFileName1)));
 		assertFalse(uut.exists(new ObsObject(auxiliaryFiles, testFileName2)));
-		uut.uploadFile(auxiliaryFiles, testFileName1, testFile1);
-		uut.uploadFile(auxiliaryFiles, testFileName2, testFile2);
+		uut.upload(Arrays.asList(new ObsUploadObject(auxiliaryFiles, testFileName1, testFile1)));
+		uut.upload(Arrays.asList(new ObsUploadObject(auxiliaryFiles, testFileName2, testFile2)));
 		assertTrue(uut.exists(new ObsObject(auxiliaryFiles, testFileName1)));
 		assertTrue(uut.exists(new ObsObject(auxiliaryFiles, testFileName2)));
 		
 		// count
-		int count = ((SwiftObsClient)uut).numberOfObjects(auxiliaryFiles, "");
+		int count = uut.numberOfObjects(auxiliaryFiles, "");
 		assertEquals(2, count);
 	}
 
 	@Test
-	public void numberOfObjectsWithPrefixTest() throws ObsException, IOException, SdkClientException {	
+	public void numberOfObjectsWithPrefixTest() throws Exception {	
 		// upload
 		assertFalse(uut.exists(new ObsObject(auxiliaryFiles, testFilePrefix + testFileName1)));
 		assertFalse(uut.exists(new ObsObject(auxiliaryFiles, testFilePrefix + testFileName2)));
-		uut.uploadFile(auxiliaryFiles, testFilePrefix + testFileName1, testFile1);
-		uut.uploadFile(auxiliaryFiles, testFilePrefix + testFileName2, testFile2);
+		uut.upload(Arrays.asList(new ObsUploadObject(auxiliaryFiles, testFilePrefix + testFileName1, testFile1)));
+		uut.upload(Arrays.asList(new ObsUploadObject(auxiliaryFiles, testFilePrefix + testFileName2, testFile2)));
 		assertTrue(uut.exists(new ObsObject(auxiliaryFiles, testFilePrefix + testFileName1)));
 		assertTrue(uut.exists(new ObsObject(auxiliaryFiles, testFilePrefix + testFileName2)));
 		
 		// count
-		int count = ((SwiftObsClient)uut).numberOfObjects(auxiliaryFiles, testFilePrefix);
+		int count = uut.numberOfObjects(auxiliaryFiles, testFilePrefix);
 		assertEquals(2, count);
 	}
 	
@@ -321,8 +336,8 @@ public class SwiftObsClientIT {
 	public final void getAllAsStreamTest() throws Exception {
 		assertFalse(uut.exists(new ObsObject(auxiliaryFiles, testFilePrefix + testFileName1)));
 		assertFalse(uut.exists(new ObsObject(auxiliaryFiles, testFilePrefix + testFileName2)));
-		uut.uploadFile(auxiliaryFiles, testFilePrefix + testFileName1, testFile1);
-		uut.uploadFile(auxiliaryFiles, testFilePrefix + testFileName2, testFile2);
+		uut.upload(Arrays.asList(new ObsUploadObject(auxiliaryFiles, testFilePrefix + testFileName1, testFile1)));
+		uut.upload(Arrays.asList(new ObsUploadObject(auxiliaryFiles, testFilePrefix + testFileName2, testFile2)));
 		assertTrue(uut.exists(new ObsObject(auxiliaryFiles, testFilePrefix + testFileName1)));
 		assertTrue(uut.exists(new ObsObject(auxiliaryFiles, testFilePrefix + testFileName2)));
 		
