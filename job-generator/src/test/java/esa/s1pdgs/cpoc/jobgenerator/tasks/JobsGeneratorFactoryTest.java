@@ -31,14 +31,14 @@ import esa.s1pdgs.cpoc.jobgenerator.config.ProcessSettings;
 import esa.s1pdgs.cpoc.jobgenerator.model.joborder.JobOrder;
 import esa.s1pdgs.cpoc.jobgenerator.model.joborder.JobOrderOutput;
 import esa.s1pdgs.cpoc.jobgenerator.model.joborder.enums.JobOrderFileNameType;
-import esa.s1pdgs.cpoc.jobgenerator.model.metadata.SearchMetadataQuery;
 import esa.s1pdgs.cpoc.jobgenerator.model.tasktable.TaskTable;
 import esa.s1pdgs.cpoc.jobgenerator.model.tasktable.TaskTableOuput;
 import esa.s1pdgs.cpoc.jobgenerator.model.tasktable.TaskTableTask;
 import esa.s1pdgs.cpoc.jobgenerator.service.XmlConverter;
-import esa.s1pdgs.cpoc.jobgenerator.service.metadata.MetadataService;
 import esa.s1pdgs.cpoc.jobgenerator.service.mqi.OutputProducerFactory;
 import esa.s1pdgs.cpoc.jobgenerator.utils.TestGenericUtils;
+import esa.s1pdgs.cpoc.metadata.client.MetadataClient;
+import esa.s1pdgs.cpoc.metadata.client.SearchMetadataQuery;
 import esa.s1pdgs.cpoc.mqi.model.queue.EdrsSessionDto;
 import esa.s1pdgs.cpoc.mqi.model.queue.ProductDto;
 
@@ -51,7 +51,7 @@ public class JobsGeneratorFactoryTest {
     private XmlConverter xmlConverter;
 
     @Mock
-    private MetadataService metadataService;
+    private MetadataClient metadataClient;
 
     @Mock
     private ProcessSettings l0ProcessSettings;
@@ -147,7 +147,7 @@ public class JobsGeneratorFactoryTest {
 
             JobsGeneratorFactory factory = new JobsGeneratorFactory(
                     l0ProcessSettings, jobGeneratorSettings, aiopProperties,
-                    xmlConverter, metadataService, JobsSender);
+                    xmlConverter, metadataClient, JobsSender);
 
             AbstractJobsGenerator<EdrsSessionDto> generator =
                     factory.createJobGeneratorForEdrsSession(new File(
@@ -396,7 +396,7 @@ public class JobsGeneratorFactoryTest {
 
             JobsGeneratorFactory factory = new JobsGeneratorFactory(
                     l0ProcessSettings, jobGeneratorSettings, aiopProperties,
-                    xmlConverter, metadataService, JobsSender);
+                    xmlConverter, metadataClient, JobsSender);
 
             AbstractJobsGenerator<ProductDto> generator =
                     factory.createJobGeneratorForL0Slice(new File(

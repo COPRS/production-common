@@ -154,15 +154,15 @@ public class L0SegmentAppJobDispatcherTest {
                 .when(appDataService)
                 .findNByPodAndGenerationTaskTableWithNotSentGeneration(
                         Mockito.anyString(), Mockito.anyString());
-        AppDataJob primaryCheckAppJob =
+        AppDataJob<?> primaryCheckAppJob =
                 TestL0SegmentUtils.buildAppData();
         primaryCheckAppJob.getGenerations().get(0)
                 .setState(AppDataJobGenerationState.PRIMARY_CHECK);
-        AppDataJob readyAppJob =
+        AppDataJob<?> readyAppJob =
                 TestL0SegmentUtils.buildAppData();
         readyAppJob.getGenerations().get(0)
                 .setState(AppDataJobGenerationState.READY);
-        AppDataJob sentAppJob =
+        AppDataJob<?> sentAppJob =
                 TestL0SegmentUtils.buildAppData();
         sentAppJob.getGenerations().get(0)
                 .setState(AppDataJobGenerationState.SENT);

@@ -23,9 +23,9 @@ import esa.s1pdgs.cpoc.jobgenerator.model.JobGeneration;
 import esa.s1pdgs.cpoc.jobgenerator.model.joborder.JobOrder;
 import esa.s1pdgs.cpoc.jobgenerator.model.joborder.JobOrderProcParam;
 import esa.s1pdgs.cpoc.jobgenerator.service.XmlConverter;
-import esa.s1pdgs.cpoc.jobgenerator.service.metadata.MetadataService;
 import esa.s1pdgs.cpoc.jobgenerator.service.mqi.OutputProducerFactory;
 import esa.s1pdgs.cpoc.jobgenerator.tasks.AbstractJobsGenerator;
+import esa.s1pdgs.cpoc.metadata.client.MetadataClient;
 import esa.s1pdgs.cpoc.metadata.model.AbstractMetadata;
 import esa.s1pdgs.cpoc.metadata.model.LevelSegmentMetadata;
 import esa.s1pdgs.cpoc.mqi.model.queue.LevelJobDto;
@@ -47,12 +47,12 @@ public class L0SegmentAppJobsGenerator extends AbstractJobsGenerator<ProductDto>
      * @param JobsSender
      */
     public L0SegmentAppJobsGenerator(final XmlConverter xmlConverter,
-            final MetadataService metadataService,
+            final MetadataClient metadataClient,
             final ProcessSettings l0ProcessSettings,
             final JobGeneratorSettings taskTablesSettings,
             final OutputProducerFactory outputFactory,
             final AppCatalogJobClient appDataService) {
-        super(xmlConverter, metadataService, l0ProcessSettings,
+        super(xmlConverter, metadataClient, l0ProcessSettings,
                 taskTablesSettings, outputFactory, appDataService);
     }
 
@@ -73,12 +73,12 @@ public class L0SegmentAppJobsGenerator extends AbstractJobsGenerator<ProductDto>
         String lastName = "";
         try {
         	@SuppressWarnings("unchecked")
-			final AppDataJob appDataJob = job.getAppDataJob();
-        	
+			final AppDataJob<ProductDto> appDataJob = job.getAppDataJob();
+
             for (GenericMessageDto<ProductDto> message : appDataJob.getMessages().stream().map(s -> (GenericMessageDto<ProductDto>)s).collect(Collectors.toList())) {
                 ProductDto dto = (ProductDto) message.getBody();
                 lastName = dto.getProductName();
-                LevelSegmentMetadata metadata = metadataService
+                LevelSegmentMetadata metadata = metadataClient
                         .getLevelSegment(dto.getFamily(), dto.getProductName());
                 if (metadata == null) {
                     missingMetadata.put(dto.getProductName(), "Missing segment");

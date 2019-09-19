@@ -19,6 +19,7 @@ import org.springframework.stereotype.Service;
 import esa.s1pdgs.cpoc.common.ProductFamily;
 import esa.s1pdgs.cpoc.common.errors.processing.MetadataQueryException;
 import esa.s1pdgs.cpoc.common.utils.LogUtils;
+import esa.s1pdgs.cpoc.metadata.client.MetadataClient;
 import esa.s1pdgs.cpoc.metadata.model.SearchMetadata;
 import esa.s1pdgs.cpoc.obs_sdk.ObsClient;
 import esa.s1pdgs.cpoc.obs_sdk.ObsObject;
@@ -30,13 +31,12 @@ import esa.s1pdgs.cpoc.report.Reporting;
 import esa.s1pdgs.cpoc.report.ReportingMessage;
 import esa.s1pdgs.cpoc.validation.config.ApplicationProperties;
 import esa.s1pdgs.cpoc.validation.config.ApplicationProperties.FamilyIntervalConf;
-import esa.s1pdgs.cpoc.validation.service.metadata.MetadataService;
 
 @Service
 public class ValidationService {
 	private static final Logger LOGGER = LogManager.getLogger(ValidationService.class);
 
-	private final MetadataService metadataService;
+	private final MetadataClient metadataClient;
 
 	private final ObsClient obsClient;
 
@@ -60,8 +60,8 @@ public class ValidationService {
 	}
 
 	@Autowired
-	public ValidationService(MetadataService metadataService, ObsClient obsClient) {
-		this.metadataService = metadataService;
+	public ValidationService(MetadataClient metadataClient, ObsClient obsClient) {
+		this.metadataClient = metadataClient;
 		this.obsClient = obsClient;
 	}
 
@@ -103,7 +103,7 @@ public class ValidationService {
 
 				String queryFamily = getQueryFamily(family);
 				LOGGER.info("Performing metadata query for family '{}'", queryFamily);
-				metadataResults = metadataService.query(ProductFamily.valueOf(queryFamily), startInterval, endInterval);				
+				metadataResults = metadataClient.query(ProductFamily.valueOf(queryFamily), startInterval, endInterval);				
 				if (metadataResults == null) {
 					// set to empty list
 					metadataResults = new ArrayList<>();

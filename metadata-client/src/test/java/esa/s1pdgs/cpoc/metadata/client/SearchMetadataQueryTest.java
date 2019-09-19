@@ -1,4 +1,4 @@
-package esa.s1pdgs.cpoc.jobgenerator.model.metadata;
+package esa.s1pdgs.cpoc.metadata.client;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
@@ -6,7 +6,6 @@ import static org.junit.Assert.assertTrue;
 import org.junit.Test;
 
 import esa.s1pdgs.cpoc.common.ProductFamily;
-import esa.s1pdgs.cpoc.jobgenerator.model.metadata.SearchMetadataQuery;
 import nl.jqno.equalsverifier.EqualsVerifier;
 import nl.jqno.equalsverifier.Warning;
 

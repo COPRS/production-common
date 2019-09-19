@@ -7,13 +7,15 @@ import java.util.Objects;
 
 import esa.s1pdgs.cpoc.common.ApplicationLevel;
 import esa.s1pdgs.cpoc.common.ProductCategory;
+import esa.s1pdgs.cpoc.mqi.model.queue.AbstractDto;
+import esa.s1pdgs.cpoc.mqi.model.rest.GenericMessageDto;
 
 /**
  * Class used for exchanging applicative data of a job
  * 
  * @author Viveris Technologies
  */
-public class AppDataJob {
+public class AppDataJob<E extends AbstractDto> {
 
     /**
      * Job identifier
@@ -54,7 +56,7 @@ public class AppDataJob {
     /**
      * MQI messages linked to this job
      */
-    private List<Object> messages;
+    private List<GenericMessageDto<E>> messages;
 
     /**
      * Product of this job
@@ -184,7 +186,7 @@ public class AppDataJob {
     /**
      * @return the messages
      */
-    public List<Object> getMessages() {
+    public List<GenericMessageDto<E>> getMessages() {
         return messages;
     }
 
@@ -192,7 +194,7 @@ public class AppDataJob {
      * @param messages
      *            the messages to set
      */
-    public void setMessages(final List<Object> messages) {
+    public void setMessages(final List<GenericMessageDto<E>> messages) {
         this.messages = messages;
     }
 

@@ -22,6 +22,7 @@ import org.springframework.util.StringUtils;
 
 import esa.s1pdgs.cpoc.appcatalog.client.job.AppCatalogJobClient;
 import esa.s1pdgs.cpoc.appcatalog.server.job.db.AppDataJob;
+import esa.s1pdgs.cpoc.appcatalog.server.job.db.AppDataJobGeneration;
 import esa.s1pdgs.cpoc.appcatalog.server.job.db.AppDataJobGenerationState;
 import esa.s1pdgs.cpoc.appcatalog.server.job.db.AppDataJobProduct;
 import esa.s1pdgs.cpoc.appcatalog.server.job.db.AppDataJobState;
@@ -47,7 +48,6 @@ import esa.s1pdgs.cpoc.jobgenerator.model.joborder.JobOrderSensingTime;
 import esa.s1pdgs.cpoc.jobgenerator.model.joborder.JobOrderTimeInterval;
 import esa.s1pdgs.cpoc.jobgenerator.model.joborder.enums.JobOrderDestination;
 import esa.s1pdgs.cpoc.jobgenerator.model.joborder.enums.JobOrderFileNameType;
-import esa.s1pdgs.cpoc.jobgenerator.model.metadata.SearchMetadataQuery;
 import esa.s1pdgs.cpoc.jobgenerator.model.metadata.SearchMetadataResult;
 import esa.s1pdgs.cpoc.jobgenerator.model.tasktable.TaskTable;
 import esa.s1pdgs.cpoc.jobgenerator.model.tasktable.TaskTableInput;
@@ -57,8 +57,9 @@ import esa.s1pdgs.cpoc.jobgenerator.model.tasktable.TaskTableTask;
 import esa.s1pdgs.cpoc.jobgenerator.model.tasktable.enums.TaskTableInputOrigin;
 import esa.s1pdgs.cpoc.jobgenerator.model.tasktable.enums.TaskTableMandatoryEnum;
 import esa.s1pdgs.cpoc.jobgenerator.service.XmlConverter;
-import esa.s1pdgs.cpoc.jobgenerator.service.metadata.MetadataService;
 import esa.s1pdgs.cpoc.jobgenerator.service.mqi.OutputProducerFactory;
+import esa.s1pdgs.cpoc.metadata.client.MetadataClient;
+import esa.s1pdgs.cpoc.metadata.client.SearchMetadataQuery;
 import esa.s1pdgs.cpoc.metadata.model.AbstractMetadata;
 import esa.s1pdgs.cpoc.metadata.model.SearchMetadata;
 import esa.s1pdgs.cpoc.mqi.model.queue.AbstractDto;
@@ -104,7 +105,7 @@ public abstract class AbstractJobsGenerator<T extends AbstractDto> implements Ru
     /**
      * 
      */
-    protected final MetadataService metadataService;
+    protected final MetadataClient metadataClient;
 
     /**
      * 
@@ -151,13 +152,13 @@ public abstract class AbstractJobsGenerator<T extends AbstractDto> implements Ru
      * @param xmlConverter
      */
     public AbstractJobsGenerator(final XmlConverter xmlConverter,
-            final MetadataService metadataService,
+            final MetadataClient metadataClient,
             final ProcessSettings l0ProcessSettings,
             final JobGeneratorSettings taskTablesSettings,
             final OutputProducerFactory outputFactory,
             final AppCatalogJobClient appDataService) {
         this.xmlConverter = xmlConverter;
-        this.metadataService = metadataService;
+        this.metadataClient = metadataClient;
         this.l0ProcessSettings = l0ProcessSettings;
         this.jobGeneratorSettings = taskTablesSettings;
         this.metadataSearchQueries = new HashMap<>();
@@ -337,9 +338,8 @@ public abstract class AbstractJobsGenerator<T extends AbstractDto> implements Ru
         final Reporting.Factory reportingFactory = new LoggerReporting.Factory("JobGenerator");
         final Reporting reporting = reportingFactory.newReporting(0);
         
-        try {
-        	
-            List<AppDataJob> jobs = appDataService
+        try {        	
+            List<AppDataJob<?>> jobs = appDataService
                     .findNByPodAndGenerationTaskTableWithNotSentGeneration(
                             l0ProcessSettings.getHostname(), taskTableXmlName);
             
@@ -558,10 +558,8 @@ public abstract class AbstractJobsGenerator<T extends AbstractDto> implements Ru
     	
         // Log functional logs, not clear when this is called
         if (job.getAppDataJob().getState() == AppDataJobState.TERMINATED) {
-        	
         	@SuppressWarnings("unchecked")
-			final AppDataJob jobDto = job.getAppDataJob();
-        	
+			final AppDataJob<?> jobDto = job.getAppDataJob();
             final List<String> taskTables =  jobDto.getGenerations().stream()
             	.map(g -> g.getTaskTable())
             	.collect(Collectors.toList());
@@ -587,7 +585,7 @@ public abstract class AbstractJobsGenerator<T extends AbstractDto> implements Ru
             if (v != null && v.getResult() == null) {
                 try {
                     List<SearchMetadata> file =
-                            this.metadataService.search(v.getQuery(),
+                            this.metadataClient.search(v.getQuery(),
                                     DateUtils.convertToAnotherFormat(
                                             job.getAppDataJob().getProduct()
                                                     .getStartTime(),

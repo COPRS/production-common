@@ -29,10 +29,10 @@ import esa.s1pdgs.cpoc.common.errors.AbstractCodedException;
 import esa.s1pdgs.cpoc.errorrepo.ErrorRepoAppender;
 import esa.s1pdgs.cpoc.jobgenerator.config.L0SlicePatternSettings;
 import esa.s1pdgs.cpoc.jobgenerator.config.ProcessSettings;
-import esa.s1pdgs.cpoc.jobgenerator.service.metadata.MetadataService;
 import esa.s1pdgs.cpoc.jobgenerator.status.AppStatus;
 import esa.s1pdgs.cpoc.jobgenerator.status.AppStatus.JobStatus;
 import esa.s1pdgs.cpoc.jobgenerator.tasks.AbstractJobsDispatcher;
+import esa.s1pdgs.cpoc.metadata.client.MetadataClient;
 import esa.s1pdgs.cpoc.metadata.model.EdrsSessionMetadata;
 import esa.s1pdgs.cpoc.mqi.client.GenericMqiClient;
 import esa.s1pdgs.cpoc.mqi.client.StatusService;
@@ -83,7 +83,7 @@ public class L1AppConsumerTest {
             new GenericMessageDto<ProductDto>(2, "", dtoNotMatch);
     
     @Mock
-    private MetadataService metadataService;
+    private MetadataClient metadataClient;
 
     @Before
     public void setUp() throws Exception {
@@ -131,7 +131,7 @@ public class L1AppConsumerTest {
                 .findByMessagesIdentifier(Mockito.anyLong());
         Mockito.doAnswer(i -> {
             return i.getArgument(0);
-        }).when(appDataService).newJob(Mockito.any());
+        }).when(appDataService).newJob(Mockito.any(), Mockito.any());
         Mockito.doAnswer(i -> {
             return i.getArgument(1);
         }).when(appDataService).patchJob(Mockito.anyLong(), Mockito.any(),
@@ -176,7 +176,7 @@ public class L1AppConsumerTest {
         			"DCS_02_L20171109175634707000125_ch1_DSDB_00033.raw",
         			"DCS_02_L20171109175634707000125_ch1_DSDB_00034.raw",
         			"DCS_02_L20171109175634707000125_ch1_DSDB_00035.raw"));
-        }).when(metadataService).getEdrsSession(Mockito.anyString(), Mockito.anyString());
+        }).when(metadataClient).getEdrsSession(Mockito.anyString(), Mockito.anyString());
     }
 
     private void mockProcessSettings() {
@@ -210,7 +210,7 @@ public class L1AppConsumerTest {
 
         LevelProductsMessageConsumer consumer = new LevelProductsMessageConsumer(l0SliceJobsDispatcher,
                 l0SlicePatternSettings, processSettings, mqiService,
-                mqiStatusService, appDataService, errorAppender, appStatus, metadataService);
+                mqiStatusService, appDataService, errorAppender, appStatus, metadataClient);
         consumer.consumeMessages();
 
         verify(l0SliceJobsDispatcher, never()).dispatch(Mockito.any());
@@ -221,14 +221,14 @@ public class L1AppConsumerTest {
     @Test
     public void testReceiveOk() throws AbstractCodedException, ParseException {
         doReturn(message1).when(mqiService).next(Mockito.any());
-        doReturn(100).when(metadataService).getSeaCoverage(Mockito.any(), Mockito.any()); 
+        doReturn(100).when(metadataClient).getSeaCoverage(Mockito.any(), Mockito.any()); 
         
         LevelProductsMessageConsumer consumer = new LevelProductsMessageConsumer(l0SliceJobsDispatcher,
                 l0SlicePatternSettings, processSettings, mqiService,
-                mqiStatusService, appDataService,  errorAppender, appStatus, metadataService);
+                mqiStatusService, appDataService,  errorAppender, appStatus, metadataClient);
         consumer.consumeMessages();
 
-        verify(appDataService, times(1)).newJob(Mockito.any());
+        verify(appDataService, times(1)).newJob(Mockito.any(), Mockito.any());
         verify(appDataService, times(1)).patchJob(Mockito.anyLong(), Mockito.any(),
                 Mockito.anyBoolean(), Mockito.anyBoolean(),
                 Mockito.anyBoolean());
@@ -243,7 +243,7 @@ public class L1AppConsumerTest {
 
         LevelProductsMessageConsumer consumer = new LevelProductsMessageConsumer(l0SliceJobsDispatcher,
                 l0SlicePatternSettings, processSettings, mqiService,
-                mqiStatusService, appDataService,  errorAppender, appStatus, metadataService);
+                mqiStatusService, appDataService,  errorAppender, appStatus, metadataClient);
         consumer.consumeMessages();
 
         verify(l0SliceJobsDispatcher, never()).dispatch(Mockito.any());
@@ -268,15 +268,15 @@ public class L1AppConsumerTest {
         doReturn(Arrays.asList(job1, job2)).when(appDataService)
                 .findByMessagesIdentifier(Mockito.anyLong());
         
-        doReturn(100).when(metadataService).getSeaCoverage(Mockito.any(), Mockito.any()); 
+        doReturn(100).when(metadataClient).getSeaCoverage(Mockito.any(), Mockito.any()); 
 
         LevelProductsMessageConsumer consumer = new LevelProductsMessageConsumer(l0SliceJobsDispatcher,
                 l0SlicePatternSettings, processSettings, mqiService,
-                mqiStatusService, appDataService,  errorAppender, appStatus, metadataService);
+                mqiStatusService, appDataService,  errorAppender, appStatus, metadataClient);
         consumer.consumeMessages();
 
         job1.setPod("");
-        verify(appDataService, never()).newJob(Mockito.any());
+        verify(appDataService, never()).newJob(Mockito.any(), Mockito.any());
         verify(appDataService, times(2)).patchJob(Mockito.eq(12L), Mockito.any(),
                 Mockito.eq(false), Mockito.eq(false),
                 Mockito.eq(false));
@@ -302,15 +302,15 @@ public class L1AppConsumerTest {
         doReturn(Arrays.asList(job1, job2)).when(appDataService)
                 .findByMessagesIdentifier(Mockito.anyLong());
         
-        doReturn(100).when(metadataService).getSeaCoverage(Mockito.any(), Mockito.any());        
+        doReturn(100).when(metadataClient).getSeaCoverage(Mockito.any(), Mockito.any());        
 
         LevelProductsMessageConsumer consumer = new LevelProductsMessageConsumer(l0SliceJobsDispatcher,
                 l0SlicePatternSettings, processSettings, mqiService,
-                mqiStatusService, appDataService,  errorAppender, appStatus, metadataService);
+                mqiStatusService, appDataService,  errorAppender, appStatus, metadataClient);
         consumer.consumeMessages();
 
         job1.setPod("");
-        verify(appDataService, never()).newJob(Mockito.any());
+        verify(appDataService, never()).newJob(Mockito.any(), Mockito.any());
         verify(appDataService, times(1)).patchJob(Mockito.eq(12L), Mockito.eq(job1),
                 Mockito.eq(false), Mockito.eq(false),
                 Mockito.eq(false));
@@ -337,15 +337,15 @@ public class L1AppConsumerTest {
         doReturn(Arrays.asList(job1, job2)).when(appDataService)
                 .findByMessagesIdentifier(Mockito.anyLong());
         
-        doReturn(100).when(metadataService).getSeaCoverage(Mockito.any(), Mockito.any()); 
+        doReturn(100).when(metadataClient).getSeaCoverage(Mockito.any(), Mockito.any()); 
 
         LevelProductsMessageConsumer consumer = new LevelProductsMessageConsumer(l0SliceJobsDispatcher,
                 l0SlicePatternSettings, processSettings, mqiService,
-                mqiStatusService, appDataService,  errorAppender, appStatus, metadataService);
+                mqiStatusService, appDataService,  errorAppender, appStatus, metadataClient);
         consumer.consumeMessages();
 
         job1.setPod("");
-        verify(appDataService, never()).newJob(Mockito.any());
+        verify(appDataService, never()).newJob(Mockito.any(), Mockito.any());
         verify(appDataService, never()).patchJob(Mockito.anyLong(), Mockito.any(),
                 Mockito.anyBoolean(), Mockito.anyBoolean(),
                 Mockito.anyBoolean());

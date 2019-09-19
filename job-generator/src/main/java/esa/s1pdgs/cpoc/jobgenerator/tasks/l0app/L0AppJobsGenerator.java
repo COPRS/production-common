@@ -21,9 +21,9 @@ import esa.s1pdgs.cpoc.jobgenerator.model.JobGeneration;
 import esa.s1pdgs.cpoc.jobgenerator.model.joborder.AbstractJobOrderConf;
 import esa.s1pdgs.cpoc.jobgenerator.model.joborder.JobOrderProcParam;
 import esa.s1pdgs.cpoc.jobgenerator.service.XmlConverter;
-import esa.s1pdgs.cpoc.jobgenerator.service.metadata.MetadataService;
 import esa.s1pdgs.cpoc.jobgenerator.service.mqi.OutputProducerFactory;
 import esa.s1pdgs.cpoc.jobgenerator.tasks.AbstractJobsGenerator;
+import esa.s1pdgs.cpoc.metadata.client.MetadataClient;
 import esa.s1pdgs.cpoc.metadata.model.EdrsSessionMetadata;
 import esa.s1pdgs.cpoc.mqi.model.queue.EdrsSessionDto;
 import esa.s1pdgs.cpoc.mqi.model.queue.LevelJobDto;
@@ -36,12 +36,12 @@ public class L0AppJobsGenerator extends AbstractJobsGenerator<EdrsSessionDto> {
 	private Map<String,Map<String,String>> aiopProperties;
 	
     public L0AppJobsGenerator(XmlConverter xmlConverter,
-            MetadataService metadataService, ProcessSettings l0ProcessSettings,
+    		MetadataClient metadataClient, ProcessSettings l0ProcessSettings,
             JobGeneratorSettings taskTablesSettings,
             final OutputProducerFactory outputFactory,
             final AppCatalogJobClient appDataService,
             final AiopProperties aiopProperties) {
-        super(xmlConverter, metadataService, l0ProcessSettings,
+        super(xmlConverter, metadataClient, l0ProcessSettings,
                 taskTablesSettings, outputFactory, appDataService);
         
         this.aiopProperties = new HashMap<>();
@@ -74,7 +74,7 @@ public class L0AppJobsGenerator extends AbstractJobsGenerator<EdrsSessionDto> {
             // Channel 1
             job.getAppDataJob().getProduct().getRaws1().forEach(raw -> {
                 try {
-                    EdrsSessionMetadata file = this.metadataService
+                    EdrsSessionMetadata file = this.metadataClient
                             .getEdrsSession("RAW", new File(raw.getFilename()).getName());
                     if (file != null) {
                         raw.setKeyObs(file.getKeyObjectStorage());
@@ -88,7 +88,7 @@ public class L0AppJobsGenerator extends AbstractJobsGenerator<EdrsSessionDto> {
             // Channel 2
             job.getAppDataJob().getProduct().getRaws2().forEach(raw -> {
                 try {
-                    EdrsSessionMetadata file = this.metadataService
+                    EdrsSessionMetadata file = this.metadataClient
                             .getEdrsSession("RAW", new File(raw.getFilename()).getName());
                     if (file != null) {
                         raw.setKeyObs(file.getKeyObjectStorage());

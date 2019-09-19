@@ -21,6 +21,12 @@ public class EdrsSessionFactory implements ProductFactory<EdrsSessionDto> {
 	protected final Pattern xmlpattern = Pattern.compile(PATTERN_STR_XML);
 	protected final Pattern rawpattern = Pattern.compile(PATTERN_STR_RAW);
 
+	private final String hostname;
+	
+	public EdrsSessionFactory(final String hostname) {
+		this.hostname = hostname;
+	}
+	
 	@Override
 	public List<Product<EdrsSessionDto>> newProducts(final File file, final IngestionDto ingestionDto,
 			final ObsAdapter obsAdapter) throws ProductException {
@@ -39,6 +45,7 @@ public class EdrsSessionFactory implements ProductFactory<EdrsSessionDto> {
 				satelliteId, stationCode, sessionId);
 
 		final Product<EdrsSessionDto> prod = new Product<>();
+		prod.getDto().setHostname(hostname);
 		prod.setFamily(ProductFamily.EDRS_SESSION);
 		prod.setFile(file);
 		prod.setDto(edrsSessionDto);
