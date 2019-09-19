@@ -394,7 +394,7 @@ public class L0AppConsumerTest {
                 processSettings, mqiService, mqiStatusService, appDataService,
                 errorAppender, appStatus, metadataService);
 
-        AppDataJob result =
+        AppDataJob<?> result =
                 edrsSessionsConsumer.buildJob(message);
         verify(appDataService, times(1)).patchJob(Mockito.eq(123L),
                 Mockito.any(), Mockito.eq(false), Mockito.eq(false),

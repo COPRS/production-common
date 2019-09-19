@@ -168,7 +168,7 @@ public class AppCatalogJobClient {
      * @return
      * @throws AbstractCodedException
      */
-    public <E extends AbstractDto> List<AppDataJob> search(final Map<String, String> filters)
+    public List<AppDataJob> search(final Map<String, String> filters)
             throws AbstractCodedException {
         int retries = 0;
         while (true) {
@@ -226,7 +226,7 @@ public class AppCatalogJobClient {
      * @return
      * @throws AbstractCodedException
      */
-    public <E extends AbstractDto> List<AppDataJob> findByMessagesIdentifier(final long messageId)
+    public List<AppDataJob> findByMessagesIdentifier(final long messageId)
             throws AbstractCodedException {   	
         return search(Collections.singletonMap("messages.identifier", Long.toString(messageId)));        
     }
@@ -238,7 +238,7 @@ public class AppCatalogJobClient {
      * @return
      * @throws AbstractCodedException
      */
-    public <E extends AbstractDto> List<AppDataJob> findByProductSessionId(final String sessionId)
+    public List<AppDataJob> findByProductSessionId(final String sessionId)
             throws AbstractCodedException {
         return search(Collections.singletonMap("product.sessionId", sessionId));
     }
@@ -250,7 +250,7 @@ public class AppCatalogJobClient {
      * @return
      * @throws AbstractCodedException
      */
-    public <E extends AbstractDto> List<AppDataJob> findByProductDataTakeId(final String dataTakeId)
+    public List<AppDataJob> findByProductDataTakeId(final String dataTakeId)
             throws AbstractCodedException {
         return search(Collections.singletonMap("product.dataTakeId", dataTakeId));
     }
@@ -263,7 +263,7 @@ public class AppCatalogJobClient {
      * @return
      * @throws AbstractCodedException
      */
-    public <E extends AbstractDto> List<AppDataJob> findByPodAndState(final String pod,
+    public List<AppDataJob> findByPodAndState(final String pod,
             final AppDataJobState state) throws AbstractCodedException {
     	final Map<String, String> filters = new HashMap<>();
     	filters.put("state", state.name());
@@ -279,7 +279,7 @@ public class AppCatalogJobClient {
      * @return
      * @throws AbstractCodedException
      */
-    public <E extends AbstractDto> List<AppDataJob> findNByPodAndGenerationTaskTableWithNotSentGeneration(
+    public List<AppDataJob> findNByPodAndGenerationTaskTableWithNotSentGeneration(
             final String pod, final String taskTable)
             throws AbstractCodedException {       
     	final Map<String, String> filters = new HashMap<>();  
@@ -297,7 +297,7 @@ public class AppCatalogJobClient {
      * @return
      * @throws AbstractCodedException
      */
-    public AppDataJob newJob(final AppDataJob job)
+    public <E extends AbstractDto> AppDataJob<E> newJob(final AppDataJob<E> job)
             throws AbstractCodedException {
         int retries = 0;
         while (true) {
@@ -305,12 +305,11 @@ public class AppCatalogJobClient {
             String uri = hostUri + "/" + category.name().toLowerCase() + "/jobs";
             LogUtils.traceLog(LOGGER, String.format("[uri %s]", uri));
             try {
-        		final ResolvableType appCatMessageType = ResolvableType.forClass(
-        				AppDataJob.class);               	
+        		final ResolvableType appCatMessageType = ResolvableType.forClass(AppDataJob.class);               	
                 final ResponseEntity<AppDataJob> response = restTemplate.exchange(
                 		uri, 
                 		HttpMethod.POST,
-                		new HttpEntity<AppDataJob>(job),
+                		new HttpEntity<AppDataJob<E>>(job),
                 		ParameterizedTypeReference.forType(appCatMessageType.getType())
                 );
                 
@@ -342,8 +341,9 @@ public class AppCatalogJobClient {
         }
     }
 
-    public AppDataJob patchJob(final long identifier,
-            final AppDataJob job, final boolean patchMessages,
+    @SuppressWarnings("unchecked")
+	public <E extends AbstractDto> AppDataJob<E> patchJob(final long identifier,
+            final AppDataJob<?> job, final boolean patchMessages,
             final boolean patchProduct, final boolean patchGenerations)
             throws AbstractCodedException {
     	job.setIdentifier(identifier);
@@ -370,13 +370,13 @@ public class AppCatalogJobClient {
                 final ResponseEntity<AppDataJob> response = restTemplate.exchange(
                 		uri, 
                 		HttpMethod.PATCH,
-                		new HttpEntity<AppDataJob>(job),
+                		new HttpEntity<AppDataJob<?>>(job),
                 		ParameterizedTypeReference.forType(appCatMessageType.getType())
                 );
                 if (response.getStatusCode() == HttpStatus.OK) {
                     LogUtils.traceLog(LOGGER, String.format("[uri %s] [ret %s]",
                             uri, response.getBody()));
-                    return response.getBody();
+                    return (AppDataJob<E>) response.getBody();
                 } else {
                     waitOrThrow(retries,
                             new AppCatalogJobPatchApiError(uri, job,
@@ -410,7 +410,8 @@ public class AppCatalogJobClient {
      * @return
      * @throws AbstractCodedException
      */
-    public AppDataJob patchTaskTableOfJob(final long identifier,
+    @SuppressWarnings("unchecked")
+	public <E extends AbstractDto> AppDataJob<E> patchTaskTableOfJob(final long identifier,
             final String taskTable, final AppDataJobGenerationState state)
             throws AbstractCodedException {
         int retries = 0;
@@ -436,7 +437,7 @@ public class AppCatalogJobClient {
                 if (response.getStatusCode() == HttpStatus.OK) {
                     LogUtils.traceLog(LOGGER, String.format("[uri %s] [ret %s]",
                             uri, response.getBody()));
-                    return response.getBody();
+                    return (AppDataJob<E>) response.getBody();
                 } else {
                     waitOrThrow(retries,
                             new AppCatalogJobPatchGenerationApiError(uri, body,

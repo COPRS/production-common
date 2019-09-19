@@ -2,6 +2,7 @@ package esa.s1pdgs.cpoc.appcatalog.server.job.db;
 
 import java.util.Date;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Sort;
@@ -15,6 +16,8 @@ import esa.s1pdgs.cpoc.appcatalog.server.job.exception.AppCatalogJobNotFoundExce
 import esa.s1pdgs.cpoc.appcatalog.server.sequence.db.SequenceDao;
 import esa.s1pdgs.cpoc.common.ProductCategory;
 import esa.s1pdgs.cpoc.common.filter.FilterCriterion;
+import esa.s1pdgs.cpoc.mqi.model.queue.AbstractDto;
+import esa.s1pdgs.cpoc.mqi.model.rest.GenericMessageDto;
 
 /**
  * @author Viveris Technologies
@@ -175,7 +178,7 @@ public class AppDataJobService {
             AppCatalogJobGenerationInvalidTransitionStateException,
             AppCatalogJobGenerationNotFoundException {
         // Find if job exists
-        AppDataJob jobDb = appDataJobDao.findById(jobId)
+        AppDataJob<?> jobDb = appDataJobDao.findById(jobId)
                 .orElseThrow(() -> new AppCatalogJobNotFoundException(jobId));
 
         // Find the right generation and update it
@@ -232,7 +235,7 @@ public class AppDataJobService {
                     terminateGeneration(jobDb, foundGenDb);
                     throw new AppCatalogJobGenerationTerminatedException(
                             jobDb.getProduct().getProductName(),
-                            jobDb.getMessages());
+                            jobDb.getMessages().stream().map(s -> (GenericMessageDto<? extends AbstractDto>)s).collect(Collectors.toList()));
                 } else {
                     foundGenDb.setLastUpdateDate(new Date());
                     foundGenDb.setNbErrors(currentNbErrors + 1);
@@ -259,7 +262,7 @@ public class AppDataJobService {
         appDataJobDao.udpateJobGeneration(jobDb.getIdentifier(), genDb);
 
         // Search if all generation are terminated
-        AppDataJob refreshJobDb = appDataJobDao.findById(jobDb.getIdentifier())
+        AppDataJob<?> refreshJobDb = appDataJobDao.findById(jobDb.getIdentifier())
                 .orElseThrow(() -> new AppCatalogJobNotFoundException(jobDb.getIdentifier()));
         boolean terminated = true;
         for (AppDataJobGeneration gen : refreshJobDb.getGenerations()) {

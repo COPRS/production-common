@@ -73,8 +73,8 @@ public class L0SegmentAppJobsGenerator extends AbstractJobsGenerator<ProductDto>
         String lastName = "";
         try {
         	@SuppressWarnings("unchecked")
-			final AppDataJob appDataJob = job.getAppDataJob();
-        	
+			final AppDataJob<ProductDto> appDataJob = job.getAppDataJob();
+
             for (GenericMessageDto<ProductDto> message : appDataJob.getMessages().stream().map(s -> (GenericMessageDto<ProductDto>)s).collect(Collectors.toList())) {
                 ProductDto dto = (ProductDto) message.getBody();
                 lastName = dto.getProductName();
