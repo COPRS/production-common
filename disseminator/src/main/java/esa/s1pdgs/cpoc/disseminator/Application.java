@@ -3,6 +3,7 @@ package esa.s1pdgs.cpoc.disseminator;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
+import org.springframework.context.annotation.ComponentScan;
 
 import esa.s1pdgs.cpoc.disseminator.config.DisseminationProperties;
 import esa.s1pdgs.cpoc.obs_sdk.ObsConfigurationProperties;
@@ -14,6 +15,7 @@ import esa.s1pdgs.cpoc.obs_sdk.ObsConfigurationProperties;
  */
 @SpringBootApplication
 @EnableConfigurationProperties({ObsConfigurationProperties.class, DisseminationProperties.class})
+@ComponentScan("esa.s1pdgs.cpoc")
 public class Application {
 	
     /**
