@@ -15,7 +15,7 @@ import esa.s1pdgs.cpoc.obs_sdk.ObsConfigurationProperties;
  */
 @SpringBootApplication
 @EnableScheduling
-@ComponentScan(basePackages = {"esa.s1pdgs.cpoc.obs_sdk"})
+@ComponentScan("esa.s1pdgs.cpoc")
 @EnableConfigurationProperties({ObsConfigurationProperties.class})
 public class Application {
 	

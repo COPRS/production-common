@@ -10,6 +10,7 @@ import esa.s1pdgs.cpoc.obs_sdk.ObsConfigurationProperties;
 
 @SpringBootApplication
 @EnableConfigurationProperties({ObsConfigurationProperties.class})
+@ComponentScan("esa.s1pdgs.cpoc")
 public class Application {
     public static void main(String[] args) {
         SpringApplication.run(Application.class, args);

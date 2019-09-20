@@ -3,6 +3,7 @@ package esa.s1pdgs.cpoc.compression;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
+import org.springframework.context.annotation.ComponentScan;
 import org.springframework.scheduling.annotation.EnableScheduling;
 
 import esa.s1pdgs.cpoc.obs_sdk.ObsConfigurationProperties;
@@ -17,6 +18,7 @@ import esa.s1pdgs.cpoc.obs_sdk.ObsConfigurationProperties;
 @SpringBootApplication
 @EnableScheduling
 @EnableConfigurationProperties({ObsConfigurationProperties.class})
+@ComponentScan("esa.s1pdgs.cpoc")
 public class Application {
 	
     /**
