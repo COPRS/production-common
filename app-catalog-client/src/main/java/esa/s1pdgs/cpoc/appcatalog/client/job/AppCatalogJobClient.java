@@ -479,7 +479,7 @@ public class AppCatalogJobClient<E extends AbstractDto> {
         				AppDataJob.class, 
         				category.getDtoClass()
         		);              	
-                final ResponseEntity<AppDataJob<?>> response = restTemplate.exchange(
+                final ResponseEntity<AppDataJob<E>> response = restTemplate.exchange(
                 		uri, 
                 		HttpMethod.PATCH,
                 		new HttpEntity<AppDataJobGeneration>(body),
