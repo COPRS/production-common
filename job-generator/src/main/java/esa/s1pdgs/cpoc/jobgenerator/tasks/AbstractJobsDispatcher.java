@@ -79,7 +79,7 @@ public abstract class AbstractJobsDispatcher<T extends AbstractDto> {
     /**
      * Applicative data service
      */
-    protected final AppCatalogJobClient appDataService;
+    protected final AppCatalogJobClient<T> appDataService;
 
     /**
      * Constructor
@@ -92,7 +92,7 @@ public abstract class AbstractJobsDispatcher<T extends AbstractDto> {
             final ProcessSettings processSettings,
             final JobsGeneratorFactory factory,
             final ThreadPoolTaskScheduler taskScheduler,
-            final AppCatalogJobClient appDataService) {
+            final AppCatalogJobClient<T> appDataService) {
         this.factory = factory;
         this.settings = settings;
         this.processSettings = processSettings;
@@ -135,10 +135,10 @@ public abstract class AbstractJobsDispatcher<T extends AbstractDto> {
 
         // Dispatch existing job with current task table configuration
         if (processSettings.getMode() != ApplicationMode.TEST) {
-            List<AppDataJob<? extends AbstractDto>> generatingJobs = appDataService
+            List<AppDataJob<T>> generatingJobs = appDataService
                     .findByPodAndState(processSettings.getHostname(), AppDataJobState.GENERATING);
             if (!CollectionUtils.isEmpty(generatingJobs)) {
-                for (AppDataJob<?> generation : generatingJobs) {
+                for (AppDataJob<T> generation : generatingJobs) {
                     // TODO ask if bypass error
                     dispatch(generation);
                 }
@@ -170,7 +170,7 @@ public abstract class AbstractJobsDispatcher<T extends AbstractDto> {
      * @param job
      * @throws AbstractCodedException
      */
-    public void dispatch(final AppDataJob<?> job)
+    public void dispatch(final AppDataJob<T> job)
             throws AbstractCodedException {
     	LOGGER.debug ("== dispatch job {}", job.toString());
         String productName = job.getProduct().getProductName();
@@ -242,7 +242,7 @@ public abstract class AbstractJobsDispatcher<T extends AbstractDto> {
     /**
      * Get task tables to generate for given job
      */
-    protected abstract List<String> getTaskTables(final AppDataJob<?> job)
+    protected abstract List<String> getTaskTables(final AppDataJob<T> job)
             throws AbstractCodedException;
 
     protected abstract String getTaskForFunctionalLog();

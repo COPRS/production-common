@@ -82,7 +82,7 @@ public class JobsGeneratorFactory {
 	 * @throws JobGenBuildTaskTableException
 	 */
 	public AbstractJobsGenerator<EdrsSessionDto> createJobGeneratorForEdrsSession(final File xmlFile,
-			final AppCatalogJobClient appDataService) throws JobGenBuildTaskTableException {
+			final AppCatalogJobClient<EdrsSessionDto> appDataService) throws JobGenBuildTaskTableException {
 		AbstractJobsGenerator<EdrsSessionDto> processor = new L0AppJobsGenerator(this.xmlConverter,
 				this.metadataClient, this.l0ProcessSettings, this.jobGeneratorSettings, this.outputFactory,
 				appDataService, aiopProperties);
@@ -99,7 +99,7 @@ public class JobsGeneratorFactory {
 	 * @throws JobGenBuildTaskTableException
 	 */
 	public AbstractJobsGenerator<ProductDto> createJobGeneratorForL0Slice(final File xmlFile,
-			final AppCatalogJobClient appDataService)
+			final AppCatalogJobClient<ProductDto> appDataService)
 			throws JobGenBuildTaskTableException {
 
 		AbstractJobsGenerator<ProductDto> processor = new LevelProductsJobsGenerator(this.xmlConverter, this.metadataClient,
@@ -118,7 +118,7 @@ public class JobsGeneratorFactory {
 	 * @throws JobGenBuildTaskTableException
 	 */
 	public AbstractJobsGenerator<ProductDto> createJobGeneratorForL0Segment(final File xmlFile,
-			final AppCatalogJobClient appDataService) throws JobGenBuildTaskTableException {
+			final AppCatalogJobClient<ProductDto> appDataService) throws JobGenBuildTaskTableException {
 		
 		AbstractJobsGenerator<ProductDto> processor = new L0SegmentAppJobsGenerator(this.xmlConverter,
 				this.metadataClient, this.l0ProcessSettings, this.jobGeneratorSettings, this.outputFactory,

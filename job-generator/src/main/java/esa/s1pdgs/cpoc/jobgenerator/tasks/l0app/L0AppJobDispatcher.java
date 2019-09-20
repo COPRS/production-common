@@ -47,7 +47,7 @@ public class L0AppJobDispatcher extends AbstractJobsDispatcher<EdrsSessionDto> {
             final ProcessSettings processSettings,
             final JobsGeneratorFactory factory,
             final ThreadPoolTaskScheduler taskScheduler,
-            final AppCatalogJobClient appDataService) {
+            final AppCatalogJobClient<EdrsSessionDto> appDataService) {
         super(settings, processSettings, factory, taskScheduler,
                 appDataService);
     }
@@ -76,8 +76,7 @@ public class L0AppJobDispatcher extends AbstractJobsDispatcher<EdrsSessionDto> {
      * Get task tables to generate for given job
      */
     @Override
-    protected List<String> getTaskTables(
-            final AppDataJob job) {
+    protected List<String> getTaskTables(final AppDataJob<EdrsSessionDto> job) {
         return Arrays.asList(TASK_TABLE_NAME);
     }
 

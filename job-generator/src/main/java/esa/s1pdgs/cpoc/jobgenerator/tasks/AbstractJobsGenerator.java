@@ -116,7 +116,7 @@ public abstract class AbstractJobsGenerator<T extends AbstractDto> implements Ru
     /**
      * Applicative data service
      */
-    private final AppCatalogJobClient appDataService;
+    private final AppCatalogJobClient<T> appDataService;
 
     /**
      * Task table
@@ -155,7 +155,7 @@ public abstract class AbstractJobsGenerator<T extends AbstractDto> implements Ru
             final ProcessSettings l0ProcessSettings,
             final JobGeneratorSettings taskTablesSettings,
             final OutputProducerFactory outputFactory,
-            final AppCatalogJobClient appDataService) {
+            final AppCatalogJobClient<T> appDataService) {
         this.xmlConverter = xmlConverter;
         this.metadataClient = metadataClient;
         this.l0ProcessSettings = l0ProcessSettings;
@@ -338,7 +338,7 @@ public abstract class AbstractJobsGenerator<T extends AbstractDto> implements Ru
         final Reporting reporting = reportingFactory.newReporting(0);
         
         try {        	
-            List<AppDataJob<?>> jobs = appDataService
+            List<AppDataJob<T>> jobs = appDataService
                     .findNByPodAndGenerationTaskTableWithNotSentGeneration(
                             l0ProcessSettings.getHostname(), taskTableXmlName);
             
@@ -346,7 +346,7 @@ public abstract class AbstractJobsGenerator<T extends AbstractDto> implements Ru
             if (CollectionUtils.isEmpty(jobs)) {
                 job = null;
             } else {
-                for (AppDataJob appDataJob : jobs) {
+                for (AppDataJob<T> appDataJob : jobs) {
                     // Check if we can do a loop
                     long currentTimestamp = System.currentTimeMillis();
                     boolean todo = false;
@@ -423,9 +423,8 @@ public abstract class AbstractJobsGenerator<T extends AbstractDto> implements Ru
                                 "{} [productName {}] 1 - Checking the pre-requirements",
                                 this.prefixLogMonitor, productName);
                         this.preSearch(job);
-                        
-                        @SuppressWarnings("unchecked")
-						AppDataJob modifiedJob = appDataService.patchJob(
+
+						AppDataJob<T> modifiedJob = appDataService.patchJob(
                                 job.getAppDataJob().getIdentifier(),
                                 job.getAppDataJob(), false, true, false);
                         job.setAppDataJob(modifiedJob);
@@ -542,7 +541,7 @@ public abstract class AbstractJobsGenerator<T extends AbstractDto> implements Ru
                 newState,
                 job.getGeneration()
         ));
-        AppDataJob modifiedJob = appDataService.patchTaskTableOfJob(
+        AppDataJob<T> modifiedJob = appDataService.patchTaskTableOfJob(
                 job.getAppDataJob().getIdentifier(),
                 job.getGeneration().getTaskTable(), newState);
         
@@ -557,8 +556,8 @@ public abstract class AbstractJobsGenerator<T extends AbstractDto> implements Ru
     	
         // Log functional logs, not clear when this is called
         if (job.getAppDataJob().getState() == AppDataJobState.TERMINATED) {
-        	@SuppressWarnings("unchecked")
-			final AppDataJob<?> jobDto = job.getAppDataJob();
+			@SuppressWarnings("unchecked")
+			final AppDataJob<T> jobDto = job.getAppDataJob();
             final List<String> taskTables =  jobDto.getGenerations().stream()
             	.map(g -> g.getTaskTable())
             	.collect(Collectors.toList());
@@ -941,9 +940,9 @@ public abstract class AbstractJobsGenerator<T extends AbstractDto> implements Ru
         LOGGER.info("{} [productName {}] 3c - Publishing job",
                 this.prefixLogMonitor,
                 job.getAppDataJob().getProduct().getProductName());
-
+        
 		@SuppressWarnings("unchecked")
-		final AppDataJob dto = job.getAppDataJob();
+		final AppDataJob<T> dto = job.getAppDataJob();
 
         this.outputFactory.sendJob((GenericMessageDto<?>) dto.getMessages().get(0), r);
     }

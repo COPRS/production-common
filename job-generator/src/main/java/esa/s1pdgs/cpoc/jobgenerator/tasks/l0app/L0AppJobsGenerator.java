@@ -39,7 +39,7 @@ public class L0AppJobsGenerator extends AbstractJobsGenerator<EdrsSessionDto> {
     		MetadataClient metadataClient, ProcessSettings l0ProcessSettings,
             JobGeneratorSettings taskTablesSettings,
             final OutputProducerFactory outputFactory,
-            final AppCatalogJobClient appDataService,
+            final AppCatalogJobClient<EdrsSessionDto> appDataService,
             final AiopProperties aiopProperties) {
         super(xmlConverter, metadataClient, l0ProcessSettings,
                 taskTablesSettings, outputFactory, appDataService);

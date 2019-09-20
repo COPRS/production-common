@@ -50,7 +50,7 @@ public class L0SegmentAppJobDispatcher extends AbstractJobsDispatcher<ProductDto
             final ProcessSettings processSettings,
             final JobsGeneratorFactory factory,
             final ThreadPoolTaskScheduler taskScheduler,
-            final AppCatalogJobClient appDataService) {
+            final AppCatalogJobClient<ProductDto> appDataService) {
         super(settings, processSettings, factory, taskScheduler,
                 appDataService);
     }
@@ -80,7 +80,7 @@ public class L0SegmentAppJobDispatcher extends AbstractJobsDispatcher<ProductDto
      * @throws JobGenMissingRoutingEntryException
      */
     @Override
-    protected List<String> getTaskTables(final AppDataJob job)
+    protected List<String> getTaskTables(final AppDataJob<ProductDto> job)
             throws JobGenMissingRoutingEntryException {
         return Arrays.asList(TASK_TABLE_NAME);
     }

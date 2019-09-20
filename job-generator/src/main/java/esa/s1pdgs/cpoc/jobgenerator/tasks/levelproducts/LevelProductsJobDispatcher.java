@@ -83,7 +83,7 @@ public class LevelProductsJobDispatcher extends AbstractJobsDispatcher<ProductDt
             final ThreadPoolTaskScheduler taskScheduler,
             final XmlConverter xmlConverter,
             final String pathRoutingXmlFile,
-            final AppCatalogJobClient appDataService) {
+            final AppCatalogJobClient<ProductDto> appDataService) {
         super(settings, processSettings, factory, taskScheduler,
                 appDataService);
         this.xmlConverter = xmlConverter;
@@ -136,7 +136,7 @@ public class LevelProductsJobDispatcher extends AbstractJobsDispatcher<ProductDt
      * @throws JobGenMissingRoutingEntryException
      */
     @Override
-    protected List<String> getTaskTables(final AppDataJob job)
+    protected List<String> getTaskTables(final AppDataJob<ProductDto> job)
             throws JobGenMissingRoutingEntryException {
         List<String> taskTables = new ArrayList<>();
         String key = job.getProduct().getAcquisition() + "_"

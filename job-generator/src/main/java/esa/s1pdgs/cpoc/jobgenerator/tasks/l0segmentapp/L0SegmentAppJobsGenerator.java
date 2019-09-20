@@ -51,7 +51,7 @@ public class L0SegmentAppJobsGenerator extends AbstractJobsGenerator<ProductDto>
             final ProcessSettings l0ProcessSettings,
             final JobGeneratorSettings taskTablesSettings,
             final OutputProducerFactory outputFactory,
-            final AppCatalogJobClient appDataService) {
+            final AppCatalogJobClient<ProductDto> appDataService) {
         super(xmlConverter, metadataClient, l0ProcessSettings,
                 taskTablesSettings, outputFactory, appDataService);
     }
