@@ -1,5 +1,6 @@
 package esa.s1pdgs.cpoc.appcatalog.server.job.rest;
 
+import java.io.IOException;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -22,6 +23,13 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.fasterxml.jackson.core.JsonParseException;
+import com.fasterxml.jackson.databind.JavaType;
+import com.fasterxml.jackson.databind.JsonMappingException;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.type.TypeFactory;
+
 import esa.s1pdgs.cpoc.appcatalog.server.job.db.AppDataJob;
 import esa.s1pdgs.cpoc.appcatalog.server.job.db.AppDataJobGeneration;
 import esa.s1pdgs.cpoc.appcatalog.server.job.db.AppDataJobGenerationState;
@@ -37,6 +45,7 @@ import esa.s1pdgs.cpoc.common.ProductCategory;
 import esa.s1pdgs.cpoc.common.errors.InternalErrorException;
 import esa.s1pdgs.cpoc.common.filter.FilterCriterion;
 import esa.s1pdgs.cpoc.common.filter.FilterUtils;
+import esa.s1pdgs.cpoc.mqi.model.queue.AbstractDto;
 
 /**
  * @author Viveris Technologies
@@ -157,17 +166,31 @@ public class JobController {
      * @return
      * @throws AppCatalogJobInvalidStateException
      * @throws AppCatalogJobGenerationInvalidStateException
+     * @throws IOException 
+     * @throws JsonMappingException 
+     * @throws JsonParseException 
      */
     @RequestMapping(method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE, path = "/{category}/jobs")
     public AppDataJob newJob(
     		@PathVariable(name = "category") final String categoryName,
-    		@RequestBody final AppDataJob newJob)
+    		@RequestBody final JsonNode node)
             throws AppCatalogJobInvalidStateException,
-            AppCatalogJobGenerationInvalidStateException {
-    	newJob.setCategory(ProductCategory.valueOf(categoryName.toUpperCase()));
+            AppCatalogJobGenerationInvalidStateException, IOException {
+    	
+    	final ProductCategory cat = ProductCategory.valueOf(categoryName.toUpperCase());
+    	
+     	final ObjectMapper objMapper = new ObjectMapper();
+    	final TypeFactory typeFactory = objMapper.getTypeFactory();
+    	final JavaType javaType = typeFactory.constructParametricType(
+    			AppDataJob.class, 
+    			cat.getDtoClass()
+    	); 
+    	final AppDataJob<?> newJob = objMapper
+    			.readValue(objMapper.treeAsTokens(node), javaType);
+    	
     	LOGGER.debug ("== newJob {}",newJob.toString());
     	// Create it
-    	AppDataJob jobResult = appDataJobService.newJob(newJob);
+    	AppDataJob<?> jobResult = appDataJobService.newJob(newJob);
     	LOGGER.debug ("== jobResult {}", jobResult.toString());
 
         return jobResult;
