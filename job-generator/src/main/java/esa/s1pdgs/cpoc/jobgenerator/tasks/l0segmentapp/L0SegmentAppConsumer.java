@@ -202,7 +202,7 @@ public class L0SegmentAppConsumer
                 productDto.setSatelliteId(satelliteId);
                 jobDto.setProduct(productDto);
 
-                return appDataService.newJob(jobDto, ProductDto.class);
+                return appDataService.newJob(jobDto);
             } else {
                 @SuppressWarnings("unchecked")
 				AppDataJob<ProductDto> jobDto = (AppDataJob<ProductDto>) existingJobsForDatatake.get(0);

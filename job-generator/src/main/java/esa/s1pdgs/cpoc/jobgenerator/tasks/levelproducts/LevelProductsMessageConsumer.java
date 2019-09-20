@@ -206,7 +206,7 @@ public class LevelProductsMessageConsumer extends AbstractGenericConsumer<Produc
                 
             jobDto.setProduct(productDto);
 
-            return appDataService.newJob(jobDto, ProductDto.class);
+            return appDataService.newJob(jobDto);
 
         } else {
             // Update pod if needed
