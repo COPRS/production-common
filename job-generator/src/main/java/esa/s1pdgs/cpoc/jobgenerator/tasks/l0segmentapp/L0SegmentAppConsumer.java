@@ -65,7 +65,7 @@ public class L0SegmentAppConsumer
             final ProcessSettings processSettings,
             final GenericMqiClient mqiService,
             final StatusService mqiStatusService,
-            final AppCatalogJobClient appDataService,
+            final AppCatalogJobClient<ProductDto> appDataService,
             final ErrorRepoAppender errorRepoAppender,
             final AppStatus appStatus) {
         super(jobsDispatcher, processSettings, mqiService, mqiStatusService,
@@ -162,7 +162,7 @@ public class L0SegmentAppConsumer
         ProductDto leveldto = mqiMessage.getBody();
 
         // Check if a job is already created for message identifier
-        List<AppDataJob<?>> existingJobs = appDataService
+        List<AppDataJob<ProductDto>> existingJobs = appDataService
                 .findByMessagesIdentifier(mqiMessage.getIdentifier());
 
         if (CollectionUtils.isEmpty(existingJobs)) {
@@ -180,7 +180,7 @@ public class L0SegmentAppConsumer
             String datatakeID = m.group(this.patternGroups.get("datatakeId"));
 
             // Search job for given datatake id
-            List<AppDataJob<?>> existingJobsForDatatake =
+            List<AppDataJob<ProductDto>> existingJobsForDatatake =
                     appDataService.findByProductDataTakeId(datatakeID);
 
             if (CollectionUtils.isEmpty(existingJobsForDatatake)) {
@@ -204,7 +204,6 @@ public class L0SegmentAppConsumer
 
                 return appDataService.newJob(jobDto);
             } else {
-                @SuppressWarnings("unchecked")
 				AppDataJob<ProductDto> jobDto = (AppDataJob<ProductDto>) existingJobsForDatatake.get(0);
 
                 if (!jobDto.getPod().equals(processSettings.getHostname())) {
@@ -218,7 +217,6 @@ public class L0SegmentAppConsumer
 
         } else {
             // Update pod if needed
-            @SuppressWarnings("unchecked")
 			AppDataJob<ProductDto> jobDto = (AppDataJob<ProductDto>) existingJobs.get(0);
 
             if (!jobDto.getPod().equals(processSettings.getHostname())) {

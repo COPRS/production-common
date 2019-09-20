@@ -65,7 +65,7 @@ public class LevelProductsMessageConsumer extends AbstractGenericConsumer<Produc
             final ProcessSettings processSettings,
             final GenericMqiClient mqiService,
             final StatusService mqiStatusService,
-            final AppCatalogJobClient appDataService,
+            final AppCatalogJobClient<ProductDto> appDataService,
             final ErrorRepoAppender errorRepoAppender,
             final AppStatus appStatus,
             final MetadataClient metadataClient) {
@@ -162,7 +162,7 @@ public class LevelProductsMessageConsumer extends AbstractGenericConsumer<Produc
         ProductDto leveldto = mqiMessage.getBody();
 
         // Check if a job is already created for message identifier
-        List<AppDataJob<?>> existingJobs = appDataService
+        List<AppDataJob<ProductDto>> existingJobs = appDataService
                 .findByMessagesIdentifier(mqiMessage.getIdentifier());
 
         if (CollectionUtils.isEmpty(existingJobs)) {
@@ -210,7 +210,6 @@ public class LevelProductsMessageConsumer extends AbstractGenericConsumer<Produc
 
         } else {
             // Update pod if needed
-            @SuppressWarnings("unchecked")
 			AppDataJob<ProductDto> jobDto = (AppDataJob<ProductDto>) existingJobs.get(0);
 
             if (!jobDto.getPod().equals(processSettings.getHostname())) {
