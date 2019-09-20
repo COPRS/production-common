@@ -1,7 +1,6 @@
 package esa.s1pdgs.cpoc.jobgenerator.tasks.levelproducts;
 
-import java.util.HashMap;
-import java.util.Map;
+import java.util.Collections;
 
 import esa.s1pdgs.cpoc.appcatalog.client.job.AppCatalogJobClient;
 import esa.s1pdgs.cpoc.appcatalog.server.job.db.AppDataJobProduct;
@@ -41,7 +40,7 @@ public class LevelProductsJobsGenerator extends AbstractJobsGenerator<ProductDto
 	 */
 	public LevelProductsJobsGenerator(XmlConverter xmlConverter, MetadataClient metadataClient, ProcessSettings processSettings,
 			JobGeneratorSettings taskTablesSettings, OutputProducerFactory outputFactory,
-			AppCatalogJobClient appDataService) {
+			AppCatalogJobClient<ProductDto>  appDataService) {
 		super(xmlConverter, metadataClient, processSettings, taskTablesSettings, outputFactory, appDataService);
 	}
 
@@ -50,7 +49,7 @@ public class LevelProductsJobsGenerator extends AbstractJobsGenerator<ProductDto
 	 */
 	@Override
 	protected void preSearch(JobGeneration job) throws JobGenInputsMissingException {
-		Map<String, String> missingMetadata = new HashMap<>();
+
 		// Retrieve instrument configuration id and slice number
 		try {
 			L0SliceMetadata file = this.metadataClient.getL0Slice(job.getAppDataJob().getProduct().getProductName());
@@ -59,8 +58,12 @@ public class LevelProductsJobsGenerator extends AbstractJobsGenerator<ProductDto
 			job.getAppDataJob().getProduct().setNumberSlice(file.getNumberSlice());
 			job.getAppDataJob().getProduct().setDataTakeId(file.getDatatakeId());
 		} catch (MetadataQueryException e) {
-			missingMetadata.put(job.getAppDataJob().getProduct().getProductName(), "No Slice: " + e.getMessage());
-			throw new JobGenInputsMissingException(missingMetadata);
+			throw new JobGenInputsMissingException(
+					Collections.singletonMap(
+							job.getAppDataJob().getProduct().getProductName(), 
+							"No Slice: " + e.getMessage()
+					)
+			);
 		}
 		// Retrieve Total_Number_Of_Slices
 		try {
@@ -70,10 +73,13 @@ public class LevelProductsJobsGenerator extends AbstractJobsGenerator<ProductDto
 			job.getAppDataJob().getProduct().setSegmentStartDate(acn.getValidityStart());
 			job.getAppDataJob().getProduct().setSegmentStopDate(acn.getValidityStop());
 		} catch (MetadataQueryException e) {
-			missingMetadata.put(job.getAppDataJob().getProduct().getProductName(), "No ACNs: " + e.getMessage());
-			throw new JobGenInputsMissingException(missingMetadata);
+			throw new JobGenInputsMissingException(	
+					Collections.singletonMap(
+							job.getAppDataJob().getProduct().getProductName(), 
+							"No ACNs: " + e.getMessage()
+					)
+			);
 		}
-
 	}
 
 	/**
