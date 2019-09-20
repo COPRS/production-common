@@ -14,7 +14,6 @@ import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;
 
 import esa.s1pdgs.cpoc.common.ProductFamily;
-import esa.s1pdgs.cpoc.common.errors.processing.JobGenMetadataException;
 import esa.s1pdgs.cpoc.common.errors.processing.MetadataQueryException;
 import esa.s1pdgs.cpoc.common.utils.DateUtils;
 import esa.s1pdgs.cpoc.metadata.model.EdrsSessionMetadata;
@@ -48,10 +47,10 @@ public class MetadataClient {
      * @param productType
      * @param productName
      * @return
-     * @throws MetadataException
+     * @throws MetadataQueryException
      */
     public EdrsSessionMetadata getEdrsSession(final String productType,
-            final String productName) throws JobGenMetadataException {
+            final String productName) throws MetadataQueryException {
         for (int retries = 0;; retries++) {
             try {
                 String uri = this.metadataBaseUri + MetadataCatalogRestPath.EDRS_SESSION.path() + "/" + productType + "/"
@@ -70,7 +69,7 @@ public class MetadataClient {
                         trySleep();
                         continue;
                     } else {
-                        throw new JobGenMetadataException(
+                        throw new MetadataQueryException(
                                 String.format("Invalid HTTP status code %s",
                                         response.getStatusCode().name()));
                     }
@@ -85,13 +84,19 @@ public class MetadataClient {
                     trySleep();
                     continue;
                 } else {
-                    throw new JobGenMetadataException(e.getMessage(), e);
+                    throw new MetadataQueryException(e.getMessage(), e);
                 }
             }
         }
     }
     
-	public int getSeaCoverage(ProductFamily family, String productName) throws JobGenMetadataException {
+	/**
+	 * @param family
+	 * @param productName
+	 * @return
+	 * @throws MetadataQueryException
+	 */
+	public int getSeaCoverage(ProductFamily family, String productName) throws MetadataQueryException {
 		int notAvailableRetries = 10;
 		
 	    String uri = this.metadataBaseUri + MetadataCatalogRestPath.L0_SLICE.path() + "/" + family + "/" + productName + "/seaCoverage";
@@ -128,7 +133,7 @@ public class MetadataClient {
                         trySleep();
                         continue;
                     } else {
-                        throw new JobGenMetadataException(
+                        throw new MetadataQueryException(
                         		String.format("Invalid HTTP status code %s",response.getStatusCode().name())
                         );
                     }
@@ -138,7 +143,7 @@ public class MetadataClient {
                     LOGGER.debug("Got coverage {}", res);
                     
                     if (res == null) {
-                    	throw new JobGenMetadataException("getSeaCoverage returned null");
+                    	throw new MetadataQueryException("getSeaCoverage returned null");
                     }                    
                     return res;
                 }                 
@@ -150,23 +155,20 @@ public class MetadataClient {
                     trySleep();
                     continue;
                 } else {
-                    throw new JobGenMetadataException(e.getMessage(), e);
+                    throw new MetadataQueryException(e.getMessage(), e);
                 }
             }
         }
 	}
 
     /**
-     * If productType = blank, the metadata catalog will extract the product
-     * type from the product name
      * 
-     * @param productType
      * @param productName
      * @return
-     * @throws MetadataException
+     * @throws MetadataQueryException
      */
     public L0SliceMetadata getL0Slice(final String productName)
-            throws JobGenMetadataException {
+            throws MetadataQueryException {
         for (int retries = 0;; retries++) {
             try {
                 String uri = this.metadataBaseUri + MetadataCatalogRestPath.L0_SLICE.path() + "/" + productName;
@@ -183,7 +185,7 @@ public class MetadataClient {
                         trySleep();
                         continue;
                     } else {
-                        throw new JobGenMetadataException(
+                        throw new MetadataQueryException(
                                 String.format("Invalid HTTP status code %s",
                                         response.getStatusCode().name()));
                     }
@@ -198,23 +200,20 @@ public class MetadataClient {
                     trySleep();
                     continue;
                 } else {
-                    throw new JobGenMetadataException(e.getMessage(), e);
+                    throw new MetadataQueryException(e.getMessage(), e);
                 }
             }
         }
     }
 
     /**
-     * If productType = blank, the metadata catalog will extract the product
-     * type from the product name
-     * 
-     * @param productType
+     * @param family
      * @param productName
      * @return
-     * @throws MetadataException
+     * @throws MetadataQueryException
      */
     public LevelSegmentMetadata getLevelSegment(final ProductFamily family,
-            final String productName) throws JobGenMetadataException {
+            final String productName) throws MetadataQueryException {
         for (int retries = 0;; retries++) {
             try {
                 String uri =
@@ -232,7 +231,7 @@ public class MetadataClient {
                         trySleep();
                         continue;
                     } else {
-                        throw new JobGenMetadataException(
+                        throw new MetadataQueryException(
                                 String.format("Invalid HTTP status code %s",
                                         response.getStatusCode().name()));
                     }
@@ -247,23 +246,21 @@ public class MetadataClient {
                     trySleep();
                     continue;
                 } else {
-                    throw new JobGenMetadataException(e.getMessage(), e);
+                    throw new MetadataQueryException(e.getMessage(), e);
                 }
             }
         }
     }
 
+
     /**
-     * If productType = blank, the metadata catalog will extract the product
-     * type from the product name
-     * 
-     * @param productType
      * @param productName
+     * @param processMode
      * @return
-     * @throws MetadataException
+     * @throws MetadataQueryException
      */
     public L0AcnMetadata getFirstACN(final String productName,
-            final String processMode) throws JobGenMetadataException {
+            final String processMode) throws MetadataQueryException {
         for (int retries = 0;; retries++) {
             try {
                 String uri = this.metadataBaseUri + MetadataCatalogRestPath.L0_SLICE.path() + "/" + productName + "/acns";
@@ -284,7 +281,7 @@ public class MetadataClient {
                         trySleep();
                         continue;
                     } else {
-                        throw new JobGenMetadataException(
+                        throw new MetadataQueryException(
                                 String.format("Invalid HTTP status code %s",
                                         response.getStatusCode().name()));
                     }
@@ -302,7 +299,7 @@ public class MetadataClient {
                         trySleep();
                         continue;
                     } else {
-                        throw new JobGenMetadataException(String.format(
+                        throw new MetadataQueryException(String.format(
                                 "No retrieved ACNs for %s", productName));
                     }
                 }
@@ -315,16 +312,26 @@ public class MetadataClient {
                     trySleep();
                     continue;
                 } else {
-                    throw new JobGenMetadataException(e.getMessage(), e);
+                    throw new MetadataQueryException(e.getMessage(), e);
                 }
             }
         }
     }
 
+    /**
+     * @param query
+     * @param t0
+     * @param t1
+     * @param satelliteId
+     * @param instrumentConfigurationId
+     * @param processMode
+     * @return
+     * @throws MetadataQueryException
+     */
     public List<SearchMetadata> search(final SearchMetadataQuery query,
             final String t0, final String t1, final String satelliteId,
             final int instrumentConfigurationId, final String processMode)
-            throws JobGenMetadataException {
+            throws MetadataQueryException {
         for (int retries = 0;; retries++) {
             try {
                 String uri = this.metadataBaseUri + MetadataCatalogRestPath.METADATA.path() + "/"
@@ -359,7 +366,7 @@ public class MetadataClient {
                         trySleep();
                         continue;
                     } else {
-                        throw new JobGenMetadataException(
+                        throw new MetadataQueryException(
                                 String.format("Invalid HTTP status code %s",
                                         response.getStatusCode().name()));
                     }
@@ -376,12 +383,19 @@ public class MetadataClient {
                     trySleep();
                     continue;
                 } else {
-                    throw new JobGenMetadataException(e.getMessage(), e);
+                    throw new MetadataQueryException(e.getMessage(), e);
                 }
             }
         }
     }
     
+	/**
+	 * @param family
+	 * @param intervalStart
+	 * @param intervalStop
+	 * @return
+	 * @throws MetadataQueryException
+	 */
 	public List<SearchMetadata> query(ProductFamily family, LocalDateTime intervalStart, LocalDateTime intervalStop)
 			throws MetadataQueryException {
 		for (int retries = 0;; retries++) {
@@ -402,11 +416,7 @@ public class MetadataClient {
 				if (response.getStatusCode() != HttpStatus.OK) {
 					if (retries < this.maxRetries) {
 						LOGGER.warn("Call rest api metadata failed: Attempt : {} / {}", retries, this.maxRetries);
-						try {
-							Thread.sleep(this.retryInMillis);
-						} catch (InterruptedException e) {
-							throw new MetadataQueryException(e.getMessage(), e);
-						}
+						trySleep();
 						continue;
 					} else {
 						throw new MetadataQueryException(
@@ -419,11 +429,7 @@ public class MetadataClient {
 			} catch (RestClientException e) {
 				if (retries < this.maxRetries) {
 					LOGGER.warn("Call rest api metadata failed: Attempt : {} / {}", retries, this.maxRetries);
-					try {
-						Thread.sleep(this.retryInMillis);
-					} catch (InterruptedException e1) {
-						throw new MetadataQueryException(e1.getMessage(), e1);
-					}
+					trySleep();
 					continue;
 				} else {
 					throw new MetadataQueryException(e.getMessage(), e);
@@ -442,14 +448,12 @@ public class MetadataClient {
     	return -1; // To indicate that null was returned and not an empty list
     }
     
-	private final void trySleep() throws JobGenMetadataException {
+	private final void trySleep() throws MetadataQueryException {
 		try {
 		    Thread.sleep(this.retryInMillis);
 		} catch (InterruptedException e) {
-		    throw new JobGenMetadataException(e.getMessage(), e);
+		    throw new MetadataQueryException(e.getMessage(), e);
 		}
 	}
-	
-	
 
 }

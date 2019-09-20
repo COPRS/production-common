@@ -15,7 +15,7 @@ import esa.s1pdgs.cpoc.appcatalog.client.job.AppCatalogJobClient;
 import esa.s1pdgs.cpoc.appcatalog.server.job.db.AppDataJob;
 import esa.s1pdgs.cpoc.appcatalog.server.job.db.AppDataJobProduct;
 import esa.s1pdgs.cpoc.common.errors.processing.JobGenInputsMissingException;
-import esa.s1pdgs.cpoc.common.errors.processing.JobGenMetadataException;
+import esa.s1pdgs.cpoc.common.errors.processing.MetadataQueryException;
 import esa.s1pdgs.cpoc.common.utils.DateUtils;
 import esa.s1pdgs.cpoc.jobgenerator.config.JobGeneratorSettings;
 import esa.s1pdgs.cpoc.jobgenerator.config.ProcessSettings;
@@ -93,7 +93,7 @@ public class L0SegmentAppJobsGenerator extends AbstractJobsGenerator<ProductDto>
                             .add(metadata);
                 }
             }
-        } catch (JobGenMetadataException e) {
+        } catch (MetadataQueryException e) {
             missingMetadata.put(lastName, "Missing segment: " + e.getMessage());
         }
 

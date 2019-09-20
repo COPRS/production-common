@@ -29,7 +29,7 @@ import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;
 
 import esa.s1pdgs.cpoc.common.ProductFamily;
-import esa.s1pdgs.cpoc.common.errors.processing.JobGenMetadataException;
+import esa.s1pdgs.cpoc.common.errors.processing.MetadataQueryException;
 import esa.s1pdgs.cpoc.metadata.model.EdrsSessionMetadata;
 import esa.s1pdgs.cpoc.metadata.model.L0AcnMetadata;
 import esa.s1pdgs.cpoc.metadata.model.L0SliceMetadata;
@@ -79,7 +79,7 @@ public class MetadataClientTest {
 
     @Test
     public void testHostnameQueryGetEdrsSession()
-            throws JobGenMetadataException {
+            throws MetadataQueryException {
         EdrsSessionMetadata expectedFile = new EdrsSessionMetadata(
                 "DCS_02_L20171109175634707000125_ch1_DSDB_00005.raw", "RAW",
                 "S1A/L20171109175634707000125/ch01/DCS_02_L20171109175634707000125_ch1_DSDB_00005.raw",
@@ -105,7 +105,7 @@ public class MetadataClientTest {
     }
 
     @Test
-    public void testGetEdrsSessionOk() throws JobGenMetadataException {
+    public void testGetEdrsSessionOk() throws MetadataQueryException {
         EdrsSessionMetadata expectedFile = new EdrsSessionMetadata(
                 "DCS_02_L20171109175634707000125_ch1_DSDB_00005.raw", "RAW",
                 "S1A/L20171109175634707000125/ch01/DCS_02_L20171109175634707000125_ch1_DSDB_00005.raw",
@@ -134,14 +134,14 @@ public class MetadataClientTest {
     }
 
     @Test
-    public void testGetEdrsSessionKo() throws JobGenMetadataException {
+    public void testGetEdrsSessionKo() throws MetadataQueryException {
         ResponseEntity<EdrsSessionMetadata> r =
                 new ResponseEntity<EdrsSessionMetadata>(
                         HttpStatus.INTERNAL_SERVER_ERROR);
         when(restTemplate.exchange(Mockito.anyString(), eq(HttpMethod.GET),
                 eq(null), eq(EdrsSessionMetadata.class))).thenReturn(r);
 
-        thrown.expect(JobGenMetadataException.class);
+        thrown.expect(MetadataQueryException.class);
         thrown.expectMessage("nvalid HTTP statu");
         this.service.getEdrsSession("RAW",
                 "DCS_02_L20171109175634707000125_ch1_DSDB_00005.raw");
@@ -149,12 +149,12 @@ public class MetadataClientTest {
     }
 
     @Test
-    public void testGetEdrsSessionRestKO() throws JobGenMetadataException {
+    public void testGetEdrsSessionRestKO() throws MetadataQueryException {
         doThrow(new RestClientException("rest exception")).when(restTemplate)
                 .exchange(Mockito.anyString(), eq(HttpMethod.GET), eq(null),
                         eq(EdrsSessionMetadata.class));
 
-        thrown.expect(JobGenMetadataException.class);
+        thrown.expect(MetadataQueryException.class);
         thrown.expectMessage("rest exception");
         thrown.expectCause(isA(RestClientException.class));
         this.service.getEdrsSession("RAW",
@@ -167,7 +167,7 @@ public class MetadataClientTest {
     // --------------------------------------------------
 
     @Test
-    public void testHostnameQueryGetLevelSegment() throws JobGenMetadataException {
+    public void testHostnameQueryGetLevelSegment() throws MetadataQueryException {
         String file =
                 "S1A_IW_RAW__0SDV_20171213T121623_20171213T121656_019684_021735_C6DB.SAFE";
         LevelSegmentMetadata expectedResult = new LevelSegmentMetadata(
@@ -190,7 +190,7 @@ public class MetadataClientTest {
     }
 
     @Test
-    public void testGetLevelSegmentOk() throws JobGenMetadataException {
+    public void testGetLevelSegmentOk() throws MetadataQueryException {
         String file =
                 "S1A_IW_RAW__0SDV_20171213T121623_20171213T121656_019684_021735_C6DB.SAFE";
         LevelSegmentMetadata expectedResult = new LevelSegmentMetadata(file, "IW_RAW__0S",
@@ -216,7 +216,7 @@ public class MetadataClientTest {
     }
 
     @Test
-    public void testGetLevelSegmentKo() throws JobGenMetadataException {
+    public void testGetLevelSegmentKo() throws MetadataQueryException {
         ResponseEntity<LevelSegmentMetadata> r = new ResponseEntity<LevelSegmentMetadata>(
                 HttpStatus.INTERNAL_SERVER_ERROR);
         when(restTemplate.exchange(Mockito.anyString(), eq(HttpMethod.GET),
@@ -225,13 +225,13 @@ public class MetadataClientTest {
         String file =
                 "S1A_IW_RAW__0SDV_20171213T121623_20171213T121656_019684_021735_C6DB.SAFE";
 
-        thrown.expect(JobGenMetadataException.class);
+        thrown.expect(MetadataQueryException.class);
         thrown.expectMessage("nvalid HTTP statu");
         this.service.getLevelSegment(ProductFamily.L0_SEGMENT, file);
     }
 
     @Test
-    public void testGetLevelSegmentRestKo() throws JobGenMetadataException {
+    public void testGetLevelSegmentRestKo() throws MetadataQueryException {
         doThrow(new RestClientException("rest exception")).when(restTemplate)
                 .exchange(Mockito.anyString(), eq(HttpMethod.GET), eq(null),
                         eq(LevelSegmentMetadata.class));
@@ -239,7 +239,7 @@ public class MetadataClientTest {
         String file =
                 "S1A_IW_RAW__0SDV_20171213T121623_20171213T121656_019684_021735_C6DB.SAFE";
 
-        thrown.expect(JobGenMetadataException.class);
+        thrown.expect(MetadataQueryException.class);
         thrown.expectMessage("rest exception");
         thrown.expectCause(isA(RestClientException.class));
         this.service.getLevelSegment(ProductFamily.L0_SEGMENT, file);
@@ -250,7 +250,7 @@ public class MetadataClientTest {
     // --------------------------------------------------
 
     @Test
-    public void testHostnameQueryGetSlice() throws JobGenMetadataException {
+    public void testHostnameQueryGetSlice() throws MetadataQueryException {
         String file =
                 "S1A_IW_RAW__0SDV_20171213T121623_20171213T121656_019684_021735_C6DB.SAFE";
         L0SliceMetadata expectedResult = new L0SliceMetadata(
@@ -274,7 +274,7 @@ public class MetadataClientTest {
     }
 
     @Test
-    public void testGetSliceOk() throws JobGenMetadataException {
+    public void testGetSliceOk() throws MetadataQueryException {
         String file =
                 "S1A_IW_RAW__0SDV_20171213T121623_20171213T121656_019684_021735_C6DB.SAFE";
         L0SliceMetadata expectedResult = new L0SliceMetadata(file, "IW_RAW__0S",
@@ -301,7 +301,7 @@ public class MetadataClientTest {
     }
 
     @Test
-    public void testGetSliceKo() throws JobGenMetadataException {
+    public void testGetSliceKo() throws MetadataQueryException {
         ResponseEntity<L0SliceMetadata> r = new ResponseEntity<L0SliceMetadata>(
                 HttpStatus.INTERNAL_SERVER_ERROR);
         when(restTemplate.exchange(Mockito.anyString(), eq(HttpMethod.GET),
@@ -310,13 +310,13 @@ public class MetadataClientTest {
         String file =
                 "S1A_IW_RAW__0SDV_20171213T121623_20171213T121656_019684_021735_C6DB.SAFE";
 
-        thrown.expect(JobGenMetadataException.class);
+        thrown.expect(MetadataQueryException.class);
         thrown.expectMessage("nvalid HTTP statu");
         this.service.getL0Slice(file);
     }
 
     @Test
-    public void testGetSliceRestKo() throws JobGenMetadataException {
+    public void testGetSliceRestKo() throws MetadataQueryException {
         doThrow(new RestClientException("rest exception")).when(restTemplate)
                 .exchange(Mockito.anyString(), eq(HttpMethod.GET), eq(null),
                         eq(L0SliceMetadata.class));
@@ -324,7 +324,7 @@ public class MetadataClientTest {
         String file =
                 "S1A_IW_RAW__0SDV_20171213T121623_20171213T121656_019684_021735_C6DB.SAFE";
 
-        thrown.expect(JobGenMetadataException.class);
+        thrown.expect(MetadataQueryException.class);
         thrown.expectMessage("rest exception");
         thrown.expectCause(isA(RestClientException.class));
         this.service.getL0Slice(file);
@@ -335,7 +335,7 @@ public class MetadataClientTest {
     // --------------------------------------------------
 
     @Test
-    public void testHostnameQueryGetFirstAcn() throws JobGenMetadataException {
+    public void testHostnameQueryGetFirstAcn() throws MetadataQueryException {
         String file =
                 "S1A_IW_RAW__0SDV_20171213T121623_20171213T121656_019684_021735_C6DB.SAFE";
         L0AcnMetadata[] expectedResult = { new L0AcnMetadata(
@@ -363,7 +363,7 @@ public class MetadataClientTest {
     }
 
     @Test
-    public void testGetFirstAcnOk() throws JobGenMetadataException {
+    public void testGetFirstAcnOk() throws MetadataQueryException {
         String file =
                 "S1A_IW_RAW__0SDV_20171213T121623_20171213T121656_019684_021735_C6DB.SAFE";
         String fileA =
@@ -406,7 +406,7 @@ public class MetadataClientTest {
     }
 
     @Test
-    public void testGetFirstAcnKo() throws JobGenMetadataException {
+    public void testGetFirstAcnKo() throws MetadataQueryException {
         String file =
                 "S1A_IW_RAW__0SDV_20171213T121623_20171213T121656_019684_021735_C6DB.SAFE";
         ResponseEntity<L0AcnMetadata[]> r = new ResponseEntity<L0AcnMetadata[]>(
@@ -418,20 +418,20 @@ public class MetadataClientTest {
                 eq(HttpMethod.GET), eq(null), eq(L0AcnMetadata[].class)))
                         .thenReturn(r);
 
-        thrown.expect(JobGenMetadataException.class);
+        thrown.expect(MetadataQueryException.class);
         thrown.expectMessage("nvalid HTTP statu");
         this.service.getFirstACN(file, "FAST");
     }
 
     @Test
-    public void testGetFirstAcnRestKo() throws JobGenMetadataException {
+    public void testGetFirstAcnRestKo() throws MetadataQueryException {
         doThrow(new RestClientException("rest exception")).when(restTemplate)
                 .exchange(Mockito.any(), eq(HttpMethod.GET), eq(null),
                         eq(L0AcnMetadata[].class));
         String file =
                 "S1A_IW_RAW__0SDV_20171213T121623_20171213T121656_019684_021735_C6DB.SAFE";
 
-        thrown.expect(JobGenMetadataException.class);
+        thrown.expect(MetadataQueryException.class);
         thrown.expectMessage("rest exception");
         thrown.expectCause(isA(RestClientException.class));
         this.service.getFirstACN(file, "FAST");
@@ -443,7 +443,7 @@ public class MetadataClientTest {
 
     @Test
     public void testHostnameSearch() throws RestClientException,
-            JobGenMetadataException, ParseException {
+    MetadataQueryException, ParseException {
         SearchMetadata expectedFile = new SearchMetadata(
                 "S1A_OPER_MPL_ORBPRE_20171208T200309_20171215T200309_0001.EOF",
                 "MPL_ORBPRE",
@@ -483,7 +483,7 @@ public class MetadataClientTest {
 
     @Test
     public void testHostnameSearchWithInsConfDir()
-            throws JobGenMetadataException, ParseException {
+            throws MetadataQueryException, ParseException {
         SearchMetadata expectedFile = new SearchMetadata(
                 "S1A_OPER_MPL_ORBPRE_20171208T200309_20171215T200309_0001.EOF",
                 "MPL_ORBPRE",
@@ -521,7 +521,7 @@ public class MetadataClientTest {
     }
 
     @Test
-    public void testSearchOk() throws JobGenMetadataException {
+    public void testSearchOk() throws MetadataQueryException {
         SearchMetadata expectedFile = new SearchMetadata(
                 "S1A_OPER_MPL_ORBPRE_20171208T200309_20171215T200309_0001.EOF",
                 "MPL_ORBPRE",
@@ -556,7 +556,7 @@ public class MetadataClientTest {
     }
 
     @Test
-    public void testSearchKo() throws JobGenMetadataException {
+    public void testSearchKo() throws MetadataQueryException {
         ResponseEntity<List<SearchMetadata>> r =
                 new ResponseEntity<List<SearchMetadata>>(
                         HttpStatus.INTERNAL_SERVER_ERROR);
@@ -564,7 +564,7 @@ public class MetadataClientTest {
                 eq(new ParameterizedTypeReference<List<SearchMetadata>>() {
                 }))).thenReturn(r);
 
-        thrown.expect(JobGenMetadataException.class);
+        thrown.expect(MetadataQueryException.class);
         thrown.expectMessage("nvalid HTTP statu");
         this.service.search(
                 new SearchMetadataQuery(1, "LatestValCover", 1, 2, "AUX_OBMEMC",
@@ -574,13 +574,13 @@ public class MetadataClientTest {
     }
 
     @Test
-    public void testSearchRestKo() throws JobGenMetadataException {
+    public void testSearchRestKo() throws MetadataQueryException {
         doThrow(new RestClientException("rest exception")).when(restTemplate)
                 .exchange(Mockito.any(), eq(HttpMethod.GET), eq(null), eq(
                         new ParameterizedTypeReference<List<SearchMetadata>>() {
                         }));
 
-        thrown.expect(JobGenMetadataException.class);
+        thrown.expect(MetadataQueryException.class);
         thrown.expectMessage("rest exception");
         thrown.expectCause(isA(RestClientException.class));
         this.service.search(

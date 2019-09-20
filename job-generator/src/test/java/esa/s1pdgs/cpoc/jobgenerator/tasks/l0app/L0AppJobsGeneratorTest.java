@@ -32,7 +32,7 @@ import esa.s1pdgs.cpoc.common.ProductFamily;
 import esa.s1pdgs.cpoc.common.errors.AbstractCodedException;
 import esa.s1pdgs.cpoc.common.errors.InternalErrorException;
 import esa.s1pdgs.cpoc.common.errors.processing.JobGenInputsMissingException;
-import esa.s1pdgs.cpoc.common.errors.processing.JobGenMetadataException;
+import esa.s1pdgs.cpoc.common.errors.processing.MetadataQueryException;
 import esa.s1pdgs.cpoc.jobgenerator.config.AiopProperties;
 import esa.s1pdgs.cpoc.jobgenerator.config.JobGeneratorSettings;
 import esa.s1pdgs.cpoc.jobgenerator.config.JobGeneratorSettings.WaitTempo;
@@ -320,7 +320,7 @@ public class L0AppJobsGeneratorTest {
             }).when(this.metadataClient).search(Mockito.any(), Mockito.any(),
                     Mockito.any(), Mockito.anyString(), Mockito.anyInt(),
                     Mockito.anyString());
-        } catch (JobGenMetadataException e) {
+        } catch (MetadataQueryException e) {
             fail(e.getMessage());
         }
     }
@@ -403,7 +403,7 @@ public class L0AppJobsGeneratorTest {
     }
 
     @Test
-    public void testPreSearchMissingRaw() throws JobGenMetadataException {
+    public void testPreSearchMissingRaw() throws MetadataQueryException {
         Mockito.doAnswer(i -> {
             return null;
         }).when(this.metadataClient).getEdrsSession(Mockito.anyString(),

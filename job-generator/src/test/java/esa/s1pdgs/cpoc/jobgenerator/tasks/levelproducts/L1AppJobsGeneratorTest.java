@@ -38,11 +38,12 @@ import esa.s1pdgs.cpoc.common.errors.AbstractCodedException;
 import esa.s1pdgs.cpoc.common.errors.InternalErrorException;
 import esa.s1pdgs.cpoc.common.errors.processing.JobGenInputsMissingException;
 import esa.s1pdgs.cpoc.common.errors.processing.JobGenMetadataException;
+import esa.s1pdgs.cpoc.common.errors.processing.MetadataQueryException;
 import esa.s1pdgs.cpoc.jobgenerator.config.AiopProperties;
+import esa.s1pdgs.cpoc.jobgenerator.config.AppConfig;
 import esa.s1pdgs.cpoc.jobgenerator.config.JobGeneratorSettings;
 import esa.s1pdgs.cpoc.jobgenerator.config.JobGeneratorSettings.WaitTempo;
 import esa.s1pdgs.cpoc.jobgenerator.config.ProcessSettings;
-import esa.s1pdgs.cpoc.jobgenerator.config.AppConfig;
 import esa.s1pdgs.cpoc.jobgenerator.model.JobGeneration;
 import esa.s1pdgs.cpoc.jobgenerator.model.joborder.AbstractJobOrderConf;
 import esa.s1pdgs.cpoc.jobgenerator.model.joborder.JobOrder;
@@ -338,7 +339,7 @@ public class L1AppJobsGeneratorTest {
             }).when(this.metadataClient).search(Mockito.any(), Mockito.any(),
                     Mockito.any(), Mockito.anyString(), Mockito.anyInt(),
                     Mockito.anyString());
-        } catch (JobGenMetadataException e) {
+        } catch (MetadataQueryException e) {
             fail(e.getMessage());
         }
     }
@@ -390,8 +391,8 @@ public class L1AppJobsGeneratorTest {
 
     @Test
     public void testPresearchWhenSliceMissing()
-            throws JobGenInputsMissingException, JobGenMetadataException {
-        doThrow(new JobGenMetadataException("test ex"))
+            throws JobGenInputsMissingException, MetadataQueryException {
+        doThrow(new MetadataQueryException("test ex"))
                 .when(this.metadataClient).getL0Slice(Mockito.anyString());
 
         thrown.expect(JobGenInputsMissingException.class);
@@ -405,8 +406,8 @@ public class L1AppJobsGeneratorTest {
 
     @Test
     public void testPresearchWhenAcnMissing()
-            throws JobGenInputsMissingException, JobGenMetadataException {
-        doThrow(new JobGenMetadataException("test ex"))
+            throws JobGenInputsMissingException, MetadataQueryException {
+        doThrow(new MetadataQueryException("test ex"))
                 .when(this.metadataClient)
                 .getFirstACN(Mockito.anyString(), Mockito.anyString());
 
