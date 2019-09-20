@@ -45,7 +45,6 @@ import esa.s1pdgs.cpoc.common.ProductCategory;
 import esa.s1pdgs.cpoc.common.errors.InternalErrorException;
 import esa.s1pdgs.cpoc.common.filter.FilterCriterion;
 import esa.s1pdgs.cpoc.common.filter.FilterUtils;
-import esa.s1pdgs.cpoc.mqi.model.queue.AbstractDto;
 
 /**
  * @author Viveris Technologies
@@ -216,17 +215,31 @@ public class JobController {
      * @throws AppCatalogJobInvalidStateException
      * @throws AppCatalogJobNotFoundException
      * @throws AppCatalogJobGenerationInvalidStateException
+     * @throws IOException 
+     * @throws JsonMappingException 
+     * @throws JsonParseException 
      */
     @RequestMapping(method = RequestMethod.PATCH, produces = MediaType.APPLICATION_JSON_UTF8_VALUE, path = "/{category}/jobs/{jobId}")
     public AppDataJob patchJob(
     		@PathVariable(name = "category") final String categoryName,
             @PathVariable(name = "jobId") final Long jobId,
-            @RequestBody final AppDataJob patchJob)
+            @RequestBody final JsonNode node)
             throws AppCatalogJobInvalidStateException,
             AppCatalogJobNotFoundException,
-            AppCatalogJobGenerationInvalidStateException {
+            AppCatalogJobGenerationInvalidStateException, JsonParseException, JsonMappingException, IOException {
+    	
+    	final ProductCategory cat = ProductCategory.valueOf(categoryName.toUpperCase());
+     	final ObjectMapper objMapper = new ObjectMapper();
+    	final TypeFactory typeFactory = objMapper.getTypeFactory();
+    	final JavaType javaType = typeFactory.constructParametricType(
+    			AppDataJob.class, 
+    			cat.getDtoClass()
+    	); 
+    	final AppDataJob<?> patchJob = objMapper
+    			.readValue(objMapper.treeAsTokens(node), javaType);    	
+   
     	AppDataJob job = appDataJobService.patchJob(jobId,patchJob);
-    	job.setCategory(ProductCategory.valueOf(categoryName.toUpperCase()));
+    	job.setCategory(cat);
     	return job;
     }
 
