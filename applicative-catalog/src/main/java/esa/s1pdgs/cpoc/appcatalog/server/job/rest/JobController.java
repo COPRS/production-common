@@ -188,6 +188,7 @@ public class JobController {
     	final AppDataJob<?> newJob = objMapper
     			.readValue(objMapper.treeAsTokens(node), javaType);
     	
+    	newJob.setCategory(cat);    	
     	LOGGER.debug ("== newJob {}",newJob.toString());
     	// Create it
     	AppDataJob<?> jobResult = appDataJobService.newJob(newJob);
