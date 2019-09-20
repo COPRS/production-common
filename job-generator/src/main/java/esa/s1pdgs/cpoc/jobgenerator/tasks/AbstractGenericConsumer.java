@@ -45,7 +45,7 @@ public abstract class AbstractGenericConsumer<T extends AbstractDto> {
     /**
      * Applicative data service
      */
-    protected final AppCatalogJobClient appDataService;
+    protected final AppCatalogJobClient<T> appDataService;
 
     /**
      * MQI service
@@ -66,7 +66,7 @@ public abstract class AbstractGenericConsumer<T extends AbstractDto> {
             final ProcessSettings processSettings,
             final GenericMqiClient mqiService,
             final StatusService mqiStatusService,
-            final AppCatalogJobClient appDataService,
+            final AppCatalogJobClient<T> appDataService,
             final AppStatus appStatus,
             final ErrorRepoAppender errorRepoAppender,
             final ProductCategory category
