@@ -206,7 +206,7 @@ public class L0AppConsumer extends AbstractGenericConsumer<EdrsSessionDto> {
                 jobDto.setProduct(productDto);
                
                 LOGGER.debug ("== jobDTO {}",jobDto.toString());
-                AppDataJob<EdrsSessionDto> newJobDto = appDataService.newJob(jobDto, EdrsSessionDto.class);
+                AppDataJob<EdrsSessionDto> newJobDto = appDataService.newJob(jobDto);
                 LOGGER.debug ("== newJobDto {}",newJobDto.toString());
                 return newJobDto;
             } else {
