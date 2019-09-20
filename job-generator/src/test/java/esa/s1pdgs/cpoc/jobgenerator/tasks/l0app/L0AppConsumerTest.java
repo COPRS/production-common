@@ -117,7 +117,7 @@ public class L0AppConsumerTest {
                 .findByMessagesIdentifier(Mockito.anyLong());
         Mockito.doAnswer(i -> {
             return i.getArgument(0);
-        }).when(appDataService).newJob(Mockito.any(),Mockito.any());
+        }).when(appDataService).newJob(Mockito.any());
         Mockito.doAnswer(i -> {
             return i.getArgument(1);
         }).when(appDataService).patchJob(Mockito.anyLong(), Mockito.any(),
