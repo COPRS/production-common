@@ -2,7 +2,10 @@ package esa.s1pdgs.cpoc.disseminator;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.context.annotation.ComponentScan;
+import org.springframework.boot.context.properties.EnableConfigurationProperties;
+
+import esa.s1pdgs.cpoc.disseminator.config.DisseminationProperties;
+import esa.s1pdgs.cpoc.obs_sdk.ObsConfigurationProperties;
 
 /**
  * Ingestor application
@@ -10,7 +13,7 @@ import org.springframework.context.annotation.ComponentScan;
  *
  */
 @SpringBootApplication
-@ComponentScan(basePackages = {"esa.s1pdgs.cpoc.obs_sdk"})
+@EnableConfigurationProperties({ObsConfigurationProperties.class, DisseminationProperties.class})
 public class Application {
 	
     /**
