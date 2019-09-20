@@ -135,7 +135,7 @@ public abstract class AbstractJobsDispatcher<T extends AbstractDto> {
 
         // Dispatch existing job with current task table configuration
         if (processSettings.getMode() != ApplicationMode.TEST) {
-            List<AppDataJob<?>> generatingJobs = appDataService
+            List<AppDataJob<? extends AbstractDto>> generatingJobs = appDataService
                     .findByPodAndState(processSettings.getHostname(), AppDataJobState.GENERATING);
             if (!CollectionUtils.isEmpty(generatingJobs)) {
                 for (AppDataJob<?> generation : generatingJobs) {

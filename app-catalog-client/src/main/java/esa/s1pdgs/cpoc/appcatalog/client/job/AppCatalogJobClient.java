@@ -1,6 +1,5 @@
 package esa.s1pdgs.cpoc.appcatalog.client.job;
 
-import java.io.IOException;
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -20,11 +19,6 @@ import org.springframework.web.client.HttpStatusCodeException;
 import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;
-
-import com.fasterxml.jackson.databind.JavaType;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.type.TypeFactory;
 
 import esa.s1pdgs.cpoc.appcatalog.server.job.db.AppDataJob;
 import esa.s1pdgs.cpoc.appcatalog.server.job.db.AppDataJobGeneration;
@@ -46,7 +40,7 @@ import esa.s1pdgs.cpoc.mqi.model.queue.AbstractDto;
  * @param <T>
  *            the type of the DTO objects used for a product category
  */
-public class AppCatalogJobClient {
+public class AppCatalogJobClient<E extends AbstractDto> {
 
     /**
      * Logger
@@ -174,7 +168,7 @@ public class AppCatalogJobClient {
      * @return
      * @throws AbstractCodedException
      */
-    public List<AppDataJob<?>> search(final Map<String, String> filters)
+    public List<AppDataJob<E>> search(final Map<String, String> filters)
             throws AbstractCodedException {
         int retries = 0;
         while (true) {
@@ -189,7 +183,7 @@ public class AppCatalogJobClient {
             final URI uri = builder.build().toUri();
             LogUtils.traceLog(LOGGER, String.format("[uri %s]", uri));
             try {
-                final ResponseEntity<List<AppDataJob<?>>> response = restTemplate.exchange(
+                final ResponseEntity<List<AppDataJob<E>>> response = restTemplate.exchange(
                 		uri, 
                 		HttpMethod.GET, 
                 		null,
@@ -232,7 +226,7 @@ public class AppCatalogJobClient {
      * @return
      * @throws AbstractCodedException
      */
-    public List<AppDataJob<?>> findByMessagesIdentifier(final long messageId)
+    public List<AppDataJob<E>> findByMessagesIdentifier(final long messageId)
             throws AbstractCodedException {   	
         return search(Collections.singletonMap("messages.identifier", Long.toString(messageId)));        
     }
@@ -244,7 +238,7 @@ public class AppCatalogJobClient {
      * @return
      * @throws AbstractCodedException
      */
-    public List<AppDataJob<?>> findByProductSessionId(final String sessionId)
+    public List<AppDataJob<E>> findByProductSessionId(final String sessionId)
             throws AbstractCodedException {
         return search(Collections.singletonMap("product.sessionId", sessionId));
     }
@@ -256,7 +250,7 @@ public class AppCatalogJobClient {
      * @return
      * @throws AbstractCodedException
      */
-    public List<AppDataJob<?>> findByProductDataTakeId(final String dataTakeId)
+    public List<AppDataJob<E>> findByProductDataTakeId(final String dataTakeId)
             throws AbstractCodedException {
         return search(Collections.singletonMap("product.dataTakeId", dataTakeId));
     }
@@ -269,7 +263,7 @@ public class AppCatalogJobClient {
      * @return
      * @throws AbstractCodedException
      */
-    public List<AppDataJob<?>> findByPodAndState(final String pod,
+    public List<AppDataJob<E>> findByPodAndState(final String pod,
             final AppDataJobState state) throws AbstractCodedException {
     	final Map<String, String> filters = new HashMap<>();
     	filters.put("state", state.name());
@@ -285,7 +279,7 @@ public class AppCatalogJobClient {
      * @return
      * @throws AbstractCodedException
      */
-    public List<AppDataJob<?>> findNByPodAndGenerationTaskTableWithNotSentGeneration(
+    public List<AppDataJob<E>> findNByPodAndGenerationTaskTableWithNotSentGeneration(
             final String pod, final String taskTable)
             throws AbstractCodedException {       
     	final Map<String, String> filters = new HashMap<>();  
@@ -303,7 +297,7 @@ public class AppCatalogJobClient {
      * @return
      * @throws AbstractCodedException
      */
-    public <E extends AbstractDto> AppDataJob<E> newJob(final AppDataJob<E> job)
+    public AppDataJob<E> newJob(final AppDataJob<E> job)
             throws AbstractCodedException {
         int retries = 0;
         while (true) {
@@ -400,7 +394,7 @@ public class AppCatalogJobClient {
 //    }
 
     @SuppressWarnings("unchecked")
-	public <E extends AbstractDto> AppDataJob<E> patchJob(final long identifier,
+	public AppDataJob<E> patchJob(final long identifier,
             final AppDataJob<?> job, final boolean patchMessages,
             final boolean patchProduct, final boolean patchGenerations)
             throws AbstractCodedException {
@@ -469,7 +463,7 @@ public class AppCatalogJobClient {
      * @throws AbstractCodedException
      */
     @SuppressWarnings("unchecked")
-	public <E extends AbstractDto> AppDataJob<E> patchTaskTableOfJob(final long identifier,
+	public AppDataJob<E> patchTaskTableOfJob(final long identifier,
             final String taskTable, final AppDataJobGenerationState state)
             throws AbstractCodedException {
         int retries = 0;
