@@ -305,7 +305,7 @@ public class AppCatalogJobClient {
             String uri = hostUri + "/" + category.name().toLowerCase() + "/jobs";
             LogUtils.traceLog(LOGGER, String.format("[uri %s]", uri));
             try {
-        		final ResolvableType appCatMessageType = ResolvableType.forClass(AppDataJob.class, dtoClass);               	
+        		final ResolvableType appCatMessageType = ResolvableType.forClassWithGenerics(AppDataJob.class, dtoClass);               	
                 final ResponseEntity<AppDataJob<E>> response = restTemplate.exchange(
                 		uri, 
                 		HttpMethod.POST,
@@ -362,7 +362,7 @@ public class AppCatalogJobClient {
             String uri = hostUri + "/" + category.name().toLowerCase() + "/jobs/" + identifier;
             LogUtils.traceLog(LOGGER, String.format("[uri %s]", uri));
             try {
-            	final ResolvableType appCatMessageType = ResolvableType.forClass(
+            	final ResolvableType appCatMessageType = ResolvableType.forClassWithGenerics(
         				AppDataJob.class, 
         				category.getDtoClass()
         		);  
@@ -424,7 +424,7 @@ public class AppCatalogJobClient {
             body.setState(state);
             LogUtils.traceLog(LOGGER, String.format("[uri %s]", uri));
             try {
-            	final ResolvableType appCatMessageType = ResolvableType.forClass(
+            	final ResolvableType appCatMessageType = ResolvableType.forClassWithGenerics(
         				AppDataJob.class, 
         				category.getDtoClass()
         		);              	
