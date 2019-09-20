@@ -131,7 +131,7 @@ public class L1AppConsumerTest {
                 .findByMessagesIdentifier(Mockito.anyLong());
         Mockito.doAnswer(i -> {
             return i.getArgument(0);
-        }).when(appDataService).newJob(Mockito.any(), Mockito.any());
+        }).when(appDataService).newJob(Mockito.any());
         Mockito.doAnswer(i -> {
             return i.getArgument(1);
         }).when(appDataService).patchJob(Mockito.anyLong(), Mockito.any(),
@@ -228,7 +228,7 @@ public class L1AppConsumerTest {
                 mqiStatusService, appDataService,  errorAppender, appStatus, metadataClient);
         consumer.consumeMessages();
 
-        verify(appDataService, times(1)).newJob(Mockito.any(), Mockito.any());
+        verify(appDataService, times(1)).newJob(Mockito.any());
         verify(appDataService, times(1)).patchJob(Mockito.anyLong(), Mockito.any(),
                 Mockito.anyBoolean(), Mockito.anyBoolean(),
                 Mockito.anyBoolean());
@@ -276,7 +276,7 @@ public class L1AppConsumerTest {
         consumer.consumeMessages();
 
         job1.setPod("");
-        verify(appDataService, never()).newJob(Mockito.any(), Mockito.any());
+        verify(appDataService, never()).newJob(Mockito.any());
         verify(appDataService, times(2)).patchJob(Mockito.eq(12L), Mockito.any(),
                 Mockito.eq(false), Mockito.eq(false),
                 Mockito.eq(false));
@@ -310,7 +310,7 @@ public class L1AppConsumerTest {
         consumer.consumeMessages();
 
         job1.setPod("");
-        verify(appDataService, never()).newJob(Mockito.any(), Mockito.any());
+        verify(appDataService, never()).newJob(Mockito.any());
         verify(appDataService, times(1)).patchJob(Mockito.eq(12L), Mockito.eq(job1),
                 Mockito.eq(false), Mockito.eq(false),
                 Mockito.eq(false));
@@ -345,7 +345,7 @@ public class L1AppConsumerTest {
         consumer.consumeMessages();
 
         job1.setPod("");
-        verify(appDataService, never()).newJob(Mockito.any(), Mockito.any());
+        verify(appDataService, never()).newJob(Mockito.any());
         verify(appDataService, never()).patchJob(Mockito.anyLong(), Mockito.any(),
                 Mockito.anyBoolean(), Mockito.anyBoolean(),
                 Mockito.anyBoolean());
