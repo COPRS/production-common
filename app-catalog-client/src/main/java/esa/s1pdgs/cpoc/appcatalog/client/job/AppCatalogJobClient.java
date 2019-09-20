@@ -393,9 +393,8 @@ public class AppCatalogJobClient<E extends AbstractDto> {
 //        }
 //    }
 
-    @SuppressWarnings("unchecked")
 	public AppDataJob<E> patchJob(final long identifier,
-            final AppDataJob<?> job, final boolean patchMessages,
+            final AppDataJob<E> job, final boolean patchMessages,
             final boolean patchProduct, final boolean patchGenerations)
             throws AbstractCodedException {
     	job.setIdentifier(identifier);
@@ -419,10 +418,10 @@ public class AppCatalogJobClient<E extends AbstractDto> {
         				category.getDtoClass()
         		);  
             	
-                final ResponseEntity<AppDataJob<?>> response = restTemplate.exchange(
+                final ResponseEntity<AppDataJob<E>> response = restTemplate.exchange(
                 		uri, 
                 		HttpMethod.PATCH,
-                		new HttpEntity<AppDataJob<?>>(job),
+                		new HttpEntity<AppDataJob<E>>(job),
                 		ParameterizedTypeReference.forType(appCatMessageType.getType())
                 );
                 if (response.getStatusCode() == HttpStatus.OK) {
