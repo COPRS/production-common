@@ -303,50 +303,6 @@ public class AppCatalogJobClient {
      * @return
      * @throws AbstractCodedException
      */
-//    public <E extends AbstractDto> AppDataJob<E> newJob(final AppDataJob<E> job)
-//            throws AbstractCodedException {
-//        int retries = 0;
-//        while (true) {
-//            retries++;
-//            String uri = hostUri + "/" + category.name().toLowerCase() + "/jobs";
-//            LogUtils.traceLog(LOGGER, String.format("[uri %s]", uri));
-//            try {
-//        		final ResolvableType appCatMessageType = ResolvableType.forClassWithGenerics(AppDataJob.class, category.getDtoClass());               	
-//                final ResponseEntity<AppDataJob<E>> response = restTemplate.exchange(
-//                		uri, 
-//                		HttpMethod.POST,
-//                		new HttpEntity<AppDataJob<E>>(job),
-//                		ParameterizedTypeReference.forType(appCatMessageType.getType())
-//                );
-//                
-//                if (response.getStatusCode() == HttpStatus.OK) {
-//                    LogUtils.traceLog(LOGGER, String.format("[uri %s] [ret %s]",
-//                            uri, response.getBody()));
-//                    return response.getBody();
-//                } else {
-//                    waitOrThrow(retries, new AppCatalogJobNewApiError(uri, job,
-//                            "HTTP status code " + response.getStatusCode()),
-//                            "new");
-//                }
-//            } catch (HttpStatusCodeException hsce) {
-//                waitOrThrow(retries,
-//                        new AppCatalogJobNewApiError(uri, job, String.format(
-//                                "HttpStatusCodeException occured: %s - %s",
-//                                hsce.getStatusCode(),
-//                                hsce.getResponseBodyAsString())),
-//                        "new");
-//            } catch (RestClientException rce) {
-//                waitOrThrow(retries,
-//                        new AppCatalogJobNewApiError(uri, job,
-//                                String.format(
-//                                        "HttpStatusCodeException occured: %s",
-//                                        rce.getMessage()),
-//                                rce),
-//                        "new");
-//            }
-//        }
-//    }
-    
     public <E extends AbstractDto> AppDataJob<E> newJob(final AppDataJob<E> job)
             throws AbstractCodedException {
         int retries = 0;
@@ -355,26 +311,18 @@ public class AppCatalogJobClient {
             String uri = hostUri + "/" + category.name().toLowerCase() + "/jobs";
             LogUtils.traceLog(LOGGER, String.format("[uri %s]", uri));
             try {
-        		final ResponseEntity<JsonNode> response = restTemplate.exchange(
+        		final ResolvableType appCatMessageType = ResolvableType.forClassWithGenerics(AppDataJob.class, category.getDtoClass());               	
+                final ResponseEntity<AppDataJob<E>> response = restTemplate.exchange(
                 		uri, 
                 		HttpMethod.POST,
                 		new HttpEntity<AppDataJob<E>>(job),
-                		JsonNode.class
+                		ParameterizedTypeReference.forType(appCatMessageType.getType())
                 );
-        		
+                
                 if (response.getStatusCode() == HttpStatus.OK) {
                     LogUtils.traceLog(LOGGER, String.format("[uri %s] [ret %s]",
                             uri, response.getBody()));
-                    
-                	final ObjectMapper objMapper = new ObjectMapper();
-                	final TypeFactory typeFactory = objMapper.getTypeFactory();
-                	final JavaType javaType = typeFactory.constructParametricType(
-                			AppDataJob.class, 
-                			category.getDtoClass()
-                	);            		
-                	return objMapper
-                			.readValue(objMapper.treeAsTokens(response.getBody()), javaType);
-                	
+                    return response.getBody();
                 } else {
                     waitOrThrow(retries, new AppCatalogJobNewApiError(uri, job,
                             "HTTP status code " + response.getStatusCode()),
@@ -387,7 +335,7 @@ public class AppCatalogJobClient {
                                 hsce.getStatusCode(),
                                 hsce.getResponseBodyAsString())),
                         "new");
-            } catch (IOException | RestClientException rce) {
+            } catch (RestClientException rce) {
                 waitOrThrow(retries,
                         new AppCatalogJobNewApiError(uri, job,
                                 String.format(
@@ -395,9 +343,61 @@ public class AppCatalogJobClient {
                                         rce.getMessage()),
                                 rce),
                         "new");
-            } 
+            }
         }
     }
+    
+//    public <E extends AbstractDto> AppDataJob<E> newJob(final AppDataJob<E> job)
+//            throws AbstractCodedException {
+//        int retries = 0;
+//        while (true) {
+//            retries++;
+//            String uri = hostUri + "/" + category.name().toLowerCase() + "/jobs";
+//            LogUtils.traceLog(LOGGER, String.format("[uri %s]", uri));
+//            try {
+//        		final ResponseEntity<JsonNode> response = restTemplate.exchange(
+//                		uri, 
+//                		HttpMethod.POST,
+//                		new HttpEntity<AppDataJob<E>>(job),
+//                		JsonNode.class
+//                );
+//        		
+//                if (response.getStatusCode() == HttpStatus.OK) {
+//                    LogUtils.traceLog(LOGGER, String.format("[uri %s] [ret %s]",
+//                            uri, response.getBody()));
+//                    
+//                	final ObjectMapper objMapper = new ObjectMapper();
+//                	final TypeFactory typeFactory = objMapper.getTypeFactory();
+//                	final JavaType javaType = typeFactory.constructParametricType(
+//                			AppDataJob.class, 
+//                			category.getDtoClass()
+//                	);            		
+//                	return objMapper
+//                			.readValue(objMapper.treeAsTokens(response.getBody()), javaType);
+//                	
+//                } else {
+//                    waitOrThrow(retries, new AppCatalogJobNewApiError(uri, job,
+//                            "HTTP status code " + response.getStatusCode()),
+//                            "new");
+//                }
+//            } catch (HttpStatusCodeException hsce) {
+//                waitOrThrow(retries,
+//                        new AppCatalogJobNewApiError(uri, job, String.format(
+//                                "HttpStatusCodeException occured: %s - %s",
+//                                hsce.getStatusCode(),
+//                                hsce.getResponseBodyAsString())),
+//                        "new");
+//            } catch (IOException | RestClientException rce) {
+//                waitOrThrow(retries,
+//                        new AppCatalogJobNewApiError(uri, job,
+//                                String.format(
+//                                        "RestClientException occured: %s",
+//                                        rce.getMessage()),
+//                                rce),
+//                        "new");
+//            } 
+//        }
+//    }
 
     @SuppressWarnings("unchecked")
 	public <E extends AbstractDto> AppDataJob<E> patchJob(final long identifier,
