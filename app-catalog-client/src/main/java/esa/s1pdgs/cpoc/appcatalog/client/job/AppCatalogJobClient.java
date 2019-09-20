@@ -461,7 +461,6 @@ public class AppCatalogJobClient<E extends AbstractDto> {
      * @return
      * @throws AbstractCodedException
      */
-    @SuppressWarnings("unchecked")
 	public AppDataJob<E> patchTaskTableOfJob(final long identifier,
             final String taskTable, final AppDataJobGenerationState state)
             throws AbstractCodedException {
@@ -488,7 +487,7 @@ public class AppCatalogJobClient<E extends AbstractDto> {
                 if (response.getStatusCode() == HttpStatus.OK) {
                     LogUtils.traceLog(LOGGER, String.format("[uri %s] [ret %s]",
                             uri, response.getBody()));
-                    return (AppDataJob<E>) response.getBody();
+                    return response.getBody();
                 } else {
                     waitOrThrow(retries,
                             new AppCatalogJobPatchGenerationApiError(uri, body,
