@@ -97,7 +97,7 @@ public class AppCatalogJobClient<E extends AbstractDto> {
     
 	static final <T> ParameterizedTypeReference<T> forCategory(final ProductCategory category)
 	{
-		final ResolvableType appCatMessageType = ResolvableType.forClass(
+		final ResolvableType appCatMessageType = ResolvableType.forClassWithGenerics(
 				AppDataJob.class, 
 				category.getDtoClass()
 		);   
