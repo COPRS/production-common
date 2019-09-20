@@ -391,7 +391,7 @@ public class AppCatalogJobClient {
                 waitOrThrow(retries,
                         new AppCatalogJobNewApiError(uri, job,
                                 String.format(
-                                        "HttpStatusCodeException occured: %s",
+                                        "RestClientException occured: %s",
                                         rce.getMessage()),
                                 rce),
                         "new");
