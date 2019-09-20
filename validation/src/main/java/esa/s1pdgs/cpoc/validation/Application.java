@@ -2,9 +2,11 @@ package esa.s1pdgs.cpoc.validation;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.context.annotation.ComponentScan;
+import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.scheduling.annotation.EnableAsync;
 import org.springframework.scheduling.annotation.EnableScheduling;
+
+import esa.s1pdgs.cpoc.obs_sdk.ObsConfigurationProperties;
 
 /**
  * A service that allows to perform inconsistency checks between
@@ -16,7 +18,7 @@ import org.springframework.scheduling.annotation.EnableScheduling;
 @SpringBootApplication
 @EnableScheduling
 @EnableAsync
-@ComponentScan(basePackages = {"esa.s1pdgs.cpoc.obs_sdk"})
+@EnableConfigurationProperties({ObsConfigurationProperties.class})
 public class Application {
 	/**
      * Main application
