@@ -22,7 +22,6 @@ import org.springframework.util.StringUtils;
 
 import esa.s1pdgs.cpoc.appcatalog.client.job.AppCatalogJobClient;
 import esa.s1pdgs.cpoc.appcatalog.server.job.db.AppDataJob;
-import esa.s1pdgs.cpoc.appcatalog.server.job.db.AppDataJobGeneration;
 import esa.s1pdgs.cpoc.appcatalog.server.job.db.AppDataJobGenerationState;
 import esa.s1pdgs.cpoc.appcatalog.server.job.db.AppDataJobProduct;
 import esa.s1pdgs.cpoc.appcatalog.server.job.db.AppDataJobState;
@@ -31,7 +30,7 @@ import esa.s1pdgs.cpoc.common.errors.AbstractCodedException;
 import esa.s1pdgs.cpoc.common.errors.InternalErrorException;
 import esa.s1pdgs.cpoc.common.errors.processing.JobGenBuildTaskTableException;
 import esa.s1pdgs.cpoc.common.errors.processing.JobGenInputsMissingException;
-import esa.s1pdgs.cpoc.common.errors.processing.JobGenMetadataException;
+import esa.s1pdgs.cpoc.common.errors.processing.MetadataQueryException;
 import esa.s1pdgs.cpoc.common.utils.DateUtils;
 import esa.s1pdgs.cpoc.common.utils.LogUtils;
 import esa.s1pdgs.cpoc.jobgenerator.config.JobGeneratorSettings;
@@ -605,7 +604,7 @@ public abstract class AbstractJobsGenerator<T extends AbstractDto> implements Ru
                     if (file != null) {
                         v.setResult(file);
                     }
-                } catch (JobGenMetadataException me) {
+                } catch (MetadataQueryException me) {
                     LOGGER.warn(
                             "{} [productName {}] [alternative {}] Exception occurred when searching alternative: {}",
                             this.prefixLogMonitor,

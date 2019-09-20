@@ -6,7 +6,7 @@ import java.util.Map;
 import esa.s1pdgs.cpoc.appcatalog.client.job.AppCatalogJobClient;
 import esa.s1pdgs.cpoc.appcatalog.server.job.db.AppDataJobProduct;
 import esa.s1pdgs.cpoc.common.errors.processing.JobGenInputsMissingException;
-import esa.s1pdgs.cpoc.common.errors.processing.JobGenMetadataException;
+import esa.s1pdgs.cpoc.common.errors.processing.MetadataQueryException;
 import esa.s1pdgs.cpoc.common.utils.DateUtils;
 import esa.s1pdgs.cpoc.jobgenerator.config.JobGeneratorSettings;
 import esa.s1pdgs.cpoc.jobgenerator.config.ProcessSettings;
@@ -58,7 +58,7 @@ public class LevelProductsJobsGenerator extends AbstractJobsGenerator<ProductDto
 			job.getAppDataJob().getProduct().setInsConfId(file.getInstrumentConfigurationId());
 			job.getAppDataJob().getProduct().setNumberSlice(file.getNumberSlice());
 			job.getAppDataJob().getProduct().setDataTakeId(file.getDatatakeId());
-		} catch (JobGenMetadataException e) {
+		} catch (MetadataQueryException e) {
 			missingMetadata.put(job.getAppDataJob().getProduct().getProductName(), "No Slice: " + e.getMessage());
 			throw new JobGenInputsMissingException(missingMetadata);
 		}
@@ -69,7 +69,7 @@ public class LevelProductsJobsGenerator extends AbstractJobsGenerator<ProductDto
 			job.getAppDataJob().getProduct().setTotalNbOfSlice(acn.getNumberOfSlices());
 			job.getAppDataJob().getProduct().setSegmentStartDate(acn.getValidityStart());
 			job.getAppDataJob().getProduct().setSegmentStopDate(acn.getValidityStop());
-		} catch (JobGenMetadataException e) {
+		} catch (MetadataQueryException e) {
 			missingMetadata.put(job.getAppDataJob().getProduct().getProductName(), "No ACNs: " + e.getMessage());
 			throw new JobGenInputsMissingException(missingMetadata);
 		}

@@ -42,7 +42,7 @@ import esa.s1pdgs.cpoc.common.errors.AbstractCodedException;
 import esa.s1pdgs.cpoc.common.errors.InternalErrorException;
 import esa.s1pdgs.cpoc.common.errors.appcatalog.AppCatalogJobSearchApiError;
 import esa.s1pdgs.cpoc.common.errors.processing.JobGenBuildTaskTableException;
-import esa.s1pdgs.cpoc.common.errors.processing.JobGenMetadataException;
+import esa.s1pdgs.cpoc.common.errors.processing.MetadataQueryException;
 import esa.s1pdgs.cpoc.jobgenerator.config.AppConfig;
 import esa.s1pdgs.cpoc.jobgenerator.config.JobGeneratorSettings;
 import esa.s1pdgs.cpoc.jobgenerator.config.JobGeneratorSettings.WaitTempo;
@@ -298,7 +298,7 @@ public class AbstractJobsGeneratorTest {
             }).when(this.metadataClient).search(Mockito.any(), Mockito.any(),
                     Mockito.any(), Mockito.anyString(), Mockito.anyInt(),
                     Mockito.anyString());
-        } catch (JobGenMetadataException e) {
+        } catch (MetadataQueryException e) {
             fail(e.getMessage());
         }
     }

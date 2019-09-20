@@ -13,7 +13,7 @@ import esa.s1pdgs.cpoc.appcatalog.server.job.db.AppDataJobFile;
 import esa.s1pdgs.cpoc.appcatalog.server.job.db.AppDataJobProduct;
 import esa.s1pdgs.cpoc.common.ProductFamily;
 import esa.s1pdgs.cpoc.common.errors.processing.JobGenInputsMissingException;
-import esa.s1pdgs.cpoc.common.errors.processing.JobGenMetadataException;
+import esa.s1pdgs.cpoc.common.errors.processing.MetadataQueryException;
 import esa.s1pdgs.cpoc.jobgenerator.config.AiopProperties;
 import esa.s1pdgs.cpoc.jobgenerator.config.JobGeneratorSettings;
 import esa.s1pdgs.cpoc.jobgenerator.config.ProcessSettings;
@@ -81,7 +81,7 @@ public class L0AppJobsGenerator extends AbstractJobsGenerator<EdrsSessionDto> {
                     } else {
                         missingRaws.put(raw.getFilename(), "No raw with name");
                     }
-                } catch (JobGenMetadataException me) {
+                } catch (MetadataQueryException me) {
                     missingRaws.put(raw.getFilename(), me.getMessage());
                 }
             });
@@ -95,7 +95,7 @@ public class L0AppJobsGenerator extends AbstractJobsGenerator<EdrsSessionDto> {
                     } else {
                         missingRaws.put(raw.getFilename(), "No raw with name");
                     }
-                } catch (JobGenMetadataException me) {
+                } catch (MetadataQueryException me) {
                     missingRaws.put(raw.getFilename(), me.getMessage());
                 }
             });
