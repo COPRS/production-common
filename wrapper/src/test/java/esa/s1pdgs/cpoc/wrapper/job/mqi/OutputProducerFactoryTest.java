@@ -22,6 +22,7 @@ import esa.s1pdgs.cpoc.mqi.model.queue.LevelReportDto;
 import esa.s1pdgs.cpoc.mqi.model.queue.ProductDto;
 import esa.s1pdgs.cpoc.mqi.model.rest.GenericMessageDto;
 import esa.s1pdgs.cpoc.mqi.model.rest.GenericPublicationMessageDto;
+import esa.s1pdgs.cpoc.wrapper.config.ProcessConfiguration;
 import esa.s1pdgs.cpoc.wrapper.job.model.mqi.FileQueueMessage;
 import esa.s1pdgs.cpoc.wrapper.job.model.mqi.ObsQueueMessage;
 
@@ -38,6 +39,9 @@ public class OutputProducerFactoryTest {
     @Mock
     private GenericMqiClient sender;
 
+    @Mock
+    private ProcessConfiguration processConfiguration;
+    
     /**
      * Factory to test
      */
@@ -58,7 +62,7 @@ public class OutputProducerFactoryTest {
         MockitoAnnotations.initMocks(this);
         doNothing().when(sender).publish(Mockito.any(), Mockito.any());
 
-        this.outputProcuderFactory = new OutputProcuderFactory(sender);
+        this.outputProcuderFactory = new OutputProcuderFactory(sender, processConfiguration);
         
         inputMessage = new GenericMessageDto<LevelJobDto>(123, "",
                 new LevelJobDto(ProductFamily.L0_JOB, "product-name", "FAST",

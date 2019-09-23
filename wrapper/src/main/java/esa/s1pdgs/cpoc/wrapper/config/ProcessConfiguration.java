@@ -1,10 +1,8 @@
-package esa.s1pdgs.cpoc.jobgenerator.config;
+package esa.s1pdgs.cpoc.wrapper.config;
 
 import org.springframework.boot.context.properties.ConfigurationProperties;
-import org.springframework.stereotype.Component;
 
 @ConfigurationProperties("process")
-@Component
 public class ProcessConfiguration {
 	private String hostname;
 	

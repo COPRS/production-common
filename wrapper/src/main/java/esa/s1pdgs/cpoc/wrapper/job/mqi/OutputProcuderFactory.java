@@ -15,6 +15,7 @@ import esa.s1pdgs.cpoc.mqi.model.queue.LevelReportDto;
 import esa.s1pdgs.cpoc.mqi.model.queue.ProductDto;
 import esa.s1pdgs.cpoc.mqi.model.rest.GenericMessageDto;
 import esa.s1pdgs.cpoc.mqi.model.rest.GenericPublicationMessageDto;
+import esa.s1pdgs.cpoc.wrapper.config.ProcessConfiguration;
 import esa.s1pdgs.cpoc.wrapper.job.model.mqi.FileQueueMessage;
 import esa.s1pdgs.cpoc.wrapper.job.model.mqi.ObsQueueMessage;
 
@@ -37,6 +38,7 @@ public class OutputProcuderFactory {
      */
     private final GenericMqiClient sender;
 
+    private final String hostname;
 
     /**
      * Constructor
@@ -45,8 +47,9 @@ public class OutputProcuderFactory {
      * @param senderReports
      */
     @Autowired
-    public OutputProcuderFactory(final GenericMqiClient sender) {
+    public OutputProcuderFactory(final GenericMqiClient sender, final ProcessConfiguration processConfiguration) {
         this.sender = sender;
+        this.hostname = processConfiguration.getHostname();
     }
 
     /**
@@ -62,6 +65,7 @@ public class OutputProcuderFactory {
                 FileUtils.readFile(msg.getFile()), 
                 msg.getFamily()
         );
+        dtoReport.setHostname(hostname);
         sender.publish(
         		new GenericPublicationMessageDto<LevelReportDto>(
         				inputMessage.getIdentifier(), 
