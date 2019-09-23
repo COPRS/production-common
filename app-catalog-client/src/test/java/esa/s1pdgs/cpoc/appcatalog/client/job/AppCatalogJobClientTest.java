@@ -11,7 +11,6 @@ import static org.mockito.Mockito.verifyNoMoreInteractions;
 import java.net.URI;
 import java.util.Arrays;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.concurrent.Callable;
 
@@ -21,6 +20,7 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 import org.springframework.core.ParameterizedTypeReference;
+import org.springframework.core.ResolvableType;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
@@ -57,7 +57,7 @@ public class AppCatalogJobClientTest {
     /**
      * Client to test
      */
-    private AppCatalogJobClient client;
+    private AppCatalogJobClient<ProductDto> client;
     
     private static final ProductDto DUMMY = new ProductDto("testProd", "testKey", ProductFamily.BLANK);
 
@@ -67,7 +67,7 @@ public class AppCatalogJobClientTest {
     @Before
     public void init() {
         MockitoAnnotations.initMocks(this);
-        client = new AppCatalogJobClient(restTemplate, "http://localhost:8080", 3, 200, ProductCategory.LEVEL_PRODUCTS);
+        client = new AppCatalogJobClient<>(restTemplate, "http://localhost:8080", 3, 200, ProductCategory.LEVEL_PRODUCTS);
     }
 
     @Test
@@ -110,7 +110,7 @@ public class AppCatalogJobClientTest {
                 Mockito.eq(expectedUri),
                 Mockito.eq(HttpMethod.GET),
                 Mockito.isNull(),
-                Mockito.eq(new ParameterizedTypeReference<List<AppDataJob>>() {})
+                Mockito.eq(AppCatalogJobClient.forCategory(ProductCategory.LEVEL_PRODUCTS))
         );
         verifyNoMoreInteractions(restTemplate);
     }
@@ -212,11 +212,15 @@ public class AppCatalogJobClientTest {
 	    );
         final AppDataJob<ProductDto> result = client.newJob(job);
         assertEquals(job, result);
+		final ResolvableType appCatMessageType = ResolvableType.forClassWithGenerics(
+				AppDataJob.class, 
+				ProductDto.class
+		); 
         verify(restTemplate, times(1)).exchange(
                 Mockito.eq("http://localhost:8080/level_products/jobs"),
                 Mockito.eq(HttpMethod.POST),
                 Mockito.eq(new HttpEntity<AppDataJob<?>>(job)),
-                Mockito.eq(new ParameterizedTypeReference<AppDataJob>(){})
+                Mockito.eq(ParameterizedTypeReference.forType(appCatMessageType.getType()))
         );
         verifyNoMoreInteractions(restTemplate);        
     }
@@ -246,11 +250,15 @@ public class AppCatalogJobClientTest {
 	                Mockito.any(ParameterizedTypeReference.class)
 	    );
         final AppDataJob<E> result = callable.call();
+    	final ResolvableType appCatMessageType = ResolvableType.forClassWithGenerics(
+				AppDataJob.class, 
+				ProductDto.class
+		);         
         verify(restTemplate, times(1)).exchange(
                 Mockito.eq("http://localhost:8080/level_products/jobs/142"),
                 Mockito.eq(HttpMethod.PATCH),
-                Mockito.eq(new HttpEntity<AppDataJob<?>>(result)),
-                Mockito.eq(new ParameterizedTypeReference<AppDataJob>() {})
+                Mockito.eq(new HttpEntity<AppDataJob<E>>(result)),
+                Mockito.eq(ParameterizedTypeReference.forType(appCatMessageType.getType()))
         );
         verifyNoMoreInteractions(restTemplate);
         return result;
@@ -348,11 +356,15 @@ public class AppCatalogJobClientTest {
                 "tasktable2",
                 AppDataJobGenerationState.SENT
         );
+		final ResolvableType appCatMessageType = ResolvableType.forClassWithGenerics(
+				AppDataJob.class, 
+				ProductDto.class
+		); 
 	    verify(restTemplate, times(1)).exchange(
 	            Mockito.eq("http://localhost:8080/level_products/jobs/142/generations/tasktable2"),
 	            Mockito.eq(HttpMethod.PATCH),
 	            Mockito.any(),
-	            Mockito.eq(new ParameterizedTypeReference<AppDataJob>() {})
+	            Mockito.eq(ParameterizedTypeReference.forType(appCatMessageType.getType()))
 	    );
 	    verifyNoMoreInteractions(restTemplate);
     }
