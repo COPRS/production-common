@@ -14,6 +14,7 @@ import org.springframework.stereotype.Service;
 import esa.s1pdgs.cpoc.common.ProductFamily;
 import esa.s1pdgs.cpoc.common.errors.InternalErrorException;
 import esa.s1pdgs.cpoc.ingestion.config.IngestionServiceConfigurationProperties;
+import esa.s1pdgs.cpoc.ingestion.config.ProcessConfiguration;
 import esa.s1pdgs.cpoc.ingestion.obs.ObsAdapter;
 import esa.s1pdgs.cpoc.mqi.model.queue.AbstractDto;
 import esa.s1pdgs.cpoc.mqi.model.queue.IngestionDto;
@@ -28,9 +29,9 @@ public class ProductServiceImpl implements ProductService {
     private final String hostname;
 	
 	@Autowired
-	public ProductServiceImpl(final ObsClient obsClient, final IngestionServiceConfigurationProperties ingestionServiceConfigurationProperties) {
+	public ProductServiceImpl(final ObsClient obsClient, final ProcessConfiguration processConfiguration) {
 		this.obsClient = obsClient;
-		this.hostname = ingestionServiceConfigurationProperties.getHostname();
+		this.hostname = processConfiguration.getHostname();
 	}
 	
 	@Override

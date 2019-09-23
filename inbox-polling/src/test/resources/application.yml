@@ -15,7 +15,10 @@ scheduling:
     
 logging:
   config: classpath:log4j2-test.yml
-  
+
+process:
+  hostname: ${HOSTNAME}                                          # Hostname
+
 inbox:
   polling-interval-ms: 10000
   polling:

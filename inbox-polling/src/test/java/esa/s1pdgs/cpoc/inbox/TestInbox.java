@@ -34,7 +34,7 @@ public class TestInbox {
 		final MockSubmissionClient fakeKafkaClient = new MockSubmissionClient(2);
 
 		final Inbox uut = new Inbox(fakeAdapter, Lists.list(InboxFilter.ALLOW_ALL),
-				new InboxPollingServiceTransactional(fakeRepo), fakeKafkaClient);
+				new InboxPollingServiceTransactional(fakeRepo), fakeKafkaClient, "hostname");
 		uut.poll();
 		fakeRepo.verify();
 		fakeKafkaClient.verify();
@@ -70,7 +70,7 @@ public class TestInbox {
 		final MockSubmissionClient fakeKafkaClient = new MockSubmissionClient(0);
 
 		final Inbox uut = new Inbox(fakeAdapter, Lists.list(InboxFilter.ALLOW_ALL),
-				new InboxPollingServiceTransactional(fakeRepo), fakeKafkaClient);
+				new InboxPollingServiceTransactional(fakeRepo), fakeKafkaClient, "hostname");
 		uut.poll();
 		fakeRepo.verify();
 		fakeKafkaClient.verify();

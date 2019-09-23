@@ -19,13 +19,15 @@ public final class Inbox {
 	private final List<InboxFilter> filter;
 	private final InboxPollingServiceTransactional inboxPollingServiceTransactional;
 	private final SubmissionClient client;
+	private final String hostname;
 
 	Inbox(final InboxAdapter inboxAdapter, final List<InboxFilter> filter,
-			final InboxPollingServiceTransactional inboxPollingServiceTransactional, final SubmissionClient client) {
+			final InboxPollingServiceTransactional inboxPollingServiceTransactional, final SubmissionClient client, final String hostname) {
 		this.inboxAdapter = inboxAdapter;
 		this.filter = filter;
 		this.inboxPollingServiceTransactional = inboxPollingServiceTransactional;
 		this.client = client;
+		this.hostname = hostname;
 	}
 
 	public final void poll() {
@@ -75,6 +77,7 @@ public final class Inbox {
 		try {
 			LOG.info("Publishing new entry to kafka queue: {}", entry);
 			IngestionDto dto = new IngestionDto(entry.getName());
+			dto.setHostname(hostname);
 		    dto.setRelativePath(entry.getRelativePath());
 		    dto.setPickupPath(entry.getPickupPath());
 			dto.setMissionId(entry.getMissionId());
