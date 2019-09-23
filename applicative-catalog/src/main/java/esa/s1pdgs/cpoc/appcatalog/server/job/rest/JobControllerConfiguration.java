@@ -3,6 +3,7 @@ package esa.s1pdgs.cpoc.appcatalog.server.job.rest;
 import java.util.Map;
 
 import org.springframework.boot.context.properties.ConfigurationProperties;
+import org.springframework.context.annotation.Configuration;
 
 import esa.s1pdgs.cpoc.common.ProductCategory;
 
