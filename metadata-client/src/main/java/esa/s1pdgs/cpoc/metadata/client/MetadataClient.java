@@ -60,8 +60,10 @@ public class MetadataClient {
 				});
 
 		if (response == null) {
+			LOGGER.debug("Edrs session not found for product type {} and product name {}", productType, productName);
 			return null;
 		} else {
+			LOGGER.debug("Returning Edrs session: {}", response.getBody());
 			return response.getBody();
 		}
 	}
@@ -77,11 +79,14 @@ public class MetadataClient {
 		String uri = this.metadataBaseUri + MetadataCatalogRestPath.L0_SLICE.path() + "/" + productName;
 
 		ResponseEntity<L0SliceMetadata> response = query(UriComponentsBuilder.fromUriString(uri).build().toUri(),
-				new ParameterizedTypeReference<L0SliceMetadata>() {});
+				new ParameterizedTypeReference<L0SliceMetadata>() {
+				});
 
 		if (response == null) {
+			LOGGER.debug("L0 slice not found for product name {}", productName);
 			return null;
 		} else {
+			LOGGER.debug("Returning L0 slice: {}", response.getBody());
 			return response.getBody();
 		}
 
@@ -99,11 +104,14 @@ public class MetadataClient {
 				+ productName;
 
 		ResponseEntity<LevelSegmentMetadata> response = query(UriComponentsBuilder.fromUriString(uri).build().toUri(),
-				new ParameterizedTypeReference<LevelSegmentMetadata>() {});
+				new ParameterizedTypeReference<LevelSegmentMetadata>() {
+				});
 
 		if (response == null) {
+			LOGGER.debug("Level segment not found for family {} and product name {}", family, productName);
 			return null;
 		} else {
+			LOGGER.debug("Returning level segment: {}", response.getBody());
 			return response.getBody();
 		}
 	}
@@ -120,16 +128,21 @@ public class MetadataClient {
 
 		UriComponentsBuilder builder = UriComponentsBuilder.fromUriString(uri).queryParam("mode", "ONE")
 				.queryParam("processMode", processMode);
-		
-		ResponseEntity<L0AcnMetadata[]> response = query(builder.build().toUri(), new ParameterizedTypeReference<L0AcnMetadata[]>(){});
+
+		ResponseEntity<L0AcnMetadata[]> response = query(builder.build().toUri(),
+				new ParameterizedTypeReference<L0AcnMetadata[]>() {
+				});
 
 		if (response == null) {
+			LOGGER.debug("First ACN not found for product name {} and process mode {}", productName, processMode);
 			return null;
 		} else {
 			L0AcnMetadata[] objects = response.getBody();
 			if (objects != null && objects.length > 0) {
+				LOGGER.debug("Returning first ACN: {}", objects[0]);
 				return objects[0];
 			} else {
+				LOGGER.debug("First ACN not found for product name {} and process mode {}", productName, processMode);
 				return null;
 			}
 		}
@@ -164,9 +177,12 @@ public class MetadataClient {
 		}
 
 		ResponseEntity<List<SearchMetadata>> response = query(builder.build().toUri(),
-				new ParameterizedTypeReference<List<SearchMetadata>>() {});
+				new ParameterizedTypeReference<List<SearchMetadata>>() {
+				});
 
 		if (response == null) {
+			LOGGER.debug("Metadata query for family '{}' and product type '{}' returned no results",
+					query.getProductFamily(), query.getProductType());
 			return null;
 		} else {
 			LOGGER.info("Metadata query for family '{}' and product type '{}' returned {} results",
@@ -196,12 +212,14 @@ public class MetadataClient {
 				.queryParam("intervalStop", intervalStop.format(DateUtils.METADATA_DATE_FORMATTER));
 
 		ResponseEntity<List<SearchMetadata>> response = query(builder.build().toUri(),
-				new ParameterizedTypeReference<List<SearchMetadata>>() {});
+				new ParameterizedTypeReference<List<SearchMetadata>>() {
+				});
 
 		if (response == null) {
+			LOGGER.debug("Metadata query for family '{}' returned no results", family);
 			return null;
 		} else {
-			LOGGER.debug("Metadata query for family '{}' returned {} results", family, numResults(response));
+			LOGGER.info("Metadata query for family '{}' returned {} results", family, numResults(response));
 			return response.getBody();
 		}
 	}
@@ -236,7 +254,7 @@ public class MetadataClient {
 
 				if (response.getStatusCode() != HttpStatus.OK) {
 					if (retries < this.maxRetries) {
-						LOGGER.warn("Call rest api metadata failed: Attempt : {} / {}", retries, this.maxRetries);
+						LOGGER.warn("Rest api metadata call failed: Attempt : {} / {}", retries, this.maxRetries);
 						trySleep();
 						continue;
 					} else {
@@ -255,7 +273,7 @@ public class MetadataClient {
 				}
 			} catch (RestClientException e) {
 				if (retries < this.maxRetries) {
-					LOGGER.warn("Call rest api metadata failed: Attempt : {} / {}", retries, this.maxRetries);
+					LOGGER.warn("Rest api metadata call failed: Attempt : {} / {}", retries, this.maxRetries);
 					trySleep();
 					continue;
 				} else {
@@ -265,7 +283,8 @@ public class MetadataClient {
 		}
 	}
 
-	private <T> ResponseEntity<T> query(URI uri, ParameterizedTypeReference<T> responseType) throws MetadataQueryException {
+	private <T> ResponseEntity<T> query(URI uri, ParameterizedTypeReference<T> responseType)
+			throws MetadataQueryException {
 
 		for (int retries = 0;; retries++) {
 			try {
@@ -273,8 +292,11 @@ public class MetadataClient {
 				ResponseEntity<T> response = this.restTemplate.exchange(uri, HttpMethod.GET, null, responseType);
 
 				if (response != null && response.getStatusCode() != HttpStatus.OK) {
+
+					LOGGER.debug("Rest api metadata call returned status code: {}", response.getStatusCode());
+
 					if (retries < this.maxRetries) {
-						LOGGER.warn("Call rest api metadata failed: Attempt : {} / {}", retries, this.maxRetries);
+						LOGGER.warn("Rest api metadata call failed: Attempt : {} / {}", retries, this.maxRetries);
 						trySleep();
 						continue;
 					} else {
@@ -283,15 +305,15 @@ public class MetadataClient {
 					}
 				} else {
 					if (response != null && response.getBody() != null) {
-						LOGGER.debug("Metadata query returned results");
+						LOGGER.debug("Rest api metadata call returned results");
 						return response;
 					} else {
 						if (retries < this.maxRetries) {
-							LOGGER.warn("Call rest api metadata failed: Attempt : {} / {}", retries, this.maxRetries);
+							LOGGER.warn("Rest api metadata call failed: Attempt : {} / {}", retries, this.maxRetries);
 							trySleep();
 							continue;
 						} else {
-							LOGGER.warn("Metadata query returned no results");
+							LOGGER.warn("Rest api metadata call returned no results");
 							return null;
 						}
 					}
@@ -299,7 +321,7 @@ public class MetadataClient {
 
 			} catch (RestClientException e) {
 				if (retries < this.maxRetries) {
-					LOGGER.warn("Call rest api metadata failed: Attempt : {} / {}", retries, this.maxRetries);
+					LOGGER.warn("Rest api metadata call failed: Attempt : {} / {}", retries, this.maxRetries);
 					trySleep();
 					continue;
 				} else {
