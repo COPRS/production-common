@@ -6,6 +6,7 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 
 import esa.s1pdgs.cpoc.common.ProductCategory;
 
+@Configuration
 @ConfigurationProperties(ignoreInvalidFields = true, prefix = "")
 public class JobControllerConfiguration {
 	static class Generations {

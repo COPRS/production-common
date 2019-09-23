@@ -1,9 +1,9 @@
 package esa.s1pdgs.cpoc.ingestion.config;
 
 import org.springframework.boot.context.properties.ConfigurationProperties;
-import org.springframework.stereotype.Component;
+import org.springframework.context.annotation.Configuration;
 
-@Component
+@Configuration
 @ConfigurationProperties("process")
 public class ProcessConfiguration {
 	private String hostname;

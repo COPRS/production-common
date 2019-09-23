@@ -15,7 +15,7 @@ import esa.s1pdgs.cpoc.common.ProductFamily;
 @PropertySource({"classpath:obs-${obsBackend:aws-s3}.properties"})
 @EnableConfigurationProperties
 @ConfigurationProperties
-@Component
+@Configuration
 public class ObsConfigurationProperties {	
 	public static final String UNDEFINED = "NOT_DEFINED";
 	
