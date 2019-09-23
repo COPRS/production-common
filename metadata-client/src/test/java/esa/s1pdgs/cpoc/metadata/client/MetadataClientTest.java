@@ -3,11 +3,13 @@ package esa.s1pdgs.cpoc.metadata.client;
 import static org.hamcrest.CoreMatchers.isA;
 import static org.junit.Assert.assertEquals;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import java.net.URI;
 import java.text.ParseException;
 import java.util.Arrays;
 import java.util.Collections;
@@ -46,7 +48,7 @@ public class MetadataClientTest {
 
     private final static String METADATA_HOST = "localhost:8082";
 
-    private MetadataClient service;
+    private MetadataClient metadataClient;
 
     private int nbRetry = 3;
     private int tempoRetry = 3;
@@ -61,7 +63,7 @@ public class MetadataClientTest {
         // Mcokito
         MockitoAnnotations.initMocks(this);
 
-        service = new MetadataClient(restTemplate, METADATA_HOST, nbRetry,
+        metadataClient = new MetadataClient(restTemplate, METADATA_HOST, nbRetry,
                 tempoRetry);
     }
     
@@ -94,14 +96,14 @@ public class MetadataClientTest {
                         HttpStatus.OK);
         String uri = "http://" + METADATA_HOST
                 + "/edrsSession/RAW/DCS_02_L20171109175634707000125_ch1_DSDB_00005.raw";
-        when(restTemplate.exchange(eq(uri), eq(HttpMethod.GET), eq(null),
-                eq(EdrsSessionMetadata.class))).thenReturn(r);
+        when(restTemplate.exchange(eq(UriComponentsBuilder.fromUriString(uri).build().toUri()), eq(HttpMethod.GET), eq(null),
+        		 any((Class<ParameterizedTypeReference<EdrsSessionMetadata>>)(Object)ParameterizedTypeReference.class))).thenReturn(r);
 
-        this.service.getEdrsSession("RAW",
+        this.metadataClient.getEdrsSession("RAW",
                 "DCS_02_L20171109175634707000125_ch1_DSDB_00005.raw");
 
-        verify(this.restTemplate, times(1)).exchange(eq(uri),
-                eq(HttpMethod.GET), eq(null), eq(EdrsSessionMetadata.class));
+        verify(this.restTemplate, times(1)).exchange(eq(UriComponentsBuilder.fromUriString(uri).build().toUri()),
+                eq(HttpMethod.GET), eq(null), any((Class<ParameterizedTypeReference<EdrsSessionMetadata>>)(Object)ParameterizedTypeReference.class));
     }
 
     @Test
@@ -118,10 +120,10 @@ public class MetadataClientTest {
         ResponseEntity<EdrsSessionMetadata> r =
                 new ResponseEntity<EdrsSessionMetadata>(expectedFile,
                         HttpStatus.OK);
-        when(restTemplate.exchange(Mockito.anyString(), eq(HttpMethod.GET),
-                eq(null), eq(EdrsSessionMetadata.class))).thenReturn(r);
+        when(restTemplate.exchange(any(URI.class), eq(HttpMethod.GET),
+                eq(null), any((Class<ParameterizedTypeReference<EdrsSessionMetadata>>)(Object)ParameterizedTypeReference.class))).thenReturn(r);
 
-        EdrsSessionMetadata file = this.service.getEdrsSession("RAW",
+        EdrsSessionMetadata file = this.metadataClient.getEdrsSession("RAW",
                 "DCS_02_L20171109175634707000125_ch1_DSDB_00005.raw");
         assertEquals("RAW", file.getProductType());
         assertEquals("DCS_02_L20171109175634707000125_ch1_DSDB_00005.raw",
@@ -138,12 +140,12 @@ public class MetadataClientTest {
         ResponseEntity<EdrsSessionMetadata> r =
                 new ResponseEntity<EdrsSessionMetadata>(
                         HttpStatus.INTERNAL_SERVER_ERROR);
-        when(restTemplate.exchange(Mockito.anyString(), eq(HttpMethod.GET),
-                eq(null), eq(EdrsSessionMetadata.class))).thenReturn(r);
+        when(restTemplate.exchange(any(URI.class), eq(HttpMethod.GET),
+                eq(null), any((Class<ParameterizedTypeReference<EdrsSessionMetadata>>)(Object)ParameterizedTypeReference.class))).thenReturn(r);
 
         thrown.expect(MetadataQueryException.class);
         thrown.expectMessage("nvalid HTTP statu");
-        this.service.getEdrsSession("RAW",
+        this.metadataClient.getEdrsSession("RAW",
                 "DCS_02_L20171109175634707000125_ch1_DSDB_00005.raw");
 
     }
@@ -151,13 +153,13 @@ public class MetadataClientTest {
     @Test
     public void testGetEdrsSessionRestKO() throws MetadataQueryException {
         doThrow(new RestClientException("rest exception")).when(restTemplate)
-                .exchange(Mockito.anyString(), eq(HttpMethod.GET), eq(null),
-                        eq(EdrsSessionMetadata.class));
+                .exchange(any(URI.class), eq(HttpMethod.GET), eq(null),
+                		 any((Class<ParameterizedTypeReference<EdrsSessionMetadata>>)(Object)ParameterizedTypeReference.class));
 
         thrown.expect(MetadataQueryException.class);
         thrown.expectMessage("rest exception");
         thrown.expectCause(isA(RestClientException.class));
-        this.service.getEdrsSession("RAW",
+        this.metadataClient.getEdrsSession("RAW",
                 "DCS_02_L20171109175634707000125_ch1_DSDB_00005.raw");
 
     }
@@ -180,13 +182,13 @@ public class MetadataClientTest {
         ResponseEntity<LevelSegmentMetadata> r = new ResponseEntity<LevelSegmentMetadata>(
                 expectedResult, HttpStatus.OK);
         String uri = "http://" + METADATA_HOST + "/level_segment/L0_SEGMENT/" + file;
-        when(restTemplate.exchange(eq(uri), eq(HttpMethod.GET), eq(null),
-                eq(LevelSegmentMetadata.class))).thenReturn(r);
+        when(restTemplate.exchange(eq(UriComponentsBuilder.fromUriString(uri).build().toUri()), eq(HttpMethod.GET), eq(null),
+        		any((Class<ParameterizedTypeReference<LevelSegmentMetadata>>)(Object)ParameterizedTypeReference.class))).thenReturn(r);
 
-        this.service.getLevelSegment(ProductFamily.L0_SEGMENT, file);
+        this.metadataClient.getLevelSegment(ProductFamily.L0_SEGMENT, file);
 
-        verify(this.restTemplate, times(1)).exchange(eq(uri),
-                eq(HttpMethod.GET), eq(null), eq(LevelSegmentMetadata.class));
+        verify(this.restTemplate, times(1)).exchange(eq(UriComponentsBuilder.fromUriString(uri).build().toUri()),
+                eq(HttpMethod.GET), eq(null), any((Class<ParameterizedTypeReference<LevelSegmentMetadata>>)(Object)ParameterizedTypeReference.class));
     }
 
     @Test
@@ -200,10 +202,10 @@ public class MetadataClientTest {
                 "021735");
         ResponseEntity<LevelSegmentMetadata> r = new ResponseEntity<LevelSegmentMetadata>(
                 expectedResult, HttpStatus.OK);
-        when(restTemplate.exchange(Mockito.anyString(), eq(HttpMethod.GET),
-                eq(null), eq(LevelSegmentMetadata.class))).thenReturn(r);
+        when(restTemplate.exchange(any(URI.class), eq(HttpMethod.GET),
+                eq(null), any((Class<ParameterizedTypeReference<LevelSegmentMetadata>>)(Object)ParameterizedTypeReference.class))).thenReturn(r);
 
-        LevelSegmentMetadata f = this.service.getLevelSegment(ProductFamily.L0_SEGMENT, file);
+        LevelSegmentMetadata f = this.metadataClient.getLevelSegment(ProductFamily.L0_SEGMENT, file);
 
         assertEquals("IW_RAW__0S", f.getProductType());
         assertEquals(file, f.getProductName());
@@ -219,22 +221,22 @@ public class MetadataClientTest {
     public void testGetLevelSegmentKo() throws MetadataQueryException {
         ResponseEntity<LevelSegmentMetadata> r = new ResponseEntity<LevelSegmentMetadata>(
                 HttpStatus.INTERNAL_SERVER_ERROR);
-        when(restTemplate.exchange(Mockito.anyString(), eq(HttpMethod.GET),
-                eq(null), eq(LevelSegmentMetadata.class))).thenReturn(r);
+        when(restTemplate.exchange(any(URI.class), eq(HttpMethod.GET),
+                eq(null), any((Class<ParameterizedTypeReference<LevelSegmentMetadata>>)(Object)ParameterizedTypeReference.class))).thenReturn(r);
 
         String file =
                 "S1A_IW_RAW__0SDV_20171213T121623_20171213T121656_019684_021735_C6DB.SAFE";
 
         thrown.expect(MetadataQueryException.class);
         thrown.expectMessage("nvalid HTTP statu");
-        this.service.getLevelSegment(ProductFamily.L0_SEGMENT, file);
+        this.metadataClient.getLevelSegment(ProductFamily.L0_SEGMENT, file);
     }
 
     @Test
     public void testGetLevelSegmentRestKo() throws MetadataQueryException {
         doThrow(new RestClientException("rest exception")).when(restTemplate)
-                .exchange(Mockito.anyString(), eq(HttpMethod.GET), eq(null),
-                        eq(LevelSegmentMetadata.class));
+                .exchange(any(URI.class), eq(HttpMethod.GET), eq(null),
+                        any((Class<ParameterizedTypeReference<LevelSegmentMetadata>>)(Object)ParameterizedTypeReference.class));
 
         String file =
                 "S1A_IW_RAW__0SDV_20171213T121623_20171213T121656_019684_021735_C6DB.SAFE";
@@ -242,7 +244,7 @@ public class MetadataClientTest {
         thrown.expect(MetadataQueryException.class);
         thrown.expectMessage("rest exception");
         thrown.expectCause(isA(RestClientException.class));
-        this.service.getLevelSegment(ProductFamily.L0_SEGMENT, file);
+        this.metadataClient.getLevelSegment(ProductFamily.L0_SEGMENT, file);
     }
 
     // --------------------------------------------------
@@ -264,13 +266,13 @@ public class MetadataClientTest {
         ResponseEntity<L0SliceMetadata> r = new ResponseEntity<L0SliceMetadata>(
                 expectedResult, HttpStatus.OK);
         String uri = "http://" + METADATA_HOST + "/l0Slice/" + file;
-        when(restTemplate.exchange(eq(uri), eq(HttpMethod.GET), eq(null),
-                eq(L0SliceMetadata.class))).thenReturn(r);
+        when(restTemplate.exchange(eq(UriComponentsBuilder.fromUriString(uri).build().toUri()), eq(HttpMethod.GET), eq(null),
+        		 any((Class<ParameterizedTypeReference<L0SliceMetadata>>)(Object)ParameterizedTypeReference.class))).thenReturn(r);
 
-        this.service.getL0Slice(file);
+        this.metadataClient.getL0Slice(file);
 
-        verify(this.restTemplate, times(1)).exchange(eq(uri),
-                eq(HttpMethod.GET), eq(null), eq(L0SliceMetadata.class));
+        verify(this.restTemplate, times(1)).exchange(eq(UriComponentsBuilder.fromUriString(uri).build().toUri()),
+                eq(HttpMethod.GET), eq(null), any((Class<ParameterizedTypeReference<L0SliceMetadata>>)(Object)ParameterizedTypeReference.class));
     }
 
     @Test
@@ -285,10 +287,10 @@ public class MetadataClientTest {
                 "021735");
         ResponseEntity<L0SliceMetadata> r = new ResponseEntity<L0SliceMetadata>(
                 expectedResult, HttpStatus.OK);
-        when(restTemplate.exchange(Mockito.anyString(), eq(HttpMethod.GET),
-                eq(null), eq(L0SliceMetadata.class))).thenReturn(r);
+        when(restTemplate.exchange(any(URI.class), eq(HttpMethod.GET),
+                eq(null),  any((Class<ParameterizedTypeReference<L0SliceMetadata>>)(Object)ParameterizedTypeReference.class))).thenReturn(r);
 
-        L0SliceMetadata f = this.service.getL0Slice(file);
+        L0SliceMetadata f = this.metadataClient.getL0Slice(file);
 
         assertEquals("IW_RAW__0S", f.getProductType());
         assertEquals(file, f.getProductName());
@@ -304,22 +306,23 @@ public class MetadataClientTest {
     public void testGetSliceKo() throws MetadataQueryException {
         ResponseEntity<L0SliceMetadata> r = new ResponseEntity<L0SliceMetadata>(
                 HttpStatus.INTERNAL_SERVER_ERROR);
-        when(restTemplate.exchange(Mockito.anyString(), eq(HttpMethod.GET),
-                eq(null), eq(L0SliceMetadata.class))).thenReturn(r);
+        when(restTemplate.exchange(any(URI.class), eq(HttpMethod.GET),
+                eq(null), 
+       		 any((Class<ParameterizedTypeReference<L0SliceMetadata>>)(Object)ParameterizedTypeReference.class))).thenReturn(r);
 
         String file =
                 "S1A_IW_RAW__0SDV_20171213T121623_20171213T121656_019684_021735_C6DB.SAFE";
 
         thrown.expect(MetadataQueryException.class);
         thrown.expectMessage("nvalid HTTP statu");
-        this.service.getL0Slice(file);
+        this.metadataClient.getL0Slice(file);
     }
 
     @Test
     public void testGetSliceRestKo() throws MetadataQueryException {
         doThrow(new RestClientException("rest exception")).when(restTemplate)
-                .exchange(Mockito.anyString(), eq(HttpMethod.GET), eq(null),
-                        eq(L0SliceMetadata.class));
+                .exchange(any(URI.class), eq(HttpMethod.GET), eq(null),
+                		any((Class<ParameterizedTypeReference<L0SliceMetadata>>)(Object)ParameterizedTypeReference.class));
 
         String file =
                 "S1A_IW_RAW__0SDV_20171213T121623_20171213T121656_019684_021735_C6DB.SAFE";
@@ -327,7 +330,7 @@ public class MetadataClientTest {
         thrown.expect(MetadataQueryException.class);
         thrown.expectMessage("rest exception");
         thrown.expectCause(isA(RestClientException.class));
-        this.service.getL0Slice(file);
+        this.metadataClient.getL0Slice(file);
     }
 
     // --------------------------------------------------
@@ -352,14 +355,14 @@ public class MetadataClientTest {
         UriComponentsBuilder builder = UriComponentsBuilder.fromUriString(uri)
                 .queryParam("mode", "ONE").queryParam("processMode", "NRT");
         when(restTemplate.exchange(eq(builder.build().toUri()),
-                eq(HttpMethod.GET), eq(null), eq(L0AcnMetadata[].class)))
+                eq(HttpMethod.GET), eq(null), any((Class<ParameterizedTypeReference<L0AcnMetadata[]>>)(Object)ParameterizedTypeReference.class)))
                         .thenReturn(r);
 
-        this.service.getFirstACN(file, "NRT");
+        this.metadataClient.getFirstACN(file, "NRT");
 
         verify(this.restTemplate, times(1)).exchange(
                 eq(builder.build().toUri()), eq(HttpMethod.GET), eq(null),
-                eq(L0AcnMetadata[].class));
+                any((Class<ParameterizedTypeReference<L0AcnMetadata[]>>)(Object)ParameterizedTypeReference.class));
     }
 
     @Test
@@ -389,10 +392,10 @@ public class MetadataClientTest {
         ResponseEntity<L0AcnMetadata[]> r = new ResponseEntity<L0AcnMetadata[]>(
                 expectedResult, HttpStatus.OK);
         when(restTemplate.exchange(eq(builder.build().toUri()),
-                eq(HttpMethod.GET), eq(null), eq(L0AcnMetadata[].class)))
+                eq(HttpMethod.GET), eq(null),  any((Class<ParameterizedTypeReference<L0AcnMetadata[]>>)(Object)ParameterizedTypeReference.class)))
                         .thenReturn(r);
 
-        L0AcnMetadata f = this.service.getFirstACN(file, "NRT");
+        L0AcnMetadata f = this.metadataClient.getFirstACN(file, "NRT");
 
         assertEquals("IW_RAW__0A", f.getProductType());
         assertEquals(fileA, f.getProductName());
@@ -415,26 +418,26 @@ public class MetadataClientTest {
         UriComponentsBuilder builder = UriComponentsBuilder.fromUriString(uri)
                 .queryParam("mode", "ONE").queryParam("processMode", "FAST");
         when(restTemplate.exchange(eq(builder.build().toUri()),
-                eq(HttpMethod.GET), eq(null), eq(L0AcnMetadata[].class)))
+                eq(HttpMethod.GET), eq(null), any((Class<ParameterizedTypeReference<L0AcnMetadata[]>>)(Object)ParameterizedTypeReference.class)))
                         .thenReturn(r);
 
         thrown.expect(MetadataQueryException.class);
         thrown.expectMessage("nvalid HTTP statu");
-        this.service.getFirstACN(file, "FAST");
+        this.metadataClient.getFirstACN(file, "FAST");
     }
 
     @Test
     public void testGetFirstAcnRestKo() throws MetadataQueryException {
         doThrow(new RestClientException("rest exception")).when(restTemplate)
                 .exchange(Mockito.any(), eq(HttpMethod.GET), eq(null),
-                        eq(L0AcnMetadata[].class));
+                		 any((Class<ParameterizedTypeReference<L0AcnMetadata[]>>)(Object)ParameterizedTypeReference.class));
         String file =
                 "S1A_IW_RAW__0SDV_20171213T121623_20171213T121656_019684_021735_C6DB.SAFE";
 
         thrown.expect(MetadataQueryException.class);
         thrown.expectMessage("rest exception");
         thrown.expectCause(isA(RestClientException.class));
-        this.service.getFirstACN(file, "FAST");
+        this.metadataClient.getFirstACN(file, "FAST");
     }
 
     // --------------------------------------------------
@@ -459,7 +462,7 @@ public class MetadataClientTest {
                 eq(new ParameterizedTypeReference<List<SearchMetadata>>() {
                 }))).thenReturn(r);
 
-        this.service.search(
+        this.metadataClient.search(
                 new SearchMetadataQuery(1, "LatestValCover", 1, 2, "AUX_OBMEMC",
                         ProductFamily.AUXILIARY_FILE),
                 "2017-11-20T22:15:16.123456Z",
@@ -499,7 +502,7 @@ public class MetadataClientTest {
                 eq(new ParameterizedTypeReference<List<SearchMetadata>>() {
                 }))).thenReturn(r);
 
-        this.service.search(
+        this.metadataClient.search(
                 new SearchMetadataQuery(1, "LatestValCover", 1, 2, "AUX_OBMEMC",
                         ProductFamily.AUXILIARY_FILE),
                 "2017-11-20T22:15:16.123456Z",
@@ -537,7 +540,7 @@ public class MetadataClientTest {
                 eq(new ParameterizedTypeReference<List<SearchMetadata>>() {
                 }))).thenReturn(r);
 
-        List<SearchMetadata> files = this.service.search(
+        List<SearchMetadata> files = this.metadataClient.search(
                 new SearchMetadataQuery(1, "LatestValCover", 1, 2, "AUX_OBMEMC",
                         ProductFamily.AUXILIARY_FILE),
                 "2017-11-20T22:15:16.123456Z",
@@ -566,7 +569,7 @@ public class MetadataClientTest {
 
         thrown.expect(MetadataQueryException.class);
         thrown.expectMessage("nvalid HTTP statu");
-        this.service.search(
+        this.metadataClient.search(
                 new SearchMetadataQuery(1, "LatestValCover", 1, 2, "AUX_OBMEMC",
                         ProductFamily.AUXILIARY_FILE),
                 "2017-11-20T22:15:16.123456Z",
@@ -583,7 +586,7 @@ public class MetadataClientTest {
         thrown.expect(MetadataQueryException.class);
         thrown.expectMessage("rest exception");
         thrown.expectCause(isA(RestClientException.class));
-        this.service.search(
+        this.metadataClient.search(
                 new SearchMetadataQuery(1, "LatestValCover", 1, 2, "AUX_OBMEMC",
                         ProductFamily.AUXILIARY_FILE),
                 "2017-11-20T22:15:16.123456Z",
