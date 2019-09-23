@@ -7,7 +7,6 @@ import org.springframework.context.annotation.Configuration;
 
 import esa.s1pdgs.cpoc.common.ProductCategory;
 
-@Configuration
 @ConfigurationProperties(ignoreInvalidFields = true, prefix = "")
 public class JobControllerConfiguration {
 	static class Generations {
