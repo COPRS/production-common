@@ -1,5 +1,6 @@
 package esa.s1pdgs.cpoc.inbox;
 
+import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -77,6 +78,7 @@ public final class Inbox {
 		try {
 			LOG.info("Publishing new entry to kafka queue: {}", entry);
 			IngestionDto dto = new IngestionDto(entry.getName());
+			dto.setCreationDate(new Date());
 			dto.setHostname(hostname);
 		    dto.setRelativePath(entry.getRelativePath());
 		    dto.setPickupPath(entry.getPickupPath());

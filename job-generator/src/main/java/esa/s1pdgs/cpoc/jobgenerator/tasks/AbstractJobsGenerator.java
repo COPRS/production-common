@@ -6,6 +6,7 @@ import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -868,6 +869,7 @@ public abstract class AbstractJobsGenerator<T extends AbstractDto> implements Ru
                 job.getAppDataJob().getProduct().getProcessMode(), workingDir,
                 jobOrder);
         
+        r.setCreationDate(new Date());
         r.setHostname(hostname);
 
         try {

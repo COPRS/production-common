@@ -1,5 +1,7 @@
 package esa.s1pdgs.cpoc.wrapper.job.mqi;
 
+import java.util.Date;
+
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -65,6 +67,7 @@ public class OutputProcuderFactory {
                 FileUtils.readFile(msg.getFile()), 
                 msg.getFamily()
         );
+        dtoReport.setCreationDate(new Date());
         dtoReport.setHostname(hostname);
         sender.publish(
         		new GenericPublicationMessageDto<LevelReportDto>(

@@ -2,6 +2,7 @@ package esa.s1pdgs.cpoc.ingestion.product;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -43,6 +44,7 @@ public class EdrsSessionFactory implements ProductFactory<EdrsSessionDto> {
 
 		EdrsSessionDto edrsSessionDto = new EdrsSessionDto(objectStorageKey, channelId, edrsSessionFileType, missionId,
 				satelliteId, stationCode, sessionId);
+		edrsSessionDto.setCreationDate(new Date());
 		edrsSessionDto.setHostname(hostname);
 
 		final Product<EdrsSessionDto> prod = new Product<>();
