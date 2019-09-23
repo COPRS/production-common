@@ -43,9 +43,9 @@ public class EdrsSessionFactory implements ProductFactory<EdrsSessionDto> {
 
 		EdrsSessionDto edrsSessionDto = new EdrsSessionDto(objectStorageKey, channelId, edrsSessionFileType, missionId,
 				satelliteId, stationCode, sessionId);
+		edrsSessionDto.setHostname(hostname);
 
 		final Product<EdrsSessionDto> prod = new Product<>();
-		prod.getDto().setHostname(hostname);
 		prod.setFamily(ProductFamily.EDRS_SESSION);
 		prod.setFile(file);
 		prod.setDto(edrsSessionDto);
