@@ -5,16 +5,13 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.ComponentScan;
 
-import esa.s1pdgs.cpoc.disseminator.config.DisseminationProperties;
-import esa.s1pdgs.cpoc.obs_sdk.ObsConfigurationProperties;
-
 /**
  * Ingestor application
  * @author Faisal Rafi
  *
  */
 @SpringBootApplication
-@EnableConfigurationProperties({ObsConfigurationProperties.class})
+@EnableConfigurationProperties
 @ComponentScan("esa.s1pdgs.cpoc")
 public class Application {
 	

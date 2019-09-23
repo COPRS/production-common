@@ -5,11 +5,8 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.ComponentScan;
 
-import esa.s1pdgs.cpoc.ingestion.config.IngestionServiceConfigurationProperties;
-import esa.s1pdgs.cpoc.obs_sdk.ObsConfigurationProperties;
-
 @SpringBootApplication
-@EnableConfigurationProperties({ObsConfigurationProperties.class})
+@EnableConfigurationProperties
 @ComponentScan("esa.s1pdgs.cpoc")
 public class Application {
     public static void main(String[] args) {
