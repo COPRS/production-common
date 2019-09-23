@@ -15,7 +15,7 @@ import esa.s1pdgs.cpoc.obs_sdk.ObsConfigurationProperties;
 @RunWith(SpringRunner.class)
 @SpringBootTest
 @DirtiesContext
-@EnableConfigurationProperties({ObsConfigurationProperties.class, ApplicationProperties.class})
+@EnableConfigurationProperties
 public class ApplicationPropertiesTest {
     /**
      * Properties to test
