@@ -10,7 +10,9 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.junit4.SpringRunner;
 
+import esa.s1pdgs.cpoc.obs_sdk.ObsClient;
 import esa.s1pdgs.cpoc.obs_sdk.ObsConfigurationProperties;
+import esa.s1pdgs.cpoc.obs_sdk.s3.S3ObsClient;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest
@@ -23,6 +25,9 @@ public class ApplicationPropertiesTest {
     @Autowired
     private ApplicationProperties properties;
     
+    @Autowired 
+    private ObsClient obsClient;
+    
     /**
      * Test the properties
      */
@@ -30,4 +35,9 @@ public class ApplicationPropertiesTest {
     public void testLoadProperties() {
         assertEquals("/usr/bin/sh", properties.getCommand());
     } 
+    
+    @Test
+    public final void testObsClient() {
+    	assertEquals(true, obsClient instanceof S3ObsClient);
+    }
 }
