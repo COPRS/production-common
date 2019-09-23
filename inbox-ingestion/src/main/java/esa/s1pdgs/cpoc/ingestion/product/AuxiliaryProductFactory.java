@@ -2,6 +2,7 @@ package esa.s1pdgs.cpoc.ingestion.product;
 
 import java.io.File;
 import java.util.Collections;
+import java.util.Date;
 import java.util.List;
 
 import esa.s1pdgs.cpoc.common.ProductFamily;
@@ -37,6 +38,7 @@ public class AuxiliaryProductFactory implements ProductFactory<ProductDto> {
 				obsAdapter.toObsKey(file), 
 				ProductFamily.AUXILIARY_FILE
 		);
+		dto.setCreationDate(new Date());
 		dto.setHostname(hostname);
 		prod.setDto(dto);
 		return prod;
