@@ -17,7 +17,7 @@ public final class InboxPollingService {
 	public final void pollAll() {
     	LOG.trace("Polling all");
     	for (final Inbox inbox : inboxes) {
-        	LOG.debug("Polling {}", inbox.description());   
+        	LOG.trace("Polling {}", inbox.description());   
         	try {
 				inbox.poll();
 			} catch (Exception e) {
