@@ -1,5 +1,6 @@
 package esa.s1pdgs.cpoc.wrapper.job.mqi;
 
+import static org.junit.Assert.assertEquals;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
@@ -9,6 +10,7 @@ import java.io.File;
 
 import org.junit.Before;
 import org.junit.Test;
+import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
@@ -86,8 +88,15 @@ public class OutputProducerFactoryTest {
                 new GenericPublicationMessageDto<LevelReportDto>(123,
                         ProductFamily.L0_REPORT, new LevelReportDto("test.txt",
                                 "Test report file", ProductFamily.L0_REPORT));
-        verify(this.sender, times(1)).publish(Mockito.eq(message), Mockito.eq(ProductCategory.LEVEL_REPORTS));
         verify(this.sender, never()).publish(Mockito.any(), Mockito.eq(ProductCategory.LEVEL_SEGMENTS));
+        
+        final ArgumentCaptor<GenericPublicationMessageDto<LevelReportDto>> captor = ArgumentCaptor.forClass(GenericPublicationMessageDto.class);
+        verify(this.sender, times(1)).publish(captor.capture(), Mockito.eq(ProductCategory.LEVEL_REPORTS));
+        
+        // copy actual creationDate into the reference message
+        GenericPublicationMessageDto<LevelReportDto> argument = captor.getValue();
+        argument.getMessageToPublish().setCreationDate(message.getMessageToPublish().getCreationDate());        
+        assertEquals(message, argument);
     }
 
     /**
@@ -165,7 +174,14 @@ public class OutputProducerFactoryTest {
                         ProductFamily.L1_REPORT, new LevelReportDto("test.txt",
                                 "Test report file", ProductFamily.L1_REPORT));
         verify(this.sender, never()).publish(Mockito.any(), Mockito.eq(ProductCategory.LEVEL_PRODUCTS));
-        verify(this.sender, times(1)).publish(Mockito.eq(message), Mockito.eq(ProductCategory.LEVEL_REPORTS));
+
+        final ArgumentCaptor<GenericPublicationMessageDto<LevelReportDto>> captor = ArgumentCaptor.forClass(GenericPublicationMessageDto.class);
+        verify(this.sender, times(1)).publish(captor.capture(), Mockito.eq(ProductCategory.LEVEL_REPORTS));
+        
+        // copy actual creationDate into the reference message
+        GenericPublicationMessageDto<LevelReportDto> argument = captor.getValue();
+        argument.getMessageToPublish().setCreationDate(message.getMessageToPublish().getCreationDate());        
+        assertEquals(message, argument);
     }
 
     /**
