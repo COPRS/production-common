@@ -15,9 +15,11 @@ public abstract class AbstractDto {
     private String hostname;
 
 	public AbstractDto() {
+		setCreationDate(new Date());
 	}
 
 	public AbstractDto(String productName, ProductFamily family) {
+		this();
 		this.productName = productName;
 		this.family = family;
 	}

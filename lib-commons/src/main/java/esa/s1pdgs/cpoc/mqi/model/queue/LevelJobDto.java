@@ -50,6 +50,7 @@ public class LevelJobDto extends AbstractDto {
      * Default constructor
      */
     public LevelJobDto() {
+    	super();
     }
 
     /**
