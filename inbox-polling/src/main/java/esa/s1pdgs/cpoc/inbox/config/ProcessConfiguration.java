@@ -1,8 +1,10 @@
 package esa.s1pdgs.cpoc.inbox.config;
 
 import org.springframework.boot.context.properties.ConfigurationProperties;
+import org.springframework.stereotype.Component;
 
 @ConfigurationProperties("process")
+@Component
 public class ProcessConfiguration {
 	private String hostname;
 	
