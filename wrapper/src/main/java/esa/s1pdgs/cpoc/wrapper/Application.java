@@ -6,8 +6,6 @@ import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.scheduling.annotation.EnableScheduling;
 
-import esa.s1pdgs.cpoc.obs_sdk.ObsConfigurationProperties;
-
 
 /**
  * L0 Wrapper application
@@ -17,7 +15,7 @@ import esa.s1pdgs.cpoc.obs_sdk.ObsConfigurationProperties;
  */
 @SpringBootApplication
 @EnableScheduling
-@EnableConfigurationProperties({ObsConfigurationProperties.class})
+@EnableConfigurationProperties
 @ComponentScan("esa.s1pdgs.cpoc")
 public class Application {
 	
