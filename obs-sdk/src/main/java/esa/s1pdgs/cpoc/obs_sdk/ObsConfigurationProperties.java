@@ -7,6 +7,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.PropertySource;
+import org.springframework.stereotype.Component;
 
 import esa.s1pdgs.cpoc.common.ProductFamily;
 
@@ -14,6 +15,7 @@ import esa.s1pdgs.cpoc.common.ProductFamily;
 @PropertySource({"classpath:obs-${obsBackend:aws-s3}.properties"})
 @EnableConfigurationProperties
 @ConfigurationProperties
+@Component
 public class ObsConfigurationProperties {	
 	public static final String UNDEFINED = "NOT_DEFINED";
 	
