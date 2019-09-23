@@ -29,7 +29,6 @@ public class AuxiliaryProductFactory implements ProductFactory<ProductDto> {
 
 	private final Product<ProductDto> newProduct(final File file, final ObsAdapter obsAdapter) {
 		final Product<ProductDto> prod = new Product<>();
-		prod.getDto().setHostname(hostname);
 		prod.setFamily(ProductFamily.AUXILIARY_FILE);
 		prod.setFile(file);	
 		
@@ -38,6 +37,7 @@ public class AuxiliaryProductFactory implements ProductFactory<ProductDto> {
 				obsAdapter.toObsKey(file), 
 				ProductFamily.AUXILIARY_FILE
 		);
+		dto.setHostname(hostname);
 		prod.setDto(dto);
 		return prod;
 	}
