@@ -34,6 +34,7 @@ import esa.s1pdgs.cpoc.common.errors.processing.MetadataQueryException;
 import esa.s1pdgs.cpoc.common.utils.DateUtils;
 import esa.s1pdgs.cpoc.common.utils.LogUtils;
 import esa.s1pdgs.cpoc.jobgenerator.config.JobGeneratorSettings;
+import esa.s1pdgs.cpoc.jobgenerator.config.ProcessConfiguration;
 import esa.s1pdgs.cpoc.jobgenerator.config.ProcessSettings;
 import esa.s1pdgs.cpoc.jobgenerator.model.JobGeneration;
 import esa.s1pdgs.cpoc.jobgenerator.model.ProductMode;
@@ -118,6 +119,8 @@ public abstract class AbstractJobsGenerator<T extends AbstractDto> implements Ru
      */
     private final AppCatalogJobClient<T> appDataService;
 
+    private final String hostname;
+
     /**
      * Task table
      */
@@ -155,7 +158,8 @@ public abstract class AbstractJobsGenerator<T extends AbstractDto> implements Ru
             final ProcessSettings l0ProcessSettings,
             final JobGeneratorSettings taskTablesSettings,
             final OutputProducerFactory outputFactory,
-            final AppCatalogJobClient<T> appDataService) {
+            final AppCatalogJobClient<T> appDataService,
+            final ProcessConfiguration processConfiguration) {
         this.xmlConverter = xmlConverter;
         this.metadataClient = metadataClient;
         this.l0ProcessSettings = l0ProcessSettings;
@@ -165,6 +169,7 @@ public abstract class AbstractJobsGenerator<T extends AbstractDto> implements Ru
         this.tasks = new ArrayList<>();
         this.mode = ProductMode.BLANK;
         this.appDataService = appDataService;
+        this.hostname = processConfiguration.getHostname();
     }
 
     // ----------------------------------------------------
@@ -862,6 +867,8 @@ public abstract class AbstractJobsGenerator<T extends AbstractDto> implements Ru
                 job.getAppDataJob().getProduct().getProductName(),
                 job.getAppDataJob().getProduct().getProcessMode(), workingDir,
                 jobOrder);
+        
+        r.setHostname(hostname);
 
         try {
 

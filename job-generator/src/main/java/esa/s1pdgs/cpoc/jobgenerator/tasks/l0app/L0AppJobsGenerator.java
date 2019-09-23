@@ -16,6 +16,7 @@ import esa.s1pdgs.cpoc.common.errors.processing.JobGenInputsMissingException;
 import esa.s1pdgs.cpoc.common.errors.processing.MetadataQueryException;
 import esa.s1pdgs.cpoc.jobgenerator.config.AiopProperties;
 import esa.s1pdgs.cpoc.jobgenerator.config.JobGeneratorSettings;
+import esa.s1pdgs.cpoc.jobgenerator.config.ProcessConfiguration;
 import esa.s1pdgs.cpoc.jobgenerator.config.ProcessSettings;
 import esa.s1pdgs.cpoc.jobgenerator.model.JobGeneration;
 import esa.s1pdgs.cpoc.jobgenerator.model.joborder.AbstractJobOrderConf;
@@ -40,9 +41,9 @@ public class L0AppJobsGenerator extends AbstractJobsGenerator<EdrsSessionDto> {
             JobGeneratorSettings taskTablesSettings,
             final OutputProducerFactory outputFactory,
             final AppCatalogJobClient<EdrsSessionDto> appDataService,
-            final AiopProperties aiopProperties) {
+            final AiopProperties aiopProperties, final ProcessConfiguration processConfiguration) {
         super(xmlConverter, metadataClient, l0ProcessSettings,
-                taskTablesSettings, outputFactory, appDataService);
+                taskTablesSettings, outputFactory, appDataService, processConfiguration);
         
         this.aiopProperties = new HashMap<>();
         Map<String, String> stationCodes = aiopProperties.getStationCodes();

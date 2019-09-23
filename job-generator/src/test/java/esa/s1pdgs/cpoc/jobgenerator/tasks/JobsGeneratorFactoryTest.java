@@ -27,6 +27,7 @@ import esa.s1pdgs.cpoc.common.ProductFamily;
 import esa.s1pdgs.cpoc.common.errors.processing.JobGenBuildTaskTableException;
 import esa.s1pdgs.cpoc.jobgenerator.config.AiopProperties;
 import esa.s1pdgs.cpoc.jobgenerator.config.JobGeneratorSettings;
+import esa.s1pdgs.cpoc.jobgenerator.config.ProcessConfiguration;
 import esa.s1pdgs.cpoc.jobgenerator.config.ProcessSettings;
 import esa.s1pdgs.cpoc.jobgenerator.model.joborder.JobOrder;
 import esa.s1pdgs.cpoc.jobgenerator.model.joborder.JobOrderOutput;
@@ -70,6 +71,9 @@ public class JobsGeneratorFactoryTest {
 
     @Mock
     private AppCatalogJobClient appDataPService;
+    
+    @Mock
+    private ProcessConfiguration processConfiguration;
 
     /**
      * Test set up
@@ -147,7 +151,7 @@ public class JobsGeneratorFactoryTest {
 
             JobsGeneratorFactory factory = new JobsGeneratorFactory(
                     l0ProcessSettings, jobGeneratorSettings, aiopProperties,
-                    xmlConverter, metadataClient, JobsSender);
+                    xmlConverter, metadataClient, JobsSender, processConfiguration);
 
             AbstractJobsGenerator<EdrsSessionDto> generator =
                     factory.createJobGeneratorForEdrsSession(new File(
@@ -396,7 +400,7 @@ public class JobsGeneratorFactoryTest {
 
             JobsGeneratorFactory factory = new JobsGeneratorFactory(
                     l0ProcessSettings, jobGeneratorSettings, aiopProperties,
-                    xmlConverter, metadataClient, JobsSender);
+                    xmlConverter, metadataClient, JobsSender, processConfiguration);
 
             AbstractJobsGenerator<ProductDto> generator =
                     factory.createJobGeneratorForL0Slice(new File(

@@ -18,6 +18,7 @@ import esa.s1pdgs.cpoc.common.errors.processing.JobGenInputsMissingException;
 import esa.s1pdgs.cpoc.common.errors.processing.MetadataQueryException;
 import esa.s1pdgs.cpoc.common.utils.DateUtils;
 import esa.s1pdgs.cpoc.jobgenerator.config.JobGeneratorSettings;
+import esa.s1pdgs.cpoc.jobgenerator.config.ProcessConfiguration;
 import esa.s1pdgs.cpoc.jobgenerator.config.ProcessSettings;
 import esa.s1pdgs.cpoc.jobgenerator.model.JobGeneration;
 import esa.s1pdgs.cpoc.jobgenerator.model.joborder.JobOrder;
@@ -51,9 +52,10 @@ public class L0SegmentAppJobsGenerator extends AbstractJobsGenerator<ProductDto>
             final ProcessSettings l0ProcessSettings,
             final JobGeneratorSettings taskTablesSettings,
             final OutputProducerFactory outputFactory,
-            final AppCatalogJobClient<ProductDto> appDataService) {
+            final AppCatalogJobClient<ProductDto> appDataService,
+            final ProcessConfiguration processConfiguration) {
         super(xmlConverter, metadataClient, l0ProcessSettings,
-                taskTablesSettings, outputFactory, appDataService);
+                taskTablesSettings, outputFactory, appDataService, processConfiguration);
     }
 
     /**

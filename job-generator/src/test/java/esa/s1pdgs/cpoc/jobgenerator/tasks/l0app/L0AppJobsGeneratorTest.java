@@ -36,6 +36,7 @@ import esa.s1pdgs.cpoc.common.errors.processing.MetadataQueryException;
 import esa.s1pdgs.cpoc.jobgenerator.config.AiopProperties;
 import esa.s1pdgs.cpoc.jobgenerator.config.JobGeneratorSettings;
 import esa.s1pdgs.cpoc.jobgenerator.config.JobGeneratorSettings.WaitTempo;
+import esa.s1pdgs.cpoc.jobgenerator.config.ProcessConfiguration;
 import esa.s1pdgs.cpoc.jobgenerator.config.ProcessSettings;
 import esa.s1pdgs.cpoc.jobgenerator.model.JobGeneration;
 import esa.s1pdgs.cpoc.jobgenerator.model.tasktable.TaskTable;
@@ -77,6 +78,9 @@ public class L0AppJobsGeneratorTest {
 
     @Mock
     private AppCatalogJobClient appDataService;
+    
+    @Mock
+    private ProcessConfiguration processConfiguration;
 
     private TaskTable expectedTaskTable;
     private L0AppJobsGenerator generator;
@@ -106,7 +110,7 @@ public class L0AppJobsGeneratorTest {
 
         JobsGeneratorFactory factory = new JobsGeneratorFactory(
                 l0ProcessSettings, jobGeneratorSettings, aiopProperties,
-                xmlConverter, metadataClient, jobsSender);
+                xmlConverter, metadataClient, jobsSender, processConfiguration);
         generator = (L0AppJobsGenerator) factory
                 .createJobGeneratorForEdrsSession(new File(
                         "./test/data/generic_config/task_tables/TaskTable.AIOP.xml"),

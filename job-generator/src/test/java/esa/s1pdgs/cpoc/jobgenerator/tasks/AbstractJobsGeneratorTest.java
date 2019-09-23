@@ -45,6 +45,7 @@ import esa.s1pdgs.cpoc.common.errors.processing.JobGenBuildTaskTableException;
 import esa.s1pdgs.cpoc.common.errors.processing.MetadataQueryException;
 import esa.s1pdgs.cpoc.jobgenerator.config.AppConfig;
 import esa.s1pdgs.cpoc.jobgenerator.config.JobGeneratorSettings;
+import esa.s1pdgs.cpoc.jobgenerator.config.ProcessConfiguration;
 import esa.s1pdgs.cpoc.jobgenerator.config.JobGeneratorSettings.WaitTempo;
 import esa.s1pdgs.cpoc.jobgenerator.config.ProcessSettings;
 import esa.s1pdgs.cpoc.jobgenerator.model.ProductMode;
@@ -90,6 +91,9 @@ public class AbstractJobsGeneratorTest {
     @Mock
     private AppCatalogJobClient appDataPService;
 
+    @Mock
+    private ProcessConfiguration processConfiguration;
+    
     private TaskTable expectedTaskTable;
 
     /**
@@ -123,7 +127,7 @@ public class AbstractJobsGeneratorTest {
 
         generator = new LevelProductsJobsGenerator(xmlConverter, metadataClient,
                 processSettings, jobGeneratorSettings, JobsSender,
-                appDataPService);
+                appDataPService, processConfiguration);
         generator.initialize(new File(
                 "./test/data/generic_config/task_tables/IW_RAW__0_GRDH_1.xml"));
         generator.setMode(ProductMode.SLICING);
@@ -353,7 +357,7 @@ public class AbstractJobsGeneratorTest {
                 .convertFromXMLToObject(Mockito.anyString());
         AbstractJobsGenerator<ProductDto> gen = new LevelProductsJobsGenerator(
                 xmlConverter, metadataClient, processSettings,
-                jobGeneratorSettings, JobsSender, appDataPService);
+                jobGeneratorSettings, JobsSender, appDataPService, processConfiguration);
         generator.setMode(ProductMode.SLICING);
 
         thrown.expect(JobGenBuildTaskTableException.class);
@@ -371,7 +375,7 @@ public class AbstractJobsGeneratorTest {
                 .convertFromXMLToObject(Mockito.anyString());
         AbstractJobsGenerator<ProductDto> gen = new LevelProductsJobsGenerator(
                 xmlConverter, metadataClient, processSettings,
-                jobGeneratorSettings, JobsSender, appDataPService);
+                jobGeneratorSettings, JobsSender, appDataPService, processConfiguration);
         generator.setMode(ProductMode.SLICING);
 
         thrown.expect(JobGenBuildTaskTableException.class);
