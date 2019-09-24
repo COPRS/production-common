@@ -8,22 +8,31 @@ import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
+import java.io.BufferedOutputStream;
 import java.io.File;
+import java.io.FileOutputStream;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 
+import com.amazonaws.util.IOUtils;
+
 import esa.s1pdgs.cpoc.common.ApplicationLevel;
 import esa.s1pdgs.cpoc.common.ProductFamily;
 import esa.s1pdgs.cpoc.common.errors.AbstractCodedException;
 import esa.s1pdgs.cpoc.common.errors.mqi.MqiPublicationError;
+import esa.s1pdgs.cpoc.common.utils.FileUtils;
+import esa.s1pdgs.cpoc.common.utils.Streams;
 import esa.s1pdgs.cpoc.mqi.model.queue.LevelJobDto;
 import esa.s1pdgs.cpoc.mqi.model.queue.LevelJobOutputDto;
 import esa.s1pdgs.cpoc.mqi.model.rest.GenericMessageDto;
@@ -43,11 +52,13 @@ import esa.s1pdgs.cpoc.wrapper.job.mqi.OutputProcuderFactory;
  * @author Viveris TEchnologies
  */
 public class OutputProcessorTest {
+	
+	private final File tmpDir = FileUtils.createTmpDir();
 
     /**
      * Test directory
      */
-    private static final String PATH_DIRECTORY_TEST = "./test/outputs/";
+    private final String PATH_DIRECTORY_TEST = tmpDir.getPath();
 
     /**
      * Processor to test
@@ -95,7 +106,7 @@ public class OutputProcessorTest {
      * @throws AbstractCodedException
      */
     @Before
-    public void init() throws AbstractCodedException {
+    public void init() throws Exception {
         // Init mocks
         MockitoAnnotations.initMocks(this);
 
@@ -165,7 +176,7 @@ public class OutputProcessorTest {
 
         processor =
                 new OutputProcessor(obsClient, procuderFactory, inputMessage,
-                        PATH_DIRECTORY_TEST + "outputs.list", 2, "MONITOR", ApplicationLevel.L0, properties);
+                        PATH_DIRECTORY_TEST + "/outputs.list", 2, "MONITOR", ApplicationLevel.L0, properties);
 
         // Mocks
         doNothing().when(obsClient).upload(Mockito.any());
@@ -173,6 +184,16 @@ public class OutputProcessorTest {
                 .sendOutput(Mockito.any(ObsQueueMessage.class), Mockito.any());
         doNothing().when(procuderFactory)
                 .sendOutput(Mockito.any(FileQueueMessage.class), Mockito.any());
+
+        try (final InputStream in = Streams.getInputStream("outputs.list");
+        	 final OutputStream out = new BufferedOutputStream(new FileOutputStream(new File(tmpDir, "outputs.list")))) {
+        	IOUtils.copy(in, out);
+        }        
+    }
+    
+    @After
+    public final void tearDown() throws Exception {
+    	FileUtils.delete(tmpDir.getPath());
     }
 
     /**
