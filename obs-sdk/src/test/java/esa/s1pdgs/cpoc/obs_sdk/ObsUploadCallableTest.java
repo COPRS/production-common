@@ -9,6 +9,7 @@ import static org.mockito.Mockito.verify;
 import java.io.File;
 import java.util.Arrays;
 
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -19,6 +20,7 @@ import org.mockito.MockitoAnnotations;
 
 import esa.s1pdgs.cpoc.common.ProductFamily;
 import esa.s1pdgs.cpoc.common.errors.AbstractCodedException;
+import esa.s1pdgs.cpoc.common.utils.FileUtils;
 import esa.s1pdgs.cpoc.obs_sdk.ObsClient;
 import esa.s1pdgs.cpoc.obs_sdk.ObsServiceException;
 import esa.s1pdgs.cpoc.obs_sdk.ObsUploadCallable;
@@ -32,6 +34,8 @@ import esa.s1pdgs.cpoc.obs_sdk.SdkClientException;
  */
 public class ObsUploadCallableTest {
 
+    private final File tmpDir = FileUtils.createTmpDir();
+    
     /**
      * Mock OBS client
      */
@@ -52,9 +56,9 @@ public class ObsUploadCallableTest {
     /**
      * Download object used when nominal case
      */
-    private ObsUploadObject object = new ObsUploadObject(ProductFamily.AUXILIARY_FILE, "key1", new File("test/key1"));
-    private ObsUploadObject objectSdk = new ObsUploadObject(ProductFamily.EDRS_SESSION, "key2", new File("test/key2"));
-    private ObsUploadObject objectAws = new ObsUploadObject(ProductFamily.AUXILIARY_FILE, "key3", new File("test/key3"));
+    private ObsUploadObject object = new ObsUploadObject(ProductFamily.AUXILIARY_FILE, "key1", new File(tmpDir, "key1"));
+    private ObsUploadObject objectSdk = new ObsUploadObject(ProductFamily.EDRS_SESSION, "key2", new File(tmpDir,"key2"));
+    private ObsUploadObject objectAws = new ObsUploadObject(ProductFamily.AUXILIARY_FILE, "key3", new File(tmpDir,"key3"));
 
     /**
      * Initialization
@@ -69,6 +73,11 @@ public class ObsUploadCallableTest {
 //        .uploadFilesPerBatch(Mockito.eq(Arrays.asList(objectSdk)));
 //        doThrow(new ObsServiceException("AWS exception")).when(obsClient)
 //        .uploadFilesPerBatch(Mockito.eq(Arrays.asList(objectAws)));
+    }
+    
+    @After
+    public void tearDown() throws Exception {  
+        FileUtils.delete(tmpDir.getPath());        
     }
 
     /**

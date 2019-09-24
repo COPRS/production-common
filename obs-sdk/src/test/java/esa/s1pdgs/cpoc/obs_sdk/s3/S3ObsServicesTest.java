@@ -36,6 +36,9 @@ import com.amazonaws.services.s3.transfer.TransferManager;
 import com.amazonaws.services.s3.transfer.Upload;
 import com.amazonaws.services.s3.transfer.model.UploadResult;
 
+import esa.s1pdgs.cpoc.common.errors.InternalErrorException;
+import esa.s1pdgs.cpoc.common.utils.FileUtils;
+
 /**
  * Test the services to access to the OBS via the amazon S3 API
  * 
@@ -50,6 +53,8 @@ public class S3ObsServicesTest {
     private final static String BCK_OBJ_NOT_EXIST = "bck-obj-not-exist";
     private final static String BCK_EXC_SDK = "bck-ex-sdk";
     private final static String BCK_EXC_AWS = "bck-ex-aws";
+    
+    private final File tmpDir = FileUtils.createTmpDir();
 
     /**
      * Mock S3 client
@@ -118,26 +123,7 @@ public class S3ObsServicesTest {
      */
     @After
     public void clean() {
-        File file1 = new File("test/key1");
-        if (file1.exists()) {
-            file1.delete();
-        }
-        File file2 = new File("test/key2");
-        if (file2.exists()) {
-            file2.delete();
-        }
-        File file3 = new File("test/root/key3");
-        if (file3.exists()) {
-            file3.delete();
-        }
-        File file4 = new File("test/key3");
-        if (file4.exists()) {
-            file4.delete();
-        }
-        File file5 = new File("test/root");
-        if (file5.exists()) {
-            file5.delete();
-        }
+    	FileUtils.delete(tmpDir.getPath());
     }
 
     private void mockAmazonS3TransactionManager() throws AmazonServiceException,
@@ -341,22 +327,21 @@ public class S3ObsServicesTest {
     @Test
     public void testNominaldownloadObjectsWithPrefixIgnoreFolder()
             throws S3ObsServiceException, S3SdkClientException {
-    	List<File> files = service.downloadObjectsWithPrefix(BCK_OBJ_EXIST, "key",
-                "test/", true);
+    	List<File> files = service.downloadObjectsWithPrefix(BCK_OBJ_EXIST, "key", tmpDir.getPath(), true);
         assertEquals(3, files.size());
         verify(s3client, times(3)).getObject(
                 Mockito.any(GetObjectRequest.class), Mockito.any(File.class));
         verify(s3client, times(1)).getObject(
                 Mockito.any(GetObjectRequest.class),
-                Mockito.eq(new File("test/key1")));
+                Mockito.eq(new File(tmpDir,"key1")));
         verify(s3client, times(1)).getObject(
                 Mockito.any(GetObjectRequest.class),
-                Mockito.eq(new File("test/key2")));
+                Mockito.eq(new File(tmpDir,"key2")));
         verify(s3client, times(1)).getObject(
                 Mockito.any(GetObjectRequest.class),
-                Mockito.eq(new File("test/root/key3")));
-        assertTrue((new File("test/key3")).exists());
-        assertFalse((new File("test/root/key3")).exists());
+                Mockito.eq(new File(tmpDir,"root/key3")));
+        assertTrue((new File(tmpDir,"key3")).exists());
+        assertFalse((new File(tmpDir,"root/key3")).exists());
     }
 
     /**
@@ -369,21 +354,21 @@ public class S3ObsServicesTest {
     public void testNominaldownloadObjectsWithPrefixNotIgnoreFolder()
             throws S3ObsServiceException, S3SdkClientException {
     	List<File> files = service.downloadObjectsWithPrefix(BCK_OBJ_EXIST, "key",
-                "test", false);
+    			tmpDir.getPath(), false);
         assertEquals(3, files.size());
         verify(s3client, times(3)).getObject(
                 Mockito.any(GetObjectRequest.class), Mockito.any(File.class));
         verify(s3client, times(1)).getObject(
                 Mockito.any(GetObjectRequest.class),
-                Mockito.eq(new File("test/key1")));
+                Mockito.eq(new File(tmpDir,"key1")));
         verify(s3client, times(1)).getObject(
                 Mockito.any(GetObjectRequest.class),
-                Mockito.eq(new File("test/key2")));
+                Mockito.eq(new File(tmpDir,"key2")));
         verify(s3client, times(1)).getObject(
                 Mockito.any(GetObjectRequest.class),
-                Mockito.eq(new File("test/root/key3")));
-        assertFalse((new File("test/key3")).exists());
-        assertTrue((new File("test/root/key3")).exists());
+                Mockito.eq(new File(tmpDir,"root/key3")));
+        assertFalse((new File(tmpDir,"key3")).exists());
+        assertTrue((new File(tmpDir,"root/key3")).exists());
     }
 
     /**
@@ -437,9 +422,9 @@ public class S3ObsServicesTest {
     @Test
     public void testUploadFileNominal()
             throws S3ObsServiceException, S3SdkClientException {
-        service.uploadFile(BCK_OBJ_EXIST, "key-test", new File("pom.xml"));
+        service.uploadFile(BCK_OBJ_EXIST, "key-test", tmpDir);
         verify(s3tm, times(1)).upload(Mockito.eq(BCK_OBJ_EXIST),
-                Mockito.eq("key-test"), Mockito.eq(new File("pom.xml")));
+                Mockito.eq("key-test"), Mockito.eq(tmpDir));
     }
 
     /**
@@ -456,7 +441,7 @@ public class S3ObsServicesTest {
         thrown.expect(hasProperty("key", is("key-test")));
         thrown.expectCause(isA(SdkClientException.class));
 
-        service.uploadFile(BCK_EXC_SDK, "key-test", new File("pom.xml"));
+        service.uploadFile(BCK_EXC_SDK, "key-test", tmpDir);
     }
 
     /**
@@ -473,7 +458,7 @@ public class S3ObsServicesTest {
         thrown.expect(hasProperty("key", is("key-test")));
         thrown.expectCause(isA(AmazonServiceException.class));
 
-        service.uploadFile(BCK_EXC_AWS, "key-test", new File("pom.xml"));
+        service.uploadFile(BCK_EXC_AWS, "key-test",tmpDir);
     }
 
     /**
@@ -481,15 +466,16 @@ public class S3ObsServicesTest {
      * 
      * @throws S3ObsServiceException
      * @throws S3SdkClientException
+     * @throws InternalErrorException 
      */
     @Test
-    public void testUploadDirectoryNominalWhenFile()
-            throws S3ObsServiceException, S3SdkClientException {
-        List<String> ret = service.uploadDirectory(BCK_OBJ_EXIST, "key-test",
-                new File("pom.xml"));
+    public void testUploadDirectoryNominalWhenFile() throws Exception {
+    	final File testFile = new File(tmpDir,"foo");
+    	FileUtils.writeFile(testFile, "123");
+    	
+        List<String> ret = service.uploadDirectory(BCK_OBJ_EXIST, "key-test", testFile);
         assertEquals(1, ret.size());
-        verify(s3tm, times(1)).upload(Mockito.eq(BCK_OBJ_EXIST),
-                Mockito.eq("key-test"), Mockito.eq(new File("pom.xml")));
+        verify(s3tm, times(1)).upload(Mockito.eq(BCK_OBJ_EXIST), Mockito.eq("key-test"), Mockito.eq(testFile));
     }
 
     /**
@@ -502,11 +488,11 @@ public class S3ObsServicesTest {
     @Test
     public void testUploadDirectoryNominal()
             throws S3ObsServiceException, S3SdkClientException, IOException {
-        File file1 = new File("test/key1");
-        File file2 = new File("test/key2");
-        File file3 = new File("test/key");
-        File file4 = new File("test/key/key3");
-        File file5 = new File("test/ghost");
+        File file1 = new File(tmpDir,"key1");
+        File file2 = new File(tmpDir,"key2");
+        File file3 = new File(tmpDir,"key");
+        File file4 = new File(tmpDir,"key/key3");
+        File file5 = new File(tmpDir,"ghost");
 
         file1.createNewFile();
         file2.createNewFile();
@@ -514,19 +500,19 @@ public class S3ObsServicesTest {
         file4.createNewFile();
         file5.mkdirs();
         
-        service.uploadDirectory(BCK_OBJ_EXIST, "key-test", new File("test"));
+        service.uploadDirectory(BCK_OBJ_EXIST, "key-test", tmpDir);
         verify(s3tm, times(3)).upload(Mockito.eq(BCK_OBJ_EXIST),
                 Mockito.anyString(), Mockito.any(File.class));
         verify(s3tm, times(1)).upload(Mockito.eq(BCK_OBJ_EXIST),
                 Mockito.eq("key-test" + File.separator + "key1"),
-                Mockito.eq(new File("test/key1")));
+                Mockito.eq(new File(tmpDir,"key1")));
         verify(s3tm, times(1)).upload(Mockito.eq(BCK_OBJ_EXIST),
                 Mockito.eq("key-test" + File.separator + "key2"),
-                Mockito.eq(new File("test/key2")));
+                Mockito.eq(new File(tmpDir,"key2")));
         verify(s3tm, times(1)).upload(
                 Mockito.eq(BCK_OBJ_EXIST), Mockito.eq("key-test"
                         + File.separator + "key" + File.separator + "key3"),
-                Mockito.eq(new File("test/key/key3")));
+                Mockito.eq(new File(tmpDir,"key/key3")));
 
         file1.delete();
         file2.delete();
@@ -545,11 +531,10 @@ public class S3ObsServicesTest {
     @Test
     public void testUploadDirectoryNominalNoChild()
             throws S3ObsServiceException, S3SdkClientException, IOException {
-        File file3 = new File("test/key");
+        File file3 = new File(tmpDir,"key");
         file3.mkdirs();
 
-        List<String> ret = service.uploadDirectory(BCK_OBJ_EXIST, "key-test",
-                new File("test/key"));
+        List<String> ret = service.uploadDirectory(BCK_OBJ_EXIST, "key-test", file3);
         assertEquals(0, ret.size());
         verify(s3tm, never()).upload(Mockito.anyString(), Mockito.anyString(),
                 Mockito.any(File.class));
