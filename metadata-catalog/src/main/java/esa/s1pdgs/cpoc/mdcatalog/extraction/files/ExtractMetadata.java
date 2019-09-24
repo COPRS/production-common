@@ -1,5 +1,6 @@
 package esa.s1pdgs.cpoc.mdcatalog.extraction.files;
 
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
 import java.nio.charset.Charset;
@@ -57,8 +58,6 @@ public class ExtractMetadata {
 	private static final String XSLT_L0_SEGMENT_MANIFEST = "XSLT_L0_SEGMENT.xslt";
 	private static final String XSLT_L1_MANIFEST = "XSLT_L1_MANIFEST.xslt";
 	private static final String XSLT_L2_MANIFEST = "XSLT_L2_MANIFEST.xslt";
-	private static final String OUTPUT_XML = "tmp/output.xml";
-	private static final String OUTPUT_L0_SEGMENT_XML = "tmp/outputl0seg.xml";
 
 	private final Map<ProductFamily, String> xsltMap;
 
@@ -666,9 +665,12 @@ public class ExtractMetadata {
 			Source xsltL1MANIFEST = new StreamSource(new File(xsltFilename));
 			Transformer transformerL0 = transFactory.newTransformer(xsltL1MANIFEST);
 			Source l1File = new StreamSource(manifestFile);
-			transformerL0.transform(l1File, new StreamResult(new File(OUTPUT_L0_SEGMENT_XML)));
+			ByteArrayOutputStream transformationStream = new ByteArrayOutputStream();
+
+			transformerL0.transform(l1File, new StreamResult(transformationStream));
 			// JSON creation
-			JSONObject metadataJSONObject = XML.toJSONObject(readFile(OUTPUT_L0_SEGMENT_XML, Charset.defaultCharset()));
+			JSONObject metadataJSONObject = XML
+					.toJSONObject(transformationStream.toString(Charset.defaultCharset().name()));
 			if (metadataJSONObject.has("startTime")) {
 				try {
 					String t = DateUtils
@@ -749,9 +751,11 @@ public class ExtractMetadata {
 			Source xsltMANIFEST = new StreamSource(new File(this.xsltDirectory + xsltMap.get(productFamily)));
 			Transformer transformer = transFactory.newTransformer(xsltMANIFEST);
 			Source inputFile = new StreamSource(manifestFile);
-			transformer.transform(inputFile, new StreamResult(new File(OUTPUT_XML)));
+			ByteArrayOutputStream transformationStream = new ByteArrayOutputStream();
+			transformer.transform(inputFile, new StreamResult(transformationStream));
 			// JSON creation
-			JSONObject metadataJSONObject = XML.toJSONObject(readFile(OUTPUT_XML, Charset.defaultCharset()));
+			JSONObject metadataJSONObject = XML
+					.toJSONObject(transformationStream.toString(Charset.defaultCharset().name()));
 
 			if (metadataJSONObject.has("sliceCoordinates")
 					&& !metadataJSONObject.getString("sliceCoordinates").isEmpty()) {
