@@ -5,9 +5,13 @@ import java.io.IOException;
 import java.nio.file.FileVisitOption;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -42,24 +46,25 @@ public class FilesystemInboxAdapter implements InboxAdapter {
 	@Override
 	public Collection<InboxEntry> read(List<InboxFilter> filter) {
 		final Set<InboxEntry> result = new HashSet<>();
+		
+		final Map<InboxFilter,List<InboxEntry>> filtered = new HashMap<>();
+		for (InboxFilter f : filter) {
+			filtered.put(f, new ArrayList<>());
+		}
 
 		LOG.trace("Reading inbox filesystem directory '{}'", inboxDirectory);
 		try {
-			for (final Path entryRelativePath : listDeep()) {
+			loopOverDirectory: for (final Path entryRelativePath : listDeep()) {
 				LOG.trace("Found '{}' in inbox filesystem directory '{}'", entryRelativePath, inboxDirectory);
 				final InboxEntry inboxEntry = inboxEntryFactory.newInboxEntry(inboxPathInformation, entryRelativePath,
 						inboxDirectory.toPath());
-				boolean ignore = false;
 				for (InboxFilter f : filter) {
 					if (!f.accept(inboxEntry)) {
-						LOG.debug("Entry '{}' in inbox filesystem directory '{}' is ignored by {}", inboxEntry,
+						LOG.trace("Entry '{}' in inbox filesystem directory '{}' is ignored by {}", inboxEntry,
 								inboxDirectory, filter);
-						ignore = true;
-						break;
+						filtered.get(f).add(inboxEntry);
+						continue loopOverDirectory;
 					}
-				}
-				if (ignore) {
-					continue;
 				}
 				LOG.trace("Adding {} from inbox filesystem directory '{}'", inboxEntry);
 				result.add(inboxEntry);
@@ -67,6 +72,12 @@ public class FilesystemInboxAdapter implements InboxAdapter {
 		} catch (IOException e) {
 			LOG.error("error while listing inbox directory", e);
 		}
+		
+		for (Entry<InboxFilter, List<InboxEntry>> entrySet : filtered.entrySet()) {
+			List<String> urls = entrySet.getValue().stream().map(s -> s.getUrl()).collect(Collectors.toList());
+			LOG.debug("Ignored {} inbox entries by filter '{}'. Affected URLs: '{}'", entrySet.getValue().size(), entrySet.getKey(), urls);
+		}
+		
 		return result;
 	}
 
