@@ -4,8 +4,6 @@ import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
 import java.nio.charset.Charset;
-import java.nio.file.Files;
-import java.nio.file.Paths;
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeParseException;
@@ -16,7 +14,6 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 import javax.xml.bind.JAXBException;
-import javax.xml.transform.Source;
 import javax.xml.transform.Transformer;
 import javax.xml.transform.TransformerException;
 import javax.xml.transform.TransformerFactory;
@@ -59,6 +56,9 @@ public class ExtractMetadata {
 	private static final String XSLT_L1_MANIFEST = "XSLT_L1_MANIFEST.xslt";
 	private static final String XSLT_L2_MANIFEST = "XSLT_L2_MANIFEST.xslt";
 
+	/**
+	 * Mapping of family to XSLT file name
+	 */
 	private final Map<ProductFamily, String> xsltMap;
 
 	/**
@@ -76,8 +76,14 @@ public class ExtractMetadata {
 	 */
 	private Map<String, Float> typeSliceLength;
 
+	/**
+	 * Directory containing the XSLT files
+	 */
 	private String xsltDirectory;
 
+	/**
+	 * The XML converter to use
+	 */
 	private final XmlConverter xmlConverter;
 
 	/**
@@ -85,6 +91,9 @@ public class ExtractMetadata {
 	 */
 	protected final String localDirectory;
 
+	/**
+	 * Logger
+	 */
 	private static final Logger LOGGER = LogManager.getLogger(ExtractMetadata.class);
 
 	/**
@@ -108,16 +117,376 @@ public class ExtractMetadata {
 	}
 
 	/**
-	 * Tool function which returns the content of a file
+	 * Function which extracts metadata from MPL EOF file
 	 * 
-	 * @param FileName
-	 * @param encoding
-	 * @return the content of the file
-	 * @throws IOException
+	 * @param descriptor        The file descriptor of the auxiliary file
+	 * @param inputMetadataFile The file containing the metadata
+	 * @return the json object with extracted metadata
+	 * @throws MetadataExtractionException
+	 * @throws MetadataMalformedException
 	 */
-	private String readFile(String fileName, Charset encoding) throws IOException {
-		byte[] encoded = Files.readAllBytes(Paths.get(fileName));
-		return new String(encoded, encoding);
+	public JSONObject processEOFFile(ConfigFileDescriptor descriptor, File inputMetadataFile)
+			throws MetadataExtractionException, MetadataMalformedException {
+
+		JSONObject metadataJSONObject = transformXMLWithXSLTToJSON(inputMetadataFile,
+				new File(this.xsltDirectory + XSLT_MPL_EOF));
+		
+		metadataJSONObject = putConfigFileMetadataToJSON(metadataJSONObject, descriptor);
+		LOGGER.debug("composed Json: {} ", metadataJSONObject);
+		return metadataJSONObject;
+	}
+
+	/**
+	 * Function which extracts metadata from AUX EOF file
+	 * 
+	 * @param descriptor        The file descriptor of the auxiliary file
+	 * @param inputMetadataFile The file containing the metadata
+	 * @return the json object with extracted metadata
+	 * @throws MetadataExtractionException
+	 * @throws MetadataMalformedException
+	 */
+	public JSONObject processEOFFileWithoutNamespace(ConfigFileDescriptor descriptor, File inputMetadataFile)
+			throws MetadataExtractionException, MetadataMalformedException {
+
+		JSONObject metadataJSONObject = transformXMLWithXSLTToJSON(inputMetadataFile,
+				new File(this.xsltDirectory + XSLT_AUX_EOF));
+		
+		metadataJSONObject = putConfigFileMetadataToJSON(metadataJSONObject, descriptor);
+		LOGGER.debug("composed Json: {} ", metadataJSONObject);
+		return metadataJSONObject;
+	}
+
+	/**
+	 * Function which extracts metadata from AUX XML file
+	 * 
+	 * @param descriptor        The file descriptor of the auxiliary file
+	 * @param inputMetadataFile The file containing the metadata
+	 * @return the json object with extracted metadata
+	 * @throws MetadataExtractionException
+	 * @throws MetadataMalformedException
+	 */
+	public JSONObject processXMLFile(ConfigFileDescriptor descriptor, File inputMetadataFile)
+			throws MetadataExtractionException, MetadataMalformedException {
+
+		JSONObject metadataJSONObject = transformXMLWithXSLTToJSON(inputMetadataFile,
+				new File(this.xsltDirectory + XSLT_AUX_XML));
+		
+		metadataJSONObject = putConfigFileMetadataToJSON(metadataJSONObject, descriptor);
+		LOGGER.debug("composed Json: {} ", metadataJSONObject);
+		return metadataJSONObject;
+	}
+
+	/**
+	 * Function which extracts metadata from AUX MANIFEST file
+	 * 
+	 * @param descriptor        The file descriptor of the auxiliary file
+	 * @param inputMetadataFile The file containing the metadata
+	 * @return the json object with extracted metadata
+	 * @throws MetadataExtractionException
+	 * @throws MetadataMalformedException
+	 */
+	// FIXEME probably it means SAFE AUX FILE ???
+	public JSONObject processSAFEFile(ConfigFileDescriptor descriptor, File inputMetadataFile)
+			throws MetadataExtractionException, MetadataMalformedException {
+
+		JSONObject metadataJSONObject = transformXMLWithXSLTToJSON(inputMetadataFile,
+				new File(this.xsltDirectory + XSLT_AUX_MANIFEST));
+		
+		metadataJSONObject = putConfigFileMetadataToJSON(metadataJSONObject, descriptor);
+		LOGGER.debug("composed Json: {} ", metadataJSONObject);
+		return metadataJSONObject;
+	}
+
+	/**
+	 * Function which extracts metadata from RAW file
+	 * 
+	 * @param descriptor The file descriptor of the raw file
+	 * @return the json object with extracted metadata
+	 * @throws MetadataExtractionException
+	 */
+	public JSONObject processRAWFile(EdrsSessionFileDescriptor descriptor) throws MetadataExtractionException {
+		JSONObject metadataJSONObject = putEdrsSessionMetadataToJSON(new JSONObject(), descriptor);
+		LOGGER.debug("composed Json: {} ", metadataJSONObject);
+		return metadataJSONObject;
+	}
+
+	/**
+	 * Function which extracts metadata from SESSION file
+	 * 
+	 * @param descriptor The file descriptor of the session file
+	 * @return the json object with extracted metadata
+	 * @throws MetadataExtractionException
+	 */
+	public JSONObject processSESSIONFile(EdrsSessionFileDescriptor descriptor) throws MetadataExtractionException {
+		try {
+			JSONObject metadataJSONObject = putEdrsSessionMetadataToJSON(new JSONObject(), descriptor);
+
+			final String name = new File(descriptor.getRelativePath()).getName();
+			final File file = new File(localDirectory, name);
+
+			EdrsSessionFile edrsSessionFile = (EdrsSessionFile) xmlConverter.convertFromXMLToObject(file.getPath());
+
+			metadataJSONObject.put("startTime", DateUtils.convertToAnotherFormat(edrsSessionFile.getStartTime(),
+					EdrsSessionFile.TIME_FORMATTER, DateUtils.METADATA_DATE_FORMATTER));
+
+			metadataJSONObject.put("stopTime", DateUtils.convertToAnotherFormat(edrsSessionFile.getStopTime(),
+					EdrsSessionFile.TIME_FORMATTER, DateUtils.METADATA_DATE_FORMATTER));
+
+			metadataJSONObject.put("rawNames",
+					edrsSessionFile.getRawNames().stream().map(r -> r.getFileName()).collect(Collectors.toList()));
+
+			LOGGER.debug("composed Json: {} ", metadataJSONObject);
+			return metadataJSONObject;
+
+		} catch (JSONException | IOException | JAXBException e) {
+			LOGGER.error("Extraction of session file metadata failed", e);
+			throw new MetadataExtractionException(e);
+		}
+	}
+
+	/**
+	 * Extracts metadata for L0 segment files 
+	 * 
+	 * @param descriptor The file descriptor of the file
+	 * @param manifestFile The input manifest File
+	 * @return json object with extracted metadata
+	 * @throws MetadataExtractionException
+	 * @throws MetadataMalformedException
+	 */
+	public JSONObject processL0Segment(OutputFileDescriptor descriptor, File manifestFile)
+			throws MetadataExtractionException, MetadataMalformedException {
+
+		File xsltFile = new File(this.xsltDirectory + XSLT_L0_SEGMENT_MANIFEST);
+		LOGGER.debug("extracting metadata for descriptor: {} ", descriptor);
+		JSONObject metadataJSONObject = transformXMLWithXSLTToJSON(manifestFile, xsltFile);
+
+		metadataJSONObject = putCommonMetadataToJSON(metadataJSONObject, descriptor);
+
+		try {
+			String productType = descriptor.getProductType();
+
+			if (productType.contains("GP_RAW_") || productType.contains("HK_RAW_")) {
+				metadataJSONObject.remove("segmentCoordinates");
+				LOGGER.debug("segment coordinates removed for product {}", descriptor.getFilename());
+				// no coord
+			} else {
+
+				if (metadataJSONObject.has("segmentCoordinates")) {
+					final String coords = metadataJSONObject.getString("segmentCoordinates");
+					if (!coords.trim().isEmpty()) {
+						metadataJSONObject.put("segmentCoordinates",
+								processCoordinates(manifestFile, descriptor, coords));
+					}
+				}
+			}
+
+			LOGGER.debug("composed Json: {} ", metadataJSONObject);
+			return metadataJSONObject;
+
+		} catch (JSONException e) {
+			LOGGER.error("Extraction of L0 segment file metadata failed", e);
+			throw new MetadataExtractionException(e);
+		}
+	}
+
+	/**
+	 * Function which extracts metadata from product
+	 * 
+	 * @param descriptor The file descriptor of the file
+	 * @param productFamily product family
+	 * @param manifestFile The input manifest file
+	 * @return json object with extracted metadata
+	 * @throws MetadataExtractionException
+	 * @throws MetadataMalformedException
+	 */
+	public JSONObject processProduct(OutputFileDescriptor descriptor, ProductFamily productFamily, File manifestFile)
+			throws MetadataExtractionException, MetadataMalformedException {
+
+		File xsltFile = new File(this.xsltDirectory + xsltMap.get(productFamily));
+		LOGGER.debug("extracting metadata for descriptor: {} ", descriptor);
+		JSONObject metadataJSONObject = transformXMLWithXSLTToJSON(manifestFile, xsltFile);
+
+		metadataJSONObject = putCommonMetadataToJSON(metadataJSONObject, descriptor);
+
+		try {
+
+			if (metadataJSONObject.has("sliceCoordinates")
+					&& !metadataJSONObject.getString("sliceCoordinates").isEmpty()) {
+				metadataJSONObject.put("sliceCoordinates",
+						processCoordinates(manifestFile, descriptor, metadataJSONObject.getString("sliceCoordinates")));
+			}
+
+			if (ProductFamily.L0_ACN.equals(productFamily) || ProductFamily.L0_SLICE.equals(productFamily)) {
+
+				if (!metadataJSONObject.has("sliceNumber")) {
+					metadataJSONObject.put("sliceNumber", 1);
+				} else if (StringUtils.isEmpty(metadataJSONObject.get("sliceNumber").toString())) {
+					metadataJSONObject.put("sliceNumber", 1);
+				}
+				if (Arrays.asList("A", "C", "N").contains(descriptor.getProductClass())) {
+					if (metadataJSONObject.has("startTime") && metadataJSONObject.has("stopTime")) {
+						metadataJSONObject.put("totalNumberOfSlice", totalNumberOfSlice(
+								metadataJSONObject.getString("startTime"), metadataJSONObject.getString("stopTime"),
+								descriptor.getSwathtype().matches("S[1-6]") ? "SM" : descriptor.getSwathtype()));
+					}
+				}
+			}
+
+			LOGGER.debug("composed Json: {} ", metadataJSONObject);
+			return metadataJSONObject;
+
+		} catch (JSONException e) {
+			LOGGER.error("Extraction of metadata failed", e);
+			throw new MetadataExtractionException(e);
+		}
+	}
+
+	private JSONObject putConfigFileMetadataToJSON(JSONObject metadataJSONObject, ConfigFileDescriptor descriptor)
+			throws MetadataExtractionException, MetadataMalformedException {
+
+		try {
+
+			if (metadataJSONObject.has("validityStartTime")) {
+				try {
+					metadataJSONObject.put("validityStartTime", DateUtils
+							.convertToMetadataDateTimeFormat((String) metadataJSONObject.get("validityStartTime")));
+				} catch (DateTimeParseException e) {
+					throw new MetadataMalformedException("validityStartTime");
+				}
+			}
+
+			if (metadataJSONObject.has("validityStopTime")) {
+
+				String validStopTime = (String) metadataJSONObject.get("validityStopTime");
+
+				if (validStopTime.contains("9999-")) {
+					metadataJSONObject.put("validityStopTime", "9999-12-31T23:59:59.999999Z");
+				} else {
+					try {
+						metadataJSONObject.put("validityStopTime",
+								DateUtils.convertToMetadataDateTimeFormat(validStopTime));
+					} catch (DateTimeParseException e) {
+						throw new MetadataMalformedException("validityStopTime");
+					}
+				}
+
+			} else {
+				metadataJSONObject.put("validityStopTime", "9999-12-31T23:59:59.999999Z");
+			}
+
+			if (metadataJSONObject.has("creationTime")) {
+				try {
+					metadataJSONObject.put("creationTime",
+							DateUtils.convertToMetadataDateTimeFormat(metadataJSONObject.getString("creationTime")));
+				} catch (DateTimeParseException e) {
+					throw new MetadataMalformedException("creationTime");
+				}
+			}
+
+			metadataJSONObject.put("productName", descriptor.getProductName());
+			metadataJSONObject.put("productClass", descriptor.getProductClass());
+			metadataJSONObject.put("productType", descriptor.getProductType());
+			metadataJSONObject.put("missionId", descriptor.getMissionId());
+			metadataJSONObject.put("satelliteId", descriptor.getSatelliteId());
+			metadataJSONObject.put("url", descriptor.getKeyObjectStorage());
+			metadataJSONObject.put("insertionTime", DateUtils.formatToMetadataDateTimeFormat(LocalDateTime.now()));
+			metadataJSONObject.put("productFamily", descriptor.getProductFamily().name());
+
+			return metadataJSONObject;
+
+		} catch (JSONException e) {
+			LOGGER.error("Error while extraction of config file metadata ", e);
+			throw new MetadataExtractionException(e);
+		}
+	}
+
+	private JSONObject putEdrsSessionMetadataToJSON(JSONObject metadataJSONObject, EdrsSessionFileDescriptor descriptor)
+			throws MetadataExtractionException {
+		try {
+			metadataJSONObject.put("productName", descriptor.getProductName());
+			metadataJSONObject.put("productType", descriptor.getEdrsSessionFileType().name());
+			metadataJSONObject.put("sessionId", descriptor.getSessionIdentifier());
+			metadataJSONObject.put("missionId", descriptor.getMissionId());
+			metadataJSONObject.put("satelliteId", descriptor.getSatelliteId());
+			metadataJSONObject.put("stationCode", descriptor.getStationCode());
+			metadataJSONObject.put("url", descriptor.getKeyObjectStorage());
+			metadataJSONObject.put("insertionTime", DateUtils.formatToMetadataDateTimeFormat(LocalDateTime.now()));
+			metadataJSONObject.put("productFamily", descriptor.getProductFamily().name());
+
+			return metadataJSONObject;
+
+		} catch (JSONException e) {
+			LOGGER.error("Error while extraction of EDRS session metadata ", e);
+			throw new MetadataExtractionException(e);
+		}
+	}
+
+	private JSONObject putCommonMetadataToJSON(JSONObject metadataJSONObject, OutputFileDescriptor descriptor)
+			throws MetadataExtractionException, MetadataMalformedException {
+
+		try {
+			if (metadataJSONObject.has("startTime")) {
+				try {
+					String t = DateUtils
+							.convertToMetadataDateTimeFormat((String) metadataJSONObject.getString("startTime"));
+					metadataJSONObject.put("startTime", t);
+					metadataJSONObject.put("validityStartTime", t);
+				} catch (DateTimeParseException e) {
+					throw new MetadataMalformedException("validityStartTime");
+				}
+			}
+
+			if (metadataJSONObject.has("stopTime")) {
+				try {
+					String t = DateUtils
+							.convertToMetadataDateTimeFormat((String) metadataJSONObject.getString("stopTime"));
+					metadataJSONObject.put("stopTime", t);
+					metadataJSONObject.put("validityStopTime", t);
+				} catch (DateTimeParseException e) {
+					throw new MetadataMalformedException("validityStopTime");
+				}
+			}
+
+			String dt = DateUtils.formatToMetadataDateTimeFormat(LocalDateTime.now());
+
+			metadataJSONObject.put("productName", descriptor.getProductName());
+			metadataJSONObject.put("productClass", descriptor.getProductClass());
+			metadataJSONObject.put("productType", descriptor.getProductType());
+			metadataJSONObject.put("resolution", descriptor.getResolution());
+			metadataJSONObject.put("missionId", descriptor.getMissionId());
+			metadataJSONObject.put("satelliteId", descriptor.getSatelliteId());
+			metadataJSONObject.put("swathtype", descriptor.getSwathtype());
+			metadataJSONObject.put("polarisation", descriptor.getPolarisation());
+			metadataJSONObject.put("dataTakeId", descriptor.getDataTakeId());
+			metadataJSONObject.put("url", descriptor.getKeyObjectStorage());
+			metadataJSONObject.put("insertionTime", dt);
+			metadataJSONObject.put("creationTime", dt);
+			metadataJSONObject.put("productFamily", descriptor.getProductFamily().name());
+			metadataJSONObject.put("processMode", descriptor.getMode());
+
+			return metadataJSONObject;
+
+		} catch (JSONException e) {
+			LOGGER.error("Error while extraction of common metadata", e);
+			throw new MetadataExtractionException(e);
+		}
+
+	}
+
+	private JSONObject transformXMLWithXSLTToJSON(File inputXMLFile, File xsltFile) throws MetadataExtractionException {
+
+		try {
+			Transformer transformer = transFactory.newTransformer(new StreamSource(xsltFile));
+			ByteArrayOutputStream transformationStream = new ByteArrayOutputStream();
+
+			transformer.transform(new StreamSource(inputXMLFile), new StreamResult(transformationStream));
+			return XML.toJSONObject(transformationStream.toString(Charset.defaultCharset().name()));
+
+		} catch (IOException | TransformerException | JSONException e) {
+			LOGGER.error("Error while transformation of  input XML file to JSON", e);
+			throw new MetadataExtractionException(e);
+		}
+
 	}
 
 	/**
@@ -335,492 +704,6 @@ public class ExtractMetadata {
 			totalNumberOfSlices = (int) Math.ceil(tmpNumberOfSlices);
 		}
 		return Math.max(totalNumberOfSlices, 1);
-	}
-
-	/**
-	 * Function which extracts metadata from MPL EOF file
-	 * 
-	 * @param descriptor The file descriptor of the auxiliary file
-	 * @param file       The file containing the metadata
-	 * @return the json object with extracted metadata
-	 * @throws MetadataExtractionException
-	 * @throws MetadataMalformedException
-	 */
-	public JSONObject processEOFFile(ConfigFileDescriptor descriptor, File file)
-			throws MetadataExtractionException, MetadataMalformedException {
-		try {
-			// XSLT Transformation
-			String xsltFilename = this.xsltDirectory + XSLT_MPL_EOF;
-			Source xsltMPLEOF = new StreamSource(new File(xsltFilename));
-			Transformer transformerMPL = transFactory.newTransformer(xsltMPLEOF);
-			Source mplMetadataFile = new StreamSource(file);
-			transformerMPL.transform(mplMetadataFile, new StreamResult(new File("tmp/output.xml")));
-			// JSON creation
-			JSONObject metadataJSONObject = XML.toJSONObject(readFile("tmp/output.xml", Charset.defaultCharset()));
-
-			// Adding also max validity stop for EOF files as it is done in SAFE
-			if (!metadataJSONObject.has("validityStopTime")) {
-
-				metadataJSONObject.put("validityStopTime", "9999-12-31T23:59:59.999999Z");
-			} else {
-				String validStopTime = metadataJSONObject.getString("validityStopTime");
-				if (validStopTime.contains("9999-")) {
-					metadataJSONObject.put("validityStopTime", "9999-12-31T23:59:59.999999Z");
-				}
-			}
-
-			try {
-				metadataJSONObject.put("validityStopTime",
-						DateUtils.convertToMetadataDateTimeFormat(metadataJSONObject.getString("validityStopTime")));
-			} catch (DateTimeParseException e) {
-				throw new MetadataMalformedException("validityStopTime");
-			}
-
-			try {
-				metadataJSONObject.put("creationTime",
-						DateUtils.convertToMetadataDateTimeFormat(metadataJSONObject.getString("creationTime")));
-			} catch (DateTimeParseException e) {
-				throw new MetadataMalformedException("creationTime");
-			}
-
-			try {
-				metadataJSONObject.put("validityStartTime",
-						DateUtils.convertToMetadataDateTimeFormat(metadataJSONObject.getString("validityStartTime")));
-			} catch (DateTimeParseException e) {
-				throw new MetadataMalformedException("validityStartTime");
-			}
-			metadataJSONObject.put("productName", descriptor.getProductName());
-			metadataJSONObject.put("productClass", descriptor.getProductClass());
-			metadataJSONObject.put("productType", descriptor.getProductType());
-			metadataJSONObject.put("missionId", descriptor.getMissionId());
-			metadataJSONObject.put("satelliteId", descriptor.getSatelliteId());
-			metadataJSONObject.put("url", descriptor.getKeyObjectStorage());
-			metadataJSONObject.put("insertionTime", DateUtils.formatToMetadataDateTimeFormat(LocalDateTime.now()));
-			metadataJSONObject.put("productFamily", descriptor.getProductFamily().name());
-			return metadataJSONObject;
-		} catch (IOException | TransformerException | JSONException e) {
-			throw new MetadataExtractionException(e);
-		}
-	}
-
-	/**
-	 * Function which extracts metadata from AUX EOF file
-	 * 
-	 * @param descriptor The file descriptor of the auxiliary file
-	 * @param file       The file containing the metadata
-	 * @return the json object with extracted metadata
-	 * @throws MetadataExtractionException
-	 * @throws MetadataMalformedException
-	 */
-	public JSONObject processEOFFileWithoutNamespace(ConfigFileDescriptor descriptor, File file)
-			throws MetadataExtractionException, MetadataMalformedException {
-		try {
-			// XSLT Transformation
-			String xsltFilename = this.xsltDirectory + XSLT_AUX_EOF;
-			Source xsltAUXEOF = new StreamSource(new File(xsltFilename));
-			Transformer transformerAUX = transFactory.newTransformer(xsltAUXEOF);
-			Source auxMetadataFile = new StreamSource(file);
-			transformerAUX.transform(auxMetadataFile, new StreamResult(new File("tmp/output.xml")));
-			// JSON creation
-			JSONObject metadataJSONObject = XML.toJSONObject(readFile("tmp/output.xml", Charset.defaultCharset()));
-
-			try {
-				metadataJSONObject.put("validityStopTime",
-						DateUtils.convertToMetadataDateTimeFormat(metadataJSONObject.getString("validityStopTime")));
-			} catch (DateTimeParseException e) {
-				throw new MetadataMalformedException("validityStopTime");
-			}
-
-			try {
-				metadataJSONObject.put("creationTime",
-						DateUtils.convertToMetadataDateTimeFormat(metadataJSONObject.getString("creationTime")));
-			} catch (DateTimeParseException e) {
-				throw new MetadataMalformedException("creationTime");
-			}
-
-			try {
-				metadataJSONObject.put("validityStartTime",
-						DateUtils.convertToMetadataDateTimeFormat(metadataJSONObject.getString("validityStartTime")));
-			} catch (DateTimeParseException e) {
-				throw new MetadataMalformedException("validityStartTime");
-			}
-
-			metadataJSONObject.put("productName", descriptor.getProductName());
-			metadataJSONObject.put("productClass", descriptor.getProductClass());
-			metadataJSONObject.put("productType", descriptor.getProductType());
-			metadataJSONObject.put("missionId", descriptor.getMissionId());
-			metadataJSONObject.put("satelliteId", descriptor.getSatelliteId());
-			metadataJSONObject.put("url", descriptor.getKeyObjectStorage());
-			metadataJSONObject.put("insertionTime", DateUtils.formatToMetadataDateTimeFormat(LocalDateTime.now()));
-			metadataJSONObject.put("productFamily", descriptor.getProductFamily().name());
-			return metadataJSONObject;
-		} catch (IOException | TransformerException | JSONException e) {
-			throw new MetadataExtractionException(e);
-		}
-	}
-
-	/**
-	 * Function which extracts metadata from AUX XML file
-	 * 
-	 * @param descriptor The file descriptor of the auxiliary file
-	 * @param file       The file containing the metadata
-	 * @return the json object with extracted metadata
-	 * @throws MetadataExtractionException
-	 * @throws MetadataMalformedException
-	 */
-	public JSONObject processXMLFile(ConfigFileDescriptor descriptor, File file)
-			throws MetadataExtractionException, MetadataMalformedException {
-		try {
-			// XSLT Transformation
-			String xsltFilename = this.xsltDirectory + XSLT_AUX_XML;
-			Source xsltAUXXML = new StreamSource(new File(xsltFilename));
-			Transformer transformerAUX = transFactory.newTransformer(xsltAUXXML);
-			Source auxMetadataFile = new StreamSource(file);
-			transformerAUX.transform(auxMetadataFile, new StreamResult(new File("tmp/output.xml")));
-			// JSON creation
-			JSONObject metadataJSONObject = XML.toJSONObject(readFile("tmp/output.xml", Charset.defaultCharset()));
-
-			// Adding also max validity stop for EOF files as it is done in SAFE
-			if (!metadataJSONObject.has("validityStopTime")) {
-
-				metadataJSONObject.put("validityStopTime", "9999-12-31T23:59:59.999999Z");
-			} else {
-				String validStopTime = metadataJSONObject.getString("validityStopTime");
-				if (validStopTime.contains("9999-")) {
-					metadataJSONObject.put("validityStopTime", "9999-12-31T23:59:59.999999Z");
-				}
-			}
-
-			try {
-				metadataJSONObject.put("validityStopTime",
-						DateUtils.convertToMetadataDateTimeFormat(metadataJSONObject.getString("validityStopTime")));
-			} catch (DateTimeParseException e) {
-				throw new MetadataMalformedException("validityStopTime");
-			}
-
-			try {
-				metadataJSONObject.put("validityStartTime",
-						DateUtils.convertToMetadataDateTimeFormat(metadataJSONObject.getString("validityStartTime")));
-			} catch (DateTimeParseException e) {
-				throw new MetadataMalformedException("validityStartTime");
-			}
-
-			try {
-				metadataJSONObject.put("creationTime",
-						DateUtils.convertToMetadataDateTimeFormat(metadataJSONObject.getString("creationTime")));
-			} catch (DateTimeParseException e) {
-				throw new MetadataMalformedException("creationTime");
-			}
-
-			metadataJSONObject.put("productName", descriptor.getProductName());
-			metadataJSONObject.put("productClass", descriptor.getProductClass());
-			metadataJSONObject.put("productType", descriptor.getProductType());
-			metadataJSONObject.put("missionId", descriptor.getMissionId());
-			metadataJSONObject.put("satelliteId", descriptor.getSatelliteId());
-			metadataJSONObject.put("url", descriptor.getKeyObjectStorage());
-			metadataJSONObject.put("insertionTime", DateUtils.formatToMetadataDateTimeFormat(LocalDateTime.now()));
-			metadataJSONObject.put("productFamily", descriptor.getProductFamily().name());
-			return metadataJSONObject;
-
-		} catch (IOException | TransformerException | JSONException e) {
-			throw new MetadataExtractionException(e);
-		}
-	}
-
-	/**
-	 * Function which extracts metadata from AUX MANIFEST file
-	 * 
-	 * @param descriptor The file descriptor of the auxiliary file
-	 * @param file       The file containing the metadata
-	 * @return the json object with extracted metadata
-	 * @throws MetadataExtractionException
-	 * @throws MetadataMalformedException
-	 */
-	// FIXEME probably it means SAFE AUX FILE ???
-	public JSONObject processSAFEFile(ConfigFileDescriptor descriptor, File file)
-			throws MetadataExtractionException, MetadataMalformedException {
-		try {
-			// XSLT Transformation
-			String xsltFilename = this.xsltDirectory + XSLT_AUX_MANIFEST;
-			Source xsltAUXMANIFEST = new StreamSource(new File(xsltFilename));
-			Transformer transformerAUX = transFactory.newTransformer(xsltAUXMANIFEST);
-			Source auxMetadataFile = new StreamSource(file);
-			transformerAUX.transform(auxMetadataFile, new StreamResult(new File("tmp/output.xml")));
-			// JSON creation
-			JSONObject metadataJSONObject = XML.toJSONObject(readFile("tmp/output.xml", Charset.defaultCharset()));
-
-			if (!metadataJSONObject.has("validityStopTime")) {
-
-				metadataJSONObject.put("validityStopTime", "9999-12-31T23:59:59.999999Z");
-			} else {
-				String validStopTime = metadataJSONObject.getString("validityStopTime");
-				if (validStopTime.contains("9999-")) {
-					metadataJSONObject.put("validityStopTime", "9999-12-31T23:59:59.999999Z");
-				}
-			}
-			metadataJSONObject.put("productName", descriptor.getProductName());
-			metadataJSONObject.put("productType", descriptor.getProductType());
-			metadataJSONObject.put("missionId", descriptor.getMissionId());
-			metadataJSONObject.put("satelliteId", descriptor.getSatelliteId());
-			metadataJSONObject.put("url", descriptor.getKeyObjectStorage());
-			metadataJSONObject.put("insertionTime", DateUtils.formatToMetadataDateTimeFormat(LocalDateTime.now()));
-			metadataJSONObject.put("productFamily", descriptor.getProductFamily().name());
-
-			if (metadataJSONObject.has("validityStartTime")) {
-				try {
-					metadataJSONObject.put("validityStartTime", DateUtils
-							.convertToMetadataDateTimeFormat((String) metadataJSONObject.get("validityStartTime")));
-				} catch (DateTimeParseException e) {
-					throw new MetadataMalformedException("validityStartTime");
-				}
-			}
-
-			if (metadataJSONObject.has("validityStopTime")) {
-				try {
-					metadataJSONObject.put("validityStopTime", DateUtils
-							.convertToMetadataDateTimeFormat((String) metadataJSONObject.get("validityStopTime")));
-				} catch (DateTimeParseException e) {
-					throw new MetadataMalformedException("validityStopTime");
-				}
-			}
-
-			return metadataJSONObject;
-		} catch (IOException | TransformerException | JSONException e) {
-			throw new MetadataExtractionException(e);
-		}
-	}
-
-	/**
-	 * Function which extracts metadata from RAW file
-	 * 
-	 * @param descriptor The file descriptor of the raw file
-	 * @return the json object with extracted metadata
-	 * @throws MetadataExtractionException
-	 */
-	public JSONObject processRAWFile(EdrsSessionFileDescriptor descriptor) throws MetadataExtractionException {
-		try {
-			JSONObject metadataJSONObject = new JSONObject();
-			metadataJSONObject.put("productName", descriptor.getProductName());
-			metadataJSONObject.put("productType", descriptor.getEdrsSessionFileType().name());
-			metadataJSONObject.put("sessionId", descriptor.getSessionIdentifier());
-			metadataJSONObject.put("missionId", descriptor.getMissionId());
-			metadataJSONObject.put("satelliteId", descriptor.getSatelliteId());
-			metadataJSONObject.put("stationCode", descriptor.getStationCode());
-			metadataJSONObject.put("url", descriptor.getKeyObjectStorage());
-			metadataJSONObject.put("insertionTime", DateUtils.formatToMetadataDateTimeFormat(LocalDateTime.now()));
-			metadataJSONObject.put("productFamily", descriptor.getProductFamily().name());
-			return metadataJSONObject;
-		} catch (JSONException e) {
-			throw new MetadataExtractionException(e);
-		}
-	}
-
-	/**
-	 * Function which extracts metadata from SESSION file
-	 * 
-	 * @param descriptor The file descriptor of the session file
-	 * @return the json object with extracted metadata
-	 * @throws MetadataExtractionException
-	 */
-	public JSONObject processSESSIONFile(EdrsSessionFileDescriptor descriptor) throws MetadataExtractionException {
-		try {
-			JSONObject metadataJSONObject = new JSONObject();
-			metadataJSONObject.put("productName", descriptor.getProductName());
-			metadataJSONObject.put("productType", descriptor.getEdrsSessionFileType().name());
-			metadataJSONObject.put("sessionId", descriptor.getSessionIdentifier());
-			metadataJSONObject.put("missionId", descriptor.getMissionId());
-			metadataJSONObject.put("satelliteId", descriptor.getSatelliteId());
-			metadataJSONObject.put("stationCode", descriptor.getStationCode());
-			metadataJSONObject.put("url", descriptor.getKeyObjectStorage());
-			metadataJSONObject.put("insertionTime", DateUtils.formatToMetadataDateTimeFormat(LocalDateTime.now()));
-			metadataJSONObject.put("productFamily", descriptor.getProductFamily().name());
-
-			final String name = new File(descriptor.getRelativePath()).getName();
-			final File file = new File(localDirectory, name);
-
-			EdrsSessionFile edrsSessionFile = (EdrsSessionFile) xmlConverter.convertFromXMLToObject(file.getPath());
-
-			metadataJSONObject.put("startTime", DateUtils.convertToAnotherFormat(edrsSessionFile.getStartTime(),
-					EdrsSessionFile.TIME_FORMATTER, DateUtils.METADATA_DATE_FORMATTER));
-
-			metadataJSONObject.put("stopTime", DateUtils.convertToAnotherFormat(edrsSessionFile.getStopTime(),
-					EdrsSessionFile.TIME_FORMATTER, DateUtils.METADATA_DATE_FORMATTER));
-
-			metadataJSONObject.put("rawNames",
-					edrsSessionFile.getRawNames().stream().map(r -> r.getFileName()).collect(Collectors.toList()));
-
-			return metadataJSONObject;
-		} catch (JSONException | IOException | JAXBException e) {
-			LOGGER.error("Extraction of session file metadata failed", e);
-			throw new MetadataExtractionException(e);
-		}
-	}
-
-	public JSONObject processL0Segment(OutputFileDescriptor descriptor, File manifestFile)
-			throws MetadataExtractionException, MetadataMalformedException {
-		try {
-			LOGGER.debug("extracting metadata for descriptor: {} ", descriptor);
-			// XSLT Transformation
-			String xsltFilename = this.xsltDirectory + XSLT_L0_SEGMENT_MANIFEST;
-			Source xsltL1MANIFEST = new StreamSource(new File(xsltFilename));
-			Transformer transformerL0 = transFactory.newTransformer(xsltL1MANIFEST);
-			Source l1File = new StreamSource(manifestFile);
-			ByteArrayOutputStream transformationStream = new ByteArrayOutputStream();
-
-			transformerL0.transform(l1File, new StreamResult(transformationStream));
-			// JSON creation
-			JSONObject metadataJSONObject = XML
-					.toJSONObject(transformationStream.toString(Charset.defaultCharset().name()));
-			if (metadataJSONObject.has("startTime")) {
-				try {
-					String t = DateUtils
-							.convertToMetadataDateTimeFormat((String) metadataJSONObject.getString("startTime"));
-					metadataJSONObject.put("startTime", t);
-					metadataJSONObject.put("validityStartTime", t);
-				} catch (DateTimeParseException e) {
-					throw new MetadataMalformedException("validityStartTime");
-				}
-			}
-			if (metadataJSONObject.has("stopTime")) {
-				try {
-					String t = DateUtils
-							.convertToMetadataDateTimeFormat((String) metadataJSONObject.getString("stopTime"));
-					metadataJSONObject.put("stopTime", t);
-					metadataJSONObject.put("validityStopTime", t);
-				} catch (DateTimeParseException e) {
-					throw new MetadataMalformedException("validityStopTime");
-				}
-			}
-
-			String productType = descriptor.getProductType();
-
-			if (productType.contains("GP_RAW_") || productType.contains("HK_RAW_")) {
-				metadataJSONObject.remove("segmentCoordinates");
-				LOGGER.debug("segment coordinates removed for product {}", descriptor.getFilename());
-				// no coord
-			} else {
-
-				if (metadataJSONObject.has("segmentCoordinates")) {
-					final String coords = metadataJSONObject.getString("segmentCoordinates");
-					if (!coords.trim().isEmpty()) {
-						metadataJSONObject.put("segmentCoordinates",
-								processCoordinates(manifestFile, descriptor, coords));
-					}
-				}
-			}
-			metadataJSONObject.put("productName", descriptor.getProductName());
-			metadataJSONObject.put("productClass", descriptor.getProductClass());
-			metadataJSONObject.put("productType", descriptor.getProductType());
-			metadataJSONObject.put("resolution", descriptor.getResolution());
-			metadataJSONObject.put("missionId", descriptor.getMissionId());
-			metadataJSONObject.put("satelliteId", descriptor.getSatelliteId());
-			metadataJSONObject.put("swathtype", descriptor.getSwathtype());
-			metadataJSONObject.put("polarisation", descriptor.getPolarisation());
-			metadataJSONObject.put("dataTakeId", descriptor.getDataTakeId());
-			metadataJSONObject.put("url", descriptor.getKeyObjectStorage());
-			metadataJSONObject.put("processMode", descriptor.getMode());
-			String dt = DateUtils.formatToMetadataDateTimeFormat(LocalDateTime.now());
-			metadataJSONObject.put("insertionTime", dt);
-			metadataJSONObject.put("creationTime", dt);
-			metadataJSONObject.put("productFamily", descriptor.getProductFamily().name());
-
-			LOGGER.debug("composed Json: {} ", metadataJSONObject);
-			return metadataJSONObject;
-		} catch (IOException | TransformerException | JSONException e) {
-			LOGGER.error(e);
-			throw new MetadataExtractionException(e);
-		}
-	}
-
-	/**
-	 * Function which extracts metadata from product
-	 * 
-	 * @param descriptor
-	 * @param manifestFile
-	 * @param output
-	 * 
-	 * @return the json object with extracted metadata
-	 * @throws MetadataExtractionException
-	 * @throws MetadataMalformedException
-	 */
-	public JSONObject processProduct(OutputFileDescriptor descriptor, ProductFamily productFamily, File manifestFile)
-			throws MetadataExtractionException, MetadataMalformedException {
-		try {
-
-			// XSLT Transformation
-			Source xsltMANIFEST = new StreamSource(new File(this.xsltDirectory + xsltMap.get(productFamily)));
-			Transformer transformer = transFactory.newTransformer(xsltMANIFEST);
-			Source inputFile = new StreamSource(manifestFile);
-			ByteArrayOutputStream transformationStream = new ByteArrayOutputStream();
-			transformer.transform(inputFile, new StreamResult(transformationStream));
-			// JSON creation
-			JSONObject metadataJSONObject = XML
-					.toJSONObject(transformationStream.toString(Charset.defaultCharset().name()));
-
-			if (metadataJSONObject.has("sliceCoordinates")
-					&& !metadataJSONObject.getString("sliceCoordinates").isEmpty()) {
-				metadataJSONObject.put("sliceCoordinates",
-						processCoordinates(manifestFile, descriptor, metadataJSONObject.getString("sliceCoordinates")));
-			}
-
-			if (metadataJSONObject.has("startTime")) {
-				try {
-					String t = DateUtils
-							.convertToMetadataDateTimeFormat((String) metadataJSONObject.getString("startTime"));
-					metadataJSONObject.put("startTime", t);
-					metadataJSONObject.put("validityStartTime", t);
-				} catch (DateTimeParseException e) {
-					throw new MetadataMalformedException("validityStartTime");
-				}
-			}
-
-			if (metadataJSONObject.has("stopTime")) {
-				try {
-					String t = DateUtils
-							.convertToMetadataDateTimeFormat((String) metadataJSONObject.getString("stopTime"));
-					metadataJSONObject.put("stopTime", t);
-					metadataJSONObject.put("validityStopTime", t);
-				} catch (DateTimeParseException e) {
-					throw new MetadataMalformedException("validityStopTime");
-				}
-			}
-
-			if (ProductFamily.L0_ACN.equals(productFamily) || ProductFamily.L0_SLICE.equals(productFamily)) {
-
-				if (!metadataJSONObject.has("sliceNumber")) {
-					metadataJSONObject.put("sliceNumber", 1);
-				} else if (StringUtils.isEmpty(metadataJSONObject.get("sliceNumber").toString())) {
-					metadataJSONObject.put("sliceNumber", 1);
-				}
-				if (Arrays.asList("A", "C", "N").contains(descriptor.getProductClass())) {
-					if (metadataJSONObject.has("startTime") && metadataJSONObject.has("stopTime")) {
-						metadataJSONObject.put("totalNumberOfSlice", totalNumberOfSlice(
-								metadataJSONObject.getString("startTime"), metadataJSONObject.getString("stopTime"),
-								descriptor.getSwathtype().matches("S[1-6]") ? "SM" : descriptor.getSwathtype()));
-					}
-				}
-			}
-
-			metadataJSONObject.put("productName", descriptor.getProductName());
-			metadataJSONObject.put("productClass", descriptor.getProductClass());
-			metadataJSONObject.put("productType", descriptor.getProductType());
-			metadataJSONObject.put("resolution", descriptor.getResolution());
-			metadataJSONObject.put("missionId", descriptor.getMissionId());
-			metadataJSONObject.put("satelliteId", descriptor.getSatelliteId());
-			metadataJSONObject.put("swathtype", descriptor.getSwathtype());
-			metadataJSONObject.put("polarisation", descriptor.getPolarisation());
-			metadataJSONObject.put("dataTakeId", descriptor.getDataTakeId());
-			metadataJSONObject.put("url", descriptor.getKeyObjectStorage());
-			String dt = DateUtils.formatToMetadataDateTimeFormat(LocalDateTime.now());
-			metadataJSONObject.put("insertionTime", dt);
-			metadataJSONObject.put("creationTime", dt);
-			metadataJSONObject.put("productFamily", descriptor.getProductFamily().name());
-			metadataJSONObject.put("processMode", descriptor.getMode());
-			LOGGER.debug("composed Json: {} ", metadataJSONObject);
-			return metadataJSONObject;
-		} catch (IOException | TransformerException | JSONException e) {
-			throw new MetadataExtractionException(e);
-		}
 	}
 
 }

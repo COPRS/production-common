@@ -335,7 +335,7 @@ public class ExtractMetadataTest {
     public void testProcessSAFEFile() throws MetadataExtractionException {
 
         JSONObject expectedResult = new JSONObject(
-                "{\"validityStopTime\":\"9999-12-31T23:59:59.000000Z\",\"site\":\"CLS-Brest\",\"missionid\":\"S1\",\"creationTime\":\"2017-10-13T10:12:00.000000Z\",\"insertionTime\":\"2018-05-31T14:34:17.000000Z\",\"satelliteid\":\"A\",\"instrumentConfigurationId\":\"6\",\"validityStartTime\":\"2017-10-17T08:00:00.000000Z\",\"productName\":\"S1A_AUX_CAL_V20171017T080000_G20171013T101200.SAFE\",\"productType\":\"AUX_CAL\",\"url\":\"S1A_AUX_CAL_V20171017T080000_G20171013T101200.SAFE\",\"productFamily\":\"AUXILIARY_FILE\"}");
+                "{\"validityStopTime\":\"9999-12-31T23:59:59.000000Z\",\"site\":\"CLS-Brest\",\"missionid\":\"S1\",\"creationTime\":\"2017-10-13T10:12:00.000000Z\",\"insertionTime\":\"2018-05-31T14:34:17.000000Z\",\"satelliteid\":\"A\",\"instrumentConfigurationId\":\"6\",\"validityStartTime\":\"2017-10-17T08:00:00.000000Z\",\"productName\":\"S1A_AUX_CAL_V20171017T080000_G20171013T101200.SAFE\",\"productType\":\"AUX_CAL\",\"url\":\"S1A_AUX_CAL_V20171017T080000_G20171013T101200.SAFE\",\"productFamily\":\"AUXILIARY_FILE\",\"productClass\":\"OPER\"}");
 
         ConfigFileDescriptor descriptor = new ConfigFileDescriptor();
         descriptor.setExtension(FileExtension.SAFE);
@@ -357,6 +357,8 @@ public class ExtractMetadataTest {
 
        try {
             JSONObject result = extractor.processSAFEFile(descriptor, file);
+            
+            System.out.println(result);
 
             assertNotNull("JSON object should not be null", result);
             assertEquals("JSON object are not equals", expectedResult.length(),
