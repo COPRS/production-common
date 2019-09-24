@@ -13,7 +13,6 @@ import org.springframework.stereotype.Service;
 
 import esa.s1pdgs.cpoc.common.ProductFamily;
 import esa.s1pdgs.cpoc.common.errors.InternalErrorException;
-import esa.s1pdgs.cpoc.ingestion.config.IngestionServiceConfigurationProperties;
 import esa.s1pdgs.cpoc.ingestion.config.ProcessConfiguration;
 import esa.s1pdgs.cpoc.ingestion.obs.ObsAdapter;
 import esa.s1pdgs.cpoc.mqi.model.queue.AbstractDto;
@@ -84,10 +83,10 @@ public class ProductServiceImpl implements ProductService {
 			throw new RuntimeException(String.format("File %s of %s does not exist", file, ingestion));
 		}
 		if (!file.canRead()) {
-			throw new RuntimeException(String.format("File %s of %s is nor readable", file, ingestion));
+			throw new RuntimeException(String.format("File %s of %s is not readable", file, ingestion));
 		}
 		if (!file.canWrite()) {
-			throw new RuntimeException(String.format("File %s of %s is nor writeable", file, ingestion));
+			throw new RuntimeException(String.format("File %s of %s is not writeable", file, ingestion));
 		}
 	}
 }
