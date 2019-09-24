@@ -74,8 +74,10 @@ public class FilesystemInboxAdapter implements InboxAdapter {
 		}
 		
 		for (Entry<InboxFilter, List<InboxEntry>> entrySet : filtered.entrySet()) {
-			List<String> urls = entrySet.getValue().stream().map(s -> s.getUrl()).collect(Collectors.toList());
-			LOG.debug("Ignored {} inbox entries by filter '{}'. Affected URLs: '{}'", entrySet.getValue().size(), entrySet.getKey(), urls);
+			if (entrySet.getValue().size() > 0) {
+				List<String> urls = entrySet.getValue().stream().map(s -> s.getUrl()).collect(Collectors.toList());
+				LOG.debug("Ignored {} inbox entries by filter '{}'. Affected URLs: '{}'", entrySet.getValue().size(), entrySet.getKey(), urls);
+			}
 		}
 		
 		return result;
