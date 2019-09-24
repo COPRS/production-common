@@ -97,9 +97,10 @@ public class AppDataJobService {
      */
     public AppDataJob newJob(final AppDataJob newJob) {
         // Check new job format TODO
-
+        long sequence = sequenceDao.getNextSequenceId(JOB_SEQ_KEY);
         // Save it
-        newJob.setIdentifier(sequenceDao.getNextSequenceId(JOB_SEQ_KEY));
+        newJob.setId(sequence);
+        newJob.setIdentifier(sequence);
         newJob.setState(AppDataJobState.WAITING);
         newJob.setCreationDate(new Date());
         newJob.setLastUpdateDate(null);
