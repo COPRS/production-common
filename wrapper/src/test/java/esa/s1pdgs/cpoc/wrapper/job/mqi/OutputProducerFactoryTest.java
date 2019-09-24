@@ -8,6 +8,7 @@ import static org.mockito.Mockito.verify;
 
 import java.io.File;
 
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
@@ -18,6 +19,7 @@ import org.mockito.MockitoAnnotations;
 import esa.s1pdgs.cpoc.common.ProductCategory;
 import esa.s1pdgs.cpoc.common.ProductFamily;
 import esa.s1pdgs.cpoc.common.errors.AbstractCodedException;
+import esa.s1pdgs.cpoc.common.utils.FileUtils;
 import esa.s1pdgs.cpoc.mqi.client.GenericMqiClient;
 import esa.s1pdgs.cpoc.mqi.model.queue.LevelJobDto;
 import esa.s1pdgs.cpoc.mqi.model.queue.LevelReportDto;
@@ -53,6 +55,8 @@ public class OutputProducerFactoryTest {
      * Input message
      */
     private GenericMessageDto<LevelJobDto> inputMessage;
+    
+    private final File testDir = FileUtils.createTmpDir();
 
     /**
      * Iinitialization
@@ -71,6 +75,11 @@ public class OutputProducerFactoryTest {
                         "work-dir", "job-order"));
         inputMessage.setInputKey(null);
     }
+    
+    @After
+    public final void tearDown() throws Exception {
+    	FileUtils.delete(testDir.getPath());
+    }
 
     /**
      * Test send L0 reports
@@ -78,10 +87,12 @@ public class OutputProducerFactoryTest {
      * @throws AbstractCodedException
      */
     @Test
-    public void testSendReport() throws AbstractCodedException {
+    public void testSendReport() throws AbstractCodedException {    	
+    	final File outputFile = new File(testDir, "report.txt");
+    	FileUtils.writeFile(outputFile, "Test report file");
+    	
         this.outputProcuderFactory.sendOutput(
-                new FileQueueMessage(ProductFamily.L0_REPORT, "test.txt",
-                        new File("./test/data/report.txt")),
+                new FileQueueMessage(ProductFamily.L0_REPORT, "test.txt", outputFile),
                 inputMessage);
         verify(this.sender, never()).publish(Mockito.any(), Mockito.eq(ProductCategory.LEVEL_PRODUCTS));
         GenericPublicationMessageDto<LevelReportDto> message =
@@ -165,9 +176,11 @@ public class OutputProducerFactoryTest {
      */
     @Test
     public void testSendL1Report() throws AbstractCodedException {
+    	final File outputFile = new File(testDir, "report.txt");
+    	FileUtils.writeFile(outputFile, "Test report file");
         this.outputProcuderFactory.sendOutput(
                 new FileQueueMessage(ProductFamily.L1_REPORT, "test.txt",
-                        new File("./test/data/report.txt")),
+                		outputFile),
                 inputMessage);
         GenericPublicationMessageDto<LevelReportDto> message =
                 new GenericPublicationMessageDto<LevelReportDto>(123,
