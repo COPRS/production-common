@@ -45,6 +45,7 @@ import esa.s1pdgs.cpoc.common.ProductCategory;
 import esa.s1pdgs.cpoc.common.errors.InternalErrorException;
 import esa.s1pdgs.cpoc.common.filter.FilterCriterion;
 import esa.s1pdgs.cpoc.common.filter.FilterUtils;
+import esa.s1pdgs.cpoc.common.utils.LogUtils;
 
 /**
  * @author Viveris Technologies
@@ -136,7 +137,10 @@ public class JobController {
             }
         }
         // Search
-        return appDataJobService.search(filters, category, sort);
+        LOGGER.debug ("performing search for input: {} {} {}", filters, category, sort);
+        List<AppDataJob> result = appDataJobService.search(filters, category, sort);
+        LOGGER.debug ("search result: {}", result);
+        return result;
     }
 
     /**
@@ -155,7 +159,9 @@ public class JobController {
             throws AppCatalogJobNotFoundException,
             AppCatalogJobInvalidStateException,
             AppCatalogJobGenerationInvalidStateException {
-        return appDataJobService.getJob(jobId);
+    	AppDataJob result= appDataJobService.getJob(jobId);
+        LOGGER.debug ("Result found for AppDataJob: {}", jobId);
+    	return result;
     }
 
     /**
@@ -238,9 +244,19 @@ public class JobController {
     	final AppDataJob<?> patchJob = objMapper
     			.readValue(objMapper.treeAsTokens(node), javaType);    	
    
-    	AppDataJob job = appDataJobService.patchJob(jobId,patchJob);
-    	job.setCategory(cat);
-    	return job;
+    	try {
+    	 	LOGGER.debug ("patching Job {}, {}",jobId,patchJob);
+			AppDataJob job = appDataJobService.patchJob(jobId,patchJob);
+			job.setCategory(cat);			
+    	 	LOGGER.debug ("job patched {}, {}",jobId,job);
+			return job;
+		} catch (Exception e) {
+			LOGGER.error("Exception occured while patching job: {}", LogUtils.toString(e));
+			throw new RuntimeException(
+					String.format("Exception occured while patching job %s", jobId), 
+					e
+			);
+		}
     }
 
     /**
