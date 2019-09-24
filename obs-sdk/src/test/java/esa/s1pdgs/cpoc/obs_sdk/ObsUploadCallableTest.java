@@ -1,8 +1,5 @@
 package esa.s1pdgs.cpoc.obs_sdk;
 
-import static org.junit.Assert.assertEquals;
-import static org.mockito.Mockito.doReturn;
-import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
@@ -21,11 +18,6 @@ import org.mockito.MockitoAnnotations;
 import esa.s1pdgs.cpoc.common.ProductFamily;
 import esa.s1pdgs.cpoc.common.errors.AbstractCodedException;
 import esa.s1pdgs.cpoc.common.utils.FileUtils;
-import esa.s1pdgs.cpoc.obs_sdk.ObsClient;
-import esa.s1pdgs.cpoc.obs_sdk.ObsServiceException;
-import esa.s1pdgs.cpoc.obs_sdk.ObsUploadCallable;
-import esa.s1pdgs.cpoc.obs_sdk.ObsUploadObject;
-import esa.s1pdgs.cpoc.obs_sdk.SdkClientException;
 
 /**
  * Test the class ObsUploadCallable
