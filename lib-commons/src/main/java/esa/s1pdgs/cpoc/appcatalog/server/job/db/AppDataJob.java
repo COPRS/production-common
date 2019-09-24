@@ -5,6 +5,8 @@ import java.util.Date;
 import java.util.List;
 import java.util.Objects;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 import esa.s1pdgs.cpoc.common.ApplicationLevel;
 import esa.s1pdgs.cpoc.common.ProductCategory;
 import esa.s1pdgs.cpoc.mqi.model.queue.AbstractDto;
@@ -17,6 +19,9 @@ import esa.s1pdgs.cpoc.mqi.model.rest.GenericMessageDto;
  */
 public class AppDataJob<E extends AbstractDto> {
 
+	// dirty workaround to have the mongodb id mapped
+	private long id;
+	
     /**
      * Job identifier
      */
@@ -77,6 +82,16 @@ public class AppDataJob<E extends AbstractDto> {
         this.messages = new ArrayList<>();
         this.generations = new ArrayList<>();
     }
+        
+    @JsonIgnore
+	public long getId() {
+		return id;
+	}
+
+    @JsonIgnore
+	public void setId(long id) {
+		this.id = id;
+	}
 
     /**
      * @return the identifier
@@ -244,7 +259,7 @@ public class AppDataJob<E extends AbstractDto> {
      */
     @Override
     public int hashCode() {
-        return Objects.hash(identifier, category, level, pod, state,
+        return Objects.hash(id, identifier, category, level, pod, state,
                 creationDate, lastUpdateDate, messages, product, generations);
     }
 
@@ -261,6 +276,7 @@ public class AppDataJob<E extends AbstractDto> {
         } else {
             AppDataJob other = (AppDataJob) obj;
             ret = identifier == other.identifier
+            		&& id == other.id
                     && Objects.equals(category, other.category)
                     && Objects.equals(level, other.level)
                     && Objects.equals(pod, other.pod)
