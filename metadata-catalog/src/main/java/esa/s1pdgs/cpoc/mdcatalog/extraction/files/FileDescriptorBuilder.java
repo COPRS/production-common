@@ -31,7 +31,7 @@ public class FileDescriptorBuilder {
 	/**
 	 * Local directory for files
 	 */
-	private final String localDirectory;
+	private final File localDirectory;
 
 	/**
 	 * Constructor
@@ -39,7 +39,7 @@ public class FileDescriptorBuilder {
 	 * @param localDirectory
 	 * @param pattern
 	 */
-	public FileDescriptorBuilder(final String localDirectory, final Pattern pattern) {
+	public FileDescriptorBuilder(final File localDirectory, final Pattern pattern) {
 		this.localDirectory = localDirectory;
 		this.pattern = pattern;
 	}
@@ -59,15 +59,17 @@ public class FileDescriptorBuilder {
 	 *             if we have
 	 */
 	public ConfigFileDescriptor buildConfigFileDescriptor(File file) throws MetadataFilePathException, MetadataIgnoredFileException {
-
 		// Extract object storage key
 		String absolutePath = file.getAbsolutePath();
-		if (absolutePath.length() <= localDirectory.length()) {
+		if (absolutePath.length() <= localDirectory.getAbsolutePath().length()) {
 			throw new MetadataFilePathException(absolutePath, "CONFIG", "File is not in root directory");
 		}
-		String relativePath = absolutePath.substring(localDirectory.length());
+		System.out.println(file);
+		String relativePath = absolutePath.substring(localDirectory.getAbsolutePath().length() + 1);
 		relativePath = relativePath.replace("\\", "/");
 
+		
+		
 		// Ignored if directory
 		if (file.isDirectory()) {
 			throw new MetadataIgnoredFileException(file.getName());
@@ -103,8 +105,11 @@ public class FileDescriptorBuilder {
 			configFile.setExtension(FileExtension.valueOfIgnoreCase(m.group(6).toUpperCase()));
 
 		} else {
-			throw new MetadataFilePathException(relativePath, "CONFIG",
-					"File does not match the configuration file pattern");
+			throw new MetadataFilePathException(
+					relativePath, 
+					"CONFIG", 
+					String.format("File %s does not match the configuration file pattern %s", relativePath, pattern)
+			);
 		}
 
 		return configFile;
@@ -125,10 +130,10 @@ public class FileDescriptorBuilder {
 			throws MetadataFilePathException, MetadataIgnoredFileException, MetadataIllegalFileExtension {
 		// Extract relative path
 		String absolutePath = file.getAbsolutePath();
-		if (absolutePath.length() <= localDirectory.length()) {
+		if (absolutePath.length() <= localDirectory.getAbsolutePath().length()) {
 			throw new MetadataFilePathException(absolutePath, "SESSION", "File is not in root directory");
 		}
-		String relativePath = absolutePath.substring(localDirectory.length());
+		String relativePath = absolutePath.substring(localDirectory.getAbsolutePath().length() + 1);
 		relativePath = relativePath.replace("\\", "/");
 
 		// Ignored if directory
@@ -163,10 +168,10 @@ public class FileDescriptorBuilder {
             throws MetadataFilePathException, MetadataIgnoredFileException {
         // Extract relative path
         String absolutePath = file.getAbsolutePath();
-        if (absolutePath.length() <= localDirectory.length()) {
+        if (absolutePath.length() <= localDirectory.getAbsolutePath().length()) {
             throw new MetadataFilePathException(absolutePath, productFamily.name(), "File is not in root directory");
         }
-        String relativePath = absolutePath.substring(localDirectory.length());
+        String relativePath = absolutePath.substring(localDirectory.getAbsolutePath().length() + 1);
         relativePath = relativePath.replace("\\", "/");
 
         // Ignored if directory

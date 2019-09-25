@@ -99,6 +99,9 @@ public class LevelProductsExtractorTest {
     
     @Mock
     XmlConverter xmlConverter;
+    
+    
+    private final File testDir = new File("src/test/resources/workDir/");
 
 	/**
 	 * Initialization
@@ -140,14 +143,13 @@ public class LevelProductsExtractorTest {
 						"S1A_OPER_AUX_OBMEMC_PDMC_20140201T000000.xml", ProductFamily.L0_ACN, "NRT"));
 
 		extractor = new LevelProductsExtractor(esServices, obsClient, mqiService, appStatus, extractorConfig,
-				(new File("./test/workDir/")).getAbsolutePath() + File.separator, "manifest.safe", errorAppender, config, ".safe", xmlConverter);
+				testDir.getAbsolutePath(), "manifest.safe", errorAppender, config, ".safe", xmlConverter);
 	}
 
 	@Test
 	public void testGetKeyObs() {
 		assertEquals("key-obs", extractor.getKeyObs(inputMessage));
-		assertEquals("S1A_AUX_CAL_V20140402T000000_G20140402T133909.SAFE/manifest.safe",
-				extractor.getKeyObs(inputMessageSafe));
+		assertEquals("S1A_AUX_CAL_V20140402T000000_G20140402T133909.SAFE/manifest.safe",extractor.getKeyObs(inputMessageSafe));
 	}
 
 	@Test
@@ -188,8 +190,8 @@ public class LevelProductsExtractorTest {
 	@Test
 	public void testExtractMetadataL0Slice() throws MetadataExtractionException, AbstractCodedException {
 
-		List<File> files = Arrays.asList(new File((new File("./test/workDir/")).getAbsolutePath() + File.separator
-				+ "S1A_IW_RAW__0SDV_20171213T121623_20171213T121656_019684_021735_C6DB.SAFE" + File.separator
+		List<File> files = Arrays.asList(new File(testDir, 
+				"S1A_IW_RAW__0SDV_20171213T121623_20171213T121656_019684_021735_C6DB.SAFE" + File.separator
 				+ "manifest.safe"));
 
 		inputMessageSafe = new GenericMessageDto<ProductDto>(123, "",
@@ -237,8 +239,8 @@ public class LevelProductsExtractorTest {
 	@Test
 	public void testExtractMetadataL0Acn() throws MetadataExtractionException, AbstractCodedException {
 
-		List<File> files = Arrays.asList(new File((new File("./test/workDir/")).getAbsolutePath() + File.separator
-				+ "S1A_IW_RAW__0SDV_20171213T121623_20171213T121656_019684_021735_C6DB.SAFE" + File.separator
+		List<File> files = Arrays.asList(new File(testDir,
+				"S1A_IW_RAW__0SDV_20171213T121623_20171213T121656_019684_021735_C6DB.SAFE" + File.separator
 				+ "manifest.safe"));
 
 		inputMessageSafe = new GenericMessageDto<ProductDto>(123, "",
@@ -285,8 +287,8 @@ public class LevelProductsExtractorTest {
 	@Test
 	public void testExtractMetadataL1Slice() throws MetadataExtractionException, AbstractCodedException {
 
-		List<File> files = Arrays.asList(new File((new File("./test/workDir/")).getAbsolutePath() + File.separator
-				+ "S1A_IW_RAW__0SDV_20171213T121623_20171213T121656_019684_021735_C6DB.SAFE" + File.separator
+		List<File> files = Arrays.asList(new File(testDir,
+				"S1A_IW_RAW__0SDV_20171213T121623_20171213T121656_019684_021735_C6DB.SAFE" + File.separator
 				+ "manifest.safe"));
 
 		inputMessageSafe = new GenericMessageDto<ProductDto>(123, "",
@@ -335,8 +337,7 @@ public class LevelProductsExtractorTest {
 
 		String l1acnName = "S1A_IW_GRDH_1ADV_20180227T145413_20180227T145438_020794_023A69_632A.SAFE";
 
-		List<File> files = Arrays.asList(new File((new File("./test/workDir/")).getAbsolutePath() + File.separator + l1acnName
-				+ File.separator + "manifest.safe"));
+		List<File> files = Arrays.asList(new File(testDir.getAbsolutePath(), l1acnName + File.separator + "manifest.safe"));
 
 		inputMessageSafe = new GenericMessageDto<ProductDto>(123, "",
 				new ProductDto(l1acnName, l1acnName, ProductFamily.L1_ACN, "NRT"));
@@ -381,8 +382,7 @@ public class LevelProductsExtractorTest {
 
 		String l2SliceName = "S1A_WV_OCN__2SSV_20190518T160559_20190518T161434_027284_0313A0_46F2.SAFE";
 
-		List<File> files = Arrays.asList(new File((new File("./test/workDir/")).getAbsolutePath() + File.separator + l2SliceName
-				+ File.separator + "manifest.safe"));
+		List<File> files = Arrays.asList(new File(testDir, l2SliceName + File.separator + "manifest.safe"));
 
 		inputMessageSafe = new GenericMessageDto<ProductDto>(123, "",
 				new ProductDto(l2SliceName, l2SliceName, ProductFamily.L2_SLICE, "NRT"));
@@ -426,8 +426,7 @@ public class LevelProductsExtractorTest {
 
 		String l2acnName = "S1A_WV_OCN__2ASV_20190518T160559_20190518T161434_027284_0313A0_2960.SAFE";
 
-		List<File> files = Arrays.asList(new File((new File("./test/workDir/")).getAbsolutePath() + File.separator + l2acnName
-				+ File.separator + "manifest.safe"));
+		List<File> files = Arrays.asList(new File(testDir, l2acnName + File.separator + "manifest.safe"));
 
 		inputMessageSafe = new GenericMessageDto<ProductDto>(123, "",
 				new ProductDto(l2acnName, l2acnName, ProductFamily.L2_ACN, "NRT"));

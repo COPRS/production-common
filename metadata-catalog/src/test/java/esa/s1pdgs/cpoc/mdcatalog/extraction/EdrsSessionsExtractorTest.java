@@ -137,9 +137,9 @@ public class EdrsSessionsExtractorTest {
         
         final LoggerReporting.Factory reportingFactory = new LoggerReporting.Factory("TestMetadataExtraction");
         
-        JSONObject expected = extractor.mdBuilder
-                .buildEdrsSessionFileMetadata(expectedDescriptor);
+        JSONObject expected = extractor.mdBuilder.buildEdrsSessionFileMetadata(expectedDescriptor);
         JSONObject result = extractor.extractMetadata(reportingFactory, inputMessage);
+        
         for (String key: expected.keySet()) {
             if (!"insertionTime".equals(key)) {
                 assertEquals(expected.get(key), result.get(key));

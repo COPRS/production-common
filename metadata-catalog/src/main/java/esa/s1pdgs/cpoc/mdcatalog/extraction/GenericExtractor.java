@@ -116,7 +116,7 @@ public abstract class GenericExtractor<T> {
             final XmlConverter xmlConverter) {
         this.localDirectory = localDirectory;
         this.fileDescriptorBuilder =
-                new FileDescriptorBuilder(this.localDirectory,
+                new FileDescriptorBuilder(new File(localDirectory),
                         Pattern.compile(pattern, Pattern.CASE_INSENSITIVE));
         this.extractorConfig = extractorConfig;
         this.mdBuilder = new MetadataBuilder(this.extractorConfig, xmlConverter, localDirectory);

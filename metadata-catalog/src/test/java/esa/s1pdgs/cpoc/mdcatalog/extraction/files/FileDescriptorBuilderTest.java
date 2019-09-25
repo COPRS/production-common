@@ -5,7 +5,6 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.fail;
 
 import java.io.File;
-import java.nio.file.Paths;
 import java.util.regex.Pattern;
 
 import org.junit.Test;
@@ -26,6 +25,8 @@ import esa.s1pdgs.cpoc.mqi.model.queue.ProductDto;
 public class FileDescriptorBuilderTest {
 
     private FileDescriptorBuilder fileDescriptorBuilder;
+    
+    private final File testDir = new File("src/test/resources/workDir");
 
     @Test
     public void testBuildConfigFileDescriptor() {
@@ -45,23 +46,22 @@ public class FileDescriptorBuilderTest {
                 "S1A_OPER_AUX_OBMEMC_PDMC_20140201T000000.xml");
         expectedResult.setProductFamily(ProductFamily.AUXILIARY_FILE);
 
-        File file = new File(
-                "test/workDir/S1A_OPER_AUX_OBMEMC_PDMC_20140201T000000.xml");
+        File file = new File(testDir,"S1A_OPER_AUX_OBMEMC_PDMC_20140201T000000.xml");
 
         fileDescriptorBuilder = new FileDescriptorBuilder(
-                Paths.get("").toAbsolutePath() + "/test/workDir/",
+        		testDir,
                 Pattern.compile(
                         "^([0-9a-z][0-9a-z]){1}([0-9a-z]){1}(_(OPER|TEST))?_(AUX_OBMEMC|AUX_PP1|AUX_CAL|AUX_INS|AUX_RESORB|MPL_ORBPRE|MPL_ORBSCT)_\\w{1,}\\.(XML|EOF|SAFE)(/.*)?$",
                         Pattern.CASE_INSENSITIVE));
         try {
-            ConfigFileDescriptor result =
-                    fileDescriptorBuilder.buildConfigFileDescriptor(file);
+            ConfigFileDescriptor result = fileDescriptorBuilder.buildConfigFileDescriptor(file);
 
             assertNotNull("File descriptor should not be null", result);
             assertEquals("File descriptor are not equals",
                     expectedResult.toString(), result.toString());
         } catch (AbstractCodedException fe) {
-            fail("Exception occurred: " + fe.getMessage());
+            fe.printStackTrace();
+            fail("Exception occurred: " + fe.getMessage());   
         }
     }
 
@@ -82,11 +82,10 @@ public class FileDescriptorBuilderTest {
                 "S1A_AUX_INS_V20171017T080000_G20171013T101216.SAFE/manifest.safe");
         expectedResult.setProductFamily(ProductFamily.AUXILIARY_FILE);
 
-        File file = new File(
-                "test/workDir/S1A_AUX_INS_V20171017T080000_G20171013T101216.SAFE/manifest.safe");
+        File file = new File(testDir,"S1A_AUX_INS_V20171017T080000_G20171013T101216.SAFE/manifest.safe");
 
         fileDescriptorBuilder = new FileDescriptorBuilder(
-                Paths.get("").toAbsolutePath() + "/test/workDir/",
+        		testDir,
                 Pattern.compile(
                         "^([0-9a-z][0-9a-z]){1}([0-9a-z]){1}(_(OPER|TEST))?_(AUX_OBMEMC|AUX_PP1|AUX_CAL|AUX_INS|AUX_RESORB|MPL_ORBPRE|MPL_ORBSCT)_\\w{1,}\\.(XML|EOF|SAFE)(/.*)?$",
                         Pattern.CASE_INSENSITIVE));
@@ -119,11 +118,11 @@ public class FileDescriptorBuilderTest {
         expectedResult.setChannel(2);
         expectedResult.setSessionIdentifier("512000176");
 
-        File file = new File(
-                "test/workDir/512000176/ch02/DCS_02_L20171109180334512000176_ch2_DSDB_00034.raw");
+        File file = new File(testDir,
+                "512000176/ch02/DCS_02_L20171109180334512000176_ch2_DSDB_00034.raw");
 
         fileDescriptorBuilder = new FileDescriptorBuilder(
-                Paths.get("").toAbsolutePath() + "/test/workDir/",
+        		testDir,
                 Pattern.compile(
                         "^(\\w+)(/|\\\\)(ch)(0[1-2])(/|\\\\)((\\w*)\\4(\\w*)\\.(XML|RAW))$",
                         Pattern.CASE_INSENSITIVE));
@@ -152,12 +151,10 @@ public class FileDescriptorBuilderTest {
         expectedResult.setChannel(1);
         expectedResult.setSessionIdentifier("L20180724144436762001030");
 
-        file = new File(                                    
-                "test/workDir/L20180724144436762001030/ch01/DCS_93_S1B__SGS__________017076_ch1_DSIB.xml");
+        file = new File(testDir,"L20180724144436762001030/ch01/DCS_93_S1B__SGS__________017076_ch1_DSIB.xml");
     
-
         fileDescriptorBuilder = new FileDescriptorBuilder(
-                Paths.get("").toAbsolutePath() + "/test/workDir/",
+        		testDir,
                 Pattern.compile(
                         "^(\\w+)(/|\\\\)(ch)(0[1-2])(/|\\\\)((\\w*)\\4(\\w*)\\.(XML|RAW))$",
                         Pattern.CASE_INSENSITIVE));
@@ -199,11 +196,11 @@ public class FileDescriptorBuilderTest {
         expectedResult.setDataTakeId("021735");
         expectedResult.setMode("FAST");
 
-        File file = new File(
-                "test/workDir/S1A_IW_RAW__0SDV_20171213T121623_20171213T121656_019684_021735_C6DB.SAFE/manifest.safe");
+        File file = new File(testDir,
+                "S1A_IW_RAW__0SDV_20171213T121623_20171213T121656_019684_021735_C6DB.SAFE/manifest.safe");
 
         fileDescriptorBuilder = new FileDescriptorBuilder(
-                Paths.get("").toAbsolutePath() + "/test/workDir/",
+        		testDir,
                 Pattern.compile(LevelProductsExtractor.PATTERN_CONFIG,
                         Pattern.CASE_INSENSITIVE));
         try {
@@ -243,11 +240,11 @@ public class FileDescriptorBuilderTest {
         expectedResult.setDataTakeId("021735");
         expectedResult.setMode("FAST");
 
-        File file = new File(
-                "test/workDir/S1A_IW_RAW__0SDV_20171213T121623_20171213T121656_019684_021735_C6DB.SAFE/manifest.safe");
+        File file = new File(testDir,
+                "S1A_IW_RAW__0SDV_20171213T121623_20171213T121656_019684_021735_C6DB.SAFE/manifest.safe");
 
         fileDescriptorBuilder = new FileDescriptorBuilder(
-                Paths.get("").toAbsolutePath() + "/test/workDir/",
+        		testDir,
                 Pattern.compile(LevelProductsExtractor.PATTERN_CONFIG,
                         Pattern.CASE_INSENSITIVE));
         try {
@@ -288,11 +285,11 @@ public class FileDescriptorBuilderTest {
         expectedResult.setDataTakeId("023A69");
         expectedResult.setMode("NRT");
 
-        File file = new File(
-                "test/workDir/S1A_IW_GRDH_1SDV_20180227T145618_20180227T145643_020794_023A69_D7EC.SAFE/manifest.safe");
+        File file = new File(testDir,
+                "S1A_IW_GRDH_1SDV_20180227T145618_20180227T145643_020794_023A69_D7EC.SAFE/manifest.safe");
 
         fileDescriptorBuilder = new FileDescriptorBuilder(
-                Paths.get("").toAbsolutePath() + "/test/workDir/",
+        		testDir,
                 Pattern.compile(LevelProductsExtractor.PATTERN_CONFIG,
                         Pattern.CASE_INSENSITIVE));
         try {
@@ -310,10 +307,9 @@ public class FileDescriptorBuilderTest {
     @Test
     public void testBuildFileDescriptorPatternFail() {
         // Auxiliary file
-        File file = new File(
-                "test/workDir/S1A_OPER_OUX_OBMEMC_PDMC_20140201T000000.xml");
+        File file = new File(testDir,"S1A_OPER_OUX_OBMEMC_PDMC_20140201T000000.xml");
         fileDescriptorBuilder = new FileDescriptorBuilder(
-                Paths.get("").toAbsolutePath() + "/test/workDir/",
+        		testDir,
                 Pattern.compile(
                         "^([0-9a-z][0-9a-z]){1}([0-9a-z]){1}(_(OPER|TEST))?_(AUX_OBMEMC|AUX_PP1|AUX_CAL|AUX_INS|AUX_RESORB|MPL_ORBPRE|MPL_ORBSCT)_\\w{1,}\\.(XML|EOF|SAFE)(/.*)?$",
                         Pattern.CASE_INSENSITIVE));
@@ -327,10 +323,9 @@ public class FileDescriptorBuilderTest {
                     fe.getCode());
         }
         // Edrs Session file
-        file = new File(
-                "test/workDir/S1A/SESSION1/ch03/DCS_02_SESSION1_ch1_DSIB.xml");
+        file = new File(testDir,"S1A/SESSION1/ch03/DCS_02_SESSION1_ch1_DSIB.xml");
         fileDescriptorBuilder = new FileDescriptorBuilder(
-                Paths.get("").toAbsolutePath() + "/test/workDir/",
+        		testDir,
                 Pattern.compile(
                         "^([a-z0-9][a-z0-9])([a-z0-9])(/|\\\\)(\\w+)(/|\\\\)(ch)(0[1-2])(/|\\\\)((\\w*)\\4(\\w*)\\.(XML|RAW))$",
                         Pattern.CASE_INSENSITIVE));
@@ -348,10 +343,9 @@ public class FileDescriptorBuilderTest {
                 "S1A_IW_RAW__0SDV_20171213T121623_20171213T121656_019684_021735_C6DB.SAFE",
                 "S1A_IW_RAW__0SDV_20171213T121623_20171213T121656_019684_021735_C6DB.SAFE",
                 ProductFamily.L0_SLICE, "FAST");
-        file = new File(
-                "test/workDir/S1A_IR_RAW__0SDV_20171213T121623_20171213T121656_019684_021735_C6DB.SAFE/manifest.safe");
+        file = new File(testDir,"S1A_IR_RAW__0SDV_20171213T121623_20171213T121656_019684_021735_C6DB.SAFE/manifest.safe");
         fileDescriptorBuilder = new FileDescriptorBuilder(
-                Paths.get("").toAbsolutePath() + "/test/workDir/",
+        		testDir,
                 Pattern.compile(LevelProductsExtractor.PATTERN_CONFIG,
                         Pattern.CASE_INSENSITIVE));
         try {
@@ -368,10 +362,10 @@ public class FileDescriptorBuilderTest {
                 "S1A_IW_RAW__0SDV_20171213T121623_20171213T121656_019684_021735_C6DB.SAFE",
                 "S1A_IW_RAW__0SDV_20171213T121623_20171213T121656_019684_021735_C6DB.SAFE",
                 ProductFamily.L1_SLICE, "FAST");
-        file = new File(
-                "test/workDir/S1A_IW_GRDH_1ZDV_20180227T145618_20180227T145643_020794_023A69_D7EC.SAFE/manifest.safe");
+        file = new File(testDir,
+                "S1A_IW_GRDH_1ZDV_20180227T145618_20180227T145643_020794_023A69_D7EC.SAFE/manifest.safe");
         fileDescriptorBuilder = new FileDescriptorBuilder(
-                Paths.get("").toAbsolutePath() + "/test/workDir/",
+        		testDir,
                 Pattern.compile(LevelProductsExtractor.PATTERN_CONFIG,
                         Pattern.CASE_INSENSITIVE));
         try {
@@ -390,7 +384,7 @@ public class FileDescriptorBuilderTest {
         // Auxiliary file
         File file = new File("/S1A_OPER_AUX.xml");
         fileDescriptorBuilder = new FileDescriptorBuilder(
-                Paths.get("").toAbsolutePath() + "/test/workDir/",
+        		testDir,
                 Pattern.compile(
                         "^([0-9a-z][0-9a-z]){1}([0-9a-z]){1}(_(OPER|TEST))?_(AUX_OBMEMC|AUX_PP1|AUX_CAL|AUX_INS|AUX_RESORB|MPL_ORBPRE|MPL_ORBSCT)_\\w{1,}\\.(XML|EOF|SAFE)(/.*)?$",
                         Pattern.CASE_INSENSITIVE));
@@ -405,7 +399,7 @@ public class FileDescriptorBuilderTest {
         // Edrs Session file
         file = new File("/S1A/SESSION1");
         fileDescriptorBuilder = new FileDescriptorBuilder(
-                Paths.get("").toAbsolutePath() + "/test/workDir/",
+        		testDir,
                 Pattern.compile(
                         "^([a-z0-9][a-z0-9])([a-z0-9])(/|\\\\)(\\w+)(/|\\\\)(ch)(0[1-2])(/|\\\\)((\\w*)\\4(\\w*)\\.(XML|RAW))$",
                         Pattern.CASE_INSENSITIVE));
@@ -424,7 +418,7 @@ public class FileDescriptorBuilderTest {
                 ProductFamily.L0_SLICE, "FAST");
         file = new File("/S1A_IW_RAW__0SDV");
         fileDescriptorBuilder = new FileDescriptorBuilder(
-                Paths.get("").toAbsolutePath() + "/test/workDir/",
+        		testDir,
                 Pattern.compile(
                         "^([0-9a-z]{2})([0-9a-z]){1}_(S[1-6]|IW|EW|WM|N[1-6]|EN|Z[1-6]|ZE|ZI|ZW|RF|GP|HK)_(RAW)(_)_(0)(A|C|N|S|_)(SH|SV|HH|HV|VV|VH|DH|DV|__)_([0-9a-z]{15})_([0-9a-z]{15})_([0-9]{6})_([0-9a-z_]{6})\\w{1,}\\.(SAFE)(/.*)?",
                         Pattern.CASE_INSENSITIVE));
@@ -444,7 +438,7 @@ public class FileDescriptorBuilderTest {
                 ProductFamily.L0_SLICE, "FAST");
         file = new File("/S1A_IW_GRDH_1SDV");
         fileDescriptorBuilder = new FileDescriptorBuilder(
-                Paths.get("").toAbsolutePath() + "/test/workDir/",
+        		testDir,
                 Pattern.compile(
                         "^(S1A|S1B|ASA)_(S[1-6]|IW|EW|WM|N[1-6]|EN|IM)_(SLC|GRD|OCN)(F|H|M|_)_(1|2)(A|S)(SH|SV|HH|HV|VV|VH|DH|DV)_([0-9a-z]{15})_([0-9a-z]{15})_([0-9]{6})_([0-9a-z_]{6})\\w{1,}\\.(SAFE)(/.*)?$",
                         Pattern.CASE_INSENSITIVE));
@@ -462,10 +456,9 @@ public class FileDescriptorBuilderTest {
     @Test
     public void testBuildFileDescriptorDirectoryFail() {
         // Auxiliary file
-        File file = new File(
-                "test/workDir/S1A_AUX_CAL_V20140402T000000_G20140402T133909.SAFE");
+        File file = new File(testDir,"S1A_AUX_CAL_V20140402T000000_G20140402T133909.SAFE");
         fileDescriptorBuilder = new FileDescriptorBuilder(
-                Paths.get("").toAbsolutePath() + "/test/workDir/",
+        		testDir,
                 Pattern.compile(
                         "^([0-9a-z][0-9a-z]){1}([0-9a-z]){1}(_(OPER|TEST))?_(AUX_OBMEMC|AUX_PP1|AUX_CAL|AUX_INS|AUX_RESORB|MPL_ORBPRE|MPL_ORBSCT)_\\w{1,}\\.(XML|EOF|SAFE)(/.*)?$",
                         Pattern.CASE_INSENSITIVE));
@@ -480,9 +473,9 @@ public class FileDescriptorBuilderTest {
                     fe.getCode());
         }
         // Edrs Session file
-        file = new File("test/workDir/S1A/SESSION1/ch01");
+        file = new File(testDir,"S1A/SESSION1/ch01");
         fileDescriptorBuilder = new FileDescriptorBuilder(
-                Paths.get("").toAbsolutePath() + "/test/workDir/",
+        		testDir,
                 Pattern.compile(
                         "^([a-z0-9][a-z0-9])([a-z0-9])(/|\\\\)(\\w+)(/|\\\\)(ch)(0[1-2])(/|\\\\)((\\w*)\\4(\\w*)\\.(XML|RAW))$",
                         Pattern.CASE_INSENSITIVE));
@@ -500,12 +493,10 @@ public class FileDescriptorBuilderTest {
                 "S1A_IW_RAW__0SDV_20171213T121623_20171213T121656_019684_021735_C6DB.SAFE",
                 "S1A_IW_RAW__0SDV_20171213T121623_20171213T121656_019684_021735_C6DB.SAFE",
                 ProductFamily.L0_SLICE, "FAST");
-        file = new File(
-                "test/workDir/S1A_IW_RAW__0SDV_20171213T121623_20171213T121656_019684_021735_C6DB.SAFE");
+        file = new File(testDir,"S1A_IW_RAW__0SDV_20171213T121623_20171213T121656_019684_021735_C6DB.SAFE");
         fileDescriptorBuilder = new FileDescriptorBuilder(
-                Paths.get("").toAbsolutePath() + "/test/workDir/",
-                Pattern.compile(LevelProductsExtractor.PATTERN_CONFIG,
-                        Pattern.CASE_INSENSITIVE));
+        		testDir,
+                Pattern.compile(LevelProductsExtractor.PATTERN_CONFIG,Pattern.CASE_INSENSITIVE));
         try {
             fileDescriptorBuilder.buildOutputFileDescriptor(file, dto, ProductFamily.L0_SLICE);
             fail("An exception should occur " + file.getName()
@@ -521,10 +512,9 @@ public class FileDescriptorBuilderTest {
                 "S1A_IW_RAW__0SDV_20171213T121623_20171213T121656_019684_021735_C6DB.SAFE",
                 "S1A_IW_RAW__0SDV_20171213T121623_20171213T121656_019684_021735_C6DB.SAFE",
                 ProductFamily.L0_SLICE, "FAST");
-        file = new File(
-                "test/workDir/S1A_IW_GRDH_1SDV_20180227T145618_20180227T145643_020794_023A69_D7EC.SAFE");
+        file = new File(testDir, "S1A_IW_GRDH_1SDV_20180227T145618_20180227T145643_020794_023A69_D7EC.SAFE");
         fileDescriptorBuilder = new FileDescriptorBuilder(
-                Paths.get("").toAbsolutePath() + "/test/workDir/",
+        		testDir,
                 Pattern.compile(LevelProductsExtractor.PATTERN_CONFIG,
                         Pattern.CASE_INSENSITIVE));
         try {
@@ -544,10 +534,9 @@ public class FileDescriptorBuilderTest {
             throws MetadataFilePathException, MetadataIgnoredFileException,
             MetadataIllegalFileExtension {
         // Edrs Session file
-        File file = new File(
-                "test/workDir/S1A/SESSION1/ch01/DCS_02_SESSION1_ch1_DSIB.xmll");
+        File file = new File(testDir,"S1A/SESSION1/ch01/DCS_02_SESSION1_ch1_DSIB.xmll");
         fileDescriptorBuilder = new FileDescriptorBuilder(
-                Paths.get("").toAbsolutePath() + "/test/workDir/",
+        		testDir,
                 Pattern.compile(
                         "^([a-z0-9][a-z0-9])([a-z0-9])(/|\\\\)(\\w+)(/|\\\\)(ch)(0[1-2])(/|\\\\)((\\w*)\\4(\\w*)\\.(XML|RAW|XMLL))$",
                         Pattern.CASE_INSENSITIVE));

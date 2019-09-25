@@ -163,8 +163,19 @@ public class KafkaProperties {
     public void setProducer(final KafkaProducerProperties producer) {
         this.producer = producer;
     }
+    
+    
 
-    /**
+    @Override
+	public String toString() {
+		return "KafkaProperties [bootstrapServers=" + bootstrapServers + ", errorTopic=" + errorTopic + ", hostname="
+				+ hostname + ", clientId=" + clientId + ", consumer=" + consumer + ", listener=" + listener
+				+ ", producer=" + producer + "]";
+	}
+
+
+
+	/**
      * Properties of a KAFKA producer
      * 
      * @author Viveris Technologies
@@ -334,6 +345,16 @@ public class KafkaProperties {
             this.offsetDftMode = defaultMode;
         }
 
+		@Override
+		public String toString() {
+			return "KafkaConsumerProperties [groupId=" + groupId + ", maxPollRecords=" + maxPollRecords
+					+ ", maxPollIntervalMs=" + maxPollIntervalMs + ", heartbeatIntvMs=" + heartbeatIntvMs
+					+ ", sessionTimeoutMs=" + sessionTimeoutMs + ", autoOffsetReset=" + autoOffsetReset
+					+ ", offsetDftMode=" + offsetDftMode + "]";
+		}
+        
+        
+
     }
 
     /**
@@ -370,6 +391,13 @@ public class KafkaProperties {
         public void setPollTimeoutMs(final long pollTimeoutMs) {
             this.pollTimeoutMs = pollTimeoutMs;
         }
+
+		@Override
+		public String toString() {
+			return "KafkaListenerProperties [pollTimeoutMs=" + pollTimeoutMs + "]";
+		}
+        
+        
 
     }
 
@@ -408,5 +436,9 @@ public class KafkaProperties {
             this.maxRetries = maxRetries;
         }
 
+		@Override
+		public String toString() {
+			return "KafkaProducerProperties [maxRetries=" + maxRetries + "]";
+		}
     }
 }

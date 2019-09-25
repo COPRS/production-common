@@ -161,7 +161,7 @@ public class AuxiliaryFilesExtractor extends GenericExtractor<ProductDto> {
 	@Override
 	protected void cleanProcessing(final GenericMessageDto<ProductDto> message) {
 		// TODO Auto-generated method stub
-		File metadataFile = new File(localDirectory + getKeyObs(message));
+		File metadataFile = new File(localDirectory, getKeyObs(message));
 		if (metadataFile.exists()) {
 			File parent = metadataFile.getParentFile();
 			metadataFile.delete();

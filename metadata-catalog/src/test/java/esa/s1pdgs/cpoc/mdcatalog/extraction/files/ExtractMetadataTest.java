@@ -38,7 +38,7 @@ public class ExtractMetadataTest {
 
     XmlConverter xmlConverter;
     
-	private static String LOCAL_DIRECTORY = ExtractMetadataTest.class.getResource("/").getFile().concat("../../test/workDir").toString();
+    private final File testDir = new File("src/test/resources/workDir");
 
 	@Before
     public void init() {
@@ -64,42 +64,42 @@ public class ExtractMetadataTest {
         typeSliceLength.put("IW", 25.0F);
         typeSliceLength.put("SM", 25.0F);
         typeSliceLength.put("WV", 0.0F);
-        extractor = new ExtractMetadata(typeOverlap, typeSliceLength,
-                "config/xsltDir/", xmlConverter, LOCAL_DIRECTORY);
+        extractor = new ExtractMetadata(typeOverlap, typeSliceLength, "config/xsltDir/", xmlConverter, testDir.getPath());
     }
 
     @Test
     public void testProcessXMLFile() {
-
         JSONObject expectedResult = new JSONObject(
-                "{\"validityStopTime\":\"9999-12-31T23:59:59.000000Z\",\"productClass\":\"OPER\",\"missionid\":\"S1\",\"creationTime\":\"2014-02-12T12:28:19.000000Z\",\"insertionTime\":\"2018-05-31T14:34:17.000000Z\",\"satelliteid\":\"A\",\"validityStartTime\":\"2014-02-01T00:00:00.000000Z\",\"productName\":\"S1A_OPER_AUX_OBMEMC_PDMC_20140201T000000.xml\",\"url\":\"S1A_OPER_AUX_OBMEMC_PDMC_20140201T000000.xml\",\"productType\":\"AUX_OBMEMC\",\"productFamily\":\"AUXILIARY_FILE\"}");
+                "{\"validityStopTime\":\"9999-12-31T23:59:59.000000Z\",\"productClass\":\"OPER\",\"missionid\":\"S1\","
+                + "\"creationTime\":\"2014-02-12T12:28:19.000000Z\",\"insertionTime\":\"2018-05-31T14:34:17.000000Z\","
+                + "\"satelliteid\":\"A\",\"validityStartTime\":\"2014-02-01T00:00:00.000000Z\","
+                + "\"productName\":\"S1A_OPER_AUX_OBMEMC_PDMC_20140201T000000.xml\","
+                + "\"url\":\"S1A_OPER_AUX_OBMEMC_PDMC_20140201T000000.xml\",\"productType\":\"AUX_OBMEMC\","
+                + "\"productFamily\":\"AUXILIARY_FILE\"}");
 
         ConfigFileDescriptor descriptor = new ConfigFileDescriptor();
         descriptor.setExtension(FileExtension.XML);
         descriptor.setFilename("S1A_OPER_AUX_OBMEMC_PDMC_20140201T000000.xml");
-        descriptor.setKeyObjectStorage(
-                "S1A_OPER_AUX_OBMEMC_PDMC_20140201T000000.xml");
+        descriptor.setKeyObjectStorage("S1A_OPER_AUX_OBMEMC_PDMC_20140201T000000.xml");
         descriptor.setMissionId("S1");
         descriptor.setSatelliteId("A");
         descriptor.setProductClass("OPER");
-        descriptor
-                .setProductName("S1A_OPER_AUX_OBMEMC_PDMC_20140201T000000.xml");
+        descriptor.setProductName("S1A_OPER_AUX_OBMEMC_PDMC_20140201T000000.xml");
         descriptor.setProductType("AUX_OBMEMC");
-        descriptor.setRelativePath(
-                "S1A_OPER_AUX_OBMEMC_PDMC_20140201T000000.xml");
+        descriptor.setRelativePath("S1A_OPER_AUX_OBMEMC_PDMC_20140201T000000.xml");
         descriptor.setProductFamily(ProductFamily.AUXILIARY_FILE);
-        File file = new File(
-                "test/workDir/S1A_OPER_AUX_OBMEMC_PDMC_20140201T000000.xml");
+        
+        File file = new File(testDir,"S1A_OPER_AUX_OBMEMC_PDMC_20140201T000000.xml");
 
         try {
             JSONObject result = extractor.processXMLFile(descriptor, file);
 
             assertNotNull("JSON object should not be null", result);
-            assertEquals("JSON object are not equals", expectedResult.length(),
-                    result.length());
+            assertEquals("JSON object are not equals", expectedResult.length(),result.length());
             assertEquals("JSON object value validityStartTime are not equals",
                     expectedResult.get("validityStartTime").toString(),
-                    result.get("validityStartTime").toString());
+                    result.get("validityStartTime").toString()
+            );
         } catch (AbstractCodedException fe) {
             fail("Exception occurred: " + fe.getMessage());
         }
@@ -122,8 +122,7 @@ public class ExtractMetadataTest {
                 "S1B_OPER_AUX_OBMEMC_PDMC_20140212T000000.xml");
         descriptor.setProductFamily(ProductFamily.AUXILIARY_FILE);
 
-        file = new File(
-                "test/workDir/S1B_OPER_AUX_OBMEMC_PDMC_20140212T000000.xml");
+        file = new File(testDir, "S1B_OPER_AUX_OBMEMC_PDMC_20140212T000000.xml");
 
         try {
             JSONObject result = extractor.processXMLFile(descriptor, file);
@@ -157,8 +156,7 @@ public class ExtractMetadataTest {
         descriptor.setRelativePath(
                 "S1A_OPER_AUX_OBMEMC_PDMC_20140201T000000.xml");
         descriptor.setProductFamily(ProductFamily.AUXILIARY_FILE);
-        File file = new File(
-                "test/workDir/S1A_OPER_OUX_OBMEMC_PDMC_20140201T000000.xml");
+        File file = new File(testDir, "S1A_OPER_OUX_OBMEMC_PDMC_20140201T000000.xml");
 
         extractor.processXMLFile(descriptor, file);
     }
@@ -185,8 +183,7 @@ public class ExtractMetadataTest {
                 "S1A_OPER_MPL_ORBPRE_20171208T200309_20171215T200309_0001.EOF");
         descriptor.setProductFamily(ProductFamily.AUXILIARY_FILE);
 
-        File file = new File(
-                "test/workDir/S1A_OPER_MPL_ORBPRE_20171208T200309_20171215T200309_0001.EOF");
+        File file = new File(testDir,"S1A_OPER_MPL_ORBPRE_20171208T200309_20171215T200309_0001.EOF");
 
         try {
             JSONObject result = extractor.processEOFFile(descriptor, file);
@@ -224,8 +221,7 @@ public class ExtractMetadataTest {
                 "S1__OPER_MSK__LAND__V20140403T210200_G20190711T113000.EOF");
         descriptor.setProductFamily(ProductFamily.AUXILIARY_FILE);
 
-        File file = new File(
-                "test/workDir/S1__OPER_MSK__LAND__V20140403T210200_G20190711T113000.EOF");
+        File file = new File(testDir, "S1__OPER_MSK__LAND__V20140403T210200_G20190711T113000.EOF");
 
         try {
             JSONObject result = extractor.processEOFFile(descriptor, file);
@@ -260,8 +256,7 @@ public class ExtractMetadataTest {
         descriptor.setRelativePath(
                 "S1A_OPER_MPL_ORBPRE_20171208T200309_20171215T200309_0001.EOF");
 
-        File file = new File(
-                "test/workDir/S1A_OPER_MPL_ORBPRE_20171208T200309_20171215T200309_0003.EOF");
+        File file = new File(testDir,"S1A_OPER_MPL_ORBPRE_20171208T200309_20171215T200309_0003.EOF");
 
         extractor.processEOFFile(descriptor, file);
     }
@@ -288,8 +283,7 @@ public class ExtractMetadataTest {
                 "S1A_OPER_AUX_RESORB_OPOD_20171213T143838_V20171213T102737_20171213T134507.EOF");
         descriptor.setProductFamily(ProductFamily.AUXILIARY_FILE);
 
-        File file = new File(
-                "test/workDir/S1A_OPER_AUX_RESORB_OPOD_20171213T143838_V20171213T102737_20171213T134507.EOF");
+        File file = new File(testDir,"S1A_OPER_AUX_RESORB_OPOD_20171213T143838_V20171213T102737_20171213T134507.EOF");
 
         try {
             JSONObject result =
@@ -325,8 +319,7 @@ public class ExtractMetadataTest {
         descriptor.setRelativePath(
                 "S1A_OPER_AUX_RESORB_OPOD_20171213T143838_V20171213T102737_20171213T134507.EOF");
 
-        File file = new File(
-                "test/workDir/S1A_OPER_AUX_RESORB_OPOD_20171213T143838_V20171213T102737_20171213T134508.EOF");
+        File file = new File(testDir,"S1A_OPER_AUX_RESORB_OPOD_20171213T143838_V20171213T102737_20171213T134508.EOF");
 
         extractor.processEOFFileWithoutNamespace(descriptor, file);
     }
@@ -352,8 +345,7 @@ public class ExtractMetadataTest {
                 "S1A_AUX_CAL_V20171017T080000_G20171013T101200.SAFE");
         descriptor.setProductFamily(ProductFamily.AUXILIARY_FILE);
 
-        File file = new File(
-                "test/workDir/S1A_AUX_CAL_V20171017T080000_G20171013T101200.SAFE/manifest.safe");
+        File file = new File(testDir,"S1A_AUX_CAL_V20171017T080000_G20171013T101200.SAFE/manifest.safe");
 
        try {
             JSONObject result = extractor.processSAFEFile(descriptor, file);
@@ -388,8 +380,7 @@ public class ExtractMetadataTest {
         descriptor.setRelativePath(
                 "S1A_AUX_CAL_V20171017T080000_G20171013T101200.SAFE");
 
-        File file = new File(
-                "test/workDir/S1A_AUX_CAL_V20171017T080000_G20171013T101201.SAFE");
+        File file = new File(testDir,"S1A_AUX_CAL_V20171017T080000_G20171013T101201.SAFE");
 
         extractor.processSAFEFile(descriptor, file);
     }
@@ -491,8 +482,8 @@ public class ExtractMetadataTest {
         descriptor.setProductFamily(ProductFamily.L0_SLICE);
         descriptor.setMode("FAST");
 
-        File file = new File(
-                "test/workDir/S1A_IW_RAW__0SDV_20171213T121623_20171213T121656_019684_021735_C6DB.SAFE/manifest.safe");
+        File file = new File(testDir,
+                "S1A_IW_RAW__0SDV_20171213T121623_20171213T121656_019684_021735_C6DB.SAFE/manifest.safe");
 
         try {
             JSONObject result = extractor.processProduct(descriptor, ProductFamily.L0_SLICE, file);
@@ -529,8 +520,8 @@ public class ExtractMetadataTest {
         descriptor.setProductFamily(ProductFamily.L0_SLICE);
         descriptor.setMode("FAST");
 
-        File file = new File(
-                "test/workDir/S1A_WV_RAW__0SSV_20180913T214325_20180913T214422_023685_0294F4_41D5.SAFE/manifest.safe");
+        File file = new File(testDir,
+                "S1A_WV_RAW__0SSV_20180913T214325_20180913T214422_023685_0294F4_41D5.SAFE/manifest.safe");
 
         try {
             JSONObject result = extractor.processProduct(descriptor, ProductFamily.L0_SLICE, file);
@@ -567,8 +558,8 @@ public class ExtractMetadataTest {
         descriptor.setPolarisation("DV");
         descriptor.setDataTakeId("021735");
 
-        File file = new File(
-                "test/workDir/S1A_IW_RAW__0SDV_20171213T121623_20171213T121656_019684_021735_C6DA.SAFE/manifest.safe");
+        File file = new File(testDir,
+                "S1A_IW_RAW__0SDV_20171213T121623_20171213T121656_019684_021735_C6DA.SAFE/manifest.safe");
 
         extractor.processProduct(descriptor, ProductFamily.L0_SLICE, file);
     }
@@ -599,8 +590,7 @@ public class ExtractMetadataTest {
         descriptor.setProductFamily(ProductFamily.L0_SEGMENT);
         descriptor.setMode("FAST");
 
-        File file = new File(
-                "test/workDir/S1B_IW_RAW__0SDV_20171213T121623_20171213T121656_019684_021735_C6DS.SAFE/manifest.safe");
+        File file = new File(testDir,"S1B_IW_RAW__0SDV_20171213T121623_20171213T121656_019684_021735_C6DS.SAFE/manifest.safe");
 
         try {
             JSONObject result = extractor.processL0Segment(descriptor, file);
@@ -638,8 +628,8 @@ public class ExtractMetadataTest {
         descriptor.setPolarisation("DV");
         descriptor.setDataTakeId("021735");
 
-        File file = new File(
-                "test/workDir/S1B_IW_RAW__0SDV_20171213T121623_20171213T121656_019684_021735_C6DD.SAFE/manifest.safe");
+        File file = new File(testDir,
+                "S1B_IW_RAW__0SDV_20171213T121623_20171213T121656_019684_021735_C6DD.SAFE/manifest.safe");
 
         extractor.processL0Segment(descriptor, file);
     }
@@ -670,8 +660,8 @@ public class ExtractMetadataTest {
         descriptor.setProductFamily(ProductFamily.L0_ACN);
         descriptor.setMode("FAST");
 
-        File file = new File(
-                "test/workDir/S1A_IW_RAW__0ADV_20171213T121123_20171213T121947_019684_021735_51B1.SAFE/manifest.safe");
+        File file = new File(testDir,
+                "S1A_IW_RAW__0ADV_20171213T121123_20171213T121947_019684_021735_51B1.SAFE/manifest.safe");
 
         try {
             JSONObject result = extractor.processProduct(descriptor,ProductFamily.L0_ACN, file);
@@ -708,8 +698,8 @@ public class ExtractMetadataTest {
         descriptor.setProductFamily(ProductFamily.L0_SLICE);
         descriptor.setMode("NRT");
 
-        file = new File(
-                "test/workDir/S1A_EW_RAW__0CDV_20180227T144704_20180227T144706_020793_023A68_401B.SAFE/manifest.safe");
+        file = new File(testDir,
+                "S1A_EW_RAW__0CDV_20180227T144704_20180227T144706_020793_023A68_401B.SAFE/manifest.safe");
 
         try {
             JSONObject result = extractor.processProduct(descriptor, ProductFamily.L0_SLICE, file);
@@ -747,8 +737,8 @@ public class ExtractMetadataTest {
         descriptor.setProductFamily(ProductFamily.L0_SLICE);
         descriptor.setMode("NRT");
 
-        file = new File(
-                "test/workDir/S1A_EW_RAW__0CDV_20180227T144704_20180227T144706_020793_023A68_401B.SAFE/manifest.safe");
+        file = new File(testDir,
+                "S1A_EW_RAW__0CDV_20180227T144704_20180227T144706_020793_023A68_401B.SAFE/manifest.safe");
 
         try {
             JSONObject result = extractor.processProduct(descriptor, ProductFamily.L0_SLICE, file);
@@ -787,8 +777,8 @@ public class ExtractMetadataTest {
         descriptor.setPolarisation("DV");
         descriptor.setDataTakeId("021735");
 
-        File file = new File(
-                "test/workDir/S1A_IW_RAW__0ADV_20171213T121123_20171213T121947_019684_021735_51B2.SAFE/manifest.safe");
+        File file = new File(testDir,
+                "S1A_IW_RAW__0ADV_20171213T121123_20171213T121947_019684_021735_51B2.SAFE/manifest.safe");
 
         extractor.processProduct(descriptor, ProductFamily.L0_ACN, file);
     }
@@ -818,8 +808,8 @@ public class ExtractMetadataTest {
         descriptor.setDataTakeId("023A69");
         descriptor.setProductFamily(ProductFamily.L1_SLICE);
 
-        File file = new File(
-                "test/workDir/S1A_IW_GRDH_1SDV_20180227T145344_20180227T145413_020794_023A69_C0B5.SAFE/manifest.safe");
+        File file = new File(testDir,
+                "S1A_IW_GRDH_1SDV_20180227T145344_20180227T145413_020794_023A69_C0B5.SAFE/manifest.safe");
 
         try {
             JSONObject result = extractor.processProduct(descriptor, ProductFamily.L1_SLICE, file);
@@ -864,8 +854,8 @@ public class ExtractMetadataTest {
         descriptor.setDataTakeId("017EF8");
         descriptor.setProductFamily(ProductFamily.L1_SLICE);
 
-        File file = new File(
-                "test/workDir/S1B_WV_SLC__1SDV_20181001T134431_20181001T135927_012959_017EF8_00EB.SAFE/manifest.safe");
+        File file = new File(testDir,
+                "S1B_WV_SLC__1SDV_20181001T134431_20181001T135927_012959_017EF8_00EB.SAFE/manifest.safe");
 
         try {
             JSONObject result = extractor.processProduct(descriptor, ProductFamily.L1_SLICE, file);
@@ -904,8 +894,8 @@ public class ExtractMetadataTest {
         descriptor.setDataTakeId("017EF8");
         descriptor.setProductFamily(ProductFamily.L1_SLICE);
 
-        File file = new File(
-                "test/workDir/S1B_WV_SLC__1SSH_20170702T130912_20170702T133355_006309_00B17D_BC10.SAFE/manifest.safe");
+        File file = new File(testDir,
+                "S1B_WV_SLC__1SSH_20170702T130912_20170702T133355_006309_00B17D_BC10.SAFE/manifest.safe");
 
         try {
             JSONObject result = extractor.processProduct(descriptor, ProductFamily.L1_SLICE, file);
@@ -944,8 +934,8 @@ public class ExtractMetadataTest {
         descriptor.setDataTakeId("017EF8");
         descriptor.setProductFamily(ProductFamily.L2_SLICE);
 
-        File file = new File(
-                "test/workDir/S1B_WV_OCN__2SSH_20170702T130912_20170702T133355_006309_00B17D_3B01.SAFE/manifest.safe");
+        File file = new File(testDir,
+                "S1B_WV_OCN__2SSH_20170702T130912_20170702T133355_006309_00B17D_3B01.SAFE/manifest.safe");
 
         try {
             JSONObject result = extractor.processProduct(descriptor, ProductFamily.L2_SLICE, file);
@@ -984,8 +974,8 @@ public class ExtractMetadataTest {
         descriptor.setDataTakeId("0294F4");
         descriptor.setProductFamily(ProductFamily.L1_SLICE);
 
-        File file = new File(
-                "test/workDir/S1A_WV_GRDM_1ASV_20180913T214338_20180913T214410_023685_0294F4_70D1.SAFE/manifest.safe");
+        File file = new File(testDir,
+                "S1A_WV_GRDM_1ASV_20180913T214338_20180913T214410_023685_0294F4_70D1.SAFE/manifest.safe");
 
         try {
             JSONObject result = extractor.processProduct(descriptor, ProductFamily.L1_SLICE, file);
@@ -1024,8 +1014,8 @@ public class ExtractMetadataTest {
         descriptor.setPolarisation("DV");
         descriptor.setDataTakeId("023A69");
 
-        File file = new File(
-                "test/workDir/S1A_IW_GRDH_1SDV_20180227T145344_20180227T145413_020794_023A69_C0B4.SAFE/manifest.safe");
+        File file = new File(testDir,
+                "S1A_IW_GRDH_1SDV_20180227T145344_20180227T145413_020794_023A69_C0B4.SAFE/manifest.safe");
         extractor.processProduct(descriptor, ProductFamily.L1_SLICE, file);
     }
 
@@ -1054,8 +1044,8 @@ public class ExtractMetadataTest {
         descriptor.setDataTakeId("023A69");
         descriptor.setProductFamily(ProductFamily.L1_ACN);
 
-        File file = new File(
-                "test/workDir/S1A_IW_GRDH_1ADV_20180227T145413_20180227T145438_020794_023A69_632A.SAFE/manifest.safe");
+        File file = new File(testDir,
+                "S1A_IW_GRDH_1ADV_20180227T145413_20180227T145438_020794_023A69_632A.SAFE/manifest.safe");
 
         try {
             JSONObject result = extractor.processProduct(descriptor, ProductFamily.L1_ACN, file);
@@ -1093,8 +1083,8 @@ public class ExtractMetadataTest {
         descriptor.setPolarisation("DV");
         descriptor.setDataTakeId("023A69");
 
-        File file = new File(
-                "test/workDir/S1A_IW_GRDH_1ADV_20180227T145413_20180227T145438_020794_023A69_632B.SAFE/manifest.safe");
+        File file = new File(testDir,
+                "S1A_IW_GRDH_1ADV_20180227T145413_20180227T145438_020794_023A69_632B.SAFE/manifest.safe");
 
         extractor.processProduct(descriptor, ProductFamily.L1_ACN, file);
     }

@@ -69,8 +69,7 @@ public class GenericConsumerTest {
     private AppCatMessageDto<ProductDto> messageLight3 = DataUtils.getLightMessage1();
 
     @ClassRule
-    public static KafkaEmbedded embeddedKafka = new KafkaEmbedded(1, false,
-            CONSUMER_TOPIC, GenericKafkaUtils.TOPIC_AUXILIARY_FILES);
+    public static KafkaEmbedded embeddedKafka = new KafkaEmbedded(1, false, CONSUMER_TOPIC, GenericKafkaUtils.TOPIC_AUXILIARY_FILES);
 
     @Before
     public void init() throws AbstractCodedException {
@@ -100,13 +99,11 @@ public class GenericConsumerTest {
     }
 
     @Test
-    public void testAuxiliaryFilesConsumer() throws InterruptedException,
-            ExecutionException, AbstractCodedException {
+    public void testAuxiliaryFilesConsumer() throws Exception {
         ProductDto dto = new ProductDto("product-name", "key-obs", ProductFamily.AUXILIARY_FILE);
         ProductDto dto2 =
                 new ProductDto("product-name-2", "key-obs-2", ProductFamily.AUXILIARY_FILE);
-        GenericKafkaUtils<ProductDto> kafkaUtils =
-                new GenericKafkaUtils<>(embeddedKafka);
+        GenericKafkaUtils<ProductDto> kafkaUtils = new GenericKafkaUtils<>(embeddedKafka);
 
         GenericConsumer<ProductDto> consumer =
                 new GenericConsumer<>(ProductCategory.AUXILIARY_FILES, properties, service, otherService,
@@ -150,4 +147,30 @@ public class GenericConsumerTest {
                 Mockito.anyInt(), Mockito.anyLong(), Mockito.eq(expected2));
 
     }
+    
+    @Test
+    public void testConsumer_OnInvalidElement_ShallConsumeDumpAndContinue() throws Exception {
+    	  final GenericKafkaUtils<String> kafkaUtils = new GenericKafkaUtils<>(embeddedKafka);
+    	     		
+          final GenericConsumer<ProductDto> uut = new GenericConsumer<>(
+        		  ProductCategory.AUXILIARY_FILES, 
+        		  properties, 
+        		  service, 
+        		  otherService,
+        		  appStatus, 
+        		  GenericKafkaUtils.TOPIC_AUXILIARY_FILES,
+        		  100, 
+        		  ProductDto.class
+          );
+          uut.start();
+          Thread.sleep(5000);
+          verify(service, never())
+          	.read(Mockito.any(),Mockito.anyString(), Mockito.anyInt(), Mockito.anyLong(), Mockito.any());
+
+          kafkaUtils.sendMessageToKafka("Totally invalid entry", GenericKafkaUtils.TOPIC_AUXILIARY_FILES);
+          
+          
+          
+    }
+
 }

@@ -31,8 +31,6 @@ public class MetadataBuilder {
 	 */
 	private ExtractMetadata extractor;
 
-	private final XmlConverter xmlConverter;
-
 	/**
      * Local directory for configurations files
      */
@@ -43,7 +41,7 @@ public class MetadataBuilder {
 	 */
 	public MetadataBuilder(MetadataExtractorConfig extractorConfig, final XmlConverter xmlConverter, final String localDirectory) {
 		this(new ExtractMetadata(extractorConfig.getTypeOverlap(), extractorConfig.getTypeSliceLength(),
-				extractorConfig.getXsltDirectory(), xmlConverter, localDirectory), xmlConverter, localDirectory);
+				extractorConfig.getXsltDirectory(), xmlConverter, localDirectory), localDirectory);
 	}
 
 	/**
@@ -51,9 +49,8 @@ public class MetadataBuilder {
 	 * 
 	 * @param extractor
 	 */
-	public MetadataBuilder(final ExtractMetadata extractor, final XmlConverter xmlConverter, final String localDirectory) {
+	public MetadataBuilder(final ExtractMetadata extractor, final String localDirectory) {
 		this.extractor = extractor;
-		this.xmlConverter = xmlConverter;
 		this.localDirectory = localDirectory;
 	}
 

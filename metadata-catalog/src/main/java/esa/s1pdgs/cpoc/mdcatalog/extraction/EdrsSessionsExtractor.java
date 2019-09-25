@@ -94,7 +94,7 @@ public class EdrsSessionsExtractor extends GenericExtractor<EdrsSessionDto> {
         
         final EdrsSessionFileDescriptor edrsFileDescriptor = extractFromFilename(
         		reportingFactory, 
-        		() -> fileDescriptorBuilder.buildEdrsSessionFileDescriptor(new File(this.localDirectory + productName))
+        		() -> fileDescriptorBuilder.buildEdrsSessionFileDescriptor(new File(this.localDirectory, productName))
         );
 
         //FIXME uniform handling of metadata extraction

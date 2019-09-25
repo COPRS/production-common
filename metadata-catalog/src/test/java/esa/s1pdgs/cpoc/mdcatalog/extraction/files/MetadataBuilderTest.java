@@ -23,17 +23,13 @@ import esa.s1pdgs.cpoc.common.errors.processing.MetadataMalformedException;
 import esa.s1pdgs.cpoc.mdcatalog.extraction.model.ConfigFileDescriptor;
 import esa.s1pdgs.cpoc.mdcatalog.extraction.model.EdrsSessionFileDescriptor;
 import esa.s1pdgs.cpoc.mdcatalog.extraction.model.OutputFileDescriptor;
-import esa.s1pdgs.cpoc.mdcatalog.extraction.xml.XmlConverter;
 
 public class MetadataBuilderTest {
 
 	@Mock
 	private ExtractMetadata extractor;
-
-	@Mock
-    XmlConverter xmlConverter;
 	
-	private static final String LOCAL_DIRECTORY = "/tmp";
+	private static final String LOCAL_DIRECTORY = "src";
 
 	@Before
 	public void init() {
@@ -61,7 +57,7 @@ public class MetadataBuilderTest {
 		File file = new File("workDir/S1A_OPER_AUX_OBMEMC_PDMC_20140201T000000.xml");
 
 		try {
-			MetadataBuilder metadataBuilder = new MetadataBuilder(extractor, xmlConverter, LOCAL_DIRECTORY);
+			MetadataBuilder metadataBuilder = new MetadataBuilder(extractor, LOCAL_DIRECTORY);
 			JSONObject dto = metadataBuilder.buildConfigFileMetadata(descriptor, file);
 
 			assertNotNull("Metadata should not be null", dto);
@@ -93,7 +89,7 @@ public class MetadataBuilderTest {
 		File file = new File("workDir/S1A_OPER_MPL_ORBSCT_20140507T150704_99999999T999999_0020.EOF");
 
 		try {
-			MetadataBuilder metadataBuilder = new MetadataBuilder(extractor, xmlConverter, LOCAL_DIRECTORY);
+			MetadataBuilder metadataBuilder = new MetadataBuilder(extractor, LOCAL_DIRECTORY);
 			JSONObject dto = metadataBuilder.buildConfigFileMetadata(descriptor, file);
 			assertNotNull("Metadata should not be null", dto);
 			assertEquals("Metadata are not equals", expectedResult.toString(), dto.toString());
@@ -124,7 +120,7 @@ public class MetadataBuilderTest {
 		File file = new File("workDir/S1A_OPER_AUX_RESORB_OPOD_20171213T143838_V20171213T102737_20171213T134507.EOF");
 
 		try {
-			MetadataBuilder metadataBuilder = new MetadataBuilder(extractor, xmlConverter, LOCAL_DIRECTORY);
+			MetadataBuilder metadataBuilder = new MetadataBuilder(extractor, LOCAL_DIRECTORY);
 			JSONObject dto = metadataBuilder.buildConfigFileMetadata(descriptor, file);
 			
 			assertNotNull("Metadata should not be null", dto);
@@ -157,7 +153,7 @@ public class MetadataBuilderTest {
 		File file = new File("workDir/S1A_AUX_INS_V20171017T080000_G20171013T101216.SAFE/manifest.safe");
 
 		try {
-			MetadataBuilder metadataBuilder = new MetadataBuilder(extractor, xmlConverter, LOCAL_DIRECTORY);
+			MetadataBuilder metadataBuilder = new MetadataBuilder(extractor, LOCAL_DIRECTORY);
 			JSONObject dto = metadataBuilder.buildConfigFileMetadata(descriptor, file);
 
 			assertNotNull("Metadata should not be null", dto);
@@ -184,7 +180,7 @@ public class MetadataBuilderTest {
 
 		try {
 			descriptor.setExtension(FileExtension.DAT);
-			MetadataBuilder metadataBuilder = new MetadataBuilder(extractor, xmlConverter, LOCAL_DIRECTORY);
+			MetadataBuilder metadataBuilder = new MetadataBuilder(extractor, LOCAL_DIRECTORY);
 			metadataBuilder.buildConfigFileMetadata(descriptor, file);
 			fail("An exception should occur");
 		} catch (MetadataExtractionException fe) {
@@ -194,7 +190,7 @@ public class MetadataBuilderTest {
 
 		try {
 			descriptor.setExtension(FileExtension.RAW);
-			MetadataBuilder metadataBuilder = new MetadataBuilder(extractor, xmlConverter, LOCAL_DIRECTORY);
+			MetadataBuilder metadataBuilder = new MetadataBuilder(extractor, LOCAL_DIRECTORY);
 			metadataBuilder.buildConfigFileMetadata(descriptor, file);
 			fail("An exception should occur");
 		} catch (MetadataExtractionException fe) {
@@ -204,7 +200,7 @@ public class MetadataBuilderTest {
 
 		try {
 			descriptor.setExtension(FileExtension.XSD);
-			MetadataBuilder metadataBuilder = new MetadataBuilder(extractor, xmlConverter, LOCAL_DIRECTORY);
+			MetadataBuilder metadataBuilder = new MetadataBuilder(extractor,  LOCAL_DIRECTORY);
 			metadataBuilder.buildConfigFileMetadata(descriptor, file);
 			fail("An exception should occur");
 		} catch (MetadataExtractionException fe) {
@@ -214,7 +210,7 @@ public class MetadataBuilderTest {
 
 		try {
 			descriptor.setExtension(FileExtension.UNKNOWN);
-			MetadataBuilder metadataBuilder = new MetadataBuilder(extractor, xmlConverter, LOCAL_DIRECTORY);
+			MetadataBuilder metadataBuilder = new MetadataBuilder(extractor, LOCAL_DIRECTORY);
 			metadataBuilder.buildConfigFileMetadata(descriptor, file);
 			fail("An exception should occur");
 		} catch (MetadataExtractionException fe) {
@@ -246,7 +242,7 @@ public class MetadataBuilderTest {
 		descriptor.setSessionIdentifier("707000180");
 
 		try {
-			MetadataBuilder metadataBuilder = new MetadataBuilder(extractor, xmlConverter, LOCAL_DIRECTORY);
+			MetadataBuilder metadataBuilder = new MetadataBuilder(extractor, LOCAL_DIRECTORY);
 			JSONObject dto = metadataBuilder.buildEdrsSessionFileMetadata(descriptor);
 
 			assertNotNull("Metadata should not be null", dto);
@@ -279,7 +275,7 @@ public class MetadataBuilderTest {
 		descriptor.setSessionIdentifier("SESSION1");
 
 		try {
-			MetadataBuilder metadataBuilder = new MetadataBuilder(extractor, xmlConverter, LOCAL_DIRECTORY);
+			MetadataBuilder metadataBuilder = new MetadataBuilder(extractor, LOCAL_DIRECTORY);
 			JSONObject dto = metadataBuilder.buildEdrsSessionFileMetadata(descriptor);
 
 			assertNotNull("Metadata should not be null", dto);
@@ -317,7 +313,7 @@ public class MetadataBuilderTest {
 		File file = new File("workDir/S1A_IW_RAW__0SDV_20171213T121623_20171213T121656_019684_021735_C6DB.SAFE/manifest.safe");
 
 		try {
-			MetadataBuilder metadataBuilder = new MetadataBuilder(extractor, xmlConverter, LOCAL_DIRECTORY);
+			MetadataBuilder metadataBuilder = new MetadataBuilder(extractor, LOCAL_DIRECTORY);
 			JSONObject dto = metadataBuilder.buildOutputFileMetadata(descriptor, file, ProductFamily.L0_SLICE);
 
 			assertNotNull("Metadata should not be null", dto);
@@ -355,7 +351,7 @@ public class MetadataBuilderTest {
 		File file = new File("workDir/S1A_IW_RAW__0ADV_20171213T121123_20171213T121947_019684_021735_51B1.SAFE/manifest.safe");
 
 		try {
-			MetadataBuilder metadataBuilder = new MetadataBuilder(extractor, xmlConverter, LOCAL_DIRECTORY);
+			MetadataBuilder metadataBuilder = new MetadataBuilder(extractor, LOCAL_DIRECTORY);
 			JSONObject dto = metadataBuilder.buildOutputFileMetadata(descriptor, file, ProductFamily.L0_ACN);
 
 			assertNotNull("Metadata should not be null", dto);
@@ -393,7 +389,7 @@ public class MetadataBuilderTest {
 		File file = new File("workDir/S1A_IW_RAW__0SDV_20171213T121623_20171213T121656_019684_021735_C6DB.SAFE/manifest.safe");
 
 		try {
-			MetadataBuilder metadataBuilder = new MetadataBuilder(extractor, xmlConverter, LOCAL_DIRECTORY);
+			MetadataBuilder metadataBuilder = new MetadataBuilder(extractor, LOCAL_DIRECTORY);
 			JSONObject dto = metadataBuilder.buildOutputFileMetadata(descriptor, file, ProductFamily.L1_SLICE);
 
 			assertNotNull("Metadata should not be null", dto);
@@ -431,7 +427,7 @@ public class MetadataBuilderTest {
 		File file = new File("workDir/S1A_IW_RAW__0ADV_20171213T121123_20171213T121947_019684_021735_51B1.SAFE/manifest.safe");
 
 		try {
-			MetadataBuilder metadataBuilder = new MetadataBuilder(extractor, xmlConverter, LOCAL_DIRECTORY);
+			MetadataBuilder metadataBuilder = new MetadataBuilder(extractor, LOCAL_DIRECTORY);
 			JSONObject dto = metadataBuilder.buildOutputFileMetadata(descriptor, file, ProductFamily.L1_ACN);
 
 			assertNotNull("Metadata should not be null", dto);

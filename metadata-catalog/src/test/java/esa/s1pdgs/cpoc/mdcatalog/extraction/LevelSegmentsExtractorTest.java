@@ -96,6 +96,8 @@ public class LevelSegmentsExtractorTest {
     private final ErrorRepoAppender errorAppender = ErrorRepoAppender.NULL;
     
     private final ProcessConfiguration config = new ProcessConfiguration();
+    
+    private final File testDir = new File("src/test/resources/workDir");
 
     @Mock
     XmlConverter xmlConverter;
@@ -146,7 +148,7 @@ public class LevelSegmentsExtractorTest {
 
         extractor = new LevelSegmentsExtractor(esServices, obsClient,
                 mqiService, appStatus, extractorConfig,
-                (new File("./test/workDir/")).getAbsolutePath()
+                testDir.getAbsolutePath()
                         + File.separator,
                 "manifest.safe", errorAppender, config, ".safe", xmlConverter);
     }
@@ -167,54 +169,31 @@ public class LevelSegmentsExtractorTest {
 
     @Test
     public void testCleanProcessing() throws IOException {
-        File newWorkDir = new File("./test/workDir2");
+        File newWorkDir = FileUtils.createTmpDir();
         newWorkDir.mkdirs();
 
-        (new File(
-                "./test/workDir2/S1A_AUX_CAL_V20140402T000000_G20140402T133909.SAFE"))
-                        .mkdirs();
-        (new File(
-                "./test/workDir2/S1A_AUX_CAL_V20140402T000000_G20140402T133909.SAFE/manifest.safe"))
-                        .createNewFile();
-        (new File(
-                "./test/workDir2/S1A_OPER_AUX_OBMEMC_PDMC_20140201T000000.xml"))
-                        .createNewFile();
+        (new File(newWorkDir,"S1A_AUX_CAL_V20140402T000000_G20140402T133909.SAFE")).mkdirs();
+        (new File(newWorkDir,"S1A_AUX_CAL_V20140402T000000_G20140402T133909.SAFE/manifest.safe")).createNewFile();
+        (new File(newWorkDir,"S1A_OPER_AUX_OBMEMC_PDMC_20140201T000000.xml")).createNewFile();
 
         extractor = new LevelSegmentsExtractor(esServices, obsClient,
-                mqiService, appStatus, extractorConfig, "./test/workDir2/",
+                mqiService, appStatus, extractorConfig, newWorkDir.getPath(),
                 "manifest.safe", errorAppender, config, ".safe", xmlConverter);
-        assertTrue((new File(
-                "./test/workDir2/S1A_AUX_CAL_V20140402T000000_G20140402T133909.SAFE"))
-                        .exists());
-        assertTrue((new File(
-                "./test/workDir2/S1A_OPER_AUX_OBMEMC_PDMC_20140201T000000.xml"))
-                        .exists());
+        
+        assertTrue((new File(newWorkDir,"S1A_AUX_CAL_V20140402T000000_G20140402T133909.SAFE")).exists());
+        assertTrue((new File(newWorkDir,"S1A_OPER_AUX_OBMEMC_PDMC_20140201T000000.xml")).exists());
 
         extractor.cleanProcessing(inputMessage);
-        assertTrue((new File(
-                "./test/workDir2/S1A_AUX_CAL_V20140402T000000_G20140402T133909.SAFE"))
-                        .exists());
-        assertTrue((new File(
-                "./test/workDir2/S1A_OPER_AUX_OBMEMC_PDMC_20140201T000000.xml"))
-                        .exists());
+        assertTrue((new File(newWorkDir,"S1A_AUX_CAL_V20140402T000000_G20140402T133909.SAFE")).exists());
+        assertTrue((new File(newWorkDir,"S1A_OPER_AUX_OBMEMC_PDMC_20140201T000000.xml")).exists());
 
         extractor.cleanProcessing(inputMessageSafe);
-        assertFalse((new File(
-                "./test/workDir2/S1A_AUX_CAL_V20140402T000000_G20140402T133909.SAFE"))
-                        .exists());
-        assertTrue((new File(
-                "./test/workDir2/S1A_OPER_AUX_OBMEMC_PDMC_20140201T000000.xml"))
-                        .exists());
+        assertFalse((new File(newWorkDir,"S1A_AUX_CAL_V20140402T000000_G20140402T133909.SAFE")).exists());
+        assertTrue((new File(newWorkDir,"S1A_OPER_AUX_OBMEMC_PDMC_20140201T000000.xml")).exists());
 
         extractor.cleanProcessing(inputMessageAux);
-        assertFalse((new File(
-                "./test/workDir2/S1A_AUX_CAL_V20140402T000000_G20140402T133909.SAFE"))
-                        .exists());
-        assertFalse((new File(
-                "./test/workDir2/S1A_OPER_AUX_OBMEMC_PDMC_20140201T000000.xml"))
-                        .exists());
-
-        FileUtils.delete("./test/workDir2");
+        assertFalse((new File(newWorkDir,"S1A_AUX_CAL_V20140402T000000_G20140402T133909.SAFE")).exists());
+        assertFalse((new File(newWorkDir,"S1A_OPER_AUX_OBMEMC_PDMC_20140201T000000.xml")).exists());
     }
 
     @SuppressWarnings("unchecked")
@@ -222,10 +201,8 @@ public class LevelSegmentsExtractorTest {
     public void testExtractMetadataL0Segment()
             throws MetadataExtractionException, AbstractCodedException {
 
-        List<File> files = Arrays.asList(new File((new File("./test/workDir/")).getAbsolutePath()
-                + File.separator
-                + "S1A_WV_RAW__0SSV_20180913T214325_20180913T214422_023685_0294F4_41D5.SAFE"
-                + File.separator + "manifest.safe"));
+        List<File> files = Arrays.asList(new File(testDir, 
+                "S1A_WV_RAW__0SSV_20180913T214325_20180913T214422_023685_0294F4_41D5.SAFE"+ File.separator + "manifest.safe"));
 
         inputMessageSafe = new GenericMessageDto<ProductDto>(123, "",
                 new ProductDto(
@@ -261,8 +238,7 @@ public class LevelSegmentsExtractorTest {
         
         JSONObject result = extractor.extractMetadata(reportingFactory, inputMessageSafe);
         for (String key : expected.keySet()) {
-            if (!("insertionTime".equals(key) || "segmentCoordinates".equals(key) 
-                    || "creationTime".equals(key))) {
+            if (!("insertionTime".equals(key) || "segmentCoordinates".equals(key) || "creationTime".equals(key))) {
                 assertEquals(expected.get(key), result.get(key));
             }
         }

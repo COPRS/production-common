@@ -54,7 +54,7 @@ public class XmlConverterTest {
         try {
             EdrsSessionFile fileChannel1 =
                     (EdrsSessionFile) xmlConverter.convertFromXMLToObject(
-                            "./test/data/DCS_02_L20171109175634707000125_ch1_DSIB.xml");
+                            "./src/test/resources/data/DCS_02_L20171109175634707000125_ch1_DSIB.xml");
             assertEquals("Session identifiers not equaled",
                     "L20171109175634707000125", fileChannel1.getSessionId());
             assertEquals("Start times not equaled", "2017-12-13T14:59:48Z",

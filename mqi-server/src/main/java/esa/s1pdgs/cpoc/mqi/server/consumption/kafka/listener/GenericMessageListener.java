@@ -94,9 +94,11 @@ public class GenericMessageListener<T>
      * Listener. Method call when a message is received
      */
     @Override
-    public void onMessage(final ConsumerRecord<String, T> data,
+    public void onMessage(
+    		final ConsumerRecord<String, T> data,
             final Acknowledgment acknowledgment,
-            final Consumer<?, ?> consumer) {
+            final Consumer<?, ?> consumer
+    ) {
 
         try {
             // Save message
