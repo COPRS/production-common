@@ -45,6 +45,7 @@ import esa.s1pdgs.cpoc.common.errors.processing.MetadataCreationException;
 import esa.s1pdgs.cpoc.common.errors.processing.MetadataMalformedException;
 import esa.s1pdgs.cpoc.common.errors.processing.MetadataNotPresentException;
 import esa.s1pdgs.cpoc.common.utils.DateUtils;
+import esa.s1pdgs.cpoc.common.utils.LogUtils;
 import esa.s1pdgs.cpoc.metadata.model.EdrsSessionMetadata;
 import esa.s1pdgs.cpoc.metadata.model.L0AcnMetadata;
 import esa.s1pdgs.cpoc.metadata.model.L0SliceMetadata;
@@ -657,8 +658,12 @@ public class EsServices {
 			if (searchResponse.getHits().totalHits >= 1) {
 				return this.extractInfoForL0ACN(searchResponse.getHits().getAt(0).getSourceAsMap());
 			}
-		} catch (IOException e) {
-			throw new Exception(e.getMessage());
+		} catch (Exception e) {
+			LOGGER.error("Exception occured while searching for acns: {}", LogUtils.toString(e));
+			throw new RuntimeException(
+					String.format("Exception occured while searching for productType %s", productType), 
+					e
+			);
 		}
 		return null;
 	}
