@@ -53,7 +53,7 @@ public class L0AppJobsGenerator extends AbstractJobsGenerator<EdrsSessionDto> {
         	map.put("Processing_Mode", aiopProperties.getProcessingMode().get(key));
         	map.put("Reprocessing_Mode", aiopProperties.getReprocessingMode().get(key));
         	map.put("Timeout", aiopProperties.getTimeout().get(key));
-        	map.put("Descramble", aiopProperties.getDescramble().get(key));
+        	map.put("Descramble", "yes");
         	map.put("RSEncode", aiopProperties.getRsEncode().get(key));
         	
         	if (null == map.get("PT_Assembly") || null == map.get("Processing_Mode") ||
@@ -117,7 +117,7 @@ public class L0AppJobsGenerator extends AbstractJobsGenerator<EdrsSessionDto> {
     	Map<String,String> aiopParams = new HashMap<>();
     	aiopParams.put("Mission_Id", product.getMissionId() + product.getSatelliteId());
     	aiopParams.put("Processing_Station", product.getStationCode());
-    	aiopParams.put("DownlinkTime", product.getStartTime());
+    	//aiopParams.put("DownlinkTime", product.getStartTime());
     	
     	//FIXME
     	String stationCode ="WILE";
