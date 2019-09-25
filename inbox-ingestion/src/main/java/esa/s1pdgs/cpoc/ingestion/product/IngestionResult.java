@@ -23,4 +23,9 @@ public class IngestionResult {
 	public long getTransferAmount() {
 		return transferAmount;
 	}
+	
+	@Override
+	public String toString() {
+		return String.format("transferAmount: %s, ingestedProducts: %s", transferAmount, ingestedProducts);
+	}
 }
