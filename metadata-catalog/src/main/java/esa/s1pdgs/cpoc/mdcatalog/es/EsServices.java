@@ -654,14 +654,16 @@ public class EsServices {
 		searchRequest.types(indexType);
 		searchRequest.source(sourceBuilder);
 		try {
+			LOGGER.debug("Sending search request to ES for L0 ACN: {}",searchRequest);
 			SearchResponse searchResponse = elasticsearchDAO.search(searchRequest);
+			LOGGER.debug("Hits found: {}",searchResponse.getHits().totalHits);
 			if (searchResponse.getHits().totalHits >= 1) {
 				return this.extractInfoForL0ACN(searchResponse.getHits().getAt(0).getSourceAsMap());
 			}
 		} catch (Exception e) {
-			LOGGER.error("Exception occured while searching for acns: {}", LogUtils.toString(e));
+			LOGGER.error("Exception occurred while searching for acns: {}", LogUtils.toString(e));
 			throw new RuntimeException(
-					String.format("Exception occured while searching for productType %s", productType), 
+					String.format("Exception occurred while searching for productType %s", productType), 
 					e
 			);
 		}
