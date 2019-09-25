@@ -54,13 +54,13 @@ public class L0SliceMetadataController extends AbstractMetadataController<L0Slic
 				if (slice == null) {
 					throw new MetadataNotPresentException(productName);
 				}
-				return getL0AcnFor(slice, mode);
+				return getL0AcnFor(slice, processMode, mode);
 			}			
 		};
 		return getResponse(productName, ProductFamily.L0_ACN, acnsSupplier);
 	}
 		
-	private final List<L0AcnMetadata> getL0AcnFor(final L0SliceMetadata slice, final String mode) throws Exception {		
+	private final List<L0AcnMetadata> getL0AcnFor(final L0SliceMetadata slice, final String processingMode, final String mode) throws Exception {		
 		final List<L0AcnMetadata> result = new ArrayList<>();
 			
 		final String productType = slice.getProductType();
@@ -69,17 +69,17 @@ public class L0SliceMetadataController extends AbstractMetadataController<L0Slic
 		
 		// Retrieve ACN		
 		for (final String acnType : Arrays.asList("A", "C", "N")) {
-			logger.info("Call getACN for {}{} {} (mode: {})", productTypeWithoutLastChar, acnType, datatakeId, mode);
+			logger.info("Call getACN for {}{} {} (processMode: {})", productTypeWithoutLastChar, acnType, datatakeId, processingMode);
 			
-			final L0AcnMetadata l0acn = esServices.getL0Acn(productTypeWithoutLastChar + acnType, datatakeId, mode);
+			final L0AcnMetadata l0acn = esServices.getL0Acn(productTypeWithoutLastChar + acnType, datatakeId, processingMode);
 			
 			if (l0acn != null) {
-				logger.debug("Got ACN for {}{} {} '{}' (mode: {})", productTypeWithoutLastChar, acnType, datatakeId, 
-						l0acn.getProductName(), mode);
+				logger.debug("Got ACN for {}{} {} '{}' (processMode: {})", productTypeWithoutLastChar, acnType, datatakeId, 
+						l0acn.getProductName(), processingMode);
 				result.add(l0acn);
 				
 				if ("ONE".equalsIgnoreCase(mode)) {
-					logger.debug("Got ACN for '{}' (mode: {}): {}", datatakeId, mode, result);
+					logger.debug("Got ACN for '{}' (processMode: {}): {}", datatakeId, processingMode, result);
 					return result;
 				}
 			}
@@ -87,7 +87,7 @@ public class L0SliceMetadataController extends AbstractMetadataController<L0Slic
 		if (result.isEmpty()) {
 			throw new MetadataNotPresentException("ACN for " + slice.getProductName());
 		}		
-		logger.debug("Got ACNs for '{}' (mode: {}): {}", datatakeId, mode, result);
+		logger.debug("Got ACNs for '{}' (mode: {}): {}", datatakeId, processingMode, result);
 		return result;		
 	}
 }
