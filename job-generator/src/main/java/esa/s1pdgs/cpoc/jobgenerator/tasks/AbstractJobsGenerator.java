@@ -606,7 +606,7 @@ public abstract class AbstractJobsGenerator<T extends AbstractDto> implements Ru
                                             .getInsConfId(),
                                     job.getAppDataJob().getProduct()
                                             .getProcessMode());
-                    if (file != null) {
+                    if (!file.isEmpty()) {
                         v.setResult(file);
                     }
                 } catch (MetadataQueryException me) {

@@ -104,10 +104,6 @@ public class ValidationService {
 				String queryFamily = getQueryFamily(family);
 				LOGGER.info("Performing metadata query for family '{}'", queryFamily);
 				metadataResults = metadataClient.query(ProductFamily.valueOf(queryFamily), startInterval, endInterval);				
-				if (metadataResults == null) {
-					// set to empty list
-					metadataResults = new ArrayList<>();
-				}
 				
 				LOGGER.info("Metadata query for family '{}' returned {} hits", queryFamily, metadataResults.size());				
 			} catch (MetadataQueryException e) {
