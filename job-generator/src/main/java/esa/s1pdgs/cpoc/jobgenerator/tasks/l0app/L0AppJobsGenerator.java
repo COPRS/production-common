@@ -171,7 +171,7 @@ public class L0AppJobsGenerator extends AbstractJobsGenerator<EdrsSessionDto> {
 			}
 		}
     	
-    	LOGGER.info("Configured AIOP for product {} with configuration {}", product.getProductName(), conf);
+    	LOGGER.debug("Configured AIOP for product {} with configuration {}", product.getProductName(), conf);
     }
 
     @Override
