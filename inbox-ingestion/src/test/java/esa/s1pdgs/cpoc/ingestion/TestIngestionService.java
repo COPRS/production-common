@@ -92,40 +92,6 @@ public final class TestIngestionService {
 		);
 		uut.onMessage(mess);
 	}
-	
-	@Test
-	public final void testPoll() throws AbstractCodedException {
-		final IngestionService uut = new IngestionService(
-				mqiClient, 
-				ErrorRepoAppender.NULL, 
-				new IngestionServiceConfigurationProperties(),
-				productService
-		);
-
-		// case null-message
-		doReturn(null).when(mqiClient).next(Mockito.any());
-		uut.poll();
-		verify(mqiClient, times(1)).next(Mockito.any());
-		verify(mqiClient, never()).ack(Mockito.any(), Mockito.any());
-
-		// case message with null-body
-		GenericMessageDto<IngestionDto> message = new GenericMessageDto<>();
-		message.setIdentifier(123L);
-		message.setBody(null);
-		doReturn(message).when(mqiClient).next(Mockito.any());
-		uut.poll();
-		verify(mqiClient, times(2)).next(Mockito.any());
-		verify(mqiClient, never()).ack(Mockito.any(), Mockito.any());
-		
-		// case dummy message
-		IngestionDto ingestionDto = new IngestionDto();
-		message.setBody(ingestionDto);
-		doReturn(message).when(mqiClient).next(Mockito.any());
-		uut.poll();
-		verify(mqiClient, times(3)).next(Mockito.any());
-		AckMessageDto ack = new AckMessageDto(message.getIdentifier(), Ack.OK, null, false);
-		verify(mqiClient, times(1)).ack(Mockito.eq(ack), Mockito.eq(ProductCategory.INGESTION));
-	}
 
 	@Test
 	public final void testIdentifyAndUpload() throws InternalErrorException {
