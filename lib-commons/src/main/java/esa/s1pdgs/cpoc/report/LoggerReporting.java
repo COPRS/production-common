@@ -48,7 +48,7 @@ public final class LoggerReporting implements Reporting  {
 	private final String taskName;
 	private final int step;
 		
-	private long actionStart;
+	private long actionStart = 0;
 
 	public LoggerReporting(Logger logger, String uid, String taskName, int step) {
 		this.logger = logger;
@@ -86,6 +86,11 @@ public final class LoggerReporting implements Reporting  {
 
 	@Override
 	public final void error(final ReportingMessage reportingMessage) {
+		// no start time defined? --> this is just an informational error
+		if (actionStart == 0L) {
+			report(Level.ERROR, Event.intermediate, reportingMessage);	
+			return;
+		}
 		final long deltaTMillis = System.currentTimeMillis() - actionStart;		
 		report(Level.ERROR, Event.end, additionalEndJsonFields(1, deltaTMillis, 0L, ReportingOutput.NULL), reportingMessage);	
 	}

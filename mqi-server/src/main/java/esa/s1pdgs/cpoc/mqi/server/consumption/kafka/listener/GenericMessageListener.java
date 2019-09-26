@@ -16,6 +16,7 @@ import esa.s1pdgs.cpoc.common.errors.AbstractCodedException;
 import esa.s1pdgs.cpoc.common.utils.LogUtils;
 import esa.s1pdgs.cpoc.mqi.server.KafkaProperties;
 import esa.s1pdgs.cpoc.mqi.server.consumption.kafka.consumer.GenericConsumer;
+import esa.s1pdgs.cpoc.mqi.server.consumption.kafka.consumer.MessageConsumer;
 import esa.s1pdgs.cpoc.mqi.server.persistence.OtherApplicationService;
 import esa.s1pdgs.cpoc.mqi.server.status.AppStatus;
 
@@ -31,63 +32,37 @@ import esa.s1pdgs.cpoc.mqi.server.status.AppStatus;
  * @author Viveris Technologies
  * @param <T>
  */
-public class GenericMessageListener<T>
-        implements AcknowledgingConsumerAwareMessageListener<String, T> {
+public final class GenericMessageListener<T> implements AcknowledgingConsumerAwareMessageListener<String, T> {
 
-    /**
-     * Logger
-     */
-    private static final Logger LOGGER =
-            LogManager.getLogger(GenericMessageListener.class);
+    private static final Logger LOGGER = LogManager.getLogger(GenericMessageListener.class);
 
-    /**
-     * Properties
-     */
     private final KafkaProperties properties;
-
-    /**
-     * Service for persisting data
-     */
     private final AppCatalogMqiService service;
-
     /**
      * Service for checking if a message is processing or not by another
      */
     private final OtherApplicationService otherAppService;
-
-    /**
-     * Generic consumer
-     */
     private final GenericConsumer<T> genericConsumer;
-
-    /**
-     * Application status
-     */
-    private final AppStatus appStatus;
-    
+    private final AppStatus appStatus;    
     private final ProductCategory category;
+    private final MessageConsumer<T> additionalConsumer;
 
-    /**
-     * Constructor
-     * 
-     * @param properties
-     * @param service
-     * @param otherAppService
-     * @param genericConsumer
-     */
     public GenericMessageListener(
     		final ProductCategory category,
     		final KafkaProperties properties,
             final AppCatalogMqiService service,
             final OtherApplicationService otherAppService,
             final GenericConsumer<T> genericConsumer,
-            final AppStatus appStatus) {
+            final AppStatus appStatus,
+            final MessageConsumer<T> additionalConsumer
+    ) {
     	this.category = category;
         this.properties = properties;
         this.service = service;
         this.otherAppService = otherAppService;
         this.genericConsumer = genericConsumer;
         this.appStatus = appStatus;
+        this.additionalConsumer = additionalConsumer;
     }
 
     /**
@@ -101,70 +76,98 @@ public class GenericMessageListener<T>
     ) {
 
         try {
+        	// handle invalid message type
+        	if (!category.getDtoClass().isAssignableFrom(data.value().getClass())) {
+        		LOGGER.debug("Invalid message type '{}' detected: {}", data.value().getClass().getName(), data.value());
+        	    acknowlegde(data, acknowledgment);
+        	    return;
+        	}
+        	final T message = data.value();
+        	LOGGER.debug("Handling message from kafka queue: {}", message);
+        	
             // Save message
-        	AppCatMessageDto result = service.read(
+        	@SuppressWarnings("unchecked")
+			final AppCatMessageDto<T> result = (AppCatMessageDto<T>) service.read(
         			category,
         			data.topic(),
-                    data.partition(), data.offset(),
+                    data.partition(), 
+                    data.offset(),
                     new AppCatReadMessageDto<T>(
                             properties.getConsumer().getGroupId(),
-                            properties.getHostname(), false, data.value()));
-
-            // Deal with result
-            switch (result.getState()) {
-                case ACK_KO:
-                case ACK_OK:
-                case ACK_WARN:
-                    // We ignore the message
-                    if (LOGGER.isDebugEnabled()) {
-                        LOGGER.debug("We ignore message {} and go the next",
-                                data);
-                    }
-                    acknowlegde(data, acknowledgment);
-                    break;
-                case SEND:
-                    // Message already processing
-                    if (properties.getHostname()
-                            .equals(result.getSendingPod())) {
-                        // Message processing by myself
-                        acknowlegde(data, acknowledgment);
-                        pause();
-                    } else {
-                        // Message processing by another pod
-                        if (!messageShallBeIgnored(data, result)) {
-                            // We have forced the reading
-                            acknowlegde(data, acknowledgment);
-                            pause();
-                        } else {
-                            // We ignore the message
-                            if (LOGGER.isDebugEnabled()) {
-                                LOGGER.debug(
-                                        "We ignore message {} and go to the next",
-                                        data);
-                            }
-                            acknowlegde(data, acknowledgment);
-                        }
-                    }
-                    break;
-                default:
-                    // Message assigned
-                    acknowlegde(data, acknowledgment);
-                    pause();
-                    break;
-            }
+                            properties.getHostname(), 
+                            false, 
+                            message
+                    )
+            );        
+        	additionalConsumer.consume(message);
+            handleMessage(data, acknowledgment, result);
             appStatus.resetError();
-        } catch (AbstractCodedException e) {
-            LOGGER.error(
-                    "{} we cannot acknowledge this message and try the next time; Set app status in error",
-                    e.getLogMessage());
+        } catch (Exception e) {        	
+        	if (e instanceof AbstractCodedException) {
+        		final AbstractCodedException ace = (AbstractCodedException) e;
+        		LOGGER.error(
+        				"{} we cannot acknowledge this message and try the next time; Set app status in error",
+        				ace.getLogMessage()
+        		);
+        	}
+        	else {
+        		LOGGER.error(LogUtils.toString(e));
+        	}         
             appStatus.setError();
         }
     }
 
+	private void handleMessage(
+			final ConsumerRecord<String, T> data, 
+			final Acknowledgment acknowledgment,
+			final AppCatMessageDto<T> result
+	) throws AbstractCodedException {	
+		// Deal with result
+		switch (result.getState()) {
+		    case ACK_KO:
+		    case ACK_OK:
+		    case ACK_WARN:
+		        // We ignore the message
+		        if (LOGGER.isDebugEnabled()) {
+		            LOGGER.debug("We ignore message {} and go the next", data);
+		        }
+		        acknowlegde(data, acknowledgment);
+		        break;
+		    case SEND:
+		        // Message already processing
+		        if (properties.getHostname().equals(result.getSendingPod())) {
+		            // Message processing by myself
+		            acknowlegde(data, acknowledgment);
+		            pause();
+		        } else {
+		            // Message processing by another pod
+		            if (!messageShallBeIgnored(data, result)) {
+		                // We have forced the reading
+		                acknowlegde(data, acknowledgment);
+		                pause();
+		            } else {
+		                // We ignore the message
+		                if (LOGGER.isDebugEnabled()) {
+		                    LOGGER.debug(
+		                            "We ignore message {} and go to the next",
+		                            data);
+		                }
+		                acknowlegde(data, acknowledgment);
+		            }
+		        }
+		        break;
+		    default:
+		        // Message assigned
+		        acknowlegde(data, acknowledgment);
+		        pause();
+		        break;
+		}
+	}
+
     /**
      * Pause the consumer
      */
-    protected void pause() {
+    final void pause() {
         this.genericConsumer.pause();
     }
 
@@ -196,7 +199,7 @@ public class GenericMessageListener<T>
      */
     protected boolean messageShallBeIgnored(
             final ConsumerRecord<String, T> data,
-            final AppCatMessageDto lightMessage)
+            final AppCatMessageDto<T> lightMessage)
             throws AbstractCodedException {
         boolean ret = false;
         // Ask to the other application

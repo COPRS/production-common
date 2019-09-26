@@ -35,6 +35,7 @@ import esa.s1pdgs.cpoc.mqi.model.queue.ProductDto;
 import esa.s1pdgs.cpoc.mqi.server.KafkaProperties;
 import esa.s1pdgs.cpoc.mqi.server.KafkaProperties.KafkaConsumerProperties;
 import esa.s1pdgs.cpoc.mqi.server.consumption.kafka.consumer.GenericConsumer;
+import esa.s1pdgs.cpoc.mqi.server.consumption.kafka.consumer.MessageConsumer;
 import esa.s1pdgs.cpoc.mqi.server.persistence.OtherApplicationService;
 import esa.s1pdgs.cpoc.mqi.server.status.AppStatus;
 
@@ -139,7 +140,7 @@ public class GenericMessageListenerTest {
                                 Mockito.eq(4), Mockito.anyString());
 
         listener = new GenericMessageListener<ProductDto>(ProductCategory.AUXILIARY_FILES, properties, service,
-                otherAppService, genericConsumer, appStatus);
+                otherAppService, genericConsumer, appStatus, MessageConsumer.nullConsumer());
     }
 
     /**

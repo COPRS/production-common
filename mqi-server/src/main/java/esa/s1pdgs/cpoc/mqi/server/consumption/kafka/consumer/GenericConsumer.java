@@ -1,20 +1,20 @@
 package esa.s1pdgs.cpoc.mqi.server.consumption.kafka.consumer;
 
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
-import java.util.concurrent.ConcurrentHashMap;
 
 import org.apache.kafka.clients.consumer.ConsumerConfig;
 import org.apache.kafka.clients.consumer.RoundRobinAssignor;
 import org.apache.kafka.common.serialization.StringDeserializer;
 import org.springframework.kafka.core.ConsumerFactory;
 import org.springframework.kafka.core.DefaultKafkaConsumerFactory;
-import org.springframework.kafka.listener.AcknowledgingConsumerAwareMessageListener;
 import org.springframework.kafka.listener.ConcurrentMessageListenerContainer;
 import org.springframework.kafka.listener.ContainerProperties;
 import org.springframework.kafka.listener.ContainerProperties.AckMode;
 import org.springframework.kafka.listener.MessageListener;
+import org.springframework.kafka.support.serializer.ErrorHandlingDeserializer2;
 import org.springframework.kafka.support.serializer.JsonDeserializer;
 
 import esa.s1pdgs.cpoc.appcatalog.client.mqi.AppCatalogMqiService;
@@ -24,6 +24,9 @@ import esa.s1pdgs.cpoc.mqi.server.consumption.kafka.listener.GenericMessageListe
 import esa.s1pdgs.cpoc.mqi.server.consumption.kafka.listener.MemoryConsumerAwareRebalanceListener;
 import esa.s1pdgs.cpoc.mqi.server.persistence.OtherApplicationService;
 import esa.s1pdgs.cpoc.mqi.server.status.AppStatus;
+import esa.s1pdgs.cpoc.report.LoggerReporting;
+import esa.s1pdgs.cpoc.report.Reporting;
+import esa.s1pdgs.cpoc.report.ReportingMessage;
 
 /**
  * Generic consumer
@@ -32,26 +35,118 @@ import esa.s1pdgs.cpoc.mqi.server.status.AppStatus;
  * @param <T>
  */
 public class GenericConsumer<T> {
+	public static final class Factory {
+	    private final KafkaProperties kafkaProperties;
+	    private final AppCatalogMqiService service;
+	    private final OtherApplicationService otherAppService;
+	    private final AppStatus appStatus;	    
+	    
+		public Factory(
+				KafkaProperties kafkaProperties, 
+				AppCatalogMqiService service,
+				OtherApplicationService otherAppService, 
+				AppStatus appStatus
+		) {
+			this.kafkaProperties = kafkaProperties;
+			this.service = service;
+			this.otherAppService = otherAppService;
+			this.appStatus = appStatus;
+		}
 
-    /**
-     * Properties
-     */
-    private final KafkaProperties properties;
+		public final <T> GenericConsumer<T> newConsumerFor(final ProductCategory cat, final int prio, final String topic) {        
+			return newConsumerFor(cat, prio, topic, MessageConsumer.nullConsumer());
+		}
+		
+		// for unit test
+		final <T> GenericConsumer<T> newConsumerFor(
+				final ProductCategory cat, 
+				final int prio, 
+				final String topic, 
+				final MessageConsumer<T> additionalConsumer
+		) {
+			final GenericConsumer<T> consumer = new GenericConsumer<>(cat,topic,prio);			
+			final GenericMessageListener<T> listener = newListenerFor(cat, consumer, additionalConsumer);		
+	        final ConcurrentMessageListenerContainer<String,T> container = new ConcurrentMessageListenerContainer<>(
+	        		consumerFactory(topic, cat.getDtoClass()),
+	                containerProperties(topic, listener)
+	        );
+	        consumer.setContainer(container);	        
+			return consumer;
+		}
+		
+		private final <T> GenericMessageListener<T> newListenerFor(
+				final ProductCategory cat, 
+				final GenericConsumer<T> consumer, 
+				final MessageConsumer<T> additionalConsumer
+		) {
+			return new GenericMessageListener<T>(cat,kafkaProperties,service,otherAppService,consumer,appStatus, additionalConsumer);
+		}
+		
+	    private final <T> ConsumerFactory<String, T> consumerFactory(final String topic, final Class<T> dtoClass) {
+    		// use unique clientId to circumvent 'instance already exists' problem
+	    	final String consumerId = kafkaProperties.getClientId() + "-" + UUID.randomUUID().toString();
+	    	
+	    	final JsonDeserializer<T> deser = new JsonDeserializer<>(dtoClass);
+	    	deser.addTrustedPackages("*");	    	
+	    	final ErrorHandlingDeserializer2<T> deserializer = new ErrorHandlingDeserializer2<>(deser);
 
-    /**
-     * Service for persisting data
-     */
-    private final AppCatalogMqiService service;
+	    	deserializer.setFailedDeserializationFunction( (b,h) -> {
+	    		final Reporting report = new LoggerReporting.Factory("MQI_Kafka_Deserialization")
+	    				.newReporting(0);
+	    		
+	    		report.error(new ReportingMessage(
+	    				"Error on deserializing element from queue '{}'. Expected json of class {} but was: {}", 
+	    				topic,
+	    				dtoClass.getName(),
+	    				new String(b)
+	    		));	    		
+	    		return null;
+	    	});
+	    		    	
+	        return new DefaultKafkaConsumerFactory<>(
+	        		consumerConfig(consumerId),
+	                new StringDeserializer(),
+	                deserializer
+	        );
+	    }
 
-    /**
-     * Service for checking if a message is processing or not by another
-     */
-    private final OtherApplicationService otherAppService;
+	    private final <T> ContainerProperties containerProperties(final String topic, final MessageListener<String, T> messageListener) {
+	        final ContainerProperties containerProp = new ContainerProperties(topic);
+	        containerProp.setMessageListener(messageListener);
+	        containerProp.setPollTimeout(kafkaProperties.getListener().getPollTimeoutMs());
+	        containerProp.setAckMode(AckMode.MANUAL_IMMEDIATE);
+	        containerProp.setConsumerRebalanceListener(
+	                new MemoryConsumerAwareRebalanceListener(
+	                		service,
+	                		kafkaProperties.getConsumer().getGroupId(),
+	                		kafkaProperties.getConsumer().getOffsetDftMode()
+	                )
+	        );
+	        return containerProp;
+	    }
 
+	    private final Map<String, Object> consumerConfig(final String consumerId) {
+	        Map<String, Object> props = new HashMap<>();
+	        props.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, kafkaProperties.getBootstrapServers());
+	        props.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class);
+	        props.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, JsonDeserializer.class);
+	        props.put(ConsumerConfig.GROUP_ID_CONFIG, kafkaProperties.getConsumer().getGroupId());
+	        props.put(ConsumerConfig.ENABLE_AUTO_COMMIT_CONFIG, false);
+	        props.put(ConsumerConfig.MAX_POLL_INTERVAL_MS_CONFIG, kafkaProperties.getConsumer().getMaxPollIntervalMs());
+	        props.put(ConsumerConfig.MAX_POLL_RECORDS_CONFIG, kafkaProperties.getConsumer().getMaxPollRecords());
+	        props.put(ConsumerConfig.SESSION_TIMEOUT_MS_CONFIG, kafkaProperties.getConsumer().getSessionTimeoutMs());
+	        props.put(ConsumerConfig.HEARTBEAT_INTERVAL_MS_CONFIG, kafkaProperties.getConsumer().getHeartbeatIntvMs()); 
+	        props.put(ConsumerConfig.PARTITION_ASSIGNMENT_STRATEGY_CONFIG, Collections.singletonList(RoundRobinAssignor.class));
+	        props.put(ConsumerConfig.CLIENT_ID_CONFIG, consumerId);
+	        props.put(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, kafkaProperties.getConsumer().getAutoOffsetReset());	        
+	        return props;
+	    }
+	}
+	
     /**
-     * Application status
+     * ProductCategory handled by this consumer
      */
-    private final AppStatus appStatus;
+    private final ProductCategory category;
 
     /**
      * Topic name
@@ -68,40 +163,10 @@ public class GenericConsumer<T> {
      */
     private ConcurrentMessageListenerContainer<String, T> container;
 
-    /**
-     * 
-     */
-    private final Class<T> consumedMsgClass;
-    
-    private final ProductCategory category;
-    
-    private final String consumerId;
-
-    /**
-     * 
-     * @param properties
-     * @param service
-     * @param otherAppService
-     * @param appStatus
-     * @param topic
-     * @param consumedMsgClass
-     */
-    public GenericConsumer(final ProductCategory category,
-    		final KafkaProperties properties,
-            final AppCatalogMqiService service,
-            final OtherApplicationService otherAppService,
-            final AppStatus appStatus, final String topic,
-            final int priority,            
-            final Class<T> consumedMsgClass) {
-    	this.category = category;
-        this.properties = properties;
-        this.service = service;
-        this.otherAppService = otherAppService;
-        this.appStatus = appStatus;
+    public GenericConsumer(final ProductCategory cat,final String topic,final int priority) {
+    	this.category = cat;
         this.topic = topic;
         this.priority = priority;
-        this.consumedMsgClass = consumedMsgClass;
-        this.consumerId = properties.getClientId() + "-" + UUID.randomUUID().toString();
     }
 
     /**
@@ -122,27 +187,13 @@ public class GenericConsumer<T> {
      * @return the consumedMsgClass
      */
     public Class<T> getConsumedMsgClass() {
-        return consumedMsgClass;
+        return category.getDtoClass();
     }
 
     /**
      * Start the consumer
      */
     public void start() {
-        AcknowledgingConsumerAwareMessageListener<String, T> messageListener = new GenericMessageListener<>(
-        		category,
-        		properties, 
-        		service,
-        		otherAppService, 
-        		this, 
-        		appStatus
-        );
-
-        container = new ConcurrentMessageListenerContainer<>(
-        		consumerFactory(),
-                containerProperties(topic, messageListener)
-        );
-
         container.start();
     }
 
@@ -159,6 +210,10 @@ public class GenericConsumer<T> {
     public void pause() {
         container.pause();
     }
+    
+    public void stop() {
+    	container.stop();
+    }
 
     /**
      * Return true if the container is paused
@@ -166,71 +221,13 @@ public class GenericConsumer<T> {
     public boolean isPaused() {
         return container.isContainerPaused();
     }
-
-    /**
-     * Build the consumer factory
-     * 
-     * @return
-     */
-    private ConsumerFactory<String, T> consumerFactory() {
-        return new DefaultKafkaConsumerFactory<>(consumerConfig(),
-                new StringDeserializer(),
-                new JsonDeserializer<>(consumedMsgClass));
-    }
-
-    /**
-     * Build the container properties
-     * 
-     * @param topic
-     * @param messageListener
-     * @return
-     */
-    private ContainerProperties containerProperties(final String topic,
-            final MessageListener<String, T> messageListener) {
-        ContainerProperties containerProp = new ContainerProperties(topic);
-        containerProp.setMessageListener(messageListener);
-        containerProp.setPollTimeout(properties.getListener().getPollTimeoutMs());
-        containerProp.setAckMode(AckMode.MANUAL_IMMEDIATE);
-        containerProp.setConsumerRebalanceListener(
-                new MemoryConsumerAwareRebalanceListener(
-                		service,
-                        properties.getConsumer().getGroupId(),
-                        properties.getConsumer().getOffsetDftMode())
-                );
-        return containerProp;
-    }
-
-    /**
-     * Consumer configuration
-     * 
-     * @return
-     */
-    private Map<String, Object> consumerConfig() {
-        Map<String, Object> props = new ConcurrentHashMap<>();
-        props.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG,
-                properties.getBootstrapServers());
-        props.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG,
-                StringDeserializer.class);
-        props.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG,
-                JsonDeserializer.class);
-        props.put(ConsumerConfig.GROUP_ID_CONFIG,
-                properties.getConsumer().getGroupId());
-        props.put(ConsumerConfig.ENABLE_AUTO_COMMIT_CONFIG, false);
-        props.put(ConsumerConfig.MAX_POLL_INTERVAL_MS_CONFIG,
-                properties.getConsumer().getMaxPollIntervalMs());
-        props.put(ConsumerConfig.MAX_POLL_RECORDS_CONFIG,
-                properties.getConsumer().getMaxPollRecords());
-        props.put(ConsumerConfig.SESSION_TIMEOUT_MS_CONFIG,
-                properties.getConsumer().getSessionTimeoutMs());
-        props.put(ConsumerConfig.HEARTBEAT_INTERVAL_MS_CONFIG,
-                properties.getConsumer().getHeartbeatIntvMs());
-        
-        
-        props.put(ConsumerConfig.PARTITION_ASSIGNMENT_STRATEGY_CONFIG,
-                Collections.singletonList(RoundRobinAssignor.class));
-        props.put(ConsumerConfig.CLIENT_ID_CONFIG, consumerId);
-        props.put(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG,
-                properties.getConsumer().getAutoOffsetReset());
-        return props;
+    
+    // accessors for testing
+    final void setContainer(ConcurrentMessageListenerContainer<String, T> container) {
+		this.container = container;
+	}
+    
+    final ConcurrentMessageListenerContainer<String, T> container() {
+    	return container;
     }
 }

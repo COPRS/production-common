@@ -29,6 +29,7 @@ import esa.s1pdgs.cpoc.mqi.server.ApplicationProperties.ProductCategoryConsumpti
 import esa.s1pdgs.cpoc.mqi.server.ApplicationProperties.ProductCategoryProperties;
 import esa.s1pdgs.cpoc.mqi.server.KafkaProperties;
 import esa.s1pdgs.cpoc.mqi.server.consumption.kafka.consumer.GenericConsumer;
+import esa.s1pdgs.cpoc.mqi.server.consumption.kafka.consumer.GenericConsumer.Factory;
 import esa.s1pdgs.cpoc.mqi.server.persistence.OtherApplicationService;
 import esa.s1pdgs.cpoc.mqi.server.status.AppStatus;
 
@@ -43,8 +44,7 @@ public class MessageConsumptionController {
     /**
      * Logger
      */
-    protected static final Logger LOGGER =
-            LogManager.getLogger(MessageConsumptionController.class);
+    protected static final Logger LOGGER = LogManager.getLogger(MessageConsumptionController.class);
 
     /**
      * List of consumers
@@ -55,12 +55,7 @@ public class MessageConsumptionController {
      * Application properties
      */
     private final ApplicationProperties appProperties;
-
-    /**
-     * Kafka properties
-     */
-    private final KafkaProperties kafkaProperties;
-    
+   
     
     private final AppCatalogMqiService service;
 
@@ -68,38 +63,44 @@ public class MessageConsumptionController {
      * Service for checking if a message is processing or not by another
      */
     private final OtherApplicationService otherAppService;
+    
+    private final GenericConsumer.Factory consumerFactory;
+    
+    MessageConsumptionController(
+    		Map<ProductCategory, Map<String, GenericConsumer<?>>> consumers,
+			ApplicationProperties appProperties, 
+			AppCatalogMqiService service, 
+			OtherApplicationService otherAppService,
+			Factory consumerFactory
+	) {
+		this.consumers = consumers;
+		this.appProperties = appProperties;
+		this.service = service;
+		this.otherAppService = otherAppService;
+		this.consumerFactory = consumerFactory;
+	}
 
-    /**
-     * Application status
-     */
-    private final AppStatus appStatus;
-
-    /**
-     * Constructor
-     * 
-     * @param appProperties
-     * @param kafkaProperties
-     */
-    @Autowired
+	@Autowired
     public MessageConsumptionController(
             final ApplicationProperties appProperties,
             final KafkaProperties kafkaProperties,
             final AppCatalogMqiService service,	
             final OtherApplicationService otherAppService,
             final AppStatus appStatus) {
-        this.consumers = new HashMap<>();
-        this.appProperties = appProperties;
-        this.kafkaProperties = kafkaProperties;
-        this.otherAppService = otherAppService;
-        this.service = service;        
-        this.appStatus = appStatus;
+		this(
+				new HashMap<>(), 
+				appProperties, 
+				service, 
+				otherAppService, 
+				new GenericConsumer.Factory(kafkaProperties, service, otherAppService, appStatus)
+		);
     }
-    
-    /**
+
+	/**
      * Start consumers according the configuration
      */
     @PostConstruct
-    public void startConsumers() {
+    public void startConsumers() {	
         // Init the list of consumers
         for (final Map.Entry<ProductCategory,ProductCategoryProperties> catEntry : appProperties.getProductCategories().entrySet()) {
             final ProductCategory cat = catEntry.getKey();
@@ -108,8 +109,9 @@ public class MessageConsumptionController {
                 LOGGER.info("Creating consumers on topics {} with for category {}", prop.getTopicsWithPriority(),cat);
                 final Map<String, GenericConsumer<?>> catConsumers = new HashMap<>();
                 for (final Map.Entry<String, Integer> entry : prop.getTopicsWithPriority().entrySet()) {
-                	final String topic = entry.getKey();               	                	
-                	catConsumers.put(topic, newConsumerFor(cat, entry.getValue(), topic, cat.getDtoClass()));
+                	final String topic = entry.getKey(); 
+                	final int prio = entry.getValue();
+                	catConsumers.put(topic, consumerFactory.newConsumerFor(cat, prio, topic));
                 }
                 consumers.put(cat, catConsumers);
             }
@@ -144,10 +146,6 @@ public class MessageConsumptionController {
             }
         }
         return message;
-    }
-    
-    private final <E> GenericConsumer<E> newConsumerFor(final ProductCategory cat,final int prio, final String topic,final Class<E> clazz) {
-    	return new GenericConsumer<E>(cat,kafkaProperties,service,otherAppService,appStatus,topic,prio,clazz);
     }
     
     private final Comparator<AppCatMessageDto<? extends AbstractDto>> priorityComparatorFor(final ProductCategory category)

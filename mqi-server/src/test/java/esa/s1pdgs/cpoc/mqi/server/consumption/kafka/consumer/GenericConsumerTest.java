@@ -6,8 +6,6 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
-import java.util.concurrent.ExecutionException;
-
 import org.junit.Before;
 import org.junit.ClassRule;
 import org.junit.Test;
@@ -71,6 +69,9 @@ public class GenericConsumerTest {
     @ClassRule
     public static KafkaEmbedded embeddedKafka = new KafkaEmbedded(1, false, CONSUMER_TOPIC, GenericKafkaUtils.TOPIC_AUXILIARY_FILES);
 
+    private GenericConsumer<ProductDto> uut; 
+    
+    
     @Before
     public void init() throws AbstractCodedException {
         MockitoAnnotations.initMocks(this);
@@ -85,31 +86,24 @@ public class GenericConsumerTest {
         doReturn(messageLight1, messageLight2, messageLight3).when(service)
                 .read(Mockito.any() ,Mockito.anyString(), Mockito.anyInt(), Mockito.anyLong(),
                         Mockito.any());
+        
+        uut = new GenericConsumer.Factory(properties, service, otherService, appStatus)
+        		.newConsumerFor(ProductCategory.AUXILIARY_FILES, 100, GenericKafkaUtils.TOPIC_AUXILIARY_FILES);
     }
 
     @Test
     public void testConstructor() {
-        GenericConsumer<ProductDto> consumer =
-                new GenericConsumer<>(ProductCategory.AUXILIARY_FILES, properties, service, otherService,
-                        appStatus, GenericKafkaUtils.TOPIC_AUXILIARY_FILES,
-                        100, ProductDto.class);
-        assertEquals(GenericKafkaUtils.TOPIC_AUXILIARY_FILES,
-                consumer.getTopic());
-        assertEquals(ProductDto.class, consumer.getConsumedMsgClass());
+        assertEquals(GenericKafkaUtils.TOPIC_AUXILIARY_FILES, uut.getTopic());
+        assertEquals(ProductDto.class, uut.getConsumedMsgClass());
     }
 
     @Test
     public void testAuxiliaryFilesConsumer() throws Exception {
         ProductDto dto = new ProductDto("product-name", "key-obs", ProductFamily.AUXILIARY_FILE);
-        ProductDto dto2 =
-                new ProductDto("product-name-2", "key-obs-2", ProductFamily.AUXILIARY_FILE);
+        ProductDto dto2 = new ProductDto("product-name-2", "key-obs-2", ProductFamily.AUXILIARY_FILE);
         GenericKafkaUtils<ProductDto> kafkaUtils = new GenericKafkaUtils<>(embeddedKafka);
 
-        GenericConsumer<ProductDto> consumer =
-                new GenericConsumer<>(ProductCategory.AUXILIARY_FILES, properties, service, otherService,
-                        appStatus, GenericKafkaUtils.TOPIC_AUXILIARY_FILES,
-                        100, ProductDto.class);
-        consumer.start();
+        uut.start();
         Thread.sleep(5000);
         verify(service, never()).read(Mockito.any(),Mockito.anyString(), Mockito.anyInt(),
                 Mockito.anyLong(), Mockito.any());
@@ -134,7 +128,7 @@ public class GenericConsumerTest {
                 Mockito.anyInt(), Mockito.anyLong(), Mockito.any());
 
         // REsume consumer
-        consumer.resume();
+        uut.resume();
         Thread.sleep(1000);
         AppCatReadMessageDto<ProductDto> expected2 =
                 new AppCatReadMessageDto<ProductDto>("wrappers",
@@ -147,30 +141,4 @@ public class GenericConsumerTest {
                 Mockito.anyInt(), Mockito.anyLong(), Mockito.eq(expected2));
 
     }
-    
-    @Test
-    public void testConsumer_OnInvalidElement_ShallConsumeDumpAndContinue() throws Exception {
-    	  final GenericKafkaUtils<String> kafkaUtils = new GenericKafkaUtils<>(embeddedKafka);
-    	     		
-          final GenericConsumer<ProductDto> uut = new GenericConsumer<>(
-        		  ProductCategory.AUXILIARY_FILES, 
-        		  properties, 
-        		  service, 
-        		  otherService,
-        		  appStatus, 
-        		  GenericKafkaUtils.TOPIC_AUXILIARY_FILES,
-        		  100, 
-        		  ProductDto.class
-          );
-          uut.start();
-          Thread.sleep(5000);
-          verify(service, never())
-          	.read(Mockito.any(),Mockito.anyString(), Mockito.anyInt(), Mockito.anyLong(), Mockito.any());
-
-          kafkaUtils.sendMessageToKafka("Totally invalid entry", GenericKafkaUtils.TOPIC_AUXILIARY_FILES);
-          
-          
-          
-    }
-
 }

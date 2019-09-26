@@ -35,6 +35,11 @@ Configuration:
         additivity: false
         AppenderRef:
           - ref: STDOUT
+      - name: org.springframework.kafka
+        level: fatal
+        additivity: false
+        AppenderRef:
+          - ref: STDOUT
     Root:
       level: error
       AppenderRef:
