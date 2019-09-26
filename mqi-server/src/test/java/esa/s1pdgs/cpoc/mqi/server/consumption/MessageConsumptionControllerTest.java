@@ -165,14 +165,6 @@ public class MessageConsumptionControllerTest {
     }
 
     /**
-     * Test spring initialization
-     */
-    @Test
-    public void testPostConstructSpring() {
-        assertEquals(2, autoManager.consumers.size());
-    }
-
-    /**
      * Test initialization when all consumers
      */
     @Test
