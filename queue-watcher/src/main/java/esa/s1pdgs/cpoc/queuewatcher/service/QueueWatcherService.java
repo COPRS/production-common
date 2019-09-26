@@ -4,81 +4,90 @@ import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.time.LocalDateTime;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+
+import javax.annotation.PostConstruct;
 
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVPrinter;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.scheduling.annotation.Scheduled;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import esa.s1pdgs.cpoc.common.ProductCategory;
-import esa.s1pdgs.cpoc.common.errors.AbstractCodedException;
 import esa.s1pdgs.cpoc.common.utils.DateUtils;
 import esa.s1pdgs.cpoc.common.utils.LogUtils;
+import esa.s1pdgs.cpoc.mqi.MqiConsumer;
+import esa.s1pdgs.cpoc.mqi.MqiListener;
 import esa.s1pdgs.cpoc.mqi.client.GenericMqiClient;
 import esa.s1pdgs.cpoc.mqi.model.queue.ProductDto;
-import esa.s1pdgs.cpoc.mqi.model.rest.Ack;
-import esa.s1pdgs.cpoc.mqi.model.rest.AckMessageDto;
 import esa.s1pdgs.cpoc.mqi.model.rest.GenericMessageDto;
 import esa.s1pdgs.cpoc.queuewatcher.config.ApplicationProperties;
 
 @Service
-public class QueueWatcherService {
-	
-	/**
-	 * Logger
-	 */
+public class QueueWatcherService implements MqiListener<ProductDto> {
+
 	private static final Logger LOGGER = LogManager.getLogger(QueueWatcherService.class);
-	
+
 	/**
 	 * MQI service for reading message ProductDto
 	 */
-	private final GenericMqiClient service;
-	
+	@Autowired
+	private GenericMqiClient mqiClient;
+
 	@Autowired
 	private ApplicationProperties properties;
-   
+
+	private final long auxFilesPollingIntervalMs;
+
+	private final long levelProductsPollingIntervalMs;
+
+	private final long levelSegmentsPollingIntervalMs;
+
+	private final long compressedProductsPollingIntervalMs;
+
 	@Autowired
-	public QueueWatcherService(final GenericMqiClient service) {
-		this.service = service;
+	public QueueWatcherService(
+			@Value("${file.product-categories.auxiliary-files.fixed-delay-ms}") final long auxFilesPollingIntervalMs,
+			@Value("${file.product-categories.level-products.fixed-delay-ms}") final long levelProductsPollingIntervalMs,
+			@Value("${file.product-categories.level-segments.fixed-delay-ms}") final long levelSegmentsPollingIntervalMs,
+			@Value("${file.product-categories.compressed-products.fixed-delay-ms}") final long compressedProductsPollingIntervalMs) {
+		this.auxFilesPollingIntervalMs = auxFilesPollingIntervalMs;
+		this.levelProductsPollingIntervalMs = levelProductsPollingIntervalMs;
+		this.levelSegmentsPollingIntervalMs = levelSegmentsPollingIntervalMs;
+		this.compressedProductsPollingIntervalMs = compressedProductsPollingIntervalMs;
 	}
-		
-	@Scheduled(fixedDelayString = "${file.product-categories.compressed-products.fixed-delay-ms}", initialDelayString = "${file.product-categories.compressed-products.init-delay-poll-ms}")
-	public void watchCompressionQueue() {
-		consume(ProductCategory.COMPRESSED_PRODUCTS);
-	}	
 
-	@Scheduled(fixedDelayString = "${file.product-categories.auxiliary-files.fixed-delay-ms}", initialDelayString = "${file.product-categories.auxiliary-files.init-delay-poll-ms}")
-	public void watchAuxIngestionQueue() {
-		consume(ProductCategory.AUXILIARY_FILES);
-	}	
+	@PostConstruct
+	public void initService() {
 
-	@Scheduled(fixedDelayString = "${file.product-categories.level-products.fixed-delay-ms}", initialDelayString = "${file.product-categories.level-products.init-delay-poll-ms}")
-	public void watchLevelProductQueue() {
-		consume(ProductCategory.LEVEL_PRODUCTS);
-	}	
+		final ExecutorService service = Executors.newFixedThreadPool(4);
+		service.execute(new MqiConsumer<ProductDto>(mqiClient, ProductCategory.AUXILIARY_FILES, this,
+				auxFilesPollingIntervalMs));
+		service.execute(new MqiConsumer<ProductDto>(mqiClient, ProductCategory.LEVEL_PRODUCTS, this,
+				levelProductsPollingIntervalMs));
+		service.execute(new MqiConsumer<ProductDto>(mqiClient, ProductCategory.LEVEL_SEGMENTS, this,
+				levelSegmentsPollingIntervalMs));
+		service.execute(new MqiConsumer<ProductDto>(mqiClient, ProductCategory.COMPRESSED_PRODUCTS, this,
+				compressedProductsPollingIntervalMs));
+		// Seems to be not relevant for EDRS_SESSIONS
+	}
 
-	@Scheduled(fixedDelayString = "${file.product-categories.level-segments.fixed-delay-ms}", initialDelayString = "${file.product-categories.level-segments.init-delay-poll-ms}")
-	public void watchLevelSegmentsQueue() {
-		consume(ProductCategory.LEVEL_SEGMENTS);
-	}	
-
-	synchronized protected void writeCSV(String dateTimeStamp, String productName) throws IOException {
+	protected synchronized void writeCSV(String dateTimeStamp, String productName) throws IOException {
 		CSVPrinter csvPrinter = null;
 		FileWriter writer = null;
-		try {			
+		try {
 			File csvFile = new File(properties.getCsvFile());
 			if (csvFile.exists()) {
 				writer = new FileWriter(csvFile, true);
-				csvPrinter = new CSVPrinter(writer,
-						CSVFormat.DEFAULT.withDelimiter(','));
+				csvPrinter = new CSVPrinter(writer, CSVFormat.DEFAULT.withDelimiter(','));
 			} else {
 				writer = new FileWriter(csvFile, false);
 				csvPrinter = new CSVPrinter(writer,
-						CSVFormat.DEFAULT.withHeader("timestamp", "file name")
-								.withDelimiter(','));
+						CSVFormat.DEFAULT.withHeader("timestamp", "file name").withDelimiter(','));
 			}
 
 			csvPrinter.printRecord(dateTimeStamp, productName);
@@ -93,32 +102,20 @@ public class QueueWatcherService {
 
 		}
 	}
-	
 
-	/**
-	 * Consume message for category and log
-	 */
-	private final void consume(final ProductCategory category)
-	{
-		GenericMessageDto<ProductDto> message = null;
+	@Override
+	public void onMessage(GenericMessageDto<ProductDto> message) {
+		final ProductDto product = message.getBody();
+		String productName = product.getProductName();
+		ProductCategory category = ProductCategory.of(product.getFamily());
+
+		LOGGER.info("received {}: {}", category, productName);
+
 		try {
-			message = this.service.next(category);
-			 if (message == null || message.getBody() == null) {
-		            LOGGER.trace(" No message received: continue");
-		            return;
-		        }
-			LOGGER.info("received {}: {}", category, message.getBody().getProductName());
-			writeCSV(DateUtils.formatToMetadataDateTimeFormat(LocalDateTime.now()),  message.getBody().getProductName());
-			this.service.ack(new AckMessageDto(message.getIdentifier(), Ack.OK, null, true), category);
-
-		} catch (AbstractCodedException ace) {
-			LOGGER.error("Error Code: {}, Message: {}", ace.getCode().getCode(),
-					ace.getLogMessage());
-		} catch (Exception e) {
+			writeCSV(DateUtils.formatToMetadataDateTimeFormat(LocalDateTime.now()), productName);
+		} catch (IOException e) {
 			LOGGER.error("Error occured while writing to CSV {}", LogUtils.toString(e));
 		}
-		return;
 	}
 
 }
-

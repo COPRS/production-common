@@ -1,6 +1,7 @@
 package esa.s1pdgs.cpoc.jobgenerator.tasks.l0app;
 
 import java.io.File;
+import java.time.format.DateTimeFormatter;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -14,6 +15,7 @@ import esa.s1pdgs.cpoc.appcatalog.server.job.db.AppDataJobProduct;
 import esa.s1pdgs.cpoc.common.ProductFamily;
 import esa.s1pdgs.cpoc.common.errors.processing.JobGenInputsMissingException;
 import esa.s1pdgs.cpoc.common.errors.processing.MetadataQueryException;
+import esa.s1pdgs.cpoc.common.utils.DateUtils;
 import esa.s1pdgs.cpoc.jobgenerator.config.AiopProperties;
 import esa.s1pdgs.cpoc.jobgenerator.config.JobGeneratorSettings;
 import esa.s1pdgs.cpoc.jobgenerator.config.ProcessConfiguration;
@@ -32,6 +34,9 @@ import esa.s1pdgs.cpoc.mqi.model.queue.LevelJobInputDto;
 
 public class L0AppJobsGenerator extends AbstractJobsGenerator<EdrsSessionDto> {
 
+    public final static DateTimeFormatter JO_TIME_FORMATTER = DateTimeFormatter.ofPattern("yyyyMMdd'T'HHmmss");
+
+    
 	private static final Logger LOGGER = LogManager.getLogger(L0AppJobsGenerator.class);
 	
 	private Map<String,Map<String,String>> aiopProperties;
@@ -114,10 +119,15 @@ public class L0AppJobsGenerator extends AbstractJobsGenerator<EdrsSessionDto> {
     	LOGGER.info("Configuring AIOP with station parameters for stationCode {} for product {}", product.getStationCode(), product.getProductName());
 
     	// collect parameters
+    	
     	Map<String,String> aiopParams = new HashMap<>();
     	aiopParams.put("Mission_Id", product.getMissionId() + product.getSatelliteId());
     	aiopParams.put("Processing_Station", product.getStationCode());
-    	aiopParams.put("DownlinkTime", product.getStartTime());
+    	//FIXME
+    	aiopParams.put("DownlinkTime",DateUtils.convertToAnotherFormat(product.getStartTime(),
+    			AppDataJobProduct.TIME_FORMATTER,
+                 JO_TIME_FORMATTER));
+    	  
     	
     	//FIXME
     	String stationCode ="WILE";
@@ -160,6 +170,8 @@ public class L0AppJobsGenerator extends AbstractJobsGenerator<EdrsSessionDto> {
         		conf.addProcParam(new JobOrderProcParam(newParam.getKey(), newParam.getValue()));
 			}
 		}
+    	
+    	LOGGER.debug("Configured AIOP for product {} with configuration {}", product.getProductName(), conf);
     }
 
     @Override

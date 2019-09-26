@@ -5,6 +5,10 @@ import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+
+import javax.annotation.PostConstruct;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -25,11 +29,11 @@ import esa.s1pdgs.cpoc.ingestion.product.IngestionResult;
 import esa.s1pdgs.cpoc.ingestion.product.Product;
 import esa.s1pdgs.cpoc.ingestion.product.ProductException;
 import esa.s1pdgs.cpoc.ingestion.product.ProductService;
+import esa.s1pdgs.cpoc.mqi.MqiConsumer;
+import esa.s1pdgs.cpoc.mqi.MqiListener;
 import esa.s1pdgs.cpoc.mqi.client.GenericMqiClient;
 import esa.s1pdgs.cpoc.mqi.model.queue.AbstractDto;
 import esa.s1pdgs.cpoc.mqi.model.queue.IngestionDto;
-import esa.s1pdgs.cpoc.mqi.model.rest.Ack;
-import esa.s1pdgs.cpoc.mqi.model.rest.AckMessageDto;
 import esa.s1pdgs.cpoc.mqi.model.rest.GenericMessageDto;
 import esa.s1pdgs.cpoc.mqi.model.rest.GenericPublicationMessageDto;
 import esa.s1pdgs.cpoc.report.FilenameReportingOutput;
@@ -39,48 +43,31 @@ import esa.s1pdgs.cpoc.report.Reporting;
 import esa.s1pdgs.cpoc.report.ReportingMessage;
 
 @Service
-public class IngestionService {
+public class IngestionService implements MqiListener<IngestionDto> {
 	static final Logger LOG = LogManager.getLogger(IngestionService.class);
 
-	private final GenericMqiClient client;
+	private final GenericMqiClient mqiClient;
 	private final ErrorRepoAppender errorRepoAppender;
 	private final IngestionServiceConfigurationProperties properties;
 	private final ProductService productService;
 
 	@Autowired
-	public IngestionService(final GenericMqiClient client, final ErrorRepoAppender errorRepoAppender,
+	public IngestionService(final GenericMqiClient mqiClient, final ErrorRepoAppender errorRepoAppender,
 			final IngestionServiceConfigurationProperties properties, final ProductService productService) {
-		this.client = client;
+		this.mqiClient = mqiClient;
 		this.errorRepoAppender = errorRepoAppender;
 		this.properties = properties;
 		this.productService = productService;
 	}
-
-	public void poll() {
-		try {
-			final GenericMessageDto<IngestionDto> message = client.next(ProductCategory.INGESTION);
-			if (message == null || message.getBody() == null) {
-				LOG.trace("No message received: continue");
-				return;
-			}
-
-			AckMessageDto ackMess;
-			try {
-				onMessage(message);
-				ackMess = new AckMessageDto(message.getIdentifier(), Ack.OK, null, false);
-				// any other error --> dump prominently into log file but continue
-			} catch (Exception e) {
-				LOG.error("Unexpected Error on Ingestion", e);
-				ackMess = new AckMessageDto(message.getIdentifier(), Ack.ERROR, LogUtils.toString(e), false);
-			}
-			client.ack(ackMess, ProductCategory.INGESTION);
-			// on communication errors with Mqi --> just dump warning and retry on next
-			// polling attempt
-		} catch (AbstractCodedException ace) {
-			LOG.warn("Error Code: {}, Message: {}", ace.getCode().getCode(), ace.getLogMessage());
-		}
+	
+	@PostConstruct
+    public void initService() {
+		final ExecutorService service = Executors.newFixedThreadPool(1);
+		service.execute(new MqiConsumer<IngestionDto>(mqiClient, ProductCategory.INGESTION, this,
+				properties.getPollingIntervalMs()));
 	}
 
+	@Override
 	public void onMessage(final GenericMessageDto<IngestionDto> message) {
 		final Reporting.Factory reportingFactory = new LoggerReporting.Factory("Ingestion");
 
@@ -149,7 +136,7 @@ public class IngestionService {
 			final ProductCategory category = ProductCategory.of(product.getFamily());
 			reporting.begin(new ReportingMessage("Start publishing file {} in topic", message.getBody().getProductName()));
 			try {
-				client.publish(result, category);
+				mqiClient.publish(result, category);
 				reporting.end(new ReportingMessage("End publishing file {} in topic", message.getBody().getProductName()));
 			} catch (AbstractCodedException e) {
 				reporting.error(new ReportingMessage("[code {}] {}", e.getCode().getCode(), e.getLogMessage()));
