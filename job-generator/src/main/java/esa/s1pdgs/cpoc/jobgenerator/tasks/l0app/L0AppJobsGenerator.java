@@ -18,7 +18,6 @@ import esa.s1pdgs.cpoc.common.errors.processing.MetadataQueryException;
 import esa.s1pdgs.cpoc.common.utils.DateUtils;
 import esa.s1pdgs.cpoc.jobgenerator.config.AiopProperties;
 import esa.s1pdgs.cpoc.jobgenerator.config.JobGeneratorSettings;
-import esa.s1pdgs.cpoc.jobgenerator.config.L0SlicePatternSettings;
 import esa.s1pdgs.cpoc.jobgenerator.config.ProcessConfiguration;
 import esa.s1pdgs.cpoc.jobgenerator.config.ProcessSettings;
 import esa.s1pdgs.cpoc.jobgenerator.model.JobGeneration;
@@ -171,6 +170,8 @@ public class L0AppJobsGenerator extends AbstractJobsGenerator<EdrsSessionDto> {
         		conf.addProcParam(new JobOrderProcParam(newParam.getKey(), newParam.getValue()));
 			}
 		}
+    	
+    	LOGGER.info("Configured AIOP for product {} with configuration {}", product.getProductName(), conf);
     }
 
     @Override

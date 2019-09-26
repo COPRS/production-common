@@ -888,10 +888,15 @@ public abstract class AbstractJobsGenerator<T extends AbstractDto> implements Ru
                 }
             });
 
+            String jobOrderXml = xmlConverter
+            .convertFromObjectToXMLString(job.getJobOrder());
+            
+            LOGGER.info("Adding input JobOrderXml '{}' to product '{}'",
+            		jobOrderXml, job.getAppDataJob().getProduct().getProductName());
+            
             // Add the jobOrder itself in inputs
             r.addInput(new LevelJobInputDto(ProductFamily.JOB_ORDER.name(),
-                    jobOrder, xmlConverter
-                            .convertFromObjectToXMLString(job.getJobOrder())));
+                    jobOrder, jobOrderXml));
 
             // Add joborder output to the DTO
             List<JobOrderOutput> distinctOutputJobOrder = job.getJobOrder()
