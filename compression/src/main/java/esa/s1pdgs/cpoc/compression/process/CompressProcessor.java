@@ -15,10 +15,12 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
+import javax.annotation.PostConstruct;
+
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.scheduling.annotation.Scheduled;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import esa.s1pdgs.cpoc.common.ProductCategory;
@@ -32,6 +34,8 @@ import esa.s1pdgs.cpoc.compression.mqi.OutputProducerFactory;
 import esa.s1pdgs.cpoc.compression.status.AppStatus;
 import esa.s1pdgs.cpoc.errorrepo.ErrorRepoAppender;
 import esa.s1pdgs.cpoc.errorrepo.model.rest.FailedProcessingDto;
+import esa.s1pdgs.cpoc.mqi.MqiConsumer;
+import esa.s1pdgs.cpoc.mqi.MqiListener;
 import esa.s1pdgs.cpoc.mqi.client.GenericMqiClient;
 import esa.s1pdgs.cpoc.mqi.client.StatusService;
 import esa.s1pdgs.cpoc.mqi.model.queue.ProductDto;
@@ -46,7 +50,7 @@ import esa.s1pdgs.cpoc.report.Reporting;
 import esa.s1pdgs.cpoc.report.ReportingMessage;
 
 @Service
-public class CompressProcessor {
+public class CompressProcessor implements MqiListener<ProductDto> {
 	/**
 	 * Logger
 	 */
@@ -75,7 +79,7 @@ public class CompressProcessor {
 	/**
 	 * MQI service for reading message
 	 */
-	private final GenericMqiClient mqiService;
+	private final GenericMqiClient mqiClient;
 
 	/**
 	 * MQI service for stopping the MQI
@@ -83,56 +87,39 @@ public class CompressProcessor {
 	private final StatusService mqiStatusService;
 
 	private final ErrorRepoAppender errorAppender;
+	
+	private final long pollingIntervalMs;
 
 	@Autowired
 	public CompressProcessor(final AppStatus appStatus, final ApplicationProperties properties,
 			final ObsClient obsClient, final OutputProducerFactory producerFactory,
-			final GenericMqiClient mqiService,
+			final GenericMqiClient mqiClient,
 			final ErrorRepoAppender errorAppender,
-			final StatusService mqiStatusService) {
+			final StatusService mqiStatusService,
+			@Value("${compression.fixed-delay-ms}") final long pollingIntervalMs) {
 		this.appStatus = appStatus;
 		this.properties = properties;
 		this.obsClient = obsClient;
 		this.producerFactory = producerFactory;
-		this.mqiService = mqiService;
+		this.mqiClient = mqiClient;
 		this.mqiStatusService = mqiStatusService;
 		this.errorAppender = errorAppender;
+		this.pollingIntervalMs = pollingIntervalMs;
+	}
+	
+	@PostConstruct
+	public void initService() {
+		final ExecutorService service = Executors.newFixedThreadPool(1);
+		service.execute(new MqiConsumer<ProductDto>(mqiClient, ProductCategory.COMPRESSED_PRODUCTS, this,
+				pollingIntervalMs));
 	}
 
 	/**
 	 * Consume and execute jobs
 	 */
-	@Scheduled(fixedDelayString = "${compression.fixed-delay-ms}", initialDelayString = "${compression.init-delay-poll-ms}")
-	public void process() {
-		LOGGER.trace("[MONITOR] [step 0] Waiting message");
+	@Override
+	public void onMessage(GenericMessageDto<ProductDto> message) {
 
-		// ----------------------------------------------------------
-		// Read Message
-		// ----------------------------------------------------------
-		LOGGER.trace("[MONITOR] [step 0] Waiting message");
-		if (appStatus.isShallBeStopped()) {
-			LOGGER.info("[MONITOR] [step 0] The wrapper shall be stopped");
-			this.appStatus.forceStopping();
-			return;
-		}
-		GenericMessageDto<ProductDto> message = null;
-		try {
-			message = mqiService.next(ProductCategory.COMPRESSED_PRODUCTS);
-			this.appStatus.setWaiting();
-		} catch (AbstractCodedException ace) {
-			LOGGER.error("[MONITOR] [step 0] [code {}] {}", ace.getCode().getCode(), ace.getLogMessage());
-			message = null;
-			this.appStatus.setError("NEXT_MESSAGE");
-		}
-		if (message == null || message.getBody() == null) {
-			LOGGER.trace("[MONITOR] [step 0] No message received: continue");
-			return;
-		}
-//		if (message.getBody().getFamily().equals(ProductFamily.L0_SEGMENT)) {
-//			// FIXME: Segment does contain productName and key null and this not working
-//			LOGGER.info("Compression job is L0 segment. Deactivated due to incompatible data structure");
-//			return;
-//		}
 		appStatus.setProcessing(message.getIdentifier());
 		LOGGER.info("Initializing job processing {}", message);
 
@@ -350,7 +337,7 @@ public class CompressProcessor {
 			final String errorMessage) {
         LOGGER.info("Acknowledging negatively {} ",dto.getBody());
 		try {
-			mqiService.ack(new AckMessageDto(dto.getIdentifier(), Ack.ERROR, errorMessage, stop), 
+			mqiClient.ack(new AckMessageDto(dto.getIdentifier(), Ack.ERROR, errorMessage, stop), 
 					ProductCategory.COMPRESSED_PRODUCTS);
 		} catch (AbstractCodedException ace) {
 			LOGGER.error("Unable to confirm negatively request:{}",ace);
@@ -361,7 +348,7 @@ public class CompressProcessor {
 	protected void ackPositively(final boolean stop, final GenericMessageDto<ProductDto> dto) {
 		LOGGER.info("Acknowledging positively {}", dto.getBody());
 		try {
-			mqiService.ack(new AckMessageDto(dto.getIdentifier(), Ack.OK, null, stop), 
+			mqiClient.ack(new AckMessageDto(dto.getIdentifier(), Ack.OK, null, stop), 
 					ProductCategory.COMPRESSED_PRODUCTS);
 		} catch (AbstractCodedException ace) {
 			LOGGER.error("Unable to confirm positively request:{}",ace);
