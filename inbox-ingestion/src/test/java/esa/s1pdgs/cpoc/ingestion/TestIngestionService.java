@@ -8,7 +8,9 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
 import java.io.File;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 
 import org.apache.logging.log4j.Logger;
 import org.junit.Before;
@@ -35,6 +37,7 @@ import esa.s1pdgs.cpoc.mqi.model.queue.ProductDto;
 import esa.s1pdgs.cpoc.mqi.model.rest.Ack;
 import esa.s1pdgs.cpoc.mqi.model.rest.AckMessageDto;
 import esa.s1pdgs.cpoc.mqi.model.rest.GenericMessageDto;
+import esa.s1pdgs.cpoc.mqi.model.rest.GenericPublicationMessageDto;
 import esa.s1pdgs.cpoc.report.LoggerReporting;
 import esa.s1pdgs.cpoc.report.Reporting;
 
@@ -245,5 +248,40 @@ public final class TestIngestionService {
 		assertThatThrownBy(() -> uut.getFamilyFor(new IngestionDto("foo.bar")))
 			.isInstanceOf(ProductException.class)
 			.hasMessageContaining("Invalid IngestionTypeConfiguration [family=FOO, regex=fo+\\.bar] for IngestionDto [");
+	}
+	
+	@Test
+	public final void testPublish() throws AbstractCodedException {
+		final IngestionService uut = new IngestionService(
+				mqiClient, 
+				ErrorRepoAppender.NULL, 
+				new IngestionServiceConfigurationProperties(),
+				productService
+		);
+		
+		doReturn(new LoggerReporting(logger, "uuid", "actionName", 2)).when(reportingFactory).newReporting(Mockito.eq(2));
+		
+		final GenericMessageDto<IngestionDto> message = new GenericMessageDto<>();
+		message.setIdentifier(123L);
+		message.setInputKey("inputKey");
+		message.setBody(new IngestionDto());
+		
+		AbstractDto dto = new ProductDto();
+		
+		final Product<AbstractDto> product = new Product<>();
+		product.setFamily(ProductFamily.AUXILIARY_FILE);
+		product.setDto(dto);
+			
+		final List<Product<AbstractDto>> products = new ArrayList<>();
+		products.add(product);
+		
+		uut.publish(products, message, reportingFactory);
+		
+		final GenericPublicationMessageDto<? extends AbstractDto> result = new GenericPublicationMessageDto<>(
+				message.getIdentifier(), product.getFamily(), product.getDto());
+		result.setInputKey(message.getInputKey());
+		result.setOutputKey(product.getFamily().toString());
+		
+		verify(mqiClient, times(1)).publish(Mockito.eq(result), Mockito.eq(ProductCategory.AUXILIARY_FILES));
 	}
 }
