@@ -64,6 +64,8 @@ public final class GenericMessageListener<T> implements AcknowledgingConsumerAwa
         this.appStatus = appStatus;
         this.additionalConsumer = additionalConsumer;
     }
+    
+
 
     /**
      * Listener. Method call when a message is received
@@ -86,19 +88,7 @@ public final class GenericMessageListener<T> implements AcknowledgingConsumerAwa
         	LOGGER.debug("Handling message from kafka queue: {}", message);
         	
             // Save message
-        	@SuppressWarnings("unchecked")
-			final AppCatMessageDto<T> result = (AppCatMessageDto<T>) service.read(
-        			category,
-        			data.topic(),
-                    data.partition(), 
-                    data.offset(),
-                    new AppCatReadMessageDto<T>(
-                            properties.getConsumer().getGroupId(),
-                            properties.getHostname(), 
-                            false, 
-                            message
-                    )
-            );        
+			final AppCatMessageDto<T> result = saveInAppCat(data, false);        
         	additionalConsumer.consume(message);
             handleMessage(data, acknowledgment, result);
             appStatus.resetError();
@@ -117,47 +107,45 @@ public final class GenericMessageListener<T> implements AcknowledgingConsumerAwa
         }
     }
 
-	private void handleMessage(
+	final void handleMessage(
 			final ConsumerRecord<String, T> data, 
 			final Acknowledgment acknowledgment,
 			final AppCatMessageDto<T> result
-	) throws AbstractCodedException {	
+	) throws AbstractCodedException {
+	   	final T message = data.value();
+	   	
 		// Deal with result
 		switch (result.getState()) {
 		    case ACK_KO:
 		    case ACK_OK:
-		    case ACK_WARN:
-		        // We ignore the message
-		        if (LOGGER.isDebugEnabled()) {
-		            LOGGER.debug("We ignore message {} and go the next", data);
-		        }
+		    case ACK_WARN:	
+		        LOGGER.debug("Message ignored and going to the next (state is ACK_WARN): {}", message);	
 		        acknowlegde(data, acknowledgment);
 		        break;
 		    case SEND:
-		        // Message already processing
+		    	LOGGER.debug("Message {} is already processing (state is SEND)", result.getIdentifier());	
 		        if (properties.getHostname().equals(result.getSendingPod())) {
-		            // Message processing by myself
+			        LOGGER.debug("Message {} already processed by this pod (state is SEND). Ignoring and pausing consumption", 
+			        		result.getIdentifier());	
 		            acknowlegde(data, acknowledgment);
 		            pause();
 		        } else {
 		            // Message processing by another pod
-		            if (!messageShallBeIgnored(data, result)) {
+		            if (messageShallBeIgnored(data, result)) {
+		            	LOGGER.debug("Message {} shall be ignored (state is SEND). Ignoring...", result.getIdentifier());
+		                acknowlegde(data, acknowledgment);
+		            } else {
+		            	LOGGER.debug("Forced message {} transition from SEND to READ). Pausing consumption", 
+		            			result.getIdentifier());
 		                // We have forced the reading
 		                acknowlegde(data, acknowledgment);
 		                pause();
-		            } else {
-		                // We ignore the message
-		                if (LOGGER.isDebugEnabled()) {
-		                    LOGGER.debug(
-		                            "We ignore message {} and go to the next",
-		                            data);
-		                }
-		                acknowlegde(data, acknowledgment);
 		            }
 		        }
 		        break;
 		    default:
 		        // Message assigned
+		    	LOGGER.debug("Message {} assigned to this pod. Pausing consumption ...", result.getIdentifier());
 		        acknowlegde(data, acknowledgment);
 		        pause();
 		        break;
@@ -177,16 +165,20 @@ public final class GenericMessageListener<T> implements AcknowledgingConsumerAwa
      * @param data
      * @param acknowledgment
      */
-    protected void acknowlegde(final ConsumerRecord<String, T> data,
+    final void acknowlegde(final ConsumerRecord<String, T> data,
             final Acknowledgment acknowledgment) {
         try {
+        	LOGGER.debug("Acknowledging KAFKA message: {}", data.value());
             acknowledgment.acknowledge();
         } catch (Exception e) {
-            LOGGER.error(
-                    "[topic {}] [partition {}] [offset {}] Cannot ack KAFKA message: {}",
-                    data.topic(), data.partition(), data.offset(),
-                    LogUtils.toString(e)
-                    );
+        	LOGGER.error(
+        			"Error on acknowledging KAFKA message (topic: {}, partition: {}, offset: {}) {} : {}", 
+        			data.topic(),
+        			data.partition(), 
+        			data.offset(),
+        			data.value(),
+        			LogUtils.toString(e)
+        	);
         }
     }
 
@@ -197,35 +189,46 @@ public final class GenericMessageListener<T> implements AcknowledgingConsumerAwa
      * @return
      * @throws AbstractCodedException
      */
-    protected boolean messageShallBeIgnored(
+    final boolean messageShallBeIgnored(
             final ConsumerRecord<String, T> data,
-            final AppCatMessageDto<T> lightMessage)
+            final AppCatMessageDto<T> mess)
             throws AbstractCodedException {
         boolean ret = false;
         // Ask to the other application
         try {
-            ret = otherAppService.isProcessing(lightMessage.getSendingPod(), category, lightMessage.getIdentifier());
+            ret = otherAppService.isProcessing(mess.getSendingPod(), category, mess.getIdentifier());
         } catch (AbstractCodedException ace) {
             ret = false;
-            LOGGER.warn(
-                    "{} No response from the other application, consider it as dead",
-                    ace.getLogMessage());
+            LOGGER.warn("{} No response from the other application, consider it as dead", ace.getLogMessage());
         }
         if (!ret) {
-			@SuppressWarnings("rawtypes")
-			AppCatMessageDto resultForce = service.read(category, data.topic(),
-                    data.partition(), data.offset(),
-                    new AppCatReadMessageDto<T>(
-                            properties.getConsumer().getGroupId(),
-                            properties.getHostname(), true, data.value()));
+        	LOGGER.debug("No other pod is handling the message {}. Enforcing update to state READ...", mess.getIdentifier());
+			final AppCatMessageDto<T> resultForce = saveInAppCat(data, true);
             if (resultForce.getState() != MessageState.READ) {
                 ret = true;
             }
-            LOGGER.warn(
-                    "We force the reading for the message {}, will the message be ignored {}",
-                    lightMessage, ret);
+            // no idea what this message shall mean - leave it here for historical purposes and someone understanding
+            LOGGER.warn("We force the reading for the message {}, will the message be ignored {}", mess, ret);
+        }
+        else {
+        	LOGGER.info("Message {} is already handled by other pod", mess.getIdentifier());
         }
         return ret;
     }
-
+    
+    @SuppressWarnings("unchecked")
+	private final AppCatMessageDto<T> saveInAppCat(final ConsumerRecord<String, T> data, boolean force) throws AbstractCodedException {
+    	return (AppCatMessageDto<T>) service.read(
+    			category,
+    			data.topic(),
+                data.partition(), 
+                data.offset(),
+                new AppCatReadMessageDto<T>(
+                        properties.getConsumer().getGroupId(),
+                        properties.getHostname(), 
+                        force, 
+                        data.value()
+                )
+        );       
+    }
 }
