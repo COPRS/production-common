@@ -154,6 +154,7 @@ public class JobProcessor implements MqiListener<LevelJobDto> {
 	
 	@PostConstruct
 	public void initService() {
+		// allow disabling polling (e.g. for junit test) by configuring the polling interval
 		if (pollingIntervalMs > 0L) {
 			final ExecutorService service = Executors.newFixedThreadPool(1);
 			service.execute(new MqiConsumer<LevelJobDto>(
