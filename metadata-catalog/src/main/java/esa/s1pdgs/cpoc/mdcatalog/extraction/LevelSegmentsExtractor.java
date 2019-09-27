@@ -94,9 +94,10 @@ public class LevelSegmentsExtractor extends GenericExtractor<ProductDto> impleme
 	@PostConstruct
 	public void initService() {
 		appStatus.setWaiting(category);
-		final ExecutorService service = Executors.newFixedThreadPool(1);
-		service.execute(
-				new MqiConsumer<ProductDto>(mqiClient, category, this, pollingIntervalMs));
+		if (pollingIntervalMs > 0) {
+			final ExecutorService service = Executors.newFixedThreadPool(1);
+			service.execute(new MqiConsumer<ProductDto>(mqiClient, category, this, pollingIntervalMs));
+		}
 	}
     
     @Override

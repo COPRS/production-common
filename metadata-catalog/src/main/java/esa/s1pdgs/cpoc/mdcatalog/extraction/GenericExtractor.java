@@ -132,7 +132,7 @@ public abstract class GenericExtractor<T> {
      * Consume a message from a product category and extract metadata
      */
     public void genericExtract(GenericMessageDto<T> message) {
-
+    	appStatus.setWaiting(category);
         // ----------------------------------------------------------
         // Process Message
         // ----------------------------------------------------------

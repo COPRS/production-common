@@ -109,9 +109,11 @@ public class CompressProcessor implements MqiListener<ProductDto> {
 	
 	@PostConstruct
 	public void initService() {
-		final ExecutorService service = Executors.newFixedThreadPool(1);
-		service.execute(new MqiConsumer<ProductDto>(mqiClient, ProductCategory.COMPRESSED_PRODUCTS, this,
-				pollingIntervalMs));
+		if (pollingIntervalMs > 0) {
+			final ExecutorService service = Executors.newFixedThreadPool(1);
+			service.execute(new MqiConsumer<ProductDto>(mqiClient, ProductCategory.COMPRESSED_PRODUCTS, this,
+					pollingIntervalMs));
+		}
 	}
 
 	/**
