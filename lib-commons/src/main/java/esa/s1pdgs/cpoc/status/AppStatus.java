@@ -12,6 +12,14 @@ public interface AppStatus {
 		@Override public long getProcessingMsgId() { return -1;}
 		@Override public final void forceStopping() {}
 	};
+	
+	default boolean isInterrupted() {
+		return Thread.currentThread().isInterrupted();
+	}
+	
+	default void sleep(final long millis) throws InterruptedException {
+		Thread.sleep(millis);
+	}
 
 	/**
 	 * @return the status

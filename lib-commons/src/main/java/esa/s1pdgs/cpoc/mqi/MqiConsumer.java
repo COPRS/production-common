@@ -53,26 +53,25 @@ public final class MqiConsumer<E extends AbstractDto> implements Runnable {
 		if (initialDelay > 0L) {
 			LOG.debug("Start MQI polling in {}ms", initialDelay);
 			try {
-				Thread.sleep(pollingIntervalMillis);
+				appStatus.sleep(pollingIntervalMillis);
 			} catch (InterruptedException e) {
 				LOG.debug("{} has been cancelled", this);
 				LOG.info("Exiting {}", this);
 				return;
 			}
-		}
-		
+		}		
 		// generic polling loop
 		LOG.info("Starting {}", this);
-		while (!Thread.currentThread().isInterrupted()) {
+		do {
 			try {
 				if (appStatus.isShallBeStopped()) {
 					LOG.info("MQI has been commanded to be stopped");
-					this.appStatus.forceStopping();
+					appStatus.forceStopping();
 					return;
 				}
 				LOG.trace("{} polls MQI", this);
 				final GenericMessageDto<E> message = client.next(category);	
-				this.appStatus.setWaiting();
+				appStatus.setWaiting();
 				if (message == null || message.getBody() == null) {
 					LOG.trace("No message received: continue");					
 					continue;
@@ -92,15 +91,15 @@ public final class MqiConsumer<E extends AbstractDto> implements Runnable {
 			// on communication errors with Mqi --> just dump warning and retry on next polling attempt
 			} catch (AbstractCodedException ace) {
 				LOG.warn("Error Code: {}, Message: {}", ace.getCode().getCode(), ace.getLogMessage());
-				this.appStatus.setError("NEXT_MESSAGE");
+				appStatus.setError("NEXT_MESSAGE");
 			}
 			try {
-				Thread.sleep(pollingIntervalMillis);
+				appStatus.sleep(pollingIntervalMillis);
 			} catch (InterruptedException e) {
 				LOG.debug("{} has been cancelled", this);
 				break;
 			}
-		}
+		} while (!appStatus.isInterrupted());
 		LOG.info("Exiting {}", this);
 	}
 
