@@ -150,7 +150,7 @@ public class LevelSegmentsExtractorTest {
                 mqiService, appStatus, extractorConfig,
                 testDir.getAbsolutePath()
                         + File.separator,
-                "manifest.safe", errorAppender, config, ".safe", xmlConverter);
+                "manifest.safe", errorAppender, config, ".safe", xmlConverter, 500);
     }
 
     @Test
@@ -178,7 +178,7 @@ public class LevelSegmentsExtractorTest {
 
         extractor = new LevelSegmentsExtractor(esServices, obsClient,
                 mqiService, appStatus, extractorConfig, newWorkDir.getPath(),
-                "manifest.safe", errorAppender, config, ".safe", xmlConverter);
+                "manifest.safe", errorAppender, config, ".safe", xmlConverter, 500);
         
         assertTrue((new File(newWorkDir,"S1A_AUX_CAL_V20140402T000000_G20140402T133909.SAFE")).exists());
         assertTrue((new File(newWorkDir,"S1A_OPER_AUX_OBMEMC_PDMC_20140201T000000.xml")).exists());

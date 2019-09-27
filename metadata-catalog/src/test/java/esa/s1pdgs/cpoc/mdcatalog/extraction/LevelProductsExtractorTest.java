@@ -143,7 +143,7 @@ public class LevelProductsExtractorTest {
 						"S1A_OPER_AUX_OBMEMC_PDMC_20140201T000000.xml", ProductFamily.L0_ACN, "NRT"));
 
 		extractor = new LevelProductsExtractor(esServices, obsClient, mqiService, appStatus, extractorConfig,
-				testDir.getAbsolutePath(), "manifest.safe", errorAppender, config, ".safe", xmlConverter);
+				testDir.getAbsolutePath(), "manifest.safe", errorAppender, config, ".safe", xmlConverter, 500);
 	}
 
 	@Test
@@ -167,7 +167,7 @@ public class LevelProductsExtractorTest {
 		(new File("./test/workDir2/S1A_OPER_AUX_OBMEMC_PDMC_20140201T000000.xml")).createNewFile();
 
 		extractor = new LevelProductsExtractor(esServices, obsClient, mqiService, appStatus, extractorConfig,
-				"./test/workDir2/", "manifest.safe", errorAppender, config,".safe", xmlConverter);
+				"./test/workDir2/", "manifest.safe", errorAppender, config,".safe", xmlConverter, 500);
 		assertTrue((new File("./test/workDir2/S1A_AUX_CAL_V20140402T000000_G20140402T133909.SAFE")).exists());
 		assertTrue((new File("./test/workDir2/S1A_OPER_AUX_OBMEMC_PDMC_20140201T000000.xml")).exists());
 

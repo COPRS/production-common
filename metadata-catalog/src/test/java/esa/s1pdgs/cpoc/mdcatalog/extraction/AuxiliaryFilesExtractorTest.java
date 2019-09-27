@@ -145,7 +145,7 @@ public class AuxiliaryFilesExtractorTest {
                 mqiService, appStatus, extractorConfig,
                 testDir.getAbsolutePath()
                         + File.separator,
-                "manifest.safe", errorAppender, new ProcessConfiguration(),".safe", xmlConverter);
+                "manifest.safe", errorAppender, new ProcessConfiguration(),".safe", xmlConverter, 500);
     }
 
     @Test
@@ -172,7 +172,7 @@ public class AuxiliaryFilesExtractorTest {
 
         extractor = new AuxiliaryFilesExtractor(esServices, obsClient,
                 mqiService, appStatus, extractorConfig, newWorkDir.getAbsolutePath(),
-                "manifest.safe", errorAppender, new ProcessConfiguration(),".safe", xmlConverter);
+                "manifest.safe", errorAppender, new ProcessConfiguration(),".safe", xmlConverter, 500);
         assertTrue(new File(newWorkDir,"S1A_AUX_CAL_V20140402T000000_G20140402T133909.SAFE").exists());
         assertTrue(new File(newWorkDir,"S1A_OPER_AUX_OBMEMC_PDMC_20140201T000000.xml").exists());
 

@@ -62,7 +62,7 @@ public abstract class GenericExtractor<T> {
     /**
      * Access to the MQI server
      */
-    protected final GenericMqiClient mqiService;
+    protected final GenericMqiClient mqiClient;
 
     /**
      * Application status
@@ -121,7 +121,7 @@ public abstract class GenericExtractor<T> {
         this.extractorConfig = extractorConfig;
         this.mdBuilder = new MetadataBuilder(this.extractorConfig, xmlConverter, localDirectory);
         this.esServices = esServices;
-        this.mqiService = mqiService;
+        this.mqiClient = mqiService;
         this.appStatus = appStatus;
         this.category = category;
         this.errorAppender = errorAppender;
@@ -131,32 +131,18 @@ public abstract class GenericExtractor<T> {
     /**
      * Consume a message from a product category and extract metadata
      */
-    public void genericExtract() {
+    public void genericExtract(GenericMessageDto<T> message) {
 
         // ----------------------------------------------------------
-        // Read Message
+        // Process Message
         // ----------------------------------------------------------
-        LOGGER.trace("[MONITOR] [step 0] [{}] Waiting message", category);
-        GenericMessageDto<T> message = null;
-        try {
-            message = mqiService.next(category);
-            appStatus.setWaiting(category);
-        } catch (AbstractCodedException ace) {
-            LOGGER.error("[MONITOR] [step 0] [{}] [code {}] {}", category,
-                    ace.getCode().getCode(), ace.getLogMessage());
-            message = null;
-            appStatus.setError(category, "NEXT_MESSAGE");
-        }
-        if (message == null || message.getBody() == null) {
+    	if (message == null || message.getBody() == null) {
             LOGGER.trace(
                     "[MONITOR] [step 0] [{}] No message received: continue",
                     category);
             return;
         }
-
-        // ----------------------------------------------------------
-        // Process Message
-        // ----------------------------------------------------------
+    	
         T dto = message.getBody();
         
         final String productName = extractProductNameFromDto(dto);
@@ -239,7 +225,7 @@ public abstract class GenericExtractor<T> {
         final Reporting reportAck = reportingFactory.newReporting(5);            
         reportAck.begin(new ReportingMessage("Start acknowledging negatively"));
         try {
-            mqiService.ack(new AckMessageDto(message.getIdentifier(), Ack.ERROR, errorMessage, false), category);
+            mqiClient.ack(new AckMessageDto(message.getIdentifier(), Ack.ERROR, errorMessage, false), category);
             errorAppender.send(failedProc);            
             reportAck.end(new ReportingMessage("End acknowledging negatively"));
         } catch (AbstractCodedException ace) {
@@ -258,7 +244,7 @@ public abstract class GenericExtractor<T> {
         final Reporting reportAck = reportingFactory.newReporting(5);            
         reportAck.begin(new ReportingMessage("Start acknowledging positively"));
         try {
-            mqiService.ack(new AckMessageDto(message.getIdentifier(), Ack.OK, null, false), category);
+            mqiClient.ack(new AckMessageDto(message.getIdentifier(), Ack.OK, null, false), category);
             reportAck.end(new ReportingMessage("End acknowledging positively"));            
         } catch (AbstractCodedException ace) {            
         	reportAck.error(new ReportingMessage("[code {}] {}", ace.getCode().getCode(), ace.getLogMessage()));            
