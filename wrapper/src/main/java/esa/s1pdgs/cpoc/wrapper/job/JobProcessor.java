@@ -17,10 +17,12 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import java.util.stream.Collectors;
 
+import javax.annotation.PostConstruct;
+
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.scheduling.annotation.Scheduled;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import esa.s1pdgs.cpoc.common.ApplicationLevel;
@@ -30,6 +32,9 @@ import esa.s1pdgs.cpoc.common.errors.AbstractCodedException.ErrorCode;
 import esa.s1pdgs.cpoc.common.errors.InternalErrorException;
 import esa.s1pdgs.cpoc.errorrepo.ErrorRepoAppender;
 import esa.s1pdgs.cpoc.errorrepo.model.rest.FailedProcessingDto;
+import esa.s1pdgs.cpoc.mqi.MqiClient;
+import esa.s1pdgs.cpoc.mqi.MqiConsumer;
+import esa.s1pdgs.cpoc.mqi.MqiListener;
 import esa.s1pdgs.cpoc.mqi.client.GenericMqiClient;
 import esa.s1pdgs.cpoc.mqi.client.StatusService;
 import esa.s1pdgs.cpoc.mqi.model.queue.LevelJobDto;
@@ -62,7 +67,7 @@ import esa.s1pdgs.cpoc.wrapper.job.process.PoolExecutorCallable;
  * @author Viveris Technologies
  */
 @Service
-public class JobProcessor {
+public class JobProcessor implements MqiListener<LevelJobDto> {
 
 	/**
 	 * Logger
@@ -97,7 +102,7 @@ public class JobProcessor {
 	/**
 	 * MQI service for reading message
 	 */
-	private final GenericMqiClient mqiService;
+	private final MqiClient mqiClient;
 
 	/**
 	 * MQI service for stopping the MQI
@@ -105,6 +110,11 @@ public class JobProcessor {
 	private final StatusService mqiStatusService;
 
 	private final ErrorRepoAppender errorAppender;
+	
+	private final long pollingIntervalMs;
+	
+	private final long initDelayPollMs;
+
 
 	/**
 	 * @param job
@@ -118,55 +128,48 @@ public class JobProcessor {
 	 * @param outputListFile
 	 */
 	@Autowired
-	public JobProcessor(final AppStatus appStatus, final ApplicationProperties properties,
-			final DevProperties devProperties, final ObsClient obsClient, final OutputProcuderFactory procuderFactory,
-			final GenericMqiClient mqiService, final ErrorRepoAppender errorAppender,
-			final StatusService mqiStatusService) {
+	public JobProcessor(
+			final AppStatus appStatus, 
+			final ApplicationProperties properties,
+			final DevProperties devProperties, 
+			final ObsClient obsClient, 
+			final OutputProcuderFactory procuderFactory,
+			final GenericMqiClient mqiClient, 
+			final ErrorRepoAppender errorAppender,
+			final StatusService mqiStatusService,
+			@Value("${process.init-delay-poll-ms}") final long initDelayPollMs,
+			@Value("${process.fixed-delay-ms}") final long pollingIntervalMs
+	) {
 		this.appStatus = appStatus;
 		this.devProperties = devProperties;
 		this.properties = properties;
 		this.obsClient = obsClient;
 		this.procuderFactory = procuderFactory;
-		this.mqiService = mqiService;
+		this.mqiClient = mqiClient;
 		this.mqiStatusService = mqiStatusService;
 		this.errorAppender = errorAppender;
+		this.initDelayPollMs = initDelayPollMs;
+		this.pollingIntervalMs = pollingIntervalMs;
 	}
 	
-	private final List<String> toReportFilenames(final LevelJobDto job) {
-		return job.getInputs().stream()
-			.map(j -> Paths.get(j.getLocalPath()).getFileName().toString())
-			.collect(Collectors.toList());
+	@PostConstruct
+	public void initService() {
+		if (pollingIntervalMs > 0L) {
+			final ExecutorService service = Executors.newFixedThreadPool(1);
+			service.execute(new MqiConsumer<LevelJobDto>(
+					mqiClient,
+					ProductCategory.LEVEL_JOBS, 
+					this, 
+					pollingIntervalMs,
+					initDelayPollMs,
+					appStatus
+			));
+		}
 	}
 
-	/**
-	 * Consume and execute jobs
-	 */
-	@Scheduled(fixedDelayString = "${process.fixed-delay-ms}", initialDelayString = "${process.init-delay-poll-ms}")
-	public void processJob() {
 
-		// ----------------------------------------------------------
-		// Read Message
-		// ----------------------------------------------------------
-		LOGGER.trace("[MONITOR] [step 0] Waiting message");
-		if (appStatus.isShallBeStopped()) {
-			LOGGER.info("[MONITOR] [step 0] The wrapper shall be stopped");
-			this.appStatus.forceStopping();
-			return;
-		}
-		GenericMessageDto<LevelJobDto> message = null;
-		try {
-			message = mqiService.next(ProductCategory.LEVEL_JOBS);
-			this.appStatus.setWaiting();
-		} catch (AbstractCodedException ace) {
-			LOGGER.error("[MONITOR] [step 0] [code {}] {}", ace.getCode().getCode(), ace.getLogMessage());
-			message = null;
-			this.appStatus.setError("NEXT_MESSAGE");
-		}
-		if (message == null || message.getBody() == null) {
-			LOGGER.trace("[MONITOR] [step 0] No message received: continue");
-			return;
-		}
-		appStatus.setProcessing(message.getIdentifier());
+	@Override
+	public final void onMessage(GenericMessageDto<LevelJobDto> message) {
 		LOGGER.info("Initializing job processing {}", message);
 
 		// ----------------------------------------------------------
@@ -451,7 +454,7 @@ public class JobProcessor {
 			final String errorMessage) {
 		LOGGER.info("{} Acknowledging negatively", getPrefixMonitorLog(MonitorLogUtils.LOG_ACK, dto.getBody()));
 		try {
-			mqiService.ack(new AckMessageDto(dto.getIdentifier(), Ack.ERROR, errorMessage, stop),
+			mqiClient.ack(new AckMessageDto(dto.getIdentifier(), Ack.ERROR, errorMessage, stop),
 					ProductCategory.LEVEL_JOBS);
 		} catch (AbstractCodedException ace) {
 			LOGGER.error("{} [step 5] {} [code {}] {}", getPrefixMonitorLog(MonitorLogUtils.LOG_DFT, dto.getBody()),
@@ -464,7 +467,7 @@ public class JobProcessor {
 	protected void ackPositively(final boolean stop, final GenericMessageDto<LevelJobDto> dto) {
 		LOGGER.info("{} Acknowledging positively", getPrefixMonitorLog(MonitorLogUtils.LOG_ACK, dto.getBody()));
 		try {
-			mqiService.ack(new AckMessageDto(dto.getIdentifier(), Ack.OK, null, stop), ProductCategory.LEVEL_JOBS);
+			mqiClient.ack(new AckMessageDto(dto.getIdentifier(), Ack.OK, null, stop), ProductCategory.LEVEL_JOBS);
 		} catch (AbstractCodedException ace) {
 			LOGGER.error("{} [step 5] {} [code {}] {}", getPrefixMonitorLog(MonitorLogUtils.LOG_DFT, dto.getBody()),
 					getPrefixMonitorLog(MonitorLogUtils.LOG_ERROR, dto.getBody()), ace.getCode().getCode(),
@@ -472,4 +475,11 @@ public class JobProcessor {
 			appStatus.setError("PROCESSING");
 		}
 	}
+	
+	private final List<String> toReportFilenames(final LevelJobDto job) {
+		return job.getInputs().stream()
+			.map(j -> Paths.get(j.getLocalPath()).getFileName().toString())
+			.collect(Collectors.toList());
+	}
+	
 }

@@ -135,7 +135,7 @@ public class JobProcessorTest extends MockPropertiesTest {
         }
         mockWorkingdirProperties(workingDir.toPath());
         processor = new JobProcessor(appStatus, properties, devProperties,
-                obsClient, procuderFactory, mqiService, errorAppender, mqiStatusService);
+                obsClient, procuderFactory, mqiService, errorAppender, mqiStatusService, 0L, 10L);
         procExecutorSrv = Executors.newSingleThreadExecutor();
         procCompletionSrv = new ExecutorCompletionService<>(procExecutorSrv);
     }
@@ -148,19 +148,6 @@ public class JobProcessorTest extends MockPropertiesTest {
         if (workingDir.exists()) {
             workingDir.delete();
         }
-    }
-
-    /**
-     * Test when application shall be stopped
-     */
-    @Test
-    public void testProcessJobWhenAppShallBeStopped() {
-        doReturn(true).when(appStatus).isShallBeStopped();
-
-        processor.processJob();
-
-        verify(appStatus, times(1)).forceStopping();
-        verifyZeroInteractions(mqiService);
     }
 
     /**
@@ -301,15 +288,11 @@ public class JobProcessorTest extends MockPropertiesTest {
     public void testCallWithNext() throws Exception {
         mockAllStep(false);
         doReturn(ApplicationLevel.L0).when(properties).getLevel();
-        doReturn(inputMessage).when(mqiService).next(Mockito.any());
-
-        processor.processJob();
-
-        verify(mqiService, times(1)).next(Mockito.eq(ProductCategory.LEVEL_JOBS));
-        verify(appStatus, times(1)).setProcessing(Mockito.eq(inputMessage.getIdentifier()));
-        verify(appStatus, times(2)).setWaiting();
+        processor.onMessage(inputMessage);
         doReturn(ApplicationLevel.L1).when(properties).getLevel();
     }
+    
+    
     /**
      * Nominal test case of call
      * 
