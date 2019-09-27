@@ -106,7 +106,7 @@ public class EdrsSessionsExtractorTest {
 
         extractor = new EdrsSessionsExtractor(esServices, obsClient, mqiService, appStatus,
                 (new File("./test/workDir/")).getAbsolutePath(),errorAppender, config,
-                extractorConfig, xmlConverter);
+                extractorConfig, xmlConverter, 500);
     }
 
     @Test

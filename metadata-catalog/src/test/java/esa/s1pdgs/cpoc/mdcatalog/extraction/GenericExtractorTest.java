@@ -108,7 +108,7 @@ public class GenericExtractorTest {
         extractor = new LevelProductsExtractor(esServices, obsClient,
                 mqiService, appStatus, extractorConfig,
                 (new File("./test/workDir/")).getAbsolutePath(),
-                "manifest.safe", errorAppender, config, ".safe", xmlConverter);
+                "manifest.safe", errorAppender, config, ".safe", xmlConverter, 500);
     }
 
     /**
@@ -193,27 +193,18 @@ public class GenericExtractorTest {
     @Test
     public void testGenericExtractMEsageBodyEmpty()
             throws AbstractCodedException {
-        doReturn(new GenericMessageDto<>(123, "", null)).when(mqiService)
-                .next(Mockito.any());
 
-        extractor.genericExtract();
-        verify(mqiService, times(1)).next(Mockito.any());
+        extractor.genericExtract(new GenericMessageDto<>(123, "", null));
         verifyZeroInteractions(obsClient);
-        verify(appStatus, times(1))
-                .setWaiting(Mockito.eq(ProductCategory.LEVEL_PRODUCTS));
         verifyNoMoreInteractions(appStatus);
         verifyZeroInteractions(esServices);
     }
 
     @Test
     public void testGenericExtractMEsageNull() throws AbstractCodedException {
-        doReturn(null).when(mqiService).next(Mockito.any());
 
-        extractor.genericExtract();
-        verify(mqiService, times(1)).next(Mockito.any());
+        extractor.genericExtract(null);
         verifyZeroInteractions(obsClient);
-        verify(appStatus, times(1))
-                .setWaiting(Mockito.eq(ProductCategory.LEVEL_PRODUCTS));
         verifyNoMoreInteractions(appStatus);
         verifyZeroInteractions(esServices);
     }

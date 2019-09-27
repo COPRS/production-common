@@ -1,11 +1,14 @@
 package esa.s1pdgs.cpoc.mdcatalog.extraction;
 
 import java.io.File;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+
+import javax.annotation.PostConstruct;
 
 import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
 import esa.s1pdgs.cpoc.common.ProductCategory;
@@ -17,6 +20,8 @@ import esa.s1pdgs.cpoc.mdcatalog.es.EsServices;
 import esa.s1pdgs.cpoc.mdcatalog.extraction.model.OutputFileDescriptor;
 import esa.s1pdgs.cpoc.mdcatalog.extraction.xml.XmlConverter;
 import esa.s1pdgs.cpoc.mdcatalog.status.AppStatus;
+import esa.s1pdgs.cpoc.mqi.MqiConsumer;
+import esa.s1pdgs.cpoc.mqi.MqiListener;
 import esa.s1pdgs.cpoc.mqi.client.GenericMqiClient;
 import esa.s1pdgs.cpoc.mqi.model.queue.ProductDto;
 import esa.s1pdgs.cpoc.mqi.model.rest.GenericMessageDto;
@@ -29,7 +34,7 @@ import esa.s1pdgs.cpoc.report.Reporting;
  * @author Olivier Bex-Chauvet
  */
 @Service
-public class LevelProductsExtractor extends GenericExtractor<ProductDto> {
+public class LevelProductsExtractor extends GenericExtractor<ProductDto> implements MqiListener<ProductDto> {
 
     /**
      * Pattern for configuration files to extract data
@@ -51,6 +56,11 @@ public class LevelProductsExtractor extends GenericExtractor<ProductDto> {
      * 
      */
     private final String fileManifestExt;
+    
+    /**
+     * 
+     */
+    private final long pollingIntervalMs;
 
     @Autowired
     public LevelProductsExtractor(final EsServices esServices,
@@ -63,23 +73,28 @@ public class LevelProductsExtractor extends GenericExtractor<ProductDto> {
             final ErrorRepoAppender errorAppender,
             final ProcessConfiguration processConfiguration,
             @Value("${file.file-with-manifest-ext}") final String fileManifestExt,
-            final XmlConverter xmlConverter) {
+            final XmlConverter xmlConverter,
+            @Value("${file.product-categories.level-products.fixed-delay-ms}") final long pollingIntervalMs) {
         super(esServices, mqiService, appStatus, localDirectory,
                 extractorConfig, PATTERN_CONFIG, errorAppender, ProductCategory.LEVEL_PRODUCTS, processConfiguration, xmlConverter);
         this.obsClient = obsClient;
         this.manifestFilename = manifestFilename;
         this.fileManifestExt = fileManifestExt;
+        this.pollingIntervalMs = pollingIntervalMs;
     }
 
-    /**
-     * Consume a message from the AUXILIARY_FILES product category and extract
-     * metadata
-     * 
-     * @see GenericExtractor#genericExtract()
-     */
-    @Scheduled(fixedDelayString = "${file.product-categories.level-products.fixed-delay-ms}", initialDelayString = "${file.product-categories.level-products.init-delay-poll-ms}")
-    public void extract() {
-        super.genericExtract();
+    @PostConstruct
+	public void initService() {
+    	appStatus.setWaiting(category);
+		final ExecutorService service = Executors.newFixedThreadPool(1);
+		service.execute(
+				new MqiConsumer<ProductDto>(mqiClient, category, this, pollingIntervalMs));
+	}
+    
+    @Override
+    public void onMessage(GenericMessageDto<ProductDto> message) {
+    	super.genericExtract(message);
+    	
     }
 
     /**
