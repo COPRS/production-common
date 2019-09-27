@@ -199,12 +199,11 @@ public class L1AppConsumerTest {
 
     @Test
     public void testProductNameNotMatch() throws AbstractCodedException {
-        doReturn(message2).when(mqiService).next(Mockito.any());
 
         LevelProductsMessageConsumer consumer = new LevelProductsMessageConsumer(l0SliceJobsDispatcher,
                 l0SlicePatternSettings, processSettings, mqiService,
-                mqiStatusService, appDataService, errorAppender, appStatus, metadataClient);
-        consumer.consumeMessages();
+                mqiStatusService, appDataService, errorAppender, appStatus, metadataClient, 0);
+        consumer.onMessage(message2);
 
         verify(l0SliceJobsDispatcher, never()).dispatch(Mockito.any());
         verify(appStatus, times(1)).setProcessing(Mockito.eq(2L));
@@ -213,13 +212,12 @@ public class L1AppConsumerTest {
 
     @Test
     public void testReceiveOk() throws AbstractCodedException, ParseException {
-        doReturn(message1).when(mqiService).next(Mockito.any());
         doReturn(100).when(metadataClient).getSeaCoverage(Mockito.any(), Mockito.any()); 
         
         LevelProductsMessageConsumer consumer = new LevelProductsMessageConsumer(l0SliceJobsDispatcher,
                 l0SlicePatternSettings, processSettings, mqiService,
-                mqiStatusService, appDataService,  errorAppender, appStatus, metadataClient);
-        consumer.consumeMessages();
+                mqiStatusService, appDataService,  errorAppender, appStatus, metadataClient, 0);
+        consumer.onMessage(message1);
 
         verify(appDataService, times(1)).newJob(Mockito.any());
         verify(appDataService, times(1)).patchJob(Mockito.anyLong(), Mockito.any(),
@@ -236,8 +234,8 @@ public class L1AppConsumerTest {
 
         LevelProductsMessageConsumer consumer = new LevelProductsMessageConsumer(l0SliceJobsDispatcher,
                 l0SlicePatternSettings, processSettings, mqiService,
-                mqiStatusService, appDataService,  errorAppender, appStatus, metadataClient);
-        consumer.consumeMessages();
+                mqiStatusService, appDataService,  errorAppender, appStatus, metadataClient, 0);
+        consumer.onMessage(null);
 
         verify(l0SliceJobsDispatcher, never()).dispatch(Mockito.any());
         verify(appStatus, never()).setProcessing(Mockito.eq(2L));
@@ -257,7 +255,6 @@ public class L1AppConsumerTest {
         job2.setPod("other-hostname");
         job2.setProduct(new AppDataJobProduct());
         job2.getProduct().setProductName("p2");
-        doReturn(message1).when(mqiService).next(Mockito.any());
         doReturn(Arrays.asList(job1, job2)).when(appDataService)
                 .findByMessagesIdentifier(Mockito.anyLong());
         
@@ -265,8 +262,8 @@ public class L1AppConsumerTest {
 
         LevelProductsMessageConsumer consumer = new LevelProductsMessageConsumer(l0SliceJobsDispatcher,
                 l0SlicePatternSettings, processSettings, mqiService,
-                mqiStatusService, appDataService,  errorAppender, appStatus, metadataClient);
-        consumer.consumeMessages();
+                mqiStatusService, appDataService,  errorAppender, appStatus, metadataClient, 0);
+        consumer.onMessage(message1);
 
         job1.setPod("");
         verify(appDataService, never()).newJob(Mockito.any());
@@ -291,7 +288,6 @@ public class L1AppConsumerTest {
         job2.setPod("other-hostname");
         job2.setProduct(new AppDataJobProduct());
         job2.getProduct().setProductName("p2");
-        doReturn(message1).when(mqiService).next(Mockito.any());
         doReturn(Arrays.asList(job1, job2)).when(appDataService)
                 .findByMessagesIdentifier(Mockito.anyLong());
         
@@ -299,8 +295,8 @@ public class L1AppConsumerTest {
 
         LevelProductsMessageConsumer consumer = new LevelProductsMessageConsumer(l0SliceJobsDispatcher,
                 l0SlicePatternSettings, processSettings, mqiService,
-                mqiStatusService, appDataService,  errorAppender, appStatus, metadataClient);
-        consumer.consumeMessages();
+                mqiStatusService, appDataService,  errorAppender, appStatus, metadataClient, 0);
+        consumer.onMessage(message1);
 
         job1.setPod("");
         verify(appDataService, never()).newJob(Mockito.any());
@@ -326,7 +322,6 @@ public class L1AppConsumerTest {
         job2.setPod("other-hostname");
         job2.setProduct(new AppDataJobProduct());
         job2.getProduct().setProductName("p1");
-        doReturn(message1).when(mqiService).next(Mockito.any());
         doReturn(Arrays.asList(job1, job2)).when(appDataService)
                 .findByMessagesIdentifier(Mockito.anyLong());
         
@@ -334,8 +329,8 @@ public class L1AppConsumerTest {
 
         LevelProductsMessageConsumer consumer = new LevelProductsMessageConsumer(l0SliceJobsDispatcher,
                 l0SlicePatternSettings, processSettings, mqiService,
-                mqiStatusService, appDataService,  errorAppender, appStatus, metadataClient);
-        consumer.consumeMessages();
+                mqiStatusService, appDataService,  errorAppender, appStatus, metadataClient, 0);
+        consumer.onMessage(message1);
 
         job1.setPod("");
         verify(appDataService, never()).newJob(Mockito.any());

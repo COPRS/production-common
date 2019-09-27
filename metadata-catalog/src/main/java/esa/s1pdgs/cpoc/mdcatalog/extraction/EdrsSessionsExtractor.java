@@ -73,12 +73,13 @@ public class EdrsSessionsExtractor extends GenericExtractor<EdrsSessionDto> impl
         this.pollingIntervalMs = pollingIntervalMs;
     }
 
-    @PostConstruct
+	@PostConstruct
 	public void initService() {
-    	appStatus.setWaiting(category);
-		final ExecutorService service = Executors.newFixedThreadPool(1);
-		service.execute(
-				new MqiConsumer<EdrsSessionDto>(mqiClient, category, this, pollingIntervalMs));
+		appStatus.setWaiting(category);
+		if (pollingIntervalMs > 0) {
+			final ExecutorService service = Executors.newFixedThreadPool(1);
+			service.execute(new MqiConsumer<EdrsSessionDto>(mqiClient, category, this, pollingIntervalMs));
+		}
 	}
     
     @Override

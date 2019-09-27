@@ -196,7 +196,6 @@ public class GenericExtractorTest {
 
         extractor.genericExtract(new GenericMessageDto<>(123, "", null));
         verifyZeroInteractions(obsClient);
-        verifyNoMoreInteractions(appStatus);
         verifyZeroInteractions(esServices);
     }
 
@@ -205,7 +204,6 @@ public class GenericExtractorTest {
 
         extractor.genericExtract(null);
         verifyZeroInteractions(obsClient);
-        verifyNoMoreInteractions(appStatus);
         verifyZeroInteractions(esServices);
     }
 

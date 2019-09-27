@@ -65,14 +65,22 @@ public class QueueWatcherService implements MqiListener<ProductDto> {
 	public void initService() {
 
 		final ExecutorService service = Executors.newFixedThreadPool(4);
-		service.execute(new MqiConsumer<ProductDto>(mqiClient, ProductCategory.AUXILIARY_FILES, this,
-				auxFilesPollingIntervalMs));
-		service.execute(new MqiConsumer<ProductDto>(mqiClient, ProductCategory.LEVEL_PRODUCTS, this,
-				levelProductsPollingIntervalMs));
-		service.execute(new MqiConsumer<ProductDto>(mqiClient, ProductCategory.LEVEL_SEGMENTS, this,
-				levelSegmentsPollingIntervalMs));
-		service.execute(new MqiConsumer<ProductDto>(mqiClient, ProductCategory.COMPRESSED_PRODUCTS, this,
-				compressedProductsPollingIntervalMs));
+		if (auxFilesPollingIntervalMs > 0) {
+			service.execute(new MqiConsumer<ProductDto>(mqiClient, ProductCategory.AUXILIARY_FILES, this,
+					auxFilesPollingIntervalMs));
+		}
+		if (levelProductsPollingIntervalMs > 0) {
+			service.execute(new MqiConsumer<ProductDto>(mqiClient, ProductCategory.LEVEL_PRODUCTS, this,
+					levelProductsPollingIntervalMs));
+		}
+		if (levelSegmentsPollingIntervalMs > 0) {
+			service.execute(new MqiConsumer<ProductDto>(mqiClient, ProductCategory.LEVEL_SEGMENTS, this,
+					levelSegmentsPollingIntervalMs));
+		}
+		if (compressedProductsPollingIntervalMs > 0) {
+			service.execute(new MqiConsumer<ProductDto>(mqiClient, ProductCategory.COMPRESSED_PRODUCTS, this,
+					compressedProductsPollingIntervalMs));
+		}
 		// Seems to be not relevant for EDRS_SESSIONS
 	}
 

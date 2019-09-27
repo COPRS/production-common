@@ -40,7 +40,7 @@ public abstract class AbstractGenericConsumer<T extends AbstractDto> {
     /**
      * MQI service
      */
-    protected final GenericMqiClient mqiService;
+    protected final GenericMqiClient mqiClient;
 
     /**
      * Applicative data service
@@ -59,7 +59,7 @@ public abstract class AbstractGenericConsumer<T extends AbstractDto> {
     
     private final ErrorRepoAppender errorRepoAppender;
     
-    private final ProductCategory category;
+    protected final ProductCategory category;
 
     public AbstractGenericConsumer(
             final AbstractJobsDispatcher<T> jobsDispatcher,
@@ -73,26 +73,12 @@ public abstract class AbstractGenericConsumer<T extends AbstractDto> {
     		) {
         this.jobsDispatcher = jobsDispatcher;
         this.processSettings = processSettings;
-        this.mqiService = mqiService;
+        this.mqiClient = mqiService;
         this.mqiStatusService = mqiStatusService;
         this.appDataService = appDataService;
         this.appStatus = appStatus;
         this.errorRepoAppender = errorRepoAppender;
         this.category = category;
-    }
-
-    protected GenericMessageDto<T> readMessage() {
-        GenericMessageDto<T> message = null;
-        try {
-            message = mqiService.next(category);
-            appStatus.setWaiting();
-        } catch (AbstractCodedException ace) {
-            LOGGER.error("[MONITOR] [code {}] {}", ace.getCode().getCode(),
-                    ace.getLogMessage());
-            message = null;
-            appStatus.setError("NEXT_MESSAGE");
-        }
-        return message;
     }
 
     /**
@@ -148,7 +134,7 @@ public abstract class AbstractGenericConsumer<T extends AbstractDto> {
         LOGGER.error(errorMessage);
         appStatus.setError("NEXT_MESSAGE");
         try {
-            mqiService.ack(
+            mqiClient.ack(
             		new AckMessageDto(dto.getIdentifier(), Ack.ERROR,errorMessage, stop),
             		category
             );            
@@ -166,7 +152,7 @@ public abstract class AbstractGenericConsumer<T extends AbstractDto> {
                 "[MONITOR] [step 3] [s1pdgsTask {}] [subTask Consume] [productName {}] [STOP OK] Acknowledging positively",
                 getTaskForFunctionalLog(), productName);
         try {
-            mqiService.ack(
+            mqiClient.ack(
                     new AckMessageDto(dto.getIdentifier(), Ack.OK, null, stop),
                     category
             );

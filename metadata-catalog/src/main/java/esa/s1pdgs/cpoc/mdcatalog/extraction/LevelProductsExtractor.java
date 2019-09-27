@@ -83,12 +83,13 @@ public class LevelProductsExtractor extends GenericExtractor<ProductDto> impleme
         this.pollingIntervalMs = pollingIntervalMs;
     }
 
-    @PostConstruct
+	@PostConstruct
 	public void initService() {
-    	appStatus.setWaiting(category);
-		final ExecutorService service = Executors.newFixedThreadPool(1);
-		service.execute(
-				new MqiConsumer<ProductDto>(mqiClient, category, this, pollingIntervalMs));
+		appStatus.setWaiting(category);
+		if (pollingIntervalMs > 0) {
+			final ExecutorService service = Executors.newFixedThreadPool(1);
+			service.execute(new MqiConsumer<ProductDto>(mqiClient, category, this, pollingIntervalMs));
+		}
 	}
     
     @Override

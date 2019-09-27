@@ -2,8 +2,12 @@ package esa.s1pdgs.cpoc.jobgenerator.tasks.levelproducts;
 
 import java.util.Date;
 import java.util.List;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+
+import javax.annotation.PostConstruct;
 
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.util.CollectionUtils;
@@ -25,8 +29,11 @@ import esa.s1pdgs.cpoc.jobgenerator.status.AppStatus;
 import esa.s1pdgs.cpoc.jobgenerator.tasks.AbstractGenericConsumer;
 import esa.s1pdgs.cpoc.jobgenerator.tasks.AbstractJobsDispatcher;
 import esa.s1pdgs.cpoc.metadata.client.MetadataClient;
+import esa.s1pdgs.cpoc.mqi.MqiConsumer;
+import esa.s1pdgs.cpoc.mqi.MqiListener;
 import esa.s1pdgs.cpoc.mqi.client.GenericMqiClient;
 import esa.s1pdgs.cpoc.mqi.client.StatusService;
+import esa.s1pdgs.cpoc.mqi.model.queue.EdrsSessionDto;
 import esa.s1pdgs.cpoc.mqi.model.queue.ProductDto;
 import esa.s1pdgs.cpoc.mqi.model.rest.GenericMessageDto;
 import esa.s1pdgs.cpoc.report.LoggerReporting;
@@ -37,7 +44,7 @@ import esa.s1pdgs.cpoc.report.ReportingMessage;
  * @author birol_colak@net.werum
  *
  */
-public class LevelProductsMessageConsumer extends AbstractGenericConsumer<ProductDto> {
+public class LevelProductsMessageConsumer extends AbstractGenericConsumer<ProductDto> implements MqiListener<ProductDto>{
 
 	 /**
      * Settings used to extract information from product name
@@ -58,36 +65,47 @@ public class LevelProductsMessageConsumer extends AbstractGenericConsumer<Produc
     
     private final MetadataClient metadataClient;
 
+    private final long pollingIntervalMs;
   
     public LevelProductsMessageConsumer(
             final AbstractJobsDispatcher<ProductDto> jobsDispatcher,
             final L0SlicePatternSettings patternSettings,
             final ProcessSettings processSettings,
-            final GenericMqiClient mqiService,
+            final GenericMqiClient mqiClient,
             final StatusService mqiStatusService,
             final AppCatalogJobClient<ProductDto> appDataService,
             final ErrorRepoAppender errorRepoAppender,
             final AppStatus appStatus,
-            final MetadataClient metadataClient) {
-        super(jobsDispatcher, processSettings, mqiService, mqiStatusService,
+            final MetadataClient metadataClient,
+            final long pollingIntervalMs) {
+        super(jobsDispatcher, processSettings, mqiClient, mqiStatusService,
                 appDataService, appStatus, errorRepoAppender, ProductCategory.LEVEL_PRODUCTS);
         this.patternSettings = patternSettings;
         this.l0SLicesPattern = Pattern.compile(this.patternSettings.getRegexp(),
                 Pattern.CASE_INSENSITIVE);
         this.seaCoverageCheckPattern = Pattern.compile(patternSettings.getSeaCoverageCheckPattern());
         this.metadataClient = metadataClient;
+        this.pollingIntervalMs = pollingIntervalMs;
     }
+    
+    @PostConstruct
+   	public void initService() {
+    	appStatus.setWaiting();
+    	if(pollingIntervalMs > 0) {
+	   		final ExecutorService service = Executors.newFixedThreadPool(1);
+	   		service.execute(
+	   				new MqiConsumer<ProductDto>(mqiClient, category, this, pollingIntervalMs));
+    	}
+   	}
 
-    /**
-     * Periodic function for processing messages
-     */
-    @Scheduled(fixedDelayString = "${process.fixed-delay-ms}", initialDelayString = "${process.initial-delay-ms}")
-    public void consumeMessages() {
+    
+    @Override
+    public void onMessage(GenericMessageDto<ProductDto> mqiMessage) {
+    	appStatus.setWaiting();
     	final Reporting.Factory reportingFactory = new LoggerReporting.Factory("L1JobGeneration"); 
     	final Reporting reporting = reportingFactory.newReporting(0);
     	
         // First, consume message
-        GenericMessageDto<ProductDto> mqiMessage = readMessage();
         if (mqiMessage == null || mqiMessage.getBody() == null) {
             LOGGER.trace("[MONITOR] [step 0] No message received: continue");
             return;

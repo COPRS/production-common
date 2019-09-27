@@ -61,10 +61,12 @@ public class IngestionService implements MqiListener<IngestionDto> {
 	}
 	
 	@PostConstruct
-    public void initService() {
-		final ExecutorService service = Executors.newFixedThreadPool(1);
-		service.execute(new MqiConsumer<IngestionDto>(mqiClient, ProductCategory.INGESTION, this,
-				properties.getPollingIntervalMs()));
+	public void initService() {
+		if (properties.getPollingIntervalMs() > 0) {
+			final ExecutorService service = Executors.newFixedThreadPool(1);
+			service.execute(new MqiConsumer<IngestionDto>(mqiClient, ProductCategory.INGESTION, this,
+					properties.getPollingIntervalMs()));
+		}
 	}
 
 	@Override

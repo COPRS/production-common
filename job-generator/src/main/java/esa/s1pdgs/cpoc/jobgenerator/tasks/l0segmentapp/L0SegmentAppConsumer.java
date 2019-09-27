@@ -3,8 +3,12 @@ package esa.s1pdgs.cpoc.jobgenerator.tasks.l0segmentapp;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+
+import javax.annotation.PostConstruct;
 
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.util.CollectionUtils;
@@ -23,8 +27,11 @@ import esa.s1pdgs.cpoc.jobgenerator.config.ProcessSettings;
 import esa.s1pdgs.cpoc.jobgenerator.status.AppStatus;
 import esa.s1pdgs.cpoc.jobgenerator.tasks.AbstractGenericConsumer;
 import esa.s1pdgs.cpoc.jobgenerator.tasks.AbstractJobsDispatcher;
+import esa.s1pdgs.cpoc.mqi.MqiConsumer;
+import esa.s1pdgs.cpoc.mqi.MqiListener;
 import esa.s1pdgs.cpoc.mqi.client.GenericMqiClient;
 import esa.s1pdgs.cpoc.mqi.client.StatusService;
+import esa.s1pdgs.cpoc.mqi.model.queue.EdrsSessionDto;
 import esa.s1pdgs.cpoc.mqi.model.queue.ProductDto;
 import esa.s1pdgs.cpoc.mqi.model.rest.GenericMessageDto;
 import esa.s1pdgs.cpoc.report.LoggerReporting;
@@ -32,7 +39,7 @@ import esa.s1pdgs.cpoc.report.Reporting;
 import esa.s1pdgs.cpoc.report.ReportingMessage;
 
 public class L0SegmentAppConsumer
-        extends AbstractGenericConsumer<ProductDto> {
+        extends AbstractGenericConsumer<ProductDto> implements MqiListener<ProductDto> {
 
     /**
      * Pattern built from the regular expression given in configuration
@@ -48,6 +55,8 @@ public class L0SegmentAppConsumer
      * 
      */
     private String taskForFunctionalLog;
+    
+    private final long pollingIntervalMs;
 
     /**
      * Constructor
@@ -55,7 +64,7 @@ public class L0SegmentAppConsumer
      * @param jobsDispatcher
      * @param patternSettings
      * @param processSettings
-     * @param mqiService
+     * @param mqiClient
      * @param appDataService
      * @param appStatus
      */
@@ -63,27 +72,36 @@ public class L0SegmentAppConsumer
             final AbstractJobsDispatcher<ProductDto> jobsDispatcher,
             final L0SegmentAppProperties appProperties,
             final ProcessSettings processSettings,
-            final GenericMqiClient mqiService,
+            final GenericMqiClient mqiClient,
             final StatusService mqiStatusService,
             final AppCatalogJobClient<ProductDto> appDataService,
             final ErrorRepoAppender errorRepoAppender,
-            final AppStatus appStatus) {
-        super(jobsDispatcher, processSettings, mqiService, mqiStatusService,
+            final AppStatus appStatus,
+            final long pollingIntervalMs) {
+        super(jobsDispatcher, processSettings, mqiClient, mqiStatusService,
                 appDataService, appStatus, errorRepoAppender, ProductCategory.LEVEL_SEGMENTS);
         this.pattern = Pattern.compile(appProperties.getNameRegexpPattern(),
                 Pattern.CASE_INSENSITIVE);
         this.patternGroups = appProperties.getNameRegexpGroups();
+        this.pollingIntervalMs = pollingIntervalMs;
     }
 
-    /**
-     * Periodic function for processing messages
-     */
-    @Scheduled(fixedDelayString = "${process.fixed-delay-ms}", initialDelayString = "${process.initial-delay-ms}")
-    public void consumeMessages() {    	
+    @PostConstruct
+   	public void initService() {
+    	appStatus.setWaiting();
+    	if(pollingIntervalMs > 0) {
+	   		final ExecutorService service = Executors.newFixedThreadPool(1);
+	   		service.execute(
+	   				new MqiConsumer<ProductDto>(mqiClient, category, this, pollingIntervalMs));
+    	}
+   	}
+    
+    
+    @Override
+    public void onMessage(GenericMessageDto<ProductDto> mqiMessage) {
+    	appStatus.setWaiting();
     	final Reporting.Factory reportingFactory = new LoggerReporting.Factory("L0_SEGMENTJobGeneration"); 
     	
-        // First, consume message
-        GenericMessageDto<ProductDto> mqiMessage = readMessage();
         if (mqiMessage == null || mqiMessage.getBody() == null) {
             LOGGER.trace("[MONITOR] [step 0] No message received: continue");
             return;

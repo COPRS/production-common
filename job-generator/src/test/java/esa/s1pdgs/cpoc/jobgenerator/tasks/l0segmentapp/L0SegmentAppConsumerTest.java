@@ -84,7 +84,7 @@ public class L0SegmentAppConsumerTest {
 		mockAppStatus();
 
 		consumer = new L0SegmentAppConsumer(jobsDispatcher, appProperties, processSettings, mqiService,
-				mqiStatusService, appDataService, errorAppender, appStatus);
+				mqiStatusService, appDataService, errorAppender, appStatus, 0);
 		consumer.setTaskForFunctionalLog(processSettings.getLevel().name() + "JobGeneration");
 	}
 
@@ -183,9 +183,7 @@ public class L0SegmentAppConsumerTest {
 
 	@Test
 	public void testConsumeWhenNoMessage() throws AbstractCodedException {
-		doReturn(null).when(mqiService).next(Mockito.any());
-
-		consumer.consumeMessages();
+		consumer.onMessage(null);
 
 		verifyZeroInteractions(jobsDispatcher, appDataService);
 		verify(appStatus, never()).setProcessing(Mockito.eq(2L));
@@ -208,7 +206,7 @@ public class L0SegmentAppConsumerTest {
 		productDto.setSatelliteId("B");
 		expectedData.setProduct(productDto);
 
-		consumer.consumeMessages();
+		consumer.onMessage(messages.get(0));
 
 		verify(appDataService, times(1)).findByMessagesIdentifier(eq(1L));
 		verify(appDataService, times(1)).findByProductDataTakeId(eq("00F9CD"));
