@@ -4,8 +4,13 @@ import java.io.File;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.stream.Collectors;
 
+import javax.annotation.PostConstruct;
+
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.util.CollectionUtils;
 
@@ -26,6 +31,8 @@ import esa.s1pdgs.cpoc.jobgenerator.tasks.AbstractGenericConsumer;
 import esa.s1pdgs.cpoc.jobgenerator.tasks.AbstractJobsDispatcher;
 import esa.s1pdgs.cpoc.metadata.client.MetadataClient;
 import esa.s1pdgs.cpoc.metadata.model.EdrsSessionMetadata;
+import esa.s1pdgs.cpoc.mqi.MqiConsumer;
+import esa.s1pdgs.cpoc.mqi.MqiListener;
 import esa.s1pdgs.cpoc.mqi.client.GenericMqiClient;
 import esa.s1pdgs.cpoc.mqi.client.StatusService;
 import esa.s1pdgs.cpoc.mqi.model.queue.EdrsSessionDto;
@@ -35,35 +42,47 @@ import esa.s1pdgs.cpoc.report.LoggerReporting;
 import esa.s1pdgs.cpoc.report.Reporting;
 import esa.s1pdgs.cpoc.report.ReportingMessage;
 
-public class L0AppConsumer extends AbstractGenericConsumer<EdrsSessionDto> {
+public class L0AppConsumer extends AbstractGenericConsumer<EdrsSessionDto> implements MqiListener<EdrsSessionDto> {
     
-    /**
-     * 
-     */
     private String taskForFunctionalLog;
     
     private final MetadataClient metadataClient;
+    
+    private final long pollingIntervalMs;
 
     public L0AppConsumer(
             final AbstractJobsDispatcher<EdrsSessionDto> jobDispatcher,
             final ProcessSettings processSettings,
-            final GenericMqiClient mqiService,
+            final GenericMqiClient mqiClient,
             final StatusService mqiStatusService,
             final AppCatalogJobClient<EdrsSessionDto> appDataService,
             final ErrorRepoAppender errorRepoAppender,
             final AppStatus appStatus,
-            final MetadataClient metadataClient) {
-        super(jobDispatcher, processSettings, mqiService, mqiStatusService,
+            final MetadataClient metadataClient,
+            final long pollingIntervalMs) {
+        super(jobDispatcher, processSettings, mqiClient, mqiStatusService,
                 appDataService, appStatus, errorRepoAppender, ProductCategory.EDRS_SESSIONS);
         this.metadataClient = metadataClient; 
+        this.pollingIntervalMs = pollingIntervalMs;
     }
 
-	@Scheduled(fixedDelayString = "${process.fixed-delay-ms}", initialDelayString = "${process.initial-delay-ms}")
-    public void consumeMessages() {    	
+    @PostConstruct
+   	public void initService() {
+    	appStatus.setWaiting();
+    	if(pollingIntervalMs > 0) {
+    		final ExecutorService service = Executors.newFixedThreadPool(1);
+    		service.execute(
+    				new MqiConsumer<EdrsSessionDto>(mqiClient, category, this, pollingIntervalMs));
+    	}
+   	}
+    
+    @Override
+    public void onMessage(GenericMessageDto<EdrsSessionDto> mqiMessage) {
+    
+    	appStatus.setWaiting();
         final Reporting.Factory reportingFactory = new LoggerReporting.Factory("L0JobGeneration");   
         
         // First, consume message
-        GenericMessageDto<EdrsSessionDto> mqiMessage = readMessage();
         if (mqiMessage == null || mqiMessage.getBody() == null) {
             LOGGER.trace("[MONITOR] [step 0] No message received: continue");
             return;
