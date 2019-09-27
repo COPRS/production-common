@@ -56,14 +56,17 @@ public class MessagePublicationController {
 
 	@PostConstruct
 	public void initialize() throws IOException, JAXBException {
-		for (final ProductCategory cat : appProperties.getProductCategories().keySet()) {
-			final ProductCategoryProperties catProp = appProperties.getProductCategories().get(cat);
+		for (final Map.Entry<ProductCategory, ProductCategoryProperties> entry : appProperties.getProductCategories().entrySet()) {					
+			final ProductCategory cat = entry.getKey();		
+			final ProductCategoryProperties catProp = entry.getValue();
 			final ProductCategoryPublicationProperties prop = catProp.getPublication();
 
 			if (prop.isEnable()) {
 				// Create routing map
 				LOGGER.info("Creating routing map for category {}", cat);
-				routing.put(cat, (Routing) xmlConverter.convertFromXMLToObject(prop.getRoutingFile()));
+				final Routing routingEntry = (Routing) xmlConverter.convertFromXMLToObject(prop.getRoutingFile());
+				LOGGER.debug("Routing for category {} is: {}", cat, routingEntry);
+				routing.put(cat, routingEntry);
 			}
 		}
 	}
@@ -102,11 +105,17 @@ public class MessagePublicationController {
 		}
 		final Route route = thisRouting.getRoute(inputKey, outputKey);
 		if (route != null) {
-			return route.getRouteTo().getTopic();
+			final String topic = route.getRouteTo().getTopic();
+			LOGGER.debug("Got topic '{}' from Route for (category: {}, inputKey: {}, outputKey: {}): {}", 
+					topic, category, inputKey, outputKey, route);
+			return topic;
 		}
 		
 		final DefaultRoute defaultRoute = thisRouting.getDefaultRoute(family);
 		if (defaultRoute != null) {
+			final String topic = defaultRoute.getRouteTo().getTopic();
+			LOGGER.debug("Got topic '{}' from DefaultRoute for (category: {}, family: {}): {}", 
+					topic, category, family, defaultRoute);
 			return defaultRoute.getRouteTo().getTopic();
 		}
 		throw new MqiRouteNotAvailable(category, family);

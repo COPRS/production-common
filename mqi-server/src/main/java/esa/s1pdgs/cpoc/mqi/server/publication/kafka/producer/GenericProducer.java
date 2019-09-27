@@ -59,9 +59,7 @@ public class GenericProducer {
     public void send(final String topic, final AbstractDto dto)
             throws MqiPublicationError {
         try {
-            if (LOGGER.isDebugEnabled()) {
-                LOGGER.debug("[send] Send object {}", dto);
-            }
+            LOGGER.debug("Sending to '{}': {}", topic, dto);
             template.send(topic, dto).get();
         } catch (CancellationException | InterruptedException | ExecutionException e) {
             throw new MqiPublicationError(topic, dto, dto.getProductName(), e.getMessage(), e);
