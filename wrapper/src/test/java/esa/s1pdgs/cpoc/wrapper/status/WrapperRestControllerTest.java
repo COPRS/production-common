@@ -23,7 +23,8 @@ import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 import esa.s1pdgs.cpoc.common.AppState;
 import esa.s1pdgs.cpoc.common.errors.AbstractCodedException;
 import esa.s1pdgs.cpoc.mqi.client.StatusService;
-import esa.s1pdgs.cpoc.wrapper.status.AppStatus.WrapperStatus;
+import esa.s1pdgs.cpoc.status.AppStatus;
+import esa.s1pdgs.cpoc.status.Status;
 import esa.s1pdgs.cpoc.wrapper.status.dto.WrapperStatusDto;
 import esa.s1pdgs.cpoc.wrapper.test.RestControllerTest;
 
@@ -83,7 +84,7 @@ public class WrapperRestControllerTest extends RestControllerTest {
      */
     @Test
     public void testUrlStatusWhenFatalError() throws Exception {
-        WrapperStatus status = (new AppStatus(3, 30, mqiStatusService)).getStatus();
+        Status status = (new AppStatusImpl(3, 30, mqiStatusService)).getStatus();
         status.setFatalError();
         doReturn(status).when(appStatus).getStatus();
 
@@ -101,7 +102,7 @@ public class WrapperRestControllerTest extends RestControllerTest {
      */
     @Test
     public void testStatusWhenFatalError() throws Exception {
-        WrapperStatus status = (new AppStatus(3, 30, mqiStatusService)).getStatus();
+        Status status = (new AppStatusImpl(3, 30, mqiStatusService)).getStatus();
         status.setFatalError();
         doReturn(status).when(appStatus).getStatus();
 
@@ -129,7 +130,7 @@ public class WrapperRestControllerTest extends RestControllerTest {
      */
     @Test
     public void testUrlStatusWhenError() throws Exception {
-        WrapperStatus status = (new AppStatus(3, 30, mqiStatusService)).getStatus();
+        Status status = (new AppStatusImpl(3, 30, mqiStatusService)).getStatus();
         status.setErrorCounterProcessing(3);
         status.setErrorCounterNextMessage(30);
         doReturn(status).when(appStatus).getStatus();
@@ -146,7 +147,7 @@ public class WrapperRestControllerTest extends RestControllerTest {
      */
     @Test
     public void testStatusWhenError() throws Exception {
-        WrapperStatus status = (new AppStatus(3, 30, mqiStatusService)).getStatus();
+        Status status = (new AppStatusImpl(3, 30, mqiStatusService)).getStatus();
         status.setErrorCounterProcessing(3);
         status.setErrorCounterProcessing(3);
         doReturn(status).when(appStatus).getStatus();

@@ -24,7 +24,7 @@ import esa.s1pdgs.cpoc.wrapper.config.ApplicationProperties;
  * 
  * @author Viveris Technologies
  */
-public class PoolExecutorCallable implements Callable<Boolean> {
+public class PoolExecutorCallable implements Callable<Void> {
 
     /**
      * Logger
@@ -87,7 +87,7 @@ public class PoolExecutorCallable implements Callable<Boolean> {
      * <br/>
      * - For each pool, launch in parallel the tasks executions
      */
-    public Boolean call() throws AbstractCodedException {
+    public Void call() throws AbstractCodedException {
         int counter = 0;
         try {
             // Wait for being active (i.e. wait for download of at least one
@@ -101,7 +101,9 @@ public class PoolExecutorCallable implements Callable<Boolean> {
             throw new InternalErrorException(ie.getMessage(), ie);
         }
 
-        if (!isInterrupted()) {
+        if (isInterrupted()) {
+        	throw new InternalErrorException("Current thread has been interrupted");
+        } else {
             LOGGER.debug(
                     "counter {} isActive {} isInterrupted {} getWaitActiveProcessNbMaxLoop {}",
                     counter, isActive(), isInterrupted(),
@@ -131,9 +133,8 @@ public class PoolExecutorCallable implements Callable<Boolean> {
 				throw e;
 			}
             reporting.end(new ReportingMessage("End " + appLevel + " processing"));
-            return true;
+            return null;
         }
-        return false;
 
     }
 

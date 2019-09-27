@@ -14,12 +14,12 @@ import esa.s1pdgs.cpoc.common.AppState;
 import esa.s1pdgs.cpoc.common.errors.AbstractCodedException;
 import esa.s1pdgs.cpoc.mqi.client.StatusService;
 
-public class AppStatusTest {
+public class AppStatusImplTest {
     
     /**
      * Application status for test
      */
-    private AppStatus appStatus;
+    private AppStatusImpl appStatus;
 
     /**
      * MQI service for stopping the MQI
@@ -33,7 +33,7 @@ public class AppStatusTest {
         
         doNothing().when(mqiStatusService).stop();
         
-        appStatus = new AppStatus(3, 30, mqiStatusService);
+        appStatus = new AppStatusImpl(3, 30, mqiStatusService);
     }
     
     /**
@@ -173,7 +173,7 @@ public class AppStatusTest {
         assertTrue(timeBefore <= appStatus.getStatus().getDateLastChangeMs());
         assertEquals(0, appStatus.getStatus().getErrorCounterProcessing());
         
-        appStatus = new AppStatus(3, 30, mqiStatusService);
+        appStatus = new AppStatusImpl(3, 30, mqiStatusService);
         appStatus.setError("PROCESSING");
         assertEquals(1, appStatus.getStatus().getErrorCounterProcessing());
         timeBefore = appStatus.getStatus().getDateLastChangeMs();

@@ -11,7 +11,8 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
 import esa.s1pdgs.cpoc.common.ProductCategory;
-import esa.s1pdgs.cpoc.wrapper.status.AppStatus.WrapperStatus;
+import esa.s1pdgs.cpoc.status.AppStatus;
+import esa.s1pdgs.cpoc.status.Status;
 import esa.s1pdgs.cpoc.wrapper.status.dto.WrapperStatusDto;
 
 /**
@@ -49,7 +50,7 @@ public class WrapperRestController {
      */
     @RequestMapping(method = RequestMethod.GET, path = "/status")
     public ResponseEntity<WrapperStatusDto> getStatusRest() {
-        WrapperStatus currentStatus = appStatus.getStatus();
+        Status currentStatus = appStatus.getStatus();
         long currentTimestamp = System.currentTimeMillis();
         long timeSinceLastChange =
                 currentTimestamp - currentStatus.getDateLastChangeMs();

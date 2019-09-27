@@ -98,7 +98,7 @@ public class JobProcessorTest extends MockPropertiesTest {
     private ExecutorService procExecutorSrv;
 
     @Mock
-    private ExecutorCompletionService<Boolean> procCompletionSrv;
+    private ExecutorCompletionService<Void> procCompletionSrv;
 
     @Mock
     private PoolExecutorCallable procExecutor;
@@ -213,7 +213,7 @@ public class JobProcessorTest extends MockPropertiesTest {
             throws AbstractCodedException, InterruptedException {
         doThrow(new WrapperProcessTimeoutException("timeout exception"))
                 .when(procExecutor).call();
-        ExecutorCompletionService<Boolean> procCompletionSrvTmp =
+        ExecutorCompletionService<Void> procCompletionSrvTmp =
                 new ExecutorCompletionService<>(
                         Executors.newSingleThreadExecutor());
         procCompletionSrvTmp.submit(procExecutor);
@@ -234,7 +234,7 @@ public class JobProcessorTest extends MockPropertiesTest {
             throws AbstractCodedException, InterruptedException {
         doThrow(new IllegalArgumentException("other exception"))
                 .when(procExecutor).call();
-        ExecutorCompletionService<Boolean> procCompletionSrvTmp =
+        ExecutorCompletionService<Void> procCompletionSrvTmp =
                 new ExecutorCompletionService<>(
                         Executors.newSingleThreadExecutor());
         procCompletionSrvTmp.submit(procExecutor);
@@ -275,9 +275,7 @@ public class JobProcessorTest extends MockPropertiesTest {
         if (simulateError) {
             doThrow(new WrapperProcessTimeoutException("timeout exception"))
                     .when(procExecutor).call();
-        } else {
-            doReturn(true).when(procExecutor).call();
-        }
+        } 
         // Step 2
         doNothing().when(inputDownloader).processInputs();
         // Step 4

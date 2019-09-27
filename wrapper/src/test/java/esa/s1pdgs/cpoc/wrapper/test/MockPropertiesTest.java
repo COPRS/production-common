@@ -12,10 +12,11 @@ import org.mockito.Mockito;
 
 import esa.s1pdgs.cpoc.common.errors.AbstractCodedException;
 import esa.s1pdgs.cpoc.mqi.client.StatusService;
+import esa.s1pdgs.cpoc.status.AppStatus;
+import esa.s1pdgs.cpoc.status.Status;
 import esa.s1pdgs.cpoc.wrapper.config.ApplicationProperties;
 import esa.s1pdgs.cpoc.wrapper.config.DevProperties;
-import esa.s1pdgs.cpoc.wrapper.status.AppStatus;
-import esa.s1pdgs.cpoc.wrapper.status.AppStatus.WrapperStatus;
+import esa.s1pdgs.cpoc.wrapper.status.AppStatusImpl;
 
 /**
  * Test class with properties mocked
@@ -138,7 +139,7 @@ public class MockPropertiesTest {
      */
     protected void mockDefaultStatus() throws AbstractCodedException {
         doNothing().when(mqiStatusService).stop();
-        mockStatus((new AppStatus(3, 30, mqiStatusService)).getStatus(), 3, false);
+        mockStatus((new AppStatusImpl(3, 30, mqiStatusService)).getStatus(), 3, false);
     }
 
     /**
@@ -148,7 +149,7 @@ public class MockPropertiesTest {
      * @param maxErrorCounter
      * @param shallBeStopped
      */
-    protected void mockStatus(final WrapperStatus state,
+    protected void mockStatus(final Status state,
             final int maxErrorCounter, final boolean shallBeStopped) {
 
         doNothing().when(appStatus).setWaiting();

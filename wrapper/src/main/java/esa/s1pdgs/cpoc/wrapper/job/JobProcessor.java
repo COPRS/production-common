@@ -42,13 +42,13 @@ import esa.s1pdgs.cpoc.report.LoggerReporting;
 import esa.s1pdgs.cpoc.report.Reporting;
 import esa.s1pdgs.cpoc.report.ReportingMessage;
 import esa.s1pdgs.cpoc.report.ReportingOutput;
+import esa.s1pdgs.cpoc.status.AppStatus;
 import esa.s1pdgs.cpoc.wrapper.config.ApplicationProperties;
 import esa.s1pdgs.cpoc.wrapper.config.DevProperties;
 import esa.s1pdgs.cpoc.wrapper.job.file.InputDownloader;
 import esa.s1pdgs.cpoc.wrapper.job.file.OutputProcessor;
 import esa.s1pdgs.cpoc.wrapper.job.mqi.OutputProcuderFactory;
 import esa.s1pdgs.cpoc.wrapper.job.process.PoolExecutorCallable;
-import esa.s1pdgs.cpoc.wrapper.status.AppStatus;
 
 /**
  * Process a jobs
@@ -213,7 +213,7 @@ public class JobProcessor {
 		PoolExecutorCallable procExecutor = new PoolExecutorCallable(properties, job,
 				getPrefixMonitorLog(MonitorLogUtils.LOG_PROCESS, job), this.properties.getLevel());
 		ExecutorService procExecutorSrv = Executors.newSingleThreadExecutor();
-		ExecutorCompletionService<Boolean> procCompletionSrv = new ExecutorCompletionService<>(procExecutorSrv);
+		ExecutorCompletionService<Void> procCompletionSrv = new ExecutorCompletionService<>(procExecutorSrv);
 		// Initialize the input downloader
 		InputDownloader inputDownloader = new InputDownloader(obsClient, job.getWorkDirectory(), job.getInputs(),
 				this.properties.getSizeBatchDownload(), getPrefixMonitorLog(MonitorLogUtils.LOG_INPUT, job),
@@ -252,7 +252,7 @@ public class JobProcessor {
             final InputDownloader inputDownloader,
             final OutputProcessor outputProcessor,
             final ExecutorService procExecutorSrv,
-            final ExecutorCompletionService<Boolean> procCompletionSrv,
+            final ExecutorCompletionService<Void> procCompletionSrv,
             final PoolExecutorCallable procExecutor,
             final Reporting report) {
         boolean poolProcessing = false;
@@ -347,7 +347,7 @@ public class JobProcessor {
 	 * @throws InterruptedException
 	 * @throws AbstractCodedException
 	 */
-	protected void waitForPoolProcessesEnding(final ExecutorCompletionService<Boolean> procCompletionSrv)
+	protected void waitForPoolProcessesEnding(final ExecutorCompletionService<Void> procCompletionSrv)
 			throws InterruptedException, AbstractCodedException {
 		checkThreadInterrupted();
 		try {

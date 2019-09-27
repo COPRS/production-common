@@ -10,6 +10,7 @@ import esa.s1pdgs.cpoc.mqi.model.queue.AbstractDto;
 import esa.s1pdgs.cpoc.mqi.model.rest.Ack;
 import esa.s1pdgs.cpoc.mqi.model.rest.AckMessageDto;
 import esa.s1pdgs.cpoc.mqi.model.rest.GenericMessageDto;
+import esa.s1pdgs.cpoc.status.AppStatus;
 
 public final class MqiConsumer<E extends AbstractDto> implements Runnable {
 	private static final Logger LOG = LogManager.getLogger(MqiConsumer.class);
@@ -18,6 +19,24 @@ public final class MqiConsumer<E extends AbstractDto> implements Runnable {
 	private final ProductCategory category;
 	private final MqiListener<E> mqiListener;
 	private final long pollingIntervalMillis;
+	private final long initialDelay;
+	private final AppStatus appStatus;
+	
+	public MqiConsumer(
+			final MqiClient client, 
+			final ProductCategory category, 
+			final MqiListener<E> mqiListener,
+			final long pollingIntervalMillis,
+			final long initialDelay,
+			final AppStatus appStatus
+	) {
+		this.client = client;
+		this.category = category;
+		this.mqiListener = mqiListener;
+		this.pollingIntervalMillis = pollingIntervalMillis;
+		this.initialDelay = initialDelay;
+		this.appStatus = appStatus;
+	}
 	
 	public MqiConsumer(
 			final MqiClient client, 
@@ -25,23 +44,40 @@ public final class MqiConsumer<E extends AbstractDto> implements Runnable {
 			final MqiListener<E> mqiListener,
 			final long pollingIntervalMillis
 	) {
-		this.client = client;
-		this.category = category;
-		this.mqiListener = mqiListener;
-		this.pollingIntervalMillis = pollingIntervalMillis;
+		this(client, category, mqiListener, pollingIntervalMillis, 0L, AppStatus.NULL);
 	}
 
 	@Override
-	public final void run() {
+	public final void run() {		
+		// handle initial delay
+		if (initialDelay > 0L) {
+			LOG.debug("Start MQI polling in {}ms", initialDelay);
+			try {
+				Thread.sleep(pollingIntervalMillis);
+			} catch (InterruptedException e) {
+				LOG.debug("{} has been cancelled", this);
+				LOG.info("Exiting {}", this);
+				return;
+			}
+		}
+		
+		// generic polling loop
 		LOG.info("Starting {}", this);
 		while (!Thread.currentThread().isInterrupted()) {
 			try {
+				if (appStatus.isShallBeStopped()) {
+					LOG.info("MQI has been commanded to be stopped");
+					this.appStatus.forceStopping();
+					return;
+				}
 				LOG.trace("{} polls MQI", this);
-				final GenericMessageDto<E> message = client.next(category);		
+				final GenericMessageDto<E> message = client.next(category);	
+				this.appStatus.setWaiting();
 				if (message == null || message.getBody() == null) {
-					LOG.trace("No message received: continue");
+					LOG.trace("No message received: continue");					
 					continue;
 				}	
+				appStatus.setProcessing(message.getIdentifier());
 				LOG.debug("{} received {} from MQI", this, message);
 				AckMessageDto ackMess;			
 				try {
@@ -53,15 +89,16 @@ public final class MqiConsumer<E extends AbstractDto> implements Runnable {
 					ackMess = new AckMessageDto(message.getIdentifier(), Ack.ERROR, LogUtils.toString(e), false);
 				}			
 				client.ack(ackMess, category);
-				try {
-					Thread.sleep(pollingIntervalMillis);
-				} catch (InterruptedException e) {
-					LOG.debug("{} has been cancelled", this);
-					break;
-				}
 			// on communication errors with Mqi --> just dump warning and retry on next polling attempt
 			} catch (AbstractCodedException ace) {
-				LOG.warn("Error Code: {}, Message: {}", ace.getCode().getCode(), ace.getLogMessage());			
+				LOG.warn("Error Code: {}, Message: {}", ace.getCode().getCode(), ace.getLogMessage());
+				this.appStatus.setError("NEXT_MESSAGE");
+			}
+			try {
+				Thread.sleep(pollingIntervalMillis);
+			} catch (InterruptedException e) {
+				LOG.debug("{} has been cancelled", this);
+				break;
 			}
 		}
 		LOG.info("Exiting {}", this);

@@ -3,7 +3,6 @@ package esa.s1pdgs.cpoc.wrapper.job.process;
 import static org.hamcrest.CoreMatchers.isA;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
 
 import java.util.concurrent.CompletionService;
 import java.util.concurrent.ExecutionException;
@@ -24,7 +23,6 @@ import esa.s1pdgs.cpoc.common.errors.processing.WrapperProcessTimeoutException;
 import esa.s1pdgs.cpoc.mqi.model.queue.LevelJobDto;
 import esa.s1pdgs.cpoc.mqi.model.queue.LevelJobPoolDto;
 import esa.s1pdgs.cpoc.mqi.model.queue.LevelJobTaskDto;
-import esa.s1pdgs.cpoc.wrapper.job.process.PoolExecutorCallable;
 import esa.s1pdgs.cpoc.wrapper.test.MockPropertiesTest;
 import esa.s1pdgs.cpoc.wrapper.test.SystemUtils;
 
@@ -74,7 +72,7 @@ public class PoolExecutorCallableTest extends MockPropertiesTest {
     public void testInterruptedDuringWaiting()
             throws InterruptedException, ExecutionException {
         ExecutorService service = Executors.newSingleThreadExecutor();
-        CompletionService<Boolean> completionService =
+        CompletionService<Void> completionService =
                 new ExecutorCompletionService<>(service);
         completionService.submit(callable);
         service.shutdownNow();
@@ -89,13 +87,12 @@ public class PoolExecutorCallableTest extends MockPropertiesTest {
             throws InterruptedException, ExecutionException {
         callable.setActive(true);
         ExecutorService service = Executors.newSingleThreadExecutor();
-        CompletionService<Boolean> completionService =
-                new ExecutorCompletionService<>(service);
+        CompletionService<Void> completionService = new ExecutorCompletionService<>(service);
         completionService.submit(callable);
         service.shutdownNow();
 
         thrown.expect(ExecutionException.class);
-        thrown.expectCause(isA(InternalErrorException.class));
+        thrown.expectCause(isA(InternalErrorException.class));        
         completionService.take().get();
     }
 
@@ -103,7 +100,7 @@ public class PoolExecutorCallableTest extends MockPropertiesTest {
     public void testWaitForActiveTooLong()
             throws InterruptedException, ExecutionException {
         ExecutorService service = Executors.newSingleThreadExecutor();
-        CompletionService<Boolean> completionService =
+        CompletionService<Void> completionService =
                 new ExecutorCompletionService<>(service);
         completionService.submit(callable);
 
@@ -115,12 +112,10 @@ public class PoolExecutorCallableTest extends MockPropertiesTest {
     @Test
     public void testProcess() throws InterruptedException, ExecutionException {
         ExecutorService service = Executors.newSingleThreadExecutor();
-        CompletionService<Boolean> completionService =
+        CompletionService<Void> completionService =
                 new ExecutorCompletionService<>(service);
         completionService.submit(callable);
         callable.setActive(true);
-
-        boolean ret = completionService.take().get();
-        assertTrue(ret);
+        completionService.take().get();
     }
 }
