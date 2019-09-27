@@ -19,10 +19,14 @@ file:
   product-categories:
     auxiliary-files:
       fixed-delay-ms: 500                                         # (fixed delay) Period in milliseconds between 2 polls of next message
+      init-delay-poll-ms: 2000
     level-products:
-      fixed-delay-ms: 500                                         # 
+      fixed-delay-ms: 500                                         #
+      init-delay-poll-ms: 2000 
     level-segments:
-      fixed-delay-ms: 500                                         # 
+      fixed-delay-ms: 500                                         #
+      init-delay-poll-ms: 2000 
     compressed-products:
-      fixed-delay-ms: 500                                         # 
+      fixed-delay-ms: 500                                         #
+      init-delay-poll-ms: 2000 
         

@@ -70,6 +70,8 @@ public class AuxiliaryFilesExtractor extends GenericExtractor<ProductDto> implem
      * 
      */
     private final long pollingIntervalMs;
+    
+    private final long pollingInitialDelayMs;
 
 	@Autowired
 	public AuxiliaryFilesExtractor(final EsServices esServices, final ObsClient obsClient,
@@ -78,13 +80,15 @@ public class AuxiliaryFilesExtractor extends GenericExtractor<ProductDto> implem
 			@Value("${file.manifest-filename}") final String manifestFilename, final ErrorRepoAppender errorAppender,
 			final ProcessConfiguration processConfiguration,
 			@Value("${file.file-with-manifest-ext}") final String fileManifestExt, final XmlConverter xmlConverter,
-			@Value("${file.product-categories.auxiliary-files.fixed-delay-ms}") final long pollingIntervalMs) {
+			@Value("${file.product-categories.auxiliary-files.fixed-delay-ms}") final long pollingIntervalMs,
+			@Value("${file.product-categories.auxiliary-files.init-delay-poll-ms}") final long pollingInitialDelayMs) {
 		super(esServices, mqiService, appStatus, localDirectory, extractorConfig, PATTERN_CONFIG, errorAppender,
 				ProductCategory.AUXILIARY_FILES, processConfiguration, xmlConverter);
 		this.obsClient = obsClient;
 		this.manifestFilename = manifestFilename;
 		this.fileManifestExt = fileManifestExt;
 		this.pollingIntervalMs = pollingIntervalMs;
+		this.pollingInitialDelayMs = pollingInitialDelayMs;
 	}
 
 	@PostConstruct
@@ -92,10 +96,11 @@ public class AuxiliaryFilesExtractor extends GenericExtractor<ProductDto> implem
 		appStatus.setWaiting(category);
 		if (pollingIntervalMs > 0) {
 			final ExecutorService service = Executors.newFixedThreadPool(1);
-			service.execute(new MqiConsumer<ProductDto>(mqiClient, category, this, pollingIntervalMs));
+			service.execute(new MqiConsumer<ProductDto>(mqiClient, category, this, pollingIntervalMs,
+					pollingInitialDelayMs, esa.s1pdgs.cpoc.status.AppStatus.NULL));
 		}
 	}
-    
+
     @Override
     public void onMessage(GenericMessageDto<ProductDto> message) {
     	super.genericExtract(message);

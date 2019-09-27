@@ -56,29 +56,30 @@ public class EdrsSessionsExtractor extends GenericExtractor<EdrsSessionDto> impl
      */
     private final long pollingIntervalMs;
     
-    @Autowired
-    public EdrsSessionsExtractor(final EsServices esServices,
-    		final ObsClient obsClient,
-            final GenericMqiClient mqiService,
-            final AppStatus appStatus,
-            @Value("${file.product-categories.edrs-sessions.local-directory}") final String localDirectory,
-            final ErrorRepoAppender errorAppender,
-            final ProcessConfiguration processConfiguration,
-            final MetadataExtractorConfig extractorConfig,
-            final XmlConverter xmlConverter,
-            @Value("${file.product-categories.edrs-sessions.fixed-delay-ms}") final long pollingIntervalMs) {
-        super(esServices, mqiService, appStatus, localDirectory,
-                extractorConfig, PATTERN_SESSION, errorAppender, ProductCategory.EDRS_SESSIONS, processConfiguration, xmlConverter);
-        this.obsClient = obsClient;
-        this.pollingIntervalMs = pollingIntervalMs;
-    }
+    private final long pollingInitialDelayMs;
+    
+	@Autowired
+	public EdrsSessionsExtractor(final EsServices esServices, final ObsClient obsClient,
+			final GenericMqiClient mqiService, final AppStatus appStatus,
+			@Value("${file.product-categories.edrs-sessions.local-directory}") final String localDirectory,
+			final ErrorRepoAppender errorAppender, final ProcessConfiguration processConfiguration,
+			final MetadataExtractorConfig extractorConfig, final XmlConverter xmlConverter,
+			@Value("${file.product-categories.edrs-sessions.fixed-delay-ms}") final long pollingIntervalMs,
+			@Value("${file.product-categories.edrs-sessions.init-delay-poll-ms}") final long pollingInitialDelayMs) {
+		super(esServices, mqiService, appStatus, localDirectory, extractorConfig, PATTERN_SESSION, errorAppender,
+				ProductCategory.EDRS_SESSIONS, processConfiguration, xmlConverter);
+		this.obsClient = obsClient;
+		this.pollingIntervalMs = pollingIntervalMs;
+		this.pollingInitialDelayMs = pollingInitialDelayMs;
+	}
 
 	@PostConstruct
 	public void initService() {
 		appStatus.setWaiting(category);
 		if (pollingIntervalMs > 0) {
 			final ExecutorService service = Executors.newFixedThreadPool(1);
-			service.execute(new MqiConsumer<EdrsSessionDto>(mqiClient, category, this, pollingIntervalMs));
+			service.execute(new MqiConsumer<EdrsSessionDto>(mqiClient, category, this, pollingIntervalMs,
+					pollingInitialDelayMs, esa.s1pdgs.cpoc.status.AppStatus.NULL));
 		}
 	}
     

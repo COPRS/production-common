@@ -202,7 +202,7 @@ public class L1AppConsumerTest {
 
         LevelProductsMessageConsumer consumer = new LevelProductsMessageConsumer(l0SliceJobsDispatcher,
                 l0SlicePatternSettings, processSettings, mqiService,
-                mqiStatusService, appDataService, errorAppender, appStatus, metadataClient, 0);
+                mqiStatusService, appDataService, errorAppender, appStatus, metadataClient, 0, 0);
         consumer.onMessage(message2);
 
         verify(l0SliceJobsDispatcher, never()).dispatch(Mockito.any());
@@ -216,7 +216,7 @@ public class L1AppConsumerTest {
         
         LevelProductsMessageConsumer consumer = new LevelProductsMessageConsumer(l0SliceJobsDispatcher,
                 l0SlicePatternSettings, processSettings, mqiService,
-                mqiStatusService, appDataService,  errorAppender, appStatus, metadataClient, 0);
+                mqiStatusService, appDataService,  errorAppender, appStatus, metadataClient, 0, 0);
         consumer.onMessage(message1);
 
         verify(appDataService, times(1)).newJob(Mockito.any());
@@ -234,7 +234,7 @@ public class L1AppConsumerTest {
 
         LevelProductsMessageConsumer consumer = new LevelProductsMessageConsumer(l0SliceJobsDispatcher,
                 l0SlicePatternSettings, processSettings, mqiService,
-                mqiStatusService, appDataService,  errorAppender, appStatus, metadataClient, 0);
+                mqiStatusService, appDataService,  errorAppender, appStatus, metadataClient, 0, 0);
         consumer.onMessage(null);
 
         verify(l0SliceJobsDispatcher, never()).dispatch(Mockito.any());
@@ -262,7 +262,7 @@ public class L1AppConsumerTest {
 
         LevelProductsMessageConsumer consumer = new LevelProductsMessageConsumer(l0SliceJobsDispatcher,
                 l0SlicePatternSettings, processSettings, mqiService,
-                mqiStatusService, appDataService,  errorAppender, appStatus, metadataClient, 0);
+                mqiStatusService, appDataService,  errorAppender, appStatus, metadataClient, 0, 0);
         consumer.onMessage(message1);
 
         job1.setPod("");
@@ -295,7 +295,7 @@ public class L1AppConsumerTest {
 
         LevelProductsMessageConsumer consumer = new LevelProductsMessageConsumer(l0SliceJobsDispatcher,
                 l0SlicePatternSettings, processSettings, mqiService,
-                mqiStatusService, appDataService,  errorAppender, appStatus, metadataClient, 0);
+                mqiStatusService, appDataService,  errorAppender, appStatus, metadataClient, 0, 0);
         consumer.onMessage(message1);
 
         job1.setPod("");
@@ -329,7 +329,7 @@ public class L1AppConsumerTest {
 
         LevelProductsMessageConsumer consumer = new LevelProductsMessageConsumer(l0SliceJobsDispatcher,
                 l0SlicePatternSettings, processSettings, mqiService,
-                mqiStatusService, appDataService,  errorAppender, appStatus, metadataClient, 0);
+                mqiStatusService, appDataService,  errorAppender, appStatus, metadataClient, 0, 0);
         consumer.onMessage(message1);
 
         job1.setPod("");

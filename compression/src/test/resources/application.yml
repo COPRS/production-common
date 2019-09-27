@@ -23,6 +23,7 @@ compression:
   command: /usr/bin/sh
   hostname: "hostname"
   fixed-delay-ms: 10
+  init-delay-poll-ms: 1000
   mqi:
     host-uri: http://localhost:8081       # the host and port for querying MQI server
     max-retries: 3                        # the maximal number of consecutive retries following a MQI request error 

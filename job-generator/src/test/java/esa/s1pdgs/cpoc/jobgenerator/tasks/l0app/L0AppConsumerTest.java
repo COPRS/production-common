@@ -200,7 +200,7 @@ public class L0AppConsumerTest {
 
         L0AppConsumer edrsSessionsConsumer = new L0AppConsumer(jobsDispatcher,
                 processSettings, mqiService, mqiStatusService, appDataService,
-                errorAppender, appStatus, metadataClient, 0);
+                errorAppender, appStatus, metadataClient, 0, 0);
 
         // Job<EdrsSession> job = new Job<EdrsSession>(session.getSessionId(),
         // session.getStartTime(), session.getStartTime(), session);
@@ -236,7 +236,7 @@ public class L0AppConsumerTest {
     public void testReceiveRaw() throws Exception {
         L0AppConsumer edrsSessionsConsumer = new L0AppConsumer(jobsDispatcher,
                 processSettings, mqiService, mqiStatusService, appDataService,
-                errorAppender, appStatus, metadataClient, 0);
+                errorAppender, appStatus, metadataClient, 0, 0);
         GenericMessageDto<EdrsSessionDto> mqiMessage= new GenericMessageDto<EdrsSessionDto>(1, "",
                 new EdrsSessionDto("KEY_OBS_SESSION_2_2", 2,
                         EdrsSessionFileType.RAW, "S1", "A", "WILE", "sessionId"));
@@ -250,7 +250,7 @@ public class L0AppConsumerTest {
     public void testReceivedSameMessageTwice() throws Exception {
         L0AppConsumer edrsSessionsConsumer = new L0AppConsumer(jobsDispatcher,
                 processSettings, mqiService, mqiStatusService, appDataService,
-                errorAppender, appStatus, metadataClient, 0);
+                errorAppender, appStatus, metadataClient, 0, 0);
 
         edrsSessionsConsumer.onMessage(message1);
         Mockito.verify(jobsDispatcher, Mockito.never()).dispatch(Mockito.any());
@@ -263,7 +263,7 @@ public class L0AppConsumerTest {
     public void testReceivedInvalidProductChannel() throws Exception {
         L0AppConsumer edrsSessionsConsumer = new L0AppConsumer(jobsDispatcher,
                 processSettings, mqiService, mqiStatusService, appDataService,
-                errorAppender, appStatus, metadataClient, 0);
+                errorAppender, appStatus, metadataClient, 0, 0);
         dto1.setChannelId(3);
 
         edrsSessionsConsumer.onMessage(message1);
@@ -286,7 +286,7 @@ public class L0AppConsumerTest {
 
         L0AppConsumer edrsSessionsConsumer = new L0AppConsumer(jobsDispatcher,
                 processSettings, mqiService, mqiStatusService, appDataService,
-                errorAppender, appStatus, metadataClient, 0);
+                errorAppender, appStatus, metadataClient, 0, 0);
 
         AppDataJob result = edrsSessionsConsumer.buildJob(message);
         verify(appDataService, never()).patchJob(Mockito.anyLong(),
@@ -315,7 +315,7 @@ public class L0AppConsumerTest {
 
         L0AppConsumer edrsSessionsConsumer = new L0AppConsumer(jobsDispatcher,
                 processSettings, mqiService, mqiStatusService, appDataService,
-                errorAppender, appStatus, metadataClient, 0);
+                errorAppender, appStatus, metadataClient, 0, 0);
 
         AppDataJob result =
                 edrsSessionsConsumer.buildJob(message);
@@ -345,7 +345,7 @@ public class L0AppConsumerTest {
 
         L0AppConsumer edrsSessionsConsumer = new L0AppConsumer(jobsDispatcher,
                 processSettings, mqiService, mqiStatusService, appDataService,
-                errorAppender, appStatus, metadataClient, 0);
+                errorAppender, appStatus, metadataClient, 0, 0);
 
         AppDataJob result =
                 edrsSessionsConsumer.buildJob(message);
@@ -381,7 +381,7 @@ public class L0AppConsumerTest {
 
         L0AppConsumer edrsSessionsConsumer = new L0AppConsumer(jobsDispatcher,
                 processSettings, mqiService, mqiStatusService, appDataService,
-                errorAppender, appStatus, metadataClient, 0);
+                errorAppender, appStatus, metadataClient, 0, 0);
 
         AppDataJob<?> result =
                 edrsSessionsConsumer.buildJob(message);

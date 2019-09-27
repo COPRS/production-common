@@ -26,6 +26,7 @@ import esa.s1pdgs.cpoc.mqi.client.GenericMqiClient;
 import esa.s1pdgs.cpoc.mqi.model.queue.ProductDto;
 import esa.s1pdgs.cpoc.mqi.model.rest.GenericMessageDto;
 import esa.s1pdgs.cpoc.queuewatcher.config.ApplicationProperties;
+import esa.s1pdgs.cpoc.status.AppStatus;
 
 @Service
 public class QueueWatcherService implements MqiListener<ProductDto> {
@@ -42,23 +43,34 @@ public class QueueWatcherService implements MqiListener<ProductDto> {
 	private ApplicationProperties properties;
 
 	private final long auxFilesPollingIntervalMs;
-
 	private final long levelProductsPollingIntervalMs;
-
 	private final long levelSegmentsPollingIntervalMs;
-
 	private final long compressedProductsPollingIntervalMs;
+
+	private final long auxFilesPollingInitialDelayMs;
+	private final long levelProductsPollingInitialDelayMs;
+	private final long levelSegmentsPollingInitialDelayMs;
+	private final long compressedProductsPollingInitialDelayMs;
 
 	@Autowired
 	public QueueWatcherService(
 			@Value("${file.product-categories.auxiliary-files.fixed-delay-ms}") final long auxFilesPollingIntervalMs,
 			@Value("${file.product-categories.level-products.fixed-delay-ms}") final long levelProductsPollingIntervalMs,
 			@Value("${file.product-categories.level-segments.fixed-delay-ms}") final long levelSegmentsPollingIntervalMs,
-			@Value("${file.product-categories.compressed-products.fixed-delay-ms}") final long compressedProductsPollingIntervalMs) {
+			@Value("${file.product-categories.compressed-products.fixed-delay-ms}") final long compressedProductsPollingIntervalMs,
+			@Value("${file.product-categories.auxiliary-files.init-delay-poll-ms}") final long auxFilesPollingInitialDelayMs,
+			@Value("${file.product-categories.level-products.init-delay-poll-ms}") final long levelProductsPollingInitialDelayMs,
+			@Value("${file.product-categories.level-segments.init-delay-poll-ms}") final long levelSegmentsPollingInitialDelayMs,
+			@Value("${file.product-categories.compressed-products.init-delay-poll-ms}") final long compressedProductsPollingInitialDelayMs) {
 		this.auxFilesPollingIntervalMs = auxFilesPollingIntervalMs;
 		this.levelProductsPollingIntervalMs = levelProductsPollingIntervalMs;
 		this.levelSegmentsPollingIntervalMs = levelSegmentsPollingIntervalMs;
 		this.compressedProductsPollingIntervalMs = compressedProductsPollingIntervalMs;
+
+		this.auxFilesPollingInitialDelayMs = auxFilesPollingInitialDelayMs;
+		this.levelProductsPollingInitialDelayMs = levelProductsPollingInitialDelayMs;
+		this.levelSegmentsPollingInitialDelayMs = levelSegmentsPollingInitialDelayMs;
+		this.compressedProductsPollingInitialDelayMs = compressedProductsPollingInitialDelayMs;
 	}
 
 	@PostConstruct
@@ -67,19 +79,19 @@ public class QueueWatcherService implements MqiListener<ProductDto> {
 		final ExecutorService service = Executors.newFixedThreadPool(4);
 		if (auxFilesPollingIntervalMs > 0) {
 			service.execute(new MqiConsumer<ProductDto>(mqiClient, ProductCategory.AUXILIARY_FILES, this,
-					auxFilesPollingIntervalMs));
+					auxFilesPollingIntervalMs, auxFilesPollingInitialDelayMs, AppStatus.NULL));
 		}
 		if (levelProductsPollingIntervalMs > 0) {
 			service.execute(new MqiConsumer<ProductDto>(mqiClient, ProductCategory.LEVEL_PRODUCTS, this,
-					levelProductsPollingIntervalMs));
+					levelProductsPollingIntervalMs, levelProductsPollingInitialDelayMs, AppStatus.NULL));
 		}
 		if (levelSegmentsPollingIntervalMs > 0) {
 			service.execute(new MqiConsumer<ProductDto>(mqiClient, ProductCategory.LEVEL_SEGMENTS, this,
-					levelSegmentsPollingIntervalMs));
+					levelSegmentsPollingIntervalMs, levelSegmentsPollingInitialDelayMs, AppStatus.NULL));
 		}
 		if (compressedProductsPollingIntervalMs > 0) {
 			service.execute(new MqiConsumer<ProductDto>(mqiClient, ProductCategory.COMPRESSED_PRODUCTS, this,
-					compressedProductsPollingIntervalMs));
+					compressedProductsPollingIntervalMs, compressedProductsPollingInitialDelayMs, AppStatus.NULL));
 		}
 		// Seems to be not relevant for EDRS_SESSIONS
 	}

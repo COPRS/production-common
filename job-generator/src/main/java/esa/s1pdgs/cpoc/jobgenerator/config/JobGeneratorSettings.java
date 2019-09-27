@@ -500,7 +500,8 @@ public class JobGeneratorSettings {
 			@Qualifier("appCatalogServiceForEdrsSessions") final AppCatalogJobClient appDataServiceErdsSettions,
 			@Qualifier("appCatalogServiceForLevelSegments") final AppCatalogJobClient appDataServiceLevelSegments,
 			final ErrorRepoAppender errorRepoAppender, final AppStatus appStatus, final MetadataClient metadataClient,
-			 @Value("${process.fixed-delay-ms}") final long pollingIntervalMs) {
+			 @Value("${process.fixed-delay-ms}") final long pollingIntervalMs,
+			 @Value("${process.initial-delay-ms}") final long pollingInitialDelayMs) {
 
 		AbstractGenericConsumer<? extends AbstractDto> messageConsumer;
 
@@ -508,18 +509,18 @@ public class JobGeneratorSettings {
 		case L0:
 			messageConsumer = new L0AppConsumer((AbstractJobsDispatcher<EdrsSessionDto>) jobsDispatcher,
 					processSettings, mqiService, mqiStatusService, appDataServiceErdsSettions,
-					errorRepoAppender, appStatus, metadataClient, pollingIntervalMs);
+					errorRepoAppender, appStatus, metadataClient, pollingIntervalMs, pollingInitialDelayMs);
 			break;
 		case L0_SEGMENT:
 			messageConsumer = new L0SegmentAppConsumer((AbstractJobsDispatcher<ProductDto>) jobsDispatcher,
 					appProperties, processSettings, mqiService, mqiStatusService, appDataServiceLevelSegments,
-					errorRepoAppender, appStatus, pollingIntervalMs);
+					errorRepoAppender, appStatus, pollingIntervalMs, pollingInitialDelayMs);
 			break;
 		case L1:
 		case L2:
 			messageConsumer = new LevelProductsMessageConsumer((AbstractJobsDispatcher<ProductDto>) jobsDispatcher,
 					patternSettings, processSettings, mqiService, mqiStatusService, appDataServiceLevelProducts,
-					errorRepoAppender, appStatus, metadataClient, pollingIntervalMs);
+					errorRepoAppender, appStatus, metadataClient, pollingIntervalMs, pollingInitialDelayMs);
 			break;
 		default:
 			throw new IllegalArgumentException("Unsupported Application Level");
