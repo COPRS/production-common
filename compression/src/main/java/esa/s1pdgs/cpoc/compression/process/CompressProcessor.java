@@ -89,6 +89,8 @@ public class CompressProcessor implements MqiListener<ProductDto> {
 	private final ErrorRepoAppender errorAppender;
 	
 	private final long pollingIntervalMs;
+	
+	private final long pollingInitialDelayMs;
 
 	@Autowired
 	public CompressProcessor(final AppStatus appStatus, final ApplicationProperties properties,
@@ -96,7 +98,8 @@ public class CompressProcessor implements MqiListener<ProductDto> {
 			final GenericMqiClient mqiClient,
 			final ErrorRepoAppender errorAppender,
 			final StatusService mqiStatusService,
-			@Value("${compression.fixed-delay-ms}") final long pollingIntervalMs) {
+			@Value("${compression.fixed-delay-ms}") final long pollingIntervalMs,
+			@Value("${compression.init-delay-poll-ms}") final long pollingInitialDelayMs) {
 		this.appStatus = appStatus;
 		this.properties = properties;
 		this.obsClient = obsClient;
@@ -105,6 +108,7 @@ public class CompressProcessor implements MqiListener<ProductDto> {
 		this.mqiStatusService = mqiStatusService;
 		this.errorAppender = errorAppender;
 		this.pollingIntervalMs = pollingIntervalMs;
+		this.pollingInitialDelayMs = pollingInitialDelayMs;
 	}
 	
 	@PostConstruct
@@ -112,7 +116,7 @@ public class CompressProcessor implements MqiListener<ProductDto> {
 		if (pollingIntervalMs > 0) {
 			final ExecutorService service = Executors.newFixedThreadPool(1);
 			service.execute(new MqiConsumer<ProductDto>(mqiClient, ProductCategory.COMPRESSED_PRODUCTS, this,
-					pollingIntervalMs));
+					pollingIntervalMs, pollingInitialDelayMs, esa.s1pdgs.cpoc.status.AppStatus.NULL));
 		}
 	}
 

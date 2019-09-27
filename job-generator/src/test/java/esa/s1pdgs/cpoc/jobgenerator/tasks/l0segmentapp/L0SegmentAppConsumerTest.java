@@ -84,7 +84,7 @@ public class L0SegmentAppConsumerTest {
 		mockAppStatus();
 
 		consumer = new L0SegmentAppConsumer(jobsDispatcher, appProperties, processSettings, mqiService,
-				mqiStatusService, appDataService, errorAppender, appStatus, 0);
+				mqiStatusService, appDataService, errorAppender, appStatus, 0, 0);
 		consumer.setTaskForFunctionalLog(processSettings.getLevel().name() + "JobGeneration");
 	}
 

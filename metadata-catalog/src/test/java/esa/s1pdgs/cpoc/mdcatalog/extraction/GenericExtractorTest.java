@@ -108,7 +108,7 @@ public class GenericExtractorTest {
         extractor = new LevelProductsExtractor(esServices, obsClient,
                 mqiService, appStatus, extractorConfig,
                 (new File("./test/workDir/")).getAbsolutePath(),
-                "manifest.safe", errorAppender, config, ".safe", xmlConverter, 500);
+                "manifest.safe", errorAppender, config, ".safe", xmlConverter, 0, 0);
     }
 
     /**

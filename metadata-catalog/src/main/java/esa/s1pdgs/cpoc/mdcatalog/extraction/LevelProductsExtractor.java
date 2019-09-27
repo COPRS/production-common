@@ -61,34 +61,34 @@ public class LevelProductsExtractor extends GenericExtractor<ProductDto> impleme
      * 
      */
     private final long pollingIntervalMs;
+    
+    private final long pollingInitialDelayMs;
 
-    @Autowired
-    public LevelProductsExtractor(final EsServices esServices,
-            final ObsClient obsClient,
-            final GenericMqiClient mqiService,
-            final AppStatus appStatus,
-            final MetadataExtractorConfig extractorConfig,
-            @Value("${file.product-categories.level-products.local-directory}") final String localDirectory,
-            @Value("${file.manifest-filename}") final String manifestFilename,
-            final ErrorRepoAppender errorAppender,
-            final ProcessConfiguration processConfiguration,
-            @Value("${file.file-with-manifest-ext}") final String fileManifestExt,
-            final XmlConverter xmlConverter,
-            @Value("${file.product-categories.level-products.fixed-delay-ms}") final long pollingIntervalMs) {
-        super(esServices, mqiService, appStatus, localDirectory,
-                extractorConfig, PATTERN_CONFIG, errorAppender, ProductCategory.LEVEL_PRODUCTS, processConfiguration, xmlConverter);
-        this.obsClient = obsClient;
-        this.manifestFilename = manifestFilename;
-        this.fileManifestExt = fileManifestExt;
-        this.pollingIntervalMs = pollingIntervalMs;
-    }
+	@Autowired
+	public LevelProductsExtractor(final EsServices esServices, final ObsClient obsClient,
+			final GenericMqiClient mqiService, final AppStatus appStatus, final MetadataExtractorConfig extractorConfig,
+			@Value("${file.product-categories.level-products.local-directory}") final String localDirectory,
+			@Value("${file.manifest-filename}") final String manifestFilename, final ErrorRepoAppender errorAppender,
+			final ProcessConfiguration processConfiguration,
+			@Value("${file.file-with-manifest-ext}") final String fileManifestExt, final XmlConverter xmlConverter,
+			@Value("${file.product-categories.level-products.fixed-delay-ms}") final long pollingIntervalMs,
+			@Value("${file.product-categories.level-products.init-delay-poll-ms}") final long pollingInitialDelayMs) {
+		super(esServices, mqiService, appStatus, localDirectory, extractorConfig, PATTERN_CONFIG, errorAppender,
+				ProductCategory.LEVEL_PRODUCTS, processConfiguration, xmlConverter);
+		this.obsClient = obsClient;
+		this.manifestFilename = manifestFilename;
+		this.fileManifestExt = fileManifestExt;
+		this.pollingIntervalMs = pollingIntervalMs;
+		this.pollingInitialDelayMs = pollingInitialDelayMs;
+	}
 
 	@PostConstruct
 	public void initService() {
 		appStatus.setWaiting(category);
 		if (pollingIntervalMs > 0) {
 			final ExecutorService service = Executors.newFixedThreadPool(1);
-			service.execute(new MqiConsumer<ProductDto>(mqiClient, category, this, pollingIntervalMs));
+			service.execute(new MqiConsumer<ProductDto>(mqiClient, category, this, pollingIntervalMs,
+					pollingInitialDelayMs, esa.s1pdgs.cpoc.status.AppStatus.NULL));
 		}
 	}
     

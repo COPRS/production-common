@@ -10,7 +10,6 @@ import java.util.regex.Pattern;
 
 import javax.annotation.PostConstruct;
 
-import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.util.CollectionUtils;
 
 import esa.s1pdgs.cpoc.appcatalog.client.job.AppCatalogJobClient;
@@ -31,7 +30,6 @@ import esa.s1pdgs.cpoc.mqi.MqiConsumer;
 import esa.s1pdgs.cpoc.mqi.MqiListener;
 import esa.s1pdgs.cpoc.mqi.client.GenericMqiClient;
 import esa.s1pdgs.cpoc.mqi.client.StatusService;
-import esa.s1pdgs.cpoc.mqi.model.queue.EdrsSessionDto;
 import esa.s1pdgs.cpoc.mqi.model.queue.ProductDto;
 import esa.s1pdgs.cpoc.mqi.model.rest.GenericMessageDto;
 import esa.s1pdgs.cpoc.report.LoggerReporting;
@@ -57,6 +55,8 @@ public class L0SegmentAppConsumer
     private String taskForFunctionalLog;
     
     private final long pollingIntervalMs;
+    
+    private final long pollingInitialDelayMs;
 
     /**
      * Constructor
@@ -68,33 +68,28 @@ public class L0SegmentAppConsumer
      * @param appDataService
      * @param appStatus
      */
-    public L0SegmentAppConsumer(
-            final AbstractJobsDispatcher<ProductDto> jobsDispatcher,
-            final L0SegmentAppProperties appProperties,
-            final ProcessSettings processSettings,
-            final GenericMqiClient mqiClient,
-            final StatusService mqiStatusService,
-            final AppCatalogJobClient<ProductDto> appDataService,
-            final ErrorRepoAppender errorRepoAppender,
-            final AppStatus appStatus,
-            final long pollingIntervalMs) {
-        super(jobsDispatcher, processSettings, mqiClient, mqiStatusService,
-                appDataService, appStatus, errorRepoAppender, ProductCategory.LEVEL_SEGMENTS);
-        this.pattern = Pattern.compile(appProperties.getNameRegexpPattern(),
-                Pattern.CASE_INSENSITIVE);
-        this.patternGroups = appProperties.getNameRegexpGroups();
-        this.pollingIntervalMs = pollingIntervalMs;
-    }
+	public L0SegmentAppConsumer(final AbstractJobsDispatcher<ProductDto> jobsDispatcher,
+			final L0SegmentAppProperties appProperties, final ProcessSettings processSettings,
+			final GenericMqiClient mqiClient, final StatusService mqiStatusService,
+			final AppCatalogJobClient<ProductDto> appDataService, final ErrorRepoAppender errorRepoAppender,
+			final AppStatus appStatus, final long pollingIntervalMs, final long pollingInitialDelayMs) {
+		super(jobsDispatcher, processSettings, mqiClient, mqiStatusService, appDataService, appStatus,
+				errorRepoAppender, ProductCategory.LEVEL_SEGMENTS);
+		this.pattern = Pattern.compile(appProperties.getNameRegexpPattern(), Pattern.CASE_INSENSITIVE);
+		this.patternGroups = appProperties.getNameRegexpGroups();
+		this.pollingIntervalMs = pollingIntervalMs;
+		this.pollingInitialDelayMs = pollingInitialDelayMs;
+	}
 
-    @PostConstruct
-   	public void initService() {
-    	appStatus.setWaiting();
-    	if(pollingIntervalMs > 0) {
-	   		final ExecutorService service = Executors.newFixedThreadPool(1);
-	   		service.execute(
-	   				new MqiConsumer<ProductDto>(mqiClient, category, this, pollingIntervalMs));
-    	}
-   	}
+	@PostConstruct
+	public void initService() {
+		appStatus.setWaiting();
+		if (pollingIntervalMs > 0) {
+			final ExecutorService service = Executors.newFixedThreadPool(1);
+			service.execute(new MqiConsumer<ProductDto>(mqiClient, category, this, pollingIntervalMs,
+					pollingInitialDelayMs, esa.s1pdgs.cpoc.status.AppStatus.NULL));
+		}
+	}
     
     
     @Override

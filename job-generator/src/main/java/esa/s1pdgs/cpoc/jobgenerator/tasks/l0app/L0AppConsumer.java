@@ -10,8 +10,6 @@ import java.util.stream.Collectors;
 
 import javax.annotation.PostConstruct;
 
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.util.CollectionUtils;
 
 import esa.s1pdgs.cpoc.appcatalog.client.job.AppCatalogJobClient;
@@ -49,33 +47,31 @@ public class L0AppConsumer extends AbstractGenericConsumer<EdrsSessionDto> imple
     private final MetadataClient metadataClient;
     
     private final long pollingIntervalMs;
-
-    public L0AppConsumer(
-            final AbstractJobsDispatcher<EdrsSessionDto> jobDispatcher,
-            final ProcessSettings processSettings,
-            final GenericMqiClient mqiClient,
-            final StatusService mqiStatusService,
-            final AppCatalogJobClient<EdrsSessionDto> appDataService,
-            final ErrorRepoAppender errorRepoAppender,
-            final AppStatus appStatus,
-            final MetadataClient metadataClient,
-            final long pollingIntervalMs) {
-        super(jobDispatcher, processSettings, mqiClient, mqiStatusService,
-                appDataService, appStatus, errorRepoAppender, ProductCategory.EDRS_SESSIONS);
-        this.metadataClient = metadataClient; 
-        this.pollingIntervalMs = pollingIntervalMs;
-    }
-
-    @PostConstruct
-   	public void initService() {
-    	appStatus.setWaiting();
-    	if(pollingIntervalMs > 0) {
-    		final ExecutorService service = Executors.newFixedThreadPool(1);
-    		service.execute(
-    				new MqiConsumer<EdrsSessionDto>(mqiClient, category, this, pollingIntervalMs));
-    	}
-   	}
     
+    private final long pollingInitialDelayMs;
+
+	public L0AppConsumer(final AbstractJobsDispatcher<EdrsSessionDto> jobDispatcher,
+			final ProcessSettings processSettings, final GenericMqiClient mqiClient,
+			final StatusService mqiStatusService, final AppCatalogJobClient<EdrsSessionDto> appDataService,
+			final ErrorRepoAppender errorRepoAppender, final AppStatus appStatus, final MetadataClient metadataClient,
+			final long pollingIntervalMs, final long pollingInitialDelayMs) {
+		super(jobDispatcher, processSettings, mqiClient, mqiStatusService, appDataService, appStatus, errorRepoAppender,
+				ProductCategory.EDRS_SESSIONS);
+		this.metadataClient = metadataClient;
+		this.pollingIntervalMs = pollingIntervalMs;
+		this.pollingInitialDelayMs = pollingInitialDelayMs;
+	}
+
+	@PostConstruct
+	public void initService() {
+		appStatus.setWaiting();
+		if (pollingIntervalMs > 0) {
+			final ExecutorService service = Executors.newFixedThreadPool(1);
+			service.execute(new MqiConsumer<EdrsSessionDto>(mqiClient, category, this, pollingIntervalMs,
+					pollingInitialDelayMs, esa.s1pdgs.cpoc.status.AppStatus.NULL));
+		}
+	}
+
     @Override
     public void onMessage(GenericMessageDto<EdrsSessionDto> mqiMessage) {
     
