@@ -64,7 +64,6 @@ public class FileDescriptorBuilder {
 		if (absolutePath.length() <= localDirectory.getAbsolutePath().length()) {
 			throw new MetadataFilePathException(absolutePath, "CONFIG", "File is not in root directory");
 		}
-		System.out.println(file);
 		String relativePath = absolutePath.substring(localDirectory.getAbsolutePath().length() + 1);
 		relativePath = relativePath.replace("\\", "/");
 
