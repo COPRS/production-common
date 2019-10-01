@@ -13,6 +13,7 @@ import static org.mockito.Mockito.doThrow;
 import java.io.File;
 import java.io.IOException;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -339,7 +340,7 @@ public class L1AppJobsGeneratorTest {
                             "A",
                             "WILE"));
                 }
-                return null;
+                return Collections.emptyList();
             }).when(this.metadataClient).search(Mockito.any(), Mockito.any(),
                     Mockito.any(), Mockito.anyString(), Mockito.anyInt(),
                     Mockito.anyString());
@@ -573,6 +574,7 @@ public class L1AppJobsGeneratorTest {
 
             // TODO to improve to check dto ok
         } catch (Exception e) {
+        	e.printStackTrace();
             fail(e.getMessage());
         }
     }
