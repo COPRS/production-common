@@ -736,8 +736,7 @@ public class EsServicesTest{
 			esServices.getL0Acn("l0_acn_0", "datatakeId", "NRT");
 			fail("An exception should occur");
 		} catch (Exception e) {
-			assertEquals("Raised exception shall concern name",
-					"productName", ((MetadataMalformedException) e).getMissingField());
+			assertMissingFieldException(e, "productName");
 		}
 		//MISSING URL
 		source = new BytesArray("{\"productName\":\"name\",\"startTime\":\"2000-01-01T00:00:00.000000Z\",\"stopTime\":"
@@ -754,8 +753,7 @@ public class EsServicesTest{
 		    esServices.getL0Acn("l0_acn_A", "datatakeId", "NRT");
 			fail("An exception should occur");
 		} catch (Exception e) {
-			assertEquals("Raised exception shall concern name",
-					"url", ((MetadataMalformedException) e).getMissingField());
+			assertMissingFieldException(e, "url");
 		}
 		//MISSING startTime
 		source = new BytesArray("{\"productName\":\"name\",\"url\""
@@ -773,8 +771,7 @@ public class EsServicesTest{
 		    esServices.getL0Acn("l0_acn_A", "datatakeId", "NRT");
 			fail("An exception should occur");
 		} catch (Exception e) {
-			assertEquals("Raised exception shall concern name",
-					"startTime", ((MetadataMalformedException) e).getMissingField());
+			assertMissingFieldException(e, "startTime");
 		}
 		//MISSING stopTime
 		source = new BytesArray("{\"productName\":\"name\",\"url\""
@@ -792,8 +789,7 @@ public class EsServicesTest{
 		    esServices.getL0Acn("l0_acn_A", "datatakeId", "NRT");
 			fail("An exception should occur");
 		} catch (Exception e) {
-			assertEquals("Raised exception shall concern name",
-					"stopTime", ((MetadataMalformedException) e).getMissingField());
+			assertMissingFieldException(e, "stopTime");
 		}
 		//MISSING instrumentConfigurationId
 		source = new BytesArray("{\"productName\":\"name\",\"url\""
@@ -811,8 +807,7 @@ public class EsServicesTest{
 		    esServices.getL0Acn("l0_acn_A", "datatakeId", "NRT");
 			fail("An exception should occur");
 		} catch (Exception e) {
-			assertEquals("Raised exception shall concern name",
-					"instrumentConfigurationId", ((MetadataMalformedException) e).getMissingField());
+			assertMissingFieldException(e, "instrumentConfigurationId");
 		}
 		//MISSING totalNumberOfSlice
 		source = new BytesArray("{\"productName\":\"name\",\"url\""
@@ -830,8 +825,7 @@ public class EsServicesTest{
 		    esServices.getL0Acn("l0_acn_A", "datatakeId", "NRT");
 			fail("An exception should occur");
 		} catch (Exception e) {
-			assertEquals("Raised exception shall concern name",
-					"totalNumberOfSlice", ((MetadataMalformedException) e).getMissingField());
+			assertMissingFieldException(e, "totalNumberOfSlice");
 		}
 		//MISSING dataTakeId
 		source = new BytesArray("{\"productName\":\"name\",\"url\""
@@ -849,8 +843,7 @@ public class EsServicesTest{
 		    esServices.getL0Acn("l0_acn_A", "datatakeId", "NRT");
 			fail("An exception should occur");
 		} catch (Exception e) {
-			assertEquals("Raised exception shall concern name",
-					"dataTakeId", ((MetadataMalformedException) e).getMissingField());
+			assertMissingFieldException(e, "dataTakeId");
 		}
         //MISSING dataTakeId
         source = new BytesArray("{\"productName\":\"name\",\"url\""
@@ -867,13 +860,16 @@ public class EsServicesTest{
             esServices.getL0Acn("l0_acn_A", "datatakeId", "NRT");
             fail("An exception should occur");
         } catch (Exception e) {
-            assertEquals("Raised exception shall concern name",
-                    "productType", ((MetadataMalformedException) e).getMissingField());
-        }
-		
+        	assertMissingFieldException(e, "productType");
+        }		
 	}
     
-    @Test
+    private void assertMissingFieldException(Exception e, final String element) {		
+		final MetadataMalformedException cause = (MetadataMalformedException) e.getCause();		
+		assertEquals("Raised exception shall concern name",element, cause.getMissingField());		
+	}
+
+	@Test
     public void getLevelSegmentTest() throws IOException {
         //Expected result
         LevelSegmentMetadata expectedResult = new LevelSegmentMetadata();
