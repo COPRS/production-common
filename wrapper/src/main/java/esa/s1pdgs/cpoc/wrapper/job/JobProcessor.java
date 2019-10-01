@@ -199,6 +199,7 @@ public class JobProcessor implements MqiListener<LevelJobDto> {
 		}
 
 		// Everything is fine with the request, we can start processing it.
+		LOGGER.debug("Everything is fine with the request, start processing job {}", job);
 		final Reporting report = reportingFactory.newReporting(0);
 		report.begin(new FilenameReportingInput(toReportFilenames(job)), new ReportingMessage("Start job processing"));
 
@@ -213,6 +214,9 @@ public class JobProcessor implements MqiListener<LevelJobDto> {
 		} else if (properties.getLevel() == ApplicationLevel.L0_SEGMENT) {
 			outputListFile = job.getWorkDirectory() + "L0ASProcList.LIST";
 		}
+		
+		LOGGER.debug("Output list build {}", outputListFile);
+		
 		// Initialize the pool processor executor
 		PoolExecutorCallable procExecutor = new PoolExecutorCallable(properties, job,
 				getPrefixMonitorLog(MonitorLogUtils.LOG_PROCESS, job), this.properties.getLevel());
