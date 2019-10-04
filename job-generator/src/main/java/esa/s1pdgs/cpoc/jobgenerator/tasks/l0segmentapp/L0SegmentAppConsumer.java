@@ -1,5 +1,6 @@
 package esa.s1pdgs.cpoc.jobgenerator.tasks.l0segmentapp;
 
+
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
@@ -49,6 +50,9 @@ public class L0SegmentAppConsumer
      */
     private final Map<String, Integer> patternGroups;
     
+    
+    private final Pattern blackList;
+    
     /**
      * 
      */
@@ -77,6 +81,7 @@ public class L0SegmentAppConsumer
 				errorRepoAppender, ProductCategory.LEVEL_SEGMENTS);
 		this.pattern = Pattern.compile(appProperties.getNameRegexpPattern(), Pattern.CASE_INSENSITIVE);
 		this.patternGroups = appProperties.getNameRegexpGroups();
+		this.blackList = (appProperties.getBlacklistPattern() == null) ? null : Pattern.compile(appProperties.getBlacklistPattern(), Pattern.CASE_INSENSITIVE);
 		this.pollingIntervalMs = pollingIntervalMs;
 		this.pollingInitialDelayMs = pollingInitialDelayMs;
 	}
@@ -110,8 +115,12 @@ public class L0SegmentAppConsumer
         String errorMessage = "";
         String productName = mqiMessage.getBody().getProductName();
         
-        FailedProcessingDto failedProc = new FailedProcessingDto();
+        if(skipProduct(productName)) {
+        	LOGGER.warn("Skipping job generation for product {}", productName);
+        	return;
+        }
         
+        FailedProcessingDto failedProc = new FailedProcessingDto();
         
         // Note: the report log of consume and global log is raised during
         // building job to get the datatake identifier which is the real
@@ -123,7 +132,7 @@ public class L0SegmentAppConsumer
             LOGGER.info(
                     "[MONITOR] [step 1] [productName {}] Creating/updating job",
                     productName);
-            reporting.begin(new ReportingMessage("Start job generation using {}", mqiMessage.getBody().getProductName()));
+            reporting.begin(new ReportingMessage("Start job generation using {}", productName));
             AppDataJob<ProductDto> appDataJob = buildJob(mqiMessage);
             productName = appDataJob.getProduct().getProductName();
 
@@ -169,7 +178,16 @@ public class L0SegmentAppConsumer
         reporting.end(new ReportingMessage("End job generation using {}", mqiMessage.getBody().getProductName()));
     }
 
-    protected AppDataJob<ProductDto> buildJob(
+    private boolean skipProduct(String productName) {
+    	
+    	boolean skip = false;
+		if(blackList != null && blackList.matcher(productName).matches()) {
+			skip = true;
+		} 
+		return skip;
+	}
+
+	protected AppDataJob<ProductDto> buildJob(
             GenericMessageDto<ProductDto> mqiMessage)
             throws AbstractCodedException {
         ProductDto leveldto = mqiMessage.getBody();
@@ -251,4 +269,5 @@ public class L0SegmentAppConsumer
     public void setTaskForFunctionalLog(String taskForFunctionalLog) {
     	this.taskForFunctionalLog = taskForFunctionalLog; 
     }
+    
 }
