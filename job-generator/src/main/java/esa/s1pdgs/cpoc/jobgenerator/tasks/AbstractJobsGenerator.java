@@ -51,7 +51,6 @@ import esa.s1pdgs.cpoc.jobgenerator.model.joborder.enums.JobOrderDestination;
 import esa.s1pdgs.cpoc.jobgenerator.model.joborder.enums.JobOrderFileNameType;
 import esa.s1pdgs.cpoc.jobgenerator.model.metadata.SearchMetadataResult;
 import esa.s1pdgs.cpoc.jobgenerator.model.tasktable.TaskTable;
-import esa.s1pdgs.cpoc.jobgenerator.model.tasktable.TaskTableDynProcParam;
 import esa.s1pdgs.cpoc.jobgenerator.model.tasktable.TaskTableInput;
 import esa.s1pdgs.cpoc.jobgenerator.model.tasktable.TaskTableInputAlternative;
 import esa.s1pdgs.cpoc.jobgenerator.model.tasktable.TaskTablePool;
@@ -122,8 +121,6 @@ public abstract class AbstractJobsGenerator<T extends AbstractDto> implements Ru
     private final AppCatalogJobClient<T> appDataService;
 
     private final String hostname;
-    
-    private final Map<String,String> parameterTypes = new HashMap<>();
 
     /**
      * Task table
@@ -557,10 +554,6 @@ public abstract class AbstractJobsGenerator<T extends AbstractDto> implements Ru
 			LOGGER.error(e);
 			return Collections.singletonMap("error", LogUtils.toString(e));
 		}
-    }
-    
-    private final String getTypeForParameter(final String parameterName) {
-    	taskTable.getDynProcParams()
     }
 
     private void updateState(JobGeneration job,
