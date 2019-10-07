@@ -117,12 +117,21 @@ public class FileUtils {
     }
     
     public static final long size(final Collection<File> files) {
-    	return files.stream()
-    			.mapToLong(f -> f.length())
-    			.sum();
+    	long size = 0;
+    	for (final File file : files) {
+    		if (file.isDirectory()) {
+    			size += size(file.listFiles());
+    		} else {
+    			size += file.length();
+    		}
+    	}
+    	return size;
     }
     
     public static final long size(final File ... files) {
+    	if (files == null) {
+    		return 0L;
+    	}
     	return size(Arrays.asList(files));
     }
     
