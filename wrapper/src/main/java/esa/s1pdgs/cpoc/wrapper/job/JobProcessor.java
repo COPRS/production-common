@@ -43,7 +43,6 @@ import esa.s1pdgs.cpoc.mqi.model.rest.Ack;
 import esa.s1pdgs.cpoc.mqi.model.rest.AckMessageDto;
 import esa.s1pdgs.cpoc.mqi.model.rest.GenericMessageDto;
 import esa.s1pdgs.cpoc.obs_sdk.ObsClient;
-import esa.s1pdgs.cpoc.report.FilenameReportingInput;
 import esa.s1pdgs.cpoc.report.JobOrderReportingInput;
 import esa.s1pdgs.cpoc.report.LoggerReporting;
 import esa.s1pdgs.cpoc.report.Reporting;
@@ -203,7 +202,7 @@ public class JobProcessor implements MqiListener<LevelJobDto> {
 		// Everything is fine with the request, we can start processing it.
 		LOGGER.debug("Everything is fine with the request, start processing job {}", job);
 		final Reporting report = reportingFactory.newReporting(0);		
-		final String jobOrderName = Paths.get(job.getJobOrder()).getFileName().toString();
+		final String jobOrderName = new File(job.getJobOrder()).getName();
 		report.begin(
 				new JobOrderReportingInput(toReportFilenames(job), jobOrderName, Collections.emptyMap()),				
 				new ReportingMessage("Start job processing")
