@@ -51,6 +51,7 @@ import esa.s1pdgs.cpoc.jobgenerator.model.joborder.enums.JobOrderDestination;
 import esa.s1pdgs.cpoc.jobgenerator.model.joborder.enums.JobOrderFileNameType;
 import esa.s1pdgs.cpoc.jobgenerator.model.metadata.SearchMetadataResult;
 import esa.s1pdgs.cpoc.jobgenerator.model.tasktable.TaskTable;
+import esa.s1pdgs.cpoc.jobgenerator.model.tasktable.TaskTableDynProcParam;
 import esa.s1pdgs.cpoc.jobgenerator.model.tasktable.TaskTableInput;
 import esa.s1pdgs.cpoc.jobgenerator.model.tasktable.TaskTableInputAlternative;
 import esa.s1pdgs.cpoc.jobgenerator.model.tasktable.TaskTablePool;
@@ -121,6 +122,8 @@ public abstract class AbstractJobsGenerator<T extends AbstractDto> implements Ru
     private final AppCatalogJobClient<T> appDataService;
 
     private final String hostname;
+    
+    private final Map<String,String> parameterTypes = new HashMap<>();
 
     /**
      * Task table
@@ -285,8 +288,26 @@ public abstract class AbstractJobsGenerator<T extends AbstractDto> implements Ru
                                 this.jobGeneratorSettings.getDefaultfamily()));
                     }
                 });
+        
+        // S1PRO-642: createParameter type map        
+//        for (final TaskTableDynProcParam param : taskTable.getDynProcParams()) {
+//        	parameterTypes.put(param.getName(), tasktableParameterTypeToReportingString(param.getType()));        	
+//        }
     }
+    
+//    private final String tasktableParameterTypeToReportingString(final String type) {
+//    	String or number or
+//    	datenumber
+//    	
+//    	
+//    	if ("string".equalsIgnoreCase(type)) {
+//    		return "string";
+//    	}
+//    }
 
+
+    
+    
     private void buildMetadataSearchQuery() {
         final AtomicInteger counter = new AtomicInteger(0);
         this.taskTable.getPools().stream()
@@ -406,6 +427,9 @@ public abstract class AbstractJobsGenerator<T extends AbstractDto> implements Ru
         if (job != null) {
             String productName =
                     job.getAppDataJob().getProduct().getProductName();
+            
+            // Joborder name for reporting
+            String jobOrderName = "NOT_KNOWN";
                   
             try {
                 LOGGER.debug(
@@ -488,7 +512,7 @@ public abstract class AbstractJobsGenerator<T extends AbstractDto> implements Ru
                         LOGGER.info("{} [productName {}] 3 - Sending job",
                                 this.prefixLogMonitor, job.getAppDataJob()
                                         .getProduct().getProductName());
-                        this.send(job);
+                        jobOrderName = this.send(job);
                 
                         updateState(job, AppDataJobGenerationState.SENT, reportPrep);
                        
@@ -507,7 +531,7 @@ public abstract class AbstractJobsGenerator<T extends AbstractDto> implements Ru
                     }
                 }
                 reporting.end(
-                		new JobOrderReportingOutput("TODO", toProcParamMap(job)), 
+                		new JobOrderReportingOutput(jobOrderName, toProcParamMap(job)), 
                 		new ReportingMessage("End job generation")
                 );
             } catch (AbstractCodedException ace) {
@@ -524,7 +548,7 @@ public abstract class AbstractJobsGenerator<T extends AbstractDto> implements Ru
     	try {
     		final Map<String,String> result = new HashMap<>();
     		
-    		for (final JobOrderProcParam param : jobGen.getJobOrder().getConf().getProcParams()) {
+    		for (final JobOrderProcParam param : jobGen.getJobOrder().getConf().getProcParams()) {    			
     			result.put(param.getName()+"_string", param.getValue());
     		}
     		return result;
@@ -533,6 +557,10 @@ public abstract class AbstractJobsGenerator<T extends AbstractDto> implements Ru
 			LOGGER.error(e);
 			return Collections.singletonMap("error", LogUtils.toString(e));
 		}
+    }
+    
+    private final String getTypeForParameter(final String parameterName) {
+    	taskTable.getDynProcParams()
     }
 
     private void updateState(JobGeneration job,
@@ -802,12 +830,14 @@ public abstract class AbstractJobsGenerator<T extends AbstractDto> implements Ru
         }
     }
 
-    protected void send(JobGeneration job) throws AbstractCodedException {
+    protected String send(JobGeneration job) throws AbstractCodedException {
         LOGGER.info("{} [productName {}] 3a - Building common job",
                 this.prefixLogMonitor,
                 job.getAppDataJob().getProduct().getProductName());
         int inc = INCREMENT_JOB.incrementAndGet();
         String workingDir = "/data/localWD/" + inc + "/";
+        // Second, build the DTO
+        String jobOrder = workingDir +  "JobOrder." + inc + ".xml";
 
         // For each input and output of the job order, prefix by the working
         // directory
@@ -847,8 +877,7 @@ public abstract class AbstractJobsGenerator<T extends AbstractDto> implements Ru
         // Custom Job order according implementation
         this.customJobOrder(job);
 
-        // Second, build the DTO
-        String jobOrder = "/data/localWD/" + inc + "/JobOrder." + inc + ".xml";
+
         ProductFamily family = ProductFamily.L0_JOB;
         switch (l0ProcessSettings.getLevel()) {
             case L0:
@@ -959,6 +988,8 @@ public abstract class AbstractJobsGenerator<T extends AbstractDto> implements Ru
 		final AppDataJob<T> dto = job.getAppDataJob();
 
         this.outputFactory.sendJob((GenericMessageDto<?>) dto.getMessages().get(0), r);
+        
+        return jobOrder;
     }
 
     protected abstract void customJobOrder(JobGeneration job);

@@ -1,5 +1,6 @@
 package esa.s1pdgs.cpoc.jobgenerator.tasks.l0segmentapp;
 
+import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
@@ -32,6 +33,7 @@ import esa.s1pdgs.cpoc.mqi.client.GenericMqiClient;
 import esa.s1pdgs.cpoc.mqi.client.StatusService;
 import esa.s1pdgs.cpoc.mqi.model.queue.ProductDto;
 import esa.s1pdgs.cpoc.mqi.model.rest.GenericMessageDto;
+import esa.s1pdgs.cpoc.report.FilenameReportingInput;
 import esa.s1pdgs.cpoc.report.LoggerReporting;
 import esa.s1pdgs.cpoc.report.Reporting;
 import esa.s1pdgs.cpoc.report.ReportingMessage;
@@ -123,7 +125,10 @@ public class L0SegmentAppConsumer
             LOGGER.info(
                     "[MONITOR] [step 1] [productName {}] Creating/updating job",
                     productName);
-            reporting.begin(new ReportingMessage("Start job generation using {}", mqiMessage.getBody().getProductName()));
+            reporting.begin(
+            		new FilenameReportingInput(Collections.singletonList(mqiMessage.getBody().getProductName())),            		
+            		new ReportingMessage("Start job generation using {}", mqiMessage.getBody().getProductName())
+            );
             AppDataJob<ProductDto> appDataJob = buildJob(mqiMessage);
             productName = appDataJob.getProduct().getProductName();
 

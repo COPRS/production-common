@@ -1,5 +1,6 @@
 package esa.s1pdgs.cpoc.jobgenerator.tasks.levelproducts;
 
+import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
@@ -34,6 +35,7 @@ import esa.s1pdgs.cpoc.mqi.client.GenericMqiClient;
 import esa.s1pdgs.cpoc.mqi.client.StatusService;
 import esa.s1pdgs.cpoc.mqi.model.queue.ProductDto;
 import esa.s1pdgs.cpoc.mqi.model.rest.GenericMessageDto;
+import esa.s1pdgs.cpoc.report.FilenameReportingInput;
 import esa.s1pdgs.cpoc.report.LoggerReporting;
 import esa.s1pdgs.cpoc.report.Reporting;
 import esa.s1pdgs.cpoc.report.ReportingMessage;
@@ -117,7 +119,10 @@ public class LevelProductsMessageConsumer extends AbstractGenericConsumer<Produc
         
         try {
             LOGGER.info("[MONITOR] [step 1] [productName {}] Creating job", productName);
-            reporting.begin(new ReportingMessage("Start job generation using {}", productName));
+            reporting.begin(
+            		new FilenameReportingInput(Collections.singletonList(mqiMessage.getBody().getProductName())),
+            		new ReportingMessage("Start job generation using {}", productName)
+            );
             
             // S1PRO-483: check for matching products if they are over sea. If not, simply skip the
             // production
