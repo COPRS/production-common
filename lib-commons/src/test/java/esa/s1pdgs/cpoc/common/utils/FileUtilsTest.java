@@ -85,7 +85,5 @@ public class FileUtilsTest {
        	assertTrue(subdir.mkdir());
     	final File file2 = new File(subdir, "test.xml");
     	FileUtils.writeFile(file2, "Ceci est une chaine de test");       			
-    	System.out.println(FileUtils.size(testDir));
-        
     }
 }
