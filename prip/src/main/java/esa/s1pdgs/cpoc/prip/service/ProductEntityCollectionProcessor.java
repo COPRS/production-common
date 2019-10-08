@@ -5,6 +5,7 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.time.Instant;
 import java.util.List;
+import java.util.UUID;
 
 import org.apache.olingo.commons.api.data.ContextURL;
 import org.apache.olingo.commons.api.data.Entity;
@@ -52,7 +53,7 @@ public class ProductEntityCollectionProcessor
 		UriResourceEntitySet uriResourceEntitySet = (UriResourceEntitySet) resourcePaths.get(0);
 		EdmEntitySet edmEntitySet = uriResourceEntitySet.getEntitySet();
 
-		EntityCollection entitySet = getData(edmEntitySet);
+		EntityCollection entitySet = getData(request, edmEntitySet);
 
 		ODataSerializer serializer = odata.createSerializer(responseFormat);
 
@@ -72,7 +73,7 @@ public class ProductEntityCollectionProcessor
 		response.setHeader(HttpHeader.CONTENT_TYPE, responseFormat.toContentTypeString());
 	}
 
-	private EntityCollection getData(EdmEntitySet edmEntitySet) {
+	private EntityCollection getData(ODataRequest request, EdmEntitySet edmEntitySet) {
 		EntityCollection productsCollection = new EntityCollection();
 		// check for which EdmEntitySet the data is requested
 		if (EdmProvider.ES_PRODUCTS_NAME.equals(edmEntitySet.getName())) {
@@ -80,36 +81,39 @@ public class ProductEntityCollectionProcessor
 
 			// add some sample product entities
 			final Entity e1 = new Entity()
-					.addProperty(new Property(null, "Id", ValueType.PRIMITIVE, 1))
+					.addProperty(new Property(null, "Id", ValueType.PRIMITIVE, MappingUtil.createId(request, "Product", UUID.fromString("123e4567-e89b-12d3-a456-556642440000"))))
 					.addProperty(new Property(null, "Name", ValueType.PRIMITIVE, "DummyProduct1"))
 					.addProperty(new Property(null, "ContentType", ValueType.PRIMITIVE, "application/octet-stream"))
 					.addProperty(new Property(null, "ContentLength", ValueType.PRIMITIVE, 0))
 					.addProperty(new Property(null, "CreationDate", ValueType.PRIMITIVE, MappingUtil.map(Instant.now())))
 					.addProperty(new Property(null, "EvictionDate", ValueType.PRIMITIVE, MappingUtil.map(Instant.now())))
 					.addProperty(new Property(null, "Checksum", ValueType.COLLECTION_COMPLEX, MappingUtil.mapToChecksumList("MD5", "d41d8cd98f00b204e9800998ecf8427e")));
-			e1.setId(createId("Products", 1));		
+			e1.setMediaContentType("application/octet-stream");
+			e1.setId(createId("Products", 1));
 			productList.add(e1);
 
 			final Entity e2 = new Entity()
-					.addProperty(new Property(null, "Id", ValueType.PRIMITIVE, 2))
+					.addProperty(new Property(null, "Id", ValueType.PRIMITIVE, MappingUtil.createId(request, "Product", UUID.fromString("123e4567-e89b-12d3-a456-556642440001"))))
 					.addProperty(new Property(null, "Name", ValueType.PRIMITIVE, "DummyProduct2"))
 					.addProperty(new Property(null, "ContentType", ValueType.PRIMITIVE, "application/octet-stream"))
 					.addProperty(new Property(null, "ContentLength", ValueType.PRIMITIVE, 0))
 					.addProperty(new Property(null, "CreationDate", ValueType.PRIMITIVE, MappingUtil.map(Instant.now())))
 					.addProperty(new Property(null, "EvictionDate", ValueType.PRIMITIVE, MappingUtil.map(Instant.now())))
 					.addProperty(new Property(null, "Checksum", ValueType.COLLECTION_COMPLEX, MappingUtil.mapToChecksumList("MD5", "d41d8cd98f00b204e9800998ecf8427e")));
-			e2.setId(createId("Products", 2));		
+			e2.setMediaContentType("application/octet-stream");
+			e2.setId(createId("Products", 2));
 			productList.add(e2);
 
 			final Entity e3 = new Entity()
-					.addProperty(new Property(null, "Id", ValueType.PRIMITIVE, 3))
+					.addProperty(new Property(null, "Id", ValueType.PRIMITIVE, MappingUtil.createId(request, "Product", UUID.fromString("123e4567-e89b-12d3-a456-556642440002"))))
 					.addProperty(new Property(null, "Name", ValueType.PRIMITIVE, "DummyProduct1"))
 					.addProperty(new Property(null, "ContentType", ValueType.PRIMITIVE, "application/octet-stream"))
 					.addProperty(new Property(null, "ContentLength", ValueType.PRIMITIVE, 0))
 					.addProperty(new Property(null, "CreationDate", ValueType.PRIMITIVE, MappingUtil.map(Instant.now())))
 					.addProperty(new Property(null, "EvictionDate", ValueType.PRIMITIVE, MappingUtil.map(Instant.now())))
 					.addProperty(new Property(null, "Checksum", ValueType.COLLECTION_COMPLEX, MappingUtil.mapToChecksumList("MD5", "d41d8cd98f00b204e9800998ecf8427e")));
-			e3.setId(createId("Products", 3));		
+			e3.setMediaContentType("application/octet-stream");
+			e3.setId(createId("Products", 3));
 			productList.add(e3);
 		}
 

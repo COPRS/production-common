@@ -13,6 +13,7 @@ import org.apache.olingo.commons.api.data.EntityCollection;
 import org.apache.olingo.commons.api.data.Property;
 import org.apache.olingo.commons.api.data.ValueType;
 import org.apache.olingo.commons.api.ex.ODataRuntimeException;
+import org.apache.olingo.server.api.ODataRequest;
 
 public class MappingUtil {
 
@@ -38,9 +39,9 @@ public class MappingUtil {
 		return possibleQuotedValue;
 	}
 
-	public static URI createId(String entitySetName, UUID id) {
+	public static URI createId(ODataRequest request, String entitySetName, UUID id) {
 		try {
-			return new URI(entitySetName + "(" + id.toString() + ")");
+			return new URI(request.getRawBaseUri() + "/" + entitySetName + "(" + id.toString() + ")");
 		} catch (URISyntaxException e) {
 			throw new ODataRuntimeException("Unable to create id for entity: " + entitySetName, e);
 		}
