@@ -13,7 +13,7 @@ RUN echo "${VERSION}" >> VERSION
 RUN echo "${BRANCH_TEXT}" >> VERSION
 RUN echo "${COMMIT_ID}" >> VERSION
 
-COPY --from=build /app/queue-watcher/target/s1pro-core-prip-server-*.jar s1pdgs-prip-server.jar
+COPY --from=build /app/prip/target/s1pro-core-prip-server-*.jar s1pdgs-prip-server.jar
 RUN apk update && apk add wget
 RUN mkdir -p tmp
 COPY /config/start.sh start.sh
