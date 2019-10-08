@@ -1,4 +1,4 @@
-package esa.s1pdgs.cpoc.prip.service;
+package esa.s1pdgs.cpoc.prip.service.edm;
 
 import java.util.ArrayList;
 import java.util.Collections;

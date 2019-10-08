@@ -16,8 +16,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import esa.s1pdgs.cpoc.prip.service.EdmProvider;
-import esa.s1pdgs.cpoc.prip.service.ProductEntityCollectionProcessor;
+import esa.s1pdgs.cpoc.prip.service.edm.EdmProvider;
+import esa.s1pdgs.cpoc.prip.service.processor.ProductEntityCollectionProcessor;
 
 @RestController
 @RequestMapping(value = "/odata")

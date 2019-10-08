@@ -1,4 +1,4 @@
-package esa.s1pdgs.cpoc.prip.service;
+package esa.s1pdgs.cpoc.prip.service.processor;
 
 import java.io.InputStream;
 import java.net.URI;
@@ -31,6 +31,7 @@ import org.apache.olingo.server.api.uri.UriInfo;
 import org.apache.olingo.server.api.uri.UriResource;
 import org.apache.olingo.server.api.uri.UriResourceEntitySet;
 
+import esa.s1pdgs.cpoc.prip.service.edm.EdmProvider;
 import esa.s1pdgs.cpoc.prip.service.mapping.MappingUtil;
 
 public class ProductEntityCollectionProcessor
