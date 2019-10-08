@@ -10,4 +10,4 @@ prip-server-build:
   script:
     - cd prip
     - dockerbuild --cache-from registry.tools.s1pdgs.eu/werum/processing/s1pro-core:final -t "$CI_REGISTRY/$CI_PROJECT_NAMESPACE/$MODULE_PRIP_SERVER:$CI_COMMIT_REF_SLUG" .
-    - docker push "$CI_REGISTRY/$CI_PROJECT_NAMESPACE/$MODULE_QUEUE_WATCHER:$CI_COMMIT_REF_SLUG"
+    - docker push "$CI_REGISTRY/$CI_PROJECT_NAMESPACE/$MODULE_PRIP_SERVER:$CI_COMMIT_REF_SLUG"
