@@ -828,9 +828,12 @@ public abstract class AbstractJobsGenerator<T extends AbstractDto> implements Ru
                 this.prefixLogMonitor,
                 job.getAppDataJob().getProduct().getProductName());
         int inc = INCREMENT_JOB.incrementAndGet();
-        String workingDir = "/data/localWD/" + inc + "/";
+        final String workingDir = "/data/localWD/" + inc + "/";
+        final String joborderName = "JobOrder." + inc + ".xml";
+        final String jobOrder = workingDir +  joborderName;
+        
         // Second, build the DTO
-        String jobOrder = workingDir +  "JobOrder." + inc + ".xml";
+
 
         // For each input and output of the job order, prefix by the working
         // directory
@@ -982,7 +985,7 @@ public abstract class AbstractJobsGenerator<T extends AbstractDto> implements Ru
 
         this.outputFactory.sendJob((GenericMessageDto<?>) dto.getMessages().get(0), r);
         
-        return jobOrder;
+        return joborderName;
     }
 
     protected abstract void customJobOrder(JobGeneration job);
