@@ -6,40 +6,42 @@ import static org.junit.Assert.assertTrue;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Files;
 
 import org.junit.After;
-import org.junit.Before;
 import org.junit.Test;
 
 import esa.s1pdgs.cpoc.common.errors.InternalErrorException;
 
-public class FileUtilsTest {
-    
-    private File testFile;
-    
-    @Before
-    public void init() throws InternalErrorException {
-        testFile = new File("test-file.xml");
-        FileUtils.writeFile("test-file.xml", "Helloword !");
-    }
-    
-    @After
+public class FileUtilsTest { 
+	private final File testDir = FileUtils.createTmpDir();
+	
+	@After
     public void clean() {
-        testFile.delete();
+        FileUtils.delete(testDir.getPath());        
     }
+	
+//    
+//    @Before
+//    public void init() throws InternalErrorException {
+//        final File testFile = new File("test-file.xml");
+//        FileUtils.writeFile("test-file.xml", "Helloword !");
+//    }
+    
+    
 
     @Test
     public void testWriteFileWithPath() throws InternalErrorException {
-        File file = new File("test.xml");
+        final File file = new File(testDir, "test.xml");
         assertFalse(file.exists());
-        FileUtils.writeFile("test.xml", "Ceci est une chaine de test");
+        FileUtils.writeFile(file.getPath(), "Ceci est une chaine de test");
         assertTrue(file.exists());
         file.delete();
     }
 
     @Test
     public void testWriteFile() throws InternalErrorException {
-        File file = new File("test.xml");
+        final File file = new File(testDir, "test.xml");
         assertFalse(file.exists());
         FileUtils.writeFile(file, "Ceci est une chaine de test");
         assertTrue(file.exists());
@@ -47,48 +49,18 @@ public class FileUtilsTest {
     }
 
     @Test(expected = InternalErrorException.class)
-    public void testWriteFileWhenDirectoryNotExist()
-            throws InternalErrorException {
-        File file = new File("tutu/test.xml");
-        FileUtils.writeFile(file, "Ceci est une chaine de test");
+    public void testWriteFileWhenDirectoryNotExist() throws InternalErrorException {
+        FileUtils.writeFile(new File("tutu/test.xml"), "Ceci est une chaine de test");
     }
-
-    /**@Test
-    public void testWriteFileWhenLock()
-            throws InternalErrorException, IOException {
-        RandomAccessFile raFile = new RandomAccessFile("test-file.xml", "rw");
-        raFile.getChannel().lock();
-        try {
-            FileUtils.writeFile(testFile, "Ceci est une chaine de test");
-            fail("An exception shall be raised");
-        } catch (InternalErrorException iee) {
-
-        } finally {
-            raFile.close();
-        }
-    }*/
 
     @Test
     public void testReadFile() throws InternalErrorException {
-        FileUtils.writeFile("test.xml", "Ceci est une chaine de test");
-        String ret = FileUtils.readFile(new File("test.xml"));
+    	final File file = new File(testDir, "test.xml");    	
+        FileUtils.writeFile(file, "Ceci est une chaine de test");
+        String ret = FileUtils.readFile(file);
         assertEquals("Ceci est une chaine de test", ret);
-        (new File("test.xml")).delete();
+        file.delete();
     }
-
-    /**@Test
-    public void testReadFileWhenException() throws InternalErrorException, IOException {
-        RandomAccessFile raFile = new RandomAccessFile("test-file.xml", "rw");
-        raFile.getChannel().lock();
-        try {
-            FileUtils.readFile(testFile);
-            fail("An exception shall be raised");
-        } catch (InternalErrorException iee) {
-
-        } finally {
-            raFile.close();
-        }
-    }*/
 
     @Test
     public void testDelete() throws IOException {
@@ -103,5 +75,17 @@ public class FileUtilsTest {
 
         FileUtils.delete("dir1");
         assertFalse((new File("dir1")).exists());
+    }
+    
+    @Test
+    public final void testSize() throws Exception {
+    	final File file = new File(testDir, "test.xml"); 
+        FileUtils.writeFile(file, "Ceci est une chaine de test");
+       	final File subdir = new File(testDir, "testDir");
+       	assertTrue(subdir.mkdir());
+    	final File file2 = new File(subdir, "test.xml");
+    	FileUtils.writeFile(file2, "Ceci est une chaine de test");       			
+    	System.out.println(FileUtils.size(testDir));
+        
     }
 }
