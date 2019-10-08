@@ -95,7 +95,7 @@ public abstract class AbstractObsClient implements ObsClient {
 						throw new ObsUnknownObject(object.getFamily(), object.getKey());
 					}					
 					final long dlSize =	FileUtils.size(files);
-					reporting.end(new ReportingMessage(dlSize, "End downloading from OBS"));             	
+					reporting.end(new ReportingMessage(dlSize, "End downloading from OBS " + dlSize + " -- " + files));             	
 					files.addAll(results);
 				} catch (SdkClientException | RuntimeException e) {
 					reporting.error(new ReportingMessage("Error on downloading from OBS: {}", LogUtils.toString(e)));
