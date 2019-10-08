@@ -16,7 +16,7 @@
 		<docker.image.prefix>springio</docker.image.prefix>
 		<project.build.finalName>s1pdgs-prip</project.build.finalName>
 		<project.artifactId>s1pdgs-prip</project.artifactId>
-		<start-class>esa.s1pdgs.cpoc.prip.server.Application</start-class>
+		<start-class>esa.s1pdgs.cpoc.prip.Application</start-class>
 	</properties>
 
 	<dependencies>
