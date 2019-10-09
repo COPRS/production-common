@@ -42,24 +42,24 @@ public class DummyPripMetadataRepositoryImpl implements PripMetadataRepository {
 						"00000000-0000-0000-0000-000000000001", // id
 						"DummyProduct1", // name
 						1000L, // size
-						"2000-01-01T00:00:00.000Z", // creation date
-						"2000-01-01T00:00:00.000Z", // eviction date
+						"2000-01-01T00:00:00.000000Z", // creation date
+						"2000-01-01T00:00:00.000000Z", // eviction date
 						"00000000000000000000000000000001" // checksum value
 				), //
 				createDummyMetadata( //
 						"00000000-0000-0000-0000-000000000002", // id
 						"DummyProduct2", // name
 						2000L, // size
-						"2000-01-01T00:00:00.000Z", // creation date
-						"2000-01-01T00:00:00.000Z", // eviction date
+						"2000-01-01T00:00:00.000000Z", // creation date
+						"2000-01-01T00:00:00.000000Z", // eviction date
 						"00000000000000000000000000000003" // checksum value
 				), //
 				createDummyMetadata( //
 						"00000000-0000-0000-0000-000000000003", // id
 						"DummyProduct3", // name
 						3000L, // size
-						"2000-01-01T00:00:00.000Z", // creation date
-						"2000-01-01T00:00:00.000Z", // eviction date
+						"2000-01-01T00:00:00.000000Z", // creation date
+						"2000-01-01T00:00:00.000000Z", // eviction date
 						"00000000000000000000000000000003" // checksum value
 				));
 	}

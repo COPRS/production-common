@@ -2,6 +2,10 @@ package esa.s1pdgs.cpoc.prip.service.mapping;
 
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.sql.Timestamp;
+import java.time.LocalDateTime;
+import java.time.ZoneOffset;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
@@ -18,6 +22,9 @@ import esa.s1pdgs.cpoc.prip.model.PripMetadata;
 
 public class MappingUtil {
 
+	public final static String PRIP_METADATA_DATE_FORMAT = "yyyy-MM-dd'T'HH:mm:ss.SSS";
+	public final static DateTimeFormatter PRIP_METADATA_DATE_FORMATTER = DateTimeFormatter.ofPattern(PRIP_METADATA_DATE_FORMAT);
+	
 	private MappingUtil() {
 	}
 	
@@ -28,8 +35,8 @@ public class MappingUtil {
 				.addProperty(new Property(null, "Name", ValueType.PRIMITIVE, pripMetadata.getName()))
 				.addProperty(new Property(null, "ContentType", ValueType.PRIMITIVE, pripMetadata.getContentType()))
 				.addProperty(new Property(null, "ContentLength", ValueType.PRIMITIVE, pripMetadata.getContentLength()))
-				.addProperty(new Property(null, "CreationDate", ValueType.PRIMITIVE, pripMetadata.getCreationDate()))
-				.addProperty(new Property(null, "EvictionDate", ValueType.PRIMITIVE, pripMetadata.getEvictionDate()))
+				.addProperty(new Property(null, "CreationDate", ValueType.PRIMITIVE, dateFormat(pripMetadata.getCreationDate())))
+				.addProperty(new Property(null, "EvictionDate", ValueType.PRIMITIVE, dateFormat(pripMetadata.getEvictionDate())))
 				.addProperty(new Property(null, "Checksums", ValueType.COLLECTION_COMPLEX, mapToChecksumList(pripMetadata.getChecksums())));
 		entity.setMediaContentType(pripMetadata.getContentType());
 		entity.setId(id);
@@ -44,7 +51,11 @@ public class MappingUtil {
 			throw new ODataRuntimeException("Unable to create id for entity: " + entitySetName, e);
 		}
 	}
-
+	
+	public static Timestamp dateFormat(LocalDateTime localDateTime) {
+		return null == localDateTime ? null : Timestamp.from(localDateTime.toInstant(ZoneOffset.UTC));
+	}
+	
 	public static List<ComplexValue> mapToChecksumList(List<Checksum> checksums) {
 		List<ComplexValue> listOfComplexValues = new ArrayList<>();
 		for (Checksum checksum : checksums) {
