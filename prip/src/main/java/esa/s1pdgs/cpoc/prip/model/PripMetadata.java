@@ -1,10 +1,13 @@
 package esa.s1pdgs.cpoc.prip.model;
 
-import java.util.Date;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
 
 public class PripMetadata {
+
+	public static final String DEFAULT_CONTENTTYPE = "file/zip";
+	public static final int DEFAULT_EVICTION_DAYS = 7;
 
 	private UUID id;
 
@@ -16,9 +19,9 @@ public class PripMetadata {
 
 	private long contentLength;
 
-	private Date creationDate;
+	private LocalDateTime creationDate;
 
-	private Date evictionDate;
+	private LocalDateTime evictionDate;
 
 	private List<Checksum> checksums;
 
@@ -65,19 +68,19 @@ public class PripMetadata {
 		this.contentLength = contentLength;
 	}
 
-	public Date getCreationDate() {
+	public LocalDateTime getCreationDate() {
 		return creationDate;
 	}
 
-	public void setCreationDate(Date creationDate) {
+	public void setCreationDate(LocalDateTime creationDate) {
 		this.creationDate = creationDate;
 	}
 
-	public Date getEvictionDate() {
+	public LocalDateTime getEvictionDate() {
 		return evictionDate;
 	}
 
-	public void setEvictionDate(Date evictionDate) {
+	public void setEvictionDate(LocalDateTime evictionDate) {
 		this.evictionDate = evictionDate;
 	}
 
@@ -87,6 +90,14 @@ public class PripMetadata {
 
 	public void setChecksums(List<Checksum> checksums) {
 		this.checksums = checksums;
+	}
+
+	@Override
+	public String toString() {
+
+		return String.format(
+				"{id: %s, obsKey: %s, name: %s, contentType: %s, contentLength: %s, creationDate: %s, evictionDate: %s, checksums: %s}",
+				id, obsKey, name, contentType, contentLength, creationDate, evictionDate, checksums);
 	}
 
 }
