@@ -5,7 +5,6 @@ import java.net.URISyntaxException;
 import java.sql.Timestamp;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
-import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
@@ -22,9 +21,6 @@ import esa.s1pdgs.cpoc.prip.model.PripMetadata;
 
 public class MappingUtil {
 
-	public final static String PRIP_METADATA_DATE_FORMAT = "yyyy-MM-dd'T'HH:mm:ss.SSS";
-	public final static DateTimeFormatter PRIP_METADATA_DATE_FORMATTER = DateTimeFormatter.ofPattern(PRIP_METADATA_DATE_FORMAT);
-	
 	private MappingUtil() {
 	}
 	
