@@ -52,13 +52,12 @@ public class EdmProvider extends org.apache.olingo.commons.api.edm.provider.Csdl
 			List<CsdlProperty> properties = new ArrayList<>();
 
 			properties.add(new CsdlProperty().setName("Id").setType(STRING_TYPE_FQN));
-			// Note: Location in Object Storage is not propagated
 			properties.add(new CsdlProperty().setName("Name").setType(STRING_TYPE_FQN));
 			properties.add(new CsdlProperty().setName("ContentType").setType(STRING_TYPE_FQN));
 			properties.add(new CsdlProperty().setName("ContentLength").setType(INT_64_TYPE_FQN));
 			properties.add(new CsdlProperty().setName("CreationDate").setType(DATE_TIME_OFFSET_TYPE_FQN));
 			properties.add(new CsdlProperty().setName("EvictionDate").setType(DATE_TIME_OFFSET_TYPE_FQN));
-			properties.add(new CsdlProperty().setName("Checksum").setType(CHECKSUM_TYPE_FQN).setCollection(true));
+			properties.add(new CsdlProperty().setName("Checksums").setType(CHECKSUM_TYPE_FQN).setCollection(true));
 
 			entityType.setProperties(properties);
 			

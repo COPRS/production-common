@@ -1,15 +1,11 @@
 package esa.s1pdgs.cpoc.prip.service.processor;
 
 import java.io.InputStream;
-import java.time.Instant;
 import java.util.List;
-import java.util.UUID;
 
 import org.apache.olingo.commons.api.data.ContextURL;
 import org.apache.olingo.commons.api.data.Entity;
 import org.apache.olingo.commons.api.data.EntityCollection;
-import org.apache.olingo.commons.api.data.Property;
-import org.apache.olingo.commons.api.data.ValueType;
 import org.apache.olingo.commons.api.edm.EdmEntitySet;
 import org.apache.olingo.commons.api.edm.EdmEntityType;
 import org.apache.olingo.commons.api.format.ContentType;
@@ -28,8 +24,11 @@ import org.apache.olingo.server.api.uri.UriInfo;
 import org.apache.olingo.server.api.uri.UriResource;
 import org.apache.olingo.server.api.uri.UriResourceEntitySet;
 
+import esa.s1pdgs.cpoc.prip.model.PripMetadata;
 import esa.s1pdgs.cpoc.prip.service.edm.EdmProvider;
 import esa.s1pdgs.cpoc.prip.service.mapping.MappingUtil;
+import esa.s1pdgs.cpoc.prip.service.metadata.DummyPripMetadataRepositoryImpl;
+import esa.s1pdgs.cpoc.prip.service.metadata.PripMetadataRepository;
 
 public class ProductEntityCollectionProcessor
 		implements org.apache.olingo.server.api.processor.EntityCollectionProcessor {
@@ -72,50 +71,17 @@ public class ProductEntityCollectionProcessor
 	}
 
 	private EntityCollection getData(ODataRequest request, EdmEntitySet edmEntitySet) {
-		EntityCollection productsCollection = new EntityCollection();
-		// check for which EdmEntitySet the data is requested
+		EntityCollection entityCollection = new EntityCollection();
 		if (EdmProvider.ES_PRODUCTS_NAME.equals(edmEntitySet.getName())) {
-			List<Entity> productList = productsCollection.getEntities();
-
-			// add some sample product entities
-			final Entity e1 = new Entity()
-					.addProperty(new Property(null, "Id", ValueType.PRIMITIVE, MappingUtil.createId(request, "Products", UUID.fromString("123e4567-e89b-12d3-a456-556642440000"))))
-					.addProperty(new Property(null, "Name", ValueType.PRIMITIVE, "DummyProduct1"))
-					.addProperty(new Property(null, "ContentType", ValueType.PRIMITIVE, "application/octet-stream"))
-					.addProperty(new Property(null, "ContentLength", ValueType.PRIMITIVE, 0))
-					.addProperty(new Property(null, "CreationDate", ValueType.PRIMITIVE, MappingUtil.map(Instant.now())))
-					.addProperty(new Property(null, "EvictionDate", ValueType.PRIMITIVE, MappingUtil.map(Instant.now())))
-					.addProperty(new Property(null, "Checksum", ValueType.COLLECTION_COMPLEX, MappingUtil.mapToChecksumList("MD5", "d41d8cd98f00b204e9800998ecf8427e")));
-			e1.setMediaContentType("application/octet-stream");
-			e1.setId(MappingUtil.createId(request, "Products", UUID.fromString("123e4567-e89b-12d3-a456-556642440000")));
-			productList.add(e1);
-
-			final Entity e2 = new Entity()
-					.addProperty(new Property(null, "Id", ValueType.PRIMITIVE, MappingUtil.createId(request, "Products", UUID.fromString("123e4567-e89b-12d3-a456-556642440001"))))
-					.addProperty(new Property(null, "Name", ValueType.PRIMITIVE, "DummyProduct2"))
-					.addProperty(new Property(null, "ContentType", ValueType.PRIMITIVE, "application/octet-stream"))
-					.addProperty(new Property(null, "ContentLength", ValueType.PRIMITIVE, 0))
-					.addProperty(new Property(null, "CreationDate", ValueType.PRIMITIVE, MappingUtil.map(Instant.now())))
-					.addProperty(new Property(null, "EvictionDate", ValueType.PRIMITIVE, MappingUtil.map(Instant.now())))
-					.addProperty(new Property(null, "Checksum", ValueType.COLLECTION_COMPLEX, MappingUtil.mapToChecksumList("MD5", "d41d8cd98f00b204e9800998ecf8427e")));
-			e2.setMediaContentType("application/octet-stream");
-			e2.setId(MappingUtil.createId(request, "Products", UUID.fromString("123e4567-e89b-12d3-a456-556642440001")));
-			productList.add(e2);
-
-			final Entity e3 = new Entity()
-					.addProperty(new Property(null, "Id", ValueType.PRIMITIVE, MappingUtil.createId(request, "Products", UUID.fromString("123e4567-e89b-12d3-a456-556642440002"))))
-					.addProperty(new Property(null, "Name", ValueType.PRIMITIVE, "DummyProduct1"))
-					.addProperty(new Property(null, "ContentType", ValueType.PRIMITIVE, "application/octet-stream"))
-					.addProperty(new Property(null, "ContentLength", ValueType.PRIMITIVE, 0))
-					.addProperty(new Property(null, "CreationDate", ValueType.PRIMITIVE, MappingUtil.map(Instant.now())))
-					.addProperty(new Property(null, "EvictionDate", ValueType.PRIMITIVE, MappingUtil.map(Instant.now())))
-					.addProperty(new Property(null, "Checksum", ValueType.COLLECTION_COMPLEX, MappingUtil.mapToChecksumList("MD5", "d41d8cd98f00b204e9800998ecf8427e")));
-			e3.setMediaContentType("application/octet-stream");
-			e3.setId(MappingUtil.createId(request, "Products", UUID.fromString("123e4567-e89b-12d3-a456-556642440002")));
-			productList.add(e3);
+			PripMetadataRepository pripMetadataRepository = new DummyPripMetadataRepositoryImpl();
+			
+			List<Entity> productList = entityCollection.getEntities();
+			for(PripMetadata pripMetadata : pripMetadataRepository.findAll()) {
+				productList.add(MappingUtil.pripMetadataToEntity(pripMetadata, request));
+			}
 		}
 
-		return productsCollection;
+		return entityCollection;
 	}
 	
 }
