@@ -31,6 +31,8 @@
 		<jsch.version>0.1.53</jsch.version>
 
 		<elasticsearch.version>6.1.3</elasticsearch.version>
+		
+		<odata.version>4.6.0</odata.version>
 	</properties>
 
 	<!-- TODO: check if this is still required -->
