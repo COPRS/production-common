@@ -41,7 +41,7 @@ public class MappingUtil {
 
 	public static URI createId(ODataRequest request, String entitySetName, UUID id) {
 		try {
-			return new URI(request.getRawBaseUri() + "/" + entitySetName + "(" + id.toString() + ")");
+			return new URI(request.getRawBaseUri() + "/" + entitySetName + "('" + id.toString() + "')");
 		} catch (URISyntaxException e) {
 			throw new ODataRuntimeException("Unable to create id for entity: " + entitySetName, e);
 		}
