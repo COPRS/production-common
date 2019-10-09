@@ -35,8 +35,8 @@ public class MappingUtil {
 				.addProperty(new Property(null, "Name", ValueType.PRIMITIVE, pripMetadata.getName()))
 				.addProperty(new Property(null, "ContentType", ValueType.PRIMITIVE, pripMetadata.getContentType()))
 				.addProperty(new Property(null, "ContentLength", ValueType.PRIMITIVE, pripMetadata.getContentLength()))
-				.addProperty(new Property(null, "CreationDate", ValueType.PRIMITIVE, dateFormat(pripMetadata.getCreationDate())))
-				.addProperty(new Property(null, "EvictionDate", ValueType.PRIMITIVE, dateFormat(pripMetadata.getEvictionDate())))
+				.addProperty(new Property(null, "CreationDate", ValueType.PRIMITIVE, convertLocalDateTimeToTimestamp(pripMetadata.getCreationDate())))
+				.addProperty(new Property(null, "EvictionDate", ValueType.PRIMITIVE, convertLocalDateTimeToTimestamp(pripMetadata.getEvictionDate())))
 				.addProperty(new Property(null, "Checksums", ValueType.COLLECTION_COMPLEX, mapToChecksumList(pripMetadata.getChecksums())));
 		entity.setMediaContentType(pripMetadata.getContentType());
 		entity.setId(id);
@@ -52,7 +52,7 @@ public class MappingUtil {
 		}
 	}
 	
-	public static Timestamp dateFormat(LocalDateTime localDateTime) {
+	public static Timestamp convertLocalDateTimeToTimestamp(LocalDateTime localDateTime) {
 		return null == localDateTime ? null : Timestamp.from(localDateTime.toInstant(ZoneOffset.UTC));
 	}
 	
