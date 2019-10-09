@@ -45,8 +45,8 @@ public class PripMetadataListener implements MqiListener<ProductDto> {
 			final GenericMqiClient mqiClient,
 			final ObsClient obsClient,
 			final PripMetadataRepository pripMetadataRepo,
-			@Value("${metadatalistener.polling-interval-ms}") final long pollingIntervalMs,
-			@Value("${metadatalistener.polling-initial-delay-ms}") final long pollingInitialDelayMs) {
+			@Value("${prip.metadatalistener.polling-interval-ms}") final long pollingIntervalMs,
+			@Value("${prip.metadatalistener.polling-initial-delay-ms}") final long pollingInitialDelayMs) {
 		this.mqiClient = mqiClient;
 		this.obsClient = obsClient;
 		this.pripMetadataRepo = pripMetadataRepo;
