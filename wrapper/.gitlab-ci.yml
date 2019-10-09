@@ -33,6 +33,6 @@ wrapper-l2-build:
   stage: module
   script:
     - cd wrapper/config/dockerfiles/L2
-    - dockerbuild --cache-from registry.tools.s1pdgs.eu/werum/processing/s1pro-core:final -t "$CI_REGISTRY/$CI_PROJECT_NAMESPACE/$MODULE_WRAPPER-l2:$CI_COMMIT_REF_SLUG" -
+    - dockerbuild --cache-from registry.tools.s1pdgs.eu/werum/processing/s1pro-core:final -t "$CI_REGISTRY/$CI_PROJECT_NAMESPACE/$MODULE_WRAPPER-l2:$CI_COMMIT_REF_SLUG" .
     - docker push "$CI_REGISTRY/$CI_PROJECT_NAMESPACE/$MODULE_WRAPPER-l2:$CI_COMMIT_REF_SLUG"
     
