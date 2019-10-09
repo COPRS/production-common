@@ -2,7 +2,7 @@ ARG BRANCH
 FROM registry.tools.s1pdgs.eu/werum/processing/s1pro-core:${BRANCH} as build
 WORKDIR /app
 
-FROM s1pro-container-alpine_base:${BRANCH}
+FROM registry.tools.s1pdgs.eu/werum/processing/s1pro-container-alpine_base:${BRANCH}
 ARG VERSION
 ARG COMMIT_ID
 ARG BRANCH_TEXT
