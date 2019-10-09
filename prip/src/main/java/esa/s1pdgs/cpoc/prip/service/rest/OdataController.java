@@ -18,6 +18,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import esa.s1pdgs.cpoc.prip.service.edm.EdmProvider;
 import esa.s1pdgs.cpoc.prip.service.processor.ProductEntityCollectionProcessor;
+import esa.s1pdgs.cpoc.prip.service.processor.ProductEntityProcessor;
 
 @RestController
 @RequestMapping(value = "/odata")
@@ -33,6 +34,7 @@ public class OdataController {
 		OData odata = OData.newInstance();
 		ServiceMetadata serviceMetadata = odata.createServiceMetadata(edmProvider, new ArrayList<EdmxReference>());
 		ODataHttpHandler handler = odata.createHandler(serviceMetadata);
+		handler.register(new ProductEntityProcessor());
 		handler.register(new ProductEntityCollectionProcessor());
 
 		handler.process(new HttpServletRequestWrapper(request) {
