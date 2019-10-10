@@ -11,6 +11,22 @@ public class PripMetadata {
 	public static final String DEFAULT_CONTENTTYPE = "file/zip";
 	public static final int DEFAULT_EVICTION_DAYS = 7;
 
+
+	public enum FIELD_NAMES {
+		ID("id"), OBS_KEY("obsKey"), NAME("name"), CONTENT_TYPE("contentType"), CONTENT_LENGTH("contentLength"),
+		CREATION_DATE("creationDate"), EVICTION_DATE("evictionDate"), CHECKSUM("checksum");
+
+		private String fieldName;
+
+		private FIELD_NAMES(String fieldName) {
+			this.fieldName = fieldName;
+		}
+
+		public String fieldName() {
+			return fieldName;
+		}
+	}
+	
 	private UUID id;
 
 	private String obsKey;
@@ -97,9 +113,15 @@ public class PripMetadata {
 	@Override
 	public String toString() {
 		return String.format(
-				"{\"id\": \"%s\", \"obsKey\": \"%s\", \"name\": \"%s\", \"contentType\": \"%s\", \"contentLength\": \"%s\", \"creationDate\": \"%s\", \"evictionDate\": \"%s\", \"checksum\": %s}",
-				id, obsKey, name, contentType, contentLength, DateUtils.formatToMetadataDateTimeFormat(creationDate),
-				DateUtils.formatToMetadataDateTimeFormat(evictionDate), checksums);
+				"{\"%s\":\"%s\", \"%s\":\"%s\", \"%s\":\"%s\", \"%s\":\"%s\", \"%s\":\"%s\", \"%s\":\"%s\", \"%s\":\"%s\", \"%s\":%s}",
+				FIELD_NAMES.ID.fieldName(), id, 
+				FIELD_NAMES.OBS_KEY.fieldName(), obsKey, 
+				FIELD_NAMES.NAME.fieldName(), name, 
+				FIELD_NAMES.CONTENT_TYPE.fieldName(), contentType,
+				FIELD_NAMES.CONTENT_LENGTH.fieldName(), contentLength,
+				FIELD_NAMES.CREATION_DATE.fieldName(), DateUtils.formatToMetadataDateTimeFormat(creationDate),
+				FIELD_NAMES.EVICTION_DATE.fieldName(), DateUtils.formatToMetadataDateTimeFormat(evictionDate), 
+				FIELD_NAMES.CHECKSUM.fieldName(), checksums);
 	}
 
 }
