@@ -671,6 +671,12 @@ public class ExtractMetadataTest {
             assertEquals("JSON object value validityStartTime are not equals",
                     expectedResult.get("missionId").toString(),
                     result.get("missionId").toString());
+            
+            assertEquals("JSON object value totalNumberOfSlice are not equals",
+                    expectedResult.get("totalNumberOfSlice").toString(),
+                    result.get("totalNumberOfSlice").toString());
+            
+            
         } catch (AbstractCodedException fe) {
             fail("Exception occurred: " + fe.getMessage());
         }
