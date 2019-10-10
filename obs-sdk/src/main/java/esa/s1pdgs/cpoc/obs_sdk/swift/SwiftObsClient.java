@@ -235,11 +235,55 @@ public class SwiftObsClient extends AbstractObsClient {
 	}
 
 	@Override
-	public Map<String,String> collectMd5Sums(ObsObject object) throws ObsException {
+	protected Map<String,String> collectMd5Sums(ObsObject object) throws ObsException {
 		try {
 			return swiftObsServices.collectMd5Sums(getBucketFor(object.getFamily()), object.getKey());
 		} catch (SwiftSdkClientException | ObsServiceException e) {
 			throw new ObsException(object.getFamily(), object.getKey(), e);
+		}
+	}
+
+	@Override
+	public long size(ObsObject object) throws ObsException {
+		try {
+			String bucketName = getBucketFor(object.getFamily());
+			/*
+			 * This method is supposed to return the size of exactly one object. If more than
+			 * one is returned the object is not unique and very likely not the full name of it or
+			 * a directory. We are not supporting this and thus operations fails
+			 */
+			if (swiftObsServices.getNbObjects(bucketName, object.getKey()) != 1) {
+				throw new IllegalArgumentException(String.format(
+						"Unable to determinate size of object '%s' (family:%s) (is a directory or not exist?)",
+						object.getKey(), object.getFamily()));
+			}
+			
+			// return the size of the object
+			return swiftObsServices.size(bucketName, object.getKey());						
+		} catch (SdkClientException ex) {
+			throw new ObsException(object.getFamily(), object.getKey(), ex);
+		}
+	}
+
+	@Override
+	public String getChecksum(ObsObject object) throws ObsException {
+		try {
+			String bucketName = getBucketFor(object.getFamily());
+			/*
+			 * This method is supposed to return the size of exactly one object. If more than
+			 * one is returned the object is not unique and very likely not the full name of it or
+			 * a directory. We are not supporting this and thus operations fails
+			 */
+			if (swiftObsServices.getNbObjects(bucketName, object.getKey()) != 1) {
+				throw new IllegalArgumentException(String.format(
+						"Unable to determinate checksum of object '%s' (family:%s) (is a directory or not exist?)",
+						object.getKey(), object.getFamily()));
+			}
+			
+			// return the checksum of the object
+			return swiftObsServices.getChecksum(bucketName, object.getKey());
+		} catch (SdkClientException ex) {
+			throw new ObsException(object.getFamily(), object.getKey(), ex);
 		}
 	}
 }

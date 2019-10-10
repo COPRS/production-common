@@ -17,8 +17,11 @@ import org.javaswift.joss.model.Account;
 import org.javaswift.joss.model.Container;
 import org.javaswift.joss.model.StoredObject;
 
+import com.amazonaws.services.s3.model.S3ObjectSummary;
+
 import esa.s1pdgs.cpoc.obs_sdk.AbstractObsClient;
 import esa.s1pdgs.cpoc.obs_sdk.s3.S3ObsServices;
+import esa.s1pdgs.cpoc.obs_sdk.s3.S3SdkClientException;
 
 public class SwiftObsServices {
 
@@ -543,4 +546,27 @@ public class SwiftObsServices {
             }
         }
     }
+
+	public long size(String bucketName, String key) throws SwiftSdkClientException {
+		log(String.format("Get size of object %s from bucket %s", key, bucketName));
+		List<StoredObject> results = new ArrayList<>();
+		getAll(bucketName, key).forEach(results::add);
+		
+		if (results.size() != 1) {
+			throw new SwiftSdkClientException(bucketName, key, String.format(
+					"Size query for object %s from bucket %s returned %s results", key, bucketName, results.size()));
+		}
+		return results.get(0).getContentLength();
+	}
+
+	public String getChecksum(String bucketName, String key) throws SwiftSdkClientException {
+		log(String.format("Get checksum of object %s from bucket %s", key, bucketName));
+		List<StoredObject> results = new ArrayList<>();
+		getAll(bucketName, key).forEach(results::add);
+		if (results.size() != 1) {
+			throw new SwiftSdkClientException(bucketName, key, String.format(
+					"Checksum query for object %s from bucket %s returned %s results", key, bucketName, results.size()));
+		}
+		return results.get(0).getEtag();
+	}
 }
