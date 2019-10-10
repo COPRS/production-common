@@ -1,4 +1,4 @@
-package esa.s1pdgs.cpoc.prip.metadata;
+package standalone.prip.service.metadata;
 
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
