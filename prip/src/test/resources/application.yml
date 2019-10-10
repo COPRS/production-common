@@ -33,3 +33,7 @@ prip:
   metadatalistener:
     polling-interval-ms: 200
     polling-initial-delay-ms: 5000
+
+# REST controller
+server:
+  port: 8081 
