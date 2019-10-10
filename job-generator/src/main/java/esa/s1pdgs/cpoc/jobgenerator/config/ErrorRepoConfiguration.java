@@ -24,14 +24,11 @@ public class ErrorRepoConfiguration {
     
     @Value("${kafka.max-retries}")
     private int maxRetries;
-    
-    @Value("${kafka.group-id}")
-    private String groupId;
-    
+
     @Value("${kafka.error-topic}")
     private String topic;
 
-	private KafkaTemplate<String, FailedProcessingDto<?>> kafkaTemplate()
+	private KafkaTemplate<String, FailedProcessingDto> kafkaTemplate()
 	{
         final Map<String, Object> props = new HashMap<>();
         props.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, bootstrapServers);
@@ -39,12 +36,12 @@ public class ErrorRepoConfiguration {
         props.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, JsonSerializer.class);
         props.put(JsonSerializer.ADD_TYPE_INFO_HEADERS, true);
         props.put(ProducerConfig.RETRIES_CONFIG, maxRetries);        
-        return new KafkaTemplate<String, FailedProcessingDto<?>>(new DefaultKafkaProducerFactory<>(props));
+        return new KafkaTemplate<String, FailedProcessingDto>(new DefaultKafkaProducerFactory<>(props));
 	}
 	
 	@Bean 
 	public ErrorRepoAppender kafkaErrorRepoAppender()
 	{
-		return new KafkaErrorRepoAppender(kafkaTemplate(), groupId, topic);
+		return new KafkaErrorRepoAppender(kafkaTemplate(), topic);
 	}
 }

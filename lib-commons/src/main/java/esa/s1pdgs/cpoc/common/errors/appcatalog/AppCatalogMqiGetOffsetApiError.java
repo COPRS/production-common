@@ -1,6 +1,5 @@
 package esa.s1pdgs.cpoc.common.errors.appcatalog;
 
-import esa.s1pdgs.cpoc.common.ProductCategory;
 import esa.s1pdgs.cpoc.common.errors.AbstractCodedException;
 
 /**
@@ -12,10 +11,7 @@ public class AppCatalogMqiGetOffsetApiError extends AbstractCodedException {
      * 
      */
     private static final long serialVersionUID = 8096417675612082535L;
-    /**
-     * Category
-     */
-    private final ProductCategory category;
+
 
     /**
      * Force
@@ -26,10 +22,8 @@ public class AppCatalogMqiGetOffsetApiError extends AbstractCodedException {
      * @param category
      * @param message
      */
-    public AppCatalogMqiGetOffsetApiError(final ProductCategory category,
-            final String uri, final String message) {
+    public AppCatalogMqiGetOffsetApiError(final String uri, final String message) {
         super(ErrorCode.APPCATALOG_MQI_GET_OFFSET_API_ERROR, message);
-        this.category = category;
         this.uri = uri;
     }
 
@@ -38,18 +32,10 @@ public class AppCatalogMqiGetOffsetApiError extends AbstractCodedException {
      * @param message
      * @param cause
      */
-    public AppCatalogMqiGetOffsetApiError(final ProductCategory category,
+    public AppCatalogMqiGetOffsetApiError(
             final String uri, final String message, final Throwable cause) {
         super(ErrorCode.APPCATALOG_MQI_GET_OFFSET_API_ERROR, message, cause);
-        this.category = category;
         this.uri = uri;
-    }
-
-    /**
-     * @return the category
-     */
-    public ProductCategory getCategory() {
-        return category;
     }
 
     /**
@@ -64,8 +50,7 @@ public class AppCatalogMqiGetOffsetApiError extends AbstractCodedException {
      */
     @Override
     public String getLogMessage() {
-        return String.format("[category %s] [uri %s] [msg %s]", category, uri,
-                getMessage());
+        return String.format("[uri %s] [msg %s]",  uri, getMessage());
     }
 
 }

@@ -2,6 +2,8 @@ package esa.s1pdgs.cpoc.obs_sdk;
 
 import java.util.Objects;
 
+import esa.s1pdgs.cpoc.common.ProductFamily;
+
 /**
  * Representes an object whose function is to be downloaded on a local directory
  * 
@@ -26,11 +28,10 @@ public class ObsDownloadObject extends ObsObject {
      * @param family
      * @param targetDir
      */
-    public ObsDownloadObject(final String key, final ObsFamily family,
-            final String targetDir) {
-        super(key, family);
+    public ObsDownloadObject(final ProductFamily family, final String key, final String targetDir) {
+        super(family, key);
         this.targetDir = targetDir;
-        if (family == ObsFamily.EDRS_SESSION) {
+        if (family == ProductFamily.EDRS_SESSION) {
             this.ignoreFolders = true;
         } else {
             this.ignoreFolders = false;

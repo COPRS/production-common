@@ -23,7 +23,7 @@ import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
 
-import esa.s1pdgs.cpoc.appcatalog.client.job.AbstractAppCatalogJobService;
+import esa.s1pdgs.cpoc.appcatalog.client.job.AppCatalogJobClient;
 import esa.s1pdgs.cpoc.appcatalog.common.rest.model.job.AppDataJobDto;
 import esa.s1pdgs.cpoc.appcatalog.common.rest.model.job.AppDataJobGenerationDtoState;
 import esa.s1pdgs.cpoc.common.ApplicationLevel;
@@ -68,7 +68,7 @@ public class L0AppJobDispatcherTest {
     private L0AppJobsGenerator mockGenerator;
 
     @Mock
-    private AbstractAppCatalogJobService<EdrsSessionDto> appDataService;
+    private AppCatalogJobClient appDataService;
 
     /**
      * Test set up

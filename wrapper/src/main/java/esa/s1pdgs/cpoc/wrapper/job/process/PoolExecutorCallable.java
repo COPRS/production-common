@@ -15,6 +15,7 @@ import esa.s1pdgs.cpoc.mqi.model.queue.LevelJobDto;
 import esa.s1pdgs.cpoc.mqi.model.queue.LevelJobPoolDto;
 import esa.s1pdgs.cpoc.report.LoggerReporting;
 import esa.s1pdgs.cpoc.report.Reporting;
+import esa.s1pdgs.cpoc.report.ReportingMessage;
 import esa.s1pdgs.cpoc.wrapper.config.ApplicationProperties;
 
 /**
@@ -112,10 +113,10 @@ public class PoolExecutorCallable implements Callable<Boolean> {
                                 + counter * properties.getWapTempoS()
                                 + " seconds");
             }
-            final Reporting.Factory reportingFactory = new LoggerReporting.Factory(LOGGER, "Processing");
+            final Reporting.Factory reportingFactory = new LoggerReporting.Factory("Processing");
             
             final Reporting reporting = reportingFactory.newReporting(0);
-            reporting.reportStart("Start " + appLevel + " processing");
+            reporting.begin(new ReportingMessage("Start " + appLevel + " processing"));
                        
             try {
 				for (PoolProcessor poolProcessor : processors) {
@@ -126,10 +127,10 @@ public class PoolExecutorCallable implements Callable<Boolean> {
 				    poolProcessor.process(reportingFactory);
 				}
 			} catch (AbstractCodedException e) {
-				reporting.reportError("[code {}] {}", e.getCode().getCode(), e.getLogMessage());
+				reporting.error(new ReportingMessage("[code {}] {}", e.getCode().getCode(), e.getLogMessage()));
 				throw e;
 			}
-            reporting.reportStop("End " + appLevel + " processing");
+            reporting.end(new ReportingMessage("End " + appLevel + " processing"));
             return true;
         }
         return false;

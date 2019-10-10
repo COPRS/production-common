@@ -1,32 +1,41 @@
 package esa.s1pdgs.cpoc.mdcatalog.extraction;
 
 import java.io.File;
+import java.time.LocalDateTime;
+import java.util.Arrays;
 import java.util.Date;
+import java.util.List;
 import java.util.regex.Pattern;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.json.JSONObject;
 
-import esa.s1pdgs.cpoc.appcatalog.rest.MqiStateMessageEnum;
 import esa.s1pdgs.cpoc.common.ProductCategory;
 import esa.s1pdgs.cpoc.common.ProductFamily;
 import esa.s1pdgs.cpoc.common.errors.AbstractCodedException;
 import esa.s1pdgs.cpoc.common.errors.AbstractCodedException.ErrorCode;
+import esa.s1pdgs.cpoc.common.utils.DateUtils;
+import esa.s1pdgs.cpoc.common.utils.LogUtils;
+import esa.s1pdgs.cpoc.common.utils.Retries;
 import esa.s1pdgs.cpoc.errorrepo.ErrorRepoAppender;
 import esa.s1pdgs.cpoc.errorrepo.model.rest.FailedProcessingDto;
 import esa.s1pdgs.cpoc.mdcatalog.ProcessConfiguration;
 import esa.s1pdgs.cpoc.mdcatalog.es.EsServices;
 import esa.s1pdgs.cpoc.mdcatalog.extraction.files.FileDescriptorBuilder;
 import esa.s1pdgs.cpoc.mdcatalog.extraction.files.MetadataBuilder;
-import esa.s1pdgs.cpoc.mdcatalog.extraction.obs.ObsService;
+import esa.s1pdgs.cpoc.mdcatalog.extraction.xml.XmlConverter;
 import esa.s1pdgs.cpoc.mdcatalog.status.AppStatus;
-import esa.s1pdgs.cpoc.mqi.client.GenericMqiService;
+import esa.s1pdgs.cpoc.mqi.client.GenericMqiClient;
 import esa.s1pdgs.cpoc.mqi.model.rest.Ack;
 import esa.s1pdgs.cpoc.mqi.model.rest.AckMessageDto;
 import esa.s1pdgs.cpoc.mqi.model.rest.GenericMessageDto;
+import esa.s1pdgs.cpoc.obs_sdk.ObsClient;
+import esa.s1pdgs.cpoc.obs_sdk.ObsDownloadObject;
+import esa.s1pdgs.cpoc.report.FilenameReportingInput;
 import esa.s1pdgs.cpoc.report.LoggerReporting;
 import esa.s1pdgs.cpoc.report.Reporting;
+import esa.s1pdgs.cpoc.report.ReportingMessage;
 
 /**
  * @author Viveris Technologies
@@ -53,7 +62,7 @@ public abstract class GenericExtractor<T> {
     /**
      * Access to the MQI server
      */
-    protected final GenericMqiService<T> mqiService;
+    protected final GenericMqiClient mqiService;
 
     /**
      * Application status
@@ -87,10 +96,8 @@ public abstract class GenericExtractor<T> {
     
     private final ErrorRepoAppender errorAppender;
     
-    private final Class<T> messageClass;
-    
     private final ProcessConfiguration processConfiguration;
-
+    
     /**
      * @param esServices
      * @param mqiService
@@ -100,25 +107,24 @@ public abstract class GenericExtractor<T> {
      * @param pattern
      */
     public GenericExtractor(final EsServices esServices,
-            final GenericMqiService<T> mqiService, final AppStatus appStatus,
+            final GenericMqiClient mqiService, final AppStatus appStatus,
             final String localDirectory,
             final MetadataExtractorConfig extractorConfig, final String pattern,
             final ErrorRepoAppender errorAppender,
             final ProductCategory category,
             final ProcessConfiguration processConfiguration,
-            final Class<T> messageClass) {
+            final XmlConverter xmlConverter) {
         this.localDirectory = localDirectory;
         this.fileDescriptorBuilder =
                 new FileDescriptorBuilder(this.localDirectory,
                         Pattern.compile(pattern, Pattern.CASE_INSENSITIVE));
         this.extractorConfig = extractorConfig;
-        this.mdBuilder = new MetadataBuilder(this.extractorConfig);
+        this.mdBuilder = new MetadataBuilder(this.extractorConfig, xmlConverter, localDirectory);
         this.esServices = esServices;
         this.mqiService = mqiService;
         this.appStatus = appStatus;
         this.category = category;
         this.errorAppender = errorAppender;
-        this.messageClass = messageClass;
         this.processConfiguration = processConfiguration;
     }
 
@@ -133,7 +139,7 @@ public abstract class GenericExtractor<T> {
         LOGGER.trace("[MONITOR] [step 0] [{}] Waiting message", category);
         GenericMessageDto<T> message = null;
         try {
-            message = mqiService.next();
+            message = mqiService.next(category);
             appStatus.setWaiting(category);
         } catch (AbstractCodedException ace) {
             LOGGER.error("[MONITOR] [step 0] [{}] [code {}] {}", category,
@@ -155,31 +161,33 @@ public abstract class GenericExtractor<T> {
         
         final String productName = extractProductNameFromDto(dto);
         
-        final Reporting.Factory reportingFactory = new LoggerReporting.Factory(LOGGER, "MetadataExtraction")
-        		.product(category.toString(), productName);
+        final Reporting.Factory reportingFactory = new LoggerReporting.Factory("MetadataExtraction");
         
         final Reporting report = reportingFactory.newReporting(0);        
-        report.reportStart("Starting metadata extraction");        
+        report.begin(new FilenameReportingInput(productName), new ReportingMessage("Starting metadata extraction"));        
         appStatus.setProcessing(category, message.getIdentifier());
         
-        final FailedProcessingDto<GenericMessageDto<T>> failedProc =  
-        		new FailedProcessingDto<GenericMessageDto<T>>();
+        FailedProcessingDto failedProc = new FailedProcessingDto();
 
         try { 	
         	
             final JSONObject metadata = extractMetadata(reportingFactory, message);
+        	LOGGER.debug("Metadata extracted :{} for product: {}",metadata,productName);
+            if (!metadata.has("insertionTime")) {
+            	metadata.put("insertionTime", DateUtils.formatToMetadataDateTimeFormat(LocalDateTime.now()));
+            }
             
             final Reporting reportPublish = reportingFactory.newReporting(4);            
-            reportPublish.reportStart("Start publishing metadata");
+            reportPublish.begin(new ReportingMessage("Start publishing metadata"));
 
             try {
 				if (!esServices.isMetadataExist(metadata)) {
 				    esServices.createMetadata(metadata);
 				}
-			    reportPublish.reportStop("End publishing metadata");
+			    reportPublish.end(new ReportingMessage("End publishing metadata"));
 				
 			} catch (Exception e) {
-				reportPublish.reportError("[code {}] {}", ErrorCode.INTERNAL_ERROR.getCode(), e.getMessage());
+				reportPublish.error(new ReportingMessage("[code {}] {}", ErrorCode.INTERNAL_ERROR.getCode(), LogUtils.toString(e)));
 				throw e;
 			}
             // Acknowledge
@@ -190,34 +198,17 @@ public abstract class GenericExtractor<T> {
                     "[MONITOR] [%s] [productName %s] [code %s] %s", category,
                     extractProductNameFromDto(dto), e1.getCode().getCode(),
                     e1.getLogMessage());
-            
-            failedProc.processingType(message.getInputKey())
-      			.topic(message.getInputKey())
-	    		.processingStatus(MqiStateMessageEnum.READ)
-	    		.productCategory(category)
-	    		.failedPod(processConfiguration.getHostname())
-	            .failureDate(new Date())
-	    		.failureMessage(errorMessage)
-	    		.processingDetails(message);
-            
-            ackNegatively(reportingFactory, failedProc, message, errorMessage);
-            
+            failedProc = new FailedProcessingDto(processConfiguration.getHostname(),new Date(),errorMessage, message);              
+            ackNegatively(reportingFactory, failedProc, message, errorMessage);            
             
         } catch (Exception e) {
             String errorMessage = String.format(
                     "[MONITOR] [%s] [productName %s] [code %s] [msg %s]",
                     category, extractProductNameFromDto(dto),
-                    ErrorCode.INTERNAL_ERROR.getCode(), e.getMessage());
-            
-            failedProc.processingType(message.getInputKey())
-        		.topic(message.getInputKey())
-	    		.processingStatus(MqiStateMessageEnum.READ)
-	    		.productCategory(category)
-	    		.failedPod(processConfiguration.getHostname())
-	            .failureDate(new Date())
-	    		.failureMessage(errorMessage)
-	    		.processingDetails(message);
-            
+                    ErrorCode.INTERNAL_ERROR.getCode(), 
+                    LogUtils.toString(e)
+            );
+            failedProc = new FailedProcessingDto(processConfiguration.getHostname(),new Date(),errorMessage, message);              
             ackNegatively(reportingFactory,failedProc, message, errorMessage);
             
         } finally {        	
@@ -225,12 +216,12 @@ public abstract class GenericExtractor<T> {
         }
 
         if (appStatus.isFatalError()) {
-            report.reportError("Fatal error");
+            report.error(new ReportingMessage("Fatal error"));
             System.exit(-1);
         } else {
             appStatus.setWaiting(category);
         }        
-        report.reportStop("End metadata extraction");
+        report.end(new ReportingMessage("End metadata extraction"));
     }
 
     /**
@@ -241,18 +232,18 @@ public abstract class GenericExtractor<T> {
      */
     final void ackNegatively(
     		final Reporting.Factory reportingFactory, 
-            final FailedProcessingDto<GenericMessageDto<T>> failedProc,
-    		final GenericMessageDto<T> message,
+            final FailedProcessingDto failedProc,
+    		final GenericMessageDto<?> message,
             final String errorMessage) {
     	
         final Reporting reportAck = reportingFactory.newReporting(5);            
-        reportAck.reportStart("Start acknowledging negatively");
+        reportAck.begin(new ReportingMessage("Start acknowledging negatively"));
         try {
-            mqiService.ack(new AckMessageDto(message.getIdentifier(), Ack.ERROR, errorMessage, false));
+            mqiService.ack(new AckMessageDto(message.getIdentifier(), Ack.ERROR, errorMessage, false), category);
             errorAppender.send(failedProc);            
-            reportAck.reportStop("End acknowledging negatively");
+            reportAck.end(new ReportingMessage("End acknowledging negatively"));
         } catch (AbstractCodedException ace) {
-        	reportAck.reportError("[code {}] {}", ace.getCode().getCode(), ace.getLogMessage());     
+        	reportAck.error(new ReportingMessage("[code {}] {}", ace.getCode().getCode(), ace.getLogMessage()));     
         }
         appStatus.setError(category, "PROCESSING");
     }
@@ -265,13 +256,12 @@ public abstract class GenericExtractor<T> {
     final void ackPositively(final Reporting.Factory reportingFactory, final GenericMessageDto<T> message) {
     	
         final Reporting reportAck = reportingFactory.newReporting(5);            
-        reportAck.reportStart("Start acknowledging positively");
-
+        reportAck.begin(new ReportingMessage("Start acknowledging positively"));
         try {
-            mqiService.ack(new AckMessageDto(message.getIdentifier(), Ack.OK, null, false));
-            reportAck.reportStop("End acknowledging positively");            
+            mqiService.ack(new AckMessageDto(message.getIdentifier(), Ack.OK, null, false), category);
+            reportAck.end(new ReportingMessage("End acknowledging positively"));            
         } catch (AbstractCodedException ace) {            
-        	reportAck.reportError("[code {}] {}", ace.getCode().getCode(), ace.getLogMessage());            
+        	reportAck.error(new ReportingMessage("[code {}] {}", ace.getCode().getCode(), ace.getLogMessage()));            
             appStatus.setError(category, "PROCESSING");
         }
     }
@@ -303,7 +293,7 @@ public abstract class GenericExtractor<T> {
 
     final File download(
     		final Reporting.Factory reportingFactory,
-    		final ObsService obsService,
+    		final ObsClient obsClient,
     		final ProductFamily family, 
     		final String productName,
     		final String keyObs
@@ -311,19 +301,28 @@ public abstract class GenericExtractor<T> {
     	throws AbstractCodedException
     {
         final Reporting reportDownload = reportingFactory
-            	.product(family.toString(), productName)        
             	.newReporting(1);
             
-        reportDownload.reportStart("Starting download of " + keyObs);
+        reportDownload.begin(new ReportingMessage("Starting download of " + keyObs + " to local directory " + this.localDirectory));
 
 		try {
-			final File metadataFile = obsService.downloadFile(family, keyObs, this.localDirectory);
-			reportDownload.reportStop("End download of " + keyObs);
-			return metadataFile;
-		} catch (AbstractCodedException e) {
-			reportDownload.reportError("[code {}] {}", e.getCode().getCode(), e.getLogMessage());
-			throw e;
-		}         
+			final List<File> files = Retries.performWithRetries(
+					() -> obsClient.download(Arrays.asList(new ObsDownloadObject(family, keyObs, this.localDirectory))), 
+					"Download of " + keyObs + " to " + localDirectory, 
+					processConfiguration.getNumObsDownloadRetries(), 
+					processConfiguration.getSleepBetweenObsRetriesMillis()
+			);
+			reportDownload.end(new ReportingMessage("End download of " + keyObs));
+			return files.size() == 1 ? files.get(0) : null;
+		} catch (Exception e) {
+			if (e instanceof AbstractCodedException) {
+				final AbstractCodedException ace = (AbstractCodedException) e;
+				reportDownload.error(new ReportingMessage("[code {}] {}", ace.getCode().getCode(), ace.getLogMessage()));
+				throw ace;
+			}
+			reportDownload.error(new ReportingMessage("Error downloading {} to local directory {}", keyObs, localDirectory));
+			throw new RuntimeException(e);     
+		}
     }
     
     final <E> E extractFromFilename(
@@ -353,14 +352,14 @@ public abstract class GenericExtractor<T> {
 		throws AbstractCodedException 
 	{
 		final Reporting reportExtractingFromFilename = reportingFactory.newReporting(step);
-		reportExtractingFromFilename.reportStart("Start extraction from " + extraction);
+		reportExtractingFromFilename.begin(new ReportingMessage("Start extraction from " + extraction));
 		try {
 			E res = supplier.get();
 					//;
-			reportExtractingFromFilename.reportStop("End extraction from " + extraction);
+			reportExtractingFromFilename.end(new ReportingMessage("End extraction from " + extraction));
 			return res;
 		} catch (AbstractCodedException e) {
-			reportExtractingFromFilename.reportError("[code {}] {}", e.getCode().getCode(), e.getLogMessage());
+			reportExtractingFromFilename.error(new ReportingMessage("[code {}] {}", e.getCode().getCode(), e.getLogMessage()));
 			throw e;
 		}
 	

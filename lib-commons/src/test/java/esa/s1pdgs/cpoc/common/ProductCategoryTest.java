@@ -20,7 +20,6 @@ public class ProductCategoryTest {
      */
     @Test
     public void testNominalEnumFunctions() {
-        assertEquals(7, ProductCategory.values().length);
         assertEquals(ProductCategory.AUXILIARY_FILES,
                 ProductCategory.valueOf("AUXILIARY_FILES"));
         assertEquals(ProductCategory.EDRS_SESSIONS,
@@ -35,6 +34,8 @@ public class ProductCategoryTest {
                 ProductCategory.valueOf("LEVEL_SEGMENTS"));
         assertEquals(ProductCategory.COMPRESSED_PRODUCTS,
                 ProductCategory.valueOf("COMPRESSED_PRODUCTS"));
+        assertEquals(ProductCategory.INGESTION,
+                ProductCategory.valueOf("INGESTION"));
         
     }
 
@@ -84,18 +85,14 @@ public class ProductCategoryTest {
         assertEquals(ProductCategory.LEVEL_PRODUCTS,
                 ProductCategory.fromProductFamily(ProductFamily.L2_SLICE));
         
+        assertEquals(ProductCategory.INGESTION,ProductCategory.fromProductFamily(ProductFamily.BLANK));
+        assertEquals(ProductCategory.INGESTION,ProductCategory.fromProductFamily(ProductFamily.INVALID));
+        
         try {
             ProductCategory.fromProductFamily(null);
             fail("an InternalErrorException shall be raised");
         } catch (InternalErrorException iee) {
             assertTrue(iee.getMessage().contains("null"));
-        }
-
-        try {
-            ProductCategory.fromProductFamily(ProductFamily.BLANK);
-            fail("an InternalErrorException shall be raised");
-        } catch (InternalErrorException iee) {
-            assertTrue(iee.getMessage().contains("BLANK"));
         }
 
         try {

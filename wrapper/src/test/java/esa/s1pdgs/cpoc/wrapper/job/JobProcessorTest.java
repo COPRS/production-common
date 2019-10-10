@@ -16,7 +16,6 @@ import java.util.concurrent.ExecutorCompletionService;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
-import org.apache.logging.log4j.LogManager;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Rule;
@@ -33,18 +32,19 @@ import esa.s1pdgs.cpoc.common.errors.InternalErrorException;
 import esa.s1pdgs.cpoc.common.errors.mqi.MqiAckApiError;
 import esa.s1pdgs.cpoc.common.errors.processing.WrapperProcessTimeoutException;
 import esa.s1pdgs.cpoc.errorrepo.ErrorRepoAppender;
-import esa.s1pdgs.cpoc.mqi.client.GenericMqiService;
+import esa.s1pdgs.cpoc.mqi.client.GenericMqiClient;
 import esa.s1pdgs.cpoc.mqi.model.queue.LevelJobDto;
 import esa.s1pdgs.cpoc.mqi.model.rest.Ack;
 import esa.s1pdgs.cpoc.mqi.model.rest.AckMessageDto;
 import esa.s1pdgs.cpoc.mqi.model.rest.GenericMessageDto;
+import esa.s1pdgs.cpoc.obs_sdk.ObsClient;
 import esa.s1pdgs.cpoc.report.LoggerReporting;
 import esa.s1pdgs.cpoc.report.Reporting;
+import esa.s1pdgs.cpoc.report.ReportingOutput;
 import esa.s1pdgs.cpoc.wrapper.TestUtils;
 import esa.s1pdgs.cpoc.wrapper.job.file.InputDownloader;
 import esa.s1pdgs.cpoc.wrapper.job.file.OutputProcessor;
 import esa.s1pdgs.cpoc.wrapper.job.mqi.OutputProcuderFactory;
-import esa.s1pdgs.cpoc.wrapper.job.obs.ObsService;
 import esa.s1pdgs.cpoc.wrapper.job.process.PoolExecutorCallable;
 import esa.s1pdgs.cpoc.wrapper.test.MockPropertiesTest;
 
@@ -65,13 +65,13 @@ public class JobProcessorTest extends MockPropertiesTest {
      * Output processsor
      */
     @Mock
-    private ObsService obsService;
+    private ObsClient obsClient;
 
     /**
      * MQI service
      */
     @Mock
-    private GenericMqiService<LevelJobDto> mqiService;
+    private GenericMqiClient mqiService;
 
     /**
      * Job to process
@@ -109,7 +109,7 @@ public class JobProcessorTest extends MockPropertiesTest {
     @Rule
     public ExpectedException thrown = ExpectedException.none();
     
-    private final Reporting.Factory reportingFactory = new LoggerReporting.Factory(LogManager.getLogger(JobProcessorTest.class), "TestOutputHandling");
+    private final Reporting.Factory reportingFactory = new LoggerReporting.Factory("TestOutputHandling");
 	
     private final ErrorRepoAppender errorAppender = ErrorRepoAppender.NULL;
 
@@ -125,6 +125,7 @@ public class JobProcessorTest extends MockPropertiesTest {
         mockDefaultAppProperties();
         mockDefaultDevProperties();
         mockDefaultStatus();
+        //devProperties.getStepsActivation().put("erasing", Boolean.FALSE);
 
         inputMessage = new GenericMessageDto<LevelJobDto>(123, "",
                 TestUtils.buildL0LevelJobDto());
@@ -132,8 +133,9 @@ public class JobProcessorTest extends MockPropertiesTest {
         if (!workingDir.exists()) {
             workingDir.mkdir();
         }
+        mockWorkingdirProperties(workingDir.toPath());
         processor = new JobProcessor(appStatus, properties, devProperties,
-                obsService, procuderFactory, mqiService, errorAppender, mqiStatusService);
+                obsClient, procuderFactory, mqiService, errorAppender, mqiStatusService);
         procExecutorSrv = Executors.newSingleThreadExecutor();
         procCompletionSrv = new ExecutorCompletionService<>(procExecutorSrv);
     }
@@ -170,12 +172,14 @@ public class JobProcessorTest extends MockPropertiesTest {
     public void testAckNegativelyWhenException() throws AbstractCodedException {
         doThrow(new MqiAckApiError(ProductCategory.AUXILIARY_FILES, 1,
                 "ack-msg", "error-ùmessage")).when(mqiService)
-                        .ack(Mockito.any());
+                        .ack(Mockito.any(), Mockito.any());
 
         processor.ackNegatively(false, inputMessage, "error message");
 
         verify(mqiService, times(1)).ack(Mockito
-                .eq(new AckMessageDto(123, Ack.ERROR, "error message", false)));
+                .eq(new AckMessageDto(123, Ack.ERROR, "error message", false)), 
+                Mockito.eq(ProductCategory.LEVEL_JOBS)
+        );
         verify(appStatus, times(1)).setError("PROCESSING");
     }
 
@@ -188,12 +192,13 @@ public class JobProcessorTest extends MockPropertiesTest {
     public void testAckPositivelyWhenException() throws AbstractCodedException {
         doThrow(new MqiAckApiError(ProductCategory.AUXILIARY_FILES, 1,
                 "ack-msg", "error-message")).when(mqiService)
-                        .ack(Mockito.any());
+                        .ack(Mockito.any(),Mockito.any());
 
         processor.ackPositively(false, inputMessage);
 
         verify(mqiService, times(1))
-                .ack(Mockito.eq(new AckMessageDto(123, Ack.OK, null, false)));
+                .ack(Mockito.eq(new AckMessageDto(123, Ack.OK, null, false)),
+                		Mockito.eq(ProductCategory.LEVEL_JOBS));
         verify(appStatus, times(1)).setError("PROCESSING");
     }
 
@@ -252,10 +257,8 @@ public class JobProcessorTest extends MockPropertiesTest {
                 new File(inputMessage.getBody().getWorkDirectory() + "file2");
         file2.createNewFile();
         assertTrue(workingDir.exists());
-        assertTrue(file1.exists());
-
-        processor.cleanJobProcessing(inputMessage.getBody(), true,
-                procExecutorSrv);
+        assertTrue(file1.exists());      
+        processor.cleanJobProcessing(inputMessage.getBody(), true, procExecutorSrv);
 
         verify(properties, times(1)).getTmProcStopS();
         assertFalse(workingDir.exists());
@@ -280,7 +283,7 @@ public class JobProcessorTest extends MockPropertiesTest {
         // Step 2
         doNothing().when(inputDownloader).processInputs();
         // Step 4
-        doNothing().when(outputProcessor).processOutput();
+        doReturn(ReportingOutput.NULL).when(outputProcessor).processOutput();
         // Step 5
         File folder1 =
                 new File(inputMessage.getBody().getWorkDirectory() + "folder1");
@@ -302,11 +305,11 @@ public class JobProcessorTest extends MockPropertiesTest {
     public void testCallWithNext() throws Exception {
         mockAllStep(false);
         doReturn(ApplicationLevel.L0).when(properties).getLevel();
-        doReturn(inputMessage).when(mqiService).next();
+        doReturn(inputMessage).when(mqiService).next(Mockito.any());
 
         processor.processJob();
 
-        verify(mqiService, times(1)).next();
+        verify(mqiService, times(1)).next(Mockito.eq(ProductCategory.LEVEL_JOBS));
         verify(appStatus, times(1)).setProcessing(Mockito.eq(inputMessage.getIdentifier()));
         verify(appStatus, times(2)).setWaiting();
         doReturn(ApplicationLevel.L1).when(properties).getLevel();

@@ -210,12 +210,16 @@ public class TestGenericUtils {
 		JobOrderProcParam procParam3 = new JobOrderProcParam("Timeout", "360");
 		JobOrderProcParam procParam4 = new JobOrderProcParam("Mission_Id", "S1");
 		JobOrderProcParam procParam5 = new JobOrderProcParam("Processing_Station", "WILE");
+		JobOrderProcParam procParam6 = new JobOrderProcParam("Descramble", "yes");
+		JobOrderProcParam procParam7 = new JobOrderProcParam("RSEncode", "yes");
 
 		conf.addProcParam(procParam1);
 		conf.addProcParam(procParam2);
 		conf.addProcParam(procParam3);
 		conf.addProcParam(procParam5);
 		conf.addProcParam(procParam4);
+		conf.addProcParam(procParam6);
+		conf.addProcParam(procParam7);
 
 		conf.addConfigFile("/usr/local/conf/AIOP/Sentinel1AIOProcessor.xml");
 		conf.addConfigFile("/usr/local/conf/AIOP/Sentinel1AIODPAssembler.xml");

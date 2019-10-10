@@ -35,7 +35,7 @@ public class KafkaSessionProducer extends AbstractKafkaService<EdrsSessionDto> {
      */
     @Override
     protected String extractProductName(EdrsSessionDto obj) {
-        return obj.getObjectStorageKey();
+        return obj.getKeyObjectStorage();
     }
 
 }

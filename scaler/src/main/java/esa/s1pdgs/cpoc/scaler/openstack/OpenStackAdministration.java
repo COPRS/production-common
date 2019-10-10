@@ -1,5 +1,6 @@
 package esa.s1pdgs.cpoc.scaler.openstack;
 
+import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -75,6 +76,18 @@ public class OpenStackAdministration {
         this.serverService = serverService;
         this.volumeService = volumeService;
     }
+    
+    public String lookUpServerId(String serverName) {
+        Map<String, String> filter = new HashMap<String, String>();
+        filter.put("name", "^" + osProperties.getServerWrapper() + "*");
+        for (Server server :  osClient().compute().servers().list()) {
+            if (server.getName().equals(serverName)) {
+            	return server.getId();
+            }
+        }
+        
+        return null;
+    }
 
     /**
      * Remove the server with given identifier
@@ -84,7 +97,11 @@ public class OpenStackAdministration {
      */
     public void deleteServer(final String serverId) throws OsEntityException {
         final OSClientV3 osClient = osClient();
+        LOGGER.info("Deleting server '{}' via OpenStack API",serverId);
         final Server s = serverService.get(osClient, serverId);
+        if (s == null) {
+        	 LOGGER.warn("[serverId {}] Server was requested to delete, but does not exist", serverId);
+        }
         final OpenStackServerProperties.ServerProperties serverProperties =
                 osProperties.getServerWrapper();
         if (serverProperties.isFloatActivation()) {

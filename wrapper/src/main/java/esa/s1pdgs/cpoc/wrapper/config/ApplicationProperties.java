@@ -62,6 +62,18 @@ public class ApplicationProperties {
     private long wapTempoS;
     
     private String hostname;
+    
+    /**
+     * Path to the working directory that should be used by the
+     * wrapper. If this path is different than the one provided in the
+     * job, it will be considered as error.
+     */
+    private String workingDir;
+    
+    private long thresholdEw;
+    private long thresholdIw;
+    private long thresholdSm;
+    private long thresholdWv;
 
     /**
      * Default constructor
@@ -212,4 +224,47 @@ public class ApplicationProperties {
 	public void setHostname(String hostname) {
 		this.hostname = hostname;
 	}
+
+	public String getWorkingDir() {
+		return workingDir;
+	}
+
+	public void setWorkingDir(String workingDir) {
+		this.workingDir = workingDir;
+	}
+
+	public long getThresholdEw() {
+		return thresholdEw;
+	}
+
+	public void setThresholdEw(long thresholdEw) {
+		this.thresholdEw = thresholdEw;
+	}
+
+	public long getThresholdIw() {
+		return thresholdIw;
+	}
+
+	public void setThresholdIw(long thresholdIw) {
+		this.thresholdIw = thresholdIw;
+	}
+
+	public long getThresholdSm() {
+		return thresholdSm;
+	}
+
+	public void setThresholdSm(long thresholdSm) {
+		this.thresholdSm = thresholdSm;
+	}
+
+	public long getThresholdWv() {
+		return thresholdWv;
+	}
+
+	public void setThresholdWv(long thresholdWv) {
+		this.thresholdWv = thresholdWv;
+	}
+	
+	
+	
 }

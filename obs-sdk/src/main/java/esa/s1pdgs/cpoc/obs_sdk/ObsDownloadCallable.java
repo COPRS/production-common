@@ -1,13 +1,18 @@
 package esa.s1pdgs.cpoc.obs_sdk;
 
+import java.io.File;
+import java.util.Arrays;
+import java.util.List;
 import java.util.concurrent.Callable;
+
+import esa.s1pdgs.cpoc.common.errors.AbstractCodedException;
 
 /**
  * Callable to download a file / folder from the OBS
  * 
  * @author Viveris Technologies
  */
-public class ObsDownloadCallable implements Callable<Integer> {
+public class ObsDownloadCallable implements Callable<List<File>> {
 
     /**
      * OBS client
@@ -33,16 +38,16 @@ public class ObsDownloadCallable implements Callable<Integer> {
 
     /**
      * Call
+     * @throws AbstractCodedException 
      */
     @Override
-    public Integer call() throws ObsServiceException, SdkClientException {
-        int nbObj = obsClient.downloadObject(object);
-        if (nbObj <= 0) {
-            throw new ObsServiceException(
-                    String.format("Unknown object %s with family %s",
-                            object.getKey(), object.getFamily()));
-        }
-        return nbObj;
+    public List<File> call() throws ObsServiceException, AbstractCodedException {
+        final List<File> files = obsClient.download(Arrays.asList(object));
+		if (files.size() <= 0) {
+			throw new ObsServiceException(
+					String.format("Unknown object %s with family %s", object.getKey(), object.getFamily()));
+		}
+		return files;
     }
 
 }

@@ -23,6 +23,8 @@ public class L0SlicePatternSettings {
 	 * The regular expression in Java format
 	 */
 	private String regexp;
+	
+	private String seaCoverageCheckPattern = "$a"; // per default, don't match anything
 
 	/**
 	 * The id of the matcher.group for the satellite identifier according the
@@ -151,4 +153,11 @@ public class L0SlicePatternSettings {
 		this.mGroupStopTime = mGroupStopTime;
 	}
 
+	public String getSeaCoverageCheckPattern() {
+		return seaCoverageCheckPattern;
+	}
+
+	public void setSeaCoverageCheckPattern(String seaCoverageCheckPattern) {
+		this.seaCoverageCheckPattern = seaCoverageCheckPattern;
+	}
 }

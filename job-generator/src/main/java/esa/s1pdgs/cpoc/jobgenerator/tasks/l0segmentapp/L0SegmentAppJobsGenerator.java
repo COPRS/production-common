@@ -10,7 +10,8 @@ import java.util.Map;
 
 import org.springframework.util.CollectionUtils;
 
-import esa.s1pdgs.cpoc.appcatalog.client.job.AbstractAppCatalogJobService;
+import esa.s1pdgs.cpoc.appcatalog.client.job.AppCatalogJobClient;
+import esa.s1pdgs.cpoc.appcatalog.common.rest.model.job.AppDataJobDto;
 import esa.s1pdgs.cpoc.appcatalog.common.rest.model.job.AppDataJobProductDto;
 import esa.s1pdgs.cpoc.common.errors.processing.JobGenInputsMissingException;
 import esa.s1pdgs.cpoc.common.errors.processing.JobGenMetadataException;
@@ -20,13 +21,14 @@ import esa.s1pdgs.cpoc.jobgenerator.config.ProcessSettings;
 import esa.s1pdgs.cpoc.jobgenerator.model.JobGeneration;
 import esa.s1pdgs.cpoc.jobgenerator.model.joborder.JobOrder;
 import esa.s1pdgs.cpoc.jobgenerator.model.joborder.JobOrderProcParam;
-import esa.s1pdgs.cpoc.jobgenerator.model.metadata.LevelSegmentMetadata;
 import esa.s1pdgs.cpoc.jobgenerator.service.XmlConverter;
 import esa.s1pdgs.cpoc.jobgenerator.service.metadata.MetadataService;
 import esa.s1pdgs.cpoc.jobgenerator.service.mqi.OutputProducerFactory;
 import esa.s1pdgs.cpoc.jobgenerator.tasks.AbstractJobsGenerator;
+import esa.s1pdgs.cpoc.metadata.model.AbstractMetadata;
+import esa.s1pdgs.cpoc.metadata.model.LevelSegmentMetadata;
 import esa.s1pdgs.cpoc.mqi.model.queue.LevelJobDto;
-import esa.s1pdgs.cpoc.mqi.model.queue.LevelSegmentDto;
+import esa.s1pdgs.cpoc.mqi.model.queue.ProductDto;
 import esa.s1pdgs.cpoc.mqi.model.rest.GenericMessageDto;
 
 /**
@@ -34,8 +36,7 @@ import esa.s1pdgs.cpoc.mqi.model.rest.GenericMessageDto;
  * 
  * @author Cyrielle Gailliard
  */
-public class L0SegmentAppJobsGenerator
-        extends AbstractJobsGenerator<LevelSegmentDto> {
+public class L0SegmentAppJobsGenerator extends AbstractJobsGenerator<ProductDto> {
 
     /**
      * @param xmlConverter
@@ -49,7 +50,7 @@ public class L0SegmentAppJobsGenerator
             final ProcessSettings l0ProcessSettings,
             final JobGeneratorSettings taskTablesSettings,
             final OutputProducerFactory outputFactory,
-            final AbstractAppCatalogJobService<LevelSegmentDto> appDataService) {
+            final AppCatalogJobClient appDataService) {
         super(xmlConverter, metadataService, l0ProcessSettings,
                 taskTablesSettings, outputFactory, appDataService);
     }
@@ -59,7 +60,7 @@ public class L0SegmentAppJobsGenerator
      * inputs
      */
     @Override
-    protected void preSearch(final JobGeneration<LevelSegmentDto> job)
+    protected void preSearch(final JobGeneration job)
             throws JobGenInputsMissingException {
         boolean fullCoverage = false;
 
@@ -70,14 +71,16 @@ public class L0SegmentAppJobsGenerator
                 new HashMap<>();
         String lastName = "";
         try {
-            for (GenericMessageDto<LevelSegmentDto> message : job
-                    .getAppDataJob().getMessages()) {
-                LevelSegmentDto dto = message.getBody();
-                lastName = dto.getName();
+        	@SuppressWarnings("unchecked")
+			final AppDataJobDto<ProductDto> appDataJob = job.getAppDataJob();
+        	
+            for (GenericMessageDto<ProductDto> message : appDataJob.getMessages()) {
+                ProductDto dto = (ProductDto) message.getBody();
+                lastName = dto.getProductName();
                 LevelSegmentMetadata metadata = metadataService
-                        .getLevelSegment(dto.getFamily(), dto.getName());
+                        .getLevelSegment(dto.getFamily(), dto.getProductName());
                 if (metadata == null) {
-                    missingMetadata.put(dto.getName(), "Missing segment");
+                    missingMetadata.put(dto.getProductName(), "Missing segment");
                 } else {
                     if (!segmentsGroupByPol
                             .containsKey(metadata.getPolarisation())) {
@@ -205,7 +208,7 @@ public class L0SegmentAppJobsGenerator
      * Custom job order before building the job DTO
      */
     @Override
-    protected void customJobOrder(final JobGeneration<LevelSegmentDto> job) {
+    protected void customJobOrder(final JobGeneration job) {
         this.updateProcParam(job.getJobOrder(), "Mission_Id",
                 job.getAppDataJob().getProduct().getMissionId()
                         + job.getAppDataJob().getProduct().getSatelliteId());
@@ -237,7 +240,7 @@ public class L0SegmentAppJobsGenerator
      * Customisation of the job DTO before sending it
      */
     @Override
-    protected void customJobDto(final JobGeneration<LevelSegmentDto> job,
+    protected void customJobDto(final JobGeneration job,
             final LevelJobDto dto) {
         // NOTHING TO DO
 
@@ -246,9 +249,9 @@ public class L0SegmentAppJobsGenerator
     protected void sortSegmentsPerStartDate(List<LevelSegmentMetadata> list) {
         list.sort((LevelSegmentMetadata s1, LevelSegmentMetadata s2) -> {
             LocalDateTime startDate1 = LocalDateTime
-                    .parse(s1.getValidityStart(), s1.getStartTimeFormatter());
+                    .parse(s1.getValidityStart(), AbstractMetadata.METADATA_DATE_FORMATTER);
             LocalDateTime startDate2 = LocalDateTime
-                    .parse(s2.getValidityStart(), s2.getStartTimeFormatter());
+                    .parse(s2.getValidityStart(), AbstractMetadata.METADATA_DATE_FORMATTER);
             return startDate1.compareTo(startDate2);
         });
     }
@@ -290,16 +293,16 @@ public class L0SegmentAppJobsGenerator
                                     .getConsolidation())) {
                 LocalDateTime previousStopDate = LocalDateTime.parse(
                         sortedSegments.get(0).getValidityStop(),
-                        sortedSegments.get(0).getStopTimeFormatter());
+                        AbstractMetadata.METADATA_DATE_FORMATTER);
                 for (LevelSegmentMetadata segment : sortedSegments.subList(1,
                         sortedSegments.size())) {
                     LocalDateTime startDate = LocalDateTime.parse(
-                            segment.getValidityStart(), segment.getStartTimeFormatter());
+                            segment.getValidityStart(), AbstractMetadata.METADATA_DATE_FORMATTER);
                     if (startDate.isAfter(previousStopDate)) {
                         return false;
                     }
                     previousStopDate = LocalDateTime
-                            .parse(segment.getValidityStop(), segment.getStopTimeFormatter());
+                            .parse(segment.getValidityStop(), AbstractMetadata.METADATA_DATE_FORMATTER);
                 }
                 return true;
             } else {
@@ -316,7 +319,7 @@ public class L0SegmentAppJobsGenerator
         }
         LevelSegmentMetadata segment = sortedSegments.get(0);
         return DateUtils.convertToAnotherFormat(segment.getValidityStart(),
-                segment.getStartTimeFormatter(), outFormatter);
+        		AbstractMetadata.METADATA_DATE_FORMATTER, outFormatter);
     }
 
     protected String getStopSensingDate(
@@ -328,7 +331,7 @@ public class L0SegmentAppJobsGenerator
         LevelSegmentMetadata segment =
                 sortedSegments.get(sortedSegments.size() - 1);
         return DateUtils.convertToAnotherFormat(segment.getValidityStop(),
-                segment.getStopTimeFormatter(), outFormatter);
+        		AbstractMetadata.METADATA_DATE_FORMATTER, outFormatter);
     }
 
     /**

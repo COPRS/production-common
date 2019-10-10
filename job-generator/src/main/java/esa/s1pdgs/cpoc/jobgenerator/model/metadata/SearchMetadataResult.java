@@ -3,6 +3,8 @@ package esa.s1pdgs.cpoc.jobgenerator.model.metadata;
 import java.util.List;
 import java.util.Objects;
 
+import esa.s1pdgs.cpoc.metadata.model.SearchMetadata;
+
 /**
  * Class representing the result of a search query for metadata
  * 
@@ -65,14 +67,10 @@ public class SearchMetadataResult {
 		this.result = result;
 	}
 
-	/**
-	 * @see java.lang.Object#toString()
-	 */
-	@Override
-	public String toString() {
+	public String toJsonString() {
 		return String.format("{query: %s, result: %s}", query, result);
 	}
-
+	
 	/**
 	 * @see java.lang.Object#hashCode()
 	 */
@@ -98,4 +96,10 @@ public class SearchMetadataResult {
 		return ret;
 	}
 
+	@Override
+	public String toString() {
+		return "SearchMetadataResult [query=" + query + ", result=" + result + "]";
+	}
+
+	
 }

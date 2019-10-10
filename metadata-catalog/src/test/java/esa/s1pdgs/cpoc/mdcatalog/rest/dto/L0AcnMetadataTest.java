@@ -4,7 +4,7 @@ import static org.junit.Assert.assertTrue;
 
 import org.junit.Test;
 
-import esa.s1pdgs.cpoc.mdcatalog.rest.dto.L0AcnMetadataDto;
+import esa.s1pdgs.cpoc.metadata.model.L0AcnMetadata;
 import nl.jqno.equalsverifier.EqualsVerifier;
 import nl.jqno.equalsverifier.Warning;
 
@@ -16,20 +16,22 @@ public class L0AcnMetadataTest {
 	//String productName, String productType, String keyObjectStorage, String validityStart,String validityStop
 	@Test
 	public void testToString() {
-		L0AcnMetadataDto obj = new L0AcnMetadataDto("name", "type", "kobs", "startDate", "stopDate");
-		obj = new L0AcnMetadataDto(obj);
+		L0AcnMetadata obj = new L0AcnMetadata("name", "type", "kobs", "startDate", "stopDate", "mission", "satellite", "station");
 		obj.setInstrumentConfigurationId(1);
 		obj.setDatatakeId("dataTakeId");
 		obj.setNumberOfSlices(8);
 		
-		String str = obj.toString();
+		String str = obj.toJsonString();
 		assertTrue(str.contains("\"productName\":\"name\""));
 		assertTrue(str.contains("\"productType\":\"type\""));
 		assertTrue(str.contains("\"keyObjectStorage\":\"kobs\""));
 		assertTrue(str.contains("\"validityStart\":\"startDate\""));
 		assertTrue(str.contains("\"validityStop\":\"stopDate\""));
+		assertTrue(str.contains("\"missionId\":\"mission\""));
+		assertTrue(str.contains("\"satelliteId\":\"satellite\""));
+		assertTrue(str.contains("\"stationCode\":\"station\""));
 		assertTrue(str.contains("\"instrumentConfigurationId\":1"));
-		assertTrue(str.contains("\"datatakeId\":\"dataTakeId"));
+		assertTrue(str.contains("\"datatakeId\":\"dataTakeId\""));
 		assertTrue(str.contains("\"numberOfSlices\":8"));
 	}
 
@@ -38,7 +40,7 @@ public class L0AcnMetadataTest {
 	 */
 	@Test
 	public void testEquals() {
-		EqualsVerifier.forClass(L0AcnMetadataDto.class).usingGetClass().suppress(Warning.NONFINAL_FIELDS).verify();
+		EqualsVerifier.forClass(L0AcnMetadata.class).usingGetClass().suppress(Warning.NONFINAL_FIELDS).verify();
 	}
 
 }

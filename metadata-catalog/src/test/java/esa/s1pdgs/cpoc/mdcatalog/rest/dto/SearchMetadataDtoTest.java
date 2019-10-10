@@ -4,7 +4,7 @@ import static org.junit.Assert.assertTrue;
 
 import org.junit.Test;
 
-import esa.s1pdgs.cpoc.mdcatalog.rest.dto.SearchMetadataDto;
+import esa.s1pdgs.cpoc.metadata.model.SearchMetadata;
 import nl.jqno.equalsverifier.EqualsVerifier;
 import nl.jqno.equalsverifier.Warning;
 
@@ -16,15 +16,18 @@ public class SearchMetadataDtoTest {
 	//String productName, String productType, String keyObjectStorage, String validityStart,String validityStop
 	@Test
 	public void testToString() {
-		SearchMetadataDto obj = new SearchMetadataDto("name", "type", "kobs", "startDate", "stopDate");
-		obj = new SearchMetadataDto(obj);
+		SearchMetadata obj = new SearchMetadata("name", "type", "kobs", "startDate", "stopDate", "mission", "satellite", "station");
 		
-		String str = obj.toString();
-        assertTrue(str.contains("productName= name"));
-        assertTrue(str.contains("productType= type"));
-        assertTrue(str.contains("keyObjectStorage= kobs"));
-        assertTrue(str.contains("validityStart= start"));
-        assertTrue(str.contains("validityStop= stop"));
+		String str = obj.toJsonString();
+        assertTrue(str.contains("\"productName\":\"name"));
+        assertTrue(str.contains("\"productType\":\"type"));
+        assertTrue(str.contains("\"keyObjectStorage\":\"kobs"));
+        assertTrue(str.contains("\"validityStart\":\"start"));
+        assertTrue(str.contains("\"validityStop\":\"stop"));
+		assertTrue(str.contains("\"missionId\":\"mission\""));
+		assertTrue(str.contains("\"satelliteId\":\"satellite\""));
+		assertTrue(str.contains("\"stationCode\":\"station\""));
+
 	}
 
 	/**
@@ -32,7 +35,7 @@ public class SearchMetadataDtoTest {
 	 */
 	@Test
 	public void testEquals() {
-		EqualsVerifier.forClass(SearchMetadataDto.class).usingGetClass().suppress(Warning.NONFINAL_FIELDS).verify();
+		EqualsVerifier.forClass(SearchMetadata.class).usingGetClass().suppress(Warning.NONFINAL_FIELDS).verify();
 	}
 
 }

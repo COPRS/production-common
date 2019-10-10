@@ -3,18 +3,14 @@ package esa.s1pdgs.cpoc.mqi.model.queue;
 import java.util.Objects;
 
 import esa.s1pdgs.cpoc.common.EdrsSessionFileType;
+import esa.s1pdgs.cpoc.common.ProductFamily;
 
 /**
  * DTO object used to transfer EDRS session files between MQI and application
  * 
  * @author Viveris technologies
  */
-public class EdrsSessionDto {
-
-    /**
-     * Key in OBS
-     */
-    private String objectStorageKey;
+public class EdrsSessionDto extends AbstractDto {
 
     /**
      * Channel identifier
@@ -27,6 +23,11 @@ public class EdrsSessionDto {
     private EdrsSessionFileType productType;
 
     /**
+     * Session id
+     */
+    private String sessionId;
+    
+    /**
      * Satellite identifier
      */
     private String satelliteId;
@@ -36,6 +37,11 @@ public class EdrsSessionDto {
      */
     private String missionId;
     
+    /**
+     * Station code
+     */
+    private String stationCode;
+
     /**
      * Default constructor
      */
@@ -48,27 +54,29 @@ public class EdrsSessionDto {
      */
     public EdrsSessionDto(final String objectStorageKey, final int channelId,
             final EdrsSessionFileType productType, final String missionId,
-            final String satelliteId) {
-        this.objectStorageKey = objectStorageKey;
+            final String satelliteId, final String stationCode, final String sessionId) {
+        super(objectStorageKey, ProductFamily.EDRS_SESSION);
         this.channelId = channelId;
         this.productType = productType;
         this.missionId = missionId;
         this.satelliteId = satelliteId;
+        this.stationCode = stationCode;
+        this.sessionId = sessionId;
     }
 
     /**
      * @return the objectStorageKey
      */
-    public String getObjectStorageKey() {
-        return objectStorageKey;
+    public String getKeyObjectStorage() {
+        return getProductName();
     }
 
     /**
      * @param objectStorageKey
      *            the objectStorageKey to set
      */
-    public void setObjectStorageKey(final String objectStorageKey) {
-        this.objectStorageKey = objectStorageKey;
+    public void setKeyObjectStorage(final String keyObjectStorage) {
+        this.setProductName(keyObjectStorage);
     }
 
     /**
@@ -131,15 +139,43 @@ public class EdrsSessionDto {
         this.missionId = missionId;
     }
 
+	/**
+	 * @return the stationCode
+	 */
+	public String getStationCode() {
+		return stationCode;
+	}
+
+	/**
+	 * @param stationCode the stationCode to set
+	 */
+	public void setStationCode(String stationCode) {
+		this.stationCode = stationCode;
+	}
+
+	/**
+	 * @return the sessionId
+	 */
+	public String getSessionId() {
+		return sessionId;
+	}
+
+	/**
+	 * @param sessionId the sessionId to set
+	 */
+	public void setSessionId(String sessionId) {
+		this.sessionId = sessionId;
+	}
+	
     /**
      * @see java.lang.Object#toString()
      */
     @Override
     public String toString() {
         return String.format(
-                "{objectStorageKey: %s, channelId: %s, productType: %s, satelliteId: %s, missionId: %s}",
-                objectStorageKey, channelId, productType, satelliteId,
-                missionId);
+                "{objectStorageKey: %s, channelId: %s, productType: %s, satelliteId: %s, missionId: %s, stationCode: %s, sessionId: %s}",
+                getKeyObjectStorage(), channelId, productType, satelliteId,
+                missionId, stationCode, sessionId);
     }
 
     /**
@@ -147,8 +183,8 @@ public class EdrsSessionDto {
      */
     @Override
     public int hashCode() {
-        return Objects.hash(objectStorageKey, channelId, productType,
-                satelliteId, missionId);
+        return Objects.hash(getKeyObjectStorage(), getFamily(), channelId, productType,
+                satelliteId, missionId, stationCode, sessionId);
     }
 
     /**
@@ -164,11 +200,14 @@ public class EdrsSessionDto {
         } else {
             EdrsSessionDto other = (EdrsSessionDto) obj;
             // field comparison
-            ret = Objects.equals(objectStorageKey, other.objectStorageKey)
+            ret = Objects.equals(getKeyObjectStorage(), other.getKeyObjectStorage())
+            		&&  Objects.equals(getFamily(), other.getFamily())
                     && channelId == other.channelId
                     && Objects.equals(productType, other.productType)
                     && Objects.equals(satelliteId, other.satelliteId)
-                    && Objects.equals(missionId, other.missionId);
+                    && Objects.equals(missionId, other.missionId)
+                    && Objects.equals(stationCode, other.stationCode)
+            		&& Objects.equals(sessionId, other.sessionId);
         }
         return ret;
     }

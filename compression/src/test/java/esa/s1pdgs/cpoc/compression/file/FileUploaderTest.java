@@ -10,13 +10,13 @@ import org.mockito.MockitoAnnotations;
 import esa.s1pdgs.cpoc.common.ProductFamily;
 import esa.s1pdgs.cpoc.common.errors.AbstractCodedException;
 import esa.s1pdgs.cpoc.compression.mqi.OutputProducerFactory;
-import esa.s1pdgs.cpoc.compression.obs.ObsService;
-import esa.s1pdgs.cpoc.mqi.model.queue.CompressionJobDto;
+import esa.s1pdgs.cpoc.mqi.model.queue.ProductDto;
 import esa.s1pdgs.cpoc.mqi.model.rest.GenericMessageDto;
+import esa.s1pdgs.cpoc.obs_sdk.ObsClient;
 
 public class FileUploaderTest {
 	@Mock
-	private ObsService obsService;
+	private ObsClient obsClient;
 
 	@Mock
 	private OutputProducerFactory producerFactory;
@@ -28,10 +28,10 @@ public class FileUploaderTest {
 		// Init mocks
 		MockitoAnnotations.initMocks(this);
 
-		GenericMessageDto<CompressionJobDto> inputMessage = new GenericMessageDto<CompressionJobDto>(123, "",
-				new CompressionJobDto("product_name",ProductFamily.L0_ACN, "object_key"));
+		GenericMessageDto<ProductDto> inputMessage = new GenericMessageDto<ProductDto>(123, "",
+				new ProductDto("product_name","object_key", ProductFamily.L0_ACN));
 
-		fileUploader = new FileUploader(obsService, producerFactory, "/tmp/compressed", inputMessage,
+		fileUploader = new FileUploader(obsClient, producerFactory, "/tmp/compressed", inputMessage,
 				inputMessage.getBody());
 	}
 

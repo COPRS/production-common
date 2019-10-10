@@ -18,12 +18,14 @@ import esa.s1pdgs.cpoc.mdcatalog.extraction.files.ExtractMetadata;
 import esa.s1pdgs.cpoc.mdcatalog.extraction.files.MetadataBuilder;
 import esa.s1pdgs.cpoc.mdcatalog.extraction.model.ConfigFileDescriptor;
 import esa.s1pdgs.cpoc.mdcatalog.extraction.model.EdrsSessionFileDescriptor;
-import esa.s1pdgs.cpoc.mdcatalog.extraction.model.L0OutputFileDescriptor;
-import esa.s1pdgs.cpoc.mdcatalog.extraction.model.L1OutputFileDescriptor;
+import esa.s1pdgs.cpoc.mdcatalog.extraction.model.OutputFileDescriptor;
+import esa.s1pdgs.cpoc.mdcatalog.extraction.xml.XmlConverter;
 import esa.s1pdgs.cpoc.common.EdrsSessionFileType;
 import esa.s1pdgs.cpoc.common.FileExtension;
+import esa.s1pdgs.cpoc.common.ProductFamily;
 import esa.s1pdgs.cpoc.common.errors.AbstractCodedException;
 import esa.s1pdgs.cpoc.common.errors.processing.MetadataExtractionException;
+import esa.s1pdgs.cpoc.common.errors.processing.MetadataMalformedException;
 
 import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.LogManager;
@@ -38,12 +40,17 @@ public class MetadataBuilderTest {
 	@Mock
 	private ExtractMetadata extractor;
 
+	@Mock
+    XmlConverter xmlConverter;
+	
+	private static final String LOCAL_DIRECTORY = "/tmp";
+
 	@Before
 	public void init() {
 		MockitoAnnotations.initMocks(this);
 	}
 
-	private void mockExtractorProcessEOFFIle(JSONObject result) throws MetadataExtractionException {
+	private void mockExtractorProcessEOFFIle(JSONObject result) throws MetadataExtractionException, MetadataMalformedException {
 		Mockito.doAnswer(i -> {
 			try {
 				Thread.sleep(500);
@@ -54,7 +61,7 @@ public class MetadataBuilderTest {
 		}).when(extractor).processEOFFile(Mockito.any(ConfigFileDescriptor.class), Mockito.any(File.class));
 	}
 
-	private void mockExtractorprocessEOFFileWithoutNamespace(JSONObject result) throws MetadataExtractionException {
+	private void mockExtractorprocessEOFFileWithoutNamespace(JSONObject result) throws MetadataExtractionException, MetadataMalformedException {
 		Mockito.doAnswer(i -> {
 			try {
 				Thread.sleep(500);
@@ -66,7 +73,7 @@ public class MetadataBuilderTest {
 				Mockito.any(File.class));
 	}
 
-	private void mockExtractorprocessXMLFile(JSONObject result) throws MetadataExtractionException {
+	private void mockExtractorprocessXMLFile(JSONObject result) throws MetadataExtractionException, MetadataMalformedException {
 		Mockito.doAnswer(i -> {
 			try {
 				Thread.sleep(500);
@@ -77,7 +84,7 @@ public class MetadataBuilderTest {
 		}).when(extractor).processXMLFile(Mockito.any(ConfigFileDescriptor.class), Mockito.any(File.class));
 	}
 
-	private void mockExtractorprocessSAFEFile(JSONObject result) throws MetadataExtractionException {
+	private void mockExtractorprocessSAFEFile(JSONObject result) throws MetadataExtractionException, MetadataMalformedException {
 		Mockito.doAnswer(i -> {
 			try {
 				Thread.sleep(500);
@@ -110,7 +117,7 @@ public class MetadataBuilderTest {
 		}).when(extractor).processSESSIONFile(Mockito.any(EdrsSessionFileDescriptor.class));
 	}
 	
-	private void mockExtractorprocessL0SliceFile(JSONObject result) throws MetadataExtractionException {
+	private void mockExtractorprocessL0SliceFile(JSONObject result) throws MetadataExtractionException, MetadataMalformedException {
 		Mockito.doAnswer(i -> {
 			try {
 				Thread.sleep(500);
@@ -118,10 +125,10 @@ public class MetadataBuilderTest {
 				LOGGER.error(e.getMessage());
 			}
 			return result;
-		}).when(extractor).processL0SliceProd(Mockito.any(L0OutputFileDescriptor.class), Mockito.any(File.class));
+		}).when(extractor).processProduct(Mockito.any(OutputFileDescriptor.class), Mockito.eq(ProductFamily.L0_SLICE), Mockito.any(File.class));
 	}
 	
-	private void mockExtractorprocessL0ACNFile(JSONObject result) throws MetadataExtractionException {
+	private void mockExtractorprocessL0ACNFile(JSONObject result) throws MetadataExtractionException, MetadataMalformedException {
 		Mockito.doAnswer(i -> {
 			try {
 				Thread.sleep(500);
@@ -129,10 +136,10 @@ public class MetadataBuilderTest {
 				LOGGER.error(e.getMessage());
 			}
 			return result;
-		}).when(extractor).processL0AcnProd(Mockito.any(L0OutputFileDescriptor.class), Mockito.any(File.class));
+		}).when(extractor).processProduct(Mockito.any(OutputFileDescriptor.class), Mockito.eq(ProductFamily.L0_ACN), Mockito.any(File.class));
 	}
 	
-	private void mockExtractorprocessL1SliceFile(JSONObject result) throws MetadataExtractionException {
+	private void mockExtractorprocessL1SliceFile(JSONObject result) throws MetadataExtractionException, MetadataMalformedException {
 		Mockito.doAnswer(i -> {
 			try {
 				Thread.sleep(500);
@@ -140,10 +147,10 @@ public class MetadataBuilderTest {
 				LOGGER.error(e.getMessage());
 			}
 			return result;
-		}).when(extractor).processL1SliceProd(Mockito.any(L1OutputFileDescriptor.class), Mockito.any(File.class));
+		}).when(extractor).processProduct(Mockito.any(OutputFileDescriptor.class), Mockito.eq(ProductFamily.L1_SLICE), Mockito.any(File.class));
 	}
 	
-	private void mockExtractorprocessL1ACNFile(JSONObject result) throws MetadataExtractionException {
+	private void mockExtractorprocessL1ACNFile(JSONObject result) throws MetadataExtractionException, MetadataMalformedException {
 		Mockito.doAnswer(i -> {
 			try {
 				Thread.sleep(500);
@@ -151,11 +158,11 @@ public class MetadataBuilderTest {
 				LOGGER.error(e.getMessage());
 			}
 			return result;
-		}).when(extractor).processL1AProd(Mockito.any(L1OutputFileDescriptor.class), Mockito.any(File.class));
+		}).when(extractor).processProduct(Mockito.any(OutputFileDescriptor.class), Mockito.eq(ProductFamily.L1_ACN), Mockito.any(File.class));
 	}
 
 	@Test
-	public void testBuildConfigFileMetadataXml() throws JSONException, MetadataExtractionException {
+	public void testBuildConfigFileMetadataXml() throws JSONException, MetadataExtractionException, MetadataMalformedException {
 		
 		ConfigFileDescriptor descriptor = new ConfigFileDescriptor();
 		descriptor.setExtension(FileExtension.XML);
@@ -175,7 +182,7 @@ public class MetadataBuilderTest {
 		File file = new File("workDir/S1A_OPER_AUX_OBMEMC_PDMC_20140201T000000.xml");
 
 		try {
-			MetadataBuilder metadataBuilder = new MetadataBuilder(extractor);
+			MetadataBuilder metadataBuilder = new MetadataBuilder(extractor, xmlConverter, LOCAL_DIRECTORY);
 			JSONObject dto = metadataBuilder.buildConfigFileMetadata(descriptor, file);
 
 			assertNotNull("Metadata should not be null", dto);
@@ -186,7 +193,7 @@ public class MetadataBuilderTest {
 	}
 	
 	@Test
-	public void testBuildConfigFileMetadataEOF() throws JSONException, MetadataExtractionException {
+	public void testBuildConfigFileMetadataEOF() throws JSONException, MetadataExtractionException, MetadataMalformedException {
 
 		ConfigFileDescriptor descriptor = new ConfigFileDescriptor();
 		descriptor.setExtension(FileExtension.EOF);
@@ -206,7 +213,7 @@ public class MetadataBuilderTest {
 		File file = new File("workDir/S1A_OPER_MPL_ORBSCT_20140507T150704_99999999T999999_0020.EOF");
 
 		try {
-			MetadataBuilder metadataBuilder = new MetadataBuilder(extractor);
+			MetadataBuilder metadataBuilder = new MetadataBuilder(extractor, xmlConverter, LOCAL_DIRECTORY);
 			JSONObject dto = metadataBuilder.buildConfigFileMetadata(descriptor, file);
 
 			assertNotNull("Metadata should not be null", dto);
@@ -217,7 +224,7 @@ public class MetadataBuilderTest {
 	}
 	
 	@Test
-	public void testBuildConfigFileMetadataAUXRESORB() throws JSONException, MetadataExtractionException {
+	public void testBuildConfigFileMetadataAUXRESORB() throws JSONException, MetadataExtractionException, MetadataMalformedException {
 
 		ConfigFileDescriptor descriptor = new ConfigFileDescriptor();
 		descriptor.setExtension(FileExtension.EOF);
@@ -237,7 +244,7 @@ public class MetadataBuilderTest {
 		File file = new File("workDir/S1A_OPER_AUX_RESORB_OPOD_20171213T143838_V20171213T102737_20171213T134507.EOF");
 
 		try {
-			MetadataBuilder metadataBuilder = new MetadataBuilder(extractor);
+			MetadataBuilder metadataBuilder = new MetadataBuilder(extractor, xmlConverter, LOCAL_DIRECTORY);
 			JSONObject dto = metadataBuilder.buildConfigFileMetadata(descriptor, file);
 			
 			assertNotNull("Metadata should not be null", dto);
@@ -248,7 +255,7 @@ public class MetadataBuilderTest {
 	}
 	
 	@Test
-	public void testBuildConfigFileMetadataSAFE() throws JSONException, MetadataExtractionException {
+	public void testBuildConfigFileMetadataSAFE() throws JSONException, MetadataExtractionException, MetadataMalformedException {
 
 		ConfigFileDescriptor descriptor = new ConfigFileDescriptor();
 		descriptor.setExtension(FileExtension.SAFE);
@@ -268,7 +275,7 @@ public class MetadataBuilderTest {
 		File file = new File("workDir/S1A_AUX_INS_V20171017T080000_G20171013T101216.SAFE/manifest.safe");
 
 		try {
-			MetadataBuilder metadataBuilder = new MetadataBuilder(extractor);
+			MetadataBuilder metadataBuilder = new MetadataBuilder(extractor, xmlConverter, LOCAL_DIRECTORY);
 			JSONObject dto = metadataBuilder.buildConfigFileMetadata(descriptor, file);
 
 			assertNotNull("Metadata should not be null", dto);
@@ -279,7 +286,7 @@ public class MetadataBuilderTest {
 	}
 
 	@Test
-	public void testBuildConfigFileMetadataInvalidExtension() throws MetadataExtractionException {
+	public void testBuildConfigFileMetadataInvalidExtension() throws MetadataExtractionException, MetadataMalformedException {
 
 		ConfigFileDescriptor descriptor = new ConfigFileDescriptor();
 		descriptor.setFilename("S1A_OPER_AUX_OBMEMC_PDMC_20140201T000000.xml");
@@ -295,7 +302,7 @@ public class MetadataBuilderTest {
 
 		try {
 			descriptor.setExtension(FileExtension.DAT);
-			MetadataBuilder metadataBuilder = new MetadataBuilder(extractor);
+			MetadataBuilder metadataBuilder = new MetadataBuilder(extractor, xmlConverter, LOCAL_DIRECTORY);
 			metadataBuilder.buildConfigFileMetadata(descriptor, file);
 			fail("An exception should occur");
 		} catch (MetadataExtractionException fe) {
@@ -305,7 +312,7 @@ public class MetadataBuilderTest {
 
 		try {
 			descriptor.setExtension(FileExtension.RAW);
-			MetadataBuilder metadataBuilder = new MetadataBuilder(extractor);
+			MetadataBuilder metadataBuilder = new MetadataBuilder(extractor, xmlConverter, LOCAL_DIRECTORY);
 			metadataBuilder.buildConfigFileMetadata(descriptor, file);
 			fail("An exception should occur");
 		} catch (MetadataExtractionException fe) {
@@ -315,7 +322,7 @@ public class MetadataBuilderTest {
 
 		try {
 			descriptor.setExtension(FileExtension.XSD);
-			MetadataBuilder metadataBuilder = new MetadataBuilder(extractor);
+			MetadataBuilder metadataBuilder = new MetadataBuilder(extractor, xmlConverter, LOCAL_DIRECTORY);
 			metadataBuilder.buildConfigFileMetadata(descriptor, file);
 			fail("An exception should occur");
 		} catch (MetadataExtractionException fe) {
@@ -325,7 +332,7 @@ public class MetadataBuilderTest {
 
 		try {
 			descriptor.setExtension(FileExtension.UNKNOWN);
-			MetadataBuilder metadataBuilder = new MetadataBuilder(extractor);
+			MetadataBuilder metadataBuilder = new MetadataBuilder(extractor, xmlConverter, LOCAL_DIRECTORY);
 			metadataBuilder.buildConfigFileMetadata(descriptor, file);
 			fail("An exception should occur");
 		} catch (MetadataExtractionException fe) {
@@ -350,13 +357,13 @@ public class MetadataBuilderTest {
 		descriptor.setMissionId("S1");
 		descriptor.setSatelliteId("A");
 		descriptor.setProductName("DCS_02_L20171109175634707000180_ch1_DSDB_00001.raw");
-		descriptor.setProductType(EdrsSessionFileType.RAW);
+		descriptor.setEdrsSessionFileType(EdrsSessionFileType.RAW);
 		descriptor.setRelativePath("S1A/707000180/ch01/DCS_02_L20171109175634707000180_ch1_DSDB_00001.raw");
 		descriptor.setChannel(1);
 		descriptor.setSessionIdentifier("707000180");
 
 		try {
-			MetadataBuilder metadataBuilder = new MetadataBuilder(extractor);
+			MetadataBuilder metadataBuilder = new MetadataBuilder(extractor, xmlConverter, LOCAL_DIRECTORY);
 			JSONObject dto = metadataBuilder.buildEdrsSessionFileMetadata(descriptor);
 
 			assertNotNull("Metadata should not be null", dto);
@@ -382,13 +389,13 @@ public class MetadataBuilderTest {
 		descriptor.setMissionId("S1");
 		descriptor.setSatelliteId("A");
 		descriptor.setProductName("DCS_02_SESSION1_ch1_DSIB.xml");
-		descriptor.setProductType(EdrsSessionFileType.SESSION);
+		descriptor.setEdrsSessionFileType(EdrsSessionFileType.SESSION);
 		descriptor.setRelativePath("S1A/SESSION1/ch01/DCS_02_SESSION1_ch1_DSIB.xml");
 		descriptor.setChannel(1);
 		descriptor.setSessionIdentifier("SESSION1");
 
 		try {
-			MetadataBuilder metadataBuilder = new MetadataBuilder(extractor);
+			MetadataBuilder metadataBuilder = new MetadataBuilder(extractor, xmlConverter, LOCAL_DIRECTORY);
 			JSONObject dto = metadataBuilder.buildEdrsSessionFileMetadata(descriptor);
 
 			assertNotNull("Metadata should not be null", dto);
@@ -399,7 +406,7 @@ public class MetadataBuilderTest {
 	}
 	
 	@Test
-	public void testbuildL0SliceOutputFileMetadata() throws JSONException, MetadataExtractionException {
+	public void testbuildL0SliceOutputFileMetadata() throws JSONException, MetadataExtractionException, MetadataMalformedException {
 		// Mock the extractor
 		JSONObject expectedResult = new JSONObject(
 				"{\"missionDataTakeId\":\"137013\",\"theoreticalSliceLength\":\"25\",\"sliceCoordinates\":{\"coordinates\":[[[86.8273,36.7787],[86.4312,38.7338],[83.6235,38.4629],[84.0935,36.5091],[86.8273,36.7787]]],\"type\":\"Polygon\"},\"insertionTime\":\"2018-05-30T14:27:43\",\"polarisation\":\"DV\",\"sliceNumber\":\"13\",\"absoluteStopOrbit\":\"19684\",\"resolution\":\"_\",\"circulationFlag\":\"13\",\"productName\":\"S1A_IW_RAW__0SDV_20171213T121623_20171213T121656_019684_021735_C6DB.SAFE\",\"dataTakeId\":\"021735\",\"productConsolidation\":\"SLICE\",\"absoluteStartOrbit\":\"19684\",\"instrumentConfigurationId\":\"6\",\"relativeStopOrbit\":\"12\",\"relativeStartOrbit\":\"12\",\"startTime\":\"2017-12-13T12:16:23.685188Z\",\"stopTime\":\"2017-12-13T12:16:56.085136Z\",\"productType\":\"IW_RAW__0S\",\"productClass\":\"S\",\"missionId\":\"S1\",\"swathtype\":\"IW\",\"pass\":\"ASCENDING\",\"satelliteId\":\"A\",\"stopTimeANX\":628491.556,\"sliceOverlap\":\"7.4\",\"startTimeANX\":\"596091.6080\"}");
@@ -407,7 +414,7 @@ public class MetadataBuilderTest {
 		this.mockExtractorprocessL0SliceFile(expectedResult);
 
 		// Build the parameters
-		L0OutputFileDescriptor descriptor = new L0OutputFileDescriptor();
+		OutputFileDescriptor descriptor = new OutputFileDescriptor();
 		descriptor.setExtension(FileExtension.SAFE);
 		descriptor.setFilename("manifest.safe");
 		descriptor.setKeyObjectStorage("S1A_IW_RAW__0SDV_20171213T121623_20171213T121656_019684_021735_C6DB.SAFE/manifest.safe");
@@ -425,8 +432,8 @@ public class MetadataBuilderTest {
 		File file = new File("workDir/S1A_IW_RAW__0SDV_20171213T121623_20171213T121656_019684_021735_C6DB.SAFE/manifest.safe");
 
 		try {
-			MetadataBuilder metadataBuilder = new MetadataBuilder(extractor);
-			JSONObject dto = metadataBuilder.buildL0SliceOutputFileMetadata(descriptor, file);
+			MetadataBuilder metadataBuilder = new MetadataBuilder(extractor, xmlConverter, LOCAL_DIRECTORY);
+			JSONObject dto = metadataBuilder.buildOutputFileMetadata(descriptor, file, ProductFamily.L0_SLICE);
 
 			assertNotNull("Metadata should not be null", dto);
 			assertEquals("Metadata are not equals", expectedResult.toString(), dto.toString());
@@ -436,7 +443,7 @@ public class MetadataBuilderTest {
 	}
 	
 	@Test
-	public void testbuildL0ACNOutputFileMetadata() throws JSONException, MetadataExtractionException {
+	public void testbuildL0ACNOutputFileMetadata() throws JSONException, MetadataExtractionException, MetadataMalformedException {
 		// Mock the extractor
 		JSONObject expectedResult = new JSONObject(
 				"{\"missionDataTakeId\":\"137013\",\"totalNumberOfSlice\":20.159704,\"sliceCoordinates\":{\"coordinates\":[[[90.3636,18.6541],[84.2062,49.0506],[80.8613,48.7621],[88.0584,18.3765],[90.3636,18.6541]]],\"type\":\"Polygon\"},\"insertionTime\":\"2018-05-30T14:27:43\",\"polarisation\":\"DV\",\"absoluteStopOrbit\":\"19684\",\"resolution\":\"_\",\"circulationFlag\":\"13\",\"productName\":\"S1A_IW_RAW__0ADV_20171213T121123_20171213T121947_019684_021735_51B1.SAFE\",\"dataTakeId\":\"021735\",\"productConsolidation\":\"FULL\",\"absoluteStartOrbit\":\"19684\",\"instrumentConfigurationId\":\"6\",\"relativeStopOrbit\":\"12\",\"relativeStartOrbit\":\"12\",\"startTime\":\"2017-12-13T12:11:23.682488Z\",\"stopTime\":\"2017-12-13T12:19:47.264351Z\",\"productType\":\"IW_RAW__0A\",\"productClass\":\"A\",\"missionId\":\"S1\",\"swathtype\":\"IW\",\"pass\":\"ASCENDING\",\"satelliteId\":\"A\",\"stopTimeANX\":799670.769,\"startTimeANX\":\"296088.9120\"}");
@@ -444,7 +451,7 @@ public class MetadataBuilderTest {
 		this.mockExtractorprocessL0ACNFile(expectedResult);
 
 		// Build the parameters
-		L0OutputFileDescriptor descriptor = new L0OutputFileDescriptor();
+		OutputFileDescriptor descriptor = new OutputFileDescriptor();
 		descriptor.setExtension(FileExtension.SAFE);
 		descriptor.setFilename("manifest.safe");
 		descriptor.setKeyObjectStorage("S1A_IW_RAW__0ADV_20171213T121123_20171213T121947_019684_021735_51B1.SAFE/manifest.safe");
@@ -462,8 +469,8 @@ public class MetadataBuilderTest {
 		File file = new File("workDir/S1A_IW_RAW__0ADV_20171213T121123_20171213T121947_019684_021735_51B1.SAFE/manifest.safe");
 
 		try {
-			MetadataBuilder metadataBuilder = new MetadataBuilder(extractor);
-			JSONObject dto = metadataBuilder.buildL0AcnOutputFileMetadata(descriptor, file);
+			MetadataBuilder metadataBuilder = new MetadataBuilder(extractor, xmlConverter, LOCAL_DIRECTORY);
+			JSONObject dto = metadataBuilder.buildOutputFileMetadata(descriptor, file, ProductFamily.L0_ACN);
 
 			assertNotNull("Metadata should not be null", dto);
 			assertEquals("Metadata are not equals", expectedResult.toString(), dto.toString());
@@ -473,7 +480,7 @@ public class MetadataBuilderTest {
 	}
 	
 	@Test
-	public void testbuildL1SliceOutputFileMetadata() throws JSONException, MetadataExtractionException {
+	public void testbuildL1SliceOutputFileMetadata() throws JSONException, MetadataExtractionException, MetadataMalformedException {
 		// Mock the extractor
 		JSONObject expectedResult = new JSONObject(
 				"{\"missionDataTakeId\":\"137013\",\"theoreticalSliceLength\":\"25\",\"sliceCoordinates\":{\"coordinates\":[[[86.8273,36.7787],[86.4312,38.7338],[83.6235,38.4629],[84.0935,36.5091],[86.8273,36.7787]]],\"type\":\"Polygon\"},\"insertionTime\":\"2018-05-30T14:27:43\",\"polarisation\":\"DV\",\"sliceNumber\":\"13\",\"absoluteStopOrbit\":\"19684\",\"resolution\":\"_\",\"circulationFlag\":\"13\",\"productName\":\"S1A_IW_RAW__0SDV_20171213T121623_20171213T121656_019684_021735_C6DB.SAFE\",\"dataTakeId\":\"021735\",\"productConsolidation\":\"SLICE\",\"absoluteStartOrbit\":\"19684\",\"instrumentConfigurationId\":\"6\",\"relativeStopOrbit\":\"12\",\"relativeStartOrbit\":\"12\",\"startTime\":\"2017-12-13T12:16:23.685188Z\",\"stopTime\":\"2017-12-13T12:16:56.085136Z\",\"productType\":\"IW_RAW__0S\",\"productClass\":\"S\",\"missionId\":\"S1\",\"swathtype\":\"IW\",\"pass\":\"ASCENDING\",\"satelliteId\":\"A\",\"stopTimeANX\":628491.556,\"sliceOverlap\":\"7.4\",\"startTimeANX\":\"596091.6080\"}");
@@ -481,7 +488,7 @@ public class MetadataBuilderTest {
 		this.mockExtractorprocessL1SliceFile(expectedResult);
 
 		// Build the parameters
-		L1OutputFileDescriptor descriptor = new L1OutputFileDescriptor();
+		OutputFileDescriptor descriptor = new OutputFileDescriptor();
 		descriptor.setExtension(FileExtension.SAFE);
 		descriptor.setFilename("S1A_IW_RAW__0SDV_20171213T121623_20171213T121656_019684_021735_C6DB.SAFE");
 		descriptor.setKeyObjectStorage("S1A_IW_RAW__0SDV_20171213T121623_20171213T121656_019684_021735_C6DB.SAFE");
@@ -499,8 +506,8 @@ public class MetadataBuilderTest {
 		File file = new File("workDir/S1A_IW_RAW__0SDV_20171213T121623_20171213T121656_019684_021735_C6DB.SAFE/manifest.safe");
 
 		try {
-			MetadataBuilder metadataBuilder = new MetadataBuilder(extractor);
-			JSONObject dto = metadataBuilder.buildL1SliceOutputFileMetadata(descriptor, file);
+			MetadataBuilder metadataBuilder = new MetadataBuilder(extractor, xmlConverter, LOCAL_DIRECTORY);
+			JSONObject dto = metadataBuilder.buildOutputFileMetadata(descriptor, file, ProductFamily.L1_SLICE);
 
 			assertNotNull("Metadata should not be null", dto);
 			assertEquals("Metadata are not equals", expectedResult.toString(), dto.toString());
@@ -510,7 +517,7 @@ public class MetadataBuilderTest {
 	}
 	
 	@Test
-	public void testbuildL1ACNOutputFileMetadata() throws JSONException, MetadataExtractionException {
+	public void testbuildL1ACNOutputFileMetadata() throws JSONException, MetadataExtractionException, MetadataMalformedException {
 		// Mock the extractor
 		JSONObject expectedResult = new JSONObject(
 				"{\"missionDataTakeId\":\"137013\",\"totalNumberOfSlice\":20.159704,\"sliceCoordinates\":{\"coordinates\":[[[90.3636,18.6541],[84.2062,49.0506],[80.8613,48.7621],[88.0584,18.3765],[90.3636,18.6541]]],\"type\":\"Polygon\"},\"insertionTime\":\"2018-05-30T14:27:43\",\"polarisation\":\"DV\",\"absoluteStopOrbit\":\"19684\",\"resolution\":\"_\",\"circulationFlag\":\"13\",\"productName\":\"S1A_IW_RAW__0ADV_20171213T121123_20171213T121947_019684_021735_51B1.SAFE\",\"dataTakeId\":\"021735\",\"productConsolidation\":\"FULL\",\"absoluteStartOrbit\":\"19684\",\"instrumentConfigurationId\":\"6\",\"relativeStopOrbit\":\"12\",\"relativeStartOrbit\":\"12\",\"startTime\":\"2017-12-13T12:11:23.682488Z\",\"stopTime\":\"2017-12-13T12:19:47.264351Z\",\"productType\":\"IW_RAW__0A\",\"productClass\":\"A\",\"missionId\":\"S1\",\"swathtype\":\"IW\",\"pass\":\"ASCENDING\",\"satelliteId\":\"A\",\"stopTimeANX\":799670.769,\"startTimeANX\":\"296088.9120\"}");
@@ -518,7 +525,7 @@ public class MetadataBuilderTest {
 		this.mockExtractorprocessL1ACNFile(expectedResult);
 
 		// Build the parameters
-		L1OutputFileDescriptor descriptor = new L1OutputFileDescriptor();
+		OutputFileDescriptor descriptor = new OutputFileDescriptor();
 		descriptor.setExtension(FileExtension.SAFE);
 		descriptor.setFilename("S1A_IW_RAW__0ADV_20171213T121123_20171213T121947_019684_021735_51B1.SAFE");
 		descriptor.setKeyObjectStorage("S1A_IW_RAW__0ADV_20171213T121123_20171213T121947_019684_021735_51B1.SAFE");
@@ -536,8 +543,8 @@ public class MetadataBuilderTest {
 		File file = new File("workDir/S1A_IW_RAW__0ADV_20171213T121123_20171213T121947_019684_021735_51B1.SAFE/manifest.safe");
 
 		try {
-			MetadataBuilder metadataBuilder = new MetadataBuilder(extractor);
-			JSONObject dto = metadataBuilder.buildL1AcnOutputFileMetadata(descriptor, file);
+			MetadataBuilder metadataBuilder = new MetadataBuilder(extractor, xmlConverter, LOCAL_DIRECTORY);
+			JSONObject dto = metadataBuilder.buildOutputFileMetadata(descriptor, file, ProductFamily.L1_ACN);
 
 			assertNotNull("Metadata should not be null", dto);
 			assertEquals("Metadata are not equals", expectedResult.toString(), dto.toString());

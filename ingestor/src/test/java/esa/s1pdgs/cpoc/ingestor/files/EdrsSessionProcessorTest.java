@@ -11,9 +11,9 @@ import esa.s1pdgs.cpoc.common.EdrsSessionFileType;
 import esa.s1pdgs.cpoc.ingestor.files.model.FileDescriptor;
 import esa.s1pdgs.cpoc.ingestor.files.services.EdrsSessionFileDescriptorService;
 import esa.s1pdgs.cpoc.ingestor.kafka.KafkaSessionProducer;
-import esa.s1pdgs.cpoc.ingestor.obs.ObsService;
 import esa.s1pdgs.cpoc.ingestor.status.AppStatus;
 import esa.s1pdgs.cpoc.mqi.model.queue.EdrsSessionDto;
+import esa.s1pdgs.cpoc.obs_sdk.ObsClient;
 
 public class EdrsSessionProcessorTest {
 
@@ -21,7 +21,7 @@ public class EdrsSessionProcessorTest {
      * Amazon S3 service for configuration files
      */
     @Mock
-    private ObsService obsService;
+    private ObsClient obsClient;
 
     /**
      * KAFKA producer on the topic "metadata"
@@ -35,7 +35,6 @@ public class EdrsSessionProcessorTest {
     @Mock
     private EdrsSessionFileDescriptorService extractor;
     
-
     /**
      * Application status
      */
@@ -46,6 +45,11 @@ public class EdrsSessionProcessorTest {
      * Service to test
      */
     private SessionFilesProcessor service;
+    
+    /**
+     * 
+     */
+    private String backupDirectory = "/tmp";
 
     /**
      * Initialization
@@ -53,7 +57,7 @@ public class EdrsSessionProcessorTest {
     @Before
     public void init() {
         MockitoAnnotations.initMocks(this);
-        service = new SessionFilesProcessor(obsService, publisher, extractor, appStatus);
+        service = new SessionFilesProcessor(obsClient, publisher, extractor, appStatus, backupDirectory, backupDirectory);
     }
 
     /**
@@ -68,8 +72,10 @@ public class EdrsSessionProcessorTest {
         desc.setProductType(EdrsSessionFileType.RAW);
         desc.setMissionId("mission");
         desc.setSatelliteId("sat");
+        desc.setStationCode("stat");
+        desc.setSessionId("sessionId");
         EdrsSessionDto expected = new EdrsSessionDto("key-obs", 15,
-                EdrsSessionFileType.RAW, "mission", "sat");
+                EdrsSessionFileType.RAW, "mission", "sat", "stat", "sessionId");
 
         assertEquals(expected, service.buildDto(desc));
     }

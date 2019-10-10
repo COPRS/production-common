@@ -7,13 +7,8 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.client.RestTemplate;
 
-import esa.s1pdgs.cpoc.appcatalog.client.job.AbstractAppCatalogJobService;
-import esa.s1pdgs.cpoc.appcatalog.client.job.EdrsSessionsAppCatalogJobService;
-import esa.s1pdgs.cpoc.appcatalog.client.job.LevelProductsAppCatalogJobService;
-import esa.s1pdgs.cpoc.appcatalog.client.job.LevelSegmentsAppCatalogJobService;
-import esa.s1pdgs.cpoc.mqi.model.queue.EdrsSessionDto;
-import esa.s1pdgs.cpoc.mqi.model.queue.LevelProductDto;
-import esa.s1pdgs.cpoc.mqi.model.queue.LevelSegmentDto;
+import esa.s1pdgs.cpoc.appcatalog.client.job.AppCatalogJobClient;
+import esa.s1pdgs.cpoc.common.ProductCategory;
 
 /**
  * Configuration of applicative data catalog client Creation of 3 services:
@@ -69,10 +64,11 @@ public class AppCatalogConfiguration {
 	 * @return
 	 */
 	@Bean(name = "appCatalogServiceForEdrsSessions")
-	public AbstractAppCatalogJobService<EdrsSessionDto> appCatalogServiceForEdrsSessions(
+	public AppCatalogJobClient appCatalogServiceForEdrsSessions(
 			final RestTemplateBuilder builder) {
+		@SuppressWarnings("deprecation")
 		RestTemplate template = builder.setConnectTimeout(tmConnectMs).build();
-		return new EdrsSessionsAppCatalogJobService(template, hostUri, maxRetries, tempoRetryMs);
+		return new AppCatalogJobClient(template, hostUri, maxRetries, tempoRetryMs, ProductCategory.EDRS_SESSIONS);
 	}
 
 	/**
@@ -82,10 +78,11 @@ public class AppCatalogConfiguration {
 	 * @return
 	 */
 	@Bean(name = "appCatalogServiceForLevelProducts")
-	public AbstractAppCatalogJobService<LevelProductDto> appCatalogServiceForLevelProducts(
+	public AppCatalogJobClient appCatalogServiceForLevelProducts(
 			final RestTemplateBuilder builder) {
+		@SuppressWarnings("deprecation")
 		RestTemplate template = builder.setConnectTimeout(tmConnectMs).build();
-		return new LevelProductsAppCatalogJobService(template, hostUri, maxRetries, tempoRetryMs);
+		return new AppCatalogJobClient(template, hostUri, maxRetries, tempoRetryMs, ProductCategory.LEVEL_PRODUCTS);
 	}
 
     /**
@@ -95,10 +92,11 @@ public class AppCatalogConfiguration {
      * @return
      */
     @Bean(name = "appCatalogServiceForLevelSegments")
-    public AbstractAppCatalogJobService<LevelSegmentDto> appCatalogServiceForLevelSegments(
+    public AppCatalogJobClient appCatalogServiceForLevelSegments(
             final RestTemplateBuilder builder) {
+    	@SuppressWarnings("deprecation")
         RestTemplate template = builder.setConnectTimeout(tmConnectMs).build();
-        return new LevelSegmentsAppCatalogJobService(template, hostUri, maxRetries, tempoRetryMs);
+        return new AppCatalogJobClient(template, hostUri, maxRetries, tempoRetryMs, ProductCategory.LEVEL_SEGMENTS);
     }
 
 }

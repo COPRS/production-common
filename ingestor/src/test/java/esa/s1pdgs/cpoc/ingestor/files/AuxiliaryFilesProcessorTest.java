@@ -8,12 +8,13 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
 import esa.s1pdgs.cpoc.common.EdrsSessionFileType;
+import esa.s1pdgs.cpoc.common.ProductFamily;
 import esa.s1pdgs.cpoc.ingestor.files.model.FileDescriptor;
 import esa.s1pdgs.cpoc.ingestor.files.services.AuxiliaryFileDescriptorService;
 import esa.s1pdgs.cpoc.ingestor.kafka.KafkaConfigFileProducer;
-import esa.s1pdgs.cpoc.ingestor.obs.ObsService;
 import esa.s1pdgs.cpoc.ingestor.status.AppStatus;
-import esa.s1pdgs.cpoc.mqi.model.queue.AuxiliaryFileDto;
+import esa.s1pdgs.cpoc.mqi.model.queue.ProductDto;
+import esa.s1pdgs.cpoc.obs_sdk.ObsClient;
 
 public class AuxiliaryFilesProcessorTest {
 
@@ -21,7 +22,7 @@ public class AuxiliaryFilesProcessorTest {
      * Amazon S3 service for configuration files
      */
     @Mock
-    private ObsService obsService;
+    private ObsClient obsClient;
 
     /**
      * KAFKA producer on the topic "metadata"
@@ -45,6 +46,11 @@ public class AuxiliaryFilesProcessorTest {
      * Service to test
      */
     private AuxiliaryFilesProcessor service;
+    
+    /**
+     * 
+     */
+    private String backupDirectory = "/tmp";
 
     /**
      * Initialization
@@ -52,7 +58,7 @@ public class AuxiliaryFilesProcessorTest {
     @Before
     public void init() {
         MockitoAnnotations.initMocks(this);
-        service = new AuxiliaryFilesProcessor(obsService, publisher, extractor, appStatus);
+        service = new AuxiliaryFilesProcessor(obsClient, publisher, extractor, appStatus, backupDirectory ,backupDirectory);
     }
 
     /**
@@ -67,8 +73,7 @@ public class AuxiliaryFilesProcessorTest {
         desc.setProductType(EdrsSessionFileType.RAW);
         desc.setMissionId("mission");
         desc.setSatelliteId("sat");
-        AuxiliaryFileDto expected =
-                new AuxiliaryFileDto("product-name", "product-name");
+        ProductDto expected = new ProductDto("product-name", "product-name", ProductFamily.AUXILIARY_FILE);
 
         assertEquals(expected, service.buildDto(desc));
     }

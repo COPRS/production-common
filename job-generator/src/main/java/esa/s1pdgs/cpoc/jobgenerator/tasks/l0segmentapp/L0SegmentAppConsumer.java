@@ -6,18 +6,13 @@ import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.scheduling.annotation.Scheduled;
-import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
 
-import esa.s1pdgs.cpoc.appcatalog.client.job.AbstractAppCatalogJobService;
+import esa.s1pdgs.cpoc.appcatalog.client.job.AppCatalogJobClient;
 import esa.s1pdgs.cpoc.appcatalog.common.rest.model.job.AppDataJobDto;
 import esa.s1pdgs.cpoc.appcatalog.common.rest.model.job.AppDataJobDtoState;
 import esa.s1pdgs.cpoc.appcatalog.common.rest.model.job.AppDataJobProductDto;
-import esa.s1pdgs.cpoc.appcatalog.rest.MqiStateMessageEnum;
 import esa.s1pdgs.cpoc.common.ProductCategory;
 import esa.s1pdgs.cpoc.common.errors.AbstractCodedException;
 import esa.s1pdgs.cpoc.common.errors.InvalidFormatProduct;
@@ -28,24 +23,31 @@ import esa.s1pdgs.cpoc.jobgenerator.config.ProcessSettings;
 import esa.s1pdgs.cpoc.jobgenerator.status.AppStatus;
 import esa.s1pdgs.cpoc.jobgenerator.tasks.AbstractGenericConsumer;
 import esa.s1pdgs.cpoc.jobgenerator.tasks.AbstractJobsDispatcher;
-import esa.s1pdgs.cpoc.mqi.client.GenericMqiService;
+import esa.s1pdgs.cpoc.mqi.client.GenericMqiClient;
 import esa.s1pdgs.cpoc.mqi.client.StatusService;
-import esa.s1pdgs.cpoc.mqi.model.queue.LevelSegmentDto;
+import esa.s1pdgs.cpoc.mqi.model.queue.ProductDto;
 import esa.s1pdgs.cpoc.mqi.model.rest.GenericMessageDto;
 import esa.s1pdgs.cpoc.report.LoggerReporting;
 import esa.s1pdgs.cpoc.report.Reporting;
-
-@Component
-@ConditionalOnProperty(name = "process.level", havingValue = "L0_SEGMENT")
+import esa.s1pdgs.cpoc.report.ReportingMessage;
 
 public class L0SegmentAppConsumer
-        extends AbstractGenericConsumer<LevelSegmentDto> {
+        extends AbstractGenericConsumer<ProductDto> {
 
     /**
      * Pattern built from the regular expression given in configuration
      */
     private final Pattern pattern;
+    
+    /**
+     * 
+     */
     private final Map<String, Integer> patternGroups;
+    
+    /**
+     * 
+     */
+    private String taskForFunctionalLog;
 
     /**
      * Constructor
@@ -57,18 +59,17 @@ public class L0SegmentAppConsumer
      * @param appDataService
      * @param appStatus
      */
-    @Autowired
     public L0SegmentAppConsumer(
-            final AbstractJobsDispatcher<LevelSegmentDto> jobsDispatcher,
+            final AbstractJobsDispatcher<ProductDto> jobsDispatcher,
             final L0SegmentAppProperties appProperties,
             final ProcessSettings processSettings,
-            @Qualifier("mqiServiceForLevelSegments") final GenericMqiService<LevelSegmentDto> mqiService,
-            @Qualifier("mqiServiceForStatus") final StatusService mqiStatusService,
-            @Qualifier("appCatalogServiceForLevelSegments") final AbstractAppCatalogJobService<LevelSegmentDto> appDataService,
+            final GenericMqiClient mqiService,
+            final StatusService mqiStatusService,
+            final AppCatalogJobClient appDataService,
             final ErrorRepoAppender errorRepoAppender,
             final AppStatus appStatus) {
         super(jobsDispatcher, processSettings, mqiService, mqiStatusService,
-                appDataService, appStatus, errorRepoAppender);
+                appDataService, appStatus, errorRepoAppender, ProductCategory.LEVEL_SEGMENTS);
         this.pattern = Pattern.compile(appProperties.getNameRegexpPattern(),
                 Pattern.CASE_INSENSITIVE);
         this.patternGroups = appProperties.getNameRegexpGroups();
@@ -79,10 +80,10 @@ public class L0SegmentAppConsumer
      */
     @Scheduled(fixedDelayString = "${process.fixed-delay-ms}", initialDelayString = "${process.initial-delay-ms}")
     public void consumeMessages() {    	
-    	final Reporting.Factory reportingFactory = new LoggerReporting.Factory(LOGGER, "L0_SEGMENTJobGeneration"); 
+    	final Reporting.Factory reportingFactory = new LoggerReporting.Factory("L0_SEGMENTJobGeneration"); 
     	
         // First, consume message
-        GenericMessageDto<LevelSegmentDto> mqiMessage = readMessage();
+        GenericMessageDto<ProductDto> mqiMessage = readMessage();
         if (mqiMessage == null || mqiMessage.getBody() == null) {
             LOGGER.trace("[MONITOR] [step 0] No message received: continue");
             return;
@@ -94,10 +95,9 @@ public class L0SegmentAppConsumer
         int step = 1;
         boolean ackOk = false;
         String errorMessage = "";
-        String productName = mqiMessage.getBody().getName();
+        String productName = mqiMessage.getBody().getProductName();
         
-        final FailedProcessingDto<GenericMessageDto<LevelSegmentDto>> failedProc =  
-        		new FailedProcessingDto<GenericMessageDto<LevelSegmentDto>>();
+        FailedProcessingDto failedProc = new FailedProcessingDto();
         
         
         // Note: the report log of consume and global log is raised during
@@ -110,8 +110,8 @@ public class L0SegmentAppConsumer
             LOGGER.info(
                     "[MONITOR] [step 1] [productName {}] Creating/updating job",
                     productName);
-            reporting.reportStart("Start job generation using " + mqiMessage.getBody().getName());
-            AppDataJobDto<LevelSegmentDto> appDataJob = buildJob(mqiMessage);
+            reporting.begin(new ReportingMessage("Start job generation using {}", mqiMessage.getBody().getProductName()));
+            AppDataJobDto<ProductDto> appDataJob = buildJob(mqiMessage);
             productName = appDataJob.getProduct().getProductName();
 
             // Dispatch job
@@ -142,16 +142,9 @@ public class L0SegmentAppConsumer
                     "[MONITOR] [step %d] [productName %s] [code %d] %s", step,
                     productName, ace.getCode().getCode(),
                     ace.getLogMessage());
-            reporting.reportError("[code {}] {}", ace.getCode().getCode(), ace.getLogMessage());
+            reporting.error(new ReportingMessage("[code {}] {}", ace.getCode().getCode(), ace.getLogMessage()));
 
-            failedProc.processingType(mqiMessage.getInputKey())
-      			.topic(mqiMessage.getInputKey())
-	    		.processingStatus(MqiStateMessageEnum.READ)
-	    		.productCategory(ProductCategory.LEVEL_SEGMENTS)
-	    		.failedPod(processSettings.getHostname())
-	            .failureDate(new Date())
-	    		.failureMessage(errorMessage)
-	    		.processingDetails(mqiMessage);
+            failedProc = new FailedProcessingDto(processSettings.getHostname(),new Date(),errorMessage, mqiMessage);
         }
 
         // Ack and check if application shall stopped
@@ -160,22 +153,22 @@ public class L0SegmentAppConsumer
         LOGGER.info("[MONITOR] [step 0] [productName {}] End",
                 productName);
         
-        reporting.reportStop("End job generation using " + mqiMessage.getBody().getName());
+        reporting.end(new ReportingMessage("End job generation using {}", mqiMessage.getBody().getProductName()));
     }
 
-    protected AppDataJobDto<LevelSegmentDto> buildJob(
-            GenericMessageDto<LevelSegmentDto> mqiMessage)
+    protected AppDataJobDto<ProductDto> buildJob(
+            GenericMessageDto<ProductDto> mqiMessage)
             throws AbstractCodedException {
-        LevelSegmentDto leveldto = mqiMessage.getBody();
+        ProductDto leveldto = mqiMessage.getBody();
 
         // Check if a job is already created for message identifier
-        List<AppDataJobDto<LevelSegmentDto>> existingJobs = appDataService
+        List<AppDataJobDto<ProductDto>> existingJobs = appDataService
                 .findByMessagesIdentifier(mqiMessage.getIdentifier());
 
         if (CollectionUtils.isEmpty(existingJobs)) {
 
             // Extract information from name
-            Matcher m = pattern.matcher(leveldto.getName());
+            Matcher m = pattern.matcher(leveldto.getProductName());
             if (!m.matches()) {
                 throw new InvalidFormatProduct(
                         "Don't match with regular expression "
@@ -187,13 +180,13 @@ public class L0SegmentAppConsumer
             String datatakeID = m.group(this.patternGroups.get("datatakeId"));
 
             // Search job for given datatake id
-            List<AppDataJobDto<LevelSegmentDto>> existingJobsForDatatake =
+            List<AppDataJobDto<ProductDto>> existingJobsForDatatake =
                     appDataService.findByProductDataTakeId(datatakeID);
 
             if (CollectionUtils.isEmpty(existingJobsForDatatake)) {
 
                 // Create the JOB
-                AppDataJobDto<LevelSegmentDto> jobDto = new AppDataJobDto<>();
+                AppDataJobDto<ProductDto> jobDto = new AppDataJobDto<>();
                 // General details
                 jobDto.setLevel(processSettings.getLevel());
                 jobDto.setPod(processSettings.getHostname());
@@ -211,8 +204,7 @@ public class L0SegmentAppConsumer
 
                 return appDataService.newJob(jobDto);
             } else {
-                AppDataJobDto<LevelSegmentDto> jobDto =
-                        existingJobsForDatatake.get(0);
+                AppDataJobDto jobDto = existingJobsForDatatake.get(0);
 
                 if (!jobDto.getPod().equals(processSettings.getHostname())) {
                     jobDto.setPod(processSettings.getHostname());
@@ -225,7 +217,7 @@ public class L0SegmentAppConsumer
 
         } else {
             // Update pod if needed
-            AppDataJobDto<LevelSegmentDto> jobDto = existingJobs.get(0);
+            AppDataJobDto jobDto = existingJobs.get(0);
 
             if (!jobDto.getPod().equals(processSettings.getHostname())) {
                 jobDto.setPod(processSettings.getHostname());
@@ -239,6 +231,11 @@ public class L0SegmentAppConsumer
 
     @Override
     protected String getTaskForFunctionalLog() {
-        return "L0_SEGMENTJobGeneration";
+    	return this.taskForFunctionalLog;
+    }
+    
+    @Override
+    public void setTaskForFunctionalLog(String taskForFunctionalLog) {
+    	this.taskForFunctionalLog = taskForFunctionalLog; 
     }
 }

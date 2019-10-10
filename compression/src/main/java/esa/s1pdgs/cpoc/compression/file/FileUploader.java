@@ -2,7 +2,7 @@ package esa.s1pdgs.cpoc.compression.file;
 
 import java.io.File;
 import java.util.ArrayList;
-import java.util.Collections;
+import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
 
@@ -14,13 +14,14 @@ import esa.s1pdgs.cpoc.common.errors.AbstractCodedException;
 import esa.s1pdgs.cpoc.common.errors.InternalErrorException;
 import esa.s1pdgs.cpoc.common.errors.mqi.MqiPublicationError;
 import esa.s1pdgs.cpoc.compression.model.mqi.CompressedProductQueueMessage;
-import esa.s1pdgs.cpoc.compression.model.obs.S3UploadFile;
 import esa.s1pdgs.cpoc.compression.mqi.OutputProducerFactory;
-import esa.s1pdgs.cpoc.compression.obs.ObsService;
-import esa.s1pdgs.cpoc.mqi.model.queue.CompressionJobDto;
+import esa.s1pdgs.cpoc.mqi.model.queue.ProductDto;
 import esa.s1pdgs.cpoc.mqi.model.rest.GenericMessageDto;
+import esa.s1pdgs.cpoc.obs_sdk.ObsClient;
+import esa.s1pdgs.cpoc.obs_sdk.ObsUploadObject;
 import esa.s1pdgs.cpoc.report.LoggerReporting;
 import esa.s1pdgs.cpoc.report.Reporting;
+import esa.s1pdgs.cpoc.report.ReportingMessage;
 
 public class FileUploader {
 	/**
@@ -30,7 +31,7 @@ public class FileUploader {
 
 	private final String workingDir;
 
-	private final CompressionJobDto job;
+	private final ProductDto job;
 
 	/**
 	 * Output producer factory for message queue system
@@ -40,7 +41,7 @@ public class FileUploader {
 	/**
 	 * Input message
 	 */
-	private final GenericMessageDto<CompressionJobDto> inputMessage;
+	private final GenericMessageDto<ProductDto> inputMessage;
 
 	/**
 	 * Cannot be a key in obs
@@ -52,20 +53,20 @@ public class FileUploader {
 	/**
 	 * OBS service
 	 */
-	private final ObsService obsService;
+	private final ObsClient obsClient;
 
-	public FileUploader(final ObsService obsService, final OutputProducerFactory producerFactory,
-			final String workingDir, final GenericMessageDto<CompressionJobDto> inputMessage,
-			final CompressionJobDto job) {
-		this.obsService = obsService;
+	public FileUploader(final ObsClient obsClient, final OutputProducerFactory producerFactory,
+			final String workingDir, final GenericMessageDto<ProductDto> inputMessage,
+			final ProductDto job) {
+		this.obsClient = obsClient;
 		this.producerFactory = producerFactory;
 		this.workingDir = workingDir;
 		this.inputMessage = inputMessage;
 		this.job = job;
 	}
 
-	public void processOutput() throws AbstractCodedException {
-		final Reporting.Factory reportingFactory = new LoggerReporting.Factory(LOGGER, "FileUploader");
+	public String processOutput() throws AbstractCodedException {
+		final Reporting.Factory reportingFactory = new LoggerReporting.Factory("FileUploader");
 		final Reporting reporting = reportingFactory.newReporting(0);
 
 		List<CompressedProductQueueMessage> outputToPublish = new ArrayList<>();
@@ -73,7 +74,7 @@ public class FileUploader {
 		try {
 			String zipFileName = job.getProductName() + ".zip";
 			File productPath = new File(workingDir + "/" + zipFileName);
-			reporting.reportStart("Start uploading " + zipFileName);
+			reporting.begin(new ReportingMessage("Start uploading {}", zipFileName));
 			if (!productPath.exists()) {
 				throw new InternalErrorException(
 						"The compressed product " + productPath + " does not exist, stopping upload");
@@ -81,17 +82,19 @@ public class FileUploader {
 						
 			LOGGER.info("Uploading compressed product {} [{}]",productPath, job.getFamily());
 			ProductFamily zipProductFamily = getCompressedProductFamily(job.getFamily());
-			S3UploadFile uploadFile = new S3UploadFile(zipProductFamily, zipFileName, productPath);
+			ObsUploadObject uploadObject = new ObsUploadObject(zipProductFamily, zipFileName, productPath);
 			
 			CompressedProductQueueMessage cpqm = new CompressedProductQueueMessage(zipProductFamily, zipFileName,zipFileName);
 			outputToPublish.add(cpqm);
-			
+		
 //// 			// Upload per batch the output
-			processProducts(reportingFactory, uploadFile, outputToPublish);
-
- 	        reporting.reportStopWithTransfer("End uploading " + zipFileName, productPath.length());
+			processProducts(reportingFactory, uploadObject, outputToPublish);
+			
+ 	        reporting.end(new ReportingMessage(productPath.length(), "End uploading {}", zipFileName));
+ 	        
+ 	        return zipFileName;
 		} catch (AbstractCodedException e) {
-			reporting.reportError("[code {}] {}", e.getCode().getCode(), e.getLogMessage());
+			reporting.error(new ReportingMessage("[code {}] {}", e.getCode().getCode(), e.getLogMessage()));
 			throw e;
 		}
 	}
@@ -100,13 +103,13 @@ public class FileUploader {
 		return ProductFamily.fromValue(inputFamily.toString() + SUFFIX_ZIPPRODUCTFAMILY);
 	}
 
-	final void processProducts(final Reporting.Factory reportingFactory, final S3UploadFile uploadFile,
+	final void processProducts(final Reporting.Factory reportingFactory, final ObsUploadObject uploadFile,
 			final List<CompressedProductQueueMessage> outputToPublish) throws AbstractCodedException {
 
 		if (Thread.currentThread().isInterrupted()) {
 			throw new InternalErrorException("The current thread as been interrupted");
 		}
-		this.obsService.uploadFilesPerBatch(Collections.singletonList(uploadFile));
+		obsClient.upload(Arrays.asList(new ObsUploadObject(uploadFile.getFamily(), uploadFile.getKey(), uploadFile.getFile())));
 
 
 		publishAccordingUploadFiles(reportingFactory, NOT_KEY_OBS, outputToPublish);
@@ -134,14 +137,14 @@ public class FileUploader {
 			if (nextKeyUpload.startsWith(msg.getObjectStorageKey())) {
 				stop = true;
 			} else {
-				final Reporting report = reportingFactory.product(null, msg.getProductName()).newReporting(1);
+				final Reporting report = reportingFactory.newReporting(1);
 
-				report.reportStart("Start publishing message");
+				report.begin(new ReportingMessage("Start publishing message"));
 				try {
 					producerFactory.sendOutput(msg, inputMessage);
-					report.reportStop("End publishing message");
+					report.end(new ReportingMessage("End publishing message"));
 				} catch (MqiPublicationError ace) {
-					report.reportError("[code {}] {}", ace.getCode().getCode(), ace.getLogMessage());
+					report.error(new ReportingMessage("[code {}] {}", ace.getCode().getCode(), ace.getLogMessage()));
 				}
 				iter.remove();
 			}

@@ -11,18 +11,7 @@ import esa.s1pdgs.cpoc.common.ProductFamily;
  * 
  * @author Viveris Technologies
  */
-public class LevelJobDto {
-
-    /**
-     * Family name
-     */
-    private ProductFamily family;
-
-    /**
-     * Session identifier
-     */
-    private String productIdentifier;
-    
+public class LevelJobDto extends AbstractDto {    
     /**
      * Process mode
      */
@@ -43,27 +32,24 @@ public class LevelJobDto {
      * They contain the absolute name on the target host and where we can find
      * the file according the input family
      */
-    private List<LevelJobInputDto> inputs;
+    private List<LevelJobInputDto> inputs= new ArrayList<>();
 
     /**
      * List information needed to validate the outputs of the job and share them
      */
-    private List<LevelJobOutputDto> outputs;
+    private List<LevelJobOutputDto> outputs= new ArrayList<>();
 
     /**
      * List the tasks to be executed for processing the job grouped by
      * pools.<br/>
      * The pools shall be executed one after one if the previous execution is ok
      */
-    private List<LevelJobPoolDto> pools;
+    private List<LevelJobPoolDto> pools= new ArrayList<>();
 
     /**
      * Default constructor
      */
     public LevelJobDto() {
-        this.inputs = new ArrayList<>();
-        this.outputs = new ArrayList<>();
-        this.pools = new ArrayList<>();
     }
 
     /**
@@ -72,34 +58,17 @@ public class LevelJobDto {
     public LevelJobDto(final ProductFamily family,
             final String productIdentifier, final String productProcessMode, final String workDirectory,
             final String jobOrder) {
-        this();
-        this.family = family;
-        this.productIdentifier = productIdentifier;
+        super(productIdentifier, family);
         this.productProcessMode = productProcessMode;
         this.workDirectory = workDirectory;
         this.jobOrder = jobOrder;
     }
 
     /**
-     * @return the family
-     */
-    public ProductFamily getFamily() {
-        return family;
-    }
-
-    /**
-     * @param family
-     *            the family to set
-     */
-    public void setFamily(final ProductFamily family) {
-        this.family = family;
-    }
-
-    /**
      * @return the productIdentifier
      */
     public String getProductIdentifier() {
-        return productIdentifier;
+        return getProductName();
     }
 
     /**
@@ -107,7 +76,7 @@ public class LevelJobDto {
      *            the productIdentifier to set
      */
     public void setProductIdentifier(final String productIdentifier) {
-        this.productIdentifier = productIdentifier;
+        this.setProductName(productIdentifier);;
     }
 
     /**
@@ -248,7 +217,7 @@ public class LevelJobDto {
     public String toString() {
         return String.format(
                 "{family: %s, productIdentifier: %s, productProcessMode: %s, workDirectory: %s, jobOrder: %s, inputs: %s, outputs: %s, pools: %s}",
-                family, productIdentifier, productProcessMode, workDirectory, jobOrder, inputs,
+                getFamily(), getProductIdentifier(), productProcessMode, workDirectory, jobOrder, inputs,
                 outputs, pools);
     }
 
@@ -257,7 +226,7 @@ public class LevelJobDto {
      */
     @Override
     public int hashCode() {
-        return Objects.hash(family, productIdentifier, productProcessMode, workDirectory, jobOrder, 
+        return Objects.hash(getFamily(), getProductIdentifier(), productProcessMode, workDirectory, jobOrder, 
                 inputs, outputs, pools);
     }
 
@@ -273,9 +242,8 @@ public class LevelJobDto {
             ret = false;
         } else {
             LevelJobDto other = (LevelJobDto) obj;
-            ret = Objects.equals(family, other.family)
-                    && Objects.equals(productIdentifier,
-                            other.productIdentifier)
+            ret = Objects.equals(getFamily(), other.getFamily())
+                    && Objects.equals(getProductIdentifier(), other.getProductIdentifier())
                     && Objects.equals(productProcessMode,
                             other.productProcessMode)
                     && Objects.equals(workDirectory, other.workDirectory)

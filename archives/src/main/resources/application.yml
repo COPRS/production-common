@@ -37,6 +37,11 @@ file:
   segments:
     local-directory: /data/segments/ # Must contains the last /
 
+# OBS
+
+obs:
+  protocol: S3
+
 dev:
   activations:
     download-all : false

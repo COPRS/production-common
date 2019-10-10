@@ -10,18 +10,19 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 
+import esa.s1pdgs.cpoc.common.ProductCategory;
 import esa.s1pdgs.cpoc.common.ProductFamily;
 import esa.s1pdgs.cpoc.common.errors.AbstractCodedException;
-import esa.s1pdgs.cpoc.mqi.client.GenericMqiService;
+import esa.s1pdgs.cpoc.mqi.client.GenericMqiClient;
 import esa.s1pdgs.cpoc.mqi.model.queue.LevelJobDto;
-import esa.s1pdgs.cpoc.mqi.model.queue.LevelProductDto;
+import esa.s1pdgs.cpoc.mqi.model.queue.ProductDto;
 import esa.s1pdgs.cpoc.mqi.model.rest.GenericMessageDto;
 import esa.s1pdgs.cpoc.mqi.model.rest.GenericPublicationMessageDto;
 
 public class OutputProducerFactoryTest {
 
     @Mock
-    private GenericMqiService<LevelJobDto> sender;
+    private GenericMqiClient sender;
 
     private OutputProducerFactory factory;
 
@@ -29,7 +30,7 @@ public class OutputProducerFactoryTest {
     public void init() throws AbstractCodedException {
         MockitoAnnotations.initMocks(this);
 
-        doNothing().when(sender).publish(Mockito.any());
+        doNothing().when(sender).publish(Mockito.any(), Mockito.any());
 
         factory = new OutputProducerFactory(sender);
     }
@@ -38,9 +39,9 @@ public class OutputProducerFactoryTest {
     public void testSendJob() throws AbstractCodedException {
         LevelJobDto dto = new LevelJobDto(ProductFamily.L1_JOB, "product-name", "NRT",
                 "work-dir", "job-order");
-        GenericMessageDto<LevelProductDto> message =
-                new GenericMessageDto<LevelProductDto>(123, "key",
-                        new LevelProductDto("level-name", "key-obs",
+        GenericMessageDto<ProductDto> message =
+                new GenericMessageDto<ProductDto>(123, "key",
+                        new ProductDto("level-name", "key-obs",
                                 ProductFamily.L0_SLICE, "NRT"));
 
         GenericPublicationMessageDto<LevelJobDto> expected =
@@ -50,7 +51,7 @@ public class OutputProducerFactoryTest {
         expected.setOutputKey("L1_JOB");
 
         factory.sendJob(message, dto);
-        verify(sender, times(1)).publish(Mockito.eq(expected));
+        verify(sender, times(1)).publish(Mockito.eq(expected),Mockito.eq(ProductCategory.LEVEL_JOBS));
     }
 //
 //    @Test

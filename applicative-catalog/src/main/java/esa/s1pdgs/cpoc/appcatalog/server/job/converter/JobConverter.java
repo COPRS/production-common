@@ -1,5 +1,6 @@
 package esa.s1pdgs.cpoc.appcatalog.server.job.converter;
 
+import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
 
 import esa.s1pdgs.cpoc.appcatalog.common.rest.model.job.AppDataJobDto;
@@ -17,6 +18,7 @@ import esa.s1pdgs.cpoc.appcatalog.server.job.db.AppDataJobState;
 import esa.s1pdgs.cpoc.appcatalog.server.job.exception.AppCatalogJobGenerationInvalidStateException;
 import esa.s1pdgs.cpoc.appcatalog.server.job.exception.AppCatalogJobInvalidStateException;
 import esa.s1pdgs.cpoc.common.ProductCategory;
+import esa.s1pdgs.cpoc.mqi.model.queue.AbstractDto;
 import esa.s1pdgs.cpoc.mqi.model.rest.GenericMessageDto;
 
 /**
@@ -24,21 +26,8 @@ import esa.s1pdgs.cpoc.mqi.model.rest.GenericMessageDto;
  * 
  * @author Viveris Technologies
  */
-public class JobConverter<T> {
-
-    /**
-     * Product category corresponding to the generic type
-     */
-    private final ProductCategory category;
-
-    /**
-     * Constructor
-     * 
-     * @param category
-     */
-    public JobConverter(final ProductCategory category) {
-        this.category = category;
-    }
+@Component
+public class JobConverter {
 
     /**
      * Convert a job from db to dto
@@ -48,11 +37,12 @@ public class JobConverter<T> {
      * @throws AppCatalogJobInvalidStateException
      * @throws AppCatalogJobGenerationInvalidStateException
      */
-    @SuppressWarnings("unchecked")
-    public AppDataJobDto<T> convertJobFromDbToDto(final AppDataJob jobDb)
-            throws AppCatalogJobInvalidStateException,
-            AppCatalogJobGenerationInvalidStateException {
-        AppDataJobDto<T> jobDto = new AppDataJobDto<>();
+    public <E extends AbstractDto> AppDataJobDto<E> convertJobFromDbToDto(
+    		final AppDataJob jobDb, 
+    		final ProductCategory category
+    )
+    	throws AppCatalogJobInvalidStateException, AppCatalogJobGenerationInvalidStateException {
+        AppDataJobDto<E> jobDto = new AppDataJobDto<E>();
         jobDto.setIdentifier(jobDb.getIdentifier());
         jobDto.setLevel(jobDb.getLevel());
         jobDto.setProduct(convertJobProductFromDbToDto(jobDb.getProduct()));
@@ -61,7 +51,9 @@ public class JobConverter<T> {
         jobDto.setCreationDate(jobDb.getCreationDate());
         jobDto.setLastUpdateDate(jobDb.getLastUpdateDate());
         for (Object jobMsgDb : jobDb.getMessages()) {
-            jobDto.getMessages().add((GenericMessageDto<T>) jobMsgDb);
+        	@SuppressWarnings("unchecked")
+			final GenericMessageDto<E> mess = (GenericMessageDto<E>) jobMsgDb;            	
+            jobDto.getMessages().add(mess);
         }
         for (AppDataJobGeneration jobGenDb : jobDb.getGenerations()) {
             jobDto.getGenerations()
@@ -78,7 +70,7 @@ public class JobConverter<T> {
      * @throws AppCatalogJobInvalidStateException
      * @throws AppCatalogJobGenerationInvalidStateException
      */
-    public AppDataJob convertJobFromDtoToDb(final AppDataJobDto<T> jobDto)
+    public AppDataJob convertJobFromDtoToDb(final AppDataJobDto<?> jobDto, final ProductCategory category)
             throws AppCatalogJobInvalidStateException,
             AppCatalogJobGenerationInvalidStateException {
         AppDataJob jobDb = new AppDataJob();
@@ -90,7 +82,7 @@ public class JobConverter<T> {
         jobDb.setCreationDate(jobDto.getCreationDate());
         jobDb.setLastUpdateDate(jobDto.getLastUpdateDate());
         jobDb.setCategory(category);
-        for (GenericMessageDto<T> jobMsgDb : jobDto.getMessages()) {
+        for (GenericMessageDto<?> jobMsgDb : jobDto.getMessages()) {
             jobDb.getMessages().add(jobMsgDb);
         }
         for (AppDataJobGenerationDto jobGenDto : jobDto.getGenerations()) {
@@ -148,6 +140,7 @@ public class JobConverter<T> {
         if (jobProductDb != null) {
             jobProductDto = new AppDataJobProductDto();
             jobProductDto.setProductName(jobProductDb.getProductName());
+            jobProductDto.setStationCode(jobProductDb.getStationCode());
             jobProductDto.setMissionId(jobProductDb.getMissionId());
             jobProductDto.setSatelliteId(jobProductDb.getSatelliteId());
             jobProductDto.setSessionId(jobProductDb.getSessionId());
@@ -190,6 +183,7 @@ public class JobConverter<T> {
         if (jobProductDto != null) {
             jobProductDb = new AppDataJobProduct();
             jobProductDb.setProductName(jobProductDto.getProductName());
+            jobProductDb.setStationCode(jobProductDto.getStationCode());
             jobProductDb.setMissionId(jobProductDto.getMissionId());
             jobProductDb.setSatelliteId(jobProductDto.getSatelliteId());
             jobProductDb.setSessionId(jobProductDto.getSessionId());

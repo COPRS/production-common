@@ -2,6 +2,8 @@ package esa.s1pdgs.cpoc.obs_sdk;
 
 import java.util.Objects;
 
+import esa.s1pdgs.cpoc.common.ProductFamily;
+
 /**
  * Describe an object of the S1-PDGS object storage
  * 
@@ -17,17 +19,17 @@ public class ObsObject {
     /**
      * Object family
      */
-    protected ObsFamily family;
+    protected ProductFamily family;
 
     /**
      * Constructor
      * 
-     * @param key
      * @param family
+     * @param key
      */
-    public ObsObject(final String key, final ObsFamily family) {
-        this.key = key;
+    public ObsObject(final ProductFamily family, final String key) {
         this.family = family;
+        this.key = key;
     }
 
     /**
@@ -48,7 +50,7 @@ public class ObsObject {
     /**
      * @return the family
      */
-    public ObsFamily getFamily() {
+    public ProductFamily getFamily() {
         return family;
     }
 
@@ -56,7 +58,7 @@ public class ObsObject {
      * @param family
      *            the family to set
      */
-    public void setFamily(final ObsFamily family) {
+    public void setFamily(final ProductFamily family) {
         this.family = family;
     }
 

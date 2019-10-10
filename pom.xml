@@ -4,7 +4,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>de.werum.s1pdgs</groupId>
 	<artifactId>s1pro-core</artifactId>
-	<version>0.4.0-SNAPSHOT</version>
+	<version>0.7.0</version>
 	<packaging>pom</packaging>
 
 	<properties>
@@ -13,19 +13,22 @@
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		
 		<!-- dependency version definitions -->	
-		<spring.boot.version>2.0.3.RELEASE</spring.boot.version>
+		<spring.boot.version>2.1.6.RELEASE</spring.boot.version>
 		
 		<!-- S1PRO-78: Don't use the one provided with spring-boot but instead this version in order
 				to work with kafak 2.2.0 -->
-		<kafka.version>2.2.0</kafka.version>
+		<kafka.version>2.1.0</kafka.version>
 		
 		<commons.logging.version>1.2</commons.logging.version>
 		<commons.configuration.version>1.10</commons.configuration.version>
+		<commons.net.version>3.3</commons.net.version>
 		<jacoco.version>0.7.5.201505241946</jacoco.version>
 		<json.version>20171018</json.version>
 		<moxy.version>2.5.0</moxy.version>
 		<equalsverifier.version>2.4.6</equalsverifier.version>
 		<aws.version>1.11.271</aws.version>
+		
+		<jsch.version>0.1.53</jsch.version>
 
 		<elasticsearch.version>6.1.3</elasticsearch.version>
 	</properties>
@@ -149,6 +152,19 @@
 			    <scope>test</scope>
 			</dependency>
 			<dependency>
+			    <groupId>org.apache.kafka</groupId>
+			    <artifactId>kafka_2.12</artifactId>
+			    <version>${kafka.version}</version>
+			    <scope>test</scope>
+			</dependency>
+			<dependency>
+			    <groupId>org.apache.kafka</groupId>
+			    <artifactId>kafka_2.12</artifactId>
+			    <version>${kafka.version}</version>
+			    <classifier>test</classifier>
+			    <scope>test</scope>
+			</dependency>
+			<dependency>
 				<groupId>org.apache.kafka</groupId>
 				<artifactId>kafka-log4j-appender</artifactId>
 				<version>${kafka.version}</version>
@@ -163,7 +179,13 @@
 				<groupId>commons-configuration</groupId>
 				<artifactId>commons-configuration</artifactId>
 				<version>${commons.configuration.version}</version>
-			</dependency>			
+			</dependency>
+			<dependency>
+		        <groupId>commons-net</groupId>
+		        <artifactId>commons-net</artifactId>
+		        <version>${commons.net.version}</version>
+		        <classifier>ftp</classifier>
+	      	</dependency>			
 			<dependency>
 				<groupId>com.amazonaws</groupId>
 				<artifactId>aws-java-sdk-s3</artifactId>
@@ -174,7 +196,11 @@
 				<artifactId>json</artifactId>
 				<version>${json.version}</version>
 			</dependency>
-			
+			<dependency>
+				<groupId>com.jcraft</groupId>
+				<artifactId>jsch</artifactId>
+				<version>${jsch.version}</version>
+			</dependency>  			
 			<dependency>
 				<groupId>io.fabric8</groupId>
 				<artifactId>kubernetes-client</artifactId>
@@ -213,6 +239,11 @@
 				<artifactId>elasticsearch-rest-high-level-client</artifactId>
 				<version>${elasticsearch.version}</version>
 			</dependency>
+				<dependency>
+				<groupId>org.elasticsearch.client</groupId>
+				<artifactId>elasticsearch-rest-client</artifactId>
+				<version>${elasticsearch.version}</version>
+			</dependency>
 			<dependency>
 				<groupId>org.elasticsearch</groupId>
 				<artifactId>elasticsearch</artifactId>
@@ -244,16 +275,19 @@
 		<module>app-catalog-client</module>
 		<module>archives</module>
 		<module>compression</module>
-		<module>ingestor</module>
+		<module>disseminator</module>
+		<module>inbox-polling</module>
+		<module>inbox-ingestion</module>
 		<module>job-generator</module>
 		<module>lib-commons</module>
+		<module>wrapper</module>
+		<module>request-repository</module>
+		<module>queue-watcher</module>
 		<module>metadata-catalog</module>
 		<module>mqi-client</module>
 		<module>mqi-server</module>
 		<module>obs-sdk</module>
+		<module>validation</module>
 		<module>scaler</module>
-		<module>wrapper</module>
-		<module>error-repository</module>
-		<module>queue-watcher</module>
 	</modules>
 </project>

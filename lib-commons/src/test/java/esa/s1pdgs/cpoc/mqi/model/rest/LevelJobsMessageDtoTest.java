@@ -25,13 +25,13 @@ public class LevelJobsMessageDtoTest {
         LevelJobDto body = new LevelJobDto(ProductFamily.L0_JOB,
                 "testEqualsFunction", "NRT", "/data/localWD/123456",
                 "/data/localWD/123456/JobOrder.xml");
-        LevelJobsMessageDto dto =
-                new LevelJobsMessageDto(123, "input-key", body);
+        GenericMessageDto<LevelJobDto> dto = new GenericMessageDto<LevelJobDto>(123, "input-key", body);
+
         assertEquals(123, dto.getIdentifier());
         assertEquals(body, dto.getBody());
         assertEquals("input-key", dto.getInputKey());
 
-        dto = new LevelJobsMessageDto();
+        dto = new GenericMessageDto<LevelJobDto>();
         dto.setIdentifier(321);
         dto.setBody(body);
         dto.setInputKey("othey-input");
@@ -48,8 +48,8 @@ public class LevelJobsMessageDtoTest {
         LevelJobDto body = new LevelJobDto(ProductFamily.L0_JOB,
                 "testEqualsFunction", "NRT", "/data/localWD/123456",
                 "/data/localWD/123456/JobOrder.xml");
-        LevelJobsMessageDto dto =
-                new LevelJobsMessageDto(123, "input-key", body);
+        GenericMessageDto<LevelJobDto> dto =
+                new GenericMessageDto<LevelJobDto>(123, "input-key", body);
         String str = dto.toString();
         assertTrue("toString should contain the identifier",
                 str.contains("identifier: 123"));
@@ -64,7 +64,7 @@ public class LevelJobsMessageDtoTest {
      */
     @Test
     public void checkEquals() {
-        EqualsVerifier.forClass(LevelJobsMessageDto.class).usingGetClass()
+        EqualsVerifier.forClass(GenericMessageDto.class).usingGetClass()
                 .suppress(Warning.NONFINAL_FIELDS).verify();
     }
 

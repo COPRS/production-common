@@ -14,12 +14,10 @@ import org.junit.Test;
 import esa.s1pdgs.cpoc.appcatalog.common.rest.model.job.AppDataJobDto;
 import esa.s1pdgs.cpoc.appcatalog.common.rest.model.job.AppDataJobGenerationDto;
 import esa.s1pdgs.cpoc.appcatalog.common.rest.model.job.AppDataJobGenerationDtoState;
-import esa.s1pdgs.cpoc.jobgenerator.model.JobGeneration;
 import esa.s1pdgs.cpoc.jobgenerator.model.joborder.JobOrder;
 import esa.s1pdgs.cpoc.jobgenerator.model.metadata.SearchMetadataQuery;
 import esa.s1pdgs.cpoc.jobgenerator.model.metadata.SearchMetadataResult;
 import esa.s1pdgs.cpoc.jobgenerator.utils.TestL0Utils;
-import esa.s1pdgs.cpoc.mqi.model.queue.EdrsSessionDto;
 import nl.jqno.equalsverifier.EqualsVerifier;
 import nl.jqno.equalsverifier.Warning;
 
@@ -42,8 +40,7 @@ public class JobGenerationTest {
      */
     @Test
     public void testToString() {
-        AppDataJobDto<EdrsSessionDto> appDataJob =
-                TestL0Utils.buildAppDataEdrsSession(true);
+        AppDataJobDto appDataJob = TestL0Utils.buildAppDataEdrsSession(true);
         AppDataJobGenerationDto gen1 = new AppDataJobGenerationDto();
         gen1.setTaskTable("TaskTable.AIOP.1.xml");
         gen1.setState(AppDataJobGenerationDtoState.INITIAL);
@@ -55,8 +52,7 @@ public class JobGenerationTest {
         gen3.setState(AppDataJobGenerationDtoState.PRIMARY_CHECK);
         appDataJob.setGenerations(Arrays.asList(gen1, gen2, gen3));
 
-        JobGeneration<EdrsSessionDto> job =
-                new JobGeneration<>(appDataJob, "TaskTable.AIOP.2.xml");
+        JobGeneration job = new JobGeneration(appDataJob, "TaskTable.AIOP.2.xml");
         assertEquals(appDataJob, job.getAppDataJob());
         assertTrue(job.getMetadataQueries().size() == 0);
         assertEquals(gen2, job.getGeneration());
@@ -81,7 +77,7 @@ public class JobGenerationTest {
         assertTrue(str.contains("generation: " + gen2.toString()));
         assertTrue(str.contains("metadataQueries: " + metadata.toString()));
 
-        job = new JobGeneration<>(appDataJob, "TaskTable.AIOP.3.xml");
+        job = new JobGeneration(appDataJob, "TaskTable.AIOP.3.xml");
         assertEquals(gen3, job.getGeneration());
 
         appDataJob.setGenerations(new ArrayList<>());
@@ -90,7 +86,7 @@ public class JobGenerationTest {
         assertEquals("TaskTable.AIOP.3.xml", job.getGeneration().getTaskTable());
         assertEquals(AppDataJobGenerationDtoState.INITIAL, job.getGeneration().getState());
         
-        job = new JobGeneration<>(appDataJob, "TaskTable.AIOP.3.xml");
+        job = new JobGeneration(appDataJob, "TaskTable.AIOP.3.xml");
         assertEquals("TaskTable.AIOP.3.xml",
                 job.getGeneration().getTaskTable());
         assertEquals(AppDataJobGenerationDtoState.INITIAL,

@@ -2,10 +2,10 @@
 spring:
   application:
     name: s1pdgs-l0-jobgenerator
-    
-# Logging
+
+# Logging     
 logging:
-  config: ./test/log4j2-test.yml
+  config: classpath:log4j2-test.yml
  
 metadata:
   host: localhost:8080
@@ -24,7 +24,7 @@ level0:
   maxagesession: 25200000
   dir-extractor-sessions: ./tmp/
   
-level1:
+level-products:
   pathroutingxmlfile: ./test/data/l1_config/routing.xml
 
 job-generator:
@@ -74,6 +74,7 @@ process:
   loglevelstdout: DEBUG
   loglevelstderr: INFO
   processingstation: WILE
+  min-sea-coverage-percentage : 0
   outputregexps: 
     SM_RAW__0S: ^S1[A-B]_S[1-6]_RAW__0S.*$
     AN_RAW__0S: ^S1[A-B]_N[1-6]_RAW__0S.*$
@@ -94,6 +95,7 @@ process:
     
 pattern-l0-slices:
   regexp: "^([0-9a-z]{2})([0-9a-z]){1}_(([0-9a-z]{2})_RAW__0([0-9a-z_]{3}))_([0-9a-z]{15})_([0-9a-z]{15})_([0-9a-z_]{6})\\w{1,}\\.SAFE(/.*)?$"
+  sea-coverage-check-pattern: "^([0-9a-zA-Z]{2})([0-9a-zA-Z]){1}_(SM|IW|EW)_RAW__0([0-9a-zA-Z_]{3})_([0-9a-zA-Z]{15})_([0-9a-zA-Z]{15})_([0-9a-zA-Z_]{6})\\w{1,}\\.SAFE(/.*)?$"
   m-group-sat-id: 2
   m-group-mission-id: 1
   m-group-acquisition: 4
@@ -105,4 +107,49 @@ status:
   delete-fixed-delay-ms: 3000
   max-error-counter-processing: 3
   max-error-counter-mqi: 30
+
+aiop:
+  station-codes:
+    cgs1: MTI_
+    cgs2: SGS_
+    cgs3: MPS_
+    cgs4: INU_
+    erds: WILE
+  pt-assembly:
+    cgs1: yes
+    cgs2: yes
+    cgs3: yes
+    cgs4: yes
+    erds: yes
+  processing-mode:
+    cgs1: NRT
+    cgs2: NRT
+    cgs3: NRT
+    cgs4: NRT
+    erds: NRT
+  reprocessing-mode:
+    cgs1: FAST24
+    cgs2: FAST24
+    cgs3: FAST24
+    cgs4: FAST24
+    erds: FAST24
+  timeout:
+    cgs1: 360
+    cgs2: 360
+    cgs3: 360
+    cgs4: 360
+    erds: 360
+  descramble:
+    cgs1: yes
+    cgs2: yes
+    cgs3: yes
+    cgs4: yes
+    erds: yes
+  rs-encode:
+    cgs1: no
+    cgs2: no
+    cgs3: no
+    cgs4: yes
+    erds: yes
+
   

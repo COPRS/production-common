@@ -18,12 +18,13 @@ import org.springframework.web.util.UriComponentsBuilder;
 
 import esa.s1pdgs.cpoc.common.ProductFamily;
 import esa.s1pdgs.cpoc.common.errors.processing.JobGenMetadataException;
-import esa.s1pdgs.cpoc.jobgenerator.model.metadata.EdrsSessionMetadata;
-import esa.s1pdgs.cpoc.jobgenerator.model.metadata.L0AcnMetadata;
-import esa.s1pdgs.cpoc.jobgenerator.model.metadata.L0SliceMetadata;
-import esa.s1pdgs.cpoc.jobgenerator.model.metadata.LevelSegmentMetadata;
-import esa.s1pdgs.cpoc.jobgenerator.model.metadata.SearchMetadata;
 import esa.s1pdgs.cpoc.jobgenerator.model.metadata.SearchMetadataQuery;
+import esa.s1pdgs.cpoc.metadata.model.EdrsSessionMetadata;
+import esa.s1pdgs.cpoc.metadata.model.L0AcnMetadata;
+import esa.s1pdgs.cpoc.metadata.model.L0SliceMetadata;
+import esa.s1pdgs.cpoc.metadata.model.LevelSegmentMetadata;
+import esa.s1pdgs.cpoc.metadata.model.SearchMetadata;
+
 
 /**
  * Metadata service
@@ -114,17 +115,13 @@ public class MetadataService {
                 ResponseEntity<EdrsSessionMetadata> response =
                         this.restTemplate.exchange(uri, HttpMethod.GET, null,
                                 EdrsSessionMetadata.class);
+                
                 if (response.getStatusCode() != HttpStatus.OK) {
                     if (retries < this.nbretry) {
                         LOGGER.warn(
                                 "Call rest api metadata failed: Attempt : {} / {}",
                                 retries, this.nbretry);
-                        try {
-                            Thread.sleep(this.temporetryms);
-                        } catch (InterruptedException e) {
-                            throw new JobGenMetadataException(e.getMessage(),
-                                    e);
-                        }
+                        trySleep();
                         continue;
                     } else {
                         throw new JobGenMetadataException(
@@ -139,11 +136,7 @@ public class MetadataService {
                     LOGGER.warn(
                             "Call rest api metadata failed: Attempt : {} / {}",
                             retries, this.nbretry);
-                    try {
-                        Thread.sleep(this.temporetryms);
-                    } catch (InterruptedException e1) {
-                        throw new JobGenMetadataException(e1.getMessage(), e1);
-                    }
+                    trySleep();
                     continue;
                 } else {
                     throw new JobGenMetadataException(e.getMessage(), e);
@@ -151,6 +144,71 @@ public class MetadataService {
             }
         }
     }
+    
+	public int getSeaCoverage(ProductFamily family, String productName) throws JobGenMetadataException {
+		int notAvailableRetries = 10;
+		
+	    String uri = this.uriL0Slice + "/" + family + "/" + productName + "/seaCoverage";
+        for (int retries = 0;; retries++) {
+            try {          
+                LOGGER.debug("Call rest metadata on {}", uri);
+
+                ResponseEntity<Integer> response = this.restTemplate.exchange(
+                		uri, 
+                		HttpMethod.GET, 
+                		null,
+                		Integer.class
+                );                
+                while (response.getStatusCode() == HttpStatus.NOT_FOUND) {
+                    LOGGER.debug("Product not available yet. Waiting...");
+                	trySleep();
+                	notAvailableRetries--;
+                    LOGGER.debug("Call rest metadata on {}", uri);
+                	response = this.restTemplate.exchange(
+                    		uri, 
+                    		HttpMethod.GET, 
+                    		null,
+                    		Integer.class
+                    );
+                	if (notAvailableRetries <= 0) {
+                		LOGGER.trace("Max number of retries reached for {}", productName);
+                		break;
+                	}                	
+                }
+                                
+                if (response.getStatusCode() != HttpStatus.OK) {
+                    if (retries < this.nbretry) {
+                        LOGGER.warn("Call rest api metadata failed: Attempt : {} / {}", retries, this.nbretry);
+                        trySleep();
+                        continue;
+                    } else {
+                        throw new JobGenMetadataException(
+                        		String.format("Invalid HTTP status code %s",response.getStatusCode().name())
+                        );
+                    }
+                	
+                } else if (response != null) {
+                    final Integer res = response.getBody();
+                    LOGGER.debug("Got coverage {}", res);
+                    
+                    if (res == null) {
+                    	throw new JobGenMetadataException("getSeaCoverage returned null");
+                    }                    
+                    return res;
+                }                 
+            } catch (RestClientException e) {
+                if (retries < this.nbretry) {
+                    LOGGER.warn(
+                            "Call rest api metadata failed: Attempt : {} / {}",
+                            retries, this.nbretry);
+                    trySleep();
+                    continue;
+                } else {
+                    throw new JobGenMetadataException(e.getMessage(), e);
+                }
+            }
+        }
+	}
 
     /**
      * If productType = blank, the metadata catalog will extract the product
@@ -176,12 +234,7 @@ public class MetadataService {
                         LOGGER.warn(
                                 "Call rest api metadata failed: Attempt : {} / {}",
                                 retries, this.nbretry);
-                        try {
-                            Thread.sleep(this.temporetryms);
-                        } catch (InterruptedException e) {
-                            throw new JobGenMetadataException(e.getMessage(),
-                                    e);
-                        }
+                        trySleep();
                         continue;
                     } else {
                         throw new JobGenMetadataException(
@@ -196,11 +249,7 @@ public class MetadataService {
                     LOGGER.warn(
                             "Call rest api metadata failed: Attempt : {} / {}",
                             retries, this.nbretry);
-                    try {
-                        Thread.sleep(this.temporetryms);
-                    } catch (InterruptedException e1) {
-                        throw new JobGenMetadataException(e1.getMessage(), e1);
-                    }
+                    trySleep();
                     continue;
                 } else {
                     throw new JobGenMetadataException(e.getMessage(), e);
@@ -234,12 +283,7 @@ public class MetadataService {
                         LOGGER.warn(
                                 "Call rest api metadata failed: Attempt : {} / {}",
                                 retries, this.nbretry);
-                        try {
-                            Thread.sleep(this.temporetryms);
-                        } catch (InterruptedException e) {
-                            throw new JobGenMetadataException(e.getMessage(),
-                                    e);
-                        }
+                        trySleep();
                         continue;
                     } else {
                         throw new JobGenMetadataException(
@@ -254,11 +298,7 @@ public class MetadataService {
                     LOGGER.warn(
                             "Call rest api metadata failed: Attempt : {} / {}",
                             retries, this.nbretry);
-                    try {
-                        Thread.sleep(this.temporetryms);
-                    } catch (InterruptedException e1) {
-                        throw new JobGenMetadataException(e1.getMessage(), e1);
-                    }
+                    trySleep();
                     continue;
                 } else {
                     throw new JobGenMetadataException(e.getMessage(), e);
@@ -295,12 +335,7 @@ public class MetadataService {
                         LOGGER.warn(
                                 "Call rest api metadata failed: Attempt : {} / {}",
                                 retries, this.nbretry);
-                        try {
-                            Thread.sleep(this.temporetryms);
-                        } catch (InterruptedException e) {
-                            throw new JobGenMetadataException(e.getMessage(),
-                                    e);
-                        }
+                        trySleep();
                         continue;
                     } else {
                         throw new JobGenMetadataException(
@@ -318,12 +353,7 @@ public class MetadataService {
                         LOGGER.warn(
                                 "Call rest api metadata failed: Attempt : {} / {}",
                                 retries, this.nbretry);
-                        try {
-                            Thread.sleep(this.temporetryms);
-                        } catch (InterruptedException e) {
-                            throw new JobGenMetadataException(e.getMessage(),
-                                    e);
-                        }
+                        trySleep();
                         continue;
                     } else {
                         throw new JobGenMetadataException(String.format(
@@ -336,11 +366,7 @@ public class MetadataService {
                     LOGGER.warn(
                             "Call rest api metadata failed: Attempt : {} / {}",
                             retries, this.nbretry);
-                    try {
-                        Thread.sleep(this.temporetryms);
-                    } catch (InterruptedException e1) {
-                        throw new JobGenMetadataException(e1.getMessage(), e1);
-                    }
+                    trySleep();
                     continue;
                 } else {
                     throw new JobGenMetadataException(e.getMessage(), e);
@@ -384,12 +410,7 @@ public class MetadataService {
                         LOGGER.warn(
                                 "Call rest api metadata failed: Attempt : {} / {}",
                                 retries, this.nbretry);
-                        try {
-                            Thread.sleep(this.temporetryms);
-                        } catch (InterruptedException e) {
-                            throw new JobGenMetadataException(e.getMessage(),
-                                    e);
-                        }
+                        trySleep();
                         continue;
                     } else {
                         throw new JobGenMetadataException(
@@ -397,6 +418,8 @@ public class MetadataService {
                                         response.getStatusCode().name()));
                     }
                 } else {
+                	LOGGER.info("Metadata query for family '{}' and product type '{}' returned {} results", 
+                			query.getProductFamily(), query.getProductType(), numResults(response));
                     return response.getBody();
                 }
             } catch (RestClientException e) {
@@ -404,11 +427,7 @@ public class MetadataService {
                     LOGGER.warn(
                             "Call rest api metadata failed: Attempt : {} / {}",
                             retries, this.nbretry);
-                    try {
-                        Thread.sleep(this.temporetryms);
-                    } catch (InterruptedException e1) {
-                        throw new JobGenMetadataException(e1.getMessage(), e1);
-                    }
+                    trySleep();
                     continue;
                 } else {
                     throw new JobGenMetadataException(e.getMessage(), e);
@@ -416,5 +435,24 @@ public class MetadataService {
             }
         }
     }
+    
+    private final int numResults(final ResponseEntity<List<SearchMetadata>> response) {
+    	if (response != null) {
+    		final List<SearchMetadata> res = response.getBody();
+    		if (res != null) {
+    			return res.size();
+    		}
+    	}
+    	return -1; // To indicate that null was returned and not an empty list
+    }
+
+	private final void trySleep() throws JobGenMetadataException {
+		try {
+		    Thread.sleep(this.temporetryms);
+		} catch (InterruptedException e) {
+		    throw new JobGenMetadataException(e.getMessage(), e);
+		}
+	}
+
 
 }

@@ -1,11 +1,13 @@
 image: docker:latest
 
 services:
-  - name: docker:dind
+  - name: docker:18.06-dind
 
 variables:
   DOCKER_HOST: tcp://localhost:2375
   MODULE: s1pro-core
+  BRANCH: $CI_COMMIT_REF_SLUG
+  VERSION: 0.7.0
 
 stages:
   - build
@@ -14,35 +16,28 @@ stages:
   - deploy
 
 before_script:
+    - alias dockerbuild="docker build --network host --pull --build-arg BRANCH=$BRANCH --build-arg BRANCH_TEXT=$BRANCH --build-arg COMMIT_ID=$CI_COMMIT_SHA --build-arg VERSION=$VERSION"
+    - alias # just for debugging purpose
     - docker login -u "$CI_REGISTRY_USERNAME" -p "$CI_REGISTRY_PASSWORD" $CI_REGISTRY
 
-# Build procedure for master branch
-build-master:
+build:
   stage: build
   script:
-    - docker build --network host --pull -t "$CI_REGISTRY/$CI_PROJECT_NAMESPACE/$MODULE" .
-    - docker push "$CI_REGISTRY/$CI_PROJECT_NAMESPACE/$MODULE"
-  only:
-    - master
-
-# Build procedure for develop branch (and all others)
-build-develop:
-  stage: build
-  script:
-    - docker build --target final --network host --pull -t "$CI_REGISTRY/$CI_PROJECT_NAMESPACE/$MODULE:$CI_COMMIT_REF_SLUG" .
+    - dockerbuild --target final -t "$CI_REGISTRY/$CI_PROJECT_NAMESPACE/$MODULE:$CI_COMMIT_REF_SLUG" .
     - docker push "$CI_REGISTRY/$CI_PROJECT_NAMESPACE/$MODULE:$CI_COMMIT_REF_SLUG"
-  except:
-    - master
 
 include:
   - local: applicative-catalog/.gitlab-ci.yml
   - local: archives/.gitlab-ci.yml
   - local: compression/.gitlab-ci.yml
-  - local: error-repository/.gitlab-ci.yml
-  - local: ingestor/.gitlab-ci.yml
+  - local: disseminator/.gitlab-ci.yml
+  - local: request-repository/.gitlab-ci.yml
+  - local: inbox-polling/.gitlab-ci.yml
+  - local: inbox-ingestion/.gitlab-ci.yml
   - local: job-generator/.gitlab-ci.yml
   - local: metadata-catalog/.gitlab-ci.yml
   - local: mqi-server/.gitlab-ci.yml
   - local: scaler/.gitlab-ci.yml
   - local: queue-watcher/.gitlab-ci.yml
+  - local: validation/.gitlab-ci.yml
   - local: wrapper/.gitlab-ci.yml

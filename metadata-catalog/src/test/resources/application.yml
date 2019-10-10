@@ -3,10 +3,10 @@ spring:
   application:
     name: s1pdgs-metadata-catalog
     
-# Logging
+# Logging     
 logging:
-  config: test/log4j2-test.yml
-
+  config: classpath:log4j2-test.yml
+  
 # Elastic Search
 elasticsearch:
   host: es-svc
@@ -18,7 +18,9 @@ elasticsearch:
   
 process:
   hostname: "hostname"
-  
+  num-obs-download-retries: 99
+  sleep-between-obs-retries-millis: 3000
+
 # KAFKA config for error queue
 kafka:
   bootstrap-servers: ${kafka_bootstrap-servers:kafka-headless:9092}   # the bootstrap servers for KAFKA

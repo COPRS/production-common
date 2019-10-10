@@ -1,6 +1,14 @@
 package esa.s1pdgs.cpoc.obs_sdk;
 
+import java.io.File;
+import java.io.InputStream;
+import java.util.Date;
 import java.util.List;
+import java.util.Map;
+
+import esa.s1pdgs.cpoc.common.ProductFamily;
+import esa.s1pdgs.cpoc.common.errors.AbstractCodedException;
+import esa.s1pdgs.cpoc.common.errors.obs.ObsException;
 
 /**
  * <p>
@@ -20,7 +28,7 @@ public interface ObsClient {
      * @throws SdkClientException
      * @throws ObsServiceException
      */
-    boolean doesObjectExist(ObsObject object)
+    boolean exists(ObsObject object)
             throws SdkClientException, ObsServiceException;
 
     /**
@@ -32,106 +40,41 @@ public interface ObsClient {
      * @throws SdkClientException
      * @throws ObsServiceException
      */
-    boolean doesPrefixExist(ObsObject object)
+    boolean prefixExists(ObsObject object)
             throws SdkClientException, ObsServiceException;
 
+	/**
+	 * Gets the list of ObsObject's of an ObsFamily whose modification times in OBS are within the time frame provided.
+	 * 
+	 * @param timeFrameBegin as {@link Date}
+	 * @param timeFrameEnd as {@link Date}
+	 * @param obsFamily as {@link ObsFamily}
+	 * @return list of ObsObject's, never null
+	 * @throws SdkClientException
+	 * @throws ObsServiceException
+	 */
+	List<ObsObject> getObsObjectsOfFamilyWithinTimeFrame(ProductFamily obsFamily, Date timeFrameBegin, Date timeFrameEnd)
+			throws SdkClientException, ObsServiceException;
+	
+	List<File> download(final List<ObsDownloadObject> objects) throws AbstractCodedException;
+	
+	void upload(final List<ObsUploadObject> objects) throws AbstractCodedException;
+	
+	void move(final ObsObject from, final ProductFamily to) throws ObsException;
+
+	Map<String,ObsObject> listInterval(final ProductFamily family, Date intervalStart, Date intervalEnd) throws SdkClientException;
+	
+    Map<String, InputStream> getAllAsInputStream(final ProductFamily family, final String keyPrefix) throws SdkClientException;
+
     /**
-     * <p>
-     * Download objects with a given prefix from the OBS in a local directory
-     * </p>
-     * If only one object matches with the prefix, the object is download in a
-     * local file. Else the objects are download in a directory named by the
-     * prefix
-     * 
+     * Performing a validation check on the given product. All checksum of the product manifest are verified and it
+     * is checked if there are superfluous files stored for directory products.
      * @param object
-     *            its key is the prefix of the objects that have to be download
-     *            its family is the name of the family that contains the object
-     *            its targetDir is the directory on which the match objects will
-     *            be download download its ignoreFolders indicates if the
-     *            folders in the objects keys shall be ignored or not
-     * @throws SdkClientException
+     * A ObsObject containing family and key of the object that shall be validated
      * @throws ObsServiceException
+     * If a consistency issue is found an exception is raised providing the product name it occured
+     * and the violation being found
+     * @throws ObsValidationException 
      */
-    int downloadObject(ObsDownloadObject object)
-            throws SdkClientException, ObsServiceException;
-
-    /**
-     * <p>
-     * Download sequentially a list of objects.
-     * </p>
-     * 
-     * @param objects
-     * @throws SdkClientException
-     * @throws ObsServiceException
-     * @see ObsClient#downloadFiles(List, int)
-     */
-    void downloadObjects(List<ObsDownloadObject> objects)
-            throws SdkClientException, ObsServiceException;
-
-    /**
-     * <p>
-     * Download in parallel a list of objects.
-     * </p>
-     * 
-     * @param objects
-     * @param parralel
-     *            true launch downloads in parallel
-     * @throws SdkClientException
-     * @throws ObsServiceException
-     * @see ObsClient#downloadFiles(List, int)
-     */
-    void downloadObjects(List<ObsDownloadObject> objects, boolean parralel)
-            throws SdkClientException, ObsServiceException;
-
-    /**
-     * @param object
-     *            its key is the key of the file / directory that have to be
-     *            upload its family is the name of the family that contains the
-     *            object its file is the file / directory to upload in OBS
-     * @return the number of upload objects
-     * @throws SdkClientException
-     * @throws ObsServiceException
-     */
-    int uploadObject(ObsUploadObject object)
-            throws SdkClientException, ObsServiceException;
-
-    /**
-     * @param objects
-     * @throws SdkClientException
-     * @throws ObsServiceException
-     */
-    void uploadObjects(List<ObsUploadObject> objects)
-            throws SdkClientException, ObsServiceException;
-
-    /**
-     * @param objects
-     * @param parralel
-     *            true launch downloads in parallel
-     * @throws SdkClientException
-     * @throws ObsServiceException
-     */
-    void uploadObjects(List<ObsUploadObject> objects, boolean parralel)
-            throws SdkClientException, ObsServiceException;
-
-    /**
-     * Get the timeout for waiting threads termination in seconds
-     * @return
-     * @throws ObsServiceException
-     */
-    int getShutdownTimeoutS() throws ObsServiceException;
-
-    /**
-     * Get the timeout for download execution in seconds
-     * @return
-     * @throws ObsServiceException
-     */
-    int getDownloadExecutionTimeoutS() throws ObsServiceException;
-
-    /**
-     * Get the timeout for upload execution in seconds
-     * @return
-     * @throws ObsServiceException
-     */
-    int getUploadExecutionTimeoutS() throws ObsServiceException;
-
+    void validate(ObsObject object) throws ObsServiceException, ObsValidationException;
 }

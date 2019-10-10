@@ -1,0 +1,38 @@
+spring:
+  application:
+    name: s1pdgs-inbox-polling
+  datasource:
+    url: jdbc:hsqldb:mem:testDb;create=true
+    password:
+    username: sa
+    driver-class-name: "org.hsqldb.jdbc.JDBCDriver"
+  jpa:
+    hibernate:
+      ddl-auto: create  
+      
+scheduling:
+  enable: false
+    
+logging:
+  config: classpath:log4j2-test.yml
+  
+inbox:
+  polling-interval-ms: 10000
+  polling:
+    - directory: /tmp/MPS_/S1A/
+      matchRegex: .+
+      ignoreRegex: (^\..*|^.*/\..*|.*\.tmp$|^lost\+found$)
+      topic: t-pdgs-ingestion
+    - directory: /tmp/WILE/S1B/
+      matchRegex: .+
+      ignoreRegex: (^\..*|^.*/\..*|.*\.tmp$|^lost\+found$)
+      topic: t-pdgs-ingestion
+  
+# KAFKA
+kafka:
+  bootstrap-servers: localhost:9093                              # the bootstrap servers for KAFKA
+  max-retries: 10
+  
+# REST controller
+server:
+  port: 8081      

@@ -8,29 +8,33 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
 import java.io.File;
+import java.util.Arrays;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import org.junit.Before;
 import org.junit.Test;
+import org.mockito.ArgumentMatchers;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 import org.springframework.kafka.support.Acknowledgment;
 
 import esa.s1pdgs.cpoc.archives.DevProperties;
-import esa.s1pdgs.cpoc.archives.services.ObsService;
 import esa.s1pdgs.cpoc.archives.status.AppStatus;
 import esa.s1pdgs.cpoc.common.ProductFamily;
+import esa.s1pdgs.cpoc.common.errors.AbstractCodedException;
 import esa.s1pdgs.cpoc.common.errors.obs.ObsException;
 import esa.s1pdgs.cpoc.common.errors.obs.ObsUnknownObject;
-import esa.s1pdgs.cpoc.mqi.model.queue.LevelProductDto;
-import esa.s1pdgs.cpoc.mqi.model.queue.LevelSegmentDto;
+import esa.s1pdgs.cpoc.mqi.model.queue.ProductDto;
+import esa.s1pdgs.cpoc.obs_sdk.ObsClient;
+import esa.s1pdgs.cpoc.obs_sdk.ObsDownloadObject;
 
 public class SegmentsConsumerTest {
 
     @Mock
-    private ObsService obsService;
+    private ObsClient obsClient;
     
     @Mock
     private DevProperties devProperties;
@@ -57,106 +61,99 @@ public class SegmentsConsumerTest {
         doReturn(activations).when(devProperties).getActivations();
     }
 
-    private void mockSliceDownloadFiles(File result)
-            throws ObsException, ObsUnknownObject {
-        doReturn(result).when(obsService).downloadFile(
-                Mockito.any(ProductFamily.class), Mockito.anyString(),
-                Mockito.anyString());
+    private void mockSliceDownloadFiles(List<File> result)
+            throws AbstractCodedException {
+        doReturn(result).when(obsClient).download(Mockito.anyList());
     }
 
     private void mockSliceObjectStorageException()
-            throws ObsException, ObsUnknownObject {
+            throws AbstractCodedException {
         doThrow(new ObsException(ProductFamily.L0_SEGMENT, "kobs",
-                new Throwable())).when(obsService).downloadFile(
-                        Mockito.any(ProductFamily.class), Mockito.anyString(),
-                        Mockito.anyString());
+                new Throwable())).when(obsClient).download(Mockito.anyList());
     }
 
     private void mockSliceObsUnknownObjectException()
-            throws ObsUnknownObject, ObsException {
+            throws AbstractCodedException {
         doThrow(new ObsUnknownObject(ProductFamily.BLANK, "kobs"))
-                .when(obsService).downloadFile(Mockito.any(ProductFamily.class),
-                        Mockito.anyString(), Mockito.anyString());
+                .when(obsClient).download(Mockito.anyList());
     }
 
-    @Test
+	@Test
+	@SuppressWarnings("unchecked")
     public void testReceiveL0Segment()
-            throws ObsException, ObsUnknownObject {
+            throws AbstractCodedException {
         SegmentsConsumer consumer =
-                new SegmentsConsumer(obsService, "test/data/segments", devProperties,
+                new SegmentsConsumer(obsClient, "test/data/segments", devProperties,
                         appStatus);
-        File expectedResult =
-                new File("test/data/segments/l0_segment/productName");
+        List<File> expectedResult = Arrays.asList(new File("test/data/segments/l0_segment/productName"));
         mockDevProperties(true);
         this.mockSliceDownloadFiles(expectedResult);
         doNothing().when(ack).acknowledge();
         consumer.receive(
-                new LevelSegmentDto("productName", "kobs", ProductFamily.L0_SEGMENT, "FAST"),
+                new ProductDto("productName", "kobs", ProductFamily.L0_SEGMENT, "FAST"),
                 ack, "topic");
         verify(ack, times(1)).acknowledge();
-        verify(obsService, times(1)).downloadFile(
-                Mockito.eq(ProductFamily.L0_SEGMENT), Mockito.eq("kobs"),
-                Mockito.eq("test/data/segments/l0_segment"));
+        
+        verify(obsClient, times(1)).download((List<ObsDownloadObject>) ArgumentMatchers.argThat(s -> ((List<ObsDownloadObject>) s).contains(new ObsDownloadObject(
+        		ProductFamily.L0_SEGMENT, "kobs","test/data/segments/l0_segment"))));
     }
 
     @Test
+	@SuppressWarnings("unchecked")
     public void testReceiveL0SegmentOnlyManifest()
-            throws ObsException, ObsUnknownObject {
+            throws AbstractCodedException {
         SlicesConsumer consumer =
-                new SlicesConsumer(obsService, "test/data/segments", devProperties,
+                new SlicesConsumer(obsClient, "test/data/segments", devProperties,
                         appStatus);
-        File expectedResult =
-                new File("test/data/segments/l0_segment/productName");
+        List<File> expectedResult = Arrays.asList(new File("test/data/segments/l0_segment/productName"));
         this.mockSliceDownloadFiles(expectedResult);
         doNothing().when(ack).acknowledge();
         consumer.receive(
-                new LevelProductDto("productName", "kobs", ProductFamily.L0_SEGMENT, "FAST"),
+                new ProductDto("productName", "kobs", ProductFamily.L0_SEGMENT, "FAST"),
                 ack, "topic");
         verify(ack, times(1)).acknowledge();
-        verify(obsService, times(1)).downloadFile(
-                Mockito.eq(ProductFamily.L0_SEGMENT), Mockito.eq("kobs/manifest.safe"),
-                Mockito.eq("test/data/segments/l0_segment"));
+        verify(obsClient, times(1)).download((List<ObsDownloadObject>) ArgumentMatchers.argThat(s -> ((List<ObsDownloadObject>) s).contains(new ObsDownloadObject(
+        		ProductFamily.L0_SEGMENT, "kobs/manifest.safe", "test/data/segments/l0_segment"))));
     }
 
     @Test
     public void testReceiveL0SegmentObjectStorageException()
-            throws ObsException, ObsUnknownObject {
+            throws AbstractCodedException {
         SlicesConsumer consumer =
-                new SlicesConsumer(obsService, "test/data/segments", devProperties,
+                new SlicesConsumer(obsClient, "test/data/segments", devProperties,
                         appStatus);
         this.mockSliceObjectStorageException();
         consumer.receive(
-                new LevelProductDto("productName", "kobs", ProductFamily.L0_SEGMENT, "FAST"),
+                new ProductDto("productName", "kobs", ProductFamily.L0_SEGMENT, "FAST"),
                 ack, "topic");
         verify(ack, never()).acknowledge();
     }
 
     @Test
     public void testReceiveL0SegmentObsUnknownObjectException()
-            throws ObsException, ObsUnknownObject {
+            throws AbstractCodedException {
         SlicesConsumer consumer =
-                new SlicesConsumer(obsService, "test/data/segments", devProperties,
+                new SlicesConsumer(obsClient, "test/data/segments", devProperties,
                         appStatus);
         this.mockSliceObsUnknownObjectException();
         consumer.receive(
-                new LevelProductDto("productName", "kobs", ProductFamily.L0_SEGMENT, "FAST"),
+                new ProductDto("productName", "kobs", ProductFamily.L0_SEGMENT, "FAST"),
                 ack, "topic");
         verify(ack, never()).acknowledge();
     }
     
     @Test
     public void testReceiveL0SegmentAckException()
-            throws ObsException, ObsUnknownObject {
+            throws AbstractCodedException {
         SlicesConsumer consumer =
-                new SlicesConsumer(obsService, "test/data/segments", devProperties,
+                new SlicesConsumer(obsClient, "test/data/segments", devProperties,
                         appStatus);
-        File expectedResult =
-                new File("test/data/segments/l0_segment/productName");
+        List<File> expectedResult = Arrays.asList(new File("test/data/segments/l0_segment/productName"));
         this.mockSliceDownloadFiles(expectedResult);
         doThrow(new IllegalArgumentException("error message")).when(ack)
         .acknowledge();
         consumer.receive(
-                new LevelProductDto("productName", "kobs", ProductFamily.L0_SEGMENT, "FAST"),
+                new ProductDto("productName", "kobs", ProductFamily.L0_SEGMENT, "FAST"),
                 ack, "topic");
         verify(ack, times(1)).acknowledge();
     }

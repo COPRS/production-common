@@ -3,13 +3,13 @@ package esa.s1pdgs.cpoc.compression.mqi;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 
+import esa.s1pdgs.cpoc.common.ProductCategory;
 import esa.s1pdgs.cpoc.common.errors.AbstractCodedException;
 import esa.s1pdgs.cpoc.compression.model.mqi.CompressedProductQueueMessage;
-import esa.s1pdgs.cpoc.mqi.client.GenericMqiService;
-import esa.s1pdgs.cpoc.mqi.model.queue.CompressionJobDto;
+import esa.s1pdgs.cpoc.mqi.client.GenericMqiClient;
+import esa.s1pdgs.cpoc.mqi.model.queue.ProductDto;
 import esa.s1pdgs.cpoc.mqi.model.rest.GenericMessageDto;
 import esa.s1pdgs.cpoc.mqi.model.rest.GenericPublicationMessageDto;
 
@@ -25,7 +25,7 @@ public class OutputProducerFactory {
     /**
      * MQI client for LEVEL_SEGMENTS
      */
-    private final GenericMqiService<CompressionJobDto> senderCompression;
+    private final GenericMqiClient senderCompression;
 
     /**
      * Constructor
@@ -34,9 +34,7 @@ public class OutputProducerFactory {
      * @param senderReports
      */
     @Autowired
-    public OutputProducerFactory(
-            @Qualifier("mqiServiceForCompression") final GenericMqiService<CompressionJobDto> senderCompressed
-            ) {
+    public OutputProducerFactory(final GenericMqiClient senderCompressed) {
     	this.senderCompression = senderCompressed;
     }
 
@@ -46,15 +44,26 @@ public class OutputProducerFactory {
      * @param msg
      * @throws AbstractCodedException
      */
-    public void sendOutput(final CompressedProductQueueMessage msg,
-            GenericMessageDto<CompressionJobDto> inputMessage)
-            throws AbstractCodedException {
-    	CompressionJobDto dto = new CompressionJobDto(msg.getProductName(),  msg.getFamily(), msg.getObjectStorageKey());
-    	GenericPublicationMessageDto messageDto = new GenericPublicationMessageDto<CompressionJobDto>(inputMessage.getIdentifier(), msg.getFamily(), dto);
+    public void sendOutput(final CompressedProductQueueMessage msg, final GenericMessageDto<ProductDto> inputMessage) throws AbstractCodedException {
+    	final GenericPublicationMessageDto<ProductDto> messageDto = new GenericPublicationMessageDto<ProductDto>(
+    			inputMessage.getIdentifier(), 
+    			msg.getFamily(), 
+    			toProductDto(msg)
+    	);
     	messageDto.setInputKey(inputMessage.getInputKey());
-    	messageDto.setOutputKey(dto.getFamily().name());
+    	messageDto.setOutputKey(msg.getFamily().name());
     	
-    	senderCompression.publish(messageDto);
+    	senderCompression.publish(messageDto, ProductCategory.COMPRESSED_PRODUCTS);
+    }
+    
+    private final ProductDto toProductDto(final CompressedProductQueueMessage msg)
+    {
+    	return new ProductDto(
+        		msg.getProductName(), 
+        		msg.getObjectStorageKey(),
+        		msg.getFamily(), 
+        		null
+        );
     }
 
 }

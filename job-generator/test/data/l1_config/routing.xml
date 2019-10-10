@@ -1,12 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<l1_routing>
-	<l1_route>
-		<l1_from>
+<level_products_routing>
+	<level_products_route>
+		<level_products_from>
 			<acquisition>EN</acquisition>
 			<satellite_id>A</satellite_id>
-		</l1_from>
-		<l1_to>
+		</level_products_from>
+		<level_products_to>
 			<task_tables>
 				<task_table>EN_RAW__0_GRDF_1.xml</task_table>
 				<task_table>EN_RAW__0_GRDH_1.xml</task_table>
@@ -15,27 +15,27 @@
 				<task_table>EN_RAW__0_SLC__1_GRDF_1.xml</task_table>
 				<task_table>EN_RAW__0_SLC__1_GRDH_1.xml</task_table>
 			</task_tables>
-		</l1_to>
-	</l1_route>
-	<l1_route>
-		<l1_from>
+		</level_products_to>
+	</level_products_route>
+	<level_products_route>
+		<level_products_from>
 			<acquisition>EN</acquisition>
 			<satellite_id>B</satellite_id>
-		</l1_from>
-		<l1_to>
+		</level_products_from>
+		<level_products_to>
 			<task_tables>
 				<task_table>EN_RAW__0_SLC__1.xml</task_table>
 				<task_table>EN_RAW__0_SLC__1_GRDF_1.xml</task_table>
 				<task_table>EN_RAW__0_SLC__1_GRDH_1.xml</task_table>
 			</task_tables>
-		</l1_to>
-	</l1_route>
-	<l1_route>
-		<l1_from>
+		</level_products_to>
+	</level_products_route>
+	<level_products_route>
+		<level_products_from>
 			<acquisition>EW</acquisition>
 			<satellite_id>A</satellite_id>
-		</l1_from>
-		<l1_to>
+		</level_products_from>
+		<level_products_to>
 			<task_tables>
 				<task_table>EW_RAW__0_GRDH_1.xml</task_table>
 				<task_table>EW_RAW__0_GRDM_1.xml</task_table>
@@ -43,27 +43,27 @@
 				<task_table>EW_RAW__0_SLC__1_GRDH_1.xml</task_table>
 				<task_table>EW_RAW__0_SLC__1_GRDM_1.xml</task_table>
 			</task_tables>
-		</l1_to>
-	</l1_route>
-	<l1_route>
-		<l1_from>
+		</level_products_to>
+	</level_products_route>
+	<level_products_route>
+		<level_products_from>
 			<acquisition>EW</acquisition>
 			<satellite_id>B</satellite_id>
-		</l1_from>
-		<l1_to>
+		</level_products_from>
+		<level_products_to>
 			<task_tables>
 				<task_table>EW_RAW__0_SLC__1.xml</task_table>
 				<task_table>EW_RAW__0_SLC__1_GRDH_1.xml</task_table>
 				<task_table>EW_RAW__0_SLC__1_GRDM_1.xml</task_table>
 			</task_tables>
-		</l1_to>
-	</l1_route>
-	<l1_route>
-		<l1_from>
+		</level_products_to>
+	</level_products_route>
+	<level_products_route>
+		<level_products_from>
 			<acquisition>IW</acquisition>
 			<satellite_id>A</satellite_id>
-		</l1_from>
-		<l1_to>
+		</level_products_from>
+		<level_products_to>
 			<task_tables>
 				<task_table>IW_RAW__0_GRDH_1.xml</task_table>
 				<task_table>IW_RAW__0_GRDM_1.xml</task_table>
@@ -71,27 +71,27 @@
 				<task_table>IW_RAW__0_SLC__1_GRDH_1.xml</task_table>
 				<task_table>IW_RAW__0_SLC__1_GRDM_1.xml</task_table>
 			</task_tables>
-		</l1_to>
-	</l1_route>
-	<l1_route>
-		<l1_from>
+		</level_products_to>
+	</level_products_route>
+	<level_products_route>
+		<level_products_from>
 			<acquisition>IW</acquisition>
 			<satellite_id>B</satellite_id>
-		</l1_from>
-		<l1_to>
+		</level_products_from>
+		<level_products_to>
 			<task_tables>
 				<task_table>IW_RAW__0_SLC__1.xml</task_table>
 				<task_table>IW_RAW__0_SLC__1_GRDH_1.xml</task_table>
 				<task_table>IW_RAW__0_SLC__1_GRDM_1.xml</task_table>
 			</task_tables>
-		</l1_to>
-	</l1_route>
-	<l1_route>
-		<l1_from>
+		</level_products_to>
+	</level_products_route>
+	<level_products_route>
+		<level_products_from>
 			<acquisition>S[1-6]</acquisition>
 			<satellite_id>A</satellite_id>
-		</l1_from>
-		<l1_to>
+		</level_products_from>
+		<level_products_to>
 			<task_tables>
 				<task_table>SM_RAW__0_GRDF_1.xml</task_table>
 				<task_table>SM_RAW__0_GRDH_1.xml</task_table>
@@ -100,20 +100,20 @@
 				<task_table>SM_RAW__0_SLC__1_GRDF_1.xml</task_table>
 				<task_table>SM_RAW__0_SLC__1_GRDH_1.xml</task_table>
 			</task_tables>
-		</l1_to>
-	</l1_route>
-	<l1_route>
-		<l1_from>
+		</level_products_to>
+	</level_products_route>
+	<level_products_route>
+		<level_products_from>
 			<acquisition>S[1-6]</acquisition>
 			<satellite_id>B</satellite_id>
-		</l1_from>
-		<l1_to>
+		</level_products_from>
+		<level_products_to>
 			<task_tables>
 				<task_table>SM_RAW__0_SLC__1.xml</task_table>
 				<task_table>SM_RAW__0_SLC__1_GRDF_1.xml</task_table>
 				<task_table>SM_RAW__0_SLC__1_GRDH_1.xml</task_table>
 			</task_tables>
-		</l1_to>
-	</l1_route>
+		</level_products_to>
+	</level_products_route>
 	
-</l1_routing>
+</level_products_routing>

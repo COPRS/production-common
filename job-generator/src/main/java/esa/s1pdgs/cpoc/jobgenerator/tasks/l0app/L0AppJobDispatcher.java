@@ -6,13 +6,9 @@ import java.util.List;
 
 import javax.annotation.PostConstruct;
 
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
-import org.springframework.stereotype.Service;
 
-import esa.s1pdgs.cpoc.appcatalog.client.job.AbstractAppCatalogJobService;
+import esa.s1pdgs.cpoc.appcatalog.client.job.AppCatalogJobClient;
 import esa.s1pdgs.cpoc.appcatalog.common.rest.model.job.AppDataJobDto;
 import esa.s1pdgs.cpoc.common.errors.AbstractCodedException;
 import esa.s1pdgs.cpoc.jobgenerator.config.JobGeneratorSettings;
@@ -28,15 +24,17 @@ import esa.s1pdgs.cpoc.mqi.model.queue.EdrsSessionDto;
  * 
  * @author Cyrielle Gailliard
  */
-@Service
-@ConditionalOnProperty(name = "process.level", havingValue = "L0")
-public class L0AppJobDispatcher
-        extends AbstractJobsDispatcher<EdrsSessionDto> {
+public class L0AppJobDispatcher extends AbstractJobsDispatcher<EdrsSessionDto> {
 
     /**
      * Task table
      */
     private static final String TASK_TABLE_NAME = "TaskTable.AIOP.xml";
+    
+    /**
+     * 
+     */
+    private String taskForFunctionalLog;
 
     /**
      * Constructor
@@ -45,12 +43,11 @@ public class L0AppJobDispatcher
      * @param jobsGeneratorFactory
      * @param jobGenerationTaskScheduler
      */
-    @Autowired
     public L0AppJobDispatcher(final JobGeneratorSettings settings,
             final ProcessSettings processSettings,
             final JobsGeneratorFactory factory,
             final ThreadPoolTaskScheduler taskScheduler,
-            @Qualifier("appCatalogServiceForEdrsSessions") final AbstractAppCatalogJobService<EdrsSessionDto> appDataService) {
+            final AppCatalogJobClient appDataService) {
         super(settings, processSettings, factory, taskScheduler,
                 appDataService);
     }
@@ -80,13 +77,17 @@ public class L0AppJobDispatcher
      */
     @Override
     protected List<String> getTaskTables(
-            final AppDataJobDto<EdrsSessionDto> job) {
+            final AppDataJobDto job) {
         return Arrays.asList(TASK_TABLE_NAME);
     }
 
     @Override
     protected String getTaskForFunctionalLog() {
-        return "L0JobGeneration";
+    	return this.taskForFunctionalLog;
     }
-
+    
+    @Override
+    public void setTaskForFunctionalLog(String taskForFunctionalLog) {
+    	this.taskForFunctionalLog = taskForFunctionalLog; 
+    }
 }

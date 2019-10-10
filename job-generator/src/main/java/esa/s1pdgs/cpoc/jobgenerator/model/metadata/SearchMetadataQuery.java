@@ -170,11 +170,7 @@ public class SearchMetadataQuery {
         this.productFamily = productFamily;
     }
 
-    /**
-     * @see java.lang.Object#toString()
-     */
-    @Override
-    public String toString() {
+    public String toJsonString() {
         return String.format(
                 "{identifier: %s, retrievalMode: %s, deltaTime0: %s, deltaTime1: %s, productType: %s, productFamily: %s}",
                 identifier, retrievalMode, deltaTime0, deltaTime1, productType,
@@ -219,4 +215,13 @@ public class SearchMetadataQuery {
         }
         return ret;
     }
+
+	@Override
+	public String toString() {
+		return "SearchMetadataQuery [identifier=" + identifier + ", retrievalMode=" + retrievalMode + ", deltaTime0="
+				+ deltaTime0 + ", deltaTime1=" + deltaTime1 + ", productType=" + productType + ", productFamily="
+				+ productFamily + "]";
+	}
+    
+    
 }

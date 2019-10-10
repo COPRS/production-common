@@ -2,9 +2,10 @@ spring:
   application:
     name: s1pdgs-ingestor
     
-# Logging
+# Logging     
 logging:
-  config: ./src/test/resources/log4j2-test.yml
+  config: classpath:log4j2-test.yml
+ 
 
 # KAFKA
 kafka:
@@ -40,5 +41,5 @@ file:
     clean-empty-directory-rate: 10000
     clean-empty-min-age: 13000
     cache-max-capacity: 70
-
+  backup-directory: /data/local-ingestor/backup/
     

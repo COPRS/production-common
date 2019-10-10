@@ -3,19 +3,21 @@ package esa.s1pdgs.cpoc.jobgenerator.tasks;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import esa.s1pdgs.cpoc.appcatalog.client.job.AbstractAppCatalogJobService;
+import esa.s1pdgs.cpoc.appcatalog.client.job.AppCatalogJobClient;
+import esa.s1pdgs.cpoc.common.ProductCategory;
 import esa.s1pdgs.cpoc.common.errors.AbstractCodedException;
 import esa.s1pdgs.cpoc.errorrepo.ErrorRepoAppender;
 import esa.s1pdgs.cpoc.errorrepo.model.rest.FailedProcessingDto;
 import esa.s1pdgs.cpoc.jobgenerator.config.ProcessSettings;
 import esa.s1pdgs.cpoc.jobgenerator.status.AppStatus;
-import esa.s1pdgs.cpoc.mqi.client.GenericMqiService;
+import esa.s1pdgs.cpoc.mqi.client.GenericMqiClient;
 import esa.s1pdgs.cpoc.mqi.client.StatusService;
+import esa.s1pdgs.cpoc.mqi.model.queue.AbstractDto;
 import esa.s1pdgs.cpoc.mqi.model.rest.Ack;
 import esa.s1pdgs.cpoc.mqi.model.rest.AckMessageDto;
 import esa.s1pdgs.cpoc.mqi.model.rest.GenericMessageDto;
 
-public abstract class AbstractGenericConsumer<T> {
+public abstract class AbstractGenericConsumer<T extends AbstractDto> {
 
     protected static final Logger LOGGER =
             LogManager.getLogger(AbstractGenericConsumer.class);
@@ -38,12 +40,12 @@ public abstract class AbstractGenericConsumer<T> {
     /**
      * MQI service
      */
-    protected final GenericMqiService<T> mqiService;
+    protected final GenericMqiClient mqiService;
 
     /**
      * Applicative data service
      */
-    protected final AbstractAppCatalogJobService<T> appDataService;
+    protected final AppCatalogJobClient appDataService;
 
     /**
      * MQI service
@@ -56,15 +58,18 @@ public abstract class AbstractGenericConsumer<T> {
     protected final AppStatus appStatus;
     
     private final ErrorRepoAppender errorRepoAppender;
+    
+    private final ProductCategory category;
 
     public AbstractGenericConsumer(
             final AbstractJobsDispatcher<T> jobsDispatcher,
             final ProcessSettings processSettings,
-            final GenericMqiService<T> mqiService,
+            final GenericMqiClient mqiService,
             final StatusService mqiStatusService,
-            final AbstractAppCatalogJobService<T> appDataService,
+            final AppCatalogJobClient appDataService,
             final AppStatus appStatus,
-            final ErrorRepoAppender errorRepoAppender
+            final ErrorRepoAppender errorRepoAppender,
+            final ProductCategory category
     		) {
         this.jobsDispatcher = jobsDispatcher;
         this.processSettings = processSettings;
@@ -73,12 +78,13 @@ public abstract class AbstractGenericConsumer<T> {
         this.appDataService = appDataService;
         this.appStatus = appStatus;
         this.errorRepoAppender = errorRepoAppender;
+        this.category = category;
     }
 
     protected GenericMessageDto<T> readMessage() {
         GenericMessageDto<T> message = null;
         try {
-            message = mqiService.next();
+            message = mqiService.next(category);
             appStatus.setWaiting();
         } catch (AbstractCodedException ace) {
             LOGGER.error("[MONITOR] [code {}] {}", ace.getCode().getCode(),
@@ -97,7 +103,7 @@ public abstract class AbstractGenericConsumer<T> {
      * @param errorMessage
      */
     protected void ackProcessing(final GenericMessageDto<T> dto,
-    		final FailedProcessingDto<GenericMessageDto<T>> failed,
+    		final FailedProcessingDto failed,
             final boolean ackOk, final String productName,
             final String errorMessage) {
         boolean stopping = appStatus.getStatus().isStopping();
@@ -142,8 +148,10 @@ public abstract class AbstractGenericConsumer<T> {
         LOGGER.error(errorMessage);
         appStatus.setError("NEXT_MESSAGE");
         try {
-            mqiService.ack(new AckMessageDto(dto.getIdentifier(), Ack.ERROR,
-                    errorMessage, stop));            
+            mqiService.ack(
+            		new AckMessageDto(dto.getIdentifier(), Ack.ERROR,errorMessage, stop),
+            		category
+            );            
         } catch (AbstractCodedException ace) {
             LOGGER.error("[MONITOR] [step 3] [productName {}] [code {}] {}",
                     productName, ace.getCode().getCode(), ace.getLogMessage());
@@ -159,7 +167,9 @@ public abstract class AbstractGenericConsumer<T> {
                 getTaskForFunctionalLog(), productName);
         try {
             mqiService.ack(
-                    new AckMessageDto(dto.getIdentifier(), Ack.OK, null, stop));
+                    new AckMessageDto(dto.getIdentifier(), Ack.OK, null, stop),
+                    category
+            );
         } catch (AbstractCodedException ace) {
             LOGGER.error("[MONITOR] [step 3] [productName {}] [code {}] {}",
                     productName, ace.getCode().getCode(), ace.getLogMessage());
@@ -168,5 +178,7 @@ public abstract class AbstractGenericConsumer<T> {
     }
 
     protected abstract String getTaskForFunctionalLog();
+    
+    public abstract void setTaskForFunctionalLog(String taskForFunctionalLog);
 
 }

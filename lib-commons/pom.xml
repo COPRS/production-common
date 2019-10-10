@@ -5,7 +5,7 @@
 	<parent>
 	  <groupId>de.werum.s1pdgs</groupId>
 	  <artifactId>s1pro-core</artifactId>
-	  <version>0.4.0-SNAPSHOT</version>
+	  <version>0.7.0</version>
 	</parent>
 	<artifactId>s1pro-core-lib-commons</artifactId>
 	<packaging>jar</packaging>
@@ -30,10 +30,6 @@
 			<artifactId>spring-kafka</artifactId>
 		</dependency>	
 		<dependency>
-			<groupId>org.springframework.data</groupId>
-			<artifactId>spring-data-mongodb</artifactId>
-		</dependency>
-		<dependency>
 			<groupId>com.fasterxml.jackson.core</groupId>
 			<artifactId>jackson-databind</artifactId>
 		</dependency>
@@ -43,6 +39,15 @@
 		</dependency>
 		
 		<!-- Tests -->
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-log4j2</artifactId>
+		</dependency>
+		<dependency>
+	      <groupId>org.apache.logging.log4j</groupId>
+	      <artifactId>log4j-core</artifactId>
+	      <scope>test</scope>
+	    </dependency>
 		<dependency>
 			<groupId>org.springframework.kafka</groupId>
 			<artifactId>spring-kafka-test</artifactId>
@@ -148,32 +153,6 @@
 					</execution>
 				</executions>
 			</plugin>
-			<plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-surefire-report-plugin</artifactId>
-        <version>3.0.0-M3</version>
-      </plugin>
-      	<plugin>
-		<groupId>org.jacoco</groupId>
-		<artifactId>jacoco-maven-plugin</artifactId>
-		<version>0.8.2</version>
-		<executions>
-			<execution>
-				<goals>
-					<goal>prepare-agent</goal>
-				</goals>
-			</execution>
-			<!-- attached to Maven test phase -->
-			<execution>
-				<id>report</id>
-				<phase>test</phase>
-				<goals>
-					<goal>report</goal>
-				</goals>
-			</execution>
-		</executions>
-	</plugin>
-      
 		</plugins>
 	</build>
 </project>

@@ -38,6 +38,11 @@ public class AppDataJobProductDto {
     private String missionId;
 
     /**
+     * Station code: e. g. WILE 
+     */
+    private String stationCode;
+    
+    /**
      * 
      */
     private String startTime;
@@ -174,6 +179,20 @@ public class AppDataJobProductDto {
         this.missionId = missionId;
     }
 
+	/**
+	 * @return the stationCode
+	 */
+	public String getStationCode() {
+		return stationCode;
+	}
+
+	/**
+	 * @param stationCode the stationCode to set
+	 */
+	public void setStationCode(String stationCode) {
+		this.stationCode = stationCode;
+	}
+	
     /**
      * @return the startTime
      */
@@ -375,11 +394,11 @@ public class AppDataJobProductDto {
     @Override
     public String toString() {
         return String.format(
-                "{sessionId: %s, productName: %s, satelliteId: %s, missionId: %s, startTime: %s, stopTime: %s, insConfId: %s, productType: %s, raws1: %s, raws2: %s, acquisition: %s, dataTakeId: %s, numberSlice: %s, totalNbOfSlice: %s, segmentStartDate: %s, segmentStopDate: %s, processMode: %s}",
-                sessionId, productName, satelliteId, missionId, startTime,
-                stopTime, insConfId, productType, raws1, raws2, acquisition,
-                dataTakeId, numberSlice, totalNbOfSlice, segmentStartDate,
-                segmentStopDate, processMode);
+                "{sessionId: %s, productName: %s, satelliteId: %s, missionId: %s, stationCode: %s, startTime: %s, stopTime: %s, insConfId: %s, productType: %s, raws1: %s, raws2: %s, acquisition: %s, dataTakeId: %s, numberSlice: %s, totalNbOfSlice: %s, segmentStartDate: %s, segmentStopDate: %s, processMode: %s}",
+                sessionId, productName, satelliteId, missionId, stationCode,
+                startTime, stopTime, insConfId, productType, raws1, raws2,
+                acquisition, dataTakeId, numberSlice, totalNbOfSlice,
+                segmentStartDate, segmentStopDate, processMode);
     }
 
     /**
@@ -388,9 +407,9 @@ public class AppDataJobProductDto {
     @Override
     public int hashCode() {
         return Objects.hash(sessionId, productName, satelliteId, missionId,
-                startTime, stopTime, insConfId, productType, raws1, raws2,
-                acquisition, dataTakeId, numberSlice, totalNbOfSlice,
-                segmentStartDate, segmentStopDate, processMode);
+        		stationCode, startTime, stopTime, insConfId, productType,
+        		raws1, raws2, acquisition, dataTakeId, numberSlice,
+        		totalNbOfSlice, segmentStartDate, segmentStopDate, processMode);
     }
 
     /**
@@ -409,6 +428,7 @@ public class AppDataJobProductDto {
                     && Objects.equals(productName, other.productName)
                     && Objects.equals(satelliteId, other.satelliteId)
                     && Objects.equals(missionId, other.missionId)
+                    && Objects.equals(stationCode, other.stationCode)
                     && Objects.equals(startTime, other.startTime)
                     && Objects.equals(stopTime, other.stopTime)
                     && insConfId == other.insConfId

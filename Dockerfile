@@ -16,7 +16,9 @@ COPY app-catalog-client/ /app/app-catalog-client
 COPY applicative-catalog/ /app/applicative-catalog
 COPY archives/ /app/archives
 COPY compression/ /app/compression
-COPY ingestor/ /app/ingestor
+COPY disseminator/ /app/disseminator
+COPY inbox-polling/ /app/inbox-polling
+COPY inbox-ingestion/ /app/inbox-ingestion
 COPY job-generator/ /app/job-generator
 COPY lib-commons/ /app/lib-commons
 COPY metadata-catalog/ /app/metadata-catalog
@@ -25,29 +27,38 @@ COPY mqi-server/ /app/mqi-server
 COPY obs-sdk/ /app/obs-sdk
 COPY scaler/ /app/scaler
 COPY wrapper/ /app/wrapper
-COPY error-repository/ /app/error-repository
+COPY request-repository/ /app/request-repository
 COPY queue-watcher/ /app/queue-watcher
+COPY validation/ /app/validation
 
-RUN mvn -Dmaven.test.skip=true -Dpmd.skip=true -Dfindbugs.skip=true -B -f /app/pom.xml -s /usr/share/maven/ref/settings-docker.xml install 
+RUN mvn -DskipTests=true -Dpmd.skip=true -Dfindbugs.skip=true -B -f /app/pom.xml -s /usr/share/maven/ref/settings-docker.xml install 
 
 ####
 # An empty image that will be just used to gather all build artifacts into a small image
 ####
 
 # scratch seems not to work for some reason, we go for alpine...
-#FROM scatch
 FROM alpine as final
+ARG COMMIT_ID
+ARG BRANCH_TEXT
 
 WORKDIR /app
+RUN echo ${VERSION} >> VERSION
+RUN echo ${BRANCH_TEXT} >> VERSION
+RUN echo ${COMMIT_ID} >> VERSION
+
 COPY --from=buildenv /app/applicative-catalog/target /app/applicative-catalog/target
 COPY --from=buildenv /app/archives/target /app/archives/target
 COPY --from=buildenv /app/compression/target /app/compression/target
-COPY --from=buildenv /app/ingestor/target /app/ingestor/target
+COPY --from=buildenv /app/disseminator/target /app/disseminator/target
+COPY --from=buildenv /app/inbox-polling/target /app/inbox-polling/target
+COPY --from=buildenv /app/inbox-ingestion/target /app/inbox-ingestion/target
 COPY --from=buildenv /app/job-generator/target /app/job-generator/target
 COPY --from=buildenv /app/metadata-catalog /app/metadata-catalog
 COPY --from=buildenv /app/mqi-server/target /app/mqi-server/target
 COPY --from=buildenv /app/scaler/target /app/scaler/target
 COPY --from=buildenv /app/wrapper/target /app/wrapper/target
 COPY --from=buildenv /app/wrapper/config /app/wrapper/config
-COPY --from=buildenv /app/error-repository/target /app/error-repository/target
+COPY --from=buildenv /app/request-repository/target /app/request-repository/target
 COPY --from=buildenv /app/queue-watcher/target /app/queue-watcher/target
+COPY --from=buildenv /app/validation/target /app/validation/target

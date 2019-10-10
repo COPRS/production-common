@@ -12,7 +12,7 @@ import org.apache.logging.log4j.Logger;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
 import org.springframework.util.CollectionUtils;
 
-import esa.s1pdgs.cpoc.appcatalog.client.job.AbstractAppCatalogJobService;
+import esa.s1pdgs.cpoc.appcatalog.client.job.AppCatalogJobClient;
 import esa.s1pdgs.cpoc.appcatalog.common.rest.model.job.AppDataJobDto;
 import esa.s1pdgs.cpoc.appcatalog.common.rest.model.job.AppDataJobDtoState;
 import esa.s1pdgs.cpoc.appcatalog.common.rest.model.job.AppDataJobGenerationDto;
@@ -21,8 +21,10 @@ import esa.s1pdgs.cpoc.common.errors.AbstractCodedException;
 import esa.s1pdgs.cpoc.common.errors.processing.JobGenMaxNumberTaskTablesReachException;
 import esa.s1pdgs.cpoc.jobgenerator.config.JobGeneratorSettings;
 import esa.s1pdgs.cpoc.jobgenerator.config.ProcessSettings;
+import esa.s1pdgs.cpoc.mqi.model.queue.AbstractDto;
 import esa.s1pdgs.cpoc.report.LoggerReporting;
 import esa.s1pdgs.cpoc.report.Reporting;
+import esa.s1pdgs.cpoc.report.ReportingMessage;
 
 /**
  * Job dispatcher<br/>
@@ -41,7 +43,7 @@ import esa.s1pdgs.cpoc.report.Reporting;
  * 
  * @param <T>
  */
-public abstract class AbstractJobsDispatcher<T> {
+public abstract class AbstractJobsDispatcher<T extends AbstractDto> {
 
     /**
      * Logger
@@ -77,7 +79,7 @@ public abstract class AbstractJobsDispatcher<T> {
     /**
      * Applicative data service
      */
-    protected final AbstractAppCatalogJobService<T> appDataService;
+    protected final AppCatalogJobClient appDataService;
 
     /**
      * Constructor
@@ -90,7 +92,7 @@ public abstract class AbstractJobsDispatcher<T> {
             final ProcessSettings processSettings,
             final JobsGeneratorFactory factory,
             final ThreadPoolTaskScheduler taskScheduler,
-            final AbstractAppCatalogJobService<T> appDataService) {
+            final AppCatalogJobClient appDataService) {
         this.factory = factory;
         this.settings = settings;
         this.processSettings = processSettings;
@@ -171,12 +173,12 @@ public abstract class AbstractJobsDispatcher<T> {
      */
     public void dispatch(final AppDataJobDto<T> job)
             throws AbstractCodedException {
+    	LOGGER.debug ("== dispatch job {}", job.toString());
         String productName = job.getProduct().getProductName();
-        final Reporting.Factory reportingFactory = new LoggerReporting.Factory(LOGGER, "Dispatch")
-    			.product(job.getProduct().getProductType(), productName);
+        final Reporting.Factory reportingFactory = new LoggerReporting.Factory("Dispatch");
     	
     	final Reporting reporting = reportingFactory.newReporting(0); 
-    	reporting.reportStart("Start dispatching product");
+    	reporting.begin(new ReportingMessage("Start dispatching product"));
     	
         try {
             List<String> taskTables = getTaskTables(job);
@@ -186,6 +188,7 @@ public abstract class AbstractJobsDispatcher<T> {
             }
             List<String> notDealTaskTables = new ArrayList<>(taskTables);
             List<AppDataJobGenerationDto> jobGens = job.getGenerations();
+            LOGGER.debug ("== job.getGenerations() {}", jobGens.toString());
 
             // Build the new job generations
             boolean needUpdate = false;
@@ -227,11 +230,12 @@ public abstract class AbstractJobsDispatcher<T> {
                 appDataService.patchJob(job.getIdentifier(), job, false, false,
                         true);
             }
-            reporting.reportStop("End dispatching product");
+            LOGGER.debug ("== dispatched job {}", job.toString());
+            reporting.end(new ReportingMessage("End dispatching product"));
 
 
         } catch (AbstractCodedException ace) {
-        	reporting.reportError("[code {}] {}", ace.getCode().getCode(), ace.getLogMessage());
+        	reporting.error(new ReportingMessage("[code {}] {}", ace.getCode().getCode(), ace.getLogMessage()));
             throw ace;
         }
     }
@@ -243,6 +247,8 @@ public abstract class AbstractJobsDispatcher<T> {
             throws AbstractCodedException;
 
     protected abstract String getTaskForFunctionalLog();
+    
+    public abstract void setTaskForFunctionalLog(String taskForFunctionalLog);
 
     /**
      * @return the generators

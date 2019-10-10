@@ -9,6 +9,8 @@ import java.nio.file.FileVisitOption;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.Arrays;
+import java.util.Collection;
 import java.util.Comparator;
 
 import esa.s1pdgs.cpoc.common.errors.InternalErrorException;
@@ -19,7 +21,6 @@ import esa.s1pdgs.cpoc.common.errors.InternalErrorException;
  * @author Viveris Technologies
  */
 public class FileUtils {
-
     /**
      * Write the string into the file
      * 
@@ -86,6 +87,16 @@ public class FileUtils {
                     + file.getName() + ": " + ioe.getMessage(), ioe);
         }
     }
+    
+    public static void deleteWithRetries(final File file, int numRetries, long retrySleep) 
+    		throws InterruptedException {
+    	Retries.performWithRetries(
+    			() -> {	delete(file.getPath()) ; return null;}, 
+    			"Deletion of " + file,
+    			numRetries, 
+    			retrySleep
+    	);    	
+    }
 
     /**
      * Delete a directory and all its subdirectories
@@ -96,7 +107,18 @@ public class FileUtils {
     public static void delete(final String path) throws IOException {
         Path pathObj = Paths.get(path);
         Files.walk(pathObj, FileVisitOption.FOLLOW_LINKS)
-                .sorted(Comparator.reverseOrder()).map(Path::toFile)
-                .peek(System.out::println).forEach(File::delete);
+                .sorted(Comparator.reverseOrder())
+                .map(Path::toFile)
+                .forEach(File::delete);
+    }
+    
+    public static final long size(final Collection<File> files) {
+    	return files.stream()
+    			.mapToLong(f -> f.length())
+    			.sum();
+    }
+    
+    public static final long size(final File ... files) {
+    	return size(Arrays.asList(files));
     }
 }

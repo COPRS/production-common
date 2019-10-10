@@ -3,6 +3,8 @@ package esa.s1pdgs.cpoc.obs_sdk;
 import java.io.File;
 import java.util.Objects;
 
+import esa.s1pdgs.cpoc.common.ProductFamily;
+
 /**
  * Representes an object whose function is to be uploaded on a local directory
  * 
@@ -22,9 +24,8 @@ public class ObsUploadObject extends ObsObject {
      * @param family
      * @param localPath
      */
-    public ObsUploadObject(final String key, final ObsFamily family,
-            final File file) {
-        super(key, family);
+    public ObsUploadObject(final ProductFamily family, final String key, final File file) {
+        super(family, key);
         this.file = file;
     }
 

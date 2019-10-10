@@ -18,11 +18,10 @@ import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 
 import esa.s1pdgs.cpoc.mdcatalog.es.EsServices;
-import esa.s1pdgs.cpoc.mdcatalog.es.model.SearchMetadata;
+import esa.s1pdgs.cpoc.metadata.model.SearchMetadata;
 import esa.s1pdgs.cpoc.common.ProductFamily;
 import esa.s1pdgs.cpoc.common.errors.processing.MetadataNotPresentException;
 import esa.s1pdgs.cpoc.mdcatalog.rest.SearchMetadataController;
-import esa.s1pdgs.cpoc.mdcatalog.rest.dto.SearchMetadataDto;
 
 public class SearchMetadataControllerTest extends RestControllerTest {
 
@@ -58,8 +57,9 @@ public class SearchMetadataControllerTest extends RestControllerTest {
 	
 	@Test
 	public void testSearchMetadataLastValCover() throws Exception {
-		List<SearchMetadataDto> expectedResult = new ArrayList<>();
-		expectedResult.add(new SearchMetadataDto("name", "type", "kobs", "startDate", "stopDate"));
+		List<SearchMetadata> expectedResult = new ArrayList<>();
+		expectedResult.add(new SearchMetadata("name", "type", "kobs", "startDate", "stopDate",
+                "mission", "satellite", "station"));
 		SearchMetadata response = new SearchMetadata();
 		response.setProductName("name");
 		response.setProductType("type");
@@ -74,8 +74,9 @@ public class SearchMetadataControllerTest extends RestControllerTest {
 	
 	@Test
     public void testSearchMetadataValIntersect() throws Exception {
-        List<SearchMetadataDto> expectedResult = new ArrayList<>();
-        expectedResult.add(new SearchMetadataDto("name", "type", "kobs", "startDate", "stopDate"));
+        List<SearchMetadata> expectedResult = new ArrayList<>();
+        expectedResult.add(new SearchMetadata("name", "type", "kobs", "startDate", "stopDate",
+                "mission", "satellite", "station"));
         SearchMetadata r = new SearchMetadata();
         r.setProductName("name");
         r.setProductType("type");

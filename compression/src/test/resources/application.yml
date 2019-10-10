@@ -2,7 +2,7 @@ spring:
   application:
     name: s1pdgs-compression
     
-# Logging
+# Logging     
 logging:
   config: classpath:log4j2-test.yml
   
@@ -12,11 +12,18 @@ kafka:
   group-id: error                                                # the group identifier to use for KAFKA publishers  
   max-retries: 10                                                # number of retries if kafka is not available
   error-topic: t-pdgs-errors
+
+status:
+  max-error-counter-processing: 2
+  max-error-counter-mqi: 2
+  delete-fixed-delay-ms: 1000
   
 # Compression
 compression:
   command: /usr/bin/sh
   hostname: "hostname"
+  init-delay-poll-ms: 10
+  fixed-delay-ms: 10
   mqi:
     host-uri: http://localhost:8081       # the host and port for querying MQI server
     max-retries: 3                        # the maximal number of consecutive retries following a MQI request error 

@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -19,7 +20,7 @@ import org.apache.logging.log4j.Logger;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 
-import esa.s1pdgs.cpoc.appcatalog.client.job.AbstractAppCatalogJobService;
+import esa.s1pdgs.cpoc.appcatalog.client.job.AppCatalogJobClient;
 import esa.s1pdgs.cpoc.appcatalog.common.rest.model.job.AppDataJobDto;
 import esa.s1pdgs.cpoc.appcatalog.common.rest.model.job.AppDataJobDtoState;
 import esa.s1pdgs.cpoc.appcatalog.common.rest.model.job.AppDataJobGenerationDtoState;
@@ -31,6 +32,7 @@ import esa.s1pdgs.cpoc.common.errors.processing.JobGenBuildTaskTableException;
 import esa.s1pdgs.cpoc.common.errors.processing.JobGenInputsMissingException;
 import esa.s1pdgs.cpoc.common.errors.processing.JobGenMetadataException;
 import esa.s1pdgs.cpoc.common.utils.DateUtils;
+import esa.s1pdgs.cpoc.common.utils.LogUtils;
 import esa.s1pdgs.cpoc.jobgenerator.config.JobGeneratorSettings;
 import esa.s1pdgs.cpoc.jobgenerator.config.ProcessSettings;
 import esa.s1pdgs.cpoc.jobgenerator.model.JobGeneration;
@@ -40,12 +42,11 @@ import esa.s1pdgs.cpoc.jobgenerator.model.joborder.JobOrder;
 import esa.s1pdgs.cpoc.jobgenerator.model.joborder.JobOrderInput;
 import esa.s1pdgs.cpoc.jobgenerator.model.joborder.JobOrderInputFile;
 import esa.s1pdgs.cpoc.jobgenerator.model.joborder.JobOrderOutput;
+import esa.s1pdgs.cpoc.jobgenerator.model.joborder.JobOrderProcParam;
 import esa.s1pdgs.cpoc.jobgenerator.model.joborder.JobOrderSensingTime;
 import esa.s1pdgs.cpoc.jobgenerator.model.joborder.JobOrderTimeInterval;
 import esa.s1pdgs.cpoc.jobgenerator.model.joborder.enums.JobOrderDestination;
 import esa.s1pdgs.cpoc.jobgenerator.model.joborder.enums.JobOrderFileNameType;
-import esa.s1pdgs.cpoc.jobgenerator.model.metadata.AbstractMetadata;
-import esa.s1pdgs.cpoc.jobgenerator.model.metadata.SearchMetadata;
 import esa.s1pdgs.cpoc.jobgenerator.model.metadata.SearchMetadataQuery;
 import esa.s1pdgs.cpoc.jobgenerator.model.metadata.SearchMetadataResult;
 import esa.s1pdgs.cpoc.jobgenerator.model.tasktable.TaskTable;
@@ -58,20 +59,25 @@ import esa.s1pdgs.cpoc.jobgenerator.model.tasktable.enums.TaskTableMandatoryEnum
 import esa.s1pdgs.cpoc.jobgenerator.service.XmlConverter;
 import esa.s1pdgs.cpoc.jobgenerator.service.metadata.MetadataService;
 import esa.s1pdgs.cpoc.jobgenerator.service.mqi.OutputProducerFactory;
+import esa.s1pdgs.cpoc.metadata.model.AbstractMetadata;
+import esa.s1pdgs.cpoc.metadata.model.SearchMetadata;
+import esa.s1pdgs.cpoc.mqi.model.queue.AbstractDto;
 import esa.s1pdgs.cpoc.mqi.model.queue.LevelJobDto;
 import esa.s1pdgs.cpoc.mqi.model.queue.LevelJobInputDto;
 import esa.s1pdgs.cpoc.mqi.model.queue.LevelJobOutputDto;
 import esa.s1pdgs.cpoc.mqi.model.queue.LevelJobPoolDto;
 import esa.s1pdgs.cpoc.mqi.model.queue.LevelJobTaskDto;
+import esa.s1pdgs.cpoc.report.JobOrderReportingOutput;
 import esa.s1pdgs.cpoc.report.LoggerReporting;
 import esa.s1pdgs.cpoc.report.Reporting;
+import esa.s1pdgs.cpoc.report.ReportingMessage;
 
 /**
  * Class for processing product for a given task table
  * 
  * @author Cyrielle Gailliard
  */
-public abstract class AbstractJobsGenerator<T> implements Runnable {
+public abstract class AbstractJobsGenerator<T extends AbstractDto> implements Runnable {
 
     /**
      * Logger
@@ -109,7 +115,7 @@ public abstract class AbstractJobsGenerator<T> implements Runnable {
     /**
      * Applicative data service
      */
-    private final AbstractAppCatalogJobService<T> appDataService;
+    private final AppCatalogJobClient appDataService;
 
     /**
      * Task table
@@ -148,7 +154,7 @@ public abstract class AbstractJobsGenerator<T> implements Runnable {
             final ProcessSettings l0ProcessSettings,
             final JobGeneratorSettings taskTablesSettings,
             final OutputProducerFactory outputFactory,
-            final AbstractAppCatalogJobService<T> appDataService) {
+            final AppCatalogJobClient appDataService) {
         this.xmlConverter = xmlConverter;
         this.metadataService = metadataService;
         this.l0ProcessSettings = l0ProcessSettings;
@@ -325,9 +331,9 @@ public abstract class AbstractJobsGenerator<T> implements Runnable {
 
     @Override
     public void run() {
-        JobGeneration<T> job = null;
+        JobGeneration job = null;
         // Get a job to generate
-        final Reporting.Factory reportingFactory = new LoggerReporting.Factory(LOGGER, "JobGenerator");
+        final Reporting.Factory reportingFactory = new LoggerReporting.Factory("JobGenerator");
         final Reporting reporting = reportingFactory.newReporting(0);
         
         try {
@@ -335,6 +341,7 @@ public abstract class AbstractJobsGenerator<T> implements Runnable {
             List<AppDataJobDto<T>> jobs = appDataService
                     .findNByPodAndGenerationTaskTableWithNotSentGeneration(
                             l0ProcessSettings.getHostname(), taskTableXmlName);
+            
             // Determine job to process
             if (CollectionUtils.isEmpty(jobs)) {
                 job = null;
@@ -343,7 +350,8 @@ public abstract class AbstractJobsGenerator<T> implements Runnable {
                     // Check if we can do a loop
                     long currentTimestamp = System.currentTimeMillis();
                     boolean todo = false;
-                    job = new JobGeneration<>(appDataJob, taskTableXmlName);
+                    job = new JobGeneration(appDataJob, taskTableXmlName);
+                    LOGGER.debug ("== new JobGeneration of job {}", job.toString());
                     switch (job.getGeneration().getState()) {
                         case INITIAL:                 
                             if (job.getGeneration().getLastUpdateDate() == null
@@ -385,7 +393,7 @@ public abstract class AbstractJobsGenerator<T> implements Runnable {
                 }
             }
         } catch (AbstractCodedException ace) {
-            LOGGER.error("{} CAnnot retrieve the current jobs: {}",
+            LOGGER.error("{} cannot retrieve the current jobs: {}",
                     this.prefixLogMonitor, ace.getLogMessage());
         }
 
@@ -399,45 +407,47 @@ public abstract class AbstractJobsGenerator<T> implements Runnable {
                         this.prefixLogMonitor, productName,
                         job.getGeneration().getState());
 
+                
+                LOGGER.debug ("== Trying job generation for job {}", job.toString());
+                
                 // Check primary input
                 if (job.getGeneration().getState() == AppDataJobGenerationDtoState.INITIAL) {
-                 	final Reporting reportInit = reportingFactory
-                			.product(null, productName)                        			
-                			.newReporting(1);
+                 	final Reporting reportInit = reportingFactory.newReporting(1);
                  	
                     try {                    	
                         if (job.getGeneration().getNbErrors() == 0) { 
-                            reporting.reportStart("Start job generation");
-                        	reportInit.reportStart("Start init job generation");
+                            reporting.begin(new ReportingMessage("Start job generation"));
+                        	reportInit.begin(new ReportingMessage("Start init job generation"));
                         }                        
                         LOGGER.info(
                                 "{} [productName {}] 1 - Checking the pre-requirements",
                                 this.prefixLogMonitor, productName);
                         this.preSearch(job);
-                        AppDataJobDto<T> modifiedJob = appDataService.patchJob(
+                        
+                        @SuppressWarnings("unchecked")
+						AppDataJobDto<T> modifiedJob = appDataService.patchJob(
                                 job.getAppDataJob().getIdentifier(),
                                 job.getAppDataJob(), false, true, false);
                         job.setAppDataJob(modifiedJob);
                         updateState(job, AppDataJobGenerationDtoState.PRIMARY_CHECK, reportInit);
-                        reportInit.reportStop("End init job generation");
+                        reportInit.end(new ReportingMessage("End init job generation"));
                     } catch (AbstractCodedException e) {
                         LOGGER.error(
                                 "{} [productName {}] 1 - Pre-requirements not checked: {}",
                                 this.prefixLogMonitor, productName,
                                 e.getLogMessage());                      
                         updateState(job, AppDataJobGenerationDtoState.INITIAL, reportInit);
-                        reportInit.reportError("[code {}] {}", e.getCode().getCode(), e.getLogMessage());
+                        reportInit.error(new ReportingMessage("[code {}] {}", e.getCode().getCode(), e.getLogMessage()));
                     }
                 }
 
                 // Search input
                 if (job.getGeneration().getState() == AppDataJobGenerationDtoState.PRIMARY_CHECK) {
                 	
-                	final Reporting reportInputs = reportingFactory
-                			.product(null, productName)                        			
+                	final Reporting reportInputs = reportingFactory                  			
                 			.newReporting(2);
                 	
-                	reportInputs.reportStart("Start searching inputs");
+                	reportInputs.begin(new ReportingMessage("Start searching inputs"));
                 	
                     try {
                         LOGGER.info("{} [productName {}] 2 - Searching inputs",
@@ -445,7 +455,7 @@ public abstract class AbstractJobsGenerator<T> implements Runnable {
                                         .getProduct().getProductName());
                         this.inputsSearch(job);
                         updateState(job, AppDataJobGenerationDtoState.READY, reportInputs);
-                        reportInputs.reportStop("End searching inputs");
+                        reportInputs.end(new ReportingMessage("End searching inputs"));
                         
                     } catch (AbstractCodedException e) {
                         LOGGER.error(
@@ -453,18 +463,17 @@ public abstract class AbstractJobsGenerator<T> implements Runnable {
                                 this.prefixLogMonitor, productName,
                                 e.getLogMessage());
                         updateState(job,AppDataJobGenerationDtoState.PRIMARY_CHECK, reportInputs);
-                        reportInputs.reportError("[code {}] {}", e.getCode().getCode(), e.getLogMessage());
+                        reportInputs.error(new ReportingMessage("[code {}] {}", e.getCode().getCode(), e.getLogMessage()));
                     }
                 }
 
                 // Prepare and send job if ready
                 if (job.getGeneration().getState() == AppDataJobGenerationDtoState.READY) {
                 	
-                  	final Reporting reportPrep = reportingFactory
-                			.product(null, productName)                        			
+                  	final Reporting reportPrep = reportingFactory                       			
                 			.newReporting(3);
                   	
-                  	reportPrep.reportStart("Start job preparation and sending");
+                  	reportPrep.begin(new ReportingMessage("Start job preparation and sending"));
                 	
                     try {
                         LOGGER.info("{} [productName {}] 2 - Searching inputs",
@@ -479,42 +488,60 @@ public abstract class AbstractJobsGenerator<T> implements Runnable {
                         updateState(job, AppDataJobGenerationDtoState.SENT, reportPrep);
                        
 						if (job.getGeneration().getState() == AppDataJobGenerationDtoState.SENT) {
-							reportPrep.reportStop("End job preparation and sending");
+							reportPrep.end(new ReportingMessage("End job preparation and sending"));
 
 						} else {
-							reportPrep.reportError("Job generation finished but job not sent");
+							reportPrep.error(new ReportingMessage("Job generation finished but job not sent"));
 						}
                     } catch (AbstractCodedException e) {
                         LOGGER.error("{} [productName {}] 3 - Job not send: {}",
                                 this.prefixLogMonitor, productName,
                                 e.getLogMessage());
                         updateState(job, AppDataJobGenerationDtoState.READY, reportPrep);
-                        reportPrep.reportError("[code {}] {}", e.getCode().getCode(), e.getLogMessage());
+                        reportPrep.error(new ReportingMessage("[code {}] {}", e.getCode().getCode(), e.getLogMessage()));
                     }
                 }
-                reporting.reportStop("End job generation");
+                reporting.end(
+                		new JobOrderReportingOutput("TODO", toProcParamMap(job)), 
+                		new ReportingMessage("End job generation")
+                );
             } catch (AbstractCodedException ace) {
                 LOGGER.error(
                         "{} [productName {}] [code ] Cannot generate job: {}",
                         this.prefixLogMonitor, productName,
                         ace.getCode().getCode(), ace.getLogMessage());
-                reporting.reportError("[code {}] {}", ace.getCode().getCode(), ace.getLogMessage());
+                reporting.error(new ReportingMessage("[code {}] {}", ace.getCode().getCode(), ace.getLogMessage()));
             }        
         }
     }
+    
+    private final Map<String,String> toProcParamMap(final JobGeneration jobGen) {    	
+    	try {
+    		final Map<String,String> result = new HashMap<>();
+    		
+    		for (final JobOrderProcParam param : jobGen.getJobOrder().getConf().getProcParams()) {
+    			result.put(param.getName()+"_string", param.getValue());
+    		}
+    		return result;
+		} catch (Exception e) {
+			// this is only used for reporting so don't break anything if this goes wrong here and provide the error message
+			LOGGER.error(e);
+			return Collections.singletonMap("error", LogUtils.toString(e));
+		}
+    }
 
-    private void updateState(JobGeneration<T> job,
+    private void updateState(JobGeneration job,
             AppDataJobGenerationDtoState newState,
             Reporting report
     )
         throws AbstractCodedException {
     	
-    	report.reportDebug("Job generation before update: {} - {} - {} - {}", 
+    	report.intermediate(new ReportingMessage("Job generation before update: {} - {} - {} - {}", 
     			job.getAppDataJob().getIdentifier(),
                 job.getGeneration().getTaskTable(), 
                 newState,
                 job.getGeneration()
-        );
+        ));
         AppDataJobDto<T> modifiedJob = appDataService.patchTaskTableOfJob(
                 job.getAppDataJob().getIdentifier(),
                 job.getGeneration().getTaskTable(), newState);
@@ -524,13 +551,17 @@ public abstract class AbstractJobsGenerator<T> implements Runnable {
         	throw new InternalErrorException("Catalog query returned null");
         }       
         
-    	report.reportDebug("Modified job generations: {}",  modifiedJob.getGenerations());
+    	report.intermediate(new ReportingMessage("Modified job generations: {}",  modifiedJob.getGenerations()));
         job.updateAppDataJob(modifiedJob, taskTableXmlName);        
-    	report.reportDebug("Job generation after update: {}", job.getGeneration());
-
+    	report.intermediate(new ReportingMessage("Job generation after update: {}", job.getGeneration()));
+    	
         // Log functional logs, not clear when this is called
         if (job.getAppDataJob().getState() == AppDataJobDtoState.TERMINATED) {
-            final List<String> taskTables = job.getAppDataJob().getGenerations().stream()
+        	
+        	@SuppressWarnings("unchecked")
+			final AppDataJobDto<? extends AbstractDto> jobDto = job.getAppDataJob();
+        	
+            final List<String> taskTables =  jobDto.getGenerations().stream()
             	.map(g -> g.getTaskTable())
             	.collect(Collectors.toList());
 
@@ -542,10 +573,10 @@ public abstract class AbstractJobsGenerator<T> implements Runnable {
         }
     }
 
-    protected abstract void preSearch(JobGeneration<T> job)
+    protected abstract void preSearch(JobGeneration job)
             throws JobGenInputsMissingException;
 
-    protected void inputsSearch(JobGeneration<T> job)
+    protected void inputsSearch(JobGeneration job)
             throws JobGenInputsMissingException {
         // First, we evaluate each input query with no found file
         LOGGER.info("{} [productName {}] 2a - Requesting metadata",
@@ -560,12 +591,12 @@ public abstract class AbstractJobsGenerator<T> implements Runnable {
                                             job.getAppDataJob().getProduct()
                                                     .getStartTime(),
                                             AppDataJobProductDto.TIME_FORMATTER,
-                                            AbstractMetadata.DATE_FORMATTER),
+                                            AbstractMetadata.METADATA_DATE_FORMATTER),
                                     DateUtils.convertToAnotherFormat(
                                             job.getAppDataJob().getProduct()
                                                     .getStopTime(),
                                             AppDataJobProductDto.TIME_FORMATTER,
-                                            AbstractMetadata.DATE_FORMATTER),
+                                            AbstractMetadata.METADATA_DATE_FORMATTER),
                                     job.getAppDataJob().getProduct()
                                             .getSatelliteId(),
                                     job.getAppDataJob().getProduct()
@@ -663,12 +694,12 @@ public abstract class AbstractJobsGenerator<T> implements Runnable {
                                                                 DateUtils
                                                                         .convertToAnotherFormat(
                                                                                 file.getValidityStart(),
-                                                                                file.getStartTimeFormatter(),
+                                                                                AbstractMetadata.METADATA_DATE_FORMATTER,
                                                                                 JobOrderTimeInterval.DATE_FORMATTER),
                                                                 DateUtils
                                                                         .convertToAnotherFormat(
                                                                                 file.getValidityStop(),
-                                                                                file.getStopTimeFormatter(),
+                                                                                AbstractMetadata.METADATA_DATE_FORMATTER,
                                                                                 JobOrderTimeInterval.DATE_FORMATTER),
                                                                 file.getProductName()))
                                                         .collect(Collectors
@@ -768,7 +799,7 @@ public abstract class AbstractJobsGenerator<T> implements Runnable {
         }
     }
 
-    protected void send(JobGeneration<T> job) throws AbstractCodedException {
+    protected void send(JobGeneration job) throws AbstractCodedException {
         LOGGER.info("{} [productName {}] 3a - Building common job",
                 this.prefixLogMonitor,
                 job.getAppDataJob().getProduct().getProductName());
@@ -913,10 +944,13 @@ public abstract class AbstractJobsGenerator<T> implements Runnable {
                 this.prefixLogMonitor,
                 job.getAppDataJob().getProduct().getProductName());
 
-        this.outputFactory.sendJob(job.getAppDataJob().getMessages().get(0), r);
+		@SuppressWarnings("unchecked")
+		final AppDataJobDto<T> dto = job.getAppDataJob();
+
+        this.outputFactory.sendJob(dto.getMessages().get(0), r);
     }
 
-    protected abstract void customJobOrder(JobGeneration<T> job);
+    protected abstract void customJobOrder(JobGeneration job);
 
-    protected abstract void customJobDto(JobGeneration<T> job, LevelJobDto dto);
+    protected abstract void customJobDto(JobGeneration job, LevelJobDto dto);
 }

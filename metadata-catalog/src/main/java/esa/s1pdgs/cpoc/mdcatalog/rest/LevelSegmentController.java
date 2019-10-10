@@ -15,9 +15,9 @@ import esa.s1pdgs.cpoc.common.ProductFamily;
 import esa.s1pdgs.cpoc.common.errors.AbstractCodedException;
 import esa.s1pdgs.cpoc.common.errors.AbstractCodedException.ErrorCode;
 import esa.s1pdgs.cpoc.common.errors.processing.MetadataNotPresentException;
+import esa.s1pdgs.cpoc.common.utils.LogUtils;
 import esa.s1pdgs.cpoc.mdcatalog.es.EsServices;
-import esa.s1pdgs.cpoc.mdcatalog.es.model.LevelSegmentMetadata;
-import esa.s1pdgs.cpoc.mdcatalog.rest.dto.LevelSegmentMetadataDto;
+import esa.s1pdgs.cpoc.metadata.model.LevelSegmentMetadata;
 
 @RestController
 @RequestMapping(path = "/level_segment")
@@ -32,40 +32,34 @@ public class LevelSegmentController {
     public LevelSegmentController(final EsServices esServices) {
         this.esServices = esServices;
     }
-
+ 
     @RequestMapping(method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_UTF8_VALUE, path = "/{family}/{productName:.+}")
-    public ResponseEntity<LevelSegmentMetadataDto> get(
+    public ResponseEntity<LevelSegmentMetadata> get(
             @PathVariable(name = "family") ProductFamily family,
             @PathVariable(name = "productName") String productName) {
         try {
-            LevelSegmentMetadata f =
-                    esServices.getLevelSegment(family, productName);
-
-            LevelSegmentMetadataDto response =
-                    new LevelSegmentMetadataDto(f.getProductName(),
-                            f.getProductType(), f.getKeyObjectStorage(),
-                            f.getValidityStart(), f.getValidityStop());
-            response.setDatatakeId(f.getDatatakeId());
-            response.setConsolidation(f.getConsolidation());
-            response.setPolarisation(f.getPolarisation());
-            return new ResponseEntity<LevelSegmentMetadataDto>(response,
-                    HttpStatus.OK);
+			LevelSegmentMetadata response = esServices.getLevelSegment(family, productName);
+			
+			if (response == null) {
+				throw new MetadataNotPresentException(productName);
+			}
+			return new ResponseEntity<LevelSegmentMetadata>(response, HttpStatus.OK);
 
         } catch (MetadataNotPresentException em) {
             LOGGER.warn("[{}] [productName {}] [code {}] {}", family,
                     productName, em.getCode().getCode(), em.getLogMessage());
-            return new ResponseEntity<LevelSegmentMetadataDto>(
+            return new ResponseEntity<LevelSegmentMetadata>(
                     HttpStatus.NOT_FOUND);
         } catch (AbstractCodedException ace) {
             LOGGER.error("[{}] [productName {}] [code {}] {}", family,
                     productName, ace.getCode().getCode(), ace.getLogMessage());
-            return new ResponseEntity<LevelSegmentMetadataDto>(
+            return new ResponseEntity<LevelSegmentMetadata>(
                     HttpStatus.INTERNAL_SERVER_ERROR);
-        } catch (Exception exc) {
+        } catch (Exception e) {
             LOGGER.error("[{}] [productName {}] [code {}] [msg {}]", family,
                     productName, ErrorCode.INTERNAL_ERROR.getCode(),
-                    exc.getMessage());
-            return new ResponseEntity<LevelSegmentMetadataDto>(
+                    LogUtils.toString(e));
+            return new ResponseEntity<LevelSegmentMetadata>(
                     HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }

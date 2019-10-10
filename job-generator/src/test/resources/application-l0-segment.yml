@@ -3,10 +3,10 @@ spring:
   application:
     name: s1pdgs-l0-jobgenerator
     
-# Logging
+# Logging     
 logging:
-  config: ./test/log4j2-test.yml
- 
+  config: classpath:log4j2-test.yml
+  
 metadata:
   host: localhost:8080
   rest-api_nb-retry: 3
@@ -18,7 +18,7 @@ level0:
   maxagesession: 25200000
   dir-extractor-sessions: ./tmp/
   
-level1:
+level-products:
   pathroutingxmlfile: ./test/data/l1_config/routing.xml
 
 job-generator:

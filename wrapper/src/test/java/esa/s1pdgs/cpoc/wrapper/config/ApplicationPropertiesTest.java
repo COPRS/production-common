@@ -42,5 +42,6 @@ public class ApplicationPropertiesTest {
         assertEquals(5, properties.getSizeBatchDownload());
         assertEquals(12, properties.getWapNbMaxLoop());
         assertEquals(10, properties.getWapTempoS());
+        assertEquals("/data/localWD", properties.getWorkingDir());
     }
 }

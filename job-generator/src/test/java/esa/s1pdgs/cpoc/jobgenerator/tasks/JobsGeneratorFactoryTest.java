@@ -21,10 +21,11 @@ import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 import org.springframework.util.StringUtils;
 
-import esa.s1pdgs.cpoc.appcatalog.client.job.AbstractAppCatalogJobService;
+import esa.s1pdgs.cpoc.appcatalog.client.job.AppCatalogJobClient;
 import esa.s1pdgs.cpoc.common.ApplicationLevel;
 import esa.s1pdgs.cpoc.common.ProductFamily;
 import esa.s1pdgs.cpoc.common.errors.processing.JobGenBuildTaskTableException;
+import esa.s1pdgs.cpoc.jobgenerator.config.AiopProperties;
 import esa.s1pdgs.cpoc.jobgenerator.config.JobGeneratorSettings;
 import esa.s1pdgs.cpoc.jobgenerator.config.ProcessSettings;
 import esa.s1pdgs.cpoc.jobgenerator.model.joborder.JobOrder;
@@ -37,11 +38,9 @@ import esa.s1pdgs.cpoc.jobgenerator.model.tasktable.TaskTableTask;
 import esa.s1pdgs.cpoc.jobgenerator.service.XmlConverter;
 import esa.s1pdgs.cpoc.jobgenerator.service.metadata.MetadataService;
 import esa.s1pdgs.cpoc.jobgenerator.service.mqi.OutputProducerFactory;
-import esa.s1pdgs.cpoc.jobgenerator.tasks.AbstractJobsGenerator;
-import esa.s1pdgs.cpoc.jobgenerator.tasks.JobsGeneratorFactory;
 import esa.s1pdgs.cpoc.jobgenerator.utils.TestGenericUtils;
 import esa.s1pdgs.cpoc.mqi.model.queue.EdrsSessionDto;
-import esa.s1pdgs.cpoc.mqi.model.queue.LevelProductDto;
+import esa.s1pdgs.cpoc.mqi.model.queue.ProductDto;
 
 public class JobsGeneratorFactoryTest {
 
@@ -61,13 +60,16 @@ public class JobsGeneratorFactoryTest {
     private JobGeneratorSettings jobGeneratorSettings;
 
     @Mock
+    private AiopProperties aiopProperties;
+    
+    @Mock
     private OutputProducerFactory JobsSender;
 
     @Mock
-    private AbstractAppCatalogJobService<EdrsSessionDto> appDataEService;
+    private AppCatalogJobClient appDataEService;
 
     @Mock
-    private AbstractAppCatalogJobService<LevelProductDto> appDataPService;
+    private AppCatalogJobClient appDataPService;
 
     /**
      * Test set up
@@ -144,8 +146,8 @@ public class JobsGeneratorFactoryTest {
             }).when(l0ProcessSettings).getLevel();
 
             JobsGeneratorFactory factory = new JobsGeneratorFactory(
-                    l0ProcessSettings, jobGeneratorSettings, xmlConverter,
-                    metadataService, JobsSender);
+                    l0ProcessSettings, jobGeneratorSettings, aiopProperties,
+                    xmlConverter, metadataService, JobsSender);
 
             AbstractJobsGenerator<EdrsSessionDto> generator =
                     factory.createJobGeneratorForEdrsSession(new File(
@@ -393,13 +395,13 @@ public class JobsGeneratorFactoryTest {
                     .thenReturn(expectedTaskTable);
 
             JobsGeneratorFactory factory = new JobsGeneratorFactory(
-                    l0ProcessSettings, jobGeneratorSettings, xmlConverter,
-                    metadataService, JobsSender);
+                    l0ProcessSettings, jobGeneratorSettings, aiopProperties,
+                    xmlConverter, metadataService, JobsSender);
 
-            AbstractJobsGenerator<LevelProductDto> generator =
+            AbstractJobsGenerator<ProductDto> generator =
                     factory.createJobGeneratorForL0Slice(new File(
                             "./test/data/generic_config/task_tables/IW_RAW__0_GRDH_1.xml"),
-                    		 ApplicationLevel.L2,appDataPService);
+                    		 appDataPService);
 
             // Check Task table
             this.checkInitializeWithTaskTableIWTaskTable(expectedTaskTable,

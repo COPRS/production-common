@@ -5,20 +5,9 @@ image: docker:latest
 variables:
   MODULE_JOB_GENERATOR: s1pro-core-job-generator
 
-job-generator-build-master:
-  stage: module
-  script:
-    - cd job-generator
-    - docker build --network host --pull -t "$CI_REGISTRY/$CI_PROJECT_NAMESPACE/$MODULE_JOB_GENERATOR" .
-    - docker push "$CI_REGISTRY/$CI_PROJECT_NAMESPACE/$MODULE_JOB_GENERATOR"
-  only:
-    - master
-
 job-generator-build:
   stage: module
   script:
     - cd job-generator
-    - docker build --cache-from registry.tools.s1pdgs.eu/werum/processing/s1pro-core:final --network host --pull -t "$CI_REGISTRY/$CI_PROJECT_NAMESPACE/$MODULE_JOB_GENERATOR:$CI_COMMIT_REF_SLUG" .
+    - dockerbuild --cache-from registry.tools.s1pdgs.eu/werum/processing/s1pro-core:final -t "$CI_REGISTRY/$CI_PROJECT_NAMESPACE/$MODULE_JOB_GENERATOR:$CI_COMMIT_REF_SLUG" .
     - docker push "$CI_REGISTRY/$CI_PROJECT_NAMESPACE/$MODULE_JOB_GENERATOR:$CI_COMMIT_REF_SLUG"
-  except:
-    - master

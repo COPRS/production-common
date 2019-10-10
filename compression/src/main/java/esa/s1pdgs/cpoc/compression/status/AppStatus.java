@@ -3,7 +3,6 @@ package esa.s1pdgs.cpoc.compression.status;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
@@ -64,7 +63,7 @@ public class AppStatus {
     public AppStatus(
             @Value("${status.max-error-counter-processing}") final int maxErrorCounterProcessing,
             @Value("${status.max-error-counter-mqi}") final int maxErrorCounterNextMessage,
-            @Qualifier("mqiServiceForStatus") final StatusService mqiStatusService) {
+            final StatusService mqiStatusService) {
         this.status = new CompressionStatus();
         this.shallBeStopped = false;
         this.maxErrorCounterProcessing = maxErrorCounterProcessing;

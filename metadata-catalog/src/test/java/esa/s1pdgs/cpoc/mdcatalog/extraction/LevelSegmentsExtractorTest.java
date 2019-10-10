@@ -10,13 +10,15 @@ import static org.mockito.Mockito.verify;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
-import org.apache.logging.log4j.LogManager;
 import org.json.JSONObject;
 import org.junit.Before;
 import org.junit.Test;
+import org.mockito.ArgumentMatchers;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
@@ -29,12 +31,14 @@ import esa.s1pdgs.cpoc.common.utils.FileUtils;
 import esa.s1pdgs.cpoc.errorrepo.ErrorRepoAppender;
 import esa.s1pdgs.cpoc.mdcatalog.ProcessConfiguration;
 import esa.s1pdgs.cpoc.mdcatalog.es.EsServices;
-import esa.s1pdgs.cpoc.mdcatalog.extraction.model.L0OutputFileDescriptor;
-import esa.s1pdgs.cpoc.mdcatalog.extraction.obs.ObsService;
+import esa.s1pdgs.cpoc.mdcatalog.extraction.model.OutputFileDescriptor;
+import esa.s1pdgs.cpoc.mdcatalog.extraction.xml.XmlConverter;
 import esa.s1pdgs.cpoc.mdcatalog.status.AppStatus;
-import esa.s1pdgs.cpoc.mqi.client.GenericMqiService;
-import esa.s1pdgs.cpoc.mqi.model.queue.LevelSegmentDto;
+import esa.s1pdgs.cpoc.mqi.client.GenericMqiClient;
+import esa.s1pdgs.cpoc.mqi.model.queue.ProductDto;
 import esa.s1pdgs.cpoc.mqi.model.rest.GenericMessageDto;
+import esa.s1pdgs.cpoc.obs_sdk.ObsClient;
+import esa.s1pdgs.cpoc.obs_sdk.ObsDownloadObject;
 import esa.s1pdgs.cpoc.report.LoggerReporting;
 
 public class LevelSegmentsExtractorTest {
@@ -49,13 +53,13 @@ public class LevelSegmentsExtractorTest {
      * Elasticsearch services
      */
     @Mock
-    protected ObsService obsService;
+    protected ObsClient obsClient;
 
     /**
      * MQI service
      */
     @Mock
-    private GenericMqiService<LevelSegmentDto> mqiService;
+    private GenericMqiClient mqiService;
 
     /**
      * 
@@ -77,22 +81,25 @@ public class LevelSegmentsExtractorTest {
     /**
      * Job to process
      */
-    private GenericMessageDto<LevelSegmentDto> inputMessage;
+    private GenericMessageDto<ProductDto> inputMessage;
 
     /**
      * Job to process
      */
-    private GenericMessageDto<LevelSegmentDto> inputMessageSafe;
+    private GenericMessageDto<ProductDto> inputMessageSafe;
 
     /**
      * Job to process
      */
-    private GenericMessageDto<LevelSegmentDto> inputMessageAux;
+    private GenericMessageDto<ProductDto> inputMessageAux;
     
     private final ErrorRepoAppender errorAppender = ErrorRepoAppender.NULL;
     
     private final ProcessConfiguration config = new ProcessConfiguration();
 
+    @Mock
+    XmlConverter xmlConverter;
+    
     /**
      * Initialization
      * 
@@ -119,29 +126,29 @@ public class LevelSegmentsExtractorTest {
         doReturn(typeSliceLength).when(extractorConfig).getTypeSliceLength();
 
         doNothing().when(appStatus).setError(Mockito.any(), Mockito.anyString());
-        doReturn(true).when(mqiService).ack(Mockito.any());
+        doReturn(true).when(mqiService).ack(Mockito.any(), Mockito.any());
 
-        inputMessage = new GenericMessageDto<LevelSegmentDto>(123, "",
-                new LevelSegmentDto("product-name", "key-obs",
+        inputMessage = new GenericMessageDto<ProductDto>(123, "",
+                new ProductDto("product-name", "key-obs",
                         ProductFamily.L0_SEGMENT, "NRT"));
 
-        inputMessageSafe = new GenericMessageDto<LevelSegmentDto>(123, "",
-                new LevelSegmentDto(
+        inputMessageSafe = new GenericMessageDto<ProductDto>(123, "",
+                new ProductDto(
                         "S1A_AUX_CAL_V20140402T000000_G20140402T133909.SAFE",
                         "S1A_AUX_CAL_V20140402T000000_G20140402T133909.SAFE",
                         ProductFamily.L0_SEGMENT, "NRT"));
 
-        inputMessageAux = new GenericMessageDto<LevelSegmentDto>(123, "",
-                new LevelSegmentDto(
+        inputMessageAux = new GenericMessageDto<ProductDto>(123, "",
+                new ProductDto(
                         "S1A_OPER_AUX_OBMEMC_PDMC_20140201T000000.xml",
                         "S1A_OPER_AUX_OBMEMC_PDMC_20140201T000000.xml",
                         ProductFamily.L0_SEGMENT, "NRT"));
 
-        extractor = new LevelSegmentsExtractor(esServices, obsService,
+        extractor = new LevelSegmentsExtractor(esServices, obsClient,
                 mqiService, appStatus, extractorConfig,
                 (new File("./test/workDir/")).getAbsolutePath()
                         + File.separator,
-                "manifest.safe", errorAppender, config, ".safe");
+                "manifest.safe", errorAppender, config, ".safe", xmlConverter);
     }
 
     @Test
@@ -173,9 +180,9 @@ public class LevelSegmentsExtractorTest {
                 "./test/workDir2/S1A_OPER_AUX_OBMEMC_PDMC_20140201T000000.xml"))
                         .createNewFile();
 
-        extractor = new LevelSegmentsExtractor(esServices, obsService,
+        extractor = new LevelSegmentsExtractor(esServices, obsClient,
                 mqiService, appStatus, extractorConfig, "./test/workDir2/",
-                "manifest.safe", errorAppender, config, ".safe");
+                "manifest.safe", errorAppender, config, ".safe", xmlConverter);
         assertTrue((new File(
                 "./test/workDir2/S1A_AUX_CAL_V20140402T000000_G20140402T133909.SAFE"))
                         .exists());
@@ -210,25 +217,25 @@ public class LevelSegmentsExtractorTest {
         FileUtils.delete("./test/workDir2");
     }
 
-    @Test
+    @SuppressWarnings("unchecked")
+	@Test
     public void testExtractMetadataL0Segment()
             throws MetadataExtractionException, AbstractCodedException {
 
-        File file = new File((new File("./test/workDir/")).getAbsolutePath()
+        List<File> files = Arrays.asList(new File((new File("./test/workDir/")).getAbsolutePath()
                 + File.separator
                 + "S1A_WV_RAW__0SSV_20180913T214325_20180913T214422_023685_0294F4_41D5.SAFE"
-                + File.separator + "manifest.safe");
+                + File.separator + "manifest.safe"));
 
-        inputMessageSafe = new GenericMessageDto<LevelSegmentDto>(123, "",
-                new LevelSegmentDto(
+        inputMessageSafe = new GenericMessageDto<ProductDto>(123, "",
+                new ProductDto(
                         "S1A_WV_RAW__0SSV_20180913T214325_20180913T214422_023685_0294F4_41D5.SAFE",
                         "S1A_WV_RAW__0SSV_20180913T214325_20180913T214422_023685_0294F4_41D5.SAFE",
                         ProductFamily.L0_SEGMENT, "FAST"));
 
-        doReturn(file).when(obsService).downloadFile(Mockito.any(),
-                Mockito.anyString(), Mockito.anyString());
+        doReturn(files).when(obsClient).download(Mockito.anyList());
 
-        L0OutputFileDescriptor descriptor = new L0OutputFileDescriptor();
+        OutputFileDescriptor descriptor = new OutputFileDescriptor();
         descriptor.setExtension(FileExtension.SAFE);
         descriptor.setFilename("manifest.safe");
         descriptor.setKeyObjectStorage(
@@ -249,12 +256,8 @@ public class LevelSegmentsExtractorTest {
         descriptor.setMode("FAST");
 
         JSONObject expected = extractor.mdBuilder
-                .buildL0SegmentOutputFileMetadata(descriptor, file);
-        
-        final LoggerReporting.Factory reportingFactory = new LoggerReporting.Factory(
-        		LogManager.getLogger(GenericExtractorTest.class), "TestMetadataExtraction")
-        		.product(ProductFamily.L0_SEGMENT.toString(), "S1A_WV_RAW__0SSV_20180913T214325_20180913T214422_023685_0294F4_41D5.SAFE");
-        
+                .buildL0SegmentOutputFileMetadata(descriptor, files.get(0));
+		final LoggerReporting.Factory reportingFactory = new LoggerReporting.Factory("TestMetadataExtraction");
         
         JSONObject result = extractor.extractMetadata(reportingFactory, inputMessageSafe);
         for (String key : expected.keySet()) {
@@ -264,11 +267,10 @@ public class LevelSegmentsExtractorTest {
             }
         }
 
-        verify(obsService, times(1)).downloadFile(
-                Mockito.eq(ProductFamily.L0_SEGMENT),
-                Mockito.eq(
-                        "S1A_WV_RAW__0SSV_20180913T214325_20180913T214422_023685_0294F4_41D5.SAFE/manifest.safe"),
-                Mockito.eq(extractor.localDirectory));
+        verify(obsClient, times(1)).download((List<ObsDownloadObject>) ArgumentMatchers.argThat(s -> ((List<ObsDownloadObject>) s).contains(
+        		new ObsDownloadObject(ProductFamily.L0_SEGMENT,
+        		"S1A_WV_RAW__0SSV_20180913T214325_20180913T214422_023685_0294F4_41D5.SAFE/manifest.safe",
+                extractor.localDirectory))));
 
     }
 

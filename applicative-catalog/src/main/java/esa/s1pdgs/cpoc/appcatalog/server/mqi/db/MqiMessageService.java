@@ -11,9 +11,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import esa.s1pdgs.cpoc.appcatalog.common.MqiMessage;
-import esa.s1pdgs.cpoc.appcatalog.rest.MqiStateMessageEnum;
 import esa.s1pdgs.cpoc.appcatalog.server.mqi.db.MqiMessageDao;
 import esa.s1pdgs.cpoc.appcatalog.server.sequence.db.SequenceDao;
+import esa.s1pdgs.cpoc.common.MessageState;
 import esa.s1pdgs.cpoc.common.ProductCategory;
 
 /**
@@ -79,7 +79,7 @@ public class MqiMessageService {
      */
     public List<MqiMessage> searchByTopicPartitionGroup(final String topic,
             final int partition, final String group,
-            final Set<MqiStateMessageEnum> states) {
+            final Set<MessageState> states) {
         return mongoDBDAO.searchByTopicPartitionGroup(topic, partition, group,
                 states);
     }
@@ -95,7 +95,7 @@ public class MqiMessageService {
      */
     public List<MqiMessage> searchByPodStateCategory(final String pod,
             final ProductCategory category,
-            final Set<MqiStateMessageEnum> states) {
+            final Set<MessageState> states) {
         return mongoDBDAO.searchByPodStateCategory(pod, category, states);
     }
 
@@ -129,6 +129,7 @@ public class MqiMessageService {
      */
     public void insertMqiMessage(final MqiMessage messageToInsert) {
         long sequence = sequenceDao.getNextSequenceId(MQI_MSG_SEQ_KEY);
+        messageToInsert.setId(sequence);
         messageToInsert.setIdentifier(sequence);
         mongoDBDAO.insert(messageToInsert);
     }

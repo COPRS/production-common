@@ -1,7 +1,5 @@
 package esa.s1pdgs.cpoc.compression.process;
 
-import static org.junit.Assert.assertEquals;
-
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
@@ -10,11 +8,8 @@ import java.nio.file.Files;
 import java.util.concurrent.CompletionService;
 import java.util.concurrent.ExecutorCompletionService;
 import java.util.concurrent.Executors;
-import java.util.concurrent.Future;
-import java.util.function.Consumer;
 
 import org.apache.commons.io.IOUtils;
-import org.apache.logging.log4j.LogManager;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -24,7 +19,7 @@ import esa.s1pdgs.cpoc.report.LoggerReporting;
 import esa.s1pdgs.cpoc.report.Reporting;
 
 public class TaskCallableTest {
-	private final Reporting.Factory reportingFactory = new LoggerReporting.Factory(LogManager.getLogger(TaskCallableTest.class), "TestProcessing");
+	private final Reporting.Factory reportingFactory = new LoggerReporting.Factory("TestProcessing");
 	  
 	private File testDir;
 	private File script;

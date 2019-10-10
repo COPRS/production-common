@@ -18,6 +18,7 @@ kafka:
 process:
   level: L0
   hostname: "hostname"
+  workingDir: /data/localWD
   fixed-delay-ms: 500
   init-delay-poll-ms: 1000
   tm-proc-one-task-s: 600
@@ -28,6 +29,10 @@ process:
   size-batch-download: 5
   wap-nb-max-loop: 12
   wap-tempo-s: 10
+  threshold-ew : 2
+  threshold-iw : 2
+  threshold-sm : 2
+  threshold-wv : 30
   mqi:
     host-uri: http://localhost:8081
     max-retries: 3

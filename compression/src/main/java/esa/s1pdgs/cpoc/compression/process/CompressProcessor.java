@@ -18,13 +18,10 @@ import java.util.concurrent.TimeoutException;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
-import esa.s1pdgs.cpoc.appcatalog.rest.MqiStateMessageEnum;
 import esa.s1pdgs.cpoc.common.ProductCategory;
-import esa.s1pdgs.cpoc.common.ProductFamily;
 import esa.s1pdgs.cpoc.common.errors.AbstractCodedException;
 import esa.s1pdgs.cpoc.common.errors.AbstractCodedException.ErrorCode;
 import esa.s1pdgs.cpoc.common.errors.InternalErrorException;
@@ -32,18 +29,21 @@ import esa.s1pdgs.cpoc.compression.config.ApplicationProperties;
 import esa.s1pdgs.cpoc.compression.file.FileDownloader;
 import esa.s1pdgs.cpoc.compression.file.FileUploader;
 import esa.s1pdgs.cpoc.compression.mqi.OutputProducerFactory;
-import esa.s1pdgs.cpoc.compression.obs.ObsService;
 import esa.s1pdgs.cpoc.compression.status.AppStatus;
 import esa.s1pdgs.cpoc.errorrepo.ErrorRepoAppender;
 import esa.s1pdgs.cpoc.errorrepo.model.rest.FailedProcessingDto;
-import esa.s1pdgs.cpoc.mqi.client.GenericMqiService;
+import esa.s1pdgs.cpoc.mqi.client.GenericMqiClient;
 import esa.s1pdgs.cpoc.mqi.client.StatusService;
-import esa.s1pdgs.cpoc.mqi.model.queue.CompressionJobDto;
+import esa.s1pdgs.cpoc.mqi.model.queue.ProductDto;
 import esa.s1pdgs.cpoc.mqi.model.rest.Ack;
 import esa.s1pdgs.cpoc.mqi.model.rest.AckMessageDto;
 import esa.s1pdgs.cpoc.mqi.model.rest.GenericMessageDto;
+import esa.s1pdgs.cpoc.obs_sdk.ObsClient;
+import esa.s1pdgs.cpoc.report.FilenameReportingInput;
+import esa.s1pdgs.cpoc.report.FilenameReportingOutput;
 import esa.s1pdgs.cpoc.report.LoggerReporting;
 import esa.s1pdgs.cpoc.report.Reporting;
+import esa.s1pdgs.cpoc.report.ReportingMessage;
 
 @Service
 public class CompressProcessor {
@@ -65,7 +65,7 @@ public class CompressProcessor {
 	/**
 	 * Output processsor
 	 */
-	private final ObsService obsService;
+	private final ObsClient obsClient;
 
 	/**
 	 * Output processsor
@@ -75,7 +75,7 @@ public class CompressProcessor {
 	/**
 	 * MQI service for reading message
 	 */
-	private final GenericMqiService<CompressionJobDto> mqiService;
+	private final GenericMqiClient mqiService;
 
 	/**
 	 * MQI service for stopping the MQI
@@ -86,15 +86,14 @@ public class CompressProcessor {
 
 	@Autowired
 	public CompressProcessor(final AppStatus appStatus, final ApplicationProperties properties,
-			final ObsService obsService, final OutputProducerFactory producerFactory,
-			@Qualifier("mqiServiceForCompression") final GenericMqiService<CompressionJobDto> mqiService,
+			final ObsClient obsClient, final OutputProducerFactory producerFactory,
+			final GenericMqiClient mqiService,
 			final ErrorRepoAppender errorAppender,
-			@Qualifier("mqiServiceForStatus") final StatusService mqiStatusService) {
+			final StatusService mqiStatusService) {
 		this.appStatus = appStatus;
 		this.properties = properties;
-		this.obsService = obsService;
+		this.obsClient = obsClient;
 		this.producerFactory = producerFactory;
-
 		this.mqiService = mqiService;
 		this.mqiStatusService = mqiStatusService;
 		this.errorAppender = errorAppender;
@@ -116,9 +115,9 @@ public class CompressProcessor {
 			this.appStatus.forceStopping();
 			return;
 		}
-		GenericMessageDto<CompressionJobDto> message = null;
+		GenericMessageDto<ProductDto> message = null;
 		try {
-			message = mqiService.next();
+			message = mqiService.next(ProductCategory.COMPRESSED_PRODUCTS);
 			this.appStatus.setWaiting();
 		} catch (AbstractCodedException ace) {
 			LOGGER.error("[MONITOR] [step 0] [code {}] {}", ace.getCode().getCode(), ace.getLogMessage());
@@ -140,14 +139,17 @@ public class CompressProcessor {
 		// ----------------------------------------------------------
 		// Initialize processing
 		// ------------------------------------------------------
-		final Reporting.Factory reportingFactory = new LoggerReporting.Factory(LOGGER, "CompressionProcessing");
+		final Reporting.Factory reportingFactory = new LoggerReporting.Factory("CompressionProcessing");
 
 		String workDir = properties.getWorkingDirectory();
 
-		final Reporting report = reportingFactory.newReporting(0);
-		report.reportStart("Start compression processing");
+		final Reporting report = reportingFactory.newReporting(0);	
+		report.begin(
+				new FilenameReportingInput(message.getBody().getProductName()),
+				new ReportingMessage("Start compression processing")
+		);
 
-		CompressionJobDto job = message.getBody();
+		ProductDto job = message.getBody();
 
 		// Initialize the pool processor executor
 		CompressExecutorCallable procExecutor = new CompressExecutorCallable(job, // getPrefixMonitorLog(MonitorLogUtils.LOG_PROCESS,
@@ -157,31 +159,35 @@ public class CompressProcessor {
 		ExecutorCompletionService<Void> procCompletionSrv = new ExecutorCompletionService<>(procExecutorSrv);
 
 		// Initialize the input downloader
-		FileDownloader fileDownloader = new FileDownloader(obsService, workDir, job,
+		FileDownloader fileDownloader = new FileDownloader(obsClient, workDir, job,
 				this.properties.getSizeBatchDownload(),
 				// getPrefixMonitorLog(MonitorLogUtils.LOG_INPUT, job),
 				"CompressionProcessor");
 
-		FileUploader fileUploader = new FileUploader(obsService, producerFactory, workDir, message, job);
+		FileUploader fileUploader = new FileUploader(obsClient, producerFactory, workDir, message, job);
 
 		// ----------------------------------------------------------
 		// Process message
 		// ----------------------------------------------------------
-		processTask(message, fileDownloader, fileUploader, procExecutorSrv, procCompletionSrv, procExecutor, report);
+		final String outputName = processTask(message, fileDownloader, fileUploader, procExecutorSrv, procCompletionSrv, procExecutor, report);
 
-		report.reportStop("End compression processing");
+		report.end(
+				new FilenameReportingOutput(outputName), 
+				new ReportingMessage("End compression processing")
+		);
 	}
 
-	protected void processTask(final GenericMessageDto<CompressionJobDto> message, final FileDownloader fileDownloader,
+	protected String processTask(final GenericMessageDto<ProductDto> message, final FileDownloader fileDownloader,
 			final FileUploader fileUploader, final ExecutorService procExecutorSrv,
 			final ExecutorCompletionService<Void> procCompletionSrv, final CompressExecutorCallable procExecutor,
 			final Reporting report) {
-		CompressionJobDto job = message.getBody();
+		ProductDto job = message.getBody();
 		int step = 0;
 		boolean ackOk = false;
 		String errorMessage = "";
-
-		final FailedProcessingDto<GenericMessageDto<CompressionJobDto>> failedProc = new FailedProcessingDto<GenericMessageDto<CompressionJobDto>>();
+		String filename = "NOT_DEFINED";
+		
+		FailedProcessingDto failedProc = null;
 
 		try {
 			step = 2;
@@ -203,7 +209,7 @@ public class CompressProcessor {
 			LOGGER.info("{} Processing l0 outputs", "LOG_OUTPUT", // getPrefixMonitorLog(MonitorLogUtils.LOG_OUTPUT
 					job);
 
-			fileUploader.processOutput();
+			filename = fileUploader.processOutput();
 
 			ackOk = true;
 		} catch (AbstractCodedException ace) {
@@ -214,12 +220,9 @@ public class CompressProcessor {
 																														// job),
 					step, "LOG_ERROR", // getPrefixMonitorLog(MonitorLogUtils.LOG_ERROR, job),
 					ace.getCode().getCode(), ace.getLogMessage());
-			report.reportError("[code {}] {}", ace.getCode().getCode(), ace.getLogMessage());
+			report.error(new ReportingMessage("[code {}] {}", ace.getCode().getCode(), ace.getLogMessage()));
 
-			failedProc.processingType(message.getInputKey()).topic(message.getInputKey())
-					.processingStatus(MqiStateMessageEnum.READ).productCategory(ProductCategory.COMPRESSED_PRODUCTS)
-					.failedPod(properties.getHostname()).failureDate(new Date()).failureMessage(errorMessage)
-					.processingDetails(message);
+			failedProc = new FailedProcessingDto(properties.getHostname(), new Date(), errorMessage, message);
 
 		} catch (InterruptedException e) {
 			ackOk = false;
@@ -228,18 +231,14 @@ public class CompressProcessor {
 					"LOG_DFT", // getPrefixMonitorLog(MonitorLogUtils.LOG_DFT, job),
 					step, "LOG_ERROR", // getPrefixMonitorLog(MonitorLogUtils.LOG_ERROR, job),
 					ErrorCode.INTERNAL_ERROR.getCode());
-			report.reportError("Interrupted job processing");
-
-			failedProc.processingType(message.getInputKey()).topic(message.getInputKey())
-					.processingStatus(MqiStateMessageEnum.READ).productCategory(ProductCategory.COMPRESSED_PRODUCTS)
-					.failedPod(properties.getHostname()).failureDate(new Date()).failureMessage(errorMessage)
-					.processingDetails(message);
-
+			report.error(new ReportingMessage("Interrupted job processing"));
+			failedProc = new FailedProcessingDto(properties.getHostname(), new Date(), errorMessage, message);
 			cleanCompressionProcessing(job, procExecutorSrv);
 		}
 
 		// Ack and check if application shall stopped
 		ackProcessing(message, failedProc, ackOk, errorMessage);
+		return filename;
 	}
 
 	/**
@@ -280,7 +279,7 @@ public class CompressProcessor {
 	 * @param poolProcessing
 	 * @param procExecutorSrv
 	 */
-	protected void cleanCompressionProcessing(final CompressionJobDto job, final ExecutorService procExecutorSrv) {
+	protected void cleanCompressionProcessing(final ProductDto job, final ExecutorService procExecutorSrv) {
 		procExecutorSrv.shutdownNow();
 		try {
 			procExecutorSrv.awaitTermination(properties.getTmProcStopS(), TimeUnit.SECONDS);
@@ -293,7 +292,7 @@ public class CompressProcessor {
 		this.eraseDirectory(job);
 	}
 
-	private void eraseDirectory(final CompressionJobDto job) {
+	private void eraseDirectory(final ProductDto job) {
 		try {
 			LOGGER.info("Erasing local working directory for job {}", job);
 			Path p = Paths.get(properties.getWorkingDirectory());
@@ -313,8 +312,8 @@ public class CompressProcessor {
 	 * @param ackOk
 	 * @param errorMessage
 	 */
-	protected void ackProcessing(final GenericMessageDto<CompressionJobDto> dto,
-			final FailedProcessingDto<GenericMessageDto<CompressionJobDto>> failed, final boolean ackOk,
+	protected void ackProcessing(final GenericMessageDto<ProductDto> dto,
+			final FailedProcessingDto failed, final boolean ackOk,
 			final String errorMessage) {
 		boolean stopping = appStatus.getStatus().isStopping();
 
@@ -334,10 +333,6 @@ public class CompressProcessor {
 				mqiStatusService.stop();
 			} catch (AbstractCodedException ace) {
 				LOGGER.error("MQI service couldn't be stopped {}",ace);
-//                LOGGER.error("{} {} Checking status consumer",
-//                        getPrefixMonitorLog(MonitorLogUtils.LOG_STATUS,
-//                                dto.getBody()),
-//                        ace.getLogMessage());
 			}
 			System.exit(0);
 		} else if (appStatus.getStatus().isFatalError()) {
@@ -351,33 +346,25 @@ public class CompressProcessor {
 	 * @param dto
 	 * @param errorMessage
 	 */
-	protected void ackNegatively(final boolean stop, final GenericMessageDto<CompressionJobDto> dto,
+	protected void ackNegatively(final boolean stop, final GenericMessageDto<ProductDto> dto,
 			final String errorMessage) {
         LOGGER.info("Acknowledging negatively {} ",dto.getBody());
 		try {
-			mqiService.ack(new AckMessageDto(dto.getIdentifier(), Ack.ERROR, errorMessage, stop));
+			mqiService.ack(new AckMessageDto(dto.getIdentifier(), Ack.ERROR, errorMessage, stop), 
+					ProductCategory.COMPRESSED_PRODUCTS);
 		} catch (AbstractCodedException ace) {
 			LOGGER.error("Unable to confirm negatively request:{}",ace);
-//            LOGGER.error("{} [step 5] {} [code {}] {}",
-//                    getPrefixMonitorLog(MonitorLogUtils.LOG_DFT, dto.getBody()),
-//                    getPrefixMonitorLog(MonitorLogUtils.LOG_ERROR,
-//                            dto.getBody()),
-//                    ace.getCode().getCode(), ace.getLogMessage());
 		}
 		appStatus.setError("PROCESSING");
 	}
 
-	protected void ackPositively(final boolean stop, final GenericMessageDto<CompressionJobDto> dto) {
+	protected void ackPositively(final boolean stop, final GenericMessageDto<ProductDto> dto) {
 		LOGGER.info("Acknowledging positively {}", dto.getBody());
 		try {
-			mqiService.ack(new AckMessageDto(dto.getIdentifier(), Ack.OK, null, stop));
+			mqiService.ack(new AckMessageDto(dto.getIdentifier(), Ack.OK, null, stop), 
+					ProductCategory.COMPRESSED_PRODUCTS);
 		} catch (AbstractCodedException ace) {
 			LOGGER.error("Unable to confirm positively request:{}",ace);
-//            LOGGER.error("{} [step 5] {} [code {}] {}",
-//                    getPrefixMonitorLog(MonitorLogUtils.LOG_DFT, dto.getBody()),
-//                    getPrefixMonitorLog(MonitorLogUtils.LOG_ERROR,
-//                            dto.getBody()),
-//                    ace.getCode().getCode(), ace.getLogMessage());
 			appStatus.setError("PROCESSING");
 		}
 	}

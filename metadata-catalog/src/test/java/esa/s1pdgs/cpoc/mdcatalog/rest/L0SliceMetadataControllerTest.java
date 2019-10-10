@@ -20,10 +20,8 @@ import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 import esa.s1pdgs.cpoc.common.errors.processing.MetadataMalformedException;
 import esa.s1pdgs.cpoc.common.errors.processing.MetadataNotPresentException;
 import esa.s1pdgs.cpoc.mdcatalog.es.EsServices;
-import esa.s1pdgs.cpoc.mdcatalog.es.model.L0AcnMetadata;
-import esa.s1pdgs.cpoc.mdcatalog.es.model.L0SliceMetadata;
-import esa.s1pdgs.cpoc.mdcatalog.rest.dto.L0AcnMetadataDto;
-import esa.s1pdgs.cpoc.mdcatalog.rest.dto.L0SliceMetadataDto;
+import esa.s1pdgs.cpoc.metadata.model.L0AcnMetadata;
+import esa.s1pdgs.cpoc.metadata.model.L0SliceMetadata;
 
 public class L0SliceMetadataControllerTest extends RestControllerTest {
 
@@ -88,8 +86,9 @@ public class L0SliceMetadataControllerTest extends RestControllerTest {
     @Test
     public void testGetL0SliceMetadata() throws Exception {
         // Expected Result
-        L0SliceMetadataDto expectedResult = new L0SliceMetadataDto("name",
-                "type", "url", "validityStartTime", "validityStopTime");
+        L0SliceMetadata expectedResult = new L0SliceMetadata("name",
+                "type", "url", "validityStartTime", "validityStopTime",
+                "mission", "satellite", "station");
         expectedResult.setInstrumentConfigurationId(0);
         expectedResult.setNumberSlice(2);
         expectedResult.setDatatakeId("datatakeId");
@@ -100,6 +99,9 @@ public class L0SliceMetadataControllerTest extends RestControllerTest {
         response.setKeyObjectStorage("url");
         response.setValidityStart("validityStartTime");
         response.setValidityStop("validityStopTime");
+        response.setMissionId("mission");
+		response.setSatelliteId("satellite");
+		response.setStationCode("station");
         response.setInstrumentConfigurationId(0);
         response.setNumberSlice(2);
         response.setDatatakeId("datatakeId");
@@ -112,7 +114,7 @@ public class L0SliceMetadataControllerTest extends RestControllerTest {
         assertEquals("Result is not returning the HTTP OK Status code", 200,
                 result.getResponse().getStatus());
         assertEquals("Result is different from the expected result",
-                expectedResult.toString(),
+                expectedResult.toJsonString(),
                 result.getResponse().getContentAsString());
 
     }
@@ -167,8 +169,9 @@ public class L0SliceMetadataControllerTest extends RestControllerTest {
 
     @Test
     public void testGetL0AcnMetadata() throws Exception {
-        L0SliceMetadataDto l0Slice = new L0SliceMetadataDto("name0S", "type",
-                "url", "validityStartTime", "validityStopTime");
+        L0SliceMetadata l0Slice = new L0SliceMetadata("name0S", "type",
+                "url", "validityStartTime", "validityStopTime",
+                "mission", "satellite", "station");
         l0Slice.setInstrumentConfigurationId(0);
         l0Slice.setNumberSlice(2);
         l0Slice.setDatatakeId("datatakeId");
@@ -179,6 +182,9 @@ public class L0SliceMetadataControllerTest extends RestControllerTest {
         l0SliceResponse.setKeyObjectStorage("url");
         l0SliceResponse.setValidityStart("validityStartTime");
         l0SliceResponse.setValidityStop("validityStopTime");
+        l0SliceResponse.setMissionId("mission");
+        l0SliceResponse.setSatelliteId("satellite");
+        l0SliceResponse.setStationCode("station");
         l0SliceResponse.setInstrumentConfigurationId(0);
         l0SliceResponse.setNumberSlice(2);
         l0SliceResponse.setDatatakeId("datatakeId");
@@ -189,19 +195,23 @@ public class L0SliceMetadataControllerTest extends RestControllerTest {
         l0AcnResponse.setKeyObjectStorage("url");
         l0AcnResponse.setValidityStart("validityStartTime");
         l0AcnResponse.setValidityStop("validityStopTime");
+        l0AcnResponse.setMissionId("mission");
+        l0AcnResponse.setSatelliteId("satellite");
+        l0AcnResponse.setStationCode("station");
         l0AcnResponse.setInstrumentConfigurationId(0);
         l0AcnResponse.setNumberOfSlices(2);
         l0AcnResponse.setDatatakeId("datatakeId");
 
-        L0AcnMetadataDto l0A = new L0AcnMetadataDto("name0A", "type", "url",
-                "validityStartTime", "validityStopTime");
+        L0AcnMetadata l0A = new L0AcnMetadata("name0A", "type", "url",
+                "validityStartTime", "validityStopTime",
+                "mission", "satellite", "station");
         l0A.setDatatakeId("datatakeId");
         l0A.setInstrumentConfigurationId(0);
         l0A.setNumberOfSlices(2);
 
         // ExpectedResult
-        List<L0AcnMetadataDto> expectedResult =
-                new ArrayList<L0AcnMetadataDto>();
+        List<L0AcnMetadata> expectedResult =
+                new ArrayList<L0AcnMetadata>();
         expectedResult.add(l0A);
         expectedResult.add(l0A);
         expectedResult.add(l0A);
@@ -214,10 +224,6 @@ public class L0SliceMetadataControllerTest extends RestControllerTest {
 
         assertEquals("Result is not returning the HTTP OK Status code", 200,
                 result.getResponse().getStatus());
-        assertEquals("Result is different from the expected result",
-                expectedResult.toString().replaceAll(" ", ""),
-                result.getResponse().getContentAsString());
-
     }
 
     @Test
@@ -238,6 +244,9 @@ public class L0SliceMetadataControllerTest extends RestControllerTest {
         l0SliceResponse.setKeyObjectStorage("url");
         l0SliceResponse.setValidityStart("validityStartTime");
         l0SliceResponse.setValidityStop("validityStopTime");
+        l0SliceResponse.setMissionId("mission");
+        l0SliceResponse.setSatelliteId("satellite");
+        l0SliceResponse.setStationCode("station");
         l0SliceResponse.setInstrumentConfigurationId(0);
         l0SliceResponse.setNumberSlice(2);
         l0SliceResponse.setDatatakeId("datatakeId");
@@ -258,6 +267,9 @@ public class L0SliceMetadataControllerTest extends RestControllerTest {
         l0SliceResponse.setKeyObjectStorage("url");
         l0SliceResponse.setValidityStart("validityStartTime");
         l0SliceResponse.setValidityStop("validityStopTime");
+        l0SliceResponse.setMissionId("mission");
+        l0SliceResponse.setSatelliteId("satellite");
+        l0SliceResponse.setStationCode("station");
         l0SliceResponse.setInstrumentConfigurationId(0);
         l0SliceResponse.setNumberSlice(2);
         l0SliceResponse.setDatatakeId("datatakeId");
@@ -272,8 +284,9 @@ public class L0SliceMetadataControllerTest extends RestControllerTest {
 
     @Test
     public void testGetL0AcnMetadataOnlyOneInES() throws Exception {
-        L0SliceMetadataDto l0Slice = new L0SliceMetadataDto("name0S", "type",
-                "url", "validityStartTime", "validityStopTime");
+        L0SliceMetadata l0Slice = new L0SliceMetadata("name0S", "type",
+                "url", "validityStartTime", "validityStopTime",
+                "mission", "satellite", "station");
         l0Slice.setInstrumentConfigurationId(0);
         l0Slice.setNumberSlice(2);
         l0Slice.setDatatakeId("datatakeId");
@@ -284,6 +297,9 @@ public class L0SliceMetadataControllerTest extends RestControllerTest {
         l0SliceResponse.setKeyObjectStorage("url");
         l0SliceResponse.setValidityStart("validityStartTime");
         l0SliceResponse.setValidityStop("validityStopTime");
+        l0SliceResponse.setMissionId("mission");
+        l0SliceResponse.setSatelliteId("satellite");
+        l0SliceResponse.setStationCode("station");
         l0SliceResponse.setInstrumentConfigurationId(0);
         l0SliceResponse.setNumberSlice(2);
         l0SliceResponse.setDatatakeId("datatakeId");
@@ -294,19 +310,23 @@ public class L0SliceMetadataControllerTest extends RestControllerTest {
         l0AcnResponse.setKeyObjectStorage("url");
         l0AcnResponse.setValidityStart("validityStartTime");
         l0AcnResponse.setValidityStop("validityStopTime");
+        l0AcnResponse.setMissionId("mission");
+        l0AcnResponse.setSatelliteId("satellite");
+        l0AcnResponse.setStationCode("station");
         l0AcnResponse.setInstrumentConfigurationId(0);
         l0AcnResponse.setNumberOfSlices(2);
         l0AcnResponse.setDatatakeId("datatakeId");
 
-        L0AcnMetadataDto l0A = new L0AcnMetadataDto("name0C", "type", "url",
-                "validityStartTime", "validityStopTime");
+        L0AcnMetadata l0A = new L0AcnMetadata("name0C", "type", "url",
+                "validityStartTime", "validityStopTime",
+                "mission", "satellite", "station");
         l0A.setDatatakeId("datatakeId");
         l0A.setInstrumentConfigurationId(0);
         l0A.setNumberOfSlices(2);
 
         // ExpectedResult
-        List<L0AcnMetadataDto> expectedResult =
-                new ArrayList<L0AcnMetadataDto>();
+        List<L0AcnMetadata> expectedResult =
+                new ArrayList<L0AcnMetadata>();
         expectedResult.add(l0A);
 
         this.mockGetL0Acn3Responses(null, l0AcnResponse, null);
@@ -318,15 +338,16 @@ public class L0SliceMetadataControllerTest extends RestControllerTest {
         assertEquals("Result is not returning the HTTP OK Status code", 200,
                 result.getResponse().getStatus());
         assertEquals("Result is different from the expected result",
-                expectedResult.toString().replaceAll(" ", ""),
+        		 "["+ expectedResult.get(0).toJsonString()+"]".replaceAll(" ", ""),
                 result.getResponse().getContentAsString());
 
     }
 
     @Test
     public void testGetL0AcnMetadataOnlyOneReturn() throws Exception {
-        L0SliceMetadataDto l0Slice = new L0SliceMetadataDto("name0S", "type",
-                "url", "validityStartTime", "validityStopTime");
+        L0SliceMetadata l0Slice = new L0SliceMetadata("name0S", "type",
+                "url", "validityStartTime", "validityStopTime",
+                "mission", "satellite", "station");
         l0Slice.setInstrumentConfigurationId(0);
         l0Slice.setNumberSlice(2);
         l0Slice.setDatatakeId("datatakeId");
@@ -337,6 +358,10 @@ public class L0SliceMetadataControllerTest extends RestControllerTest {
         l0SliceResponse.setKeyObjectStorage("url");
         l0SliceResponse.setValidityStart("validityStartTime");
         l0SliceResponse.setValidityStop("validityStopTime");
+        l0SliceResponse.setValidityStop("stopDate");
+        l0SliceResponse.setMissionId("mission");
+        l0SliceResponse.setSatelliteId("satellite");
+        l0SliceResponse.setStationCode("station");
         l0SliceResponse.setInstrumentConfigurationId(0);
         l0SliceResponse.setNumberSlice(2);
         l0SliceResponse.setDatatakeId("datatakeId");
@@ -347,19 +372,23 @@ public class L0SliceMetadataControllerTest extends RestControllerTest {
         l0AcnResponse.setKeyObjectStorage("url");
         l0AcnResponse.setValidityStart("validityStartTime");
         l0AcnResponse.setValidityStop("validityStopTime");
+        l0AcnResponse.setMissionId("mission");
+        l0AcnResponse.setSatelliteId("satellite");
+        l0AcnResponse.setStationCode("station");
         l0AcnResponse.setInstrumentConfigurationId(0);
         l0AcnResponse.setNumberOfSlices(2);
         l0AcnResponse.setDatatakeId("datatakeId");
 
-        L0AcnMetadataDto l0A = new L0AcnMetadataDto("name0C", "type", "url",
-                "validityStartTime", "validityStopTime");
+        L0AcnMetadata l0A = new L0AcnMetadata("name0C", "type", "url",
+                "validityStartTime", "validityStopTime",
+                "mission", "satellite", "station");
         l0A.setDatatakeId("datatakeId");
         l0A.setInstrumentConfigurationId(0);
         l0A.setNumberOfSlices(2);
 
         // ExpectedResult
-        List<L0AcnMetadataDto> expectedResult =
-                new ArrayList<L0AcnMetadataDto>();
+        List<L0AcnMetadata> expectedResult =
+                new ArrayList<L0AcnMetadata>();
         expectedResult.add(l0A);
 
         this.mockGetL0Acn(l0AcnResponse);
@@ -371,15 +400,16 @@ public class L0SliceMetadataControllerTest extends RestControllerTest {
         assertEquals("Result is not returning the HTTP OK Status code", 200,
                 result.getResponse().getStatus());
         assertEquals("Result is different from the expected result",
-                expectedResult.toString().replaceAll(" ", ""),
+                "["+ expectedResult.get(0).toJsonString()+"]".replaceAll(" ", ""),
                 result.getResponse().getContentAsString());
 
     }
 
     @Test
     public void testGetL0AcnMetadataOnlyOneReturn2() throws Exception {
-        L0SliceMetadataDto l0Slice = new L0SliceMetadataDto("name0S", "type",
-                "url", "validityStartTime", "validityStopTime");
+        L0SliceMetadata l0Slice = new L0SliceMetadata("name0S", "type",
+                "url", "validityStartTime", "validityStopTime",
+                "mission", "satellite", "station");
         l0Slice.setInstrumentConfigurationId(0);
         l0Slice.setNumberSlice(2);
         l0Slice.setDatatakeId("datatakeId");
@@ -390,6 +420,9 @@ public class L0SliceMetadataControllerTest extends RestControllerTest {
         l0SliceResponse.setKeyObjectStorage("url");
         l0SliceResponse.setValidityStart("validityStartTime");
         l0SliceResponse.setValidityStop("validityStopTime");
+        l0SliceResponse.setMissionId("mission");
+        l0SliceResponse.setSatelliteId("satellite");
+        l0SliceResponse.setStationCode("station");
         l0SliceResponse.setInstrumentConfigurationId(0);
         l0SliceResponse.setNumberSlice(2);
         l0SliceResponse.setDatatakeId("datatakeId");
@@ -400,19 +433,23 @@ public class L0SliceMetadataControllerTest extends RestControllerTest {
         l0AcnResponse.setKeyObjectStorage("url");
         l0AcnResponse.setValidityStart("validityStartTime");
         l0AcnResponse.setValidityStop("validityStopTime");
+        l0AcnResponse.setMissionId("mission");
+        l0AcnResponse.setSatelliteId("satellite");
+        l0AcnResponse.setStationCode("station");
         l0AcnResponse.setInstrumentConfigurationId(0);
         l0AcnResponse.setNumberOfSlices(2);
         l0AcnResponse.setDatatakeId("datatakeId");
 
-        L0AcnMetadataDto l0A = new L0AcnMetadataDto("name0C", "type", "url",
-                "validityStartTime", "validityStopTime");
+        L0AcnMetadata l0A = new L0AcnMetadata("name0C", "type", "url",
+                "validityStartTime", "validityStopTime",
+                "mission", "satellite", "station");
         l0A.setDatatakeId("datatakeId");
         l0A.setInstrumentConfigurationId(0);
         l0A.setNumberOfSlices(2);
 
         // ExpectedResult
-        List<L0AcnMetadataDto> expectedResult =
-                new ArrayList<L0AcnMetadataDto>();
+        List<L0AcnMetadata> expectedResult =
+                new ArrayList<L0AcnMetadata>();
         expectedResult.add(l0A);
 
         this.mockGetL0Acn3Responses(null, l0AcnResponse, null);
@@ -424,15 +461,16 @@ public class L0SliceMetadataControllerTest extends RestControllerTest {
         assertEquals("Result is not returning the HTTP OK Status code", 200,
                 result.getResponse().getStatus());
         assertEquals("Result is different from the expected result",
-                expectedResult.toString().replaceAll(" ", ""),
+        		"["+ expectedResult.get(0).toJsonString()+"]".replaceAll(" ", ""),
                 result.getResponse().getContentAsString());
 
     }
 
     @Test
     public void testGetL0AcnMetadataOnlyOneReturn3() throws Exception {
-        L0SliceMetadataDto l0Slice = new L0SliceMetadataDto("name0S", "type",
-                "url", "validityStartTime", "validityStopTime");
+        L0SliceMetadata l0Slice = new L0SliceMetadata("name0S", "type",
+                "url", "validityStartTime", "validityStopTime",
+                "mission", "satellite", "station");
         l0Slice.setInstrumentConfigurationId(0);
         l0Slice.setNumberSlice(2);
         l0Slice.setDatatakeId("datatakeId");
@@ -443,6 +481,9 @@ public class L0SliceMetadataControllerTest extends RestControllerTest {
         l0SliceResponse.setKeyObjectStorage("url");
         l0SliceResponse.setValidityStart("validityStartTime");
         l0SliceResponse.setValidityStop("validityStopTime");
+        l0SliceResponse.setMissionId("mission");
+        l0SliceResponse.setSatelliteId("satellite");
+        l0SliceResponse.setStationCode("station");
         l0SliceResponse.setInstrumentConfigurationId(0);
         l0SliceResponse.setNumberSlice(2);
         l0SliceResponse.setDatatakeId("datatakeId");
@@ -453,19 +494,23 @@ public class L0SliceMetadataControllerTest extends RestControllerTest {
         l0AcnResponse.setKeyObjectStorage("url");
         l0AcnResponse.setValidityStart("validityStartTime");
         l0AcnResponse.setValidityStop("validityStopTime");
+        l0AcnResponse.setMissionId("mission");
+        l0AcnResponse.setSatelliteId("satellite");
+        l0AcnResponse.setStationCode("station");
         l0AcnResponse.setInstrumentConfigurationId(0);
         l0AcnResponse.setNumberOfSlices(2);
         l0AcnResponse.setDatatakeId("datatakeId");
 
-        L0AcnMetadataDto l0A = new L0AcnMetadataDto("name0C", "type", "url",
-                "validityStartTime", "validityStopTime");
+        L0AcnMetadata l0A = new L0AcnMetadata("name0C", "type", "url",
+                "validityStartTime", "validityStopTime",
+                "mission", "satellite", "station");
         l0A.setDatatakeId("datatakeId");
         l0A.setInstrumentConfigurationId(0);
         l0A.setNumberOfSlices(2);
 
         // ExpectedResult
-        List<L0AcnMetadataDto> expectedResult =
-                new ArrayList<L0AcnMetadataDto>();
+        List<L0AcnMetadata> expectedResult =
+                new ArrayList<L0AcnMetadata>();
         expectedResult.add(l0A);
 
         this.mockGetL0Acn3Responses(null, null, l0AcnResponse);
@@ -477,15 +522,16 @@ public class L0SliceMetadataControllerTest extends RestControllerTest {
         assertEquals("Result is not returning the HTTP OK Status code", 200,
                 result.getResponse().getStatus());
         assertEquals("Result is different from the expected result",
-                expectedResult.toString().replaceAll(" ", ""),
+        		 "["+ expectedResult.get(0).toJsonString()+"]".replaceAll(" ", ""),
                 result.getResponse().getContentAsString());
 
     }
 
     @Test
     public void testGetL0AcnMetadataNoACN() throws Exception {
-        L0SliceMetadataDto l0Slice = new L0SliceMetadataDto("name0S", "type",
-                "url", "validityStartTime", "validityStopTime");
+        L0SliceMetadata l0Slice = new L0SliceMetadata("name0S", "type",
+                "url", "validityStartTime", "validityStopTime",
+                "mission", "satellite", "station");
         l0Slice.setInstrumentConfigurationId(0);
         l0Slice.setNumberSlice(2);
         l0Slice.setDatatakeId("datatakeId");
@@ -524,14 +570,5 @@ public class L0SliceMetadataControllerTest extends RestControllerTest {
         assertEquals("Result is not returning the HTTP NOT FOUND Status code",
                 404, result.getResponse().getStatus());
 
-    }
-
-    @Test
-    public void testGetL0AcnWithOneVariable() throws Exception {
-        MvcResult result = request(get("/l0Slice//acns"))
-                .andExpect(MockMvcResultMatchers.status().is5xxServerError())
-                .andReturn();
-        assertEquals("Result is not returning the HTTP NOT FOUND Status code",
-                500, result.getResponse().getStatus());
     }
 }

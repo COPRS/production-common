@@ -6,15 +6,10 @@ import java.util.List;
 
 import javax.annotation.PostConstruct;
 
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
-import org.springframework.stereotype.Service;
 
-import esa.s1pdgs.cpoc.appcatalog.client.job.AbstractAppCatalogJobService;
+import esa.s1pdgs.cpoc.appcatalog.client.job.AppCatalogJobClient;
 import esa.s1pdgs.cpoc.appcatalog.common.rest.model.job.AppDataJobDto;
-import esa.s1pdgs.cpoc.common.ApplicationLevel;
 import esa.s1pdgs.cpoc.common.errors.AbstractCodedException;
 import esa.s1pdgs.cpoc.common.errors.processing.JobGenMissingRoutingEntryException;
 import esa.s1pdgs.cpoc.jobgenerator.config.JobGeneratorSettings;
@@ -22,7 +17,7 @@ import esa.s1pdgs.cpoc.jobgenerator.config.ProcessSettings;
 import esa.s1pdgs.cpoc.jobgenerator.tasks.AbstractJobsDispatcher;
 import esa.s1pdgs.cpoc.jobgenerator.tasks.AbstractJobsGenerator;
 import esa.s1pdgs.cpoc.jobgenerator.tasks.JobsGeneratorFactory;
-import esa.s1pdgs.cpoc.mqi.model.queue.LevelSegmentDto;
+import esa.s1pdgs.cpoc.mqi.model.queue.ProductDto;
 
 /**
  * Dispatcher of L0 slice product<br/>
@@ -32,15 +27,17 @@ import esa.s1pdgs.cpoc.mqi.model.queue.LevelSegmentDto;
  * 
  * @author Cyrielle Gailliard
  */
-@Service
-@ConditionalOnProperty(name = "process.level", havingValue = "L0_SEGMENT")
-public class L0SegmentAppJobDispatcher
-        extends AbstractJobsDispatcher<LevelSegmentDto> {
+public class L0SegmentAppJobDispatcher extends AbstractJobsDispatcher<ProductDto> {
 
     /**
      * Task table
      */
     private static final String TASK_TABLE_NAME = "TaskTable.L0ASP.xml";
+    
+    /**
+     * 
+     */
+    private String taskForFunctionalLog;
 
     /**
      * @param settings
@@ -49,12 +46,11 @@ public class L0SegmentAppJobDispatcher
      * @param xmlConverter
      * @param pathRoutingXmlFile
      */
-    @Autowired
     public L0SegmentAppJobDispatcher(final JobGeneratorSettings settings,
             final ProcessSettings processSettings,
             final JobsGeneratorFactory factory,
             final ThreadPoolTaskScheduler taskScheduler,
-            @Qualifier("appCatalogServiceForLevelSegments") final AbstractAppCatalogJobService<LevelSegmentDto> appDataService) {
+            final AppCatalogJobClient appDataService) {
         super(settings, processSettings, factory, taskScheduler,
                 appDataService);
     }
@@ -72,7 +68,7 @@ public class L0SegmentAppJobDispatcher
      * 
      */
     @Override
-    protected AbstractJobsGenerator<LevelSegmentDto> createJobGenerator(
+    protected AbstractJobsGenerator<ProductDto> createJobGenerator(
             final File xmlFile) throws AbstractCodedException {
         return this.factory.createJobGeneratorForL0Segment(xmlFile,
                 appDataService);
@@ -84,15 +80,19 @@ public class L0SegmentAppJobDispatcher
      * @throws JobGenMissingRoutingEntryException
      */
     @Override
-    protected List<String> getTaskTables(
-            final AppDataJobDto<LevelSegmentDto> job)
+    protected List<String> getTaskTables(final AppDataJobDto job)
             throws JobGenMissingRoutingEntryException {
         return Arrays.asList(TASK_TABLE_NAME);
     }
 
     @Override
     protected String getTaskForFunctionalLog() {
-        return ApplicationLevel.L0_SEGMENT.name() + "JobGeneration";
+    	return this.taskForFunctionalLog;
+    }
+    
+    @Override
+    public void setTaskForFunctionalLog(String taskForFunctionalLog) {
+    	this.taskForFunctionalLog = taskForFunctionalLog; 
     }
 
 }

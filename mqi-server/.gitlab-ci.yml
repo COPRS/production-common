@@ -5,20 +5,9 @@ image: docker:latest
 variables:
   MODULE_MQI_SERVER: s1pro-core-mqi-server
 
-mqi-server-build-master:
-  stage: module
-  script:
-    - cd mqi-server
-    - docker build --network host --pull -t "$CI_REGISTRY/$CI_PROJECT_NAMESPACE/$MODULE_MQI_SERVER" .
-    - docker push "$CI_REGISTRY/$CI_PROJECT_NAMESPACE/$MODULE_MQI_SERVER"
-  only:
-    - master
-
 mqi-server-build:
   stage: module
   script:
     - cd mqi-server
-    - docker build --cache-from registry.tools.s1pdgs.eu/werum/processing/s1pro-core:final --network host --pull -t "$CI_REGISTRY/$CI_PROJECT_NAMESPACE/$MODULE_MQI_SERVER:$CI_COMMIT_REF_SLUG" .
+    - dockerbuild --cache-from registry.tools.s1pdgs.eu/werum/processing/s1pro-core:final -t "$CI_REGISTRY/$CI_PROJECT_NAMESPACE/$MODULE_MQI_SERVER:$CI_COMMIT_REF_SLUG" .
     - docker push "$CI_REGISTRY/$CI_PROJECT_NAMESPACE/$MODULE_MQI_SERVER:$CI_COMMIT_REF_SLUG"
-  except:
-    - master

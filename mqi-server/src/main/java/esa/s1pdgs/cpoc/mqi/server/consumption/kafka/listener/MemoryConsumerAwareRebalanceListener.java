@@ -10,8 +10,9 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.kafka.listener.ConsumerAwareRebalanceListener;
 
-import esa.s1pdgs.cpoc.appcatalog.client.mqi.GenericAppCatalogMqiService;
+import esa.s1pdgs.cpoc.appcatalog.client.mqi.AppCatalogMqiService;
 import esa.s1pdgs.cpoc.common.errors.AbstractCodedException;
+import esa.s1pdgs.cpoc.common.utils.LogUtils;
 
 /**
  * Rebalance listener when messages are in memory
@@ -30,7 +31,7 @@ public class MemoryConsumerAwareRebalanceListener
     /**
      * Service for checking if a message is processing or not by another
      */
-    private final GenericAppCatalogMqiService<?> service;
+    private final AppCatalogMqiService service;
 
     /**
      * Group name
@@ -46,7 +47,7 @@ public class MemoryConsumerAwareRebalanceListener
      * Default constructor
      */
     public MemoryConsumerAwareRebalanceListener(
-            final GenericAppCatalogMqiService<?> service, final String group,
+            final AppCatalogMqiService service, final String group,
             final int defaultMode) {
         super();
         this.service = service;
@@ -105,16 +106,15 @@ public class MemoryConsumerAwareRebalanceListener
             long startingOffset = defaultMode;
             try {
                 startingOffset =
-                        service.getEarliestOffset(topicPartition.topic(),
-                                topicPartition.partition(), group);
+                        service.getEarliestOffset(topicPartition.topic(), topicPartition.partition(), group);
             } catch (AbstractCodedException ace) {
                 LOGGER.error(
                         "[MONITOR] [rebalance] Exception occurred, set default mode {}: {}",
                         defaultMode, ace.getLogMessage());
-            } catch (Exception exc) {
+            } catch (Exception e) {
                 LOGGER.error(
                         "[MONITOR] [rebalance] Exception occurred, set default mode {}: {}",
-                        defaultMode, exc.getMessage());
+                        defaultMode, LogUtils.toString(e));
             }
             if (startingOffset == -3) {
                 LOGGER.info("[MONITOR] [rebalance] Leaving it alone");

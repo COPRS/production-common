@@ -30,8 +30,9 @@ public class ElasticsearchDAO {
 		return this.restHighLevelClient.index(request);
 	}
 	
-	public SearchResponse search (SearchRequest searchRequest) throws IOException {
+	public SearchResponse search (SearchRequest searchRequest) throws IOException {		
 		return this.restHighLevelClient.search(searchRequest);
 	}
+
 
 }

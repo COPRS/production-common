@@ -13,12 +13,27 @@ public class EdrsSessionFileDescriptor extends AbstractFileDescriptor {
 	/**
 	 * Product type: RAW or SESSION here
 	 */
-	private EdrsSessionFileType productType;
+	private EdrsSessionFileType edrsSessionFileType;
 
 	/**
 	 * Session identifier
 	 */
 	private String sessionIdentifier;
+
+	/**
+	 * Session identifier
+	 */
+	private String stationCode;
+	
+	
+	
+	public String getStationCode() {
+		return stationCode;
+	}
+
+	public void setStationCode(String stationCode) {
+		this.stationCode = stationCode;
+	}
 
 	/**
 	 * Channel number
@@ -29,47 +44,26 @@ public class EdrsSessionFileDescriptor extends AbstractFileDescriptor {
 		super();
 	}
 
-	/**
-	 * @return the productType
-	 */
-	public EdrsSessionFileType getProductType() {
-		return productType;
+	public EdrsSessionFileType getEdrsSessionFileType() {
+		return edrsSessionFileType;
 	}
 
-	/**
-	 * @param productType
-	 *            the productType to set
-	 */
-	public void setProductType(EdrsSessionFileType productType) {
-		this.productType = productType;
+	public void setEdrsSessionFileType(EdrsSessionFileType productType) {
+		this.edrsSessionFileType = productType;
 	}
 
-	/**
-	 * @return the sessionIdentifier
-	 */
 	public String getSessionIdentifier() {
 		return sessionIdentifier;
 	}
 
-	/**
-	 * @param sessionIdentifier
-	 *            the sessionIdentifier to set
-	 */
 	public void setSessionIdentifier(String sessionIdentifier) {
 		this.sessionIdentifier = sessionIdentifier;
 	}
 
-	/**
-	 * @return the channel
-	 */
 	public int getChannel() {
 		return channel;
 	}
 
-	/**
-	 * @param channel
-	 *            the channel to set
-	 */
 	public void setChannel(int channel) {
 		this.channel = channel;
 	}
@@ -79,8 +73,8 @@ public class EdrsSessionFileDescriptor extends AbstractFileDescriptor {
 	 */
 	public String toString() {
 		String info = String.format(
-				"{ 'relativePath': %s, 'filename': %s, 'extension': %s, 'sessionIdentifier': %s, 'productName': %s, 'productType': %s, 'channel': %d, 'missionId': %s, 'satelliteId': %s, 'keyObjectStorage': %s}",
-				relativePath, filename, extension, sessionIdentifier, productName, productType, channel, missionId,
+				"{ 'relativePath': %s, 'stationCode': %s ,'filename': %s, 'extension': %s, 'sessionIdentifier': %s, 'productName': %s, 'productType': %s, 'channel': %d, 'missionId': %s, 'satelliteId': %s, 'keyObjectStorage': %s}",
+				relativePath, filename, stationCode,extension, sessionIdentifier, productName, edrsSessionFileType, channel, missionId,
 				satelliteId, keyObjectStorage);
 		return info;
 	}
@@ -92,14 +86,22 @@ public class EdrsSessionFileDescriptor extends AbstractFileDescriptor {
 	public boolean equals(Object obj) {
 		if (this == obj)
 			return true;
+	    if (obj == null || getClass() != obj.getClass())
+	    	return false;
 		if (!super.equals(obj))
-			return false;
-		if (getClass() != obj.getClass())
 			return false;
 		EdrsSessionFileDescriptor other = (EdrsSessionFileDescriptor) obj;
 		if (channel != other.channel)
 			return false;
-		if (productType != other.productType)
+		if (edrsSessionFileType == null) {
+			if (other.edrsSessionFileType != null)
+				return false;
+		} else if (!edrsSessionFileType.equals(other.edrsSessionFileType))
+			return false;
+		if (stationCode == null) {
+			if (other.stationCode != null)
+				return false;
+		} else if (!stationCode.equals(other.stationCode))
 			return false;
 		if (sessionIdentifier == null) {
 			if (other.sessionIdentifier != null)
@@ -117,8 +119,9 @@ public class EdrsSessionFileDescriptor extends AbstractFileDescriptor {
 		final int prime = 31;
 		int result = super.hashCode();
 		result = prime * result + channel;
-		result = prime * result + ((productType == null) ? 0 : productType.hashCode());
+		result = prime * result + ((edrsSessionFileType == null) ? 0 : edrsSessionFileType.hashCode());
 		result = prime * result + ((sessionIdentifier == null) ? 0 : sessionIdentifier.hashCode());
+		result = prime * result + ((stationCode == null) ? 0 : stationCode.hashCode());
 		return result;
 	}
 

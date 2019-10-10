@@ -3,6 +3,7 @@ package esa.s1pdgs.cpoc.wrapper.test;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doReturn;
 
+import java.nio.file.Path;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -81,7 +82,7 @@ public class MockPropertiesTest {
     /**
      * Default mock of application properties
      */
-    protected void mockDefaultAppProperties() {
+    protected void mockDefaultAppProperties() {    	    	
         mockTmAppProperties(1800, 600, 300, 60);
         mockSizeAppProperties(20, 5);
         mockWapAppProperties(12, 1);
@@ -124,6 +125,10 @@ public class MockPropertiesTest {
     protected void mockWapAppProperties(int wapNbMaxLoop, long wapTempoS) {
         doReturn(wapNbMaxLoop).when(properties).getWapNbMaxLoop();
         doReturn(wapTempoS).when(properties).getWapTempoS();
+    }
+    
+    protected void mockWorkingdirProperties(Path workingdir) {
+    	doReturn(workingdir.toString()).when(properties).getWorkingDir();
     }
 
     /**

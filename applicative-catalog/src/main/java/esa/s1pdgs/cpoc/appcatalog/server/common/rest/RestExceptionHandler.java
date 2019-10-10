@@ -8,6 +8,7 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 
 import esa.s1pdgs.cpoc.appcatalog.server.job.exception.AbstractAppDataException;
 import esa.s1pdgs.cpoc.common.errors.AbstractCodedException;
+import esa.s1pdgs.cpoc.common.utils.LogUtils;
 
 /**
  * Handler REST exception
@@ -48,7 +49,7 @@ public class RestExceptionHandler {
         // Build error response
         String error = String.format(
                 "{'status': %s, 'messsage': '%s', 'code': %s}", status.value(),
-                ex.getMessage(),
+                LogUtils.toString(ex),
                 AbstractCodedException.ErrorCode.INTERNAL_ERROR.getCode());
 
         return new ResponseEntity<>(error, status);
@@ -63,7 +64,7 @@ public class RestExceptionHandler {
         // Build error response
         String error = String.format(
                 "{'status': %s, 'messsage': '%s', 'code': %s}", status.value(),
-                ex.getMessage(),
+                LogUtils.toString(ex),
                 AbstractCodedException.ErrorCode.INTERNAL_ERROR.getCode());
 
         return new ResponseEntity<>(error, status);

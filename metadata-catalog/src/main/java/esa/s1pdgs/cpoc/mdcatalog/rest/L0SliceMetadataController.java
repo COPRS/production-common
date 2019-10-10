@@ -15,14 +15,14 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import esa.s1pdgs.cpoc.common.ProductFamily;
 import esa.s1pdgs.cpoc.common.errors.AbstractCodedException;
 import esa.s1pdgs.cpoc.common.errors.AbstractCodedException.ErrorCode;
 import esa.s1pdgs.cpoc.common.errors.processing.MetadataNotPresentException;
+import esa.s1pdgs.cpoc.common.utils.LogUtils;
 import esa.s1pdgs.cpoc.mdcatalog.es.EsServices;
-import esa.s1pdgs.cpoc.mdcatalog.es.model.L0AcnMetadata;
-import esa.s1pdgs.cpoc.mdcatalog.es.model.L0SliceMetadata;
-import esa.s1pdgs.cpoc.mdcatalog.rest.dto.L0AcnMetadataDto;
-import esa.s1pdgs.cpoc.mdcatalog.rest.dto.L0SliceMetadataDto;
+import esa.s1pdgs.cpoc.metadata.model.L0AcnMetadata;
+import esa.s1pdgs.cpoc.metadata.model.L0SliceMetadata;
 
 @RestController
 @RequestMapping(path = "/l0Slice")
@@ -36,36 +36,48 @@ public class L0SliceMetadataController {
 	public L0SliceMetadataController(final EsServices esServices) {
 		this.esServices = esServices;
 	}
+	
+    
+    @RequestMapping(method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_UTF8_VALUE, path = "/{family}/{productName:.+}/seaCoverage")
+    public ResponseEntity<Integer> getSeaCoverage(
+            @PathVariable(name = "family") ProductFamily family,
+            @PathVariable(name = "productName") String productName) {
+        try {
+			return new ResponseEntity<>(esServices.getSeaCoverage(family, productName), HttpStatus.OK);
+        } catch (MetadataNotPresentException em) {
+            LOGGER.warn("[{}] [productName {}] [code {}] {}", family, productName, 
+            		em.getCode().getCode(), em.getLogMessage());            
+            return new ResponseEntity<Integer>(HttpStatus.NOT_FOUND);
+        } catch (Exception e) {
+            LOGGER.error("[{}] [productName {}] [code {}] [msg {}]", family, productName, 
+            		ErrorCode.INTERNAL_ERROR.getCode(), LogUtils.toString(e));
+            return new ResponseEntity<Integer>(HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
 
 	@RequestMapping(method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_UTF8_VALUE, path = "/{productName:.+}")
-	public ResponseEntity<L0SliceMetadataDto> get(@PathVariable(name = "productName") String productName) {
+	public ResponseEntity<L0SliceMetadata> get(@PathVariable(name = "productName") String productName) {
 		try {
-			L0SliceMetadata f = esServices.getL0Slice(productName);
-
-			L0SliceMetadataDto response = new L0SliceMetadataDto(f.getProductName(), f.getProductType(),
-					f.getKeyObjectStorage(), f.getValidityStart(), f.getValidityStop());
-			response.setNumberSlice(f.getNumberSlice());
-			response.setInstrumentConfigurationId(f.getInstrumentConfigurationId());
-			response.setDatatakeId(f.getDatatakeId());
-			return new ResponseEntity<L0SliceMetadataDto>(response, HttpStatus.OK);
+			final L0SliceMetadata response = esServices.getL0Slice(productName);
+			return new ResponseEntity<L0SliceMetadata>(response, HttpStatus.OK);
 			
 		} catch (MetadataNotPresentException em) {
 			LOGGER.warn("[L0_SLICE] [productName {}] [code {}] {}", productName,
 					em.getCode().getCode(), em.getLogMessage());
-			return new ResponseEntity<L0SliceMetadataDto>(HttpStatus.NOT_FOUND);
+			return new ResponseEntity<L0SliceMetadata>(HttpStatus.NOT_FOUND);
 		} catch (AbstractCodedException ace) {
 			LOGGER.error("[L0_SLICE] [productName {}] [code {}] {}", productName,
 					ace.getCode().getCode(), ace.getLogMessage());
-			return new ResponseEntity<L0SliceMetadataDto>(HttpStatus.INTERNAL_SERVER_ERROR);
-		} catch (Exception exc) {
+			return new ResponseEntity<L0SliceMetadata>(HttpStatus.INTERNAL_SERVER_ERROR);
+		} catch (Exception e) {
 			LOGGER.error("[L0_SLICE] [productName {}] [code {}] [msg {}]", productName,
-					ErrorCode.INTERNAL_ERROR.getCode(), exc.getMessage());
-			return new ResponseEntity<L0SliceMetadataDto>(HttpStatus.INTERNAL_SERVER_ERROR);
-		}
+					ErrorCode.INTERNAL_ERROR.getCode(),   LogUtils.toString(e));
+			return new ResponseEntity<L0SliceMetadata>(HttpStatus.INTERNAL_SERVER_ERROR);
+		}		
 	}
 
 	@RequestMapping(method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_UTF8_VALUE, path = "/{productName:.+}/acns")
-	public ResponseEntity<List<L0AcnMetadataDto>> getAcns(
+	public ResponseEntity<List<L0AcnMetadata>> getAcns(
 			@PathVariable(name = "productName") String productName,
 			@RequestParam(name = "processMode", defaultValue = "NONE") String processMode,
 			@RequestParam(value = "mode", defaultValue = "ALL") String mode) {
@@ -74,72 +86,78 @@ public class L0SliceMetadataController {
 			L0SliceMetadata f = esServices.getL0Slice(productName);
 			if (f == null) {
 				LOGGER.warn("[L0_SLICE] [productName {}] Not found", productName);
-				return new ResponseEntity<List<L0AcnMetadataDto>>(HttpStatus.NOT_FOUND);
+				return new ResponseEntity<List<L0AcnMetadata>>(HttpStatus.NOT_FOUND);
 			}
 			String productType = f.getProductType();
 			String productTypeWithoutLastChar = productType.substring(0, productType.length() - 1);
 
 			// Retrieve ACN
-			List<L0AcnMetadataDto> r = new ArrayList<>();
+			List<L0AcnMetadata> r = new ArrayList<>();
 
 			LOGGER.info("Call getACN for {}A {}", productTypeWithoutLastChar, f.getDatatakeId());
 			L0AcnMetadata l0a = esServices.getL0Acn(productTypeWithoutLastChar + "A", f.getDatatakeId(), processMode);
 			if (l0a != null) {
-				L0AcnMetadataDto l0aDto = new L0AcnMetadataDto(l0a.getProductName(), l0a.getProductType(),
-						l0a.getKeyObjectStorage(), l0a.getValidityStart(), l0a.getValidityStop());
+				L0AcnMetadata l0aDto = new L0AcnMetadata(l0a.getProductName(), l0a.getProductType(),
+						l0a.getKeyObjectStorage(), l0a.getValidityStart(), l0a.getValidityStop(),
+						l0a.getMissionId(), l0a.getSatelliteId(), l0a.getStationCode(),
+						f.getInstrumentConfigurationId(), f.getNumberSlice(), f.getDatatakeId());
 				l0aDto.setInstrumentConfigurationId(l0a.getInstrumentConfigurationId());
 				l0aDto.setNumberOfSlices(l0a.getNumberOfSlices());
 				l0aDto.setDatatakeId(l0a.getDatatakeId());
 				r.add(l0aDto);
 				if ("ONE".equalsIgnoreCase(mode)) {
-					return new ResponseEntity<List<L0AcnMetadataDto>>(r, HttpStatus.OK);
+					return new ResponseEntity<List<L0AcnMetadata>>(r, HttpStatus.OK);
 				}
 			}
             LOGGER.info("Call getACN for {}C {}", productTypeWithoutLastChar, f.getDatatakeId());
 			L0AcnMetadata l0c = esServices.getL0Acn(productTypeWithoutLastChar + "C", f.getDatatakeId(), processMode);
 			if (l0c != null) {
-				L0AcnMetadataDto l0cDto = new L0AcnMetadataDto(l0c.getProductName(), l0c.getProductType(),
-						l0c.getKeyObjectStorage(), l0c.getValidityStart(), l0c.getValidityStop());
+				L0AcnMetadata l0cDto = new L0AcnMetadata(l0c.getProductName(), l0c.getProductType(),
+						l0c.getKeyObjectStorage(), l0c.getValidityStart(), l0c.getValidityStop(),
+						l0c.getMissionId(), l0c.getSatelliteId(), l0c.getStationCode(),
+						f.getInstrumentConfigurationId(), f.getNumberSlice(), f.getDatatakeId());
 				l0cDto.setInstrumentConfigurationId(l0c.getInstrumentConfigurationId());
 				l0cDto.setNumberOfSlices(l0c.getNumberOfSlices());
 				l0cDto.setDatatakeId(l0c.getDatatakeId());
 				r.add(l0cDto);
 				if ("ONE".equalsIgnoreCase(mode)) {
-					return new ResponseEntity<List<L0AcnMetadataDto>>(r, HttpStatus.OK);
+					return new ResponseEntity<List<L0AcnMetadata>>(r, HttpStatus.OK);
 				}
 			}
             LOGGER.info("Call getACN for {}N {}", productTypeWithoutLastChar, f.getDatatakeId());
 			L0AcnMetadata l0n = esServices.getL0Acn(productTypeWithoutLastChar + "N", f.getDatatakeId(), processMode);
 			if (l0n != null) {
-				L0AcnMetadataDto l0nDto = new L0AcnMetadataDto(l0n.getProductName(), l0n.getProductType(),
-						l0n.getKeyObjectStorage(), l0n.getValidityStart(), l0n.getValidityStop());
+				L0AcnMetadata l0nDto = new L0AcnMetadata(l0n.getProductName(), l0n.getProductType(),
+						l0n.getKeyObjectStorage(), l0n.getValidityStart(), l0n.getValidityStop(),
+						l0n.getMissionId(), l0n.getSatelliteId(), l0n.getStationCode(),
+						f.getInstrumentConfigurationId(), f.getNumberSlice(), f.getDatatakeId());
 				l0nDto.setInstrumentConfigurationId(l0n.getInstrumentConfigurationId());
 				l0nDto.setNumberOfSlices(l0n.getNumberOfSlices());
 				l0nDto.setDatatakeId(l0n.getDatatakeId());
 				r.add(l0nDto);
 				if ("ONE".equalsIgnoreCase(mode)) {
-					return new ResponseEntity<List<L0AcnMetadataDto>>(r, HttpStatus.OK);
+					return new ResponseEntity<List<L0AcnMetadata>>(r, HttpStatus.OK);
 				}
 			}
 
 			if(l0a == null && l0c == null && l0n == null) {
-				return new ResponseEntity<List<L0AcnMetadataDto>>(HttpStatus.NOT_FOUND);
+				return new ResponseEntity<List<L0AcnMetadata>>(HttpStatus.NOT_FOUND);
 			}
 			
-			return new ResponseEntity<List<L0AcnMetadataDto>>(r, HttpStatus.OK);
+			return new ResponseEntity<List<L0AcnMetadata>>(r, HttpStatus.OK);
 
 		} catch (MetadataNotPresentException em) {
 			LOGGER.warn("[L0_SLICE] [productName {}] [code {}] {}", productName,
 					em.getCode().getCode(), em.getLogMessage());
-			return new ResponseEntity<List<L0AcnMetadataDto>>(HttpStatus.NOT_FOUND);
+			return new ResponseEntity<List<L0AcnMetadata>>(HttpStatus.NOT_FOUND);
 		} catch (AbstractCodedException ace) {
 			LOGGER.error("[L0_SLICE] [productName {}] [code {}] {}", productName,
 					ace.getCode().getCode(), ace.getLogMessage());
-			return new ResponseEntity<List<L0AcnMetadataDto>>(HttpStatus.INTERNAL_SERVER_ERROR);
+			return new ResponseEntity<List<L0AcnMetadata>>(HttpStatus.INTERNAL_SERVER_ERROR);
 		} catch (Exception e) {
 			LOGGER.error("[L0_SLICE] [productName {}] [code {}] [msg {}]", productName,
-					ErrorCode.INTERNAL_ERROR.getCode(), e.getMessage());
-			return new ResponseEntity<List<L0AcnMetadataDto>>(HttpStatus.INTERNAL_SERVER_ERROR);
+					ErrorCode.INTERNAL_ERROR.getCode(), LogUtils.toString(e));
+			return new ResponseEntity<List<L0AcnMetadata>>(HttpStatus.INTERNAL_SERVER_ERROR);
 		}
 	}
 }

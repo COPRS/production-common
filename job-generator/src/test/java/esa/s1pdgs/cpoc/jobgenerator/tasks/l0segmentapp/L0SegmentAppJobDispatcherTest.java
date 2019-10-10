@@ -23,7 +23,7 @@ import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
 
-import esa.s1pdgs.cpoc.appcatalog.client.job.AbstractAppCatalogJobService;
+import esa.s1pdgs.cpoc.appcatalog.client.job.AppCatalogJobClient;
 import esa.s1pdgs.cpoc.appcatalog.common.rest.model.job.AppDataJobDto;
 import esa.s1pdgs.cpoc.appcatalog.common.rest.model.job.AppDataJobGenerationDtoState;
 import esa.s1pdgs.cpoc.common.ApplicationLevel;
@@ -35,7 +35,7 @@ import esa.s1pdgs.cpoc.jobgenerator.config.JobGeneratorSettings;
 import esa.s1pdgs.cpoc.jobgenerator.config.ProcessSettings;
 import esa.s1pdgs.cpoc.jobgenerator.tasks.JobsGeneratorFactory;
 import esa.s1pdgs.cpoc.jobgenerator.utils.TestL0SegmentUtils;
-import esa.s1pdgs.cpoc.mqi.model.queue.LevelSegmentDto;
+import esa.s1pdgs.cpoc.mqi.model.queue.ProductDto;
 
 /**
  * Test the class JobDispatcher
@@ -69,7 +69,7 @@ public class L0SegmentAppJobDispatcherTest {
     private L0SegmentAppJobDispatcher mockGenerator;
 
     @Mock
-    private AbstractAppCatalogJobService<LevelSegmentDto> appDataService;
+    private AppCatalogJobClient appDataService;
 
     /**
      * Test set up
@@ -155,15 +155,15 @@ public class L0SegmentAppJobDispatcherTest {
                 .when(appDataService)
                 .findNByPodAndGenerationTaskTableWithNotSentGeneration(
                         Mockito.anyString(), Mockito.anyString());
-        AppDataJobDto<LevelSegmentDto> primaryCheckAppJob =
+        AppDataJobDto<ProductDto> primaryCheckAppJob =
                 TestL0SegmentUtils.buildAppData();
         primaryCheckAppJob.getGenerations().get(0)
                 .setState(AppDataJobGenerationDtoState.PRIMARY_CHECK);
-        AppDataJobDto<LevelSegmentDto> readyAppJob =
+        AppDataJobDto<ProductDto> readyAppJob =
                 TestL0SegmentUtils.buildAppData();
         readyAppJob.getGenerations().get(0)
                 .setState(AppDataJobGenerationDtoState.READY);
-        AppDataJobDto<LevelSegmentDto> sentAppJob =
+        AppDataJobDto<ProductDto> sentAppJob =
                 TestL0SegmentUtils.buildAppData();
         sentAppJob.getGenerations().get(0)
                 .setState(AppDataJobGenerationDtoState.SENT);
@@ -235,7 +235,7 @@ public class L0SegmentAppJobDispatcherTest {
     @Test
     public void testGetTaskTable() throws JobGenMissingRoutingEntryException {
 
-        AppDataJobDto<LevelSegmentDto> appData =
+        AppDataJobDto<ProductDto> appData =
                 TestL0SegmentUtils.buildAppData();
 
         // Init dispatcher

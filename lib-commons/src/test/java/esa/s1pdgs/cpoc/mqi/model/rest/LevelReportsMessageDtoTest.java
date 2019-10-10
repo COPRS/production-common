@@ -24,13 +24,13 @@ public class LevelReportsMessageDtoTest {
     public void testGettersSettersConstructors() {
         LevelReportDto body = new LevelReportDto("product-name", "key-obs",
                 ProductFamily.L0_REPORT);
-        LevelReportsMessageDto dto =
-                new LevelReportsMessageDto(123, "input-key", body);
+        GenericMessageDto<LevelReportDto> dto =
+                new GenericMessageDto<LevelReportDto>(123, "input-key", body);
         assertEquals(123, dto.getIdentifier());
         assertEquals(body, dto.getBody());
         assertEquals("input-key", dto.getInputKey());
 
-        dto = new LevelReportsMessageDto();
+        dto = new GenericMessageDto<LevelReportDto>();
         dto.setIdentifier(321);
         dto.setBody(body);
         dto.setInputKey("othey-input");
@@ -46,8 +46,8 @@ public class LevelReportsMessageDtoTest {
     public void testToString() {
         LevelReportDto body = new LevelReportDto("product-name", "key-obs",
                 ProductFamily.L0_REPORT);
-        LevelReportsMessageDto dto =
-                new LevelReportsMessageDto(123, "input-key", body);
+        GenericMessageDto<LevelReportDto> dto =
+                new GenericMessageDto<LevelReportDto>(123, "input-key", body);
         String str = dto.toString();
         assertTrue("toString should contain the identifier",
                 str.contains("identifier: 123"));
@@ -62,7 +62,7 @@ public class LevelReportsMessageDtoTest {
      */
     @Test
     public void checkEquals() {
-        EqualsVerifier.forClass(LevelReportsMessageDto.class).usingGetClass()
+        EqualsVerifier.forClass(GenericMessageDto.class).usingGetClass()
                 .suppress(Warning.NONFINAL_FIELDS).verify();
     }
 

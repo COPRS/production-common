@@ -1,0 +1,30 @@
+spring:
+  application:
+    name: s1pdgs-request-repo
+  main:
+     allow-bean-definition-overriding: true
+   
+logging:
+  config: classpath:log4j2-test.yml
+  
+# REST controller
+server:
+  port: 8081      
+  
+# KAFKA
+kafka:
+  bootstrap-servers: localhost:9093                              # the bootstrap servers for KAFKA
+  group-id: error                                                # the group identifier to use for KAFKA publishers  
+  max-retries: 10                                                # number of retries if kafka is not available
+  poll-timeout: 3000
+  producer-retries: 10
+  max-pool-records: 1                                             # the maximal number of messages to get per poll
+  session-timeout-ms: 120000                                      # the timeout to acknowledge a message
+  topic:
+    errors: t-pdgs-errors
+
+# MongoDB
+mongodb:
+  host: localhost
+  port: 27017
+  database: s1pdgs                                                             #
