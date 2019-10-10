@@ -30,8 +30,17 @@
 			<groupId>de.werum.s1pdgs</groupId>
 			<artifactId>s1pro-core-mqi-client</artifactId>
 			<version>${project.version}</version>
-		</dependency>
+		</dependency>	
 		
+		<dependency>
+			<groupId>de.werum.s1pdgs</groupId>
+			<artifactId>s1pro-core-obs-sdk</artifactId>
+			<version>${project.version}</version>
+			<classifier>tests</classifier>
+      		<type>test-jar</type>
+      		<scope>test</scope>
+		</dependency>
+	
 		<dependency>
 			<groupId>de.werum.s1pdgs</groupId>
 			<artifactId>s1pro-core-obs-sdk</artifactId>
@@ -95,12 +104,6 @@
         <dependency>
 			<groupId>org.elasticsearch.client</groupId>
 			<artifactId>elasticsearch-rest-high-level-client</artifactId>
-			<exclusions>
-				<exclusion>
-					<groupId>org.elasticsearch</groupId>
-					<artifactId>elasticsearch</artifactId>
-				</exclusion>
-			</exclusions>
 		</dependency>
 
 		<dependency>
