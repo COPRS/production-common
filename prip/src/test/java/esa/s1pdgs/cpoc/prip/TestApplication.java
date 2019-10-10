@@ -9,9 +9,8 @@ import org.springframework.test.context.junit4.SpringRunner;
 @RunWith(SpringRunner.class)
 @SpringBootTest
 @DirtiesContext
-public class TestApplication {		
+public class TestApplication {
 	@Test
 	public void applicationContextTest() throws InterruptedException {
-		Application.main(new String[] {});
 	}
 }

@@ -4,6 +4,8 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
 
+import esa.s1pdgs.cpoc.common.utils.DateUtils;
+
 public class PripMetadata {
 
 	public static final String DEFAULT_CONTENTTYPE = "file/zip";
@@ -94,10 +96,10 @@ public class PripMetadata {
 
 	@Override
 	public String toString() {
-
 		return String.format(
-				"{id: %s, obsKey: %s, name: %s, contentType: %s, contentLength: %s, creationDate: %s, evictionDate: %s, checksums: %s}",
-				id, obsKey, name, contentType, contentLength, creationDate, evictionDate, checksums);
+				"{\"id\": \"%s\", \"obsKey\": \"%s\", \"name\": \"%s\", \"contentType\": \"%s\", \"contentLength\": \"%s\", \"creationDate\": \"%s\", \"evictionDate\": \"%s\", \"checksum\": %s}",
+				id, obsKey, name, contentType, contentLength, DateUtils.formatToMetadataDateTimeFormat(creationDate),
+				DateUtils.formatToMetadataDateTimeFormat(evictionDate), checksums);
 	}
 
 }

@@ -22,7 +22,7 @@ mqi:
 # Elastic Search
 elasticsearch:
   host: localhost                                           # Host of Elasticsearch cluster
-  port:  9300                                  # Port of Elasticsearch cluster
+  port:  9200                                  # Port of Elasticsearch cluster
   index-type: metadata                              # Elasticsearch index type used for metadata
   connect-timeout-ms: 2000                                        # Timeout in milliseconds of connection to the cluster
   socket-timeout-ms: 10000                                        # Timeout in milliseconds of the socket to the cluster

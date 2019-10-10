@@ -1,14 +1,39 @@
 package esa.s1pdgs.cpoc.prip.service.metadata;
 
+import java.io.IOException;
 import java.util.List;
+
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+import org.elasticsearch.action.index.IndexRequest;
+import org.elasticsearch.client.RestHighLevelClient;
+import org.elasticsearch.common.xcontent.XContentType;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 
 import esa.s1pdgs.cpoc.prip.model.PripMetadata;
 
+@Service
 public class PripElasticSearchMetadataRepo implements PripMetadataRepository {
+
+	private static final Logger LOGGER = LogManager.getLogger(PripElasticSearchMetadataRepo.class);
+
+	@Autowired
+	private RestHighLevelClient restHighLevelClient;
 
 	@Override
 	public void save(PripMetadata pripMetadata) {
-		// TODO Auto-generated method stub
+
+		LOGGER.info("saving PRIP metadata");
+		LOGGER.debug("saving PRIP metadata {}", pripMetadata.toString());
+
+		IndexRequest request = new IndexRequest("prip", "metadata", pripMetadata.getName())
+				.source(pripMetadata.toString(), XContentType.JSON);
+		try {
+			restHighLevelClient.index(request);
+		} catch (IOException e) {
+			LOGGER.warn("could not save PRIP metadata", e);
+		}
 	}
 
 	@Override

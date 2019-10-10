@@ -1,7 +1,7 @@
 package esa.s1pdgs.cpoc.prip.model;
 
 public class Checksum {
-	
+
 	public static final String DEFAULT_ALGORITHM = "MD5";
 
 	private String algorithm;
@@ -25,7 +25,7 @@ public class Checksum {
 
 	@Override
 	public String toString() {
-		return String.format("{algorithm: %s, value: %s}", algorithm, value);
+		return String.format("{\"algorithm\": \"%s\", \"value\": \"%s\"}", algorithm, value);
 	}
 
 }
