@@ -75,7 +75,6 @@ public class ProductEntityCollectionProcessor
 
 	private EntityCollection getData(ODataRequest request, EdmEntitySet edmEntitySet) {
 		EntityCollection entityCollection = new EntityCollection();
-		System.err.println(pripMetadataRepository.getClass().getSimpleName());
 		if (EdmProvider.ES_PRODUCTS_NAME.equals(edmEntitySet.getName())) {
 			List<Entity> productList = entityCollection.getEntities();
 			for(PripMetadata pripMetadata : pripMetadataRepository.findAll()) {
