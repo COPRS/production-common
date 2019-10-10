@@ -17,6 +17,8 @@ import esa.s1pdgs.cpoc.prip.model.PripMetadata;
 public class PripElasticSearchMetadataRepo implements PripMetadataRepository {
 
 	private static final Logger LOGGER = LogManager.getLogger(PripElasticSearchMetadataRepo.class);
+	private static final String ES_INDEX = "prip";
+	private static final String ES_PRIP_TYPE = "metadata";
 
 	@Autowired
 	private RestHighLevelClient restHighLevelClient;
@@ -25,9 +27,9 @@ public class PripElasticSearchMetadataRepo implements PripMetadataRepository {
 	public void save(PripMetadata pripMetadata) {
 
 		LOGGER.info("saving PRIP metadata");
-		LOGGER.debug("saving PRIP metadata {}", pripMetadata.toString());
+		LOGGER.debug("saving PRIP metadata {}", pripMetadata);
 
-		IndexRequest request = new IndexRequest("prip", "metadata", pripMetadata.getName())
+		IndexRequest request = new IndexRequest(ES_INDEX, ES_PRIP_TYPE, pripMetadata.getName())
 				.source(pripMetadata.toString(), XContentType.JSON);
 		try {
 			restHighLevelClient.index(request);

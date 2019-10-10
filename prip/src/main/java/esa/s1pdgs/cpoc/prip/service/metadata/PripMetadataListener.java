@@ -16,12 +16,15 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import esa.s1pdgs.cpoc.common.ProductCategory;
+import esa.s1pdgs.cpoc.common.ProductFamily;
+import esa.s1pdgs.cpoc.common.errors.obs.ObsException;
 import esa.s1pdgs.cpoc.mqi.MqiConsumer;
 import esa.s1pdgs.cpoc.mqi.MqiListener;
 import esa.s1pdgs.cpoc.mqi.client.GenericMqiClient;
 import esa.s1pdgs.cpoc.mqi.model.queue.ProductDto;
 import esa.s1pdgs.cpoc.mqi.model.rest.GenericMessageDto;
 import esa.s1pdgs.cpoc.obs_sdk.ObsClient;
+import esa.s1pdgs.cpoc.obs_sdk.ObsObject;
 import esa.s1pdgs.cpoc.prip.model.Checksum;
 import esa.s1pdgs.cpoc.prip.model.PripMetadata;
 
@@ -29,21 +32,19 @@ import esa.s1pdgs.cpoc.prip.model.PripMetadata;
 public class PripMetadataListener implements MqiListener<ProductDto> {
 
 	private static final Logger LOGGER = LogManager.getLogger(PripMetadataListener.class);
-	
+
 	private final GenericMqiClient mqiClient;
-	
+
 	private final ObsClient obsClient;
-	
+
 	private final long pollingIntervalMs;
-	
+
 	private final long pollingInitialDelayMs;
-	
+
 	private final PripMetadataRepository pripMetadataRepo;
-	
+
 	@Autowired
-	public PripMetadataListener(
-			final GenericMqiClient mqiClient,
-			final ObsClient obsClient,
+	public PripMetadataListener(final GenericMqiClient mqiClient, final ObsClient obsClient,
 			final PripMetadataRepository pripMetadataRepo,
 			@Value("${prip.metadatalistener.polling-interval-ms}") final long pollingIntervalMs,
 			@Value("${prip.metadatalistener.polling-initial-delay-ms}") final long pollingInitialDelayMs) {
@@ -53,7 +54,7 @@ public class PripMetadataListener implements MqiListener<ProductDto> {
 		this.pollingIntervalMs = pollingIntervalMs;
 		this.pollingInitialDelayMs = pollingInitialDelayMs;
 	}
-	
+
 	@PostConstruct
 	public void initService() {
 		if (pollingIntervalMs > 0) {
@@ -63,41 +64,52 @@ public class PripMetadataListener implements MqiListener<ProductDto> {
 		}
 	}
 
-	
 	@Override
 	public void onMessage(GenericMessageDto<ProductDto> message) {
-		
+
 		LOGGER.debug("starting saving PRIP metadata, got message: {}", message);
-		
+
 		ProductDto productDto = message.getBody();
 		LocalDateTime creationDate = LocalDateTime.now();
-		
+
 		PripMetadata pripMetadata = new PripMetadata();
 		pripMetadata.setId(UUID.randomUUID());
 		pripMetadata.setObsKey(productDto.getKeyObjectStorage());
 		pripMetadata.setName(productDto.getProductName());
 		pripMetadata.setContentType(PripMetadata.DEFAULT_CONTENTTYPE);
-		pripMetadata.setContentLength(getContentLength());
+		pripMetadata.setContentLength(getContentLength(productDto.getFamily(), productDto.getKeyObjectStorage()));
 		pripMetadata.setCreationDate(creationDate);
 		pripMetadata.setEvictionDate(creationDate.plusDays(PripMetadata.DEFAULT_EVICTION_DAYS));
-		pripMetadata.setChecksums(getChecksums());
-		
+		pripMetadata.setChecksums(getChecksums(productDto.getFamily(), productDto.getKeyObjectStorage()));
+
 		pripMetadataRepo.save(pripMetadata);
-		
+
 		LOGGER.debug("end of saving PRIP metadata: {}", pripMetadata);
 	}
 
-	private long getContentLength() {
-		//TODO: obsClient.getContentLength
-		return 0;
+	private long getContentLength(ProductFamily family, String key) {
+		long contentLength = 0;
+		try {
+			contentLength = obsClient.size(new ObsObject(family, key));
+
+		} catch (ObsException e) {
+			LOGGER.warn(String.format("could not determine content length of %s", key), e);
+		}
+		return contentLength;
 	}
 
-	private List<Checksum> getChecksums() {
-		//TODO: obsClient.getChecksum
+	private List<Checksum> getChecksums(ProductFamily family, String key) {
 		Checksum checksum = new Checksum();
-		checksum.setAlgorithm(Checksum.DEFAULT_ALGORITHM);
+		checksum.setAlgorithm("");
 		checksum.setValue("");
+		try {
+			String value = obsClient.getChecksum(new ObsObject(family, key));
+			checksum.setAlgorithm(Checksum.DEFAULT_ALGORITHM);
+			checksum.setValue(value);
+		} catch (ObsException e) {
+			LOGGER.warn(String.format("could not determine checksum of %s", key), e);
+
+		}
 		return Arrays.asList(checksum);
 	}
-
 }
