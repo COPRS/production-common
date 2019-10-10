@@ -17,6 +17,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import esa.s1pdgs.cpoc.prip.service.edm.EdmProvider;
+import esa.s1pdgs.cpoc.prip.service.metadata.PripMetadataRepository;
 import esa.s1pdgs.cpoc.prip.service.processor.ProductEntityCollectionProcessor;
 import esa.s1pdgs.cpoc.prip.service.processor.ProductEntityProcessor;
 
@@ -29,13 +30,16 @@ public class OdataController {
 	@Autowired
 	EdmProvider edmProvider;
 	
+	@Autowired
+	PripMetadataRepository pripMetadataRepository;
+	
 	@RequestMapping(value = "/v1/**")
 	public void process(HttpServletRequest request, HttpServletResponse response) {
 		OData odata = OData.newInstance();
 		ServiceMetadata serviceMetadata = odata.createServiceMetadata(edmProvider, new ArrayList<EdmxReference>());
 		ODataHttpHandler handler = odata.createHandler(serviceMetadata);
-		handler.register(new ProductEntityProcessor());
-		handler.register(new ProductEntityCollectionProcessor());
+		handler.register(new ProductEntityProcessor(pripMetadataRepository));
+		handler.register(new ProductEntityCollectionProcessor(pripMetadataRepository));
 
 		handler.process(new HttpServletRequestWrapper(request) {
 	         @Override

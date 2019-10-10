@@ -26,13 +26,17 @@ import org.apache.olingo.server.api.uri.UriResourceEntitySet;
 import esa.s1pdgs.cpoc.prip.model.PripMetadata;
 import esa.s1pdgs.cpoc.prip.service.edm.EdmProvider;
 import esa.s1pdgs.cpoc.prip.service.mapping.MappingUtil;
-import esa.s1pdgs.cpoc.prip.service.metadata.DummyPripMetadataRepositoryImpl;
 import esa.s1pdgs.cpoc.prip.service.metadata.PripMetadataRepository;
 
 public class ProductEntityProcessor implements org.apache.olingo.server.api.processor.EntityProcessor {
 
 	private OData odata;
 	private ServiceMetadata serviceMetadata;
+	private PripMetadataRepository pripMetadataRepository;
+
+	public ProductEntityProcessor(PripMetadataRepository pripMetadataRepository) {
+		this.pripMetadataRepository = pripMetadataRepository;
+	}
 	
 	@Override
 	public void init(OData odata, ServiceMetadata serviceMetadata) {
@@ -47,11 +51,9 @@ public class ProductEntityProcessor implements org.apache.olingo.server.api.proc
 		UriResourceEntitySet uriResourceEntitySet = (UriResourceEntitySet) resourcePaths.get(0);
 		EdmEntitySet edmEntitySet = uriResourceEntitySet.getEntitySet();
 		
-		if (EdmProvider.ES_PRODUCTS_NAME.equals(edmEntitySet.getName())) {
-			List<UriParameter> keyPredicates = uriResourceEntitySet.getKeyPredicates();
-			
-			PripMetadataRepository pripMetadataRepository = new DummyPripMetadataRepositoryImpl();
-			PripMetadata foundPripMetadata = pripMetadataRepository.findById("00000000-0000-0000-0000-000000000001");
+		List<UriParameter> keyPredicates = uriResourceEntitySet.getKeyPredicates();
+		if (EdmProvider.ES_PRODUCTS_NAME.equals(edmEntitySet.getName()) && keyPredicates.size() >= 1) {
+			PripMetadata foundPripMetadata = pripMetadataRepository.findById(keyPredicates.get(0).getText().replace("'", ""));
 			if (null != foundPripMetadata) {
 				Entity entity = MappingUtil.pripMetadataToEntity(foundPripMetadata, request);
 							
@@ -64,6 +66,9 @@ public class ProductEntityProcessor implements org.apache.olingo.server.api.proc
 				
 				response.setContent(entityStream);
 				response.setStatusCode(HttpStatusCode.OK.getStatusCode());
+				response.setHeader(HttpHeader.CONTENT_TYPE, responseFormat.toContentTypeString());
+			} else {
+				response.setStatusCode(HttpStatusCode.NOT_FOUND.getStatusCode());				
 				response.setHeader(HttpHeader.CONTENT_TYPE, responseFormat.toContentTypeString());
 			}
 		}

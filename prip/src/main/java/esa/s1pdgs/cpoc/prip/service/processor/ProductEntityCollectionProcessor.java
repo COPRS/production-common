@@ -27,7 +27,6 @@ import org.apache.olingo.server.api.uri.UriResourceEntitySet;
 import esa.s1pdgs.cpoc.prip.model.PripMetadata;
 import esa.s1pdgs.cpoc.prip.service.edm.EdmProvider;
 import esa.s1pdgs.cpoc.prip.service.mapping.MappingUtil;
-import esa.s1pdgs.cpoc.prip.service.metadata.DummyPripMetadataRepositoryImpl;
 import esa.s1pdgs.cpoc.prip.service.metadata.PripMetadataRepository;
 
 public class ProductEntityCollectionProcessor
@@ -35,8 +34,12 @@ public class ProductEntityCollectionProcessor
 
 	private OData odata;
 	private ServiceMetadata serviceMetadata;
-
-	@Override
+	private PripMetadataRepository pripMetadataRepository;
+	
+	public ProductEntityCollectionProcessor(PripMetadataRepository pripMetadataRepository) {
+		this.pripMetadataRepository = pripMetadataRepository;
+	}
+	
 	public void init(OData odata, ServiceMetadata serviceMetadata) {
 		this.odata = odata;
 		this.serviceMetadata = serviceMetadata;
@@ -72,9 +75,8 @@ public class ProductEntityCollectionProcessor
 
 	private EntityCollection getData(ODataRequest request, EdmEntitySet edmEntitySet) {
 		EntityCollection entityCollection = new EntityCollection();
+		System.err.println(pripMetadataRepository.getClass().getSimpleName());
 		if (EdmProvider.ES_PRODUCTS_NAME.equals(edmEntitySet.getName())) {
-			PripMetadataRepository pripMetadataRepository = new DummyPripMetadataRepositoryImpl();
-			
 			List<Entity> productList = entityCollection.getEntities();
 			for(PripMetadata pripMetadata : pripMetadataRepository.findAll()) {
 				productList.add(MappingUtil.pripMetadataToEntity(pripMetadata, request));

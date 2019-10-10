@@ -25,9 +25,9 @@ public class MappingUtil {
 	}
 	
 	public static Entity pripMetadataToEntity(PripMetadata pripMetadata, ODataRequest request) {
-		URI id = MappingUtil.createId(request, "Products", pripMetadata.getId());
+		URI uri = MappingUtil.createId(request, "Products", pripMetadata.getId());
 		Entity entity = new Entity()
-				.addProperty(new Property(null, "Id", ValueType.PRIMITIVE, id))
+				.addProperty(new Property(null, "Id", ValueType.PRIMITIVE, pripMetadata.getId()))
 				.addProperty(new Property(null, "Name", ValueType.PRIMITIVE, pripMetadata.getName()))
 				.addProperty(new Property(null, "ContentType", ValueType.PRIMITIVE, pripMetadata.getContentType()))
 				.addProperty(new Property(null, "ContentLength", ValueType.PRIMITIVE, pripMetadata.getContentLength()))
@@ -35,8 +35,7 @@ public class MappingUtil {
 				.addProperty(new Property(null, "EvictionDate", ValueType.PRIMITIVE, convertLocalDateTimeToTimestamp(pripMetadata.getEvictionDate())))
 				.addProperty(new Property(null, "Checksums", ValueType.COLLECTION_COMPLEX, mapToChecksumList(pripMetadata.getChecksums())));
 		entity.setMediaContentType(pripMetadata.getContentType());
-		entity.setId(id);
-		
+		entity.setId(uri);
 		return entity;
 	}
 

@@ -40,7 +40,7 @@ public class DummyPripMetadataRepositoryImpl implements PripMetadataRepository {
 		return Arrays.asList( //
 				createDummyMetadata( //
 						"00000000-0000-0000-0000-000000000001", // id
-						"DummyProduct1", // name
+						"DummyProduct1.ZIP", // name
 						1000L, // size
 						"2000-01-01T00:00:00.000000Z", // creation date
 						"2000-01-01T00:00:00.000000Z", // eviction date
@@ -48,7 +48,7 @@ public class DummyPripMetadataRepositoryImpl implements PripMetadataRepository {
 				), //
 				createDummyMetadata( //
 						"00000000-0000-0000-0000-000000000002", // id
-						"DummyProduct2", // name
+						"DummyProduct2.ZIP", // name
 						2000L, // size
 						"2000-01-01T00:00:00.000000Z", // creation date
 						"2000-01-01T00:00:00.000000Z", // eviction date
@@ -56,7 +56,7 @@ public class DummyPripMetadataRepositoryImpl implements PripMetadataRepository {
 				), //
 				createDummyMetadata( //
 						"00000000-0000-0000-0000-000000000003", // id
-						"DummyProduct3", // name
+						"DummyProduct3.ZIP", // name
 						3000L, // size
 						"2000-01-01T00:00:00.000000Z", // creation date
 						"2000-01-01T00:00:00.000000Z", // eviction date
@@ -73,7 +73,7 @@ public class DummyPripMetadataRepositoryImpl implements PripMetadataRepository {
 		
 		metadata.setId(UUID.fromString(id));
 		metadata.setName(name);
-		metadata.setObsKey("Prefix/" + name + ".ZIP");
+		metadata.setObsKey("Prefix/" + name);
 		metadata.setContentLength(size);
 		metadata.setContentType("application/octet-stream");
 		metadata.setCreationDate(DateUtils.parse(creationDate));
