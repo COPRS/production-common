@@ -4,7 +4,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>de.werum.s1pdgs</groupId>
 	<artifactId>s1pro-core</artifactId>
-	<version>0.7.0</version>
+	<version>0.7.2</version>
 	<packaging>pom</packaging>
 
 	<properties>

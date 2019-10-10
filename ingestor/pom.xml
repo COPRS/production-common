@@ -6,7 +6,7 @@
 	<parent>
 	  <groupId>de.werum.s1pdgs</groupId>
 	  <artifactId>s1pro-core</artifactId>
-	  <version>0.7.0</version>
+	  <version>0.7.2</version>
 	</parent>
 	<artifactId>s1pro-core-ingestor</artifactId>
 	<packaging>jar</packaging>
