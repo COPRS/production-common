@@ -341,8 +341,8 @@ public class ExtractMetadata {
 	 */
 	private int totalNumberOfSlice(String startTime, String stopTime,
 			String type) {
-		final Duration duration = Duration.between(DateUtils.parse(stopTime),
-				DateUtils.parse(startTime));
+		final Duration duration = Duration.between(DateUtils.parse(startTime),
+				DateUtils.parse(stopTime));
 
 		float sliceLength = this.typeSliceLength.get(type);
 
