@@ -1,4 +1,4 @@
-package esa.s1pdgs.cpoc.prip.service.metadata;
+package esa.s1pdgs.cpoc.prip.metadata;
 
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
@@ -10,6 +10,7 @@ import java.util.UUID;
 import esa.s1pdgs.cpoc.common.utils.DateUtils;
 import esa.s1pdgs.cpoc.prip.model.Checksum;
 import esa.s1pdgs.cpoc.prip.model.PripMetadata;
+import esa.s1pdgs.cpoc.prip.service.metadata.PripMetadataRepository;
 
 public class DummyPripMetadataRepositoryImpl implements PripMetadataRepository {
 
