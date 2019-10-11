@@ -78,7 +78,7 @@ public class ProductEntityCollectionProcessor
 		if (EdmProvider.ES_PRODUCTS_NAME.equals(edmEntitySet.getName())) {
 			List<Entity> productList = entityCollection.getEntities();
 			for(PripMetadata pripMetadata : pripMetadataRepository.findAll()) {
-				productList.add(MappingUtil.pripMetadataToEntity(pripMetadata, request));
+				productList.add(MappingUtil.pripMetadataToEntity(pripMetadata, request.getRawBaseUri()));
 			}
 		}
 

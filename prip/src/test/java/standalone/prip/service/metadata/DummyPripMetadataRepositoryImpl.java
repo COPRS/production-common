@@ -1,10 +1,7 @@
 package standalone.prip.service.metadata;
 
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
 import java.util.Arrays;
 import java.util.List;
-import java.util.TimeZone;
 import java.util.UUID;
 
 import esa.s1pdgs.cpoc.common.utils.DateUtils;
@@ -68,10 +65,6 @@ public class DummyPripMetadataRepositoryImpl implements PripMetadataRepository {
 	private PripMetadata createDummyMetadata(String id, String name, long size, String creationDate,
 			String evictionDate, String checksumValue) {
 		PripMetadata metadata = new PripMetadata();
-
-		DateFormat sdf = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
-		sdf.setTimeZone(TimeZone.getTimeZone("UTC"));
-		
 		metadata.setId(UUID.fromString(id));
 		metadata.setName(name);
 		metadata.setObsKey("Prefix/" + name);

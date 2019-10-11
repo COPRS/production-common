@@ -14,7 +14,6 @@ import org.apache.olingo.commons.api.data.Entity;
 import org.apache.olingo.commons.api.data.Property;
 import org.apache.olingo.commons.api.data.ValueType;
 import org.apache.olingo.commons.api.ex.ODataRuntimeException;
-import org.apache.olingo.server.api.ODataRequest;
 
 import esa.s1pdgs.cpoc.prip.model.Checksum;
 import esa.s1pdgs.cpoc.prip.model.PripMetadata;
@@ -24,10 +23,10 @@ public class MappingUtil {
 	private MappingUtil() {
 	}
 	
-	public static Entity pripMetadataToEntity(PripMetadata pripMetadata, ODataRequest request) {
-		URI uri = MappingUtil.createId(request, "Products", pripMetadata.getId());
+	public static Entity pripMetadataToEntity(PripMetadata pripMetadata, String rawBaseUri) {
+		URI uri = MappingUtil.createId(rawBaseUri, "Products", pripMetadata.getId());
 		Entity entity = new Entity()
-				.addProperty(new Property(null, "Id", ValueType.PRIMITIVE, pripMetadata.getId()))
+				.addProperty(new Property(null, "Id", ValueType.PRIMITIVE, pripMetadata.getId().toString()))
 				.addProperty(new Property(null, "Name", ValueType.PRIMITIVE, pripMetadata.getName()))
 				.addProperty(new Property(null, "ContentType", ValueType.PRIMITIVE, pripMetadata.getContentType()))
 				.addProperty(new Property(null, "ContentLength", ValueType.PRIMITIVE, pripMetadata.getContentLength()))
@@ -39,9 +38,9 @@ public class MappingUtil {
 		return entity;
 	}
 
-	public static URI createId(ODataRequest request, String entitySetName, UUID id) {
+	public static URI createId(String rawBaseUri, String entitySetName, UUID id) {
 		try {
-			return new URI(request.getRawBaseUri() + "/" + entitySetName + "('" + id.toString() + "')");
+			return new URI(rawBaseUri + "/" + entitySetName + "('" + id.toString() + "')");
 		} catch (URISyntaxException e) {
 			throw new ODataRuntimeException("Unable to create id for entity: " + entitySetName, e);
 		}
