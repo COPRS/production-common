@@ -216,8 +216,11 @@ public class LevelProductsExtractorTest {
 		descriptor.setPolarisation("DV");
 		descriptor.setDataTakeId("021735");
 		descriptor.setProductFamily(ProductFamily.L0_SLICE);
+		
+		ProductDto productDTO = new ProductDto();
+		productDTO.setFamily(ProductFamily.L0_SLICE);
 
-		JSONObject expected = extractor.mdBuilder.buildOutputFileMetadata(descriptor, files.get(0), ProductFamily.L0_SLICE);
+		JSONObject expected = extractor.mdBuilder.buildOutputFileMetadata(descriptor, files.get(0), productDTO);
 
 		final LoggerReporting.Factory reportingFactory = new LoggerReporting.Factory("TestMetadataExtraction");
 
@@ -265,8 +268,11 @@ public class LevelProductsExtractorTest {
 		descriptor.setPolarisation("DV");
 		descriptor.setDataTakeId("021735");
 		descriptor.setProductFamily(ProductFamily.L0_ACN);
+		
+		ProductDto productDTO = new ProductDto();
+		productDTO.setFamily(ProductFamily.L0_ACN);
 
-		JSONObject expected = extractor.mdBuilder.buildOutputFileMetadata(descriptor, files.get(0), ProductFamily.L0_ACN);
+		JSONObject expected = extractor.mdBuilder.buildOutputFileMetadata(descriptor, files.get(0), productDTO);
 		final LoggerReporting.Factory reportingFactory = new LoggerReporting.Factory("TestMetadataExtraction");
 
 		JSONObject result = extractor.extractMetadata(reportingFactory, inputMessageSafe);
@@ -313,8 +319,11 @@ public class LevelProductsExtractorTest {
 		descriptor.setPolarisation("DV");
 		descriptor.setDataTakeId("021735");
 		descriptor.setProductFamily(ProductFamily.L1_SLICE);
+		
+		ProductDto productDTO = new ProductDto();
+		productDTO.setFamily(ProductFamily.L1_SLICE);
 
-		JSONObject expected = extractor.mdBuilder.buildOutputFileMetadata(descriptor, files.get(0), ProductFamily.L1_SLICE);
+		JSONObject expected = extractor.mdBuilder.buildOutputFileMetadata(descriptor, files.get(0), productDTO);
 		final LoggerReporting.Factory reportingFactory = new LoggerReporting.Factory("TestMetadataExtraction");
 
 		JSONObject result = extractor.extractMetadata(reportingFactory, inputMessageSafe);
@@ -359,8 +368,11 @@ public class LevelProductsExtractorTest {
 		descriptor.setPolarisation("DV");
 		descriptor.setDataTakeId("023A69");
 		descriptor.setProductFamily(ProductFamily.L1_ACN);
+		
+		ProductDto productDTO = new ProductDto();
+		productDTO.setFamily(ProductFamily.L1_ACN);
 
-		JSONObject expected = extractor.mdBuilder.buildOutputFileMetadata(descriptor, files.get(0), ProductFamily.L1_ACN);
+		JSONObject expected = extractor.mdBuilder.buildOutputFileMetadata(descriptor, files.get(0), productDTO);
 
 		final LoggerReporting.Factory reportingFactory = new LoggerReporting.Factory("TestMetadataExtraction");
 
@@ -404,8 +416,11 @@ public class LevelProductsExtractorTest {
 		descriptor.setPolarisation("SV");
 		descriptor.setDataTakeId("0313A0");
 		descriptor.setProductFamily(ProductFamily.L2_SLICE);
+		
+		ProductDto productDTO = new ProductDto();
+		productDTO.setFamily(ProductFamily.L2_SLICE);
 
-		JSONObject expected = extractor.mdBuilder.buildOutputFileMetadata(descriptor, files.get(0), ProductFamily.L2_SLICE);
+		JSONObject expected = extractor.mdBuilder.buildOutputFileMetadata(descriptor, files.get(0), productDTO);
 		final LoggerReporting.Factory reportingFactory = new LoggerReporting.Factory("TestMetadataExtraction");
 
 		JSONObject result = extractor.extractMetadata(reportingFactory, inputMessageSafe);
@@ -448,8 +463,11 @@ public class LevelProductsExtractorTest {
 		descriptor.setPolarisation("SV");
 		descriptor.setDataTakeId("0313A0");
 		descriptor.setProductFamily(ProductFamily.L2_ACN);
+		
+		ProductDto productDTO = new ProductDto();
+		productDTO.setFamily(ProductFamily.L2_ACN);
 
-		JSONObject expected = extractor.mdBuilder.buildOutputFileMetadata(descriptor, files.get(0), ProductFamily.L2_ACN);
+		JSONObject expected = extractor.mdBuilder.buildOutputFileMetadata(descriptor, files.get(0), productDTO);
 		final LoggerReporting.Factory reportingFactory = new LoggerReporting.Factory("TestMetadataExtraction");
 		JSONObject result = extractor.extractMetadata(reportingFactory, inputMessageSafe);
 		for (String key : expected.keySet()) {
