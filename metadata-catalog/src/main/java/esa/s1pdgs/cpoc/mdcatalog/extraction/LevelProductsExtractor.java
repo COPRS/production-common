@@ -130,7 +130,7 @@ public class LevelProductsExtractor extends GenericExtractor<ProductDto> impleme
     	final OutputFileDescriptor descriptor = extractFromFilename(reportingFactory, () -> fileDescriptorBuilder.buildOutputFileDescriptor(metadataFile, dto, dto.getFamily()));
     	return extractFromFile(
     			reportingFactory, 
-    			() -> mdBuilder.buildOutputFileMetadata(descriptor, metadataFile, dto.getFamily()));
+    			() -> mdBuilder.buildOutputFileMetadata(descriptor, metadataFile, dto));
     }
     
 
