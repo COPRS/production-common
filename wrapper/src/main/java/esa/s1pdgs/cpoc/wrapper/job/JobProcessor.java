@@ -6,6 +6,7 @@ import java.nio.file.FileVisitOption;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
@@ -42,7 +43,7 @@ import esa.s1pdgs.cpoc.mqi.model.rest.Ack;
 import esa.s1pdgs.cpoc.mqi.model.rest.AckMessageDto;
 import esa.s1pdgs.cpoc.mqi.model.rest.GenericMessageDto;
 import esa.s1pdgs.cpoc.obs_sdk.ObsClient;
-import esa.s1pdgs.cpoc.report.FilenameReportingInput;
+import esa.s1pdgs.cpoc.report.JobOrderReportingInput;
 import esa.s1pdgs.cpoc.report.LoggerReporting;
 import esa.s1pdgs.cpoc.report.Reporting;
 import esa.s1pdgs.cpoc.report.ReportingMessage;
@@ -200,8 +201,12 @@ public class JobProcessor implements MqiListener<LevelJobDto> {
 
 		// Everything is fine with the request, we can start processing it.
 		LOGGER.debug("Everything is fine with the request, start processing job {}", job);
-		final Reporting report = reportingFactory.newReporting(0);
-		report.begin(new FilenameReportingInput(toReportFilenames(job)), new ReportingMessage("Start job processing"));
+		final Reporting report = reportingFactory.newReporting(0);		
+		final String jobOrderName = new File(job.getJobOrder()).getName();
+		report.begin(
+				new JobOrderReportingInput(toReportFilenames(job), jobOrderName, Collections.emptyMap()),				
+				new ReportingMessage("Start job processing")
+		);
 
 		File workdir = new File(job.getWorkDirectory());
 		// Clean up the working directory with all of its content
