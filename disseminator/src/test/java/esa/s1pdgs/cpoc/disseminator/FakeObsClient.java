@@ -73,4 +73,18 @@ public abstract class FakeObsClient implements ObsClient {
 
 	}
 
+	@Override
+	public long size(ObsObject object) throws ObsException {
+		// TODO Auto-generated method stub
+		return 0;
+	}
+
+	@Override
+	public String getChecksum(ObsObject object) throws ObsException {
+		// TODO Auto-generated method stub
+		return null;
+	}
+	
+	
+
 }
