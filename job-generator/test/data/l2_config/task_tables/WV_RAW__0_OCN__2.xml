@@ -312,7 +312,7 @@
 					<Version>02.84</Version>
 					<Critical>true</Critical>
 					<Criticality_Level>2</Criticality_Level>
-					<File_Name>/usr/local/components/S1IPF/bin/S1IPF_wrapperScripts/LOP_ProcMain_Wrapper.sh</File_Name>
+					<File_Name>/usr/local/components/S1IPF_wrapperScripts/LOP_ProcMain_Wrapper.sh</File_Name>
 					<List_of_Inputs count="7">
 						<Input ref="SL2">
 						</Input>
