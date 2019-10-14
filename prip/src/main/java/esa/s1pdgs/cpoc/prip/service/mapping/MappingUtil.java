@@ -52,11 +52,13 @@ public class MappingUtil {
 	
 	public static List<ComplexValue> mapToChecksumList(List<Checksum> checksums) {
 		List<ComplexValue> listOfComplexValues = new ArrayList<>();
-		for (Checksum checksum : checksums) {
-			ComplexValue complexValue = new ComplexValue();
-			complexValue.getValue().add(new Property(null, "Algorithm", ValueType.PRIMITIVE, checksum.getAlgorithm()));
-			complexValue.getValue().add(new Property(null, "Value", ValueType.PRIMITIVE, checksum.getValue()));
-			listOfComplexValues.add(complexValue);
+		if (null != checksums) {
+			for (Checksum checksum : checksums) {
+				ComplexValue complexValue = new ComplexValue();
+				complexValue.getValue().add(new Property(null, "Algorithm", ValueType.PRIMITIVE, checksum.getAlgorithm()));
+				complexValue.getValue().add(new Property(null, "Value", ValueType.PRIMITIVE, checksum.getValue()));
+				listOfComplexValues.add(complexValue);
+			}
 		}
 		return listOfComplexValues;
 	}
