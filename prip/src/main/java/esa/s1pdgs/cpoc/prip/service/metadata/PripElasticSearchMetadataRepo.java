@@ -1,6 +1,7 @@
 package esa.s1pdgs.cpoc.prip.service.metadata;
 
 import java.io.IOException;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -16,6 +17,7 @@ import org.elasticsearch.action.search.SearchResponse;
 import org.elasticsearch.action.support.replication.ReplicationResponse;
 import org.elasticsearch.client.RestHighLevelClient;
 import org.elasticsearch.common.xcontent.XContentType;
+import org.elasticsearch.index.query.BoolQueryBuilder;
 import org.elasticsearch.index.query.QueryBuilders;
 import org.elasticsearch.search.SearchHit;
 import org.elasticsearch.search.builder.SearchSourceBuilder;
@@ -74,7 +76,7 @@ public class PripElasticSearchMetadataRepo implements PripMetadataRepository {
 	public List<PripMetadata> findAll() {
 		LOGGER.info("finding PRIP metadata");
 
-		List<PripMetadata> metadata = new ArrayList<PripMetadata>();
+		List<PripMetadata> metadata = new ArrayList<>();
 		SearchSourceBuilder sourceBuilder = new SearchSourceBuilder();
 		sourceBuilder.size(DEFAULT_MAX_HITS);
 		SearchRequest searchRequest = new SearchRequest(ES_INDEX);
@@ -103,6 +105,7 @@ public class PripElasticSearchMetadataRepo implements PripMetadataRepository {
 
 		SearchSourceBuilder sourceBuilder = new SearchSourceBuilder();
 		sourceBuilder.query(QueryBuilders.termQuery(PripMetadata.FIELD_NAMES.ID.fieldName(), id));
+
 		SearchRequest searchRequest = new SearchRequest(ES_INDEX);
 		searchRequest.types(ES_PRIP_TYPE);
 		searchRequest.source(sourceBuilder);
@@ -124,6 +127,45 @@ public class PripElasticSearchMetadataRepo implements PripMetadataRepository {
 		}
 		LOGGER.info("finding PRIP metadata successful");
 		return pripMetadata;
+	}
+
+	@Override
+	public List<PripMetadata> findByCreationDate(LocalDateTime creationDateStart, LocalDateTime creationDateStop) {
+
+		if (creationDateStart.isAfter(creationDateStop)) {
+			throw new IllegalArgumentException("creationDateStart is after creationDateStop");
+		}
+
+		LOGGER.info("finding PRIP metadata within creationDate interval {} and {}", creationDateStart,
+				creationDateStop);
+
+		SearchSourceBuilder sourceBuilder = new SearchSourceBuilder();
+		BoolQueryBuilder queryBuilder = QueryBuilders.boolQuery()
+				.must(QueryBuilders.rangeQuery(PripMetadata.FIELD_NAMES.CREATION_DATE.fieldName())
+						.from(DateUtils.formatToMetadataDateTimeFormat(creationDateStart))
+						.to(DateUtils.formatToMetadataDateTimeFormat(creationDateStop)));
+		sourceBuilder.query(queryBuilder);
+
+		SearchRequest searchRequest = new SearchRequest(ES_INDEX);
+		searchRequest.types(ES_PRIP_TYPE);
+		searchRequest.source(sourceBuilder);
+
+		List<PripMetadata> metadata = new ArrayList<>();
+
+		try {
+			SearchResponse searchResponse = restHighLevelClient.search(searchRequest);
+			LOGGER.trace("response {}", searchResponse);
+
+			for (SearchHit hit : searchResponse.getHits().getHits()) {
+				metadata.add(mapSearchHitToPripMetadata(hit));
+			}
+
+		} catch (IOException e) {
+			LOGGER.warn("error while finding PRIP metadata", e);
+		}
+		LOGGER.info("finding PRIP metadata successful, number of hits {}", metadata.size());
+		return metadata;
+
 	}
 
 	private PripMetadata mapSearchHitToPripMetadata(SearchHit hit) {

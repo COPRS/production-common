@@ -1,5 +1,6 @@
 package standalone.prip.service.metadata;
 
+import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
@@ -77,5 +78,11 @@ public class DummyPripMetadataRepositoryImpl implements PripMetadataRepository {
 		checksum.setValue(checksumValue);
 		metadata.setChecksums(Arrays.asList(checksum));
 		return metadata;
+	}
+
+	@Override
+	public List<PripMetadata> findByCreationDate(LocalDateTime creationDateStart, LocalDateTime creationDateStop) {
+		// TODO Auto-generated method stub
+		return null;
 	}
 }
