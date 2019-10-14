@@ -20,7 +20,7 @@ public class LevelJobOutputDto {
 	/**
 	 * Is a oqcCheck for the wrapper required for this output?
 	 */
-	private boolean oqcCheck;
+	private boolean oqcCheck = false;
 
 	/**
 	 * Default constructor

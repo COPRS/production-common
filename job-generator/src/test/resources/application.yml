@@ -62,6 +62,9 @@ job-generator:
     AN_RAW__0A: N[1-6]_RAW__0A
     AN_RAW__0C: N[1-6]_RAW__0C
     AN_RAW__0N: N[1-6]_RAW__0N
+  oqcCheck:
+    - L0_SLICE
+    - L1_SLICE
 
 # L0 Process configuration
 process:

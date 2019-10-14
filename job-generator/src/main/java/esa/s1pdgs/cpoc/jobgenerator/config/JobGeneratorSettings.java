@@ -1,6 +1,8 @@
 package esa.s1pdgs.cpoc.jobgenerator.config;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import javax.annotation.PostConstruct;
@@ -130,6 +132,8 @@ public class JobGeneratorSettings {
 	 * in lowercase in not the metadata index (example: aux_resorb use aux_res)<br/>
 	 */
 	private Map<String, String> mapTypeMeta;
+	
+	private List<ProductFamily> oqcCheck;
 
 //    private ProcessSettings processSettings;
 
@@ -140,6 +144,7 @@ public class JobGeneratorSettings {
 //        this.processSettings = processSettings;
 		this.inputfamilies = new HashMap<>();
 		this.outputfamilies = new HashMap<>();
+		this.oqcCheck = new ArrayList<>();
 
 	}
 
@@ -441,6 +446,14 @@ public class JobGeneratorSettings {
 		this.mapTypeMeta = mapTypeMeta;
 	}
 
+	public List<ProductFamily> getOqcCheck() {
+		return oqcCheck;
+	}
+
+	public void setOqcCheck(List<ProductFamily> oqcCheck) {
+		this.oqcCheck = oqcCheck;
+	}
+
 	/**
 	 * Display object in JSON format
 	 */
@@ -451,7 +464,9 @@ public class JobGeneratorSettings {
 				+ ", diroftasktables: " + diroftasktables + ", jobgenfixedrate: " + jobgenfixedrate
 				+ ", defaultfamily: " + defaultfamily + ", outputfamiliesstr: " + outputfamiliesstr
 				+ ", outputfamilies: " + outputfamilies + ", typeOverlap: " + typeOverlap + ", typeSliceLength: "
-				+ typeSliceLength + ", mapTypeMeta: " + mapTypeMeta + "}";
+				+ typeSliceLength + ", mapTypeMeta: " + mapTypeMeta
+				+ ", oqcCheck: "+oqcCheck
+				+ "}";
 	}
 
 	@Bean

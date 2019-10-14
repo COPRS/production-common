@@ -924,30 +924,25 @@ public abstract class AbstractJobsGenerator<T extends AbstractDto> implements Ru
                     jobOrder, jobOrderXml));
 
             // Add joborder output to the DTO
-            List<JobOrderOutput> distinctOutputJobOrder = job.getJobOrder()
-                    .getProcs().stream()
-                    .filter(proc -> proc != null
-                            && !CollectionUtils.isEmpty(proc.getOutputs()))
+            List<JobOrderOutput> distinctOutputJobOrder = job.getJobOrder().getProcs().stream()
+                    .filter(proc -> proc != null && !CollectionUtils.isEmpty(proc.getOutputs()))
                     .flatMap(proc -> proc.getOutputs().stream())
-                    .filter(output -> output
-                            .getFileNameType() == JobOrderFileNameType.REGEXP
-                            && output
-                                    .getDestination() == JobOrderDestination.DB)
-                    .distinct().collect(Collectors.toList());
+                    .filter(output -> output.getFileNameType() == JobOrderFileNameType.REGEXP && output.getDestination() == JobOrderDestination.DB)
+                    .distinct()
+                    .collect(Collectors.toList());
+            
             r.addOutputs(distinctOutputJobOrder.stream()
                     .map(output -> new LevelJobOutputDto(
                             output.getFamily().name(), output.getFileName()))
                     .collect(Collectors.toList()));
-            List<JobOrderOutput> distinctOutputJobOrderNotRegexp = job
-                    .getJobOrder().getProcs().stream()
-                    .filter(proc -> proc != null
-                            && !CollectionUtils.isEmpty(proc.getOutputs()))
+            
+            List<JobOrderOutput> distinctOutputJobOrderNotRegexp = job.getJobOrder().getProcs().stream()
+                    .filter(proc -> proc != null && !CollectionUtils.isEmpty(proc.getOutputs()))
                     .flatMap(proc -> proc.getOutputs().stream())
-                    .filter(output -> output
-                            .getFileNameType() == JobOrderFileNameType.DIRECTORY
-                            && output
-                                    .getDestination() == JobOrderDestination.DB)
-                    .distinct().collect(Collectors.toList());
+                    .filter(output -> output.getFileNameType() == JobOrderFileNameType.DIRECTORY && output.getDestination() == JobOrderDestination.DB)
+                    .distinct()
+                    .collect(Collectors.toList());
+            
             r.addOutputs(distinctOutputJobOrderNotRegexp
                     .stream().map(
                             output -> new LevelJobOutputDto(
@@ -956,6 +951,19 @@ public abstract class AbstractJobsGenerator<T extends AbstractDto> implements Ru
                                             + output.getFileType() + ".*$"))
                     .collect(Collectors.toList()));
 
+            for (LevelJobOutputDto output: r.getOutputs()) {
+            	// Iterate over the outputs and identify if an OQC check is required
+            	ProductFamily outputFamily = ProductFamily.valueOf(output.getFamily());
+            	if (this.jobGeneratorSettings.getOqcCheck().contains(outputFamily)) {
+            		// Hit, we found a product family that had been configured as oqc check. Flag it.
+            		LOGGER.info("Found output of family {}, flagging it as oqcCheck",outputFamily);
+            		output.setOqcCheck(true);
+            	} else {
+            		// No hit
+            		LOGGER.info("Found output of family {}, no oqcCheck required",outputFamily);
+            	}
+            }
+            
             // Add the tasks
             this.tasks.forEach(pool -> {
                 LevelJobPoolDto poolDto = new LevelJobPoolDto();
