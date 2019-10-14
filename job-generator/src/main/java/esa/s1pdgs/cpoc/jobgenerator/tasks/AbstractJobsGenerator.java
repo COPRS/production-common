@@ -960,7 +960,7 @@ public abstract class AbstractJobsGenerator<T extends AbstractDto> implements Ru
             		output.setOqcCheck(true);
             	} else {
             		// No hit
-            		LOGGER.info("Found output of family {}, no oqcCheck required",outputFamily);
+            		LOGGER.debug("Found output of family {}, no oqcCheck required",outputFamily);
             	}
             }
             
