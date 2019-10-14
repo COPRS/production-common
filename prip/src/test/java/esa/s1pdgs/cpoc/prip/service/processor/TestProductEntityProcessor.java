@@ -74,10 +74,10 @@ public class TestProductEntityProcessor {
 
 	@Test
 	public void TestReadEntity_OnExistentProduct_ShallReturnStatusOk() throws ODataApplicationException, ODataLibraryException, IOException {
-		String entity = "Products";
+		String entitySetName = "Products";
 		String uuid = "00000000-0000-0000-0000-000000000001";
 		String baseUri = "http://example.org";
-		String odataPath = "/" + entity + "(%27" + uuid + "%27)";
+		String odataPath = "/" + entitySetName + "(%27" + uuid + "%27)";
 
 		PripMetadata pripMetadata = new PripMetadata();
 		pripMetadata.setId(UUID.fromString("00000000-0000-0000-0000-000000000001"));
@@ -96,7 +96,7 @@ public class TestProductEntityProcessor {
 		doReturn("Id").when(uriParameterMock).getName();
 		doReturn("'" + uuid + "'").when(uriParameterMock).getText();
 		
-		doReturn(entity).when(edmEntitySetMock).getName();
+		doReturn(entitySetName).when(edmEntitySetMock).getName();
 		
 		doReturn(odataSerializerMock).when(odataMock).createSerializer(Mockito.any());
 		

@@ -68,9 +68,9 @@ public class TestProductEntityCollectionProcessor {
 
 	@Test
 	public void TestReadEntityCollection() throws ODataApplicationException, ODataLibraryException, IOException {
-		String entity = "Products";
+		String entitySetName = "Products";
 		String baseUri = "http://example.org";
-		String odataPath = "/" + entity;
+		String odataPath = "/" + entitySetName;
 		
 		doReturn(Collections.emptyList()).when(pripMetadataRepositoryMock).findAll();
 		
@@ -82,7 +82,7 @@ public class TestProductEntityCollectionProcessor {
 		
 		doReturn(edmEntitySetMock).when(uriResourceEntitySetMock).getEntitySet();
 		
-		doReturn(entity).when(edmEntitySetMock).getName();
+		doReturn(entitySetName).when(edmEntitySetMock).getName();
 		
 		doReturn(odataSerializerMock).when(odataMock).createSerializer(Mockito.any());
 		
