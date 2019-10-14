@@ -8,7 +8,7 @@ public class ProductDto extends AbstractDto {
 
 	private String keyObjectStorage;
 	private String mode = null;
-	private OQCFlag ocqFlag = OQCFlag.NOT_CHECKED;
+	private OQCFlag oqcFlag = OQCFlag.NOT_CHECKED;
 
 	public ProductDto() {
 		super();
@@ -39,13 +39,13 @@ public class ProductDto extends AbstractDto {
 	public void setMode(String mode) {
 		this.mode = mode;
 	}
-
-	public OQCFlag getOcqFlag() {
-		return ocqFlag;
+	
+	public OQCFlag getOqcFlag() {
+		return oqcFlag;
 	}
 
-	public void setOcqFlag(OQCFlag ocqFlag) {
-		this.ocqFlag = ocqFlag;
+	public void setOqcFlag(OQCFlag oqcFlag) {
+		this.oqcFlag = oqcFlag;
 	}
 
 	/**
@@ -55,7 +55,7 @@ public class ProductDto extends AbstractDto {
 	public String toString() {
 		return String.format(
 				"{productName: %s, keyObjectStorage: %s, family: %s, mode: %s, oqcFlag: %s, hostname: %s, creationDate: %s}",
-				getProductName(), keyObjectStorage, getFamily(), mode, ocqFlag.toString(), getHostname(),
+				getProductName(), keyObjectStorage, getFamily(), mode, oqcFlag.toString(), getHostname(),
 				getCreationDate());
 	}
 
@@ -64,7 +64,7 @@ public class ProductDto extends AbstractDto {
 	 */
 	@Override
 	public int hashCode() {
-		return Objects.hash(getProductName(), keyObjectStorage, getFamily(), mode, ocqFlag, getHostname(),
+		return Objects.hash(getProductName(), keyObjectStorage, getFamily(), mode, oqcFlag, getHostname(),
 				getCreationDate());
 	}
 
@@ -85,7 +85,7 @@ public class ProductDto extends AbstractDto {
 					&& Objects.equals(keyObjectStorage, other.keyObjectStorage)
 					&& Objects.equals(getFamily(), other.getFamily()) 
 					&& Objects.equals(mode, other.mode)
-					&& Objects.equals(ocqFlag, other.ocqFlag) 
+					&& Objects.equals(oqcFlag, other.oqcFlag) 
 					&& Objects.equals(getHostname(), other.getHostname())
 					&& Objects.equals(getCreationDate(), other.getCreationDate());
 		}
