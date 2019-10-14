@@ -153,7 +153,7 @@ public class MetadataBuilder {
         JSONObject metadataToIndex = new JSONObject();
         metadataToIndex = extractor.processProduct(descriptor, dto.getFamily(), file);
         // Adding fields that are directly used from the DTO
-        metadataToIndex.put("oqcFlag", dto.getOcqFlag());
+        metadataToIndex.put("oqcFlag", dto.getOqcFlag());
         LOGGER.debug("JSON OBJECT:{}",metadataToIndex.toString());
         return metadataToIndex;
     }

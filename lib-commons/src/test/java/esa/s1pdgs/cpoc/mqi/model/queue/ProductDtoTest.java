@@ -99,7 +99,7 @@ public class ProductDtoTest {
         dto.setKeyObjectStorage("key-obs");
         dto.setFamily(ProductFamily.L2_SLICE);
         dto.setMode("FAST");
-        dto.setOcqFlag(OQCFlag.CHECKED_NOK);
+        dto.setOqcFlag(OQCFlag.CHECKED_NOK);
         String str = dto.toString();
         assertTrue(str.contains("productName: product-name"));
         assertTrue(str.contains("keyObjectStorage: key-obs"));
