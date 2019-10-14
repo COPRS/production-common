@@ -4,6 +4,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
 
+import esa.s1pdgs.cpoc.common.ProductFamily;
 import esa.s1pdgs.cpoc.common.utils.DateUtils;
 
 public class PripMetadata {
@@ -11,10 +12,10 @@ public class PripMetadata {
 	public static final String DEFAULT_CONTENTTYPE = "application/zip";
 	public static final int DEFAULT_EVICTION_DAYS = 7;
 
-
 	public enum FIELD_NAMES {
-		ID("id"), OBS_KEY("obsKey"), NAME("name"), CONTENT_TYPE("contentType"), CONTENT_LENGTH("contentLength"),
-		CREATION_DATE("creationDate"), EVICTION_DATE("evictionDate"), CHECKSUM("checksum");
+		ID("id"), OBS_KEY("obsKey"), NAME("name"), PRODUCT_FAMILY("productFamily"), CONTENT_TYPE("contentType"),
+		CONTENT_LENGTH("contentLength"), CREATION_DATE("creationDate"), EVICTION_DATE("evictionDate"),
+		CHECKSUM("checksum");
 
 		private String fieldName;
 
@@ -26,12 +27,14 @@ public class PripMetadata {
 			return fieldName;
 		}
 	}
-	
+
 	private UUID id;
 
 	private String obsKey;
 
 	private String name;
+
+	private ProductFamily productFamily;
 
 	private String contentType;
 
@@ -68,6 +71,14 @@ public class PripMetadata {
 
 	public void setName(String name) {
 		this.name = name;
+	}
+
+	public ProductFamily getProductFamily() {
+		return productFamily;
+	}
+
+	public void setProductFamily(ProductFamily productFamily) {
+		this.productFamily = productFamily;
 	}
 
 	public String getContentType() {
@@ -113,14 +124,12 @@ public class PripMetadata {
 	@Override
 	public String toString() {
 		return String.format(
-				"{\"%s\":\"%s\", \"%s\":\"%s\", \"%s\":\"%s\", \"%s\":\"%s\", \"%s\":\"%s\", \"%s\":\"%s\", \"%s\":\"%s\", \"%s\":%s}",
-				FIELD_NAMES.ID.fieldName(), id, 
-				FIELD_NAMES.OBS_KEY.fieldName(), obsKey, 
-				FIELD_NAMES.NAME.fieldName(), name, 
-				FIELD_NAMES.CONTENT_TYPE.fieldName(), contentType,
-				FIELD_NAMES.CONTENT_LENGTH.fieldName(), contentLength,
+				"{\"%s\":\"%s\", \"%s\":\"%s\", \"%s\":\"%s\", \"%s\":\"%s\", \"%s\":\"%s\", \"%s\":\"%s\", \"%s\":\"%s\", \"%s\":\"%s\", \"%s\":%s}",
+				FIELD_NAMES.ID.fieldName(), id, FIELD_NAMES.OBS_KEY.fieldName(), obsKey, FIELD_NAMES.NAME.fieldName(),
+				name, FIELD_NAMES.CONTENT_TYPE.fieldName(), FIELD_NAMES.PRODUCT_FAMILY.fieldName, productFamily.name(),
+				contentType, FIELD_NAMES.CONTENT_LENGTH.fieldName(), contentLength,
 				FIELD_NAMES.CREATION_DATE.fieldName(), DateUtils.formatToMetadataDateTimeFormat(creationDate),
-				FIELD_NAMES.EVICTION_DATE.fieldName(), DateUtils.formatToMetadataDateTimeFormat(evictionDate), 
+				FIELD_NAMES.EVICTION_DATE.fieldName(), DateUtils.formatToMetadataDateTimeFormat(evictionDate),
 				FIELD_NAMES.CHECKSUM.fieldName(), checksums);
 	}
 
