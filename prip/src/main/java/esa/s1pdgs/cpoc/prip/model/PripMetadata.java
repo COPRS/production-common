@@ -8,7 +8,7 @@ import esa.s1pdgs.cpoc.common.utils.DateUtils;
 
 public class PripMetadata {
 
-	public static final String DEFAULT_CONTENTTYPE = "file/zip";
+	public static final String DEFAULT_CONTENTTYPE = "application/zip";
 	public static final int DEFAULT_EVICTION_DAYS = 7;
 
 
