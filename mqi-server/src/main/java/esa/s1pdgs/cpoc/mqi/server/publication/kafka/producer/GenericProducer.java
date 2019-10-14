@@ -38,6 +38,7 @@ public class GenericProducer {
     @Autowired
     public GenericProducer(final KafkaProperties properties) {
         this.properties = properties;
+        LOGGER.debug("Generic producer config used: {}", this.properties);
         this.template = new KafkaTemplate<>(producerFactory());
     }
 
