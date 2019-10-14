@@ -133,4 +133,71 @@ public class PripMetadata {
 				DateUtils.formatToMetadataDateTimeFormat(evictionDate), FIELD_NAMES.CHECKSUM.fieldName(), checksums);
 	}
 
+	@Override
+	public int hashCode() {
+		final int prime = 31;
+		int result = 1;
+		result = prime * result + ((checksums == null) ? 0 : checksums.hashCode());
+		result = prime * result + (int) (contentLength ^ (contentLength >>> 32));
+		result = prime * result + ((contentType == null) ? 0 : contentType.hashCode());
+		result = prime * result + ((creationDate == null) ? 0 : creationDate.hashCode());
+		result = prime * result + ((evictionDate == null) ? 0 : evictionDate.hashCode());
+		result = prime * result + ((id == null) ? 0 : id.hashCode());
+		result = prime * result + ((name == null) ? 0 : name.hashCode());
+		result = prime * result + ((obsKey == null) ? 0 : obsKey.hashCode());
+		result = prime * result + ((productFamily == null) ? 0 : productFamily.hashCode());
+		return result;
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj)
+			return true;
+		if (obj == null)
+			return false;
+		if (getClass() != obj.getClass())
+			return false;
+		PripMetadata other = (PripMetadata) obj;
+		if (checksums == null) {
+			if (other.checksums != null)
+				return false;
+		} else if (!checksums.equals(other.checksums))
+			return false;
+		if (contentLength != other.contentLength)
+			return false;
+		if (contentType == null) {
+			if (other.contentType != null)
+				return false;
+		} else if (!contentType.equals(other.contentType))
+			return false;
+		if (creationDate == null) {
+			if (other.creationDate != null)
+				return false;
+		} else if (!creationDate.equals(other.creationDate))
+			return false;
+		if (evictionDate == null) {
+			if (other.evictionDate != null)
+				return false;
+		} else if (!evictionDate.equals(other.evictionDate))
+			return false;
+		if (id == null) {
+			if (other.id != null)
+				return false;
+		} else if (!id.equals(other.id))
+			return false;
+		if (name == null) {
+			if (other.name != null)
+				return false;
+		} else if (!name.equals(other.name))
+			return false;
+		if (obsKey == null) {
+			if (other.obsKey != null)
+				return false;
+		} else if (!obsKey.equals(other.obsKey))
+			return false;
+		if (productFamily != other.productFamily)
+			return false;
+		return true;
+	}
+
 }
