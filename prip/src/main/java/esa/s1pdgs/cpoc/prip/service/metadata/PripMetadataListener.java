@@ -76,6 +76,7 @@ public class PripMetadataListener implements MqiListener<ProductDto> {
 		pripMetadata.setId(UUID.randomUUID());
 		pripMetadata.setObsKey(productDto.getKeyObjectStorage());
 		pripMetadata.setName(productDto.getProductName());
+		pripMetadata.setProductFamily(productDto.getFamily());
 		pripMetadata.setContentType(PripMetadata.DEFAULT_CONTENTTYPE);
 		pripMetadata.setContentLength(getContentLength(productDto.getFamily(), productDto.getKeyObjectStorage()));
 		pripMetadata.setCreationDate(creationDate);
