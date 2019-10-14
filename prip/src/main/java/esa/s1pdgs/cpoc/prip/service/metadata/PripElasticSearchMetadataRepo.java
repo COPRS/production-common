@@ -54,7 +54,7 @@ public class PripElasticSearchMetadataRepo implements PripMetadataRepository {
 
 			if (indexResponse.getResult() == DocWriteResponse.Result.CREATED
 					|| indexResponse.getResult() == DocWriteResponse.Result.UPDATED) {
-				LOGGER.info("saving PRIP matadata successful");
+				LOGGER.info("saving PRIP metadata successful");
 			} else {
 				ReplicationResponse.ShardInfo shardInfo = indexResponse.getShardInfo();
 				if (shardInfo.getFailed() > 0) {
