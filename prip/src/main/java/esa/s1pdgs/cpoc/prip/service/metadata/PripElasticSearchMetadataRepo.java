@@ -119,7 +119,6 @@ public class PripElasticSearchMetadataRepo implements PripMetadataRepository {
 
 		for (PripDateTimeFilter filter : creationDateFilters) {
 
-
 			LOGGER.info("finding PRIP metadata with creationDate {}", filter);
 
 			RangeQueryBuilder rangeQueryBuilder = QueryBuilders.rangeQuery(PripMetadata.FIELD_NAMES.CREATION_DATE.fieldName());
@@ -134,7 +133,7 @@ public class PripElasticSearchMetadataRepo implements PripMetadataRepository {
 			default: throw new IllegalArgumentException(
 					String.format("not supported filter operator: %s", filter.getOperator().name()));
 			}
-			queryBuilder.should(rangeQueryBuilder);
+			queryBuilder.must(rangeQueryBuilder);
 		}
 
 		return query(queryBuilder);
