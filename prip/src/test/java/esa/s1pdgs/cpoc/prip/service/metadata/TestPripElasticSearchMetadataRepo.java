@@ -32,7 +32,7 @@ import org.mockito.MockitoAnnotations;
 
 import esa.s1pdgs.cpoc.common.ProductFamily;
 import esa.s1pdgs.cpoc.prip.model.Checksum;
-import esa.s1pdgs.cpoc.prip.model.PripDateTimeIntervalFilter;
+import esa.s1pdgs.cpoc.prip.model.PripDateTimeFilter;
 import esa.s1pdgs.cpoc.prip.model.PripMetadata;
 
 public class TestPripElasticSearchMetadataRepo {
@@ -164,7 +164,7 @@ public class TestPripElasticSearchMetadataRepo {
 		doReturn(searchHits).when(searchResponse).getHits();
 		doReturn(searchResponse).when(restHighLevelClient).search(Mockito.any());
 
-		List<PripDateTimeIntervalFilter> creationDateIntervals = new ArrayList<>();
+		List<PripDateTimeFilter> creationDateIntervals = new ArrayList<>();
 		
 		List<PripMetadata> result = repo.findByCreationDate(creationDateIntervals);
 

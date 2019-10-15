@@ -27,7 +27,7 @@ import org.springframework.stereotype.Service;
 import esa.s1pdgs.cpoc.common.ProductFamily;
 import esa.s1pdgs.cpoc.common.utils.DateUtils;
 import esa.s1pdgs.cpoc.prip.model.Checksum;
-import esa.s1pdgs.cpoc.prip.model.PripDateTimeIntervalFilter;
+import esa.s1pdgs.cpoc.prip.model.PripDateTimeFilter;
 import esa.s1pdgs.cpoc.prip.model.PripMetadata;
 import esa.s1pdgs.cpoc.prip.model.PripTextFilter;
 
@@ -78,27 +78,7 @@ public class PripElasticSearchMetadataRepo implements PripMetadataRepository {
 	@Override
 	public List<PripMetadata> findAll() {
 		LOGGER.info("finding PRIP metadata");
-
-		List<PripMetadata> metadata = new ArrayList<>();
-		SearchSourceBuilder sourceBuilder = new SearchSourceBuilder();
-		sourceBuilder.size(DEFAULT_MAX_HITS);
-		SearchRequest searchRequest = new SearchRequest(ES_INDEX);
-		searchRequest.types(ES_PRIP_TYPE);
-		searchRequest.source(sourceBuilder);
-
-		try {
-			SearchResponse searchResponse = restHighLevelClient.search(searchRequest);
-			LOGGER.trace("response {}", searchResponse);
-
-			for (SearchHit hit : searchResponse.getHits().getHits()) {
-				metadata.add(mapSearchHitToPripMetadata(hit));
-			}
-
-		} catch (IOException e) {
-			LOGGER.warn("error while finding PRIP metadata", e);
-		}
-		LOGGER.info("finding PRIP metadata successful, number of hits {}", metadata.size());
-		return metadata;
+		return query(null);
 	}
 
 	@Override
@@ -133,29 +113,71 @@ public class PripElasticSearchMetadataRepo implements PripMetadataRepository {
 	}
 
 	@Override
-	public List<PripMetadata> findByCreationDate(List<PripDateTimeIntervalFilter> creationDateIntervals) {
+	public List<PripMetadata> findByCreationDate(List<PripDateTimeFilter> creationDateFilters) {
 
-		SearchSourceBuilder sourceBuilder = new SearchSourceBuilder();
 		BoolQueryBuilder queryBuilder = QueryBuilders.boolQuery();
 
-		for (PripDateTimeIntervalFilter interval : creationDateIntervals) {
-			if (interval.getDateTimeStart().isAfter(interval.getDateTimeStop())) {
-				throw new IllegalArgumentException("creationDateStart is after creationDateStop");
+		for (PripDateTimeFilter filter : creationDateFilters) {
+
+
+			LOGGER.info("finding PRIP metadata with creationDate {}", filter);
+
+			RangeQueryBuilder rangeQueryBuilder = QueryBuilders.rangeQuery(PripMetadata.FIELD_NAMES.CREATION_DATE.fieldName());
+			
+			switch(filter.getOperator()) {
+			case LT:
+				rangeQueryBuilder.lt(filter.getDateTime());
+				break;
+			case GT:
+				rangeQueryBuilder.gt(filter.getDateTime());
+				break;
+			default: throw new IllegalArgumentException(
+					String.format("not supported filter operator: %s", filter.getOperator().name()));
+			}
+			queryBuilder.should(rangeQueryBuilder);
+		}
+
+		return query(queryBuilder);
+
+	}
+
+	@Override
+	public List<PripMetadata> findByProductName(List<PripTextFilter> nameFilters) {
+
+		BoolQueryBuilder queryBuilder = QueryBuilders.boolQuery();
+
+		for (PripTextFilter filter : nameFilters) {
+			LOGGER.info("finding PRIP metadata with filter {}", filter);
+
+			switch (filter.getFunction()) {
+			case STARTS_WITH:
+				queryBuilder.must(QueryBuilders.prefixQuery(PripMetadata.FIELD_NAMES.NAME.fieldName(), filter.getText()));
+				break;
+			case CONTAINS:
+				//TODO
+				break;
+			default:
+				throw new IllegalArgumentException(
+						String.format("not supported filter function: %s", filter.getFunction().name()));
 			}
 
-			LOGGER.info("finding PRIP metadata within creationDate interval {} and {}", interval.getDateTimeStart(),
-					interval.getDateTimeStop());
-
-			RangeQueryBuilder rangeQueryBuilder = QueryBuilders
-					.rangeQuery(PripMetadata.FIELD_NAMES.CREATION_DATE.fieldName())
-					.from(DateUtils.formatToMetadataDateTimeFormat(interval.getDateTimeStart()))
-					.to(DateUtils.formatToMetadataDateTimeFormat(interval.getDateTimeStop()));
-
-			queryBuilder.should(rangeQueryBuilder);
-
 		}
-		sourceBuilder.query(queryBuilder);
 
+		return query(queryBuilder);
+	}
+
+	@Override
+	public List<PripMetadata> findByCreationDateAndProductName(List<PripDateTimeFilter> creationDateIntervals,
+			List<PripTextFilter> nameFilters) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	private List<PripMetadata> query(BoolQueryBuilder queryBuilder) {
+		SearchSourceBuilder sourceBuilder = new SearchSourceBuilder();
+		if (queryBuilder != null) {
+			sourceBuilder.query(queryBuilder);
+		}
 		SearchRequest searchRequest = new SearchRequest(ES_INDEX);
 		searchRequest.types(ES_PRIP_TYPE);
 		sourceBuilder.size(DEFAULT_MAX_HITS);
@@ -176,19 +198,6 @@ public class PripElasticSearchMetadataRepo implements PripMetadataRepository {
 		}
 		LOGGER.info("finding PRIP metadata successful, number of hits {}", metadata.size());
 		return metadata;
-
-	}
-
-	@Override
-	public List<PripMetadata> findByProductName(List<PripTextFilter> nameFilters) {
-		return null;
-	}
-
-	@Override
-	public List<PripMetadata> findByCreationDateAndProductName(List<PripDateTimeIntervalFilter> creationDateIntervals,
-			List<PripTextFilter> nameFilters) {
-		// TODO Auto-generated method stub
-		return null;
 	}
 
 	private PripMetadata mapSearchHitToPripMetadata(SearchHit hit) {

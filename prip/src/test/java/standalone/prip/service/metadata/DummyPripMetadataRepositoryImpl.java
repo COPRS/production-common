@@ -6,7 +6,7 @@ import java.util.UUID;
 
 import esa.s1pdgs.cpoc.common.utils.DateUtils;
 import esa.s1pdgs.cpoc.prip.model.Checksum;
-import esa.s1pdgs.cpoc.prip.model.PripDateTimeIntervalFilter;
+import esa.s1pdgs.cpoc.prip.model.PripDateTimeFilter;
 import esa.s1pdgs.cpoc.prip.model.PripMetadata;
 import esa.s1pdgs.cpoc.prip.model.PripTextFilter;
 import esa.s1pdgs.cpoc.prip.service.metadata.PripMetadataRepository;
@@ -82,7 +82,7 @@ public class DummyPripMetadataRepositoryImpl implements PripMetadataRepository {
 	}
 
 	@Override
-	public List<PripMetadata> findByCreationDate(List<PripDateTimeIntervalFilter> creationDateIntervals) {
+	public List<PripMetadata> findByCreationDate(List<PripDateTimeFilter> creationDateFilters) {
 		// TODO Auto-generated method stub
 		return null;
 	}
@@ -94,7 +94,7 @@ public class DummyPripMetadataRepositoryImpl implements PripMetadataRepository {
 	}
 
 	@Override
-	public List<PripMetadata> findByCreationDateAndProductName(List<PripDateTimeIntervalFilter> creationDateIntervals,
+	public List<PripMetadata> findByCreationDateAndProductName(List<PripDateTimeFilter> creationDateFilters,
 			List<PripTextFilter> nameFilters) {
 		// TODO Auto-generated method stub
 		return null;

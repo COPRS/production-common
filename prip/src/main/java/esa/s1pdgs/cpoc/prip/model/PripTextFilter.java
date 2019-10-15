@@ -25,4 +25,9 @@ public class PripTextFilter {
 		this.text = text;
 	}
 
+	@Override
+	public String toString() {
+		return String.format("{\"%s\":\"%s\"}", function.name(), text);
+	}
+
 }
