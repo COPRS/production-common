@@ -1,7 +1,6 @@
 package esa.s1pdgs.cpoc.prip.service.metadata;
 
 import java.io.IOException;
-import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -27,7 +26,9 @@ import org.springframework.stereotype.Service;
 import esa.s1pdgs.cpoc.common.ProductFamily;
 import esa.s1pdgs.cpoc.common.utils.DateUtils;
 import esa.s1pdgs.cpoc.prip.model.Checksum;
+import esa.s1pdgs.cpoc.prip.model.PripDateTimeIntervalFilter;
 import esa.s1pdgs.cpoc.prip.model.PripMetadata;
+import esa.s1pdgs.cpoc.prip.model.PripTextFilter;
 
 @Service
 public class PripElasticSearchMetadataRepo implements PripMetadataRepository {
@@ -131,20 +132,24 @@ public class PripElasticSearchMetadataRepo implements PripMetadataRepository {
 	}
 
 	@Override
-	public List<PripMetadata> findByCreationDate(LocalDateTime creationDateStart, LocalDateTime creationDateStop) {
-
-		if (creationDateStart.isAfter(creationDateStop)) {
-			throw new IllegalArgumentException("creationDateStart is after creationDateStop");
-		}
-
-		LOGGER.info("finding PRIP metadata within creationDate interval {} and {}", creationDateStart,
-				creationDateStop);
+	public List<PripMetadata> findByCreationDate(List<PripDateTimeIntervalFilter> creationDateIntervals) {
 
 		SearchSourceBuilder sourceBuilder = new SearchSourceBuilder();
-		BoolQueryBuilder queryBuilder = QueryBuilders.boolQuery()
-				.must(QueryBuilders.rangeQuery(PripMetadata.FIELD_NAMES.CREATION_DATE.fieldName())
-						.from(DateUtils.formatToMetadataDateTimeFormat(creationDateStart))
-						.to(DateUtils.formatToMetadataDateTimeFormat(creationDateStop)));
+		BoolQueryBuilder queryBuilder = QueryBuilders.boolQuery();
+
+		for (PripDateTimeIntervalFilter interval : creationDateIntervals) {
+			if (interval.getDateTimeStart().isAfter(interval.getDateTimeStop())) {
+				throw new IllegalArgumentException("creationDateStart is after creationDateStop");
+			}
+
+			LOGGER.info("finding PRIP metadata within creationDate interval {} and {}", interval.getDateTimeStart(),
+					interval.getDateTimeStop());
+
+			queryBuilder.must(QueryBuilders.rangeQuery(PripMetadata.FIELD_NAMES.CREATION_DATE.fieldName())
+					.from(DateUtils.formatToMetadataDateTimeFormat(interval.getDateTimeStart()))
+					.to(DateUtils.formatToMetadataDateTimeFormat(interval.getDateTimeStop())));
+
+		}
 		sourceBuilder.query(queryBuilder);
 
 		SearchRequest searchRequest = new SearchRequest(ES_INDEX);
@@ -198,6 +203,19 @@ public class PripElasticSearchMetadataRepo implements PripMetadataRepository {
 
 		LOGGER.debug("hit {}", pm);
 		return pm;
+	}
+
+	@Override
+	public List<PripMetadata> findByProductName(List<PripTextFilter> nameFilters) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public List<PripMetadata> findByCreationDateAndProductName(List<PripDateTimeIntervalFilter> creationDateIntervals,
+			List<PripTextFilter> nameFilters) {
+		// TODO Auto-generated method stub
+		return null;
 	}
 
 }

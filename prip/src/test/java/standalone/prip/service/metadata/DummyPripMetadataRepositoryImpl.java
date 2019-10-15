@@ -1,13 +1,14 @@
 package standalone.prip.service.metadata;
 
-import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
 
 import esa.s1pdgs.cpoc.common.utils.DateUtils;
 import esa.s1pdgs.cpoc.prip.model.Checksum;
+import esa.s1pdgs.cpoc.prip.model.PripDateTimeIntervalFilter;
 import esa.s1pdgs.cpoc.prip.model.PripMetadata;
+import esa.s1pdgs.cpoc.prip.model.PripTextFilter;
 import esa.s1pdgs.cpoc.prip.service.metadata.PripMetadataRepository;
 
 public class DummyPripMetadataRepositoryImpl implements PripMetadataRepository {
@@ -81,7 +82,20 @@ public class DummyPripMetadataRepositoryImpl implements PripMetadataRepository {
 	}
 
 	@Override
-	public List<PripMetadata> findByCreationDate(LocalDateTime creationDateStart, LocalDateTime creationDateStop) {
+	public List<PripMetadata> findByCreationDate(List<PripDateTimeIntervalFilter> creationDateIntervals) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public List<PripMetadata> findByProductName(List<PripTextFilter> nameFilters) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public List<PripMetadata> findByCreationDateAndProductName(List<PripDateTimeIntervalFilter> creationDateIntervals,
+			List<PripTextFilter> nameFilters) {
 		// TODO Auto-generated method stub
 		return null;
 	}
