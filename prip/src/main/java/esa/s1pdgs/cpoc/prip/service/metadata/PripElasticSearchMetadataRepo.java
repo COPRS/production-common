@@ -18,6 +18,7 @@ import org.elasticsearch.client.RestHighLevelClient;
 import org.elasticsearch.common.xcontent.XContentType;
 import org.elasticsearch.index.query.BoolQueryBuilder;
 import org.elasticsearch.index.query.QueryBuilders;
+import org.elasticsearch.index.query.RangeQueryBuilder;
 import org.elasticsearch.search.SearchHit;
 import org.elasticsearch.search.builder.SearchSourceBuilder;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -36,7 +37,7 @@ public class PripElasticSearchMetadataRepo implements PripMetadataRepository {
 	private static final Logger LOGGER = LogManager.getLogger(PripElasticSearchMetadataRepo.class);
 	private static final String ES_INDEX = "prip";
 	private static final String ES_PRIP_TYPE = "metadata";
-	private static final int DEFAULT_MAX_HITS = 100;
+	private static final int DEFAULT_MAX_HITS = 1000;
 
 	private final RestHighLevelClient restHighLevelClient;
 
@@ -145,15 +146,19 @@ public class PripElasticSearchMetadataRepo implements PripMetadataRepository {
 			LOGGER.info("finding PRIP metadata within creationDate interval {} and {}", interval.getDateTimeStart(),
 					interval.getDateTimeStop());
 
-			queryBuilder.must(QueryBuilders.rangeQuery(PripMetadata.FIELD_NAMES.CREATION_DATE.fieldName())
+			RangeQueryBuilder rangeQueryBuilder = QueryBuilders
+					.rangeQuery(PripMetadata.FIELD_NAMES.CREATION_DATE.fieldName())
 					.from(DateUtils.formatToMetadataDateTimeFormat(interval.getDateTimeStart()))
-					.to(DateUtils.formatToMetadataDateTimeFormat(interval.getDateTimeStop())));
+					.to(DateUtils.formatToMetadataDateTimeFormat(interval.getDateTimeStop()));
+
+			queryBuilder.should(rangeQueryBuilder);
 
 		}
 		sourceBuilder.query(queryBuilder);
 
 		SearchRequest searchRequest = new SearchRequest(ES_INDEX);
 		searchRequest.types(ES_PRIP_TYPE);
+		sourceBuilder.size(DEFAULT_MAX_HITS);
 		searchRequest.source(sourceBuilder);
 
 		List<PripMetadata> metadata = new ArrayList<>();
@@ -172,6 +177,18 @@ public class PripElasticSearchMetadataRepo implements PripMetadataRepository {
 		LOGGER.info("finding PRIP metadata successful, number of hits {}", metadata.size());
 		return metadata;
 
+	}
+
+	@Override
+	public List<PripMetadata> findByProductName(List<PripTextFilter> nameFilters) {
+		return null;
+	}
+
+	@Override
+	public List<PripMetadata> findByCreationDateAndProductName(List<PripDateTimeIntervalFilter> creationDateIntervals,
+			List<PripTextFilter> nameFilters) {
+		// TODO Auto-generated method stub
+		return null;
 	}
 
 	private PripMetadata mapSearchHitToPripMetadata(SearchHit hit) {
@@ -203,19 +220,6 @@ public class PripElasticSearchMetadataRepo implements PripMetadataRepository {
 
 		LOGGER.debug("hit {}", pm);
 		return pm;
-	}
-
-	@Override
-	public List<PripMetadata> findByProductName(List<PripTextFilter> nameFilters) {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	@Override
-	public List<PripMetadata> findByCreationDateAndProductName(List<PripDateTimeIntervalFilter> creationDateIntervals,
-			List<PripTextFilter> nameFilters) {
-		// TODO Auto-generated method stub
-		return null;
 	}
 
 }
