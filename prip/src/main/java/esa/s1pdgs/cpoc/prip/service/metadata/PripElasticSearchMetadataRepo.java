@@ -121,17 +121,19 @@ public class PripElasticSearchMetadataRepo implements PripMetadataRepository {
 
 			LOGGER.info("finding PRIP metadata with creationDate {}", filter);
 
-			RangeQueryBuilder rangeQueryBuilder = QueryBuilders.rangeQuery(PripMetadata.FIELD_NAMES.CREATION_DATE.fieldName());
-			
-			switch(filter.getOperator()) {
+			RangeQueryBuilder rangeQueryBuilder = QueryBuilders
+					.rangeQuery(PripMetadata.FIELD_NAMES.CREATION_DATE.fieldName());
+
+			switch (filter.getOperator()) {
 			case LT:
 				rangeQueryBuilder.lt(filter.getDateTime());
 				break;
 			case GT:
 				rangeQueryBuilder.gt(filter.getDateTime());
 				break;
-			default: throw new IllegalArgumentException(
-					String.format("not supported filter operator: %s", filter.getOperator().name()));
+			default:
+				throw new IllegalArgumentException(
+						String.format("not supported filter operator: %s", filter.getOperator().name()));
 			}
 			queryBuilder.must(rangeQueryBuilder);
 		}
@@ -150,16 +152,17 @@ public class PripElasticSearchMetadataRepo implements PripMetadataRepository {
 
 			switch (filter.getFunction()) {
 			case STARTS_WITH:
-				queryBuilder.must(QueryBuilders.prefixQuery(PripMetadata.FIELD_NAMES.NAME.fieldName(), filter.getText()));
+				queryBuilder
+						.must(QueryBuilders.prefixQuery(PripMetadata.FIELD_NAMES.NAME.fieldName(), filter.getText()));
 				break;
 			case CONTAINS:
-				//TODO
+				queryBuilder.must(QueryBuilders.regexpQuery(PripMetadata.FIELD_NAMES.NAME.fieldName(),
+						String.format(".*%s.*", filter.getText())));
 				break;
 			default:
 				throw new IllegalArgumentException(
 						String.format("not supported filter function: %s", filter.getFunction().name()));
 			}
-
 		}
 
 		return query(queryBuilder);
