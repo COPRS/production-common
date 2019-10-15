@@ -32,6 +32,7 @@ import org.mockito.MockitoAnnotations;
 
 import esa.s1pdgs.cpoc.common.ProductFamily;
 import esa.s1pdgs.cpoc.prip.model.Checksum;
+import esa.s1pdgs.cpoc.prip.model.PripDateTimeIntervalFilter;
 import esa.s1pdgs.cpoc.prip.model.PripMetadata;
 
 public class TestPripElasticSearchMetadataRepo {
@@ -140,7 +141,37 @@ public class TestPripElasticSearchMetadataRepo {
 		List<PripMetadata> result = repo.findAll();
 		assertEquals(0, result.size());
 	}
+	
+	@Test
+	public void testFindByCreationDate() throws IOException {
+		
+		SearchHit[] hits = new SearchHit[2];
 
+		PripMetadata pripMetadata1 = createPripMetadata();
+		BytesReference source1 = new BytesArray(pripMetadata1.toString());
+		SearchHit h1 = new SearchHit(1);
+		h1.sourceRef(source1);
+		hits[0] = h1;
+
+		PripMetadata pripMetadata2 = createPripMetadata();
+		BytesReference source2 = new BytesArray(pripMetadata2.toString());
+		SearchHit h2 = new SearchHit(1);
+		h2.sourceRef(source2);
+		hits[1] = h2;
+
+		SearchHits searchHits = new SearchHits(hits, 2, 0);
+
+		doReturn(searchHits).when(searchResponse).getHits();
+		doReturn(searchResponse).when(restHighLevelClient).search(Mockito.any());
+
+		List<PripDateTimeIntervalFilter> creationDateIntervals = new ArrayList<>();
+		
+		List<PripMetadata> result = repo.findByCreationDate(creationDateIntervals);
+
+		assertTrue(result.contains(pripMetadata1));
+		assertTrue(result.contains(pripMetadata2));
+	}
+	
 	private PripMetadata createPripMetadata() {
 		LocalDateTime creationDate = LocalDateTime.now();
 
