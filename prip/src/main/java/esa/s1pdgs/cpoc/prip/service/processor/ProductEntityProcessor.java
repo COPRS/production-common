@@ -22,6 +22,8 @@ import org.apache.olingo.server.api.uri.UriInfo;
 import org.apache.olingo.server.api.uri.UriParameter;
 import org.apache.olingo.server.api.uri.UriResource;
 import org.apache.olingo.server.api.uri.UriResourceEntitySet;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import esa.s1pdgs.cpoc.prip.model.PripMetadata;
 import esa.s1pdgs.cpoc.prip.service.edm.EdmProvider;
@@ -30,6 +32,8 @@ import esa.s1pdgs.cpoc.prip.service.metadata.PripMetadataRepository;
 
 public class ProductEntityProcessor implements org.apache.olingo.server.api.processor.EntityProcessor {
 
+	private static final Logger LOGGER = LoggerFactory.getLogger(ProductEntityProcessor.class);
+	
 	private OData odata;
 	private ServiceMetadata serviceMetadata;
 	private PripMetadataRepository pripMetadataRepository;
@@ -53,7 +57,8 @@ public class ProductEntityProcessor implements org.apache.olingo.server.api.proc
 		
 		List<UriParameter> keyPredicates = uriResourceEntitySet.getKeyPredicates();
 		if (EdmProvider.ES_PRODUCTS_NAME.equals(edmEntitySet.getName()) && keyPredicates.size() >= 1) {
-			PripMetadata foundPripMetadata = pripMetadataRepository.findById(keyPredicates.get(0).getText().replace("'", ""));
+			String uuid = keyPredicates.get(0).getText().replace("'", "");
+			PripMetadata foundPripMetadata = pripMetadataRepository.findById(uuid);
 			if (null != foundPripMetadata) {
 				Entity entity = MappingUtil.pripMetadataToEntity(foundPripMetadata, request.getRawBaseUri());
 							
@@ -67,9 +72,11 @@ public class ProductEntityProcessor implements org.apache.olingo.server.api.proc
 				response.setContent(entityStream);
 				response.setStatusCode(HttpStatusCode.OK.getStatusCode());
 				response.setHeader(HttpHeader.CONTENT_TYPE, responseFormat.toContentTypeString());
+				LOGGER.debug("Serving product metadata for id {}", uuid);
 			} else {
 				response.setStatusCode(HttpStatusCode.NOT_FOUND.getStatusCode());				
 				response.setHeader(HttpHeader.CONTENT_TYPE, responseFormat.toContentTypeString());
+				LOGGER.debug("No product metadata found with id {}", uuid);
 			}
 		}
 	}

@@ -53,7 +53,7 @@ public class ProductsFilterVisitor implements ExpressionVisitor<Object> {
 				pripDateTimefilter1.setDateTime(DateUtils.parse(((Literal)left).getText()));
 				pripDateTimefilter1.setOperator(Operator.LT);
 			} else {
-				throw new ExpressionVisitException("Invalid expression");
+				throw new ExpressionVisitException("Invalid or unsupported operand");
 			}
 			pripDateTimeFilters.add(pripDateTimefilter1);
 			break;
@@ -67,7 +67,7 @@ public class ProductsFilterVisitor implements ExpressionVisitor<Object> {
 				pripDateTimefilter2.setDateTime(DateUtils.parse(((Literal)left).getText()));
 				pripDateTimefilter2.setOperator(Operator.GT);
 			} else {
-				throw new ExpressionVisitException("Invalid expression");
+				throw new ExpressionVisitException("Invalid or unsupported operand");
 			}
 			pripDateTimeFilters.add(pripDateTimefilter2);
 			break;
@@ -99,7 +99,7 @@ public class ProductsFilterVisitor implements ExpressionVisitor<Object> {
 				textFilter.setText(s.substring(1, s.length() - 1));
 				pripTextFilters.add(textFilter);
 			} else {
-				throw new ExpressionVisitException("Invalid expression");
+				throw new ExpressionVisitException("Invalid or unsupported parameter");
 			}
 		}
 		return null;
