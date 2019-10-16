@@ -2,6 +2,7 @@ package esa.s1pdgs.cpoc.prip.service.metadata;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -21,6 +22,7 @@ import org.elasticsearch.index.query.QueryBuilders;
 import org.elasticsearch.index.query.RangeQueryBuilder;
 import org.elasticsearch.search.SearchHit;
 import org.elasticsearch.search.builder.SearchSourceBuilder;
+import org.elasticsearch.search.sort.SortOrder;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -76,12 +78,6 @@ public class PripElasticSearchMetadataRepo implements PripMetadataRepository {
 	}
 
 	@Override
-	public List<PripMetadata> findAll() {
-		LOGGER.info("finding PRIP metadata");
-		return query(null);
-	}
-
-	@Override
 	public PripMetadata findById(String id) {
 
 		LOGGER.info("finding PRIP metadata with id {}", id);
@@ -113,7 +109,26 @@ public class PripElasticSearchMetadataRepo implements PripMetadataRepository {
 	}
 
 	@Override
+	public List<PripMetadata> findAll() {
+		LOGGER.info("finding PRIP metadata");
+		return query(null);
+	}
+
+	@Override
 	public List<PripMetadata> findByCreationDate(List<PripDateTimeFilter> creationDateFilters) {
+
+		return findByCreationDateAndProductName(creationDateFilters, Collections.<PripTextFilter>emptyList());
+	}
+
+	@Override
+	public List<PripMetadata> findByProductName(List<PripTextFilter> nameFilters) {
+
+		return findByCreationDateAndProductName(Collections.<PripDateTimeFilter>emptyList(), nameFilters);
+	}
+
+	@Override
+	public List<PripMetadata> findByCreationDateAndProductName(List<PripDateTimeFilter> creationDateFilters,
+			List<PripTextFilter> nameFilters) {
 
 		BoolQueryBuilder queryBuilder = QueryBuilders.boolQuery();
 
@@ -138,26 +153,17 @@ public class PripElasticSearchMetadataRepo implements PripMetadataRepository {
 			queryBuilder.must(rangeQueryBuilder);
 		}
 
-		return query(queryBuilder);
-
-	}
-
-	@Override
-	public List<PripMetadata> findByProductName(List<PripTextFilter> nameFilters) {
-
-		BoolQueryBuilder queryBuilder = QueryBuilders.boolQuery();
-
 		for (PripTextFilter filter : nameFilters) {
 			LOGGER.info("finding PRIP metadata with filter {}", filter);
 
 			switch (filter.getFunction()) {
 			case STARTS_WITH:
-				queryBuilder
-						.must(QueryBuilders.prefixQuery(PripMetadata.FIELD_NAMES.NAME.fieldName(), filter.getText()));
+				queryBuilder.must(QueryBuilders.wildcardQuery(PripMetadata.FIELD_NAMES.NAME.fieldName(),
+						String.format("%s*", filter.getText().toLowerCase())));
 				break;
 			case CONTAINS:
-				queryBuilder.must(QueryBuilders.regexpQuery(PripMetadata.FIELD_NAMES.NAME.fieldName(),
-						String.format(".*%s.*", filter.getText())));
+				queryBuilder.must(QueryBuilders.wildcardQuery(PripMetadata.FIELD_NAMES.NAME.fieldName(),
+						String.format("*%s*", filter.getText().toLowerCase())));
 				break;
 			default:
 				throw new IllegalArgumentException(
@@ -168,28 +174,25 @@ public class PripElasticSearchMetadataRepo implements PripMetadataRepository {
 		return query(queryBuilder);
 	}
 
-	@Override
-	public List<PripMetadata> findByCreationDateAndProductName(List<PripDateTimeFilter> creationDateIntervals,
-			List<PripTextFilter> nameFilters) {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
 	private List<PripMetadata> query(BoolQueryBuilder queryBuilder) {
 		SearchSourceBuilder sourceBuilder = new SearchSourceBuilder();
 		if (queryBuilder != null) {
 			sourceBuilder.query(queryBuilder);
 		}
+		sourceBuilder.size(DEFAULT_MAX_HITS);
+		sourceBuilder.sort(PripMetadata.FIELD_NAMES.CREATION_DATE.fieldName(), SortOrder.ASC);
+
 		SearchRequest searchRequest = new SearchRequest(ES_INDEX);
 		searchRequest.types(ES_PRIP_TYPE);
-		sourceBuilder.size(DEFAULT_MAX_HITS);
 		searchRequest.source(sourceBuilder);
 
 		List<PripMetadata> metadata = new ArrayList<>();
 
+		LOGGER.debug("search request: {}", searchRequest);
+
 		try {
 			SearchResponse searchResponse = restHighLevelClient.search(searchRequest);
-			LOGGER.trace("response {}", searchResponse);
+			LOGGER.debug("response: {}", searchResponse);
 
 			for (SearchHit hit : searchResponse.getHits().getHits()) {
 				metadata.add(mapSearchHitToPripMetadata(hit));
