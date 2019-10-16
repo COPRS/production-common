@@ -2,7 +2,6 @@ package esa.s1pdgs.cpoc.prip.service.metadata;
 
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -116,28 +115,33 @@ public class PripElasticSearchMetadataRepo implements PripMetadataRepository {
 
 	@Override
 	public List<PripMetadata> findByCreationDate(List<PripDateTimeFilter> creationDateFilters) {
-
-		return findByCreationDateAndProductName(creationDateFilters, Collections.<PripTextFilter>emptyList());
+		BoolQueryBuilder queryBuilder = QueryBuilders.boolQuery();
+		buildQueryWithDateTimeFilters(creationDateFilters, queryBuilder, PripMetadata.FIELD_NAMES.CREATION_DATE);
+		return query(queryBuilder);
 	}
 
 	@Override
 	public List<PripMetadata> findByProductName(List<PripTextFilter> nameFilters) {
-
-		return findByCreationDateAndProductName(Collections.<PripDateTimeFilter>emptyList(), nameFilters);
+		BoolQueryBuilder queryBuilder = QueryBuilders.boolQuery();
+		buildQueryWithTextFilters(nameFilters, queryBuilder, PripMetadata.FIELD_NAMES.NAME);
+		return query(queryBuilder);
 	}
 
 	@Override
 	public List<PripMetadata> findByCreationDateAndProductName(List<PripDateTimeFilter> creationDateFilters,
 			List<PripTextFilter> nameFilters) {
-
 		BoolQueryBuilder queryBuilder = QueryBuilders.boolQuery();
+		buildQueryWithDateTimeFilters(creationDateFilters, queryBuilder, PripMetadata.FIELD_NAMES.CREATION_DATE);
+		buildQueryWithTextFilters(nameFilters, queryBuilder, PripMetadata.FIELD_NAMES.NAME);
+		return query(queryBuilder);
+	}
 
-		for (PripDateTimeFilter filter : creationDateFilters) {
-
+	private void buildQueryWithDateTimeFilters(List<PripDateTimeFilter> dateTimeFilters, BoolQueryBuilder queryBuilder,
+			PripMetadata.FIELD_NAMES fieldName) {
+		for (PripDateTimeFilter filter : dateTimeFilters) {
 			LOGGER.info("finding PRIP metadata with creationDate {}", filter);
 
-			RangeQueryBuilder rangeQueryBuilder = QueryBuilders
-					.rangeQuery(PripMetadata.FIELD_NAMES.CREATION_DATE.fieldName());
+			RangeQueryBuilder rangeQueryBuilder = QueryBuilders.rangeQuery(fieldName.fieldName());
 
 			switch (filter.getOperator()) {
 			case LT:
@@ -152,17 +156,21 @@ public class PripElasticSearchMetadataRepo implements PripMetadataRepository {
 			}
 			queryBuilder.must(rangeQueryBuilder);
 		}
+	}
 
-		for (PripTextFilter filter : nameFilters) {
+	private void buildQueryWithTextFilters(List<PripTextFilter> textFilters, BoolQueryBuilder queryBuilder,
+			PripMetadata.FIELD_NAMES fieldName) {
+
+		for (PripTextFilter filter : textFilters) {
 			LOGGER.info("finding PRIP metadata with filter {}", filter);
 
 			switch (filter.getFunction()) {
 			case STARTS_WITH:
-				queryBuilder.must(QueryBuilders.wildcardQuery(PripMetadata.FIELD_NAMES.NAME.fieldName(),
+				queryBuilder.must(QueryBuilders.wildcardQuery(fieldName.fieldName(),
 						String.format("%s*", filter.getText().toLowerCase())));
 				break;
 			case CONTAINS:
-				queryBuilder.must(QueryBuilders.wildcardQuery(PripMetadata.FIELD_NAMES.NAME.fieldName(),
+				queryBuilder.must(QueryBuilders.wildcardQuery(fieldName.fieldName(),
 						String.format("*%s*", filter.getText().toLowerCase())));
 				break;
 			default:
@@ -170,8 +178,6 @@ public class PripElasticSearchMetadataRepo implements PripMetadataRepository {
 						String.format("not supported filter function: %s", filter.getFunction().name()));
 			}
 		}
-
-		return query(queryBuilder);
 	}
 
 	private List<PripMetadata> query(BoolQueryBuilder queryBuilder) {
