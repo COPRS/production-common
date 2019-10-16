@@ -19,6 +19,7 @@ import org.apache.olingo.server.api.ODataResponse;
 import org.apache.olingo.server.api.ServiceMetadata;
 import org.apache.olingo.server.api.serializer.EntityCollectionSerializerOptions;
 import org.apache.olingo.server.api.serializer.ODataSerializer;
+import org.apache.olingo.server.api.serializer.SerializerException;
 import org.apache.olingo.server.api.serializer.SerializerResult;
 import org.apache.olingo.server.api.uri.UriInfo;
 import org.apache.olingo.server.api.uri.UriResource;
@@ -65,62 +66,64 @@ public class ProductEntityCollectionProcessor
 		EdmEntitySet edmEntitySet = uriResourceEntitySet.getEntitySet();
 
 		if (EdmProvider.ES_PRODUCTS_NAME.equals(edmEntitySet.getName())) {
-			EntityCollection entitySet = getData(request, edmEntitySet, uriInfo.getSystemQueryOptions());
-
-			ODataSerializer serializer = odata.createSerializer(responseFormat);
-			ContextURL contextUrl = ContextURL.with().entitySet(edmEntitySet).build();
-			EntityCollectionSerializerOptions opts = EntityCollectionSerializerOptions.with()
-					.id(request.getRawBaseUri() + "/" + edmEntitySet.getName()).contextURL(contextUrl).build();
-			SerializerResult serializerResult = serializer.entityCollection(serviceMetadata,
-					edmEntitySet.getEntityType(), entitySet, opts);
-			InputStream serializedContent = serializerResult.getContent();
-
-			response.setContent(serializedContent);
-			response.setStatusCode(HttpStatusCode.OK.getStatusCode());
-			response.setHeader(HttpHeader.CONTENT_TYPE, responseFormat.toContentTypeString());
-			LOGGER.debug("Serving product metadata collection with {} items", entitySet.getEntities().size());
-		}
-	}
-
-	private EntityCollection getData(ODataRequest request, EdmEntitySet edmEntitySet,
-			List<SystemQueryOption> systemQueryOptions) {
-		EntityCollection entityCollection = new EntityCollection();
-		List<PripDateTimeFilter> pripDateTimeFilters = Collections.emptyList();
-		List<PripTextFilter> pripTextFilters = Collections.emptyList();
-		for (SystemQueryOption queryOption : systemQueryOptions) {
-			if (queryOption.getKind().equals(SystemQueryOptionKind.FILTER)) {
-				if (queryOption instanceof FilterOption) {
-					FilterOption filterOption = (FilterOption) queryOption;
-					Expression expression = filterOption.getExpression();
-					try {
-						ProductsFilterVisitor productFilterVistor = new ProductsFilterVisitor();
-						expression.accept(productFilterVistor); // also has a return value, which is currently not needed
-						pripDateTimeFilters = productFilterVistor.getPripDateTimeFilters();
-						pripTextFilters = productFilterVistor.getPripTextFilters();
-					} catch (ExpressionVisitException | ODataApplicationException e) {
-						LOGGER.error("Invalid or unsupported filter expression: {}", filterOption.getText(), e);
-						return entityCollection;
+			EntityCollection entityCollection = new EntityCollection();
+			List<PripDateTimeFilter> pripDateTimeFilters = Collections.emptyList();
+			List<PripTextFilter> pripTextFilters = Collections.emptyList();
+			for (SystemQueryOption queryOption : uriInfo.getSystemQueryOptions()) {
+				if (queryOption.getKind().equals(SystemQueryOptionKind.FILTER)) {
+					if (queryOption instanceof FilterOption) {
+						FilterOption filterOption = (FilterOption) queryOption;
+						Expression expression = filterOption.getExpression();
+						try {
+							ProductsFilterVisitor productFilterVistor = new ProductsFilterVisitor();
+							expression.accept(productFilterVistor); // also has a return value, which is currently not needed
+							pripDateTimeFilters = productFilterVistor.getPripDateTimeFilters();
+							pripTextFilters = productFilterVistor.getPripTextFilters();
+						} catch (ExpressionVisitException | ODataApplicationException e) {
+							LOGGER.error("Invalid or unsupported filter expression: {}", filterOption.getText(), e);
+							response.setStatusCode(HttpStatusCode.BAD_REQUEST.getStatusCode());
+							return;
+						}
 					}
 				}
 			}
-		}
 
-		List<PripMetadata> queryResult;
-		if (pripDateTimeFilters.size() > 0 && pripTextFilters.size() > 0) {
-			queryResult = pripMetadataRepository.findByCreationDateAndProductName(pripDateTimeFilters, pripTextFilters);
-		} else if (pripDateTimeFilters.size() > 0) {
-			queryResult = pripMetadataRepository.findByCreationDate(pripDateTimeFilters);
-		} else if (pripTextFilters.size() > 0) {
-			queryResult = pripMetadataRepository.findByProductName(pripTextFilters);
-		} else {
-			queryResult = pripMetadataRepository.findAll();
-		}
+			List<PripMetadata> queryResult;
+			if (pripDateTimeFilters.size() > 0 && pripTextFilters.size() > 0) {
+				queryResult = pripMetadataRepository.findByCreationDateAndProductName(pripDateTimeFilters, pripTextFilters);
+			} else if (pripDateTimeFilters.size() > 0) {
+				queryResult = pripMetadataRepository.findByCreationDate(pripDateTimeFilters);
+			} else if (pripTextFilters.size() > 0) {
+				queryResult = pripMetadataRepository.findByProductName(pripTextFilters);
+			} else {
+				queryResult = pripMetadataRepository.findAll();
+			}
 
-		List<Entity> productList = entityCollection.getEntities();
-		for (PripMetadata pripMetadata : queryResult) {
-			productList.add(MappingUtil.pripMetadataToEntity(pripMetadata, request.getRawBaseUri()));
+			List<Entity> productList = entityCollection.getEntities();
+			for (PripMetadata pripMetadata : queryResult) {
+				productList.add(MappingUtil.pripMetadataToEntity(pripMetadata, request.getRawBaseUri()));
+			}
+			
+			InputStream serializedContent = serializeEntityCollection(
+					entityCollection, edmEntitySet, request.getRawBaseUri(), responseFormat);
+			
+			response.setContent(serializedContent);
+			response.setStatusCode(HttpStatusCode.OK.getStatusCode());
+			response.setHeader(HttpHeader.CONTENT_TYPE, responseFormat.toContentTypeString());
+			LOGGER.debug("Serving product metadata collection with {} items", entityCollection.getEntities().size());
 		}
-
-		return entityCollection;
 	}
+	
+	private InputStream serializeEntityCollection(EntityCollection entityCollection, EdmEntitySet edmEntitySet,
+			String rawBaseUri, ContentType format) throws SerializerException {
+		ODataSerializer serializer = odata.createSerializer(format);
+		ContextURL contextUrl = ContextURL.with().entitySet(edmEntitySet).build();
+		EntityCollectionSerializerOptions opts = EntityCollectionSerializerOptions.with()
+				.id(rawBaseUri + "/" + edmEntitySet.getName()).contextURL(contextUrl).build();
+		SerializerResult serializerResult = serializer.entityCollection(serviceMetadata,
+				edmEntitySet.getEntityType(), entityCollection, opts);
+		InputStream serializedContent = serializerResult.getContent();
+		return serializedContent;
+	}
+	
 }
