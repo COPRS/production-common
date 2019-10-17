@@ -1,13 +1,16 @@
 package standalone.prip.service.metadata;
 
-import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
 
 import esa.s1pdgs.cpoc.common.utils.DateUtils;
 import esa.s1pdgs.cpoc.prip.model.Checksum;
+import esa.s1pdgs.cpoc.prip.model.PripDateTimeFilter;
 import esa.s1pdgs.cpoc.prip.model.PripMetadata;
+import esa.s1pdgs.cpoc.prip.model.PripTextFilter;
 import esa.s1pdgs.cpoc.prip.service.metadata.PripMetadataRepository;
 
 public class DummyPripMetadataRepositoryImpl implements PripMetadataRepository {
@@ -25,6 +28,44 @@ public class DummyPripMetadataRepositoryImpl implements PripMetadataRepository {
 	}
 
 	@Override
+	public List<PripMetadata> findByCreationDate(List<PripDateTimeFilter> creationDateFilters) {
+		return findByCreationDateAndProductName(creationDateFilters, Collections.emptyList());
+	}
+
+	@Override
+	public List<PripMetadata> findByProductName(List<PripTextFilter> nameFilters) {
+		return findByCreationDateAndProductName(Collections.emptyList(), nameFilters);
+	}
+
+	@Override
+	public List<PripMetadata> findByCreationDateAndProductName(List<PripDateTimeFilter> creationDateFilters,
+			List<PripTextFilter> nameFilters) {
+		List<PripMetadata> searchResult = new ArrayList<>();
+		for (PripMetadata item : pripMetadataList) {
+			boolean itemMatchesCreationDateFilters = true; 
+			boolean itemMatchNameFilters = true;
+			
+			for (PripDateTimeFilter creationDateFilter: creationDateFilters) {
+				switch (creationDateFilter.getOperator()) {
+					case GT: itemMatchesCreationDateFilters &= item.getCreationDate().isAfter(creationDateFilter.getDateTime()); break;
+					case LT: itemMatchesCreationDateFilters &= item.getCreationDate().isBefore(creationDateFilter.getDateTime()); break;
+				}
+			}
+			for (PripTextFilter nameFilter : nameFilters) {
+				switch (nameFilter.getFunction()) {
+					case CONTAINS: itemMatchNameFilters &= item.getName().indexOf(nameFilter.getText()) >= 0; break;
+					case STARTS_WITH: itemMatchNameFilters &= item.getName().startsWith(nameFilter.getText()); break;						
+				}
+			}
+			
+			if (itemMatchesCreationDateFilters && itemMatchNameFilters) {
+				searchResult.add(item);
+			}
+		}
+		return searchResult;
+	}
+		
+	@Override
 	public PripMetadata findById(String id) {
 		UUID uuid = UUID.fromString(id);
 		for (PripMetadata pripMetadata : pripMetadataList) {
@@ -41,24 +82,24 @@ public class DummyPripMetadataRepositoryImpl implements PripMetadataRepository {
 						"00000000-0000-0000-0000-000000000001", // id
 						"DummyProduct1.ZIP", // name
 						1000L, // size
-						"2000-01-01T00:00:00.000000Z", // creation date
-						"2000-01-01T00:00:00.000000Z", // eviction date
+						"2011-01-01T01:00:00.000Z", // creation date
+						"2011-01-01T01:00:00.000Z", // eviction date
 						"00000000000000000000000000000001" // checksum value
 				), //
 				createDummyMetadata( //
 						"00000000-0000-0000-0000-000000000002", // id
 						"DummyProduct2.ZIP", // name
 						2000L, // size
-						"2000-01-01T00:00:00.000000Z", // creation date
-						"2000-01-01T00:00:00.000000Z", // eviction date
+						"2012-01-01T02:00:00.000Z", // creation date
+						"2012-01-01T02:00:00.000Z", // eviction date
 						"00000000000000000000000000000003" // checksum value
 				), //
 				createDummyMetadata( //
 						"00000000-0000-0000-0000-000000000003", // id
 						"DummyProduct3.ZIP", // name
 						3000L, // size
-						"2000-01-01T00:00:00.000000Z", // creation date
-						"2000-01-01T00:00:00.000000Z", // eviction date
+						"2013-01-01T03:00:00.000Z", // creation date
+						"2013-01-01T03:00:00.000Z", // eviction date
 						"00000000000000000000000000000003" // checksum value
 				));
 	}
@@ -80,9 +121,4 @@ public class DummyPripMetadataRepositoryImpl implements PripMetadataRepository {
 		return metadata;
 	}
 
-	@Override
-	public List<PripMetadata> findByCreationDate(LocalDateTime creationDateStart, LocalDateTime creationDateStop) {
-		// TODO Auto-generated method stub
-		return null;
-	}
 }

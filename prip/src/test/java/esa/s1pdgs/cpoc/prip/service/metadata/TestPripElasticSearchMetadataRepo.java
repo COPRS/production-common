@@ -32,7 +32,10 @@ import org.mockito.MockitoAnnotations;
 
 import esa.s1pdgs.cpoc.common.ProductFamily;
 import esa.s1pdgs.cpoc.prip.model.Checksum;
+import esa.s1pdgs.cpoc.prip.model.PripDateTimeFilter;
 import esa.s1pdgs.cpoc.prip.model.PripMetadata;
+import esa.s1pdgs.cpoc.prip.model.PripTextFilter;
+import esa.s1pdgs.cpoc.prip.model.PripDateTimeFilter.Operator;
 
 public class TestPripElasticSearchMetadataRepo {
 
@@ -139,6 +142,153 @@ public class TestPripElasticSearchMetadataRepo {
 		doThrow(new IOException("testexecption")).when(restHighLevelClient).search(Mockito.any());
 		List<PripMetadata> result = repo.findAll();
 		assertEquals(0, result.size());
+	}
+
+	@Test
+	public void testFindByCreationDate() throws IOException {
+
+		SearchHit[] hits = new SearchHit[2];
+
+		PripMetadata pripMetadata1 = createPripMetadata();
+		BytesReference source1 = new BytesArray(pripMetadata1.toString());
+		SearchHit h1 = new SearchHit(1);
+		h1.sourceRef(source1);
+		hits[0] = h1;
+
+		PripMetadata pripMetadata2 = createPripMetadata();
+		BytesReference source2 = new BytesArray(pripMetadata2.toString());
+		SearchHit h2 = new SearchHit(1);
+		h2.sourceRef(source2);
+		hits[1] = h2;
+
+		SearchHits searchHits = new SearchHits(hits, 2, 0);
+
+		doReturn(searchHits).when(searchResponse).getHits();
+		doReturn(searchResponse).when(restHighLevelClient).search(Mockito.any());
+
+		List<PripDateTimeFilter> creationDateIntervals = new ArrayList<>();
+
+		PripDateTimeFilter f1 = new PripDateTimeFilter();
+		f1.setDateTime(LocalDateTime.of(2019, 10, 16, 10, 48, 52));
+		f1.setOperator(Operator.LT);
+
+		PripDateTimeFilter f2 = new PripDateTimeFilter();
+		f2.setDateTime(LocalDateTime.of(2019, 10, 16, 10, 48, 50));
+		f2.setOperator(Operator.GT);
+
+		creationDateIntervals.add(f1);
+		creationDateIntervals.add(f2);
+
+		List<PripMetadata> result = repo.findByCreationDate(creationDateIntervals);
+
+		assertTrue(result.contains(pripMetadata1));
+		assertTrue(result.contains(pripMetadata2));
+	}
+
+	@Test
+	public void testFindByProductName() throws IOException {
+
+		SearchHit[] hits = new SearchHit[2];
+
+		PripMetadata pripMetadata1 = createPripMetadata();
+		BytesReference source1 = new BytesArray(pripMetadata1.toString());
+		SearchHit h1 = new SearchHit(1);
+		h1.sourceRef(source1);
+		hits[0] = h1;
+
+		PripMetadata pripMetadata2 = createPripMetadata();
+		BytesReference source2 = new BytesArray(pripMetadata2.toString());
+		SearchHit h2 = new SearchHit(1);
+		h2.sourceRef(source2);
+		hits[1] = h2;
+
+		SearchHits searchHits = new SearchHits(hits, 2, 0);
+
+		doReturn(searchHits).when(searchResponse).getHits();
+		doReturn(searchResponse).when(restHighLevelClient).search(Mockito.any());
+
+		List<PripTextFilter> nameFilters = new ArrayList<>();
+
+		PripTextFilter f1 = new PripTextFilter();
+		f1.setFunction(PripTextFilter.Function.STARTS_WITH);
+		f1.setText("S1B".toLowerCase());
+
+		PripTextFilter f2 = new PripTextFilter();
+		f2.setFunction(PripTextFilter.Function.CONTAINS);
+		f2.setText("1SS".toLowerCase());
+
+		PripTextFilter f3 = new PripTextFilter();
+		f3.setFunction(PripTextFilter.Function.CONTAINS);
+		f3.setText("_001027_".toLowerCase());
+
+		nameFilters.add(f1);
+		nameFilters.add(f2);
+		nameFilters.add(f3);
+
+		List<PripMetadata> result = repo.findByProductName(nameFilters);
+
+		assertTrue(result.contains(pripMetadata1));
+		assertTrue(result.contains(pripMetadata2));
+	}
+
+	@Test
+	public void testFindByCreationDateAndName() throws IOException {
+
+		SearchHit[] hits = new SearchHit[2];
+
+		PripMetadata pripMetadata1 = createPripMetadata();
+		BytesReference source1 = new BytesArray(pripMetadata1.toString());
+		SearchHit h1 = new SearchHit(1);
+		h1.sourceRef(source1);
+		hits[0] = h1;
+
+		PripMetadata pripMetadata2 = createPripMetadata();
+		BytesReference source2 = new BytesArray(pripMetadata2.toString());
+		SearchHit h2 = new SearchHit(1);
+		h2.sourceRef(source2);
+		hits[1] = h2;
+
+		SearchHits searchHits = new SearchHits(hits, 2, 0);
+
+		doReturn(searchHits).when(searchResponse).getHits();
+		doReturn(searchResponse).when(restHighLevelClient).search(Mockito.any());
+
+		List<PripDateTimeFilter> creationDateFilters = new ArrayList<>();
+
+		PripDateTimeFilter f1 = new PripDateTimeFilter();
+		f1.setDateTime(LocalDateTime.of(2019, 10, 16, 10, 48, 53));
+		f1.setOperator(Operator.LT);
+
+		PripDateTimeFilter f2 = new PripDateTimeFilter();
+		f2.setDateTime(LocalDateTime.of(2019, 10, 16, 10, 48, 50));
+		f2.setOperator(Operator.GT);
+
+		creationDateFilters.add(f1);
+		creationDateFilters.add(f2);
+
+		List<PripTextFilter> nameFilters = new ArrayList<>();
+
+		PripTextFilter n1 = new PripTextFilter();
+		n1.setFunction(PripTextFilter.Function.STARTS_WITH);
+		n1.setText("S1B".toLowerCase());
+
+		PripTextFilter n2 = new PripTextFilter();
+		n2.setFunction(PripTextFilter.Function.CONTAINS);
+		n2.setText("1SS".toLowerCase());
+
+		PripTextFilter n3 = new PripTextFilter();
+		n3.setFunction(PripTextFilter.Function.CONTAINS);
+		n3.setText("_001170_".toLowerCase());
+
+		nameFilters.add(n1);
+		nameFilters.add(n2);
+		nameFilters.add(n3);
+
+		List<PripMetadata> result = repo.findByCreationDateAndProductName(creationDateFilters, nameFilters);
+
+		assertTrue(result.contains(pripMetadata1));
+		assertTrue(result.contains(pripMetadata2));
+
 	}
 
 	private PripMetadata createPripMetadata() {

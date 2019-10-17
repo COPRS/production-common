@@ -35,6 +35,8 @@ public class OdataController {
 	
 	@RequestMapping(value = "/v1/**")
 	public void process(HttpServletRequest request, HttpServletResponse response) {
+		String queryParams = request.getQueryString() == null ? "" : "?" + request.getQueryString();
+		LOGGER.info("Received HTTP request for URL: {}", request.getRequestURL().toString() + queryParams);
 		OData odata = OData.newInstance();
 		ServiceMetadata serviceMetadata = odata.createServiceMetadata(edmProvider, new ArrayList<EdmxReference>());
 		ODataHttpHandler handler = odata.createHandler(serviceMetadata);

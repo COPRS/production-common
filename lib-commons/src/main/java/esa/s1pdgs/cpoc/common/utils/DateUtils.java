@@ -1,6 +1,5 @@
 package esa.s1pdgs.cpoc.common.utils;
 
-import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.LinkedHashMap;
@@ -10,11 +9,14 @@ import java.util.function.Predicate;
 public class DateUtils {
 	public final static String METADATA_DATE_FORMAT = "yyyy-MM-dd'T'HH:mm:ss.SSSSSS'Z'";
 	public final static DateTimeFormatter METADATA_DATE_FORMATTER = DateTimeFormatter.ofPattern(METADATA_DATE_FORMAT);
+	public final static String ODATA_DATE_FORMAT = "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'";
+	public final static DateTimeFormatter ODATA_DATE_FORMATTER = DateTimeFormatter.ofPattern(ODATA_DATE_FORMAT);
 	
 	private static final Map<Predicate<String>,DateTimeFormatter> FORMATS = new LinkedHashMap<>();	
 	static {
 		FORMATS.put(s -> s.length() == 27 && s.endsWith("Z"), METADATA_DATE_FORMATTER);
 		FORMATS.put(s -> s.length() == 26, DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSSSSS"));
+		FORMATS.put(s -> s.length() == 24 && s.endsWith("Z"), ODATA_DATE_FORMATTER);
 		FORMATS.put(s -> s.length() == 23 && s.startsWith("UTC="), DateTimeFormatter.ofPattern("'UTC='yyyy-MM-dd'T'HH:mm:ss"));
 		FORMATS.put(s -> s.length() == 19, DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss"));
 	}
