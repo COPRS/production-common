@@ -109,7 +109,8 @@ public class OutputProcuderFactory {
         		msg.getProductName(), 
         		msg.getKeyObs(),
         		msg.getFamily(), 
-        		toUppercaseOrNull(msg.getProcessMode())
+        		toUppercaseOrNull(msg.getProcessMode()),
+        		msg.getOqcFlag()
         );
     }
     

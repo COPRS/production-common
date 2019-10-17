@@ -19,9 +19,14 @@ public class ProductDto extends AbstractDto {
 	}
 
 	public ProductDto(String productName, String keyObjectStorage, ProductFamily family, String mode) {
+		this(productName, keyObjectStorage, family, mode, OQCFlag.NOT_CHECKED);
+	}
+	
+	public ProductDto(String productName, String keyObjectStorage, ProductFamily family, String mode, OQCFlag oqcFlag) {
 		super(productName, family);
 		this.keyObjectStorage = keyObjectStorage;
 		this.mode = mode;
+		this.oqcFlag = oqcFlag;
 	}
 
 	public String getKeyObjectStorage() {

@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Ipf_Job_Order>
+  <Ipf_Conf>
+    <Processor_Name>amalfi-server-sentinel-1</Processor_Name>
+    <Version>2.2.0</Version>
+    <Stdout_Log_Level>INFO</Stdout_Log_Level>
+    <Stderr_Log_Level>INFO</Stderr_Log_Level>
+    <Test>false</Test>
+    <Breakpoint_Enable>false</Breakpoint_Enable>
+    <Processing_Station>TEST</Processing_Station>
+    <Config_Files />
+    <Sensing_Time>
+      <Start>20071002_000005000000</Start>
+      <Stop>20071002_012018000000</Stop>
+    </Sensing_Time>
+    <Dynamic_Processing_Parameters>
+      <Processing_Parameter>
+         <Name>addon</Name>
+         <Value>
+            /usr/local/amalfi/latest/addons/amalfi-config-sentinel-1-2.2.1.jar
+         </Value>
+      </Processing_Parameter>
+      <Processing_Parameter>
+         <Name>addon</Name>
+         <Value>
+            /usr/local/amalfi/latest/addons/amalfi-config-safe-2.2.0.jar
+         </Value>
+      </Processing_Parameter>
+      <Processing_Parameter>
+         <Name>addon</Name>
+         <Value>
+            /usr/local/amalfi/latest/addons/drbx-cortex-topic-safe-1-0-beta-1.jar
+         </Value>
+      </Processing_Parameter>
+      <Processing_Parameter>
+         <Name>addon</Name>
+         <Value>
+            /usr/local/amalfi/latest/addons/drbx-cortex-topic-sentinel-1-1-0-beta-1.jar
+         </Value>
+      </Processing_Parameter>
+      <Processing_Parameter>
+         <Name>xml_report_pattern</Name>
+         <Value>
+            %i-report-%d.xml
+         </Value>
+      </Processing_Parameter>
+      <Processing_Parameter>
+         <Name>pdf_report_pattern</Name>
+         <Value>
+            %i-report-%d.pdf
+         </Value>
+      </Processing_Parameter>
+    </Dynamic_Processing_Parameters>
+  </Ipf_Conf>
+  <List_of_Ipf_Procs count="1">
+    <Ipf_Proc>
+      <Task_Name>Inspection</Task_Name>
+      <Task_Version>1.0</Task_Version>
+      <BreakPoint>
+         <List_of_Brk_Files count="0" />
+      </BreakPoint>
+      <List_of_Inputs count="1">
+        <Input>
+          <File_Type>SENTINEL-1</File_Type>
+          <File_Name_Type>Physical</File_Name_Type>
+          <List_of_File_Names count="1">
+            <File_Name>      
+              /data/S1A_S1_SLC__1SDH_20110130T105900_20110130T110000_123456_000001_0001.SAFE
+            </File_Name>
+          </List_of_File_Names>
+        </Input>
+      </List_of_Inputs>
+      <List_of_Outputs count="1">
+        <Output>
+          <File_Type>AmalfiXmlReport</File_Type>
+          <File_Name_Type>Directory</File_Name_Type>
+          <File_Name>/data/outputs/reports</File_Name>
+        </Output>
+      </List_of_Outputs>
+    </Ipf_Proc>
+  </List_of_Ipf_Procs>
+</Ipf_Job_Order>
