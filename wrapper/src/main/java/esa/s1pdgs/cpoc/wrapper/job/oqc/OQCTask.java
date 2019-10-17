@@ -88,8 +88,7 @@ public class OQCTask implements Callable<OQCFlag> {
 
 	private Path generateWorkingDirectory() {
 		try {
-			Path workDir = Files.createTempDirectory(oqcBaseWorkingDirectory,
-					originalProduct.getFileName().toString());
+			Path workDir = Files.createDirectories(Paths.get(oqcBaseWorkingDirectory.toString(),originalProduct.getFileName().toString())); 
 			Files.createDirectories(Paths.get(workDir.toString(), "reports"));
 			LOGGER.info("Generated working directory for oqc check: {}", workDir);
 			return workDir;

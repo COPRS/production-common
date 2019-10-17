@@ -69,7 +69,7 @@ public class OQCTaskTest {
 		LevelJobOutputDto dto = new LevelJobOutputDto();
 		dto.setOqcCheck(true);
 		
-		Path productDir = Files.createTempDirectory(Paths.get("/tmp"), "OQCTASK");
+		Path productDir = Files.createTempDirectory("OQCTASK");
 
 		OQCFlag flag = executor.executeOQC(productDir, dto, new OQCSleepTaskFactory());
 		
@@ -109,7 +109,7 @@ public class OQCTaskTest {
 
 	@Test
 	public void testCompleteTask() throws Exception {
-		Path productDir = Files.createTempDirectory(Paths.get("/tmp"), "OQCTASK");
+		Path productDir = Files.createTempDirectory("OQCTASK");
 		
 		OQCTask task = new OQCTask(defaultProperties, productDir);
 		OQCFlag flag = task.call();
