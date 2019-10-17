@@ -115,6 +115,7 @@ public class PripElasticSearchMetadataRepo implements PripMetadataRepository {
 
 	@Override
 	public List<PripMetadata> findByCreationDate(List<PripDateTimeFilter> creationDateFilters) {
+		LOGGER.info("finding PRIP metadata with creationDate filters {}", creationDateFilters);
 		BoolQueryBuilder queryBuilder = QueryBuilders.boolQuery();
 		buildQueryWithDateTimeFilters(creationDateFilters, queryBuilder, PripMetadata.FIELD_NAMES.CREATION_DATE);
 		return query(queryBuilder);
@@ -122,6 +123,7 @@ public class PripElasticSearchMetadataRepo implements PripMetadataRepository {
 
 	@Override
 	public List<PripMetadata> findByProductName(List<PripTextFilter> nameFilters) {
+		LOGGER.info("finding PRIP metadata with name filters {}", nameFilters);
 		BoolQueryBuilder queryBuilder = QueryBuilders.boolQuery();
 		buildQueryWithTextFilters(nameFilters, queryBuilder, PripMetadata.FIELD_NAMES.NAME);
 		return query(queryBuilder);
@@ -130,6 +132,7 @@ public class PripElasticSearchMetadataRepo implements PripMetadataRepository {
 	@Override
 	public List<PripMetadata> findByCreationDateAndProductName(List<PripDateTimeFilter> creationDateFilters,
 			List<PripTextFilter> nameFilters) {
+		LOGGER.info("finding PRIP metadata with creationDate filters {} and name filters {}", creationDateFilters, nameFilters);
 		BoolQueryBuilder queryBuilder = QueryBuilders.boolQuery();
 		buildQueryWithDateTimeFilters(creationDateFilters, queryBuilder, PripMetadata.FIELD_NAMES.CREATION_DATE);
 		buildQueryWithTextFilters(nameFilters, queryBuilder, PripMetadata.FIELD_NAMES.NAME);
@@ -138,8 +141,8 @@ public class PripElasticSearchMetadataRepo implements PripMetadataRepository {
 
 	private void buildQueryWithDateTimeFilters(List<PripDateTimeFilter> dateTimeFilters, BoolQueryBuilder queryBuilder,
 			PripMetadata.FIELD_NAMES fieldName) {
+		
 		for (PripDateTimeFilter filter : dateTimeFilters) {
-			LOGGER.info("finding PRIP metadata with creationDate {}", filter);
 
 			RangeQueryBuilder rangeQueryBuilder = QueryBuilders.rangeQuery(fieldName.fieldName());
 
@@ -162,7 +165,6 @@ public class PripElasticSearchMetadataRepo implements PripMetadataRepository {
 			PripMetadata.FIELD_NAMES fieldName) {
 
 		for (PripTextFilter filter : textFilters) {
-			LOGGER.info("finding PRIP metadata with filter {}", filter);
 
 			switch (filter.getFunction()) {
 			case STARTS_WITH:
