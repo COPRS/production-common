@@ -29,6 +29,9 @@ import esa.s1pdgs.cpoc.obs_sdk.ObsServiceException;
 import esa.s1pdgs.cpoc.obs_sdk.ObsUploadObject;
 import esa.s1pdgs.cpoc.obs_sdk.SdkClientException;
 import esa.s1pdgs.cpoc.obs_sdk.ValidArgumentAssertion;
+import esa.s1pdgs.cpoc.report.LoggerReporting;
+import esa.s1pdgs.cpoc.report.Reporting;
+import esa.s1pdgs.cpoc.report.ReportingMessage;
 
 public class SwiftObsClient extends AbstractObsClient {
 	public static final class Factory implements ObsClient.Factory {
@@ -290,10 +293,14 @@ public class SwiftObsClient extends AbstractObsClient {
 
 	@Override
 	public URL createTemporaryDownloadUrl(ObsObject object, long expirationTimeInSeconds) throws ObsException {
+		URL url;
 		try {
-			return swiftObsServices.createTemporaryDownloadUrl(getBucketFor(object.getFamily()), object.getKey(), expirationTimeInSeconds);
+			url = swiftObsServices.createTemporaryDownloadUrl(getBucketFor(object.getFamily()), object.getKey(), expirationTimeInSeconds);
 		} catch (SdkClientException ex) {
 			throw new ObsException(object.getFamily(), object.getKey(), ex);
 		}
+		final Reporting reporting = new LoggerReporting.Factory("CreateTemporaryDownloadUrl").newReporting(0);
+     	reporting.intermediate(new ReportingMessage(size(object), "Created temporary download URL for username '{}' for product '{}'", "anonymous", object.getKey()));
+     	return url;
 	}
 }

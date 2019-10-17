@@ -39,6 +39,9 @@ import esa.s1pdgs.cpoc.obs_sdk.ObsUploadObject;
 import esa.s1pdgs.cpoc.obs_sdk.SdkClientException;
 import esa.s1pdgs.cpoc.obs_sdk.ValidArgumentAssertion;
 import esa.s1pdgs.cpoc.obs_sdk.s3.retry.SDKCustomDefaultRetryCondition;
+import esa.s1pdgs.cpoc.report.LoggerReporting;
+import esa.s1pdgs.cpoc.report.Reporting;
+import esa.s1pdgs.cpoc.report.ReportingMessage;
 
 /**
  * <p>
@@ -307,10 +310,14 @@ public class S3ObsClient extends AbstractObsClient {
 
 	@Override
 	public URL createTemporaryDownloadUrl(ObsObject object, long expirationTimeInSeconds) throws ObsException, ObsServiceException {
+		URL url;		
 		try {
-			return s3Services.createTemporaryDownloadUrl(getBucketFor(object.getFamily()), object.getKey(), expirationTimeInSeconds);
+			url = s3Services.createTemporaryDownloadUrl(getBucketFor(object.getFamily()), object.getKey(), expirationTimeInSeconds);
 		} catch (S3SdkClientException ex) {
-			throw new ObsException(object.getFamily(), object.getKey(), ex);
+			throw new ObsException(object.getFamily(), object.getKey(), ex);			
 		}
+		final Reporting reporting = new LoggerReporting.Factory("CreateTemporaryDownloadUrl").newReporting(0);
+     	reporting.intermediate(new ReportingMessage(size(object), "Created temporary download URL for username '{}' for product '{}'", "anonymous", object.getKey()));
+     	return url;
 	}
 }
