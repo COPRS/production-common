@@ -13,9 +13,11 @@ import org.apache.olingo.server.api.ServiceMetadata;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import esa.s1pdgs.cpoc.obs_sdk.ObsClient;
 import esa.s1pdgs.cpoc.prip.service.edm.EdmProvider;
 import esa.s1pdgs.cpoc.prip.service.metadata.PripMetadataRepository;
 import esa.s1pdgs.cpoc.prip.service.processor.ProductEntityCollectionProcessor;
@@ -28,19 +30,25 @@ public class OdataController {
 	private static final Logger LOGGER = LoggerFactory.getLogger(OdataController.class);
 
 	@Autowired
-	EdmProvider edmProvider;
+	private EdmProvider edmProvider;
 	
 	@Autowired
-	PripMetadataRepository pripMetadataRepository;
+	private PripMetadataRepository pripMetadataRepository;
+	
+	@Autowired
+	private ObsClient obsClient;
+	
+	@Value("${prip.download-url-expiration-time-in-seconds:600}")
+	private long downloadUrlExpirationTimeInSeconds;
 	
 	@RequestMapping(value = "/v1/**")
 	public void process(HttpServletRequest request, HttpServletResponse response) {
 		String queryParams = request.getQueryString() == null ? "" : "?" + request.getQueryString();
-		LOGGER.info("Received HTTP request for URL: {}", request.getRequestURL().toString() + queryParams);
+		LOGGER.info("Received HTTP request for URL: {}", request.getRequestURL().toString() + queryParams);		
 		OData odata = OData.newInstance();
 		ServiceMetadata serviceMetadata = odata.createServiceMetadata(edmProvider, new ArrayList<EdmxReference>());
 		ODataHttpHandler handler = odata.createHandler(serviceMetadata);
-		handler.register(new ProductEntityProcessor(pripMetadataRepository));
+		handler.register(new ProductEntityProcessor(pripMetadataRepository, obsClient, downloadUrlExpirationTimeInSeconds));
 		handler.register(new ProductEntityCollectionProcessor(pripMetadataRepository));
 
 		handler.process(new HttpServletRequestWrapper(request) {

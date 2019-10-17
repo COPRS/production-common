@@ -61,6 +61,8 @@ public class EdmProvider extends org.apache.olingo.commons.api.edm.provider.Csdl
 
 			entityType.setProperties(properties);
 			
+			entityType.setHasStream(true);
+			
 			return entityType;
 		}
 
