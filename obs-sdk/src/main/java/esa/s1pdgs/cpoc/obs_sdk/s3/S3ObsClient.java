@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.PrintWriter;
+import java.net.URL;
 import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.Date;
@@ -27,7 +28,6 @@ import com.amazonaws.services.s3.transfer.TransferManager;
 import com.amazonaws.services.s3.transfer.TransferManagerBuilder;
 
 import esa.s1pdgs.cpoc.common.ProductFamily;
-import esa.s1pdgs.cpoc.common.errors.AbstractCodedException.ErrorCode;
 import esa.s1pdgs.cpoc.common.errors.obs.ObsException;
 import esa.s1pdgs.cpoc.obs_sdk.AbstractObsClient;
 import esa.s1pdgs.cpoc.obs_sdk.ObsClient;
@@ -301,6 +301,15 @@ public class S3ObsClient extends AbstractObsClient {
 			// return the checksum of the object
 			return s3Services.getChecksum(bucketName, object.getKey());
 		} catch (SdkClientException ex) {
+			throw new ObsException(object.getFamily(), object.getKey(), ex);
+		}
+	}
+
+	@Override
+	public URL createTemporaryDownloadUrl(ObsObject object, long expirationTimeInSeconds) throws ObsException, ObsServiceException {
+		try {
+			return s3Services.createTemporaryDownloadUrl(getBucketFor(object.getFamily()), object.getKey(), expirationTimeInSeconds);
+		} catch (S3SdkClientException ex) {
 			throw new ObsException(object.getFamily(), object.getKey(), ex);
 		}
 	}

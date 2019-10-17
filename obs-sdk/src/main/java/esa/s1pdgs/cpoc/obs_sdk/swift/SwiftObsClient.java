@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.PrintWriter;
+import java.net.URL;
 import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -282,6 +283,15 @@ public class SwiftObsClient extends AbstractObsClient {
 			
 			// return the checksum of the object
 			return swiftObsServices.getChecksum(bucketName, object.getKey());
+		} catch (SdkClientException ex) {
+			throw new ObsException(object.getFamily(), object.getKey(), ex);
+		}
+	}
+
+	@Override
+	public URL createTemporaryDownloadUrl(ObsObject object, long expirationTimeInSeconds) throws ObsException {
+		try {
+			return swiftObsServices.createTemporaryDownloadUrl(getBucketFor(object.getFamily()), object.getKey(), expirationTimeInSeconds);
 		} catch (SdkClientException ex) {
 			throw new ObsException(object.getFamily(), object.getKey(), ex);
 		}

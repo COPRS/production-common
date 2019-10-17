@@ -2,6 +2,7 @@ package esa.s1pdgs.cpoc.obs_sdk;
 
 import java.io.File;
 import java.io.InputStream;
+import java.net.URL;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
@@ -114,4 +115,6 @@ public interface ObsClient {
      * or an attempt is being made to query the size of a directory
      */
     String getChecksum(final ObsObject object) throws ObsException;
+    
+    URL createTemporaryDownloadUrl(ObsObject object, long expirationTimeInSeconds) throws ObsException, ObsServiceException;
 }
