@@ -57,4 +57,32 @@ public class PripDateTimeFilter {
 		return String.format("{\"%s\":\"%s\"}", operator.getOperator(), DateUtils.formatToMetadataDateTimeFormat(dateTime));
 	}
 
+	@Override
+	public int hashCode() {
+		final int prime = 31;
+		int result = 1;
+		result = prime * result + ((dateTime == null) ? 0 : dateTime.hashCode());
+		result = prime * result + ((operator == null) ? 0 : operator.hashCode());
+		return result;
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj)
+			return true;
+		if (obj == null)
+			return false;
+		if (getClass() != obj.getClass())
+			return false;
+		PripDateTimeFilter other = (PripDateTimeFilter) obj;
+		if (dateTime == null) {
+			if (other.dateTime != null)
+				return false;
+		} else if (!dateTime.equals(other.dateTime))
+			return false;
+		if (operator != other.operator)
+			return false;
+		return true;
+	}
+
 }
