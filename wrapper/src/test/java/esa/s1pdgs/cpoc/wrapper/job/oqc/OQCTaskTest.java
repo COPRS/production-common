@@ -116,6 +116,6 @@ public class OQCTaskTest {
 		assertThat(flag,is(notNullValue()));
 		assertThat(flag,is(OQCFlag.CHECKED_OK));
 		
-		FileUtils.delete(productDir.toString());
+//		FileUtils.delete(productDir.toString());
 	}
 }
