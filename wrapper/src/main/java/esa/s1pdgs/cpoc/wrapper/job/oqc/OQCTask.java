@@ -29,6 +29,7 @@ import org.apache.logging.log4j.Logger;
 import org.springframework.core.io.ClassPathResource;
 import org.w3c.dom.Document;
 import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
 
 import esa.s1pdgs.cpoc.common.utils.FileUtils;
 import esa.s1pdgs.cpoc.common.utils.LogUtils;
@@ -115,8 +116,14 @@ public class OQCTask implements Callable<OQCFlag> {
 			// replace content that is specific for the task
 			((Node) xpath.compile("//Input/List_of_File_Names/File_Name/text()").evaluate(document,
 					XPathConstants.NODE)).setTextContent(originalProduct.toString());
-			((Node) xpath.compile("//Output/File_Name/text()").evaluate(document, XPathConstants.NODE))
-					.setTextContent(workDir.toString() + "/reports");
+			
+			NodeList outputNodes = (NodeList)xpath.compile("//Output/File_Name/text()").evaluate(document, XPathConstants.NODESET);
+			for (int c=0; c < outputNodes.getLength(); c++) {
+				Node node = outputNodes.item(c);
+				node.setTextContent(workDir.toString() + "/reports");
+			}			
+//			((Node) xpath.compile("//Output/File_Name/text()").evaluate(document, XPathConstants.NODESET))
+//					.setTextContent(workDir.toString() + "/reports");
 
 			TransformerFactory tf = TransformerFactory.newInstance();
 			Transformer t = tf.newTransformer();
