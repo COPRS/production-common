@@ -2,6 +2,7 @@ package esa.s1pdgs.cpoc.disseminator;
 
 import java.io.File;
 import java.io.InputStream;
+import java.net.URL;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
@@ -85,6 +86,12 @@ public abstract class FakeObsClient implements ObsClient {
 		return null;
 	}
 	
+	@Override
+	public URL createTemporaryDownloadUrl(ObsObject object, long expirationTimeInSeconds)
+			throws ObsException, ObsServiceException {
+		// TODO Auto-generated method stub
+		return null;
+	}	
 	
 
 }
