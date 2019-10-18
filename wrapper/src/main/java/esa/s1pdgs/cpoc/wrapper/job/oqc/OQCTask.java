@@ -82,7 +82,7 @@ public class OQCTask implements Callable<OQCFlag> {
 			// cleanup
 			FileUtils.delete(workDir.toString());
 			
-			LOGGER.debug("OQC validatiomn was successful, resulting in {}", oqcFlag);
+			LOGGER.debug("OQC validation was successful, resulting in {}", oqcFlag);
 			return oqcFlag;
 		} catch (Exception e) {
 			// Consider every failure as a non successful validation!
