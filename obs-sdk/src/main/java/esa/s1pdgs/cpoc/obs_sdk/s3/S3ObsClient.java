@@ -266,6 +266,7 @@ public class S3ObsClient extends AbstractObsClient {
 
 	@Override
 	public long size(final ObsObject object) throws ObsException {
+		ValidArgumentAssertion.assertValidArgument(object);
 		try {
 			String bucketName = getBucketFor(object.getFamily());
 			/*
@@ -288,6 +289,7 @@ public class S3ObsClient extends AbstractObsClient {
 	
 	@Override
 	public String getChecksum(final ObsObject object) throws ObsException {
+		ValidArgumentAssertion.assertValidArgument(object);
 		try {
 			String bucketName = getBucketFor(object.getFamily());
 			/*
@@ -310,6 +312,7 @@ public class S3ObsClient extends AbstractObsClient {
 
 	@Override
 	public URL createTemporaryDownloadUrl(ObsObject object, long expirationTimeInSeconds) throws ObsException, ObsServiceException {
+		ValidArgumentAssertion.assertValidArgument(object);
 		URL url;		
 		try {
 			url = s3Services.createTemporaryDownloadUrl(getBucketFor(object.getFamily()), object.getKey(), expirationTimeInSeconds);

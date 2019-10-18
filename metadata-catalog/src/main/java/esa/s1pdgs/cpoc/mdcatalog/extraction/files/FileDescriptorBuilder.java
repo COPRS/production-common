@@ -1,6 +1,8 @@
 package esa.s1pdgs.cpoc.mdcatalog.extraction.files;
 
 import java.io.File;
+import java.util.Arrays;
+import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -23,6 +25,9 @@ import esa.s1pdgs.cpoc.mqi.model.queue.ProductDto;
  */
 public class FileDescriptorBuilder {
 
+	
+	private static final List<String> AUX_ECE_TYPES = Arrays.asList("AMV_ERRMAT", "AMH_ERRMAT");
+	
 	/**
 	 * Pattern for files to extract data
 	 */
@@ -99,7 +104,13 @@ public class FileDescriptorBuilder {
 			configFile.setMissionId(m.group(1));
 			configFile.setSatelliteId(m.group(2));
 			configFile.setProductClass(m.group(4));
-			configFile.setProductType(m.group(5));
+			
+			String typeString = m.group(5);
+			
+			if (AUX_ECE_TYPES.contains(typeString)) {
+				typeString = "AUX_ECE";
+			}			
+			configFile.setProductType(typeString);
 			configFile.setProductFamily(ProductFamily.AUXILIARY_FILE);
 			configFile.setExtension(FileExtension.valueOfIgnoreCase(m.group(6).toUpperCase()));
 
