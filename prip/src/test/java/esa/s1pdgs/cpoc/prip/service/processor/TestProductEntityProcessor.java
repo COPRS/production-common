@@ -6,6 +6,7 @@ import static org.mockito.Mockito.times;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
+import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.UUID;
@@ -31,6 +32,9 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 
+import esa.s1pdgs.cpoc.common.errors.obs.ObsException;
+import esa.s1pdgs.cpoc.obs_sdk.ObsClient;
+import esa.s1pdgs.cpoc.obs_sdk.ObsServiceException;
 import esa.s1pdgs.cpoc.prip.model.PripMetadata;
 import esa.s1pdgs.cpoc.prip.service.metadata.PripMetadataRepository;
 
@@ -65,10 +69,14 @@ public class TestProductEntityProcessor {
 	@Mock
 	SerializerResult serializerResultMock;
 	
+	@Mock
+	ObsClient obsClientMock; 
+	
 	@Before
 	public void setup() {
 		MockitoAnnotations.initMocks(this);
-		uut = new ProductEntityProcessor(pripMetadataRepositoryMock);
+		int downloadUrlExpirationTimeInSeconds = 0;
+		uut = new ProductEntityProcessor(pripMetadataRepositoryMock, obsClientMock, downloadUrlExpirationTimeInSeconds);
 		uut.init(odataMock, null);
 	}
 
@@ -140,6 +148,73 @@ public class TestProductEntityProcessor {
 				
 		ODataResponse odataResponse = new ODataResponse();
 		uut.readEntity(odataRequestMock, odataResponse, uriInfoMock, ContentType.JSON_FULL_METADATA);
+		
+		Mockito.verify(pripMetadataRepositoryMock, times(1)).findById(Mockito.eq(uuid));
+		assertEquals(HttpStatusCode.NOT_FOUND.getStatusCode(), odataResponse.getStatusCode());
+	}
+	
+	@Test
+	public void TestReadMediaEntity_OnExistentProduct_ShallReturnStatusTemoraryRedirect()
+			throws ODataApplicationException, ODataLibraryException, IOException, ObsException, ObsServiceException {
+		String entitySetName = "Products";
+		String uuid = "00000000-0000-0000-0000-000000000001";
+		String baseUri = "http://example.org";
+		String odataPath = "/" + entitySetName + "(%27" + uuid + "%27)";
+
+		PripMetadata pripMetadata = new PripMetadata();
+		pripMetadata.setId(UUID.fromString("00000000-0000-0000-0000-000000000001"));
+		
+		doReturn(pripMetadata).when(pripMetadataRepositoryMock).findById(Mockito.eq(uuid));
+
+		doReturn(baseUri).when(odataRequestMock).getRawBaseUri();
+		doReturn(odataPath).when(odataRequestMock).getRawODataPath();
+		doReturn(baseUri + odataPath).when(odataRequestMock).getRawRequestUri();
+
+		doReturn(Arrays.asList(uriResourceEntitySetMock)).when(uriInfoMock).getUriResourceParts();
+
+		doReturn(edmEntitySetMock).when(uriResourceEntitySetMock).getEntitySet();
+		doReturn(Arrays.asList(uriParameterMock)).when(uriResourceEntitySetMock).getKeyPredicates();
+		
+		doReturn("Id").when(uriParameterMock).getName();
+		doReturn("'" + uuid + "'").when(uriParameterMock).getText();
+		
+		doReturn(entitySetName).when(edmEntitySetMock).getName();
+			
+		doReturn(new URL("http://www.example.org")).when(obsClientMock).createTemporaryDownloadUrl(Mockito.any(), Mockito.anyLong());
+		
+		ODataResponse odataResponse = new ODataResponse();
+		uut.readMediaEntity(odataRequestMock, odataResponse, uriInfoMock, ContentType.JSON_FULL_METADATA);
+		
+		Mockito.verify(pripMetadataRepositoryMock, times(1)).findById(Mockito.eq(uuid));
+		assertEquals(HttpStatusCode.TEMPORARY_REDIRECT.getStatusCode(), odataResponse.getStatusCode());
+	}
+	
+	@Test
+	public void TestReadMediaEntity_OnNonExistentProduct_ShallReturnStatusNotFound()
+			throws ODataApplicationException, ODataLibraryException, IOException, ObsException, ObsServiceException {
+		String entitySetName = "Products";
+		String uuid = "00000000-0000-0000-0000-000000000001";
+		String baseUri = "http://example.org";
+		String odataPath = "/" + entitySetName + "(%27" + uuid + "%27)";
+
+		doReturn(null).when(pripMetadataRepositoryMock).findById(Mockito.eq(uuid));
+
+		doReturn(baseUri).when(odataRequestMock).getRawBaseUri();
+		doReturn(odataPath).when(odataRequestMock).getRawODataPath();
+		doReturn(baseUri + odataPath).when(odataRequestMock).getRawRequestUri();
+
+		doReturn(Arrays.asList(uriResourceEntitySetMock)).when(uriInfoMock).getUriResourceParts();
+
+		doReturn(edmEntitySetMock).when(uriResourceEntitySetMock).getEntitySet();
+		doReturn(Arrays.asList(uriParameterMock)).when(uriResourceEntitySetMock).getKeyPredicates();
+		
+		doReturn("Id").when(uriParameterMock).getName();
+		doReturn("'" + uuid + "'").when(uriParameterMock).getText();
+		
+		doReturn(entitySetName).when(edmEntitySetMock).getName();
+			
+		ODataResponse odataResponse = new ODataResponse();
+		uut.readMediaEntity(odataRequestMock, odataResponse, uriInfoMock, ContentType.JSON_FULL_METADATA);
 		
 		Mockito.verify(pripMetadataRepositoryMock, times(1)).findById(Mockito.eq(uuid));
 		assertEquals(HttpStatusCode.NOT_FOUND.getStatusCode(), odataResponse.getStatusCode());

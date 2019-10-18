@@ -17,6 +17,7 @@ import org.apache.olingo.server.api.ODataLibraryException;
 import org.apache.olingo.server.api.ODataRequest;
 import org.apache.olingo.server.api.ODataResponse;
 import org.apache.olingo.server.api.ServiceMetadata;
+import org.apache.olingo.server.api.processor.EntityCollectionProcessor;
 import org.apache.olingo.server.api.serializer.EntityCollectionSerializerOptions;
 import org.apache.olingo.server.api.serializer.ODataSerializer;
 import org.apache.olingo.server.api.serializer.SerializerException;
@@ -41,7 +42,7 @@ import esa.s1pdgs.cpoc.prip.service.metadata.PripMetadataRepository;
 import esa.s1pdgs.cpoc.prip.service.processor.visitor.ProductsFilterVisitor;
 
 public class ProductEntityCollectionProcessor
-		implements org.apache.olingo.server.api.processor.EntityCollectionProcessor {
+		implements EntityCollectionProcessor {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(ProductEntityCollectionProcessor.class);
 

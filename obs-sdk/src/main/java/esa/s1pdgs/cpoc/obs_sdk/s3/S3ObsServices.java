@@ -3,6 +3,7 @@ package esa.s1pdgs.cpoc.obs_sdk.s3;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
@@ -13,9 +14,15 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.util.CollectionUtils;
 
+import com.amazonaws.AmazonServiceException;
+import com.amazonaws.HttpMethod;
+import com.amazonaws.auth.profile.ProfileCredentialsProvider;
 import com.amazonaws.event.ProgressEvent;
+import com.amazonaws.regions.Regions;
 import com.amazonaws.services.s3.AmazonS3;
+import com.amazonaws.services.s3.AmazonS3ClientBuilder;
 import com.amazonaws.services.s3.model.CopyObjectRequest;
+import com.amazonaws.services.s3.model.GeneratePresignedUrlRequest;
 import com.amazonaws.services.s3.model.GetObjectRequest;
 import com.amazonaws.services.s3.model.ObjectListing;
 import com.amazonaws.services.s3.model.ObjectMetadata;
@@ -556,4 +563,28 @@ public class S3ObsServices {
 		}
 		return results.get(0).getETag();
 	}
+
+	public URL createTemporaryDownloadUrl(String bucketName, String key, long expirationTimeInSeconds) throws S3SdkClientException {
+		Regions clientRegion = Regions.DEFAULT_REGION;
+        try {
+            AmazonS3 s3Client = AmazonS3ClientBuilder.standard()
+                    .withRegion(clientRegion)
+                    .withCredentials(new ProfileCredentialsProvider())
+                    .build();
+
+            java.util.Date expiration = new java.util.Date();
+            long expTimeMillis = expiration.getTime();
+            expTimeMillis += 1000 * expirationTimeInSeconds;
+            expiration.setTime(expTimeMillis);
+
+            GeneratePresignedUrlRequest generatePresignedUrlRequest =
+                    new GeneratePresignedUrlRequest(bucketName, key)
+                            .withMethod(HttpMethod.GET)
+                            .withExpiration(expiration);
+            return s3Client.generatePresignedUrl(generatePresignedUrlRequest);
+        } catch (AmazonServiceException e) {
+            throw new S3SdkClientException(bucketName, key, "Could not create temporary download URL");
+        }
+    }
+
 }

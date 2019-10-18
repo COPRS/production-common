@@ -16,7 +16,7 @@ public interface PripMetadataRepository {
 	public void save(PripMetadata pripMetadata);
 	
 	/**
-	 * Finds a PRIP metadata by its ID.
+	 * Finds a PRIP metadata by its ID. Returns null if not found.
 	 * 
 	 * @param id
 	 * @return
