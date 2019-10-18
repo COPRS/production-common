@@ -54,7 +54,8 @@ public class PripDateTimeFilter {
 
 	@Override
 	public String toString() {
-		return String.format("{\"%s\":\"%s\"}", operator.getOperator(), DateUtils.formatToMetadataDateTimeFormat(dateTime));
+		return String.format("{\"%s\":\"%s\"}", (operator == null) ? null : operator.getOperator(),
+				(dateTime == null) ? null : DateUtils.formatToMetadataDateTimeFormat(dateTime));
 	}
 
 	@Override
