@@ -48,7 +48,7 @@ import esa.s1pdgs.cpoc.mdcatalog.extraction.xml.XmlConverter;
 public class ExtractMetadata {
 
 	private static final String XSLT_MPL_EOF = "XSLT_MPL_EOF.xslt";
-	private static final String XSLT_AUX_EOF = "XSLT_AUX_EOF.xslt";
+	private static final String XSLT_AUX_EOF = "XSLT_MPL_EOF.xslt"; // FIXME it's the same --> remove it
 	private static final String XSLT_AUX_XML = "XSLT_AUX_XML.xslt";
 	private static final String XSLT_AUX_MANIFEST = "XSLT_AUX_MANIFEST.xslt";
 	private static final String XSLT_L0_MANIFEST = "XSLT_L0_MANIFEST.xslt";

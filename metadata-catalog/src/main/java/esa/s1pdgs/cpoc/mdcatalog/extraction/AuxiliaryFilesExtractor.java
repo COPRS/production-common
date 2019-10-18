@@ -4,6 +4,7 @@
 package esa.s1pdgs.cpoc.mdcatalog.extraction;
 
 import java.io.File;
+import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -46,10 +47,11 @@ import esa.s1pdgs.cpoc.report.Reporting;
 public class AuxiliaryFilesExtractor extends GenericExtractor<ProductDto> implements MqiListener<ProductDto> {
 
 	private static final Logger LOGGER = LogManager.getLogger(AuxiliaryFilesExtractor.class);
+	
 	/**
 	 * Pattern for configuration files to extract data
 	 */
-	private final static String PATTERN_CONFIG = "^([0-9a-z][0-9a-z]){1}([0-9a-z_]){1}(_(OPER|TEST))?_(AUX_OBMEMC|AUX_PP1|AUX_PP2|AUX_CAL|AUX_INS|AUX_RESORB|AUX_WND|AUX_ICE|AUX_WAV|MPL_ORBPRE|MPL_ORBSCT|MSK__LAND_)_\\w{1,}\\.(XML|EOF|SAFE)(/.*)?$";
+	private final static String PATTERN_CONFIG = "^([0-9a-z][0-9a-z]){1}([0-9a-z_]){1}(_(OPER|TEST))?_(AUX_OBMEMC|AUX_PP1|AUX_PP2|AUX_CAL|AUX_INS|AUX_RESORB|AUX_WND|AUX_ICE|AUX_SCS|AMV_ERRMAT|AMH_ERRMAT|AUX_WAV|MPL_ORBPRE|MPL_ORBSCT|MSK__LAND_)_\\w{1,}\\.(XML|EOF|SAFE)(/.*)?$";
 
 	/**
 	 * Amazon S3 service for configuration files

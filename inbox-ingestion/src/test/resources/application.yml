@@ -15,7 +15,7 @@ ingestion:
   tempo-retry-ms: 10000  
   types:
     - family: AUXILIARY_FILE 
-      regex: ^([0-9a-z][0-9a-z]){1}([0-9a-z_]){1}(_(OPER|TEST))?_(AUX_OBMEMC|AUX_PP1|AUX_PP2|AUX_CAL|AUX_INS|AUX_RESORB|AUX_WND|AUX_ICE|AUX_WAV|MPL_ORBPRE|MPL_ORBSCT)_\w{1,}\.(XML|EOF|SAFE)(/.*)?$
+      regex: ^([0-9a-z][0-9a-z]){1}([0-9a-z_]){1}(_(OPER|TEST))?_(AUX_OBMEMC|AUX_PP1|AUX_PP2|AUX_CAL|AUX_INS|AUX_RESORB|AUX_SCS|AMV_ERRMAT|AMH_ERRMAT|AUX_WND|AUX_ICE|AUX_WAV|MPL_ORBPRE|MPL_ORBSCT)_\w{1,}\.(XML|EOF|SAFE)(/.*)?$
 
 # KAFKA
 kafka:
