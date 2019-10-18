@@ -23,6 +23,7 @@ import org.elasticsearch.search.SearchHit;
 import org.elasticsearch.search.builder.SearchSourceBuilder;
 import org.elasticsearch.search.sort.SortOrder;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import esa.s1pdgs.cpoc.common.ProductFamily;
@@ -38,13 +39,15 @@ public class PripElasticSearchMetadataRepo implements PripMetadataRepository {
 	private static final Logger LOGGER = LogManager.getLogger(PripElasticSearchMetadataRepo.class);
 	private static final String ES_INDEX = "prip";
 	private static final String ES_PRIP_TYPE = "metadata";
-	private static final int DEFAULT_MAX_HITS = 1000;
+	private final int maxSearchHits;
 
 	private final RestHighLevelClient restHighLevelClient;
 
 	@Autowired
-	public PripElasticSearchMetadataRepo(RestHighLevelClient restHighLevelClient) {
+	public PripElasticSearchMetadataRepo(RestHighLevelClient restHighLevelClient,
+			@Value("${prip.repository.max-search-hits}") final int maxSearchHits) {
 		this.restHighLevelClient = restHighLevelClient;
+		this.maxSearchHits = maxSearchHits;
 	}
 
 	@Override
@@ -132,7 +135,8 @@ public class PripElasticSearchMetadataRepo implements PripMetadataRepository {
 	@Override
 	public List<PripMetadata> findByCreationDateAndProductName(List<PripDateTimeFilter> creationDateFilters,
 			List<PripTextFilter> nameFilters) {
-		LOGGER.info("finding PRIP metadata with creationDate filters {} and name filters {}", creationDateFilters, nameFilters);
+		LOGGER.info("finding PRIP metadata with creationDate filters {} and name filters {}", creationDateFilters,
+				nameFilters);
 		BoolQueryBuilder queryBuilder = QueryBuilders.boolQuery();
 		buildQueryWithDateTimeFilters(creationDateFilters, queryBuilder, PripMetadata.FIELD_NAMES.CREATION_DATE);
 		buildQueryWithTextFilters(nameFilters, queryBuilder, PripMetadata.FIELD_NAMES.NAME);
@@ -141,7 +145,7 @@ public class PripElasticSearchMetadataRepo implements PripMetadataRepository {
 
 	private void buildQueryWithDateTimeFilters(List<PripDateTimeFilter> dateTimeFilters, BoolQueryBuilder queryBuilder,
 			PripMetadata.FIELD_NAMES fieldName) {
-		
+
 		for (PripDateTimeFilter filter : dateTimeFilters) {
 
 			RangeQueryBuilder rangeQueryBuilder = QueryBuilders.rangeQuery(fieldName.fieldName());
@@ -187,7 +191,7 @@ public class PripElasticSearchMetadataRepo implements PripMetadataRepository {
 		if (queryBuilder != null) {
 			sourceBuilder.query(queryBuilder);
 		}
-		sourceBuilder.size(DEFAULT_MAX_HITS);
+		sourceBuilder.size(maxSearchHits);
 		sourceBuilder.sort(PripMetadata.FIELD_NAMES.CREATION_DATE.fieldName(), SortOrder.ASC);
 
 		SearchRequest searchRequest = new SearchRequest(ES_INDEX);

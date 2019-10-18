@@ -249,6 +249,7 @@ public class SwiftObsClient extends AbstractObsClient {
 
 	@Override
 	public long size(ObsObject object) throws ObsException {
+		ValidArgumentAssertion.assertValidArgument(object);
 		try {
 			String bucketName = getBucketFor(object.getFamily());
 			/*
@@ -271,6 +272,7 @@ public class SwiftObsClient extends AbstractObsClient {
 
 	@Override
 	public String getChecksum(ObsObject object) throws ObsException {
+		ValidArgumentAssertion.assertValidArgument(object);
 		try {
 			String bucketName = getBucketFor(object.getFamily());
 			/*
@@ -293,6 +295,7 @@ public class SwiftObsClient extends AbstractObsClient {
 
 	@Override
 	public URL createTemporaryDownloadUrl(ObsObject object, long expirationTimeInSeconds) throws ObsException {
+		ValidArgumentAssertion.assertValidArgument(object);
 		URL url;
 		try {
 			url = swiftObsServices.createTemporaryDownloadUrl(getBucketFor(object.getFamily()), object.getKey(), expirationTimeInSeconds);

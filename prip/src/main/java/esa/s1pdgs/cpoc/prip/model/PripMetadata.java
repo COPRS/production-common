@@ -126,11 +126,13 @@ public class PripMetadata {
 		return String.format(
 				"{\"%s\":\"%s\", \"%s\":\"%s\", \"%s\":\"%s\", \"%s\":\"%s\", \"%s\":\"%s\", \"%s\":\"%s\", \"%s\":\"%s\", \"%s\":\"%s\", \"%s\":%s}",
 				FIELD_NAMES.ID.fieldName(), id, FIELD_NAMES.OBS_KEY.fieldName(), obsKey, FIELD_NAMES.NAME.fieldName(),
-				name, FIELD_NAMES.PRODUCT_FAMILY.fieldName(), productFamily.name(),
+				name, FIELD_NAMES.PRODUCT_FAMILY.fieldName(), (productFamily == null) ? null : productFamily.name(),
 				FIELD_NAMES.CONTENT_TYPE.fieldName(), contentType, FIELD_NAMES.CONTENT_LENGTH.fieldName(),
 				contentLength, FIELD_NAMES.CREATION_DATE.fieldName(),
-				DateUtils.formatToMetadataDateTimeFormat(creationDate), FIELD_NAMES.EVICTION_DATE.fieldName(),
-				DateUtils.formatToMetadataDateTimeFormat(evictionDate), FIELD_NAMES.CHECKSUM.fieldName(), checksums);
+				(creationDate == null) ? null : DateUtils.formatToMetadataDateTimeFormat(creationDate),
+				FIELD_NAMES.EVICTION_DATE.fieldName(),
+				(evictionDate == null) ? null : DateUtils.formatToMetadataDateTimeFormat(evictionDate),
+				FIELD_NAMES.CHECKSUM.fieldName(), checksums);
 	}
 
 	@Override

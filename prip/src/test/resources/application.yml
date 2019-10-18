@@ -33,6 +33,8 @@ prip:
   metadatalistener:
     polling-interval-ms: 200
     polling-initial-delay-ms: 5000
+  repository:
+    max-search-hits: 1000
   download-url-expiration-time-in-seconds: 600
 
 # REST controller
