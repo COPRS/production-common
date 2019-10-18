@@ -58,9 +58,14 @@ public class OQCTask implements Callable<OQCFlag> {
 
 	@Override
 	public OQCFlag call() {
-		LOGGER.info("Performing OQC check for product: {}", originalProduct);
+		LOGGER.info("Performing OQC check for product: {}", originalProduct);		
 
 		try {
+			if (!Files.exists(originalProduct)) {
+				LOGGER.error("Unable to find original product at {}", originalProduct);
+				throw new IllegalArgumentException("Unable to find original product at "+originalProduct);
+			}
+			
 			// Generate working directory
 			Path workDir = generateWorkingDirectory();
 
