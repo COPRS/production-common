@@ -41,8 +41,7 @@ import esa.s1pdgs.cpoc.prip.service.mapping.MappingUtil;
 import esa.s1pdgs.cpoc.prip.service.metadata.PripMetadataRepository;
 import esa.s1pdgs.cpoc.prip.service.processor.visitor.ProductsFilterVisitor;
 
-public class ProductEntityCollectionProcessor
-		implements EntityCollectionProcessor {
+public class ProductEntityCollectionProcessor implements EntityCollectionProcessor {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(ProductEntityCollectionProcessor.class);
 
@@ -66,65 +65,65 @@ public class ProductEntityCollectionProcessor
 		UriResourceEntitySet uriResourceEntitySet = (UriResourceEntitySet) resourcePaths.get(0);
 		EdmEntitySet edmEntitySet = uriResourceEntitySet.getEntitySet();
 
-		if (EdmProvider.ES_PRODUCTS_NAME.equals(edmEntitySet.getName())) {
-			EntityCollection entityCollection = new EntityCollection();
-			List<PripDateTimeFilter> pripDateTimeFilters = Collections.emptyList();
-			List<PripTextFilter> pripTextFilters = Collections.emptyList();
-			for (SystemQueryOption queryOption : uriInfo.getSystemQueryOptions()) {
-				if (queryOption.getKind().equals(SystemQueryOptionKind.FILTER)) {
-					if (queryOption instanceof FilterOption) {
-						FilterOption filterOption = (FilterOption) queryOption;
-						Expression expression = filterOption.getExpression();
-						try {
-							ProductsFilterVisitor productFilterVistor = new ProductsFilterVisitor();
-							expression.accept(productFilterVistor); // also has a return value, which is currently not needed
-							pripDateTimeFilters = productFilterVistor.getPripDateTimeFilters();
-							pripTextFilters = productFilterVistor.getPripTextFilters();
-						} catch (ExpressionVisitException | ODataApplicationException e) {
-							LOGGER.error("Invalid or unsupported filter expression: {}", filterOption.getText(), e);
-							response.setStatusCode(HttpStatusCode.BAD_REQUEST.getStatusCode());
-							return;
-						}
-					}
-				}
-			}
-
-			List<PripMetadata> queryResult;
-			if (pripDateTimeFilters.size() > 0 && pripTextFilters.size() > 0) {
-				queryResult = pripMetadataRepository.findByCreationDateAndProductName(pripDateTimeFilters, pripTextFilters);
-			} else if (pripDateTimeFilters.size() > 0) {
-				queryResult = pripMetadataRepository.findByCreationDate(pripDateTimeFilters);
-			} else if (pripTextFilters.size() > 0) {
-				queryResult = pripMetadataRepository.findByProductName(pripTextFilters);
-			} else {
-				queryResult = pripMetadataRepository.findAll();
-			}
-
-			List<Entity> productList = entityCollection.getEntities();
-			for (PripMetadata pripMetadata : queryResult) {
-				productList.add(MappingUtil.pripMetadataToEntity(pripMetadata, request.getRawBaseUri()));
-			}
-			
-			InputStream serializedContent = serializeEntityCollection(
-					entityCollection, edmEntitySet, request.getRawBaseUri(), responseFormat);
-			
-			response.setContent(serializedContent);
-			response.setStatusCode(HttpStatusCode.OK.getStatusCode());
-			response.setHeader(HttpHeader.CONTENT_TYPE, responseFormat.toContentTypeString());
-			LOGGER.debug("Serving product metadata collection with {} items", entityCollection.getEntities().size());
+		if (!EdmProvider.ES_PRODUCTS_NAME.equals(edmEntitySet.getName())) {
+			return;
 		}
+		
+		EntityCollection entityCollection = new EntityCollection();
+		List<PripDateTimeFilter> pripDateTimeFilters = Collections.emptyList();
+		List<PripTextFilter> pripTextFilters = Collections.emptyList();
+		for (SystemQueryOption queryOption : uriInfo.getSystemQueryOptions()) {
+			if (queryOption instanceof FilterOption && queryOption.getKind().equals(SystemQueryOptionKind.FILTER)) {
+				FilterOption filterOption = (FilterOption) queryOption;
+				Expression expression = filterOption.getExpression();
+				try {
+					ProductsFilterVisitor productFilterVistor = new ProductsFilterVisitor();
+					expression.accept(productFilterVistor); // also has a return value, which is currently not needed
+					pripDateTimeFilters = productFilterVistor.getPripDateTimeFilters();
+					pripTextFilters = productFilterVistor.getPripTextFilters();
+				} catch (ExpressionVisitException | ODataApplicationException e) {
+					LOGGER.error("Invalid or unsupported filter expression: {}", filterOption.getText(), e);
+					response.setStatusCode(HttpStatusCode.BAD_REQUEST.getStatusCode());
+					return;
+				}
+
+			}
+		}
+
+		List<PripMetadata> queryResult;
+		if (!pripDateTimeFilters.isEmpty() && !pripTextFilters.isEmpty()) {
+			queryResult = pripMetadataRepository.findByCreationDateAndProductName(pripDateTimeFilters, pripTextFilters);
+		} else if (!pripDateTimeFilters.isEmpty()) {
+			queryResult = pripMetadataRepository.findByCreationDate(pripDateTimeFilters);
+		} else if (!pripTextFilters.isEmpty()) {
+			queryResult = pripMetadataRepository.findByProductName(pripTextFilters);
+		} else {
+			queryResult = pripMetadataRepository.findAll();
+		}
+
+		List<Entity> productList = entityCollection.getEntities();
+		for (PripMetadata pripMetadata : queryResult) {
+			productList.add(MappingUtil.pripMetadataToEntity(pripMetadata, request.getRawBaseUri()));
+		}
+
+		InputStream serializedContent = serializeEntityCollection(entityCollection, edmEntitySet,
+				request.getRawBaseUri(), responseFormat);
+
+		response.setContent(serializedContent);
+		response.setStatusCode(HttpStatusCode.OK.getStatusCode());
+		response.setHeader(HttpHeader.CONTENT_TYPE, responseFormat.toContentTypeString());
+		LOGGER.debug("Serving product metadata collection with {} items", entityCollection.getEntities().size());
 	}
-	
+
 	private InputStream serializeEntityCollection(EntityCollection entityCollection, EdmEntitySet edmEntitySet,
 			String rawBaseUri, ContentType format) throws SerializerException {
 		ODataSerializer serializer = odata.createSerializer(format);
 		ContextURL contextUrl = ContextURL.with().entitySet(edmEntitySet).build();
 		EntityCollectionSerializerOptions opts = EntityCollectionSerializerOptions.with()
 				.id(rawBaseUri + "/" + edmEntitySet.getName()).contextURL(contextUrl).build();
-		SerializerResult serializerResult = serializer.entityCollection(serviceMetadata,
-				edmEntitySet.getEntityType(), entityCollection, opts);
-		InputStream serializedContent = serializerResult.getContent();
-		return serializedContent;
+		SerializerResult serializerResult = serializer.entityCollection(serviceMetadata, edmEntitySet.getEntityType(),
+				entityCollection, opts);
+		return serializerResult.getContent();
 	}
-	
+
 }
