@@ -117,7 +117,6 @@ public class ProductEntityProcessor implements EntityProcessor, MediaEntityProce
 				
 				response.setStatusCode(HttpStatusCode.TEMPORARY_REDIRECT.getStatusCode());
 				response.setHeader(HttpHeader.LOCATION, url.toString());
-				response.setHeader("content-disposition", "attachment; filename=\"" + foundPripMetadata.getName() + "\"");
 				LOGGER.debug("Redirecting to product data for id '{}'", uuid);
 			} else {
 				response.setStatusCode(HttpStatusCode.NOT_FOUND.getStatusCode());				
