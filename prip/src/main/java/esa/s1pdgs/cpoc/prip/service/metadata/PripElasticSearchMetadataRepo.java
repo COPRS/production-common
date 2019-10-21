@@ -85,7 +85,7 @@ public class PripElasticSearchMetadataRepo implements PripMetadataRepository {
 		LOGGER.info("finding PRIP metadata with id {}", id);
 
 		SearchSourceBuilder sourceBuilder = new SearchSourceBuilder();
-		sourceBuilder.query(QueryBuilders.termQuery(PripMetadata.FIELD_NAMES.ID.fieldName(), escapeMinusSign(id)));
+		sourceBuilder.query(QueryBuilders.matchQuery(PripMetadata.FIELD_NAMES.ID.fieldName(), id));
 
 		SearchRequest searchRequest = new SearchRequest(ES_INDEX);
 		searchRequest.types(ES_PRIP_TYPE);
@@ -108,10 +108,6 @@ public class PripElasticSearchMetadataRepo implements PripMetadataRepository {
 		}
 		LOGGER.info("finding PRIP metadata successful");
 		return pripMetadata;
-	}
-
-	private String escapeMinusSign(String id) {
-		return id.replace("-","\\-");
 	}
 
 	@Override
