@@ -6,7 +6,9 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Primary;
 
+import esa.s1pdgs.cpoc.obs_sdk.ObsClient;
 import esa.s1pdgs.cpoc.prip.service.metadata.PripMetadataRepository;
+import standalone.prip.obs.FakeObsClient;
 import standalone.prip.service.metadata.DummyPripMetadataRepositoryImpl;
 
 @SpringBootApplication
@@ -20,5 +22,11 @@ public class StandaloneApplication {
     @Primary
     PripMetadataRepository getPripMetadataRepository() {
     	return new DummyPripMetadataRepositoryImpl();
+    }
+    
+    @Bean
+    @Primary
+    ObsClient getObsClient() {
+    	return new FakeObsClient();
     }
 }

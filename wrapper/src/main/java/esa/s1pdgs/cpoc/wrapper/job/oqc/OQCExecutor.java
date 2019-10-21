@@ -31,10 +31,9 @@ public class OQCExecutor {
 			LOGGER.info("Executing OQC check for product {}", originalProduct);
 			ExecutorService executor = Executors.newSingleThreadExecutor();
 
-//			executor.execute(factory.createOQCTask(properties, productName));
-			
 			try {
-				executor.submit(factory.createOQCTask(properties, originalProduct)).get(properties.getOqcTimeoutInSeconds(), TimeUnit.SECONDS);
+				OQCFlag flag = executor.submit(factory.createOQCTask(properties, originalProduct)).get(properties.getOqcTimeoutInSeconds(), TimeUnit.SECONDS);
+				return flag;
 			} catch (Exception e) {
 				/*
 				 *  Whatever happens, something was not working as expected and it needs to be assumed that the OQC

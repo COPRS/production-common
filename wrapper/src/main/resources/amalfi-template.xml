@@ -17,25 +17,25 @@
       <Processing_Parameter>
          <Name>addon</Name>
          <Value>
-            /usr/local/amalfi/latest/addons/amalfi-config-sentinel-1-2.2.1.jar
+            /usr/local/components/amalfi/addons/amalfi-config-sentinel-1-2.2.1.jar
          </Value>
       </Processing_Parameter>
       <Processing_Parameter>
          <Name>addon</Name>
          <Value>
-            /usr/local/amalfi/latest/addons/amalfi-config-safe-2.2.0.jar
+            /usr/local/components/amalfi/addons/amalfi-config-safe-2.2.0.jar
          </Value>
       </Processing_Parameter>
       <Processing_Parameter>
          <Name>addon</Name>
          <Value>
-            /usr/local/amalfi/latest/addons/drbx-cortex-topic-safe-1-0-beta-1.jar
+            /usr/local/components/amalfi/addons/drbx-cortex-topic-safe-1-0-beta-1.jar
          </Value>
       </Processing_Parameter>
       <Processing_Parameter>
          <Name>addon</Name>
          <Value>
-            /usr/local/amalfi/latest/addons/drbx-cortex-topic-sentinel-1-1-0-beta-1.jar
+            /usr/local/components/amalfi/addons/drbx-cortex-topic-sentinel-1-1-0-beta-1.jar
          </Value>
       </Processing_Parameter>
       <Processing_Parameter>
@@ -70,12 +70,17 @@
           </List_of_File_Names>
         </Input>
       </List_of_Inputs>
-      <List_of_Outputs count="1">
+      <List_of_Outputs count="2">
+        <Output>
+          <File_Type>AmalfiPdfReport</File_Type>
+          <File_Name_Type>Directory</File_Name_Type>
+          <File_Name>/data/outputs/reports</File_Name>
+        </Output>
         <Output>
           <File_Type>AmalfiXmlReport</File_Type>
           <File_Name_Type>Directory</File_Name_Type>
           <File_Name>/data/outputs/reports</File_Name>
-        </Output>
+        </Output>        
       </List_of_Outputs>
     </Ipf_Proc>
   </List_of_Ipf_Procs>

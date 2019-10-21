@@ -36,6 +36,7 @@ import com.amazonaws.util.IOUtils;
 import esa.s1pdgs.cpoc.obs_sdk.AbstractObsClient;
 import esa.s1pdgs.cpoc.obs_sdk.ObsServiceException;
 import esa.s1pdgs.cpoc.obs_sdk.SdkClientException;
+import esa.s1pdgs.cpoc.obs_sdk.swift.SwiftSdkClientException;
 
 /**
  * Provides services to manage objects in the object storage wia the AmazonS3
@@ -148,6 +149,41 @@ public class S3ObsServices {
 		}
 	}
 
+	/**
+     * Check if bucket exists
+     * 
+     * @param bucketName
+     * @return
+	 * @throws S3SdkClientException 
+	 * @throws S3ObsServiceException 
+	 * @throws SwiftSdkClientException
+     */
+	public boolean bucketExist(final String bucketName) throws S3SdkClientException, S3ObsServiceException {
+		for (int retryCount = 1;; retryCount++) {
+			try {
+				return s3client.doesBucketExistV2(bucketName);
+			} catch (com.amazonaws.AmazonServiceException ase) {
+				throw new S3ObsServiceException(bucketName, "",
+						String.format("Checking bucket existance fails: %s", ase.getMessage()), ase);
+			} catch (com.amazonaws.SdkClientException sce) {
+				if (retryCount <= numRetries) {
+					LOGGER.warn(String.format("Checking bucket existance %s failed: Attempt : %d / %d", bucketName,
+							retryCount, numRetries));
+					try {
+						Thread.sleep(retryDelay);
+					} catch (InterruptedException e) {
+						throw new S3SdkClientException(bucketName, "",
+								String.format("Checking bucket existance fails: %s", sce.getMessage()), sce);
+					}
+					continue;
+				} else {
+					throw new S3SdkClientException(bucketName, "",
+							String.format("Checking bucket existance fails: %s", sce.getMessage()), sce);
+				}
+			}
+		}
+	}
+	
 	/**
 	 * Get the number of objects in the bucket whose key matches with prefix
 	 * 
@@ -443,6 +479,32 @@ public class S3ObsServices {
 		return fileList;
 	}
 
+	public void createBucket(String bucketName) throws SwiftSdkClientException, ObsServiceException, S3SdkClientException {
+		for (int retryCount = 1;; retryCount++) {
+			try {
+				s3client.createBucket(bucketName);
+			} catch (com.amazonaws.AmazonServiceException ase) {
+				throw new S3ObsServiceException(bucketName, "",
+						String.format("Bucket creation fails: %s", ase.getMessage()), ase);
+			} catch (com.amazonaws.SdkClientException sce) {
+				if (retryCount <= numRetries) {
+					LOGGER.warn(String.format("Checking bucket existance %s failed: Attempt : %d / %d", bucketName,
+							retryCount, numRetries));
+					try {
+						Thread.sleep(retryDelay);
+					} catch (InterruptedException e) {
+						throw new S3SdkClientException(bucketName, "",
+								String.format("Bucket creation fails: %s", sce.getMessage()), sce);
+					}
+					continue;
+				} else {
+					throw new S3SdkClientException(bucketName, "",
+							String.format("Bucket creation fails: %s", sce.getMessage()), sce);
+				}
+			}
+		}
+	}
+	
 	/**
 	 * @param bucketName
 	 * @return
