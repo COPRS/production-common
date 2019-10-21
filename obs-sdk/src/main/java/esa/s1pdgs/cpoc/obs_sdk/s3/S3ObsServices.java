@@ -627,13 +627,7 @@ public class S3ObsServices {
 	}
 
 	public URL createTemporaryDownloadUrl(String bucketName, String key, long expirationTimeInSeconds) throws S3SdkClientException {
-		Regions clientRegion = Regions.DEFAULT_REGION;
         try {
-            AmazonS3 s3Client = AmazonS3ClientBuilder.standard()
-                    .withRegion(clientRegion)
-                    .withCredentials(new ProfileCredentialsProvider())
-                    .build();
-
             java.util.Date expiration = new java.util.Date();
             long expTimeMillis = expiration.getTime();
             expTimeMillis += 1000 * expirationTimeInSeconds;
@@ -643,7 +637,7 @@ public class S3ObsServices {
                     new GeneratePresignedUrlRequest(bucketName, key)
                             .withMethod(HttpMethod.GET)
                             .withExpiration(expiration);
-            return s3Client.generatePresignedUrl(generatePresignedUrlRequest);
+            return s3client.generatePresignedUrl(generatePresignedUrlRequest);
         } catch (AmazonServiceException e) {
             throw new S3SdkClientException(bucketName, key, "Could not create temporary download URL");
         }

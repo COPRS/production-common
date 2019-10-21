@@ -1,5 +1,8 @@
 package esa.s1pdgs.cpoc.prip.service.processor.visitor;
 
+import static esa.s1pdgs.cpoc.prip.service.edm.EntityTypeProperties.CreationDate;
+import static esa.s1pdgs.cpoc.prip.service.edm.EntityTypeProperties.Name;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -26,7 +29,7 @@ import esa.s1pdgs.cpoc.prip.model.PripTextFilter;
 public class ProductsFilterVisitor implements ExpressionVisitor<Object> {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(ProductsFilterVisitor.class);
-	
+
 	private List<PripDateTimeFilter> pripDateTimeFilters;
 	private List<PripTextFilter> pripTextFilters;
 
@@ -58,7 +61,7 @@ public class ProductsFilterVisitor implements ExpressionVisitor<Object> {
 
 		if (right instanceof Member) {
 			rightOperand = memberText((Member) right);
-		} else if (left instanceof Literal) {
+		} else if (right instanceof Literal) {
 			rightOperand = ((Literal) right).getText();
 		}
 
@@ -70,10 +73,10 @@ public class ProductsFilterVisitor implements ExpressionVisitor<Object> {
 		case GT:
 			PripDateTimeFilter pripDateTimefilter1 = new PripDateTimeFilter();
 			// one side must be CreationDate, the other a literal
-			if (left instanceof Member && leftOperand.equals("CreationDate") && right instanceof Literal) {
+			if (left instanceof Member && leftOperand.equals(CreationDate.name()) && right instanceof Literal) {
 				pripDateTimefilter1.setDateTime(DateUtils.parse(rightOperand));
 				pripDateTimefilter1.setOperator(Operator.GT);
-			} else if (right instanceof Member && rightOperand.equals("CreationDate") && left instanceof Literal) {
+			} else if (right instanceof Member && rightOperand.equals(CreationDate.name()) && left instanceof Literal) {
 				pripDateTimefilter1.setDateTime(DateUtils.parse(leftOperand));
 				pripDateTimefilter1.setOperator(Operator.LT);
 			} else {
@@ -85,10 +88,10 @@ public class ProductsFilterVisitor implements ExpressionVisitor<Object> {
 		case LT:
 			PripDateTimeFilter pripDateTimefilter2 = new PripDateTimeFilter();
 			// one side must be CreationDate, the other a literal
-			if (left instanceof Member && leftOperand.equals("CreationDate") && right instanceof Literal) {
+			if (left instanceof Member && leftOperand.equals(CreationDate.name()) && right instanceof Literal) {
 				pripDateTimefilter2.setDateTime(DateUtils.parse(rightOperand));
 				pripDateTimefilter2.setOperator(Operator.LT);
-			} else if (right instanceof Member && rightOperand.equals("CreationDate") && left instanceof Literal) {
+			} else if (right instanceof Member && rightOperand.equals(CreationDate.name()) && left instanceof Literal) {
 				pripDateTimefilter2.setDateTime(DateUtils.parse(leftOperand));
 				pripDateTimefilter2.setOperator(Operator.GT);
 			} else {
@@ -112,22 +115,31 @@ public class ProductsFilterVisitor implements ExpressionVisitor<Object> {
 	@Override
 	public Object visitMethodCall(MethodKind methodCall, List<Object> parameters)
 			throws ExpressionVisitException, ODataApplicationException {
-		if (methodCall.equals(MethodKind.CONTAINS) || methodCall.equals(MethodKind.STARTSWITH)) {
-			if (parameters.size() == 2 && parameters.get(0) instanceof Member
-					&& memberText((Member) parameters.get(0)).equals("Name") && parameters.get(1) instanceof Literal) {
-				PripTextFilter textFilter = new PripTextFilter();
-				if (methodCall.equals(MethodKind.CONTAINS)) {
-					textFilter.setFunction(PripTextFilter.Function.CONTAINS);
-				} else if (methodCall.equals(MethodKind.STARTSWITH)) {
-					textFilter.setFunction(PripTextFilter.Function.STARTS_WITH);
-				}
-				String s = ((Literal) parameters.get(1)).getText();
-				textFilter.setText(s.substring(1, s.length() - 1));
-				pripTextFilters.add(textFilter);
-			} else {
-				throw new ExpressionVisitException("Invalid or unsupported parameter");
-			}
+
+		if (!methodCall.equals(MethodKind.CONTAINS) && !methodCall.equals(MethodKind.STARTSWITH)) {
+			return null;
 		}
+		
+		LOGGER.debug("got method {}", methodCall.name());
+		
+		if (parameters.size() == 2 && parameters.get(0) instanceof Member
+				&& memberText((Member) parameters.get(0)).equals(Name.name()) && parameters.get(1) instanceof Literal) {
+			
+			PripTextFilter textFilter = new PripTextFilter();
+			if (methodCall.equals(MethodKind.CONTAINS)) {
+				textFilter.setFunction(PripTextFilter.Function.CONTAINS);
+			} else if (methodCall.equals(MethodKind.STARTSWITH)) {
+				textFilter.setFunction(PripTextFilter.Function.STARTS_WITH);
+			}
+			String s = ((Literal) parameters.get(1)).getText();
+			textFilter.setText(s.substring(1, s.length() - 1));
+			pripTextFilters.add(textFilter);
+			LOGGER.debug("using filter {} ", textFilter);
+			
+		} else {
+			throw new ExpressionVisitException("Invalid or unsupported parameter");
+		}
+
 		return null;
 	}
 

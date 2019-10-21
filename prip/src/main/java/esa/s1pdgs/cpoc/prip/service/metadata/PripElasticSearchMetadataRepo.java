@@ -85,7 +85,7 @@ public class PripElasticSearchMetadataRepo implements PripMetadataRepository {
 		LOGGER.info("finding PRIP metadata with id {}", id);
 
 		SearchSourceBuilder sourceBuilder = new SearchSourceBuilder();
-		sourceBuilder.query(QueryBuilders.termQuery(PripMetadata.FIELD_NAMES.ID.fieldName(), id));
+		sourceBuilder.query(QueryBuilders.matchQuery(PripMetadata.FIELD_NAMES.ID.fieldName(), id));
 
 		SearchRequest searchRequest = new SearchRequest(ES_INDEX);
 		searchRequest.types(ES_PRIP_TYPE);

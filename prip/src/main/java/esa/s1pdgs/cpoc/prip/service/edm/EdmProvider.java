@@ -1,5 +1,15 @@
 package esa.s1pdgs.cpoc.prip.service.edm;
 
+import static esa.s1pdgs.cpoc.prip.service.edm.EntityTypeProperties.Algorithm;
+import static esa.s1pdgs.cpoc.prip.service.edm.EntityTypeProperties.Checksums;
+import static esa.s1pdgs.cpoc.prip.service.edm.EntityTypeProperties.ContentLength;
+import static esa.s1pdgs.cpoc.prip.service.edm.EntityTypeProperties.ContentType;
+import static esa.s1pdgs.cpoc.prip.service.edm.EntityTypeProperties.CreationDate;
+import static esa.s1pdgs.cpoc.prip.service.edm.EntityTypeProperties.EvictionDate;
+import static esa.s1pdgs.cpoc.prip.service.edm.EntityTypeProperties.Id;
+import static esa.s1pdgs.cpoc.prip.service.edm.EntityTypeProperties.Name;
+import static esa.s1pdgs.cpoc.prip.service.edm.EntityTypeProperties.Value;
+
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -25,7 +35,8 @@ public class EdmProvider extends org.apache.olingo.commons.api.edm.provider.Csdl
 	public static final FullQualifiedName STRING_TYPE_FQN = EdmPrimitiveTypeKind.String.getFullQualifiedName();
 	public static final FullQualifiedName DATE_TIME_OFFSET_TYPE_FQN = EdmPrimitiveTypeKind.DateTimeOffset
 			.getFullQualifiedName();
-	public static final FullQualifiedName CHECKSUM_TYPE_FQN = new FullQualifiedName(SERVICE_NAMESPACE, "Checksum");
+	public static final FullQualifiedName CHECKSUM_TYPE_FQN = new FullQualifiedName(SERVICE_NAMESPACE,
+			EntityTypeProperties.Checksums.name());
 
 	// EDM Container
 	public static final String CONTAINER_NAME = "PRIPData";
@@ -45,24 +56,24 @@ public class EdmProvider extends org.apache.olingo.commons.api.edm.provider.Csdl
 			entityType.setName(ET_PRODUCT_NAME);
 
 			CsdlPropertyRef propertyRef = new CsdlPropertyRef();
-			propertyRef.setName("Id");
+			propertyRef.setName(EntityTypeProperties.Id.name());
 
 			entityType.setKey(Collections.singletonList(propertyRef));
 
 			List<CsdlProperty> properties = new ArrayList<>();
 
-			properties.add(new CsdlProperty().setName("Id").setType(STRING_TYPE_FQN));
-			properties.add(new CsdlProperty().setName("Name").setType(STRING_TYPE_FQN));
-			properties.add(new CsdlProperty().setName("ContentType").setType(STRING_TYPE_FQN));
-			properties.add(new CsdlProperty().setName("ContentLength").setType(INT_64_TYPE_FQN));
-			properties.add(new CsdlProperty().setName("CreationDate").setType(DATE_TIME_OFFSET_TYPE_FQN));
-			properties.add(new CsdlProperty().setName("EvictionDate").setType(DATE_TIME_OFFSET_TYPE_FQN));
-			properties.add(new CsdlProperty().setName("Checksums").setType(CHECKSUM_TYPE_FQN).setCollection(true));
+			properties.add(new CsdlProperty().setName(Id.name()).setType(STRING_TYPE_FQN));
+			properties.add(new CsdlProperty().setName(Name.name()).setType(STRING_TYPE_FQN));
+			properties.add(new CsdlProperty().setName(ContentType.name()).setType(STRING_TYPE_FQN));
+			properties.add(new CsdlProperty().setName(ContentLength.name()).setType(INT_64_TYPE_FQN));
+			properties.add(new CsdlProperty().setName(CreationDate.name()).setType(DATE_TIME_OFFSET_TYPE_FQN));
+			properties.add(new CsdlProperty().setName(EvictionDate.name()).setType(DATE_TIME_OFFSET_TYPE_FQN));
+			properties.add(new CsdlProperty().setName(Checksums.name()).setType(CHECKSUM_TYPE_FQN).setCollection(true));
 
 			entityType.setProperties(properties);
-			
+
 			entityType.setHasStream(true);
-			
+
 			return entityType;
 		}
 
@@ -75,10 +86,10 @@ public class EdmProvider extends org.apache.olingo.commons.api.edm.provider.Csdl
 			CsdlComplexType entityType = new CsdlComplexType();
 			entityType.setName(CHECKSUM_TYPE_FQN.getName());
 			List<CsdlProperty> properties = new ArrayList<>();
-			properties.add(new CsdlProperty().setName("Algorithm")
+			properties.add(new CsdlProperty().setName(Algorithm.name())
 					.setType(EdmPrimitiveTypeKind.String.getFullQualifiedName()));
-			properties.add(
-					new CsdlProperty().setName("Value").setType(EdmPrimitiveTypeKind.String.getFullQualifiedName()));
+			properties.add(new CsdlProperty().setName(Value.name())
+					.setType(EdmPrimitiveTypeKind.String.getFullQualifiedName()));
 			entityType.setProperties(properties);
 			return entityType;
 		}
