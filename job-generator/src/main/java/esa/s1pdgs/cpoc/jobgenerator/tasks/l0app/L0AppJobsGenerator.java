@@ -67,6 +67,9 @@ public class L0AppJobsGenerator extends AbstractJobsGenerator<EdrsSessionDto> {
         	    	throw new RuntimeException(String.format("Invalid AIOP configuration for %s: Station_Code=%s, PT_Assembly=%s, Processing_Mode=%s, Reprocessing_Mode=%s, Timeout=%s, Descramble=%s, RSEncode=%s",
         	    			key, stationCodes.get(key), map.get("PT_Assembly"), map.get("Processing_Mode"), map.get("Reprocessing_Mode"), map.get("Timeout"), map.get("Descramble"), map.get("RSEncode")));
         	    }
+        	
+        	
+            LOGGER.debug ("== Descramble {}, RSEncode {}",aiopProperties.getDescramble().get(key),aiopProperties.getRsEncode().get(key));
         	LOGGER.trace("Initializing AIOP parameter {} for station {} ", map, stationCodes.get(key));
         	this.aiopProperties.put(stationCodes.get(key), map);
         }
