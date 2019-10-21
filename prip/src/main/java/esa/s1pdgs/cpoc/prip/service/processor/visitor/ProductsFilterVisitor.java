@@ -61,7 +61,7 @@ public class ProductsFilterVisitor implements ExpressionVisitor<Object> {
 
 		if (right instanceof Member) {
 			rightOperand = memberText((Member) right);
-		} else if (left instanceof Literal) {
+		} else if (right instanceof Literal) {
 			rightOperand = ((Literal) right).getText();
 		}
 
