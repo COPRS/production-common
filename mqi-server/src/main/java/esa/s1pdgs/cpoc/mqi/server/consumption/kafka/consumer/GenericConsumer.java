@@ -59,6 +59,10 @@ public class GenericConsumer<T> {
 			return newConsumerFor(cat, prio, topic, MessageConsumer.nullConsumer());
 		}
 		
+		public final String clientId() {
+			return clientId;
+		}
+		
 		// for unit test
 		final <T> GenericConsumer<T> newConsumerFor(
 				final ProductCategory cat, 
