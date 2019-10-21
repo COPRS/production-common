@@ -6,6 +6,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
 
+import esa.s1pdgs.cpoc.common.ProductFamily;
 import esa.s1pdgs.cpoc.common.utils.DateUtils;
 import esa.s1pdgs.cpoc.prip.model.Checksum;
 import esa.s1pdgs.cpoc.prip.model.PripDateTimeFilter;
@@ -110,6 +111,7 @@ public class DummyPripMetadataRepositoryImpl implements PripMetadataRepository {
 		metadata.setId(UUID.fromString(id));
 		metadata.setName(name);
 		metadata.setObsKey("Prefix/" + name);
+		metadata.setProductFamily(ProductFamily.AUXILIARY_FILE_ZIP);
 		metadata.setContentLength(size);
 		metadata.setContentType("application/octet-stream");
 		metadata.setCreationDate(DateUtils.parse(creationDate));
