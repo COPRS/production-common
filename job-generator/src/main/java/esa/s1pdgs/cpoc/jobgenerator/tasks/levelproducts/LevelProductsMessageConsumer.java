@@ -197,7 +197,7 @@ public class LevelProductsMessageConsumer extends AbstractGenericConsumer<Produc
             final String acquisition = m.group(this.patternSettings.getMGroupAcquisition());
             final String startTime = m.group(this.patternSettings.getMGroupStartTime());
             final String stopTime = m.group(this.patternSettings.getMGroupStopTime());
-
+            
             // Create the JOB
             AppDataJob<ProductDto> jobDto = new AppDataJob<>();
             // General details
@@ -218,10 +218,16 @@ public class LevelProductsMessageConsumer extends AbstractGenericConsumer<Produc
             productDto.setStopTime(DateUtils.convertToAnotherFormat(stopTime,
                     L0SlicePatternSettings.TIME_FORMATTER,
                     AppDataJobProduct.TIME_FORMATTER));
-            
+   
             // FIXME dirty workaround to get things working
-            productDto.setStationCode("WILE");
-                
+            productDto.setStationCode("WILE");     
+            
+            // S1PRO-707: only add polarisation flag, if it's actually configured to be extracted 
+            // (otherwise, there would be invalid information in it)
+            if (this.patternSettings.getGroupPolarisation() != -1) {
+            	final String polarisation = m.group(this.patternSettings.getGroupPolarisation());
+            	productDto.setPolarisation(polarisation);
+            }     
             jobDto.setProduct(productDto);
 
             return appDataService.newJob(jobDto);

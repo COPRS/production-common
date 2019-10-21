@@ -167,22 +167,30 @@ public class MetadataClient {
 	 */
 	@SuppressWarnings("unchecked")
 	public List<SearchMetadata> search(final SearchMetadataQuery query, final String t0, final String t1,
-			final String satelliteId, final int instrumentConfigurationId, final String processMode)
+			final String satelliteId, final int instrumentConfigurationId, final String processMode, String polarisation)
 			throws MetadataQueryException {
 
 		String uri = this.metadataBaseUri + MetadataCatalogRestPath.METADATA.path() + "/"
 				+ query.getProductFamily().toString() + "/search";
 		UriComponentsBuilder builder = UriComponentsBuilder.fromUriString(uri)
-				.queryParam("productType", query.getProductType()).queryParam("mode", query.getRetrievalMode())
-				.queryParam("t0", t0).queryParam("t1", t1).queryParam("dt0", query.getDeltaTime0())
-				.queryParam("dt1", query.getDeltaTime1()).queryParam("satellite", satelliteId);
+				.queryParam("productType", query.getProductType())
+				.queryParam("mode", query.getRetrievalMode())
+				.queryParam("t0", t0)
+				.queryParam("t1", t1)
+				.queryParam("dt0", query.getDeltaTime0())
+				.queryParam("dt1", query.getDeltaTime1())
+				.queryParam("satellite", satelliteId);
+
+		
 		if (processMode != null) {
 			builder.queryParam("processMode", processMode);
 		}
 		if (instrumentConfigurationId != -1) {
 			builder.queryParam("insConfId", instrumentConfigurationId);
 		}
-
+		if (polarisation != null) {
+			builder.queryParam("polarisation", polarisation);
+		}
 		ResponseEntity<List<SearchMetadata>> response = query(builder.build().toUri(),
 				new ParameterizedTypeReference<List<SearchMetadata>>() {
 				});

@@ -108,7 +108,9 @@ public class SearchMetadataController {
 			@RequestParam(name = "processMode", defaultValue = "NONE") String processMode,
 			@RequestParam(name = "insConfId", defaultValue = "-1") int insConfId,
 			@RequestParam(value = "dt0", defaultValue = "0.0") double dt0,
-			@RequestParam(value = "dt1", defaultValue = "0.0") double dt1) {
+			@RequestParam(value = "dt1", defaultValue = "0.0") double dt1,
+			@RequestParam(value = "polarisation", defaultValue = "NONE") String polarisation
+	) {
 		LOGGER.info("Received search query for family '{}', product type '{}', mode '{}', satellite '{}'",
 				productFamily, productType, mode, satellite);
 		try {
@@ -165,12 +167,16 @@ public class SearchMetadataController {
 				}
 				return new ResponseEntity<List<SearchMetadata>>(response, HttpStatus.OK);
 			} else if ("ClosestStopValidity".equals(mode)) {
-				SearchMetadata f = esServices.closestStopValidity(productType, ProductFamily.fromValue(productFamily),
-						convertDateForSearch(startDate, -dt0,
-								DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSSSSS'Z'")),
-						convertDateForSearch(stopDate, dt1,
-								DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSSSSS'Z'")),
-						satellite, insConfId, processMode);
+				SearchMetadata f = esServices.closestStopValidity(
+						productType, 
+						ProductFamily.fromValue(productFamily),
+						convertDateForSearch(startDate, -dt0,DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSSSSS'Z'")),
+						convertDateForSearch(stopDate, dt1, DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSSSSS'Z'")),
+						satellite, 
+						insConfId, 
+						processMode, 
+						polarisation
+				);
 
 				if (f != null) {
 					response.add(new SearchMetadata(f.getProductName(), f.getProductType(), f.getKeyObjectStorage(),

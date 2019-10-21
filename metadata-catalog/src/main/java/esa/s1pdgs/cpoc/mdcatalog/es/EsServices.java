@@ -283,7 +283,8 @@ public class EsServices {
 				instrumentConfId, 
 				processMode, 
 				QueryBuilders.rangeQuery("validityStartTime").lt(centreTime), 
-				new FieldSortBuilder("validityStartTime").order(SortOrder.DESC)				
+				new FieldSortBuilder("validityStartTime").order(SortOrder.DESC)	,
+				"NONE"
 		);
 		final SearchRequest afterRequest = newQueryFor(
 				productType, 
@@ -291,7 +292,8 @@ public class EsServices {
 				instrumentConfId, 
 				processMode, 
 				QueryBuilders.rangeQuery("validityStartTime").gte(centreTime), 
-				new FieldSortBuilder("validityStartTime").order(SortOrder.ASC)	
+				new FieldSortBuilder("validityStartTime").order(SortOrder.ASC),
+				"NONE"
 		);		
 		try {
 			final SearchResponse beforeResponse = elasticsearchDAO.search(beforeRequest);
@@ -355,7 +357,7 @@ public class EsServices {
 	}
 
 	private final SearchRequest newQueryFor(String productType, ProductFamily productFamily, int instrumentConfId,
-			String processMode, RangeQueryBuilder rangeQueryBuilder, FieldSortBuilder sortOrder) throws InternalErrorException {
+			String processMode, RangeQueryBuilder rangeQueryBuilder, FieldSortBuilder sortOrder, String polarisation) throws InternalErrorException {
 		ProductCategory category = ProductCategory.of(productFamily);
 		SearchSourceBuilder sourceBuilder = new SearchSourceBuilder();
 		BoolQueryBuilder queryBuilder = QueryBuilders.boolQuery()
@@ -373,6 +375,9 @@ public class EsServices {
 		// Process mode
 		if (category == ProductCategory.LEVEL_PRODUCTS || category == ProductCategory.LEVEL_SEGMENTS) {
 			queryBuilder = queryBuilder.must(QueryBuilders.termQuery("processMode.keyword", processMode));
+		}
+		if (!polarisation.equals("NONE")) {
+			queryBuilder.must(QueryBuilders.termQuery("polarisation", polarisation));
 		}
 		LOGGER.debug("query composed is {}", queryBuilder);
 		
@@ -402,7 +407,8 @@ public class EsServices {
 	 * instead of startTime 
 	 */
 	public SearchMetadata closestStopValidity(String productType, ProductFamily productFamily, String beginDate,
-			String endDate, String satelliteId, int instrumentConfId, String processMode) throws Exception {
+			String endDate, String satelliteId, int instrumentConfId, String processMode, String polarisation) 
+					throws Exception {
 		LOGGER.debug("Searching products via selection policy 'closestStartValidity' for {}, startDate {}, endDate {} ",
 				productType, beginDate, endDate);
 		
@@ -416,7 +422,8 @@ public class EsServices {
 				instrumentConfId, 
 				processMode, 
 				QueryBuilders.rangeQuery("validityStopTime").lt(centreTime), 
-				new FieldSortBuilder("validityStopTime").order(SortOrder.DESC)	
+				new FieldSortBuilder("validityStopTime").order(SortOrder.DESC)	,
+				polarisation
 		);
 		final SearchRequest afterRequest = newQueryFor(
 				productType, 
@@ -424,7 +431,8 @@ public class EsServices {
 				instrumentConfId, 
 				processMode, 
 				QueryBuilders.rangeQuery("validityStopTime").gte(centreTime), 
-				new FieldSortBuilder("validityStopTime").order(SortOrder.ASC)	
+				new FieldSortBuilder("validityStopTime").order(SortOrder.ASC),
+				polarisation
 		);		
 		try {
 			final SearchResponse beforeResponse = elasticsearchDAO.search(beforeRequest);

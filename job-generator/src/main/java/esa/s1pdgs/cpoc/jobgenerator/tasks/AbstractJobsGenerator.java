@@ -406,9 +406,10 @@ public abstract class AbstractJobsGenerator<T extends AbstractDto> implements Ru
                         for (Integer key : metadataSearchQueries.keySet()) {
                             SearchMetadataQuery query =
                                     metadataSearchQueries.get(key);
-                            job.getMetadataQueries().put(key,
-                                    new SearchMetadataResult(
-                                            new SearchMetadataQuery(query)));
+                            job.getMetadataQueries().put(
+                            		key,
+                                    new SearchMetadataResult(new SearchMetadataQuery(query))
+                            );
                         }
                         break;
                     } else {
@@ -609,24 +610,34 @@ public abstract class AbstractJobsGenerator<T extends AbstractDto> implements Ru
         job.getMetadataQueries().forEach((k, v) -> {
             if (v != null && v.getResult() == null) {
                 try {
-                    List<SearchMetadata> file =
-                            this.metadataClient.search(v.getQuery(),
-                                    DateUtils.convertToAnotherFormat(
-                                            job.getAppDataJob().getProduct()
-                                                    .getStartTime(),
-                                            AppDataJobProduct.TIME_FORMATTER,
-                                            AbstractMetadata.METADATA_DATE_FORMATTER),
-                                    DateUtils.convertToAnotherFormat(
-                                            job.getAppDataJob().getProduct()
-                                                    .getStopTime(),
-                                            AppDataJobProduct.TIME_FORMATTER,
-                                            AbstractMetadata.METADATA_DATE_FORMATTER),
-                                    job.getAppDataJob().getProduct()
-                                            .getSatelliteId(),
-                                    job.getAppDataJob().getProduct()
-                                            .getInsConfId(),
-                                    job.getAppDataJob().getProduct()
-                                            .getProcessMode());
+                	final String productType = v.getQuery().getProductType();
+                	LOGGER.debug("Querying input product of type {}", productType);
+                	
+                	// S1PRO-707: only "AUX_ECE" requires to query polarisation
+                	final String polarisation;
+                	if ("AUX_ECE".equals(productType.toUpperCase())) {
+                		polarisation = getPolarisationFor(job.getAppDataJob().getProduct());
+                	}
+                	else {
+                		polarisation = null;
+                	}                	
+                    List<SearchMetadata> file = this.metadataClient.search(
+                    		v.getQuery(),
+                    		DateUtils.convertToAnotherFormat(
+                    				job.getAppDataJob().getProduct().getStartTime(),
+                    				AppDataJobProduct.TIME_FORMATTER,
+                    				AbstractMetadata.METADATA_DATE_FORMATTER
+                    		),
+                    		DateUtils.convertToAnotherFormat(
+                    				job.getAppDataJob().getProduct().getStopTime(),
+                    				AppDataJobProduct.TIME_FORMATTER,
+                    				AbstractMetadata.METADATA_DATE_FORMATTER
+                    		),
+                    		job.getAppDataJob().getProduct().getSatelliteId(),
+                            job.getAppDataJob().getProduct().getInsConfId(),
+                            job.getAppDataJob().getProduct().getProcessMode(),
+                            polarisation
+                    );
                     if (!file.isEmpty()) {
                         v.setResult(file);
                     }
@@ -999,4 +1010,16 @@ public abstract class AbstractJobsGenerator<T extends AbstractDto> implements Ru
     protected abstract void customJobOrder(JobGeneration job);
 
     protected abstract void customJobDto(JobGeneration job, LevelJobDto dto);
+    
+    // S1PRO-707
+    static final String getPolarisationFor(AppDataJobProduct product) {
+    	final String polarisation = product.getPolarisation().toUpperCase();
+    	if (polarisation.equals("SV") || polarisation.equals("DV")) {
+    		return "V";    		
+    	}
+    	else if (polarisation.equals("SH") || polarisation.equals("DH")) {
+    		return "H";
+    	}
+    	return "NONE";    	
+    }
 }
