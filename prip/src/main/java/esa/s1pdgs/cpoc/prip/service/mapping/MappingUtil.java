@@ -1,5 +1,15 @@
 package esa.s1pdgs.cpoc.prip.service.mapping;
 
+import static esa.s1pdgs.cpoc.prip.service.edm.EntityTypeProperties.Algorithm;
+import static esa.s1pdgs.cpoc.prip.service.edm.EntityTypeProperties.Checksums;
+import static esa.s1pdgs.cpoc.prip.service.edm.EntityTypeProperties.ContentLength;
+import static esa.s1pdgs.cpoc.prip.service.edm.EntityTypeProperties.ContentType;
+import static esa.s1pdgs.cpoc.prip.service.edm.EntityTypeProperties.CreationDate;
+import static esa.s1pdgs.cpoc.prip.service.edm.EntityTypeProperties.EvictionDate;
+import static esa.s1pdgs.cpoc.prip.service.edm.EntityTypeProperties.Id;
+import static esa.s1pdgs.cpoc.prip.service.edm.EntityTypeProperties.Name;
+import static esa.s1pdgs.cpoc.prip.service.edm.EntityTypeProperties.Value;
+
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.sql.Timestamp;
@@ -17,6 +27,7 @@ import org.apache.olingo.commons.api.ex.ODataRuntimeException;
 
 import esa.s1pdgs.cpoc.prip.model.Checksum;
 import esa.s1pdgs.cpoc.prip.model.PripMetadata;
+import esa.s1pdgs.cpoc.prip.service.edm.EdmProvider;
 
 public class MappingUtil {
 
@@ -24,15 +35,15 @@ public class MappingUtil {
 	}
 	
 	public static Entity pripMetadataToEntity(PripMetadata pripMetadata, String rawBaseUri) {
-		URI uri = MappingUtil.createId(rawBaseUri, "Products", pripMetadata.getId());
+		URI uri = MappingUtil.createId(rawBaseUri, EdmProvider.ES_PRODUCTS_NAME, pripMetadata.getId());
 		Entity entity = new Entity()
-				.addProperty(new Property(null, "Id", ValueType.PRIMITIVE, pripMetadata.getId().toString()))
-				.addProperty(new Property(null, "Name", ValueType.PRIMITIVE, pripMetadata.getName()))
-				.addProperty(new Property(null, "ContentType", ValueType.PRIMITIVE, pripMetadata.getContentType()))
-				.addProperty(new Property(null, "ContentLength", ValueType.PRIMITIVE, pripMetadata.getContentLength()))
-				.addProperty(new Property(null, "CreationDate", ValueType.PRIMITIVE, convertLocalDateTimeToTimestamp(pripMetadata.getCreationDate())))
-				.addProperty(new Property(null, "EvictionDate", ValueType.PRIMITIVE, convertLocalDateTimeToTimestamp(pripMetadata.getEvictionDate())))
-				.addProperty(new Property(null, "Checksums", ValueType.COLLECTION_COMPLEX, mapToChecksumList(pripMetadata.getChecksums())));
+				.addProperty(new Property(null, Id.name(), ValueType.PRIMITIVE, pripMetadata.getId().toString()))
+				.addProperty(new Property(null, Name.name(), ValueType.PRIMITIVE, pripMetadata.getName()))
+				.addProperty(new Property(null, ContentType.name(), ValueType.PRIMITIVE, pripMetadata.getContentType()))
+				.addProperty(new Property(null, ContentLength.name(), ValueType.PRIMITIVE, pripMetadata.getContentLength()))
+				.addProperty(new Property(null, CreationDate.name(), ValueType.PRIMITIVE, convertLocalDateTimeToTimestamp(pripMetadata.getCreationDate())))
+				.addProperty(new Property(null, EvictionDate.name(), ValueType.PRIMITIVE, convertLocalDateTimeToTimestamp(pripMetadata.getEvictionDate())))
+				.addProperty(new Property(null, Checksums.name(), ValueType.COLLECTION_COMPLEX, mapToChecksumList(pripMetadata.getChecksums())));
 		entity.setMediaContentType(pripMetadata.getContentType());
 		entity.setId(uri);
 		return entity;
@@ -55,8 +66,8 @@ public class MappingUtil {
 		if (null != checksums) {
 			for (Checksum checksum : checksums) {
 				ComplexValue complexValue = new ComplexValue();
-				complexValue.getValue().add(new Property(null, "Algorithm", ValueType.PRIMITIVE, checksum.getAlgorithm()));
-				complexValue.getValue().add(new Property(null, "Value", ValueType.PRIMITIVE, checksum.getValue()));
+				complexValue.getValue().add(new Property(null, Algorithm.name(), ValueType.PRIMITIVE, checksum.getAlgorithm()));
+				complexValue.getValue().add(new Property(null, Value.name(), ValueType.PRIMITIVE, checksum.getValue()));
 				listOfComplexValues.add(complexValue);
 			}
 		}
