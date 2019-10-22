@@ -30,7 +30,7 @@ import esa.s1pdgs.cpoc.common.ProductCategory;
 @Service
 public class MqiMessageDao {
 
-    private static final String ID_NAME = "_id";
+    private static final String ID_NAME = "id";
 	/**
      * Mongo DB client
      */
