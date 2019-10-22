@@ -83,7 +83,7 @@ public class MqiMessageTest {
         assertTrue(str.contains("nbRetries\":\"0"));
         assertTrue(str.contains("dto\":\"null"));
         assertTrue(str.contains("creationDate\":\""+now));
-        assertNotNull(message.getIdentifier());
+        assertNotNull(message.getId());
     }
     
     /**

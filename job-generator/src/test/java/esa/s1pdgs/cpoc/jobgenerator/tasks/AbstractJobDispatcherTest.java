@@ -139,15 +139,15 @@ public class AbstractJobDispatcherTest {
     private void mockAppDataService()
             throws InternalErrorException, AbstractCodedException {
         AppDataJob<?> appData1 = new AppDataJob<>();
-        appData1.setIdentifier(12);
+        appData1.setId(12);
         appData1.setProduct(new AppDataJobProduct());
         appData1.getProduct().setProductName("p1");
         AppDataJob<?> appData2 = new AppDataJob<>();
-        appData2.setIdentifier(12);
+        appData2.setId(12);
         appData2.setProduct(new AppDataJobProduct());
         appData2.getProduct().setProductName("p2");
         AppDataJob<?> appData3 = new AppDataJob<>();
-        appData3.setIdentifier(12);
+        appData3.setId(12);
         appData3.setProduct(new AppDataJobProduct());
         appData3.getProduct().setProductName("p3");
         doReturn(Arrays.asList(appData1, appData2, appData3))
@@ -284,12 +284,12 @@ public class AbstractJobDispatcherTest {
                 Mockito.anyBoolean());
 
         AppDataJob<?> dto = new AppDataJob<>();
-        dto.setIdentifier(12);
+        dto.setId(12);
         dto.setProduct(new AppDataJobProduct());
         dto.getProduct().setProductName("p1");
 
         AppDataJob<?> expected = new AppDataJob<>();
-        expected.setIdentifier(12);
+        expected.setId(12);
         expected.setProduct(new AppDataJobProduct());
         expected.getProduct().setProductName("p1");
         expected.setState(AppDataJobState.GENERATING);
@@ -312,7 +312,7 @@ public class AbstractJobDispatcherTest {
                 Mockito.anyBoolean());
 
         AppDataJob<?> dto = new AppDataJob<>();
-        dto.setIdentifier(12);
+        dto.setId(12);
         dto.setProduct(new AppDataJobProduct());
         dto.getProduct().setProductName("p1");
         dto.setState(AppDataJobState.GENERATING);
@@ -323,7 +323,7 @@ public class AbstractJobDispatcherTest {
         dto.getGenerations().get(1).setState(AppDataJobGenerationState.READY);
 
         AppDataJob<?> expected = new AppDataJob<>();
-        expected.setIdentifier(12);
+        expected.setId(12);
         expected.setProduct(new AppDataJobProduct());
         expected.getProduct().setProductName("p1");
         expected.setState(AppDataJobState.GENERATING);
@@ -346,7 +346,7 @@ public class AbstractJobDispatcherTest {
                 Mockito.anyBoolean());
 
         AppDataJob<?> dto = new AppDataJob<>();
-        dto.setIdentifier(12);
+        dto.setId(12);
         dto.setProduct(new AppDataJobProduct());
         dto.getProduct().setProductName("p1");
 
@@ -362,7 +362,7 @@ public class AbstractJobDispatcherTest {
                 Mockito.anyBoolean());
 
         AppDataJob<?> dto = new AppDataJob<>();
-        dto.setIdentifier(12);
+        dto.setId(12);
         dto.setProduct(new AppDataJobProduct());
         dto.getProduct().setProductName("p1");
         dto.setState(AppDataJobState.GENERATING);
@@ -373,7 +373,7 @@ public class AbstractJobDispatcherTest {
         dto.getGenerations().get(1).setState(AppDataJobGenerationState.READY);
 
         AppDataJob<?> expected = new AppDataJob<>();
-        expected.setIdentifier(12);
+        expected.setId(12);
         expected.setProduct(new AppDataJobProduct());
         expected.getProduct().setProductName("p1");
         expected.setState(AppDataJobState.GENERATING);

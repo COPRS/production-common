@@ -135,7 +135,7 @@ public class L0SegmentAppConsumerTest {
 	}
 
 	public void mockAppDataService() throws AbstractCodedException {
-		doReturn(new ArrayList<>()).when(appDataService).findByMessagesIdentifier(anyLong());
+		doReturn(new ArrayList<>()).when(appDataService).findByMessagesId(anyLong());
 		doReturn(new ArrayList<>()).when(appDataService).findByProductDataTakeId(anyString());
 		Mockito.doAnswer(i -> {
 			return i.getArgument(0);
@@ -176,7 +176,7 @@ public class L0SegmentAppConsumerTest {
 
 		AppDataJob result = consumer.buildJob(messages.get(0));
 		assertEquals(expectedData, result);
-		verify(appDataService, times(1)).findByMessagesIdentifier(eq(1L));
+		verify(appDataService, times(1)).findByMessagesId(eq(1L));
 		verify(appDataService, times(1)).findByProductDataTakeId(eq("00F9CD"));
 		verify(appDataService, times(1)).newJob(eq(expectedData));
 	}
@@ -208,7 +208,7 @@ public class L0SegmentAppConsumerTest {
 
 		consumer.onMessage(messages.get(0));
 
-		verify(appDataService, times(1)).findByMessagesIdentifier(eq(1L));
+		verify(appDataService, times(1)).findByMessagesId(eq(1L));
 		verify(appDataService, times(1)).findByProductDataTakeId(eq("00F9CD"));
 		verify(appDataService, times(1)).newJob(any());
 		verify(appDataService, times(1)).patchJob(anyLong(), any(), eq(false), eq(false), eq(false));

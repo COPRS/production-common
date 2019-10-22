@@ -14,7 +14,7 @@ public class GenericMessageDto<T> {
     /**
      * Message identifier
      */
-    private long identifier;
+    private long id;
 
     /**
      * Input key
@@ -39,10 +39,10 @@ public class GenericMessageDto<T> {
      * @param identifier
      * @param body
      */
-    public GenericMessageDto(final long identifier, final String inputKey,
+    public GenericMessageDto(final long id, final String inputKey,
             final T body) {
         this();
-        this.identifier = identifier;
+        this.id = id;
         this.inputKey = inputKey;
         this.body = body;
     }
@@ -50,16 +50,16 @@ public class GenericMessageDto<T> {
     /**
      * @return the identifier
      */
-    public long getIdentifier() {
-        return identifier;
+    public long getId() {
+        return id;
     }
 
     /**
      * @param identifier
      *            the identifier to set
      */
-    public void setIdentifier(final long identifier) {
-        this.identifier = identifier;
+    public void setId(final long id) {
+        this.id = id;
     }
 
     /**
@@ -97,8 +97,8 @@ public class GenericMessageDto<T> {
      */
     @Override
     public String toString() {
-        return String.format("{identifier: %s, inputKey: %s, body: %s}",
-                identifier, inputKey, body);
+        return String.format("{id: %s, inputKey: %s, body: %s}",
+                id, inputKey, body);
     }
 
     /**
@@ -106,7 +106,7 @@ public class GenericMessageDto<T> {
      */
     @Override
     public int hashCode() {
-        return Objects.hash(identifier, inputKey, body);
+        return Objects.hash(id, inputKey, body);
     }
 
     /**
@@ -121,7 +121,7 @@ public class GenericMessageDto<T> {
             ret = false;
         } else {
             GenericMessageDto<?> other = (GenericMessageDto<?>) obj;
-            ret = identifier == other.identifier
+            ret = id == other.id
                     && Objects.equals(inputKey, other.inputKey)
                     && Objects.equals(body, other.body);
         }

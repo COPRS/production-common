@@ -13,7 +13,7 @@ public class MessageConverter {
 		final AppCatMessageDto<T> result = new AppCatMessageDto<>();		
 		result.setCategory(message.getCategory());
 		result.setGroup(message.getGroup());
-		result.setIdentifier(message.getIdentifier());
+		result.setId(message.getId());
 		result.setLastAckDate(message.getLastAckDate());
 		result.setLastReadDate(message.getLastReadDate());
 		result.setLastSendDate(message.getLastSendDate());

@@ -126,7 +126,7 @@ public class CompressProcessor implements MqiListener<ProductDto> {
 	@Override
 	public void onMessage(GenericMessageDto<ProductDto> message) {
 
-		appStatus.setProcessing(message.getIdentifier());
+		appStatus.setProcessing(message.getId());
 		LOGGER.info("Initializing job processing {}", message);
 
 		// ----------------------------------------------------------
@@ -343,7 +343,7 @@ public class CompressProcessor implements MqiListener<ProductDto> {
 			final String errorMessage) {
         LOGGER.info("Acknowledging negatively {} ",dto.getBody());
 		try {
-			mqiClient.ack(new AckMessageDto(dto.getIdentifier(), Ack.ERROR, errorMessage, stop), 
+			mqiClient.ack(new AckMessageDto(dto.getId(), Ack.ERROR, errorMessage, stop), 
 					ProductCategory.COMPRESSED_PRODUCTS);
 		} catch (AbstractCodedException ace) {
 			LOGGER.error("Unable to confirm negatively request:{}",ace);
@@ -354,7 +354,7 @@ public class CompressProcessor implements MqiListener<ProductDto> {
 	protected void ackPositively(final boolean stop, final GenericMessageDto<ProductDto> dto) {
 		LOGGER.info("Acknowledging positively {}", dto.getBody());
 		try {
-			mqiClient.ack(new AckMessageDto(dto.getIdentifier(), Ack.OK, null, stop), 
+			mqiClient.ack(new AckMessageDto(dto.getId(), Ack.OK, null, stop), 
 					ProductCategory.COMPRESSED_PRODUCTS);
 		} catch (AbstractCodedException ace) {
 			LOGGER.error("Unable to confirm positively request:{}",ace);

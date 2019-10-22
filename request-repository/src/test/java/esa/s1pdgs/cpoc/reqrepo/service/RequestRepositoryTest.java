@@ -112,11 +112,11 @@ public class RequestRepositoryTest {
 	public void testSaveFailedProcessing_OnExistingMessage_ShallPersistFailedProcessing() {
 		doReturn(newMqiMessage(456))
 			.when(mqiMessageRepository)
-			.findByIdentifier(456);
+			.findById(456);
 		
 		uut.saveFailedProcessing(newFailedProcessingDto(456));
 		
-		verify(mqiMessageRepository, times(1)).findByIdentifier(456);
+		verify(mqiMessageRepository, times(1)).findById(456);
 		verify(failedProcessingRepo, times(1)).save(Mockito.any());
 	}
 
@@ -174,7 +174,7 @@ public class RequestRepositoryTest {
 	{
 		doReturn(newMqiMessage(123))
 			.when(mqiMessageRepository)
-			.findByIdentifier(123);
+			.findById(123);
 		
 		final Processing actual = uut.getProcessing(123);
 		assertNotNull(actual);
@@ -186,7 +186,7 @@ public class RequestRepositoryTest {
 	{
 		doReturn(null)
 			.when(mqiMessageRepository)
-			.findByIdentifier(123);
+			.findById(123);
 		
 		assertNull(uut.getProcessing(123));
 	}
@@ -255,7 +255,7 @@ public class RequestRepositoryTest {
 	
 	private final FailedProcessingDto newFailedProcessingDto(long id) {
 		final GenericMessageDto<?> mess = new GenericMessageDto<>();
-		mess.setIdentifier(id);
+		mess.setId(id);
 		
 		final FailedProcessingDto fpDto = new FailedProcessingDto();
 		fpDto.setProcessingDetails(mess);
@@ -281,7 +281,7 @@ public class RequestRepositoryTest {
 	
 	private final MqiMessage newMqiMessage(final long id, final MessageState state) {
 		final MqiMessage mqiMsg = new MqiMessage();
-		mqiMsg.setIdentifier(id);
+		mqiMsg.setId(id);
 		mqiMsg.setCreationDate(new Date());
 		mqiMsg.setState(state);
 		mqiMsg.setTopic("t-pdgs-l0-segments");

@@ -32,7 +32,7 @@ public class Processing {
 
 	@JsonProperty("id")
 	public long getIdentifier() {
-		return mqiMessage.getIdentifier();
+		return mqiMessage.getId();
 	}
 
 	@JsonProperty("productCategory")

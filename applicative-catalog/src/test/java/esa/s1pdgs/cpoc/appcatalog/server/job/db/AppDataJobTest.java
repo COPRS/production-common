@@ -43,7 +43,7 @@ public class AppDataJobTest {
         assertNull(obj.getCreationDate());
         assertNull(obj.getLastUpdateDate());
         
-        obj.setIdentifier(123);
+        obj.setId(123);
         obj.setLevel(ApplicationLevel.L1);
         obj.setPod("pod-name");
         obj.setState(AppDataJobState.DISPATCHING);
@@ -55,7 +55,7 @@ public class AppDataJobTest {
         obj.setCategory(ProductCategory.AUXILIARY_FILES);
 
         // check setters
-        assertEquals(123, obj.getIdentifier());
+        assertEquals(123, obj.getId());
         assertEquals(ApplicationLevel.L1, obj.getLevel());
         assertEquals(2, obj.getMessages().size());
         assertEquals(AppDataJobState.DISPATCHING, obj.getState());
@@ -66,7 +66,7 @@ public class AppDataJobTest {
         
         // check toString
         String str = obj.toString();
-        assertTrue(str.contains("identifier: 123"));
+        assertTrue(str.contains("id: 123"));
         assertTrue(str.contains("level: L1"));
         assertTrue(str.contains("state: DISPATCHING"));
         assertTrue(str.contains("pod: pod-name"));

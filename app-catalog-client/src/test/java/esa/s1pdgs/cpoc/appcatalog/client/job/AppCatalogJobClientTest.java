@@ -133,10 +133,10 @@ public class AppCatalogJobClientTest {
     public void testfindByMessagesIdentifier() throws Exception {  
     	runSearchTest(
     			() -> {
-    		        client.findByMessagesIdentifier(12L);
+    		        client.findByMessagesId(12L);
     		        return null;
     			}, 
-    			"messages.identifier=12"
+    			"messages.id=12"
     	);
     } 
 
@@ -165,7 +165,7 @@ public class AppCatalogJobClientTest {
 
     private AppDataJob<ProductDto> buildJob() {
         AppDataJob<ProductDto> job = new AppDataJob<>();
-        job.setIdentifier(142);
+        job.setId(142);
         job.setState(AppDataJobState.DISPATCHING);
         
         AppDataJobProduct product = new AppDataJobProduct();
@@ -236,7 +236,7 @@ public class AppCatalogJobClientTest {
 	                Mockito.any(ParameterizedTypeReference.class)
 	    );    	
         final AppDataJob<ProductDto> job = buildJob();
-        client.patchJob(job.getIdentifier(), job, true, true, true);
+        client.patchJob(job.getId(), job, true, true, true);
     }
     
 	@SuppressWarnings("unchecked")
@@ -269,7 +269,7 @@ public class AppCatalogJobClientTest {
     	final AppDataJob<ProductDto> job = buildJob();
     	final AppDataJob<ProductDto> result = runPatchTest(
     			job,
-    			() -> client.patchJob(job.getIdentifier(), job, true, true, true)
+    			() -> client.patchJob(job.getId(), job, true, true, true)
     	);
     	assertEquals(job, result);    	
     }
@@ -279,7 +279,7 @@ public class AppCatalogJobClientTest {
         final AppDataJob<ProductDto> job = buildJob();
         final AppDataJob<ProductDto> result = runPatchTest(
     			job,
-    			() -> client.patchJob(job.getIdentifier(), job, false, true, true)
+    			() -> client.patchJob(job.getId(), job, false, true, true)
     	);        
         assertEquals(0, result.getMessages().size());
         assertEquals(job.getProduct(), result.getProduct());
@@ -291,7 +291,7 @@ public class AppCatalogJobClientTest {
         final AppDataJob<ProductDto> job = buildJob();
         final AppDataJob<ProductDto> result = runPatchTest(
     			job,
-    			() -> client.patchJob(job.getIdentifier(), job, true, false, true)
+    			() -> client.patchJob(job.getId(), job, true, false, true)
     	);     
         assertEquals(job.getMessages(), result.getMessages());
         assertNull(result.getProduct());
@@ -303,7 +303,7 @@ public class AppCatalogJobClientTest {
         final AppDataJob<ProductDto> job = buildJob();
         final AppDataJob<ProductDto> result = runPatchTest(
     			job,
-    			() -> client.patchJob(job.getIdentifier(), job, true, true, false)
+    			() -> client.patchJob(job.getId(), job, true, true, false)
     	);     
         assertEquals(0, result.getGenerations().size());
         assertEquals(job.getProduct(), result.getProduct());
@@ -315,7 +315,7 @@ public class AppCatalogJobClientTest {
         final AppDataJob<ProductDto> job = buildJob();
         final AppDataJob<ProductDto> result = runPatchTest(
     			job,
-    			() -> client.patchJob(job.getIdentifier(), job, false, true, false)
+    			() -> client.patchJob(job.getId(), job, false, true, false)
     	);     
         assertEquals(0, result.getMessages().size());
         assertEquals(job.getProduct(), result.getProduct());
@@ -334,7 +334,7 @@ public class AppCatalogJobClientTest {
 	            Mockito.any(ParameterizedTypeReference.class)
 	    );   
         client.patchTaskTableOfJob(
-        		job.getIdentifier(),
+        		job.getId(),
                 job.getGenerations().get(0).getTaskTable(),
                 AppDataJobGenerationState.SENT
         );
@@ -352,7 +352,7 @@ public class AppCatalogJobClientTest {
 	                Mockito.any(ParameterizedTypeReference.class)
 	    );
 	    client.patchTaskTableOfJob(
-                job.getIdentifier(), 
+                job.getId(), 
                 "tasktable2",
                 AppDataJobGenerationState.SENT
         );

@@ -151,7 +151,7 @@ public abstract class GenericExtractor<T> {
         
         final Reporting report = reportingFactory.newReporting(0);        
         report.begin(new FilenameReportingInput(productName), new ReportingMessage("Starting metadata extraction"));        
-        appStatus.setProcessing(category, message.getIdentifier());
+        appStatus.setProcessing(category, message.getId());
         
         FailedProcessingDto failedProc = new FailedProcessingDto();
 
@@ -225,7 +225,7 @@ public abstract class GenericExtractor<T> {
         final Reporting reportAck = reportingFactory.newReporting(5);            
         reportAck.begin(new ReportingMessage("Start acknowledging negatively"));
         try {
-            mqiClient.ack(new AckMessageDto(message.getIdentifier(), Ack.ERROR, errorMessage, false), category);
+            mqiClient.ack(new AckMessageDto(message.getId(), Ack.ERROR, errorMessage, false), category);
             errorAppender.send(failedProc);            
             reportAck.end(new ReportingMessage("End acknowledging negatively"));
         } catch (AbstractCodedException ace) {
@@ -244,7 +244,7 @@ public abstract class GenericExtractor<T> {
         final Reporting reportAck = reportingFactory.newReporting(5);            
         reportAck.begin(new ReportingMessage("Start acknowledging positively"));
         try {
-            mqiClient.ack(new AckMessageDto(message.getIdentifier(), Ack.OK, null, false), category);
+            mqiClient.ack(new AckMessageDto(message.getId(), Ack.OK, null, false), category);
             reportAck.end(new ReportingMessage("End acknowledging positively"));            
         } catch (AbstractCodedException ace) {            
         	reportAck.error(new ReportingMessage("[code {}] {}", ace.getCode().getCode(), ace.getLogMessage()));            

@@ -123,20 +123,20 @@ public final class GenericMessageListener<T> implements AcknowledgingConsumerAwa
 		        acknowlegde(data, acknowledgment);
 		        break;
 		    case SEND:
-		    	LOGGER.debug("Message {} is already processing (state is SEND)", result.getIdentifier());	
+		    	LOGGER.debug("Message {} is already processing (state is SEND)", result.getId());	
 		        if (properties.getHostname().equals(result.getSendingPod())) {
 			        LOGGER.debug("Message {} already processed by this pod (state is SEND). Ignoring and pausing consumption", 
-			        		result.getIdentifier());	
+			        		result.getId());	
 		            acknowlegde(data, acknowledgment);
 		            pause();
 		        } else {
 		            // Message processing by another pod
 		            if (messageShallBeIgnored(data, result)) {
-		            	LOGGER.debug("Message {} shall be ignored (state is SEND). Ignoring...", result.getIdentifier());
+		            	LOGGER.debug("Message {} shall be ignored (state is SEND). Ignoring...", result.getId());
 		                acknowlegde(data, acknowledgment);
 		            } else {
 		            	LOGGER.debug("Forced message {} transition from SEND to READ). Pausing consumption", 
-		            			result.getIdentifier());
+		            			result.getId());
 		                // We have forced the reading
 		                acknowlegde(data, acknowledgment);
 		                pause();
@@ -145,7 +145,7 @@ public final class GenericMessageListener<T> implements AcknowledgingConsumerAwa
 		        break;
 		    default:
 		        // Message assigned
-		    	LOGGER.debug("Message {} assigned to this pod. Pausing consumption ...", result.getIdentifier());
+		    	LOGGER.debug("Message {} assigned to this pod. Pausing consumption ...", result.getId());
 		        acknowlegde(data, acknowledgment);
 		        pause();
 		        break;
@@ -196,13 +196,13 @@ public final class GenericMessageListener<T> implements AcknowledgingConsumerAwa
         boolean ret = false;
         // Ask to the other application
         try {
-            ret = otherAppService.isProcessing(mess.getSendingPod(), category, mess.getIdentifier());
+            ret = otherAppService.isProcessing(mess.getSendingPod(), category, mess.getId());
         } catch (AbstractCodedException ace) {
             ret = false;
             LOGGER.warn("{} No response from the other application, consider it as dead", ace.getLogMessage());
         }
         if (!ret) {
-        	LOGGER.debug("No other pod is handling the message {}. Enforcing update to state READ...", mess.getIdentifier());
+        	LOGGER.debug("No other pod is handling the message {}. Enforcing update to state READ...", mess.getId());
 			final AppCatMessageDto<T> resultForce = saveInAppCat(data, true);
             if (resultForce.getState() != MessageState.READ) {
                 ret = true;
@@ -211,7 +211,7 @@ public final class GenericMessageListener<T> implements AcknowledgingConsumerAwa
             LOGGER.warn("We force the reading for the message {}, will the message be ignored {}", mess, ret);
         }
         else {
-        	LOGGER.info("Message {} is already handled by other pod", mess.getIdentifier());
+        	LOGGER.info("Message {} is already handled by other pod", mess.getId());
         }
         return ret;
     }

@@ -63,15 +63,15 @@ public class JobControllerTest extends RestControllerTest{
         Map<String, String> params = new HashMap<>();
         params.put("[orderByAsc]", "valueFilter");
         params.put("[orderByDesc]", "valueFilter1");
-        params.put("_id", "123");
-        params.put("messages.identifier", "124");
+        params.put("_id", "124");
+        params.put("messages.id", "124");
         params.put("creationDate", "20180227T104128");
         params.put("product.stopTime", "20180227T104128");
         
         List<FilterCriterion> filters = new ArrayList<>();
         filters.add(new FilterCriterion("product.stopTime", jobController.convertDateIso("20180227T104128")));
-        filters.add(new FilterCriterion("messages.identifier", 124L));
-        filters.add(new FilterCriterion("_id", 123L));
+        filters.add(new FilterCriterion("messages.id", 124L));
+        filters.add(new FilterCriterion("_id", 124L));
         filters.add(new FilterCriterion("creationDate", jobController.convertDateIso("20180227T104128")));
         
         List<AppDataJob> jobsDb = new ArrayList<>();

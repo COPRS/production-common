@@ -23,14 +23,14 @@ public class GenericMessageDtoTest {
 	@Test
 	public void testGettersSettersConstructors() {
 		GenericMessageDto<String> dto = new GenericMessageDto<String>(123, "input-key", "key-obs");
-		assertEquals(123, dto.getIdentifier());
+		assertEquals(123, dto.getId());
 		assertEquals("key-obs", dto.getBody());
         assertEquals("input-key", dto.getInputKey());
 
-		dto.setIdentifier(321);;
+		dto.setId(321);;
 		dto.setBody("other-key");
 		dto.setInputKey("othey-input");
-		assertEquals(321, dto.getIdentifier());
+		assertEquals(321, dto.getId());
 		assertEquals("other-key", dto.getBody());
         assertEquals("othey-input", dto.getInputKey());
 	}

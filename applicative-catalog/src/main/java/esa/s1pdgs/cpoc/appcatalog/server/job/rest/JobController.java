@@ -63,7 +63,7 @@ public class JobController {
     private final static String PK_ID = "_id";
     private final static String PK_CREATION = "creationDate";
     private final static String PK_UPDATE = "lastUpdateDate";
-    private final static String PK_MESSAGES_ID = "messages.identifier";
+    private final static String PK_MESSAGES_ID = "messages.id";
     private final static String PK_PRODUCT_START = "product.startTime";
     private final static String PK_PRODUCT_STOP = "product.stopTime";
     
@@ -118,8 +118,6 @@ public class JobController {
                             .extractCriterion(keyFilter, valueFilter);
                     switch (criterion.getKey()) {
                         case PK_ID:
-                            criterion.setValue(Long.decode(valueFilter));
-                            break;
                         case PK_MESSAGES_ID:
                             criterion.setValue(Long.decode(valueFilter));
                             break;

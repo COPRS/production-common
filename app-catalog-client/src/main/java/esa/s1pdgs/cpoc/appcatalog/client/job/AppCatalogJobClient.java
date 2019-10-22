@@ -226,9 +226,9 @@ public class AppCatalogJobClient<E extends AbstractDto> {
      * @return
      * @throws AbstractCodedException
      */
-    public List<AppDataJob<E>> findByMessagesIdentifier(final long messageId)
+    public List<AppDataJob<E>> findByMessagesId(final long messageId)
             throws AbstractCodedException {   	
-        return search(Collections.singletonMap("messages.identifier", Long.toString(messageId)));        
+        return search(Collections.singletonMap("messages.id", Long.toString(messageId)));        
     }
 
     /**
@@ -397,7 +397,7 @@ public class AppCatalogJobClient<E extends AbstractDto> {
             final AppDataJob<E> job, final boolean patchMessages,
             final boolean patchProduct, final boolean patchGenerations)
             throws AbstractCodedException {
-    	job.setIdentifier(identifier);
+    	job.setId(identifier);
         if (!patchMessages) {
         	job.setMessages(new ArrayList<>());
         }

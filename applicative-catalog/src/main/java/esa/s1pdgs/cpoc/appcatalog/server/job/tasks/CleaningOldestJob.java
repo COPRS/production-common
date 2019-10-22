@@ -126,7 +126,7 @@ public class CleaningOldestJob {
                         jobS.getProduct().getProductName(), category,
                         jobS.getLevel(), state);
             }
-            appDataJobService.deleteJob(jobS.getIdentifier());
+            appDataJobService.deleteJob(jobS.getId());
         }
     }
 

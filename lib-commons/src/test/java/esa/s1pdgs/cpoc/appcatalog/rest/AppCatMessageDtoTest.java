@@ -34,7 +34,7 @@ public class AppCatMessageDtoTest {
                 ProductCategory.AUXILIARY_FILES, 1000, "topic-name", 2, 3210);
         assertNull(obj2.getDto());
         assertEquals(ProductCategory.AUXILIARY_FILES, obj2.getCategory());
-        assertEquals(1000, obj2.getIdentifier());
+        assertEquals(1000, obj2.getId());
         assertEquals("topic-name", obj2.getTopic());
         assertEquals(2, obj2.getPartition());
         assertEquals(3210, obj2.getOffset());
@@ -43,7 +43,7 @@ public class AppCatMessageDtoTest {
                 ProductCategory.AUXILIARY_FILES, 1000, "topic-name", 2, 3210,
                 "dto-object");
         assertEquals(ProductCategory.AUXILIARY_FILES, obj3.getCategory());
-        assertEquals(1000, obj3.getIdentifier());
+        assertEquals(1000, obj3.getId());
         assertEquals("topic-name", obj3.getTopic());
         assertEquals(2, obj3.getPartition());
         assertEquals(3210, obj3.getOffset());

@@ -453,7 +453,7 @@ public abstract class AbstractJobsGenerator<T extends AbstractDto> implements Ru
                         this.preSearch(job);
 
 						AppDataJob<T> modifiedJob = appDataService.patchJob(
-                                job.getAppDataJob().getIdentifier(),
+                                job.getAppDataJob().getId(),
                                 job.getAppDataJob(), false, true, false);
                         job.setAppDataJob(modifiedJob);
                         updateState(job, AppDataJobGenerationState.PRIMARY_CHECK, reportInit);
@@ -564,13 +564,13 @@ public abstract class AbstractJobsGenerator<T extends AbstractDto> implements Ru
         throws AbstractCodedException {
     	
     	report.intermediate(new ReportingMessage("Job generation before update: {} - {} - {} - {}", 
-    			job.getAppDataJob().getIdentifier(),
+    			job.getAppDataJob().getId(),
                 job.getGeneration().getTaskTable(), 
                 newState,
                 job.getGeneration()
         ));
         AppDataJob<T> modifiedJob = appDataService.patchTaskTableOfJob(
-                job.getAppDataJob().getIdentifier(),
+                job.getAppDataJob().getId(),
                 job.getGeneration().getTaskTable(), newState);
         
         if (modifiedJob == null)

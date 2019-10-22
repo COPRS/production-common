@@ -30,7 +30,8 @@ import esa.s1pdgs.cpoc.common.ProductCategory;
 @Service
 public class MqiMessageDao {
 
-    /**
+    private static final String ID_NAME = "_id";
+	/**
      * Mongo DB client
      */
     private final MongoTemplate mongoClient;
@@ -130,7 +131,7 @@ public class MqiMessageDao {
      * @return the list of message
      */
     public List<MqiMessage> searchByID(final long messageID) {
-        Query query = query(where("identifier").is(messageID));
+        Query query = query(where(ID_NAME).is(messageID));
         return find(query);
     }
 
@@ -159,7 +160,7 @@ public class MqiMessageDao {
      */
     public void updateByID(final long messageID,
             final Map<String, Object> updateMap) {
-        Query query = query(where("identifier").is(messageID));
+        Query query = query(where(ID_NAME).is(messageID));
         Update update = new Update();
         updateMap.forEach((k, v) -> update.set(k, v));
         updateFirst(query, update);

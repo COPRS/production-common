@@ -111,7 +111,7 @@ public class L0SegmentAppConsumer
         final Reporting reporting = reportingFactory.newReporting(0);
         
         // process message
-        appStatus.setProcessing(mqiMessage.getIdentifier());
+        appStatus.setProcessing(mqiMessage.getId());
         int step = 1;
         boolean ackOk = false;
         String errorMessage = "";
@@ -150,7 +150,7 @@ public class L0SegmentAppConsumer
                     || appDataJob
                             .getState() == AppDataJobState.DISPATCHING) {
                 appDataJob.setState(AppDataJobState.DISPATCHING);
-                appDataJob = appDataService.patchJob(appDataJob.getIdentifier(),
+                appDataJob = appDataService.patchJob(appDataJob.getId(),
                         appDataJob, false, false, false);
                 jobsDispatcher.dispatch(appDataJob);
             } else {
@@ -198,8 +198,7 @@ public class L0SegmentAppConsumer
         ProductDto leveldto = mqiMessage.getBody();
 
         // Check if a job is already created for message identifier
-        List<AppDataJob<ProductDto>> existingJobs = appDataService
-                .findByMessagesIdentifier(mqiMessage.getIdentifier());
+        List<AppDataJob<ProductDto>> existingJobs = appDataService.findByMessagesId(mqiMessage.getId());
 
         if (CollectionUtils.isEmpty(existingJobs)) {
 
@@ -246,7 +245,7 @@ public class L0SegmentAppConsumer
                     jobDto.setPod(processSettings.getHostname());
                 }
                 jobDto.getMessages().add(mqiMessage);
-                return appDataService.patchJob(jobDto.getIdentifier(), jobDto,
+                return appDataService.patchJob(jobDto.getId(), jobDto,
                         true, false, false);
 
             }
@@ -257,7 +256,7 @@ public class L0SegmentAppConsumer
 
             if (!jobDto.getPod().equals(processSettings.getHostname())) {
                 jobDto.setPod(processSettings.getHostname());
-                jobDto = appDataService.patchJob(jobDto.getIdentifier(), jobDto,
+                jobDto = appDataService.patchJob(jobDto.getId(), jobDto,
                         false, false, false);
             }
             // Job already exists

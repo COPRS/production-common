@@ -226,7 +226,7 @@ public abstract class AbstractJobsDispatcher<T extends AbstractDto> {
             // Update task tables
             if (needUpdate) {
                 job.setState(AppDataJobState.GENERATING);
-                appDataService.patchJob(job.getIdentifier(), job, false, false,
+                appDataService.patchJob(job.getId(), job, false, false,
                         true);
             }
             LOGGER.debug ("== dispatched job {}", job.toString());

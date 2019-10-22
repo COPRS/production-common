@@ -27,15 +27,15 @@ public class LevelJobsMessageDtoTest {
                 "/data/localWD/123456/JobOrder.xml");
         GenericMessageDto<LevelJobDto> dto = new GenericMessageDto<LevelJobDto>(123, "input-key", body);
 
-        assertEquals(123, dto.getIdentifier());
+        assertEquals(123, dto.getId());
         assertEquals(body, dto.getBody());
         assertEquals("input-key", dto.getInputKey());
 
         dto = new GenericMessageDto<LevelJobDto>();
-        dto.setIdentifier(321);
+        dto.setId(321);
         dto.setBody(body);
         dto.setInputKey("othey-input");
-        assertEquals(321, dto.getIdentifier());
+        assertEquals(321, dto.getId());
         assertEquals(body, dto.getBody());
         assertEquals("othey-input", dto.getInputKey());
     }

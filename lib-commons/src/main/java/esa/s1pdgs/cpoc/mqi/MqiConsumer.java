@@ -76,16 +76,16 @@ public final class MqiConsumer<E extends AbstractDto> implements Runnable {
 					LOG.trace("No message received: continue");					
 					continue;
 				}	
-				appStatus.setProcessing(message.getIdentifier());
+				appStatus.setProcessing(message.getId());
 				LOG.debug("{} received {} from MQI", this, message);
 				AckMessageDto ackMess;			
 				try {
 					mqiListener.onMessage(message);
-					ackMess = new AckMessageDto(message.getIdentifier(), Ack.OK, null, false);
+					ackMess = new AckMessageDto(message.getId(), Ack.OK, null, false);
 				// any other error --> dump prominently into log file but continue	
 				} catch (Exception e) {
 					LOG.error(String.format("Unexpected Error handling message %s", message), e);
-					ackMess = new AckMessageDto(message.getIdentifier(), Ack.ERROR, LogUtils.toString(e), false);
+					ackMess = new AckMessageDto(message.getId(), Ack.ERROR, LogUtils.toString(e), false);
 				}			
 				client.ack(ackMess, category);
 			// on communication errors with Mqi --> just dump warning and retry on next polling attempt

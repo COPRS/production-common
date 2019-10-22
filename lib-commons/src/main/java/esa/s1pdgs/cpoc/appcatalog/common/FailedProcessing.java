@@ -54,7 +54,7 @@ public class FailedProcessing extends AbstractRequest {
 	public static FailedProcessing valueOf(final MqiMessage message, final FailedProcessingDto failedProc)
 	{
 		return new FailedProcessing(
-				message.getIdentifier(), 
+				message.getId(), 
 				message.getCategory(), 
 				message.getTopic(), 
 				message.getPartition(),
