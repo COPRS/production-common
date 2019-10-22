@@ -77,13 +77,11 @@ public class AppDataJob<E extends AbstractDto> {
         this.messages = new ArrayList<>();
         this.generations = new ArrayList<>();
     }
-        
-    @JsonIgnore
+
 	public long getId() {
 		return id;
 	}
 
-    @JsonIgnore
 	public void setId(long id) {
 		this.id = id;
 	}
