@@ -113,11 +113,11 @@ aiop:
     cgs4: INU_
     erds: WILE
   pt-assembly:
-    cgs1: yes
-    cgs2: yes
-    cgs3: yes
-    cgs4: yes
-    erds: yes
+    cgs1: "yes"
+    cgs2: "yes"
+    cgs3: "yes"
+    cgs4: "yes"
+    erds: "yes"
   processing-mode:
     cgs1: NRT
     cgs2: NRT
@@ -137,15 +137,15 @@ aiop:
     cgs4: 360
     erds: 360
   descramble:
-    cgs1: yes
-    cgs2: yes
-    cgs3: yes
-    cgs4: yes
-    erds: yes
+    cgs1: "yes"
+    cgs2: "yes"
+    cgs3: "yes"
+    cgs4: "yes"
+    erds: "yes"
   rs-encode:
-    cgs1: no
-    cgs2: no
-    cgs3: no
-    cgs4: yes
-    erds: yes
+    cgs1: "no"
+    cgs2: "no"
+    cgs3: "no"
+    cgs4: "yes"
+    erds: "yes"
 
