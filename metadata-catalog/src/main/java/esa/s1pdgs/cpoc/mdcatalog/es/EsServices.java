@@ -24,6 +24,7 @@ import org.elasticsearch.common.geo.builders.PolygonBuilder;
 import org.elasticsearch.common.xcontent.XContentType;
 import org.elasticsearch.index.query.BoolQueryBuilder;
 import org.elasticsearch.index.query.GeoShapeQueryBuilder;
+import org.elasticsearch.index.query.QueryBuilder;
 import org.elasticsearch.index.query.QueryBuilders;
 import org.elasticsearch.index.query.RangeQueryBuilder;
 import org.elasticsearch.rest.RestStatus;
@@ -195,7 +196,7 @@ public class EsServices {
 		BoolQueryBuilder queryBuilder = QueryBuilders.boolQuery()
 				.must(QueryBuilders.rangeQuery("validityStartTime").lt(beginDate))
 				.must(QueryBuilders.rangeQuery("validityStopTime").gt(endDate))
-				.must(QueryBuilders.termQuery("satelliteId.keyword", satelliteId));
+				.must(satelliteId(satelliteId));
 		// Product type
 		if (category == ProductCategory.LEVEL_PRODUCTS || category == ProductCategory.LEVEL_SEGMENTS) {
 			queryBuilder = queryBuilder.must(QueryBuilders.regexpQuery("productType.keyword", productType));
@@ -492,7 +493,7 @@ public class EsServices {
 		BoolQueryBuilder queryBuilder = QueryBuilders.boolQuery()
 				.must(QueryBuilders.rangeQuery("startTime").lt(endDate))
 				.must(QueryBuilders.rangeQuery("stopTime").gt(beginDate))
-				.must(QueryBuilders.termQuery("satelliteId.keyword", satelliteId))
+				.must(satelliteId(satelliteId))
 				.must(QueryBuilders.regexpQuery("productType.keyword", productType))
 				.must(QueryBuilders.termQuery("processMode.keyword", processMode));
 		sourceBuilder.query(queryBuilder);
@@ -928,5 +929,12 @@ public class EsServices {
 			throw new MetadataMalformedException("productConsolidation");
 		}
 		return r;
+	}
+	
+	private final QueryBuilder satelliteId(String satelliteId) {		
+		return QueryBuilders.boolQuery()
+			.should(QueryBuilders.termQuery("satelliteId.keyword", satelliteId))
+			.should(QueryBuilders.termQuery("satelliteId.keyword", "_"));
+	
 	}
 }
