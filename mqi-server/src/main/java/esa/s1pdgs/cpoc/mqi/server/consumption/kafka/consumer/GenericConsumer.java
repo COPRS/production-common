@@ -39,8 +39,9 @@ public class GenericConsumer<T> {
 	    private final KafkaProperties kafkaProperties;
 	    private final AppCatalogMqiService service;
 	    private final OtherApplicationService otherAppService;
-	    private final AppStatus appStatus;	    
-	    
+	    private final AppStatus appStatus;	  
+	    private final String clientId;
+	    	    
 		public Factory(
 				KafkaProperties kafkaProperties, 
 				AppCatalogMqiService service,
@@ -51,10 +52,15 @@ public class GenericConsumer<T> {
 			this.service = service;
 			this.otherAppService = otherAppService;
 			this.appStatus = appStatus;
+			this.clientId = kafkaProperties.getClientId() + "-" + UUID.randomUUID().toString();
 		}
 
 		public final <T> GenericConsumer<T> newConsumerFor(final ProductCategory cat, final int prio, final String topic) {        
 			return newConsumerFor(cat, prio, topic, MessageConsumer.nullConsumer());
+		}
+		
+		public final String clientId() {
+			return clientId;
 		}
 		
 		// for unit test
@@ -83,9 +89,7 @@ public class GenericConsumer<T> {
 		}
 		
 	    private final <T> ConsumerFactory<String, T> consumerFactory(final String topic, final Class<T> dtoClass) {
-    		// use unique clientId to circumvent 'instance already exists' problem
-	    	final String consumerId = kafkaProperties.getClientId() + "-" + UUID.randomUUID().toString();
-	    	
+	  	    	
 	    	final JsonDeserializer<T> deser = new JsonDeserializer<>(dtoClass);
 	    	deser.addTrustedPackages("*");	    	
 	    	final ErrorHandlingDeserializer2<T> deserializer = new ErrorHandlingDeserializer2<>(deser);
@@ -104,7 +108,7 @@ public class GenericConsumer<T> {
 	    	});
 	    		    	
 	        return new DefaultKafkaConsumerFactory<>(
-	        		consumerConfig(consumerId),
+	        		consumerConfig(clientId),
 	                new StringDeserializer(),
 	                deserializer
 	        );

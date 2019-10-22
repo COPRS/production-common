@@ -39,7 +39,7 @@ public class EdmProviderTest {
 				EdmPrimitiveTypeKind.Int64.getFullQualifiedName(), //
 				EdmPrimitiveTypeKind.DateTimeOffset.getFullQualifiedName(), //
 				EdmPrimitiveTypeKind.DateTimeOffset.getFullQualifiedName(), //
-				new FullQualifiedName("S1PDGS", "Checksum")), //
+				new FullQualifiedName("S1PDGS", "Checksums")), //
 				properties.stream().map(p -> p.getTypeAsFQNObject()).collect(Collectors.toList()));
 		
 		assertEquals(Arrays.asList(false, false, false, false, false, false, true),
@@ -48,7 +48,7 @@ public class EdmProviderTest {
 	
 	@Test
 	public void testGetComplexType() throws ODataException {
-		CsdlComplexType complexType = uut.getComplexType(new FullQualifiedName("S1PDGS", "Checksum"));
+		CsdlComplexType complexType = uut.getComplexType(new FullQualifiedName("S1PDGS", "Checksums"));
 		List<CsdlProperty> properties = complexType.getProperties();
 		assertEquals("Algorithm", properties.get(0).getName());
 		assertEquals(EdmPrimitiveTypeKind.String.getFullQualifiedName(), properties.get(0).getTypeAsFQNObject());

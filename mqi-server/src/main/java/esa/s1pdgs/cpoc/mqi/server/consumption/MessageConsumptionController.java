@@ -110,7 +110,9 @@ public class MessageConsumptionController {
                 final Map<String, GenericConsumer<?>> catConsumers = new HashMap<>();
                 for (final Map.Entry<String, Integer> entry : prop.getTopicsWithPriority().entrySet()) {
                 	final String topic = entry.getKey(); 
-                	final int prio = entry.getValue();
+                	final int prio = entry.getValue();                	
+                	LOGGER.debug("Creating new consumer with clientId {} on category {} (topic: {}) with priority {}", 
+                			consumerFactory.clientId(), cat, topic, prio);
                 	catConsumers.put(topic, consumerFactory.newConsumerFor(cat, prio, topic));
                 }
                 consumers.put(cat, catConsumers);

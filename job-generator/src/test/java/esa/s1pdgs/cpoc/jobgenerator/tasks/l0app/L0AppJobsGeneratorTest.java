@@ -323,7 +323,7 @@ public class L0AppJobsGeneratorTest {
                 return null;
             }).when(this.metadataClient).search(Mockito.any(), Mockito.any(),
                     Mockito.any(), Mockito.anyString(), Mockito.anyInt(),
-                    Mockito.anyString());
+                    Mockito.anyString(), Mockito.anyString());
         } catch (MetadataQueryException e) {
             fail(e.getMessage());
         }

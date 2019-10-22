@@ -403,7 +403,7 @@ public class MetadataClientTest {
 
 		this.metadataClient.search(
 				new SearchMetadataQuery(1, "LatestValCover", 1, 2, "AUX_OBMEMC", ProductFamily.AUXILIARY_FILE),
-				"2017-11-20T22:15:16.123456Z", "2017-12-20T10:15:16.654321Z", "A", -1, "FAST");
+				"2017-11-20T22:15:16.123456Z", "2017-12-20T10:15:16.654321Z", "A", -1, "FAST", "NONE");
 
 		String uri = "http://" + METADATA_HOST + "/metadata/AUXILIARY_FILE/search";
 		UriComponentsBuilder builder = UriComponentsBuilder.fromUriString(uri).queryParam("productType", "AUX_OBMEMC")
@@ -428,7 +428,7 @@ public class MetadataClientTest {
 
 		this.metadataClient.search(
 				new SearchMetadataQuery(1, "LatestValCover", 1, 2, "AUX_OBMEMC", ProductFamily.AUXILIARY_FILE),
-				"2017-11-20T22:15:16.123456Z", "2017-12-20T10:15:16.654321Z", "A", 6, null);
+				"2017-11-20T22:15:16.123456Z", "2017-12-20T10:15:16.654321Z", "A", 6, null, "NONE");
 
 		String uri = "http://" + METADATA_HOST + "/metadata/AUXILIARY_FILE/search";
 		UriComponentsBuilder builder = UriComponentsBuilder.fromUriString(uri).queryParam("productType", "AUX_OBMEMC")
@@ -453,7 +453,7 @@ public class MetadataClientTest {
 
 		List<SearchMetadata> files = this.metadataClient.search(
 				new SearchMetadataQuery(1, "LatestValCover", 1, 2, "AUX_OBMEMC", ProductFamily.AUXILIARY_FILE),
-				"2017-11-20T22:15:16.123456Z", "2017-12-20T10:15:16.654321Z", "A", -1, null);
+				"2017-11-20T22:15:16.123456Z", "2017-12-20T10:15:16.654321Z", "A", -1, null, "NONE");
 		SearchMetadata file = files.get(0);
 		assertEquals("MPL_ORBPRE", file.getProductType());
 		assertEquals("S1A_OPER_MPL_ORBPRE_20171208T200309_20171215T200309_0001.EOF", file.getProductName());
@@ -475,7 +475,7 @@ public class MetadataClientTest {
 		thrown.expectMessage("nvalid HTTP statu");
 		this.metadataClient.search(
 				new SearchMetadataQuery(1, "LatestValCover", 1, 2, "AUX_OBMEMC", ProductFamily.AUXILIARY_FILE),
-				"2017-11-20T22:15:16.123456Z", "2017-12-20T10:15:16.654321Z", "A", -1, "");
+				"2017-11-20T22:15:16.123456Z", "2017-12-20T10:15:16.654321Z", "A", -1, "", "NONE");
 	}
 
 	@Test
@@ -489,7 +489,7 @@ public class MetadataClientTest {
 		thrown.expectCause(isA(RestClientException.class));
 		this.metadataClient.search(
 				new SearchMetadataQuery(1, "LatestValCover", 1, 2, "AUX_OBMEMC", ProductFamily.AUXILIARY_FILE),
-				"2017-11-20T22:15:16.123456Z", "2017-12-20T10:15:16.654321Z", "A", -1, "");
+				"2017-11-20T22:15:16.123456Z", "2017-12-20T10:15:16.654321Z", "A", -1, "", "NONE");
 	}
 
 	@Test
