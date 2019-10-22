@@ -86,8 +86,7 @@ public class OQCTask implements Callable<OQCFlag> {
 			return oqcFlag;
 		} catch (Exception e) {
 			// Consider every failure as a non successful validation!
-			e.printStackTrace();
-			LOGGER.error("An error occured during the oqc validation, resulting in NOT_CHECKED flag");
+			LOGGER.error("An error occured during the oqc validation, resulting in NOT_CHECKED flag",e);
 			return OQCFlag.NOT_CHECKED;
 		}
 	}
@@ -96,7 +95,7 @@ public class OQCTask implements Callable<OQCFlag> {
 		try {
 			Path workDir = Files.createDirectories(Paths.get(oqcBaseWorkingDirectory.toString(),originalProduct.getFileName().toString())); 
 			Files.createDirectories(Paths.get(workDir.toString(), "reports"));
-			LOGGER.info("Generated working directory for oqc check: {}", workDir);
+			LOGGER.debug("Generated working directory for oqc check: {}", workDir);
 			return workDir;
 		} catch (IOException e) {
 			LOGGER.error("Failed to generate oqc working directory: {}",LogUtils.toString(e));
@@ -172,7 +171,7 @@ public class OQCTask implements Callable<OQCFlag> {
 
 	private OQCFlag evaluateOQC(Path workingDirectory) {
 		Path reportDir = Paths.get(workingDirectory.toString(), "reports");
-		LOGGER.info("Evaluating results from report directory {}", reportDir);
+		LOGGER.debug("Evaluating results from report directory {}", reportDir);
 
 		// Identify the possible reports
 		Path pdfReport = null;

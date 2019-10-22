@@ -24,10 +24,11 @@ import org.w3c.dom.Node;
 import esa.s1pdgs.cpoc.common.utils.FileUtils;
 import esa.s1pdgs.cpoc.mqi.model.queue.LevelJobOutputDto;
 import esa.s1pdgs.cpoc.mqi.model.queue.OQCFlag;
+import esa.s1pdgs.cpoc.report.LoggerReporting;
+import esa.s1pdgs.cpoc.report.Reporting;
 import esa.s1pdgs.cpoc.wrapper.config.ApplicationProperties;
 
-public class OQCTaskTest {
-
+public class OQCTaskTest {    
 	// For testing purpose. Instead of a real OQC, we simulate one that is locked up
 	public class OQCSleepTaskFactory extends OQCTaskFactory {
 		@Override
