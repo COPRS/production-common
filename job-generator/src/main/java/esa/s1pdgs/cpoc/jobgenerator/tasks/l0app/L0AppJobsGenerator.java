@@ -68,8 +68,6 @@ public class L0AppJobsGenerator extends AbstractJobsGenerator<EdrsSessionDto> {
         	    			key, stationCodes.get(key), map.get("PT_Assembly"), map.get("Processing_Mode"), map.get("Reprocessing_Mode"), map.get("Timeout"), map.get("Descramble"), map.get("RSEncode")));
         	    }
         	
-        	
-            LOGGER.debug ("== Descramble {}, RSEncode {}",aiopProperties.getDescramble().get(key),aiopProperties.getRsEncode().get(key));
         	LOGGER.trace("Initializing AIOP parameter {} for station {} ", map, stationCodes.get(key));
         	this.aiopProperties.put(stationCodes.get(key), map);
         }
