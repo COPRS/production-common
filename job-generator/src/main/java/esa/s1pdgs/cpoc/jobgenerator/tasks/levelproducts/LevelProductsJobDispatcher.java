@@ -141,6 +141,7 @@ public class LevelProductsJobDispatcher extends AbstractJobsDispatcher<ProductDt
         List<String> taskTables = new ArrayList<>();
         String key = job.getProduct().getAcquisition() + "_"
                 + job.getProduct().getSatelliteId();
+        LOGGER.debug("Searching tasktable for {}", key);
         routingMap.forEach((k,v) -> {
             if (k.matcher(key).matches()) {
                 for (String taskTable : v) {
@@ -153,7 +154,10 @@ public class LevelProductsJobDispatcher extends AbstractJobsDispatcher<ProductDt
                     }
                 }
             }
-        });
+        });        
+        if (taskTables.isEmpty()) {
+            LOGGER.warn("No tasktable found for {} in: {}", key, routingMap);
+        }        
         return taskTables;
     }
 
