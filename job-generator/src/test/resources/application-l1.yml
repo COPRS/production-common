@@ -25,9 +25,10 @@ process:
     REP_EFEP_: ^S1[A|B|_]_OPER_REP_PASS.*.EOF$
     
 pattern-l0-slices:
-  regexp: "^([0-9a-z]{2})([0-9a-z]){1}_(([0-9a-z]{2})_RAW__0([0-9a-z_]{3}))_([0-9a-z]{15})_([0-9a-z]{15})_([0-9a-z_]{6})\\w{1,}\\.SAFE(/.*)?$"
+  regexp: "^([0-9a-z]{2})([0-9a-z]){1}_(([0-9a-z]{2})_RAW__0([0-9a-z_])([0-9a-z_]{2}))_([0-9a-z]{15})_([0-9a-z]{15})_([0-9a-z_]{6})\\w{1,}\\.SAFE(/.*)?$"
   m-group-sat-id: 2
   m-group-mission-id: 1
   m-group-acquisition: 4
-  m-group-start-time: 6
-  m-group-stop-time: 7
+  group-polarisation: 6
+  m-group-start-time: 7
+  m-group-stop-time: 8

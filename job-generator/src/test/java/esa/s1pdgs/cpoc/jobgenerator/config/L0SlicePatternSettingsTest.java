@@ -31,10 +31,11 @@ public class L0SlicePatternSettingsTest {
 		assertEquals(2, l0SlicePatternSettings.getMGroupSatId());
 		assertEquals(1, l0SlicePatternSettings.getMGroupMissionId());
 		assertEquals(4, l0SlicePatternSettings.getMGroupAcquisition());
-		assertEquals(6, l0SlicePatternSettings.getMGroupStartTime());
-		assertEquals(7, l0SlicePatternSettings.getMGroupStopTime());
+		assertEquals(6, l0SlicePatternSettings.getGroupPolarisation());
+		assertEquals(7, l0SlicePatternSettings.getMGroupStartTime());
+		assertEquals(8, l0SlicePatternSettings.getMGroupStopTime());
 		assertEquals(
-				"^([0-9a-z]{2})([0-9a-z]){1}_(([0-9a-z]{2})_RAW__0([0-9a-z_]{3}))_([0-9a-z]{15})_([0-9a-z]{15})_([0-9a-z_]{6})\\w{1,}\\.SAFE(/.*)?$",
+				"^([0-9a-z]{2})([0-9a-z]){1}_(([0-9a-z]{2})_RAW__0([0-9a-z_])([0-9a-z_]{2}))_([0-9a-z]{15})_([0-9a-z]{15})_([0-9a-z_]{6})\\w{1,}\\.SAFE(/.*)?$",
 				l0SlicePatternSettings.getRegexp());
 	}
 	
