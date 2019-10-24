@@ -410,7 +410,7 @@ public class EsServices {
 	public SearchMetadata closestStopValidity(String productType, ProductFamily productFamily, String beginDate,
 			String endDate, String satelliteId, int instrumentConfId, String processMode, String polarisation) 
 					throws Exception {
-		LOGGER.debug("Searching products via selection policy 'closestStartValidity' for {}, startDate {}, endDate {} ",
+		LOGGER.debug("Searching products via selection policy 'closestStopValidity' for {}, startDate {}, endDate {} ",
 				productType, beginDate, endDate);
 		
 		// mimic the same behaviour used in the old processing system	
