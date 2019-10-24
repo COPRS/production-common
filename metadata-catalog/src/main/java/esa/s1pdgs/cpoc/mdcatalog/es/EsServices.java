@@ -378,7 +378,7 @@ public class EsServices {
 			queryBuilder = queryBuilder.must(QueryBuilders.termQuery("processMode.keyword", processMode));
 		}
 		if (!polarisation.equals("NONE")) {
-			queryBuilder.must(QueryBuilders.termQuery("polarisation", polarisation));
+			queryBuilder.must(QueryBuilders.termQuery("polarisation.keyword", polarisation));
 		}
 		LOGGER.debug("query composed is {}", queryBuilder);
 		
