@@ -304,7 +304,7 @@ public class EsServicesTest{
 		
 		try {
 			SearchMetadata result = esServices.closestStopValidity("type", ProductFamily.L2_ACN, 
-			        "2012-05-05T10:10:12.000120Z", "2019-05-05T10:10:12.001230Z", "A", 6, "FAST");
+			        "2012-05-05T10:10:12.000120Z", "2019-05-05T10:10:12.001230Z", "A", 6, "FAST", "NONE");
 			assertEquals("Search metadata are not equals", expectedResult, result);
 		} catch (Exception e) {
 			fail("Exception occurred: " + e.getMessage());

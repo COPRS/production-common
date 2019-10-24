@@ -71,7 +71,7 @@ public class OutputProcuderFactory {
         dtoReport.setHostname(hostname);
         sender.publish(
         		new GenericPublicationMessageDto<LevelReportDto>(
-        				inputMessage.getIdentifier(), 
+        				inputMessage.getId(), 
         				msg.getFamily(), 
         				dtoReport
         		),
@@ -89,7 +89,7 @@ public class OutputProcuderFactory {
             throws AbstractCodedException {
     	
         final GenericPublicationMessageDto<ProductDto> messageToPublish = new GenericPublicationMessageDto<ProductDto>(
-                inputMessage.getIdentifier(), 
+                inputMessage.getId(), 
                 msg.getFamily(),
                 toProductDto(msg)
 		);
@@ -109,7 +109,8 @@ public class OutputProcuderFactory {
         		msg.getProductName(), 
         		msg.getKeyObs(),
         		msg.getFamily(), 
-        		toUppercaseOrNull(msg.getProcessMode())
+        		toUppercaseOrNull(msg.getProcessMode()),
+        		msg.getOqcFlag()
         );
     }
     

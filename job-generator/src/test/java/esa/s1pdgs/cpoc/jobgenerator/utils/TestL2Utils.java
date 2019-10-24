@@ -60,7 +60,7 @@ public class TestL2Utils {
     public static AppDataJob buildJobGeneration(
             boolean preSearchInfo) throws InternalErrorException {
         AppDataJob ret = new AppDataJob();
-        ret.setIdentifier(123);
+        ret.setId(123);
         ret.setState(AppDataJobState.GENERATING);
         ret.setPod("hostname");
         ret.setLevel(ApplicationLevel.L2);

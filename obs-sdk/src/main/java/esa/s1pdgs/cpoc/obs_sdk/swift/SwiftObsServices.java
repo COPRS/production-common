@@ -3,6 +3,8 @@ package esa.s1pdgs.cpoc.obs_sdk.swift;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -47,6 +49,7 @@ public class SwiftObsServices {
     public static long MAX_SEGMENT_SIZE = 5L*1024*1024*1024;
     
     public SwiftObsServices(Account client, final int numRetries, final int retryDelay) {
+    	client.setHashPassword("hashPassword"); // required for 
     	this.client = client;
         this.numRetries = numRetries;
         this.retryDelay = retryDelay;
@@ -346,7 +349,7 @@ public class SwiftObsServices {
 	public void createContainer(String containerName) throws SwiftSdkClientException {
 		for (int retryCount = 1;; retryCount++) {
             try {
-                log(String.format("Creating container %s", containerName));
+                log(String.format("Creating cobject.ontainer %s", containerName));
 
                 Container container = client.getContainer(containerName);
                 container.create();
@@ -543,4 +546,38 @@ public class SwiftObsServices {
             }
         }
     }
+
+	public long size(String bucketName, String key) throws SwiftSdkClientException {
+		log(String.format("Get size of object %s from bucket %s", key, bucketName));
+		List<StoredObject> results = new ArrayList<>();
+		getAll(bucketName, key).forEach(results::add);
+		
+		if (results.size() != 1) {
+			throw new SwiftSdkClientException(bucketName, key, String.format(
+					"Size query for object %s from bucket %s returned %s results", key, bucketName, results.size()));
+		}
+		return results.get(0).getContentLength();
+	}
+
+	public String getChecksum(String bucketName, String key) throws SwiftSdkClientException {
+		log(String.format("Get checksum of object %s from bucket %s", key, bucketName));
+		List<StoredObject> results = new ArrayList<>();
+		getAll(bucketName, key).forEach(results::add);
+		if (results.size() != 1) {
+			throw new SwiftSdkClientException(bucketName, key, String.format(
+					"Checksum query for object %s from bucket %s returned %s results", key, bucketName, results.size()));
+		}
+		return results.get(0).getEtag();
+	}
+
+	public URL createTemporaryDownloadUrl(String bucketName, String key, long expirationTimeInSeconds) throws SwiftSdkClientException {
+		Container container = client.getContainer(bucketName);
+		StoredObject storedObject = container.getObject(key);
+		String urlStr = storedObject.getTempGetUrl(expirationTimeInSeconds);
+		try {
+			return new URL(urlStr);
+		} catch (MalformedURLException e) {
+			throw new SwiftSdkClientException(bucketName, key, "Could not create temporary download URL");
+		}
+	}
 }

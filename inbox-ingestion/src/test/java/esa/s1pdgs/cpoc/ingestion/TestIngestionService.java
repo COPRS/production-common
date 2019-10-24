@@ -34,8 +34,6 @@ import esa.s1pdgs.cpoc.mqi.client.GenericMqiClient;
 import esa.s1pdgs.cpoc.mqi.model.queue.AbstractDto;
 import esa.s1pdgs.cpoc.mqi.model.queue.IngestionDto;
 import esa.s1pdgs.cpoc.mqi.model.queue.ProductDto;
-import esa.s1pdgs.cpoc.mqi.model.rest.Ack;
-import esa.s1pdgs.cpoc.mqi.model.rest.AckMessageDto;
 import esa.s1pdgs.cpoc.mqi.model.rest.GenericMessageDto;
 import esa.s1pdgs.cpoc.mqi.model.rest.GenericPublicationMessageDto;
 import esa.s1pdgs.cpoc.report.LoggerReporting;
@@ -70,7 +68,7 @@ public final class TestIngestionService {
 		ingestion.setPickupPath("/tmp");
 		
 		final GenericMessageDto<IngestionDto> mess = new GenericMessageDto<IngestionDto>();
-		mess.setIdentifier(123);
+		mess.setId(123);
 		mess.setInputKey("testKEy");
 		mess.setBody(ingestion);
 		
@@ -109,7 +107,7 @@ public final class TestIngestionService {
 		doReturn(new LoggerReporting(logger, "uuid", "actionName", 1)).when(reportingFactory).newReporting(Mockito.eq(1));
 
 		GenericMessageDto<IngestionDto> message = new GenericMessageDto<>();
-		message.setIdentifier(123L);
+		message.setId(123L);
 		message.setBody(null);
 		IngestionDto ingestionDto = new IngestionDto("foo.bar");
 		message.setBody(ingestionDto);
@@ -150,7 +148,7 @@ public final class TestIngestionService {
 		doReturn(new LoggerReporting(logger, "uuid", "actionName", 1)).when(reportingFactory).newReporting(Mockito.eq(1));
 
 		GenericMessageDto<IngestionDto> message = new GenericMessageDto<>();
-		message.setIdentifier(123L);
+		message.setId(123L);
 		message.setBody(null);
 		IngestionDto ingestionDto = new IngestionDto("foo.bar");
 		message.setBody(ingestionDto);
@@ -228,7 +226,7 @@ public final class TestIngestionService {
 		doReturn(new LoggerReporting(logger, "uuid", "actionName", 2)).when(reportingFactory).newReporting(Mockito.eq(2));
 		
 		final GenericMessageDto<IngestionDto> message = new GenericMessageDto<>();
-		message.setIdentifier(123L);
+		message.setId(123L);
 		message.setInputKey("inputKey");
 		message.setBody(new IngestionDto());
 		
@@ -244,7 +242,7 @@ public final class TestIngestionService {
 		uut.publish(products, message, reportingFactory);
 		
 		final GenericPublicationMessageDto<? extends AbstractDto> result = new GenericPublicationMessageDto<>(
-				message.getIdentifier(), product.getFamily(), product.getDto());
+				message.getId(), product.getFamily(), product.getDto());
 		result.setInputKey(message.getInputKey());
 		result.setOutputKey(product.getFamily().toString());
 		

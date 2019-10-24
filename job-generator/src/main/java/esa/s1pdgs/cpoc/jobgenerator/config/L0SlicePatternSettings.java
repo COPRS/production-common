@@ -51,6 +51,8 @@ public class L0SlicePatternSettings {
 	 * The id of the matcher.group for the stop time according the regexp.
 	 */
 	private int mGroupStopTime;
+	
+	private int groupPolarisation;
 
 	/**
 	 * Default constructor
@@ -61,6 +63,7 @@ public class L0SlicePatternSettings {
 		mGroupAcquisition = 0;
 		mGroupStartTime = 0;
 		mGroupStopTime = 0;
+		groupPolarisation = -1;
 	}
 
 	/**
@@ -159,5 +162,13 @@ public class L0SlicePatternSettings {
 
 	public void setSeaCoverageCheckPattern(String seaCoverageCheckPattern) {
 		this.seaCoverageCheckPattern = seaCoverageCheckPattern;
+	}
+
+	public int getGroupPolarisation() {
+		return groupPolarisation;
+	}
+
+	public void setGroupPolarisation(int groupPolarisation) {
+		this.groupPolarisation = groupPolarisation;
 	}
 }

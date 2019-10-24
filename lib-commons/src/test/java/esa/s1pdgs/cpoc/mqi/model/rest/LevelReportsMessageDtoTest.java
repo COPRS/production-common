@@ -26,15 +26,15 @@ public class LevelReportsMessageDtoTest {
                 ProductFamily.L0_REPORT);
         GenericMessageDto<LevelReportDto> dto =
                 new GenericMessageDto<LevelReportDto>(123, "input-key", body);
-        assertEquals(123, dto.getIdentifier());
+        assertEquals(123, dto.getId());
         assertEquals(body, dto.getBody());
         assertEquals("input-key", dto.getInputKey());
 
         dto = new GenericMessageDto<LevelReportDto>();
-        dto.setIdentifier(321);
+        dto.setId(321);
         dto.setBody(body);
         dto.setInputKey("othey-input");
-        assertEquals(321, dto.getIdentifier());
+        assertEquals(321, dto.getId());
         assertEquals(body, dto.getBody());
         assertEquals("othey-input", dto.getInputKey());
     }

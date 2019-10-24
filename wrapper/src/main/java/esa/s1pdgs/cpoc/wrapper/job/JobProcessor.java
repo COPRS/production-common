@@ -464,7 +464,7 @@ public class JobProcessor implements MqiListener<LevelJobDto> {
 			final String errorMessage) {
 		LOGGER.info("{} Acknowledging negatively", getPrefixMonitorLog(MonitorLogUtils.LOG_ACK, dto.getBody()));
 		try {
-			mqiClient.ack(new AckMessageDto(dto.getIdentifier(), Ack.ERROR, errorMessage, stop),
+			mqiClient.ack(new AckMessageDto(dto.getId(), Ack.ERROR, errorMessage, stop),
 					ProductCategory.LEVEL_JOBS);
 		} catch (AbstractCodedException ace) {
 			LOGGER.error("{} [step 5] {} [code {}] {}", getPrefixMonitorLog(MonitorLogUtils.LOG_DFT, dto.getBody()),
@@ -477,7 +477,7 @@ public class JobProcessor implements MqiListener<LevelJobDto> {
 	protected void ackPositively(final boolean stop, final GenericMessageDto<LevelJobDto> dto) {
 		LOGGER.info("{} Acknowledging positively", getPrefixMonitorLog(MonitorLogUtils.LOG_ACK, dto.getBody()));
 		try {
-			mqiClient.ack(new AckMessageDto(dto.getIdentifier(), Ack.OK, null, stop), ProductCategory.LEVEL_JOBS);
+			mqiClient.ack(new AckMessageDto(dto.getId(), Ack.OK, null, stop), ProductCategory.LEVEL_JOBS);
 		} catch (AbstractCodedException ace) {
 			LOGGER.error("{} [step 5] {} [code {}] {}", getPrefixMonitorLog(MonitorLogUtils.LOG_DFT, dto.getBody()),
 					getPrefixMonitorLog(MonitorLogUtils.LOG_ERROR, dto.getBody()), ace.getCode().getCode(),

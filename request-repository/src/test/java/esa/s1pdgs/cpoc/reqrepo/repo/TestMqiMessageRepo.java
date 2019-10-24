@@ -44,8 +44,8 @@ public class TestMqiMessageRepo {
     public final void testFindByIdentifier_OnExistingId_ShallReturnObject() throws Exception
     {
     	ops.insert(newMqiMessage(1));    	    	
-    	final MqiMessage actual = uut.findByIdentifier(1);
-    	assertEquals(1L, actual.getIdentifier());
+    	final MqiMessage actual = uut.findById(1);
+    	assertEquals(1L, actual.getId());
     	uut.deleteAll();
     }
     
@@ -68,10 +68,10 @@ public class TestMqiMessageRepo {
     	assertEquals(4, actual.size()); 
 
     	// assert correct order of returned objects
-    	assertEquals(4, actual.get(0).getIdentifier()); 
-    	assertEquals(2, actual.get(1).getIdentifier()); 
-    	assertEquals(5, actual.get(2).getIdentifier()); 
-    	assertEquals(3, actual.get(3).getIdentifier()); 
+    	assertEquals(4, actual.get(0).getId()); 
+    	assertEquals(2, actual.get(1).getId()); 
+    	assertEquals(5, actual.get(2).getId()); 
+    	assertEquals(3, actual.get(3).getId()); 
     	
     	uut.deleteAll();
     }
@@ -95,10 +95,10 @@ public class TestMqiMessageRepo {
     	assertEquals(4, actual.size()); 
     	
     	// assert correct order of returned objects
-    	assertEquals(4, actual.get(0).getIdentifier()); 
-    	assertEquals(2, actual.get(1).getIdentifier()); 
-    	assertEquals(5, actual.get(2).getIdentifier()); 
-    	assertEquals(3, actual.get(3).getIdentifier()); 
+    	assertEquals(4, actual.get(0).getId()); 
+    	assertEquals(2, actual.get(1).getId()); 
+    	assertEquals(5, actual.get(2).getId()); 
+    	assertEquals(3, actual.get(3).getId()); 
     	
     	uut.deleteAll();
     }
@@ -160,8 +160,8 @@ public class TestMqiMessageRepo {
     	);
     	assertEquals(2, actual.size());   
     	
-    	assertEquals(2, actual.get(0).getIdentifier()); 
-    	assertEquals(3, actual.get(1).getIdentifier()); 
+    	assertEquals(2, actual.get(0).getId()); 
+    	assertEquals(3, actual.get(1).getId()); 
     	
     	uut.deleteAll();
     }
@@ -208,8 +208,8 @@ public class TestMqiMessageRepo {
     	assertEquals(2, actual.size()); 
     	
     	// assert correct order of returned objects
-    	assertEquals(4, actual.get(0).getIdentifier()); 
-    	assertEquals(2, actual.get(1).getIdentifier());     	
+    	assertEquals(4, actual.get(0).getId()); 
+    	assertEquals(2, actual.get(1).getId());     	
     	uut.deleteAll();
     }
     
@@ -236,8 +236,8 @@ public class TestMqiMessageRepo {
     	assertEquals(2, actual.size()); 
     	System.err.println(actual);
     	// assert correct order of returned objects
-    	assertEquals(2, actual.get(0).getIdentifier()); 
-    	assertEquals(3, actual.get(1).getIdentifier()); 
+    	assertEquals(2, actual.get(0).getId()); 
+    	assertEquals(3, actual.get(1).getId()); 
     	
     	uut.deleteAll();
     }
@@ -278,7 +278,6 @@ public class TestMqiMessageRepo {
     {
     	final MqiMessage proc = new MqiMessage();
     	proc.setId(id);
-    	proc.setIdentifier(id);
     	proc.setCreationDate(new Date());
     	proc.setState(MessageState.READ);
     	proc.setTopic("t-pdgs-l0-segments");

@@ -21,11 +21,6 @@ public class AppDataJob<E extends AbstractDto> {
 
 	// dirty workaround to have the mongodb id mapped
 	private long id;
-	
-    /**
-     * Job identifier
-     */
-    private long identifier;
 
     /**
      * Product category
@@ -82,31 +77,14 @@ public class AppDataJob<E extends AbstractDto> {
         this.messages = new ArrayList<>();
         this.generations = new ArrayList<>();
     }
-        
-    @JsonIgnore
+
 	public long getId() {
 		return id;
 	}
 
-    @JsonIgnore
 	public void setId(long id) {
 		this.id = id;
 	}
-
-    /**
-     * @return the identifier
-     */
-    public long getIdentifier() {
-        return identifier;
-    }
-
-    /**
-     * @param identifier
-     *            the identifier to set
-     */
-    public void setIdentifier(final long identifier) {
-        this.identifier = identifier;
-    }
 
     /**
      * @return the category
@@ -249,8 +227,8 @@ public class AppDataJob<E extends AbstractDto> {
     @Override
     public String toString() {
         return String.format(
-                "{identifier: %s, category: %s, level: %s, pod: %s, state: %s, creationDate: %s, lastUpdateDate: %s, messages: %s, product: %s, generations: %s}",
-                identifier, category, level, pod, state, creationDate,
+                "{id: %s, category: %s, level: %s, pod: %s, state: %s, creationDate: %s, lastUpdateDate: %s, messages: %s, product: %s, generations: %s}",
+                id, category, level, pod, state, creationDate,
                 lastUpdateDate, messages, product, generations);
     }
 
@@ -259,7 +237,7 @@ public class AppDataJob<E extends AbstractDto> {
      */
     @Override
     public int hashCode() {
-        return Objects.hash(id, identifier, category, level, pod, state,
+        return Objects.hash(id, category, level, pod, state,
                 creationDate, lastUpdateDate, messages, product, generations);
     }
 
@@ -275,8 +253,7 @@ public class AppDataJob<E extends AbstractDto> {
             ret = false;
         } else {
             AppDataJob other = (AppDataJob) obj;
-            ret = identifier == other.identifier
-            		&& id == other.id
+            ret =  id == other.id
                     && Objects.equals(category, other.category)
                     && Objects.equals(level, other.level)
                     && Objects.equals(pod, other.pod)

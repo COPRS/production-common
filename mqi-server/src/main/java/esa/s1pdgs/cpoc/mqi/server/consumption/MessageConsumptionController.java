@@ -110,7 +110,9 @@ public class MessageConsumptionController {
                 final Map<String, GenericConsumer<?>> catConsumers = new HashMap<>();
                 for (final Map.Entry<String, Integer> entry : prop.getTopicsWithPriority().entrySet()) {
                 	final String topic = entry.getKey(); 
-                	final int prio = entry.getValue();
+                	final int prio = entry.getValue();                	
+                	LOGGER.debug("Creating new consumer with clientId {} on category {} (topic: {}) with priority {}", 
+                			consumerFactory.clientId(), cat, topic, prio);
                 	catConsumers.put(topic, consumerFactory.newConsumerFor(cat, prio, topic));
                 }
                 consumers.put(cat, catConsumers);
@@ -206,7 +208,7 @@ public class MessageConsumptionController {
         if (message.getState() == MessageState.SEND) {
             if (isSameSendingPod(message.getSendingPod())) {
 
-                ret = service.send(category, message.getIdentifier(),
+                ret = service.send(category, message.getId(),
                         new AppCatSendMessageDto(appProperties.getHostname(),
                                 false));
             } else {
@@ -214,7 +216,7 @@ public class MessageConsumptionController {
                 try {
                     isProcessing = otherAppService.isProcessing(
                             message.getSendingPod(), category,
-                            message.getIdentifier());
+                            message.getId());
                 } catch (AbstractCodedException ace) {
                     isProcessing = false;
                     LOGGER.warn(
@@ -222,7 +224,7 @@ public class MessageConsumptionController {
                             ace.getLogMessage());
                 }
                 if (!isProcessing) {
-                    ret = service.send(category, message.getIdentifier(),
+                    ret = service.send(category, message.getId(),
                             new AppCatSendMessageDto(appProperties.getHostname(),
                                     true));
                 } else {
@@ -231,7 +233,7 @@ public class MessageConsumptionController {
             }
         } else {
             // We return this message after persisting it as sending
-            ret = service.send(category, message.getIdentifier(),
+            ret = service.send(category, message.getId(),
                     new AppCatSendMessageDto(appProperties.getHostname(), false));
         }
 
@@ -257,7 +259,7 @@ public class MessageConsumptionController {
         if (object == null) {
             return null;
         }
-        return new GenericMessageDto<>(object.getIdentifier(), object.getTopic(), object.getDto());
+        return new GenericMessageDto<>(object.getId(), object.getTopic(), object.getDto());
     }
 
     /**

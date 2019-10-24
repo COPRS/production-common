@@ -135,7 +135,7 @@ public abstract class AbstractGenericConsumer<T extends AbstractDto> {
         appStatus.setError("NEXT_MESSAGE");
         try {
             mqiClient.ack(
-            		new AckMessageDto(dto.getIdentifier(), Ack.ERROR,errorMessage, stop),
+            		new AckMessageDto(dto.getId(), Ack.ERROR,errorMessage, stop),
             		category
             );            
         } catch (AbstractCodedException ace) {
@@ -153,7 +153,7 @@ public abstract class AbstractGenericConsumer<T extends AbstractDto> {
                 getTaskForFunctionalLog(), productName);
         try {
             mqiClient.ack(
-                    new AckMessageDto(dto.getIdentifier(), Ack.OK, null, stop),
+                    new AckMessageDto(dto.getId(), Ack.OK, null, stop),
                     category
             );
         } catch (AbstractCodedException ace) {

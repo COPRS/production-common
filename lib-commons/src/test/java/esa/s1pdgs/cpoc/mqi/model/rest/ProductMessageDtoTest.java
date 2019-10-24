@@ -25,15 +25,15 @@ public class ProductMessageDtoTest {
         ProductDto body = new ProductDto("product-name", "key-obs", ProductFamily.AUXILIARY_FILE, null);
         GenericMessageDto<ProductDto> dto =
                 new GenericMessageDto<ProductDto>(123, "input-key", body);
-        assertEquals(123, dto.getIdentifier());
+        assertEquals(123, dto.getId());
         assertEquals(body, dto.getBody());
         assertEquals("input-key", dto.getInputKey());
 
         dto = new GenericMessageDto<ProductDto>();
-        dto.setIdentifier(321);
+        dto.setId(321);
         dto.setBody(body);
         dto.setInputKey("othey-input");
-        assertEquals(321, dto.getIdentifier());
+        assertEquals(321, dto.getId());
         assertEquals(body, dto.getBody());
         assertEquals("othey-input", dto.getInputKey());
     }

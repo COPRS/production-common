@@ -1,5 +1,6 @@
 package esa.s1pdgs.cpoc.jobgenerator.config;
 
+
 import java.util.HashMap;
 import java.util.Map;
 
@@ -16,6 +17,8 @@ public class L0SegmentAppProperties {
      * The regular expression in Java format
      */
     private String nameRegexpPattern;
+    
+    private String blacklistPattern;
     
     /**
      * The regular expression in Java format
@@ -42,6 +45,20 @@ public class L0SegmentAppProperties {
     }
 
     /**
+     * @return
+     */
+    public String getBlacklistPattern() {
+		return blacklistPattern;
+	}
+
+	/**
+	 * @param blacklistPattern
+	 */
+	public void setBlacklistPattern(String blacklistPattern) {
+		this.blacklistPattern = blacklistPattern;
+	}
+
+	/**
      * @return the nameRegexpGroups
      */
     public Map<String, Integer> getNameRegexpGroups() {

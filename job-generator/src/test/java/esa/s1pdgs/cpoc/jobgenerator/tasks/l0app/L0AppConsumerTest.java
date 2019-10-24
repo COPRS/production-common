@@ -114,7 +114,7 @@ public class L0AppConsumerTest {
 
         // Mock the appcatalog service
         doReturn(new ArrayList<>()).when(appDataService)
-                .findByMessagesIdentifier(Mockito.anyLong());
+                .findByMessagesId(Mockito.anyLong());
         Mockito.doAnswer(i -> {
             return i.getArgument(0);
         }).when(appDataService).newJob(Mockito.any());
@@ -282,7 +282,7 @@ public class L0AppConsumerTest {
         AppDataJob expected = TestL0Utils.buildAppDataEdrsSession(false);
 
         doReturn(Arrays.asList(expected)).when(appDataService)
-                .findByMessagesIdentifier(Mockito.anyLong());
+                .findByMessagesId(Mockito.anyLong());
 
         L0AppConsumer edrsSessionsConsumer = new L0AppConsumer(jobsDispatcher,
                 processSettings, mqiService, mqiStatusService, appDataService,
@@ -311,7 +311,7 @@ public class L0AppConsumerTest {
         returned.setPod("other-pod");
 
         doReturn(Arrays.asList(returned)).when(appDataService)
-                .findByMessagesIdentifier(Mockito.anyLong());
+                .findByMessagesId(Mockito.anyLong());
 
         L0AppConsumer edrsSessionsConsumer = new L0AppConsumer(jobsDispatcher,
                 processSettings, mqiService, mqiStatusService, appDataService,
@@ -339,7 +339,7 @@ public class L0AppConsumerTest {
                 TestL0Utils.buildAppDataEdrsSessionWithRaw2(true);
 
         doReturn(null).when(appDataService)
-                .findByMessagesIdentifier(Mockito.anyLong());
+                .findByMessagesId(Mockito.anyLong());
         doReturn(Arrays.asList(returned)).when(appDataService)
                 .findByProductSessionId(Mockito.anyString());
 
@@ -375,7 +375,7 @@ public class L0AppConsumerTest {
         returned.setPod("other-pod");
 
         doReturn(null).when(appDataService)
-                .findByMessagesIdentifier(Mockito.anyLong());
+                .findByMessagesId(Mockito.anyLong());
         doReturn(Arrays.asList(returned)).when(appDataService)
                 .findByProductSessionId(Mockito.anyString());
 

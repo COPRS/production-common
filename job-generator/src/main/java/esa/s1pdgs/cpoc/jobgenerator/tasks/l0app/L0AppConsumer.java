@@ -96,7 +96,7 @@ public class L0AppConsumer extends AbstractGenericConsumer<EdrsSessionDto> imple
             // Note: the report log of consume and global log is raised during
             // building job to get the session identifier which is the real
             // product name
-            appStatus.setProcessing(mqiMessage.getIdentifier());            
+            appStatus.setProcessing(mqiMessage.getId());            
     	 	
             final Reporting reporting = reportingFactory.newReporting(0);
             FailedProcessingDto failedProc = new FailedProcessingDto();
@@ -132,7 +132,7 @@ public class L0AppConsumer extends AbstractGenericConsumer<EdrsSessionDto> imple
                     if (appDataJob.getState() == AppDataJobState.WAITING) {
                         appDataJob.setState(AppDataJobState.DISPATCHING);
                         appDataJob = appDataService.patchJob(
-                                appDataJob.getIdentifier(), appDataJob, false,
+                                appDataJob.getId(), appDataJob, false,
                                 false, false);
                         LOGGER.debug ("== appDataJob(2) {}",appDataJob.toString());
                     }
@@ -170,7 +170,7 @@ public class L0AppConsumer extends AbstractGenericConsumer<EdrsSessionDto> imple
     	
     	// Check if a job is already created for message identifier
 		List<AppDataJob<EdrsSessionDto>> existingJobs = appDataService
-                .findByMessagesIdentifier(mqiMessage.getIdentifier());
+                .findByMessagesId(mqiMessage.getId());
 
         if (CollectionUtils.isEmpty(existingJobs)) {
         	final EdrsSessionDto sessionDto = mqiMessage.getBody();
@@ -268,7 +268,7 @@ public class L0AppConsumer extends AbstractGenericConsumer<EdrsSessionDto> imple
                 }
                 // Update
                 if (update) {                	
-                    jobDto = appDataService.patchJob(jobDto.getIdentifier(),
+                    jobDto = appDataService.patchJob(jobDto.getId(),
                             jobDto, updateMessage, updateProduct, false);
                     LOGGER.debug ("== updated(1) jobDto {}", jobDto.toString());
                 }
@@ -291,7 +291,7 @@ public class L0AppConsumer extends AbstractGenericConsumer<EdrsSessionDto> imple
             }
             // Update
             if (update) {
-                jobDto = appDataService.patchJob(jobDto.getIdentifier(), jobDto,
+                jobDto = appDataService.patchJob(jobDto.getId(), jobDto,
                         updateMessage, updateProduct, false);
                 LOGGER.debug ("== updated(2) jobDto {}", jobDto.toString());
             }

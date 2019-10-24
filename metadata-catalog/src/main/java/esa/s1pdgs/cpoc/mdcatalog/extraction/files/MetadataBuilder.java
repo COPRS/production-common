@@ -6,7 +6,6 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.json.JSONObject;
 
-import esa.s1pdgs.cpoc.common.ProductFamily;
 import esa.s1pdgs.cpoc.common.errors.processing.MetadataExtractionException;
 import esa.s1pdgs.cpoc.common.errors.processing.MetadataMalformedException;
 import esa.s1pdgs.cpoc.mdcatalog.extraction.MetadataExtractorConfig;
@@ -14,6 +13,7 @@ import esa.s1pdgs.cpoc.mdcatalog.extraction.model.ConfigFileDescriptor;
 import esa.s1pdgs.cpoc.mdcatalog.extraction.model.EdrsSessionFileDescriptor;
 import esa.s1pdgs.cpoc.mdcatalog.extraction.model.OutputFileDescriptor;
 import esa.s1pdgs.cpoc.mdcatalog.extraction.xml.XmlConverter;
+import esa.s1pdgs.cpoc.mqi.model.queue.ProductDto;
 
 /**
  * Class to build metadata for configuration and ERDS session files
@@ -148,10 +148,12 @@ public class MetadataBuilder {
      * @throws MetadataExtractionException
 	 * @throws MetadataMalformedException 
      */
-    public JSONObject buildOutputFileMetadata(OutputFileDescriptor descriptor, File file, ProductFamily productFamily)
+    public JSONObject buildOutputFileMetadata(OutputFileDescriptor descriptor, File file, ProductDto dto)
             throws MetadataExtractionException, MetadataMalformedException {
         JSONObject metadataToIndex = new JSONObject();
-        metadataToIndex = extractor.processProduct(descriptor, productFamily, file);        
+        metadataToIndex = extractor.processProduct(descriptor, dto.getFamily(), file);
+        // Adding fields that are directly used from the DTO
+        metadataToIndex.put("oqcFlag", dto.getOqcFlag());
         LOGGER.debug("JSON OBJECT:{}",metadataToIndex.toString());
         return metadataToIndex;
     }

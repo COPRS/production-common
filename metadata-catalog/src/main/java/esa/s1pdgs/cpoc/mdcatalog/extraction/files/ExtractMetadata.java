@@ -48,7 +48,6 @@ import esa.s1pdgs.cpoc.mdcatalog.extraction.xml.XmlConverter;
 public class ExtractMetadata {
 
 	private static final String XSLT_MPL_EOF = "XSLT_MPL_EOF.xslt";
-	private static final String XSLT_AUX_EOF = "XSLT_AUX_EOF.xslt";
 	private static final String XSLT_AUX_XML = "XSLT_AUX_XML.xslt";
 	private static final String XSLT_AUX_MANIFEST = "XSLT_AUX_MANIFEST.xslt";
 	private static final String XSLT_L0_MANIFEST = "XSLT_L0_MANIFEST.xslt";
@@ -149,7 +148,7 @@ public class ExtractMetadata {
 			throws MetadataExtractionException, MetadataMalformedException {
 
 		JSONObject metadataJSONObject = transformXMLWithXSLTToJSON(inputMetadataFile,
-				new File(this.xsltDirectory + XSLT_AUX_EOF));
+				new File(this.xsltDirectory + XSLT_MPL_EOF));
 		
 		metadataJSONObject = putConfigFileMetadataToJSON(metadataJSONObject, descriptor);
 		LOGGER.debug("composed Json: {} ", metadataJSONObject);

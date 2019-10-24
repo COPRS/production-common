@@ -12,6 +12,11 @@ import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
@@ -27,6 +32,7 @@ import esa.s1pdgs.cpoc.common.errors.mqi.MqiPublicationError;
 import esa.s1pdgs.cpoc.common.errors.obs.ObsException;
 import esa.s1pdgs.cpoc.mqi.model.queue.LevelJobDto;
 import esa.s1pdgs.cpoc.mqi.model.queue.LevelJobOutputDto;
+import esa.s1pdgs.cpoc.mqi.model.queue.OQCFlag;
 import esa.s1pdgs.cpoc.mqi.model.rest.GenericMessageDto;
 import esa.s1pdgs.cpoc.obs_sdk.ObsClient;
 import esa.s1pdgs.cpoc.obs_sdk.ObsUploadObject;
@@ -41,6 +47,10 @@ import esa.s1pdgs.cpoc.wrapper.config.ApplicationProperties;
 import esa.s1pdgs.cpoc.wrapper.job.model.mqi.FileQueueMessage;
 import esa.s1pdgs.cpoc.wrapper.job.model.mqi.ObsQueueMessage;
 import esa.s1pdgs.cpoc.wrapper.job.mqi.OutputProcuderFactory;
+import esa.s1pdgs.cpoc.wrapper.job.oqc.OQCDefaultTaskFactory;
+import esa.s1pdgs.cpoc.wrapper.job.oqc.OQCExecutor;
+import esa.s1pdgs.cpoc.wrapper.job.oqc.OQCTask;
+import esa.s1pdgs.cpoc.wrapper.job.oqc.OQCTaskFactory;
 
 /**
  * Process outputs according their family: - publication in message queue system
@@ -182,6 +192,8 @@ public class OutputProcessor {
 			throws AbstractCodedException {
 
 		long productSize = 0;
+		
+		OQCExecutor executor = new OQCExecutor(properties);
 
 		LOGGER.info("{} 2 - Starting organizing outputs", prefixMonitorLogs);
 
@@ -202,6 +214,9 @@ public class OutputProcessor {
 
 				final File file = new File(filePath);
 				final Reporting reporting = reportingFactory.newReporting(0);
+				
+				OQCFlag oqcFlag = executor.executeOQC(Paths.get(getFilePath(line, productName)), matchOutput, new OQCDefaultTaskFactory());
+				LOGGER.debug("Result of OQC validation was: {}",oqcFlag);
 				
 				switch (family) {
 				case L0_REPORT:
@@ -229,7 +244,7 @@ public class OutputProcessor {
 							if (!ghostCandidate) {
 								reporting.intermediate(new ReportingMessage("Product {} is not a ghost candidate in NRT scenario", productName));
 								uploadBatch.add(new ObsUploadObject(family, productName, file));
-								outputToPublish.add(new ObsQueueMessage(family, productName, productName, "NRT"));
+								outputToPublish.add(new ObsQueueMessage(family, productName, productName, "NRT",oqcFlag));
 								productSize += size(file);
 							} else {
 								reporting.intermediate(new ReportingMessage("Product {} is a ghost candidate in NRT scenario", productName));
@@ -242,12 +257,8 @@ public class OutputProcessor {
 								reporting.intermediate(new ReportingMessage("Product {} is not a ghost candidate in FAST scenario", productName));
 								uploadBatch.add(new ObsUploadObject(ProductFamily.L0_SEGMENT, productName, file));
 								outputToPublish.add(
-									new ObsQueueMessage(ProductFamily.L0_SEGMENT, productName, productName, "FAST24"));
-								
-								
-								
-								
-								
+									new ObsQueueMessage(ProductFamily.L0_SEGMENT, productName, productName, "FAST24",oqcFlag));
+
 							} else {
 								reporting.intermediate(new ReportingMessage("Product {} is a ghost candidate in FAST scenario", productName));
 								uploadBatch.add(new ObsUploadObject(ProductFamily.GHOST, productName, file));
@@ -261,7 +272,7 @@ public class OutputProcessor {
 								matchOutput.getFamily());
 						uploadBatch.add(new ObsUploadObject(family, productName, file));
 						outputToPublish.add(new ObsQueueMessage(family, productName, productName,
-								inputMessage.getBody().getProductProcessMode()));
+								inputMessage.getBody().getProductProcessMode(),oqcFlag));
 						productSize += size(file);
 					}
 					reporting.end(new ReportingMessage("End of ghost candidate detection"));
@@ -279,7 +290,7 @@ public class OutputProcessor {
 							if (!ghostCandidate) {
 								reporting.intermediate(new ReportingMessage("Product {} is not a ghost candidate in NRT scenario", productName));
 								uploadBatch.add(new ObsUploadObject(family, productName, file));
-								outputToPublish.add(new ObsQueueMessage(family, productName, productName, "NRT"));
+								outputToPublish.add(new ObsQueueMessage(family, productName, productName, "NRT",oqcFlag));
 								productSize += size(file);
 							} else {
 								reporting.intermediate(new ReportingMessage("Product {} is a ghost candidate in NRT scenario", productName));
@@ -291,7 +302,7 @@ public class OutputProcessor {
 							if (!ghostCandidate) {
 								reporting.intermediate(new ReportingMessage("Product {} is not a ghost candidate in FAST scenario", productName));
 								uploadBatch.add(new ObsUploadObject(family, productName, file));
-								outputToPublish.add(new ObsQueueMessage(family, productName, productName, "FAST24"));
+								outputToPublish.add(new ObsQueueMessage(family, productName, productName, "FAST24",oqcFlag));
 								productSize += size(file);
 							} else {
 								reporting.intermediate(new ReportingMessage("Product {} is a ghost candidate in FAST scenario", productName));
@@ -304,7 +315,7 @@ public class OutputProcessor {
 								matchOutput.getFamily());
 						uploadBatch.add(new ObsUploadObject(family, productName, file));
 						outputToPublish.add(new ObsQueueMessage(family, productName, productName,
-								inputMessage.getBody().getProductProcessMode()));
+								inputMessage.getBody().getProductProcessMode(),oqcFlag));
 						productSize += size(file);
 					}
 					break;
@@ -318,7 +329,7 @@ public class OutputProcessor {
 							matchOutput.getFamily());
 					uploadBatch.add(new ObsUploadObject(family, productName, file));
 					outputToPublish.add(new ObsQueueMessage(family, productName, productName,
-							inputMessage.getBody().getProductProcessMode()));
+							inputMessage.getBody().getProductProcessMode(), oqcFlag));
 					productSize += size(file);
 					break;
 				case BLANK:
@@ -332,6 +343,8 @@ public class OutputProcessor {
 		}
 		return productSize;
 	}
+	
+	
 
 	/**
 	 * This method takes the product name and returns if this product is a possible

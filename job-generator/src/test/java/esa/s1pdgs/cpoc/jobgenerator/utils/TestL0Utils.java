@@ -109,7 +109,7 @@ public class TestL0Utils {
             boolean xmlOnlyForRaws, String missionId, boolean raw1,
             boolean raw2) {
         AppDataJob ret = new AppDataJob();
-        ret.setIdentifier(123);
+        ret.setId(123);
         ret.setState(AppDataJobState.GENERATING);
         ret.setPod("hostname");
         ret.setLevel(ApplicationLevel.L0);

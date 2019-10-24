@@ -15,7 +15,6 @@ COPY PmdJavaRuleset.xml /app
 COPY app-catalog-client/ /app/app-catalog-client
 COPY applicative-catalog/ /app/applicative-catalog
 COPY archives/ /app/archives
-COPY compression/ /app/compression
 COPY disseminator/ /app/disseminator
 COPY inbox-polling/ /app/inbox-polling
 COPY inbox-ingestion/ /app/inbox-ingestion
@@ -31,6 +30,8 @@ COPY wrapper/ /app/wrapper
 COPY request-repository/ /app/request-repository
 COPY queue-watcher/ /app/queue-watcher
 COPY validation/ /app/validation
+COPY compression/ /app/compression
+COPY prip /app/prip
 
 RUN mvn -DskipTests=true -Dpmd.skip=true -Dfindbugs.skip=true -B -f /app/pom.xml -s /usr/share/maven/ref/settings-docker.xml install 
 
@@ -50,7 +51,6 @@ RUN echo ${COMMIT_ID} >> VERSION
 
 COPY --from=buildenv /app/applicative-catalog/target /app/applicative-catalog/target
 COPY --from=buildenv /app/archives/target /app/archives/target
-COPY --from=buildenv /app/compression/target /app/compression/target
 COPY --from=buildenv /app/disseminator/target /app/disseminator/target
 COPY --from=buildenv /app/inbox-polling/target /app/inbox-polling/target
 COPY --from=buildenv /app/inbox-ingestion/target /app/inbox-ingestion/target
@@ -64,3 +64,5 @@ COPY --from=buildenv /app/wrapper/config /app/wrapper/config
 COPY --from=buildenv /app/request-repository/target /app/request-repository/target
 COPY --from=buildenv /app/queue-watcher/target /app/queue-watcher/target
 COPY --from=buildenv /app/validation/target /app/validation/target
+COPY --from=buildenv /app/compression/target /app/compression/target
+COPY --from=buildenv /app/prip/target /app/prip/target

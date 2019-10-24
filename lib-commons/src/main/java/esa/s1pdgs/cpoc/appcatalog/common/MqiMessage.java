@@ -17,11 +17,6 @@ public class MqiMessage extends AbstractRequest {
 	// dirty workaround to have the mongodb id mapped
 	private long id;
 	
-	/**
-	 * Identifier of the message
-	 */
-	protected long identifier;
-	
     /**
      * Pod who read the message
      */
@@ -69,20 +64,6 @@ public class MqiMessage extends AbstractRequest {
 		this.id = id;
 	}
 
-	/**
-	 * @return the identifier
-	 */
-	public long getIdentifier() {
-	    return identifier;
-	}
-
-	/**
-	 * @param identifier the identifier to set
-	 */
-	public void setIdentifier(long identifier) {
-		this.identifier = identifier;
-	}
-
     /**
      * @return the readingPod
      */
@@ -113,7 +94,7 @@ public class MqiMessage extends AbstractRequest {
      */
     @Override
     public String toString() {
-        return "{\"category\":\"" + category + "\", \"identifier\":\"" + identifier
+        return "{\"category\":\"" + category + "\", \"id\":\"" + id
                 + "\", \"topic\":\"" + topic + "\", \"partition\":\"" + partition + "\", \"offset\":\""
                 + offset + "\", \"group\":\"" + group + "\", \"state\":\"" + state
                 + "\", \"readingPod\":\"" + readingPod + "\", \"lastReadDate\":\""
@@ -135,7 +116,6 @@ public class MqiMessage extends AbstractRequest {
                 + ((creationDate == null) ? 0 : creationDate.hashCode());
         result = prime * result + ((dto == null) ? 0 : dto.hashCode());
         result = prime * result + ((group == null) ? 0 : group.hashCode());
-        result = prime * result + (int) (identifier ^ (identifier >>> 32));
         result = prime * result + (int) (id ^ (id >>> 32));
         result = prime * result
                 + ((lastAckDate == null) ? 0 : lastAckDate.hashCode());
@@ -184,8 +164,6 @@ public class MqiMessage extends AbstractRequest {
             if (other.group != null)
                 return false;
         } else if (!group.equals(other.group))
-            return false;
-        if (identifier != other.identifier)
             return false;
         if (id != other.id)
             return false;

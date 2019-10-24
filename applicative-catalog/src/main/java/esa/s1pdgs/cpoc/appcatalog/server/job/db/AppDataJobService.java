@@ -100,7 +100,6 @@ public class AppDataJobService {
         long sequence = sequenceDao.getNextSequenceId(JOB_SEQ_KEY);
         // Save it
         newJob.setId(sequence);
-        newJob.setIdentifier(sequence);
         newJob.setState(AppDataJobState.WAITING);
         newJob.setCreationDate(new Date());
         newJob.setLastUpdateDate(null);
@@ -241,14 +240,14 @@ public class AppDataJobService {
                     foundGenDb.setLastUpdateDate(new Date());
                     foundGenDb.setNbErrors(currentNbErrors + 1);
                     foundGenDb.setState(patchGen.getState());
-                    appDataJobDao.udpateJobGeneration(jobDb.getIdentifier(), foundGenDb);
+                    appDataJobDao.udpateJobGeneration(jobDb.getId(), foundGenDb);
                     return jobDb;
                 }
             } else {
                 foundGenDb.setState(patchGen.getState());
                 foundGenDb.setLastUpdateDate(new Date());
                 foundGenDb.setNbErrors(0);
-                appDataJobDao.udpateJobGeneration(jobDb.getIdentifier(), foundGenDb);
+                appDataJobDao.udpateJobGeneration(jobDb.getId(), foundGenDb);
                 return jobDb;
             }
         }
@@ -260,11 +259,11 @@ public class AppDataJobService {
         genDb.setState(AppDataJobGenerationState.SENT);
         genDb.setLastUpdateDate(new Date());
         genDb.setNbErrors(0);
-        appDataJobDao.udpateJobGeneration(jobDb.getIdentifier(), genDb);
+        appDataJobDao.udpateJobGeneration(jobDb.getId(), genDb);
 
         // Search if all generation are terminated
-        AppDataJob<?> refreshJobDb = appDataJobDao.findById(jobDb.getIdentifier())
-                .orElseThrow(() -> new AppCatalogJobNotFoundException(jobDb.getIdentifier()));
+        AppDataJob<?> refreshJobDb = appDataJobDao.findById(jobDb.getId())
+                .orElseThrow(() -> new AppCatalogJobNotFoundException(jobDb.getId()));
         boolean terminated = true;
         for (AppDataJobGeneration gen : refreshJobDb.getGenerations()) {
             if (gen.getState() != AppDataJobGenerationState.SENT) {

@@ -301,7 +301,7 @@ public class AbstractJobsGeneratorTest {
                 return null;
             }).when(this.metadataClient).search(Mockito.any(), Mockito.any(),
                     Mockito.any(), Mockito.anyString(), Mockito.anyInt(),
-                    Mockito.anyString());
+                    Mockito.anyString(), Mockito.anyString());
         } catch (MetadataQueryException e) {
             fail(e.getMessage());
         }
@@ -451,7 +451,7 @@ public class AbstractJobsGeneratorTest {
         }).when(jobGeneratorSettings).getWaitmetadatainput();
         
         AppDataJob<EdrsSessionDto> job1 = new AppDataJob();
-        job1.setIdentifier(12L);
+        job1.setId(12L);
         job1.getGenerations().add(new AppDataJobGeneration());
         job1.getGenerations().get(0).setTaskTable("IW_RAW__0_GRDH_1.xml");
         job1.getGenerations().get(0).setState(AppDataJobGenerationState.INITIAL);
@@ -481,14 +481,14 @@ public class AbstractJobsGeneratorTest {
         }).when(jobGeneratorSettings).getWaitmetadatainput();
         
         AppDataJob<EdrsSessionDto> job1 = new AppDataJob();
-        job1.setIdentifier(12L);
+        job1.setId(12L);
         job1.getGenerations().add(new AppDataJobGeneration());
         job1.getGenerations().get(0).setTaskTable("IW_RAW__0_GRDH_1.xml");
         job1.getGenerations().get(0).setState(AppDataJobGenerationState.INITIAL);
         job1.getGenerations().get(0).setLastUpdateDate(new Date());
         
         AppDataJob<EdrsSessionDto> job2 = new AppDataJob();
-        job2.setIdentifier(12L);
+        job2.setId(12L);
         job2.getGenerations().add(new AppDataJobGeneration());
         job2.getGenerations().get(0).setTaskTable("IW_RAW__0_GRDH_1.xml");
         job2.getGenerations().get(0).setState(AppDataJobGenerationState.PRIMARY_CHECK);

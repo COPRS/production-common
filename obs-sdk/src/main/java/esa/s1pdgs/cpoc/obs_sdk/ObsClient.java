@@ -2,6 +2,7 @@ package esa.s1pdgs.cpoc.obs_sdk;
 
 import java.io.File;
 import java.io.InputStream;
+import java.net.URL;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
@@ -90,4 +91,30 @@ public interface ObsClient {
      * @throws IllegalArgumentException
      */
     void validate(ObsObject object) throws ObsServiceException, ObsValidationException;
+    
+    /**
+     * Returns the size of the OBS object requested
+     * @param object
+     * The target OBS object
+     * @return
+     * The size of the object
+     * @throws ObsException
+     * Can be thrown if anything with the communication is not working as expected
+     * or an attempt is being made to query the size of a directory
+     */
+    long size(final ObsObject object) throws ObsException;
+    
+    /**
+     * Returns the eTag md5 checksum of the OBJ object requested
+     * @param object
+     * The target OBS object
+     * @return
+     * The MD5 sum of the object
+     * @throws ObsException
+     * Can be thrown if anything with the communication is not working as expected
+     * or an attempt is being made to query the size of a directory
+     */
+    String getChecksum(final ObsObject object) throws ObsException;
+    
+    URL createTemporaryDownloadUrl(ObsObject object, long expirationTimeInSeconds) throws ObsException, ObsServiceException;
 }

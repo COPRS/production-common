@@ -128,7 +128,7 @@ public class IngestionService implements MqiListener<IngestionDto> {
 			final Reporting.Factory reportingFactory) throws InternalErrorException {
 		for (final Product<AbstractDto> product : products) {
 			final GenericPublicationMessageDto<? extends AbstractDto> result = new GenericPublicationMessageDto<>(
-					message.getIdentifier(), product.getFamily(), product.getDto());
+					message.getId(), product.getFamily(), product.getDto());
 			result.setInputKey(message.getInputKey());
 			result.setOutputKey(product.getFamily().toString());
 			LOG.info("publishing : {}", result);

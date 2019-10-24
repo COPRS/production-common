@@ -46,7 +46,7 @@ public class OutputProducerFactory {
      */
     public void sendOutput(final CompressedProductQueueMessage msg, final GenericMessageDto<ProductDto> inputMessage) throws AbstractCodedException {
     	final GenericPublicationMessageDto<ProductDto> messageDto = new GenericPublicationMessageDto<ProductDto>(
-    			inputMessage.getIdentifier(), 
+    			inputMessage.getId(), 
     			msg.getFamily(), 
     			toProductDto(msg)
     	);

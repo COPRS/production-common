@@ -9,8 +9,8 @@ variables:
 wrapper-l0-build:
   stage: module
   script:
-    - cd wrapper
-    - cat config/dockerfiles/Dockerfile_L0 | dockerbuild --cache-from registry.tools.s1pdgs.eu/werum/processing/s1pro-core:final --network host --pull -t "$CI_REGISTRY/$CI_PROJECT_NAMESPACE/$MODULE_WRAPPER-l0:$CI_COMMIT_REF_SLUG" -
+    - cd wrapper/config/dockerfiles/L0/
+    - dockerbuild --cache-from registry.tools.s1pdgs.eu/werum/processing/s1pro-core:final -t "$CI_REGISTRY/$CI_PROJECT_NAMESPACE/$MODULE_WRAPPER-l0:$CI_COMMIT_REF_SLUG" .
     - docker push "$CI_REGISTRY/$CI_PROJECT_NAMESPACE/$MODULE_WRAPPER-l0:$CI_COMMIT_REF_SLUG"
   except:
     - master
@@ -18,21 +18,21 @@ wrapper-l0-build:
 wrapper-l0-segment-build:
   stage: module
   script:
-    - cd wrapper
-    - cat config/dockerfiles/Dockerfile_L0_segment | dockerbuild --cache-from registry.tools.s1pdgs.eu/werum/processing/s1pro-core:final -t "$CI_REGISTRY/$CI_PROJECT_NAMESPACE/$MODULE_WRAPPER-l0-segment:$CI_COMMIT_REF_SLUG" -
+    - cd wrapper/config/dockerfiles/L0_segment
+    - dockerbuild --cache-from registry.tools.s1pdgs.eu/werum/processing/s1pro-core:final -t "$CI_REGISTRY/$CI_PROJECT_NAMESPACE/$MODULE_WRAPPER-l0-segment:$CI_COMMIT_REF_SLUG" .
     - docker push "$CI_REGISTRY/$CI_PROJECT_NAMESPACE/$MODULE_WRAPPER-l0-segment:$CI_COMMIT_REF_SLUG"
 
 wrapper-l1-build:
   stage: module
   script:
-    - cd wrapper
-    - cat config/dockerfiles/Dockerfile_L1 | dockerbuild --cache-from registry.tools.s1pdgs.eu/werum/processing/s1pro-core:final -t "$CI_REGISTRY/$CI_PROJECT_NAMESPACE/$MODULE_WRAPPER-l1:$CI_COMMIT_REF_SLUG" -
+    - cd wrapper/config/dockerfiles/L1
+    - dockerbuild --cache-from registry.tools.s1pdgs.eu/werum/processing/s1pro-core:final -t "$CI_REGISTRY/$CI_PROJECT_NAMESPACE/$MODULE_WRAPPER-l1:$CI_COMMIT_REF_SLUG" .
     - docker push "$CI_REGISTRY/$CI_PROJECT_NAMESPACE/$MODULE_WRAPPER-l1:$CI_COMMIT_REF_SLUG"
     
 wrapper-l2-build:
   stage: module
   script:
-    - cd wrapper
-    - cat config/dockerfiles/Dockerfile_L2 | dockerbuild --cache-from registry.tools.s1pdgs.eu/werum/processing/s1pro-core:final -t "$CI_REGISTRY/$CI_PROJECT_NAMESPACE/$MODULE_WRAPPER-l2:$CI_COMMIT_REF_SLUG" -
+    - cd wrapper/config/dockerfiles/L2
+    - dockerbuild --cache-from registry.tools.s1pdgs.eu/werum/processing/s1pro-core:final -t "$CI_REGISTRY/$CI_PROJECT_NAMESPACE/$MODULE_WRAPPER-l2:$CI_COMMIT_REF_SLUG" .
     - docker push "$CI_REGISTRY/$CI_PROJECT_NAMESPACE/$MODULE_WRAPPER-l2:$CI_COMMIT_REF_SLUG"
     

@@ -68,10 +68,7 @@ public class SwiftObsClientIT {
 	
 	@Before
 	public void setUp() throws ObsException, SdkClientException {	
-		System.out.println("hu");
-
 		uut = (SwiftObsClient) new SwiftObsClient.Factory().newObsClient(configuration);
-		System.out.println("hi");
 		
 		// prepare environment
 		if (!uut.containerExists(auxiliaryFiles)) {
@@ -109,7 +106,6 @@ public class SwiftObsClientIT {
 		if (uut.exists(new ObsObject(auxiliaryFiles, testDirectoryName + ".md5sum"))) {
 			uut.deleteObject(auxiliaryFiles, testDirectoryName + ".md5sum");
 		}
-		System.out.println("ha");
 	}
 	
 	@Test

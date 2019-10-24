@@ -1,5 +1,6 @@
 package esa.s1pdgs.cpoc.jobgenerator.tasks.l0segmentapp;
 
+
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
@@ -51,6 +52,9 @@ public class L0SegmentAppConsumer
      */
     private final Map<String, Integer> patternGroups;
     
+    
+    private final Pattern blackList;
+    
     /**
      * 
      */
@@ -79,6 +83,7 @@ public class L0SegmentAppConsumer
 				errorRepoAppender, ProductCategory.LEVEL_SEGMENTS);
 		this.pattern = Pattern.compile(appProperties.getNameRegexpPattern(), Pattern.CASE_INSENSITIVE);
 		this.patternGroups = appProperties.getNameRegexpGroups();
+		this.blackList = (appProperties.getBlacklistPattern() == null) ? null : Pattern.compile(appProperties.getBlacklistPattern(), Pattern.CASE_INSENSITIVE);
 		this.pollingIntervalMs = pollingIntervalMs;
 		this.pollingInitialDelayMs = pollingInitialDelayMs;
 	}
@@ -106,14 +111,18 @@ public class L0SegmentAppConsumer
         final Reporting reporting = reportingFactory.newReporting(0);
         
         // process message
-        appStatus.setProcessing(mqiMessage.getIdentifier());
+        appStatus.setProcessing(mqiMessage.getId());
         int step = 1;
         boolean ackOk = false;
         String errorMessage = "";
         String productName = mqiMessage.getBody().getProductName();
         
-        FailedProcessingDto failedProc = new FailedProcessingDto();
+        if(skipProduct(productName)) {
+        	LOGGER.warn("Skipping job generation for product {}", productName);
+        	return;
+        }
         
+        FailedProcessingDto failedProc = new FailedProcessingDto();
         
         // Note: the report log of consume and global log is raised during
         // building job to get the datatake identifier which is the real
@@ -141,7 +150,7 @@ public class L0SegmentAppConsumer
                     || appDataJob
                             .getState() == AppDataJobState.DISPATCHING) {
                 appDataJob.setState(AppDataJobState.DISPATCHING);
-                appDataJob = appDataService.patchJob(appDataJob.getIdentifier(),
+                appDataJob = appDataService.patchJob(appDataJob.getId(),
                         appDataJob, false, false, false);
                 jobsDispatcher.dispatch(appDataJob);
             } else {
@@ -174,14 +183,22 @@ public class L0SegmentAppConsumer
         reporting.end(new ReportingMessage("End job generation using {}", mqiMessage.getBody().getProductName()));
     }
 
-    protected AppDataJob<ProductDto> buildJob(
+    private boolean skipProduct(String productName) {
+    	
+    	boolean skip = false;
+		if(blackList != null && blackList.matcher(productName).matches()) {
+			skip = true;
+		} 
+		return skip;
+	}
+
+	protected AppDataJob<ProductDto> buildJob(
             GenericMessageDto<ProductDto> mqiMessage)
             throws AbstractCodedException {
         ProductDto leveldto = mqiMessage.getBody();
 
         // Check if a job is already created for message identifier
-        List<AppDataJob<ProductDto>> existingJobs = appDataService
-                .findByMessagesIdentifier(mqiMessage.getIdentifier());
+        List<AppDataJob<ProductDto>> existingJobs = appDataService.findByMessagesId(mqiMessage.getId());
 
         if (CollectionUtils.isEmpty(existingJobs)) {
 
@@ -228,7 +245,7 @@ public class L0SegmentAppConsumer
                     jobDto.setPod(processSettings.getHostname());
                 }
                 jobDto.getMessages().add(mqiMessage);
-                return appDataService.patchJob(jobDto.getIdentifier(), jobDto,
+                return appDataService.patchJob(jobDto.getId(), jobDto,
                         true, false, false);
 
             }
@@ -239,7 +256,7 @@ public class L0SegmentAppConsumer
 
             if (!jobDto.getPod().equals(processSettings.getHostname())) {
                 jobDto.setPod(processSettings.getHostname());
-                jobDto = appDataService.patchJob(jobDto.getIdentifier(), jobDto,
+                jobDto = appDataService.patchJob(jobDto.getId(), jobDto,
                         false, false, false);
             }
             // Job already exists
@@ -256,4 +273,5 @@ public class L0SegmentAppConsumer
     public void setTaskForFunctionalLog(String taskForFunctionalLog) {
     	this.taskForFunctionalLog = taskForFunctionalLog; 
     }
+    
 }

@@ -126,7 +126,7 @@ public class MessageManager {
 			case SEND:
 				LOGGER.debug("{} MqiMessage is SEND", logPrefix);
 				final HashMap<String, Object> updateMap = handleUpdateStateSend(logPrefix, messageFromDB, force, pod);
-				messageService.updateByID(messageFromDB.getIdentifier(), updateMap);
+				messageService.updateByID(messageFromDB.getId(), updateMap);
 				break;
 			case READ:
 				LOGGER.debug("{} MqiMessage is at State READ", logPrefix);
@@ -136,7 +136,7 @@ public class MessageManager {
 				updates.put("lastReadDate", now);
 				messageFromDB.setReadingPod(pod);
 				updates.put("readingPod", pod);	
-				messageService.updateByID(messageFromDB.getIdentifier(), updates);
+				messageService.updateByID(messageFromDB.getId(), updates);
 				break;	
 			default:
 				throw new IllegalArgumentException(String.format("Unhandled state %s", messageFromDB.getState()));

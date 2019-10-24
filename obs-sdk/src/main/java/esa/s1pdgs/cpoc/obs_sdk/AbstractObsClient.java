@@ -268,6 +268,6 @@ public abstract class AbstractObsClient implements ObsClient {
 		}
     }
 	
-	public abstract Map<String,String> collectMd5Sums(ObsObject object) throws ObsServiceException, ObsException;
+	protected abstract Map<String,String> collectMd5Sums(ObsObject object) throws ObsServiceException, ObsException;
 	
 }

@@ -21,7 +21,7 @@ public class AppCatMessageDto<T> {
     /**
      * Identifier
      */
-    private long identifier;
+    private long id;
 
     /**
      * Topic name
@@ -115,7 +115,7 @@ public class AppCatMessageDto<T> {
             final long identifier, final String topic, final int partition,
             final long offset) {
         this(category);
-        this.identifier = identifier;
+        this.id = identifier;
         this.topic = topic;
         this.partition = partition;
         this.offset = offset;
@@ -123,7 +123,7 @@ public class AppCatMessageDto<T> {
 
     public AppCatMessageDto(ProductCategory category, int identifier, String topic, int partition, int offset, T dto) {
         this(category);
-        this.identifier = identifier;
+        this.id = identifier;
         this.topic = topic;
         this.partition = partition;
         this.offset = offset;
@@ -148,16 +148,16 @@ public class AppCatMessageDto<T> {
     /**
      * @return the identifier
      */
-    public long getIdentifier() {
-        return identifier;
+    public long getId() {
+        return id;
     }
 
     /**
      * @param identifier
      *            the identifier to set
      */
-    public void setIdentifier(final long identifier) {
-        this.identifier = identifier;
+    public void setId(final long identifier) {
+        this.id = identifier;
     }
 
     /**
@@ -368,10 +368,10 @@ public class AppCatMessageDto<T> {
      */
     public String toStringForExtend() {
         return String.format(
-                "category: %s, identifier: %s, topic: %s, partition: %s, offset: %s, "
+                "category: %s, id: %s, topic: %s, partition: %s, offset: %s, "
                 + "group: %s, state: %s, readingPod: %s, lastReadDate: %s, sendingPod: %s, "
                 + "lastSendDate: %s, lastAckDate: %s, nbRetries: %s, creationDate: %s, dto: %s",
-                category, identifier, topic, partition, offset, group, state,
+                category, id, topic, partition, offset, group, state,
                 readingPod, lastReadDate, sendingPod, lastSendDate, lastAckDate,
                 nbRetries, creationDate, dto);
     }
@@ -381,7 +381,7 @@ public class AppCatMessageDto<T> {
      */
     @Override
     public int hashCode() {
-        return Objects.hash(category, identifier, topic, partition, offset,
+        return Objects.hash(category, id, topic, partition, offset,
                 group, state, readingPod, lastReadDate, sendingPod,
                 lastSendDate, lastAckDate, nbRetries, creationDate, dto);
     }
@@ -399,7 +399,7 @@ public class AppCatMessageDto<T> {
         } else {
             AppCatMessageDto<?> other = (AppCatMessageDto<?>) obj;
             ret = Objects.equals(category, other.category)
-                    && identifier == other.identifier
+                    && id == other.id
                     && Objects.equals(topic, other.topic)
                     && partition == other.partition && offset == other.offset
                     && Objects.equals(group, other.group)

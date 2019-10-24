@@ -406,9 +406,10 @@ public abstract class AbstractJobsGenerator<T extends AbstractDto> implements Ru
                         for (Integer key : metadataSearchQueries.keySet()) {
                             SearchMetadataQuery query =
                                     metadataSearchQueries.get(key);
-                            job.getMetadataQueries().put(key,
-                                    new SearchMetadataResult(
-                                            new SearchMetadataQuery(query)));
+                            job.getMetadataQueries().put(
+                            		key,
+                                    new SearchMetadataResult(new SearchMetadataQuery(query))
+                            );
                         }
                         break;
                     } else {
@@ -452,7 +453,7 @@ public abstract class AbstractJobsGenerator<T extends AbstractDto> implements Ru
                         this.preSearch(job);
 
 						AppDataJob<T> modifiedJob = appDataService.patchJob(
-                                job.getAppDataJob().getIdentifier(),
+                                job.getAppDataJob().getId(),
                                 job.getAppDataJob(), false, true, false);
                         job.setAppDataJob(modifiedJob);
                         updateState(job, AppDataJobGenerationState.PRIMARY_CHECK, reportInit);
@@ -563,13 +564,13 @@ public abstract class AbstractJobsGenerator<T extends AbstractDto> implements Ru
         throws AbstractCodedException {
     	
     	report.intermediate(new ReportingMessage("Job generation before update: {} - {} - {} - {}", 
-    			job.getAppDataJob().getIdentifier(),
+    			job.getAppDataJob().getId(),
                 job.getGeneration().getTaskTable(), 
                 newState,
                 job.getGeneration()
         ));
         AppDataJob<T> modifiedJob = appDataService.patchTaskTableOfJob(
-                job.getAppDataJob().getIdentifier(),
+                job.getAppDataJob().getId(),
                 job.getGeneration().getTaskTable(), newState);
         
         if (modifiedJob == null)
@@ -609,24 +610,34 @@ public abstract class AbstractJobsGenerator<T extends AbstractDto> implements Ru
         job.getMetadataQueries().forEach((k, v) -> {
             if (v != null && v.getResult() == null) {
                 try {
-                    List<SearchMetadata> file =
-                            this.metadataClient.search(v.getQuery(),
-                                    DateUtils.convertToAnotherFormat(
-                                            job.getAppDataJob().getProduct()
-                                                    .getStartTime(),
-                                            AppDataJobProduct.TIME_FORMATTER,
-                                            AbstractMetadata.METADATA_DATE_FORMATTER),
-                                    DateUtils.convertToAnotherFormat(
-                                            job.getAppDataJob().getProduct()
-                                                    .getStopTime(),
-                                            AppDataJobProduct.TIME_FORMATTER,
-                                            AbstractMetadata.METADATA_DATE_FORMATTER),
-                                    job.getAppDataJob().getProduct()
-                                            .getSatelliteId(),
-                                    job.getAppDataJob().getProduct()
-                                            .getInsConfId(),
-                                    job.getAppDataJob().getProduct()
-                                            .getProcessMode());
+                	final String productType = v.getQuery().getProductType();
+                	LOGGER.debug("Querying input product of type {}", productType);
+                	
+                	// S1PRO-707: only "AUX_ECE" requires to query polarisation
+                	final String polarisation;
+                	if ("AUX_ECE".equals(productType.toUpperCase())) {
+                		polarisation = getPolarisationFor(job.getAppDataJob().getProduct());
+                	}
+                	else {
+                		polarisation = null;
+                	}                	
+                    List<SearchMetadata> file = this.metadataClient.search(
+                    		v.getQuery(),
+                    		DateUtils.convertToAnotherFormat(
+                    				job.getAppDataJob().getProduct().getStartTime(),
+                    				AppDataJobProduct.TIME_FORMATTER,
+                    				AbstractMetadata.METADATA_DATE_FORMATTER
+                    		),
+                    		DateUtils.convertToAnotherFormat(
+                    				job.getAppDataJob().getProduct().getStopTime(),
+                    				AppDataJobProduct.TIME_FORMATTER,
+                    				AbstractMetadata.METADATA_DATE_FORMATTER
+                    		),
+                    		job.getAppDataJob().getProduct().getSatelliteId(),
+                            job.getAppDataJob().getProduct().getInsConfId(),
+                            job.getAppDataJob().getProduct().getProcessMode(),
+                            polarisation
+                    );
                     if (!file.isEmpty()) {
                         v.setResult(file);
                     }
@@ -924,30 +935,25 @@ public abstract class AbstractJobsGenerator<T extends AbstractDto> implements Ru
                     jobOrder, jobOrderXml));
 
             // Add joborder output to the DTO
-            List<JobOrderOutput> distinctOutputJobOrder = job.getJobOrder()
-                    .getProcs().stream()
-                    .filter(proc -> proc != null
-                            && !CollectionUtils.isEmpty(proc.getOutputs()))
+            List<JobOrderOutput> distinctOutputJobOrder = job.getJobOrder().getProcs().stream()
+                    .filter(proc -> proc != null && !CollectionUtils.isEmpty(proc.getOutputs()))
                     .flatMap(proc -> proc.getOutputs().stream())
-                    .filter(output -> output
-                            .getFileNameType() == JobOrderFileNameType.REGEXP
-                            && output
-                                    .getDestination() == JobOrderDestination.DB)
-                    .distinct().collect(Collectors.toList());
+                    .filter(output -> output.getFileNameType() == JobOrderFileNameType.REGEXP && output.getDestination() == JobOrderDestination.DB)
+                    .distinct()
+                    .collect(Collectors.toList());
+            
             r.addOutputs(distinctOutputJobOrder.stream()
                     .map(output -> new LevelJobOutputDto(
                             output.getFamily().name(), output.getFileName()))
                     .collect(Collectors.toList()));
-            List<JobOrderOutput> distinctOutputJobOrderNotRegexp = job
-                    .getJobOrder().getProcs().stream()
-                    .filter(proc -> proc != null
-                            && !CollectionUtils.isEmpty(proc.getOutputs()))
+            
+            List<JobOrderOutput> distinctOutputJobOrderNotRegexp = job.getJobOrder().getProcs().stream()
+                    .filter(proc -> proc != null && !CollectionUtils.isEmpty(proc.getOutputs()))
                     .flatMap(proc -> proc.getOutputs().stream())
-                    .filter(output -> output
-                            .getFileNameType() == JobOrderFileNameType.DIRECTORY
-                            && output
-                                    .getDestination() == JobOrderDestination.DB)
-                    .distinct().collect(Collectors.toList());
+                    .filter(output -> output.getFileNameType() == JobOrderFileNameType.DIRECTORY && output.getDestination() == JobOrderDestination.DB)
+                    .distinct()
+                    .collect(Collectors.toList());
+            
             r.addOutputs(distinctOutputJobOrderNotRegexp
                     .stream().map(
                             output -> new LevelJobOutputDto(
@@ -956,6 +962,19 @@ public abstract class AbstractJobsGenerator<T extends AbstractDto> implements Ru
                                             + output.getFileType() + ".*$"))
                     .collect(Collectors.toList()));
 
+            for (LevelJobOutputDto output: r.getOutputs()) {
+            	// Iterate over the outputs and identify if an OQC check is required
+            	ProductFamily outputFamily = ProductFamily.valueOf(output.getFamily());
+            	if (this.jobGeneratorSettings.getOqcCheck().contains(outputFamily)) {
+            		// Hit, we found a product family that had been configured as oqc check. Flag it.
+            		LOGGER.info("Found output of family {}, flagging it as oqcCheck",outputFamily);
+            		output.setOqcCheck(true);
+            	} else {
+            		// No hit
+            		LOGGER.debug("Found output of family {}, no oqcCheck required",outputFamily);
+            	}
+            }
+            
             // Add the tasks
             this.tasks.forEach(pool -> {
                 LevelJobPoolDto poolDto = new LevelJobPoolDto();
@@ -991,4 +1010,16 @@ public abstract class AbstractJobsGenerator<T extends AbstractDto> implements Ru
     protected abstract void customJobOrder(JobGeneration job);
 
     protected abstract void customJobDto(JobGeneration job, LevelJobDto dto);
+    
+    // S1PRO-707
+    static final String getPolarisationFor(AppDataJobProduct product) {
+    	final String polarisation = product.getPolarisation().toUpperCase();
+    	if (polarisation.equals("SV") || polarisation.equals("DV")) {
+    		return "V";    		
+    	}
+    	else if (polarisation.equals("SH") || polarisation.equals("DH")) {
+    		return "H";
+    	}
+    	return "NONE";    	
+    }
 }

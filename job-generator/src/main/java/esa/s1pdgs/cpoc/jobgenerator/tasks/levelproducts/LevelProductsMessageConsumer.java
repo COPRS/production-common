@@ -108,7 +108,7 @@ public class LevelProductsMessageConsumer extends AbstractGenericConsumer<Produc
             return;
         }
         // process message
-        appStatus.setProcessing(mqiMessage.getIdentifier());
+        appStatus.setProcessing(mqiMessage.getId());
         int step = 1;
         boolean ackOk = false;
         String errorMessage = "";
@@ -149,7 +149,7 @@ public class LevelProductsMessageConsumer extends AbstractGenericConsumer<Produc
                     productName);
             if (appDataJob.getState() == AppDataJobState.WAITING) {
                 appDataJob.setState(AppDataJobState.DISPATCHING);
-                appDataJob = appDataService.patchJob(appDataJob.getIdentifier(),
+                appDataJob = appDataService.patchJob(appDataJob.getId(),
                         appDataJob, false, false, false);
             }
             jobsDispatcher.dispatch(appDataJob);
@@ -181,7 +181,7 @@ public class LevelProductsMessageConsumer extends AbstractGenericConsumer<Produc
 
         // Check if a job is already created for message identifier
         List<AppDataJob<ProductDto>> existingJobs = appDataService
-                .findByMessagesIdentifier(mqiMessage.getIdentifier());
+                .findByMessagesId(mqiMessage.getId());
 
         if (CollectionUtils.isEmpty(existingJobs)) {
             // Job does not exists => create it
@@ -197,7 +197,7 @@ public class LevelProductsMessageConsumer extends AbstractGenericConsumer<Produc
             final String acquisition = m.group(this.patternSettings.getMGroupAcquisition());
             final String startTime = m.group(this.patternSettings.getMGroupStartTime());
             final String stopTime = m.group(this.patternSettings.getMGroupStopTime());
-
+            
             // Create the JOB
             AppDataJob<ProductDto> jobDto = new AppDataJob<>();
             // General details
@@ -218,10 +218,16 @@ public class LevelProductsMessageConsumer extends AbstractGenericConsumer<Produc
             productDto.setStopTime(DateUtils.convertToAnotherFormat(stopTime,
                     L0SlicePatternSettings.TIME_FORMATTER,
                     AppDataJobProduct.TIME_FORMATTER));
-            
+   
             // FIXME dirty workaround to get things working
-            productDto.setStationCode("WILE");
-                
+            productDto.setStationCode("WILE");     
+            
+            // S1PRO-707: only add polarisation flag, if it's actually configured to be extracted 
+            // (otherwise, there would be invalid information in it)
+            if (this.patternSettings.getGroupPolarisation() != -1) {
+            	final String polarisation = m.group(this.patternSettings.getGroupPolarisation());
+            	productDto.setPolarisation(polarisation);
+            }     
             jobDto.setProduct(productDto);
 
             return appDataService.newJob(jobDto);
@@ -232,7 +238,7 @@ public class LevelProductsMessageConsumer extends AbstractGenericConsumer<Produc
 
             if (!jobDto.getPod().equals(processSettings.getHostname())) {
                 jobDto.setPod(processSettings.getHostname());
-                jobDto = appDataService.patchJob(jobDto.getIdentifier(), jobDto,
+                jobDto = appDataService.patchJob(jobDto.getId(), jobDto,
                         false, false, false);
             }
             // Job already exists

@@ -26,15 +26,15 @@ public class EdrsSessionsMessageDtoTest {
                 EdrsSessionFileType.RAW, "S1", "B", "WILE", "sessionId");
         
         GenericMessageDto<EdrsSessionDto> dto = new GenericMessageDto<EdrsSessionDto>(123, "input-key", body);
-        assertEquals(123, dto.getIdentifier());
+        assertEquals(123, dto.getId());
         assertEquals(body, dto.getBody());
         assertEquals("input-key", dto.getInputKey());
 
         dto = new GenericMessageDto<EdrsSessionDto>();
-        dto.setIdentifier(321);
+        dto.setId(321);
         dto.setBody(body);
         dto.setInputKey("othey-input");
-        assertEquals(321, dto.getIdentifier());
+        assertEquals(321, dto.getId());
         assertEquals(body, dto.getBody());
         assertEquals("othey-input", dto.getInputKey());
     }

@@ -41,8 +41,8 @@ public class RequestRepositoryImpl implements RequestRepository {
 	@Override
 	public synchronized void saveFailedProcessing(FailedProcessingDto failedProcessingDto) {
 		final GenericMessageDto<?> dto = failedProcessingDto.getProcessingDetails();
-		final MqiMessage message = mqiMessageRepository.findByIdentifier(dto.getIdentifier());
-		assertNotNull("original request", message, dto.getIdentifier());
+		final MqiMessage message = mqiMessageRepository.findById(dto.getId());
+		assertNotNull("original request", message, dto.getId());
 		failedProcessingRepo.save(FailedProcessing.valueOf(message, failedProcessingDto));
 	}
 
@@ -86,7 +86,7 @@ public class RequestRepositoryImpl implements RequestRepository {
 	
 	@Override
 	public Processing getProcessing(long id) {		
-		final MqiMessage mess = mqiMessageRepository.findByIdentifier(id);		
+		final MqiMessage mess = mqiMessageRepository.findById(id);		
 		if (mess == null) {
 			return null;
 		}	

@@ -74,6 +74,11 @@ public class ApplicationProperties {
     private long thresholdIw;
     private long thresholdSm;
     private long thresholdWv;
+    
+    private boolean oqcEnabled = false;
+    private String oqcBinaryPath;
+    private String oqcWorkingDir;
+    private long oqcTimeoutInSeconds = 60;
 
     /**
      * Default constructor
@@ -264,7 +269,37 @@ public class ApplicationProperties {
 	public void setThresholdWv(long thresholdWv) {
 		this.thresholdWv = thresholdWv;
 	}
-	
-	
-	
+
+	public long getOqcTimeoutInSeconds() {
+		return oqcTimeoutInSeconds;
+	}
+
+	public void setOqcTimeoutInSeconds(long oqcTimeoutInSeconds) {
+		this.oqcTimeoutInSeconds = oqcTimeoutInSeconds;
+	}
+
+	public String getOqcBinaryPath() {
+		return oqcBinaryPath;
+	}
+
+	public void setOqcBinaryPath(String oqcBinaryPath) {
+		this.oqcBinaryPath = oqcBinaryPath;
+	}
+
+	public String getOqcWorkingDir() {
+		return oqcWorkingDir;
+	}
+
+	public void setOqcWorkingDir(String oqcWorkingDir) {
+		this.oqcWorkingDir = oqcWorkingDir;
+	}
+
+	public boolean isOqcEnabled() {
+		return oqcEnabled;
+	}
+
+	public void setOqcEnabled(boolean oqcEnabled) {
+		this.oqcEnabled = oqcEnabled;
+	}
+		
 }

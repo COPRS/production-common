@@ -13,7 +13,7 @@ import esa.s1pdgs.cpoc.common.MessageState;
 @Service
 public interface MqiMessageRepo extends MongoRepository<MqiMessage, Long> {
 	
-	MqiMessage findByIdentifier(long identifier);
+	MqiMessage findById(long id);
 	
 	List<MqiMessage> findByStateInAndTopicInOrderByCreationDate(List<MessageState> states, List<String> topics);
 	

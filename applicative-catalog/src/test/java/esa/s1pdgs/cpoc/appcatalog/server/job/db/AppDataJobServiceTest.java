@@ -118,7 +118,7 @@ public class AppDataJobServiceTest {
         gen3.setTaskTable("tast-table-3");
         GenericMessageDto<ProductDto> message1 = new GenericMessageDto<ProductDto>(1, "topic1", null);
         GenericMessageDto<ProductDto> message2 = new GenericMessageDto<ProductDto>(2, "topic1", null);
-        obj.setIdentifier(123);
+        obj.setId(123);
         obj.setLevel(ApplicationLevel.L1);
         obj.setPod("pod-name");
         obj.setState(AppDataJobState.DISPATCHING);
@@ -140,7 +140,7 @@ public class AppDataJobServiceTest {
         gen3.setTaskTable("tast-table-32");
         GenericMessageDto<ProductDto> message12 = new GenericMessageDto<ProductDto>(12, "topic12", null);
         GenericMessageDto<ProductDto> message22 = new GenericMessageDto<ProductDto>(22, "topic12", null);
-        obj2.setIdentifier(123);
+        obj2.setId(123);
         obj2.setLevel(ApplicationLevel.L1);
         obj2.setPod("pod-name-2");
         obj2.setState(AppDataJobState.GENERATING);
@@ -171,7 +171,7 @@ public class AppDataJobServiceTest {
         gen3.setTaskTable("task-table-3");
         GenericMessageDto<ProductDto> message1 = new GenericMessageDto<ProductDto>(1, "topic1", null);
         GenericMessageDto<ProductDto> message2 = new GenericMessageDto<ProductDto>(2, "topic1", null);
-        obj.setIdentifier(123);
+        obj.setId(123);
         obj.setLevel(ApplicationLevel.L1);
         obj.setPod("pod-name");
         obj.setState(AppDataJobState.WAITING);
@@ -211,7 +211,7 @@ public class AppDataJobServiceTest {
         gen3.setTaskTable("task-table-3");
         GenericMessageDto<ProductDto> message1 = new GenericMessageDto<ProductDto>(1, "topic1", null);
         GenericMessageDto<ProductDto> message2 = new GenericMessageDto<ProductDto>(2, "topic1", null);
-        obj.setIdentifier(123);
+        obj.setId(123);
         obj.setLevel(ApplicationLevel.L1);
         obj.setPod("pod-name");
         obj.setState(AppDataJobState.WAITING);
@@ -253,7 +253,7 @@ public class AppDataJobServiceTest {
         gen3.setTaskTable("task-table-3");
         GenericMessageDto<ProductDto> message1 = new GenericMessageDto<ProductDto>(1, "topic1", null);
         GenericMessageDto<ProductDto> message2 = new GenericMessageDto<ProductDto>(2, "topic1", null);
-        obj.setIdentifier(123);
+        obj.setId(123);
         obj.setLevel(ApplicationLevel.L1);
         obj.setPod("pod-name");
         obj.setState(AppDataJobState.WAITING);
@@ -288,7 +288,7 @@ public class AppDataJobServiceTest {
         gen3.setTaskTable("task-table-3");
         GenericMessageDto<ProductDto> message1 = new GenericMessageDto<ProductDto>(1, "topic1", null);
         GenericMessageDto<ProductDto> message2 = new GenericMessageDto<ProductDto>(2, "topic1", null);
-        obj.setIdentifier(123);
+        obj.setId(123);
         obj.setLevel(ApplicationLevel.L1);
         obj.setPod("pod-name");
         obj.setState(AppDataJobState.WAITING);
@@ -330,7 +330,7 @@ public class AppDataJobServiceTest {
         gen3.setTaskTable("task-table-3");
         GenericMessageDto<ProductDto> message1 = new GenericMessageDto<ProductDto>(1, "topic1", null);
         GenericMessageDto<ProductDto> message2 = new GenericMessageDto<ProductDto>(2, "topic1", null);
-        obj.setIdentifier(123);
+        obj.setId(123);
         obj.setLevel(ApplicationLevel.L1);
         obj.setPod("pod-name");
         obj.setState(AppDataJobState.WAITING);
@@ -365,7 +365,7 @@ public class AppDataJobServiceTest {
         gen3.setTaskTable("task-table-3");
         GenericMessageDto<ProductDto> message1 = new GenericMessageDto<ProductDto>(1, "topic1", null);
         GenericMessageDto<ProductDto> message2 = new GenericMessageDto<ProductDto>(2, "topic1", null);
-        obj.setIdentifier(123);
+        obj.setId(123);
         obj.setLevel(ApplicationLevel.L1);
         obj.setPod("pod-name");
         obj.setState(AppDataJobState.WAITING);
@@ -409,7 +409,7 @@ public class AppDataJobServiceTest {
         gen3.setState(AppDataJobGenerationState.SENT);
         GenericMessageDto<ProductDto> message1 = new GenericMessageDto<ProductDto>(1, "topic1", null);
         GenericMessageDto<ProductDto> message2 = new GenericMessageDto<ProductDto>(2, "topic1", null);
-        obj.setIdentifier(123);
+        obj.setId(123);
         obj.setLevel(ApplicationLevel.L1);
         obj.setPod("pod-name");
         obj.setState(AppDataJobState.WAITING);
@@ -452,7 +452,7 @@ public class AppDataJobServiceTest {
         gen3.setTaskTable("task-table-3");
         GenericMessageDto<ProductDto> message1 = new GenericMessageDto<ProductDto>(1, "topic1", null);
         GenericMessageDto<ProductDto> message2 = new GenericMessageDto<ProductDto>(2, "topic1", null);
-        obj.setIdentifier(123);
+        obj.setId(123);
         obj.setLevel(ApplicationLevel.L1);
         obj.setPod("pod-name");
         obj.setState(AppDataJobState.WAITING);
@@ -486,7 +486,7 @@ public class AppDataJobServiceTest {
         gen3.setTaskTable("task-table-3");
         GenericMessageDto<ProductDto> message1 = new GenericMessageDto<ProductDto>(1, "topic1", null);
         GenericMessageDto<ProductDto> message2 = new GenericMessageDto<ProductDto>(2, "topic1", null);
-        obj.setIdentifier(123);
+        obj.setId(123);
         obj.setLevel(ApplicationLevel.L1);
         obj.setPod("pod-name");
         obj.setState(AppDataJobState.WAITING);
@@ -516,7 +516,7 @@ public class AppDataJobServiceTest {
         gen3.setTaskTable("task-table-3");
         GenericMessageDto<ProductDto> message1 = new GenericMessageDto<ProductDto>(1, "topic1", null);
         GenericMessageDto<ProductDto> message2 = new GenericMessageDto<ProductDto>(2, "topic1", null);
-        obj.setIdentifier(123);
+        obj.setId(123);
         obj.setLevel(ApplicationLevel.L1);
         obj.setPod("pod-name");
         obj.setState(AppDataJobState.WAITING);

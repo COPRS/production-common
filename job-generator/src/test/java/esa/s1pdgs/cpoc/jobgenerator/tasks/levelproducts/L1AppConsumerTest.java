@@ -121,7 +121,7 @@ public class L1AppConsumerTest {
 
         // Mock the appcatalog service
         doReturn(new ArrayList<>()).when(appDataService)
-                .findByMessagesIdentifier(Mockito.anyLong());
+                .findByMessagesId(Mockito.anyLong());
         Mockito.doAnswer(i -> {
             return i.getArgument(0);
         }).when(appDataService).newJob(Mockito.any());
@@ -246,17 +246,17 @@ public class L1AppConsumerTest {
     public void testReceiveAlreadyExistOtherPod()
             throws AbstractCodedException, ParseException {
         AppDataJob job1 = new AppDataJob();
-        job1.setIdentifier(12L);
+        job1.setId(12L);
         job1.setPod("i-hostname");
         job1.setProduct(new AppDataJobProduct());
         job1.getProduct().setProductName("p1");
         AppDataJob job2 = new AppDataJob();
-        job2.setIdentifier(24L);
+        job2.setId(24L);
         job2.setPod("other-hostname");
         job2.setProduct(new AppDataJobProduct());
         job2.getProduct().setProductName("p2");
         doReturn(Arrays.asList(job1, job2)).when(appDataService)
-                .findByMessagesIdentifier(Mockito.anyLong());
+                .findByMessagesId(Mockito.anyLong());
         
         doReturn(100).when(metadataClient).getSeaCoverage(Mockito.any(), Mockito.any()); 
 
@@ -279,17 +279,17 @@ public class L1AppConsumerTest {
     public void testReceiveAlreadyExistSamePodWaiting()
             throws AbstractCodedException, ParseException {
         AppDataJob job1 = new AppDataJob();
-        job1.setIdentifier(12L);
+        job1.setId(12L);
         job1.setPod("hostname");
         job1.setProduct(new AppDataJobProduct());
         job1.getProduct().setProductName("p1");
         AppDataJob job2 = new AppDataJob();
-        job2.setIdentifier(24L);
+        job2.setId(24L);
         job2.setPod("other-hostname");
         job2.setProduct(new AppDataJobProduct());
         job2.getProduct().setProductName("p2");
         doReturn(Arrays.asList(job1, job2)).when(appDataService)
-                .findByMessagesIdentifier(Mockito.anyLong());
+                .findByMessagesId(Mockito.anyLong());
         
         doReturn(100).when(metadataClient).getSeaCoverage(Mockito.any(), Mockito.any());        
 
@@ -312,18 +312,18 @@ public class L1AppConsumerTest {
     public void testReceiveAlreadyExistSamePodGenerating()
             throws AbstractCodedException, ParseException {
         AppDataJob job1 = new AppDataJob();
-        job1.setIdentifier(12L);
+        job1.setId(12L);
         job1.setPod("hostname");
         job1.setState(AppDataJobState.DISPATCHING);
         job1.setProduct(new AppDataJobProduct());
         job1.getProduct().setProductName("p1");
         AppDataJob job2 = new AppDataJob();
-        job2.setIdentifier(24L);
+        job2.setId(24L);
         job2.setPod("other-hostname");
         job2.setProduct(new AppDataJobProduct());
         job2.getProduct().setProductName("p1");
         doReturn(Arrays.asList(job1, job2)).when(appDataService)
-                .findByMessagesIdentifier(Mockito.anyLong());
+                .findByMessagesId(Mockito.anyLong());
         
         doReturn(100).when(metadataClient).getSeaCoverage(Mockito.any(), Mockito.any()); 
 

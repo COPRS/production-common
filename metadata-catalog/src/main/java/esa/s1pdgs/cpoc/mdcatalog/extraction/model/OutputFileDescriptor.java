@@ -5,7 +5,7 @@ package esa.s1pdgs.cpoc.mdcatalog.extraction.model;
 
 
 /**
- * Class describing a L0 output file
+ * Class describing a output file
  * 
  * @author Olivier Bex-Chauvet
  *
