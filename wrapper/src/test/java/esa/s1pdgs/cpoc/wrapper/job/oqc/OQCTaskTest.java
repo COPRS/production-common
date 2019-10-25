@@ -66,6 +66,10 @@ public class OQCTaskTest {
 
 	@Test(timeout = 3000)
 	public void testTimeout() throws Exception {
+		File ipf = new File(getClass().getClassLoader().getResource("ipf-oqc-block.sh").getFile());
+		ipf.setExecutable(true);
+		defaultProperties.setOqcBinaryPath(ipf.getAbsolutePath());
+		
 		OQCExecutor executor = new OQCExecutor(defaultProperties);
 		LevelJobOutputDto dto = new LevelJobOutputDto();
 		dto.setOqcCheck(true);
@@ -79,6 +83,22 @@ public class OQCTaskTest {
 		
 		FileUtils.delete(productDir.toString());
 	}
+	
+	@Test
+	public void testOQCExecutorService() throws Exception {
+		OQCExecutor executor = new OQCExecutor(defaultProperties);
+		LevelJobOutputDto dto = new LevelJobOutputDto();
+		dto.setOqcCheck(true);
+		
+		Path productDir = Files.createTempDirectory("OQCTASK");
+
+		OQCFlag flag = executor.executeOQC(productDir, dto, new OQCDefaultTaskFactory());
+		
+		assertThat(flag, is(notNullValue()));
+		assertThat(flag, is(OQCFlag.CHECKED_OK));
+	}
+	
+	
 	
 	@Test
 	public void testOQCJobOrderGeneration() throws Exception {

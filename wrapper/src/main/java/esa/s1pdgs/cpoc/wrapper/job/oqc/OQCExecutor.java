@@ -36,19 +36,19 @@ public class OQCExecutor {
 			// This output needs to be quality checked
 			LOGGER.info("Executing OQC check for product {}", originalProduct);
 			Reporting reporting = reportingFactory.newReporting(0);
-			reporting.begin(new ReportingMessage("Start of oqc execution"));
+			reporting.begin(new ReportingMessage("Start of oqc execution for product {}", originalProduct.getFileName().toString()));
 			ExecutorService executor = Executors.newSingleThreadExecutor();
 
 			try {
-				OQCFlag flag = executor.submit(factory.createOQCTask(properties, originalProduct)).get(properties.getOqcTimeoutInSeconds(), TimeUnit.SECONDS);
-				reporting.end(new ReportingMessage("End of oqc execution"));
+				OQCFlag flag = executor.submit(factory.createOQCTask(properties, originalProduct)).get();
+				reporting.end(new ReportingMessage("End of oqc execution for product {} ({})",originalProduct.getFileName().toString(),flag) );
 				return flag;
 			} catch (Exception e) {
 				/*
 				 *  Whatever happens, something was not working as expected and it needs to be assumed that the OQC
 				 *  check failed.
 				 */
-				reporting.error(new ReportingMessage("Error on oqc execution {}", LogUtils.toString(e)));
+				reporting.error(new ReportingMessage("Error on oqc execution for product {} ({}): {}", LogUtils.toString(e),originalProduct.getFileName().toString(), OQCFlag.NOT_CHECKED) );
 				LOGGER.error("Failed to execute OQC check successfully: "+LogUtils.toString(e));
 			}
 			

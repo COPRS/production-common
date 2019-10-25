@@ -216,7 +216,7 @@ public class OutputProcessor {
 				final Reporting reporting = reportingFactory.newReporting(0);
 				
 				OQCFlag oqcFlag = executor.executeOQC(Paths.get(getFilePath(line, productName)), matchOutput, new OQCDefaultTaskFactory());
-				LOGGER.debug("Result of OQC validation was: {}",oqcFlag);
+				LOGGER.info("Result of OQC validation was: {}",oqcFlag);
 				
 				switch (family) {
 				case L0_REPORT:

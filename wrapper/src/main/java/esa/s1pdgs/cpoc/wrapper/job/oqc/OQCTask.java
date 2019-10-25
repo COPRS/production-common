@@ -10,6 +10,8 @@ import java.util.List;
 import java.util.concurrent.Callable;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -46,6 +48,7 @@ public class OQCTask implements Callable<OQCFlag> {
 
 	private Path binaryPath;
 	private Path oqcBaseWorkingDirectory;
+	private long timeOutInSeconds;
 
 	private final Consumer<String> stdOutConsumer = DEFAULT_OUTPUT_CONSUMER;
 	private final Consumer<String> stdErrConsumer = DEFAULT_OUTPUT_CONSUMER;
@@ -55,6 +58,7 @@ public class OQCTask implements Callable<OQCFlag> {
 
 		this.binaryPath = Paths.get(properties.getOqcBinaryPath());
 		this.oqcBaseWorkingDirectory = Paths.get(properties.getOqcWorkingDir());
+		this.timeOutInSeconds = properties.getOqcTimeoutInSeconds();
 	}
 
 	@Override
@@ -155,6 +159,13 @@ public class OQCTask implements Callable<OQCFlag> {
 			final Future<?> err = Executors.newSingleThreadExecutor()
 					.submit(new StreamGobbler(process.getErrorStream(), stdErrConsumer));
 			r = process.waitFor();
+			process.waitFor(timeOutInSeconds,TimeUnit.SECONDS);
+			
+			if (process.isAlive()) {
+				LOGGER.info("Failed to terminate process after 5 seconds, enforcing termination");
+				process.destroyForcibly();
+				throw new TimeoutException("OQC process timed out");
+			}
 
 			// wait for STDOUT/STDERR to be consumed
 			out.get();
