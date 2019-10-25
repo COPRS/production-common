@@ -9,7 +9,6 @@ import java.io.File;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.concurrent.Callable;
 
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.xpath.XPath;
@@ -24,32 +23,9 @@ import org.w3c.dom.Node;
 import esa.s1pdgs.cpoc.common.utils.FileUtils;
 import esa.s1pdgs.cpoc.mqi.model.queue.LevelJobOutputDto;
 import esa.s1pdgs.cpoc.mqi.model.queue.OQCFlag;
-import esa.s1pdgs.cpoc.report.LoggerReporting;
-import esa.s1pdgs.cpoc.report.Reporting;
 import esa.s1pdgs.cpoc.wrapper.config.ApplicationProperties;
 
 public class OQCTaskTest {    
-	// For testing purpose. Instead of a real OQC, we simulate one that is locked up
-	public class OQCSleepTaskFactory extends OQCTaskFactory {
-		@Override
-		public Callable<OQCFlag> createOQCTask(ApplicationProperties properties, Path originalProduct) {
-			return new Callable<OQCFlag>() {
-
-				@Override
-				public OQCFlag call() {
-					try {
-						Thread.sleep(50000);
-					} catch (InterruptedException e) {
-						e.printStackTrace();
-					}
-					
-					return OQCFlag.NOT_CHECKED;
-				}
-
-			};
-		}
-
-	}
 	
 	private ApplicationProperties defaultProperties;
 	
@@ -76,7 +52,7 @@ public class OQCTaskTest {
 		
 		Path productDir = Files.createTempDirectory("OQCTASK");
 
-		OQCFlag flag = executor.executeOQC(productDir, dto, new OQCSleepTaskFactory());
+		OQCFlag flag = executor.executeOQC(productDir, dto, new OQCDefaultTaskFactory());
 		
 		assertThat(flag, is(notNullValue()));
 		assertThat(flag, is(OQCFlag.NOT_CHECKED));

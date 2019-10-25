@@ -158,11 +158,10 @@ public class OQCTask implements Callable<OQCFlag> {
 					.submit(new StreamGobbler(process.getInputStream(), stdOutConsumer));
 			final Future<?> err = Executors.newSingleThreadExecutor()
 					.submit(new StreamGobbler(process.getErrorStream(), stdErrConsumer));
-			r = process.waitFor();
-			process.waitFor(timeOutInSeconds,TimeUnit.SECONDS);
+			process.waitFor(1,TimeUnit.SECONDS);
 			
 			if (process.isAlive()) {
-				LOGGER.info("Failed to terminate process after 5 seconds, enforcing termination");
+				LOGGER.info("Process is still alive, enforcing termination");
 				process.destroyForcibly();
 				throw new TimeoutException("OQC process timed out");
 			}
