@@ -49,7 +49,7 @@ public class OQCExecutor {
 				 *  check failed.
 				 */
 				reporting.error(new ReportingMessage("Error on oqc execution {}", LogUtils.toString(e)));
-				LOGGER.error("Failed to execute OQC check successfully: "+LogUtils.toString(e));
+				LOGGER.error("Failed to execute OQC check successfully: {}", LogUtils.toString(e));
 			}
 			
 		} else {
