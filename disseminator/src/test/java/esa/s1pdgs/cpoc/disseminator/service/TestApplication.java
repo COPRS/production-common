@@ -59,7 +59,7 @@ public class TestApplication {
 		final List<DisseminationTypeConfiguration> diss = catEntry.getValue();
 		assertEquals(1, diss.size());
 		final DisseminationTypeConfiguration dissConfig = diss.get(0);
-		assertEquals("^([0-9a-z][0-9a-z]){1}([0-9a-z_]){1}(_(OPER|TEST))?_(AUX_OBMEMC|AUX_PP1|AUX_PP2|AUX_CAL|AUX_INS|AUX_RESORB|AUX_WND|AUX_ICE|AUX_WAV|MPL_ORBPRE|MPL_ORBSCT)_\\w{1,}\\.(XML|EOF|SAFE)(/.*)?$", dissConfig.getRegex());
+		assertEquals("^([0-9a-z][0-9a-z]){1}([0-9a-z_]){1}(_(OPER|TEST))?_(AUX_OBMEMC|AUX_PP1|AUX_PP2|AUX_CAL|AUX_INS|AUX_RESORB|AUX_WND|AUX_ICE|AUX_SCS|AMV_ERRMAT|AMH_ERRMAT|AUX_WAV|MPL_ORBPRE|MPL_ORBSCT)_\\w{1,}\\.(XML|EOF|SAFE)(/.*)?$", dissConfig.getRegex());
 		assertEquals("myLittleOutbox", dissConfig.getTarget());
 	}
 	
