@@ -27,6 +27,7 @@ import javax.xml.xpath.XPathFactory;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.core.io.ClassPathResource;
+import org.springframework.util.Assert;
 import org.w3c.dom.Document;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
@@ -93,7 +94,12 @@ public class OQCTask implements Callable<OQCFlag> {
 
 	private Path generateWorkingDirectory() {
 		try {
-			Path workDir = Files.createDirectories(Paths.get(oqcBaseWorkingDirectory.toString(),originalProduct.getFileName().toString())); 
+			final Path filename = originalProduct.getFileName();
+			Assert.notNull(filename, "Could not determine filename of original filename " + originalProduct);
+			
+			Path workDir = Files.createDirectories(
+					Paths.get(oqcBaseWorkingDirectory.toString(), filename.toString())
+			); 
 			Files.createDirectories(Paths.get(workDir.toString(), "reports"));
 			LOGGER.debug("Generated working directory for oqc check: {}", workDir);
 			return workDir;
@@ -102,6 +108,7 @@ public class OQCTask implements Callable<OQCFlag> {
 			throw new IllegalArgumentException("Failed to generate oqc working directory:"+LogUtils.toString(e));
 		}
 	}
+
 
 	Path generateJobOrder(Path workDir) {
 		Path path = Paths.get(workDir.toString(), "JobOrder.000000000.xml");
@@ -227,7 +234,9 @@ public class OQCTask implements Callable<OQCFlag> {
 			}
 			
 			// Copy pdf report into original product
-			Path newPdf = Paths.get(originalProduct.toString(), pdfReport.getFileName().toString());	
+			final Path pdfName = pdfReport.getFileName(); 
+			Assert.notNull(pdfName, "Could not determine name of pdf OQC report");
+			Path newPdf = Paths.get(originalProduct.toString(), pdfName.toString());
 			LOGGER.info("Copying pdf report {} into original product {}", pdfReport, newPdf);
 			Files.copy(pdfReport, newPdf, StandardCopyOption.REPLACE_EXISTING);
 		} catch (Exception e) {
