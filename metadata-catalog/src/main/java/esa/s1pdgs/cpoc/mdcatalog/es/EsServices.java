@@ -133,8 +133,10 @@ public class EsServices {
 	public void createMetadata(JSONObject product) throws Exception {
 		try {
 			String productType = null;
-			if (ProductFamily.AUXILIARY_FILE.equals(ProductFamily.valueOf(product.getString("productFamily")))
-					|| ProductFamily.EDRS_SESSION.equals(ProductFamily.valueOf(product.getString("productFamily")))) {
+			ProductFamily family = ProductFamily.valueOf(product.getString("productFamily"));
+			
+			if (ProductFamily.AUXILIARY_FILE.equals(family)
+					|| ProductFamily.EDRS_SESSION.equals(family)) {
 				productType = product.getString("productType").toLowerCase();
 			} else {
 				productType = product.getString("productFamily").toLowerCase();
@@ -147,8 +149,35 @@ public class EsServices {
 			IndexResponse response = elasticsearchDAO.index(request);
 
 			if (response.status() != RestStatus.CREATED) {
-				throw new MetadataCreationException(productName, response.status().toString(),
-						response.getResult().toString());
+				/*
+				 *  S1PRO-783: This is a temporary work around for the WV footprint issue that occurs for WV products
+				 *  when the footprint does cross the date line border. As it is currently not possible to submit these
+				 *  kind of products, we are not failing immediately, but trying to resubmit it without a footprint.
+				 *  
+				 *  This is a workaround and will be obsoleted by S1PRO-778. Due to no defined pattern, we have to parse
+				 *  the exception to identify possible footprint issues.
+				 */
+				String result = response.getResult().toString();
+				if (result.contains("failed to parse field [sliceCoordinates] of type [geo_shape]")) {
+					LOGGER.warn("Parsing error occured for sliceCoordinates, dropping them as workaround for #S1PRO-783");					
+					product.remove("sliceCoordinates");
+				}
+				if (result.contains("failed to parse field [segmentCoordinates] of type [geo_shape]")) {
+					LOGGER.warn("Parsing error occured for segmentCoordinates, dropping them as workaround for #S1PRO-783");
+					product.remove("segmentCoordinates");
+				}
+				
+				request = new IndexRequest(productType, indexType, productName).source(product.toString(),
+						XContentType.JSON);
+				response = elasticsearchDAO.index(request);
+				// END OF WORKAROUND S1PRO-783
+				
+				// If it still fails, we cannot fix it. Raise exception
+				if (response.status() != RestStatus.CREATED) {
+					throw new MetadataCreationException(productName, response.status().toString(),
+							response.getResult().toString());	
+				}
+												
 			}
 		} catch (JSONException | IOException e) {
 			throw new Exception(e);
