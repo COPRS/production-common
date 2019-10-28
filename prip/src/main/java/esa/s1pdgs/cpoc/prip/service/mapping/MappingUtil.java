@@ -30,10 +30,6 @@ import esa.s1pdgs.cpoc.prip.model.PripMetadata;
 import esa.s1pdgs.cpoc.prip.service.edm.EdmProvider;
 
 public class MappingUtil {
-
-	private MappingUtil() {
-	}
-	
 	public static Entity pripMetadataToEntity(PripMetadata pripMetadata, String rawBaseUri) {
 		URI uri = MappingUtil.createId(rawBaseUri, EdmProvider.ES_PRODUCTS_NAME, pripMetadata.getId());
 		Entity entity = new Entity()

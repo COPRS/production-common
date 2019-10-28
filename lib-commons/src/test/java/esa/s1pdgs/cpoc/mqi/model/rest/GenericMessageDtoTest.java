@@ -42,7 +42,7 @@ public class GenericMessageDtoTest {
 	public void testToString() {
 	    GenericMessageDto<String> dto = new GenericMessageDto<String>(123, "input-key", "key-obs");
 		String str = dto.toString();
-		assertTrue("toString should contain the identifier", str.contains("identifier: 123"));
+		assertTrue("toString should contain the identifier", str.contains("id: 123"));
 		assertTrue("toString should contain the body", str.contains("body: key-obs"));
         assertTrue("toString should contain the input key", str.contains("inputKey: input-key"));
 	}

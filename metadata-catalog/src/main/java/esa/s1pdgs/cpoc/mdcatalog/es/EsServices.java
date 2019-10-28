@@ -407,7 +407,7 @@ public class EsServices {
 			queryBuilder = queryBuilder.must(QueryBuilders.termQuery("processMode.keyword", processMode));
 		}
 		if (!polarisation.equals("NONE")) {
-			queryBuilder.must(QueryBuilders.termQuery("polarisation", polarisation));
+			queryBuilder.must(QueryBuilders.termQuery("polarisation.keyword", polarisation));
 		}
 		LOGGER.debug("query composed is {}", queryBuilder);
 		
@@ -439,7 +439,7 @@ public class EsServices {
 	public SearchMetadata closestStopValidity(String productType, ProductFamily productFamily, String beginDate,
 			String endDate, String satelliteId, int instrumentConfId, String processMode, String polarisation) 
 					throws Exception {
-		LOGGER.debug("Searching products via selection policy 'closestStartValidity' for {}, startDate {}, endDate {} ",
+		LOGGER.debug("Searching products via selection policy 'closestStopValidity' for {}, startDate {}, endDate {} ",
 				productType, beginDate, endDate);
 		
 		// mimic the same behaviour used in the old processing system	

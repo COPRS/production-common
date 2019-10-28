@@ -406,10 +406,16 @@ public class MetadataClientTest {
 				"2017-11-20T22:15:16.123456Z", "2017-12-20T10:15:16.654321Z", "A", -1, "FAST", "NONE");
 
 		String uri = "http://" + METADATA_HOST + "/metadata/AUXILIARY_FILE/search";
-		UriComponentsBuilder builder = UriComponentsBuilder.fromUriString(uri).queryParam("productType", "AUX_OBMEMC")
-				.queryParam("mode", "LatestValCover").queryParam("t0", "2017-11-20T22:15:16.123456Z")
-				.queryParam("t1", "2017-12-20T10:15:16.654321Z").queryParam("dt0", "1.0").queryParam("dt1", "2.0")
-				.queryParam("satellite", "A").queryParam("processMode", "FAST");
+		UriComponentsBuilder builder = UriComponentsBuilder.fromUriString(uri)
+				.queryParam("productType", "AUX_OBMEMC")
+				.queryParam("mode", "LatestValCover")
+				.queryParam("t0", "2017-11-20T22:15:16.123456Z")
+				.queryParam("t1", "2017-12-20T10:15:16.654321Z")
+				.queryParam("dt0", "1.0")
+				.queryParam("dt1", "2.0")
+				.queryParam("satellite", "A")
+				.queryParam("processMode", "FAST")
+				.queryParam("polarisation", "NONE");
 		verify(this.restTemplate, times(1)).exchange(eq(builder.build().toUri()), eq(HttpMethod.GET), eq(null),
 				eq(new ParameterizedTypeReference<List<SearchMetadata>>() {
 				}));
@@ -431,10 +437,17 @@ public class MetadataClientTest {
 				"2017-11-20T22:15:16.123456Z", "2017-12-20T10:15:16.654321Z", "A", 6, null, "NONE");
 
 		String uri = "http://" + METADATA_HOST + "/metadata/AUXILIARY_FILE/search";
-		UriComponentsBuilder builder = UriComponentsBuilder.fromUriString(uri).queryParam("productType", "AUX_OBMEMC")
-				.queryParam("mode", "LatestValCover").queryParam("t0", "2017-11-20T22:15:16.123456Z")
-				.queryParam("t1", "2017-12-20T10:15:16.654321Z").queryParam("dt0", "1.0").queryParam("dt1", "2.0")
-				.queryParam("satellite", "A").queryParam("insConfId", 6);
+		UriComponentsBuilder builder = UriComponentsBuilder.fromUriString(uri)
+				.queryParam("productType", "AUX_OBMEMC")
+				.queryParam("mode", "LatestValCover")
+				.queryParam("t0", "2017-11-20T22:15:16.123456Z")
+				.queryParam("t1", "2017-12-20T10:15:16.654321Z")
+				.queryParam("dt0", "1.0")
+				.queryParam("dt1", "2.0")
+				.queryParam("satellite", "A")
+				.queryParam("insConfId", 6)
+				.queryParam("polarisation", "NONE")
+				;
 		verify(this.restTemplate, times(1)).exchange(eq(builder.build().toUri()), eq(HttpMethod.GET), eq(null),
 				eq(new ParameterizedTypeReference<List<SearchMetadata>>() {
 				}));
