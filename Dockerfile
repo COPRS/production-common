@@ -33,7 +33,8 @@ COPY validation/ /app/validation
 COPY compression/ /app/compression
 COPY prip /app/prip
 
-RUN export MAVEN_OPTS="-Xms2g -Xmx4g" mvn -DskipTests=true -Dpmd.skip=true -Dfindbugs.skip=true -B -f /app/pom.xml -s /usr/share/maven/ref/settings-docker.xml install 
+RUN export MAVEN_OPTS="-Xms2g -Xmx4g"
+RUN mvn -DskipTests=true -Dpmd.skip=true -Dfindbugs.skip=true -B -f /app/pom.xml -s /usr/share/maven/ref/settings-docker.xml install 
 
 ####
 # An empty image that will be just used to gather all build artifacts into a small image
