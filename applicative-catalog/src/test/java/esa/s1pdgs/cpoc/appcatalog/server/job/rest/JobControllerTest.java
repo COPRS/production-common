@@ -70,9 +70,9 @@ public class JobControllerTest extends RestControllerTest{
         
         List<FilterCriterion> filters = new ArrayList<>();
         filters.add(new FilterCriterion("product.stopTime", jobController.convertDateIso("20180227T104128")));
-        filters.add(new FilterCriterion("messages.id", 124L));
         filters.add(new FilterCriterion("_id", 124L));
         filters.add(new FilterCriterion("creationDate", jobController.convertDateIso("20180227T104128")));
+        filters.add(new FilterCriterion("messages.id", 124L));
         
         List<AppDataJob> jobsDb = new ArrayList<>();
         doReturn(jobsDb).when(appDataJobService).search(Mockito.any(), Mockito.any(), Mockito.any());

@@ -16,6 +16,7 @@ import java.util.Map;
 
 import org.apache.commons.io.IOUtils;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
@@ -35,6 +36,7 @@ import esa.s1pdgs.cpoc.obs_sdk.ObsUploadObject;
 import esa.s1pdgs.cpoc.obs_sdk.ObsValidationException;
 import esa.s1pdgs.cpoc.obs_sdk.SdkClientException;
 
+@Ignore
 @RunWith(SpringRunner.class)
 @TestPropertySource("classpath:obs-swift.properties")
 @ContextConfiguration(classes = {ObsConfigurationProperties.class})

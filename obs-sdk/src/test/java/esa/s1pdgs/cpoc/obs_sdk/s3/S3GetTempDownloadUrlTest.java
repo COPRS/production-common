@@ -11,6 +11,7 @@ import org.joda.time.Duration;
 import org.joda.time.Instant;
 import org.junit.Before;
 import org.junit.Ignore;
+import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ContextConfiguration;
@@ -24,6 +25,7 @@ import esa.s1pdgs.cpoc.obs_sdk.ObsObject;
 import esa.s1pdgs.cpoc.obs_sdk.ObsServiceException;
 import esa.s1pdgs.cpoc.obs_sdk.SdkClientException;
 
+@Ignore
 @RunWith(SpringRunner.class)
 @TestPropertySource("classpath:obs-aws-s3.properties")
 @ContextConfiguration(classes = {ObsConfigurationProperties.class})
@@ -63,7 +65,7 @@ public class S3GetTempDownloadUrlTest {
 		assertTrue(uut.exists(OBS_OBJECT));
 	}
 	
-	@Ignore
+	@Test
 	public void tempUrlDownloadTest_OnDownloadFinishesBeforeExpirationDate () throws ObsServiceException, SdkClientException, AbstractCodedException, IOException {		
 		long expirationTimeInSeconds = 10L;
 		URL url = uut.createTemporaryDownloadUrl(OBS_OBJECT, expirationTimeInSeconds);

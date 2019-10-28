@@ -10,6 +10,8 @@ import java.util.List;
 import java.util.concurrent.Callable;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -27,6 +29,7 @@ import javax.xml.xpath.XPathFactory;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.core.io.ClassPathResource;
+import org.springframework.util.Assert;
 import org.w3c.dom.Document;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
@@ -46,6 +49,7 @@ public class OQCTask implements Callable<OQCFlag> {
 
 	private Path binaryPath;
 	private Path oqcBaseWorkingDirectory;
+	private long timeOutInSeconds;
 
 	private final Consumer<String> stdOutConsumer = DEFAULT_OUTPUT_CONSUMER;
 	private final Consumer<String> stdErrConsumer = DEFAULT_OUTPUT_CONSUMER;
@@ -55,6 +59,7 @@ public class OQCTask implements Callable<OQCFlag> {
 
 		this.binaryPath = Paths.get(properties.getOqcBinaryPath());
 		this.oqcBaseWorkingDirectory = Paths.get(properties.getOqcWorkingDir());
+		this.timeOutInSeconds = properties.getOqcTimeoutInSeconds();
 	}
 
 	@Override
@@ -93,7 +98,12 @@ public class OQCTask implements Callable<OQCFlag> {
 
 	private Path generateWorkingDirectory() {
 		try {
-			Path workDir = Files.createDirectories(Paths.get(oqcBaseWorkingDirectory.toString(),originalProduct.getFileName().toString())); 
+			final Path filename = originalProduct.getFileName();
+			Assert.notNull(filename, "Could not determine filename of original filename " + originalProduct);
+			
+			Path workDir = Files.createDirectories(
+					Paths.get(oqcBaseWorkingDirectory.toString(), filename.toString())
+			); 
 			Files.createDirectories(Paths.get(workDir.toString(), "reports"));
 			LOGGER.debug("Generated working directory for oqc check: {}", workDir);
 			return workDir;
@@ -102,6 +112,7 @@ public class OQCTask implements Callable<OQCFlag> {
 			throw new IllegalArgumentException("Failed to generate oqc working directory:"+LogUtils.toString(e));
 		}
 	}
+
 
 	Path generateJobOrder(Path workDir) {
 		Path path = Paths.get(workDir.toString(), "JobOrder.000000000.xml");
@@ -154,7 +165,13 @@ public class OQCTask implements Callable<OQCFlag> {
 					.submit(new StreamGobbler(process.getInputStream(), stdOutConsumer));
 			final Future<?> err = Executors.newSingleThreadExecutor()
 					.submit(new StreamGobbler(process.getErrorStream(), stdErrConsumer));
-			r = process.waitFor();
+			process.waitFor(timeOutInSeconds,TimeUnit.SECONDS);
+			
+			if (process.isAlive()) {
+				LOGGER.info("Process is still alive, enforcing termination");
+				process.destroyForcibly();
+				throw new TimeoutException("OQC process timed out");
+			}
 
 			// wait for STDOUT/STDERR to be consumed
 			out.get();
@@ -227,7 +244,9 @@ public class OQCTask implements Callable<OQCFlag> {
 			}
 			
 			// Copy pdf report into original product
-			Path newPdf = Paths.get(originalProduct.toString(), pdfReport.getFileName().toString());	
+			final Path pdfName = pdfReport.getFileName(); 
+			Assert.notNull(pdfName, "Could not determine name of pdf OQC report");
+			Path newPdf = Paths.get(originalProduct.toString(), pdfName.toString());
 			LOGGER.info("Copying pdf report {} into original product {}", pdfReport, newPdf);
 			Files.copy(pdfReport, newPdf, StandardCopyOption.REPLACE_EXISTING);
 		} catch (Exception e) {

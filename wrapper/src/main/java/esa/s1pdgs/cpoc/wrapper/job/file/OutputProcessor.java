@@ -12,11 +12,6 @@ import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.TimeoutException;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
@@ -49,8 +44,6 @@ import esa.s1pdgs.cpoc.wrapper.job.model.mqi.ObsQueueMessage;
 import esa.s1pdgs.cpoc.wrapper.job.mqi.OutputProcuderFactory;
 import esa.s1pdgs.cpoc.wrapper.job.oqc.OQCDefaultTaskFactory;
 import esa.s1pdgs.cpoc.wrapper.job.oqc.OQCExecutor;
-import esa.s1pdgs.cpoc.wrapper.job.oqc.OQCTask;
-import esa.s1pdgs.cpoc.wrapper.job.oqc.OQCTaskFactory;
 
 /**
  * Process outputs according their family: - publication in message queue system
@@ -216,7 +209,7 @@ public class OutputProcessor {
 				final Reporting reporting = reportingFactory.newReporting(0);
 				
 				OQCFlag oqcFlag = executor.executeOQC(Paths.get(getFilePath(line, productName)), matchOutput, new OQCDefaultTaskFactory());
-				LOGGER.debug("Result of OQC validation was: {}",oqcFlag);
+				LOGGER.info("Result of OQC validation was: {}",oqcFlag);
 				
 				switch (family) {
 				case L0_REPORT:

@@ -48,7 +48,7 @@ public class ProductMessageDtoTest {
                 new GenericMessageDto<ProductDto>(123, "input-key", body);
         String str = dto.toString();
         assertTrue("toString should contain the identifier",
-                str.contains("identifier: 123"));
+                str.contains("id: 123"));
         assertTrue("toString should contain the body",
                 str.contains("body: " + body.toString()));
         assertTrue("toString should contain the input key",
