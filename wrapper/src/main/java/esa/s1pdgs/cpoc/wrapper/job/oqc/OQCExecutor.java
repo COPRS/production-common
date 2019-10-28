@@ -52,7 +52,7 @@ public class OQCExecutor {
 				 */
 				reporting.error(new ReportingMessage("Error on oqc execution for product {} ({}): {}",
 						LogUtils.toString(e), originalProduct.getFileName(), OQCFlag.NOT_CHECKED));
-				LOGGER.error("Failed to execute OQC check successfully: " + LogUtils.toString(e));
+				LOGGER.error("Failed to execute OQC check successfully: {}", LogUtils.toString(e));
 
 			}
 
