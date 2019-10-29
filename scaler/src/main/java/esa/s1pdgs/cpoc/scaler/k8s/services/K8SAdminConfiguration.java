@@ -1,5 +1,7 @@
 package esa.s1pdgs.cpoc.scaler.k8s.services;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -12,6 +14,7 @@ import io.fabric8.kubernetes.client.KubernetesClient;
 
 @Configuration
 public class K8SAdminConfiguration {
+	private static final Logger LOGGER = LogManager.getLogger(K8SAdminConfiguration.class);
 	
 	private final K8SProperties properties;
 	
@@ -30,6 +33,7 @@ public class K8SAdminConfiguration {
 		          .withClientCertData(properties.getClientCertData())
 		          .withNamespace(properties.getNamespace())
 		          .build();
+		LOGGER.info("K8S configuration used: {}",config);
 		return config;
 	}
 	
