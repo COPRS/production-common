@@ -1,5 +1,7 @@
 package esa.s1pdgs.cpoc.mqi.server;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Configuration;
@@ -13,6 +15,8 @@ import org.springframework.context.annotation.Configuration;
 @EnableConfigurationProperties
 @ConfigurationProperties(prefix = "kafka")
 public class KafkaProperties {
+	
+	protected static final Logger LOGGER = LogManager.getLogger(KafkaProperties.class);
 
     /**
      * host:port to use for establishing the initial connection to the Kafka
@@ -172,8 +176,6 @@ public class KafkaProperties {
 				+ hostname + ", clientId=" + clientId + ", consumer=" + consumer + ", listener=" + listener
 				+ ", producer=" + producer + "]";
 	}
-
-
 
 	/**
      * Properties of a KAFKA producer
