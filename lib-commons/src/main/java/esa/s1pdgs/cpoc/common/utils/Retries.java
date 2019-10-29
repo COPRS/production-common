@@ -27,7 +27,8 @@ public class Retries {
     								 name,
     								 String.valueOf(attempt),
     								 LogUtils.toString(e)
-    						)
+    						),
+    						e
     				);
     			}  			
     			if (LOG.isWarnEnabled()) {
