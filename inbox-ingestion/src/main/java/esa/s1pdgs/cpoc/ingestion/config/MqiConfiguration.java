@@ -22,7 +22,7 @@ public class MqiConfiguration {
 
     @Autowired
     public MqiConfiguration(
-    		/* @Value("${mqi.host-uri}") */ @Value("#{environment.mqi_host_uri}") final String hostUri,
+    		@Value("${mqi.host-uri}") final String hostUri,
             @Value("${mqi.max-retries}") final int maxRetries,
             @Value("${mqi.tempo-retry-ms}") final int tempoRetryMs,
             final RestTemplateBuilder builder) {
