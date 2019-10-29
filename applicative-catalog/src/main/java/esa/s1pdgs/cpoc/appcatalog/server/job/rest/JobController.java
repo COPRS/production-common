@@ -135,9 +135,9 @@ public class JobController {
             }
         }
         // Search
-        LOGGER.debug ("performing search for input: {} {} {}", filters, category, sort);
+        LOGGER.trace ("performing search for input: {} {} {}", filters, category, sort);
         List<AppDataJob> result = appDataJobService.search(filters, category, sort);
-        LOGGER.debug ("search result: {}", result);
+        LOGGER.trace ("search result: {}", result);
         return result;
     }
 
