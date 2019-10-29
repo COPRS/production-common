@@ -32,8 +32,13 @@ public class Retries {
     				);
     			}  			
     			if (LOG.isWarnEnabled()) {
-        			LOG.warn("Error on performing {} ({}/{}), retrying in {}ms: {}",  name, attempt, numRetries+1, retrySleep, 
-        					LogUtils.toString(e));
+    				if (LOG.isDebugEnabled()) {
+    					LOG.debug("Error on performing {} ({}/{}), retrying in {}ms: {}", name, attempt, numRetries+1, retrySleep, 
+    							LogUtils.toString(e));
+        			} 
+    				else {
+    					LOG.warn("Error on performing {} ({}/{}), retrying in {}ms", name, attempt, numRetries+1, retrySleep);
+        			}
     			}
     			Thread.sleep(retrySleep);
     		}
