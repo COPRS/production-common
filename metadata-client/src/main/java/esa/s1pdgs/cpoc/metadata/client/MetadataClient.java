@@ -4,6 +4,7 @@ import java.net.URI;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.Callable;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -18,6 +19,7 @@ import org.springframework.web.util.UriComponentsBuilder;
 import esa.s1pdgs.cpoc.common.ProductFamily;
 import esa.s1pdgs.cpoc.common.errors.processing.MetadataQueryException;
 import esa.s1pdgs.cpoc.common.utils.DateUtils;
+import esa.s1pdgs.cpoc.common.utils.Retries;
 import esa.s1pdgs.cpoc.metadata.model.EdrsSessionMetadata;
 import esa.s1pdgs.cpoc.metadata.model.L0AcnMetadata;
 import esa.s1pdgs.cpoc.metadata.model.L0SliceMetadata;
@@ -26,10 +28,6 @@ import esa.s1pdgs.cpoc.metadata.model.SearchMetadata;
 
 public class MetadataClient {
 	
-	private static final String MSG_REST_API_METADATA_CALL_FAILED_ATTEMPT = "Rest api metadata call failed: Attempt : {} / {}";
-
-	private static final String MSG_CALL_REST_METADATA_ON = "Call rest metadata on {}";
-
 	private static final Logger LOGGER = LogManager.getLogger(MetadataClient.class);
 
 	private final RestTemplate restTemplate;
@@ -37,8 +35,6 @@ public class MetadataClient {
 	private final int maxRetries;
 	private final int retryInMillis;
 	
-	
-
 	public MetadataClient(final RestTemplate restTemplate, final String metadataHostname, final int maxRetries,
 			final int retryInMillis) {
 		this.restTemplate = restTemplate;
@@ -165,7 +161,6 @@ public class MetadataClient {
 	 * @return
 	 * @throws MetadataQueryException
 	 */
-	@SuppressWarnings("unchecked")
 	public List<SearchMetadata> search(final SearchMetadataQuery query, final String t0, final String t1,
 			final String satelliteId, final int instrumentConfigurationId, final String processMode, String polarisation)
 			throws MetadataQueryException {
@@ -213,7 +208,6 @@ public class MetadataClient {
 	 * @return
 	 * @throws MetadataQueryException
 	 */
-	@SuppressWarnings("unchecked")
 	public List<SearchMetadata> query(ProductFamily family, LocalDateTime intervalStart, LocalDateTime intervalStop)
 			throws MetadataQueryException {
 
@@ -246,100 +240,99 @@ public class MetadataClient {
 	 * @throws MetadataQueryException
 	 */
 	public int getSeaCoverage(ProductFamily family, String productName) throws MetadataQueryException {
-		int notAvailableRetries = 10;
 
-		String uri = this.metadataBaseUri + MetadataCatalogRestPath.L0_SLICE.path() + "/" + family + "/" + productName
-				+ "/seaCoverage";
-		for (int retries = 0;; retries++) {
-			try {
-				LOGGER.debug(MSG_CALL_REST_METADATA_ON, uri);
-
-				ResponseEntity<Integer> response = this.restTemplate.exchange(uri, HttpMethod.GET, null, Integer.class);
-				while (response.getStatusCode() == HttpStatus.NOT_FOUND) {
-					LOGGER.debug("Product not available yet. Waiting...");
-					trySleep();
-					notAvailableRetries--;
-					LOGGER.debug(MSG_CALL_REST_METADATA_ON, uri);
-					response = this.restTemplate.exchange(uri, HttpMethod.GET, null, Integer.class);
-					if (notAvailableRetries <= 0) {
-						LOGGER.trace("Max number of retries reached for {}", productName);
-						break;
-					}
-				}
-
-				if (response.getStatusCode() != HttpStatus.OK) {
-					if (retries < this.maxRetries) {
-						LOGGER.warn(MSG_REST_API_METADATA_CALL_FAILED_ATTEMPT, retries, this.maxRetries);
-						trySleep();
-					} else {
-						throw new MetadataQueryException(
-								String.format("Invalid HTTP status code %s", response.getStatusCode().name()));
-					}
-
-				} else if (response != null) {
-					final Integer res = response.getBody();
-					LOGGER.debug("Got coverage {}", res);
-
-					if (res == null) {
-						throw new MetadataQueryException("getSeaCoverage returned null");
-					}
-					return res;
-				}
-			} catch (RestClientException e) {
-				if (retries < this.maxRetries) {
-					LOGGER.warn(MSG_REST_API_METADATA_CALL_FAILED_ATTEMPT, retries, this.maxRetries);
-					trySleep();
-				} else {
-					throw new MetadataQueryException(e.getMessage(), e);
-				}
-			}
-		}
-	}
-
-	private <T> ResponseEntity<T> query(URI uri, ParameterizedTypeReference<T> responseType)
-			throws MetadataQueryException {
-
-		for (int retries = 0;; retries++) {
-			try {
-				LOGGER.debug(MSG_CALL_REST_METADATA_ON, uri);
-				ResponseEntity<T> response = this.restTemplate.exchange(uri, HttpMethod.GET, null, responseType);
-
-				if (response != null && response.getStatusCode() != HttpStatus.OK) {
-
-					LOGGER.debug("Rest api metadata call returned status code: {}", response.getStatusCode());
-
-					if (retries < this.maxRetries) {
-						LOGGER.warn(MSG_REST_API_METADATA_CALL_FAILED_ATTEMPT, retries, this.maxRetries);
-						trySleep();
-					} else {
-						throw new MetadataQueryException(
-								String.format("Invalid HTTP status code %s", response.getStatusCode().name()));
-					}
-				} else {
-					if (response != null && response.getBody() != null) {
-						LOGGER.debug("Rest api metadata call returned results");
-						return response;
-					} else {
-						if (retries < this.maxRetries) {
-							LOGGER.warn(MSG_REST_API_METADATA_CALL_FAILED_ATTEMPT, retries, this.maxRetries);
-							trySleep();
-						} else {
-							LOGGER.warn("Rest api metadata call returned no results");
-							return null;
+		final String uri = this.metadataBaseUri + MetadataCatalogRestPath.L0_SLICE.path() + "/" 
+				+ family + "/" + productName + "/seaCoverage";
+		
+		final String commandDescription = String.format("call rest metadata for sea coverage check on %s", uri);
+		
+		return performWithRetries(
+				commandDescription,
+				() -> {
+					int notAvailableRetries = 10;					
+					LOGGER.debug(commandDescription);
+					ResponseEntity<Integer> response = this.restTemplate.exchange(uri, HttpMethod.GET, null, Integer.class);
+					while (response == null || response.getStatusCode() == HttpStatus.NOT_FOUND) {
+						LOGGER.debug("Product not available yet. Waiting...");
+						try {
+							Thread.sleep(this.retryInMillis);
+						} catch (InterruptedException e) {
+							throw new MetadataQueryException(e.getMessage(), e);
+						}
+						notAvailableRetries--;
+						LOGGER.debug("Retrying call rest metadata for sea coverage check on  {}", uri);
+						response = this.restTemplate.exchange(uri, HttpMethod.GET, null, Integer.class);
+						if (notAvailableRetries <= 0) {
+							LOGGER.trace("Max number of retries reached for {}", productName);
+							break;
 						}
 					}
+					handleReturnValueErrors(uri, response);
+					final Integer res = response.getBody();
+					LOGGER.debug("Got coverage {}", res);
+					return res;					
 				}
+		);
+	}
 
-			} catch (RestClientException e) {
-				if (retries < this.maxRetries) {
-					LOGGER.warn(MSG_REST_API_METADATA_CALL_FAILED_ATTEMPT, retries, this.maxRetries);
-					trySleep();
-				} else {
-					throw new MetadataQueryException(e.getMessage(), e);
+	private <T> ResponseEntity<T> query(URI uri, ParameterizedTypeReference<T> responseType) throws MetadataQueryException {
+		final String commandDescription = String.format("call rest metadata on %s", uri);
+		
+		return performWithRetries(
+				commandDescription,
+				() -> {
+					LOGGER.debug(commandDescription);
+					final ResponseEntity<T> response = restTemplate.exchange(uri, HttpMethod.GET, null, responseType);
+					handleReturnValueErrors(uri.toString(), response);
+					LOGGER.debug("Rest api metadata call returned results");
+					return response;					
 				}
-			}
+		);
+	}
+
+	private final <T> void handleReturnValueErrors(String uri, final ResponseEntity<T> response) throws MetadataQueryException {
+		if (response == null) {
+			throw new MetadataQueryException(String.format("Rest metadata call %s returned null", uri));
+		}
+		if (response.getStatusCode() != HttpStatus.OK) {
+			throw new MetadataQueryException(
+					String.format("Rest metadata call %s returned status code %s", uri, response.getStatusCode())
+			);
+		}
+		if (response.getBody() == null) {
+			throw new MetadataQueryException(String.format("Rest metadata call %s returned null body", uri));
 		}
 	}
+	
+	private final <T> T performWithRetries(
+			final String commandDescription, 
+			final Callable<T> command
+	) throws MetadataQueryException {
+		try {
+			return Retries.performWithRetries(
+					command,
+					commandDescription,
+					maxRetries, 
+					retryInMillis
+			);
+		} catch (RuntimeException e) {
+			// unwrap possible metadata exception
+			if (e.getCause() instanceof MetadataQueryException) {
+				final MetadataQueryException metadataException = (MetadataQueryException) e.getCause();
+				throw metadataException;
+			}
+			else if (e.getCause() instanceof RestClientException) {
+				final RestClientException restClientException = (RestClientException) e.getCause();				
+				throw new MetadataQueryException(restClientException.getMessage(), restClientException);
+			}
+			// otherwise simply pass through exception
+			throw e;
+		} catch (InterruptedException e) {
+			throw new RuntimeException(
+					String.format("Interrupted on command execution of '%s'", commandDescription)
+			);
+		}
+	}	
 
 	private final int numResults(final ResponseEntity<List<SearchMetadata>> response) {
 		if (response != null) {
@@ -350,13 +343,4 @@ public class MetadataClient {
 		}
 		return -1; // To indicate that null was returned and not an empty list
 	}
-
-	private final void trySleep() throws MetadataQueryException {
-		try {
-			Thread.sleep(this.retryInMillis);
-		} catch (InterruptedException e) {
-			throw new MetadataQueryException(e.getMessage(), e);
-		}
-	}
-
 }

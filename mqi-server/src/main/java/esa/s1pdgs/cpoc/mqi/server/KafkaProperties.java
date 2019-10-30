@@ -5,8 +5,6 @@ import org.apache.logging.log4j.Logger;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.context.event.EventListener;
-import org.springframework.kafka.event.NonResponsiveConsumerEvent;
 
 /**
  * Configuration of Kafka consumer / producer / topics
@@ -178,13 +176,6 @@ public class KafkaProperties {
 				+ hostname + ", clientId=" + clientId + ", consumer=" + consumer + ", listener=" + listener
 				+ ", producer=" + producer + "]";
 	}
-    
-    @EventListener()
-    public void eventHandler(NonResponsiveConsumerEvent event) {
-        //When Kafka server is down, NonResponsiveConsumerEvent error is caught here.
-    	LOGGER.warn("CAUGHT the event {}", event);
-    	System.exit(0);
-    }
 
 	/**
      * Properties of a KAFKA producer

@@ -130,7 +130,6 @@ public class MetadataClientTest {
 						.thenReturn(r);
 
 		thrown.expect(MetadataQueryException.class);
-		thrown.expectMessage("nvalid HTTP statu");
 		this.metadataClient.getEdrsSession("RAW", "DCS_02_L20171109175634707000125_ch1_DSDB_00005.raw");
 
 	}
@@ -142,7 +141,6 @@ public class MetadataClientTest {
 				any((Class<ParameterizedTypeReference<EdrsSessionMetadata>>) (Object) ParameterizedTypeReference.class));
 
 		thrown.expect(MetadataQueryException.class);
-		thrown.expectMessage("rest exception");
 		thrown.expectCause(isA(RestClientException.class));
 		this.metadataClient.getEdrsSession("RAW", "DCS_02_L20171109175634707000125_ch1_DSDB_00005.raw");
 
@@ -208,21 +206,22 @@ public class MetadataClientTest {
 		String file = "S1A_IW_RAW__0SDV_20171213T121623_20171213T121656_019684_021735_C6DB.SAFE";
 
 		thrown.expect(MetadataQueryException.class);
-		thrown.expectMessage("nvalid HTTP statu");
 		this.metadataClient.getLevelSegment(ProductFamily.L0_SEGMENT, file);
 	}
 
 	@Test
 	public void testGetLevelSegmentRestKo() throws MetadataQueryException {
-		doThrow(new RestClientException("rest exception")).when(restTemplate).exchange(any(URI.class),
-				eq(HttpMethod.GET), eq(null),
-				any((Class<ParameterizedTypeReference<LevelSegmentMetadata>>) (Object) ParameterizedTypeReference.class));
+		doThrow(new RestClientException("rest exception"))
+			.when(restTemplate)
+			.exchange(
+					any(URI.class),
+					eq(HttpMethod.GET), 
+					eq(null),
+					any((Class<ParameterizedTypeReference<LevelSegmentMetadata>>) (Object) ParameterizedTypeReference.class));
 
 		String file = "S1A_IW_RAW__0SDV_20171213T121623_20171213T121656_019684_021735_C6DB.SAFE";
 
 		thrown.expect(MetadataQueryException.class);
-		thrown.expectMessage("rest exception");
-		thrown.expectCause(isA(RestClientException.class));
 		this.metadataClient.getLevelSegment(ProductFamily.L0_SEGMENT, file);
 	}
 
@@ -283,7 +282,6 @@ public class MetadataClientTest {
 		String file = "S1A_IW_RAW__0SDV_20171213T121623_20171213T121656_019684_021735_C6DB.SAFE";
 
 		thrown.expect(MetadataQueryException.class);
-		thrown.expectMessage("nvalid HTTP statu");
 		this.metadataClient.getL0Slice(file);
 	}
 
@@ -369,7 +367,6 @@ public class MetadataClientTest {
 						.thenReturn(r);
 
 		thrown.expect(MetadataQueryException.class);
-		thrown.expectMessage("nvalid HTTP statu");
 		this.metadataClient.getFirstACN(file, "FAST");
 	}
 
@@ -485,7 +482,6 @@ public class MetadataClientTest {
 				}))).thenReturn(r);
 
 		thrown.expect(MetadataQueryException.class);
-		thrown.expectMessage("nvalid HTTP statu");
 		this.metadataClient.search(
 				new SearchMetadataQuery(1, "LatestValCover", 1, 2, "AUX_OBMEMC", ProductFamily.AUXILIARY_FILE),
 				"2017-11-20T22:15:16.123456Z", "2017-12-20T10:15:16.654321Z", "A", -1, "", "NONE");
@@ -535,10 +531,12 @@ public class MetadataClientTest {
 
 	@Test
 	public void testQueryForValidationServiceNoResult() throws MetadataQueryException {
-
+		ResponseEntity<List<SearchMetadata>> responseEntity = new ResponseEntity<List<SearchMetadata>>(
+				Collections.emptyList(), HttpStatus.OK);
+		
 		when(restTemplate.exchange(Mockito.any(), eq(HttpMethod.GET), eq(null),
 				eq(new ParameterizedTypeReference<List<SearchMetadata>>() {
-				}))).thenReturn(null);
+				}))).thenReturn(responseEntity);
 
 		LocalDateTime intervalStart = DateUtils.parse("2017-11-01T00:00:00.000000Z");
 		LocalDateTime intervalStop = DateUtils.parse("2018-01-01T00:00:00.000000Z");
@@ -547,7 +545,6 @@ public class MetadataClientTest {
 				intervalStop);
 
 		assertTrue(queryResult.isEmpty());
-
 	}
 
 	@Test
@@ -572,10 +569,7 @@ public class MetadataClientTest {
 
 		when(restTemplate.exchange(Mockito.anyString(), eq(HttpMethod.GET), eq(null), eq(Integer.class)))
 				.thenReturn(responseEntity);
-
 		thrown.expect(MetadataQueryException.class);
-		thrown.expectMessage("Invalid HTTP status code NOT_FOUND");
-
 		this.metadataClient.getSeaCoverage(ProductFamily.AUXILIARY_FILE,
 				"S1A_OPER_MPL_ORBPRE_20171208T200309_20171215T200309_0001.EOF");
 	}
