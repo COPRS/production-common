@@ -51,7 +51,7 @@ public class InboxFactory {
 		filter.add(new BlacklistRegexRelativePathInboxFilter(Pattern.compile(config.getIgnoreRegex())));
 		filter.add(new WhitelistRegexRelativePathInboxFilter(Pattern.compile(config.getMatchRegex())));
 		return new Inbox(inboxAdapterFactory.newInboxAdapter(config.getDirectory()), filter,
-				inboxPollingServiceTransactional, new KafkaSubmissionClient(kafkaTemplate, config.getTopic()), hostname
+				inboxPollingServiceTransactional, new KafkaSubmissionClient(kafkaTemplate, config.getTopic() + "-" + hostname), hostname
 		);
 	}
 
