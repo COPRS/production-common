@@ -160,18 +160,22 @@ public class EsServices {
 				 */
 				LOGGER.warn("An exception occured while accessing the elastic search index: {}", LogUtils.toString(e));
 				String result = e.getMessage().toString();
+				boolean fixed = false;
 				if (result.contains("failed to parse field [sliceCoordinates] of type [geo_shape]")) {
 					LOGGER.warn(
 							"Parsing error occured for sliceCoordinates, dropping them as workaround for #S1PRO-783");
 					product.remove("sliceCoordinates");
-				} else {
-					throw e;
+					fixed = true;
 				}
+				
 				if (result.contains("failed to parse field [segmentCoordinates] of type [geo_shape]")) {
 					LOGGER.warn(
 							"Parsing error occured for segmentCoordinates, dropping them as workaround for #S1PRO-783");
 					product.remove("segmentCoordinates");
-				} else {
+					fixed = true;
+				}
+				
+				if (!fixed) {
 					throw e;
 				}
 				
