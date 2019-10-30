@@ -1,4 +1,4 @@
-#/bin/bash
+#!/bin/bash
 wget --cut-dirs=2 --no-parent -nH -r $externalconf_host/$externalconf_dir/mqi-server/ -P /app --reject="index.html*"
 if [[ ${HOSTNAME} == inbox-ingestion* ]]
 then
