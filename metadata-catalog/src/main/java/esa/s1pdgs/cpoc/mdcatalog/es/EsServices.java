@@ -69,9 +69,8 @@ public class EsServices {
 	 * Logger
 	 */
 	private static final Logger LOGGER = LogManager.getLogger(EsServices.class);
-	
+
 	private static int SIZE_LIMIT = 1000;
-	
 
 	/**
 	 * Elasticsearch client
@@ -82,14 +81,13 @@ public class EsServices {
 	 * Index type for elastic search
 	 */
 	private final String indexType;
-	
+
 	private final String landmaskIndexType;
 
 	@Autowired
 	public EsServices(final ElasticsearchDAO elasticsearchDAO,
 			@Value("${elasticsearch.index-type}") final String indexType,
-			@Value("${elasticsearch.landmask-index-type:metadata}") final String landmaskIndexType
-			) {
+			@Value("${elasticsearch.landmask-index-type:metadata}") final String landmaskIndexType) {
 		this.elasticsearchDAO = elasticsearchDAO;
 		this.indexType = indexType;
 		this.landmaskIndexType = landmaskIndexType;
@@ -135,9 +133,8 @@ public class EsServices {
 		try {
 			String productType = null;
 			ProductFamily family = ProductFamily.valueOf(product.getString("productFamily"));
-			
-			if (ProductFamily.AUXILIARY_FILE.equals(family)
-					|| ProductFamily.EDRS_SESSION.equals(family)) {
+
+			if (ProductFamily.AUXILIARY_FILE.equals(family) || ProductFamily.EDRS_SESSION.equals(family)) {
 				productType = product.getString("productType").toLowerCase();
 			} else {
 				productType = product.getString("productFamily").toLowerCase();
@@ -148,50 +145,54 @@ public class EsServices {
 					XContentType.JSON);
 
 			IndexResponse response = null;
-			try {			
+			try {
 				response = elasticsearchDAO.index(request);
 			} catch (ElasticsearchStatusException e) {
 				/*
-				 *  S1PRO-783: This is a temporary work around for the WV footprint issue that occurs for WV products
-				 *  when the footprint does cross the date line border. As it is currently not possible to submit these
-				 *  kind of products, we are not failing immediately, but trying to resubmit it without a footprint.
-				 *  
-				 *  This is a workaround and will be obsoleted by S1PRO-778. Due to no defined pattern, we have to parse
-				 *  the exception to identify possible footprint issues.
+				 * S1PRO-783: This is a temporary work around for the WV footprint issue that
+				 * occurs for WV products when the footprint does cross the date line border. As
+				 * it is currently not possible to submit these kind of products, we are not
+				 * failing immediately, but trying to resubmit it without a footprint.
+				 * 
+				 * This is a workaround and will be obsoleted by S1PRO-778. Due to no defined
+				 * pattern, we have to parse the exception to identify possible footprint
+				 * issues.
 				 */
 				String result = response.getResult().toString();
 				if (result.contains("failed to parse field [sliceCoordinates] of type [geo_shape]")) {
-					LOGGER.warn("Parsing error occured for sliceCoordinates, dropping them as workaround for #S1PRO-783");					
+					LOGGER.warn(
+							"Parsing error occured for sliceCoordinates, dropping them as workaround for #S1PRO-783");
 					product.remove("sliceCoordinates");
 				} else {
 					throw e;
 				}
 				if (result.contains("failed to parse field [segmentCoordinates] of type [geo_shape]")) {
-					LOGGER.warn("Parsing error occured for segmentCoordinates, dropping them as workaround for #S1PRO-783");
+					LOGGER.warn(
+							"Parsing error occured for segmentCoordinates, dropping them as workaround for #S1PRO-783");
 					product.remove("segmentCoordinates");
 				} else {
 					throw e;
 				}
-				
+
 				request = new IndexRequest(productType, indexType, productName).source(product.toString(),
 						XContentType.JSON);
 				response = elasticsearchDAO.index(request);
 				// END OF WORKAROUND S1PRO-783
 			}
 
-			if (response.status() != RestStatus.CREATED) {				
+			if (response.status() != RestStatus.CREATED) {
 				// If it still fails, we cannot fix it. Raise exception
 				if (response.status() != RestStatus.CREATED) {
 					throw new MetadataCreationException(productName, response.status().toString(),
-							response.getResult().toString());	
+							response.getResult().toString());
 				}
-												
+
 			}
 		} catch (JSONException | IOException e) {
 			throw new Exception(e);
 		}
 	}
-	
+
 	public void createGeoMetadata(JSONObject product, String landName) throws Exception {
 		try {
 //			String landName = product.getString("name");
@@ -232,8 +233,7 @@ public class EsServices {
 		// Generic fields
 		BoolQueryBuilder queryBuilder = QueryBuilders.boolQuery()
 				.must(QueryBuilders.rangeQuery("validityStartTime").lt(beginDate))
-				.must(QueryBuilders.rangeQuery("validityStopTime").gt(endDate))
-				.must(satelliteId(satelliteId));
+				.must(QueryBuilders.rangeQuery("validityStopTime").gt(endDate)).must(satelliteId(satelliteId));
 		// Product type
 		if (category == ProductCategory.LEVEL_PRODUCTS || category == ProductCategory.LEVEL_SEGMENTS) {
 			queryBuilder = queryBuilder.must(QueryBuilders.regexpQuery("productType.keyword", productType));
@@ -249,9 +249,9 @@ public class EsServices {
 			queryBuilder = queryBuilder.must(QueryBuilders.termQuery("processMode.keyword", processMode));
 		}
 		LOGGER.debug("query composed is {}", queryBuilder);
-		
+
 		sourceBuilder.query(queryBuilder);
-		
+
 		String index = null;
 		if (ProductFamily.AUXILIARY_FILE.equals(productFamily) || ProductFamily.EDRS_SESSION.equals(productFamily)) {
 			index = productType.toLowerCase();
@@ -274,15 +274,17 @@ public class EsServices {
 				r.setKeyObjectStorage(source.get("url").toString());
 				if (source.containsKey("validityStartTime")) {
 					try {
-						r.setValidityStart(DateUtils.convertToMetadataDateTimeFormat(source.get("validityStartTime").toString()));
-					} catch(DateTimeParseException e) {
+						r.setValidityStart(
+								DateUtils.convertToMetadataDateTimeFormat(source.get("validityStartTime").toString()));
+					} catch (DateTimeParseException e) {
 						throw new MetadataMalformedException("validityStartTime");
 					}
 				}
 				if (source.containsKey("validityStopTime")) {
 					try {
-						r.setValidityStop(DateUtils.convertToMetadataDateTimeFormat(source.get("validityStopTime").toString()));
-					} catch(DateTimeParseException e) {
+						r.setValidityStop(
+								DateUtils.convertToMetadataDateTimeFormat(source.get("validityStopTime").toString()));
+					} catch (DateTimeParseException e) {
 						throw new MetadataMalformedException("validityStopTime");
 					}
 				}
@@ -303,71 +305,57 @@ public class EsServices {
 	 * where startTime < centreTime and there exists no corresponding File_Type with
 	 * greater startTime where startTime < centreTime select from File_Type where
 	 * startTime >= centreTime and there exists no corresponding File_Type with
-	 * lesser startTime where startTime >= centreTime 
-	 * implementation.Needs to be implemented properly
+	 * lesser startTime where startTime >= centreTime implementation.Needs to be
+	 * implemented properly
 	 */
 	public SearchMetadata closestStartValidity(String productType, ProductFamily productFamily, String beginDate,
 			String endDate, String satelliteId, int instrumentConfId, String processMode) throws Exception {
 		LOGGER.debug("Searching products via selection policy 'closestStartValidity' for {}, startDate {}, endDate {} ",
 				productType, beginDate, endDate);
-		
-		// mimic the same behaviour used in the old processing system	
+
+		// mimic the same behaviour used in the old processing system
 		final LocalDateTime cTime = calculateCentreTime(beginDate, endDate);
 		final String centreTime = DateUtils.formatToMetadataDateTimeFormat(cTime);
-		
-		final SearchRequest beforeRequest = newQueryFor(
-				productType, 
-				productFamily, 
-				instrumentConfId, 
-				processMode, 
-				QueryBuilders.rangeQuery("validityStartTime").lt(centreTime), 
-				new FieldSortBuilder("validityStartTime").order(SortOrder.DESC)	,
-				"NONE"
-		);
-		final SearchRequest afterRequest = newQueryFor(
-				productType, 
-				productFamily, 
-				instrumentConfId, 
-				processMode, 
-				QueryBuilders.rangeQuery("validityStartTime").gte(centreTime), 
-				new FieldSortBuilder("validityStartTime").order(SortOrder.ASC),
-				"NONE"
-		);		
+
+		final SearchRequest beforeRequest = newQueryFor(productType, productFamily, instrumentConfId, processMode,
+				QueryBuilders.rangeQuery("validityStartTime").lt(centreTime),
+				new FieldSortBuilder("validityStartTime").order(SortOrder.DESC), "NONE");
+		final SearchRequest afterRequest = newQueryFor(productType, productFamily, instrumentConfId, processMode,
+				QueryBuilders.rangeQuery("validityStartTime").gte(centreTime),
+				new FieldSortBuilder("validityStartTime").order(SortOrder.ASC), "NONE");
 		try {
 			final SearchResponse beforeResponse = elasticsearchDAO.search(beforeRequest);
 			final SearchResponse afterResponse = elasticsearchDAO.search(afterRequest);
-			
+
 			final SearchHits before = beforeResponse.getHits();
 			final SearchHits after = afterResponse.getHits();
-			
+
 			LOGGER.debug("Total Hits Found before {} and after {}", before.totalHits, after.totalHits);
-			
+
 			if (before.totalHits == 0 && after.totalHits > 0) {
 				final SearchMetadata metaAfter = toSearchMetadata(after.getAt(0));
 				LOGGER.debug("Candidate after was the best result, {}", metaAfter.getProductName());
 				return metaAfter;
-			}
-			else if (before.totalHits > 0 && after.totalHits == 0) {				
+			} else if (before.totalHits > 0 && after.totalHits == 0) {
 				final SearchMetadata metaBefore = toSearchMetadata(before.getAt(0));
 				LOGGER.debug("Candidate before was the best result, {}", metaBefore.getProductName());
 				return metaBefore;
-			}
-			else if (before.totalHits == 0 && after.totalHits == 0)	{
+			} else if (before.totalHits == 0 && after.totalHits == 0) {
 				return null;
 			}
-			
-			// "merge" functionality from old processing system implementation 
+
+			// "merge" functionality from old processing system implementation
 			final SearchMetadata metaBefore = toSearchMetadata(before.getAt(0));
 			final SearchMetadata metaAfter = toSearchMetadata(after.getAt(0));
 
-			final Duration durationBefore = Duration.between(DateUtils.parse(metaBefore.getValidityStart()), cTime).abs();
+			final Duration durationBefore = Duration.between(DateUtils.parse(metaBefore.getValidityStart()), cTime)
+					.abs();
 			final Duration durationAfter = Duration.between(DateUtils.parse(metaAfter.getValidityStart()), cTime).abs();
-			
+
 			if (durationBefore.compareTo(durationAfter) <= 0) {
 				LOGGER.debug("Candidate before was the best result, {}", metaBefore.getProductName());
 				return metaBefore;
-			}
-			else {
+			} else {
 				LOGGER.debug("Candidate after was the best result, {}", metaAfter.getProductName());
 				return metaAfter;
 			}
@@ -376,10 +364,7 @@ public class EsServices {
 		}
 	}
 
-
-	
-	private final SearchMetadata toSearchMetadata(final SearchHit hit)
-	{
+	private final SearchMetadata toSearchMetadata(final SearchHit hit) {
 		final Map<String, Object> source = hit.getSourceAsMap();
 		final SearchMetadata r = new SearchMetadata();
 		r.setProductName(source.get("productName").toString());
@@ -390,16 +375,16 @@ public class EsServices {
 		}
 		if (source.containsKey("validityStopTime")) {
 			r.setValidityStop(DateUtils.convertToMetadataDateTimeFormat(source.get("validityStopTime").toString()));
-		}		
+		}
 		return r;
 	}
 
 	private final SearchRequest newQueryFor(String productType, ProductFamily productFamily, int instrumentConfId,
-			String processMode, RangeQueryBuilder rangeQueryBuilder, FieldSortBuilder sortOrder, String polarisation) throws InternalErrorException {
+			String processMode, RangeQueryBuilder rangeQueryBuilder, FieldSortBuilder sortOrder, String polarisation)
+			throws InternalErrorException {
 		ProductCategory category = ProductCategory.of(productFamily);
 		SearchSourceBuilder sourceBuilder = new SearchSourceBuilder();
-		BoolQueryBuilder queryBuilder = QueryBuilders.boolQuery()
-				.must(rangeQueryBuilder);
+		BoolQueryBuilder queryBuilder = QueryBuilders.boolQuery().must(rangeQueryBuilder);
 
 		if (category == ProductCategory.LEVEL_PRODUCTS || category == ProductCategory.LEVEL_SEGMENTS) {
 			queryBuilder = queryBuilder.must(QueryBuilders.regexpQuery("productType.keyword", productType));
@@ -418,7 +403,7 @@ public class EsServices {
 			queryBuilder.must(QueryBuilders.termQuery("polarisation.keyword", polarisation));
 		}
 		LOGGER.debug("query composed is {}", queryBuilder);
-		
+
 		sourceBuilder.query(queryBuilder);
 
 		String index = null;
@@ -430,8 +415,6 @@ public class EsServices {
 		sourceBuilder.size(1);
 		sourceBuilder.sort(sortOrder);
 
-		
-
 		final SearchRequest searchRequest = new SearchRequest(index);
 		searchRequest.types(indexType);
 		searchRequest.source(sourceBuilder);
@@ -442,67 +425,53 @@ public class EsServices {
 	 * ClosestStopValidity Similar to 'ClosestStartValidity', this policy uses a
 	 * centre time calculated as (t0-t1) / 2 to determine auxiliary data, which is
 	 * located closest to the centre time but using stopTime as the reference
-	 * instead of startTime 
+	 * instead of startTime
 	 */
 	public SearchMetadata closestStopValidity(String productType, ProductFamily productFamily, String beginDate,
-			String endDate, String satelliteId, int instrumentConfId, String processMode, String polarisation) 
-					throws Exception {
+			String endDate, String satelliteId, int instrumentConfId, String processMode, String polarisation)
+			throws Exception {
 		LOGGER.debug("Searching products via selection policy 'closestStopValidity' for {}, startDate {}, endDate {} ",
 				productType, beginDate, endDate);
-		
-		// mimic the same behaviour used in the old processing system	
+
+		// mimic the same behaviour used in the old processing system
 		final LocalDateTime cTime = calculateCentreTime(beginDate, endDate);
 		final String centreTime = DateUtils.formatToMetadataDateTimeFormat(cTime);
-		
-		final SearchRequest beforeRequest = newQueryFor(
-				productType, 
-				productFamily, 
-				instrumentConfId, 
-				processMode, 
-				QueryBuilders.rangeQuery("validityStopTime").lt(centreTime), 
-				new FieldSortBuilder("validityStopTime").order(SortOrder.DESC)	,
-				polarisation
-		);
-		final SearchRequest afterRequest = newQueryFor(
-				productType, 
-				productFamily, 
-				instrumentConfId, 
-				processMode, 
-				QueryBuilders.rangeQuery("validityStopTime").gte(centreTime), 
-				new FieldSortBuilder("validityStopTime").order(SortOrder.ASC),
-				polarisation
-		);		
+
+		final SearchRequest beforeRequest = newQueryFor(productType, productFamily, instrumentConfId, processMode,
+				QueryBuilders.rangeQuery("validityStopTime").lt(centreTime),
+				new FieldSortBuilder("validityStopTime").order(SortOrder.DESC), polarisation);
+		final SearchRequest afterRequest = newQueryFor(productType, productFamily, instrumentConfId, processMode,
+				QueryBuilders.rangeQuery("validityStopTime").gte(centreTime),
+				new FieldSortBuilder("validityStopTime").order(SortOrder.ASC), polarisation);
 		try {
 			final SearchResponse beforeResponse = elasticsearchDAO.search(beforeRequest);
 			final SearchResponse afterResponse = elasticsearchDAO.search(afterRequest);
-			
+
 			final SearchHits before = beforeResponse.getHits();
 			final SearchHits after = afterResponse.getHits();
-			
+
 			LOGGER.debug("Total Hits Found before {} and after {}", before.totalHits, after.totalHits);
-			
+
 			if (before.totalHits == 0 && after.totalHits > 0) {
 				return toSearchMetadata(after.getAt(0));
-			}
-			else if (before.totalHits > 0 && after.totalHits == 0) {
+			} else if (before.totalHits > 0 && after.totalHits == 0) {
 				return toSearchMetadata(before.getAt(0));
-			}
-			else if (before.totalHits == 0 && after.totalHits == 0)	{
+			} else if (before.totalHits == 0 && after.totalHits == 0) {
 				return null;
 			}
-			
-			// "merge" functionality from old processing system implementation 
+
+			// "merge" functionality from old processing system implementation
 			final SearchMetadata metaBefore = toSearchMetadata(before.getAt(0));
 			final SearchMetadata metaAfter = toSearchMetadata(after.getAt(0));
-			
-			final Duration durationBefore = Duration.between(DateUtils.parse(metaBefore.getValidityStop()), cTime).abs();
+
+			final Duration durationBefore = Duration.between(DateUtils.parse(metaBefore.getValidityStop()), cTime)
+					.abs();
 			final Duration durationAfter = Duration.between(DateUtils.parse(metaAfter.getValidityStop()), cTime).abs();
-			
+
 			if (durationBefore.compareTo(durationAfter) <= 0) {
 				LOGGER.debug("Candidate before was the best result, {}", metaBefore.getProductName());
 				return metaBefore;
-			}
-			else {
+			} else {
 				LOGGER.debug("Candidate after was the best result, {}", metaAfter.getProductName());
 				return metaAfter;
 			}
@@ -529,8 +498,7 @@ public class EsServices {
 		// Generic fields
 		BoolQueryBuilder queryBuilder = QueryBuilders.boolQuery()
 				.must(QueryBuilders.rangeQuery("startTime").lt(endDate))
-				.must(QueryBuilders.rangeQuery("stopTime").gt(beginDate))
-				.must(satelliteId(satelliteId))
+				.must(QueryBuilders.rangeQuery("stopTime").gt(beginDate)).must(satelliteId(satelliteId))
 				.must(QueryBuilders.regexpQuery("productType.keyword", productType))
 				.must(QueryBuilders.termQuery("processMode.keyword", processMode));
 		sourceBuilder.query(queryBuilder);
@@ -550,15 +518,17 @@ public class EsServices {
 					local.setKeyObjectStorage(source.get("url").toString());
 					if (source.containsKey("startTime")) {
 						try {
-							local.setValidityStart(DateUtils.convertToMetadataDateTimeFormat(source.get("startTime").toString()));
-						} catch(DateTimeParseException e) {
+							local.setValidityStart(
+									DateUtils.convertToMetadataDateTimeFormat(source.get("startTime").toString()));
+						} catch (DateTimeParseException e) {
 							throw new MetadataMalformedException("startTime");
 						}
 					}
 					if (source.containsKey("stopTime")) {
 						try {
-							local.setValidityStop(DateUtils.convertToMetadataDateTimeFormat(source.get("stopTime").toString()));
-						} catch(DateTimeParseException e) {
+							local.setValidityStop(
+									DateUtils.convertToMetadataDateTimeFormat(source.get("stopTime").toString()));
+						} catch (DateTimeParseException e) {
 							throw new MetadataMalformedException("stopTime");
 						}
 					}
@@ -571,22 +541,22 @@ public class EsServices {
 		}
 		return null;
 	}
-	
-	
-	public List<SearchMetadata> intervalQuery(String startTime, String stopTime, ProductFamily productFamily, String productType) throws Exception {
+
+	public List<SearchMetadata> intervalQuery(String startTime, String stopTime, ProductFamily productFamily,
+			String productType) throws Exception {
 		SearchSourceBuilder sourceBuilder = new SearchSourceBuilder();
 		BoolQueryBuilder queryBuilder = QueryBuilders.boolQuery()
 				.must(QueryBuilders.rangeQuery("insertionTime").from(startTime).to(stopTime));
-				//.must(QueryBuilders.rangeQuery("insertionTime").gt(stopTime));
-				//.must(QueryBuilders.termQuery("satelliteId.keyword", satelliteId))
-				//.must(QueryBuilders.regexpQuery("productType.keyword", productType));
-				//.must(QueryBuilders.termQuery("processMode.keyword", processMode));
-		
+		// .must(QueryBuilders.rangeQuery("insertionTime").gt(stopTime));
+		// .must(QueryBuilders.termQuery("satelliteId.keyword", satelliteId))
+		// .must(QueryBuilders.regexpQuery("productType.keyword", productType));
+		// .must(QueryBuilders.termQuery("processMode.keyword", processMode));
+
 		LOGGER.debug("query composed is {}", queryBuilder);
-		
+
 		sourceBuilder.query(queryBuilder);
 		sourceBuilder.size(SIZE_LIMIT);
-		
+
 		String index = null;
 		if (ProductFamily.EDRS_SESSION.equals(productFamily)) {
 			index = "raw";
@@ -598,7 +568,7 @@ public class EsServices {
 		SearchRequest searchRequest = new SearchRequest(index);
 		searchRequest.types(indexType);
 		searchRequest.source(sourceBuilder);
-		
+
 		try {
 			SearchResponse searchResponse = elasticsearchDAO.search(searchRequest);
 			if (searchResponse.getHits().totalHits >= 1) {
@@ -611,15 +581,17 @@ public class EsServices {
 					local.setKeyObjectStorage(source.get("url").toString());
 					if (source.containsKey("startTime")) {
 						try {
-							local.setValidityStart(DateUtils.convertToMetadataDateTimeFormat(source.get("startTime").toString()));
-						} catch(DateTimeParseException e) {
+							local.setValidityStart(
+									DateUtils.convertToMetadataDateTimeFormat(source.get("startTime").toString()));
+						} catch (DateTimeParseException e) {
 							throw new MetadataMalformedException("startTime");
 						}
 					}
 					if (source.containsKey("stopTime")) {
 						try {
-							local.setValidityStop(DateUtils.convertToMetadataDateTimeFormat(source.get("stopTime").toString()));
-						} catch(DateTimeParseException e) {
+							local.setValidityStop(
+									DateUtils.convertToMetadataDateTimeFormat(source.get("stopTime").toString()));
+						} catch (DateTimeParseException e) {
 							throw new MetadataMalformedException("stopTime");
 						}
 					}
@@ -630,7 +602,7 @@ public class EsServices {
 		} catch (IOException e) {
 			throw new Exception(e.getMessage());
 		}
-		
+
 		return null;
 	}
 
@@ -657,15 +629,16 @@ public class EsServices {
 		r.setKeyObjectStorage(source.get("url").toString());
 		if (source.containsKey("validityStartTime")) {
 			try {
-				r.setValidityStart(DateUtils.convertToMetadataDateTimeFormat(source.get("validityStartTime").toString()));
-			} catch(DateTimeParseException e) {
+				r.setValidityStart(
+						DateUtils.convertToMetadataDateTimeFormat(source.get("validityStartTime").toString()));
+			} catch (DateTimeParseException e) {
 				throw new MetadataMalformedException("validityStartTime");
 			}
 		}
 		if (source.containsKey("validityStopTime")) {
 			try {
 				r.setValidityStop(DateUtils.convertToMetadataDateTimeFormat(source.get("validityStopTime").toString()));
-			} catch(DateTimeParseException e) {
+			} catch (DateTimeParseException e) {
 				throw new MetadataMalformedException("validityStopTime");
 			}
 		}
@@ -675,7 +648,7 @@ public class EsServices {
 		r.setStationCode(source.getOrDefault("stationCode", "NOT_FOUND").toString());
 		r.setSatelliteId(source.getOrDefault("satelliteId", "NOT_FOUND").toString());
 		r.setMissionId(source.getOrDefault("missionId", "NOT_FOUND").toString());
-				
+
 		@SuppressWarnings("unchecked")
 		List<String> rawNames = (List<String>) source.getOrDefault("rawNames", Collections.emptyList());
 		r.setRawNames(rawNames);
@@ -700,18 +673,16 @@ public class EsServices {
 		searchRequest.types(indexType);
 		searchRequest.source(sourceBuilder);
 		try {
-			LOGGER.debug("Sending search request to ES for L0 ACN: {}",searchRequest);
+			LOGGER.debug("Sending search request to ES for L0 ACN: {}", searchRequest);
 			SearchResponse searchResponse = elasticsearchDAO.search(searchRequest);
-			LOGGER.debug("Hits found: {}",searchResponse.getHits().totalHits);
+			LOGGER.debug("Hits found: {}", searchResponse.getHits().totalHits);
 			if (searchResponse.getHits().totalHits >= 1) {
 				return this.extractInfoForL0ACN(searchResponse.getHits().getAt(0).getSourceAsMap());
 			}
 		} catch (Exception e) {
 			LOGGER.error("Exception occurred while searching for acns: {}", LogUtils.toString(e));
 			throw new RuntimeException(
-					String.format("Exception occurred while searching for productType %s", productType), 
-					e
-			);
+					String.format("Exception occurred while searching for productType %s", productType), e);
 		}
 		return null;
 	}
@@ -768,7 +739,7 @@ public class EsServices {
 		if (source.containsKey("startTime")) {
 			try {
 				r.setValidityStart(DateUtils.convertToMetadataDateTimeFormat(source.get("startTime").toString()));
-			} catch(DateTimeParseException e) {
+			} catch (DateTimeParseException e) {
 				throw new MetadataMalformedException("startTime");
 			}
 		} else {
@@ -777,7 +748,7 @@ public class EsServices {
 		if (source.containsKey("stopTime")) {
 			try {
 				r.setValidityStop(DateUtils.convertToMetadataDateTimeFormat((source.get("stopTime").toString())));
-			} catch(DateTimeParseException e) {
+			} catch (DateTimeParseException e) {
 				throw new MetadataMalformedException("stopTime");
 			}
 		} else {
@@ -822,7 +793,7 @@ public class EsServices {
 		if (source.containsKey("startTime")) {
 			try {
 				r.setValidityStart(DateUtils.convertToMetadataDateTimeFormat(source.get("startTime").toString()));
-			} catch(DateTimeParseException e) {
+			} catch (DateTimeParseException e) {
 				throw new MetadataMalformedException("startTime");
 			}
 		} else {
@@ -831,7 +802,7 @@ public class EsServices {
 		if (source.containsKey("stopTime")) {
 			try {
 				r.setValidityStop(DateUtils.convertToMetadataDateTimeFormat(source.get("stopTime").toString()));
-			} catch(DateTimeParseException e) {
+			} catch (DateTimeParseException e) {
 				throw new MetadataMalformedException("stopTime");
 			}
 		} else {
@@ -844,50 +815,47 @@ public class EsServices {
 		}
 		return r;
 	}
-	
+
 	@SuppressWarnings("unchecked")
-	public int getSeaCoverage(ProductFamily family, String productName) throws MetadataNotPresentException {		
-		try {	
-			final GetResponse response = elasticsearchDAO.get(
-					new GetRequest(family.name().toLowerCase(), indexType, productName)
-			);
+	public int getSeaCoverage(ProductFamily family, String productName) throws MetadataNotPresentException {
+		try {
+			final GetResponse response = elasticsearchDAO
+					.get(new GetRequest(family.name().toLowerCase(), indexType, productName));
 			if (!response.isExists()) {
-				throw new MetadataNotPresentException(productName);				
-			}	
-			
-			// TODO FIXME this needs to be fixed to use a proper abstraction  			
-			final Map<String,Object> sliceCoordinates = (Map<String, Object>) response.getSourceAsMap()
+				throw new MetadataNotPresentException(productName);
+			}
+
+			// TODO FIXME this needs to be fixed to use a proper abstraction
+			final Map<String, Object> sliceCoordinates = (Map<String, Object>) response.getSourceAsMap()
 					.get("sliceCoordinates");
-			
+
 			final String type = (String) sliceCoordinates.get("type");
 			LOGGER.debug("Found sliceCoordinates of type {}", type);
-			
+
 			final List<Object> firstArray = (List<Object>) sliceCoordinates.get("coordinates");
 			final List<Object> secondArray = (List<Object>) firstArray.get(0);
-			
-			final CoordinatesBuilder coordBuilder = new CoordinatesBuilder();	
+
+			final CoordinatesBuilder coordBuilder = new CoordinatesBuilder();
 
 			for (final Object arr : secondArray) {
-				final List<Double> coords = (List<Double>) arr;			
+				final List<Double> coords = (List<Double>) arr;
 				final double lon = coords.get(0);
 				final double lat = coords.get(1);
 				coordBuilder.coordinate(lon, lat);
 			}
-			final GeoShapeQueryBuilder queryBuilder = QueryBuilders.geoIntersectionQuery(
-					"geometry", 
-					new PolygonBuilder(coordBuilder)
-			);
-			LOGGER.debug("Using {}", queryBuilder);			
+			final GeoShapeQueryBuilder queryBuilder = QueryBuilders.geoIntersectionQuery("geometry",
+					new PolygonBuilder(coordBuilder));
+			LOGGER.debug("Using {}", queryBuilder);
 			final SearchSourceBuilder sourceBuilder = new SearchSourceBuilder();
 			sourceBuilder.query(queryBuilder);
 			sourceBuilder.size(SIZE_LIMIT);
-		
+
 			final SearchRequest request = new SearchRequest("landmask");
 			request.types(landmaskIndexType);
 			request.source(sourceBuilder);
-			
-			final SearchResponse searchResponse = elasticsearchDAO.search(request);			
-			if (searchResponse.getHits().totalHits > 0) {				
+
+			final SearchResponse searchResponse = elasticsearchDAO.search(request);
+			if (searchResponse.getHits().totalHits > 0) {
 				// TODO FIXME implement coverage calculation
 				return 0;
 			}
@@ -935,7 +903,7 @@ public class EsServices {
 		if (source.containsKey("startTime")) {
 			try {
 				r.setValidityStart(DateUtils.convertToMetadataDateTimeFormat(source.get("startTime").toString()));
-			} catch(DateTimeParseException e) {
+			} catch (DateTimeParseException e) {
 				throw new MetadataMalformedException("startTime");
 			}
 		} else {
@@ -944,7 +912,7 @@ public class EsServices {
 		if (source.containsKey("stopTime")) {
 			try {
 				r.setValidityStop(DateUtils.convertToMetadataDateTimeFormat(source.get("stopTime").toString()));
-			} catch(DateTimeParseException e) {
+			} catch (DateTimeParseException e) {
 				throw new MetadataMalformedException("stopTime");
 			}
 		} else {
@@ -967,11 +935,10 @@ public class EsServices {
 		}
 		return r;
 	}
-	
-	private final QueryBuilder satelliteId(String satelliteId) {		
-		return QueryBuilders.boolQuery()
-			.should(QueryBuilders.termQuery("satelliteId.keyword", satelliteId))
-			.should(QueryBuilders.termQuery("satelliteId.keyword", "_"));
-	
+
+	private final QueryBuilder satelliteId(String satelliteId) {
+		return QueryBuilders.boolQuery().should(QueryBuilders.termQuery("satelliteId.keyword", satelliteId))
+				.should(QueryBuilders.termQuery("satelliteId.keyword", "_"));
+
 	}
 }

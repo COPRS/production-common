@@ -343,7 +343,6 @@ public class ExtractMetadata {
 	private JSONObject putConfigFileMetadataToJSON(JSONObject metadataJSONObject, ConfigFileDescriptor descriptor)
 			throws MetadataExtractionException, MetadataMalformedException {
 
-		System.out.println("=== DEBUG: "+metadataJSONObject);
 		try {
 
 			if (metadataJSONObject.has("validityStartTime")) {
