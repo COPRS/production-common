@@ -13,6 +13,7 @@ import java.util.Map;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.elasticsearch.ElasticsearchStatusException;
 import org.elasticsearch.action.get.GetRequest;
 import org.elasticsearch.action.get.GetResponse;
 import org.elasticsearch.action.index.IndexRequest;
@@ -146,9 +147,10 @@ public class EsServices {
 			IndexRequest request = new IndexRequest(productType, indexType, productName).source(product.toString(),
 					XContentType.JSON);
 
-			IndexResponse response = elasticsearchDAO.index(request);
-
-			if (response.status() != RestStatus.CREATED) {
+			IndexResponse response = null;
+			try {			
+				response = elasticsearchDAO.index(request);
+			} catch (ElasticsearchStatusException e) {
 				/*
 				 *  S1PRO-783: This is a temporary work around for the WV footprint issue that occurs for WV products
 				 *  when the footprint does cross the date line border. As it is currently not possible to submit these
@@ -161,17 +163,23 @@ public class EsServices {
 				if (result.contains("failed to parse field [sliceCoordinates] of type [geo_shape]")) {
 					LOGGER.warn("Parsing error occured for sliceCoordinates, dropping them as workaround for #S1PRO-783");					
 					product.remove("sliceCoordinates");
+				} else {
+					throw e;
 				}
 				if (result.contains("failed to parse field [segmentCoordinates] of type [geo_shape]")) {
 					LOGGER.warn("Parsing error occured for segmentCoordinates, dropping them as workaround for #S1PRO-783");
 					product.remove("segmentCoordinates");
+				} else {
+					throw e;
 				}
 				
 				request = new IndexRequest(productType, indexType, productName).source(product.toString(),
 						XContentType.JSON);
 				response = elasticsearchDAO.index(request);
 				// END OF WORKAROUND S1PRO-783
-				
+			}
+
+			if (response.status() != RestStatus.CREATED) {				
 				// If it still fails, we cannot fix it. Raise exception
 				if (response.status() != RestStatus.CREATED) {
 					throw new MetadataCreationException(productName, response.status().toString(),
