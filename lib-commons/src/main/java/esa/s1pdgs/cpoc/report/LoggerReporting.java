@@ -81,7 +81,7 @@ public final class LoggerReporting implements Reporting  {
 	@Override
 	public final void end(final ReportingOutput out, final ReportingMessage reportingMessage) {
 	    long deltaTMillis = 0;
-		if (actionStart != 0L) {
+		if (actionStart != 0L) {			
 			deltaTMillis =  System.currentTimeMillis() - actionStart;		
 		}
 		report(Level.INFO, Event.end, additionalEndJsonFields(0, deltaTMillis, reportingMessage.getTransferAmount(), out), reportingMessage);	

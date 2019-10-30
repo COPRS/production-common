@@ -435,18 +435,14 @@ public abstract class AbstractJobsGenerator<T extends AbstractDto> implements Ru
                         this.prefixLogMonitor, productName,
                         job.getGeneration().getState());
 
-                
+                reporting.begin(new ReportingMessage("Start job generation"));        
                 LOGGER.debug ("== Trying job generation for job {}", job.toString());
                 
                 // Check primary input
                 if (job.getGeneration().getState() == AppDataJobGenerationState.INITIAL) {
                  	final Reporting reportInit = reportingFactory.newReporting(1);
-                 	
-                    try {                    	
-                        if (job.getGeneration().getNbErrors() == 0) { 
-                            reporting.begin(new ReportingMessage("Start job generation"));
-                        	reportInit.begin(new ReportingMessage("Start init job generation"));
-                        }                        
+                    reportInit.begin(new ReportingMessage("Start init job generation"));
+                    try { 
                         LOGGER.info(
                                 "{} [productName {}] 1 - Checking the pre-requirements",
                                 this.prefixLogMonitor, productName);
