@@ -158,7 +158,7 @@ public class EsServices {
 				 * pattern, we have to parse the exception to identify possible footprint
 				 * issues.
 				 */
-				LOGGER.warn("An exception occured while accessing the elastic search index: {}", e);
+				LOGGER.warn("An exception occured while accessing the elastic search index: {}", LogUtils.toString(e));
 				String result = e.getMessage().toString();
 				if (result.contains("failed to parse field [sliceCoordinates] of type [geo_shape]")) {
 					LOGGER.warn(
@@ -174,6 +174,8 @@ public class EsServices {
 				} else {
 					throw e;
 				}
+				
+				LOGGER.debug("Content of JSON second attempt: {}", product.toString());
 
 				request = new IndexRequest(productType, indexType, productName).source(product.toString(),
 						XContentType.JSON);
