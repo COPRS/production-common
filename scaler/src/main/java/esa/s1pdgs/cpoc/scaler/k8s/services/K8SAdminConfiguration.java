@@ -33,7 +33,7 @@ public class K8SAdminConfiguration {
 		          .withClientCertData(properties.getClientCertData())
 		          .withNamespace(properties.getNamespace())
 		          .build();
-		LOGGER.info("K8S configuration used: {}",config);
+		LOGGER.info("Using {} as master url for K8S",config.getMasterUrl());
 		return config;
 	}
 	
