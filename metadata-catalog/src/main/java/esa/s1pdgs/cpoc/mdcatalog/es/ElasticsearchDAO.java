@@ -2,7 +2,6 @@ package esa.s1pdgs.cpoc.mdcatalog.es;
 
 import java.io.IOException;
 
-import org.elasticsearch.ElasticsearchStatusException;
 import org.elasticsearch.action.get.GetRequest;
 import org.elasticsearch.action.get.GetResponse;
 import org.elasticsearch.action.index.IndexRequest;
@@ -10,7 +9,6 @@ import org.elasticsearch.action.index.IndexResponse;
 import org.elasticsearch.action.search.SearchRequest;
 import org.elasticsearch.action.search.SearchResponse;
 import org.elasticsearch.client.RestHighLevelClient;
-import org.elasticsearch.rest.RestStatus;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -29,8 +27,7 @@ public class ElasticsearchDAO {
 	}
 	
 	public IndexResponse index (IndexRequest request) throws IOException {
-		throw new ElasticsearchStatusException("FORCED STOP", RestStatus.INTERNAL_SERVER_ERROR);
-//		return this.restHighLevelClient.index(request);
+		return this.restHighLevelClient.index(request);
 	}
 	
 	public SearchResponse search (SearchRequest searchRequest) throws IOException {		
