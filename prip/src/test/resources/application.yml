@@ -37,6 +37,10 @@ prip:
     max-search-hits: 1000
   download-url-expiration-time-in-seconds: 600
 
+status:
+  delete-fixed-delay-ms: 3000
+  max-error-counter: 30
+
 # REST controller
 server:
   port: 8080 
