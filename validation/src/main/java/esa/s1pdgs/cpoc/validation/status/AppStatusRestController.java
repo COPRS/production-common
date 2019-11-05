@@ -1,4 +1,4 @@
-package esa.s1pdgs.cpoc.prip.status;
+package esa.s1pdgs.cpoc.validation.status;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -9,18 +9,18 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
-import esa.s1pdgs.cpoc.prip.status.AppStatus.PripStatus;
-import esa.s1pdgs.cpoc.prip.status.dto.PripStatusDto;
+import esa.s1pdgs.cpoc.validation.status.AppStatus.ValidationStatus;
+import esa.s1pdgs.cpoc.validation.status.dto.ValidationStatusDto;
 
 @RestController
 @RequestMapping(path = "/app")
-public class PripRestController {
+public class AppStatusRestController {
 
     /**
      * Logger
      */
     protected static final Logger LOGGER =
-            LogManager.getLogger(PripRestController.class);
+            LogManager.getLogger(AppStatusRestController.class);
 
     /**
      * Application status
@@ -33,7 +33,7 @@ public class PripRestController {
      * @param appStatus
      */
     @Autowired
-    public PripRestController(final AppStatus appStatus) {
+    public AppStatusRestController(final AppStatus appStatus) {
         this.appStatus = appStatus;
     }
 
@@ -43,19 +43,19 @@ public class PripRestController {
      * @return
      */
     @RequestMapping(method = RequestMethod.GET, path = "/status")
-    public ResponseEntity<PripStatusDto> getStatusRest() {
-    	PripStatus currentStatus = appStatus.getStatus();
+    public ResponseEntity<ValidationStatusDto> getStatusRest() {
+    	ValidationStatus currentStatus = appStatus.getStatus();
         long currentTimestamp = System.currentTimeMillis();
         long timeSinceLastChange =
                 currentTimestamp - currentStatus.getDateLastChangeMs();
-        PripStatusDto pripStatus =
-                new PripStatusDto(currentStatus.getState(),
+        ValidationStatusDto validationStatus =
+                new ValidationStatusDto(currentStatus.getState(),
                         timeSinceLastChange, currentStatus.getErrorCounter());
         if (currentStatus.isFatalError()) {
-            return new ResponseEntity<PripStatusDto>(pripStatus,
+            return new ResponseEntity<ValidationStatusDto>(validationStatus,
                     HttpStatus.INTERNAL_SERVER_ERROR);
         }
-        return new ResponseEntity<PripStatusDto>(pripStatus,
+        return new ResponseEntity<ValidationStatusDto>(validationStatus,
                 HttpStatus.OK);
     }
 
@@ -67,10 +67,10 @@ public class PripRestController {
     @RequestMapping(method = RequestMethod.POST, path = "/stop")
     public ResponseEntity<String> postStop() {
         LOGGER.info(
-                "[MONITOR] PRIP is scheduled to stop");
+                "[MONITOR] Validation service is scheduled to stop");
         appStatus.setStopping();
         return new ResponseEntity<String>(
-                "PRIP is scheduled to stop",
+                "Validation service is scheduled to stop",
                 HttpStatus.OK);
     }
     
