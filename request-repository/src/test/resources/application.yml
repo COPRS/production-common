@@ -28,3 +28,7 @@ mongodb:
   host: localhost
   port: 27017
   database: s1pdgs                                                             #
+
+status:
+  delete-fixed-delay-ms: 3000
+  max-error-counter: 30
