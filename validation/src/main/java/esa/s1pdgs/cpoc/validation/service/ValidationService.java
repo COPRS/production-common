@@ -31,6 +31,7 @@ import esa.s1pdgs.cpoc.report.Reporting;
 import esa.s1pdgs.cpoc.report.ReportingMessage;
 import esa.s1pdgs.cpoc.validation.config.ApplicationProperties;
 import esa.s1pdgs.cpoc.validation.config.ApplicationProperties.FamilyIntervalConf;
+import esa.s1pdgs.cpoc.validation.status.AppStatus;
 
 @Service
 public class ValidationService {
@@ -43,6 +44,12 @@ public class ValidationService {
 	@Autowired
 	private ApplicationProperties properties;
 	
+	@Autowired
+	private AppStatus appStatus;
+	
+	private int nbRunningConsistencyChecks = 0; 
+	private Object nbRunningConsistencyChecksLock = new Object();
+    		
 	private static class Discrepancy {
 		public String obsKey;
 		public String reason;
@@ -66,6 +73,11 @@ public class ValidationService {
 	}
 
 	public int checkConsistencyForInterval() {
+		synchronized(nbRunningConsistencyChecksLock) {
+			if (++nbRunningConsistencyChecks == 1) {
+				appStatus.setProcessing();
+			}
+		}
 		final Reporting.Factory reportingFactory = new LoggerReporting.Factory("ValidationService");
 		int discrepancies = 0;
 
@@ -79,6 +91,11 @@ public class ValidationService {
 			discrepancies += validateProductFamily(reportingFactory, family, startInterval, endInterval);
 		}
 		LOGGER.info("Found {} discrepancies for all families",discrepancies);
+		synchronized(nbRunningConsistencyChecksLock) {
+			if (--nbRunningConsistencyChecks == 0) {
+				appStatus.setWaiting();
+			}
+		}
 		return discrepancies;
 	}
 
