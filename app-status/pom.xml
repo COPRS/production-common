@@ -3,53 +3,22 @@
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 	<parent>
-	  <groupId>de.werum.s1pdgs</groupId>
-	  <artifactId>s1pro-core</artifactId>
-	  <version>0.10.0-SNAPSHOT</version>
+		<groupId>de.werum.s1pdgs</groupId>
+		<artifactId>s1pro-core</artifactId>
+		<version>0.10.0-SNAPSHOT</version>
 	</parent>
-	<artifactId>s1pro-core-prip-server</artifactId>
+	<artifactId>s1pro-core-app-status</artifactId>
 	<packaging>jar</packaging>
-	
-	<description>S1PDGS Cloud POC - PRoduction Interface delivery Point (PRIP)</description>
-
 	<properties>
-		<docker.image.prefix>springio</docker.image.prefix>
-		<project.build.finalName>s1pdgs-prip</project.build.finalName>
-		<project.artifactId>s1pdgs-prip</project.artifactId>
-		<start-class>esa.s1pdgs.cpoc.prip.Application</start-class>
+		<project.build.finalName>s1pdgs-app-status</project.build.finalName>
+		<project.artifactId>s1pdgs-app-status</project.artifactId>
 	</properties>
 
 	<dependencies>
-		<dependency>
-			<groupId>de.werum.s1pdgs</groupId>
-			<artifactId>s1pro-core-lib-commons</artifactId>
-			<version>${project.version}</version>
-		</dependency>
 
 		<dependency>
 			<groupId>de.werum.s1pdgs</groupId>
-			<artifactId>s1pro-core-app-status</artifactId>
-			<version>${project.version}</version>
-		</dependency>
-		
-		<dependency>
-			<groupId>de.werum.s1pdgs</groupId>
-			<artifactId>s1pro-core-mqi-client</artifactId>
-			<version>${project.version}</version>
-		</dependency>	
-		
-		<dependency>
-			<groupId>de.werum.s1pdgs</groupId>
-			<artifactId>s1pro-core-obs-sdk</artifactId>
-			<version>${project.version}</version>
-			<classifier>tests</classifier>
-      		<type>test-jar</type>
-      		<scope>test</scope>
-		</dependency>
-	
-		<dependency>
-			<groupId>de.werum.s1pdgs</groupId>
-			<artifactId>s1pro-core-obs-sdk</artifactId>
+			<artifactId>s1pro-core-lib-commons</artifactId>
 			<version>${project.version}</version>
 		</dependency>
 	
@@ -67,10 +36,15 @@
 				</exclusion>
 			</exclusions>
 		</dependency>
+
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-jetty</artifactId>
 		</dependency>
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-log4j2</artifactId>
+		</dependency>			
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-test</artifactId>
@@ -82,78 +56,11 @@
 				</exclusion>
 			</exclusions>
 		</dependency>
-		
-		<dependency>
-			<groupId>org.springframework.boot</groupId>
-			<artifactId>spring-boot-starter-log4j2</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>com.fasterxml.jackson.dataformat</groupId>
-			<artifactId>jackson-dataformat-yaml</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>com.fasterxml.jackson.core</groupId>
-			<artifactId>jackson-databind</artifactId>
-		</dependency>
-
-		<dependency>
-			<groupId>de.werum.s1pdgs</groupId>
-			<artifactId>s1pro-core-lib-commons</artifactId>
-			<version>${project.version}</version>
-		</dependency>
-
-		<dependency>
-			<groupId>org.json</groupId>
-			<artifactId>json</artifactId>
-		</dependency>
-		
-        <dependency>
-			<groupId>org.elasticsearch.client</groupId>
-			<artifactId>elasticsearch-rest-high-level-client</artifactId>
-		</dependency>
-
-		<dependency>
-			<groupId>com.jayway.jsonpath</groupId>
-			<artifactId>json-path</artifactId>
-			<scope>test</scope>
-		</dependency>
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-configuration-processor</artifactId>
 			<optional>true</optional>
 		</dependency>
-		<dependency>
-			<groupId>nl.jqno.equalsverifier</groupId>
-			<artifactId>equalsverifier</artifactId>
-			<scope>test</scope>
-		</dependency>
-		<dependency>
-			<groupId>org.springframework.boot</groupId>
-			<artifactId>spring-boot-devtools</artifactId>
-		</dependency>
-		
-		<dependency>
-	      <groupId>org.apache.olingo</groupId>
-	      <artifactId>odata-server-api</artifactId>
-	      <version>${odata.version}</version>
-	    </dependency>
-	    <dependency>
-	      <groupId>org.apache.olingo</groupId>
-	      <artifactId>odata-server-core</artifactId>
-	      <version>${odata.version}</version>
-	      <scope>runtime</scope>
-	    </dependency>
-	
-	    <dependency>
-	      <groupId>org.apache.olingo</groupId>
-	      <artifactId>odata-commons-api</artifactId>
-	      <version>${odata.version}</version>
-	    </dependency>
-	    <dependency>
-	      <groupId>org.apache.olingo</groupId>
-	      <artifactId>odata-commons-core</artifactId>
-	      <version>${odata.version}</version>
-	    </dependency>
 	</dependencies>
 
 	<build>
@@ -164,7 +71,7 @@
 			</plugin>
 			<plugin>
 				<groupId>org.springframework.boot</groupId>
-				<artifactId>spring-boot-maven-plugin</artifactId>				
+				<artifactId>spring-boot-maven-plugin</artifactId>
 			</plugin>
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
@@ -239,5 +146,4 @@
 			</plugin>
 		</plugins>
 	</build>
-
 </project>

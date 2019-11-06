@@ -1,10 +1,10 @@
-package esa.s1pdgs.cpoc.prip.status.dto;
+package esa.s1pdgs.cpoc.appstatus.dto;
 
 import java.util.Objects;
 
 import esa.s1pdgs.cpoc.common.AppState;
 
-public class PripStatusDto {
+public class AppStatusDto {
 	/**
      * Status
      */
@@ -20,12 +20,12 @@ public class PripStatusDto {
      */
     private int errorCounter;
     
-    public PripStatusDto() {
+    public AppStatusDto() {
         timeSinceLastChange = 0;
         errorCounter = 0;
     }
 
-    public PripStatusDto(final AppState state, final long timeLastChange,
+    public AppStatusDto(final AppState state, final long timeLastChange,
             final int errorCounter) {
         super();
         this.status = state;
@@ -77,7 +77,7 @@ public class PripStatusDto {
         } else if (obj == null || getClass() != obj.getClass()) {
             ret = false;
         } else {
-        	PripStatusDto other = (PripStatusDto) obj;
+        	AppStatusDto other = (AppStatusDto) obj;
             // field comparison
             ret = Objects.equals(status, other.status)
                     && timeSinceLastChange == other.timeSinceLastChange
