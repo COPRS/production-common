@@ -1,4 +1,4 @@
-package esa.s1pdgs.cpoc.validation.status;
+package esa.s1pdgs.cpoc.reqrepo.status;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -11,15 +11,20 @@ import esa.s1pdgs.cpoc.status.AbstractAppStatus;
 import esa.s1pdgs.cpoc.status.Status;
 
 @Component
-public class AppStatus extends AbstractAppStatus {
+public class AppStatusImpl extends AbstractAppStatus {
 
     /**
      * Logger
      */
-    private static final Logger LOGGER = LogManager.getLogger(AppStatus.class);
+    private static final Logger LOGGER = LogManager.getLogger(AppStatusImpl.class);
 
+    /**
+     * Constructor
+     * 
+     * @param maxErrorCounter
+     */
     @Autowired
-    public AppStatus(@Value("${status.max-error-counter}") final int maxErrorCounter) {
+    public AppStatusImpl(@Value("${status.max-error-counter}") final int maxErrorCounter) {
     	super(new Status(maxErrorCounter, 0));
     }
 

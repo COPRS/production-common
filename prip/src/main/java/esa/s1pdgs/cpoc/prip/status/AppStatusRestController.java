@@ -9,8 +9,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
-import esa.s1pdgs.cpoc.prip.status.AppStatus.PripStatus;
 import esa.s1pdgs.cpoc.prip.status.dto.PripStatusDto;
+import esa.s1pdgs.cpoc.status.Status;
 
 @RestController
 @RequestMapping(path = "/app")
@@ -25,7 +25,7 @@ public class AppStatusRestController {
     /**
      * Application status
      */
-    private final AppStatus appStatus;
+    private final AppStatusImpl appStatus;
 
     /**
      * Constructor
@@ -33,7 +33,7 @@ public class AppStatusRestController {
      * @param appStatus
      */
     @Autowired
-    public AppStatusRestController(final AppStatus appStatus) {
+    public AppStatusRestController(final AppStatusImpl appStatus) {
         this.appStatus = appStatus;
     }
 
@@ -44,19 +44,11 @@ public class AppStatusRestController {
      */
     @RequestMapping(method = RequestMethod.GET, path = "/status")
     public ResponseEntity<PripStatusDto> getStatusRest() {
-    	PripStatus currentStatus = appStatus.getStatus();
-        long currentTimestamp = System.currentTimeMillis();
-        long timeSinceLastChange =
-                currentTimestamp - currentStatus.getDateLastChangeMs();
-        PripStatusDto pripStatus =
-                new PripStatusDto(currentStatus.getState(),
-                        timeSinceLastChange, currentStatus.getErrorCounter());
-        if (currentStatus.isFatalError()) {
-            return new ResponseEntity<PripStatusDto>(pripStatus,
-                    HttpStatus.INTERNAL_SERVER_ERROR);
-        }
-        return new ResponseEntity<PripStatusDto>(pripStatus,
-                HttpStatus.OK);
+    	Status status = appStatus.getStatus();
+    	long msSinceLastChange = System.currentTimeMillis() - status.getDateLastChangeMs();
+        PripStatusDto dto = new PripStatusDto(status.getState(), msSinceLastChange, status.getErrorCounterProcessing());
+        HttpStatus httpStatus = status.isFatalError() ? HttpStatus.INTERNAL_SERVER_ERROR : HttpStatus.OK;
+		return new ResponseEntity<PripStatusDto>(dto, httpStatus);
     }
 
     /**
