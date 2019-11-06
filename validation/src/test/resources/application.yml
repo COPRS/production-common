@@ -29,3 +29,7 @@ validation:
       initialDelay: 3600
       lifeTime: 604800
       gracePeriod: 3600
+
+status:
+  delete-fixed-delay-ms: 3000
+  max-error-counter: 30
