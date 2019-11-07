@@ -1,10 +1,13 @@
 package esa.s1pdgs.cpoc.appstatus.rest;
 
+import java.util.NoSuchElementException;
+
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
@@ -47,7 +50,7 @@ public class AppStatusRestController {
     public ResponseEntity<AppStatusDto> getStatusRest() {
     	Status status = appStatus.getStatus();
     	long msSinceLastChange = System.currentTimeMillis() - status.getDateLastChangeMs();
-        AppStatusDto dto = new AppStatusDto(status.getState(), msSinceLastChange, status.getErrorCounterProcessing());
+        AppStatusDto dto = new AppStatusDto(status.getState(), msSinceLastChange, status.getErrorCounterNextMessage() + status.getErrorCounterProcessing());
         HttpStatus httpStatus = status.isFatalError() ? HttpStatus.INTERNAL_SERVER_ERROR : HttpStatus.OK;
 		return new ResponseEntity<AppStatusDto>(dto, httpStatus);
     }
@@ -66,5 +69,27 @@ public class AppStatusRestController {
                 "Service is scheduled to stop",
                 HttpStatus.OK);
     }
+    
+    @RequestMapping(method = RequestMethod.GET, path = "/{category}/process/{messageId}")
+	public ResponseEntity<Boolean> isProcessing(@PathVariable(name = "category") final String category,
+			@PathVariable(name = "messageId") final long messageId) {
+		try {
+			return new ResponseEntity<Boolean>(appStatus.isProcessing(category, messageId), HttpStatus.OK);
+		} catch (UnsupportedOperationException e) {
+			// service does not offer isProcessing()
+			return new ResponseEntity<Boolean>(false, HttpStatus.NOT_FOUND);
+		} catch (NoSuchElementException e) {
+			// the given category does not exist in general or is not known by the called implementation
+			LOGGER.warn(
+					"[category {}] [messageId {}] Ask for message processing information on a not manageable category",
+					category, messageId);
+			return new ResponseEntity<Boolean>(false, HttpStatus.OK); // 200 for now to be conform with the existing tests (can we change this to 404?)   
+		} catch (IllegalArgumentException e) {
+			// invalid message id
+			LOGGER.warn("[category {}] [messageId {}] Ask for message processing information for an invalid message id",
+					category, messageId);
+			return new ResponseEntity<Boolean>(false, HttpStatus.BAD_REQUEST);
+		}
+	}
     
 }

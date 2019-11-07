@@ -98,6 +98,11 @@ public abstract class AbstractAppStatus implements AppStatus {
     }
 
 	@Override
+	public boolean isProcessing(String category, long messageId) {
+		throw new UnsupportedOperationException();
+	}
+	
+	@Override
 	abstract public void forceStopping();
 
 }
