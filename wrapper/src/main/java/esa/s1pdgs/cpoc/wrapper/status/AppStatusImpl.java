@@ -39,6 +39,16 @@ public class AppStatusImpl extends AbstractAppStatus {
         this.mqiStatusService = mqiStatusService;
     }
 
+    @Override
+    public boolean isProcessing(String category, long messageId) {
+    	if (!ProductCategory.LEVEL_JOBS.name().toLowerCase().equals(category)) {
+    		throw new NoSuchElementException(String.format("Category %s not available for processing", category));
+    	} else if (messageId < 0) {
+    		throw new IllegalArgumentException(String.format("Message id value %d is out of range", messageId));			
+    	}		
+    	return getProcessingMsgId() != AppStatus.PROCESSING_MSG_ID_UNDEFINED && getProcessingMsgId() == messageId;
+    }
+
     /**
      * Stop the application if someone asks for forcing stop
      */
@@ -55,13 +65,4 @@ public class AppStatusImpl extends AbstractAppStatus {
         }
     }
 
-	@Override
-	public boolean isProcessing(String category, long messageId) {
-		if (!ProductCategory.LEVEL_JOBS.name().toLowerCase().equals(category)) {
-			throw new NoSuchElementException(String.format("Category %s not available for processing", category));
-		} else if (messageId < 0) {
-			throw new IllegalArgumentException(String.format("Message id value %d is out of range", messageId));			
-		}		
-		return getProcessingMsgId() != AppStatus.PROCESSING_MSG_ID_UNDEFINED && getProcessingMsgId() == messageId;
-	}
 }
