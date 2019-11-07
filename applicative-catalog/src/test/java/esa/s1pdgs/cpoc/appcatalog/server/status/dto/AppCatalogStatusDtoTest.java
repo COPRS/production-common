@@ -9,6 +9,7 @@ import static org.junit.Assert.assertTrue;
 import org.junit.Test;
 
 import esa.s1pdgs.cpoc.common.AppState;
+import esa.s1pdgs.cpoc.mqi.model.rest.StatusDto;
 import nl.jqno.equalsverifier.EqualsVerifier;
 import nl.jqno.equalsverifier.Warning;
 
@@ -24,10 +25,10 @@ public class AppCatalogStatusDtoTest {
      */
     @Test
     public void testConstructor() {
-        AppCatalogStatusDto dto =
-                new AppCatalogStatusDto(AppState.PROCESSING, 123456, 8);
+    	StatusDto dto =
+                new StatusDto(AppState.PROCESSING, 123456, 8);
         assertEquals(AppState.PROCESSING, dto.getStatus());
-        assertEquals(123456, dto.getTimeSinceLastChange());
+        assertEquals(123456, dto.getMsLastChange());
         assertEquals(8, dto.getErrorCounter());
     }
 
@@ -36,13 +37,13 @@ public class AppCatalogStatusDtoTest {
      */
     @Test
     public void testToStringAndSetters() {
-        AppCatalogStatusDto dto = new AppCatalogStatusDto();
+    	StatusDto dto = new StatusDto();
         dto.setStatus(AppState.FATALERROR);
-        dto.setTimeSinceLastChange(953620);
+        dto.setMsLastChange(953620);
         dto.setErrorCounter(4);
         String str = dto.toString();
         assertTrue(str.contains("status: FATALERROR"));
-        assertTrue(str.contains("timeSinceLastChange: 953620"));
+        assertTrue(str.contains("msLastChange: 953620"));
         assertTrue(str.contains("errorCounter: 4"));
     }
 
@@ -51,7 +52,7 @@ public class AppCatalogStatusDtoTest {
      */
     @Test
     public void equalsDto() {
-        EqualsVerifier.forClass(AppCatalogStatusDto.class).usingGetClass()
+        EqualsVerifier.forClass(StatusDto.class).usingGetClass()
                 .suppress(Warning.NONFINAL_FIELDS).verify();
     }
 
