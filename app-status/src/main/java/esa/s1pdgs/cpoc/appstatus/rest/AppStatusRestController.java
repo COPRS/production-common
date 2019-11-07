@@ -50,7 +50,7 @@ public class AppStatusRestController {
     public ResponseEntity<AppStatusDto> getStatusRest() {
     	Status status = appStatus.getStatus();
     	long msSinceLastChange = System.currentTimeMillis() - status.getDateLastChangeMs();
-        AppStatusDto dto = new AppStatusDto(status.getState(), msSinceLastChange, status.getErrorCounterProcessing());
+        AppStatusDto dto = new AppStatusDto(status.getState(), msSinceLastChange, status.getErrorCounterNextMessage() + status.getErrorCounterProcessing());
         HttpStatus httpStatus = status.isFatalError() ? HttpStatus.INTERNAL_SERVER_ERROR : HttpStatus.OK;
 		return new ResponseEntity<AppStatusDto>(dto, httpStatus);
     }
