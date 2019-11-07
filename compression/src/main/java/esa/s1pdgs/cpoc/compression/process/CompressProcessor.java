@@ -31,7 +31,6 @@ import esa.s1pdgs.cpoc.compression.config.ApplicationProperties;
 import esa.s1pdgs.cpoc.compression.file.FileDownloader;
 import esa.s1pdgs.cpoc.compression.file.FileUploader;
 import esa.s1pdgs.cpoc.compression.mqi.OutputProducerFactory;
-import esa.s1pdgs.cpoc.compression.status.AppStatus;
 import esa.s1pdgs.cpoc.errorrepo.ErrorRepoAppender;
 import esa.s1pdgs.cpoc.errorrepo.model.rest.FailedProcessingDto;
 import esa.s1pdgs.cpoc.mqi.MqiConsumer;
@@ -48,6 +47,7 @@ import esa.s1pdgs.cpoc.report.FilenameReportingOutput;
 import esa.s1pdgs.cpoc.report.LoggerReporting;
 import esa.s1pdgs.cpoc.report.Reporting;
 import esa.s1pdgs.cpoc.report.ReportingMessage;
+import esa.s1pdgs.cpoc.status.AppStatus;
 
 @Service
 public class CompressProcessor implements MqiListener<ProductDto> {

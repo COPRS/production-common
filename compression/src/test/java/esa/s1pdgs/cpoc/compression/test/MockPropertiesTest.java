@@ -11,9 +11,9 @@ import org.mockito.Mockito;
 
 import esa.s1pdgs.cpoc.common.errors.AbstractCodedException;
 import esa.s1pdgs.cpoc.compression.config.ApplicationProperties;
-import esa.s1pdgs.cpoc.compression.status.AppStatus;
-import esa.s1pdgs.cpoc.compression.status.AppStatus.CompressionStatus;
+import esa.s1pdgs.cpoc.compression.status.AppStatusImpl;
 import esa.s1pdgs.cpoc.mqi.client.StatusService;
+import esa.s1pdgs.cpoc.status.Status;
 
 /**
  * Test class with properties mocked
@@ -37,7 +37,7 @@ public class MockPropertiesTest {
      * Application status
      */
     @Mock
-    protected AppStatus appStatus;
+    protected AppStatusImpl appStatus;
 
     /**
      * MQI service for stopping the MQI
@@ -126,7 +126,7 @@ public class MockPropertiesTest {
      */
     protected void mockDefaultStatus() throws AbstractCodedException {
         doNothing().when(mqiStatusService).stop();
-        mockStatus((new AppStatus(3, 30, mqiStatusService)).getStatus(), 3, false);
+        mockStatus((new Status(3, 30)), false);
     }
 
     /**
@@ -136,8 +136,7 @@ public class MockPropertiesTest {
      * @param maxErrorCounter
      * @param shallBeStopped
      */
-    protected void mockStatus(final CompressionStatus state,
-            final int maxErrorCounter, final boolean shallBeStopped) {
+    protected void mockStatus(final Status status, final boolean shallBeStopped) {
 
         doNothing().when(appStatus).setWaiting();
         doNothing().when(appStatus).setProcessing(Mockito.anyLong());
@@ -146,7 +145,7 @@ public class MockPropertiesTest {
         doNothing().when(appStatus).setShallBeStopped(Mockito.anyBoolean());
         doNothing().when(appStatus).forceStopping();
 
-        doReturn(state).when(appStatus).getStatus();
+        doReturn(status).when(appStatus).getStatus();
         doReturn(shallBeStopped).when(appStatus).isShallBeStopped();
     }
 }
