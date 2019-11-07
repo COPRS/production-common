@@ -281,6 +281,7 @@
 	<modules>
 		<module>applicative-catalog</module>
 		<module>app-catalog-client</module>
+		<module>app-status</module>
 		<module>archives</module>
 		<module>disseminator</module>
 		<module>inbox-polling</module>
