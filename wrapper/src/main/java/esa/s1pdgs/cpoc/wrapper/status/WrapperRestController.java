@@ -50,19 +50,12 @@ public class WrapperRestController {
      */
     @RequestMapping(method = RequestMethod.GET, path = "/status")
     public ResponseEntity<WrapperStatusDto> getStatusRest() {
-        Status currentStatus = appStatus.getStatus();
-        long currentTimestamp = System.currentTimeMillis();
-        long timeSinceLastChange =
-                currentTimestamp - currentStatus.getDateLastChangeMs();
-        WrapperStatusDto wrapperStatus =
-                new WrapperStatusDto(currentStatus.getState(),
-                        timeSinceLastChange, currentStatus.getErrorCounterProcessing());
-        if (currentStatus.isFatalError()) {
-            return new ResponseEntity<WrapperStatusDto>(wrapperStatus,
-                    HttpStatus.INTERNAL_SERVER_ERROR);
-        }
-        return new ResponseEntity<WrapperStatusDto>(wrapperStatus,
-                HttpStatus.OK);
+    	Status status = appStatus.getStatus();
+		long msSinceLastChange = System.currentTimeMillis() - status.getDateLastChangeMs();
+		WrapperStatusDto dto = new WrapperStatusDto(status.getState(), msSinceLastChange,
+				status.getErrorCounterProcessing());
+		HttpStatus httpStatus = status.isFatalError() ? HttpStatus.INTERNAL_SERVER_ERROR : HttpStatus.OK;
+		return new ResponseEntity<WrapperStatusDto>(dto, httpStatus);
     }
 
     /**

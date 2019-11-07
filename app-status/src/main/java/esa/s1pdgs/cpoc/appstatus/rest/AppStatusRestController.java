@@ -1,4 +1,4 @@
-package esa.s1pdgs.cpoc.prip.status;
+package esa.s1pdgs.cpoc.appstatus.rest;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -9,8 +9,9 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
-import esa.s1pdgs.cpoc.prip.status.AppStatus.PripStatus;
-import esa.s1pdgs.cpoc.prip.status.dto.PripStatusDto;
+import esa.s1pdgs.cpoc.appstatus.dto.AppStatusDto;
+import esa.s1pdgs.cpoc.status.AppStatus;
+import esa.s1pdgs.cpoc.status.Status;
 
 @RestController
 @RequestMapping(path = "/app")
@@ -43,20 +44,12 @@ public class AppStatusRestController {
      * @return
      */
     @RequestMapping(method = RequestMethod.GET, path = "/status")
-    public ResponseEntity<PripStatusDto> getStatusRest() {
-    	PripStatus currentStatus = appStatus.getStatus();
-        long currentTimestamp = System.currentTimeMillis();
-        long timeSinceLastChange =
-                currentTimestamp - currentStatus.getDateLastChangeMs();
-        PripStatusDto pripStatus =
-                new PripStatusDto(currentStatus.getState(),
-                        timeSinceLastChange, currentStatus.getErrorCounter());
-        if (currentStatus.isFatalError()) {
-            return new ResponseEntity<PripStatusDto>(pripStatus,
-                    HttpStatus.INTERNAL_SERVER_ERROR);
-        }
-        return new ResponseEntity<PripStatusDto>(pripStatus,
-                HttpStatus.OK);
+    public ResponseEntity<AppStatusDto> getStatusRest() {
+    	Status status = appStatus.getStatus();
+    	long msSinceLastChange = System.currentTimeMillis() - status.getDateLastChangeMs();
+        AppStatusDto dto = new AppStatusDto(status.getState(), msSinceLastChange, status.getErrorCounterProcessing());
+        HttpStatus httpStatus = status.isFatalError() ? HttpStatus.INTERNAL_SERVER_ERROR : HttpStatus.OK;
+		return new ResponseEntity<AppStatusDto>(dto, httpStatus);
     }
 
     /**
@@ -67,10 +60,10 @@ public class AppStatusRestController {
     @RequestMapping(method = RequestMethod.POST, path = "/stop")
     public ResponseEntity<String> postStop() {
         LOGGER.info(
-                "[MONITOR] PRIP is scheduled to stop");
+                "[MONITOR] Service is scheduled to stop");
         appStatus.setStopping();
         return new ResponseEntity<String>(
-                "PRIP is scheduled to stop",
+                "Service is scheduled to stop",
                 HttpStatus.OK);
     }
     

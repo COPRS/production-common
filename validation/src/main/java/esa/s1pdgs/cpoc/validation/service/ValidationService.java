@@ -29,9 +29,9 @@ import esa.s1pdgs.cpoc.obs_sdk.SdkClientException;
 import esa.s1pdgs.cpoc.report.LoggerReporting;
 import esa.s1pdgs.cpoc.report.Reporting;
 import esa.s1pdgs.cpoc.report.ReportingMessage;
+import esa.s1pdgs.cpoc.status.AppStatus;
 import esa.s1pdgs.cpoc.validation.config.ApplicationProperties;
 import esa.s1pdgs.cpoc.validation.config.ApplicationProperties.FamilyIntervalConf;
-import esa.s1pdgs.cpoc.validation.status.AppStatus;
 
 @Service
 public class ValidationService {
@@ -75,7 +75,7 @@ public class ValidationService {
 	public int checkConsistencyForInterval() {
 		synchronized(nbRunningConsistencyChecksLock) {
 			if (++nbRunningConsistencyChecks == 1) {
-				appStatus.setProcessing();
+				appStatus.setProcessing(esa.s1pdgs.cpoc.status.AppStatus.PROCESSING_MSG_ID_UNDEFINED);
 			}
 		}
 		final Reporting.Factory reportingFactory = new LoggerReporting.Factory("ValidationService");

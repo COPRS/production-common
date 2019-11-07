@@ -1,6 +1,12 @@
 package esa.s1pdgs.cpoc.status;
 
-public interface AppStatus {	
+public interface AppStatus {
+	
+	/**
+	 * For waiting state and computations where no MQI is involved
+	 */
+	public static final long PROCESSING_MSG_ID_UNDEFINED = 0;
+
 	public static final AppStatus NULL = new AppStatus() {		
 		@Override public final void setWaiting() {}		
 		@Override public final void setStopping() {}		
@@ -61,6 +67,7 @@ public interface AppStatus {
 	 *            the shallBeStopped to set
 	 */
 	void setShallBeStopped(boolean shallBeStopped);
+
 
 	/**
 	 * Stop the application if someone asks for forcing stop

@@ -24,9 +24,6 @@ public class WrapperStatusDto {
      */
     private int errorCounter;
     
-    /**
-     * Constrcutor
-     */
     public WrapperStatusDto() {
         timeSinceLastChange = 0;
         errorCounter = 0;

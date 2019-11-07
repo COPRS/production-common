@@ -2,11 +2,6 @@ package esa.s1pdgs.cpoc.status;
 
 import esa.s1pdgs.cpoc.common.AppState;
 
-/**
- * Internal status
- * 
- * @author Viveris Technologies
- */
 public class Status {
 
     /**
@@ -30,10 +25,19 @@ public class Status {
     private int errorCounterNextMessage;
 
     /**
-     * Constrcutor
+     * Maximal number of consecutive errors for processing
      */
-    public Status() {
-        this.state = AppState.WAITING;
+    private final int maxErrorCounterProcessing;
+    
+    /**
+     * Maximal number of consecutive errors for MQI
+     */
+    private final int maxErrorCounterNextMessage;
+    
+    public Status(int maxErrorCounterProcessing, int maxErrorCounterNextMessage) {
+    	this.maxErrorCounterProcessing = maxErrorCounterProcessing;
+    	this.maxErrorCounterNextMessage = maxErrorCounterNextMessage;
+        state = AppState.WAITING;        
         errorCounterProcessing = 0;
         errorCounterNextMessage = 0;
         dateLastChangeMs = System.currentTimeMillis();
@@ -66,8 +70,6 @@ public class Status {
     public int getErrorCounterNextMessage() {
         return errorCounterNextMessage;
     }
-
-    
 
     /**
      * Set status WAITING
@@ -102,24 +104,18 @@ public class Status {
         errorCounterNextMessage = 0;
     }
 
-    /**
-     * Set status ERROR
-     */
-    public void setErrorCounterProcessing(final int maxErrorCounter) {
+    public void incrementErrorCounterProcessing() {
         if (!isStopping()) {
             state = AppState.ERROR;
             dateLastChangeMs = System.currentTimeMillis();
             errorCounterProcessing++;
-            if (errorCounterProcessing >= maxErrorCounter) {
+            if (errorCounterProcessing >= maxErrorCounterProcessing) {
                 setFatalError();
             }
         }
     }
     
-    /**
-     * @param errorCounterNextMessage the errorCounterNextMessage to set
-     */
-    public void setErrorCounterNextMessage(final int maxErrorCounterNextMessage) {
+    public void incrementErrorCounterNextMessage() {
         if (!isStopping()) {
             state = AppState.ERROR;
             dateLastChangeMs = System.currentTimeMillis();

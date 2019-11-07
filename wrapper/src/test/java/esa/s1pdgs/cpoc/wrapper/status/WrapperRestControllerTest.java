@@ -131,8 +131,8 @@ public class WrapperRestControllerTest extends RestControllerTest {
     @Test
     public void testUrlStatusWhenError() throws Exception {
         Status status = (new AppStatusImpl(3, 30, mqiStatusService)).getStatus();
-        status.setErrorCounterProcessing(3);
-        status.setErrorCounterNextMessage(30);
+        status.incrementErrorCounterProcessing();
+        status.incrementErrorCounterNextMessage();
         doReturn(status).when(appStatus).getStatus();
 
         request(get("/app/status"))
@@ -148,8 +148,8 @@ public class WrapperRestControllerTest extends RestControllerTest {
     @Test
     public void testStatusWhenError() throws Exception {
         Status status = (new AppStatusImpl(3, 30, mqiStatusService)).getStatus();
-        status.setErrorCounterProcessing(3);
-        status.setErrorCounterProcessing(3);
+        status.incrementErrorCounterProcessing();
+        status.incrementErrorCounterProcessing();
         doReturn(status).when(appStatus).getStatus();
 
         long diffTmBefore =

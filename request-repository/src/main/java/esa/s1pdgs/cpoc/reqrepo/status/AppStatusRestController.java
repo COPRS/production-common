@@ -9,8 +9,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
-import esa.s1pdgs.cpoc.reqrepo.status.AppStatus.ValidationStatus;
 import esa.s1pdgs.cpoc.reqrepo.status.dto.RequestRepisitoryStatusDto;
+import esa.s1pdgs.cpoc.status.Status;
 
 @RestController
 @RequestMapping(path = "/app")
@@ -25,7 +25,7 @@ public class AppStatusRestController {
     /**
      * Application status
      */
-    private final AppStatus appStatus;
+    private final AppStatusImpl appStatus;
 
     /**
      * Constructor
@@ -33,7 +33,7 @@ public class AppStatusRestController {
      * @param appStatus
      */
     @Autowired
-    public AppStatusRestController(final AppStatus appStatus) {
+    public AppStatusRestController(final AppStatusImpl appStatus) {
         this.appStatus = appStatus;
     }
 
@@ -44,19 +44,12 @@ public class AppStatusRestController {
      */
     @RequestMapping(method = RequestMethod.GET, path = "/status")
     public ResponseEntity<RequestRepisitoryStatusDto> getStatusRest() {
-    	ValidationStatus currentStatus = appStatus.getStatus();
-        long currentTimestamp = System.currentTimeMillis();
-        long timeSinceLastChange =
-                currentTimestamp - currentStatus.getDateLastChangeMs();
-        RequestRepisitoryStatusDto validationStatus =
-                new RequestRepisitoryStatusDto(currentStatus.getState(),
-                        timeSinceLastChange, currentStatus.getErrorCounter());
-        if (currentStatus.isFatalError()) {
-            return new ResponseEntity<RequestRepisitoryStatusDto>(validationStatus,
-                    HttpStatus.INTERNAL_SERVER_ERROR);
-        }
-        return new ResponseEntity<RequestRepisitoryStatusDto>(validationStatus,
-                HttpStatus.OK);
+		Status status = appStatus.getStatus();
+		long msSinceLastChange = System.currentTimeMillis() - status.getDateLastChangeMs();
+		RequestRepisitoryStatusDto dto = new RequestRepisitoryStatusDto(status.getState(), msSinceLastChange,
+				status.getErrorCounterProcessing());
+		HttpStatus httpStatus = status.isFatalError() ? HttpStatus.INTERNAL_SERVER_ERROR : HttpStatus.OK;
+		return new ResponseEntity<RequestRepisitoryStatusDto>(dto, httpStatus);
     }
 
     /**
