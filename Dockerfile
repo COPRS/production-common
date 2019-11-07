@@ -20,6 +20,7 @@ COPY inbox-polling/ /app/inbox-polling
 COPY inbox-ingestion/ /app/inbox-ingestion
 COPY job-generator/ /app/job-generator
 COPY lib-commons/ /app/lib-commons
+COPY app-status /app/app-status
 COPY metadata-catalog/ /app/metadata-catalog
 COPY metadata-client/ /app/metadata-client
 COPY mqi-client/ /app/mqi-client
