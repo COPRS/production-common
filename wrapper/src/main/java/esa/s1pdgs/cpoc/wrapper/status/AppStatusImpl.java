@@ -1,5 +1,7 @@
 package esa.s1pdgs.cpoc.wrapper.status;
 
+import java.util.NoSuchElementException;
+
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -8,9 +10,11 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
+import esa.s1pdgs.cpoc.common.ProductCategory;
 import esa.s1pdgs.cpoc.common.errors.AbstractCodedException;
 import esa.s1pdgs.cpoc.mqi.client.StatusService;
 import esa.s1pdgs.cpoc.status.AbstractAppStatus;
+import esa.s1pdgs.cpoc.status.AppStatus;
 import esa.s1pdgs.cpoc.status.Status;
 
 @Component
@@ -50,4 +54,14 @@ public class AppStatusImpl extends AbstractAppStatus {
             System.exit(0);
         }
     }
+
+	@Override
+	public boolean isProcessing(String category, long messageId) {
+		if (!ProductCategory.LEVEL_JOBS.name().toLowerCase().equals(category)) {
+			throw new NoSuchElementException(String.format("Category %s not available for processing", category));
+		} else if (messageId < 0) {
+			throw new IllegalArgumentException(String.format("Message id value %d is out of range", messageId));			
+		}		
+		return getProcessingMsgId() != AppStatus.PROCESSING_MSG_ID_UNDEFINED && getProcessingMsgId() == messageId;
+	}
 }

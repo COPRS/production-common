@@ -1,4 +1,4 @@
-package esa.s1pdgs.cpoc.wrapper.status.dto;
+package esa.s1pdgs.cpoc.appstatus.dto;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
@@ -14,15 +14,15 @@ import nl.jqno.equalsverifier.Warning;
  * 
  * @author Viveris Technologies
  */
-public class WrapperStatusDtoTest {
+public class AppStatusDtoTest {
 
     /**
-     * Test default cosntructor and getters
+     * Test default constructor and getters
      */
     @Test
     public void testConstructor() {
-        WrapperStatusDto dto =
-                new WrapperStatusDto(AppState.PROCESSING, 123456, 8);
+        AppStatusDto dto =
+                new AppStatusDto(AppState.PROCESSING, 123456, 8);
         assertEquals(AppState.PROCESSING, dto.getStatus());
         assertEquals(123456, dto.getTimeSinceLastChange());
         assertEquals(8, dto.getErrorCounter());
@@ -33,7 +33,7 @@ public class WrapperStatusDtoTest {
      */
     @Test
     public void testToStringAndSetters() {
-        WrapperStatusDto dto = new WrapperStatusDto();
+    	AppStatusDto dto = new AppStatusDto();
         dto.setStatus(AppState.FATALERROR);
         dto.setTimeSinceLastChange(953620);
         dto.setErrorCounter(4);
@@ -48,7 +48,7 @@ public class WrapperStatusDtoTest {
      */
     @Test
     public void equalsDto() {
-        EqualsVerifier.forClass(WrapperStatusDto.class).usingGetClass()
+        EqualsVerifier.forClass(AppStatusDto.class).usingGetClass()
                 .suppress(Warning.NONFINAL_FIELDS).verify();
     }
 }

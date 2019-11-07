@@ -1,5 +1,7 @@
 package esa.s1pdgs.cpoc.status;
 
+import java.util.NoSuchElementException;
+
 public interface AppStatus {
 	
 	/**
@@ -16,6 +18,7 @@ public interface AppStatus {
 		@Override public final boolean isShallBeStopped() {return false;}
 		@Override public final Status getStatus() {return null;}		
 		@Override public long getProcessingMsgId() { return -1;}
+		@Override public boolean isProcessing(String category, long messageId) {return false;}
 		@Override public final void forceStopping() {}
 	};
 	
@@ -68,6 +71,12 @@ public interface AppStatus {
 	 */
 	void setShallBeStopped(boolean shallBeStopped);
 
+	/**
+	 * @param category
+	 * @param messageId
+	 * @return is job processing
+	 */
+	boolean isProcessing(String category, long messageId) throws UnsupportedOperationException, NoSuchElementException, IllegalArgumentException;
 
 	/**
 	 * Stop the application if someone asks for forcing stop
