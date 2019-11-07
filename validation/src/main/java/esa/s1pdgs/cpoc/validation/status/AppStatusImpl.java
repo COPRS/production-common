@@ -19,14 +19,14 @@ public class AppStatusImpl extends AbstractAppStatus {
     private static final Logger LOGGER = LogManager.getLogger(AppStatusImpl.class);
 
     @Autowired
-    public AppStatusImpl(@Value("${status.max-error-counter}") final int maxErrorCounter) {
+    public AppStatusImpl(@Value("${status.max-error-counter:100}") final int maxErrorCounter) {
     	super(new Status(maxErrorCounter, 0));
     }
 
     /**
      * Stop the application if someone asks for forcing stop
      */
-    @Scheduled(fixedDelayString = "${status.delete-fixed-delay-ms}")
+    @Scheduled(fixedDelayString = "${status.delete-fixed-delay-ms:3000}")
     public void forceStopping() {
         if (isShallBeStopped()) {
             System.exit(0);
