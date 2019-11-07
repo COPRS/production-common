@@ -32,8 +32,8 @@ public class AppStatusImpl extends AbstractAppStatus {
 
     @Autowired
     public AppStatusImpl(
-            @Value("${status.max-error-counter-processing}") final int maxErrorCounterProcessing,
-            @Value("${status.max-error-counter-mqi}") final int maxErrorCounterNextMessage,
+            @Value("${status.max-error-counter-processing:100}") final int maxErrorCounterProcessing,
+            @Value("${status.max-error-counter-mqi:100}") final int maxErrorCounterNextMessage,
             @Qualifier("mqiServiceForStatus") final StatusService mqiStatusService) {
     	super(new Status(maxErrorCounterProcessing, maxErrorCounterNextMessage));
         this.mqiStatusService = mqiStatusService;
@@ -53,7 +53,7 @@ public class AppStatusImpl extends AbstractAppStatus {
      * Stop the application if someone asks for forcing stop
      */
     @Override
-	@Scheduled(fixedDelayString = "${status.delete-fixed-delay-ms}")
+	@Scheduled(fixedDelayString = "${status.delete-fixed-delay-ms:3000}")
     public void forceStopping() {
         if (isShallBeStopped()) {
             try {
