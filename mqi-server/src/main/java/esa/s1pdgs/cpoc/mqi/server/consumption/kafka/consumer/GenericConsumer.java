@@ -56,6 +56,13 @@ public class GenericConsumer<T> {
 			return newConsumerFor(cat, prio, topic, MessageConsumer.nullConsumer());
 		}
 		
+   		// use unique clientId to circumvent 'instance already exists' problem
+		public final String clientIdForTopic(final String topic) {
+			return kafkaProperties.getClientId() + "-" + 
+	    			kafkaProperties.getHostname()  + "-" + 
+	    			topic;
+		}
+		
 		// for unit test
 		final <T> GenericConsumer<T> newConsumerFor(
 				final ProductCategory cat, 
@@ -69,7 +76,7 @@ public class GenericConsumer<T> {
 	        		consumerFactory(topic, cat.getDtoClass()),
 	                containerProperties(topic, listener)
 	        );
-	        consumer.setContainer(container);	        
+	        consumer.setContainer(container);	  
 			return consumer;
 		}
 		
@@ -81,12 +88,7 @@ public class GenericConsumer<T> {
 			return new GenericMessageListener<T>(cat,kafkaProperties,service,otherAppService,consumer,appStatus, additionalConsumer);
 		}
 		
-	    private final <T> ConsumerFactory<String, T> consumerFactory(final String topic, final Class<T> dtoClass) {
-    		// use unique clientId to circumvent 'instance already exists' problem
-	    	final String consumerId = kafkaProperties.getClientId() + "-" + 
-	    			kafkaProperties.getHostname()  + "-" + 
-	    			topic;
-	    	
+	    private final <T> ConsumerFactory<String, T> consumerFactory(final String topic, final Class<T> dtoClass) {	    	
 	    	final JsonDeserializer<T> deser = new JsonDeserializer<>(dtoClass);
 	    	deser.addTrustedPackages("*");	    	
 	    	final ErrorHandlingDeserializer2<T> deserializer = new ErrorHandlingDeserializer2<>(deser);
@@ -104,7 +106,7 @@ public class GenericConsumer<T> {
 	    		return null;
 	    	});	    		    	
 	        return new DefaultKafkaConsumerFactory<>(
-	        		consumerConfig(consumerId),
+	        		consumerConfig(clientIdForTopic(topic)),
 	                new StringDeserializer(),
 	                deserializer
 	        );

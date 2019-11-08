@@ -112,7 +112,7 @@ public class MessageConsumptionController {
                 	final String topic = entry.getKey(); 
                 	final int prio = entry.getValue();                	
                 	LOGGER.debug("Creating new consumer with clientId {} on category {} (topic: {}) with priority {}", 
-                			consumerFactory.clientId(), cat, topic, prio);
+                			consumerFactory.clientIdForTopic(topic), cat, topic, prio);
                 	catConsumers.put(topic, consumerFactory.newConsumerFor(cat, prio, topic));
                 }
                 consumers.put(cat, catConsumers);
