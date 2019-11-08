@@ -90,6 +90,17 @@ public class PodService {
 				Pod pod = (Pod) resource;
 				pod.getMetadata().setName(pod.getMetadata().getName() + suffixe);
 				if (!CollectionUtils.isEmpty(pod.getSpec().getVolumes())) {
+					boolean justConfigVolumes = true;
+					for (Volume vvv : pod.getSpec().getVolumes()) {
+						LOGGER.info("Volume from file found {}",vvv.getName());
+						if (!vvv.getName().endsWith("config-volume")) {
+							justConfigVolumes = false;
+						}
+					}
+					
+					if (justConfigVolumes) {
+						break;
+					}
 					Volume v = pod.getSpec().getVolumes().get(0);
 					v.getPersistentVolumeClaim().setClaimName(v.getPersistentVolumeClaim().getClaimName() + suffixe);
 				}
