@@ -139,6 +139,7 @@ public class Scaler {
             }
 
         } catch (AbstractCodedException e) {
+        	e.printStackTrace();
             LOGGER.error("[INIT] [code {}] {}", e.getCode().getCode(),
                     e.getLogMessage());
         } catch (Exception e) {
