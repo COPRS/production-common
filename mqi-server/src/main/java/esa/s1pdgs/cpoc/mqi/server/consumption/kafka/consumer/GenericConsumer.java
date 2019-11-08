@@ -3,7 +3,6 @@ package esa.s1pdgs.cpoc.mqi.server.consumption.kafka.consumer;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.UUID;
 
 import org.apache.kafka.clients.consumer.ConsumerConfig;
 import org.apache.kafka.clients.consumer.RoundRobinAssignor;
@@ -40,7 +39,6 @@ public class GenericConsumer<T> {
 	    private final AppCatalogMqiService service;
 	    private final OtherApplicationService otherAppService;
 	    private final AppStatus appStatus;	  
-	    private final String clientId;
 	    	    
 		public Factory(
 				KafkaProperties kafkaProperties, 
@@ -52,15 +50,10 @@ public class GenericConsumer<T> {
 			this.service = service;
 			this.otherAppService = otherAppService;
 			this.appStatus = appStatus;
-			this.clientId = kafkaProperties.getClientId() + "-" + UUID.randomUUID().toString();
 		}
 
 		public final <T> GenericConsumer<T> newConsumerFor(final ProductCategory cat, final int prio, final String topic) {        
 			return newConsumerFor(cat, prio, topic, MessageConsumer.nullConsumer());
-		}
-		
-		public final String clientId() {
-			return clientId;
 		}
 		
 		// for unit test
@@ -89,7 +82,11 @@ public class GenericConsumer<T> {
 		}
 		
 	    private final <T> ConsumerFactory<String, T> consumerFactory(final String topic, final Class<T> dtoClass) {
-	  	    	
+    		// use unique clientId to circumvent 'instance already exists' problem
+	    	final String consumerId = kafkaProperties.getClientId() + "-" + 
+	    			kafkaProperties.getHostname()  + "-" + 
+	    			topic;
+	    	
 	    	final JsonDeserializer<T> deser = new JsonDeserializer<>(dtoClass);
 	    	deser.addTrustedPackages("*");	    	
 	    	final ErrorHandlingDeserializer2<T> deserializer = new ErrorHandlingDeserializer2<>(deser);
@@ -105,10 +102,9 @@ public class GenericConsumer<T> {
 	    				new String(b)
 	    		));	    		
 	    		return null;
-	    	});
-	    		    	
+	    	});	    		    	
 	        return new DefaultKafkaConsumerFactory<>(
-	        		consumerConfig(clientId),
+	        		consumerConfig(consumerId),
 	                new StringDeserializer(),
 	                deserializer
 	        );
