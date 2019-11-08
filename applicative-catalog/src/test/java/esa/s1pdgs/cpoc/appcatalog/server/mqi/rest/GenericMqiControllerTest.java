@@ -44,11 +44,11 @@ import esa.s1pdgs.cpoc.appcatalog.server.RestControllerTest;
 import esa.s1pdgs.cpoc.appcatalog.server.mqi.MessageConverter;
 import esa.s1pdgs.cpoc.appcatalog.server.mqi.MessageManager;
 import esa.s1pdgs.cpoc.appcatalog.server.mqi.db.MqiMessageService;
-import esa.s1pdgs.cpoc.appcatalog.server.status.AppStatus;
 import esa.s1pdgs.cpoc.common.MessageState;
 import esa.s1pdgs.cpoc.common.ProductCategory;
 import esa.s1pdgs.cpoc.mqi.model.queue.ProductDto;
 import esa.s1pdgs.cpoc.mqi.model.rest.Ack;
+import esa.s1pdgs.cpoc.status.AppStatus;
 
 /**
  * Test class for MqiAuxiliaryFile rest controller

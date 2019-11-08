@@ -73,10 +73,10 @@ public abstract class AbstractAppStatus implements AppStatus {
      */
     @Override
 	public synchronized void setError(String type) {
-        if(type.equals("PROCESSING")) {
+    	if("NEXT_MESSAGE".equals(type) || "MQI".equals(type)) {
+    		this.status.incrementErrorCounterNextMessage();
+    	} else  if("PROCESSING".equals(type) || "JOB".equals(type)) {
             this.status.incrementErrorCounterProcessing();
-        } else if(type.equals("NEXT_MESSAGE")) {
-            this.status.incrementErrorCounterNextMessage();
         }
     }
 
