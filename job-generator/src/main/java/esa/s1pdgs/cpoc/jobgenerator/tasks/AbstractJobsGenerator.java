@@ -51,6 +51,7 @@ import esa.s1pdgs.cpoc.jobgenerator.model.joborder.enums.JobOrderDestination;
 import esa.s1pdgs.cpoc.jobgenerator.model.joborder.enums.JobOrderFileNameType;
 import esa.s1pdgs.cpoc.jobgenerator.model.metadata.SearchMetadataResult;
 import esa.s1pdgs.cpoc.jobgenerator.model.tasktable.TaskTable;
+import esa.s1pdgs.cpoc.jobgenerator.model.tasktable.TaskTableDynProcParam;
 import esa.s1pdgs.cpoc.jobgenerator.model.tasktable.TaskTableInput;
 import esa.s1pdgs.cpoc.jobgenerator.model.tasktable.TaskTableInputAlternative;
 import esa.s1pdgs.cpoc.jobgenerator.model.tasktable.TaskTablePool;
@@ -236,24 +237,18 @@ public abstract class AbstractJobsGenerator<T extends AbstractDto> implements Ru
 
     private void buildJobOrderTemplate() {
         // Build from task table
-        TaskTableToJobOrderConverter converter =
-                new TaskTableToJobOrderConverter();
-        this.jobOrderTemplate = converter.apply(this.taskTable);
+        TaskTableToJobOrderConverter converter = new TaskTableToJobOrderConverter();
+        jobOrderTemplate = converter.apply(this.taskTable);
 
         // Update values from configuration file
-        this.jobOrderTemplate.getConf().getProcParams().forEach(item -> {
-            if (this.l0ProcessSettings.getParams()
-                    .containsKey(item.getName())) {
-                item.setValue(
-                        this.l0ProcessSettings.getParams().get(item.getName()));
+        jobOrderTemplate.getConf().getProcParams().forEach(item -> {
+            if (l0ProcessSettings.getParams().containsKey(item.getName())) {
+                item.setValue(l0ProcessSettings.getParams().get(item.getName()));                
             }
         });
-        this.jobOrderTemplate.getConf()
-                .setStdoutLogLevel(this.l0ProcessSettings.getLoglevelstdout());
-        this.jobOrderTemplate.getConf()
-                .setStderrLogLevel(this.l0ProcessSettings.getLoglevelstderr());
-        this.jobOrderTemplate.getConf().setProcessingStation(
-                this.l0ProcessSettings.getProcessingstation());
+        jobOrderTemplate.getConf().setStdoutLogLevel(l0ProcessSettings.getLoglevelstdout());
+        jobOrderTemplate.getConf().setStderrLogLevel(l0ProcessSettings.getLoglevelstderr());
+        jobOrderTemplate.getConf().setProcessingStation(l0ProcessSettings.getProcessingstation());
 
         // Update outputs from configuration file
         this.jobOrderTemplate.getProcs().stream()
@@ -542,12 +537,17 @@ public abstract class AbstractJobsGenerator<T extends AbstractDto> implements Ru
     	try {
     		final Map<String,String> result = new HashMap<>();
     		
-    		for (final JobOrderProcParam param : jobGen.getJobOrder().getConf().getProcParams()) {    			
-    			result.put(param.getName()+"_string", param.getValue());
+    		for (final JobOrderProcParam param : jobGen.getJobOrder().getConf().getProcParams()) {  
+        		// S1PRO-699: Determine type of parameter to use the appropriate suffix in reporting
+    			final String reportingType = mapTasktableTypeToReportingType(
+    					getTypeForParameterName(param.getName())
+    			);
+    			result.put(param.getName() + reportingType, param.getValue());
     		}
     		return result;
 		} catch (Exception e) {
-			// this is only used for reporting so don't break anything if this goes wrong here and provide the error message
+			// this is only used for reporting so don't break anything if this goes wrong here 
+			// and provide the error message
 			LOGGER.error(e);
 			return Collections.singletonMap("error", LogUtils.toString(e));
 		}
@@ -1017,5 +1017,23 @@ public abstract class AbstractJobsGenerator<T extends AbstractDto> implements Ru
     		return "H";
     	}
     	return "NONE";    	
+    }
+    
+    private final String getTypeForParameterName(final String name) {    			
+    	for (final TaskTableDynProcParam param : taskTable.getDynProcParams()) {
+    		if (param.getName().equals(name)) {
+    			return param.getType();
+    		}    		
+    	}
+    	return "String";
+    }
+    
+    private final String mapTasktableTypeToReportingType(final String type) {
+    	if ("number".equalsIgnoreCase(type)) {
+    		return "_double";
+    	} else if ("datenumber".equalsIgnoreCase(type)) {
+    		return "_date";
+    	}
+    	return "_string";
     }
 }
