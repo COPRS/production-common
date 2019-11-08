@@ -103,7 +103,7 @@ public class AppStatusImpl extends AbstractAppStatus {
 		    }
 		}
 	}
-	
+		
     @Override
     public boolean isProcessing(String category, long messageId) {
     	if (!ProductCategory.EDRS_SESSIONS.name().toLowerCase().equals(category) &&

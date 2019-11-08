@@ -94,7 +94,32 @@ public class Status {
      * @return the status
      */
     public AppState getState() {
-        return state;
+    	if (subStatuses.isEmpty() || state == AppState.STOPPING) {
+    		return state;
+    	} else {
+    		// note: this code block has been moved from metadata catalog
+    		boolean isFatalError = false;
+    		boolean isError = false;
+    		boolean isProcessing = false;
+    		for(Status subStatus : subStatuses.values()) {
+    			if (subStatus.isFatalError()) {
+    				isFatalError = true;
+    			} else if (subStatus.isError()) {
+    				isError = true;
+    			} else if (subStatus.isProcessing()) {
+    				isProcessing = true;
+    			}
+    		}
+    		AppState ret = AppState.WAITING;
+    		if (isFatalError) {
+    			ret = AppState.FATALERROR;
+    		} else if (isError) {
+    			ret = AppState.ERROR;
+    		} else if (isProcessing) {
+    			ret = AppState.PROCESSING;
+    		}
+    		return ret;
+    	}
     }
 
     /**
@@ -115,14 +140,30 @@ public class Status {
      * @return the errorCounter
      */
     public int getErrorCounterProcessing() {
-        return errorCounterProcessing;
+    	if (subStatuses.isEmpty()) { 
+    		return errorCounterProcessing;
+    	} else {
+    		int sum = 0;
+			for(Status subStatus : subStatuses.values()) {
+				sum +=  subStatus.getErrorCounterProcessing();
+			}
+			return sum;
+    	}
     }
 
     /**
      * @return the errorCounterNextMessage
      */
     public int getErrorCounterNextMessage() {
-        return errorCounterNextMessage;
+    	if (subStatuses.isEmpty()) { 
+    		return errorCounterNextMessage;
+    	} else {
+    		int sum = 0;
+			for(Status subStatus : subStatuses.values()) {
+				sum += subStatus.getErrorCounterNextMessage();						
+			}
+			return sum;
+    	}
     }
 
     /**
@@ -196,7 +237,7 @@ public class Status {
      * @return
      */
     public boolean isWaiting() {
-        return state == AppState.WAITING;
+   		return getState() == AppState.WAITING;
     }
 
     /**
@@ -205,7 +246,7 @@ public class Status {
      * @return
      */
     public boolean isProcessing() {
-        return state == AppState.PROCESSING;
+    	return getState() == AppState.PROCESSING;
     }
 
     /**
@@ -214,7 +255,7 @@ public class Status {
      * @return
      */
     public boolean isStopping() {
-        return state == AppState.STOPPING;
+        return state == AppState.STOPPING; // for stopping direct access to state is required
     }
 
     /**
@@ -223,7 +264,7 @@ public class Status {
      * @return
      */
     public boolean isError() {
-        return state == AppState.ERROR;
+   		return getState() == AppState.ERROR;
     }
 
     /**
@@ -232,11 +273,7 @@ public class Status {
      * @return
      */
     public boolean isFatalError() {
-    	boolean isFatalError = state == AppState.FATALERROR;
-    	for(Status subStatus : subStatuses.values()) {
-    		isFatalError = isFatalError || subStatus.isFatalError();
-    	}
-    	return isFatalError;
+   		return getState() == AppState.FATALERROR;
     }
 
 	/**

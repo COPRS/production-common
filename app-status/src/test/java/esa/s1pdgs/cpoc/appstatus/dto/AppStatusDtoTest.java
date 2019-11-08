@@ -6,6 +6,8 @@ import static org.junit.Assert.assertTrue;
 import org.junit.Test;
 
 import esa.s1pdgs.cpoc.common.AppState;
+import esa.s1pdgs.cpoc.common.ProductCategory;
+import esa.s1pdgs.cpoc.common.ProductFamily;
 import nl.jqno.equalsverifier.EqualsVerifier;
 import nl.jqno.equalsverifier.Warning;
 
@@ -28,6 +30,19 @@ public class AppStatusDtoTest {
         assertEquals(AppState.PROCESSING, dto.getStatus());
         assertEquals(new Long(123456L), dto.getTimeSinceLastChange());
         assertEquals(new Integer(8), dto.getErrorCounter());
+        
+		AppStatusDto status1 = new AppStatusDto(ProductCategory.EDRS_SESSIONS, AppState.PROCESSING);
+		status1.setTimeSinceLastChange(123456L);
+		status1.setErrorCounter(8);
+		AppStatusDto status2 = new AppStatusDto(ProductCategory.LEVEL_JOBS, AppState.WAITING);
+		status2.setTimeSinceLastChange(12L);
+		status2.setErrorCounter(0);
+		dto.addSubStatuses(status1);
+		dto.addSubStatuses(status2);
+
+		assertEquals(2, dto.getSubStatuses().size());
+		assertEquals(status1, dto.getSubStatuses().get(ProductCategory.EDRS_SESSIONS));
+		assertEquals(status2, dto.getSubStatuses().get(ProductCategory.LEVEL_JOBS));
     }
 
     /**
@@ -50,7 +65,8 @@ public class AppStatusDtoTest {
      */
     @Test
     public void equalsDto() {
-        EqualsVerifier.forClass(AppStatusDto.class).usingGetClass()
+        EqualsVerifier.forClass(AppStatusDto.class).withPrefabValues(AppStatusDto.class, new AppStatusDto(ProductCategory.AUXILIARY_FILES, AppState.WAITING), new AppStatusDto(ProductCategory.EDRS_SESSIONS, AppState.PROCESSING)).usingGetClass()
                 .suppress(Warning.NONFINAL_FIELDS).verify();
     }
+    
 }
