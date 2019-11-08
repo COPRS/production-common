@@ -28,7 +28,6 @@ import esa.s1pdgs.cpoc.common.utils.FileUtils;
 import esa.s1pdgs.cpoc.common.utils.LogUtils;
 import esa.s1pdgs.cpoc.report.LoggerReporting;
 import esa.s1pdgs.cpoc.report.ObsReportingInput;
-import esa.s1pdgs.cpoc.report.ObsReportingOutput;
 import esa.s1pdgs.cpoc.report.Reporting;
 import esa.s1pdgs.cpoc.report.ReportingMessage;
 
@@ -127,15 +126,15 @@ public abstract class AbstractObsClient implements ObsClient {
         	
             // Upload object in sequential
             for (final ObsUploadObject object : objects) {            	
-             	reporting.begin(new ReportingMessage("Start uploading to OBS"));
+             	reporting.begin(
+             			new ObsReportingInput(getBucketFor(object.getFamily()), object.getKey()),
+             			new ReportingMessage("Start uploading to OBS")
+             	);
              	
              	try {
     				uploadObject(object);
     				final long dlSize =	FileUtils.size(object.getFile());
-    				reporting.end( 
-    						new ObsReportingOutput(getBucketFor(object.getFamily()), object.getKey()), 
-    						new ReportingMessage(dlSize, "End uploading to OBS")
-    				);             	
+    				reporting.end(new ReportingMessage(dlSize, "End uploading to OBS"));             	
     			} catch (SdkClientException | RuntimeException e) {
     				reporting.error(new ReportingMessage("Error on uploading to OBS: {}", LogUtils.toString(e)));
     				throw e;
