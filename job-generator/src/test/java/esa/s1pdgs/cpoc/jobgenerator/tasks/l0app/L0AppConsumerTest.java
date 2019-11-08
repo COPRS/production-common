@@ -1,6 +1,6 @@
 package esa.s1pdgs.cpoc.jobgenerator.tasks.l0app;
 
-import static org.junit.Assert.assertEquals; 
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doReturn;
@@ -27,8 +27,6 @@ import esa.s1pdgs.cpoc.common.EdrsSessionFileType;
 import esa.s1pdgs.cpoc.common.errors.AbstractCodedException;
 import esa.s1pdgs.cpoc.errorrepo.ErrorRepoAppender;
 import esa.s1pdgs.cpoc.jobgenerator.config.ProcessSettings;
-import esa.s1pdgs.cpoc.jobgenerator.status.AppStatus;
-import esa.s1pdgs.cpoc.jobgenerator.status.AppStatus.JobStatus;
 import esa.s1pdgs.cpoc.jobgenerator.tasks.AbstractJobsDispatcher;
 import esa.s1pdgs.cpoc.jobgenerator.utils.TestL0Utils;
 import esa.s1pdgs.cpoc.metadata.client.MetadataClient;
@@ -37,6 +35,8 @@ import esa.s1pdgs.cpoc.mqi.client.GenericMqiClient;
 import esa.s1pdgs.cpoc.mqi.client.StatusService;
 import esa.s1pdgs.cpoc.mqi.model.queue.EdrsSessionDto;
 import esa.s1pdgs.cpoc.mqi.model.rest.GenericMessageDto;
+import esa.s1pdgs.cpoc.status.AppStatus;
+import esa.s1pdgs.cpoc.status.Status;
 
 public class L0AppConsumerTest {
 
@@ -60,7 +60,7 @@ public class L0AppConsumerTest {
     private AppStatus appStatus;
 
     @Mock
-    private JobStatus jobStatus;
+    private Status jobStatus;
     
     @Mock
     private MetadataClient metadataClient;

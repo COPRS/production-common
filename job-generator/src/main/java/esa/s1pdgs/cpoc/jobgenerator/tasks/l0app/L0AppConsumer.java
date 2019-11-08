@@ -24,7 +24,6 @@ import esa.s1pdgs.cpoc.common.errors.InvalidFormatProduct;
 import esa.s1pdgs.cpoc.errorrepo.ErrorRepoAppender;
 import esa.s1pdgs.cpoc.errorrepo.model.rest.FailedProcessingDto;
 import esa.s1pdgs.cpoc.jobgenerator.config.ProcessSettings;
-import esa.s1pdgs.cpoc.jobgenerator.status.AppStatus;
 import esa.s1pdgs.cpoc.jobgenerator.tasks.AbstractGenericConsumer;
 import esa.s1pdgs.cpoc.jobgenerator.tasks.AbstractJobsDispatcher;
 import esa.s1pdgs.cpoc.metadata.client.MetadataClient;
@@ -39,6 +38,7 @@ import esa.s1pdgs.cpoc.report.FilenameReportingInput;
 import esa.s1pdgs.cpoc.report.LoggerReporting;
 import esa.s1pdgs.cpoc.report.Reporting;
 import esa.s1pdgs.cpoc.report.ReportingMessage;
+import esa.s1pdgs.cpoc.status.AppStatus;
 
 public class L0AppConsumer extends AbstractGenericConsumer<EdrsSessionDto> implements MqiListener<EdrsSessionDto> {
     
