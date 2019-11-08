@@ -125,7 +125,7 @@ public class AppStatusRestControllerTest {
                 System.currentTimeMillis() - status.getDateLastChangeMs();
         verify(appStatus, times(1)).getStatus();
         assertEquals(AppState.FATALERROR, result.getBody().getStatus());
-        assertEquals(0, result.getBody().getErrorCounter());
+        assertEquals(new Integer(0), result.getBody().getErrorCounter());
         assertTrue(result.getBody().getTimeSinceLastChange() >= diffTmBefore);
         assertTrue(diffTmAfter >= result.getBody().getTimeSinceLastChange());
     }
@@ -169,7 +169,7 @@ public class AppStatusRestControllerTest {
                 System.currentTimeMillis() - status.getDateLastChangeMs();
         verify(appStatus, times(1)).getStatus();
         assertEquals(AppState.ERROR, result.getBody().getStatus());
-        assertEquals(2, result.getBody().getErrorCounter());
+        assertEquals(new Integer(2), result.getBody().getErrorCounter());
         assertTrue(result.getBody().getTimeSinceLastChange() >= diffTmBefore);
         assertTrue(diffTmAfter >= result.getBody().getTimeSinceLastChange());
     }

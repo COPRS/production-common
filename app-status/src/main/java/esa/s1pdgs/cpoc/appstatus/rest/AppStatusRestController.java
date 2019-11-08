@@ -49,10 +49,20 @@ public class AppStatusRestController {
     @RequestMapping(method = RequestMethod.GET, path = "/status")
     public ResponseEntity<AppStatusDto> getStatusRest() {
     	Status status = appStatus.getStatus();
-    	long msSinceLastChange = System.currentTimeMillis() - status.getDateLastChangeMs();
-        AppStatusDto dto = new AppStatusDto(status.getState(), msSinceLastChange, status.getErrorCounterNextMessage() + status.getErrorCounterProcessing());
+    	AppStatusDto statusDto = new AppStatusDto(status.getState());
+    	if (status.getSubStatuses().isEmpty()) {
+	        statusDto.setErrorCounter(status.getErrorCounterNextMessage() + status.getErrorCounterProcessing());
+	        statusDto.setTimeSinceLastChange(System.currentTimeMillis() - status.getDateLastChangeMs());
+    	} else {
+    		for (Status subStatus : appStatus.getSubStatuses().values()) {
+    			AppStatusDto subStatusDto = new AppStatusDto(subStatus.getCategory().get(), subStatus.getState());
+    			subStatusDto.setErrorCounter(subStatus.getErrorCounterNextMessage() + subStatus.getErrorCounterProcessing());
+    			subStatusDto.setTimeSinceLastChange(System.currentTimeMillis() - subStatus.getDateLastChangeMs());
+    			statusDto.addSubStatuses(subStatusDto);
+    		}
+    	}
         HttpStatus httpStatus = status.isFatalError() ? HttpStatus.INTERNAL_SERVER_ERROR : HttpStatus.OK;
-		return new ResponseEntity<AppStatusDto>(dto, httpStatus);
+		return new ResponseEntity<AppStatusDto>(statusDto, httpStatus);
     }
 
     /**

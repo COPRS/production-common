@@ -1,14 +1,39 @@
 package esa.s1pdgs.cpoc.status;
 
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Optional;
+
 import esa.s1pdgs.cpoc.common.AppState;
+import esa.s1pdgs.cpoc.common.ProductCategory;
 
 public class Status {
 
+	/**
+	 * For waiting state and computations where no MQI is involved
+	 */
+	public static final long PROCESSING_MSG_ID_UNDEFINED = 0;
+	
     /**
-     * State
+     * State of application
      */
     private AppState state;
 
+    /**
+     * Category of state
+     */
+    private Optional<ProductCategory> category;
+    
+    /**
+     * Status per category
+     */
+    private Map<ProductCategory, Status> subStatuses;
+    
+    /**
+     * Identifier of the processing message
+     */
+    private long processingMsgId;
+    
     /**
      * Date of the last change of the status (old status != new status)
      */
@@ -34,14 +59,36 @@ public class Status {
      */
     private final int maxErrorCounterNextMessage;
     
+    public Status(ProductCategory productCategory, int maxErrorCounterProcessing, int maxErrorCounterNextMessage) {
+    	this(maxErrorCounterProcessing, maxErrorCounterNextMessage);
+    	category = Optional.ofNullable(productCategory);
+    }
+    
     public Status(int maxErrorCounterProcessing, int maxErrorCounterNextMessage) {
     	this.maxErrorCounterProcessing = maxErrorCounterProcessing;
     	this.maxErrorCounterNextMessage = maxErrorCounterNextMessage;
-        state = AppState.WAITING;        
-        errorCounterProcessing = 0;
-        errorCounterNextMessage = 0;
-        dateLastChangeMs = System.currentTimeMillis();
+    	processingMsgId = PROCESSING_MSG_ID_UNDEFINED;
+    	state = AppState.WAITING;        
+    	errorCounterProcessing = 0;
+    	errorCounterNextMessage = 0;
+    	dateLastChangeMs = System.currentTimeMillis();
+    	category = Optional.empty();
+    	subStatuses = new HashMap<>();
     }
+    
+	/**
+	 * @return the category
+	 */
+	public Optional<ProductCategory> getCategory() {
+		return category;
+	}
+
+	/**
+	 * @param category the category to set
+	 */
+	public void setCategory(Optional<ProductCategory> category) {
+		this.category = category;
+	}
 
     /**
      * @return the status
@@ -50,6 +97,13 @@ public class Status {
         return state;
     }
 
+    /**
+	 * @return the processingMsgId
+	 */
+	public long getProcessingMsgId() {
+		return processingMsgId;
+	}
+	
     /**
      * @return the timeSinceLastChange
      */
@@ -77,6 +131,7 @@ public class Status {
     public void setWaiting() {
         if (!isStopping() && !isFatalError()) {
             state = AppState.WAITING;
+            processingMsgId = PROCESSING_MSG_ID_UNDEFINED;
             dateLastChangeMs = System.currentTimeMillis();
             errorCounterNextMessage = 0;
         }
@@ -85,9 +140,10 @@ public class Status {
     /**
      * Set status PROCESSING
      */
-    public void setProcessing() {
+    public void setProcessing(long processingMsgId) {
         if (!isStopping() && !isFatalError()) {
-            state = AppState.PROCESSING;
+        	this.processingMsgId = processingMsgId;
+        	state = AppState.PROCESSING;
             dateLastChangeMs = System.currentTimeMillis();
             errorCounterProcessing = 0;
             errorCounterNextMessage = 0;
@@ -176,7 +232,25 @@ public class Status {
      * @return
      */
     public boolean isFatalError() {
-        return state == AppState.FATALERROR;
+    	boolean isFatalError = state == AppState.FATALERROR;
+    	for(Status subStatus : subStatuses.values()) {
+    		isFatalError = isFatalError || subStatus.isFatalError();
+    	}
+    	return isFatalError;
     }
+
+	/**
+	 * @return the subStatuses
+	 */
+	public Map<ProductCategory, Status> getSubStatuses() {
+		return subStatuses;
+	}
+
+	/**
+	 * @param subStatuses the subStatuses to set
+	 */
+	public void setSubStatuses(Map<ProductCategory, Status> subStatuses) {
+		this.subStatuses = subStatuses;
+	}
 
 }

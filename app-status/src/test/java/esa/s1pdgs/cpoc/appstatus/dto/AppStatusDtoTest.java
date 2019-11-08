@@ -22,10 +22,12 @@ public class AppStatusDtoTest {
     @Test
     public void testConstructor() {
         AppStatusDto dto =
-                new AppStatusDto(AppState.PROCESSING, 123456, 8);
+                new AppStatusDto(AppState.PROCESSING);
+        dto.setErrorCounter(8);
+        dto.setTimeSinceLastChange(123456L);
         assertEquals(AppState.PROCESSING, dto.getStatus());
-        assertEquals(123456, dto.getTimeSinceLastChange());
-        assertEquals(8, dto.getErrorCounter());
+        assertEquals(new Long(123456L), dto.getTimeSinceLastChange());
+        assertEquals(new Integer(8), dto.getErrorCounter());
     }
 
     /**
@@ -35,7 +37,7 @@ public class AppStatusDtoTest {
     public void testToStringAndSetters() {
     	AppStatusDto dto = new AppStatusDto();
         dto.setStatus(AppState.FATALERROR);
-        dto.setTimeSinceLastChange(953620);
+        dto.setTimeSinceLastChange(953620L);
         dto.setErrorCounter(4);
         String str = dto.toString();
         assertTrue(str.contains("status: FATALERROR"));

@@ -1,24 +1,25 @@
 package esa.s1pdgs.cpoc.status;
 
+import java.util.Collections;
+import java.util.Map;
 import java.util.NoSuchElementException;
+
+import esa.s1pdgs.cpoc.common.ProductCategory;
 
 public interface AppStatus {
 	
-	/**
-	 * For waiting state and computations where no MQI is involved
-	 */
-	public static final long PROCESSING_MSG_ID_UNDEFINED = 0;
-
 	public static final AppStatus NULL = new AppStatus() {		
+		@Override public final Status getStatus() {return null;}		
+		@Override public final Map<ProductCategory, Status> getSubStatuses() { return Collections.emptyMap(); }
+		@Override public final void addSubStatus(Status subStatus) {}
 		@Override public final void setWaiting() {}		
 		@Override public final void setStopping() {}		
 		@Override public final void setShallBeStopped(boolean shallBeStopped) {}		
 		@Override public final void setProcessing(long processingMsgId) {}
 		@Override public final void setError(String type) {}
 		@Override public final boolean isShallBeStopped() {return false;}
-		@Override public final Status getStatus() {return null;}		
-		@Override public long getProcessingMsgId() { return -1;}
-		@Override public boolean isProcessing(String category, long messageId) {return false;}
+		@Override public final long getProcessingMsgId() { return -1;}
+		@Override public final boolean isProcessing(String category, long messageId) {return false;}
 		@Override public final void forceStopping() {}
 	};
 	
@@ -31,10 +32,20 @@ public interface AppStatus {
 	}
 
 	/**
-	 * @return the status
+	 * @return the status of the application
 	 */
 	Status getStatus();
 
+	/**
+	 * @return the status per category
+	 */
+	Map<ProductCategory, Status> getSubStatuses();
+
+	/**
+	 * @param statusPerCategory
+	 */
+	void addSubStatus(Status subStatus) throws IllegalArgumentException;
+	
 	/**
 	 * @return the processingMsgId
 	 */

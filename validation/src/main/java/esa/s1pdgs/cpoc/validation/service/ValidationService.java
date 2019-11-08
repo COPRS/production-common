@@ -75,7 +75,7 @@ public class ValidationService {
 	public int checkConsistencyForInterval() {
 		synchronized(nbRunningConsistencyChecksLock) {
 			if (++nbRunningConsistencyChecks == 1) {
-				appStatus.setProcessing(esa.s1pdgs.cpoc.status.AppStatus.PROCESSING_MSG_ID_UNDEFINED);
+				appStatus.setProcessing(esa.s1pdgs.cpoc.status.Status.PROCESSING_MSG_ID_UNDEFINED);
 			}
 		}
 		final Reporting.Factory reportingFactory = new LoggerReporting.Factory("ValidationService");

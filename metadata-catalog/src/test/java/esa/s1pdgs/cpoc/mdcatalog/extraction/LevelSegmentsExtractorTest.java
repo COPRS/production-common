@@ -33,7 +33,7 @@ import esa.s1pdgs.cpoc.mdcatalog.ProcessConfiguration;
 import esa.s1pdgs.cpoc.mdcatalog.es.EsServices;
 import esa.s1pdgs.cpoc.mdcatalog.extraction.model.OutputFileDescriptor;
 import esa.s1pdgs.cpoc.mdcatalog.extraction.xml.XmlConverter;
-import esa.s1pdgs.cpoc.mdcatalog.status.AppStatus;
+import esa.s1pdgs.cpoc.mdcatalog.status.AppStatusImpl;
 import esa.s1pdgs.cpoc.mqi.client.GenericMqiClient;
 import esa.s1pdgs.cpoc.mqi.model.queue.ProductDto;
 import esa.s1pdgs.cpoc.mqi.model.rest.GenericMessageDto;
@@ -71,7 +71,7 @@ public class LevelSegmentsExtractorTest {
      * Application status
      */
     @Mock
-    protected AppStatus appStatus;
+    protected AppStatusImpl appStatus;
 
     /**
      * Extractor

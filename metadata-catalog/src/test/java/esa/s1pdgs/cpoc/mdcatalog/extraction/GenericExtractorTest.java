@@ -6,7 +6,6 @@ import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.verifyZeroInteractions;
 
 import java.io.File;
@@ -26,7 +25,7 @@ import esa.s1pdgs.cpoc.errorrepo.model.rest.FailedProcessingDto;
 import esa.s1pdgs.cpoc.mdcatalog.ProcessConfiguration;
 import esa.s1pdgs.cpoc.mdcatalog.es.EsServices;
 import esa.s1pdgs.cpoc.mdcatalog.extraction.xml.XmlConverter;
-import esa.s1pdgs.cpoc.mdcatalog.status.AppStatus;
+import esa.s1pdgs.cpoc.mdcatalog.status.AppStatusImpl;
 import esa.s1pdgs.cpoc.mqi.client.GenericMqiClient;
 import esa.s1pdgs.cpoc.mqi.model.queue.ProductDto;
 import esa.s1pdgs.cpoc.mqi.model.rest.Ack;
@@ -65,7 +64,7 @@ public class GenericExtractorTest {
      * Application status
      */
     @Mock
-    protected AppStatus appStatus;
+    protected AppStatusImpl appStatus;
     
     @Mock
     XmlConverter xmlConverter;
@@ -95,8 +94,7 @@ public class GenericExtractorTest {
     public void init() throws AbstractCodedException {
         MockitoAnnotations.initMocks(this);
 
-        doNothing().when(appStatus).setError(Mockito.any(),
-                Mockito.anyString());
+        doNothing().when(appStatus).setError(Mockito.anyString());
         doReturn(true).when(mqiService).ack(Mockito.any(), Mockito.any());
 
         inputMessage = new GenericMessageDto<ProductDto>(123, "",
@@ -127,8 +125,7 @@ public class GenericExtractorTest {
         verify(mqiService, times(1)).ack(
         		Mockito.eq(new AckMessageDto(123, Ack.ERROR, "error message", false)), 
         		Mockito.eq(ProductCategory.LEVEL_PRODUCTS));
-        verify(appStatus, times(1)).setError(
-                Mockito.eq(ProductCategory.LEVEL_PRODUCTS),
+        verify(appStatus, times(1)).setError(Mockito.eq(ProductCategory.LEVEL_PRODUCTS),
                 Mockito.anyString());
     }
 
@@ -146,9 +143,7 @@ public class GenericExtractorTest {
         verify(mqiService, times(1)).ack(
         		Mockito.eq(new AckMessageDto(123, Ack.ERROR, "error message", false)),
         		Mockito.eq(ProductCategory.LEVEL_PRODUCTS));
-        verify(appStatus, times(1)).setError(
-                Mockito.eq(ProductCategory.LEVEL_PRODUCTS),
-                Mockito.anyString());
+        verify(appStatus, times(1)).setError(Mockito.eq(ProductCategory.LEVEL_PRODUCTS), Mockito.anyString());
     }
 
     /**

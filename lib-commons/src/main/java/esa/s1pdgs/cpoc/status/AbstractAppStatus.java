@@ -1,30 +1,28 @@
 package esa.s1pdgs.cpoc.status;
 
+import java.util.Map;
+
+import esa.s1pdgs.cpoc.common.ProductCategory;
+
 public abstract class AbstractAppStatus implements AppStatus {
 
     /**
-     * Status
+     * Status of application
      */
-    private final Status status;
-
+    protected final Status status;
+    
     /**
      * Indicate if the application shall be stopped
      */
     private boolean shallBeStopped;
 
-    /**
-     * Identifier of the processing message
-     */
-    private long processingMsgId;
-
     public AbstractAppStatus(Status status) {
 		this.status = status;
 		shallBeStopped = false;
-        processingMsgId = PROCESSING_MSG_ID_UNDEFINED;
 	}
     
     /**
-     * @return the status
+     * @return the application status
      */
     @Override
 	public synchronized Status getStatus() {
@@ -32,11 +30,27 @@ public abstract class AbstractAppStatus implements AppStatus {
     }
 
     /**
+     * @return the status per category
+     */
+	@Override
+	public Map<ProductCategory, Status> getSubStatuses() {
+		return status.getSubStatuses();
+	}
+	
+	@Override
+	public void addSubStatus(Status status) {
+		if (!status.getCategory().isPresent()) {
+			throw new IllegalArgumentException("Assignment as a substatus failed because category attribute is not present");
+		}
+		this.status.getSubStatuses().put(status.getCategory().get(), status);
+	}
+    
+    /**
      * @return the processingMsgId
      */
     @Override
 	public long getProcessingMsgId() {
-        return processingMsgId;
+        return status.getProcessingMsgId();
     }
 
     /**
@@ -44,8 +58,7 @@ public abstract class AbstractAppStatus implements AppStatus {
      */
     @Override
 	public synchronized void setWaiting() {
-        this.processingMsgId = PROCESSING_MSG_ID_UNDEFINED;
-        this.status.setWaiting();
+        status.setWaiting();
     }
 
     /**
@@ -53,8 +66,7 @@ public abstract class AbstractAppStatus implements AppStatus {
      */
     @Override
 	public synchronized void setProcessing(final long processingMsgId) {
-        this.processingMsgId = processingMsgId;
-        this.status.setProcessing();
+        this.status.setProcessing(processingMsgId);
     }
 
     /**

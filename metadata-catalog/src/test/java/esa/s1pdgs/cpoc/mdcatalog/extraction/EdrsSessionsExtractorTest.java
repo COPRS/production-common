@@ -23,7 +23,7 @@ import esa.s1pdgs.cpoc.mdcatalog.ProcessConfiguration;
 import esa.s1pdgs.cpoc.mdcatalog.es.EsServices;
 import esa.s1pdgs.cpoc.mdcatalog.extraction.model.EdrsSessionFileDescriptor;
 import esa.s1pdgs.cpoc.mdcatalog.extraction.xml.XmlConverter;
-import esa.s1pdgs.cpoc.mdcatalog.status.AppStatus;
+import esa.s1pdgs.cpoc.mdcatalog.status.AppStatusImpl;
 import esa.s1pdgs.cpoc.mqi.client.GenericMqiClient;
 import esa.s1pdgs.cpoc.mqi.model.queue.EdrsSessionDto;
 import esa.s1pdgs.cpoc.mqi.model.rest.GenericMessageDto;
@@ -60,7 +60,7 @@ public class EdrsSessionsExtractorTest {
      * Application status
      */
     @Mock
-    protected AppStatus appStatus;
+    protected AppStatusImpl appStatus;
 
     /**
      * Extractor
@@ -93,7 +93,7 @@ public class EdrsSessionsExtractorTest {
     public void init() throws AbstractCodedException {
         MockitoAnnotations.initMocks(this);
 
-        doNothing().when(appStatus).setError(Mockito.any(), Mockito.anyString());
+        doNothing().when(appStatus).setError(Mockito.anyString());
         doReturn(true).when(mqiService).ack(Mockito.any(), Mockito.any());
 
         inputMessage = new GenericMessageDto<EdrsSessionDto>(123, "",

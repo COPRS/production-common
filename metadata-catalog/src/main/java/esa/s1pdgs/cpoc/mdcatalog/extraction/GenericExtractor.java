@@ -25,7 +25,7 @@ import esa.s1pdgs.cpoc.mdcatalog.es.EsServices;
 import esa.s1pdgs.cpoc.mdcatalog.extraction.files.FileDescriptorBuilder;
 import esa.s1pdgs.cpoc.mdcatalog.extraction.files.MetadataBuilder;
 import esa.s1pdgs.cpoc.mdcatalog.extraction.xml.XmlConverter;
-import esa.s1pdgs.cpoc.mdcatalog.status.AppStatus;
+import esa.s1pdgs.cpoc.mdcatalog.status.AppStatusImpl;
 import esa.s1pdgs.cpoc.mqi.client.GenericMqiClient;
 import esa.s1pdgs.cpoc.mqi.model.rest.Ack;
 import esa.s1pdgs.cpoc.mqi.model.rest.AckMessageDto;
@@ -67,7 +67,7 @@ public abstract class GenericExtractor<T> {
     /**
      * Application status
      */
-    protected final AppStatus appStatus;
+    protected final AppStatusImpl appStatus;
 
     /**
      * Metadata builder
@@ -107,7 +107,7 @@ public abstract class GenericExtractor<T> {
      * @param pattern
      */
     public GenericExtractor(final EsServices esServices,
-            final GenericMqiClient mqiService, final AppStatus appStatus,
+            final GenericMqiClient mqiService, final AppStatusImpl appStatus,
             final String localDirectory,
             final MetadataExtractorConfig extractorConfig, final String pattern,
             final ErrorRepoAppender errorAppender,
@@ -201,7 +201,7 @@ public abstract class GenericExtractor<T> {
             this.cleanProcessing(message);
         }
 
-        if (appStatus.isFatalError()) {
+        if (appStatus.getStatus().isFatalError()) {
             report.error(new ReportingMessage("Fatal error"));
             System.exit(-1);
         } else {

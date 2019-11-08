@@ -47,7 +47,7 @@ public class AppStatusImpl extends AbstractAppStatus {
     	} else if (messageId < 0) {
     		throw new IllegalArgumentException(String.format("Message id value %d is out of range", messageId));			
     	}		
-    	return getProcessingMsgId() != AppStatus.PROCESSING_MSG_ID_UNDEFINED && getProcessingMsgId() == messageId;
+    	return getProcessingMsgId() != Status.PROCESSING_MSG_ID_UNDEFINED && getProcessingMsgId() == messageId;
     }
 
     /**

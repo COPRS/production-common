@@ -4,7 +4,6 @@
 package esa.s1pdgs.cpoc.mdcatalog.extraction;
 
 import java.io.File;
-import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -29,7 +28,7 @@ import esa.s1pdgs.cpoc.mdcatalog.es.EsServices;
 import esa.s1pdgs.cpoc.mdcatalog.extraction.files.LandMaskExtractor;
 import esa.s1pdgs.cpoc.mdcatalog.extraction.model.ConfigFileDescriptor;
 import esa.s1pdgs.cpoc.mdcatalog.extraction.xml.XmlConverter;
-import esa.s1pdgs.cpoc.mdcatalog.status.AppStatus;
+import esa.s1pdgs.cpoc.mdcatalog.status.AppStatusImpl;
 import esa.s1pdgs.cpoc.mqi.MqiConsumer;
 import esa.s1pdgs.cpoc.mqi.MqiListener;
 import esa.s1pdgs.cpoc.mqi.client.GenericMqiClient;
@@ -77,7 +76,7 @@ public class AuxiliaryFilesExtractor extends GenericExtractor<ProductDto> implem
 
 	@Autowired
 	public AuxiliaryFilesExtractor(final EsServices esServices, final ObsClient obsClient,
-			final GenericMqiClient mqiService, final AppStatus appStatus, final MetadataExtractorConfig extractorConfig,
+			final GenericMqiClient mqiService, final AppStatusImpl appStatus, final MetadataExtractorConfig extractorConfig,
 			@Value("${file.product-categories.auxiliary-files.local-directory}") final String localDirectory,
 			@Value("${file.manifest-filename}") final String manifestFilename, final ErrorRepoAppender errorAppender,
 			final ProcessConfiguration processConfiguration,

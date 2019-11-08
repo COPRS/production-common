@@ -1,4 +1,4 @@
-package esa.s1pdgs.cpoc.mdcatalog.status.dto;
+package esa.s1pdgs.cpoc.appstatus.dto;
 
 import java.util.Objects;
 
@@ -30,9 +30,6 @@ public class StatusPerCategoryDto {
 	 */
 	private ProductCategory category;
 
-	/**
-	 * Constrcutor
-	 */
 	public StatusPerCategoryDto() {
 		timeSinceLastChange = 0;
 		errorCounter = 0;
