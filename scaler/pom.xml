@@ -69,6 +69,11 @@
 		<!-- Internal libraries -->
 		<dependency>
 			<groupId>de.werum.s1pdgs</groupId>
+			<artifactId>s1pro-core-app-status</artifactId>
+			<version>${project.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>de.werum.s1pdgs</groupId>
 			<artifactId>s1pro-core-obs-sdk</artifactId>
 			<version>${project.version}</version>
 			<classifier>tests</classifier>
