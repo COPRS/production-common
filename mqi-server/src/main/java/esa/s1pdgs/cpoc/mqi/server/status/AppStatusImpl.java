@@ -4,10 +4,12 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Component;
 
 import esa.s1pdgs.cpoc.status.AbstractAppStatus;
 import esa.s1pdgs.cpoc.status.Status;
 
+@Component
 public class AppStatusImpl extends AbstractAppStatus {
 	
 	/**
