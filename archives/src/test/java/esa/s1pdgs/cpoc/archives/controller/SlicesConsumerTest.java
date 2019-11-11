@@ -22,7 +22,6 @@ import org.mockito.MockitoAnnotations;
 import org.springframework.kafka.support.Acknowledgment;
 
 import esa.s1pdgs.cpoc.archives.DevProperties;
-import esa.s1pdgs.cpoc.archives.status.AppStatus;
 import esa.s1pdgs.cpoc.common.ProductFamily;
 import esa.s1pdgs.cpoc.common.errors.AbstractCodedException;
 import esa.s1pdgs.cpoc.common.errors.obs.ObsException;
@@ -30,6 +29,7 @@ import esa.s1pdgs.cpoc.common.errors.obs.ObsUnknownObject;
 import esa.s1pdgs.cpoc.mqi.model.queue.ProductDto;
 import esa.s1pdgs.cpoc.obs_sdk.ObsClient;
 import esa.s1pdgs.cpoc.obs_sdk.ObsDownloadObject;
+import esa.s1pdgs.cpoc.status.AppStatus;
 
 public class SlicesConsumerTest {
 

@@ -11,15 +11,11 @@ import org.springframework.messaging.handler.annotation.Header;
 import org.springframework.stereotype.Component;
 
 import esa.s1pdgs.cpoc.archives.DevProperties;
-import esa.s1pdgs.cpoc.archives.status.AppStatus;
-import esa.s1pdgs.cpoc.common.ResumeDetails;
-import esa.s1pdgs.cpoc.common.errors.AbstractCodedException.ErrorCode;
 import esa.s1pdgs.cpoc.common.errors.obs.ObsException;
 import esa.s1pdgs.cpoc.mqi.model.queue.ProductDto;
 import esa.s1pdgs.cpoc.obs_sdk.ObsClient;
 import esa.s1pdgs.cpoc.obs_sdk.ObsDownloadObject;
-import esa.s1pdgs.cpoc.report.LoggerReporting;
-import esa.s1pdgs.cpoc.report.Reporting;
+import esa.s1pdgs.cpoc.status.AppStatus;
 
 /**
  * @author Viveris Technologies
@@ -65,7 +61,7 @@ public class SegmentsConsumer {
             final Acknowledgment acknowledgment,
             @Header(KafkaHeaders.RECEIVED_TOPIC) final String topic) {
   	
-        this.appStatus.setProcessing("SLICES");
+        //this.appStatus.setProcessing("SLICES"); // Commented out because AppStatusImpl can currently only track one thing and is used by the ReportsConsumer
         try {
             if (!devProperties.getActivations().get("download-all")) {
                 this.obsClient.download(Arrays.asList(new ObsDownloadObject(dto.getFamily(),
@@ -79,9 +75,9 @@ public class SegmentsConsumer {
             }
             acknowledgment.acknowledge();
         } catch (ObsException e) {        	
-            this.appStatus.setError("SLICES");
+            //this.appStatus.setError("SLICES"); // Commented out because AppStatusImpl can currently only track one thing and is used by the ReportsConsumer
         } catch (Exception exc) {
-            this.appStatus.setError("SLICES");
+            //this.appStatus.setError("SLICES"); // Commented out because AppStatusImpl can currently only track one thing and is used by the ReportsConsumer
         }
         this.appStatus.setWaiting();
     }

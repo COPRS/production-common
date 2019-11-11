@@ -12,12 +12,13 @@ import org.springframework.kafka.support.KafkaHeaders;
 import org.springframework.messaging.handler.annotation.Header;
 import org.springframework.stereotype.Component;
 
-import esa.s1pdgs.cpoc.archives.status.AppStatus;
 import esa.s1pdgs.cpoc.common.ResumeDetails;
 import esa.s1pdgs.cpoc.common.errors.AbstractCodedException.ErrorCode;
 import esa.s1pdgs.cpoc.common.errors.InternalErrorException;
 import esa.s1pdgs.cpoc.common.utils.FileUtils;
 import esa.s1pdgs.cpoc.mqi.model.queue.LevelReportDto;
+import esa.s1pdgs.cpoc.status.AppStatus;
+import esa.s1pdgs.cpoc.status.Status;
 
 /**
  * Consumer of reports
@@ -68,7 +69,7 @@ public class ReportsConsumer {
         LOGGER.info(
                 "[step 0] [family {}] [productName {}] Starting distribution",
                 dto.getFamily(), dto.getProductName());
-        this.appStatus.setProcessing("REPORTS");
+        this.appStatus.setProcessing(Status.PROCESSING_MSG_ID_UNDEFINED);
         try {
             File report = new File(sharedVolume + File.separator
                     + dto.getFamily().name().toLowerCase() + File.separator

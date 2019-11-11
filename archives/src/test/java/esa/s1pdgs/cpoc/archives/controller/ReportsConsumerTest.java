@@ -16,9 +16,9 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.springframework.kafka.support.Acknowledgment;
 
-import esa.s1pdgs.cpoc.archives.status.AppStatus;
 import esa.s1pdgs.cpoc.common.ProductFamily;
 import esa.s1pdgs.cpoc.mqi.model.queue.LevelReportDto;
+import esa.s1pdgs.cpoc.status.AppStatus;
 
 public class ReportsConsumerTest {
 
