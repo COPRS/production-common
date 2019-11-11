@@ -19,8 +19,8 @@ public class AppStatusImpl extends AbstractAppStatus {
     private static final Logger LOGGER = LogManager.getLogger(AppStatusImpl.class);
 
     @Autowired
-    public AppStatusImpl(@Value("${status.max-error-counter-processing:100}") final int maxErrorCounterProcessing,
-    		@Value("${status.max-error-counter-next-message:100}") final int maxErrorCounterNextMessage) {
+    public AppStatusImpl(@Value("${status.max-error-counter-job:100}") final int maxErrorCounterProcessing,
+    		@Value("${status.max-error-counter-mqi:100}") final int maxErrorCounterNextMessage) {
     	super(new Status(maxErrorCounterProcessing, maxErrorCounterNextMessage));
     }
 
