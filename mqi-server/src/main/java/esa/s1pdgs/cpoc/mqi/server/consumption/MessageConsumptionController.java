@@ -31,7 +31,7 @@ import esa.s1pdgs.cpoc.mqi.server.KafkaProperties;
 import esa.s1pdgs.cpoc.mqi.server.consumption.kafka.consumer.GenericConsumer;
 import esa.s1pdgs.cpoc.mqi.server.consumption.kafka.consumer.GenericConsumer.Factory;
 import esa.s1pdgs.cpoc.mqi.server.persistence.OtherApplicationService;
-import esa.s1pdgs.cpoc.mqi.server.status.AppStatus;
+import esa.s1pdgs.cpoc.mqi.server.status.AppStatusImpl;
 
 /**
  * Manager of consumers
@@ -86,7 +86,7 @@ public class MessageConsumptionController {
             final KafkaProperties kafkaProperties,
             final AppCatalogMqiService service,	
             final OtherApplicationService otherAppService,
-            final AppStatus appStatus) {
+            final AppStatusImpl appStatus) {
 		this(
 				new HashMap<>(), 
 				appProperties, 

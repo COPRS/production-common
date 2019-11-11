@@ -13,7 +13,7 @@ public class AppStatusTest {
     /**
      * Application status for test
      */
-    private AppStatus appStatus = new AppStatus(3);
+    private AppStatusImpl appStatus = new AppStatusImpl(3);
     
     /**
      * Check constructor
@@ -24,7 +24,7 @@ public class AppStatusTest {
         assertEquals(AppState.WAITING, appStatus.getStatus().getState());
         assertFalse(appStatus.getStatus().isError());
         assertFalse(appStatus.getStatus().isFatalError());
-        assertEquals(0, appStatus.getStatus().getErrorCounter());
+        assertEquals(0, appStatus.getStatus().getErrorCounterNextMessage());
         assertTrue(System.currentTimeMillis() >= appStatus.getStatus().getDateLastChangeMs());
         assertTrue(appStatus.getStatus().getDateLastChangeMs() > 0);
         
@@ -39,31 +39,31 @@ public class AppStatusTest {
     public void testResetError() {
         long timeBefore = appStatus.getStatus().getDateLastChangeMs();
         
-        appStatus.setError();
+        appStatus.setError("MQI");
         assertTrue(appStatus.getStatus().isError());
         timeBefore = appStatus.getStatus().getDateLastChangeMs();
-        appStatus.resetError();
+        appStatus.setWaiting();
         assertFalse(appStatus.getStatus().isError());
         assertTrue(timeBefore <= appStatus.getStatus().getDateLastChangeMs());
-        assertEquals(0, appStatus.getStatus().getErrorCounter());
+        assertEquals(0, appStatus.getStatus().getErrorCounterNextMessage());
         
-        appStatus = new AppStatus(3);
-        appStatus.setError();
-        appStatus.setError();
-        appStatus.setError();
+        appStatus = new AppStatusImpl(3);
+        appStatus.setError("MQI");
+        appStatus.setError("MQI");
+        appStatus.setError("MQI");
         timeBefore = appStatus.getStatus().getDateLastChangeMs();
         assertTrue(appStatus.getStatus().isFatalError());
-        appStatus.resetError();
+        appStatus.setWaiting();
         assertTrue(appStatus.getStatus().isFatalError());
         assertTrue(timeBefore <= appStatus.getStatus().getDateLastChangeMs());
-        assertEquals(3, appStatus.getStatus().getErrorCounter());
+        assertEquals(3, appStatus.getStatus().getErrorCounterNextMessage());
 
         appStatus.setStopping();
         timeBefore = appStatus.getStatus().getDateLastChangeMs();
-        appStatus.resetError();
+        appStatus.setWaiting();
         assertTrue(appStatus.getStatus().isStopping());
         assertTrue(timeBefore <= appStatus.getStatus().getDateLastChangeMs());
-        assertEquals(0, appStatus.getStatus().getErrorCounter());
+        assertEquals(0, appStatus.getStatus().getErrorCounterNextMessage());
     }
 
     /**
@@ -73,30 +73,30 @@ public class AppStatusTest {
     public void testStopping() {
         long timeBefore = appStatus.getStatus().getDateLastChangeMs();
         
-        appStatus.resetError();
+        appStatus.setWaiting();
         assertFalse(appStatus.isShallBeStopped());
         timeBefore = appStatus.getStatus().getDateLastChangeMs();
         appStatus.setStopping();
         assertTrue(appStatus.isShallBeStopped());
         assertTrue(appStatus.getStatus().isStopping());
         assertTrue(timeBefore <= appStatus.getStatus().getDateLastChangeMs());
-        assertEquals(0, appStatus.getStatus().getErrorCounter());
+        assertEquals(0, appStatus.getStatus().getErrorCounterNextMessage());
         
-        appStatus = new AppStatus(3);
-        appStatus.setError();
-        assertEquals(1, appStatus.getStatus().getErrorCounter());
+        appStatus = new AppStatusImpl(3);
+        appStatus.setError("MQI");
+        assertEquals(1, appStatus.getStatus().getErrorCounterNextMessage());
         timeBefore = appStatus.getStatus().getDateLastChangeMs();
         appStatus.setStopping();
         assertTrue(appStatus.isShallBeStopped());
         assertTrue(appStatus.getStatus().isStopping());
         assertTrue(timeBefore <= appStatus.getStatus().getDateLastChangeMs());
-        assertEquals(0, appStatus.getStatus().getErrorCounter());
+        assertEquals(0, appStatus.getStatus().getErrorCounterNextMessage());
         
         timeBefore = appStatus.getStatus().getDateLastChangeMs();
         appStatus.setStopping();
         assertTrue(appStatus.getStatus().isStopping());
         assertTrue(timeBefore <= appStatus.getStatus().getDateLastChangeMs());
-        assertEquals(0, appStatus.getStatus().getErrorCounter());
+        assertEquals(0, appStatus.getStatus().getErrorCounterNextMessage());
     }
 
     /**
@@ -106,29 +106,29 @@ public class AppStatusTest {
     public void testError() {
         long timeBefore = appStatus.getStatus().getDateLastChangeMs();
         
-        appStatus.resetError();
+        appStatus.setWaiting();
         timeBefore = appStatus.getStatus().getDateLastChangeMs();
-        appStatus.setError();
+        appStatus.setError("MQI");
         assertTrue(appStatus.getStatus().isError());
         assertTrue(timeBefore <= appStatus.getStatus().getDateLastChangeMs());
-        assertEquals(1, appStatus.getStatus().getErrorCounter());
+        assertEquals(1, appStatus.getStatus().getErrorCounterNextMessage());
         
         timeBefore = appStatus.getStatus().getDateLastChangeMs();
-        appStatus.setError();
+        appStatus.setError("MQI");
         assertTrue(appStatus.getStatus().isError());
         assertTrue(timeBefore <= appStatus.getStatus().getDateLastChangeMs());
-        assertEquals(2, appStatus.getStatus().getErrorCounter());
+        assertEquals(2, appStatus.getStatus().getErrorCounterNextMessage());
         
         timeBefore = appStatus.getStatus().getDateLastChangeMs();
-        appStatus.setError();
+        appStatus.setError("MQI");
         assertFalse(appStatus.getStatus().isError());
         assertTrue(appStatus.getStatus().isFatalError());
         assertTrue(timeBefore <= appStatus.getStatus().getDateLastChangeMs());
-        assertEquals(3, appStatus.getStatus().getErrorCounter());
+        assertEquals(3, appStatus.getStatus().getErrorCounterNextMessage());
         
         appStatus.setStopping();
         timeBefore = appStatus.getStatus().getDateLastChangeMs();
-        appStatus.setError();
+        appStatus.setError("MQI");
         assertFalse(appStatus.getStatus().isError());
         assertEquals(timeBefore, appStatus.getStatus().getDateLastChangeMs());
     }

@@ -18,7 +18,7 @@ import esa.s1pdgs.cpoc.mqi.server.KafkaProperties;
 import esa.s1pdgs.cpoc.mqi.server.consumption.kafka.consumer.GenericConsumer;
 import esa.s1pdgs.cpoc.mqi.server.consumption.kafka.consumer.MessageConsumer;
 import esa.s1pdgs.cpoc.mqi.server.persistence.OtherApplicationService;
-import esa.s1pdgs.cpoc.mqi.server.status.AppStatus;
+import esa.s1pdgs.cpoc.mqi.server.status.AppStatusImpl;
 
 /**
  * Kafka message listener<br/>
@@ -43,7 +43,7 @@ public final class GenericMessageListener<T> implements AcknowledgingConsumerAwa
      */
     private final OtherApplicationService otherAppService;
     private final GenericConsumer<T> genericConsumer;
-    private final AppStatus appStatus;    
+    private final AppStatusImpl appStatus;    
     private final ProductCategory category;
     private final MessageConsumer<T> additionalConsumer;
 
@@ -53,7 +53,7 @@ public final class GenericMessageListener<T> implements AcknowledgingConsumerAwa
             final AppCatalogMqiService service,
             final OtherApplicationService otherAppService,
             final GenericConsumer<T> genericConsumer,
-            final AppStatus appStatus,
+            final AppStatusImpl appStatus,
             final MessageConsumer<T> additionalConsumer
     ) {
     	this.category = category;
@@ -91,7 +91,7 @@ public final class GenericMessageListener<T> implements AcknowledgingConsumerAwa
 			final AppCatMessageDto<T> result = saveInAppCat(data, false);        
         	additionalConsumer.consume(message);
             handleMessage(data, acknowledgment, result);
-            appStatus.resetError();
+            appStatus.setError("MQI");
         } catch (Exception e) {        	
         	if (e instanceof AbstractCodedException) {
         		final AbstractCodedException ace = (AbstractCodedException) e;
@@ -103,7 +103,7 @@ public final class GenericMessageListener<T> implements AcknowledgingConsumerAwa
         	else {
         		LOGGER.error(LogUtils.toString(e));
         	}         
-            appStatus.setError();
+            appStatus.setError("MQI");
         }
     }
 

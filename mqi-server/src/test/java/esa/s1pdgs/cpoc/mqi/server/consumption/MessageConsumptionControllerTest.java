@@ -21,7 +21,6 @@ import java.util.Map;
 
 import org.junit.Before;
 import org.junit.ClassRule;
-import org.junit.Ignore;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
@@ -58,7 +57,7 @@ import esa.s1pdgs.cpoc.mqi.server.GenericKafkaUtils;
 import esa.s1pdgs.cpoc.mqi.server.KafkaProperties;
 import esa.s1pdgs.cpoc.mqi.server.consumption.kafka.consumer.GenericConsumer;
 import esa.s1pdgs.cpoc.mqi.server.persistence.OtherApplicationService;
-import esa.s1pdgs.cpoc.mqi.server.status.AppStatus;
+import esa.s1pdgs.cpoc.mqi.server.status.AppStatusImpl;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest
@@ -86,7 +85,7 @@ public class MessageConsumptionControllerTest {
     private OtherApplicationService otherService;
 
     @Autowired
-    protected AppStatus appStatus;
+    protected AppStatusImpl appStatus;
 
     @Autowired
     private MessageConsumptionController autoManager;

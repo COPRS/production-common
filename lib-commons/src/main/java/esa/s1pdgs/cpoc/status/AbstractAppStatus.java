@@ -85,9 +85,9 @@ public abstract class AbstractAppStatus implements AppStatus {
      */
     @Override
 	public synchronized void setError(String type) {
-    	if("NEXT_MESSAGE".equals(type) || "MQI".equals(type)) {
+    	if("NEXT_MESSAGE".equals(type) || "MQI".equals(type)) { // TODO: Refactor these MQI client error synonyms
     		this.status.incrementErrorCounterNextMessage();
-    	} else  if("PROCESSING".equals(type) || "JOB".equals(type)) {
+    	} else if("PROCESSING".equals(type) || "JOB".equals(type)) { // TODO: Refactor these main task synonyms
             this.status.incrementErrorCounterProcessing();
         }
     }

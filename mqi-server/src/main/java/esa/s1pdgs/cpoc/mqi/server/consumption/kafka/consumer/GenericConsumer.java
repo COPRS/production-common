@@ -22,7 +22,7 @@ import esa.s1pdgs.cpoc.mqi.server.KafkaProperties;
 import esa.s1pdgs.cpoc.mqi.server.consumption.kafka.listener.GenericMessageListener;
 import esa.s1pdgs.cpoc.mqi.server.consumption.kafka.listener.MemoryConsumerAwareRebalanceListener;
 import esa.s1pdgs.cpoc.mqi.server.persistence.OtherApplicationService;
-import esa.s1pdgs.cpoc.mqi.server.status.AppStatus;
+import esa.s1pdgs.cpoc.mqi.server.status.AppStatusImpl;
 import esa.s1pdgs.cpoc.report.LoggerReporting;
 import esa.s1pdgs.cpoc.report.Reporting;
 import esa.s1pdgs.cpoc.report.ReportingMessage;
@@ -38,13 +38,13 @@ public class GenericConsumer<T> {
 	    private final KafkaProperties kafkaProperties;
 	    private final AppCatalogMqiService service;
 	    private final OtherApplicationService otherAppService;
-	    private final AppStatus appStatus;	  
+	    private final AppStatusImpl appStatus;	  
 	    	    
 		public Factory(
 				KafkaProperties kafkaProperties, 
 				AppCatalogMqiService service,
 				OtherApplicationService otherAppService, 
-				AppStatus appStatus
+				AppStatusImpl appStatus
 		) {
 			this.kafkaProperties = kafkaProperties;
 			this.service = service;

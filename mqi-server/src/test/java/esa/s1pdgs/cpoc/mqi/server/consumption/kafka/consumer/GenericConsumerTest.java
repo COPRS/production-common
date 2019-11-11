@@ -31,7 +31,7 @@ import esa.s1pdgs.cpoc.mqi.model.queue.ProductDto;
 import esa.s1pdgs.cpoc.mqi.server.GenericKafkaUtils;
 import esa.s1pdgs.cpoc.mqi.server.KafkaProperties;
 import esa.s1pdgs.cpoc.mqi.server.persistence.OtherApplicationService;
-import esa.s1pdgs.cpoc.mqi.server.status.AppStatus;
+import esa.s1pdgs.cpoc.mqi.server.status.AppStatusImpl;
 import esa.s1pdgs.cpoc.mqi.server.test.DataUtils;
 
 @RunWith(SpringRunner.class)
@@ -52,7 +52,7 @@ public class GenericConsumerTest {
      * Application status
      */
     @Autowired
-    private AppStatus appStatus;
+    private AppStatusImpl appStatus;
 
     @Mock
     private AppCatalogMqiService service;

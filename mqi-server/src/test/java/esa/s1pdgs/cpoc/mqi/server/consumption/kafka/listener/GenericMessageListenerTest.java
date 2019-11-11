@@ -22,8 +22,8 @@ import org.mockito.MockitoAnnotations;
 import org.springframework.kafka.support.Acknowledgment;
 
 import esa.s1pdgs.cpoc.appcatalog.client.mqi.AppCatalogMqiService;
-import esa.s1pdgs.cpoc.appcatalog.rest.AppCatReadMessageDto;
 import esa.s1pdgs.cpoc.appcatalog.rest.AppCatMessageDto;
+import esa.s1pdgs.cpoc.appcatalog.rest.AppCatReadMessageDto;
 import esa.s1pdgs.cpoc.common.MessageState;
 import esa.s1pdgs.cpoc.common.ProductCategory;
 import esa.s1pdgs.cpoc.common.ProductFamily;
@@ -37,7 +37,7 @@ import esa.s1pdgs.cpoc.mqi.server.KafkaProperties.KafkaConsumerProperties;
 import esa.s1pdgs.cpoc.mqi.server.consumption.kafka.consumer.GenericConsumer;
 import esa.s1pdgs.cpoc.mqi.server.consumption.kafka.consumer.MessageConsumer;
 import esa.s1pdgs.cpoc.mqi.server.persistence.OtherApplicationService;
-import esa.s1pdgs.cpoc.mqi.server.status.AppStatus;
+import esa.s1pdgs.cpoc.mqi.server.status.AppStatusImpl;
 
 /**
  * Test the listener GenericMessageListener
@@ -85,7 +85,7 @@ public class GenericMessageListenerTest {
      * Application status
      */
     @Mock
-    private AppStatus appStatus;
+    private AppStatusImpl appStatus;
 
     /**
      * Consumer of message listener
@@ -121,8 +121,8 @@ public class GenericMessageListenerTest {
         doReturn(consumerProperties).when(properties).getConsumer();
         doReturn("group-name").when(consumerProperties).getGroupId();
 
-        doNothing().when(appStatus).resetError();
-        doNothing().when(appStatus).setError();
+        doNothing().when(appStatus).setWaiting();
+        doNothing().when(appStatus).setError("MQI");
 
         doNothing().when(genericConsumer).pause();
         doNothing().when(acknowledgment).acknowledge();
@@ -370,7 +370,7 @@ public class GenericMessageListenerTest {
         verify(service, times(1)).read(Mockito.eq(ProductCategory.AUXILIARY_FILES),Mockito.eq(data.topic()),
                 Mockito.eq(data.partition()), Mockito.eq(data.offset()),
                 Mockito.eq(expectedReadBody));
-        verify(appStatus, times(1)).resetError();
+        verify(appStatus, times(1)).setWaiting();
         if (pause) {
             verify(genericConsumer, times(1)).pause();
         } else {
@@ -397,7 +397,7 @@ public class GenericMessageListenerTest {
 
         listener.onMessage(data, acknowledgment, onMsgConsumer);
 
-        verify(appStatus, times(1)).setError();
+        verify(appStatus, times(1)).setError("MQI");
         verifyNoMoreInteractions(appStatus);
         verifyZeroInteractions(onMsgConsumer);
         verifyZeroInteractions(otherAppService);
@@ -432,7 +432,7 @@ public class GenericMessageListenerTest {
         verify(service, times(1)).read(Mockito.eq(ProductCategory.AUXILIARY_FILES),Mockito.eq(data.topic()),
                 Mockito.eq(data.partition()), Mockito.eq(data.offset()),
                 Mockito.eq(expectedReadBody));
-        verify(appStatus, times(1)).resetError();
+        verify(appStatus, times(1)).setWaiting();
         verify(acknowledgment, times(1)).acknowledge();
         verify(genericConsumer, times(1)).pause();
         verifyNoMoreInteractions(appStatus);
@@ -467,7 +467,7 @@ public class GenericMessageListenerTest {
         verify(service, times(1)).read(Mockito.eq(ProductCategory.AUXILIARY_FILES),Mockito.eq(data.topic()),
                 Mockito.eq(data.partition()), Mockito.eq(data.offset()),
                 Mockito.eq(expectedReadBody));
-        verify(appStatus, times(1)).resetError();
+        verify(appStatus, times(1)).setWaiting();
         verify(acknowledgment, times(1)).acknowledge();
         verifyNoMoreInteractions(appStatus);
         verifyZeroInteractions(genericConsumer);
@@ -516,7 +516,7 @@ public class GenericMessageListenerTest {
         verify(service, times(1)).read(Mockito.eq(ProductCategory.AUXILIARY_FILES),Mockito.eq(data.topic()),
                 Mockito.eq(data.partition()), Mockito.eq(data.offset()),
                 Mockito.eq(expectedReadBodyForce));
-        verify(appStatus, times(1)).resetError();
+        verify(appStatus, times(1)).setWaiting();
         verifyNoMoreInteractions(appStatus);
         verify(acknowledgment, times(1)).acknowledge();
         verify(genericConsumer, times(1)).pause();
