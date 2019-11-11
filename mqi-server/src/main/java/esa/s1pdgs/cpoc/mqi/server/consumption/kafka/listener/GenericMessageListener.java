@@ -91,7 +91,7 @@ public final class GenericMessageListener<T> implements AcknowledgingConsumerAwa
 			final AppCatMessageDto<T> result = saveInAppCat(data, false);        
         	additionalConsumer.consume(message);
             handleMessage(data, acknowledgment, result);
-            appStatus.setError("MQI");
+            appStatus.setWaiting();
         } catch (Exception e) {        	
         	if (e instanceof AbstractCodedException) {
         		final AbstractCodedException ace = (AbstractCodedException) e;
