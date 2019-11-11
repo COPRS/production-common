@@ -66,9 +66,9 @@ public class AppStatusRestController {
     }
     
     @RequestMapping(method = RequestMethod.GET, path = "/readiness")
-    public ResponseEntity<Void> getReadiness() {
+    public ResponseEntity<String> getReadiness() {
     	HttpStatus httpStatus = appStatus.getKubernetesReadiness() ? HttpStatus.OK : HttpStatus.SERVICE_UNAVAILABLE;
-    	return new ResponseEntity<Void>((Void)null, httpStatus);    	
+    	return new ResponseEntity<String>("", httpStatus);    	
     }
 
     /**
