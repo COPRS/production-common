@@ -30,37 +30,6 @@ public class AppStatusImpl extends AbstractAppStatus {
     	addSubStatus(new Status(ProductCategory.LEVEL_PRODUCTS, maxErrorCounterProcessing, maxErrorCounterNextMessage));
     }
     
-//    /**
-//	 * @return the status
-//	 */
-//	public synchronized Map<ProductCategory, Status> getSubStatus() {
-//		return null;
-//	}
-//	
-//	public AppState getGlobalAppState() {
-//		boolean isFatalError = false;
-//		boolean isError = false;
-//		boolean isProcessing = false;
-//		for (Status subStatus : getSubStatuses().values()) {
-//			if (subStatus.isFatalError()) {
-//				isFatalError = true;
-//			} else if (subStatus.isError()) {
-//				isError = true;
-//			} else if (subStatus.isProcessing()) {
-//				isProcessing = true;
-//			}
-//		}
-//		AppState ret = AppState.WAITING;
-//		if (isFatalError) {
-//			ret = AppState.FATALERROR;
-//		} else if (isError) {
-//			ret = AppState.ERROR;
-//		} else if (isProcessing) {
-//			ret = AppState.PROCESSING;
-//		}
-//		return ret;
-//	}
-
 	/**
 	 * @return the processingMsgId
 	 */
