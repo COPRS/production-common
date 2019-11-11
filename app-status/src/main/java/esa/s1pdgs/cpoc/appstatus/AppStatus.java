@@ -18,9 +18,10 @@ public interface AppStatus {
 		@Override public final void setProcessing(long processingMsgId) {}
 		@Override public final void setError(String type) {}
 		@Override public final boolean isShallBeStopped() {return false;}
-		@Override public final long getProcessingMsgId() { return -1;}
+		@Override public final long getProcessingMsgId() { return Status.PROCESSING_MSG_ID_UNDEFINED; }
 		@Override public final boolean isProcessing(String category, long messageId) {return false;}
 		@Override public final void forceStopping() {}
+		@Override public boolean getKubernetesReadiness() { return false; }
 	};
 	
 	default boolean isInterrupted() {
@@ -89,6 +90,11 @@ public interface AppStatus {
 	 */
 	boolean isProcessing(String category, long messageId) throws UnsupportedOperationException, NoSuchElementException, IllegalArgumentException;
 
+	/**
+	 * @return kubernetes readiness
+	 */
+	boolean getKubernetesReadiness();
+	
 	/**
 	 * Stop the application if someone asks for forcing stop
 	 */

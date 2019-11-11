@@ -114,6 +114,14 @@ public abstract class AbstractAppStatus implements AppStatus {
 		throw new UnsupportedOperationException();
 	}
 	
+	/**
+	 * @return kubernetes readiness
+	 */
+	@Override
+	public boolean getKubernetesReadiness() {
+		return true;
+	}
+	
 	@Override
 	abstract public void forceStopping();
 

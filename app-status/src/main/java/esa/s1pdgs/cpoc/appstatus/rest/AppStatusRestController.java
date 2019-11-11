@@ -64,6 +64,12 @@ public class AppStatusRestController {
         HttpStatus httpStatus = status.isFatalError() ? HttpStatus.INTERNAL_SERVER_ERROR : HttpStatus.OK;
 		return new ResponseEntity<AppStatusDto>(statusDto, httpStatus);
     }
+    
+    @RequestMapping(method = RequestMethod.GET, path = "/readiness")
+    public ResponseEntity<Void> getReadiness() {
+    	HttpStatus httpStatus = appStatus.getKubernetesReadiness() ? HttpStatus.OK : HttpStatus.SERVICE_UNAVAILABLE;
+    	return new ResponseEntity<Void>((Void)null, httpStatus);    	
+    }
 
     /**
      * Stop application
