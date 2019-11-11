@@ -7,8 +7,8 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
-import esa.s1pdgs.cpoc.status.AbstractAppStatus;
-import esa.s1pdgs.cpoc.status.Status;
+import esa.s1pdgs.cpoc.appstatus.AbstractAppStatus;
+import esa.s1pdgs.cpoc.appstatus.Status;
 
 @Component
 public class AppStatusImpl extends AbstractAppStatus {

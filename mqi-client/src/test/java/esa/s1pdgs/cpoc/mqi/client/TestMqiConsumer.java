@@ -1,4 +1,4 @@
-package esa.s1pdgs.cpoc.mqi;
+package esa.s1pdgs.cpoc.mqi.client;
 
 import static org.junit.Assert.assertEquals;
 import static org.mockito.Mockito.doReturn;
@@ -13,14 +13,17 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 
+import esa.s1pdgs.cpoc.appstatus.AppStatus;
 import esa.s1pdgs.cpoc.common.ProductCategory;
 import esa.s1pdgs.cpoc.common.ProductFamily;
 import esa.s1pdgs.cpoc.common.errors.mqi.MqiAckApiError;
+import esa.s1pdgs.cpoc.mqi.client.MqiClient;
+import esa.s1pdgs.cpoc.mqi.client.MqiConsumer;
+import esa.s1pdgs.cpoc.mqi.client.MqiListener;
 import esa.s1pdgs.cpoc.mqi.model.queue.ProductDto;
 import esa.s1pdgs.cpoc.mqi.model.rest.Ack;
 import esa.s1pdgs.cpoc.mqi.model.rest.AckMessageDto;
 import esa.s1pdgs.cpoc.mqi.model.rest.GenericMessageDto;
-import esa.s1pdgs.cpoc.status.AppStatus;
 
 public class TestMqiConsumer {	
 	@Mock

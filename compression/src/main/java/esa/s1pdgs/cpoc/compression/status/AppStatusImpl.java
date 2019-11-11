@@ -10,12 +10,12 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
+import esa.s1pdgs.cpoc.appstatus.AbstractAppStatus;
+import esa.s1pdgs.cpoc.appstatus.AppStatus;
+import esa.s1pdgs.cpoc.appstatus.Status;
 import esa.s1pdgs.cpoc.common.ProductCategory;
 import esa.s1pdgs.cpoc.common.errors.AbstractCodedException;
 import esa.s1pdgs.cpoc.mqi.client.StatusService;
-import esa.s1pdgs.cpoc.status.AbstractAppStatus;
-import esa.s1pdgs.cpoc.status.AppStatus;
-import esa.s1pdgs.cpoc.status.Status;
 
 @Component
 public class AppStatusImpl extends AbstractAppStatus {

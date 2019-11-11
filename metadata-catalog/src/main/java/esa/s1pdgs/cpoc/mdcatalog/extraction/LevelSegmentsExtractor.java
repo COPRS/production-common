@@ -22,9 +22,9 @@ import esa.s1pdgs.cpoc.mdcatalog.es.EsServices;
 import esa.s1pdgs.cpoc.mdcatalog.extraction.model.OutputFileDescriptor;
 import esa.s1pdgs.cpoc.mdcatalog.extraction.xml.XmlConverter;
 import esa.s1pdgs.cpoc.mdcatalog.status.AppStatusImpl;
-import esa.s1pdgs.cpoc.mqi.MqiConsumer;
-import esa.s1pdgs.cpoc.mqi.MqiListener;
 import esa.s1pdgs.cpoc.mqi.client.GenericMqiClient;
+import esa.s1pdgs.cpoc.mqi.client.MqiConsumer;
+import esa.s1pdgs.cpoc.mqi.client.MqiListener;
 import esa.s1pdgs.cpoc.mqi.model.queue.ProductDto;
 import esa.s1pdgs.cpoc.mqi.model.rest.GenericMessageDto;
 import esa.s1pdgs.cpoc.obs_sdk.ObsClient;
@@ -93,7 +93,7 @@ public class LevelSegmentsExtractor extends GenericExtractor<ProductDto> impleme
 		if (pollingIntervalMs > 0) {
 			final ExecutorService service = Executors.newFixedThreadPool(1);
 			service.execute(new MqiConsumer<ProductDto>(mqiClient, category, this, pollingIntervalMs,
-					pollingInitialDelayMs, esa.s1pdgs.cpoc.status.AppStatus.NULL));
+					pollingInitialDelayMs, esa.s1pdgs.cpoc.appstatus.AppStatus.NULL));
 		}
 	}
 

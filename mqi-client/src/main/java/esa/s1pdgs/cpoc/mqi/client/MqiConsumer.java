@@ -1,8 +1,9 @@
-package esa.s1pdgs.cpoc.mqi;
+package esa.s1pdgs.cpoc.mqi.client;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import esa.s1pdgs.cpoc.appstatus.AppStatus;
 import esa.s1pdgs.cpoc.common.ProductCategory;
 import esa.s1pdgs.cpoc.common.errors.AbstractCodedException;
 import esa.s1pdgs.cpoc.common.utils.LogUtils;
@@ -10,7 +11,6 @@ import esa.s1pdgs.cpoc.mqi.model.queue.AbstractDto;
 import esa.s1pdgs.cpoc.mqi.model.rest.Ack;
 import esa.s1pdgs.cpoc.mqi.model.rest.AckMessageDto;
 import esa.s1pdgs.cpoc.mqi.model.rest.GenericMessageDto;
-import esa.s1pdgs.cpoc.status.AppStatus;
 
 public final class MqiConsumer<E extends AbstractDto> implements Runnable {
 	private static final Logger LOG = LogManager.getLogger(MqiConsumer.class);

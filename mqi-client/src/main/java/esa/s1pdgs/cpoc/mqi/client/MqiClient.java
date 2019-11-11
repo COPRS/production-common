@@ -1,4 +1,4 @@
-package esa.s1pdgs.cpoc.mqi;
+package esa.s1pdgs.cpoc.mqi.client;
 
 import esa.s1pdgs.cpoc.common.ProductCategory;
 import esa.s1pdgs.cpoc.common.errors.AbstractCodedException;

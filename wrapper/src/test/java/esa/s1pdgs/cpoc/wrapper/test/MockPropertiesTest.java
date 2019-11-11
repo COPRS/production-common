@@ -10,10 +10,10 @@ import java.util.Map;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 
+import esa.s1pdgs.cpoc.appstatus.AppStatus;
+import esa.s1pdgs.cpoc.appstatus.Status;
 import esa.s1pdgs.cpoc.common.errors.AbstractCodedException;
 import esa.s1pdgs.cpoc.mqi.client.StatusService;
-import esa.s1pdgs.cpoc.status.AppStatus;
-import esa.s1pdgs.cpoc.status.Status;
 import esa.s1pdgs.cpoc.wrapper.config.ApplicationProperties;
 import esa.s1pdgs.cpoc.wrapper.config.DevProperties;
 import esa.s1pdgs.cpoc.wrapper.status.AppStatusImpl;

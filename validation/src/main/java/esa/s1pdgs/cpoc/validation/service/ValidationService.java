@@ -16,6 +16,7 @@ import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import esa.s1pdgs.cpoc.appstatus.AppStatus;
 import esa.s1pdgs.cpoc.common.ProductFamily;
 import esa.s1pdgs.cpoc.common.errors.processing.MetadataQueryException;
 import esa.s1pdgs.cpoc.common.utils.LogUtils;
@@ -29,7 +30,6 @@ import esa.s1pdgs.cpoc.obs_sdk.SdkClientException;
 import esa.s1pdgs.cpoc.report.LoggerReporting;
 import esa.s1pdgs.cpoc.report.Reporting;
 import esa.s1pdgs.cpoc.report.ReportingMessage;
-import esa.s1pdgs.cpoc.status.AppStatus;
 import esa.s1pdgs.cpoc.validation.config.ApplicationProperties;
 import esa.s1pdgs.cpoc.validation.config.ApplicationProperties.FamilyIntervalConf;
 
@@ -75,7 +75,7 @@ public class ValidationService {
 	public int checkConsistencyForInterval() {
 		synchronized(nbRunningConsistencyChecksLock) {
 			if (++nbRunningConsistencyChecks == 1) {
-				appStatus.setProcessing(esa.s1pdgs.cpoc.status.Status.PROCESSING_MSG_ID_UNDEFINED);
+				appStatus.setProcessing(esa.s1pdgs.cpoc.appstatus.Status.PROCESSING_MSG_ID_UNDEFINED);
 			}
 		}
 		final Reporting.Factory reportingFactory = new LoggerReporting.Factory("ValidationService");

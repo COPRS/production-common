@@ -9,11 +9,11 @@ import java.util.Map;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 
+import esa.s1pdgs.cpoc.appstatus.Status;
 import esa.s1pdgs.cpoc.common.errors.AbstractCodedException;
 import esa.s1pdgs.cpoc.compression.config.ApplicationProperties;
 import esa.s1pdgs.cpoc.compression.status.AppStatusImpl;
 import esa.s1pdgs.cpoc.mqi.client.StatusService;
-import esa.s1pdgs.cpoc.status.Status;
 
 /**
  * Test class with properties mocked

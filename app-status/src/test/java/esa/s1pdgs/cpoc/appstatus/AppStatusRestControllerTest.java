@@ -35,8 +35,6 @@ import esa.s1pdgs.cpoc.appstatus.dto.AppStatusDto;
 import esa.s1pdgs.cpoc.appstatus.rest.AppStatusRestController;
 import esa.s1pdgs.cpoc.common.AppState;
 import esa.s1pdgs.cpoc.common.errors.AbstractCodedException;
-import esa.s1pdgs.cpoc.status.AppStatus;
-import esa.s1pdgs.cpoc.status.Status;
 
 public class AppStatusRestControllerTest {
 	

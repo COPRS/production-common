@@ -1,4 +1,4 @@
-package esa.s1pdgs.cpoc.status;
+package esa.s1pdgs.cpoc.appstatus;
 
 import java.util.Collections;
 import java.util.Map;
