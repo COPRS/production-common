@@ -14,8 +14,6 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import java.io.IOException;
 import java.util.NoSuchElementException;
 
-import javax.annotation.Resource;
-
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mock;
@@ -29,7 +27,6 @@ import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
-import org.springframework.web.context.WebApplicationContext;
 
 import esa.s1pdgs.cpoc.appstatus.dto.AppStatusDto;
 import esa.s1pdgs.cpoc.appstatus.rest.AppStatusRestController;
@@ -48,9 +45,6 @@ public class AppStatusRestControllerTest {
      * Controller to test
      */
     private AppStatusRestController uut;
-
-    @Resource
-	public WebApplicationContext wac;
 
 	protected MockMvc mockMvc;
 
@@ -200,6 +194,20 @@ public class AppStatusRestControllerTest {
 			    .andExpect(MockMvcResultMatchers.status().isOk())
 			    .andExpect(MockMvcResultMatchers.content().string("false"));
 
+    }
+    
+    @Test
+    public void testKubernetesReadiness_OnIsReady_ShallReturnHttpOk() throws Exception {
+    	doReturn(true).when(appStatus).getKubernetesReadiness();
+    	request(get("/app/readiness"))
+    			.andExpect(MockMvcResultMatchers.status().isOk());
+    }
+
+    @Test
+    public void testKubernetesReadiness_OnIsNotReady_ShallReturnHttpServiceUnavailable() throws Exception {
+    	doReturn(false).when(appStatus).getKubernetesReadiness();
+    	request(get("/app/readiness"))
+    			.andExpect(MockMvcResultMatchers.status().isServiceUnavailable());
     }
 
 }
