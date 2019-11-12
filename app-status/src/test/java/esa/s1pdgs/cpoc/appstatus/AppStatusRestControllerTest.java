@@ -197,14 +197,14 @@ public class AppStatusRestControllerTest {
     }
     
     @Test
-    public void testKubernetesReadiness_OnIsReady_ShallReturnHttpOk() throws Exception {
+    public void testGetKubernetesReadiness_OnIsReady_ShallReturnHttpStatusOk() throws Exception {
     	doReturn(true).when(appStatus).getKubernetesReadiness();
     	request(get("/app/readiness"))
     			.andExpect(MockMvcResultMatchers.status().isOk());
     }
 
     @Test
-    public void testKubernetesReadiness_OnIsNotReady_ShallReturnHttpServiceUnavailable() throws Exception {
+    public void testGetKubernetesReadiness_OnIsNotReady_ShallReturnHttpStatusServiceUnavailable() throws Exception {
     	doReturn(false).when(appStatus).getKubernetesReadiness();
     	request(get("/app/readiness"))
     			.andExpect(MockMvcResultMatchers.status().isServiceUnavailable());
