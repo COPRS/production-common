@@ -8,7 +8,7 @@ import org.junit.Test;
 
 import esa.s1pdgs.cpoc.common.AppState;
 
-public class AppStatusTest {
+public class AppStatusImplTest {
     
     /**
      * Application status for test
