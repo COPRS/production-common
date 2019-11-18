@@ -437,7 +437,7 @@ public class L0AppJobsGeneratorTest {
 //                new JobGeneration(appDataJob, "TaskTable.AIOP.xml");
 //        job.setJobOrder(TestL0Utils.buildJobOrderL20171109175634707000125());
 //        ProductFamily family = ProductFamily.EDRS_SESSION;
-//        LevelJobDto dto = new LevelJobDto(family,
+//        IpfExecutionJob dto = new IpfExecutionJob(family,
 //                appDataJob.getProduct().getProductName(),
 //                appDataJob.getProduct().getProcessMode(), "/data/test/workdir/",
 //                "/data/test/workdir/JobOrder.xml");

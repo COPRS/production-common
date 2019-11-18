@@ -8,7 +8,6 @@ import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyZeroInteractions;
 
 import java.io.File;
 import java.io.IOException;
@@ -128,7 +127,7 @@ public class JobProcessorTest extends MockPropertiesTest {
         //devProperties.getStepsActivation().put("erasing", Boolean.FALSE);
 
         inputMessage = new GenericMessageDto<IpfExecutionJob>(123, "",
-                TestUtils.buildL0LevelJobDto());
+                TestUtils.buildL0IpfExecutionJob());
         workingDir = new File(inputMessage.getBody().getWorkDirectory());
         if (!workingDir.exists()) {
             workingDir.mkdir();

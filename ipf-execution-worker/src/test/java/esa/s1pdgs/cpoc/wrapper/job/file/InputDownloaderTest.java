@@ -56,10 +56,10 @@ public class InputDownloaderTest {
     private File statusFile = new File(TestUtils.WORKDIR + "Status.txt");
     private File blankFile = new File(TestUtils.WORKDIR + "blank.xml");
 
-    private IpfExecutionJob dtol0 = TestUtils.buildL0LevelJobDto();
+    private IpfExecutionJob jobL0 = TestUtils.buildL0IpfExecutionJob();
     private InputDownloader downloaderL0;
 
-    private IpfExecutionJob dtol1 = TestUtils.buildL0LevelJobDto();
+    private IpfExecutionJob jobL1 = TestUtils.buildL0IpfExecutionJob();
     private InputDownloader downloaderL1;
 
     /**
@@ -77,11 +77,11 @@ public class InputDownloaderTest {
                 .setActive(Mockito.anyBoolean());
 
         downloaderL0 = new InputDownloader(obsClient, TestUtils.WORKDIR,
-                dtol0.getInputs(), 5, "prefix-logs", this.poolProcessorExecutor,
+                jobL0.getInputs(), 5, "prefix-logs", this.poolProcessorExecutor,
                 ApplicationLevel.L0);
 
         downloaderL1 = new InputDownloader(obsClient, TestUtils.WORKDIR,
-                dtol1.getInputs(), 5, "prefix-logs", this.poolProcessorExecutor,
+                jobL1.getInputs(), 5, "prefix-logs", this.poolProcessorExecutor,
                 ApplicationLevel.L1);
     }
 
@@ -93,7 +93,7 @@ public class InputDownloaderTest {
      */
     @Test
     public void testSortInputs() throws AbstractCodedException, IOException {
-        dtol0.addInput(TestUtils.buildBlankInputDto());
+        jobL0.addInput(TestUtils.buildBlankInputDto());
 
         List<ObsDownloadObject> downloadToBatch = TestUtils.getL0DownloadFile();
         List<ObsDownloadObject> result = downloaderL0.sortInputs();
@@ -133,7 +133,7 @@ public class InputDownloaderTest {
     @Test(expected = UnknownFamilyException.class)
     public void testSortInputsWithInvalidFamily()
             throws InternalErrorException, UnknownFamilyException, IOException {
-        dtol0.addInput(TestUtils.buildInvalidInputDto());
+        jobL0.addInput(TestUtils.buildInvalidInputDto());
         downloaderL0.sortInputs();
     }
 

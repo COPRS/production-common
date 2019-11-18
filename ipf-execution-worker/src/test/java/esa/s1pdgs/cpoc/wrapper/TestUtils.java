@@ -30,37 +30,37 @@ public class TestUtils {
 		}
 	}
 
-    public static IpfExecutionJob buildL0LevelJobDto() {
-        IpfExecutionJob dto = new IpfExecutionJob(ProductFamily.L0_JOB, "SESSIONID", "FAST", WORKDIR, WORKDIR + "JobOrder.xml");
+    public static IpfExecutionJob buildL0IpfExecutionJob() {
+        IpfExecutionJob job = new IpfExecutionJob(ProductFamily.L0_JOB, "SESSIONID", "FAST", WORKDIR, WORKDIR + "JobOrder.xml");
 
-        dto.addInput(buildAuxiliaryInputDto("AUX_OBMEMC.xml"));
-        dto.addInput(buildAuxiliaryInputDto("MPL_OBRP.xml"));
-        dto.addInput(buildAuxiliaryInputDto("MPL_DLF.xml"));
-        dto.addInput(buildLevelJobInputDto());
-        dto.addInput(buildRawInputDto("SESSIONID_ch1_001.raw", 1));
-        dto.addInput(buildRawInputDto("SESSIONID_ch2_001.raw", 2));
-        dto.addInput(buildRawInputDto("SESSIONID_ch1_002.raw", 1));
-        dto.addInput(buildRawInputDto("SESSIONID_ch2_002.raw", 2));
-        dto.addInput(new LevelJobInputDto("EDRS_SESSION", WORKDIR + "ch01/testrename.raw",
+        job.addInput(buildAuxiliaryInputDto("AUX_OBMEMC.xml"));
+        job.addInput(buildAuxiliaryInputDto("MPL_OBRP.xml"));
+        job.addInput(buildAuxiliaryInputDto("MPL_DLF.xml"));
+        job.addInput(buildLevelJobInputDto());
+        job.addInput(buildRawInputDto("SESSIONID_ch1_001.raw", 1));
+        job.addInput(buildRawInputDto("SESSIONID_ch2_001.raw", 2));
+        job.addInput(buildRawInputDto("SESSIONID_ch1_002.raw", 1));
+        job.addInput(buildRawInputDto("SESSIONID_ch2_002.raw", 2));
+        job.addInput(new LevelJobInputDto("EDRS_SESSION", WORKDIR + "ch01/testrename.raw",
                 "SESSIONID_ch1_003.raw"));
 
-        dto.addPool(buildPoolDto1());
-        dto.addPool(buildPoolDto2());
-        dto.addPool(buildPoolDto3());
+        job.addPool(buildPoolDto1());
+        job.addPool(buildPoolDto2());
+        job.addPool(buildPoolDto3());
 
-        dto.addOutput(buildProductOutputDto("^.*SM_RAW__0S.*$"));
-        dto.addOutput(buildProductOutputDto("^.*IW_RAW__0S.*$"));
-        dto.addOutput(buildAcnOutputDto("^.*SM_RAW__0A.*$"));
-        dto.addOutput(buildAcnOutputDto("^.*IW_RAW__0A.*$"));
-        dto.addOutput(buildAcnOutputDto("^.*EW_RAW__0A.*$"));
-        dto.addOutput(buildReportOutputDto("^S1[A|B|_]_OPER_REP_PASS.*.EOF$"));
-        dto.addOutput(buildReportOutputDto("^report*.XML$"));
+        job.addOutput(buildProductOutputDto("^.*SM_RAW__0S.*$"));
+        job.addOutput(buildProductOutputDto("^.*IW_RAW__0S.*$"));
+        job.addOutput(buildAcnOutputDto("^.*SM_RAW__0A.*$"));
+        job.addOutput(buildAcnOutputDto("^.*IW_RAW__0A.*$"));
+        job.addOutput(buildAcnOutputDto("^.*EW_RAW__0A.*$"));
+        job.addOutput(buildReportOutputDto("^S1[A|B|_]_OPER_REP_PASS.*.EOF$"));
+        job.addOutput(buildReportOutputDto("^report*.XML$"));
 
-        return dto;
+        return job;
     }
 
     public static List<ObsDownloadObject> getL0DownloadFile() {
-        return getL0DownloadFile(buildL0LevelJobDto());
+        return getL0DownloadFile(buildL0IpfExecutionJob());
     }
 
     public static List<ObsDownloadObject> getL0DownloadFile(IpfExecutionJob l0Job) {

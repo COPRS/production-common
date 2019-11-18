@@ -23,7 +23,7 @@ import nl.jqno.equalsverifier.Warning;
  * @author Cyrielle Gailliard
  *
  */
-public class LevelJobDtoTest {
+public class IpfExecutionJobTest {
 
 	private LevelJobInputDto input1;
 	private LevelJobInputDto input2;
@@ -46,19 +46,19 @@ public class LevelJobDtoTest {
 		pool2.addTask(new LevelJobTaskDto("path2"));
 	}
 
-	private void checkDto(IpfExecutionJob dto1) {
-	    assertEquals(ProductFamily.L0_JOB, dto1.getFamily());
-		assertTrue("testEqualsFunction".equals(dto1.getProductIdentifier()));
-        assertTrue("NRT".equals(dto1.getProductProcessMode()));
-		assertTrue("/data/localWD/123456".equals(dto1.getWorkDirectory()));
-		assertTrue("/data/localWD/123456/JobOrder.xml".equals(dto1.getJobOrder()));
-		assertTrue(2 == dto1.getInputs().size());
-		assertEquals(dto1.getInputs().get(1), input2);
-		assertTrue(3 == dto1.getOutputs().size());
-		assertEquals(dto1.getOutputs().get(0), output1);
-		assertEquals(dto1.getOutputs().get(2), output3);
-		assertTrue(2 == dto1.getPools().size());
-		assertEquals(dto1.getPools().get(0), pool1);
+	private void checkDto(IpfExecutionJob job) {
+	    assertEquals(ProductFamily.L0_JOB, job.getFamily());
+		assertTrue("testEqualsFunction".equals(job.getProductIdentifier()));
+        assertTrue("NRT".equals(job.getProductProcessMode()));
+		assertTrue("/data/localWD/123456".equals(job.getWorkDirectory()));
+		assertTrue("/data/localWD/123456/JobOrder.xml".equals(job.getJobOrder()));
+		assertTrue(2 == job.getInputs().size());
+		assertEquals(job.getInputs().get(1), input2);
+		assertTrue(3 == job.getOutputs().size());
+		assertEquals(job.getOutputs().get(0), output1);
+		assertEquals(job.getOutputs().get(2), output3);
+		assertTrue(2 == job.getPools().size());
+		assertEquals(job.getPools().get(0), pool1);
 	}
 
 	/**
@@ -66,16 +66,16 @@ public class LevelJobDtoTest {
 	 */
 	@Test
 	public void testConstructorAndGetters() {
-		IpfExecutionJob dto1 = new IpfExecutionJob(ProductFamily.L0_JOB, "testEqualsFunction", "NRT", "/data/localWD/123456", "/data/localWD/123456/JobOrder.xml");
-		dto1.addInput(input1);
-		dto1.addInput(input2);
-		dto1.addOutput(output1);
-		dto1.addOutput(output2);
-		dto1.addOutput(output3);
-		dto1.addPool(pool1);
-		dto1.addPool(pool2);
+		IpfExecutionJob job = new IpfExecutionJob(ProductFamily.L0_JOB, "testEqualsFunction", "NRT", "/data/localWD/123456", "/data/localWD/123456/JobOrder.xml");
+		job.addInput(input1);
+		job.addInput(input2);
+		job.addOutput(output1);
+		job.addOutput(output2);
+		job.addOutput(output3);
+		job.addPool(pool1);
+		job.addPool(pool2);
 
-		checkDto(dto1);
+		checkDto(job);
 	}
 
 	/**
@@ -83,19 +83,19 @@ public class LevelJobDtoTest {
 	 */
 	@Test
 	public void testToStringAndSetters() {
-		IpfExecutionJob dto1 = new IpfExecutionJob();
-		dto1.setFamily(ProductFamily.L0_JOB);
-		dto1.setProductIdentifier("testEqualsFunction");
-		dto1.setProductProcessMode("NRT");
-		dto1.setWorkDirectory("/data/localWD/123456");
-		dto1.setJobOrder("/data/localWD/123456/JobOrder.xml");
-		dto1.setInputs(Arrays.asList(input1, input2));
-		dto1.setOutputs(Arrays.asList(output1, output2, output3));
-		dto1.setPools(Arrays.asList(pool1, pool2));
+		IpfExecutionJob job = new IpfExecutionJob();
+		job.setFamily(ProductFamily.L0_JOB);
+		job.setProductIdentifier("testEqualsFunction");
+		job.setProductProcessMode("NRT");
+		job.setWorkDirectory("/data/localWD/123456");
+		job.setJobOrder("/data/localWD/123456/JobOrder.xml");
+		job.setInputs(Arrays.asList(input1, input2));
+		job.setOutputs(Arrays.asList(output1, output2, output3));
+		job.setPools(Arrays.asList(pool1, pool2));
 
-		checkDto(dto1);
+		checkDto(job);
 
-		String str = dto1.toString();
+		String str = job.toString();
         assertTrue(str.contains("family: L0_JOB"));
 		assertTrue(str.contains("productIdentifier: testEqualsFunction"));
         assertTrue(str.contains("productProcessMode: NRT"));
