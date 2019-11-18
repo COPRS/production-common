@@ -19,7 +19,7 @@ public class AuxiliaryProductFactory implements ProductFactory<ProductionEvent> 
 	}
 	
 	@Override
-	public List<Product<ProductionEvent>> newProducts(final File file, final IngestionJob ingestionDto, final ObsAdapter obsAdapter) throws ProductException {			
+	public List<Product<ProductionEvent>> newProducts(final File file, final IngestionJob ingestionJob, final ObsAdapter obsAdapter) throws ProductException {			
 		return Collections.singletonList(newProduct(file, obsAdapter));
 	}
 	

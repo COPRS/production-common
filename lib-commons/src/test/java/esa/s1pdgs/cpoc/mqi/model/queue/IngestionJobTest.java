@@ -13,7 +13,7 @@ import nl.jqno.equalsverifier.Warning;
  * @author Viveris Technologies
  *
  */
-public class IngestionDtoTest {
+public class IngestionJobTest {
 
 	/**
 	 * Check equals and hashcode methods

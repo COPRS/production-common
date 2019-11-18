@@ -21,5 +21,5 @@ public interface ProductFactory<E extends AbstractDto> {
     	throw new UnsupportedOperationException(String.format("Not yet supported for %s", family)); 
     }
     
-    public List<Product<E>> newProducts(final File file, final IngestionJob ingestionDto, final ObsAdapter obsAdapter) throws ProductException; 
+    public List<Product<E>> newProducts(final File file, final IngestionJob ingestionJob, final ObsAdapter obsAdapter) throws ProductException; 
 }
