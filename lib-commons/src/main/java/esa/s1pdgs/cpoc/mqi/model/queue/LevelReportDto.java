@@ -9,6 +9,7 @@ import esa.s1pdgs.cpoc.common.ProductFamily;
  * 
  * @author Viveris Technologies
  */
+@Deprecated
 public class LevelReportDto extends AbstractDto {
 
     /**
