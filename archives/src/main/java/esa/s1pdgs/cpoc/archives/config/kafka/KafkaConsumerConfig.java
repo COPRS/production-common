@@ -24,7 +24,7 @@ import org.springframework.kafka.listener.ContainerProperties.AckMode;
 import org.springframework.kafka.support.serializer.JsonDeserializer;
 
 import esa.s1pdgs.cpoc.mqi.model.queue.LevelReportDto;
-import esa.s1pdgs.cpoc.mqi.model.queue.ProductDto;
+import esa.s1pdgs.cpoc.mqi.model.queue.ProductionEvent;
 
 /**
  * KAFKA consumer configuration
@@ -103,10 +103,10 @@ public class KafkaConsumerConfig {
      * @return
      */
     @Bean
-    public ConsumerFactory<String, ProductDto> consumerFactory() {
+    public ConsumerFactory<String, ProductionEvent> consumerFactory() {
         return new DefaultKafkaConsumerFactory<>(consumerConfigs(""),
                 new StringDeserializer(),
-                new JsonDeserializer<>(ProductDto.class));
+                new JsonDeserializer<>(ProductionEvent.class));
     }
 
     /**
@@ -115,8 +115,8 @@ public class KafkaConsumerConfig {
      * @return
      */
     @Bean
-    public KafkaListenerContainerFactory<ConcurrentMessageListenerContainer<String, ProductDto>> kafkaListenerContainerFactory() {
-        ConcurrentKafkaListenerContainerFactory<String, ProductDto> factory =
+    public KafkaListenerContainerFactory<ConcurrentMessageListenerContainer<String, ProductionEvent>> kafkaListenerContainerFactory() {
+        ConcurrentKafkaListenerContainerFactory<String, ProductionEvent> factory =
                 new ConcurrentKafkaListenerContainerFactory<>();
         factory.setConsumerFactory(consumerFactory());
         factory.getContainerProperties().setPollTimeout(kafkaPooltimeout);
@@ -169,10 +169,10 @@ public class KafkaConsumerConfig {
      * @return
      */
     @Bean(name = "segmentConsumerFactory")
-    public ConsumerFactory<String, ProductDto> segmentConsumerFactory() {
+    public ConsumerFactory<String, ProductionEvent> segmentConsumerFactory() {
         return new DefaultKafkaConsumerFactory<>(consumerConfigs("-segment"),
                 new StringDeserializer(),
-                new JsonDeserializer<>(ProductDto.class));
+                new JsonDeserializer<>(ProductionEvent.class));
     }
 
     /**
@@ -181,8 +181,8 @@ public class KafkaConsumerConfig {
      * @return
      */
     @Bean(name = "segmentKafkaListenerContainerFactory")
-    public KafkaListenerContainerFactory<ConcurrentMessageListenerContainer<String, ProductDto>> segmentKafkaListenerContainerFactory() {
-        ConcurrentKafkaListenerContainerFactory<String, ProductDto> factory =
+    public KafkaListenerContainerFactory<ConcurrentMessageListenerContainer<String, ProductionEvent>> segmentKafkaListenerContainerFactory() {
+        ConcurrentKafkaListenerContainerFactory<String, ProductionEvent> factory =
                 new ConcurrentKafkaListenerContainerFactory<>();
         factory.setConsumerFactory(segmentConsumerFactory());
         factory.getContainerProperties().setPollTimeout(kafkaPooltimeout);

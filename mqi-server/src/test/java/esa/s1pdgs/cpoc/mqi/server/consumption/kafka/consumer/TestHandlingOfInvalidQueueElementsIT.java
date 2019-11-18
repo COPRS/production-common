@@ -35,7 +35,7 @@ import esa.s1pdgs.cpoc.appcatalog.rest.AppCatMessageDto;
 import esa.s1pdgs.cpoc.common.MessageState;
 import esa.s1pdgs.cpoc.common.ProductCategory;
 import esa.s1pdgs.cpoc.common.ProductFamily;
-import esa.s1pdgs.cpoc.mqi.model.queue.ProductDto;
+import esa.s1pdgs.cpoc.mqi.model.queue.ProductionEvent;
 import esa.s1pdgs.cpoc.mqi.server.GenericKafkaUtils;
 import esa.s1pdgs.cpoc.mqi.server.KafkaProperties;
 import esa.s1pdgs.cpoc.mqi.server.persistence.OtherApplicationService;
@@ -98,19 +98,19 @@ public class TestHandlingOfInvalidQueueElementsIT {
     @Mock
     private OtherApplicationService otherService;
 	
-	private GenericConsumer<ProductDto> uut;
+	private GenericConsumer<ProductionEvent> uut;
 	
-	private BlockingQueue<ProductDto> elements;
+	private BlockingQueue<ProductionEvent> elements;
 	
 	@Before
 	public void setUp() throws Exception {
         MockitoAnnotations.initMocks(this);
         
-        final AppCatMessageDto<ProductDto> m1 = DataUtils.getLightMessage1();
-        final AppCatMessageDto<ProductDto> m2 = DataUtils.getLightMessage2();
+        final AppCatMessageDto<ProductionEvent> m1 = DataUtils.getLightMessage1();
+        final AppCatMessageDto<ProductionEvent> m2 = DataUtils.getLightMessage2();
         m2.setState(MessageState.SEND);
         m2.setSendingPod("test-host");
-        final AppCatMessageDto<ProductDto> m3 = DataUtils.getLightMessage1();
+        final AppCatMessageDto<ProductionEvent> m3 = DataUtils.getLightMessage1();
         m3.setState(MessageState.SEND);
         m3.setSendingPod("other-host");
 
@@ -119,9 +119,9 @@ public class TestHandlingOfInvalidQueueElementsIT {
         
         elements = new LinkedBlockingQueue<>();
         
-        final MessageConsumer<ProductDto> messageConsumer = new MessageConsumer<ProductDto>() {		
+        final MessageConsumer<ProductionEvent> messageConsumer = new MessageConsumer<ProductionEvent>() {		
 			@Override
-			public void consume(ProductDto message) throws Exception {
+			public void consume(ProductionEvent message) throws Exception {
 				elements.add(message);		
 			}
 		};
@@ -142,9 +142,9 @@ public class TestHandlingOfInvalidQueueElementsIT {
 
 	@Test
 	public void testNominalConsumption_ShallNotFail() throws Exception {		
-        final ProductDto expected = new ProductDto("1", "2", ProductFamily.AUXILIARY_FILE);          
+        final ProductionEvent expected = new ProductionEvent("1", "2", ProductFamily.AUXILIARY_FILE);          
         send(expected);                
-        final ProductDto actual = elements.poll(10, TimeUnit.SECONDS);        
+        final ProductionEvent actual = elements.poll(10, TimeUnit.SECONDS);        
         assertEquals(expected, actual);
 	}
 	
@@ -159,9 +159,9 @@ public class TestHandlingOfInvalidQueueElementsIT {
         elements.poll(10, TimeUnit.SECONDS); 
         
         // insert valid object        
-        final ProductDto expected = new ProductDto("1", "2", ProductFamily.AUXILIARY_FILE);          
+        final ProductionEvent expected = new ProductionEvent("1", "2", ProductFamily.AUXILIARY_FILE);          
         send(expected);                
-        final ProductDto actual = elements.poll(10, TimeUnit.SECONDS);        
+        final ProductionEvent actual = elements.poll(10, TimeUnit.SECONDS);        
         assertEquals(expected, actual);
 	}
 	

@@ -24,7 +24,7 @@ import esa.s1pdgs.cpoc.common.errors.mqi.MqiCategoryNotAvailable;
 import esa.s1pdgs.cpoc.common.errors.mqi.MqiPublicationError;
 import esa.s1pdgs.cpoc.common.errors.mqi.MqiRouteNotAvailable;
 import esa.s1pdgs.cpoc.mqi.model.queue.AbstractDto;
-import esa.s1pdgs.cpoc.mqi.model.queue.ProductDto;
+import esa.s1pdgs.cpoc.mqi.model.queue.ProductionEvent;
 import esa.s1pdgs.cpoc.mqi.model.rest.Ack;
 import esa.s1pdgs.cpoc.mqi.model.rest.AckMessageDto;
 import esa.s1pdgs.cpoc.mqi.model.rest.GenericMessageDto;
@@ -142,10 +142,10 @@ public class TestProductDistributionController {
                 "publisher")).when(publication).publish(Mockito.any(), 
                         Mockito.any(), Mockito.any(), Mockito.any());
         
-        final ProductDto dto = new ProductDto("test321", "bar", ProductFamily.AUXILIARY_FILE);
+        final ProductionEvent dto = new ProductionEvent("test321", "bar", ProductFamily.AUXILIARY_FILE);
         
         try {
-		    final GenericPublicationMessageDto<? extends AbstractDto> mess = new GenericPublicationMessageDto<ProductDto>(
+		    final GenericPublicationMessageDto<? extends AbstractDto> mess = new GenericPublicationMessageDto<ProductionEvent>(
 		    		ProductFamily.AUXILIARY_FILE,
 		    		dto
 		    );
@@ -177,12 +177,12 @@ public class TestProductDistributionController {
         doThrow(MqiPublicationError.class).when(publication)
                 .publish(Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any());
         
-        final ProductDto dto = new ProductDto("test321", "bar", ProductFamily.AUXILIARY_FILE);
+        final ProductionEvent dto = new ProductionEvent("test321", "bar", ProductFamily.AUXILIARY_FILE);
         
         try {
-		    final GenericPublicationMessageDto<? extends AbstractDto> mess = new GenericPublicationMessageDto<ProductDto>(
+		    final GenericPublicationMessageDto<? extends AbstractDto> mess = new GenericPublicationMessageDto<ProductionEvent>(
 		    		ProductFamily.AUXILIARY_FILE,
-		    		new ProductDto("test321", "bar", ProductFamily.AUXILIARY_FILE)
+		    		new ProductionEvent("test321", "bar", ProductFamily.AUXILIARY_FILE)
 		    );
         	final ObjectMapper objMapper = new ObjectMapper();
         	final JsonNode json = objMapper.convertValue(mess, JsonNode.class);	

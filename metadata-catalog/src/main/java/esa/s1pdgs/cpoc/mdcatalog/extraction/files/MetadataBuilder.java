@@ -13,7 +13,7 @@ import esa.s1pdgs.cpoc.mdcatalog.extraction.model.ConfigFileDescriptor;
 import esa.s1pdgs.cpoc.mdcatalog.extraction.model.EdrsSessionFileDescriptor;
 import esa.s1pdgs.cpoc.mdcatalog.extraction.model.OutputFileDescriptor;
 import esa.s1pdgs.cpoc.mdcatalog.extraction.xml.XmlConverter;
-import esa.s1pdgs.cpoc.mqi.model.queue.ProductDto;
+import esa.s1pdgs.cpoc.mqi.model.queue.ProductionEvent;
 
 /**
  * Class to build metadata for configuration and ERDS session files
@@ -148,7 +148,7 @@ public class MetadataBuilder {
      * @throws MetadataExtractionException
 	 * @throws MetadataMalformedException 
      */
-    public JSONObject buildOutputFileMetadata(OutputFileDescriptor descriptor, File file, ProductDto dto)
+    public JSONObject buildOutputFileMetadata(OutputFileDescriptor descriptor, File file, ProductionEvent dto)
             throws MetadataExtractionException, MetadataMalformedException {
         JSONObject metadataToIndex = new JSONObject();
         metadataToIndex = extractor.processProduct(descriptor, dto.getFamily(), file);

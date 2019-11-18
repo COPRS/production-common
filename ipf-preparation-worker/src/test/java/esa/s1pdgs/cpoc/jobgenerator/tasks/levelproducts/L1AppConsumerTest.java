@@ -36,13 +36,13 @@ import esa.s1pdgs.cpoc.metadata.client.MetadataClient;
 import esa.s1pdgs.cpoc.metadata.model.EdrsSessionMetadata;
 import esa.s1pdgs.cpoc.mqi.client.GenericMqiClient;
 import esa.s1pdgs.cpoc.mqi.client.StatusService;
-import esa.s1pdgs.cpoc.mqi.model.queue.ProductDto;
+import esa.s1pdgs.cpoc.mqi.model.queue.ProductionEvent;
 import esa.s1pdgs.cpoc.mqi.model.rest.GenericMessageDto;
 
 public class L1AppConsumerTest {
 
     @Mock
-    private AbstractJobsDispatcher<ProductDto> l0SliceJobsDispatcher;
+    private AbstractJobsDispatcher<ProductionEvent> l0SliceJobsDispatcher;
 
     @Mock
     protected ProcessSettings processSettings;
@@ -69,18 +69,18 @@ public class L1AppConsumerTest {
     
     private ErrorRepoAppender errorAppender = ErrorRepoAppender.NULL ;
 
-    private ProductDto dtoMatch = new ProductDto(
+    private ProductionEvent dtoMatch = new ProductionEvent(
             "S1A_IW_RAW__0SDV_20171213T121623_20171213T121656_019684_021735_C6DB.SAFE",
             "S1A_IW_RAW__0SDV_20171213T121623_20171213T121656_019684_021735_C6DB.SAFE",
             ProductFamily.L0_SLICE, "NRT");
-    private ProductDto dtoNotMatch = new ProductDto(
+    private ProductionEvent dtoNotMatch = new ProductionEvent(
             "S1A_I_RAW__0SDV_20171213T121623_20171213T121656_019684_021735_C6DB.SAFE",
             "S1A_I_RAW__0SDV_20171213T121623_20171213T121656_019684_021735_C6DB.SAFE",
             ProductFamily.L0_SLICE, "NRT");
-    private GenericMessageDto<ProductDto> message1 =
-            new GenericMessageDto<ProductDto>(1, "", dtoMatch);
-    private GenericMessageDto<ProductDto> message2 =
-            new GenericMessageDto<ProductDto>(2, "", dtoNotMatch);
+    private GenericMessageDto<ProductionEvent> message1 =
+            new GenericMessageDto<ProductionEvent>(1, "", dtoMatch);
+    private GenericMessageDto<ProductionEvent> message2 =
+            new GenericMessageDto<ProductionEvent>(2, "", dtoNotMatch);
     
     @Mock
     private MetadataClient metadataClient;

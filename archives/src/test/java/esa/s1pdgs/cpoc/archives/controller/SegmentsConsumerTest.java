@@ -27,7 +27,7 @@ import esa.s1pdgs.cpoc.common.ProductFamily;
 import esa.s1pdgs.cpoc.common.errors.AbstractCodedException;
 import esa.s1pdgs.cpoc.common.errors.obs.ObsException;
 import esa.s1pdgs.cpoc.common.errors.obs.ObsUnknownObject;
-import esa.s1pdgs.cpoc.mqi.model.queue.ProductDto;
+import esa.s1pdgs.cpoc.mqi.model.queue.ProductionEvent;
 import esa.s1pdgs.cpoc.obs_sdk.ObsClient;
 import esa.s1pdgs.cpoc.obs_sdk.ObsDownloadObject;
 
@@ -90,7 +90,7 @@ public class SegmentsConsumerTest {
         this.mockSliceDownloadFiles(expectedResult);
         doNothing().when(ack).acknowledge();
         consumer.receive(
-                new ProductDto("productName", "kobs", ProductFamily.L0_SEGMENT, "FAST"),
+                new ProductionEvent("productName", "kobs", ProductFamily.L0_SEGMENT, "FAST"),
                 ack, "topic");
         verify(ack, times(1)).acknowledge();
         
@@ -109,7 +109,7 @@ public class SegmentsConsumerTest {
         this.mockSliceDownloadFiles(expectedResult);
         doNothing().when(ack).acknowledge();
         consumer.receive(
-                new ProductDto("productName", "kobs", ProductFamily.L0_SEGMENT, "FAST"),
+                new ProductionEvent("productName", "kobs", ProductFamily.L0_SEGMENT, "FAST"),
                 ack, "topic");
         verify(ack, times(1)).acknowledge();
         verify(obsClient, times(1)).download((List<ObsDownloadObject>) ArgumentMatchers.argThat(s -> ((List<ObsDownloadObject>) s).contains(new ObsDownloadObject(
@@ -124,7 +124,7 @@ public class SegmentsConsumerTest {
                         appStatus);
         this.mockSliceObjectStorageException();
         consumer.receive(
-                new ProductDto("productName", "kobs", ProductFamily.L0_SEGMENT, "FAST"),
+                new ProductionEvent("productName", "kobs", ProductFamily.L0_SEGMENT, "FAST"),
                 ack, "topic");
         verify(ack, never()).acknowledge();
     }
@@ -137,7 +137,7 @@ public class SegmentsConsumerTest {
                         appStatus);
         this.mockSliceObsUnknownObjectException();
         consumer.receive(
-                new ProductDto("productName", "kobs", ProductFamily.L0_SEGMENT, "FAST"),
+                new ProductionEvent("productName", "kobs", ProductFamily.L0_SEGMENT, "FAST"),
                 ack, "topic");
         verify(ack, never()).acknowledge();
     }
@@ -153,7 +153,7 @@ public class SegmentsConsumerTest {
         doThrow(new IllegalArgumentException("error message")).when(ack)
         .acknowledge();
         consumer.receive(
-                new ProductDto("productName", "kobs", ProductFamily.L0_SEGMENT, "FAST"),
+                new ProductionEvent("productName", "kobs", ProductFamily.L0_SEGMENT, "FAST"),
                 ack, "topic");
         verify(ack, times(1)).acknowledge();
     }

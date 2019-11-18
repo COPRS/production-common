@@ -23,7 +23,7 @@ import esa.s1pdgs.cpoc.mdcatalog.status.AppStatusImpl;
 import esa.s1pdgs.cpoc.mqi.client.GenericMqiClient;
 import esa.s1pdgs.cpoc.mqi.client.MqiConsumer;
 import esa.s1pdgs.cpoc.mqi.client.MqiListener;
-import esa.s1pdgs.cpoc.mqi.model.queue.ProductDto;
+import esa.s1pdgs.cpoc.mqi.model.queue.ProductionEvent;
 import esa.s1pdgs.cpoc.mqi.model.rest.GenericMessageDto;
 import esa.s1pdgs.cpoc.obs_sdk.ObsClient;
 import esa.s1pdgs.cpoc.report.Reporting;
@@ -34,7 +34,7 @@ import esa.s1pdgs.cpoc.report.Reporting;
  * @author Olivier Bex-Chauvet
  */
 @Service
-public class LevelProductsExtractor extends GenericExtractor<ProductDto> implements MqiListener<ProductDto> {
+public class LevelProductsExtractor extends GenericExtractor<ProductionEvent> implements MqiListener<ProductionEvent> {
 
     /**
      * Pattern for configuration files to extract data
@@ -87,13 +87,13 @@ public class LevelProductsExtractor extends GenericExtractor<ProductDto> impleme
 		appStatus.setWaiting(category);
 		if (pollingIntervalMs > 0) {
 			final ExecutorService service = Executors.newFixedThreadPool(1);
-			service.execute(new MqiConsumer<ProductDto>(mqiClient, category, this, pollingIntervalMs,
+			service.execute(new MqiConsumer<ProductionEvent>(mqiClient, category, this, pollingIntervalMs,
 					pollingInitialDelayMs, esa.s1pdgs.cpoc.appstatus.AppStatus.NULL));
 		}
 	}
     
     @Override
-    public void onMessage(GenericMessageDto<ProductDto> message) {
+    public void onMessage(GenericMessageDto<ProductionEvent> message) {
     	super.genericExtract(message);
     	
     }
@@ -104,9 +104,9 @@ public class LevelProductsExtractor extends GenericExtractor<ProductDto> impleme
     @Override
     protected JSONObject extractMetadata(
     		final Reporting.Factory reportingFactory, 
-            final GenericMessageDto<ProductDto> message)
+            final GenericMessageDto<ProductionEvent> message)
             throws AbstractCodedException {
-        ProductDto dto = message.getBody();
+        ProductionEvent dto = message.getBody();
         // Upload file
         String keyObs = getKeyObs(message);
         
@@ -119,7 +119,7 @@ public class LevelProductsExtractor extends GenericExtractor<ProductDto> impleme
     
     private final JSONObject extract(	
     		final Reporting.Factory reportingFactory, 
-    		final ProductDto dto,
+    		final ProductionEvent dto,
     		final File metadataFile,
             final String productName,
             final ProductFamily family
@@ -140,7 +140,7 @@ public class LevelProductsExtractor extends GenericExtractor<ProductDto> impleme
      * @param message
      * @return
      */
-    protected String getKeyObs(final GenericMessageDto<ProductDto> message) {
+    protected String getKeyObs(final GenericMessageDto<ProductionEvent> message) {
         String keyObs = message.getBody().getKeyObjectStorage();
         if (keyObs.toLowerCase().endsWith(fileManifestExt.toLowerCase())) {
             keyObs += "/" + manifestFilename;
@@ -152,7 +152,7 @@ public class LevelProductsExtractor extends GenericExtractor<ProductDto> impleme
      * @see GenericExtractor#extractProductNameFromDto(Object)
      */
     @Override
-    protected String extractProductNameFromDto(final ProductDto dto) {
+    protected String extractProductNameFromDto(final ProductionEvent dto) {
         return dto.getProductName();
     }
 
@@ -161,7 +161,7 @@ public class LevelProductsExtractor extends GenericExtractor<ProductDto> impleme
      */
     @Override
     protected void cleanProcessing(
-            final GenericMessageDto<ProductDto> message) {
+            final GenericMessageDto<ProductionEvent> message) {
         // TODO Auto-generated method stub
         File metadataFile = new File(localDirectory + getKeyObs(message));
         if (metadataFile.exists()) {

@@ -6,7 +6,7 @@ import static org.junit.Assert.assertTrue;
 import org.junit.Test;
 
 import esa.s1pdgs.cpoc.common.ProductFamily;
-import esa.s1pdgs.cpoc.mqi.model.queue.ProductDto;
+import esa.s1pdgs.cpoc.mqi.model.queue.ProductionEvent;
 import nl.jqno.equalsverifier.EqualsVerifier;
 import nl.jqno.equalsverifier.Warning;
 
@@ -23,11 +23,11 @@ public class ProductDtoTest {
 	 */
 	@Test
 	public void testAux() {
-		ProductDto dto = new ProductDto("product-name", "key-obs", ProductFamily.AUXILIARY_FILE, null);
+		ProductionEvent dto = new ProductionEvent("product-name", "key-obs", ProductFamily.AUXILIARY_FILE, null);
 		assertEquals("product-name", dto.getProductName());
 		assertEquals("key-obs", dto.getKeyObjectStorage());
 
-		dto = new ProductDto();
+		dto = new ProductionEvent();
 		dto.setProductName("other-product");
 		dto.setKeyObjectStorage("other-key");
 		assertEquals("other-product", dto.getProductName());
@@ -36,7 +36,7 @@ public class ProductDtoTest {
 	
     @Test
     public void testLevelProduct() {
-        ProductDto dto = new ProductDto("product-name", "key-obs", ProductFamily.L0_SLICE, "NRT");
+        ProductionEvent dto = new ProductionEvent("product-name", "key-obs", ProductFamily.L0_SLICE, "NRT");
         assertEquals("product-name", dto.getProductName());
         assertEquals("key-obs", dto.getKeyObjectStorage());
         assertEquals(ProductFamily.L0_SLICE, dto.getFamily());
@@ -46,7 +46,7 @@ public class ProductDtoTest {
     
     @Test
     public void testLevelSegment() {
-        ProductDto dto = new ProductDto("product-name", "key-obs", ProductFamily.L0_SLICE, "NRT");
+        ProductionEvent dto = new ProductionEvent("product-name", "key-obs", ProductFamily.L0_SLICE, "NRT");
         assertEquals("product-name", dto.getProductName());
         assertEquals("key-obs", dto.getKeyObjectStorage());
         assertEquals(ProductFamily.L0_SLICE, dto.getFamily());
@@ -58,7 +58,7 @@ public class ProductDtoTest {
 	 */
 	@Test
 	public void testToString() {
-		ProductDto dto = new ProductDto("product-name", "key-obs", ProductFamily.AUXILIARY_FILE, null);
+		ProductionEvent dto = new ProductionEvent("product-name", "key-obs", ProductFamily.AUXILIARY_FILE, null);
 		String str = dto.toString();
 		assertTrue("toString should contain the product name", str.contains("productName: product-name"));
 		assertTrue("toString should contain the key OBS", str.contains("keyObjectStorage: key-obs"));
@@ -69,7 +69,7 @@ public class ProductDtoTest {
 	 */
 	@Test
 	public void checkEquals() {
-		EqualsVerifier.forClass(ProductDto.class).usingGetClass().suppress(Warning.NONFINAL_FIELDS).verify();
+		EqualsVerifier.forClass(ProductionEvent.class).usingGetClass().suppress(Warning.NONFINAL_FIELDS).verify();
 	}
 	
     /**
@@ -77,7 +77,7 @@ public class ProductDtoTest {
      */
     @Test
     public void testToStringAndSetters() {
-        ProductDto dto = new ProductDto();
+        ProductionEvent dto = new ProductionEvent();
         dto.setProductName("product-name");
         dto.setKeyObjectStorage("key-obs");
         dto.setFamily(ProductFamily.L1_SLICE);
@@ -94,7 +94,7 @@ public class ProductDtoTest {
      */
     @Test
     public void testToStringAndSettersL2() {
-        ProductDto dto = new ProductDto();
+        ProductionEvent dto = new ProductionEvent();
         dto.setProductName("product-name");
         dto.setKeyObjectStorage("key-obs");
         dto.setFamily(ProductFamily.L2_SLICE);

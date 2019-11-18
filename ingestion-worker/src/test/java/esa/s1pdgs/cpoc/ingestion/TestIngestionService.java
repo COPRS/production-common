@@ -33,7 +33,7 @@ import esa.s1pdgs.cpoc.ingestion.product.ProductService;
 import esa.s1pdgs.cpoc.mqi.client.GenericMqiClient;
 import esa.s1pdgs.cpoc.mqi.model.queue.AbstractDto;
 import esa.s1pdgs.cpoc.mqi.model.queue.IngestionJob;
-import esa.s1pdgs.cpoc.mqi.model.queue.ProductDto;
+import esa.s1pdgs.cpoc.mqi.model.queue.ProductionEvent;
 import esa.s1pdgs.cpoc.mqi.model.rest.GenericMessageDto;
 import esa.s1pdgs.cpoc.mqi.model.rest.GenericPublicationMessageDto;
 import esa.s1pdgs.cpoc.report.LoggerReporting;
@@ -116,7 +116,7 @@ public final class TestIngestionService {
 		final Product<AbstractDto> prod = new Product<>();
 		prod.setFamily(ProductFamily.AUXILIARY_FILE);
 		prod.setFile(file);	
-		final ProductDto dto = new ProductDto(
+		final ProductionEvent dto = new ProductionEvent(
 				file.getName(), 
 				"foo.bar", 
 				ProductFamily.AUXILIARY_FILE
@@ -230,7 +230,7 @@ public final class TestIngestionService {
 		message.setInputKey("inputKey");
 		message.setBody(new IngestionJob());
 		
-		AbstractDto dto = new ProductDto();
+		AbstractDto dto = new ProductionEvent();
 		
 		final Product<AbstractDto> product = new Product<>();
 		product.setFamily(ProductFamily.AUXILIARY_FILE);

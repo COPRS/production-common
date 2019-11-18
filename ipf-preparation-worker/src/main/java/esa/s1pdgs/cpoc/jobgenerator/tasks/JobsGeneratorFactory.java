@@ -19,7 +19,7 @@ import esa.s1pdgs.cpoc.jobgenerator.tasks.l0segmentapp.L0SegmentAppJobsGenerator
 import esa.s1pdgs.cpoc.jobgenerator.tasks.levelproducts.LevelProductsJobsGenerator;
 import esa.s1pdgs.cpoc.metadata.client.MetadataClient;
 import esa.s1pdgs.cpoc.mqi.model.queue.IngestionEvent;
-import esa.s1pdgs.cpoc.mqi.model.queue.ProductDto;
+import esa.s1pdgs.cpoc.mqi.model.queue.ProductionEvent;
 
 @Service
 public class JobsGeneratorFactory {
@@ -102,11 +102,11 @@ public class JobsGeneratorFactory {
 	 * @return
 	 * @throws JobGenBuildTaskTableException
 	 */
-	public AbstractJobsGenerator<ProductDto> createJobGeneratorForL0Slice(final File xmlFile,
-			final AppCatalogJobClient<ProductDto> appDataService)
+	public AbstractJobsGenerator<ProductionEvent> createJobGeneratorForL0Slice(final File xmlFile,
+			final AppCatalogJobClient<ProductionEvent> appDataService)
 			throws JobGenBuildTaskTableException {
 
-		AbstractJobsGenerator<ProductDto> processor = new LevelProductsJobsGenerator(this.xmlConverter, this.metadataClient,
+		AbstractJobsGenerator<ProductionEvent> processor = new LevelProductsJobsGenerator(this.xmlConverter, this.metadataClient,
 				this.l0ProcessSettings, this.jobGeneratorSettings, this.outputFactory, appDataService, processConfiguration);
 		processor.setMode(ProductMode.SLICING);
 		processor.initialize(xmlFile);
@@ -121,10 +121,10 @@ public class JobsGeneratorFactory {
 	 * @return
 	 * @throws JobGenBuildTaskTableException
 	 */
-	public AbstractJobsGenerator<ProductDto> createJobGeneratorForL0Segment(final File xmlFile,
-			final AppCatalogJobClient<ProductDto> appDataService) throws JobGenBuildTaskTableException {
+	public AbstractJobsGenerator<ProductionEvent> createJobGeneratorForL0Segment(final File xmlFile,
+			final AppCatalogJobClient<ProductionEvent> appDataService) throws JobGenBuildTaskTableException {
 		
-		AbstractJobsGenerator<ProductDto> processor = new L0SegmentAppJobsGenerator(this.xmlConverter,
+		AbstractJobsGenerator<ProductionEvent> processor = new L0SegmentAppJobsGenerator(this.xmlConverter,
 				this.metadataClient, this.l0ProcessSettings, this.jobGeneratorSettings, this.outputFactory,
 				appDataService, processConfiguration);
 		processor.setMode(ProductMode.SLICING);

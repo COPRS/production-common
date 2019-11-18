@@ -47,7 +47,7 @@ import esa.s1pdgs.cpoc.appcatalog.server.mqi.db.MqiMessageService;
 import esa.s1pdgs.cpoc.appstatus.AppStatus;
 import esa.s1pdgs.cpoc.common.MessageState;
 import esa.s1pdgs.cpoc.common.ProductCategory;
-import esa.s1pdgs.cpoc.mqi.model.queue.ProductDto;
+import esa.s1pdgs.cpoc.mqi.model.queue.ProductionEvent;
 import esa.s1pdgs.cpoc.mqi.model.rest.Ack;
 
 /**
@@ -69,7 +69,7 @@ public class GenericMqiControllerTest extends RestControllerTest {
     @Mock
     private AppStatus appStatus;
 
-    private GenericMessageController<ProductDto> controller;
+    private GenericMessageController<ProductionEvent> controller;
     
     private MessageManager messManager;
     private MessageConverter messConverter = new MessageConverter();
@@ -79,7 +79,7 @@ public class GenericMqiControllerTest extends RestControllerTest {
         MockitoAnnotations.initMocks(this);
         messManager = new MessageManager(mongoDBServices, maxRetries, -3);
         
-        this.controller =  new GenericMessageController<ProductDto>(messConverter,messManager,appStatus);
+        this.controller =  new GenericMessageController<ProductionEvent>(messConverter,messManager,appStatus);
         this.initMockMvc(this.controller);
     }
 
@@ -119,8 +119,8 @@ public class GenericMqiControllerTest extends RestControllerTest {
         doNothing().when(mongoDBServices)
                 .insertMqiMessage(Mockito.any(MqiMessage.class));
         this.mockSearchByTopicPartitionOffsetGroup(new ArrayList<MqiMessage>());
-        AppCatReadMessageDto<ProductDto> body =
-                new AppCatReadMessageDto<ProductDto>("group",
+        AppCatReadMessageDto<ProductionEvent> body =
+                new AppCatReadMessageDto<ProductionEvent>("group",
                         "readingPod", false, null);
         request(post("/mqi/auxiliary_files/topic/1/5/read")
                 .contentType(MediaType.APPLICATION_JSON_VALUE)
@@ -143,8 +143,8 @@ public class GenericMqiControllerTest extends RestControllerTest {
         List<MqiMessage> response = new ArrayList<MqiMessage>();
         response.add(message);
         this.mockSearchByTopicPartitionOffsetGroup(response);
-        AppCatReadMessageDto<ProductDto> body =
-                new AppCatReadMessageDto<ProductDto>("group",
+        AppCatReadMessageDto<ProductionEvent> body =
+                new AppCatReadMessageDto<ProductionEvent>("group",
                         "readingPod", false, null);
         request(post("/mqi/auxiliary_files/topic/1/5/read")
                 .contentType(MediaType.APPLICATION_JSON_VALUE)
@@ -171,8 +171,8 @@ public class GenericMqiControllerTest extends RestControllerTest {
         doNothing().when(mongoDBServices).updateByID(Mockito.anyLong(),
                 Mockito.any());
 
-        AppCatReadMessageDto<ProductDto> body =
-                new AppCatReadMessageDto<ProductDto>("group",
+        AppCatReadMessageDto<ProductionEvent> body =
+                new AppCatReadMessageDto<ProductionEvent>("group",
                         "readingPod2", false, null);
         request(post("/mqi/auxiliary_files/topic/1/5/read")
                 .contentType(MediaType.APPLICATION_JSON_VALUE)
@@ -202,8 +202,8 @@ public class GenericMqiControllerTest extends RestControllerTest {
         List<MqiMessage> response = new ArrayList<MqiMessage>();
         response.add(message);
         this.mockSearchByTopicPartitionOffsetGroup(response);
-        AppCatReadMessageDto<ProductDto> body =
-                new AppCatReadMessageDto<ProductDto>("group",
+        AppCatReadMessageDto<ProductionEvent> body =
+                new AppCatReadMessageDto<ProductionEvent>("group",
                         "readingPod2", true, null);
         request(post("/mqi/auxiliary_files/topic/1/5/read")
                 .contentType(MediaType.APPLICATION_JSON_VALUE)
@@ -232,8 +232,8 @@ public class GenericMqiControllerTest extends RestControllerTest {
         List<MqiMessage> response = new ArrayList<MqiMessage>();
         response.add(message);
         this.mockSearchByTopicPartitionOffsetGroup(response);
-        AppCatReadMessageDto<ProductDto> body =
-                new AppCatReadMessageDto<ProductDto>("group",
+        AppCatReadMessageDto<ProductionEvent> body =
+                new AppCatReadMessageDto<ProductionEvent>("group",
                         "readingPod", true, null);
         request(post("/mqi/auxiliary_files/topic/1/5/read")
                 .contentType(MediaType.APPLICATION_JSON_VALUE)
@@ -261,8 +261,8 @@ public class GenericMqiControllerTest extends RestControllerTest {
         List<MqiMessage> response = new ArrayList<MqiMessage>();
         response.add(message);
         this.mockSearchByTopicPartitionOffsetGroup(response);
-        AppCatReadMessageDto<ProductDto> body =
-                new AppCatReadMessageDto<ProductDto>("group",
+        AppCatReadMessageDto<ProductionEvent> body =
+                new AppCatReadMessageDto<ProductionEvent>("group",
                         "readingPod", false, null);
         request(post("/mqi/auxiliary_files/topic/1/5/read")
                 .contentType(MediaType.APPLICATION_JSON_VALUE)
@@ -289,8 +289,8 @@ public class GenericMqiControllerTest extends RestControllerTest {
         List<MqiMessage> response = new ArrayList<MqiMessage>();
         response.add(message);
         this.mockSearchByTopicPartitionOffsetGroup(response);
-        AppCatReadMessageDto<ProductDto> body =
-                new AppCatReadMessageDto<ProductDto>("group",
+        AppCatReadMessageDto<ProductionEvent> body =
+                new AppCatReadMessageDto<ProductionEvent>("group",
                         "readingPod", false, null);
         request(post("/mqi/auxiliary_files/topic/1/5/read")
                 .contentType(MediaType.APPLICATION_JSON_VALUE)
@@ -313,8 +313,8 @@ public class GenericMqiControllerTest extends RestControllerTest {
                 .searchByTopicPartitionOffsetGroup(Mockito.anyString(),
                         Mockito.anyInt(), Mockito.anyLong(),
                         Mockito.anyString());
-        AppCatReadMessageDto<ProductDto> body =
-                new AppCatReadMessageDto<ProductDto>("group",
+        AppCatReadMessageDto<ProductionEvent> body =
+                new AppCatReadMessageDto<ProductionEvent>("group",
                         "readingPod", false, null);
         request(post("/mqi/auxiliary_files/topic/1/5/read")
                 .contentType(MediaType.APPLICATION_JSON_VALUE)

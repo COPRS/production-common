@@ -35,7 +35,7 @@ import esa.s1pdgs.cpoc.mdcatalog.extraction.model.OutputFileDescriptor;
 import esa.s1pdgs.cpoc.mdcatalog.extraction.xml.XmlConverter;
 import esa.s1pdgs.cpoc.mdcatalog.status.AppStatusImpl;
 import esa.s1pdgs.cpoc.mqi.client.GenericMqiClient;
-import esa.s1pdgs.cpoc.mqi.model.queue.ProductDto;
+import esa.s1pdgs.cpoc.mqi.model.queue.ProductionEvent;
 import esa.s1pdgs.cpoc.mqi.model.rest.GenericMessageDto;
 import esa.s1pdgs.cpoc.obs_sdk.ObsClient;
 import esa.s1pdgs.cpoc.obs_sdk.ObsDownloadObject;
@@ -81,17 +81,17 @@ public class LevelSegmentsExtractorTest {
     /**
      * Job to process
      */
-    private GenericMessageDto<ProductDto> inputMessage;
+    private GenericMessageDto<ProductionEvent> inputMessage;
 
     /**
      * Job to process
      */
-    private GenericMessageDto<ProductDto> inputMessageSafe;
+    private GenericMessageDto<ProductionEvent> inputMessageSafe;
 
     /**
      * Job to process
      */
-    private GenericMessageDto<ProductDto> inputMessageAux;
+    private GenericMessageDto<ProductionEvent> inputMessageAux;
     
     private final ErrorRepoAppender errorAppender = ErrorRepoAppender.NULL;
     
@@ -130,18 +130,18 @@ public class LevelSegmentsExtractorTest {
         doNothing().when(appStatus).setError(Mockito.any(), Mockito.anyString());
         doReturn(true).when(mqiService).ack(Mockito.any(), Mockito.any());
 
-        inputMessage = new GenericMessageDto<ProductDto>(123, "",
-                new ProductDto("product-name", "key-obs",
+        inputMessage = new GenericMessageDto<ProductionEvent>(123, "",
+                new ProductionEvent("product-name", "key-obs",
                         ProductFamily.L0_SEGMENT, "NRT"));
 
-        inputMessageSafe = new GenericMessageDto<ProductDto>(123, "",
-                new ProductDto(
+        inputMessageSafe = new GenericMessageDto<ProductionEvent>(123, "",
+                new ProductionEvent(
                         "S1A_AUX_CAL_V20140402T000000_G20140402T133909.SAFE",
                         "S1A_AUX_CAL_V20140402T000000_G20140402T133909.SAFE",
                         ProductFamily.L0_SEGMENT, "NRT"));
 
-        inputMessageAux = new GenericMessageDto<ProductDto>(123, "",
-                new ProductDto(
+        inputMessageAux = new GenericMessageDto<ProductionEvent>(123, "",
+                new ProductionEvent(
                         "S1A_OPER_AUX_OBMEMC_PDMC_20140201T000000.xml",
                         "S1A_OPER_AUX_OBMEMC_PDMC_20140201T000000.xml",
                         ProductFamily.L0_SEGMENT, "NRT"));
@@ -204,8 +204,8 @@ public class LevelSegmentsExtractorTest {
         List<File> files = Arrays.asList(new File(testDir, 
                 "S1A_WV_RAW__0SSV_20180913T214325_20180913T214422_023685_0294F4_41D5.SAFE"+ File.separator + "manifest.safe"));
 
-        inputMessageSafe = new GenericMessageDto<ProductDto>(123, "",
-                new ProductDto(
+        inputMessageSafe = new GenericMessageDto<ProductionEvent>(123, "",
+                new ProductionEvent(
                         "S1A_WV_RAW__0SSV_20180913T214325_20180913T214422_023685_0294F4_41D5.SAFE",
                         "S1A_WV_RAW__0SSV_20180913T214325_20180913T214422_023685_0294F4_41D5.SAFE",
                         ProductFamily.L0_SEGMENT, "FAST"));

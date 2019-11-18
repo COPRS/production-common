@@ -27,7 +27,7 @@ import esa.s1pdgs.cpoc.common.ProductFamily;
 import esa.s1pdgs.cpoc.common.errors.AbstractCodedException;
 import esa.s1pdgs.cpoc.common.errors.obs.ObsException;
 import esa.s1pdgs.cpoc.common.errors.obs.ObsUnknownObject;
-import esa.s1pdgs.cpoc.mqi.model.queue.ProductDto;
+import esa.s1pdgs.cpoc.mqi.model.queue.ProductionEvent;
 import esa.s1pdgs.cpoc.obs_sdk.ObsClient;
 import esa.s1pdgs.cpoc.obs_sdk.ObsDownloadObject;
 
@@ -90,7 +90,7 @@ public class SlicesConsumerTest {
         this.mockSliceDownloadFiles(expectedResult);
         doNothing().when(ack).acknowledge();
         consumer.receive(
-                new ProductDto("productName", "kobs", ProductFamily.L0_SLICE, "NRT"),
+                new ProductionEvent("productName", "kobs", ProductFamily.L0_SLICE, "NRT"),
                 ack, "topic");
         verify(ack, times(1)).acknowledge();
         verify(obsClient, times(1)).download((List<ObsDownloadObject>) ArgumentMatchers.argThat(s -> ((List<ObsDownloadObject>) s).contains(new ObsDownloadObject(
@@ -108,7 +108,7 @@ public class SlicesConsumerTest {
         this.mockSliceDownloadFiles(expectedResult);
         doNothing().when(ack).acknowledge();
         consumer.receive(
-                new ProductDto("productName", "kobs", ProductFamily.L0_SLICE, "NRT"),
+                new ProductionEvent("productName", "kobs", ProductFamily.L0_SLICE, "NRT"),
                 ack, "topic");
         verify(ack, times(1)).acknowledge();
         verify(obsClient, times(1)).download((List<ObsDownloadObject>) ArgumentMatchers.argThat(s -> ((List<ObsDownloadObject>) s).contains(new ObsDownloadObject(
@@ -123,7 +123,7 @@ public class SlicesConsumerTest {
                         appStatus);
         this.mockSliceObjectStorageException();
         consumer.receive(
-                new ProductDto("productName", "kobs", ProductFamily.L0_SLICE, "NRT"),
+                new ProductionEvent("productName", "kobs", ProductFamily.L0_SLICE, "NRT"),
                 ack, "topic");
         verify(ack, never()).acknowledge();
     }
@@ -136,7 +136,7 @@ public class SlicesConsumerTest {
                         appStatus);
         this.mockSliceObsUnknownObjectException();
         consumer.receive(
-                new ProductDto("productName", "kobs", ProductFamily.L0_SLICE, "NRT"),
+                new ProductionEvent("productName", "kobs", ProductFamily.L0_SLICE, "NRT"),
                 ack, "topic");
         verify(ack, never()).acknowledge();
     }
@@ -152,7 +152,7 @@ public class SlicesConsumerTest {
         doThrow(new IllegalArgumentException("error message")).when(ack)
         .acknowledge();
         consumer.receive(
-                new ProductDto("productName", "kobs", ProductFamily.L0_SLICE, "NRT"),
+                new ProductionEvent("productName", "kobs", ProductFamily.L0_SLICE, "NRT"),
                 ack, "topic");
         verify(ack, times(1)).acknowledge();
     }
@@ -167,7 +167,7 @@ public class SlicesConsumerTest {
         this.mockSliceDownloadFiles(expectedResult);
         doNothing().when(ack).acknowledge();
         consumer.receive(
-                new ProductDto("productName", "kobs", ProductFamily.L1_SLICE, "NRT"),
+                new ProductionEvent("productName", "kobs", ProductFamily.L1_SLICE, "NRT"),
                 ack, "topic");
         verify(ack, times(1)).acknowledge();
         verify(obsClient, times(1)).download((List<ObsDownloadObject>) ArgumentMatchers.argThat(s -> ((List<ObsDownloadObject>) s).contains(new ObsDownloadObject(
@@ -182,7 +182,7 @@ public class SlicesConsumerTest {
                         appStatus);
         this.mockSliceObjectStorageException();
         consumer.receive(
-                new ProductDto("productName", "kobs", ProductFamily.L1_SLICE, "NRT"),
+                new ProductionEvent("productName", "kobs", ProductFamily.L1_SLICE, "NRT"),
                 ack, "topic");
         verify(ack, never()).acknowledge();
     }
@@ -195,7 +195,7 @@ public class SlicesConsumerTest {
                         appStatus);
         this.mockSliceObsUnknownObjectException();
         consumer.receive(
-                new ProductDto("productName", "kobs", ProductFamily.L1_SLICE, "NRT"),
+                new ProductionEvent("productName", "kobs", ProductFamily.L1_SLICE, "NRT"),
                 ack, "topic");
         verify(ack, never()).acknowledge();
     }
@@ -211,7 +211,7 @@ public class SlicesConsumerTest {
         doThrow(new IllegalArgumentException("error message")).when(ack)
         .acknowledge();
         consumer.receive(
-                new ProductDto("productName", "kobs", ProductFamily.L1_SLICE, "NRT"),
+                new ProductionEvent("productName", "kobs", ProductFamily.L1_SLICE, "NRT"),
                 ack, "topic");
         verify(ack, times(1)).acknowledge();
     }
@@ -222,7 +222,7 @@ public class SlicesConsumerTest {
                 new SlicesConsumer(obsClient, "test/data/slices", devProperties,
                         appStatus);
         consumer.receive(
-                new ProductDto("productName", "kobs", ProductFamily.BLANK, "NRT"),
+                new ProductionEvent("productName", "kobs", ProductFamily.BLANK, "NRT"),
                 ack, "topic");
     }
     
@@ -237,7 +237,7 @@ public class SlicesConsumerTest {
         this.mockSliceDownloadFiles(expectedResult);
         doNothing().when(ack).acknowledge();
         consumer.receive(
-                new ProductDto("productName", "kobs", ProductFamily.L2_SLICE, "NRT"),
+                new ProductionEvent("productName", "kobs", ProductFamily.L2_SLICE, "NRT"),
                 ack, "topic");
         verify(ack, times(1)).acknowledge();
         verify(obsClient, times(1)).download((List<ObsDownloadObject>) ArgumentMatchers.argThat(s -> ((List<ObsDownloadObject>) s).contains(new ObsDownloadObject(
@@ -255,7 +255,7 @@ public class SlicesConsumerTest {
         this.mockSliceDownloadFiles(expectedResult);
         doNothing().when(ack).acknowledge();
         consumer.receive(
-                new ProductDto("productName", "kobs", ProductFamily.L2_ACN, "NRT"),
+                new ProductionEvent("productName", "kobs", ProductFamily.L2_ACN, "NRT"),
                 ack, "topic");
         verify(ack, times(1)).acknowledge();
         verify(obsClient, times(1)).download((List<ObsDownloadObject>) ArgumentMatchers.argThat(s -> ((List<ObsDownloadObject>) s).contains(new ObsDownloadObject(

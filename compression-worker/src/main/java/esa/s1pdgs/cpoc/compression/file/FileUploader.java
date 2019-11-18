@@ -15,7 +15,7 @@ import esa.s1pdgs.cpoc.common.errors.InternalErrorException;
 import esa.s1pdgs.cpoc.common.errors.mqi.MqiPublicationError;
 import esa.s1pdgs.cpoc.compression.model.mqi.CompressedProductQueueMessage;
 import esa.s1pdgs.cpoc.compression.mqi.OutputProducerFactory;
-import esa.s1pdgs.cpoc.mqi.model.queue.ProductDto;
+import esa.s1pdgs.cpoc.mqi.model.queue.ProductionEvent;
 import esa.s1pdgs.cpoc.mqi.model.rest.GenericMessageDto;
 import esa.s1pdgs.cpoc.obs_sdk.ObsClient;
 import esa.s1pdgs.cpoc.obs_sdk.ObsUploadObject;
@@ -31,7 +31,7 @@ public class FileUploader {
 
 	private final String workingDir;
 
-	private final ProductDto job;
+	private final ProductionEvent job;
 
 	/**
 	 * Output producer factory for message queue system
@@ -41,7 +41,7 @@ public class FileUploader {
 	/**
 	 * Input message
 	 */
-	private final GenericMessageDto<ProductDto> inputMessage;
+	private final GenericMessageDto<ProductionEvent> inputMessage;
 
 	/**
 	 * Cannot be a key in obs
@@ -56,8 +56,8 @@ public class FileUploader {
 	private final ObsClient obsClient;
 
 	public FileUploader(final ObsClient obsClient, final OutputProducerFactory producerFactory,
-			final String workingDir, final GenericMessageDto<ProductDto> inputMessage,
-			final ProductDto job) {
+			final String workingDir, final GenericMessageDto<ProductionEvent> inputMessage,
+			final ProductionEvent job) {
 		this.obsClient = obsClient;
 		this.producerFactory = producerFactory;
 		this.workingDir = workingDir;

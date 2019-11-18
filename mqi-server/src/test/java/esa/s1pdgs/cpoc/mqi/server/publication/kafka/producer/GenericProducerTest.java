@@ -23,7 +23,7 @@ import org.springframework.util.concurrent.ListenableFuture;
 
 import esa.s1pdgs.cpoc.common.ProductFamily;
 import esa.s1pdgs.cpoc.common.errors.mqi.MqiPublicationError;
-import esa.s1pdgs.cpoc.mqi.model.queue.ProductDto;
+import esa.s1pdgs.cpoc.mqi.model.queue.ProductionEvent;
 import esa.s1pdgs.cpoc.mqi.server.KafkaProperties;
 
 /**
@@ -52,7 +52,7 @@ public class GenericProducerTest {
     private KafkaTemplate<String, Object> template;
 
     @Mock
-    private ListenableFuture<SendResult<String, ProductDto>> future;
+    private ListenableFuture<SendResult<String, ProductionEvent>> future;
 
     /**
      * Publisher to test
@@ -62,7 +62,7 @@ public class GenericProducerTest {
     /**
      * DTO to send
      */
-    private ProductDto dto;
+    private ProductionEvent dto;
 
     /**
      * Initialization
@@ -71,7 +71,7 @@ public class GenericProducerTest {
     public void init() {
         MockitoAnnotations.initMocks(this);
 
-        dto = new ProductDto("product-name-1", "key-obs", ProductFamily.AUXILIARY_FILE);
+        dto = new ProductionEvent("product-name-1", "key-obs", ProductFamily.AUXILIARY_FILE);
 
         producer = new GenericProducer(properties, template);
     }

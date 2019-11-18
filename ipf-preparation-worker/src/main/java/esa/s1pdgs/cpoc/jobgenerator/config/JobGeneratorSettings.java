@@ -36,7 +36,7 @@ import esa.s1pdgs.cpoc.mqi.client.GenericMqiClient;
 import esa.s1pdgs.cpoc.mqi.client.StatusService;
 import esa.s1pdgs.cpoc.mqi.model.queue.AbstractDto;
 import esa.s1pdgs.cpoc.mqi.model.queue.IngestionEvent;
-import esa.s1pdgs.cpoc.mqi.model.queue.ProductDto;
+import esa.s1pdgs.cpoc.mqi.model.queue.ProductionEvent;
 
 /**
  * Extraction class of "tasktables" configuration properties
@@ -527,13 +527,13 @@ public class JobGeneratorSettings {
 					errorRepoAppender, appStatus, metadataClient, pollingIntervalMs, pollingInitialDelayMs);
 			break;
 		case L0_SEGMENT:
-			messageConsumer = new L0SegmentAppConsumer((AbstractJobsDispatcher<ProductDto>) jobsDispatcher,
+			messageConsumer = new L0SegmentAppConsumer((AbstractJobsDispatcher<ProductionEvent>) jobsDispatcher,
 					appProperties, processSettings, mqiService, mqiStatusService, appDataServiceLevelSegments,
 					errorRepoAppender, appStatus, pollingIntervalMs, pollingInitialDelayMs);
 			break;
 		case L1:
 		case L2:
-			messageConsumer = new LevelProductsMessageConsumer((AbstractJobsDispatcher<ProductDto>) jobsDispatcher,
+			messageConsumer = new LevelProductsMessageConsumer((AbstractJobsDispatcher<ProductionEvent>) jobsDispatcher,
 					patternSettings, processSettings, mqiService, mqiStatusService, appDataServiceLevelProducts,
 					errorRepoAppender, appStatus, metadataClient, pollingIntervalMs, pollingInitialDelayMs);
 			break;

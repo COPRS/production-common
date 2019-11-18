@@ -9,7 +9,7 @@ import esa.s1pdgs.cpoc.common.ProductCategory;
 import esa.s1pdgs.cpoc.common.errors.AbstractCodedException;
 import esa.s1pdgs.cpoc.compression.model.mqi.CompressedProductQueueMessage;
 import esa.s1pdgs.cpoc.mqi.client.GenericMqiClient;
-import esa.s1pdgs.cpoc.mqi.model.queue.ProductDto;
+import esa.s1pdgs.cpoc.mqi.model.queue.ProductionEvent;
 import esa.s1pdgs.cpoc.mqi.model.rest.GenericMessageDto;
 import esa.s1pdgs.cpoc.mqi.model.rest.GenericPublicationMessageDto;
 
@@ -44,8 +44,8 @@ public class OutputProducerFactory {
      * @param msg
      * @throws AbstractCodedException
      */
-    public void sendOutput(final CompressedProductQueueMessage msg, final GenericMessageDto<ProductDto> inputMessage) throws AbstractCodedException {
-    	final GenericPublicationMessageDto<ProductDto> messageDto = new GenericPublicationMessageDto<ProductDto>(
+    public void sendOutput(final CompressedProductQueueMessage msg, final GenericMessageDto<ProductionEvent> inputMessage) throws AbstractCodedException {
+    	final GenericPublicationMessageDto<ProductionEvent> messageDto = new GenericPublicationMessageDto<ProductionEvent>(
     			inputMessage.getId(), 
     			msg.getFamily(), 
     			toProductDto(msg)
@@ -56,9 +56,9 @@ public class OutputProducerFactory {
     	senderCompression.publish(messageDto, ProductCategory.COMPRESSED_PRODUCTS);
     }
     
-    private final ProductDto toProductDto(final CompressedProductQueueMessage msg)
+    private final ProductionEvent toProductDto(final CompressedProductQueueMessage msg)
     {
-    	return new ProductDto(
+    	return new ProductionEvent(
         		msg.getProductName(), 
         		msg.getObjectStorageKey(),
         		msg.getFamily(), 

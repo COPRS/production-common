@@ -21,7 +21,7 @@ import esa.s1pdgs.cpoc.disseminator.config.DisseminationProperties.Dissemination
 import esa.s1pdgs.cpoc.disseminator.config.DisseminationProperties.OutboxConfiguration;
 import esa.s1pdgs.cpoc.disseminator.config.DisseminationProperties.OutboxConfiguration.Protocol;
 import esa.s1pdgs.cpoc.errorrepo.ErrorRepoAppender;
-import esa.s1pdgs.cpoc.mqi.model.queue.ProductDto;
+import esa.s1pdgs.cpoc.mqi.model.queue.ProductionEvent;
 import esa.s1pdgs.cpoc.mqi.model.rest.GenericMessageDto;
 import esa.s1pdgs.cpoc.obs_sdk.ObsObject;
 import esa.s1pdgs.cpoc.obs_sdk.ObsServiceException;
@@ -79,8 +79,8 @@ public class TestApplication {
 		final DisseminationService uut = new DisseminationService(null, null, properties, ErrorRepoAppender.NULL);
 		
 		//final GenericMq
-		final ProductDto fakeProduct = new ProductDto("fakeProduct", "my/key", ProductFamily.BLANK);
-		final GenericMessageDto<ProductDto> fakeMessage = new GenericMessageDto<ProductDto>(123, "myKey", fakeProduct); 
+		final ProductionEvent fakeProduct = new ProductionEvent("fakeProduct", "my/key", ProductFamily.BLANK);
+		final GenericMessageDto<ProductionEvent> fakeMessage = new GenericMessageDto<ProductionEvent>(123, "myKey", fakeProduct); 
 		uut.onMessage(fakeMessage);
 	}
 	
@@ -94,8 +94,8 @@ public class TestApplication {
 		final DisseminationService uut = new DisseminationService(null, fakeObsClient, properties, ErrorRepoAppender.NULL);
 		
 		//final GenericMq
-		final ProductDto fakeProduct = new ProductDto("fakeProduct", "my/key", ProductFamily.BLANK);
-		final GenericMessageDto<ProductDto> fakeMessage = new GenericMessageDto<ProductDto>(123, "myKey", fakeProduct); 
+		final ProductionEvent fakeProduct = new ProductionEvent("fakeProduct", "my/key", ProductFamily.BLANK);
+		final GenericMessageDto<ProductionEvent> fakeMessage = new GenericMessageDto<ProductionEvent>(123, "myKey", fakeProduct); 
 		uut.onMessage(fakeMessage);
 	}
 }

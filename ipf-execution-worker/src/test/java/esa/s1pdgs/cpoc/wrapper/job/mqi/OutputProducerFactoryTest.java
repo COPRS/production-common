@@ -23,7 +23,7 @@ import esa.s1pdgs.cpoc.common.utils.FileUtils;
 import esa.s1pdgs.cpoc.mqi.client.GenericMqiClient;
 import esa.s1pdgs.cpoc.mqi.model.queue.IpfExecutionJob;
 import esa.s1pdgs.cpoc.mqi.model.queue.LevelReportDto;
-import esa.s1pdgs.cpoc.mqi.model.queue.ProductDto;
+import esa.s1pdgs.cpoc.mqi.model.queue.ProductionEvent;
 import esa.s1pdgs.cpoc.mqi.model.rest.GenericMessageDto;
 import esa.s1pdgs.cpoc.mqi.model.rest.GenericPublicationMessageDto;
 import esa.s1pdgs.cpoc.wrapper.config.ProcessConfiguration;
@@ -120,9 +120,9 @@ public class OutputProducerFactoryTest {
         this.outputProcuderFactory
                 .sendOutput(new ObsQueueMessage(ProductFamily.L0_SLICE,
                         "test.txt", "test.txt", "NRT"), inputMessage);
-        GenericPublicationMessageDto<ProductDto> message =
-                new GenericPublicationMessageDto<ProductDto>(123,
-                        ProductFamily.L0_SLICE, new ProductDto("test.txt",
+        GenericPublicationMessageDto<ProductionEvent> message =
+                new GenericPublicationMessageDto<ProductionEvent>(123,
+                        ProductFamily.L0_SLICE, new ProductionEvent("test.txt",
                                 "test.txt", ProductFamily.L0_SLICE, "NRT"));
         message.setOutputKey("L0_SLICE");
         verify(this.sender, times(1)).publish(Mockito.eq(message), Mockito.eq(ProductCategory.LEVEL_PRODUCTS));
@@ -140,9 +140,9 @@ public class OutputProducerFactoryTest {
         this.outputProcuderFactory
                 .sendOutput(new ObsQueueMessage(ProductFamily.L0_SEGMENT,
                         "test.txt", "test.txt", "NRT"), inputMessage);
-        GenericPublicationMessageDto<ProductDto> message =
-                new GenericPublicationMessageDto<ProductDto>(123,
-                        ProductFamily.L0_SEGMENT, new ProductDto("test.txt",
+        GenericPublicationMessageDto<ProductionEvent> message =
+                new GenericPublicationMessageDto<ProductionEvent>(123,
+                        ProductFamily.L0_SEGMENT, new ProductionEvent("test.txt",
                                 "test.txt", ProductFamily.L0_SEGMENT, "NRT"));
         
         verify(this.sender, times(1)).publish(Mockito.eq(message), Mockito.eq(ProductCategory.LEVEL_SEGMENTS));
@@ -159,9 +159,9 @@ public class OutputProducerFactoryTest {
         this.outputProcuderFactory
                 .sendOutput(new ObsQueueMessage(ProductFamily.L0_ACN,
                         "test.txt", "test.txt", "FAST"), inputMessage);
-        GenericPublicationMessageDto<ProductDto> message =
-                new GenericPublicationMessageDto<ProductDto>(123,
-                        ProductFamily.L0_ACN, new ProductDto("test.txt",
+        GenericPublicationMessageDto<ProductionEvent> message =
+                new GenericPublicationMessageDto<ProductionEvent>(123,
+                        ProductFamily.L0_ACN, new ProductionEvent("test.txt",
                                 "test.txt", ProductFamily.L0_ACN, "FAST"));
         message.setOutputKey("L0_ACN");
         
@@ -207,9 +207,9 @@ public class OutputProducerFactoryTest {
         this.outputProcuderFactory
                 .sendOutput(new ObsQueueMessage(ProductFamily.L1_SLICE,
                         "test.txt", "test.txt", "FAST"), inputMessage);
-        GenericPublicationMessageDto<ProductDto> message =
-                new GenericPublicationMessageDto<ProductDto>(123,
-                        ProductFamily.L1_SLICE, new ProductDto("test.txt",
+        GenericPublicationMessageDto<ProductionEvent> message =
+                new GenericPublicationMessageDto<ProductionEvent>(123,
+                        ProductFamily.L1_SLICE, new ProductionEvent("test.txt",
                                 "test.txt", ProductFamily.L1_SLICE, "FAST"));
         message.setOutputKey("L1_SLICE");
         
@@ -227,9 +227,9 @@ public class OutputProducerFactoryTest {
         this.outputProcuderFactory
                 .sendOutput(new ObsQueueMessage(ProductFamily.L1_ACN,
                         "test.txt", "test.txt", "NRT"), inputMessage);
-        GenericPublicationMessageDto<ProductDto> message =
-                new GenericPublicationMessageDto<ProductDto>(123,
-                        ProductFamily.L1_ACN, new ProductDto("test.txt",
+        GenericPublicationMessageDto<ProductionEvent> message =
+                new GenericPublicationMessageDto<ProductionEvent>(123,
+                        ProductFamily.L1_ACN, new ProductionEvent("test.txt",
                                 "test.txt", ProductFamily.L1_ACN, "NRT"));
         message.setOutputKey("L1_ACN");
         

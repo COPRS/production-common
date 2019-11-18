@@ -27,7 +27,7 @@ import esa.s1pdgs.cpoc.jobgenerator.service.XmlConverter;
 import esa.s1pdgs.cpoc.jobgenerator.tasks.AbstractJobsDispatcher;
 import esa.s1pdgs.cpoc.jobgenerator.tasks.AbstractJobsGenerator;
 import esa.s1pdgs.cpoc.jobgenerator.tasks.JobsGeneratorFactory;
-import esa.s1pdgs.cpoc.mqi.model.queue.ProductDto;
+import esa.s1pdgs.cpoc.mqi.model.queue.ProductionEvent;
 
 /**
  * 
@@ -39,7 +39,7 @@ import esa.s1pdgs.cpoc.mqi.model.queue.ProductDto;
  * @author birol_colak@net.werum
  *
  */
-public class LevelProductsJobDispatcher extends AbstractJobsDispatcher<ProductDto> {
+public class LevelProductsJobDispatcher extends AbstractJobsDispatcher<ProductionEvent> {
 
 	 /**
      * Logger
@@ -83,7 +83,7 @@ public class LevelProductsJobDispatcher extends AbstractJobsDispatcher<ProductDt
             final ThreadPoolTaskScheduler taskScheduler,
             final XmlConverter xmlConverter,
             final String pathRoutingXmlFile,
-            final AppCatalogJobClient<ProductDto> appDataService) {
+            final AppCatalogJobClient<ProductionEvent> appDataService) {
         super(settings, processSettings, factory, taskScheduler,
                 appDataService);
         this.xmlConverter = xmlConverter;
@@ -124,7 +124,7 @@ public class LevelProductsJobDispatcher extends AbstractJobsDispatcher<ProductDt
      * 
      */
     @Override
-    protected AbstractJobsGenerator<ProductDto> createJobGenerator(
+    protected AbstractJobsGenerator<ProductionEvent> createJobGenerator(
             final File xmlFile) throws AbstractCodedException {
         return this.factory.createJobGeneratorForL0Slice(xmlFile,
                 appDataService);
@@ -136,7 +136,7 @@ public class LevelProductsJobDispatcher extends AbstractJobsDispatcher<ProductDt
      * @throws JobGenMissingRoutingEntryException
      */
     @Override
-    protected List<String> getTaskTables(final AppDataJob<ProductDto> job)
+    protected List<String> getTaskTables(final AppDataJob<ProductionEvent> job)
             throws JobGenMissingRoutingEntryException {
         List<String> taskTables = new ArrayList<>();
         String key = job.getProduct().getAcquisition() + "_"

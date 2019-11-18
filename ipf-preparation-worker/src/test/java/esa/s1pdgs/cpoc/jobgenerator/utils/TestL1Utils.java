@@ -15,7 +15,7 @@ import esa.s1pdgs.cpoc.jobgenerator.model.routing.LevelProductsRoute;
 import esa.s1pdgs.cpoc.jobgenerator.model.routing.LevelProductsRouteFrom;
 import esa.s1pdgs.cpoc.jobgenerator.model.routing.LevelProductsRouteTo;
 import esa.s1pdgs.cpoc.jobgenerator.model.routing.LevelProductsRouting;
-import esa.s1pdgs.cpoc.mqi.model.queue.ProductDto;
+import esa.s1pdgs.cpoc.mqi.model.queue.ProductionEvent;
 import esa.s1pdgs.cpoc.mqi.model.rest.GenericMessageDto;
 
 public class TestL1Utils {
@@ -70,9 +70,9 @@ public class TestL1Utils {
         ret.setPod("hostname");
         ret.setLevel(ApplicationLevel.L0);
 
-        GenericMessageDto<ProductDto> message1 =
-                new GenericMessageDto<ProductDto>(1, "input-key",
-                        new ProductDto(
+        GenericMessageDto<ProductionEvent> message1 =
+                new GenericMessageDto<ProductionEvent>(1, "input-key",
+                        new ProductionEvent(
                                 "S1A_IW_RAW__0SDV_20171213T142312_20171213T142344_019685_02173E_07F5.SAFE",
                                 "S1A_IW_RAW__0SDV_20171213T142312_20171213T142344_019685_02173E_07F5.SAFE",
                                 ProductFamily.L0_ACN, "NRT"));

@@ -22,12 +22,12 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-import esa.s1pdgs.cpoc.mqi.model.queue.ProductDto;
+import esa.s1pdgs.cpoc.mqi.model.queue.ProductionEvent;
 import esa.s1pdgs.cpoc.mqi.model.queue.IngestionEvent;
 import esa.s1pdgs.cpoc.mqi.model.queue.IpfExecutionJob;
-import esa.s1pdgs.cpoc.mqi.model.queue.ProductDto;
+import esa.s1pdgs.cpoc.mqi.model.queue.ProductionEvent;
 import esa.s1pdgs.cpoc.mqi.model.queue.LevelReportDto;
-import esa.s1pdgs.cpoc.mqi.model.queue.ProductDto;
+import esa.s1pdgs.cpoc.mqi.model.queue.ProductionEvent;
 
 public class GenericKafkaUtils<T> {
 
@@ -74,12 +74,12 @@ public class GenericKafkaUtils<T> {
         return KafkaTestUtils.getSingleRecord(consumer, topic);
     }
 
-    public ConsumerRecord<String, ProductDto> getReceivedRecordAux(
+    public ConsumerRecord<String, ProductionEvent> getReceivedRecordAux(
             String topic) throws Exception {
-        Consumer<String, ProductDto> consumer =
-                new DefaultKafkaConsumerFactory<String, ProductDto>(
+        Consumer<String, ProductionEvent> consumer =
+                new DefaultKafkaConsumerFactory<String, ProductionEvent>(
                         consumerProps(), new StringDeserializer(),
-                        new JsonDeserializer<>(ProductDto.class)).createConsumer();
+                        new JsonDeserializer<>(ProductionEvent.class)).createConsumer();
         embeddedKafka.consumeFromAnEmbeddedTopic(consumer, topic);
         return KafkaTestUtils.getSingleRecord(consumer, topic);
     }
@@ -94,22 +94,22 @@ public class GenericKafkaUtils<T> {
         return KafkaTestUtils.getSingleRecord(consumer, topic);
     }
 
-    public ConsumerRecord<String, ProductDto> getReceivedRecordProducts(
+    public ConsumerRecord<String, ProductionEvent> getReceivedRecordProducts(
             String topic) throws Exception {
-        Consumer<String, ProductDto> consumer =
-                new DefaultKafkaConsumerFactory<String, ProductDto>(
+        Consumer<String, ProductionEvent> consumer =
+                new DefaultKafkaConsumerFactory<String, ProductionEvent>(
                         consumerProps(), new StringDeserializer(),
-                        new JsonDeserializer<>(ProductDto.class)).createConsumer();
+                        new JsonDeserializer<>(ProductionEvent.class)).createConsumer();
         embeddedKafka.consumeFromAnEmbeddedTopic(consumer, topic);
         return KafkaTestUtils.getSingleRecord(consumer, topic);
     }
 
-    public ConsumerRecord<String, ProductDto> getReceivedRecordSegments(
+    public ConsumerRecord<String, ProductionEvent> getReceivedRecordSegments(
             String topic) throws Exception {
-        Consumer<String, ProductDto> consumer =
-                new DefaultKafkaConsumerFactory<String, ProductDto>(
+        Consumer<String, ProductionEvent> consumer =
+                new DefaultKafkaConsumerFactory<String, ProductionEvent>(
                         consumerProps(), new StringDeserializer(),
-                        new JsonDeserializer<>(ProductDto.class)).createConsumer();
+                        new JsonDeserializer<>(ProductionEvent.class)).createConsumer();
         embeddedKafka.consumeFromAnEmbeddedTopic(consumer, topic);
         return KafkaTestUtils.getSingleRecord(consumer, topic);
     }

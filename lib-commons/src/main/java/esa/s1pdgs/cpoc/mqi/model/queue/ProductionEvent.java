@@ -4,25 +4,25 @@ import java.util.Objects;
 
 import esa.s1pdgs.cpoc.common.ProductFamily;
 
-public class ProductDto extends AbstractDto {
+public class ProductionEvent extends AbstractDto {
 
 	private String keyObjectStorage;
 	private String mode = null;
 	private OQCFlag oqcFlag = OQCFlag.NOT_CHECKED;
 
-	public ProductDto() {
+	public ProductionEvent() {
 		super();
 	}
 
-	public ProductDto(String productName, String keyObjectStorage, ProductFamily family) {
+	public ProductionEvent(String productName, String keyObjectStorage, ProductFamily family) {
 		this(productName, keyObjectStorage, family, null);
 	}
 
-	public ProductDto(String productName, String keyObjectStorage, ProductFamily family, String mode) {
+	public ProductionEvent(String productName, String keyObjectStorage, ProductFamily family, String mode) {
 		this(productName, keyObjectStorage, family, mode, OQCFlag.NOT_CHECKED);
 	}
 	
-	public ProductDto(String productName, String keyObjectStorage, ProductFamily family, String mode, OQCFlag oqcFlag) {
+	public ProductionEvent(String productName, String keyObjectStorage, ProductFamily family, String mode, OQCFlag oqcFlag) {
 		super(productName, family);
 		this.keyObjectStorage = keyObjectStorage;
 		this.mode = mode;
@@ -84,7 +84,7 @@ public class ProductDto extends AbstractDto {
 		} else if (obj == null || getClass() != obj.getClass()) {
 			ret = false;
 		} else {
-			ProductDto other = (ProductDto) obj;
+			ProductionEvent other = (ProductionEvent) obj;
 			// field comparison
 			ret = Objects.equals(getProductName(), other.getProductName())
 					&& Objects.equals(keyObjectStorage, other.keyObjectStorage)

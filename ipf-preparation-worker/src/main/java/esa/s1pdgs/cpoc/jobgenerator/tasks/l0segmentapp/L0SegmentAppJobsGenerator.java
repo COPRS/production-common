@@ -30,7 +30,7 @@ import esa.s1pdgs.cpoc.metadata.client.MetadataClient;
 import esa.s1pdgs.cpoc.metadata.model.AbstractMetadata;
 import esa.s1pdgs.cpoc.metadata.model.LevelSegmentMetadata;
 import esa.s1pdgs.cpoc.mqi.model.queue.IpfExecutionJob;
-import esa.s1pdgs.cpoc.mqi.model.queue.ProductDto;
+import esa.s1pdgs.cpoc.mqi.model.queue.ProductionEvent;
 import esa.s1pdgs.cpoc.mqi.model.rest.GenericMessageDto;
 
 /**
@@ -38,7 +38,7 @@ import esa.s1pdgs.cpoc.mqi.model.rest.GenericMessageDto;
  * 
  * @author Cyrielle Gailliard
  */
-public class L0SegmentAppJobsGenerator extends AbstractJobsGenerator<ProductDto> {
+public class L0SegmentAppJobsGenerator extends AbstractJobsGenerator<ProductionEvent> {
 
     /**
      * @param xmlConverter
@@ -52,7 +52,7 @@ public class L0SegmentAppJobsGenerator extends AbstractJobsGenerator<ProductDto>
             final ProcessSettings l0ProcessSettings,
             final JobGeneratorSettings taskTablesSettings,
             final OutputProducerFactory outputFactory,
-            final AppCatalogJobClient<ProductDto> appDataService,
+            final AppCatalogJobClient<ProductionEvent> appDataService,
             final ProcessConfiguration processConfiguration) {
         super(xmlConverter, metadataClient, l0ProcessSettings,
                 taskTablesSettings, outputFactory, appDataService, processConfiguration);
@@ -75,10 +75,10 @@ public class L0SegmentAppJobsGenerator extends AbstractJobsGenerator<ProductDto>
         String lastName = "";
         try {
         	@SuppressWarnings("unchecked")
-			final AppDataJob<ProductDto> appDataJob = job.getAppDataJob();
+			final AppDataJob<ProductionEvent> appDataJob = job.getAppDataJob();
 
-            for (GenericMessageDto<ProductDto> message : appDataJob.getMessages().stream().map(s -> (GenericMessageDto<ProductDto>)s).collect(Collectors.toList())) {
-                ProductDto dto = (ProductDto) message.getBody();
+            for (GenericMessageDto<ProductionEvent> message : appDataJob.getMessages().stream().map(s -> (GenericMessageDto<ProductionEvent>)s).collect(Collectors.toList())) {
+                ProductionEvent dto = (ProductionEvent) message.getBody();
                 lastName = dto.getProductName();
                 LevelSegmentMetadata metadata = metadataClient
                         .getLevelSegment(dto.getFamily(), dto.getProductName());

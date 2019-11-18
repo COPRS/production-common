@@ -35,7 +35,7 @@ import esa.s1pdgs.cpoc.mdcatalog.extraction.model.OutputFileDescriptor;
 import esa.s1pdgs.cpoc.mdcatalog.extraction.xml.XmlConverter;
 import esa.s1pdgs.cpoc.mdcatalog.status.AppStatusImpl;
 import esa.s1pdgs.cpoc.mqi.client.GenericMqiClient;
-import esa.s1pdgs.cpoc.mqi.model.queue.ProductDto;
+import esa.s1pdgs.cpoc.mqi.model.queue.ProductionEvent;
 import esa.s1pdgs.cpoc.mqi.model.rest.GenericMessageDto;
 import esa.s1pdgs.cpoc.obs_sdk.ObsClient;
 import esa.s1pdgs.cpoc.obs_sdk.ObsDownloadObject;
@@ -81,17 +81,17 @@ public class LevelProductsExtractorTest {
 	/**
 	 * Job to process
 	 */
-	private GenericMessageDto<ProductDto> inputMessage;
+	private GenericMessageDto<ProductionEvent> inputMessage;
 
 	/**
 	 * Job to process
 	 */
-	private GenericMessageDto<ProductDto> inputMessageSafe;
+	private GenericMessageDto<ProductionEvent> inputMessageSafe;
 
 	/**
 	 * Job to process
 	 */
-	private GenericMessageDto<ProductDto> inputMessageAux;
+	private GenericMessageDto<ProductionEvent> inputMessageAux;
 	
     private final ErrorRepoAppender errorAppender = ErrorRepoAppender.NULL;
     
@@ -131,15 +131,15 @@ public class LevelProductsExtractorTest {
 		doNothing().when(appStatus).setError(Mockito.any(), Mockito.anyString());
 		doReturn(true).when(mqiService).ack(Mockito.any(), Mockito.any());
 
-		inputMessage = new GenericMessageDto<ProductDto>(123, "",
-				new ProductDto("product-name", "key-obs", ProductFamily.L0_ACN, "NRT"));
+		inputMessage = new GenericMessageDto<ProductionEvent>(123, "",
+				new ProductionEvent("product-name", "key-obs", ProductFamily.L0_ACN, "NRT"));
 
-		inputMessageSafe = new GenericMessageDto<ProductDto>(123, "",
-				new ProductDto("S1A_AUX_CAL_V20140402T000000_G20140402T133909.SAFE",
+		inputMessageSafe = new GenericMessageDto<ProductionEvent>(123, "",
+				new ProductionEvent("S1A_AUX_CAL_V20140402T000000_G20140402T133909.SAFE",
 						"S1A_AUX_CAL_V20140402T000000_G20140402T133909.SAFE", ProductFamily.L0_ACN, "NRT"));
 
-		inputMessageAux = new GenericMessageDto<ProductDto>(123, "",
-				new ProductDto("S1A_OPER_AUX_OBMEMC_PDMC_20140201T000000.xml",
+		inputMessageAux = new GenericMessageDto<ProductionEvent>(123, "",
+				new ProductionEvent("S1A_OPER_AUX_OBMEMC_PDMC_20140201T000000.xml",
 						"S1A_OPER_AUX_OBMEMC_PDMC_20140201T000000.xml", ProductFamily.L0_ACN, "NRT"));
 
 		extractor = new LevelProductsExtractor(esServices, obsClient, mqiService, appStatus, extractorConfig,
@@ -194,8 +194,8 @@ public class LevelProductsExtractorTest {
 				"S1A_IW_RAW__0SDV_20171213T121623_20171213T121656_019684_021735_C6DB.SAFE" + File.separator
 				+ "manifest.safe"));
 
-		inputMessageSafe = new GenericMessageDto<ProductDto>(123, "",
-				new ProductDto("S1A_IW_RAW__0SDV_20171213T121623_20171213T121656_019684_021735_C6DB.SAFE",
+		inputMessageSafe = new GenericMessageDto<ProductionEvent>(123, "",
+				new ProductionEvent("S1A_IW_RAW__0SDV_20171213T121623_20171213T121656_019684_021735_C6DB.SAFE",
 						"S1A_IW_RAW__0SDV_20171213T121623_20171213T121656_019684_021735_C6DB.SAFE",
 						ProductFamily.L0_SLICE, "NRT"));
 
@@ -217,7 +217,7 @@ public class LevelProductsExtractorTest {
 		descriptor.setDataTakeId("021735");
 		descriptor.setProductFamily(ProductFamily.L0_SLICE);
 		
-		ProductDto productDTO = new ProductDto();
+		ProductionEvent productDTO = new ProductionEvent();
 		productDTO.setFamily(ProductFamily.L0_SLICE);
 
 		JSONObject expected = extractor.mdBuilder.buildOutputFileMetadata(descriptor, files.get(0), productDTO);
@@ -246,8 +246,8 @@ public class LevelProductsExtractorTest {
 				"S1A_IW_RAW__0SDV_20171213T121623_20171213T121656_019684_021735_C6DB.SAFE" + File.separator
 				+ "manifest.safe"));
 
-		inputMessageSafe = new GenericMessageDto<ProductDto>(123, "",
-				new ProductDto("S1A_IW_RAW__0SDV_20171213T121623_20171213T121656_019684_021735_C6DB.SAFE",
+		inputMessageSafe = new GenericMessageDto<ProductionEvent>(123, "",
+				new ProductionEvent("S1A_IW_RAW__0SDV_20171213T121623_20171213T121656_019684_021735_C6DB.SAFE",
 						"S1A_IW_RAW__0SDV_20171213T121623_20171213T121656_019684_021735_C6DB.SAFE",
 						ProductFamily.L0_ACN, "NRT"));
 
@@ -269,7 +269,7 @@ public class LevelProductsExtractorTest {
 		descriptor.setDataTakeId("021735");
 		descriptor.setProductFamily(ProductFamily.L0_ACN);
 		
-		ProductDto productDTO = new ProductDto();
+		ProductionEvent productDTO = new ProductionEvent();
 		productDTO.setFamily(ProductFamily.L0_ACN);
 
 		JSONObject expected = extractor.mdBuilder.buildOutputFileMetadata(descriptor, files.get(0), productDTO);
@@ -297,8 +297,8 @@ public class LevelProductsExtractorTest {
 				"S1A_IW_RAW__0SDV_20171213T121623_20171213T121656_019684_021735_C6DB.SAFE" + File.separator
 				+ "manifest.safe"));
 
-		inputMessageSafe = new GenericMessageDto<ProductDto>(123, "",
-				new ProductDto("S1A_IW_RAW__0SDV_20171213T121623_20171213T121656_019684_021735_C6DB.SAFE",
+		inputMessageSafe = new GenericMessageDto<ProductionEvent>(123, "",
+				new ProductionEvent("S1A_IW_RAW__0SDV_20171213T121623_20171213T121656_019684_021735_C6DB.SAFE",
 						"S1A_IW_RAW__0SDV_20171213T121623_20171213T121656_019684_021735_C6DB.SAFE",
 						ProductFamily.L1_SLICE, "NRT"));
 
@@ -320,7 +320,7 @@ public class LevelProductsExtractorTest {
 		descriptor.setDataTakeId("021735");
 		descriptor.setProductFamily(ProductFamily.L1_SLICE);
 		
-		ProductDto productDTO = new ProductDto();
+		ProductionEvent productDTO = new ProductionEvent();
 		productDTO.setFamily(ProductFamily.L1_SLICE);
 
 		JSONObject expected = extractor.mdBuilder.buildOutputFileMetadata(descriptor, files.get(0), productDTO);
@@ -348,8 +348,8 @@ public class LevelProductsExtractorTest {
 
 		List<File> files = Arrays.asList(new File(testDir.getAbsolutePath(), l1acnName + File.separator + "manifest.safe"));
 
-		inputMessageSafe = new GenericMessageDto<ProductDto>(123, "",
-				new ProductDto(l1acnName, l1acnName, ProductFamily.L1_ACN, "NRT"));
+		inputMessageSafe = new GenericMessageDto<ProductionEvent>(123, "",
+				new ProductionEvent(l1acnName, l1acnName, ProductFamily.L1_ACN, "NRT"));
 
 		doReturn(files).when(obsClient).download(Mockito.anyList());
 
@@ -369,7 +369,7 @@ public class LevelProductsExtractorTest {
 		descriptor.setDataTakeId("023A69");
 		descriptor.setProductFamily(ProductFamily.L1_ACN);
 		
-		ProductDto productDTO = new ProductDto();
+		ProductionEvent productDTO = new ProductionEvent();
 		productDTO.setFamily(ProductFamily.L1_ACN);
 
 		JSONObject expected = extractor.mdBuilder.buildOutputFileMetadata(descriptor, files.get(0), productDTO);
@@ -396,8 +396,8 @@ public class LevelProductsExtractorTest {
 
 		List<File> files = Arrays.asList(new File(testDir, l2SliceName + File.separator + "manifest.safe"));
 
-		inputMessageSafe = new GenericMessageDto<ProductDto>(123, "",
-				new ProductDto(l2SliceName, l2SliceName, ProductFamily.L2_SLICE, "NRT"));
+		inputMessageSafe = new GenericMessageDto<ProductionEvent>(123, "",
+				new ProductionEvent(l2SliceName, l2SliceName, ProductFamily.L2_SLICE, "NRT"));
 
 		doReturn(files).when(obsClient).download(Mockito.anyList());
 
@@ -417,7 +417,7 @@ public class LevelProductsExtractorTest {
 		descriptor.setDataTakeId("0313A0");
 		descriptor.setProductFamily(ProductFamily.L2_SLICE);
 		
-		ProductDto productDTO = new ProductDto();
+		ProductionEvent productDTO = new ProductionEvent();
 		productDTO.setFamily(ProductFamily.L2_SLICE);
 
 		JSONObject expected = extractor.mdBuilder.buildOutputFileMetadata(descriptor, files.get(0), productDTO);
@@ -443,8 +443,8 @@ public class LevelProductsExtractorTest {
 
 		List<File> files = Arrays.asList(new File(testDir, l2acnName + File.separator + "manifest.safe"));
 
-		inputMessageSafe = new GenericMessageDto<ProductDto>(123, "",
-				new ProductDto(l2acnName, l2acnName, ProductFamily.L2_ACN, "NRT"));
+		inputMessageSafe = new GenericMessageDto<ProductionEvent>(123, "",
+				new ProductionEvent(l2acnName, l2acnName, ProductFamily.L2_ACN, "NRT"));
 
 		doReturn(files).when(obsClient).download(Mockito.anyList());
 
@@ -464,7 +464,7 @@ public class LevelProductsExtractorTest {
 		descriptor.setDataTakeId("0313A0");
 		descriptor.setProductFamily(ProductFamily.L2_ACN);
 		
-		ProductDto productDTO = new ProductDto();
+		ProductionEvent productDTO = new ProductionEvent();
 		productDTO.setFamily(ProductFamily.L2_ACN);
 
 		JSONObject expected = extractor.mdBuilder.buildOutputFileMetadata(descriptor, files.get(0), productDTO);

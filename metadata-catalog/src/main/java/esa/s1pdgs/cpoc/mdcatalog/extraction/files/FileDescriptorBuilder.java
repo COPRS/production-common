@@ -15,7 +15,7 @@ import esa.s1pdgs.cpoc.common.errors.processing.MetadataIllegalFileExtension;
 import esa.s1pdgs.cpoc.mdcatalog.extraction.model.ConfigFileDescriptor;
 import esa.s1pdgs.cpoc.mdcatalog.extraction.model.EdrsSessionFileDescriptor;
 import esa.s1pdgs.cpoc.mdcatalog.extraction.model.OutputFileDescriptor;
-import esa.s1pdgs.cpoc.mqi.model.queue.ProductDto;
+import esa.s1pdgs.cpoc.mqi.model.queue.ProductionEvent;
 
 /**
  * Service to build file descriptor
@@ -174,7 +174,7 @@ public class FileDescriptorBuilder {
 		}
 	}
 	
-	public OutputFileDescriptor buildOutputFileDescriptor(File file, ProductDto product, ProductFamily productFamily)
+	public OutputFileDescriptor buildOutputFileDescriptor(File file, ProductionEvent product, ProductFamily productFamily)
             throws MetadataFilePathException, MetadataIgnoredFileException {
         // Extract relative path
         String absolutePath = file.getAbsolutePath();

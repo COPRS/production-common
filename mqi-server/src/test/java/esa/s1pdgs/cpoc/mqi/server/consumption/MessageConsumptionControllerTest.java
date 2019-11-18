@@ -47,7 +47,7 @@ import esa.s1pdgs.cpoc.common.errors.processing.StatusProcessingApiError;
 import esa.s1pdgs.cpoc.mqi.model.queue.IngestionEvent;
 import esa.s1pdgs.cpoc.mqi.model.queue.IpfExecutionJob;
 import esa.s1pdgs.cpoc.mqi.model.queue.LevelReportDto;
-import esa.s1pdgs.cpoc.mqi.model.queue.ProductDto;
+import esa.s1pdgs.cpoc.mqi.model.queue.ProductionEvent;
 import esa.s1pdgs.cpoc.mqi.model.rest.Ack;
 import esa.s1pdgs.cpoc.mqi.model.rest.GenericMessageDto;
 import esa.s1pdgs.cpoc.mqi.server.ApplicationProperties;
@@ -173,13 +173,13 @@ public class MessageConsumptionControllerTest {
                 manager.consumers.get(ProductCategory.AUXILIARY_FILES).size());
         assertEquals("topic", manager.consumers
                 .get(ProductCategory.AUXILIARY_FILES).get("topic").getTopic());
-        assertEquals(ProductDto.class,
+        assertEquals(ProductionEvent.class,
                 manager.consumers.get(ProductCategory.AUXILIARY_FILES)
                         .get("topic").getConsumedMsgClass());
         assertEquals("topic-other",
                 manager.consumers.get(ProductCategory.AUXILIARY_FILES)
                         .get("topic-other").getTopic());
-        assertEquals(ProductDto.class,
+        assertEquals(ProductionEvent.class,
                 manager.consumers.get(ProductCategory.AUXILIARY_FILES)
                         .get("topic-other").getConsumedMsgClass());
 
@@ -195,7 +195,7 @@ public class MessageConsumptionControllerTest {
                 manager.consumers.get(ProductCategory.LEVEL_PRODUCTS).size());
         assertEquals("topic", manager.consumers
                 .get(ProductCategory.LEVEL_PRODUCTS).get("topic").getTopic());
-        assertEquals(ProductDto.class,
+        assertEquals(ProductionEvent.class,
                 manager.consumers.get(ProductCategory.LEVEL_PRODUCTS)
                         .get("topic").getConsumedMsgClass());
 
@@ -225,7 +225,7 @@ public class MessageConsumptionControllerTest {
                 manager.consumers.get(ProductCategory.LEVEL_SEGMENTS).size());
         assertEquals("topic", manager.consumers.get(ProductCategory.LEVEL_SEGMENTS)
                 .get("topic").getTopic());
-        assertEquals(ProductDto.class,
+        assertEquals(ProductionEvent.class,
                 manager.consumers.get(ProductCategory.LEVEL_SEGMENTS).get("topic")
                         .getConsumedMsgClass());        
     }
@@ -505,13 +505,13 @@ public class MessageConsumptionControllerTest {
     private void testSendMessageWhenAskOtherAppNotNeeded(
             MessageState state) throws AbstractCodedException {
 
-        AppCatMessageDto<ProductDto> msgLight = new AppCatMessageDto<ProductDto>(
+        AppCatMessageDto<ProductionEvent> msgLight = new AppCatMessageDto<ProductionEvent>(
                 ProductCategory.AUXILIARY_FILES, 1234, "topic", 1, 111);
         msgLight.setState(state);
         msgLight.setReadingPod("pod-name");
         msgLight.setSendingPod("pod-name");
 
-        AppCatMessageDto<ProductDto> msgLight2 = new AppCatMessageDto<ProductDto>(
+        AppCatMessageDto<ProductionEvent> msgLight2 = new AppCatMessageDto<ProductionEvent>(
                 ProductCategory.AUXILIARY_FILES, 1235, "topic", 1, 111);
         msgLight2.setState(state);
         msgLight2.setReadingPod("pod-name");
@@ -545,7 +545,7 @@ public class MessageConsumptionControllerTest {
     public void testSendWhenMessageProcessingByAnotherAndResponseTrue()
             throws AbstractCodedException {
 
-        AppCatMessageDto<ProductDto> msgLight = new AppCatMessageDto<ProductDto>(
+        AppCatMessageDto<ProductionEvent> msgLight = new AppCatMessageDto<ProductionEvent>(
                 ProductCategory.AUXILIARY_FILES, 1234, "topic", 1, 111);
         msgLight.setState(MessageState.SEND);
         msgLight.setReadingPod("pod-name");
@@ -592,13 +592,13 @@ public class MessageConsumptionControllerTest {
     private void testSendWhenMessageProcessingByAnotherAndResponseFalse()
             throws AbstractCodedException {
 
-        AppCatMessageDto<ProductDto> msgLight = new AppCatMessageDto<ProductDto>(
+        AppCatMessageDto<ProductionEvent> msgLight = new AppCatMessageDto<ProductionEvent>(
                 ProductCategory.AUXILIARY_FILES, 1234L, "topic", 1, 111);
         msgLight.setState(MessageState.SEND);
         msgLight.setReadingPod("pod-name");
         msgLight.setSendingPod("other-name");
 
-        AppCatMessageDto<ProductDto> msgLight2 = new AppCatMessageDto<ProductDto>(
+        AppCatMessageDto<ProductionEvent> msgLight2 = new AppCatMessageDto<ProductionEvent>(
                 ProductCategory.AUXILIARY_FILES, 1235L, "topic", 1, 111);
         msgLight2.setState(MessageState.SEND);
         msgLight2.setReadingPod("pod-name");

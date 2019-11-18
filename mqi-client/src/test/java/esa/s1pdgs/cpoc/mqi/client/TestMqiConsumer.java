@@ -20,7 +20,7 @@ import esa.s1pdgs.cpoc.common.errors.mqi.MqiAckApiError;
 import esa.s1pdgs.cpoc.mqi.client.MqiClient;
 import esa.s1pdgs.cpoc.mqi.client.MqiConsumer;
 import esa.s1pdgs.cpoc.mqi.client.MqiListener;
-import esa.s1pdgs.cpoc.mqi.model.queue.ProductDto;
+import esa.s1pdgs.cpoc.mqi.model.queue.ProductionEvent;
 import esa.s1pdgs.cpoc.mqi.model.rest.Ack;
 import esa.s1pdgs.cpoc.mqi.model.rest.AckMessageDto;
 import esa.s1pdgs.cpoc.mqi.model.rest.GenericMessageDto;
@@ -30,13 +30,13 @@ public class TestMqiConsumer {
 	private MqiClient fakeClient;
 	
 	@Mock
-	private MqiListener<ProductDto> fakeListener;
+	private MqiListener<ProductionEvent> fakeListener;
 	
 	@Mock
 	private AppStatus fakeappStatus;
 	
-	private final ProductDto fakeDto = new ProductDto("1", "2", ProductFamily.AUXILIARY_FILE);
-	private final GenericMessageDto<ProductDto> mess = new GenericMessageDto<ProductDto>(1, "test", fakeDto);
+	private final ProductionEvent fakeDto = new ProductionEvent("1", "2", ProductFamily.AUXILIARY_FILE);
+	private final GenericMessageDto<ProductionEvent> mess = new GenericMessageDto<ProductionEvent>(1, "test", fakeDto);
 	
 	@Before
 	public final void setUp() throws Exception {

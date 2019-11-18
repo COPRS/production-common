@@ -36,7 +36,7 @@ import esa.s1pdgs.cpoc.common.errors.mqi.MqiRouteNotAvailable;
 import esa.s1pdgs.cpoc.mqi.model.queue.IngestionEvent;
 import esa.s1pdgs.cpoc.mqi.model.queue.IpfExecutionJob;
 import esa.s1pdgs.cpoc.mqi.model.queue.LevelReportDto;
-import esa.s1pdgs.cpoc.mqi.model.queue.ProductDto;
+import esa.s1pdgs.cpoc.mqi.model.queue.ProductionEvent;
 import esa.s1pdgs.cpoc.mqi.server.ApplicationProperties;
 import esa.s1pdgs.cpoc.mqi.server.ApplicationProperties.ProductCategoryProperties;
 import esa.s1pdgs.cpoc.mqi.server.ApplicationProperties.ProductCategoryPublicationProperties;
@@ -88,7 +88,7 @@ public class MessagePublicationControllerTest {
     private ApplicationProperties appProperties;
 
     private MessagePublicationController customController;
-    private GenericKafkaUtils<ProductDto> kafkaUtilsProducts;
+    private GenericKafkaUtils<ProductionEvent> kafkaUtilsProducts;
     private GenericKafkaUtils<LevelReportDto> kafkaUtilsReports;
     private GenericKafkaUtils<IngestionEvent> kafkaUtilsEdrsSession;
     private GenericKafkaUtils<IpfExecutionJob> kafkaUtilsJobs;
@@ -97,7 +97,7 @@ public class MessagePublicationControllerTest {
     public void init() {
         MockitoAnnotations.initMocks(this);
 
-        kafkaUtilsProducts = new GenericKafkaUtils<ProductDto>(embeddedKafka);
+        kafkaUtilsProducts = new GenericKafkaUtils<ProductionEvent>(embeddedKafka);
         kafkaUtilsReports = new GenericKafkaUtils<LevelReportDto>(embeddedKafka);
         kafkaUtilsEdrsSession = new GenericKafkaUtils<IngestionEvent>(embeddedKafka);
         kafkaUtilsJobs = new GenericKafkaUtils<IpfExecutionJob>(embeddedKafka);
@@ -206,12 +206,12 @@ public class MessagePublicationControllerTest {
 
     @Test
     public void publishAuxiliaryFiles() throws Exception {
-        ProductDto dto = new ProductDto("product-name", "key-obs", ProductFamily.AUXILIARY_FILE);
+        ProductionEvent dto = new ProductionEvent("product-name", "key-obs", ProductFamily.AUXILIARY_FILE);
         initCustomControllerForAllPublication();
 
         customController.publish(ProductCategory.AUXILIARY_FILES, dto, "NONE", "NONE");
 
-        ConsumerRecord<String, ProductDto> record = kafkaUtilsProducts
+        ConsumerRecord<String, ProductionEvent> record = kafkaUtilsProducts
                 .getReceivedRecordAux(GenericKafkaUtils.TOPIC_AUXILIARY_FILES);
 
         assertEquals(dto, record.value());
@@ -219,13 +219,13 @@ public class MessagePublicationControllerTest {
 
     @Test
     public void publishLevelProducts() throws Exception {
-        ProductDto dto = new ProductDto("product-name", "key-obs",
+        ProductionEvent dto = new ProductionEvent("product-name", "key-obs",
                 ProductFamily.L0_SLICE, "NRT");
         initCustomControllerForAllPublication();
 
         customController.publish(ProductCategory.LEVEL_PRODUCTS, dto, "NONE", "NONE");
 
-        ConsumerRecord<String, ProductDto> record = kafkaUtilsProducts
+        ConsumerRecord<String, ProductionEvent> record = kafkaUtilsProducts
                 .getReceivedRecordProducts(GenericKafkaUtils.TOPIC_L0_PRODUCTS);
 
         assertEquals(dto, record.value());
@@ -233,13 +233,13 @@ public class MessagePublicationControllerTest {
 
     @Test
     public void publishLevelProducts1() throws Exception {
-        ProductDto dto = new ProductDto("product-name", "key-obs",
+        ProductionEvent dto = new ProductionEvent("product-name", "key-obs",
                 ProductFamily.L1_ACN, "NRT");
         initCustomControllerForAllPublication();
 
         customController.publish(ProductCategory.LEVEL_PRODUCTS,dto, "t-pdgs-l1-jobs-nrt", "L1_ACN");
 
-        ConsumerRecord<String, ProductDto> record = kafkaUtilsProducts
+        ConsumerRecord<String, ProductionEvent> record = kafkaUtilsProducts
                 .getReceivedRecordProducts(GenericKafkaUtils.TOPIC_L1_ACNS);
 
         assertEquals(dto, record.value());
@@ -248,13 +248,13 @@ public class MessagePublicationControllerTest {
 
     @Test
     public void publishLevelSegments() throws Exception {
-        ProductDto dto = new ProductDto("product-name", "key-obs",
+        ProductionEvent dto = new ProductionEvent("product-name", "key-obs",
                 ProductFamily.L0_SEGMENT, "FAST");
         initCustomControllerForAllPublication();
 
         customController.publish(ProductCategory.LEVEL_SEGMENTS, dto, "NONE", "NONE");
 
-        ConsumerRecord<String, ProductDto> record = kafkaUtilsProducts
+        ConsumerRecord<String, ProductionEvent> record = kafkaUtilsProducts
                 .getReceivedRecordSegments(GenericKafkaUtils.TOPIC_L0_SEGMENTS);
 
         assertEquals(dto, record.value());

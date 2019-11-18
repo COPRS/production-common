@@ -17,7 +17,7 @@ import esa.s1pdgs.cpoc.jobgenerator.config.ProcessSettings;
 import esa.s1pdgs.cpoc.jobgenerator.tasks.AbstractJobsDispatcher;
 import esa.s1pdgs.cpoc.jobgenerator.tasks.AbstractJobsGenerator;
 import esa.s1pdgs.cpoc.jobgenerator.tasks.JobsGeneratorFactory;
-import esa.s1pdgs.cpoc.mqi.model.queue.ProductDto;
+import esa.s1pdgs.cpoc.mqi.model.queue.ProductionEvent;
 
 /**
  * Dispatcher of L0 slice product<br/>
@@ -27,7 +27,7 @@ import esa.s1pdgs.cpoc.mqi.model.queue.ProductDto;
  * 
  * @author Cyrielle Gailliard
  */
-public class L0SegmentAppJobDispatcher extends AbstractJobsDispatcher<ProductDto> {
+public class L0SegmentAppJobDispatcher extends AbstractJobsDispatcher<ProductionEvent> {
 
     /**
      * Task table
@@ -50,7 +50,7 @@ public class L0SegmentAppJobDispatcher extends AbstractJobsDispatcher<ProductDto
             final ProcessSettings processSettings,
             final JobsGeneratorFactory factory,
             final ThreadPoolTaskScheduler taskScheduler,
-            final AppCatalogJobClient<ProductDto> appDataService) {
+            final AppCatalogJobClient<ProductionEvent> appDataService) {
         super(settings, processSettings, factory, taskScheduler,
                 appDataService);
     }
@@ -68,7 +68,7 @@ public class L0SegmentAppJobDispatcher extends AbstractJobsDispatcher<ProductDto
      * 
      */
     @Override
-    protected AbstractJobsGenerator<ProductDto> createJobGenerator(
+    protected AbstractJobsGenerator<ProductionEvent> createJobGenerator(
             final File xmlFile) throws AbstractCodedException {
         return this.factory.createJobGeneratorForL0Segment(xmlFile,
                 appDataService);
@@ -80,7 +80,7 @@ public class L0SegmentAppJobDispatcher extends AbstractJobsDispatcher<ProductDto
      * @throws JobGenMissingRoutingEntryException
      */
     @Override
-    protected List<String> getTaskTables(final AppDataJob<ProductDto> job)
+    protected List<String> getTaskTables(final AppDataJob<ProductionEvent> job)
             throws JobGenMissingRoutingEntryException {
         return Arrays.asList(TASK_TABLE_NAME);
     }

@@ -38,7 +38,7 @@ import esa.s1pdgs.cpoc.mqi.client.GenericMqiClient;
 import esa.s1pdgs.cpoc.mqi.client.MqiConsumer;
 import esa.s1pdgs.cpoc.mqi.client.MqiListener;
 import esa.s1pdgs.cpoc.mqi.client.StatusService;
-import esa.s1pdgs.cpoc.mqi.model.queue.ProductDto;
+import esa.s1pdgs.cpoc.mqi.model.queue.ProductionEvent;
 import esa.s1pdgs.cpoc.mqi.model.rest.Ack;
 import esa.s1pdgs.cpoc.mqi.model.rest.AckMessageDto;
 import esa.s1pdgs.cpoc.mqi.model.rest.GenericMessageDto;
@@ -50,7 +50,7 @@ import esa.s1pdgs.cpoc.report.Reporting;
 import esa.s1pdgs.cpoc.report.ReportingMessage;
 
 @Service
-public class CompressProcessor implements MqiListener<ProductDto> {
+public class CompressProcessor implements MqiListener<ProductionEvent> {
 	/**
 	 * Logger
 	 */
@@ -115,7 +115,7 @@ public class CompressProcessor implements MqiListener<ProductDto> {
 	public void initService() {
 		if (pollingIntervalMs > 0) {
 			final ExecutorService service = Executors.newFixedThreadPool(1);
-			service.execute(new MqiConsumer<ProductDto>(mqiClient, ProductCategory.COMPRESSED_PRODUCTS, this,
+			service.execute(new MqiConsumer<ProductionEvent>(mqiClient, ProductCategory.COMPRESSED_PRODUCTS, this,
 					pollingIntervalMs, pollingInitialDelayMs, esa.s1pdgs.cpoc.appstatus.AppStatus.NULL));
 		}
 	}
@@ -124,7 +124,7 @@ public class CompressProcessor implements MqiListener<ProductDto> {
 	 * Consume and execute jobs
 	 */
 	@Override
-	public void onMessage(GenericMessageDto<ProductDto> message) {
+	public void onMessage(GenericMessageDto<ProductionEvent> message) {
 
 		appStatus.setProcessing(message.getId());
 		LOGGER.info("Initializing job processing {}", message);
@@ -142,7 +142,7 @@ public class CompressProcessor implements MqiListener<ProductDto> {
 				new ReportingMessage("Start compression processing")
 		);
 
-		ProductDto job = message.getBody();
+		ProductionEvent job = message.getBody();
 
 		// Initialize the pool processor executor
 		CompressExecutorCallable procExecutor = new CompressExecutorCallable(job, // getPrefixMonitorLog(MonitorLogUtils.LOG_PROCESS,
@@ -170,11 +170,11 @@ public class CompressProcessor implements MqiListener<ProductDto> {
 		);
 	}
 
-	protected String processTask(final GenericMessageDto<ProductDto> message, final FileDownloader fileDownloader,
+	protected String processTask(final GenericMessageDto<ProductionEvent> message, final FileDownloader fileDownloader,
 			final FileUploader fileUploader, final ExecutorService procExecutorSrv,
 			final ExecutorCompletionService<Void> procCompletionSrv, final CompressExecutorCallable procExecutor,
 			final Reporting report) {
-		ProductDto job = message.getBody();
+		ProductionEvent job = message.getBody();
 		int step = 0;
 		boolean ackOk = false;
 		String errorMessage = "";
@@ -272,7 +272,7 @@ public class CompressProcessor implements MqiListener<ProductDto> {
 	 * @param poolProcessing
 	 * @param procExecutorSrv
 	 */
-	protected void cleanCompressionProcessing(final ProductDto job, final ExecutorService procExecutorSrv) {
+	protected void cleanCompressionProcessing(final ProductionEvent job, final ExecutorService procExecutorSrv) {
 		procExecutorSrv.shutdownNow();
 		try {
 			procExecutorSrv.awaitTermination(properties.getTmProcStopS(), TimeUnit.SECONDS);
@@ -285,7 +285,7 @@ public class CompressProcessor implements MqiListener<ProductDto> {
 		this.eraseDirectory(job);
 	}
 
-	private void eraseDirectory(final ProductDto job) {
+	private void eraseDirectory(final ProductionEvent job) {
 		try {
 			LOGGER.info("Erasing local working directory for job {}", job);
 			Path p = Paths.get(properties.getWorkingDirectory());
@@ -305,7 +305,7 @@ public class CompressProcessor implements MqiListener<ProductDto> {
 	 * @param ackOk
 	 * @param errorMessage
 	 */
-	protected void ackProcessing(final GenericMessageDto<ProductDto> dto,
+	protected void ackProcessing(final GenericMessageDto<ProductionEvent> dto,
 			final FailedProcessingDto failed, final boolean ackOk,
 			final String errorMessage) {
 		boolean stopping = appStatus.getStatus().isStopping();
@@ -339,7 +339,7 @@ public class CompressProcessor implements MqiListener<ProductDto> {
 	 * @param dto
 	 * @param errorMessage
 	 */
-	protected void ackNegatively(final boolean stop, final GenericMessageDto<ProductDto> dto,
+	protected void ackNegatively(final boolean stop, final GenericMessageDto<ProductionEvent> dto,
 			final String errorMessage) {
         LOGGER.info("Acknowledging negatively {} ",dto.getBody());
 		try {
@@ -351,7 +351,7 @@ public class CompressProcessor implements MqiListener<ProductDto> {
 		appStatus.setError("PROCESSING");
 	}
 
-	protected void ackPositively(final boolean stop, final GenericMessageDto<ProductDto> dto) {
+	protected void ackPositively(final boolean stop, final GenericMessageDto<ProductionEvent> dto) {
 		LOGGER.info("Acknowledging positively {}", dto.getBody());
 		try {
 			mqiClient.ack(new AckMessageDto(dto.getId(), Ack.OK, null, stop), 

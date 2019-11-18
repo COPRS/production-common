@@ -40,7 +40,7 @@ import esa.s1pdgs.cpoc.common.errors.processing.JobGenBuildTaskTableException;
 import esa.s1pdgs.cpoc.common.errors.processing.JobGenMaxNumberTaskTablesReachException;
 import esa.s1pdgs.cpoc.jobgenerator.config.JobGeneratorSettings;
 import esa.s1pdgs.cpoc.jobgenerator.config.ProcessSettings;
-import esa.s1pdgs.cpoc.mqi.model.queue.ProductDto;
+import esa.s1pdgs.cpoc.mqi.model.queue.ProductionEvent;
 
 public class AbstractJobDispatcherTest {
 
@@ -391,7 +391,7 @@ public class AbstractJobDispatcherTest {
 
 }
 
-class AbstractJobsDispatcherImpl extends AbstractJobsDispatcher<ProductDto> {
+class AbstractJobsDispatcherImpl extends AbstractJobsDispatcher<ProductionEvent> {
 
     private int counter;
     private int counterDispatch;
@@ -408,7 +408,7 @@ class AbstractJobsDispatcherImpl extends AbstractJobsDispatcher<ProductDto> {
     }
 
     @Override
-    protected AbstractJobsGenerator<ProductDto> createJobGenerator(File xmlFile)
+    protected AbstractJobsGenerator<ProductionEvent> createJobGenerator(File xmlFile)
             throws JobGenBuildTaskTableException {
         this.counter++;
         return null;

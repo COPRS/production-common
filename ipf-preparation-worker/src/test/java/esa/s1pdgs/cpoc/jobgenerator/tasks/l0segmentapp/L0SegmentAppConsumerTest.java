@@ -37,7 +37,7 @@ import esa.s1pdgs.cpoc.jobgenerator.config.ProcessSettings;
 import esa.s1pdgs.cpoc.jobgenerator.tasks.AbstractJobsDispatcher;
 import esa.s1pdgs.cpoc.mqi.client.GenericMqiClient;
 import esa.s1pdgs.cpoc.mqi.client.StatusService;
-import esa.s1pdgs.cpoc.mqi.model.queue.ProductDto;
+import esa.s1pdgs.cpoc.mqi.model.queue.ProductionEvent;
 import esa.s1pdgs.cpoc.mqi.model.rest.GenericMessageDto;
 
 public class L0SegmentAppConsumerTest {
@@ -49,7 +49,7 @@ public class L0SegmentAppConsumerTest {
 	private ProcessSettings processSettings;
 
 	@Mock
-	private AbstractJobsDispatcher<ProductDto> jobsDispatcher;
+	private AbstractJobsDispatcher<ProductionEvent> jobsDispatcher;
 
 	@Mock
 	private GenericMqiClient mqiService;
@@ -66,7 +66,7 @@ public class L0SegmentAppConsumerTest {
 	@Mock
 	private Status jobStatus;
 
-	private List<GenericMessageDto<ProductDto>> messages;
+	private List<GenericMessageDto<ProductionEvent>> messages;
 
 	private L0SegmentAppConsumer consumer;
 
@@ -108,18 +108,18 @@ public class L0SegmentAppConsumerTest {
 
 	public void initMessages() {
 		messages = new ArrayList<>();
-		GenericMessageDto<ProductDto> message1 = new GenericMessageDto<ProductDto>(1, "topic1",
-				new ProductDto("S1B_IW_RAW__0SHV_20171218T094703_20171218T094735_008772_00F9CD_EB01.SAFE",
+		GenericMessageDto<ProductionEvent> message1 = new GenericMessageDto<ProductionEvent>(1, "topic1",
+				new ProductionEvent("S1B_IW_RAW__0SHV_20171218T094703_20171218T094735_008772_00F9CD_EB01.SAFE",
 						"S1B_IW_RAW__0SHV_20171218T094703_20171218T094735_008772_00F9CD_EB01.SAFE",
 						ProductFamily.L0_SEGMENT, "FAST"));
 		messages.add(message1);
-		GenericMessageDto<ProductDto> message2 = new GenericMessageDto<ProductDto>(2, "topic1",
-				new ProductDto("S1B_IW_RAW__0SSV_20171218T090732_20171218T090732_008771_00F9CA_C40B.SAFE",
+		GenericMessageDto<ProductionEvent> message2 = new GenericMessageDto<ProductionEvent>(2, "topic1",
+				new ProductionEvent("S1B_IW_RAW__0SSV_20171218T090732_20171218T090732_008771_00F9CA_C40B.SAFE",
 						"S1B_IW_RAW__0SSV_20171218T090732_20171218T090732_008771_00F9CA_C40B.SAFE",
 						ProductFamily.L0_SEGMENT, "FAST"));
 		messages.add(message2);
-		GenericMessageDto<ProductDto> message3 = new GenericMessageDto<ProductDto>(1, "topic1",
-				new ProductDto("S1B_IW_RAW__0SHH_20171218T094703_20171218T094735_008772_00F9CD_EB01.SAFE",
+		GenericMessageDto<ProductionEvent> message3 = new GenericMessageDto<ProductionEvent>(1, "topic1",
+				new ProductionEvent("S1B_IW_RAW__0SHH_20171218T094703_20171218T094735_008772_00F9CD_EB01.SAFE",
 						"S1B_IW_RAW__0SHH_20171218T094703_20171218T094735_008772_00F9CD_EB01.SAFE",
 						ProductFamily.L0_SEGMENT, "FAST"));
 		messages.add(message3);

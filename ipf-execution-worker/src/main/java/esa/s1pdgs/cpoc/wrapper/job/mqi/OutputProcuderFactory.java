@@ -14,7 +14,7 @@ import esa.s1pdgs.cpoc.common.utils.FileUtils;
 import esa.s1pdgs.cpoc.mqi.client.GenericMqiClient;
 import esa.s1pdgs.cpoc.mqi.model.queue.IpfExecutionJob;
 import esa.s1pdgs.cpoc.mqi.model.queue.LevelReportDto;
-import esa.s1pdgs.cpoc.mqi.model.queue.ProductDto;
+import esa.s1pdgs.cpoc.mqi.model.queue.ProductionEvent;
 import esa.s1pdgs.cpoc.mqi.model.rest.GenericMessageDto;
 import esa.s1pdgs.cpoc.mqi.model.rest.GenericPublicationMessageDto;
 import esa.s1pdgs.cpoc.wrapper.config.ProcessConfiguration;
@@ -88,7 +88,7 @@ public class OutputProcuderFactory {
     public void sendOutput(final ObsQueueMessage msg, GenericMessageDto<IpfExecutionJob> inputMessage)
             throws AbstractCodedException {
     	
-        final GenericPublicationMessageDto<ProductDto> messageToPublish = new GenericPublicationMessageDto<ProductDto>(
+        final GenericPublicationMessageDto<ProductionEvent> messageToPublish = new GenericPublicationMessageDto<ProductionEvent>(
                 inputMessage.getId(), 
                 msg.getFamily(),
                 toProductDto(msg)
@@ -103,9 +103,9 @@ public class OutputProcuderFactory {
         }
     }
     
-    private final ProductDto toProductDto(final ObsQueueMessage msg)
+    private final ProductionEvent toProductDto(final ObsQueueMessage msg)
     {
-    	return new ProductDto(
+    	return new ProductionEvent(
         		msg.getProductName(), 
         		msg.getKeyObs(),
         		msg.getFamily(), 

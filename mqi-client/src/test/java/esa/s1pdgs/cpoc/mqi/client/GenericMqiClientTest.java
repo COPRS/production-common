@@ -35,7 +35,7 @@ import esa.s1pdgs.cpoc.common.errors.AbstractCodedException;
 import esa.s1pdgs.cpoc.common.errors.mqi.MqiAckApiError;
 import esa.s1pdgs.cpoc.common.errors.mqi.MqiNextApiError;
 import esa.s1pdgs.cpoc.common.errors.mqi.MqiPublishApiError;
-import esa.s1pdgs.cpoc.mqi.model.queue.ProductDto;
+import esa.s1pdgs.cpoc.mqi.model.queue.ProductionEvent;
 import esa.s1pdgs.cpoc.mqi.model.rest.Ack;
 import esa.s1pdgs.cpoc.mqi.model.rest.AckMessageDto;
 import esa.s1pdgs.cpoc.mqi.model.rest.GenericMessageDto;
@@ -69,9 +69,9 @@ public class GenericMqiClientTest {
      * DTO
      */
     private AckMessageDto ackMessage;
-    private GenericPublicationMessageDto<ProductDto> pubMessage;
+    private GenericPublicationMessageDto<ProductionEvent> pubMessage;
     
-    private GenericMessageDto<ProductDto> message;
+    private GenericMessageDto<ProductionEvent> message;
 
     /**
      * Initialization
@@ -85,12 +85,12 @@ public class GenericMqiClientTest {
         service = factory.newGenericMqiService();
         ackMessage = new AckMessageDto(1, Ack.OK, "message", true);
 
-        pubMessage = new GenericPublicationMessageDto<ProductDto>(
-                ProductFamily.L0_SLICE, new ProductDto("name", "keyobs",
+        pubMessage = new GenericPublicationMessageDto<ProductionEvent>(
+                ProductFamily.L0_SLICE, new ProductionEvent("name", "keyobs",
                         ProductFamily.L0_SLICE, "NRT"));
         
-        message = new GenericMessageDto<ProductDto>(123, "input-key",
-                new ProductDto("name", "keyobs", ProductFamily.AUXILIARY_FILE, null));
+        message = new GenericMessageDto<ProductionEvent>(123, "input-key",
+                new ProductionEvent("name", "keyobs", ProductFamily.AUXILIARY_FILE, null));
     }
 
     /**
@@ -159,7 +159,7 @@ public class GenericMqiClientTest {
                     Mockito.eq("uri/messages/level_products/publish"),
                     Mockito.eq(HttpMethod.POST),
                     Mockito.eq(
-                            new HttpEntity<GenericPublicationMessageDto<ProductDto>>(
+                            new HttpEntity<GenericPublicationMessageDto<ProductionEvent>>(
                                     pubMessage)),
                     Mockito.eq(Void.class));
             verifyNoMoreInteractions(restTemplate);
@@ -186,7 +186,7 @@ public class GenericMqiClientTest {
                 Mockito.eq("uri/messages/level_products/publish"),
                 Mockito.eq(HttpMethod.POST),
                 Mockito.eq(
-                        new HttpEntity<GenericPublicationMessageDto<ProductDto>>(
+                        new HttpEntity<GenericPublicationMessageDto<ProductionEvent>>(
                                 pubMessage)),
                 Mockito.eq(Void.class));
         verifyNoMoreInteractions(restTemplate);
@@ -210,7 +210,7 @@ public class GenericMqiClientTest {
                 Mockito.eq("uri/messages/level_products/publish"),
                 Mockito.eq(HttpMethod.POST),
                 Mockito.eq(
-                        new HttpEntity<GenericPublicationMessageDto<ProductDto>>(
+                        new HttpEntity<GenericPublicationMessageDto<ProductionEvent>>(
                                 pubMessage)),
                 Mockito.eq(Void.class));
         verifyNoMoreInteractions(restTemplate);
@@ -364,11 +364,11 @@ public class GenericMqiClientTest {
     @Test
     public void testNextWhenResponseKO() throws AbstractCodedException {
         doReturn(
-                new ResponseEntity<GenericMessageDto<ProductDto>>(
+                new ResponseEntity<GenericMessageDto<ProductionEvent>>(
                         HttpStatus.BAD_GATEWAY),
-                new ResponseEntity<GenericMessageDto<ProductDto>>(
+                new ResponseEntity<GenericMessageDto<ProductionEvent>>(
                         HttpStatus.INTERNAL_SERVER_ERROR),
-                new ResponseEntity<GenericMessageDto<ProductDto>>(
+                new ResponseEntity<GenericMessageDto<ProductionEvent>>(
                         HttpStatus.NOT_FOUND)).when(restTemplate).exchange(
                                 Mockito.anyString(),
                                 Mockito.any(HttpMethod.class),
@@ -393,21 +393,21 @@ public class GenericMqiClientTest {
     @Test
     public void testNext1() throws AbstractCodedException {
         doReturn(
-                new ResponseEntity<GenericMessageDto<ProductDto>>(
+                new ResponseEntity<GenericMessageDto<ProductionEvent>>(
                         HttpStatus.BAD_GATEWAY),
-                new ResponseEntity<GenericMessageDto<ProductDto>>(message,
+                new ResponseEntity<GenericMessageDto<ProductionEvent>>(message,
                         HttpStatus.OK)).when(restTemplate).exchange(
                                 Mockito.anyString(),
                                 Mockito.any(HttpMethod.class),
                                 Mockito.isNull(),
                                 Mockito.any(ParameterizedTypeReference.class));
 
-        GenericMessageDto<ProductDto> ret = service.next(ProductCategory.AUXILIARY_FILES);
+        GenericMessageDto<ProductionEvent> ret = service.next(ProductCategory.AUXILIARY_FILES);
         assertEquals(message, ret);
         
     	final ResolvableType type = ResolvableType.forClassWithGenerics(
     			GenericMessageDto.class, 
-    			ProductDto.class
+    			ProductionEvent.class
     	);           
         verify(restTemplate, times(2)).exchange(
                 Mockito.eq("uri/messages/auxiliary_files/next"),
@@ -424,17 +424,17 @@ public class GenericMqiClientTest {
     @SuppressWarnings("unchecked")
     @Test
     public void testNext2() throws AbstractCodedException {
-        doReturn(new ResponseEntity<GenericMessageDto<ProductDto>>(message, HttpStatus.OK))
+        doReturn(new ResponseEntity<GenericMessageDto<ProductionEvent>>(message, HttpStatus.OK))
                 .when(restTemplate).exchange(Mockito.anyString(),
                         Mockito.any(HttpMethod.class),
                         Mockito.isNull(),
                         Mockito.any(ParameterizedTypeReference.class));
 
-        GenericMessageDto<ProductDto> ret = service.next(ProductCategory.AUXILIARY_FILES);
+        GenericMessageDto<ProductionEvent> ret = service.next(ProductCategory.AUXILIARY_FILES);
         
     	final ResolvableType type = ResolvableType.forClassWithGenerics(
     			GenericMessageDto.class, 
-    			ProductDto.class
+    			ProductionEvent.class
     	);         
         
         assertEquals(message, ret);

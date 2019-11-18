@@ -33,7 +33,7 @@ import esa.s1pdgs.cpoc.mqi.client.GenericMqiClient;
 import esa.s1pdgs.cpoc.mqi.client.MqiConsumer;
 import esa.s1pdgs.cpoc.mqi.client.MqiListener;
 import esa.s1pdgs.cpoc.mqi.client.StatusService;
-import esa.s1pdgs.cpoc.mqi.model.queue.ProductDto;
+import esa.s1pdgs.cpoc.mqi.model.queue.ProductionEvent;
 import esa.s1pdgs.cpoc.mqi.model.rest.GenericMessageDto;
 import esa.s1pdgs.cpoc.report.FilenameReportingInput;
 import esa.s1pdgs.cpoc.report.LoggerReporting;
@@ -44,7 +44,7 @@ import esa.s1pdgs.cpoc.report.ReportingMessage;
  * @author birol_colak@net.werum
  *
  */
-public class LevelProductsMessageConsumer extends AbstractGenericConsumer<ProductDto> implements MqiListener<ProductDto>{
+public class LevelProductsMessageConsumer extends AbstractGenericConsumer<ProductionEvent> implements MqiListener<ProductionEvent>{
 
 	 /**
      * Settings used to extract information from product name
@@ -66,10 +66,10 @@ public class LevelProductsMessageConsumer extends AbstractGenericConsumer<Produc
     
     private final long pollingInitialDelayMs;
   
-	public LevelProductsMessageConsumer(final AbstractJobsDispatcher<ProductDto> jobsDispatcher,
+	public LevelProductsMessageConsumer(final AbstractJobsDispatcher<ProductionEvent> jobsDispatcher,
 			final L0SlicePatternSettings patternSettings, final ProcessSettings processSettings,
 			final GenericMqiClient mqiClient, final StatusService mqiStatusService,
-			final AppCatalogJobClient<ProductDto> appDataService, final ErrorRepoAppender errorRepoAppender,
+			final AppCatalogJobClient<ProductionEvent> appDataService, final ErrorRepoAppender errorRepoAppender,
 			final AppStatus appStatus, final MetadataClient metadataClient, final long pollingIntervalMs,
 			final long pollingInitialDelayMs) {
 		super(jobsDispatcher, processSettings, mqiClient, mqiStatusService, appDataService, appStatus,
@@ -87,14 +87,14 @@ public class LevelProductsMessageConsumer extends AbstractGenericConsumer<Produc
 		appStatus.setWaiting();
 		if (pollingIntervalMs > 0) {
 			final ExecutorService service = Executors.newFixedThreadPool(1);
-			service.execute(new MqiConsumer<ProductDto>(mqiClient, category, this, pollingIntervalMs,
+			service.execute(new MqiConsumer<ProductionEvent>(mqiClient, category, this, pollingIntervalMs,
 					pollingInitialDelayMs, esa.s1pdgs.cpoc.appstatus.AppStatus.NULL));
 		}
 	}
 
     
     @Override
-    public void onMessage(GenericMessageDto<ProductDto> mqiMessage) {
+    public void onMessage(GenericMessageDto<ProductionEvent> mqiMessage) {
     	appStatus.setWaiting();
     	final Reporting.Factory reportingFactory = new LoggerReporting.Factory("L1JobGeneration"); 
     	final Reporting reporting = reportingFactory.newReporting(0);
@@ -136,7 +136,7 @@ public class LevelProductsMessageConsumer extends AbstractGenericConsumer<Produc
             }        	
         	
             // Check if a job is already created for message identifier
-            AppDataJob<ProductDto> appDataJob = buildJob(mqiMessage);
+            AppDataJob<ProductionEvent> appDataJob = buildJob(mqiMessage);
             productName = appDataJob.getProduct().getProductName();
 
             // Dispatch job
@@ -172,12 +172,12 @@ public class LevelProductsMessageConsumer extends AbstractGenericConsumer<Produc
         reporting.end(new ReportingMessage("End job generation using {}", productName));
     }
 
-    protected AppDataJob<ProductDto> buildJob(GenericMessageDto<ProductDto> mqiMessage)
+    protected AppDataJob<ProductionEvent> buildJob(GenericMessageDto<ProductionEvent> mqiMessage)
             throws AbstractCodedException {
-        ProductDto leveldto = mqiMessage.getBody();
+        ProductionEvent leveldto = mqiMessage.getBody();
 
         // Check if a job is already created for message identifier
-        List<AppDataJob<ProductDto>> existingJobs = appDataService
+        List<AppDataJob<ProductionEvent>> existingJobs = appDataService
                 .findByMessagesId(mqiMessage.getId());
 
         if (CollectionUtils.isEmpty(existingJobs)) {
@@ -196,7 +196,7 @@ public class LevelProductsMessageConsumer extends AbstractGenericConsumer<Produc
             final String stopTime = m.group(this.patternSettings.getMGroupStopTime());
             
             // Create the JOB
-            AppDataJob<ProductDto> jobDto = new AppDataJob<>();
+            AppDataJob<ProductionEvent> jobDto = new AppDataJob<>();
             // General details
             jobDto.setLevel(processSettings.getLevel());
             jobDto.setPod(processSettings.getHostname());
@@ -231,7 +231,7 @@ public class LevelProductsMessageConsumer extends AbstractGenericConsumer<Produc
 
         } else {
             // Update pod if needed
-			AppDataJob<ProductDto> jobDto = (AppDataJob<ProductDto>) existingJobs.get(0);
+			AppDataJob<ProductionEvent> jobDto = (AppDataJob<ProductionEvent>) existingJobs.get(0);
 
             if (!jobDto.getPod().equals(processSettings.getHostname())) {
                 jobDto.setPod(processSettings.getHostname());

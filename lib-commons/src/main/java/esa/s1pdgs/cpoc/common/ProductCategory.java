@@ -5,7 +5,7 @@ import esa.s1pdgs.cpoc.mqi.model.queue.AbstractDto;
 import esa.s1pdgs.cpoc.mqi.model.queue.IngestionEvent;
 import esa.s1pdgs.cpoc.mqi.model.queue.IpfExecutionJob;
 import esa.s1pdgs.cpoc.mqi.model.queue.LevelReportDto;
-import esa.s1pdgs.cpoc.mqi.model.queue.ProductDto;
+import esa.s1pdgs.cpoc.mqi.model.queue.ProductionEvent;
 import esa.s1pdgs.cpoc.mqi.model.queue.IngestionJob;
 
 /**
@@ -14,13 +14,13 @@ import esa.s1pdgs.cpoc.mqi.model.queue.IngestionJob;
  * @author Viveris Technologie
  */
 public enum ProductCategory {
-    AUXILIARY_FILES(ProductDto.class), 
+    AUXILIARY_FILES(ProductionEvent.class), 
     EDRS_SESSIONS(IngestionEvent.class), 
     LEVEL_JOBS(IpfExecutionJob.class), 
-    LEVEL_PRODUCTS(ProductDto.class), 
+    LEVEL_PRODUCTS(ProductionEvent.class), 
     LEVEL_REPORTS(LevelReportDto.class), 
-    LEVEL_SEGMENTS(ProductDto.class), 
-    COMPRESSED_PRODUCTS(ProductDto.class),
+    LEVEL_SEGMENTS(ProductionEvent.class), 
+    COMPRESSED_PRODUCTS(ProductionEvent.class),
     INGESTION(IngestionJob.class);
 	
     /**

@@ -35,7 +35,7 @@ import esa.s1pdgs.cpoc.mdcatalog.extraction.model.ConfigFileDescriptor;
 import esa.s1pdgs.cpoc.mdcatalog.extraction.xml.XmlConverter;
 import esa.s1pdgs.cpoc.mdcatalog.status.AppStatusImpl;
 import esa.s1pdgs.cpoc.mqi.client.GenericMqiClient;
-import esa.s1pdgs.cpoc.mqi.model.queue.ProductDto;
+import esa.s1pdgs.cpoc.mqi.model.queue.ProductionEvent;
 import esa.s1pdgs.cpoc.mqi.model.rest.GenericMessageDto;
 import esa.s1pdgs.cpoc.obs_sdk.ObsClient;
 import esa.s1pdgs.cpoc.obs_sdk.ObsDownloadObject;
@@ -81,17 +81,17 @@ public class AuxiliaryFilesExtractorTest {
     /**
      * Job to process
      */
-    private GenericMessageDto<ProductDto> inputMessage;
+    private GenericMessageDto<ProductionEvent> inputMessage;
 
     /**
      * Job to process
      */
-    private GenericMessageDto<ProductDto> inputMessageSafe;
+    private GenericMessageDto<ProductionEvent> inputMessageSafe;
 
     /**
      * Job to process
      */
-    private GenericMessageDto<ProductDto> inputMessageAux;
+    private GenericMessageDto<ProductionEvent> inputMessageAux;
     
     private final ErrorRepoAppender errorAppender = ErrorRepoAppender.NULL;
     
@@ -128,16 +128,16 @@ public class AuxiliaryFilesExtractorTest {
         doNothing().when(appStatus).setError(Mockito.anyString());
         doReturn(true).when(mqiService).ack(Mockito.any(), Mockito.any());
 
-        inputMessage = new GenericMessageDto<ProductDto>(123, "",
-                new ProductDto("product-name", "key-obs", ProductFamily.AUXILIARY_FILE));
+        inputMessage = new GenericMessageDto<ProductionEvent>(123, "",
+                new ProductionEvent("product-name", "key-obs", ProductFamily.AUXILIARY_FILE));
 
-        inputMessageSafe = new GenericMessageDto<ProductDto>(123, "",
-                new ProductDto(
+        inputMessageSafe = new GenericMessageDto<ProductionEvent>(123, "",
+                new ProductionEvent(
                         "S1A_AUX_CAL_V20140402T000000_G20140402T133909.SAFE",
                         "S1A_AUX_CAL_V20140402T000000_G20140402T133909.SAFE", ProductFamily.AUXILIARY_FILE));
 
-        inputMessageAux = new GenericMessageDto<ProductDto>(123, "",
-                new ProductDto(
+        inputMessageAux = new GenericMessageDto<ProductionEvent>(123, "",
+                new ProductionEvent(
                         "S1A_OPER_AUX_OBMEMC_PDMC_20140201T000000.xml",
                         "S1A_OPER_AUX_OBMEMC_PDMC_20140201T000000.xml", ProductFamily.AUXILIARY_FILE));
 
@@ -201,8 +201,8 @@ public class AuxiliaryFilesExtractorTest {
 
 		String fileName = "S1__AUX_WAV_V20110801T000000_G20111026T141850.SAFE";
 
-		GenericMessageDto<ProductDto> inputMessageAuxWAV = new GenericMessageDto<ProductDto>(123, "",
-				new ProductDto(fileName, fileName, ProductFamily.AUXILIARY_FILE));
+		GenericMessageDto<ProductionEvent> inputMessageAuxWAV = new GenericMessageDto<ProductionEvent>(123, "",
+				new ProductionEvent(fileName, fileName, ProductFamily.AUXILIARY_FILE));
 
 		testExtractMetadata(inputMessageAuxWAV, fileName, fileName + File.separator + "manifest.safe",
 				FileExtension.SAFE, "S1", "_", null, "AUX_WAV");
@@ -212,8 +212,8 @@ public class AuxiliaryFilesExtractorTest {
 	public void testExtractMetadataAuxICE() throws AbstractCodedException {
 
 		String fileName = "S1__AUX_ICE_V20160501T120000_G20160502T043607.SAFE";
-		GenericMessageDto<ProductDto> inputMessageAuxICE = new GenericMessageDto<ProductDto>(123, "",
-				new ProductDto(fileName, fileName, ProductFamily.AUXILIARY_FILE));
+		GenericMessageDto<ProductionEvent> inputMessageAuxICE = new GenericMessageDto<ProductionEvent>(123, "",
+				new ProductionEvent(fileName, fileName, ProductFamily.AUXILIARY_FILE));
 
 		testExtractMetadata(inputMessageAuxICE, fileName, fileName + File.separator + "manifest.safe",
 				FileExtension.SAFE, "S1", "_", null, "AUX_ICE");
@@ -224,8 +224,8 @@ public class AuxiliaryFilesExtractorTest {
 
 		String fileName = "S1__AUX_WND_V20160423T120000_G20160422T060059.SAFE";
 
-		GenericMessageDto<ProductDto> inputMessageAuxWND = new GenericMessageDto<ProductDto>(123, "",
-				new ProductDto(fileName, fileName, ProductFamily.AUXILIARY_FILE));
+		GenericMessageDto<ProductionEvent> inputMessageAuxWND = new GenericMessageDto<ProductionEvent>(123, "",
+				new ProductionEvent(fileName, fileName, ProductFamily.AUXILIARY_FILE));
 
 		testExtractMetadata(inputMessageAuxWND, fileName, fileName + File.separator + "manifest.safe",
 				FileExtension.SAFE, "S1", "_", null, "AUX_WND");
@@ -237,8 +237,8 @@ public class AuxiliaryFilesExtractorTest {
 
 		String fileName = "S1A_AUX_PP2_V20171017T080000_G20171013T101254.SAFE";
 
-		GenericMessageDto<ProductDto> inputMessageAuxWND = new GenericMessageDto<ProductDto>(123, "",
-				new ProductDto(fileName, fileName, ProductFamily.AUXILIARY_FILE));
+		GenericMessageDto<ProductionEvent> inputMessageAuxWND = new GenericMessageDto<ProductionEvent>(123, "",
+				new ProductionEvent(fileName, fileName, ProductFamily.AUXILIARY_FILE));
 
 		testExtractMetadata(inputMessageAuxWND, fileName, fileName + File.separator + "manifest.safe",
 				FileExtension.SAFE, "S1", "A", null, "AUX_PP2");
@@ -246,7 +246,7 @@ public class AuxiliaryFilesExtractorTest {
 	}
 
 	@SuppressWarnings("unchecked")
-	private void testExtractMetadata(GenericMessageDto<ProductDto> inputMessage, String productFileName,
+	private void testExtractMetadata(GenericMessageDto<ProductionEvent> inputMessage, String productFileName,
 			String metadataFile, FileExtension fileExtension, String missionId, String satelliteId, String productClass,
 			String productType) throws AbstractCodedException {
 		List<File> files = Arrays.asList(new File(testDir,metadataFile));

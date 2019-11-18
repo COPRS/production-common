@@ -27,7 +27,7 @@ import esa.s1pdgs.cpoc.common.MessageState;
 import esa.s1pdgs.cpoc.common.ProductCategory;
 import esa.s1pdgs.cpoc.common.ProductFamily;
 import esa.s1pdgs.cpoc.common.errors.AbstractCodedException;
-import esa.s1pdgs.cpoc.mqi.model.queue.ProductDto;
+import esa.s1pdgs.cpoc.mqi.model.queue.ProductionEvent;
 import esa.s1pdgs.cpoc.mqi.server.GenericKafkaUtils;
 import esa.s1pdgs.cpoc.mqi.server.KafkaProperties;
 import esa.s1pdgs.cpoc.mqi.server.persistence.OtherApplicationService;
@@ -60,16 +60,16 @@ public class GenericConsumerTest {
     @Mock
     private OtherApplicationService otherService;
 
-    private AppCatMessageDto<ProductDto> messageLight1 = DataUtils.getLightMessage1();
+    private AppCatMessageDto<ProductionEvent> messageLight1 = DataUtils.getLightMessage1();
 
-    private AppCatMessageDto<ProductDto> messageLight2 = DataUtils.getLightMessage2();
+    private AppCatMessageDto<ProductionEvent> messageLight2 = DataUtils.getLightMessage2();
 
-    private AppCatMessageDto<ProductDto> messageLight3 = DataUtils.getLightMessage1();
+    private AppCatMessageDto<ProductionEvent> messageLight3 = DataUtils.getLightMessage1();
 
     @ClassRule
     public static KafkaEmbedded embeddedKafka = new KafkaEmbedded(1, false, CONSUMER_TOPIC, GenericKafkaUtils.TOPIC_AUXILIARY_FILES);
 
-    private GenericConsumer<ProductDto> uut; 
+    private GenericConsumer<ProductionEvent> uut; 
     
     
     @Before
@@ -94,14 +94,14 @@ public class GenericConsumerTest {
     @Test
     public void testConstructor() {
         assertEquals(GenericKafkaUtils.TOPIC_AUXILIARY_FILES, uut.getTopic());
-        assertEquals(ProductDto.class, uut.getConsumedMsgClass());
+        assertEquals(ProductionEvent.class, uut.getConsumedMsgClass());
     }
 
     @Test
     public void testAuxiliaryFilesConsumer() throws Exception {
-        ProductDto dto = new ProductDto("product-name", "key-obs", ProductFamily.AUXILIARY_FILE);
-        ProductDto dto2 = new ProductDto("product-name-2", "key-obs-2", ProductFamily.AUXILIARY_FILE);
-        GenericKafkaUtils<ProductDto> kafkaUtils = new GenericKafkaUtils<>(embeddedKafka);
+        ProductionEvent dto = new ProductionEvent("product-name", "key-obs", ProductFamily.AUXILIARY_FILE);
+        ProductionEvent dto2 = new ProductionEvent("product-name-2", "key-obs-2", ProductFamily.AUXILIARY_FILE);
+        GenericKafkaUtils<ProductionEvent> kafkaUtils = new GenericKafkaUtils<>(embeddedKafka);
 
         uut.start();
         Thread.sleep(5000);
@@ -112,8 +112,8 @@ public class GenericConsumerTest {
         kafkaUtils.sendMessageToKafka(dto,
                 GenericKafkaUtils.TOPIC_AUXILIARY_FILES);
         Thread.sleep(1500);
-        AppCatReadMessageDto<ProductDto> expected =
-                new AppCatReadMessageDto<ProductDto>("wrappers",
+        AppCatReadMessageDto<ProductionEvent> expected =
+                new AppCatReadMessageDto<ProductionEvent>("wrappers",
                         "test-host", false, dto);
         verify(service, times(1)).read(Mockito.eq(ProductCategory.AUXILIARY_FILES),
                 Mockito.eq(GenericKafkaUtils.TOPIC_AUXILIARY_FILES),
@@ -130,8 +130,8 @@ public class GenericConsumerTest {
         // REsume consumer
         uut.resume();
         Thread.sleep(1000);
-        AppCatReadMessageDto<ProductDto> expected2 =
-                new AppCatReadMessageDto<ProductDto>("wrappers",
+        AppCatReadMessageDto<ProductionEvent> expected2 =
+                new AppCatReadMessageDto<ProductionEvent>("wrappers",
                         "test-host", false, dto2);
         verify(service, times(2)).read(Mockito.eq(ProductCategory.AUXILIARY_FILES),
                 Mockito.eq(GenericKafkaUtils.TOPIC_AUXILIARY_FILES),

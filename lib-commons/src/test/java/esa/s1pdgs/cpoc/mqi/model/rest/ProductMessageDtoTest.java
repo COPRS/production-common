@@ -6,7 +6,7 @@ import static org.junit.Assert.assertTrue;
 import org.junit.Test;
 
 import esa.s1pdgs.cpoc.common.ProductFamily;
-import esa.s1pdgs.cpoc.mqi.model.queue.ProductDto;
+import esa.s1pdgs.cpoc.mqi.model.queue.ProductionEvent;
 import nl.jqno.equalsverifier.EqualsVerifier;
 import nl.jqno.equalsverifier.Warning;
 
@@ -22,14 +22,14 @@ public class ProductMessageDtoTest {
      */
     @Test
     public void testGettersSettersConstructors() {
-        ProductDto body = new ProductDto("product-name", "key-obs", ProductFamily.AUXILIARY_FILE, null);
-        GenericMessageDto<ProductDto> dto =
-                new GenericMessageDto<ProductDto>(123, "input-key", body);
+        ProductionEvent body = new ProductionEvent("product-name", "key-obs", ProductFamily.AUXILIARY_FILE, null);
+        GenericMessageDto<ProductionEvent> dto =
+                new GenericMessageDto<ProductionEvent>(123, "input-key", body);
         assertEquals(123, dto.getId());
         assertEquals(body, dto.getBody());
         assertEquals("input-key", dto.getInputKey());
 
-        dto = new GenericMessageDto<ProductDto>();
+        dto = new GenericMessageDto<ProductionEvent>();
         dto.setId(321);
         dto.setBody(body);
         dto.setInputKey("othey-input");
@@ -43,9 +43,9 @@ public class ProductMessageDtoTest {
      */
     @Test
     public void testToString() {
-        ProductDto body = new ProductDto("product-name", "key-obs", ProductFamily.AUXILIARY_FILE, null);
-        GenericMessageDto<ProductDto> dto =
-                new GenericMessageDto<ProductDto>(123, "input-key", body);
+        ProductionEvent body = new ProductionEvent("product-name", "key-obs", ProductFamily.AUXILIARY_FILE, null);
+        GenericMessageDto<ProductionEvent> dto =
+                new GenericMessageDto<ProductionEvent>(123, "input-key", body);
         String str = dto.toString();
         assertTrue("toString should contain the identifier",
                 str.contains("id: 123"));

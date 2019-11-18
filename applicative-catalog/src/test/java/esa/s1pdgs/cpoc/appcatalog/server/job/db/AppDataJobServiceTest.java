@@ -35,7 +35,7 @@ import esa.s1pdgs.cpoc.common.ApplicationLevel;
 import esa.s1pdgs.cpoc.common.ProductCategory;
 import esa.s1pdgs.cpoc.common.filter.FilterCriterion;
 import esa.s1pdgs.cpoc.common.filter.FilterOperator;
-import esa.s1pdgs.cpoc.mqi.model.queue.ProductDto;
+import esa.s1pdgs.cpoc.mqi.model.queue.ProductionEvent;
 import esa.s1pdgs.cpoc.mqi.model.rest.GenericMessageDto;
 
 /**
@@ -116,8 +116,8 @@ public class AppDataJobServiceTest {
         gen2.setTaskTable("tast-table-2");
         AppDataJobGeneration gen3 = new AppDataJobGeneration();
         gen3.setTaskTable("tast-table-3");
-        GenericMessageDto<ProductDto> message1 = new GenericMessageDto<ProductDto>(1, "topic1", null);
-        GenericMessageDto<ProductDto> message2 = new GenericMessageDto<ProductDto>(2, "topic1", null);
+        GenericMessageDto<ProductionEvent> message1 = new GenericMessageDto<ProductionEvent>(1, "topic1", null);
+        GenericMessageDto<ProductionEvent> message2 = new GenericMessageDto<ProductionEvent>(2, "topic1", null);
         obj.setId(123);
         obj.setLevel(ApplicationLevel.L1);
         obj.setPod("pod-name");
@@ -138,8 +138,8 @@ public class AppDataJobServiceTest {
         gen2.setTaskTable("tast-table-22");
         AppDataJobGeneration gen32 = new AppDataJobGeneration();
         gen3.setTaskTable("tast-table-32");
-        GenericMessageDto<ProductDto> message12 = new GenericMessageDto<ProductDto>(12, "topic12", null);
-        GenericMessageDto<ProductDto> message22 = new GenericMessageDto<ProductDto>(22, "topic12", null);
+        GenericMessageDto<ProductionEvent> message12 = new GenericMessageDto<ProductionEvent>(12, "topic12", null);
+        GenericMessageDto<ProductionEvent> message22 = new GenericMessageDto<ProductionEvent>(22, "topic12", null);
         obj2.setId(123);
         obj2.setLevel(ApplicationLevel.L1);
         obj2.setPod("pod-name-2");
@@ -169,8 +169,8 @@ public class AppDataJobServiceTest {
         gen2.setTaskTable("task-table-2");
         AppDataJobGeneration gen3 = new AppDataJobGeneration();
         gen3.setTaskTable("task-table-3");
-        GenericMessageDto<ProductDto> message1 = new GenericMessageDto<ProductDto>(1, "topic1", null);
-        GenericMessageDto<ProductDto> message2 = new GenericMessageDto<ProductDto>(2, "topic1", null);
+        GenericMessageDto<ProductionEvent> message1 = new GenericMessageDto<ProductionEvent>(1, "topic1", null);
+        GenericMessageDto<ProductionEvent> message2 = new GenericMessageDto<ProductionEvent>(2, "topic1", null);
         obj.setId(123);
         obj.setLevel(ApplicationLevel.L1);
         obj.setPod("pod-name");
@@ -200,7 +200,7 @@ public class AppDataJobServiceTest {
     
     @Test
     public void patchGenerationToJobGen4Test() throws AppCatalogJobNotFoundException, AppCatalogJobGenerationTerminatedException, AppCatalogJobGenerationInvalidTransitionStateException, AppCatalogJobGenerationNotFoundException {
-        AppDataJob<ProductDto> obj = new AppDataJob<>();
+        AppDataJob<ProductionEvent> obj = new AppDataJob<>();
         AppDataJobProduct product = new AppDataJobProduct();
         product.setSessionId("session-id");
         AppDataJobGeneration gen1 = new AppDataJobGeneration();
@@ -209,8 +209,8 @@ public class AppDataJobServiceTest {
         gen2.setTaskTable("task-table-2");
         AppDataJobGeneration gen3 = new AppDataJobGeneration();
         gen3.setTaskTable("task-table-3");
-        GenericMessageDto<ProductDto> message1 = new GenericMessageDto<ProductDto>(1, "topic1", null);
-        GenericMessageDto<ProductDto> message2 = new GenericMessageDto<ProductDto>(2, "topic1", null);
+        GenericMessageDto<ProductionEvent> message1 = new GenericMessageDto<ProductionEvent>(1, "topic1", null);
+        GenericMessageDto<ProductionEvent> message2 = new GenericMessageDto<ProductionEvent>(2, "topic1", null);
         obj.setId(123);
         obj.setLevel(ApplicationLevel.L1);
         obj.setPod("pod-name");
@@ -241,7 +241,7 @@ public class AppDataJobServiceTest {
     
     @Test(expected = AppCatalogJobGenerationInvalidTransitionStateException.class)
     public void patchGenerationToJobGen4InvalidTransitionTest() throws AppCatalogJobNotFoundException, AppCatalogJobGenerationTerminatedException, AppCatalogJobGenerationInvalidTransitionStateException, AppCatalogJobGenerationNotFoundException {
-        AppDataJob<ProductDto> obj = new AppDataJob<>();
+        AppDataJob<ProductionEvent> obj = new AppDataJob<>();
         AppDataJobProduct product = new AppDataJobProduct();
         product.setSessionId("session-id");
         AppDataJobGeneration gen1 = new AppDataJobGeneration();
@@ -251,8 +251,8 @@ public class AppDataJobServiceTest {
         gen2.setTaskTable("task-table-2");
         AppDataJobGeneration gen3 = new AppDataJobGeneration();
         gen3.setTaskTable("task-table-3");
-        GenericMessageDto<ProductDto> message1 = new GenericMessageDto<ProductDto>(1, "topic1", null);
-        GenericMessageDto<ProductDto> message2 = new GenericMessageDto<ProductDto>(2, "topic1", null);
+        GenericMessageDto<ProductionEvent> message1 = new GenericMessageDto<ProductionEvent>(1, "topic1", null);
+        GenericMessageDto<ProductionEvent> message2 = new GenericMessageDto<ProductionEvent>(2, "topic1", null);
         obj.setId(123);
         obj.setLevel(ApplicationLevel.L1);
         obj.setPod("pod-name");
@@ -276,7 +276,7 @@ public class AppDataJobServiceTest {
     
     @Test
     public void patchGenerationToJobGen5Test() throws AppCatalogJobNotFoundException, AppCatalogJobGenerationTerminatedException, AppCatalogJobGenerationInvalidTransitionStateException, AppCatalogJobGenerationNotFoundException {
-        AppDataJob<ProductDto> obj = new AppDataJob<>();
+        AppDataJob<ProductionEvent> obj = new AppDataJob<>();
         AppDataJobProduct product = new AppDataJobProduct();
         product.setSessionId("session-id");
         AppDataJobGeneration gen1 = new AppDataJobGeneration();
@@ -286,8 +286,8 @@ public class AppDataJobServiceTest {
         gen2.setTaskTable("task-table-2");
         AppDataJobGeneration gen3 = new AppDataJobGeneration();
         gen3.setTaskTable("task-table-3");
-        GenericMessageDto<ProductDto> message1 = new GenericMessageDto<ProductDto>(1, "topic1", null);
-        GenericMessageDto<ProductDto> message2 = new GenericMessageDto<ProductDto>(2, "topic1", null);
+        GenericMessageDto<ProductionEvent> message1 = new GenericMessageDto<ProductionEvent>(1, "topic1", null);
+        GenericMessageDto<ProductionEvent> message2 = new GenericMessageDto<ProductionEvent>(2, "topic1", null);
         obj.setId(123);
         obj.setLevel(ApplicationLevel.L1);
         obj.setPod("pod-name");
@@ -318,7 +318,7 @@ public class AppDataJobServiceTest {
     
     @Test(expected = AppCatalogJobGenerationInvalidTransitionStateException.class)
     public void patchGenerationToJobGen5InvalidTransitionTest() throws AppCatalogJobNotFoundException, AppCatalogJobGenerationTerminatedException, AppCatalogJobGenerationInvalidTransitionStateException, AppCatalogJobGenerationNotFoundException {
-        AppDataJob<ProductDto> obj = new AppDataJob<>();
+        AppDataJob<ProductionEvent> obj = new AppDataJob<>();
         AppDataJobProduct product = new AppDataJobProduct();
         product.setSessionId("session-id");
         AppDataJobGeneration gen1 = new AppDataJobGeneration();
@@ -328,8 +328,8 @@ public class AppDataJobServiceTest {
         gen2.setTaskTable("task-table-2");
         AppDataJobGeneration gen3 = new AppDataJobGeneration();
         gen3.setTaskTable("task-table-3");
-        GenericMessageDto<ProductDto> message1 = new GenericMessageDto<ProductDto>(1, "topic1", null);
-        GenericMessageDto<ProductDto> message2 = new GenericMessageDto<ProductDto>(2, "topic1", null);
+        GenericMessageDto<ProductionEvent> message1 = new GenericMessageDto<ProductionEvent>(1, "topic1", null);
+        GenericMessageDto<ProductionEvent> message2 = new GenericMessageDto<ProductionEvent>(2, "topic1", null);
         obj.setId(123);
         obj.setLevel(ApplicationLevel.L1);
         obj.setPod("pod-name");
@@ -353,7 +353,7 @@ public class AppDataJobServiceTest {
     
     @Test
     public void patchGenerationToJobGen6Test() throws AppCatalogJobNotFoundException, AppCatalogJobGenerationTerminatedException, AppCatalogJobGenerationInvalidTransitionStateException, AppCatalogJobGenerationNotFoundException {
-        AppDataJob<ProductDto> obj = new AppDataJob<>();
+        AppDataJob<ProductionEvent> obj = new AppDataJob<>();
         AppDataJobProduct product = new AppDataJobProduct();
         product.setSessionId("session-id");
         AppDataJobGeneration gen1 = new AppDataJobGeneration();
@@ -363,8 +363,8 @@ public class AppDataJobServiceTest {
         gen2.setTaskTable("task-table-2");
         AppDataJobGeneration gen3 = new AppDataJobGeneration();
         gen3.setTaskTable("task-table-3");
-        GenericMessageDto<ProductDto> message1 = new GenericMessageDto<ProductDto>(1, "topic1", null);
-        GenericMessageDto<ProductDto> message2 = new GenericMessageDto<ProductDto>(2, "topic1", null);
+        GenericMessageDto<ProductionEvent> message1 = new GenericMessageDto<ProductionEvent>(1, "topic1", null);
+        GenericMessageDto<ProductionEvent> message2 = new GenericMessageDto<ProductionEvent>(2, "topic1", null);
         obj.setId(123);
         obj.setLevel(ApplicationLevel.L1);
         obj.setPod("pod-name");
@@ -395,7 +395,7 @@ public class AppDataJobServiceTest {
     
     @Test
     public void patchGenerationToJobGenAllSent() throws AppCatalogJobNotFoundException, AppCatalogJobGenerationTerminatedException, AppCatalogJobGenerationInvalidTransitionStateException, AppCatalogJobGenerationNotFoundException {
-        AppDataJob<ProductDto> obj = new AppDataJob<>();
+        AppDataJob<ProductionEvent> obj = new AppDataJob<>();
         AppDataJobProduct product = new AppDataJobProduct();
         product.setSessionId("session-id");
         AppDataJobGeneration gen1 = new AppDataJobGeneration();
@@ -407,8 +407,8 @@ public class AppDataJobServiceTest {
         AppDataJobGeneration gen3 = new AppDataJobGeneration();
         gen3.setTaskTable("task-table-3");
         gen3.setState(AppDataJobGenerationState.SENT);
-        GenericMessageDto<ProductDto> message1 = new GenericMessageDto<ProductDto>(1, "topic1", null);
-        GenericMessageDto<ProductDto> message2 = new GenericMessageDto<ProductDto>(2, "topic1", null);
+        GenericMessageDto<ProductionEvent> message1 = new GenericMessageDto<ProductionEvent>(1, "topic1", null);
+        GenericMessageDto<ProductionEvent> message2 = new GenericMessageDto<ProductionEvent>(2, "topic1", null);
         obj.setId(123);
         obj.setLevel(ApplicationLevel.L1);
         obj.setPod("pod-name");
@@ -440,7 +440,7 @@ public class AppDataJobServiceTest {
     
     @Test(expected = AppCatalogJobGenerationInvalidTransitionStateException.class)
     public void patchGenerationToJobGen6InvalidTransitionTest() throws AppCatalogJobNotFoundException, AppCatalogJobGenerationTerminatedException, AppCatalogJobGenerationInvalidTransitionStateException, AppCatalogJobGenerationNotFoundException {
-        AppDataJob<ProductDto> obj = new AppDataJob<>();
+        AppDataJob<ProductionEvent> obj = new AppDataJob<>();
         AppDataJobProduct product = new AppDataJobProduct();
         product.setSessionId("session-id");
         AppDataJobGeneration gen1 = new AppDataJobGeneration();
@@ -450,8 +450,8 @@ public class AppDataJobServiceTest {
         gen2.setTaskTable("task-table-2");
         AppDataJobGeneration gen3 = new AppDataJobGeneration();
         gen3.setTaskTable("task-table-3");
-        GenericMessageDto<ProductDto> message1 = new GenericMessageDto<ProductDto>(1, "topic1", null);
-        GenericMessageDto<ProductDto> message2 = new GenericMessageDto<ProductDto>(2, "topic1", null);
+        GenericMessageDto<ProductionEvent> message1 = new GenericMessageDto<ProductionEvent>(1, "topic1", null);
+        GenericMessageDto<ProductionEvent> message2 = new GenericMessageDto<ProductionEvent>(2, "topic1", null);
         obj.setId(123);
         obj.setLevel(ApplicationLevel.L1);
         obj.setPod("pod-name");
@@ -475,7 +475,7 @@ public class AppDataJobServiceTest {
     
     @Test(expected = AppCatalogJobGenerationTerminatedException.class)
     public void patchGenerationToJobErrorTest() throws AppCatalogJobNotFoundException, AppCatalogJobGenerationTerminatedException, AppCatalogJobGenerationInvalidTransitionStateException, AppCatalogJobGenerationNotFoundException {
-        AppDataJob<ProductDto> obj = new AppDataJob<>();
+        AppDataJob<ProductionEvent> obj = new AppDataJob<>();
         AppDataJobProduct product = new AppDataJobProduct();
         product.setSessionId("session-id");
         AppDataJobGeneration gen1 = new AppDataJobGeneration();
@@ -484,8 +484,8 @@ public class AppDataJobServiceTest {
         gen2.setTaskTable("task-table-2");
         AppDataJobGeneration gen3 = new AppDataJobGeneration();
         gen3.setTaskTable("task-table-3");
-        GenericMessageDto<ProductDto> message1 = new GenericMessageDto<ProductDto>(1, "topic1", null);
-        GenericMessageDto<ProductDto> message2 = new GenericMessageDto<ProductDto>(2, "topic1", null);
+        GenericMessageDto<ProductionEvent> message1 = new GenericMessageDto<ProductionEvent>(1, "topic1", null);
+        GenericMessageDto<ProductionEvent> message2 = new GenericMessageDto<ProductionEvent>(2, "topic1", null);
         obj.setId(123);
         obj.setLevel(ApplicationLevel.L1);
         obj.setPod("pod-name");
@@ -505,7 +505,7 @@ public class AppDataJobServiceTest {
     
     @Test(expected = AppCatalogJobGenerationNotFoundException.class)
     public void patchGenerationToJobNoTaskTableTest() throws AppCatalogJobNotFoundException, AppCatalogJobGenerationTerminatedException, AppCatalogJobGenerationInvalidTransitionStateException, AppCatalogJobGenerationNotFoundException {
-        AppDataJob<ProductDto> obj = new AppDataJob<>();
+        AppDataJob<ProductionEvent> obj = new AppDataJob<>();
         AppDataJobProduct product = new AppDataJobProduct();
         product.setSessionId("session-id");
         AppDataJobGeneration gen1 = new AppDataJobGeneration();
@@ -514,8 +514,8 @@ public class AppDataJobServiceTest {
         gen2.setTaskTable("task-table-2");
         AppDataJobGeneration gen3 = new AppDataJobGeneration();
         gen3.setTaskTable("task-table-3");
-        GenericMessageDto<ProductDto> message1 = new GenericMessageDto<ProductDto>(1, "topic1", null);
-        GenericMessageDto<ProductDto> message2 = new GenericMessageDto<ProductDto>(2, "topic1", null);
+        GenericMessageDto<ProductionEvent> message1 = new GenericMessageDto<ProductionEvent>(1, "topic1", null);
+        GenericMessageDto<ProductionEvent> message2 = new GenericMessageDto<ProductionEvent>(2, "topic1", null);
         obj.setId(123);
         obj.setLevel(ApplicationLevel.L1);
         obj.setPod("pod-name");

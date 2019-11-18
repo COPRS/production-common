@@ -13,7 +13,7 @@ import org.apache.logging.log4j.Logger;
 import esa.s1pdgs.cpoc.common.errors.AbstractCodedException;
 import esa.s1pdgs.cpoc.common.errors.InternalErrorException;
 import esa.s1pdgs.cpoc.common.errors.UnknownFamilyException;
-import esa.s1pdgs.cpoc.mqi.model.queue.ProductDto;
+import esa.s1pdgs.cpoc.mqi.model.queue.ProductionEvent;
 import esa.s1pdgs.cpoc.obs_sdk.ObsClient;
 import esa.s1pdgs.cpoc.obs_sdk.ObsDownloadObject;
 import esa.s1pdgs.cpoc.report.LoggerReporting;
@@ -39,14 +39,14 @@ public class FileDownloader {
 	/**
 	 * List of all the inputs
 	 */
-	private final ProductDto job;
+	private final ProductionEvent job;
 
 	/**
 	 * Prefix to concatene to monitor logs
 	 */
 	private final String prefixMonitorLogs;
 
-	public FileDownloader(final ObsClient obsClient, final String localWorkingDir, final ProductDto job,
+	public FileDownloader(final ObsClient obsClient, final String localWorkingDir, final ProductionEvent job,
 			final int sizeDownBatch, final String prefixMonitorLogs) {
 		this.obsClient = obsClient;
 		this.localWorkingDir = localWorkingDir;

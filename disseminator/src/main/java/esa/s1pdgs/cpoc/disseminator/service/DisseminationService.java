@@ -34,7 +34,7 @@ import esa.s1pdgs.cpoc.errorrepo.model.rest.FailedProcessingDto;
 import esa.s1pdgs.cpoc.mqi.client.GenericMqiClient;
 import esa.s1pdgs.cpoc.mqi.client.MqiConsumer;
 import esa.s1pdgs.cpoc.mqi.client.MqiListener;
-import esa.s1pdgs.cpoc.mqi.model.queue.ProductDto;
+import esa.s1pdgs.cpoc.mqi.model.queue.ProductionEvent;
 import esa.s1pdgs.cpoc.mqi.model.rest.GenericMessageDto;
 import esa.s1pdgs.cpoc.obs_sdk.ObsClient;
 import esa.s1pdgs.cpoc.obs_sdk.ObsObject;
@@ -47,7 +47,7 @@ import esa.s1pdgs.cpoc.report.Reporting;
 import esa.s1pdgs.cpoc.report.ReportingMessage;
 
 @Service
-public class DisseminationService implements MqiListener<ProductDto> {	
+public class DisseminationService implements MqiListener<ProductionEvent> {	
 	private static final Logger LOG = LogManager.getLogger(DisseminationService.class);
 	
 	// list of all outbox client factories for protocols. For newly implemented protocols, add factory here
@@ -98,13 +98,13 @@ public class DisseminationService implements MqiListener<ProductDto> {
     	for (final Map.Entry<ProductCategory, List<DisseminationTypeConfiguration>> entry : properties.getCategories().entrySet()) {	
     		// start consumer for each category
     		LOG.debug("Starting consumer for {}", entry);
-    		service.execute(new MqiConsumer<ProductDto>(client, entry.getKey(),this, properties.getPollingIntervalMs()));
+    		service.execute(new MqiConsumer<ProductionEvent>(client, entry.getKey(),this, properties.getPollingIntervalMs()));
     	}
     }
     
 	@Override
-	public void onMessage(final GenericMessageDto<ProductDto> message) {
-		final ProductDto product = message.getBody();
+	public void onMessage(final GenericMessageDto<ProductionEvent> message) {
+		final ProductionEvent product = message.getBody();
 		LOG.debug("Handling {}", message);
 		
 		for (final DisseminationTypeConfiguration config : configsFor(product.getFamily())) {	
@@ -120,8 +120,8 @@ public class DisseminationService implements MqiListener<ProductDto> {
     	return properties.getCategories().getOrDefault(ProductCategory.of(family), Collections.emptyList());	
     }
 
-	final void handleTransferTo(final GenericMessageDto<ProductDto> message, final String target) {		
-		final ProductDto product = message.getBody();
+	final void handleTransferTo(final GenericMessageDto<ProductionEvent> message, final String target) {		
+		final ProductionEvent product = message.getBody();
 		
 		final Reporting.Factory rf = new LoggerReporting.Factory("Dissemination");
 		final Reporting reporting = rf.newReporting(0);
@@ -174,7 +174,7 @@ public class DisseminationService implements MqiListener<ProductDto> {
 		);
 	}
 
-	final void assertExists(final ProductDto product) throws ObsServiceException, SdkClientException {
+	final void assertExists(final ProductionEvent product) throws ObsServiceException, SdkClientException {
 		if (!obsClient.prefixExists(new ObsObject(product.getFamily(), product.getKeyObjectStorage()))) {
 			throw new DisseminationException(
 					String.format(

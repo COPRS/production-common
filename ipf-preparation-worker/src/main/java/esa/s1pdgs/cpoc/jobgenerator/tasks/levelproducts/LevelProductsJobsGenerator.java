@@ -21,7 +21,7 @@ import esa.s1pdgs.cpoc.metadata.client.MetadataClient;
 import esa.s1pdgs.cpoc.metadata.model.L0AcnMetadata;
 import esa.s1pdgs.cpoc.metadata.model.L0SliceMetadata;
 import esa.s1pdgs.cpoc.mqi.model.queue.IpfExecutionJob;
-import esa.s1pdgs.cpoc.mqi.model.queue.ProductDto;
+import esa.s1pdgs.cpoc.mqi.model.queue.ProductionEvent;
 
 /**
  * Customization of the job generator for L1 and L2 slice products
@@ -29,7 +29,7 @@ import esa.s1pdgs.cpoc.mqi.model.queue.ProductDto;
  * @author birol_colak@net.werum
  *
  */
-public class LevelProductsJobsGenerator extends AbstractJobsGenerator<ProductDto> {
+public class LevelProductsJobsGenerator extends AbstractJobsGenerator<ProductionEvent> {
 
 	/**
 	 * @param xmlConverter
@@ -41,7 +41,7 @@ public class LevelProductsJobsGenerator extends AbstractJobsGenerator<ProductDto
 	 */
 	public LevelProductsJobsGenerator(XmlConverter xmlConverter, MetadataClient metadataClient, ProcessSettings processSettings,
 			JobGeneratorSettings taskTablesSettings, OutputProducerFactory outputFactory,
-			AppCatalogJobClient<ProductDto>  appDataService, ProcessConfiguration processConfiguration) {
+			AppCatalogJobClient<ProductionEvent>  appDataService, ProcessConfiguration processConfiguration) {
 		super(xmlConverter, metadataClient, processSettings, taskTablesSettings, outputFactory, appDataService, processConfiguration);
 	}
 

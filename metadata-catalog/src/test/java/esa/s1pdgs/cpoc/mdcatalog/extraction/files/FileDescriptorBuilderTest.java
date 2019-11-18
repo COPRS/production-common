@@ -20,7 +20,7 @@ import esa.s1pdgs.cpoc.mdcatalog.extraction.LevelProductsExtractor;
 import esa.s1pdgs.cpoc.mdcatalog.extraction.model.ConfigFileDescriptor;
 import esa.s1pdgs.cpoc.mdcatalog.extraction.model.EdrsSessionFileDescriptor;
 import esa.s1pdgs.cpoc.mdcatalog.extraction.model.OutputFileDescriptor;
-import esa.s1pdgs.cpoc.mqi.model.queue.ProductDto;
+import esa.s1pdgs.cpoc.mqi.model.queue.ProductionEvent;
 
 public class FileDescriptorBuilderTest {
 
@@ -173,7 +173,7 @@ public class FileDescriptorBuilderTest {
 
     @Test
     public void testBuildL0OutputFileDescriptor() {
-        ProductDto dto = new ProductDto(
+        ProductionEvent dto = new ProductionEvent(
                 "S1A_IW_RAW__0SDV_20171213T121623_20171213T121656_019684_021735_C6DB.SAFE",
                 "S1A_IW_RAW__0SDV_20171213T121623_20171213T121656_019684_021735_C6DB.SAFE",
                 ProductFamily.L0_SLICE, "FAST");
@@ -217,7 +217,7 @@ public class FileDescriptorBuilderTest {
 
     @Test
     public void testBuildL0SegmentFileDescriptor() {
-        ProductDto dto = new ProductDto(
+        ProductionEvent dto = new ProductionEvent(
                 "S1A_IW_RAW__0SDV_20171213T121623_20171213T121656_019684_021735_C6DB.SAFE",
                 "S1A_IW_RAW__0SDV_20171213T121623_20171213T121656_019684_021735_C6DB.SAFE",
                 ProductFamily.L0_SEGMENT, "FAST");
@@ -261,7 +261,7 @@ public class FileDescriptorBuilderTest {
 
     @Test
     public void testBuildL1OutputFileDescriptor() {
-        ProductDto dto = new ProductDto(
+        ProductionEvent dto = new ProductionEvent(
                 "S1A_IW_GRDH_1SDV_20180227T145618_20180227T145643_020794_023A69_D7EC.SAFE",
                 "S1A_IW_GRDH_1SDV_20180227T145618_20180227T145643_020794_023A69_D7EC.SAFE",
                 ProductFamily.L1_SLICE, "NRT");
@@ -339,7 +339,7 @@ public class FileDescriptorBuilderTest {
                     fe.getCode());
         }
         // L0
-        ProductDto dto = new ProductDto(
+        ProductionEvent dto = new ProductionEvent(
                 "S1A_IW_RAW__0SDV_20171213T121623_20171213T121656_019684_021735_C6DB.SAFE",
                 "S1A_IW_RAW__0SDV_20171213T121623_20171213T121656_019684_021735_C6DB.SAFE",
                 ProductFamily.L0_SLICE, "FAST");
@@ -358,7 +358,7 @@ public class FileDescriptorBuilderTest {
                     fe.getCode());
         }
         // L1
-        ProductDto dto1 = new ProductDto(
+        ProductionEvent dto1 = new ProductionEvent(
                 "S1A_IW_RAW__0SDV_20171213T121623_20171213T121656_019684_021735_C6DB.SAFE",
                 "S1A_IW_RAW__0SDV_20171213T121623_20171213T121656_019684_021735_C6DB.SAFE",
                 ProductFamily.L1_SLICE, "FAST");
@@ -412,7 +412,7 @@ public class FileDescriptorBuilderTest {
                     fe.getCode());
         }
         // L0
-        ProductDto dto = new ProductDto(
+        ProductionEvent dto = new ProductionEvent(
                 "S1A_IW_RAW__0SDV_20171213T121623_20171213T121656_019684_021735_C6DB.SAFE",
                 "S1A_IW_RAW__0SDV_20171213T121623_20171213T121656_019684_021735_C6DB.SAFE",
                 ProductFamily.L0_SLICE, "FAST");
@@ -432,7 +432,7 @@ public class FileDescriptorBuilderTest {
                     fe.getCode());
         }
         // L1
-        ProductDto dto1 = new ProductDto(
+        ProductionEvent dto1 = new ProductionEvent(
                 "S1A_IW_RAW__0SDV_20171213T121623_20171213T121656_019684_021735_C6DB.SAFE",
                 "S1A_IW_RAW__0SDV_20171213T121623_20171213T121656_019684_021735_C6DB.SAFE",
                 ProductFamily.L0_SLICE, "FAST");
@@ -489,7 +489,7 @@ public class FileDescriptorBuilderTest {
                     fe.getCode());
         }
         // L0
-        ProductDto dto = new ProductDto(
+        ProductionEvent dto = new ProductionEvent(
                 "S1A_IW_RAW__0SDV_20171213T121623_20171213T121656_019684_021735_C6DB.SAFE",
                 "S1A_IW_RAW__0SDV_20171213T121623_20171213T121656_019684_021735_C6DB.SAFE",
                 ProductFamily.L0_SLICE, "FAST");
@@ -508,7 +508,7 @@ public class FileDescriptorBuilderTest {
                     fe.getCode());
         }
         // L1
-        ProductDto dto1 = new ProductDto(
+        ProductionEvent dto1 = new ProductionEvent(
                 "S1A_IW_RAW__0SDV_20171213T121623_20171213T121656_019684_021735_C6DB.SAFE",
                 "S1A_IW_RAW__0SDV_20171213T121623_20171213T121656_019684_021735_C6DB.SAFE",
                 ProductFamily.L0_SLICE, "FAST");

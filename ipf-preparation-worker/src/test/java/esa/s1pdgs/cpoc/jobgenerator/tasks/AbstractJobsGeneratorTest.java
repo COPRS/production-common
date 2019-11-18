@@ -59,7 +59,7 @@ import esa.s1pdgs.cpoc.metadata.client.MetadataClient;
 import esa.s1pdgs.cpoc.metadata.client.SearchMetadataQuery;
 import esa.s1pdgs.cpoc.metadata.model.SearchMetadata;
 import esa.s1pdgs.cpoc.mqi.model.queue.IngestionEvent;
-import esa.s1pdgs.cpoc.mqi.model.queue.ProductDto;
+import esa.s1pdgs.cpoc.mqi.model.queue.ProductionEvent;
 
 public class AbstractJobsGeneratorTest {
 
@@ -86,7 +86,7 @@ public class AbstractJobsGeneratorTest {
 
     private int nbLoopMetadata;
 
-    private AbstractJobsGenerator<ProductDto> generator;
+    private AbstractJobsGenerator<ProductionEvent> generator;
 
     @Mock
     private AppCatalogJobClient appDataPService;
@@ -355,7 +355,7 @@ public class AbstractJobsGeneratorTest {
             throws IOException, JAXBException, JobGenBuildTaskTableException {
         doThrow(new IOException("IO exception raised")).when(xmlConverter)
                 .convertFromXMLToObject(Mockito.anyString());
-        AbstractJobsGenerator<ProductDto> gen = new LevelProductsJobsGenerator(
+        AbstractJobsGenerator<ProductionEvent> gen = new LevelProductsJobsGenerator(
                 xmlConverter, metadataClient, processSettings,
                 jobGeneratorSettings, JobsSender, appDataPService, processConfiguration);
         generator.setMode(ProductMode.SLICING);
@@ -373,7 +373,7 @@ public class AbstractJobsGeneratorTest {
             throws IOException, JAXBException, JobGenBuildTaskTableException {
         doThrow(new JAXBException("JAXB exception raised")).when(xmlConverter)
                 .convertFromXMLToObject(Mockito.anyString());
-        AbstractJobsGenerator<ProductDto> gen = new LevelProductsJobsGenerator(
+        AbstractJobsGenerator<ProductionEvent> gen = new LevelProductsJobsGenerator(
                 xmlConverter, metadataClient, processSettings,
                 jobGeneratorSettings, JobsSender, appDataPService, processConfiguration);
         generator.setMode(ProductMode.SLICING);

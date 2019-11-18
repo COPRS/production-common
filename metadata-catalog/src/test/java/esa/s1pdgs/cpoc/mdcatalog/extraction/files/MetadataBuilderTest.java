@@ -23,7 +23,7 @@ import esa.s1pdgs.cpoc.common.errors.processing.MetadataMalformedException;
 import esa.s1pdgs.cpoc.mdcatalog.extraction.model.ConfigFileDescriptor;
 import esa.s1pdgs.cpoc.mdcatalog.extraction.model.EdrsSessionFileDescriptor;
 import esa.s1pdgs.cpoc.mdcatalog.extraction.model.OutputFileDescriptor;
-import esa.s1pdgs.cpoc.mqi.model.queue.ProductDto;
+import esa.s1pdgs.cpoc.mqi.model.queue.ProductionEvent;
 
 public class MetadataBuilderTest {
 
@@ -313,7 +313,7 @@ public class MetadataBuilderTest {
 		
 		File file = new File("workDir/S1A_IW_RAW__0SDV_20171213T121623_20171213T121656_019684_021735_C6DB.SAFE/manifest.safe");
 		
-		ProductDto productDTO = new ProductDto();
+		ProductionEvent productDTO = new ProductionEvent();
 		productDTO.setFamily(ProductFamily.L0_SLICE);
 
 		try {
@@ -354,7 +354,7 @@ public class MetadataBuilderTest {
 		
 		File file = new File("workDir/S1A_IW_RAW__0ADV_20171213T121123_20171213T121947_019684_021735_51B1.SAFE/manifest.safe");
 		
-		ProductDto productDTO = new ProductDto();
+		ProductionEvent productDTO = new ProductionEvent();
 		productDTO.setFamily(ProductFamily.L0_ACN);
 
 		try {
@@ -395,7 +395,7 @@ public class MetadataBuilderTest {
 		
 		File file = new File("workDir/S1A_IW_RAW__0SDV_20171213T121623_20171213T121656_019684_021735_C6DB.SAFE/manifest.safe");
 		
-		ProductDto productDTO = new ProductDto();
+		ProductionEvent productDTO = new ProductionEvent();
 		productDTO.setFamily(ProductFamily.L1_SLICE);
 
 		try {
@@ -436,7 +436,7 @@ public class MetadataBuilderTest {
 		
 		File file = new File("workDir/S1A_IW_RAW__0ADV_20171213T121123_20171213T121947_019684_021735_51B1.SAFE/manifest.safe");
 		
-		ProductDto productDTO = new ProductDto();
+		ProductionEvent productDTO = new ProductionEvent();
 		productDTO.setFamily(ProductFamily.L1_ACN);
 
 		try {

@@ -28,7 +28,7 @@ import esa.s1pdgs.cpoc.common.MessageState;
 import esa.s1pdgs.cpoc.common.ProductFamily;
 import esa.s1pdgs.cpoc.errorrepo.model.rest.FailedProcessingDto;
 import esa.s1pdgs.cpoc.mqi.model.queue.AbstractDto;
-import esa.s1pdgs.cpoc.mqi.model.queue.ProductDto;
+import esa.s1pdgs.cpoc.mqi.model.queue.ProductionEvent;
 import esa.s1pdgs.cpoc.mqi.model.rest.GenericMessageDto;
 import esa.s1pdgs.cpoc.reqrepo.kafka.producer.SubmissionClient;
 import esa.s1pdgs.cpoc.reqrepo.repo.FailedProcessingRepo;
@@ -131,7 +131,7 @@ public class RequestRepositoryTest {
 
 	@Test
 	public void testRestartAndDeleteFailedProcessing_OnExistingTopicAndRequest_ShallResubmitAndDelete() {	
-		final FailedProcessing fp = newFailedProcessing(123, new ProductDto("f","b", ProductFamily.AUXILIARY_FILE)); 
+		final FailedProcessing fp = newFailedProcessing(123, new ProductionEvent("f","b", ProductFamily.AUXILIARY_FILE)); 
 		doReturn(fp)
 			.when(failedProcessingRepo)
 			.findById(123);
@@ -145,7 +145,7 @@ public class RequestRepositoryTest {
 
 	@Test(expected = RuntimeException.class)
 	public void testRestartAndDeleteFailedProcessing_OnTopicNull_ShallThrowException() {		
-		final FailedProcessing fp = newFailedProcessing(456, new ProductDto("f","b", ProductFamily.AUXILIARY_FILE));
+		final FailedProcessing fp = newFailedProcessing(456, new ProductionEvent("f","b", ProductFamily.AUXILIARY_FILE));
 		fp.setTopic(null);
 
 		doReturn(fp)
@@ -264,7 +264,7 @@ public class RequestRepositoryTest {
 	}
 	
 	private final FailedProcessing newFailedProcessing(final long id) {
-		return newFailedProcessing(id, new ProductDto());
+		return newFailedProcessing(id, new ProductionEvent());
 	}
 	
 	private final FailedProcessing newFailedProcessing(final long id, final AbstractDto mess) {

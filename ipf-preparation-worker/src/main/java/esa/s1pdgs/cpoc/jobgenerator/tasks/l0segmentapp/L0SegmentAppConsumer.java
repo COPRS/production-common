@@ -32,7 +32,7 @@ import esa.s1pdgs.cpoc.mqi.client.GenericMqiClient;
 import esa.s1pdgs.cpoc.mqi.client.MqiConsumer;
 import esa.s1pdgs.cpoc.mqi.client.MqiListener;
 import esa.s1pdgs.cpoc.mqi.client.StatusService;
-import esa.s1pdgs.cpoc.mqi.model.queue.ProductDto;
+import esa.s1pdgs.cpoc.mqi.model.queue.ProductionEvent;
 import esa.s1pdgs.cpoc.mqi.model.rest.GenericMessageDto;
 import esa.s1pdgs.cpoc.report.FilenameReportingInput;
 import esa.s1pdgs.cpoc.report.LoggerReporting;
@@ -40,7 +40,7 @@ import esa.s1pdgs.cpoc.report.Reporting;
 import esa.s1pdgs.cpoc.report.ReportingMessage;
 
 public class L0SegmentAppConsumer
-        extends AbstractGenericConsumer<ProductDto> implements MqiListener<ProductDto> {
+        extends AbstractGenericConsumer<ProductionEvent> implements MqiListener<ProductionEvent> {
 
     /**
      * Pattern built from the regular expression given in configuration
@@ -74,10 +74,10 @@ public class L0SegmentAppConsumer
      * @param appDataService
      * @param appStatus
      */
-	public L0SegmentAppConsumer(final AbstractJobsDispatcher<ProductDto> jobsDispatcher,
+	public L0SegmentAppConsumer(final AbstractJobsDispatcher<ProductionEvent> jobsDispatcher,
 			final L0SegmentAppProperties appProperties, final ProcessSettings processSettings,
 			final GenericMqiClient mqiClient, final StatusService mqiStatusService,
-			final AppCatalogJobClient<ProductDto> appDataService, final ErrorRepoAppender errorRepoAppender,
+			final AppCatalogJobClient<ProductionEvent> appDataService, final ErrorRepoAppender errorRepoAppender,
 			final AppStatus appStatus, final long pollingIntervalMs, final long pollingInitialDelayMs) {
 		super(jobsDispatcher, processSettings, mqiClient, mqiStatusService, appDataService, appStatus,
 				errorRepoAppender, ProductCategory.LEVEL_SEGMENTS);
@@ -93,14 +93,14 @@ public class L0SegmentAppConsumer
 		appStatus.setWaiting();
 		if (pollingIntervalMs > 0) {
 			final ExecutorService service = Executors.newFixedThreadPool(1);
-			service.execute(new MqiConsumer<ProductDto>(mqiClient, category, this, pollingIntervalMs,
+			service.execute(new MqiConsumer<ProductionEvent>(mqiClient, category, this, pollingIntervalMs,
 					pollingInitialDelayMs, esa.s1pdgs.cpoc.appstatus.AppStatus.NULL));
 		}
 	}
     
     
     @Override
-    public void onMessage(GenericMessageDto<ProductDto> mqiMessage) {
+    public void onMessage(GenericMessageDto<ProductionEvent> mqiMessage) {
     	appStatus.setWaiting();
     	final Reporting.Factory reportingFactory = new LoggerReporting.Factory("L0_SEGMENTJobGeneration"); 
     	
@@ -138,7 +138,7 @@ public class L0SegmentAppConsumer
             		new FilenameReportingInput(Collections.singletonList(mqiMessage.getBody().getProductName())),            		
             		new ReportingMessage("Start job generation using {}", mqiMessage.getBody().getProductName())
             );
-            AppDataJob<ProductDto> appDataJob = buildJob(mqiMessage);
+            AppDataJob<ProductionEvent> appDataJob = buildJob(mqiMessage);
             productName = appDataJob.getProduct().getProductName();
 
             // Dispatch job
@@ -192,13 +192,13 @@ public class L0SegmentAppConsumer
 		return skip;
 	}
 
-	protected AppDataJob<ProductDto> buildJob(
-            GenericMessageDto<ProductDto> mqiMessage)
+	protected AppDataJob<ProductionEvent> buildJob(
+            GenericMessageDto<ProductionEvent> mqiMessage)
             throws AbstractCodedException {
-        ProductDto leveldto = mqiMessage.getBody();
+        ProductionEvent leveldto = mqiMessage.getBody();
 
         // Check if a job is already created for message identifier
-        List<AppDataJob<ProductDto>> existingJobs = appDataService.findByMessagesId(mqiMessage.getId());
+        List<AppDataJob<ProductionEvent>> existingJobs = appDataService.findByMessagesId(mqiMessage.getId());
 
         if (CollectionUtils.isEmpty(existingJobs)) {
 
@@ -215,13 +215,13 @@ public class L0SegmentAppConsumer
             String datatakeID = m.group(this.patternGroups.get("datatakeId"));
 
             // Search job for given datatake id
-            List<AppDataJob<ProductDto>> existingJobsForDatatake =
+            List<AppDataJob<ProductionEvent>> existingJobsForDatatake =
                     appDataService.findByProductDataTakeId(datatakeID);
 
             if (CollectionUtils.isEmpty(existingJobsForDatatake)) {
 
                 // Create the JOB
-                AppDataJob<ProductDto> jobDto = new AppDataJob<>();
+                AppDataJob<ProductionEvent> jobDto = new AppDataJob<>();
                 // General details
                 jobDto.setLevel(processSettings.getLevel());
                 jobDto.setPod(processSettings.getHostname());
@@ -239,7 +239,7 @@ public class L0SegmentAppConsumer
 
                 return appDataService.newJob(jobDto);
             } else {
-				AppDataJob<ProductDto> jobDto = (AppDataJob<ProductDto>) existingJobsForDatatake.get(0);
+				AppDataJob<ProductionEvent> jobDto = (AppDataJob<ProductionEvent>) existingJobsForDatatake.get(0);
 
                 if (!jobDto.getPod().equals(processSettings.getHostname())) {
                     jobDto.setPod(processSettings.getHostname());
@@ -252,7 +252,7 @@ public class L0SegmentAppConsumer
 
         } else {
             // Update pod if needed
-			AppDataJob<ProductDto> jobDto = (AppDataJob<ProductDto>) existingJobs.get(0);
+			AppDataJob<ProductionEvent> jobDto = (AppDataJob<ProductionEvent>) existingJobs.get(0);
 
             if (!jobDto.getPod().equals(processSettings.getHostname())) {
                 jobDto.setPod(processSettings.getHostname());
