@@ -16,9 +16,9 @@ COPY app-catalog-client/ /app/app-catalog-client
 COPY applicative-catalog/ /app/applicative-catalog
 COPY archives/ /app/archives
 COPY disseminator/ /app/disseminator
-COPY inbox-polling/ /app/inbox-polling
-COPY inbox-ingestion/ /app/inbox-ingestion
-COPY job-generator/ /app/job-generator
+COPY ingestion-trigger/ /app/ingestion-trigger
+COPY ingestion-worker/ /app/ingestion-worker
+COPY ipf-preparation-worker/ /app/ipf-preparation-worker
 COPY lib-commons/ /app/lib-commons
 COPY app-status /app/app-status
 COPY metadata-catalog/ /app/metadata-catalog
@@ -27,11 +27,11 @@ COPY mqi-client/ /app/mqi-client
 COPY mqi-server/ /app/mqi-server
 COPY obs-sdk/ /app/obs-sdk
 COPY scaler/ /app/scaler
-COPY wrapper/ /app/wrapper
+COPY ipf-execution-worker/ /app/ipf-execution-worker
 COPY request-repository/ /app/request-repository
 COPY queue-watcher/ /app/queue-watcher
 COPY validation/ /app/validation
-COPY compression/ /app/compression
+COPY compression-worker/ /app/compression-worker
 COPY prip /app/prip
 
 RUN mvn -DskipTests=true -Dpmd.skip=true -Dfindbugs.skip=true -B -f /app/pom.xml -s /usr/share/maven/ref/settings-docker.xml install 
