@@ -8,7 +8,7 @@
 	  <artifactId>s1pro-core</artifactId>
 	  <version>0.11.0-SNAPSHOT</version>
 	</parent>
-	<artifactId>s1pro-core-ipf-execution-worker</artifactId>
+	<artifactId>s1pro-core-ipf-preparation-worker</artifactId>
 	<packaging>jar</packaging>
 
 	<!-- <parent> <groupId>org.springframework.boot</groupId> <artifactId>spring-boot-starter-parent</artifactId> 
