@@ -72,15 +72,15 @@ public class TestProductServiceImpl {
 	public void testIngest() throws ProductException, InternalErrorException {
 		final Date now = new Date();
 		final ProductFamily family = ProductFamily.AUXILIARY_FILE;
-		IngestionJob ingestionDto = new IngestionJob("productName");
-		ingestionDto.setPickupPath("/dev");
-		ingestionDto.setRelativePath("null");
-		ingestionDto.setFamily(family);
-		ingestionDto.setMissionId("S1");
-		ingestionDto.setSatelliteId("A");
-		ingestionDto.setStationCode("WILE");
-		ingestionDto.setCreationDate(now);
-		ingestionDto.setHostname("hostname");
+		IngestionJob ingestionJob = new IngestionJob("productName");
+		ingestionJob.setPickupPath("/dev");
+		ingestionJob.setRelativePath("null");
+		ingestionJob.setFamily(family);
+		ingestionJob.setMissionId("S1");
+		ingestionJob.setSatelliteId("A");
+		ingestionJob.setStationCode("WILE");
+		ingestionJob.setCreationDate(now);
+		ingestionJob.setHostname("hostname");
 		Product<AbstractDto> product = new Product<>();
 		product.setFamily(family);
 		ProductionEvent expectedProductionEvent = new ProductionEvent("null", "null", family);
@@ -89,16 +89,16 @@ public class TestProductServiceImpl {
 		product.setDto(expectedProductionEvent);
 		product.setFile(new File("/dev/null"));		
 		IngestionResult expectedResult = new IngestionResult(Arrays.asList(product), 0L);
-		IngestionResult actualResult = uut.ingest(family, ingestionDto);
+		IngestionResult actualResult = uut.ingest(family, ingestionJob);
 		assertEquals(expectedResult.toString(), actualResult.toString());
 	}
 
 	@Test
 	public void testMarkInvalid() throws AbstractCodedException {
-		IngestionJob ingestionDto = new IngestionJob();
-		ingestionDto.setPickupPath("pickup/path");
-		ingestionDto.setRelativePath("relative/path");
-		uut.markInvalid(ingestionDto);
+		IngestionJob ingestionJob = new IngestionJob();
+		ingestionJob.setPickupPath("pickup/path");
+		ingestionJob.setRelativePath("relative/path");
+		uut.markInvalid(ingestionJob);
 		ObsUploadObject uploadObj = new ObsUploadObject(ProductFamily.INVALID, "relative/path", new File("pickup/path/relative/path"));
 		verify(obsClient, times(1)).upload(Mockito.eq(Arrays.asList(uploadObj)));
 	}
@@ -110,25 +110,25 @@ public class TestProductServiceImpl {
 
 	@Test
 	public void testToFile() {
-		IngestionJob ingestionDto = new IngestionJob();
-		ingestionDto.setPickupPath("/tmp/foo");
-		ingestionDto.setRelativePath("bar/baaaaar");
-		assertEquals(new File("/tmp/foo/bar/baaaaar"), uut.toFile(ingestionDto));
+		IngestionJob ingestionJob = new IngestionJob();
+		ingestionJob.setPickupPath("/tmp/foo");
+		ingestionJob.setRelativePath("bar/baaaaar");
+		assertEquals(new File("/tmp/foo/bar/baaaaar"), uut.toFile(ingestionJob));
 	}
 
 	@Test
 	public void testAssertPermissions() {
-		IngestionJob ingestionDto = new IngestionJob();
-		assertThatThrownBy(() -> ProductServiceImpl.assertPermissions(ingestionDto, nonExistentFile))
+		IngestionJob ingestionJob = new IngestionJob();
+		assertThatThrownBy(() -> ProductServiceImpl.assertPermissions(ingestionJob, nonExistentFile))
 			.isInstanceOf(RuntimeException.class)
-			.hasMessageContaining("File nonExistentFile of " + ingestionDto + " does not exist");
+			.hasMessageContaining("File nonExistentFile of " + ingestionJob + " does not exist");
 
-		assertThatThrownBy(() -> ProductServiceImpl.assertPermissions(ingestionDto, notReadableFile))
+		assertThatThrownBy(() -> ProductServiceImpl.assertPermissions(ingestionJob, notReadableFile))
 			.isInstanceOf(RuntimeException.class)
-			.hasMessageContaining("File notReadableFile of " + ingestionDto + " is not readable");
+			.hasMessageContaining("File notReadableFile of " + ingestionJob + " is not readable");
 		
-		assertThatThrownBy(() -> ProductServiceImpl.assertPermissions(ingestionDto, notWritableFile))
+		assertThatThrownBy(() -> ProductServiceImpl.assertPermissions(ingestionJob, notWritableFile))
 			.isInstanceOf(RuntimeException.class)
-			.hasMessageContaining("File notWritableFile of " + ingestionDto + " is not writeable");
+			.hasMessageContaining("File notWritableFile of " + ingestionJob + " is not writeable");
 	}
 }

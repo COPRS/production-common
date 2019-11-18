@@ -36,14 +36,14 @@ public class EdrsSessionFactoryTest {
 	@Test
 	public void newProducts() {
 		EdrsSessionFactory uut = new EdrsSessionFactory("hostname");
-		IngestionJob ingestionDto = new IngestionJob();
-		ingestionDto.setMissionId("S1"); 
-		ingestionDto.setSatelliteId("B");
-		ingestionDto.setStationCode("WILE"); 
-		ingestionDto.setPickupPath("pickup/path");
-		ingestionDto.setRelativePath("DCS_00_L20000101000000000000000_ch1_DSIB.xml");
+		IngestionJob ingestionJob = new IngestionJob();
+		ingestionJob.setMissionId("S1"); 
+		ingestionJob.setSatelliteId("B");
+		ingestionJob.setStationCode("WILE"); 
+		ingestionJob.setPickupPath("pickup/path");
+		ingestionJob.setRelativePath("DCS_00_L20000101000000000000000_ch1_DSIB.xml");
 		List<Product<IngestionEvent>> result = uut.newProducts(new File("pickup/path/DCS_00_L20000101000000000000000_ch1_DSIB.xml"),
-				ingestionDto, obsAdapter);
+				ingestionJob, obsAdapter);
 		assertEquals(1L, result.size());
 		assertEquals(ProductFamily.EDRS_SESSION, result.get(0).getFamily());
 		assertEquals(new File("pickup/path/DCS_00_L20000101000000000000000_ch1_DSIB.xml"), result.get(0).getFile());

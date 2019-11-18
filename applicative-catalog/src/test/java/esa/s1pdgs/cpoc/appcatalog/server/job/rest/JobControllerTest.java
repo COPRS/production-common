@@ -55,7 +55,7 @@ public class JobControllerTest extends RestControllerTest{
     public void patchJobTest() throws AppCatalogJobInvalidStateException, AppCatalogJobGenerationInvalidStateException, AppCatalogJobNotFoundException {
         doReturn(new AppDataJob<IngestionEvent>()).when(appDataJobService).patchJob(Mockito.anyLong(), Mockito.any());
        // FIXME
-        //this.jobController.patchJob(ProductCategory.LEVEL_JOBS.toString().toLowerCase(), 123L, new AppDataJob<EdrsSessionDto>());
+        //this.jobController.patchJob(ProductCategory.LEVEL_JOBS.toString().toLowerCase(), 123L, new AppDataJob<IngestionEvent>());
     }
     
     @Test
