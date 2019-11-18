@@ -289,7 +289,7 @@ public class PodServiceTest {
         assertEquals("podName1-suffixe", result.get(1).getMetadata().getName());
         assertEquals("podName2-suffixe", result.get(2).getMetadata().getName());
         Pod pExp = (Pod) result.get(2);
-        assertEquals("claimName-suffixe", pExp.getSpec().getVolumes().get(0)
+        assertEquals("claimName", pExp.getSpec().getVolumes().get(0)
                 .getPersistentVolumeClaim().getClaimName());
     }
 
