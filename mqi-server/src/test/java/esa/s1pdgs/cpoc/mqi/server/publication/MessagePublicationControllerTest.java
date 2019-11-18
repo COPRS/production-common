@@ -33,7 +33,7 @@ import esa.s1pdgs.cpoc.common.ProductFamily;
 import esa.s1pdgs.cpoc.common.errors.mqi.MqiCategoryNotAvailable;
 import esa.s1pdgs.cpoc.common.errors.mqi.MqiPublicationError;
 import esa.s1pdgs.cpoc.common.errors.mqi.MqiRouteNotAvailable;
-import esa.s1pdgs.cpoc.mqi.model.queue.EdrsSessionDto;
+import esa.s1pdgs.cpoc.mqi.model.queue.IngestionEvent;
 import esa.s1pdgs.cpoc.mqi.model.queue.IpfExecutionJob;
 import esa.s1pdgs.cpoc.mqi.model.queue.LevelReportDto;
 import esa.s1pdgs.cpoc.mqi.model.queue.ProductDto;
@@ -90,7 +90,7 @@ public class MessagePublicationControllerTest {
     private MessagePublicationController customController;
     private GenericKafkaUtils<ProductDto> kafkaUtilsProducts;
     private GenericKafkaUtils<LevelReportDto> kafkaUtilsReports;
-    private GenericKafkaUtils<EdrsSessionDto> kafkaUtilsEdrsSession;
+    private GenericKafkaUtils<IngestionEvent> kafkaUtilsEdrsSession;
     private GenericKafkaUtils<IpfExecutionJob> kafkaUtilsJobs;
     
     @Before
@@ -99,7 +99,7 @@ public class MessagePublicationControllerTest {
 
         kafkaUtilsProducts = new GenericKafkaUtils<ProductDto>(embeddedKafka);
         kafkaUtilsReports = new GenericKafkaUtils<LevelReportDto>(embeddedKafka);
-        kafkaUtilsEdrsSession = new GenericKafkaUtils<EdrsSessionDto>(embeddedKafka);
+        kafkaUtilsEdrsSession = new GenericKafkaUtils<IngestionEvent>(embeddedKafka);
         kafkaUtilsJobs = new GenericKafkaUtils<IpfExecutionJob>(embeddedKafka);
     }
 
@@ -176,7 +176,7 @@ public class MessagePublicationControllerTest {
     @Test
     public void publishNoCat() throws MqiPublicationError,
             MqiCategoryNotAvailable, MqiRouteNotAvailable {
-        EdrsSessionDto dto = new EdrsSessionDto("obs-key", 1,
+        IngestionEvent dto = new IngestionEvent("obs-key", 1,
                 EdrsSessionFileType.RAW, "S1", "A", "WILE", "sessionId");
         initCustomControllerForNoPublication();
 
@@ -190,13 +190,13 @@ public class MessagePublicationControllerTest {
 
     @Test
     public void publishEdrsSessions() throws Exception {
-        EdrsSessionDto dto = new EdrsSessionDto("obs-key", 2,
+        IngestionEvent dto = new IngestionEvent("obs-key", 2,
                 EdrsSessionFileType.RAW, "S1", "A", "WILE", "sessionId");
         initCustomControllerForAllPublication();
 
         customController.publish(ProductCategory.EDRS_SESSIONS, dto, "NONE", "NONE");
 
-        ConsumerRecord<String, EdrsSessionDto> record =
+        ConsumerRecord<String, IngestionEvent> record =
                 kafkaUtilsEdrsSession.getReceivedRecordEdrsSession(
                         GenericKafkaUtils.TOPIC_EDRS_SESSIONS);
 

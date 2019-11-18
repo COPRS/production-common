@@ -16,7 +16,7 @@ import esa.s1pdgs.cpoc.jobgenerator.config.ProcessSettings;
 import esa.s1pdgs.cpoc.jobgenerator.tasks.AbstractJobsDispatcher;
 import esa.s1pdgs.cpoc.jobgenerator.tasks.AbstractJobsGenerator;
 import esa.s1pdgs.cpoc.jobgenerator.tasks.JobsGeneratorFactory;
-import esa.s1pdgs.cpoc.mqi.model.queue.EdrsSessionDto;
+import esa.s1pdgs.cpoc.mqi.model.queue.IngestionEvent;
 
 /**
  * Dispatcher of EdrsSession product<br/>
@@ -24,7 +24,7 @@ import esa.s1pdgs.cpoc.mqi.model.queue.EdrsSessionDto;
  * 
  * @author Cyrielle Gailliard
  */
-public class L0AppJobDispatcher extends AbstractJobsDispatcher<EdrsSessionDto> {
+public class L0AppJobDispatcher extends AbstractJobsDispatcher<IngestionEvent> {
 
     /**
      * Task table
@@ -47,7 +47,7 @@ public class L0AppJobDispatcher extends AbstractJobsDispatcher<EdrsSessionDto> {
             final ProcessSettings processSettings,
             final JobsGeneratorFactory factory,
             final ThreadPoolTaskScheduler taskScheduler,
-            final AppCatalogJobClient<EdrsSessionDto> appDataService) {
+            final AppCatalogJobClient<IngestionEvent> appDataService) {
         super(settings, processSettings, factory, taskScheduler,
                 appDataService);
     }
@@ -67,7 +67,7 @@ public class L0AppJobDispatcher extends AbstractJobsDispatcher<EdrsSessionDto> {
      * 
      */
     @Override
-    protected AbstractJobsGenerator<EdrsSessionDto> createJobGenerator(
+    protected AbstractJobsGenerator<IngestionEvent> createJobGenerator(
             final File xmlFile) throws AbstractCodedException {
         return this.factory.createJobGeneratorForEdrsSession(xmlFile, appDataService);
     }
@@ -76,7 +76,7 @@ public class L0AppJobDispatcher extends AbstractJobsDispatcher<EdrsSessionDto> {
      * Get task tables to generate for given job
      */
     @Override
-    protected List<String> getTaskTables(final AppDataJob<EdrsSessionDto> job) {
+    protected List<String> getTaskTables(final AppDataJob<IngestionEvent> job) {
         return Arrays.asList(TASK_TABLE_NAME);
     }
 

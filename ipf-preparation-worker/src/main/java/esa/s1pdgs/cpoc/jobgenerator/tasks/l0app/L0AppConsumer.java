@@ -33,14 +33,14 @@ import esa.s1pdgs.cpoc.mqi.client.GenericMqiClient;
 import esa.s1pdgs.cpoc.mqi.client.MqiConsumer;
 import esa.s1pdgs.cpoc.mqi.client.MqiListener;
 import esa.s1pdgs.cpoc.mqi.client.StatusService;
-import esa.s1pdgs.cpoc.mqi.model.queue.EdrsSessionDto;
+import esa.s1pdgs.cpoc.mqi.model.queue.IngestionEvent;
 import esa.s1pdgs.cpoc.mqi.model.rest.GenericMessageDto;
 import esa.s1pdgs.cpoc.report.FilenameReportingInput;
 import esa.s1pdgs.cpoc.report.LoggerReporting;
 import esa.s1pdgs.cpoc.report.Reporting;
 import esa.s1pdgs.cpoc.report.ReportingMessage;
 
-public class L0AppConsumer extends AbstractGenericConsumer<EdrsSessionDto> implements MqiListener<EdrsSessionDto> {
+public class L0AppConsumer extends AbstractGenericConsumer<IngestionEvent> implements MqiListener<IngestionEvent> {
     
     private String taskForFunctionalLog;
     
@@ -50,9 +50,9 @@ public class L0AppConsumer extends AbstractGenericConsumer<EdrsSessionDto> imple
     
     private final long pollingInitialDelayMs;
 
-	public L0AppConsumer(final AbstractJobsDispatcher<EdrsSessionDto> jobDispatcher,
+	public L0AppConsumer(final AbstractJobsDispatcher<IngestionEvent> jobDispatcher,
 			final ProcessSettings processSettings, final GenericMqiClient mqiClient,
-			final StatusService mqiStatusService, final AppCatalogJobClient<EdrsSessionDto> appDataService,
+			final StatusService mqiStatusService, final AppCatalogJobClient<IngestionEvent> appDataService,
 			final ErrorRepoAppender errorRepoAppender, final AppStatus appStatus, final MetadataClient metadataClient,
 			final long pollingIntervalMs, final long pollingInitialDelayMs) {
 		super(jobDispatcher, processSettings, mqiClient, mqiStatusService, appDataService, appStatus, errorRepoAppender,
@@ -67,13 +67,13 @@ public class L0AppConsumer extends AbstractGenericConsumer<EdrsSessionDto> imple
 		appStatus.setWaiting();
 		if (pollingIntervalMs > 0) {
 			final ExecutorService service = Executors.newFixedThreadPool(1);
-			service.execute(new MqiConsumer<EdrsSessionDto>(mqiClient, category, this, pollingIntervalMs,
+			service.execute(new MqiConsumer<IngestionEvent>(mqiClient, category, this, pollingIntervalMs,
 					pollingInitialDelayMs, esa.s1pdgs.cpoc.appstatus.AppStatus.NULL));
 		}
 	}
 
     @Override
-    public void onMessage(GenericMessageDto<EdrsSessionDto> mqiMessage) {
+    public void onMessage(GenericMessageDto<IngestionEvent> mqiMessage) {
     
     	appStatus.setWaiting();
         final Reporting.Factory reportingFactory = new LoggerReporting.Factory("L0JobGeneration");   
@@ -85,7 +85,7 @@ public class L0AppConsumer extends AbstractGenericConsumer<EdrsSessionDto> imple
         }
 
         // Second process message
-        EdrsSessionDto leveldto = mqiMessage.getBody();
+        IngestionEvent leveldto = mqiMessage.getBody();
         String productName = leveldto.getKeyObjectStorage();
 
         if (leveldto.getProductType() == EdrsSessionFileType.SESSION) {
@@ -118,7 +118,7 @@ public class L0AppConsumer extends AbstractGenericConsumer<EdrsSessionDto> imple
                 		new ReportingMessage("Start job generation using  {}", mqiMessage.getBody().getKeyObjectStorage())
                 );
                 
-                AppDataJob<EdrsSessionDto> appDataJob = buildJob(mqiMessage);
+                AppDataJob<IngestionEvent> appDataJob = buildJob(mqiMessage);
                 
                 LOGGER.debug ("== appDataJob(1) {}",appDataJob.toString());
                 productName = appDataJob.getProduct().getProductName();
@@ -165,15 +165,15 @@ public class L0AppConsumer extends AbstractGenericConsumer<EdrsSessionDto> imple
 
     }
 
-	protected AppDataJob<EdrsSessionDto> buildJob(GenericMessageDto<EdrsSessionDto> mqiMessage)
+	protected AppDataJob<IngestionEvent> buildJob(GenericMessageDto<IngestionEvent> mqiMessage)
             throws AbstractCodedException {
     	
     	// Check if a job is already created for message identifier
-		List<AppDataJob<EdrsSessionDto>> existingJobs = appDataService
+		List<AppDataJob<IngestionEvent>> existingJobs = appDataService
                 .findByMessagesId(mqiMessage.getId());
 
         if (CollectionUtils.isEmpty(existingJobs)) {
-        	final EdrsSessionDto sessionDto = mqiMessage.getBody();
+        	final IngestionEvent sessionDto = mqiMessage.getBody();
         	final String productType = sessionDto.getProductType().name();
         	final String productName = new File(sessionDto.getProductName()).getName();
         	LOGGER.debug("Querying metadata for product {} of type {}", productName, productType); 
@@ -181,13 +181,13 @@ public class L0AppConsumer extends AbstractGenericConsumer<EdrsSessionDto> imple
            	LOGGER.debug ("Got result {}", edrsSessionMetadata); 
         	
             // Search if session is already in progress
-			List<AppDataJob<EdrsSessionDto>> existingJobsForSession =
-                    (List<AppDataJob<EdrsSessionDto>>) appDataService.findByProductSessionId(sessionDto.getSessionId());
+			List<AppDataJob<IngestionEvent>> existingJobsForSession =
+                    (List<AppDataJob<IngestionEvent>>) appDataService.findByProductSessionId(sessionDto.getSessionId());
 
             if (CollectionUtils.isEmpty(existingJobsForSession)) {
             	LOGGER.debug ("== creating jobDTO from {}",mqiMessage ); 
                 // Create the JOB
-                AppDataJob<EdrsSessionDto> jobDto = new AppDataJob<>();
+                AppDataJob<IngestionEvent> jobDto = new AppDataJob<>();
                 // General details
                 jobDto.setLevel(processSettings.getLevel());
                 jobDto.setPod(processSettings.getHostname());
@@ -219,7 +219,7 @@ public class L0AppConsumer extends AbstractGenericConsumer<EdrsSessionDto> imple
                 jobDto.setProduct(productDto);
                
                 LOGGER.debug ("== jobDTO {}",jobDto.toString());
-				AppDataJob<EdrsSessionDto> newJobDto = appDataService.newJob(jobDto);
+				AppDataJob<IngestionEvent> newJobDto = appDataService.newJob(jobDto);
                 LOGGER.debug ("== newJobDto {}",newJobDto.toString());
                 return newJobDto;
             } else {
@@ -228,7 +228,7 @@ public class L0AppConsumer extends AbstractGenericConsumer<EdrsSessionDto> imple
                 boolean update = false;
                 boolean updateMessage = false;
                 boolean updateProduct = false;
-                AppDataJob<EdrsSessionDto> jobDto = (AppDataJob<EdrsSessionDto>) existingJobsForSession.get(0);
+                AppDataJob<IngestionEvent> jobDto = (AppDataJob<IngestionEvent>) existingJobsForSession.get(0);
                 LOGGER.debug ("== existingJobsForSession.get(0) jobDto {}", jobDto.toString());
                 
                 if (!jobDto.getPod().equals(processSettings.getHostname())) {
@@ -237,11 +237,11 @@ public class L0AppConsumer extends AbstractGenericConsumer<EdrsSessionDto> imple
                 }                
                 LOGGER.debug ("== existing message {}", jobDto.getMessages().toString());
                 
-				final GenericMessageDto<EdrsSessionDto> firstMess = (GenericMessageDto<EdrsSessionDto>) jobDto.getMessages().get(0);
+				final GenericMessageDto<IngestionEvent> firstMess = (GenericMessageDto<IngestionEvent>) jobDto.getMessages().get(0);
                 
 				LOGGER.debug ("== firstMessage {}",firstMess.toString());
                 // Updates messages if needed
-                final EdrsSessionDto dto = firstMess.getBody();
+                final IngestionEvent dto = firstMess.getBody();
                 
                 if (jobDto.getMessages().size() == 1 && dto.getChannelId() != mqiMessage.getBody().getChannelId()) {
                 	LOGGER.debug ("== existing message {}",jobDto.getMessages());
@@ -282,7 +282,7 @@ public class L0AppConsumer extends AbstractGenericConsumer<EdrsSessionDto> imple
             boolean update = false;
             boolean updateMessage = false;
             boolean updateProduct = false;
-            AppDataJob<EdrsSessionDto> jobDto = existingJobs.get(0);
+            AppDataJob<IngestionEvent> jobDto = existingJobs.get(0);
             LOGGER.debug ("== existingJobs.get(0) jobDto {}", jobDto.toString());
 
             if (!jobDto.getPod().equals(processSettings.getHostname())) {

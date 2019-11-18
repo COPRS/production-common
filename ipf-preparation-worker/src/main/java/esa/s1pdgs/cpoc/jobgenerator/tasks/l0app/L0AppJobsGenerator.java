@@ -28,11 +28,11 @@ import esa.s1pdgs.cpoc.jobgenerator.service.mqi.OutputProducerFactory;
 import esa.s1pdgs.cpoc.jobgenerator.tasks.AbstractJobsGenerator;
 import esa.s1pdgs.cpoc.metadata.client.MetadataClient;
 import esa.s1pdgs.cpoc.metadata.model.EdrsSessionMetadata;
-import esa.s1pdgs.cpoc.mqi.model.queue.EdrsSessionDto;
+import esa.s1pdgs.cpoc.mqi.model.queue.IngestionEvent;
 import esa.s1pdgs.cpoc.mqi.model.queue.IpfExecutionJob;
 import esa.s1pdgs.cpoc.mqi.model.queue.LevelJobInputDto;
 
-public class L0AppJobsGenerator extends AbstractJobsGenerator<EdrsSessionDto> {
+public class L0AppJobsGenerator extends AbstractJobsGenerator<IngestionEvent> {
 
     public final static DateTimeFormatter JO_TIME_FORMATTER = DateTimeFormatter.ofPattern("yyyyMMdd'T'HHmmss");
 
@@ -45,7 +45,7 @@ public class L0AppJobsGenerator extends AbstractJobsGenerator<EdrsSessionDto> {
     		MetadataClient metadataClient, ProcessSettings l0ProcessSettings,
             JobGeneratorSettings taskTablesSettings,
             final OutputProducerFactory outputFactory,
-            final AppCatalogJobClient<EdrsSessionDto> appDataService,
+            final AppCatalogJobClient<IngestionEvent> appDataService,
             final AiopProperties aiopProperties, final ProcessConfiguration processConfiguration) {
         super(xmlConverter, metadataClient, l0ProcessSettings,
                 taskTablesSettings, outputFactory, appDataService, processConfiguration);

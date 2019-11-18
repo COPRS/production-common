@@ -11,10 +11,10 @@ import esa.s1pdgs.cpoc.common.EdrsSessionFileType;
 import esa.s1pdgs.cpoc.common.FileExtension;
 import esa.s1pdgs.cpoc.common.ProductFamily;
 import esa.s1pdgs.cpoc.ingestion.obs.ObsAdapter;
-import esa.s1pdgs.cpoc.mqi.model.queue.EdrsSessionDto;
+import esa.s1pdgs.cpoc.mqi.model.queue.IngestionEvent;
 import esa.s1pdgs.cpoc.mqi.model.queue.IngestionJob;
 
-public class EdrsSessionFactory implements ProductFactory<EdrsSessionDto> {
+public class EdrsSessionFactory implements ProductFactory<IngestionEvent> {
 
 	final static String PATTERN_STR_XML = ".*(DCS_[0-9]{2}_([a-zA-Z0-9_]{24})_ch([12])_DSIB\\.(xml))";
 	final static String PATTERN_STR_RAW = ".*(DCS_[0-9]{2}_([a-zA-Z0-9_]{24})_ch([12])_DSDB_([0-9]{5})\\.(raw|aisp))";
@@ -29,10 +29,10 @@ public class EdrsSessionFactory implements ProductFactory<EdrsSessionDto> {
 	}
 	
 	@Override
-	public List<Product<EdrsSessionDto>> newProducts(final File file, final IngestionJob ingestionDto,
+	public List<Product<IngestionEvent>> newProducts(final File file, final IngestionJob ingestionDto,
 			final ObsAdapter obsAdapter) throws ProductException {
 
-		final List<Product<EdrsSessionDto>> result = new ArrayList<>();
+		final List<Product<IngestionEvent>> result = new ArrayList<>();
 
 		String objectStorageKey = ingestionDto.getRelativePath();
 		int channelId = extractChannelId(ingestionDto.getRelativePath());
@@ -42,12 +42,12 @@ public class EdrsSessionFactory implements ProductFactory<EdrsSessionDto> {
 		String stationCode = ingestionDto.getStationCode();
 		String sessionId = extractSessionId(ingestionDto.getRelativePath());
 
-		EdrsSessionDto edrsSessionDto = new EdrsSessionDto(objectStorageKey, channelId, edrsSessionFileType, missionId,
+		IngestionEvent edrsSessionDto = new IngestionEvent(objectStorageKey, channelId, edrsSessionFileType, missionId,
 				satelliteId, stationCode, sessionId);
 		edrsSessionDto.setCreationDate(new Date());
 		edrsSessionDto.setHostname(hostname);
 
-		final Product<EdrsSessionDto> prod = new Product<>();
+		final Product<IngestionEvent> prod = new Product<>();
 		prod.setFamily(ProductFamily.EDRS_SESSION);
 		prod.setFile(file);
 		prod.setDto(edrsSessionDto);

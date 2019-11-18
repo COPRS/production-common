@@ -23,7 +23,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import esa.s1pdgs.cpoc.mqi.model.queue.ProductDto;
-import esa.s1pdgs.cpoc.mqi.model.queue.EdrsSessionDto;
+import esa.s1pdgs.cpoc.mqi.model.queue.IngestionEvent;
 import esa.s1pdgs.cpoc.mqi.model.queue.IpfExecutionJob;
 import esa.s1pdgs.cpoc.mqi.model.queue.ProductDto;
 import esa.s1pdgs.cpoc.mqi.model.queue.LevelReportDto;
@@ -64,12 +64,12 @@ public class GenericKafkaUtils<T> {
         return KafkaTestUtils.getSingleRecord(consumer, topic);
     }
 
-    public ConsumerRecord<String, EdrsSessionDto> getReceivedRecordEdrsSession(
+    public ConsumerRecord<String, IngestionEvent> getReceivedRecordEdrsSession(
             String topic) throws Exception {
-        Consumer<String, EdrsSessionDto> consumer =
-                new DefaultKafkaConsumerFactory<String, EdrsSessionDto>(
+        Consumer<String, IngestionEvent> consumer =
+                new DefaultKafkaConsumerFactory<String, IngestionEvent>(
                         consumerProps(), new StringDeserializer(),
-                        new JsonDeserializer<>(EdrsSessionDto.class)).createConsumer();
+                        new JsonDeserializer<>(IngestionEvent.class)).createConsumer();
         embeddedKafka.consumeFromAnEmbeddedTopic(consumer, topic);
         return KafkaTestUtils.getSingleRecord(consumer, topic);
     }

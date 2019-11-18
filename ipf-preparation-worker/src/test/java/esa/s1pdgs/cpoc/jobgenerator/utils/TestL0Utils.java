@@ -14,7 +14,7 @@ import esa.s1pdgs.cpoc.appcatalog.server.job.db.AppDataJobState;
 import esa.s1pdgs.cpoc.common.ApplicationLevel;
 import esa.s1pdgs.cpoc.common.EdrsSessionFileType;
 import esa.s1pdgs.cpoc.jobgenerator.model.tasktable.TaskTable;
-import esa.s1pdgs.cpoc.mqi.model.queue.EdrsSessionDto;
+import esa.s1pdgs.cpoc.mqi.model.queue.IngestionEvent;
 import esa.s1pdgs.cpoc.mqi.model.rest.GenericMessageDto;
 
 public class TestL0Utils {
@@ -114,19 +114,19 @@ public class TestL0Utils {
         ret.setPod("hostname");
         ret.setLevel(ApplicationLevel.L0);
 
-        List<GenericMessageDto<EdrsSessionDto>> messages = new ArrayList<>();
+        List<GenericMessageDto<IngestionEvent>> messages = new ArrayList<>();
         if (raw1) {
-            GenericMessageDto<EdrsSessionDto> message1 =
-                    new GenericMessageDto<EdrsSessionDto>(1, "input-key",
-                            new EdrsSessionDto("obs1", 1,
+            GenericMessageDto<IngestionEvent> message1 =
+                    new GenericMessageDto<IngestionEvent>(1, "input-key",
+                            new IngestionEvent("obs1", 1,
                                     EdrsSessionFileType.SESSION, missionId,
                                     "A", "WILE", "sessionId"));
             messages.add(message1);
         }
         if (raw2) {
-            GenericMessageDto<EdrsSessionDto> message2 =
-                    new GenericMessageDto<EdrsSessionDto>(1, "input-key",
-                            new EdrsSessionDto("obs2", 2,
+            GenericMessageDto<IngestionEvent> message2 =
+                    new GenericMessageDto<IngestionEvent>(1, "input-key",
+                            new IngestionEvent("obs2", 2,
                                     EdrsSessionFileType.SESSION, missionId,
                                     "A", "WILE", "sessionId"));
             messages.add(message2);

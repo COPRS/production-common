@@ -25,7 +25,7 @@ import esa.s1pdgs.cpoc.mdcatalog.extraction.model.EdrsSessionFileDescriptor;
 import esa.s1pdgs.cpoc.mdcatalog.extraction.xml.XmlConverter;
 import esa.s1pdgs.cpoc.mdcatalog.status.AppStatusImpl;
 import esa.s1pdgs.cpoc.mqi.client.GenericMqiClient;
-import esa.s1pdgs.cpoc.mqi.model.queue.EdrsSessionDto;
+import esa.s1pdgs.cpoc.mqi.model.queue.IngestionEvent;
 import esa.s1pdgs.cpoc.mqi.model.rest.GenericMessageDto;
 import esa.s1pdgs.cpoc.obs_sdk.ObsClient;
 import esa.s1pdgs.cpoc.report.LoggerReporting;
@@ -70,12 +70,12 @@ public class EdrsSessionsExtractorTest {
     /**
      * Job to process
      */
-    private GenericMessageDto<EdrsSessionDto> inputMessage;
+    private GenericMessageDto<IngestionEvent> inputMessage;
 
     /**
      * Job to process
      */
-    private GenericMessageDto<EdrsSessionDto> inputMessageXml;
+    private GenericMessageDto<IngestionEvent> inputMessageXml;
 
     private final ErrorRepoAppender errorAppender = ErrorRepoAppender.NULL;
     
@@ -96,12 +96,12 @@ public class EdrsSessionsExtractorTest {
         doNothing().when(appStatus).setError(Mockito.anyString());
         doReturn(true).when(mqiService).ack(Mockito.any(), Mockito.any());
 
-        inputMessage = new GenericMessageDto<EdrsSessionDto>(123, "",
-                new EdrsSessionDto("123/ch01/D_123_ch01_D.RAW", 1,
+        inputMessage = new GenericMessageDto<IngestionEvent>(123, "",
+                new IngestionEvent("123/ch01/D_123_ch01_D.RAW", 1,
                         EdrsSessionFileType.RAW, "S1", "A", "WILE", "123"));
 
-        inputMessageXml = new GenericMessageDto<EdrsSessionDto>(123, "",
-                new EdrsSessionDto("123/ch02/D_123_ch03_D.XML", 2,
+        inputMessageXml = new GenericMessageDto<IngestionEvent>(123, "",
+                new IngestionEvent("123/ch02/D_123_ch03_D.XML", 2,
                         EdrsSessionFileType.SESSION, "S1", "B", "WILE", "sessionId"));
 
         extractor = new EdrsSessionsExtractor(esServices, obsClient, mqiService, appStatus,

@@ -18,7 +18,7 @@ import esa.s1pdgs.cpoc.jobgenerator.tasks.l0app.L0AppJobsGenerator;
 import esa.s1pdgs.cpoc.jobgenerator.tasks.l0segmentapp.L0SegmentAppJobsGenerator;
 import esa.s1pdgs.cpoc.jobgenerator.tasks.levelproducts.LevelProductsJobsGenerator;
 import esa.s1pdgs.cpoc.metadata.client.MetadataClient;
-import esa.s1pdgs.cpoc.mqi.model.queue.EdrsSessionDto;
+import esa.s1pdgs.cpoc.mqi.model.queue.IngestionEvent;
 import esa.s1pdgs.cpoc.mqi.model.queue.ProductDto;
 
 @Service
@@ -85,9 +85,9 @@ public class JobsGeneratorFactory {
 	 * @return
 	 * @throws JobGenBuildTaskTableException
 	 */
-	public AbstractJobsGenerator<EdrsSessionDto> createJobGeneratorForEdrsSession(final File xmlFile,
-			final AppCatalogJobClient<EdrsSessionDto> appDataService) throws JobGenBuildTaskTableException {
-		AbstractJobsGenerator<EdrsSessionDto> processor = new L0AppJobsGenerator(this.xmlConverter,
+	public AbstractJobsGenerator<IngestionEvent> createJobGeneratorForEdrsSession(final File xmlFile,
+			final AppCatalogJobClient<IngestionEvent> appDataService) throws JobGenBuildTaskTableException {
+		AbstractJobsGenerator<IngestionEvent> processor = new L0AppJobsGenerator(this.xmlConverter,
 				this.metadataClient, this.l0ProcessSettings, this.jobGeneratorSettings, this.outputFactory,
 				appDataService, aiopProperties, processConfiguration);
 		processor.setMode(ProductMode.SLICING);

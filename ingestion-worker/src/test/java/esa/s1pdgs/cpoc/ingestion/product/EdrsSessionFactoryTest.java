@@ -15,7 +15,7 @@ import org.mockito.MockitoAnnotations;
 import esa.s1pdgs.cpoc.common.EdrsSessionFileType;
 import esa.s1pdgs.cpoc.common.ProductFamily;
 import esa.s1pdgs.cpoc.ingestion.obs.ObsAdapter;
-import esa.s1pdgs.cpoc.mqi.model.queue.EdrsSessionDto;
+import esa.s1pdgs.cpoc.mqi.model.queue.IngestionEvent;
 import esa.s1pdgs.cpoc.mqi.model.queue.IngestionJob;
 
 public class EdrsSessionFactoryTest {
@@ -42,7 +42,7 @@ public class EdrsSessionFactoryTest {
 		ingestionDto.setStationCode("WILE"); 
 		ingestionDto.setPickupPath("pickup/path");
 		ingestionDto.setRelativePath("DCS_00_L20000101000000000000000_ch1_DSIB.xml");
-		List<Product<EdrsSessionDto>> result = uut.newProducts(new File("pickup/path/DCS_00_L20000101000000000000000_ch1_DSIB.xml"),
+		List<Product<IngestionEvent>> result = uut.newProducts(new File("pickup/path/DCS_00_L20000101000000000000000_ch1_DSIB.xml"),
 				ingestionDto, obsAdapter);
 		assertEquals(1L, result.size());
 		assertEquals(ProductFamily.EDRS_SESSION, result.get(0).getFamily());

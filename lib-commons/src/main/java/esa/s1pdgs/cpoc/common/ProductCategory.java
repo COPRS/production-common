@@ -2,7 +2,7 @@ package esa.s1pdgs.cpoc.common;
 
 import esa.s1pdgs.cpoc.common.errors.InternalErrorException;
 import esa.s1pdgs.cpoc.mqi.model.queue.AbstractDto;
-import esa.s1pdgs.cpoc.mqi.model.queue.EdrsSessionDto;
+import esa.s1pdgs.cpoc.mqi.model.queue.IngestionEvent;
 import esa.s1pdgs.cpoc.mqi.model.queue.IpfExecutionJob;
 import esa.s1pdgs.cpoc.mqi.model.queue.LevelReportDto;
 import esa.s1pdgs.cpoc.mqi.model.queue.ProductDto;
@@ -15,7 +15,7 @@ import esa.s1pdgs.cpoc.mqi.model.queue.IngestionJob;
  */
 public enum ProductCategory {
     AUXILIARY_FILES(ProductDto.class), 
-    EDRS_SESSIONS(EdrsSessionDto.class), 
+    EDRS_SESSIONS(IngestionEvent.class), 
     LEVEL_JOBS(IpfExecutionJob.class), 
     LEVEL_PRODUCTS(ProductDto.class), 
     LEVEL_REPORTS(LevelReportDto.class), 

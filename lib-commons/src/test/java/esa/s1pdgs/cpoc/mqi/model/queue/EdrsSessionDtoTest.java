@@ -6,7 +6,7 @@ import static org.junit.Assert.assertTrue;
 import org.junit.Test;
 
 import esa.s1pdgs.cpoc.common.EdrsSessionFileType;
-import esa.s1pdgs.cpoc.mqi.model.queue.EdrsSessionDto;
+import esa.s1pdgs.cpoc.mqi.model.queue.IngestionEvent;
 import nl.jqno.equalsverifier.EqualsVerifier;
 import nl.jqno.equalsverifier.Warning;
 
@@ -23,14 +23,14 @@ public class EdrsSessionDtoTest {
 	 */
 	@Test
 	public void testGettersSettersConstructors() {
-		EdrsSessionDto dto = new EdrsSessionDto("key-obs", 2, EdrsSessionFileType.RAW, "S1", "B", "WILE", "sessionId");
+		IngestionEvent dto = new IngestionEvent("key-obs", 2, EdrsSessionFileType.RAW, "S1", "B", "WILE", "sessionId");
 		assertEquals("key-obs", dto.getKeyObjectStorage());
 		assertEquals(2, dto.getChannelId());
 		assertEquals(EdrsSessionFileType.RAW, dto.getProductType());
 		assertEquals("S1", dto.getMissionId());
 		assertEquals("B", dto.getSatelliteId());
 
-		dto = new EdrsSessionDto();
+		dto = new IngestionEvent();
 		dto.setKeyObjectStorage("other-key");
 		dto.setChannelId(15);
 		dto.setMissionId("other-mission");
@@ -48,7 +48,7 @@ public class EdrsSessionDtoTest {
 	 */
 	@Test
 	public void testToString() {
-		EdrsSessionDto dto = new EdrsSessionDto("key-obs", 2, EdrsSessionFileType.RAW, "S1", "B", "WILE", "sessionId");
+		IngestionEvent dto = new IngestionEvent("key-obs", 2, EdrsSessionFileType.RAW, "S1", "B", "WILE", "sessionId");
 		String str = dto.toString();
 		assertTrue("toString should contain the key OBS", str.contains("objectStorageKey: key-obs"));
 		assertTrue("toString should contain the channel id", str.contains("channelId: 2"));
@@ -62,7 +62,7 @@ public class EdrsSessionDtoTest {
 	 */
 	@Test
 	public void checkEquals() {
-		EqualsVerifier.forClass(EdrsSessionDto.class).usingGetClass().suppress(Warning.NONFINAL_FIELDS).verify();
+		EqualsVerifier.forClass(IngestionEvent.class).usingGetClass().suppress(Warning.NONFINAL_FIELDS).verify();
 	}
 
 }

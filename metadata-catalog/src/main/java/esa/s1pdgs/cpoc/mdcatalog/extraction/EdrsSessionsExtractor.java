@@ -27,7 +27,7 @@ import esa.s1pdgs.cpoc.mdcatalog.status.AppStatusImpl;
 import esa.s1pdgs.cpoc.mqi.client.GenericMqiClient;
 import esa.s1pdgs.cpoc.mqi.client.MqiConsumer;
 import esa.s1pdgs.cpoc.mqi.client.MqiListener;
-import esa.s1pdgs.cpoc.mqi.model.queue.EdrsSessionDto;
+import esa.s1pdgs.cpoc.mqi.model.queue.IngestionEvent;
 import esa.s1pdgs.cpoc.mqi.model.rest.GenericMessageDto;
 import esa.s1pdgs.cpoc.obs_sdk.ObsClient;
 import esa.s1pdgs.cpoc.report.Reporting;
@@ -38,7 +38,7 @@ import esa.s1pdgs.cpoc.report.Reporting;
  * @author Olivier Bex-Chauvet
  */
 @Service
-public class EdrsSessionsExtractor extends GenericExtractor<EdrsSessionDto> implements MqiListener<EdrsSessionDto> {
+public class EdrsSessionsExtractor extends GenericExtractor<IngestionEvent> implements MqiListener<IngestionEvent> {
 
     /**
      * Pattern for ERDS session files to extract data
@@ -78,13 +78,13 @@ public class EdrsSessionsExtractor extends GenericExtractor<EdrsSessionDto> impl
 		appStatus.setWaiting(category);
 		if (pollingIntervalMs > 0) {
 			final ExecutorService service = Executors.newFixedThreadPool(1);
-			service.execute(new MqiConsumer<EdrsSessionDto>(mqiClient, category, this, pollingIntervalMs,
+			service.execute(new MqiConsumer<IngestionEvent>(mqiClient, category, this, pollingIntervalMs,
 					pollingInitialDelayMs, esa.s1pdgs.cpoc.appstatus.AppStatus.NULL));
 		}
 	}
     
     @Override
-    public void onMessage(GenericMessageDto<EdrsSessionDto> message) {
+    public void onMessage(GenericMessageDto<IngestionEvent> message) {
     	super.genericExtract(message);
     	
     }
@@ -93,7 +93,7 @@ public class EdrsSessionsExtractor extends GenericExtractor<EdrsSessionDto> impl
      * @see GenericExtractor#extractProductNameFromDto(Object)
      */
     @Override
-    protected String extractProductNameFromDto(final EdrsSessionDto dto) {
+    protected String extractProductNameFromDto(final IngestionEvent dto) {
         return dto.getKeyObjectStorage();
     }
 
@@ -103,7 +103,7 @@ public class EdrsSessionsExtractor extends GenericExtractor<EdrsSessionDto> impl
     @Override
     protected JSONObject extractMetadata(
      		final Reporting.Factory reportingFactory, 
-            final GenericMessageDto<EdrsSessionDto> message)
+            final GenericMessageDto<IngestionEvent> message)
             throws AbstractCodedException {
     	
         final String productName = extractProductNameFromDto(message.getBody());
@@ -140,7 +140,7 @@ public class EdrsSessionsExtractor extends GenericExtractor<EdrsSessionDto> impl
      */
     @Override
     protected void cleanProcessing(
-            final GenericMessageDto<EdrsSessionDto> message) {
+            final GenericMessageDto<IngestionEvent> message) {
         // Nothing to do
     }
     

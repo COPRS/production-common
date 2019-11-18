@@ -44,7 +44,7 @@ import esa.s1pdgs.cpoc.common.ResumeDetails;
 import esa.s1pdgs.cpoc.common.errors.AbstractCodedException;
 import esa.s1pdgs.cpoc.common.errors.mqi.MqiCategoryNotAvailable;
 import esa.s1pdgs.cpoc.common.errors.processing.StatusProcessingApiError;
-import esa.s1pdgs.cpoc.mqi.model.queue.EdrsSessionDto;
+import esa.s1pdgs.cpoc.mqi.model.queue.IngestionEvent;
 import esa.s1pdgs.cpoc.mqi.model.queue.IpfExecutionJob;
 import esa.s1pdgs.cpoc.mqi.model.queue.LevelReportDto;
 import esa.s1pdgs.cpoc.mqi.model.queue.ProductDto;
@@ -187,7 +187,7 @@ public class MessageConsumptionControllerTest {
                 manager.consumers.get(ProductCategory.EDRS_SESSIONS).size());
         assertEquals("topic", manager.consumers
                 .get(ProductCategory.EDRS_SESSIONS).get("topic").getTopic());
-        assertEquals(EdrsSessionDto.class,
+        assertEquals(IngestionEvent.class,
                 manager.consumers.get(ProductCategory.EDRS_SESSIONS)
                         .get("topic").getConsumedMsgClass());
 

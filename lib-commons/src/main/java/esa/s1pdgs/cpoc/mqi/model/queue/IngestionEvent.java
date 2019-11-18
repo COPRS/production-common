@@ -10,7 +10,7 @@ import esa.s1pdgs.cpoc.common.ProductFamily;
  * 
  * @author Viveris technologies
  */
-public class EdrsSessionDto extends AbstractDto {
+public class IngestionEvent extends AbstractDto {
 
     /**
      * Channel identifier
@@ -45,14 +45,14 @@ public class EdrsSessionDto extends AbstractDto {
     /**
      * Default constructor
      */
-    public EdrsSessionDto() {
+    public IngestionEvent() {
         super();
     }
 
     /**
      * Default constructor
      */
-    public EdrsSessionDto(final String objectStorageKey, final int channelId,
+    public IngestionEvent(final String objectStorageKey, final int channelId,
             final EdrsSessionFileType productType, final String missionId,
             final String satelliteId, final String stationCode, final String sessionId) {
         super(objectStorageKey, ProductFamily.EDRS_SESSION);
@@ -198,7 +198,7 @@ public class EdrsSessionDto extends AbstractDto {
         } else if (obj == null || getClass() != obj.getClass()) {
             ret = false;
         } else {
-            EdrsSessionDto other = (EdrsSessionDto) obj;
+            IngestionEvent other = (IngestionEvent) obj;
             // field comparison
             ret = Objects.equals(getKeyObjectStorage(), other.getKeyObjectStorage())
             		&&  Objects.equals(getFamily(), other.getFamily())

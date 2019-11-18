@@ -6,7 +6,7 @@ import static org.junit.Assert.assertTrue;
 import org.junit.Test;
 
 import esa.s1pdgs.cpoc.common.EdrsSessionFileType;
-import esa.s1pdgs.cpoc.mqi.model.queue.EdrsSessionDto;
+import esa.s1pdgs.cpoc.mqi.model.queue.IngestionEvent;
 import nl.jqno.equalsverifier.EqualsVerifier;
 import nl.jqno.equalsverifier.Warning;
 
@@ -22,15 +22,15 @@ public class EdrsSessionsMessageDtoTest {
      */
     @Test
     public void testGettersSettersConstructors() {
-        EdrsSessionDto body = new EdrsSessionDto("key-obs", 2,
+        IngestionEvent body = new IngestionEvent("key-obs", 2,
                 EdrsSessionFileType.RAW, "S1", "B", "WILE", "sessionId");
         
-        GenericMessageDto<EdrsSessionDto> dto = new GenericMessageDto<EdrsSessionDto>(123, "input-key", body);
+        GenericMessageDto<IngestionEvent> dto = new GenericMessageDto<IngestionEvent>(123, "input-key", body);
         assertEquals(123, dto.getId());
         assertEquals(body, dto.getBody());
         assertEquals("input-key", dto.getInputKey());
 
-        dto = new GenericMessageDto<EdrsSessionDto>();
+        dto = new GenericMessageDto<IngestionEvent>();
         dto.setId(321);
         dto.setBody(body);
         dto.setInputKey("othey-input");
@@ -44,9 +44,9 @@ public class EdrsSessionsMessageDtoTest {
      */
     @Test
     public void testToString() {
-        EdrsSessionDto body = new EdrsSessionDto("key-obs", 2,
+        IngestionEvent body = new IngestionEvent("key-obs", 2,
                 EdrsSessionFileType.RAW, "S1", "B", "WILE", "sessionId");
-        GenericMessageDto<EdrsSessionDto> dto = new GenericMessageDto<EdrsSessionDto>(123, "input-key", body);
+        GenericMessageDto<IngestionEvent> dto = new GenericMessageDto<IngestionEvent>(123, "input-key", body);
         String str = dto.toString();
         assertTrue("toString should contain the identifier",
                 str.contains("id: 123"));

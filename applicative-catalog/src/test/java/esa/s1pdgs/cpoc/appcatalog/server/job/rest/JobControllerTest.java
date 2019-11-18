@@ -28,7 +28,7 @@ import esa.s1pdgs.cpoc.appcatalog.server.job.exception.AppCatalogJobNotFoundExce
 import esa.s1pdgs.cpoc.common.ProductCategory;
 import esa.s1pdgs.cpoc.common.errors.InternalErrorException;
 import esa.s1pdgs.cpoc.common.filter.FilterCriterion;
-import esa.s1pdgs.cpoc.mqi.model.queue.EdrsSessionDto;
+import esa.s1pdgs.cpoc.mqi.model.queue.IngestionEvent;
 
 public class JobControllerTest extends RestControllerTest{
 
@@ -53,7 +53,7 @@ public class JobControllerTest extends RestControllerTest{
     
     @Test
     public void patchJobTest() throws AppCatalogJobInvalidStateException, AppCatalogJobGenerationInvalidStateException, AppCatalogJobNotFoundException {
-        doReturn(new AppDataJob<EdrsSessionDto>()).when(appDataJobService).patchJob(Mockito.anyLong(), Mockito.any());
+        doReturn(new AppDataJob<IngestionEvent>()).when(appDataJobService).patchJob(Mockito.anyLong(), Mockito.any());
        // FIXME
         //this.jobController.patchJob(ProductCategory.LEVEL_JOBS.toString().toLowerCase(), 123L, new AppDataJob<EdrsSessionDto>());
     }
