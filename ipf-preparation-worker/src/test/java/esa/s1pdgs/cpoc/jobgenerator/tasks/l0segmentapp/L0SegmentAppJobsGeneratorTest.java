@@ -60,7 +60,7 @@
 //import esa.s1pdgs.cpoc.jobgenerator.utils.TestL0Utils;
 //import esa.s1pdgs.cpoc.metadata.model.LevelSegmentMetadata;
 //import esa.s1pdgs.cpoc.mqi.model.queue.LevelJobDto;
-//import esa.s1pdgs.cpoc.mqi.model.queue.ProductDto;
+//import esa.s1pdgs.cpoc.mqi.model.queue.ProductionEvent;
 //
 //public class L0SegmentAppJobsGeneratorTest {
 //

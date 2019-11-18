@@ -10,13 +10,7 @@ import esa.s1pdgs.cpoc.mqi.model.queue.ProductionEvent;
 import nl.jqno.equalsverifier.EqualsVerifier;
 import nl.jqno.equalsverifier.Warning;
 
-/**
- * Test the DTO object KafkaConfigFileDto
- * 
- * @author Viveris Technologies
- *
- */
-public class ProductDtoTest {
+public class ProductionEventTest {
 
 	/**
 	 * Test getters, setters and constructors

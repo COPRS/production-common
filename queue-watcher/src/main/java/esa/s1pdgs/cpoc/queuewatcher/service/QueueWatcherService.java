@@ -34,7 +34,7 @@ public class QueueWatcherService implements MqiListener<ProductionEvent> {
 	private static final Logger LOGGER = LogManager.getLogger(QueueWatcherService.class);
 
 	/**
-	 * MQI service for reading message ProductDto
+	 * MQI service for reading message ProductionEvent
 	 */
 	@Autowired
 	private GenericMqiClient mqiClient;

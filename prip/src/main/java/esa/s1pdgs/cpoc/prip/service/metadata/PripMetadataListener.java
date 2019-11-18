@@ -69,19 +69,19 @@ public class PripMetadataListener implements MqiListener<ProductionEvent> {
 
 		LOGGER.debug("starting saving PRIP metadata, got message: {}", message);
 
-		ProductionEvent productDto = message.getBody();
+		ProductionEvent productionEvent = message.getBody();
 		LocalDateTime creationDate = LocalDateTime.now();
 
 		PripMetadata pripMetadata = new PripMetadata();
 		pripMetadata.setId(UUID.randomUUID());
-		pripMetadata.setObsKey(productDto.getKeyObjectStorage());
-		pripMetadata.setName(productDto.getProductName());
-		pripMetadata.setProductFamily(productDto.getFamily());
+		pripMetadata.setObsKey(productionEvent.getKeyObjectStorage());
+		pripMetadata.setName(productionEvent.getProductName());
+		pripMetadata.setProductFamily(productionEvent.getFamily());
 		pripMetadata.setContentType(PripMetadata.DEFAULT_CONTENTTYPE);
-		pripMetadata.setContentLength(getContentLength(productDto.getFamily(), productDto.getKeyObjectStorage()));
+		pripMetadata.setContentLength(getContentLength(productionEvent.getFamily(), productionEvent.getKeyObjectStorage()));
 		pripMetadata.setCreationDate(creationDate);
 		pripMetadata.setEvictionDate(creationDate.plusDays(PripMetadata.DEFAULT_EVICTION_DAYS));
-		pripMetadata.setChecksums(getChecksums(productDto.getFamily(), productDto.getKeyObjectStorage()));
+		pripMetadata.setChecksums(getChecksums(productionEvent.getFamily(), productionEvent.getKeyObjectStorage()));
 
 		pripMetadataRepo.save(pripMetadata);
 

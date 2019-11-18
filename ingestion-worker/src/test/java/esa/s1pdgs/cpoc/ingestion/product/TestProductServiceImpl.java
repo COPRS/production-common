@@ -83,10 +83,10 @@ public class TestProductServiceImpl {
 		ingestionDto.setHostname("hostname");
 		Product<AbstractDto> product = new Product<>();
 		product.setFamily(family);
-		ProductionEvent expectedProductDto = new ProductionEvent("null", "null", family);
-		expectedProductDto.setHostname("hostname");
-		expectedProductDto.setCreationDate(now);
-		product.setDto(expectedProductDto);
+		ProductionEvent expectedProductionEvent = new ProductionEvent("null", "null", family);
+		expectedProductionEvent.setHostname("hostname");
+		expectedProductionEvent.setCreationDate(now);
+		product.setDto(expectedProductionEvent);
 		product.setFile(new File("/dev/null"));		
 		IngestionResult expectedResult = new IngestionResult(Arrays.asList(product), 0L);
 		IngestionResult actualResult = uut.ingest(family, ingestionDto);

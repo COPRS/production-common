@@ -48,7 +48,7 @@ public class OutputProducerFactory {
     	final GenericPublicationMessageDto<ProductionEvent> messageDto = new GenericPublicationMessageDto<ProductionEvent>(
     			inputMessage.getId(), 
     			msg.getFamily(), 
-    			toProductDto(msg)
+    			toProductionEvent(msg)
     	);
     	messageDto.setInputKey(inputMessage.getInputKey());
     	messageDto.setOutputKey(msg.getFamily().name());
@@ -56,7 +56,7 @@ public class OutputProducerFactory {
     	senderCompression.publish(messageDto, ProductCategory.COMPRESSED_PRODUCTS);
     }
     
-    private final ProductionEvent toProductDto(final CompressedProductQueueMessage msg)
+    private final ProductionEvent toProductionEvent(final CompressedProductQueueMessage msg)
     {
     	return new ProductionEvent(
         		msg.getProductName(), 

@@ -83,8 +83,8 @@ public class TestHandlingOfInvalidQueueElementsIT {
 	@ClassRule
 	public static EmbeddedKafkaRule embeddedKafka = new EmbeddedKafkaRule(1, true, SENDER_TOPIC);
 	
-//	private KafkaMessageListenerContainer<String, ProductDto> container;
-//	private BlockingQueue<ConsumerRecord<String, ProductDto>> records;
+//	private KafkaMessageListenerContainer<String, ProductionEvent> container;
+//	private BlockingQueue<ConsumerRecord<String, ProductionEvent>> records;
 
     @Autowired
     private KafkaProperties properties;

@@ -308,8 +308,8 @@ public class TestPripElasticSearchMetadataRepo {
 
 		PripMetadata pripMetadata = new PripMetadata();
 		pripMetadata.setId(UUID.randomUUID());
-		pripMetadata.setObsKey("productDto/keyObjectStorage");
-		pripMetadata.setName("productDto.productName");
+		pripMetadata.setObsKey("productionEvent/keyObjectStorage");
+		pripMetadata.setName("productionEvent.productName");
 		pripMetadata.setProductFamily(ProductFamily.AUXILIARY_FILE_ZIP);
 		pripMetadata.setContentType(PripMetadata.DEFAULT_CONTENTTYPE);
 		pripMetadata.setContentLength(0);

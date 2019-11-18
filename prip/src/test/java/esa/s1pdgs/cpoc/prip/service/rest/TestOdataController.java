@@ -215,7 +215,7 @@ public class TestOdataController {
 		PripMetadata pripMetadata = new PripMetadata();
 		UUID id = UUID.randomUUID();
 		pripMetadata.setId(id);
-		pripMetadata.setObsKey("productDto/keyObjectStorage");
+		pripMetadata.setObsKey("productionEvent/keyObjectStorage");
 		pripMetadata.setName(name);
 		pripMetadata.setProductFamily(ProductFamily.AUXILIARY_FILE_ZIP);
 		pripMetadata.setContentType(PripMetadata.DEFAULT_CONTENTTYPE);

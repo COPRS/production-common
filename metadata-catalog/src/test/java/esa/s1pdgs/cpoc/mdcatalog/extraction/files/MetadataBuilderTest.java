@@ -313,12 +313,12 @@ public class MetadataBuilderTest {
 		
 		File file = new File("workDir/S1A_IW_RAW__0SDV_20171213T121623_20171213T121656_019684_021735_C6DB.SAFE/manifest.safe");
 		
-		ProductionEvent productDTO = new ProductionEvent();
-		productDTO.setFamily(ProductFamily.L0_SLICE);
+		ProductionEvent productionEvent = new ProductionEvent();
+		productionEvent.setFamily(ProductFamily.L0_SLICE);
 
 		try {
 			MetadataBuilder metadataBuilder = new MetadataBuilder(extractor, LOCAL_DIRECTORY);
-			JSONObject dto = metadataBuilder.buildOutputFileMetadata(descriptor, file, productDTO);
+			JSONObject dto = metadataBuilder.buildOutputFileMetadata(descriptor, file, productionEvent);
 
 			assertNotNull("Metadata should not be null", dto);
 			assertEquals("Metadata are not equals", expectedResult.toString(), dto.toString());
@@ -354,12 +354,12 @@ public class MetadataBuilderTest {
 		
 		File file = new File("workDir/S1A_IW_RAW__0ADV_20171213T121123_20171213T121947_019684_021735_51B1.SAFE/manifest.safe");
 		
-		ProductionEvent productDTO = new ProductionEvent();
-		productDTO.setFamily(ProductFamily.L0_ACN);
+		ProductionEvent productionEvent = new ProductionEvent();
+		productionEvent.setFamily(ProductFamily.L0_ACN);
 
 		try {
 			MetadataBuilder metadataBuilder = new MetadataBuilder(extractor, LOCAL_DIRECTORY);
-			JSONObject dto = metadataBuilder.buildOutputFileMetadata(descriptor, file, productDTO);
+			JSONObject dto = metadataBuilder.buildOutputFileMetadata(descriptor, file, productionEvent);
 
 			assertNotNull("Metadata should not be null", dto);
 			assertEquals("Metadata are not equals", expectedResult.toString(), dto.toString());
@@ -395,12 +395,12 @@ public class MetadataBuilderTest {
 		
 		File file = new File("workDir/S1A_IW_RAW__0SDV_20171213T121623_20171213T121656_019684_021735_C6DB.SAFE/manifest.safe");
 		
-		ProductionEvent productDTO = new ProductionEvent();
-		productDTO.setFamily(ProductFamily.L1_SLICE);
+		ProductionEvent productionEvent = new ProductionEvent();
+		productionEvent.setFamily(ProductFamily.L1_SLICE);
 
 		try {
 			MetadataBuilder metadataBuilder = new MetadataBuilder(extractor, LOCAL_DIRECTORY);
-			JSONObject dto = metadataBuilder.buildOutputFileMetadata(descriptor, file, productDTO);
+			JSONObject dto = metadataBuilder.buildOutputFileMetadata(descriptor, file, productionEvent);
 
 			assertNotNull("Metadata should not be null", dto);
 			assertEquals("Metadata are not equals", expectedResult.toString(), dto.toString());
@@ -436,12 +436,12 @@ public class MetadataBuilderTest {
 		
 		File file = new File("workDir/S1A_IW_RAW__0ADV_20171213T121123_20171213T121947_019684_021735_51B1.SAFE/manifest.safe");
 		
-		ProductionEvent productDTO = new ProductionEvent();
-		productDTO.setFamily(ProductFamily.L1_ACN);
+		ProductionEvent productionEvent = new ProductionEvent();
+		productionEvent.setFamily(ProductFamily.L1_ACN);
 
 		try {
 			MetadataBuilder metadataBuilder = new MetadataBuilder(extractor, LOCAL_DIRECTORY);
-			JSONObject dto = metadataBuilder.buildOutputFileMetadata(descriptor, file, productDTO);
+			JSONObject dto = metadataBuilder.buildOutputFileMetadata(descriptor, file, productionEvent);
 
 			assertNotNull("Metadata should not be null", dto);
 			assertEquals("Metadata are not equals", expectedResult.toString(), dto.toString());
