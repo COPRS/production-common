@@ -3,11 +3,11 @@
 image: docker:latest
 
 variables:
-  MODULE_COMPRESSION: s1pro-core-compression
+  MODULE_COMPRESSION_WORKER: s1pro-core-compression-worker
 
-compression-build:
+compression-worker-build:
   stage: module
   script:
-    - cd compression
-    - dockerbuild --cache-from registry.tools.s1pdgs.eu/werum/processing/s1pro-core:final -t "$CI_REGISTRY/$CI_PROJECT_NAMESPACE/$MODULE_COMPRESSION:$CI_COMMIT_REF_SLUG" .
-    - docker push "$CI_REGISTRY/$CI_PROJECT_NAMESPACE/$MODULE_COMPRESSION:$CI_COMMIT_REF_SLUG"
+    - cd compression-worker
+    - dockerbuild --cache-from registry.tools.s1pdgs.eu/werum/processing/s1pro-core:final -t "$CI_REGISTRY/$CI_PROJECT_NAMESPACE/$MODULE_COMPRESSION_WORKER:$CI_COMMIT_REF_SLUG" .
+    - docker push "$CI_REGISTRY/$CI_PROJECT_NAMESPACE/$MODULE_COMPRESSION_WORKER:$CI_COMMIT_REF_SLUG"
