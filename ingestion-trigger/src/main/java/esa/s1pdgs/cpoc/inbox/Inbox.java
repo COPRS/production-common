@@ -11,7 +11,7 @@ import org.slf4j.LoggerFactory;
 import esa.s1pdgs.cpoc.inbox.entity.InboxEntry;
 import esa.s1pdgs.cpoc.inbox.filter.InboxFilter;
 import esa.s1pdgs.cpoc.inbox.kafka.producer.SubmissionClient;
-import esa.s1pdgs.cpoc.mqi.model.queue.IngestionDto;
+import esa.s1pdgs.cpoc.mqi.model.queue.IngestionJob;
 
 public final class Inbox {
 	private static final Logger LOG = LoggerFactory.getLogger(Inbox.class);
@@ -77,7 +77,7 @@ public final class Inbox {
 	private void handleNew(final InboxEntry entry) {
 		try {
 			LOG.info("Publishing new entry to kafka queue: {}", entry);
-			IngestionDto dto = new IngestionDto(entry.getName());
+			IngestionJob dto = new IngestionJob(entry.getName());
 			dto.setCreationDate(new Date());
 			dto.setHostname(hostname);
 		    dto.setRelativePath(entry.getRelativePath());

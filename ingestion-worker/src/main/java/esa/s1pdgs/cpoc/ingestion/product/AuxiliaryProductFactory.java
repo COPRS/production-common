@@ -7,7 +7,7 @@ import java.util.List;
 
 import esa.s1pdgs.cpoc.common.ProductFamily;
 import esa.s1pdgs.cpoc.ingestion.obs.ObsAdapter;
-import esa.s1pdgs.cpoc.mqi.model.queue.IngestionDto;
+import esa.s1pdgs.cpoc.mqi.model.queue.IngestionJob;
 import esa.s1pdgs.cpoc.mqi.model.queue.ProductDto;
 
 public class AuxiliaryProductFactory implements ProductFactory<ProductDto> {	
@@ -19,7 +19,7 @@ public class AuxiliaryProductFactory implements ProductFactory<ProductDto> {
 	}
 	
 	@Override
-	public List<Product<ProductDto>> newProducts(final File file, final IngestionDto ingestionDto, final ObsAdapter obsAdapter) throws ProductException {			
+	public List<Product<ProductDto>> newProducts(final File file, final IngestionJob ingestionDto, final ObsAdapter obsAdapter) throws ProductException {			
 		return Collections.singletonList(newProduct(file, obsAdapter));
 	}
 	

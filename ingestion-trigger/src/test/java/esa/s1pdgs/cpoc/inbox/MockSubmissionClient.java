@@ -6,11 +6,11 @@ import java.util.ArrayList;
 import java.util.List;
 
 import esa.s1pdgs.cpoc.inbox.kafka.producer.SubmissionClient;
-import esa.s1pdgs.cpoc.mqi.model.queue.IngestionDto;
+import esa.s1pdgs.cpoc.mqi.model.queue.IngestionJob;
 
 class MockSubmissionClient implements SubmissionClient
 {
-	private final List<IngestionDto> elements = new ArrayList<>();
+	private final List<IngestionJob> elements = new ArrayList<>();
 	private final int expectedCalls;
 	
 	public MockSubmissionClient(int expectedCalls) {
@@ -18,7 +18,7 @@ class MockSubmissionClient implements SubmissionClient
 	}
 	
 	@Override
-	public void publish(IngestionDto dto) {
+	public void publish(IngestionJob dto) {
 		elements.add(dto);			
 	}
 	

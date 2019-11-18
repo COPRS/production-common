@@ -22,7 +22,7 @@ import esa.s1pdgs.cpoc.common.errors.AbstractCodedException;
 import esa.s1pdgs.cpoc.common.errors.InternalErrorException;
 import esa.s1pdgs.cpoc.ingestion.config.ProcessConfiguration;
 import esa.s1pdgs.cpoc.mqi.model.queue.AbstractDto;
-import esa.s1pdgs.cpoc.mqi.model.queue.IngestionDto;
+import esa.s1pdgs.cpoc.mqi.model.queue.IngestionJob;
 import esa.s1pdgs.cpoc.mqi.model.queue.ProductDto;
 import esa.s1pdgs.cpoc.obs_sdk.ObsClient;
 import esa.s1pdgs.cpoc.obs_sdk.ObsUploadObject;
@@ -72,7 +72,7 @@ public class TestProductServiceImpl {
 	public void testIngest() throws ProductException, InternalErrorException {
 		final Date now = new Date();
 		final ProductFamily family = ProductFamily.AUXILIARY_FILE;
-		IngestionDto ingestionDto = new IngestionDto("productName");
+		IngestionJob ingestionDto = new IngestionJob("productName");
 		ingestionDto.setPickupPath("/dev");
 		ingestionDto.setRelativePath("null");
 		ingestionDto.setFamily(family);
@@ -95,7 +95,7 @@ public class TestProductServiceImpl {
 
 	@Test
 	public void testMarkInvalid() throws AbstractCodedException {
-		IngestionDto ingestionDto = new IngestionDto();
+		IngestionJob ingestionDto = new IngestionJob();
 		ingestionDto.setPickupPath("pickup/path");
 		ingestionDto.setRelativePath("relative/path");
 		uut.markInvalid(ingestionDto);
@@ -110,7 +110,7 @@ public class TestProductServiceImpl {
 
 	@Test
 	public void testToFile() {
-		IngestionDto ingestionDto = new IngestionDto();
+		IngestionJob ingestionDto = new IngestionJob();
 		ingestionDto.setPickupPath("/tmp/foo");
 		ingestionDto.setRelativePath("bar/baaaaar");
 		assertEquals(new File("/tmp/foo/bar/baaaaar"), uut.toFile(ingestionDto));
@@ -118,7 +118,7 @@ public class TestProductServiceImpl {
 
 	@Test
 	public void testAssertPermissions() {
-		IngestionDto ingestionDto = new IngestionDto();
+		IngestionJob ingestionDto = new IngestionJob();
 		assertThatThrownBy(() -> ProductServiceImpl.assertPermissions(ingestionDto, nonExistentFile))
 			.isInstanceOf(RuntimeException.class)
 			.hasMessageContaining("File nonExistentFile of " + ingestionDto + " does not exist");

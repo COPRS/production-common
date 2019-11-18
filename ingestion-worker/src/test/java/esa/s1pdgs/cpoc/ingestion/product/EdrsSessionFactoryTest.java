@@ -16,7 +16,7 @@ import esa.s1pdgs.cpoc.common.EdrsSessionFileType;
 import esa.s1pdgs.cpoc.common.ProductFamily;
 import esa.s1pdgs.cpoc.ingestion.obs.ObsAdapter;
 import esa.s1pdgs.cpoc.mqi.model.queue.EdrsSessionDto;
-import esa.s1pdgs.cpoc.mqi.model.queue.IngestionDto;
+import esa.s1pdgs.cpoc.mqi.model.queue.IngestionJob;
 
 public class EdrsSessionFactoryTest {
 	
@@ -36,7 +36,7 @@ public class EdrsSessionFactoryTest {
 	@Test
 	public void newProducts() {
 		EdrsSessionFactory uut = new EdrsSessionFactory("hostname");
-		IngestionDto ingestionDto = new IngestionDto();
+		IngestionJob ingestionDto = new IngestionJob();
 		ingestionDto.setMissionId("S1"); 
 		ingestionDto.setSatelliteId("B");
 		ingestionDto.setStationCode("WILE"); 

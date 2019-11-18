@@ -20,20 +20,20 @@ import esa.s1pdgs.cpoc.inbox.filter.BlacklistRegexRelativePathInboxFilter;
 import esa.s1pdgs.cpoc.inbox.filter.InboxFilter;
 import esa.s1pdgs.cpoc.inbox.filter.WhitelistRegexRelativePathInboxFilter;
 import esa.s1pdgs.cpoc.inbox.kafka.producer.KafkaSubmissionClient;
-import esa.s1pdgs.cpoc.mqi.model.queue.IngestionDto;
+import esa.s1pdgs.cpoc.mqi.model.queue.IngestionJob;
 
 @Component
 public class InboxFactory {
 
 	private static final Logger LOG = LoggerFactory.getLogger(InboxFactory.class);
 
-	private final KafkaTemplate<String, IngestionDto> kafkaTemplate;
+	private final KafkaTemplate<String, IngestionJob> kafkaTemplate;
 	private final InboxAdapterFactory inboxAdapterFactory;
 	private final InboxPollingServiceTransactional inboxPollingServiceTransactional;
 	private final String hostname;
 
 	@Autowired
-	public InboxFactory(final KafkaTemplate<String, IngestionDto> kafkaTemplate,
+	public InboxFactory(final KafkaTemplate<String, IngestionJob> kafkaTemplate,
 			final InboxPollingServiceTransactional inboxPollingServiceTransactional,
 			final InboxAdapterFactory inboxAdapterFactory,
 			final ProcessConfiguration processConfiguration) {
