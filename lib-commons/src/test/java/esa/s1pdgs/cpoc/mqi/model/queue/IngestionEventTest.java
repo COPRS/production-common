@@ -23,8 +23,9 @@ public class IngestionEventTest {
 	 */
 	@Test
 	public void testGettersSettersConstructors() {
-		IngestionEvent dto = new IngestionEvent("key-obs", 2, EdrsSessionFileType.RAW, "S1", "B", "WILE", "sessionId");
+		IngestionEvent dto = new IngestionEvent("key-obs", "/path/of/inbox", 2, EdrsSessionFileType.RAW, "S1", "B", "WILE", "sessionId");
 		assertEquals("key-obs", dto.getKeyObjectStorage());
+		assertEquals("/path/of/inbox", dto.getInboxPath());
 		assertEquals(2, dto.getChannelId());
 		assertEquals(EdrsSessionFileType.RAW, dto.getProductType());
 		assertEquals("S1", dto.getMissionId());
@@ -48,9 +49,10 @@ public class IngestionEventTest {
 	 */
 	@Test
 	public void testToString() {
-		IngestionEvent dto = new IngestionEvent("key-obs", 2, EdrsSessionFileType.RAW, "S1", "B", "WILE", "sessionId");
+		IngestionEvent dto = new IngestionEvent("key-obs", "/path/of/inbox", 2, EdrsSessionFileType.RAW, "S1", "B", "WILE", "sessionId");
 		String str = dto.toString();
 		assertTrue("toString should contain the key OBS", str.contains("objectStorageKey: key-obs"));
+		assertTrue("toString should contain the inbox path", str.contains("inboxPath: /path/of/inbox"));
 		assertTrue("toString should contain the channel id", str.contains("channelId: 2"));
 		assertTrue("toString should contain the product type", str.contains("productType: RAW"));
 		assertTrue("toString should contain the mission id", str.contains("missionId: S1"));

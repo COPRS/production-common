@@ -43,6 +43,11 @@ public class IngestionEvent extends AbstractDto {
     private String stationCode;
 
     /**
+     * Inbox path
+     */
+    private String inboxPath;
+    
+    /**
      * Default constructor
      */
     public IngestionEvent() {
@@ -52,10 +57,11 @@ public class IngestionEvent extends AbstractDto {
     /**
      * Default constructor
      */
-    public IngestionEvent(final String objectStorageKey, final int channelId,
+    public IngestionEvent(final String objectStorageKey, String inboxPath, final int channelId,
             final EdrsSessionFileType productType, final String missionId,
             final String satelliteId, final String stationCode, final String sessionId) {
         super(objectStorageKey, ProductFamily.EDRS_SESSION);
+        this.inboxPath = inboxPath;
         this.channelId = channelId;
         this.productType = productType;
         this.missionId = missionId;
@@ -78,6 +84,20 @@ public class IngestionEvent extends AbstractDto {
     public void setKeyObjectStorage(final String keyObjectStorage) {
         this.setProductName(keyObjectStorage);
     }
+
+	/**
+	 * @return the inboxPath
+	 */
+	public String getInboxPath() {
+		return inboxPath;
+	}
+
+	/**
+	 * @param inboxPath the inboxPath to set
+	 */
+	public void setInboxPath(String inboxPath) {
+		this.inboxPath = inboxPath;
+	}
 
     /**
      * @return the channelId
@@ -173,8 +193,8 @@ public class IngestionEvent extends AbstractDto {
     @Override
     public String toString() {
         return String.format(
-                "{objectStorageKey: %s, channelId: %s, productType: %s, satelliteId: %s, missionId: %s, stationCode: %s, sessionId: %s, hostname: %s, creationDate: %s}",
-                getKeyObjectStorage(), channelId, productType, satelliteId,
+                "{objectStorageKey: %s, inboxPath: %s, channelId: %s, productType: %s, satelliteId: %s, missionId: %s, stationCode: %s, sessionId: %s, hostname: %s, creationDate: %s}",
+                getKeyObjectStorage(), inboxPath, channelId, productType, satelliteId,
                 missionId, stationCode, sessionId, getHostname(), getCreationDate());
     }
 
@@ -183,7 +203,7 @@ public class IngestionEvent extends AbstractDto {
      */
     @Override
     public int hashCode() {
-        return Objects.hash(getKeyObjectStorage(), getFamily(), channelId, productType,
+        return Objects.hash(getKeyObjectStorage(), inboxPath, getFamily(), channelId, productType,
                 satelliteId, missionId, stationCode, sessionId, getHostname(), getCreationDate());
     }
 
@@ -201,6 +221,7 @@ public class IngestionEvent extends AbstractDto {
             IngestionEvent other = (IngestionEvent) obj;
             // field comparison
             ret = Objects.equals(getKeyObjectStorage(), other.getKeyObjectStorage())
+            		&& Objects.equals(inboxPath, other.inboxPath)
             		&&  Objects.equals(getFamily(), other.getFamily())
                     && channelId == other.channelId
                     && Objects.equals(productType, other.productType)

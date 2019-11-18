@@ -22,7 +22,7 @@ public class EdrsSessionsMessageDtoTest {
      */
     @Test
     public void testGettersSettersConstructors() {
-        IngestionEvent body = new IngestionEvent("key-obs", 2,
+        IngestionEvent body = new IngestionEvent("key-obs", "/path/of/inbox", 2,
                 EdrsSessionFileType.RAW, "S1", "B", "WILE", "sessionId");
         
         GenericMessageDto<IngestionEvent> dto = new GenericMessageDto<IngestionEvent>(123, "input-key", body);
@@ -44,7 +44,7 @@ public class EdrsSessionsMessageDtoTest {
      */
     @Test
     public void testToString() {
-        IngestionEvent body = new IngestionEvent("key-obs", 2,
+        IngestionEvent body = new IngestionEvent("key-obs", "/path/of/inbox", 2,
                 EdrsSessionFileType.RAW, "S1", "B", "WILE", "sessionId");
         GenericMessageDto<IngestionEvent> dto = new GenericMessageDto<IngestionEvent>(123, "input-key", body);
         String str = dto.toString();

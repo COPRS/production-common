@@ -109,8 +109,8 @@ public final class TestIngestionService {
 		GenericMessageDto<IngestionJob> message = new GenericMessageDto<>();
 		message.setId(123L);
 		message.setBody(null);
-		IngestionJob ingestionDto = new IngestionJob("foo.bar");
-		message.setBody(ingestionDto);
+		IngestionJob ingestionJob = new IngestionJob("foo.bar");
+		message.setBody(ingestionJob);
 		
 		File file = new File("foo.bar");
 		final Product<AbstractDto> prod = new Product<>();
@@ -124,11 +124,11 @@ public final class TestIngestionService {
 		prod.setDto(dto);
 		
 		IngestionResult expectedResult = new IngestionResult(Arrays.asList(prod), 0L);
-		doReturn(expectedResult).when(productService).ingest(Mockito.eq(ProductFamily.AUXILIARY_FILE), Mockito.eq(ingestionDto));
+		doReturn(expectedResult).when(productService).ingest(Mockito.eq(ProductFamily.AUXILIARY_FILE), Mockito.eq(ingestionJob));
 		
-		IngestionResult result = uut.identifyAndUpload(reportingFactory, message, ingestionDto);
+		IngestionResult result = uut.identifyAndUpload(reportingFactory, message, ingestionJob);
 		assertEquals(expectedResult, result);
-		verify(productService, times(1)).ingest(Mockito.eq(ProductFamily.AUXILIARY_FILE), Mockito.eq(ingestionDto));
+		verify(productService, times(1)).ingest(Mockito.eq(ProductFamily.AUXILIARY_FILE), Mockito.eq(ingestionJob));
 		verify(productService, never()).markInvalid(Mockito.any());
 	}
 	
@@ -150,13 +150,13 @@ public final class TestIngestionService {
 		GenericMessageDto<IngestionJob> message = new GenericMessageDto<>();
 		message.setId(123L);
 		message.setBody(null);
-		IngestionJob ingestionDto = new IngestionJob("foo.bar");
-		message.setBody(ingestionDto);
+		IngestionJob ingestionJob = new IngestionJob("foo.bar");
+		message.setBody(ingestionJob);
 		
-		IngestionResult result = uut.identifyAndUpload(reportingFactory, message, ingestionDto);
+		IngestionResult result = uut.identifyAndUpload(reportingFactory, message, ingestionJob);
 		assertEquals(IngestionResult.NULL, result);
 		verify(productService, never()).ingest(Mockito.any(), Mockito.any());
-		verify(productService, times(1)).markInvalid(Mockito.eq(ingestionDto));
+		verify(productService, times(1)).markInvalid(Mockito.eq(ingestionJob));
 	}
 
 	@Test
@@ -192,7 +192,7 @@ public final class TestIngestionService {
 		
 		assertThatThrownBy(() -> uut.getFamilyFor(new IngestionJob("fu.bar")))
 			.isInstanceOf(ProductException.class)
-			.hasMessageContaining("No matching config found for IngestionDto");
+			.hasMessageContaining("No matching config found for IngestionJob");
 	}
 	
 	@Test
@@ -211,7 +211,7 @@ public final class TestIngestionService {
 		
 		assertThatThrownBy(() -> uut.getFamilyFor(new IngestionJob("foo.bar")))
 			.isInstanceOf(ProductException.class)
-			.hasMessageContaining("Invalid IngestionTypeConfiguration [family=FOO, regex=fo+\\.bar] for IngestionDto [");
+			.hasMessageContaining("Invalid IngestionTypeConfiguration [family=FOO, regex=fo+\\.bar] for IngestionJob [");
 	}
 	
 	@Test
