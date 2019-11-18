@@ -13,7 +13,7 @@ RUN echo "${VERSION}" >> VERSION
 RUN echo "${BRANCH_TEXT}" >> VERSION
 RUN echo "${COMMIT_ID}" >> VERSION
 
-COPY --from=build /app/inbox-polling/target/s1pro-core-inbox-polling-*.jar s1pdgs-inbox-polling.jar
+COPY --from=build /app/ingestion-trigger/target/s1pro-core-ingestion-trigger-*.jar s1pdgs-ingestion-trigger.jar
 COPY /config/start.sh start.sh
 
 ENTRYPOINT "/app/start.sh"
