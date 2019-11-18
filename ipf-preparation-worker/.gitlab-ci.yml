@@ -5,7 +5,7 @@ image: docker:latest
 variables:
   MODULE_IPF_PREPARATION_WORKER: s1pro-core-ipf-preparation-worker
 
-job-generator-build:
+ipf-preparation-worker-build:
   stage: module
   script:
     - cd ipf-preparation-worker
