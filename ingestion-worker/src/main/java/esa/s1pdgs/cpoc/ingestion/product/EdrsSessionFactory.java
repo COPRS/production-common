@@ -42,15 +42,15 @@ public class EdrsSessionFactory implements ProductFactory<IngestionEvent> {
 		String stationCode = ingestionJob.getStationCode();
 		String sessionId = extractSessionId(ingestionJob.getRelativePath());
 
-		IngestionEvent edrsSessionDto = new IngestionEvent(objectStorageKey, channelId, edrsSessionFileType, missionId,
+		IngestionEvent ingestionEvent = new IngestionEvent(objectStorageKey, channelId, edrsSessionFileType, missionId,
 				satelliteId, stationCode, sessionId);
-		edrsSessionDto.setCreationDate(new Date());
-		edrsSessionDto.setHostname(hostname);
+		ingestionEvent.setCreationDate(new Date());
+		ingestionEvent.setHostname(hostname);
 
 		final Product<IngestionEvent> prod = new Product<>();
 		prod.setFamily(ProductFamily.EDRS_SESSION);
 		prod.setFile(file);
-		prod.setDto(edrsSessionDto);
+		prod.setDto(ingestionEvent);
 
 		result.add(prod);
 		return result;
