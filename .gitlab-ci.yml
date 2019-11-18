@@ -31,14 +31,14 @@ include:
   - local: archives/.gitlab-ci.yml
   - local: disseminator/.gitlab-ci.yml
   - local: request-repository/.gitlab-ci.yml
-  - local: inbox-polling/.gitlab-ci.yml
-  - local: inbox-ingestion/.gitlab-ci.yml
-  - local: job-generator/.gitlab-ci.yml
+  - local: ingestion-trigger/.gitlab-ci.yml
+  - local: ingestion-worker/.gitlab-ci.yml
+  - local: ipf-preparation-worker/.gitlab-ci.yml
   - local: metadata-catalog/.gitlab-ci.yml
   - local: mqi-server/.gitlab-ci.yml
   - local: scaler/.gitlab-ci.yml
   - local: queue-watcher/.gitlab-ci.yml
   - local: validation/.gitlab-ci.yml
-  - local: compression/.gitlab-ci.yml
+  - local: compression-worker/.gitlab-ci.yml
   - local: prip/.gitlab-ci.yml
-  - local: wrapper/.gitlab-ci.yml
+  - local: ipf-execution-worker/.gitlab-ci.yml
