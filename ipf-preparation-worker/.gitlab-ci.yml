@@ -3,11 +3,11 @@
 image: docker:latest
 
 variables:
-  MODULE_JOB_GENERATOR: s1pro-core-job-generator
+  MODULE_IPF_PREPARATION_WORKER: s1pro-core-ipf-preparation-worker
 
 job-generator-build:
   stage: module
   script:
-    - cd job-generator
-    - dockerbuild --cache-from registry.tools.s1pdgs.eu/werum/processing/s1pro-core:final -t "$CI_REGISTRY/$CI_PROJECT_NAMESPACE/$MODULE_JOB_GENERATOR:$CI_COMMIT_REF_SLUG" .
-    - docker push "$CI_REGISTRY/$CI_PROJECT_NAMESPACE/$MODULE_JOB_GENERATOR:$CI_COMMIT_REF_SLUG"
+    - cd ipf-preparation-worker
+    - dockerbuild --cache-from registry.tools.s1pdgs.eu/werum/processing/s1pro-core:final -t "$CI_REGISTRY/$CI_PROJECT_NAMESPACE/$MODULE_IPF_PREPARATION_WORKER:$CI_COMMIT_REF_SLUG" .
+    - docker push "$CI_REGISTRY/$CI_PROJECT_NAMESPACE/$MODULE_IPF_PREPARATION_WORKER:$CI_COMMIT_REF_SLUG"
