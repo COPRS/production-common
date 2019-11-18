@@ -9,7 +9,7 @@ variables:
 ipf-execution-worker-l0-build:
   stage: module
   script:
-    - cd ipf-execution-worker/config/dockerfiles/L0/
+    - cd ipf-execution-worker/config/dockerfiles/L0_AIO/
     - dockerbuild --cache-from registry.tools.s1pdgs.eu/werum/processing/s1pro-core:final -t "$CI_REGISTRY/$CI_PROJECT_NAMESPACE/$MODULE_IPF_EXECUTION_WORKER-l0-aio:$CI_COMMIT_REF_SLUG" .
     - docker push "$CI_REGISTRY/$CI_PROJECT_NAMESPACE/$MODULE_IPF_EXECUTION_WORKER-l0-aio:$CI_COMMIT_REF_SLUG"
   except:
@@ -18,7 +18,7 @@ ipf-execution-worker-l0-build:
 ipf-execution-worker-l0-segment-build:
   stage: module
   script:
-    - cd ipf-execution-worker/config/dockerfiles/L0_segment
+    - cd ipf-execution-worker/config/dockerfiles/L0_ASP
     - dockerbuild --cache-from registry.tools.s1pdgs.eu/werum/processing/s1pro-core:final -t "$CI_REGISTRY/$CI_PROJECT_NAMESPACE/$MODULE_IPF_EXECUTION_WORKER-l0-asp:$CI_COMMIT_REF_SLUG" .
     - docker push "$CI_REGISTRY/$CI_PROJECT_NAMESPACE/$MODULE_IPF_EXECUTION_WORKER-l0-asp:$CI_COMMIT_REF_SLUG"
 
