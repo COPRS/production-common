@@ -6,7 +6,7 @@ import java.util.List;
 import esa.s1pdgs.cpoc.common.ProductFamily;
 import esa.s1pdgs.cpoc.ingestion.obs.ObsAdapter;
 import esa.s1pdgs.cpoc.mqi.model.queue.AbstractDto;
-import esa.s1pdgs.cpoc.mqi.model.queue.IngestionDto;
+import esa.s1pdgs.cpoc.mqi.model.queue.IngestionJob;
 
 public interface ProductFactory<E extends AbstractDto> {
 	
@@ -21,5 +21,5 @@ public interface ProductFactory<E extends AbstractDto> {
     	throw new UnsupportedOperationException(String.format("Not yet supported for %s", family)); 
     }
     
-    public List<Product<E>> newProducts(final File file, final IngestionDto ingestionDto, final ObsAdapter obsAdapter) throws ProductException; 
+    public List<Product<E>> newProducts(final File file, final IngestionJob ingestionDto, final ObsAdapter obsAdapter) throws ProductException; 
 }

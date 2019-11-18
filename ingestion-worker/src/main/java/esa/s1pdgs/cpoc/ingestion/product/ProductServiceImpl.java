@@ -16,7 +16,7 @@ import esa.s1pdgs.cpoc.common.errors.InternalErrorException;
 import esa.s1pdgs.cpoc.ingestion.config.ProcessConfiguration;
 import esa.s1pdgs.cpoc.ingestion.obs.ObsAdapter;
 import esa.s1pdgs.cpoc.mqi.model.queue.AbstractDto;
-import esa.s1pdgs.cpoc.mqi.model.queue.IngestionDto;
+import esa.s1pdgs.cpoc.mqi.model.queue.IngestionJob;
 import esa.s1pdgs.cpoc.obs_sdk.ObsClient;
 
 @Service
@@ -34,7 +34,7 @@ public class ProductServiceImpl implements ProductService {
 	}
 	
 	@Override
-	public IngestionResult ingest(final ProductFamily family, final IngestionDto ingestion) 
+	public IngestionResult ingest(final ProductFamily family, final IngestionJob ingestion) 
 			throws ProductException, InternalErrorException {
 		final File file = toFile(ingestion);		
 		assertPermissions(ingestion, file);
@@ -61,7 +61,7 @@ public class ProductServiceImpl implements ProductService {
 	}
 
 	@Override
-	public void markInvalid(IngestionDto ingestion) {	
+	public void markInvalid(IngestionJob ingestion) {	
 		final File file = toFile(ingestion);
 		newObsAdapterFor(Paths.get(ingestion.getPickupPath())).upload(ProductFamily.INVALID, file);		
 	}
@@ -70,7 +70,7 @@ public class ProductServiceImpl implements ProductService {
 		return relPath.toString();
 	}
 	
-	final File toFile(final IngestionDto ingestion) {
+	final File toFile(final IngestionJob ingestion) {
 		return Paths.get(ingestion.getPickupPath(), ingestion.getRelativePath()).toFile();
 	}
 	
@@ -78,7 +78,7 @@ public class ProductServiceImpl implements ProductService {
 		return new ObsAdapter(obsClient, inboxPath);		
 	}
 	
-	static void assertPermissions(final IngestionDto ingestion, final File file) {
+	static void assertPermissions(final IngestionJob ingestion, final File file) {
 		if (!file.exists()) {
 			throw new RuntimeException(String.format("File %s of %s does not exist", file, ingestion));
 		}

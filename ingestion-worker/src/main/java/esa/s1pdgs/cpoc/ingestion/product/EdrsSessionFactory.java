@@ -12,7 +12,7 @@ import esa.s1pdgs.cpoc.common.FileExtension;
 import esa.s1pdgs.cpoc.common.ProductFamily;
 import esa.s1pdgs.cpoc.ingestion.obs.ObsAdapter;
 import esa.s1pdgs.cpoc.mqi.model.queue.EdrsSessionDto;
-import esa.s1pdgs.cpoc.mqi.model.queue.IngestionDto;
+import esa.s1pdgs.cpoc.mqi.model.queue.IngestionJob;
 
 public class EdrsSessionFactory implements ProductFactory<EdrsSessionDto> {
 
@@ -29,7 +29,7 @@ public class EdrsSessionFactory implements ProductFactory<EdrsSessionDto> {
 	}
 	
 	@Override
-	public List<Product<EdrsSessionDto>> newProducts(final File file, final IngestionDto ingestionDto,
+	public List<Product<EdrsSessionDto>> newProducts(final File file, final IngestionJob ingestionDto,
 			final ObsAdapter obsAdapter) throws ProductException {
 
 		final List<Product<EdrsSessionDto>> result = new ArrayList<>();

@@ -20,7 +20,7 @@ public class IngestionDtoTest {
 	 */
 	@Test
 	public void checkEquals() {
-		EqualsVerifier.forClass(IngestionDto.class).usingGetClass().suppress(Warning.NONFINAL_FIELDS).verify();
+		EqualsVerifier.forClass(IngestionJob.class).usingGetClass().suppress(Warning.NONFINAL_FIELDS).verify();
 	}
 	
     /**
@@ -28,7 +28,7 @@ public class IngestionDtoTest {
      */
     @Test
     public void testToStringAndSetters() {
-    	IngestionDto dto = new IngestionDto();
+    	IngestionJob dto = new IngestionJob();
         dto.setProductName("product-name");
         dto.setRelativePath("product-name");
         dto.setPickupPath("/fooBar");

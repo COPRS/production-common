@@ -32,7 +32,7 @@ import esa.s1pdgs.cpoc.ingestion.product.ProductException;
 import esa.s1pdgs.cpoc.ingestion.product.ProductService;
 import esa.s1pdgs.cpoc.mqi.client.GenericMqiClient;
 import esa.s1pdgs.cpoc.mqi.model.queue.AbstractDto;
-import esa.s1pdgs.cpoc.mqi.model.queue.IngestionDto;
+import esa.s1pdgs.cpoc.mqi.model.queue.IngestionJob;
 import esa.s1pdgs.cpoc.mqi.model.queue.ProductDto;
 import esa.s1pdgs.cpoc.mqi.model.rest.GenericMessageDto;
 import esa.s1pdgs.cpoc.mqi.model.rest.GenericPublicationMessageDto;
@@ -63,21 +63,21 @@ public final class TestIngestionService {
 
 	@Test
 	public final void testOnMessage() {
-		final IngestionDto ingestion = new IngestionDto("fooBar");
+		final IngestionJob ingestion = new IngestionJob("fooBar");
 		ingestion.setRelativePath("fooBar");
 		ingestion.setPickupPath("/tmp");
 		
-		final GenericMessageDto<IngestionDto> mess = new GenericMessageDto<IngestionDto>();
+		final GenericMessageDto<IngestionJob> mess = new GenericMessageDto<IngestionJob>();
 		mess.setId(123);
 		mess.setInputKey("testKEy");
 		mess.setBody(ingestion);
 		
 		final ProductService fakeProductService = new ProductService() {			
 			@Override
-			public void markInvalid(IngestionDto ingestion) {}
+			public void markInvalid(IngestionJob ingestion) {}
 			
 			@Override
-			public IngestionResult ingest(ProductFamily family, IngestionDto ingestion)
+			public IngestionResult ingest(ProductFamily family, IngestionJob ingestion)
 					throws ProductException, InternalErrorException {
 				return IngestionResult.NULL;
 			}
@@ -106,10 +106,10 @@ public final class TestIngestionService {
 		);
 		doReturn(new LoggerReporting(logger, "uuid", "actionName", 1)).when(reportingFactory).newReporting(Mockito.eq(1));
 
-		GenericMessageDto<IngestionDto> message = new GenericMessageDto<>();
+		GenericMessageDto<IngestionJob> message = new GenericMessageDto<>();
 		message.setId(123L);
 		message.setBody(null);
-		IngestionDto ingestionDto = new IngestionDto("foo.bar");
+		IngestionJob ingestionDto = new IngestionJob("foo.bar");
 		message.setBody(ingestionDto);
 		
 		File file = new File("foo.bar");
@@ -147,10 +147,10 @@ public final class TestIngestionService {
 		);
 		doReturn(new LoggerReporting(logger, "uuid", "actionName", 1)).when(reportingFactory).newReporting(Mockito.eq(1));
 
-		GenericMessageDto<IngestionDto> message = new GenericMessageDto<>();
+		GenericMessageDto<IngestionJob> message = new GenericMessageDto<>();
 		message.setId(123L);
 		message.setBody(null);
-		IngestionDto ingestionDto = new IngestionDto("foo.bar");
+		IngestionJob ingestionDto = new IngestionJob("foo.bar");
 		message.setBody(ingestionDto);
 		
 		IngestionResult result = uut.identifyAndUpload(reportingFactory, message, ingestionDto);
@@ -173,7 +173,7 @@ public final class TestIngestionService {
 				productService
 		);
 		
-		uut.getFamilyFor(new IngestionDto("foo.bar"));
+		uut.getFamilyFor(new IngestionJob("foo.bar"));
 	}
 	
 	@Test
@@ -190,7 +190,7 @@ public final class TestIngestionService {
 				productService
 		);
 		
-		assertThatThrownBy(() -> uut.getFamilyFor(new IngestionDto("fu.bar")))
+		assertThatThrownBy(() -> uut.getFamilyFor(new IngestionJob("fu.bar")))
 			.isInstanceOf(ProductException.class)
 			.hasMessageContaining("No matching config found for IngestionDto");
 	}
@@ -209,7 +209,7 @@ public final class TestIngestionService {
 				productService
 		);
 		
-		assertThatThrownBy(() -> uut.getFamilyFor(new IngestionDto("foo.bar")))
+		assertThatThrownBy(() -> uut.getFamilyFor(new IngestionJob("foo.bar")))
 			.isInstanceOf(ProductException.class)
 			.hasMessageContaining("Invalid IngestionTypeConfiguration [family=FOO, regex=fo+\\.bar] for IngestionDto [");
 	}
@@ -225,10 +225,10 @@ public final class TestIngestionService {
 		
 		doReturn(new LoggerReporting(logger, "uuid", "actionName", 2)).when(reportingFactory).newReporting(Mockito.eq(2));
 		
-		final GenericMessageDto<IngestionDto> message = new GenericMessageDto<>();
+		final GenericMessageDto<IngestionJob> message = new GenericMessageDto<>();
 		message.setId(123L);
 		message.setInputKey("inputKey");
-		message.setBody(new IngestionDto());
+		message.setBody(new IngestionJob());
 		
 		AbstractDto dto = new ProductDto();
 		

@@ -2,7 +2,7 @@ package esa.s1pdgs.cpoc.mqi.model.queue;
 
 import esa.s1pdgs.cpoc.common.ProductFamily;
 
-public class IngestionDto extends AbstractDto {
+public class IngestionJob extends AbstractDto {
 
 	private String relativePath;
 	private String pickupPath;
@@ -10,11 +10,11 @@ public class IngestionDto extends AbstractDto {
 	private String satelliteId;
 	private String stationCode;
 
-	public IngestionDto() {
+	public IngestionJob() {
 		super();
 	}
 
-	public IngestionDto(String productName) {
+	public IngestionJob(String productName) {
 		super(productName, ProductFamily.BLANK);
 	}
 
@@ -82,7 +82,7 @@ public class IngestionDto extends AbstractDto {
 			return false;
 		if (getClass() != obj.getClass())
 			return false;
-		IngestionDto other = (IngestionDto) obj;
+		IngestionJob other = (IngestionJob) obj;
 		if (missionId == null) {
 			if (other.missionId != null)
 				return false;

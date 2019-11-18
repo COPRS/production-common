@@ -13,7 +13,7 @@ import org.springframework.kafka.core.DefaultKafkaProducerFactory;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.kafka.support.serializer.JsonSerializer;
 
-import esa.s1pdgs.cpoc.mqi.model.queue.IngestionDto;
+import esa.s1pdgs.cpoc.mqi.model.queue.IngestionJob;
 
 
 @EnableKafka
@@ -26,7 +26,7 @@ public class KafkaConfig {
     private String bootstrapServers;
     
     @Bean
-    public KafkaTemplate<String, IngestionDto> kafkaProducerClient()    {
+    public KafkaTemplate<String, IngestionJob> kafkaProducerClient()    {
         final Map<String, Object> props = new HashMap<>();
         props.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, bootstrapServers);
         props.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, StringSerializer.class);
@@ -35,6 +35,6 @@ public class KafkaConfig {
         // max int to have ~ infinite retries
         props.put(ProducerConfig.RETRIES_CONFIG, Integer.MAX_VALUE);    
                  
-        return new KafkaTemplate<String, IngestionDto>(new DefaultKafkaProducerFactory<>(props));
+        return new KafkaTemplate<String, IngestionJob>(new DefaultKafkaProducerFactory<>(props));
     }
 }

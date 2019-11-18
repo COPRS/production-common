@@ -33,7 +33,7 @@ import esa.s1pdgs.cpoc.mqi.client.GenericMqiClient;
 import esa.s1pdgs.cpoc.mqi.client.MqiConsumer;
 import esa.s1pdgs.cpoc.mqi.client.MqiListener;
 import esa.s1pdgs.cpoc.mqi.model.queue.AbstractDto;
-import esa.s1pdgs.cpoc.mqi.model.queue.IngestionDto;
+import esa.s1pdgs.cpoc.mqi.model.queue.IngestionJob;
 import esa.s1pdgs.cpoc.mqi.model.rest.GenericMessageDto;
 import esa.s1pdgs.cpoc.mqi.model.rest.GenericPublicationMessageDto;
 import esa.s1pdgs.cpoc.report.FilenameReportingOutput;
@@ -43,7 +43,7 @@ import esa.s1pdgs.cpoc.report.Reporting;
 import esa.s1pdgs.cpoc.report.ReportingMessage;
 
 @Service
-public class IngestionService implements MqiListener<IngestionDto> {
+public class IngestionService implements MqiListener<IngestionJob> {
 	static final Logger LOG = LogManager.getLogger(IngestionService.class);
 
 	private final GenericMqiClient mqiClient;
@@ -64,16 +64,16 @@ public class IngestionService implements MqiListener<IngestionDto> {
 	public void initService() {
 		if (properties.getPollingIntervalMs() > 0) {
 			final ExecutorService service = Executors.newFixedThreadPool(1);
-			service.execute(new MqiConsumer<IngestionDto>(mqiClient, ProductCategory.INGESTION, this,
+			service.execute(new MqiConsumer<IngestionJob>(mqiClient, ProductCategory.INGESTION, this,
 					properties.getPollingIntervalMs()));
 		}
 	}
 
 	@Override
-	public void onMessage(final GenericMessageDto<IngestionDto> message) {
+	public void onMessage(final GenericMessageDto<IngestionJob> message) {
 		final Reporting.Factory reportingFactory = new LoggerReporting.Factory("Ingestion");
 
-		final IngestionDto ingestion = message.getBody();
+		final IngestionJob ingestion = message.getBody();
 		LOG.debug("received Ingestion: {}", ingestion.getProductName());
 
 		final Reporting reporting = reportingFactory.newReporting(0);
@@ -96,7 +96,7 @@ public class IngestionService implements MqiListener<IngestionDto> {
 	}
 
 	final IngestionResult identifyAndUpload(final Reporting.Factory reportingFactory,
-			final GenericMessageDto<IngestionDto> message, final IngestionDto ingestion) throws InternalErrorException {
+			final GenericMessageDto<IngestionJob> message, final IngestionJob ingestion) throws InternalErrorException {
 		IngestionResult result = IngestionResult.NULL;
 		try {
 			final ProductFamily family = getFamilyFor(ingestion);
@@ -124,7 +124,7 @@ public class IngestionService implements MqiListener<IngestionDto> {
 		return result;
 	}
 
-	final void publish(final List<Product<AbstractDto>> products, final GenericMessageDto<IngestionDto> message,
+	final void publish(final List<Product<AbstractDto>> products, final GenericMessageDto<IngestionJob> message,
 			final Reporting.Factory reportingFactory) throws InternalErrorException {
 		for (final Product<AbstractDto> product : products) {
 			final GenericPublicationMessageDto<? extends AbstractDto> result = new GenericPublicationMessageDto<>(
@@ -146,7 +146,7 @@ public class IngestionService implements MqiListener<IngestionDto> {
 		}
 	}
 
-	final void delete(final IngestionDto ingestion, final Reporting.Factory reportingFactory)
+	final void delete(final IngestionJob ingestion, final Reporting.Factory reportingFactory)
 			throws InternalErrorException, InterruptedException {
 		final File file = Paths.get(ingestion.getPickupPath(), ingestion.getRelativePath()).toFile();
 		if (file.exists()) {
@@ -157,7 +157,7 @@ public class IngestionService implements MqiListener<IngestionDto> {
 		}
 	}
 
-	final ProductFamily getFamilyFor(final IngestionDto dto) throws ProductException {
+	final ProductFamily getFamilyFor(final IngestionJob dto) throws ProductException {
 		for (final IngestionTypeConfiguration config : properties.getTypes()) {
 			if (dto.getProductName().matches(config.getRegex())) {
 				LOG.debug("Found {} for {}", config, dto);

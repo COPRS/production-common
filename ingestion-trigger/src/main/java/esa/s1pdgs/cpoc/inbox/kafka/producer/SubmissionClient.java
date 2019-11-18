@@ -1,12 +1,12 @@
 package esa.s1pdgs.cpoc.inbox.kafka.producer;
 
-import esa.s1pdgs.cpoc.mqi.model.queue.IngestionDto;
+import esa.s1pdgs.cpoc.mqi.model.queue.IngestionJob;
 
 public interface SubmissionClient {
 	
 	public static final SubmissionClient NULL = new SubmissionClient() {
 		@Override
-		public void publish(IngestionDto dto) {}
+		public void publish(IngestionJob dto) {}
 	};	
-	void publish(final IngestionDto dto);
+	void publish(final IngestionJob dto);
 }
