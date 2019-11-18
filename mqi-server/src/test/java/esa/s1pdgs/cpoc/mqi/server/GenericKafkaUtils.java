@@ -24,7 +24,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 import esa.s1pdgs.cpoc.mqi.model.queue.ProductDto;
 import esa.s1pdgs.cpoc.mqi.model.queue.EdrsSessionDto;
-import esa.s1pdgs.cpoc.mqi.model.queue.LevelJobDto;
+import esa.s1pdgs.cpoc.mqi.model.queue.IpfExecutionJob;
 import esa.s1pdgs.cpoc.mqi.model.queue.ProductDto;
 import esa.s1pdgs.cpoc.mqi.model.queue.LevelReportDto;
 import esa.s1pdgs.cpoc.mqi.model.queue.ProductDto;
@@ -84,12 +84,12 @@ public class GenericKafkaUtils<T> {
         return KafkaTestUtils.getSingleRecord(consumer, topic);
     }
 
-    public ConsumerRecord<String, LevelJobDto> getReceivedRecordJobs(
+    public ConsumerRecord<String, IpfExecutionJob> getReceivedRecordJobs(
             String topic) throws Exception {
-        Consumer<String, LevelJobDto> consumer =
-                new DefaultKafkaConsumerFactory<String, LevelJobDto>(
+        Consumer<String, IpfExecutionJob> consumer =
+                new DefaultKafkaConsumerFactory<String, IpfExecutionJob>(
                         consumerProps(), new StringDeserializer(),
-                        new JsonDeserializer<>(LevelJobDto.class)).createConsumer();
+                        new JsonDeserializer<>(IpfExecutionJob.class)).createConsumer();
         embeddedKafka.consumeFromAnEmbeddedTopic(consumer, topic);
         return KafkaTestUtils.getSingleRecord(consumer, topic);
     }

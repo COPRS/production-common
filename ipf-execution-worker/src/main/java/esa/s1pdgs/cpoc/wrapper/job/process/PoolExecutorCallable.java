@@ -11,7 +11,7 @@ import esa.s1pdgs.cpoc.common.ApplicationLevel;
 import esa.s1pdgs.cpoc.common.errors.AbstractCodedException;
 import esa.s1pdgs.cpoc.common.errors.InternalErrorException;
 import esa.s1pdgs.cpoc.common.errors.processing.WrapperProcessTimeoutException;
-import esa.s1pdgs.cpoc.mqi.model.queue.LevelJobDto;
+import esa.s1pdgs.cpoc.mqi.model.queue.IpfExecutionJob;
 import esa.s1pdgs.cpoc.mqi.model.queue.LevelJobPoolDto;
 import esa.s1pdgs.cpoc.report.LoggerReporting;
 import esa.s1pdgs.cpoc.report.Reporting;
@@ -65,7 +65,7 @@ public class PoolExecutorCallable implements Callable<Void> {
      * @param prefixMonitorLogs
      */
     public PoolExecutorCallable(final ApplicationProperties properties,
-            final LevelJobDto job, final String prefixLogs, final ApplicationLevel appLevel) {
+            final IpfExecutionJob job, final String prefixLogs, final ApplicationLevel appLevel) {
         this.active = false;
         this.properties = properties;
         this.prefixMonitorLogs = prefixLogs;

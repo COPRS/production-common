@@ -5,7 +5,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import esa.s1pdgs.cpoc.common.ProductFamily;
-import esa.s1pdgs.cpoc.mqi.model.queue.LevelJobDto;
+import esa.s1pdgs.cpoc.mqi.model.queue.IpfExecutionJob;
 import esa.s1pdgs.cpoc.mqi.model.queue.LevelJobInputDto;
 import esa.s1pdgs.cpoc.mqi.model.queue.LevelJobOutputDto;
 import esa.s1pdgs.cpoc.mqi.model.queue.LevelJobPoolDto;
@@ -16,8 +16,8 @@ public class TestUtils {
 
     public final static String WORKDIR = "./test_work_dir/";
 
-    public static LevelJobDto buildL0LevelJobDto() {
-        LevelJobDto dto = new LevelJobDto(ProductFamily.L0_JOB, "SESSIONID", "FAST", WORKDIR, WORKDIR + "JobOrder.xml");
+    public static IpfExecutionJob buildL0LevelJobDto() {
+        IpfExecutionJob dto = new IpfExecutionJob(ProductFamily.L0_JOB, "SESSIONID", "FAST", WORKDIR, WORKDIR + "JobOrder.xml");
 
         dto.addInput(buildAuxiliaryInputDto("AUX_OBMEMC.xml"));
         dto.addInput(buildAuxiliaryInputDto("MPL_OBRP.xml"));
@@ -49,7 +49,7 @@ public class TestUtils {
         return getL0DownloadFile(buildL0LevelJobDto());
     }
 
-    public static List<ObsDownloadObject> getL0DownloadFile(LevelJobDto l0Job) {
+    public static List<ObsDownloadObject> getL0DownloadFile(IpfExecutionJob l0Job) {
 
         List<ObsDownloadObject> downloadToBatch = new ArrayList<>();
         downloadToBatch.add(new ObsDownloadObject(

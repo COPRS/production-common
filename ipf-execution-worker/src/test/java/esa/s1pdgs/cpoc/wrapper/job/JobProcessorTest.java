@@ -33,7 +33,7 @@ import esa.s1pdgs.cpoc.common.errors.mqi.MqiAckApiError;
 import esa.s1pdgs.cpoc.common.errors.processing.WrapperProcessTimeoutException;
 import esa.s1pdgs.cpoc.errorrepo.ErrorRepoAppender;
 import esa.s1pdgs.cpoc.mqi.client.GenericMqiClient;
-import esa.s1pdgs.cpoc.mqi.model.queue.LevelJobDto;
+import esa.s1pdgs.cpoc.mqi.model.queue.IpfExecutionJob;
 import esa.s1pdgs.cpoc.mqi.model.rest.Ack;
 import esa.s1pdgs.cpoc.mqi.model.rest.AckMessageDto;
 import esa.s1pdgs.cpoc.mqi.model.rest.GenericMessageDto;
@@ -76,7 +76,7 @@ public class JobProcessorTest extends MockPropertiesTest {
     /**
      * Job to process
      */
-    private GenericMessageDto<LevelJobDto> inputMessage;
+    private GenericMessageDto<IpfExecutionJob> inputMessage;
 
     /**
      * Processor to test
@@ -127,7 +127,7 @@ public class JobProcessorTest extends MockPropertiesTest {
         mockDefaultStatus();
         //devProperties.getStepsActivation().put("erasing", Boolean.FALSE);
 
-        inputMessage = new GenericMessageDto<LevelJobDto>(123, "",
+        inputMessage = new GenericMessageDto<IpfExecutionJob>(123, "",
                 TestUtils.buildL0LevelJobDto());
         workingDir = new File(inputMessage.getBody().getWorkDirectory());
         if (!workingDir.exists()) {

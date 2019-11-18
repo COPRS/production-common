@@ -8,7 +8,7 @@ import org.springframework.stereotype.Service;
 import esa.s1pdgs.cpoc.common.ProductCategory;
 import esa.s1pdgs.cpoc.common.errors.AbstractCodedException;
 import esa.s1pdgs.cpoc.mqi.client.GenericMqiClient;
-import esa.s1pdgs.cpoc.mqi.model.queue.LevelJobDto;
+import esa.s1pdgs.cpoc.mqi.model.queue.IpfExecutionJob;
 import esa.s1pdgs.cpoc.mqi.model.rest.GenericMessageDto;
 import esa.s1pdgs.cpoc.mqi.model.rest.GenericPublicationMessageDto;
 
@@ -47,10 +47,10 @@ public class OutputProducerFactory {
      * @param msg
      * @throws AbstractCodedException
      */
-    public void sendJob(GenericMessageDto<?> genericMessageDto, LevelJobDto dto)
+    public void sendJob(GenericMessageDto<?> genericMessageDto, IpfExecutionJob dto)
             throws AbstractCodedException {
-        GenericPublicationMessageDto<LevelJobDto> messageToPublish =
-                new GenericPublicationMessageDto<LevelJobDto>(
+        GenericPublicationMessageDto<IpfExecutionJob> messageToPublish =
+                new GenericPublicationMessageDto<IpfExecutionJob>(
                         genericMessageDto.getId(), dto.getFamily(), dto);
         messageToPublish.setInputKey(genericMessageDto.getInputKey());
         messageToPublish.setOutputKey(dto.getFamily().name());

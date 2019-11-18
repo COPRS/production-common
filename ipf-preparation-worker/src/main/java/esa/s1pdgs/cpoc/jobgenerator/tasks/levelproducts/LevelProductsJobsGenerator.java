@@ -20,7 +20,7 @@ import esa.s1pdgs.cpoc.jobgenerator.tasks.AbstractJobsGenerator;
 import esa.s1pdgs.cpoc.metadata.client.MetadataClient;
 import esa.s1pdgs.cpoc.metadata.model.L0AcnMetadata;
 import esa.s1pdgs.cpoc.metadata.model.L0SliceMetadata;
-import esa.s1pdgs.cpoc.mqi.model.queue.LevelJobDto;
+import esa.s1pdgs.cpoc.mqi.model.queue.IpfExecutionJob;
 import esa.s1pdgs.cpoc.mqi.model.queue.ProductDto;
 
 /**
@@ -112,7 +112,7 @@ public class LevelProductsJobsGenerator extends AbstractJobsGenerator<ProductDto
 	 * Customization of the job DTO before sending it
 	 */
 	@Override
-	protected void customJobDto(JobGeneration job, LevelJobDto dto) {
+	protected void customJobDto(JobGeneration job, IpfExecutionJob dto) {
 		// NOTHING TO DO
 
 	}

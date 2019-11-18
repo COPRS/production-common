@@ -5,7 +5,7 @@ import static org.junit.Assert.assertEquals;
 import org.junit.Test;
 
 import esa.s1pdgs.cpoc.common.ProductFamily;
-import esa.s1pdgs.cpoc.mqi.model.queue.LevelJobDto;
+import esa.s1pdgs.cpoc.mqi.model.queue.IpfExecutionJob;
 import esa.s1pdgs.cpoc.wrapper.job.MonitorLogUtils;
 
 public class MonitorLogUtilsTest {
@@ -17,7 +17,7 @@ public class MonitorLogUtilsTest {
     @Test
     public void testGetPrefixMonitorLogs() {
         
-        LevelJobDto job = new LevelJobDto(ProductFamily.L0_JOB, "SESSIONID", "FAST",
+        IpfExecutionJob job = new IpfExecutionJob(ProductFamily.L0_JOB, "SESSIONID", "FAST",
                 "./test_work_dir/", "job-order");
         String baseLog = "[MONITOR]";
         String productLog =

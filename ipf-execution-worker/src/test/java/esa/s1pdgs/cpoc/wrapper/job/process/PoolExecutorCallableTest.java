@@ -20,7 +20,7 @@ import esa.s1pdgs.cpoc.common.ApplicationLevel;
 import esa.s1pdgs.cpoc.common.ProductFamily;
 import esa.s1pdgs.cpoc.common.errors.InternalErrorException;
 import esa.s1pdgs.cpoc.common.errors.processing.WrapperProcessTimeoutException;
-import esa.s1pdgs.cpoc.mqi.model.queue.LevelJobDto;
+import esa.s1pdgs.cpoc.mqi.model.queue.IpfExecutionJob;
 import esa.s1pdgs.cpoc.mqi.model.queue.LevelJobPoolDto;
 import esa.s1pdgs.cpoc.mqi.model.queue.LevelJobTaskDto;
 import esa.s1pdgs.cpoc.wrapper.test.MockPropertiesTest;
@@ -28,7 +28,7 @@ import esa.s1pdgs.cpoc.wrapper.test.SystemUtils;
 
 public class PoolExecutorCallableTest extends MockPropertiesTest {
 
-    private LevelJobDto job;
+    private IpfExecutionJob job;
 
     private PoolExecutorCallable callable;
 
@@ -44,7 +44,7 @@ public class PoolExecutorCallableTest extends MockPropertiesTest {
         mockDefaultAppProperties();
         mockWapAppProperties(3, 1);
 
-        job = new LevelJobDto(ProductFamily.L0_JOB, "id", "FAST", ".", "3");
+        job = new IpfExecutionJob(ProductFamily.L0_JOB, "id", "FAST", ".", "3");
         job.addPool(new LevelJobPoolDto());
         job.getPools().get(0)
                 .addTask(new LevelJobTaskDto(SystemUtils.getCmdMkdir()));

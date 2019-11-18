@@ -25,7 +25,7 @@ import esa.s1pdgs.cpoc.common.errors.InternalErrorException;
 import esa.s1pdgs.cpoc.common.errors.UnknownFamilyException;
 import esa.s1pdgs.cpoc.common.errors.mqi.MqiPublicationError;
 import esa.s1pdgs.cpoc.common.errors.obs.ObsException;
-import esa.s1pdgs.cpoc.mqi.model.queue.LevelJobDto;
+import esa.s1pdgs.cpoc.mqi.model.queue.IpfExecutionJob;
 import esa.s1pdgs.cpoc.mqi.model.queue.LevelJobOutputDto;
 import esa.s1pdgs.cpoc.mqi.model.queue.OQCFlag;
 import esa.s1pdgs.cpoc.mqi.model.rest.GenericMessageDto;
@@ -96,7 +96,7 @@ public class OutputProcessor {
 	/**
 	 * Input message
 	 */
-	private final GenericMessageDto<LevelJobDto> inputMessage;
+	private final GenericMessageDto<IpfExecutionJob> inputMessage;
 
 	/**
 	 * List of authorized and family correspondance define in the job
@@ -140,7 +140,7 @@ public class OutputProcessor {
 	 * @param properties
 	 */
 	public OutputProcessor(final ObsClient obsClient, final OutputProcuderFactory procuderFactory,
-			final GenericMessageDto<LevelJobDto> inputMessage, final String listFile, final int sizeUploadBatch,
+			final GenericMessageDto<IpfExecutionJob> inputMessage, final String listFile, final int sizeUploadBatch,
 			final String prefixMonitorLogs, final ApplicationLevel appLevel, final ApplicationProperties properties) {
 		this.obsClient = obsClient;
 		this.procuderFactory = procuderFactory;

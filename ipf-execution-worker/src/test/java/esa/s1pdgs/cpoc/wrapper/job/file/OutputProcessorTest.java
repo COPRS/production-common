@@ -33,7 +33,7 @@ import esa.s1pdgs.cpoc.common.errors.AbstractCodedException;
 import esa.s1pdgs.cpoc.common.errors.mqi.MqiPublicationError;
 import esa.s1pdgs.cpoc.common.utils.FileUtils;
 import esa.s1pdgs.cpoc.common.utils.Streams;
-import esa.s1pdgs.cpoc.mqi.model.queue.LevelJobDto;
+import esa.s1pdgs.cpoc.mqi.model.queue.IpfExecutionJob;
 import esa.s1pdgs.cpoc.mqi.model.queue.LevelJobOutputDto;
 import esa.s1pdgs.cpoc.mqi.model.rest.GenericMessageDto;
 import esa.s1pdgs.cpoc.obs_sdk.ObsClient;
@@ -83,7 +83,7 @@ public class OutputProcessorTest {
     /**
      * List of outputs in job
      */
-    private GenericMessageDto<LevelJobDto> inputMessage;
+    private GenericMessageDto<IpfExecutionJob> inputMessage;
     private List<LevelJobOutputDto> authorizedOutputs;
 
     /**
@@ -111,8 +111,8 @@ public class OutputProcessorTest {
         MockitoAnnotations.initMocks(this);
 
         // Objects
-        inputMessage = new GenericMessageDto<LevelJobDto>(123, "",
-                new LevelJobDto(ProductFamily.L0_JOB, "product-name", "FAST24",
+        inputMessage = new GenericMessageDto<IpfExecutionJob>(123, "",
+                new IpfExecutionJob(ProductFamily.L0_JOB, "product-name", "FAST24",
                         PATH_DIRECTORY_TEST, "job-order"));
         authorizedOutputs = new ArrayList<>();
         authorizedOutputs.add(TestUtils.buildProductOutputDto(

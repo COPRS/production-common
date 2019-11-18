@@ -29,7 +29,7 @@ import esa.s1pdgs.cpoc.jobgenerator.tasks.AbstractJobsGenerator;
 import esa.s1pdgs.cpoc.metadata.client.MetadataClient;
 import esa.s1pdgs.cpoc.metadata.model.EdrsSessionMetadata;
 import esa.s1pdgs.cpoc.mqi.model.queue.EdrsSessionDto;
-import esa.s1pdgs.cpoc.mqi.model.queue.LevelJobDto;
+import esa.s1pdgs.cpoc.mqi.model.queue.IpfExecutionJob;
 import esa.s1pdgs.cpoc.mqi.model.queue.LevelJobInputDto;
 
 public class L0AppJobsGenerator extends AbstractJobsGenerator<EdrsSessionDto> {
@@ -180,7 +180,7 @@ public class L0AppJobsGenerator extends AbstractJobsGenerator<EdrsSessionDto> {
     }
 
     @Override
-    protected void customJobDto(JobGeneration job, LevelJobDto dto) {
+    protected void customJobDto(JobGeneration job, IpfExecutionJob dto) {
         // Add input relative to the channels
         if (job.getAppDataJob().getProduct() != null) {
             int nb1 = 0;

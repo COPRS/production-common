@@ -6,7 +6,7 @@ import static org.junit.Assert.assertTrue;
 import org.junit.Test;
 
 import esa.s1pdgs.cpoc.common.ProductFamily;
-import esa.s1pdgs.cpoc.mqi.model.queue.LevelJobDto;
+import esa.s1pdgs.cpoc.mqi.model.queue.IpfExecutionJob;
 import nl.jqno.equalsverifier.EqualsVerifier;
 import nl.jqno.equalsverifier.Warning;
 
@@ -22,16 +22,16 @@ public class LevelJobsMessageDtoTest {
      */
     @Test
     public void testGettersSettersConstructors() {
-        LevelJobDto body = new LevelJobDto(ProductFamily.L0_JOB,
+        IpfExecutionJob body = new IpfExecutionJob(ProductFamily.L0_JOB,
                 "testEqualsFunction", "NRT", "/data/localWD/123456",
                 "/data/localWD/123456/JobOrder.xml");
-        GenericMessageDto<LevelJobDto> dto = new GenericMessageDto<LevelJobDto>(123, "input-key", body);
+        GenericMessageDto<IpfExecutionJob> dto = new GenericMessageDto<IpfExecutionJob>(123, "input-key", body);
 
         assertEquals(123, dto.getId());
         assertEquals(body, dto.getBody());
         assertEquals("input-key", dto.getInputKey());
 
-        dto = new GenericMessageDto<LevelJobDto>();
+        dto = new GenericMessageDto<IpfExecutionJob>();
         dto.setId(321);
         dto.setBody(body);
         dto.setInputKey("othey-input");
@@ -45,11 +45,11 @@ public class LevelJobsMessageDtoTest {
      */
     @Test
     public void testToString() {
-        LevelJobDto body = new LevelJobDto(ProductFamily.L0_JOB,
+        IpfExecutionJob body = new IpfExecutionJob(ProductFamily.L0_JOB,
                 "testEqualsFunction", "NRT", "/data/localWD/123456",
                 "/data/localWD/123456/JobOrder.xml");
-        GenericMessageDto<LevelJobDto> dto =
-                new GenericMessageDto<LevelJobDto>(123, "input-key", body);
+        GenericMessageDto<IpfExecutionJob> dto =
+                new GenericMessageDto<IpfExecutionJob>(123, "input-key", body);
         String str = dto.toString();
         assertTrue("toString should contain the identifier",
                 str.contains("id: 123"));

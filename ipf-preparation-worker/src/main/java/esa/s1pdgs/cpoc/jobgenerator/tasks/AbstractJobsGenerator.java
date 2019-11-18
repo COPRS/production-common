@@ -65,7 +65,7 @@ import esa.s1pdgs.cpoc.metadata.client.SearchMetadataQuery;
 import esa.s1pdgs.cpoc.metadata.model.AbstractMetadata;
 import esa.s1pdgs.cpoc.metadata.model.SearchMetadata;
 import esa.s1pdgs.cpoc.mqi.model.queue.AbstractDto;
-import esa.s1pdgs.cpoc.mqi.model.queue.LevelJobDto;
+import esa.s1pdgs.cpoc.mqi.model.queue.IpfExecutionJob;
 import esa.s1pdgs.cpoc.mqi.model.queue.LevelJobInputDto;
 import esa.s1pdgs.cpoc.mqi.model.queue.LevelJobOutputDto;
 import esa.s1pdgs.cpoc.mqi.model.queue.LevelJobPoolDto;
@@ -896,7 +896,7 @@ public abstract class AbstractJobsGenerator<T extends AbstractDto> implements Ru
                 family = ProductFamily.L2_JOB;
                 break;
         }
-        final LevelJobDto r = new LevelJobDto(family,
+        final IpfExecutionJob r = new IpfExecutionJob(family,
                 job.getAppDataJob().getProduct().getProductName(),
                 job.getAppDataJob().getProduct().getProcessMode(), workingDir,
                 jobOrder);
@@ -1005,7 +1005,7 @@ public abstract class AbstractJobsGenerator<T extends AbstractDto> implements Ru
 
     protected abstract void customJobOrder(JobGeneration job);
 
-    protected abstract void customJobDto(JobGeneration job, LevelJobDto dto);
+    protected abstract void customJobDto(JobGeneration job, IpfExecutionJob dto);
     
     // S1PRO-707
     static final String getPolarisationFor(AppDataJobProduct product) {

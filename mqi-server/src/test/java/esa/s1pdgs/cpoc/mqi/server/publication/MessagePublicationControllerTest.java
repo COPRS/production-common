@@ -34,7 +34,7 @@ import esa.s1pdgs.cpoc.common.errors.mqi.MqiCategoryNotAvailable;
 import esa.s1pdgs.cpoc.common.errors.mqi.MqiPublicationError;
 import esa.s1pdgs.cpoc.common.errors.mqi.MqiRouteNotAvailable;
 import esa.s1pdgs.cpoc.mqi.model.queue.EdrsSessionDto;
-import esa.s1pdgs.cpoc.mqi.model.queue.LevelJobDto;
+import esa.s1pdgs.cpoc.mqi.model.queue.IpfExecutionJob;
 import esa.s1pdgs.cpoc.mqi.model.queue.LevelReportDto;
 import esa.s1pdgs.cpoc.mqi.model.queue.ProductDto;
 import esa.s1pdgs.cpoc.mqi.server.ApplicationProperties;
@@ -91,7 +91,7 @@ public class MessagePublicationControllerTest {
     private GenericKafkaUtils<ProductDto> kafkaUtilsProducts;
     private GenericKafkaUtils<LevelReportDto> kafkaUtilsReports;
     private GenericKafkaUtils<EdrsSessionDto> kafkaUtilsEdrsSession;
-    private GenericKafkaUtils<LevelJobDto> kafkaUtilsJobs;
+    private GenericKafkaUtils<IpfExecutionJob> kafkaUtilsJobs;
     
     @Before
     public void init() {
@@ -100,7 +100,7 @@ public class MessagePublicationControllerTest {
         kafkaUtilsProducts = new GenericKafkaUtils<ProductDto>(embeddedKafka);
         kafkaUtilsReports = new GenericKafkaUtils<LevelReportDto>(embeddedKafka);
         kafkaUtilsEdrsSession = new GenericKafkaUtils<EdrsSessionDto>(embeddedKafka);
-        kafkaUtilsJobs = new GenericKafkaUtils<LevelJobDto>(embeddedKafka);
+        kafkaUtilsJobs = new GenericKafkaUtils<IpfExecutionJob>(embeddedKafka);
     }
 
     private void initCustomControllerForNoPublication() {
@@ -262,13 +262,13 @@ public class MessagePublicationControllerTest {
 
     @Test
     public void publishLevelJobs() throws Exception {
-        LevelJobDto dto = new LevelJobDto(ProductFamily.L1_JOB, "product-name", "NRT",
+        IpfExecutionJob dto = new IpfExecutionJob(ProductFamily.L1_JOB, "product-name", "NRT",
                 "work-directory", "job-order");
         initCustomControllerForAllPublication();
 
         customController.publish(ProductCategory.LEVEL_JOBS, dto, "t-pdgs-l0-slices-nrt", "L1_JOB");
 
-        ConsumerRecord<String, LevelJobDto> record = kafkaUtilsJobs
+        ConsumerRecord<String, IpfExecutionJob> record = kafkaUtilsJobs
                 .getReceivedRecordJobs(GenericKafkaUtils.TOPIC_L1_JOBS);
 
         assertEquals(dto, record.value());
@@ -276,13 +276,13 @@ public class MessagePublicationControllerTest {
 
     @Test
     public void publishLevelJobs1() throws Exception {
-        LevelJobDto dto = new LevelJobDto(ProductFamily.L0_JOB, "product-name", "NRT",
+        IpfExecutionJob dto = new IpfExecutionJob(ProductFamily.L0_JOB, "product-name", "NRT",
                 "work-directory", "job-order");
         initCustomControllerForAllPublication();
 
         customController.publish(ProductCategory.LEVEL_JOBS, dto, "NONE", "NONE");
 
-        ConsumerRecord<String, LevelJobDto> record = kafkaUtilsJobs
+        ConsumerRecord<String, IpfExecutionJob> record = kafkaUtilsJobs
                 .getReceivedRecordJobs(GenericKafkaUtils.TOPIC_L0_JOBS);
 
         assertEquals(dto, record.value());
@@ -290,13 +290,13 @@ public class MessagePublicationControllerTest {
 
     @Test
     public void publishLevelJobsL2() throws Exception {
-        LevelJobDto dto = new LevelJobDto(ProductFamily.L2_JOB, "product-name", "FAST",
+        IpfExecutionJob dto = new IpfExecutionJob(ProductFamily.L2_JOB, "product-name", "FAST",
                 "work-directory", "job-order");
         initCustomControllerForAllPublication();
 
         customController.publish(ProductCategory.LEVEL_JOBS, dto, "NONE", "NONE");
 
-        ConsumerRecord<String, LevelJobDto> record = kafkaUtilsJobs
+        ConsumerRecord<String, IpfExecutionJob> record = kafkaUtilsJobs
                 .getReceivedRecordJobs(GenericKafkaUtils.TOPIC_L2_JOBS);
 
         assertEquals(dto, record.value());

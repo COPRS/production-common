@@ -8,7 +8,7 @@ import org.mockito.Mock;
 
 import esa.s1pdgs.cpoc.common.ApplicationLevel;
 import esa.s1pdgs.cpoc.common.ProductFamily;
-import esa.s1pdgs.cpoc.mqi.model.queue.LevelJobDto;
+import esa.s1pdgs.cpoc.mqi.model.queue.IpfExecutionJob;
 import esa.s1pdgs.cpoc.mqi.model.rest.GenericMessageDto;
 import esa.s1pdgs.cpoc.obs_sdk.ObsClient;
 import esa.s1pdgs.cpoc.wrapper.config.ApplicationProperties;
@@ -24,8 +24,8 @@ public class GhostTest {
 
 	@Before
 	public void setup() {
-		GenericMessageDto<LevelJobDto> inputMessage = new GenericMessageDto<LevelJobDto>(123, "",
-				new LevelJobDto(ProductFamily.L0_JOB, "product-name", "FAST24", "", "job-order"));
+		GenericMessageDto<IpfExecutionJob> inputMessage = new GenericMessageDto<IpfExecutionJob>(123, "",
+				new IpfExecutionJob(ProductFamily.L0_JOB, "product-name", "FAST24", "", "job-order"));
 		
 		ApplicationProperties properties = new ApplicationProperties();
 		properties.setThresholdEw(2);

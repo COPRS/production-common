@@ -21,7 +21,7 @@ import esa.s1pdgs.cpoc.common.ProductFamily;
 import esa.s1pdgs.cpoc.common.errors.AbstractCodedException;
 import esa.s1pdgs.cpoc.common.utils.FileUtils;
 import esa.s1pdgs.cpoc.mqi.client.GenericMqiClient;
-import esa.s1pdgs.cpoc.mqi.model.queue.LevelJobDto;
+import esa.s1pdgs.cpoc.mqi.model.queue.IpfExecutionJob;
 import esa.s1pdgs.cpoc.mqi.model.queue.LevelReportDto;
 import esa.s1pdgs.cpoc.mqi.model.queue.ProductDto;
 import esa.s1pdgs.cpoc.mqi.model.rest.GenericMessageDto;
@@ -54,7 +54,7 @@ public class OutputProducerFactoryTest {
     /**
      * Input message
      */
-    private GenericMessageDto<LevelJobDto> inputMessage;
+    private GenericMessageDto<IpfExecutionJob> inputMessage;
     
     private final File testDir = FileUtils.createTmpDir();
 
@@ -70,8 +70,8 @@ public class OutputProducerFactoryTest {
 
         this.outputProcuderFactory = new OutputProcuderFactory(sender, processConfiguration);
         
-        inputMessage = new GenericMessageDto<LevelJobDto>(123, "",
-                new LevelJobDto(ProductFamily.L0_JOB, "product-name", "FAST",
+        inputMessage = new GenericMessageDto<IpfExecutionJob>(123, "",
+                new IpfExecutionJob(ProductFamily.L0_JOB, "product-name", "FAST",
                         "work-dir", "job-order"));
         inputMessage.setInputKey(null);
     }

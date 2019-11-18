@@ -45,7 +45,7 @@ import esa.s1pdgs.cpoc.common.errors.AbstractCodedException;
 import esa.s1pdgs.cpoc.common.errors.mqi.MqiCategoryNotAvailable;
 import esa.s1pdgs.cpoc.common.errors.processing.StatusProcessingApiError;
 import esa.s1pdgs.cpoc.mqi.model.queue.EdrsSessionDto;
-import esa.s1pdgs.cpoc.mqi.model.queue.LevelJobDto;
+import esa.s1pdgs.cpoc.mqi.model.queue.IpfExecutionJob;
 import esa.s1pdgs.cpoc.mqi.model.queue.LevelReportDto;
 import esa.s1pdgs.cpoc.mqi.model.queue.ProductDto;
 import esa.s1pdgs.cpoc.mqi.model.rest.Ack;
@@ -203,7 +203,7 @@ public class MessageConsumptionControllerTest {
                 manager.consumers.get(ProductCategory.LEVEL_JOBS).size());
         assertEquals("topic", manager.consumers.get(ProductCategory.LEVEL_JOBS)
                 .get("topic").getTopic());
-        assertEquals(LevelJobDto.class,
+        assertEquals(IpfExecutionJob.class,
                 manager.consumers.get(ProductCategory.LEVEL_JOBS).get("topic")
                         .getConsumedMsgClass());
 
@@ -364,10 +364,10 @@ public class MessageConsumptionControllerTest {
     public void testAckWhenStopNotAsk()
             throws AbstractCodedException, InterruptedException {
 
-        LevelJobDto dto = new LevelJobDto(ProductFamily.L1_JOB, "product-name", "NRT",
+        IpfExecutionJob dto = new IpfExecutionJob(ProductFamily.L1_JOB, "product-name", "NRT",
                 "work-dir", "job-order");
-        AppCatMessageDto<LevelJobDto> message =
-                new AppCatMessageDto<LevelJobDto>(
+        AppCatMessageDto<IpfExecutionJob> message =
+                new AppCatMessageDto<IpfExecutionJob>(
                         ProductCategory.LEVEL_JOBS, 123, "topic", 1, 22, dto);
 
         doReturn(true).when(service).ack(Mockito.eq(ProductCategory.LEVEL_JOBS),Mockito.eq(123L),
@@ -394,8 +394,8 @@ public class MessageConsumptionControllerTest {
     public void testAckWhenStopNotAskButTopicUnknown()
             throws AbstractCodedException, InterruptedException {
 
-        LevelJobDto dto = new LevelJobDto(ProductFamily.L1_JOB, "product-name", "NRT", "work-dir", "job-order");
-        AppCatMessageDto<LevelJobDto> message = new AppCatMessageDto<LevelJobDto>(
+        IpfExecutionJob dto = new IpfExecutionJob(ProductFamily.L1_JOB, "product-name", "NRT", "work-dir", "job-order");
+        AppCatMessageDto<IpfExecutionJob> message = new AppCatMessageDto<IpfExecutionJob>(
         		ProductCategory.LEVEL_JOBS, 
         		123, 
         		"topic-unknown", 
@@ -430,10 +430,10 @@ public class MessageConsumptionControllerTest {
     public void testAckWhenStopAsk()
             throws AbstractCodedException, InterruptedException {
 
-        LevelJobDto dto = new LevelJobDto(ProductFamily.L1_JOB, "product-name", "NRT",
+        IpfExecutionJob dto = new IpfExecutionJob(ProductFamily.L1_JOB, "product-name", "NRT",
                 "work-dir", "job-order");
-        AppCatMessageDto<LevelJobDto> message =
-                new AppCatMessageDto<LevelJobDto>(
+        AppCatMessageDto<IpfExecutionJob> message =
+                new AppCatMessageDto<IpfExecutionJob>(
                         ProductCategory.LEVEL_JOBS, 123, "topic4", 1, 22, dto);
 
         doReturn(true).when(service).ack(Mockito.eq(ProductCategory.LEVEL_JOBS),Mockito.eq(123L),Mockito.any());
@@ -454,9 +454,9 @@ public class MessageConsumptionControllerTest {
     
     @Test
     public void testAckWhenStopAskL2() throws AbstractCodedException, InterruptedException {
-        LevelJobDto dto = new LevelJobDto(ProductFamily.L2_JOB, "product-name", "NRT", "work-dir", "job-order");
-        AppCatMessageDto<LevelJobDto> message =
-                new AppCatMessageDto<LevelJobDto>(
+        IpfExecutionJob dto = new IpfExecutionJob(ProductFamily.L2_JOB, "product-name", "NRT", "work-dir", "job-order");
+        AppCatMessageDto<IpfExecutionJob> message =
+                new AppCatMessageDto<IpfExecutionJob>(
                         ProductCategory.LEVEL_JOBS, 123, "topic5", 1, 22, dto);
 
         doReturn(true).when(service).ack(Mockito.eq(ProductCategory.LEVEL_JOBS),Mockito.eq(123L), Mockito.any());

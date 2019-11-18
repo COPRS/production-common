@@ -9,7 +9,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 import esa.s1pdgs.cpoc.common.ProductFamily;
-import esa.s1pdgs.cpoc.mqi.model.queue.LevelJobDto;
+import esa.s1pdgs.cpoc.mqi.model.queue.IpfExecutionJob;
 import esa.s1pdgs.cpoc.mqi.model.queue.LevelJobInputDto;
 import esa.s1pdgs.cpoc.mqi.model.queue.LevelJobOutputDto;
 import esa.s1pdgs.cpoc.mqi.model.queue.LevelJobPoolDto;
@@ -46,7 +46,7 @@ public class LevelJobDtoTest {
 		pool2.addTask(new LevelJobTaskDto("path2"));
 	}
 
-	private void checkDto(LevelJobDto dto1) {
+	private void checkDto(IpfExecutionJob dto1) {
 	    assertEquals(ProductFamily.L0_JOB, dto1.getFamily());
 		assertTrue("testEqualsFunction".equals(dto1.getProductIdentifier()));
         assertTrue("NRT".equals(dto1.getProductProcessMode()));
@@ -66,7 +66,7 @@ public class LevelJobDtoTest {
 	 */
 	@Test
 	public void testConstructorAndGetters() {
-		LevelJobDto dto1 = new LevelJobDto(ProductFamily.L0_JOB, "testEqualsFunction", "NRT", "/data/localWD/123456", "/data/localWD/123456/JobOrder.xml");
+		IpfExecutionJob dto1 = new IpfExecutionJob(ProductFamily.L0_JOB, "testEqualsFunction", "NRT", "/data/localWD/123456", "/data/localWD/123456/JobOrder.xml");
 		dto1.addInput(input1);
 		dto1.addInput(input2);
 		dto1.addOutput(output1);
@@ -83,7 +83,7 @@ public class LevelJobDtoTest {
 	 */
 	@Test
 	public void testToStringAndSetters() {
-		LevelJobDto dto1 = new LevelJobDto();
+		IpfExecutionJob dto1 = new IpfExecutionJob();
 		dto1.setFamily(ProductFamily.L0_JOB);
 		dto1.setProductIdentifier("testEqualsFunction");
 		dto1.setProductProcessMode("NRT");
@@ -115,6 +115,6 @@ public class LevelJobDtoTest {
 	 */
 	@Test
 	public void equalsDto() {
-		EqualsVerifier.forClass(LevelJobDto.class).usingGetClass().suppress(Warning.NONFINAL_FIELDS).verify();
+		EqualsVerifier.forClass(IpfExecutionJob.class).usingGetClass().suppress(Warning.NONFINAL_FIELDS).verify();
 	}
 }

@@ -24,7 +24,7 @@ import esa.s1pdgs.cpoc.common.errors.AbstractCodedException;
 import esa.s1pdgs.cpoc.common.errors.InternalErrorException;
 import esa.s1pdgs.cpoc.common.errors.UnknownFamilyException;
 import esa.s1pdgs.cpoc.common.utils.FileUtils;
-import esa.s1pdgs.cpoc.mqi.model.queue.LevelJobDto;
+import esa.s1pdgs.cpoc.mqi.model.queue.IpfExecutionJob;
 import esa.s1pdgs.cpoc.obs_sdk.ObsClient;
 import esa.s1pdgs.cpoc.obs_sdk.ObsDownloadObject;
 import esa.s1pdgs.cpoc.wrapper.TestUtils;
@@ -56,10 +56,10 @@ public class InputDownloaderTest {
     private File statusFile = new File(TestUtils.WORKDIR + "Status.txt");
     private File blankFile = new File(TestUtils.WORKDIR + "blank.xml");
 
-    private LevelJobDto dtol0 = TestUtils.buildL0LevelJobDto();
+    private IpfExecutionJob dtol0 = TestUtils.buildL0LevelJobDto();
     private InputDownloader downloaderL0;
 
-    private LevelJobDto dtol1 = TestUtils.buildL0LevelJobDto();
+    private IpfExecutionJob dtol1 = TestUtils.buildL0LevelJobDto();
     private InputDownloader downloaderL1;
 
     /**

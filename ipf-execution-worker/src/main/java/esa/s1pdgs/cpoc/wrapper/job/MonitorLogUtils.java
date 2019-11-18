@@ -1,6 +1,6 @@
 package esa.s1pdgs.cpoc.wrapper.job;
 
-import esa.s1pdgs.cpoc.mqi.model.queue.LevelJobDto;
+import esa.s1pdgs.cpoc.mqi.model.queue.IpfExecutionJob;
 
 public final class MonitorLogUtils {
 
@@ -56,7 +56,7 @@ public final class MonitorLogUtils {
      * @return
      */
     public static String getPrefixMonitorLog(final String step,
-            final LevelJobDto job) {
+            final IpfExecutionJob job) {
         String ret;
         switch (step) {
             case LOG_ERROR:

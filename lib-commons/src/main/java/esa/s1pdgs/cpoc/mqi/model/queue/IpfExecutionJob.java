@@ -11,7 +11,7 @@ import esa.s1pdgs.cpoc.common.ProductFamily;
  * 
  * @author Viveris Technologies
  */
-public class LevelJobDto extends AbstractDto {    
+public class IpfExecutionJob extends AbstractDto {    
     /**
      * Process mode
      */
@@ -49,14 +49,14 @@ public class LevelJobDto extends AbstractDto {
     /**
      * Default constructor
      */
-    public LevelJobDto() {
+    public IpfExecutionJob() {
     	super();
     }
 
     /**
      * Constructor from session identifier
      */
-    public LevelJobDto(final ProductFamily family,
+    public IpfExecutionJob(final ProductFamily family,
             final String productIdentifier, final String productProcessMode, final String workDirectory,
             final String jobOrder) {
         super(productIdentifier, family);
@@ -242,7 +242,7 @@ public class LevelJobDto extends AbstractDto {
         } else if (obj == null || getClass() != obj.getClass()) {
             ret = false;
         } else {
-            LevelJobDto other = (LevelJobDto) obj;
+            IpfExecutionJob other = (IpfExecutionJob) obj;
             ret = Objects.equals(getFamily(), other.getFamily())
                     && Objects.equals(getProductIdentifier(), other.getProductIdentifier())
                     && Objects.equals(productProcessMode,

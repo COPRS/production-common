@@ -12,7 +12,7 @@ import esa.s1pdgs.cpoc.common.ProductFamily;
 import esa.s1pdgs.cpoc.common.errors.AbstractCodedException;
 import esa.s1pdgs.cpoc.common.utils.FileUtils;
 import esa.s1pdgs.cpoc.mqi.client.GenericMqiClient;
-import esa.s1pdgs.cpoc.mqi.model.queue.LevelJobDto;
+import esa.s1pdgs.cpoc.mqi.model.queue.IpfExecutionJob;
 import esa.s1pdgs.cpoc.mqi.model.queue.LevelReportDto;
 import esa.s1pdgs.cpoc.mqi.model.queue.ProductDto;
 import esa.s1pdgs.cpoc.mqi.model.rest.GenericMessageDto;
@@ -60,7 +60,7 @@ public class OutputProcuderFactory {
      * @param msg
      * @throws AbstractCodedException
      */
-    public void sendOutput(final FileQueueMessage msg, GenericMessageDto<LevelJobDto> inputMessage)
+    public void sendOutput(final FileQueueMessage msg, GenericMessageDto<IpfExecutionJob> inputMessage)
             throws AbstractCodedException {
         LevelReportDto dtoReport = new LevelReportDto(
         		msg.getProductName(),
@@ -85,7 +85,7 @@ public class OutputProcuderFactory {
      * @param msg
      * @throws AbstractCodedException
      */
-    public void sendOutput(final ObsQueueMessage msg, GenericMessageDto<LevelJobDto> inputMessage)
+    public void sendOutput(final ObsQueueMessage msg, GenericMessageDto<IpfExecutionJob> inputMessage)
             throws AbstractCodedException {
     	
         final GenericPublicationMessageDto<ProductDto> messageToPublish = new GenericPublicationMessageDto<ProductDto>(

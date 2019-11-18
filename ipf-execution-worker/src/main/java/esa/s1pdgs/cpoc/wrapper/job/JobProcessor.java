@@ -39,7 +39,7 @@ import esa.s1pdgs.cpoc.mqi.client.MqiClient;
 import esa.s1pdgs.cpoc.mqi.client.MqiConsumer;
 import esa.s1pdgs.cpoc.mqi.client.MqiListener;
 import esa.s1pdgs.cpoc.mqi.client.StatusService;
-import esa.s1pdgs.cpoc.mqi.model.queue.LevelJobDto;
+import esa.s1pdgs.cpoc.mqi.model.queue.IpfExecutionJob;
 import esa.s1pdgs.cpoc.mqi.model.rest.Ack;
 import esa.s1pdgs.cpoc.mqi.model.rest.AckMessageDto;
 import esa.s1pdgs.cpoc.mqi.model.rest.GenericMessageDto;
@@ -68,7 +68,7 @@ import esa.s1pdgs.cpoc.wrapper.job.process.PoolExecutorCallable;
  * @author Viveris Technologies
  */
 @Service
-public class JobProcessor implements MqiListener<LevelJobDto> {
+public class JobProcessor implements MqiListener<IpfExecutionJob> {
 
 	/**
 	 * Logger
@@ -158,7 +158,7 @@ public class JobProcessor implements MqiListener<LevelJobDto> {
 		// allow disabling polling (e.g. for junit test) by configuring the polling interval
 		if (pollingIntervalMs > 0L) {
 			final ExecutorService service = Executors.newFixedThreadPool(1);
-			service.execute(new MqiConsumer<LevelJobDto>(
+			service.execute(new MqiConsumer<IpfExecutionJob>(
 					mqiClient,
 					ProductCategory.LEVEL_JOBS, 
 					this, 
@@ -171,13 +171,13 @@ public class JobProcessor implements MqiListener<LevelJobDto> {
 
 
 	@Override
-	public final void onMessage(GenericMessageDto<LevelJobDto> message) {
+	public final void onMessage(GenericMessageDto<IpfExecutionJob> message) {
 		LOGGER.info("Initializing job processing {}", message);
 
 		// ----------------------------------------------------------
 		// Initialize processing
 		// ------------------------------------------------------
-		LevelJobDto job = message.getBody();
+		IpfExecutionJob job = message.getBody();
 		final Reporting.Factory reportingFactory = new LoggerReporting.Factory("JobProcessing");
 
 		/*
@@ -249,7 +249,7 @@ public class JobProcessor implements MqiListener<LevelJobDto> {
 	 * @param step
 	 * @return
 	 */
-	protected String getPrefixMonitorLog(final String step, final LevelJobDto job) {
+	protected String getPrefixMonitorLog(final String step, final IpfExecutionJob job) {
 		return MonitorLogUtils.getPrefixMonitorLog(step, job);
 	}
 
@@ -261,7 +261,7 @@ public class JobProcessor implements MqiListener<LevelJobDto> {
      * @param procCompletionSrv
      * @param procExecutor
      */
-    protected ReportingOutput processJob(final GenericMessageDto<LevelJobDto> message,
+    protected ReportingOutput processJob(final GenericMessageDto<IpfExecutionJob> message,
             final InputDownloader inputDownloader,
             final OutputProcessor outputProcessor,
             final ExecutorService procExecutorSrv,
@@ -269,7 +269,7 @@ public class JobProcessor implements MqiListener<LevelJobDto> {
             final PoolExecutorCallable procExecutor,
             final Reporting report) {
         boolean poolProcessing = false;
-        LevelJobDto job = message.getBody();
+        IpfExecutionJob job = message.getBody();
         int step = 0;
         boolean ackOk = false;
         String errorMessage = "";
@@ -381,7 +381,7 @@ public class JobProcessor implements MqiListener<LevelJobDto> {
 	 * @param poolProcessing
 	 * @param procExecutorSrv
 	 */
-	protected void cleanJobProcessing(final LevelJobDto job, final boolean poolProcessing,
+	protected void cleanJobProcessing(final IpfExecutionJob job, final boolean poolProcessing,
 			final ExecutorService procExecutorSrv) {
 		if (poolProcessing) {
 			procExecutorSrv.shutdownNow();
@@ -426,7 +426,7 @@ public class JobProcessor implements MqiListener<LevelJobDto> {
 	 * @param ackOk
 	 * @param errorMessage
 	 */
-	protected void ackProcessing(final GenericMessageDto<LevelJobDto> dto, final FailedProcessingDto failed,
+	protected void ackProcessing(final GenericMessageDto<IpfExecutionJob> dto, final FailedProcessingDto failed,
 			final boolean ackOk, final String errorMessage) {
 		boolean stopping = appStatus.getStatus().isStopping();
 
@@ -460,7 +460,7 @@ public class JobProcessor implements MqiListener<LevelJobDto> {
 	 * @param dto
 	 * @param errorMessage
 	 */
-	protected void ackNegatively(final boolean stop, final GenericMessageDto<LevelJobDto> dto,
+	protected void ackNegatively(final boolean stop, final GenericMessageDto<IpfExecutionJob> dto,
 			final String errorMessage) {
 		LOGGER.info("{} Acknowledging negatively", getPrefixMonitorLog(MonitorLogUtils.LOG_ACK, dto.getBody()));
 		try {
@@ -474,7 +474,7 @@ public class JobProcessor implements MqiListener<LevelJobDto> {
 		appStatus.setError("PROCESSING");
 	}
 
-	protected void ackPositively(final boolean stop, final GenericMessageDto<LevelJobDto> dto) {
+	protected void ackPositively(final boolean stop, final GenericMessageDto<IpfExecutionJob> dto) {
 		LOGGER.info("{} Acknowledging positively", getPrefixMonitorLog(MonitorLogUtils.LOG_ACK, dto.getBody()));
 		try {
 			mqiClient.ack(new AckMessageDto(dto.getId(), Ack.OK, null, stop), ProductCategory.LEVEL_JOBS);
@@ -486,7 +486,7 @@ public class JobProcessor implements MqiListener<LevelJobDto> {
 		}
 	}
 	
-	private final List<String> toReportFilenames(final LevelJobDto job) {
+	private final List<String> toReportFilenames(final IpfExecutionJob job) {
 		return job.getInputs().stream()
 			.map(j -> Paths.get(j.getLocalPath()).getFileName().toString())
 			.collect(Collectors.toList());

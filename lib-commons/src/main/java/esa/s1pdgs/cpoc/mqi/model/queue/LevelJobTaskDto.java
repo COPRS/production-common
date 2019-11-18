@@ -4,7 +4,7 @@ import java.util.Objects;
 
 /**
  * @author Viveris Technologies
- * @see LevelJobDto
+ * @see IpfExecutionJob
  */
 public class LevelJobTaskDto {
 

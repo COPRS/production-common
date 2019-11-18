@@ -6,7 +6,7 @@ import esa.s1pdgs.cpoc.common.ProductFamily;
 
 /**
  * @author Viveris Technologies
- * @see LevelJobDto
+ * @see IpfExecutionJob
  */
 public class LevelJobInputDto {
 

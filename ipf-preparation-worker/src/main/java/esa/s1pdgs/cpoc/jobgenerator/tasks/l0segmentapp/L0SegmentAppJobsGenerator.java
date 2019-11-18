@@ -29,7 +29,7 @@ import esa.s1pdgs.cpoc.jobgenerator.tasks.AbstractJobsGenerator;
 import esa.s1pdgs.cpoc.metadata.client.MetadataClient;
 import esa.s1pdgs.cpoc.metadata.model.AbstractMetadata;
 import esa.s1pdgs.cpoc.metadata.model.LevelSegmentMetadata;
-import esa.s1pdgs.cpoc.mqi.model.queue.LevelJobDto;
+import esa.s1pdgs.cpoc.mqi.model.queue.IpfExecutionJob;
 import esa.s1pdgs.cpoc.mqi.model.queue.ProductDto;
 import esa.s1pdgs.cpoc.mqi.model.rest.GenericMessageDto;
 
@@ -244,7 +244,7 @@ public class L0SegmentAppJobsGenerator extends AbstractJobsGenerator<ProductDto>
      */
     @Override
     protected void customJobDto(final JobGeneration job,
-            final LevelJobDto dto) {
+            final IpfExecutionJob dto) {
         // NOTHING TO DO
 
     }

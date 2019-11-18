@@ -14,7 +14,7 @@ import esa.s1pdgs.cpoc.common.ProductCategory;
 import esa.s1pdgs.cpoc.common.ProductFamily;
 import esa.s1pdgs.cpoc.common.errors.AbstractCodedException;
 import esa.s1pdgs.cpoc.mqi.client.GenericMqiClient;
-import esa.s1pdgs.cpoc.mqi.model.queue.LevelJobDto;
+import esa.s1pdgs.cpoc.mqi.model.queue.IpfExecutionJob;
 import esa.s1pdgs.cpoc.mqi.model.queue.ProductDto;
 import esa.s1pdgs.cpoc.mqi.model.rest.GenericMessageDto;
 import esa.s1pdgs.cpoc.mqi.model.rest.GenericPublicationMessageDto;
@@ -37,15 +37,15 @@ public class OutputProducerFactoryTest {
 
     @Test
     public void testSendJob() throws AbstractCodedException {
-        LevelJobDto dto = new LevelJobDto(ProductFamily.L1_JOB, "product-name", "NRT",
+        IpfExecutionJob dto = new IpfExecutionJob(ProductFamily.L1_JOB, "product-name", "NRT",
                 "work-dir", "job-order");
         GenericMessageDto<ProductDto> message =
                 new GenericMessageDto<ProductDto>(123, "key",
                         new ProductDto("level-name", "key-obs",
                                 ProductFamily.L0_SLICE, "NRT"));
 
-        GenericPublicationMessageDto<LevelJobDto> expected =
-                new GenericPublicationMessageDto<LevelJobDto>(123L,
+        GenericPublicationMessageDto<IpfExecutionJob> expected =
+                new GenericPublicationMessageDto<IpfExecutionJob>(123L,
                         ProductFamily.L1_JOB, dto);
         expected.setInputKey("key");
         expected.setOutputKey("L1_JOB");

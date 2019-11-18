@@ -62,7 +62,7 @@ import esa.s1pdgs.cpoc.metadata.client.SearchMetadataQuery;
 import esa.s1pdgs.cpoc.metadata.model.L0AcnMetadata;
 import esa.s1pdgs.cpoc.metadata.model.L0SliceMetadata;
 import esa.s1pdgs.cpoc.metadata.model.SearchMetadata;
-import esa.s1pdgs.cpoc.mqi.model.queue.LevelJobDto;
+import esa.s1pdgs.cpoc.mqi.model.queue.IpfExecutionJob;
 
 public class L1AppJobsGeneratorTest {
 
@@ -106,7 +106,7 @@ public class L1AppJobsGeneratorTest {
 
     private AppDataJob appDataJobComplete;
 
-    private LevelJobDto publishedJob;
+    private IpfExecutionJob publishedJob;
 
     /**
      * Test set up
