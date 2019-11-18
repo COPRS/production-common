@@ -284,11 +284,11 @@
 		<module>app-status</module>
 		<module>archives</module>
 		<module>disseminator</module>
-		<module>inbox-polling</module>
-		<module>inbox-ingestion</module>
-		<module>job-generator</module>
+		<module>ingestion-trigger</module>
+		<module>ingestion-worker</module>
+		<module>ipf-preparation-worker</module>
 		<module>lib-commons</module>
-		<module>wrapper</module>
+		<module>ipf-execution-worker</module>
 		<module>request-repository</module>
 		<module>queue-watcher</module>
 		<module>metadata-catalog</module>
@@ -299,6 +299,6 @@
 		<module>prip</module>
 		<module>validation</module>
 		<module>scaler</module>
-		<module>compression</module>
+		<module>compression-worker</module>
 	</modules>
 </project>
