@@ -29,18 +29,18 @@ public class EdrsSessionFactory implements ProductFactory<IngestionEvent> {
 	}
 	
 	@Override
-	public List<Product<IngestionEvent>> newProducts(final File file, final IngestionJob ingestionDto,
+	public List<Product<IngestionEvent>> newProducts(final File file, final IngestionJob ingestionJob,
 			final ObsAdapter obsAdapter) throws ProductException {
 
 		final List<Product<IngestionEvent>> result = new ArrayList<>();
 
-		String objectStorageKey = ingestionDto.getRelativePath();
-		int channelId = extractChannelId(ingestionDto.getRelativePath());
-		EdrsSessionFileType edrsSessionFileType = extractEdrsSessionFileType(ingestionDto.getRelativePath());
-		String missionId = ingestionDto.getMissionId();
-		String satelliteId = ingestionDto.getSatelliteId();
-		String stationCode = ingestionDto.getStationCode();
-		String sessionId = extractSessionId(ingestionDto.getRelativePath());
+		String objectStorageKey = ingestionJob.getRelativePath();
+		int channelId = extractChannelId(ingestionJob.getRelativePath());
+		EdrsSessionFileType edrsSessionFileType = extractEdrsSessionFileType(ingestionJob.getRelativePath());
+		String missionId = ingestionJob.getMissionId();
+		String satelliteId = ingestionJob.getSatelliteId();
+		String stationCode = ingestionJob.getStationCode();
+		String sessionId = extractSessionId(ingestionJob.getRelativePath());
 
 		IngestionEvent edrsSessionDto = new IngestionEvent(objectStorageKey, channelId, edrsSessionFileType, missionId,
 				satelliteId, stationCode, sessionId);

@@ -134,7 +134,7 @@ public class IngestionJob extends AbstractDto {
 	@Override
 	public String toString() {
 		return String.format(
-				"IngestionDto [relativePath=%s, pickupPath=%s, missionId=%s, satelliteId=%s, stationCode=%s, hostname: %s, creationDate: %s]",
+				"IngestionJob [relativePath=%s, pickupPath=%s, missionId=%s, satelliteId=%s, stationCode=%s, hostname: %s, creationDate: %s]",
 				relativePath, pickupPath, missionId, satelliteId, stationCode, getHostname(), getCreationDate());
 	}
 }
