@@ -92,6 +92,9 @@ public class PodService {
 				if (!CollectionUtils.isEmpty(pod.getSpec().getVolumes())) {
 					boolean justConfigVolumes = true;
 					for (Volume vvv : pod.getSpec().getVolumes()) {
+						if (vvv.getName() == null) {
+							continue;
+						}						
 						LOGGER.info("Volume from file found {}",vvv.getName());
 						if (!vvv.getName().endsWith("config-volume")) {
 							justConfigVolumes = false;
