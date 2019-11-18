@@ -12,9 +12,7 @@ import org.springframework.scheduling.annotation.EnableScheduling;
  */
 @SpringBootApplication
 @EnableScheduling
-@ComponentScan("esa.s1pdgs.cpoc")
 public class Application {
-
 	/**
      * Main application
      * @param args
