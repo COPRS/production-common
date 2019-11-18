@@ -16,7 +16,7 @@ import nl.jqno.equalsverifier.Warning;
  * @author Viveris Technologies
  *
  */
-public class EdrsSessionDtoTest {
+public class IngestionEventTest {
 
 	/**
 	 * Test getters, setters and constructors
