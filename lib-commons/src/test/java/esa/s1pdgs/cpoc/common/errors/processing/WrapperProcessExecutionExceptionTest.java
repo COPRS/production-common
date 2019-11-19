@@ -7,7 +7,7 @@ import static org.junit.Assert.assertTrue;
 import org.junit.Test;
 
 import esa.s1pdgs.cpoc.common.errors.AbstractCodedException.ErrorCode;
-import esa.s1pdgs.cpoc.common.errors.processing.WrapperProcessExecutionException;
+import esa.s1pdgs.cpoc.common.errors.processing.IpfExecutionWorkerProcessExecutionException;
 
 /**
  * Test the ProcessExecutionException
@@ -21,8 +21,8 @@ public class WrapperProcessExecutionExceptionTest {
      */
     @Test
     public void testProcessExecutionException() {
-        WrapperProcessExecutionException e1 =
-                new WrapperProcessExecutionException(139, "erreur message");
+        IpfExecutionWorkerProcessExecutionException e1 =
+                new IpfExecutionWorkerProcessExecutionException(139, "erreur message");
 
         assertEquals(ErrorCode.PROCESS_EXIT_ERROR, e1.getCode());
         assertEquals(139, e1.getExitCode());

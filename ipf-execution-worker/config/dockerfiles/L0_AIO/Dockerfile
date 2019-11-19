@@ -13,8 +13,8 @@ RUN echo "${VERSION}" >> VERSION
 RUN echo "${BRANCH_TEXT}" >> VERSION
 RUN echo "${COMMIT_ID}" >> VERSION
 
-COPY --from=build /app/wrapper/target/s1pro-core-ipf-execution-worker-*.jar s1pdgs-ipf-execution-worker.jar
-COPY --from=build /app/wrapper/config/start/start_l0.sh /app/start_l0.sh
+COPY --from=build /app/ipf-execution-worker/target/s1pro-core-ipf-execution-worker-*.jar s1pdgs-ipf-execution-worker.jar
+COPY --from=build /app/ipf-execution-worker/config/start/start_l0.sh /app/start_l0.sh
 RUN chmod +x /app/start_l0.sh
 
 # Add Tini as entry point
