@@ -176,7 +176,7 @@ public class MessagePublicationControllerTest {
     @Test
     public void publishNoCat() throws MqiPublicationError,
             MqiCategoryNotAvailable, MqiRouteNotAvailable {
-        IngestionEvent dto = new IngestionEvent("obs-key", 1,
+        IngestionEvent ingestionEvent = new IngestionEvent("obs-key", "/path/of/inbox", 1,
                 EdrsSessionFileType.RAW, "S1", "A", "WILE", "sessionId");
         initCustomControllerForNoPublication();
 
@@ -185,22 +185,22 @@ public class MessagePublicationControllerTest {
                 hasProperty("category", is(ProductCategory.EDRS_SESSIONS)));
         thrown.expect(hasProperty("type", is("publisher")));
 
-        customController.publish(ProductCategory.EDRS_SESSIONS, dto, "NONE", "NONE");
+        customController.publish(ProductCategory.EDRS_SESSIONS, ingestionEvent, "NONE", "NONE");
     }
 
     @Test
     public void publishEdrsSessions() throws Exception {
-        IngestionEvent dto = new IngestionEvent("obs-key", 2,
+        IngestionEvent ingestionEvent = new IngestionEvent("obs-key", "/path/of/inbox", 2,
                 EdrsSessionFileType.RAW, "S1", "A", "WILE", "sessionId");
         initCustomControllerForAllPublication();
 
-        customController.publish(ProductCategory.EDRS_SESSIONS, dto, "NONE", "NONE");
+        customController.publish(ProductCategory.EDRS_SESSIONS, ingestionEvent, "NONE", "NONE");
 
         ConsumerRecord<String, IngestionEvent> record =
                 kafkaUtilsEdrsSession.getReceivedRecordEdrsSession(
                         GenericKafkaUtils.TOPIC_EDRS_SESSIONS);
 
-        assertEquals(dto, record.value());
+        assertEquals(ingestionEvent, record.value());
     }
 
 

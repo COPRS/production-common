@@ -97,11 +97,11 @@ public class EdrsSessionsExtractorTest {
         doReturn(true).when(mqiService).ack(Mockito.any(), Mockito.any());
 
         inputMessage = new GenericMessageDto<IngestionEvent>(123, "",
-                new IngestionEvent("123/ch01/D_123_ch01_D.RAW", 1,
+                new IngestionEvent("123/ch01/D_123_ch01_D.RAW", "/path/of/inbox", 1,
                         EdrsSessionFileType.RAW, "S1", "A", "WILE", "123"));
 
         inputMessageXml = new GenericMessageDto<IngestionEvent>(123, "",
-                new IngestionEvent("123/ch02/D_123_ch03_D.XML", 2,
+                new IngestionEvent("123/ch02/D_123_ch03_D.XML", "/path/of/inbox", 2,
                         EdrsSessionFileType.SESSION, "S1", "B", "WILE", "sessionId"));
 
         extractor = new EdrsSessionsExtractor(esServices, obsClient, mqiService, appStatus,
