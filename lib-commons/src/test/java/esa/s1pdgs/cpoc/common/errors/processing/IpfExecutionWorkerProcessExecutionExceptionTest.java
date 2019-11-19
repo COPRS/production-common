@@ -14,7 +14,7 @@ import esa.s1pdgs.cpoc.common.errors.processing.IpfExecutionWorkerProcessExecuti
  * 
  * @author Viveris Technologies
  */
-public class WrapperProcessExecutionExceptionTest {
+public class IpfExecutionWorkerProcessExecutionExceptionTest {
 
     /**
      * Test the ProcessExecutionException

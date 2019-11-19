@@ -14,7 +14,7 @@ import esa.s1pdgs.cpoc.common.errors.processing.IpfExecutionWorkerProcessTimeout
  * 
  * @author Viveris Technologies
  */
-public class WrapperProcessTimeoutExceptionTest {
+public class IpfExecutionWorkerProcessTimeoutExceptionTest {
 
     /**
      * Test the InvalidFormatProduct
