@@ -13,7 +13,7 @@ import esa.s1pdgs.cpoc.jobgenerator.tasks.AbstractJobsDispatcher;
 public class ThreadPoolTaskSchedulerConfig {
 
 
-	@Value("${job-generator.maxnboftasktable}")
+	@Value("${ipf-preparation-worker.maxnboftasktable}")
 	protected int poolSize;
 
 	@Bean(name="jobGenerationTaskScheduler", destroyMethod = "shutdown")

@@ -11,7 +11,7 @@ metadata:
   rest-api_nb-retry: 3                                             #  
   rest-api_tempo-retry-ms: 1000                                    # 
   
-job-generator:
+ipf-preparation-worker:
   diroftasktables: /app/config/task_tables/                        # Directory where the task tables are located
   maxnboftasktable: 1                                              # Maximal number of task tables in memory. The application will not start in there are more than this number tasktables in the directory
   jobgenfixedrate: 100                                             # (Fixed delay) Period between 2 generations

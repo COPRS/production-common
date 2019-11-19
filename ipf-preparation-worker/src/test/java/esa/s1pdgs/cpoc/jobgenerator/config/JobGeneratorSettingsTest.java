@@ -11,7 +11,7 @@ import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.junit4.SpringRunner;
 
 import esa.s1pdgs.cpoc.common.ProductFamily;
-import esa.s1pdgs.cpoc.jobgenerator.config.JobGeneratorSettings;
+import esa.s1pdgs.cpoc.jobgenerator.config.IpfPreparationWorkerSettings;
 
 /**
  * Test the class JobGeneratorSettings
@@ -28,7 +28,7 @@ public class JobGeneratorSettingsTest {
 	 * Job generator settings
 	 */
 	@Autowired
-	private JobGeneratorSettings jobGenSettings;
+	private IpfPreparationWorkerSettings jobGenSettings;
 
 	/**
 	 * Test the settings initialization by parsing the application file
@@ -86,7 +86,7 @@ public class JobGeneratorSettingsTest {
 	
 	@Test
 	public void testSimulateMapStrEmpty() {
-		JobGeneratorSettings settings = new JobGeneratorSettings();
+		IpfPreparationWorkerSettings settings = new IpfPreparationWorkerSettings();
 		
 		// Test map product type / family: Force str to null
 		settings.setOutputfamiliesstr(null);

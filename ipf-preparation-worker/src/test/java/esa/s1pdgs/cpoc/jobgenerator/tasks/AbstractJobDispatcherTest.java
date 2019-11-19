@@ -38,7 +38,7 @@ import esa.s1pdgs.cpoc.common.errors.InternalErrorException;
 import esa.s1pdgs.cpoc.common.errors.appcatalog.AppCatalogJobPatchApiError;
 import esa.s1pdgs.cpoc.common.errors.processing.JobGenBuildTaskTableException;
 import esa.s1pdgs.cpoc.common.errors.processing.JobGenMaxNumberTaskTablesReachException;
-import esa.s1pdgs.cpoc.jobgenerator.config.JobGeneratorSettings;
+import esa.s1pdgs.cpoc.jobgenerator.config.IpfPreparationWorkerSettings;
 import esa.s1pdgs.cpoc.jobgenerator.config.ProcessSettings;
 import esa.s1pdgs.cpoc.mqi.model.queue.ProductionEvent;
 
@@ -54,7 +54,7 @@ public class AbstractJobDispatcherTest {
      * Job generator settings
      */
     @Mock
-    private JobGeneratorSettings jobGeneratorSettings;
+    private IpfPreparationWorkerSettings jobGeneratorSettings;
 
     @Mock
     private ProcessSettings processSettings;
@@ -396,7 +396,7 @@ class AbstractJobsDispatcherImpl extends AbstractJobsDispatcher<ProductionEvent>
     private int counter;
     private int counterDispatch;
 
-    public AbstractJobsDispatcherImpl(JobGeneratorSettings taskTablesSettings,
+    public AbstractJobsDispatcherImpl(IpfPreparationWorkerSettings taskTablesSettings,
             final ProcessSettings processSettings,
             JobsGeneratorFactory jobsGeneratorFactory,
             ThreadPoolTaskScheduler jobGenerationTaskScheduler,

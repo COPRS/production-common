@@ -30,7 +30,7 @@ import esa.s1pdgs.cpoc.common.ApplicationLevel;
 import esa.s1pdgs.cpoc.common.ApplicationMode;
 import esa.s1pdgs.cpoc.common.errors.AbstractCodedException;
 import esa.s1pdgs.cpoc.common.errors.InternalErrorException;
-import esa.s1pdgs.cpoc.jobgenerator.config.JobGeneratorSettings;
+import esa.s1pdgs.cpoc.jobgenerator.config.IpfPreparationWorkerSettings;
 import esa.s1pdgs.cpoc.jobgenerator.config.ProcessSettings;
 import esa.s1pdgs.cpoc.jobgenerator.tasks.JobsGeneratorFactory;
 import esa.s1pdgs.cpoc.jobgenerator.utils.TestL0Utils;
@@ -52,7 +52,7 @@ public class L0AppJobDispatcherTest {
      * Job generator settings
      */
     @Mock
-    private JobGeneratorSettings jobGeneratorSettings;
+    private IpfPreparationWorkerSettings jobGeneratorSettings;
 
     @Mock
     private ProcessSettings processSettings;

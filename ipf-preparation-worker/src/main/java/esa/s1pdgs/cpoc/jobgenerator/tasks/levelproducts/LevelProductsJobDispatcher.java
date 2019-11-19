@@ -20,7 +20,7 @@ import esa.s1pdgs.cpoc.appcatalog.server.job.db.AppDataJob;
 import esa.s1pdgs.cpoc.common.errors.AbstractCodedException;
 import esa.s1pdgs.cpoc.common.errors.InternalErrorException;
 import esa.s1pdgs.cpoc.common.errors.processing.JobGenMissingRoutingEntryException;
-import esa.s1pdgs.cpoc.jobgenerator.config.JobGeneratorSettings;
+import esa.s1pdgs.cpoc.jobgenerator.config.IpfPreparationWorkerSettings;
 import esa.s1pdgs.cpoc.jobgenerator.config.ProcessSettings;
 import esa.s1pdgs.cpoc.jobgenerator.model.routing.LevelProductsRouting;
 import esa.s1pdgs.cpoc.jobgenerator.service.XmlConverter;
@@ -77,7 +77,7 @@ public class LevelProductsJobDispatcher extends AbstractJobsDispatcher<Productio
      * @param xmlConverter
      * @param pathRoutingXmlFile
      */
-    public LevelProductsJobDispatcher(final JobGeneratorSettings settings,
+    public LevelProductsJobDispatcher(final IpfPreparationWorkerSettings settings,
             final ProcessSettings processSettings,
             final JobsGeneratorFactory factory,
             final ThreadPoolTaskScheduler taskScheduler,

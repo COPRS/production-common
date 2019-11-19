@@ -26,7 +26,7 @@ import esa.s1pdgs.cpoc.common.ApplicationLevel;
 import esa.s1pdgs.cpoc.common.ProductFamily;
 import esa.s1pdgs.cpoc.common.errors.processing.JobGenBuildTaskTableException;
 import esa.s1pdgs.cpoc.jobgenerator.config.AiopProperties;
-import esa.s1pdgs.cpoc.jobgenerator.config.JobGeneratorSettings;
+import esa.s1pdgs.cpoc.jobgenerator.config.IpfPreparationWorkerSettings;
 import esa.s1pdgs.cpoc.jobgenerator.config.ProcessConfiguration;
 import esa.s1pdgs.cpoc.jobgenerator.config.ProcessSettings;
 import esa.s1pdgs.cpoc.jobgenerator.model.joborder.JobOrder;
@@ -58,7 +58,7 @@ public class JobsGeneratorFactoryTest {
     private ProcessSettings l0ProcessSettings;
 
     @Mock
-    private JobGeneratorSettings jobGeneratorSettings;
+    private IpfPreparationWorkerSettings jobGeneratorSettings;
 
     @Mock
     private AiopProperties aiopProperties;

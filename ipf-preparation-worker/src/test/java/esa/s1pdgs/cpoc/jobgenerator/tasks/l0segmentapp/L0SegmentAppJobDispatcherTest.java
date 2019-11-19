@@ -31,7 +31,7 @@ import esa.s1pdgs.cpoc.common.ApplicationMode;
 import esa.s1pdgs.cpoc.common.errors.AbstractCodedException;
 import esa.s1pdgs.cpoc.common.errors.InternalErrorException;
 import esa.s1pdgs.cpoc.common.errors.processing.JobGenMissingRoutingEntryException;
-import esa.s1pdgs.cpoc.jobgenerator.config.JobGeneratorSettings;
+import esa.s1pdgs.cpoc.jobgenerator.config.IpfPreparationWorkerSettings;
 import esa.s1pdgs.cpoc.jobgenerator.config.ProcessSettings;
 import esa.s1pdgs.cpoc.jobgenerator.tasks.JobsGeneratorFactory;
 import esa.s1pdgs.cpoc.jobgenerator.utils.TestL0SegmentUtils;
@@ -53,7 +53,7 @@ public class L0SegmentAppJobDispatcherTest {
      * Job generator settings
      */
     @Mock
-    private JobGeneratorSettings jobGeneratorSettings;
+    private IpfPreparationWorkerSettings jobGeneratorSettings;
 
     @Mock
     private ProcessSettings processSettings;

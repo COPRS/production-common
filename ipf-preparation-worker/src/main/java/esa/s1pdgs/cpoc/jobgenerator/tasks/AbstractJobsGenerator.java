@@ -34,7 +34,7 @@ import esa.s1pdgs.cpoc.common.errors.processing.JobGenInputsMissingException;
 import esa.s1pdgs.cpoc.common.errors.processing.MetadataQueryException;
 import esa.s1pdgs.cpoc.common.utils.DateUtils;
 import esa.s1pdgs.cpoc.common.utils.LogUtils;
-import esa.s1pdgs.cpoc.jobgenerator.config.JobGeneratorSettings;
+import esa.s1pdgs.cpoc.jobgenerator.config.IpfPreparationWorkerSettings;
 import esa.s1pdgs.cpoc.jobgenerator.config.ProcessConfiguration;
 import esa.s1pdgs.cpoc.jobgenerator.config.ProcessSettings;
 import esa.s1pdgs.cpoc.jobgenerator.model.JobGeneration;
@@ -114,7 +114,7 @@ public abstract class AbstractJobsGenerator<T extends AbstractDto> implements Ru
      */
     protected final ProcessSettings l0ProcessSettings;
 
-    protected final JobGeneratorSettings jobGeneratorSettings;
+    protected final IpfPreparationWorkerSettings jobGeneratorSettings;
 
     /**
      * Applicative data service
@@ -158,7 +158,7 @@ public abstract class AbstractJobsGenerator<T extends AbstractDto> implements Ru
     public AbstractJobsGenerator(final XmlConverter xmlConverter,
             final MetadataClient metadataClient,
             final ProcessSettings l0ProcessSettings,
-            final JobGeneratorSettings taskTablesSettings,
+            final IpfPreparationWorkerSettings taskTablesSettings,
             final OutputProducerFactory outputFactory,
             final AppCatalogJobClient<T> appDataService,
             final ProcessConfiguration processConfiguration) {

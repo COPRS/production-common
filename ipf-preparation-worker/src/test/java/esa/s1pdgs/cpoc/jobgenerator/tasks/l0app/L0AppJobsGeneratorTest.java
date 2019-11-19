@@ -34,8 +34,8 @@ import esa.s1pdgs.cpoc.common.errors.InternalErrorException;
 import esa.s1pdgs.cpoc.common.errors.processing.JobGenInputsMissingException;
 import esa.s1pdgs.cpoc.common.errors.processing.MetadataQueryException;
 import esa.s1pdgs.cpoc.jobgenerator.config.AiopProperties;
-import esa.s1pdgs.cpoc.jobgenerator.config.JobGeneratorSettings;
-import esa.s1pdgs.cpoc.jobgenerator.config.JobGeneratorSettings.WaitTempo;
+import esa.s1pdgs.cpoc.jobgenerator.config.IpfPreparationWorkerSettings;
+import esa.s1pdgs.cpoc.jobgenerator.config.IpfPreparationWorkerSettings.WaitTempo;
 import esa.s1pdgs.cpoc.jobgenerator.config.ProcessConfiguration;
 import esa.s1pdgs.cpoc.jobgenerator.config.ProcessSettings;
 import esa.s1pdgs.cpoc.jobgenerator.model.JobGeneration;
@@ -68,7 +68,7 @@ public class L0AppJobsGeneratorTest {
     private ProcessSettings l0ProcessSettings;
 
     @Mock
-    private JobGeneratorSettings jobGeneratorSettings;
+    private IpfPreparationWorkerSettings jobGeneratorSettings;
 
     @Mock
     private AiopProperties aiopProperties;

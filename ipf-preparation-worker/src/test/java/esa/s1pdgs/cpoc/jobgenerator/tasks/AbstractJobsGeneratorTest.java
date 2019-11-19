@@ -44,9 +44,9 @@ import esa.s1pdgs.cpoc.common.errors.appcatalog.AppCatalogJobSearchApiError;
 import esa.s1pdgs.cpoc.common.errors.processing.JobGenBuildTaskTableException;
 import esa.s1pdgs.cpoc.common.errors.processing.MetadataQueryException;
 import esa.s1pdgs.cpoc.jobgenerator.config.AppConfig;
-import esa.s1pdgs.cpoc.jobgenerator.config.JobGeneratorSettings;
+import esa.s1pdgs.cpoc.jobgenerator.config.IpfPreparationWorkerSettings;
 import esa.s1pdgs.cpoc.jobgenerator.config.ProcessConfiguration;
-import esa.s1pdgs.cpoc.jobgenerator.config.JobGeneratorSettings.WaitTempo;
+import esa.s1pdgs.cpoc.jobgenerator.config.IpfPreparationWorkerSettings.WaitTempo;
 import esa.s1pdgs.cpoc.jobgenerator.config.ProcessSettings;
 import esa.s1pdgs.cpoc.jobgenerator.model.ProductMode;
 import esa.s1pdgs.cpoc.jobgenerator.model.tasktable.TaskTable;
@@ -79,7 +79,7 @@ public class AbstractJobsGeneratorTest {
     private ProcessSettings processSettings;
 
     @Mock
-    private JobGeneratorSettings jobGeneratorSettings;
+    private IpfPreparationWorkerSettings jobGeneratorSettings;
 
     @Mock
     private OutputProducerFactory JobsSender;

@@ -45,8 +45,8 @@ import esa.s1pdgs.cpoc.mqi.model.queue.ProductionEvent;
  */
 @Configuration
 @EnableConfigurationProperties
-@ConfigurationProperties(prefix = "job-generator")
-public class JobGeneratorSettings {
+@ConfigurationProperties(prefix = "ipf-preparation-worker")
+public class IpfPreparationWorkerSettings {
 
 	/**
 	 * Separator use to seperate the elements of a map in a string format
@@ -140,7 +140,7 @@ public class JobGeneratorSettings {
 	/**
 	 * Default constructors
 	 */
-	public JobGeneratorSettings() {
+	public IpfPreparationWorkerSettings() {
 //        this.processSettings = processSettings;
 		this.inputfamilies = new HashMap<>();
 		this.outputfamilies = new HashMap<>();

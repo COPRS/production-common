@@ -17,7 +17,7 @@ import esa.s1pdgs.cpoc.common.errors.processing.JobGenInputsMissingException;
 import esa.s1pdgs.cpoc.common.errors.processing.MetadataQueryException;
 import esa.s1pdgs.cpoc.common.utils.DateUtils;
 import esa.s1pdgs.cpoc.jobgenerator.config.AiopProperties;
-import esa.s1pdgs.cpoc.jobgenerator.config.JobGeneratorSettings;
+import esa.s1pdgs.cpoc.jobgenerator.config.IpfPreparationWorkerSettings;
 import esa.s1pdgs.cpoc.jobgenerator.config.ProcessConfiguration;
 import esa.s1pdgs.cpoc.jobgenerator.config.ProcessSettings;
 import esa.s1pdgs.cpoc.jobgenerator.model.JobGeneration;
@@ -43,7 +43,7 @@ public class L0AppJobsGenerator extends AbstractJobsGenerator<IngestionEvent> {
 	
     public L0AppJobsGenerator(XmlConverter xmlConverter,
     		MetadataClient metadataClient, ProcessSettings l0ProcessSettings,
-            JobGeneratorSettings taskTablesSettings,
+            IpfPreparationWorkerSettings taskTablesSettings,
             final OutputProducerFactory outputFactory,
             final AppCatalogJobClient<IngestionEvent> appDataService,
             final AiopProperties aiopProperties, final ProcessConfiguration processConfiguration) {

@@ -21,7 +21,7 @@ level0:
 level-products:
   pathroutingxmlfile: ./test/data/l1_config/routing.xml
 
-job-generator:
+ipf-preparation-worker:
   diroftasktables: ./test/data/l0_config/task_tables/
   maxnboftasktable: 2
   maxnumberofjobs: 20

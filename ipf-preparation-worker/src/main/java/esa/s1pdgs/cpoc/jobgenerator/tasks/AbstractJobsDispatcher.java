@@ -19,7 +19,7 @@ import esa.s1pdgs.cpoc.appcatalog.server.job.db.AppDataJobState;
 import esa.s1pdgs.cpoc.common.ApplicationMode;
 import esa.s1pdgs.cpoc.common.errors.AbstractCodedException;
 import esa.s1pdgs.cpoc.common.errors.processing.JobGenMaxNumberTaskTablesReachException;
-import esa.s1pdgs.cpoc.jobgenerator.config.JobGeneratorSettings;
+import esa.s1pdgs.cpoc.jobgenerator.config.IpfPreparationWorkerSettings;
 import esa.s1pdgs.cpoc.jobgenerator.config.ProcessSettings;
 import esa.s1pdgs.cpoc.mqi.model.queue.AbstractDto;
 import esa.s1pdgs.cpoc.report.LoggerReporting;
@@ -54,7 +54,7 @@ public abstract class AbstractJobsDispatcher<T extends AbstractDto> {
     /**
      * Job Generator settings
      */
-    protected final JobGeneratorSettings settings;
+    protected final IpfPreparationWorkerSettings settings;
 
     /**
      * Process settings
@@ -88,7 +88,7 @@ public abstract class AbstractJobsDispatcher<T extends AbstractDto> {
      * @param factory
      * @param taskScheduler
      */
-    public AbstractJobsDispatcher(final JobGeneratorSettings settings,
+    public AbstractJobsDispatcher(final IpfPreparationWorkerSettings settings,
             final ProcessSettings processSettings,
             final JobsGeneratorFactory factory,
             final ThreadPoolTaskScheduler taskScheduler,

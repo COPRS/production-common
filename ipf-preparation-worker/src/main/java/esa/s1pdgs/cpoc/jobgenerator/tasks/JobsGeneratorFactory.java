@@ -8,7 +8,7 @@ import org.springframework.stereotype.Service;
 import esa.s1pdgs.cpoc.appcatalog.client.job.AppCatalogJobClient;
 import esa.s1pdgs.cpoc.common.errors.processing.JobGenBuildTaskTableException;
 import esa.s1pdgs.cpoc.jobgenerator.config.AiopProperties;
-import esa.s1pdgs.cpoc.jobgenerator.config.JobGeneratorSettings;
+import esa.s1pdgs.cpoc.jobgenerator.config.IpfPreparationWorkerSettings;
 import esa.s1pdgs.cpoc.jobgenerator.config.ProcessConfiguration;
 import esa.s1pdgs.cpoc.jobgenerator.config.ProcessSettings;
 import esa.s1pdgs.cpoc.jobgenerator.model.ProductMode;
@@ -32,7 +32,7 @@ public class JobsGeneratorFactory {
 	/**
 	 * 
 	 */
-	private final JobGeneratorSettings jobGeneratorSettings;
+	private final IpfPreparationWorkerSettings jobGeneratorSettings;
 
 	/**
 	 * 
@@ -66,7 +66,7 @@ public class JobsGeneratorFactory {
 	 */
 	@Autowired
 	public JobsGeneratorFactory(final ProcessSettings l0ProcessSettings,
-			final JobGeneratorSettings jobGeneratorSettings, final AiopProperties aiopProperties,
+			final IpfPreparationWorkerSettings jobGeneratorSettings, final AiopProperties aiopProperties,
 			final XmlConverter xmlConverter, final MetadataClient metadataClient,
 			final OutputProducerFactory outputFactory, final ProcessConfiguration processConfiguration) {
 		this.l0ProcessSettings = l0ProcessSettings;

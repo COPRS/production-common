@@ -7,7 +7,7 @@ import esa.s1pdgs.cpoc.appcatalog.server.job.db.AppDataJobProduct;
 import esa.s1pdgs.cpoc.common.errors.processing.JobGenInputsMissingException;
 import esa.s1pdgs.cpoc.common.errors.processing.MetadataQueryException;
 import esa.s1pdgs.cpoc.common.utils.DateUtils;
-import esa.s1pdgs.cpoc.jobgenerator.config.JobGeneratorSettings;
+import esa.s1pdgs.cpoc.jobgenerator.config.IpfPreparationWorkerSettings;
 import esa.s1pdgs.cpoc.jobgenerator.config.ProcessConfiguration;
 import esa.s1pdgs.cpoc.jobgenerator.config.ProcessSettings;
 import esa.s1pdgs.cpoc.jobgenerator.model.JobGeneration;
@@ -40,7 +40,7 @@ public class LevelProductsJobsGenerator extends AbstractJobsGenerator<Production
 	 * @param appDataService
 	 */
 	public LevelProductsJobsGenerator(XmlConverter xmlConverter, MetadataClient metadataClient, ProcessSettings processSettings,
-			JobGeneratorSettings taskTablesSettings, OutputProducerFactory outputFactory,
+			IpfPreparationWorkerSettings taskTablesSettings, OutputProducerFactory outputFactory,
 			AppCatalogJobClient<ProductionEvent>  appDataService, ProcessConfiguration processConfiguration) {
 		super(xmlConverter, metadataClient, processSettings, taskTablesSettings, outputFactory, appDataService, processConfiguration);
 	}
