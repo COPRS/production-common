@@ -8,7 +8,7 @@ import org.springframework.context.annotation.Configuration;
 
 @Configuration
 @ConfigurationProperties("ingestion")
-public class IngestionServiceConfigurationProperties {	
+public class IngestionWorkerServiceConfigurationProperties {	
 	private long pollingIntervalMs = 100;
 	private int maxRetries = 2;	
 	private long tempoRetryMs = 100;

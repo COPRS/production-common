@@ -23,7 +23,7 @@ import esa.s1pdgs.cpoc.common.utils.FileUtils;
 import esa.s1pdgs.cpoc.common.utils.LogUtils;
 import esa.s1pdgs.cpoc.errorrepo.ErrorRepoAppender;
 import esa.s1pdgs.cpoc.errorrepo.model.rest.FailedProcessingDto;
-import esa.s1pdgs.cpoc.ingestion.worker.config.IngestionServiceConfigurationProperties;
+import esa.s1pdgs.cpoc.ingestion.worker.config.IngestionWorkerServiceConfigurationProperties;
 import esa.s1pdgs.cpoc.ingestion.worker.config.IngestionTypeConfiguration;
 import esa.s1pdgs.cpoc.ingestion.worker.product.IngestionResult;
 import esa.s1pdgs.cpoc.ingestion.worker.product.Product;
@@ -43,17 +43,17 @@ import esa.s1pdgs.cpoc.report.Reporting;
 import esa.s1pdgs.cpoc.report.ReportingMessage;
 
 @Service
-public class IngestionService implements MqiListener<IngestionJob> {
-	static final Logger LOG = LogManager.getLogger(IngestionService.class);
+public class IngestionWorkerService implements MqiListener<IngestionJob> {
+	static final Logger LOG = LogManager.getLogger(IngestionWorkerService.class);
 
 	private final GenericMqiClient mqiClient;
 	private final ErrorRepoAppender errorRepoAppender;
-	private final IngestionServiceConfigurationProperties properties;
+	private final IngestionWorkerServiceConfigurationProperties properties;
 	private final ProductService productService;
 
 	@Autowired
-	public IngestionService(final GenericMqiClient mqiClient, final ErrorRepoAppender errorRepoAppender,
-			final IngestionServiceConfigurationProperties properties, final ProductService productService) {
+	public IngestionWorkerService(final GenericMqiClient mqiClient, final ErrorRepoAppender errorRepoAppender,
+			final IngestionWorkerServiceConfigurationProperties properties, final ProductService productService) {
 		this.mqiClient = mqiClient;
 		this.errorRepoAppender = errorRepoAppender;
 		this.properties = properties;

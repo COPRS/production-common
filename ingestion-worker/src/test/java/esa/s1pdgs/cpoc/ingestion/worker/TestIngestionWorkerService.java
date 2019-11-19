@@ -24,8 +24,8 @@ import esa.s1pdgs.cpoc.common.ProductFamily;
 import esa.s1pdgs.cpoc.common.errors.AbstractCodedException;
 import esa.s1pdgs.cpoc.common.errors.InternalErrorException;
 import esa.s1pdgs.cpoc.errorrepo.ErrorRepoAppender;
-import esa.s1pdgs.cpoc.ingestion.worker.IngestionService;
-import esa.s1pdgs.cpoc.ingestion.worker.config.IngestionServiceConfigurationProperties;
+import esa.s1pdgs.cpoc.ingestion.worker.IngestionWorkerService;
+import esa.s1pdgs.cpoc.ingestion.worker.config.IngestionWorkerServiceConfigurationProperties;
 import esa.s1pdgs.cpoc.ingestion.worker.config.IngestionTypeConfiguration;
 import esa.s1pdgs.cpoc.ingestion.worker.product.IngestionResult;
 import esa.s1pdgs.cpoc.ingestion.worker.product.Product;
@@ -40,7 +40,7 @@ import esa.s1pdgs.cpoc.mqi.model.rest.GenericPublicationMessageDto;
 import esa.s1pdgs.cpoc.report.LoggerReporting;
 import esa.s1pdgs.cpoc.report.Reporting;
 
-public final class TestIngestionService {
+public final class TestIngestionWorkerService {
 	
 	@Mock
 	GenericMqiClient mqiClient;
@@ -83,10 +83,10 @@ public final class TestIngestionService {
 				return IngestionResult.NULL;
 			}
 		};		
-		final IngestionService uut = new IngestionService(
+		final IngestionWorkerService uut = new IngestionWorkerService(
 				null, 
 				ErrorRepoAppender.NULL, 
-				new IngestionServiceConfigurationProperties(), 
+				new IngestionWorkerServiceConfigurationProperties(), 
 				fakeProductService
 		);
 		uut.onMessage(mess);
@@ -94,12 +94,12 @@ public final class TestIngestionService {
 
 	@Test
 	public final void testIdentifyAndUpload() throws InternalErrorException {
-		IngestionServiceConfigurationProperties properties = new IngestionServiceConfigurationProperties();
+		IngestionWorkerServiceConfigurationProperties properties = new IngestionWorkerServiceConfigurationProperties();
 		IngestionTypeConfiguration itc = new IngestionTypeConfiguration();
 		itc.setFamily(ProductFamily.AUXILIARY_FILE.name());
 		itc.setRegex("fo+\\.bar");
 		properties.setTypes(Arrays.asList(itc));
-		final IngestionService uut = new IngestionService(
+		final IngestionWorkerService uut = new IngestionWorkerService(
 				mqiClient, 
 				ErrorRepoAppender.NULL, 
 				properties,
@@ -135,12 +135,12 @@ public final class TestIngestionService {
 	
 	@Test
 	public final void testIdentifyAndUploadOnInvalidFamily() throws InternalErrorException {
-		IngestionServiceConfigurationProperties properties = new IngestionServiceConfigurationProperties();
+		IngestionWorkerServiceConfigurationProperties properties = new IngestionWorkerServiceConfigurationProperties();
 		IngestionTypeConfiguration itc = new IngestionTypeConfiguration();
 		itc.setFamily("FOO");
 		itc.setRegex("fo+\\.bar");
 		properties.setTypes(Arrays.asList(itc));
-		final IngestionService uut = new IngestionService(
+		final IngestionWorkerService uut = new IngestionWorkerService(
 				mqiClient, 
 				ErrorRepoAppender.NULL, 
 				properties,
@@ -162,12 +162,12 @@ public final class TestIngestionService {
 
 	@Test
 	public final void testGetFamilyForNominal() {
-		IngestionServiceConfigurationProperties properties = new IngestionServiceConfigurationProperties();
+		IngestionWorkerServiceConfigurationProperties properties = new IngestionWorkerServiceConfigurationProperties();
 		IngestionTypeConfiguration itc = new IngestionTypeConfiguration();
 		itc.setFamily(ProductFamily.AUXILIARY_FILE.name());
 		itc.setRegex("fo+\\.bar");
 		properties.setTypes(Arrays.asList(itc));
-		final IngestionService uut = new IngestionService(
+		final IngestionWorkerService uut = new IngestionWorkerService(
 				mqiClient, 
 				ErrorRepoAppender.NULL, 
 				properties,
@@ -179,12 +179,12 @@ public final class TestIngestionService {
 	
 	@Test
 	public final void testGetFamilyForNotMatching() {
-		IngestionServiceConfigurationProperties properties = new IngestionServiceConfigurationProperties();
+		IngestionWorkerServiceConfigurationProperties properties = new IngestionWorkerServiceConfigurationProperties();
 		IngestionTypeConfiguration itc = new IngestionTypeConfiguration();
 		itc.setFamily(ProductFamily.AUXILIARY_FILE.name());
 		itc.setRegex("fo+\\.bar");
 		properties.setTypes(Arrays.asList(itc));
-		final IngestionService uut = new IngestionService(
+		final IngestionWorkerService uut = new IngestionWorkerService(
 				mqiClient, 
 				ErrorRepoAppender.NULL, 
 				properties,
@@ -198,12 +198,12 @@ public final class TestIngestionService {
 	
 	@Test
 	public final void testGetFamilyForInvalid() {
-		IngestionServiceConfigurationProperties properties = new IngestionServiceConfigurationProperties();
+		IngestionWorkerServiceConfigurationProperties properties = new IngestionWorkerServiceConfigurationProperties();
 		IngestionTypeConfiguration itc = new IngestionTypeConfiguration();
 		itc.setFamily("FOO");
 		itc.setRegex("fo+\\.bar");
 		properties.setTypes(Arrays.asList(itc));
-		final IngestionService uut = new IngestionService(
+		final IngestionWorkerService uut = new IngestionWorkerService(
 				mqiClient, 
 				ErrorRepoAppender.NULL, 
 				properties,
@@ -217,10 +217,10 @@ public final class TestIngestionService {
 	
 	@Test
 	public final void testPublish() throws AbstractCodedException {
-		final IngestionService uut = new IngestionService(
+		final IngestionWorkerService uut = new IngestionWorkerService(
 				mqiClient, 
 				ErrorRepoAppender.NULL, 
-				new IngestionServiceConfigurationProperties(),
+				new IngestionWorkerServiceConfigurationProperties(),
 				productService
 		);
 		
