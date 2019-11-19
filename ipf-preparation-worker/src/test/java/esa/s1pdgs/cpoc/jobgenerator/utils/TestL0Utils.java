@@ -118,7 +118,7 @@ public class TestL0Utils {
         if (raw1) {
             GenericMessageDto<IngestionEvent> message1 =
                     new GenericMessageDto<IngestionEvent>(1, "input-key",
-                            new IngestionEvent("obs1", 1,
+                            new IngestionEvent("obs1", "/path/of/inbox", 1,
                                     EdrsSessionFileType.SESSION, missionId,
                                     "A", "WILE", "sessionId"));
             messages.add(message1);
@@ -126,7 +126,7 @@ public class TestL0Utils {
         if (raw2) {
             GenericMessageDto<IngestionEvent> message2 =
                     new GenericMessageDto<IngestionEvent>(1, "input-key",
-                            new IngestionEvent("obs2", 2,
+                            new IngestionEvent("obs2", "/path/of/inbox", 2,
                                     EdrsSessionFileType.SESSION, missionId,
                                     "A", "WILE", "sessionId"));
             messages.add(message2);

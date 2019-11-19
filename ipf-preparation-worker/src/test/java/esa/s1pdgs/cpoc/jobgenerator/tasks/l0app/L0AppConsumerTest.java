@@ -67,22 +67,22 @@ public class L0AppConsumerTest {
 
     private ErrorRepoAppender errorAppender = ErrorRepoAppender.NULL ;
 
-    private IngestionEvent dto1 = new IngestionEvent("KEY_OBS_SESSION_1_1", 1,
+    private IngestionEvent ingestionEvent1 = new IngestionEvent("KEY_OBS_SESSION_1_1", "/path/of/inbox", 1,
             EdrsSessionFileType.SESSION, "S1", "A", "WILE", "sessionId");
-    private IngestionEvent dto2 = new IngestionEvent("KEY_OBS_SESSION_1_2", 2,
+    private IngestionEvent ingestionEvent2 = new IngestionEvent("KEY_OBS_SESSION_1_2", "/path/of/inbox", 2,
             EdrsSessionFileType.SESSION, "S1", "A", "WILE", "sessionId");
-    private IngestionEvent dto3 = new IngestionEvent("KEY_OBS_SESSION_2_1", 1,
+    private IngestionEvent ingestionEvent3 = new IngestionEvent("KEY_OBS_SESSION_2_1", "/path/of/inbox", 1,
             EdrsSessionFileType.SESSION, "S1", "A", "WILE", "sessionId");
-    private IngestionEvent dto4 = new IngestionEvent("KEY_OBS_SESSION_2_2", 2,
+    private IngestionEvent ingestionEvent4 = new IngestionEvent("KEY_OBS_SESSION_2_2", "/path/of/inbox", 2,
             EdrsSessionFileType.SESSION, "S1", "A", "WILE", "sessionId");
     private GenericMessageDto<IngestionEvent> message1 =
-            new GenericMessageDto<IngestionEvent>(1, "", dto1);
+            new GenericMessageDto<IngestionEvent>(1, "", ingestionEvent1);
     private GenericMessageDto<IngestionEvent> message2 =
-            new GenericMessageDto<IngestionEvent>(2, "", dto2);
+            new GenericMessageDto<IngestionEvent>(2, "", ingestionEvent2);
     private GenericMessageDto<IngestionEvent> message3 =
-            new GenericMessageDto<IngestionEvent>(3, "", dto3);
+            new GenericMessageDto<IngestionEvent>(3, "", ingestionEvent3);
     private GenericMessageDto<IngestionEvent> message4 =
-            new GenericMessageDto<IngestionEvent>(4, "", dto4);
+            new GenericMessageDto<IngestionEvent>(4, "", ingestionEvent4);
 
     /**
      * Test set up
@@ -238,7 +238,7 @@ public class L0AppConsumerTest {
                 processSettings, mqiService, mqiStatusService, appDataService,
                 errorAppender, appStatus, metadataClient, 0, 0);
         GenericMessageDto<IngestionEvent> mqiMessage= new GenericMessageDto<IngestionEvent>(1, "",
-                new IngestionEvent("KEY_OBS_SESSION_2_2", 2,
+                new IngestionEvent("KEY_OBS_SESSION_2_2", "/path/of/inbox", 2,
                         EdrsSessionFileType.RAW, "S1", "A", "WILE", "sessionId"));
         
         
@@ -264,7 +264,7 @@ public class L0AppConsumerTest {
         L0AppConsumer edrsSessionsConsumer = new L0AppConsumer(jobsDispatcher,
                 processSettings, mqiService, mqiStatusService, appDataService,
                 errorAppender, appStatus, metadataClient, 0, 0);
-        dto1.setChannelId(3);
+        ingestionEvent1.setChannelId(3);
 
         edrsSessionsConsumer.onMessage(message1);
         Mockito.verify(jobsDispatcher, Mockito.never()).dispatch(Mockito.any());
@@ -274,10 +274,10 @@ public class L0AppConsumerTest {
     public void testBuildWhenMessageIdExistSameHostname()
             throws AbstractCodedException {
 
-        IngestionEvent dto = new IngestionEvent("KEY_OBS_SESSION_1_1", 1,
+        IngestionEvent ingestionEvent = new IngestionEvent("KEY_OBS_SESSION_1_1", "/path/of/inbox", 1,
                 EdrsSessionFileType.SESSION, "S1", "A", "WILE", "sessionId");
         GenericMessageDto<IngestionEvent> message =
-                new GenericMessageDto<IngestionEvent>(123, "", dto);
+                new GenericMessageDto<IngestionEvent>(123, "", ingestionEvent);
 
         AppDataJob expected = TestL0Utils.buildAppDataEdrsSession(false);
 
@@ -299,10 +299,10 @@ public class L0AppConsumerTest {
     public void testBuildWhenMessageIdExistDifferentHostname()
             throws AbstractCodedException {
 
-        IngestionEvent dto = new IngestionEvent("KEY_OBS_SESSION_1_1", 1,
+        IngestionEvent ingestionEvent = new IngestionEvent("KEY_OBS_SESSION_1_1", "/path/of/inbox", 1,
                 EdrsSessionFileType.SESSION, "S1", "A", "WILE", "sessionId");
         GenericMessageDto<IngestionEvent> message =
-                new GenericMessageDto<IngestionEvent>(123, "", dto);
+                new GenericMessageDto<IngestionEvent>(123, "", ingestionEvent);
 
         AppDataJob expected =
                 TestL0Utils.buildAppDataEdrsSession(true);
@@ -328,10 +328,10 @@ public class L0AppConsumerTest {
     @Test
     public void testBuildWhenMessageIdNotExistNewRaw()
             throws AbstractCodedException {
-    	IngestionEvent dto = new IngestionEvent("obs1", 1,
+    	IngestionEvent ingestionEvent = new IngestionEvent("obs1", "/path/of/inbox", 1,
                 EdrsSessionFileType.SESSION, "S1", "A", "WILE", "sessionId");
         GenericMessageDto<IngestionEvent> message =
-                new GenericMessageDto<IngestionEvent>(123, "", dto);
+                new GenericMessageDto<IngestionEvent>(123, "", ingestionEvent);
 
         AppDataJob expected =
                 TestL0Utils.buildAppDataEdrsSession(true);
@@ -363,10 +363,10 @@ public class L0AppConsumerTest {
     @Test
     public void testBuildWhenMessageIdNotExistHostnameDifeerentAllRaw()
             throws AbstractCodedException {
-        IngestionEvent dto = new IngestionEvent("obs1", 1,
+        IngestionEvent ingestionEvent = new IngestionEvent("obs1", "/path/of/inbox", 1,
                 EdrsSessionFileType.SESSION, "S1", "A", "WILE", "sessionId");
         GenericMessageDto<IngestionEvent> message =
-                new GenericMessageDto<IngestionEvent>(123, "", dto);
+                new GenericMessageDto<IngestionEvent>(123, "", ingestionEvent);
 
         AppDataJob expected =
                 TestL0Utils.buildAppDataEdrsSession(true);
