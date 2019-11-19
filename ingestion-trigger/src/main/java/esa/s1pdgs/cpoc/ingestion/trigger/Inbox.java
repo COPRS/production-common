@@ -18,15 +18,15 @@ public final class Inbox {
 
 	private final InboxAdapter inboxAdapter;
 	private final List<InboxFilter> filter;
-	private final IngestionTriggerServiceTransactional inboxPollingServiceTransactional;
+	private final IngestionTriggerServiceTransactional ingestionTriggerServiceTransactional;
 	private final SubmissionClient client;
 	private final String hostname;
 
 	Inbox(final InboxAdapter inboxAdapter, final List<InboxFilter> filter,
-			final IngestionTriggerServiceTransactional inboxPollingServiceTransactional, final SubmissionClient client, final String hostname) {
+			final IngestionTriggerServiceTransactional ingestionTriggerServiceTransactional, final SubmissionClient client, final String hostname) {
 		this.inboxAdapter = inboxAdapter;
 		this.filter = filter;
-		this.inboxPollingServiceTransactional = inboxPollingServiceTransactional;
+		this.ingestionTriggerServiceTransactional = ingestionTriggerServiceTransactional;
 		this.client = client;
 		this.hostname = hostname;
 	}
@@ -34,7 +34,7 @@ public final class Inbox {
 	public final void poll() {
 		try {
 			final Set<InboxEntry> pickupContent = new HashSet<>(inboxAdapter.read(filter));
-			final Set<InboxEntry> persistedContent = inboxPollingServiceTransactional
+			final Set<InboxEntry> persistedContent = ingestionTriggerServiceTransactional
 					.getAllForPath(inboxAdapter.inboxPath());
 
 			final Set<InboxEntry> newElements = new HashSet<>(pickupContent);
@@ -49,7 +49,7 @@ public final class Inbox {
 				// from the
 				// persistence so it will not be ignored if it occurs again on the inbox
 				LOG.debug("Deleting all {} from persistence", finishedElements);
-				inboxPollingServiceTransactional.removeFinished(finishedElements);
+				ingestionTriggerServiceTransactional.removeFinished(finishedElements);
 			}
 
 			if (newElements.size() != 0) {
@@ -86,7 +86,7 @@ public final class Inbox {
 			dto.setSatelliteId(entry.getSatelliteId());
 			dto.setStationCode(entry.getStationCode());
 			client.publish(dto);
-			final InboxEntry persisted = inboxPollingServiceTransactional.add(entry);
+			final InboxEntry persisted = ingestionTriggerServiceTransactional.add(entry);
 			LOG.debug("Added {} to persistence", persisted);
 		} catch (Exception e) {
 			LOG.error(String.format("Error on handling %s in %s", entry, description()), e);

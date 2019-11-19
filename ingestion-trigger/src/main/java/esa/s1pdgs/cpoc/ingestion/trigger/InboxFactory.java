@@ -29,7 +29,7 @@ public class InboxFactory {
 
 	private final KafkaTemplate<String, IngestionJob> kafkaTemplate;
 	private final InboxAdapterFactory inboxAdapterFactory;
-	private final IngestionTriggerServiceTransactional inboxPollingServiceTransactional;
+	private final IngestionTriggerServiceTransactional ingestionTriggerServiceTransactional;
 	private final String hostname;
 
 	@Autowired
@@ -38,7 +38,7 @@ public class InboxFactory {
 			final InboxAdapterFactory inboxAdapterFactory,
 			final ProcessConfiguration processConfiguration) {
 		this.kafkaTemplate = kafkaTemplate;
-		this.inboxPollingServiceTransactional = inboxPollingServiceTransactional;
+		this.ingestionTriggerServiceTransactional = inboxPollingServiceTransactional;
 		this.inboxAdapterFactory = inboxAdapterFactory;
 		this.hostname = processConfiguration.getHostname();
 	}
@@ -51,7 +51,7 @@ public class InboxFactory {
 		filter.add(new BlacklistRegexRelativePathInboxFilter(Pattern.compile(config.getIgnoreRegex())));
 		filter.add(new WhitelistRegexRelativePathInboxFilter(Pattern.compile(config.getMatchRegex())));
 		return new Inbox(inboxAdapterFactory.newInboxAdapter(config.getDirectory()), filter,
-				inboxPollingServiceTransactional, new KafkaSubmissionClient(kafkaTemplate, config.getTopic() + "-" + hostname), hostname
+				ingestionTriggerServiceTransactional, new KafkaSubmissionClient(kafkaTemplate, config.getTopic() + "-" + hostname), hostname
 		);
 	}
 

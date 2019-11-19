@@ -14,16 +14,16 @@ import esa.s1pdgs.cpoc.ingestion.trigger.PollingTrigger;
 @EnableScheduling
 @Configuration
 public class SchedulingConfiguration {
-	private final IngestionTriggerService pollingService;
+	private final IngestionTriggerService ingestionTriggerService;
 	
 	@Autowired
-	public SchedulingConfiguration(IngestionTriggerService pollingService) {
-		this.pollingService = pollingService;
+	public SchedulingConfiguration(IngestionTriggerService ingestionTriggerService) {
+		this.ingestionTriggerService = ingestionTriggerService;
 	}
 
 	@Bean
 	public PollingTrigger pollingTrigger()
 	{
-		return new PollingTrigger(pollingService);
+		return new PollingTrigger(ingestionTriggerService);
 	}
 }
