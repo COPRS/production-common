@@ -26,7 +26,7 @@ import esa.s1pdgs.cpoc.ingestion.trigger.entity.InboxEntryRepository;
 @Transactional
 public class TestApplication {
 	@Autowired
-	private InboxPollingService service;
+	private IngestionTriggerService service;
 
 	@Autowired
 	private InboxEntryRepository repo;

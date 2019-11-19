@@ -5,12 +5,12 @@ import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public final class InboxPollingService {		
-	private static final Logger LOG = LoggerFactory.getLogger(InboxPollingService.class);
+public final class IngestionTriggerService {		
+	private static final Logger LOG = LoggerFactory.getLogger(IngestionTriggerService.class);
 	
 	private final List<Inbox> inboxes;
 	
-	public InboxPollingService(List<Inbox> inboxes) {
+	public IngestionTriggerService(List<Inbox> inboxes) {
 		this.inboxes = inboxes;
 	}
 	 

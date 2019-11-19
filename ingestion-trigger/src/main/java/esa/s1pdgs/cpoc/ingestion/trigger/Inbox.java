@@ -18,12 +18,12 @@ public final class Inbox {
 
 	private final InboxAdapter inboxAdapter;
 	private final List<InboxFilter> filter;
-	private final InboxPollingServiceTransactional inboxPollingServiceTransactional;
+	private final IngestionTriggerServiceTransactional inboxPollingServiceTransactional;
 	private final SubmissionClient client;
 	private final String hostname;
 
 	Inbox(final InboxAdapter inboxAdapter, final List<InboxFilter> filter,
-			final InboxPollingServiceTransactional inboxPollingServiceTransactional, final SubmissionClient client, final String hostname) {
+			final IngestionTriggerServiceTransactional inboxPollingServiceTransactional, final SubmissionClient client, final String hostname) {
 		this.inboxAdapter = inboxAdapter;
 		this.filter = filter;
 		this.inboxPollingServiceTransactional = inboxPollingServiceTransactional;

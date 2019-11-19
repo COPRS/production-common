@@ -29,12 +29,12 @@ public class InboxFactory {
 
 	private final KafkaTemplate<String, IngestionJob> kafkaTemplate;
 	private final InboxAdapterFactory inboxAdapterFactory;
-	private final InboxPollingServiceTransactional inboxPollingServiceTransactional;
+	private final IngestionTriggerServiceTransactional inboxPollingServiceTransactional;
 	private final String hostname;
 
 	@Autowired
 	public InboxFactory(final KafkaTemplate<String, IngestionJob> kafkaTemplate,
-			final InboxPollingServiceTransactional inboxPollingServiceTransactional,
+			final IngestionTriggerServiceTransactional inboxPollingServiceTransactional,
 			final InboxAdapterFactory inboxAdapterFactory,
 			final ProcessConfiguration processConfiguration) {
 		this.kafkaTemplate = kafkaTemplate;

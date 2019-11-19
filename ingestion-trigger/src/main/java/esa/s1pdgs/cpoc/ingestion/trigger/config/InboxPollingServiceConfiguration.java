@@ -12,7 +12,7 @@ import org.springframework.context.annotation.Configuration;
 
 import esa.s1pdgs.cpoc.ingestion.trigger.Inbox;
 import esa.s1pdgs.cpoc.ingestion.trigger.InboxFactory;
-import esa.s1pdgs.cpoc.ingestion.trigger.InboxPollingService;
+import esa.s1pdgs.cpoc.ingestion.trigger.IngestionTriggerService;
 
 @Configuration
 public class InboxPollingServiceConfiguration {
@@ -32,7 +32,7 @@ public class InboxPollingServiceConfiguration {
 	}
 
 	@Bean
-	public InboxPollingService newInboxService() {
+	public IngestionTriggerService newInboxService() {
 		final List<Inbox> inboxes = new ArrayList<>();
 
 		for (InboxConfiguration c : properties.getPolling()) {
@@ -43,6 +43,6 @@ public class InboxPollingServiceConfiguration {
 				LOG.error(e.getMessage());
 			}
 		}
-		return new InboxPollingService(inboxes);
+		return new IngestionTriggerService(inboxes);
 	}
 }

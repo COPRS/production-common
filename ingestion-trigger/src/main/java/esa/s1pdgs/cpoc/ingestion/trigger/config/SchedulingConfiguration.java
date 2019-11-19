@@ -6,7 +6,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.scheduling.annotation.EnableScheduling;
 
-import esa.s1pdgs.cpoc.ingestion.trigger.InboxPollingService;
+import esa.s1pdgs.cpoc.ingestion.trigger.IngestionTriggerService;
 import esa.s1pdgs.cpoc.ingestion.trigger.PollingTrigger;
 
 // make scheduling configurable via property to allow disabling it in unit tests
@@ -14,10 +14,10 @@ import esa.s1pdgs.cpoc.ingestion.trigger.PollingTrigger;
 @EnableScheduling
 @Configuration
 public class SchedulingConfiguration {
-	private final InboxPollingService pollingService;
+	private final IngestionTriggerService pollingService;
 	
 	@Autowired
-	public SchedulingConfiguration(InboxPollingService pollingService) {
+	public SchedulingConfiguration(IngestionTriggerService pollingService) {
 		this.pollingService = pollingService;
 	}
 

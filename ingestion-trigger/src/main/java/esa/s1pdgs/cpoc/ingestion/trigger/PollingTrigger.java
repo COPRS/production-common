@@ -6,9 +6,9 @@ import org.springframework.scheduling.annotation.Scheduled;
 public class PollingTrigger {
 	private static final Logger LOG = org.slf4j.LoggerFactory.getLogger(PollingTrigger.class);
 	
-	private final InboxPollingService pollingService;
+	private final IngestionTriggerService pollingService;
 
-	public PollingTrigger(InboxPollingService pollingService) {
+	public PollingTrigger(IngestionTriggerService pollingService) {
 		this.pollingService = pollingService;
 	}
 	
