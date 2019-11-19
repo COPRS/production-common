@@ -1,4 +1,4 @@
-package esa.s1pdgs.cpoc.ingestion;
+package esa.s1pdgs.cpoc.ingestion.worker;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;

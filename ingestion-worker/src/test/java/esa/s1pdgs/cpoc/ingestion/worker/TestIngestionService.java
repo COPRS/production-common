@@ -1,4 +1,4 @@
-package esa.s1pdgs.cpoc.ingestion;
+package esa.s1pdgs.cpoc.ingestion.worker;
 
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.Assert.assertEquals;
@@ -24,12 +24,13 @@ import esa.s1pdgs.cpoc.common.ProductFamily;
 import esa.s1pdgs.cpoc.common.errors.AbstractCodedException;
 import esa.s1pdgs.cpoc.common.errors.InternalErrorException;
 import esa.s1pdgs.cpoc.errorrepo.ErrorRepoAppender;
-import esa.s1pdgs.cpoc.ingestion.config.IngestionServiceConfigurationProperties;
-import esa.s1pdgs.cpoc.ingestion.config.IngestionTypeConfiguration;
-import esa.s1pdgs.cpoc.ingestion.product.IngestionResult;
-import esa.s1pdgs.cpoc.ingestion.product.Product;
-import esa.s1pdgs.cpoc.ingestion.product.ProductException;
-import esa.s1pdgs.cpoc.ingestion.product.ProductService;
+import esa.s1pdgs.cpoc.ingestion.worker.IngestionService;
+import esa.s1pdgs.cpoc.ingestion.worker.config.IngestionServiceConfigurationProperties;
+import esa.s1pdgs.cpoc.ingestion.worker.config.IngestionTypeConfiguration;
+import esa.s1pdgs.cpoc.ingestion.worker.product.IngestionResult;
+import esa.s1pdgs.cpoc.ingestion.worker.product.Product;
+import esa.s1pdgs.cpoc.ingestion.worker.product.ProductException;
+import esa.s1pdgs.cpoc.ingestion.worker.product.ProductService;
 import esa.s1pdgs.cpoc.mqi.client.GenericMqiClient;
 import esa.s1pdgs.cpoc.mqi.model.queue.AbstractDto;
 import esa.s1pdgs.cpoc.mqi.model.queue.IngestionJob;

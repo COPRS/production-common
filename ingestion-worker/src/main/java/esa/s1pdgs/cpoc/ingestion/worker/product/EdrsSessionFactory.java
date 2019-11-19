@@ -1,4 +1,4 @@
-package esa.s1pdgs.cpoc.ingestion.product;
+package esa.s1pdgs.cpoc.ingestion.worker.product;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -10,7 +10,7 @@ import java.util.regex.Pattern;
 import esa.s1pdgs.cpoc.common.EdrsSessionFileType;
 import esa.s1pdgs.cpoc.common.FileExtension;
 import esa.s1pdgs.cpoc.common.ProductFamily;
-import esa.s1pdgs.cpoc.ingestion.obs.ObsAdapter;
+import esa.s1pdgs.cpoc.ingestion.worker.obs.ObsAdapter;
 import esa.s1pdgs.cpoc.mqi.model.queue.IngestionEvent;
 import esa.s1pdgs.cpoc.mqi.model.queue.IngestionJob;
 

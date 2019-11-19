@@ -1,4 +1,4 @@
-package esa.s1pdgs.cpoc.ingestion;
+package esa.s1pdgs.cpoc.ingestion.worker;
 
 import java.io.File;
 import java.nio.file.Paths;
@@ -23,12 +23,12 @@ import esa.s1pdgs.cpoc.common.utils.FileUtils;
 import esa.s1pdgs.cpoc.common.utils.LogUtils;
 import esa.s1pdgs.cpoc.errorrepo.ErrorRepoAppender;
 import esa.s1pdgs.cpoc.errorrepo.model.rest.FailedProcessingDto;
-import esa.s1pdgs.cpoc.ingestion.config.IngestionServiceConfigurationProperties;
-import esa.s1pdgs.cpoc.ingestion.config.IngestionTypeConfiguration;
-import esa.s1pdgs.cpoc.ingestion.product.IngestionResult;
-import esa.s1pdgs.cpoc.ingestion.product.Product;
-import esa.s1pdgs.cpoc.ingestion.product.ProductException;
-import esa.s1pdgs.cpoc.ingestion.product.ProductService;
+import esa.s1pdgs.cpoc.ingestion.worker.config.IngestionServiceConfigurationProperties;
+import esa.s1pdgs.cpoc.ingestion.worker.config.IngestionTypeConfiguration;
+import esa.s1pdgs.cpoc.ingestion.worker.product.IngestionResult;
+import esa.s1pdgs.cpoc.ingestion.worker.product.Product;
+import esa.s1pdgs.cpoc.ingestion.worker.product.ProductException;
+import esa.s1pdgs.cpoc.ingestion.worker.product.ProductService;
 import esa.s1pdgs.cpoc.mqi.client.GenericMqiClient;
 import esa.s1pdgs.cpoc.mqi.client.MqiConsumer;
 import esa.s1pdgs.cpoc.mqi.client.MqiListener;

@@ -1,4 +1,4 @@
-package esa.s1pdgs.cpoc.ingestion.status;
+package esa.s1pdgs.cpoc.ingestion.worker.status;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;

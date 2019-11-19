@@ -1,4 +1,4 @@
-package esa.s1pdgs.cpoc.ingestion.product;
+package esa.s1pdgs.cpoc.ingestion.worker.product;
 
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.Assert.assertEquals;
@@ -20,7 +20,11 @@ import org.mockito.MockitoAnnotations;
 import esa.s1pdgs.cpoc.common.ProductFamily;
 import esa.s1pdgs.cpoc.common.errors.AbstractCodedException;
 import esa.s1pdgs.cpoc.common.errors.InternalErrorException;
-import esa.s1pdgs.cpoc.ingestion.config.ProcessConfiguration;
+import esa.s1pdgs.cpoc.ingestion.worker.config.ProcessConfiguration;
+import esa.s1pdgs.cpoc.ingestion.worker.product.IngestionResult;
+import esa.s1pdgs.cpoc.ingestion.worker.product.Product;
+import esa.s1pdgs.cpoc.ingestion.worker.product.ProductException;
+import esa.s1pdgs.cpoc.ingestion.worker.product.ProductServiceImpl;
 import esa.s1pdgs.cpoc.mqi.model.queue.AbstractDto;
 import esa.s1pdgs.cpoc.mqi.model.queue.IngestionJob;
 import esa.s1pdgs.cpoc.mqi.model.queue.ProductionEvent;

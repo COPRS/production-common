@@ -1,4 +1,4 @@
-package esa.s1pdgs.cpoc.ingestion.product;
+package esa.s1pdgs.cpoc.ingestion.worker.product;
 
 import static org.junit.Assert.assertEquals;
 
@@ -14,7 +14,9 @@ import org.mockito.MockitoAnnotations;
 
 import esa.s1pdgs.cpoc.common.EdrsSessionFileType;
 import esa.s1pdgs.cpoc.common.ProductFamily;
-import esa.s1pdgs.cpoc.ingestion.obs.ObsAdapter;
+import esa.s1pdgs.cpoc.ingestion.worker.obs.ObsAdapter;
+import esa.s1pdgs.cpoc.ingestion.worker.product.EdrsSessionFactory;
+import esa.s1pdgs.cpoc.ingestion.worker.product.Product;
 import esa.s1pdgs.cpoc.mqi.model.queue.IngestionEvent;
 import esa.s1pdgs.cpoc.mqi.model.queue.IngestionJob;
 

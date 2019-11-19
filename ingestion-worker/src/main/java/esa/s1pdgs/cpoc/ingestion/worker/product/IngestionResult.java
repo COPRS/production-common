@@ -1,4 +1,4 @@
-package esa.s1pdgs.cpoc.ingestion.product;
+package esa.s1pdgs.cpoc.ingestion.worker.product;
 
 import java.util.Collections;
 import java.util.List;

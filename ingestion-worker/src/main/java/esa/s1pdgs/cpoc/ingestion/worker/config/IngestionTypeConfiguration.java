@@ -1,4 +1,4 @@
-package esa.s1pdgs.cpoc.ingestion.config;
+package esa.s1pdgs.cpoc.ingestion.worker.config;
 
 public class IngestionTypeConfiguration
 {

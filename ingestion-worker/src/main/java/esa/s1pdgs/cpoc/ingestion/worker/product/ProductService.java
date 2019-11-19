@@ -1,4 +1,4 @@
-package esa.s1pdgs.cpoc.ingestion.product;
+package esa.s1pdgs.cpoc.ingestion.worker.product;
 
 import esa.s1pdgs.cpoc.common.ProductFamily;
 import esa.s1pdgs.cpoc.common.errors.InternalErrorException;

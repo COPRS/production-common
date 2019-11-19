@@ -1,4 +1,4 @@
-package esa.s1pdgs.cpoc.ingestion;
+package esa.s1pdgs.cpoc.ingestion.worker;
 
 import static org.junit.Assert.fail;
 

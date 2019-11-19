@@ -1,4 +1,4 @@
-package esa.s1pdgs.cpoc.ingestion.obs;
+package esa.s1pdgs.cpoc.ingestion.worker.obs;
 
 import java.io.File;
 import java.nio.file.Path;
@@ -8,7 +8,7 @@ import esa.s1pdgs.cpoc.common.ProductFamily;
 import esa.s1pdgs.cpoc.common.errors.AbstractCodedException;
 import esa.s1pdgs.cpoc.common.errors.obs.ObsException;
 import esa.s1pdgs.cpoc.common.utils.LogUtils;
-import esa.s1pdgs.cpoc.ingestion.product.ProductException;
+import esa.s1pdgs.cpoc.ingestion.worker.product.ProductException;
 import esa.s1pdgs.cpoc.obs_sdk.ObsClient;
 import esa.s1pdgs.cpoc.obs_sdk.ObsObject;
 import esa.s1pdgs.cpoc.obs_sdk.ObsUploadObject;

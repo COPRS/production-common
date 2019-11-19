@@ -1,4 +1,4 @@
-package esa.s1pdgs.cpoc.ingestion.product;
+package esa.s1pdgs.cpoc.ingestion.worker.product;
 
 import java.io.File;
 import java.util.Collections;
@@ -6,7 +6,7 @@ import java.util.Date;
 import java.util.List;
 
 import esa.s1pdgs.cpoc.common.ProductFamily;
-import esa.s1pdgs.cpoc.ingestion.obs.ObsAdapter;
+import esa.s1pdgs.cpoc.ingestion.worker.obs.ObsAdapter;
 import esa.s1pdgs.cpoc.mqi.model.queue.IngestionJob;
 import esa.s1pdgs.cpoc.mqi.model.queue.ProductionEvent;
 

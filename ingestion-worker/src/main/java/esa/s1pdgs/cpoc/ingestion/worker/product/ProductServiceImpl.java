@@ -1,4 +1,4 @@
-package esa.s1pdgs.cpoc.ingestion.product;
+package esa.s1pdgs.cpoc.ingestion.worker.product;
 
 import java.io.File;
 import java.nio.file.Path;
@@ -13,8 +13,8 @@ import org.springframework.stereotype.Service;
 
 import esa.s1pdgs.cpoc.common.ProductFamily;
 import esa.s1pdgs.cpoc.common.errors.InternalErrorException;
-import esa.s1pdgs.cpoc.ingestion.config.ProcessConfiguration;
-import esa.s1pdgs.cpoc.ingestion.obs.ObsAdapter;
+import esa.s1pdgs.cpoc.ingestion.worker.config.ProcessConfiguration;
+import esa.s1pdgs.cpoc.ingestion.worker.obs.ObsAdapter;
 import esa.s1pdgs.cpoc.mqi.model.queue.AbstractDto;
 import esa.s1pdgs.cpoc.mqi.model.queue.IngestionJob;
 import esa.s1pdgs.cpoc.obs_sdk.ObsClient;
