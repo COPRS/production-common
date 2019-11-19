@@ -1,8 +1,8 @@
-S1-PDGS Cloud POC - Wrapper
-===========================
+S1-PDGS Cloud POC - Ipf Execution Worker
+=========================================
 
 This module is in charge of preparing the working directory, executing the processes of the level and ingesting the outputs in the OBS facility and message queue system.
-It gets its job from the job generator which has been developed in order to given all needed information in the job message. Thus, the wrapper can be only seen as an orders executor with no “intelligence”.
+It gets its job from the job generator which has been developed in order to given all needed information in the job message. Thus, the Ipf Execution Worker can be only seen as an orders executor with no “intelligence”.
 It has been designed for being used on different level with the less possible configuration.
 
 
@@ -13,9 +13,9 @@ It has been designed for being used on different level with the less possible co
 
 The ingestor is a Spring Boot application configured with annotations.
 
-The wrapper periodically asks its MQI server for a new message:
-* if no message: the wrapper will wait for the next loop
-* else: the wrapper will process the job
+The Ipf Execution Worker periodically asks its MQI server for a new message:
+* if no message: the Ipf Execution Worker will wait for the next loop
+* else: the Ipf Execution Worker will process the job
 
 The job processing is executed in the following manner. The job processor:
 
@@ -67,7 +67,7 @@ Below the parameters to configure for the production
 
 Parameter                                        | Description
 ------------------------------------------------ | ------------- 
-server.port                                      | port used for publishing REST API around wrapper status
+server.port                                      | port used for publishing REST API around Ipf Execution Worker status
 process.level                                    | application level (L0/L1)
 process.fixed-delay-ms                           | (fixed delay) period in milliseconds between 2 polls of next message
 process.init-delay-poll-ms                       | the initial delay to apply before consuming messages
@@ -85,6 +85,6 @@ process.mqi.tempo-retry-ms                       |
 status.delete-fixed-delay-ms                     | (fixed delay) period in milliseconds between 2 check if application shall be stopped or not
 status.max-error-counter-processing              | the number of consecutive processing errors leading to the state FATALERROR
 status.max-error-counter-mqi                     | the number of consecutive MQI errors leading to the state FATALERROR
-dev.steps-activation.download			           | if false, the wrapper ignores the step around input downloading
-dev.steps-activation.upload                      | if false, the wrapper ignores the step around outputs processing
-dev.steps-activation.erasing                     | if false, the wrapper ignores the step around working directory cleaning
+dev.steps-activation.download			           | if false, the Ipf Execution Worker ignores the step around input downloading
+dev.steps-activation.upload                      | if false, the Ipf Execution Worker ignores the step around outputs processing
+dev.steps-activation.erasing                     | if false, the Ipf Execution Worker ignores the step around working directory cleaning

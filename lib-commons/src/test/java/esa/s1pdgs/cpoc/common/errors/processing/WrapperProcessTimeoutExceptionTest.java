@@ -7,7 +7,7 @@ import static org.junit.Assert.assertTrue;
 import org.junit.Test;
 
 import esa.s1pdgs.cpoc.common.errors.AbstractCodedException.ErrorCode;
-import esa.s1pdgs.cpoc.common.errors.processing.WrapperProcessTimeoutException;
+import esa.s1pdgs.cpoc.common.errors.processing.IpfExecutionWorkerProcessTimeoutException;
 
 /**
  * Test the class ProcessTimeoutException
@@ -21,8 +21,8 @@ public class WrapperProcessTimeoutExceptionTest {
      */
     @Test
     public void testProcessTimeoutException() {
-        WrapperProcessTimeoutException e1 =
-                new WrapperProcessTimeoutException("erreur message");
+        IpfExecutionWorkerProcessTimeoutException e1 =
+                new IpfExecutionWorkerProcessTimeoutException("erreur message");
 
         assertEquals(
                 ErrorCode.PROCESS_TIMEOUT,
