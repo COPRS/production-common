@@ -1,6 +1,6 @@
 spring:
   application:
-    name: s1pdgs-inbox-polling
+    name: s1pdgs-ingestion-trigger
   datasource:
     url: jdbc:hsqldb:mem:testDb;create=true
     password:
