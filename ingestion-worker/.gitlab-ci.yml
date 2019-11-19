@@ -3,7 +3,7 @@
 image: docker:latest
 
 variables:
-  MODULE_INGESTION_WORKER: s1pro-core-inbox-ingestion-worker
+  MODULE_INGESTION_WORKER: s1pro-core-ingestion-worker
 
 ingestion-worker-build:
   stage: module

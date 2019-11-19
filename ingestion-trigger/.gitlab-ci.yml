@@ -3,7 +3,7 @@
 image: docker:latest
 
 variables:
-  MODULE_INGESTION_TRIGGER: s1pro-core-inbox-polling
+  MODULE_INGESTION_TRIGGER: s1pro-core-ingestion-trigger
 
 ingestion-trigger-build:
   stage: module
