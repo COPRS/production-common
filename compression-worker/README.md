@@ -1,3 +1,3 @@
-S1-PDGS Cloud - ZIP Servic
-==========================
+S1-PDGS Cloud - Compression Worker
+==================================
 TBD
