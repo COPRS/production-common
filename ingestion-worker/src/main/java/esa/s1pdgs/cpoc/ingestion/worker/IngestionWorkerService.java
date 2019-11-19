@@ -71,7 +71,7 @@ public class IngestionWorkerService implements MqiListener<IngestionJob> {
 
 	@Override
 	public void onMessage(final GenericMessageDto<IngestionJob> message) {
-		final Reporting.Factory reportingFactory = new LoggerReporting.Factory("Ingestion");
+		final Reporting.Factory reportingFactory = new LoggerReporting.Factory("IngestionWorker");
 
 		final IngestionJob ingestion = message.getBody();
 		LOG.debug("received Ingestion: {}", ingestion.getProductName());
