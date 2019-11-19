@@ -15,14 +15,14 @@ import esa.s1pdgs.cpoc.ingestion.trigger.InboxFactory;
 import esa.s1pdgs.cpoc.ingestion.trigger.IngestionTriggerService;
 
 @Configuration
-public class InboxPollingServiceConfiguration {
-	private static final Logger LOG = LoggerFactory.getLogger(InboxPollingServiceConfiguration.class);
+public class IngestionTriggerServiceConfiguration {
+	private static final Logger LOG = LoggerFactory.getLogger(IngestionTriggerServiceConfiguration.class);
 
 	private final InboxPollingConfigurationProperties properties;
 	private final InboxFactory inboxFactory;
 
 	@Autowired
-	public InboxPollingServiceConfiguration(final InboxPollingConfigurationProperties properties,
+	public IngestionTriggerServiceConfiguration(final InboxPollingConfigurationProperties properties,
 			// InboxFactory is autowired here without a qualifier because there is only one
 			// implementation of it in the classpath. This needs to be changed in the future
 			// when there are other types of inboxes available
