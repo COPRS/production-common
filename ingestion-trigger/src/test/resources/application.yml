@@ -19,7 +19,7 @@ logging:
 process:
   hostname: ${HOSTNAME}                                          # Hostname
 
-inbox:
+ingestion-trigger:
   polling-interval-ms: 10000
   polling:
     - directory: /tmp/MPS_/S1A/

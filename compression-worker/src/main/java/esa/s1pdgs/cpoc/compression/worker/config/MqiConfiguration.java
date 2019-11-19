@@ -22,9 +22,9 @@ public class MqiConfiguration {
      */
     @Autowired
     public MqiConfiguration(
-            @Value("${compression.mqi.host-uri}") final String hostUri,
-            @Value("${compression.mqi.max-retries}") final int maxRetries,
-            @Value("${compression.mqi.tempo-retry-ms}") final int tempoRetryMs,
+            @Value("${compression-worker.mqi.host-uri}") final String hostUri,
+            @Value("${compression-worker.mqi.max-retries}") final int maxRetries,
+            @Value("${compression-worker.mqi.tempo-retry-ms}") final int tempoRetryMs,
             final RestTemplateBuilder builder) {
     	mqiClientFactory = new MqiClientFactory(hostUri, maxRetries, tempoRetryMs)
     			.restTemplateSupplier(builder::build);

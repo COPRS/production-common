@@ -6,7 +6,7 @@ import org.springframework.context.annotation.Configuration;
 
 @Configuration
 @EnableConfigurationProperties
-@ConfigurationProperties(prefix = "compression")
+@ConfigurationProperties(prefix = "compression-worker")
 public class ApplicationProperties {
 	/**
 	 * The command that is performed to invoke the compression process

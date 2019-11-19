@@ -8,7 +8,7 @@ logging:
 process:
   hostname: ${HOSTNAME}                                          # Hostname
   
-ingestion:
+ingestion-worker:
   hostname: ${HOSTNAME}
   polling-interval-ms: 10000
   max-retries: 10                                                # the maximal number of consecutive retries for unsuccessful deletion

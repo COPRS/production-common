@@ -19,7 +19,7 @@ status:
   delete-fixed-delay-ms: 1000
   
 # Compression
-compression:
+compression-worker:
   command: /usr/bin/sh
   hostname: "hostname"
   fixed-delay-ms: 10

@@ -12,7 +12,7 @@ public class PollingTrigger {
 		this.pollingService = pollingService;
 	}
 	
-    @Scheduled(fixedRateString = "${inbox.polling-interval-ms}")   
+    @Scheduled(fixedRateString = "${ingestion-trigger.polling-interval-ms}")   
 	public void poll() {
     	LOG.debug("Trigger polling of all inboxes");
     	pollingService.pollAll();

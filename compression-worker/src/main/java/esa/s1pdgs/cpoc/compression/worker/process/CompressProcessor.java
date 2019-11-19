@@ -98,8 +98,8 @@ public class CompressProcessor implements MqiListener<ProductionEvent> {
 			final GenericMqiClient mqiClient,
 			final ErrorRepoAppender errorAppender,
 			final StatusService mqiStatusService,
-			@Value("${compression.fixed-delay-ms}") final long pollingIntervalMs,
-			@Value("${compression.init-delay-poll-ms}") final long pollingInitialDelayMs) {
+			@Value("${compression-worker.fixed-delay-ms}") final long pollingIntervalMs,
+			@Value("${compression-worker.init-delay-poll-ms}") final long pollingInitialDelayMs) {
 		this.appStatus = appStatus;
 		this.properties = properties;
 		this.obsClient = obsClient;
