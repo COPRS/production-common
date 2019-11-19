@@ -13,7 +13,7 @@
 		<docker.image.prefix>springio</docker.image.prefix>
 		<project.build.finalName>s1pdgs-ingestion-trigger</project.build.finalName>
 		<project.artifactId>s1pdgs-ingestion-trigger</project.artifactId>
-		<start-class>esa.s1pdgs.cpoc.inbox.Application</start-class>
+		<start-class>esa.s1pdgs.cpoc.ingestion.trigger.Application</start-class>
 	</properties>
 
 	<dependencies>

@@ -1,0 +1,22 @@
+package esa.s1pdgs.cpoc.ingestion.trigger.kafka.producer;
+
+import org.springframework.kafka.core.KafkaTemplate;
+
+import esa.s1pdgs.cpoc.mqi.model.queue.IngestionJob;
+
+public class KafkaSubmissionClient implements SubmissionClient {
+	
+	private final KafkaTemplate<String, IngestionJob> client;
+	private final String topic;
+	
+	public KafkaSubmissionClient(KafkaTemplate<String, IngestionJob> client, String topic) {
+		this.client = client;
+		this.topic = topic;
+	}
+
+	@Override
+	public void publish(final IngestionJob dto) {    
+        client.send(topic, dto);
+	}
+
+}
