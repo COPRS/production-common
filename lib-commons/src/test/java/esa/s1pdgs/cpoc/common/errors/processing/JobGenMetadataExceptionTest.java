@@ -21,8 +21,8 @@ public class JobGenMetadataExceptionTest {
      */
     @Test
     public void test() {
-        JobGenMetadataException e1 =
-                new JobGenMetadataException("error-message");
+        IpfPrepWorkerMetadataException e1 =
+                new IpfPrepWorkerMetadataException("error-message");
         assertEquals("error-message", e1.getMessage());
         assertEquals(ErrorCode.JOB_GEN_METADATA_ERROR, e1.getCode());
         assertNull(e1.getCause());
@@ -30,7 +30,7 @@ public class JobGenMetadataExceptionTest {
         String str1 = e1.getLogMessage();
         assertTrue(str1.contains("[msg error-message]"));
 
-        JobGenMetadataException e2 = new JobGenMetadataException(
+        IpfPrepWorkerMetadataException e2 = new IpfPrepWorkerMetadataException(
                 "error-message", new Exception("cause-message"));
         assertEquals("error-message", e2.getMessage());
         assertEquals(ErrorCode.JOB_GEN_METADATA_ERROR, e2.getCode());

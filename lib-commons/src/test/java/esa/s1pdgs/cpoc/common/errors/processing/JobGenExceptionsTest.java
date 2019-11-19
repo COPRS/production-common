@@ -11,13 +11,13 @@ import java.util.Map;
 import org.junit.Test;
 
 import esa.s1pdgs.cpoc.common.errors.AbstractCodedException.ErrorCode;
-import esa.s1pdgs.cpoc.common.errors.processing.JobGenBuildTaskTableException;
-import esa.s1pdgs.cpoc.common.errors.processing.JobGenInputsMissingException;
-import esa.s1pdgs.cpoc.common.errors.processing.JobGenMaxNumberCachedJobsReachException;
-import esa.s1pdgs.cpoc.common.errors.processing.JobGenMaxNumberCachedSessionsReachException;
-import esa.s1pdgs.cpoc.common.errors.processing.JobGenMaxNumberTaskTablesReachException;
-import esa.s1pdgs.cpoc.common.errors.processing.JobGenMissingRoutingEntryException;
-import esa.s1pdgs.cpoc.common.errors.processing.JobGenerationException;
+import esa.s1pdgs.cpoc.common.errors.processing.IpfPrepWorkerBuildTaskTableException;
+import esa.s1pdgs.cpoc.common.errors.processing.IpfPrepWorkerInputsMissingException;
+import esa.s1pdgs.cpoc.common.errors.processing.IpfPrepWorkerMaxNumberCachedJobsReachException;
+import esa.s1pdgs.cpoc.common.errors.processing.IpfPrepWorkerMaxNumberCachedSessionsReachException;
+import esa.s1pdgs.cpoc.common.errors.processing.IpfPrepWorkerMaxNumberTaskTablesReachException;
+import esa.s1pdgs.cpoc.common.errors.processing.IpfPrepWorkerMissingRoutingEntryException;
+import esa.s1pdgs.cpoc.common.errors.processing.IpfPrepWorkerException;
 
 /**
  * Test the Exceptions
@@ -31,7 +31,7 @@ public class JobGenExceptionsTest {
      */
     @Test
     public void testJobGenerationException() {
-        JobGenerationException e = new JobGenerationException("task-table",
+        IpfPrepWorkerException e = new IpfPrepWorkerException("task-table",
                 ErrorCode.JOB_GENERATOR_INIT_FAILED, "errer message");
 
         assertEquals("task-table", e.getTaskTable());
@@ -42,7 +42,7 @@ public class JobGenExceptionsTest {
         assertTrue(str.contains("[taskTable task-table]"));
         assertTrue(str.contains("[msg errer message]"));
 
-        JobGenerationException e1 = new JobGenerationException("tasktable",
+        IpfPrepWorkerException e1 = new IpfPrepWorkerException("tasktable",
                 ErrorCode.INTERNAL_ERROR, "error message",
                 new Throwable("throwable message"));
 
@@ -61,8 +61,8 @@ public class JobGenExceptionsTest {
      */
     @Test
     public void testBuildTaskTableException() {
-        JobGenerationException e1 =
-                new JobGenBuildTaskTableException("tasktable", "error message",
+        IpfPrepWorkerException e1 =
+                new IpfPrepWorkerBuildTaskTableException("tasktable", "error message",
                         new Throwable("throwable message"));
 
         assertEquals("tasktable", e1.getTaskTable());
@@ -80,8 +80,8 @@ public class JobGenExceptionsTest {
      */
     @Test
     public void testMissingRoutingEntryException() {
-        JobGenMissingRoutingEntryException e1 =
-                new JobGenMissingRoutingEntryException("erreur message");
+        IpfPrepWorkerMissingRoutingEntryException e1 =
+                new IpfPrepWorkerMissingRoutingEntryException("erreur message");
 
         assertEquals(ErrorCode.MISSING_ROUTING_ENTRY, e1.getCode());
         assertEquals("erreur message", e1.getMessage());
@@ -96,8 +96,8 @@ public class JobGenExceptionsTest {
      */
     @Test
     public void testMaxNumberTaskTablesReachException() {
-        JobGenMaxNumberTaskTablesReachException e1 =
-                new JobGenMaxNumberTaskTablesReachException("erreur message");
+        IpfPrepWorkerMaxNumberTaskTablesReachException e1 =
+                new IpfPrepWorkerMaxNumberTaskTablesReachException("erreur message");
 
         assertEquals(ErrorCode.MAX_NUMBER_TASKTABLE_REACH, e1.getCode());
         assertEquals("erreur message", e1.getMessage());
@@ -112,8 +112,8 @@ public class JobGenExceptionsTest {
      */
     @Test
     public void testMaxNumberCachedSessionsReachException() {
-        JobGenMaxNumberCachedSessionsReachException e1 =
-                new JobGenMaxNumberCachedSessionsReachException(
+        IpfPrepWorkerMaxNumberCachedSessionsReachException e1 =
+                new IpfPrepWorkerMaxNumberCachedSessionsReachException(
                         "erreur message");
 
         assertEquals(ErrorCode.MAX_NUMBER_CACHED_SESSIONS_REACH, e1.getCode());
@@ -129,8 +129,8 @@ public class JobGenExceptionsTest {
      */
     @Test
     public void testMaxNumberCachedJobsReachException() {
-        JobGenMaxNumberCachedJobsReachException e1 =
-                new JobGenMaxNumberCachedJobsReachException("task-table-1",
+        IpfPrepWorkerMaxNumberCachedJobsReachException e1 =
+                new IpfPrepWorkerMaxNumberCachedJobsReachException("task-table-1",
                         "erreur message");
 
         assertEquals(ErrorCode.MAX_NUMBER_CACHED_JOB_REACH, e1.getCode());
@@ -151,8 +151,8 @@ public class JobGenExceptionsTest {
         Map<String, String> data = new HashMap<>();
         data.put("key1", "value1");
         data.put("key3", "");
-        JobGenInputsMissingException e1 =
-                new JobGenInputsMissingException(data);
+        IpfPrepWorkerInputsMissingException e1 =
+                new IpfPrepWorkerInputsMissingException(data);
 
         assertTrue(e1.getMissingMetadata().size() == 2);
         assertEquals(ErrorCode.MISSING_INPUT, e1.getCode());
@@ -171,8 +171,8 @@ public class JobGenExceptionsTest {
      */
     @Test
     public void testInputsMissingExceptionNull() {
-        JobGenInputsMissingException e1 =
-                new JobGenInputsMissingException(null);
+        IpfPrepWorkerInputsMissingException e1 =
+                new IpfPrepWorkerInputsMissingException(null);
 
         assertTrue(e1.getMissingMetadata().size() == 0);
         assertEquals(ErrorCode.MISSING_INPUT, e1.getCode());
