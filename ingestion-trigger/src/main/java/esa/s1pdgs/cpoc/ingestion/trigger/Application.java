@@ -7,7 +7,7 @@ import org.springframework.context.annotation.ComponentScan;
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
 
-import esa.s1pdgs.cpoc.ingestion.trigger.config.InboxPollingConfigurationProperties;
+import esa.s1pdgs.cpoc.ingestion.trigger.config.IngestionTriggerConfigurationProperties;
 
 @SpringBootApplication
 @EnableJpaRepositories

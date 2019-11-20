@@ -7,8 +7,8 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Configuration;
 
 @Configuration
-@ConfigurationProperties("inbox")
-public class InboxPollingConfigurationProperties {
+@ConfigurationProperties("ingestion-trigger")
+public class IngestionTriggerConfigurationProperties {
 	
 	private long pollingIntervalMs;
 	
