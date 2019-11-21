@@ -17,7 +17,7 @@ kafka:
   session-timeout-ms: 120000
   topics:
     slices: t-pdgs-l0-slices,t-pdgs-l1-slices
-    reports: t-pdgs-aio-production-report-events,t-pdgs-l1-reports
+    reports: t-pdgs-aio-production-report-events,t-pdgs-l1-production-report-events
     segments: t-pdgs-aio-l0-segment-production-events
   enable-consumer:
     slice: true

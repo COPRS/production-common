@@ -22,7 +22,7 @@ This consumer is plugged to t-pdgs-l0-slices and t-pdgs-l1-slices.
 When it receives a message, it will download the slice from the right bucket of the object storage directly on the shared volume, so it will be available through FTP as soon as possible.
 
 ##### Reports Consumer
-This consumer is plugged to t-pdgs-aio-production-report-events and t-pdgs-l1-reports.
+This consumer is plugged to t-pdgs-aio-production-report-events and t-pdgs-l1-production-report-events.
 The message in this queue contains the payload (i.e. the report itself), so when the message is read, it is written on the shared volume without accessing the object storage.
 
 ### Builds

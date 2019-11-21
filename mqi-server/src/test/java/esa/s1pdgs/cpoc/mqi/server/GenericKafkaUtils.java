@@ -39,7 +39,7 @@ public class GenericKafkaUtils<T> {
     public final static String TOPIC_L1_JOBS = "t-pdgs-l1-jobs";
     public final static String TOPIC_L1_PRODUCTS = "t-pdgs-l1-slices";
     public final static String TOPIC_L1_ACNS = "t-pdgs-l1-acns";
-    public final static String TOPIC_L1_REPORTS = "t-pdgs-l1-reports";
+    public final static String TOPIC_L1_REPORTS = "t-pdgs-l1-production-report-events";
     public final static String TOPIC_EDRS_SESSIONS = "t-pdgs-session-file-ingestion-events";
     public final static String TOPIC_AUXILIARY_FILES = "t-pdgs-aux-ingestion-events";
     public final static String TOPIC_L0_SEGMENTS = "t-pdgs-aio-l0-segment-production-events";
