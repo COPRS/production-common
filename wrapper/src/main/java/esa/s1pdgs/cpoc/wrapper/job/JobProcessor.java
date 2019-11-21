@@ -32,6 +32,7 @@ import esa.s1pdgs.cpoc.common.ProductCategory;
 import esa.s1pdgs.cpoc.common.errors.AbstractCodedException;
 import esa.s1pdgs.cpoc.common.errors.AbstractCodedException.ErrorCode;
 import esa.s1pdgs.cpoc.common.errors.InternalErrorException;
+import esa.s1pdgs.cpoc.common.utils.LogUtils;
 import esa.s1pdgs.cpoc.errorrepo.ErrorRepoAppender;
 import esa.s1pdgs.cpoc.errorrepo.model.rest.FailedProcessingDto;
 import esa.s1pdgs.cpoc.mqi.client.GenericMqiClient;
@@ -320,8 +321,8 @@ public class JobProcessor implements MqiListener<LevelJobDto> {
                     getPrefixMonitorLog(MonitorLogUtils.LOG_DFT, job), step,
                     getPrefixMonitorLog(MonitorLogUtils.LOG_ERROR, job),
                     ace.getCode().getCode(), ace.getLogMessage());
-            report.error(new ReportingMessage("[code {}] {}", ace.getCode().getCode(), ace.getLogMessage()));
-            
+            report.error(new ReportingMessage("[code {}] {}", ace.getCode().getCode(), ace.getLogMessage()));            
+            LOGGER.error(LogUtils.toString(ace));            
             failedProc = new FailedProcessingDto(properties.getHostname(),new Date(),errorMessage, message);  
             
         } catch (InterruptedException e) {
@@ -333,6 +334,7 @@ public class JobProcessor implements MqiListener<LevelJobDto> {
                     ErrorCode.INTERNAL_ERROR.getCode(),
                     properties.getLevel());
             report.error(new ReportingMessage("Interrupted job processing"));
+            LOGGER.error(LogUtils.toString(e));    
             failedProc = new FailedProcessingDto(properties.getHostname(),new Date(),errorMessage, message);  
         } finally {
             cleanJobProcessing(job, poolProcessing, procExecutorSrv);
