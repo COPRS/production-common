@@ -223,7 +223,7 @@ public class RequestRepositoryTest {
 			.when(mqiMessageRepository)
 			.findByStateInAndTopicInOrderByCreationDate(Mockito.any(),Mockito.any());
 		
-		final List<Processing> actual = uut.getProcessings(null, 0, Collections.singletonList("t-pdgs-l0-segments"), Collections.emptyList());
+		final List<Processing> actual = uut.getProcessings(null, 0, Collections.singletonList("t-pdgs-aio-l0-segment-production-events"), Collections.emptyList());
 		assertEquals(4, actual.size());		
 	}
 	
@@ -284,7 +284,7 @@ public class RequestRepositoryTest {
 		mqiMsg.setId(id);
 		mqiMsg.setCreationDate(new Date());
 		mqiMsg.setState(state);
-		mqiMsg.setTopic("t-pdgs-l0-segments");
+		mqiMsg.setTopic("t-pdgs-aio-l0-segment-production-events");
 		return mqiMsg;
 	}
 }

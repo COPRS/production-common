@@ -259,7 +259,7 @@ public class TestMqiMessageRepo {
     	ops.insert(newMqiMessage(1));    
     	ops.insert(newMqiMessage(2));  
     	ops.insert(newMqiMessage(3));  
-    	assertEquals(3L, uut.countByStateInAndTopicIn(RequestRepository.PROCESSING_STATE_LIST, Collections.singletonList("t-pdgs-l0-segments")));
+    	assertEquals(3L, uut.countByStateInAndTopicIn(RequestRepository.PROCESSING_STATE_LIST, Collections.singletonList("t-pdgs-aio-l0-segment-production-events")));
     	uut.deleteAll();
     }
     
@@ -280,7 +280,7 @@ public class TestMqiMessageRepo {
     	proc.setId(id);
     	proc.setCreationDate(new Date());
     	proc.setState(MessageState.READ);
-    	proc.setTopic("t-pdgs-l0-segments");
+    	proc.setTopic("t-pdgs-aio-l0-segment-production-events");
     	return proc;
     }    
 }

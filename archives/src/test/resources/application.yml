@@ -18,7 +18,7 @@ kafka:
   topics:
     slices: t-pdgs-l0-slices,t-pdgs-l1-slices
     reports: t-pdgs-l0-reports,t-pdgs-l1-reports
-    segments: t-pdgs-l0-segments
+    segments: t-pdgs-aio-l0-segment-production-events
   enable-consumer:
     slice: true
     report: false
