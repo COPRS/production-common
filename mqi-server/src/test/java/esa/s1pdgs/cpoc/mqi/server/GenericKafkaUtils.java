@@ -35,7 +35,7 @@ public class GenericKafkaUtils<T> {
     public final static String TOPIC_L0_JOBS = "t-pdgs-aio-execution-jobs";
     public final static String TOPIC_L0_PRODUCTS = "t-pdgs-l0-slices";
     public final static String TOPIC_L0_ACNS = "t-pdgs-l0-acns";
-    public final static String TOPIC_L0_REPORTS = "t-pdgs-l0-reports";
+    public final static String TOPIC_L0_REPORTS = "t-pdgs-aio-production-report-events";
     public final static String TOPIC_L1_JOBS = "t-pdgs-l1-jobs";
     public final static String TOPIC_L1_PRODUCTS = "t-pdgs-l1-slices";
     public final static String TOPIC_L1_ACNS = "t-pdgs-l1-acns";
