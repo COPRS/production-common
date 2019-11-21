@@ -237,7 +237,7 @@ public class MessagePublicationControllerTest {
                 ProductFamily.L1_ACN, "NRT");
         initCustomControllerForAllPublication();
 
-        customController.publish(ProductCategory.LEVEL_PRODUCTS,dto, "t-pdgs-l1-jobs-nrt", "L1_ACN");
+        customController.publish(ProductCategory.LEVEL_PRODUCTS,dto, "t-pdgs-l1-execution-jobs-nrt", "L1_ACN");
 
         ConsumerRecord<String, ProductionEvent> record = kafkaUtilsProducts
                 .getReceivedRecordProducts(GenericKafkaUtils.TOPIC_L1_ACNS);
