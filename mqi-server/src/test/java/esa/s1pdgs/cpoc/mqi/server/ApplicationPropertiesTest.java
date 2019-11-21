@@ -39,7 +39,7 @@ public class ApplicationPropertiesTest {
      */
     @ClassRule
     public static KafkaEmbedded embeddedKafka =
-            new KafkaEmbedded(1, true, "t-pdgs-l0-jobs");
+            new KafkaEmbedded(1, true, "t-pdgs-aio-execution-jobs");
 
     /**
      * Properties to test
@@ -77,7 +77,7 @@ public class ApplicationPropertiesTest {
         assertTrue(properties.getProductCategories()
                 .get(ProductCategory.LEVEL_JOBS).getConsumption().isEnable());
         expectedTopics = new HashMap<>();
-        expectedTopics.put("t-pdgs-l0-jobs", 0);
+        expectedTopics.put("t-pdgs-aio-execution-jobs", 0);
         assertEquals(expectedTopics.keySet(), properties.getProductCategories()
                 .get(ProductCategory.LEVEL_JOBS).getConsumption().getTopicsWithPriority().keySet());
         // Level reports

@@ -17,7 +17,7 @@ import esa.s1pdgs.cpoc.scaler.k8s.K8SProperties;
 public class K8SPropertiesTest {
 
 	//@Rule
-	//public KafkaEmbedded embeddedKafka = new KafkaEmbedded(1, true, "t-pdgs-l0-jobs");
+	//public KafkaEmbedded embeddedKafka = new KafkaEmbedded(1, true, "t-pdgs-aio-execution-jobs");
 	
 	@Autowired
 	private K8SProperties k8sProperties;

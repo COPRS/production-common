@@ -24,7 +24,7 @@ public class ApplicationTest {
 	 * Embedded Kafka
 	 */
 	@ClassRule
-	public static KafkaEmbedded embeddedKafka = new KafkaEmbedded(1, true, "t-pdgs-l0-jobs");
+	public static KafkaEmbedded embeddedKafka = new KafkaEmbedded(1, true, "t-pdgs-aio-execution-jobs");
 
 	@Test
 	public void applicationContextTest() {

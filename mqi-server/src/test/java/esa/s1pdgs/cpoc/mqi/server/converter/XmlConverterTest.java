@@ -66,7 +66,7 @@ public class XmlConverterTest {
         
         DefaultRoute route0 = new DefaultRoute();
         RouteTo routeTo0 = new RouteTo();
-        routeTo0.setTopic("t-pdgs-l0-jobs");
+        routeTo0.setTopic("t-pdgs-aio-execution-jobs");
         route0.setFamily(ProductFamily.L0_JOB);
         route0.setRouteTo(routeTo0);
 
