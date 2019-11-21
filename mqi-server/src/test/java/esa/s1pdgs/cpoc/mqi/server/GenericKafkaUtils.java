@@ -47,7 +47,7 @@ public class GenericKafkaUtils<T> {
     public final static String TOPIC_L2_JOBS = "t-pdgs-l2-jobs";
     public final static String TOPIC_L2_PRODUCTS = "t-pdgs-l2-slices";
     public final static String TOPIC_L2_ACNS = "t-pdgs-l2-acns";
-    public final static String TOPIC_L2_REPORTS = "t-pdgs-l2-reports";
+    public final static String TOPIC_L2_REPORTS = "t-pdgs-l2-production-report-events";
     
     private final KafkaEmbedded embeddedKafka;
 

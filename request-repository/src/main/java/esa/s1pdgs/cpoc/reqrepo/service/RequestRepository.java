@@ -14,7 +14,7 @@ public interface RequestRepository {
 			"t-pdgs-l0asp-l0-slice-production-events-fast", "t-pdgs-l0asp-l0-acn-production-events-fast", "t-pdgs-aio-production-report-events", "t-pdgs-l0asp-production-report-events",
 			"t-pdgs-aio-l0-blank-production-events", "t-pdgs-l1-slices-production-events-nrt", "t-pdgs-l1-acn-production-events-nrt", "t-pdgs-l1-slices-production-events-fast",
 			"t-pdgs-l1-acn-production-events-fast", "t-pdgs-l1-production-report-events", "t-pdgs-l1-execution-jobs-nrt", "t-pdgs-l1-execution-jobs-fast",
-			"t-pdgs-l2-acn-production-events-fast", "t-pdgs-l2-slices-production-events-fast", "t-pdgs-l2-execution-jobs-fast", "t-pdgs-l2-reports",
+			"t-pdgs-l2-acn-production-events-fast", "t-pdgs-l2-slices-production-events-fast", "t-pdgs-l2-execution-jobs-fast", "t-pdgs-l2-production-report-events",
 			"t-pdgs-compressed-products");
 	
 	public static final List<MessageState> PROCESSING_STATE_LIST = Arrays.asList(MessageState.values());
