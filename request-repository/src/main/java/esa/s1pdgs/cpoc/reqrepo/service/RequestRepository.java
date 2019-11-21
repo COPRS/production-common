@@ -10,7 +10,7 @@ import esa.s1pdgs.cpoc.errorrepo.model.rest.FailedProcessingDto;
 
 public interface RequestRepository {	
 	public static final List<String> PROCESSING_TYPES_LIST = Arrays.asList("t-pdgs-session-file-ingestion-events", "t-pdgs-aux-ingestion-events", "t-pdgs-aio-execution-jobs",
-			"t-pdgs-l0asp-execution-jobs", "t-pdgs-l0-segments", "t-pdgs-l0-slices-nrt", "t-pdgs-l0-acns-nrt",
+			"t-pdgs-l0asp-execution-jobs", "t-pdgs-l0-segments", "t-pdgs-l0-slices-nrt", "t-pdgs-aio-l0-acn-production-events-nrt",
 			"t-pdgs-l0-slices-fast", "t-pdgs-l0-acns-fast", "t-pdgs-l0-reports", "t-pdgs-l0-segment-reports",
 			"t-pdgs-l0-blanks", "t-pdgs-l1-slices-nrt", "t-pdgs-l1-acns-nrt", "t-pdgs-l1-slices-fast",
 			"t-pdgs-l1-acns-fast", "t-pdgs-l1-reports", "t-pdgs-l1-execution-jobs-nrt", "t-pdgs-l1-execution-jobs-fast",
