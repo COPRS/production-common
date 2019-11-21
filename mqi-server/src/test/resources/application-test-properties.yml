@@ -38,7 +38,7 @@ application:
       consumption:
         enable: true
         topics-with-priority: 
-          t-pdgs-edrs-sessions: 100
+          t-pdgs-session-file-ingestion-events: 100
           t-topic-2: 10       
       publication:
         enable: false

@@ -133,7 +133,7 @@ public class TestMqiMessageRepo {
     	
     	List<MqiMessage> actual = uut.findByStateInAndTopicInOrderByCreationDate(    			
     			RequestRepository.PROCESSING_STATE_LIST,
-    			Collections.singletonList("t-pdgs-edrs-sessions")
+    			Collections.singletonList("t-pdgs-session-file-ingestion-events")
     	);
     	assertEquals(0, actual.size());     	
     	uut.deleteAll();
@@ -148,15 +148,15 @@ public class TestMqiMessageRepo {
     			newMqiMessage(5),
     			newMqiMessage(3)
     	);        	
-       	expected.get(1).setTopic("t-pdgs-edrs-sessions");
-     	expected.get(3).setTopic("t-pdgs-edrs-sessions");
+       	expected.get(1).setTopic("t-pdgs-session-file-ingestion-events");
+     	expected.get(3).setTopic("t-pdgs-session-file-ingestion-events");
     	for (final MqiMessage mess : expected)    	{
     		ops.insert(mess);  
     	}   
     	
     	List<MqiMessage> actual = uut.findByStateInAndTopicInOrderByCreationDate(    			
     			RequestRepository.PROCESSING_STATE_LIST,
-    			Collections.singletonList("t-pdgs-edrs-sessions")
+    			Collections.singletonList("t-pdgs-session-file-ingestion-events")
     	);
     	assertEquals(2, actual.size());   
     	
