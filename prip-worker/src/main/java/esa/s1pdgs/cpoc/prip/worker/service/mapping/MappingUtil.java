@@ -25,8 +25,8 @@ import org.apache.olingo.commons.api.data.Property;
 import org.apache.olingo.commons.api.data.ValueType;
 import org.apache.olingo.commons.api.ex.ODataRuntimeException;
 
-import esa.s1pdgs.cpoc.prip.worker.model.Checksum;
-import esa.s1pdgs.cpoc.prip.worker.model.PripMetadata;
+import esa.s1pdgs.cpoc.prip.model.Checksum;
+import esa.s1pdgs.cpoc.prip.model.PripMetadata;
 import esa.s1pdgs.cpoc.prip.worker.service.edm.EdmProvider;
 
 public class MappingUtil {

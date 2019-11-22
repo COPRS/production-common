@@ -18,8 +18,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import esa.s1pdgs.cpoc.obs_sdk.ObsClient;
+import esa.s1pdgs.cpoc.prip.metadata.PripMetadataRepository;
 import esa.s1pdgs.cpoc.prip.worker.service.edm.EdmProvider;
-import esa.s1pdgs.cpoc.prip.worker.service.metadata.PripMetadataRepository;
 import esa.s1pdgs.cpoc.prip.worker.service.processor.ProductEntityCollectionProcessor;
 import esa.s1pdgs.cpoc.prip.worker.service.processor.ProductEntityProcessor;
 

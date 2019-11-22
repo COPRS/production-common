@@ -7,7 +7,7 @@ import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Primary;
 
 import esa.s1pdgs.cpoc.obs_sdk.ObsClient;
-import esa.s1pdgs.cpoc.prip.worker.service.metadata.PripMetadataRepository;
+import esa.s1pdgs.cpoc.prip.metadata.PripMetadataRepository;
 import standalone.prip.frontend.obs.FakeObsClient;
 import standalone.prip.frontend.service.metadata.DummyPripMetadataRepositoryImpl;
 

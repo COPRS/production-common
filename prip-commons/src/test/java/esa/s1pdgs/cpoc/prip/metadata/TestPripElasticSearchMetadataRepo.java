@@ -1,4 +1,4 @@
-package esa.s1pdgs.cpoc.prip.worker.service.metadata;
+package esa.s1pdgs.cpoc.prip.metadata;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
@@ -31,12 +31,12 @@ import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 
 import esa.s1pdgs.cpoc.common.ProductFamily;
-import esa.s1pdgs.cpoc.prip.worker.model.Checksum;
-import esa.s1pdgs.cpoc.prip.worker.model.PripDateTimeFilter;
-import esa.s1pdgs.cpoc.prip.worker.model.PripMetadata;
-import esa.s1pdgs.cpoc.prip.worker.model.PripTextFilter;
-import esa.s1pdgs.cpoc.prip.worker.model.PripDateTimeFilter.Operator;
-import esa.s1pdgs.cpoc.prip.worker.service.metadata.PripElasticSearchMetadataRepo;
+import esa.s1pdgs.cpoc.prip.metadata.PripElasticSearchMetadataRepo;
+import esa.s1pdgs.cpoc.prip.model.Checksum;
+import esa.s1pdgs.cpoc.prip.model.PripDateTimeFilter;
+import esa.s1pdgs.cpoc.prip.model.PripMetadata;
+import esa.s1pdgs.cpoc.prip.model.PripTextFilter;
+import esa.s1pdgs.cpoc.prip.model.PripDateTimeFilter.Operator;
 
 public class TestPripElasticSearchMetadataRepo {
 

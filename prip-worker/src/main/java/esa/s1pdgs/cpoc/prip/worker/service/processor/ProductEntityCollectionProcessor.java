@@ -33,12 +33,12 @@ import org.apache.olingo.server.api.uri.queryoption.expression.ExpressionVisitEx
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import esa.s1pdgs.cpoc.prip.worker.model.PripDateTimeFilter;
-import esa.s1pdgs.cpoc.prip.worker.model.PripMetadata;
-import esa.s1pdgs.cpoc.prip.worker.model.PripTextFilter;
+import esa.s1pdgs.cpoc.prip.metadata.PripMetadataRepository;
+import esa.s1pdgs.cpoc.prip.model.PripDateTimeFilter;
+import esa.s1pdgs.cpoc.prip.model.PripMetadata;
+import esa.s1pdgs.cpoc.prip.model.PripTextFilter;
 import esa.s1pdgs.cpoc.prip.worker.service.edm.EdmProvider;
 import esa.s1pdgs.cpoc.prip.worker.service.mapping.MappingUtil;
-import esa.s1pdgs.cpoc.prip.worker.service.metadata.PripMetadataRepository;
 import esa.s1pdgs.cpoc.prip.worker.service.processor.visitor.ProductsFilterVisitor;
 
 public class ProductEntityCollectionProcessor implements EntityCollectionProcessor {

@@ -1,4 +1,4 @@
-package esa.s1pdgs.cpoc.prip.worker.model;
+package esa.s1pdgs.cpoc.prip.model;
 
 import java.time.LocalDateTime;
 import java.util.List;

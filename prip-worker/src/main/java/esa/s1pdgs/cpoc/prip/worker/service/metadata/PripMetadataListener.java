@@ -25,8 +25,9 @@ import esa.s1pdgs.cpoc.mqi.model.queue.ProductionEvent;
 import esa.s1pdgs.cpoc.mqi.model.rest.GenericMessageDto;
 import esa.s1pdgs.cpoc.obs_sdk.ObsClient;
 import esa.s1pdgs.cpoc.obs_sdk.ObsObject;
-import esa.s1pdgs.cpoc.prip.worker.model.Checksum;
-import esa.s1pdgs.cpoc.prip.worker.model.PripMetadata;
+import esa.s1pdgs.cpoc.prip.metadata.PripMetadataRepository;
+import esa.s1pdgs.cpoc.prip.model.Checksum;
+import esa.s1pdgs.cpoc.prip.model.PripMetadata;
 
 @Service
 public class PripMetadataListener implements MqiListener<ProductionEvent> {

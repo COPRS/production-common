@@ -29,7 +29,7 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 
-import esa.s1pdgs.cpoc.prip.worker.service.metadata.PripMetadataRepository;
+import esa.s1pdgs.cpoc.prip.metadata.PripMetadataRepository;
 import esa.s1pdgs.cpoc.prip.worker.service.processor.ProductEntityCollectionProcessor;
 
 public class TestProductEntityCollectionProcessor {

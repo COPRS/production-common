@@ -22,9 +22,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import esa.s1pdgs.cpoc.common.utils.DateUtils;
-import esa.s1pdgs.cpoc.prip.worker.model.PripDateTimeFilter;
-import esa.s1pdgs.cpoc.prip.worker.model.PripTextFilter;
-import esa.s1pdgs.cpoc.prip.worker.model.PripDateTimeFilter.Operator;
+import esa.s1pdgs.cpoc.prip.model.PripDateTimeFilter;
+import esa.s1pdgs.cpoc.prip.model.PripTextFilter;
+import esa.s1pdgs.cpoc.prip.model.PripDateTimeFilter.Operator;
 
 public class ProductsFilterVisitor implements ExpressionVisitor<Object> {
 

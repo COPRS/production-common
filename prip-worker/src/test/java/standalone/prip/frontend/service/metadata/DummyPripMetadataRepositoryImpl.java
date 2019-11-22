@@ -8,11 +8,11 @@ import java.util.UUID;
 
 import esa.s1pdgs.cpoc.common.ProductFamily;
 import esa.s1pdgs.cpoc.common.utils.DateUtils;
-import esa.s1pdgs.cpoc.prip.worker.model.Checksum;
-import esa.s1pdgs.cpoc.prip.worker.model.PripDateTimeFilter;
-import esa.s1pdgs.cpoc.prip.worker.model.PripMetadata;
-import esa.s1pdgs.cpoc.prip.worker.model.PripTextFilter;
-import esa.s1pdgs.cpoc.prip.worker.service.metadata.PripMetadataRepository;
+import esa.s1pdgs.cpoc.prip.metadata.PripMetadataRepository;
+import esa.s1pdgs.cpoc.prip.model.Checksum;
+import esa.s1pdgs.cpoc.prip.model.PripDateTimeFilter;
+import esa.s1pdgs.cpoc.prip.model.PripMetadata;
+import esa.s1pdgs.cpoc.prip.model.PripTextFilter;
 
 public class DummyPripMetadataRepositoryImpl implements PripMetadataRepository {
 

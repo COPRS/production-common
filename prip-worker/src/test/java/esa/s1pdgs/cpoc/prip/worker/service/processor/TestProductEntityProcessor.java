@@ -35,8 +35,8 @@ import org.mockito.MockitoAnnotations;
 import esa.s1pdgs.cpoc.common.errors.obs.ObsException;
 import esa.s1pdgs.cpoc.obs_sdk.ObsClient;
 import esa.s1pdgs.cpoc.obs_sdk.ObsServiceException;
-import esa.s1pdgs.cpoc.prip.worker.model.PripMetadata;
-import esa.s1pdgs.cpoc.prip.worker.service.metadata.PripMetadataRepository;
+import esa.s1pdgs.cpoc.prip.metadata.PripMetadataRepository;
+import esa.s1pdgs.cpoc.prip.model.PripMetadata;
 import esa.s1pdgs.cpoc.prip.worker.service.processor.ProductEntityProcessor;
 
 public class TestProductEntityProcessor {

@@ -1,10 +1,10 @@
-package esa.s1pdgs.cpoc.prip.worker.service.metadata;
+package esa.s1pdgs.cpoc.prip.metadata;
 
 import java.util.List;
 
-import esa.s1pdgs.cpoc.prip.worker.model.PripDateTimeFilter;
-import esa.s1pdgs.cpoc.prip.worker.model.PripMetadata;
-import esa.s1pdgs.cpoc.prip.worker.model.PripTextFilter;
+import esa.s1pdgs.cpoc.prip.model.PripDateTimeFilter;
+import esa.s1pdgs.cpoc.prip.model.PripMetadata;
+import esa.s1pdgs.cpoc.prip.model.PripTextFilter;
 
 public interface PripMetadataRepository {
 

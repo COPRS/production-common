@@ -17,8 +17,8 @@ import org.apache.olingo.commons.api.data.ValueType;
 import org.junit.Assert;
 import org.junit.Test;
 
-import esa.s1pdgs.cpoc.prip.worker.model.Checksum;
-import esa.s1pdgs.cpoc.prip.worker.model.PripMetadata;
+import esa.s1pdgs.cpoc.prip.model.Checksum;
+import esa.s1pdgs.cpoc.prip.model.PripMetadata;
 import esa.s1pdgs.cpoc.prip.worker.service.mapping.MappingUtil;
 
 public class TestMappingUtil {
