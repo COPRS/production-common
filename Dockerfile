@@ -32,7 +32,10 @@ COPY request-repository/ /app/request-repository
 COPY queue-watcher/ /app/queue-watcher
 COPY validation/ /app/validation
 COPY compression-worker/ /app/compression-worker
+COPY prip-trigger /app/prip-trigger
 COPY prip-worker /app/prip-worker
+COPY prip-frontend /app/prip-frontend
+
 
 RUN mvn -DskipTests=true -Dpmd.skip=true -Dfindbugs.skip=true -B -f /app/pom.xml -s /usr/share/maven/ref/settings-docker.xml install 
 
@@ -66,4 +69,6 @@ COPY --from=buildenv /app/request-repository/target /app/request-repository/targ
 COPY --from=buildenv /app/queue-watcher/target /app/queue-watcher/target
 COPY --from=buildenv /app/validation/target /app/validation/target
 COPY --from=buildenv /app/compression-worker/target /app/compression-worker/target
+COPY --from=buildenv /app/prip-trigger/target /app/prip-trigger/target
 COPY --from=buildenv /app/prip-worker/target /app/prip-worker/target
+COPY --from=buildenv /app/prip-frontend/target /app/prip-frontend/target
