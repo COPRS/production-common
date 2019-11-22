@@ -1,24 +1,25 @@
 package esa.s1pdgs.cpoc.mqi.model.queue;
 
-public class CompressionEvent {
+import esa.s1pdgs.cpoc.common.ProductFamily;
 
-	private String fileName;
-	private String obsKey;
+public class CompressionEvent extends AbstractMessage {
 
-	public String getFileName() {
-		return fileName;
+	private ProductFamily productFamily;
+	private String keyObjectStorage;
+	
+	public ProductFamily getProductFamily() {
+		return productFamily;
+	}
+	public void setProductFamily(ProductFamily productFamily) {
+		this.productFamily = productFamily;
+	}
+	public String getKeyObjectStorage() {
+		return keyObjectStorage;
+	}
+	public void setKeyObjectStorage(String keyObjectStorage) {
+		this.keyObjectStorage = keyObjectStorage;
 	}
 
-	public void setFileName(String fileName) {
-		this.fileName = fileName;
-	}
-
-	public String getObsKey() {
-		return obsKey;
-	}
-
-	public void setObsKey(String obsKey) {
-		this.obsKey = obsKey;
-	}
+	
 
 }

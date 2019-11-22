@@ -2,17 +2,28 @@ package esa.s1pdgs.cpoc.mqi.model.queue;
 
 import java.time.LocalDateTime;
 
-public class PripJob {
+import esa.s1pdgs.cpoc.common.ProductFamily;
 
-	private String obsKey;
+public class PripJob extends AbstractMessage {
+
+	private ProductFamily productFamily;
+	private String keyObjectStorage;
 	private LocalDateTime evictionDate;
 
-	public String getObsKey() {
-		return obsKey;
+	public ProductFamily getProductFamily() {
+		return productFamily;
 	}
 
-	public void setObsKey(String obsKey) {
-		this.obsKey = obsKey;
+	public void setProductFamily(ProductFamily productFamily) {
+		this.productFamily = productFamily;
+	}
+
+	public String getKeyObjectStorage() {
+		return keyObjectStorage;
+	}
+
+	public void setKeyObjectStorage(String keyObjectStorage) {
+		this.keyObjectStorage = keyObjectStorage;
 	}
 
 	public LocalDateTime getEvictionDate() {

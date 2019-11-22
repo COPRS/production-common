@@ -11,7 +11,11 @@ import esa.s1pdgs.cpoc.common.ProductFamily;
  * 
  * @author Viveris Technologies
  */
-public class IpfExecutionJob extends AbstractDto {    
+public class IpfExecutionJob extends AbstractMessage {
+	
+	private ProductFamily productFamily;
+	private String keyObjectStorage;
+	
     /**
      * Process mode
      */
@@ -56,29 +60,33 @@ public class IpfExecutionJob extends AbstractDto {
     /**
      * Constructor from session identifier
      */
-    public IpfExecutionJob(final ProductFamily family,
-            final String productIdentifier, final String productProcessMode, final String workDirectory,
+    public IpfExecutionJob(final ProductFamily productFamily,
+            final String keyObjectStorage, final String productProcessMode, final String workDirectory,
             final String jobOrder) {
-        super(productIdentifier, family);
+        this.productFamily = productFamily;
+        this.keyObjectStorage = keyObjectStorage;
         this.productProcessMode = productProcessMode;
         this.workDirectory = workDirectory;
         this.jobOrder = jobOrder;
     }
+    
+    
 
-    /**
-     * @return the productIdentifier
-     */
-    public String getProductIdentifier() {
-        return getProductName();
-    }
+    public ProductFamily getProductFamily() {
+		return productFamily;
+	}
 
-    /**
-     * @param productIdentifier
-     *            the productIdentifier to set
-     */
-    public void setProductIdentifier(final String productIdentifier) {
-        this.setProductName(productIdentifier);;
-    }
+	public void setProductFamily(ProductFamily productFamily) {
+		this.productFamily = productFamily;
+	}
+
+	public String getKeyObjectStorage() {
+		return keyObjectStorage;
+	}
+
+	public void setKeyObjectStorage(String keyObjectStorage) {
+		this.keyObjectStorage = keyObjectStorage;
+	}
 
     /**
      * @return the workDirectory
@@ -217,8 +225,8 @@ public class IpfExecutionJob extends AbstractDto {
     @Override
     public String toString() {
         return String.format(
-                "{family: %s, productIdentifier: %s, productProcessMode: %s, workDirectory: %s, jobOrder: %s, inputs: %s, outputs: %s, pools: %s, hostname: %s, creationDate: %s}",
-                getFamily(), getProductIdentifier(), productProcessMode, workDirectory, jobOrder, inputs,
+                "{family: %s, getKeyObjectStorage: %s, productProcessMode: %s, workDirectory: %s, jobOrder: %s, inputs: %s, outputs: %s, pools: %s, hostname: %s, creationDate: %s}",
+                getProductFamily(), getKeyObjectStorage(), productProcessMode, workDirectory, jobOrder, inputs,
                 outputs, pools, getHostname(), getCreationDate());
     }
 
@@ -227,7 +235,7 @@ public class IpfExecutionJob extends AbstractDto {
      */
     @Override
     public int hashCode() {
-        return Objects.hash(getFamily(), getProductIdentifier(), productProcessMode, workDirectory, jobOrder, 
+        return Objects.hash(getProductFamily(), getKeyObjectStorage(), productProcessMode, workDirectory, jobOrder, 
                 inputs, outputs, pools, getHostname(), getCreationDate());
     }
 
@@ -243,8 +251,8 @@ public class IpfExecutionJob extends AbstractDto {
             ret = false;
         } else {
             IpfExecutionJob other = (IpfExecutionJob) obj;
-            ret = Objects.equals(getFamily(), other.getFamily())
-                    && Objects.equals(getProductIdentifier(), other.getProductIdentifier())
+            ret = Objects.equals(getProductFamily(), other.getProductFamily())
+                    && Objects.equals(getKeyObjectStorage(), other.getKeyObjectStorage())
                     && Objects.equals(productProcessMode,
                             other.productProcessMode)
                     && Objects.equals(workDirectory, other.workDirectory)

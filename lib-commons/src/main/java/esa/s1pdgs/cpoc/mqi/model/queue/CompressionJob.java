@@ -1,45 +1,49 @@
 package esa.s1pdgs.cpoc.mqi.model.queue;
 
-public class CompressionJob {
+import esa.s1pdgs.cpoc.common.ProductFamily;
+
+public class CompressionJob extends AbstractMessage {
 	
-	private String inputFileName;
-	private String inputObsKey;	
-	private String outputFileName;
-	private String outputObsKey;
+	private ProductFamily inputProductFamily;
+	private String inputKeyObjectStorage;
+	private ProductFamily outputProductFamily;
+	private String outputKeyObjectStorage;
+
+	// TODO TAI: Der Name ist unglücklich
 	private CompressionDirection compressionDirection;
-	
-	public String getInputFileName() {
-		return inputFileName;
+
+	public ProductFamily getInputProductFamily() {
+		return inputProductFamily;
 	}
-	
-	public void setInputFileName(String inputFileName) {
-		this.inputFileName = inputFileName;
+
+	public void setInputProductFamily(ProductFamily inputProductFamily) {
+		this.inputProductFamily = inputProductFamily;
 	}
-	
-	public String getInputObsKey() {
-		return inputObsKey;
+
+	public String getInputKeyObjectStorage() {
+		return inputKeyObjectStorage;
 	}
-	
-	public void setInputObsKey(String inputObsKey) {
-		this.inputObsKey = inputObsKey;
+
+	public void setInputKeyObjectStorage(String inputKeyObjectStorage) {
+		this.inputKeyObjectStorage = inputKeyObjectStorage;
 	}
-	
-	public String getOutputFileName() {
-		return outputFileName;
+
+	public ProductFamily getOutputProductFamily() {
+		return outputProductFamily;
 	}
-	
-	public void setOutputFileName(String outputFileName) {
-		this.outputFileName = outputFileName;
+
+	public void setOutputProductFamily(ProductFamily outputProductFamily) {
+		this.outputProductFamily = outputProductFamily;
 	}
-	
-	public String getOutputObsKey() {
-		return outputObsKey;
+
+	public String getOutputKeyObjectStorage() {
+		return outputKeyObjectStorage;
 	}
-	
-	public void setOutputObsKey(String outputObsKey) {
-		this.outputObsKey = outputObsKey;
+
+	public void setOutputKeyObjectStorage(String outputKeyObjectStorage) {
+		this.outputKeyObjectStorage = outputKeyObjectStorage;
 	}
-	
+
 	public CompressionDirection getCompressionDirection() {
 		return compressionDirection;
 	}
@@ -50,8 +54,8 @@ public class CompressionJob {
 
 	@Override
 	public String toString() {
-		return "CompressionJob [inputFileName=" + inputFileName + ", inputObsKey=" + inputObsKey + ", outputFileName="
-				+ outputFileName + ", outputObsKey=" + outputObsKey + ", compressionDirection=" + compressionDirection
+		return "CompressionJob [inputKeyObjectStorage=" + inputKeyObjectStorage + ", outputKeyObjectStorage=" + outputKeyObjectStorage + ", inputProductFamily="
+				+ inputProductFamily + ", outputProductFamily=" + outputProductFamily + ", compressionDirection=" + compressionDirection
 				+ "]";
 	}
 
@@ -60,10 +64,10 @@ public class CompressionJob {
 		final int prime = 31;
 		int result = 1;
 		result = prime * result + ((compressionDirection == null) ? 0 : compressionDirection.hashCode());
-		result = prime * result + ((inputFileName == null) ? 0 : inputFileName.hashCode());
-		result = prime * result + ((inputObsKey == null) ? 0 : inputObsKey.hashCode());
-		result = prime * result + ((outputFileName == null) ? 0 : outputFileName.hashCode());
-		result = prime * result + ((outputObsKey == null) ? 0 : outputObsKey.hashCode());
+		result = prime * result + ((inputKeyObjectStorage == null) ? 0 : inputKeyObjectStorage.hashCode());
+		result = prime * result + ((outputKeyObjectStorage == null) ? 0 : outputKeyObjectStorage.hashCode());
+		result = prime * result + ((inputProductFamily == null) ? 0 : inputProductFamily.hashCode());
+		result = prime * result + ((outputProductFamily == null) ? 0 : outputProductFamily.hashCode());
 		return result;
 	}
 
@@ -78,25 +82,15 @@ public class CompressionJob {
 		CompressionJob other = (CompressionJob) obj;
 		if (compressionDirection != other.compressionDirection)
 			return false;
-		if (inputFileName == null) {
-			if (other.inputFileName != null)
+		if (inputKeyObjectStorage == null) {
+			if (other.inputKeyObjectStorage != null)
 				return false;
-		} else if (!inputFileName.equals(other.inputFileName))
+		} else if (!outputKeyObjectStorage.equals(other.outputKeyObjectStorage))
 			return false;
-		if (inputObsKey == null) {
-			if (other.inputObsKey != null)
+		if (inputProductFamily == null) {
+			if (other.inputProductFamily != null)
 				return false;
-		} else if (!inputObsKey.equals(other.inputObsKey))
-			return false;
-		if (outputFileName == null) {
-			if (other.outputFileName != null)
-				return false;
-		} else if (!outputFileName.equals(other.outputFileName))
-			return false;
-		if (outputObsKey == null) {
-			if (other.outputObsKey != null)
-				return false;
-		} else if (!outputObsKey.equals(other.outputObsKey))
+		} else if (!outputProductFamily.equals(other.outputProductFamily))
 			return false;
 		return true;
 	}

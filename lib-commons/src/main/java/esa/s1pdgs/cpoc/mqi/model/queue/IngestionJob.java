@@ -2,7 +2,10 @@ package esa.s1pdgs.cpoc.mqi.model.queue;
 
 import esa.s1pdgs.cpoc.common.ProductFamily;
 
-public class IngestionJob extends AbstractDto {
+public class IngestionJob extends AbstractMessage {
+	
+	private ProductFamily productFamily;
+	private String keyObjectStorage;
 
 	private String relativePath;
 	private String pickupPath;
@@ -10,12 +13,25 @@ public class IngestionJob extends AbstractDto {
 	private String satelliteId;
 	private String stationCode;
 
-	public IngestionJob() {
-		super();
+	public IngestionJob(String keyObjectStorage) {
+		this.keyObjectStorage = keyObjectStorage;
+		this.productFamily = ProductFamily.BLANK;
 	}
 
-	public IngestionJob(String productName) {
-		super(productName, ProductFamily.BLANK);
+	public ProductFamily getProductFamily() {
+		return productFamily;
+	}
+
+	public void setProductFamily(ProductFamily productFamily) {
+		this.productFamily = productFamily;
+	}
+
+	public String getKeyObjectStorage() {
+		return keyObjectStorage;
+	}
+
+	public void setKeyObjectStorage(String keyObjectStorage) {
+		this.keyObjectStorage = keyObjectStorage;
 	}
 
 	public String getRelativePath() {
@@ -62,8 +78,8 @@ public class IngestionJob extends AbstractDto {
 	public int hashCode() {
 		final int prime = 31;
 		int result = 1;
-		result = prime * result + ((getProductName() == null) ? 0 : getProductName().hashCode());
-		result = prime * result + ((getFamily() == null) ? 0 : getFamily().hashCode());
+		result = prime * result + ((getKeyObjectStorage() == null) ? 0 : getKeyObjectStorage().hashCode());
+		result = prime * result + ((getProductFamily() == null) ? 0 : getProductFamily().hashCode());
 		result = prime * result + ((missionId == null) ? 0 : missionId.hashCode());
 		result = prime * result + ((pickupPath == null) ? 0 : pickupPath.hashCode());
 		result = prime * result + ((relativePath == null) ? 0 : relativePath.hashCode());
@@ -88,15 +104,14 @@ public class IngestionJob extends AbstractDto {
 				return false;
 		} else if (!missionId.equals(other.missionId))
 			return false;
-		if (getProductName() == null) {
-			if (other.getProductName() != null)
+		if (getKeyObjectStorage() == null) {
+			if (other.getKeyObjectStorage() != null)
 				return false;
-		} else if (!getProductName().equals(other.getProductName()))
-			return false;
-		if (getFamily() == null) {
-			if (other.getFamily() != null)
+		}
+		if (getProductFamily() == null) {
+			if (other.getProductFamily() != null)
 				return false;
-		} else if (!getFamily().equals(other.getFamily()))
+		} else if (!getProductFamily().equals(other.getProductFamily()))
 			return false;
 		if (pickupPath == null) {
 			if (other.pickupPath != null)

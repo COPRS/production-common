@@ -4,7 +4,10 @@ import java.time.LocalDateTime;
 
 import esa.s1pdgs.cpoc.common.ProductFamily;
 
-public class CatalogEvent extends AbstractDto {
+public class CatalogEvent extends AbstractMessage {
+	
+	private ProductFamily productFamily;
+	private String keyObjectStorage;
 	
 	private String productType;
 	private String missionId;
@@ -21,8 +24,9 @@ public class CatalogEvent extends AbstractDto {
 		super();
 	}
 	
-	public CatalogEvent(String productName, ProductFamily family) {
-		super(productName, family);
+	public CatalogEvent(String keyObjectStorage, ProductFamily productfamily) {
+		this.productFamily = productFamily;
+		this.keyObjectStorage = keyObjectStorage;
 	}
 
 	public String getProductType() {
