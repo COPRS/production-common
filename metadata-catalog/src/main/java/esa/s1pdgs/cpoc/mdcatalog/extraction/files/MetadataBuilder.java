@@ -151,7 +151,7 @@ public class MetadataBuilder {
     public JSONObject buildOutputFileMetadata(OutputFileDescriptor descriptor, File file, ProductionEvent dto)
             throws MetadataExtractionException, MetadataMalformedException {
         JSONObject metadataToIndex = new JSONObject();
-        metadataToIndex = extractor.processProduct(descriptor, dto.getFamily(), file);
+        metadataToIndex = extractor.processProduct(descriptor, dto.getProductFamily(), file);
         // Adding fields that are directly used from the DTO
         metadataToIndex.put("oqcFlag", dto.getOqcFlag());
         LOGGER.debug("JSON OBJECT:{}",metadataToIndex.toString());

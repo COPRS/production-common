@@ -115,7 +115,7 @@ public class LevelSegmentsExtractor extends GenericExtractor<ProductionEvent> im
         final ProductionEvent dto = message.getBody();
         final String keyObs = getKeyObs(message);        
         final String productName = extractProductNameFromDto(dto);
-        final ProductFamily family = message.getBody().getFamily();
+        final ProductFamily family = message.getBody().getProductFamily();
         
         LOGGER.debug("starting to download metadatafile for for product: {}",productName);
         
@@ -125,7 +125,7 @@ public class LevelSegmentsExtractor extends GenericExtractor<ProductionEvent> im
         
     	final OutputFileDescriptor l0SegmentDesc = extractFromFilename(
     			reportingFactory, 
-    			() -> fileDescriptorBuilder.buildOutputFileDescriptor(metadataFile, dto, dto.getFamily())
+    			() -> fileDescriptorBuilder.buildOutputFileDescriptor(metadataFile, dto, dto.getProductFamily())
     	);
     	LOGGER.debug("OutputFileDescriptor:{} for product: {}",l0SegmentDesc.toString(),productName);
     	
@@ -155,7 +155,7 @@ public class LevelSegmentsExtractor extends GenericExtractor<ProductionEvent> im
      */
     @Override
     protected String extractProductNameFromDto(final ProductionEvent dto) {
-        return dto.getProductName();
+        return dto.getKeyObjectStorage();
     }
 
     /**

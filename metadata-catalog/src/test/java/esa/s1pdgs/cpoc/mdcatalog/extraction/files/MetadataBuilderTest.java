@@ -314,7 +314,7 @@ public class MetadataBuilderTest {
 		File file = new File("workDir/S1A_IW_RAW__0SDV_20171213T121623_20171213T121656_019684_021735_C6DB.SAFE/manifest.safe");
 		
 		ProductionEvent productionEvent = new ProductionEvent();
-		productionEvent.setFamily(ProductFamily.L0_SLICE);
+		productionEvent.setProductFamily(ProductFamily.L0_SLICE);
 
 		try {
 			MetadataBuilder metadataBuilder = new MetadataBuilder(extractor, LOCAL_DIRECTORY);
@@ -355,7 +355,7 @@ public class MetadataBuilderTest {
 		File file = new File("workDir/S1A_IW_RAW__0ADV_20171213T121123_20171213T121947_019684_021735_51B1.SAFE/manifest.safe");
 		
 		ProductionEvent productionEvent = new ProductionEvent();
-		productionEvent.setFamily(ProductFamily.L0_ACN);
+		productionEvent.setProductFamily(ProductFamily.L0_ACN);
 
 		try {
 			MetadataBuilder metadataBuilder = new MetadataBuilder(extractor, LOCAL_DIRECTORY);
@@ -396,7 +396,7 @@ public class MetadataBuilderTest {
 		File file = new File("workDir/S1A_IW_RAW__0SDV_20171213T121623_20171213T121656_019684_021735_C6DB.SAFE/manifest.safe");
 		
 		ProductionEvent productionEvent = new ProductionEvent();
-		productionEvent.setFamily(ProductFamily.L1_SLICE);
+		productionEvent.setProductFamily(ProductFamily.L1_SLICE);
 
 		try {
 			MetadataBuilder metadataBuilder = new MetadataBuilder(extractor, LOCAL_DIRECTORY);
@@ -437,7 +437,7 @@ public class MetadataBuilderTest {
 		File file = new File("workDir/S1A_IW_RAW__0ADV_20171213T121123_20171213T121947_019684_021735_51B1.SAFE/manifest.safe");
 		
 		ProductionEvent productionEvent = new ProductionEvent();
-		productionEvent.setFamily(ProductFamily.L1_ACN);
+		productionEvent.setProductFamily(ProductFamily.L1_ACN);
 
 		try {
 			MetadataBuilder metadataBuilder = new MetadataBuilder(extractor, LOCAL_DIRECTORY);

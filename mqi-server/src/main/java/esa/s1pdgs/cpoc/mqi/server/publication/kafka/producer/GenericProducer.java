@@ -63,7 +63,7 @@ public class GenericProducer {
             LOGGER.debug("Sending to '{}': {}", topic, dto);
             template.send(topic, dto).get();
         } catch (CancellationException | InterruptedException | ExecutionException e) {
-            throw new MqiPublicationError(topic, dto, dto.getProductName(), e.getMessage(), e);
+            throw new MqiPublicationError(topic, dto, "NOPRODUCTNAMEANYMORE", e.getMessage(), e);
         }
     }
 

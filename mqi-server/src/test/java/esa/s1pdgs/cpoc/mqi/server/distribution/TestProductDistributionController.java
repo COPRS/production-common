@@ -37,8 +37,7 @@ import esa.s1pdgs.cpoc.mqi.server.publication.MessagePublicationController;
 public class TestProductDistributionController {
 	
 	static final class StringDto extends AbstractMessage {
-		public StringDto(String productName) {
-			super(productName, ProductFamily.BLANK);
+		public StringDto(String productName) {			
 		}		
 	}
 

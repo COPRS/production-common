@@ -174,16 +174,17 @@ public class ProductDistributionController {
         	final GenericPublicationMessageDto<? extends AbstractMessage> mess = objMapper
         			.readValue(objMapper.treeAsTokens(message), javaType);
         	
+        	// TODO: the productname does not exist everywhere anymore.
             LOGGER.info(
                     "[MONITOR] [category {}] [api publish] [messageId {}] [productName: {}] Starting",
-                    category, mess.getInputMessageId(), mess.getMessageToPublish().getProductName());
+                    category, mess.getInputMessageId(), "NOPRODUCTNAMEANYMORE");
         	
             publication.publish(category, mess.getMessageToPublish(), mess.getInputKey(), mess.getOutputKey());
-            
+
+        	// TODO: the productname does not exist everywhere anymore.
             LOGGER.info(
                     "[MONITOR] [category {}] [api publish] [httpCode {}] [messageId {}] [productName: {}] End",
-                    category, 200, mess.getInputMessageId(), mess.getMessageToPublish().getProductName()
-            );
+                    category, 200, mess.getInputMessageId(), "NOPRODUCTNAMEANYMORE"            );
         } catch (MqiPublicationError kse) {
             LOGGER.error("[publish] KafkaSendException occurred: {}", kse.getMessage());
             throw new ProductDistributionException(HttpStatus.GATEWAY_TIMEOUT);

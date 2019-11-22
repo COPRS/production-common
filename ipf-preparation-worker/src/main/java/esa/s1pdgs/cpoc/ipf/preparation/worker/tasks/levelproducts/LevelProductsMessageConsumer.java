@@ -109,15 +109,15 @@ public class LevelProductsMessageConsumer extends AbstractGenericConsumer<Produc
         int step = 1;
         boolean ackOk = false;
         String errorMessage = "";
-        String productName = mqiMessage.getBody().getProductName();
-        ProductFamily family = mqiMessage.getBody().getFamily();
+        String productName = mqiMessage.getBody().getKeyObjectStorage();
+        ProductFamily family = mqiMessage.getBody().getProductFamily();
 
         FailedProcessingDto failedProc =  new FailedProcessingDto();
         
         try {
             LOGGER.info("[MONITOR] [step 1] [productName {}] Creating job", productName);
             reporting.begin(
-            		new FilenameReportingInput(Collections.singletonList(mqiMessage.getBody().getProductName())),
+            		new FilenameReportingInput(Collections.singletonList(mqiMessage.getBody().getKeyObjectStorage())),
             		new ReportingMessage("Start job generation using {}", productName)
             );
             
@@ -182,7 +182,7 @@ public class LevelProductsMessageConsumer extends AbstractGenericConsumer<Produc
 
         if (CollectionUtils.isEmpty(existingJobs)) {
             // Job does not exists => create it
-            Matcher m = l0SLicesPattern.matcher(leveldto.getProductName());
+            Matcher m = l0SLicesPattern.matcher(leveldto.getKeyObjectStorage());
             if (!m.matches()) {
                 throw new InvalidFormatProduct(
                         "Don't match with regular expression "
@@ -206,7 +206,7 @@ public class LevelProductsMessageConsumer extends AbstractGenericConsumer<Produc
             AppDataJobProduct productDto = new AppDataJobProduct();
             productDto.setAcquisition(acquisition);
             productDto.setMissionId(missionId);
-            productDto.setProductName(leveldto.getProductName());
+            productDto.setProductName(leveldto.getKeyObjectStorage());
             productDto.setProcessMode(leveldto.getMode());
             productDto.setSatelliteId(satelliteId);
             productDto.setStartTime(DateUtils.convertToAnotherFormat(startTime,

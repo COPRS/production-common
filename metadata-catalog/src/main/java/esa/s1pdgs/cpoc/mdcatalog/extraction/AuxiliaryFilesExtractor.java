@@ -174,7 +174,7 @@ public class AuxiliaryFilesExtractor extends GenericExtractor<ProductionEvent> i
 	 */
 	@Override
 	protected String extractProductNameFromDto(final ProductionEvent dto) {
-		return dto.getProductName();
+		return dto.getKeyObjectStorage();
 	}
 
 	/**

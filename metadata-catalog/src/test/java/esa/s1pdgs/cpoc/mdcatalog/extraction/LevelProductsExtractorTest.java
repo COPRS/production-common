@@ -218,7 +218,7 @@ public class LevelProductsExtractorTest {
 		descriptor.setProductFamily(ProductFamily.L0_SLICE);
 		
 		ProductionEvent productionEvent = new ProductionEvent();
-		productionEvent.setFamily(ProductFamily.L0_SLICE);
+		productionEvent.setProductFamily(ProductFamily.L0_SLICE);
 
 		JSONObject expected = extractor.mdBuilder.buildOutputFileMetadata(descriptor, files.get(0), productionEvent);
 
@@ -270,7 +270,7 @@ public class LevelProductsExtractorTest {
 		descriptor.setProductFamily(ProductFamily.L0_ACN);
 		
 		ProductionEvent productionEvent = new ProductionEvent();
-		productionEvent.setFamily(ProductFamily.L0_ACN);
+		productionEvent.setProductFamily(ProductFamily.L0_ACN);
 
 		JSONObject expected = extractor.mdBuilder.buildOutputFileMetadata(descriptor, files.get(0), productionEvent);
 		final LoggerReporting.Factory reportingFactory = new LoggerReporting.Factory("TestMetadataExtraction");
@@ -321,7 +321,7 @@ public class LevelProductsExtractorTest {
 		descriptor.setProductFamily(ProductFamily.L1_SLICE);
 		
 		ProductionEvent productionEvent = new ProductionEvent();
-		productionEvent.setFamily(ProductFamily.L1_SLICE);
+		productionEvent.setProductFamily(ProductFamily.L1_SLICE);
 
 		JSONObject expected = extractor.mdBuilder.buildOutputFileMetadata(descriptor, files.get(0), productionEvent);
 		final LoggerReporting.Factory reportingFactory = new LoggerReporting.Factory("TestMetadataExtraction");
@@ -370,7 +370,7 @@ public class LevelProductsExtractorTest {
 		descriptor.setProductFamily(ProductFamily.L1_ACN);
 		
 		ProductionEvent productionEvent = new ProductionEvent();
-		productionEvent.setFamily(ProductFamily.L1_ACN);
+		productionEvent.setProductFamily(ProductFamily.L1_ACN);
 
 		JSONObject expected = extractor.mdBuilder.buildOutputFileMetadata(descriptor, files.get(0), productionEvent);
 
@@ -418,7 +418,7 @@ public class LevelProductsExtractorTest {
 		descriptor.setProductFamily(ProductFamily.L2_SLICE);
 		
 		ProductionEvent productionEvent = new ProductionEvent();
-		productionEvent.setFamily(ProductFamily.L2_SLICE);
+		productionEvent.setProductFamily(ProductFamily.L2_SLICE);
 
 		JSONObject expected = extractor.mdBuilder.buildOutputFileMetadata(descriptor, files.get(0), productionEvent);
 		final LoggerReporting.Factory reportingFactory = new LoggerReporting.Factory("TestMetadataExtraction");
@@ -465,7 +465,7 @@ public class LevelProductsExtractorTest {
 		descriptor.setProductFamily(ProductFamily.L2_ACN);
 		
 		ProductionEvent productionEvent = new ProductionEvent();
-		productionEvent.setFamily(ProductFamily.L2_ACN);
+		productionEvent.setProductFamily(ProductFamily.L2_ACN);
 
 		JSONObject expected = extractor.mdBuilder.buildOutputFileMetadata(descriptor, files.get(0), productionEvent);
 		final LoggerReporting.Factory reportingFactory = new LoggerReporting.Factory("TestMetadataExtraction");

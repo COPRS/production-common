@@ -111,7 +111,7 @@ public class LevelProductsExtractor extends GenericExtractor<ProductionEvent> im
         String keyObs = getKeyObs(message);
         
         final String productName = extractProductNameFromDto(dto);
-        final ProductFamily family = message.getBody().getFamily();
+        final ProductFamily family = message.getBody().getProductFamily();
         
         final File metadataFile = download(reportingFactory, obsClient, family, productName, keyObs);        
         return extract(reportingFactory, dto, metadataFile, productName, family);
@@ -127,7 +127,7 @@ public class LevelProductsExtractor extends GenericExtractor<ProductionEvent> im
     	throws AbstractCodedException
     {
     	
-    	final OutputFileDescriptor descriptor = extractFromFilename(reportingFactory, () -> fileDescriptorBuilder.buildOutputFileDescriptor(metadataFile, dto, dto.getFamily()));
+    	final OutputFileDescriptor descriptor = extractFromFilename(reportingFactory, () -> fileDescriptorBuilder.buildOutputFileDescriptor(metadataFile, dto, dto.getProductFamily()));
     	return extractFromFile(
     			reportingFactory, 
     			() -> mdBuilder.buildOutputFileMetadata(descriptor, metadataFile, dto));
@@ -153,7 +153,7 @@ public class LevelProductsExtractor extends GenericExtractor<ProductionEvent> im
      */
     @Override
     protected String extractProductNameFromDto(final ProductionEvent dto) {
-        return dto.getProductName();
+        return dto.getKeyObjectStorage();
     }
 
     /**
