@@ -12,8 +12,6 @@ import esa.s1pdgs.cpoc.common.ProductFamily;
  * @author Viveris Technologies
  */
 public class IpfExecutionJob extends AbstractMessage {
-	
-	private ProductFamily productFamily;
 	private String keyObjectStorage;
 	
     /**
@@ -63,22 +61,12 @@ public class IpfExecutionJob extends AbstractMessage {
     public IpfExecutionJob(final ProductFamily productFamily,
             final String keyObjectStorage, final String productProcessMode, final String workDirectory,
             final String jobOrder) {
-        this.productFamily = productFamily;
+        super(productFamily);
         this.keyObjectStorage = keyObjectStorage;
         this.productProcessMode = productProcessMode;
         this.workDirectory = workDirectory;
         this.jobOrder = jobOrder;
     }
-    
-    
-
-    public ProductFamily getProductFamily() {
-		return productFamily;
-	}
-
-	public void setProductFamily(ProductFamily productFamily) {
-		this.productFamily = productFamily;
-	}
 
 	public String getKeyObjectStorage() {
 		return keyObjectStorage;

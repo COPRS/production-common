@@ -5,7 +5,6 @@ import java.util.Objects;
 import esa.s1pdgs.cpoc.common.ProductFamily;
 
 public class ProductionEvent extends AbstractMessage {
-	private ProductFamily productFamily;
 	private String keyObjectStorage;
 	private String mode = null;
 	private OQCFlag oqcFlag = OQCFlag.NOT_CHECKED;
@@ -26,14 +25,6 @@ public class ProductionEvent extends AbstractMessage {
 		this.keyObjectStorage = keyObjectStorage;
 		this.mode = mode;
 		this.oqcFlag = oqcFlag;
-	}
-	
-	public ProductFamily getProductFamily() {
-		return productFamily;
-	}
-
-	public void setProductFamily(ProductFamily productFamily) {
-		this.productFamily = productFamily;
 	}
 
 	public String getKeyObjectStorage() {
@@ -67,7 +58,7 @@ public class ProductionEvent extends AbstractMessage {
 	public String toString() {
 		return String.format(
 				"{keyObjectStorage: %s, family: %s, mode: %s, oqcFlag: %s, hostname: %s, creationDate: %s}",
-				keyObjectStorage, productFamily, mode, oqcFlag.toString(), getHostname(),
+				keyObjectStorage, getProductFamily(), mode, oqcFlag.toString(), getHostname(),
 				getCreationDate());
 	}
 
@@ -76,7 +67,7 @@ public class ProductionEvent extends AbstractMessage {
 	 */
 	@Override
 	public int hashCode() {
-		return Objects.hash(keyObjectStorage, productFamily, mode, oqcFlag, getHostname(),
+		return Objects.hash(keyObjectStorage, getProductFamily(), mode, oqcFlag, getHostname(),
 				getCreationDate());
 	}
 
@@ -94,7 +85,7 @@ public class ProductionEvent extends AbstractMessage {
 			ProductionEvent other = (ProductionEvent) obj;
 			// field comparison
 			ret = Objects.equals(keyObjectStorage, other.keyObjectStorage)
-					&& Objects.equals(productFamily, other.getProductFamily()) 
+					&& Objects.equals(getProductFamily(), other.getProductFamily()) 
 					&& Objects.equals(mode, other.mode)
 					&& Objects.equals(oqcFlag, other.oqcFlag) 
 					&& Objects.equals(getHostname(), other.getHostname())

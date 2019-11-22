@@ -11,8 +11,6 @@ import esa.s1pdgs.cpoc.common.ProductFamily;
  * @author Viveris technologies
  */
 public class IngestionEvent extends AbstractMessage {
-	
-	private ProductFamily productFamily;
 	private String keyObjectStorage;
 
     /**
@@ -63,7 +61,7 @@ public class IngestionEvent extends AbstractMessage {
     public IngestionEvent(final String keyObjectStorage, String inboxPath, final int channelId,
             final EdrsSessionFileType productType, final String missionId,
             final String satelliteId, final String stationCode, final String sessionId) {
-        this.productFamily = ProductFamily.EDRS_SESSION;
+        super(ProductFamily.EDRS_SESSION);
         this.keyObjectStorage = keyObjectStorage;
         this.inboxPath = inboxPath;
         this.channelId = channelId;
@@ -191,14 +189,6 @@ public class IngestionEvent extends AbstractMessage {
 		this.sessionId = sessionId;
 	}
 	
-    public ProductFamily getProductFamily() {
-		return productFamily;
-	}
-
-	public void setProductFamily(ProductFamily productFamily) {
-		this.productFamily = productFamily;
-	}
-
 	/**
      * @see java.lang.Object#toString()
      */

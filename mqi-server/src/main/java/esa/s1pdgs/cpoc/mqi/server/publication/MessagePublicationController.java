@@ -83,7 +83,7 @@ public class MessagePublicationController {
 	 */
 	public void publish(ProductCategory category, AbstractMessage dto, String inputKey, String outputKey)
 			throws MqiPublicationError, MqiCategoryNotAvailable, MqiRouteNotAvailable {		
-		final String topic = getTopic(category, dto.getFamily(), inputKey, outputKey);
+		final String topic = getTopic(category, dto.getProductFamily(), inputKey, outputKey);
 		kafkaProducer.send(topic, dto);
 	}
 

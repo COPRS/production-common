@@ -2,7 +2,7 @@ package esa.s1pdgs.cpoc.mqi.model.queue;
 
 import java.util.List;
 
-public class IpfPreparationJob {
+public class IpfPreparationJob extends AbstractMessage {
 
 	private String ipfName;
 	private String ipfVersion;

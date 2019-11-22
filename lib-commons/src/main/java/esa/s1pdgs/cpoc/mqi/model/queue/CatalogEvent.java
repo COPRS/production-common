@@ -5,8 +5,6 @@ import java.time.LocalDateTime;
 import esa.s1pdgs.cpoc.common.ProductFamily;
 
 public class CatalogEvent extends AbstractMessage {
-	
-	private ProductFamily productFamily;
 	private String keyObjectStorage;
 	
 	private String productType;
@@ -25,7 +23,7 @@ public class CatalogEvent extends AbstractMessage {
 	}
 	
 	public CatalogEvent(String keyObjectStorage, ProductFamily productfamily) {
-		this.productFamily = productFamily;
+		super(productfamily);
 		this.keyObjectStorage = keyObjectStorage;
 	}
 

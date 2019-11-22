@@ -3,22 +3,12 @@ package esa.s1pdgs.cpoc.mqi.model.queue;
 import esa.s1pdgs.cpoc.common.ProductFamily;
 
 public class CompressionJob extends AbstractMessage {
-	
-	private ProductFamily inputProductFamily;
 	private String inputKeyObjectStorage;
 	private ProductFamily outputProductFamily;
 	private String outputKeyObjectStorage;
 
 	// TODO TAI: Der Name ist unglücklich
 	private CompressionDirection compressionDirection;
-
-	public ProductFamily getInputProductFamily() {
-		return inputProductFamily;
-	}
-
-	public void setInputProductFamily(ProductFamily inputProductFamily) {
-		this.inputProductFamily = inputProductFamily;
-	}
 
 	public String getInputKeyObjectStorage() {
 		return inputKeyObjectStorage;
@@ -55,7 +45,7 @@ public class CompressionJob extends AbstractMessage {
 	@Override
 	public String toString() {
 		return "CompressionJob [inputKeyObjectStorage=" + inputKeyObjectStorage + ", outputKeyObjectStorage=" + outputKeyObjectStorage + ", inputProductFamily="
-				+ inputProductFamily + ", outputProductFamily=" + outputProductFamily + ", compressionDirection=" + compressionDirection
+				+ getProductFamily() + ", outputProductFamily=" + outputProductFamily + ", compressionDirection=" + compressionDirection
 				+ "]";
 	}
 
@@ -66,7 +56,6 @@ public class CompressionJob extends AbstractMessage {
 		result = prime * result + ((compressionDirection == null) ? 0 : compressionDirection.hashCode());
 		result = prime * result + ((inputKeyObjectStorage == null) ? 0 : inputKeyObjectStorage.hashCode());
 		result = prime * result + ((outputKeyObjectStorage == null) ? 0 : outputKeyObjectStorage.hashCode());
-		result = prime * result + ((inputProductFamily == null) ? 0 : inputProductFamily.hashCode());
 		result = prime * result + ((outputProductFamily == null) ? 0 : outputProductFamily.hashCode());
 		return result;
 	}
@@ -85,14 +74,17 @@ public class CompressionJob extends AbstractMessage {
 		if (inputKeyObjectStorage == null) {
 			if (other.inputKeyObjectStorage != null)
 				return false;
+		} else if (!inputKeyObjectStorage.equals(other.inputKeyObjectStorage))
+			return false;
+		if (outputKeyObjectStorage == null) {
+			if (other.outputKeyObjectStorage != null)
+				return false;
 		} else if (!outputKeyObjectStorage.equals(other.outputKeyObjectStorage))
 			return false;
-		if (inputProductFamily == null) {
-			if (other.inputProductFamily != null)
-				return false;
-		} else if (!outputProductFamily.equals(other.outputProductFamily))
+		if (outputProductFamily != other.outputProductFamily)
 			return false;
 		return true;
 	}
+
 
 }

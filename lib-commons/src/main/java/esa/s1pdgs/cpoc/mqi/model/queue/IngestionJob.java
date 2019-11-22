@@ -3,8 +3,6 @@ package esa.s1pdgs.cpoc.mqi.model.queue;
 import esa.s1pdgs.cpoc.common.ProductFamily;
 
 public class IngestionJob extends AbstractMessage {
-	
-	private ProductFamily productFamily;
 	private String keyObjectStorage;
 
 	private String relativePath;
@@ -18,16 +16,8 @@ public class IngestionJob extends AbstractMessage {
 	}
 
 	public IngestionJob(String keyObjectStorage) {
-		this.keyObjectStorage = keyObjectStorage;
-		this.productFamily = ProductFamily.BLANK;
-	}
-
-	public ProductFamily getProductFamily() {
-		return productFamily;
-	}
-
-	public void setProductFamily(ProductFamily productFamily) {
-		this.productFamily = productFamily;
+		super(ProductFamily.BLANK);
+		this.keyObjectStorage = keyObjectStorage;		
 	}
 
 	public String getKeyObjectStorage() {
