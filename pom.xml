@@ -296,7 +296,10 @@
 		<module>mqi-client</module>
 		<module>mqi-server</module>
 		<module>obs-sdk</module>
-		<module>prip</module>
+		<module>prip-trigger</module>
+		<module>prip-worker</module>
+		<module>prip-frontend</module>
+		<module>prip-commons</module>
 		<module>validation</module>
 		<module>scaler</module>
 		<module>compression-worker</module>
