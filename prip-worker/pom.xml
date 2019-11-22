@@ -25,7 +25,7 @@
 			<artifactId>s1pro-core-lib-commons</artifactId>
 			<version>${project.version}</version>
 		</dependency>
-
+		
 		<dependency>
 			<groupId>de.werum.s1pdgs</groupId>
 			<artifactId>s1pro-core-app-status</artifactId>
@@ -94,12 +94,6 @@
 		<dependency>
 			<groupId>com.fasterxml.jackson.core</groupId>
 			<artifactId>jackson-databind</artifactId>
-		</dependency>
-
-		<dependency>
-			<groupId>de.werum.s1pdgs</groupId>
-			<artifactId>s1pro-core-lib-commons</artifactId>
-			<version>${project.version}</version>
 		</dependency>
 
 		<dependency>
