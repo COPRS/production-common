@@ -32,6 +32,7 @@ COPY request-repository/ /app/request-repository
 COPY queue-watcher/ /app/queue-watcher
 COPY validation/ /app/validation
 COPY compression-worker/ /app/compression-worker
+COPY prip-commons /app/prip-commons
 COPY prip-trigger /app/prip-trigger
 COPY prip-worker /app/prip-worker
 COPY prip-frontend /app/prip-frontend
