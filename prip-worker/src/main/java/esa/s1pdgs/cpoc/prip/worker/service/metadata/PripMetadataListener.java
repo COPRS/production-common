@@ -76,13 +76,13 @@ public class PripMetadataListener implements MqiListener<ProductionEvent> {
 		PripMetadata pripMetadata = new PripMetadata();
 		pripMetadata.setId(UUID.randomUUID());
 		pripMetadata.setObsKey(productionEvent.getKeyObjectStorage());
-		pripMetadata.setName(productionEvent.getProductName());
-		pripMetadata.setProductFamily(productionEvent.getFamily());
+		pripMetadata.setName(productionEvent.getKeyObjectStorage());
+		pripMetadata.setProductFamily(productionEvent.getProductFamily());
 		pripMetadata.setContentType(PripMetadata.DEFAULT_CONTENTTYPE);
-		pripMetadata.setContentLength(getContentLength(productionEvent.getFamily(), productionEvent.getKeyObjectStorage()));
+		pripMetadata.setContentLength(getContentLength(productionEvent.getProductFamily(), productionEvent.getKeyObjectStorage()));
 		pripMetadata.setCreationDate(creationDate);
 		pripMetadata.setEvictionDate(creationDate.plusDays(PripMetadata.DEFAULT_EVICTION_DAYS));
-		pripMetadata.setChecksums(getChecksums(productionEvent.getFamily(), productionEvent.getKeyObjectStorage()));
+		pripMetadata.setChecksums(getChecksums(productionEvent.getProductFamily(), productionEvent.getKeyObjectStorage()));
 
 		pripMetadataRepo.save(pripMetadata);
 
