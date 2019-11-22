@@ -1,7 +1,5 @@
 package esa.s1pdgs.cpoc.compression.worker.file;
 
-import static org.junit.Assert.assertEquals;
-
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mock;
@@ -9,9 +7,8 @@ import org.mockito.MockitoAnnotations;
 
 import esa.s1pdgs.cpoc.common.ProductFamily;
 import esa.s1pdgs.cpoc.common.errors.AbstractCodedException;
-import esa.s1pdgs.cpoc.compression.worker.file.FileUploader;
 import esa.s1pdgs.cpoc.compression.worker.mqi.OutputProducerFactory;
-import esa.s1pdgs.cpoc.mqi.model.queue.ProductionEvent;
+import esa.s1pdgs.cpoc.mqi.model.queue.CompressionJob;
 import esa.s1pdgs.cpoc.mqi.model.rest.GenericMessageDto;
 import esa.s1pdgs.cpoc.obs_sdk.ObsClient;
 
@@ -29,8 +26,8 @@ public class FileUploaderTest {
 		// Init mocks
 		MockitoAnnotations.initMocks(this);
 
-		GenericMessageDto<ProductionEvent> inputMessage = new GenericMessageDto<ProductionEvent>(123, "",
-				new ProductionEvent("product_name","object_key", ProductFamily.L0_ACN));
+		GenericMessageDto<CompressionJob> inputMessage = new GenericMessageDto<CompressionJob>(123, "",
+				new CompressionJob("input_key", ProductFamily.L0_ACN, "input_key.zip", ProductFamily.L0_ACN_ZIP));
 
 		fileUploader = new FileUploader(obsClient, producerFactory, "/tmp/compressed", inputMessage,
 				inputMessage.getBody());
@@ -38,11 +35,6 @@ public class FileUploaderTest {
 
 	@Test
 	public void testProductFamily() {
-		 assertEquals(fileUploader.getCompressedProductFamily(ProductFamily.L0_ACN), ProductFamily.L0_ACN_ZIP);
-		 assertEquals(fileUploader.getCompressedProductFamily(ProductFamily.L1_ACN), ProductFamily.L1_ACN_ZIP);
-		 assertEquals(fileUploader.getCompressedProductFamily(ProductFamily.L2_ACN), ProductFamily.L2_ACN_ZIP);
-		 assertEquals(fileUploader.getCompressedProductFamily(ProductFamily.L0_SLICE), ProductFamily.L0_SLICE_ZIP);
-		 assertEquals(fileUploader.getCompressedProductFamily(ProductFamily.L1_SLICE), ProductFamily.L1_SLICE_ZIP);
-		 assertEquals(fileUploader.getCompressedProductFamily(ProductFamily.L2_SLICE), ProductFamily.L2_SLICE_ZIP);
+
 	}
 }

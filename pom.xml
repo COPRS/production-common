@@ -302,6 +302,7 @@
 		<module>prip-commons</module>
 		<module>validation</module>
 		<module>scaler</module>
+		<module>compression-trigger</module>
 		<module>compression-worker</module>
 	</modules>
 </project>

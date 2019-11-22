@@ -9,7 +9,8 @@ import esa.s1pdgs.cpoc.common.ProductCategory;
 import esa.s1pdgs.cpoc.common.errors.AbstractCodedException;
 import esa.s1pdgs.cpoc.compression.worker.model.mqi.CompressedProductQueueMessage;
 import esa.s1pdgs.cpoc.mqi.client.GenericMqiClient;
-import esa.s1pdgs.cpoc.mqi.model.queue.ProductionEvent;
+import esa.s1pdgs.cpoc.mqi.model.queue.CompressionEvent;
+import esa.s1pdgs.cpoc.mqi.model.queue.CompressionJob;
 import esa.s1pdgs.cpoc.mqi.model.rest.GenericMessageDto;
 import esa.s1pdgs.cpoc.mqi.model.rest.GenericPublicationMessageDto;
 
@@ -44,11 +45,11 @@ public class OutputProducerFactory {
      * @param msg
      * @throws AbstractCodedException
      */
-    public void sendOutput(final CompressedProductQueueMessage msg, final GenericMessageDto<ProductionEvent> inputMessage) throws AbstractCodedException {
-    	final GenericPublicationMessageDto<ProductionEvent> messageDto = new GenericPublicationMessageDto<ProductionEvent>(
+    public void sendOutput(final CompressedProductQueueMessage msg, final GenericMessageDto<CompressionJob> inputMessage) throws AbstractCodedException {
+    	final GenericPublicationMessageDto<CompressionEvent> messageDto = new GenericPublicationMessageDto<CompressionEvent>(
     			inputMessage.getId(), 
     			msg.getFamily(), 
-    			toProductionEvent(msg)
+    			toCompressionEvent(msg)
     	);
     	messageDto.setInputKey(inputMessage.getInputKey());
     	messageDto.setOutputKey(msg.getFamily().name());
@@ -56,13 +57,11 @@ public class OutputProducerFactory {
     	senderCompression.publish(messageDto, ProductCategory.COMPRESSED_PRODUCTS);
     }
     
-    private final ProductionEvent toProductionEvent(final CompressedProductQueueMessage msg)
+    private final CompressionEvent toCompressionEvent(final CompressedProductQueueMessage msg)
     {
-    	return new ProductionEvent(
-        		msg.getProductName(), 
+    	return new CompressionEvent(
         		msg.getObjectStorageKey(),
-        		msg.getFamily(), 
-        		null
+        		msg.getFamily()
         );
     }
 

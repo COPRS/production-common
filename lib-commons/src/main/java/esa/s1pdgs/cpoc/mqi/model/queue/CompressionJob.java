@@ -7,6 +7,13 @@ public class CompressionJob extends AbstractMessage {
 	private ProductFamily outputProductFamily;
 	private String outputKeyObjectStorage;
 
+	public CompressionJob(String inputKeyObjectStorage, ProductFamily inputProductFamily, String outputKeyObjectStorage, ProductFamily outputProductFamily) {
+		super(inputProductFamily);
+		setInputKeyObjectStorage(inputKeyObjectStorage);
+		setOutputKeyObjectStorage(outputKeyObjectStorage);
+		setOutputProductFamily(outputProductFamily);
+	}
+
 	// TODO TAI: Der Name ist unglücklich
 	private CompressionDirection compressionDirection;
 
@@ -37,16 +44,16 @@ public class CompressionJob extends AbstractMessage {
 	public CompressionDirection getCompressionDirection() {
 		return compressionDirection;
 	}
-	
+
 	public void setCompressionDirection(CompressionDirection compressionDirection) {
 		this.compressionDirection = compressionDirection;
 	}
 
 	@Override
 	public String toString() {
-		return "CompressionJob [inputKeyObjectStorage=" + inputKeyObjectStorage + ", outputKeyObjectStorage=" + outputKeyObjectStorage + ", inputProductFamily="
-				+ getProductFamily() + ", outputProductFamily=" + outputProductFamily + ", compressionDirection=" + compressionDirection
-				+ "]";
+		return "CompressionJob [inputKeyObjectStorage=" + inputKeyObjectStorage + ", outputKeyObjectStorage="
+				+ outputKeyObjectStorage + ", inputProductFamily=" + getProductFamily() + ", outputProductFamily="
+				+ outputProductFamily + ", compressionDirection=" + compressionDirection + "]";
 	}
 
 	@Override
@@ -85,6 +92,5 @@ public class CompressionJob extends AbstractMessage {
 			return false;
 		return true;
 	}
-
 
 }

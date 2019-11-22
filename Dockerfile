@@ -31,6 +31,7 @@ COPY ipf-execution-worker/ /app/ipf-execution-worker
 COPY request-repository/ /app/request-repository
 COPY queue-watcher/ /app/queue-watcher
 COPY validation/ /app/validation
+COPY compression-trigger/ /app/compression-trigger
 COPY compression-worker/ /app/compression-worker
 COPY prip-commons /app/prip-commons
 COPY prip-trigger /app/prip-trigger
@@ -69,6 +70,7 @@ COPY --from=buildenv /app/ipf-execution-worker/config /app/ipf-execution-worker/
 COPY --from=buildenv /app/request-repository/target /app/request-repository/target
 COPY --from=buildenv /app/queue-watcher/target /app/queue-watcher/target
 COPY --from=buildenv /app/validation/target /app/validation/target
+COPY --from=buildenv /app/compression-trigger/target /app/compression-trigger/target
 COPY --from=buildenv /app/compression-worker/target /app/compression-worker/target
 COPY --from=buildenv /app/prip-trigger/target /app/prip-trigger/target
 COPY --from=buildenv /app/prip-worker/target /app/prip-worker/target

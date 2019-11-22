@@ -15,7 +15,7 @@ import esa.s1pdgs.cpoc.common.errors.InternalErrorException;
 import esa.s1pdgs.cpoc.common.errors.mqi.MqiPublicationError;
 import esa.s1pdgs.cpoc.compression.worker.model.mqi.CompressedProductQueueMessage;
 import esa.s1pdgs.cpoc.compression.worker.mqi.OutputProducerFactory;
-import esa.s1pdgs.cpoc.mqi.model.queue.ProductionEvent;
+import esa.s1pdgs.cpoc.mqi.model.queue.CompressionJob;
 import esa.s1pdgs.cpoc.mqi.model.rest.GenericMessageDto;
 import esa.s1pdgs.cpoc.obs_sdk.ObsClient;
 import esa.s1pdgs.cpoc.obs_sdk.ObsUploadObject;
@@ -31,7 +31,7 @@ public class FileUploader {
 
 	private final String workingDir;
 
-	private final ProductionEvent job;
+	private final CompressionJob job;
 
 	/**
 	 * Output producer factory for message queue system
@@ -41,14 +41,13 @@ public class FileUploader {
 	/**
 	 * Input message
 	 */
-	private final GenericMessageDto<ProductionEvent> inputMessage;
+	private final GenericMessageDto<CompressionJob> inputMessage;
 
 	/**
 	 * Cannot be a key in obs
 	 */
 	protected static final String NOT_KEY_OBS = "IT_IS_NOT_A_KEY";
 
-	protected static final String SUFFIX_ZIPPRODUCTFAMILY = "_ZIP";
 
 	/**
 	 * OBS service
@@ -56,8 +55,8 @@ public class FileUploader {
 	private final ObsClient obsClient;
 
 	public FileUploader(final ObsClient obsClient, final OutputProducerFactory producerFactory,
-			final String workingDir, final GenericMessageDto<ProductionEvent> inputMessage,
-			final ProductionEvent job) {
+			final String workingDir, final GenericMessageDto<CompressionJob> inputMessage,
+			final CompressionJob job) {
 		this.obsClient = obsClient;
 		this.producerFactory = producerFactory;
 		this.workingDir = workingDir;
@@ -72,7 +71,7 @@ public class FileUploader {
 		List<CompressedProductQueueMessage> outputToPublish = new ArrayList<>();
 
 		try {
-			String zipFileName = job.getProductName() + ".zip";
+			String zipFileName = job.getOutputKeyObjectStorage();
 			File productPath = new File(workingDir + "/" + zipFileName);
 			reporting.begin(new ReportingMessage("Start uploading {}", zipFileName));
 			if (!productPath.exists()) {
@@ -80,11 +79,11 @@ public class FileUploader {
 						"The compressed product " + productPath + " does not exist, stopping upload");
 			}
 						
-			LOGGER.info("Uploading compressed product {} [{}]",productPath, job.getFamily());
-			ProductFamily zipProductFamily = getCompressedProductFamily(job.getFamily());
+			LOGGER.info("Uploading compressed product {} [{}]",productPath, job.getProductFamily());
+			ProductFamily zipProductFamily = job.getOutputProductFamily();
 			ObsUploadObject uploadObject = new ObsUploadObject(zipProductFamily, zipFileName, productPath);
 			
-			CompressedProductQueueMessage cpqm = new CompressedProductQueueMessage(zipProductFamily, zipFileName,zipFileName);
+			CompressedProductQueueMessage cpqm = new CompressedProductQueueMessage(zipProductFamily, zipFileName, zipFileName);
 			outputToPublish.add(cpqm);
 		
 //// 			// Upload per batch the output
@@ -97,10 +96,6 @@ public class FileUploader {
 			reporting.error(new ReportingMessage("[code {}] {}", e.getCode().getCode(), e.getLogMessage()));
 			throw e;
 		}
-	}
-
-	ProductFamily getCompressedProductFamily(ProductFamily inputFamily) {
-		return ProductFamily.fromValue(inputFamily.toString() + SUFFIX_ZIPPRODUCTFAMILY);
 	}
 
 	final void processProducts(final Reporting.Factory reportingFactory, final ObsUploadObject uploadFile,

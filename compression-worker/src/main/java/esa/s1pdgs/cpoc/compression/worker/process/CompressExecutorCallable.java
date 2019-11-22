@@ -14,7 +14,7 @@ import org.apache.logging.log4j.Logger;
 import esa.s1pdgs.cpoc.common.errors.AbstractCodedException;
 import esa.s1pdgs.cpoc.common.errors.InternalErrorException;
 import esa.s1pdgs.cpoc.compression.worker.config.ApplicationProperties;
-import esa.s1pdgs.cpoc.mqi.model.queue.ProductionEvent;
+import esa.s1pdgs.cpoc.mqi.model.queue.CompressionJob;
 import esa.s1pdgs.cpoc.report.LoggerReporting;
 import esa.s1pdgs.cpoc.report.Reporting;
 import esa.s1pdgs.cpoc.report.ReportingMessage;
@@ -28,7 +28,7 @@ public class CompressExecutorCallable implements Callable<Void> {
 	
 	private static final Consumer<String> DEFAULT_OUTPUT_CONSUMER = LOGGER::info;
 
-	private ProductionEvent job;
+	private CompressionJob job;
 
 	/**
 	 * Application properties
@@ -42,7 +42,7 @@ public class CompressExecutorCallable implements Callable<Void> {
 	 * @param job
 	 * @param prefixMonitorLogs
 	 */
-	public CompressExecutorCallable(final ProductionEvent job, final String prefixLogs, ApplicationProperties properties) {
+	public CompressExecutorCallable(final CompressionJob job, final String prefixLogs, ApplicationProperties properties) {
 		this.job = job;
 		this.properties = properties;
 	}
@@ -54,21 +54,20 @@ public class CompressExecutorCallable implements Callable<Void> {
 	 */
 	public Void call() throws AbstractCodedException {
 		
-		LOGGER.debug("command={}, productName={}, workingDirectory={}",properties.getCommand(), job.getProductName(), properties.getWorkingDirectory());
+		LOGGER.debug("command={}, productName={}, workingDirectory={}",properties.getCommand(), job.getInputKeyObjectStorage(), properties.getWorkingDirectory());
 		/*completionSrv.submit(new TaskCallable(properties.getCommand(), job.getProductName(),
 				properties.getWorkingDirectory(), reporting));*/
-		execute(properties.getCommand(), job.getProductName(), properties.getWorkingDirectory());
+		execute(properties.getCommand(), job.getInputKeyObjectStorage(), job.getOutputKeyObjectStorage(), properties.getWorkingDirectory());
 
 		return null;
 	}
 	
-	public TaskResult execute(final String binaryPath, final String inputPath,
+	public TaskResult execute(final String binaryPath, final String inputPath, final String outputPath,
             final String workDirectory) throws InternalErrorException {
 		
 		final Reporting.Factory reportingFactory = new LoggerReporting.Factory("Compression");
 		final Reporting reporting = reportingFactory.newReporting(0);
 		
-		String outputPath = inputPath+".zip";
 		LOGGER.info("Starting compression task using '{}' with input {} and output {} in {}", binaryPath, inputPath, outputPath, workDirectory);
         reporting.begin(new ReportingMessage("Start Task {}", binaryPath));
         
