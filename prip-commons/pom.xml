@@ -13,9 +13,7 @@
 	<description>S1PDGS Cloud POC - PRoduction Interface delivery Point (PRIP)</description>
 
 	<properties>
-		<docker.image.prefix>springio</docker.image.prefix>
-		<project.build.finalName>s1pdgs-prip-commons</project.build.finalName>
-		<project.artifactId>s1pdgs-prip-commons</project.artifactId>
+		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 	</properties>
 
 	<dependencies>
@@ -153,11 +151,7 @@
 		<plugins>
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-clean-plugin</artifactId>
-			</plugin>
-			<plugin>
-				<groupId>org.springframework.boot</groupId>
-				<artifactId>spring-boot-maven-plugin</artifactId>				
+				<artifactId>maven-clean-plugin</artifactId>			
 			</plugin>
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
