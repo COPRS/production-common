@@ -33,9 +33,11 @@ prip-worker:
   metadatalistener:
     polling-interval-ms: 200
     polling-initial-delay-ms: 5000
+
+# PRIP Commons config
+prip-commons:
   repository:
     max-search-hits: 1000
-  download-url-expiration-time-in-seconds: 600
 
 status:
   delete-fixed-delay-ms: 3000
