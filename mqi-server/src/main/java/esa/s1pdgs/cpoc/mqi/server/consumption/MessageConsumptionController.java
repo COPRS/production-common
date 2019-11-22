@@ -21,7 +21,7 @@ import esa.s1pdgs.cpoc.common.ProductCategory;
 import esa.s1pdgs.cpoc.common.ResumeDetails;
 import esa.s1pdgs.cpoc.common.errors.AbstractCodedException;
 import esa.s1pdgs.cpoc.common.errors.mqi.MqiCategoryNotAvailable;
-import esa.s1pdgs.cpoc.mqi.model.queue.AbstractDto;
+import esa.s1pdgs.cpoc.mqi.model.queue.AbstractMessage;
 import esa.s1pdgs.cpoc.mqi.model.rest.Ack;
 import esa.s1pdgs.cpoc.mqi.model.rest.GenericMessageDto;
 import esa.s1pdgs.cpoc.mqi.server.ApplicationProperties;
@@ -134,13 +134,13 @@ public class MessageConsumptionController {
      * @return
      * @throws AbstractCodedException
      */
-    public GenericMessageDto<? extends AbstractDto> nextMessage(final ProductCategory category)
+    public GenericMessageDto<? extends AbstractMessage> nextMessage(final ProductCategory category)
     		throws AbstractCodedException {
     	// invalid category
     	if (!consumers.containsKey(category)) {
             throw new MqiCategoryNotAvailable(category, "consumer");
     	}
-    	final GenericMessageDto<? extends AbstractDto> message = nextMessageByCat(category);
+    	final GenericMessageDto<? extends AbstractMessage> message = nextMessageByCat(category);
         // if no message and consumer is pause => resume it
         if (message == null) {
             for(final GenericConsumer<?> consumer : consumers.get(category).values()) {
@@ -150,11 +150,11 @@ public class MessageConsumptionController {
         return message;
     }
     
-    private final Comparator<AppCatMessageDto<? extends AbstractDto>> priorityComparatorFor(final ProductCategory category)
+    private final Comparator<AppCatMessageDto<? extends AbstractMessage>> priorityComparatorFor(final ProductCategory category)
     {
-    	return new Comparator<AppCatMessageDto<? extends AbstractDto>>() {
+    	return new Comparator<AppCatMessageDto<? extends AbstractMessage>>() {
             @Override
-            public int compare(AppCatMessageDto<? extends AbstractDto> o1, AppCatMessageDto<? extends AbstractDto> o2) {
+            public int compare(AppCatMessageDto<? extends AbstractMessage> o1, AppCatMessageDto<? extends AbstractMessage> o2) {
                 if(consumers.get(category).get(o1.getTopic()).getPriority() >
                     consumers.get(category).get(o2.getTopic()).getPriority()) {
                     return -1;
@@ -181,14 +181,14 @@ public class MessageConsumptionController {
      * @throws AbstractCodedException
      */
     @SuppressWarnings("unchecked")
-    private final GenericMessageDto<? extends AbstractDto> nextMessageByCat(final ProductCategory category) throws AbstractCodedException {
-        final List<AppCatMessageDto<? extends AbstractDto>> messages = service.next(category, appProperties.getHostname());
+    private final GenericMessageDto<? extends AbstractMessage> nextMessageByCat(final ProductCategory category) throws AbstractCodedException {
+        final List<AppCatMessageDto<? extends AbstractMessage>> messages = service.next(category, appProperties.getHostname());
         if (messages != null)
         {
             Collections.sort(messages, priorityComparatorFor(category));
-            for (final AppCatMessageDto<? extends AbstractDto> tmpMessage : messages) {
+            for (final AppCatMessageDto<? extends AbstractMessage> tmpMessage : messages) {
                 if (send(category, service, tmpMessage)) {
-                    return (GenericMessageDto<? extends AbstractDto>) convertToRestDto(tmpMessage);
+                    return (GenericMessageDto<? extends AbstractMessage>) convertToRestDto(tmpMessage);
                 }
             }
         }

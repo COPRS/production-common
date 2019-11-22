@@ -53,7 +53,7 @@ public class EdrsSessionFactoryTest {
 		assertEquals("hostname", result.get(0).getDto().getHostname());
 		assertEquals("DCS_00_L20000101000000000000000_ch1_DSIB.xml", result.get(0).getDto().getKeyObjectStorage());
 		assertEquals("S1", result.get(0).getDto().getMissionId());
-		assertEquals("DCS_00_L20000101000000000000000_ch1_DSIB.xml", result.get(0).getDto().getProductName());
+		assertEquals("DCS_00_L20000101000000000000000_ch1_DSIB.xml", result.get(0).getDto().getKeyObjectStorage());
 		assertEquals("SESSION", result.get(0).getDto().getProductType().name());
 		assertEquals("B", result.get(0).getDto().getSatelliteId());
 		assertEquals("L20000101000000000000000", result.get(0).getDto().getSessionId());

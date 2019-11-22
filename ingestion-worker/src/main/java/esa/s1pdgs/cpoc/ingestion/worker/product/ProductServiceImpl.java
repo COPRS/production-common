@@ -15,7 +15,7 @@ import esa.s1pdgs.cpoc.common.ProductFamily;
 import esa.s1pdgs.cpoc.common.errors.InternalErrorException;
 import esa.s1pdgs.cpoc.ingestion.worker.config.ProcessConfiguration;
 import esa.s1pdgs.cpoc.ingestion.worker.obs.ObsAdapter;
-import esa.s1pdgs.cpoc.mqi.model.queue.AbstractDto;
+import esa.s1pdgs.cpoc.mqi.model.queue.AbstractMessage;
 import esa.s1pdgs.cpoc.mqi.model.queue.IngestionJob;
 import esa.s1pdgs.cpoc.obs_sdk.ObsClient;
 
@@ -38,14 +38,14 @@ public class ProductServiceImpl implements ProductService {
 			throws ProductException, InternalErrorException {
 		final File file = toFile(ingestion);		
 		assertPermissions(ingestion, file);
-		final ProductFactory<AbstractDto> productFactory = ProductFactory.newProductFactoryFor(family, hostname);
+		final ProductFactory<AbstractMessage> productFactory = ProductFactory.newProductFactoryFor(family, hostname);
 		LOG.debug("Using {} for {}", productFactory, family);
 		
 		final ObsAdapter obsAdapter = newObsAdapterFor(Paths.get(ingestion.getPickupPath()));
-		final List<Product<AbstractDto>> result = productFactory.newProducts(file, ingestion, obsAdapter);					
+		final List<Product<AbstractMessage>> result = productFactory.newProducts(file, ingestion, obsAdapter);					
 		long transferAmount = 0L;
 		// is restart scenario?
-		if (ingestion.getFamily() == ProductFamily.INVALID) {
+		if (ingestion.getProductFamily() == ProductFamily.INVALID) {
 			
 			// has been already restarted before?
 			if (family == ProductFamily.INVALID) {

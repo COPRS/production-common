@@ -45,7 +45,7 @@ import esa.s1pdgs.cpoc.common.errors.appcatalog.AppCatalogMqiGetNbReadingApiErro
 import esa.s1pdgs.cpoc.common.errors.appcatalog.AppCatalogMqiGetOffsetApiError;
 import esa.s1pdgs.cpoc.common.errors.appcatalog.AppCatalogMqiReadApiError;
 import esa.s1pdgs.cpoc.common.errors.appcatalog.AppCatalogMqiSendApiError;
-import esa.s1pdgs.cpoc.mqi.model.queue.AbstractDto;
+import esa.s1pdgs.cpoc.mqi.model.queue.AbstractMessage;
 import esa.s1pdgs.cpoc.mqi.model.queue.ProductionEvent;
 import esa.s1pdgs.cpoc.mqi.model.rest.Ack;
 
@@ -769,7 +769,7 @@ public class AppCatalogMqiServiceTest {
                 .build()
                 .toUri();
 
-        final List<AppCatMessageDto<? extends AbstractDto>> result = service.next(ProductCategory.LEVEL_PRODUCTS, "pod-name");
+        final List<AppCatMessageDto<? extends AbstractMessage>> result = service.next(ProductCategory.LEVEL_PRODUCTS, "pod-name");
         assertEquals(messages, result);
         verify(restTemplate, times(2)).exchange(
         		Mockito.eq(expectedUri),

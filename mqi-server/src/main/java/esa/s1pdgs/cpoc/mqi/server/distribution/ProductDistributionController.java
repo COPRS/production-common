@@ -24,7 +24,7 @@ import esa.s1pdgs.cpoc.common.errors.AbstractCodedException;
 import esa.s1pdgs.cpoc.common.errors.mqi.MqiCategoryNotAvailable;
 import esa.s1pdgs.cpoc.common.errors.mqi.MqiPublicationError;
 import esa.s1pdgs.cpoc.common.errors.mqi.MqiRouteNotAvailable;
-import esa.s1pdgs.cpoc.mqi.model.queue.AbstractDto;
+import esa.s1pdgs.cpoc.mqi.model.queue.AbstractMessage;
 import esa.s1pdgs.cpoc.mqi.model.rest.Ack;
 import esa.s1pdgs.cpoc.mqi.model.rest.AckMessageDto;
 import esa.s1pdgs.cpoc.mqi.model.rest.GenericMessageDto;
@@ -102,7 +102,7 @@ public class ProductDistributionController {
      * @return
      */
     @RequestMapping(method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_UTF8_VALUE, path = "/{category}/next")
-    public GenericMessageDto<? extends AbstractDto> next(@PathVariable("category") String categoryName) throws ProductDistributionException {
+    public GenericMessageDto<? extends AbstractMessage> next(@PathVariable("category") String categoryName) throws ProductDistributionException {
     	final ProductCategory category = ProductCategory.valueOf(categoryName.toUpperCase());    	
         LOGGER.debug("[MONITOR] [category {}] [api next] Starting", category);
 
@@ -171,7 +171,7 @@ public class ProductDistributionController {
         			GenericPublicationMessageDto.class, 
         			category.getDtoClass()
         	);
-        	final GenericPublicationMessageDto<? extends AbstractDto> mess = objMapper
+        	final GenericPublicationMessageDto<? extends AbstractMessage> mess = objMapper
         			.readValue(objMapper.treeAsTokens(message), javaType);
         	
             LOGGER.info(
@@ -198,10 +198,10 @@ public class ProductDistributionController {
 		} 
     }
     
-    private final GenericMessageDto<? extends AbstractDto> nextMessage(final ProductCategory category) throws ProductDistributionException
+    private final GenericMessageDto<? extends AbstractMessage> nextMessage(final ProductCategory category) throws ProductDistributionException
     {
     	try {
-			final GenericMessageDto<? extends AbstractDto> res = messages.nextMessage(category);
+			final GenericMessageDto<? extends AbstractMessage> res = messages.nextMessage(category);
 	        LOGGER.debug("[MONITOR] [category {}] [api next] [httpCode {}] End", category, 200);     
 			return res;
 		} catch (AbstractCodedException e) {

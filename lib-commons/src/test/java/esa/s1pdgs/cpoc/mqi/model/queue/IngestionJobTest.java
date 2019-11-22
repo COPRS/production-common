@@ -29,7 +29,7 @@ public class IngestionJobTest {
     @Test
     public void testToStringAndSetters() {
     	IngestionJob dto = new IngestionJob();
-        dto.setProductName("product-name");
+        dto.setKeyObjectStorage("product-name");
         dto.setRelativePath("product-name");
         dto.setPickupPath("/fooBar");
  

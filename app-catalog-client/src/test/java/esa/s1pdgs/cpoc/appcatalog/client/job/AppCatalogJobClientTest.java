@@ -40,7 +40,7 @@ import esa.s1pdgs.cpoc.common.errors.appcatalog.AppCatalogJobNewApiError;
 import esa.s1pdgs.cpoc.common.errors.appcatalog.AppCatalogJobPatchApiError;
 import esa.s1pdgs.cpoc.common.errors.appcatalog.AppCatalogJobPatchGenerationApiError;
 import esa.s1pdgs.cpoc.common.errors.appcatalog.AppCatalogJobSearchApiError;
-import esa.s1pdgs.cpoc.mqi.model.queue.AbstractDto;
+import esa.s1pdgs.cpoc.mqi.model.queue.AbstractMessage;
 import esa.s1pdgs.cpoc.mqi.model.queue.ProductionEvent;
 import esa.s1pdgs.cpoc.mqi.model.rest.GenericMessageDto;
 
@@ -240,7 +240,7 @@ public class AppCatalogJobClientTest {
     }
     
 	@SuppressWarnings("unchecked")
-	private final <E extends AbstractDto> AppDataJob<E> runPatchTest(final AppDataJob<E> job, final Callable<AppDataJob<E>> callable) throws Exception {   
+	private final <E extends AbstractMessage> AppDataJob<E> runPatchTest(final AppDataJob<E> job, final Callable<AppDataJob<E>> callable) throws Exception {   
     	doReturn(new ResponseEntity<AppDataJob<?>>(job, HttpStatus.OK))
     	
 	    	.when(restTemplate).exchange(

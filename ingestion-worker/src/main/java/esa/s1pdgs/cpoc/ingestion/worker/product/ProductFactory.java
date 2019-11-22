@@ -5,13 +5,13 @@ import java.util.List;
 
 import esa.s1pdgs.cpoc.common.ProductFamily;
 import esa.s1pdgs.cpoc.ingestion.worker.obs.ObsAdapter;
-import esa.s1pdgs.cpoc.mqi.model.queue.AbstractDto;
+import esa.s1pdgs.cpoc.mqi.model.queue.AbstractMessage;
 import esa.s1pdgs.cpoc.mqi.model.queue.IngestionJob;
 
-public interface ProductFactory<E extends AbstractDto> {
+public interface ProductFactory<E extends AbstractMessage> {
 	
     @SuppressWarnings("unchecked")
-	public static <E extends AbstractDto> ProductFactory<E> newProductFactoryFor(final ProductFamily family, String hostname)
+	public static <E extends AbstractMessage> ProductFactory<E> newProductFactoryFor(final ProductFamily family, String hostname)
     {
     	if (family == ProductFamily.AUXILIARY_FILE) {
     		return (ProductFactory<E>) new AuxiliaryProductFactory(hostname);

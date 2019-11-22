@@ -16,7 +16,7 @@ import esa.s1pdgs.cpoc.appcatalog.server.job.exception.AppCatalogJobNotFoundExce
 import esa.s1pdgs.cpoc.appcatalog.server.sequence.db.SequenceDao;
 import esa.s1pdgs.cpoc.common.ProductCategory;
 import esa.s1pdgs.cpoc.common.filter.FilterCriterion;
-import esa.s1pdgs.cpoc.mqi.model.queue.AbstractDto;
+import esa.s1pdgs.cpoc.mqi.model.queue.AbstractMessage;
 import esa.s1pdgs.cpoc.mqi.model.rest.GenericMessageDto;
 
 /**
@@ -235,7 +235,7 @@ public class AppDataJobService {
                     terminateGeneration(jobDb, foundGenDb);
                     throw new AppCatalogJobGenerationTerminatedException(
                             jobDb.getProduct().getProductName(),
-                            jobDb.getMessages().stream().map(s -> (GenericMessageDto<? extends AbstractDto>)s).collect(Collectors.toList()));
+                            jobDb.getMessages().stream().map(s -> (GenericMessageDto<? extends AbstractMessage>)s).collect(Collectors.toList()));
                 } else {
                     foundGenDb.setLastUpdateDate(new Date());
                     foundGenDb.setNbErrors(currentNbErrors + 1);

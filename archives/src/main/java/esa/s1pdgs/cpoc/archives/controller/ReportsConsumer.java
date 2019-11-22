@@ -68,31 +68,31 @@ public class ReportsConsumer {
             @Header(KafkaHeaders.RECEIVED_TOPIC) final String topic) {
         LOGGER.info(
                 "[step 0] [family {}] [productName {}] Starting distribution",
-                dto.getFamily(), dto.getProductName());
+                dto.getProductFamily(), dto.getKeyObjectStorage());
         this.appStatus.setProcessing(Status.PROCESSING_MSG_ID_UNDEFINED);
         try {
             File report = new File(sharedVolume + File.separator
-                    + dto.getFamily().name().toLowerCase() + File.separator
-                    + dto.getProductName());
+                    + dto.getProductFamily().name().toLowerCase() + File.separator
+                    + dto.getKeyObjectStorage());
             FileUtils.writeFile(report, dto.getContent());
             acknowledgment.acknowledge();
         } catch (InternalErrorException iee) {
             LOGGER.error(
                     "[MONITOR] [step 0] [family {}] [productName {}] [code {}] [resuming {}] {}",
-                    dto.getFamily(), dto.getProductName(),
+                    dto.getProductFamily(), dto.getKeyObjectStorage(),
                     iee.getCode().getCode(), new ResumeDetails(topic, dto),
                     iee.getLogMessage());
             this.appStatus.setError("REPORTS");
         } catch (Exception exc) {
             LOGGER.error(
                     "[MONITOR] [step 0] [family {}] [productName {}] [code {}] Exception occurred during acknowledgment {}",
-                    dto.getFamily(), dto.getProductName(),
+                    dto.getProductFamily(), dto.getKeyObjectStorage(),
                     ErrorCode.INTERNAL_ERROR.getCode(), exc.getMessage());
             this.appStatus.setError("REPORTS");
         }
 
-        LOGGER.info("[step 0] [family {}] End Distribution", dto.getFamily(),
-                dto.getProductName());
+        LOGGER.info("[step 0] [family {}] End Distribution", dto.getProductFamily(),
+                dto.getKeyObjectStorage());
         this.appStatus.setWaiting();
     }
 }

@@ -10,14 +10,14 @@ import org.junit.Test;
 
 import esa.s1pdgs.cpoc.appcatalog.server.job.exception.AbstractAppDataException.ErrorCode;
 import esa.s1pdgs.cpoc.common.ProductFamily;
-import esa.s1pdgs.cpoc.mqi.model.queue.AbstractDto;
+import esa.s1pdgs.cpoc.mqi.model.queue.AbstractMessage;
 import esa.s1pdgs.cpoc.mqi.model.rest.GenericMessageDto;
 
 public class AppCatalogJobGenerationTerminatedExceptionTest {
 	
-	static final class ExampleDto extends AbstractDto {
+	static final class ExampleDto extends AbstractMessage {
 		public ExampleDto() {
-			super("", ProductFamily.BLANK);
+			//super("", ProductFamily.BLANK);
 		}
 		
 		@Override
@@ -28,7 +28,7 @@ public class AppCatalogJobGenerationTerminatedExceptionTest {
 	
     @Test
     public void testConstructors() {
-    	List<GenericMessageDto<? extends AbstractDto>> list = Arrays.asList(
+    	List<GenericMessageDto<? extends AbstractMessage>> list = Arrays.asList(
         		new GenericMessageDto<ExampleDto>(1, "msg1", new ExampleDto()),
         		new GenericMessageDto<ExampleDto>(2, "msg2", new ExampleDto()),
         		new GenericMessageDto<ExampleDto>(3, "msg3", new ExampleDto())

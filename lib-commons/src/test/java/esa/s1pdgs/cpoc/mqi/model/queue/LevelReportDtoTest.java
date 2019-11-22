@@ -25,9 +25,9 @@ public class LevelReportDtoTest {
     public void testConstructor() {
         LevelReportDto dto = new LevelReportDto("product-name", "key-obs",
                 ProductFamily.L0_REPORT);
-        assertEquals("product-name", dto.getProductName());
+        assertEquals("product-name", dto.getKeyObjectStorage());
         assertEquals("key-obs", dto.getContent());
-        assertEquals(ProductFamily.L0_REPORT, dto.getFamily());
+        assertEquals(ProductFamily.L0_REPORT, dto.getProductFamily());
     }
 
     /**
@@ -36,9 +36,9 @@ public class LevelReportDtoTest {
     @Test
     public void testToStringAndSetters() {
         LevelReportDto dto = new LevelReportDto();
-        dto.setProductName("product-name");
+        dto.setKeyObjectStorage("product-name");
         dto.setContent("key-obs");
-        dto.setFamily(ProductFamily.L1_REPORT);
+        dto.setProductFamily(ProductFamily.L1_REPORT);
         String str = dto.toString();
         assertTrue(str.contains("productName: product-name"));
         assertTrue(str.contains("content: key-obs"));

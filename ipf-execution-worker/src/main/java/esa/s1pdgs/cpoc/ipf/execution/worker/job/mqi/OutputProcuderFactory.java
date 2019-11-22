@@ -1,5 +1,6 @@
 package esa.s1pdgs.cpoc.ipf.execution.worker.job.mqi;
 
+import java.time.LocalDateTime;
 import java.util.Date;
 
 import org.apache.logging.log4j.LogManager;
@@ -67,7 +68,7 @@ public class OutputProcuderFactory {
                 FileUtils.readFile(msg.getFile()), 
                 msg.getFamily()
         );
-        dtoReport.setCreationDate(new Date());
+        dtoReport.setCreationDate(LocalDateTime.now());
         dtoReport.setHostname(hostname);
         sender.publish(
         		new GenericPublicationMessageDto<LevelReportDto>(
@@ -106,7 +107,6 @@ public class OutputProcuderFactory {
     private final ProductionEvent toProductionEvent(final ObsQueueMessage msg)
     {
     	return new ProductionEvent(
-        		msg.getProductName(), 
         		msg.getKeyObs(),
         		msg.getFamily(), 
         		toUppercaseOrNull(msg.getProcessMode()),

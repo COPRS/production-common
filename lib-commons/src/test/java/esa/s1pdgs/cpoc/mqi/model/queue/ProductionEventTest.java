@@ -18,22 +18,22 @@ public class ProductionEventTest {
 	@Test
 	public void testAux() {
 		ProductionEvent dto = new ProductionEvent("product-name", "key-obs", ProductFamily.AUXILIARY_FILE, null);
-		assertEquals("product-name", dto.getProductName());
+		assertEquals("product-name", dto.getKeyObjectStorage());
 		assertEquals("key-obs", dto.getKeyObjectStorage());
 
 		dto = new ProductionEvent();
-		dto.setProductName("other-product");
+		dto.setKeyObjectStorage("other-product");
 		dto.setKeyObjectStorage("other-key");
-		assertEquals("other-product", dto.getProductName());
+		assertEquals("other-product", dto.getKeyObjectStorage());
 		assertEquals("other-key", dto.getKeyObjectStorage());
 	}
 	
     @Test
     public void testLevelProduct() {
         ProductionEvent dto = new ProductionEvent("product-name", "key-obs", ProductFamily.L0_SLICE, "NRT");
-        assertEquals("product-name", dto.getProductName());
+        assertEquals("product-name", dto.getKeyObjectStorage());
         assertEquals("key-obs", dto.getKeyObjectStorage());
-        assertEquals(ProductFamily.L0_SLICE, dto.getFamily());
+        assertEquals(ProductFamily.L0_SLICE, dto.getProductFamily());
         assertEquals("NRT", dto.getMode());
     }
 
@@ -41,9 +41,9 @@ public class ProductionEventTest {
     @Test
     public void testLevelSegment() {
         ProductionEvent dto = new ProductionEvent("product-name", "key-obs", ProductFamily.L0_SLICE, "NRT");
-        assertEquals("product-name", dto.getProductName());
+        assertEquals("product-name", dto.getKeyObjectStorage());
         assertEquals("key-obs", dto.getKeyObjectStorage());
-        assertEquals(ProductFamily.L0_SLICE, dto.getFamily());
+        assertEquals(ProductFamily.L0_SLICE, dto.getProductFamily());
         assertEquals("NRT", dto.getMode());
     }
     
@@ -72,9 +72,9 @@ public class ProductionEventTest {
     @Test
     public void testToStringAndSetters() {
         ProductionEvent dto = new ProductionEvent();
-        dto.setProductName("product-name");
+        dto.setKeyObjectStorage("product-name");
         dto.setKeyObjectStorage("key-obs");
-        dto.setFamily(ProductFamily.L1_SLICE);
+        dto.setProductFamily(ProductFamily.L1_SLICE);
         dto.setMode("FAST");
         String str = dto.toString();
         assertTrue(str.contains("productName: product-name"));
@@ -89,9 +89,9 @@ public class ProductionEventTest {
     @Test
     public void testToStringAndSettersL2() {
         ProductionEvent dto = new ProductionEvent();
-        dto.setProductName("product-name");
+        dto.setKeyObjectStorage("product-name");
         dto.setKeyObjectStorage("key-obs");
-        dto.setFamily(ProductFamily.L2_SLICE);
+        dto.setProductFamily(ProductFamily.L2_SLICE);
         dto.setMode("FAST");
         dto.setOqcFlag(OQCFlag.CHECKED_NOK);
         String str = dto.toString();

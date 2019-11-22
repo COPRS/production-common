@@ -27,7 +27,7 @@ import esa.s1pdgs.cpoc.appcatalog.common.Processing;
 import esa.s1pdgs.cpoc.common.MessageState;
 import esa.s1pdgs.cpoc.common.ProductFamily;
 import esa.s1pdgs.cpoc.errorrepo.model.rest.FailedProcessingDto;
-import esa.s1pdgs.cpoc.mqi.model.queue.AbstractDto;
+import esa.s1pdgs.cpoc.mqi.model.queue.AbstractMessage;
 import esa.s1pdgs.cpoc.mqi.model.queue.ProductionEvent;
 import esa.s1pdgs.cpoc.mqi.model.rest.GenericMessageDto;
 import esa.s1pdgs.cpoc.reqrepo.kafka.producer.SubmissionClient;
@@ -267,7 +267,7 @@ public class RequestRepositoryTest {
 		return newFailedProcessing(id, new ProductionEvent());
 	}
 	
-	private final FailedProcessing newFailedProcessing(final long id, final AbstractDto mess) {
+	private final FailedProcessing newFailedProcessing(final long id, final AbstractMessage mess) {
 		final FailedProcessing fpDto = new FailedProcessing();
 		fpDto.setId(123);
 		fpDto.setDto(mess);

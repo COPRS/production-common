@@ -115,7 +115,7 @@ public class L0SegmentAppConsumer
         int step = 1;
         boolean ackOk = false;
         String errorMessage = "";
-        String productName = mqiMessage.getBody().getProductName();
+        String productName = mqiMessage.getBody().getKeyObjectStorage();
         
         if(skipProduct(productName)) {
         	LOGGER.warn("Skipping job generation for product {}", productName);
@@ -135,8 +135,8 @@ public class L0SegmentAppConsumer
                     "[MONITOR] [step 1] [productName {}] Creating/updating job",
                     productName);
             reporting.begin(
-            		new FilenameReportingInput(Collections.singletonList(mqiMessage.getBody().getProductName())),            		
-            		new ReportingMessage("Start job generation using {}", mqiMessage.getBody().getProductName())
+            		new FilenameReportingInput(Collections.singletonList(mqiMessage.getBody().getKeyObjectStorage())),            		
+            		new ReportingMessage("Start job generation using {}", mqiMessage.getBody().getKeyObjectStorage())
             );
             AppDataJob<ProductionEvent> appDataJob = buildJob(mqiMessage);
             productName = appDataJob.getProduct().getProductName();
@@ -180,7 +180,7 @@ public class L0SegmentAppConsumer
         LOGGER.info("[MONITOR] [step 0] [productName {}] End",
                 productName);
         
-        reporting.end(new ReportingMessage("End job generation using {}", mqiMessage.getBody().getProductName()));
+        reporting.end(new ReportingMessage("End job generation using {}", mqiMessage.getBody().getKeyObjectStorage()));
     }
 
     private boolean skipProduct(String productName) {
@@ -203,7 +203,7 @@ public class L0SegmentAppConsumer
         if (CollectionUtils.isEmpty(existingJobs)) {
 
             // Extract information from name
-            Matcher m = pattern.matcher(leveldto.getProductName());
+            Matcher m = pattern.matcher(leveldto.getKeyObjectStorage());
             if (!m.matches()) {
                 throw new InvalidFormatProduct(
                         "Don't match with regular expression "

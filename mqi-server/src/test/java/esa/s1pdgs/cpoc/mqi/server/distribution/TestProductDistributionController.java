@@ -23,7 +23,7 @@ import esa.s1pdgs.cpoc.common.errors.AbstractCodedException;
 import esa.s1pdgs.cpoc.common.errors.mqi.MqiCategoryNotAvailable;
 import esa.s1pdgs.cpoc.common.errors.mqi.MqiPublicationError;
 import esa.s1pdgs.cpoc.common.errors.mqi.MqiRouteNotAvailable;
-import esa.s1pdgs.cpoc.mqi.model.queue.AbstractDto;
+import esa.s1pdgs.cpoc.mqi.model.queue.AbstractMessage;
 import esa.s1pdgs.cpoc.mqi.model.queue.ProductionEvent;
 import esa.s1pdgs.cpoc.mqi.model.rest.Ack;
 import esa.s1pdgs.cpoc.mqi.model.rest.AckMessageDto;
@@ -36,7 +36,7 @@ import esa.s1pdgs.cpoc.mqi.server.publication.MessagePublicationController;
 
 public class TestProductDistributionController {
 	
-	static final class StringDto extends AbstractDto {
+	static final class StringDto extends AbstractMessage {
 		public StringDto(String productName) {
 			super(productName, ProductFamily.BLANK);
 		}		
@@ -145,7 +145,7 @@ public class TestProductDistributionController {
         final ProductionEvent dto = new ProductionEvent("test321", "bar", ProductFamily.AUXILIARY_FILE);
         
         try {
-		    final GenericPublicationMessageDto<? extends AbstractDto> mess = new GenericPublicationMessageDto<ProductionEvent>(
+		    final GenericPublicationMessageDto<? extends AbstractMessage> mess = new GenericPublicationMessageDto<ProductionEvent>(
 		    		ProductFamily.AUXILIARY_FILE,
 		    		dto
 		    );
@@ -180,7 +180,7 @@ public class TestProductDistributionController {
         final ProductionEvent dto = new ProductionEvent("test321", "bar", ProductFamily.AUXILIARY_FILE);
         
         try {
-		    final GenericPublicationMessageDto<? extends AbstractDto> mess = new GenericPublicationMessageDto<ProductionEvent>(
+		    final GenericPublicationMessageDto<? extends AbstractMessage> mess = new GenericPublicationMessageDto<ProductionEvent>(
 		    		ProductFamily.AUXILIARY_FILE,
 		    		new ProductionEvent("test321", "bar", ProductFamily.AUXILIARY_FILE)
 		    );

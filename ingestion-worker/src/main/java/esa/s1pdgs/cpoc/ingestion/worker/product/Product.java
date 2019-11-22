@@ -3,9 +3,9 @@ package esa.s1pdgs.cpoc.ingestion.worker.product;
 import java.io.File;
 
 import esa.s1pdgs.cpoc.common.ProductFamily;
-import esa.s1pdgs.cpoc.mqi.model.queue.AbstractDto;
+import esa.s1pdgs.cpoc.mqi.model.queue.AbstractMessage;
 
-public class Product<E extends AbstractDto> {	
+public class Product<E extends AbstractMessage> {	
 	private ProductFamily family;
 	private File file;
 	private E dto;

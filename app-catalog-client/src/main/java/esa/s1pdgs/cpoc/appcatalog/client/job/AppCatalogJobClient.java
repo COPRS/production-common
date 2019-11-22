@@ -31,7 +31,7 @@ import esa.s1pdgs.cpoc.common.errors.appcatalog.AppCatalogJobPatchApiError;
 import esa.s1pdgs.cpoc.common.errors.appcatalog.AppCatalogJobPatchGenerationApiError;
 import esa.s1pdgs.cpoc.common.errors.appcatalog.AppCatalogJobSearchApiError;
 import esa.s1pdgs.cpoc.common.utils.LogUtils;
-import esa.s1pdgs.cpoc.mqi.model.queue.AbstractDto;
+import esa.s1pdgs.cpoc.mqi.model.queue.AbstractMessage;
 
 /**
  * Generic client for requesting applicative catalog around job applicative data
@@ -40,7 +40,7 @@ import esa.s1pdgs.cpoc.mqi.model.queue.AbstractDto;
  * @param <T>
  *            the type of the DTO objects used for a product category
  */
-public class AppCatalogJobClient<E extends AbstractDto> {
+public class AppCatalogJobClient<E extends AbstractMessage> {
 
     /**
      * Logger

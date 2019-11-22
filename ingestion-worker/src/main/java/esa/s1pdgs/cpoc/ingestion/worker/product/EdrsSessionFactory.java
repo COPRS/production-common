@@ -1,6 +1,7 @@
 package esa.s1pdgs.cpoc.ingestion.worker.product;
 
 import java.io.File;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -44,7 +45,7 @@ public class EdrsSessionFactory implements ProductFactory<IngestionEvent> {
 
 		IngestionEvent ingestionEvent = new IngestionEvent(objectStorageKey, file.getPath(), channelId, edrsSessionFileType, missionId,
 				satelliteId, stationCode, sessionId);
-		ingestionEvent.setCreationDate(new Date());
+		ingestionEvent.setCreationDate(LocalDateTime.now());
 		ingestionEvent.setHostname(hostname);
 
 		final Product<IngestionEvent> prod = new Product<>();

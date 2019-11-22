@@ -8,6 +8,7 @@ import static org.mockito.Mockito.verify;
 
 import java.io.File;
 import java.nio.file.Paths;
+import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.Date;
 
@@ -25,7 +26,7 @@ import esa.s1pdgs.cpoc.ingestion.worker.product.IngestionResult;
 import esa.s1pdgs.cpoc.ingestion.worker.product.Product;
 import esa.s1pdgs.cpoc.ingestion.worker.product.ProductException;
 import esa.s1pdgs.cpoc.ingestion.worker.product.ProductServiceImpl;
-import esa.s1pdgs.cpoc.mqi.model.queue.AbstractDto;
+import esa.s1pdgs.cpoc.mqi.model.queue.AbstractMessage;
 import esa.s1pdgs.cpoc.mqi.model.queue.IngestionJob;
 import esa.s1pdgs.cpoc.mqi.model.queue.ProductionEvent;
 import esa.s1pdgs.cpoc.obs_sdk.ObsClient;
@@ -74,22 +75,21 @@ public class TestProductServiceImpl {
 	
 	@Test
 	public void testIngest() throws ProductException, InternalErrorException {
-		final Date now = new Date();
 		final ProductFamily family = ProductFamily.AUXILIARY_FILE;
 		IngestionJob ingestionJob = new IngestionJob("productName");
 		ingestionJob.setPickupPath("/dev");
 		ingestionJob.setRelativePath("null");
-		ingestionJob.setFamily(family);
+		ingestionJob.setProductFamily(family);
 		ingestionJob.setMissionId("S1");
 		ingestionJob.setSatelliteId("A");
 		ingestionJob.setStationCode("WILE");
-		ingestionJob.setCreationDate(now);
+		ingestionJob.setCreationDate(LocalDateTime.now());
 		ingestionJob.setHostname("hostname");
-		Product<AbstractDto> product = new Product<>();
+		Product<AbstractMessage> product = new Product<>();
 		product.setFamily(family);
 		ProductionEvent expectedProductionEvent = new ProductionEvent("null", "null", family);
 		expectedProductionEvent.setHostname("hostname");
-		expectedProductionEvent.setCreationDate(now);
+		expectedProductionEvent.setCreationDate(LocalDateTime.now());
 		product.setDto(expectedProductionEvent);
 		product.setFile(new File("/dev/null"));		
 		IngestionResult expectedResult = new IngestionResult(Arrays.asList(product), 0L);

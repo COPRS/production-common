@@ -34,7 +34,7 @@ import esa.s1pdgs.cpoc.ipf.preparation.worker.tasks.levelproducts.LevelProductsM
 import esa.s1pdgs.cpoc.metadata.client.MetadataClient;
 import esa.s1pdgs.cpoc.mqi.client.GenericMqiClient;
 import esa.s1pdgs.cpoc.mqi.client.StatusService;
-import esa.s1pdgs.cpoc.mqi.model.queue.AbstractDto;
+import esa.s1pdgs.cpoc.mqi.model.queue.AbstractMessage;
 import esa.s1pdgs.cpoc.mqi.model.queue.IngestionEvent;
 import esa.s1pdgs.cpoc.mqi.model.queue.ProductionEvent;
 
@@ -471,7 +471,7 @@ public class IpfPreparationWorkerSettings {
 
 	@Bean
 	@Autowired
-	public AbstractJobsDispatcher<? extends AbstractDto> jobsDispatcher(final ProcessSettings processSettings,
+	public AbstractJobsDispatcher<? extends AbstractMessage> jobsDispatcher(final ProcessSettings processSettings,
 			final JobsGeneratorFactory factory, final ThreadPoolTaskScheduler taskScheduler,
 			final XmlConverter xmlConverter,
 			@Value("${level-products.pathroutingxmlfile}") final String pathRoutingXmlFile,
@@ -479,7 +479,7 @@ public class IpfPreparationWorkerSettings {
 			@Qualifier("appCatalogServiceForEdrsSessions") final AppCatalogJobClient appDataServiceErdsSettions,
 			@Qualifier("appCatalogServiceForLevelSegments") final AppCatalogJobClient appDataServiceLevelSegments) {
 
-		AbstractJobsDispatcher<? extends AbstractDto> jobsDispatcher;
+		AbstractJobsDispatcher<? extends AbstractMessage> jobsDispatcher;
 
 		switch (processSettings.getLevel()) {
 		case L0:
@@ -506,8 +506,8 @@ public class IpfPreparationWorkerSettings {
 	@SuppressWarnings("unchecked")
 	@Bean
 	@Autowired
-	public AbstractGenericConsumer<? extends AbstractDto> productMessageConsumer(
-			final AbstractJobsDispatcher<? extends AbstractDto> jobsDispatcher,
+	public AbstractGenericConsumer<? extends AbstractMessage> productMessageConsumer(
+			final AbstractJobsDispatcher<? extends AbstractMessage> jobsDispatcher,
 			final L0SegmentAppProperties appProperties, final L0SlicePatternSettings patternSettings,
 			final ProcessSettings processSettings, final GenericMqiClient mqiService,
 			final StatusService mqiStatusService,
@@ -518,7 +518,7 @@ public class IpfPreparationWorkerSettings {
 			 @Value("${process.fixed-delay-ms}") final long pollingIntervalMs,
 			 @Value("${process.initial-delay-ms}") final long pollingInitialDelayMs) {
 
-		AbstractGenericConsumer<? extends AbstractDto> messageConsumer;
+		AbstractGenericConsumer<? extends AbstractMessage> messageConsumer;
 
 		switch (processSettings.getLevel()) {
 		case L0:

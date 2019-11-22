@@ -107,10 +107,10 @@ public class DisseminationService implements MqiListener<ProductionEvent> {
 		final ProductionEvent product = message.getBody();
 		LOG.debug("Handling {}", message);
 		
-		for (final DisseminationTypeConfiguration config : configsFor(product.getFamily())) {	
-			LOG.trace("Checking if product {} matches {}", product.getProductName(), config.getRegex());
-			if (product.getProductName().matches(config.getRegex())) {
-				LOG.debug("Found config {} for product {}", config, product.getProductName());
+		for (final DisseminationTypeConfiguration config : configsFor(product.getProductFamily())) {	
+			LOG.trace("Checking if product {} matches {}", product.getKeyObjectStorage(), config.getRegex());
+			if (product.getKeyObjectStorage().matches(config.getRegex())) {
+				LOG.debug("Found config {} for product {}", config, product.getKeyObjectStorage());
 				handleTransferTo(message, config.getTarget());
 			}			
 		}			
@@ -129,7 +129,7 @@ public class DisseminationService implements MqiListener<ProductionEvent> {
 		String targetUrl = "";
 		
 		reporting.begin(
-				new FilenameReportingInput(product.getProductName()),
+				new FilenameReportingInput(product.getKeyObjectStorage()),
 				new ReportingMessage("Start dissemination of product to outbox {}", target) 
 		);
 		try {
@@ -140,7 +140,7 @@ public class DisseminationService implements MqiListener<ProductionEvent> {
 			reportingDl.begin(new ReportingMessage("Start downloading file from OBS {} to {}", product.getKeyObjectStorage(), target));
 			try {
 				targetUrl = Retries.performWithRetries(
-						() -> outboxClient.transfer(new ObsObject(product.getFamily(), product.getKeyObjectStorage())), 
+						() -> outboxClient.transfer(new ObsObject(product.getProductFamily(), product.getKeyObjectStorage())), 
 						"Transfer of " + product.getKeyObjectStorage() + " to " + target,
 						properties.getMaxRetries(), 
 						properties.getTempoRetryMs()
@@ -175,12 +175,12 @@ public class DisseminationService implements MqiListener<ProductionEvent> {
 	}
 
 	final void assertExists(final ProductionEvent product) throws ObsServiceException, SdkClientException {
-		if (!obsClient.prefixExists(new ObsObject(product.getFamily(), product.getKeyObjectStorage()))) {
+		if (!obsClient.prefixExists(new ObsObject(product.getProductFamily(), product.getKeyObjectStorage()))) {
 			throw new DisseminationException(
 					String.format(
 							"OBS file '%s' (%s) does not exist", 
 							product.getKeyObjectStorage(), 
-							product.getFamily()
+							product.getProductFamily()
 					)
 			);
 		}

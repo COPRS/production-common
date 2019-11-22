@@ -1,5 +1,6 @@
 package esa.s1pdgs.cpoc.ingestion.trigger;
 
+import java.time.LocalDateTime;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
@@ -78,7 +79,7 @@ public final class Inbox {
 		try {
 			LOG.info("Publishing new entry to kafka queue: {}", entry);
 			IngestionJob dto = new IngestionJob(entry.getName());
-			dto.setCreationDate(new Date());
+			dto.setCreationDate(LocalDateTime.now());
 			dto.setHostname(hostname);
 		    dto.setRelativePath(entry.getRelativePath());
 		    dto.setPickupPath(entry.getPickupPath());

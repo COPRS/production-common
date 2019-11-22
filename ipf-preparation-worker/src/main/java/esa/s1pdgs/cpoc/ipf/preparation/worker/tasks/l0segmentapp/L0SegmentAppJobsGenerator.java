@@ -79,11 +79,11 @@ public class L0SegmentAppJobsGenerator extends AbstractJobsGenerator<ProductionE
 
             for (GenericMessageDto<ProductionEvent> message : appDataJob.getMessages().stream().map(s -> (GenericMessageDto<ProductionEvent>)s).collect(Collectors.toList())) {
                 ProductionEvent dto = (ProductionEvent) message.getBody();
-                lastName = dto.getProductName();
+                lastName = dto.getKeyObjectStorage();
                 LevelSegmentMetadata metadata = metadataClient
-                        .getLevelSegment(dto.getFamily(), dto.getProductName());
+                        .getLevelSegment(dto.getProductFamily(), dto.getKeyObjectStorage());
                 if (metadata == null) {
-                    missingMetadata.put(dto.getProductName(), "Missing segment");
+                    missingMetadata.put(dto.getKeyObjectStorage(), "Missing segment");
                 } else {
                     if (!segmentsGroupByPol
                             .containsKey(metadata.getPolarisation())) {

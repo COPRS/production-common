@@ -32,7 +32,7 @@ import esa.s1pdgs.cpoc.ingestion.worker.product.Product;
 import esa.s1pdgs.cpoc.ingestion.worker.product.ProductException;
 import esa.s1pdgs.cpoc.ingestion.worker.product.ProductService;
 import esa.s1pdgs.cpoc.mqi.client.GenericMqiClient;
-import esa.s1pdgs.cpoc.mqi.model.queue.AbstractDto;
+import esa.s1pdgs.cpoc.mqi.model.queue.AbstractMessage;
 import esa.s1pdgs.cpoc.mqi.model.queue.IngestionJob;
 import esa.s1pdgs.cpoc.mqi.model.queue.ProductionEvent;
 import esa.s1pdgs.cpoc.mqi.model.rest.GenericMessageDto;
@@ -114,7 +114,7 @@ public final class TestIngestionWorkerService {
 		message.setBody(ingestionJob);
 		
 		File file = new File("foo.bar");
-		final Product<AbstractDto> prod = new Product<>();
+		final Product<AbstractMessage> prod = new Product<>();
 		prod.setFamily(ProductFamily.AUXILIARY_FILE);
 		prod.setFile(file);	
 		final ProductionEvent dto = new ProductionEvent(
@@ -231,18 +231,18 @@ public final class TestIngestionWorkerService {
 		message.setInputKey("inputKey");
 		message.setBody(new IngestionJob());
 		
-		AbstractDto dto = new ProductionEvent();
+		AbstractMessage dto = new ProductionEvent();
 		
-		final Product<AbstractDto> product = new Product<>();
+		final Product<AbstractMessage> product = new Product<>();
 		product.setFamily(ProductFamily.AUXILIARY_FILE);
 		product.setDto(dto);
 			
-		final List<Product<AbstractDto>> products = new ArrayList<>();
+		final List<Product<AbstractMessage>> products = new ArrayList<>();
 		products.add(product);
 		
 		uut.publish(products, message, reportingFactory);
 		
-		final GenericPublicationMessageDto<? extends AbstractDto> result = new GenericPublicationMessageDto<>(
+		final GenericPublicationMessageDto<? extends AbstractMessage> result = new GenericPublicationMessageDto<>(
 				message.getId(), product.getFamily(), product.getDto());
 		result.setInputKey(message.getInputKey());
 		result.setOutputKey(product.getFamily().toString());

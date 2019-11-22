@@ -1,7 +1,7 @@
 package esa.s1pdgs.cpoc.common;
 
 import esa.s1pdgs.cpoc.common.errors.InternalErrorException;
-import esa.s1pdgs.cpoc.mqi.model.queue.AbstractDto;
+import esa.s1pdgs.cpoc.mqi.model.queue.AbstractMessage;
 import esa.s1pdgs.cpoc.mqi.model.queue.IngestionEvent;
 import esa.s1pdgs.cpoc.mqi.model.queue.IpfExecutionJob;
 import esa.s1pdgs.cpoc.mqi.model.queue.LevelReportDto;
@@ -140,9 +140,9 @@ public enum ProductCategory {
         return ret;
     }
     
-    private final Class<? extends AbstractDto> dtoClass;
+    private final Class<? extends AbstractMessage> dtoClass;
 
-	private ProductCategory(Class<? extends AbstractDto> dtoClass) {
+	private ProductCategory(Class<? extends AbstractMessage> dtoClass) {
 		this.dtoClass = dtoClass;
 	}
 	

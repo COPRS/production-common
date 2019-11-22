@@ -51,9 +51,9 @@ public class OutputProducerFactory {
             throws AbstractCodedException {
         GenericPublicationMessageDto<IpfExecutionJob> messageToPublish =
                 new GenericPublicationMessageDto<IpfExecutionJob>(
-                        genericMessageDto.getId(), dto.getFamily(), dto);
+                        genericMessageDto.getId(), dto.getProductFamily(), dto);
         messageToPublish.setInputKey(genericMessageDto.getInputKey());
-        messageToPublish.setOutputKey(dto.getFamily().name());
+        messageToPublish.setOutputKey(dto.getProductFamily().name());
         senderJobs.publish(messageToPublish, ProductCategory.LEVEL_JOBS);
     }    
 }

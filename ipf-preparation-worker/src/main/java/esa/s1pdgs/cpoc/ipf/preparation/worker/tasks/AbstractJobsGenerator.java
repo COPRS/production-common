@@ -2,6 +2,7 @@ package esa.s1pdgs.cpoc.ipf.preparation.worker.tasks;
 
 import java.io.File;
 import java.io.IOException;
+import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -64,7 +65,7 @@ import esa.s1pdgs.cpoc.metadata.client.MetadataClient;
 import esa.s1pdgs.cpoc.metadata.client.SearchMetadataQuery;
 import esa.s1pdgs.cpoc.metadata.model.AbstractMetadata;
 import esa.s1pdgs.cpoc.metadata.model.SearchMetadata;
-import esa.s1pdgs.cpoc.mqi.model.queue.AbstractDto;
+import esa.s1pdgs.cpoc.mqi.model.queue.AbstractMessage;
 import esa.s1pdgs.cpoc.mqi.model.queue.IpfExecutionJob;
 import esa.s1pdgs.cpoc.mqi.model.queue.LevelJobInputDto;
 import esa.s1pdgs.cpoc.mqi.model.queue.LevelJobOutputDto;
@@ -81,7 +82,7 @@ import esa.s1pdgs.cpoc.report.ReportingMessage;
  * 
  * @author Cyrielle Gailliard
  */
-public abstract class AbstractJobsGenerator<T extends AbstractDto> implements Runnable {
+public abstract class AbstractJobsGenerator<T extends AbstractMessage> implements Runnable {
 
     /**
      * Logger
@@ -901,7 +902,7 @@ public abstract class AbstractJobsGenerator<T extends AbstractDto> implements Ru
                 job.getAppDataJob().getProduct().getProcessMode(), workingDir,
                 jobOrder);
         
-        r.setCreationDate(new Date());
+        r.setCreationDate(LocalDateTime.now());
         r.setHostname(hostname);
 
         try {

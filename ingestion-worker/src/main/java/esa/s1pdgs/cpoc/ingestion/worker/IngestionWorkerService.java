@@ -32,7 +32,7 @@ import esa.s1pdgs.cpoc.ingestion.worker.product.ProductService;
 import esa.s1pdgs.cpoc.mqi.client.GenericMqiClient;
 import esa.s1pdgs.cpoc.mqi.client.MqiConsumer;
 import esa.s1pdgs.cpoc.mqi.client.MqiListener;
-import esa.s1pdgs.cpoc.mqi.model.queue.AbstractDto;
+import esa.s1pdgs.cpoc.mqi.model.queue.AbstractMessage;
 import esa.s1pdgs.cpoc.mqi.model.queue.IngestionJob;
 import esa.s1pdgs.cpoc.mqi.model.rest.GenericMessageDto;
 import esa.s1pdgs.cpoc.mqi.model.rest.GenericPublicationMessageDto;
@@ -74,12 +74,12 @@ public class IngestionWorkerService implements MqiListener<IngestionJob> {
 		final Reporting.Factory reportingFactory = new LoggerReporting.Factory("IngestionWorker");
 
 		final IngestionJob ingestion = message.getBody();
-		LOG.debug("received Ingestion: {}", ingestion.getProductName());
+		LOG.debug("received Ingestion: {}", ingestion.getKeyObjectStorage());
 
 		final Reporting reporting = reportingFactory.newReporting(0);
 		reporting.begin(
-				new InboxReportingInput(ingestion.getProductName(), ingestion.getRelativePath(), ingestion.getPickupPath()), 
-				new ReportingMessage("Start processing of {}", ingestion.getProductName())
+				new InboxReportingInput(ingestion.getKeyObjectStorage(), ingestion.getRelativePath(), ingestion.getPickupPath()), 
+				new ReportingMessage("Start processing of {}", ingestion.getKeyObjectStorage())
 		);
 
 		try {
@@ -87,8 +87,8 @@ public class IngestionWorkerService implements MqiListener<IngestionJob> {
 			publish(result.getIngestedProducts(), message, reportingFactory);
 			delete(ingestion, reportingFactory);
 			reporting.end(
-					new FilenameReportingOutput(ingestion.getProductName()),
-					new ReportingMessage(result.getTransferAmount(),"End processing of {}", ingestion.getProductName())
+					new FilenameReportingOutput(ingestion.getKeyObjectStorage()),
+					new ReportingMessage(result.getTransferAmount(),"End processing of {}", ingestion.getKeyObjectStorage())
 			);
 		} catch (Exception e) {
 			reporting.error(new ReportingMessage(LogUtils.toString(e)));
@@ -103,20 +103,20 @@ public class IngestionWorkerService implements MqiListener<IngestionJob> {
 
 			final Reporting reportObs = reportingFactory.newReporting(1);
 
-			reportObs.begin(new ReportingMessage("Start uploading {} in OBS", ingestion.getProductName()));
+			reportObs.begin(new ReportingMessage("Start uploading {} in OBS", ingestion.getKeyObjectStorage()));
 
 			try {
 				result = productService.ingest(family, ingestion);
 			} catch (ProductException e) {
-				reportObs.error(new ReportingMessage("Error uploading {} in OBS: {}", ingestion.getProductName(), e.getMessage()));
+				reportObs.error(new ReportingMessage("Error uploading {} in OBS: {}", ingestion.getKeyObjectStorage(), e.getMessage()));
 				throw e;
 			}
-			reportObs.end(new ReportingMessage("End uploading {} in OBS", ingestion.getProductName()));
+			reportObs.end(new ReportingMessage("End uploading {} in OBS", ingestion.getKeyObjectStorage()));
 			// is thrown if product shall be marked as invalid
 		} catch (ProductException e) {
 			LOG.warn(e.getMessage());
 			productService.markInvalid(ingestion);
-			message.getBody().setFamily(ProductFamily.INVALID);
+			message.getBody().setProductFamily(ProductFamily.INVALID);
 			final FailedProcessingDto failed = new FailedProcessingDto(properties.getHostname(), new Date(),
 					e.getMessage(), message);
 			errorRepoAppender.send(failed);
@@ -124,10 +124,10 @@ public class IngestionWorkerService implements MqiListener<IngestionJob> {
 		return result;
 	}
 
-	final void publish(final List<Product<AbstractDto>> products, final GenericMessageDto<IngestionJob> message,
+	final void publish(final List<Product<AbstractMessage>> products, final GenericMessageDto<IngestionJob> message,
 			final Reporting.Factory reportingFactory) throws InternalErrorException {
-		for (final Product<AbstractDto> product : products) {
-			final GenericPublicationMessageDto<? extends AbstractDto> result = new GenericPublicationMessageDto<>(
+		for (final Product<AbstractMessage> product : products) {
+			final GenericPublicationMessageDto<? extends AbstractMessage> result = new GenericPublicationMessageDto<>(
 					message.getId(), product.getFamily(), product.getDto());
 			result.setInputKey(message.getInputKey());
 			result.setOutputKey(product.getFamily().toString());
@@ -136,10 +136,10 @@ public class IngestionWorkerService implements MqiListener<IngestionJob> {
 			final Reporting reporting = reportingFactory.newReporting(2);
 
 			final ProductCategory category = ProductCategory.of(product.getFamily());
-			reporting.begin(new ReportingMessage("Start publishing file {} in topic", message.getBody().getProductName()));
+			reporting.begin(new ReportingMessage("Start publishing file {} in topic", message.getBody().getKeyObjectStorage()));
 			try {
 				mqiClient.publish(result, category);
-				reporting.end(new ReportingMessage("End publishing file {} in topic", message.getBody().getProductName()));
+				reporting.end(new ReportingMessage("End publishing file {} in topic", message.getBody().getKeyObjectStorage()));
 			} catch (AbstractCodedException e) {
 				reporting.error(new ReportingMessage("[code {}] {}", e.getCode().getCode(), e.getLogMessage()));
 			}
@@ -159,7 +159,7 @@ public class IngestionWorkerService implements MqiListener<IngestionJob> {
 
 	final ProductFamily getFamilyFor(final IngestionJob dto) throws ProductException {
 		for (final IngestionTypeConfiguration config : properties.getTypes()) {
-			if (dto.getProductName().matches(config.getRegex())) {
+			if (dto.getKeyObjectStorage().matches(config.getRegex())) {
 				LOG.debug("Found {} for {}", config, dto);
 				try {
 					return ProductFamily.valueOf(config.getFamily());

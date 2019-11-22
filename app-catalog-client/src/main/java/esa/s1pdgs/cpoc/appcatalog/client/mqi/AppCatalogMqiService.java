@@ -29,7 +29,7 @@ import esa.s1pdgs.cpoc.common.errors.appcatalog.AppCatalogMqiNextApiError;
 import esa.s1pdgs.cpoc.common.errors.appcatalog.AppCatalogMqiReadApiError;
 import esa.s1pdgs.cpoc.common.errors.appcatalog.AppCatalogMqiSendApiError;
 import esa.s1pdgs.cpoc.common.utils.LogUtils;
-import esa.s1pdgs.cpoc.mqi.model.queue.AbstractDto;
+import esa.s1pdgs.cpoc.mqi.model.queue.AbstractMessage;
 import esa.s1pdgs.cpoc.mqi.model.rest.Ack;
 
 /**
@@ -150,7 +150,7 @@ public class AppCatalogMqiService {
      * @throws AbstractCodedException
      */
 	@SuppressWarnings("unchecked")
-	public AppCatMessageDto<? extends AbstractDto> read(
+	public AppCatMessageDto<? extends AbstractMessage> read(
     		final ProductCategory category,
     		final String topic, 
     		final int partition,
@@ -386,7 +386,7 @@ public class AppCatalogMqiService {
         }
     }
 
-    public List<AppCatMessageDto<? extends AbstractDto>> next(final ProductCategory category, String podName)
+    public List<AppCatMessageDto<? extends AbstractMessage>> next(final ProductCategory category, String podName)
             throws AbstractCodedException {
         int retries = 0;
         while (true) {
@@ -398,7 +398,7 @@ public class AppCatalogMqiService {
             URI uri = builder.build().toUri();
             try {
     	
-                final ResponseEntity<List<AppCatMessageDto<? extends AbstractDto>>> response =
+                final ResponseEntity<List<AppCatMessageDto<? extends AbstractMessage>>> response =
                         restTemplate.exchange(
                         		uri, 
                         		HttpMethod.GET, 
@@ -406,11 +406,11 @@ public class AppCatalogMqiService {
                         		forCategory(category)
                 );
                 if (response.getStatusCode() == HttpStatus.OK) {
-                    List<AppCatMessageDto<? extends AbstractDto>> body = response.getBody();
+                    List<AppCatMessageDto<? extends AbstractMessage>> body = response.getBody();
                     if (body == null) {
                         return new ArrayList<>();
                     } else {
-                    	List<AppCatMessageDto<? extends AbstractDto>> ret = new ArrayList<AppCatMessageDto<? extends AbstractDto>>();
+                    	List<AppCatMessageDto<? extends AbstractMessage>> ret = new ArrayList<AppCatMessageDto<? extends AbstractMessage>>();
                         ret.addAll(body);
                         return ret;
                     }

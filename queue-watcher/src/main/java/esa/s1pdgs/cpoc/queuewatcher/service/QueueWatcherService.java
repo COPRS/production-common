@@ -126,8 +126,8 @@ public class QueueWatcherService implements MqiListener<ProductionEvent> {
 	@Override
 	public void onMessage(GenericMessageDto<ProductionEvent> message) {
 		final ProductionEvent product = message.getBody();
-		String productName = product.getProductName();
-		ProductCategory category = ProductCategory.of(product.getFamily());
+		String productName = product.getKeyObjectStorage();
+		ProductCategory category = ProductCategory.of(product.getProductFamily());
 
 		LOGGER.info("received {}: {}", category, productName);
 

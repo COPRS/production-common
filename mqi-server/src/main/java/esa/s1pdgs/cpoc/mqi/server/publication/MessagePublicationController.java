@@ -17,7 +17,7 @@ import esa.s1pdgs.cpoc.common.ProductFamily;
 import esa.s1pdgs.cpoc.common.errors.mqi.MqiCategoryNotAvailable;
 import esa.s1pdgs.cpoc.common.errors.mqi.MqiPublicationError;
 import esa.s1pdgs.cpoc.common.errors.mqi.MqiRouteNotAvailable;
-import esa.s1pdgs.cpoc.mqi.model.queue.AbstractDto;
+import esa.s1pdgs.cpoc.mqi.model.queue.AbstractMessage;
 import esa.s1pdgs.cpoc.mqi.server.ApplicationProperties;
 import esa.s1pdgs.cpoc.mqi.server.ApplicationProperties.ProductCategoryProperties;
 import esa.s1pdgs.cpoc.mqi.server.ApplicationProperties.ProductCategoryPublicationProperties;
@@ -81,7 +81,7 @@ public class MessagePublicationController {
 	 * @throws MqiCategoryNotAvailable
 	 * @throws MqiRouteNotAvailable
 	 */
-	public void publish(ProductCategory category, AbstractDto dto, String inputKey, String outputKey)
+	public void publish(ProductCategory category, AbstractMessage dto, String inputKey, String outputKey)
 			throws MqiPublicationError, MqiCategoryNotAvailable, MqiRouteNotAvailable {		
 		final String topic = getTopic(category, dto.getFamily(), inputKey, outputKey);
 		kafkaProducer.send(topic, dto);

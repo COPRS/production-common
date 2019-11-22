@@ -17,7 +17,7 @@ import esa.s1pdgs.cpoc.common.errors.mqi.MqiAckApiError;
 import esa.s1pdgs.cpoc.common.errors.mqi.MqiNextApiError;
 import esa.s1pdgs.cpoc.common.errors.mqi.MqiPublishApiError;
 import esa.s1pdgs.cpoc.common.utils.LogUtils;
-import esa.s1pdgs.cpoc.mqi.model.queue.AbstractDto;
+import esa.s1pdgs.cpoc.mqi.model.queue.AbstractMessage;
 import esa.s1pdgs.cpoc.mqi.model.rest.AckMessageDto;
 import esa.s1pdgs.cpoc.mqi.model.rest.GenericMessageDto;
 import esa.s1pdgs.cpoc.mqi.model.rest.GenericPublicationMessageDto;
@@ -211,7 +211,7 @@ public class GenericMqiClient implements MqiClient {
      * @throws AbstractCodedException
      */
     @Override
-	public <E extends AbstractDto> void publish(final GenericPublicationMessageDto<E> message, final ProductCategory category)
+	public <E extends AbstractMessage> void publish(final GenericPublicationMessageDto<E> message, final ProductCategory category)
             throws AbstractCodedException {
         int retries = 0;
         while (true) {

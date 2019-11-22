@@ -61,52 +61,52 @@ public final class MonitorLogUtils {
         switch (step) {
             case LOG_ERROR:
                 ret = String.format("[productName %s] [workDir %s]",
-                        job.getProductIdentifier(), job.getWorkDirectory());
+                        job.getKeyObjectStorage(), job.getWorkDirectory());
                 break;
             case LOG_BEGIN:
                 ret = String.format(
                         "[MONITOR] [step 0] [productName %s] [workDir %s]",
-                        job.getProductIdentifier(), job.getWorkDirectory());
+                        job.getKeyObjectStorage(), job.getWorkDirectory());
                 break;
             case LOG_READ:
                 ret = String.format(
                         "[MONITOR] [step 1] [productName %s] [workDir %s]",
-                        job.getProductIdentifier(), job.getWorkDirectory());
+                        job.getKeyObjectStorage(), job.getWorkDirectory());
                 break;
             case LOG_PROCESS:
                 ret = String.format(
                         "[MONITOR] [step 3] [productName %s] [workDir %s]",
-                        job.getProductIdentifier(), job.getWorkDirectory());
+                        job.getKeyObjectStorage(), job.getWorkDirectory());
                 break;
             case LOG_INPUT:
                 ret = String.format(
                         "[MONITOR] [step 2] [productName %s] [workDir %s]",
-                        job.getProductIdentifier(), job.getWorkDirectory());
+                        job.getKeyObjectStorage(), job.getWorkDirectory());
                 break;
             case LOG_OUTPUT:
                 ret = String.format(
                         "[MONITOR] [step 4] [productName %s] [workDir %s]",
-                        job.getProductIdentifier(), job.getWorkDirectory());
+                        job.getKeyObjectStorage(), job.getWorkDirectory());
                 break;
             case LOG_ACK:
                 ret = String.format(
                         "[MONITOR] [step 6] [productName %s] [workDir %s]",
-                        job.getProductIdentifier(), job.getWorkDirectory());
+                        job.getKeyObjectStorage(), job.getWorkDirectory());
                 break;
             case LOG_ERASE:
                 ret = String.format(
                         "[MONITOR] [step 5] [productName %s] [workDir %s]",
-                        job.getProductIdentifier(), job.getWorkDirectory());
+                        job.getKeyObjectStorage(), job.getWorkDirectory());
                 break;
             case LOG_STATUS:
                 ret = String.format(
                         "[MONITOR] [step 7] [productName %s] [workDir %s]",
-                        job.getProductIdentifier(), job.getWorkDirectory());
+                        job.getKeyObjectStorage(), job.getWorkDirectory());
                 break;
             case LOG_END:
                 ret = String.format(
                         "[MONITOR] [step 0] [productName %s] [workDir %s]",
-                        job.getProductIdentifier(), job.getWorkDirectory());
+                        job.getKeyObjectStorage(), job.getWorkDirectory());
                 break;
             default:
                 ret = "[MONITOR]";

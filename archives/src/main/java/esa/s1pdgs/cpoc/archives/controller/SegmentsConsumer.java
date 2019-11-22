@@ -64,14 +64,14 @@ public class SegmentsConsumer {
         //this.appStatus.setProcessing("SLICES"); // Commented out because AppStatusImpl can currently only track one thing and is used by the ReportsConsumer
         try {
             if (!devProperties.getActivations().get("download-all")) {
-                this.obsClient.download(Arrays.asList(new ObsDownloadObject(dto.getFamily(),
+                this.obsClient.download(Arrays.asList(new ObsDownloadObject(dto.getProductFamily(),
                         dto.getKeyObjectStorage() + "/manifest.safe",
                         this.sharedVolume + "/"
-                                + dto.getFamily().name().toLowerCase())));
+                                + dto.getProductFamily().name().toLowerCase())));
             } else {
-                this.obsClient.download(Arrays.asList(new ObsDownloadObject(dto.getFamily(),
+                this.obsClient.download(Arrays.asList(new ObsDownloadObject(dto.getProductFamily(),
                         dto.getKeyObjectStorage(), this.sharedVolume + "/"
-                                + dto.getFamily().name().toLowerCase())));
+                                + dto.getProductFamily().name().toLowerCase())));
             }
             acknowledgment.acknowledge();
         } catch (ObsException e) {        	

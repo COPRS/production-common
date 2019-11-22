@@ -17,7 +17,7 @@ import org.springframework.kafka.support.serializer.JsonSerializer;
 import org.springframework.stereotype.Component;
 
 import esa.s1pdgs.cpoc.common.errors.mqi.MqiPublicationError;
-import esa.s1pdgs.cpoc.mqi.model.queue.AbstractDto;
+import esa.s1pdgs.cpoc.mqi.model.queue.AbstractMessage;
 import esa.s1pdgs.cpoc.mqi.server.KafkaProperties;
 
 /**
@@ -57,7 +57,7 @@ public class GenericProducer {
      * 
      * @param descriptor
      */
-    public void send(final String topic, final AbstractDto dto)
+    public void send(final String topic, final AbstractMessage dto)
             throws MqiPublicationError {
         try {
             LOGGER.debug("Sending to '{}': {}", topic, dto);

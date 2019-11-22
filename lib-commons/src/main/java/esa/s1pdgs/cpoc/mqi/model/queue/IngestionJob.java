@@ -12,6 +12,10 @@ public class IngestionJob extends AbstractMessage {
 	private String missionId;
 	private String satelliteId;
 	private String stationCode;
+	
+	public IngestionJob() {
+		
+	}
 
 	public IngestionJob(String keyObjectStorage) {
 		this.keyObjectStorage = keyObjectStorage;

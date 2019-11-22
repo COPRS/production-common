@@ -2,7 +2,7 @@ package esa.s1pdgs.cpoc.mqi.client;
 
 import esa.s1pdgs.cpoc.common.ProductCategory;
 import esa.s1pdgs.cpoc.common.errors.AbstractCodedException;
-import esa.s1pdgs.cpoc.mqi.model.queue.AbstractDto;
+import esa.s1pdgs.cpoc.mqi.model.queue.AbstractMessage;
 import esa.s1pdgs.cpoc.mqi.model.rest.AckMessageDto;
 import esa.s1pdgs.cpoc.mqi.model.rest.GenericMessageDto;
 import esa.s1pdgs.cpoc.mqi.model.rest.GenericPublicationMessageDto;
@@ -34,7 +34,7 @@ public interface MqiClient {
 	 * @param message
 	 * @throws AbstractCodedException
 	 */
-	<E extends AbstractDto> void publish(GenericPublicationMessageDto<E> message, ProductCategory category)
+	<E extends AbstractMessage> void publish(GenericPublicationMessageDto<E> message, ProductCategory category)
 			throws AbstractCodedException;
 
 }

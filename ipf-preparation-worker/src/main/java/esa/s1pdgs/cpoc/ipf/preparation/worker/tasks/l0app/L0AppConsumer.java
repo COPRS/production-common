@@ -175,7 +175,7 @@ public class L0AppConsumer extends AbstractGenericConsumer<IngestionEvent> imple
         if (CollectionUtils.isEmpty(existingJobs)) {
         	final IngestionEvent sessionDto = mqiMessage.getBody();
         	final String productType = sessionDto.getProductType().name();
-        	final String productName = new File(sessionDto.getProductName()).getName();
+        	final String productName = new File(sessionDto.getKeyObjectStorage()).getName();
         	LOGGER.debug("Querying metadata for product {} of type {}", productName, productType); 
         	final EdrsSessionMetadata edrsSessionMetadata = metadataClient.getEdrsSession(productType, productName);
            	LOGGER.debug ("Got result {}", edrsSessionMetadata); 

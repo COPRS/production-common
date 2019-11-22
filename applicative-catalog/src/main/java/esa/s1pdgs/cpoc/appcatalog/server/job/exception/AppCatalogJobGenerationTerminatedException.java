@@ -5,7 +5,7 @@ import java.util.List;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.ResponseStatus;
 
-import esa.s1pdgs.cpoc.mqi.model.queue.AbstractDto;
+import esa.s1pdgs.cpoc.mqi.model.queue.AbstractMessage;
 import esa.s1pdgs.cpoc.mqi.model.rest.GenericMessageDto;
 
 /**
@@ -27,7 +27,7 @@ public class AppCatalogJobGenerationTerminatedException extends AbstractAppDataE
     /**
      * Type of job: db or dto
      */
-    private final List<GenericMessageDto<? extends AbstractDto>> mqiMessages;
+    private final List<GenericMessageDto<? extends AbstractMessage>> mqiMessages;
 
     /**
      * Constructor
@@ -35,7 +35,7 @@ public class AppCatalogJobGenerationTerminatedException extends AbstractAppDataE
      * @param id
      */
     public AppCatalogJobGenerationTerminatedException(final String productName,
-            final List<GenericMessageDto<? extends AbstractDto>> mqiMessages) {
+            final List<GenericMessageDto<? extends AbstractMessage>> mqiMessages) {
         super(ErrorCode.JOB_GENERATION_TERMINATED, "Job generation forcely terminated");
         this.productName = productName;
         this.mqiMessages = mqiMessages;
@@ -51,7 +51,7 @@ public class AppCatalogJobGenerationTerminatedException extends AbstractAppDataE
     /**
      * @return the type
      */
-    public List<GenericMessageDto<? extends AbstractDto>> getMqiMessages() {
+    public List<GenericMessageDto<? extends AbstractMessage>> getMqiMessages() {
         return mqiMessages;
     }
 

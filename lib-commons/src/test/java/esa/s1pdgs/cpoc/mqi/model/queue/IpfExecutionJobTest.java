@@ -47,8 +47,8 @@ public class IpfExecutionJobTest {
 	}
 
 	private void checkDto(IpfExecutionJob job) {
-	    assertEquals(ProductFamily.L0_JOB, job.getFamily());
-		assertTrue("testEqualsFunction".equals(job.getProductIdentifier()));
+	    assertEquals(ProductFamily.L0_JOB, job.getProductFamily());
+		assertTrue("testEqualsFunction".equals(job.getKeyObjectStorage()));
         assertTrue("NRT".equals(job.getProductProcessMode()));
 		assertTrue("/data/localWD/123456".equals(job.getWorkDirectory()));
 		assertTrue("/data/localWD/123456/JobOrder.xml".equals(job.getJobOrder()));
@@ -84,8 +84,8 @@ public class IpfExecutionJobTest {
 	@Test
 	public void testToStringAndSetters() {
 		IpfExecutionJob job = new IpfExecutionJob();
-		job.setFamily(ProductFamily.L0_JOB);
-		job.setProductIdentifier("testEqualsFunction");
+		job.setProductFamily(ProductFamily.L0_JOB);
+		job.setKeyObjectStorage("testEqualsFunction");
 		job.setProductProcessMode("NRT");
 		job.setWorkDirectory("/data/localWD/123456");
 		job.setJobOrder("/data/localWD/123456/JobOrder.xml");
