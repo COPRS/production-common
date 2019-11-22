@@ -1,4 +1,6 @@
-package esa.s1pdgs.cpoc.prip.worker.status;
+package esa.s1pdgs.cpoc.prip.frontend.status;
+
+import java.io.IOException;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -32,6 +34,20 @@ public class AppStatusImpl extends AbstractAppStatus {
     	super(new Status(maxErrorCounter, 0));
     	this.restHighLevelClient = restHighLevelClient;
     }
+
+    /**
+	 * @return kubernetes readiness
+	 */
+	@Override
+	public boolean getKubernetesReadiness() {		
+		boolean elasticSearchReadiness;
+		try {
+			elasticSearchReadiness = restHighLevelClient.ping();
+		} catch (IOException e) {
+			elasticSearchReadiness = false;
+		}
+		return elasticSearchReadiness;
+	}
 	
     /**
      * Stop the application if someone asks for forcing stop
