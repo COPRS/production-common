@@ -4,9 +4,7 @@ import java.time.LocalDateTime;
 
 import esa.s1pdgs.cpoc.common.ProductFamily;
 
-public class CatalogEvent extends AbstractMessage {
-	private String keyObjectStorage;
-	
+public class CatalogEvent extends AbstractMessage {	
 	private String productType;
 	private String missionId;
 	private String satelliteId;
@@ -20,11 +18,6 @@ public class CatalogEvent extends AbstractMessage {
 	
 	public CatalogEvent() {
 		super();
-	}
-	
-	public CatalogEvent(String keyObjectStorage, ProductFamily productfamily) {
-		super(productfamily);
-		this.keyObjectStorage = keyObjectStorage;
 	}
 
 	public String getProductType() {

@@ -3,27 +3,18 @@ package esa.s1pdgs.cpoc.mqi.model.queue;
 import esa.s1pdgs.cpoc.common.ProductFamily;
 
 public class CompressionJob extends AbstractMessage {
-	private String inputKeyObjectStorage;
 	private ProductFamily outputProductFamily;
 	private String outputKeyObjectStorage;
 
 	public CompressionJob(String inputKeyObjectStorage, ProductFamily inputProductFamily, String outputKeyObjectStorage, ProductFamily outputProductFamily) {
 		super(inputProductFamily);
-		setInputKeyObjectStorage(inputKeyObjectStorage);
+		this.setKeyObjectStorage(inputKeyObjectStorage);
 		setOutputKeyObjectStorage(outputKeyObjectStorage);
 		setOutputProductFamily(outputProductFamily);
 	}
 
 	// TODO TAI: Der Name ist unglücklich
 	private CompressionDirection compressionDirection;
-
-	public String getInputKeyObjectStorage() {
-		return inputKeyObjectStorage;
-	}
-
-	public void setInputKeyObjectStorage(String inputKeyObjectStorage) {
-		this.inputKeyObjectStorage = inputKeyObjectStorage;
-	}
 
 	public ProductFamily getOutputProductFamily() {
 		return outputProductFamily;
@@ -51,7 +42,7 @@ public class CompressionJob extends AbstractMessage {
 
 	@Override
 	public String toString() {
-		return "CompressionJob [inputKeyObjectStorage=" + inputKeyObjectStorage + ", outputKeyObjectStorage="
+		return "CompressionJob [inputKeyObjectStorage=" + this.getKeyObjectStorage() + ", outputKeyObjectStorage="
 				+ outputKeyObjectStorage + ", inputProductFamily=" + getProductFamily() + ", outputProductFamily="
 				+ outputProductFamily + ", compressionDirection=" + compressionDirection + "]";
 	}
@@ -61,7 +52,7 @@ public class CompressionJob extends AbstractMessage {
 		final int prime = 31;
 		int result = 1;
 		result = prime * result + ((compressionDirection == null) ? 0 : compressionDirection.hashCode());
-		result = prime * result + ((inputKeyObjectStorage == null) ? 0 : inputKeyObjectStorage.hashCode());
+		result = prime * result + ((this.getKeyObjectStorage() == null) ? 0 : this.getKeyObjectStorage().hashCode());
 		result = prime * result + ((outputKeyObjectStorage == null) ? 0 : outputKeyObjectStorage.hashCode());
 		result = prime * result + ((outputProductFamily == null) ? 0 : outputProductFamily.hashCode());
 		return result;
@@ -78,10 +69,10 @@ public class CompressionJob extends AbstractMessage {
 		CompressionJob other = (CompressionJob) obj;
 		if (compressionDirection != other.compressionDirection)
 			return false;
-		if (inputKeyObjectStorage == null) {
-			if (other.inputKeyObjectStorage != null)
+		if (this.getKeyObjectStorage() == null) {
+			if (other.getKeyObjectStorage() != null)
 				return false;
-		} else if (!inputKeyObjectStorage.equals(other.inputKeyObjectStorage))
+		} else if (!getKeyObjectStorage().equals(other.getKeyObjectStorage()))
 			return false;
 		if (outputKeyObjectStorage == null) {
 			if (other.outputKeyObjectStorage != null)

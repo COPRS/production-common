@@ -5,7 +5,6 @@ import java.util.Objects;
 import esa.s1pdgs.cpoc.common.ProductFamily;
 
 public class ProductionEvent extends AbstractMessage {
-	private String keyObjectStorage;
 	private String mode = null;
 	private OQCFlag oqcFlag = OQCFlag.NOT_CHECKED;
 
@@ -22,17 +21,9 @@ public class ProductionEvent extends AbstractMessage {
 	}
 	
 	public ProductionEvent(String keyObjectStorage, ProductFamily family, String mode, OQCFlag oqcFlag) {
-		this.keyObjectStorage = keyObjectStorage;
+		this.setKeyObjectStorage(keyObjectStorage);
 		this.mode = mode;
 		this.oqcFlag = oqcFlag;
-	}
-
-	public String getKeyObjectStorage() {
-		return keyObjectStorage;
-	}
-
-	public void setKeyObjectStorage(String keyObjectStorage) {
-		this.keyObjectStorage = keyObjectStorage;
 	}
 
 	public String getMode() {
@@ -58,7 +49,7 @@ public class ProductionEvent extends AbstractMessage {
 	public String toString() {
 		return String.format(
 				"{keyObjectStorage: %s, family: %s, mode: %s, oqcFlag: %s, hostname: %s, creationDate: %s}",
-				keyObjectStorage, getProductFamily(), mode, oqcFlag.toString(), getHostname(),
+				this.getKeyObjectStorage(), getProductFamily(), mode, oqcFlag.toString(), getHostname(),
 				getCreationDate());
 	}
 
@@ -67,7 +58,7 @@ public class ProductionEvent extends AbstractMessage {
 	 */
 	@Override
 	public int hashCode() {
-		return Objects.hash(keyObjectStorage, getProductFamily(), mode, oqcFlag, getHostname(),
+		return Objects.hash(this.getKeyObjectStorage(), getProductFamily(), mode, oqcFlag, getHostname(),
 				getCreationDate());
 	}
 
@@ -84,7 +75,7 @@ public class ProductionEvent extends AbstractMessage {
 		} else {
 			ProductionEvent other = (ProductionEvent) obj;
 			// field comparison
-			ret = Objects.equals(keyObjectStorage, other.keyObjectStorage)
+			ret = Objects.equals(this.getKeyObjectStorage(), other.getKeyObjectStorage())
 					&& Objects.equals(getProductFamily(), other.getProductFamily()) 
 					&& Objects.equals(mode, other.mode)
 					&& Objects.equals(oqcFlag, other.oqcFlag) 

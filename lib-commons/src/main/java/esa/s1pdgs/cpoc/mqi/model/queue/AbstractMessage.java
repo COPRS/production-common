@@ -15,10 +15,11 @@ import esa.s1pdgs.cpoc.common.ProductFamily;
  */
 public abstract class AbstractMessage {
 	private ProductFamily productFamily;
+	private String keyObjectStorage;
 	
     private LocalDateTime creationDate;
     private String hostname;
-
+    
 	public AbstractMessage() {
 		/* Most of the subsystems are not setting these
 		 * values at the moment. Lets see if this automatic
@@ -31,6 +32,19 @@ public abstract class AbstractMessage {
 	public AbstractMessage(ProductFamily productFamily) {
 		super();
 		this.productFamily = productFamily;
+	}
+	
+	public AbstractMessage(ProductFamily productFamily, String keyObjectStorage) {
+		this(productFamily);
+		this.keyObjectStorage = keyObjectStorage;
+	}
+
+	public String getKeyObjectStorage() {
+		return keyObjectStorage;
+	}
+
+	public void setKeyObjectStorage(String keyObjectStorage) {
+		this.keyObjectStorage = keyObjectStorage;
 	}
 
 	public ProductFamily getProductFamily() {
