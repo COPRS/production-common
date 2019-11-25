@@ -10,7 +10,6 @@ import java.io.File;
 import java.nio.file.Paths;
 import java.time.LocalDateTime;
 import java.util.Arrays;
-import java.util.Date;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -22,10 +21,6 @@ import esa.s1pdgs.cpoc.common.ProductFamily;
 import esa.s1pdgs.cpoc.common.errors.AbstractCodedException;
 import esa.s1pdgs.cpoc.common.errors.InternalErrorException;
 import esa.s1pdgs.cpoc.ingestion.worker.config.ProcessConfiguration;
-import esa.s1pdgs.cpoc.ingestion.worker.product.IngestionResult;
-import esa.s1pdgs.cpoc.ingestion.worker.product.Product;
-import esa.s1pdgs.cpoc.ingestion.worker.product.ProductException;
-import esa.s1pdgs.cpoc.ingestion.worker.product.ProductServiceImpl;
 import esa.s1pdgs.cpoc.mqi.model.queue.AbstractMessage;
 import esa.s1pdgs.cpoc.mqi.model.queue.IngestionJob;
 import esa.s1pdgs.cpoc.mqi.model.queue.ProductionEvent;
@@ -76,7 +71,7 @@ public class TestProductServiceImpl {
 	@Test
 	public void testIngest() throws ProductException, InternalErrorException {
 		final ProductFamily family = ProductFamily.AUXILIARY_FILE;
-		IngestionJob ingestionJob = new IngestionJob("productName");
+		final IngestionJob ingestionJob = new IngestionJob("productName");
 		ingestionJob.setPickupPath("/dev");
 		ingestionJob.setRelativePath("null");
 		ingestionJob.setProductFamily(family);
@@ -85,25 +80,26 @@ public class TestProductServiceImpl {
 		ingestionJob.setStationCode("WILE");
 		ingestionJob.setCreationDate(LocalDateTime.now());
 		ingestionJob.setHostname("hostname");
-		Product<AbstractMessage> product = new Product<>();
+		final Product<AbstractMessage> product = new Product<>();
 		product.setFamily(family);
-		ProductionEvent expectedProductionEvent = new ProductionEvent("null", "null", family);
+		final ProductionEvent expectedProductionEvent = new ProductionEvent("null", "null", family);
 		expectedProductionEvent.setHostname("hostname");
 		expectedProductionEvent.setCreationDate(LocalDateTime.now());
 		product.setDto(expectedProductionEvent);
 		product.setFile(new File("/dev/null"));		
-		IngestionResult expectedResult = new IngestionResult(Arrays.asList(product), 0L);
-		IngestionResult actualResult = uut.ingest(family, ingestionJob);
-		assertEquals(expectedResult.toString(), actualResult.toString());
+		final IngestionResult expectedResult = new IngestionResult(Arrays.asList(product), 0L);
+		final IngestionResult actualResult = uut.ingest(family, ingestionJob);
+		assertEquals(expectedResult.getIngestedProducts().size(), actualResult.getIngestedProducts().size());
+		assertEquals(expectedResult.getTransferAmount(), actualResult.getTransferAmount());
 	}
 
 	@Test
 	public void testMarkInvalid() throws AbstractCodedException {
-		IngestionJob ingestionJob = new IngestionJob();
+		final IngestionJob ingestionJob = new IngestionJob();
 		ingestionJob.setPickupPath("pickup/path");
 		ingestionJob.setRelativePath("relative/path");
 		uut.markInvalid(ingestionJob);
-		ObsUploadObject uploadObj = new ObsUploadObject(ProductFamily.INVALID, "relative/path", new File("pickup/path/relative/path"));
+		final ObsUploadObject uploadObj = new ObsUploadObject(ProductFamily.INVALID, "relative/path", new File("pickup/path/relative/path"));
 		verify(obsClient, times(1)).upload(Mockito.eq(Arrays.asList(uploadObj)));
 	}
 
@@ -114,7 +110,7 @@ public class TestProductServiceImpl {
 
 	@Test
 	public void testToFile() {
-		IngestionJob ingestionJob = new IngestionJob();
+		final IngestionJob ingestionJob = new IngestionJob();
 		ingestionJob.setPickupPath("/tmp/foo");
 		ingestionJob.setRelativePath("bar/baaaaar");
 		assertEquals(new File("/tmp/foo/bar/baaaaar"), uut.toFile(ingestionJob));
@@ -122,7 +118,7 @@ public class TestProductServiceImpl {
 
 	@Test
 	public void testAssertPermissions() {
-		IngestionJob ingestionJob = new IngestionJob();
+		final IngestionJob ingestionJob = new IngestionJob();
 		assertThatThrownBy(() -> ProductServiceImpl.assertPermissions(ingestionJob, nonExistentFile))
 			.isInstanceOf(RuntimeException.class)
 			.hasMessageContaining("File nonExistentFile of " + ingestionJob + " does not exist");

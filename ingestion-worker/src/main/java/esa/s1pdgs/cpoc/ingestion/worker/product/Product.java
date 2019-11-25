@@ -1,6 +1,7 @@
 package esa.s1pdgs.cpoc.ingestion.worker.product;
 
 import java.io.File;
+import java.util.Objects;
 
 import esa.s1pdgs.cpoc.common.ProductFamily;
 import esa.s1pdgs.cpoc.mqi.model.queue.AbstractMessage;
@@ -14,7 +15,7 @@ public class Product<E extends AbstractMessage> {
 		return family;
 	}
 	
-	public void setFamily(ProductFamily family) {
+	public void setFamily(final ProductFamily family) {
 		this.family = family;
 	}
 	
@@ -22,7 +23,7 @@ public class Product<E extends AbstractMessage> {
 		return dto;
 	}
 	
-	public void setDto(E dto) {
+	public void setDto(final E dto) {
 		this.dto = dto;
 	}
 
@@ -30,8 +31,28 @@ public class Product<E extends AbstractMessage> {
 		return file;
 	}
 
-	public void setFile(File file) {
+	public void setFile(final File file) {
 		this.file = file;
+	}
+	
+	@Override
+	public int hashCode() {
+		return Objects.hash(dto, family, file);
+	}
+
+	@Override
+	public boolean equals(final Object obj) {
+		if (this == obj) {
+			return true;
+		}
+		if (obj == null) {
+			return false;
+		}
+		if (getClass() != obj.getClass()) {
+			return false;
+		}
+		final Product other = (Product) obj;
+		return Objects.equals(dto, other.dto) && family == other.family && Objects.equals(file, other.file);
 	}
 
 	@Override
