@@ -7,10 +7,9 @@ public class CompressionJob extends AbstractMessage {
 	private String outputKeyObjectStorage;
 
 	public CompressionJob(String inputKeyObjectStorage, ProductFamily inputProductFamily, String outputKeyObjectStorage, ProductFamily outputProductFamily) {
-		super(inputProductFamily);
-		this.setKeyObjectStorage(inputKeyObjectStorage);
-		setOutputKeyObjectStorage(outputKeyObjectStorage);
-		setOutputProductFamily(outputProductFamily);
+		super(inputProductFamily, inputKeyObjectStorage);
+		this.outputKeyObjectStorage = outputKeyObjectStorage;
+		this.outputProductFamily = outputProductFamily;
 	}
 
 	// TODO TAI: Der Name ist unglücklich
