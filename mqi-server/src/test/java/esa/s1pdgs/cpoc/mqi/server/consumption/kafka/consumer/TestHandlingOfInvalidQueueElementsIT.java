@@ -51,7 +51,7 @@ public class TestHandlingOfInvalidQueueElementsIT {
 		private int foo;
 		private String bar;
 		
-		public FailClass(int foo, String bar) {
+		public FailClass(final int foo, final String bar) {
 			this.foo = foo;
 			this.bar = bar;
 		}
@@ -60,7 +60,7 @@ public class TestHandlingOfInvalidQueueElementsIT {
 			return foo;
 		}
 		
-		public void setFoo(int foo) {
+		public void setFoo(final int foo) {
 			this.foo = foo;
 		}
 		
@@ -68,7 +68,7 @@ public class TestHandlingOfInvalidQueueElementsIT {
 			return bar;
 		}
 
-		public void setBar(String bar) {
+		public void setBar(final String bar) {
 			this.bar = bar;
 		}
 		
@@ -121,7 +121,7 @@ public class TestHandlingOfInvalidQueueElementsIT {
         
         final MessageConsumer<ProductionEvent> messageConsumer = new MessageConsumer<ProductionEvent>() {		
 			@Override
-			public void consume(ProductionEvent message) throws Exception {
+			public void consume(final ProductionEvent message) throws Exception {
 				elements.add(message);		
 			}
 		};
@@ -144,7 +144,9 @@ public class TestHandlingOfInvalidQueueElementsIT {
 	public void testNominalConsumption_ShallNotFail() throws Exception {		
         final ProductionEvent expected = new ProductionEvent("1", "2", ProductFamily.AUXILIARY_FILE);          
         send(expected);                
-        final ProductionEvent actual = elements.poll(10, TimeUnit.SECONDS);        
+        final ProductionEvent actual = elements.poll(10, TimeUnit.SECONDS);         
+        // make equals work
+        expected.setCreationDate(actual.getCreationDate());
         assertEquals(expected, actual);
 	}
 	
@@ -161,16 +163,18 @@ public class TestHandlingOfInvalidQueueElementsIT {
         // insert valid object        
         final ProductionEvent expected = new ProductionEvent("1", "2", ProductFamily.AUXILIARY_FILE);          
         send(expected);                
-        final ProductionEvent actual = elements.poll(10, TimeUnit.SECONDS);        
+        final ProductionEvent actual = elements.poll(10, TimeUnit.SECONDS);    
+        // make equals work
+        expected.setCreationDate(actual.getCreationDate());
         assertEquals(expected, actual);
 	}
 	
-	private final <T> void send(T mess) throws InterruptedException, ExecutionException {
-        Map<String, Object> senderProps = KafkaTestUtils.producerProps(embeddedKafka.getEmbeddedKafka());
+	private final <T> void send(final T mess) throws InterruptedException, ExecutionException {
+        final Map<String, Object> senderProps = KafkaTestUtils.producerProps(embeddedKafka.getEmbeddedKafka());
         senderProps.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, JsonSerializer.class);
         
-        ProducerFactory<Integer, T> pf = new DefaultKafkaProducerFactory<>(senderProps);
-        KafkaTemplate<Integer, T> template = new KafkaTemplate<>(pf);    
+        final ProducerFactory<Integer, T> pf = new DefaultKafkaProducerFactory<>(senderProps);
+        final KafkaTemplate<Integer, T> template = new KafkaTemplate<>(pf);    
         template.send(SENDER_TOPIC, mess).get();
 	}
 }

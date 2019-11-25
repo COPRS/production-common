@@ -18,6 +18,7 @@ import org.springframework.stereotype.Component;
 
 import esa.s1pdgs.cpoc.common.errors.mqi.MqiPublicationError;
 import esa.s1pdgs.cpoc.mqi.model.queue.AbstractMessage;
+import esa.s1pdgs.cpoc.mqi.model.queue.ProductionEvent;
 import esa.s1pdgs.cpoc.mqi.server.KafkaProperties;
 
 /**
@@ -62,8 +63,12 @@ public class GenericProducer {
         try {
             LOGGER.debug("Sending to '{}': {}", topic, dto);
             template.send(topic, dto).get();
-        } catch (CancellationException | InterruptedException | ExecutionException e) {
-            throw new MqiPublicationError(topic, dto, "NOPRODUCTNAMEANYMORE", e.getMessage(), e);
+        } catch (CancellationException | InterruptedException | ExecutionException e) {        	
+        	if (dto instanceof ProductionEvent) {
+        		final ProductionEvent event = (ProductionEvent) dto;
+        		throw new MqiPublicationError(topic, dto, event.getProductName(), e.getMessage(), e);
+        	}
+        	throw new MqiPublicationError(topic, dto, "NOPRODUCTNAMEANYMORE", e.getMessage(), e);
         }
     }
 
@@ -73,7 +78,7 @@ public class GenericProducer {
      * @return
      */
     private Map<String, Object> producerConfigs() {
-        Map<String, Object> props = new ConcurrentHashMap<>();
+        final Map<String, Object> props = new ConcurrentHashMap<>();
         props.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG,
                 properties.getBootstrapServers());
         props.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG,

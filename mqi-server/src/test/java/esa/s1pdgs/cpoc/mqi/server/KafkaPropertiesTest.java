@@ -11,7 +11,6 @@ import org.springframework.kafka.test.rule.KafkaEmbedded;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.junit4.SpringRunner;
 
-import esa.s1pdgs.cpoc.mqi.server.KafkaProperties;
 import esa.s1pdgs.cpoc.mqi.server.KafkaProperties.KafkaConsumerProperties;
 import esa.s1pdgs.cpoc.mqi.server.KafkaProperties.KafkaListenerProperties;
 import esa.s1pdgs.cpoc.mqi.server.KafkaProperties.KafkaProducerProperties;
@@ -44,8 +43,8 @@ public class KafkaPropertiesTest {
      */
     @Test
     public void testInitialization() {
-        assertEquals("wrapper-0", properties.getHostname());
-        assertEquals("wrapper", properties.getClientId());
+        assertEquals("mqi-0", properties.getHostname());
+        assertEquals("mqi-server", properties.getClientId());
         assertEquals("t-pdgs-errors", properties.getErrorTopic());
 
         // Consumer
@@ -69,11 +68,11 @@ public class KafkaPropertiesTest {
      */
     @Test
     public void testSetters() {
-        KafkaProducerProperties producer = new KafkaProducerProperties();
+        final KafkaProducerProperties producer = new KafkaProducerProperties();
         producer.setMaxRetries(5);
-        KafkaListenerProperties listener = new KafkaListenerProperties();
+        final KafkaListenerProperties listener = new KafkaListenerProperties();
         listener.setPollTimeoutMs(50);
-        KafkaConsumerProperties consumer = new KafkaConsumerProperties();
+        final KafkaConsumerProperties consumer = new KafkaConsumerProperties();
         consumer.setGroupId("group-id");
         consumer.setHeartbeatIntvMs(1);
         consumer.setMaxPollIntervalMs(2);
