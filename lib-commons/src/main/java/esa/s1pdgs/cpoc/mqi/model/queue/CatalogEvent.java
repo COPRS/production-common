@@ -3,13 +3,19 @@ package esa.s1pdgs.cpoc.mqi.model.queue;
 import java.util.Date;
 import java.util.Objects;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
+
 public class CatalogEvent extends AbstractMessage {		
 	private String productType;
 	private String missionId;
 	private String satelliteId;
+	@JsonFormat(pattern="yyyy-MM-dd'T'HH:mm:ss.SSS'Z'", timezone="UTC")
 	private Date creationTime;
+	@JsonFormat(pattern="yyyy-MM-dd'T'HH:mm:ss.SSS'Z'", timezone="UTC")
 	private Date insertionTime;
+	@JsonFormat(pattern="yyyy-MM-dd'T'HH:mm:ss.SSS'Z'", timezone="UTC")
 	private Date validityStartTime;
+	@JsonFormat(pattern="yyyy-MM-dd'T'HH:mm:ss.SSS'Z'", timezone="UTC")
 	private Date validityStopTime;
 	private String instrumentConfigurationId;
 	private String site;

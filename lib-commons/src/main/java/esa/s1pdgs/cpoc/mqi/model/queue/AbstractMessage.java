@@ -2,6 +2,7 @@ package esa.s1pdgs.cpoc.mqi.model.queue;
 
 import java.util.Date;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import esa.s1pdgs.cpoc.common.ProductFamily;
@@ -29,6 +30,7 @@ public abstract class AbstractMessage {
 	 * values at the moment. Lets see if this automatic
 	 * approach is working. 
 	 */
+	@JsonFormat(pattern="yyyy-MM-dd'T'HH:mm:ss.SSS'Z'", timezone="UTC")
 	protected Date creationDate = new Date();
 	protected String hostname = DEFAULT_HOSTNAME;
 	
