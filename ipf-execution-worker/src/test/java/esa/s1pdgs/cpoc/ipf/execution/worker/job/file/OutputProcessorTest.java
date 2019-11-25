@@ -4,6 +4,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -35,7 +36,6 @@ import esa.s1pdgs.cpoc.common.utils.FileUtils;
 import esa.s1pdgs.cpoc.common.utils.Streams;
 import esa.s1pdgs.cpoc.ipf.execution.worker.TestUtils;
 import esa.s1pdgs.cpoc.ipf.execution.worker.config.ApplicationProperties;
-import esa.s1pdgs.cpoc.ipf.execution.worker.job.file.OutputProcessor;
 import esa.s1pdgs.cpoc.ipf.execution.worker.job.model.mqi.FileQueueMessage;
 import esa.s1pdgs.cpoc.ipf.execution.worker.job.model.mqi.ObsQueueMessage;
 import esa.s1pdgs.cpoc.ipf.execution.worker.job.mqi.OutputProcuderFactory;
@@ -181,9 +181,9 @@ public class OutputProcessorTest {
 
         // Mocks
         doNothing().when(obsClient).upload(Mockito.any());
-        doNothing().when(procuderFactory)
+        doReturn(null).when(procuderFactory)
                 .sendOutput(Mockito.any(ObsQueueMessage.class), Mockito.any());
-        doNothing().when(procuderFactory)
+        doReturn(null).when(procuderFactory)
                 .sendOutput(Mockito.any(FileQueueMessage.class), Mockito.any());
 
         try (final InputStream in = Streams.getInputStream("outputs.list");
@@ -211,10 +211,10 @@ public class OutputProcessorTest {
     public void testExtractFiles() throws NoSuchMethodException,
             SecurityException, IllegalAccessException, IllegalArgumentException,
             InvocationTargetException {
-        Method method = processor.getClass().getDeclaredMethod("extractFiles");
+        final Method method = processor.getClass().getDeclaredMethod("extractFiles");
         method.setAccessible(true);
 
-        List<String> result = (List) method.invoke(processor);
+        final List<String> result = (List) method.invoke(processor);
         assertEquals(9, result.size());
         assertEquals(
                 "NRT/S1A_IW_RAW__0ADV_20171213T121123_20171213T121947_019684_021735_51B1.ISIP",
@@ -241,7 +241,7 @@ public class OutputProcessorTest {
     public void testGetProductName() throws NoSuchMethodException,
             SecurityException, IllegalAccessException, IllegalArgumentException,
             InvocationTargetException {
-        Method method = processor.getClass().getDeclaredMethod("getProductName",
+        final Method method = processor.getClass().getDeclaredMethod("getProductName",
                 String.class);
         method.setAccessible(true);
 
@@ -272,7 +272,7 @@ public class OutputProcessorTest {
     public void testGetFilePath() throws NoSuchMethodException,
             SecurityException, IllegalAccessException, IllegalArgumentException,
             InvocationTargetException {
-        Method method = processor.getClass().getDeclaredMethod("getFilePath",
+        final Method method = processor.getClass().getDeclaredMethod("getFilePath",
                 String.class, String.class);
         method.setAccessible(true);
 
@@ -305,7 +305,7 @@ public class OutputProcessorTest {
     public void testGetMatchOutput() throws NoSuchMethodException,
             SecurityException, IllegalAccessException, IllegalArgumentException,
             InvocationTargetException {
-        Method method = processor.getClass().getDeclaredMethod("getMatchOutput",
+        final Method method = processor.getClass().getDeclaredMethod("getMatchOutput",
                 String.class);
         method.setAccessible(true);
 
@@ -327,10 +327,10 @@ public class OutputProcessorTest {
      */
     @Test
     public void testSortOutputsForL0() throws AbstractCodedException {
-        List<ObsUploadObject> uploadBatch = new ArrayList<>();
-        List<ObsQueueMessage> outputToPublish = new ArrayList<>();
-        List<FileQueueMessage> reportToPublish = new ArrayList<>();
-        List<String> lines = new ArrayList<>();
+        final List<ObsUploadObject> uploadBatch = new ArrayList<>();
+        final List<ObsQueueMessage> outputToPublish = new ArrayList<>();
+        final List<FileQueueMessage> reportToPublish = new ArrayList<>();
+        final List<String> lines = new ArrayList<>();
         lines.add(
                 "FAST24/S1A_IW_RAW__0ADV_20171213T121123_20171213T121947_019684_021735_51B1.ISIP");
         lines.add(
@@ -395,10 +395,10 @@ public class OutputProcessorTest {
                 new OutputProcessor(obsClient, procuderFactory, inputMessage,
                         PATH_DIRECTORY_TEST + "outputs.list", 2, "MONITOR", ApplicationLevel.L0_SEGMENT, properties);
         
-        List<ObsUploadObject> uploadBatch = new ArrayList<>();
-        List<ObsQueueMessage> outputToPublish = new ArrayList<>();
-        List<FileQueueMessage> reportToPublish = new ArrayList<>();
-        List<String> lines = new ArrayList<>();
+        final List<ObsUploadObject> uploadBatch = new ArrayList<>();
+        final List<ObsQueueMessage> outputToPublish = new ArrayList<>();
+        final List<FileQueueMessage> reportToPublish = new ArrayList<>();
+        final List<String> lines = new ArrayList<>();
         lines.add(
                 "FAST24/S1A_IW_RAW__0ADV_20171213T121123_20171213T121947_019684_021735_51B1.ISIP");
         lines.add(
@@ -477,10 +477,10 @@ public class OutputProcessorTest {
                 new OutputProcessor(obsClient, procuderFactory, inputMessage,
                         PATH_DIRECTORY_TEST + "outputs.list", 2, "MONITOR", ApplicationLevel.L1, properties);
         
-        List<ObsUploadObject> uploadBatch = new ArrayList<>();
-        List<ObsQueueMessage> outputToPublish = new ArrayList<>();
-        List<FileQueueMessage> reportToPublish = new ArrayList<>();
-        List<String> lines = new ArrayList<>();
+        final List<ObsUploadObject> uploadBatch = new ArrayList<>();
+        final List<ObsQueueMessage> outputToPublish = new ArrayList<>();
+        final List<FileQueueMessage> reportToPublish = new ArrayList<>();
+        final List<String> lines = new ArrayList<>();
         lines.add(
                 "FAST24/S1A_IW_RAW__0ADV_20171213T121123_20171213T121947_019684_021735_51B1.ISIP");
         lines.add(
@@ -545,10 +545,10 @@ public class OutputProcessorTest {
                 new OutputProcessor(obsClient, procuderFactory, inputMessage,
                         PATH_DIRECTORY_TEST + "outputs.list", 2, "MONITOR", ApplicationLevel.L1, properties);
         
-        List<ObsUploadObject> uploadBatch = new ArrayList<>();
-        List<ObsQueueMessage> outputToPublish = new ArrayList<>();
-        List<FileQueueMessage> reportToPublish = new ArrayList<>();
-        List<String> lines = new ArrayList<>();
+        final List<ObsUploadObject> uploadBatch = new ArrayList<>();
+        final List<ObsQueueMessage> outputToPublish = new ArrayList<>();
+        final List<FileQueueMessage> reportToPublish = new ArrayList<>();
+        final List<String> lines = new ArrayList<>();
         lines.add(
                 "FAST24/S1A_IW_SLC__1ADV_20171213T121123_20171213T121947_019684_021735_51B1.ISIP");
         lines.add(
@@ -654,7 +654,7 @@ public class OutputProcessorTest {
 
     @Test
     public void testPublishAccordingUploadFiles1() throws Exception {
-        Method method = getMethodForPublishAccodingUpload();        
+        final Method method = getMethodForPublishAccodingUpload();        
         method.invoke(processor, reportingFactory, 2, "", new ArrayList<>());
         verify(procuderFactory, times(0))
                 .sendOutput(Mockito.any(ObsQueueMessage.class), Mockito.any());
@@ -670,7 +670,7 @@ public class OutputProcessorTest {
 
     @Test
     public void testPublishAccordingUploadFiles2() throws Exception {
-        Method method = getMethodForPublishAccodingUpload();
+        final Method method = getMethodForPublishAccodingUpload();
 
         method.invoke(processor, reportingFactory, 2, "", new ArrayList<>());
         verify(procuderFactory, times(0))
@@ -691,7 +691,7 @@ public class OutputProcessorTest {
                         .sendOutput(Mockito.eq(outputToPublish.get(0)),
                                 Mockito.any());
 
-        Method method = getMethodForPublishAccodingUpload();
+        final Method method = getMethodForPublishAccodingUpload();
 
         method.invoke(processor, reportingFactory, 2, "", new ArrayList<>());
         verify(procuderFactory, times(0))
@@ -706,7 +706,7 @@ public class OutputProcessorTest {
 
     private Method getMethodForPublishAccodingUpload()
             throws NoSuchMethodException, SecurityException {
-        Method method = processor.getClass().getDeclaredMethod(
+        final Method method = processor.getClass().getDeclaredMethod(
                 "publishAccordingUploadFiles", Reporting.Factory.class, double.class, String.class,
                 List.class);
         method.setAccessible(true);
@@ -723,9 +723,9 @@ public class OutputProcessorTest {
 
         // check OBS service
         verify(obsClient, times(2)).upload(Mockito.any());
-        List<ObsUploadObject> batch1 = uploadBatch.subList(0, 2);
+        final List<ObsUploadObject> batch1 = uploadBatch.subList(0, 2);
         verify(obsClient, times(1)).upload(Mockito.eq(batch1));
-        List<ObsUploadObject> batch2 = uploadBatch.subList(2, 3);
+        final List<ObsUploadObject> batch2 = uploadBatch.subList(2, 3);
         verify(obsClient, times(1)).upload(Mockito.eq(batch2));
     }
 

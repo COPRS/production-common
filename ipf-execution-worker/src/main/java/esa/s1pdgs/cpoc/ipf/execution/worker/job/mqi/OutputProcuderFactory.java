@@ -60,7 +60,7 @@ public class OutputProcuderFactory {
      * @param msg
      * @throws AbstractCodedException
      */
-    public void sendOutput(final FileQueueMessage msg, final GenericMessageDto<IpfExecutionJob> inputMessage)
+    public GenericPublicationMessageDto<LevelReportDto> sendOutput(final FileQueueMessage msg, final GenericMessageDto<IpfExecutionJob> inputMessage)
             throws AbstractCodedException {
         final LevelReportDto dtoReport = new LevelReportDto(
         		msg.getProductName(),
@@ -69,14 +69,14 @@ public class OutputProcuderFactory {
         );
         dtoReport.setCreationDate(LocalDateTime.now());
         dtoReport.setHostname(hostname);
-        sender.publish(
-        		new GenericPublicationMessageDto<LevelReportDto>(
-        				inputMessage.getId(), 
-        				msg.getFamily(), 
-        				dtoReport
-        		),
-        		ProductCategory.LEVEL_REPORTS
-        );
+        
+        final GenericPublicationMessageDto<LevelReportDto> mess = new GenericPublicationMessageDto<LevelReportDto>(
+				inputMessage.getId(), 
+				msg.getFamily(), 
+				dtoReport
+		);        
+        sender.publish(mess,ProductCategory.LEVEL_REPORTS);
+        return mess;
     }
 
     /**
@@ -85,7 +85,7 @@ public class OutputProcuderFactory {
      * @param msg
      * @throws AbstractCodedException
      */
-    public void sendOutput(final ObsQueueMessage msg, final GenericMessageDto<IpfExecutionJob> inputMessage)
+    public GenericPublicationMessageDto<ProductionEvent> sendOutput(final ObsQueueMessage msg, final GenericMessageDto<IpfExecutionJob> inputMessage)
             throws AbstractCodedException {
     	
         final GenericPublicationMessageDto<ProductionEvent> messageToPublish = new GenericPublicationMessageDto<ProductionEvent>(
@@ -101,6 +101,7 @@ public class OutputProcuderFactory {
     		messageToPublish.setOutputKey(msg.getFamily().name());
             sender.publish(messageToPublish, ProductCategory.LEVEL_PRODUCTS);
         }
+        return messageToPublish;
     }
     
     private final ProductionEvent toProductionEvent(final ObsQueueMessage msg)
