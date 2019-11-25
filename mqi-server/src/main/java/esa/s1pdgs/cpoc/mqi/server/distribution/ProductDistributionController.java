@@ -177,14 +177,14 @@ public class ProductDistributionController {
         	// TODO: the productname does not exist everywhere anymore.
             LOGGER.info(
                     "[MONITOR] [category {}] [api publish] [messageId {}] [productName: {}] Starting",
-                    category, mess.getInputMessageId(), "NOPRODUCTNAMEANYMORE");
+                    category, mess.getInputMessageId(), mess.getMessageToPublish().getKeyObjectStorage());
         	
             publication.publish(category, mess.getMessageToPublish(), mess.getInputKey(), mess.getOutputKey());
 
         	// TODO: the productname does not exist everywhere anymore.
             LOGGER.info(
                     "[MONITOR] [category {}] [api publish] [httpCode {}] [messageId {}] [productName: {}] End",
-                    category, 200, mess.getInputMessageId(), "NOPRODUCTNAMEANYMORE"            );
+                    category, 200, mess.getInputMessageId(), mess.getMessageToPublish().getKeyObjectStorage());
         } catch (MqiPublicationError kse) {
             LOGGER.error("[publish] KafkaSendException occurred: {}", kse.getMessage());
             throw new ProductDistributionException(HttpStatus.GATEWAY_TIMEOUT);
