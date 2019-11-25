@@ -103,7 +103,7 @@ public class AuxiliaryFilesExtractor extends GenericExtractor<ProductionEvent> i
 	}
 
     @Override
-    public void onMessage(GenericMessageDto<ProductionEvent> message) {
+    public void onMessage(final GenericMessageDto<ProductionEvent> message) {
     	super.genericExtract(message);
     	
     }
@@ -139,14 +139,14 @@ public class AuxiliaryFilesExtractor extends GenericExtractor<ProductionEvent> i
 				final List<JSONObject> landMasks = new LandMaskExtractor().extract(metadataFile);
 				LOGGER.info("Uploading {} land mask polygons", landMasks.size());
 				int c=0;
-				for (JSONObject land : landMasks) {
+				for (final JSONObject land : landMasks) {
 					LOGGER.debug("Uploading land mask for {}", land.getString("name"));
 					LOGGER.trace("land mask json: {}",land.toString());
 					esServices.createGeoMetadata(land,"land"+c);
 					LOGGER.debug("Uploading land mask finished for {}", land.getString("name"));
 					c++;
 				}
-			} catch (Exception ex) {
+			} catch (final Exception ex) {
 				LOGGER.error("An error occured while ingesting land mark documents: {}", LogUtils.toString(ex));
 				throw new InternalErrorException(LogUtils.toString(ex));
 			}
@@ -174,7 +174,7 @@ public class AuxiliaryFilesExtractor extends GenericExtractor<ProductionEvent> i
 	 */
 	@Override
 	protected String extractProductNameFromDto(final ProductionEvent dto) {
-		return dto.getKeyObjectStorage();
+		return dto.getProductName();
 	}
 
 	/**
@@ -183,9 +183,9 @@ public class AuxiliaryFilesExtractor extends GenericExtractor<ProductionEvent> i
 	@Override
 	protected void cleanProcessing(final GenericMessageDto<ProductionEvent> message) {
 		// TODO Auto-generated method stub
-		File metadataFile = new File(localDirectory, getKeyObs(message));
+		final File metadataFile = new File(localDirectory, getKeyObs(message));
 		if (metadataFile.exists()) {
-			File parent = metadataFile.getParentFile();
+			final File parent = metadataFile.getParentFile();
 			metadataFile.delete();
 			// Remove upper directory if needed
 			if (!localDirectory.endsWith(parent.getName() + "/")) {

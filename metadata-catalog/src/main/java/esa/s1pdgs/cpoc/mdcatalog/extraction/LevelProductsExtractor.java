@@ -93,7 +93,7 @@ public class LevelProductsExtractor extends GenericExtractor<ProductionEvent> im
 	}
     
     @Override
-    public void onMessage(GenericMessageDto<ProductionEvent> message) {
+    public void onMessage(final GenericMessageDto<ProductionEvent> message) {
     	super.genericExtract(message);
     	
     }
@@ -106,9 +106,9 @@ public class LevelProductsExtractor extends GenericExtractor<ProductionEvent> im
     		final Reporting.Factory reportingFactory, 
             final GenericMessageDto<ProductionEvent> message)
             throws AbstractCodedException {
-        ProductionEvent dto = message.getBody();
+        final ProductionEvent dto = message.getBody();
         // Upload file
-        String keyObs = getKeyObs(message);
+        final String keyObs = getKeyObs(message);
         
         final String productName = extractProductNameFromDto(dto);
         final ProductFamily family = message.getBody().getProductFamily();
@@ -153,7 +153,7 @@ public class LevelProductsExtractor extends GenericExtractor<ProductionEvent> im
      */
     @Override
     protected String extractProductNameFromDto(final ProductionEvent dto) {
-        return dto.getKeyObjectStorage();
+        return dto.getProductName();
     }
 
     /**
@@ -163,9 +163,9 @@ public class LevelProductsExtractor extends GenericExtractor<ProductionEvent> im
     protected void cleanProcessing(
             final GenericMessageDto<ProductionEvent> message) {
         // TODO Auto-generated method stub
-        File metadataFile = new File(localDirectory + getKeyObs(message));
+        final File metadataFile = new File(localDirectory + getKeyObs(message));
         if (metadataFile.exists()) {
-            File parent = metadataFile.getParentFile();
+            final File parent = metadataFile.getParentFile();
             metadataFile.delete();
             // Remove upper directory if needed
             if (!localDirectory.endsWith(parent.getName() + "/")) {
