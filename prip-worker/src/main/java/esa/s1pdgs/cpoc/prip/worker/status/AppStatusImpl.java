@@ -19,18 +19,14 @@ public class AppStatusImpl extends AbstractAppStatus {
      */
     private static final Logger LOGGER = LogManager.getLogger(AppStatusImpl.class);
 
-	private RestHighLevelClient restHighLevelClient;
-	
 	/**
      * Constructor
      * 
      * @param maxErrorCounter
      */
     @Autowired
-    public AppStatusImpl(@Value("${status.max-error-counter:100}") final int maxErrorCounter,
-    		RestHighLevelClient restHighLevelClient) {
+    public AppStatusImpl(@Value("${status.max-error-counter:100}") final int maxErrorCounter) {
     	super(new Status(maxErrorCounter, 0));
-    	this.restHighLevelClient = restHighLevelClient;
     }
 	
     /**

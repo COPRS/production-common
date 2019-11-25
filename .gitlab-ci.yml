@@ -39,6 +39,9 @@ include:
   - local: scaler/.gitlab-ci.yml
   - local: queue-watcher/.gitlab-ci.yml
   - local: validation/.gitlab-ci.yml
+  - local: compression-trigger/.gitlab-ci.yml
   - local: compression-worker/.gitlab-ci.yml
+  - local: prip-trigger/.gitlab-ci.yml
   - local: prip-worker/.gitlab-ci.yml
+  - local: prip-frontend/.gitlab-ci.yml
   - local: ipf-execution-worker/.gitlab-ci.yml
