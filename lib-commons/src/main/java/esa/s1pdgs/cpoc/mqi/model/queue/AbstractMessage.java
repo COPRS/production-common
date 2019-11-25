@@ -16,6 +16,9 @@ import esa.s1pdgs.cpoc.common.ProductFamily;
  */
 public abstract class AbstractMessage {
 	@JsonIgnore
+	public static final String DEFAULT_HOSTNAME = System.getenv("HOSTNAME");
+	
+	@JsonIgnore
 	public static final String NOT_DEFINED = "NOT_DEFINED";
 		
 	// use some sane defaults
@@ -27,7 +30,7 @@ public abstract class AbstractMessage {
 	 * approach is working. 
 	 */
 	protected LocalDateTime creationDate = LocalDateTime.now();
-	protected String hostname = System.getenv("HOSTNAME");
+	protected String hostname = DEFAULT_HOSTNAME;
 	
 	public AbstractMessage() {
 	}
