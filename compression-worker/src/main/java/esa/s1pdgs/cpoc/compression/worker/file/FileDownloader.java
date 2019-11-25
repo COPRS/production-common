@@ -105,13 +105,13 @@ public class FileDownloader {
 	protected ObsDownloadObject buildInput() throws InternalErrorException, UnknownFamilyException {
 		LOGGER.info("{} 3 - Starting organizing inputs", prefixMonitorLogs);
 		
-		if (job.getInputKeyObjectStorage() == null) {
+		if (job.getKeyObjectStorage() == null) {
 			throw new InternalErrorException("productName to download cannot be null");
 		}
 
 		String targetFile = this.localWorkingDir+"/"+job.getOutputKeyObjectStorage();
-		LOGGER.info("Input {} will be stored in {}", job.getInputKeyObjectStorage(), targetFile);
-		return new ObsDownloadObject(job.getProductFamily(), job.getInputKeyObjectStorage(),targetFile);
+		LOGGER.info("Input {} will be stored in {}", job.getKeyObjectStorage(), targetFile);
+		return new ObsDownloadObject(job.getProductFamily(), job.getKeyObjectStorage(),targetFile);
 
 	}
 

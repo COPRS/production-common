@@ -54,10 +54,10 @@ public class CompressExecutorCallable implements Callable<Void> {
 	 */
 	public Void call() throws AbstractCodedException {
 		
-		LOGGER.debug("command={}, productName={}, workingDirectory={}",properties.getCommand(), job.getInputKeyObjectStorage(), properties.getWorkingDirectory());
+		LOGGER.debug("command={}, productName={}, workingDirectory={}",properties.getCommand(), job.getKeyObjectStorage(), properties.getWorkingDirectory());
 		/*completionSrv.submit(new TaskCallable(properties.getCommand(), job.getProductName(),
 				properties.getWorkingDirectory(), reporting));*/
-		execute(properties.getCommand(), job.getInputKeyObjectStorage(), job.getOutputKeyObjectStorage(), properties.getWorkingDirectory());
+		execute(properties.getCommand(), job.getKeyObjectStorage(), job.getOutputKeyObjectStorage(), properties.getWorkingDirectory());
 
 		return null;
 	}

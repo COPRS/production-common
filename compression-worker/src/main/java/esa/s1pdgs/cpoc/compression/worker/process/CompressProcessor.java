@@ -138,7 +138,7 @@ public class CompressProcessor implements MqiListener<CompressionJob> {
 
 		final Reporting report = reportingFactory.newReporting(0);	
 		report.begin(
-				new FilenameReportingInput(message.getBody().getInputKeyObjectStorage()),
+				new FilenameReportingInput(message.getBody().getKeyObjectStorage()),
 				new ReportingMessage("Start compression processing")
 		);
 

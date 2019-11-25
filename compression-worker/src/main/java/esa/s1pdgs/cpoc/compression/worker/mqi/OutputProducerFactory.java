@@ -59,9 +59,9 @@ public class OutputProducerFactory {
     
     private final CompressionEvent toCompressionEvent(final CompressedProductQueueMessage msg)
     {
-    	return new CompressionEvent(
-        		msg.getObjectStorageKey(),
-        		msg.getFamily()
+    	return new CompressionEvent(        		
+        		msg.getFamily(),
+        		msg.getObjectStorageKey()
         );
     }
 
