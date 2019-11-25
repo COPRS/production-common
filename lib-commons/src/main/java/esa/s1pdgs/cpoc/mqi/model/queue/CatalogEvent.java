@@ -1,10 +1,9 @@
 package esa.s1pdgs.cpoc.mqi.model.queue;
 
 import java.time.LocalDateTime;
+import java.util.Objects;
 
-import esa.s1pdgs.cpoc.common.ProductFamily;
-
-public class CatalogEvent extends AbstractMessage {	
+public class CatalogEvent extends AbstractMessage {		
 	private String productType;
 	private String missionId;
 	private String satelliteId;
@@ -16,15 +15,11 @@ public class CatalogEvent extends AbstractMessage {
 	private String site;
 	private String url;
 	
-	public CatalogEvent() {
-		super();
-	}
-
 	public String getProductType() {
 		return productType;
 	}
 
-	public void setProductType(String productType) {
+	public void setProductType(final String productType) {
 		this.productType = productType;
 	}
 
@@ -32,7 +27,7 @@ public class CatalogEvent extends AbstractMessage {
 		return missionId;
 	}
 
-	public void setMissionId(String missionId) {
+	public void setMissionId(final String missionId) {
 		this.missionId = missionId;
 	}
 
@@ -40,7 +35,7 @@ public class CatalogEvent extends AbstractMessage {
 		return satelliteId;
 	}
 
-	public void setSatelliteId(String satelliteId) {
+	public void setSatelliteId(final String satelliteId) {
 		this.satelliteId = satelliteId;
 	}
 
@@ -48,7 +43,7 @@ public class CatalogEvent extends AbstractMessage {
 		return creationTime;
 	}
 
-	public void setCreationTime(LocalDateTime creationTime) {
+	public void setCreationTime(final LocalDateTime creationTime) {
 		this.creationTime = creationTime;
 	}
 
@@ -56,7 +51,7 @@ public class CatalogEvent extends AbstractMessage {
 		return insertionTime;
 	}
 
-	public void setInsertionTime(LocalDateTime insertionTime) {
+	public void setInsertionTime(final LocalDateTime insertionTime) {
 		this.insertionTime = insertionTime;
 	}
 
@@ -64,7 +59,7 @@ public class CatalogEvent extends AbstractMessage {
 		return validityStartTime;
 	}
 
-	public void setValidityStartTime(LocalDateTime validityStartTime) {
+	public void setValidityStartTime(final LocalDateTime validityStartTime) {
 		this.validityStartTime = validityStartTime;
 	}
 
@@ -72,7 +67,7 @@ public class CatalogEvent extends AbstractMessage {
 		return validityStopTime;
 	}
 
-	public void setValidityStopTime(LocalDateTime validityStopTime) {
+	public void setValidityStopTime(final LocalDateTime validityStopTime) {
 		this.validityStopTime = validityStopTime;
 	}
 
@@ -80,7 +75,7 @@ public class CatalogEvent extends AbstractMessage {
 		return instrumentConfigurationId;
 	}
 
-	public void setInstrumentConfigurationId(String instrumentConfigurationId) {
+	public void setInstrumentConfigurationId(final String instrumentConfigurationId) {
 		this.instrumentConfigurationId = instrumentConfigurationId;
 	}
 
@@ -88,7 +83,7 @@ public class CatalogEvent extends AbstractMessage {
 		return site;
 	}
 
-	public void setSite(String site) {
+	public void setSite(final String site) {
 		this.site = site;
 	}
 
@@ -96,95 +91,52 @@ public class CatalogEvent extends AbstractMessage {
 		return url;
 	}
 
-	public void setUrl(String url) {
+	public void setUrl(final String url) {
 		this.url = url;
 	}
 
 	@Override
-	public String toString() {
-		return "CatalogEvent [productType=" + productType + ", missionId=" + missionId + ", satelliteId=" + satelliteId
-				+ ", creationTime=" + creationTime + ", insertionTime=" + insertionTime + ", validityStartTime="
-				+ validityStartTime + ", validityStopTime=" + validityStopTime + ", instrumentConfigurationId="
-				+ instrumentConfigurationId + ", site=" + site + ", url=" + url + "]";
-	}
-
-	@Override
 	public int hashCode() {
-		final int prime = 31;
-		int result = 1;
-		result = prime * result + ((creationTime == null) ? 0 : creationTime.hashCode());
-		result = prime * result + ((insertionTime == null) ? 0 : insertionTime.hashCode());
-		result = prime * result + ((instrumentConfigurationId == null) ? 0 : instrumentConfigurationId.hashCode());
-		result = prime * result + ((missionId == null) ? 0 : missionId.hashCode());
-		result = prime * result + ((productType == null) ? 0 : productType.hashCode());
-		result = prime * result + ((satelliteId == null) ? 0 : satelliteId.hashCode());
-		result = prime * result + ((site == null) ? 0 : site.hashCode());
-		result = prime * result + ((url == null) ? 0 : url.hashCode());
-		result = prime * result + ((validityStartTime == null) ? 0 : validityStartTime.hashCode());
-		result = prime * result + ((validityStopTime == null) ? 0 : validityStopTime.hashCode());
-		return result;
+		return Objects.hash(creationDate, creationTime, hostname, insertionTime, instrumentConfigurationId,
+				keyObjectStorage, missionId, productFamily, productType, satelliteId, site, url, validityStartTime,
+				validityStopTime);
 	}
 
 	@Override
-	public boolean equals(Object obj) {
-		if (this == obj)
+	public boolean equals(final Object obj) {
+		if (this == obj) {
 			return true;
-		if (obj == null)
+		}
+		if (obj == null) {
 			return false;
-		if (getClass() != obj.getClass())
+		}
+		if (getClass() != obj.getClass()) {
 			return false;
-		CatalogEvent other = (CatalogEvent) obj;
-		if (creationTime == null) {
-			if (other.creationTime != null)
-				return false;
-		} else if (!creationTime.equals(other.creationTime))
-			return false;
-		if (insertionTime == null) {
-			if (other.insertionTime != null)
-				return false;
-		} else if (!insertionTime.equals(other.insertionTime))
-			return false;
-		if (instrumentConfigurationId == null) {
-			if (other.instrumentConfigurationId != null)
-				return false;
-		} else if (!instrumentConfigurationId.equals(other.instrumentConfigurationId))
-			return false;
-		if (missionId == null) {
-			if (other.missionId != null)
-				return false;
-		} else if (!missionId.equals(other.missionId))
-			return false;
-		if (productType == null) {
-			if (other.productType != null)
-				return false;
-		} else if (!productType.equals(other.productType))
-			return false;
-		if (satelliteId == null) {
-			if (other.satelliteId != null)
-				return false;
-		} else if (!satelliteId.equals(other.satelliteId))
-			return false;
-		if (site == null) {
-			if (other.site != null)
-				return false;
-		} else if (!site.equals(other.site))
-			return false;
-		if (url == null) {
-			if (other.url != null)
-				return false;
-		} else if (!url.equals(other.url))
-			return false;
-		if (validityStartTime == null) {
-			if (other.validityStartTime != null)
-				return false;
-		} else if (!validityStartTime.equals(other.validityStartTime))
-			return false;
-		if (validityStopTime == null) {
-			if (other.validityStopTime != null)
-				return false;
-		} else if (!validityStopTime.equals(other.validityStopTime))
-			return false;
-		return true;
+		}
+		final CatalogEvent other = (CatalogEvent) obj;
+		return Objects.equals(creationDate, other.creationDate) 
+				&& Objects.equals(creationTime, other.creationTime)
+				&& Objects.equals(hostname, other.hostname) 
+				&& Objects.equals(insertionTime, other.insertionTime)
+				&& Objects.equals(instrumentConfigurationId, other.instrumentConfigurationId)
+				&& Objects.equals(keyObjectStorage, other.keyObjectStorage)
+				&& Objects.equals(missionId, other.missionId) 
+				&& productFamily == other.productFamily
+				&& Objects.equals(productType, other.productType) 
+				&& Objects.equals(satelliteId, other.satelliteId)
+				&& Objects.equals(site, other.site) 
+				&& Objects.equals(url, other.url)
+				&& Objects.equals(validityStartTime, other.validityStartTime)
+				&& Objects.equals(validityStopTime, other.validityStopTime);
 	}
-	
+
+	@Override
+	public String toString() {
+		return "CatalogEvent [productFamily=" + productFamily + ", keyObjectStorage=" + keyObjectStorage
+				+ ", creationDate=" + creationDate + ", hostname=" + hostname + ", productType=" + productType
+				+ ", missionId=" + missionId + ", satelliteId=" + satelliteId + ", creationTime=" + creationTime
+				+ ", insertionTime=" + insertionTime + ", validityStartTime=" + validityStartTime
+				+ ", validityStopTime=" + validityStopTime + ", instrumentConfigurationId=" + instrumentConfigurationId
+				+ ", site=" + site + ", url=" + url + "]";
+	}
 }

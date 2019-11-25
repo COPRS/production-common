@@ -59,8 +59,7 @@ public class IpfExecutionJob extends AbstractMessage {
     public IpfExecutionJob(final ProductFamily productFamily,
             final String keyObjectStorage, final String productProcessMode, final String workDirectory,
             final String jobOrder) {
-        super(productFamily);
-        this.setKeyObjectStorage(keyObjectStorage);
+        super(productFamily, keyObjectStorage);
         this.productProcessMode = productProcessMode;
         this.workDirectory = workDirectory;
         this.jobOrder = jobOrder;
@@ -106,7 +105,7 @@ public class IpfExecutionJob extends AbstractMessage {
     /**
      * @param productProcessMode the productProcessMode to set
      */
-    public void setProductProcessMode(String productProcessMode) {
+    public void setProductProcessMode(final String productProcessMode) {
         this.productProcessMode = productProcessMode;
     }
 
@@ -197,54 +196,41 @@ public class IpfExecutionJob extends AbstractMessage {
         this.pools.add(pool);
     }
 
-    /**
-     * to string
-     */
-    @Override
-    public String toString() {
-        return String.format(
-                "{family: %s, getKeyObjectStorage: %s, productProcessMode: %s, workDirectory: %s, jobOrder: %s, inputs: %s, outputs: %s, pools: %s, hostname: %s, creationDate: %s}",
-                getProductFamily(), getKeyObjectStorage(), productProcessMode, workDirectory, jobOrder, inputs,
-                outputs, pools, getHostname(), getCreationDate());
-    }
+	@Override
+	public int hashCode() {
+		return Objects.hash(creationDate, hostname, inputs, jobOrder, keyObjectStorage, outputs, pools, productFamily,
+				productProcessMode, workDirectory);
+	}
 
-    /**
-     * hash code
-     */
-    @Override
-    public int hashCode() {
-        return Objects.hash(getProductFamily(), getKeyObjectStorage(), productProcessMode, workDirectory, jobOrder, 
-                inputs, outputs, pools, getHostname(), getCreationDate());
-    }
+	@Override
+	public boolean equals(final Object obj) {
+		if (this == obj) {
+			return true;
+		}
+		if (obj == null) {
+			return false;
+		}
+		if (getClass() != obj.getClass()) {
+			return false;
+		}
+		final IpfExecutionJob other = (IpfExecutionJob) obj;
+		return Objects.equals(creationDate, other.creationDate) 
+				&& Objects.equals(hostname, other.hostname)
+				&& Objects.equals(inputs, other.inputs) 
+				&& Objects.equals(jobOrder, other.jobOrder)
+				&& Objects.equals(keyObjectStorage, other.keyObjectStorage) 
+				&& Objects.equals(outputs, other.outputs)
+				&& Objects.equals(pools, other.pools) 
+				&& productFamily == other.productFamily
+				&& Objects.equals(productProcessMode, other.productProcessMode)
+				&& Objects.equals(workDirectory, other.workDirectory);
+	}
 
-    /**
-     * equals
-     */
-    @Override
-    public boolean equals(final Object obj) {
-        boolean ret;
-        if (this == obj) {
-            ret = true;
-        } else if (obj == null || getClass() != obj.getClass()) {
-            ret = false;
-        } else {
-            IpfExecutionJob other = (IpfExecutionJob) obj;
-            ret = Objects.equals(getProductFamily(), other.getProductFamily())
-                    && Objects.equals(getKeyObjectStorage(), other.getKeyObjectStorage())
-                    && Objects.equals(productProcessMode,
-                            other.productProcessMode)
-                    && Objects.equals(workDirectory, other.workDirectory)
-                    && Objects.equals(jobOrder, other.jobOrder)
-                    && Objects.equals(inputs, other.inputs)
-                    && Objects.equals(outputs, other.outputs)
-                    && Objects.equals(pools, other.pools)
-                    && Objects.equals(getHostname(), other.getHostname())
-            		&& Objects.equals(getCreationDate(), other.getCreationDate())
-            		&& Objects.equals(getHostname(), other.getHostname())
-                    && Objects.equals(getCreationDate(), other.getCreationDate());
-        }
-        return ret;
-
-    }
-
+	@Override
+	public String toString() {
+		return "IpfExecutionJob [productFamily=" + productFamily + ", keyObjectStorage=" + keyObjectStorage
+				+ ", creationDate=" + creationDate + ", hostname=" + hostname + ", productProcessMode="
+				+ productProcessMode + ", workDirectory=" + workDirectory + ", jobOrder=" + jobOrder + ", inputs="
+				+ inputs + ", outputs=" + outputs + ", pools=" + pools + "]";
+	}
 }

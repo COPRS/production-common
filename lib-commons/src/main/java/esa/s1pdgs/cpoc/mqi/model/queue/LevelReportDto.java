@@ -9,14 +9,7 @@ import esa.s1pdgs.cpoc.common.ProductFamily;
  * 
  * @author Viveris Technologies
  */
-@Deprecated
 public class LevelReportDto extends AbstractMessage {
-
-	private ProductFamily productFamily;
-	private String keyObjectStorage;
-    /**
-     * ObjectkeyStorage of the reports
-     */
     private String content;
 
     /**
@@ -32,11 +25,9 @@ public class LevelReportDto extends AbstractMessage {
      */
     public LevelReportDto(final String productName, final String content,
             final ProductFamily family) {
-        this.keyObjectStorage = productName;
-        this.productFamily = family;
+    	super(family, productName);
         this.content = content;
     }
-
 
     /**
      * @return the content
@@ -44,16 +35,6 @@ public class LevelReportDto extends AbstractMessage {
     public String getContent() {
         return content;
     }
-    
-    
-
-    public ProductFamily getProductFamily() {
-		return productFamily;
-	}
-
-	public void setProductFamily(ProductFamily productFamily) {
-		this.productFamily = productFamily;
-	}
 
 	/**
      * @param content
@@ -63,51 +44,33 @@ public class LevelReportDto extends AbstractMessage {
         this.content = content;
     }
 
-    public String getKeyObjectStorage() {
-		return keyObjectStorage;
+	@Override
+	public int hashCode() {
+		return Objects.hash(content, creationDate, hostname, keyObjectStorage, productFamily);
 	}
 
-	public void setKeyObjectStorage(String keyObjectStorage) {
-		this.keyObjectStorage = keyObjectStorage;
+	@Override
+	public boolean equals(final Object obj) {
+		if (this == obj) {
+			return true;
+		}
+		if (obj == null) {
+			return false;
+		}
+		if (getClass() != obj.getClass()) {
+			return false;
+		}
+		final LevelReportDto other = (LevelReportDto) obj;
+		return Objects.equals(content, other.content) 
+				&& Objects.equals(creationDate, other.creationDate)
+				&& Objects.equals(hostname, other.hostname) 
+				&& Objects.equals(keyObjectStorage, other.keyObjectStorage)
+				&& productFamily == other.productFamily;
 	}
 
-	/**
-     * @see java.lang.Object#toString()
-     */
-    @Override
-    public String toString() {
-        return String.format("{productName: %s, content: %s, family: %s, hostname: %s, creationDate: %s}",
-                keyObjectStorage, content, getProductFamily(), getHostname(), getCreationDate());
-    }
-
-    /**
-     * @see java.lang.Object#hashCode()
-     */
-    @Override
-    public int hashCode() {
-        return Objects.hash(keyObjectStorage, content, getProductFamily(), getHostname(), getCreationDate());
-    }
-
-    /**
-     * @see java.lang.Object#equals()
-     */
-    @Override
-    public boolean equals(final Object obj) {
-        boolean ret;
-        if (this == obj) {
-            ret = true;
-        } else if (obj == null || getClass() != obj.getClass()) {
-            ret = false;
-        } else {
-            LevelReportDto other = (LevelReportDto) obj;
-            // field comparison
-            ret = Objects.equals(keyObjectStorage, other.getKeyObjectStorage())
-                    && Objects.equals(content, other.content)
-                    && Objects.equals(getProductFamily(), other.getProductFamily())
-                    && Objects.equals(getHostname(), other.getHostname())
-            		&& Objects.equals(getCreationDate(), other.getCreationDate());
-        }
-        return ret;
-    }
-
+	@Override
+	public String toString() {
+		return "LevelReportDto [productFamily=" + productFamily + ", keyObjectStorage=" + keyObjectStorage
+				+ ", creationDate=" + creationDate + ", hostname=" + hostname + ", content=" + content + "]";
+	}
 }

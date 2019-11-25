@@ -1,25 +1,35 @@
 package esa.s1pdgs.cpoc.mqi.model.queue;
 
+import java.util.Objects;
+
 import esa.s1pdgs.cpoc.common.ProductFamily;
 
-public class CompressionJob extends AbstractMessage {
-	private ProductFamily outputProductFamily;
-	private String outputKeyObjectStorage;
+public class CompressionJob extends AbstractMessage {	
+	// use some sane defaults
+	private ProductFamily outputProductFamily = ProductFamily.BLANK;
+	private String outputKeyObjectStorage = NOT_DEFINED;
+	private CompressionDirection compressionDirection = CompressionDirection.UNDEFINED;
 
-	public CompressionJob(String inputKeyObjectStorage, ProductFamily inputProductFamily, String outputKeyObjectStorage, ProductFamily outputProductFamily) {
+	public CompressionJob() {
+		super();
+	}	
+
+	public CompressionJob(
+			final String inputKeyObjectStorage, 
+			final ProductFamily inputProductFamily, 
+			final String outputKeyObjectStorage, 
+			final ProductFamily outputProductFamily
+	) {
 		super(inputProductFamily, inputKeyObjectStorage);
 		this.outputKeyObjectStorage = outputKeyObjectStorage;
 		this.outputProductFamily = outputProductFamily;
 	}
 
-	// TODO TAI: Der Name ist unglücklich
-	private CompressionDirection compressionDirection;
-
 	public ProductFamily getOutputProductFamily() {
 		return outputProductFamily;
 	}
 
-	public void setOutputProductFamily(ProductFamily outputProductFamily) {
+	public void setOutputProductFamily(final ProductFamily outputProductFamily) {
 		this.outputProductFamily = outputProductFamily;
 	}
 
@@ -27,7 +37,7 @@ public class CompressionJob extends AbstractMessage {
 		return outputKeyObjectStorage;
 	}
 
-	public void setOutputKeyObjectStorage(String outputKeyObjectStorage) {
+	public void setOutputKeyObjectStorage(final String outputKeyObjectStorage) {
 		this.outputKeyObjectStorage = outputKeyObjectStorage;
 	}
 
@@ -35,52 +45,42 @@ public class CompressionJob extends AbstractMessage {
 		return compressionDirection;
 	}
 
-	public void setCompressionDirection(CompressionDirection compressionDirection) {
+	public void setCompressionDirection(final CompressionDirection compressionDirection) {
 		this.compressionDirection = compressionDirection;
 	}
 
 	@Override
-	public String toString() {
-		return "CompressionJob [inputKeyObjectStorage=" + this.getKeyObjectStorage() + ", outputKeyObjectStorage="
-				+ outputKeyObjectStorage + ", inputProductFamily=" + getProductFamily() + ", outputProductFamily="
-				+ outputProductFamily + ", compressionDirection=" + compressionDirection + "]";
-	}
-
-	@Override
 	public int hashCode() {
-		final int prime = 31;
-		int result = 1;
-		result = prime * result + ((compressionDirection == null) ? 0 : compressionDirection.hashCode());
-		result = prime * result + ((this.getKeyObjectStorage() == null) ? 0 : this.getKeyObjectStorage().hashCode());
-		result = prime * result + ((outputKeyObjectStorage == null) ? 0 : outputKeyObjectStorage.hashCode());
-		result = prime * result + ((outputProductFamily == null) ? 0 : outputProductFamily.hashCode());
-		return result;
+		return Objects.hash(compressionDirection, creationDate, hostname, keyObjectStorage, outputKeyObjectStorage,
+				outputProductFamily, productFamily);
 	}
 
 	@Override
-	public boolean equals(Object obj) {
-		if (this == obj)
+	public boolean equals(final Object obj) {
+		if (this == obj) {
 			return true;
-		if (obj == null)
+		}
+		if (obj == null) {
 			return false;
-		if (getClass() != obj.getClass())
+		}
+		if (getClass() != obj.getClass()) {
 			return false;
-		CompressionJob other = (CompressionJob) obj;
-		if (compressionDirection != other.compressionDirection)
-			return false;
-		if (this.getKeyObjectStorage() == null) {
-			if (other.getKeyObjectStorage() != null)
-				return false;
-		} else if (!getKeyObjectStorage().equals(other.getKeyObjectStorage()))
-			return false;
-		if (outputKeyObjectStorage == null) {
-			if (other.outputKeyObjectStorage != null)
-				return false;
-		} else if (!outputKeyObjectStorage.equals(other.outputKeyObjectStorage))
-			return false;
-		if (outputProductFamily != other.outputProductFamily)
-			return false;
-		return true;
+		}
+		final CompressionJob other = (CompressionJob) obj;
+		return compressionDirection == other.compressionDirection 
+				&& Objects.equals(creationDate, other.creationDate)
+				&& Objects.equals(hostname, other.hostname) 
+				&& Objects.equals(keyObjectStorage, other.keyObjectStorage)
+				&& Objects.equals(outputKeyObjectStorage, other.outputKeyObjectStorage)
+				&& outputProductFamily == other.outputProductFamily 
+				&& productFamily == other.productFamily;
 	}
 
+	@Override
+	public String toString() {
+		return "CompressionJob [productFamily=" + productFamily + ", keyObjectStorage=" + keyObjectStorage
+				+ ", creationDate=" + creationDate + ", hostname=" + hostname + ", outputProductFamily="
+				+ outputProductFamily + ", outputKeyObjectStorage=" + outputKeyObjectStorage + ", compressionDirection="
+				+ compressionDirection + "]";
+	}
 }

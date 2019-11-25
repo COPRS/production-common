@@ -6,7 +6,6 @@ import static org.junit.Assert.assertTrue;
 import org.junit.Test;
 
 import esa.s1pdgs.cpoc.common.EdrsSessionFileType;
-import esa.s1pdgs.cpoc.mqi.model.queue.IngestionEvent;
 import nl.jqno.equalsverifier.EqualsVerifier;
 import nl.jqno.equalsverifier.Warning;
 
@@ -49,14 +48,14 @@ public class IngestionEventTest {
 	 */
 	@Test
 	public void testToString() {
-		IngestionEvent dto = new IngestionEvent("key-obs", "/path/of/inbox", 2, EdrsSessionFileType.RAW, "S1", "B", "WILE", "sessionId");
-		String str = dto.toString();
-		assertTrue("toString should contain the key OBS", str.contains("objectStorageKey: key-obs"));
-		assertTrue("toString should contain the inbox path", str.contains("inboxPath: /path/of/inbox"));
-		assertTrue("toString should contain the channel id", str.contains("channelId: 2"));
-		assertTrue("toString should contain the product type", str.contains("productType: RAW"));
-		assertTrue("toString should contain the mission id", str.contains("missionId: S1"));
-		assertTrue("toString should contain the satellite id", str.contains("satelliteId: B"));
+		final IngestionEvent dto = new IngestionEvent("key-obs", "/path/of/inbox", 2, EdrsSessionFileType.RAW, "S1", "B", "WILE", "sessionId");
+		final String str = dto.toString();
+		assertTrue("toString should contain the key OBS", str.contains("key-obs"));
+		assertTrue("toString should contain the inbox path", str.contains("/path/of/inbox"));
+		assertTrue("toString should contain the channel id", str.contains("2"));
+		assertTrue("toString should contain the product type", str.contains("RAW"));
+		assertTrue("toString should contain the mission id", str.contains("S1"));
+		assertTrue("toString should contain the satellite id", str.contains("B"));
 	}
 
 	/**

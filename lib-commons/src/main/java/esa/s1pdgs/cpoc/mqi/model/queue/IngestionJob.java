@@ -1,8 +1,10 @@
 package esa.s1pdgs.cpoc.mqi.model.queue;
 
+import java.util.Objects;
+
 import esa.s1pdgs.cpoc.common.ProductFamily;
 
-public class IngestionJob extends AbstractMessage {
+public class IngestionJob extends AbstractMessage {	
 	private String relativePath;
 	private String pickupPath;
 	private String missionId;
@@ -10,19 +12,18 @@ public class IngestionJob extends AbstractMessage {
 	private String stationCode;
 	
 	public IngestionJob() {
-		
+		super();
 	}
 
-	public IngestionJob(String keyObjectStorage) {
-		super(ProductFamily.BLANK);
-		this.setKeyObjectStorage(keyObjectStorage);	
+	public IngestionJob(final String keyObjectStorage) {
+		super(ProductFamily.BLANK, keyObjectStorage);
 	}
 
 	public String getRelativePath() {
 		return relativePath;
 	}
 
-	public void setRelativePath(String relativePath) {
+	public void setRelativePath(final String relativePath) {
 		this.relativePath = relativePath;
 	}
 
@@ -30,7 +31,7 @@ public class IngestionJob extends AbstractMessage {
 		return missionId;
 	}
 
-	public void setMissionId(String missionId) {
+	public void setMissionId(final String missionId) {
 		this.missionId = missionId;
 	}
 
@@ -38,7 +39,7 @@ public class IngestionJob extends AbstractMessage {
 		return satelliteId;
 	}
 
-	public void setSatelliteId(String satelliteId) {
+	public void setSatelliteId(final String satelliteId) {
 		this.satelliteId = satelliteId;
 	}
 
@@ -46,7 +47,7 @@ public class IngestionJob extends AbstractMessage {
 		return stationCode;
 	}
 
-	public void setStationCode(String stationCode) {
+	public void setStationCode(final String stationCode) {
 		this.stationCode = stationCode;
 	}
 
@@ -54,86 +55,44 @@ public class IngestionJob extends AbstractMessage {
 		return pickupPath;
 	}
 
-	public void setPickupPath(String pickupPath) {
+	public void setPickupPath(final String pickupPath) {
 		this.pickupPath = pickupPath;
 	}
 
 	@Override
 	public int hashCode() {
-		final int prime = 31;
-		int result = 1;
-		result = prime * result + ((getKeyObjectStorage() == null) ? 0 : getKeyObjectStorage().hashCode());
-		result = prime * result + ((getProductFamily() == null) ? 0 : getProductFamily().hashCode());
-		result = prime * result + ((missionId == null) ? 0 : missionId.hashCode());
-		result = prime * result + ((pickupPath == null) ? 0 : pickupPath.hashCode());
-		result = prime * result + ((relativePath == null) ? 0 : relativePath.hashCode());
-		result = prime * result + ((satelliteId == null) ? 0 : satelliteId.hashCode());
-		result = prime * result + ((stationCode == null) ? 0 : stationCode.hashCode());
-		result = prime * result + ((getHostname() == null) ? 0 : getHostname().hashCode());
-		result = prime * result + ((getCreationDate() == null) ? 0 : getCreationDate().hashCode());
-		return result;
+		return Objects.hash(creationDate, hostname, keyObjectStorage, missionId, pickupPath, productFamily,
+				relativePath, satelliteId, stationCode);
 	}
 
 	@Override
-	public boolean equals(Object obj) {
-		if (this == obj)
+	public boolean equals(final Object obj) {
+		if (this == obj) {
 			return true;
-		if (obj == null)
-			return false;
-		if (getClass() != obj.getClass())
-			return false;
-		IngestionJob other = (IngestionJob) obj;
-		if (missionId == null) {
-			if (other.missionId != null)
-				return false;
-		} else if (!missionId.equals(other.missionId))
-			return false;
-		if (getKeyObjectStorage() == null) {
-			if (other.getKeyObjectStorage() != null)
-				return false;
 		}
-		if (getProductFamily() == null) {
-			if (other.getProductFamily() != null)
-				return false;
-		} else if (!getProductFamily().equals(other.getProductFamily()))
+		if (obj == null) {
 			return false;
-		if (pickupPath == null) {
-			if (other.pickupPath != null)
-				return false;
-		} else if (!pickupPath.equals(other.pickupPath))
+		}
+		if (getClass() != obj.getClass()) {
 			return false;
-		if (relativePath == null) {
-			if (other.relativePath != null)
-				return false;
-		} else if (!relativePath.equals(other.relativePath))
-			return false;
-		if (satelliteId == null) {
-			if (other.satelliteId != null)
-				return false;
-		} else if (!satelliteId.equals(other.satelliteId))
-			return false;
-		if (stationCode == null) {
-			if (other.stationCode != null)
-				return false;
-		} else if (!stationCode.equals(other.stationCode))
-			return false;
-		if (getHostname() == null) {
-			if (other.getHostname() != null)
-				return false;
-		} else if (!getHostname().equals(other.getHostname()))
-			return false;
-		if (getCreationDate() == null) {
-			if (other.getCreationDate() != null)
-				return false;
-		} else if (!getCreationDate().equals(other.getCreationDate()))
-			return false;
-		return true;
+		}
+		final IngestionJob other = (IngestionJob) obj;
+		return Objects.equals(creationDate, other.creationDate) 
+				&& Objects.equals(hostname, other.hostname)
+				&& Objects.equals(keyObjectStorage, other.keyObjectStorage)
+				&& Objects.equals(missionId, other.missionId) 
+				&& Objects.equals(pickupPath, other.pickupPath)
+				&& productFamily == other.productFamily 
+				&& Objects.equals(relativePath, other.relativePath)
+				&& Objects.equals(satelliteId, other.satelliteId) 
+				&& Objects.equals(stationCode, other.stationCode);
 	}
 
 	@Override
 	public String toString() {
-		return String.format(
-				"IngestionJob [relativePath=%s, pickupPath=%s, missionId=%s, satelliteId=%s, stationCode=%s, hostname: %s, creationDate: %s]",
-				relativePath, pickupPath, missionId, satelliteId, stationCode, getHostname(), getCreationDate());
-	}
+		return "IngestionJob [productFamily=" + productFamily + ", keyObjectStorage=" + keyObjectStorage
+				+ ", creationDate=" + creationDate + ", hostname=" + hostname + ", relativePath=" + relativePath
+				+ ", pickupPath=" + pickupPath + ", missionId=" + missionId + ", satelliteId=" + satelliteId
+				+ ", stationCode=" + stationCode + "]";
+	}	
 }

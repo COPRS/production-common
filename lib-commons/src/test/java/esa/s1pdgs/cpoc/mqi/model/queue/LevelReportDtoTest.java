@@ -7,7 +7,6 @@ import static org.junit.Assert.assertTrue;
 import org.junit.Test;
 
 import esa.s1pdgs.cpoc.common.ProductFamily;
-import esa.s1pdgs.cpoc.mqi.model.queue.LevelReportDto;
 import nl.jqno.equalsverifier.EqualsVerifier;
 import nl.jqno.equalsverifier.Warning;
 
@@ -23,7 +22,7 @@ public class LevelReportDtoTest {
      */
     @Test
     public void testConstructor() {
-        LevelReportDto dto = new LevelReportDto("product-name", "key-obs",
+        final LevelReportDto dto = new LevelReportDto("product-name", "key-obs",
                 ProductFamily.L0_REPORT);
         assertEquals("product-name", dto.getKeyObjectStorage());
         assertEquals("key-obs", dto.getContent());
@@ -35,14 +34,14 @@ public class LevelReportDtoTest {
      */
     @Test
     public void testToStringAndSetters() {
-        LevelReportDto dto = new LevelReportDto();
+        final LevelReportDto dto = new LevelReportDto();
         dto.setKeyObjectStorage("product-name");
         dto.setContent("key-obs");
         dto.setProductFamily(ProductFamily.L1_REPORT);
-        String str = dto.toString();
-        assertTrue(str.contains("productName: product-name"));
-        assertTrue(str.contains("content: key-obs"));
-        assertTrue(str.contains("family: L1_REPORT"));
+        final String str = dto.toString();
+        assertTrue(str.contains("product-name"));
+        assertTrue(str.contains("key-obs"));
+        assertTrue(str.contains("L1_REPORT"));
     }
 
     /**

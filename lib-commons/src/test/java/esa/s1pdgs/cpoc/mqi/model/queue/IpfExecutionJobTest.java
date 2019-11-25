@@ -9,11 +9,6 @@ import org.junit.Before;
 import org.junit.Test;
 
 import esa.s1pdgs.cpoc.common.ProductFamily;
-import esa.s1pdgs.cpoc.mqi.model.queue.IpfExecutionJob;
-import esa.s1pdgs.cpoc.mqi.model.queue.LevelJobInputDto;
-import esa.s1pdgs.cpoc.mqi.model.queue.LevelJobOutputDto;
-import esa.s1pdgs.cpoc.mqi.model.queue.LevelJobPoolDto;
-import esa.s1pdgs.cpoc.mqi.model.queue.LevelJobTaskDto;
 import nl.jqno.equalsverifier.EqualsVerifier;
 import nl.jqno.equalsverifier.Warning;
 
@@ -46,7 +41,7 @@ public class IpfExecutionJobTest {
 		pool2.addTask(new LevelJobTaskDto("path2"));
 	}
 
-	private void checkDto(IpfExecutionJob job) {
+	private void checkDto(final IpfExecutionJob job) {
 	    assertEquals(ProductFamily.L0_JOB, job.getProductFamily());
 		assertTrue("testEqualsFunction".equals(job.getKeyObjectStorage()));
         assertTrue("NRT".equals(job.getProductProcessMode()));
@@ -66,7 +61,7 @@ public class IpfExecutionJobTest {
 	 */
 	@Test
 	public void testConstructorAndGetters() {
-		IpfExecutionJob job = new IpfExecutionJob(ProductFamily.L0_JOB, "testEqualsFunction", "NRT", "/data/localWD/123456", "/data/localWD/123456/JobOrder.xml");
+		final IpfExecutionJob job = new IpfExecutionJob(ProductFamily.L0_JOB, "testEqualsFunction", "NRT", "/data/localWD/123456", "/data/localWD/123456/JobOrder.xml");
 		job.addInput(input1);
 		job.addInput(input2);
 		job.addOutput(output1);
@@ -83,7 +78,7 @@ public class IpfExecutionJobTest {
 	 */
 	@Test
 	public void testToStringAndSetters() {
-		IpfExecutionJob job = new IpfExecutionJob();
+		final IpfExecutionJob job = new IpfExecutionJob();
 		job.setProductFamily(ProductFamily.L0_JOB);
 		job.setKeyObjectStorage("testEqualsFunction");
 		job.setProductProcessMode("NRT");
@@ -95,19 +90,15 @@ public class IpfExecutionJobTest {
 
 		checkDto(job);
 
-		String str = job.toString();
-        assertTrue(str.contains("family: L0_JOB"));
-		assertTrue(str.contains("productIdentifier: testEqualsFunction"));
-        assertTrue(str.contains("productProcessMode: NRT"));
-		assertTrue(str.contains("workDirectory: /data/localWD/123456"));
-		assertTrue(str.contains("jobOrder: /data/localWD/123456/JobOrder.xml"));
-		assertTrue(str.contains("inputs:"));
+		final String str = job.toString();
+        assertTrue(str.contains("L0_JOB"));
+		assertTrue(str.contains("testEqualsFunction"));
+        assertTrue(str.contains("NRT"));
+		assertTrue(str.contains("/data/localWD/123456"));
+		assertTrue(str.contains("/data/localWD/123456/JobOrder.xml"));
 		assertTrue(str.contains(input2.toString()));
-		assertTrue(str.contains("outputs:"));
 		assertTrue(str.contains(output1.toString()));
-		assertTrue(str.contains("pools:"));
 		assertTrue(str.contains(pool2.toString()));
-
 	}
 
 	/**

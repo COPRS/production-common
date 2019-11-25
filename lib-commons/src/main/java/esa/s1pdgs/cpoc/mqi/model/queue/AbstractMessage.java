@@ -1,7 +1,8 @@
 package esa.s1pdgs.cpoc.mqi.model.queue;
 
 import java.time.LocalDateTime;
-import java.util.Date;
+
+import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import esa.s1pdgs.cpoc.common.ProductFamily;
 
@@ -14,28 +15,25 @@ import esa.s1pdgs.cpoc.common.ProductFamily;
  *
  */
 public abstract class AbstractMessage {
-	private ProductFamily productFamily;
-	private String keyObjectStorage;
+	@JsonIgnore
+	public static final String NOT_DEFINED = "NOT_DEFINED";
+		
+	// use some sane defaults
+	protected ProductFamily productFamily = ProductFamily.BLANK;
+	protected String keyObjectStorage = NOT_DEFINED;
 	
-    private LocalDateTime creationDate;
-    private String hostname;
-    
+	/* Most of the subsystems are not setting these
+	 * values at the moment. Lets see if this automatic
+	 * approach is working. 
+	 */
+	protected LocalDateTime creationDate = LocalDateTime.now();
+	protected String hostname = System.getenv("HOSTNAME");
+	
 	public AbstractMessage() {
-		/* Most of the subsystems are not setting these
-		 * values at the moment. Lets see if this automatic
-		 * approach is working. 
-		 */
-		creationDate = LocalDateTime.now();
-		hostname = System.getenv("HOSTNAME");
 	}
 	
-	public AbstractMessage(ProductFamily productFamily) {
-		super();
+	public AbstractMessage(final ProductFamily productFamily, final String keyObjectStorage) {
 		this.productFamily = productFamily;
-	}
-	
-	public AbstractMessage(ProductFamily productFamily, String keyObjectStorage) {
-		this(productFamily);
 		this.keyObjectStorage = keyObjectStorage;
 	}
 
@@ -43,7 +41,7 @@ public abstract class AbstractMessage {
 		return keyObjectStorage;
 	}
 
-	public void setKeyObjectStorage(String keyObjectStorage) {
+	public void setKeyObjectStorage(final String keyObjectStorage) {
 		this.keyObjectStorage = keyObjectStorage;
 	}
 
@@ -51,7 +49,7 @@ public abstract class AbstractMessage {
 		return productFamily;
 	}
 
-	public void setProductFamily(ProductFamily productFamily) {
+	public void setProductFamily(final ProductFamily productFamily) {
 		this.productFamily = productFamily;
 	}
 
@@ -59,7 +57,7 @@ public abstract class AbstractMessage {
 		return creationDate;
 	}
 
-	public void setCreationDate(LocalDateTime creationDate) {
+	public void setCreationDate(final LocalDateTime creationDate) {
 		this.creationDate = creationDate;
 	}
 
@@ -67,43 +65,7 @@ public abstract class AbstractMessage {
 		return hostname;
 	}
 
-	public void setHostname(String hostname) {
+	public void setHostname(final String hostname) {
 		this.hostname = hostname;
-	}
-
-	@Override
-	public int hashCode() {
-		final int prime = 31;
-		int result = 1;
-		result = prime * result + ((creationDate == null) ? 0 : creationDate.hashCode());
-		result = prime * result + ((hostname == null) ? 0 : hostname.hashCode());
-		result = prime * result + ((productFamily == null) ? 0 : productFamily.hashCode());
-		return result;
-	}
-
-	@Override
-	public boolean equals(Object obj) {
-		if (this == obj)
-			return true;
-		if (obj == null)
-			return false;
-		if (getClass() != obj.getClass())
-			return false;
-		AbstractMessage other = (AbstractMessage) obj;
-		if (creationDate == null) {
-			if (other.creationDate != null)
-				return false;
-		} else if (!creationDate.equals(other.creationDate))
-			return false;
-		if (hostname == null) {
-			if (other.hostname != null)
-				return false;
-		} else if (!hostname.equals(other.hostname))
-			return false;
-		if (productFamily != other.productFamily)
-			return false;
-		return true;
-	}
-	
-	
+	}	
 }

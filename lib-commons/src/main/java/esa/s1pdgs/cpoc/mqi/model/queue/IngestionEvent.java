@@ -15,7 +15,7 @@ public class IngestionEvent extends AbstractMessage {
      * Channel identifier
      */
     private int channelId;
-
+    
     /**
      * Type of the EDRS session file: raw or XML file
      */
@@ -53,14 +53,17 @@ public class IngestionEvent extends AbstractMessage {
         super();
     }
 
-    /**
-     * Default constructor
-     */
-    public IngestionEvent(final String keyObjectStorage, String inboxPath, final int channelId,
-            final EdrsSessionFileType productType, final String missionId,
-            final String satelliteId, final String stationCode, final String sessionId) {
-        super(ProductFamily.EDRS_SESSION);
-        this.setKeyObjectStorage(keyObjectStorage);
+    public IngestionEvent(
+    		final String keyObjectStorage, 
+    		final String inboxPath, 
+    		final int channelId,
+            final EdrsSessionFileType productType, 
+            final String missionId,
+            final String satelliteId, 
+            final String stationCode, 
+            final String sessionId
+    ) {
+        super(ProductFamily.EDRS_SESSION, keyObjectStorage);
         this.inboxPath = inboxPath;
         this.channelId = channelId;
         this.productType = productType;
@@ -80,7 +83,7 @@ public class IngestionEvent extends AbstractMessage {
 	/**
 	 * @param inboxPath the inboxPath to set
 	 */
-	public void setInboxPath(String inboxPath) {
+	public void setInboxPath(final String inboxPath) {
 		this.inboxPath = inboxPath;
 	}
 
@@ -154,7 +157,7 @@ public class IngestionEvent extends AbstractMessage {
 	/**
 	 * @param stationCode the stationCode to set
 	 */
-	public void setStationCode(String stationCode) {
+	public void setStationCode(final String stationCode) {
 		this.stationCode = stationCode;
 	}
 
@@ -168,56 +171,46 @@ public class IngestionEvent extends AbstractMessage {
 	/**
 	 * @param sessionId the sessionId to set
 	 */
-	public void setSessionId(String sessionId) {
+	public void setSessionId(final String sessionId) {
 		this.sessionId = sessionId;
 	}
-	
-	/**
-     * @see java.lang.Object#toString()
-     */
-    @Override
-    public String toString() {
-        return String.format(
-                "{objectStorageKey: %s, inboxPath: %s, channelId: %s, productType: %s, satelliteId: %s, missionId: %s, stationCode: %s, sessionId: %s, hostname: %s, creationDate: %s}",
-                getKeyObjectStorage(), inboxPath, channelId, productType, satelliteId,
-                missionId, stationCode, sessionId, getHostname(), getCreationDate());
-    }
 
-    /**
-     * @see java.lang.Object#hashCode()
-     */
-    @Override
-    public int hashCode() {
-        return Objects.hash(getKeyObjectStorage(), inboxPath, getProductFamily(), channelId, productType,
-                satelliteId, missionId, stationCode, sessionId, getHostname(), getCreationDate());
-    }
+	@Override
+	public int hashCode() {
+		return Objects.hash(channelId, creationDate, hostname, inboxPath, keyObjectStorage, missionId, productFamily,
+				productType, satelliteId, sessionId, stationCode);
+	}
 
-    /**
-     * @see java.lang.Object#equals()
-     */
-    @Override
-    public boolean equals(final Object obj) {
-        boolean ret;
-        if (this == obj) {
-            ret = true;
-        } else if (obj == null || getClass() != obj.getClass()) {
-            ret = false;
-        } else {
-            IngestionEvent other = (IngestionEvent) obj;
-            // field comparison
-            ret = Objects.equals(getKeyObjectStorage(), other.getKeyObjectStorage())
-            		&& Objects.equals(inboxPath, other.inboxPath)
-            		&&  Objects.equals(getProductFamily(), other.getProductFamily())
-                    && channelId == other.channelId
-                    && Objects.equals(productType, other.productType)
-                    && Objects.equals(satelliteId, other.satelliteId)
-                    && Objects.equals(missionId, other.missionId)
-                    && Objects.equals(stationCode, other.stationCode)
-            		&& Objects.equals(sessionId, other.sessionId)
-            		&& Objects.equals(getHostname(), other.getHostname())
-            		&& Objects.equals(getCreationDate(), other.getCreationDate());
-        }
-        return ret;
-    }
+	@Override
+	public boolean equals(final Object obj) {
+		if (this == obj) {
+			return true;
+		}
+		if (obj == null) {
+			return false;
+		}
+		if (getClass() != obj.getClass()) {
+			return false;
+		}
+		final IngestionEvent other = (IngestionEvent) obj;
+		return channelId == other.channelId 
+				&& Objects.equals(creationDate, other.creationDate)
+				&& Objects.equals(hostname, other.hostname) 
+				&& Objects.equals(inboxPath, other.inboxPath)
+				&& Objects.equals(keyObjectStorage, other.keyObjectStorage)
+				&& Objects.equals(missionId, other.missionId) 
+				&& productFamily == other.productFamily
+				&& productType == other.productType 
+				&& Objects.equals(satelliteId, other.satelliteId)
+				&& Objects.equals(sessionId, other.sessionId) 
+				&& Objects.equals(stationCode, other.stationCode);
+	}
 
+	@Override
+	public String toString() {
+		return "IngestionEvent [productFamily=" + productFamily + ", keyObjectStorage=" + keyObjectStorage
+				+ ", creationDate=" + creationDate + ", hostname=" + hostname + ", channelId=" + channelId
+				+ ", productType=" + productType + ", sessionId=" + sessionId + ", satelliteId=" + satelliteId
+				+ ", missionId=" + missionId + ", stationCode=" + stationCode + ", inboxPath=" + inboxPath + "]";
+	}
 }

@@ -1,7 +1,6 @@
 package esa.s1pdgs.cpoc.ipf.execution.worker.job.mqi;
 
 import java.time.LocalDateTime;
-import java.util.Date;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -61,9 +60,9 @@ public class OutputProcuderFactory {
      * @param msg
      * @throws AbstractCodedException
      */
-    public void sendOutput(final FileQueueMessage msg, GenericMessageDto<IpfExecutionJob> inputMessage)
+    public void sendOutput(final FileQueueMessage msg, final GenericMessageDto<IpfExecutionJob> inputMessage)
             throws AbstractCodedException {
-        LevelReportDto dtoReport = new LevelReportDto(
+        final LevelReportDto dtoReport = new LevelReportDto(
         		msg.getProductName(),
                 FileUtils.readFile(msg.getFile()), 
                 msg.getFamily()
@@ -86,7 +85,7 @@ public class OutputProcuderFactory {
      * @param msg
      * @throws AbstractCodedException
      */
-    public void sendOutput(final ObsQueueMessage msg, GenericMessageDto<IpfExecutionJob> inputMessage)
+    public void sendOutput(final ObsQueueMessage msg, final GenericMessageDto<IpfExecutionJob> inputMessage)
             throws AbstractCodedException {
     	
         final GenericPublicationMessageDto<ProductionEvent> messageToPublish = new GenericPublicationMessageDto<ProductionEvent>(
@@ -107,7 +106,8 @@ public class OutputProcuderFactory {
     private final ProductionEvent toProductionEvent(final ObsQueueMessage msg)
     {
     	return new ProductionEvent(
-        		msg.getKeyObs(),
+    			msg.getProductName(),
+        		msg.getKeyObs(),        	
         		msg.getFamily(), 
         		toUppercaseOrNull(msg.getProcessMode()),
         		msg.getOqcFlag()
