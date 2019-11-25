@@ -8,8 +8,8 @@ import static org.mockito.Mockito.verify;
 
 import java.io.File;
 import java.nio.file.Paths;
-import java.time.LocalDateTime;
 import java.util.Arrays;
+import java.util.Date;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -78,13 +78,13 @@ public class TestProductServiceImpl {
 		ingestionJob.setMissionId("S1");
 		ingestionJob.setSatelliteId("A");
 		ingestionJob.setStationCode("WILE");
-		ingestionJob.setCreationDate(LocalDateTime.now());
+		ingestionJob.setCreationDate(new Date());
 		ingestionJob.setHostname("hostname");
 		final Product<AbstractMessage> product = new Product<>();
 		product.setFamily(family);
 		final ProductionEvent expectedProductionEvent = new ProductionEvent("null", "null", family);
 		expectedProductionEvent.setHostname("hostname");
-		expectedProductionEvent.setCreationDate(LocalDateTime.now());
+		expectedProductionEvent.setCreationDate(new Date());
 		product.setDto(expectedProductionEvent);
 		product.setFile(new File("/dev/null"));		
 		final IngestionResult expectedResult = new IngestionResult(Arrays.asList(product), 0L);

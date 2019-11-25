@@ -1,6 +1,5 @@
 package esa.s1pdgs.cpoc.ingestion.trigger;
 
-import java.time.LocalDateTime;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
@@ -61,7 +60,7 @@ public final class Inbox {
 				// configured queue.
 				newElements.stream().forEach(e -> handleNew(e));
 			}
-		} catch (Exception e) {
+		} catch (final Exception e) {
 			LOG.error(String.format("Error on polling %s", description()), e);
 		}
 	}
@@ -78,8 +77,8 @@ public final class Inbox {
 	private void handleNew(final InboxEntry entry) {
 		try {
 			LOG.info("Publishing new entry to kafka queue: {}", entry);
-			IngestionJob dto = new IngestionJob(entry.getName());
-			dto.setCreationDate(LocalDateTime.now());
+			final IngestionJob dto = new IngestionJob(entry.getName());
+			dto.setCreationDate(new Date());
 			dto.setHostname(hostname);
 		    dto.setRelativePath(entry.getRelativePath());
 		    dto.setPickupPath(entry.getPickupPath());
@@ -89,7 +88,7 @@ public final class Inbox {
 			client.publish(dto);
 			final InboxEntry persisted = ingestionTriggerServiceTransactional.add(entry);
 			LOG.debug("Added {} to persistence", persisted);
-		} catch (Exception e) {
+		} catch (final Exception e) {
 			LOG.error(String.format("Error on handling %s in %s", entry, description()), e);
 		}
 	}

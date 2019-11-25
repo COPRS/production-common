@@ -4,7 +4,7 @@
 	<default_route description="default route of product family AUXILIARY_FILES">
 		<family>AUXILIARY_FILE</family>
 		<route_to>
-			<topic>t-pdgs-auxiliary-files</topic>
+			<topic>t-pdgs-aux-ingestion-events</topic>
 		</route_to>
 	</default_route>
 </routing>

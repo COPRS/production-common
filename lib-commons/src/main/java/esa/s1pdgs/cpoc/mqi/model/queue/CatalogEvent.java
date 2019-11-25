@@ -1,16 +1,16 @@
 package esa.s1pdgs.cpoc.mqi.model.queue;
 
-import java.time.LocalDateTime;
+import java.util.Date;
 import java.util.Objects;
 
 public class CatalogEvent extends AbstractMessage {		
 	private String productType;
 	private String missionId;
 	private String satelliteId;
-	private LocalDateTime creationTime;
-	private LocalDateTime insertionTime;
-	private LocalDateTime validityStartTime;
-	private LocalDateTime validityStopTime;
+	private Date creationTime;
+	private Date insertionTime;
+	private Date validityStartTime;
+	private Date validityStopTime;
 	private String instrumentConfigurationId;
 	private String site;
 	private String url;
@@ -39,35 +39,35 @@ public class CatalogEvent extends AbstractMessage {
 		this.satelliteId = satelliteId;
 	}
 
-	public LocalDateTime getCreationTime() {
+	public Date getCreationTime() {
 		return creationTime;
 	}
 
-	public void setCreationTime(final LocalDateTime creationTime) {
+	public void setCreationTime(final Date creationTime) {
 		this.creationTime = creationTime;
 	}
 
-	public LocalDateTime getInsertionTime() {
+	public Date getInsertionTime() {
 		return insertionTime;
 	}
 
-	public void setInsertionTime(final LocalDateTime insertionTime) {
+	public void setInsertionTime(final Date insertionTime) {
 		this.insertionTime = insertionTime;
 	}
 
-	public LocalDateTime getValidityStartTime() {
+	public Date getValidityStartTime() {
 		return validityStartTime;
 	}
 
-	public void setValidityStartTime(final LocalDateTime validityStartTime) {
+	public void setValidityStartTime(final Date validityStartTime) {
 		this.validityStartTime = validityStartTime;
 	}
 
-	public LocalDateTime getValidityStopTime() {
+	public Date getValidityStopTime() {
 		return validityStopTime;
 	}
 
-	public void setValidityStopTime(final LocalDateTime validityStopTime) {
+	public void setValidityStopTime(final Date validityStopTime) {
 		this.validityStopTime = validityStopTime;
 	}
 

@@ -1,6 +1,6 @@
 package esa.s1pdgs.cpoc.mqi.model.queue;
 
-import java.time.LocalDateTime;
+import java.util.Date;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
@@ -29,7 +29,7 @@ public abstract class AbstractMessage {
 	 * values at the moment. Lets see if this automatic
 	 * approach is working. 
 	 */
-	protected LocalDateTime creationDate = LocalDateTime.now();
+	protected Date creationDate = new Date();
 	protected String hostname = DEFAULT_HOSTNAME;
 	
 	public AbstractMessage() {
@@ -56,11 +56,11 @@ public abstract class AbstractMessage {
 		this.productFamily = productFamily;
 	}
 
-	public LocalDateTime getCreationDate() {
+	public Date getCreationDate() {
 		return creationDate;
 	}
 
-	public void setCreationDate(final LocalDateTime creationDate) {
+	public void setCreationDate(final Date creationDate) {
 		this.creationDate = creationDate;
 	}
 

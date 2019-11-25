@@ -11,8 +11,8 @@ logging:
 
 kafka:
   bootstrap-servers: ${spring.embedded.kafka.brokers}
-  hostname: wrapper-0
-  client-id: wrapper
+  hostname: mqi-0
+  client-id: mqi-server
   error-topic: t-pdgs-errors
   consumer:
     group-id: wrappers

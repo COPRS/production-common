@@ -2,7 +2,6 @@ package esa.s1pdgs.cpoc.ipf.preparation.worker.tasks;
 
 import java.io.File;
 import java.io.IOException;
-import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -71,7 +70,6 @@ import esa.s1pdgs.cpoc.mqi.model.queue.LevelJobInputDto;
 import esa.s1pdgs.cpoc.mqi.model.queue.LevelJobOutputDto;
 import esa.s1pdgs.cpoc.mqi.model.queue.LevelJobPoolDto;
 import esa.s1pdgs.cpoc.mqi.model.queue.LevelJobTaskDto;
-import esa.s1pdgs.cpoc.mqi.model.rest.GenericMessageDto;
 import esa.s1pdgs.cpoc.report.JobOrderReportingOutput;
 import esa.s1pdgs.cpoc.report.LoggerReporting;
 import esa.s1pdgs.cpoc.report.Reporting;
@@ -183,7 +181,7 @@ public abstract class AbstractJobsGenerator<T extends AbstractMessage> implement
      * @param mode
      *            the mode to set
      */
-    public void setMode(ProductMode mode) {
+    public void setMode(final ProductMode mode) {
         this.mode = mode;
     }
 
@@ -192,7 +190,7 @@ public abstract class AbstractJobsGenerator<T extends AbstractMessage> implement
      * 
      * @param xmlFile
      */
-    public void initialize(File xmlFile) throws IpfPrepWorkerBuildTaskTableException {
+    public void initialize(final File xmlFile) throws IpfPrepWorkerBuildTaskTableException {
 
         // Build task table
         this.taskTableXmlName = xmlFile.getName();
@@ -223,7 +221,7 @@ public abstract class AbstractJobsGenerator<T extends AbstractMessage> implement
      * @param xmlFile
      * @throws BuildTaskTableException
      */
-    private void buildTaskTable(File xmlFile)
+    private void buildTaskTable(final File xmlFile)
             throws IpfPrepWorkerBuildTaskTableException {
         // Retrieve task table
         try {
@@ -238,7 +236,7 @@ public abstract class AbstractJobsGenerator<T extends AbstractMessage> implement
 
     private void buildJobOrderTemplate() {
         // Build from task table
-        TaskTableToJobOrderConverter converter = new TaskTableToJobOrderConverter();
+        final TaskTableToJobOrderConverter converter = new TaskTableToJobOrderConverter();
         jobOrderTemplate = converter.apply(this.taskTable);
 
         // Update values from configuration file
@@ -327,7 +325,7 @@ public abstract class AbstractJobsGenerator<T extends AbstractMessage> implement
                         family = this.ipfPreparationWorkerSettings.getInputfamilies()
                                 .get(fileType);
                     }
-                    SearchMetadataQuery query =
+                    final SearchMetadataQuery query =
                             new SearchMetadataQuery(counter.incrementAndGet(),
                                     k.getRetrievalMode(), k.getDeltaTime0(),
                                     k.getDeltaTime1(), fileType, family);
@@ -358,7 +356,7 @@ public abstract class AbstractJobsGenerator<T extends AbstractMessage> implement
         final Reporting reporting = reportingFactory.newReporting(0);
         
         try {        	
-            List<AppDataJob<T>> jobs = appDataService
+            final List<AppDataJob<T>> jobs = appDataService
                     .findNByPodAndGenerationTaskTableWithNotSentGeneration(
                             l0ProcessSettings.getHostname(), taskTableXmlName);
             
@@ -366,9 +364,9 @@ public abstract class AbstractJobsGenerator<T extends AbstractMessage> implement
             if (CollectionUtils.isEmpty(jobs)) {
                 job = null;
             } else {
-                for (AppDataJob<T> appDataJob : jobs) {
+                for (final AppDataJob<T> appDataJob : jobs) {
                     // Check if we can do a loop
-                    long currentTimestamp = System.currentTimeMillis();
+                    final long currentTimestamp = System.currentTimeMillis();
                     boolean todo = false;
                     job = new JobGeneration(appDataJob, taskTableXmlName);
                     LOGGER.debug ("== new JobGeneration of job {}", job.toString());
@@ -399,8 +397,8 @@ public abstract class AbstractJobsGenerator<T extends AbstractMessage> implement
                     if (todo) {
                         job.setJobOrder(new JobOrder(this.jobOrderTemplate,
                                 this.l0ProcessSettings.getLevel()));
-                        for (Integer key : metadataSearchQueries.keySet()) {
-                            SearchMetadataQuery query =
+                        for (final Integer key : metadataSearchQueries.keySet()) {
+                            final SearchMetadataQuery query =
                                     metadataSearchQueries.get(key);
                             job.getMetadataQueries().put(
                             		key,
@@ -413,13 +411,13 @@ public abstract class AbstractJobsGenerator<T extends AbstractMessage> implement
                     }
                 }
             }
-        } catch (AbstractCodedException ace) {
+        } catch (final AbstractCodedException ace) {
             LOGGER.error("{} cannot retrieve the current jobs: {}",
                     this.prefixLogMonitor, ace.getLogMessage());
         }
 
         if (job != null) {
-            String productName =
+            final String productName =
                     job.getAppDataJob().getProduct().getProductName();
             
             // Joborder name for reporting
@@ -444,13 +442,13 @@ public abstract class AbstractJobsGenerator<T extends AbstractMessage> implement
                                 this.prefixLogMonitor, productName);
                         this.preSearch(job);
 
-						AppDataJob<T> modifiedJob = appDataService.patchJob(
+						final AppDataJob<T> modifiedJob = appDataService.patchJob(
                                 job.getAppDataJob().getId(),
                                 job.getAppDataJob(), false, true, false);
                         job.setAppDataJob(modifiedJob);
                         updateState(job, AppDataJobGenerationState.PRIMARY_CHECK, reportInit);
                         reportInit.end(new ReportingMessage("End init job generation"));
-                    } catch (AbstractCodedException e) {
+                    } catch (final AbstractCodedException e) {
                         LOGGER.error(
                                 "{} [productName {}] 1 - Pre-requirements not checked: {}",
                                 this.prefixLogMonitor, productName,
@@ -476,7 +474,7 @@ public abstract class AbstractJobsGenerator<T extends AbstractMessage> implement
                         updateState(job, AppDataJobGenerationState.READY, reportInputs);
                         reportInputs.end(new ReportingMessage("End searching inputs"));
                         
-                    } catch (AbstractCodedException e) {
+                    } catch (final AbstractCodedException e) {
                         LOGGER.error(
                                 "{} [productName {}] 2 - Inputs not found: {}",
                                 this.prefixLogMonitor, productName,
@@ -512,7 +510,7 @@ public abstract class AbstractJobsGenerator<T extends AbstractMessage> implement
 						} else {
 							reportPrep.error(new ReportingMessage("Job generation finished but job not sent"));
 						}
-                    } catch (AbstractCodedException e) {
+                    } catch (final AbstractCodedException e) {
                         LOGGER.error("{} [productName {}] 3 - Job not send: {}",
                                 this.prefixLogMonitor, productName,
                                 e.getLogMessage());
@@ -524,7 +522,7 @@ public abstract class AbstractJobsGenerator<T extends AbstractMessage> implement
                 		new JobOrderReportingOutput(jobOrderName, toProcParamMap(job)), 
                 		new ReportingMessage("End job generation")
                 );
-            } catch (AbstractCodedException ace) {
+            } catch (final AbstractCodedException ace) {
                 LOGGER.error(
                         "{} [productName {}] [code ] Cannot generate job: {}",
                         this.prefixLogMonitor, productName,
@@ -546,7 +544,7 @@ public abstract class AbstractJobsGenerator<T extends AbstractMessage> implement
     			result.put(param.getName() + reportingType, param.getValue());
     		}
     		return result;
-		} catch (Exception e) {
+		} catch (final Exception e) {
 			// this is only used for reporting so don't break anything if this goes wrong here 
 			// and provide the error message
 			LOGGER.error(e);
@@ -554,9 +552,9 @@ public abstract class AbstractJobsGenerator<T extends AbstractMessage> implement
 		}
     }
 
-    private void updateState(JobGeneration job,
-            AppDataJobGenerationState newState,
-            Reporting report
+    private void updateState(final JobGeneration job,
+            final AppDataJobGenerationState newState,
+            final Reporting report
     )
         throws AbstractCodedException {
     	
@@ -566,7 +564,7 @@ public abstract class AbstractJobsGenerator<T extends AbstractMessage> implement
                 newState,
                 job.getGeneration()
         ));
-        AppDataJob<T> modifiedJob = appDataService.patchTaskTableOfJob(
+        final AppDataJob<T> modifiedJob = appDataService.patchTaskTableOfJob(
                 job.getAppDataJob().getId(),
                 job.getGeneration().getTaskTable(), newState);
         
@@ -598,7 +596,7 @@ public abstract class AbstractJobsGenerator<T extends AbstractMessage> implement
     protected abstract void preSearch(JobGeneration job)
             throws IpfPrepWorkerInputsMissingException;
 
-    protected void inputsSearch(JobGeneration job)
+    protected void inputsSearch(final JobGeneration job)
             throws IpfPrepWorkerInputsMissingException {
         // First, we evaluate each input query with no found file
         LOGGER.info("{} [productName {}] 2a - Requesting metadata",
@@ -618,7 +616,7 @@ public abstract class AbstractJobsGenerator<T extends AbstractMessage> implement
                 	else {
                 		polarisation = null;
                 	}                	
-                    List<SearchMetadata> file = this.metadataClient.search(
+                    final List<SearchMetadata> file = this.metadataClient.search(
                     		v.getQuery(),
                     		DateUtils.convertToAnotherFormat(
                     				job.getAppDataJob().getProduct().getStartTime(),
@@ -638,7 +636,7 @@ public abstract class AbstractJobsGenerator<T extends AbstractMessage> implement
                     if (!file.isEmpty()) {
                         v.setResult(file);
                     }
-                } catch (MetadataQueryException me) {
+                } catch (final MetadataQueryException me) {
                     LOGGER.warn(
                             "{} [productName {}] [alternative {}] Exception occurred when searching alternative: {}",
                             this.prefixLogMonitor,
@@ -657,20 +655,20 @@ public abstract class AbstractJobsGenerator<T extends AbstractMessage> implement
                 this.prefixLogMonitor,
                 job.getAppDataJob().getProduct().getProductName());
         int counterProc = 0;
-        Map<String, JobOrderInput> referenceInputs = new HashMap<>();
-        for (TaskTablePool pool : this.taskTable.getPools()) {
-            for (TaskTableTask task : pool.getTasks()) {
-                Map<String, String> missingMetadata = new HashMap<>();
-                List<JobOrderInput> futureInputs = new ArrayList<>();
-                for (TaskTableInput input : task.getInputs()) {
+        final Map<String, JobOrderInput> referenceInputs = new HashMap<>();
+        for (final TaskTablePool pool : this.taskTable.getPools()) {
+            for (final TaskTableTask task : pool.getTasks()) {
+                final Map<String, String> missingMetadata = new HashMap<>();
+                final List<JobOrderInput> futureInputs = new ArrayList<>();
+                for (final TaskTableInput input : task.getInputs()) {
                     // If it is a reference
                     if (StringUtils.isEmpty(input.getReference())) {
 
                         if (ProductMode.isCompatibleWithTaskTableMode(this.mode,
                                 input.getMode())) {
-                            int currentOrder = 99;
+                            final int currentOrder = 99;
                             List<JobOrderInput> inputsToAdd = new ArrayList<>();
-                            for (TaskTableInputAlternative alt : input
+                            for (final TaskTableInputAlternative alt : input
                                     .getAlternatives()) {
                                 // We ignore input not DB
                                 if (alt.getOrigin() == TaskTableInputOrigin.DB) {
@@ -709,7 +707,7 @@ public abstract class AbstractJobsGenerator<T extends AbstractMessage> implement
                                         }
 
                                         // Check order
-                                        List<JobOrderInputFile> jobOrderInputFiles =
+                                        final List<JobOrderInputFile> jobOrderInputFiles =
                                                 job.getMetadataQueries().get(alt
                                                         .getIdSearchMetadataQuery())
                                                         .getResult().stream()
@@ -718,7 +716,7 @@ public abstract class AbstractJobsGenerator<T extends AbstractMessage> implement
                                                                 file.getKeyObjectStorage()))
                                                         .collect(Collectors
                                                                 .toList());
-                                        List<JobOrderTimeInterval> jobOrderTimeIntervals =
+                                        final List<JobOrderTimeInterval> jobOrderTimeIntervals =
                                                 job.getMetadataQueries().get(alt
                                                         .getIdSearchMetadataQuery())
                                                         .getResult().stream()
@@ -756,17 +754,17 @@ public abstract class AbstractJobsGenerator<T extends AbstractMessage> implement
                                         break;
                                     }
                                 } else {
-                                    DateTimeFormatter outFormatter =
+                                    final DateTimeFormatter outFormatter =
                                             DateTimeFormatter.ofPattern(
                                                     "yyyyMMdd_HHmmssSSSSSS");
-                                    String startDate =
+                                    final String startDate =
                                             DateUtils.convertToAnotherFormat(
                                                     job.getAppDataJob()
                                                             .getProduct()
                                                             .getStartTime(),
                                                     AppDataJobProduct.TIME_FORMATTER,
                                                     outFormatter);
-                                    String stopDate =
+                                    final String stopDate =
                                             DateUtils.convertToAnotherFormat(
                                                     job.getAppDataJob()
                                                             .getProduct()
@@ -796,7 +794,7 @@ public abstract class AbstractJobsGenerator<T extends AbstractMessage> implement
                             }
                             if (!inputsToAdd.isEmpty()) {
                                 // We take a random one
-                                int indexToTake = ThreadLocalRandom.current()
+                                final int indexToTake = ThreadLocalRandom.current()
                                         .nextInt(0, inputsToAdd.size());
                                 futureInputs.add(inputsToAdd.get(indexToTake));
                                 if (!StringUtils.isEmpty(input.getId())) {
@@ -831,11 +829,11 @@ public abstract class AbstractJobsGenerator<T extends AbstractMessage> implement
         }
     }
 
-    protected String send(JobGeneration job) throws AbstractCodedException {
+    protected String send(final JobGeneration job) throws AbstractCodedException {
         LOGGER.info("{} [productName {}] 3a - Building common job",
                 this.prefixLogMonitor,
                 job.getAppDataJob().getProduct().getProductName());
-        int inc = INCREMENT_JOB.incrementAndGet();
+        final int inc = INCREMENT_JOB.incrementAndGet();
         final String workingDir = "/data/localWD/" + inc + "/";
         final String joborderName = "JobOrder." + inc + ".xml";
         final String jobOrder = workingDir +  joborderName;
@@ -902,26 +900,26 @@ public abstract class AbstractJobsGenerator<T extends AbstractMessage> implement
                 job.getAppDataJob().getProduct().getProcessMode(), workingDir,
                 jobOrder);
         
-        r.setCreationDate(LocalDateTime.now());
+        r.setCreationDate(new Date());
         r.setHostname(hostname);
 
         try {
 
             // Add jobOrder inputs to the DTO
-            List<JobOrderInput> distinctInputJobOrder = job.getJobOrder()
+            final List<JobOrderInput> distinctInputJobOrder = job.getJobOrder()
                     .getProcs().stream()
                     .filter(proc -> proc != null
                             && !CollectionUtils.isEmpty(proc.getInputs()))
                     .flatMap(proc -> proc.getInputs().stream()).distinct()
                     .collect(Collectors.toList());
             distinctInputJobOrder.forEach(input -> {
-                for (JobOrderInputFile file : input.getFilenames()) {
+                for (final JobOrderInputFile file : input.getFilenames()) {
                     r.addInput(new LevelJobInputDto(input.getFamily().name(),
                             file.getFilename(), file.getKeyObjectStorage()));
                 }
             });
 
-            String jobOrderXml = xmlConverter
+            final String jobOrderXml = xmlConverter
             .convertFromObjectToXMLString(job.getJobOrder());
             
             LOGGER.trace("Adding input JobOrderXml '{}' for product '{}'",
@@ -932,7 +930,7 @@ public abstract class AbstractJobsGenerator<T extends AbstractMessage> implement
                     jobOrder, jobOrderXml));
 
             // Add joborder output to the DTO
-            List<JobOrderOutput> distinctOutputJobOrder = job.getJobOrder().getProcs().stream()
+            final List<JobOrderOutput> distinctOutputJobOrder = job.getJobOrder().getProcs().stream()
                     .filter(proc -> proc != null && !CollectionUtils.isEmpty(proc.getOutputs()))
                     .flatMap(proc -> proc.getOutputs().stream())
                     .filter(output -> output.getFileNameType() == JobOrderFileNameType.REGEXP && output.getDestination() == JobOrderDestination.DB)
@@ -944,7 +942,7 @@ public abstract class AbstractJobsGenerator<T extends AbstractMessage> implement
                             output.getFamily().name(), output.getFileName()))
                     .collect(Collectors.toList()));
             
-            List<JobOrderOutput> distinctOutputJobOrderNotRegexp = job.getJobOrder().getProcs().stream()
+            final List<JobOrderOutput> distinctOutputJobOrderNotRegexp = job.getJobOrder().getProcs().stream()
                     .filter(proc -> proc != null && !CollectionUtils.isEmpty(proc.getOutputs()))
                     .flatMap(proc -> proc.getOutputs().stream())
                     .filter(output -> output.getFileNameType() == JobOrderFileNameType.DIRECTORY && output.getDestination() == JobOrderDestination.DB)
@@ -959,9 +957,9 @@ public abstract class AbstractJobsGenerator<T extends AbstractMessage> implement
                                             + output.getFileType() + ".*$"))
                     .collect(Collectors.toList()));
 
-            for (LevelJobOutputDto output: r.getOutputs()) {
+            for (final LevelJobOutputDto output: r.getOutputs()) {
             	// Iterate over the outputs and identify if an OQC check is required
-            	ProductFamily outputFamily = ProductFamily.valueOf(output.getFamily());
+            	final ProductFamily outputFamily = ProductFamily.valueOf(output.getFamily());
             	if (this.ipfPreparationWorkerSettings.getOqcCheck().contains(outputFamily)) {
             		// Hit, we found a product family that had been configured as oqc check. Flag it.
             		LOGGER.info("Found output of family {}, flagging it as oqcCheck",outputFamily);
@@ -974,7 +972,7 @@ public abstract class AbstractJobsGenerator<T extends AbstractMessage> implement
             
             // Add the tasks
             this.tasks.forEach(pool -> {
-                LevelJobPoolDto poolDto = new LevelJobPoolDto();
+                final LevelJobPoolDto poolDto = new LevelJobPoolDto();
                 pool.forEach(task -> {
                     poolDto.addTask(new LevelJobTaskDto(task));
                 });
@@ -999,7 +997,7 @@ public abstract class AbstractJobsGenerator<T extends AbstractMessage> implement
 		@SuppressWarnings("unchecked")
 		final AppDataJob<T> dto = job.getAppDataJob();
 
-        this.outputFactory.sendJob((GenericMessageDto<?>) dto.getMessages().get(0), r);
+        this.outputFactory.sendJob(dto.getMessages().get(0), r);
         
         return joborderName;
     }
@@ -1009,7 +1007,7 @@ public abstract class AbstractJobsGenerator<T extends AbstractMessage> implement
     protected abstract void customJobDto(JobGeneration job, IpfExecutionJob dto);
     
     // S1PRO-707
-    static final String getPolarisationFor(AppDataJobProduct product) {
+    static final String getPolarisationFor(final AppDataJobProduct product) {
     	final String polarisation = product.getPolarisation().toUpperCase();
     	if (polarisation.equals("SV") || polarisation.equals("DV")) {
     		return "V";    		

@@ -1,7 +1,6 @@
 package esa.s1pdgs.cpoc.ingestion.worker.product;
 
 import java.io.File;
-import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -35,17 +34,17 @@ public class EdrsSessionFactory implements ProductFactory<IngestionEvent> {
 
 		final List<Product<IngestionEvent>> result = new ArrayList<>();
 
-		String objectStorageKey = ingestionJob.getRelativePath();
-		int channelId = extractChannelId(ingestionJob.getRelativePath());
-		EdrsSessionFileType edrsSessionFileType = extractEdrsSessionFileType(ingestionJob.getRelativePath());
-		String missionId = ingestionJob.getMissionId();
-		String satelliteId = ingestionJob.getSatelliteId();
-		String stationCode = ingestionJob.getStationCode();
-		String sessionId = extractSessionId(ingestionJob.getRelativePath());
+		final String objectStorageKey = ingestionJob.getRelativePath();
+		final int channelId = extractChannelId(ingestionJob.getRelativePath());
+		final EdrsSessionFileType edrsSessionFileType = extractEdrsSessionFileType(ingestionJob.getRelativePath());
+		final String missionId = ingestionJob.getMissionId();
+		final String satelliteId = ingestionJob.getSatelliteId();
+		final String stationCode = ingestionJob.getStationCode();
+		final String sessionId = extractSessionId(ingestionJob.getRelativePath());
 
-		IngestionEvent ingestionEvent = new IngestionEvent(objectStorageKey, file.getPath(), channelId, edrsSessionFileType, missionId,
+		final IngestionEvent ingestionEvent = new IngestionEvent(objectStorageKey, file.getPath(), channelId, edrsSessionFileType, missionId,
 				satelliteId, stationCode, sessionId);
-		ingestionEvent.setCreationDate(LocalDateTime.now());
+		ingestionEvent.setCreationDate(new Date());
 		ingestionEvent.setHostname(hostname);
 
 		final Product<IngestionEvent> prod = new Product<>();
@@ -57,9 +56,9 @@ public class EdrsSessionFactory implements ProductFactory<IngestionEvent> {
 		return result;
 	}
 
-	int extractChannelId(String relativePath) {
-		Matcher xmlmatcher = xmlpattern.matcher(relativePath);
-		Matcher rawmatcher = rawpattern.matcher(relativePath);
+	int extractChannelId(final String relativePath) {
+		final Matcher xmlmatcher = xmlpattern.matcher(relativePath);
+		final Matcher rawmatcher = rawpattern.matcher(relativePath);
 
 		if (xmlmatcher.matches()) {
 			return Integer.parseInt(xmlmatcher.group(3));
@@ -70,10 +69,10 @@ public class EdrsSessionFactory implements ProductFactory<IngestionEvent> {
 		}
 	}
 
-	EdrsSessionFileType extractEdrsSessionFileType(String relativePath) {
+	EdrsSessionFileType extractEdrsSessionFileType(final String relativePath) {
 
-		Matcher xmlmatcher = xmlpattern.matcher(relativePath);
-		Matcher rawmatcher = rawpattern.matcher(relativePath);
+		final Matcher xmlmatcher = xmlpattern.matcher(relativePath);
+		final Matcher rawmatcher = rawpattern.matcher(relativePath);
 
 		if (xmlmatcher.matches()) {
 			return EdrsSessionFileType.valueFromExtension(FileExtension.valueOfIgnoreCase(xmlmatcher.group(4)));
@@ -84,9 +83,9 @@ public class EdrsSessionFactory implements ProductFactory<IngestionEvent> {
 		}
 	}
 	
-	String extractSessionId(String relativePath) {
-		Matcher xmlmatcher = xmlpattern.matcher(relativePath);
-		Matcher rawmatcher = rawpattern.matcher(relativePath);
+	String extractSessionId(final String relativePath) {
+		final Matcher xmlmatcher = xmlpattern.matcher(relativePath);
+		final Matcher rawmatcher = rawpattern.matcher(relativePath);
 
 		if (xmlmatcher.matches()) {
 			return xmlmatcher.group(2);

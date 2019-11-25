@@ -1,6 +1,6 @@
 package esa.s1pdgs.cpoc.ipf.execution.worker.job.mqi;
 
-import java.time.LocalDateTime;
+import java.util.Date;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -67,7 +67,7 @@ public class OutputProcuderFactory {
                 FileUtils.readFile(msg.getFile()), 
                 msg.getFamily()
         );
-        dtoReport.setCreationDate(LocalDateTime.now());
+        dtoReport.setCreationDate(new Date());
         dtoReport.setHostname(hostname);
         
         final GenericPublicationMessageDto<LevelReportDto> mess = new GenericPublicationMessageDto<LevelReportDto>(

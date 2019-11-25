@@ -55,12 +55,16 @@ public class MessagePublicationControllerTest {
 
     @ClassRule
     public static KafkaEmbedded embeddedKafka = new KafkaEmbedded(1, true,
-            GenericKafkaUtils.TOPIC_ERROR, GenericKafkaUtils.TOPIC_L0_PRODUCTS,
-            GenericKafkaUtils.TOPIC_L0_ACNS, GenericKafkaUtils.TOPIC_L0_REPORTS,
+            GenericKafkaUtils.TOPIC_ERROR, 
+            GenericKafkaUtils.TOPIC_L0_PRODUCTS,
+            GenericKafkaUtils.TOPIC_L0_ACNS, 
+            GenericKafkaUtils.TOPIC_L0_REPORTS,
             GenericKafkaUtils.TOPIC_L1_PRODUCTS,
             GenericKafkaUtils.TOPIC_AUXILIARY_FILES,
-            GenericKafkaUtils.TOPIC_L1_ACNS, GenericKafkaUtils.TOPIC_L1_REPORTS,
-            GenericKafkaUtils.TOPIC_L0_JOBS, GenericKafkaUtils.TOPIC_L1_JOBS,
+            GenericKafkaUtils.TOPIC_L1_ACNS, 
+            GenericKafkaUtils.TOPIC_L1_REPORTS,
+            GenericKafkaUtils.TOPIC_L0_JOBS, 
+            GenericKafkaUtils.TOPIC_L1_JOBS,
             GenericKafkaUtils.TOPIC_EDRS_SESSIONS,
             GenericKafkaUtils.TOPIC_L0_SEGMENTS,
             GenericKafkaUtils.TOPIC_L2_JOBS,
@@ -117,7 +121,7 @@ public class MessagePublicationControllerTest {
     }
 
     private void initCustomControllerForAllPublication() {
-        Map<ProductCategory, ProductCategoryProperties> map = new HashMap<>();
+        final Map<ProductCategory, ProductCategoryProperties> map = new HashMap<>();
         map.put(ProductCategory.AUXILIARY_FILES, new ProductCategoryProperties(
                 null, new ProductCategoryPublicationProperties(true,
                         "./src/test/resources/routing-files/auxiliary-files.xml")));
@@ -176,7 +180,7 @@ public class MessagePublicationControllerTest {
     @Test
     public void publishNoCat() throws MqiPublicationError,
             MqiCategoryNotAvailable, MqiRouteNotAvailable {
-        IngestionEvent ingestionEvent = new IngestionEvent("obs-key", "/path/of/inbox", 1,
+        final IngestionEvent ingestionEvent = new IngestionEvent("obs-key", "/path/of/inbox", 1,
                 EdrsSessionFileType.RAW, "S1", "A", "WILE", "sessionId");
         initCustomControllerForNoPublication();
 
@@ -190,13 +194,13 @@ public class MessagePublicationControllerTest {
 
     @Test
     public void publishEdrsSessions() throws Exception {
-        IngestionEvent ingestionEvent = new IngestionEvent("obs-key", "/path/of/inbox", 2,
+        final IngestionEvent ingestionEvent = new IngestionEvent("obs-key", "/path/of/inbox", 2,
                 EdrsSessionFileType.RAW, "S1", "A", "WILE", "sessionId");
         initCustomControllerForAllPublication();
 
         customController.publish(ProductCategory.EDRS_SESSIONS, ingestionEvent, "NONE", "NONE");
 
-        ConsumerRecord<String, IngestionEvent> record =
+        final ConsumerRecord<String, IngestionEvent> record =
                 kafkaUtilsEdrsSession.getReceivedRecordEdrsSession(
                         GenericKafkaUtils.TOPIC_EDRS_SESSIONS);
 
@@ -206,12 +210,12 @@ public class MessagePublicationControllerTest {
 
     @Test
     public void publishAuxiliaryFiles() throws Exception {
-        ProductionEvent dto = new ProductionEvent("product-name", "key-obs", ProductFamily.AUXILIARY_FILE);
+        final ProductionEvent dto = new ProductionEvent("product-name", "key-obs", ProductFamily.AUXILIARY_FILE);
         initCustomControllerForAllPublication();
 
         customController.publish(ProductCategory.AUXILIARY_FILES, dto, "NONE", "NONE");
 
-        ConsumerRecord<String, ProductionEvent> record = kafkaUtilsProducts
+        final ConsumerRecord<String, ProductionEvent> record = kafkaUtilsProducts
                 .getReceivedRecordAux(GenericKafkaUtils.TOPIC_AUXILIARY_FILES);
 
         assertEquals(dto, record.value());
@@ -219,13 +223,13 @@ public class MessagePublicationControllerTest {
 
     @Test
     public void publishLevelProducts() throws Exception {
-        ProductionEvent dto = new ProductionEvent("product-name", "key-obs",
+        final ProductionEvent dto = new ProductionEvent("product-name", "key-obs",
                 ProductFamily.L0_SLICE, "NRT");
         initCustomControllerForAllPublication();
 
         customController.publish(ProductCategory.LEVEL_PRODUCTS, dto, "NONE", "NONE");
 
-        ConsumerRecord<String, ProductionEvent> record = kafkaUtilsProducts
+        final ConsumerRecord<String, ProductionEvent> record = kafkaUtilsProducts
                 .getReceivedRecordProducts(GenericKafkaUtils.TOPIC_L0_PRODUCTS);
 
         assertEquals(dto, record.value());
@@ -233,13 +237,13 @@ public class MessagePublicationControllerTest {
 
     @Test
     public void publishLevelProducts1() throws Exception {
-        ProductionEvent dto = new ProductionEvent("product-name", "key-obs",
+        final ProductionEvent dto = new ProductionEvent("product-name", "key-obs",
                 ProductFamily.L1_ACN, "NRT");
         initCustomControllerForAllPublication();
 
         customController.publish(ProductCategory.LEVEL_PRODUCTS,dto, "t-pdgs-l1-execution-jobs-nrt", "L1_ACN");
 
-        ConsumerRecord<String, ProductionEvent> record = kafkaUtilsProducts
+        final ConsumerRecord<String, ProductionEvent> record = kafkaUtilsProducts
                 .getReceivedRecordProducts(GenericKafkaUtils.TOPIC_L1_ACNS);
 
         assertEquals(dto, record.value());
@@ -248,13 +252,13 @@ public class MessagePublicationControllerTest {
 
     @Test
     public void publishLevelSegments() throws Exception {
-        ProductionEvent dto = new ProductionEvent("product-name", "key-obs",
+        final ProductionEvent dto = new ProductionEvent("product-name", "key-obs",
                 ProductFamily.L0_SEGMENT, "FAST");
         initCustomControllerForAllPublication();
 
         customController.publish(ProductCategory.LEVEL_SEGMENTS, dto, "NONE", "NONE");
 
-        ConsumerRecord<String, ProductionEvent> record = kafkaUtilsProducts
+        final ConsumerRecord<String, ProductionEvent> record = kafkaUtilsProducts
                 .getReceivedRecordSegments(GenericKafkaUtils.TOPIC_L0_SEGMENTS);
 
         assertEquals(dto, record.value());
@@ -262,13 +266,13 @@ public class MessagePublicationControllerTest {
 
     @Test
     public void publishLevelJobs() throws Exception {
-        IpfExecutionJob dto = new IpfExecutionJob(ProductFamily.L1_JOB, "product-name", "NRT",
+        final IpfExecutionJob dto = new IpfExecutionJob(ProductFamily.L1_JOB, "product-name", "NRT",
                 "work-directory", "job-order");
         initCustomControllerForAllPublication();
 
         customController.publish(ProductCategory.LEVEL_JOBS, dto, "t-pdgs-aio-l0-slice-production-events-nrt", "L1_JOB");
 
-        ConsumerRecord<String, IpfExecutionJob> record = kafkaUtilsJobs
+        final ConsumerRecord<String, IpfExecutionJob> record = kafkaUtilsJobs
                 .getReceivedRecordJobs(GenericKafkaUtils.TOPIC_L1_JOBS);
 
         assertEquals(dto, record.value());
@@ -276,13 +280,13 @@ public class MessagePublicationControllerTest {
 
     @Test
     public void publishLevelJobs1() throws Exception {
-        IpfExecutionJob dto = new IpfExecutionJob(ProductFamily.L0_JOB, "product-name", "NRT",
+        final IpfExecutionJob dto = new IpfExecutionJob(ProductFamily.L0_JOB, "product-name", "NRT",
                 "work-directory", "job-order");
         initCustomControllerForAllPublication();
 
         customController.publish(ProductCategory.LEVEL_JOBS, dto, "NONE", "NONE");
 
-        ConsumerRecord<String, IpfExecutionJob> record = kafkaUtilsJobs
+        final ConsumerRecord<String, IpfExecutionJob> record = kafkaUtilsJobs
                 .getReceivedRecordJobs(GenericKafkaUtils.TOPIC_L0_JOBS);
 
         assertEquals(dto, record.value());
@@ -290,13 +294,13 @@ public class MessagePublicationControllerTest {
 
     @Test
     public void publishLevelJobsL2() throws Exception {
-        IpfExecutionJob dto = new IpfExecutionJob(ProductFamily.L2_JOB, "product-name", "FAST",
+        final IpfExecutionJob dto = new IpfExecutionJob(ProductFamily.L2_JOB, "product-name", "FAST",
                 "work-directory", "job-order");
         initCustomControllerForAllPublication();
 
         customController.publish(ProductCategory.LEVEL_JOBS, dto, "NONE", "NONE");
 
-        ConsumerRecord<String, IpfExecutionJob> record = kafkaUtilsJobs
+        final ConsumerRecord<String, IpfExecutionJob> record = kafkaUtilsJobs
                 .getReceivedRecordJobs(GenericKafkaUtils.TOPIC_L2_JOBS);
 
         assertEquals(dto, record.value());
@@ -304,13 +308,13 @@ public class MessagePublicationControllerTest {
 
     @Test
     public void publishLevelReports() throws Exception {
-        LevelReportDto dto = new LevelReportDto("product-name", "content",
+        final LevelReportDto dto = new LevelReportDto("product-name", "content",
                 ProductFamily.L1_REPORT);
         initCustomControllerForAllPublication();
 
         customController.publish(ProductCategory.LEVEL_REPORTS, dto, "NONE", "NONE");
 
-        ConsumerRecord<String, LevelReportDto> record = kafkaUtilsReports
+        final ConsumerRecord<String, LevelReportDto> record = kafkaUtilsReports
                 .getReceivedRecordReports(GenericKafkaUtils.TOPIC_L1_REPORTS);
 
         assertEquals(dto, record.value());
@@ -318,13 +322,13 @@ public class MessagePublicationControllerTest {
 
     @Test
     public void publishLevelReports1() throws Exception {
-        LevelReportDto dto = new LevelReportDto("product-name2", "content2",
+        final LevelReportDto dto = new LevelReportDto("product-name2", "content2",
                 ProductFamily.L0_REPORT);
         initCustomControllerForAllPublication();
 
         customController.publish(ProductCategory.LEVEL_REPORTS, dto, "NONE", "NONE");
 
-        ConsumerRecord<String, LevelReportDto> record = kafkaUtilsReports
+        final ConsumerRecord<String, LevelReportDto> record = kafkaUtilsReports
                 .getReceivedRecordReports(GenericKafkaUtils.TOPIC_L0_REPORTS);
 
         assertEquals(dto, record.value());
@@ -332,13 +336,13 @@ public class MessagePublicationControllerTest {
     
     @Test
     public void publishLevelReportsL2() throws Exception {
-        LevelReportDto dto = new LevelReportDto("product-name2", "content2",
+        final LevelReportDto dto = new LevelReportDto("product-name2", "content2",
                 ProductFamily.L2_REPORT);
         initCustomControllerForAllPublication();
 
         customController.publish(ProductCategory.LEVEL_REPORTS, dto, "NONE", "NONE");
 
-        ConsumerRecord<String, LevelReportDto> record = kafkaUtilsReports
+        final ConsumerRecord<String, LevelReportDto> record = kafkaUtilsReports
                 .getReceivedRecordReports(GenericKafkaUtils.TOPIC_L2_REPORTS);
 
         assertEquals(dto, record.value());

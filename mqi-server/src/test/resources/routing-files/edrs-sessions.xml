@@ -4,7 +4,7 @@
 	<default_route description="default route of product family EDRS_SESSION">
 		<family>EDRS_SESSION</family>
 		<route_to>
-			<topic>t-pdgs-edrs-sessions</topic>
+			<topic>t-pdgs-session-file-ingestion-events</topic>
 		</route_to>
 	</default_route>
 </routing>

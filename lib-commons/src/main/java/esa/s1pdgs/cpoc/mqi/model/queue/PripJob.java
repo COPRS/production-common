@@ -1,16 +1,16 @@
 package esa.s1pdgs.cpoc.mqi.model.queue;
 
-import java.time.LocalDateTime;
+import java.util.Date;
 import java.util.Objects;
 
 public class PripJob extends AbstractMessage {
-	private LocalDateTime evictionDate;
+	private Date evictionDate;
 
-	public LocalDateTime getEvictionDate() {
+	public Date getEvictionDate() {
 		return evictionDate;
 	}
 
-	public void setEvictionDate(final LocalDateTime evictionDate) {
+	public void setEvictionDate(final Date evictionDate) {
 		this.evictionDate = evictionDate;
 	}
 
