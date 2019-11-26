@@ -72,13 +72,13 @@ public class XmlConverterTest {
 
         DefaultRoute route1 = new DefaultRoute();
         RouteTo routeTo1 = new RouteTo();
-        routeTo1.setTopic("t-pdgs-l1-jobs");
+        routeTo1.setTopic("t-pdgs-l1-execution-jobs-nrt");
         route1.setFamily(ProductFamily.L1_JOB);
         route1.setRouteTo(routeTo1);
        
         DefaultRoute route2 = new DefaultRoute();
         RouteTo routeTo2 = new RouteTo();
-        routeTo2.setTopic("t-pdgs-l2-jobs");
+        routeTo2.setTopic("t-pdgs-l2-execution-jobs-fast");
         route2.setFamily(ProductFamily.L2_JOB);
         route2.setRouteTo(routeTo2);
         

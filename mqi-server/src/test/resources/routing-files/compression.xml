@@ -4,55 +4,55 @@
 	<default_route description="default route of product family L0_BLANK_ZIP">
 		<family>L0_BLANK_ZIP</family>
 		<route_to>
-			<topic>t-pdgs-compressed-products</topic>
+			<topic>t-pdgs-compression-events</topic>
 		</route_to>
 	</default_route>
 	<default_route description="default route of product family L0_SEGMENT_ZIP">
 		<family>L0_SEGMENT_ZIP</family>
 		<route_to>
-			<topic>t-pdgs-compressed-products</topic>
+			<topic>t-pdgs-compression-events</topic>
 		</route_to>
 	</default_route>
 	<default_route description="default route of product family AUXILIARY_FILE_ZIP">
 		<family>AUXILIARY_FILE_ZIP</family>
 		<route_to>
-			<topic>t-pdgs-compressed-products</topic>
+			<topic>t-pdgs-compression-events</topic>
 		</route_to>
 	</default_route>
 	<default_route description="default route of product family L0_ACN_ZIP">
 		<family>L0_ACN_ZIP</family>
 		<route_to>
-			<topic>t-pdgs-compressed-products</topic>
+			<topic>t-pdgs-compression-events</topic>
 		</route_to>
 	</default_route>
 	<default_route description="default route of product family L1_ACN_ZIP">
 		<family>L1_ACN_ZIP</family>
 		<route_to>
-			<topic>t-pdgs-compressed-products</topic>
+			<topic>t-pdgs-compression-events</topic>
 		</route_to>
 	</default_route>
 	<default_route description="default route of product family L2_ACN_ZIP">
 		<family>L2_ACN_ZIP</family>
 		<route_to>
-			<topic>t-pdgs-compressed-products</topic>
+			<topic>t-pdgs-compression-events</topic>
 		</route_to>
 	</default_route>
 	<default_route description="default route of product family L0_SLICE_ZIP">
 		<family>L0_SLICE_ZIP</family>
 		<route_to>
-			<topic>t-pdgs-compressed-products</topic>
+			<topic>t-pdgs-compression-events</topic>
 		</route_to>
 	</default_route>
 	<default_route description="default route of product family L1_SLICE_ZIP">
 		<family>L1_SLICE_ZIP</family>
 		<route_to>
-			<topic>t-pdgs-compressed-products</topic>
+			<topic>t-pdgs-compression-events</topic>
 		</route_to>
 	</default_route>
 	<default_route description="default route of product family L2_SLICE_ZIP">
 		<family>L2_SLICE_ZIP</family>
 		<route_to>
-			<topic>t-pdgs-compressed-products</topic>
+			<topic>t-pdgs-compression-events</topic>
 		</route_to>
 	</default_route>
 </routing>
