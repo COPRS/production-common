@@ -10,7 +10,7 @@ import esa.s1pdgs.cpoc.errorrepo.model.rest.FailedProcessingDto;
 
 public interface RequestRepository {	
 	public static final List<String> PROCESSING_TYPES_LIST = Arrays.asList("t-pdgs-session-file-ingestion-events", "t-pdgs-aux-ingestion-events", "t-pdgs-aio-execution-jobs",
-			"t-pdgs-l0asp-execution-jobs", "t-pdgs-aio-l0-segment-production-events", "t-pdgs-aio-l0-slice-production-events-nrt", "t-pdgs-aio-l0-acn-production-events-nrt",
+			"t-pdgs-l0asp-execution-jobs", "t-pdgs-aio-l0-segment-production-events", "t-pdgs-l0asp-l0-slice-production-events-nrt", "t-pdgs-l0asp-l0-acn-production-events-nrt",
 			"t-pdgs-l0asp-l0-slice-production-events-fast", "t-pdgs-l0asp-l0-acn-production-events-fast", "t-pdgs-aio-production-report-events", "t-pdgs-l0asp-production-report-events",
 			"t-pdgs-aio-l0-blank-production-events", "t-pdgs-l1-slices-production-events-nrt", "t-pdgs-l1-acn-production-events-nrt", "t-pdgs-l1-slices-production-events-fast",
 			"t-pdgs-l1-acn-production-events-fast", "t-pdgs-l1-production-report-events", "t-pdgs-l1-execution-jobs-nrt", "t-pdgs-l1-execution-jobs-fast",

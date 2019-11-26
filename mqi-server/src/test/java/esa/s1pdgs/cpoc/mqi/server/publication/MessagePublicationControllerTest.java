@@ -270,7 +270,7 @@ public class MessagePublicationControllerTest {
                 "work-directory", "job-order");
         initCustomControllerForAllPublication();
 
-        customController.publish(ProductCategory.LEVEL_JOBS, dto, "t-pdgs-aio-l0-slice-production-events-nrt", "L1_JOB");
+        customController.publish(ProductCategory.LEVEL_JOBS, dto, "t-pdgs-l0asp-l0-slice-production-events-nrt", "L1_JOB");
 
         final ConsumerRecord<String, IpfExecutionJob> record = kafkaUtilsJobs
                 .getReceivedRecordJobs(GenericKafkaUtils.TOPIC_L1_JOBS);
