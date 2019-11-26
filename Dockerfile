@@ -21,7 +21,8 @@ COPY ingestion-worker/ /app/ingestion-worker
 COPY ipf-preparation-worker/ /app/ipf-preparation-worker
 COPY lib-commons/ /app/lib-commons
 COPY app-status /app/app-status
-COPY metadata-catalog/ /app/metadata-catalog
+COPY metadata-catalog-trigger/ /app/metadata-catalog-trigger
+COPY metadata-catalog-worker/ /app/metadata-catalog-worker
 COPY metadata-client/ /app/metadata-client
 COPY mqi-client/ /app/mqi-client
 COPY mqi-server/ /app/mqi-server
@@ -61,7 +62,8 @@ COPY --from=buildenv /app/disseminator/target /app/disseminator/target
 COPY --from=buildenv /app/ingestion-trigger/target /app/ingestion-trigger/target
 COPY --from=buildenv /app/ingestion-worker/target /app/ingestion-worker/target
 COPY --from=buildenv /app/ipf-preparation-worker/target /app/ipf-preparation-worker/target
-COPY --from=buildenv /app/metadata-catalog /app/metadata-catalog
+COPY --from=buildenv /app/metadata-catalog-trigger /app/metadata-catalog-trigger
+COPY --from=buildenv /app/metadata-catalog-worker /app/metadata-catalog-worker
 COPY --from=buildenv /app/metadata-client /app/metadata-client
 COPY --from=buildenv /app/mqi-server/target /app/mqi-server/target
 COPY --from=buildenv /app/scaler/target /app/scaler/target
