@@ -21,7 +21,8 @@ COPY ingestion-worker/ /app/ingestion-worker
 COPY ipf-preparation-worker/ /app/ipf-preparation-worker
 COPY lib-commons/ /app/lib-commons
 COPY app-status /app/app-status
-COPY metadata-catalog/ /app/metadata-catalog
+COPY metadata-catalog-trigger/ /app/metadata-catalog-trigger
+COPY metadata-catalog-worker/ /app/metadata-catalog-worker
 COPY metadata-client/ /app/metadata-client
 COPY mqi-client/ /app/mqi-client
 COPY mqi-server/ /app/mqi-server
