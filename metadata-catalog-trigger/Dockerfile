@@ -13,7 +13,7 @@ RUN echo "${VERSION}" >> VERSION
 RUN echo "${BRANCH_TEXT}" >> VERSION
 RUN echo "${COMMIT_ID}" >> VERSION
 
-COPY --from=build /app/metadata-catalog/target/s1pro-core-metadata-catalog-trigger-*.jar s1pdgs-core-metadata-catalog-trigger.jar
+COPY --from=build /app/metadata-catalog-trigger/target/s1pro-core-metadata-catalog-trigger-*.jar s1pdgs-core-metadata-catalog-trigger.jar
 COPY /config/start.sh start.sh
 
 ENTRYPOINT "/app/start.sh"
