@@ -4,37 +4,37 @@
 	<default_route description="default route of product family L0_PRODUCT">
 		<family>L0_SLICE</family>
 		<route_to>
-			<topic>t-pdgs-l0-slices</topic>
+			<topic>t-pdgs-l0asp-l0-slice-production-events-nrt</topic>
 		</route_to>
 	</default_route>
 	<default_route description="default route of product family L0_ACN">
 		<family>L0_ACN</family>
 		<route_to>
-			<topic>t-pdgs-l0-acns</topic>
+			<topic>t-pdgs-l0asp-l0-acn-production-events-nrt</topic>
 		</route_to>
 	</default_route>
 	<default_route description="default route of product family L1_PRODUCT">
 		<family>L1_SLICE</family>
 		<route_to>
-			<topic>t-pdgs-l1-slices</topic>
+			<topic>t-pdgs-l1-slices-production-events-nrt</topic>
 		</route_to>
 	</default_route>
 	<default_route description="default route of product family L1_ACN">
 		<family>L1_ACN</family>
 		<route_to>
-			<topic>t-pdgs-l1-acns</topic>
+			<topic>t-pdgs-l1-acn-production-events-nrt</topic>
 		</route_to>
 	</default_route>
 	<default_route description="default route of product family L2_PRODUCT">
 		<family>L2_SLICE</family>
 		<route_to>
-			<topic>t-pdgs-l2-slices</topic>
+			<topic>t-pdgs-l2-slices-production-events-fast</topic>
 		</route_to>
 	</default_route>
 	<default_route description="default route of product family L2_ACN">
 		<family>L2_ACN</family>
 		<route_to>
-			<topic>t-pdgs-l2-acns</topic>
+			<topic>t-pdgs-l2-acn-production-events-fast</topic>
 		</route_to>
 	</default_route>
 </routing>

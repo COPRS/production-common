@@ -1,0 +1,29 @@
+#TODO: figure out why I need this here and in bootstrap.yml
+spring:
+  application:
+    name: s1pdgs-prip-trigger
+    
+# Logging
+logging:
+  config: classpath:log4j2-test.yml
+
+# MQI config
+mqi:
+  host-uri: http://localhost:8081                               # the host and port for querying MQI server
+  max-retries: 100                                              # the maximal number of consecutive retries following a MQI request error 
+  tempo-retry-ms: 10000                                         # 
+ 
+# PRIP Trigger config
+prip-trigger:
+  compression-event-listener:
+    polling-interval-ms: 200
+    polling-initial-delay-ms: 5000
+
+status:
+  delete-fixed-delay-ms: 3000
+  max-error-counter-processing: 30
+  max-error-counter-mqi: 30
+
+# REST controller
+server:
+  port: 8080 

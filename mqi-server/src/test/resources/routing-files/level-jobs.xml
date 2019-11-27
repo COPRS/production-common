@@ -10,13 +10,13 @@
 	<default_route description="default route of product family L1_JOB">
 		<family>L1_JOB</family>
 		<route_to>
-			<topic>t-pdgs-l1-jobs</topic>
+			<topic>t-pdgs-l1-execution-jobs-nrt</topic>
 		</route_to>
 	</default_route>
 	<default_route description="default route of product family L2_JOB">
 		<family>L2_JOB</family>
 		<route_to>
-			<topic>t-pdgs-l2-jobs</topic>
+			<topic>t-pdgs-l2-execution-jobs-fast</topic>
 		</route_to>
 	</default_route>
 </routing>

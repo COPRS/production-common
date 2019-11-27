@@ -5,21 +5,17 @@ spring:
 # Logging
 logging:
   config: classpath:log4j2-test.yml
-  
-# KAFKA config for error queue
-kafka:
-  bootstrap-servers: ${kafka_bootstrap-servers:kafka-headless:9092}   # the bootstrap servers for KAFKA
-  group-id: error                                                # the group identifier to use for KAFKA publishers  
-  max-retries: 10                                                # number of retries if kafka is not available
-  error-topic: t-pdgs-errors  
 
 status:
   delete-fixed-delay-ms: 1800000                                   # (fixed delay) period in milliseconds between 2 check if application shall be stopped or not
   max-error-counter-processing: 3                                  # the number of consecutive processing errors leading to the state FATALERROR
   max-error-counter-mqi: 30                                        # the number of consecutive MQI errors leading to the state FATALERROR
   
-# Compression worker
+# Compression trigger
 compression-trigger:
+    production-event-listener:
+        polling-interval-ms: 200
+        polling-initial-delay-ms: 5000
     mqi:
         host-uri: http://localhost:8081       # the host and port for querying MQI server
         max-retries: 45                        # the maximal number of consecutive retries following a MQI request error 

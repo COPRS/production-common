@@ -2,13 +2,7 @@
 spring:
   application:
     name: s1pdgs-prip-worker
-    
-# Kafka
-# Be careful! This is the kafka configuration for the kafka logger service!
-kafka:
-  bootstrap-servers: localhost:9093                                         # host:port to use for establishing the initial connection to the Kafka cluster
-  group-id: kafka-listener-service
-    
+
 # Logging
 logging:
   config: classpath:log4j2-test.yml
@@ -30,7 +24,7 @@ elasticsearch:
   
 # PRIP Worker config
 prip-worker:
-  metadatalistener:
+  publishing-job-listener:
     polling-interval-ms: 200
     polling-initial-delay-ms: 5000
 
@@ -41,7 +35,8 @@ prip-commons:
 
 status:
   delete-fixed-delay-ms: 3000
-  max-error-counter: 30
+  max-error-counter-processing: 30
+  max-error-counter-mqi: 30
 
 # REST controller
 server:

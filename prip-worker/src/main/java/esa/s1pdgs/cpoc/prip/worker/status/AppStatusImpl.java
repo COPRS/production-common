@@ -2,7 +2,6 @@ package esa.s1pdgs.cpoc.prip.worker.status;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.elasticsearch.client.RestHighLevelClient;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -22,11 +21,13 @@ public class AppStatusImpl extends AbstractAppStatus {
 	/**
      * Constructor
      * 
-     * @param maxErrorCounter
+     * @param maxErrorCounterProcessing
+     * @param maxErrorCounterMqi
      */
     @Autowired
-    public AppStatusImpl(@Value("${status.max-error-counter:100}") final int maxErrorCounter) {
-    	super(new Status(maxErrorCounter, 0));
+    public AppStatusImpl(@Value("${status.max-error-counter:100}") final int maxErrorCounterProcessing,
+    		@Value("${status.max-error-counter:100}") final int maxErrorCounterMqi) {
+    	super(new Status(maxErrorCounterProcessing, maxErrorCounterMqi));
     }
 	
     /**
