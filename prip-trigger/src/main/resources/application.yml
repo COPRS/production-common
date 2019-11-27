@@ -1,7 +1,7 @@
 #TODO: figure out why I need this here and in bootstrap.yml
 spring:
   application:
-    name: s1pdgs-prip-worker
+    name: s1pdgs-prip-trigger
     
 # Kafka
 # Be careful! This is the kafka configuration for the kafka logger service!
@@ -18,26 +18,12 @@ mqi:
   host-uri: http://localhost:8081                               # the host and port for querying MQI server
   max-retries: 100                                              # the maximal number of consecutive retries following a MQI request error 
   tempo-retry-ms: 10000                                         # 
-  
-# Elastic Search
-elasticsearch:
-  host: localhost                                           # Host of Elasticsearch cluster
-  port:  9200                                  # Port of Elasticsearch cluster
-  index-type: metadata                              # Elasticsearch index type used for metadata
-  connect-timeout-ms: 2000                                        # Timeout in milliseconds of connection to the cluster
-  socket-timeout-ms: 10000                                        # Timeout in milliseconds of the socket to the cluster
-  max-retry-timeout-ms: 30000                                     # Timeout in milliseconds of connection to the cluster
-  
-# PRIP Worker config
-prip-worker:
-  publishing-job-listener:
+ 
+# PRIP Trigger config
+prip-trigger:
+  compression-event-listener:
     polling-interval-ms: 200
     polling-initial-delay-ms: 5000
-
-# PRIP Commons config
-prip-commons:
-  repository:
-    max-search-hits: 1000
 
 status:
   delete-fixed-delay-ms: 3000

@@ -21,7 +21,7 @@ import esa.s1pdgs.cpoc.common.errors.obs.ObsException;
 import esa.s1pdgs.cpoc.mqi.client.GenericMqiClient;
 import esa.s1pdgs.cpoc.mqi.client.MqiConsumer;
 import esa.s1pdgs.cpoc.mqi.client.MqiListener;
-import esa.s1pdgs.cpoc.mqi.model.queue.ProductionEvent;
+import esa.s1pdgs.cpoc.mqi.model.queue.PublishingJob;
 import esa.s1pdgs.cpoc.mqi.model.rest.GenericMessageDto;
 import esa.s1pdgs.cpoc.obs_sdk.ObsClient;
 import esa.s1pdgs.cpoc.obs_sdk.ObsObject;
@@ -30,9 +30,9 @@ import esa.s1pdgs.cpoc.prip.model.Checksum;
 import esa.s1pdgs.cpoc.prip.model.PripMetadata;
 
 @Service
-public class PripMetadataListener implements MqiListener<ProductionEvent> {
+public class PublishingJobListener implements MqiListener<PublishingJob> {
 
-	private static final Logger LOGGER = LogManager.getLogger(PripMetadataListener.class);
+	private static final Logger LOGGER = LogManager.getLogger(PublishingJobListener.class);
 
 	private final GenericMqiClient mqiClient;
 
@@ -45,10 +45,10 @@ public class PripMetadataListener implements MqiListener<ProductionEvent> {
 	private final PripMetadataRepository pripMetadataRepo;
 
 	@Autowired
-	public PripMetadataListener(final GenericMqiClient mqiClient, final ObsClient obsClient,
+	public PublishingJobListener(final GenericMqiClient mqiClient, final ObsClient obsClient,
 			final PripMetadataRepository pripMetadataRepo,
-			@Value("${prip-worker.metadatalistener.polling-interval-ms}") final long pollingIntervalMs,
-			@Value("${prip-worker.metadatalistener.polling-initial-delay-ms}") final long pollingInitialDelayMs) {
+			@Value("${prip-worker.publishing-job-listener.polling-interval-ms}") final long pollingIntervalMs,
+			@Value("${prip-worker.publishing-job-listener.polling-initial-delay-ms}") final long pollingInitialDelayMs) {
 		this.mqiClient = mqiClient;
 		this.obsClient = obsClient;
 		this.pripMetadataRepo = pripMetadataRepo;
@@ -60,29 +60,29 @@ public class PripMetadataListener implements MqiListener<ProductionEvent> {
 	public void initService() {
 		if (pollingIntervalMs > 0) {
 			final ExecutorService service = Executors.newFixedThreadPool(1);
-			service.execute(new MqiConsumer<ProductionEvent>(mqiClient, ProductCategory.COMPRESSED_PRODUCTS, this,
+			service.execute(new MqiConsumer<PublishingJob>(mqiClient, ProductCategory.COMPRESSED_PRODUCTS, this,
 					pollingIntervalMs, pollingInitialDelayMs, esa.s1pdgs.cpoc.appstatus.AppStatus.NULL));
 		}
 	}
 
 	@Override
-	public void onMessage(GenericMessageDto<ProductionEvent> message) {
+	public void onMessage(GenericMessageDto<PublishingJob> message) {
 
 		LOGGER.debug("starting saving PRIP metadata, got message: {}", message);
 
-		ProductionEvent productionEvent = message.getBody();
+		PublishingJob publishingJob = message.getBody();
 		LocalDateTime creationDate = LocalDateTime.now();
 
 		PripMetadata pripMetadata = new PripMetadata();
 		pripMetadata.setId(UUID.randomUUID());
-		pripMetadata.setObsKey(productionEvent.getKeyObjectStorage());
-		pripMetadata.setName(productionEvent.getKeyObjectStorage());
-		pripMetadata.setProductFamily(productionEvent.getProductFamily());
+		pripMetadata.setObsKey(publishingJob.getKeyObjectStorage());
+		pripMetadata.setName(publishingJob.getKeyObjectStorage());
+		pripMetadata.setProductFamily(publishingJob.getProductFamily());
 		pripMetadata.setContentType(PripMetadata.DEFAULT_CONTENTTYPE);
-		pripMetadata.setContentLength(getContentLength(productionEvent.getProductFamily(), productionEvent.getKeyObjectStorage()));
+		pripMetadata.setContentLength(getContentLength(publishingJob.getProductFamily(), publishingJob.getKeyObjectStorage()));
 		pripMetadata.setCreationDate(creationDate);
 		pripMetadata.setEvictionDate(creationDate.plusDays(PripMetadata.DEFAULT_EVICTION_DAYS));
-		pripMetadata.setChecksums(getChecksums(productionEvent.getProductFamily(), productionEvent.getKeyObjectStorage()));
+		pripMetadata.setChecksums(getChecksums(publishingJob.getProductFamily(), publishingJob.getKeyObjectStorage()));
 
 		pripMetadataRepo.save(pripMetadata);
 
