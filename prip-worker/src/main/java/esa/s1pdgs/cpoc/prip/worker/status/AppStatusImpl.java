@@ -21,11 +21,13 @@ public class AppStatusImpl extends AbstractAppStatus {
 	/**
      * Constructor
      * 
-     * @param maxErrorCounter
+     * @param maxErrorCounterProcessing
+     * @param maxErrorCounterMqi
      */
     @Autowired
-    public AppStatusImpl(@Value("${status.max-error-counter:100}") final int maxErrorCounter) {
-    	super(new Status(maxErrorCounter, 0));
+    public AppStatusImpl(@Value("${status.max-error-counter:100}") final int maxErrorCounterProcessing,
+    		@Value("${status.max-error-counter:100}") final int maxErrorCounterMqi) {
+    	super(new Status(maxErrorCounterProcessing, maxErrorCounterMqi));
     }
 	
     /**

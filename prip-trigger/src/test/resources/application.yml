@@ -27,7 +27,8 @@ prip-trigger:
 
 status:
   delete-fixed-delay-ms: 3000
-  max-error-counter: 30
+  max-error-counter-processing: 30
+  max-error-counter-mqi: 30
 
 # REST controller
 server:
