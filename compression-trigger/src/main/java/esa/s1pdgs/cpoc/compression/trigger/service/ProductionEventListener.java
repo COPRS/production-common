@@ -30,8 +30,8 @@ public class ProductionEventListener implements MqiListener<ProductionEvent> {
 
 	@Autowired
 	public ProductionEventListener(final GenericMqiClient mqiClient,
-			@Value("${compression.fixed-delay-ms}") final long pollingIntervalMs,
-			@Value("${compression.init-delay-poll-ms}") final long pollingInitialDelayMs,
+			@Value("${compression-trigger.fixed-delay-ms}") final long pollingIntervalMs,
+			@Value("${compression-trigger.init-delay-poll-ms}") final long pollingInitialDelayMs,
 			final CompressionTrigger compressionTrigger) {
 		this.mqiClient = mqiClient;
 		this.pollingIntervalMs = pollingIntervalMs;

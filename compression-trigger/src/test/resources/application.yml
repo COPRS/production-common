@@ -18,8 +18,11 @@ status:
   max-error-counter-processing: 3                                  # the number of consecutive processing errors leading to the state FATALERROR
   max-error-counter-mqi: 30                                        # the number of consecutive MQI errors leading to the state FATALERROR
   
-# Compression worker
+# Compression trigger
 compression-trigger:
+    production-event-listener:
+        polling-interval-ms: 200
+        polling-initial-delay-ms: 5000
     mqi:
         host-uri: http://localhost:8081       # the host and port for querying MQI server
         max-retries: 45                        # the maximal number of consecutive retries following a MQI request error 
