@@ -1,4 +1,4 @@
-package esa.s1pdgs.cpoc.mdc.worker.extraction.xml;
+package esa.s1pdgs.cpoc.mdc.worker.config;
 
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -6,6 +6,8 @@ import java.util.concurrent.ConcurrentHashMap;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.oxm.jaxb.Jaxb2Marshaller;
+
+import esa.s1pdgs.cpoc.mdc.worker.extraction.xml.XmlConverter;
 
 @Configuration
 public class XmlConverterConfig {

@@ -1,4 +1,4 @@
-package esa.s1pdgs.cpoc.mdc.worker.extraction;
+package esa.s1pdgs.cpoc.mdc.worker.config;
 
 import static org.junit.Assert.assertEquals;
 
@@ -9,7 +9,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.junit4.SpringRunner;
 
-import esa.s1pdgs.cpoc.mdc.worker.extraction.MetadataExtractorConfig;
+import esa.s1pdgs.cpoc.mdc.worker.config.MetadataExtractorConfig;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest

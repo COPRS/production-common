@@ -1,4 +1,4 @@
-package esa.s1pdgs.cpoc.mdc.worker.extraction;
+package esa.s1pdgs.cpoc.mdc.worker.extraction.files;
 
 import java.io.File;
 import java.io.IOException;

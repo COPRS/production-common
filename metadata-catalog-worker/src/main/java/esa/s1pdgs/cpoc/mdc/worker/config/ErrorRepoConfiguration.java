@@ -1,4 +1,4 @@
-package esa.s1pdgs.cpoc.mdc.worker;
+package esa.s1pdgs.cpoc.mdc.worker.config;
 
 import java.util.HashMap;
 import java.util.Map;

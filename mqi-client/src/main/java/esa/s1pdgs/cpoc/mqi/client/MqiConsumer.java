@@ -54,7 +54,7 @@ public final class MqiConsumer<E extends AbstractMessage> implements Runnable {
 			LOG.debug("Start MQI polling in {}ms", initialDelay);
 			try {
 				appStatus.sleep(pollingIntervalMillis);
-			} catch (InterruptedException e) {
+			} catch (final InterruptedException e) {
 				LOG.debug("{} has been cancelled", this);
 				LOG.info("Exiting {}", this);
 				return;
@@ -83,19 +83,19 @@ public final class MqiConsumer<E extends AbstractMessage> implements Runnable {
 					mqiListener.onMessage(message);
 					ackMess = new AckMessageDto(message.getId(), Ack.OK, null, false);
 				// any other error --> dump prominently into log file but continue	
-				} catch (Exception e) {
-					LOG.error(String.format("Unexpected Error handling message %s", message), e);
+				} catch (final Exception e) {
+					LOG.error(String.format("Error handling message %s", message), e);
 					ackMess = new AckMessageDto(message.getId(), Ack.ERROR, LogUtils.toString(e), false);
 				}			
 				client.ack(ackMess, category);
 			// on communication errors with Mqi --> just dump warning and retry on next polling attempt
-			} catch (AbstractCodedException ace) {
+			} catch (final AbstractCodedException ace) {
 				LOG.warn("Error Code: {}, Message: {}", ace.getCode().getCode(), ace.getLogMessage());
 				appStatus.setError("NEXT_MESSAGE");
 			}
 			try {
 				appStatus.sleep(pollingIntervalMillis);
-			} catch (InterruptedException e) {
+			} catch (final InterruptedException e) {
 				LOG.debug("{} has been cancelled", this);
 				break;
 			}

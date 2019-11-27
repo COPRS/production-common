@@ -12,9 +12,9 @@ import org.junit.Before;
 import org.junit.Test;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 
+import esa.s1pdgs.cpoc.mdc.worker.config.XmlConverterConfig;
 import esa.s1pdgs.cpoc.mdc.worker.extraction.model.EdrsSessionFile;
 import esa.s1pdgs.cpoc.mdc.worker.extraction.xml.XmlConverter;
-import esa.s1pdgs.cpoc.mdc.worker.extraction.xml.XmlConverterConfig;
 
 public class XmlConverterTest {
 	

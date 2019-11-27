@@ -27,30 +27,32 @@ kafka:
   group-id: error                                                # the group identifier to use for KAFKA publishers  
   max-retries: 10                                                # number of retries if kafka is not available
   error-topic: t-pdgs-errors
+
+mqi:
+  host-uri: http://localhost:8081
+  max-retries: 3
+  tempo-retry-ms: 1000
     
-# File
-file:
-  file-with-manifest-ext: .safe
-  manifest-filename: manifest.safe
-  mqi:
-    host-uri: http://localhost:8081
-    max-retries: 3
-    tempo-retry-ms: 1000
+worker:
   product-categories:
     auxiliary-files:
+      pattern-config: ^([0-9a-z][0-9a-z]){1}([0-9a-z_]){1}(_(OPER|TEST))?_(AUX_OBMEMC|AUX_PP1|AUX_PP2|AUX_CAL|AUX_INS|AUX_RESORB|AUX_WND|AUX_ICE|AUX_SCS|AMV_ERRMAT|AMH_ERRMAT|AUX_WAV|MPL_ORBPRE|MPL_ORBSCT|MSK__LAND_)_\w{1,}\.(XML|EOF|SAFE)(/.*)?$
       local-directory: /data/local-catalog/auxiliary_files/ # Must contains the last /
       fixed-delay-ms: 500
       init-delay-poll-ms: 2000
-    edrs_sessions:
+    edrs-sessions:
+      pattern-config: ^(\w+)(/|\\)(ch)(0[1-2])(/|\\)((\w*)(\w{4})\.(xml|RAW))$
       local-directory: /data/local-catalog/edrs_sessions/ # Must contains the last /
+      fixed-delay-ms: 500
+      init-delay-poll-ms: 2000    
+    level-segments:
+      pattern-config: ^(S1|AS)(A|B)_(S[1-6]|RF|GP|HK|IW|EW|WV|N[1-6]|EN|IM)_(SLC|GRD|OCN|RAW)(F|H|M|_)_(0)(A|C|N|S|_)(SH|__|SV|HH|HV|VV|VH|DH|DV)_([0-9a-z]{15})_([0-9a-z]{15})_([0-9]{6})_([0-9a-z_]{6})\w{1,}\.(SAFE)(/.*)?$
+      local-directory: /data/local-catalog/level_segments/ # Must contains the last /
       fixed-delay-ms: 500
       init-delay-poll-ms: 2000
     level-products:
+      pattern-config: ^(S1|AS)(A|B)_(S[1-6]|IW|EW|WV|GP|HK|N[1-6]|EN|IM)_(SLC|GRD|OCN|RAW)(F|H|M|_)_(0|1|2)(A|C|N|S|_)(SH|SV|HH|HV|VV|VH|DH|DV)_([0-9a-z]{15})_([0-9a-z]{15})_([0-9]{6})_([0-9a-z_]{6})\w{1,}\.(SAFE)(/.*)?$
       local-directory: /data/local-catalog/level_products/ # Must contains the last /
-      fixed-delay-ms: 500
-      init-delay-poll-ms: 2000
-    level-segments:
-      local-directory: /data/local-catalog/level_segments/ # Must contains the last /
       fixed-delay-ms: 500
       init-delay-poll-ms: 2000
     

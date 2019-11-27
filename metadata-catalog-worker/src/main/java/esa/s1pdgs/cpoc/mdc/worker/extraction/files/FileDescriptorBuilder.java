@@ -15,7 +15,7 @@ import esa.s1pdgs.cpoc.common.errors.processing.MetadataIllegalFileExtension;
 import esa.s1pdgs.cpoc.mdc.worker.extraction.model.ConfigFileDescriptor;
 import esa.s1pdgs.cpoc.mdc.worker.extraction.model.EdrsSessionFileDescriptor;
 import esa.s1pdgs.cpoc.mdc.worker.extraction.model.OutputFileDescriptor;
-import esa.s1pdgs.cpoc.mqi.model.queue.ProductionEvent;
+import esa.s1pdgs.cpoc.mqi.model.queue.CatalogJob;
 
 /**
  * Service to build file descriptor
@@ -49,6 +49,7 @@ public class FileDescriptorBuilder {
 		this.pattern = pattern;
 	}
 
+	@Override
 	public String toString() {
 		return String.format("localDirectory : %s, pattern : %s", localDirectory, pattern.toString());
 	}
@@ -63,9 +64,9 @@ public class FileDescriptorBuilder {
 	 * @throws FilePathException
 	 *             if we have
 	 */
-	public ConfigFileDescriptor buildConfigFileDescriptor(File file) throws MetadataFilePathException, MetadataIgnoredFileException {
+	public ConfigFileDescriptor buildConfigFileDescriptor(final File file) throws MetadataFilePathException, MetadataIgnoredFileException {
 		// Extract object storage key
-		String absolutePath = file.getAbsolutePath();
+		final String absolutePath = file.getAbsolutePath();
 		if (absolutePath.length() <= localDirectory.getAbsolutePath().length()) {
 			throw new MetadataFilePathException(absolutePath, "CONFIG", "File is not in root directory");
 		}
@@ -81,17 +82,17 @@ public class FileDescriptorBuilder {
 
 		// Check if key matches the pattern
 		ConfigFileDescriptor configFile = null;
-		Matcher m = pattern.matcher(relativePath);
+		final Matcher m = pattern.matcher(relativePath);
 		if (m.matches()) {
 			// Extract product name
 			String productName = relativePath;
-			int indexFirstSeparator = relativePath.indexOf("/");
+			final int indexFirstSeparator = relativePath.indexOf("/");
 			if (indexFirstSeparator != -1) {
 				productName = relativePath.substring(0, indexFirstSeparator);
 			}
 			// Extract filename
 			String filename = relativePath;
-			int indexLastSeparator = relativePath.lastIndexOf("/");
+			final int indexLastSeparator = relativePath.lastIndexOf("/");
 			if (indexFirstSeparator != -1) {
 				filename = relativePath.substring(indexLastSeparator + 1);
 			}
@@ -136,10 +137,10 @@ public class FileDescriptorBuilder {
 	 * @throws IgnoredFileException
 	 * @throws IllegalFileExtension
 	 */
-	public EdrsSessionFileDescriptor buildEdrsSessionFileDescriptor(File file)
+	public EdrsSessionFileDescriptor buildEdrsSessionFileDescriptor(final File file)
 			throws MetadataFilePathException, MetadataIgnoredFileException, MetadataIllegalFileExtension {
 		// Extract relative path
-		String absolutePath = file.getAbsolutePath();
+		final String absolutePath = file.getAbsolutePath();
 		if (absolutePath.length() <= localDirectory.getAbsolutePath().length()) {
 			throw new MetadataFilePathException(absolutePath, "SESSION", "File is not in root directory");
 		}
@@ -150,9 +151,9 @@ public class FileDescriptorBuilder {
 		if (file.isDirectory()) {
 			throw new MetadataIgnoredFileException(file.getName());
 		}
-		Matcher m = pattern.matcher(relativePath);
+		final Matcher m = pattern.matcher(relativePath);
 		if (m.matches()) {
-			EdrsSessionFileDescriptor descriptor = new EdrsSessionFileDescriptor();
+			final EdrsSessionFileDescriptor descriptor = new EdrsSessionFileDescriptor();
 			descriptor.setFilename(m.group(6));
 			descriptor.setRelativePath(relativePath);
 			descriptor.setProductName(m.group(6));
@@ -174,10 +175,10 @@ public class FileDescriptorBuilder {
 		}
 	}
 	
-	public OutputFileDescriptor buildOutputFileDescriptor(File file, ProductionEvent product, ProductFamily productFamily)
+	public OutputFileDescriptor buildOutputFileDescriptor(final File file, final CatalogJob product, final ProductFamily productFamily)
             throws MetadataFilePathException, MetadataIgnoredFileException {
         // Extract relative path
-        String absolutePath = file.getAbsolutePath();
+        final String absolutePath = file.getAbsolutePath();
         if (absolutePath.length() <= localDirectory.getAbsolutePath().length()) {
             throw new MetadataFilePathException(absolutePath, productFamily.name(), "File is not in root directory");
         }
@@ -189,17 +190,17 @@ public class FileDescriptorBuilder {
             throw new MetadataIgnoredFileException(file.getName());
         }
         OutputFileDescriptor descriptor = null;
-        Matcher m = pattern.matcher(relativePath);
+        final Matcher m = pattern.matcher(relativePath);
         if (m.matches()) {
             // Extract product name
             String productName = relativePath;
-            int indexFirstSeparator = relativePath.indexOf("/");
+            final int indexFirstSeparator = relativePath.indexOf("/");
             if (indexFirstSeparator != -1) {
                 productName = relativePath.substring(0, indexFirstSeparator);
             }
             // Extract filename
             String filename = relativePath;
-            int indexLastSeparator = relativePath.lastIndexOf("/");
+            final int indexLastSeparator = relativePath.lastIndexOf("/");
             if (indexFirstSeparator != -1) {
                 filename = relativePath.substring(indexLastSeparator + 1);
             }

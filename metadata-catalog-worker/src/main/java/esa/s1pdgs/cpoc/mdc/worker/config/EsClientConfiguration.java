@@ -1,4 +1,4 @@
-package esa.s1pdgs.cpoc.mdc.worker.es;
+package esa.s1pdgs.cpoc.mdc.worker.config;
 
 import java.net.UnknownHostException;
 

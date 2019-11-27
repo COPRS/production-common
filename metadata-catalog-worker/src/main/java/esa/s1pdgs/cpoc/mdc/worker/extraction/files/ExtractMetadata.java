@@ -33,7 +33,6 @@ import esa.s1pdgs.cpoc.common.ProductFamily;
 import esa.s1pdgs.cpoc.common.errors.processing.MetadataExtractionException;
 import esa.s1pdgs.cpoc.common.errors.processing.MetadataMalformedException;
 import esa.s1pdgs.cpoc.common.utils.DateUtils;
-import esa.s1pdgs.cpoc.mdc.worker.extraction.WVFootPrintExtension;
 import esa.s1pdgs.cpoc.mdc.worker.extraction.model.ConfigFileDescriptor;
 import esa.s1pdgs.cpoc.mdc.worker.extraction.model.EdrsSessionFile;
 import esa.s1pdgs.cpoc.mdc.worker.extraction.model.EdrsSessionFileDescriptor;
@@ -86,11 +85,6 @@ public class ExtractMetadata {
 	private final XmlConverter xmlConverter;
 
 	/**
-	 * Local directory for configurations files
-	 */
-	protected final String localDirectory;
-
-	/**
 	 * Logger
 	 */
 	private static final Logger LOGGER = LogManager.getLogger(ExtractMetadata.class);
@@ -99,13 +93,12 @@ public class ExtractMetadata {
 	 * Constructor
 	 */
 	public ExtractMetadata(final Map<String, Float> typeOverlap, final Map<String, Float> typeSliceLength,
-			final String xsltDirectory, final XmlConverter xmlConverter, final String localDirectory) {
+			final String xsltDirectory, final XmlConverter xmlConverter) {
 		this.transFactory = TransformerFactory.newInstance();
 		this.typeOverlap = typeOverlap;
 		this.typeSliceLength = typeSliceLength;
 		this.xsltDirectory = xsltDirectory;
 		this.xmlConverter = xmlConverter;
-		this.localDirectory = localDirectory;
 		this.xsltMap = new HashMap<>();
 		this.xsltMap.put(ProductFamily.L0_ACN, XSLT_L0_MANIFEST);
 		this.xsltMap.put(ProductFamily.L0_SLICE, XSLT_L0_MANIFEST);
@@ -124,7 +117,7 @@ public class ExtractMetadata {
 	 * @throws MetadataExtractionException
 	 * @throws MetadataMalformedException
 	 */
-	public JSONObject processEOFFile(ConfigFileDescriptor descriptor, File inputMetadataFile)
+	public JSONObject processEOFFile(final ConfigFileDescriptor descriptor, final File inputMetadataFile)
 			throws MetadataExtractionException, MetadataMalformedException {
 
 		JSONObject metadataJSONObject = transformXMLWithXSLTToJSON(inputMetadataFile,
@@ -144,7 +137,7 @@ public class ExtractMetadata {
 	 * @throws MetadataExtractionException
 	 * @throws MetadataMalformedException
 	 */
-	public JSONObject processEOFFileWithoutNamespace(ConfigFileDescriptor descriptor, File inputMetadataFile)
+	public JSONObject processEOFFileWithoutNamespace(final ConfigFileDescriptor descriptor, final File inputMetadataFile)
 			throws MetadataExtractionException, MetadataMalformedException {
 
 		JSONObject metadataJSONObject = transformXMLWithXSLTToJSON(inputMetadataFile,
@@ -164,7 +157,7 @@ public class ExtractMetadata {
 	 * @throws MetadataExtractionException
 	 * @throws MetadataMalformedException
 	 */
-	public JSONObject processXMLFile(ConfigFileDescriptor descriptor, File inputMetadataFile)
+	public JSONObject processXMLFile(final ConfigFileDescriptor descriptor, final File inputMetadataFile)
 			throws MetadataExtractionException, MetadataMalformedException {
 
 		JSONObject metadataJSONObject = transformXMLWithXSLTToJSON(inputMetadataFile,
@@ -185,7 +178,7 @@ public class ExtractMetadata {
 	 * @throws MetadataMalformedException
 	 */
 	// FIXEME probably it means SAFE AUX FILE ???
-	public JSONObject processSAFEFile(ConfigFileDescriptor descriptor, File inputMetadataFile)
+	public JSONObject processSAFEFile(final ConfigFileDescriptor descriptor, final File inputMetadataFile)
 			throws MetadataExtractionException, MetadataMalformedException {
 
 		JSONObject metadataJSONObject = transformXMLWithXSLTToJSON(inputMetadataFile,
@@ -203,8 +196,8 @@ public class ExtractMetadata {
 	 * @return the json object with extracted metadata
 	 * @throws MetadataExtractionException
 	 */
-	public JSONObject processRAWFile(EdrsSessionFileDescriptor descriptor) throws MetadataExtractionException {
-		JSONObject metadataJSONObject = putEdrsSessionMetadataToJSON(new JSONObject(), descriptor);
+	public JSONObject processRAWFile(final EdrsSessionFileDescriptor descriptor) throws MetadataExtractionException {
+		final JSONObject metadataJSONObject = putEdrsSessionMetadataToJSON(new JSONObject(), descriptor);
 		LOGGER.debug("composed Json: {} ", metadataJSONObject);
 		return metadataJSONObject;
 	}
@@ -216,14 +209,17 @@ public class ExtractMetadata {
 	 * @return the json object with extracted metadata
 	 * @throws MetadataExtractionException
 	 */
-	public JSONObject processSESSIONFile(EdrsSessionFileDescriptor descriptor) throws MetadataExtractionException {
+	public JSONObject processSESSIONFile(
+			final EdrsSessionFileDescriptor descriptor,
+			final File file
+	) throws MetadataExtractionException {
 		try {
-			JSONObject metadataJSONObject = putEdrsSessionMetadataToJSON(new JSONObject(), descriptor);
+			final JSONObject metadataJSONObject = putEdrsSessionMetadataToJSON(new JSONObject(), descriptor);
 
-			final String name = new File(descriptor.getRelativePath()).getName();
-			final File file = new File(localDirectory, name);
+//			final String name = new File(descriptor.getRelativePath()).getName();
+//			final File file = new File(localDirectory, name);
 
-			EdrsSessionFile edrsSessionFile = (EdrsSessionFile) xmlConverter.convertFromXMLToObject(file.getPath());
+			final EdrsSessionFile edrsSessionFile = (EdrsSessionFile) xmlConverter.convertFromXMLToObject(file.getPath());
 
 			metadataJSONObject.put("startTime", DateUtils.convertToAnotherFormat(edrsSessionFile.getStartTime(),
 					EdrsSessionFile.TIME_FORMATTER, DateUtils.METADATA_DATE_FORMATTER));
@@ -252,17 +248,17 @@ public class ExtractMetadata {
 	 * @throws MetadataExtractionException
 	 * @throws MetadataMalformedException
 	 */
-	public JSONObject processL0Segment(OutputFileDescriptor descriptor, File manifestFile)
+	public JSONObject processL0Segment(final OutputFileDescriptor descriptor, final File manifestFile)
 			throws MetadataExtractionException, MetadataMalformedException {
 
-		File xsltFile = new File(this.xsltDirectory + XSLT_L0_SEGMENT_MANIFEST);
+		final File xsltFile = new File(this.xsltDirectory + XSLT_L0_SEGMENT_MANIFEST);
 		LOGGER.debug("extracting metadata for descriptor: {} ", descriptor);
 		JSONObject metadataJSONObject = transformXMLWithXSLTToJSON(manifestFile, xsltFile);
 
 		metadataJSONObject = putCommonMetadataToJSON(metadataJSONObject, descriptor);
 
 		try {
-			String productType = descriptor.getProductType();
+			final String productType = descriptor.getProductType();
 
 			if (productType.contains("GP_RAW_") || productType.contains("HK_RAW_")) {
 				metadataJSONObject.remove("segmentCoordinates");
@@ -282,7 +278,7 @@ public class ExtractMetadata {
 			LOGGER.debug("composed Json: {} ", metadataJSONObject);
 			return metadataJSONObject;
 
-		} catch (JSONException e) {
+		} catch (final JSONException e) {
 			LOGGER.error("Extraction of L0 segment file metadata failed", e);
 			throw new MetadataExtractionException(e);
 		}
@@ -298,10 +294,10 @@ public class ExtractMetadata {
 	 * @throws MetadataExtractionException
 	 * @throws MetadataMalformedException
 	 */
-	public JSONObject processProduct(OutputFileDescriptor descriptor, ProductFamily productFamily, File manifestFile)
+	public JSONObject processProduct(final OutputFileDescriptor descriptor, final ProductFamily productFamily, final File manifestFile)
 			throws MetadataExtractionException, MetadataMalformedException {
 
-		File xsltFile = new File(this.xsltDirectory + xsltMap.get(productFamily));
+		final File xsltFile = new File(this.xsltDirectory + xsltMap.get(productFamily));
 		LOGGER.debug("extracting metadata for descriptor: {} ", descriptor);
 		JSONObject metadataJSONObject = transformXMLWithXSLTToJSON(manifestFile, xsltFile);
 
@@ -334,13 +330,13 @@ public class ExtractMetadata {
 			LOGGER.debug("composed Json: {} ", metadataJSONObject);
 			return metadataJSONObject;
 
-		} catch (JSONException e) {
+		} catch (final JSONException e) {
 			LOGGER.error("Extraction of metadata failed", e);
 			throw new MetadataExtractionException(e);
 		}
 	}
 
-	private JSONObject putConfigFileMetadataToJSON(JSONObject metadataJSONObject, ConfigFileDescriptor descriptor)
+	private JSONObject putConfigFileMetadataToJSON(final JSONObject metadataJSONObject, final ConfigFileDescriptor descriptor)
 			throws MetadataExtractionException, MetadataMalformedException {
 
 		try {
@@ -349,14 +345,14 @@ public class ExtractMetadata {
 				try {
 					metadataJSONObject.put("validityStartTime", DateUtils
 							.convertToMetadataDateTimeFormat((String) metadataJSONObject.get("validityStartTime")));
-				} catch (DateTimeParseException e) {
+				} catch (final DateTimeParseException e) {
 					throw new MetadataMalformedException("validityStartTime");
 				}
 			}
 
 			if (metadataJSONObject.has("validityStopTime")) {
 
-				String validStopTime = (String) metadataJSONObject.get("validityStopTime");
+				final String validStopTime = (String) metadataJSONObject.get("validityStopTime");
 
 				if (validStopTime.contains("9999-")) {
 					metadataJSONObject.put("validityStopTime", "9999-12-31T23:59:59.999999Z");
@@ -364,7 +360,7 @@ public class ExtractMetadata {
 					try {
 						metadataJSONObject.put("validityStopTime",
 								DateUtils.convertToMetadataDateTimeFormat(validStopTime));
-					} catch (DateTimeParseException e) {
+					} catch (final DateTimeParseException e) {
 						throw new MetadataMalformedException("validityStopTime");
 					}
 				}
@@ -377,7 +373,7 @@ public class ExtractMetadata {
 				try {
 					metadataJSONObject.put("creationTime",
 							DateUtils.convertToMetadataDateTimeFormat(metadataJSONObject.getString("creationTime")));
-				} catch (DateTimeParseException e) {
+				} catch (final DateTimeParseException e) {
 					throw new MetadataMalformedException("creationTime");
 				}
 			}
@@ -393,13 +389,13 @@ public class ExtractMetadata {
 
 			return metadataJSONObject;
 
-		} catch (JSONException e) {
+		} catch (final JSONException e) {
 			LOGGER.error("Error while extraction of config file metadata ", e);
 			throw new MetadataExtractionException(e);
 		}
 	}
 
-	private JSONObject putEdrsSessionMetadataToJSON(JSONObject metadataJSONObject, EdrsSessionFileDescriptor descriptor)
+	private JSONObject putEdrsSessionMetadataToJSON(final JSONObject metadataJSONObject, final EdrsSessionFileDescriptor descriptor)
 			throws MetadataExtractionException {
 		try {
 			metadataJSONObject.put("productName", descriptor.getProductName());
@@ -414,39 +410,39 @@ public class ExtractMetadata {
 
 			return metadataJSONObject;
 
-		} catch (JSONException e) {
+		} catch (final JSONException e) {
 			LOGGER.error("Error while extraction of EDRS session metadata ", e);
 			throw new MetadataExtractionException(e);
 		}
 	}
 
-	private JSONObject putCommonMetadataToJSON(JSONObject metadataJSONObject, OutputFileDescriptor descriptor)
+	private JSONObject putCommonMetadataToJSON(final JSONObject metadataJSONObject, final OutputFileDescriptor descriptor)
 			throws MetadataExtractionException, MetadataMalformedException {
 
 		try {
 			if (metadataJSONObject.has("startTime")) {
 				try {
-					String t = DateUtils
-							.convertToMetadataDateTimeFormat((String) metadataJSONObject.getString("startTime"));
+					final String t = DateUtils
+							.convertToMetadataDateTimeFormat(metadataJSONObject.getString("startTime"));
 					metadataJSONObject.put("startTime", t);
 					metadataJSONObject.put("validityStartTime", t);
-				} catch (DateTimeParseException e) {
+				} catch (final DateTimeParseException e) {
 					throw new MetadataMalformedException("validityStartTime");
 				}
 			}
 
 			if (metadataJSONObject.has("stopTime")) {
 				try {
-					String t = DateUtils
-							.convertToMetadataDateTimeFormat((String) metadataJSONObject.getString("stopTime"));
+					final String t = DateUtils
+							.convertToMetadataDateTimeFormat(metadataJSONObject.getString("stopTime"));
 					metadataJSONObject.put("stopTime", t);
 					metadataJSONObject.put("validityStopTime", t);
-				} catch (DateTimeParseException e) {
+				} catch (final DateTimeParseException e) {
 					throw new MetadataMalformedException("validityStopTime");
 				}
 			}
 
-			String dt = DateUtils.formatToMetadataDateTimeFormat(LocalDateTime.now());
+			final String dt = DateUtils.formatToMetadataDateTimeFormat(LocalDateTime.now());
 
 			metadataJSONObject.put("productName", descriptor.getProductName());
 			metadataJSONObject.put("productClass", descriptor.getProductClass());
@@ -465,18 +461,18 @@ public class ExtractMetadata {
 
 			return metadataJSONObject;
 
-		} catch (JSONException e) {
+		} catch (final JSONException e) {
 			LOGGER.error("Error while extraction of common metadata", e);
 			throw new MetadataExtractionException(e);
 		}
 
 	}
 
-	private JSONObject transformXMLWithXSLTToJSON(File inputXMLFile, File xsltFile) throws MetadataExtractionException {
+	private JSONObject transformXMLWithXSLTToJSON(final File inputXMLFile, final File xsltFile) throws MetadataExtractionException {
 
 		try {
-			Transformer transformer = transFactory.newTransformer(new StreamSource(xsltFile));
-			ByteArrayOutputStream transformationStream = new ByteArrayOutputStream();
+			final Transformer transformer = transFactory.newTransformer(new StreamSource(xsltFile));
+			final ByteArrayOutputStream transformationStream = new ByteArrayOutputStream();
 
 			transformer.transform(new StreamSource(inputXMLFile), new StreamResult(transformationStream));
 			return XML.toJSONObject(transformationStream.toString(Charset.defaultCharset().name()));
@@ -496,10 +492,10 @@ public class ExtractMetadata {
 	 * @return the coordinates in good format
 	 * @throws MetadataExtractionException
 	 */
-	private JSONObject processCoordinates(File manifest, OutputFileDescriptor descriptor, String rawCoordinates)
+	private JSONObject processCoordinates(final File manifest, final OutputFileDescriptor descriptor, final String rawCoordinates)
 			throws MetadataExtractionException {
 		try {
-			String productType = descriptor.getProductType();
+			final String productType = descriptor.getProductType();
 			// ------------ LEVEL 0 --------------------//
 			if (productType.matches(".._RAW__0.")) {
 
@@ -543,15 +539,15 @@ public class ExtractMetadata {
 						String.format("handling not implemented for productType %s ", productType)));
 			}
 
-		} catch (JSONException e) {
+		} catch (final JSONException e) {
 			throw new MetadataExtractionException(e);
 		}
 	}
 
-	private JSONObject processCoordinatesforWVL0(String rawCoordinatesFromManifest) {
+	private JSONObject processCoordinatesforWVL0(final String rawCoordinatesFromManifest) {
 		// Snippet from manifest
 		// -74.8571,-120.3411 -75.4484,-121.9204
-		String[] points = rawCoordinatesFromManifest.split(" ");
+		final String[] points = rawCoordinatesFromManifest.split(" ");
 
 		if (points.length != 2) {
 			throw new IllegalArgumentException("2 coordinates are expected");
@@ -565,7 +561,7 @@ public class ExtractMetadata {
 		final String stopNadirLatitude = stopNadirPoint[0];
 		final String stopNadirLongitude = stopNadirPoint[1];
 
-		JSONObject geoShape = new JSONObject();
+		final JSONObject geoShape = new JSONObject();
 		final JSONArray geoShapeCoordinates = new JSONArray();
 		geoShape.put("type", "linestring");
 		geoShapeCoordinates.put(new JSONArray("[" + startNadirLongitude + "," + startNadirLatitude + "]"));
@@ -576,7 +572,7 @@ public class ExtractMetadata {
 		return geoShape;
 	}
 
-	private JSONObject processCoordinatesforL1andL2(String rawCoordinatesFromManifest) {
+	private JSONObject processCoordinatesforL1andL2(final String rawCoordinatesFromManifest) {
 
 		LOGGER.debug("l1/l2 coords: {} ", rawCoordinatesFromManifest);
 		// Snippet from manifest
@@ -626,7 +622,7 @@ public class ExtractMetadata {
 		return geoShape;
 	}
 
-	private JSONObject processCoordinatesAsIS(String rawCoordinatesFromManifest) {
+	private JSONObject processCoordinatesAsIS(final String rawCoordinatesFromManifest) {
 		// Snippet from manifest
 		// 36.7787,86.8273 38.7338,86.4312 38.4629,83.6235 36.5091,84.0935
 		// 36.7787,86.8273
@@ -683,19 +679,19 @@ public class ExtractMetadata {
 	 * @param type
 	 * @return an int which is the number of Slices
 	 */
-	private int totalNumberOfSlice(String startTime, String stopTime, String type) {
+	private int totalNumberOfSlice(final String startTime, final String stopTime, final String type) {
 		final Duration duration = Duration.between(DateUtils.parse(startTime), DateUtils.parse(stopTime));
 
-		float sliceLength = this.typeSliceLength.get(type);
+		final float sliceLength = this.typeSliceLength.get(type);
 
 		// Case of their is no slice information in manifest
 		if (sliceLength <= 0) {
 			return 1;
 		}
-		float overlap = this.typeOverlap.get(type);
+		final float overlap = this.typeOverlap.get(type);
 
-		float tmpNumberOfSlices = (duration.get(ChronoUnit.SECONDS) - overlap) / sliceLength;
-		double fracNumberOfSlices = tmpNumberOfSlices - Math.floor(tmpNumberOfSlices);
+		final float tmpNumberOfSlices = (duration.get(ChronoUnit.SECONDS) - overlap) / sliceLength;
+		final double fracNumberOfSlices = tmpNumberOfSlices - Math.floor(tmpNumberOfSlices);
 		int totalNumberOfSlices = 0;
 		if ((fracNumberOfSlices * sliceLength) < overlap) {
 			totalNumberOfSlices = (int) Math.floor(tmpNumberOfSlices);

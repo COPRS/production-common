@@ -26,6 +26,11 @@ public abstract class AbstractMessage {
 	protected ProductFamily productFamily = ProductFamily.BLANK;
 	protected String keyObjectStorage = NOT_DEFINED;
 	
+	/*
+	 * WARNING: the fields below are just for informational purposes and will not be evaluated
+	 * in any functional way.
+	 */
+	
 	/* Most of the subsystems are not setting these
 	 * values at the moment. Lets see if this automatic
 	 * approach is working. 

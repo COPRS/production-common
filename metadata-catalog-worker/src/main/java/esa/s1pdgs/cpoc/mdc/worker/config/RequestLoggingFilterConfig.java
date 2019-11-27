@@ -1,4 +1,4 @@
-package esa.s1pdgs.cpoc.mdc.worker;
+package esa.s1pdgs.cpoc.mdc.worker.config;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;

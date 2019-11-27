@@ -1,4 +1,4 @@
-package esa.s1pdgs.cpoc.mdc.worker.extraction;
+package esa.s1pdgs.cpoc.mdc.worker.config;
 
 import java.util.Map;
 

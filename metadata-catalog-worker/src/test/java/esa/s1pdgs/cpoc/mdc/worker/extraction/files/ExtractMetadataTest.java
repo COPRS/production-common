@@ -24,7 +24,6 @@ import esa.s1pdgs.cpoc.common.ProductFamily;
 import esa.s1pdgs.cpoc.common.errors.AbstractCodedException;
 import esa.s1pdgs.cpoc.common.errors.processing.MetadataExtractionException;
 import esa.s1pdgs.cpoc.common.errors.processing.MetadataMalformedException;
-import esa.s1pdgs.cpoc.mdc.worker.extraction.files.ExtractMetadata;
 import esa.s1pdgs.cpoc.mdc.worker.extraction.model.ConfigFileDescriptor;
 import esa.s1pdgs.cpoc.mdc.worker.extraction.model.EdrsSessionFileDescriptor;
 import esa.s1pdgs.cpoc.mdc.worker.extraction.model.OutputFileDescriptor;
@@ -44,9 +43,9 @@ public class ExtractMetadataTest {
 	@Before
     public void init() {
 		xmlConverter = new XmlConverter();
-		Jaxb2Marshaller jaxb2Marshaller = new Jaxb2Marshaller();
+		final Jaxb2Marshaller jaxb2Marshaller = new Jaxb2Marshaller();
 		jaxb2Marshaller.setPackagesToScan("esa.s1pdgs.cpoc.mdc.worker.extraction.model");
-		Map<String, Object> map = new ConcurrentHashMap<String, Object>();
+		final Map<String, Object> map = new ConcurrentHashMap<String, Object>();
 		map.put("jaxb.formatted.output", true);
 		map.put("jaxb.encoding", "UTF-8");
 		jaxb2Marshaller.setMarshallerProperties(map);
@@ -54,18 +53,23 @@ public class ExtractMetadataTest {
 		xmlConverter.setUnmarshaller(jaxb2Marshaller);
 		
         // "EW:8.2F||IW:7.4F||SM:7.7F||WM:0.0F"
-        Map<String, Float> typeOverlap = new HashMap<String, Float>();
+        final Map<String, Float> typeOverlap = new HashMap<String, Float>();
         typeOverlap.put("EW", 8.2F);
         typeOverlap.put("IW", 7.4F);
         typeOverlap.put("SM", 7.7F);
         typeOverlap.put("WV", 0.0F);
         // "EW:60.0F||IW:25.0F||SM:25.0F||WM:0.0F"
-        Map<String, Float> typeSliceLength = new HashMap<String, Float>();
+        final Map<String, Float> typeSliceLength = new HashMap<String, Float>();
         typeSliceLength.put("EW", 60.0F);
         typeSliceLength.put("IW", 25.0F);
         typeSliceLength.put("SM", 25.0F);
         typeSliceLength.put("WV", 0.0F);
-        extractor = new ExtractMetadata(typeOverlap, typeSliceLength, "config/xsltDir/", xmlConverter, testDir.getPath());
+        extractor = new ExtractMetadata(
+        		typeOverlap, 
+        		typeSliceLength, 
+        		"config/xsltDir/", 
+        		xmlConverter
+        );
     }
 
     @Test
@@ -93,7 +97,7 @@ public class ExtractMetadataTest {
         File file = new File(testDir,"S1A_OPER_AUX_OBMEMC_PDMC_20140201T000000.xml");
 
         try {
-            JSONObject result = extractor.processXMLFile(descriptor, file);
+            final JSONObject result = extractor.processXMLFile(descriptor, file);
 
             assertNotNull("JSON object should not be null", result);
             assertEquals("JSON object are not equals", expectedResult.length(),result.length());
@@ -101,7 +105,7 @@ public class ExtractMetadataTest {
                     expectedResult.get("validityStartTime").toString(),
                     result.get("validityStartTime").toString()
             );
-        } catch (AbstractCodedException fe) {
+        } catch (final AbstractCodedException fe) {
             fail("Exception occurred: " + fe.getMessage());
         }
 
@@ -126,7 +130,7 @@ public class ExtractMetadataTest {
         file = new File(testDir, "S1B_OPER_AUX_OBMEMC_PDMC_20140212T000000.xml");
 
         try {
-            JSONObject result = extractor.processXMLFile(descriptor, file);
+            final JSONObject result = extractor.processXMLFile(descriptor, file);
 
             assertNotNull("JSON object should not be null", result);
             assertEquals("JSON object are not equals", expectedResult.length(),
@@ -134,7 +138,7 @@ public class ExtractMetadataTest {
             assertEquals("JSON object value validityStartTime are not equals",
                     expectedResult.get("validityStartTime").toString(),
                     result.get("validityStartTime").toString());
-        } catch (AbstractCodedException fe) {
+        } catch (final AbstractCodedException fe) {
             fail("Exception occurred: " + fe.getMessage());
         }
     }
@@ -143,7 +147,7 @@ public class ExtractMetadataTest {
     public void testProcessXMLMissingFileFail()
             throws MetadataExtractionException, MetadataMalformedException {
 
-        ConfigFileDescriptor descriptor = new ConfigFileDescriptor();
+        final ConfigFileDescriptor descriptor = new ConfigFileDescriptor();
         descriptor.setExtension(FileExtension.XML);
         descriptor.setFilename("S1A_OPER_AUX_OBMEMC_PDMC_20140201T000000.xml");
         descriptor.setKeyObjectStorage(
@@ -157,7 +161,7 @@ public class ExtractMetadataTest {
         descriptor.setRelativePath(
                 "S1A_OPER_AUX_OBMEMC_PDMC_20140201T000000.xml");
         descriptor.setProductFamily(ProductFamily.AUXILIARY_FILE);
-        File file = new File(testDir, "S1A_OPER_OUX_OBMEMC_PDMC_20140201T000000.xml");
+        final File file = new File(testDir, "S1A_OPER_OUX_OBMEMC_PDMC_20140201T000000.xml");
 
         extractor.processXMLFile(descriptor, file);
     }
@@ -165,10 +169,10 @@ public class ExtractMetadataTest {
     @Test
     public void testProcessEOFFile() {
 
-        JSONObject expectedResult = new JSONObject(
+        final JSONObject expectedResult = new JSONObject(
                 "{\"validityStopTime\":\"2017-12-15T20:03:09.000000Z\",\"productClass\":\"OPER\",\"missionid\":\"S1\",\"creationTime\":\"2017-12-08T20:02:13.000000Z\",\"insertionTime\":\"2018-05-31T14:34:17.000000Z\",\"satelliteid\":\"A\",\"validityStartTime\":\"2017-12-08T20:03:09.000000Z\",\"version\":\"0001\",\"productName\":\"S1A_OPER_MPL_ORBPRE_20171208T200309_20171215T200309_0001.EOF\",\"url\":\"S1A_OPER_MPL_ORBPRE_20171208T200309_20171215T200309_0001.EOF\",\"productType\":\"MPL_ORBPRE\",\"productFamily\":\"AUXILIARY_FILE\"}");
 
-        ConfigFileDescriptor descriptor = new ConfigFileDescriptor();
+        final ConfigFileDescriptor descriptor = new ConfigFileDescriptor();
         descriptor.setExtension(FileExtension.EOF);
         descriptor.setFilename(
                 "S1A_OPER_MPL_ORBPRE_20171208T200309_20171215T200309_0001.EOF");
@@ -184,10 +188,10 @@ public class ExtractMetadataTest {
                 "S1A_OPER_MPL_ORBPRE_20171208T200309_20171215T200309_0001.EOF");
         descriptor.setProductFamily(ProductFamily.AUXILIARY_FILE);
 
-        File file = new File(testDir,"S1A_OPER_MPL_ORBPRE_20171208T200309_20171215T200309_0001.EOF");
+        final File file = new File(testDir,"S1A_OPER_MPL_ORBPRE_20171208T200309_20171215T200309_0001.EOF");
 
         try {
-            JSONObject result = extractor.processEOFFile(descriptor, file);
+            final JSONObject result = extractor.processEOFFile(descriptor, file);
 
             assertNotNull("JSON object should not be null", result);
             assertEquals("JSON object are not equals", expectedResult.length(),
@@ -195,7 +199,7 @@ public class ExtractMetadataTest {
             assertEquals("JSON object value validityStartTime are not equals",
                     expectedResult.getString("validityStartTime"),
                     result.getString("validityStartTime"));
-        } catch (AbstractCodedException fe) {
+        } catch (final AbstractCodedException fe) {
             fail("Exception occurred: " + fe.getMessage());
         }
     }
@@ -203,10 +207,10 @@ public class ExtractMetadataTest {
     @Test
     public void testProcessLandMskFile() {
 
-        JSONObject expectedResult = new JSONObject(
+        final JSONObject expectedResult = new JSONObject(
                 "{\"validityStopTime\":\"9999-12-31T00:00:00.000000Z\",\"productClass\":\"OPER\",\"missionid\":\"S1\",\"creationTime\":\"2019-07-11T11:33:00.000000Z\",\"insertionTime\":\"2018-05-31T14:34:17.000000Z\",\"satelliteid\":\"A\",\"validityStartTime\":\"2014-04-03T21:02:00.000000Z\",\"version\":\"0001\",\"productName\":\"S1A_OPER_MPL_ORBPRE_20171208T200309_20171215T200309_0001.EOF\",\"url\":\"S1__OPER_MSK__LAND__V20140403T210200_G20190711T113000.EOF\",\"productType\":\"MSK__LAND_\",\"productFamily\":\"AUXILIARY_FILE\"}");
 
-        ConfigFileDescriptor descriptor = new ConfigFileDescriptor();
+        final ConfigFileDescriptor descriptor = new ConfigFileDescriptor();
         descriptor.setExtension(FileExtension.EOF);
         descriptor.setFilename(
                 "S1__OPER_MSK__LAND__V20140403T210200_G20190711T113000.EOF");
@@ -222,10 +226,10 @@ public class ExtractMetadataTest {
                 "S1__OPER_MSK__LAND__V20140403T210200_G20190711T113000.EOF");
         descriptor.setProductFamily(ProductFamily.AUXILIARY_FILE);
 
-        File file = new File(testDir, "S1__OPER_MSK__LAND__V20140403T210200_G20190711T113000.EOF");
+        final File file = new File(testDir, "S1__OPER_MSK__LAND__V20140403T210200_G20190711T113000.EOF");
 
         try {
-            JSONObject result = extractor.processEOFFile(descriptor, file);
+            final JSONObject result = extractor.processEOFFile(descriptor, file);
 
             assertNotNull("JSON object should not be null", result);
             assertEquals("JSON object are not equals", expectedResult.length(),
@@ -233,7 +237,7 @@ public class ExtractMetadataTest {
             assertEquals("JSON object value validityStartTime are not equals",
                     expectedResult.getString("validityStartTime"),
                     result.getString("validityStartTime"));
-        } catch (AbstractCodedException fe) {
+        } catch (final AbstractCodedException fe) {
             fail("Exception occurred: " + fe.getMessage());
         }
     }
@@ -242,7 +246,7 @@ public class ExtractMetadataTest {
     public void testProcessEOFMissingFileFail()
             throws MetadataExtractionException, MetadataMalformedException {
 
-        ConfigFileDescriptor descriptor = new ConfigFileDescriptor();
+        final ConfigFileDescriptor descriptor = new ConfigFileDescriptor();
         descriptor.setExtension(FileExtension.EOF);
         descriptor.setFilename(
                 "S1A_OPER_MPL_ORBPRE_20171208T200309_20171215T200309_0001.EOF");
@@ -257,7 +261,7 @@ public class ExtractMetadataTest {
         descriptor.setRelativePath(
                 "S1A_OPER_MPL_ORBPRE_20171208T200309_20171215T200309_0001.EOF");
 
-        File file = new File(testDir,"S1A_OPER_MPL_ORBPRE_20171208T200309_20171215T200309_0003.EOF");
+        final File file = new File(testDir,"S1A_OPER_MPL_ORBPRE_20171208T200309_20171215T200309_0003.EOF");
 
         extractor.processEOFFile(descriptor, file);
     }
@@ -265,10 +269,10 @@ public class ExtractMetadataTest {
     @Test
     public void testProcessEOFFileWithoutFile() {
 
-        JSONObject expectedResult = new JSONObject(
+        final JSONObject expectedResult = new JSONObject(
                 "{\"validityStopTime\":\"2017-12-13T13:45:07.000000Z\",\"productClass\":\"OPER\",\"missionid\":\"S1\",\"creationTime\":\"2017-12-13T14:38:38.000000Z\",\"insertionTime\":\"2018-05-31T14:34:18.000000Z\",\"satelliteid\":\"A\",\"validityStartTime\":\"2017-12-13T10:27:37.000000Z\",\"version\":\"0001\",\"productType\":\"AUX_RESORB\",\"productName\":\"S1A_OPER_AUX_RESORB_OPOD_20171213T143838_V20171213T102737_20171213T134507.EOF\",\"url\":\"S1A_OPER_AUX_RESORB_OPOD_20171213T143838_V20171213T102737_20171213T134507.EOF\",\"productFamily\":\"AUXILIARY_FILE\"}");
 
-        ConfigFileDescriptor descriptor = new ConfigFileDescriptor();
+        final ConfigFileDescriptor descriptor = new ConfigFileDescriptor();
         descriptor.setExtension(FileExtension.EOF);
         descriptor.setFilename(
                 "S1A_OPER_AUX_RESORB_OPOD_20171213T143838_V20171213T102737_20171213T134507.EOF");
@@ -284,10 +288,10 @@ public class ExtractMetadataTest {
                 "S1A_OPER_AUX_RESORB_OPOD_20171213T143838_V20171213T102737_20171213T134507.EOF");
         descriptor.setProductFamily(ProductFamily.AUXILIARY_FILE);
 
-        File file = new File(testDir,"S1A_OPER_AUX_RESORB_OPOD_20171213T143838_V20171213T102737_20171213T134507.EOF");
+        final File file = new File(testDir,"S1A_OPER_AUX_RESORB_OPOD_20171213T143838_V20171213T102737_20171213T134507.EOF");
 
         try {
-            JSONObject result =
+            final JSONObject result =
                     extractor.processEOFFileWithoutNamespace(descriptor, file);
 
             assertNotNull("JSON object should not be null", result);
@@ -296,7 +300,7 @@ public class ExtractMetadataTest {
             assertEquals("JSON object value validityStartTime are not equals",
                     expectedResult.get("validityStartTime").toString(),
                     result.get("validityStartTime").toString());
-        } catch (AbstractCodedException fe) {
+        } catch (final AbstractCodedException fe) {
             fail("Exception occurred: " + fe.getMessage());
         }
     }
@@ -305,7 +309,7 @@ public class ExtractMetadataTest {
     public void testProcessEOFFileWithoutMissingFileFail()
             throws MetadataExtractionException, MetadataMalformedException {
 
-        ConfigFileDescriptor descriptor = new ConfigFileDescriptor();
+        final ConfigFileDescriptor descriptor = new ConfigFileDescriptor();
         descriptor.setExtension(FileExtension.EOF);
         descriptor.setFilename(
                 "S1A_OPER_AUX_RESORB_OPOD_20171213T143838_V20171213T102737_20171213T134507.EOF");
@@ -320,7 +324,7 @@ public class ExtractMetadataTest {
         descriptor.setRelativePath(
                 "S1A_OPER_AUX_RESORB_OPOD_20171213T143838_V20171213T102737_20171213T134507.EOF");
 
-        File file = new File(testDir,"S1A_OPER_AUX_RESORB_OPOD_20171213T143838_V20171213T102737_20171213T134508.EOF");
+        final File file = new File(testDir,"S1A_OPER_AUX_RESORB_OPOD_20171213T143838_V20171213T102737_20171213T134508.EOF");
 
         extractor.processEOFFileWithoutNamespace(descriptor, file);
     }
@@ -328,10 +332,10 @@ public class ExtractMetadataTest {
     @Test
     public void testProcessSAFEFile() throws MetadataExtractionException {
 
-        JSONObject expectedResult = new JSONObject(
+        final JSONObject expectedResult = new JSONObject(
                 "{\"validityStopTime\":\"9999-12-31T23:59:59.000000Z\",\"site\":\"CLS-Brest\",\"missionid\":\"S1\",\"creationTime\":\"2017-10-13T10:12:00.000000Z\",\"insertionTime\":\"2018-05-31T14:34:17.000000Z\",\"satelliteid\":\"A\",\"instrumentConfigurationId\":\"6\",\"validityStartTime\":\"2017-10-17T08:00:00.000000Z\",\"productName\":\"S1A_AUX_CAL_V20171017T080000_G20171013T101200.SAFE\",\"productType\":\"AUX_CAL\",\"url\":\"S1A_AUX_CAL_V20171017T080000_G20171013T101200.SAFE\",\"productFamily\":\"AUXILIARY_FILE\",\"productClass\":\"OPER\"}");
 
-        ConfigFileDescriptor descriptor = new ConfigFileDescriptor();
+        final ConfigFileDescriptor descriptor = new ConfigFileDescriptor();
         descriptor.setExtension(FileExtension.SAFE);
         descriptor.setFilename("manifest.safe");
         descriptor.setKeyObjectStorage(
@@ -346,10 +350,10 @@ public class ExtractMetadataTest {
                 "S1A_AUX_CAL_V20171017T080000_G20171013T101200.SAFE");
         descriptor.setProductFamily(ProductFamily.AUXILIARY_FILE);
 
-        File file = new File(testDir,"S1A_AUX_CAL_V20171017T080000_G20171013T101200.SAFE/manifest.safe");
+        final File file = new File(testDir,"S1A_AUX_CAL_V20171017T080000_G20171013T101200.SAFE/manifest.safe");
 
        try {
-            JSONObject result = extractor.processSAFEFile(descriptor, file);
+            final JSONObject result = extractor.processSAFEFile(descriptor, file);
             
             System.out.println(result);
 
@@ -359,7 +363,7 @@ public class ExtractMetadataTest {
             assertEquals("JSON object value validityStartTime are not equals",
                     expectedResult.get("validityStartTime").toString(),
                     result.get("validityStartTime").toString());
-       } catch (AbstractCodedException fe) {
+       } catch (final AbstractCodedException fe) {
             fail("Exception occurred: " + fe.getMessage());
        }
     }
@@ -367,7 +371,7 @@ public class ExtractMetadataTest {
     @Test(expected = AbstractCodedException.class)
     public void testProcessSAFEFileFail() throws MetadataExtractionException, MetadataMalformedException {
 
-        ConfigFileDescriptor descriptor = new ConfigFileDescriptor();
+        final ConfigFileDescriptor descriptor = new ConfigFileDescriptor();
         descriptor.setExtension(FileExtension.SAFE);
         descriptor.setFilename("manifest.safe");
         descriptor.setKeyObjectStorage(
@@ -381,7 +385,7 @@ public class ExtractMetadataTest {
         descriptor.setRelativePath(
                 "S1A_AUX_CAL_V20171017T080000_G20171013T101200.SAFE");
 
-        File file = new File(testDir,"S1A_AUX_CAL_V20171017T080000_G20171013T101201.SAFE");
+        final File file = new File(testDir,"S1A_AUX_CAL_V20171017T080000_G20171013T101201.SAFE");
 
         extractor.processSAFEFile(descriptor, file);
     }
@@ -389,10 +393,10 @@ public class ExtractMetadataTest {
     @Test
     public void testProcessRAWFile() {
 
-        JSONObject expectedResult = new JSONObject(
+        final JSONObject expectedResult = new JSONObject(
                 "{\"insertionTime\":\"2018-02-07T13:26:12\",\"missionId\":\"S1\",\"sessionId\":\"707000180\",\"productName\":\"DCS_02_L20171109175634707000180_ch1_DSDB_00001.raw\",\"satelliteId\":\"A\",\"productType\":\"RAW\",\"url\":\"SESSION1/DCS_02_SESSION1_ch1_DSIB.xml\",\"productFamily\":\"EDRS_SESSION\"}");
 
-        EdrsSessionFileDescriptor descriptor = new EdrsSessionFileDescriptor();
+        final EdrsSessionFileDescriptor descriptor = new EdrsSessionFileDescriptor();
         descriptor.setExtension(FileExtension.RAW);
         descriptor.setFilename(
                 "DCS_02_L20171109175634707000180_ch1_DSDB_00001.raw");
@@ -410,7 +414,7 @@ public class ExtractMetadataTest {
         descriptor.setProductFamily(ProductFamily.EDRS_SESSION);
 
         try {
-            JSONObject result = extractor.processRAWFile(descriptor);
+            final JSONObject result = extractor.processRAWFile(descriptor);
 
             assertNotNull("JSON object should not be null", result);
             assertEquals("JSON object are not equals", expectedResult.length(),
@@ -418,17 +422,17 @@ public class ExtractMetadataTest {
             assertEquals("JSON object value validityStartTime are not equals",
                     expectedResult.get("missionId").toString(),
                     result.get("missionId").toString());
-        } catch (AbstractCodedException fe) {
+        } catch (final AbstractCodedException fe) {
             fail("Exception occurred: " + fe.getMessage());
         }
     }
 
     @Test
     public void testProcessSESSIONFile() {
-        JSONObject expectedResult = new JSONObject(
+        final JSONObject expectedResult = new JSONObject(
                 "{\"insertionTime\":\"2018-02-07T13:26:12\",\"missionId\":\"S1\",\"sessionId\":\"SESSION1\",\"timeStart\":\"2017-12-13T14:59:48Z\",\"timeStop\":\"2017-12-13T15:17:25Z\",\"rawNames\":[],\"productName\":\"DCS_02_SESSION1_ch1_DSIB.xml\",\"satelliteId\":\"A\",\"productType\":\"SESSION\",\"url\":\"SESSION1/DCS_02_SESSION1_ch1_DSIB.xml\",\"productFamily\":\"EDRS_SESSION\"}");
 
-        EdrsSessionFileDescriptor descriptor = new EdrsSessionFileDescriptor();
+        final EdrsSessionFileDescriptor descriptor = new EdrsSessionFileDescriptor();
         descriptor.setExtension(FileExtension.XML);
         descriptor.setFilename("DCS_02_SESSION1_ch1_DSIB.xml");
         descriptor.setKeyObjectStorage(
@@ -443,15 +447,18 @@ public class ExtractMetadataTest {
         descriptor.setSessionIdentifier("SESSION1");
         descriptor.setProductFamily(ProductFamily.EDRS_SESSION);
         descriptor.setSessionIdentifier("sessionId");
+        
+        final File file = new File(testDir,"S1A/SESSION1/ch01/DCS_02_SESSION1_ch1_DSIB.xml");
+        
         try {
-            JSONObject result = extractor.processSESSIONFile(descriptor);
+            final JSONObject result = extractor.processSESSIONFile(descriptor, file);
             assertNotNull("JSON object should not be null", result);
             assertEquals("JSON object are not equals", expectedResult.length(),
                     result.length());
             assertEquals("JSON object value validityStartTime are not equals",
                     expectedResult.get("missionId").toString(),
                     result.get("missionId").toString());
-        } catch (AbstractCodedException fe) {
+        } catch (final AbstractCodedException fe) {
         	fe.printStackTrace();
             fail("Exception occurred: " + fe.getMessage());
         }
@@ -460,10 +467,10 @@ public class ExtractMetadataTest {
     @Test
     public void testProcessL0SlicesFileIW() {
 
-        JSONObject expectedResult = new JSONObject(
+        final JSONObject expectedResult = new JSONObject(
                 "{\"missionDataTakeId\":137013,\"theoreticalSliceLength\":25,\"sliceCoordinates\":{\"coordinates\":[[[86.8273,36.7787],[86.4312,38.7338],[83.6235,38.4629],[84.0935,36.5091],[86.8273,36.7787]]],\"type\":\"polygon\"},\"insertionTime\":\"2018-05-31T14:34:18\",\"creationTime\":\"2018-05-31T15:33:43\",\"polarisation\":\"DV\",\"sliceNumber\":13,\"absoluteStopOrbit\":19684,\"resolution\":\"_\",\"circulationFlag\":13,\"productName\":\"S1A_IW_RAW__0SDV_20171213T121623_20171213T121656_019684_021735_C6DB.SAFE/manifest.safe\",\"dataTakeId\":\"021735\",\"productConsolidation\":\"SLICE\",\"absoluteStartOrbit\":19684,\"validityStopTime\":\"2017-12-13T12:16:56.085136Z\",\"instrumentConfigurationId\":6,\"relativeStopOrbit\":12,\"relativeStartOrbit\":12,\"startTime\":\"2017-12-13T12:16:23.685188Z\",\"stopTime\":\"2017-12-13T12:16:56.085136Z\",\"productType\":\"IW_RAW__0S\",\"productClass\":\"S\",\"missionId\":\"S1\",\"swathtype\":\"IW\",\"pass\":\"ASCENDING\",\"satelliteId\":\"A\",\"stopTimeANX\":628491.556,\"url\":\"S1A_IW_RAW__0SDV_20171213T121623_20171213T121656_019684_021735_C6DB.SAFE\",\"sliceOverlap\":7.4,\"startTimeANX\":\"596091.6080\",\"validityStartTime\":\"2017-12-13T12:16:23.685188Z\",\"processMode\":\"FAST\",\"productFamily\":\"L0_SLICE\"}");
 
-        OutputFileDescriptor descriptor = new OutputFileDescriptor();
+        final OutputFileDescriptor descriptor = new OutputFileDescriptor();
         descriptor.setExtension(FileExtension.SAFE);
         descriptor.setFilename("manifest.safe");
         descriptor.setKeyObjectStorage(
@@ -483,25 +490,25 @@ public class ExtractMetadataTest {
         descriptor.setProductFamily(ProductFamily.L0_SLICE);
         descriptor.setMode("FAST");
 
-        File file = new File(testDir,
+        final File file = new File(testDir,
                 "S1A_IW_RAW__0SDV_20171213T121623_20171213T121656_019684_021735_C6DB.SAFE/manifest.safe");
 
         try {
-            JSONObject result = extractor.processProduct(descriptor, ProductFamily.L0_SLICE, file);
+            final JSONObject result = extractor.processProduct(descriptor, ProductFamily.L0_SLICE, file);
             assertNotNull("JSON object should not be null", result);
             assertEquals("JSON object are not equals", expectedResult.length(),
                     result.length());
             assertEquals("JSON object value validityStartTime are not equals",
                     expectedResult.getString("productConsolidation"),
                     result.getString("productConsolidation"));
-        } catch (AbstractCodedException fe) {
+        } catch (final AbstractCodedException fe) {
             fail("Exception occurred: " + fe.getMessage());
         }
     }
 
     @Test
     public void testProcessL0SlicesFileWV() {
-        OutputFileDescriptor descriptor = new OutputFileDescriptor();
+        final OutputFileDescriptor descriptor = new OutputFileDescriptor();
         descriptor.setExtension(FileExtension.SAFE);
         descriptor.setFilename("manifest.safe");
         descriptor.setKeyObjectStorage(
@@ -521,18 +528,18 @@ public class ExtractMetadataTest {
         descriptor.setProductFamily(ProductFamily.L0_SLICE);
         descriptor.setMode("FAST");
 
-        File file = new File(testDir,
+        final File file = new File(testDir,
                 "S1A_WV_RAW__0SSV_20180913T214325_20180913T214422_023685_0294F4_41D5.SAFE/manifest.safe");
 
         try {
-            JSONObject result = extractor.processProduct(descriptor, ProductFamily.L0_SLICE, file);
+            final JSONObject result = extractor.processProduct(descriptor, ProductFamily.L0_SLICE, file);
             
             assertNotNull("JSON object should not be null", result);
             assertEquals("linestring", result.getJSONObject("sliceCoordinates").getString("type"));
             assertEquals(new JSONArray("[108.5909,-62.2900]").toString(), result.getJSONObject("sliceCoordinates").getJSONArray("coordinates").get(0).toString());
             assertEquals(new JSONArray("[105.8055,-65.5655]").toString(), result.getJSONObject("sliceCoordinates").getJSONArray("coordinates").get(1).toString());
             assertEquals(1, result.getInt("sliceNumber"));
-        } catch (AbstractCodedException fe) {
+        } catch (final AbstractCodedException fe) {
             fail("Exception occurred: " + fe.getMessage());
         }
     }
@@ -541,7 +548,7 @@ public class ExtractMetadataTest {
     public void testProcessL0SlicesMissingFileFail()
             throws MetadataExtractionException, MetadataMalformedException {
 
-        OutputFileDescriptor descriptor = new OutputFileDescriptor();
+        final OutputFileDescriptor descriptor = new OutputFileDescriptor();
         descriptor.setExtension(FileExtension.SAFE);
         descriptor.setFilename("manifest.safe");
         descriptor.setKeyObjectStorage(
@@ -559,7 +566,7 @@ public class ExtractMetadataTest {
         descriptor.setPolarisation("DV");
         descriptor.setDataTakeId("021735");
 
-        File file = new File(testDir,
+        final File file = new File(testDir,
                 "S1A_IW_RAW__0SDV_20171213T121623_20171213T121656_019684_021735_C6DA.SAFE/manifest.safe");
 
         extractor.processProduct(descriptor, ProductFamily.L0_SLICE, file);
@@ -568,10 +575,10 @@ public class ExtractMetadataTest {
     @Test
     public void testProcessL0SegmentFile() {
 
-        JSONObject expectedResult = new JSONObject(
+        final JSONObject expectedResult = new JSONObject(
                 "{\"missionDataTakeId\":72627,\"productFamily\":\"L0_SEGMENT\",\"insertionTime\":\"2018-10-15T11:44:03.000000Z\",\"creationTime\":\"2018-10-15T11:44:03.000000Z\",\"polarisation\":\"DV\",\"absoluteStopOrbit\":9809,\"resolution\":\"_\",\"circulationFlag\":7,\"productName\":\"S1B_IW_RAW__0SDV_20171213T121623_20171213T121656_019684_021735_C6DS.SAFE\",\"dataTakeId\":\"021735\",\"productConsolidation\":\"FULL\",\"absoluteStartOrbit\":9809,\"validityStopTime\":\"2018-02-27T12:53:00.422905Z\",\"instrumentConfigurationId\":1,\"relativeStopOrbit\":158,\"relativeStartOrbit\":158,\"startTime\":\"2018-02-27T12:51:14.794304Z\",\"stopTime\":\"2018-02-27T12:53:00.422905Z\",\"productType\":\"IW_RAW__0S\",\"productClass\":\"S\",\"missionId\":\"S1\",\"swathtype\":\"IW\",\"pass\":\"DESCENDING\",\"satelliteId\":\"B\",\"stopTimeANX\":1849446.881,\"url\":\"S1B_IW_RAW__0SDV_20171213T121623_20171213T121656_019684_021735_C6DS.SAFE\",\"startTimeANX\":1743818.281,\"validityStartTime\":\"2018-02-27T12:51:14.794304Z\",\"segmentCoordinates\":{\"coordinates\":[[[-94.8783,73.8984],[-98.2395,67.6029],[-88.9623,66.8368],[-82.486,72.8925],[-94.8783,73.8984]]],\"type\":\"polygon\"},\"processMode\":\"FAST\"}");
 
-        OutputFileDescriptor descriptor = new OutputFileDescriptor();
+        final OutputFileDescriptor descriptor = new OutputFileDescriptor();
         descriptor.setExtension(FileExtension.SAFE);
         descriptor.setFilename("manifest.safe");
         descriptor.setKeyObjectStorage(
@@ -591,10 +598,10 @@ public class ExtractMetadataTest {
         descriptor.setProductFamily(ProductFamily.L0_SEGMENT);
         descriptor.setMode("FAST");
 
-        File file = new File(testDir,"S1B_IW_RAW__0SDV_20171213T121623_20171213T121656_019684_021735_C6DS.SAFE/manifest.safe");
+        final File file = new File(testDir,"S1B_IW_RAW__0SDV_20171213T121623_20171213T121656_019684_021735_C6DS.SAFE/manifest.safe");
 
         try {
-            JSONObject result = extractor.processL0Segment(descriptor, file);
+            final JSONObject result = extractor.processL0Segment(descriptor, file);
             
             assertNotNull("JSON object should not be null", result);
             assertEquals("JSON object are not equals", expectedResult.length(),
@@ -602,7 +609,7 @@ public class ExtractMetadataTest {
             assertEquals("JSON object value validityStartTime are not equals",
                     expectedResult.getString("productConsolidation"),
                     result.getString("productConsolidation"));
-        } catch (AbstractCodedException fe) {
+        } catch (final AbstractCodedException fe) {
             fail("Exception occurred: " + fe.getMessage());
         }
     }
@@ -611,7 +618,7 @@ public class ExtractMetadataTest {
     public void testProcessL0SegmentMissingFileFail()
             throws MetadataExtractionException, MetadataMalformedException {
 
-        OutputFileDescriptor descriptor = new OutputFileDescriptor();
+        final OutputFileDescriptor descriptor = new OutputFileDescriptor();
         descriptor.setExtension(FileExtension.SAFE);
         descriptor.setFilename("manifest.safe");
         descriptor.setKeyObjectStorage(
@@ -629,7 +636,7 @@ public class ExtractMetadataTest {
         descriptor.setPolarisation("DV");
         descriptor.setDataTakeId("021735");
 
-        File file = new File(testDir,
+        final File file = new File(testDir,
                 "S1B_IW_RAW__0SDV_20171213T121623_20171213T121656_019684_021735_C6DD.SAFE/manifest.safe");
 
         extractor.processL0Segment(descriptor, file);
@@ -665,7 +672,7 @@ public class ExtractMetadataTest {
                 "S1A_IW_RAW__0ADV_20171213T121123_20171213T121947_019684_021735_51B1.SAFE/manifest.safe");
 
         try {
-            JSONObject result = extractor.processProduct(descriptor,ProductFamily.L0_ACN, file);
+            final JSONObject result = extractor.processProduct(descriptor,ProductFamily.L0_ACN, file);
             assertNotNull("JSON object should not be null", result);
             assertEquals("JSON object are not equals", expectedResult.length(),
                     result.length());
@@ -678,7 +685,7 @@ public class ExtractMetadataTest {
                     result.get("totalNumberOfSlice").toString());
             
             
-        } catch (AbstractCodedException fe) {
+        } catch (final AbstractCodedException fe) {
             fail("Exception occurred: " + fe.getMessage());
         }
 
@@ -709,7 +716,7 @@ public class ExtractMetadataTest {
                 "S1A_EW_RAW__0CDV_20180227T144704_20180227T144706_020793_023A68_401B.SAFE/manifest.safe");
 
         try {
-            JSONObject result = extractor.processProduct(descriptor, ProductFamily.L0_SLICE, file);
+            final JSONObject result = extractor.processProduct(descriptor, ProductFamily.L0_SLICE, file);
 
             assertNotNull("JSON object should not be null", result);
             assertEquals("JSON object are not equals", expectedResult.length(),
@@ -717,7 +724,7 @@ public class ExtractMetadataTest {
             assertEquals("JSON object value validityStartTime are not equals",
                     expectedResult.get("productConsolidation").toString(),
                     result.get("productConsolidation").toString());
-        } catch (AbstractCodedException fe) {
+        } catch (final AbstractCodedException fe) {
             fail("Exception occurred: " + fe.getMessage());
         }
 
@@ -748,7 +755,7 @@ public class ExtractMetadataTest {
                 "S1A_EW_RAW__0CDV_20180227T144704_20180227T144706_020793_023A68_401B.SAFE/manifest.safe");
 
         try {
-            JSONObject result = extractor.processProduct(descriptor, ProductFamily.L0_SLICE, file);
+            final JSONObject result = extractor.processProduct(descriptor, ProductFamily.L0_SLICE, file);
             
             assertNotNull("JSON object should not be null", result);
             assertEquals("JSON object are not equals", expectedResult.length(),
@@ -756,7 +763,7 @@ public class ExtractMetadataTest {
             assertEquals("JSON object value totalNumberOfSlice are not equals",
                     expectedResult.get("totalNumberOfSlice").toString(),
                     result.get("totalNumberOfSlice").toString());
-        } catch (AbstractCodedException fe) {
+        } catch (final AbstractCodedException fe) {
             fail("Exception occurred: " + fe.getMessage());
         }
 
@@ -766,7 +773,7 @@ public class ExtractMetadataTest {
     public void testProcessL0ACNMissingFileFail()
             throws MetadataExtractionException, MetadataMalformedException {
 
-        OutputFileDescriptor descriptor = new OutputFileDescriptor();
+        final OutputFileDescriptor descriptor = new OutputFileDescriptor();
         descriptor.setExtension(FileExtension.SAFE);
         descriptor.setFilename("manifest.safe");
         descriptor.setKeyObjectStorage(
@@ -784,7 +791,7 @@ public class ExtractMetadataTest {
         descriptor.setPolarisation("DV");
         descriptor.setDataTakeId("021735");
 
-        File file = new File(testDir,
+        final File file = new File(testDir,
                 "S1A_IW_RAW__0ADV_20171213T121123_20171213T121947_019684_021735_51B2.SAFE/manifest.safe");
 
         extractor.processProduct(descriptor, ProductFamily.L0_ACN, file);
@@ -793,10 +800,10 @@ public class ExtractMetadataTest {
     @Test
     public void testProcessL1SlicesFile() {
 
-        JSONObject expectedResult = new JSONObject(
+        final JSONObject expectedResult = new JSONObject(
                 "{\"missionDataTakeId\":146025,\"sliceCoordinates\":{\"coordinates\":[[[48.27924,12.378114],[50.603844,12.829241],[50.958828,11.081389],[48.64994,10.625828],[48.27924,12.378114]]],\"type\":\"polygon\"},\"insertionTime\":\"2018-06-01T11:40:35\",\"creationTime\":\"2018-06-01T11:40:35\",\"polarisation\":\"DV\",\"sliceNumber\":1,\"absoluteStopOrbit\":20794,\"resolution\":\"_\",\"productName\":\"S1A_IW_GRDH_1SDV_20180227T145344_20180227T145413_020794_023A69_C0B5.SAFE\",\"dataTakeId\":\"023A69\",\"absoluteStartOrbit\":20794,\"validityStopTime\":\"2018-02-27T14:54:13.190581\",\"instrumentConfigurationId\":6,\"relativeStopOrbit\":72,\"relativeStartOrbit\":72,\"startTime\":\"2018-02-27T14:53:44.184986\",\"stopTime\":\"2018-02-27T14:54:13.190581\",\"productType\":\"IW_GRDH_0S\",\"productClass\":\"S\",\"missionId\":\"S1\",\"swathtype\":\"IW\",\"pass\":\"ASCENDING\",\"satelliteId\":\"A\",\"stopTimeANX\":193284.4,\"url\":\"S1A_IW_GRDH_1SDV_20180227T145344_20180227T145413_020794_023A69_C0B5.SAFE\",\"startTimeANX\":164278.8,\"validityStartTime\":\"2018-02-27T14:53:44.184986\",\"productFamily\":\"L1_SLICE\"}");
 
-        OutputFileDescriptor descriptor = new OutputFileDescriptor();
+        final OutputFileDescriptor descriptor = new OutputFileDescriptor();
         descriptor.setExtension(FileExtension.SAFE);
         descriptor.setFilename("manifest.safe");
         descriptor.setKeyObjectStorage(
@@ -815,11 +822,11 @@ public class ExtractMetadataTest {
         descriptor.setDataTakeId("023A69");
         descriptor.setProductFamily(ProductFamily.L1_SLICE);
 
-        File file = new File(testDir,
+        final File file = new File(testDir,
                 "S1A_IW_GRDH_1SDV_20180227T145344_20180227T145413_020794_023A69_C0B5.SAFE/manifest.safe");
 
         try {
-            JSONObject result = extractor.processProduct(descriptor, ProductFamily.L1_SLICE, file);
+            final JSONObject result = extractor.processProduct(descriptor, ProductFamily.L1_SLICE, file);
             assertNotNull("JSON object should not be null", result);
             assertEquals("JSON object are not equals", expectedResult.length(),
                     result.length());
@@ -834,7 +841,7 @@ public class ExtractMetadataTest {
                     result.get("absoluteStopOrbit").toString());
             assertEquals("2018-02-27T14:53:44.184986Z", result.get("validityStartTime"));
             assertEquals("2018-02-27T14:54:13.190581Z", result.get("validityStopTime"));
-        } catch (AbstractCodedException fe) {
+        } catch (final AbstractCodedException fe) {
             fail("Exception occurred: " + fe.getMessage());
         }
     }
@@ -842,7 +849,7 @@ public class ExtractMetadataTest {
     @Test
     public void testProcessL1SlicesWVFile() {
         
-        OutputFileDescriptor descriptor = new OutputFileDescriptor();
+        final OutputFileDescriptor descriptor = new OutputFileDescriptor();
         descriptor.setExtension(FileExtension.SAFE);
         descriptor.setFilename("manifest.safe");
         descriptor.setKeyObjectStorage(
@@ -861,11 +868,11 @@ public class ExtractMetadataTest {
         descriptor.setDataTakeId("017EF8");
         descriptor.setProductFamily(ProductFamily.L1_SLICE);
 
-        File file = new File(testDir,
+        final File file = new File(testDir,
                 "S1B_WV_SLC__1SDV_20181001T134431_20181001T135927_012959_017EF8_00EB.SAFE/manifest.safe");
 
         try {
-            JSONObject result = extractor.processProduct(descriptor, ProductFamily.L1_SLICE, file);
+            final JSONObject result = extractor.processProduct(descriptor, ProductFamily.L1_SLICE, file);
 
             assertNotNull("JSON object should not be null", result);
             assertEquals("Polygon", result.getJSONObject("sliceCoordinates").getString("type"));
@@ -874,7 +881,7 @@ public class ExtractMetadataTest {
             assertEquals(new JSONArray("[84.809326,-57.154243]").toString(), result.getJSONObject("sliceCoordinates").getJSONArray("coordinates").getJSONArray(0).get(2).toString());
             assertEquals(new JSONArray("[82.243843,-58.707996]").toString(), result.getJSONObject("sliceCoordinates").getJSONArray("coordinates").getJSONArray(0).get(3).toString());
             assertEquals(new JSONArray("[63.622650,-6.293599]").toString(), result.getJSONObject("sliceCoordinates").getJSONArray("coordinates").getJSONArray(0).get(4).toString());
-        } catch (AbstractCodedException fe) {
+        } catch (final AbstractCodedException fe) {
             fail("Exception occurred: " + fe.getMessage());
         }
     }
@@ -882,7 +889,7 @@ public class ExtractMetadataTest {
     @Test
     public void testProcessL1SlicesWVFile2() {
         
-        OutputFileDescriptor descriptor = new OutputFileDescriptor();
+        final OutputFileDescriptor descriptor = new OutputFileDescriptor();
         descriptor.setExtension(FileExtension.SAFE);
         descriptor.setFilename("manifest.safe");
         descriptor.setKeyObjectStorage(
@@ -901,11 +908,11 @@ public class ExtractMetadataTest {
         descriptor.setDataTakeId("017EF8");
         descriptor.setProductFamily(ProductFamily.L1_SLICE);
 
-        File file = new File(testDir,
+        final File file = new File(testDir,
                 "S1B_WV_SLC__1SSH_20170702T130912_20170702T133355_006309_00B17D_BC10.SAFE/manifest.safe");
 
         try {
-            JSONObject result = extractor.processProduct(descriptor, ProductFamily.L1_SLICE, file);
+            final JSONObject result = extractor.processProduct(descriptor, ProductFamily.L1_SLICE, file);
 
             assertNotNull("JSON object should not be null", result);
             assertEquals("Polygon", result.getJSONObject("sliceCoordinates").getString("type"));
@@ -914,7 +921,7 @@ public class ExtractMetadataTest {
             assertEquals(new JSONArray("[-110.519669,8.143796]").toString(), result.getJSONObject("sliceCoordinates").getJSONArray("coordinates").getJSONArray(0).get(2).toString());
             assertEquals(new JSONArray("[-108.503227,8.657177]").toString(), result.getJSONObject("sliceCoordinates").getJSONArray("coordinates").getJSONArray(0).get(3).toString());
             assertEquals(new JSONArray("[-162.062683,-76.17926]").toString(), result.getJSONObject("sliceCoordinates").getJSONArray("coordinates").getJSONArray(0).get(4).toString());
-        } catch (AbstractCodedException fe) {
+        } catch (final AbstractCodedException fe) {
             fail("Exception occurred: " + fe.getMessage());
         }
     }
@@ -922,7 +929,7 @@ public class ExtractMetadataTest {
     @Test
     public void testProcessL2SlicesWVFile() {
         
-        OutputFileDescriptor descriptor = new OutputFileDescriptor();
+        final OutputFileDescriptor descriptor = new OutputFileDescriptor();
         descriptor.setExtension(FileExtension.SAFE);
         descriptor.setFilename("manifest.safe");
         descriptor.setKeyObjectStorage(
@@ -941,11 +948,11 @@ public class ExtractMetadataTest {
         descriptor.setDataTakeId("017EF8");
         descriptor.setProductFamily(ProductFamily.L2_SLICE);
 
-        File file = new File(testDir,
+        final File file = new File(testDir,
                 "S1B_WV_OCN__2SSH_20170702T130912_20170702T133355_006309_00B17D_3B01.SAFE/manifest.safe");
 
         try {
-            JSONObject result = extractor.processProduct(descriptor, ProductFamily.L2_SLICE, file);
+            final JSONObject result = extractor.processProduct(descriptor, ProductFamily.L2_SLICE, file);
 
             assertNotNull("JSON object should not be null", result);
             assertEquals("Polygon", result.getJSONObject("sliceCoordinates").getString("type"));
@@ -954,7 +961,7 @@ public class ExtractMetadataTest {
             assertEquals(new JSONArray("[-110.51963,8.143985]").toString(), result.getJSONObject("sliceCoordinates").getJSONArray("coordinates").getJSONArray(0).get(2).toString());
             assertEquals(new JSONArray("[-108.503189,8.657347]").toString(), result.getJSONObject("sliceCoordinates").getJSONArray("coordinates").getJSONArray(0).get(3).toString());
             assertEquals(new JSONArray("[-162.062119,-76.179138]").toString(), result.getJSONObject("sliceCoordinates").getJSONArray("coordinates").getJSONArray(0).get(4).toString());
-        } catch (AbstractCodedException fe) {
+        } catch (final AbstractCodedException fe) {
             fail("Exception occurred: " + fe.getMessage());
         }
     }
@@ -962,7 +969,7 @@ public class ExtractMetadataTest {
     @Test
     public void testProcessL1SlicesWVFile3raw() {
         
-        OutputFileDescriptor descriptor = new OutputFileDescriptor();
+        final OutputFileDescriptor descriptor = new OutputFileDescriptor();
         descriptor.setExtension(FileExtension.SAFE);
         descriptor.setFilename("manifest.safe");
         descriptor.setKeyObjectStorage(
@@ -981,11 +988,11 @@ public class ExtractMetadataTest {
         descriptor.setDataTakeId("0294F4");
         descriptor.setProductFamily(ProductFamily.L1_SLICE);
 
-        File file = new File(testDir,
+        final File file = new File(testDir,
                 "S1A_WV_GRDM_1ASV_20180913T214338_20180913T214410_023685_0294F4_70D1.SAFE/manifest.safe");
 
         try {
-            JSONObject result = extractor.processProduct(descriptor, ProductFamily.L1_SLICE, file);
+            final JSONObject result = extractor.processProduct(descriptor, ProductFamily.L1_SLICE, file);
 
             assertNotNull("JSON object should not be null", result);
             assertEquals("Polygon", result.getJSONObject("sliceCoordinates").getString("type"));
@@ -994,7 +1001,7 @@ public class ExtractMetadataTest {
             assertEquals(new JSONArray("[102.146751,-62.931400]").toString(), result.getJSONObject("sliceCoordinates").getJSONArray("coordinates").getJSONArray(0).get(2).toString());
             assertEquals(new JSONArray("[100.111465,-61.471767]").toString(), result.getJSONObject("sliceCoordinates").getJSONArray("coordinates").getJSONArray(0).get(3).toString());
             assertEquals(new JSONArray("[98.145752,-63.219410]").toString(), result.getJSONObject("sliceCoordinates").getJSONArray("coordinates").getJSONArray(0).get(4).toString());
-        } catch (AbstractCodedException fe) {
+        } catch (final AbstractCodedException fe) {
             fail("Exception occurred: " + fe.getMessage());
         }
     }
@@ -1003,7 +1010,7 @@ public class ExtractMetadataTest {
     public void testProcessL1SlicesMissingFileFail()
             throws MetadataExtractionException, MetadataMalformedException {
 
-        OutputFileDescriptor descriptor = new OutputFileDescriptor();
+        final OutputFileDescriptor descriptor = new OutputFileDescriptor();
         descriptor.setExtension(FileExtension.SAFE);
         descriptor.setFilename("manifest.safe");
         descriptor.setKeyObjectStorage(
@@ -1021,7 +1028,7 @@ public class ExtractMetadataTest {
         descriptor.setPolarisation("DV");
         descriptor.setDataTakeId("023A69");
 
-        File file = new File(testDir,
+        final File file = new File(testDir,
                 "S1A_IW_GRDH_1SDV_20180227T145344_20180227T145413_020794_023A69_C0B4.SAFE/manifest.safe");
         extractor.processProduct(descriptor, ProductFamily.L1_SLICE, file);
     }
@@ -1029,10 +1036,10 @@ public class ExtractMetadataTest {
     @Test
     public void testProcessL1AFile() {
 
-        JSONObject expectedResult = new JSONObject(
+        final JSONObject expectedResult = new JSONObject(
                 "{\"missionDataTakeId\":146025,\"sliceCoordinates\":{\"coordinates\":[[[47.968777,13.890088],[50.308678,14.337382],[50.603825,12.829331],[48.279221,12.378204],[47.968777,13.890088]]],\"type\":\"polygon\"},\"insertionTime\":\"2018-06-01T11:40:59\",\"creationTime\":\"2018-06-01T11:40:59\",\"polarisation\":\"DV\",\"sliceNumber\":2,\"absoluteStopOrbit\":20794,\"resolution\":\"_\",\"productName\":\"S1A_IW_GRDH_1ADV_20180227T145413_20180227T145438_020794_023A69_632A.SAFE\",\"dataTakeId\":\"023A69\",\"absoluteStartOrbit\":20794,\"validityStopTime\":\"2018-02-27T14:54:38.190463\",\"instrumentConfigurationId\":6,\"relativeStopOrbit\":72,\"relativeStartOrbit\":72,\"startTime\":\"2018-02-27T14:54:13.192073\",\"stopTime\":\"2018-02-27T14:54:38.190463\",\"productType\":\"IW_GRDH_0A\",\"productClass\":\"A\",\"missionId\":\"S1\",\"swathtype\":\"IW\",\"pass\":\"ASCENDING\",\"satelliteId\":\"A\",\"stopTimeANX\":218284.2,\"url\":\"S1A_IW_GRDH_1ADV_20180227T145413_20180227T145438_020794_023A69_632A.SAFE\",\"startTimeANX\":193285.8,\"validityStartTime\":\"2018-02-27T14:54:13.192073\",\"productFamily\":\"L1_ACN\"}");
 
-        OutputFileDescriptor descriptor = new OutputFileDescriptor();
+        final OutputFileDescriptor descriptor = new OutputFileDescriptor();
         descriptor.setExtension(FileExtension.SAFE);
         descriptor.setFilename("manifest.safe");
         descriptor.setKeyObjectStorage(
@@ -1051,11 +1058,11 @@ public class ExtractMetadataTest {
         descriptor.setDataTakeId("023A69");
         descriptor.setProductFamily(ProductFamily.L1_ACN);
 
-        File file = new File(testDir,
+        final File file = new File(testDir,
                 "S1A_IW_GRDH_1ADV_20180227T145413_20180227T145438_020794_023A69_632A.SAFE/manifest.safe");
 
         try {
-            JSONObject result = extractor.processProduct(descriptor, ProductFamily.L1_ACN, file);
+            final JSONObject result = extractor.processProduct(descriptor, ProductFamily.L1_ACN, file);
 
             assertNotNull("JSON object should not be null", result);
             assertEquals("JSON object are not equals", expectedResult.length(),
@@ -1063,7 +1070,7 @@ public class ExtractMetadataTest {
             assertEquals("JSON object value validityStartTime are not equals",
                     expectedResult.get("missionId").toString(),
                     result.get("missionId").toString());
-        } catch (AbstractCodedException fe) {
+        } catch (final AbstractCodedException fe) {
             fail("Exception occurred: " + fe.getMessage());
         }
     }
@@ -1072,7 +1079,7 @@ public class ExtractMetadataTest {
     public void testProcessL1AMissingFileFail()
             throws MetadataExtractionException, MetadataMalformedException {
 
-        OutputFileDescriptor descriptor = new OutputFileDescriptor();
+        final OutputFileDescriptor descriptor = new OutputFileDescriptor();
         descriptor.setExtension(FileExtension.SAFE);
         descriptor.setFilename("manifest.safe");
         descriptor.setKeyObjectStorage(
@@ -1090,7 +1097,7 @@ public class ExtractMetadataTest {
         descriptor.setPolarisation("DV");
         descriptor.setDataTakeId("023A69");
 
-        File file = new File(testDir,
+        final File file = new File(testDir,
                 "S1A_IW_GRDH_1ADV_20180227T145413_20180227T145438_020794_023A69_632B.SAFE/manifest.safe");
 
         extractor.processProduct(descriptor, ProductFamily.L1_ACN, file);

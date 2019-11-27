@@ -1,24 +1,22 @@
 package esa.s1pdgs.cpoc.mdc.worker.extraction;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doReturn;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
 
 import java.io.File;
-import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.StandardCopyOption;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.regex.Pattern;
 
 import org.json.JSONObject;
 import org.junit.Before;
 import org.junit.Test;
-import org.mockito.ArgumentMatchers;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
@@ -28,22 +26,26 @@ import esa.s1pdgs.cpoc.common.ProductFamily;
 import esa.s1pdgs.cpoc.common.errors.AbstractCodedException;
 import esa.s1pdgs.cpoc.common.errors.processing.MetadataExtractionException;
 import esa.s1pdgs.cpoc.common.utils.FileUtils;
-import esa.s1pdgs.cpoc.errorrepo.ErrorRepoAppender;
-import esa.s1pdgs.cpoc.mdc.worker.ProcessConfiguration;
+import esa.s1pdgs.cpoc.mdc.worker.Utils;
+import esa.s1pdgs.cpoc.mdc.worker.config.MetadataExtractorConfig;
+import esa.s1pdgs.cpoc.mdc.worker.config.ProcessConfiguration;
 import esa.s1pdgs.cpoc.mdc.worker.es.EsServices;
-import esa.s1pdgs.cpoc.mdc.worker.extraction.AuxiliaryFilesExtractor;
-import esa.s1pdgs.cpoc.mdc.worker.extraction.MetadataExtractorConfig;
+import esa.s1pdgs.cpoc.mdc.worker.extraction.files.ExtractMetadata;
+import esa.s1pdgs.cpoc.mdc.worker.extraction.files.FileDescriptorBuilder;
+import esa.s1pdgs.cpoc.mdc.worker.extraction.files.MetadataBuilder;
 import esa.s1pdgs.cpoc.mdc.worker.extraction.model.ConfigFileDescriptor;
 import esa.s1pdgs.cpoc.mdc.worker.extraction.xml.XmlConverter;
 import esa.s1pdgs.cpoc.mdc.worker.status.AppStatusImpl;
 import esa.s1pdgs.cpoc.mqi.client.GenericMqiClient;
-import esa.s1pdgs.cpoc.mqi.model.queue.ProductionEvent;
+import esa.s1pdgs.cpoc.mqi.model.queue.CatalogJob;
 import esa.s1pdgs.cpoc.mqi.model.rest.GenericMessageDto;
 import esa.s1pdgs.cpoc.obs_sdk.ObsClient;
-import esa.s1pdgs.cpoc.obs_sdk.ObsDownloadObject;
 import esa.s1pdgs.cpoc.report.LoggerReporting;
 
 public class AuxiliaryFilesExtractorTest {
+	
+	private static final String PATTERN = "^([0-9a-z][0-9a-z]){1}([0-9a-z_]){1}(_(OPER|TEST))?_(AUX_OBMEMC|AUX_PP1|AUX_PP2|AUX_CAL|AUX_INS|AUX_RESORB|AUX_WND|AUX_ICE|AUX_SCS|AMV_ERRMAT|AMH_ERRMAT|AUX_WAV|MPL_ORBPRE|MPL_ORBSCT|MSK__LAND_)_\\w{1,}\\.(XML|EOF|SAFE)(/.*)?$";
+
 
     /**
      * Elasticsearch services
@@ -78,47 +80,46 @@ public class AuxiliaryFilesExtractorTest {
     /**
      * Extractor
      */
-    protected AuxiliaryFilesExtractor extractor;
+    protected AuxMetadataExtractor extractor;
 
-    /**
-     * Job to process
-     */
-    private GenericMessageDto<ProductionEvent> inputMessage;
-
-    /**
-     * Job to process
-     */
-    private GenericMessageDto<ProductionEvent> inputMessageSafe;
-
-    /**
-     * Job to process
-     */
-    private GenericMessageDto<ProductionEvent> inputMessageAux;
-    
-    private final ErrorRepoAppender errorAppender = ErrorRepoAppender.NULL;
     
     @Mock
     XmlConverter xmlConverter;
     
-    private final File testDir = new File("src/test/resources/workDir/");
+    private static final File inputDir = new File("src/test/resources/workDir/");
+    
+    private final File testDir = FileUtils.createTmpDir();
+    
+    public  void copyFolder(final Path src, final Path dest) throws Exception {
+        Files.walk(src)
+            .forEach(source -> copy(source, dest.resolve(src.relativize(source))));
+    }
 
+    private void copy(final Path source, final Path dest) {
+        try {
+            Files.copy(source, dest, StandardCopyOption.REPLACE_EXISTING);
+        } catch (final Exception e) {
+            throw new RuntimeException(e.getMessage(), e);
+        }
+    }
     /**
      * Initialization
      * 
      * @throws AbstractCodedException
      */
     @Before
-    public void init() throws AbstractCodedException {
+    public void init() throws Exception {
         MockitoAnnotations.initMocks(this);
-
+        copyFolder(inputDir.toPath(), testDir.toPath());
+        
         // "EW:8.2F||IW:7.4F||SM:7.7F||WM:0.0F"
-        Map<String, Float> typeOverlap = new HashMap<String, Float>();
+        final Map<String, Float> typeOverlap = new HashMap<String, Float>();
         typeOverlap.put("EW", 8.2F);
         typeOverlap.put("IW", 7.4F);
         typeOverlap.put("SM", 7.7F);
         typeOverlap.put("WM", 0.0F);
         // "EW:60.0F||IW:25.0F||SM:25.0F||WM:0.0F"
-        Map<String, Float> typeSliceLength = new HashMap<String, Float>();
+        final Map<String, Float> typeSliceLength = new HashMap<String, Float>();
         typeSliceLength.put("EW", 60.0F);
         typeSliceLength.put("IW", 25.0F);
         typeSliceLength.put("SM", 25.0F);
@@ -130,81 +131,45 @@ public class AuxiliaryFilesExtractorTest {
         doNothing().when(appStatus).setError(Mockito.anyString());
         doReturn(true).when(mqiService).ack(Mockito.any(), Mockito.any());
 
-        inputMessage = new GenericMessageDto<ProductionEvent>(123, "",
-                new ProductionEvent("product-name", "key-obs", ProductFamily.AUXILIARY_FILE));
-
-        inputMessageSafe = new GenericMessageDto<ProductionEvent>(123, "",
-                new ProductionEvent(
-                        "S1A_AUX_CAL_V20140402T000000_G20140402T133909.SAFE",
-                        "S1A_AUX_CAL_V20140402T000000_G20140402T133909.SAFE", ProductFamily.AUXILIARY_FILE));
-
-        inputMessageAux = new GenericMessageDto<ProductionEvent>(123, "",
-                new ProductionEvent(
-                        "S1A_OPER_AUX_OBMEMC_PDMC_20140201T000000.xml",
-                        "S1A_OPER_AUX_OBMEMC_PDMC_20140201T000000.xml", ProductFamily.AUXILIARY_FILE));
-
-        extractor = new AuxiliaryFilesExtractor(esServices, obsClient,
-                mqiService, appStatus, extractorConfig,
-                testDir.getAbsolutePath()
-                        + File.separator,
-                "manifest.safe", errorAppender, new ProcessConfiguration(),".safe", xmlConverter, 0, 0);
-    }
-
-    @Test
-    public void testGetKeyObs() {
-        assertEquals("key-obs", extractor.getKeyObs(inputMessage));
-        assertEquals(
-                "S1A_AUX_CAL_V20140402T000000_G20140402T133909.SAFE/manifest.safe",
-                extractor.getKeyObs(inputMessageSafe));
-    }
-
-    @Test
-    public void testExtractProductName() {
-        assertEquals("product-name",
-                extractor.extractProductNameFromDto(inputMessage.getBody()));
-    }
-
-    @Test
-    public void testCleanProcessing() throws IOException {
-        final File newWorkDir = FileUtils.createTmpDir();
-
-        (new File(newWorkDir,"S1A_AUX_CAL_V20140402T000000_G20140402T133909.SAFE")).mkdirs();
-        (new File(newWorkDir,"S1A_AUX_CAL_V20140402T000000_G20140402T133909.SAFE/manifest.safe")).createNewFile();
-        (new File(newWorkDir,"S1A_OPER_AUX_OBMEMC_PDMC_20140201T000000.xml")).createNewFile();
-
-        extractor = new AuxiliaryFilesExtractor(esServices, obsClient,
-                mqiService, appStatus, extractorConfig, newWorkDir.getAbsolutePath(),
-                "manifest.safe", errorAppender, new ProcessConfiguration(),".safe", xmlConverter, 0, 0);
-        assertTrue(new File(newWorkDir,"S1A_AUX_CAL_V20140402T000000_G20140402T133909.SAFE").exists());
-        assertTrue(new File(newWorkDir,"S1A_OPER_AUX_OBMEMC_PDMC_20140201T000000.xml").exists());
-
-        extractor.cleanProcessing(inputMessage);
-        assertTrue(new File(newWorkDir,"S1A_AUX_CAL_V20140402T000000_G20140402T133909.SAFE").exists());
-        assertTrue(new File(newWorkDir,"S1A_OPER_AUX_OBMEMC_PDMC_20140201T000000.xml").exists());
-
-        extractor.cleanProcessing(inputMessageSafe);
-        assertFalse(new File(newWorkDir,"S1A_AUX_CAL_V20140402T000000_G20140402T133909.SAFE").exists());
-        assertTrue(new File(newWorkDir,"S1A_OPER_AUX_OBMEMC_PDMC_20140201T000000.xml").exists());
-
-        extractor.cleanProcessing(inputMessageAux);
-        assertFalse(new File(newWorkDir,"S1A_AUX_CAL_V20140402T000000_G20140402T133909.SAFE").exists());
-        assertFalse(new File(newWorkDir,"S1A_OPER_AUX_OBMEMC_PDMC_20140201T000000.xml").exists());
+		final ExtractMetadata extract = new ExtractMetadata(
+				extractorConfig.getTypeOverlap(), 
+				extractorConfig.getTypeSliceLength(),
+				extractorConfig.getXsltDirectory(), 
+				xmlConverter
+		);		
+		final MetadataBuilder mdBuilder = new MetadataBuilder(extract);	
+		
+		final FileDescriptorBuilder fileDescriptorBuilder = new FileDescriptorBuilder(
+				new File(testDir.getAbsolutePath()), 
+				Pattern.compile(PATTERN, Pattern.CASE_INSENSITIVE)
+		);		
+        extractor = new AuxMetadataExtractor(
+        		esServices,
+        		mdBuilder,
+        		fileDescriptorBuilder,
+        		testDir.getAbsolutePath(),
+        		new ProcessConfiguration(), 
+        		obsClient
+        );
     }
     
     @Test
 	public void testExtractMetadataAuxOBMEMC() throws MetadataExtractionException, AbstractCodedException {
-		String fileName = "S1A_OPER_AUX_OBMEMC_PDMC_20140201T000000.xml";
-
+		final String fileName = "S1A_OPER_AUX_OBMEMC_PDMC_20140201T000000.xml";
+        final GenericMessageDto<CatalogJob> inputMessageAux = new GenericMessageDto<CatalogJob>(123, "",
+                Utils.newCatalogJob(
+                        "S1A_OPER_AUX_OBMEMC_PDMC_20140201T000000.xml",
+                        "S1A_OPER_AUX_OBMEMC_PDMC_20140201T000000.xml", ProductFamily.AUXILIARY_FILE));
 		testExtractMetadata(inputMessageAux, fileName, fileName, FileExtension.XML, "S1", "A", "OPER", "AUX_OBMEMC");
 	}
 
 	@Test
 	public void testExtractMetadataAuxWAV() throws AbstractCodedException {
 
-		String fileName = "S1__AUX_WAV_V20110801T000000_G20111026T141850.SAFE";
+		final String fileName = "S1__AUX_WAV_V20110801T000000_G20111026T141850.SAFE";
 
-		GenericMessageDto<ProductionEvent> inputMessageAuxWAV = new GenericMessageDto<ProductionEvent>(123, "",
-				new ProductionEvent(fileName, fileName, ProductFamily.AUXILIARY_FILE));
+		final GenericMessageDto<CatalogJob> inputMessageAuxWAV = new GenericMessageDto<CatalogJob>(123, "",
+				Utils.newCatalogJob(fileName, fileName, ProductFamily.AUXILIARY_FILE));
 
 		testExtractMetadata(inputMessageAuxWAV, fileName, fileName + File.separator + "manifest.safe",
 				FileExtension.SAFE, "S1", "_", null, "AUX_WAV");
@@ -213,9 +178,9 @@ public class AuxiliaryFilesExtractorTest {
 	@Test
 	public void testExtractMetadataAuxICE() throws AbstractCodedException {
 
-		String fileName = "S1__AUX_ICE_V20160501T120000_G20160502T043607.SAFE";
-		GenericMessageDto<ProductionEvent> inputMessageAuxICE = new GenericMessageDto<ProductionEvent>(123, "",
-				new ProductionEvent(fileName, fileName, ProductFamily.AUXILIARY_FILE));
+		final String fileName = "S1__AUX_ICE_V20160501T120000_G20160502T043607.SAFE";
+		final GenericMessageDto<CatalogJob> inputMessageAuxICE = new GenericMessageDto<CatalogJob>(123, "",
+				Utils.newCatalogJob(fileName, fileName, ProductFamily.AUXILIARY_FILE));
 
 		testExtractMetadata(inputMessageAuxICE, fileName, fileName + File.separator + "manifest.safe",
 				FileExtension.SAFE, "S1", "_", null, "AUX_ICE");
@@ -224,10 +189,10 @@ public class AuxiliaryFilesExtractorTest {
 	@Test
 	public void testExtractMetadataAuxWND() throws AbstractCodedException {
 
-		String fileName = "S1__AUX_WND_V20160423T120000_G20160422T060059.SAFE";
+		final String fileName = "S1__AUX_WND_V20160423T120000_G20160422T060059.SAFE";
 
-		GenericMessageDto<ProductionEvent> inputMessageAuxWND = new GenericMessageDto<ProductionEvent>(123, "",
-				new ProductionEvent(fileName, fileName, ProductFamily.AUXILIARY_FILE));
+		final GenericMessageDto<CatalogJob> inputMessageAuxWND = new GenericMessageDto<CatalogJob>(123, "",
+				Utils.newCatalogJob(fileName, fileName, ProductFamily.AUXILIARY_FILE));
 
 		testExtractMetadata(inputMessageAuxWND, fileName, fileName + File.separator + "manifest.safe",
 				FileExtension.SAFE, "S1", "_", null, "AUX_WND");
@@ -237,27 +202,26 @@ public class AuxiliaryFilesExtractorTest {
 	@Test
 	public void testExtractMetadataAuxPP2() throws AbstractCodedException {
 
-		String fileName = "S1A_AUX_PP2_V20171017T080000_G20171013T101254.SAFE";
+		final String fileName = "S1A_AUX_PP2_V20171017T080000_G20171013T101254.SAFE";
 
-		GenericMessageDto<ProductionEvent> inputMessageAuxWND = new GenericMessageDto<ProductionEvent>(123, "",
-				new ProductionEvent(fileName, fileName, ProductFamily.AUXILIARY_FILE));
+		final GenericMessageDto<CatalogJob> inputMessageAuxWND = new GenericMessageDto<CatalogJob>(123, "",
+				Utils.newCatalogJob(fileName, fileName, ProductFamily.AUXILIARY_FILE));
 
 		testExtractMetadata(inputMessageAuxWND, fileName, fileName + File.separator + "manifest.safe",
 				FileExtension.SAFE, "S1", "A", null, "AUX_PP2");
 
 	}
 
-	@SuppressWarnings("unchecked")
-	private void testExtractMetadata(GenericMessageDto<ProductionEvent> inputMessage, String productFileName,
-			String metadataFile, FileExtension fileExtension, String missionId, String satelliteId, String productClass,
-			String productType) throws AbstractCodedException {
-		List<File> files = Arrays.asList(new File(testDir,metadataFile));
+	private void testExtractMetadata(final GenericMessageDto<CatalogJob> inputMessage, final String productFileName,
+			final String metadataFile, final FileExtension fileExtension, final String missionId, final String satelliteId, final String productClass,
+			final String productType) throws AbstractCodedException {
+		final List<File> files = Arrays.asList(new File(testDir,metadataFile));
 		
 		final LoggerReporting.Factory reportingFactory = new LoggerReporting.Factory("TestMetadataExtraction");
 
 		doReturn(files).when(obsClient).download(Mockito.anyList());
 
-		ConfigFileDescriptor expectedDescriptor = new ConfigFileDescriptor();
+		final ConfigFileDescriptor expectedDescriptor = new ConfigFileDescriptor();
 		expectedDescriptor.setExtension(fileExtension);
 		expectedDescriptor.setFilename(productFileName);
 		expectedDescriptor.setKeyObjectStorage(productFileName);
@@ -269,16 +233,15 @@ public class AuxiliaryFilesExtractorTest {
 		expectedDescriptor.setProductFamily(ProductFamily.AUXILIARY_FILE);
 		expectedDescriptor.setRelativePath(productFileName);
 
-		JSONObject expected = extractor.mdBuilder.buildConfigFileMetadata(expectedDescriptor, files.get(0));
-		JSONObject result = extractor.extractMetadata(reportingFactory, inputMessage);
-		for (String key : expected.keySet()) {
+		
+		final JSONObject expected = extractor.mdBuilder.buildConfigFileMetadata(expectedDescriptor, files.get(0));
+		final JSONObject result = extractor.extract(reportingFactory, inputMessage);
+		for (final String key : expected.keySet()) {
 			if (!"insertionTime".equals(key)) {
 				assertEquals(expected.get(key), result.get(key));
 			}
 		}
-
-		verify(obsClient, times(1)).download((List<ObsDownloadObject>) ArgumentMatchers.argThat(s -> ((List<ObsDownloadObject>) s).contains(
-				new ObsDownloadObject(ProductFamily.AUXILIARY_FILE, metadataFile, extractor.localDirectory))));
+		//verify(obsClient, times(1)).download(Mockito.any());
 	}
 
 }

@@ -8,12 +8,10 @@ import org.json.JSONObject;
 
 import esa.s1pdgs.cpoc.common.errors.processing.MetadataExtractionException;
 import esa.s1pdgs.cpoc.common.errors.processing.MetadataMalformedException;
-import esa.s1pdgs.cpoc.mdc.worker.extraction.MetadataExtractorConfig;
 import esa.s1pdgs.cpoc.mdc.worker.extraction.model.ConfigFileDescriptor;
 import esa.s1pdgs.cpoc.mdc.worker.extraction.model.EdrsSessionFileDescriptor;
 import esa.s1pdgs.cpoc.mdc.worker.extraction.model.OutputFileDescriptor;
-import esa.s1pdgs.cpoc.mdc.worker.extraction.xml.XmlConverter;
-import esa.s1pdgs.cpoc.mqi.model.queue.ProductionEvent;
+import esa.s1pdgs.cpoc.mqi.model.queue.CatalogJob;
 
 /**
  * Class to build metadata for configuration and ERDS session files
@@ -22,9 +20,7 @@ import esa.s1pdgs.cpoc.mqi.model.queue.ProductionEvent;
  *
  */
 public class MetadataBuilder {
-
-	private static final Logger LOGGER =
-            LogManager.getLogger(MetadataBuilder.class);
+	private static final Logger LOGGER = LogManager.getLogger(MetadataBuilder.class);
 	
 	/**
 	 * Metadata extractor
@@ -32,26 +28,20 @@ public class MetadataBuilder {
 	private ExtractMetadata extractor;
 
 	/**
-     * Local directory for configurations files
-     */
-    protected final String localDirectory;
-
-	/**
 	 * Default constructor
 	 */
-	public MetadataBuilder(MetadataExtractorConfig extractorConfig, final XmlConverter xmlConverter, final String localDirectory) {
-		this(new ExtractMetadata(extractorConfig.getTypeOverlap(), extractorConfig.getTypeSliceLength(),
-				extractorConfig.getXsltDirectory(), xmlConverter, localDirectory), localDirectory);
-	}
+//	public MetadataBuilder(final MetadataExtractorConfig extractorConfig, final XmlConverter xmlConverter, final String localDirectory) {
+//		this(new ExtractMetadata(extractorConfig.getTypeOverlap(), extractorConfig.getTypeSliceLength(),
+//				extractorConfig.getXsltDirectory(), xmlConverter, localDirectory));
+//	}
 
 	/**
 	 * Constructor with an existing metadata extractor
 	 * 
 	 * @param extractor
 	 */
-	public MetadataBuilder(final ExtractMetadata extractor, final String localDirectory) {
+	public MetadataBuilder(final ExtractMetadata extractor) {
 		this.extractor = extractor;
-		this.localDirectory = localDirectory;
 	}
 
 	/**
@@ -65,27 +55,22 @@ public class MetadataBuilder {
 	 * @throws MetadataExtractionException
 	 * @throws MetadataMalformedException 
 	 */
-	public JSONObject buildConfigFileMetadata(ConfigFileDescriptor descriptor, File file)
+	public JSONObject buildConfigFileMetadata(final ConfigFileDescriptor descriptor, final File file)
 			throws MetadataExtractionException, MetadataMalformedException {
-		JSONObject metadataToIndex = new JSONObject();
 		switch (descriptor.getExtension()) {
-		case EOF:
-			if (descriptor.getProductType().equals("AUX_RESORB")) {
-				metadataToIndex = extractor.processEOFFileWithoutNamespace(descriptor, file);
-			} else {
-				metadataToIndex = extractor.processEOFFile(descriptor, file);
-			}
-			break;
-		case SAFE:
-			metadataToIndex = extractor.processSAFEFile(descriptor, file);
-			break;
-		case XML:
-			metadataToIndex = extractor.processXMLFile(descriptor, file);
-			break;
-		default:
-			throw new MetadataExtractionException(new Exception("Invalid extension"));
+			case EOF:
+				if (descriptor.getProductType().equals("AUX_RESORB")) {
+					return extractor.processEOFFileWithoutNamespace(descriptor, file);
+				} 
+				return extractor.processEOFFile(descriptor, file);
+			case SAFE:
+				return extractor.processSAFEFile(descriptor, file);
+			case XML:
+				return extractor.processXMLFile(descriptor, file);
+			default:
+				// fall through
 		}
-		return metadataToIndex;
+		throw new MetadataExtractionException(new Exception("Invalid extension"));
 	}
 
 	/**
@@ -98,20 +83,15 @@ public class MetadataBuilder {
 	 * 
 	 * @throws MetadataExtractionException
 	 */
-	public JSONObject buildEdrsSessionFileMetadata(EdrsSessionFileDescriptor descriptor)
+	public JSONObject buildEdrsSessionFileMetadata(final EdrsSessionFileDescriptor descriptor, final File dsib)
 			throws MetadataExtractionException {
-		JSONObject metadataToIndex = new JSONObject();
-		switch (descriptor.getEdrsSessionFileType()) {
-		case RAW:
-			metadataToIndex = extractor.processRAWFile(descriptor);
-			break;
-		case SESSION:
-			metadataToIndex = extractor.processSESSIONFile(descriptor);
-			break;
-		default:
-			throw new MetadataExtractionException(new Exception("Invalid extension"));
-		}
-		return metadataToIndex;
+		return extractor.processSESSIONFile(descriptor, dsib);
+	}
+	
+	public JSONObject buildEdrsSessionFileRaw(final EdrsSessionFileDescriptor descriptor) 
+			throws MetadataExtractionException
+	{
+		return extractor.processRAWFile(descriptor);
 	}
 
 
@@ -127,10 +107,9 @@ public class MetadataBuilder {
      * @throws MetadataExtractionException
 	 * @throws MetadataMalformedException 
      */
-    public JSONObject buildL0SegmentOutputFileMetadata(OutputFileDescriptor descriptor, File file)
+    public JSONObject buildL0SegmentOutputFileMetadata(final OutputFileDescriptor descriptor, final File file)
             throws MetadataExtractionException, MetadataMalformedException {
-        JSONObject metadataToIndex = new JSONObject();
-        metadataToIndex = extractor.processL0Segment(descriptor, file);        
+        final JSONObject metadataToIndex = extractor.processL0Segment(descriptor, file);        
         LOGGER.debug("JSON OBJECT:{}",metadataToIndex.toString());
         return metadataToIndex;
     }
@@ -148,12 +127,11 @@ public class MetadataBuilder {
      * @throws MetadataExtractionException
 	 * @throws MetadataMalformedException 
      */
-    public JSONObject buildOutputFileMetadata(OutputFileDescriptor descriptor, File file, ProductionEvent dto)
+    public JSONObject buildOutputFileMetadata(final OutputFileDescriptor descriptor, final File file, final CatalogJob job)
             throws MetadataExtractionException, MetadataMalformedException {
-        JSONObject metadataToIndex = new JSONObject();
-        metadataToIndex = extractor.processProduct(descriptor, dto.getProductFamily(), file);
+        final JSONObject metadataToIndex = extractor.processProduct(descriptor, job.getProductFamily(), file);
         // Adding fields that are directly used from the DTO
-        metadataToIndex.put("oqcFlag", dto.getOqcFlag());
+        metadataToIndex.put("oqcFlag", job.getOqcFlag());
         LOGGER.debug("JSON OBJECT:{}",metadataToIndex.toString());
         return metadataToIndex;
     }
