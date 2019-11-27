@@ -5,13 +5,6 @@ spring:
 # Logging
 logging:
   config: classpath:log4j2-test.yml
-  
-# KAFKA config for error queue
-kafka:
-  bootstrap-servers: ${kafka_bootstrap-servers:kafka-headless:9092}   # the bootstrap servers for KAFKA
-  group-id: error                                                # the group identifier to use for KAFKA publishers  
-  max-retries: 10                                                # number of retries if kafka is not available
-  error-topic: t-pdgs-errors  
 
 status:
   delete-fixed-delay-ms: 1800000                                   # (fixed delay) period in milliseconds between 2 check if application shall be stopped or not
