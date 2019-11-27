@@ -23,8 +23,8 @@ import esa.s1pdgs.cpoc.common.utils.FileUtils;
 import esa.s1pdgs.cpoc.common.utils.LogUtils;
 import esa.s1pdgs.cpoc.errorrepo.ErrorRepoAppender;
 import esa.s1pdgs.cpoc.errorrepo.model.rest.FailedProcessingDto;
-import esa.s1pdgs.cpoc.ingestion.worker.config.IngestionWorkerServiceConfigurationProperties;
 import esa.s1pdgs.cpoc.ingestion.worker.config.IngestionTypeConfiguration;
+import esa.s1pdgs.cpoc.ingestion.worker.config.IngestionWorkerServiceConfigurationProperties;
 import esa.s1pdgs.cpoc.ingestion.worker.product.IngestionResult;
 import esa.s1pdgs.cpoc.ingestion.worker.product.Product;
 import esa.s1pdgs.cpoc.ingestion.worker.product.ProductException;
@@ -90,8 +90,12 @@ public class IngestionWorkerService implements MqiListener<IngestionJob> {
 					new FilenameReportingOutput(ingestion.getKeyObjectStorage()),
 					new ReportingMessage(result.getTransferAmount(),"End processing of {}", ingestion.getKeyObjectStorage())
 			);
-		} catch (Exception e) {
+		} catch (final Exception e) {
 			reporting.error(new ReportingMessage(LogUtils.toString(e)));
+			throw new RuntimeException(
+					String.format("Error on ingestion of %s: %s", ingestion, LogUtils.toString(e)),
+					e
+			);
 		}
 	}
 
@@ -107,13 +111,13 @@ public class IngestionWorkerService implements MqiListener<IngestionJob> {
 
 			try {
 				result = productService.ingest(family, ingestion);
-			} catch (ProductException e) {
+			} catch (final ProductException e) {
 				reportObs.error(new ReportingMessage("Error uploading {} in OBS: {}", ingestion.getKeyObjectStorage(), e.getMessage()));
 				throw e;
 			}
 			reportObs.end(new ReportingMessage("End uploading {} in OBS", ingestion.getKeyObjectStorage()));
 			// is thrown if product shall be marked as invalid
-		} catch (ProductException e) {
+		} catch (final ProductException e) {
 			LOG.warn(e.getMessage());
 			productService.markInvalid(ingestion);
 			message.getBody().setProductFamily(ProductFamily.INVALID);
@@ -125,7 +129,7 @@ public class IngestionWorkerService implements MqiListener<IngestionJob> {
 	}
 
 	final void publish(final List<Product<AbstractMessage>> products, final GenericMessageDto<IngestionJob> message,
-			final Reporting.Factory reportingFactory) throws InternalErrorException {
+			final Reporting.Factory reportingFactory) throws AbstractCodedException {
 		for (final Product<AbstractMessage> product : products) {
 			final GenericPublicationMessageDto<? extends AbstractMessage> result = new GenericPublicationMessageDto<>(
 					message.getId(), product.getFamily(), product.getDto());
@@ -140,7 +144,7 @@ public class IngestionWorkerService implements MqiListener<IngestionJob> {
 			try {
 				mqiClient.publish(result, category);
 				reporting.end(new ReportingMessage("End publishing file {} in topic", message.getBody().getKeyObjectStorage()));
-			} catch (AbstractCodedException e) {
+			} catch (final AbstractCodedException e) {
 				reporting.error(new ReportingMessage("[code {}] {}", e.getCode().getCode(), e.getLogMessage()));
 			}
 		}
@@ -153,7 +157,12 @@ public class IngestionWorkerService implements MqiListener<IngestionJob> {
 			final Reporting reporting = reportingFactory.newReporting(3);
 			reporting.begin(new ReportingMessage("Start removing file {}", file.getPath()));
 
-			FileUtils.deleteWithRetries(file, properties.getMaxRetries(), properties.getTempoRetryMs());
+			try {
+				FileUtils.deleteWithRetries(file, properties.getMaxRetries(), properties.getTempoRetryMs());
+				reporting.end(new ReportingMessage("End removing file {}", file.getPath()));
+			} catch (final Exception e) {
+				reporting.error(new ReportingMessage("Error on removing file {}: {}", LogUtils.toString(e)));
+			}
 		}
 	}
 
@@ -163,7 +172,7 @@ public class IngestionWorkerService implements MqiListener<IngestionJob> {
 				LOG.debug("Found {} for {}", config, dto);
 				try {
 					return ProductFamily.valueOf(config.getFamily());
-				} catch (Exception e) {
+				} catch (final Exception e) {
 					throw new ProductException(String.format("Invalid %s for %s (allowed: %s)", config, dto,
 							Arrays.toString(ProductFamily.values())));
 				}
