@@ -12,21 +12,22 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import esa.s1pdgs.cpoc.common.ProductCategory;
+import esa.s1pdgs.cpoc.common.errors.AbstractCodedException;
 import esa.s1pdgs.cpoc.mqi.client.GenericMqiClient;
 import esa.s1pdgs.cpoc.mqi.client.MqiConsumer;
 import esa.s1pdgs.cpoc.mqi.client.MqiListener;
 import esa.s1pdgs.cpoc.mqi.model.queue.CompressionEvent;
+import esa.s1pdgs.cpoc.mqi.model.queue.PublishingJob;
 import esa.s1pdgs.cpoc.mqi.model.rest.GenericMessageDto;
+import esa.s1pdgs.cpoc.mqi.model.rest.GenericPublicationMessageDto;
 
 @Service
 public class CompressionEventListener implements MqiListener<CompressionEvent> {
 	
 	private static final Logger LOGGER = LogManager.getLogger(CompressionEventListener.class);
-	
-	private final GenericMqiClient mqiClient;
-	
-	private final long pollingIntervalMs;
 
+	private final GenericMqiClient mqiClient;
+	private final long pollingIntervalMs;
 	private final long pollingInitialDelayMs;
 
 	@Autowired
@@ -46,9 +47,24 @@ public class CompressionEventListener implements MqiListener<CompressionEvent> {
 					pollingIntervalMs, pollingInitialDelayMs, esa.s1pdgs.cpoc.appstatus.AppStatus.NULL));
 		}
 	}
-	
+
 	@Override
-	public void onMessage(GenericMessageDto<CompressionEvent> message) {
+	public void onMessage(GenericMessageDto<CompressionEvent> inputMessage) throws AbstractCodedException {
+		LOGGER.debug("starting conversion of CompressionEvent to PublishingJob, got message: {}", inputMessage);
 		
+		final CompressionEvent compressionEvent = inputMessage.getBody();
+		
+		final PublishingJob publishingJob = new PublishingJob();
+		publishingJob.setKeyObjectStorage(compressionEvent.getKeyObjectStorage());
+		publishingJob.setProductFamily(compressionEvent.getProductFamily());
+		
+		GenericPublicationMessageDto<PublishingJob> outputMessage =
+				new GenericPublicationMessageDto<PublishingJob>(inputMessage.getId(),
+				compressionEvent.getProductFamily(), publishingJob);
+		
+		mqiClient.publish(outputMessage, ProductCategory.COMPRESSED_PRODUCTS);
+
+		LOGGER.debug("end conversion of CompressionEvent to PublishingJob, sent message: {}", outputMessage);
 	}
+
 }
