@@ -25,7 +25,7 @@ public class AppStatusImpl extends AbstractAppStatus {
      */
     @Autowired
     public AppStatusImpl(@Value("${status.max-error-counter-processing:100}") final int maxErrorCounterProcessing,
-    		@Value("${status.max-error-counter-mqi100}") final int maxErrorCounterMqi) {
+    		@Value("${status.max-error-counter-mqi:100}") final int maxErrorCounterMqi) {
     	super(new Status(maxErrorCounterProcessing, maxErrorCounterMqi));
     }
 	
