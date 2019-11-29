@@ -16,7 +16,7 @@ import esa.s1pdgs.cpoc.ipf.preparation.worker.config.ProcessSettings;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.tasks.AbstractJobsDispatcher;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.tasks.AbstractJobsGenerator;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.tasks.JobsGeneratorFactory;
-import esa.s1pdgs.cpoc.mqi.model.queue.IngestionEvent;
+import esa.s1pdgs.cpoc.mqi.model.queue.CatalogEvent;
 
 /**
  * Dispatcher of EdrsSession product<br/>
@@ -24,7 +24,7 @@ import esa.s1pdgs.cpoc.mqi.model.queue.IngestionEvent;
  * 
  * @author Cyrielle Gailliard
  */
-public class L0AppJobDispatcher extends AbstractJobsDispatcher<IngestionEvent> {
+public class L0AppJobDispatcher extends AbstractJobsDispatcher<CatalogEvent> {
 
     /**
      * Task table
@@ -47,7 +47,7 @@ public class L0AppJobDispatcher extends AbstractJobsDispatcher<IngestionEvent> {
             final ProcessSettings processSettings,
             final JobsGeneratorFactory factory,
             final ThreadPoolTaskScheduler taskScheduler,
-            final AppCatalogJobClient<IngestionEvent> appDataService) {
+            final AppCatalogJobClient<CatalogEvent> appDataService) {
         super(settings, processSettings, factory, taskScheduler,
                 appDataService);
     }
@@ -67,7 +67,7 @@ public class L0AppJobDispatcher extends AbstractJobsDispatcher<IngestionEvent> {
      * 
      */
     @Override
-    protected AbstractJobsGenerator<IngestionEvent> createJobGenerator(
+    protected AbstractJobsGenerator<CatalogEvent> createJobGenerator(
             final File xmlFile) throws AbstractCodedException {
         return this.factory.createJobGeneratorForEdrsSession(xmlFile, appDataService);
     }
@@ -76,7 +76,7 @@ public class L0AppJobDispatcher extends AbstractJobsDispatcher<IngestionEvent> {
      * Get task tables to generate for given job
      */
     @Override
-    protected List<String> getTaskTables(final AppDataJob<IngestionEvent> job) {
+    protected List<String> getTaskTables(final AppDataJob<CatalogEvent> job) {
         return Arrays.asList(TASK_TABLE_NAME);
     }
 

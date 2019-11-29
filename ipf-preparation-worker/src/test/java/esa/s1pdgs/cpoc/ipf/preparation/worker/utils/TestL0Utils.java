@@ -14,7 +14,7 @@ import esa.s1pdgs.cpoc.appcatalog.server.job.db.AppDataJobState;
 import esa.s1pdgs.cpoc.common.ApplicationLevel;
 import esa.s1pdgs.cpoc.common.EdrsSessionFileType;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.model.tasktable.TaskTable;
-import esa.s1pdgs.cpoc.mqi.model.queue.IngestionEvent;
+import esa.s1pdgs.cpoc.mqi.model.queue.CatalogEvent;
 import esa.s1pdgs.cpoc.mqi.model.rest.GenericMessageDto;
 
 public class TestL0Utils {
@@ -94,39 +94,56 @@ public class TestL0Utils {
 //                TestL0Utils.getEdrsSessionFileRawsChannel2(xmlOnlyForRaws));
 //        return r;
 //    }
+    
+
+    // FIXME
+    public static CatalogEvent newCatalogEvent(
+    		final String string, 
+    		final String string2, 
+    		final int i, 
+    		final EdrsSessionFileType raw, 
+    		final String string3,
+			final String string4, 
+			final String string5, 
+			final String string6
+	) {
+		// TODO Auto-generated method stub FIXME
+		return new CatalogEvent();
+	}
+
 //
     public static AppDataJob buildAppDataEdrsSession(
-            boolean xmlOnlyForRaws) {
+            final boolean xmlOnlyForRaws) {
         return buildAppDataEdrsSession(xmlOnlyForRaws, "S1", true, true);
     }
 
     public static AppDataJob buildAppDataEdrsSessionWithRaw2(
-            boolean xmlOnlyForRaws) {
+            final boolean xmlOnlyForRaws) {
         return buildAppDataEdrsSession(xmlOnlyForRaws, "S1", false, true);
     }
 
     public static AppDataJob buildAppDataEdrsSession(
-            boolean xmlOnlyForRaws, String missionId, boolean raw1,
-            boolean raw2) {
-        AppDataJob ret = new AppDataJob();
+            final boolean xmlOnlyForRaws, final String missionId, final boolean raw1,
+            final boolean raw2) {
+        final AppDataJob ret = new AppDataJob();
         ret.setId(123);
         ret.setState(AppDataJobState.GENERATING);
         ret.setPod("hostname");
         ret.setLevel(ApplicationLevel.L0);
 
-        List<GenericMessageDto<IngestionEvent>> messages = new ArrayList<>();
+        final List<GenericMessageDto<CatalogEvent>> messages = new ArrayList<>();
         if (raw1) {
-            GenericMessageDto<IngestionEvent> message1 =
-                    new GenericMessageDto<IngestionEvent>(1, "input-key",
-                            new IngestionEvent("obs1", "/path/of/inbox", 1,
+            final GenericMessageDto<CatalogEvent> message1 =
+                    new GenericMessageDto<CatalogEvent>(1, "input-key",
+                            newCatalogEvent("obs1", "/path/of/inbox", 1,
                                     EdrsSessionFileType.SESSION, missionId,
                                     "A", "WILE", "sessionId"));
             messages.add(message1);
         }
         if (raw2) {
-            GenericMessageDto<IngestionEvent> message2 =
-                    new GenericMessageDto<IngestionEvent>(1, "input-key",
-                            new IngestionEvent("obs2", "/path/of/inbox", 2,
+            final GenericMessageDto<CatalogEvent> message2 =
+                    new GenericMessageDto<CatalogEvent>(1, "input-key",
+                            newCatalogEvent("obs2", "/path/of/inbox", 2,
                                     EdrsSessionFileType.SESSION, missionId,
                                     "A", "WILE", "sessionId"));
             messages.add(message2);
@@ -134,7 +151,7 @@ public class TestL0Utils {
         
         ret.setMessages(messages.stream().collect(Collectors.toList()));
 
-        AppDataJobProduct product = new AppDataJobProduct();
+        final AppDataJobProduct product = new AppDataJobProduct();
         product.setMissionId(missionId);
         product.setProductName("L20171109175634707000125");
         if (raw1) {
@@ -152,7 +169,7 @@ public class TestL0Utils {
         product.setProcessMode("");
         ret.setProduct(product);
 
-        AppDataJobGeneration gen1 = new AppDataJobGeneration();
+        final AppDataJobGeneration gen1 = new AppDataJobGeneration();
         gen1.setTaskTable("TaskTable.AIOP.xml");
         gen1.setState(AppDataJobGenerationState.INITIAL);
         ret.setGenerations(Arrays.asList(gen1));
@@ -161,7 +178,7 @@ public class TestL0Utils {
     }
 
     public static List<AppDataJobFile> getRawsChannel1(
-            boolean xmlOnlyForRaws) {
+            final boolean xmlOnlyForRaws) {
         if (xmlOnlyForRaws) {
             return Arrays.asList(new AppDataJobFile(
                     "DCS_02_L20171109175634707000125_ch1_DSDB_00001.raw"),
@@ -343,7 +360,7 @@ public class TestL0Utils {
     }
 
     public static List<AppDataJobFile> getRawsChannel2(
-            boolean xmlOnlyForRaws) {
+            final boolean xmlOnlyForRaws) {
         if (xmlOnlyForRaws) {
             return Arrays.asList(new AppDataJobFile(
                     "DCS_02_L20171109175634707000125_ch2_DSDB_00001.raw"),

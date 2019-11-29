@@ -16,6 +16,7 @@ import org.springframework.stereotype.Controller;
 import esa.s1pdgs.cpoc.appcatalog.client.mqi.AppCatalogMqiService;
 import esa.s1pdgs.cpoc.appcatalog.rest.AppCatMessageDto;
 import esa.s1pdgs.cpoc.appcatalog.rest.AppCatSendMessageDto;
+import esa.s1pdgs.cpoc.appstatus.AppStatus;
 import esa.s1pdgs.cpoc.common.MessageState;
 import esa.s1pdgs.cpoc.common.ProductCategory;
 import esa.s1pdgs.cpoc.common.ResumeDetails;
@@ -31,7 +32,6 @@ import esa.s1pdgs.cpoc.mqi.server.KafkaProperties;
 import esa.s1pdgs.cpoc.mqi.server.consumption.kafka.consumer.GenericConsumer;
 import esa.s1pdgs.cpoc.mqi.server.consumption.kafka.consumer.GenericConsumer.Factory;
 import esa.s1pdgs.cpoc.mqi.server.persistence.OtherApplicationService;
-import esa.s1pdgs.cpoc.mqi.server.status.AppStatusImpl;
 
 /**
  * Manager of consumers
@@ -67,11 +67,11 @@ public class MessageConsumptionController {
     private final GenericConsumer.Factory consumerFactory;
     
     MessageConsumptionController(
-    		Map<ProductCategory, Map<String, GenericConsumer<?>>> consumers,
-			ApplicationProperties appProperties, 
-			AppCatalogMqiService service, 
-			OtherApplicationService otherAppService,
-			Factory consumerFactory
+    		final Map<ProductCategory, Map<String, GenericConsumer<?>>> consumers,
+			final ApplicationProperties appProperties, 
+			final AppCatalogMqiService service, 
+			final OtherApplicationService otherAppService,
+			final Factory consumerFactory
 	) {
 		this.consumers = consumers;
 		this.appProperties = appProperties;
@@ -86,7 +86,7 @@ public class MessageConsumptionController {
             final KafkaProperties kafkaProperties,
             final AppCatalogMqiService service,	
             final OtherApplicationService otherAppService,
-            final AppStatusImpl appStatus) {
+            final AppStatus appStatus) {
 		this(
 				new HashMap<>(), 
 				appProperties, 
@@ -120,7 +120,7 @@ public class MessageConsumptionController {
         }
         // Start the consumers
         for (final Map<String, GenericConsumer<?>> catConsumers : consumers.values()) {
-            for (GenericConsumer<?> consumer : catConsumers.values()) {
+            for (final GenericConsumer<?> consumer : catConsumers.values()) {
                 LOGGER.info("Starting consumer on topic {}", consumer.getTopic());
                 consumer.start();
             }
@@ -154,7 +154,7 @@ public class MessageConsumptionController {
     {
     	return new Comparator<AppCatMessageDto<? extends AbstractMessage>>() {
             @Override
-            public int compare(AppCatMessageDto<? extends AbstractMessage> o1, AppCatMessageDto<? extends AbstractMessage> o2) {
+            public int compare(final AppCatMessageDto<? extends AbstractMessage> o1, final AppCatMessageDto<? extends AbstractMessage> o2) {
                 if(consumers.get(category).get(o1.getTopic()).getPriority() >
                     consumers.get(category).get(o2.getTopic()).getPriority()) {
                     return -1;
@@ -217,7 +217,7 @@ public class MessageConsumptionController {
                     isProcessing = otherAppService.isProcessing(
                             message.getSendingPod(), category,
                             message.getId());
-                } catch (AbstractCodedException ace) {
+                } catch (final AbstractCodedException ace) {
                     isProcessing = false;
                     LOGGER.warn(
                             "{} No response from the other application, consider it as dead",

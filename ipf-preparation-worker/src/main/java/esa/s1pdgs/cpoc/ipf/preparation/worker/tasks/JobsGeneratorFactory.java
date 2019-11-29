@@ -18,7 +18,7 @@ import esa.s1pdgs.cpoc.ipf.preparation.worker.tasks.l0app.L0AppJobsGenerator;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.tasks.l0segmentapp.L0SegmentAppJobsGenerator;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.tasks.levelproducts.LevelProductsJobsGenerator;
 import esa.s1pdgs.cpoc.metadata.client.MetadataClient;
-import esa.s1pdgs.cpoc.mqi.model.queue.IngestionEvent;
+import esa.s1pdgs.cpoc.mqi.model.queue.CatalogEvent;
 import esa.s1pdgs.cpoc.mqi.model.queue.ProductionEvent;
 
 @Service
@@ -85,9 +85,9 @@ public class JobsGeneratorFactory {
 	 * @return
 	 * @throws IpfPrepWorkerBuildTaskTableException
 	 */
-	public AbstractJobsGenerator<IngestionEvent> createJobGeneratorForEdrsSession(final File xmlFile,
-			final AppCatalogJobClient<IngestionEvent> appDataService) throws IpfPrepWorkerBuildTaskTableException {
-		AbstractJobsGenerator<IngestionEvent> processor = new L0AppJobsGenerator(this.xmlConverter,
+	public AbstractJobsGenerator<CatalogEvent> createJobGeneratorForEdrsSession(final File xmlFile,
+			final AppCatalogJobClient<CatalogEvent> appDataService) throws IpfPrepWorkerBuildTaskTableException {
+		AbstractJobsGenerator<CatalogEvent> processor = new L0AppJobsGenerator(this.xmlConverter,
 				this.metadataClient, this.l0ProcessSettings, this.ipfPreparationWorkerSettings, this.outputFactory,
 				appDataService, aiopProperties, processConfiguration);
 		processor.setMode(ProductMode.SLICING);

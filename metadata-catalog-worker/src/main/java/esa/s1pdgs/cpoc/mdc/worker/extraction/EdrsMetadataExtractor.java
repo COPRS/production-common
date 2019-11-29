@@ -43,10 +43,10 @@ public class EdrsMetadataExtractor extends AbstractMetadataExtractor {
         );
 
         //FIXME uniform handling of metadata extraction
-        edrsFileDescriptor.setMissionId(catJob.getMissionId());
-        edrsFileDescriptor.setSatelliteId(catJob.getSatelliteId());
-        edrsFileDescriptor.setSessionIdentifier(catJob.getSessionId());
-        edrsFileDescriptor.setStationCode(catJob.getStationCode());
+//        edrsFileDescriptor.setMissionId(catJob.getMissionId());
+//        edrsFileDescriptor.setSatelliteId(catJob.getSatelliteId());
+//        edrsFileDescriptor.setSessionIdentifier(catJob.getSessionId());
+//        edrsFileDescriptor.setStationCode(catJob.getStationCode());
         
         // Only when it is a DSIB
         if (edrsFileDescriptor.getEdrsSessionFileType() == EdrsSessionFileType.SESSION)

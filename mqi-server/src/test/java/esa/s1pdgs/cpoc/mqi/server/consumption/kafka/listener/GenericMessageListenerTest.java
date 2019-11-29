@@ -24,6 +24,7 @@ import org.springframework.kafka.support.Acknowledgment;
 import esa.s1pdgs.cpoc.appcatalog.client.mqi.AppCatalogMqiService;
 import esa.s1pdgs.cpoc.appcatalog.rest.AppCatMessageDto;
 import esa.s1pdgs.cpoc.appcatalog.rest.AppCatReadMessageDto;
+import esa.s1pdgs.cpoc.appstatus.AppStatus;
 import esa.s1pdgs.cpoc.common.MessageState;
 import esa.s1pdgs.cpoc.common.ProductCategory;
 import esa.s1pdgs.cpoc.common.ProductFamily;
@@ -37,7 +38,6 @@ import esa.s1pdgs.cpoc.mqi.server.KafkaProperties.KafkaConsumerProperties;
 import esa.s1pdgs.cpoc.mqi.server.consumption.kafka.consumer.GenericConsumer;
 import esa.s1pdgs.cpoc.mqi.server.consumption.kafka.consumer.MessageConsumer;
 import esa.s1pdgs.cpoc.mqi.server.persistence.OtherApplicationService;
-import esa.s1pdgs.cpoc.mqi.server.status.AppStatusImpl;
 
 /**
  * Test the listener GenericMessageListener
@@ -85,7 +85,7 @@ public class GenericMessageListenerTest {
      * Application status
      */
     @Mock
-    private AppStatusImpl appStatus;
+    private AppStatus appStatus;
 
     /**
      * Consumer of message listener
@@ -196,7 +196,7 @@ public class GenericMessageListenerTest {
     public void testmessageShallBeIgnoredWhenResponseTrue()
             throws AbstractCodedException {
 
-        AppCatMessageDto<ProductionEvent> msgLight = new AppCatMessageDto<ProductionEvent>(
+        final AppCatMessageDto<ProductionEvent> msgLight = new AppCatMessageDto<ProductionEvent>(
                 ProductCategory.AUXILIARY_FILES, 1234, "topic", 1, 111);
         msgLight.setState(MessageState.SEND);
         msgLight.setReadingPod("pod-name");
@@ -245,30 +245,30 @@ public class GenericMessageListenerTest {
     private void testmessageShallBeIgnoredWhenFalse()
             throws AbstractCodedException {
 
-        AppCatMessageDto<ProductionEvent> msgLight = new AppCatMessageDto<ProductionEvent>(
+        final AppCatMessageDto<ProductionEvent> msgLight = new AppCatMessageDto<ProductionEvent>(
                 ProductCategory.AUXILIARY_FILES, 1234, "topic", 1, 111);
         msgLight.setState(MessageState.SEND);
         msgLight.setReadingPod("pod-name");
         msgLight.setSendingPod("other-name");
 
-        AppCatMessageDto<ProductionEvent> msgLightForceRead = new AppCatMessageDto<ProductionEvent>(
+        final AppCatMessageDto<ProductionEvent> msgLightForceRead = new AppCatMessageDto<ProductionEvent>(
                 ProductCategory.AUXILIARY_FILES, 1234, "topic", 1, 111);
         msgLightForceRead.setState(MessageState.READ);
         msgLightForceRead.setReadingPod("pod-name");
 
-        AppCatMessageDto<ProductionEvent> msgLightForceAck = new AppCatMessageDto<ProductionEvent>(
+        final AppCatMessageDto<ProductionEvent> msgLightForceAck = new AppCatMessageDto<ProductionEvent>(
                 ProductCategory.AUXILIARY_FILES, 1234, "topic", 1, 111);
         msgLightForceAck.setState(MessageState.ACK_KO);
         msgLightForceAck.setReadingPod("pod-name");
         msgLightForceAck.setSendingPod("other-name");
 
-        AppCatMessageDto<ProductionEvent> msgLightForceSend = new AppCatMessageDto<ProductionEvent>(
+        final AppCatMessageDto<ProductionEvent> msgLightForceSend = new AppCatMessageDto<ProductionEvent>(
                 ProductCategory.AUXILIARY_FILES, 1234, "topic", 1, 111);
         msgLightForceSend.setState(MessageState.SEND);
         msgLightForceSend.setReadingPod("pod-name");
         msgLightForceSend.setSendingPod("other-name");
 
-        AppCatReadMessageDto<ProductionEvent> expectedReadBody =
+        final AppCatReadMessageDto<ProductionEvent> expectedReadBody =
                 new AppCatReadMessageDto<ProductionEvent>("group-name", "pod-name",
                         true, data.value());
 
@@ -349,13 +349,13 @@ public class GenericMessageListenerTest {
      * @param pause
      * @throws AbstractCodedException
      */
-    private void checkOnMEssageWhenAckRead(MessageState state,
-            boolean pause) throws AbstractCodedException {
-        AppCatMessageDto<ProductionEvent> msgLight = new AppCatMessageDto<ProductionEvent>(
+    private void checkOnMEssageWhenAckRead(final MessageState state,
+            final boolean pause) throws AbstractCodedException {
+        final AppCatMessageDto<ProductionEvent> msgLight = new AppCatMessageDto<ProductionEvent>(
                 ProductCategory.AUXILIARY_FILES, 1234, "topic", 1, 111);
         msgLight.setState(state);
 
-        AppCatReadMessageDto<ProductionEvent> expectedReadBody =
+        final AppCatReadMessageDto<ProductionEvent> expectedReadBody =
                 new AppCatReadMessageDto<ProductionEvent>("group-name", "pod-name",
                         false, data.value());
 
@@ -391,7 +391,7 @@ public class GenericMessageListenerTest {
                         Mockito.anyString(), Mockito.anyInt(),
                         Mockito.anyLong(), Mockito.any());
 
-        AppCatReadMessageDto<ProductionEvent> expectedReadBody =
+        final AppCatReadMessageDto<ProductionEvent> expectedReadBody =
                 new AppCatReadMessageDto<>("group-name", "pod-name",
                         false, data.value());
 
@@ -415,12 +415,12 @@ public class GenericMessageListenerTest {
     @Test
     public void testOnMessageWhenProcessingBySamePod()
             throws AbstractCodedException {
-        AppCatMessageDto<ProductionEvent> msgLight = new AppCatMessageDto<ProductionEvent>(
+        final AppCatMessageDto<ProductionEvent> msgLight = new AppCatMessageDto<ProductionEvent>(
                 ProductCategory.AUXILIARY_FILES, 1234, "topic", 1, 111);
         msgLight.setState(MessageState.SEND);
         msgLight.setSendingPod("pod-name");
 
-        AppCatReadMessageDto<ProductionEvent> expectedReadBody =
+        final AppCatReadMessageDto<ProductionEvent> expectedReadBody =
                 new AppCatReadMessageDto<>("group-name", "pod-name",
                         false, data.value());
 
@@ -448,12 +448,12 @@ public class GenericMessageListenerTest {
     @Test
     public void testOnMessageWhenProcessingByOtherPod()
             throws AbstractCodedException {
-        AppCatMessageDto<ProductionEvent> msgLight = new AppCatMessageDto<ProductionEvent>(
+        final AppCatMessageDto<ProductionEvent> msgLight = new AppCatMessageDto<ProductionEvent>(
                 ProductCategory.AUXILIARY_FILES, 1234, "topic", 1, 111);
         msgLight.setState(MessageState.SEND);
         msgLight.setSendingPod("other-name");
 
-        AppCatReadMessageDto<ProductionEvent> expectedReadBody =
+        final AppCatReadMessageDto<ProductionEvent> expectedReadBody =
                 new AppCatReadMessageDto<>("group-name", "pod-name",
                         false, data.value());
 
@@ -484,21 +484,21 @@ public class GenericMessageListenerTest {
     @Test
     public void testOnMessageWhenProcessingButNoResponse()
             throws AbstractCodedException {
-        AppCatMessageDto<ProductionEvent> msgLight = new AppCatMessageDto<ProductionEvent>(
+        final AppCatMessageDto<ProductionEvent> msgLight = new AppCatMessageDto<ProductionEvent>(
                 ProductCategory.AUXILIARY_FILES, 1234, "topic", 1, 111);
         msgLight.setState(MessageState.SEND);
         msgLight.setSendingPod("other-name");
 
-        AppCatMessageDto<ProductionEvent> msgLightForceRead = new AppCatMessageDto<ProductionEvent>(
+        final AppCatMessageDto<ProductionEvent> msgLightForceRead = new AppCatMessageDto<ProductionEvent>(
                 ProductCategory.AUXILIARY_FILES, 1234, "topic", 1, 111);
         msgLightForceRead.setState(MessageState.READ);
         msgLightForceRead.setReadingPod("pod-name");
 
-        AppCatReadMessageDto<ProductionEvent> expectedReadBody =
+        final AppCatReadMessageDto<ProductionEvent> expectedReadBody =
                 new AppCatReadMessageDto<>("group-name", "pod-name",
                         false, data.value());
 
-        AppCatReadMessageDto<ProductionEvent> expectedReadBodyForce =
+        final AppCatReadMessageDto<ProductionEvent> expectedReadBodyForce =
                 new AppCatReadMessageDto<>("group-name", "pod-name",
                         true, data.value());
 

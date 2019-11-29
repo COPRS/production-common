@@ -11,7 +11,6 @@ import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.junit4.SpringRunner;
 
 import esa.s1pdgs.cpoc.common.ApplicationLevel;
-import esa.s1pdgs.cpoc.ipf.preparation.worker.config.ProcessSettings;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest

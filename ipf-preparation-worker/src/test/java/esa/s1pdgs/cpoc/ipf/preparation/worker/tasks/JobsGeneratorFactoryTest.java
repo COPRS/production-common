@@ -42,7 +42,7 @@ import esa.s1pdgs.cpoc.ipf.preparation.worker.tasks.JobsGeneratorFactory;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.utils.TestGenericUtils;
 import esa.s1pdgs.cpoc.metadata.client.MetadataClient;
 import esa.s1pdgs.cpoc.metadata.client.SearchMetadataQuery;
-import esa.s1pdgs.cpoc.mqi.model.queue.IngestionEvent;
+import esa.s1pdgs.cpoc.mqi.model.queue.CatalogEvent;
 import esa.s1pdgs.cpoc.mqi.model.queue.ProductionEvent;
 
 public class JobsGeneratorFactoryTest {
@@ -155,7 +155,7 @@ public class JobsGeneratorFactoryTest {
                     l0ProcessSettings, ipfPreparationWorkerSettings, aiopProperties,
                     xmlConverter, metadataClient, JobsSender, processConfiguration);
 
-            AbstractJobsGenerator<IngestionEvent> generator =
+            AbstractJobsGenerator<CatalogEvent> generator =
                     factory.createJobGeneratorForEdrsSession(new File(
                             "./test/data/generic_config/task_tables/task_tables/TaskTable.AIOP.xml"),
                             appDataEService);
