@@ -7,8 +7,17 @@ import java.util.Objects;
  * 
  * @author Viveris technologies
  */
-public class IngestionEvent extends AbstractMessage {	
-	private String relativePath;
+public class IngestionEvent extends AbstractMessage {
+	private String productName = NOT_DEFINED;
+	private String relativePath = NOT_DEFINED;
+
+	public String getProductName() {
+		return productName;
+	}
+
+	public void setProductName(final String productName) {
+		this.productName = productName;
+	}
 
 	public String getRelativePath() {
 		return relativePath;
@@ -17,10 +26,10 @@ public class IngestionEvent extends AbstractMessage {
 	public void setRelativePath(final String relativePath) {
 		this.relativePath = relativePath;
 	}
-
+	
 	@Override
 	public int hashCode() {
-		return Objects.hash(creationDate, hostname, keyObjectStorage, productFamily, relativePath);
+		return Objects.hash(creationDate, hostname, keyObjectStorage, productFamily, productName, relativePath);
 	}
 
 	@Override
@@ -39,12 +48,14 @@ public class IngestionEvent extends AbstractMessage {
 				&& Objects.equals(hostname, other.hostname)
 				&& Objects.equals(keyObjectStorage, other.keyObjectStorage) 
 				&& productFamily == other.productFamily
+				&& Objects.equals(productName, other.productName)
 				&& Objects.equals(relativePath, other.relativePath);
 	}
 
 	@Override
 	public String toString() {
-		return "IngestionEvent [productFamily=" + productFamily + ", keyObjectStorage=" + keyObjectStorage
-				+ ", creationDate=" + creationDate + ", hostname=" + hostname + ", relativePath=" + relativePath + "]";
+		return "IngestionEvent [productName=" + productName + ", productFamily=" + productFamily + ", keyObjectStorage=" 
+				+ keyObjectStorage + ", creationDate=" + creationDate + ", hostname=" + hostname + ", relativePath=" + 
+				relativePath + "]";
 	}
 }

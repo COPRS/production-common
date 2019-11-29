@@ -21,9 +21,8 @@ import esa.s1pdgs.cpoc.common.ProductFamily;
 import esa.s1pdgs.cpoc.common.errors.AbstractCodedException;
 import esa.s1pdgs.cpoc.common.errors.InternalErrorException;
 import esa.s1pdgs.cpoc.ingestion.worker.config.ProcessConfiguration;
-import esa.s1pdgs.cpoc.mqi.model.queue.AbstractMessage;
+import esa.s1pdgs.cpoc.mqi.model.queue.IngestionEvent;
 import esa.s1pdgs.cpoc.mqi.model.queue.IngestionJob;
-import esa.s1pdgs.cpoc.mqi.model.queue.ProductionEvent;
 import esa.s1pdgs.cpoc.obs_sdk.ObsClient;
 import esa.s1pdgs.cpoc.obs_sdk.ObsUploadObject;
 
@@ -48,9 +47,7 @@ public class TestProductServiceImpl {
 	@Before
 	public void setup() {
 		MockitoAnnotations.initMocks(this);
-		processConfiguration = new ProcessConfiguration();
-		processConfiguration.setHostname("hostname");
-		uut = new ProductServiceImpl(obsClient, processConfiguration);
+		uut = new ProductServiceImpl(obsClient);
 		
 		doReturn(false).when(nonExistentFile).exists();
 		doReturn(false).when(nonExistentFile).canRead();
@@ -80,9 +77,12 @@ public class TestProductServiceImpl {
 		ingestionJob.setStationCode("WILE");
 		ingestionJob.setCreationDate(new Date());
 		ingestionJob.setHostname("hostname");
-		final Product<AbstractMessage> product = new Product<>();
+		final Product<IngestionEvent> product = new Product<>();
 		product.setFamily(family);
-		final ProductionEvent expectedProductionEvent = new ProductionEvent("null", "null", family);
+		final IngestionEvent expectedProductionEvent = new IngestionEvent();
+		expectedProductionEvent.setProductName("null");
+		expectedProductionEvent.setKeyObjectStorage("null");
+		expectedProductionEvent.setProductFamily(family);
 		expectedProductionEvent.setHostname("hostname");
 		expectedProductionEvent.setCreationDate(new Date());
 		product.setDto(expectedProductionEvent);

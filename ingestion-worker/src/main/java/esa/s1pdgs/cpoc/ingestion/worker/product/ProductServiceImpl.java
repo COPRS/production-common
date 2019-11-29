@@ -3,7 +3,7 @@ package esa.s1pdgs.cpoc.ingestion.worker.product;
 import java.io.File;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.List;
+import java.util.Collections;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.logging.log4j.LogManager;
@@ -13,9 +13,8 @@ import org.springframework.stereotype.Service;
 
 import esa.s1pdgs.cpoc.common.ProductFamily;
 import esa.s1pdgs.cpoc.common.errors.InternalErrorException;
-import esa.s1pdgs.cpoc.ingestion.worker.config.ProcessConfiguration;
 import esa.s1pdgs.cpoc.ingestion.worker.obs.ObsAdapter;
-import esa.s1pdgs.cpoc.mqi.model.queue.AbstractMessage;
+import esa.s1pdgs.cpoc.mqi.model.queue.IngestionEvent;
 import esa.s1pdgs.cpoc.mqi.model.queue.IngestionJob;
 import esa.s1pdgs.cpoc.obs_sdk.ObsClient;
 
@@ -24,13 +23,10 @@ public class ProductServiceImpl implements ProductService {
 	static final Logger LOG = LogManager.getLogger(ProductServiceImpl.class);
 	
     private final ObsClient obsClient;
-    
-    private final String hostname;
 	
 	@Autowired
-	public ProductServiceImpl(final ObsClient obsClient, final ProcessConfiguration processConfiguration) {
+	public ProductServiceImpl(final ObsClient obsClient) {
 		this.obsClient = obsClient;
-		this.hostname = processConfiguration.getHostname();
 	}
 	
 	@Override
@@ -38,13 +34,22 @@ public class ProductServiceImpl implements ProductService {
 			throws ProductException, InternalErrorException {
 		final File file = toFile(ingestion);		
 		assertPermissions(ingestion, file);
-		final ProductFactory<AbstractMessage> productFactory = ProductFactory.newProductFactoryFor(family, hostname);
-		LOG.debug("Using {} for {}", productFactory, family);
 		
 		final ObsAdapter obsAdapter = newObsAdapterFor(Paths.get(ingestion.getPickupPath()));
-		final List<Product<AbstractMessage>> result = productFactory.newProducts(file, ingestion, obsAdapter);					
+		
+		final IngestionEvent dto = new IngestionEvent();
+		dto.setProductName(file.getName());
+		dto.setProductFamily(family);
+		dto.setKeyObjectStorage(obsAdapter.toObsKey(file));
+		dto.setRelativePath(ingestion.getRelativePath());
+		
+		final Product<IngestionEvent> prod = new Product<>();
+		prod.setFamily(family);
+		prod.setFile(file);	
+		prod.setDto(dto);
+		
 		long transferAmount = 0L;
-		// is restart scenario?
+
 		if (ingestion.getProductFamily() == ProductFamily.INVALID) {
 			
 			// has been already restarted before?
@@ -57,11 +62,11 @@ public class ProductServiceImpl implements ProductService {
 			obsAdapter.upload(family, file);
 			transferAmount = FileUtils.sizeOf(file);
 		}		
-		return new IngestionResult(result, transferAmount);	
+		return new IngestionResult(Collections.singletonList(prod), transferAmount);	
 	}
 
 	@Override
-	public void markInvalid(IngestionJob ingestion) {	
+	public void markInvalid(final IngestionJob ingestion) {	
 		final File file = toFile(ingestion);
 		newObsAdapterFor(Paths.get(ingestion.getPickupPath())).upload(ProductFamily.INVALID, file);		
 	}

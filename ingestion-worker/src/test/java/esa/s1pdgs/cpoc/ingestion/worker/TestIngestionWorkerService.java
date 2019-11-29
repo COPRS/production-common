@@ -24,17 +24,16 @@ import esa.s1pdgs.cpoc.common.ProductFamily;
 import esa.s1pdgs.cpoc.common.errors.AbstractCodedException;
 import esa.s1pdgs.cpoc.common.errors.InternalErrorException;
 import esa.s1pdgs.cpoc.errorrepo.ErrorRepoAppender;
-import esa.s1pdgs.cpoc.ingestion.worker.IngestionWorkerService;
-import esa.s1pdgs.cpoc.ingestion.worker.config.IngestionWorkerServiceConfigurationProperties;
 import esa.s1pdgs.cpoc.ingestion.worker.config.IngestionTypeConfiguration;
+import esa.s1pdgs.cpoc.ingestion.worker.config.IngestionWorkerServiceConfigurationProperties;
 import esa.s1pdgs.cpoc.ingestion.worker.product.IngestionResult;
 import esa.s1pdgs.cpoc.ingestion.worker.product.Product;
 import esa.s1pdgs.cpoc.ingestion.worker.product.ProductException;
 import esa.s1pdgs.cpoc.ingestion.worker.product.ProductService;
 import esa.s1pdgs.cpoc.mqi.client.GenericMqiClient;
 import esa.s1pdgs.cpoc.mqi.model.queue.AbstractMessage;
+import esa.s1pdgs.cpoc.mqi.model.queue.IngestionEvent;
 import esa.s1pdgs.cpoc.mqi.model.queue.IngestionJob;
-import esa.s1pdgs.cpoc.mqi.model.queue.ProductionEvent;
 import esa.s1pdgs.cpoc.mqi.model.rest.GenericMessageDto;
 import esa.s1pdgs.cpoc.mqi.model.rest.GenericPublicationMessageDto;
 import esa.s1pdgs.cpoc.report.LoggerReporting;
@@ -75,10 +74,10 @@ public final class TestIngestionWorkerService {
 		
 		final ProductService fakeProductService = new ProductService() {			
 			@Override
-			public void markInvalid(IngestionJob ingestion) {}
+			public void markInvalid(final IngestionJob ingestion) {}
 			
 			@Override
-			public IngestionResult ingest(ProductFamily family, IngestionJob ingestion)
+			public IngestionResult ingest(final ProductFamily family, final IngestionJob ingestion)
 					throws ProductException, InternalErrorException {
 				return IngestionResult.NULL;
 			}
@@ -92,10 +91,22 @@ public final class TestIngestionWorkerService {
 		uut.onMessage(mess);
 	}
 
+	private final IngestionEvent newIngestionEvent(
+			final String name,
+			final String key,
+			final ProductFamily family
+	) {
+		final IngestionEvent dto = new IngestionEvent();
+		dto.setProductName(name);
+		dto.setRelativePath(key);
+		dto.setProductFamily(family);
+		return dto;
+	}
+	
 	@Test
 	public final void testIdentifyAndUpload() throws InternalErrorException {
-		IngestionWorkerServiceConfigurationProperties properties = new IngestionWorkerServiceConfigurationProperties();
-		IngestionTypeConfiguration itc = new IngestionTypeConfiguration();
+		final IngestionWorkerServiceConfigurationProperties properties = new IngestionWorkerServiceConfigurationProperties();
+		final IngestionTypeConfiguration itc = new IngestionTypeConfiguration();
 		itc.setFamily(ProductFamily.AUXILIARY_FILE.name());
 		itc.setRegex("fo+\\.bar");
 		properties.setTypes(Arrays.asList(itc));
@@ -107,27 +118,27 @@ public final class TestIngestionWorkerService {
 		);
 		doReturn(new LoggerReporting(logger, "uuid", "actionName", 1)).when(reportingFactory).newReporting(Mockito.eq(1));
 
-		GenericMessageDto<IngestionJob> message = new GenericMessageDto<>();
+		final GenericMessageDto<IngestionJob> message = new GenericMessageDto<>();
 		message.setId(123L);
 		message.setBody(null);
-		IngestionJob ingestionJob = new IngestionJob("foo.bar");
+		final IngestionJob ingestionJob = new IngestionJob("foo.bar");
 		message.setBody(ingestionJob);
 		
-		File file = new File("foo.bar");
-		final Product<AbstractMessage> prod = new Product<>();
+		final File file = new File("foo.bar");
+		final Product<IngestionEvent> prod = new Product<>();
 		prod.setFamily(ProductFamily.AUXILIARY_FILE);
 		prod.setFile(file);	
-		final ProductionEvent dto = new ProductionEvent(
+		final IngestionEvent dto = newIngestionEvent(
 				file.getName(), 
 				"foo.bar", 
 				ProductFamily.AUXILIARY_FILE
 		);
 		prod.setDto(dto);
 		
-		IngestionResult expectedResult = new IngestionResult(Arrays.asList(prod), 0L);
+		final IngestionResult expectedResult = new IngestionResult(Arrays.asList(prod), 0L);
 		doReturn(expectedResult).when(productService).ingest(Mockito.eq(ProductFamily.AUXILIARY_FILE), Mockito.eq(ingestionJob));
 		
-		IngestionResult result = uut.identifyAndUpload(reportingFactory, message, ingestionJob);
+		final IngestionResult result = uut.identifyAndUpload(reportingFactory, message, ingestionJob);
 		assertEquals(expectedResult, result);
 		verify(productService, times(1)).ingest(Mockito.eq(ProductFamily.AUXILIARY_FILE), Mockito.eq(ingestionJob));
 		verify(productService, never()).markInvalid(Mockito.any());
@@ -135,8 +146,8 @@ public final class TestIngestionWorkerService {
 	
 	@Test
 	public final void testIdentifyAndUploadOnInvalidFamily() throws InternalErrorException {
-		IngestionWorkerServiceConfigurationProperties properties = new IngestionWorkerServiceConfigurationProperties();
-		IngestionTypeConfiguration itc = new IngestionTypeConfiguration();
+		final IngestionWorkerServiceConfigurationProperties properties = new IngestionWorkerServiceConfigurationProperties();
+		final IngestionTypeConfiguration itc = new IngestionTypeConfiguration();
 		itc.setFamily("FOO");
 		itc.setRegex("fo+\\.bar");
 		properties.setTypes(Arrays.asList(itc));
@@ -148,13 +159,13 @@ public final class TestIngestionWorkerService {
 		);
 		doReturn(new LoggerReporting(logger, "uuid", "actionName", 1)).when(reportingFactory).newReporting(Mockito.eq(1));
 
-		GenericMessageDto<IngestionJob> message = new GenericMessageDto<>();
+		final GenericMessageDto<IngestionJob> message = new GenericMessageDto<>();
 		message.setId(123L);
 		message.setBody(null);
-		IngestionJob ingestionJob = new IngestionJob("foo.bar");
+		final IngestionJob ingestionJob = new IngestionJob("foo.bar");
 		message.setBody(ingestionJob);
 		
-		IngestionResult result = uut.identifyAndUpload(reportingFactory, message, ingestionJob);
+		final IngestionResult result = uut.identifyAndUpload(reportingFactory, message, ingestionJob);
 		assertEquals(IngestionResult.NULL, result);
 		verify(productService, never()).ingest(Mockito.any(), Mockito.any());
 		verify(productService, times(1)).markInvalid(Mockito.eq(ingestionJob));
@@ -162,8 +173,8 @@ public final class TestIngestionWorkerService {
 
 	@Test
 	public final void testGetFamilyForNominal() {
-		IngestionWorkerServiceConfigurationProperties properties = new IngestionWorkerServiceConfigurationProperties();
-		IngestionTypeConfiguration itc = new IngestionTypeConfiguration();
+		final IngestionWorkerServiceConfigurationProperties properties = new IngestionWorkerServiceConfigurationProperties();
+		final IngestionTypeConfiguration itc = new IngestionTypeConfiguration();
 		itc.setFamily(ProductFamily.AUXILIARY_FILE.name());
 		itc.setRegex("fo+\\.bar");
 		properties.setTypes(Arrays.asList(itc));
@@ -179,8 +190,8 @@ public final class TestIngestionWorkerService {
 	
 	@Test
 	public final void testGetFamilyForNotMatching() {
-		IngestionWorkerServiceConfigurationProperties properties = new IngestionWorkerServiceConfigurationProperties();
-		IngestionTypeConfiguration itc = new IngestionTypeConfiguration();
+		final IngestionWorkerServiceConfigurationProperties properties = new IngestionWorkerServiceConfigurationProperties();
+		final IngestionTypeConfiguration itc = new IngestionTypeConfiguration();
 		itc.setFamily(ProductFamily.AUXILIARY_FILE.name());
 		itc.setRegex("fo+\\.bar");
 		properties.setTypes(Arrays.asList(itc));
@@ -198,8 +209,8 @@ public final class TestIngestionWorkerService {
 	
 	@Test
 	public final void testGetFamilyForInvalid() {
-		IngestionWorkerServiceConfigurationProperties properties = new IngestionWorkerServiceConfigurationProperties();
-		IngestionTypeConfiguration itc = new IngestionTypeConfiguration();
+		final IngestionWorkerServiceConfigurationProperties properties = new IngestionWorkerServiceConfigurationProperties();
+		final IngestionTypeConfiguration itc = new IngestionTypeConfiguration();
 		itc.setFamily("FOO");
 		itc.setRegex("fo+\\.bar");
 		properties.setTypes(Arrays.asList(itc));
@@ -231,13 +242,13 @@ public final class TestIngestionWorkerService {
 		message.setInputKey("inputKey");
 		message.setBody(new IngestionJob());
 		
-		AbstractMessage dto = new ProductionEvent();
+		final IngestionEvent dto = new IngestionEvent();
 		
-		final Product<AbstractMessage> product = new Product<>();
+		final Product<IngestionEvent> product = new Product<>();
 		product.setFamily(ProductFamily.AUXILIARY_FILE);
 		product.setDto(dto);
 			
-		final List<Product<AbstractMessage>> products = new ArrayList<>();
+		final List<Product<IngestionEvent>> products = new ArrayList<>();
 		products.add(product);
 		
 		uut.publish(products, message, reportingFactory);

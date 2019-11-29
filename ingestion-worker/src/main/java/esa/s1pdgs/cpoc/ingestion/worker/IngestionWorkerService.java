@@ -33,6 +33,7 @@ import esa.s1pdgs.cpoc.mqi.client.GenericMqiClient;
 import esa.s1pdgs.cpoc.mqi.client.MqiConsumer;
 import esa.s1pdgs.cpoc.mqi.client.MqiListener;
 import esa.s1pdgs.cpoc.mqi.model.queue.AbstractMessage;
+import esa.s1pdgs.cpoc.mqi.model.queue.IngestionEvent;
 import esa.s1pdgs.cpoc.mqi.model.queue.IngestionJob;
 import esa.s1pdgs.cpoc.mqi.model.rest.GenericMessageDto;
 import esa.s1pdgs.cpoc.mqi.model.rest.GenericPublicationMessageDto;
@@ -128,9 +129,9 @@ public class IngestionWorkerService implements MqiListener<IngestionJob> {
 		return result;
 	}
 
-	final void publish(final List<Product<AbstractMessage>> products, final GenericMessageDto<IngestionJob> message,
+	final void publish(final List<Product<IngestionEvent>> products, final GenericMessageDto<IngestionJob> message,
 			final Reporting.Factory reportingFactory) throws AbstractCodedException {
-		for (final Product<AbstractMessage> product : products) {
+		for (final Product<IngestionEvent> product : products) {
 			final GenericPublicationMessageDto<? extends AbstractMessage> result = new GenericPublicationMessageDto<>(
 					message.getId(), product.getFamily(), product.getDto());
 			result.setInputKey(message.getInputKey());
