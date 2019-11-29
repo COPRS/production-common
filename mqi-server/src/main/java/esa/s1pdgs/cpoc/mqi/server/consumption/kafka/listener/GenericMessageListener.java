@@ -10,6 +10,7 @@ import org.springframework.kafka.support.Acknowledgment;
 import esa.s1pdgs.cpoc.appcatalog.client.mqi.AppCatalogMqiService;
 import esa.s1pdgs.cpoc.appcatalog.rest.AppCatMessageDto;
 import esa.s1pdgs.cpoc.appcatalog.rest.AppCatReadMessageDto;
+import esa.s1pdgs.cpoc.appstatus.AppStatus;
 import esa.s1pdgs.cpoc.common.MessageState;
 import esa.s1pdgs.cpoc.common.ProductCategory;
 import esa.s1pdgs.cpoc.common.errors.AbstractCodedException;
@@ -18,7 +19,6 @@ import esa.s1pdgs.cpoc.mqi.server.KafkaProperties;
 import esa.s1pdgs.cpoc.mqi.server.consumption.kafka.consumer.GenericConsumer;
 import esa.s1pdgs.cpoc.mqi.server.consumption.kafka.consumer.MessageConsumer;
 import esa.s1pdgs.cpoc.mqi.server.persistence.OtherApplicationService;
-import esa.s1pdgs.cpoc.mqi.server.status.AppStatusImpl;
 
 /**
  * Kafka message listener<br/>
@@ -43,7 +43,7 @@ public final class GenericMessageListener<T> implements AcknowledgingConsumerAwa
      */
     private final OtherApplicationService otherAppService;
     private final GenericConsumer<T> genericConsumer;
-    private final AppStatusImpl appStatus;    
+    private final AppStatus appStatus;    
     private final ProductCategory category;
     private final MessageConsumer<T> additionalConsumer;
 
@@ -53,7 +53,7 @@ public final class GenericMessageListener<T> implements AcknowledgingConsumerAwa
             final AppCatalogMqiService service,
             final OtherApplicationService otherAppService,
             final GenericConsumer<T> genericConsumer,
-            final AppStatusImpl appStatus,
+            final AppStatus appStatus,
             final MessageConsumer<T> additionalConsumer
     ) {
     	this.category = category;
@@ -92,7 +92,7 @@ public final class GenericMessageListener<T> implements AcknowledgingConsumerAwa
         	additionalConsumer.consume(message);
             handleMessage(data, acknowledgment, result);
             appStatus.setWaiting();
-        } catch (Exception e) {        	
+        } catch (final Exception e) {        	
         	if (e instanceof AbstractCodedException) {
         		final AbstractCodedException ace = (AbstractCodedException) e;
         		LOGGER.error(
@@ -170,7 +170,7 @@ public final class GenericMessageListener<T> implements AcknowledgingConsumerAwa
         try {
         	LOGGER.debug("Acknowledging KAFKA message: {}", data.value());
             acknowledgment.acknowledge();
-        } catch (Exception e) {
+        } catch (final Exception e) {
         	LOGGER.error(
         			"Error on acknowledging KAFKA message (topic: {}, partition: {}, offset: {}) {} : {}", 
         			data.topic(),
@@ -197,7 +197,7 @@ public final class GenericMessageListener<T> implements AcknowledgingConsumerAwa
         // Ask to the other application
         try {
             ret = otherAppService.isProcessing(mess.getSendingPod(), category, mess.getId());
-        } catch (AbstractCodedException ace) {
+        } catch (final AbstractCodedException ace) {
             ret = false;
             LOGGER.warn("{} No response from the other application, consider it as dead", ace.getLogMessage());
         }
@@ -217,7 +217,7 @@ public final class GenericMessageListener<T> implements AcknowledgingConsumerAwa
     }
     
     @SuppressWarnings("unchecked")
-	private final AppCatMessageDto<T> saveInAppCat(final ConsumerRecord<String, T> data, boolean force) throws AbstractCodedException {
+	private final AppCatMessageDto<T> saveInAppCat(final ConsumerRecord<String, T> data, final boolean force) throws AbstractCodedException {
     	return (AppCatMessageDto<T>) service.read(
     			category,
     			data.topic(),

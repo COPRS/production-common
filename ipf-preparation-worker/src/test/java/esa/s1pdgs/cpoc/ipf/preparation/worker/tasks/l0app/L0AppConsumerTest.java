@@ -30,19 +30,18 @@ import esa.s1pdgs.cpoc.common.errors.AbstractCodedException;
 import esa.s1pdgs.cpoc.errorrepo.ErrorRepoAppender;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.config.ProcessSettings;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.tasks.AbstractJobsDispatcher;
-import esa.s1pdgs.cpoc.ipf.preparation.worker.tasks.l0app.L0AppConsumer;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.utils.TestL0Utils;
 import esa.s1pdgs.cpoc.metadata.client.MetadataClient;
 import esa.s1pdgs.cpoc.metadata.model.EdrsSessionMetadata;
 import esa.s1pdgs.cpoc.mqi.client.GenericMqiClient;
 import esa.s1pdgs.cpoc.mqi.client.StatusService;
-import esa.s1pdgs.cpoc.mqi.model.queue.IngestionEvent;
+import esa.s1pdgs.cpoc.mqi.model.queue.CatalogEvent;
 import esa.s1pdgs.cpoc.mqi.model.rest.GenericMessageDto;
 
 public class L0AppConsumerTest {
 
     @Mock
-    private AbstractJobsDispatcher<IngestionEvent> jobsDispatcher;
+    private AbstractJobsDispatcher<CatalogEvent> jobsDispatcher;
 
     @Mock
     protected ProcessSettings processSettings;
@@ -68,22 +67,24 @@ public class L0AppConsumerTest {
 
     private ErrorRepoAppender errorAppender = ErrorRepoAppender.NULL ;
 
-    private IngestionEvent ingestionEvent1 = new IngestionEvent("KEY_OBS_SESSION_1_1", "/path/of/inbox", 1,
+    // TODO FIXME
+    
+    private CatalogEvent ingestionEvent1 = TestL0Utils.newCatalogEvent("KEY_OBS_SESSION_1_1", "/path/of/inbox", 1,
             EdrsSessionFileType.SESSION, "S1", "A", "WILE", "sessionId");
-    private IngestionEvent ingestionEvent2 = new IngestionEvent("KEY_OBS_SESSION_1_2", "/path/of/inbox", 2,
+    private CatalogEvent ingestionEvent2 = TestL0Utils.newCatalogEvent("KEY_OBS_SESSION_1_2", "/path/of/inbox", 2,
             EdrsSessionFileType.SESSION, "S1", "A", "WILE", "sessionId");
-    private IngestionEvent ingestionEvent3 = new IngestionEvent("KEY_OBS_SESSION_2_1", "/path/of/inbox", 1,
+    private CatalogEvent ingestionEvent3 = TestL0Utils.newCatalogEvent("KEY_OBS_SESSION_2_1", "/path/of/inbox", 1,
             EdrsSessionFileType.SESSION, "S1", "A", "WILE", "sessionId");
-    private IngestionEvent ingestionEvent4 = new IngestionEvent("KEY_OBS_SESSION_2_2", "/path/of/inbox", 2,
+    private CatalogEvent ingestionEvent4 = TestL0Utils.newCatalogEvent("KEY_OBS_SESSION_2_2", "/path/of/inbox", 2,
             EdrsSessionFileType.SESSION, "S1", "A", "WILE", "sessionId");
-    private GenericMessageDto<IngestionEvent> message1 =
-            new GenericMessageDto<IngestionEvent>(1, "", ingestionEvent1);
-    private GenericMessageDto<IngestionEvent> message2 =
-            new GenericMessageDto<IngestionEvent>(2, "", ingestionEvent2);
-    private GenericMessageDto<IngestionEvent> message3 =
-            new GenericMessageDto<IngestionEvent>(3, "", ingestionEvent3);
-    private GenericMessageDto<IngestionEvent> message4 =
-            new GenericMessageDto<IngestionEvent>(4, "", ingestionEvent4);
+    private GenericMessageDto<CatalogEvent> message1 =
+            new GenericMessageDto<CatalogEvent>(1, "",ingestionEvent1);
+    private GenericMessageDto<CatalogEvent> message2 =
+            new GenericMessageDto<CatalogEvent>(2, "", ingestionEvent2);
+    private GenericMessageDto<CatalogEvent> message3 =
+            new GenericMessageDto<CatalogEvent>(3, "", ingestionEvent3);
+    private GenericMessageDto<CatalogEvent> message4 =
+            new GenericMessageDto<CatalogEvent>(4, "", ingestionEvent4);
 
     /**
      * Test set up
@@ -168,11 +169,11 @@ public class L0AppConsumerTest {
 
     private void mockProcessSettings() {
         Mockito.doAnswer(i -> {
-            Map<String, String> r = new HashMap<String, String>(2);
+            final Map<String, String> r = new HashMap<String, String>(2);
             return r;
         }).when(processSettings).getParams();
         Mockito.doAnswer(i -> {
-            Map<String, String> r = new HashMap<String, String>(5);
+            final Map<String, String> r = new HashMap<String, String>(5);
             r.put("SM_RAW__0S", "^S1[A-B]_S[1-6]_RAW__0S.*$");
             r.put("AN_RAW__0S", "^S1[A-B]_N[1-6]_RAW__0S.*$");
             r.put("ZS_RAW__0S", "^S1[A-B]_N[1-6]_RAW__0S.*$");
@@ -199,7 +200,7 @@ public class L0AppConsumerTest {
     @Test
     public void testReceiveSession() throws Exception {
 
-        L0AppConsumer edrsSessionsConsumer = new L0AppConsumer(jobsDispatcher,
+        final L0AppConsumer edrsSessionsConsumer = new L0AppConsumer(jobsDispatcher,
                 processSettings, mqiService, mqiStatusService, appDataService,
                 errorAppender, appStatus, metadataClient, 0, 0);
 
@@ -235,11 +236,11 @@ public class L0AppConsumerTest {
      */
     @Test
     public void testReceiveRaw() throws Exception {
-        L0AppConsumer edrsSessionsConsumer = new L0AppConsumer(jobsDispatcher,
+        final L0AppConsumer edrsSessionsConsumer = new L0AppConsumer(jobsDispatcher,
                 processSettings, mqiService, mqiStatusService, appDataService,
                 errorAppender, appStatus, metadataClient, 0, 0);
-        GenericMessageDto<IngestionEvent> mqiMessage= new GenericMessageDto<IngestionEvent>(1, "",
-                new IngestionEvent("KEY_OBS_SESSION_2_2", "/path/of/inbox", 2,
+        final GenericMessageDto<CatalogEvent> mqiMessage= new GenericMessageDto<CatalogEvent>(1, "",
+                TestL0Utils.newCatalogEvent("KEY_OBS_SESSION_2_2", "/path/of/inbox", 2,
                         EdrsSessionFileType.RAW, "S1", "A", "WILE", "sessionId"));
         
         
@@ -247,12 +248,13 @@ public class L0AppConsumerTest {
         Mockito.verify(jobsDispatcher, never()).dispatch(Mockito.any());
     }
 
-    @Test
+	@Test
     public void testReceivedSameMessageTwice() throws Exception {
-        L0AppConsumer edrsSessionsConsumer = new L0AppConsumer(jobsDispatcher,
+        final L0AppConsumer edrsSessionsConsumer = new L0AppConsumer(jobsDispatcher,
                 processSettings, mqiService, mqiStatusService, appDataService,
                 errorAppender, appStatus, metadataClient, 0, 0);
 
+        System.out.println(Integer.MAX_VALUE);
         edrsSessionsConsumer.onMessage(message1);
         Mockito.verify(jobsDispatcher, Mockito.never()).dispatch(Mockito.any());
 
@@ -262,7 +264,7 @@ public class L0AppConsumerTest {
 
     @Test
     public void testReceivedInvalidProductChannel() throws Exception {
-        L0AppConsumer edrsSessionsConsumer = new L0AppConsumer(jobsDispatcher,
+        final L0AppConsumer edrsSessionsConsumer = new L0AppConsumer(jobsDispatcher,
                 processSettings, mqiService, mqiStatusService, appDataService,
                 errorAppender, appStatus, metadataClient, 0, 0);
         ingestionEvent1.setChannelId(3);
@@ -275,21 +277,21 @@ public class L0AppConsumerTest {
     public void testBuildWhenMessageIdExistSameHostname()
             throws AbstractCodedException {
 
-        IngestionEvent ingestionEvent = new IngestionEvent("KEY_OBS_SESSION_1_1", "/path/of/inbox", 1,
+        final CatalogEvent ingestionEvent = TestL0Utils.newCatalogEvent("KEY_OBS_SESSION_1_1", "/path/of/inbox", 1,
                 EdrsSessionFileType.SESSION, "S1", "A", "WILE", "sessionId");
-        GenericMessageDto<IngestionEvent> message =
-                new GenericMessageDto<IngestionEvent>(123, "", ingestionEvent);
+        final GenericMessageDto<CatalogEvent> message =
+                new GenericMessageDto<CatalogEvent>(123, "", ingestionEvent);
 
-        AppDataJob expected = TestL0Utils.buildAppDataEdrsSession(false);
+        final AppDataJob expected = TestL0Utils.buildAppDataEdrsSession(false);
 
         doReturn(Arrays.asList(expected)).when(appDataService)
                 .findByMessagesId(Mockito.anyLong());
 
-        L0AppConsumer edrsSessionsConsumer = new L0AppConsumer(jobsDispatcher,
+        final L0AppConsumer edrsSessionsConsumer = new L0AppConsumer(jobsDispatcher,
                 processSettings, mqiService, mqiStatusService, appDataService,
                 errorAppender, appStatus, metadataClient, 0, 0);
 
-        AppDataJob result = edrsSessionsConsumer.buildJob(message);
+        final AppDataJob result = edrsSessionsConsumer.buildJob(message);
         verify(appDataService, never()).patchJob(Mockito.anyLong(),
                 Mockito.any(), Mockito.anyBoolean(), Mockito.anyBoolean(),
                 Mockito.anyBoolean());
@@ -300,25 +302,25 @@ public class L0AppConsumerTest {
     public void testBuildWhenMessageIdExistDifferentHostname()
             throws AbstractCodedException {
 
-        IngestionEvent ingestionEvent = new IngestionEvent("KEY_OBS_SESSION_1_1", "/path/of/inbox", 1,
+        final CatalogEvent ingestionEvent = TestL0Utils.newCatalogEvent("KEY_OBS_SESSION_1_1", "/path/of/inbox", 1,
                 EdrsSessionFileType.SESSION, "S1", "A", "WILE", "sessionId");
-        GenericMessageDto<IngestionEvent> message =
-                new GenericMessageDto<IngestionEvent>(123, "", ingestionEvent);
+        final GenericMessageDto<CatalogEvent> message =
+                new GenericMessageDto<CatalogEvent>(123, "", ingestionEvent);
 
-        AppDataJob expected =
+        final AppDataJob expected =
                 TestL0Utils.buildAppDataEdrsSession(true);
-        AppDataJob returned =
+        final AppDataJob returned =
                 TestL0Utils.buildAppDataEdrsSession(true);
         returned.setPod("other-pod");
 
         doReturn(Arrays.asList(returned)).when(appDataService)
                 .findByMessagesId(Mockito.anyLong());
 
-        L0AppConsumer edrsSessionsConsumer = new L0AppConsumer(jobsDispatcher,
+        final L0AppConsumer edrsSessionsConsumer = new L0AppConsumer(jobsDispatcher,
                 processSettings, mqiService, mqiStatusService, appDataService,
                 errorAppender, appStatus, metadataClient, 0, 0);
 
-        AppDataJob result =
+        final AppDataJob result =
                 edrsSessionsConsumer.buildJob(message);
         verify(appDataService, times(1)).patchJob(Mockito.eq(123L),
                 Mockito.any(), Mockito.eq(false), Mockito.eq(false),
@@ -329,14 +331,14 @@ public class L0AppConsumerTest {
     @Test
     public void testBuildWhenMessageIdNotExistNewRaw()
             throws AbstractCodedException {
-    	IngestionEvent ingestionEvent = new IngestionEvent("obs1", "/path/of/inbox", 1,
+    	final CatalogEvent ingestionEvent = TestL0Utils.newCatalogEvent("obs1", "/path/of/inbox", 1,
                 EdrsSessionFileType.SESSION, "S1", "A", "WILE", "sessionId");
-        GenericMessageDto<IngestionEvent> message =
-                new GenericMessageDto<IngestionEvent>(123, "", ingestionEvent);
+        final GenericMessageDto<CatalogEvent> message =
+                new GenericMessageDto<CatalogEvent>(123, "", ingestionEvent);
 
-        AppDataJob expected =
+        final AppDataJob expected =
                 TestL0Utils.buildAppDataEdrsSession(true);
-        AppDataJob returned =
+        final AppDataJob returned =
                 TestL0Utils.buildAppDataEdrsSessionWithRaw2(true);
 
         doReturn(null).when(appDataService)
@@ -344,11 +346,11 @@ public class L0AppConsumerTest {
         doReturn(Arrays.asList(returned)).when(appDataService)
                 .findByProductSessionId(Mockito.anyString());
 
-        L0AppConsumer edrsSessionsConsumer = new L0AppConsumer(jobsDispatcher,
+        final L0AppConsumer edrsSessionsConsumer = new L0AppConsumer(jobsDispatcher,
                 processSettings, mqiService, mqiStatusService, appDataService,
                 errorAppender, appStatus, metadataClient, 0, 0);
 
-        AppDataJob result =
+        final AppDataJob result =
                 edrsSessionsConsumer.buildJob(message);
         verify(appDataService, times(1)).patchJob(Mockito.eq(123L),
                 Mockito.any(), Mockito.eq(true), Mockito.eq(true),
@@ -364,14 +366,14 @@ public class L0AppConsumerTest {
     @Test
     public void testBuildWhenMessageIdNotExistHostnameDifeerentAllRaw()
             throws AbstractCodedException {
-        IngestionEvent ingestionEvent = new IngestionEvent("obs1", "/path/of/inbox", 1,
+        final CatalogEvent ingestionEvent = TestL0Utils.newCatalogEvent("obs1", "/path/of/inbox", 1,
                 EdrsSessionFileType.SESSION, "S1", "A", "WILE", "sessionId");
-        GenericMessageDto<IngestionEvent> message =
-                new GenericMessageDto<IngestionEvent>(123, "", ingestionEvent);
+        final GenericMessageDto<CatalogEvent> message =
+                new GenericMessageDto<CatalogEvent>(123, "", ingestionEvent);
 
-        AppDataJob expected =
+        final AppDataJob expected =
                 TestL0Utils.buildAppDataEdrsSession(true);
-        AppDataJob returned =
+        final AppDataJob returned =
                 TestL0Utils.buildAppDataEdrsSession(true);
         returned.setPod("other-pod");
 
@@ -380,11 +382,11 @@ public class L0AppConsumerTest {
         doReturn(Arrays.asList(returned)).when(appDataService)
                 .findByProductSessionId(Mockito.anyString());
 
-        L0AppConsumer edrsSessionsConsumer = new L0AppConsumer(jobsDispatcher,
+        final L0AppConsumer edrsSessionsConsumer = new L0AppConsumer(jobsDispatcher,
                 processSettings, mqiService, mqiStatusService, appDataService,
                 errorAppender, appStatus, metadataClient, 0, 0);
 
-        AppDataJob<?> result =
+        final AppDataJob<?> result =
                 edrsSessionsConsumer.buildJob(message);
         verify(appDataService, times(1)).patchJob(Mockito.eq(123L),
                 Mockito.any(), Mockito.eq(false), Mockito.eq(false),

@@ -18,7 +18,6 @@ import esa.s1pdgs.cpoc.appcatalog.server.job.db.AppDataJobFile;
 import esa.s1pdgs.cpoc.appcatalog.server.job.db.AppDataJobProduct;
 import esa.s1pdgs.cpoc.appcatalog.server.job.db.AppDataJobState;
 import esa.s1pdgs.cpoc.appstatus.AppStatus;
-import esa.s1pdgs.cpoc.common.EdrsSessionFileType;
 import esa.s1pdgs.cpoc.common.ProductCategory;
 import esa.s1pdgs.cpoc.common.errors.AbstractCodedException;
 import esa.s1pdgs.cpoc.common.errors.InvalidFormatProduct;
@@ -33,14 +32,14 @@ import esa.s1pdgs.cpoc.mqi.client.GenericMqiClient;
 import esa.s1pdgs.cpoc.mqi.client.MqiConsumer;
 import esa.s1pdgs.cpoc.mqi.client.MqiListener;
 import esa.s1pdgs.cpoc.mqi.client.StatusService;
-import esa.s1pdgs.cpoc.mqi.model.queue.IngestionEvent;
+import esa.s1pdgs.cpoc.mqi.model.queue.CatalogEvent;
 import esa.s1pdgs.cpoc.mqi.model.rest.GenericMessageDto;
 import esa.s1pdgs.cpoc.report.FilenameReportingInput;
 import esa.s1pdgs.cpoc.report.LoggerReporting;
 import esa.s1pdgs.cpoc.report.Reporting;
 import esa.s1pdgs.cpoc.report.ReportingMessage;
 
-public class L0AppConsumer extends AbstractGenericConsumer<IngestionEvent> implements MqiListener<IngestionEvent> {
+public class L0AppConsumer extends AbstractGenericConsumer<CatalogEvent> implements MqiListener<CatalogEvent> {
     
     private String taskForFunctionalLog;
     
@@ -50,9 +49,9 @@ public class L0AppConsumer extends AbstractGenericConsumer<IngestionEvent> imple
     
     private final long pollingInitialDelayMs;
 
-	public L0AppConsumer(final AbstractJobsDispatcher<IngestionEvent> jobDispatcher,
+	public L0AppConsumer(final AbstractJobsDispatcher<CatalogEvent> jobDispatcher,
 			final ProcessSettings processSettings, final GenericMqiClient mqiClient,
-			final StatusService mqiStatusService, final AppCatalogJobClient<IngestionEvent> appDataService,
+			final StatusService mqiStatusService, final AppCatalogJobClient<CatalogEvent> appDataService,
 			final ErrorRepoAppender errorRepoAppender, final AppStatus appStatus, final MetadataClient metadataClient,
 			final long pollingIntervalMs, final long pollingInitialDelayMs) {
 		super(jobDispatcher, processSettings, mqiClient, mqiStatusService, appDataService, appStatus, errorRepoAppender,
@@ -67,13 +66,13 @@ public class L0AppConsumer extends AbstractGenericConsumer<IngestionEvent> imple
 		appStatus.setWaiting();
 		if (pollingIntervalMs > 0) {
 			final ExecutorService service = Executors.newFixedThreadPool(1);
-			service.execute(new MqiConsumer<IngestionEvent>(mqiClient, category, this, pollingIntervalMs,
+			service.execute(new MqiConsumer<CatalogEvent>(mqiClient, category, this, pollingIntervalMs,
 					pollingInitialDelayMs, esa.s1pdgs.cpoc.appstatus.AppStatus.NULL));
 		}
 	}
 
     @Override
-    public void onMessage(GenericMessageDto<IngestionEvent> mqiMessage) {
+    public void onMessage(final GenericMessageDto<CatalogEvent> mqiMessage) {
     
     	appStatus.setWaiting();
         final Reporting.Factory reportingFactory = new LoggerReporting.Factory("L0JobGeneration");   
@@ -85,10 +84,12 @@ public class L0AppConsumer extends AbstractGenericConsumer<IngestionEvent> imple
         }
 
         // Second process message
-        IngestionEvent leveldto = mqiMessage.getBody();
+        final CatalogEvent leveldto = mqiMessage.getBody();
         String productName = leveldto.getKeyObjectStorage();
 
-        if (leveldto.getProductType() == EdrsSessionFileType.SESSION) {
+        if (leveldto.getProductType().equals("EDRS_SESSION")) {
+        
+        //if (leveldto.getProductType() == EdrsSessionFileType.SESSION) {
 
             int step = 0;
             boolean ackOk = false;
@@ -118,7 +119,7 @@ public class L0AppConsumer extends AbstractGenericConsumer<IngestionEvent> imple
                 		new ReportingMessage("Start job generation using  {}", mqiMessage.getBody().getKeyObjectStorage())
                 );
                 
-                AppDataJob<IngestionEvent> appDataJob = buildJob(mqiMessage);
+                AppDataJob<CatalogEvent> appDataJob = buildJob(mqiMessage);
                 
                 LOGGER.debug ("== appDataJob(1) {}",appDataJob.toString());
                 productName = appDataJob.getProduct().getProductName();
@@ -141,7 +142,7 @@ public class L0AppConsumer extends AbstractGenericConsumer<IngestionEvent> imple
                 // Ack
                 step++;
                 ackOk = true;
-            } catch (AbstractCodedException ace) {
+            } catch (final AbstractCodedException ace) {
                 ackOk = false;
                 errorMessage = String.format(
                         "[MONITOR] [step %d] [productName %s] [code %d] %s",
@@ -165,36 +166,36 @@ public class L0AppConsumer extends AbstractGenericConsumer<IngestionEvent> imple
 
     }
 
-	protected AppDataJob<IngestionEvent> buildJob(GenericMessageDto<IngestionEvent> mqiMessage)
+	protected AppDataJob<CatalogEvent> buildJob(final GenericMessageDto<CatalogEvent> mqiMessage)
             throws AbstractCodedException {
     	
     	// Check if a job is already created for message identifier
-		List<AppDataJob<IngestionEvent>> existingJobs = appDataService
+		final List<AppDataJob<CatalogEvent>> existingJobs = appDataService
                 .findByMessagesId(mqiMessage.getId());
 
         if (CollectionUtils.isEmpty(existingJobs)) {
-        	final IngestionEvent sessionDto = mqiMessage.getBody();
-        	final String productType = sessionDto.getProductType().name();
+        	final CatalogEvent sessionDto = mqiMessage.getBody();
+        	final String productType = sessionDto.getProductType();
         	final String productName = new File(sessionDto.getKeyObjectStorage()).getName();
         	LOGGER.debug("Querying metadata for product {} of type {}", productName, productType); 
         	final EdrsSessionMetadata edrsSessionMetadata = metadataClient.getEdrsSession(productType, productName);
            	LOGGER.debug ("Got result {}", edrsSessionMetadata); 
         	
             // Search if session is already in progress
-			List<AppDataJob<IngestionEvent>> existingJobsForSession =
-                    (List<AppDataJob<IngestionEvent>>) appDataService.findByProductSessionId(sessionDto.getSessionId());
+			final List<AppDataJob<CatalogEvent>> existingJobsForSession =
+                    appDataService.findByProductSessionId(sessionDto.getSessionId());
 
             if (CollectionUtils.isEmpty(existingJobsForSession)) {
             	LOGGER.debug ("== creating jobDTO from {}",mqiMessage ); 
                 // Create the JOB
-                AppDataJob<IngestionEvent> jobDto = new AppDataJob<>();
+                final AppDataJob<CatalogEvent> jobDto = new AppDataJob<>();
                 // General details
                 jobDto.setLevel(processSettings.getLevel());
                 jobDto.setPod(processSettings.getHostname());
                 // Messages
                 jobDto.getMessages().add(mqiMessage);
                 // Product
-                AppDataJobProduct productDto = new AppDataJobProduct();
+                final AppDataJobProduct productDto = new AppDataJobProduct();
                 productDto.setProductType(productType);
                 productDto.setSessionId(sessionDto.getSessionId());
                 productDto.setMissionId(edrsSessionMetadata.getMissionId());
@@ -219,7 +220,7 @@ public class L0AppConsumer extends AbstractGenericConsumer<IngestionEvent> imple
                 jobDto.setProduct(productDto);
                
                 LOGGER.debug ("== jobDTO {}",jobDto.toString());
-				AppDataJob<IngestionEvent> newJobDto = appDataService.newJob(jobDto);
+				final AppDataJob<CatalogEvent> newJobDto = appDataService.newJob(jobDto);
                 LOGGER.debug ("== newJobDto {}",newJobDto.toString());
                 return newJobDto;
             } else {
@@ -228,7 +229,7 @@ public class L0AppConsumer extends AbstractGenericConsumer<IngestionEvent> imple
                 boolean update = false;
                 boolean updateMessage = false;
                 boolean updateProduct = false;
-                AppDataJob<IngestionEvent> jobDto = (AppDataJob<IngestionEvent>) existingJobsForSession.get(0);
+                AppDataJob<CatalogEvent> jobDto = existingJobsForSession.get(0);
                 LOGGER.debug ("== existingJobsForSession.get(0) jobDto {}", jobDto.toString());
                 
                 if (!jobDto.getPod().equals(processSettings.getHostname())) {
@@ -237,11 +238,11 @@ public class L0AppConsumer extends AbstractGenericConsumer<IngestionEvent> imple
                 }                
                 LOGGER.debug ("== existing message {}", jobDto.getMessages().toString());
                 
-				final GenericMessageDto<IngestionEvent> firstMess = (GenericMessageDto<IngestionEvent>) jobDto.getMessages().get(0);
+				final GenericMessageDto<CatalogEvent> firstMess = jobDto.getMessages().get(0);
                 
 				LOGGER.debug ("== firstMessage {}",firstMess.toString());
                 // Updates messages if needed
-                final IngestionEvent dto = firstMess.getBody();
+                final CatalogEvent dto = firstMess.getBody();
                 
                 if (jobDto.getMessages().size() == 1 && dto.getChannelId() != mqiMessage.getBody().getChannelId()) {
                 	LOGGER.debug ("== existing message {}",jobDto.getMessages());
@@ -280,9 +281,9 @@ public class L0AppConsumer extends AbstractGenericConsumer<IngestionEvent> imple
         } else {
             // Update pod if needed
             boolean update = false;
-            boolean updateMessage = false;
-            boolean updateProduct = false;
-            AppDataJob<IngestionEvent> jobDto = existingJobs.get(0);
+            final boolean updateMessage = false;
+            final boolean updateProduct = false;
+            AppDataJob<CatalogEvent> jobDto = existingJobs.get(0);
             LOGGER.debug ("== existingJobs.get(0) jobDto {}", jobDto.toString());
 
             if (!jobDto.getPod().equals(processSettings.getHostname())) {
@@ -307,7 +308,7 @@ public class L0AppConsumer extends AbstractGenericConsumer<IngestionEvent> imple
     }
     
     @Override
-    public void setTaskForFunctionalLog(String taskForFunctionalLog) {
+    public void setTaskForFunctionalLog(final String taskForFunctionalLog) {
     	this.taskForFunctionalLog = taskForFunctionalLog; 
     }
 }

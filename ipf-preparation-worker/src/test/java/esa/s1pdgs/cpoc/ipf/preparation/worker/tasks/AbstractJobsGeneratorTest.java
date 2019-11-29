@@ -59,7 +59,7 @@ import esa.s1pdgs.cpoc.ipf.preparation.worker.utils.TestL1Utils;
 import esa.s1pdgs.cpoc.metadata.client.MetadataClient;
 import esa.s1pdgs.cpoc.metadata.client.SearchMetadataQuery;
 import esa.s1pdgs.cpoc.metadata.model.SearchMetadata;
-import esa.s1pdgs.cpoc.mqi.model.queue.IngestionEvent;
+import esa.s1pdgs.cpoc.mqi.model.queue.CatalogEvent;
 import esa.s1pdgs.cpoc.mqi.model.queue.ProductionEvent;
 
 public class AbstractJobsGeneratorTest {
@@ -324,13 +324,13 @@ public class AbstractJobsGeneratorTest {
                 .when(appDataPService)
                 .findNByPodAndGenerationTaskTableWithNotSentGeneration(
                         Mockito.anyString(), Mockito.anyString());
-        AppDataJob<IngestionEvent> primaryCheckAppJob = TestL1Utils.buildJobGeneration(true);
+        AppDataJob<CatalogEvent> primaryCheckAppJob = TestL1Utils.buildJobGeneration(true);
         primaryCheckAppJob.getGenerations().get(0)
                 .setState(AppDataJobGenerationState.PRIMARY_CHECK);
-        AppDataJob<IngestionEvent> readyAppJob = TestL1Utils.buildJobGeneration(true);
+        AppDataJob<CatalogEvent> readyAppJob = TestL1Utils.buildJobGeneration(true);
         readyAppJob.getGenerations().get(0)
                 .setState(AppDataJobGenerationState.READY);
-        AppDataJob<IngestionEvent> sentAppJob = TestL1Utils.buildJobGeneration(true);
+        AppDataJob<CatalogEvent> sentAppJob = TestL1Utils.buildJobGeneration(true);
         sentAppJob.getGenerations().get(0)
                 .setState(AppDataJobGenerationState.SENT);
         doReturn(TestL1Utils.buildJobGeneration(true)).when(appDataPService)
@@ -451,7 +451,7 @@ public class AbstractJobsGeneratorTest {
             return new WaitTempo(10000, 3);
         }).when(ipfPreparationWorkerSettings).getWaitmetadatainput();
         
-        AppDataJob<IngestionEvent> job1 = new AppDataJob();
+        AppDataJob<CatalogEvent> job1 = new AppDataJob();
         job1.setId(12L);
         job1.getGenerations().add(new AppDataJobGeneration());
         job1.getGenerations().get(0).setTaskTable("IW_RAW__0_GRDH_1.xml");
@@ -481,14 +481,14 @@ public class AbstractJobsGeneratorTest {
             return new WaitTempo(10000, 3);
         }).when(ipfPreparationWorkerSettings).getWaitmetadatainput();
         
-        AppDataJob<IngestionEvent> job1 = new AppDataJob();
+        AppDataJob<CatalogEvent> job1 = new AppDataJob();
         job1.setId(12L);
         job1.getGenerations().add(new AppDataJobGeneration());
         job1.getGenerations().get(0).setTaskTable("IW_RAW__0_GRDH_1.xml");
         job1.getGenerations().get(0).setState(AppDataJobGenerationState.INITIAL);
         job1.getGenerations().get(0).setLastUpdateDate(new Date());
         
-        AppDataJob<IngestionEvent> job2 = new AppDataJob();
+        AppDataJob<CatalogEvent> job2 = new AppDataJob();
         job2.setId(12L);
         job2.getGenerations().add(new AppDataJobGeneration());
         job2.getGenerations().get(0).setTaskTable("IW_RAW__0_GRDH_1.xml");

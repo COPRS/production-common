@@ -145,4 +145,24 @@ public class CatalogEvent extends AbstractMessage {
 				+ ", validityStopTime=" + validityStopTime + ", instrumentConfigurationId=" + instrumentConfigurationId
 				+ ", site=" + site + ", url=" + url + "]";
 	}
+
+	public int getChannelId() {
+		// TODO Auto-generated method stub
+		return 0;
+	}
+
+	public String getSessionId() {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	public String getStationCode() {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	public void setChannelId(final int i) {
+		// TODO Auto-generated method stub
+		
+	}
 }

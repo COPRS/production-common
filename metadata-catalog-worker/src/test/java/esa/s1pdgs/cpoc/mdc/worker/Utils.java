@@ -38,10 +38,12 @@ public class Utils {
     	job.setKeyObjectStorage(keyObs);
     	job.setProductFamily(family);
     	job.setMode(mode);
-    	job.setMissionId(missionId);
-    	job.setSatelliteId(satelliteId);
-    	job.setStationCode(stationCode);
-    	job.setSessionId(sessionId);
+    	
+    	// TODO FIXME
+//    	job.setMissionId(missionId);
+//    	job.setSatelliteId(satelliteId);
+//    	job.setStationCode(stationCode);
+//    	job.setSessionId(sessionId);
     	
     	return job;
     }

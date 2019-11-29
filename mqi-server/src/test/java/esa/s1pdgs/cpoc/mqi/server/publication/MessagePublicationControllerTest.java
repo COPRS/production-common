@@ -180,7 +180,7 @@ public class MessagePublicationControllerTest {
     @Test
     public void publishNoCat() throws MqiPublicationError,
             MqiCategoryNotAvailable, MqiRouteNotAvailable {
-        final IngestionEvent ingestionEvent = new IngestionEvent("obs-key", "/path/of/inbox", 1,
+        final IngestionEvent ingestionEvent = newIngestionEvent("obs-key", "/path/of/inbox", 1,
                 EdrsSessionFileType.RAW, "S1", "A", "WILE", "sessionId");
         initCustomControllerForNoPublication();
 
@@ -192,9 +192,16 @@ public class MessagePublicationControllerTest {
         customController.publish(ProductCategory.EDRS_SESSIONS, ingestionEvent, "NONE", "NONE");
     }
 
-    @Test
+    private IngestionEvent newIngestionEvent(final String string, final String string2, final int i, final EdrsSessionFileType raw,
+			final String string3, final String string4, final String string5, final String string6) {
+    	
+    	// TODO FIXME
+    	return new IngestionEvent();
+	}
+
+	@Test
     public void publishEdrsSessions() throws Exception {
-        final IngestionEvent ingestionEvent = new IngestionEvent("obs-key", "/path/of/inbox", 2,
+        final IngestionEvent ingestionEvent = newIngestionEvent("obs-key", "/path/of/inbox", 2,
                 EdrsSessionFileType.RAW, "S1", "A", "WILE", "sessionId");
         initCustomControllerForAllPublication();
 

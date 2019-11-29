@@ -17,12 +17,12 @@ import org.springframework.kafka.support.serializer.ErrorHandlingDeserializer2;
 import org.springframework.kafka.support.serializer.JsonDeserializer;
 
 import esa.s1pdgs.cpoc.appcatalog.client.mqi.AppCatalogMqiService;
+import esa.s1pdgs.cpoc.appstatus.AppStatus;
 import esa.s1pdgs.cpoc.common.ProductCategory;
 import esa.s1pdgs.cpoc.mqi.server.KafkaProperties;
 import esa.s1pdgs.cpoc.mqi.server.consumption.kafka.listener.GenericMessageListener;
 import esa.s1pdgs.cpoc.mqi.server.consumption.kafka.listener.MemoryConsumerAwareRebalanceListener;
 import esa.s1pdgs.cpoc.mqi.server.persistence.OtherApplicationService;
-import esa.s1pdgs.cpoc.mqi.server.status.AppStatusImpl;
 import esa.s1pdgs.cpoc.report.LoggerReporting;
 import esa.s1pdgs.cpoc.report.Reporting;
 import esa.s1pdgs.cpoc.report.ReportingMessage;
@@ -38,13 +38,13 @@ public class GenericConsumer<T> {
 	    private final KafkaProperties kafkaProperties;
 	    private final AppCatalogMqiService service;
 	    private final OtherApplicationService otherAppService;
-	    private final AppStatusImpl appStatus;	  
+	    private final AppStatus appStatus;	  
 	    	    
 		public Factory(
-				KafkaProperties kafkaProperties, 
-				AppCatalogMqiService service,
-				OtherApplicationService otherAppService, 
-				AppStatusImpl appStatus
+				final KafkaProperties kafkaProperties, 
+				final AppCatalogMqiService service,
+				final OtherApplicationService otherAppService, 
+				final AppStatus appStatus
 		) {
 			this.kafkaProperties = kafkaProperties;
 			this.service = service;
@@ -128,7 +128,7 @@ public class GenericConsumer<T> {
 	    }
 
 	    private final Map<String, Object> consumerConfig(final String consumerId) {
-	        Map<String, Object> props = new HashMap<>();
+	        final Map<String, Object> props = new HashMap<>();
 	        props.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, kafkaProperties.getBootstrapServers());
 	        props.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class);
 	        props.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, JsonDeserializer.class);
@@ -225,7 +225,7 @@ public class GenericConsumer<T> {
     }
     
     // accessors for testing
-    final void setContainer(ConcurrentMessageListenerContainer<String, T> container) {
+    final void setContainer(final ConcurrentMessageListenerContainer<String, T> container) {
 		this.container = container;
 	}
     

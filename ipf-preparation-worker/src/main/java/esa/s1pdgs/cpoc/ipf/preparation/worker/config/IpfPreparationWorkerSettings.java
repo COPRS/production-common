@@ -35,7 +35,7 @@ import esa.s1pdgs.cpoc.metadata.client.MetadataClient;
 import esa.s1pdgs.cpoc.mqi.client.GenericMqiClient;
 import esa.s1pdgs.cpoc.mqi.client.StatusService;
 import esa.s1pdgs.cpoc.mqi.model.queue.AbstractMessage;
-import esa.s1pdgs.cpoc.mqi.model.queue.IngestionEvent;
+import esa.s1pdgs.cpoc.mqi.model.queue.CatalogEvent;
 import esa.s1pdgs.cpoc.mqi.model.queue.ProductionEvent;
 
 /**
@@ -522,7 +522,7 @@ public class IpfPreparationWorkerSettings {
 
 		switch (processSettings.getLevel()) {
 		case L0:
-			messageConsumer = new L0AppConsumer((AbstractJobsDispatcher<IngestionEvent>) jobsDispatcher,
+			messageConsumer = new L0AppConsumer((AbstractJobsDispatcher<CatalogEvent>) jobsDispatcher,
 					processSettings, mqiService, mqiStatusService, appDataServiceErdsSettions,
 					errorRepoAppender, appStatus, metadataClient, pollingIntervalMs, pollingInitialDelayMs);
 			break;

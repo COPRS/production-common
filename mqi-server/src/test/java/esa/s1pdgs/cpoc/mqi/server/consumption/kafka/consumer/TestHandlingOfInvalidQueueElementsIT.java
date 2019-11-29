@@ -32,6 +32,7 @@ import org.springframework.test.context.junit4.SpringRunner;
 
 import esa.s1pdgs.cpoc.appcatalog.client.mqi.AppCatalogMqiService;
 import esa.s1pdgs.cpoc.appcatalog.rest.AppCatMessageDto;
+import esa.s1pdgs.cpoc.appstatus.AppStatus;
 import esa.s1pdgs.cpoc.common.MessageState;
 import esa.s1pdgs.cpoc.common.ProductCategory;
 import esa.s1pdgs.cpoc.common.ProductFamily;
@@ -39,7 +40,6 @@ import esa.s1pdgs.cpoc.mqi.model.queue.ProductionEvent;
 import esa.s1pdgs.cpoc.mqi.server.GenericKafkaUtils;
 import esa.s1pdgs.cpoc.mqi.server.KafkaProperties;
 import esa.s1pdgs.cpoc.mqi.server.persistence.OtherApplicationService;
-import esa.s1pdgs.cpoc.mqi.server.status.AppStatusImpl;
 import esa.s1pdgs.cpoc.mqi.server.test.DataUtils;
 
 @RunWith(SpringRunner.class)
@@ -90,7 +90,7 @@ public class TestHandlingOfInvalidQueueElementsIT {
     private KafkaProperties properties;
 
     @Autowired
-    private AppStatusImpl appStatus;
+    private AppStatus appStatus;
 
     @Mock
     private AppCatalogMqiService service;

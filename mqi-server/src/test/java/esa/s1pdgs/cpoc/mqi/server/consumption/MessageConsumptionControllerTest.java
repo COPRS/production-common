@@ -37,6 +37,7 @@ import org.springframework.test.context.junit4.SpringRunner;
 import esa.s1pdgs.cpoc.appcatalog.client.mqi.AppCatalogMqiService;
 import esa.s1pdgs.cpoc.appcatalog.rest.AppCatMessageDto;
 import esa.s1pdgs.cpoc.appcatalog.rest.AppCatSendMessageDto;
+import esa.s1pdgs.cpoc.appstatus.AppStatus;
 import esa.s1pdgs.cpoc.common.MessageState;
 import esa.s1pdgs.cpoc.common.ProductCategory;
 import esa.s1pdgs.cpoc.common.ProductFamily;
@@ -57,7 +58,6 @@ import esa.s1pdgs.cpoc.mqi.server.GenericKafkaUtils;
 import esa.s1pdgs.cpoc.mqi.server.KafkaProperties;
 import esa.s1pdgs.cpoc.mqi.server.consumption.kafka.consumer.GenericConsumer;
 import esa.s1pdgs.cpoc.mqi.server.persistence.OtherApplicationService;
-import esa.s1pdgs.cpoc.mqi.server.status.AppStatusImpl;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest
@@ -85,7 +85,7 @@ public class MessageConsumptionControllerTest {
     private OtherApplicationService otherService;
 
     @Autowired
-    protected AppStatusImpl appStatus;
+    protected AppStatus appStatus;
 
     @Autowired
     private MessageConsumptionController autoManager;
@@ -109,49 +109,49 @@ public class MessageConsumptionControllerTest {
      * activated
      */
     private void startManagerWithAllConsumers() {
-        Map<String, Integer> auxTopicsWithPriority = new HashMap<>();
+        final Map<String, Integer> auxTopicsWithPriority = new HashMap<>();
         auxTopicsWithPriority.put("topic", 100);
         auxTopicsWithPriority.put("topic-other", 10);
-        Map<String, Integer> edrsTopicsWithPriority = new HashMap<>();
+        final Map<String, Integer> edrsTopicsWithPriority = new HashMap<>();
         edrsTopicsWithPriority.put("topic", 10);
-        Map<String, Integer> lProdTopicsWithPriority = new HashMap<>();
+        final Map<String, Integer> lProdTopicsWithPriority = new HashMap<>();
         lProdTopicsWithPriority.put("topic", 100);
-        Map<String, Integer> lJobTopicsWithPriority = new HashMap<>();
+        final Map<String, Integer> lJobTopicsWithPriority = new HashMap<>();
         lJobTopicsWithPriority.put("topic", 10);
-        Map<String, Integer> lRepTopicsWithPriority = new HashMap<>();
+        final Map<String, Integer> lRepTopicsWithPriority = new HashMap<>();
         lRepTopicsWithPriority.put("topic", 100);
         lRepTopicsWithPriority.put("another-topic", 10);
-        Map<String, Integer> lSegTopicsWithPriority = new HashMap<>();
+        final Map<String, Integer> lSegTopicsWithPriority = new HashMap<>();
         lSegTopicsWithPriority.put("topic", 100);
-        Map<String, Integer> lErrorsTopics = new HashMap<>();
+        final Map<String, Integer> lErrorsTopics = new HashMap<>();
         lErrorsTopics.put("topic", 100);
-        Map<ProductCategory, ProductCategoryProperties> map = new HashMap<>();
-        ProductCategoryConsumptionProperties prodCatAux =
+        final Map<ProductCategory, ProductCategoryProperties> map = new HashMap<>();
+        final ProductCategoryConsumptionProperties prodCatAux =
                 new ProductCategoryConsumptionProperties(true);
         prodCatAux.setTopicsWithPriority(auxTopicsWithPriority);
         map.put(ProductCategory.AUXILIARY_FILES,
                 new ProductCategoryProperties(prodCatAux, null));
-        ProductCategoryConsumptionProperties prodCatProd =
+        final ProductCategoryConsumptionProperties prodCatProd =
                 new ProductCategoryConsumptionProperties(true);
         prodCatProd.setTopicsWithPriority(lProdTopicsWithPriority);
         map.put(ProductCategory.LEVEL_PRODUCTS,
                 new ProductCategoryProperties(prodCatProd, null));
-        ProductCategoryConsumptionProperties prodCatJob =
+        final ProductCategoryConsumptionProperties prodCatJob =
                 new ProductCategoryConsumptionProperties(true);
         prodCatJob.setTopicsWithPriority(lJobTopicsWithPriority);
         map.put(ProductCategory.LEVEL_JOBS,
                 new ProductCategoryProperties(prodCatJob, null));
-        ProductCategoryConsumptionProperties prodCatEDRS =
+        final ProductCategoryConsumptionProperties prodCatEDRS =
                 new ProductCategoryConsumptionProperties(true);
         prodCatEDRS.setTopicsWithPriority(edrsTopicsWithPriority);
         map.put(ProductCategory.EDRS_SESSIONS,
                 new ProductCategoryProperties(prodCatEDRS, null));
-        ProductCategoryConsumptionProperties prodCatRep =
+        final ProductCategoryConsumptionProperties prodCatRep =
                 new ProductCategoryConsumptionProperties(true);
         prodCatRep.setTopicsWithPriority(lRepTopicsWithPriority);
         map.put(ProductCategory.LEVEL_REPORTS,
                 new ProductCategoryProperties(prodCatRep, null));
-        ProductCategoryConsumptionProperties prodCatSeg =
+        final ProductCategoryConsumptionProperties prodCatSeg =
                 new ProductCategoryConsumptionProperties(true);
         prodCatSeg.setTopicsWithPriority(lSegTopicsWithPriority);
         map.put(ProductCategory.LEVEL_SEGMENTS,
@@ -304,10 +304,10 @@ public class MessageConsumptionControllerTest {
      * @param category
      * @throws AbstractCodedException
      */
-    private void testNextMessage(final ProductCategory category, int nbCallOtherService)
+    private void testNextMessage(final ProductCategory category, final int nbCallOtherService)
             throws AbstractCodedException {
         // Processing by another pod
-        AppCatMessageDto<?> msg1 =
+        final AppCatMessageDto<?> msg1 =
                 new AppCatMessageDto<>(category, 1, "topic", 1, 10);
         msg1.setState(MessageState.SEND);
         msg1.setCreationDate(new Date());
@@ -316,14 +316,14 @@ public class MessageConsumptionControllerTest {
                 Mockito.any(), Mockito.eq(1L));
 
         // Status read
-        AppCatMessageDto<?> msg2 =
+        final AppCatMessageDto<?> msg2 =
                 new AppCatMessageDto<>(category, 2, "topic", 1, 11);
         msg2.setState(MessageState.READ);
         msg2.setCreationDate(new Date());
         doReturn(true).when(service).send(Mockito.eq(category), Mockito.eq(2L), Mockito.any());
 
         // Status read
-        AppCatMessageDto<?> msg3 =
+        final AppCatMessageDto<?> msg3 =
                 new AppCatMessageDto<>(category, 3, "topic", 2, 11);
         msg3.setState(MessageState.READ);
         msg3.setCreationDate(new Date());
@@ -364,9 +364,9 @@ public class MessageConsumptionControllerTest {
     public void testAckWhenStopNotAsk()
             throws AbstractCodedException, InterruptedException {
 
-        IpfExecutionJob dto = new IpfExecutionJob(ProductFamily.L1_JOB, "product-name", "NRT",
+        final IpfExecutionJob dto = new IpfExecutionJob(ProductFamily.L1_JOB, "product-name", "NRT",
                 "work-dir", "job-order");
-        AppCatMessageDto<IpfExecutionJob> message =
+        final AppCatMessageDto<IpfExecutionJob> message =
                 new AppCatMessageDto<IpfExecutionJob>(
                         ProductCategory.LEVEL_JOBS, 123, "topic", 1, 22, dto);
 
@@ -376,13 +376,13 @@ public class MessageConsumptionControllerTest {
         doReturn(0).when(service)
                 .getNbReadingMessages(Mockito.anyString(), Mockito.anyString());
 
-        ResumeDetails expectedRd = new ResumeDetails("topic", dto);
+        final ResumeDetails expectedRd = new ResumeDetails("topic", dto);
 
         Thread.sleep(2000);
         manager.consumers.get(ProductCategory.LEVEL_JOBS).get("topic").pause();
 
         Thread.sleep(2000);
-        ResumeDetails rd = manager.ackMessage(ProductCategory.LEVEL_JOBS, 123, Ack.OK, false);
+        final ResumeDetails rd = manager.ackMessage(ProductCategory.LEVEL_JOBS, 123, Ack.OK, false);
         assertEquals(expectedRd, rd);
 
         // Check resume call
@@ -394,8 +394,8 @@ public class MessageConsumptionControllerTest {
     public void testAckWhenStopNotAskButTopicUnknown()
             throws AbstractCodedException, InterruptedException {
 
-        IpfExecutionJob dto = new IpfExecutionJob(ProductFamily.L1_JOB, "product-name", "NRT", "work-dir", "job-order");
-        AppCatMessageDto<IpfExecutionJob> message = new AppCatMessageDto<IpfExecutionJob>(
+        final IpfExecutionJob dto = new IpfExecutionJob(ProductFamily.L1_JOB, "product-name", "NRT", "work-dir", "job-order");
+        final AppCatMessageDto<IpfExecutionJob> message = new AppCatMessageDto<IpfExecutionJob>(
         		ProductCategory.LEVEL_JOBS, 
         		123, 
         		"topic-unknown", 
@@ -430,9 +430,9 @@ public class MessageConsumptionControllerTest {
     public void testAckWhenStopAsk()
             throws AbstractCodedException, InterruptedException {
 
-        IpfExecutionJob dto = new IpfExecutionJob(ProductFamily.L1_JOB, "product-name", "NRT",
+        final IpfExecutionJob dto = new IpfExecutionJob(ProductFamily.L1_JOB, "product-name", "NRT",
                 "work-dir", "job-order");
-        AppCatMessageDto<IpfExecutionJob> message =
+        final AppCatMessageDto<IpfExecutionJob> message =
                 new AppCatMessageDto<IpfExecutionJob>(
                         ProductCategory.LEVEL_JOBS, 123, "topic4", 1, 22, dto);
 
@@ -454,8 +454,8 @@ public class MessageConsumptionControllerTest {
     
     @Test
     public void testAckWhenStopAskL2() throws AbstractCodedException, InterruptedException {
-        IpfExecutionJob dto = new IpfExecutionJob(ProductFamily.L2_JOB, "product-name", "NRT", "work-dir", "job-order");
-        AppCatMessageDto<IpfExecutionJob> message =
+        final IpfExecutionJob dto = new IpfExecutionJob(ProductFamily.L2_JOB, "product-name", "NRT", "work-dir", "job-order");
+        final AppCatMessageDto<IpfExecutionJob> message =
                 new AppCatMessageDto<IpfExecutionJob>(
                         ProductCategory.LEVEL_JOBS, 123, "topic5", 1, 22, dto);
 
@@ -503,15 +503,15 @@ public class MessageConsumptionControllerTest {
      * @throws AbstractCodedException
      */
     private void testSendMessageWhenAskOtherAppNotNeeded(
-            MessageState state) throws AbstractCodedException {
+            final MessageState state) throws AbstractCodedException {
 
-        AppCatMessageDto<ProductionEvent> msgLight = new AppCatMessageDto<ProductionEvent>(
+        final AppCatMessageDto<ProductionEvent> msgLight = new AppCatMessageDto<ProductionEvent>(
                 ProductCategory.AUXILIARY_FILES, 1234, "topic", 1, 111);
         msgLight.setState(state);
         msgLight.setReadingPod("pod-name");
         msgLight.setSendingPod("pod-name");
 
-        AppCatMessageDto<ProductionEvent> msgLight2 = new AppCatMessageDto<ProductionEvent>(
+        final AppCatMessageDto<ProductionEvent> msgLight2 = new AppCatMessageDto<ProductionEvent>(
                 ProductCategory.AUXILIARY_FILES, 1235, "topic", 1, 111);
         msgLight2.setState(state);
         msgLight2.setReadingPod("pod-name");
@@ -524,7 +524,7 @@ public class MessageConsumptionControllerTest {
         doReturn(false).when(service)
                 .send(Mockito.eq(ProductCategory.AUXILIARY_FILES),Mockito.eq(1235L), Mockito.any());
 
-        AppCatSendMessageDto expected = new AppCatSendMessageDto("pod-name", false);
+        final AppCatSendMessageDto expected = new AppCatSendMessageDto("pod-name", false);
 
         assertTrue(manager.send(ProductCategory.AUXILIARY_FILES,service, msgLight));
         assertFalse(manager.send(ProductCategory.AUXILIARY_FILES,service, msgLight2));
@@ -545,7 +545,7 @@ public class MessageConsumptionControllerTest {
     public void testSendWhenMessageProcessingByAnotherAndResponseTrue()
             throws AbstractCodedException {
 
-        AppCatMessageDto<ProductionEvent> msgLight = new AppCatMessageDto<ProductionEvent>(
+        final AppCatMessageDto<ProductionEvent> msgLight = new AppCatMessageDto<ProductionEvent>(
                 ProductCategory.AUXILIARY_FILES, 1234, "topic", 1, 111);
         msgLight.setState(MessageState.SEND);
         msgLight.setReadingPod("pod-name");
@@ -592,13 +592,13 @@ public class MessageConsumptionControllerTest {
     private void testSendWhenMessageProcessingByAnotherAndResponseFalse()
             throws AbstractCodedException {
 
-        AppCatMessageDto<ProductionEvent> msgLight = new AppCatMessageDto<ProductionEvent>(
+        final AppCatMessageDto<ProductionEvent> msgLight = new AppCatMessageDto<ProductionEvent>(
                 ProductCategory.AUXILIARY_FILES, 1234L, "topic", 1, 111);
         msgLight.setState(MessageState.SEND);
         msgLight.setReadingPod("pod-name");
         msgLight.setSendingPod("other-name");
 
-        AppCatMessageDto<ProductionEvent> msgLight2 = new AppCatMessageDto<ProductionEvent>(
+        final AppCatMessageDto<ProductionEvent> msgLight2 = new AppCatMessageDto<ProductionEvent>(
                 ProductCategory.AUXILIARY_FILES, 1235L, "topic", 1, 111);
         msgLight2.setState(MessageState.SEND);
         msgLight2.setReadingPod("pod-name");
@@ -609,7 +609,7 @@ public class MessageConsumptionControllerTest {
         doReturn(false).when(service)
                 .send(Mockito.eq(ProductCategory.AUXILIARY_FILES),Mockito.eq(1235L), Mockito.any());
 
-        AppCatSendMessageDto expected = new AppCatSendMessageDto("pod-name", true);
+        final AppCatSendMessageDto expected = new AppCatSendMessageDto("pod-name", true);
 
         assertTrue(manager.send(ProductCategory.AUXILIARY_FILES,service, msgLight));
         assertFalse(manager.send(ProductCategory.AUXILIARY_FILES,service, msgLight2));
