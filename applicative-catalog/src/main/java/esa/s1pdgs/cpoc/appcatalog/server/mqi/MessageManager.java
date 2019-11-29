@@ -35,9 +35,9 @@ public class MessageManager {
 
     @Autowired
 	public MessageManager(
-			MqiMessageService messageService, 
-			@Value("${mqi.max-retries}") int maxRetries,
-			@Value("${mqi.dft-offset}") int defaultOffset
+			final MqiMessageService messageService, 
+			@Value("${mqi.max-retries}") final int maxRetries,
+			@Value("${mqi.dft-offset}") final int defaultOffset
 	) {
 		this.messageService = messageService;
 		this.maxRetries = maxRetries;
@@ -60,6 +60,7 @@ public class MessageManager {
 			final MqiMessage messageToInsert = new MqiMessage(category, topic, partition, offset, body.getGroup(),
 					MessageState.READ, body.getPod(), now, null, null, null, 0, body.getDto(), now);
 		    messageService.insertMqiMessage(messageToInsert);
+			LOGGER.debug("{} new MqiMessage inserted {}", logPrefix, messageToInsert); 
 		    return messageToInsert;
 		}
 		LOGGER.debug("{} Found MqiMessage", logPrefix);  
@@ -121,12 +122,13 @@ public class MessageManager {
 			case ACK_KO:
 			case ACK_OK:
 			case ACK_WARN:
-				LOGGER.debug("{} MqiMessage is Acknowledge", logPrefix);
+				LOGGER.debug("{} MqiMessage is Acknowledge ({})", logPrefix, messageFromDB.getState());
 				break;
 			case SEND:
-				LOGGER.debug("{} MqiMessage is SEND", logPrefix);
+				LOGGER.debug("{} MqiMessage is at State SEND", logPrefix);
 				final HashMap<String, Object> updateMap = handleUpdateStateSend(logPrefix, messageFromDB, force, pod);
 				messageService.updateByID(messageFromDB.getId(), updateMap);
+				LOGGER.debug("{} MqiMessage in state SEND updated using {}", logPrefix, updateMap);
 				break;
 			case READ:
 				LOGGER.debug("{} MqiMessage is at State READ", logPrefix);
@@ -137,13 +139,14 @@ public class MessageManager {
 				messageFromDB.setReadingPod(pod);
 				updates.put("readingPod", pod);	
 				messageService.updateByID(messageFromDB.getId(), updates);
+				LOGGER.debug("{} MqiMessage in state READ updated using {}", logPrefix, updates);
 				break;	
 			default:
 				throw new IllegalArgumentException(String.format("Unhandled state %s", messageFromDB.getState()));
 		  }
 	}
 
-	public List<MqiMessage> getNextForPodByCategory(String pod, ProductCategory category) {
+	public List<MqiMessage> getNextForPodByCategory(final String pod, final ProductCategory category) {
 		// only return the ones not in any state ACK*
         return messageService.searchByPodStateCategory(pod, category, ACKS);		
 	}
@@ -163,7 +166,7 @@ public class MessageManager {
 		return messageService.countReadingMessages(pod, topic);
 	}
 	
-	public MqiMessage getMessage(long messageID) throws IllegalStateException
+	public MqiMessage getMessage(final long messageID) throws IllegalStateException
 	{
 		final List<MqiMessage> responseFromDB = messageService.searchByID(messageID);
 
@@ -173,7 +176,7 @@ public class MessageManager {
         return responseFromDB.get(0);
 	}
 
-	public boolean handleSendMessage(long messageID, String pod) throws IllegalStateException {                
+	public boolean handleSendMessage(final long messageID, final String pod) throws IllegalStateException {                
         final MqiMessage messageFromDB = getMessage(messageID);
         final Date now = new Date();        
      	LOGGER.debug("[Send Message] [MessageID {}] MqiMessage found is at state {}", messageID, messageFromDB.getState());
