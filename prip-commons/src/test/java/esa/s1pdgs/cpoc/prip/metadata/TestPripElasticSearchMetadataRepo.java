@@ -38,7 +38,6 @@ import esa.s1pdgs.cpoc.prip.model.PripDateTimeFilter.Operator;
 import esa.s1pdgs.cpoc.prip.model.PripMetadata;
 import esa.s1pdgs.cpoc.prip.model.PripTextFilter;
 
-@Ignore
 public class TestPripElasticSearchMetadataRepo {
 
 	@Mock
