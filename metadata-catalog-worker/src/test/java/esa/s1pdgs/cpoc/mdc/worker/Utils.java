@@ -1,5 +1,9 @@
 package esa.s1pdgs.cpoc.mdc.worker;
 
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.StandardCopyOption;
+
 import esa.s1pdgs.cpoc.common.EdrsSessionFileType;
 import esa.s1pdgs.cpoc.common.ProductFamily;
 import esa.s1pdgs.cpoc.mqi.model.queue.CatalogJob;
@@ -40,6 +44,19 @@ public class Utils {
     	job.setSessionId(sessionId);
     	
     	return job;
+    }
+    
+    public static final void copyFolder(final Path src, final Path dest) throws Exception {
+        Files.walk(src)
+            .forEach(source -> copy(source, dest.resolve(src.relativize(source))));
+    }
+
+    private static final void copy(final Path source, final Path dest) {
+        try {
+            Files.copy(source, dest, StandardCopyOption.REPLACE_EXISTING);
+        } catch (final Exception e) {
+            throw new RuntimeException(e.getMessage(), e);
+        }
     }
 
 

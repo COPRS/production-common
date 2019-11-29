@@ -33,8 +33,8 @@ public class GenericKafkaUtils<T> {
 
     public final static String TOPIC_ERROR = "t-pdgs-errors";
     public final static String TOPIC_L0_JOBS = "t-pdgs-aio-execution-jobs";
-    public final static String TOPIC_L0_PRODUCTS = "t-pdgs-l0asp-l0-slice-production-events-nrt"; // t-pdgs-l0-slices -> t-pdgs-l0asp-l0-slice-production-events-nrt
-    public final static String TOPIC_L0_ACNS = "t-pdgs-l0asp-l0-acn-production-events-nrt";
+    public final static String TOPIC_L0_PRODUCTS = "t-pdgs-aio-l0-slice-production-events-nrt"; // t-pdgs-l0-slices -> t-pdgs-aio-l0-slice-production-events-nrt
+    public final static String TOPIC_L0_ACNS = "t-pdgs-aio-l0-acn-production-events-nrt";
     public final static String TOPIC_L0_REPORTS = "t-pdgs-aio-production-report-events";
     public final static String TOPIC_L1_JOBS = "t-pdgs-l1-execution-jobs-nrt"; // ok t-pdgs-l1-jobs -> t-pdgs-l1-execution-jobs-nrt
     public final static String TOPIC_L1_PRODUCTS = "t-pdgs-l0asp-l1-slice-production-events-nrt"; // ???
