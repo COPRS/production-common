@@ -34,22 +34,28 @@ public class CompressionTrigger {
 		LOGGER.info("Received new production event for compression: {}",productionEvent);
 
 		final GenericPublicationMessageDto<CompressionJob> outputMessage = new GenericPublicationMessageDto<CompressionJob>(
-				message.getId(), productionEvent.getProductFamily(), productionEventToCompressionJob(productionEvent));
+				message.getId(), 
+				productionEvent.getProductFamily(), 
+				productionEventToCompressionJob(productionEvent)
+		);
 		this.mqiClient.publish(outputMessage, ProductCategory.COMPRESSED_PRODUCTS);
 	}
 
-	private CompressionJob productionEventToCompressionJob(ProductionEvent productionEvent) {
+	private CompressionJob productionEventToCompressionJob(final ProductionEvent productionEvent) {
 
-		return new CompressionJob(productionEvent.getKeyObjectStorage(), productionEvent.getProductFamily(),
+		return new CompressionJob(
+				productionEvent.getKeyObjectStorage(), 
+				productionEvent.getProductFamily(),
 				getCompressedKeyObjectStorage(productionEvent.getKeyObjectStorage()),
-				getCompressedProductFamily(productionEvent.getProductFamily()));
+				getCompressedProductFamily(productionEvent.getProductFamily())
+		);
 	}
 
-	String getCompressedKeyObjectStorage(String inputKeyObjectStorage) {
+	String getCompressedKeyObjectStorage(final String inputKeyObjectStorage) {
 		return inputKeyObjectStorage + SUFFIX_ZIPPPRODUCTFILE;
 	}
 
-	ProductFamily getCompressedProductFamily(ProductFamily inputFamily) {
+	ProductFamily getCompressedProductFamily(final ProductFamily inputFamily) {
 		return ProductFamily.fromValue(inputFamily.toString() + SUFFIX_ZIPPRODUCTFAMILY);
 	}
 
