@@ -4,10 +4,11 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 
 import org.springframework.boot.context.properties.ConfigurationProperties;
+import org.springframework.context.annotation.Configuration;
 
 import esa.s1pdgs.cpoc.common.ProductCategory;
 
-
+@Configuration
 @ConfigurationProperties("trigger")
 public class MdcTriggerConfigurationProperties {
 	public static class CategoryConfig

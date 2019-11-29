@@ -1,5 +1,7 @@
 package esa.s1pdgs.cpoc.compression.trigger.service;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -14,7 +16,8 @@ import esa.s1pdgs.cpoc.mqi.model.rest.GenericPublicationMessageDto;
 
 @Service
 public class CompressionTrigger {
-
+	private static final Logger LOGGER = LogManager.getLogger(CompressionTrigger.class);
+	
 	private static final String SUFFIX_ZIPPRODUCTFAMILY = "_ZIP";
 	private static final String SUFFIX_ZIPPPRODUCTFILE = ".zip";
 
@@ -25,9 +28,10 @@ public class CompressionTrigger {
 		this.mqiClient = mqiClient;
 	}
 
-	public void trigger(GenericMessageDto<ProductionEvent> message) throws AbstractCodedException {
-
+	public void trigger(GenericMessageDto<ProductionEvent> message) throws AbstractCodedException {		
 		ProductionEvent productionEvent = message.getBody();
+		
+		LOGGER.info("Received new production event for compression: {}",productionEvent);
 
 		final GenericPublicationMessageDto<CompressionJob> outputMessage = new GenericPublicationMessageDto<CompressionJob>(
 				message.getId(), productionEvent.getProductFamily(), productionEventToCompressionJob(productionEvent));
