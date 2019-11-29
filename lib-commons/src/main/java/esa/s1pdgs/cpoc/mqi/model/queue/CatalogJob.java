@@ -3,14 +3,11 @@ package esa.s1pdgs.cpoc.mqi.model.queue;
 import java.util.Objects;
 
 public class CatalogJob extends AbstractMessage {	
-	private String productName;
-    private String sessionId;
-    private String satelliteId;
-    private String missionId;
-    private String stationCode;
+	private String productName = NOT_DEFINED;
+	private String relativePath = NOT_DEFINED;
     private String mode;
     private OQCFlag oqcFlag = OQCFlag.NOT_CHECKED;
-
+    
 	public String getProductName() {
 		return productName;
 	}
@@ -18,37 +15,13 @@ public class CatalogJob extends AbstractMessage {
 	public void setProductName(final String productName) {
 		this.productName = productName;
 	}
-
-	public String getSessionId() {
-		return sessionId;
+	
+	public String getRelativePath() {
+		return relativePath;
 	}
 
-	public void setSessionId(final String sessionId) {
-		this.sessionId = sessionId;
-	}
-
-	public String getSatelliteId() {
-		return satelliteId;
-	}
-
-	public void setSatelliteId(final String satelliteId) {
-		this.satelliteId = satelliteId;
-	}
-
-	public String getMissionId() {
-		return missionId;
-	}
-
-	public void setMissionId(final String missionId) {
-		this.missionId = missionId;
-	}
-
-	public String getStationCode() {
-		return stationCode;
-	}
-
-	public void setStationCode(final String stationCode) {
-		this.stationCode = stationCode;
+	public void setRelativePath(final String relativePath) {
+		this.relativePath = relativePath;
 	}
 
 	public String getMode() {
@@ -69,8 +42,8 @@ public class CatalogJob extends AbstractMessage {
 
 	@Override
 	public int hashCode() {
-		return Objects.hash(creationDate, hostname, keyObjectStorage, missionId, mode, oqcFlag, productFamily,
-				productName, satelliteId, sessionId, stationCode);
+		return Objects.hash(creationDate, hostname, keyObjectStorage, relativePath, mode, oqcFlag, productFamily,
+				productName);
 	}
 
 	@Override
@@ -88,21 +61,17 @@ public class CatalogJob extends AbstractMessage {
 		return Objects.equals(creationDate, other.creationDate) 
 				&& Objects.equals(hostname, other.hostname)
 				&& Objects.equals(keyObjectStorage, other.keyObjectStorage)
-				&& Objects.equals(missionId, other.missionId) 
+				&& Objects.equals(relativePath, other.relativePath) 
 				&& Objects.equals(mode, other.mode)
 				&& oqcFlag == other.oqcFlag 
 				&& productFamily == other.productFamily
-				&& Objects.equals(productName, other.productName) 
-				&& Objects.equals(satelliteId, other.satelliteId)
-				&& Objects.equals(sessionId, other.sessionId) 
-				&& Objects.equals(stationCode, other.stationCode);
+				&& Objects.equals(productName, other.productName);
 	}
 
 	@Override
 	public String toString() {
 		return "CatalogJob [productFamily=" + productFamily + ", keyObjectStorage=" + keyObjectStorage
 				+ ", creationDate=" + creationDate + ", hostname=" + hostname + ", productName=" + productName
-				+ ", sessionId=" + sessionId + ", satelliteId=" + satelliteId + ", missionId=" + missionId
-				+ ", stationCode=" + stationCode + ", mode=" + mode + ", oqcFlag=" + oqcFlag + "]";
+				+ ", relativePath=" + relativePath + ", mode=" + mode + ", oqcFlag=" + oqcFlag + "]";
 	}
 }

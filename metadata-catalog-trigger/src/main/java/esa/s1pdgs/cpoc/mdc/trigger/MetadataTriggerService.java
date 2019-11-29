@@ -1,6 +1,5 @@
 package esa.s1pdgs.cpoc.mdc.trigger;
 
-import java.util.Arrays;
 import java.util.Map;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -19,10 +18,8 @@ import esa.s1pdgs.cpoc.mdc.trigger.config.MdcTriggerConfigurationProperties;
 import esa.s1pdgs.cpoc.mdc.trigger.config.MdcTriggerConfigurationProperties.CategoryConfig;
 import esa.s1pdgs.cpoc.mqi.client.MqiClient;
 import esa.s1pdgs.cpoc.mqi.client.MqiConsumer;
-import esa.s1pdgs.cpoc.mqi.model.queue.AbstractMessage;
 import esa.s1pdgs.cpoc.mqi.model.queue.CatalogJob;
 import esa.s1pdgs.cpoc.mqi.model.queue.IngestionEvent;
-import esa.s1pdgs.cpoc.mqi.model.queue.ProductionEvent;
 import esa.s1pdgs.cpoc.mqi.model.rest.GenericMessageDto;
 import esa.s1pdgs.cpoc.mqi.model.rest.GenericPublicationMessageDto;
 
@@ -75,7 +72,7 @@ public class MetadataTriggerService {
 	
 	private final MqiConsumer<?> newMqiConsumerFor(final ProductCategory cat, final CategoryConfig config) {
 		LOG.debug("Creating MQI consumer for category {} using {}", cat, config);
-		return new MqiConsumer<ProductionEvent>(
+		return new MqiConsumer<IngestionEvent>(
 				mqiClient, 
 				cat, 
 				p -> publish(cat, p, toCatalogJob(p.getBody())),
@@ -85,52 +82,18 @@ public class MetadataTriggerService {
 		);
 	}
 		
-	private final <E extends AbstractMessage> CatalogJob toCatalogJob(final E e) {
-
-		// TODO make sure than keyObs contains the metadata file
+	private final CatalogJob toCatalogJob(final IngestionEvent event) {
+		final CatalogJob job = new CatalogJob();
+		job.setProductName(event.getProductName());
+		job.setRelativePath(event.getRelativePath());
+		job.setProductFamily(event.getProductFamily());
 		
-		// special case: EDRS_SESSION are of type IngestionEvent
-		if (e instanceof IngestionEvent) {
-			final IngestionEvent event = (IngestionEvent) e;
-			
-			final CatalogJob job = new CatalogJob();
+		// make sure than keyObs contains the metadata file
+		if (event.getKeyObjectStorage().toLowerCase().endsWith(properties.getFileWithManifestExt())) {
+			job.setKeyObjectStorage(event.getKeyObjectStorage() + "/" + properties.getManifestFilename());
+		} else {
 			job.setKeyObjectStorage(event.getKeyObjectStorage());
-			job.setMissionId(event.getMissionId());
-			job.setProductFamily(event.getProductFamily());
-			job.setProductName(event.getKeyObjectStorage());
-			job.setSatelliteId(event.getSatelliteId());
-			job.setSessionId(event.getSessionId());
-			job.setStationCode(event.getStationCode());
-			return job;
 		}
-		// everything else is a ProductionEvent
-		else if (e instanceof ProductionEvent) {
-			final ProductionEvent event = (ProductionEvent) e;
-			
-			final CatalogJob job = new CatalogJob();
-			job.setProductName(((ProductionEvent) e).getProductName());
-			job.setProductFamily(event.getProductFamily());
-			
-			if (event.getKeyObjectStorage().toLowerCase().endsWith(properties.getFileWithManifestExt())) {
-				job.setKeyObjectStorage(event.getProductName() + "/" + properties.getManifestFilename());
-			} else {
-				job.setKeyObjectStorage(event.getKeyObjectStorage());
-			}
-			return job;
-		}
-		// otherwise, we got an error
-		else {
-			throw new RuntimeException(
-					String.format(
-							"Invalid input message class - expected to be in %s but was: %s", 
-							Arrays.asList(IngestionEvent.class, ProductionEvent.class),
-							e.getClass()
-					)
-			);
-		}
+		return job;
 	}
-	
-//	private final CatalogJob toCatalogJob(final ProductionEvent event) {
-//		// TODO
-//	}
 }
