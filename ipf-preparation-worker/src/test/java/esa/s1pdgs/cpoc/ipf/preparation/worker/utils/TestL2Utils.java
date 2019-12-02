@@ -2,6 +2,7 @@ package esa.s1pdgs.cpoc.ipf.preparation.worker.utils;
 
 import java.util.Arrays;
 import java.util.Calendar;
+import java.util.Date;
 
 import esa.s1pdgs.cpoc.appcatalog.server.job.db.AppDataJob;
 import esa.s1pdgs.cpoc.appcatalog.server.job.db.AppDataJobGeneration;
@@ -21,7 +22,7 @@ import esa.s1pdgs.cpoc.mqi.model.rest.GenericMessageDto;
 public class TestL2Utils {
 
     public static LevelProductsRouting buildL2Routing() {
-        LevelProductsRouting r = new LevelProductsRouting();
+        final LevelProductsRouting r = new LevelProductsRouting();
         r.addRoute(new LevelProductsRoute(new LevelProductsRouteFrom("WV", "A"),
         		  new LevelProductsRouteTo(Arrays.asList("WV_RAW__0_OCN__2.xml"))));
         r.addRoute(new LevelProductsRoute(new LevelProductsRouteFrom("WV", "B"),
@@ -58,14 +59,14 @@ public class TestL2Utils {
     }
 
     public static AppDataJob buildJobGeneration(
-            boolean preSearchInfo) throws InternalErrorException {
-        AppDataJob ret = new AppDataJob();
+            final boolean preSearchInfo) throws InternalErrorException {
+        final AppDataJob ret = new AppDataJob();
         ret.setId(123);
         ret.setState(AppDataJobState.GENERATING);
         ret.setPod("hostname");
         ret.setLevel(ApplicationLevel.L2);
 
-        GenericMessageDto<ProductionEvent> message1 =
+        final GenericMessageDto<ProductionEvent> message1 =
                 new GenericMessageDto<ProductionEvent>(1, "input-key",
                         new ProductionEvent(
                                 "S1A_IW_RAW__0SDV_20171213T142312_20171213T142344_019685_02173E_07F5.SAFE",
@@ -73,11 +74,11 @@ public class TestL2Utils {
                                 ProductFamily.L0_ACN, "NRT"));
         ret.setMessages(Arrays.asList(message1));
 
-        Calendar start1 = Calendar.getInstance();
+        final Calendar start1 = Calendar.getInstance();
         start1.set(2017, Calendar.DECEMBER, 13, 14, 59, 48);
-        Calendar stop1 = Calendar.getInstance();
+        final Calendar stop1 = Calendar.getInstance();
         stop1.set(2017, Calendar.DECEMBER, 13, 15, 17, 25);
-        AppDataJobProduct product = new AppDataJobProduct();
+        final AppDataJobProduct product = new AppDataJobProduct();
         product.setMissionId("S1");
         product.setProductName(
                 "S1A_IW_RAW__0SDV_20171213T142312_20171213T142344_019685_02173E_07F5.SAFE");
@@ -97,18 +98,22 @@ public class TestL2Utils {
         }
         ret.setProduct(product);
 
-        AppDataJobGeneration gen1 = new AppDataJobGeneration();
+        final AppDataJobGeneration gen1 = new AppDataJobGeneration();
         gen1.setTaskTable("IW_RAW__0_GRDH_1.xml");
         gen1.setState(AppDataJobGenerationState.INITIAL);
-        AppDataJobGeneration gen2 = new AppDataJobGeneration();
+        gen1.setCreationDate(new Date(0L));
+        final AppDataJobGeneration gen2 = new AppDataJobGeneration();
         gen2.setTaskTable("IW_RAW__0_GRDM_1.xml");
         gen2.setState(AppDataJobGenerationState.READY);
-        AppDataJobGeneration gen3 = new AppDataJobGeneration();
+        gen2.setCreationDate(new Date(0L));
+        final AppDataJobGeneration gen3 = new AppDataJobGeneration();
         gen3.setTaskTable("IW_RAW__0_SLC__1.xml");
         gen3.setState(AppDataJobGenerationState.PRIMARY_CHECK);
-        AppDataJobGeneration gen4 = new AppDataJobGeneration();
+        gen3.setCreationDate(new Date(0L));
+        final AppDataJobGeneration gen4 = new AppDataJobGeneration();
         gen4.setTaskTable("IW_RAW__0_SLC__1_GRDH_1.xml");
         gen4.setState(AppDataJobGenerationState.SENT);
+        gen4.setCreationDate(new Date(0L));
         ret.setGenerations(Arrays.asList(gen1, gen2, gen3, gen4));
 
         return ret;

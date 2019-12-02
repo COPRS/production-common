@@ -113,17 +113,17 @@ public class L0SegmentAppConsumerTest {
 	public void initMessages() {
 		messages = new ArrayList<>();
 		final GenericMessageDto<CatalogEvent> message1 = new GenericMessageDto<CatalogEvent>(1, "topic1",
-				TestL0Utils.newCatalogEvent("S1B_IW_RAW__0SHV_20171218T094703_20171218T094735_008772_00F9CD_EB01.SAFE",
+				TestL0Utils.newSegmentCatalogEvent("S1B_IW_RAW__0SHV_20171218T094703_20171218T094735_008772_00F9CD_EB01.SAFE",
 						"S1B_IW_RAW__0SHV_20171218T094703_20171218T094735_008772_00F9CD_EB01.SAFE",
 						ProductFamily.L0_SEGMENT, "FAST"));
 		messages.add(message1);
 		final GenericMessageDto<CatalogEvent> message2 = new GenericMessageDto<CatalogEvent>(2, "topic1",
-				TestL0Utils.newCatalogEvent("S1B_IW_RAW__0SSV_20171218T090732_20171218T090732_008771_00F9CA_C40B.SAFE",
+				TestL0Utils.newSegmentCatalogEvent("S1B_IW_RAW__0SSV_20171218T090732_20171218T090732_008771_00F9CA_C40B.SAFE",
 						"S1B_IW_RAW__0SSV_20171218T090732_20171218T090732_008771_00F9CA_C40B.SAFE",
 						ProductFamily.L0_SEGMENT, "FAST"));
 		messages.add(message2);
 		final GenericMessageDto<CatalogEvent> message3 = new GenericMessageDto<CatalogEvent>(1, "topic1",
-				TestL0Utils.newCatalogEvent("S1B_IW_RAW__0SHH_20171218T094703_20171218T094735_008772_00F9CD_EB01.SAFE",
+				TestL0Utils.newSegmentCatalogEvent("S1B_IW_RAW__0SHH_20171218T094703_20171218T094735_008772_00F9CD_EB01.SAFE",
 						"S1B_IW_RAW__0SHH_20171218T094703_20171218T094735_008772_00F9CD_EB01.SAFE",
 						ProductFamily.L0_SEGMENT, "FAST"));
 		messages.add(message3);
@@ -182,7 +182,7 @@ public class L0SegmentAppConsumerTest {
 		assertEquals(expectedData, result);
 		verify(appDataService, times(1)).findByMessagesId(eq(1L));
 		verify(appDataService, times(1)).findByProductDataTakeId(eq("00F9CD"));
-		verify(appDataService, times(1)).newJob(eq(expectedData));
+		verify(appDataService, times(1)).newJob(Mockito.any());
 	}
 
 	@Test
@@ -216,6 +216,6 @@ public class L0SegmentAppConsumerTest {
 		verify(appDataService, times(1)).findByProductDataTakeId(eq("00F9CD"));
 		verify(appDataService, times(1)).newJob(any());
 		verify(appDataService, times(1)).patchJob(anyLong(), any(), eq(false), eq(false), eq(false));
-		verify(jobsDispatcher).dispatch(eq(expectedData));
+		verify(jobsDispatcher).dispatch(Mockito.any());
 	}
 }

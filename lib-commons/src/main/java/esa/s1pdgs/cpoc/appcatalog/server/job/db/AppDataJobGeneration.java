@@ -152,7 +152,7 @@ public class AppDataJobGeneration {
         } else if (obj == null || getClass() != obj.getClass()) {
             ret = false;
         } else {
-            AppDataJobGeneration other = (AppDataJobGeneration) obj;
+            final AppDataJobGeneration other = (AppDataJobGeneration) obj;
             ret = Objects.equals(creationDate, other.creationDate)
                     && Objects.equals(lastUpdateDate, other.lastUpdateDate)
                     && Objects.equals(taskTable, other.taskTable)

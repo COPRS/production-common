@@ -10,6 +10,7 @@ import static org.mockito.Mockito.verifyNoMoreInteractions;
 
 import java.net.URI;
 import java.util.Arrays;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.Callable;
@@ -88,7 +89,7 @@ public class AppCatalogJobClientTest {
 	                Mockito.any(),
 	                Mockito.any(ParameterizedTypeReference.class)
 	    );        
-        Map<String, String> filters = new HashMap<>();
+        final Map<String, String> filters = new HashMap<>();
         filters.put("filter1", "value1");
         filters.put("filter2", "value2");
         client.search(filters);
@@ -119,7 +120,7 @@ public class AppCatalogJobClientTest {
     public void testSearch() throws Exception {
     	runSearchTest(
     			() -> {
-    		        Map<String, String> filters = new HashMap<>();
+    		        final Map<String, String> filters = new HashMap<>();
     		        filters.put("filter1", "value1");
     		        filters.put("filter2", "value2");
     		        client.search(filters);
@@ -164,24 +165,26 @@ public class AppCatalogJobClientTest {
     }
 
     private AppDataJob<ProductionEvent> buildJob() {
-        AppDataJob<ProductionEvent> job = new AppDataJob<>();
+        final AppDataJob<ProductionEvent> job = new AppDataJob<>();
         job.setId(142);
         job.setState(AppDataJobState.DISPATCHING);
         
-        AppDataJobProduct product = new AppDataJobProduct();
+        final AppDataJobProduct product = new AppDataJobProduct();
         product.setProductName("toto");
         job.setProduct(product);
         
-        GenericMessageDto<ProductionEvent> message1 = new GenericMessageDto<ProductionEvent>(1, "key1", DUMMY);
-        GenericMessageDto<ProductionEvent> message2 = new GenericMessageDto<ProductionEvent>(2, "key2", DUMMY);
+        final GenericMessageDto<ProductionEvent> message1 = new GenericMessageDto<ProductionEvent>(1, "key1", DUMMY);
+        final GenericMessageDto<ProductionEvent> message2 = new GenericMessageDto<ProductionEvent>(2, "key2", DUMMY);
         job.setMessages(Arrays.asList(message1, message2));
         
-        AppDataJobGeneration gen1 = new AppDataJobGeneration();
+        final AppDataJobGeneration gen1 = new AppDataJobGeneration();
         gen1.setTaskTable("tasktable1");
         gen1.setState(AppDataJobGenerationState.INITIAL);
-        AppDataJobGeneration gen2 = new AppDataJobGeneration();
+        gen1.setCreationDate(new Date(0L));
+        final AppDataJobGeneration gen2 = new AppDataJobGeneration();
         gen2.setTaskTable("tasktable2");
         gen2.setState(AppDataJobGenerationState.READY);
+        gen2.setCreationDate(new Date(0L));
         job.setGenerations(Arrays.asList(gen1, gen2));
         return job;
     }

@@ -70,18 +70,18 @@ public class L1AppConsumerTest {
     
     private ErrorRepoAppender errorAppender = ErrorRepoAppender.NULL ;
 
-    private CatalogEvent dtoMatch = TestL0Utils.newCatalogEvent(
+    private CatalogEvent dtoMatch = TestL0Utils.newSliceCatalogEvent(
             "S1A_IW_RAW__0SDV_20171213T121623_20171213T121656_019684_021735_C6DB.SAFE",
             "S1A_IW_RAW__0SDV_20171213T121623_20171213T121656_019684_021735_C6DB.SAFE",
             ProductFamily.L0_SLICE, "NRT");
-    private CatalogEvent dtoNotMatch = TestL0Utils.newCatalogEvent(
-            "S1A_I_RAW__0SDV_20171213T121623_20171213T121656_019684_021735_C6DB.SAFE",
-            "S1A_I_RAW__0SDV_20171213T121623_20171213T121656_019684_021735_C6DB.SAFE",
-            ProductFamily.L0_SLICE, "NRT");
+//    private CatalogEvent dtoNotMatch = TestL0Utils.newSliceCatalogEvent(
+//            "S1A_I_RAW__0SDV_20171213T121623_20171213T121656_019684_021735_C6DB.SAFE",
+//            "S1A_I_RAW__0SDV_20171213T121623_20171213T121656_019684_021735_C6DB.SAFE",
+//            ProductFamily.L0_SLICE, "NRT");
     private GenericMessageDto<CatalogEvent> message1 =
             new GenericMessageDto<CatalogEvent>(1, "", dtoMatch);
-    private GenericMessageDto<CatalogEvent> message2 =
-            new GenericMessageDto<CatalogEvent>(2, "", dtoNotMatch);
+//    private GenericMessageDto<CatalogEvent> message2 =
+//            new GenericMessageDto<CatalogEvent>(2, "", dtoNotMatch);
     
     @Mock
     private MetadataClient metadataClient;
@@ -110,7 +110,7 @@ public class L1AppConsumerTest {
         this.mockProcessSettings();
 
         // Mock the MQI service
-        doReturn(message1, message2).when(mqiService).next(Mockito.any());
+        doReturn(message1).when(mqiService).next(Mockito.any());
         doReturn(true).when(mqiService).ack(Mockito.any(), Mockito.any());
 
         // Mock app status
@@ -196,19 +196,6 @@ public class L1AppConsumerTest {
         Mockito.doAnswer(i -> {
             return ApplicationMode.TEST;
         }).when(processSettings).getMode();
-    }
-
-    @Test
-    public void testProductNameNotMatch() throws AbstractCodedException {
-
-        final LevelProductsConsumer consumer = new LevelProductsConsumer(l0SliceJobsDispatcher,
-                l0SlicePatternSettings, processSettings, mqiService,
-                mqiStatusService, appDataService, errorAppender, appStatus, metadataClient, 0, 0);
-        consumer.onMessage(message2);
-
-        verify(l0SliceJobsDispatcher, never()).dispatch(Mockito.any());
-        verify(appStatus, times(1)).setProcessing(Mockito.eq(2L));
-        verify(appStatus, times(2)).setWaiting();
     }
 
     @Test

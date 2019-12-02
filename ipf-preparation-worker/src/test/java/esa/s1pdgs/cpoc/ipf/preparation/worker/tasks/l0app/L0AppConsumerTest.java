@@ -331,9 +331,11 @@ public class L0AppConsumerTest {
                 errorAppender, appStatus, metadataClient, 0, 0);
 
         final AppDataJob result = edrsSessionsConsumer.buildJob(message);
+        result.setCreationDate(expected.getCreationDate());
         verify(appDataService, times(1)).patchJob(Mockito.eq(123L),
                 Mockito.any(), Mockito.eq(false), Mockito.eq(false),
                 Mockito.eq(false));
+        
         assertEquals(expected, result);
     }
 

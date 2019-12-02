@@ -1,10 +1,14 @@
 package esa.s1pdgs.cpoc.ipf.preparation.worker.utils;
 
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 import com.fasterxml.jackson.databind.JsonNode;
@@ -19,96 +23,84 @@ import esa.s1pdgs.cpoc.appcatalog.server.job.db.AppDataJobState;
 import esa.s1pdgs.cpoc.common.ApplicationLevel;
 import esa.s1pdgs.cpoc.common.EdrsSessionFileType;
 import esa.s1pdgs.cpoc.common.ProductFamily;
+import esa.s1pdgs.cpoc.common.utils.DateUtils;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.model.tasktable.TaskTable;
 import esa.s1pdgs.cpoc.mqi.model.queue.CatalogEvent;
 import esa.s1pdgs.cpoc.mqi.model.rest.GenericMessageDto;
 
 public class TestL0Utils {
-
+    public final static DateTimeFormatter TIME_FORMATTER = DateTimeFormatter.ofPattern("yyyyMMdd'T'HHmmss");
+	
+    private static final String SEGMENT_PATTERN = "^([0-9a-z]{2})([0-9a-z]{1})_(([0-9a-z]{2})_RAW__0S([0-9a-z_]{2}))_"
+    		+ "([0-9a-z]{15})_([0-9a-z]{15})_([0-9a-z_]{6})_([0-9a-z_]{6})\\w{1,}\\.SAFE(/.*)?$";
+    
+    private static final String SLICE_PATTERN = "^([0-9a-z]{2})([0-9a-z]){1}_(([0-9a-z]{2})_RAW__0([0-9a-z_]{3}))_"
+    		+ "([0-9a-z]{15})_([0-9a-z]{15})_([0-9a-z_]{6})_([0-9a-z_]{6})\\w{1,}\\.SAFE(/.*)?$";
+    
     public static TaskTable buildTaskTableAIOP() {
         return TestGenericUtils.buildTaskTableAIOP();
     }
-
-//    public static JobOrder buildJobOrderL20171109175634707000125() {
-//        return buildJobOrderL20171109175634707000125(false);
-//    }
-//
-//    public static JobOrder buildJobOrderL20171109175634707000125(
-//            boolean xmlOnly) {
-//        JobOrder template = TestGenericUtils.buildJobOrderTemplateAIOP(xmlOnly);
-//
-//        template.getConf().setSensingTime(new JobOrderSensingTime(
-//                "20171213_145948000000", "20171213_151725000000"));
-//        template.getConf()
-//                .addProcParam(new JobOrderProcParam("Mission_Id", "S1A"));
-//
-//        JobOrderInput input1 = new JobOrderInput();
-//        input1.setFileType("MPL_ORBPRE");
-//        input1.setFileNameType(JobOrderFileNameType.PHYSICAL);
-//        input1.addFilename(
-//                "/data/localWD/564061776/S1A_OPER_MPL_ORBPRE_20171208T200309_20171215T200309_0001.EOF",
-//                "S1A_OPER_MPL_ORBPRE_20171208T200309_20171215T200309_0001.EOF");
-//        input1.addTimeInterval(new JobOrderTimeInterval("20171208_200309000000",
-//                "20171215_200309000000",
-//                "/data/localWD/564061776/S1A_OPER_MPL_ORBPRE_20171208T200309_20171215T200309_0001.EOF"));
-//        JobOrderInput input2 = new JobOrderInput();
-//        input2.setFileType("MPL_ORBSCT");
-//        input2.setFileNameType(JobOrderFileNameType.PHYSICAL);
-//        input2.addFilename(
-//                "/data/localWD/564061776/S1A_OPER_MPL_ORBSCT_20140507T150704_99999999T999999_0020.EOF",
-//                "S1A_OPER_MPL_ORBSCT_20140507T150704_99999999T999999_0020.EOF");
-//        input2.addTimeInterval(new JobOrderTimeInterval("20140403_224609000000",
-//                "99991231_235959000000",
-//                "/data/localWD/564061776/S1A_OPER_MPL_ORBSCT_20140507T150704_99999999T999999_0020.EOF"));
-//        JobOrderInput input3 = new JobOrderInput();
-//        input3.setFileType("AUX_OBMEMC");
-//        input3.setFileNameType(JobOrderFileNameType.PHYSICAL);
-//        input3.addFilename(
-//                "/data/localWD/564061776/S1A_OPER_AUX_OBMEMC_PDMC_20140201T000000.xml",
-//                "S1A_OPER_AUX_OBMEMC_PDMC_20140201T000000.xml");
-//        input3.addTimeInterval(new JobOrderTimeInterval("20140201_000000000000",
-//                "99991231_235959000000",
-//                "/data/localWD/564061776/S1A_OPER_AUX_OBMEMC_PDMC_20140201T000000.xml"));
-//
-//        template.getProcs().get(0).addInput(input1);
-//        template.getProcs().get(0).addInput(input2);
-//        template.getProcs().get(0).addInput(input3);
-//
-//        return template;
-//    }
-//
-//    public static EdrsSessionFile createEdrsSessionFileChannel1(
-//            boolean xmlOnlyForRaws) {
-//
-//        EdrsSessionFile r = new EdrsSessionFile();
-//        r.setSessionId("L20171109175634707000125");
-//        r.setStartTime("2017-12-13T14:59:48Z");
-//        r.setStopTime("2017-12-13T15:17:25Z");
-//        r.setRawNames(
-//                TestL0Utils.getEdrsSessionFileRawsChannel1(xmlOnlyForRaws));
-//        return r;
-//    }
-//
-//    public static EdrsSessionFile createEdrsSessionFileChannel2(
-//            boolean xmlOnlyForRaws) {
-//
-//        EdrsSessionFile r = new EdrsSessionFile();
-//        r.setSessionId("L20171109175634707000125");
-//        r.setStartTime("2017-12-13T14:59:48Z");
-//        r.setStopTime("2017-12-13T15:17:25Z");
-//        r.setRawNames(
-//                TestL0Utils.getEdrsSessionFileRawsChannel2(xmlOnlyForRaws));
-//        return r;
-//    }
     
-    public static CatalogEvent newCatalogEvent(
+    private static final String formatDate(final String date) {
+       	return DateUtils.convertToAnotherFormat(date,
+                TIME_FORMATTER,
+                AppDataJobProduct.TIME_FORMATTER);
+    }
+    
+    public static CatalogEvent newSegmentCatalogEvent(    		
     		final String productName, 
     		final String keyObs, 
     		final ProductFamily family,
-    		final String moder
+    		final String mode
 	) {
-        // FIXME
-    	return new CatalogEvent();
+    	return newCatalogEvent(SEGMENT_PATTERN, productName, keyObs, family, mode);    			
+    }
+    
+    public static CatalogEvent newSliceCatalogEvent(    		
+    		final String productName, 
+    		final String keyObs, 
+    		final ProductFamily family,
+    		final String mode
+	) {
+    	return newCatalogEvent(SLICE_PATTERN, productName, keyObs, family, mode);    			
+    }
+    
+    static CatalogEvent newCatalogEvent(
+    		final String lePattern,
+    		final String productName, 
+    		final String keyObs, 
+    		final ProductFamily family,
+    		final String mode
+	) {
+    	final Pattern pattern = Pattern.compile(lePattern, Pattern.CASE_INSENSITIVE);
+    	
+    	final Matcher m = pattern.matcher(productName);
+    	if (!m.matches()) {
+    		throw new RuntimeException("No worky worky! " + productName);
+    	}    	
+    	final Map<String,String> map = new HashMap<>();
+
+    	map.put("missionId", m.group(1));
+    	map.put("satelliteId", m.group(2)); 
+    	
+    	final String type =  m.group(3) + "_RAW__0S";
+       	map.put("swathtype", m.group(4));    	
+    	map.put("polarisation", m.group(5));
+      	map.put("startTime", formatDate(m.group(6)));
+    	map.put("stopTime", formatDate(m.group(7)));
+    	map.put("datatakeId", m.group(9));
+    	map.put("processMode",  mode);
+    	map.put("stationCode",  "WILE");
+    	
+    	final ObjectMapper mapper = new ObjectMapper();
+    	final JsonNode jsonNode = mapper.convertValue(map, JsonNode.class);
+    	
+    	final CatalogEvent event = new CatalogEvent();
+    	event.setProductFamily(family);
+    	event.setProductType(type);
+    	event.setKeyObjectStorage(keyObs);
+    	event.setMetadata(jsonNode);    	
+    	return event;
     }
 
 
@@ -133,6 +125,7 @@ public class TestL0Utils {
     	final JsonNode jsonNode = mapper.convertValue(map, JsonNode.class);
     	
     	final CatalogEvent event = new CatalogEvent();
+    	event.setCreationDate(new Date(0L));
     	event.setProductFamily(ProductFamily.EDRS_SESSION);
     	event.setProductType(type.name());
     	event.setKeyObjectStorage(keyObs);
@@ -201,6 +194,7 @@ public class TestL0Utils {
         final AppDataJobGeneration gen1 = new AppDataJobGeneration();
         gen1.setTaskTable("TaskTable.AIOP.xml");
         gen1.setState(AppDataJobGenerationState.INITIAL);
+        gen1.setCreationDate(new Date(0L));
         ret.setGenerations(Arrays.asList(gen1));
 
         return ret;
