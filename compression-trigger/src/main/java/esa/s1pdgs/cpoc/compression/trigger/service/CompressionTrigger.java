@@ -37,6 +37,8 @@ public class CompressionTrigger {
 				productionEvent.getProductFamily(), 
 				productionEventToCompressionJob(productionEvent)
 		);
+		outputMessage.setInputKey(message.getInputKey());
+		outputMessage.setOutputKey(outputMessage.getMessageToPublish().getOutputProductFamily().name());
 		
 		LOGGER.info("Publishing compression event with publication messager: {}",outputMessage);
 		this.mqiClient.publish(outputMessage, ProductCategory.COMPRESSED_PRODUCTS);
