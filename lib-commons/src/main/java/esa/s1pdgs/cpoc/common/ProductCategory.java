@@ -2,11 +2,12 @@ package esa.s1pdgs.cpoc.common;
 
 import esa.s1pdgs.cpoc.common.errors.InternalErrorException;
 import esa.s1pdgs.cpoc.mqi.model.queue.AbstractMessage;
+import esa.s1pdgs.cpoc.mqi.model.queue.CompressionJob;
 import esa.s1pdgs.cpoc.mqi.model.queue.IngestionEvent;
+import esa.s1pdgs.cpoc.mqi.model.queue.IngestionJob;
 import esa.s1pdgs.cpoc.mqi.model.queue.IpfExecutionJob;
 import esa.s1pdgs.cpoc.mqi.model.queue.LevelReportDto;
 import esa.s1pdgs.cpoc.mqi.model.queue.ProductionEvent;
-import esa.s1pdgs.cpoc.mqi.model.queue.IngestionJob;
 
 /**
  * Group products per category
@@ -20,7 +21,7 @@ public enum ProductCategory {
     LEVEL_PRODUCTS(ProductionEvent.class), 
     LEVEL_REPORTS(LevelReportDto.class), 
     LEVEL_SEGMENTS(ProductionEvent.class), 
-    COMPRESSED_PRODUCTS(ProductionEvent.class),
+    COMPRESSED_PRODUCTS(CompressionJob.class),
     INGESTION(IngestionJob.class);
 	
     /**
