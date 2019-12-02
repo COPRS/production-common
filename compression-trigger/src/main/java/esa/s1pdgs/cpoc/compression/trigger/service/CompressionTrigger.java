@@ -32,12 +32,13 @@ public class CompressionTrigger {
 		ProductionEvent productionEvent = message.getBody();
 		
 		LOGGER.info("Received new production event for compression: {}",productionEvent);
-
 		final GenericPublicationMessageDto<CompressionJob> outputMessage = new GenericPublicationMessageDto<CompressionJob>(
 				message.getId(), 
 				productionEvent.getProductFamily(), 
 				productionEventToCompressionJob(productionEvent)
 		);
+		
+		LOGGER.info("Publishing compression event with publication messager: {}",outputMessage);
 		this.mqiClient.publish(outputMessage, ProductCategory.COMPRESSED_PRODUCTS);
 	}
 
