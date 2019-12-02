@@ -188,19 +188,6 @@ public class L0SegmentAppConsumer
 
         if (CollectionUtils.isEmpty(existingJobs)) {        	
         	final CatalogEventAdapter eventAdapter = new CatalogEventAdapter(catEvent);
-        	
-
-            // Extract information from name
-//            final Matcher m = pattern.matcher(leveldto.getKeyObjectStorage());
-//            if (!m.matches()) {
-//                throw new InvalidFormatProduct(
-//                        "Don't match with regular expression "
-//                                + this.pattern.pattern());
-//            }
-//            final String satelliteId = m.group(this.patternGroups.get("satelliteId"));
-//            final String missionId = m.group(this.patternGroups.get("missionId"));
-//            final String acquisition = m.group(this.patternGroups.get("acquisition"));
-//            final String datatakeID = m.group(this.patternGroups.get("datatakeId"));
 
             // Search job for given datatake id
             final List<AppDataJob<CatalogEvent>> existingJobsForDatatake =
