@@ -12,12 +12,13 @@ import org.springframework.scheduling.annotation.EnableScheduling;
  */
 @SpringBootApplication
 @EnableScheduling
+@ComponentScan("esa.s1pdgs.cpoc")
 public class Application {
 	/**
      * Main application
      * @param args
      */
-    public static void main(String[] args) {
+    public static void main(final String[] args) {
         SpringApplication.run(Application.class, args);
     }
 
