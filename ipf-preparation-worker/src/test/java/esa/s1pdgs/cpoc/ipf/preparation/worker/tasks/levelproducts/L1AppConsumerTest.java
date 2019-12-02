@@ -32,18 +32,18 @@ import esa.s1pdgs.cpoc.errorrepo.ErrorRepoAppender;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.config.L0SlicePatternSettings;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.config.ProcessSettings;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.tasks.AbstractJobsDispatcher;
-import esa.s1pdgs.cpoc.ipf.preparation.worker.tasks.levelproducts.LevelProductsConsumer;
+import esa.s1pdgs.cpoc.ipf.preparation.worker.utils.TestL0Utils;
 import esa.s1pdgs.cpoc.metadata.client.MetadataClient;
 import esa.s1pdgs.cpoc.metadata.model.EdrsSessionMetadata;
 import esa.s1pdgs.cpoc.mqi.client.GenericMqiClient;
 import esa.s1pdgs.cpoc.mqi.client.StatusService;
-import esa.s1pdgs.cpoc.mqi.model.queue.ProductionEvent;
+import esa.s1pdgs.cpoc.mqi.model.queue.CatalogEvent;
 import esa.s1pdgs.cpoc.mqi.model.rest.GenericMessageDto;
 
 public class L1AppConsumerTest {
 
     @Mock
-    private AbstractJobsDispatcher<ProductionEvent> l0SliceJobsDispatcher;
+    private AbstractJobsDispatcher<CatalogEvent> l0SliceJobsDispatcher;
 
     @Mock
     protected ProcessSettings processSettings;
@@ -70,18 +70,18 @@ public class L1AppConsumerTest {
     
     private ErrorRepoAppender errorAppender = ErrorRepoAppender.NULL ;
 
-    private ProductionEvent dtoMatch = new ProductionEvent(
+    private CatalogEvent dtoMatch = TestL0Utils.newCatalogEvent(
             "S1A_IW_RAW__0SDV_20171213T121623_20171213T121656_019684_021735_C6DB.SAFE",
             "S1A_IW_RAW__0SDV_20171213T121623_20171213T121656_019684_021735_C6DB.SAFE",
             ProductFamily.L0_SLICE, "NRT");
-    private ProductionEvent dtoNotMatch = new ProductionEvent(
+    private CatalogEvent dtoNotMatch = TestL0Utils.newCatalogEvent(
             "S1A_I_RAW__0SDV_20171213T121623_20171213T121656_019684_021735_C6DB.SAFE",
             "S1A_I_RAW__0SDV_20171213T121623_20171213T121656_019684_021735_C6DB.SAFE",
             ProductFamily.L0_SLICE, "NRT");
-    private GenericMessageDto<ProductionEvent> message1 =
-            new GenericMessageDto<ProductionEvent>(1, "", dtoMatch);
-    private GenericMessageDto<ProductionEvent> message2 =
-            new GenericMessageDto<ProductionEvent>(2, "", dtoNotMatch);
+    private GenericMessageDto<CatalogEvent> message1 =
+            new GenericMessageDto<CatalogEvent>(1, "", dtoMatch);
+    private GenericMessageDto<CatalogEvent> message2 =
+            new GenericMessageDto<CatalogEvent>(2, "", dtoNotMatch);
     
     @Mock
     private MetadataClient metadataClient;
@@ -175,11 +175,11 @@ public class L1AppConsumerTest {
 
     private void mockProcessSettings() {
         Mockito.doAnswer(i -> {
-            Map<String, String> r = new HashMap<String, String>(2);
+            final Map<String, String> r = new HashMap<String, String>(2);
             return r;
         }).when(processSettings).getParams();
         Mockito.doAnswer(i -> {
-            Map<String, String> r = new HashMap<String, String>(5);
+            final Map<String, String> r = new HashMap<String, String>(5);
             r.put("SM_RAW__0S", "^S1[A-B]_S[1-6]_RAW__0S.*$");
             r.put("AN_RAW__0S", "^S1[A-B]_N[1-6]_RAW__0S.*$");
             r.put("ZS_RAW__0S", "^S1[A-B]_N[1-6]_RAW__0S.*$");
@@ -201,7 +201,7 @@ public class L1AppConsumerTest {
     @Test
     public void testProductNameNotMatch() throws AbstractCodedException {
 
-        LevelProductsConsumer consumer = new LevelProductsConsumer(l0SliceJobsDispatcher,
+        final LevelProductsConsumer consumer = new LevelProductsConsumer(l0SliceJobsDispatcher,
                 l0SlicePatternSettings, processSettings, mqiService,
                 mqiStatusService, appDataService, errorAppender, appStatus, metadataClient, 0, 0);
         consumer.onMessage(message2);
@@ -215,7 +215,7 @@ public class L1AppConsumerTest {
     public void testReceiveOk() throws AbstractCodedException, ParseException {
         doReturn(100).when(metadataClient).getSeaCoverage(Mockito.any(), Mockito.any()); 
         
-        LevelProductsConsumer consumer = new LevelProductsConsumer(l0SliceJobsDispatcher,
+        final LevelProductsConsumer consumer = new LevelProductsConsumer(l0SliceJobsDispatcher,
                 l0SlicePatternSettings, processSettings, mqiService,
                 mqiStatusService, appDataService,  errorAppender, appStatus, metadataClient, 0, 0);
         consumer.onMessage(message1);
@@ -233,7 +233,7 @@ public class L1AppConsumerTest {
     public void testReceiveNull() throws AbstractCodedException {
         doReturn(null).when(mqiService).next(Mockito.any());
 
-        LevelProductsConsumer consumer = new LevelProductsConsumer(l0SliceJobsDispatcher,
+        final LevelProductsConsumer consumer = new LevelProductsConsumer(l0SliceJobsDispatcher,
                 l0SlicePatternSettings, processSettings, mqiService,
                 mqiStatusService, appDataService,  errorAppender, appStatus, metadataClient, 0, 0);
         consumer.onMessage(null);
@@ -246,12 +246,12 @@ public class L1AppConsumerTest {
     @Test
     public void testReceiveAlreadyExistOtherPod()
             throws AbstractCodedException, ParseException {
-        AppDataJob job1 = new AppDataJob();
+        final AppDataJob job1 = new AppDataJob();
         job1.setId(12L);
         job1.setPod("i-hostname");
         job1.setProduct(new AppDataJobProduct());
         job1.getProduct().setProductName("p1");
-        AppDataJob job2 = new AppDataJob();
+        final AppDataJob job2 = new AppDataJob();
         job2.setId(24L);
         job2.setPod("other-hostname");
         job2.setProduct(new AppDataJobProduct());
@@ -261,7 +261,7 @@ public class L1AppConsumerTest {
         
         doReturn(100).when(metadataClient).getSeaCoverage(Mockito.any(), Mockito.any()); 
 
-        LevelProductsConsumer consumer = new LevelProductsConsumer(l0SliceJobsDispatcher,
+        final LevelProductsConsumer consumer = new LevelProductsConsumer(l0SliceJobsDispatcher,
                 l0SlicePatternSettings, processSettings, mqiService,
                 mqiStatusService, appDataService,  errorAppender, appStatus, metadataClient, 0, 0);
         consumer.onMessage(message1);
@@ -279,12 +279,12 @@ public class L1AppConsumerTest {
     @Test
     public void testReceiveAlreadyExistSamePodWaiting()
             throws AbstractCodedException, ParseException {
-        AppDataJob job1 = new AppDataJob();
+        final AppDataJob job1 = new AppDataJob();
         job1.setId(12L);
         job1.setPod("hostname");
         job1.setProduct(new AppDataJobProduct());
         job1.getProduct().setProductName("p1");
-        AppDataJob job2 = new AppDataJob();
+        final AppDataJob job2 = new AppDataJob();
         job2.setId(24L);
         job2.setPod("other-hostname");
         job2.setProduct(new AppDataJobProduct());
@@ -294,7 +294,7 @@ public class L1AppConsumerTest {
         
         doReturn(100).when(metadataClient).getSeaCoverage(Mockito.any(), Mockito.any());        
 
-        LevelProductsConsumer consumer = new LevelProductsConsumer(l0SliceJobsDispatcher,
+        final LevelProductsConsumer consumer = new LevelProductsConsumer(l0SliceJobsDispatcher,
                 l0SlicePatternSettings, processSettings, mqiService,
                 mqiStatusService, appDataService,  errorAppender, appStatus, metadataClient, 0, 0);
         consumer.onMessage(message1);
@@ -312,13 +312,13 @@ public class L1AppConsumerTest {
     @Test
     public void testReceiveAlreadyExistSamePodGenerating()
             throws AbstractCodedException, ParseException {
-        AppDataJob job1 = new AppDataJob();
+        final AppDataJob job1 = new AppDataJob();
         job1.setId(12L);
         job1.setPod("hostname");
         job1.setState(AppDataJobState.DISPATCHING);
         job1.setProduct(new AppDataJobProduct());
         job1.getProduct().setProductName("p1");
-        AppDataJob job2 = new AppDataJob();
+        final AppDataJob job2 = new AppDataJob();
         job2.setId(24L);
         job2.setPod("other-hostname");
         job2.setProduct(new AppDataJobProduct());
@@ -328,7 +328,7 @@ public class L1AppConsumerTest {
         
         doReturn(100).when(metadataClient).getSeaCoverage(Mockito.any(), Mockito.any()); 
 
-        LevelProductsConsumer consumer = new LevelProductsConsumer(l0SliceJobsDispatcher,
+        final LevelProductsConsumer consumer = new LevelProductsConsumer(l0SliceJobsDispatcher,
                 l0SlicePatternSettings, processSettings, mqiService,
                 mqiStatusService, appDataService,  errorAppender, appStatus, metadataClient, 0, 0);
         consumer.onMessage(message1);

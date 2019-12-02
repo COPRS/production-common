@@ -100,8 +100,18 @@ public class TestL0Utils {
 //                TestL0Utils.getEdrsSessionFileRawsChannel2(xmlOnlyForRaws));
 //        return r;
 //    }
+    
+    public static CatalogEvent newCatalogEvent(
+    		final String productName, 
+    		final String keyObs, 
+    		final ProductFamily family,
+    		final String moder
+	) {
+        // FIXME
+    	return new CatalogEvent();
+    }
 
-    // FIXME
+
     public static CatalogEvent newCatalogEvent(
     		final String productName, 
     		final String keyObs, 

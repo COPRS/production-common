@@ -35,10 +35,10 @@ import esa.s1pdgs.cpoc.errorrepo.ErrorRepoAppender;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.config.L0SegmentAppProperties;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.config.ProcessSettings;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.tasks.AbstractJobsDispatcher;
-import esa.s1pdgs.cpoc.ipf.preparation.worker.tasks.l0segmentapp.L0SegmentAppConsumer;
+import esa.s1pdgs.cpoc.ipf.preparation.worker.utils.TestL0Utils;
 import esa.s1pdgs.cpoc.mqi.client.GenericMqiClient;
 import esa.s1pdgs.cpoc.mqi.client.StatusService;
-import esa.s1pdgs.cpoc.mqi.model.queue.ProductionEvent;
+import esa.s1pdgs.cpoc.mqi.model.queue.CatalogEvent;
 import esa.s1pdgs.cpoc.mqi.model.rest.GenericMessageDto;
 
 public class L0SegmentAppConsumerTest {
@@ -50,7 +50,7 @@ public class L0SegmentAppConsumerTest {
 	private ProcessSettings processSettings;
 
 	@Mock
-	private AbstractJobsDispatcher<ProductionEvent> jobsDispatcher;
+	private AbstractJobsDispatcher<CatalogEvent> jobsDispatcher;
 
 	@Mock
 	private GenericMqiClient mqiService;
@@ -67,7 +67,7 @@ public class L0SegmentAppConsumerTest {
 	@Mock
 	private Status jobStatus;
 
-	private List<GenericMessageDto<ProductionEvent>> messages;
+	private List<GenericMessageDto<CatalogEvent>> messages;
 
 	private L0SegmentAppConsumer consumer;
 
@@ -84,13 +84,16 @@ public class L0SegmentAppConsumerTest {
 		mockAppDataService();
 		mockAppStatus();
 
-		consumer = new L0SegmentAppConsumer(jobsDispatcher, appProperties, processSettings, mqiService,
+		consumer = new L0SegmentAppConsumer(
+				jobsDispatcher, 
+				appProperties, 
+				processSettings, mqiService,
 				mqiStatusService, appDataService, errorAppender, appStatus, 0, 0);
 		consumer.setTaskForFunctionalLog(processSettings.getLevel().name() + "JobGeneration");
 	}
 
 	public void mockProperties() {
-		HashMap<String, Integer> groups = new HashMap<>();
+		final HashMap<String, Integer> groups = new HashMap<>();
 		groups.put("missionId", 1);
 		groups.put("satelliteId", 2);
 		groups.put("acquisition", 4);
@@ -109,18 +112,18 @@ public class L0SegmentAppConsumerTest {
 
 	public void initMessages() {
 		messages = new ArrayList<>();
-		GenericMessageDto<ProductionEvent> message1 = new GenericMessageDto<ProductionEvent>(1, "topic1",
-				new ProductionEvent("S1B_IW_RAW__0SHV_20171218T094703_20171218T094735_008772_00F9CD_EB01.SAFE",
+		final GenericMessageDto<CatalogEvent> message1 = new GenericMessageDto<CatalogEvent>(1, "topic1",
+				TestL0Utils.newCatalogEvent("S1B_IW_RAW__0SHV_20171218T094703_20171218T094735_008772_00F9CD_EB01.SAFE",
 						"S1B_IW_RAW__0SHV_20171218T094703_20171218T094735_008772_00F9CD_EB01.SAFE",
 						ProductFamily.L0_SEGMENT, "FAST"));
 		messages.add(message1);
-		GenericMessageDto<ProductionEvent> message2 = new GenericMessageDto<ProductionEvent>(2, "topic1",
-				new ProductionEvent("S1B_IW_RAW__0SSV_20171218T090732_20171218T090732_008771_00F9CA_C40B.SAFE",
+		final GenericMessageDto<CatalogEvent> message2 = new GenericMessageDto<CatalogEvent>(2, "topic1",
+				TestL0Utils.newCatalogEvent("S1B_IW_RAW__0SSV_20171218T090732_20171218T090732_008771_00F9CA_C40B.SAFE",
 						"S1B_IW_RAW__0SSV_20171218T090732_20171218T090732_008771_00F9CA_C40B.SAFE",
 						ProductFamily.L0_SEGMENT, "FAST"));
 		messages.add(message2);
-		GenericMessageDto<ProductionEvent> message3 = new GenericMessageDto<ProductionEvent>(1, "topic1",
-				new ProductionEvent("S1B_IW_RAW__0SHH_20171218T094703_20171218T094735_008772_00F9CD_EB01.SAFE",
+		final GenericMessageDto<CatalogEvent> message3 = new GenericMessageDto<CatalogEvent>(1, "topic1",
+				TestL0Utils.newCatalogEvent("S1B_IW_RAW__0SHH_20171218T094703_20171218T094735_008772_00F9CD_EB01.SAFE",
 						"S1B_IW_RAW__0SHH_20171218T094703_20171218T094735_008772_00F9CD_EB01.SAFE",
 						ProductFamily.L0_SEGMENT, "FAST"));
 		messages.add(message3);
@@ -162,11 +165,11 @@ public class L0SegmentAppConsumerTest {
 
 	@Test
 	public void testBuildJobNew() throws AbstractCodedException {
-		AppDataJob expectedData = new AppDataJob();
+		final AppDataJob expectedData = new AppDataJob();
 		expectedData.setLevel(processSettings.getLevel());
 		expectedData.setPod(processSettings.getHostname());
 		expectedData.getMessages().add(messages.get(0));
-		AppDataJobProduct productDto = new AppDataJobProduct();
+		final AppDataJobProduct productDto = new AppDataJobProduct();
 		productDto.setAcquisition("IW");
 		productDto.setMissionId("S1");
 		productDto.setDataTakeId("00F9CD");
@@ -175,7 +178,7 @@ public class L0SegmentAppConsumerTest {
 		productDto.setSatelliteId("B");
 		expectedData.setProduct(productDto);
 
-		AppDataJob result = consumer.buildJob(messages.get(0));
+		final AppDataJob result = consumer.buildJob(messages.get(0));
 		assertEquals(expectedData, result);
 		verify(appDataService, times(1)).findByMessagesId(eq(1L));
 		verify(appDataService, times(1)).findByProductDataTakeId(eq("00F9CD"));
@@ -193,12 +196,12 @@ public class L0SegmentAppConsumerTest {
 
 	@Test
 	public void testConsumeWhenNewJob() throws AbstractCodedException {
-		AppDataJob expectedData = new AppDataJob();
+		final AppDataJob expectedData = new AppDataJob();
 		expectedData.setLevel(processSettings.getLevel());
 		expectedData.setPod(processSettings.getHostname());
 		expectedData.setState(AppDataJobState.DISPATCHING);
 		expectedData.getMessages().add(messages.get(0));
-		AppDataJobProduct productDto = new AppDataJobProduct();
+		final AppDataJobProduct productDto = new AppDataJobProduct();
 		productDto.setAcquisition("IW");
 		productDto.setMissionId("S1");
 		productDto.setDataTakeId("00F9CD");
