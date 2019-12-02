@@ -9,6 +9,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Service;
 
 import esa.s1pdgs.cpoc.appstatus.AppStatus;
 import esa.s1pdgs.cpoc.common.ProductCategory;
@@ -19,6 +20,7 @@ import esa.s1pdgs.cpoc.mqi.client.MqiListener;
 import esa.s1pdgs.cpoc.mqi.model.queue.ProductionEvent;
 import esa.s1pdgs.cpoc.mqi.model.rest.GenericMessageDto;
 
+@Service
 public class ProductionEventListener implements MqiListener<ProductionEvent> {
 
 	private static final Logger LOGGER = LogManager.getLogger(ProductionEventListener.class);
@@ -46,6 +48,7 @@ public class ProductionEventListener implements MqiListener<ProductionEvent> {
 	
 	@PostConstruct
 	public void initService() {
+		LOGGER.info("Setting up product event listener");
 		if (pollingIntervalMs > 0) {
 			final ExecutorService service = Executors.newFixedThreadPool(1);
 			service.execute(new MqiConsumer<ProductionEvent>(mqiClient, ProductCategory.COMPRESSED_PRODUCTS, this,
