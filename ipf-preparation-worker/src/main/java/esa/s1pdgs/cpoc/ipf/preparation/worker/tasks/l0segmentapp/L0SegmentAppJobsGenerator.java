@@ -30,7 +30,7 @@ import esa.s1pdgs.cpoc.metadata.client.MetadataClient;
 import esa.s1pdgs.cpoc.metadata.model.AbstractMetadata;
 import esa.s1pdgs.cpoc.metadata.model.LevelSegmentMetadata;
 import esa.s1pdgs.cpoc.mqi.model.queue.IpfExecutionJob;
-import esa.s1pdgs.cpoc.mqi.model.queue.ProductionEvent;
+import esa.s1pdgs.cpoc.mqi.model.queue.CatalogEvent;
 import esa.s1pdgs.cpoc.mqi.model.rest.GenericMessageDto;
 
 /**
@@ -38,7 +38,7 @@ import esa.s1pdgs.cpoc.mqi.model.rest.GenericMessageDto;
  * 
  * @author Cyrielle Gailliard
  */
-public class L0SegmentAppJobsGenerator extends AbstractJobsGenerator<ProductionEvent> {
+public class L0SegmentAppJobsGenerator extends AbstractJobsGenerator<CatalogEvent> {
 
     /**
      * @param xmlConverter
@@ -52,7 +52,7 @@ public class L0SegmentAppJobsGenerator extends AbstractJobsGenerator<ProductionE
             final ProcessSettings l0ProcessSettings,
             final IpfPreparationWorkerSettings taskTablesSettings,
             final OutputProducerFactory outputFactory,
-            final AppCatalogJobClient<ProductionEvent> appDataService,
+            final AppCatalogJobClient<CatalogEvent> appDataService,
             final ProcessConfiguration processConfiguration) {
         super(xmlConverter, metadataClient, l0ProcessSettings,
                 taskTablesSettings, outputFactory, appDataService, processConfiguration);
@@ -75,10 +75,10 @@ public class L0SegmentAppJobsGenerator extends AbstractJobsGenerator<ProductionE
         String lastName = "";
         try {
         	@SuppressWarnings("unchecked")
-			final AppDataJob<ProductionEvent> appDataJob = job.getAppDataJob();
+			final AppDataJob<CatalogEvent> appDataJob = job.getAppDataJob();
 
-            for (GenericMessageDto<ProductionEvent> message : appDataJob.getMessages().stream().map(s -> (GenericMessageDto<ProductionEvent>)s).collect(Collectors.toList())) {
-                ProductionEvent dto = (ProductionEvent) message.getBody();
+            for (GenericMessageDto<CatalogEvent> message : appDataJob.getMessages().stream().map(s -> (GenericMessageDto<CatalogEvent>)s).collect(Collectors.toList())) {
+                CatalogEvent dto = (CatalogEvent) message.getBody();
                 lastName = dto.getKeyObjectStorage();
                 LevelSegmentMetadata metadata = metadataClient
                         .getLevelSegment(dto.getProductFamily(), dto.getKeyObjectStorage());

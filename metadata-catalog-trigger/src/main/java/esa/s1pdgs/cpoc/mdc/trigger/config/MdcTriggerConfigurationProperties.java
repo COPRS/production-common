@@ -37,10 +37,7 @@ public class MdcTriggerConfigurationProperties {
 			return "CategoryConfig [fixedDelayMs=" + fixedDelayMs + ", initDelayPolMs=" + initDelayPolMs + "]";
 		}
 	}
-	
-	  
-	private String fileWithManifestExt = ".safe";
-	private String manifestFilename = "manifest.safe";  
+
 	private Map<ProductCategory, CategoryConfig> productCategories = new LinkedHashMap<>();
 
 	public Map<ProductCategory, CategoryConfig> getProductCategories() {
@@ -49,21 +46,5 @@ public class MdcTriggerConfigurationProperties {
 
 	public void setProductCategories(final Map<ProductCategory, CategoryConfig> productCategories) {
 		this.productCategories = productCategories;
-	}
-
-	public String getFileWithManifestExt() {
-		return fileWithManifestExt;
-	}
-
-	public void setFileWithManifestExt(final String fileWithManifestExt) {
-		this.fileWithManifestExt = fileWithManifestExt;
-	}
-
-	public String getManifestFilename() {
-		return manifestFilename;
-	}
-
-	public void setManifestFilename(final String manifestFilename) {
-		this.manifestFilename = manifestFilename;
 	}
 }

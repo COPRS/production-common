@@ -2,8 +2,13 @@ package esa.s1pdgs.cpoc.ipf.preparation.worker.utils;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
+
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 import esa.s1pdgs.cpoc.appcatalog.server.job.db.AppDataJob;
 import esa.s1pdgs.cpoc.appcatalog.server.job.db.AppDataJobFile;
@@ -13,6 +18,7 @@ import esa.s1pdgs.cpoc.appcatalog.server.job.db.AppDataJobProduct;
 import esa.s1pdgs.cpoc.appcatalog.server.job.db.AppDataJobState;
 import esa.s1pdgs.cpoc.common.ApplicationLevel;
 import esa.s1pdgs.cpoc.common.EdrsSessionFileType;
+import esa.s1pdgs.cpoc.common.ProductFamily;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.model.tasktable.TaskTable;
 import esa.s1pdgs.cpoc.mqi.model.queue.CatalogEvent;
 import esa.s1pdgs.cpoc.mqi.model.rest.GenericMessageDto;
@@ -94,21 +100,34 @@ public class TestL0Utils {
 //                TestL0Utils.getEdrsSessionFileRawsChannel2(xmlOnlyForRaws));
 //        return r;
 //    }
-    
 
     // FIXME
     public static CatalogEvent newCatalogEvent(
-    		final String string, 
-    		final String string2, 
-    		final int i, 
-    		final EdrsSessionFileType raw, 
-    		final String string3,
-			final String string4, 
-			final String string5, 
-			final String string6
+    		final String productName, 
+    		final String keyObs, 
+    		final int channelId, 
+    		final EdrsSessionFileType type, 
+    		final String missionId,
+			final String satelliteId, 
+			final String stationCode, 
+			final String sessionId
 	) {
-		// TODO Auto-generated method stub FIXME
-		return new CatalogEvent();
+    	final Map<String,String> map = new HashMap<>();
+    	map.put("channelId", String.valueOf(channelId));
+    	map.put("missionId", missionId);
+    	map.put("satelliteId", satelliteId);
+    	map.put("stationCode", stationCode);
+      	map.put("sessionId", sessionId);
+    	
+    	final ObjectMapper mapper = new ObjectMapper();
+    	final JsonNode jsonNode = mapper.convertValue(map, JsonNode.class);
+    	
+    	final CatalogEvent event = new CatalogEvent();
+    	event.setProductFamily(ProductFamily.EDRS_SESSION);
+    	event.setProductType(type.name());
+    	event.setKeyObjectStorage(keyObs);
+    	event.setMetadata(jsonNode);    	
+    	return event;
 	}
 
 //

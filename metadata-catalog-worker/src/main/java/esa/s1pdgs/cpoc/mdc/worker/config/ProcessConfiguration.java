@@ -8,16 +8,18 @@ import org.springframework.context.annotation.Configuration;
 @EnableConfigurationProperties
 @ConfigurationProperties(prefix = "process")
 public class ProcessConfiguration {
-
 	private String hostname = "";
 	private int numObsDownloadRetries = 99;
-	private long sleepBetweenObsRetriesMillis = 3000L; 
+	private long sleepBetweenObsRetriesMillis = 3000L; 	
+	private String fileWithManifestExt = ".safe";
+	private String manifestFilename = "manifest.safe";  
+	
 
 	public String getHostname() {
 		return hostname;
 	}
 
-	public void setHostname(String hostname) {
+	public void setHostname(final String hostname) {
 		this.hostname = hostname;
 	}
 
@@ -25,7 +27,7 @@ public class ProcessConfiguration {
 		return numObsDownloadRetries;
 	}
 
-	public void setNumObsDownloadRetries(int numObsDownloadRetries) {
+	public void setNumObsDownloadRetries(final int numObsDownloadRetries) {
 		this.numObsDownloadRetries = numObsDownloadRetries;
 	}
 
@@ -33,7 +35,23 @@ public class ProcessConfiguration {
 		return sleepBetweenObsRetriesMillis;
 	}
 
-	public void setSleepBetweenObsRetriesMillis(long sleepBetweenObsRetriesMillis) {
+	public void setSleepBetweenObsRetriesMillis(final long sleepBetweenObsRetriesMillis) {
 		this.sleepBetweenObsRetriesMillis = sleepBetweenObsRetriesMillis;
+	}
+	
+	public String getFileWithManifestExt() {
+		return fileWithManifestExt;
+	}
+
+	public void setFileWithManifestExt(final String fileWithManifestExt) {
+		this.fileWithManifestExt = fileWithManifestExt;
+	}
+
+	public String getManifestFilename() {
+		return manifestFilename;
+	}
+
+	public void setManifestFilename(final String manifestFilename) {
+		this.manifestFilename = manifestFilename;
 	}
 }

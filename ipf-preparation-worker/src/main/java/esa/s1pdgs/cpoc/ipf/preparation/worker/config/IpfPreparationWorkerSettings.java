@@ -30,13 +30,13 @@ import esa.s1pdgs.cpoc.ipf.preparation.worker.tasks.l0app.L0AppJobDispatcher;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.tasks.l0segmentapp.L0SegmentAppConsumer;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.tasks.l0segmentapp.L0SegmentAppJobDispatcher;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.tasks.levelproducts.LevelProductsJobDispatcher;
-import esa.s1pdgs.cpoc.ipf.preparation.worker.tasks.levelproducts.LevelProductsMessageConsumer;
+import esa.s1pdgs.cpoc.ipf.preparation.worker.tasks.levelproducts.LevelProductsConsumer;
 import esa.s1pdgs.cpoc.metadata.client.MetadataClient;
 import esa.s1pdgs.cpoc.mqi.client.GenericMqiClient;
 import esa.s1pdgs.cpoc.mqi.client.StatusService;
 import esa.s1pdgs.cpoc.mqi.model.queue.AbstractMessage;
 import esa.s1pdgs.cpoc.mqi.model.queue.CatalogEvent;
-import esa.s1pdgs.cpoc.mqi.model.queue.ProductionEvent;
+import esa.s1pdgs.cpoc.mqi.model.queue.CatalogEvent;
 
 /**
  * Extraction class of "tasktables" configuration properties
@@ -527,13 +527,13 @@ public class IpfPreparationWorkerSettings {
 					errorRepoAppender, appStatus, metadataClient, pollingIntervalMs, pollingInitialDelayMs);
 			break;
 		case L0_SEGMENT:
-			messageConsumer = new L0SegmentAppConsumer((AbstractJobsDispatcher<ProductionEvent>) jobsDispatcher,
+			messageConsumer = new L0SegmentAppConsumer((AbstractJobsDispatcher<CatalogEvent>) jobsDispatcher,
 					appProperties, processSettings, mqiService, mqiStatusService, appDataServiceLevelSegments,
 					errorRepoAppender, appStatus, pollingIntervalMs, pollingInitialDelayMs);
 			break;
 		case L1:
 		case L2:
-			messageConsumer = new LevelProductsMessageConsumer((AbstractJobsDispatcher<ProductionEvent>) jobsDispatcher,
+			messageConsumer = new LevelProductsConsumer((AbstractJobsDispatcher<CatalogEvent>) jobsDispatcher,
 					patternSettings, processSettings, mqiService, mqiStatusService, appDataServiceLevelProducts,
 					errorRepoAppender, appStatus, metadataClient, pollingIntervalMs, pollingInitialDelayMs);
 			break;

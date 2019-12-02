@@ -398,6 +398,7 @@ public class ExtractMetadata {
 	private JSONObject putEdrsSessionMetadataToJSON(final JSONObject metadataJSONObject, final EdrsSessionFileDescriptor descriptor)
 			throws MetadataExtractionException {
 		try {
+			metadataJSONObject.put("channelId", descriptor.getChannel());
 			metadataJSONObject.put("productName", descriptor.getProductName());
 			metadataJSONObject.put("productType", descriptor.getEdrsSessionFileType().name());
 			metadataJSONObject.put("sessionId", descriptor.getSessionIdentifier());

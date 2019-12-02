@@ -27,7 +27,7 @@ import esa.s1pdgs.cpoc.ipf.preparation.worker.service.XmlConverter;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.tasks.AbstractJobsDispatcher;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.tasks.AbstractJobsGenerator;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.tasks.JobsGeneratorFactory;
-import esa.s1pdgs.cpoc.mqi.model.queue.ProductionEvent;
+import esa.s1pdgs.cpoc.mqi.model.queue.CatalogEvent;
 
 /**
  * 
@@ -39,7 +39,7 @@ import esa.s1pdgs.cpoc.mqi.model.queue.ProductionEvent;
  * @author birol_colak@net.werum
  *
  */
-public class LevelProductsJobDispatcher extends AbstractJobsDispatcher<ProductionEvent> {
+public class LevelProductsJobDispatcher extends AbstractJobsDispatcher<CatalogEvent> {
 
 	 /**
      * Logger
@@ -83,7 +83,7 @@ public class LevelProductsJobDispatcher extends AbstractJobsDispatcher<Productio
             final ThreadPoolTaskScheduler taskScheduler,
             final XmlConverter xmlConverter,
             final String pathRoutingXmlFile,
-            final AppCatalogJobClient<ProductionEvent> appDataService) {
+            final AppCatalogJobClient<CatalogEvent> appDataService) {
         super(settings, processSettings, factory, taskScheduler,
                 appDataService);
         this.xmlConverter = xmlConverter;
@@ -124,7 +124,7 @@ public class LevelProductsJobDispatcher extends AbstractJobsDispatcher<Productio
      * 
      */
     @Override
-    protected AbstractJobsGenerator<ProductionEvent> createJobGenerator(
+    protected AbstractJobsGenerator<CatalogEvent> createJobGenerator(
             final File xmlFile) throws AbstractCodedException {
         return this.factory.createJobGeneratorForL0Slice(xmlFile,
                 appDataService);
@@ -136,7 +136,7 @@ public class LevelProductsJobDispatcher extends AbstractJobsDispatcher<Productio
      * @throws IpfPrepWorkerMissingRoutingEntryException
      */
     @Override
-    protected List<String> getTaskTables(final AppDataJob<ProductionEvent> job)
+    protected List<String> getTaskTables(final AppDataJob<CatalogEvent> job)
             throws IpfPrepWorkerMissingRoutingEntryException {
         List<String> taskTables = new ArrayList<>();
         String key = job.getProduct().getAcquisition() + "_"

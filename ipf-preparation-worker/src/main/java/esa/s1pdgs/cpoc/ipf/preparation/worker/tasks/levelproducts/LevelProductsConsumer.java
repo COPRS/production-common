@@ -5,7 +5,6 @@ import java.util.Date;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import javax.annotation.PostConstruct;
@@ -20,20 +19,19 @@ import esa.s1pdgs.cpoc.appstatus.AppStatus;
 import esa.s1pdgs.cpoc.common.ProductCategory;
 import esa.s1pdgs.cpoc.common.ProductFamily;
 import esa.s1pdgs.cpoc.common.errors.AbstractCodedException;
-import esa.s1pdgs.cpoc.common.errors.InvalidFormatProduct;
-import esa.s1pdgs.cpoc.common.utils.DateUtils;
 import esa.s1pdgs.cpoc.errorrepo.ErrorRepoAppender;
 import esa.s1pdgs.cpoc.errorrepo.model.rest.FailedProcessingDto;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.config.L0SlicePatternSettings;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.config.ProcessSettings;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.tasks.AbstractGenericConsumer;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.tasks.AbstractJobsDispatcher;
+import esa.s1pdgs.cpoc.ipf.preparation.worker.tasks.CatalogEventAdapter;
 import esa.s1pdgs.cpoc.metadata.client.MetadataClient;
 import esa.s1pdgs.cpoc.mqi.client.GenericMqiClient;
 import esa.s1pdgs.cpoc.mqi.client.MqiConsumer;
 import esa.s1pdgs.cpoc.mqi.client.MqiListener;
 import esa.s1pdgs.cpoc.mqi.client.StatusService;
-import esa.s1pdgs.cpoc.mqi.model.queue.ProductionEvent;
+import esa.s1pdgs.cpoc.mqi.model.queue.CatalogEvent;
 import esa.s1pdgs.cpoc.mqi.model.rest.GenericMessageDto;
 import esa.s1pdgs.cpoc.report.FilenameReportingInput;
 import esa.s1pdgs.cpoc.report.LoggerReporting;
@@ -44,18 +42,7 @@ import esa.s1pdgs.cpoc.report.ReportingMessage;
  * @author birol_colak@net.werum
  *
  */
-public class LevelProductsMessageConsumer extends AbstractGenericConsumer<ProductionEvent> implements MqiListener<ProductionEvent>{
-
-	 /**
-     * Settings used to extract information from product name
-     */
-    private final L0SlicePatternSettings patternSettings;
-
-    /**
-     * Pattern built from the regular expression given in configuration
-     */
-    private final Pattern l0SLicesPattern;
-    
+public class LevelProductsConsumer extends AbstractGenericConsumer<CatalogEvent> implements MqiListener<CatalogEvent>{
     private final Pattern seaCoverageCheckPattern;
     
     private String taskForFunctionalLog;
@@ -66,16 +53,14 @@ public class LevelProductsMessageConsumer extends AbstractGenericConsumer<Produc
     
     private final long pollingInitialDelayMs;
   
-	public LevelProductsMessageConsumer(final AbstractJobsDispatcher<ProductionEvent> jobsDispatcher,
+	public LevelProductsConsumer(final AbstractJobsDispatcher<CatalogEvent> jobsDispatcher,
 			final L0SlicePatternSettings patternSettings, final ProcessSettings processSettings,
 			final GenericMqiClient mqiClient, final StatusService mqiStatusService,
-			final AppCatalogJobClient<ProductionEvent> appDataService, final ErrorRepoAppender errorRepoAppender,
+			final AppCatalogJobClient<CatalogEvent> appDataService, final ErrorRepoAppender errorRepoAppender,
 			final AppStatus appStatus, final MetadataClient metadataClient, final long pollingIntervalMs,
 			final long pollingInitialDelayMs) {
 		super(jobsDispatcher, processSettings, mqiClient, mqiStatusService, appDataService, appStatus,
 				errorRepoAppender, ProductCategory.LEVEL_PRODUCTS);
-		this.patternSettings = patternSettings;
-		this.l0SLicesPattern = Pattern.compile(this.patternSettings.getRegexp(), Pattern.CASE_INSENSITIVE);
 		this.seaCoverageCheckPattern = Pattern.compile(patternSettings.getSeaCoverageCheckPattern());
 		this.metadataClient = metadataClient;
 		this.pollingIntervalMs = pollingIntervalMs;
@@ -87,14 +72,14 @@ public class LevelProductsMessageConsumer extends AbstractGenericConsumer<Produc
 		appStatus.setWaiting();
 		if (pollingIntervalMs > 0) {
 			final ExecutorService service = Executors.newFixedThreadPool(1);
-			service.execute(new MqiConsumer<ProductionEvent>(mqiClient, category, this, pollingIntervalMs,
+			service.execute(new MqiConsumer<CatalogEvent>(mqiClient, category, this, pollingIntervalMs,
 					pollingInitialDelayMs, esa.s1pdgs.cpoc.appstatus.AppStatus.NULL));
 		}
 	}
 
     
     @Override
-    public void onMessage(GenericMessageDto<ProductionEvent> mqiMessage) {
+    public void onMessage(final GenericMessageDto<CatalogEvent> mqiMessage) {
     	appStatus.setWaiting();
     	final Reporting.Factory reportingFactory = new LoggerReporting.Factory("L1JobGeneration"); 
     	final Reporting reporting = reportingFactory.newReporting(0);
@@ -110,7 +95,7 @@ public class LevelProductsMessageConsumer extends AbstractGenericConsumer<Produc
         boolean ackOk = false;
         String errorMessage = "";
         String productName = mqiMessage.getBody().getKeyObjectStorage();
-        ProductFamily family = mqiMessage.getBody().getProductFamily();
+        final ProductFamily family = mqiMessage.getBody().getProductFamily();
 
         FailedProcessingDto failedProc =  new FailedProcessingDto();
         
@@ -136,7 +121,7 @@ public class LevelProductsMessageConsumer extends AbstractGenericConsumer<Produc
             }        	
         	
             // Check if a job is already created for message identifier
-            AppDataJob<ProductionEvent> appDataJob = buildJob(mqiMessage);
+            AppDataJob<CatalogEvent> appDataJob = buildJob(mqiMessage);
             productName = appDataJob.getProduct().getProductName();
 
             // Dispatch job
@@ -155,7 +140,7 @@ public class LevelProductsMessageConsumer extends AbstractGenericConsumer<Produc
             step++;
             ackOk = true;
 
-        } catch (AbstractCodedException ace) {
+        } catch (final AbstractCodedException ace) {
             ackOk = false;
             errorMessage = String.format(
                     "[MONITOR] [step %d] [productName %s] [code %d] %s", step,
@@ -172,71 +157,46 @@ public class LevelProductsMessageConsumer extends AbstractGenericConsumer<Produc
         reporting.end(new ReportingMessage("End job generation using {}", productName));
     }
 
-    protected AppDataJob<ProductionEvent> buildJob(GenericMessageDto<ProductionEvent> mqiMessage)
+    protected AppDataJob<CatalogEvent> buildJob(final GenericMessageDto<CatalogEvent> mqiMessage)
             throws AbstractCodedException {
-        ProductionEvent leveldto = mqiMessage.getBody();
+        final CatalogEvent event = mqiMessage.getBody();
 
         // Check if a job is already created for message identifier
-        List<AppDataJob<ProductionEvent>> existingJobs = appDataService
+        final List<AppDataJob<CatalogEvent>> existingJobs = appDataService
                 .findByMessagesId(mqiMessage.getId());
 
         if (CollectionUtils.isEmpty(existingJobs)) {
-            // Job does not exists => create it
-            Matcher m = l0SLicesPattern.matcher(leveldto.getKeyObjectStorage());
-            if (!m.matches()) {
-                throw new InvalidFormatProduct(
-                        "Don't match with regular expression "
-                                + this.patternSettings.getRegexp());
-            }
-
-            final String satelliteId = m.group(this.patternSettings.getMGroupSatId());
-            final String missionId = m.group(this.patternSettings.getMGroupMissionId());
-            final String acquisition = m.group(this.patternSettings.getMGroupAcquisition());
-            final String startTime = m.group(this.patternSettings.getMGroupStartTime());
-            final String stopTime = m.group(this.patternSettings.getMGroupStopTime());
+        	final CatalogEventAdapter eventAdapter = new CatalogEventAdapter(event);
             
             // Create the JOB
-            AppDataJob<ProductionEvent> jobDto = new AppDataJob<>();
+            final AppDataJob<CatalogEvent> jobDto = new AppDataJob<>();
             // General details
             jobDto.setLevel(processSettings.getLevel());
             jobDto.setPod(processSettings.getHostname());
             // Messages
             jobDto.getMessages().add(mqiMessage);
             // Product
-            AppDataJobProduct productDto = new AppDataJobProduct();
-            productDto.setAcquisition(acquisition);
-            productDto.setMissionId(missionId);
-            productDto.setProductName(leveldto.getKeyObjectStorage());
-            productDto.setProcessMode(leveldto.getMode());
-            productDto.setSatelliteId(satelliteId);
-            productDto.setStartTime(DateUtils.convertToAnotherFormat(startTime,
-                    L0SlicePatternSettings.TIME_FORMATTER,
-                    AppDataJobProduct.TIME_FORMATTER));
-            productDto.setStopTime(DateUtils.convertToAnotherFormat(stopTime,
-                    L0SlicePatternSettings.TIME_FORMATTER,
-                    AppDataJobProduct.TIME_FORMATTER));
-   
-            // FIXME dirty workaround to get things working
-            productDto.setStationCode("WILE");     
-            
-            // S1PRO-707: only add polarisation flag, if it's actually configured to be extracted 
-            // (otherwise, there would be invalid information in it)
-            if (this.patternSettings.getGroupPolarisation() != -1) {
-            	final String polarisation = m.group(this.patternSettings.getGroupPolarisation());
-            	productDto.setPolarisation(polarisation);
-            }     
+            final AppDataJobProduct productDto = new AppDataJobProduct();
+            productDto.setAcquisition(eventAdapter.swathType());
+            productDto.setMissionId(eventAdapter.missionId());
+            productDto.setProductName(event.getKeyObjectStorage());
+            productDto.setProcessMode(eventAdapter.processMode());
+            productDto.setSatelliteId(eventAdapter.satelliteId());
+            productDto.setStartTime(eventAdapter.startTime());
+            productDto.setStopTime(eventAdapter.stopTime());
+            productDto.setStationCode(eventAdapter.stationCode());   
+           	productDto.setPolarisation(eventAdapter.polarisation()); 
             jobDto.setProduct(productDto);
 
             return appDataService.newJob(jobDto);
 
         } else {
             // Update pod if needed
-			AppDataJob<ProductionEvent> jobDto = (AppDataJob<ProductionEvent>) existingJobs.get(0);
+			AppDataJob<CatalogEvent> jobDto = existingJobs.get(0);
 
             if (!jobDto.getPod().equals(processSettings.getHostname())) {
                 jobDto.setPod(processSettings.getHostname());
-                jobDto = appDataService.patchJob(jobDto.getId(), jobDto,
-                        false, false, false);
+                jobDto = appDataService.patchJob(jobDto.getId(), jobDto, false, false, false);
             }
             // Job already exists
             return jobDto;
@@ -249,7 +209,7 @@ public class LevelProductsMessageConsumer extends AbstractGenericConsumer<Produc
     }
     
     @Override
-    public void setTaskForFunctionalLog(String taskForFunctionalLog) {
+    public void setTaskForFunctionalLog(final String taskForFunctionalLog) {
     	this.taskForFunctionalLog = taskForFunctionalLog; 
     }
 }

@@ -87,13 +87,7 @@ public class MetadataTriggerService {
 		job.setProductName(event.getProductName());
 		job.setRelativePath(event.getRelativePath());
 		job.setProductFamily(event.getProductFamily());
-		
-		// make sure than keyObs contains the metadata file
-		if (event.getKeyObjectStorage().toLowerCase().endsWith(properties.getFileWithManifestExt())) {
-			job.setKeyObjectStorage(event.getKeyObjectStorage() + "/" + properties.getManifestFilename());
-		} else {
-			job.setKeyObjectStorage(event.getKeyObjectStorage());
-		}
+		job.setKeyObjectStorage(event.getKeyObjectStorage());
 		return job;
 	}
 }

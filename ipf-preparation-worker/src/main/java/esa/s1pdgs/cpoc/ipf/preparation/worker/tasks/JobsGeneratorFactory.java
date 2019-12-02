@@ -19,7 +19,7 @@ import esa.s1pdgs.cpoc.ipf.preparation.worker.tasks.l0segmentapp.L0SegmentAppJob
 import esa.s1pdgs.cpoc.ipf.preparation.worker.tasks.levelproducts.LevelProductsJobsGenerator;
 import esa.s1pdgs.cpoc.metadata.client.MetadataClient;
 import esa.s1pdgs.cpoc.mqi.model.queue.CatalogEvent;
-import esa.s1pdgs.cpoc.mqi.model.queue.ProductionEvent;
+import esa.s1pdgs.cpoc.mqi.model.queue.CatalogEvent;
 
 @Service
 public class JobsGeneratorFactory {
@@ -102,11 +102,11 @@ public class JobsGeneratorFactory {
 	 * @return
 	 * @throws IpfPrepWorkerBuildTaskTableException
 	 */
-	public AbstractJobsGenerator<ProductionEvent> createJobGeneratorForL0Slice(final File xmlFile,
-			final AppCatalogJobClient<ProductionEvent> appDataService)
+	public AbstractJobsGenerator<CatalogEvent> createJobGeneratorForL0Slice(final File xmlFile,
+			final AppCatalogJobClient<CatalogEvent> appDataService)
 			throws IpfPrepWorkerBuildTaskTableException {
 
-		AbstractJobsGenerator<ProductionEvent> processor = new LevelProductsJobsGenerator(this.xmlConverter, this.metadataClient,
+		AbstractJobsGenerator<CatalogEvent> processor = new LevelProductsJobsGenerator(this.xmlConverter, this.metadataClient,
 				this.l0ProcessSettings, this.ipfPreparationWorkerSettings, this.outputFactory, appDataService, processConfiguration);
 		processor.setMode(ProductMode.SLICING);
 		processor.initialize(xmlFile);
@@ -121,10 +121,10 @@ public class JobsGeneratorFactory {
 	 * @return
 	 * @throws IpfPrepWorkerBuildTaskTableException
 	 */
-	public AbstractJobsGenerator<ProductionEvent> createJobGeneratorForL0Segment(final File xmlFile,
-			final AppCatalogJobClient<ProductionEvent> appDataService) throws IpfPrepWorkerBuildTaskTableException {
+	public AbstractJobsGenerator<CatalogEvent> createJobGeneratorForL0Segment(final File xmlFile,
+			final AppCatalogJobClient<CatalogEvent> appDataService) throws IpfPrepWorkerBuildTaskTableException {
 		
-		AbstractJobsGenerator<ProductionEvent> processor = new L0SegmentAppJobsGenerator(this.xmlConverter,
+		AbstractJobsGenerator<CatalogEvent> processor = new L0SegmentAppJobsGenerator(this.xmlConverter,
 				this.metadataClient, this.l0ProcessSettings, this.ipfPreparationWorkerSettings, this.outputFactory,
 				appDataService, processConfiguration);
 		processor.setMode(ProductMode.SLICING);

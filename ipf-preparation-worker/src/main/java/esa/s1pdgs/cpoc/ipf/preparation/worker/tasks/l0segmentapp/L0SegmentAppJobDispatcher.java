@@ -17,7 +17,7 @@ import esa.s1pdgs.cpoc.ipf.preparation.worker.config.ProcessSettings;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.tasks.AbstractJobsDispatcher;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.tasks.AbstractJobsGenerator;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.tasks.JobsGeneratorFactory;
-import esa.s1pdgs.cpoc.mqi.model.queue.ProductionEvent;
+import esa.s1pdgs.cpoc.mqi.model.queue.CatalogEvent;
 
 /**
  * Dispatcher of L0 slice product<br/>
@@ -27,7 +27,7 @@ import esa.s1pdgs.cpoc.mqi.model.queue.ProductionEvent;
  * 
  * @author Cyrielle Gailliard
  */
-public class L0SegmentAppJobDispatcher extends AbstractJobsDispatcher<ProductionEvent> {
+public class L0SegmentAppJobDispatcher extends AbstractJobsDispatcher<CatalogEvent> {
 
     /**
      * Task table
@@ -50,7 +50,7 @@ public class L0SegmentAppJobDispatcher extends AbstractJobsDispatcher<Production
             final ProcessSettings processSettings,
             final JobsGeneratorFactory factory,
             final ThreadPoolTaskScheduler taskScheduler,
-            final AppCatalogJobClient<ProductionEvent> appDataService) {
+            final AppCatalogJobClient<CatalogEvent> appDataService) {
         super(settings, processSettings, factory, taskScheduler,
                 appDataService);
     }
@@ -68,7 +68,7 @@ public class L0SegmentAppJobDispatcher extends AbstractJobsDispatcher<Production
      * 
      */
     @Override
-    protected AbstractJobsGenerator<ProductionEvent> createJobGenerator(
+    protected AbstractJobsGenerator<CatalogEvent> createJobGenerator(
             final File xmlFile) throws AbstractCodedException {
         return this.factory.createJobGeneratorForL0Segment(xmlFile,
                 appDataService);
@@ -80,7 +80,7 @@ public class L0SegmentAppJobDispatcher extends AbstractJobsDispatcher<Production
      * @throws IpfPrepWorkerMissingRoutingEntryException
      */
     @Override
-    protected List<String> getTaskTables(final AppDataJob<ProductionEvent> job)
+    protected List<String> getTaskTables(final AppDataJob<CatalogEvent> job)
             throws IpfPrepWorkerMissingRoutingEntryException {
         return Arrays.asList(TASK_TABLE_NAME);
     }

@@ -18,6 +18,7 @@ import esa.s1pdgs.cpoc.appcatalog.server.job.db.AppDataJobFile;
 import esa.s1pdgs.cpoc.appcatalog.server.job.db.AppDataJobProduct;
 import esa.s1pdgs.cpoc.appcatalog.server.job.db.AppDataJobState;
 import esa.s1pdgs.cpoc.appstatus.AppStatus;
+import esa.s1pdgs.cpoc.common.EdrsSessionFileType;
 import esa.s1pdgs.cpoc.common.ProductCategory;
 import esa.s1pdgs.cpoc.common.errors.AbstractCodedException;
 import esa.s1pdgs.cpoc.common.errors.InvalidFormatProduct;
@@ -26,6 +27,7 @@ import esa.s1pdgs.cpoc.errorrepo.model.rest.FailedProcessingDto;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.config.ProcessSettings;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.tasks.AbstractGenericConsumer;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.tasks.AbstractJobsDispatcher;
+import esa.s1pdgs.cpoc.ipf.preparation.worker.tasks.CatalogEventAdapter;
 import esa.s1pdgs.cpoc.metadata.client.MetadataClient;
 import esa.s1pdgs.cpoc.metadata.model.EdrsSessionMetadata;
 import esa.s1pdgs.cpoc.mqi.client.GenericMqiClient;
@@ -39,8 +41,7 @@ import esa.s1pdgs.cpoc.report.LoggerReporting;
 import esa.s1pdgs.cpoc.report.Reporting;
 import esa.s1pdgs.cpoc.report.ReportingMessage;
 
-public class L0AppConsumer extends AbstractGenericConsumer<CatalogEvent> implements MqiListener<CatalogEvent> {
-    
+public class L0AppConsumer extends AbstractGenericConsumer<CatalogEvent> implements MqiListener<CatalogEvent> {	
     private String taskForFunctionalLog;
     
     private final MetadataClient metadataClient;
@@ -84,13 +85,12 @@ public class L0AppConsumer extends AbstractGenericConsumer<CatalogEvent> impleme
         }
 
         // Second process message
-        final CatalogEvent leveldto = mqiMessage.getBody();
-        String productName = leveldto.getKeyObjectStorage();
-
-        if (leveldto.getProductType().equals("EDRS_SESSION")) {
+        final CatalogEvent event = mqiMessage.getBody();
+        final CatalogEventAdapter eventAdapter = new CatalogEventAdapter(event);
         
-        //if (leveldto.getProductType() == EdrsSessionFileType.SESSION) {
+        String productName = event.getKeyObjectStorage();
 
+        if (event.getProductType().equals(EdrsSessionFileType.SESSION.toString())) {
             int step = 0;
             boolean ackOk = false;
             String errorMessage = "";
@@ -108,20 +108,19 @@ public class L0AppConsumer extends AbstractGenericConsumer<CatalogEvent> impleme
                 step = 1;
                 LOGGER.info(
                         "[MONITOR] [step {}] [productName {}] Building product",
-                        step, leveldto.getKeyObjectStorage());
-                if (leveldto.getChannelId() != 1
-                        && leveldto.getChannelId() != 2) {
-                    throw new InvalidFormatProduct("Invalid channel identifier "
-                            + leveldto.getChannelId());
+                        step, event.getKeyObjectStorage());
+
+               	final int channelId = eventAdapter.channelId();
+                if (channelId != 1 && channelId != 2) {
+                    throw new InvalidFormatProduct("Invalid channel identifier " + channelId);
                 }
                 reporting.begin(
                 		new FilenameReportingInput(Collections.singletonList(mqiMessage.getBody().getKeyObjectStorage())),
                 		new ReportingMessage("Start job generation using  {}", mqiMessage.getBody().getKeyObjectStorage())
                 );
                 
-                AppDataJob<CatalogEvent> appDataJob = buildJob(mqiMessage);
-                
-                LOGGER.debug ("== appDataJob(1) {}",appDataJob.toString());
+                AppDataJob<CatalogEvent> appDataJob = buildJob(mqiMessage);                
+                LOGGER.debug ("== appDataJob(1) {}", appDataJob.toString());
                 productName = appDataJob.getProduct().getProductName();
 
                 // Dispatch
@@ -158,14 +157,11 @@ public class L0AppConsumer extends AbstractGenericConsumer<CatalogEvent> impleme
             ackProcessing(mqiMessage, failedProc, ackOk, productName, errorMessage);
 
             step = 0;
-            LOGGER.info("[MONITOR] [step 0] [productName {}] End", step,
-                    leveldto.getKeyObjectStorage());
-                       
+            LOGGER.info("[MONITOR] [step 0] [productName {}] End", step, event.getKeyObjectStorage());                       
             reporting.end(new ReportingMessage("End job generation using {}", mqiMessage.getBody().getKeyObjectStorage()));
         }
-
     }
-
+    
 	protected AppDataJob<CatalogEvent> buildJob(final GenericMessageDto<CatalogEvent> mqiMessage)
             throws AbstractCodedException {
     	
@@ -174,16 +170,18 @@ public class L0AppConsumer extends AbstractGenericConsumer<CatalogEvent> impleme
                 .findByMessagesId(mqiMessage.getId());
 
         if (CollectionUtils.isEmpty(existingJobs)) {
-        	final CatalogEvent sessionDto = mqiMessage.getBody();
-        	final String productType = sessionDto.getProductType();
-        	final String productName = new File(sessionDto.getKeyObjectStorage()).getName();
+        	final CatalogEvent event = mqiMessage.getBody();
+        	final String productType = event.getProductType();
+        	final String productName = new File(event.getKeyObjectStorage()).getName();
         	LOGGER.debug("Querying metadata for product {} of type {}", productName, productType); 
         	final EdrsSessionMetadata edrsSessionMetadata = metadataClient.getEdrsSession(productType, productName);
            	LOGGER.debug ("Got result {}", edrsSessionMetadata); 
-        	
+           	
+           	final CatalogEventAdapter eventAdapter = new CatalogEventAdapter(event);
+          			           	
             // Search if session is already in progress
 			final List<AppDataJob<CatalogEvent>> existingJobsForSession =
-                    appDataService.findByProductSessionId(sessionDto.getSessionId());
+                    appDataService.findByProductSessionId(eventAdapter.sessionId());
 
             if (CollectionUtils.isEmpty(existingJobsForSession)) {
             	LOGGER.debug ("== creating jobDTO from {}",mqiMessage ); 
@@ -197,15 +195,15 @@ public class L0AppConsumer extends AbstractGenericConsumer<CatalogEvent> impleme
                 // Product
                 final AppDataJobProduct productDto = new AppDataJobProduct();
                 productDto.setProductType(productType);
-                productDto.setSessionId(sessionDto.getSessionId());
+                productDto.setSessionId(eventAdapter.sessionId());
                 productDto.setMissionId(edrsSessionMetadata.getMissionId());
-                productDto.setStationCode(sessionDto.getStationCode());
-                productDto.setProductName(sessionDto.getSessionId());
-                productDto.setSatelliteId(sessionDto.getSatelliteId());
+                productDto.setStationCode(eventAdapter.stationCode());
+                productDto.setProductName(eventAdapter.sessionId());
+                productDto.setSatelliteId(eventAdapter.satelliteId());
                 productDto.setStartTime(edrsSessionMetadata.getStartTime());
                 productDto.setStopTime(edrsSessionMetadata.getStopTime());
 
-                if (sessionDto.getChannelId() == 1) {
+                if (eventAdapter.channelId() == 1) {
                     LOGGER.debug ("== ch1 ");    
                     productDto.setRaws1(edrsSessionMetadata.getRawNames().stream().map(
                             s -> new AppDataJobFile(s))
@@ -244,11 +242,13 @@ public class L0AppConsumer extends AbstractGenericConsumer<CatalogEvent> impleme
                 // Updates messages if needed
                 final CatalogEvent dto = firstMess.getBody();
                 
-                if (jobDto.getMessages().size() == 1 && dto.getChannelId() != mqiMessage.getBody().getChannelId()) {
+             	final int queriedChannelId = new CatalogEventAdapter(dto).channelId();
+             	
+                if (jobDto.getMessages().size() == 1 && queriedChannelId != eventAdapter.channelId()) {
                 	LOGGER.debug ("== existing message {}",jobDto.getMessages());
                 	
                     jobDto.getMessages().add(mqiMessage);
-                    if (mqiMessage.getBody().getChannelId() == 1) {
+                    if (eventAdapter.channelId() == 1) {
                         jobDto.getProduct()
                                 .setRaws1(edrsSessionMetadata.getRawNames().stream()
                                         .map(s -> new AppDataJobFile(s))

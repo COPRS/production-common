@@ -99,7 +99,6 @@
 			<artifactId>s1pro-core-mqi-client</artifactId>
 			<version>${project.version}</version>
 		</dependency>
-
 		<dependency>
 			<groupId>org.json</groupId>
 			<artifactId>json</artifactId>

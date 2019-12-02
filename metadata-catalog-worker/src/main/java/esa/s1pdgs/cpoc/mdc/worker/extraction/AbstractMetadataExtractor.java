@@ -40,7 +40,7 @@ public abstract class AbstractMetadataExtractor implements MetadataExtractor {
 		this.processConfiguration = processConfiguration;
 		this.obsClient = obsClient;
 	}
-
+	
 	final File downloadToLocalFolder(
     		final Reporting.Factory reportingFactory,  
     		final ProductFamily family, 
@@ -48,18 +48,22 @@ public abstract class AbstractMetadataExtractor implements MetadataExtractor {
     ) 
     	throws AbstractCodedException
     {
-        final Reporting reportDownload = reportingFactory
-            	.newReporting(1);            
-        reportDownload.begin(new ReportingMessage("Starting download of " + keyObs + " to local directory " + this.localDirectory));
+		// make sure than keyObs contains the metadata file
+		final String metadataKeyObs = getMetadataKeyObs(keyObs);
+		
+        final Reporting reportDownload = reportingFactory.newReporting(1);            
+        reportDownload.begin(new ReportingMessage(
+        		"Starting download of {} to local directory {}", metadataKeyObs, localDirectory
+        ));
 
 		try {
 			final List<File> files = Retries.performWithRetries(
-					() -> obsClient.download(Arrays.asList(new ObsDownloadObject(family, keyObs, this.localDirectory))), 
-					"Download of " + keyObs + " to " + localDirectory, 
+					() -> obsClient.download(Arrays.asList(new ObsDownloadObject(family, metadataKeyObs, this.localDirectory))), 
+					"Download of " + metadataKeyObs + " to " + localDirectory, 
 					processConfiguration.getNumObsDownloadRetries(), 
 					processConfiguration.getSleepBetweenObsRetriesMillis()
 			);
-			reportDownload.end(new ReportingMessage("End download of " + keyObs));
+			reportDownload.end(new ReportingMessage("End download of " + metadataKeyObs));
 			return files.size() == 1 ? files.get(0) : null;
 		} catch (final Exception e) {
 			if (e instanceof AbstractCodedException) {
@@ -67,7 +71,7 @@ public abstract class AbstractMetadataExtractor implements MetadataExtractor {
 				reportDownload.error(new ReportingMessage("[code {}] {}", ace.getCode().getCode(), ace.getLogMessage()));
 				throw ace;
 			}
-			reportDownload.error(new ReportingMessage("Error downloading {} to local directory {}", keyObs, localDirectory));
+			reportDownload.error(new ReportingMessage("Error downloading {} to local directory {}", metadataKeyObs, localDirectory));
 			throw new RuntimeException(e);     
 		}
     }
@@ -99,17 +103,22 @@ public abstract class AbstractMetadataExtractor implements MetadataExtractor {
 		throws AbstractCodedException 
 	{
 		final Reporting reportExtractingFromFilename = reportingFactory.newReporting(step);
-		reportExtractingFromFilename.begin(new ReportingMessage("Start extraction from " + extraction));
+		reportExtractingFromFilename.begin(new ReportingMessage("Start extraction from {}", extraction));
 		try {
 			final E res = supplier.get();
 					//;
-			reportExtractingFromFilename.end(new ReportingMessage("End extraction from " + extraction));
+			reportExtractingFromFilename.end(new ReportingMessage("End extraction from {}", extraction));
 			return res;
 		} catch (final AbstractCodedException e) {
 			reportExtractingFromFilename.error(new ReportingMessage("[code {}] {}", e.getCode().getCode(), e.getLogMessage()));
 			throw e;
 		}
 	}
-    
-
+	
+	private final String getMetadataKeyObs(final String productKeyObs) {
+		if (productKeyObs.endsWith(processConfiguration.getFileWithManifestExt())) {
+			return productKeyObs + "/" + processConfiguration.getManifestFilename();
+		} 
+		return productKeyObs;
+	}
 }

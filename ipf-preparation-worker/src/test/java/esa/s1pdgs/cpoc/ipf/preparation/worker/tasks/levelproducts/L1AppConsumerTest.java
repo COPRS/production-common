@@ -32,7 +32,7 @@ import esa.s1pdgs.cpoc.errorrepo.ErrorRepoAppender;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.config.L0SlicePatternSettings;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.config.ProcessSettings;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.tasks.AbstractJobsDispatcher;
-import esa.s1pdgs.cpoc.ipf.preparation.worker.tasks.levelproducts.LevelProductsMessageConsumer;
+import esa.s1pdgs.cpoc.ipf.preparation.worker.tasks.levelproducts.LevelProductsConsumer;
 import esa.s1pdgs.cpoc.metadata.client.MetadataClient;
 import esa.s1pdgs.cpoc.metadata.model.EdrsSessionMetadata;
 import esa.s1pdgs.cpoc.mqi.client.GenericMqiClient;
@@ -201,7 +201,7 @@ public class L1AppConsumerTest {
     @Test
     public void testProductNameNotMatch() throws AbstractCodedException {
 
-        LevelProductsMessageConsumer consumer = new LevelProductsMessageConsumer(l0SliceJobsDispatcher,
+        LevelProductsConsumer consumer = new LevelProductsConsumer(l0SliceJobsDispatcher,
                 l0SlicePatternSettings, processSettings, mqiService,
                 mqiStatusService, appDataService, errorAppender, appStatus, metadataClient, 0, 0);
         consumer.onMessage(message2);
@@ -215,7 +215,7 @@ public class L1AppConsumerTest {
     public void testReceiveOk() throws AbstractCodedException, ParseException {
         doReturn(100).when(metadataClient).getSeaCoverage(Mockito.any(), Mockito.any()); 
         
-        LevelProductsMessageConsumer consumer = new LevelProductsMessageConsumer(l0SliceJobsDispatcher,
+        LevelProductsConsumer consumer = new LevelProductsConsumer(l0SliceJobsDispatcher,
                 l0SlicePatternSettings, processSettings, mqiService,
                 mqiStatusService, appDataService,  errorAppender, appStatus, metadataClient, 0, 0);
         consumer.onMessage(message1);
@@ -233,7 +233,7 @@ public class L1AppConsumerTest {
     public void testReceiveNull() throws AbstractCodedException {
         doReturn(null).when(mqiService).next(Mockito.any());
 
-        LevelProductsMessageConsumer consumer = new LevelProductsMessageConsumer(l0SliceJobsDispatcher,
+        LevelProductsConsumer consumer = new LevelProductsConsumer(l0SliceJobsDispatcher,
                 l0SlicePatternSettings, processSettings, mqiService,
                 mqiStatusService, appDataService,  errorAppender, appStatus, metadataClient, 0, 0);
         consumer.onMessage(null);
@@ -261,7 +261,7 @@ public class L1AppConsumerTest {
         
         doReturn(100).when(metadataClient).getSeaCoverage(Mockito.any(), Mockito.any()); 
 
-        LevelProductsMessageConsumer consumer = new LevelProductsMessageConsumer(l0SliceJobsDispatcher,
+        LevelProductsConsumer consumer = new LevelProductsConsumer(l0SliceJobsDispatcher,
                 l0SlicePatternSettings, processSettings, mqiService,
                 mqiStatusService, appDataService,  errorAppender, appStatus, metadataClient, 0, 0);
         consumer.onMessage(message1);
@@ -294,7 +294,7 @@ public class L1AppConsumerTest {
         
         doReturn(100).when(metadataClient).getSeaCoverage(Mockito.any(), Mockito.any());        
 
-        LevelProductsMessageConsumer consumer = new LevelProductsMessageConsumer(l0SliceJobsDispatcher,
+        LevelProductsConsumer consumer = new LevelProductsConsumer(l0SliceJobsDispatcher,
                 l0SlicePatternSettings, processSettings, mqiService,
                 mqiStatusService, appDataService,  errorAppender, appStatus, metadataClient, 0, 0);
         consumer.onMessage(message1);
@@ -328,7 +328,7 @@ public class L1AppConsumerTest {
         
         doReturn(100).when(metadataClient).getSeaCoverage(Mockito.any(), Mockito.any()); 
 
-        LevelProductsMessageConsumer consumer = new LevelProductsMessageConsumer(l0SliceJobsDispatcher,
+        LevelProductsConsumer consumer = new LevelProductsConsumer(l0SliceJobsDispatcher,
                 l0SlicePatternSettings, processSettings, mqiService,
                 mqiStatusService, appDataService,  errorAppender, appStatus, metadataClient, 0, 0);
         consumer.onMessage(message1);
