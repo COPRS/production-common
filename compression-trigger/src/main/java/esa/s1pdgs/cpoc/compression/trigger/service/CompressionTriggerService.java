@@ -76,7 +76,7 @@ public class CompressionTriggerService {
     			job
     	);
     	messageDto.setInputKey(mess.getInputKey());
-    	messageDto.setOutputKey(job.getProductFamily().name());
+    	messageDto.setOutputKey(job.getOutputProductFamily().name());
 		try {
 			mqiClient.publish(messageDto, cat);
 		} catch (final AbstractCodedException e) {
