@@ -60,11 +60,11 @@ public class CompressionTriggerService {
 	
 	private final MqiConsumer<?> newMqiConsumerFor(final ProductCategory cat, final CategoryConfig config) {
 		LOGGER.debug("Creating MQI consumer for category {} using {}", cat, config);
-
+	
 		return new MqiConsumer<ProductionEvent>(
 				mqiClient, 
 				cat, 
-				p -> publish(ProductCategory.COMPRESSED_PRODUCTS, p, toCompressionJob(p.getBody())),
+				p -> publish(ProductCategory.COMPRESSION_JOBS, p, toCompressionJob(p.getBody())),
 				config.getFixedDelayMs(),
 				config.getInitDelayPolMs(),
 				appStatus
