@@ -19,6 +19,7 @@ import esa.s1pdgs.cpoc.compression.trigger.config.TriggerConfigurationProperties
 import esa.s1pdgs.cpoc.compression.trigger.config.TriggerConfigurationProperties.CategoryConfig;
 import esa.s1pdgs.cpoc.mqi.client.GenericMqiClient;
 import esa.s1pdgs.cpoc.mqi.client.MqiConsumer;
+import esa.s1pdgs.cpoc.mqi.model.queue.CompressionDirection;
 import esa.s1pdgs.cpoc.mqi.model.queue.CompressionJob;
 import esa.s1pdgs.cpoc.mqi.model.queue.ProductionEvent;
 import esa.s1pdgs.cpoc.mqi.model.rest.GenericMessageDto;
@@ -92,7 +93,8 @@ public class CompressionTriggerService {
 				event.getKeyObjectStorage(), 
 				event.getProductFamily(),
 				getCompressedKeyObjectStorage(event.getKeyObjectStorage()),
-				getCompressedProductFamily(event.getProductFamily())
+				getCompressedProductFamily(event.getProductFamily()),
+				CompressionDirection.COMPRESS
 		);
 	}
 	
