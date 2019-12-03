@@ -115,7 +115,7 @@ public class CompressProcessor implements MqiListener<CompressionJob> {
 	public void initService() {
 		if (pollingIntervalMs > 0) {
 			final ExecutorService service = Executors.newFixedThreadPool(1);
-			service.execute(new MqiConsumer<CompressionJob>(mqiClient, ProductCategory.COMPRESSED_PRODUCTS, this,
+			service.execute(new MqiConsumer<CompressionJob>(mqiClient, ProductCategory.COMPRESSION_JOBS, this,
 					pollingIntervalMs, pollingInitialDelayMs, esa.s1pdgs.cpoc.appstatus.AppStatus.NULL));
 		}
 	}
