@@ -115,7 +115,7 @@ public class CompressProcessor implements MqiListener<CompressionJob> {
 	public void initService() {
 		if (pollingIntervalMs > 0) {
 			final ExecutorService service = Executors.newFixedThreadPool(1);
-			service.execute(new MqiConsumer<CompressionJob>(mqiClient, ProductCategory.COMPRESSED_PRODUCTS, this,
+			service.execute(new MqiConsumer<CompressionJob>(mqiClient, ProductCategory.COMPRESSION_JOBS, this,
 					pollingIntervalMs, pollingInitialDelayMs, esa.s1pdgs.cpoc.appstatus.AppStatus.NULL));
 		}
 	}
@@ -344,7 +344,7 @@ public class CompressProcessor implements MqiListener<CompressionJob> {
         LOGGER.info("Acknowledging negatively {} ",dto.getBody());
 		try {
 			mqiClient.ack(new AckMessageDto(dto.getId(), Ack.ERROR, errorMessage, stop), 
-					ProductCategory.COMPRESSED_PRODUCTS);
+					ProductCategory.COMPRESSION_JOBS);
 		} catch (AbstractCodedException ace) {
 			LOGGER.error("Unable to confirm negatively request:{}",ace);
 		}
@@ -355,7 +355,7 @@ public class CompressProcessor implements MqiListener<CompressionJob> {
 		LOGGER.info("Acknowledging positively {}", dto.getBody());
 		try {
 			mqiClient.ack(new AckMessageDto(dto.getId(), Ack.OK, null, stop), 
-					ProductCategory.COMPRESSED_PRODUCTS);
+					ProductCategory.COMPRESSION_JOBS);
 		} catch (AbstractCodedException ace) {
 			LOGGER.error("Unable to confirm positively request:{}",ace);
 			appStatus.setError("PROCESSING");

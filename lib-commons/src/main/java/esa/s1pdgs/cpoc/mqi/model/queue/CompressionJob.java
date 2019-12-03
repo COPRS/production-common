@@ -18,11 +18,13 @@ public class CompressionJob extends AbstractMessage {
 			final String inputKeyObjectStorage, 
 			final ProductFamily inputProductFamily, 
 			final String outputKeyObjectStorage, 
-			final ProductFamily outputProductFamily
+			final ProductFamily outputProductFamily,
+			final CompressionDirection compressionDirection
 	) {
 		super(inputProductFamily, inputKeyObjectStorage);
 		this.outputKeyObjectStorage = outputKeyObjectStorage;
 		this.outputProductFamily = outputProductFamily;
+		this.compressionDirection = compressionDirection;
 	}
 
 	public ProductFamily getOutputProductFamily() {

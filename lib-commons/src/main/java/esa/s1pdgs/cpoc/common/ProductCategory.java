@@ -2,6 +2,7 @@ package esa.s1pdgs.cpoc.common;
 
 import esa.s1pdgs.cpoc.common.errors.InternalErrorException;
 import esa.s1pdgs.cpoc.mqi.model.queue.AbstractMessage;
+import esa.s1pdgs.cpoc.mqi.model.queue.CompressionEvent;
 import esa.s1pdgs.cpoc.mqi.model.queue.CompressionJob;
 import esa.s1pdgs.cpoc.mqi.model.queue.IngestionEvent;
 import esa.s1pdgs.cpoc.mqi.model.queue.IngestionJob;
@@ -20,8 +21,9 @@ public enum ProductCategory {
     LEVEL_JOBS(IpfExecutionJob.class), 
     LEVEL_PRODUCTS(ProductionEvent.class), 
     LEVEL_REPORTS(LevelReportDto.class), 
-    LEVEL_SEGMENTS(ProductionEvent.class), 
-    COMPRESSED_PRODUCTS(CompressionJob.class),
+    LEVEL_SEGMENTS(ProductionEvent.class),
+    COMPRESSION_JOBS(CompressionJob.class),
+    COMPRESSED_PRODUCTS(CompressionEvent.class),
     INGESTION(IngestionJob.class);
 	
     /**
@@ -74,7 +76,7 @@ public enum ProductCategory {
 			case L1_SLICE_ZIP:
 			case L2_ACN_ZIP:
 			case L2_SLICE_ZIP:
-				return ProductCategory.COMPRESSED_PRODUCTS; 
+				return ProductCategory.COMPRESSION_JOBS; 
 	        default:
 	        	throw new IllegalArgumentException(
 	        			String.format("Cannot determine product category for family %s", family)
