@@ -76,7 +76,7 @@ public enum ProductCategory {
 			case L1_SLICE_ZIP:
 			case L2_ACN_ZIP:
 			case L2_SLICE_ZIP:
-				return ProductCategory.COMPRESSED_PRODUCTS; 
+				return ProductCategory.COMPRESSION_JOBS; 
 	        default:
 	        	throw new IllegalArgumentException(
 	        			String.format("Cannot determine product category for family %s", family)
