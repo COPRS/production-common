@@ -6,11 +6,11 @@ import org.junit.Test;
 
 import esa.s1pdgs.cpoc.common.ProductFamily;
 
-public class CompressionTriggerTest {
+public class CompressionTriggerServiceTest {
 
 	@Test
 	public void testGetCompressedKeyObjectStorage() {
-		CompressionTrigger t = new CompressionTrigger(null);
+		CompressionTriggerService t = new CompressionTriggerService(null,null,null);
 
 		assertEquals(t.getCompressedProductFamily(ProductFamily.L0_ACN), ProductFamily.L0_ACN_ZIP);
 		assertEquals(t.getCompressedProductFamily(ProductFamily.L1_ACN), ProductFamily.L1_ACN_ZIP);
