@@ -14,12 +14,12 @@ public class FilesystemInboxAdapterFactory implements InboxAdapterFactory {
 	private final InboxEntryFactory inboxEntryFactory;
 	
 	@Autowired
-	public FilesystemInboxAdapterFactory(InboxEntryFactory inboxEntryFactory) {
+	public FilesystemInboxAdapterFactory(final InboxEntryFactory inboxEntryFactory) {
 		this.inboxEntryFactory = inboxEntryFactory;
 	}
 	
 	@Override
-	public InboxAdapter newInboxAdapter(String inboxPath) {
-		return new FilesystemInboxAdapter(new File(inboxPath.replace("file://", "")), inboxEntryFactory);
+	public InboxAdapter newInboxAdapter(final String inboxPath) {
+		return new FilesystemInboxAdapter(new File(inboxPath.replace("file://", "")).toPath(), inboxEntryFactory);
 	}
 }

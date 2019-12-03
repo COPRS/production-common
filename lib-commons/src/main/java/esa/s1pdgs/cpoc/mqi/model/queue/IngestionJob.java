@@ -7,9 +7,6 @@ import esa.s1pdgs.cpoc.common.ProductFamily;
 public class IngestionJob extends AbstractMessage {	
 	private String relativePath;
 	private String pickupPath;
-	private String missionId;
-	private String satelliteId;
-	private String stationCode;
 	
 	public IngestionJob() {
 		super();
@@ -27,29 +24,6 @@ public class IngestionJob extends AbstractMessage {
 		this.relativePath = relativePath;
 	}
 
-	public String getMissionId() {
-		return missionId;
-	}
-
-	public void setMissionId(final String missionId) {
-		this.missionId = missionId;
-	}
-
-	public String getSatelliteId() {
-		return satelliteId;
-	}
-
-	public void setSatelliteId(final String satelliteId) {
-		this.satelliteId = satelliteId;
-	}
-
-	public String getStationCode() {
-		return stationCode;
-	}
-
-	public void setStationCode(final String stationCode) {
-		this.stationCode = stationCode;
-	}
 
 	public String getPickupPath() {
 		return pickupPath;
@@ -61,8 +35,8 @@ public class IngestionJob extends AbstractMessage {
 
 	@Override
 	public int hashCode() {
-		return Objects.hash(creationDate, hostname, keyObjectStorage, missionId, pickupPath, productFamily,
-				relativePath, satelliteId, stationCode);
+		return Objects.hash(creationDate, hostname, keyObjectStorage, pickupPath, productFamily,
+				relativePath);
 	}
 
 	@Override
@@ -80,19 +54,15 @@ public class IngestionJob extends AbstractMessage {
 		return Objects.equals(creationDate, other.creationDate) 
 				&& Objects.equals(hostname, other.hostname)
 				&& Objects.equals(keyObjectStorage, other.keyObjectStorage)
-				&& Objects.equals(missionId, other.missionId) 
 				&& Objects.equals(pickupPath, other.pickupPath)
 				&& productFamily == other.productFamily 
-				&& Objects.equals(relativePath, other.relativePath)
-				&& Objects.equals(satelliteId, other.satelliteId) 
-				&& Objects.equals(stationCode, other.stationCode);
+				&& Objects.equals(relativePath, other.relativePath);
 	}
 
 	@Override
 	public String toString() {
 		return "IngestionJob [productFamily=" + productFamily + ", keyObjectStorage=" + keyObjectStorage
 				+ ", creationDate=" + creationDate + ", hostname=" + hostname + ", relativePath=" + relativePath
-				+ ", pickupPath=" + pickupPath + ", missionId=" + missionId + ", satelliteId=" + satelliteId
-				+ ", stationCode=" + stationCode + "]";
+				+ ", pickupPath=" + pickupPath + "]";
 	}	
 }

@@ -19,7 +19,7 @@ public class IngestionTriggerServiceTransactional {
 	private final InboxEntryRepository repository;
 
 	@Autowired
-	public IngestionTriggerServiceTransactional(InboxEntryRepository repository) {
+	public IngestionTriggerServiceTransactional(final InboxEntryRepository repository) {
 		this.repository = repository;
 	}	
 	
@@ -29,11 +29,7 @@ public class IngestionTriggerServiceTransactional {
 	}
 	
 	public void removeFinished(final Collection<InboxEntry> finishedEntries) {		
-		final Set<String> toBeDeleted = finishedEntries.stream()
-				.map(e -> e.getUrl())
-				.collect(Collectors.toCollection(HashSet::new));
-		
-		repository.deleteByUrlIn(toBeDeleted);
+		repository.deleteAll(finishedEntries);
 	}	
 	
 	public InboxEntry add(final InboxEntry entry) {

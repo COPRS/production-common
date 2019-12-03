@@ -2,6 +2,8 @@ package esa.s1pdgs.cpoc.ingestion.trigger;
 
 import static org.junit.Assert.assertEquals;
 
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
@@ -16,8 +18,10 @@ import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit4.SpringRunner;
 
+import esa.s1pdgs.cpoc.ingestion.trigger.config.IngestionTriggerConfigurationProperties;
 import esa.s1pdgs.cpoc.ingestion.trigger.entity.InboxEntry;
 import esa.s1pdgs.cpoc.ingestion.trigger.entity.InboxEntryRepository;
+import esa.s1pdgs.cpoc.ingestion.trigger.fs.FilesystemInboxEntryFactory;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest
@@ -27,20 +31,24 @@ import esa.s1pdgs.cpoc.ingestion.trigger.entity.InboxEntryRepository;
 public class TestApplication {
 	@Autowired
 	private IngestionTriggerService service;
+	
+	@Autowired
+	private IngestionTriggerConfigurationProperties props;
 
 	@Autowired
 	private InboxEntryRepository repo;
 
 	@Test
-	public void testPollAll_OnEmptyInboxAndPersistedEntries_ShallDeletePersistedEntries() throws InterruptedException {
-		final InboxEntry content = new InboxEntry("bar", "bar", "/tmp/MPS_/S1A", "S1", "A", "MPS_");
-		content.setUrl("/tmp/MPS_/S1A/bar");
+	public void testPollAll_OnEmptyInboxAndPersistedEntries_ShallDeletePersistedEntries() throws InterruptedException {		
+		final Path inbox = Paths.get(props.getPolling().get(0).getDirectory());
+		if (!inbox.toFile().exists()) {
+			inbox.toFile().mkdirs();
+		}		
+		final FilesystemInboxEntryFactory fact = new FilesystemInboxEntryFactory();	
+		final InboxEntry content = fact.newInboxEntry(inbox, inbox.resolve("WILE/S1B/L20180724144436762001030/ch01/DCS_02_L20180724144436762001030_ch1_DSIB.xml"));
+		final InboxEntry content2 = fact.newInboxEntry(inbox, inbox.resolve("AUX/S1__AUX_ICE_V20160501T120000_G20160502T043607.SAFE"));
 		repo.save(content);
-
-		final InboxEntry content2 = new InboxEntry("bar2", "bar2", "/tmp/WILE/S1B", "S1", "B", "WILE");
-		content2.setUrl("/tmp/WILE/S1B/bar2");
 		repo.save(content2);
-
 		service.pollAll();
 
 		final List<InboxEntry> actual = read();
@@ -48,6 +56,7 @@ public class TestApplication {
 	}
 
 	private final List<InboxEntry> read() {
-		return StreamSupport.stream(repo.findAll().spliterator(), false).collect(Collectors.toList());
+		return StreamSupport.stream(repo.findAll().spliterator(), false)
+				.collect(Collectors.toList());
 	}
 }

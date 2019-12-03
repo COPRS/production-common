@@ -1,6 +1,5 @@
 package esa.s1pdgs.cpoc.ingestion.trigger;
 
-import java.util.Collection;
 import java.util.Collections;
 import java.util.Optional;
 
@@ -10,22 +9,22 @@ import esa.s1pdgs.cpoc.ingestion.trigger.entity.InboxEntryRepository;
 public abstract class AbstractInboxEntryRepository implements InboxEntryRepository {
 
 	@Override
-	public <S extends InboxEntry> S save(S entity) {
+	public <S extends InboxEntry> S save(final S entity) {
 		return entity;
 	}
 
 	@Override
-	public <S extends InboxEntry> Iterable<S> saveAll(Iterable<S> entities) {
+	public <S extends InboxEntry> Iterable<S> saveAll(final Iterable<S> entities) {
 		return entities;
 	}
 
 	@Override
-	public Optional<InboxEntry> findById(Long id) {
+	public Optional<InboxEntry> findById(final Long id) {
 		return Optional.empty();
 	}
 
 	@Override
-	public boolean existsById(Long id) {
+	public boolean existsById(final Long id) {
 		return false;
 	}
 
@@ -35,7 +34,7 @@ public abstract class AbstractInboxEntryRepository implements InboxEntryReposito
 	}
 
 	@Override
-	public Iterable<InboxEntry> findAllById(Iterable<Long> ids) {
+	public Iterable<InboxEntry> findAllById(final Iterable<Long> ids) {
 		return Collections.emptyList();
 	}
 
@@ -45,17 +44,14 @@ public abstract class AbstractInboxEntryRepository implements InboxEntryReposito
 	}
 
 	@Override
-	public void deleteById(Long id) {	 }
+	public void deleteById(final Long id) {	 }
 
 	@Override
-	public void delete(InboxEntry entity) {}
+	public void delete(final InboxEntry entity) {}
 
 	@Override
-	public void deleteAll(Iterable<? extends InboxEntry> entities) {}
+	public void deleteAll(final Iterable<? extends InboxEntry> entities) {}
 
 	@Override
 	public void deleteAll() {}
-
-	@Override
-	public void deleteByUrlIn(Collection<String> url) {}
 }
