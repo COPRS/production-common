@@ -22,7 +22,7 @@ public enum ProductCategory {
     LEVEL_PRODUCTS(ProductionEvent.class), 
     LEVEL_REPORTS(LevelReportDto.class), 
     LEVEL_SEGMENTS(ProductionEvent.class),
-    COMPRESSION_JOB(CompressionJob.class),
+    COMPRESSION_JOBS(CompressionJob.class),
     COMPRESSED_PRODUCTS(CompressionEvent.class),
     INGESTION(IngestionJob.class);
 	
