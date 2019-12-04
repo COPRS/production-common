@@ -72,9 +72,6 @@ public class TestProductServiceImpl {
 		ingestionJob.setPickupPath("/dev");
 		ingestionJob.setRelativePath("null");
 		ingestionJob.setProductFamily(family);
-		ingestionJob.setMissionId("S1");
-		ingestionJob.setSatelliteId("A");
-		ingestionJob.setStationCode("WILE");
 		ingestionJob.setCreationDate(new Date());
 		ingestionJob.setHostname("hostname");
 		final Product<IngestionEvent> product = new Product<>();

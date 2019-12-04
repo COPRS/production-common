@@ -1,12 +1,13 @@
 package esa.s1pdgs.cpoc.ingestion.trigger;
 
-import java.util.Date;
+import java.util.Collection;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.util.StringUtils;
 
 import esa.s1pdgs.cpoc.ingestion.trigger.entity.InboxEntry;
 import esa.s1pdgs.cpoc.ingestion.trigger.filter.InboxFilter;
@@ -17,48 +18,65 @@ public final class Inbox {
 	private static final Logger LOG = LoggerFactory.getLogger(Inbox.class);
 
 	private final InboxAdapter inboxAdapter;
-	private final List<InboxFilter> filter;
+	private final InboxFilter filter;
 	private final IngestionTriggerServiceTransactional ingestionTriggerServiceTransactional;
 	private final SubmissionClient client;
-	private final String hostname;
 
-	Inbox(final InboxAdapter inboxAdapter, final List<InboxFilter> filter,
-			final IngestionTriggerServiceTransactional ingestionTriggerServiceTransactional, final SubmissionClient client, final String hostname) {
+	Inbox(
+			final InboxAdapter inboxAdapter, 
+			final InboxFilter filter,
+			final IngestionTriggerServiceTransactional ingestionTriggerServiceTransactional, 
+			final SubmissionClient client
+	) {
 		this.inboxAdapter = inboxAdapter;
 		this.filter = filter;
 		this.ingestionTriggerServiceTransactional = ingestionTriggerServiceTransactional;
 		this.client = client;
-		this.hostname = hostname;
 	}
-
+	
 	public final void poll() {
 		try {
 			final Set<InboxEntry> pickupContent = new HashSet<>(inboxAdapter.read(filter));
 			final Set<InboxEntry> persistedContent = ingestionTriggerServiceTransactional
 					.getAllForPath(inboxAdapter.inboxPath());
 
+			LOG.trace("Found {} on pickup and persisted are {}", summarize(pickupContent), summarize(persistedContent));
 			final Set<InboxEntry> newElements = new HashSet<>(pickupContent);
-			newElements.removeAll(persistedContent);
-
+			newElements.removeAll(persistedContent);	
 			final Set<InboxEntry> finishedElements = new HashSet<>(persistedContent);
 			finishedElements.removeAll(pickupContent);
+			
+			final StringBuilder logMessage = new StringBuilder();
 
 			if (finishedElements.size() != 0) {
-				LOG.info("Got {} finished elements: {}", finishedElements.size(), finishedElements);
+				logMessage.append("Handled ")
+					.append(finishedElements.size())
+					.append(" finished elements (")
+					.append(summarize(finishedElements))
+					.append(")");
 				// when a product has been removed from the inbox directory, it shall be removed
-				// from the
-				// persistence so it will not be ignored if it occurs again on the inbox
-				LOG.debug("Deleting all {} from persistence", finishedElements);
+				// from the persistence so it will not be ignored if it occurs again on the inbox
+				LOG.debug("Deleting all {} from persistence", summarize(finishedElements));
 				ingestionTriggerServiceTransactional.removeFinished(finishedElements);
 			}
 
 			if (newElements.size() != 0) {
-				LOG.info("Got {} new elements: {}", newElements.size(), newElements);
-
+				if (logMessage.length() == 0) {
+					logMessage.append("Handled ");
+				} else {
+					logMessage.append(" and ");
+				}
+				logMessage.append(newElements.size())
+					.append(" new elements (")
+					.append(summarize(newElements))
+					.append(")");
 				// all products not stored in the repo are considered new and shall be added to
 				// the
 				// configured queue.
 				newElements.stream().forEach(e -> handleNew(e));
+			}
+			if (logMessage.length() != 0) {
+				LOG.info(logMessage.toString());
 			}
 		} catch (final Exception e) {
 			LOG.error(String.format("Error on polling %s", description()), e);
@@ -76,15 +94,10 @@ public final class Inbox {
 
 	private void handleNew(final InboxEntry entry) {
 		try {
-			LOG.info("Publishing new entry to kafka queue: {}", entry);
+			LOG.debug("Publishing new entry to kafka queue: {}", entry);
 			final IngestionJob dto = new IngestionJob(entry.getName());
-			dto.setCreationDate(new Date());
-			dto.setHostname(hostname);
 		    dto.setRelativePath(entry.getRelativePath());
 		    dto.setPickupPath(entry.getPickupPath());
-			dto.setMissionId(entry.getMissionId());
-			dto.setSatelliteId(entry.getSatelliteId());
-			dto.setStationCode(entry.getStationCode());
 			client.publish(dto);
 			final InboxEntry persisted = ingestionTriggerServiceTransactional.add(entry);
 			LOG.debug("Added {} to persistence", persisted);
@@ -92,5 +105,15 @@ public final class Inbox {
 			LOG.error(String.format("Error on handling %s in %s", entry, description()), e);
 		}
 	}
-
+	
+	private final String summarize(final Collection<InboxEntry> entries) {
+		final String summary = entries.stream()
+			.map(p -> p.getName())
+			.collect(Collectors.joining(", "));
+		
+		if (StringUtils.isEmpty(summary)) {
+			return "[none]";
+		}
+		return summary;
+	}
 }

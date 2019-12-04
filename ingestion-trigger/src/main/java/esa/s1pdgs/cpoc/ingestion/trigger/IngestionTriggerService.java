@@ -10,17 +10,17 @@ public final class IngestionTriggerService {
 	
 	private final List<Inbox> inboxes;
 	
-	public IngestionTriggerService(List<Inbox> inboxes) {
+	public IngestionTriggerService(final List<Inbox> inboxes) {
 		this.inboxes = inboxes;
 	}
 	 
 	public final void pollAll() {
     	LOG.trace("Polling all");
     	for (final Inbox inbox : inboxes) {
-        	LOG.trace("Polling {}", inbox.description());   
+        	LOG.debug("Polling {}", inbox.description());   
         	try {
 				inbox.poll();
-			} catch (Exception e) {
+			} catch (final Exception e) {
 				LOG.error(String.format("Failed polling %s", inbox), e);
 			}
     	}

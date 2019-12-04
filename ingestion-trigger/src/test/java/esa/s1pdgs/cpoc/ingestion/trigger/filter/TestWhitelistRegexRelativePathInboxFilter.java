@@ -8,7 +8,6 @@ import org.junit.Assert;
 import org.junit.Test;
 
 import esa.s1pdgs.cpoc.ingestion.trigger.entity.InboxEntry;
-import esa.s1pdgs.cpoc.ingestion.trigger.filter.WhitelistRegexRelativePathInboxFilter;
 
 public class TestWhitelistRegexRelativePathInboxFilter {
 
@@ -25,25 +24,25 @@ public class TestWhitelistRegexRelativePathInboxFilter {
 	@Test
 	public final void testAccept_OnMatchingRegex_ShallReturnFalse_forSession() {
 		assertEquals(false, filterForSessions.accept(new InboxEntry("foo.tmp", "dir1/dir2/foo.tmp",
-				"file:///tmp/MPS_/S1A/dir1/dir2/foo.tmp", "S1", "A", "MPS_")));
+				"file:///tmp/MPS_/S1A/dir1/dir2/foo.tmp")));
 	}
 
 	@Test
 	public final void testAccept_OnMatchingRegex_ShallReturnTrue_forSession() {
 		assertEquals(true, filterForSessions.accept(new InboxEntry("foo.DSDB.raw", "dir1/dir2/foo.DSDB.raw",
-				"file:///tmp/MPS_/S1A/dir1/dir2/foo.DSDB.raw", "S1", "A", "MPS_")));
+				"file:///tmp/MPS_/S1A/dir1/dir2/foo.DSDB.raw")));
 	}
 
 	@Test
 	public final void testAccept_OnMatchingRegex_ShallReturnTrue2_forSession() {
 		assertEquals(true, filterForSessions.accept(new InboxEntry("foo.DSDB_bar.AISP", "dir1/dir2/foo.DSDB_bar.AISP",
-				"file:///tmp/MPS_/S1A/dir1/dir2/foo.DSDB_bar.AISP", "S1", "A", "MPS_")));
+				"file:///tmp/MPS_/S1A/dir1/dir2/foo.DSDB_bar.AISP")));
 	}
 
 	@Test
 	public final void testAccept_OnMatchingRegex_ShallReturnTrue3_forSession() {
 		assertEquals(true, filterForSessions.accept(new InboxEntry("foo.DSIB.xml", "dir1/dir2/foo.DSIB.xml",
-				"file:///tmp/MPS_/S1A/dir1/dir2/foo.DSIB.xml", "S1", "A", "MPS_")));
+				"file:///tmp/MPS_/S1A/dir1/dir2/foo.DSIB.xml")));
 	}
 
 	@Test
