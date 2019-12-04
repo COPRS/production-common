@@ -8,6 +8,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import esa.s1pdgs.cpoc.common.ProductCategory;
+import esa.s1pdgs.cpoc.mdc.worker.config.MdcWorkerConfigurationProperties;
 import esa.s1pdgs.cpoc.mdc.worker.config.MdcWorkerConfigurationProperties.CategoryConfig;
 import esa.s1pdgs.cpoc.mdc.worker.config.MetadataExtractorConfig;
 import esa.s1pdgs.cpoc.mdc.worker.config.ProcessConfiguration;
@@ -15,6 +16,8 @@ import esa.s1pdgs.cpoc.mdc.worker.es.EsServices;
 import esa.s1pdgs.cpoc.mdc.worker.extraction.files.ExtractMetadata;
 import esa.s1pdgs.cpoc.mdc.worker.extraction.files.FileDescriptorBuilder;
 import esa.s1pdgs.cpoc.mdc.worker.extraction.files.MetadataBuilder;
+import esa.s1pdgs.cpoc.mdc.worker.extraction.path.PathMetadataExtractor;
+import esa.s1pdgs.cpoc.mdc.worker.extraction.path.PathMetadataExtractorImpl;
 import esa.s1pdgs.cpoc.mdc.worker.extraction.xml.XmlConverter;
 import esa.s1pdgs.cpoc.obs_sdk.ObsClient;
 
@@ -32,7 +35,8 @@ public class MetadataExtractorFactory {
 			final MetadataExtractorConfig extractorConfig,
 			final XmlConverter xmlConverter, 
 			final ObsClient obsClient, 
-			final ProcessConfiguration processConfiguration
+			final ProcessConfiguration processConfiguration,
+			final MdcWorkerConfigurationProperties properties
 	) {
 		this.esServices = esServices;
 		this.extractorConfig = extractorConfig;
@@ -53,7 +57,7 @@ public class MetadataExtractorFactory {
 				extractorConfig.getXsltDirectory(), 
 				xmlConverter
 		);		
-		final MetadataBuilder mdBuilder = new MetadataBuilder(extract);		
+		final MetadataBuilder mdBuilder = new MetadataBuilder(extract);
 		
 		switch (category){
 		    case AUXILIARY_FILES:
@@ -72,7 +76,8 @@ public class MetadataExtractorFactory {
 		    			fileDescriptorBuilder, 
 		    			config.getLocalDirectory(), 
 		    			processConfiguration, 
-		    			obsClient
+		    			obsClient,
+		    			newPathMetadataExtractor(config)
 		    	);
 		    case LEVEL_SEGMENTS:
 		    	return new LevelSegmentMetadataExtractor(
@@ -106,6 +111,16 @@ public class MetadataExtractorFactory {
 								ProductCategory.LEVEL_PRODUCTS
 						)
 				)
+		);
+	}
+	
+	private final PathMetadataExtractor newPathMetadataExtractor(final CategoryConfig config) {
+		if (config.getPathPattern() == null) {
+			return PathMetadataExtractor.NULL;
+		}
+		return new PathMetadataExtractorImpl(
+					Pattern.compile(config.getPathPattern(), Pattern.CASE_INSENSITIVE), 
+					config.getPathMetadataElements()
 		);
 	}
 }

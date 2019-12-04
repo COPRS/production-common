@@ -1,6 +1,7 @@
 package esa.s1pdgs.cpoc.mdc.worker.extraction;
 
 import java.io.File;
+import java.util.Arrays;
 import java.util.List;
 
 import org.json.JSONObject;
@@ -15,13 +16,15 @@ import esa.s1pdgs.cpoc.mdc.worker.es.EsServices;
 import esa.s1pdgs.cpoc.mdc.worker.extraction.files.FileDescriptorBuilder;
 import esa.s1pdgs.cpoc.mdc.worker.extraction.files.LandMaskExtractor;
 import esa.s1pdgs.cpoc.mdc.worker.extraction.files.MetadataBuilder;
-import esa.s1pdgs.cpoc.mdc.worker.extraction.model.ConfigFileDescriptor;
+import esa.s1pdgs.cpoc.mdc.worker.extraction.model.AuxDescriptor;
 import esa.s1pdgs.cpoc.mqi.model.queue.CatalogJob;
 import esa.s1pdgs.cpoc.mqi.model.rest.GenericMessageDto;
 import esa.s1pdgs.cpoc.obs_sdk.ObsClient;
 import esa.s1pdgs.cpoc.report.Reporting;
 
 public final class AuxMetadataExtractor extends AbstractMetadataExtractor {	
+	private static final List<String> AUX_ECE_TYPES = Arrays.asList("AMV_ERRMAT", "AMH_ERRMAT");
+	
 	public AuxMetadataExtractor(
 			final EsServices esServices, 
 			final MetadataBuilder mdBuilder,
@@ -35,13 +38,15 @@ public final class AuxMetadataExtractor extends AbstractMetadataExtractor {
 	@Override
 	public JSONObject extract(final Reporting.Factory reportingFactory, final GenericMessageDto<CatalogJob> message) throws AbstractCodedException {
 		final CatalogJob job = message.getBody();
-		final File metadataFile = downloadToLocalFolder(reportingFactory, ProductFamily.AUXILIARY_FILE, job.getKeyObjectStorage());
-		
-		try {
-			// Extract description from pattern
-			final ConfigFileDescriptor configFileDesc = extractFromFilename(
+		final File metadataFile = downloadToLocalFolder(
+				reportingFactory, 
+				ProductFamily.AUXILIARY_FILE, 
+				job.getKeyObjectStorage()
+		);
+		try {			
+			final AuxDescriptor configFileDesc = extractFromFilename(
 					reportingFactory,
-					() -> fileDescriptorBuilder.buildConfigFileDescriptor(metadataFile)
+					() -> fileDescriptorBuilder.buildAuxDescriptor(metadataFile)
 			);
 
 			// Build metadata from file and extracted

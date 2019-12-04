@@ -1,5 +1,6 @@
 package esa.s1pdgs.cpoc.mdc.worker.config;
 
+import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
@@ -17,6 +18,8 @@ public class MdcWorkerConfigurationProperties {
 		private long initDelayPollMs = 2000L;
 		private String localDirectory;
 		private String patternConfig;
+		private String pathPattern = null;
+		private Map<String,Integer> pathMetadataElements = new HashMap<>();
 
 		public long getFixedDelayMs() {
 			return fixedDelayMs;
@@ -49,11 +52,28 @@ public class MdcWorkerConfigurationProperties {
 		public void setPatternConfig(final String patternConfig) {
 			this.patternConfig = patternConfig;
 		}
+		
+		public String getPathPattern() {
+			return pathPattern;
+		}
+
+		public void setPathPattern(final String pathPattern) {
+			this.pathPattern = pathPattern;
+		}
+
+		public Map<String, Integer> getPathMetadataElements() {
+			return pathMetadataElements;
+		}
+
+		public void setPathMetadataElements(final Map<String, Integer> pathMetadataElements) {
+			this.pathMetadataElements = pathMetadataElements;
+		}
 
 		@Override
 		public String toString() {
 			return "CategoryConfig [fixedDelayMs=" + fixedDelayMs + ", initDelayPollMs=" + initDelayPollMs
-					+ ", localDirectory=" + localDirectory + ", patternConfig=" + patternConfig + "]";
+					+ ", localDirectory=" + localDirectory + ", patternConfig=" + patternConfig + ", pathPattern="
+					+ pathPattern + ", pathMetadataElements=" + pathMetadataElements + "]";
 		}
 	}
 

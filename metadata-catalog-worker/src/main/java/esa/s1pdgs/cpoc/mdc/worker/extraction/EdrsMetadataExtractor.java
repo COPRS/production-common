@@ -13,41 +13,43 @@ import esa.s1pdgs.cpoc.mdc.worker.es.EsServices;
 import esa.s1pdgs.cpoc.mdc.worker.extraction.files.FileDescriptorBuilder;
 import esa.s1pdgs.cpoc.mdc.worker.extraction.files.MetadataBuilder;
 import esa.s1pdgs.cpoc.mdc.worker.extraction.model.EdrsSessionFileDescriptor;
+import esa.s1pdgs.cpoc.mdc.worker.extraction.path.PathMetadataExtractor;
 import esa.s1pdgs.cpoc.mqi.model.queue.CatalogJob;
 import esa.s1pdgs.cpoc.mqi.model.rest.GenericMessageDto;
 import esa.s1pdgs.cpoc.obs_sdk.ObsClient;
 import esa.s1pdgs.cpoc.report.Reporting.Factory;
 
-public class EdrsMetadataExtractor extends AbstractMetadataExtractor {
+public class EdrsMetadataExtractor extends AbstractMetadataExtractor {	
+	private final PathMetadataExtractor pathExtractor;
+	
 	public EdrsMetadataExtractor(
 			final EsServices esServices, 
 			final MetadataBuilder mdBuilder,
 			final FileDescriptorBuilder fileDescriptorBuilder, 
 			final String localDirectory,
 			final ProcessConfiguration processConfiguration, 
-			final ObsClient obsClient
+			final ObsClient obsClient,
+			final PathMetadataExtractor pathExtractor
 	) {
 		super(esServices, mdBuilder, fileDescriptorBuilder, localDirectory, processConfiguration, obsClient);
+		this.pathExtractor = pathExtractor;
 	}
-
+	
 	@Override
 	public JSONObject extract(final Factory reportingFactory, final GenericMessageDto<CatalogJob> message)
 			throws AbstractCodedException {
 		final CatalogJob catJob = message.getBody();
         final ProductFamily family = ProductFamily.EDRS_SESSION;        
         final File product = new File(this.localDirectory, catJob.getKeyObjectStorage());
-        
+
         final EdrsSessionFileDescriptor edrsFileDescriptor = extractFromFilename(
         		reportingFactory, 
-        		() -> fileDescriptorBuilder.buildEdrsSessionFileDescriptor(product)
-        );
-
-        //FIXME uniform handling of metadata extraction
-//        edrsFileDescriptor.setMissionId(catJob.getMissionId());
-//        edrsFileDescriptor.setSatelliteId(catJob.getSatelliteId());
-//        edrsFileDescriptor.setSessionIdentifier(catJob.getSessionId());
-//        edrsFileDescriptor.setStationCode(catJob.getStationCode());
-        
+        		() -> fileDescriptorBuilder.buildEdrsSessionFileDescriptor(
+        				product, 
+        				pathExtractor.metadataFrom(catJob),
+        				catJob
+        		)
+        );        
         // Only when it is a DSIB
         if (edrsFileDescriptor.getEdrsSessionFileType() == EdrsSessionFileType.SESSION)
         {

@@ -1,5 +1,7 @@
 package esa.s1pdgs.cpoc.mdc.worker.extraction.model;
 
+import java.util.Objects;
+
 import esa.s1pdgs.cpoc.common.EdrsSessionFileType;
 
 /**
@@ -9,46 +11,27 @@ import esa.s1pdgs.cpoc.common.EdrsSessionFileType;
  *
  */
 public class EdrsSessionFileDescriptor extends AbstractFileDescriptor {
-
 	/**
 	 * Product type: RAW or SESSION here
 	 */
 	private EdrsSessionFileType edrsSessionFileType;
-
-	/**
-	 * Session identifier
-	 */
 	private String sessionIdentifier;
-
-	/**
-	 * Session identifier
-	 */
 	private String stationCode;
-	
-	
+	private int channel;
 	
 	public String getStationCode() {
 		return stationCode;
 	}
 
-	public void setStationCode(String stationCode) {
+	public void setStationCode(final String stationCode) {
 		this.stationCode = stationCode;
-	}
-
-	/**
-	 * Channel number
-	 */
-	private int channel;
-
-	public EdrsSessionFileDescriptor() {
-		super();
 	}
 
 	public EdrsSessionFileType getEdrsSessionFileType() {
 		return edrsSessionFileType;
 	}
 
-	public void setEdrsSessionFileType(EdrsSessionFileType productType) {
+	public void setEdrsSessionFileType(final EdrsSessionFileType productType) {
 		this.edrsSessionFileType = productType;
 	}
 
@@ -56,7 +39,7 @@ public class EdrsSessionFileDescriptor extends AbstractFileDescriptor {
 		return sessionIdentifier;
 	}
 
-	public void setSessionIdentifier(String sessionIdentifier) {
+	public void setSessionIdentifier(final String sessionIdentifier) {
 		this.sessionIdentifier = sessionIdentifier;
 	}
 
@@ -64,65 +47,47 @@ public class EdrsSessionFileDescriptor extends AbstractFileDescriptor {
 		return channel;
 	}
 
-	public void setChannel(int channel) {
+	public void setChannel(final int channel) {
 		this.channel = channel;
 	}
 
-	/**
-	 * String formatting
-	 */
-	public String toString() {
-		String info = String.format(
-				"{ 'relativePath': %s, 'stationCode': %s ,'filename': %s, 'extension': %s, 'sessionIdentifier': %s, 'productName': %s, 'productType': %s, 'channel': %d, 'missionId': %s, 'satelliteId': %s, 'keyObjectStorage': %s}",
-				relativePath, filename, stationCode,extension, sessionIdentifier, productName, edrsSessionFileType, channel, missionId,
-				satelliteId, keyObjectStorage);
-		return info;
-	}
-
-	/* (non-Javadoc)
-	 * @see java.lang.Object#equals(java.lang.Object)
-	 */
-	@Override
-	public boolean equals(Object obj) {
-		if (this == obj)
-			return true;
-	    if (obj == null || getClass() != obj.getClass())
-	    	return false;
-		if (!super.equals(obj))
-			return false;
-		EdrsSessionFileDescriptor other = (EdrsSessionFileDescriptor) obj;
-		if (channel != other.channel)
-			return false;
-		if (edrsSessionFileType == null) {
-			if (other.edrsSessionFileType != null)
-				return false;
-		} else if (!edrsSessionFileType.equals(other.edrsSessionFileType))
-			return false;
-		if (stationCode == null) {
-			if (other.stationCode != null)
-				return false;
-		} else if (!stationCode.equals(other.stationCode))
-			return false;
-		if (sessionIdentifier == null) {
-			if (other.sessionIdentifier != null)
-				return false;
-		} else if (!sessionIdentifier.equals(other.sessionIdentifier))
-			return false;
-		return true;
-	}
-
-	/* (non-Javadoc)
-	 * @see java.lang.Object#hashCode()
-	 */
 	@Override
 	public int hashCode() {
-		final int prime = 31;
-		int result = super.hashCode();
-		result = prime * result + channel;
-		result = prime * result + ((edrsSessionFileType == null) ? 0 : edrsSessionFileType.hashCode());
-		result = prime * result + ((sessionIdentifier == null) ? 0 : sessionIdentifier.hashCode());
-		result = prime * result + ((stationCode == null) ? 0 : stationCode.hashCode());
-		return result;
+		return Objects.hash(channel, edrsSessionFileType, extension, filename, keyObjectStorage, missionId, mode,
+				productClass, productFamily, productName, productType, relativePath, satelliteId, sessionIdentifier,
+				stationCode);
 	}
 
+	@Override
+	public boolean equals(final Object obj) {
+		if (this == obj) {
+			return true;
+		}
+		if (obj == null) {
+			return false;
+		}
+		if (getClass() != obj.getClass()) {
+			return false;
+		}
+		final EdrsSessionFileDescriptor other = (EdrsSessionFileDescriptor) obj;
+		return channel == other.channel && edrsSessionFileType == other.edrsSessionFileType
+				&& extension == other.extension && Objects.equals(filename, other.filename)
+				&& Objects.equals(keyObjectStorage, other.keyObjectStorage)
+				&& Objects.equals(missionId, other.missionId) && Objects.equals(mode, other.mode)
+				&& Objects.equals(productClass, other.productClass) && productFamily == other.productFamily
+				&& Objects.equals(productName, other.productName) && Objects.equals(productType, other.productType)
+				&& Objects.equals(relativePath, other.relativePath) && Objects.equals(satelliteId, other.satelliteId)
+				&& Objects.equals(sessionIdentifier, other.sessionIdentifier)
+				&& Objects.equals(stationCode, other.stationCode);
+	}
+
+	@Override
+	public String toString() {
+		return "EdrsSessionFileDescriptor [productType=" + productType + ", productClass=" + productClass
+				+ ", relativePath=" + relativePath + ", filename=" + filename + ", extension=" + extension
+				+ ", productName=" + productName + ", missionId=" + missionId + ", satelliteId=" + satelliteId
+				+ ", keyObjectStorage=" + keyObjectStorage + ", productFamily=" + productFamily + ", mode=" + mode
+				+ ", edrsSessionFileType=" + edrsSessionFileType + ", sessionIdentifier=" + sessionIdentifier
+				+ ", stationCode=" + stationCode + ", channel=" + channel + "]";
+	}
 }

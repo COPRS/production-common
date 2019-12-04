@@ -3,6 +3,7 @@
  */
 package esa.s1pdgs.cpoc.mdc.worker.extraction.model;
 
+import java.util.Objects;
 
 /**
  * Class describing a output file
@@ -11,47 +12,28 @@ package esa.s1pdgs.cpoc.mdc.worker.extraction.model;
  *
  */
 public class OutputFileDescriptor extends AbstractFileDescriptor {
-	
-	/**
-	 * Resolution
-	 */
 	private String resolution;
-	
-	/**
-	 * Swathtype
-	 */
 	private String swathtype;
-	
-	/**
-	 * Polarisation
-	 */
 	private String polarisation;
-	
-	/**
-	 * DataTakeId
-	 */
 	private String dataTakeId;
-	
-	/**
-	 * Default Constructor
-	 */
-	public OutputFileDescriptor() {
-	}
 
-
+	@Override
 	public String getProductType() {
 		return productType;
 	}
 
-	public void setProductType(String productType) {
+	@Override
+	public void setProductType(final String productType) {
 		this.productType = productType;
 	}
 
+	@Override
 	public String getProductClass() {
 		return productClass;
 	}
 
-	public void setProductClass(String productClass) {
+	@Override
+	public void setProductClass(final String productClass) {
 		this.productClass = productClass;
 	}
 
@@ -59,7 +41,7 @@ public class OutputFileDescriptor extends AbstractFileDescriptor {
 		return resolution;
 	}
 
-	public void setResolution(String resolution) {
+	public void setResolution(final String resolution) {
 		this.resolution = resolution;
 	}
 
@@ -67,7 +49,7 @@ public class OutputFileDescriptor extends AbstractFileDescriptor {
 		return swathtype;
 	}
 
-	public void setSwathtype(String swathtype) {
+	public void setSwathtype(final String swathtype) {
 		this.swathtype = swathtype;
 	}
 
@@ -75,7 +57,7 @@ public class OutputFileDescriptor extends AbstractFileDescriptor {
 		return polarisation;
 	}
 
-	public void setPolarisation(String polarisation) {
+	public void setPolarisation(final String polarisation) {
 		this.polarisation = polarisation;
 	}
 	
@@ -83,80 +65,45 @@ public class OutputFileDescriptor extends AbstractFileDescriptor {
 		return dataTakeId;
 	}
 
-	public void setDataTakeId(String dataTakeId) {
+	public void setDataTakeId(final String dataTakeId) {
 		this.dataTakeId = dataTakeId;
 	}
 
-	/* (non-Javadoc)
-	 * @see java.lang.Object#toString()
-	 */
-	@Override
-	public String toString() {
-		return "OutputFileDescriptor [productType=" + productType + ", productClass=" + productClass + ", resolution="
-				+ resolution + ", swathtype=" + swathtype + ", polarisation=" + polarisation + ", dataTakeId="
-				+ dataTakeId + ", relativePath=" + relativePath + ", filename=" + filename + ", extension=" + extension
-				+ ", productName=" + productName + ", missionId=" + missionId + ", satelliteId=" + satelliteId
-				+ ", keyObjectStorage=" + keyObjectStorage + "]";
-	}
-
-	/* (non-Javadoc)
-	 * @see java.lang.Object#equals(java.lang.Object)
-	 */
-	@Override
-	public boolean equals(Object obj) {
-		if (this == obj)
-			return true;
-	    if (obj == null || getClass() != obj.getClass())
-	    	return false;
-		if (!super.equals(obj))
-			return false;
-		OutputFileDescriptor other = (OutputFileDescriptor) obj;
-		if (dataTakeId == null) {
-			if (other.dataTakeId != null)
-				return false;
-		} else if (!dataTakeId.equals(other.dataTakeId))
-			return false;
-		if (polarisation == null) {
-			if (other.polarisation != null)
-				return false;
-		} else if (!polarisation.equals(other.polarisation))
-			return false;
-		if (productClass == null) {
-			if (other.productClass != null)
-				return false;
-		} else if (!productClass.equals(other.productClass))
-			return false;
-		if (productType == null) {
-			if (other.productType != null)
-				return false;
-		} else if (!productType.equals(other.productType))
-			return false;
-		if (resolution == null) {
-			if (other.resolution != null)
-				return false;
-		} else if (!resolution.equals(other.resolution))
-			return false;
-		if (swathtype == null) {
-			if (other.swathtype != null)
-				return false;
-		} else if (!swathtype.equals(other.swathtype))
-			return false;
-		return true;
-	}
-	
-	/* (non-Javadoc)
-	 * @see java.lang.Object#hashCode()
-	 */
 	@Override
 	public int hashCode() {
-		final int prime = 31;
-		int result = super.hashCode();
-		result = prime * result + ((dataTakeId == null) ? 0 : dataTakeId.hashCode());
-		result = prime * result + ((polarisation == null) ? 0 : polarisation.hashCode());
-		result = prime * result + ((productClass == null) ? 0 : productClass.hashCode());
-		result = prime * result + ((productType == null) ? 0 : productType.hashCode());
-		result = prime * result + ((resolution == null) ? 0 : resolution.hashCode());
-		result = prime * result + ((swathtype == null) ? 0 : swathtype.hashCode());
-		return result;
+		return Objects.hash(dataTakeId, extension, filename, keyObjectStorage, missionId, mode, polarisation,
+				productClass, productFamily, productName, productType, relativePath, resolution, satelliteId,
+				swathtype);
+	}
+
+	@Override
+	public boolean equals(final Object obj) {
+		if (this == obj) {
+			return true;
+		}
+		if (obj == null) {
+			return false;
+		}
+		if (getClass() != obj.getClass()) {
+			return false;
+		}
+		final OutputFileDescriptor other = (OutputFileDescriptor) obj;
+		return Objects.equals(dataTakeId, other.dataTakeId) && extension == other.extension
+				&& Objects.equals(filename, other.filename) && Objects.equals(keyObjectStorage, other.keyObjectStorage)
+				&& Objects.equals(missionId, other.missionId) && Objects.equals(mode, other.mode)
+				&& Objects.equals(polarisation, other.polarisation) && Objects.equals(productClass, other.productClass)
+				&& productFamily == other.productFamily && Objects.equals(productName, other.productName)
+				&& Objects.equals(productType, other.productType) && Objects.equals(relativePath, other.relativePath)
+				&& Objects.equals(resolution, other.resolution) && Objects.equals(satelliteId, other.satelliteId)
+				&& Objects.equals(swathtype, other.swathtype);
+	}
+
+	@Override
+	public String toString() {
+		return "OutputFileDescriptor [productType=" + productType + ", productClass=" + productClass + ", relativePath="
+				+ relativePath + ", filename=" + filename + ", extension=" + extension + ", productName=" + productName
+				+ ", missionId=" + missionId + ", satelliteId=" + satelliteId + ", keyObjectStorage=" + keyObjectStorage
+				+ ", productFamily=" + productFamily + ", mode=" + mode + ", resolution=" + resolution + ", swathtype="
+				+ swathtype + ", polarisation=" + polarisation + ", dataTakeId=" + dataTakeId + "]";
 	}
 }

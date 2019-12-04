@@ -167,7 +167,7 @@ public class TestLevelProductMetadataExtractor {
 		final OutputFileDescriptor descriptor = new OutputFileDescriptor();
 		descriptor.setExtension(FileExtension.SAFE);
 		descriptor.setFilename("manifest.safe");
-		descriptor.setKeyObjectStorage("S1A_IW_RAW__0SDV_20171213T121623_20171213T121656_019684_021735_C6DB.SAFE/manifest.safe");
+		descriptor.setKeyObjectStorage("S1A_IW_RAW__0SDV_20171213T121623_20171213T121656_019684_021735_C6DB.SAFE");
 		descriptor.setMissionId("S1");
 		descriptor.setSatelliteId("A");
 		descriptor.setProductName("S1A_IW_RAW__0SDV_20171213T121623_20171213T121656_019684_021735_C6DB.SAFE");
@@ -208,16 +208,19 @@ public class TestLevelProductMetadataExtractor {
 
 		final GenericMessageDto<CatalogJob> inputMessageSafe = new GenericMessageDto<CatalogJob>(
 				123, "",
-				Utils.newCatalogJob("S1A_IW_RAW__0SDV_20171213T121623_20171213T121656_019684_021735_C6DB.SAFE",
+				Utils.newCatalogJob(
+						"S1A_IW_RAW__0SDV_20171213T121623_20171213T121656_019684_021735_C6DB.SAFE",
 						"S1A_IW_RAW__0SDV_20171213T121623_20171213T121656_019684_021735_C6DB.SAFE/manifest.safe",
-						ProductFamily.L0_ACN, "NRT"));
-
+						ProductFamily.L0_ACN, 
+						"NRT"
+				)
+		);
 		doReturn(files).when(obsClient).download(Mockito.anyList());
 
 		final OutputFileDescriptor descriptor = new OutputFileDescriptor();
 		descriptor.setExtension(FileExtension.SAFE);
 		descriptor.setFilename("manifest.safe");
-		descriptor.setKeyObjectStorage("S1A_IW_RAW__0SDV_20171213T121623_20171213T121656_019684_021735_C6DB.SAFE/manifest.safe");
+		descriptor.setKeyObjectStorage("S1A_IW_RAW__0SDV_20171213T121623_20171213T121656_019684_021735_C6DB.SAFE");
 		descriptor.setMissionId("S1");
 		descriptor.setSatelliteId("A");
 		descriptor.setProductName("S1A_IW_RAW__0SDV_20171213T121623_20171213T121656_019684_021735_C6DB.SAFE");
@@ -264,7 +267,7 @@ public class TestLevelProductMetadataExtractor {
 		final OutputFileDescriptor descriptor = new OutputFileDescriptor();
 		descriptor.setExtension(FileExtension.SAFE);
 		descriptor.setFilename("S1A_IW_RAW__0SDV_20171213T121623_20171213T121656_019684_021735_C6DB.SAFE");
-		descriptor.setKeyObjectStorage("S1A_IW_RAW__0SDV_20171213T121623_20171213T121656_019684_021735_C6DB.SAFE/manifest.safe");
+		descriptor.setKeyObjectStorage("S1A_IW_RAW__0SDV_20171213T121623_20171213T121656_019684_021735_C6DB.SAFE");
 		descriptor.setMissionId("S1");
 		descriptor.setSatelliteId("A");
 		descriptor.setProductName("S1A_IW_RAW__0SDV_20171213T121623_20171213T121656_019684_021735_C6DB.SAFE");
@@ -309,7 +312,7 @@ public class TestLevelProductMetadataExtractor {
 		final OutputFileDescriptor descriptor = new OutputFileDescriptor();
 		descriptor.setExtension(FileExtension.SAFE);
 		descriptor.setFilename(l1acnName);
-		descriptor.setKeyObjectStorage(l1acnName + "/manifest.safe");
+		descriptor.setKeyObjectStorage(l1acnName);
 		descriptor.setMissionId("S1");
 		descriptor.setSatelliteId("A");
 		descriptor.setProductName(l1acnName);
@@ -355,7 +358,7 @@ public class TestLevelProductMetadataExtractor {
 		final OutputFileDescriptor descriptor = new OutputFileDescriptor();
 		descriptor.setExtension(FileExtension.SAFE);
 		descriptor.setFilename(l2SliceName);
-		descriptor.setKeyObjectStorage(l2SliceName+ "/manifest.safe");
+		descriptor.setKeyObjectStorage(l2SliceName);
 		descriptor.setMissionId("S1");
 		descriptor.setSatelliteId("A");
 		descriptor.setProductName(l2SliceName);
@@ -400,7 +403,7 @@ public class TestLevelProductMetadataExtractor {
 		final OutputFileDescriptor descriptor = new OutputFileDescriptor();
 		descriptor.setExtension(FileExtension.SAFE);
 		descriptor.setFilename(l2acnName);
-		descriptor.setKeyObjectStorage(l2acnName + "/manifest.safe");
+		descriptor.setKeyObjectStorage(l2acnName);
 		descriptor.setMissionId("S1");
 		descriptor.setSatelliteId("A");
 		descriptor.setProductName(l2acnName);

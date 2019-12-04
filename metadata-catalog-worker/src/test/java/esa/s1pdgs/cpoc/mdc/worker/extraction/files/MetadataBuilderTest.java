@@ -22,7 +22,7 @@ import esa.s1pdgs.cpoc.common.errors.AbstractCodedException;
 import esa.s1pdgs.cpoc.common.errors.processing.MetadataExtractionException;
 import esa.s1pdgs.cpoc.common.errors.processing.MetadataMalformedException;
 import esa.s1pdgs.cpoc.common.utils.FileUtils;
-import esa.s1pdgs.cpoc.mdc.worker.extraction.model.ConfigFileDescriptor;
+import esa.s1pdgs.cpoc.mdc.worker.extraction.model.AuxDescriptor;
 import esa.s1pdgs.cpoc.mdc.worker.extraction.model.EdrsSessionFileDescriptor;
 import esa.s1pdgs.cpoc.mdc.worker.extraction.model.OutputFileDescriptor;
 import esa.s1pdgs.cpoc.mqi.model.queue.CatalogJob;
@@ -47,7 +47,7 @@ public class MetadataBuilderTest {
 	@Test
 	public void testBuildConfigFileMetadataXml() throws JSONException, MetadataExtractionException, MetadataMalformedException {
 		
-		final ConfigFileDescriptor descriptor = new ConfigFileDescriptor();
+		final AuxDescriptor descriptor = new AuxDescriptor();
 		descriptor.setExtension(FileExtension.XML);
 		descriptor.setFilename("S1A_OPER_AUX_OBMEMC_PDMC_20140201T000000.xml");
 		descriptor.setKeyObjectStorage("S1A_OPER_AUX_OBMEMC_PDMC_20140201T000000.xml");
@@ -61,7 +61,7 @@ public class MetadataBuilderTest {
 		final JSONObject expectedResult = new JSONObject("{\"productName\": \"S1A_OPER_AUX_OBMEMC_PDMC_20140201T000000.xml\"}");
 
 		Mockito.doAnswer(i ->expectedResult)
-			.when(extractor).processXMLFile(Mockito.any(ConfigFileDescriptor.class), Mockito.any(File.class));
+			.when(extractor).processXMLFile(Mockito.any(AuxDescriptor.class), Mockito.any(File.class));
 
 		final File file = new File("workDir/S1A_OPER_AUX_OBMEMC_PDMC_20140201T000000.xml");
 
@@ -79,7 +79,7 @@ public class MetadataBuilderTest {
 	@Test
 	public void testBuildConfigFileMetadataEOF() throws JSONException, MetadataExtractionException, MetadataMalformedException {
 
-		final ConfigFileDescriptor descriptor = new ConfigFileDescriptor();
+		final AuxDescriptor descriptor = new AuxDescriptor();
 		descriptor.setExtension(FileExtension.EOF);
 		descriptor.setFilename("S1A_OPER_MPL_ORBSCT_20140507T150704_99999999T999999_0020.EOF");
 		descriptor.setKeyObjectStorage("S1A_OPER_MPL_ORBSCT_20140507T150704_99999999T999999_0020.EOF");
@@ -93,7 +93,7 @@ public class MetadataBuilderTest {
 		final JSONObject expectedResult = new JSONObject("{\"validityStopTime\":\"9999-12-31T23:59:59\",\"productClass\":\"OPER\",\"missionid\":\"S1\",\"creationTime\":\"2017-01-23T16:38:09\",\"insertionTime\":\"2018-05-30T11:40:06\",\"satelliteid\":\"A\",\"validityStartTime\":\"2014-04-03T22:46:09\",\"version\":\"0020\",\"productName\":\"S1A_OPER_MPL_ORBSCT_20140507T150704_99999999T999999_0020.EOF\",\"productType\":\"MPL_ORBSCT\"}");
 		
 		Mockito.doAnswer(i -> expectedResult)
-			.when(extractor).processEOFFile(Mockito.any(ConfigFileDescriptor.class), Mockito.any(File.class));
+			.when(extractor).processEOFFile(Mockito.any(AuxDescriptor.class), Mockito.any(File.class));
 
 		final File file = new File("workDir/S1A_OPER_MPL_ORBSCT_20140507T150704_99999999T999999_0020.EOF");
 
@@ -110,7 +110,7 @@ public class MetadataBuilderTest {
 	@Test
 	public void testBuildConfigFileMetadataAUXRESORB() throws JSONException, MetadataExtractionException, MetadataMalformedException {
 
-		final ConfigFileDescriptor descriptor = new ConfigFileDescriptor();
+		final AuxDescriptor descriptor = new AuxDescriptor();
 		descriptor.setExtension(FileExtension.EOF);
 		descriptor.setFilename("S1A_OPER_AUX_RESORB_OPOD_20171213T143838_V20171213T102737_20171213T134507.EOF");
 		descriptor.setKeyObjectStorage("S1A_OPER_AUX_RESORB_OPOD_20171213T143838_V20171213T102737_20171213T134507.EOF");
@@ -124,7 +124,7 @@ public class MetadataBuilderTest {
 		final JSONObject expectedResult = new JSONObject("{\"validityStopTime\":\"2017-12-13T13:45:07\",\"productClass\":\"OPER\",\"missionid\":\"S1\",\"creationTime\":\"2017-12-13T14:38:38\",\"insertionTime\":\"2018-05-30T11:40:06\",\"satelliteid\":\"A\",\"validityStartTime\":\"2017-12-13T10:27:37\",\"version\":\"0001\",\"productType\":\"AUX_RESORB\",\"productName\":\"S1A_OPER_AUX_RESORB_OPOD_20171213T143838_V20171213T102737_20171213T134507.EOF\"}");
 
 		Mockito.doAnswer(i -> expectedResult)
-			.when(extractor).processEOFFileWithoutNamespace(Mockito.any(ConfigFileDescriptor.class),Mockito.any(File.class));
+			.when(extractor).processEOFFileWithoutNamespace(Mockito.any(AuxDescriptor.class),Mockito.any(File.class));
 
 		final File file = new File("workDir/S1A_OPER_AUX_RESORB_OPOD_20171213T143838_V20171213T102737_20171213T134507.EOF");
 
@@ -142,7 +142,7 @@ public class MetadataBuilderTest {
 	@Test
 	public void testBuildConfigFileMetadataSAFE() throws JSONException, MetadataExtractionException, MetadataMalformedException {
 
-		final ConfigFileDescriptor descriptor = new ConfigFileDescriptor();
+		final AuxDescriptor descriptor = new AuxDescriptor();
 		descriptor.setExtension(FileExtension.SAFE);
 		descriptor.setFilename("S1A_AUX_INS_V20171017T080000_G20171013T101216.SAFE");
 		descriptor.setKeyObjectStorage("S1A_AUX_INS_V20171017T080000_G20171013T101216.SAFE");
@@ -156,7 +156,7 @@ public class MetadataBuilderTest {
 		final JSONObject expectedResult = new JSONObject("{\"validityStopTime\":\"9999-12-31T23:59:59\",\"site\":\"CLS-Brest\",\"missionid\":\"S1\",\"creationTime\":\"2017-10-13T10:12:16.000000\",\"insertionTime\":\"2018-05-30T11:40:06\",\"satelliteid\":\"A\",\"instrumentConfigurationId\":\"6\",\"validityStartTime\":\"2017-10-17T08:00:00.000000\",\"productName\":\"S1A_AUX_INS_V20171017T080000_G20171013T101216.SAFE\",\"productType\":\"AUX_INS\"}");
 
 		Mockito.doAnswer(i -> expectedResult)
-			.when(extractor).processSAFEFile(Mockito.any(ConfigFileDescriptor.class), Mockito.any(File.class));
+			.when(extractor).processSAFEFile(Mockito.any(AuxDescriptor.class), Mockito.any(File.class));
 
 
 		final File file = new File("workDir/S1A_AUX_INS_V20171017T080000_G20171013T101216.SAFE/manifest.safe");
@@ -175,7 +175,7 @@ public class MetadataBuilderTest {
 	@Test
 	public void testBuildConfigFileMetadataInvalidExtension() throws MetadataExtractionException, MetadataMalformedException {
 
-		final ConfigFileDescriptor descriptor = new ConfigFileDescriptor();
+		final AuxDescriptor descriptor = new AuxDescriptor();
 		descriptor.setFilename("S1A_OPER_AUX_OBMEMC_PDMC_20140201T000000.xml");
 		descriptor.setKeyObjectStorage("S1A_OPER_AUX_OBMEMC_PDMC_20140201T000000.xml");
 		descriptor.setMissionId("S1");

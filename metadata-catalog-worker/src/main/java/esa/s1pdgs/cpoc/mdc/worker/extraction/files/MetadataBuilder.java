@@ -8,7 +8,7 @@ import org.json.JSONObject;
 
 import esa.s1pdgs.cpoc.common.errors.processing.MetadataExtractionException;
 import esa.s1pdgs.cpoc.common.errors.processing.MetadataMalformedException;
-import esa.s1pdgs.cpoc.mdc.worker.extraction.model.ConfigFileDescriptor;
+import esa.s1pdgs.cpoc.mdc.worker.extraction.model.AuxDescriptor;
 import esa.s1pdgs.cpoc.mdc.worker.extraction.model.EdrsSessionFileDescriptor;
 import esa.s1pdgs.cpoc.mdc.worker.extraction.model.OutputFileDescriptor;
 import esa.s1pdgs.cpoc.mqi.model.queue.CatalogJob;
@@ -55,7 +55,7 @@ public class MetadataBuilder {
 	 * @throws MetadataExtractionException
 	 * @throws MetadataMalformedException 
 	 */
-	public JSONObject buildConfigFileMetadata(final ConfigFileDescriptor descriptor, final File file)
+	public JSONObject buildConfigFileMetadata(final AuxDescriptor descriptor, final File file)
 			throws MetadataExtractionException, MetadataMalformedException {
 		switch (descriptor.getExtension()) {
 			case EOF:

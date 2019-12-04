@@ -5,6 +5,8 @@ import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doReturn;
 
 import java.io.File;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.regex.Pattern;
 
 import org.json.JSONObject;
@@ -28,6 +30,7 @@ import esa.s1pdgs.cpoc.mdc.worker.extraction.files.ExtractMetadata;
 import esa.s1pdgs.cpoc.mdc.worker.extraction.files.FileDescriptorBuilder;
 import esa.s1pdgs.cpoc.mdc.worker.extraction.files.MetadataBuilder;
 import esa.s1pdgs.cpoc.mdc.worker.extraction.model.EdrsSessionFileDescriptor;
+import esa.s1pdgs.cpoc.mdc.worker.extraction.path.PathMetadataExtractorImpl;
 import esa.s1pdgs.cpoc.mdc.worker.extraction.xml.XmlConverter;
 import esa.s1pdgs.cpoc.mdc.worker.status.AppStatusImpl;
 import esa.s1pdgs.cpoc.mqi.client.GenericMqiClient;
@@ -38,7 +41,7 @@ import esa.s1pdgs.cpoc.report.LoggerReporting;
 
 public class TestEdrsMetadataExtractor {
 	
-	private static final String PATTERN = "^(\\w+)(/|\\\\)(ch)(0[1-2])(/|\\\\)((\\w*)(\\w{4})\\.(xml|RAW))$";
+	private static final String PATTERN = "(WILE|MTI_|SGS_|INU_)/S1(A|B)/([A-Za-z0-9]+)/ch0(1|2)/(.+DSIB\\.(xml|XML)|.+DSDB.*\\.(raw|RAW|aisp|AISP))";
 
     /**
      * Elasticsearch services
@@ -99,7 +102,7 @@ public class TestEdrsMetadataExtractor {
         doReturn(true).when(mqiService).ack(Mockito.any(), Mockito.any());
 
         inputMessage = new GenericMessageDto<CatalogJob>(123, "",
-                Utils.newCatalogJob("123", "123/ch01/D_123_ch01_D.RAW", ProductFamily.EDRS_SESSION, null));
+                Utils.newCatalogJob("D_123_ch01_D.RAW", "WILE/S1A/123/ch01/D_123_ch01_DSDB.RAW", ProductFamily.EDRS_SESSION, null));
         
 		final FileDescriptorBuilder fileDescriptorBuilder = new FileDescriptorBuilder(
 				testDir, 
@@ -113,14 +116,25 @@ public class TestEdrsMetadataExtractor {
 				xmlConverter
 		);		
 		final MetadataBuilder mdBuilder = new MetadataBuilder(extract);
-
+		
+		final Map<String,Integer> conf = new HashMap<>();
+		conf.put("stationCode", 1);
+		conf.put("missionId", 2);
+		conf.put("satelliteId", 3);
+		conf.put("sessionId", 4);
+		conf.put("channelId", 5);
+		
         extractor = new EdrsMetadataExtractor(
     			esServices, 
     			mdBuilder, 
     			fileDescriptorBuilder, 
     			testDir.getPath(), 
     			new ProcessConfiguration(), 
-    			obsClient
+    			obsClient,
+    			new PathMetadataExtractorImpl(
+    					Pattern.compile("^([a-z_]{4})/([0-9a-z_]{2})([0-9a-z_]{1})/([0-9a-z_]+)/ch0([1-2])/.+"), 
+    					conf
+    			)
     	);
     }
 
@@ -130,7 +144,7 @@ public class TestEdrsMetadataExtractor {
                 new EdrsSessionFileDescriptor();
         
         expectedDescriptor.setFilename("D_123_ch01_D.RAW");
-        expectedDescriptor.setRelativePath("123/ch01/D_123_ch01_D.RAW");
+        expectedDescriptor.setRelativePath("WILE/S1A/123/ch01/D_123_ch01_DSDB.RAW");
         expectedDescriptor.setProductName("D_123_ch01_D.RAW");
         expectedDescriptor.setExtension(FileExtension.RAW);
         expectedDescriptor.setEdrsSessionFileType(EdrsSessionFileType.RAW);

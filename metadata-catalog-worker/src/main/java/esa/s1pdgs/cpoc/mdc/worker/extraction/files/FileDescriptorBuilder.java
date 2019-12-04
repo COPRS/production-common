@@ -3,6 +3,7 @@ package esa.s1pdgs.cpoc.mdc.worker.extraction.files;
 import java.io.File;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -12,7 +13,7 @@ import esa.s1pdgs.cpoc.common.ProductFamily;
 import esa.s1pdgs.cpoc.common.errors.processing.MetadataFilePathException;
 import esa.s1pdgs.cpoc.common.errors.processing.MetadataIgnoredFileException;
 import esa.s1pdgs.cpoc.common.errors.processing.MetadataIllegalFileExtension;
-import esa.s1pdgs.cpoc.mdc.worker.extraction.model.ConfigFileDescriptor;
+import esa.s1pdgs.cpoc.mdc.worker.extraction.model.AuxDescriptor;
 import esa.s1pdgs.cpoc.mdc.worker.extraction.model.EdrsSessionFileDescriptor;
 import esa.s1pdgs.cpoc.mdc.worker.extraction.model.OutputFileDescriptor;
 import esa.s1pdgs.cpoc.mqi.model.queue.CatalogJob;
@@ -64,7 +65,7 @@ public class FileDescriptorBuilder {
 	 * @throws FilePathException
 	 *             if we have
 	 */
-	public ConfigFileDescriptor buildConfigFileDescriptor(final File file) throws MetadataFilePathException, MetadataIgnoredFileException {
+	public AuxDescriptor buildAuxDescriptor(final File file) throws MetadataFilePathException, MetadataIgnoredFileException {
 		// Extract object storage key
 		final String absolutePath = file.getAbsolutePath();
 		if (absolutePath.length() <= localDirectory.getAbsolutePath().length()) {
@@ -81,7 +82,7 @@ public class FileDescriptorBuilder {
 		}
 
 		// Check if key matches the pattern
-		ConfigFileDescriptor configFile = null;
+		AuxDescriptor configFile = null;
 		final Matcher m = pattern.matcher(relativePath);
 		if (m.matches()) {
 			// Extract product name
@@ -97,7 +98,7 @@ public class FileDescriptorBuilder {
 				filename = relativePath.substring(indexLastSeparator + 1);
 			}
 			// Build descriptor
-			configFile = new ConfigFileDescriptor();
+			configFile = new AuxDescriptor();
 			configFile.setFilename(filename);
 			configFile.setRelativePath(relativePath);
 			configFile.setKeyObjectStorage(productName);
@@ -137,7 +138,11 @@ public class FileDescriptorBuilder {
 	 * @throws IgnoredFileException
 	 * @throws IllegalFileExtension
 	 */
-	public EdrsSessionFileDescriptor buildEdrsSessionFileDescriptor(final File file)
+	public EdrsSessionFileDescriptor buildEdrsSessionFileDescriptor(
+			final File file, 
+			final Map<String,String> metadataFromPath,
+			final CatalogJob catJob
+	)
 			throws MetadataFilePathException, MetadataIgnoredFileException, MetadataIllegalFileExtension {
 		// Extract relative path
 		final String absolutePath = file.getAbsolutePath();
@@ -152,26 +157,32 @@ public class FileDescriptorBuilder {
 			throw new MetadataIgnoredFileException(file.getName());
 		}
 		final Matcher m = pattern.matcher(relativePath);
-		if (m.matches()) {
-			final EdrsSessionFileDescriptor descriptor = new EdrsSessionFileDescriptor();
-			descriptor.setFilename(m.group(6));
-			descriptor.setRelativePath(relativePath);
-			descriptor.setProductName(m.group(6));
-			descriptor.setExtension(FileExtension.valueOfIgnoreCase(m.group(9)));
-			descriptor.setEdrsSessionFileType(EdrsSessionFileType.valueFromExtension(descriptor.getExtension()));
-//			descriptor.setMissionId(m.group(1));
-//			descriptor.setSatelliteId(m.group(2));
-			descriptor.setChannel(Integer.parseInt(m.group(4)));
-			descriptor.setSessionIdentifier(m.group(1));
-			descriptor.setKeyObjectStorage(relativePath);
-			descriptor.setProductFamily(ProductFamily.EDRS_SESSION);
+		if (m.matches()) {			
+	        final String suffix = file.getName().substring(file.getName().lastIndexOf('.')+1);
+	        final FileExtension ext = FileExtension.valueOfIgnoreCase(suffix);
 			
-				
+			final EdrsSessionFileDescriptor descriptor = new EdrsSessionFileDescriptor();			
+			descriptor.setFilename(file.getName()); 
+			descriptor.setRelativePath(catJob.getRelativePath());     
+			descriptor.setKeyObjectStorage(catJob.getKeyObjectStorage());
+			descriptor.setProductFamily(catJob.getProductFamily());
+			descriptor.setExtension(ext);        
+			descriptor.setEdrsSessionFileType(EdrsSessionFileType.valueFromExtension(ext));
+
+	        descriptor.setMissionId(metadataFromPath.get("missionId"));
+	        descriptor.setSatelliteId(metadataFromPath.get("satelliteId"));
+	        descriptor.setSessionIdentifier(metadataFromPath.get("sessionId"));
+	    	descriptor.setProductName(descriptor.getSessionIdentifier());       
+	        descriptor.setStationCode(metadataFromPath.get("stationCode"));
+	        descriptor.setChannel(Integer.parseInt(metadataFromPath.get("channelId")));
 			
 			return descriptor;
 		} else {
-			throw new MetadataFilePathException(relativePath, "SESSION",
-					"File does not match the configuration file pattern");
+			throw new MetadataFilePathException(
+					relativePath, 
+					"SESSION",
+					String.format("File %s does not match the configuration file pattern %s", relativePath, pattern)
+			);
 		}
 	}
 	
@@ -222,8 +233,11 @@ public class FileDescriptorBuilder {
             descriptor.setProductFamily(productFamily);
 
         } else {
-            throw new MetadataFilePathException(relativePath, productFamily.name(),
-                    "File does not match the configuration file pattern");
+			throw new MetadataFilePathException(
+					relativePath, 
+					productFamily.name(),
+					String.format("File %s does not match the configuration file pattern %s", relativePath, pattern)
+			);
         }
 
         return descriptor;

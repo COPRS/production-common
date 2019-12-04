@@ -30,7 +30,7 @@ import esa.s1pdgs.cpoc.mdc.worker.es.EsServices;
 import esa.s1pdgs.cpoc.mdc.worker.extraction.files.ExtractMetadata;
 import esa.s1pdgs.cpoc.mdc.worker.extraction.files.FileDescriptorBuilder;
 import esa.s1pdgs.cpoc.mdc.worker.extraction.files.MetadataBuilder;
-import esa.s1pdgs.cpoc.mdc.worker.extraction.model.ConfigFileDescriptor;
+import esa.s1pdgs.cpoc.mdc.worker.extraction.model.AuxDescriptor;
 import esa.s1pdgs.cpoc.mdc.worker.extraction.xml.XmlConverter;
 import esa.s1pdgs.cpoc.mdc.worker.status.AppStatusImpl;
 import esa.s1pdgs.cpoc.mqi.client.GenericMqiClient;
@@ -206,7 +206,7 @@ public class TestAuxMetadataExtractor {
 
 		doReturn(files).when(obsClient).download(Mockito.anyList());
 
-		final ConfigFileDescriptor expectedDescriptor = new ConfigFileDescriptor();
+		final AuxDescriptor expectedDescriptor = new AuxDescriptor();
 		expectedDescriptor.setExtension(fileExtension);
 		expectedDescriptor.setFilename(productFileName);
 		expectedDescriptor.setKeyObjectStorage(productFileName);

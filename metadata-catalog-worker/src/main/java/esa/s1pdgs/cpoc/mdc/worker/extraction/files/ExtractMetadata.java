@@ -33,7 +33,7 @@ import esa.s1pdgs.cpoc.common.ProductFamily;
 import esa.s1pdgs.cpoc.common.errors.processing.MetadataExtractionException;
 import esa.s1pdgs.cpoc.common.errors.processing.MetadataMalformedException;
 import esa.s1pdgs.cpoc.common.utils.DateUtils;
-import esa.s1pdgs.cpoc.mdc.worker.extraction.model.ConfigFileDescriptor;
+import esa.s1pdgs.cpoc.mdc.worker.extraction.model.AuxDescriptor;
 import esa.s1pdgs.cpoc.mdc.worker.extraction.model.EdrsSessionFile;
 import esa.s1pdgs.cpoc.mdc.worker.extraction.model.EdrsSessionFileDescriptor;
 import esa.s1pdgs.cpoc.mdc.worker.extraction.model.OutputFileDescriptor;
@@ -117,7 +117,7 @@ public class ExtractMetadata {
 	 * @throws MetadataExtractionException
 	 * @throws MetadataMalformedException
 	 */
-	public JSONObject processEOFFile(final ConfigFileDescriptor descriptor, final File inputMetadataFile)
+	public JSONObject processEOFFile(final AuxDescriptor descriptor, final File inputMetadataFile)
 			throws MetadataExtractionException, MetadataMalformedException {
 
 		JSONObject metadataJSONObject = transformXMLWithXSLTToJSON(inputMetadataFile,
@@ -137,7 +137,7 @@ public class ExtractMetadata {
 	 * @throws MetadataExtractionException
 	 * @throws MetadataMalformedException
 	 */
-	public JSONObject processEOFFileWithoutNamespace(final ConfigFileDescriptor descriptor, final File inputMetadataFile)
+	public JSONObject processEOFFileWithoutNamespace(final AuxDescriptor descriptor, final File inputMetadataFile)
 			throws MetadataExtractionException, MetadataMalformedException {
 
 		JSONObject metadataJSONObject = transformXMLWithXSLTToJSON(inputMetadataFile,
@@ -157,7 +157,7 @@ public class ExtractMetadata {
 	 * @throws MetadataExtractionException
 	 * @throws MetadataMalformedException
 	 */
-	public JSONObject processXMLFile(final ConfigFileDescriptor descriptor, final File inputMetadataFile)
+	public JSONObject processXMLFile(final AuxDescriptor descriptor, final File inputMetadataFile)
 			throws MetadataExtractionException, MetadataMalformedException {
 
 		JSONObject metadataJSONObject = transformXMLWithXSLTToJSON(inputMetadataFile,
@@ -178,7 +178,7 @@ public class ExtractMetadata {
 	 * @throws MetadataMalformedException
 	 */
 	// FIXEME probably it means SAFE AUX FILE ???
-	public JSONObject processSAFEFile(final ConfigFileDescriptor descriptor, final File inputMetadataFile)
+	public JSONObject processSAFEFile(final AuxDescriptor descriptor, final File inputMetadataFile)
 			throws MetadataExtractionException, MetadataMalformedException {
 
 		JSONObject metadataJSONObject = transformXMLWithXSLTToJSON(inputMetadataFile,
@@ -336,7 +336,7 @@ public class ExtractMetadata {
 		}
 	}
 
-	private JSONObject putConfigFileMetadataToJSON(final JSONObject metadataJSONObject, final ConfigFileDescriptor descriptor)
+	private JSONObject putConfigFileMetadataToJSON(final JSONObject metadataJSONObject, final AuxDescriptor descriptor)
 			throws MetadataExtractionException, MetadataMalformedException {
 
 		try {

@@ -30,9 +30,14 @@ public abstract class AbstractMetadataExtractor implements MetadataExtractor {
     protected final ProcessConfiguration processConfiguration;
     private final ObsClient obsClient;
 
-	public AbstractMetadataExtractor(final EsServices esServices, final MetadataBuilder mdBuilder,
-			final FileDescriptorBuilder fileDescriptorBuilder, final String localDirectory,
-			final ProcessConfiguration processConfiguration, final ObsClient obsClient) {
+	public AbstractMetadataExtractor(
+			final EsServices esServices, 
+			final MetadataBuilder mdBuilder,
+			final FileDescriptorBuilder fileDescriptorBuilder, 
+			final String localDirectory,
+			final ProcessConfiguration processConfiguration, 
+			final ObsClient obsClient
+	) {
 		this.esServices = esServices;
 		this.mdBuilder = mdBuilder;
 		this.fileDescriptorBuilder = fileDescriptorBuilder;
@@ -40,7 +45,7 @@ public abstract class AbstractMetadataExtractor implements MetadataExtractor {
 		this.processConfiguration = processConfiguration;
 		this.obsClient = obsClient;
 	}
-	
+
 	final File downloadToLocalFolder(
     		final Reporting.Factory reportingFactory,  
     		final ProductFamily family, 
