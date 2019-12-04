@@ -30,9 +30,9 @@ import esa.s1pdgs.cpoc.prip.model.Checksum;
 import esa.s1pdgs.cpoc.prip.model.PripMetadata;
 
 @Service
-public class PublishingJobListener implements MqiListener<PripPublishingJob> {
+public class PripPublishingJobListener implements MqiListener<PripPublishingJob> {
 
-	private static final Logger LOGGER = LogManager.getLogger(PublishingJobListener.class);
+	private static final Logger LOGGER = LogManager.getLogger(PripPublishingJobListener.class);
 
 	private final GenericMqiClient mqiClient;
 
@@ -45,7 +45,7 @@ public class PublishingJobListener implements MqiListener<PripPublishingJob> {
 	private final PripMetadataRepository pripMetadataRepo;
 
 	@Autowired
-	public PublishingJobListener(final GenericMqiClient mqiClient, final ObsClient obsClient,
+	public PripPublishingJobListener(final GenericMqiClient mqiClient, final ObsClient obsClient,
 			final PripMetadataRepository pripMetadataRepo,
 			@Value("${prip-worker.publishing-job-listener.polling-interval-ms}") final long pollingIntervalMs,
 			@Value("${prip-worker.publishing-job-listener.polling-initial-delay-ms}") final long pollingInitialDelayMs) {
