@@ -5,7 +5,7 @@ import java.util.Objects;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 
-public class PripJob extends AbstractMessage {	
+public class PripPublishingJob extends AbstractMessage {	
 	@JsonFormat(pattern="yyyy-MM-dd'T'HH:mm:ss.SSS'Z'", timezone="UTC")
 	private Date evictionDate;
 
@@ -33,7 +33,7 @@ public class PripJob extends AbstractMessage {
 		if (getClass() != obj.getClass()) {
 			return false;
 		}
-		final PripJob other = (PripJob) obj;
+		final PripPublishingJob other = (PripPublishingJob) obj;
 		return Objects.equals(creationDate, other.creationDate) 
 				&& Objects.equals(evictionDate, other.evictionDate)
 				&& Objects.equals(hostname, other.hostname) 
@@ -43,7 +43,7 @@ public class PripJob extends AbstractMessage {
 
 	@Override
 	public String toString() {
-		return "PripJob [productFamily=" + productFamily + ", keyObjectStorage=" + keyObjectStorage + ", creationDate="
+		return "PripPublishingJob [productFamily=" + productFamily + ", keyObjectStorage=" + keyObjectStorage + ", creationDate="
 				+ creationDate + ", hostname=" + hostname + ", evictionDate=" + evictionDate + "]";
 	}
 }

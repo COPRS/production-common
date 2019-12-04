@@ -17,7 +17,7 @@ import esa.s1pdgs.cpoc.mqi.client.GenericMqiClient;
 import esa.s1pdgs.cpoc.mqi.client.MqiConsumer;
 import esa.s1pdgs.cpoc.mqi.client.MqiListener;
 import esa.s1pdgs.cpoc.mqi.model.queue.CompressionEvent;
-import esa.s1pdgs.cpoc.mqi.model.queue.PublishingJob;
+import esa.s1pdgs.cpoc.mqi.model.queue.PripPublishingJob;
 import esa.s1pdgs.cpoc.mqi.model.rest.GenericMessageDto;
 import esa.s1pdgs.cpoc.mqi.model.rest.GenericPublicationMessageDto;
 
@@ -54,12 +54,12 @@ public class CompressionEventListener implements MqiListener<CompressionEvent> {
 		
 		final CompressionEvent compressionEvent = inputMessage.getBody();
 		
-		final PublishingJob publishingJob = new PublishingJob();
+		final PripPublishingJob publishingJob = new PripPublishingJob();
 		publishingJob.setKeyObjectStorage(compressionEvent.getKeyObjectStorage());
 		publishingJob.setProductFamily(compressionEvent.getProductFamily());
 		
-		GenericPublicationMessageDto<PublishingJob> outputMessage =
-				new GenericPublicationMessageDto<PublishingJob>(inputMessage.getId(),
+		GenericPublicationMessageDto<PripPublishingJob> outputMessage =
+				new GenericPublicationMessageDto<PripPublishingJob>(inputMessage.getId(),
 				compressionEvent.getProductFamily(), publishingJob);
 		
 		mqiClient.publish(outputMessage, ProductCategory.COMPRESSED_PRODUCTS);

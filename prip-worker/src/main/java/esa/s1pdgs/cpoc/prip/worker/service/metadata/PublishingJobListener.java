@@ -21,7 +21,7 @@ import esa.s1pdgs.cpoc.common.errors.obs.ObsException;
 import esa.s1pdgs.cpoc.mqi.client.GenericMqiClient;
 import esa.s1pdgs.cpoc.mqi.client.MqiConsumer;
 import esa.s1pdgs.cpoc.mqi.client.MqiListener;
-import esa.s1pdgs.cpoc.mqi.model.queue.PublishingJob;
+import esa.s1pdgs.cpoc.mqi.model.queue.PripPublishingJob;
 import esa.s1pdgs.cpoc.mqi.model.rest.GenericMessageDto;
 import esa.s1pdgs.cpoc.obs_sdk.ObsClient;
 import esa.s1pdgs.cpoc.obs_sdk.ObsObject;
@@ -30,7 +30,7 @@ import esa.s1pdgs.cpoc.prip.model.Checksum;
 import esa.s1pdgs.cpoc.prip.model.PripMetadata;
 
 @Service
-public class PublishingJobListener implements MqiListener<PublishingJob> {
+public class PublishingJobListener implements MqiListener<PripPublishingJob> {
 
 	private static final Logger LOGGER = LogManager.getLogger(PublishingJobListener.class);
 
@@ -60,17 +60,17 @@ public class PublishingJobListener implements MqiListener<PublishingJob> {
 	public void initService() {
 		if (pollingIntervalMs > 0) {
 			final ExecutorService service = Executors.newFixedThreadPool(1);
-			service.execute(new MqiConsumer<PublishingJob>(mqiClient, ProductCategory.COMPRESSED_PRODUCTS, this,
+			service.execute(new MqiConsumer<PripPublishingJob>(mqiClient, ProductCategory.PRIP_JOBS, this,
 					pollingIntervalMs, pollingInitialDelayMs, esa.s1pdgs.cpoc.appstatus.AppStatus.NULL));
 		}
 	}
 
 	@Override
-	public void onMessage(GenericMessageDto<PublishingJob> message) {
+	public void onMessage(GenericMessageDto<PripPublishingJob> message) {
 
 		LOGGER.debug("starting saving PRIP metadata, got message: {}", message);
 
-		PublishingJob publishingJob = message.getBody();
+		PripPublishingJob publishingJob = message.getBody();
 		LocalDateTime creationDate = LocalDateTime.now();
 
 		PripMetadata pripMetadata = new PripMetadata();
