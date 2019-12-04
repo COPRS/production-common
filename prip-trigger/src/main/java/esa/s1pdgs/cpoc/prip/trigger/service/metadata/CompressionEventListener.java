@@ -62,7 +62,7 @@ public class CompressionEventListener implements MqiListener<CompressionEvent> {
 				new GenericPublicationMessageDto<PripPublishingJob>(inputMessage.getId(),
 				compressionEvent.getProductFamily(), publishingJob);
 		
-		mqiClient.publish(outputMessage, ProductCategory.COMPRESSED_PRODUCTS);
+		mqiClient.publish(outputMessage, ProductCategory.PRIP_JOBS);
 
 		LOGGER.debug("end conversion of CompressionEvent to PublishingJob, sent message: {}", outputMessage);
 	}
