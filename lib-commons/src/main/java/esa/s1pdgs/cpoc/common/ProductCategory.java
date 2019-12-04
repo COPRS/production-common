@@ -8,6 +8,7 @@ import esa.s1pdgs.cpoc.mqi.model.queue.IngestionEvent;
 import esa.s1pdgs.cpoc.mqi.model.queue.IngestionJob;
 import esa.s1pdgs.cpoc.mqi.model.queue.IpfExecutionJob;
 import esa.s1pdgs.cpoc.mqi.model.queue.LevelReportDto;
+import esa.s1pdgs.cpoc.mqi.model.queue.PripJob;
 import esa.s1pdgs.cpoc.mqi.model.queue.ProductionEvent;
 
 /**
@@ -24,7 +25,8 @@ public enum ProductCategory {
     LEVEL_SEGMENTS(ProductionEvent.class),
     COMPRESSION_JOBS(CompressionJob.class),
     COMPRESSED_PRODUCTS(CompressionEvent.class),
-    INGESTION(IngestionJob.class);
+    INGESTION(IngestionJob.class),
+    PRIP_JOBS(PripJob.class);
 	
     /**
      * Get the category for a given product family.
