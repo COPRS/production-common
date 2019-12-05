@@ -7,7 +7,7 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Configuration;
 
 @Configuration
-@ConfigurationProperties("ingestion")
+@ConfigurationProperties("ingestion-worker")
 public class IngestionWorkerServiceConfigurationProperties {	
 	private long pollingIntervalMs = 100;
 	private int maxRetries = 2;	
@@ -19,7 +19,7 @@ public class IngestionWorkerServiceConfigurationProperties {
 		return pollingIntervalMs;
 	}
 	
-	public void setPollingIntervalMs(long pollingIntervalMs) {
+	public void setPollingIntervalMs(final long pollingIntervalMs) {
 		this.pollingIntervalMs = pollingIntervalMs;
 	}
 	
@@ -27,7 +27,7 @@ public class IngestionWorkerServiceConfigurationProperties {
 		return hostname;
 	}
 	
-	public void setHostname(String hostname) {
+	public void setHostname(final String hostname) {
 		this.hostname = hostname;
 	}
 	
@@ -35,7 +35,7 @@ public class IngestionWorkerServiceConfigurationProperties {
 		return maxRetries;
 	}
 
-	public void setMaxRetries(int maxRetries) {
+	public void setMaxRetries(final int maxRetries) {
 		this.maxRetries = maxRetries;
 	}
 
@@ -43,7 +43,7 @@ public class IngestionWorkerServiceConfigurationProperties {
 		return tempoRetryMs;
 	}
 
-	public void setTempoRetryMs(long tempoRetryMs) {
+	public void setTempoRetryMs(final long tempoRetryMs) {
 		this.tempoRetryMs = tempoRetryMs;
 	}
 
@@ -51,7 +51,7 @@ public class IngestionWorkerServiceConfigurationProperties {
 		return types;
 	}
 
-	public void setTypes(List<IngestionTypeConfiguration> types) {
+	public void setTypes(final List<IngestionTypeConfiguration> types) {
 		this.types = types;
 	}
 }
