@@ -6,7 +6,7 @@
 	<parent>
 		<groupId>de.werum.s1pdgs</groupId>
 		<artifactId>s1pro-core</artifactId>
-		<version>0.11.0-SNAPSHOT</version>
+		<version>0.11.0</version>
 	</parent>
 	<artifactId>s1pro-core-validation</artifactId>
 	<packaging>jar</packaging>
