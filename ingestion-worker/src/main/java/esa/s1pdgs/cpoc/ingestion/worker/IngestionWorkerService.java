@@ -140,10 +140,9 @@ public class IngestionWorkerService implements MqiListener<IngestionJob> {
 
 			final Reporting reporting = reportingFactory.newReporting(2);
 
-			final ProductCategory category = ProductCategory.of(product.getFamily());
 			reporting.begin(new ReportingMessage("Start publishing file {} in topic", message.getBody().getKeyObjectStorage()));
 			try {
-				mqiClient.publish(result, category);
+				mqiClient.publish(result, ProductCategory.INGESTION_EVENT);
 				reporting.end(new ReportingMessage("End publishing file {} in topic", message.getBody().getKeyObjectStorage()));
 			} catch (final AbstractCodedException e) {
 				reporting.error(new ReportingMessage("[code {}] {}", e.getCode().getCode(), e.getLogMessage()));

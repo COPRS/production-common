@@ -26,6 +26,7 @@ public enum ProductCategory {
     COMPRESSION_JOBS(CompressionJob.class),
     COMPRESSED_PRODUCTS(CompressionEvent.class),
     INGESTION(IngestionJob.class),
+    INGESTION_EVENT(IngestionEvent.class),
     PRIP_JOBS(PripPublishingJob.class);
 	
     /**
@@ -147,7 +148,7 @@ public enum ProductCategory {
     
     private final Class<? extends AbstractMessage> dtoClass;
 
-	private ProductCategory(Class<? extends AbstractMessage> dtoClass) {
+	private ProductCategory(final Class<? extends AbstractMessage> dtoClass) {
 		this.dtoClass = dtoClass;
 	}
 	
