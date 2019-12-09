@@ -1,4 +1,4 @@
-package esa.s1pdgs.cpoc.appcatalog.server.job.db;
+package esa.s1pdgs.cpoc.appcatalog;
 
 /**
  * State of a job generation

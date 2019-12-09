@@ -1,4 +1,4 @@
-package esa.s1pdgs.cpoc.appcatalog.server.job.db;
+package esa.s1pdgs.cpoc.appcatalog;
 
 /**
  * Available states of job's applicative data
