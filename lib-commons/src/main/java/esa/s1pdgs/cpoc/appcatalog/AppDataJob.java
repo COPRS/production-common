@@ -5,8 +5,6 @@ import java.util.Date;
 import java.util.List;
 import java.util.Objects;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
-
 import esa.s1pdgs.cpoc.common.ApplicationLevel;
 import esa.s1pdgs.cpoc.common.ProductCategory;
 import esa.s1pdgs.cpoc.mqi.model.queue.AbstractMessage;
@@ -82,7 +80,7 @@ public class AppDataJob<E extends AbstractMessage> {
 		return id;
 	}
 
-	public void setId(long id) {
+	public void setId(final long id) {
 		this.id = id;
 	}
 
@@ -97,7 +95,7 @@ public class AppDataJob<E extends AbstractMessage> {
      * @param category
      *            the category to set
      */
-    public void setCategory(ProductCategory category) {
+    public void setCategory(final ProductCategory category) {
         this.category = category;
     }
 
@@ -252,7 +250,7 @@ public class AppDataJob<E extends AbstractMessage> {
         } else if (obj == null || getClass() != obj.getClass()) {
             ret = false;
         } else {
-            AppDataJob other = (AppDataJob) obj;
+            final AppDataJob other = (AppDataJob) obj;
             ret =  id == other.id
                     && Objects.equals(category, other.category)
                     && Objects.equals(level, other.level)
