@@ -3,10 +3,15 @@ package esa.s1pdgs.cpoc.mqi.model.queue;
 import java.util.List;
 import java.util.Objects;
 
+import esa.s1pdgs.cpoc.appcatalog.AppDataJob;
+
 public class IpfPreparationJob extends AbstractMessage {
 	private String ipfName;
 	private String ipfVersion;
 	private List<String> preselectednputs;
+	
+	// workaround until S1PRO-940 is implemented
+	private AppDataJob<AbstractMessage> appDataJob;
 
 	public String getIpfName() {
 		return ipfName;
@@ -31,10 +36,18 @@ public class IpfPreparationJob extends AbstractMessage {
 	public void setPreselectednputs(final List<String> preselectednputs) {
 		this.preselectednputs = preselectednputs;
 	}
+	
+	public AppDataJob<AbstractMessage> getAppDataJob() {
+		return appDataJob;
+	}
+
+	void setAppDataJob(final AppDataJob<AbstractMessage> appDataJob) {
+		this.appDataJob = appDataJob;
+	}
 
 	@Override
 	public int hashCode() {
-		return Objects.hash(creationDate, hostname, ipfName, ipfVersion, keyObjectStorage, preselectednputs,
+		return Objects.hash(appDataJob, creationDate, hostname, ipfName, ipfVersion, keyObjectStorage, preselectednputs,
 				productFamily);
 	}
 
@@ -51,6 +64,7 @@ public class IpfPreparationJob extends AbstractMessage {
 		}
 		final IpfPreparationJob other = (IpfPreparationJob) obj;
 		return Objects.equals(creationDate, other.creationDate) 
+				&& Objects.equals(appDataJob, other.appDataJob)				
 				&& Objects.equals(hostname, other.hostname)
 				&& Objects.equals(ipfName, other.ipfName) 
 				&& Objects.equals(ipfVersion, other.ipfVersion)
@@ -63,6 +77,6 @@ public class IpfPreparationJob extends AbstractMessage {
 	public String toString() {
 		return "IpfPreparationJob [productFamily=" + productFamily + ", keyObjectStorage=" + keyObjectStorage
 				+ ", creationDate=" + creationDate + ", hostname=" + hostname + ", ipfName=" + ipfName + ", ipfVersion="
-				+ ipfVersion + ", preselectednputs=" + preselectednputs + "]";
+				+ ipfVersion + ", preselectednputs=" + preselectednputs + ", appDataJob=" + appDataJob +"]";
 	}
 }

@@ -8,6 +8,7 @@ import esa.s1pdgs.cpoc.mqi.model.queue.CompressionJob;
 import esa.s1pdgs.cpoc.mqi.model.queue.IngestionEvent;
 import esa.s1pdgs.cpoc.mqi.model.queue.IngestionJob;
 import esa.s1pdgs.cpoc.mqi.model.queue.IpfExecutionJob;
+import esa.s1pdgs.cpoc.mqi.model.queue.IpfPreparationJob;
 import esa.s1pdgs.cpoc.mqi.model.queue.LevelReportDto;
 import esa.s1pdgs.cpoc.mqi.model.queue.PripPublishingJob;
 import esa.s1pdgs.cpoc.mqi.model.queue.ProductionEvent;
@@ -28,6 +29,7 @@ public enum ProductCategory {
     COMPRESSED_PRODUCTS(CompressionEvent.class),
     INGESTION(IngestionJob.class),
     INGESTION_EVENT(IngestionEvent.class),
+    PREPARATION_JOB(IpfPreparationJob.class),    
     CATALOG_EVENT(CatalogEvent.class),
     PRIP_JOBS(PripPublishingJob.class);
 	
