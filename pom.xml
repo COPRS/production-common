@@ -300,7 +300,7 @@
 		<module>prip-trigger</module>
 		<module>prip-worker</module>
 		<module>prip-frontend</module>
-		<module>prip-commons</module>
+		<module>prip-client</module>
 		<module>validation</module>
 		<module>scaler</module>
 		<module>compression-trigger</module>

@@ -22,7 +22,7 @@
 	<dependencies>
 		<dependency>
 			<groupId>de.werum.s1pdgs</groupId>
-			<artifactId>s1pro-core-prip-commons</artifactId>
+			<artifactId>s1pro-core-prip-client</artifactId>
 			<version>${project.version}</version>
 		</dependency>
 		

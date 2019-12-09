@@ -27,7 +27,7 @@ prip-frontend:
   download-url-expiration-time-in-seconds: 600
 
 # PRIP Commons config
-prip-commons:
+prip-client:
   repository:
     max-search-hits: 1000
 
