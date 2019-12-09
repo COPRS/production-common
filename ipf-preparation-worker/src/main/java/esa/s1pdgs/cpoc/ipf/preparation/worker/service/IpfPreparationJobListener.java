@@ -76,11 +76,7 @@ public class IpfPreparationJobListener {
 	
 	public final void consume(final GenericMessageDto<IpfPreparationJob> message)
 			throws AbstractCodedException {		
-		final IpfPreparationJob ipfPrepJob = message.getBody();	
-		final String productName = ipfPrepJob.getAppDataJob().getProduct().getProductName();
-		final ProductFamily family = ipfPrepJob.getProductFamily();
-		
-		jobsDispatcher.dispatch(ipfPrepJob.getAppDataJob());
+		jobsDispatcher.dispatch(message.getBody().getAppDataJob());
 	}
 
 }
