@@ -67,29 +67,15 @@ ipf-preparation-worker:
     - L1_SLICE
   product-categories:
     auxiliary-files:
-      pattern-config: ^([0-9a-z][0-9a-z]){1}([0-9a-z_]){1}(_(OPER|TEST))?_(AUX_OBMEMC|AUX_PP1|AUX_PP2|AUX_CAL|AUX_INS|AUX_RESORB|AUX_WND|AUX_ICE|AUX_SCS|AMV_ERRMAT|AMH_ERRMAT|AUX_WAV|MPL_ORBPRE|MPL_ORBSCT|MSK__LAND_)_\w{1,}\.(XML|EOF|SAFE)(/.*)?$
-      local-directory: /data/local-catalog/auxiliary_files/ # Must contains the last /
       fixed-delay-ms: 500
       init-delay-poll-ms: 2000
     edrs-sessions:
-      pattern-config: ^(\w+)(/|\\)(ch)(0[1-2])(/|\\)((\w*)(\w{4})\.(xml|RAW))$
-      local-directory: /data/local-catalog/edrs_sessions/ # Must contains the last /
       fixed-delay-ms: 500
       init-delay-poll-ms: 2000
-      path-pattern: ^([a-z_]{4})/([0-9a-z_]{3})/([0-9a-z_]+)/ch0([1-2])/.+
-      path-metadata-elements:
-        stationCode: 1
-        satelliteId: 2
-        sessionId: 3
-        channelId: 4   
     level-segments:
-      pattern-config: ^(S1|AS)(A|B)_(S[1-6]|RF|GP|HK|IW|EW|WV|N[1-6]|EN|IM)_(SLC|GRD|OCN|RAW)(F|H|M|_)_(0)(A|C|N|S|_)(SH|__|SV|HH|HV|VV|VH|DH|DV)_([0-9a-z]{15})_([0-9a-z]{15})_([0-9]{6})_([0-9a-z_]{6})\w{1,}\.(SAFE)(/.*)?$
-      local-directory: /data/local-catalog/level_segments/ # Must contains the last /
       fixed-delay-ms: 500
       init-delay-poll-ms: 2000
     level-products:
-      pattern-config: ^(S1|AS)(A|B)_(S[1-6]|IW|EW|WV|GP|HK|N[1-6]|EN|IM)_(SLC|GRD|OCN|RAW)(F|H|M|_)_(0|1|2)(A|C|N|S|_)(SH|SV|HH|HV|VV|VH|DH|DV)_([0-9a-z]{15})_([0-9a-z]{15})_([0-9]{6})_([0-9a-z_]{6})\w{1,}\.(SAFE)(/.*)?$
-      local-directory: /data/local-catalog/level_products/ # Must contains the last /
       fixed-delay-ms: 500
       init-delay-poll-ms: 2000
 
