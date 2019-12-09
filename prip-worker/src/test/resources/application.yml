@@ -29,7 +29,7 @@ prip-worker:
     polling-initial-delay-ms: 5000
 
 # PRIP Commons config
-prip-commons:
+prip-client:
   repository:
     max-search-hits: 1000
 
