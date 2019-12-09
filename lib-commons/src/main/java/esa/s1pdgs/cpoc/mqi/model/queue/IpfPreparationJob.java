@@ -11,7 +11,7 @@ public class IpfPreparationJob extends AbstractMessage {
 	private List<String> preselectednputs;
 	
 	// workaround until S1PRO-940 is implemented
-	private AppDataJob<AbstractMessage> appDataJob;
+	private AppDataJob<CatalogEvent> appDataJob;
 
 	public String getIpfName() {
 		return ipfName;
@@ -37,11 +37,11 @@ public class IpfPreparationJob extends AbstractMessage {
 		this.preselectednputs = preselectednputs;
 	}
 	
-	public AppDataJob<AbstractMessage> getAppDataJob() {
+	public AppDataJob<CatalogEvent> getAppDataJob() {
 		return appDataJob;
 	}
 
-	public void setAppDataJob(final AppDataJob<AbstractMessage> appDataJob) {
+	public void setAppDataJob(final AppDataJob<CatalogEvent> appDataJob) {
 		this.appDataJob = appDataJob;
 	}
 
