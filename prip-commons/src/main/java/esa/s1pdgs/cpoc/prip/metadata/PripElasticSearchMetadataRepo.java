@@ -45,7 +45,7 @@ public class PripElasticSearchMetadataRepo implements PripMetadataRepository {
 
 	@Autowired
 	public PripElasticSearchMetadataRepo(RestHighLevelClient restHighLevelClient,
-			@Value("${prip-commons.repository.max-search-hits}") final int maxSearchHits) {
+			@Value("${prip-client.repository.max-search-hits}") final int maxSearchHits) {
 		this.restHighLevelClient = restHighLevelClient;
 		this.maxSearchHits = maxSearchHits;
 	}
