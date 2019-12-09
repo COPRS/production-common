@@ -7,11 +7,9 @@ import java.util.regex.Pattern;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.springframework.stereotype.Component;
 
 import esa.s1pdgs.cpoc.mqi.model.queue.CatalogJob;
 
-@Component
 public class PathMetadataExtractorImpl implements PathMetadataExtractor {		
 	private static final Logger LOG = LogManager.getLogger(PathMetadataExtractorImpl.class);
 	
