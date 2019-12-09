@@ -18,25 +18,14 @@ import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
 import org.springframework.util.StringUtils;
 
 import esa.s1pdgs.cpoc.appcatalog.client.job.AppCatalogJobClient;
-import esa.s1pdgs.cpoc.appstatus.AppStatus;
 import esa.s1pdgs.cpoc.common.ProductFamily;
-import esa.s1pdgs.cpoc.errorrepo.ErrorRepoAppender;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.service.XmlConverter;
-import esa.s1pdgs.cpoc.ipf.preparation.worker.tasks.AbstractGenericConsumer;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.tasks.AbstractJobsDispatcher;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.tasks.JobsGeneratorFactory;
-import esa.s1pdgs.cpoc.ipf.preparation.worker.tasks.l0app.L0AppConsumer;
-import esa.s1pdgs.cpoc.ipf.preparation.worker.tasks.l0app.L0AppJobDispatcher;
-import esa.s1pdgs.cpoc.ipf.preparation.worker.tasks.l0segmentapp.L0SegmentAppConsumer;
-import esa.s1pdgs.cpoc.ipf.preparation.worker.tasks.l0segmentapp.L0SegmentAppJobDispatcher;
-import esa.s1pdgs.cpoc.ipf.preparation.worker.tasks.levelproducts.LevelProductsJobDispatcher;
-import esa.s1pdgs.cpoc.ipf.preparation.worker.tasks.levelproducts.LevelProductsConsumer;
-import esa.s1pdgs.cpoc.metadata.client.MetadataClient;
-import esa.s1pdgs.cpoc.mqi.client.GenericMqiClient;
-import esa.s1pdgs.cpoc.mqi.client.StatusService;
+import esa.s1pdgs.cpoc.ipf.preparation.worker.tasks.edrssession.L0AppJobDispatcher;
+import esa.s1pdgs.cpoc.ipf.preparation.worker.tasks.l0segment.L0SegmentAppJobDispatcher;
+import esa.s1pdgs.cpoc.ipf.preparation.worker.tasks.l0slice.LevelProductsJobDispatcher;
 import esa.s1pdgs.cpoc.mqi.model.queue.AbstractMessage;
-import esa.s1pdgs.cpoc.mqi.model.queue.CatalogEvent;
-import esa.s1pdgs.cpoc.mqi.model.queue.CatalogEvent;
 
 /**
  * Extraction class of "tasktables" configuration properties
@@ -167,12 +156,12 @@ public class IpfPreparationWorkerSettings {
 		if (StringUtils.isEmpty(inputfamiliesstr)) {
 			return;
 		}
-		String[] paramsTmp = inputfamiliesstr.split(MAP_ELM_SEP);
+		final String[] paramsTmp = inputfamiliesstr.split(MAP_ELM_SEP);
 		for (int i = 0; i < paramsTmp.length; i++) {
-			String[] tmp = paramsTmp[i].split(MAP_KEY_VAL_SEP);
+			final String[] tmp = paramsTmp[i].split(MAP_KEY_VAL_SEP);
 			if (tmp != null && tmp.length == 2) {
-				String key = tmp[0];
-				String valStr = tmp[1];
+				final String key = tmp[0];
+				final String valStr = tmp[1];
 				inputfamilies.put(key, ProductFamily.valueOf(valStr));
 			}
 		}
@@ -185,12 +174,12 @@ public class IpfPreparationWorkerSettings {
 		if (StringUtils.isEmpty(outputfamiliesstr)) {
 			return;
 		}
-		String[] paramsTmp = outputfamiliesstr.split(MAP_ELM_SEP);
+		final String[] paramsTmp = outputfamiliesstr.split(MAP_ELM_SEP);
 		for (int i = 0; i < paramsTmp.length; i++) {
-			String[] tmp = paramsTmp[i].split(MAP_KEY_VAL_SEP);
+			final String[] tmp = paramsTmp[i].split(MAP_KEY_VAL_SEP);
 			if (tmp != null && tmp.length == 2) {
-				String key = tmp[0];
-				String valStr = tmp[1];
+				final String key = tmp[0];
+				final String valStr = tmp[1];
 				outputfamilies.put(key, ProductFamily.valueOf(valStr));
 			}
 		}
@@ -390,7 +379,7 @@ public class IpfPreparationWorkerSettings {
 	/**
 	 * @param inputfamiliesstr the inputfamiliesstr to set
 	 */
-	public void setInputfamiliesstr(String inputfamiliesstr) {
+	public void setInputfamiliesstr(final String inputfamiliesstr) {
 		this.inputfamiliesstr = inputfamiliesstr;
 	}
 
@@ -450,7 +439,7 @@ public class IpfPreparationWorkerSettings {
 		return oqcCheck;
 	}
 
-	public void setOqcCheck(List<ProductFamily> oqcCheck) {
+	public void setOqcCheck(final List<ProductFamily> oqcCheck) {
 		this.oqcCheck = oqcCheck;
 	}
 
@@ -500,48 +489,5 @@ public class IpfPreparationWorkerSettings {
 		}
 		jobsDispatcher.setTaskForFunctionalLog(String.format("%sJobGeneration", processSettings.getLevel().name()));
 		return jobsDispatcher;
-
 	}
-
-	@SuppressWarnings("unchecked")
-	@Bean
-	@Autowired
-	public AbstractGenericConsumer<? extends AbstractMessage> productMessageConsumer(
-			final AbstractJobsDispatcher<? extends AbstractMessage> jobsDispatcher,
-			final L0SegmentAppProperties appProperties, final L0SlicePatternSettings patternSettings,
-			final ProcessSettings processSettings, final GenericMqiClient mqiService,
-			final StatusService mqiStatusService,
-			@Qualifier("appCatalogServiceForLevelProducts") final AppCatalogJobClient appDataServiceLevelProducts,
-			@Qualifier("appCatalogServiceForEdrsSessions") final AppCatalogJobClient appDataServiceErdsSettions,
-			@Qualifier("appCatalogServiceForLevelSegments") final AppCatalogJobClient appDataServiceLevelSegments,
-			final ErrorRepoAppender errorRepoAppender, final AppStatus appStatus, final MetadataClient metadataClient,
-			 @Value("${process.fixed-delay-ms}") final long pollingIntervalMs,
-			 @Value("${process.initial-delay-ms}") final long pollingInitialDelayMs) {
-
-		AbstractGenericConsumer<? extends AbstractMessage> messageConsumer;
-
-		switch (processSettings.getLevel()) {
-		case L0:
-			messageConsumer = new L0AppConsumer((AbstractJobsDispatcher<CatalogEvent>) jobsDispatcher,
-					processSettings, mqiService, mqiStatusService, appDataServiceErdsSettions,
-					errorRepoAppender, appStatus, metadataClient, pollingIntervalMs, pollingInitialDelayMs);
-			break;
-		case L0_SEGMENT:
-			messageConsumer = new L0SegmentAppConsumer((AbstractJobsDispatcher<CatalogEvent>) jobsDispatcher,
-					appProperties, processSettings, mqiService, mqiStatusService, appDataServiceLevelSegments,
-					errorRepoAppender, appStatus, pollingIntervalMs, pollingInitialDelayMs);
-			break;
-		case L1:
-		case L2:
-			messageConsumer = new LevelProductsConsumer((AbstractJobsDispatcher<CatalogEvent>) jobsDispatcher,
-					patternSettings, processSettings, mqiService, mqiStatusService, appDataServiceLevelProducts,
-					errorRepoAppender, appStatus, metadataClient, pollingIntervalMs, pollingInitialDelayMs);
-			break;
-		default:
-			throw new IllegalArgumentException("Unsupported Application Level");
-		}
-		messageConsumer.setTaskForFunctionalLog(String.format("%sJobGeneration", processSettings.getLevel().name()));
-		return messageConsumer;
-	}
-
 }
