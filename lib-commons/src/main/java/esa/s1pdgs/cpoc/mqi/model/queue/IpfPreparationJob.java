@@ -41,7 +41,7 @@ public class IpfPreparationJob extends AbstractMessage {
 		return appDataJob;
 	}
 
-	void setAppDataJob(final AppDataJob<AbstractMessage> appDataJob) {
+	public void setAppDataJob(final AppDataJob<AbstractMessage> appDataJob) {
 		this.appDataJob = appDataJob;
 	}
 
