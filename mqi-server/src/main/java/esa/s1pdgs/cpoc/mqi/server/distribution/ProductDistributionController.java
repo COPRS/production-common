@@ -164,7 +164,7 @@ public class ProductDistributionController {
     ) throws ProductDistributionException {    	
     	final ProductCategory category = ProductCategory.valueOf(categoryName.toUpperCase());   
         try {
-        	LOGGER.debug("[MONITOR] [category {}] [api publish] Received publish request");
+        	LOGGER.debug("[MONITOR] [category {}] [api publish] Received publish request", categoryName);
         	final ObjectMapper objMapper = new ObjectMapper();
         	final TypeFactory typeFactory = objMapper.getTypeFactory();
         	final JavaType javaType = typeFactory.constructParametricType(
