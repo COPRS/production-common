@@ -18,7 +18,7 @@ kafka:
   group-id: error                                                # the group identifier to use for KAFKA publishers  
   max-retries: 10                                                # number of retries if kafka is not available
   error-topic: t-pdgs-errors
-    
+
 level0:
   maxnumberofsessions: 20
   maxagesession: 25200000
@@ -65,6 +65,19 @@ ipf-preparation-worker:
   oqcCheck:
     - L0_SLICE
     - L1_SLICE
+  product-categories:
+    auxiliary-files:
+      fixed-delay-ms: 500
+      init-delay-poll-ms: 2000
+    edrs-sessions:
+      fixed-delay-ms: 500
+      init-delay-poll-ms: 2000
+    level-segments:
+      fixed-delay-ms: 500
+      init-delay-poll-ms: 2000
+    level-products:
+      fixed-delay-ms: 500
+      init-delay-poll-ms: 2000
 
 # L0 Process configuration
 process:

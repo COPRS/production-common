@@ -228,6 +228,4 @@
 			</plugin>
 		</plugins>
 	</build>
-
-	<description>Java application with Spring Boot and Docker</description>
 </project>

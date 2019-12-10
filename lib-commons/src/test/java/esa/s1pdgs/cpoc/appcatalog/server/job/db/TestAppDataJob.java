@@ -2,6 +2,7 @@ package esa.s1pdgs.cpoc.appcatalog.server.job.db;
 
 import org.junit.Test;
 
+import esa.s1pdgs.cpoc.appcatalog.AppDataJob;
 import nl.jqno.equalsverifier.EqualsVerifier;
 import nl.jqno.equalsverifier.Warning;
 

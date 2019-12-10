@@ -9,6 +9,8 @@ import java.util.Date;
 
 import org.junit.Test;
 
+import esa.s1pdgs.cpoc.appcatalog.AppDataJobGeneration;
+import esa.s1pdgs.cpoc.appcatalog.AppDataJobGenerationState;
 import nl.jqno.equalsverifier.EqualsVerifier;
 import nl.jqno.equalsverifier.Warning;
 

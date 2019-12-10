@@ -32,10 +32,10 @@ import org.springframework.context.annotation.AnnotationConfigApplicationContext
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import esa.s1pdgs.cpoc.appcatalog.AppDataJob;
+import esa.s1pdgs.cpoc.appcatalog.AppDataJobGeneration;
+import esa.s1pdgs.cpoc.appcatalog.AppDataJobGenerationState;
 import esa.s1pdgs.cpoc.appcatalog.client.job.AppCatalogJobClient;
-import esa.s1pdgs.cpoc.appcatalog.server.job.db.AppDataJob;
-import esa.s1pdgs.cpoc.appcatalog.server.job.db.AppDataJobGeneration;
-import esa.s1pdgs.cpoc.appcatalog.server.job.db.AppDataJobGenerationState;
 import esa.s1pdgs.cpoc.common.ApplicationLevel;
 import esa.s1pdgs.cpoc.common.ProductFamily;
 import esa.s1pdgs.cpoc.common.errors.AbstractCodedException;
@@ -52,7 +52,7 @@ import esa.s1pdgs.cpoc.ipf.preparation.worker.model.ProductMode;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.model.tasktable.TaskTable;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.service.XmlConverter;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.service.mqi.OutputProducerFactory;
-import esa.s1pdgs.cpoc.ipf.preparation.worker.tasks.levelproducts.LevelProductsJobsGenerator;
+import esa.s1pdgs.cpoc.ipf.preparation.worker.tasks.l0slice.LevelProductsJobsGenerator;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.utils.TestGenericUtils;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.utils.TestL1Utils;
 import esa.s1pdgs.cpoc.metadata.client.MetadataClient;

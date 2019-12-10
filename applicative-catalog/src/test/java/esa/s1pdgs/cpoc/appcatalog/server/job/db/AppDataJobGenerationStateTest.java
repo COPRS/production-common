@@ -4,6 +4,8 @@ import static org.junit.Assert.assertEquals;
 
 import org.junit.Test;
 
+import esa.s1pdgs.cpoc.appcatalog.AppDataJobGenerationState;
+
 /**
  * Available states of a job generation
  */

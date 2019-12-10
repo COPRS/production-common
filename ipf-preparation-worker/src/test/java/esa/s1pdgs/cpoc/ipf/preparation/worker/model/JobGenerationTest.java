@@ -11,9 +11,9 @@ import java.util.Map;
 
 import org.junit.Test;
 
-import esa.s1pdgs.cpoc.appcatalog.server.job.db.AppDataJob;
-import esa.s1pdgs.cpoc.appcatalog.server.job.db.AppDataJobGeneration;
-import esa.s1pdgs.cpoc.appcatalog.server.job.db.AppDataJobGenerationState;
+import esa.s1pdgs.cpoc.appcatalog.AppDataJob;
+import esa.s1pdgs.cpoc.appcatalog.AppDataJobGeneration;
+import esa.s1pdgs.cpoc.appcatalog.AppDataJobGenerationState;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.model.JobGeneration;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.model.joborder.JobOrder;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.model.metadata.SearchMetadataResult;

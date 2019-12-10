@@ -4,11 +4,11 @@ import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Date;
 
-import esa.s1pdgs.cpoc.appcatalog.server.job.db.AppDataJob;
-import esa.s1pdgs.cpoc.appcatalog.server.job.db.AppDataJobGeneration;
-import esa.s1pdgs.cpoc.appcatalog.server.job.db.AppDataJobGenerationState;
-import esa.s1pdgs.cpoc.appcatalog.server.job.db.AppDataJobProduct;
-import esa.s1pdgs.cpoc.appcatalog.server.job.db.AppDataJobState;
+import esa.s1pdgs.cpoc.appcatalog.AppDataJob;
+import esa.s1pdgs.cpoc.appcatalog.AppDataJobGeneration;
+import esa.s1pdgs.cpoc.appcatalog.AppDataJobGenerationState;
+import esa.s1pdgs.cpoc.appcatalog.AppDataJobProduct;
+import esa.s1pdgs.cpoc.appcatalog.AppDataJobState;
 import esa.s1pdgs.cpoc.common.ApplicationLevel;
 import esa.s1pdgs.cpoc.common.ProductFamily;
 import esa.s1pdgs.cpoc.common.errors.InternalErrorException;

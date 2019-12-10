@@ -1,0 +1,44 @@
+spring:
+  application:
+    name: s1pdgs-l0-aio-ipf-preparation-trigger
+    
+# Logging
+logging:
+  config: ${log4j_filename:config/log4j2.yml}
+ 
+# KAFKA config for error queue
+kafka:
+  bootstrap-servers: ${kafka_bootstrap-servers:kafka-headless:9092}   # the bootstrap servers for KAFKA
+  group-id: error                                                # the group identifier to use for KAFKA publishers  
+  max-retries: 10                                                # number of retries if kafka is not available
+  error-topic: t-pdgs-errors
+
+
+appcatalog:
+  host-uri: http://s1pro-app-catalog-svc:8080                          # URI of the applicative data catalog APIs
+  max-retries: 3                                                 # Nb Max of retry to connect API 
+  tempo-retry-ms: 1000                                           # Tempo before a retry to connect API  
+  tm-connect-ms: 5000                                            # Timeout of connections to the API  
+  category: edrs-sessions
+
+
+metadata:
+  host: ${catalog_rest_host} 
+  rest-api_nb-retry: 100  
+  rest-api_tempo-retry-ms: 3000     
+status:
+  delete-fixed-delay-ms: 1800000                                   # (fixed delay) period in milliseconds between 2 check if application shall be stopped or not
+  max-error-counter-processing: 3                                  # the number of consecutive processing errors leading to the state FATALERROR
+  max-error-counter-mqi: 30                                        # the number of consecutive MQI errors leading to the state FATALERROR
+
+mqi:
+  host-uri: http://localhost:8081                                # URI of the MQI server APIs
+  max-retries: 45                                                 # Nb Max of retry to connect API REST
+  tempo-retry-ms: 1000                                           # Tempo before a retry to connect API REST
+
+
+
+process:
+  level: L0                                                        # Level for job generator 
+  hostname: ${HOSTNAME}                                            # Hostname 
+
