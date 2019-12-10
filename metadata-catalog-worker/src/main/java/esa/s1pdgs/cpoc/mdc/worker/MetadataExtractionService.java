@@ -86,7 +86,7 @@ public class MetadataExtractionService {
 		}
     }
 	
-	public final void consume(final GenericMessageDto<CatalogJob> message, final MetadataExtractor mex)
+	public final void consume(final GenericMessageDto<CatalogJob> message, final CategoryConfig config)
 			throws AbstractCodedException {		
 		final CatalogJob catJob = message.getBody();	
 		final String productName = catJob.getProductName();
@@ -96,7 +96,11 @@ public class MetadataExtractionService {
         final Reporting report = reportingFactory.newReporting(0);        
         report.begin(new FilenameReportingInput(productName), new ReportingMessage("Starting metadata extraction"));   
 		try {
-			final JSONObject metadata = mex.extract(reportingFactory, message);
+			final MetadataExtractor extractor = extractorFactory.newMetadataExtractorFor(
+					ProductCategory.of(catJob.getProductFamily()), 
+					config
+			);			
+			final JSONObject metadata = extractor.extract(reportingFactory, message);
         	LOG.debug("Metadata extracted :{} for product: {}", metadata, productName);
         	
         	// TODO move to extractor
@@ -151,14 +155,10 @@ public class MetadataExtractionService {
 	
 	private final MqiConsumer<CatalogJob> newConsumerFor(final ProductCategory category, final CategoryConfig config) {
 		LOG.debug("Creating MQI consumer for category {} using {}", category, config);
-		final MetadataExtractor extractor = extractorFactory.newMetadataExtractorFor(
-				category, 
-				config
-		);
 		return new MqiConsumer<CatalogJob>(
 				mqiClient, 
 				category, 
-				m -> consume(m, extractor),
+				m -> consume(m, config),
 				config.getFixedDelayMs(),
 				config.getInitDelayPollMs(),
 				appStatus
