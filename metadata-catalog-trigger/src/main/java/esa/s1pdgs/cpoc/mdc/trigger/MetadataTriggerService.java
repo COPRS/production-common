@@ -77,7 +77,7 @@ public class MetadataTriggerService {
 			return new MqiConsumer<IngestionEvent>(
 					mqiClient, 
 					cat, 
-					p -> publish(cat, p, toCatalogJob(p.getBody())),
+					p -> publish(ProductCategory.CATALOG_JOBS, p, toCatalogJob(p.getBody())),
 					config.getFixedDelayMs(),
 					config.getInitDelayPolMs(),
 					appStatus
@@ -86,7 +86,7 @@ public class MetadataTriggerService {
 			return new MqiConsumer<ProductionEvent>(
 					mqiClient, 
 					cat, 
-					p -> publish(cat, p, toCatalogJob(p.getBody())),
+					p -> publish(ProductCategory.CATALOG_JOBS, p, toCatalogJob(p.getBody())),
 					config.getFixedDelayMs(),
 					config.getInitDelayPolMs(),
 					appStatus
