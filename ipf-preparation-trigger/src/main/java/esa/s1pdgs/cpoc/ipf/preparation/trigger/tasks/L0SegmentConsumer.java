@@ -4,11 +4,6 @@ package esa.s1pdgs.cpoc.ipf.preparation.trigger.tasks;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.regex.Pattern;
-
-import javax.annotation.PostConstruct;
 
 import org.springframework.util.CollectionUtils;
 
@@ -21,11 +16,8 @@ import esa.s1pdgs.cpoc.common.ProductCategory;
 import esa.s1pdgs.cpoc.common.errors.AbstractCodedException;
 import esa.s1pdgs.cpoc.errorrepo.ErrorRepoAppender;
 import esa.s1pdgs.cpoc.errorrepo.model.rest.FailedProcessingDto;
-import esa.s1pdgs.cpoc.ipf.preparation.trigger.config.L0SegmentAppProperties;
 import esa.s1pdgs.cpoc.ipf.preparation.trigger.config.ProcessSettings;
 import esa.s1pdgs.cpoc.mqi.client.GenericMqiClient;
-import esa.s1pdgs.cpoc.mqi.client.MqiConsumer;
-import esa.s1pdgs.cpoc.mqi.client.MqiListener;
 import esa.s1pdgs.cpoc.mqi.client.StatusService;
 import esa.s1pdgs.cpoc.mqi.model.queue.CatalogEvent;
 import esa.s1pdgs.cpoc.mqi.model.rest.GenericMessageDto;
@@ -34,63 +26,24 @@ import esa.s1pdgs.cpoc.report.LoggerReporting;
 import esa.s1pdgs.cpoc.report.Reporting;
 import esa.s1pdgs.cpoc.report.ReportingMessage;
 
-public class L0SegmentConsumer
-        extends AbstractGenericConsumer<CatalogEvent> implements MqiListener<CatalogEvent> {
-    
-    
-    private final Pattern blackList;
-    
-    /**
-     * 
-     */
-    private String taskForFunctionalLog;
-    
-    private final long pollingIntervalMs;
-    
-    private final long pollingInitialDelayMs;
-
-    /**
-     * Constructor
-     * 
-     * @param jobsDispatcher
-     * @param patternSettings
-     * @param processSettings
-     * @param mqiClient
-     * @param appDataService
-     * @param appStatus
-     */
+public class L0SegmentConsumer extends AbstractGenericConsumer<CatalogEvent> {    
 	public L0SegmentConsumer(
-			final L0SegmentAppProperties appProperties, final ProcessSettings processSettings,
-			final GenericMqiClient mqiClient, final StatusService mqiStatusService,
-			final AppCatalogJobClient<CatalogEvent> appDataService, final ErrorRepoAppender errorRepoAppender,
-			final AppStatus appStatus, final long pollingIntervalMs, final long pollingInitialDelayMs) {
+			final ProcessSettings processSettings,
+			final GenericMqiClient mqiClient, 
+			final StatusService mqiStatusService,
+			final AppCatalogJobClient<CatalogEvent> appDataService, 
+			final ErrorRepoAppender errorRepoAppender,
+			final AppStatus appStatus, 
+			final long pollingIntervalMs, 
+			final long pollingInitialDelayMs
+	) {
 		super(processSettings, mqiClient, mqiStatusService, appDataService, appStatus,
-				errorRepoAppender, ProductCategory.LEVEL_SEGMENTS);
-		this.blackList = (appProperties.getBlacklistPattern() == null) ? null : Pattern.compile(appProperties.getBlacklistPattern(), Pattern.CASE_INSENSITIVE);
-		this.pollingIntervalMs = pollingIntervalMs;
-		this.pollingInitialDelayMs = pollingInitialDelayMs;
+				errorRepoAppender, ProductCategory.LEVEL_SEGMENTS);		
 	}
 
-	@PostConstruct
-	public void initService() {
-		appStatus.setWaiting();
-		if (pollingIntervalMs > 0) {
-			final ExecutorService service = Executors.newFixedThreadPool(1);
-			service.execute(new MqiConsumer<CatalogEvent>(mqiClient, category, this, pollingIntervalMs,
-					pollingInitialDelayMs, esa.s1pdgs.cpoc.appstatus.AppStatus.NULL));
-		}
-	}
-    
-    
     @Override
     public void onMessage(final GenericMessageDto<CatalogEvent> mqiMessage) {
-    	appStatus.setWaiting();
     	final Reporting.Factory reportingFactory = new LoggerReporting.Factory("L0_SEGMENTJobGeneration"); 
-    	
-        if (mqiMessage == null || mqiMessage.getBody() == null) {
-            LOGGER.trace("[MONITOR] [step 0] No message received: continue");
-            return;
-        }
         final Reporting reporting = reportingFactory.newReporting(0);
         
         // process message
@@ -135,7 +88,7 @@ public class L0SegmentConsumer
                 appDataJob.setState(AppDataJobState.DISPATCHING);
                 appDataJob = appDataService.patchJob(appDataJob.getId(),
                         appDataJob, false, false, false);
-                publish(appDataJob);
+                publish(appDataJob, mqiMessage.getBody().getProductFamily(), mqiMessage.getInputKey());
             } else {
                 LOGGER.info(
                         "[MONITOR] [step 2] [productName {}] Job for datatake already dispatched",
@@ -155,6 +108,7 @@ public class L0SegmentConsumer
             reporting.error(new ReportingMessage("[code {}] {}", ace.getCode().getCode(), ace.getLogMessage()));
 
             failedProc = new FailedProcessingDto(processSettings.getHostname(),new Date(),errorMessage, mqiMessage);
+            
         }
 
         // Ack and check if application shall stopped
@@ -166,14 +120,7 @@ public class L0SegmentConsumer
         reporting.end(new ReportingMessage("End job generation using {}", mqiMessage.getBody().getKeyObjectStorage()));
     }
 
-    private boolean skipProduct(final String productName) {
-    	
-    	boolean skip = false;
-		if(blackList != null && blackList.matcher(productName).matches()) {
-			skip = true;
-		} 
-		return skip;
-	}
+
 
 	protected AppDataJob<CatalogEvent> buildJob(
             final GenericMessageDto<CatalogEvent> mqiMessage)
@@ -235,15 +182,4 @@ public class L0SegmentConsumer
             return jobDto;
         }
     }
-
-    @Override
-    protected String getTaskForFunctionalLog() {
-    	return this.taskForFunctionalLog;
-    }
-    
-    @Override
-    public void setTaskForFunctionalLog(final String taskForFunctionalLog) {
-    	this.taskForFunctionalLog = taskForFunctionalLog; 
-    }
-    
 }

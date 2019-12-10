@@ -1,68 +1,57 @@
 package esa.s1pdgs.cpoc.ipf.preparation.trigger.tasks;
 
+import java.util.Collections;
+import java.util.Date;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.regex.Pattern;
+
+import javax.annotation.PostConstruct;
+
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import esa.s1pdgs.cpoc.appcatalog.AppDataJob;
+import esa.s1pdgs.cpoc.appcatalog.AppDataJobState;
 import esa.s1pdgs.cpoc.appcatalog.client.job.AppCatalogJobClient;
 import esa.s1pdgs.cpoc.appstatus.AppStatus;
 import esa.s1pdgs.cpoc.common.ProductCategory;
+import esa.s1pdgs.cpoc.common.ProductFamily;
 import esa.s1pdgs.cpoc.common.errors.AbstractCodedException;
 import esa.s1pdgs.cpoc.errorrepo.ErrorRepoAppender;
 import esa.s1pdgs.cpoc.errorrepo.model.rest.FailedProcessingDto;
 import esa.s1pdgs.cpoc.ipf.preparation.trigger.config.ProcessSettings;
 import esa.s1pdgs.cpoc.mqi.client.GenericMqiClient;
+import esa.s1pdgs.cpoc.mqi.client.MqiConsumer;
+import esa.s1pdgs.cpoc.mqi.client.MqiListener;
 import esa.s1pdgs.cpoc.mqi.client.StatusService;
 import esa.s1pdgs.cpoc.mqi.model.queue.AbstractMessage;
 import esa.s1pdgs.cpoc.mqi.model.queue.CatalogEvent;
-import esa.s1pdgs.cpoc.mqi.model.rest.Ack;
-import esa.s1pdgs.cpoc.mqi.model.rest.AckMessageDto;
+import esa.s1pdgs.cpoc.mqi.model.queue.IpfPreparationJob;
 import esa.s1pdgs.cpoc.mqi.model.rest.GenericMessageDto;
+import esa.s1pdgs.cpoc.mqi.model.rest.GenericPublicationMessageDto;
+import esa.s1pdgs.cpoc.report.FilenameReportingInput;
+import esa.s1pdgs.cpoc.report.LoggerReporting;
+import esa.s1pdgs.cpoc.report.Reporting;
+import esa.s1pdgs.cpoc.report.ReportingMessage;
 
-public abstract class AbstractGenericConsumer<T extends AbstractMessage> {
+public abstract class AbstractGenericConsumer<T extends AbstractMessage> implements MqiListener<CatalogEvent> {
+    protected static final Logger LOGGER = LogManager.getLogger(AbstractGenericConsumer.class);
 
-    protected static final Logger LOGGER =
-            LogManager.getLogger(AbstractGenericConsumer.class);
-
-    /**
-     * Format of dates used in filename of the products
-     */
-    protected static final String DATE_FORMAT = "yyyyMMdd'T'HHmmss";
-
-    /**
-     * Process settings
-     */
     protected final ProcessSettings processSettings;
-
-    /**
-     * MQI service
-     */
     protected final GenericMqiClient mqiClient;
-
-    /**
-     * Applicative data service
-     */
-    protected final AppCatalogJobClient<T> appDataService;
-
-    /**
-     * MQI service
-     */
+    protected final AppCatalogJobClient<CatalogEvent> appDataService;
     protected final StatusService mqiStatusService;
-
-    /**
-     * Application status
-     */
-    protected final AppStatus appStatus;
-    
-    private final ErrorRepoAppender errorRepoAppender;
-    
+    protected final AppStatus appStatus;    
+    protected final ErrorRepoAppender errorRepoAppender;    
     protected final ProductCategory category;
+    private final Pattern blackList;
 
     public AbstractGenericConsumer(
             final ProcessSettings processSettings,
             final GenericMqiClient mqiService,
             final StatusService mqiStatusService,
-            final AppCatalogJobClient<T> appDataService,
+            final AppCatalogJobClient<CatalogEvent> appDataService,
             final AppStatus appStatus,
             final ErrorRepoAppender errorRepoAppender,
             final ProductCategory category
@@ -74,96 +63,117 @@ public abstract class AbstractGenericConsumer<T extends AbstractMessage> {
         this.appStatus = appStatus;
         this.errorRepoAppender = errorRepoAppender;
         this.category = category;
+        this.blackList = (processSettings.getBlacklistPattern() == null) ? null : Pattern.compile(processSettings.getBlacklistPattern(), Pattern.CASE_INSENSITIVE);
     }
     
-    protected void publish(final AppDataJob<CatalogEvent> appDataJob) {
-    	// FIXME
-    }
+	@PostConstruct
+	public void initService() {
+		appStatus.setWaiting();
+		if (processSettings.getFixedDelayMs() > 0) {
+			final ExecutorService service = Executors.newFixedThreadPool(1);
+			service.execute(newMqiConsumer());
+		}
+	} 
+	
+    @Override
+    public void onMessage(final GenericMessageDto<CatalogEvent> mqiMessage) {
+    	final Reporting.Factory reportingFactory = new LoggerReporting.Factory("L0_SEGMENTJobGeneration"); 
+        final Reporting reporting = reportingFactory.newReporting(0);
+        String productName = mqiMessage.getBody().getKeyObjectStorage();
 
-    /**
-     * Ack job processing and stop app if needed
-     * 
-     * @param dto
-     * @param ackOk
-     * @param errorMessage
-     */
-    protected void ackProcessing(final GenericMessageDto<T> dto,
-    		final FailedProcessingDto failed,
-            final boolean ackOk, final String productName,
-            final String errorMessage) {
-        final boolean stopping = appStatus.getStatus().isStopping();
-
-        // Ack
-        if (ackOk) {
-            ackPositively(stopping, dto, productName);
-        } else {
-            ackNegatively(stopping, dto, productName, errorMessage);
-            errorRepoAppender.send(failed);
+        if (skipProduct(productName)) {
+        	LOGGER.warn("Skipping job generation for product {}", productName);
+        	return;
         }
+        LOGGER.debug("Handling consumption of {} product {}", category, productName);
 
-        // Check status
-        // TODO remove
-        LOGGER.info(
-                "[MONITOR] [step 3] [productName {}] Checking status application",
-                productName);
-        if (appStatus.getStatus().isStopping()) {
-            try {
-                mqiStatusService.stop();
-            } catch (final AbstractCodedException ace) {
-                LOGGER.error(
-                        "[MONITOR] [step 3] [productName {}] [code {}] {} ",
-                        productName, ace.getCode().getCode(),
-                        ace.getLogMessage());
-            }
-            System.exit(0);
-        } else if (appStatus.getStatus().isFatalError()) {
-            System.exit(-1);
-        } else {
-            appStatus.setWaiting();
-        }
-    }
-
-    /**
-     * @param dto
-     * @param errorMessage
-     */
-    protected void ackNegatively(final boolean stop,
-            final GenericMessageDto<T> dto, final String productName,
-            final String errorMessage) {
-        LOGGER.error(errorMessage);
-        appStatus.setError("NEXT_MESSAGE");
         try {
-            mqiClient.ack(
-            		new AckMessageDto(dto.getId(), Ack.ERROR,errorMessage, stop),
-            		category
-            );            
-        } catch (final AbstractCodedException ace) {
-            LOGGER.error("[MONITOR] [step 3] [productName {}] [code {}] {}",
-                    productName, ace.getCode().getCode(), ace.getLogMessage());
-        }
-    }
-
-    protected void ackPositively(final boolean stop,
-            final GenericMessageDto<T> dto, final String productName) {
-
-        // Log for functional monitoring
-        LOGGER.info(
-                "[MONITOR] [step 3] [s1pdgsTask {}] [subTask Consume] [productName {}] [STOP OK] Acknowledging positively",
-                getTaskForFunctionalLog(), productName);
-        try {
-            mqiClient.ack(
-                    new AckMessageDto(dto.getId(), Ack.OK, null, stop),
-                    category
+            // Check if a job is already created for message identifier
+            LOGGER.info("Creating/updating job for product {}", productName);
+            reporting.begin(
+            		new FilenameReportingInput(Collections.singletonList(mqiMessage.getBody().getKeyObjectStorage())),            		
+            		new ReportingMessage("Start job generation using {}", mqiMessage.getBody().getKeyObjectStorage())
             );
-        } catch (final AbstractCodedException ace) {
-            LOGGER.error("[MONITOR] [step 3] [productName {}] [code {}] {}",
-                    productName, ace.getCode().getCode(), ace.getLogMessage());
-            appStatus.setError("NEXT_MESSAGE");
+            AppDataJob<CatalogEvent> appDataJob = buildJob(mqiMessage);
+            productName = appDataJob.getProduct().getProductName();
+
+            LOGGER.info(
+                    "[MONITOR] [step 2] [productName {}] Dispatching product",
+                    productName);
+            if (appDataJob.getState() == AppDataJobState.WAITING || appDataJob.getState() == AppDataJobState.DISPATCHING) {
+                appDataJob.setState(AppDataJobState.DISPATCHING);
+                appDataJob = appDataService.patchJob(appDataJob.getId(), appDataJob, false, false, false);
+                publish(appDataJob, mqiMessage.getBody().getProductFamily(), mqiMessage.getInputKey());
+            } else {
+                LOGGER.info(
+                        "[MONITOR] [step 2] [productName {}] Job for datatake already dispatched",
+                        productName);
+            }
+            LOGGER.debug("Done handling consumption of {} product {}", category, productName);
+        } catch (final AbstractCodedException ace) {            
+            final String errorMessage = String.format(
+            		"[productName %s] [code %d] %s",
+            		productName, 
+            		ace.getCode().getCode(),
+            		ace.getLogMessage()
+            );
+            reporting.error(new ReportingMessage("[code {}] {}", ace.getCode().getCode(), ace.getLogMessage()));
+            errorRepoAppender.send(
+            	new FailedProcessingDto(processSettings.getHostname(),new Date(), errorMessage, mqiMessage)
+            );
         }
     }
-
-    protected abstract String getTaskForFunctionalLog();
+	
+	protected abstract AppDataJob<CatalogEvent> buildJob(final GenericMessageDto<CatalogEvent> mqiMessage);
     
-    public abstract void setTaskForFunctionalLog(String taskForFunctionalLog);
-
+    private final MqiConsumer<CatalogEvent> newMqiConsumer() {
+    	return new MqiConsumer<CatalogEvent>(
+    			mqiClient, 
+    			category, 
+    			this, 
+    			processSettings.getFixedDelayMs(),
+				processSettings.getInitialDelayMs(), 
+				appStatus
+		);
+    }
+    
+    private boolean skipProduct(final String productName) {    	
+    	boolean skip = false;
+		if(blackList != null && blackList.matcher(productName).matches()) {
+			skip = true;
+		} 
+		return skip;
+	}
+    
+    
+    
+    protected void publish(
+    		final AppDataJob<CatalogEvent> appDataJob,
+    		final ProductFamily family,
+    		final String topic    		
+    ) {   
+    	final IpfPreparationJob job = new IpfPreparationJob();
+    	job.setAppDataJob(appDataJob);
+    	
+    	final GenericPublicationMessageDto<IpfPreparationJob> messageDto = new GenericPublicationMessageDto<IpfPreparationJob>(
+    			appDataJob.getId(), 
+    			family, 
+    			job
+    	);
+    	messageDto.setInputKey(topic);
+    	messageDto.setOutputKey(job.getProductFamily().name());
+		try {
+			mqiClient.publish(messageDto, ProductCategory.PREPARATION_JOB);
+		} catch (final AbstractCodedException e) {
+			throw new RuntimeException(
+					String.format(
+							"Error publishing %s message %s: %s", 
+							ProductCategory.PREPARATION_JOB, 
+							messageDto, 
+							e.getLogMessage()
+					),
+					e
+			);
+		}
+    }
 }

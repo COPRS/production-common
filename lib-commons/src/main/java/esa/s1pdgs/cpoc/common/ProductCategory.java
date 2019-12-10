@@ -3,6 +3,7 @@ package esa.s1pdgs.cpoc.common;
 import esa.s1pdgs.cpoc.common.errors.InternalErrorException;
 import esa.s1pdgs.cpoc.mqi.model.queue.AbstractMessage;
 import esa.s1pdgs.cpoc.mqi.model.queue.CatalogEvent;
+import esa.s1pdgs.cpoc.mqi.model.queue.CatalogJob;
 import esa.s1pdgs.cpoc.mqi.model.queue.CompressionEvent;
 import esa.s1pdgs.cpoc.mqi.model.queue.CompressionJob;
 import esa.s1pdgs.cpoc.mqi.model.queue.IngestionEvent;
@@ -31,6 +32,8 @@ public enum ProductCategory {
     INGESTION_EVENT(IngestionEvent.class),
     PREPARATION_JOB(IpfPreparationJob.class),    
     CATALOG_EVENT(CatalogEvent.class),
+    CATALOG_JOB(CatalogJob.class),
+    PRODUCTION_EVENT(ProductionEvent.class),
     PRIP_JOBS(PripPublishingJob.class);
 	
     /**

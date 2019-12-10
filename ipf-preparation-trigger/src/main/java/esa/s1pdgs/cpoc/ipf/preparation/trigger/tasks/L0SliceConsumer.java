@@ -3,11 +3,7 @@ package esa.s1pdgs.cpoc.ipf.preparation.trigger.tasks;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 import java.util.regex.Pattern;
-
-import javax.annotation.PostConstruct;
 
 import org.springframework.util.CollectionUtils;
 
@@ -21,12 +17,9 @@ import esa.s1pdgs.cpoc.common.ProductFamily;
 import esa.s1pdgs.cpoc.common.errors.AbstractCodedException;
 import esa.s1pdgs.cpoc.errorrepo.ErrorRepoAppender;
 import esa.s1pdgs.cpoc.errorrepo.model.rest.FailedProcessingDto;
-import esa.s1pdgs.cpoc.ipf.preparation.trigger.config.L0SlicePatternSettings;
 import esa.s1pdgs.cpoc.ipf.preparation.trigger.config.ProcessSettings;
 import esa.s1pdgs.cpoc.metadata.client.MetadataClient;
 import esa.s1pdgs.cpoc.mqi.client.GenericMqiClient;
-import esa.s1pdgs.cpoc.mqi.client.MqiConsumer;
-import esa.s1pdgs.cpoc.mqi.client.MqiListener;
 import esa.s1pdgs.cpoc.mqi.client.StatusService;
 import esa.s1pdgs.cpoc.mqi.model.queue.CatalogEvent;
 import esa.s1pdgs.cpoc.mqi.model.rest.GenericMessageDto;
@@ -39,45 +32,28 @@ import esa.s1pdgs.cpoc.report.ReportingMessage;
  * @author birol_colak@net.werum
  *
  */
-public class L0SliceConsumer extends AbstractGenericConsumer<CatalogEvent> implements MqiListener<CatalogEvent>{
-    private final Pattern seaCoverageCheckPattern;
-    
-    private String taskForFunctionalLog;
-    
+public class L0SliceConsumer extends AbstractGenericConsumer<CatalogEvent> {
+    private final Pattern seaCoverageCheckPattern;    
     private final MetadataClient metadataClient;
-
-    private final long pollingIntervalMs;
-    
-    private final long pollingInitialDelayMs;
   
 	public L0SliceConsumer(
-			final L0SlicePatternSettings patternSettings, final ProcessSettings processSettings,
-			final GenericMqiClient mqiClient, final StatusService mqiStatusService,
-			final AppCatalogJobClient<CatalogEvent> appDataService, final ErrorRepoAppender errorRepoAppender,
-			final AppStatus appStatus, final MetadataClient metadataClient, final long pollingIntervalMs,
-			final long pollingInitialDelayMs) {
+			final ProcessSettings processSettings,
+			final GenericMqiClient mqiClient,
+			final StatusService mqiStatusService,
+			final AppCatalogJobClient<CatalogEvent> appDataService, 
+			final ErrorRepoAppender errorRepoAppender,
+			final AppStatus appStatus, 
+			final MetadataClient metadataClient
+	) {
 		super(processSettings, mqiClient, mqiStatusService, appDataService, appStatus,
 				errorRepoAppender, ProductCategory.LEVEL_PRODUCTS);
-		this.seaCoverageCheckPattern = Pattern.compile(patternSettings.getSeaCoverageCheckPattern());
+		this.seaCoverageCheckPattern = Pattern.compile(processSettings.getSeaCoverageCheckPattern());
 		this.metadataClient = metadataClient;
-		this.pollingIntervalMs = pollingIntervalMs;
-		this.pollingInitialDelayMs = pollingInitialDelayMs;
-	}
-
-	@PostConstruct
-	public void initService() {
-		appStatus.setWaiting();
-		if (pollingIntervalMs > 0) {
-			final ExecutorService service = Executors.newFixedThreadPool(1);
-			service.execute(new MqiConsumer<CatalogEvent>(mqiClient, category, this, pollingIntervalMs,
-					pollingInitialDelayMs, esa.s1pdgs.cpoc.appstatus.AppStatus.NULL));
-		}
 	}
 
     
     @Override
     public void onMessage(final GenericMessageDto<CatalogEvent> mqiMessage) {
-    	appStatus.setWaiting();
     	final Reporting.Factory reportingFactory = new LoggerReporting.Factory("L1JobGeneration"); 
     	final Reporting reporting = reportingFactory.newReporting(0);
     	
@@ -131,7 +107,7 @@ public class L0SliceConsumer extends AbstractGenericConsumer<CatalogEvent> imple
                 appDataJob = appDataService.patchJob(appDataJob.getId(),
                         appDataJob, false, false, false);
             }
-            publish(appDataJob);
+            publish(appDataJob, family, mqiMessage.getInputKey());
 
             // Ack
             step++;
@@ -154,7 +130,8 @@ public class L0SliceConsumer extends AbstractGenericConsumer<CatalogEvent> imple
         reporting.end(new ReportingMessage("End job generation using {}", productName));
     }
 
-    protected AppDataJob<CatalogEvent> buildJob(final GenericMessageDto<CatalogEvent> mqiMessage)
+    @Override
+	protected AppDataJob<CatalogEvent> buildJob(final GenericMessageDto<CatalogEvent> mqiMessage)
             throws AbstractCodedException {
         final CatalogEvent event = mqiMessage.getBody();
 
@@ -198,15 +175,5 @@ public class L0SliceConsumer extends AbstractGenericConsumer<CatalogEvent> imple
             // Job already exists
             return jobDto;
         }
-    }
-
-    @Override
-    protected String getTaskForFunctionalLog() {
-    	return this.taskForFunctionalLog;
-    }
-    
-    @Override
-    public void setTaskForFunctionalLog(final String taskForFunctionalLog) {
-    	this.taskForFunctionalLog = taskForFunctionalLog; 
     }
 }

@@ -4,11 +4,7 @@ import java.io.File;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 import java.util.stream.Collectors;
-
-import javax.annotation.PostConstruct;
 
 import org.springframework.util.CollectionUtils;
 
@@ -20,6 +16,7 @@ import esa.s1pdgs.cpoc.appcatalog.client.job.AppCatalogJobClient;
 import esa.s1pdgs.cpoc.appstatus.AppStatus;
 import esa.s1pdgs.cpoc.common.EdrsSessionFileType;
 import esa.s1pdgs.cpoc.common.ProductCategory;
+import esa.s1pdgs.cpoc.common.ProductFamily;
 import esa.s1pdgs.cpoc.common.errors.AbstractCodedException;
 import esa.s1pdgs.cpoc.common.errors.InvalidFormatProduct;
 import esa.s1pdgs.cpoc.errorrepo.ErrorRepoAppender;
@@ -28,8 +25,6 @@ import esa.s1pdgs.cpoc.ipf.preparation.trigger.config.ProcessSettings;
 import esa.s1pdgs.cpoc.metadata.client.MetadataClient;
 import esa.s1pdgs.cpoc.metadata.model.EdrsSessionMetadata;
 import esa.s1pdgs.cpoc.mqi.client.GenericMqiClient;
-import esa.s1pdgs.cpoc.mqi.client.MqiConsumer;
-import esa.s1pdgs.cpoc.mqi.client.MqiListener;
 import esa.s1pdgs.cpoc.mqi.client.StatusService;
 import esa.s1pdgs.cpoc.mqi.model.queue.CatalogEvent;
 import esa.s1pdgs.cpoc.mqi.model.rest.GenericMessageDto;
@@ -38,48 +33,27 @@ import esa.s1pdgs.cpoc.report.LoggerReporting;
 import esa.s1pdgs.cpoc.report.Reporting;
 import esa.s1pdgs.cpoc.report.ReportingMessage;
 
-public class EdrsSessionConsumer extends AbstractGenericConsumer<CatalogEvent> implements MqiListener<CatalogEvent> {	
-    private String taskForFunctionalLog;
-    
+public class EdrsSessionConsumer extends AbstractGenericConsumer<CatalogEvent> {	
+    private String taskForFunctionalLog;    
     private final MetadataClient metadataClient;
-    
-    private final long pollingIntervalMs;
-    
-    private final long pollingInitialDelayMs;
 
 	public EdrsSessionConsumer(
-			final ProcessSettings processSettings, final GenericMqiClient mqiClient,
-			final StatusService mqiStatusService, final AppCatalogJobClient<CatalogEvent> appDataService,
-			final ErrorRepoAppender errorRepoAppender, final AppStatus appStatus, final MetadataClient metadataClient,
-			final long pollingIntervalMs, final long pollingInitialDelayMs) {
+			final ProcessSettings processSettings, 
+			final GenericMqiClient mqiClient,
+			final StatusService mqiStatusService, 
+			final AppCatalogJobClient<CatalogEvent> appDataService,
+			final ErrorRepoAppender errorRepoAppender, 
+			final AppStatus appStatus, 
+			final MetadataClient metadataClient
+	) {
 		super(processSettings, mqiClient, mqiStatusService, appDataService, appStatus, errorRepoAppender,
 				ProductCategory.EDRS_SESSIONS);
 		this.metadataClient = metadataClient;
-		this.pollingIntervalMs = pollingIntervalMs;
-		this.pollingInitialDelayMs = pollingInitialDelayMs;
-	}
-
-	@PostConstruct
-	public void initService() {
-		appStatus.setWaiting();
-		if (pollingIntervalMs > 0) {
-			final ExecutorService service = Executors.newFixedThreadPool(1);
-			service.execute(new MqiConsumer<CatalogEvent>(mqiClient, category, this, pollingIntervalMs,
-					pollingInitialDelayMs, esa.s1pdgs.cpoc.appstatus.AppStatus.NULL));
-		}
 	}
 
     @Override
-    public void onMessage(final GenericMessageDto<CatalogEvent> mqiMessage) {
-    
-    	appStatus.setWaiting();
+    public void onMessage(final GenericMessageDto<CatalogEvent> mqiMessage) {        	
         final Reporting.Factory reportingFactory = new LoggerReporting.Factory("L0JobGeneration");   
-        
-        // First, consume message
-        if (mqiMessage == null || mqiMessage.getBody() == null) {
-            LOGGER.trace("[MONITOR] [step 0] No message received: continue");
-            return;
-        }
 
         // Second process message
         final CatalogEvent event = mqiMessage.getBody();
@@ -131,9 +105,9 @@ public class EdrsSessionConsumer extends AbstractGenericConsumer<CatalogEvent> i
                         appDataJob = appDataService.patchJob(
                                 appDataJob.getId(), appDataJob, false,
                                 false, false);
-                        LOGGER.debug ("== appDataJob(2) {}",appDataJob.toString());
+                        LOGGER.debug ("== appDataJob(2) {}", appDataJob.toString());
                     }
-                    publish(appDataJob);
+                    publish(appDataJob, ProductFamily.EDRS_SESSION, mqiMessage.getInputKey());
                 }
                 // Ack
                 step++;
@@ -148,11 +122,8 @@ public class EdrsSessionConsumer extends AbstractGenericConsumer<CatalogEvent> i
                 reporting.error(new ReportingMessage("[code {}] {}", ace.getCode().getCode(), ace.getLogMessage()));
                 
                 failedProc = new FailedProcessingDto(processSettings.getHostname(),new Date(),errorMessage, mqiMessage);
+                errorRepoAppender.send(failedProc);
             }  
-            
-            // Ack and check if application shall stopped
-            ackProcessing(mqiMessage, failedProc, ackOk, productName, errorMessage);
-
             step = 0;
             LOGGER.info("[MONITOR] [step 0] [productName {}] End", step, event.getKeyObjectStorage());                       
             reporting.end(new ReportingMessage("End job generation using {}", mqiMessage.getBody().getKeyObjectStorage()));
@@ -219,7 +190,6 @@ public class EdrsSessionConsumer extends AbstractGenericConsumer<CatalogEvent> i
                 LOGGER.debug ("== newJobDto {}",newJobDto.toString());
                 return newJobDto;
             } else {
-
                 // Update pod if needed
                 boolean update = false;
                 boolean updateMessage = false;
@@ -270,9 +240,7 @@ public class EdrsSessionConsumer extends AbstractGenericConsumer<CatalogEvent> i
                             jobDto, updateMessage, updateProduct, false);
                     LOGGER.debug ("== updated(1) jobDto {}", jobDto.toString());
                 }
-                // Return object
                 return jobDto;
-
             }
 
         } else {
@@ -293,19 +261,7 @@ public class EdrsSessionConsumer extends AbstractGenericConsumer<CatalogEvent> i
                         updateMessage, updateProduct, false);
                 LOGGER.debug ("== updated(2) jobDto {}", jobDto.toString());
             }
-            // Return object
             return jobDto;
         }
-
-    }
-
-    @Override
-    protected String getTaskForFunctionalLog() {
-    	return this.taskForFunctionalLog;
-    }
-    
-    @Override
-    public void setTaskForFunctionalLog(final String taskForFunctionalLog) {
-    	this.taskForFunctionalLog = taskForFunctionalLog; 
     }
 }
