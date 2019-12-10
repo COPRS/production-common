@@ -12,7 +12,6 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import esa.s1pdgs.cpoc.appcatalog.AppDataJob;
-import esa.s1pdgs.cpoc.appcatalog.AppDataJobState;
 import esa.s1pdgs.cpoc.appcatalog.client.job.AppCatalogJobClient;
 import esa.s1pdgs.cpoc.appstatus.AppStatus;
 import esa.s1pdgs.cpoc.common.ProductCategory;
@@ -21,6 +20,7 @@ import esa.s1pdgs.cpoc.common.errors.AbstractCodedException;
 import esa.s1pdgs.cpoc.errorrepo.ErrorRepoAppender;
 import esa.s1pdgs.cpoc.errorrepo.model.rest.FailedProcessingDto;
 import esa.s1pdgs.cpoc.ipf.preparation.trigger.config.ProcessSettings;
+import esa.s1pdgs.cpoc.metadata.client.MetadataClient;
 import esa.s1pdgs.cpoc.mqi.client.GenericMqiClient;
 import esa.s1pdgs.cpoc.mqi.client.MqiConsumer;
 import esa.s1pdgs.cpoc.mqi.client.MqiListener;
@@ -37,7 +37,7 @@ import esa.s1pdgs.cpoc.report.ReportingMessage;
 
 public abstract class AbstractGenericConsumer<T extends AbstractMessage> implements MqiListener<CatalogEvent> {
     protected static final Logger LOGGER = LogManager.getLogger(AbstractGenericConsumer.class);
-
+    
     protected final ProcessSettings processSettings;
     protected final GenericMqiClient mqiClient;
     protected final AppCatalogJobClient<CatalogEvent> appDataService;
@@ -45,7 +45,9 @@ public abstract class AbstractGenericConsumer<T extends AbstractMessage> impleme
     protected final AppStatus appStatus;    
     protected final ErrorRepoAppender errorRepoAppender;    
     protected final ProductCategory category;
-    private final Pattern blackList;
+    private final Pattern blackList;    
+    private final Pattern seaCoverageCheckPattern;    
+    private final MetadataClient metadataClient;
 
     public AbstractGenericConsumer(
             final ProcessSettings processSettings,
@@ -54,8 +56,9 @@ public abstract class AbstractGenericConsumer<T extends AbstractMessage> impleme
             final AppCatalogJobClient<CatalogEvent> appDataService,
             final AppStatus appStatus,
             final ErrorRepoAppender errorRepoAppender,
-            final ProductCategory category
-    		) {
+            final ProductCategory category,
+            final MetadataClient metadataClient
+    ) {
         this.processSettings = processSettings;
         this.mqiClient = mqiService;
         this.mqiStatusService = mqiStatusService;
@@ -63,7 +66,11 @@ public abstract class AbstractGenericConsumer<T extends AbstractMessage> impleme
         this.appStatus = appStatus;
         this.errorRepoAppender = errorRepoAppender;
         this.category = category;
-        this.blackList = (processSettings.getBlacklistPattern() == null) ? null : Pattern.compile(processSettings.getBlacklistPattern(), Pattern.CASE_INSENSITIVE);
+        this.blackList = (processSettings.getBlacklistPattern() == null) ? 
+        		null : 
+        		Pattern.compile(processSettings.getBlacklistPattern(), Pattern.CASE_INSENSITIVE);
+		this.seaCoverageCheckPattern = Pattern.compile(processSettings.getSeaCoverageCheckPattern());
+		this.metadataClient = metadataClient;
     }
     
 	@PostConstruct
@@ -74,42 +81,41 @@ public abstract class AbstractGenericConsumer<T extends AbstractMessage> impleme
 			service.execute(newMqiConsumer());
 		}
 	} 
-	
+
     @Override
     public void onMessage(final GenericMessageDto<CatalogEvent> mqiMessage) {
     	final Reporting.Factory reportingFactory = new LoggerReporting.Factory("L0_SEGMENTJobGeneration"); 
         final Reporting reporting = reportingFactory.newReporting(0);
-        String productName = mqiMessage.getBody().getKeyObjectStorage();
+        final String productName = mqiMessage.getBody().getKeyObjectStorage();
+        final ProductFamily family = mqiMessage.getBody().getProductFamily();
 
-        if (skipProduct(productName)) {
-        	LOGGER.warn("Skipping job generation for product {}", productName);
-        	return;
-        }
-        LOGGER.debug("Handling consumption of {} product {}", category, productName);
 
         try {
+            // TODO generalize filtering
+            if (skipProduct(productName)) {
+            	LOGGER.warn("Skipping job generation for product {}", productName);
+            	return;
+            }
+            
+            // S1PRO-483: check for matching products if they are over sea. If not, simply skip the
+            // production
+            if (seaCoverageCheckPattern.matcher(productName).matches()) {          	
+            	if (metadataClient.getSeaCoverage(family, productName) <= processSettings.getMinSeaCoveragePercentage()) {
+                    return;
+                }
+            }  
+            LOGGER.debug("Handling consumption of {} product {}", category, productName);
+        	
             // Check if a job is already created for message identifier
             LOGGER.info("Creating/updating job for product {}", productName);
             reporting.begin(
             		new FilenameReportingInput(Collections.singletonList(mqiMessage.getBody().getKeyObjectStorage())),            		
             		new ReportingMessage("Start job generation using {}", mqiMessage.getBody().getKeyObjectStorage())
             );
-            AppDataJob<CatalogEvent> appDataJob = buildJob(mqiMessage);
-            productName = appDataJob.getProduct().getProductName();
-
-            LOGGER.info(
-                    "[MONITOR] [step 2] [productName {}] Dispatching product",
-                    productName);
-            if (appDataJob.getState() == AppDataJobState.WAITING || appDataJob.getState() == AppDataJobState.DISPATCHING) {
-                appDataJob.setState(AppDataJobState.DISPATCHING);
-                appDataJob = appDataService.patchJob(appDataJob.getId(), appDataJob, false, false, false);
-                publish(appDataJob, mqiMessage.getBody().getProductFamily(), mqiMessage.getInputKey());
-            } else {
-                LOGGER.info(
-                        "[MONITOR] [step 2] [productName {}] Job for datatake already dispatched",
-                        productName);
-            }
+            final AppDataJob<CatalogEvent> appDataJob = dispatch(mqiMessage);
+            publish(appDataJob, mqiMessage.getBody().getProductFamily(), mqiMessage.getInputKey());
             LOGGER.debug("Done handling consumption of {} product {}", category, productName);
+            reporting.end(new ReportingMessage("End job generation using {}", productName));
         } catch (final AbstractCodedException ace) {            
             final String errorMessage = String.format(
             		"[productName %s] [code %d] %s",
@@ -123,31 +129,10 @@ public abstract class AbstractGenericConsumer<T extends AbstractMessage> impleme
             );
         }
     }
-	
-	protected abstract AppDataJob<CatalogEvent> buildJob(final GenericMessageDto<CatalogEvent> mqiMessage);
     
-    private final MqiConsumer<CatalogEvent> newMqiConsumer() {
-    	return new MqiConsumer<CatalogEvent>(
-    			mqiClient, 
-    			category, 
-    			this, 
-    			processSettings.getFixedDelayMs(),
-				processSettings.getInitialDelayMs(), 
-				appStatus
-		);
-    }
-    
-    private boolean skipProduct(final String productName) {    	
-    	boolean skip = false;
-		if(blackList != null && blackList.matcher(productName).matches()) {
-			skip = true;
-		} 
-		return skip;
-	}
-    
-    
-    
-    protected void publish(
+	protected abstract AppDataJob<CatalogEvent> dispatch(final GenericMessageDto<CatalogEvent> mqiMessage) throws AbstractCodedException;
+	    
+    private final void publish(
     		final AppDataJob<CatalogEvent> appDataJob,
     		final ProductFamily family,
     		final String topic    		
@@ -176,4 +161,23 @@ public abstract class AbstractGenericConsumer<T extends AbstractMessage> impleme
 			);
 		}
     }
+
+    private final MqiConsumer<CatalogEvent> newMqiConsumer() {
+    	return new MqiConsumer<CatalogEvent>(
+    			mqiClient, 
+    			category, 
+    			this, 
+    			processSettings.getFixedDelayMs(),
+				processSettings.getInitialDelayMs(), 
+				appStatus
+		);
+    }
+    
+    private final boolean skipProduct(final String productName) {    	
+    	boolean skip = false;
+		if(blackList != null && blackList.matcher(productName).matches()) {
+			skip = true;
+		} 
+		return skip;
+	}
 }

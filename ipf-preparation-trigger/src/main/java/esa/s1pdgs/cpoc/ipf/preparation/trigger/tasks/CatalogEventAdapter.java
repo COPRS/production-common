@@ -1,5 +1,7 @@
 package esa.s1pdgs.cpoc.ipf.preparation.trigger.tasks;
 
+import java.util.List;
+
 import com.fasterxml.jackson.databind.JsonNode;
 
 import esa.s1pdgs.cpoc.mqi.model.queue.CatalogEvent;
@@ -54,6 +56,10 @@ public final class CatalogEventAdapter {
 	
 	public final String polarisation() {
 		return getStringValue("polarisation");
+	}
+	
+	public final List<String> listValues(final String name) {
+		return event.getMetadata().findValuesAsText(name);
 	}
 
     private final String getStringValue(final String key)

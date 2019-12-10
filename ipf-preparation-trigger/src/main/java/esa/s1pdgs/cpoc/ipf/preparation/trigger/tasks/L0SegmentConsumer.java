@@ -1,8 +1,6 @@
 package esa.s1pdgs.cpoc.ipf.preparation.trigger.tasks;
 
 
-import java.util.Collections;
-import java.util.Date;
 import java.util.List;
 
 import org.springframework.util.CollectionUtils;
@@ -15,114 +13,50 @@ import esa.s1pdgs.cpoc.appstatus.AppStatus;
 import esa.s1pdgs.cpoc.common.ProductCategory;
 import esa.s1pdgs.cpoc.common.errors.AbstractCodedException;
 import esa.s1pdgs.cpoc.errorrepo.ErrorRepoAppender;
-import esa.s1pdgs.cpoc.errorrepo.model.rest.FailedProcessingDto;
 import esa.s1pdgs.cpoc.ipf.preparation.trigger.config.ProcessSettings;
+import esa.s1pdgs.cpoc.metadata.client.MetadataClient;
 import esa.s1pdgs.cpoc.mqi.client.GenericMqiClient;
 import esa.s1pdgs.cpoc.mqi.client.StatusService;
 import esa.s1pdgs.cpoc.mqi.model.queue.CatalogEvent;
 import esa.s1pdgs.cpoc.mqi.model.rest.GenericMessageDto;
-import esa.s1pdgs.cpoc.report.FilenameReportingInput;
-import esa.s1pdgs.cpoc.report.LoggerReporting;
-import esa.s1pdgs.cpoc.report.Reporting;
-import esa.s1pdgs.cpoc.report.ReportingMessage;
 
-public class L0SegmentConsumer extends AbstractGenericConsumer<CatalogEvent> {    
+public final class L0SegmentConsumer extends AbstractGenericConsumer<CatalogEvent> {    
 	public L0SegmentConsumer(
-			final ProcessSettings processSettings,
-			final GenericMqiClient mqiClient, 
-			final StatusService mqiStatusService,
-			final AppCatalogJobClient<CatalogEvent> appDataService, 
-			final ErrorRepoAppender errorRepoAppender,
-			final AppStatus appStatus, 
-			final long pollingIntervalMs, 
-			final long pollingInitialDelayMs
+			final ProcessSettings processSettings, 
+			final GenericMqiClient mqiClient,
+			final StatusService mqiStatusService, 
+			final AppCatalogJobClient<CatalogEvent> appDataService,
+			final ErrorRepoAppender errorRepoAppender, 
+			final AppStatus appStatus,
+			final MetadataClient metadataClient
 	) {
-		super(processSettings, mqiClient, mqiStatusService, appDataService, appStatus,
-				errorRepoAppender, ProductCategory.LEVEL_SEGMENTS);		
+		super(
+				processSettings, 
+				mqiClient, 
+				mqiStatusService, 
+				appDataService, 
+				appStatus, 
+				errorRepoAppender,
+				ProductCategory.EDRS_SESSIONS,
+				metadataClient
+		);
 	}
-
+	
     @Override
-    public void onMessage(final GenericMessageDto<CatalogEvent> mqiMessage) {
-    	final Reporting.Factory reportingFactory = new LoggerReporting.Factory("L0_SEGMENTJobGeneration"); 
-        final Reporting reporting = reportingFactory.newReporting(0);
+	protected final AppDataJob<CatalogEvent> dispatch(final GenericMessageDto<CatalogEvent> mqiMessage) throws AbstractCodedException {
+        final AppDataJob<CatalogEvent> appDataJob = buildJob(mqiMessage);
+        final String productName = appDataJob.getProduct().getProductName();
+        LOGGER.info("Dispatching product {}", productName);
         
-        // process message
-        appStatus.setProcessing(mqiMessage.getId());
-        int step = 1;
-        boolean ackOk = false;
-        String errorMessage = "";
-        String productName = mqiMessage.getBody().getKeyObjectStorage();
-        
-        if(skipProduct(productName)) {
-        	LOGGER.warn("Skipping job generation for product {}", productName);
-        	return;
+        if (appDataJob.getState() == AppDataJobState.WAITING || appDataJob.getState() == AppDataJobState.DISPATCHING) {
+            appDataJob.setState(AppDataJobState.DISPATCHING);
+            return appDataService.patchJob(appDataJob.getId(), appDataJob, false, false, false);
         }
-        
-        FailedProcessingDto failedProc = new FailedProcessingDto();
-        
-        // Note: the report log of consume and global log is raised during
-        // building job to get the datatake identifier which is the real
-        // product name
+        LOGGER.info("Job for datatake already dispatched, product {}", productName);
+        return appDataJob;
+	}    
 
-        try {
-
-            // Check if a job is already created for message identifier
-            LOGGER.info(
-                    "[MONITOR] [step 1] [productName {}] Creating/updating job",
-                    productName);
-            reporting.begin(
-            		new FilenameReportingInput(Collections.singletonList(mqiMessage.getBody().getKeyObjectStorage())),            		
-            		new ReportingMessage("Start job generation using {}", mqiMessage.getBody().getKeyObjectStorage())
-            );
-            AppDataJob<CatalogEvent> appDataJob = buildJob(mqiMessage);
-            productName = appDataJob.getProduct().getProductName();
-
-            // Dispatch job
-            step++;
-            LOGGER.info(
-                    "[MONITOR] [step 2] [productName {}] Dispatching product",
-                    productName);
-            if (appDataJob.getState() == AppDataJobState.WAITING
-                    || appDataJob
-                            .getState() == AppDataJobState.DISPATCHING) {
-                appDataJob.setState(AppDataJobState.DISPATCHING);
-                appDataJob = appDataService.patchJob(appDataJob.getId(),
-                        appDataJob, false, false, false);
-                publish(appDataJob, mqiMessage.getBody().getProductFamily(), mqiMessage.getInputKey());
-            } else {
-                LOGGER.info(
-                        "[MONITOR] [step 2] [productName {}] Job for datatake already dispatched",
-                        productName);
-            }
-
-            // Ack
-            step++;
-            ackOk = true;
-
-        } catch (final AbstractCodedException ace) {
-            ackOk = false;
-            errorMessage = String.format(
-                    "[MONITOR] [step %d] [productName %s] [code %d] %s", step,
-                    productName, ace.getCode().getCode(),
-                    ace.getLogMessage());
-            reporting.error(new ReportingMessage("[code {}] {}", ace.getCode().getCode(), ace.getLogMessage()));
-
-            failedProc = new FailedProcessingDto(processSettings.getHostname(),new Date(),errorMessage, mqiMessage);
-            
-        }
-
-        // Ack and check if application shall stopped
-        ackProcessing(mqiMessage, failedProc, ackOk, productName, errorMessage);
-
-        LOGGER.info("[MONITOR] [step 0] [productName {}] End",
-                productName);
-        
-        reporting.end(new ReportingMessage("End job generation using {}", mqiMessage.getBody().getKeyObjectStorage()));
-    }
-
-
-
-	protected AppDataJob<CatalogEvent> buildJob(
+	private final AppDataJob<CatalogEvent> buildJob(
             final GenericMessageDto<CatalogEvent> mqiMessage)
             throws AbstractCodedException {
         final CatalogEvent catEvent = mqiMessage.getBody();
