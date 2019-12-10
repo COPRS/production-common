@@ -27,6 +27,7 @@ public enum ProductCategory {
     COMPRESSED_PRODUCTS(CompressionEvent.class),
     INGESTION(IngestionJob.class),
     INGESTION_EVENT(IngestionEvent.class),
+    PRODUCTION_EVENT(ProductionEvent.class),
     PRIP_JOBS(PripPublishingJob.class);
 	
     /**
