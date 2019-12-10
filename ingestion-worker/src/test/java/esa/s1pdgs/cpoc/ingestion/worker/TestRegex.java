@@ -1,5 +1,6 @@
 package esa.s1pdgs.cpoc.ingestion.worker;
 
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
 
 import java.util.Arrays;
@@ -43,8 +44,13 @@ public class TestRegex {
 			else {
 				System.out.println(name + " matches " + auxPattern);
 			}
-		}
-		
+		}		
+	}
+	
+	@Test
+	public final void testAuxRegex_ShallNotMAtchOnSubdirs() {
+		final Pattern auxPattern = Pattern.compile(PATTERN_STR);		
+		assertEquals(false, auxPattern.matcher("S1B_AUX_CAL_V20160422T000000_G20170328T092822.SAFE/manifest.safe").matches());
 	}
 	
 	private static final String OTHER_PATTERN = "(.*\\.tmp$|^lost\\+found$)";
