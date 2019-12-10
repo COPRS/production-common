@@ -20,6 +20,7 @@ import esa.s1pdgs.cpoc.mqi.client.MqiClient;
 import esa.s1pdgs.cpoc.mqi.client.MqiConsumer;
 import esa.s1pdgs.cpoc.mqi.model.queue.CatalogJob;
 import esa.s1pdgs.cpoc.mqi.model.queue.IngestionEvent;
+import esa.s1pdgs.cpoc.mqi.model.queue.ProductionEvent;
 import esa.s1pdgs.cpoc.mqi.model.rest.GenericMessageDto;
 import esa.s1pdgs.cpoc.mqi.model.rest.GenericPublicationMessageDto;
 
@@ -72,20 +73,42 @@ public class MetadataTriggerService {
 	
 	private final MqiConsumer<?> newMqiConsumerFor(final ProductCategory cat, final CategoryConfig config) {
 		LOG.debug("Creating MQI consumer for category {} using {}", cat, config);
-		return new MqiConsumer<IngestionEvent>(
-				mqiClient, 
-				cat, 
-				p -> publish(cat, p, toCatalogJob(p.getBody())),
-				config.getFixedDelayMs(),
-				config.getInitDelayPolMs(),
-				appStatus
-		);
+		if (cat == ProductCategory.INGESTION_EVENT) {
+			return new MqiConsumer<IngestionEvent>(
+					mqiClient, 
+					cat, 
+					p -> publish(cat, p, toCatalogJob(p.getBody())),
+					config.getFixedDelayMs(),
+					config.getInitDelayPolMs(),
+					appStatus
+			);
+		} else if (cat == ProductCategory.PRODUCTION_EVENT) {
+			return new MqiConsumer<ProductionEvent>(
+					mqiClient, 
+					cat, 
+					p -> publish(cat, p, toCatalogJob(p.getBody())),
+					config.getFixedDelayMs(),
+					config.getInitDelayPolMs(),
+					appStatus
+			);
+		} else {
+			throw new IllegalArgumentException(String.format("Invalid product category %s. Available are %s", cat, ProductCategory.values()));
+		}
 	}
 		
 	private final CatalogJob toCatalogJob(final IngestionEvent event) {
 		final CatalogJob job = new CatalogJob();
 		job.setProductName(event.getProductName());
 		job.setRelativePath(event.getRelativePath());
+		job.setProductFamily(event.getProductFamily());
+		job.setKeyObjectStorage(event.getKeyObjectStorage());
+		return job;
+	}
+	
+	private final CatalogJob toCatalogJob(final ProductionEvent event) {
+		final CatalogJob job = new CatalogJob();
+		job.setProductName(event.getProductName());
+		// relativ path should not be needed here --> only evaluated for EDRS_SESSION
 		job.setProductFamily(event.getProductFamily());
 		job.setKeyObjectStorage(event.getKeyObjectStorage());
 		return job;
