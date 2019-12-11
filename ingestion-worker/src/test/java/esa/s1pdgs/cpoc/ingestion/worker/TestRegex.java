@@ -31,7 +31,7 @@ public class TestRegex {
 	
 	private static final List<String> IGNORED = Arrays.asList("foo.tmp","lost+found");
 	
-	private static final String PATTERN_STR = "^[0-9a-zA-Z][0-9a-zA-Z][0-9a-zA-Z]_((OPER|TEST|REPR)_)?(AUX_OBMEMC|AUX_PP1|AUX_PP2|AUX_CAL|AUX_INS|AUX_RESORB|AUX_WND|AUX_ICE|AUX_WAV|MPL_ORBPRE|MPL_ORBSCT)_.*\\.(xml|XML|EOF|SAFE)?$";
+	private static final String PATTERN_STR = "^[0-9a-zA-Z][0-9a-zA-Z][0-9a-zA-Z]_((OPER|TEST|REPR)_)?(AUX_OBMEMC|AUX_PP1|AUX_PP2|AUX_CAL|AUX_INS|AUX_RESORB|AUX_WND|AUX_ICE|AUX_WAV|MPL_ORBPRE|MPL_ORBSCT)_[^/]*\\.(xml|XML|EOF|SAFE)?$";
 	
 	@Test
 	public final void testAuxRegex() {

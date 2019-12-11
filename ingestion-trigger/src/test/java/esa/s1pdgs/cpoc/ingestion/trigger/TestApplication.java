@@ -50,11 +50,7 @@ public class TestApplication {
 		
 		repo.save(content);
 		repo.save(content2);
-		
-		System.out.println("DIMS " +	repo.findByPickupPath("/tmp/test123"));
 		service.pollAll();
-		
-		System.out.println("DIMS " +	repo.findByPickupPath("/tmp/test123"));
 		
 		final List<InboxEntry> actual = read();
 		assertEquals(0, actual.size());
