@@ -38,7 +38,7 @@ public final class LevelSegmentMetadataExtractor extends AbstractMetadataExtract
         final ProductFamily family = message.getBody().getProductFamily();
         
         logger.debug("starting to download metadatafile for for product: {}", productName);        
-        final File metadataFile = downloadToLocalFolder(reportingFactory, family, job.getKeyObjectStorage());
+        final File metadataFile = downloadMetadataFileToLocalFolder(reportingFactory, family, job.getKeyObjectStorage());
         try {
             logger.debug("segment metadata file dowloaded:{} for product: {}", metadataFile.getAbsolutePath(), productName);
             
