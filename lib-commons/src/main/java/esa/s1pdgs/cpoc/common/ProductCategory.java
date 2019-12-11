@@ -32,7 +32,7 @@ public enum ProductCategory {
     INGESTION_EVENT(IngestionEvent.class),
     PREPARATION_JOB(IpfPreparationJob.class),    
     CATALOG_EVENT(CatalogEvent.class),
-    CATALOG_JOB(CatalogJob.class),
+    CATALOG_JOBS(CatalogJob.class),
     PRODUCTION_EVENT(ProductionEvent.class),
     PRIP_JOBS(PripPublishingJob.class);
 	
