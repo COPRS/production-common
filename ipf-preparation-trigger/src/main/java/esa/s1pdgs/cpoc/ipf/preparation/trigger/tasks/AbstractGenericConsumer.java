@@ -148,12 +148,12 @@ public abstract class AbstractGenericConsumer<T extends AbstractMessage> impleme
     	messageDto.setInputKey(topic);
     	messageDto.setOutputKey(job.getProductFamily().name());
 		try {
-			mqiClient.publish(messageDto, ProductCategory.PREPARATION_JOB);
+			mqiClient.publish(messageDto, ProductCategory.PREPARATION_JOBS);
 		} catch (final AbstractCodedException e) {
 			throw new RuntimeException(
 					String.format(
 							"Error publishing %s message %s: %s", 
-							ProductCategory.PREPARATION_JOB, 
+							ProductCategory.PREPARATION_JOBS, 
 							messageDto, 
 							e.getLogMessage()
 					),
