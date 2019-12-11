@@ -9,7 +9,7 @@ import org.springframework.stereotype.Component;
 
 import esa.s1pdgs.cpoc.common.ProductCategory;
 import esa.s1pdgs.cpoc.mdc.worker.config.MdcWorkerConfigurationProperties;
-import esa.s1pdgs.cpoc.mdc.worker.config.MdcWorkerConfigurationProperties.FamilyConfig;
+import esa.s1pdgs.cpoc.mdc.worker.config.MdcWorkerConfigurationProperties.CategoryConfig;
 import esa.s1pdgs.cpoc.mdc.worker.config.MetadataExtractorConfig;
 import esa.s1pdgs.cpoc.mdc.worker.config.ProcessConfiguration;
 import esa.s1pdgs.cpoc.mdc.worker.es.EsServices;
@@ -45,7 +45,7 @@ public class MetadataExtractorFactory {
 		this.processConfiguration = processConfiguration;
 	}
 
-	public MetadataExtractor newMetadataExtractorFor(final ProductCategory category, final FamilyConfig config) {
+	public MetadataExtractor newMetadataExtractorFor(final ProductCategory category, final CategoryConfig config) {
 		final FileDescriptorBuilder fileDescriptorBuilder = new FileDescriptorBuilder(
 				new File(config.getLocalDirectory()), 
 				Pattern.compile(config.getPatternConfig(), Pattern.CASE_INSENSITIVE)
@@ -114,7 +114,7 @@ public class MetadataExtractorFactory {
 		);
 	}
 	
-	private final PathMetadataExtractor newPathMetadataExtractor(final FamilyConfig config) {
+	private final PathMetadataExtractor newPathMetadataExtractor(final CategoryConfig config) {
 		if (config.getPathPattern() == null) {
 			return PathMetadataExtractor.NULL;
 		}
