@@ -43,12 +43,13 @@ public final class Inbox {
 			LOG.trace("Found {} on pickup and persisted are {}", summarize(pickupContent), summarize(persistedContent));
 			final Set<InboxEntry> newElements = new HashSet<>(pickupContent);
 			newElements.removeAll(persistedContent);	
+			
 			final Set<InboxEntry> finishedElements = new HashSet<>(persistedContent);
 			finishedElements.removeAll(pickupContent);
 			
 			final StringBuilder logMessage = new StringBuilder();
 
-			if (finishedElements.size() != 0) {
+			if (!finishedElements.isEmpty()) {
 				logMessage.append("Handled ")
 					.append(finishedElements.size())
 					.append(" finished elements (")
@@ -60,7 +61,7 @@ public final class Inbox {
 				ingestionTriggerServiceTransactional.removeFinished(finishedElements);
 			}
 
-			if (newElements.size() != 0) {
+			if (!newElements.isEmpty()) {
 				if (logMessage.length() == 0) {
 					logMessage.append("Handled ");
 				} else {
@@ -71,8 +72,7 @@ public final class Inbox {
 					.append(summarize(newElements))
 					.append(")");
 				// all products not stored in the repo are considered new and shall be added to
-				// the
-				// configured queue.
+				// the configured queue.
 				newElements.stream().forEach(e -> handleNew(e));
 			}
 			if (logMessage.length() != 0) {
