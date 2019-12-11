@@ -50,7 +50,7 @@ public class TestRegex {
 	@Test
 	public final void testAuxRegex_ShallNotMAtchOnSubdirs() {
 		final Pattern auxPattern = Pattern.compile(PATTERN_STR);		
-		assertEquals(false, auxPattern.matcher("S1B_AUX_CAL_V20160422T000000_G20170328T092822.SAFE/manifest.safe").matches());
+		assertEquals(false, auxPattern.matcher("S1A_AUX_INS_V20171017T080000_G20180313T104658.SAFE/data/s1a-aux-ins.xml").matches());
 	}
 	
 	private static final String OTHER_PATTERN = "(.*\\.tmp$|^lost\\+found$)";
