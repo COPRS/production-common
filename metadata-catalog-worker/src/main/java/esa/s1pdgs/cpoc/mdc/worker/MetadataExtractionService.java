@@ -29,8 +29,10 @@ import esa.s1pdgs.cpoc.common.utils.LogUtils;
 import esa.s1pdgs.cpoc.errorrepo.ErrorRepoAppender;
 import esa.s1pdgs.cpoc.errorrepo.model.rest.FailedProcessingDto;
 import esa.s1pdgs.cpoc.mdc.worker.config.MdcWorkerConfigurationProperties;
-import esa.s1pdgs.cpoc.mdc.worker.config.MdcWorkerConfigurationProperties.CategoryConfig;
+import esa.s1pdgs.cpoc.mdc.worker.config.MdcWorkerConfigurationProperties.FamilyConfig;
 import esa.s1pdgs.cpoc.mdc.worker.config.ProcessConfiguration;
+import esa.s1pdgs.cpoc.mdc.worker.config.TriggerConfigurationProperties;
+import esa.s1pdgs.cpoc.mdc.worker.config.TriggerConfigurationProperties.CategoryConfig;
 import esa.s1pdgs.cpoc.mdc.worker.es.EsServices;
 import esa.s1pdgs.cpoc.mdc.worker.extraction.MetadataExtractor;
 import esa.s1pdgs.cpoc.mdc.worker.extraction.MetadataExtractorFactory;
@@ -57,6 +59,7 @@ public class MetadataExtractionService {
     private final MqiClient mqiClient;
     private final MdcWorkerConfigurationProperties properties;
     private final MetadataExtractorFactory extractorFactory;
+    private final TriggerConfigurationProperties triggerConfiguration;
         
     @Autowired
     public MetadataExtractionService(
@@ -66,7 +69,8 @@ public class MetadataExtractionService {
 			final EsServices esServices,
 			final MqiClient mqiClient,
 			final MdcWorkerConfigurationProperties properties,
-			final MetadataExtractorFactory extractorFactory
+			final MetadataExtractorFactory extractorFactory,
+			final TriggerConfigurationProperties triggerConfiguration
 	) {
 		this.appStatus = appStatus;
 		this.errorAppender = errorAppender;
@@ -75,22 +79,27 @@ public class MetadataExtractionService {
 		this.mqiClient = mqiClient;
 		this.properties = properties;
 		this.extractorFactory = extractorFactory;
+		this.triggerConfiguration = triggerConfiguration;
 	}
 
 	@PostConstruct
     public void init() {	
-		final ExecutorService service = Executors.newFixedThreadPool(properties.getProductCategories().size());
+		final Map<ProductCategory, CategoryConfig> entries = triggerConfiguration.getProductCategories();
+
+		final ExecutorService service = Executors.newFixedThreadPool(entries.size());
 		
-		for (final Map.Entry<ProductCategory, CategoryConfig> entry : properties.getProductCategories().entrySet()) {				
+		for (final Map.Entry<ProductCategory, CategoryConfig> entry : entries.entrySet()) {			
 			service.execute(newConsumerFor(entry.getKey(), entry.getValue()));
 		}
     }
 	
-	public final void consume(final GenericMessageDto<CatalogJob> message, final CategoryConfig config)
+	public final void consume(final GenericMessageDto<CatalogJob> message)
 			throws AbstractCodedException {		
 		final CatalogJob catJob = message.getBody();	
 		final String productName = catJob.getProductName();
 		final ProductFamily family = catJob.getProductFamily();
+		
+		FamilyConfig config = this.properties.getProductFamilies().get(family);
 		
         final Reporting.Factory reportingFactory = new LoggerReporting.Factory("MetadataExtraction");        
         final Reporting report = reportingFactory.newReporting(0);        
@@ -158,7 +167,7 @@ public class MetadataExtractionService {
 		return new MqiConsumer<CatalogJob>(
 				mqiClient, 
 				category, 
-				m -> consume(m, config),
+				m -> consume(m),
 				config.getFixedDelayMs(),
 				config.getInitDelayPollMs(),
 				appStatus

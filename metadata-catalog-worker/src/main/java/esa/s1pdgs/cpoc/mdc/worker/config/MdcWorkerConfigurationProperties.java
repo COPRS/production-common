@@ -8,11 +8,12 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Configuration;
 
 import esa.s1pdgs.cpoc.common.ProductCategory;
+import esa.s1pdgs.cpoc.common.ProductFamily;
 
 @Configuration
 @ConfigurationProperties("worker")
 public class MdcWorkerConfigurationProperties {
-	public static class CategoryConfig
+	public static class FamilyConfig
 	{
 		private long fixedDelayMs = 500L;
 		private long initDelayPollMs = 2000L;
@@ -71,19 +72,19 @@ public class MdcWorkerConfigurationProperties {
 
 		@Override
 		public String toString() {
-			return "CategoryConfig [fixedDelayMs=" + fixedDelayMs + ", initDelayPollMs=" + initDelayPollMs
+			return "FamilyConfig [fixedDelayMs=" + fixedDelayMs + ", initDelayPollMs=" + initDelayPollMs
 					+ ", localDirectory=" + localDirectory + ", patternConfig=" + patternConfig + ", pathPattern="
 					+ pathPattern + ", pathMetadataElements=" + pathMetadataElements + "]";
 		}
 	}
 
-	private Map<ProductCategory, CategoryConfig> productCategories = new LinkedHashMap<>();
+	private Map<ProductFamily, FamilyConfig> productFamilies= new LinkedHashMap<>();
 	
-	public Map<ProductCategory, CategoryConfig> getProductCategories() {
-		return productCategories;
+	public Map<ProductFamily, FamilyConfig> getProductFamilies() {
+		return productFamilies;
 	}
 
-	public void setProductCategories(final Map<ProductCategory, CategoryConfig> productCategories) {
-		this.productCategories = productCategories;
+	public void setProductFamilies(final Map<ProductFamily, FamilyConfig> productFamilies) {
+		this.productFamilies = productFamilies;
 	}
 }
