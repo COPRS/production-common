@@ -31,7 +31,6 @@ public class TriggerConfig {
 	private final ErrorRepoAppender errorRepoAppender;
 	private final AppStatus appStatus;
 	private final MetadataClient metadataClient;
-	private final ProductCategory category;
 	
 	@Autowired
 	public TriggerConfig(
@@ -42,8 +41,7 @@ public class TriggerConfig {
 			final StatusService mqiStatusService,
 			final ErrorRepoAppender errorRepoAppender, 
 			final AppStatus appStatus,
-			final MetadataClient metadataClient,
-			final ProductCategory category
+			final MetadataClient metadataClient
 	) {
 		this.processSettings = processSettings;
 		this.mqiService = mqiService;
@@ -51,7 +49,6 @@ public class TriggerConfig {
 		this.errorRepoAppender = errorRepoAppender;
 		this.appStatus = appStatus;
 		this.metadataClient = metadataClient;
-		this.category = category;
 		this.properties = properties;
 		this.restTemplate = restTemplateBuilder
 				.setConnectTimeout(properties.getTmConnectMs())
@@ -65,10 +62,10 @@ public class TriggerConfig {
 				properties.getHostUri(), 
 				properties.getMaxRetries(), 
 				properties.getTempoRetryMs(), 
-				category
+				processSettings.getCategory()
 		);
 		
-		switch (category) {
+		switch (processSettings.getCategory()) {
 			case EDRS_SESSIONS:
 				return new EdrsSessionConsumer(
 						processSettings, 
@@ -103,7 +100,7 @@ public class TriggerConfig {
 				throw new IllegalStateException(
 						String.format(
 								"Invalid category %s, configured are: %s", 
-								category,
+								processSettings.getCategory(),
 								Arrays.asList(
 										ProductCategory.EDRS_SESSIONS, 
 										ProductCategory.LEVEL_SEGMENTS,

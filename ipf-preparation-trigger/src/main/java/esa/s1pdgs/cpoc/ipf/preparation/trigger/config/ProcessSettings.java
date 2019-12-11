@@ -5,6 +5,7 @@ import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.context.annotation.Configuration;
 
 import esa.s1pdgs.cpoc.common.ApplicationLevel;
+import esa.s1pdgs.cpoc.common.ProductCategory;
 
 /**
  * Extraction class of "process" configuration properties
@@ -47,6 +48,8 @@ public class ProcessSettings {
     private long fixedDelayMs;
     
     private long initialDelayMs;
+    
+	private ProductCategory category;
 
     public ApplicationLevel getLevel() {
         return level;
@@ -103,5 +106,13 @@ public class ProcessSettings {
 
 	public void setInitialDelayMs(final long initialDelayMs) {
 		this.initialDelayMs = initialDelayMs;
+	}
+
+	public ProductCategory getCategory() {
+		return category;
+	}
+
+	public void setCategory(final ProductCategory category) {
+		this.category = category;
 	}
 }
