@@ -1,7 +1,7 @@
 package esa.s1pdgs.cpoc.mdc.worker.extraction;
 
 import java.io.File;
-import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
 import org.apache.logging.log4j.LogManager;
@@ -63,8 +63,8 @@ public abstract class AbstractMetadataExtractor implements MetadataExtractor {
 
 		try {
 			final List<File> files = Retries.performWithRetries(
-					() -> obsClient.download(Arrays.asList(new ObsDownloadObject(family, metadataKeyObs, this.localDirectory))), 
-					"Download of " + metadataKeyObs + " to " + localDirectory, 
+					() -> obsClient.download(Collections.singletonList(new ObsDownloadObject(family, metadataKeyObs, this.localDirectory))), 
+					"Download of metadata file " + metadataKeyObs + " to " + localDirectory, 
 					processConfiguration.getNumObsDownloadRetries(), 
 					processConfiguration.getSleepBetweenObsRetriesMillis()
 			);
