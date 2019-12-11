@@ -14,28 +14,10 @@ import esa.s1pdgs.cpoc.common.ProductCategory;
 public class MdcWorkerConfigurationProperties {
 	public static class CategoryConfig
 	{
-		private long fixedDelayMs = 500L;
-		private long initDelayPollMs = 2000L;
 		private String localDirectory;
 		private String patternConfig;
 		private String pathPattern = null;
 		private Map<String,Integer> pathMetadataElements = new HashMap<>();
-
-		public long getFixedDelayMs() {
-			return fixedDelayMs;
-		}
-
-		public void setFixedDelayMs(final long fixedDelayMs) {
-			this.fixedDelayMs = fixedDelayMs;
-		}
-
-		public long getInitDelayPollMs() {
-			return initDelayPollMs;
-		}
-
-		public void setInitDelayPollMs(final long initDelayPolMs) {
-			this.initDelayPollMs = initDelayPolMs;
-		}
 
 		public String getLocalDirectory() {
 			return localDirectory;
@@ -71,8 +53,7 @@ public class MdcWorkerConfigurationProperties {
 
 		@Override
 		public String toString() {
-			return "CategoryConfig [fixedDelayMs=" + fixedDelayMs + ", initDelayPollMs=" + initDelayPollMs
-					+ ", localDirectory=" + localDirectory + ", patternConfig=" + patternConfig + ", pathPattern="
+			return "CategoryConfig [localDirectory=" + localDirectory + ", patternConfig=" + patternConfig + ", pathPattern="
 					+ pathPattern + ", pathMetadataElements=" + pathMetadataElements + "]";
 		}
 	}
