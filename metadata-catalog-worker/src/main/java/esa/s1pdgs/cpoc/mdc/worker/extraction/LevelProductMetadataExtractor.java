@@ -35,7 +35,7 @@ public final class LevelProductMetadataExtractor extends AbstractMetadataExtract
         final CatalogJob job = message.getBody();        
         final ProductFamily family = message.getBody().getProductFamily();
         
-        final File metadataFile = downloadToLocalFolder(reportingFactory, family, job.getKeyObjectStorage());
+        final File metadataFile = downloadMetadataFileToLocalFolder(reportingFactory, family, job.getKeyObjectStorage());
         try {
         	final OutputFileDescriptor descriptor = extractFromFilename(
         			reportingFactory, 

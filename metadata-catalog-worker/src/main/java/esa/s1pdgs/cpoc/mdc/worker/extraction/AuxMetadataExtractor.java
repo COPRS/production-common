@@ -38,7 +38,7 @@ public final class AuxMetadataExtractor extends AbstractMetadataExtractor {
 	@Override
 	public JSONObject extract(final Reporting.Factory reportingFactory, final GenericMessageDto<CatalogJob> message) throws AbstractCodedException {
 		final CatalogJob job = message.getBody();
-		final File metadataFile = downloadToLocalFolder(
+		final File metadataFile = downloadMetadataFileToLocalFolder(
 				reportingFactory, 
 				ProductFamily.AUXILIARY_FILE, 
 				job.getKeyObjectStorage()

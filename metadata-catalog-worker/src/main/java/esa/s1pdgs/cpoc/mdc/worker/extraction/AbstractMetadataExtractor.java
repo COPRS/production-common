@@ -46,7 +46,7 @@ public abstract class AbstractMetadataExtractor implements MetadataExtractor {
 		this.obsClient = obsClient;
 	}
 
-	final File downloadToLocalFolder(
+	final File downloadMetadataFileToLocalFolder(
     		final Reporting.Factory reportingFactory,  
     		final ProductFamily family, 
     		final String keyObs
@@ -121,7 +121,7 @@ public abstract class AbstractMetadataExtractor implements MetadataExtractor {
 	}
 	
 	private final String getMetadataKeyObs(final String productKeyObs) {
-		if (productKeyObs.endsWith(processConfiguration.getFileWithManifestExt())) {
+		if (productKeyObs.toLowerCase().endsWith(processConfiguration.getFileWithManifestExt())) {
 			return productKeyObs + "/" + processConfiguration.getManifestFilename();
 		} 
 		return productKeyObs;
