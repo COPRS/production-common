@@ -100,8 +100,11 @@ public class IngestionWorkerService implements MqiListener<IngestionJob> {
 		}
 	}
 
-	final IngestionResult identifyAndUpload(final Reporting.Factory reportingFactory,
-			final GenericMessageDto<IngestionJob> message, final IngestionJob ingestion) throws InternalErrorException {
+	final IngestionResult identifyAndUpload(
+			final Reporting.Factory reportingFactory,
+			final GenericMessageDto<IngestionJob> message, 
+			final IngestionJob ingestion
+	) throws InternalErrorException {
 		IngestionResult result = IngestionResult.NULL;
 		try {
 			final ProductFamily family = getFamilyFor(ingestion);
