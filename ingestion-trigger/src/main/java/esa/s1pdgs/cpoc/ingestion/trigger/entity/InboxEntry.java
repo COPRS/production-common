@@ -70,20 +70,18 @@ public class InboxEntry {
 			return false;
 		}
 		final InboxEntry other = (InboxEntry) obj;
-		return id == other.id 
-				&& Objects.equals(name, other.name) 
+		return Objects.equals(name, other.name) 
 				&& Objects.equals(pickupPath, other.pickupPath)
 				&& Objects.equals(relativePath, other.relativePath);
 	}
 
 	@Override
 	public int hashCode() {
-		return Objects.hash(id, name, pickupPath, relativePath);
+		return Objects.hash(name, pickupPath, relativePath);
 	}
 
 	@Override
 	public String toString() {
-		return "InboxEntry [id=" + id + ", name=" + name + ", relativePath=" + relativePath + ", pickupPath="
-				+ pickupPath + "]";
+		return "InboxEntry [name=" + name + ", relativePath=" + relativePath + ", pickupPath=" + pickupPath + "]";
 	}
 }
