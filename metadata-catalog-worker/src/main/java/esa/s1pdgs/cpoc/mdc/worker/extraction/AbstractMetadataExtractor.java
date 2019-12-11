@@ -69,7 +69,14 @@ public abstract class AbstractMetadataExtractor implements MetadataExtractor {
 					processConfiguration.getSleepBetweenObsRetriesMillis()
 			);
 			reportDownload.end(new ReportingMessage("End download of " + metadataKeyObs));
-			return files.size() == 1 ? files.get(0) : null;
+			if (files.size() != 1) {
+				throw new IllegalArgumentException(
+						String.format("Expected to download metadata file '%s' but was: %s", metadataKeyObs, files)
+				);
+			}
+			final File metadataFile = files.get(0);
+			logger.debug("Downloaded metadata file {} to {}", metadataKeyObs, metadataFile);
+			return metadataFile;
 		} catch (final Exception e) {
 			if (e instanceof AbstractCodedException) {
 				final AbstractCodedException ace = (AbstractCodedException) e;
@@ -111,7 +118,6 @@ public abstract class AbstractMetadataExtractor implements MetadataExtractor {
 		reportExtractingFromFilename.begin(new ReportingMessage("Start extraction from {}", extraction));
 		try {
 			final E res = supplier.get();
-					//;
 			reportExtractingFromFilename.end(new ReportingMessage("End extraction from {}", extraction));
 			return res;
 		} catch (final AbstractCodedException e) {
