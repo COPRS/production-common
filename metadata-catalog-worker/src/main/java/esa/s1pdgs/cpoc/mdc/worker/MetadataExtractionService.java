@@ -29,8 +29,9 @@ import esa.s1pdgs.cpoc.common.utils.LogUtils;
 import esa.s1pdgs.cpoc.errorrepo.ErrorRepoAppender;
 import esa.s1pdgs.cpoc.errorrepo.model.rest.FailedProcessingDto;
 import esa.s1pdgs.cpoc.mdc.worker.config.MdcWorkerConfigurationProperties;
-import esa.s1pdgs.cpoc.mdc.worker.config.MdcWorkerConfigurationProperties.CategoryConfig;
 import esa.s1pdgs.cpoc.mdc.worker.config.ProcessConfiguration;
+import esa.s1pdgs.cpoc.mdc.worker.config.TriggerConfigurationProperties;
+import esa.s1pdgs.cpoc.mdc.worker.config.TriggerConfigurationProperties.CategoryConfig;
 import esa.s1pdgs.cpoc.mdc.worker.es.EsServices;
 import esa.s1pdgs.cpoc.mdc.worker.extraction.MetadataExtractor;
 import esa.s1pdgs.cpoc.mdc.worker.extraction.MetadataExtractorFactory;
@@ -57,6 +58,7 @@ public class MetadataExtractionService {
     private final MqiClient mqiClient;
     private final MdcWorkerConfigurationProperties properties;
     private final MetadataExtractorFactory extractorFactory;
+    private final TriggerConfigurationProperties triggerConfiguration;
         
     @Autowired
     public MetadataExtractionService(
@@ -66,7 +68,8 @@ public class MetadataExtractionService {
 			final EsServices esServices,
 			final MqiClient mqiClient,
 			final MdcWorkerConfigurationProperties properties,
-			final MetadataExtractorFactory extractorFactory
+			final MetadataExtractorFactory extractorFactory,
+			final TriggerConfigurationProperties triggerConfiguration
 	) {
 		this.appStatus = appStatus;
 		this.errorAppender = errorAppender;
@@ -75,13 +78,15 @@ public class MetadataExtractionService {
 		this.mqiClient = mqiClient;
 		this.properties = properties;
 		this.extractorFactory = extractorFactory;
+		this.triggerConfiguration = triggerConfiguration;
 	}
 
 	@PostConstruct
     public void init() {	
-		final ExecutorService service = Executors.newFixedThreadPool(properties.getProductCategories().size());
+		final Map<ProductCategory, CategoryConfig> entries = triggerConfiguration.getProductCategories();		
+		final ExecutorService service = Executors.newFixedThreadPool(entries.size());
 		
-		for (final Map.Entry<ProductCategory, CategoryConfig> entry : properties.getProductCategories().entrySet()) {				
+		for (final Map.Entry<ProductCategory, CategoryConfig> entry : entries.entrySet()) {			
 			service.execute(newConsumerFor(entry.getKey(), entry.getValue()));
 		}
     }
@@ -92,13 +97,16 @@ public class MetadataExtractionService {
 		final String productName = catJob.getProductName();
 		final ProductFamily family = catJob.getProductFamily();
 		
+		ProductCategory category = ProductCategory.of(family);
+
+		
         final Reporting.Factory reportingFactory = new LoggerReporting.Factory("MetadataExtraction");        
         final Reporting report = reportingFactory.newReporting(0);        
         report.begin(new FilenameReportingInput(productName), new ReportingMessage("Starting metadata extraction"));   
 		try {
 			final MetadataExtractor extractor = extractorFactory.newMetadataExtractorFor(
-					ProductCategory.of(catJob.getProductFamily()), 
-					config
+					category,
+					properties.getProductCategories().get(category)
 			);			
 			final JSONObject metadata = extractor.extract(reportingFactory, message);
         	LOG.debug("Metadata extracted :{} for product: {}", metadata, productName);
