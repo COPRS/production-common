@@ -69,6 +69,8 @@ public class InboxEntry {
 		if (getClass() != obj.getClass()) {
 			return false;
 		}
+		// WARNING: Don't take 'id' into account when implementing equals/hashCode 
+		// because it's always 0 when created from Inbox		
 		final InboxEntry other = (InboxEntry) obj;
 		return Objects.equals(name, other.name) 
 				&& Objects.equals(pickupPath, other.pickupPath)
