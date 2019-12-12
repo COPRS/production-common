@@ -131,7 +131,7 @@ public class MetadataExtractionService {
 		    	);
 		    	messageDto.setInputKey(message.getInputKey());
 		    	messageDto.setOutputKey(event.getProductFamily().name());		    	
-				mqiClient.publish(messageDto, ProductCategory.of(family));		
+				mqiClient.publish(messageDto, ProductCategory.CATALOG_EVENT);		
 				
 			    reportPublish.end(new ReportingMessage("End publishing metadata"));
 				
