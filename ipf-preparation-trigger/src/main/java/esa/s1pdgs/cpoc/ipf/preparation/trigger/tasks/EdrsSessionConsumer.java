@@ -46,7 +46,7 @@ public final class EdrsSessionConsumer extends AbstractGenericConsumer<CatalogEv
 	
     @Override
 	protected final AppDataJob<CatalogEvent> dispatch(final GenericMessageDto<CatalogEvent> mqiMessage) 
-			throws AbstractCodedException {
+			throws AbstractCodedException {    	
         final AppDataJob<CatalogEvent> appDataJob = buildJob(mqiMessage);                
         LOGGER.debug ("== appDataJob(1) {}", appDataJob.toString());
         final String productName = appDataJob.getProduct().getProductName();

@@ -14,9 +14,11 @@ import org.apache.logging.log4j.Logger;
 import esa.s1pdgs.cpoc.appcatalog.AppDataJob;
 import esa.s1pdgs.cpoc.appcatalog.client.job.AppCatalogJobClient;
 import esa.s1pdgs.cpoc.appstatus.AppStatus;
+import esa.s1pdgs.cpoc.common.EdrsSessionFileType;
 import esa.s1pdgs.cpoc.common.ProductCategory;
 import esa.s1pdgs.cpoc.common.ProductFamily;
 import esa.s1pdgs.cpoc.common.errors.AbstractCodedException;
+import esa.s1pdgs.cpoc.common.errors.processing.MetadataQueryException;
 import esa.s1pdgs.cpoc.errorrepo.ErrorRepoAppender;
 import esa.s1pdgs.cpoc.errorrepo.model.rest.FailedProcessingDto;
 import esa.s1pdgs.cpoc.ipf.preparation.trigger.config.ProcessSettings;
@@ -86,34 +88,23 @@ public abstract class AbstractGenericConsumer<T extends AbstractMessage> impleme
     public void onMessage(final GenericMessageDto<CatalogEvent> mqiMessage) {
     	final Reporting.Factory reportingFactory = new LoggerReporting.Factory("L0_SEGMENTJobGeneration"); 
         final Reporting reporting = reportingFactory.newReporting(0);
-        final String productName = mqiMessage.getBody().getKeyObjectStorage();
-        final ProductFamily family = mqiMessage.getBody().getProductFamily();
-
+        final CatalogEvent event = mqiMessage.getBody();
+        final String productName = event.getProductName();
 
         try {
-            // TODO generalize filtering
-            if (skipProduct(productName)) {
-            	LOGGER.warn("Skipping job generation for product {}", productName);
+            if (shallBeSkipped(event)) {
             	return;
             }
-            
-            // S1PRO-483: check for matching products if they are over sea. If not, simply skip the
-            // production
-            if (seaCoverageCheckPattern.matcher(productName).matches()) {          	
-            	if (metadataClient.getSeaCoverage(family, productName) <= processSettings.getMinSeaCoveragePercentage()) {
-                    return;
-                }
-            }  
             LOGGER.debug("Handling consumption of {} product {}", category, productName);
         	
             // Check if a job is already created for message identifier
             LOGGER.info("Creating/updating job for product {}", productName);
             reporting.begin(
-            		new FilenameReportingInput(Collections.singletonList(mqiMessage.getBody().getKeyObjectStorage())),            		
-            		new ReportingMessage("Start job generation using {}", mqiMessage.getBody().getKeyObjectStorage())
+            		new FilenameReportingInput(Collections.singletonList(event.getKeyObjectStorage())),            		
+            		new ReportingMessage("Start job generation using {}", event.getKeyObjectStorage())
             );
             final AppDataJob<CatalogEvent> appDataJob = dispatch(mqiMessage);
-            publish(appDataJob, mqiMessage.getBody().getProductFamily(), mqiMessage.getInputKey());
+            publish(appDataJob, event.getProductFamily(), mqiMessage.getInputKey());
             LOGGER.debug("Done handling consumption of {} product {}", category, productName);
             reporting.end(new ReportingMessage("End job generation using {}", productName));
         } catch (final AbstractCodedException ace) {            
@@ -172,12 +163,32 @@ public abstract class AbstractGenericConsumer<T extends AbstractMessage> impleme
 				appStatus
 		);
     }
-    
-    private final boolean skipProduct(final String productName) {    	
-    	boolean skip = false;
-		if(blackList != null && blackList.matcher(productName).matches()) {
-			skip = true;
-		} 
-		return skip;
-	}
+
+	private final boolean shallBeSkipped(final CatalogEvent event) throws MetadataQueryException {
+        final String productName = event.getProductName();
+        final ProductFamily family = event.getProductFamily();
+        final String productType = event.getProductType();
+        
+		if (blackList != null && blackList.matcher(productName).matches()) {
+			LOGGER.warn("Skipping job generation for product {} due to blacklist {}", productName, blackList);
+			return true;
+		}
+		
+		// Only sessions are used
+		if (family == ProductFamily.EDRS_SESSION 
+				&& 	EdrsSessionFileType.valueOf(productType.toUpperCase()) == EdrsSessionFileType.RAW) {
+			LOGGER.warn("Skipping job generation for product {} because it's EdrsSessionFileType.RAW", productName);
+			return true;
+		}
+		
+        // S1PRO-483: check for matching products if they are over sea. If not, simply skip the
+        // production
+        if (seaCoverageCheckPattern.matcher(productName).matches()) {          	
+        	if (metadataClient.getSeaCoverage(family, productName) <= processSettings.getMinSeaCoveragePercentage()) {
+        		LOGGER.warn("Skipping job generation for product {} because it is not over sea", productName);
+                return true;
+            }
+        }        
+        return false;
+	}    
 }
