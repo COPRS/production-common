@@ -56,10 +56,10 @@ public class ProductServiceImpl implements ProductService {
 			if (family == ProductFamily.INVALID) {
 				
 			} else {
-				obsAdapter.move(ProductFamily.INVALID, family, file);	
+				obsAdapter.move(ProductFamily.INVALID, family, file, ingestion.getKeyObjectStorage());	
 			}
 		} else {
-			obsAdapter.upload(family, file);
+			obsAdapter.upload(family, file, ingestion.getKeyObjectStorage());
 			transferAmount = FileUtils.sizeOf(file);
 		}		
 		return new IngestionResult(Collections.singletonList(prod), transferAmount);	
@@ -68,7 +68,7 @@ public class ProductServiceImpl implements ProductService {
 	@Override
 	public void markInvalid(final IngestionJob ingestion) {	
 		final File file = toFile(ingestion);
-		newObsAdapterFor(Paths.get(ingestion.getPickupPath())).upload(ProductFamily.INVALID, file);		
+		newObsAdapterFor(Paths.get(ingestion.getPickupPath())).upload(ProductFamily.INVALID, file, ingestion.getKeyObjectStorage());		
 	}
 	
 	final String toObsKey(final Path relPath) {

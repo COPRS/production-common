@@ -26,8 +26,8 @@ public class ObsAdapter {
 		this.inboxPath 	= inboxPath;
 	}
 	
-	public final void upload(final ProductFamily family, final File file) {
-		final String obsKey = toObsKey(file);
+	public final void upload(final ProductFamily family, final File file, final String obsKey) {
+		//final String obsKey = toObsKey(file);
 		
 		try {
 			if (!obsClient.exists(new ObsObject(family, obsKey))) {
@@ -40,8 +40,8 @@ public class ObsAdapter {
 		}
 	}
 	
-	public final void move(final ProductFamily from,final ProductFamily to, final File file) throws ProductException {
-		final String obsKey = toObsKey(file);
+	public final void move(final ProductFamily from,final ProductFamily to, final File file, final String obsKey) throws ProductException {
+		//final String obsKey = toObsKey(file);
 		try {
 			if (!obsClient.exists(new ObsObject(from, obsKey))) {
 				throw new ProductException(
