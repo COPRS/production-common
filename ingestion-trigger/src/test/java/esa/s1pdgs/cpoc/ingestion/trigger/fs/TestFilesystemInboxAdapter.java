@@ -21,7 +21,7 @@ import esa.s1pdgs.cpoc.ingestion.trigger.filter.WhitelistRegexRelativePathInboxF
 public class TestFilesystemInboxAdapter {
 	private final FilesystemInboxEntryFactory factory = new FilesystemInboxEntryFactory();
 	private final File testDir = FileUtils.createTmpDir();	
-	private final FilesystemInboxAdapter uut = new FilesystemInboxAdapter(testDir.toPath(), factory);
+	private final FilesystemInboxAdapter uut = new FilesystemInboxAdapter(testDir.toPath(), factory, 0);
 
 	@After
 	public final void tearDown() throws IOException {
@@ -57,20 +57,17 @@ public class TestFilesystemInboxAdapter {
 				new BlacklistRegexRelativePathInboxFilter(Pattern.compile("(^\\..*|.*\\.tmp$|db.*|^lost\\+found$)")),
 				new WhitelistRegexRelativePathInboxFilter(Pattern.compile("(WILE|MTI_|SGS_|INU_)/S1(A|B)/([A-Za-z0-9]+)/ch0(1|2)/(.+DSIB\\.(xml|XML)|.+DSDB.*\\.(raw|RAW|aisp|AISP))"))
 		);
-		final Collection<InboxEntry> actualEdrs = uut.read(edrsFilter);
+		final FilesystemInboxAdapter uutEdrs = new FilesystemInboxAdapter(testDir.toPath(), factory, 2);
+		final Collection<InboxEntry> actualEdrs = uutEdrs.read(edrsFilter);
 		assertEquals(2, actualEdrs.size());
-		
+
 		final InboxFilter auxFilter = new JoinedFilter(
 				new BlacklistRegexRelativePathInboxFilter(Pattern.compile("(^\\..*|.*\\.tmp$|db.*|^lost\\+found$)")),
 				new WhitelistRegexRelativePathInboxFilter(Pattern.compile("AUX/[0-9a-zA-Z][0-9a-zA-Z][0-9a-zA-Z_]_((OPER|TEST|REPR)_)?(AUX_OBMEMC|AUX_PP1|AUX_PP2|AUX_CAL|AUX_INS|AUX_RESORB|AUX_WND|AUX_SCS|AMV_ERRMAT|AMH_ERRMAT|AUX_ICE|AUX_WAV|MPL_ORBPRE|MPL_ORBSCT|MSK__LAND)_.*\\.(xml|XML|EOF|SAFE)"))
 		);
-		final Collection<InboxEntry> actualAux = uut.read(auxFilter);
+		final FilesystemInboxAdapter uutAux = new FilesystemInboxAdapter(testDir.toPath(), factory, 1);
+		final Collection<InboxEntry> actualAux = uutAux.read(auxFilter);
 		assertEquals(1, actualAux.size());
-		
-		for (final InboxEntry entry : actualAux) {
-			System.out.println(entry);
-		}
-				
 	}
 	
 	private final File newTestProduct(final String name) {

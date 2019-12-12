@@ -33,7 +33,7 @@ public class InboxFactory {
 
 	public Inbox newInbox(final InboxConfiguration config) throws IOException {
 		return new Inbox(
-				inboxAdapterFactory.newInboxAdapter(config.getDirectory()), 
+				inboxAdapterFactory.newInboxAdapter(config.getDirectory(), config.getProductInDirectoryLevel()), 
 				new JoinedFilter(
 						new BlacklistRegexRelativePathInboxFilter(Pattern.compile(config.getIgnoreRegex())),
 						new WhitelistRegexRelativePathInboxFilter(Pattern.compile(config.getMatchRegex()))
