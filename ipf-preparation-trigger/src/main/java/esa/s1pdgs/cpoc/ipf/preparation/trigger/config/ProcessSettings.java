@@ -67,7 +67,6 @@ public class ProcessSettings {
         this.hostname = hostname;
     }
 
-
 	public int getMinSeaCoveragePercentage() {
 		return minSeaCoveragePercentage;
 	}

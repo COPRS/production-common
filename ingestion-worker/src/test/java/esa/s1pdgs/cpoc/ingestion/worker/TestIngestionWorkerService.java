@@ -258,6 +258,6 @@ public final class TestIngestionWorkerService {
 		result.setInputKey(message.getInputKey());
 		result.setOutputKey(product.getFamily().toString());
 		
-		verify(mqiClient, times(1)).publish(Mockito.eq(result), Mockito.eq(ProductCategory.AUXILIARY_FILES));
+		verify(mqiClient, times(1)).publish(Mockito.eq(result), Mockito.eq(ProductCategory.INGESTION_EVENT));
 	}
 }

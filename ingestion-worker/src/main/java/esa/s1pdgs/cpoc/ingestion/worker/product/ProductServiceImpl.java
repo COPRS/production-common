@@ -38,6 +38,7 @@ public class ProductServiceImpl implements ProductService {
 		final ObsAdapter obsAdapter = newObsAdapterFor(Paths.get(ingestion.getPickupPath()));
 		
 		final IngestionEvent dto = new IngestionEvent();
+		
 		dto.setProductName(file.getName());
 		dto.setProductFamily(family);
 		dto.setKeyObjectStorage(obsAdapter.toObsKey(file));

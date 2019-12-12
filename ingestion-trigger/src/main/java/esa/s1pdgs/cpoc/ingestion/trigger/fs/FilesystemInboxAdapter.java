@@ -21,22 +21,23 @@ public class FilesystemInboxAdapter implements InboxAdapter {
 
 	private final InboxEntryFactory inboxEntryFactory;
 	private final Path inboxDirectory;
+	private final int productInDirectoryLevel;
 
-	public FilesystemInboxAdapter(final Path inboxDirectory, final InboxEntryFactory inboxEntryFactory) {
+	public FilesystemInboxAdapter(final Path inboxDirectory, final InboxEntryFactory inboxEntryFactory, final int productInDirectoryLevel) {
 		this.inboxDirectory = inboxDirectory;
 		this.inboxEntryFactory = inboxEntryFactory;
+		this.productInDirectoryLevel = productInDirectoryLevel;
 	}
 
 	@Override
 	public Collection<InboxEntry> read(final InboxFilter filter) throws IOException {
 		LOG.trace("Reading inbox filesystem directory '{}'", inboxDirectory);
 		final Set<InboxEntry> entries = Files.walk(inboxDirectory, FileVisitOption.FOLLOW_LINKS)
-				.filter(p -> !p.equals(inboxDirectory))
-				.map(p -> inboxEntryFactory.newInboxEntry(inboxDirectory, p))
+				.filter(p -> exceedsMinConfiguredDirectoryDepth(p))
+				.map(p -> newInboxEntryFor(p))
 				.filter(e -> filter.accept(e))
 				.collect(Collectors.toSet());			
-		
-		LOG.trace("Found {} entries in inbox filesystem directory '{}'", entries.size(), inboxDirectory);
+		LOG.trace("Found {} entries in inbox filesystem directory '{}': {}", entries.size(), inboxDirectory, entries);
 		return entries;
 	}
 
@@ -53,5 +54,13 @@ public class FilesystemInboxAdapter implements InboxAdapter {
 	@Override
 	public String toString() {
 		return "FilesystemInboxAdapter [inboxDirectory=" + inboxDirectory + "]";
+	}
+		
+	private final InboxEntry newInboxEntryFor(final Path path) {
+		return inboxEntryFactory.newInboxEntry(inboxDirectory, path, productInDirectoryLevel);
+	}
+	
+	private final boolean exceedsMinConfiguredDirectoryDepth(final Path path) {
+		return inboxDirectory.relativize(path).getNameCount() > productInDirectoryLevel;
 	}
 }

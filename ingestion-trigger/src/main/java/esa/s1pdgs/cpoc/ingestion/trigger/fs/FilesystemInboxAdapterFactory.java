@@ -19,7 +19,11 @@ public class FilesystemInboxAdapterFactory implements InboxAdapterFactory {
 	}
 	
 	@Override
-	public InboxAdapter newInboxAdapter(final String inboxPath) {
-		return new FilesystemInboxAdapter(new File(inboxPath.replace("file://", "")).toPath(), inboxEntryFactory);
+	public InboxAdapter newInboxAdapter(final String inboxPath, final int productInDirectoryLevel) {
+		return new FilesystemInboxAdapter(
+				new File(inboxPath.replace("file://", "")).toPath(), 
+				inboxEntryFactory,
+				productInDirectoryLevel
+		);
 	}
 }

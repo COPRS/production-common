@@ -176,8 +176,14 @@ public class IngestionWorkerService implements MqiListener<IngestionJob> {
 				try {
 					return ProductFamily.valueOf(config.getFamily());
 				} catch (final Exception e) {
-					throw new ProductException(String.format("Invalid %s for %s (allowed: %s)", config, dto,
-							Arrays.toString(ProductFamily.values())));
+					throw new ProductException(
+							String.format(
+									"Invalid %s for %s (allowed: %s)", 
+									config, 
+									dto,
+									Arrays.toString(ProductFamily.values())
+							)
+					);
 				}
 			}
 		}
