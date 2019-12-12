@@ -165,7 +165,7 @@ public abstract class AbstractGenericConsumer<T extends AbstractMessage> impleme
     private final MqiConsumer<CatalogEvent> newMqiConsumer() {
     	return new MqiConsumer<CatalogEvent>(
     			mqiClient, 
-    			category, 
+    			ProductCategory.CATALOG_EVENT, 
     			this, 
     			processSettings.getFixedDelayMs(),
 				processSettings.getInitialDelayMs(), 
