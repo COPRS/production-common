@@ -62,7 +62,7 @@ public class TriggerConfig {
 				properties.getHostUri(), 
 				properties.getMaxRetries(), 
 				properties.getTempoRetryMs(), 
-				processSettings.getCategory()
+				ProductCategory.CATALOG_EVENT
 		);
 		
 		switch (processSettings.getCategory()) {
