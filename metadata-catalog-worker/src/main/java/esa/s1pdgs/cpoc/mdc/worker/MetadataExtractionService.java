@@ -1,7 +1,5 @@
 package esa.s1pdgs.cpoc.mdc.worker;
 
-import java.io.IOException;
-import java.io.StringWriter;
 import java.time.LocalDateTime;
 import java.util.Date;
 import java.util.Map;
@@ -17,7 +15,7 @@ import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import esa.s1pdgs.cpoc.common.ProductCategory;
@@ -97,7 +95,7 @@ public class MetadataExtractionService {
 		final String productName = catJob.getProductName();
 		final ProductFamily family = catJob.getProductFamily();
 		
-		ProductCategory category = ProductCategory.of(family);
+		final ProductCategory category = ProductCategory.of(family);
 
 		
         final Reporting.Factory reportingFactory = new LoggerReporting.Factory("MetadataExtraction");        
@@ -179,17 +177,15 @@ public class MetadataExtractionService {
 		catEvent.setKeyObjectStorage(catJob.getKeyObjectStorage());
 		catEvent.setProductFamily(catJob.getProductFamily());
 		catEvent.setProductType(metadata.getString("productType"));
-		catEvent.setMetadata(toJsonNode(metadata));		
+		catEvent.setMetadata(toMap(metadata));		
 		return catEvent;
 	}
 	
-	private final JsonNode toJsonNode(final JSONObject json) {
+	private final Map<String, Object> toMap(final JSONObject json) {
 		try {
-			final StringWriter stringWriter = new StringWriter();
-			json.write(stringWriter); 
-			final ObjectMapper objectMapper = new ObjectMapper();
-			return objectMapper.readTree(stringWriter.toString());
-		} catch (JSONException | IOException e) {
+			final ObjectMapper mapper = new ObjectMapper();
+			return mapper.convertValue(json, new TypeReference<Map<String, Object>>(){});
+		} catch (final JSONException e) {
 			throw new RuntimeException(e);
 		}
 	}

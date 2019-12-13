@@ -2,8 +2,6 @@ package esa.s1pdgs.cpoc.ipf.preparation.trigger.tasks;
 
 import java.util.List;
 
-import com.fasterxml.jackson.databind.JsonNode;
-
 import esa.s1pdgs.cpoc.mqi.model.queue.CatalogEvent;
 
 public final class CatalogEventAdapter {
@@ -59,7 +57,7 @@ public final class CatalogEventAdapter {
 	}
 	
 	public final List<String> listValues(final String name) {
-		return event.getMetadata().findValuesAsText(name);
+		return (List<String>) event.getMetadata().get(name);
 	}
 
     private final String getStringValue(final String key)
@@ -75,10 +73,10 @@ public final class CatalogEventAdapter {
 	
     private final String getStringValue(final String key, final String defaultValue)
     {
-    	final JsonNode textNode = event.getMetadata().findValue(key);
-    	if (textNode == null) {
+    	final String text = (String) event.getMetadata().get(key);
+    	if (text == null) {
     		return defaultValue;
     	}
-    	return textNode.asText();
+    	return text;
     }
 }

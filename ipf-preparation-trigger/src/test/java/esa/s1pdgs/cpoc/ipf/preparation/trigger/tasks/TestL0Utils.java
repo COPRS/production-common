@@ -11,9 +11,6 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
-
 import esa.s1pdgs.cpoc.appcatalog.AppDataJob;
 import esa.s1pdgs.cpoc.appcatalog.AppDataJobFile;
 import esa.s1pdgs.cpoc.appcatalog.AppDataJobGeneration;
@@ -74,7 +71,7 @@ public class TestL0Utils {
     	if (!m.matches()) {
     		throw new RuntimeException("No worky worky! " + productName);
     	}    	
-    	final Map<String,String> map = new HashMap<>();
+    	final Map<String,Object> map = new HashMap<>();
 
     	map.put("missionId", m.group(1));
     	map.put("satelliteId", m.group(2)); 
@@ -88,14 +85,11 @@ public class TestL0Utils {
     	map.put("processMode",  mode);
     	map.put("stationCode",  "WILE");
     	
-    	final ObjectMapper mapper = new ObjectMapper();
-    	final JsonNode jsonNode = mapper.convertValue(map, JsonNode.class);
-    	
     	final CatalogEvent event = new CatalogEvent();
     	event.setProductFamily(family);
     	event.setProductType(type);
     	event.setKeyObjectStorage(keyObs);
-    	event.setMetadata(jsonNode);    	
+    	event.setMetadata(map);    	
     	return event;
     }
 
@@ -110,22 +104,19 @@ public class TestL0Utils {
 			final String stationCode, 
 			final String sessionId
 	) {
-    	final Map<String,String> map = new HashMap<>();
+    	final Map<String,Object> map = new HashMap<>();
     	map.put("channelId", String.valueOf(channelId));
     	map.put("missionId", missionId);
     	map.put("satelliteId", satelliteId);
     	map.put("stationCode", stationCode);
       	map.put("sessionId", sessionId);
-    	
-    	final ObjectMapper mapper = new ObjectMapper();
-    	final JsonNode jsonNode = mapper.convertValue(map, JsonNode.class);
-    	
+
     	final CatalogEvent event = new CatalogEvent();
     	event.setCreationDate(new Date(0L));
     	event.setProductFamily(ProductFamily.EDRS_SESSION);
     	event.setProductType(type.name());
     	event.setKeyObjectStorage(keyObs);
-    	event.setMetadata(jsonNode);    	
+    	event.setMetadata(map);    	
     	return event;
 	}
 

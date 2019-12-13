@@ -1,13 +1,12 @@
 package esa.s1pdgs.cpoc.mqi.model.queue;
 
+import java.util.Map;
 import java.util.Objects;
-
-import com.fasterxml.jackson.databind.JsonNode;
 
 public class CatalogEvent extends AbstractMessage {	
 	private String productName;
 	private String productType;
-	private JsonNode metadata;
+	private Map<String,Object> metadata;
 	
 	public String getProductName() {
 		return productName;
@@ -25,11 +24,11 @@ public class CatalogEvent extends AbstractMessage {
 		this.productType = productType;
 	}
 	
-	public JsonNode getMetadata() {
+	public Map<String,Object> getMetadata() {
 		return metadata;
 	}
 	
-	public void setMetadata(final JsonNode metadata) {
+	public void setMetadata(final Map<String,Object> metadata) {
 		this.metadata = metadata;
 	}
 
