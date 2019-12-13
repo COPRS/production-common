@@ -10,13 +10,9 @@ import javax.annotation.PostConstruct;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.json.JSONException;
 import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.ObjectMapper;
 
 import esa.s1pdgs.cpoc.common.ProductCategory;
 import esa.s1pdgs.cpoc.common.ProductFamily;
@@ -177,16 +173,7 @@ public class MetadataExtractionService {
 		catEvent.setKeyObjectStorage(catJob.getKeyObjectStorage());
 		catEvent.setProductFamily(catJob.getProductFamily());
 		catEvent.setProductType(metadata.getString("productType"));
-		catEvent.setMetadata(toMap(metadata));		
+		catEvent.setMetadata(metadata.toMap());		
 		return catEvent;
-	}
-	
-	private final Map<String, Object> toMap(final JSONObject json) {
-		try {
-			final ObjectMapper mapper = new ObjectMapper();
-			return mapper.convertValue(json, new TypeReference<Map<String, Object>>(){});
-		} catch (final JSONException e) {
-			throw new RuntimeException(e);
-		}
 	}
 }
