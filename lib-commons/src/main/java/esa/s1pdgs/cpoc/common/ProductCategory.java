@@ -20,12 +20,12 @@ import esa.s1pdgs.cpoc.mqi.model.queue.ProductionEvent;
  * @author Viveris Technologie
  */
 public enum ProductCategory {
-    AUXILIARY_FILES(ProductionEvent.class), 
-    EDRS_SESSIONS(IngestionEvent.class), 
+    AUXILIARY_FILES(CatalogEvent.class), 
+    EDRS_SESSIONS(CatalogEvent.class), 
     LEVEL_JOBS(IpfExecutionJob.class), 
-    LEVEL_PRODUCTS(ProductionEvent.class), 
+    LEVEL_PRODUCTS(CatalogEvent.class), 
     LEVEL_REPORTS(LevelReportDto.class), 
-    LEVEL_SEGMENTS(ProductionEvent.class),
+    LEVEL_SEGMENTS(CatalogEvent.class),
     COMPRESSION_JOBS(CompressionJob.class),
     COMPRESSED_PRODUCTS(CompressionEvent.class),
     INGESTION(IngestionJob.class),
