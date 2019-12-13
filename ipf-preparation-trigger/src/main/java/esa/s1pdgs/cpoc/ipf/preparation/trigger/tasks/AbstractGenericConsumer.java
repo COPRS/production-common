@@ -129,6 +129,7 @@ public abstract class AbstractGenericConsumer<T extends AbstractMessage> impleme
     		final String topic    		
     ) {   
     	final IpfPreparationJob job = new IpfPreparationJob();
+    	job.setProductFamily(family);
     	job.setAppDataJob(appDataJob);
     	
     	final GenericPublicationMessageDto<IpfPreparationJob> messageDto = new GenericPublicationMessageDto<IpfPreparationJob>(
@@ -137,7 +138,7 @@ public abstract class AbstractGenericConsumer<T extends AbstractMessage> impleme
     			job
     	);
     	messageDto.setInputKey(topic);
-    	messageDto.setOutputKey(job.getProductFamily().name());
+    	messageDto.setOutputKey(family.name());
 		try {
 			mqiClient.publish(messageDto, ProductCategory.PREPARATION_JOBS);
 		} catch (final AbstractCodedException e) {
