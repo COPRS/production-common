@@ -17,7 +17,7 @@ public final class CatalogEventAdapter {
 	}
 	
 	public final int channelId() {
-		return Integer.parseInt(getStringValue("channelId"));
+		return getIntegerValue("channelId");
 	}
 	
 	public final String stationCode() {
@@ -70,10 +70,15 @@ public final class CatalogEventAdapter {
     	}
     	return value;
     }
+    
+    private final Integer getIntegerValue(final String key) {
+    	final Integer value = (int) event.getMetadata().get(key);
+    	return value;
+    }
 	
     private final String getStringValue(final String key, final String defaultValue)
     {
-    	final String text = (String) event.getMetadata().get(key);
+    	final String text = (String) event.getMetadata().get(key);    	
     	if (text == null) {
     		return defaultValue;
     	}
