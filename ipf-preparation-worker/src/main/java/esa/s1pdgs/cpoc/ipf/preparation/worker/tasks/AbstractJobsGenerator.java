@@ -358,7 +358,7 @@ public abstract class AbstractJobsGenerator<T extends AbstractMessage> implement
         try {        	
             final List<AppDataJob<T>> jobs = appDataService
                     .findNByPodAndGenerationTaskTableWithNotSentGeneration(
-                            l0ProcessSettings.getHostname(), taskTableXmlName);
+                            l0ProcessSettings.getTriggerHostname(), taskTableXmlName);
             
             // Determine job to process
             if (CollectionUtils.isEmpty(jobs)) {
