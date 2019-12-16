@@ -52,9 +52,6 @@ import esa.s1pdgs.cpoc.ipf.preparation.worker.model.ProductMode;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.model.tasktable.TaskTable;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.service.XmlConverter;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.service.mqi.OutputProducerFactory;
-import esa.s1pdgs.cpoc.ipf.preparation.worker.tasks.l0slice.LevelProductsJobsGenerator;
-import esa.s1pdgs.cpoc.ipf.preparation.worker.utils.TestGenericUtils;
-import esa.s1pdgs.cpoc.ipf.preparation.worker.utils.TestL1Utils;
 import esa.s1pdgs.cpoc.metadata.client.MetadataClient;
 import esa.s1pdgs.cpoc.metadata.client.SearchMetadataQuery;
 import esa.s1pdgs.cpoc.metadata.model.SearchMetadata;
@@ -88,7 +85,7 @@ public class AbstractJobsGeneratorTest {
     private AbstractJobsGenerator<CatalogEvent> generator;
 
     @Mock
-    private AppCatalogJobClient appDataPService;
+    private AppCatalogJobClient<CatalogEvent> appDataPService;
 
     @Mock
     private ProcessConfiguration processConfiguration;
@@ -157,7 +154,7 @@ public class AbstractJobsGeneratorTest {
         }).when(processSettings).getLevel();
         Mockito.doAnswer(i -> {
             return "hostname";
-        }).when(processSettings).getHostname();
+        }).when(processSettings).getTriggerHostname();
     }
 
     private void mockJobGeneratorSettings() {

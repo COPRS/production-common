@@ -1,4 +1,4 @@
-package esa.s1pdgs.cpoc.ipf.preparation.worker.tasks.edrssession;
+package esa.s1pdgs.cpoc.ipf.preparation.worker.tasks;
 
 import java.io.File;
 import java.time.format.DateTimeFormatter;
@@ -25,7 +25,6 @@ import esa.s1pdgs.cpoc.ipf.preparation.worker.model.joborder.AbstractJobOrderCon
 import esa.s1pdgs.cpoc.ipf.preparation.worker.model.joborder.JobOrderProcParam;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.service.XmlConverter;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.service.mqi.OutputProducerFactory;
-import esa.s1pdgs.cpoc.ipf.preparation.worker.tasks.AbstractJobsGenerator;
 import esa.s1pdgs.cpoc.metadata.client.MetadataClient;
 import esa.s1pdgs.cpoc.metadata.model.EdrsSessionMetadata;
 import esa.s1pdgs.cpoc.mqi.model.queue.CatalogEvent;
@@ -35,15 +34,14 @@ import esa.s1pdgs.cpoc.mqi.model.queue.LevelJobInputDto;
 public class L0AppJobsGenerator extends AbstractJobsGenerator<CatalogEvent> {
 
     public final static DateTimeFormatter JO_TIME_FORMATTER = DateTimeFormatter.ofPattern("yyyyMMdd'T'HHmmss");
-
     
 	private static final Logger LOGGER = LogManager.getLogger(L0AppJobsGenerator.class);
 	
 	private Map<String,Map<String,String>> aiopProperties;
 	
-    public L0AppJobsGenerator(XmlConverter xmlConverter,
-    		MetadataClient metadataClient, ProcessSettings l0ProcessSettings,
-            IpfPreparationWorkerSettings taskTablesSettings,
+    public L0AppJobsGenerator(final XmlConverter xmlConverter,
+    		final MetadataClient metadataClient, final ProcessSettings l0ProcessSettings,
+            final IpfPreparationWorkerSettings taskTablesSettings,
             final OutputProducerFactory outputFactory,
             final AppCatalogJobClient<CatalogEvent> appDataService,
             final AiopProperties aiopProperties, final ProcessConfiguration processConfiguration) {
@@ -51,9 +49,9 @@ public class L0AppJobsGenerator extends AbstractJobsGenerator<CatalogEvent> {
                 taskTablesSettings, outputFactory, appDataService, processConfiguration);
         
         this.aiopProperties = new HashMap<>();
-        Map<String, String> stationCodes = aiopProperties.getStationCodes();
-        for (String key : stationCodes.keySet()) {
-        	Map<String, String> map = new HashMap<>();
+        final Map<String, String> stationCodes = aiopProperties.getStationCodes();
+        for (final String key : stationCodes.keySet()) {
+        	final Map<String, String> map = new HashMap<>();
         	map.put("PT_Assembly", aiopProperties.getPtAssembly().get(key));
         	map.put("Processing_Mode", aiopProperties.getProcessingMode().get(key));
         	map.put("Reprocessing_Mode", aiopProperties.getReprocessingMode().get(key));
@@ -74,36 +72,36 @@ public class L0AppJobsGenerator extends AbstractJobsGenerator<CatalogEvent> {
     }
 
     @Override
-    protected void preSearch(JobGeneration job)
+    protected void preSearch(final JobGeneration job)
             throws IpfPrepWorkerInputsMissingException {
-        Map<String, String> missingRaws = new HashMap<>();
+        final Map<String, String> missingRaws = new HashMap<>();
         if (job.getAppDataJob() != null
                 && job.getAppDataJob().getProduct() != null) {
             // Channel 1
             job.getAppDataJob().getProduct().getRaws1().forEach(raw -> {
                 try {
-                    EdrsSessionMetadata file = this.metadataClient
+                    final EdrsSessionMetadata file = this.metadataClient
                             .getEdrsSession("RAW", new File(raw.getFilename()).getName());
                     if (file != null) {
                         raw.setKeyObs(file.getKeyObjectStorage());
                     } else {
                         missingRaws.put(raw.getFilename(), "No raw with name");
                     }
-                } catch (MetadataQueryException me) {
+                } catch (final MetadataQueryException me) {
                     missingRaws.put(raw.getFilename(), me.getMessage());
                 }
             });
             // Channel 2
             job.getAppDataJob().getProduct().getRaws2().forEach(raw -> {
                 try {
-                    EdrsSessionMetadata file = this.metadataClient
+                    final EdrsSessionMetadata file = this.metadataClient
                             .getEdrsSession("RAW", new File(raw.getFilename()).getName());
                     if (file != null) {
                         raw.setKeyObs(file.getKeyObjectStorage());
                     } else {
                         missingRaws.put(raw.getFilename(), "No raw with name");
                     }
-                } catch (MetadataQueryException me) {
+                } catch (final MetadataQueryException me) {
                     missingRaws.put(raw.getFilename(), me.getMessage());
                 }
             });
@@ -114,15 +112,15 @@ public class L0AppJobsGenerator extends AbstractJobsGenerator<CatalogEvent> {
     }
 
     @Override
-    protected void customJobOrder(JobGeneration job) {
-    	AbstractJobOrderConf conf = job.getJobOrder().getConf();
-    	AppDataJobProduct product = job.getAppDataJob().getProduct();
-    	boolean reprocessing = false; // currently no reprocessing supported
+    protected void customJobOrder(final JobGeneration job) {
+    	final AbstractJobOrderConf conf = job.getJobOrder().getConf();
+    	final AppDataJobProduct product = job.getAppDataJob().getProduct();
+    	final boolean reprocessing = false; // currently no reprocessing supported
     	LOGGER.info("Configuring AIOP with station parameters for stationCode {} for product {}", product.getStationCode(), product.getProductName());
 
     	// collect parameters
     	
-    	Map<String,String> aiopParams = new HashMap<>();
+    	final Map<String,String> aiopParams = new HashMap<>();
     	aiopParams.put("Mission_Id", product.getMissionId() + product.getSatelliteId());
     	aiopParams.put("Processing_Station", product.getStationCode());
     	//FIXME
@@ -140,7 +138,7 @@ public class L0AppJobsGenerator extends AbstractJobsGenerator<CatalogEvent> {
     		LOGGER.warn("**** stationCode is null, choosing default ****");    		
     	}
     	
-    	for (Entry<String,String> entrySet : aiopProperties.get(stationCode).entrySet()) {
+    	for (final Entry<String,String> entrySet : aiopProperties.get(stationCode).entrySet()) {
     		switch(entrySet.getKey()) {
     			case "Processing_Mode":
     				if (!reprocessing) {
@@ -161,10 +159,10 @@ public class L0AppJobsGenerator extends AbstractJobsGenerator<CatalogEvent> {
     	LOGGER.trace("Existing parameters: {}", conf.getProcParams());
     	LOGGER.trace("New AIOP parameters: {}", aiopParams);
     	
-    	for (Entry<String, String> newParam : aiopParams.entrySet()) {
+    	for (final Entry<String, String> newParam : aiopParams.entrySet()) {
     		boolean found = false;
     		if (null != conf.getProcParams()) {
-        		for (JobOrderProcParam existingParam : conf.getProcParams()) {
+        		for (final JobOrderProcParam existingParam : conf.getProcParams()) {
     				if (newParam.getKey().equals(existingParam.getName())) {
     					found = true;
     					existingParam.setValue(newParam.getValue());
@@ -180,7 +178,7 @@ public class L0AppJobsGenerator extends AbstractJobsGenerator<CatalogEvent> {
     }
 
     @Override
-    protected void customJobDto(JobGeneration job, IpfExecutionJob dto) {
+    protected void customJobDto(final JobGeneration job, final IpfExecutionJob dto) {
         // Add input relative to the channels
         if (job.getAppDataJob().getProduct() != null) {
             int nb1 = 0;
@@ -196,10 +194,10 @@ public class L0AppJobsGenerator extends AbstractJobsGenerator<CatalogEvent> {
                     (p1, p2) -> p1.getFilename().compareTo(p2.getFilename()));
 
             // Add raw to the job order, one file per channel
-            int nb = Math.max(nb1, nb2);
+            final int nb = Math.max(nb1, nb2);
             for (int i = 0; i < nb; i++) {
                 if (i < nb1) {
-                    AppDataJobFile raw =
+                    final AppDataJobFile raw =
                             job.getAppDataJob().getProduct().getRaws1().get(i);
                     dto.addInput(
                             new LevelJobInputDto(
@@ -209,7 +207,7 @@ public class L0AppJobsGenerator extends AbstractJobsGenerator<CatalogEvent> {
                                     raw.getKeyObs()));
                 }
                 if (i < nb2) {
-                    AppDataJobFile raw =
+                    final AppDataJobFile raw =
                             job.getAppDataJob().getProduct().getRaws2().get(i);
                     dto.addInput(
                             new LevelJobInputDto(

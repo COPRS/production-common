@@ -1,4 +1,4 @@
-package esa.s1pdgs.cpoc.ipf.preparation.worker.tasks.l0slice;
+package esa.s1pdgs.cpoc.ipf.preparation.worker.tasks;
 
 import static org.hamcrest.CoreMatchers.isA;
 import static org.junit.Assert.assertEquals;
@@ -46,9 +46,8 @@ import esa.s1pdgs.cpoc.ipf.preparation.worker.config.ProcessSettings;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.model.routing.LevelProductsRouting;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.service.XmlConverter;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.tasks.JobsGeneratorFactory;
-import esa.s1pdgs.cpoc.ipf.preparation.worker.tasks.l0slice.LevelProductsJobDispatcher;
-import esa.s1pdgs.cpoc.ipf.preparation.worker.tasks.l0slice.LevelProductsJobsGenerator;
-import esa.s1pdgs.cpoc.ipf.preparation.worker.utils.TestL1Utils;
+import esa.s1pdgs.cpoc.ipf.preparation.worker.tasks.LevelProductsJobDispatcher;
+import esa.s1pdgs.cpoc.ipf.preparation.worker.tasks.LevelProductsJobsGenerator;
 
 public class L1AppJobDispatcherTest {
 

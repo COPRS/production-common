@@ -40,9 +40,6 @@ import esa.s1pdgs.cpoc.common.errors.processing.IpfPrepWorkerBuildTaskTableExcep
 import esa.s1pdgs.cpoc.common.errors.processing.IpfPrepWorkerMaxNumberTaskTablesReachException;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.config.IpfPreparationWorkerSettings;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.config.ProcessSettings;
-import esa.s1pdgs.cpoc.ipf.preparation.worker.tasks.AbstractJobsDispatcher;
-import esa.s1pdgs.cpoc.ipf.preparation.worker.tasks.AbstractJobsGenerator;
-import esa.s1pdgs.cpoc.ipf.preparation.worker.tasks.JobsGeneratorFactory;
 import esa.s1pdgs.cpoc.mqi.model.queue.ProductionEvent;
 
 public class AbstractJobDispatcherTest {
@@ -100,8 +97,8 @@ public class AbstractJobDispatcherTest {
      * @param maxNbTasktable
      * @param taskTablesDirectory
      */
-    private void mockJobGeneratorSettings(int maxNbTasktable,
-            String taskTablesDirectory) {
+    private void mockJobGeneratorSettings(final int maxNbTasktable,
+            final String taskTablesDirectory) {
         // Mock the job generator settings
         doAnswer(i -> {
             return taskTablesDirectory;
@@ -116,11 +113,11 @@ public class AbstractJobDispatcherTest {
 
     private void mockProcessSettings() {
         Mockito.doAnswer(i -> {
-            Map<String, String> r = new HashMap<String, String>(2);
+            final Map<String, String> r = new HashMap<String, String>(2);
             return r;
         }).when(processSettings).getParams();
         Mockito.doAnswer(i -> {
-            Map<String, String> r = new HashMap<String, String>(5);
+            final Map<String, String> r = new HashMap<String, String>(5);
             r.put("SM_RAW__0S", "^S1[A-B]_S[1-6]_RAW__0S.*$");
             r.put("AN_RAW__0S", "^S1[A-B]_N[1-6]_RAW__0S.*$");
             r.put("ZS_RAW__0S", "^S1[A-B]_N[1-6]_RAW__0S.*$");
@@ -141,15 +138,15 @@ public class AbstractJobDispatcherTest {
 
     private void mockAppDataService()
             throws InternalErrorException, AbstractCodedException {
-        AppDataJob<?> appData1 = new AppDataJob<>();
+        final AppDataJob<?> appData1 = new AppDataJob<>();
         appData1.setId(12);
         appData1.setProduct(new AppDataJobProduct());
         appData1.getProduct().setProductName("p1");
-        AppDataJob<?> appData2 = new AppDataJob<>();
+        final AppDataJob<?> appData2 = new AppDataJob<>();
         appData2.setId(12);
         appData2.setProduct(new AppDataJobProduct());
         appData2.getProduct().setProductName("p2");
-        AppDataJob<?> appData3 = new AppDataJob<>();
+        final AppDataJob<?> appData3 = new AppDataJob<>();
         appData3.setId(12);
         appData3.setProduct(new AppDataJobProduct());
         appData3.getProduct().setProductName("p3");
@@ -180,7 +177,7 @@ public class AbstractJobDispatcherTest {
     @Test
     public void testConstructor() {
         this.mockJobGeneratorSettings(4, "./test/data/l0_config/task_tables/");
-        AbstractJobsDispatcherImpl dispatcher = this.createDispatcher();
+        final AbstractJobsDispatcherImpl dispatcher = this.createDispatcher();
         assertTrue(dispatcher.generators.isEmpty());
     }
 
@@ -191,13 +188,13 @@ public class AbstractJobDispatcherTest {
     @Test
     public void testNbMaxTaskTables() {
         this.mockJobGeneratorSettings(1, "./test/data");
-        AbstractJobsDispatcherImpl dispatcher = this.createDispatcher();
+        final AbstractJobsDispatcherImpl dispatcher = this.createDispatcher();
         try {
             dispatcher.initTaskTables();
             fail("An exception shall be raised");
-        } catch (IpfPrepWorkerMaxNumberTaskTablesReachException e) {
+        } catch (final IpfPrepWorkerMaxNumberTaskTablesReachException e) {
             assertTrue(e.getMessage().contains("Too much task"));
-        } catch (AbstractCodedException e) {
+        } catch (final AbstractCodedException e) {
             fail("Invalid raised exception: " + e.getMessage());
         }
     }
@@ -217,7 +214,7 @@ public class AbstractJobDispatcherTest {
                 Mockito.any());
 
         // Initialize
-        AbstractJobsDispatcherImpl dispatcher = this.createDispatcher();
+        final AbstractJobsDispatcherImpl dispatcher = this.createDispatcher();
         try {
             dispatcher.initTaskTables();
             verify(jobGenerationTaskScheduler, times(3))
@@ -230,7 +227,7 @@ public class AbstractJobDispatcherTest {
             assertTrue(dispatcher.generators.containsKey("IW_RAW__0_GRDH_1.xml"));
 
             assertTrue(dispatcher.getCounter() == 3);
-        } catch (AbstractCodedException e) {
+        } catch (final AbstractCodedException e) {
             fail("Invalid raised exception: " + e.getMessage());
         }
     }
@@ -253,7 +250,7 @@ public class AbstractJobDispatcherTest {
         }).when(processSettings).getMode();
 
         // Initialize
-        AbstractJobsDispatcherImpl dispatcher = this.createDispatcher();
+        final AbstractJobsDispatcherImpl dispatcher = this.createDispatcher();
         try {
             dispatcher.initTaskTables();
             verify(jobGenerationTaskScheduler, times(3))
@@ -274,7 +271,7 @@ public class AbstractJobDispatcherTest {
 
             assertTrue(dispatcher.getCounterDispatch() == 3);
 
-        } catch (AbstractCodedException e) {
+        } catch (final AbstractCodedException e) {
             fail("Invalid raised exception: " + e.getMessage());
         }
     }
@@ -286,12 +283,12 @@ public class AbstractJobDispatcherTest {
                 Mockito.any(), Mockito.anyBoolean(), Mockito.anyBoolean(),
                 Mockito.anyBoolean());
 
-        AppDataJob<?> dto = new AppDataJob<>();
+        final AppDataJob<?> dto = new AppDataJob<>();
         dto.setId(12);
         dto.setProduct(new AppDataJobProduct());
         dto.getProduct().setProductName("p1");
 
-        AppDataJob<?> expected = new AppDataJob<>();
+        final AppDataJob<?> expected = new AppDataJob<>();
         expected.setId(12);
         expected.setProduct(new AppDataJobProduct());
         expected.getProduct().setProductName("p1");
@@ -314,7 +311,7 @@ public class AbstractJobDispatcherTest {
                 Mockito.any(), Mockito.anyBoolean(), Mockito.anyBoolean(),
                 Mockito.anyBoolean());
 
-        AppDataJob<?> dto = new AppDataJob<>();
+        final AppDataJob<?> dto = new AppDataJob<>();
         dto.setId(12);
         dto.setProduct(new AppDataJobProduct());
         dto.getProduct().setProductName("p1");
@@ -325,7 +322,7 @@ public class AbstractJobDispatcherTest {
         dto.getGenerations().get(1).setTaskTable("tt2");
         dto.getGenerations().get(1).setState(AppDataJobGenerationState.READY);
 
-        AppDataJob<?> expected = new AppDataJob<>();
+        final AppDataJob<?> expected = new AppDataJob<>();
         expected.setId(12);
         expected.setProduct(new AppDataJobProduct());
         expected.getProduct().setProductName("p1");
@@ -348,7 +345,7 @@ public class AbstractJobDispatcherTest {
                 Mockito.any(), Mockito.anyBoolean(), Mockito.anyBoolean(),
                 Mockito.anyBoolean());
 
-        AppDataJob<?> dto = new AppDataJob<>();
+        final AppDataJob<?> dto = new AppDataJob<>();
         dto.setId(12);
         dto.setProduct(new AppDataJobProduct());
         dto.getProduct().setProductName("p1");
@@ -364,7 +361,7 @@ public class AbstractJobDispatcherTest {
                 Mockito.any(), Mockito.anyBoolean(), Mockito.anyBoolean(),
                 Mockito.anyBoolean());
 
-        AppDataJob<?> dto = new AppDataJob<>();
+        final AppDataJob<?> dto = new AppDataJob<>();
         dto.setId(12);
         dto.setProduct(new AppDataJobProduct());
         dto.getProduct().setProductName("p1");
@@ -375,7 +372,7 @@ public class AbstractJobDispatcherTest {
         dto.getGenerations().get(1).setTaskTable("tt1");
         dto.getGenerations().get(1).setState(AppDataJobGenerationState.READY);
 
-        AppDataJob<?> expected = new AppDataJob<>();
+        final AppDataJob<?> expected = new AppDataJob<>();
         expected.setId(12);
         expected.setProduct(new AppDataJobProduct());
         expected.getProduct().setProductName("p1");
@@ -399,10 +396,10 @@ class AbstractJobsDispatcherImpl extends AbstractJobsDispatcher<ProductionEvent>
     private int counter;
     private int counterDispatch;
 
-    public AbstractJobsDispatcherImpl(IpfPreparationWorkerSettings taskTablesSettings,
+    public AbstractJobsDispatcherImpl(final IpfPreparationWorkerSettings taskTablesSettings,
             final ProcessSettings processSettings,
-            JobsGeneratorFactory jobsGeneratorFactory,
-            ThreadPoolTaskScheduler jobGenerationTaskScheduler,
+            final JobsGeneratorFactory jobsGeneratorFactory,
+            final ThreadPoolTaskScheduler jobGenerationTaskScheduler,
             final AppCatalogJobClient appDataService) {
         super(taskTablesSettings, processSettings, jobsGeneratorFactory,
                 jobGenerationTaskScheduler, appDataService);
@@ -411,13 +408,14 @@ class AbstractJobsDispatcherImpl extends AbstractJobsDispatcher<ProductionEvent>
     }
 
     @Override
-    protected AbstractJobsGenerator<ProductionEvent> createJobGenerator(File xmlFile)
+    protected AbstractJobsGenerator<ProductionEvent> createJobGenerator(final File xmlFile)
             throws IpfPrepWorkerBuildTaskTableException {
         this.counter++;
         return null;
     }
 
-    public void dispatch(final AppDataJob job)
+    @Override
+	public void dispatch(final AppDataJob job)
             throws AbstractCodedException {
         counterDispatch++;
         super.dispatch(job);
@@ -436,15 +434,4 @@ class AbstractJobsDispatcherImpl extends AbstractJobsDispatcher<ProductionEvent>
     public int getCounterDispatch() {
         return counterDispatch;
     }
-
-    @Override
-    protected String getTaskForFunctionalLog() {
-        return "Task";
-    }
-
-	@Override
-	public void setTaskForFunctionalLog(String taskForFunctionalLog) {
-		
-		
-	}
 }

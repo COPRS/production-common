@@ -244,10 +244,6 @@ public abstract class AbstractJobsDispatcher<T extends AbstractMessage> {
     protected abstract List<String> getTaskTables(final AppDataJob<T> job)
             throws AbstractCodedException;
 
-    protected abstract String getTaskForFunctionalLog();
-    
-    public abstract void setTaskForFunctionalLog(String taskForFunctionalLog);
-
     /**
      * @return the generators
      */

@@ -1,4 +1,4 @@
-package esa.s1pdgs.cpoc.ipf.preparation.worker.utils;
+package esa.s1pdgs.cpoc.ipf.preparation.worker.tasks;
 
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
@@ -28,10 +28,10 @@ import esa.s1pdgs.cpoc.mqi.model.rest.GenericMessageDto;
 public class TestL0Utils {
     public final static DateTimeFormatter TIME_FORMATTER = DateTimeFormatter.ofPattern("yyyyMMdd'T'HHmmss");
 	
-    private static final String SEGMENT_PATTERN = "^([0-9a-z]{2})([0-9a-z]{1})_(([0-9a-z]{2})_RAW__0S([0-9a-z_]{2}))_"
+    public static final String SEGMENT_PATTERN = "^([0-9a-z]{2})([0-9a-z]{1})_(([0-9a-z]{2})_RAW__0S([0-9a-z_]{2}))_"
     		+ "([0-9a-z]{15})_([0-9a-z]{15})_([0-9a-z_]{6})_([0-9a-z_]{6})\\w{1,}\\.SAFE(/.*)?$";
     
-    private static final String SLICE_PATTERN = "^([0-9a-z]{2})([0-9a-z]){1}_(([0-9a-z]{2})_RAW__0([0-9a-z_]{3}))_"
+    public static final String SLICE_PATTERN = "^([0-9a-z]{2})([0-9a-z]){1}_(([0-9a-z]{2})_RAW__0([0-9a-z_]{3}))_"
     		+ "([0-9a-z]{15})_([0-9a-z]{15})_([0-9a-z_]{6})_([0-9a-z_]{6})\\w{1,}\\.SAFE(/.*)?$";
     
     public static TaskTable buildTaskTableAIOP() {

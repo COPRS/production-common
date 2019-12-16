@@ -1,4 +1,4 @@
-package esa.s1pdgs.cpoc.ipf.preparation.worker.tasks.l0slice;
+package esa.s1pdgs.cpoc.ipf.preparation.worker.tasks;
 
 import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.hasKey;
@@ -55,9 +55,7 @@ import esa.s1pdgs.cpoc.ipf.preparation.worker.model.tasktable.TaskTable;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.service.XmlConverter;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.service.mqi.OutputProducerFactory;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.tasks.JobsGeneratorFactory;
-import esa.s1pdgs.cpoc.ipf.preparation.worker.tasks.l0slice.LevelProductsJobsGenerator;
-import esa.s1pdgs.cpoc.ipf.preparation.worker.utils.TestGenericUtils;
-import esa.s1pdgs.cpoc.ipf.preparation.worker.utils.TestL1Utils;
+import esa.s1pdgs.cpoc.ipf.preparation.worker.tasks.LevelProductsJobsGenerator;
 import esa.s1pdgs.cpoc.metadata.client.MetadataClient;
 import esa.s1pdgs.cpoc.metadata.client.SearchMetadataQuery;
 import esa.s1pdgs.cpoc.metadata.model.L0AcnMetadata;
