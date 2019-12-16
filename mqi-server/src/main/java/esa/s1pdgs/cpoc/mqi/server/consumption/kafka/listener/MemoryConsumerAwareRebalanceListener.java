@@ -94,13 +94,13 @@ public class MemoryConsumerAwareRebalanceListener
     @Override
     public void onPartitionsAssigned(final Consumer<?, ?> consumer,
             final Collection<TopicPartition> partitions) {
-        LOGGER.info("[MONITOR] [rebalance]onPartitionsAssigned call");
+        LOGGER.info("[MONITOR] [rebalance] onPartitionsAssigned call");
         // We seek the consumer on the right offset
         Iterator<TopicPartition> topicPartitionIterator = partitions.iterator();
         while (topicPartitionIterator.hasNext()) {
             TopicPartition topicPartition = topicPartitionIterator.next();
             LOGGER.debug(
-                    "[MONITOR] [rebalance]Current offset is {} committed offset is -> {}",
+                    "[MONITOR] [rebalance] Current offset is {} committed offset is -> {}",
                     consumer.position(topicPartition),
                     consumer.committed(topicPartition));
             long startingOffset = defaultMode;
