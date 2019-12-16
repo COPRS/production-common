@@ -1,6 +1,7 @@
 package esa.s1pdgs.cpoc.ipf.preparation.worker.config;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -18,6 +19,7 @@ import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
 import org.springframework.util.StringUtils;
 
 import esa.s1pdgs.cpoc.appcatalog.client.job.AppCatalogJobClient;
+import esa.s1pdgs.cpoc.common.ApplicationLevel;
 import esa.s1pdgs.cpoc.common.ProductCategory;
 import esa.s1pdgs.cpoc.common.ProductFamily;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.service.XmlConverter;
@@ -61,7 +63,13 @@ public class IpfPreparationWorkerSettings {
 			default:
 				// fall through to throw exception
 		}
-		throw new IllegalArgumentException(String.format("Unsupported Application Level: %s", processSettings.getLevel()));
+		throw new IllegalArgumentException(
+				String.format(
+						"Unsupported Application Level '%s'. Available are: %s", 
+						processSettings.getLevel(),
+						Arrays.asList(ApplicationLevel.values())
+				)
+		);
 	}
 	
 	public static class CategoryConfig
