@@ -37,13 +37,8 @@ import esa.s1pdgs.cpoc.ipf.preparation.worker.model.tasktable.TaskTableOuput;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.model.tasktable.TaskTableTask;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.service.XmlConverter;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.service.mqi.OutputProducerFactory;
-import esa.s1pdgs.cpoc.ipf.preparation.worker.tasks.AbstractJobsGenerator;
-import esa.s1pdgs.cpoc.ipf.preparation.worker.tasks.JobsGeneratorFactory;
-import esa.s1pdgs.cpoc.ipf.preparation.worker.utils.TestGenericUtils;
 import esa.s1pdgs.cpoc.metadata.client.MetadataClient;
 import esa.s1pdgs.cpoc.metadata.client.SearchMetadataQuery;
-import esa.s1pdgs.cpoc.mqi.model.queue.CatalogEvent;
-import esa.s1pdgs.cpoc.mqi.model.queue.ProductionEvent;
 
 public class JobsGeneratorFactoryTest {
 
@@ -89,27 +84,27 @@ public class JobsGeneratorFactoryTest {
 
         // Mock job generator settings
         Mockito.doAnswer(i -> {
-            Map<String, String> r = new HashMap<String, String>(2);
+            final Map<String, String> r = new HashMap<String, String>(2);
             r.put("PT_Assembly", "no");
             r.put("Timeout", "60");
             return r;
         }).when(l0ProcessSettings).getParams();
         Mockito.doAnswer(i -> {
-            Map<String, String> r = new HashMap<String, String>(2);
+            final Map<String, String> r = new HashMap<String, String>(2);
             r.put("AN_RAW__0S", "^S1[A-B]_N[1-6]_RAW__0S.*$");
             r.put("REP_EFEP_", "^S1[A|B|_]_OPER_REP_PASS.*.EOF$");
             return r;
         }).when(l0ProcessSettings).getOutputregexps();
         Mockito.doAnswer(i -> {
-            Map<String, ProductFamily> r =
+            final Map<String, ProductFamily> r =
                     new HashMap<String, ProductFamily>(20);
-            String families =
+            final String families =
                     "SM_RAW__0S:L0_SLICE||IW_RAW__0S:L0_SLICE||EW_RAW__0S:L0_SLICE||WV_RAW__0S:L0_SLICE||RF_RAW__0S:L0_SLICE||AN_RAW__0S:L0_SLICE||EN_RAW__0S:L0_SLICE||ZS_RAW__0S:L0_SLICE||ZE_RAW__0S:L0_SLICE||ZI_RAW__0S:L0_SLICE||ZW_RAW__0S:L0_SLICE||GP_RAW__0_:BLANK||HK_RAW__0_:BLANK||REP_ACQNR:L0_REPORT||REP_L0PSA_:L0_REPORT||REP_EFEP_:L0_REPORT||IW_GRDH_1S:L1_SLICE||IW_GRDH_1A:L1_ACN";
             if (!StringUtils.isEmpty(families)) {
-                String[] paramsTmp = families.split("\\|\\|");
+                final String[] paramsTmp = families.split("\\|\\|");
                 for (int k = 0; k < paramsTmp.length; k++) {
                     if (!StringUtils.isEmpty(paramsTmp[k])) {
-                        String[] tmp = paramsTmp[k].split(":", 2);
+                        final String[] tmp = paramsTmp[k].split(":", 2);
                         if (tmp.length == 2) {
                             r.put(tmp[0], ProductFamily.fromValue(tmp[1]));
                         }
@@ -119,15 +114,15 @@ public class JobsGeneratorFactoryTest {
             return r;
         }).when(ipfPreparationWorkerSettings).getOutputfamilies();
         Mockito.doAnswer(i -> {
-            Map<String, ProductFamily> r =
+            final Map<String, ProductFamily> r =
                     new HashMap<String, ProductFamily>(20);
-            String families =
+            final String families =
                     "MPL_ORBPRE:AUXILIARY_FILE||MPL_ORBSCT:AUXILIARY_FILE||AUX_OBMEMC:AUXILIARY_FILE||AUX_CAL:AUXILIARY_FILE||AUX_PP1:AUXILIARY_FILE||AUX_INS:AUXILIARY_FILE||AUX_RESORB:AUXILIARY_FILE||AUX_RES:AUXILIARY_FILE";
             if (!StringUtils.isEmpty(families)) {
-                String[] paramsTmp = families.split("\\|\\|");
+                final String[] paramsTmp = families.split("\\|\\|");
                 for (int k = 0; k < paramsTmp.length; k++) {
                     if (!StringUtils.isEmpty(paramsTmp[k])) {
-                        String[] tmp = paramsTmp[k].split(":", 2);
+                        final String[] tmp = paramsTmp[k].split(":", 2);
                         if (tmp.length == 2) {
                             r.put(tmp[0], ProductFamily.fromValue(tmp[1]));
                         }
@@ -142,7 +137,7 @@ public class JobsGeneratorFactoryTest {
     public void testCreateJobGeneratorForEdrsSession() {
         try {
 
-            TaskTable expectedTaskTable = TestGenericUtils.buildTaskTableAIOP();
+            final TaskTable expectedTaskTable = TestGenericUtils.buildTaskTableAIOP();
             Mockito.when(
                     xmlConverter.convertFromXMLToObject(Mockito.anyString()))
                     .thenReturn(expectedTaskTable);
@@ -151,11 +146,11 @@ public class JobsGeneratorFactoryTest {
                 return ApplicationLevel.L0;
             }).when(l0ProcessSettings).getLevel();
 
-            JobsGeneratorFactory factory = new JobsGeneratorFactory(
+            final JobsGeneratorFactory factory = new JobsGeneratorFactory(
                     l0ProcessSettings, ipfPreparationWorkerSettings, aiopProperties,
                     xmlConverter, metadataClient, JobsSender, processConfiguration);
 
-            AbstractJobsGenerator<CatalogEvent> generator =
+            final AbstractJobsGenerator generator =
                     factory.createJobGeneratorForEdrsSession(new File(
                             "./test/data/generic_config/task_tables/task_tables/TaskTable.AIOP.xml"),
                             appDataEService);
@@ -175,7 +170,7 @@ public class JobsGeneratorFactoryTest {
             // Check task
             this.checkInitializeWithTaskTableAIOPTasks(expectedTaskTable,
                     generator.tasks);
-        } catch (IpfPrepWorkerBuildTaskTableException e) {
+        } catch (final IpfPrepWorkerBuildTaskTableException e) {
             fail("BuildTaskTableException raised: " + e.getMessage());
         } catch (IOException | JAXBException e1) {
             fail("BuildTaskTableException raised: " + e1.getMessage());
@@ -183,16 +178,16 @@ public class JobsGeneratorFactoryTest {
     }
 
     private void checkInitializeWithTaskTableAIOPTaskTable(
-            TaskTable expectedTaskTable, TaskTable result) {
+            final TaskTable expectedTaskTable, final TaskTable result) {
         assertEquals(expectedTaskTable, result);
     }
 
-    private void checkInitializeWithTaskTableAIOPJobOrder(TaskTable t,
-            JobOrder o) {
+    private void checkInitializeWithTaskTableAIOPJobOrder(final TaskTable t,
+            final JobOrder o) {
 
-        TaskTableTask task11 = t.getPools().get(0).getTasks().get(0);
-        TaskTableTask task12 = t.getPools().get(0).getTasks().get(1);
-        TaskTableTask task13 = t.getPools().get(0).getTasks().get(2);
+        final TaskTableTask task11 = t.getPools().get(0).getTasks().get(0);
+        final TaskTableTask task12 = t.getPools().get(0).getTasks().get(1);
+        final TaskTableTask task13 = t.getPools().get(0).getTasks().get(2);
 
         assertEquals("[JobOrder > Conf] Invalid processor name",
                 t.getProcessorName(), o.getConf().getProcessorName());
@@ -247,8 +242,8 @@ public class JobsGeneratorFactoryTest {
 
         assertTrue("[Outputs] Invalid number", task11.getOutputs().size() == o
                 .getProcs().get(0).getOutputs().size());
-        JobOrderOutput oOutput0 = o.getProcs().get(0).getOutputs().get(0);
-        TaskTableOuput tOutput0 = task11.getOutputs().get(0);
+        final JobOrderOutput oOutput0 = o.getProcs().get(0).getOutputs().get(0);
+        final TaskTableOuput tOutput0 = task11.getOutputs().get(0);
         assertFalse("[Outputs] Invalid mandatory", oOutput0.isMandatory());
         assertTrue("[Outputs] Invalid filenametype",
                 oOutput0.getFileNameType() == JobOrderFileNameType.REGEXP);
@@ -257,8 +252,8 @@ public class JobsGeneratorFactoryTest {
         assertEquals("[Outputs] Invalid filename",
                 "^.*" + tOutput0.getType() + ".*$", oOutput0.getFileName());
 
-        JobOrderOutput oOutput2 = o.getProcs().get(0).getOutputs().get(2);
-        TaskTableOuput tOutput2 = task11.getOutputs().get(2);
+        final JobOrderOutput oOutput2 = o.getProcs().get(0).getOutputs().get(2);
+        final TaskTableOuput tOutput2 = task11.getOutputs().get(2);
         assertFalse("[Outputs] Invalid mandatory", oOutput2.isMandatory());
         assertTrue("[Outputs] Invalid filenametype",
                 oOutput2.getFileNameType() == JobOrderFileNameType.DIRECTORY);
@@ -268,8 +263,8 @@ public class JobsGeneratorFactoryTest {
                 oOutput2.getFileType());
         assertEquals("[Outputs] Invalid filename", "", oOutput2.getFileName());
 
-        JobOrderOutput oOutput15 = o.getProcs().get(0).getOutputs().get(15);
-        TaskTableOuput tOutput15 = task11.getOutputs().get(15);
+        final JobOrderOutput oOutput15 = o.getProcs().get(0).getOutputs().get(15);
+        final TaskTableOuput tOutput15 = task11.getOutputs().get(15);
         assertFalse("[Outputs] Invalid mandatory", oOutput15.isMandatory());
         assertTrue("[Outputs] Invalid filenametype",
                 oOutput15.getFileNameType() == JobOrderFileNameType.REGEXP);
@@ -280,8 +275,8 @@ public class JobsGeneratorFactoryTest {
         assertEquals("[Outputs] Invalid filename",
                 "^S1[A|B|_]_OPER_REP_PASS.*.EOF$", oOutput15.getFileName());
 
-        JobOrderOutput oOutput15b = o.getProcs().get(1).getOutputs().get(5);
-        TaskTableOuput tOutput15b = task12.getOutputs().get(5);
+        final JobOrderOutput oOutput15b = o.getProcs().get(1).getOutputs().get(5);
+        final TaskTableOuput tOutput15b = task12.getOutputs().get(5);
         assertFalse("[Outputs] Invalid mandatory", oOutput15b.isMandatory());
         assertTrue("[Outputs] Invalid filenametype",
                 oOutput15b.getFileNameType() == JobOrderFileNameType.REGEXP);
@@ -294,12 +289,12 @@ public class JobsGeneratorFactoryTest {
     }
 
     private void checkInitializeWithTaskTableAIOPMetadataSearchQueries(
-            TaskTable r, Map<Integer, SearchMetadataQuery> s) {
+            final TaskTable r, final Map<Integer, SearchMetadataQuery> s) {
 
         assertTrue("Invalid number of search metadata query", s.size() == 3);
 
-        TaskTableTask task11 = r.getPools().get(0).getTasks().get(0);
-        TaskTableTask task12 = r.getPools().get(0).getTasks().get(1);
+        final TaskTableTask task11 = r.getPools().get(0).getTasks().get(0);
+        final TaskTableTask task12 = r.getPools().get(0).getTasks().get(1);
 
         s.forEach((k, v) -> {
             if ("MPL_ORBPRE".equals(v.getProductType())) {
@@ -359,8 +354,8 @@ public class JobsGeneratorFactoryTest {
         });
     }
 
-    private void checkInitializeWithTaskTableAIOPTasks(TaskTable t,
-            List<List<String>> tasks) {
+    private void checkInitializeWithTaskTableAIOPTasks(final TaskTable t,
+            final List<List<String>> tasks) {
         assertEquals("Invalid number of pools", t.getPools().size(),
                 tasks.size());
         assertEquals("Invalid number of pools", 2, tasks.size());
@@ -395,16 +390,16 @@ public class JobsGeneratorFactoryTest {
                 return ApplicationLevel.L1;
             }).when(l0ProcessSettings).getLevel();
 
-            TaskTable expectedTaskTable = TestGenericUtils.buildTaskTableIW();
+            final TaskTable expectedTaskTable = TestGenericUtils.buildTaskTableIW();
             Mockito.when(
                     xmlConverter.convertFromXMLToObject(Mockito.anyString()))
                     .thenReturn(expectedTaskTable);
 
-            JobsGeneratorFactory factory = new JobsGeneratorFactory(
+            final JobsGeneratorFactory factory = new JobsGeneratorFactory(
                     l0ProcessSettings, ipfPreparationWorkerSettings, aiopProperties,
                     xmlConverter, metadataClient, JobsSender, processConfiguration);
 
-            AbstractJobsGenerator<ProductionEvent> generator =
+            final AbstractJobsGenerator generator =
                     factory.createJobGeneratorForL0Slice(new File(
                             "./test/data/generic_config/task_tables/IW_RAW__0_GRDH_1.xml"),
                     		 appDataPService);
@@ -424,7 +419,7 @@ public class JobsGeneratorFactoryTest {
             // Check task
             this.checkInitializeWithTaskTableIWTasks(expectedTaskTable,
                     generator.tasks);
-        } catch (IpfPrepWorkerBuildTaskTableException e) {
+        } catch (final IpfPrepWorkerBuildTaskTableException e) {
             fail("BuildTaskTableException raised: " + e.getMessage());
         } catch (IOException | JAXBException e1) {
             fail("BuildTaskTableException raised: " + e1.getMessage());
@@ -432,16 +427,16 @@ public class JobsGeneratorFactoryTest {
     }
 
     private void checkInitializeWithTaskTableIWTaskTable(
-            TaskTable expectedTaskTable, TaskTable result) {
+            final TaskTable expectedTaskTable, final TaskTable result) {
         assertEquals(expectedTaskTable, result);
     }
 
-    private void checkInitializeWithTaskTableIWJobOrder(TaskTable t,
-            JobOrder o) {
+    private void checkInitializeWithTaskTableIWJobOrder(final TaskTable t,
+            final JobOrder o) {
 
-        TaskTableTask task11 = t.getPools().get(0).getTasks().get(0);
-        TaskTableTask task13 = t.getPools().get(2).getTasks().get(0);
-        TaskTableTask task14 = t.getPools().get(3).getTasks().get(0);
+        final TaskTableTask task11 = t.getPools().get(0).getTasks().get(0);
+        final TaskTableTask task13 = t.getPools().get(2).getTasks().get(0);
+        final TaskTableTask task14 = t.getPools().get(3).getTasks().get(0);
 
         assertEquals("[JobOrder > Conf] Invalid processor name",
                 t.getProcessorName(), o.getConf().getProcessorName());
@@ -473,8 +468,8 @@ public class JobsGeneratorFactoryTest {
         assertTrue("[Outputs] Invalid number for proc4", task14.getOutputs()
                 .size() == o.getProcs().get(3).getOutputs().size());
 
-        JobOrderOutput oOutput0 = o.getProcs().get(3).getOutputs().get(0);
-        TaskTableOuput tOutput0 = task14.getOutputs().get(0);
+        final JobOrderOutput oOutput0 = o.getProcs().get(3).getOutputs().get(0);
+        final TaskTableOuput tOutput0 = task14.getOutputs().get(0);
         assertTrue("[Outputs] Invalid mandatory", oOutput0.isMandatory());
         assertTrue("[Outputs] Invalid filenametype",
                 oOutput0.getFileNameType() == JobOrderFileNameType.DIRECTORY);
@@ -484,8 +479,8 @@ public class JobsGeneratorFactoryTest {
         assertEquals("[Outputs] Invalid family", ProductFamily.L1_SLICE,
                 oOutput0.getFamily());
 
-        JobOrderOutput oOutput1 = o.getProcs().get(3).getOutputs().get(1);
-        TaskTableOuput tOutput1 = task14.getOutputs().get(1);
+        final JobOrderOutput oOutput1 = o.getProcs().get(3).getOutputs().get(1);
+        final TaskTableOuput tOutput1 = task14.getOutputs().get(1);
         assertFalse("[Outputs] Invalid mandatory", oOutput1.isMandatory());
         assertTrue("[Outputs] Invalid filenametype",
                 oOutput1.getFileNameType() == JobOrderFileNameType.DIRECTORY);
@@ -497,12 +492,12 @@ public class JobsGeneratorFactoryTest {
     }
 
     private void checkInitializeWithTaskTableIWMetadataSearchQueries(
-            TaskTable r, Map<Integer, SearchMetadataQuery> s) {
+            final TaskTable r, final Map<Integer, SearchMetadataQuery> s) {
 
         assertTrue("Invalid number of search metadata query", s.size() == 10);
 
         s.forEach((k, v) -> {
-            TaskTableTask task11 = r.getPools().get(0).getTasks().get(0);
+            final TaskTableTask task11 = r.getPools().get(0).getTasks().get(0);
             if ("AUX_POE".equals(v.getProductType())) {
                 assertEquals("[smq AUX_POE] invalid delta 0", 0,
                         v.getDeltaTime0(), 0);
@@ -535,8 +530,8 @@ public class JobsGeneratorFactoryTest {
         });
     }
 
-    private void checkInitializeWithTaskTableIWTasks(TaskTable t,
-            List<List<String>> tasks) {
+    private void checkInitializeWithTaskTableIWTasks(final TaskTable t,
+            final List<List<String>> tasks) {
         assertEquals("Invalid number of pools", t.getPools().size(),
                 tasks.size());
         assertEquals("Invalid number of pools", 5, tasks.size());

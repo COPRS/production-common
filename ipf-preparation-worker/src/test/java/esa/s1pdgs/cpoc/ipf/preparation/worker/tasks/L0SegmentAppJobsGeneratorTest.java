@@ -1,4 +1,4 @@
-package esa.s1pdgs.cpoc.ipf.preparation.worker.tasks.l0segment;
+package esa.s1pdgs.cpoc.ipf.preparation.worker.tasks;
 // FIXME: Get Test running again
 
 //package esa.s1pdgs.cpoc.jobgenerator.tasks.l0segmentapp;

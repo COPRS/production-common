@@ -1,4 +1,4 @@
-package esa.s1pdgs.cpoc.ipf.preparation.worker.utils;
+package esa.s1pdgs.cpoc.ipf.preparation.worker.tasks;
 
 import java.util.Arrays;
 import java.util.Calendar;
@@ -19,57 +19,52 @@ import esa.s1pdgs.cpoc.ipf.preparation.worker.model.routing.LevelProductsRouting
 import esa.s1pdgs.cpoc.mqi.model.queue.ProductionEvent;
 import esa.s1pdgs.cpoc.mqi.model.rest.GenericMessageDto;
 
-public class TestL1Utils {
+public class TestL2Utils {
 
-    public static LevelProductsRouting buildL1Routing() {
+    public static LevelProductsRouting buildL2Routing() {
         final LevelProductsRouting r = new LevelProductsRouting();
-        r.addRoute(new LevelProductsRoute(new LevelProductsRouteFrom("EN", "A"),
-                new LevelProductsRouteTo(Arrays.asList("EN_RAW__0_GRDF_1.xml",
-                        "EN_RAW__0_GRDH_1.xml", "EN_RAW__0_GRDM_1.xml",
-                        "EN_RAW__0_SLC__1.xml", "EN_RAW__0_SLC__1_GRDF_1.xml",
-                        "EN_RAW__0_SLC__1_GRDH_1.xml"))));
-        r.addRoute(new LevelProductsRoute(new LevelProductsRouteFrom("EN", "B"),
-                new LevelProductsRouteTo(Arrays.asList("EN_RAW__0_SLC__1.xml",
-                        "EN_RAW__0_SLC__1_GRDF_1.xml",
-                        "EN_RAW__0_SLC__1_GRDH_1.xml"))));
-        r.addRoute(new LevelProductsRoute(new LevelProductsRouteFrom("EW", "A"),
-                new LevelProductsRouteTo(Arrays.asList("EW_RAW__0_GRDH_1.xml",
-                        "EW_RAW__0_GRDM_1.xml", "EW_RAW__0_SLC__1.xml",
-                        "EW_RAW__0_SLC__1_GRDH_1.xml",
-                        "EW_RAW__0_SLC__1_GRDM_1.xml"))));
-        r.addRoute(new LevelProductsRoute(new LevelProductsRouteFrom("EW", "B"),
-                new LevelProductsRouteTo(Arrays.asList("EW_RAW__0_SLC__1.xml",
-                        "EW_RAW__0_SLC__1_GRDH_1.xml",
-                        "EW_RAW__0_SLC__1_GRDM_1.xml"))));
-        r.addRoute(new LevelProductsRoute(new LevelProductsRouteFrom("IW", "A"),
-                new LevelProductsRouteTo(Arrays.asList("IW_RAW__0_GRDH_1.xml",
-                        "IW_RAW__0_GRDM_1.xml", "IW_RAW__0_SLC__1.xml",
-                        "IW_RAW__0_SLC__1_GRDH_1.xml",
-                        "IW_RAW__0_SLC__1_GRDM_1.xml"))));
-        r.addRoute(new LevelProductsRoute(new LevelProductsRouteFrom("IW", "B"),
-                new LevelProductsRouteTo(Arrays.asList("IW_RAW__0_SLC__1.xml",
-                        "IW_RAW__0_SLC__1_GRDH_1.xml",
-                        "IW_RAW__0_SLC__1_GRDM_1.xml"))));
-        r.addRoute(new LevelProductsRoute(new LevelProductsRouteFrom("S[1-6]", "A"),
-                new LevelProductsRouteTo(Arrays.asList("SM_RAW__0_GRDF_1.xml",
-                        "SM_RAW__0_GRDH_1.xml", "SM_RAW__0_GRDM_1.xml",
-                        "SM_RAW__0_SLC__1.xml", "SM_RAW__0_SLC__1_GRDF_1.xml",
-                        "SM_RAW__0_SLC__1_GRDH_1.xml"))));
-        r.addRoute(new LevelProductsRoute(new LevelProductsRouteFrom("S[1-6]", "B"),
-                new LevelProductsRouteTo(Arrays.asList("SM_RAW__0_SLC__1.xml",
-                        "SM_RAW__0_SLC__1_GRDF_1.xml",
-                        "SM_RAW__0_SLC__1_GRDH_1.xml"))));
+        r.addRoute(new LevelProductsRoute(new LevelProductsRouteFrom("WV", "A"),
+        		  new LevelProductsRouteTo(Arrays.asList("WV_RAW__0_OCN__2.xml"))));
+        r.addRoute(new LevelProductsRoute(new LevelProductsRouteFrom("WV", "B"),
+                new LevelProductsRouteTo(Arrays.asList("WV_RAW__0_OCN__2.xml"))));
+//        r.addRoute(new L2Route(new L2RouteFrom("EW", "A"),
+//                new L2RouteTo(Arrays.asList("EW_RAW__0_GRDH_1.xml",
+//                        "EW_RAW__0_GRDM_1.xml", "EW_RAW__0_SLC__1.xml",
+//                        "EW_RAW__0_SLC__1_GRDH_1.xml",
+//                        "EW_RAW__0_SLC__1_GRDM_1.xml"))));
+//        r.addRoute(new L2Route(new L2RouteFrom("EW", "B"),
+//                new L2RouteTo(Arrays.asList("EW_RAW__0_SLC__1.xml",
+//                        "EW_RAW__0_SLC__1_GRDH_1.xml",
+//                        "EW_RAW__0_SLC__1_GRDM_1.xml"))));
+//        r.addRoute(new L2Route(new L2RouteFrom("IW", "A"),
+//                new L2RouteTo(Arrays.asList("IW_RAW__0_GRDH_1.xml",
+//                        "IW_RAW__0_GRDM_1.xml", "IW_RAW__0_SLC__1.xml",
+//                        "IW_RAW__0_SLC__1_GRDH_1.xml",
+//                        "IW_RAW__0_SLC__1_GRDM_1.xml"))));
+//        r.addRoute(new L2Route(new L2RouteFrom("IW", "B"),
+//                new L2RouteTo(Arrays.asList("IW_RAW__0_SLC__1.xml",
+//                        "IW_RAW__0_SLC__1_GRDH_1.xml",
+//                        "IW_RAW__0_SLC__1_GRDM_1.xml"))));
+//        r.addRoute(new L2Route(new L2RouteFrom("S[1-6]", "A"),
+//                new L2RouteTo(Arrays.asList("SM_RAW__0_GRDF_1.xml",
+//                        "SM_RAW__0_GRDH_1.xml", "SM_RAW__0_GRDM_1.xml",
+//                        "SM_RAW__0_SLC__1.xml", "SM_RAW__0_SLC__1_GRDF_1.xml",
+//                        "SM_RAW__0_SLC__1_GRDH_1.xml"))));
+//        r.addRoute(new L2Route(new L2RouteFrom("S[1-6]", "B"),
+//                new L2RouteTo(Arrays.asList("SM_RAW__0_SLC__1.xml",
+//                        "SM_RAW__0_SLC__1_GRDF_1.xml",
+//                        "SM_RAW__0_SLC__1_GRDH_1.xml"))));
 
         return r;
     }
 
-    public static  AppDataJob buildJobGeneration(
+    public static AppDataJob buildJobGeneration(
             final boolean preSearchInfo) throws InternalErrorException {
         final AppDataJob ret = new AppDataJob();
         ret.setId(123);
         ret.setState(AppDataJobState.GENERATING);
         ret.setPod("hostname");
-        ret.setLevel(ApplicationLevel.L0);
+        ret.setLevel(ApplicationLevel.L2);
 
         final GenericMessageDto<ProductionEvent> message1 =
                 new GenericMessageDto<ProductionEvent>(1, "input-key",

@@ -1,4 +1,4 @@
-package esa.s1pdgs.cpoc.ipf.preparation.worker.tasks.l0segment;
+package esa.s1pdgs.cpoc.ipf.preparation.worker.tasks;
 
 import java.io.File;
 import java.util.Arrays;
@@ -14,9 +14,6 @@ import esa.s1pdgs.cpoc.common.errors.AbstractCodedException;
 import esa.s1pdgs.cpoc.common.errors.processing.IpfPrepWorkerMissingRoutingEntryException;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.config.IpfPreparationWorkerSettings;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.config.ProcessSettings;
-import esa.s1pdgs.cpoc.ipf.preparation.worker.tasks.AbstractJobsDispatcher;
-import esa.s1pdgs.cpoc.ipf.preparation.worker.tasks.AbstractJobsGenerator;
-import esa.s1pdgs.cpoc.ipf.preparation.worker.tasks.JobsGeneratorFactory;
 import esa.s1pdgs.cpoc.mqi.model.queue.CatalogEvent;
 
 /**
@@ -27,51 +24,29 @@ import esa.s1pdgs.cpoc.mqi.model.queue.CatalogEvent;
  * 
  * @author Cyrielle Gailliard
  */
-public class L0SegmentAppJobDispatcher extends AbstractJobsDispatcher<CatalogEvent> {
-
-    /**
-     * Task table
-     */
+public class L0SegmentAppJobDispatcher extends AbstractJobsDispatcher {
     private static final String TASK_TABLE_NAME = "TaskTable.L0ASP.xml";
-    
-    /**
-     * 
-     */
-    private String taskForFunctionalLog;
 
-    /**
-     * @param settings
-     * @param factory
-     * @param taskScheduler
-     * @param xmlConverter
-     * @param pathRoutingXmlFile
-     */
-    public L0SegmentAppJobDispatcher(final IpfPreparationWorkerSettings settings,
+    public L0SegmentAppJobDispatcher(
+    		final IpfPreparationWorkerSettings settings,
             final ProcessSettings processSettings,
             final JobsGeneratorFactory factory,
             final ThreadPoolTaskScheduler taskScheduler,
-            final AppCatalogJobClient<CatalogEvent> appDataService) {
-        super(settings, processSettings, factory, taskScheduler,
-                appDataService);
+            final AppCatalogJobClient<CatalogEvent> appDataService
+    ) {
+        super(settings, processSettings, factory, taskScheduler, appDataService);
     }
 
-    /**
-     * @throws AbstractCodedException
-     */
     @PostConstruct
     public void initialize() throws AbstractCodedException {
-        // Init job generators from task tables
         super.initTaskTables();
     }
 
-    /**
-     * 
-     */
     @Override
-    protected AbstractJobsGenerator<CatalogEvent> createJobGenerator(
-            final File xmlFile) throws AbstractCodedException {
-        return this.factory.createJobGeneratorForL0Segment(xmlFile,
-                appDataService);
+    protected AbstractJobsGenerator createJobGenerator(
+            final File xmlFile
+    ) throws AbstractCodedException {
+        return this.factory.createJobGeneratorForL0Segment(xmlFile, appDataService);
     }
 
     /**
@@ -84,15 +59,4 @@ public class L0SegmentAppJobDispatcher extends AbstractJobsDispatcher<CatalogEve
             throws IpfPrepWorkerMissingRoutingEntryException {
         return Arrays.asList(TASK_TABLE_NAME);
     }
-
-    @Override
-    protected String getTaskForFunctionalLog() {
-    	return this.taskForFunctionalLog;
-    }
-    
-    @Override
-    public void setTaskForFunctionalLog(String taskForFunctionalLog) {
-    	this.taskForFunctionalLog = taskForFunctionalLog; 
-    }
-
 }

@@ -1,13 +1,14 @@
 package esa.s1pdgs.cpoc.ipf.preparation.worker.config;
 
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
-
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.web.client.RestTemplateBuilder;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.oxm.jaxb.Jaxb2Marshaller;
+import org.springframework.web.client.RestTemplate;
 
-import esa.s1pdgs.cpoc.ipf.preparation.worker.service.XmlConverter;
+import esa.s1pdgs.cpoc.appcatalog.client.job.AppCatalogJobClient;
+import esa.s1pdgs.cpoc.common.ProductCategory;
+import esa.s1pdgs.cpoc.mqi.model.queue.CatalogEvent;
 
 /**
  * General application configuration
@@ -15,33 +16,31 @@ import esa.s1pdgs.cpoc.ipf.preparation.worker.service.XmlConverter;
  *
  */
 @Configuration
-public class AppConfig {
-
-	/**
-	 * XML converter
-	 * @return
-	 */
-	@Bean
-	public XmlConverter xmlConverter() {
-		XmlConverter xmlConverter = new XmlConverter();
-		xmlConverter.setMarshaller(jaxb2Marshaller());
-		xmlConverter.setUnmarshaller(jaxb2Marshaller());
+public class AppConfig {	
+	private final AppCatalogConfigurationProperties properties;
+	private final RestTemplate restTemplate;
 		
-		return xmlConverter;
+	@Autowired
+	public AppConfig(
+			final AppCatalogConfigurationProperties properties,
+			final RestTemplateBuilder restTemplateBuilder
+	) {
+		this.properties = properties;
+		this.restTemplate = restTemplateBuilder
+				.setConnectTimeout(properties.getTmConnectMs())
+				.build();
+	}
+	
+	@Bean
+	public AppCatalogJobClient<CatalogEvent> appCatClient() {
+		return new AppCatalogJobClient<>(
+				restTemplate, 
+				properties.getHostUri(), 
+				properties.getMaxRetries(), 
+				properties.getTempoRetryMs(), 
+				ProductCategory.CATALOG_EVENT
+		);
 	}
 
-	/**
-	 * JAXb2 marshaller
-	 * @return
-	 */
-	@Bean
-	public Jaxb2Marshaller jaxb2Marshaller() {
-		Jaxb2Marshaller jaxb2Marshaller = new Jaxb2Marshaller();
-		jaxb2Marshaller.setPackagesToScan("esa.s1pdgs.cpoc.ipf.preparation.worker.model");
-		Map<String, Object> map = new ConcurrentHashMap<String, Object>();
-		map.put("jaxb.formatted.output", true);
-		map.put("jaxb.encoding", "UTF-8");
-		jaxb2Marshaller.setMarshallerProperties(map);
-		return jaxb2Marshaller;
-	}
+
 }

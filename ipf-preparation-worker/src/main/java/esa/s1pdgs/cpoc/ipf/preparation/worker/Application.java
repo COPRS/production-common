@@ -6,8 +6,6 @@ import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.scheduling.annotation.EnableScheduling;
 
-import esa.s1pdgs.cpoc.obs_sdk.ObsConfigurationProperties;
-
 /**
  * L0 job generator application
  * @author Cyrielle Gailliard

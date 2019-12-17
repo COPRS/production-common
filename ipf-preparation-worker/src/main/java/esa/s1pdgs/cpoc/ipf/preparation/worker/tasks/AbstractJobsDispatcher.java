@@ -21,7 +21,7 @@ import esa.s1pdgs.cpoc.common.errors.AbstractCodedException;
 import esa.s1pdgs.cpoc.common.errors.processing.IpfPrepWorkerMaxNumberTaskTablesReachException;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.config.IpfPreparationWorkerSettings;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.config.ProcessSettings;
-import esa.s1pdgs.cpoc.mqi.model.queue.AbstractMessage;
+import esa.s1pdgs.cpoc.mqi.model.queue.CatalogEvent;
 import esa.s1pdgs.cpoc.report.LoggerReporting;
 import esa.s1pdgs.cpoc.report.Reporting;
 import esa.s1pdgs.cpoc.report.ReportingMessage;
@@ -43,7 +43,7 @@ import esa.s1pdgs.cpoc.report.ReportingMessage;
  * 
  * @param <T>
  */
-public abstract class AbstractJobsDispatcher<T extends AbstractMessage> {
+public abstract class AbstractJobsDispatcher {
 
     /**
      * Logger
@@ -64,7 +64,7 @@ public abstract class AbstractJobsDispatcher<T extends AbstractMessage> {
     /**
      * Available job generators (one per task tables)
      */
-    protected Map<String, AbstractJobsGenerator<T>> generators;
+    protected Map<String, AbstractJobsGenerator> generators;
 
     /**
      * Scheduler containing the job generation processors
@@ -79,7 +79,7 @@ public abstract class AbstractJobsDispatcher<T extends AbstractMessage> {
     /**
      * Applicative data service
      */
-    protected final AppCatalogJobClient<T> appDataService;
+    protected final AppCatalogJobClient<CatalogEvent> appDataService;
 
     /**
      * Constructor
@@ -92,7 +92,7 @@ public abstract class AbstractJobsDispatcher<T extends AbstractMessage> {
             final ProcessSettings processSettings,
             final JobsGeneratorFactory factory,
             final ThreadPoolTaskScheduler taskScheduler,
-            final AppCatalogJobClient<T> appDataService) {
+            final AppCatalogJobClient<CatalogEvent> appDataService) {
         this.factory = factory;
         this.settings = settings;
         this.processSettings = processSettings;
@@ -114,9 +114,9 @@ public abstract class AbstractJobsDispatcher<T extends AbstractMessage> {
      */
     protected void initTaskTables() throws AbstractCodedException {
         // Retrieve list of XML files in the directory
-        File directoryXml = new File(this.settings.getDiroftasktables());
+        final File directoryXml = new File(this.settings.getDiroftasktables());
         if (directoryXml != null && directoryXml.isDirectory()) {
-            File[] taskTableFiles =
+            final File[] taskTableFiles =
                     directoryXml.listFiles(parameter -> parameter.isFile());
             if (taskTableFiles != null) {
                 if (taskTableFiles.length > this.settings
@@ -125,9 +125,8 @@ public abstract class AbstractJobsDispatcher<T extends AbstractMessage> {
                             String.format("Too much task tables %d",
                                     taskTableFiles.length));
                 }
-                for (File taskTableFile : taskTableFiles) {
-                    AbstractJobsGenerator<T> jobGenerator =
-                            this.createJobGenerator(taskTableFile);
+                for (final File taskTableFile : taskTableFiles) {
+                    final AbstractJobsGenerator jobGenerator = createJobGenerator(taskTableFile);
                     generators.put(taskTableFile.getName(), jobGenerator);
                 }
             }
@@ -135,10 +134,10 @@ public abstract class AbstractJobsDispatcher<T extends AbstractMessage> {
 
         // Dispatch existing job with current task table configuration
         if (processSettings.getMode() != ApplicationMode.TEST) {
-            List<AppDataJob<T>> generatingJobs = appDataService
+            final List<AppDataJob<CatalogEvent>> generatingJobs = appDataService
                     .findByPodAndState(processSettings.getHostname(), AppDataJobState.GENERATING);
             if (!CollectionUtils.isEmpty(generatingJobs)) {
-                for (AppDataJob<T> generation : generatingJobs) {
+                for (final AppDataJob<CatalogEvent> generation : generatingJobs) {
                     // TODO ask if bypass error
                     dispatch(generation);
                 }
@@ -146,7 +145,7 @@ public abstract class AbstractJobsDispatcher<T extends AbstractMessage> {
         }
 
         // Launch generators
-        for (String taskTable : generators.keySet()) {
+        for (final String taskTable : generators.keySet()) {
             taskScheduler.scheduleWithFixedDelay(generators.get(taskTable),
                     settings.getJobgenfixedrate());
         }
@@ -159,7 +158,7 @@ public abstract class AbstractJobsDispatcher<T extends AbstractMessage> {
      * @return
      * @throws AbstractCodedException
      */
-    protected abstract AbstractJobsGenerator<T> createJobGenerator(
+    protected abstract AbstractJobsGenerator createJobGenerator(
             final File xmlFile) throws AbstractCodedException;
 
     /**
@@ -170,32 +169,32 @@ public abstract class AbstractJobsDispatcher<T extends AbstractMessage> {
      * @param job
      * @throws AbstractCodedException
      */
-    public void dispatch(final AppDataJob<T> job)
+    public void dispatch(final AppDataJob<CatalogEvent> job)
             throws AbstractCodedException {
     	LOGGER.debug ("== dispatch job {}", job.toString());
-        String productName = job.getProduct().getProductName();
+        final String productName = job.getProduct().getProductName();
         final Reporting.Factory reportingFactory = new LoggerReporting.Factory("Dispatch");
     	
     	final Reporting reporting = reportingFactory.newReporting(0); 
     	reporting.begin(new ReportingMessage("Start dispatching product"));
     	
         try {
-            List<String> taskTables = getTaskTables(job);
+            final List<String> taskTables = getTaskTables(job);
             if (taskTables.isEmpty())
             {
              LOGGER.info("Nothing to do as no TaskTables found for {}.",productName);
             }
-            List<String> notDealTaskTables = new ArrayList<>(taskTables);
-            List<AppDataJobGeneration> jobGens = job.getGenerations();
+            final List<String> notDealTaskTables = new ArrayList<>(taskTables);
+            final List<AppDataJobGeneration> jobGens = job.getGenerations();
             LOGGER.debug ("== job.getGenerations() {}", jobGens.toString());
 
             // Build the new job generations
             boolean needUpdate = false;
             if (CollectionUtils.isEmpty(jobGens)) {
                 // No current generation, add the new ones
-                for (String table : taskTables) {
+                for (final String table : taskTables) {
                     needUpdate = true;
-                    AppDataJobGeneration jobGen =
+                    final AppDataJobGeneration jobGen =
                             new AppDataJobGeneration();
                     jobGen.setTaskTable(table);
                     job.getGenerations().add(jobGen);
@@ -203,9 +202,9 @@ public abstract class AbstractJobsDispatcher<T extends AbstractMessage> {
             } else {
                 // Some generation already exists, update or delete the useless
                 // ones
-                for (Iterator<AppDataJobGeneration> iterator =
+                for (final Iterator<AppDataJobGeneration> iterator =
                         jobGens.iterator(); iterator.hasNext();) {
-                    AppDataJobGeneration jobGen = iterator.next();
+                    final AppDataJobGeneration jobGen = iterator.next();
                     if (taskTables.contains(jobGen.getTaskTable())) {
                         notDealTaskTables.remove(jobGen.getTaskTable());
                     } else {
@@ -214,9 +213,9 @@ public abstract class AbstractJobsDispatcher<T extends AbstractMessage> {
                     }
                 }
                 // Create the new ones
-                for (String taskTable : notDealTaskTables) {
+                for (final String taskTable : notDealTaskTables) {
                     needUpdate = true;
-                    AppDataJobGeneration jobGen =
+                    final AppDataJobGeneration jobGen =
                             new AppDataJobGeneration();
                     jobGen.setTaskTable(taskTable);
                     job.getGenerations().add(jobGen);
@@ -226,14 +225,13 @@ public abstract class AbstractJobsDispatcher<T extends AbstractMessage> {
             // Update task tables
             if (needUpdate) {
                 job.setState(AppDataJobState.GENERATING);
-                appDataService.patchJob(job.getId(), job, false, false,
-                        true);
+                appDataService.patchJob(job.getId(), job, false, false, true);
             }
             LOGGER.debug ("== dispatched job {}", job.toString());
             reporting.end(new ReportingMessage("End dispatching product"));
 
 
-        } catch (AbstractCodedException ace) {
+        } catch (final AbstractCodedException ace) {
         	reporting.error(new ReportingMessage("[code {}] {}", ace.getCode().getCode(), ace.getLogMessage()));
             throw ace;
         }
@@ -242,17 +240,13 @@ public abstract class AbstractJobsDispatcher<T extends AbstractMessage> {
     /**
      * Get task tables to generate for given job
      */
-    protected abstract List<String> getTaskTables(final AppDataJob<T> job)
+    protected abstract List<String> getTaskTables(final AppDataJob<CatalogEvent> job)
             throws AbstractCodedException;
-
-    protected abstract String getTaskForFunctionalLog();
-    
-    public abstract void setTaskForFunctionalLog(String taskForFunctionalLog);
 
     /**
      * @return the generators
      */
-    public Map<String, AbstractJobsGenerator<T>> getGenerators() {
+    public Map<String, AbstractJobsGenerator> getGenerators() {
         return generators;
     }
     

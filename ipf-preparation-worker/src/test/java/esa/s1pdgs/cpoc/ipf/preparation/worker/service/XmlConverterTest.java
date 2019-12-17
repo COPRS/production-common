@@ -9,12 +9,9 @@ import java.io.IOException;
 
 import javax.xml.bind.JAXBException;
 
-import org.junit.After;
-import org.junit.Before;
 import org.junit.Test;
-import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 
-import esa.s1pdgs.cpoc.ipf.preparation.worker.config.AppConfig;
+import esa.s1pdgs.cpoc.ipf.preparation.worker.config.XmlConfig;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.model.routing.LevelProductsRouting;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.model.tasktable.TaskTable;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.model.tasktable.TaskTableInput;
@@ -22,57 +19,26 @@ import esa.s1pdgs.cpoc.ipf.preparation.worker.model.tasktable.TaskTableInputAlte
 import esa.s1pdgs.cpoc.ipf.preparation.worker.model.tasktable.TaskTableOuput;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.model.tasktable.TaskTablePool;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.model.tasktable.TaskTableTask;
-import esa.s1pdgs.cpoc.ipf.preparation.worker.service.XmlConverter;
-import esa.s1pdgs.cpoc.ipf.preparation.worker.utils.TestL0Utils;
-import esa.s1pdgs.cpoc.ipf.preparation.worker.utils.TestL1Utils;
+import esa.s1pdgs.cpoc.ipf.preparation.worker.tasks.TestL0Utils;
+import esa.s1pdgs.cpoc.ipf.preparation.worker.tasks.TestL1Utils;
 
 /**
  * Test XML conversion and mapping
  * 
  * @author Cyrielle
  */
-public class XmlConverterTest {
-
-    /**
-     * Spring annotation context
-     */
-    private AnnotationConfigApplicationContext ctx;
-
-    /**
-     * XML converter
-     */
-    private XmlConverter xmlConverter;
-
-    /**
-     * Initialize the spring context
-     */
-    @Before
-    public void init() {
-        ctx = new AnnotationConfigApplicationContext();
-        ctx.register(AppConfig.class);
-        ctx.refresh();
-        xmlConverter = ctx.getBean(XmlConverter.class);
-
-    }
-
-    /**
-     * Close the spring context
-     */
-    @After
-    public void close() {
-        ctx.close();
-    }
-
+public class XmlConverterTest {	
+	private final XmlConverter uut = new XmlConfig().xmlConverter();
     /**
      * Test the conversion task table XML file => task table object
      */
     @Test
     public void testUnmarshalingTaskTable() {
         try {
-            TaskTable taskTable =
-                    (TaskTable) xmlConverter.convertFromXMLToObject(
+            final TaskTable taskTable =
+                    (TaskTable) uut.convertFromXMLToObject(
                             "./test/data/generic_config/task_tables/TaskTable.AIOP.xml");
-            TaskTable expectedTaskTable = TestL0Utils.buildTaskTableAIOP();
+            final TaskTable expectedTaskTable = TestL0Utils.buildTaskTableAIOP();
 
             assertEquals("[TaskTable] Invalid processor name",
                     expectedTaskTable.getProcessorName(),
@@ -113,8 +79,8 @@ public class XmlConverterTest {
                     expectedTaskTable.getPools().size(),
                     taskTable.getPools().size());
 
-            TaskTablePool pool1 = taskTable.getPools().get(0);
-            TaskTablePool expectedPool1 = expectedTaskTable.getPools().get(0);
+            final TaskTablePool pool1 = taskTable.getPools().get(0);
+            final TaskTablePool expectedPool1 = expectedTaskTable.getPools().get(0);
             assertTrue("[Pool1] Invalid detached",
                     expectedPool1.isDetached() == pool1.isDetached());
             assertEquals("[Pool1] Invalid killing signal",
@@ -124,8 +90,8 @@ public class XmlConverterTest {
             assertEquals("[Task] Invalid number",
                     expectedPool1.getTasks().size(), pool1.getTasks().size());
 
-            TaskTableTask task1 = pool1.getTasks().get(0);
-            TaskTableTask expectedTask1 = expectedPool1.getTasks().get(0);
+            final TaskTableTask task1 = pool1.getTasks().get(0);
+            final TaskTableTask expectedTask1 = expectedPool1.getTasks().get(0);
             assertEquals("[Task1] Invalid processor name",
                     expectedTask1.getName(), task1.getName());
             assertEquals("[Task1] Invalid version", expectedTask1.getVersion(),
@@ -142,8 +108,8 @@ public class XmlConverterTest {
             assertEquals("[Input] Invalid number",
                     expectedTask1.getInputs().size(), task1.getInputs().size());
 
-            TaskTableInput input1 = task1.getInputs().get(0);
-            TaskTableInput expectedInput1 = expectedTask1.getInputs().get(0);
+            final TaskTableInput input1 = task1.getInputs().get(0);
+            final TaskTableInput expectedInput1 = expectedTask1.getInputs().get(0);
             assertTrue("[Input1] Invalid mode",
                     expectedInput1.getMode() == input1.getMode());
             assertTrue("[Input1] Invalid mandatory",
@@ -154,8 +120,8 @@ public class XmlConverterTest {
                     expectedInput1.getAlternatives().size(),
                     input1.getAlternatives().size());
 
-            TaskTableInputAlternative alt1 = input1.getAlternatives().get(0);
-            TaskTableInputAlternative expectedAlt1 =
+            final TaskTableInputAlternative alt1 = input1.getAlternatives().get(0);
+            final TaskTableInputAlternative expectedAlt1 =
                     expectedInput1.getAlternatives().get(0);
             assertEquals("[Alternative1] Invalid order",
                     expectedAlt1.getOrder(), alt1.getOrder());
@@ -177,8 +143,8 @@ public class XmlConverterTest {
                     expectedTask1.getOutputs().size(),
                     task1.getOutputs().size());
 
-            TaskTableOuput output1 = task1.getOutputs().get(0);
-            TaskTableOuput expectedOutput1 = expectedTask1.getOutputs().get(0);
+            final TaskTableOuput output1 = task1.getOutputs().get(0);
+            final TaskTableOuput expectedOutput1 = expectedTask1.getOutputs().get(0);
             assertTrue("[Output1] Invalid destination", expectedOutput1
                     .getDestination() == output1.getDestination());
             assertTrue("[Output1] Invalid mandatory",
@@ -332,10 +298,10 @@ public class XmlConverterTest {
     @Test
     public void testUnmarshalingL1Routing() {
         try {
-            LevelProductsRouting converted =
-                    (LevelProductsRouting) xmlConverter.convertFromXMLToObject(
+            final LevelProductsRouting converted =
+                    (LevelProductsRouting) uut.convertFromXMLToObject(
                             "./test/data/l1_config/routing.xml");
-            LevelProductsRouting expected = TestL1Utils.buildL1Routing();
+            final LevelProductsRouting expected = TestL1Utils.buildL1Routing();
 
             assertEquals("0", expected.getRoutes().get(0),
                     converted.getRoutes().get(0));

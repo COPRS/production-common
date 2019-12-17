@@ -59,6 +59,8 @@ public class ProcessSettings {
      * Processing station
      */
     private String processingstation;
+    
+    private String triggerHostname;
 
     /**
      * Processing dynamic parameters: key = parameter name, value = parameter
@@ -200,7 +202,15 @@ public class ProcessSettings {
 		return minSeaCoveragePercentage;
 	}
 
-	public void setMinSeaCoveragePercentage(int minSeaCoveragePercentage) {
+	public void setMinSeaCoveragePercentage(final int minSeaCoveragePercentage) {
 		this.minSeaCoveragePercentage = minSeaCoveragePercentage;
+	}
+
+	public String getTriggerHostname() {
+		return triggerHostname;
+	}
+
+	public void setTriggerHostname(final String triggerHostname) {
+		this.triggerHostname = triggerHostname;
 	}
 }

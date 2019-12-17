@@ -1,6 +1,7 @@
 package esa.s1pdgs.cpoc.ipf.preparation.worker.config;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -9,7 +10,6 @@ import java.util.Map;
 import javax.annotation.PostConstruct;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
@@ -19,15 +19,16 @@ import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
 import org.springframework.util.StringUtils;
 
 import esa.s1pdgs.cpoc.appcatalog.client.job.AppCatalogJobClient;
+import esa.s1pdgs.cpoc.common.ApplicationLevel;
 import esa.s1pdgs.cpoc.common.ProductCategory;
 import esa.s1pdgs.cpoc.common.ProductFamily;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.service.XmlConverter;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.tasks.AbstractJobsDispatcher;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.tasks.JobsGeneratorFactory;
-import esa.s1pdgs.cpoc.ipf.preparation.worker.tasks.edrssession.L0AppJobDispatcher;
-import esa.s1pdgs.cpoc.ipf.preparation.worker.tasks.l0segment.L0SegmentAppJobDispatcher;
-import esa.s1pdgs.cpoc.ipf.preparation.worker.tasks.l0slice.LevelProductsJobDispatcher;
-import esa.s1pdgs.cpoc.mqi.model.queue.AbstractMessage;
+import esa.s1pdgs.cpoc.ipf.preparation.worker.tasks.L0AppJobDispatcher;
+import esa.s1pdgs.cpoc.ipf.preparation.worker.tasks.L0SegmentAppJobDispatcher;
+import esa.s1pdgs.cpoc.ipf.preparation.worker.tasks.LevelProductsJobDispatcher;
+import esa.s1pdgs.cpoc.mqi.model.queue.CatalogEvent;
 
 /**
  * Extraction class of "tasktables" configuration properties
@@ -41,35 +42,33 @@ public class IpfPreparationWorkerSettings {
 
 	@Bean
 	@Autowired
-	public AbstractJobsDispatcher<? extends AbstractMessage> jobsDispatcher(final ProcessSettings processSettings,
-			final JobsGeneratorFactory factory, final ThreadPoolTaskScheduler taskScheduler,
+	public AbstractJobsDispatcher jobsDispatcher(
+			final ProcessSettings processSettings,
+			final JobsGeneratorFactory factory, 
+			final ThreadPoolTaskScheduler taskScheduler,
 			final XmlConverter xmlConverter,
 			@Value("${level-products.pathroutingxmlfile}") final String pathRoutingXmlFile,
-			@Qualifier("appCatalogServiceForLevelProducts") final AppCatalogJobClient appDataServiceLevelProducts,
-			@Qualifier("appCatalogServiceForEdrsSessions") final AppCatalogJobClient appDataServiceErdsSettions,
-			@Qualifier("appCatalogServiceForLevelSegments") final AppCatalogJobClient appDataServiceLevelSegments) {
-
-		AbstractJobsDispatcher<? extends AbstractMessage> jobsDispatcher;
-
+			final AppCatalogJobClient<CatalogEvent> appCatClient
+	) {
 		switch (processSettings.getLevel()) {
-		case L0:
-			jobsDispatcher = new L0AppJobDispatcher(this, processSettings, factory, taskScheduler,
-					appDataServiceErdsSettions);
-			break;
-		case L0_SEGMENT:
-			jobsDispatcher = new L0SegmentAppJobDispatcher(this, processSettings, factory, taskScheduler,
-					appDataServiceLevelSegments);
-			break;
-		case L1:
-		case L2:
-			jobsDispatcher = new LevelProductsJobDispatcher(this, processSettings, factory, taskScheduler, xmlConverter,
-					pathRoutingXmlFile, appDataServiceLevelProducts);
-			break;
-		default:
-			throw new IllegalArgumentException("Unsupported Application Level");
+			case L0:
+				return new L0AppJobDispatcher(this, processSettings, factory, taskScheduler, appCatClient);
+			case L0_SEGMENT:
+				return new L0SegmentAppJobDispatcher(this, processSettings, factory, taskScheduler, appCatClient);
+			case L1:
+			case L2:
+				return new LevelProductsJobDispatcher(this, processSettings, factory, taskScheduler, xmlConverter, 
+						pathRoutingXmlFile, appCatClient);
+			default:
+				// fall through to throw exception
 		}
-		jobsDispatcher.setTaskForFunctionalLog(String.format("%sJobGeneration", processSettings.getLevel().name()));
-		return jobsDispatcher;
+		throw new IllegalArgumentException(
+				String.format(
+						"Unsupported Application Level '%s'. Available are: %s", 
+						processSettings.getLevel(),
+						Arrays.asList(ApplicationLevel.values())
+				)
+		);
 	}
 	
 	public static class CategoryConfig
@@ -164,7 +163,7 @@ public class IpfPreparationWorkerSettings {
 	/**
 	 * Map between output product type and product family
 	 */
-	private Map<String, ProductFamily> inputfamilies;
+	private Map<String, ProductFamily> inputfamilies = new HashMap<>();
 
 	/**
 	 * Map between output product type and product family in string format.<br/>
@@ -175,39 +174,26 @@ public class IpfPreparationWorkerSettings {
 	/**
 	 * Map between output product type and product family
 	 */
-	private Map<String, ProductFamily> outputfamilies;
+	private Map<String, ProductFamily> outputfamilies = new HashMap<>();;
 
 	/**
 	 * Map of all the overlap for the different slice type
 	 */
-	private Map<String, Float> typeOverlap;
+	private Map<String, Float> typeOverlap = new HashMap<>();;
 
 	/**
 	 * Map of all the length for the different slice type<br/>
 	 * Format: acquisition in IW, EW, SM, EM
 	 */
-	private Map<String, Float> typeSliceLength;
+	private Map<String, Float> typeSliceLength = new HashMap<>();;
 
 	/**
 	 * Map product type and corresponding metadata index in case of the product type
 	 * in lowercase in not the metadata index (example: aux_resorb use aux_res)<br/>
 	 */
-	private Map<String, String> mapTypeMeta;
+	private Map<String, String> mapTypeMeta = new HashMap<>();;
 	
-	private List<ProductFamily> oqcCheck;
-
-//    private ProcessSettings processSettings;
-
-	/**
-	 * Default constructors
-	 */
-	public IpfPreparationWorkerSettings() {
-//        this.processSettings = processSettings;
-		this.inputfamilies = new HashMap<>();
-		this.outputfamilies = new HashMap<>();
-		this.oqcCheck = new ArrayList<>();
-
-	}
+	private List<ProductFamily> oqcCheck = new ArrayList<>();
 
 	/**
 	 * Initialization function:

@@ -1,4 +1,4 @@
-package esa.s1pdgs.cpoc.ipf.preparation.worker.tasks.l0segment;
+package esa.s1pdgs.cpoc.ipf.preparation.worker.tasks;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -25,12 +25,11 @@ import esa.s1pdgs.cpoc.ipf.preparation.worker.model.joborder.JobOrder;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.model.joborder.JobOrderProcParam;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.service.XmlConverter;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.service.mqi.OutputProducerFactory;
-import esa.s1pdgs.cpoc.ipf.preparation.worker.tasks.AbstractJobsGenerator;
 import esa.s1pdgs.cpoc.metadata.client.MetadataClient;
 import esa.s1pdgs.cpoc.metadata.model.AbstractMetadata;
 import esa.s1pdgs.cpoc.metadata.model.LevelSegmentMetadata;
-import esa.s1pdgs.cpoc.mqi.model.queue.IpfExecutionJob;
 import esa.s1pdgs.cpoc.mqi.model.queue.CatalogEvent;
+import esa.s1pdgs.cpoc.mqi.model.queue.IpfExecutionJob;
 import esa.s1pdgs.cpoc.mqi.model.rest.GenericMessageDto;
 
 /**
@@ -38,15 +37,8 @@ import esa.s1pdgs.cpoc.mqi.model.rest.GenericMessageDto;
  * 
  * @author Cyrielle Gailliard
  */
-public class L0SegmentAppJobsGenerator extends AbstractJobsGenerator<CatalogEvent> {
-
-    /**
-     * @param xmlConverter
-     * @param metadataService
-     * @param l0ProcessSettings
-     * @param taskTablesSettings
-     * @param JobsSender
-     */
+public class L0SegmentAppJobsGenerator extends AbstractJobsGenerator {
+	
     public L0SegmentAppJobsGenerator(final XmlConverter xmlConverter,
             final MetadataClient metadataClient,
             final ProcessSettings l0ProcessSettings,
@@ -58,29 +50,25 @@ public class L0SegmentAppJobsGenerator extends AbstractJobsGenerator<CatalogEven
                 taskTablesSettings, outputFactory, appDataService, processConfiguration);
     }
 
-    /**
-     * Check the product and retrieve useful information before searching
-     * inputs
-     */
     @Override
     protected void preSearch(final JobGeneration job)
             throws IpfPrepWorkerInputsMissingException {
         boolean fullCoverage = false;
 
         // Retrieve the segments
-        Map<String, String> missingMetadata = new HashMap<>();
-        List<String> pols = new ArrayList<>();
-        Map<String, List<LevelSegmentMetadata>> segmentsGroupByPol =
+        final Map<String, String> missingMetadata = new HashMap<>();
+        final List<String> pols = new ArrayList<>();
+        final Map<String, List<LevelSegmentMetadata>> segmentsGroupByPol =
                 new HashMap<>();
         String lastName = "";
         try {
         	@SuppressWarnings("unchecked")
 			final AppDataJob<CatalogEvent> appDataJob = job.getAppDataJob();
 
-            for (GenericMessageDto<CatalogEvent> message : appDataJob.getMessages().stream().map(s -> (GenericMessageDto<CatalogEvent>)s).collect(Collectors.toList())) {
-                CatalogEvent dto = (CatalogEvent) message.getBody();
+            for (final GenericMessageDto<CatalogEvent> message : appDataJob.getMessages().stream().map(s -> s).collect(Collectors.toList())) {
+                final CatalogEvent dto = message.getBody();
                 lastName = dto.getKeyObjectStorage();
-                LevelSegmentMetadata metadata = metadataClient
+                final LevelSegmentMetadata metadata = metadataClient
                         .getLevelSegment(dto.getProductFamily(), dto.getKeyObjectStorage());
                 if (metadata == null) {
                     missingMetadata.put(dto.getKeyObjectStorage(), "Missing segment");
@@ -95,7 +83,7 @@ public class L0SegmentAppJobsGenerator extends AbstractJobsGenerator<CatalogEven
                             .add(metadata);
                 }
             }
-        } catch (MetadataQueryException e) {
+        } catch (final MetadataQueryException e) {
             missingMetadata.put(lastName, "Missing segment: " + e.getMessage());
         }
 
@@ -113,8 +101,8 @@ public class L0SegmentAppJobsGenerator extends AbstractJobsGenerator<CatalogEven
                     "Invalid number of polarisation " + pols.size());
         } else if (pols.size() == 1) {
             // Sort segments
-            String polA = pols.get(0);
-            List<LevelSegmentMetadata> segmentsA = segmentsGroupByPol.get(polA);
+            final String polA = pols.get(0);
+            final List<LevelSegmentMetadata> segmentsA = segmentsGroupByPol.get(polA);
             // Check coverage ok
             if (isSinglePolarisation(polA)) {
                 sortSegmentsPerStartDate(segmentsA);
@@ -141,11 +129,11 @@ public class L0SegmentAppJobsGenerator extends AbstractJobsGenerator<CatalogEven
                     AppDataJobProduct.TIME_FORMATTER);
 
         } else {
-            String polA = pols.get(0);
-            String polB = pols.get(1);
+            final String polA = pols.get(0);
+            final String polB = pols.get(1);
             // Sort segments
-            List<LevelSegmentMetadata> segmentsA = segmentsGroupByPol.get(polA);
-            List<LevelSegmentMetadata> segmentsB = segmentsGroupByPol.get(polB);
+            final List<LevelSegmentMetadata> segmentsA = segmentsGroupByPol.get(polA);
+            final List<LevelSegmentMetadata> segmentsB = segmentsGroupByPol.get(polB);
             // Check coverage ok
             if (isDoublePolarisation(polA, polB)) {
                 boolean fullCoverageA = false;
@@ -180,7 +168,7 @@ public class L0SegmentAppJobsGenerator extends AbstractJobsGenerator<CatalogEven
                         "Invalid double polarisation " + polA + " - " + polB);
             }
             // Get sensing start and stop
-            DateTimeFormatter formatter = AppDataJobProduct.TIME_FORMATTER;
+            final DateTimeFormatter formatter = AppDataJobProduct.TIME_FORMATTER;
             sensingStart = least(getStartSensingDate(segmentsA, formatter),
                     getStartSensingDate(segmentsB, formatter), formatter);
             sensingStop = more(getStopSensingDate(segmentsA, formatter),
@@ -189,7 +177,7 @@ public class L0SegmentAppJobsGenerator extends AbstractJobsGenerator<CatalogEven
 
         // Check if we add the coverage
         if (!fullCoverage) {
-            Date currentDate = new Date();
+            final Date currentDate = new Date();
             if (job.getGeneration().getCreationDate()
                     .getTime() < currentDate.getTime() - ipfPreparationWorkerSettings
                             .getWaitprimarycheck().getMaxTimelifeS() * 1000) {
@@ -227,7 +215,7 @@ public class L0SegmentAppJobsGenerator extends AbstractJobsGenerator<CatalogEven
     protected void updateProcParam(final JobOrder jobOrder, final String name,
             final String newValue) {
         boolean update = false;
-        for (JobOrderProcParam param : jobOrder.getConf().getProcParams()) {
+        for (final JobOrderProcParam param : jobOrder.getConf().getProcParams()) {
             if (name.equals(param.getName())) {
                 param.setValue(newValue);
                 update = true;
@@ -249,17 +237,17 @@ public class L0SegmentAppJobsGenerator extends AbstractJobsGenerator<CatalogEven
 
     }
 
-    protected void sortSegmentsPerStartDate(List<LevelSegmentMetadata> list) {
-        list.sort((LevelSegmentMetadata s1, LevelSegmentMetadata s2) -> {
-            LocalDateTime startDate1 = LocalDateTime
+    protected void sortSegmentsPerStartDate(final List<LevelSegmentMetadata> list) {
+        list.sort((final LevelSegmentMetadata s1, final LevelSegmentMetadata s2) -> {
+            final LocalDateTime startDate1 = LocalDateTime
                     .parse(s1.getValidityStart(), AbstractMetadata.METADATA_DATE_FORMATTER);
-            LocalDateTime startDate2 = LocalDateTime
+            final LocalDateTime startDate2 = LocalDateTime
                     .parse(s2.getValidityStart(), AbstractMetadata.METADATA_DATE_FORMATTER);
             return startDate1.compareTo(startDate2);
         });
     }
 
-    protected boolean isSinglePolarisation(String polA) {
+    protected boolean isSinglePolarisation(final String polA) {
         if ("SH".equals(polA) || "SV".equals(polA)) {
             return true;
         } else {
@@ -267,7 +255,7 @@ public class L0SegmentAppJobsGenerator extends AbstractJobsGenerator<CatalogEven
         }
     }
 
-    protected boolean isDoublePolarisation(String polA, String polB) {
+    protected boolean isDoublePolarisation(final String polA, final String polB) {
         if (("VH".equals(polA) && "VV".equals(polB))
                 || ("VV".equals(polA) && "VH".equals(polB))) {
             return true;
@@ -279,7 +267,7 @@ public class L0SegmentAppJobsGenerator extends AbstractJobsGenerator<CatalogEven
         }
     }
 
-    protected boolean isCovered(List<LevelSegmentMetadata> sortedSegments) {
+    protected boolean isCovered(final List<LevelSegmentMetadata> sortedSegments) {
         if (CollectionUtils.isEmpty(sortedSegments)) {
             return false;
         } else if (sortedSegments.size() == 1) {
@@ -297,9 +285,9 @@ public class L0SegmentAppJobsGenerator extends AbstractJobsGenerator<CatalogEven
                 LocalDateTime previousStopDate = LocalDateTime.parse(
                         sortedSegments.get(0).getValidityStop(),
                         AbstractMetadata.METADATA_DATE_FORMATTER);
-                for (LevelSegmentMetadata segment : sortedSegments.subList(1,
+                for (final LevelSegmentMetadata segment : sortedSegments.subList(1,
                         sortedSegments.size())) {
-                    LocalDateTime startDate = LocalDateTime.parse(
+                    final LocalDateTime startDate = LocalDateTime.parse(
                             segment.getValidityStart(), AbstractMetadata.METADATA_DATE_FORMATTER);
                     if (startDate.isAfter(previousStopDate)) {
                         return false;
@@ -315,23 +303,23 @@ public class L0SegmentAppJobsGenerator extends AbstractJobsGenerator<CatalogEven
     }
 
     protected String getStartSensingDate(
-            List<LevelSegmentMetadata> sortedSegments,
-            DateTimeFormatter outFormatter) {
+            final List<LevelSegmentMetadata> sortedSegments,
+            final DateTimeFormatter outFormatter) {
         if (CollectionUtils.isEmpty(sortedSegments)) {
             return null;
         }
-        LevelSegmentMetadata segment = sortedSegments.get(0);
+        final LevelSegmentMetadata segment = sortedSegments.get(0);
         return DateUtils.convertToAnotherFormat(segment.getValidityStart(),
         		AbstractMetadata.METADATA_DATE_FORMATTER, outFormatter);
     }
 
     protected String getStopSensingDate(
-            List<LevelSegmentMetadata> sortedSegments,
-            DateTimeFormatter outFormatter) {
+            final List<LevelSegmentMetadata> sortedSegments,
+            final DateTimeFormatter outFormatter) {
         if (CollectionUtils.isEmpty(sortedSegments)) {
             return null;
         }
-        LevelSegmentMetadata segment =
+        final LevelSegmentMetadata segment =
                 sortedSegments.get(sortedSegments.size() - 1);
         return DateUtils.convertToAnotherFormat(segment.getValidityStop(),
         		AbstractMetadata.METADATA_DATE_FORMATTER, outFormatter);
@@ -344,9 +332,9 @@ public class L0SegmentAppJobsGenerator extends AbstractJobsGenerator<CatalogEven
      * @param b
      * @return
      */
-    protected String least(String a, String b, DateTimeFormatter formatter) {
-        LocalDateTime timeA = LocalDateTime.parse(a, formatter);
-        LocalDateTime timeB = LocalDateTime.parse(b, formatter);
+    protected String least(final String a, final String b, final DateTimeFormatter formatter) {
+        final LocalDateTime timeA = LocalDateTime.parse(a, formatter);
+        final LocalDateTime timeB = LocalDateTime.parse(b, formatter);
         return timeA == null ? b
                 : (b == null ? a : (timeA.isBefore(timeB) ? a : b));
     }
@@ -358,17 +346,17 @@ public class L0SegmentAppJobsGenerator extends AbstractJobsGenerator<CatalogEven
      * @param b
      * @return
      */
-    protected String more(String a, String b, DateTimeFormatter formatter) {
-        LocalDateTime timeA = LocalDateTime.parse(a, formatter);
-        LocalDateTime timeB = LocalDateTime.parse(b, formatter);
+    protected String more(final String a, final String b, final DateTimeFormatter formatter) {
+        final LocalDateTime timeA = LocalDateTime.parse(a, formatter);
+        final LocalDateTime timeB = LocalDateTime.parse(b, formatter);
         return timeA == null ? b
                 : (b == null ? a : (timeA.isAfter(timeB) ? a : b));
     }
 
     protected String extractConsolidation(
-            List<LevelSegmentMetadata> sortedSegments) {
+            final List<LevelSegmentMetadata> sortedSegments) {
         String ret = "";
-        for (LevelSegmentMetadata segment : sortedSegments) {
+        for (final LevelSegmentMetadata segment : sortedSegments) {
             ret += segment.getConsolidation() + " " + segment.getValidityStart()
                     + " " + segment.getValidityStop() + " | ";
         }
