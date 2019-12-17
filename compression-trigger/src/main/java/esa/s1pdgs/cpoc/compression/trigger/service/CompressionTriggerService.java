@@ -19,6 +19,7 @@ import esa.s1pdgs.cpoc.compression.trigger.config.TriggerConfigurationProperties
 import esa.s1pdgs.cpoc.compression.trigger.config.TriggerConfigurationProperties.CategoryConfig;
 import esa.s1pdgs.cpoc.mqi.client.GenericMqiClient;
 import esa.s1pdgs.cpoc.mqi.client.MqiConsumer;
+import esa.s1pdgs.cpoc.mqi.client.MqiMessageFilterConfiguration;
 import esa.s1pdgs.cpoc.mqi.model.queue.CompressionDirection;
 import esa.s1pdgs.cpoc.mqi.model.queue.CompressionJob;
 import esa.s1pdgs.cpoc.mqi.model.queue.ProductionEvent;
@@ -35,14 +36,17 @@ public class CompressionTriggerService {
 
 	private final GenericMqiClient mqiClient;
 	private final TriggerConfigurationProperties properties;
+	private final MqiMessageFilterConfiguration mqiMessageFilterConfiguration;
 	
 	private final AppStatus appStatus;
 
 	@Autowired
 	public CompressionTriggerService(final GenericMqiClient mqiClient,
+			final MqiMessageFilterConfiguration mqiMessageFilterConfiguration,
 			final AppStatus appStatus,
 			final TriggerConfigurationProperties properties) {
 		this.mqiClient = mqiClient;
+		this.mqiMessageFilterConfiguration = mqiMessageFilterConfiguration;
 		this.appStatus = appStatus;
 		this.properties = properties;
 	}
@@ -65,6 +69,7 @@ public class CompressionTriggerService {
 				mqiClient, 
 				cat, 
 				p -> publish(ProductCategory.COMPRESSION_JOBS, p, toCompressionJob(p.getBody())),
+				mqiMessageFilterConfiguration.getMessageFilter(),
 				config.getFixedDelayMs(),
 				config.getInitDelayPolMs(),
 				appStatus

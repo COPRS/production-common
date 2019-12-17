@@ -10,7 +10,7 @@ public class CompressionTriggerServiceTest {
 
 	@Test
 	public void testGetCompressedKeyObjectStorage() {
-		CompressionTriggerService t = new CompressionTriggerService(null,null,null);
+		CompressionTriggerService t = new CompressionTriggerService(null,null,null,null);
 
 		assertEquals(t.getCompressedProductFamily(ProductFamily.L0_ACN), ProductFamily.L0_ACN_ZIP);
 		assertEquals(t.getCompressedProductFamily(ProductFamily.L1_ACN), ProductFamily.L1_ACN_ZIP);
