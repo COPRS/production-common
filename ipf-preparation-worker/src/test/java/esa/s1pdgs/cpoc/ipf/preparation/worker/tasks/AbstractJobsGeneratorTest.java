@@ -82,7 +82,7 @@ public class AbstractJobsGeneratorTest {
 
     private int nbLoopMetadata;
 
-    private AbstractJobsGenerator<CatalogEvent> generator;
+    private AbstractJobsGenerator generator;
 
     @Mock
     private AppCatalogJobClient<CatalogEvent> appDataPService;
@@ -357,7 +357,7 @@ public class AbstractJobsGeneratorTest {
             throws IOException, JAXBException, IpfPrepWorkerBuildTaskTableException {
         doThrow(new IOException("IO exception raised")).when(xmlConverter)
                 .convertFromXMLToObject(Mockito.anyString());
-        final AbstractJobsGenerator<CatalogEvent> gen = new LevelProductsJobsGenerator(
+        final AbstractJobsGenerator gen = new LevelProductsJobsGenerator(
                 xmlConverter, metadataClient, processSettings,
                 ipfPreparationWorkerSettings, jobSender, appDataPService, processConfiguration);
         generator.setMode(ProductMode.SLICING);
@@ -375,7 +375,7 @@ public class AbstractJobsGeneratorTest {
             throws IOException, JAXBException, IpfPrepWorkerBuildTaskTableException {
         doThrow(new JAXBException("JAXB exception raised")).when(xmlConverter)
                 .convertFromXMLToObject(Mockito.anyString());
-        final AbstractJobsGenerator<CatalogEvent> gen = new LevelProductsJobsGenerator(
+        final AbstractJobsGenerator gen = new LevelProductsJobsGenerator(
                 xmlConverter, metadataClient, processSettings,
                 ipfPreparationWorkerSettings, jobSender, appDataPService, processConfiguration);
         generator.setMode(ProductMode.SLICING);

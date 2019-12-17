@@ -16,7 +16,6 @@ import esa.s1pdgs.cpoc.ipf.preparation.worker.service.XmlConverter;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.service.mqi.OutputProducerFactory;
 import esa.s1pdgs.cpoc.metadata.client.MetadataClient;
 import esa.s1pdgs.cpoc.mqi.model.queue.CatalogEvent;
-import esa.s1pdgs.cpoc.mqi.model.queue.CatalogEvent;
 
 @Service
 public class JobsGeneratorFactory {
@@ -82,9 +81,9 @@ public class JobsGeneratorFactory {
 	 * @return
 	 * @throws IpfPrepWorkerBuildTaskTableException
 	 */
-	public AbstractJobsGenerator<CatalogEvent> createJobGeneratorForEdrsSession(final File xmlFile,
+	public AbstractJobsGenerator createJobGeneratorForEdrsSession(final File xmlFile,
 			final AppCatalogJobClient<CatalogEvent> appDataService) throws IpfPrepWorkerBuildTaskTableException {
-		AbstractJobsGenerator<CatalogEvent> processor = new L0AppJobsGenerator(this.xmlConverter,
+		final AbstractJobsGenerator processor = new L0AppJobsGenerator(this.xmlConverter,
 				this.metadataClient, this.l0ProcessSettings, this.ipfPreparationWorkerSettings, this.outputFactory,
 				appDataService, aiopProperties, processConfiguration);
 		processor.setMode(ProductMode.SLICING);
@@ -99,11 +98,11 @@ public class JobsGeneratorFactory {
 	 * @return
 	 * @throws IpfPrepWorkerBuildTaskTableException
 	 */
-	public AbstractJobsGenerator<CatalogEvent> createJobGeneratorForL0Slice(final File xmlFile,
+	public AbstractJobsGenerator createJobGeneratorForL0Slice(final File xmlFile,
 			final AppCatalogJobClient<CatalogEvent> appDataService)
 			throws IpfPrepWorkerBuildTaskTableException {
 
-		AbstractJobsGenerator<CatalogEvent> processor = new LevelProductsJobsGenerator(this.xmlConverter, this.metadataClient,
+		final AbstractJobsGenerator processor = new LevelProductsJobsGenerator(this.xmlConverter, this.metadataClient,
 				this.l0ProcessSettings, this.ipfPreparationWorkerSettings, this.outputFactory, appDataService, processConfiguration);
 		processor.setMode(ProductMode.SLICING);
 		processor.initialize(xmlFile);
@@ -118,10 +117,10 @@ public class JobsGeneratorFactory {
 	 * @return
 	 * @throws IpfPrepWorkerBuildTaskTableException
 	 */
-	public AbstractJobsGenerator<CatalogEvent> createJobGeneratorForL0Segment(final File xmlFile,
+	public AbstractJobsGenerator createJobGeneratorForL0Segment(final File xmlFile,
 			final AppCatalogJobClient<CatalogEvent> appDataService) throws IpfPrepWorkerBuildTaskTableException {
 		
-		AbstractJobsGenerator<CatalogEvent> processor = new L0SegmentAppJobsGenerator(this.xmlConverter,
+		final AbstractJobsGenerator processor = new L0SegmentAppJobsGenerator(this.xmlConverter,
 				this.metadataClient, this.l0ProcessSettings, this.ipfPreparationWorkerSettings, this.outputFactory,
 				appDataService, processConfiguration);
 		processor.setMode(ProductMode.SLICING);

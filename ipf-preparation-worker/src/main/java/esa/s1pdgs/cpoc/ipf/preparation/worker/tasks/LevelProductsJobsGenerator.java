@@ -19,8 +19,8 @@ import esa.s1pdgs.cpoc.ipf.preparation.worker.service.mqi.OutputProducerFactory;
 import esa.s1pdgs.cpoc.metadata.client.MetadataClient;
 import esa.s1pdgs.cpoc.metadata.model.L0AcnMetadata;
 import esa.s1pdgs.cpoc.metadata.model.L0SliceMetadata;
-import esa.s1pdgs.cpoc.mqi.model.queue.IpfExecutionJob;
 import esa.s1pdgs.cpoc.mqi.model.queue.CatalogEvent;
+import esa.s1pdgs.cpoc.mqi.model.queue.IpfExecutionJob;
 
 /**
  * Customization of the job generator for L1 and L2 slice products
@@ -28,7 +28,7 @@ import esa.s1pdgs.cpoc.mqi.model.queue.CatalogEvent;
  * @author birol_colak@net.werum
  *
  */
-public class LevelProductsJobsGenerator extends AbstractJobsGenerator<CatalogEvent> {
+public class LevelProductsJobsGenerator extends AbstractJobsGenerator {
 
 	/**
 	 * @param xmlConverter
@@ -38,9 +38,9 @@ public class LevelProductsJobsGenerator extends AbstractJobsGenerator<CatalogEve
 	 * @param outputFactory
 	 * @param appDataService
 	 */
-	public LevelProductsJobsGenerator(XmlConverter xmlConverter, MetadataClient metadataClient, ProcessSettings processSettings,
-			IpfPreparationWorkerSettings taskTablesSettings, OutputProducerFactory outputFactory,
-			AppCatalogJobClient<CatalogEvent>  appDataService, ProcessConfiguration processConfiguration) {
+	public LevelProductsJobsGenerator(final XmlConverter xmlConverter, final MetadataClient metadataClient, final ProcessSettings processSettings,
+			final IpfPreparationWorkerSettings taskTablesSettings, final OutputProducerFactory outputFactory,
+			final AppCatalogJobClient<CatalogEvent>  appDataService, final ProcessConfiguration processConfiguration) {
 		super(xmlConverter, metadataClient, processSettings, taskTablesSettings, outputFactory, appDataService, processConfiguration);
 	}
 
@@ -48,16 +48,16 @@ public class LevelProductsJobsGenerator extends AbstractJobsGenerator<CatalogEve
 	 * Check the product and retrieve useful information before searching inputs
 	 */
 	@Override
-	protected void preSearch(JobGeneration job) throws IpfPrepWorkerInputsMissingException {
+	protected void preSearch(final JobGeneration job) throws IpfPrepWorkerInputsMissingException {
 
 		// Retrieve instrument configuration id and slice number
 		try {
-			L0SliceMetadata file = this.metadataClient.getL0Slice(job.getAppDataJob().getProduct().getProductName());
+			final L0SliceMetadata file = this.metadataClient.getL0Slice(job.getAppDataJob().getProduct().getProductName());
 			job.getAppDataJob().getProduct().setProductType(file.getProductType());
 			job.getAppDataJob().getProduct().setInsConfId(file.getInstrumentConfigurationId());
 			job.getAppDataJob().getProduct().setNumberSlice(file.getNumberSlice());
 			job.getAppDataJob().getProduct().setDataTakeId(file.getDatatakeId());
-		} catch (MetadataQueryException e) {
+		} catch (final MetadataQueryException e) {
 			throw new IpfPrepWorkerInputsMissingException(
 					Collections.singletonMap(
 							job.getAppDataJob().getProduct().getProductName(), 
@@ -67,12 +67,12 @@ public class LevelProductsJobsGenerator extends AbstractJobsGenerator<CatalogEve
 		}
 		// Retrieve Total_Number_Of_Slices
 		try {
-			L0AcnMetadata acn = this.metadataClient.getFirstACN(job.getAppDataJob().getProduct().getProductName(),
+			final L0AcnMetadata acn = this.metadataClient.getFirstACN(job.getAppDataJob().getProduct().getProductName(),
 					job.getAppDataJob().getProduct().getProcessMode());
 			job.getAppDataJob().getProduct().setTotalNbOfSlice(acn.getNumberOfSlices());
 			job.getAppDataJob().getProduct().setSegmentStartDate(acn.getValidityStart());
 			job.getAppDataJob().getProduct().setSegmentStopDate(acn.getValidityStop());
-		} catch (MetadataQueryException e) {
+		} catch (final MetadataQueryException e) {
 			throw new IpfPrepWorkerInputsMissingException(	
 					Collections.singletonMap(
 							job.getAppDataJob().getProduct().getProductName(), 
@@ -86,11 +86,11 @@ public class LevelProductsJobsGenerator extends AbstractJobsGenerator<CatalogEve
 	 *	Custom job order before building the job DTO
 	 */
 	@Override
-	protected void customJobOrder(JobGeneration job) {
+	protected void customJobOrder(final JobGeneration job) {
 		// Rewrite job order sensing time
-		String jobOrderStart = DateUtils.convertToAnotherFormat(job.getAppDataJob().getProduct().getSegmentStartDate(),
+		final String jobOrderStart = DateUtils.convertToAnotherFormat(job.getAppDataJob().getProduct().getSegmentStartDate(),
 				AppDataJobProduct.TIME_FORMATTER, JobOrderSensingTime.DATETIME_FORMATTER);
-		String jobOrderStop = DateUtils.convertToAnotherFormat(job.getAppDataJob().getProduct().getSegmentStopDate(),
+		final String jobOrderStop = DateUtils.convertToAnotherFormat(job.getAppDataJob().getProduct().getSegmentStopDate(),
 				AppDataJobProduct.TIME_FORMATTER, JobOrderSensingTime.DATETIME_FORMATTER);
 		job.getJobOrder().getConf().setSensingTime(new JobOrderSensingTime(jobOrderStart, jobOrderStop));
 
@@ -111,7 +111,7 @@ public class LevelProductsJobsGenerator extends AbstractJobsGenerator<CatalogEve
 	 * Customization of the job DTO before sending it
 	 */
 	@Override
-	protected void customJobDto(JobGeneration job, IpfExecutionJob dto) {
+	protected void customJobDto(final JobGeneration job, final IpfExecutionJob dto) {
 		// NOTHING TO DO
 
 	}
@@ -125,7 +125,7 @@ public class LevelProductsJobsGenerator extends AbstractJobsGenerator<CatalogEve
 	 */
 	void updateProcParam(final JobOrder jobOrder, final String name, final String newValue) {
 		boolean update = false;
-		for (JobOrderProcParam param : jobOrder.getConf().getProcParams()) {
+		for (final JobOrderProcParam param : jobOrder.getConf().getProcParams()) {
 			if (name.equals(param.getName())) {
 				param.setValue(newValue);
 				update = true;

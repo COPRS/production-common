@@ -36,7 +36,7 @@ import esa.s1pdgs.cpoc.mqi.model.queue.CatalogEvent;
  * @author birol_colak@net.werum
  *
  */
-public class LevelProductsJobDispatcher extends AbstractJobsDispatcher<CatalogEvent> {
+public class LevelProductsJobDispatcher extends AbstractJobsDispatcher {
     private static final Logger LOGGER = LogManager.getLogger(LevelProductsJobDispatcher.class);
 
     private final XmlConverter xmlConverter;
@@ -84,7 +84,7 @@ public class LevelProductsJobDispatcher extends AbstractJobsDispatcher<CatalogEv
     }
 
     @Override
-    protected AbstractJobsGenerator<CatalogEvent> createJobGenerator(
+    protected AbstractJobsGenerator createJobGenerator(
             final File xmlFile
     ) throws AbstractCodedException {
         return this.factory.createJobGeneratorForL0Slice(xmlFile, appDataService);

@@ -21,7 +21,7 @@ import esa.s1pdgs.cpoc.common.errors.AbstractCodedException;
 import esa.s1pdgs.cpoc.common.errors.processing.IpfPrepWorkerMaxNumberTaskTablesReachException;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.config.IpfPreparationWorkerSettings;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.config.ProcessSettings;
-import esa.s1pdgs.cpoc.mqi.model.queue.AbstractMessage;
+import esa.s1pdgs.cpoc.mqi.model.queue.CatalogEvent;
 import esa.s1pdgs.cpoc.report.LoggerReporting;
 import esa.s1pdgs.cpoc.report.Reporting;
 import esa.s1pdgs.cpoc.report.ReportingMessage;
@@ -43,7 +43,7 @@ import esa.s1pdgs.cpoc.report.ReportingMessage;
  * 
  * @param <T>
  */
-public abstract class AbstractJobsDispatcher<T extends AbstractMessage> {
+public abstract class AbstractJobsDispatcher {
 
     /**
      * Logger
@@ -64,7 +64,7 @@ public abstract class AbstractJobsDispatcher<T extends AbstractMessage> {
     /**
      * Available job generators (one per task tables)
      */
-    protected Map<String, AbstractJobsGenerator<T>> generators;
+    protected Map<String, AbstractJobsGenerator> generators;
 
     /**
      * Scheduler containing the job generation processors
@@ -79,7 +79,7 @@ public abstract class AbstractJobsDispatcher<T extends AbstractMessage> {
     /**
      * Applicative data service
      */
-    protected final AppCatalogJobClient<T> appDataService;
+    protected final AppCatalogJobClient<CatalogEvent> appDataService;
 
     /**
      * Constructor
@@ -92,7 +92,7 @@ public abstract class AbstractJobsDispatcher<T extends AbstractMessage> {
             final ProcessSettings processSettings,
             final JobsGeneratorFactory factory,
             final ThreadPoolTaskScheduler taskScheduler,
-            final AppCatalogJobClient<T> appDataService) {
+            final AppCatalogJobClient<CatalogEvent> appDataService) {
         this.factory = factory;
         this.settings = settings;
         this.processSettings = processSettings;
@@ -126,8 +126,7 @@ public abstract class AbstractJobsDispatcher<T extends AbstractMessage> {
                                     taskTableFiles.length));
                 }
                 for (final File taskTableFile : taskTableFiles) {
-                    final AbstractJobsGenerator<T> jobGenerator =
-                            this.createJobGenerator(taskTableFile);
+                    final AbstractJobsGenerator jobGenerator = createJobGenerator(taskTableFile);
                     generators.put(taskTableFile.getName(), jobGenerator);
                 }
             }
@@ -135,10 +134,10 @@ public abstract class AbstractJobsDispatcher<T extends AbstractMessage> {
 
         // Dispatch existing job with current task table configuration
         if (processSettings.getMode() != ApplicationMode.TEST) {
-            final List<AppDataJob<T>> generatingJobs = appDataService
+            final List<AppDataJob<CatalogEvent>> generatingJobs = appDataService
                     .findByPodAndState(processSettings.getHostname(), AppDataJobState.GENERATING);
             if (!CollectionUtils.isEmpty(generatingJobs)) {
-                for (final AppDataJob<T> generation : generatingJobs) {
+                for (final AppDataJob<CatalogEvent> generation : generatingJobs) {
                     // TODO ask if bypass error
                     dispatch(generation);
                 }
@@ -159,7 +158,7 @@ public abstract class AbstractJobsDispatcher<T extends AbstractMessage> {
      * @return
      * @throws AbstractCodedException
      */
-    protected abstract AbstractJobsGenerator<T> createJobGenerator(
+    protected abstract AbstractJobsGenerator createJobGenerator(
             final File xmlFile) throws AbstractCodedException;
 
     /**
@@ -170,7 +169,7 @@ public abstract class AbstractJobsDispatcher<T extends AbstractMessage> {
      * @param job
      * @throws AbstractCodedException
      */
-    public void dispatch(final AppDataJob<T> job)
+    public void dispatch(final AppDataJob<CatalogEvent> job)
             throws AbstractCodedException {
     	LOGGER.debug ("== dispatch job {}", job.toString());
         final String productName = job.getProduct().getProductName();
@@ -241,13 +240,13 @@ public abstract class AbstractJobsDispatcher<T extends AbstractMessage> {
     /**
      * Get task tables to generate for given job
      */
-    protected abstract List<String> getTaskTables(final AppDataJob<T> job)
+    protected abstract List<String> getTaskTables(final AppDataJob<CatalogEvent> job)
             throws AbstractCodedException;
 
     /**
      * @return the generators
      */
-    public Map<String, AbstractJobsGenerator<T>> getGenerators() {
+    public Map<String, AbstractJobsGenerator> getGenerators() {
         return generators;
     }
     

@@ -28,7 +28,6 @@ import esa.s1pdgs.cpoc.ipf.preparation.worker.tasks.JobsGeneratorFactory;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.tasks.L0AppJobDispatcher;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.tasks.L0SegmentAppJobDispatcher;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.tasks.LevelProductsJobDispatcher;
-import esa.s1pdgs.cpoc.mqi.model.queue.AbstractMessage;
 import esa.s1pdgs.cpoc.mqi.model.queue.CatalogEvent;
 
 /**
@@ -43,7 +42,7 @@ public class IpfPreparationWorkerSettings {
 
 	@Bean
 	@Autowired
-	public AbstractJobsDispatcher<? extends AbstractMessage> jobsDispatcher(
+	public AbstractJobsDispatcher jobsDispatcher(
 			final ProcessSettings processSettings,
 			final JobsGeneratorFactory factory, 
 			final ThreadPoolTaskScheduler taskScheduler,

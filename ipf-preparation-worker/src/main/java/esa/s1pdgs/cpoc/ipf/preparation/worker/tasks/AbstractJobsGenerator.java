@@ -64,7 +64,7 @@ import esa.s1pdgs.cpoc.metadata.client.MetadataClient;
 import esa.s1pdgs.cpoc.metadata.client.SearchMetadataQuery;
 import esa.s1pdgs.cpoc.metadata.model.AbstractMetadata;
 import esa.s1pdgs.cpoc.metadata.model.SearchMetadata;
-import esa.s1pdgs.cpoc.mqi.model.queue.AbstractMessage;
+import esa.s1pdgs.cpoc.mqi.model.queue.CatalogEvent;
 import esa.s1pdgs.cpoc.mqi.model.queue.IpfExecutionJob;
 import esa.s1pdgs.cpoc.mqi.model.queue.LevelJobInputDto;
 import esa.s1pdgs.cpoc.mqi.model.queue.LevelJobOutputDto;
@@ -80,13 +80,12 @@ import esa.s1pdgs.cpoc.report.ReportingMessage;
  * 
  * @author Cyrielle Gailliard
  */
-public abstract class AbstractJobsGenerator<T extends AbstractMessage> implements Runnable {
+public abstract class AbstractJobsGenerator implements Runnable {
 
     /**
      * Logger
      */
-    protected static final Logger LOGGER =
-            LogManager.getLogger(AbstractJobsGenerator.class);
+    protected static final Logger LOGGER = LogManager.getLogger(AbstractJobsGenerator.class);
 
     /**
      * Use to generate an incremental id for locally upload session files
@@ -118,7 +117,7 @@ public abstract class AbstractJobsGenerator<T extends AbstractMessage> implement
     /**
      * Applicative data service
      */
-    private final AppCatalogJobClient<T> appDataService;
+    private final AppCatalogJobClient<CatalogEvent> appDataService;
 
     private final String hostname;
 
@@ -159,7 +158,7 @@ public abstract class AbstractJobsGenerator<T extends AbstractMessage> implement
             final ProcessSettings l0ProcessSettings,
             final IpfPreparationWorkerSettings taskTablesSettings,
             final OutputProducerFactory outputFactory,
-            final AppCatalogJobClient<T> appDataService,
+            final AppCatalogJobClient<CatalogEvent> appDataService,
             final ProcessConfiguration processConfiguration) {
         this.xmlConverter = xmlConverter;
         this.metadataClient = metadataClient;
@@ -356,7 +355,7 @@ public abstract class AbstractJobsGenerator<T extends AbstractMessage> implement
         final Reporting reporting = reportingFactory.newReporting(0);
         
         try {        	
-            final List<AppDataJob<T>> jobs = appDataService
+            final List<AppDataJob<CatalogEvent>> jobs = appDataService
                     .findNByPodAndGenerationTaskTableWithNotSentGeneration(
                             l0ProcessSettings.getTriggerHostname(), taskTableXmlName);
             
@@ -364,7 +363,7 @@ public abstract class AbstractJobsGenerator<T extends AbstractMessage> implement
             if (CollectionUtils.isEmpty(jobs)) {
                 job = null;
             } else {
-                for (final AppDataJob<T> appDataJob : jobs) {
+                for (final AppDataJob<CatalogEvent> appDataJob : jobs) {
                     // Check if we can do a loop
                     final long currentTimestamp = System.currentTimeMillis();
                     boolean todo = false;
@@ -442,7 +441,7 @@ public abstract class AbstractJobsGenerator<T extends AbstractMessage> implement
                                 this.prefixLogMonitor, productName);
                         this.preSearch(job);
 
-						final AppDataJob<T> modifiedJob = appDataService.patchJob(
+						final AppDataJob<CatalogEvent> modifiedJob = appDataService.patchJob(
                                 job.getAppDataJob().getId(),
                                 job.getAppDataJob(), false, true, false);
                         job.setAppDataJob(modifiedJob);
@@ -564,7 +563,7 @@ public abstract class AbstractJobsGenerator<T extends AbstractMessage> implement
                 newState,
                 job.getGeneration()
         ));
-        final AppDataJob<T> modifiedJob = appDataService.patchTaskTableOfJob(
+        final AppDataJob<CatalogEvent> modifiedJob = appDataService.patchTaskTableOfJob(
                 job.getAppDataJob().getId(),
                 job.getGeneration().getTaskTable(), newState);
         
@@ -579,8 +578,7 @@ public abstract class AbstractJobsGenerator<T extends AbstractMessage> implement
     	
         // Log functional logs, not clear when this is called
         if (job.getAppDataJob().getState() == AppDataJobState.TERMINATED) {
-			@SuppressWarnings("unchecked")
-			final AppDataJob<T> jobDto = job.getAppDataJob();
+			final AppDataJob<CatalogEvent> jobDto = job.getAppDataJob();
             final List<String> taskTables =  jobDto.getGenerations().stream()
             	.map(g -> g.getTaskTable())
             	.collect(Collectors.toList());
@@ -995,7 +993,7 @@ public abstract class AbstractJobsGenerator<T extends AbstractMessage> implement
                 job.getAppDataJob().getProduct().getProductName());
         
 		@SuppressWarnings("unchecked")
-		final AppDataJob<T> dto = job.getAppDataJob();
+		final AppDataJob<CatalogEvent> dto = job.getAppDataJob();
 
         this.outputFactory.sendJob(dto.getMessages().get(0), r);
         

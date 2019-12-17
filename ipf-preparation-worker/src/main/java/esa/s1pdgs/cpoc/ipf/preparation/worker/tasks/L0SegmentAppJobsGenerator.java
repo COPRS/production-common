@@ -37,7 +37,7 @@ import esa.s1pdgs.cpoc.mqi.model.rest.GenericMessageDto;
  * 
  * @author Cyrielle Gailliard
  */
-public class L0SegmentAppJobsGenerator extends AbstractJobsGenerator<CatalogEvent> {
+public class L0SegmentAppJobsGenerator extends AbstractJobsGenerator {
 	
     public L0SegmentAppJobsGenerator(final XmlConverter xmlConverter,
             final MetadataClient metadataClient,

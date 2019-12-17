@@ -12,12 +12,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import esa.s1pdgs.cpoc.common.ProductCategory;
-import esa.s1pdgs.cpoc.common.ProductFamily;
 import esa.s1pdgs.cpoc.common.errors.AbstractCodedException;
-import esa.s1pdgs.cpoc.errorrepo.ErrorRepoAppender;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.config.IpfPreparationWorkerSettings;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.config.IpfPreparationWorkerSettings.CategoryConfig;
-import esa.s1pdgs.cpoc.ipf.preparation.worker.config.ProcessConfiguration;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.status.AppStatusImpl;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.tasks.AbstractJobsDispatcher;
 import esa.s1pdgs.cpoc.mqi.client.MqiClient;
@@ -30,8 +27,6 @@ public class IpfPreparationJobListener {
 	private static final Logger LOG = LogManager.getLogger(IpfPreparationJobListener.class);
 
     private final AppStatusImpl appStatus;
-    private final ErrorRepoAppender errorAppender;
-    private final ProcessConfiguration processConfiguration;
     private final MqiClient mqiClient;
     private final IpfPreparationWorkerSettings ipfPreparationWorkerSettings;
     private final AbstractJobsDispatcher jobsDispatcher;
@@ -39,15 +34,11 @@ public class IpfPreparationJobListener {
     @Autowired
     public IpfPreparationJobListener(
     		final AppStatusImpl appStatus,
-			final ErrorRepoAppender errorAppender, 
-			final ProcessConfiguration processConfiguration, 
 			final MqiClient mqiClient,
 			final IpfPreparationWorkerSettings properties,
 			final AbstractJobsDispatcher jobsDispatcher
 	) {
 		this.appStatus = appStatus;
-		this.errorAppender = errorAppender;
-		this.processConfiguration = processConfiguration;
 		this.mqiClient = mqiClient;
 		this.ipfPreparationWorkerSettings = properties;
 		this.jobsDispatcher = jobsDispatcher;

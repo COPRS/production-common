@@ -31,7 +31,7 @@ import esa.s1pdgs.cpoc.mqi.model.queue.CatalogEvent;
 import esa.s1pdgs.cpoc.mqi.model.queue.IpfExecutionJob;
 import esa.s1pdgs.cpoc.mqi.model.queue.LevelJobInputDto;
 
-public class L0AppJobsGenerator extends AbstractJobsGenerator<CatalogEvent> {
+public class L0AppJobsGenerator extends AbstractJobsGenerator {
 
     public final static DateTimeFormatter JO_TIME_FORMATTER = DateTimeFormatter.ofPattern("yyyyMMdd'T'HHmmss");
     

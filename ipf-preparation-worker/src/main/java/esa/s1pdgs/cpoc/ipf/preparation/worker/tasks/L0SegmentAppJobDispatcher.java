@@ -24,7 +24,7 @@ import esa.s1pdgs.cpoc.mqi.model.queue.CatalogEvent;
  * 
  * @author Cyrielle Gailliard
  */
-public class L0SegmentAppJobDispatcher extends AbstractJobsDispatcher<CatalogEvent> {
+public class L0SegmentAppJobDispatcher extends AbstractJobsDispatcher {
     private static final String TASK_TABLE_NAME = "TaskTable.L0ASP.xml";
 
     public L0SegmentAppJobDispatcher(
@@ -43,7 +43,7 @@ public class L0SegmentAppJobDispatcher extends AbstractJobsDispatcher<CatalogEve
     }
 
     @Override
-    protected AbstractJobsGenerator<CatalogEvent> createJobGenerator(
+    protected AbstractJobsGenerator createJobGenerator(
             final File xmlFile
     ) throws AbstractCodedException {
         return this.factory.createJobGeneratorForL0Segment(xmlFile, appDataService);
