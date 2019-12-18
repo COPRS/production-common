@@ -37,7 +37,8 @@ import esa.s1pdgs.cpoc.mqi.client.GenericMqiClient;
 import esa.s1pdgs.cpoc.mqi.model.queue.CatalogJob;
 import esa.s1pdgs.cpoc.mqi.model.rest.GenericMessageDto;
 import esa.s1pdgs.cpoc.obs_sdk.ObsClient;
-import esa.s1pdgs.cpoc.report.LoggerReporting;
+import esa.s1pdgs.cpoc.report.Reporting;
+import esa.s1pdgs.cpoc.report.ReportingUtils;
 
 public class TestEdrsMetadataExtractor {
 	
@@ -156,10 +157,11 @@ public class TestEdrsMetadataExtractor {
         expectedDescriptor.setKeyObjectStorage("123/ch01/D_123_ch01_D.RAW");
         expectedDescriptor.setProductFamily(ProductFamily.EDRS_SESSION);
         
-        final LoggerReporting.Factory reportingFactory = new LoggerReporting.Factory("TestMetadataExtraction");
-        
+		final Reporting reporting = ReportingUtils.newReportingBuilderFor("TestMetadataExtraction")
+				.newReporting();
+		
         final JSONObject expected = extractor.mdBuilder.buildEdrsSessionFileRaw(expectedDescriptor);
-        final JSONObject result = extractor.extract(reportingFactory, inputMessage);
+        final JSONObject result = extractor.extract(reporting, inputMessage);
         
         for (final String key: expected.keySet()) {
             if (!"insertionTime".equals(key)) {

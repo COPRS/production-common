@@ -26,10 +26,10 @@ import esa.s1pdgs.cpoc.common.errors.obs.ObsParallelAccessException;
 import esa.s1pdgs.cpoc.common.errors.obs.ObsUnknownObject;
 import esa.s1pdgs.cpoc.common.utils.FileUtils;
 import esa.s1pdgs.cpoc.common.utils.LogUtils;
-import esa.s1pdgs.cpoc.report.LoggerReporting;
-import esa.s1pdgs.cpoc.report.ObsReportingInput;
 import esa.s1pdgs.cpoc.report.Reporting;
 import esa.s1pdgs.cpoc.report.ReportingMessage;
+import esa.s1pdgs.cpoc.report.ReportingUtils;
+import esa.s1pdgs.cpoc.report.message.input.ObsReportingInput;
 
 /**
  * Provides an implementation of the ObsClient where the download / upload in
@@ -42,11 +42,11 @@ public abstract class AbstractObsClient implements ObsClient {
 	
 	private final ObsConfigurationProperties configuration;
 	
-	public AbstractObsClient(ObsConfigurationProperties configuration) {
+	public AbstractObsClient(final ObsConfigurationProperties configuration) {
 		this.configuration = configuration;
 	}
 
-	protected final String getBucketFor(ProductFamily family) throws ObsServiceException {
+	protected final String getBucketFor(final ProductFamily family) throws ObsServiceException {
 		return configuration.getBucketFor(family);
 	}
 
@@ -58,20 +58,20 @@ public abstract class AbstractObsClient implements ObsClient {
             final boolean parallel)
             throws SdkClientException, ObsServiceException, ObsException {
     	
-    	List<File> files = new ArrayList<>();
+    	final List<File> files = new ArrayList<>();
         if (objects.size() > 1 && parallel) {
             // Download objects in parallel
-            ExecutorService workerThread = Executors.newFixedThreadPool(objects.size());
-            CompletionService<List<File>> service = new ExecutorCompletionService<>(workerThread);
+            final ExecutorService workerThread = Executors.newFixedThreadPool(objects.size());
+            final CompletionService<List<File>> service = new ExecutorCompletionService<>(workerThread);
             // Launch all downloads
-            List<Future<List<File>>> futures = new ArrayList<>();
-            for (ObsDownloadObject object : objects) {
+            final List<Future<List<File>>> futures = new ArrayList<>();
+            for (final ObsDownloadObject object : objects) {
             	futures.add(service.submit(new ObsDownloadCallable(this, object)));
             }
             
             waitForCompletion(workerThread, service, objects.size(),configuration.getTimeoutDownExec());
 
-            for (Future<List<File>> future : futures) {
+            for (final Future<List<File>> future : futures) {
 	            try {
 	            	files.addAll(future.get());
 	            } catch (InterruptedException | ExecutionException e) {
@@ -80,8 +80,9 @@ public abstract class AbstractObsClient implements ObsClient {
 	            }
             }
         } else {
-         	final Reporting reporting = new LoggerReporting.Factory("Read")
-         			.newReporting(0);            	
+    		final Reporting reporting = ReportingUtils.newReportingBuilderFor("Read")
+    				.newReporting();
+      	
             // Download object in sequential
             for (final ObsDownloadObject object : objects) {            
              	reporting.begin(
@@ -110,19 +111,19 @@ public abstract class AbstractObsClient implements ObsClient {
             throws SdkClientException, ObsServiceException, ObsException {
         if (objects.size() > 1 && parallel) {
             // Upload objects in parallel
-            ExecutorService workerThread =
+            final ExecutorService workerThread =
                     Executors.newFixedThreadPool(objects.size());
-            CompletionService<Void> service =
+            final CompletionService<Void> service =
                     new ExecutorCompletionService<>(workerThread);
             // Launch all downloads
-            for (ObsUploadObject object : objects) {
+            for (final ObsUploadObject object : objects) {
                 service.submit(new ObsUploadCallable(this, object));
             }
             waitForCompletion(workerThread, service, objects.size(), configuration.getTimeoutUpExec());
 
         } else {
-        	final Reporting reporting = new LoggerReporting.Factory("Write")
-         			.newReporting(0); 
+      		final Reporting reporting = ReportingUtils.newReportingBuilderFor("Write")
+    				.newReporting();
         	
             // Upload object in sequential
             for (final ObsUploadObject object : objects) {            	
@@ -161,7 +162,7 @@ public abstract class AbstractObsClient implements ObsClient {
                 for (int i = 0; i < nbTasks; i++) {
                     try {
                         service.take().get(timeout, TimeUnit.SECONDS);
-                    } catch (ExecutionException e) {
+                    } catch (final ExecutionException e) {
                         if (e.getCause() instanceof ObsServiceException) {
                             throw (ObsServiceException) e.getCause();
                         } else {
@@ -186,11 +187,12 @@ public abstract class AbstractObsClient implements ObsClient {
      * @throws AbstractCodedException
      * @throws IllegalArgumentException
      */
-    public List<File> download(final List<ObsDownloadObject> objects) throws AbstractCodedException {
+    @Override
+	public List<File> download(final List<ObsDownloadObject> objects) throws AbstractCodedException {
     	ValidArgumentAssertion.assertValidArgument(objects);
         try {
             return downloadObjects(objects, true);
-        } catch (SdkClientException exc) {
+        } catch (final SdkClientException exc) {
             throw new ObsParallelAccessException(exc);
         }
     }
@@ -201,33 +203,35 @@ public abstract class AbstractObsClient implements ObsClient {
      * @param objects
      * @throws AbstractCodedException
      */
-    public void upload(final List<ObsUploadObject> objects)
+    @Override
+	public void upload(final List<ObsUploadObject> objects)
             throws AbstractCodedException {
     	ValidArgumentAssertion.assertValidArgument(objects);
         try {
             uploadObjects(objects, true);
-        } catch (SdkClientException exc) {
+        } catch (final SdkClientException exc) {
             throw new ObsParallelAccessException(exc);
         }
     }
 
-    public Map<String,ObsObject> listInterval(final ProductFamily family, Date intervalStart, Date intervalEnd) throws SdkClientException {
+    @Override
+	public Map<String,ObsObject> listInterval(final ProductFamily family, final Date intervalStart, final Date intervalEnd) throws SdkClientException {
     	ValidArgumentAssertion.assertValidArgument(family);
     	ValidArgumentAssertion.assertValidArgument(intervalStart);
     	ValidArgumentAssertion.assertValidArgument(intervalEnd);
     	
-    	List<ObsObject> results = getObsObjectsOfFamilyWithinTimeFrame(family, intervalStart, intervalEnd);
-    	Map<String, ObsObject> map = results.stream()
+    	final List<ObsObject> results = getObsObjectsOfFamilyWithinTimeFrame(family, intervalStart, intervalEnd);
+    	final Map<String, ObsObject> map = results.stream()
     		      .collect(Collectors.toMap(ObsObject::getKey, obsObject -> obsObject));
     	    	
     	return map;
     }
 	
 	@Override
-    public void validate(ObsObject object) throws ObsServiceException, ObsValidationException {
+    public void validate(final ObsObject object) throws ObsServiceException, ObsValidationException {
 		ValidArgumentAssertion.assertValidArgument(object);
 		try {
-			Map<String, InputStream> isMap = getAllAsInputStream(object.getFamily(), object.getKey() + MD5SUM_SUFFIX);
+			final Map<String, InputStream> isMap = getAllAsInputStream(object.getFamily(), object.getKey() + MD5SUM_SUFFIX);
 			if (isMap.size() > 1) {
 				Utils.closeQuietly(isMap.values());
 				throw new ObsValidationException("More than one checksum file returned");
@@ -236,15 +240,15 @@ public abstract class AbstractObsClient implements ObsClient {
 				throw new ObsValidationException("Checksum file not found for: {} of family {}", object.getKey(), object.getFamily());
 			} 
 			try(final InputStream is = isMap.get(object.getKey() + MD5SUM_SUFFIX)) {
-				Map<String,String> md5sums = collectMd5Sums(object);
+				final Map<String,String> md5sums = collectMd5Sums(object);
 				try(BufferedReader reader = new BufferedReader(new InputStreamReader(is))) {
 					String line;
 	                while ((line = reader.readLine()) != null) {    
-	                	int idx = line.indexOf("  ");
+	                	final int idx = line.indexOf("  ");
 	                	if (idx >= 0 && line.length() > (idx + 2)) {
-	                		String md5 = line.substring(0, idx);
-	                		String key = line.substring(idx + 2);
-	                		String currentMd5 = md5sums.get(key);
+	                		final String md5 = line.substring(0, idx);
+	                		final String key = line.substring(idx + 2);
+	                		final String currentMd5 = md5sums.get(key);
 	                		if (null == currentMd5) {
 	                			throw new ObsValidationException("Object not found: {} of family {}", key, object.getFamily());
 	                		}
@@ -255,7 +259,7 @@ public abstract class AbstractObsClient implements ObsClient {
 	                	}
 		            }
                 }
-				for (String key : md5sums.keySet()) {
+				for (final String key : md5sums.keySet()) {
 					throw new ObsValidationException("Unexpected object found: {} for {} of family {}", key, object.getKey(), object.getFamily());
 				}
 			}

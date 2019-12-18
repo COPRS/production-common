@@ -14,13 +14,13 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
-import esa.s1pdgs.cpoc.compression.worker.process.TaskResult;
 import esa.s1pdgs.cpoc.compression.worker.test.SystemUtils;
-import esa.s1pdgs.cpoc.report.LoggerReporting;
 import esa.s1pdgs.cpoc.report.Reporting;
+import esa.s1pdgs.cpoc.report.ReportingUtils;
 
 public class TaskCallableTest {
-	private final Reporting.Factory reportingFactory = new LoggerReporting.Factory("TestProcessing");
+	final Reporting report = ReportingUtils.newReportingBuilderFor("TestProcessing")
+			.newReporting();
 	  
 	private File testDir;
 	private File script;

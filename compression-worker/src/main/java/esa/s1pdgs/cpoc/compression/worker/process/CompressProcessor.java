@@ -43,11 +43,11 @@ import esa.s1pdgs.cpoc.mqi.model.rest.Ack;
 import esa.s1pdgs.cpoc.mqi.model.rest.AckMessageDto;
 import esa.s1pdgs.cpoc.mqi.model.rest.GenericMessageDto;
 import esa.s1pdgs.cpoc.obs_sdk.ObsClient;
-import esa.s1pdgs.cpoc.report.FilenameReportingInput;
-import esa.s1pdgs.cpoc.report.FilenameReportingOutput;
-import esa.s1pdgs.cpoc.report.LoggerReporting;
 import esa.s1pdgs.cpoc.report.Reporting;
 import esa.s1pdgs.cpoc.report.ReportingMessage;
+import esa.s1pdgs.cpoc.report.ReportingUtils;
+import esa.s1pdgs.cpoc.report.message.input.FilenameReportingInput;
+import esa.s1pdgs.cpoc.report.message.output.FilenameReportingOutput;
 
 @Service
 public class CompressProcessor implements MqiListener<CompressionJob> {
@@ -124,7 +124,7 @@ public class CompressProcessor implements MqiListener<CompressionJob> {
 	 * Consume and execute jobs
 	 */
 	@Override
-	public void onMessage(GenericMessageDto<CompressionJob> message) {
+	public void onMessage(final GenericMessageDto<CompressionJob> message) {
 
 		appStatus.setProcessing(message.getId());
 		LOGGER.info("Initializing job processing {}", message);
@@ -132,32 +132,31 @@ public class CompressProcessor implements MqiListener<CompressionJob> {
 		// ----------------------------------------------------------
 		// Initialize processing
 		// ------------------------------------------------------
-		final Reporting.Factory reportingFactory = new LoggerReporting.Factory("CompressionProcessing");
+		final Reporting report = ReportingUtils.newReportingBuilderFor("CompressionProcessing")
+				.newReporting();
 
-		String workDir = properties.getWorkingDirectory();
-
-		final Reporting report = reportingFactory.newReporting(0);	
+		final String workDir = properties.getWorkingDirectory();
 		report.begin(
 				new FilenameReportingInput(message.getBody().getKeyObjectStorage()),
 				new ReportingMessage("Start compression processing")
 		);
 
-		CompressionJob job = message.getBody();
+		final CompressionJob job = message.getBody();
 
 		// Initialize the pool processor executor
-		CompressExecutorCallable procExecutor = new CompressExecutorCallable(job, // getPrefixMonitorLog(MonitorLogUtils.LOG_PROCESS,
+		final CompressExecutorCallable procExecutor = new CompressExecutorCallable(job, // getPrefixMonitorLog(MonitorLogUtils.LOG_PROCESS,
 																					// job),
 				"CompressionProcessor - process", properties);
-		ExecutorService procExecutorSrv = Executors.newSingleThreadExecutor();
-		ExecutorCompletionService<Void> procCompletionSrv = new ExecutorCompletionService<>(procExecutorSrv);
+		final ExecutorService procExecutorSrv = Executors.newSingleThreadExecutor();
+		final ExecutorCompletionService<Void> procCompletionSrv = new ExecutorCompletionService<>(procExecutorSrv);
 
 		// Initialize the input downloader
-		FileDownloader fileDownloader = new FileDownloader(obsClient, workDir, job,
+		final FileDownloader fileDownloader = new FileDownloader(obsClient, workDir, job,
 				this.properties.getSizeBatchDownload(),
 				// getPrefixMonitorLog(MonitorLogUtils.LOG_INPUT, job),
 				"CompressionProcessor");
 
-		FileUploader fileUploader = new FileUploader(obsClient, producerFactory, workDir, message, job);
+		final FileUploader fileUploader = new FileUploader(obsClient, producerFactory, workDir, message, job);
 
 		// ----------------------------------------------------------
 		// Process message
@@ -174,7 +173,7 @@ public class CompressProcessor implements MqiListener<CompressionJob> {
 			final FileUploader fileUploader, final ExecutorService procExecutorSrv,
 			final ExecutorCompletionService<Void> procCompletionSrv, final CompressExecutorCallable procExecutor,
 			final Reporting report) {
-		CompressionJob job = message.getBody();
+		final CompressionJob job = message.getBody();
 		int step = 0;
 		boolean ackOk = false;
 		String errorMessage = "";
@@ -205,7 +204,7 @@ public class CompressProcessor implements MqiListener<CompressionJob> {
 			filename = fileUploader.processOutput();
 
 			ackOk = true;
-		} catch (AbstractCodedException ace) {
+		} catch (final AbstractCodedException ace) {
 			ackOk = false;
 
 			errorMessage = String.format(
@@ -217,7 +216,7 @@ public class CompressProcessor implements MqiListener<CompressionJob> {
 
 			failedProc = new FailedProcessingDto(properties.getHostname(), new Date(), errorMessage, message);
 
-		} catch (InterruptedException e) {
+		} catch (final InterruptedException e) {
 			ackOk = false;
 			errorMessage = String.format(
 					"%s [step %d] %s [code %d] [s1pdgsCompressionTask] [STOP KO] [subTask processing] [msg interrupted exception]",
@@ -256,13 +255,13 @@ public class CompressProcessor implements MqiListener<CompressionJob> {
 		checkThreadInterrupted();
 		try {
 			procCompletionSrv.take().get(properties.getTmProcAllTasksS(), TimeUnit.SECONDS);
-		} catch (ExecutionException e) {
+		} catch (final ExecutionException e) {
 			if (e.getCause() instanceof AbstractCodedException) {
 				throw (AbstractCodedException) e.getCause();
 			} else {
 				throw new InternalErrorException(e.getMessage(), e);
 			}
-		} catch (TimeoutException e) {
+		} catch (final TimeoutException e) {
 			throw new InternalErrorException(e.getMessage(), e);
 		}
 	}
@@ -277,7 +276,7 @@ public class CompressProcessor implements MqiListener<CompressionJob> {
 		try {
 			procExecutorSrv.awaitTermination(properties.getTmProcStopS(), TimeUnit.SECONDS);
 			// TODO send kill if fails
-		} catch (InterruptedException e) {
+		} catch (final InterruptedException e) {
 			// Conserves the interruption
 			Thread.currentThread().interrupt();
 		}
@@ -288,10 +287,10 @@ public class CompressProcessor implements MqiListener<CompressionJob> {
 	private void eraseDirectory(final CompressionJob job) {
 		try {
 			LOGGER.info("Erasing local working directory for job {}", job);
-			Path p = Paths.get(properties.getWorkingDirectory());
+			final Path p = Paths.get(properties.getWorkingDirectory());
 			Files.walk(p, FileVisitOption.FOLLOW_LINKS).sorted(Comparator.reverseOrder()).map(Path::toFile)
 					.peek(System.out::println).forEach(File::delete);
-		} catch (IOException e) {
+		} catch (final IOException e) {
 			LOGGER.error("{} [code {}] Failed to erase local working directory", job,
 					ErrorCode.INTERNAL_ERROR.getCode());
 			this.appStatus.setError("PROCESSING");
@@ -308,7 +307,7 @@ public class CompressProcessor implements MqiListener<CompressionJob> {
 	protected void ackProcessing(final GenericMessageDto<CompressionJob> dto,
 			final FailedProcessingDto failed, final boolean ackOk,
 			final String errorMessage) {
-		boolean stopping = appStatus.getStatus().isStopping();
+		final boolean stopping = appStatus.getStatus().isStopping();
 
 		// Ack
 		if (ackOk) {
@@ -324,7 +323,7 @@ public class CompressProcessor implements MqiListener<CompressionJob> {
 			// TODO send stop to the MQI
 			try {
 				mqiStatusService.stop();
-			} catch (AbstractCodedException ace) {
+			} catch (final AbstractCodedException ace) {
 				LOGGER.error("MQI service couldn't be stopped {}",ace);
 			}
 			System.exit(0);
@@ -345,7 +344,7 @@ public class CompressProcessor implements MqiListener<CompressionJob> {
 		try {
 			mqiClient.ack(new AckMessageDto(dto.getId(), Ack.ERROR, errorMessage, stop), 
 					ProductCategory.COMPRESSION_JOBS);
-		} catch (AbstractCodedException ace) {
+		} catch (final AbstractCodedException ace) {
 			LOGGER.error("Unable to confirm negatively request:{}",ace);
 		}
 		appStatus.setError("PROCESSING");
@@ -356,7 +355,7 @@ public class CompressProcessor implements MqiListener<CompressionJob> {
 		try {
 			mqiClient.ack(new AckMessageDto(dto.getId(), Ack.OK, null, stop), 
 					ProductCategory.COMPRESSION_JOBS);
-		} catch (AbstractCodedException ace) {
+		} catch (final AbstractCodedException ace) {
 			LOGGER.error("Unable to confirm positively request:{}",ace);
 			appStatus.setError("PROCESSING");
 		}

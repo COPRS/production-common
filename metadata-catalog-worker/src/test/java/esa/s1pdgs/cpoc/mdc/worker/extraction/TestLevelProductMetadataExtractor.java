@@ -39,7 +39,8 @@ import esa.s1pdgs.cpoc.mqi.client.GenericMqiClient;
 import esa.s1pdgs.cpoc.mqi.model.queue.CatalogJob;
 import esa.s1pdgs.cpoc.mqi.model.rest.GenericMessageDto;
 import esa.s1pdgs.cpoc.obs_sdk.ObsClient;
-import esa.s1pdgs.cpoc.report.LoggerReporting;
+import esa.s1pdgs.cpoc.report.Reporting;
+import esa.s1pdgs.cpoc.report.ReportingUtils;
 
 public class TestLevelProductMetadataExtractor {
 	private static final String PATTERN = "^(S1|AS)(A|B)_(S[1-6]|IW|EW|WV|GP|HK|N[1-6]|EN|IM)_(SLC|GRD|OCN|RAW)(F|H|M|_)_(0|1|2)(A|C|N|S|_)(SH|SV|HH|HV|VV|VH|DH|DV)_([0-9a-z]{15})_([0-9a-z]{15})_([0-9]{6})_([0-9a-z_]{6})\\w{1,}\\.(SAFE)(/.*)?$";
@@ -90,6 +91,9 @@ public class TestLevelProductMetadataExtractor {
     private final File inputDir = new File("src/test/resources/workDir/");
     
     private final File testDir = FileUtils.createTmpDir();
+    
+	final Reporting reporting = ReportingUtils.newReportingBuilderFor("TestMetadataExtraction")
+			.newReporting();
 
 	/**
 	 * Initialization
@@ -185,9 +189,7 @@ public class TestLevelProductMetadataExtractor {
 
 		final JSONObject expected = extractor.mdBuilder.buildOutputFileMetadata(descriptor, files.get(0), job);
 
-		final LoggerReporting.Factory reportingFactory = new LoggerReporting.Factory("TestMetadataExtraction");
-
-		final JSONObject result = extractor.extract(reportingFactory, inputMessageSafe);
+		final JSONObject result = extractor.extract(reporting, inputMessageSafe);
 		for (final String key : expected.keySet()) {
 			if (!("insertionTime".equals(key) || "sliceCoordinates".equals(key) || "creationTime".equals(key))) {
 				System.out.println("Key");
@@ -237,9 +239,8 @@ public class TestLevelProductMetadataExtractor {
 		job.setProductFamily(ProductFamily.L0_ACN);
 
 		final JSONObject expected = extractor.mdBuilder.buildOutputFileMetadata(descriptor, files.get(0), job);
-		final LoggerReporting.Factory reportingFactory = new LoggerReporting.Factory("TestMetadataExtraction");
 
-		final JSONObject result = extractor.extract(reportingFactory, inputMessageSafe);
+		final JSONObject result = extractor.extract(reporting, inputMessageSafe);
 		for (final String key : expected.keySet()) {
 			if (!("insertionTime".equals(key) || "sliceCoordinates".equals(key) || "creationTime".equals(key))) {
 				assertEquals(expected.get(key), result.get(key));
@@ -284,9 +285,8 @@ public class TestLevelProductMetadataExtractor {
 		job.setProductFamily(ProductFamily.L1_SLICE);
 
 		final JSONObject expected = extractor.mdBuilder.buildOutputFileMetadata(descriptor, files.get(0), job);
-		final LoggerReporting.Factory reportingFactory = new LoggerReporting.Factory("TestMetadataExtraction");
 
-		final JSONObject result = extractor.extract(reportingFactory, inputMessageSafe);
+		final JSONObject result = extractor.extract(reporting, inputMessageSafe);
 		for (final String key : expected.keySet()) {
 			if (!("insertionTime".equals(key) || "sliceCoordinates".equals(key) || "creationTime".equals(key))) {
 				assertEquals(expected.get(key), result.get(key));
@@ -330,9 +330,7 @@ public class TestLevelProductMetadataExtractor {
 
 		final JSONObject expected = extractor.mdBuilder.buildOutputFileMetadata(descriptor, files.get(0), job);
 
-		final LoggerReporting.Factory reportingFactory = new LoggerReporting.Factory("TestMetadataExtraction");
-
-		final JSONObject result = extractor.extract(reportingFactory, inputMessageSafe);
+		final JSONObject result = extractor.extract(reporting, inputMessageSafe);
 		for (final String key : expected.keySet()) {
 			if (!("insertionTime".equals(key) || "sliceCoordinates".equals(key) || "creationTime".equals(key))) {
 				assertEquals(expected.get(key), result.get(key));
@@ -375,9 +373,8 @@ public class TestLevelProductMetadataExtractor {
 		job.setProductFamily(ProductFamily.L2_SLICE);
 
 		final JSONObject expected = extractor.mdBuilder.buildOutputFileMetadata(descriptor, files.get(0), job);
-		final LoggerReporting.Factory reportingFactory = new LoggerReporting.Factory("TestMetadataExtraction");
 
-		final JSONObject result = extractor.extract(reportingFactory, inputMessageSafe);
+		final JSONObject result = extractor.extract(reporting, inputMessageSafe);
 		for (final String key : expected.keySet()) {
 			if (!("insertionTime".equals(key) || "sliceCoordinates".equals(key) || "creationTime".equals(key))) {
 				assertEquals(expected.get(key), result.get(key));
@@ -420,8 +417,8 @@ public class TestLevelProductMetadataExtractor {
 		job.setProductFamily(ProductFamily.L2_ACN);
 
 		final JSONObject expected = extractor.mdBuilder.buildOutputFileMetadata(descriptor, files.get(0), job);
-		final LoggerReporting.Factory reportingFactory = new LoggerReporting.Factory("TestMetadataExtraction");
-		final JSONObject result = extractor.extract(reportingFactory, inputMessageSafe);
+
+		final JSONObject result = extractor.extract(reporting, inputMessageSafe);
 		for (final String key : expected.keySet()) {
 			if (!("insertionTime".equals(key) || "sliceCoordinates".equals(key) || "creationTime".equals(key))) {
 				assertEquals(expected.get(key), result.get(key));

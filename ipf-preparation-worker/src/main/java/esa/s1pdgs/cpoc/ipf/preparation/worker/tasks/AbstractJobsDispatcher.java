@@ -22,9 +22,9 @@ import esa.s1pdgs.cpoc.common.errors.processing.IpfPrepWorkerMaxNumberTaskTables
 import esa.s1pdgs.cpoc.ipf.preparation.worker.config.IpfPreparationWorkerSettings;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.config.ProcessSettings;
 import esa.s1pdgs.cpoc.mqi.model.queue.CatalogEvent;
-import esa.s1pdgs.cpoc.report.LoggerReporting;
 import esa.s1pdgs.cpoc.report.Reporting;
 import esa.s1pdgs.cpoc.report.ReportingMessage;
+import esa.s1pdgs.cpoc.report.ReportingUtils;
 
 /**
  * Job dispatcher<br/>
@@ -173,9 +173,9 @@ public abstract class AbstractJobsDispatcher {
             throws AbstractCodedException {
     	LOGGER.debug ("== dispatch job {}", job.toString());
         final String productName = job.getProduct().getProductName();
-        final Reporting.Factory reportingFactory = new LoggerReporting.Factory("Dispatch");
-    	
-    	final Reporting reporting = reportingFactory.newReporting(0); 
+        final Reporting reporting = ReportingUtils.newReportingBuilderFor("Dispatch")
+    			.newReporting();
+
     	reporting.begin(new ReportingMessage("Start dispatching product"));
     	
         try {

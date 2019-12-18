@@ -13,7 +13,7 @@ Configuration:
            Pattern: "{\"header\":{\"type\":\"LOG\",\"timestamp\":\"%d{yyyy-MM-dd'T'HH:mm:ss.nnnnnn}Z\",\"level\":\"%level\",\"line\":%L,\"file\":\"%.255F\",\"thread\":\"%.255t\"},\"message\":{\"content\":\"%enc{%m%xEx}{JSON}\"},\"custom\":{\"logger_string\":\"%logger\"}}%n"    
       - name: REPORT
         PatternLayout:
-          Pattern: "{\"header\":{\"type\":\"REPORT\",\"timestamp\":\"%d{yyyy-MM-dd'T'HH:mm:ss.nnnnnn}Z\",\"level\":\"%level\"},\"message\":{\"content\":\"%enc{%m%xEx}{JSON}\"},\"task\":{\"uid\":\"%X{uid}\",\"name\":\"%X{taskName}\",\"step\":%X{step},\"event\":\"%X{event}\"%X{jsonAdditional}}}%n"
+          Pattern: "%msg%n"
   Loggers:
     logger:
       - name: esa.s1pdgs.cpoc.report.Reporting

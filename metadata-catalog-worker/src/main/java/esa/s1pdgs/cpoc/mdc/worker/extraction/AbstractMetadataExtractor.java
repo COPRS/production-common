@@ -47,7 +47,7 @@ public abstract class AbstractMetadataExtractor implements MetadataExtractor {
 	}
 
 	final File downloadMetadataFileToLocalFolder(
-    		final Reporting.Factory reportingFactory,  
+    		final Reporting reporting,  
     		final ProductFamily family, 
     		final String keyObs
     ) 
@@ -56,7 +56,7 @@ public abstract class AbstractMetadataExtractor implements MetadataExtractor {
 		// make sure than keyObs contains the metadata file
 		final String metadataKeyObs = getMetadataKeyObs(keyObs);
 		
-        final Reporting reportDownload = reportingFactory.newReporting(1);            
+        final Reporting reportDownload = reporting.newChild("MetadataExtraction.Download");         
         reportDownload.begin(new ReportingMessage(
         		"Starting download of {} to local directory {}", metadataKeyObs, localDirectory
         ));
@@ -89,39 +89,38 @@ public abstract class AbstractMetadataExtractor implements MetadataExtractor {
     }
 
     final <E> E extractFromFilename(
-			final Reporting.Factory reportingFactory,
+			final Reporting reporting,
 			final ThrowingSupplier<E> supplier
 	) 
 		throws AbstractCodedException 
 	{
-    	return extractFrom(reportingFactory, 2, "filename", supplier);
+    	return extractFrom(reporting.newChild("MetadataExtraction.FilenameExtract"), 2, "filename", supplier);
 	}
     
     final JSONObject extractFromFile(
-			final Reporting.Factory reportingFactory,
+			final Reporting reporting,
 			final ThrowingSupplier<JSONObject> supplier
 	) 
 		throws AbstractCodedException 
 	{
-    	return extractFrom(reportingFactory, 3, "file", supplier);
+    	return extractFrom(reporting.newChild("MetadataExtraction.FileExtract"), 3, "file", supplier);
 	}
     
 	private final <E> E extractFrom(
-			final Reporting.Factory reportingFactory,
+			final Reporting reporting,
 			final int step,
 			final String extraction,
 			final ThrowingSupplier<E> supplier
 	) 
 		throws AbstractCodedException 
 	{
-		final Reporting reportExtractingFromFilename = reportingFactory.newReporting(step);
-		reportExtractingFromFilename.begin(new ReportingMessage("Start extraction from {}", extraction));
+		reporting.begin(new ReportingMessage("Start extraction from {}", extraction));
 		try {
 			final E res = supplier.get();
-			reportExtractingFromFilename.end(new ReportingMessage("End extraction from {}", extraction));
+			reporting.end(new ReportingMessage("End extraction from {}", extraction));
 			return res;
 		} catch (final AbstractCodedException e) {
-			reportExtractingFromFilename.error(new ReportingMessage("[code {}] {}", e.getCode().getCode(), e.getLogMessage()));
+			reporting.error(new ReportingMessage("[code {}] {}", e.getCode().getCode(), e.getLogMessage()));
 			throw e;
 		}
 	}

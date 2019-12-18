@@ -40,11 +40,11 @@ import esa.s1pdgs.cpoc.obs_sdk.ObsClient;
 import esa.s1pdgs.cpoc.obs_sdk.ObsObject;
 import esa.s1pdgs.cpoc.obs_sdk.ObsServiceException;
 import esa.s1pdgs.cpoc.obs_sdk.SdkClientException;
-import esa.s1pdgs.cpoc.report.FilenameReportingInput;
-import esa.s1pdgs.cpoc.report.LoggerReporting;
-import esa.s1pdgs.cpoc.report.OutboxReportingOutput;
 import esa.s1pdgs.cpoc.report.Reporting;
 import esa.s1pdgs.cpoc.report.ReportingMessage;
+import esa.s1pdgs.cpoc.report.ReportingUtils;
+import esa.s1pdgs.cpoc.report.message.input.FilenameReportingInput;
+import esa.s1pdgs.cpoc.report.message.output.OutboxReportingOutput;
 
 @Service
 public class DisseminationService implements MqiListener<ProductionEvent> {	
@@ -123,8 +123,8 @@ public class DisseminationService implements MqiListener<ProductionEvent> {
 	final void handleTransferTo(final GenericMessageDto<ProductionEvent> message, final String target) {		
 		final ProductionEvent product = message.getBody();
 		
-		final Reporting.Factory rf = new LoggerReporting.Factory("Dissemination");
-		final Reporting reporting = rf.newReporting(0);
+		final Reporting reporting = ReportingUtils.newReportingBuilderFor("Dissemination")
+				.newReporting();
 		
 		String targetUrl = "";
 		
@@ -136,7 +136,7 @@ public class DisseminationService implements MqiListener<ProductionEvent> {
 			assertExists(product);
 			final OutboxClient outboxClient = clientForTarget(target);
 
-			final Reporting reportingDl = rf.newReporting(1);
+			final Reporting reportingDl = reporting.newChild("Dissemination.ObsDownload");
 			reportingDl.begin(new ReportingMessage("Start downloading file from OBS {} to {}", product.getKeyObjectStorage(), target));
 			try {
 				targetUrl = Retries.performWithRetries(
@@ -146,12 +146,12 @@ public class DisseminationService implements MqiListener<ProductionEvent> {
 						properties.getTempoRetryMs()
 				);
 				reportingDl.end(new ReportingMessage("End downloading file from OBS {} to {}", product.getKeyObjectStorage(), target));
-			} catch (Exception e) {
+			} catch (final Exception e) {
 				reportingDl.error(new ReportingMessage("Error downloading file from OBS {} to {}: {} ", 
 						product.getKeyObjectStorage(), target, LogUtils.toString(e)));
 				throw e;
 			}							
-		} catch (Exception e) {					
+		} catch (final Exception e) {					
 			final String errMessage = (e instanceof DisseminationException) ? e.getMessage() : LogUtils.toString(e); 
 			final String messageString = String.format(
 					"Error on dissemination of product to outbox %s: %s", 

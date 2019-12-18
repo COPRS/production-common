@@ -32,7 +32,6 @@ import esa.s1pdgs.cpoc.common.errors.mqi.MqiAckApiError;
 import esa.s1pdgs.cpoc.common.errors.processing.IpfExecutionWorkerProcessTimeoutException;
 import esa.s1pdgs.cpoc.errorrepo.ErrorRepoAppender;
 import esa.s1pdgs.cpoc.ipf.execution.worker.TestUtils;
-import esa.s1pdgs.cpoc.ipf.execution.worker.job.JobProcessor;
 import esa.s1pdgs.cpoc.ipf.execution.worker.job.file.InputDownloader;
 import esa.s1pdgs.cpoc.ipf.execution.worker.job.file.OutputProcessor;
 import esa.s1pdgs.cpoc.ipf.execution.worker.job.mqi.OutputProcuderFactory;
@@ -44,9 +43,9 @@ import esa.s1pdgs.cpoc.mqi.model.rest.Ack;
 import esa.s1pdgs.cpoc.mqi.model.rest.AckMessageDto;
 import esa.s1pdgs.cpoc.mqi.model.rest.GenericMessageDto;
 import esa.s1pdgs.cpoc.obs_sdk.ObsClient;
-import esa.s1pdgs.cpoc.report.LoggerReporting;
 import esa.s1pdgs.cpoc.report.Reporting;
 import esa.s1pdgs.cpoc.report.ReportingOutput;
+import esa.s1pdgs.cpoc.report.ReportingUtils;
 
 /**
  * Test the job processor
@@ -109,7 +108,8 @@ public class JobProcessorTest extends MockPropertiesTest {
     @Rule
     public ExpectedException thrown = ExpectedException.none();
     
-    private final Reporting.Factory reportingFactory = new LoggerReporting.Factory("TestOutputHandling");
+    private final Reporting reporting = ReportingUtils.newReportingBuilderFor("TestOutputHandling")
+			.newReporting();
 	
     private final ErrorRepoAppender errorAppender = ErrorRepoAppender.NULL;
 
@@ -200,7 +200,7 @@ public class JobProcessorTest extends MockPropertiesTest {
             throws AbstractCodedException, InterruptedException {
         doThrow(new IpfExecutionWorkerProcessTimeoutException("timeout exception"))
                 .when(procExecutor).call();
-        ExecutorCompletionService<Void> procCompletionSrvTmp =
+        final ExecutorCompletionService<Void> procCompletionSrvTmp =
                 new ExecutorCompletionService<>(
                         Executors.newSingleThreadExecutor());
         procCompletionSrvTmp.submit(procExecutor);
@@ -221,7 +221,7 @@ public class JobProcessorTest extends MockPropertiesTest {
             throws AbstractCodedException, InterruptedException {
         doThrow(new IllegalArgumentException("other exception"))
                 .when(procExecutor).call();
-        ExecutorCompletionService<Void> procCompletionSrvTmp =
+        final ExecutorCompletionService<Void> procCompletionSrvTmp =
                 new ExecutorCompletionService<>(
                         Executors.newSingleThreadExecutor());
         procCompletionSrvTmp.submit(procExecutor);
@@ -232,13 +232,13 @@ public class JobProcessorTest extends MockPropertiesTest {
 
     @Test
     public void testCleanJobProcessing() throws IOException {
-        File folder1 =
+        final File folder1 =
                 new File(inputMessage.getBody().getWorkDirectory() + "folder1");
         folder1.mkdir();
-        File file1 = new File(inputMessage.getBody().getWorkDirectory()
+        final File file1 = new File(inputMessage.getBody().getWorkDirectory()
                 + "folder1" + File.separator + "file1");
         file1.createNewFile();
-        File file2 =
+        final File file2 =
                 new File(inputMessage.getBody().getWorkDirectory() + "file2");
         file2.createNewFile();
         assertTrue(workingDir.exists());
@@ -257,7 +257,7 @@ public class JobProcessorTest extends MockPropertiesTest {
      *            executor
      * @throws Exception
      */
-    private void mockAllStep(boolean simulateError) throws Exception {
+    private void mockAllStep(final boolean simulateError) throws Exception {
         // Step 3
         if (simulateError) {
             doThrow(new IpfExecutionWorkerProcessTimeoutException("timeout exception"))
@@ -268,13 +268,13 @@ public class JobProcessorTest extends MockPropertiesTest {
         // Step 4
         doReturn(ReportingOutput.NULL).when(outputProcessor).processOutput();
         // Step 5
-        File folder1 =
+        final File folder1 =
                 new File(inputMessage.getBody().getWorkDirectory() + "folder1");
         folder1.mkdir();
-        File file1 = new File(inputMessage.getBody().getWorkDirectory()
+        final File file1 = new File(inputMessage.getBody().getWorkDirectory()
                 + "folder1" + File.separator + "file1");
         file1.createNewFile();
-        File file2 =
+        final File file2 =
                 new File(inputMessage.getBody().getWorkDirectory() + "file2");
         file2.createNewFile();
     }
@@ -305,7 +305,7 @@ public class JobProcessorTest extends MockPropertiesTest {
         
 
         processor.processJob(inputMessage, inputDownloader, outputProcessor,
-                procExecutorSrv, procCompletionSrv, procExecutor, reportingFactory.newReporting(0));
+                procExecutorSrv, procCompletionSrv, procExecutor, reporting);
 
         // Check step 3
         verify(procExecutor, times(1)).call();
@@ -333,7 +333,7 @@ public class JobProcessorTest extends MockPropertiesTest {
         mockDevProperties(false, true, true, true);
 
         processor.processJob(inputMessage, inputDownloader, outputProcessor,
-                procExecutorSrv, procCompletionSrv, procExecutor, reportingFactory.newReporting(0));
+                procExecutorSrv, procCompletionSrv, procExecutor, reporting);
 
         // Check step 3
         verify(procExecutor, times(1)).call();
@@ -361,7 +361,7 @@ public class JobProcessorTest extends MockPropertiesTest {
         mockDevProperties(true, true, false, true);
 
         processor.processJob(inputMessage, inputDownloader, outputProcessor,
-                procExecutorSrv, procCompletionSrv, procExecutor, reportingFactory.newReporting(0));
+                procExecutorSrv, procCompletionSrv, procExecutor, reporting);
 
         // Check step 3
         verify(procExecutor, times(1)).call();
@@ -390,7 +390,7 @@ public class JobProcessorTest extends MockPropertiesTest {
         mockDevProperties(true, true, true, false);
 
         processor.processJob(inputMessage, inputDownloader, outputProcessor,
-                procExecutorSrv, procCompletionSrv, procExecutor, reportingFactory.newReporting(0));
+                procExecutorSrv, procCompletionSrv, procExecutor, reporting);
 
         // Check step 3
         verify(procExecutor, times(1)).call();
@@ -421,7 +421,7 @@ public class JobProcessorTest extends MockPropertiesTest {
         mockAllStep(true);
 
         processor.processJob(inputMessage, inputDownloader, outputProcessor,
-                procExecutorSrv, procCompletionSrv, procExecutor, reportingFactory.newReporting(0));
+                procExecutorSrv, procCompletionSrv, procExecutor, reporting);
 
         // Check step 3
         verify(procExecutor, times(1)).call();

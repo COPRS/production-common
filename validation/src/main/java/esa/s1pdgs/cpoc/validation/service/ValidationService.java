@@ -27,9 +27,9 @@ import esa.s1pdgs.cpoc.obs_sdk.ObsObject;
 import esa.s1pdgs.cpoc.obs_sdk.ObsServiceException;
 import esa.s1pdgs.cpoc.obs_sdk.ObsValidationException;
 import esa.s1pdgs.cpoc.obs_sdk.SdkClientException;
-import esa.s1pdgs.cpoc.report.LoggerReporting;
 import esa.s1pdgs.cpoc.report.Reporting;
 import esa.s1pdgs.cpoc.report.ReportingMessage;
+import esa.s1pdgs.cpoc.report.ReportingUtils;
 import esa.s1pdgs.cpoc.validation.config.ApplicationProperties;
 import esa.s1pdgs.cpoc.validation.config.ApplicationProperties.FamilyIntervalConf;
 
@@ -54,20 +54,20 @@ public class ValidationService {
 		public String obsKey;
 		public String reason;
 		
-		public Discrepancy(String obsKey, String reason) {
+		public Discrepancy(final String obsKey, final String reason) {
 			this.obsKey = obsKey;
 			this.reason = reason;
 		}
 		
 		@Override
 		public String toString() {
-			StringBuilder sb = new StringBuilder();
+			final StringBuilder sb = new StringBuilder();
 			return sb.append(obsKey).append(" (reason:").append(reason).append(")").toString();
 		}
 	}
 
 	@Autowired
-	public ValidationService(MetadataClient metadataClient, ObsClient obsClient) {
+	public ValidationService(final MetadataClient metadataClient, final ObsClient obsClient) {
 		this.metadataClient = metadataClient;
 		this.obsClient = obsClient;
 	}
@@ -78,17 +78,19 @@ public class ValidationService {
 				appStatus.setProcessing(esa.s1pdgs.cpoc.appstatus.Status.PROCESSING_MSG_ID_UNDEFINED);
 			}
 		}
-		final Reporting.Factory reportingFactory = new LoggerReporting.Factory("ValidationService");
+		final Reporting reporting = ReportingUtils.newReportingBuilderFor("ValidationService")
+				.newReporting();
+		
 		int discrepancies = 0;
 
-		Set<ProductFamily> families = properties.getFamilies().keySet();
+		final Set<ProductFamily> families = properties.getFamilies().keySet();
 		LOGGER.info("Validating {} product families", families.size());
-		for (ProductFamily family : families) {
-			FamilyIntervalConf conf = properties.getFamilies().get(family);
+		for (final ProductFamily family : families) {
+			final FamilyIntervalConf conf = properties.getFamilies().get(family);
 			
-			LocalDateTime startInterval = LocalDateTime.now().minusSeconds(conf.getLifeTime());
-			LocalDateTime endInterval = LocalDateTime.now().minusSeconds(conf.getInitialDelay()); 
-			discrepancies += validateProductFamily(reportingFactory, family, startInterval, endInterval);
+			final LocalDateTime startInterval = LocalDateTime.now().minusSeconds(conf.getLifeTime());
+			final LocalDateTime endInterval = LocalDateTime.now().minusSeconds(conf.getInitialDelay()); 
+			discrepancies += validateProductFamily(reporting, family, startInterval, endInterval);
 		}
 		LOGGER.info("Found {} discrepancies for all families",discrepancies);
 		synchronized(nbRunningConsistencyChecksLock) {
@@ -99,14 +101,13 @@ public class ValidationService {
 		return discrepancies;
 	}
 
-	int validateProductFamily(Reporting.Factory reportingFactory, ProductFamily family, LocalDateTime startInterval,
-			LocalDateTime endInterval) {
-
-		final Reporting reportingValidation = reportingFactory.newReporting(0);
-		reportingValidation.begin(new ReportingMessage("Starting validation task from {} to {} for family {}",
+	int validateProductFamily(final Reporting reporting, final ProductFamily family, final LocalDateTime startInterval,
+			final LocalDateTime endInterval) {
+	
+		reporting.begin(new ReportingMessage("Starting validation task from {} to {} for family {}",
 				startInterval, endInterval, family));
 
-		final Reporting reportingMetadata = reportingFactory.newReporting(1);
+		final Reporting reportingMetadata = reporting.newChild("ValidationService.ValidateMDC");
 
 		try {
 
@@ -118,24 +119,24 @@ public class ValidationService {
 			try {
 				reportingMetadata.begin(new ReportingMessage("Gathering discrepancies in metadata catalog"));
 
-				String queryFamily = getQueryFamily(family);
+				final String queryFamily = getQueryFamily(family);
 				LOGGER.info("Performing metadata query for family '{}'", queryFamily);
 				metadataResults = metadataClient.query(ProductFamily.valueOf(queryFamily), startInterval, endInterval);				
 				
 				LOGGER.info("Metadata query for family '{}' returned {} hits", queryFamily, metadataResults.size());				
-			} catch (MetadataQueryException e) {
+			} catch (final MetadataQueryException e) {
 				reportingMetadata.error(new ReportingMessage("Error occured while performing metadata catalog query task [code {}] {}",
 						e.getCode().getCode(), e.getLogMessage()));
 				throw e;
 			}
 
-			final Reporting reportingObs = reportingFactory.newReporting(2);
+			final Reporting reportingObs = reporting.newChild("ValidationService.ValidateOBS");
 			Map<String, ObsObject> obsResults = null;
 			try {
 				reportingObs.begin(new ReportingMessage("Gathering discrepancies in OBS"));
 
-				Date startDate = Date.from(startInterval.atZone(ZoneId.of("UTC")).toInstant());
-				Date endDate = Date.from(endInterval.atZone(ZoneId.of("UTC")).toInstant());
+				final Date startDate = Date.from(startInterval.atZone(ZoneId.of("UTC")).toInstant());
+				final Date endDate = Date.from(endInterval.atZone(ZoneId.of("UTC")).toInstant());
 
 				obsResults = obsClient.listInterval(ProductFamily.valueOf(family.name()), startDate, endDate);
 				LOGGER.info("OBS query for family '{}' returned {} results", family, obsResults.size());
@@ -150,8 +151,8 @@ public class ValidationService {
 			 * catalog that is available. Then we instruct the obs client to validate if these entries are valid.
 			 */
 
-			List<Discrepancy> discrepancies = new ArrayList<>();
-			for (SearchMetadata smd : metadataResults) {
+			final List<Discrepancy> discrepancies = new ArrayList<>();
+			for (final SearchMetadata smd : metadataResults) {
 				try {
 					// If its a zipped family, we need to extend the filename
 					String key = smd.getKeyObjectStorage();					
@@ -170,14 +171,14 @@ public class ValidationService {
 			 * Step 3: After we know that the catalog data is valid within the OBS, we check if there are additional
 			 * products stored within that are not expects.
 			 */
-			Set<String> realKeys = extractRealKeys(obsResults.values(), family);
-			for (SearchMetadata smd : metadataResults) {
+			final Set<String> realKeys = extractRealKeys(obsResults.values(), family);
+			for (final SearchMetadata smd : metadataResults) {
 				realKeys.remove(smd.getKeyObjectStorage());
 			}
 			
 			LOGGER.info("Found {} keys that are in OBS, but not in MetadataCatalog", realKeys.size());
-			for (String key: realKeys) {
-				Discrepancy discrepancy = new Discrepancy(key,"Exists in OBS, but not in MDC");
+			for (final String key: realKeys) {
+				final Discrepancy discrepancy = new Discrepancy(key,"Exists in OBS, but not in MDC");
 				discrepancies.add(discrepancy);
 			}
 			
@@ -187,27 +188,27 @@ public class ValidationService {
 
 			if (discrepancies.isEmpty()) {
 				reportingMetadata.end(new ReportingMessage("No discrepancies found in MetadataCatalog"));
-				reportingValidation.end(new ReportingMessage("No discrepancy found"));
+				reporting.end(new ReportingMessage("No discrepancy found"));
 			} else {
 				reportingMetadata.error(new ReportingMessage("Discrepancies found for following products: {}",
 						buildProductList(discrepancies)));
-				reportingValidation.error(new ReportingMessage("Discrepancy found for {} product(s)", discrepancies.size()));
+				reporting.error(new ReportingMessage("Discrepancy found for {} product(s)", discrepancies.size()));
 			}
 
 			LOGGER.info("Found {} discrepancies for family '{}'", discrepancies.size(), family);
 			return discrepancies.size();
-		} catch (Exception ex) {
-			reportingValidation.error(new ReportingMessage("Error occured while performing validation task: {}", LogUtils.toString(ex)));
+		} catch (final Exception ex) {
+			reporting.error(new ReportingMessage("Error occured while performing validation task: {}", LogUtils.toString(ex)));
 		}
 
 		return 0;
 	}
 	
-	Set<String> extractRealKeys(Collection<ObsObject> obsResults, ProductFamily family) {
-		Set<String> realProducts = new HashSet<>();
-		for (ObsObject obsResult: obsResults) {			
-			String key = obsResult.getKey();
-			int index = key.indexOf("/");
+	Set<String> extractRealKeys(final Collection<ObsObject> obsResults, final ProductFamily family) {
+		final Set<String> realProducts = new HashSet<>();
+		for (final ObsObject obsResult: obsResults) {			
+			final String key = obsResult.getKey();
+			final int index = key.indexOf("/");
 			String realKey = null;
 			
 			if (family == ProductFamily.EDRS_SESSION) {
@@ -235,7 +236,7 @@ public class ValidationService {
 		return realProducts;
 	}
 
-	String getQueryFamily(ProductFamily family) {
+	String getQueryFamily(final ProductFamily family) {
 		if (family.name().endsWith("_ZIP")) {
 			/*
 			 * Oops: We are having a zip family here. This means we are not performing the
@@ -247,11 +248,11 @@ public class ValidationService {
 		return family.name();
 	}
 
-	private String buildProductList(List<Discrepancy> discrepancies) {
+	private String buildProductList(final List<Discrepancy> discrepancies) {
 		if (discrepancies.size() == 0) {
 			return "";
 		}
-		StringBuilder builder = new StringBuilder();
+		final StringBuilder builder = new StringBuilder();
 		builder.append("[");
 		for (int i = 0; i < discrepancies.size(); i++) {
 			builder.append(discrepancies.get(i));

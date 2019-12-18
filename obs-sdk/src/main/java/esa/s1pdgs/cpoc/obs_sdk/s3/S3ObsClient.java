@@ -40,9 +40,9 @@ import esa.s1pdgs.cpoc.obs_sdk.SdkClientException;
 import esa.s1pdgs.cpoc.obs_sdk.ValidArgumentAssertion;
 import esa.s1pdgs.cpoc.obs_sdk.s3.retry.SDKCustomDefaultRetryCondition;
 import esa.s1pdgs.cpoc.obs_sdk.swift.SwiftSdkClientException;
-import esa.s1pdgs.cpoc.report.LoggerReporting;
 import esa.s1pdgs.cpoc.report.Reporting;
 import esa.s1pdgs.cpoc.report.ReportingMessage;
+import esa.s1pdgs.cpoc.report.ReportingUtils;
 
 /**
  * <p>
@@ -56,7 +56,7 @@ public class S3ObsClient extends AbstractObsClient {
 
 	public static final class Factory implements ObsClient.Factory {
 		@Override
-		public final ObsClient newObsClient(ObsConfigurationProperties config) {
+		public final ObsClient newObsClient(final ObsConfigurationProperties config) {
 			final BasicAWSCredentials awsCreds = new BasicAWSCredentials(config.getUserId(), config.getUserSecret());
 			final ClientConfiguration clientConfig = new ClientConfiguration();
 			clientConfig.setProtocol(Protocol.HTTP);
@@ -108,7 +108,7 @@ public class S3ObsClient extends AbstractObsClient {
 		this.s3Services = s3Services;
 	}
 	
-	public boolean bucketExists(ProductFamily family) throws ObsServiceException, S3SdkClientException {
+	public boolean bucketExists(final ProductFamily family) throws ObsServiceException, S3SdkClientException {
 		return s3Services.bucketExist(getBucketFor(family));
 	}
 
@@ -147,7 +147,7 @@ public class S3ObsClient extends AbstractObsClient {
 	@Override
 	public void uploadObject(final ObsUploadObject object)
 			throws SdkClientException, ObsServiceException, ObsException {
-		List<String> fileList = new ArrayList<>();
+		final List<String> fileList = new ArrayList<>();
 		if (object.getFile().isDirectory()) {
 			fileList.addAll(
 					s3Services.uploadDirectory(getBucketFor(object.getFamily()), object.getKey(), object.getFile()));
@@ -163,11 +163,11 @@ public class S3ObsClient extends AbstractObsClient {
 		try {
 			file = File.createTempFile(object.getKey(), MD5SUM_SUFFIX);
 			try (PrintWriter writer = new PrintWriter(file)) {
-				for (String fileInfo : fileList) {
+				for (final String fileInfo : fileList) {
 					writer.println(fileInfo);
 				}
 			}
-		} catch (IOException e) {
+		} catch (final IOException e) {
 			throw new S3ObsServiceException(getBucketFor(object.getFamily()), object.getKey(),
 					"Could not store md5sum temp file", e);
 		}
@@ -175,13 +175,13 @@ public class S3ObsClient extends AbstractObsClient {
 
 		try {
 			Files.delete(file.toPath());
-		} catch (IOException e) {
+		} catch (final IOException e) {
 			file.deleteOnExit();
 		}
 	}
 
 	@Override
-	public void move(ObsObject from, ProductFamily to) throws ObsException {
+	public void move(final ObsObject from, final ProductFamily to) throws ObsException {
 		ValidArgumentAssertion.assertValidArgument(from);
 		ValidArgumentAssertion.assertValidArgument(to);
 		try {
@@ -192,7 +192,7 @@ public class S3ObsClient extends AbstractObsClient {
 		}
 	}
 	
-	public void createBucket(ProductFamily family) throws SwiftSdkClientException, ObsServiceException, S3SdkClientException {
+	public void createBucket(final ProductFamily family) throws SwiftSdkClientException, ObsServiceException, S3SdkClientException {
 		s3Services.createBucket(getBucketFor(family));
 	}
 
@@ -206,9 +206,9 @@ public class S3ObsClient extends AbstractObsClient {
 		ValidArgumentAssertion.assertValidArgument(timeFrameBegin);
 		ValidArgumentAssertion.assertValidArgument(timeFrameEnd);
 
-		long methodStartTime = System.currentTimeMillis();
-		List<ObsObject> objectsOfTimeFrame = new ArrayList<>();
-		String bucket = getBucketFor(family);
+		final long methodStartTime = System.currentTimeMillis();
+		final List<ObsObject> objectsOfTimeFrame = new ArrayList<>();
+		final String bucket = getBucketFor(family);
 		LOGGER.debug(String.format("listing objects in OBS from bucket %s within last modification time %s to %s",
 				bucket, timeFrameBegin, timeFrameEnd));
 		ObjectListing objListing = s3Services.listObjectsFromBucket(bucket);
@@ -219,21 +219,21 @@ public class S3ObsClient extends AbstractObsClient {
 				break;
 			}
 
-			List<S3ObjectSummary> objSum = objListing.getObjectSummaries();
+			final List<S3ObjectSummary> objSum = objListing.getObjectSummaries();
 
 			if (objSum == null || objSum.size() == 0) {
 				break;
 			}
 
-			for (S3ObjectSummary s : objSum) {
+			for (final S3ObjectSummary s : objSum) {
 				if (s.getKey().endsWith(MD5SUM_SUFFIX)) {
 					continue;
 				}
 
-				Date lastModified = s.getLastModified();
+				final Date lastModified = s.getLastModified();
 
 				if (lastModified.after(timeFrameBegin) && lastModified.before(timeFrameEnd)) {
-					ObsObject obsObj = new ObsObject(family, s.getKey());
+					final ObsObject obsObj = new ObsObject(family, s.getKey());
 					objectsOfTimeFrame.add(obsObj);
 				}
 			}
@@ -245,7 +245,7 @@ public class S3ObsClient extends AbstractObsClient {
 
 		} while (truncated);
 
-		float methodDuration = (System.currentTimeMillis() - methodStartTime) / 1000f;
+		final float methodDuration = (System.currentTimeMillis() - methodStartTime) / 1000f;
 		LOGGER.debug(String.format("Time for OBS listing objects from bucket %s within time frame: %.2fs", bucket,
 				methodDuration));
 
@@ -253,7 +253,7 @@ public class S3ObsClient extends AbstractObsClient {
 	}
 
 	@Override
-	public Map<String, InputStream> getAllAsInputStream(ProductFamily family, String keyPrefix)
+	public Map<String, InputStream> getAllAsInputStream(final ProductFamily family, final String keyPrefix)
 			throws SdkClientException {
 		ValidArgumentAssertion.assertValidArgument(family);
 		ValidArgumentAssertion.assertValidPrefixArgument(keyPrefix);
@@ -265,7 +265,7 @@ public class S3ObsClient extends AbstractObsClient {
 	}
 
 	@Override
-	protected Map<String, String> collectMd5Sums(ObsObject object) throws ObsException {
+	protected Map<String, String> collectMd5Sums(final ObsObject object) throws ObsException {
 		try {
 			return s3Services.collectMd5Sums(getBucketFor(object.getFamily()), object.getKey());
 		} catch (S3SdkClientException | ObsServiceException e) {
@@ -277,7 +277,7 @@ public class S3ObsClient extends AbstractObsClient {
 	public long size(final ObsObject object) throws ObsException {
 		ValidArgumentAssertion.assertValidArgument(object);
 		try {
-			String bucketName = getBucketFor(object.getFamily());
+			final String bucketName = getBucketFor(object.getFamily());
 			/*
 			 * This method is supposed to return the size of exactly one object. If more than
 			 * one is returned the object is not unique and very likely not the full name of it or
@@ -291,7 +291,7 @@ public class S3ObsClient extends AbstractObsClient {
 			
 			// return the size of the object
 			return s3Services.size(bucketName, object.getKey());						
-		} catch (SdkClientException ex) {
+		} catch (final SdkClientException ex) {
 			throw new ObsException(object.getFamily(), object.getKey(), ex);
 		}
 	}
@@ -300,7 +300,7 @@ public class S3ObsClient extends AbstractObsClient {
 	public String getChecksum(final ObsObject object) throws ObsException {
 		ValidArgumentAssertion.assertValidArgument(object);
 		try {
-			String bucketName = getBucketFor(object.getFamily());
+			final String bucketName = getBucketFor(object.getFamily());
 			/*
 			 * This method is supposed to return the size of exactly one object. If more than
 			 * one is returned the object is not unique and very likely not the full name of it or
@@ -314,21 +314,24 @@ public class S3ObsClient extends AbstractObsClient {
 			
 			// return the checksum of the object
 			return s3Services.getChecksum(bucketName, object.getKey());
-		} catch (SdkClientException ex) {
+		} catch (final SdkClientException ex) {
 			throw new ObsException(object.getFamily(), object.getKey(), ex);
 		}
 	}
 
 	@Override
-	public URL createTemporaryDownloadUrl(ObsObject object, long expirationTimeInSeconds) throws ObsException, ObsServiceException {
+	public URL createTemporaryDownloadUrl(final ObsObject object, final long expirationTimeInSeconds) throws ObsException, ObsServiceException {
 		ValidArgumentAssertion.assertValidArgument(object);
 		URL url;		
 		try {
 			url = s3Services.createTemporaryDownloadUrl(getBucketFor(object.getFamily()), object.getKey(), expirationTimeInSeconds);
-		} catch (S3SdkClientException ex) {
+		} catch (final S3SdkClientException ex) {
 			throw new ObsException(object.getFamily(), object.getKey(), ex);			
 		}
-		final Reporting reporting = new LoggerReporting.Factory("CreateTemporaryDownloadUrl").newReporting(0);
+		
+		final Reporting reporting = ReportingUtils.newReportingBuilderFor("CreateTemporaryDownloadUrl")
+				.newReporting();
+		
      	reporting.intermediate(new ReportingMessage(size(object), "Created temporary download URL for username '{}' for product '{}'", "anonymous", object.getKey()));
      	return url;
 	}

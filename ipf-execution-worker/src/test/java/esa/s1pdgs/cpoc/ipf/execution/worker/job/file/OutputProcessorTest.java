@@ -44,8 +44,8 @@ import esa.s1pdgs.cpoc.mqi.model.queue.LevelJobOutputDto;
 import esa.s1pdgs.cpoc.mqi.model.rest.GenericMessageDto;
 import esa.s1pdgs.cpoc.obs_sdk.ObsClient;
 import esa.s1pdgs.cpoc.obs_sdk.ObsUploadObject;
-import esa.s1pdgs.cpoc.report.LoggerReporting;
 import esa.s1pdgs.cpoc.report.Reporting;
+import esa.s1pdgs.cpoc.report.ReportingUtils;
 
 /**
  * Test the output processor
@@ -97,10 +97,10 @@ public class OutputProcessorTest {
      * Reports output to publish
      */
     private List<FileQueueMessage> reportToPublish;
-    
-    private final Reporting.Factory reportingFactory = new LoggerReporting.Factory("TestOutputHandling");
-	
 
+    private final Reporting reporting = ReportingUtils.newReportingBuilderFor("TestOutputHandling")
+			.newReporting();
+    
     /**
      * Initialization
      * 
@@ -346,7 +346,7 @@ public class OutputProcessorTest {
         lines.add("S1A_BLANK_FILE.SAFE");
 
         processor.sortOutputs(lines, uploadBatch, outputToPublish,
-                reportToPublish,reportingFactory);
+                reportToPublish, reporting);
 
         // Check products
         assertEquals(4, uploadBatch.size());
@@ -416,7 +416,7 @@ public class OutputProcessorTest {
         lines.add("S1A_BLANK_FILE.SAFE");
 
         processor.sortOutputs(lines, uploadBatch, outputToPublish,
-                reportToPublish, reportingFactory);
+                reportToPublish, reporting);
 
         // Check products
         assertEquals(5, uploadBatch.size());
@@ -496,7 +496,7 @@ public class OutputProcessorTest {
         lines.add("S1A_BLANK_FILE.SAFE");
 
         processor.sortOutputs(lines, uploadBatch, outputToPublish,
-                reportToPublish, reportingFactory);
+                reportToPublish, reporting);
 
         // Check products
         assertEquals(4, uploadBatch.size());
@@ -564,7 +564,7 @@ public class OutputProcessorTest {
         lines.add("S1A_BLANK_FILE.SAFE");
 
         processor.sortOutputs(lines, uploadBatch, outputToPublish,
-                reportToPublish, reportingFactory);
+                reportToPublish, reporting);
 
         // Check products
         assertEquals(4, uploadBatch.size());
@@ -655,11 +655,11 @@ public class OutputProcessorTest {
     @Test
     public void testPublishAccordingUploadFiles1() throws Exception {
         final Method method = getMethodForPublishAccodingUpload();        
-        method.invoke(processor, reportingFactory, 2, "", new ArrayList<>());
+        method.invoke(processor, reporting, 2, "", new ArrayList<>());
         verify(procuderFactory, times(0))
                 .sendOutput(Mockito.any(ObsQueueMessage.class), Mockito.any());
 
-        method.invoke(processor, reportingFactory, 2, "o2", outputToPublish);
+        method.invoke(processor, reporting, 2, "o2", outputToPublish);
         verify(procuderFactory, times(1))
                 .sendOutput(Mockito.any(ObsQueueMessage.class), Mockito.any());
         verify(procuderFactory, times(1)).sendOutput(Mockito
@@ -672,11 +672,11 @@ public class OutputProcessorTest {
     public void testPublishAccordingUploadFiles2() throws Exception {
         final Method method = getMethodForPublishAccodingUpload();
 
-        method.invoke(processor, reportingFactory, 2, "", new ArrayList<>());
+        method.invoke(processor, reporting, 2, "", new ArrayList<>());
         verify(procuderFactory, times(0))
                 .sendOutput(Mockito.any(ObsQueueMessage.class), Mockito.any());
 
-        method.invoke(processor, reportingFactory, 2, OutputProcessor.NOT_KEY_OBS,
+        method.invoke(processor, reporting, 2, OutputProcessor.NOT_KEY_OBS,
                 outputToPublish);
         verify(procuderFactory, times(3))
                 .sendOutput(Mockito.any(ObsQueueMessage.class), Mockito.any());
@@ -693,11 +693,11 @@ public class OutputProcessorTest {
 
         final Method method = getMethodForPublishAccodingUpload();
 
-        method.invoke(processor, reportingFactory, 2, "", new ArrayList<>());
+        method.invoke(processor, reporting, 2, "", new ArrayList<>());
         verify(procuderFactory, times(0))
                 .sendOutput(Mockito.any(ObsQueueMessage.class), Mockito.any());
 
-        method.invoke(processor, reportingFactory, 2, OutputProcessor.NOT_KEY_OBS,
+        method.invoke(processor, reporting, 2, OutputProcessor.NOT_KEY_OBS,
                 outputToPublish);
         verify(procuderFactory, times(3))
                 .sendOutput(Mockito.any(ObsQueueMessage.class), Mockito.any());
@@ -707,7 +707,7 @@ public class OutputProcessorTest {
     private Method getMethodForPublishAccodingUpload()
             throws NoSuchMethodException, SecurityException {
         final Method method = processor.getClass().getDeclaredMethod(
-                "publishAccordingUploadFiles", Reporting.Factory.class, double.class, String.class,
+                "publishAccordingUploadFiles", Reporting.class, double.class, String.class,
                 List.class);
         method.setAccessible(true);
         return method;
@@ -715,7 +715,7 @@ public class OutputProcessorTest {
 
     @Test
     public void testProcessProducts() throws AbstractCodedException {    	
-        processor.processProducts(reportingFactory,uploadBatch, outputToPublish);
+        processor.processProducts(reporting, uploadBatch, outputToPublish);
 
         // check publication
         verify(procuderFactory, times(3))

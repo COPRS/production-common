@@ -18,14 +18,13 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
-import esa.s1pdgs.cpoc.ipf.execution.worker.job.process.TaskCallable;
-import esa.s1pdgs.cpoc.ipf.execution.worker.job.process.TaskResult;
 import esa.s1pdgs.cpoc.ipf.execution.worker.test.SystemUtils;
-import esa.s1pdgs.cpoc.report.LoggerReporting;
 import esa.s1pdgs.cpoc.report.Reporting;
+import esa.s1pdgs.cpoc.report.ReportingUtils;
 
 public class TaskCallableTest {
-	private final Reporting.Factory reportingFactory = new LoggerReporting.Factory("TestProcessing");
+    private final Reporting reporting = ReportingUtils.newReportingBuilderFor("TestProcessing")
+			.newReporting();
 	  
 	private File testDir;
 	private File ipf;
@@ -56,7 +55,7 @@ public class TaskCallableTest {
 	@Test
 	public void testRun_Nominal() throws Exception {		
 		final Future<TaskResult> future = completionService.submit(
-				new TaskCallable(ipf.getPath(), "0", testDir.getPath(), reportingFactory.newReporting(0))
+				new TaskCallable(ipf.getPath(), "0", testDir.getPath(), reporting)
 		);
 		final TaskResult result = future.get();
 		assertEquals(ipf.getPath(), result.getBinary());
@@ -70,7 +69,7 @@ public class TaskCallableTest {
 		final Consumer<String> outputConsumer = m -> builder.append(m).append(';');
 
 		final Future<TaskResult> future = completionService
-				.submit(new TaskCallable(ipf.getPath(), "0", testDir.getPath(), outputConsumer, outputConsumer, reportingFactory.newReporting(0)));
+				.submit(new TaskCallable(ipf.getPath(), "0", testDir.getPath(), outputConsumer, outputConsumer, reporting));
 		final TaskResult result = future.get();
 		assertEquals(ipf.getPath(), result.getBinary());
 		assertEquals(0, result.getExitCode());

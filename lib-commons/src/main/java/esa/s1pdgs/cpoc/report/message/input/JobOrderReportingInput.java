@@ -1,4 +1,4 @@
-package esa.s1pdgs.cpoc.report;
+package esa.s1pdgs.cpoc.report.message.input;
 
 import java.util.Collections;
 import java.util.List;

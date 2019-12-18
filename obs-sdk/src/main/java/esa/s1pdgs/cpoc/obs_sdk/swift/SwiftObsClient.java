@@ -29,15 +29,15 @@ import esa.s1pdgs.cpoc.obs_sdk.ObsServiceException;
 import esa.s1pdgs.cpoc.obs_sdk.ObsUploadObject;
 import esa.s1pdgs.cpoc.obs_sdk.SdkClientException;
 import esa.s1pdgs.cpoc.obs_sdk.ValidArgumentAssertion;
-import esa.s1pdgs.cpoc.report.LoggerReporting;
 import esa.s1pdgs.cpoc.report.Reporting;
 import esa.s1pdgs.cpoc.report.ReportingMessage;
+import esa.s1pdgs.cpoc.report.ReportingUtils;
 
 public class SwiftObsClient extends AbstractObsClient {
 	public static final class Factory implements ObsClient.Factory {
 
 		@Override
-		public final ObsClient newObsClient(ObsConfigurationProperties config) {
+		public final ObsClient newObsClient(final ObsConfigurationProperties config) {
 	    	final AccountConfig accConf = new AccountConfig();
 	    	accConf.setUsername(config.getUserId());
 	        accConf.setPassword(config.getUserSecret());
@@ -84,7 +84,7 @@ public class SwiftObsClient extends AbstractObsClient {
 //	                configuration.getInt(RETRY_POLICY_MAX_RETRIES), true);
 //	        client.setRetryPolicy(retryPolicy);
 			
-			Account account = new AccountFactory(accConf).createAccount();
+			final Account account = new AccountFactory(accConf).createAccount();
 			
 			if (null != account.getPreferredRegion() && !"".equals(account.getPreferredRegion())) {
 				account.getAccess().setPreferredRegion(account.getPreferredRegion());
@@ -107,22 +107,22 @@ public class SwiftObsClient extends AbstractObsClient {
 		this.swiftObsServices = swiftObsServices;
 	}
 
-	public boolean containerExists(ProductFamily family) throws ObsServiceException {
+	public boolean containerExists(final ProductFamily family) throws ObsServiceException {
 		return swiftObsServices.containerExist(getBucketFor(family));
 	}
 	
-	public int numberOfObjects(ProductFamily family, String prefixKey) throws SwiftSdkClientException, ObsServiceException {
+	public int numberOfObjects(final ProductFamily family, final String prefixKey) throws SwiftSdkClientException, ObsServiceException {
 		return swiftObsServices.getNbObjects(getBucketFor(family), prefixKey);
 	}
     
 	@Override
-	public boolean exists(ObsObject object) throws SdkClientException, ObsServiceException {
+	public boolean exists(final ObsObject object) throws SdkClientException, ObsServiceException {
 		ValidArgumentAssertion.assertValidArgument(object);
 		return swiftObsServices.exist(getBucketFor(object.getFamily()), object.getKey());
 	}
 
 	@Override
-	public boolean prefixExists(ObsObject object) throws SdkClientException, ObsServiceException {
+	public boolean prefixExists(final ObsObject object) throws SdkClientException, ObsServiceException {
 		ValidArgumentAssertion.assertValidArgument(object);
 		return swiftObsServices.getNbObjects(
                 getBucketFor(object.getFamily()),
@@ -130,7 +130,7 @@ public class SwiftObsClient extends AbstractObsClient {
 	}
 
 	@Override
-	public List<File> downloadObject(ObsDownloadObject object) throws SdkClientException, ObsServiceException {
+	public List<File> downloadObject(final ObsDownloadObject object) throws SdkClientException, ObsServiceException {
 		return swiftObsServices.downloadObjectsWithPrefix(
                 getBucketFor(object.getFamily()),
                 object.getKey(), object.getTargetDir(),
@@ -138,8 +138,8 @@ public class SwiftObsClient extends AbstractObsClient {
 	}
 
 	@Override
-	public void uploadObject(ObsUploadObject object) throws SdkClientException, ObsServiceException, ObsException {
-		List<String> fileList = new ArrayList<>();
+	public void uploadObject(final ObsUploadObject object) throws SdkClientException, ObsServiceException, ObsException {
+		final List<String> fileList = new ArrayList<>();
         if (object.getFile().isDirectory()) {
         	fileList.addAll(swiftObsServices.uploadDirectory(
                     getBucketFor(object.getFamily()),
@@ -155,30 +155,30 @@ public class SwiftObsClient extends AbstractObsClient {
 		try {
 			file = File.createTempFile(object.getKey(), AbstractObsClient.MD5SUM_SUFFIX);
 			try(PrintWriter writer = new PrintWriter(file)) {
-				for (String fileInfo : fileList) {
+				for (final String fileInfo : fileList) {
 					writer.println(fileInfo);
 				}
 			}
-		} catch (IOException e) {
+		} catch (final IOException e) {
 			throw new SwiftObsServiceException(getBucketFor(object.getFamily()), object.getKey(), "Could not store md5sum temp file", e);
 		}
 		swiftObsServices.uploadFile(getBucketFor(object.getFamily()), object.getKey() + AbstractObsClient.MD5SUM_SUFFIX, file);
 		
 		try {
 			Files.delete(file.toPath());
-		} catch(IOException e) {
+		} catch(final IOException e) {
 			file.deleteOnExit();
 		}
 	}	
 	
 	@Override
-	public void move(ObsObject from, ProductFamily to) throws ObsException, ObsServiceException {
+	public void move(final ObsObject from, final ProductFamily to) throws ObsException, ObsServiceException {
 		ValidArgumentAssertion.assertValidArgument(from);
 		ValidArgumentAssertion.assertValidArgument(to);
 		swiftObsServices.move(from.getKey(), getBucketFor(from.getFamily()), getBucketFor(to));
 	}
 
-	public void createContainer(ProductFamily family) throws SwiftSdkClientException, ObsServiceException {
+	public void createContainer(final ProductFamily family) throws SwiftSdkClientException, ObsServiceException {
 		swiftObsServices.createContainer(getBucketFor(family));
 	}
 	
@@ -187,15 +187,15 @@ public class SwiftObsClient extends AbstractObsClient {
 	}
 
 	@Override
-	public List<ObsObject> getObsObjectsOfFamilyWithinTimeFrame(ProductFamily family, Date timeFrameBegin, Date timeFrameEnd)
+	public List<ObsObject> getObsObjectsOfFamilyWithinTimeFrame(final ProductFamily family, final Date timeFrameBegin, final Date timeFrameEnd)
 			throws SdkClientException, ObsServiceException {
 		ValidArgumentAssertion.assertValidArgument(family);
 		ValidArgumentAssertion.assertValidArgument(timeFrameBegin);
 		ValidArgumentAssertion.assertValidArgument(timeFrameEnd);
 
-		long methodStartTime = System.currentTimeMillis();
-		List<ObsObject> objectsOfTimeFrame = new ArrayList<>();
-		String container = getBucketFor(family);
+		final long methodStartTime = System.currentTimeMillis();
+		final List<ObsObject> objectsOfTimeFrame = new ArrayList<>();
+		final String container = getBucketFor(family);
 		Collection<StoredObject> objListing = swiftObsServices.listObjectsFromContainer(container);
 		boolean possiblyTruncated = false;
 		String marker = "";
@@ -204,11 +204,11 @@ public class SwiftObsClient extends AbstractObsClient {
 				break;
 			}
 			
-			for (StoredObject o : objListing) {
+			for (final StoredObject o : objListing) {
 				marker = o.getName();
-				Date lastModified = o.getLastModifiedAsDate();
+				final Date lastModified = o.getLastModifiedAsDate();
 				if (lastModified.after(timeFrameBegin) && lastModified.before(timeFrameEnd)) {
-					ObsObject obsObj = new ObsObject(family, o.getName());
+					final ObsObject obsObj = new ObsObject(family, o.getName());
 					objectsOfTimeFrame.add(obsObj);
 				}
 			}
@@ -220,7 +220,7 @@ public class SwiftObsClient extends AbstractObsClient {
 
 		} while (possiblyTruncated);
 
-		float methodDuration = (System.currentTimeMillis() - methodStartTime) / 1000f;
+		final float methodDuration = (System.currentTimeMillis() - methodStartTime) / 1000f;
 		LOGGER.debug(String.format("Time for OBS listing objects from bucket %s within time frame: %.2fs", container,
 				methodDuration));
 
@@ -228,7 +228,7 @@ public class SwiftObsClient extends AbstractObsClient {
 	}
 	
 	@Override
-	public Map<String, InputStream> getAllAsInputStream(ProductFamily family, String keyPrefix) throws SdkClientException {
+	public Map<String, InputStream> getAllAsInputStream(final ProductFamily family, final String keyPrefix) throws SdkClientException {
 		ValidArgumentAssertion.assertValidArgument(family);
 		ValidArgumentAssertion.assertValidPrefixArgument(keyPrefix);
 		final String bucket = getBucketFor(family);
@@ -239,7 +239,7 @@ public class SwiftObsClient extends AbstractObsClient {
 	}
 
 	@Override
-	protected Map<String,String> collectMd5Sums(ObsObject object) throws ObsException {
+	protected Map<String,String> collectMd5Sums(final ObsObject object) throws ObsException {
 		try {
 			return swiftObsServices.collectMd5Sums(getBucketFor(object.getFamily()), object.getKey());
 		} catch (SwiftSdkClientException | ObsServiceException e) {
@@ -248,10 +248,10 @@ public class SwiftObsClient extends AbstractObsClient {
 	}
 
 	@Override
-	public long size(ObsObject object) throws ObsException {
+	public long size(final ObsObject object) throws ObsException {
 		ValidArgumentAssertion.assertValidArgument(object);
 		try {
-			String bucketName = getBucketFor(object.getFamily());
+			final String bucketName = getBucketFor(object.getFamily());
 			/*
 			 * This method is supposed to return the size of exactly one object. If more than
 			 * one is returned the object is not unique and very likely not the full name of it or
@@ -265,16 +265,16 @@ public class SwiftObsClient extends AbstractObsClient {
 			
 			// return the size of the object
 			return swiftObsServices.size(bucketName, object.getKey());						
-		} catch (SdkClientException ex) {
+		} catch (final SdkClientException ex) {
 			throw new ObsException(object.getFamily(), object.getKey(), ex);
 		}
 	}
 
 	@Override
-	public String getChecksum(ObsObject object) throws ObsException {
+	public String getChecksum(final ObsObject object) throws ObsException {
 		ValidArgumentAssertion.assertValidArgument(object);
 		try {
-			String bucketName = getBucketFor(object.getFamily());
+			final String bucketName = getBucketFor(object.getFamily());
 			/*
 			 * This method is supposed to return the size of exactly one object. If more than
 			 * one is returned the object is not unique and very likely not the full name of it or
@@ -288,21 +288,23 @@ public class SwiftObsClient extends AbstractObsClient {
 			
 			// return the checksum of the object
 			return swiftObsServices.getChecksum(bucketName, object.getKey());
-		} catch (SdkClientException ex) {
+		} catch (final SdkClientException ex) {
 			throw new ObsException(object.getFamily(), object.getKey(), ex);
 		}
 	}
 
 	@Override
-	public URL createTemporaryDownloadUrl(ObsObject object, long expirationTimeInSeconds) throws ObsException {
+	public URL createTemporaryDownloadUrl(final ObsObject object, final long expirationTimeInSeconds) throws ObsException {
 		ValidArgumentAssertion.assertValidArgument(object);
 		URL url;
 		try {
 			url = swiftObsServices.createTemporaryDownloadUrl(getBucketFor(object.getFamily()), object.getKey(), expirationTimeInSeconds);
-		} catch (SdkClientException ex) {
+		} catch (final SdkClientException ex) {
 			throw new ObsException(object.getFamily(), object.getKey(), ex);
 		}
-		final Reporting reporting = new LoggerReporting.Factory("CreateTemporaryDownloadUrl").newReporting(0);
+		final Reporting reporting = ReportingUtils.newReportingBuilderFor("CreateTemporaryDownloadUrl")
+				.newReporting();
+		
      	reporting.intermediate(new ReportingMessage(size(object), "Created temporary download URL for username '{}' for product '{}'", "anonymous", object.getKey()));
      	return url;
 	}

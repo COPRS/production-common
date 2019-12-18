@@ -11,9 +11,9 @@ import esa.s1pdgs.cpoc.common.utils.LogUtils;
 import esa.s1pdgs.cpoc.ipf.execution.worker.config.ApplicationProperties;
 import esa.s1pdgs.cpoc.mqi.model.queue.LevelJobOutputDto;
 import esa.s1pdgs.cpoc.mqi.model.queue.OQCFlag;
-import esa.s1pdgs.cpoc.report.LoggerReporting;
 import esa.s1pdgs.cpoc.report.Reporting;
 import esa.s1pdgs.cpoc.report.ReportingMessage;
+import esa.s1pdgs.cpoc.report.ReportingUtils;
 
 public class OQCExecutor {
 	/**
@@ -23,29 +23,29 @@ public class OQCExecutor {
 
 	private ApplicationProperties properties;
 
-	private final Reporting.Factory reportingFactory = new LoggerReporting.Factory("Online Quality Check");
-
-	public OQCExecutor(ApplicationProperties properties) {
+	public OQCExecutor(final ApplicationProperties properties) {
 		this.properties = properties;
 	}
 
-	public OQCFlag executeOQC(Path originalProduct, LevelJobOutputDto output, OQCTaskFactory factory) {
+	public OQCFlag executeOQC(final Path originalProduct, final LevelJobOutputDto output, final OQCTaskFactory factory) {
+		final Reporting reporting = ReportingUtils.newReportingBuilderFor("Online Quality Check")
+				.newReporting();
+		
 		// Just check if OQC is enabled after all
 		if (properties.isOqcEnabled() && output.isOqcCheck()) {
 			// This output needs to be quality checked
 			LOGGER.info("Executing OQC check for product {}", originalProduct);
-			Reporting reporting = reportingFactory.newReporting(0);
 			
 			reporting.begin(new ReportingMessage("Start of oqc execution for product {}",
 					originalProduct.getFileName()));
-			ExecutorService executor = Executors.newSingleThreadExecutor();
+			final ExecutorService executor = Executors.newSingleThreadExecutor();
 
 			try {
-				OQCFlag flag = executor.submit(factory.createOQCTask(properties, originalProduct)).get();
+				final OQCFlag flag = executor.submit(factory.createOQCTask(properties, originalProduct)).get();
 				reporting.end(new ReportingMessage("End of oqc execution for product {} ({})",
 						originalProduct.getFileName(), flag));
 				return flag;
-			} catch (Exception e) {
+			} catch (final Exception e) {
 				/*
 				 * Whatever happens, something was not working as expected and it needs to be
 				 * assumed that the OQC check failed.

@@ -1,20 +1,22 @@
-package esa.s1pdgs.cpoc.report;
+package esa.s1pdgs.cpoc.report.message.input;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
-public class ObsReportingOutput implements ReportingOutput {
+import esa.s1pdgs.cpoc.report.ReportingInput;
+
+public class ObsReportingInput implements ReportingInput {
 	@JsonProperty("bucket_string")
 	private String bucketName;
 	
 	@JsonProperty("obs_key_string")
 	private String obsKey;
 		
-	public ObsReportingOutput(String bucketName, String obsKey) {
+	public ObsReportingInput(String bucketName, String obsKey) {
 		this.bucketName = bucketName;
 		this.obsKey = obsKey;
 	}
 	
-	public ObsReportingOutput() {
+	public ObsReportingInput() {
 		this(null, null);
 	}
 

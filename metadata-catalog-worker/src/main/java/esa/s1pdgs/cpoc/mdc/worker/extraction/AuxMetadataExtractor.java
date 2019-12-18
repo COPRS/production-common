@@ -36,21 +36,21 @@ public final class AuxMetadataExtractor extends AbstractMetadataExtractor {
 	}
 
 	@Override
-	public JSONObject extract(final Reporting.Factory reportingFactory, final GenericMessageDto<CatalogJob> message) throws AbstractCodedException {
+	public JSONObject extract(final Reporting reporting, final GenericMessageDto<CatalogJob> message) throws AbstractCodedException {
 		final CatalogJob job = message.getBody();
 		final File metadataFile = downloadMetadataFileToLocalFolder(
-				reportingFactory, 
+				reporting, 
 				ProductFamily.AUXILIARY_FILE, 
 				job.getKeyObjectStorage()
 		);
 		try {			
 			final AuxDescriptor configFileDesc = extractFromFilename(
-					reportingFactory,
+					reporting,
 					() -> fileDescriptorBuilder.buildAuxDescriptor(metadataFile)
 			);
 
 			// Build metadata from file and extracted
-			final JSONObject obj = extractFromFile(reportingFactory,
+			final JSONObject obj = extractFromFile(reporting,
 					() -> mdBuilder.buildConfigFileMetadata(configFileDesc, metadataFile));
 
 			/*

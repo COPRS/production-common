@@ -19,9 +19,9 @@ import esa.s1pdgs.cpoc.mqi.model.queue.CompressionJob;
 import esa.s1pdgs.cpoc.mqi.model.rest.GenericMessageDto;
 import esa.s1pdgs.cpoc.obs_sdk.ObsClient;
 import esa.s1pdgs.cpoc.obs_sdk.ObsUploadObject;
-import esa.s1pdgs.cpoc.report.LoggerReporting;
 import esa.s1pdgs.cpoc.report.Reporting;
 import esa.s1pdgs.cpoc.report.ReportingMessage;
+import esa.s1pdgs.cpoc.report.ReportingUtils;
 
 public class FileUploader {
 	/**
@@ -65,14 +65,14 @@ public class FileUploader {
 	}
 
 	public String processOutput() throws AbstractCodedException {
-		final Reporting.Factory reportingFactory = new LoggerReporting.Factory("FileUploader");
-		final Reporting reporting = reportingFactory.newReporting(0);
+		final Reporting reporting = ReportingUtils.newReportingBuilderFor("FileUploader")
+				.newReporting();
 
-		List<CompressedProductQueueMessage> outputToPublish = new ArrayList<>();
+		final List<CompressedProductQueueMessage> outputToPublish = new ArrayList<>();
 
 		try {
-			String zipFileName = job.getOutputKeyObjectStorage();
-			File productPath = new File(workingDir + "/" + zipFileName);
+			final String zipFileName = job.getOutputKeyObjectStorage();
+			final File productPath = new File(workingDir + "/" + zipFileName);
 			reporting.begin(new ReportingMessage("Start uploading {}", zipFileName));
 			if (!productPath.exists()) {
 				throw new InternalErrorException(
@@ -80,25 +80,25 @@ public class FileUploader {
 			}
 						
 			LOGGER.info("Uploading compressed product {} [{}]",productPath, job.getProductFamily());
-			ProductFamily zipProductFamily = job.getOutputProductFamily();
-			ObsUploadObject uploadObject = new ObsUploadObject(zipProductFamily, zipFileName, productPath);
+			final ProductFamily zipProductFamily = job.getOutputProductFamily();
+			final ObsUploadObject uploadObject = new ObsUploadObject(zipProductFamily, zipFileName, productPath);
 			
-			CompressedProductQueueMessage cpqm = new CompressedProductQueueMessage(zipProductFamily, zipFileName, zipFileName);
+			final CompressedProductQueueMessage cpqm = new CompressedProductQueueMessage(zipProductFamily, zipFileName, zipFileName);
 			outputToPublish.add(cpqm);
 		
 //// 			// Upload per batch the output
-			processProducts(reportingFactory, uploadObject, outputToPublish);
+			processProducts(reporting, uploadObject, outputToPublish);
 			
  	        reporting.end(new ReportingMessage(productPath.length(), "End uploading {}", zipFileName));
  	        
  	        return zipFileName;
-		} catch (AbstractCodedException e) {
+		} catch (final AbstractCodedException e) {
 			reporting.error(new ReportingMessage("[code {}] {}", e.getCode().getCode(), e.getLogMessage()));
 			throw e;
 		}
 	}
 
-	final void processProducts(final Reporting.Factory reportingFactory, final ObsUploadObject uploadFile,
+	final void processProducts(final Reporting reporting, final ObsUploadObject uploadFile,
 			final List<CompressedProductQueueMessage> outputToPublish) throws AbstractCodedException {
 
 		if (Thread.currentThread().isInterrupted()) {
@@ -107,7 +107,7 @@ public class FileUploader {
 		obsClient.upload(Arrays.asList(new ObsUploadObject(uploadFile.getFamily(), uploadFile.getKey(), uploadFile.getFile())));
 
 
-		publishAccordingUploadFiles(reportingFactory, NOT_KEY_OBS, outputToPublish);
+		publishAccordingUploadFiles(reporting, NOT_KEY_OBS, outputToPublish);
 	}
 
 	/**
@@ -118,27 +118,27 @@ public class FileUploader {
 	 * @param outputToPublish
 	 * @throws AbstractCodedException
 	 */
-	private void publishAccordingUploadFiles(final Reporting.Factory reportingFactory, final String nextKeyUpload,
+	private void publishAccordingUploadFiles(final Reporting reporting, final String nextKeyUpload,
 			final List<CompressedProductQueueMessage> outputToPublish) throws AbstractCodedException {
 
         LOGGER.info("{} 3 - Publishing KAFKA messages for batch ");
-		Iterator<CompressedProductQueueMessage> iter = outputToPublish.iterator();
+		final Iterator<CompressedProductQueueMessage> iter = outputToPublish.iterator();
 		boolean stop = false;
 		while (!stop && iter.hasNext()) {
 			if (Thread.currentThread().isInterrupted()) {
 				throw new InternalErrorException("The current thread as been interrupted");
 			}
-			CompressedProductQueueMessage msg = iter.next();
+			final CompressedProductQueueMessage msg = iter.next();
 			if (nextKeyUpload.startsWith(msg.getObjectStorageKey())) {
 				stop = true;
 			} else {
-				final Reporting report = reportingFactory.newReporting(1);
+				final Reporting report = reporting.newChild("FileUploader.Publish");
 
 				report.begin(new ReportingMessage("Start publishing message"));
 				try {
 					producerFactory.sendOutput(msg, inputMessage);
 					report.end(new ReportingMessage("End publishing message"));
-				} catch (MqiPublicationError ace) {
+				} catch (final MqiPublicationError ace) {
 					report.error(new ReportingMessage("[code {}] {}", ace.getCode().getCode(), ace.getLogMessage()));
 				}
 				iter.remove();
