@@ -25,6 +25,7 @@ import esa.s1pdgs.cpoc.common.errors.InternalErrorException;
 import esa.s1pdgs.cpoc.common.errors.UnknownFamilyException;
 import esa.s1pdgs.cpoc.common.errors.mqi.MqiPublicationError;
 import esa.s1pdgs.cpoc.common.errors.obs.ObsException;
+import esa.s1pdgs.cpoc.common.utils.LogUtils;
 import esa.s1pdgs.cpoc.ipf.execution.worker.config.ApplicationProperties;
 import esa.s1pdgs.cpoc.ipf.execution.worker.job.model.mqi.FileQueueMessage;
 import esa.s1pdgs.cpoc.ipf.execution.worker.job.model.mqi.ObsQueueMessage;
@@ -36,6 +37,7 @@ import esa.s1pdgs.cpoc.mqi.model.queue.LevelJobOutputDto;
 import esa.s1pdgs.cpoc.mqi.model.queue.OQCFlag;
 import esa.s1pdgs.cpoc.mqi.model.rest.GenericMessageDto;
 import esa.s1pdgs.cpoc.obs_sdk.ObsClient;
+import esa.s1pdgs.cpoc.obs_sdk.ObsEmptyFileException;
 import esa.s1pdgs.cpoc.obs_sdk.ObsUploadObject;
 import esa.s1pdgs.cpoc.report.FilenameReportingOutput;
 import esa.s1pdgs.cpoc.report.LoggerReporting;
@@ -499,9 +501,10 @@ public class OutputProcessor {
 	 * @param uploadBatch
 	 * @param outputToPublish
 	 * @throws AbstractCodedException
+	 * @throws ObsEmptyFileException 
 	 */
 	final void processProducts(final Reporting.Factory reportingFactory, final List<ObsUploadObject> uploadBatch,
-			final List<ObsQueueMessage> outputToPublish) throws AbstractCodedException {
+			final List<ObsQueueMessage> outputToPublish) throws AbstractCodedException, ObsEmptyFileException {
 
 		double size = Double.valueOf(uploadBatch.size());
 		double nbPool = Math.ceil(size / sizeUploadBatch);
@@ -526,6 +529,9 @@ public class OutputProcessor {
 
 			} catch (AbstractCodedException e) {
 				report.error(new ReportingMessage("[code {}] {}", e.getCode().getCode(), e.getLogMessage()));
+				throw e;
+			} catch (ObsEmptyFileException e) {
+				report.error(new ReportingMessage(LogUtils.toString(e)));
 				throw e;
 			}
 		}
@@ -600,11 +606,12 @@ public class OutputProcessor {
 
 	/**
 	 * Function which process all the output of L0 process
+	 * @throws ObsEmptyFileException 
 	 * 
 	 * @throws ObsException
 	 * @throws IOException
 	 */
-	public ReportingOutput processOutput() throws AbstractCodedException {
+	public ReportingOutput processOutput() throws AbstractCodedException, ObsEmptyFileException {
 		final Reporting.Factory reportingFactory = new LoggerReporting.Factory("OutputHandling");
 
 		List<String> result = new ArrayList<>();
@@ -639,6 +646,9 @@ public class OutputProcessor {
 			reporting.end(new ReportingMessage(size, "End handling of outputs " + result));
 		} catch (AbstractCodedException e) {
 			reporting.error(new ReportingMessage("[code {}] {}", e.getCode().getCode(), e.getLogMessage()));
+			throw e;
+		} catch (ObsEmptyFileException e) {
+			reporting.error(new ReportingMessage(LogUtils.toString(e)));
 			throw e;
 		}
 		

@@ -10,6 +10,7 @@ import esa.s1pdgs.cpoc.common.errors.obs.ObsException;
 import esa.s1pdgs.cpoc.common.utils.LogUtils;
 import esa.s1pdgs.cpoc.ingestion.worker.product.ProductException;
 import esa.s1pdgs.cpoc.obs_sdk.ObsClient;
+import esa.s1pdgs.cpoc.obs_sdk.ObsEmptyFileException;
 import esa.s1pdgs.cpoc.obs_sdk.ObsObject;
 import esa.s1pdgs.cpoc.obs_sdk.ObsUploadObject;
 import esa.s1pdgs.cpoc.obs_sdk.SdkClientException;
@@ -26,7 +27,7 @@ public class ObsAdapter {
 		this.inboxPath 	= inboxPath;
 	}
 	
-	public final void upload(final ProductFamily family, final File file, final String obsKey) {
+	public final void upload(final ProductFamily family, final File file, final String obsKey) throws ObsEmptyFileException {
 		//final String obsKey = toObsKey(file);
 		
 		try {

@@ -78,10 +78,11 @@ public class ObsUploadCallableTest {
      * @throws ObsServiceException
      * @throws SdkClientException
      * @throws AbstractCodedException 
+     * @throws ObsEmptyFileException 
      */
     @Test
     public void testNominalCall()
-            throws ObsServiceException, SdkClientException, AbstractCodedException {
+            throws ObsServiceException, SdkClientException, AbstractCodedException, ObsEmptyFileException {
         callable = new ObsUploadCallable(obsClient, object);
         callable.call();
         verify(obsClient, times(1)).upload(Mockito.eq(Arrays.asList(object)));

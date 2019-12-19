@@ -29,6 +29,7 @@ import esa.s1pdgs.cpoc.ingestion.worker.product.IngestionResult;
 import esa.s1pdgs.cpoc.ingestion.worker.product.Product;
 import esa.s1pdgs.cpoc.ingestion.worker.product.ProductException;
 import esa.s1pdgs.cpoc.ingestion.worker.product.ProductService;
+import esa.s1pdgs.cpoc.ingestion.worker.product.ProductServiceImpl;
 import esa.s1pdgs.cpoc.mqi.client.GenericMqiClient;
 import esa.s1pdgs.cpoc.mqi.client.MqiConsumer;
 import esa.s1pdgs.cpoc.mqi.client.MqiListener;
@@ -37,6 +38,7 @@ import esa.s1pdgs.cpoc.mqi.model.queue.IngestionEvent;
 import esa.s1pdgs.cpoc.mqi.model.queue.IngestionJob;
 import esa.s1pdgs.cpoc.mqi.model.rest.GenericMessageDto;
 import esa.s1pdgs.cpoc.mqi.model.rest.GenericPublicationMessageDto;
+import esa.s1pdgs.cpoc.obs_sdk.ObsEmptyFileException;
 import esa.s1pdgs.cpoc.report.FilenameReportingOutput;
 import esa.s1pdgs.cpoc.report.InboxReportingInput;
 import esa.s1pdgs.cpoc.report.LoggerReporting;
@@ -84,6 +86,11 @@ public class IngestionWorkerService implements MqiListener<IngestionJob> {
 		);
 
 		try {
+			File file = ProductServiceImpl.toFile(ingestion);
+			if(org.apache.commons.io.FileUtils.sizeOf(file) == 0) {
+				throw new Exception("Empty file detected: " + file.getName());
+			}
+			
 			final IngestionResult result = identifyAndUpload(reportingFactory, message, ingestion);
 			publish(result.getIngestedProducts(), message, reportingFactory);
 			delete(ingestion, reportingFactory);
@@ -100,34 +107,43 @@ public class IngestionWorkerService implements MqiListener<IngestionJob> {
 		}
 	}
 
-	final IngestionResult identifyAndUpload(
-			final Reporting.Factory reportingFactory,
-			final GenericMessageDto<IngestionJob> message, 
-			final IngestionJob ingestion
-	) throws InternalErrorException {
+	final IngestionResult identifyAndUpload(final Reporting.Factory reportingFactory,
+			final GenericMessageDto<IngestionJob> message, final IngestionJob ingestion)
+			throws InternalErrorException, ObsEmptyFileException {
 		IngestionResult result = IngestionResult.NULL;
+
+		// TODO: Refactor Exception handling
 		try {
-			final ProductFamily family = getFamilyFor(ingestion);
-
-			final Reporting reportObs = reportingFactory.newReporting(1);
-
-			reportObs.begin(new ReportingMessage("Start uploading {} in OBS", ingestion.getKeyObjectStorage()));
-
 			try {
-				result = productService.ingest(family, ingestion);
+				final ProductFamily family = getFamilyFor(ingestion);
+
+				final Reporting reportObs = reportingFactory.newReporting(1);
+
+				reportObs.begin(new ReportingMessage("Start uploading {} in OBS", ingestion.getKeyObjectStorage()));
+
+				try {
+					result = productService.ingest(family, ingestion);
+				} catch (final ProductException | ObsEmptyFileException e) {
+					reportObs.error(new ReportingMessage("Error uploading {} in OBS: {}",
+							ingestion.getKeyObjectStorage(), e.getMessage()));
+					throw e;
+				}
+				reportObs.end(new ReportingMessage("End uploading {} in OBS", ingestion.getKeyObjectStorage()));
+				// is thrown if product shall be marked as invalid
 			} catch (final ProductException e) {
-				reportObs.error(new ReportingMessage("Error uploading {} in OBS: {}", ingestion.getKeyObjectStorage(), e.getMessage()));
-				throw e;
+				LOG.warn(e.getMessage());
+				productService.markInvalid(ingestion);
+				message.getBody().setProductFamily(ProductFamily.INVALID);
+				final FailedProcessingDto failed = new FailedProcessingDto(properties.getHostname(), new Date(),
+						e.getMessage(), message);
+				errorRepoAppender.send(failed);
 			}
-			reportObs.end(new ReportingMessage("End uploading {} in OBS", ingestion.getKeyObjectStorage()));
-			// is thrown if product shall be marked as invalid
-		} catch (final ProductException e) {
-			LOG.warn(e.getMessage());
-			productService.markInvalid(ingestion);
-			message.getBody().setProductFamily(ProductFamily.INVALID);
+		} catch (ObsEmptyFileException e) {
+
 			final FailedProcessingDto failed = new FailedProcessingDto(properties.getHostname(), new Date(),
 					e.getMessage(), message);
 			errorRepoAppender.send(failed);
+			throw e;
 		}
 		return result;
 	}
@@ -189,5 +205,16 @@ public class IngestionWorkerService implements MqiListener<IngestionJob> {
 		}
 		throw new ProductException(String.format("No matching config found for %s in: %s", dto, properties.getTypes()));
 	}
+	
+//	private void handleProductAsInvalid(IngestionJob ingestion, GenericMessageDto<IngestionJob> ingestMessage,
+//			String errorMessage) {
+//
+//		LOG.warn(errorMessage);
+//		productService.markInvalid(ingestion);
+//		ingestMessage.getBody().setProductFamily(ProductFamily.INVALID);
+//		final FailedProcessingDto failed = new FailedProcessingDto(properties.getHostname(), new Date(), errorMessage,
+//				ingestMessage);
+//		errorRepoAppender.send(failed);
+//	}
 
 }

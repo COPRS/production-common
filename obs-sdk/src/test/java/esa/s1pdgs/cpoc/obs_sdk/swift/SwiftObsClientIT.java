@@ -31,6 +31,7 @@ import esa.s1pdgs.cpoc.common.errors.AbstractCodedException;
 import esa.s1pdgs.cpoc.common.errors.obs.ObsException;
 import esa.s1pdgs.cpoc.obs_sdk.ObsConfigurationProperties;
 import esa.s1pdgs.cpoc.obs_sdk.ObsDownloadObject;
+import esa.s1pdgs.cpoc.obs_sdk.ObsEmptyFileException;
 import esa.s1pdgs.cpoc.obs_sdk.ObsObject;
 import esa.s1pdgs.cpoc.obs_sdk.ObsUploadObject;
 import esa.s1pdgs.cpoc.obs_sdk.ObsValidationException;
@@ -127,7 +128,7 @@ public class SwiftObsClientIT {
 	}
 
 	@Test
-	public void uploadAndValidationOfCompleteDirectoryTest() throws IOException, SdkClientException, AbstractCodedException, ObsValidationException {	
+	public void uploadAndValidationOfCompleteDirectoryTest() throws IOException, SdkClientException, AbstractCodedException, ObsValidationException, ObsEmptyFileException {	
 		// upload directory
 		assertFalse(uut.exists(new ObsObject(auxiliaryFiles, testDirectoryName + "/" + testFileName1)));
 		assertFalse(uut.exists(new ObsObject(auxiliaryFiles, testDirectoryName + "/" + testFileName2)));
@@ -143,7 +144,7 @@ public class SwiftObsClientIT {
 	}
 	
 	@Test
-	public void uploadAndValidationOfDirectoryWithUnexpectedObejectTest() throws IOException, SdkClientException, AbstractCodedException, ObsValidationException {	
+	public void uploadAndValidationOfDirectoryWithUnexpectedObejectTest() throws IOException, SdkClientException, AbstractCodedException, ObsValidationException, ObsEmptyFileException {	
 		// upload directory
 		assertFalse(uut.exists(new ObsObject(auxiliaryFiles, testDirectoryName + "/" + testFileName1)));
 		assertFalse(uut.exists(new ObsObject(auxiliaryFiles, testDirectoryName + "/" + testFileName2)));
@@ -164,7 +165,7 @@ public class SwiftObsClientIT {
 	}
 	
 	@Test
-	public void uploadAndValidationOfIncompleteDirectoryTest() throws IOException, SdkClientException, AbstractCodedException, ObsValidationException {	
+	public void uploadAndValidationOfIncompleteDirectoryTest() throws IOException, SdkClientException, AbstractCodedException, ObsValidationException, ObsEmptyFileException {	
 		// upload
 		assertFalse(uut.exists(new ObsObject(auxiliaryFiles, testDirectoryName + "/" + testFileName1)));
 		assertFalse(uut.exists(new ObsObject(auxiliaryFiles, testDirectoryName + "/" + testFileName2)));
@@ -186,7 +187,7 @@ public class SwiftObsClientIT {
 	}
 	
 	@Test
-	public void uploadAndValidationOfDirectoryWithWrongChecksumTest() throws IOException, SdkClientException, AbstractCodedException, ObsValidationException {	
+	public void uploadAndValidationOfDirectoryWithWrongChecksumTest() throws IOException, SdkClientException, AbstractCodedException, ObsValidationException, ObsEmptyFileException {	
 		// upload
 		assertFalse(uut.exists(new ObsObject(auxiliaryFiles, testDirectoryName + "/" + testFileName1)));
 		assertFalse(uut.exists(new ObsObject(auxiliaryFiles, testDirectoryName + "/" + testFileName2)));
@@ -275,7 +276,7 @@ public class SwiftObsClientIT {
 	}
 
 	@Test
-	public void downloadOfDirectoryTest() throws IOException, SdkClientException, AbstractCodedException {	
+	public void downloadOfDirectoryTest() throws IOException, SdkClientException, AbstractCodedException, ObsEmptyFileException {	
 		// upload
 		assertFalse(uut.exists(new ObsObject(auxiliaryFiles, testDirectoryName + "/" + testFileName1)));
 		assertFalse(uut.exists(new ObsObject(auxiliaryFiles, testDirectoryName + "/" + testFileName2)));

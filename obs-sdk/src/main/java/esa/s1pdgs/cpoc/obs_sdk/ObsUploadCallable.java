@@ -37,9 +37,10 @@ public class ObsUploadCallable implements Callable<Void> {
     /**
      * Call
      * @throws AbstractCodedException 
+     * @throws ObsEmptyFileException 
      */
     @Override
-    public Void call() throws AbstractCodedException {
+    public Void call() throws AbstractCodedException, ObsEmptyFileException {
     	obsClient.upload(Arrays.asList(object));
         return null;
     }

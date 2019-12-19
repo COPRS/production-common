@@ -43,6 +43,7 @@ import esa.s1pdgs.cpoc.mqi.model.queue.IpfExecutionJob;
 import esa.s1pdgs.cpoc.mqi.model.queue.LevelJobOutputDto;
 import esa.s1pdgs.cpoc.mqi.model.rest.GenericMessageDto;
 import esa.s1pdgs.cpoc.obs_sdk.ObsClient;
+import esa.s1pdgs.cpoc.obs_sdk.ObsEmptyFileException;
 import esa.s1pdgs.cpoc.obs_sdk.ObsUploadObject;
 import esa.s1pdgs.cpoc.report.LoggerReporting;
 import esa.s1pdgs.cpoc.report.Reporting;
@@ -714,7 +715,7 @@ public class OutputProcessorTest {
     }
 
     @Test
-    public void testProcessProducts() throws AbstractCodedException {    	
+    public void testProcessProducts() throws AbstractCodedException, ObsEmptyFileException {    	
         processor.processProducts(reportingFactory,uploadBatch, outputToPublish);
 
         // check publication
@@ -730,7 +731,7 @@ public class OutputProcessorTest {
     }
 
     @Test
-    public void testProcessOutputs() throws AbstractCodedException {
+    public void testProcessOutputs() throws AbstractCodedException, ObsEmptyFileException {
         processor.processOutput();
 
         // check publication

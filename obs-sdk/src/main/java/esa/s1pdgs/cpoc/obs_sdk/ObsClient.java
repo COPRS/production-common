@@ -71,7 +71,7 @@ public interface ObsClient {
 	
 	List<File> download(final List<ObsDownloadObject> objects) throws AbstractCodedException;
 	
-	void upload(final List<ObsUploadObject> objects) throws AbstractCodedException;
+	void upload(final List<ObsUploadObject> objects) throws AbstractCodedException, ObsEmptyFileException;
 	
 	void move(final ObsObject from, final ProductFamily to) throws ObsException, ObsServiceException;
 

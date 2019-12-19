@@ -196,20 +196,27 @@ public abstract class AbstractObsClient implements ObsClient {
     }
 
 	/**
-     * Upload files per batch
-     * 
-     * @param objects
-     * @throws AbstractCodedException
-     */
-    public void upload(final List<ObsUploadObject> objects)
-            throws AbstractCodedException {
-    	ValidArgumentAssertion.assertValidArgument(objects);
-        try {
-            uploadObjects(objects, true);
-        } catch (SdkClientException exc) {
-            throw new ObsParallelAccessException(exc);
-        }
-    }
+	 * Upload files per batch
+	 * 
+	 * @param objects
+	 * @throws AbstractCodedException
+	 * @throws ObsEmptyFileException
+	 */
+	public void upload(final List<ObsUploadObject> objects) throws AbstractCodedException, ObsEmptyFileException {
+		ValidArgumentAssertion.assertValidArgument(objects);
+
+		for (ObsUploadObject o : objects) {
+			if (FileUtils.size(o.getFile()) == 0) {
+				throw new ObsEmptyFileException("Empty file detected: " + o.getFile().getName());
+			}
+		}
+
+		try {
+			uploadObjects(objects, true);
+		} catch (SdkClientException exc) {
+			throw new ObsParallelAccessException(exc);
+		}
+	}
 
     public Map<String,ObsObject> listInterval(final ProductFamily family, Date intervalStart, Date intervalEnd) throws SdkClientException {
     	ValidArgumentAssertion.assertValidArgument(family);

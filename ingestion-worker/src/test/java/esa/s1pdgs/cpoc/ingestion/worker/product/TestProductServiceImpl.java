@@ -24,6 +24,7 @@ import esa.s1pdgs.cpoc.ingestion.worker.config.ProcessConfiguration;
 import esa.s1pdgs.cpoc.mqi.model.queue.IngestionEvent;
 import esa.s1pdgs.cpoc.mqi.model.queue.IngestionJob;
 import esa.s1pdgs.cpoc.obs_sdk.ObsClient;
+import esa.s1pdgs.cpoc.obs_sdk.ObsEmptyFileException;
 import esa.s1pdgs.cpoc.obs_sdk.ObsUploadObject;
 
 public class TestProductServiceImpl {
@@ -66,7 +67,7 @@ public class TestProductServiceImpl {
 	}
 	
 	@Test
-	public void testIngest() throws ProductException, InternalErrorException {
+	public void testIngest() throws ProductException, InternalErrorException, ObsEmptyFileException {
 		final ProductFamily family = ProductFamily.AUXILIARY_FILE;
 		final IngestionJob ingestionJob = new IngestionJob("productName");
 		ingestionJob.setPickupPath("/dev");
@@ -91,7 +92,7 @@ public class TestProductServiceImpl {
 	}
 
 	@Test
-	public void testMarkInvalid() throws AbstractCodedException {
+	public void testMarkInvalid() throws AbstractCodedException, ObsEmptyFileException {
 		final IngestionJob ingestionJob = new IngestionJob();
 		ingestionJob.setPickupPath("pickup/path");
 		ingestionJob.setRelativePath("relative/path");

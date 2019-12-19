@@ -51,6 +51,7 @@ import esa.s1pdgs.cpoc.mqi.model.rest.Ack;
 import esa.s1pdgs.cpoc.mqi.model.rest.AckMessageDto;
 import esa.s1pdgs.cpoc.mqi.model.rest.GenericMessageDto;
 import esa.s1pdgs.cpoc.obs_sdk.ObsClient;
+import esa.s1pdgs.cpoc.obs_sdk.ObsEmptyFileException;
 import esa.s1pdgs.cpoc.report.JobOrderReportingInput;
 import esa.s1pdgs.cpoc.report.LoggerReporting;
 import esa.s1pdgs.cpoc.report.Reporting;
@@ -336,7 +337,12 @@ public class JobProcessor implements MqiListener<IpfExecutionJob> {
             report.error(new ReportingMessage("Interrupted job processing"));
             LOGGER.error(LogUtils.toString(e));    
             failedProc = new FailedProcessingDto(properties.getHostname(),new Date(),errorMessage, message);  
-        } finally {
+        } catch (ObsEmptyFileException e) {
+        	 ackOk = false;
+             report.error(new ReportingMessage(LogUtils.toString(e)));            
+             LOGGER.error(LogUtils.toString(e));            
+             failedProc = new FailedProcessingDto(properties.getHostname(),new Date(),errorMessage, message); 
+		} finally {
             cleanJobProcessing(job, poolProcessing, procExecutorSrv);
         }
 

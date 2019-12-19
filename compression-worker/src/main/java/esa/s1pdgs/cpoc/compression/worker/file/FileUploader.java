@@ -13,11 +13,13 @@ import esa.s1pdgs.cpoc.common.ProductFamily;
 import esa.s1pdgs.cpoc.common.errors.AbstractCodedException;
 import esa.s1pdgs.cpoc.common.errors.InternalErrorException;
 import esa.s1pdgs.cpoc.common.errors.mqi.MqiPublicationError;
+import esa.s1pdgs.cpoc.common.utils.LogUtils;
 import esa.s1pdgs.cpoc.compression.worker.model.mqi.CompressedProductQueueMessage;
 import esa.s1pdgs.cpoc.compression.worker.mqi.OutputProducerFactory;
 import esa.s1pdgs.cpoc.mqi.model.queue.CompressionJob;
 import esa.s1pdgs.cpoc.mqi.model.rest.GenericMessageDto;
 import esa.s1pdgs.cpoc.obs_sdk.ObsClient;
+import esa.s1pdgs.cpoc.obs_sdk.ObsEmptyFileException;
 import esa.s1pdgs.cpoc.obs_sdk.ObsUploadObject;
 import esa.s1pdgs.cpoc.report.LoggerReporting;
 import esa.s1pdgs.cpoc.report.Reporting;
@@ -64,7 +66,7 @@ public class FileUploader {
 		this.job = job;
 	}
 
-	public String processOutput() throws AbstractCodedException {
+	public String processOutput() throws AbstractCodedException, ObsEmptyFileException {
 		final Reporting.Factory reportingFactory = new LoggerReporting.Factory("FileUploader");
 		final Reporting reporting = reportingFactory.newReporting(0);
 
@@ -95,11 +97,14 @@ public class FileUploader {
 		} catch (AbstractCodedException e) {
 			reporting.error(new ReportingMessage("[code {}] {}", e.getCode().getCode(), e.getLogMessage()));
 			throw e;
+		} catch (ObsEmptyFileException e) {
+			reporting.error(new ReportingMessage(LogUtils.toString(e)));
+			throw e;
 		}
 	}
 
 	final void processProducts(final Reporting.Factory reportingFactory, final ObsUploadObject uploadFile,
-			final List<CompressedProductQueueMessage> outputToPublish) throws AbstractCodedException {
+			final List<CompressedProductQueueMessage> outputToPublish) throws AbstractCodedException, ObsEmptyFileException {
 
 		if (Thread.currentThread().isInterrupted()) {
 			throw new InternalErrorException("The current thread as been interrupted");

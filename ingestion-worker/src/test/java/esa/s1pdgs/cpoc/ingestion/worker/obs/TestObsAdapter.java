@@ -22,6 +22,7 @@ import esa.s1pdgs.cpoc.common.errors.AbstractCodedException;
 import esa.s1pdgs.cpoc.common.errors.obs.ObsException;
 import esa.s1pdgs.cpoc.ingestion.worker.product.ProductException;
 import esa.s1pdgs.cpoc.obs_sdk.ObsClient;
+import esa.s1pdgs.cpoc.obs_sdk.ObsEmptyFileException;
 import esa.s1pdgs.cpoc.obs_sdk.ObsObject;
 import esa.s1pdgs.cpoc.obs_sdk.ObsUploadObject;
 import esa.s1pdgs.cpoc.obs_sdk.SdkClientException;
@@ -42,7 +43,7 @@ public class TestObsAdapter {
 	}
 	
 	@Test
-	public final void testUpload() throws AbstractCodedException {
+	public final void testUpload() throws AbstractCodedException, ObsEmptyFileException {
 		final ObsAdapter uut = new ObsAdapter(obsClient, Paths.get("/tmp/foo"));
 		uut.upload(ProductFamily.AUXILIARY_FILE, new File("/tmp/foo/bar/baaaaar"), "bar/baaaaar");
 		final List<ObsUploadObject> expectedArg = Arrays.asList(

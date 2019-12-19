@@ -27,6 +27,7 @@ import esa.s1pdgs.cpoc.appstatus.AppStatus;
 import esa.s1pdgs.cpoc.common.ProductCategory;
 import esa.s1pdgs.cpoc.common.errors.AbstractCodedException;
 import esa.s1pdgs.cpoc.common.errors.AbstractCodedException.ErrorCode;
+import esa.s1pdgs.cpoc.common.utils.LogUtils;
 import esa.s1pdgs.cpoc.common.errors.InternalErrorException;
 import esa.s1pdgs.cpoc.compression.worker.config.ApplicationProperties;
 import esa.s1pdgs.cpoc.compression.worker.file.FileDownloader;
@@ -43,6 +44,7 @@ import esa.s1pdgs.cpoc.mqi.model.rest.Ack;
 import esa.s1pdgs.cpoc.mqi.model.rest.AckMessageDto;
 import esa.s1pdgs.cpoc.mqi.model.rest.GenericMessageDto;
 import esa.s1pdgs.cpoc.obs_sdk.ObsClient;
+import esa.s1pdgs.cpoc.obs_sdk.ObsEmptyFileException;
 import esa.s1pdgs.cpoc.report.FilenameReportingInput;
 import esa.s1pdgs.cpoc.report.FilenameReportingOutput;
 import esa.s1pdgs.cpoc.report.LoggerReporting;
@@ -227,6 +229,10 @@ public class CompressProcessor implements MqiListener<CompressionJob> {
 			report.error(new ReportingMessage("Interrupted job processing"));
 			failedProc = new FailedProcessingDto(properties.getHostname(), new Date(), errorMessage, message);
 			cleanCompressionProcessing(job, procExecutorSrv);
+		} catch (ObsEmptyFileException e) {
+			ackOk = false;
+			report.error(new ReportingMessage(LogUtils.toString(e)));
+			failedProc = new FailedProcessingDto(properties.getHostname(), new Date(), errorMessage, message);
 		}
 
 		// Ack and check if application shall stopped

@@ -36,6 +36,7 @@ import esa.s1pdgs.cpoc.mqi.model.queue.IngestionEvent;
 import esa.s1pdgs.cpoc.mqi.model.queue.IngestionJob;
 import esa.s1pdgs.cpoc.mqi.model.rest.GenericMessageDto;
 import esa.s1pdgs.cpoc.mqi.model.rest.GenericPublicationMessageDto;
+import esa.s1pdgs.cpoc.obs_sdk.ObsEmptyFileException;
 import esa.s1pdgs.cpoc.report.LoggerReporting;
 import esa.s1pdgs.cpoc.report.Reporting;
 
@@ -104,7 +105,7 @@ public final class TestIngestionWorkerService {
 	}
 	
 	@Test
-	public final void testIdentifyAndUpload() throws InternalErrorException {
+	public final void testIdentifyAndUpload() throws InternalErrorException, ProductException, ObsEmptyFileException {
 		final IngestionWorkerServiceConfigurationProperties properties = new IngestionWorkerServiceConfigurationProperties();
 		final IngestionTypeConfiguration itc = new IngestionTypeConfiguration();
 		itc.setFamily(ProductFamily.AUXILIARY_FILE.name());
@@ -145,7 +146,7 @@ public final class TestIngestionWorkerService {
 	}
 	
 	@Test
-	public final void testIdentifyAndUploadOnInvalidFamily() throws InternalErrorException {
+	public final void testIdentifyAndUploadOnInvalidFamily() throws InternalErrorException, ObsEmptyFileException {
 		final IngestionWorkerServiceConfigurationProperties properties = new IngestionWorkerServiceConfigurationProperties();
 		final IngestionTypeConfiguration itc = new IngestionTypeConfiguration();
 		itc.setFamily("FOO");

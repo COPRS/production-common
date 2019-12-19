@@ -17,6 +17,7 @@ import esa.s1pdgs.cpoc.ingestion.worker.obs.ObsAdapter;
 import esa.s1pdgs.cpoc.mqi.model.queue.IngestionEvent;
 import esa.s1pdgs.cpoc.mqi.model.queue.IngestionJob;
 import esa.s1pdgs.cpoc.obs_sdk.ObsClient;
+import esa.s1pdgs.cpoc.obs_sdk.ObsEmptyFileException;
 
 @Service
 public class ProductServiceImpl implements ProductService {	
@@ -31,7 +32,7 @@ public class ProductServiceImpl implements ProductService {
 	
 	@Override
 	public IngestionResult ingest(final ProductFamily family, final IngestionJob ingestion) 
-			throws ProductException, InternalErrorException {
+			throws ProductException, InternalErrorException, ObsEmptyFileException {
 		final File file = toFile(ingestion);		
 		assertPermissions(ingestion, file);
 		
@@ -66,7 +67,7 @@ public class ProductServiceImpl implements ProductService {
 	}
 
 	@Override
-	public void markInvalid(final IngestionJob ingestion) {	
+	public void markInvalid(final IngestionJob ingestion) throws ObsEmptyFileException {	
 		final File file = toFile(ingestion);
 		newObsAdapterFor(Paths.get(ingestion.getPickupPath())).upload(ProductFamily.INVALID, file, ingestion.getKeyObjectStorage());		
 	}
@@ -75,7 +76,7 @@ public class ProductServiceImpl implements ProductService {
 		return relPath.toString();
 	}
 	
-	final File toFile(final IngestionJob ingestion) {
+	public static final File toFile(final IngestionJob ingestion) {
 		return Paths.get(ingestion.getPickupPath(), ingestion.getRelativePath()).toFile();
 	}
 	
