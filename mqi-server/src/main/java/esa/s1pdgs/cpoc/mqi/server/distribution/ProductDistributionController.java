@@ -104,7 +104,7 @@ public class ProductDistributionController {
     @RequestMapping(method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_UTF8_VALUE, path = "/{category}/next")
     public GenericMessageDto<? extends AbstractMessage> next(@PathVariable("category") String categoryName) throws ProductDistributionException {
     	final ProductCategory category = ProductCategory.valueOf(categoryName.toUpperCase());    	
-        LOGGER.debug("[MONITOR] [category {}] [api next] Starting", category);
+        LOGGER.trace("[MONITOR] [category {}] [api next] Starting", category);
 
         // We wait to be sure one message is read
         try {
