@@ -33,7 +33,7 @@ public final class CatalogEventAdapter {
 	}
 	
 	public final String datatakeId() {
-		return getStringValue("datatakeId");
+		return getStringValue("dataTakeId");
 	}
 	
 	public final String swathType() {
