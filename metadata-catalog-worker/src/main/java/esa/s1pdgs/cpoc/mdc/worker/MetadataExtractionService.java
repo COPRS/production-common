@@ -115,7 +115,11 @@ public class MetadataExtractionService {
 
             try {
 				if (!esServices.isMetadataExist(metadata)) {
+					LOG.debug("Creating metatadata in ES for product {}", productName);
 				    esServices.createMetadata(metadata);
+				}
+				else{
+					LOG.debug("ES already contains metadata for product {}", productName);
 				}
 				final CatalogEvent event = toCatalogEvent(catJob, metadata);
 		    	final GenericPublicationMessageDto<CatalogEvent> messageDto = new GenericPublicationMessageDto<CatalogEvent>(
