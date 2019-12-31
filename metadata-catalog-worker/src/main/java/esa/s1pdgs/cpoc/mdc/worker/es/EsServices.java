@@ -114,6 +114,9 @@ public class EsServices {
 			final GetRequest getRequest = new GetRequest(productType, indexType, productName);
 
 			final GetResponse response = elasticsearchDAO.get(getRequest);
+			
+			LOGGER.debug("Product {} response from ES {}", productName,response);
+
 			return response.isExists();
 		} catch (final JSONException je) {
 			throw new Exception(je.getMessage());
