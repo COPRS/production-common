@@ -1,6 +1,7 @@
 package esa.s1pdgs.cpoc.mdc.worker.extraction.files;
 
 import java.io.File;
+import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
@@ -152,6 +153,8 @@ public class FileDescriptorBuilder {
 		String relativePath = absolutePath.substring(localDirectory.getAbsolutePath().length() + 1);
 		relativePath = relativePath.replace("\\", "/");
 
+		final String dsiborDsdbName = Paths.get(relativePath).getFileName().toString();
+		
 		// Ignored if directory
 		if (file.isDirectory()) {
 			throw new MetadataIgnoredFileException(file.getName());
@@ -172,7 +175,8 @@ public class FileDescriptorBuilder {
 	        descriptor.setMissionId(metadataFromPath.get("missionId"));
 	        descriptor.setSatelliteId(metadataFromPath.get("satelliteId"));
 	        descriptor.setSessionIdentifier(metadataFromPath.get("sessionId"));
-	    	descriptor.setProductName(descriptor.getSessionIdentifier());       
+	    	//descriptor.setProductName(descriptor.getSessionIdentifier());       
+	        descriptor.setProductName(dsiborDsdbName);
 	        descriptor.setStationCode(metadataFromPath.get("stationCode"));
 	        descriptor.setChannel(Integer.parseInt(metadataFromPath.get("channelId")));
 			
