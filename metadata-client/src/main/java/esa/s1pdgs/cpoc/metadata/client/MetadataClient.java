@@ -284,7 +284,7 @@ public class MetadataClient {
 					LOGGER.debug(commandDescription);
 					final ResponseEntity<T> response = restTemplate.exchange(uri, HttpMethod.GET, null, responseType);
 					handleReturnValueErrors(uri.toString(), response);
-					LOGGER.debug("Rest api metadata call returned results");
+					LOGGER.debug("Rest api metadata call returned result. URI: {}, Response: {},",uri,response.getBody());
 					return response;					
 				}
 		);

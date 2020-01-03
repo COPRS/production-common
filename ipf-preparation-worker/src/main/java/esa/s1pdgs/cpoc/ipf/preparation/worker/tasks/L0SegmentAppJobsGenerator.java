@@ -71,6 +71,7 @@ public class L0SegmentAppJobsGenerator extends AbstractJobsGenerator {
                 final LevelSegmentMetadata metadata = metadataClient
                         .getLevelSegment(dto.getProductFamily(), dto.getKeyObjectStorage());
                 if (metadata == null) {
+                	LOGGER.debug("== preSearch: metadata is null for {}",dto.getKeyObjectStorage());
                     missingMetadata.put(dto.getKeyObjectStorage(), "Missing segment");
                 } else {
                     if (!segmentsGroupByPol
@@ -84,11 +85,13 @@ public class L0SegmentAppJobsGenerator extends AbstractJobsGenerator {
                 }
             }
         } catch (final MetadataQueryException e) {
+        	LOGGER.debug("== preSearch: Exception- Missing segment for lastname{}",lastName);
             missingMetadata.put(lastName, "Missing segment: " + e.getMessage());
         }
 
         // If missing one segment
         if (!missingMetadata.isEmpty()) {
+        	LOGGER.debug("== preSearch: Missing other segment for lastname{}",lastName);
             throw new IpfPrepWorkerInputsMissingException(missingMetadata);
         }
 
@@ -193,6 +196,7 @@ public class L0SegmentAppJobsGenerator extends AbstractJobsGenerator {
             job.getAppDataJob().getProduct().setStartTime(sensingStart);
             job.getAppDataJob().getProduct().setStopTime(sensingStop);
         }
+        LOGGER.debug("== preSearch: performed lastName: {},fullCoverage= {} ",lastName,fullCoverage);
     }
 
     /**

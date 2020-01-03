@@ -361,6 +361,9 @@ public abstract class AbstractJobsGenerator implements Runnable {
             
             // Determine job to process
             if (CollectionUtils.isEmpty(jobs)) {
+            	LOGGER.debug("==  no job found in AppCatalog for taskTableXmlName {}",
+						taskTableXmlName);
+		
                 job = null;
             } else {
                 for (final AppDataJob<CatalogEvent> appDataJob : jobs) {
@@ -429,7 +432,6 @@ public abstract class AbstractJobsGenerator implements Runnable {
                         job.getGeneration().getState());
 
                 reporting.begin(new ReportingMessage("Start job generation"));        
-                LOGGER.debug ("== Trying job generation for job {}", job.toString());
                 
                 // Check primary input
                 if (job.getGeneration().getState() == AppDataJobGenerationState.INITIAL) {
