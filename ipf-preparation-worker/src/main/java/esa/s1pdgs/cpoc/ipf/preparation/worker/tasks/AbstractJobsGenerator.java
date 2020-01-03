@@ -591,6 +591,8 @@ public abstract class AbstractJobsGenerator implements Runnable {
                     job.getAppDataJob().getProduct().getProductName(),
                     taskTables);
         }
+    	LOGGER.debug("== Job order {} updated to state {}",  job.getAppDataJob().getId(), newState);
+        
     }
 
     protected abstract void preSearch(JobGeneration job)
@@ -606,7 +608,7 @@ public abstract class AbstractJobsGenerator implements Runnable {
             if (v != null && v.getResult() == null) {
                 try {
                 	final String productType = v.getQuery().getProductType();
-                	LOGGER.debug("Querying input product of type {}", productType);
+                	LOGGER.debug("Querying input product of type {}, AppJobId {}", productType, job.getAppDataJob().getId());
                 	
                 	// S1PRO-707: only "AUX_ECE" requires to query polarisation
                 	final String polarisation;
@@ -646,14 +648,15 @@ public abstract class AbstractJobsGenerator implements Runnable {
             }
         });
         if (LOGGER.isDebugEnabled()) {
-            LOGGER.debug("Search metadata queries {}",
+            LOGGER.debug("Search metadata queries, AppJobId {}, Query {}",job.getAppDataJob().getId(),
                     job.getMetadataQueries());
         }
 
         // Second, for each task check if input is mandatory and if a file exist
-        LOGGER.info("{} [productName {}] 2b - Try building inputs",
+        LOGGER.info("{} [productName {}] 2b - Try building inputs for appJob {}",
                 this.prefixLogMonitor,
-                job.getAppDataJob().getProduct().getProductName());
+                job.getAppDataJob().getProduct().getProductName(),
+                job.getAppDataJob().getId());
         int counterProc = 0;
         final Map<String, JobOrderInput> referenceInputs = new HashMap<>();
         for (final TaskTablePool pool : this.taskTable.getPools()) {
