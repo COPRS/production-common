@@ -361,7 +361,7 @@ public abstract class AbstractJobsGenerator implements Runnable {
             
             // Determine job to process
             if (CollectionUtils.isEmpty(jobs)) {
-            	LOGGER.debug("==  no job found in AppCatalog for taskTableXmlName {}",
+            	LOGGER.trace("==  no job found in AppCatalog for taskTableXmlName {}",
 						taskTableXmlName);
 		
                 job = null;
