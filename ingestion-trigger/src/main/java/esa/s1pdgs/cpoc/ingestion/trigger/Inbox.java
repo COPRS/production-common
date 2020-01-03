@@ -1,5 +1,7 @@
 package esa.s1pdgs.cpoc.ingestion.trigger;
 
+import java.io.File;
+import java.nio.file.Paths;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
@@ -73,7 +75,14 @@ public final class Inbox {
 					.append(")");
 				// all products not stored in the repo are considered new and shall be added to
 				// the configured queue.
-				newElements.stream().forEach(e -> handleNew(e));
+				for(InboxEntry e: newElements) {
+					final File file = Paths.get(e.getPickupPath(), e.getRelativePath()).toFile();
+					if(org.apache.commons.io.FileUtils.sizeOf(file) == 0) {
+						LOG.warn("Empty file detected, skipping: " + file.getName());
+						continue;
+					}
+					handleNew(e);
+				}
 			}
 			if (logMessage.length() != 0) {
 				LOG.info(logMessage.toString());
