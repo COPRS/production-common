@@ -505,9 +505,7 @@ public class EsServices {
 	public List<SearchMetadata> valIntersect(final String beginDate, final String endDate, final String productType, final String processMode,
 			final String satelliteId) throws Exception {
 
-		LOGGER.debug("Searching products via selection policy 'valIntersect' for {}, startDate {}, endDate {},processMode {}, satelliteId {} ",
-				productType, beginDate, endDate,processMode, satelliteId);
-		
+			
 		final SearchSourceBuilder sourceBuilder = new SearchSourceBuilder();
 		// Generic fields
 		final BoolQueryBuilder queryBuilder = QueryBuilders.boolQuery()
@@ -523,7 +521,7 @@ public class EsServices {
 		searchRequest.source(sourceBuilder);
 		try {
 			final SearchResponse searchResponse = elasticsearchDAO.search(searchRequest);
-			LOGGER.debug("valIntersect: Total Hits Found  {}", searchResponse.getHits());
+			LOGGER.debug("valIntersect: Total Hits Found  {}", searchResponse.getHits().totalHits);
 			if (searchResponse.getHits().totalHits >= 1) {
 				final List<SearchMetadata> r = new ArrayList<>();
 				for (final SearchHit hit : searchResponse.getHits().getHits()) {
