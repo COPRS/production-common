@@ -135,7 +135,7 @@ public abstract class AbstractJobsDispatcher {
         // Dispatch existing job with current task table configuration
         if (processSettings.getMode() != ApplicationMode.TEST) {
             final List<AppDataJob<CatalogEvent>> generatingJobs = appDataService
-                    .findByPodAndState(processSettings.getHostname(), AppDataJobState.GENERATING);
+                    .findByPodAndState(processSettings.getTriggerHostname(), AppDataJobState.GENERATING);
             if (!CollectionUtils.isEmpty(generatingJobs)) {
                 for (final AppDataJob<CatalogEvent> generation : generatingJobs) {
                     // TODO ask if bypass error
