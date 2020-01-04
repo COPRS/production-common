@@ -111,6 +111,7 @@ public class MetadataTriggerService {
 		// relativ path should not be needed here --> only evaluated for EDRS_SESSION
 		job.setProductFamily(event.getProductFamily());
 		job.setKeyObjectStorage(event.getKeyObjectStorage());
+		job.setMode(event.getMode());
 		return job;
 	}
 }
