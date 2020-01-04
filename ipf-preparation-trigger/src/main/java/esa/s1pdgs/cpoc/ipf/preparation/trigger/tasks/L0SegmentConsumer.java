@@ -86,7 +86,9 @@ public final class L0SegmentConsumer extends AbstractGenericConsumer<CatalogEven
                 productDto.setMissionId(eventAdapter.missionId());
                 productDto.setDataTakeId(eventAdapter.datatakeId());
                 productDto.setProductName("l0_segments_for_" + eventAdapter.datatakeId());
-                productDto.setProcessMode(eventAdapter.processMode());
+                //FIXME catalog event shall take processMode into account
+                //productDto.setProcessMode(eventAdapter.processMode());
+                productDto.setProcessMode("FAST24");
                 productDto.setSatelliteId(eventAdapter.satelliteId());
                 jobDto.setProduct(productDto);
 
