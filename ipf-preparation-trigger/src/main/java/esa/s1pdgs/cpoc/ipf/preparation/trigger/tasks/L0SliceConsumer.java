@@ -52,6 +52,7 @@ public final class L0SliceConsumer extends AbstractGenericConsumer<CatalogEvent>
             appDataJob.setState(AppDataJobState.DISPATCHING);
             return appDataService.patchJob(appDataJob.getId(), appDataJob, false, false, false);
         }
+        LOGGER.info("Job for datatake already dispatched, product {}", productName);
         return appDataJob;        
 	}
 
@@ -82,7 +83,8 @@ public final class L0SliceConsumer extends AbstractGenericConsumer<CatalogEvent>
             productDto.setSatelliteId(eventAdapter.satelliteId());
             productDto.setStartTime(eventAdapter.startTime());
             productDto.setStopTime(eventAdapter.stopTime());
-            productDto.setStationCode(eventAdapter.stationCode());   
+            //TODO figure out if is relevant for L1/L2.
+            //productDto.setStationCode(eventAdapter.stationCode());   
            	productDto.setPolarisation(eventAdapter.polarisation()); 
             jobDto.setProduct(productDto);
 
