@@ -15,6 +15,9 @@ import esa.s1pdgs.cpoc.ingestion.trigger.entity.InboxEntry;
 import esa.s1pdgs.cpoc.ingestion.trigger.filter.InboxFilter;
 import esa.s1pdgs.cpoc.ingestion.trigger.kafka.producer.SubmissionClient;
 import esa.s1pdgs.cpoc.mqi.model.queue.IngestionJob;
+import esa.s1pdgs.cpoc.report.LoggerReporting;
+import esa.s1pdgs.cpoc.report.Reporting;
+import esa.s1pdgs.cpoc.report.ReportingMessage;
 
 public final class Inbox {
 	private static final Logger LOG = LoggerFactory.getLogger(Inbox.class);
@@ -78,7 +81,12 @@ public final class Inbox {
 				for(InboxEntry e: newElements) {
 					final File file = Paths.get(e.getPickupPath(), e.getRelativePath()).toFile();
 					if(org.apache.commons.io.FileUtils.sizeOf(file) == 0) {
-						LOG.warn("Empty file detected, skipping: " + file.getName());
+						
+						String errorMessage = "Empty file detected, skipping: " + file.getName(); 
+						final Reporting.Factory reportingFactory = new LoggerReporting.Factory("Inbox");
+				        final Reporting reporting = reportingFactory.newReporting(0);
+				        reporting.error(new ReportingMessage(errorMessage));
+					    
 						continue;
 					}
 					handleNew(e);
