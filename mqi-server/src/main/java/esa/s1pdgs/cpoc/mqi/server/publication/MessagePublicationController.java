@@ -101,6 +101,8 @@ public class MessagePublicationController {
 			final String outputKey) throws MqiCategoryNotAvailable, MqiRouteNotAvailable {		
 		final Routing thisRouting = routing.get(category);
 		
+		LOGGER.debug("getTopic inpputKey={}, outputKey={}, family={}, category={}", inputKey, outputKey, family, category);
+		
 		if (thisRouting == null) {
 			throw new MqiCategoryNotAvailable(category, "publisher");
 		}
