@@ -23,4 +23,4 @@ ADD https://github.com/krallin/tini/releases/download/${TINI_VERSION}/tini /tini
 RUN chmod +x /tini
 ENTRYPOINT ["/tini", "--"]
 
-CMD ["/app/start_l2.sh"]
+CMD ["/app/start_custom.sh"]

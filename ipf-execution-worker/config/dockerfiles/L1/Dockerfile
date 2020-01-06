@@ -2,7 +2,6 @@ ARG BRANCH
 FROM registry.tools.s1pdgs.eu/werum/processing/s1pro-core:${BRANCH} as build
 WORKDIR /app
 
-
 FROM registry.tools.s1pdgs.eu/werum/processing/s1pro-container-l1:${BRANCH}
 ARG VERSION
 ARG COMMIT_ID
@@ -24,4 +23,4 @@ ADD https://github.com/krallin/tini/releases/download/${TINI_VERSION}/tini /tini
 RUN chmod +x /tini
 ENTRYPOINT ["/tini", "--"]
 
-CMD ["/app/start_l1.sh"]
+CMD ["/app/start_custom.sh"]

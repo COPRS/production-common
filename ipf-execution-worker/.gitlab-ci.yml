@@ -15,28 +15,12 @@ ipf-execution-worker-l0-build:
   except:
     - master
 
-ipf-execution-worker-l0-simulator-build:
-  stage: module
-  script:
-    - cd ipf-execution-worker/config/dockerfiles/L0_AIO_Sim/
-    - dockerbuild --cache-from registry.tools.s1pdgs.eu/werum/processing/s1pro-core:final -t "$CI_REGISTRY/$CI_PROJECT_NAMESPACE/$MODULE_IPF_EXECUTION_WORKER-l0-aio-simulator:$CI_COMMIT_REF_SLUG" .
-    - docker push "$CI_REGISTRY/$CI_PROJECT_NAMESPACE/$MODULE_IPF_EXECUTION_WORKER-l0-aio-simulator:$CI_COMMIT_REF_SLUG"
-  except:
-    - master
-    
 ipf-execution-worker-l0-segment-build:
   stage: module
   script:
     - cd ipf-execution-worker/config/dockerfiles/L0_ASP
     - dockerbuild --cache-from registry.tools.s1pdgs.eu/werum/processing/s1pro-core:final -t "$CI_REGISTRY/$CI_PROJECT_NAMESPACE/$MODULE_IPF_EXECUTION_WORKER-l0-asp:$CI_COMMIT_REF_SLUG" .
     - docker push "$CI_REGISTRY/$CI_PROJECT_NAMESPACE/$MODULE_IPF_EXECUTION_WORKER-l0-asp:$CI_COMMIT_REF_SLUG"
-
-ipf-execution-worker-l0-segment-simulator-build:
-  stage: module
-  script:
-    - cd ipf-execution-worker/config/dockerfiles/L0_ASP_Sim
-    - dockerbuild --cache-from registry.tools.s1pdgs.eu/werum/processing/s1pro-core:final -t "$CI_REGISTRY/$CI_PROJECT_NAMESPACE/$MODULE_IPF_EXECUTION_WORKER-l0-asp-simulator:$CI_COMMIT_REF_SLUG" .
-    - docker push "$CI_REGISTRY/$CI_PROJECT_NAMESPACE/$MODULE_IPF_EXECUTION_WORKER-l0-asp-simulator:$CI_COMMIT_REF_SLUG"
 
 ipf-execution-worker-l1-build:
   stage: module
@@ -45,13 +29,6 @@ ipf-execution-worker-l1-build:
     - dockerbuild --cache-from registry.tools.s1pdgs.eu/werum/processing/s1pro-core:final -t "$CI_REGISTRY/$CI_PROJECT_NAMESPACE/$MODULE_IPF_EXECUTION_WORKER-l1:$CI_COMMIT_REF_SLUG" .
     - docker push "$CI_REGISTRY/$CI_PROJECT_NAMESPACE/$MODULE_IPF_EXECUTION_WORKER-l1:$CI_COMMIT_REF_SLUG"
 
-ipf-execution-worker-l1-simulator-build:
-  stage: module
-  script:
-    - cd ipf-execution-worker/config/dockerfiles/L1_Sim
-    - dockerbuild --cache-from registry.tools.s1pdgs.eu/werum/processing/s1pro-core:final -t "$CI_REGISTRY/$CI_PROJECT_NAMESPACE/$MODULE_IPF_EXECUTION_WORKER-l1-simulator:$CI_COMMIT_REF_SLUG" .
-    - docker push "$CI_REGISTRY/$CI_PROJECT_NAMESPACE/$MODULE_IPF_EXECUTION_WORKER-l1-simulator:$CI_COMMIT_REF_SLUG"
-
 ipf-execution-worker-l2-build:
   stage: module
   script:
@@ -59,9 +36,10 @@ ipf-execution-worker-l2-build:
     - dockerbuild --cache-from registry.tools.s1pdgs.eu/werum/processing/s1pro-core:final -t "$CI_REGISTRY/$CI_PROJECT_NAMESPACE/$MODULE_IPF_EXECUTION_WORKER-l2:$CI_COMMIT_REF_SLUG" .
     - docker push "$CI_REGISTRY/$CI_PROJECT_NAMESPACE/$MODULE_IPF_EXECUTION_WORKER-l2:$CI_COMMIT_REF_SLUG"
 
-ipf-execution-worker-l2-simulator-build:
+ipf-execution-worker-simulator-build:
   stage: module
   script:
-    - cd ipf-execution-worker/config/dockerfiles/L2_Sim
-    - dockerbuild --cache-from registry.tools.s1pdgs.eu/werum/processing/s1pro-core:final -t "$CI_REGISTRY/$CI_PROJECT_NAMESPACE/$MODULE_IPF_EXECUTION_WORKER-l2-simulator:$CI_COMMIT_REF_SLUG" .
-    - docker push "$CI_REGISTRY/$CI_PROJECT_NAMESPACE/$MODULE_IPF_EXECUTION_WORKER-l2-simulator:$CI_COMMIT_REF_SLUG"
+    - cd ipf-execution-worker/config/dockerfiles/simulator/
+    - dockerbuild --cache-from registry.tools.s1pdgs.eu/werum/processing/s1pro-core:final -t "$CI_REGISTRY/$CI_PROJECT_NAMESPACE/$MODULE_IPF_EXECUTION_WORKER-simulator:$CI_COMMIT_REF_SLUG" .
+    - docker push "$CI_REGISTRY/$CI_PROJECT_NAMESPACE/$MODULE_IPF_EXECUTION_WORKER-simulator:$CI_COMMIT_REF_SLUG"
+

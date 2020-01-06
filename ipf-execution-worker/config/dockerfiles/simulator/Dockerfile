@@ -15,7 +15,7 @@ RUN echo "${BRANCH_TEXT}" >> VERSION
 RUN echo "${COMMIT_ID}" >> VERSION
 
 COPY --from=build /app/ipf-execution-worker/target/s1pro-core-ipf-execution-worker-*.jar s1pdgs-ipf-execution-worker.jar
-COPY --from=build /app/ipf-execution-worker/config/start/start_l2.sh /app/start_l2.sh
+COPY --from=build /app/ipf-execution-worker/config/start/start.sh /app/start.sh
 RUN chmod +x /app/start_l2.sh
 
 # Add Tini as entry point
@@ -24,4 +24,4 @@ ADD https://github.com/krallin/tini/releases/download/${TINI_VERSION}/tini /tini
 RUN chmod +x /tini
 ENTRYPOINT ["/tini", "--"]
 
-CMD ["/app/start_l2.sh"]
+CMD ["/app/start.sh"]

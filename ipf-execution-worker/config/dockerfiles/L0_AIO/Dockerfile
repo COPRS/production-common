@@ -26,4 +26,4 @@ ENTRYPOINT ["/tini", "--"]
 # Remove ghost removal logic from script
 RUN sed -i s,'eval ${removeCMD}',#REMOVED,g /usr/local/components/AIOP/bin/makeListFile.sh
 
-CMD ["/app/start_l0.sh"]
+CMD ["/app/start.sh"]
