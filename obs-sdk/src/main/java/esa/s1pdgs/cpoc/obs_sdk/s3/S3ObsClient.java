@@ -323,16 +323,16 @@ public class S3ObsClient extends AbstractObsClient {
 	public URL createTemporaryDownloadUrl(final ObsObject object, final long expirationTimeInSeconds) throws ObsException, ObsServiceException {
 		ValidArgumentAssertion.assertValidArgument(object);
 		URL url;		
+		final Reporting reporting = ReportingUtils.newReportingBuilderFor("CreateTemporaryDownloadUrl")
+				.newReporting();
+		reporting.begin(new ReportingMessage(size(object), "Start creating temporary download URL for username '{}' for product '{}'", "anonymous", object.getKey()));
+
 		try {
 			url = s3Services.createTemporaryDownloadUrl(getBucketFor(object.getFamily()), object.getKey(), expirationTimeInSeconds);
 		} catch (final S3SdkClientException ex) {
 			throw new ObsException(object.getFamily(), object.getKey(), ex);			
 		}
-		
-		final Reporting reporting = ReportingUtils.newReportingBuilderFor("CreateTemporaryDownloadUrl")
-				.newReporting();
-		
-     	reporting.intermediate(new ReportingMessage(size(object), "Created temporary download URL for username '{}' for product '{}'", "anonymous", object.getKey()));
+		reporting.end(new ReportingMessage(size(object), "End creating temporary download URL for username '{}' for product '{}'", "anonymous", object.getKey()));				
      	return url;
 	}
 }
