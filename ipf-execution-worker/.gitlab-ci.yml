@@ -40,6 +40,6 @@ ipf-execution-worker-simulator-build:
   stage: module
   script:
     - cd ipf-execution-worker/config/dockerfiles/simulator/
-    - dockerbuild --cache-from registry.tools.s1pdgs.eu/werum/processing/s1pro-core:final -t "$CI_REGISTRY/$CI_PROJECT_NAMESPACE/$MODULE_IPF_EXECUTION_WORKER-simulator:$CI_COMMIT_REF_SLUG" .
-    - docker push "$CI_REGISTRY/$CI_PROJECT_NAMESPACE/$MODULE_IPF_EXECUTION_WORKER-simulator:$CI_COMMIT_REF_SLUG"
+    - dockerbuild --cache-from registry.tools.s1pdgs.eu/werum/processing/s1pro-core:final -t "$CI_REGISTRY/$CI_PROJECT_NAMESPACE/$MODULE_IPF_EXECUTION_WORKER-simulators:$CI_COMMIT_REF_SLUG" .
+    - docker push "$CI_REGISTRY/$CI_PROJECT_NAMESPACE/$MODULE_IPF_EXECUTION_WORKER-simulators:$CI_COMMIT_REF_SLUG"
 
