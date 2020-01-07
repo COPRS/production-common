@@ -158,7 +158,7 @@ public class TestEdrsMetadataExtractor {
         expectedDescriptor.setProductFamily(ProductFamily.EDRS_SESSION);
         
 		final Reporting reporting = ReportingUtils.newReportingBuilderFor("TestMetadataExtraction")
-				.newReporting();
+				.newWorkerComponentReporting();
 		
         final JSONObject expected = extractor.mdBuilder.buildEdrsSessionFileRaw(expectedDescriptor);
         final JSONObject result = extractor.extract(reporting, inputMessage);

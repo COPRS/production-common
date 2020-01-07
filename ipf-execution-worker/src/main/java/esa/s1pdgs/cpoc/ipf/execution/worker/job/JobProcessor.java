@@ -182,7 +182,7 @@ public class JobProcessor implements MqiListener<IpfExecutionJob> {
 		final IpfExecutionJob job = message.getBody();
 		
 		final Reporting reporting = ReportingUtils.newReportingBuilderFor("JobProcessing")
-				.newReporting();
+				.newWorkerComponentReporting();
 
 		/*
 		 * If the working directory provided by the job order is outside the expected

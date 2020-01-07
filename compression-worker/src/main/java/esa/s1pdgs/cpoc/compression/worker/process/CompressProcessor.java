@@ -135,7 +135,7 @@ public class CompressProcessor implements MqiListener<CompressionJob> {
 		// Initialize processing
 		// ------------------------------------------------------
 		final Reporting report = ReportingUtils.newReportingBuilderFor("CompressionProcessing")
-				.newReporting();
+				.newWorkerComponentReporting();
 
 		final String workDir = properties.getWorkingDirectory();
 		report.begin(

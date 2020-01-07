@@ -125,7 +125,7 @@ public class InputDownloader {
         final List<ObsDownloadObject> downloadToBatch = sortInputs();
         
 		final Reporting reporting = ReportingUtils.newReportingBuilderFor("InputDownloader")
-				.newReporting();
+				.newWorkerComponentReporting();
         
         final StringBuilder stringBuilder = new StringBuilder();
         for (final ObsDownloadObject input : downloadToBatch) {

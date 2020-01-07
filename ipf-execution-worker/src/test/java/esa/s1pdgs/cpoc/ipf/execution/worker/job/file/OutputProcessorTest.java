@@ -100,7 +100,7 @@ public class OutputProcessorTest {
     private List<FileQueueMessage> reportToPublish;
 
     private final Reporting reporting = ReportingUtils.newReportingBuilderFor("TestOutputHandling")
-			.newReporting();
+			.newWorkerComponentReporting();
     
     /**
      * Initialization

@@ -109,7 +109,7 @@ public class JobProcessorTest extends MockPropertiesTest {
     public ExpectedException thrown = ExpectedException.none();
     
     private final Reporting reporting = ReportingUtils.newReportingBuilderFor("TestOutputHandling")
-			.newReporting();
+			.newWorkerComponentReporting();
 	
     private final ErrorRepoAppender errorAppender = ErrorRepoAppender.NULL;
 

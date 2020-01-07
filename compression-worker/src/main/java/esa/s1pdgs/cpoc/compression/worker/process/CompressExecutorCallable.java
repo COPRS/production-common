@@ -67,7 +67,7 @@ public class CompressExecutorCallable implements Callable<Void> {
             final String workDirectory) throws InternalErrorException {
 		
 		final Reporting reporting = ReportingUtils.newReportingBuilderFor("Compression")
-				.newReporting();
+				.newWorkerComponentReporting();
 		
 		LOGGER.info("Starting compression task using '{}' with input {} and output {} in {}", binaryPath, inputPath, outputPath, workDirectory);
         reporting.begin(new ReportingMessage("Start Task {}", binaryPath));

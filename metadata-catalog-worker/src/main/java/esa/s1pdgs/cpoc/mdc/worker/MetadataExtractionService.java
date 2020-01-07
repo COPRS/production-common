@@ -94,7 +94,7 @@ public class MetadataExtractionService {
 		final ProductCategory category = ProductCategory.of(family);
 
 		final Reporting reporting = ReportingUtils.newReportingBuilderFor("MetadataExtraction")
-				.newReporting();
+				.newWorkerComponentReporting();
     
 		reporting.begin(new FilenameReportingInput(productName), new ReportingMessage("Starting metadata extraction"));   
 		try {

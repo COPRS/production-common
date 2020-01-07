@@ -324,7 +324,7 @@ public class S3ObsClient extends AbstractObsClient {
 		ValidArgumentAssertion.assertValidArgument(object);
 		URL url;		
 		final Reporting reporting = ReportingUtils.newReportingBuilderFor("CreateTemporaryDownloadUrl")
-				.newReporting();
+				.newWorkerComponentReporting();
 		reporting.begin(new ReportingMessage(size(object), "Start creating temporary download URL for username '{}' for product '{}'", "anonymous", object.getKey()));
 
 		try {

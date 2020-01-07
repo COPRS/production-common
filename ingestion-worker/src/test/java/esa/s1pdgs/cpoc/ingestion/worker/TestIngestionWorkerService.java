@@ -46,7 +46,7 @@ public final class TestIngestionWorkerService {
 	GenericMqiClient mqiClient;
 
 	Reporting reporting = ReportingUtils.newReportingBuilderFor("Test")
-			.newReporting();
+			.newWorkerComponentReporting();
 	
 	@Mock
 	Logger logger;

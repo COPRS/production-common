@@ -612,7 +612,7 @@ public class OutputProcessor {
 	 */
 	public ReportingOutput processOutput() throws AbstractCodedException, ObsEmptyFileException {
 		final Reporting reporting = ReportingUtils.newReportingBuilderFor("OutputHandling")
-				.newReporting();
+				.newWorkerComponentReporting();
 
 		List<String> result = new ArrayList<>();
 		final List<Segment> segments = new ArrayList<>();

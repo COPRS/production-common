@@ -29,7 +29,7 @@ public class OQCExecutor {
 
 	public OQCFlag executeOQC(final Path originalProduct, final LevelJobOutputDto output, final OQCTaskFactory factory) {
 		final Reporting reporting = ReportingUtils.newReportingBuilderFor("Online Quality Check")
-				.newReporting();
+				.newWorkerComponentReporting();
 		
 		// Just check if OQC is enabled after all
 		if (properties.isOqcEnabled() && output.isOqcCheck()) {

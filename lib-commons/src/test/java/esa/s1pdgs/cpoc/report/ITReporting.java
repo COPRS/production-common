@@ -16,7 +16,7 @@ public final class ITReporting {
 	@Test
 	public final void testReportingVsLogging() {
 		Reporting uut = ReportingUtils.newReportingBuilderFor("test")
-				.newReporting();
+				.newWorkerComponentReporting();
 		
 		uut.begin(new ReportingMessage("Foo"));		
 		uut.end(new ReportingMessage(42000L, "baz"));	
@@ -26,7 +26,7 @@ public final class ITReporting {
 		uut.end(new JobOrderReportingOutput(UUID.randomUUID().toString(), Collections.singletonMap("foo_string", "bar")), new ReportingMessage(42000L, "baz"));
 		
 		uut = ReportingUtils.newReportingBuilderFor("test2")
-				.newReporting();
+				.newWorkerComponentReporting();
 		uut.begin(new ReportingMessage("Foo"));
 		uut.end(new FilenameReportingOutput(Collections.singletonList("fooBar.txt")), new ReportingMessage(230000000L,"Foo"));
 		

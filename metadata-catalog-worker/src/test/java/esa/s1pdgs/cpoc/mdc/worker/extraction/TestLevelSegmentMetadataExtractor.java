@@ -87,7 +87,7 @@ public class TestLevelSegmentMetadataExtractor {
 
     
 	final Reporting reporting = ReportingUtils.newReportingBuilderFor("TestMetadataExtraction")
-			.newReporting();
+			.newWorkerComponentReporting();
     
     private static final File inputDir = new File("src/test/resources/workDir/");
     

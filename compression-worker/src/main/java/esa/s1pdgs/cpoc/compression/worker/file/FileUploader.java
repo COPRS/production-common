@@ -68,7 +68,7 @@ public class FileUploader {
 
 	public String processOutput() throws AbstractCodedException, ObsEmptyFileException {
 		final Reporting reporting = ReportingUtils.newReportingBuilderFor("FileUploader")
-				.newReporting();
+				.newWorkerComponentReporting();
 
 		final List<CompressedProductQueueMessage> outputToPublish = new ArrayList<>();
 

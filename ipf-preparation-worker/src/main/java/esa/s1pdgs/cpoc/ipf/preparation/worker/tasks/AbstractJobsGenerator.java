@@ -352,7 +352,7 @@ public abstract class AbstractJobsGenerator implements Runnable {
         JobGeneration job = null;
         // Get a job to generate
         final Reporting reporting = ReportingUtils.newReportingBuilderFor("JobGenerator")
-    			.newReporting();
+    			.newWorkerComponentReporting();
         
         try {        	
             final List<AppDataJob<CatalogEvent>> jobs = appDataService

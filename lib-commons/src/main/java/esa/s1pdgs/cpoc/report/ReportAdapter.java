@@ -57,7 +57,7 @@ public final class ReportAdapter implements Reporting {
 		}
 
 		@Override
-		public Reporting newReporting() {
+		public Reporting newWorkerComponentReporting() {
 			return new ReportAdapter(this);
 		}
 		
@@ -95,7 +95,7 @@ public final class ReportAdapter implements Reporting {
 	public final Reporting newChild(final String childActionName) {
 		return new Builder(appender, childActionName, null, id, UUID.randomUUID())
 				.addTags(tags)
-				.newReporting();
+				.newWorkerComponentReporting();
 	}
 	
 	final String toString(final ReportingMessage mess) {

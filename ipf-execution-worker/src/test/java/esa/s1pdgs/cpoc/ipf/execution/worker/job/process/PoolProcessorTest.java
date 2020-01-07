@@ -17,7 +17,7 @@ import esa.s1pdgs.cpoc.report.ReportingUtils;
 
 public class PoolProcessorTest {
     private final Reporting reporting = ReportingUtils.newReportingBuilderFor("TestProcessing")
-			.newReporting();
+			.newWorkerComponentReporting();
 	  
     private File testDir = new File("./3");
 

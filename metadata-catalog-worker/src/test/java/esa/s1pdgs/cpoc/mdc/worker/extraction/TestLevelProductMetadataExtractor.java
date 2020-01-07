@@ -93,7 +93,7 @@ public class TestLevelProductMetadataExtractor {
     private final File testDir = FileUtils.createTmpDir();
     
 	final Reporting reporting = ReportingUtils.newReportingBuilderFor("TestMetadataExtraction")
-			.newReporting();
+			.newWorkerComponentReporting();
 
 	/**
 	 * Initialization

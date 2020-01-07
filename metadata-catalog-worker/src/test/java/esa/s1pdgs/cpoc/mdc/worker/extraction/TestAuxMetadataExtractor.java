@@ -204,7 +204,7 @@ public class TestAuxMetadataExtractor {
 		final List<File> files = Arrays.asList(new File(testDir,metadataFile));
 		
 		final Reporting reporting = ReportingUtils.newReportingBuilderFor("TestMetadataExtraction")
-				.newReporting();
+				.newWorkerComponentReporting();
 
 		doReturn(files).when(obsClient).download(Mockito.anyList());
 

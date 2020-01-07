@@ -69,7 +69,7 @@ public class FileDownloader {
 		final ObsDownloadObject inputProduct = buildInput();
 
 		final Reporting reporting = ReportingUtils.newReportingBuilderFor("FileDownloader")
-				.newReporting();
+				.newWorkerComponentReporting();
 
 		reporting.begin(new ReportingMessage("Start download of product to compress {}", inputProduct));
 

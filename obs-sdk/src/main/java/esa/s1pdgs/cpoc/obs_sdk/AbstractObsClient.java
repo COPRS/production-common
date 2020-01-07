@@ -81,7 +81,7 @@ public abstract class AbstractObsClient implements ObsClient {
             }
         } else {
     		final Reporting reporting = ReportingUtils.newReportingBuilderFor("Read")
-    				.newReporting();
+    				.newWorkerComponentReporting();
       	
             // Download object in sequential
             for (final ObsDownloadObject object : objects) {            
@@ -123,7 +123,7 @@ public abstract class AbstractObsClient implements ObsClient {
 
         } else {
       		final Reporting reporting = ReportingUtils.newReportingBuilderFor("Write")
-    				.newReporting();
+    				.newWorkerComponentReporting();
         	
             // Upload object in sequential
             for (final ObsUploadObject object : objects) {            	

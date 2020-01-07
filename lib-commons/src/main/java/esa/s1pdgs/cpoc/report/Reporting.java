@@ -14,7 +14,7 @@ public interface Reporting {
 			return addTags(Collections.singleton(tag));
 		}
 		Builder addTags(Collection<String> tags);
-		Reporting newReporting();
+		Reporting newWorkerComponentReporting();
 		void newTriggerComponentReporting(final ReportingMessage reportingMessage);
 	}
 	

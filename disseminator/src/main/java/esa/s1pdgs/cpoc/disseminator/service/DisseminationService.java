@@ -124,7 +124,7 @@ public class DisseminationService implements MqiListener<ProductionEvent> {
 		final ProductionEvent product = message.getBody();
 		
 		final Reporting reporting = ReportingUtils.newReportingBuilderFor("Dissemination")
-				.newReporting();
+				.newWorkerComponentReporting();
 		
 		String targetUrl = "";
 		

@@ -174,7 +174,7 @@ public abstract class AbstractJobsDispatcher {
     	LOGGER.debug ("== dispatch job {}", job.toString());
         final String productName = job.getProduct().getProductName();
         final Reporting reporting = ReportingUtils.newReportingBuilderFor("Dispatch")
-    			.newReporting();
+    			.newWorkerComponentReporting();
 
     	reporting.begin(new ReportingMessage("Start dispatching product"));
     	

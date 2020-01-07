@@ -20,7 +20,7 @@ import esa.s1pdgs.cpoc.report.ReportingUtils;
 
 public class TaskCallableTest {
 	final Reporting report = ReportingUtils.newReportingBuilderFor("TestProcessing")
-			.newReporting();
+			.newWorkerComponentReporting();
 	  
 	private File testDir;
 	private File script;

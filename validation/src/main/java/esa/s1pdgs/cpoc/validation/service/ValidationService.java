@@ -79,7 +79,7 @@ public class ValidationService {
 			}
 		}
 		final Reporting reporting = ReportingUtils.newReportingBuilderFor("ValidationService")
-				.newReporting();
+				.newWorkerComponentReporting();
 		
 		int discrepancies = 0;
 

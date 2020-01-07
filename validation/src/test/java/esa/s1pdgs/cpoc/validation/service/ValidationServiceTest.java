@@ -38,7 +38,7 @@ public class ValidationServiceTest {
 	private ValidationService validationService;
 	
 	final Reporting reporting = ReportingUtils.newReportingBuilderFor("ValidationService")
-			.newReporting();
+			.newWorkerComponentReporting();
 
 	@Mock
 	Reporting report;

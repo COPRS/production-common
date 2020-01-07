@@ -24,7 +24,7 @@ import esa.s1pdgs.cpoc.report.ReportingUtils;
 
 public class TaskCallableTest {
     private final Reporting reporting = ReportingUtils.newReportingBuilderFor("TestProcessing")
-			.newReporting();
+			.newWorkerComponentReporting();
 	  
 	private File testDir;
 	private File ipf;

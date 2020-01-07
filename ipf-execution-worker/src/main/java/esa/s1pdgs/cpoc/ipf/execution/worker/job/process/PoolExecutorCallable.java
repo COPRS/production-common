@@ -117,7 +117,7 @@ public class PoolExecutorCallable implements Callable<Void> {
                                 + " seconds");
             }            
     		final Reporting reporting = ReportingUtils.newReportingBuilderFor("Processing")
-    				.newReporting();
+    				.newWorkerComponentReporting();
     		
             reporting.begin(new ReportingMessage("Start " + appLevel + " processing"));
                        
