@@ -19,7 +19,6 @@ public interface Reporting {
 	
 	enum Event {
 		begin,
-		intermediate,
 		end
 	}
 	
@@ -49,7 +48,6 @@ public interface Reporting {
 	}	
 	
 	void begin(ReportingInput input, ReportingMessage reportingMessage);
-	void intermediate(ReportingMessage reportingMessage);
 	void end(ReportingOutput output, ReportingMessage reportingMessage);
 	void error(ReportingMessage reportingMessage);	
 	Reporting newChild(String childActionName);

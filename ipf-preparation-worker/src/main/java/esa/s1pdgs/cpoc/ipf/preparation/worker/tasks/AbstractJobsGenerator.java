@@ -554,12 +554,12 @@ public abstract class AbstractJobsGenerator implements Runnable {
     )
         throws AbstractCodedException {
     	
-    	report.intermediate(new ReportingMessage("Job generation before update: {} - {} - {} - {}", 
+    	LOGGER.info("Job generation before update: {} - {} - {} - {}", 
     			job.getAppDataJob().getId(),
                 job.getGeneration().getTaskTable(), 
                 newState,
                 job.getGeneration()
-        ));
+        );
         final AppDataJob<CatalogEvent> modifiedJob = appDataService.patchTaskTableOfJob(
                 job.getAppDataJob().getId(),
                 job.getGeneration().getTaskTable(), newState);
@@ -569,9 +569,9 @@ public abstract class AbstractJobsGenerator implements Runnable {
         	throw new InternalErrorException("Catalog query returned null");
         }       
         
-    	report.intermediate(new ReportingMessage("Modified job generations: {}",  modifiedJob.getGenerations()));
+        LOGGER.info("Modified job generations: {}",  modifiedJob.getGenerations());
         job.updateAppDataJob(modifiedJob, taskTableXmlName);        
-    	report.intermediate(new ReportingMessage("Job generation after update: {}", job.getGeneration()));
+        LOGGER.info("Job generation after update: {}", job.getGeneration());
     	
         // Log functional logs, not clear when this is called
         if (job.getAppDataJob().getState() == AppDataJobState.TERMINATED) {

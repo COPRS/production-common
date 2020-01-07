@@ -113,16 +113,6 @@ public final class ReportAdapter implements Reporting {
 	}
 	
 	@Override
-	public final void intermediate(final ReportingMessage reportingMessage) {
-		appender.report(new JacksonReportEntry(
-				new Header(actionName, Level.DEBUG), 
-				new Task(id.toString(), actionName, Event.intermediate), 
-				new Message(toString(reportingMessage))
-		));	
-	}
-
-	
-	@Override
 	public final void end(final ReportingOutput out, final ReportingMessage reportingMessage) {
 		final long deltaTMillis = getDeltaMillis();
 		final long transferAmount = reportingMessage.getTransferAmount();

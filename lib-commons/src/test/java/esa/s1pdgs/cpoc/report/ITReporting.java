@@ -19,13 +19,10 @@ public final class ITReporting {
 				.newReporting();
 		
 		uut.begin(new ReportingMessage("Foo"));		
-		uut.intermediate(new ReportingMessage("bar"));
 		uut.end(new ReportingMessage(42000L, "baz"));	
 		
 		uut = uut.newChild("test.child");
 		uut.begin(new ReportingMessage("Foo"));		
-		uut.intermediate(new ReportingMessage("bar"));
-		uut.intermediate(new ReportingMessage("baaz"));
 		uut.end(new JobOrderReportingOutput(UUID.randomUUID().toString(), Collections.singletonMap("foo_string", "bar")), new ReportingMessage(42000L, "baz"));
 		
 		uut = ReportingUtils.newReportingBuilderFor("test2")
