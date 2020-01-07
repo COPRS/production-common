@@ -60,6 +60,17 @@ public final class ReportAdapter implements Reporting {
 		public Reporting newReporting() {
 			return new ReportAdapter(this);
 		}
+		
+		@Override
+		public void newTriggerComponentReporting(final ReportingMessage reportingMessage) {
+			ReportAdapter reportAdapter = new ReportAdapter(this);
+			reportAdapter.appender.report(new JacksonReportEntry(
+					new Header(reportAdapter.actionName, Level.INFO), 
+					null,
+					new Message(reportAdapter.toString(reportingMessage))
+			));
+			
+		}
 	}	
 	private final List<String> tags;	
 	private final ReportAppender appender;
@@ -87,7 +98,7 @@ public final class ReportAdapter implements Reporting {
 				.newReporting();
 	}
 	
-	private final String toString(final ReportingMessage mess) {
+	final String toString(final ReportingMessage mess) {
 		// poor man solution to allow logback based string substitution
 		return String.format(
 				mess.getMessage().replaceAll(Pattern.quote("{}"), "%s"), 

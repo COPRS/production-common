@@ -13,8 +13,9 @@ public interface Reporting {
 		default Builder addTag(final String tag) {
 			return addTags(Collections.singleton(tag));
 		}
-		Builder addTags(Collection<String> tags);	
+		Builder addTags(Collection<String> tags);
 		Reporting newReporting();
+		void newTriggerComponentReporting(final ReportingMessage reportingMessage);
 	}
 	
 	enum Event {
