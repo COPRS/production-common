@@ -17,7 +17,7 @@ import esa.s1pdgs.cpoc.mdc.worker.extraction.path.PathMetadataExtractor;
 import esa.s1pdgs.cpoc.mqi.model.queue.CatalogJob;
 import esa.s1pdgs.cpoc.mqi.model.rest.GenericMessageDto;
 import esa.s1pdgs.cpoc.obs_sdk.ObsClient;
-import esa.s1pdgs.cpoc.report.Reporting.Factory;
+import esa.s1pdgs.cpoc.report.Reporting;
 
 public class EdrsMetadataExtractor extends AbstractMetadataExtractor {	
 	private final PathMetadataExtractor pathExtractor;
@@ -36,14 +36,14 @@ public class EdrsMetadataExtractor extends AbstractMetadataExtractor {
 	}
 	
 	@Override
-	public JSONObject extract(final Factory reportingFactory, final GenericMessageDto<CatalogJob> message)
+	public JSONObject extract(final Reporting reporting, final GenericMessageDto<CatalogJob> message)
 			throws AbstractCodedException {
 		final CatalogJob catJob = message.getBody();
         final ProductFamily family = ProductFamily.EDRS_SESSION;        
         final File product = new File(this.localDirectory, catJob.getKeyObjectStorage());
 
         final EdrsSessionFileDescriptor edrsFileDescriptor = extractFromFilename(
-        		reportingFactory, 
+        		reporting, 
         		() -> fileDescriptorBuilder.buildEdrsSessionFileDescriptor(
         				product, 
         				pathExtractor.metadataFrom(catJob),
@@ -53,13 +53,13 @@ public class EdrsMetadataExtractor extends AbstractMetadataExtractor {
         // Only when it is a DSIB
         if (edrsFileDescriptor.getEdrsSessionFileType() == EdrsSessionFileType.SESSION)
         {
-        	downloadMetadataFileToLocalFolder(reportingFactory, family, catJob.getKeyObjectStorage());
+        	downloadMetadataFileToLocalFolder(reporting, family, catJob.getKeyObjectStorage());
 
 			final String dsibName = new File(edrsFileDescriptor.getRelativePath()).getName();			
 			final File dsib = new File(localDirectory, dsibName);
         	try {
     			return extractFromFile(
-    	        		reportingFactory,
+    					reporting,
     	        		() -> mdBuilder.buildEdrsSessionFileMetadata(edrsFileDescriptor, dsib)
     	        );
         	}
@@ -69,7 +69,7 @@ public class EdrsMetadataExtractor extends AbstractMetadataExtractor {
         } 
         // RAW files        
         return extractFromFile(
-        		reportingFactory,
+        		reporting,
         		() -> mdBuilder.buildEdrsSessionFileRaw(edrsFileDescriptor)
         );
 	}

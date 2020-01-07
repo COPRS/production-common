@@ -15,9 +15,9 @@ import esa.s1pdgs.cpoc.common.errors.AbstractCodedException;
 import esa.s1pdgs.cpoc.common.errors.InternalErrorException;
 import esa.s1pdgs.cpoc.compression.worker.config.ApplicationProperties;
 import esa.s1pdgs.cpoc.mqi.model.queue.CompressionJob;
-import esa.s1pdgs.cpoc.report.LoggerReporting;
 import esa.s1pdgs.cpoc.report.Reporting;
 import esa.s1pdgs.cpoc.report.ReportingMessage;
+import esa.s1pdgs.cpoc.report.ReportingUtils;
 
 public class CompressExecutorCallable implements Callable<Void> {
 
@@ -42,7 +42,7 @@ public class CompressExecutorCallable implements Callable<Void> {
 	 * @param job
 	 * @param prefixMonitorLogs
 	 */
-	public CompressExecutorCallable(final CompressionJob job, final String prefixLogs, ApplicationProperties properties) {
+	public CompressExecutorCallable(final CompressionJob job, final String prefixLogs, final ApplicationProperties properties) {
 		this.job = job;
 		this.properties = properties;
 	}
@@ -52,6 +52,7 @@ public class CompressExecutorCallable implements Callable<Void> {
 	 * - Wait for being active (see {@link ApplicationProperties} wap fields) <br/>
 	 * - For each pool, launch in parallel the tasks executions
 	 */
+	@Override
 	public Void call() throws AbstractCodedException {
 		
 		LOGGER.debug("command={}, productName={}, workingDirectory={}",properties.getCommand(), job.getKeyObjectStorage(), properties.getWorkingDirectory());
@@ -65,21 +66,20 @@ public class CompressExecutorCallable implements Callable<Void> {
 	public TaskResult execute(final String binaryPath, final String inputPath, final String outputPath,
             final String workDirectory) throws InternalErrorException {
 		
-		final Reporting.Factory reportingFactory = new LoggerReporting.Factory("Compression");
-		final Reporting reporting = reportingFactory.newReporting(0);
+		final Reporting reporting = ReportingUtils.newReportingBuilderFor("Compression")
+				.newReporting();
 		
 		LOGGER.info("Starting compression task using '{}' with input {} and output {} in {}", binaryPath, inputPath, outputPath, workDirectory);
         reporting.begin(new ReportingMessage("Start Task {}", binaryPath));
         
-        Consumer<String> stdOutConsumer = DEFAULT_OUTPUT_CONSUMER;
-        Consumer<String> stdErrConsumer = DEFAULT_OUTPUT_CONSUMER;
+        final Consumer<String> stdOutConsumer = DEFAULT_OUTPUT_CONSUMER;
+        final Consumer<String> stdErrConsumer = DEFAULT_OUTPUT_CONSUMER;
         
-
         int r = -1;
 
         Process process = null;
         try {
-            ProcessBuilder builder = new ProcessBuilder();
+            final ProcessBuilder builder = new ProcessBuilder();
             builder.command(binaryPath, inputPath, outputPath);
             builder.directory(new File(workDirectory));
             process = builder.start();
@@ -96,15 +96,15 @@ public class CompressExecutorCallable implements Callable<Void> {
             out.get();
 			err.get();
 
-		} catch (InterruptedException ie) {
+		} catch (final InterruptedException ie) {
 			reporting.error(new ReportingMessage("Interrupted Task {}", binaryPath));
 			LOGGER.warn("[task {}] [workDirectory {}]  InterruptedException", binaryPath, workDirectory);
 			Thread.currentThread().interrupt();
-		} catch (IOException ioe) {
+		} catch (final IOException ioe) {
 			final InternalErrorException ex = new InternalErrorException("Cannot build the command for the task " + binaryPath, ioe);
 			reporting.error(new ReportingMessage("[code {}] {}", ex.getCode().getCode(), ex.getLogMessage()));
 			throw ex;
-		} catch (ExecutionException e) {
+		} catch (final ExecutionException e) {
 			final InternalErrorException ex =  new InternalErrorException("Error on consuming stdout/stderr of task " + binaryPath, e);
 			reporting.error(new ReportingMessage("[code {}] {}", ex.getCode().getCode(), ex.getLogMessage()));
 			throw ex;

@@ -97,15 +97,15 @@ public class PoolProcessor {
      * 
      * @throws AbstractCodedException
      */
-    public void process(final Reporting.Factory reportingFactory) throws AbstractCodedException {
+    public void process(final Reporting reportingParent) throws AbstractCodedException {
         boolean stopAllProcessCall = false;     
         int j=0;
         try {
             try {
                 LOGGER.info("{} 1 - Submitting tasks {}", prefixLogs,
                         pool.getTasks());
-                for (LevelJobTaskDto task : pool.getTasks()) {
-                	final Reporting reporting = reportingFactory.newReporting(j+1);
+                for (final LevelJobTaskDto task : pool.getTasks()) {
+                	final Reporting reporting = reportingParent.newChild("Processing.Task");
                 	
                     completionSrv.submit(new TaskCallable(task.getBinaryPath(),
                             jobOrderPath, workDirectory, reporting));
@@ -125,7 +125,7 @@ public class PoolProcessor {
             } catch (InterruptedException | TimeoutException e) {
                 stopAllProcessCall = true;
                 throw new InternalErrorException(e.getMessage(), e);
-            } catch (ExecutionException e) {
+            } catch (final ExecutionException e) {
                 stopAllProcessCall = true;
                 if (e.getCause() instanceof AbstractCodedException) {
                     throw (AbstractCodedException) e.getCause();
@@ -139,7 +139,7 @@ public class PoolProcessor {
 
                 }
             }
-        } catch (InterruptedException ie) {
+        } catch (final InterruptedException ie) {
             throw new InternalErrorException(ie.getMessage(), ie);
         }
     }
@@ -166,10 +166,10 @@ public class PoolProcessor {
      */
     private void waitNextTaskResult() throws InterruptedException,
             ExecutionException, TimeoutException, IpfExecutionWorkerProcessExecutionException {
-        TaskResult r = completionSrv.take().get(this.tmProcessOneTaskS,
+        final TaskResult r = completionSrv.take().get(this.tmProcessOneTaskS,
                 TimeUnit.SECONDS);
-        int exitCode = r.getExitCode();
-        String task = r.getBinary();
+        final int exitCode = r.getExitCode();
+        final String task = r.getBinary();
         if (exitCode == 0) {
             LOGGER.info("{} 2 - Task {} successfully executed", this.prefixLogs,
                     task);

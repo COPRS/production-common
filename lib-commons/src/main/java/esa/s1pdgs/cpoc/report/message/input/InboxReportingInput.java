@@ -1,6 +1,8 @@
-package esa.s1pdgs.cpoc.report;
+package esa.s1pdgs.cpoc.report.message.input;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+
+import esa.s1pdgs.cpoc.report.ReportingInput;
 
 public class InboxReportingInput implements ReportingInput {	
 	

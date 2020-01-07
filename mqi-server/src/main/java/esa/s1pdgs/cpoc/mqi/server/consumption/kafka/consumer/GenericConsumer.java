@@ -7,6 +7,8 @@ import java.util.Map;
 import org.apache.kafka.clients.consumer.ConsumerConfig;
 import org.apache.kafka.clients.consumer.RoundRobinAssignor;
 import org.apache.kafka.common.serialization.StringDeserializer;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.springframework.kafka.core.ConsumerFactory;
 import org.springframework.kafka.core.DefaultKafkaConsumerFactory;
 import org.springframework.kafka.listener.ConcurrentMessageListenerContainer;
@@ -23,9 +25,8 @@ import esa.s1pdgs.cpoc.mqi.server.KafkaProperties;
 import esa.s1pdgs.cpoc.mqi.server.consumption.kafka.listener.GenericMessageListener;
 import esa.s1pdgs.cpoc.mqi.server.consumption.kafka.listener.MemoryConsumerAwareRebalanceListener;
 import esa.s1pdgs.cpoc.mqi.server.persistence.OtherApplicationService;
-import esa.s1pdgs.cpoc.report.LoggerReporting;
 import esa.s1pdgs.cpoc.report.Reporting;
-import esa.s1pdgs.cpoc.report.ReportingMessage;
+import esa.s1pdgs.cpoc.report.ReportingUtils;
 
 /**
  * Generic consumer
@@ -35,6 +36,8 @@ import esa.s1pdgs.cpoc.report.ReportingMessage;
  */
 public class GenericConsumer<T> {
 	public static final class Factory {
+		protected static final Logger LOGGER = LogManager.getLogger(Factory.class);
+		
 	    private final KafkaProperties kafkaProperties;
 	    private final AppCatalogMqiService service;
 	    private final OtherApplicationService otherAppService;
@@ -93,16 +96,15 @@ public class GenericConsumer<T> {
 	    	deser.addTrustedPackages("*");	    	
 	    	final ErrorHandlingDeserializer2<T> deserializer = new ErrorHandlingDeserializer2<>(deser);
 
-	    	deserializer.setFailedDeserializationFunction( (b,h) -> {
-	    		final Reporting report = new LoggerReporting.Factory("MQI_Kafka_Deserialization")
-	    				.newReporting(0);
-	    		
-	    		report.error(new ReportingMessage(
+	    	deserializer.setFailedDeserializationFunction( (b,h) -> {	    	
+	    		final Reporting reporting = ReportingUtils.newReportingBuilderFor("MQI_Kafka_Deserialization")
+	    				.newReporting();
+	    		LOGGER.error(
 	    				"Error on deserializing element from queue '{}'. Expected json of class {} but was: {}", 
 	    				topic,
 	    				dtoClass.getName(),
 	    				new String(b)
-	    		));	    		
+	    		);	    		
 	    		return null;
 	    	});	    		    	
 	        return new DefaultKafkaConsumerFactory<>(

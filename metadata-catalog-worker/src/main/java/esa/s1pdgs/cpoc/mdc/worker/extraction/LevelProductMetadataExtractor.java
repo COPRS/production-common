@@ -15,7 +15,7 @@ import esa.s1pdgs.cpoc.mdc.worker.extraction.model.OutputFileDescriptor;
 import esa.s1pdgs.cpoc.mqi.model.queue.CatalogJob;
 import esa.s1pdgs.cpoc.mqi.model.rest.GenericMessageDto;
 import esa.s1pdgs.cpoc.obs_sdk.ObsClient;
-import esa.s1pdgs.cpoc.report.Reporting.Factory;
+import esa.s1pdgs.cpoc.report.Reporting;
 
 public final class LevelProductMetadataExtractor extends AbstractMetadataExtractor {
 
@@ -30,19 +30,19 @@ public final class LevelProductMetadataExtractor extends AbstractMetadataExtract
 	}
 
 	@Override
-	public final JSONObject extract(final Factory reportingFactory, final GenericMessageDto<CatalogJob> message)
+	public final JSONObject extract(final Reporting reporting, final GenericMessageDto<CatalogJob> message)
 			throws AbstractCodedException {
         final CatalogJob job = message.getBody();        
         final ProductFamily family = message.getBody().getProductFamily();
         
-        final File metadataFile = downloadMetadataFileToLocalFolder(reportingFactory, family, job.getKeyObjectStorage());
+        final File metadataFile = downloadMetadataFileToLocalFolder(reporting, family, job.getKeyObjectStorage());
         try {
         	final OutputFileDescriptor descriptor = extractFromFilename(
-        			reportingFactory, 
+        			reporting, 
         			() -> fileDescriptorBuilder.buildOutputFileDescriptor(metadataFile, job, job.getProductFamily())
         	);
         	return extractFromFile(
-        			reportingFactory, 
+        			reporting, 
         			() -> mdBuilder.buildOutputFileMetadata(descriptor, metadataFile, job)); 
         }
         finally {

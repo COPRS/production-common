@@ -39,7 +39,8 @@ import esa.s1pdgs.cpoc.mqi.client.GenericMqiClient;
 import esa.s1pdgs.cpoc.mqi.model.queue.CatalogJob;
 import esa.s1pdgs.cpoc.mqi.model.rest.GenericMessageDto;
 import esa.s1pdgs.cpoc.obs_sdk.ObsClient;
-import esa.s1pdgs.cpoc.report.LoggerReporting;
+import esa.s1pdgs.cpoc.report.Reporting;
+import esa.s1pdgs.cpoc.report.ReportingUtils;
 
 public class TestLevelSegmentMetadataExtractor {
 	private static final String PATTERN = "^(S1|AS)(A|B)_(S[1-6]|RF|GP|HK|IW|EW|WV|N[1-6]|EN|IM)_(SLC|GRD|OCN|RAW)(F|H|M|_)_(0)(A|C|N|S|_)(SH|__|SV|HH|HV|VV|VH|DH|DV)_([0-9a-z]{15})_([0-9a-z]{15})_([0-9]{6})_([0-9a-z_]{6})\\w{1,}\\.(SAFE)(/.*)?$";
@@ -84,6 +85,9 @@ public class TestLevelSegmentMetadataExtractor {
      */
     private GenericMessageDto<CatalogJob> inputMessageSafe;
 
+    
+	final Reporting reporting = ReportingUtils.newReportingBuilderFor("TestMetadataExtraction")
+			.newReporting();
     
     private static final File inputDir = new File("src/test/resources/workDir/");
     
@@ -187,9 +191,8 @@ public class TestLevelSegmentMetadataExtractor {
 
         final JSONObject expected = extractor.mdBuilder
                 .buildL0SegmentOutputFileMetadata(descriptor, files.get(0));
-		final LoggerReporting.Factory reportingFactory = new LoggerReporting.Factory("TestMetadataExtraction");
-        
-        final JSONObject result = extractor.extract(reportingFactory, inputMessageSafe);
+
+        final JSONObject result = extractor.extract(reporting, inputMessageSafe);
         for (final String key : expected.keySet()) {
             if (!("insertionTime".equals(key) || "segmentCoordinates".equals(key) || "creationTime".equals(key))) {
                 assertEquals(expected.get(key), result.get(key));

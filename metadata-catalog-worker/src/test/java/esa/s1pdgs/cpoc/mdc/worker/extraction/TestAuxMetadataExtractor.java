@@ -37,7 +37,8 @@ import esa.s1pdgs.cpoc.mqi.client.GenericMqiClient;
 import esa.s1pdgs.cpoc.mqi.model.queue.CatalogJob;
 import esa.s1pdgs.cpoc.mqi.model.rest.GenericMessageDto;
 import esa.s1pdgs.cpoc.obs_sdk.ObsClient;
-import esa.s1pdgs.cpoc.report.LoggerReporting;
+import esa.s1pdgs.cpoc.report.Reporting;
+import esa.s1pdgs.cpoc.report.ReportingUtils;
 
 public class TestAuxMetadataExtractor {
 	
@@ -202,7 +203,8 @@ public class TestAuxMetadataExtractor {
 			final String productType) throws AbstractCodedException {
 		final List<File> files = Arrays.asList(new File(testDir,metadataFile));
 		
-		final LoggerReporting.Factory reportingFactory = new LoggerReporting.Factory("TestMetadataExtraction");
+		final Reporting reporting = ReportingUtils.newReportingBuilderFor("TestMetadataExtraction")
+				.newReporting();
 
 		doReturn(files).when(obsClient).download(Mockito.anyList());
 
@@ -220,7 +222,7 @@ public class TestAuxMetadataExtractor {
 
 		
 		final JSONObject expected = extractor.mdBuilder.buildConfigFileMetadata(expectedDescriptor, files.get(0));
-		final JSONObject result = extractor.extract(reportingFactory, inputMessage);
+		final JSONObject result = extractor.extract(reporting, inputMessage);
 		for (final String key : expected.keySet()) {
 			if (!"insertionTime".equals(key)) {
 				assertEquals(expected.get(key), result.get(key));

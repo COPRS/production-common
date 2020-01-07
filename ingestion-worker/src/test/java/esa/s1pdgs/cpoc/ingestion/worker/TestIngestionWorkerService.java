@@ -37,16 +37,16 @@ import esa.s1pdgs.cpoc.mqi.model.queue.IngestionJob;
 import esa.s1pdgs.cpoc.mqi.model.rest.GenericMessageDto;
 import esa.s1pdgs.cpoc.mqi.model.rest.GenericPublicationMessageDto;
 import esa.s1pdgs.cpoc.obs_sdk.ObsEmptyFileException;
-import esa.s1pdgs.cpoc.report.LoggerReporting;
 import esa.s1pdgs.cpoc.report.Reporting;
+import esa.s1pdgs.cpoc.report.ReportingUtils;
 
 public final class TestIngestionWorkerService {
 	
 	@Mock
 	GenericMqiClient mqiClient;
-	
-	@Mock
-	Reporting.Factory reportingFactory;
+
+	Reporting reporting = ReportingUtils.newReportingBuilderFor("Test")
+			.newReporting();
 	
 	@Mock
 	Logger logger;
@@ -117,8 +117,6 @@ public final class TestIngestionWorkerService {
 				properties,
 				productService
 		);
-		doReturn(new LoggerReporting(logger, "uuid", "actionName", 1)).when(reportingFactory).newReporting(Mockito.eq(1));
-
 		final GenericMessageDto<IngestionJob> message = new GenericMessageDto<>();
 		message.setId(123L);
 		message.setBody(null);
@@ -139,7 +137,7 @@ public final class TestIngestionWorkerService {
 		final IngestionResult expectedResult = new IngestionResult(Arrays.asList(prod), 0L);
 		doReturn(expectedResult).when(productService).ingest(Mockito.eq(ProductFamily.AUXILIARY_FILE), Mockito.eq(ingestionJob));
 		
-		final IngestionResult result = uut.identifyAndUpload(reportingFactory, message, ingestionJob);
+		final IngestionResult result = uut.identifyAndUpload(reporting, message, ingestionJob);
 		assertEquals(expectedResult, result);
 		verify(productService, times(1)).ingest(Mockito.eq(ProductFamily.AUXILIARY_FILE), Mockito.eq(ingestionJob));
 		verify(productService, never()).markInvalid(Mockito.any());
@@ -158,15 +156,13 @@ public final class TestIngestionWorkerService {
 				properties,
 				productService
 		);
-		doReturn(new LoggerReporting(logger, "uuid", "actionName", 1)).when(reportingFactory).newReporting(Mockito.eq(1));
-
 		final GenericMessageDto<IngestionJob> message = new GenericMessageDto<>();
 		message.setId(123L);
 		message.setBody(null);
 		final IngestionJob ingestionJob = new IngestionJob("foo.bar");
 		message.setBody(ingestionJob);
 		
-		final IngestionResult result = uut.identifyAndUpload(reportingFactory, message, ingestionJob);
+		final IngestionResult result = uut.identifyAndUpload(reporting, message, ingestionJob);
 		assertEquals(IngestionResult.NULL, result);
 		verify(productService, never()).ingest(Mockito.any(), Mockito.any());
 		verify(productService, times(1)).markInvalid(Mockito.eq(ingestionJob));
@@ -235,9 +231,7 @@ public final class TestIngestionWorkerService {
 				new IngestionWorkerServiceConfigurationProperties(),
 				productService
 		);
-		
-		doReturn(new LoggerReporting(logger, "uuid", "actionName", 2)).when(reportingFactory).newReporting(Mockito.eq(2));
-		
+
 		final GenericMessageDto<IngestionJob> message = new GenericMessageDto<>();
 		message.setId(123L);
 		message.setInputKey("inputKey");
@@ -252,7 +246,7 @@ public final class TestIngestionWorkerService {
 		final List<Product<IngestionEvent>> products = new ArrayList<>();
 		products.add(product);
 		
-		uut.publish(products, message, reportingFactory);
+		uut.publish(products, message, reporting);
 		
 		final GenericPublicationMessageDto<? extends AbstractMessage> result = new GenericPublicationMessageDto<>(
 				message.getId(), product.getFamily(), product.getDto());

@@ -36,10 +36,10 @@ import esa.s1pdgs.cpoc.mqi.model.queue.CatalogEvent;
 import esa.s1pdgs.cpoc.mqi.model.queue.CatalogJob;
 import esa.s1pdgs.cpoc.mqi.model.rest.GenericMessageDto;
 import esa.s1pdgs.cpoc.mqi.model.rest.GenericPublicationMessageDto;
-import esa.s1pdgs.cpoc.report.FilenameReportingInput;
-import esa.s1pdgs.cpoc.report.LoggerReporting;
 import esa.s1pdgs.cpoc.report.Reporting;
 import esa.s1pdgs.cpoc.report.ReportingMessage;
+import esa.s1pdgs.cpoc.report.ReportingUtils;
+import esa.s1pdgs.cpoc.report.message.input.FilenameReportingInput;
 
 @Service
 public class MetadataExtractionService {
@@ -93,16 +93,16 @@ public class MetadataExtractionService {
 		
 		final ProductCategory category = ProductCategory.of(family);
 
-		
-        final Reporting.Factory reportingFactory = new LoggerReporting.Factory("MetadataExtraction");        
-        final Reporting report = reportingFactory.newReporting(0);        
-        report.begin(new FilenameReportingInput(productName), new ReportingMessage("Starting metadata extraction"));   
+		final Reporting reporting = ReportingUtils.newReportingBuilderFor("MetadataExtraction")
+				.newReporting();
+    
+		reporting.begin(new FilenameReportingInput(productName), new ReportingMessage("Starting metadata extraction"));   
 		try {
 			final MetadataExtractor extractor = extractorFactory.newMetadataExtractorFor(
 					category,
 					properties.getProductCategories().get(category)
 			);			
-			final JSONObject metadata = extractor.extract(reportingFactory, message);
+			final JSONObject metadata = extractor.extract(reporting, message);
         	LOG.debug("Metadata extracted :{} for product: {}", metadata, productName);
         	
         	// TODO move to extractor
@@ -110,7 +110,7 @@ public class MetadataExtractionService {
             	metadata.put("insertionTime", DateUtils.formatToMetadataDateTimeFormat(LocalDateTime.now()));
             }
             
-            final Reporting reportPublish = reportingFactory.newReporting(4);            
+            final Reporting reportPublish = reporting.newChild("MetadataExtraction.Publish");       
             reportPublish.begin(new ReportingMessage("Start publishing metadata"));
 
             try {
@@ -137,7 +137,7 @@ public class MetadataExtractionService {
 				reportPublish.error(new ReportingMessage("[code {}] {}", ErrorCode.INTERNAL_ERROR.getCode(), LogUtils.toString(e)));
 				throw e;
 			}
-            report.end(new ReportingMessage("End metadata extraction"));
+            reporting.end(new ReportingMessage("End metadata extraction"));
 		}
 		catch (final Exception e) {
 			final String errorMessage = String.format(
@@ -154,7 +154,7 @@ public class MetadataExtractionService {
 	        		errorMessage,
 	        		message
 	        )); 
-            report.error(new ReportingMessage(errorMessage));
+            reporting.error(new ReportingMessage(errorMessage));
             throw new RuntimeException(errorMessage);
 		}    
 	}

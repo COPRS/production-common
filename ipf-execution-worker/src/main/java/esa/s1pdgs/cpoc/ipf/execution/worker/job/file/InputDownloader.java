@@ -21,9 +21,9 @@ import esa.s1pdgs.cpoc.ipf.execution.worker.job.process.PoolExecutorCallable;
 import esa.s1pdgs.cpoc.mqi.model.queue.LevelJobInputDto;
 import esa.s1pdgs.cpoc.obs_sdk.ObsClient;
 import esa.s1pdgs.cpoc.obs_sdk.ObsDownloadObject;
-import esa.s1pdgs.cpoc.report.LoggerReporting;
 import esa.s1pdgs.cpoc.report.Reporting;
 import esa.s1pdgs.cpoc.report.ReportingMessage;
+import esa.s1pdgs.cpoc.report.ReportingUtils;
 
 /**
  * Class which create the local working directory and download all the inputs
@@ -122,10 +122,10 @@ public class InputDownloader {
 
         // Create necessary directories and download input with content in
         // message
-        List<ObsDownloadObject> downloadToBatch = sortInputs();
+        final List<ObsDownloadObject> downloadToBatch = sortInputs();
         
-        final Reporting reporting = new LoggerReporting.Factory("InputDownloader")
-        		.newReporting(0);
+		final Reporting reporting = ReportingUtils.newReportingBuilderFor("InputDownloader")
+				.newReporting();
         
         final StringBuilder stringBuilder = new StringBuilder();
         for (final ObsDownloadObject input : downloadToBatch) {
@@ -141,7 +141,7 @@ public class InputDownloader {
 			 // Complete download
 	        completeDownload();	      	
 	        reporting.end(new ReportingMessage(getWorkdirSize(), "End download of products {}", listinputs));			
-		} catch (AbstractCodedException e) {
+		} catch (final AbstractCodedException e) {
 			reporting.error(new ReportingMessage("[code {}] {}", e.getCode().getCode(), e.getLogMessage()));
 			throw e;
 		}       
@@ -154,7 +154,7 @@ public class InputDownloader {
      */
     private void initializeDownload() throws InternalErrorException {
         LOGGER.info("{} 1 - Creating working directory", prefixMonitorLogs);
-        File workingDir = new File(localWorkingDir);
+        final File workingDir = new File(localWorkingDir);
         workingDir.mkdirs();
 
         LOGGER.info("{} 2 - Creating status.txt file with ONGOING",
@@ -197,11 +197,11 @@ public class InputDownloader {
             throws InternalErrorException, UnknownFamilyException {
         LOGGER.info("{} 3 - Starting organizing inputs", prefixMonitorLogs);
 
-        List<ObsDownloadObject> downloadToBatch = new ArrayList<>();
+        final List<ObsDownloadObject> downloadToBatch = new ArrayList<>();
 
-        for (LevelJobInputDto input : inputs) {
+        for (final LevelJobInputDto input : inputs) {
             // Check if a directory shall be created
-            File parent = (new File(input.getLocalPath())).getParentFile();
+            final File parent = (new File(input.getLocalPath())).getParentFile();
             if (!parent.exists()) {
                 parent.mkdirs();
             }
@@ -264,8 +264,8 @@ public class InputDownloader {
                 throw new InternalErrorException("The current thread as been interrupted");
             } else {
                 LOGGER.info("{} 4 - Starting downloading batch {}", prefixMonitorLogs, i);
-                int lastIndex = Math.min((i + 1) * sizeDownBatch, downloadToBatch.size());                
-                List<ObsDownloadObject> subListS3 = downloadToBatch.subList(i * sizeDownBatch, lastIndex);
+                final int lastIndex = Math.min((i + 1) * sizeDownBatch, downloadToBatch.size());                
+                final List<ObsDownloadObject> subListS3 = downloadToBatch.subList(i * sizeDownBatch, lastIndex);
                 this.obsClient.download(subListS3);
                 if (appLevel == ApplicationLevel.L0 && nbUploadedRaw < 2) {
                     nbUploadedRaw += subListS3.stream().filter(
@@ -293,7 +293,7 @@ public class InputDownloader {
 			  .mapToLong(p -> p.toFile().length())
 			  .sum();
 			
-		} catch (IOException e) {
+		} catch (final IOException e) {
 			throw new InternalErrorException(
 					String.format("Error on determining size of %s: %s", localWorkingDir, e.getMessage()),
 					e

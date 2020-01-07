@@ -16,9 +16,9 @@ import esa.s1pdgs.cpoc.common.errors.UnknownFamilyException;
 import esa.s1pdgs.cpoc.mqi.model.queue.CompressionJob;
 import esa.s1pdgs.cpoc.obs_sdk.ObsClient;
 import esa.s1pdgs.cpoc.obs_sdk.ObsDownloadObject;
-import esa.s1pdgs.cpoc.report.LoggerReporting;
 import esa.s1pdgs.cpoc.report.Reporting;
 import esa.s1pdgs.cpoc.report.ReportingMessage;
+import esa.s1pdgs.cpoc.report.ReportingUtils;
 
 public class FileDownloader {
 	/**
@@ -66,9 +66,10 @@ public class FileDownloader {
 
 		// Create necessary directories and download input with content in
 		// message
-		ObsDownloadObject inputProduct = buildInput();
+		final ObsDownloadObject inputProduct = buildInput();
 
-		final Reporting reporting = new LoggerReporting.Factory("FileDownloader").newReporting(0);
+		final Reporting reporting = ReportingUtils.newReportingBuilderFor("FileDownloader")
+				.newReporting();
 
 		reporting.begin(new ReportingMessage("Start download of product to compress {}", inputProduct));
 
@@ -76,7 +77,7 @@ public class FileDownloader {
 		try {
 			downloadInputs(inputProduct);
 			reporting.end(new ReportingMessage(getWorkdirSize(), "End download of products {}", inputProduct));
-		} catch (AbstractCodedException e) {
+		} catch (final AbstractCodedException e) {
 			reporting.error(new ReportingMessage("[code {}] {}", e.getCode().getCode(), e.getLogMessage()));
 			throw e;
 		}
@@ -89,7 +90,7 @@ public class FileDownloader {
 	 */
 	private void initializeDownload() throws InternalErrorException {
 		LOGGER.info("{} 1 - Creating working directory", prefixMonitorLogs);
-		File workingDir = new File(localWorkingDir);
+		final File workingDir = new File(localWorkingDir);
 		workingDir.mkdirs();
 	}
 
@@ -109,7 +110,7 @@ public class FileDownloader {
 			throw new InternalErrorException("productName to download cannot be null");
 		}
 
-		String targetFile = this.localWorkingDir+"/"+job.getOutputKeyObjectStorage();
+		final String targetFile = this.localWorkingDir+"/"+job.getOutputKeyObjectStorage();
 		LOGGER.info("Input {} will be stored in {}", job.getKeyObjectStorage(), targetFile);
 		return new ObsDownloadObject(job.getProductFamily(), job.getKeyObjectStorage(),targetFile);
 
@@ -132,7 +133,7 @@ public class FileDownloader {
 			final Path folder = Paths.get(localWorkingDir);
 			return Files.walk(folder).filter(p -> p.toFile().isFile()).mapToLong(p -> p.toFile().length()).sum();
 
-		} catch (IOException e) {
+		} catch (final IOException e) {
 			throw new InternalErrorException(
 					String.format("Error on determining size of %s: %s", localWorkingDir, e.getMessage()), e);
 		}

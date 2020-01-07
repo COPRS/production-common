@@ -70,10 +70,10 @@ import esa.s1pdgs.cpoc.mqi.model.queue.LevelJobInputDto;
 import esa.s1pdgs.cpoc.mqi.model.queue.LevelJobOutputDto;
 import esa.s1pdgs.cpoc.mqi.model.queue.LevelJobPoolDto;
 import esa.s1pdgs.cpoc.mqi.model.queue.LevelJobTaskDto;
-import esa.s1pdgs.cpoc.report.JobOrderReportingOutput;
-import esa.s1pdgs.cpoc.report.LoggerReporting;
 import esa.s1pdgs.cpoc.report.Reporting;
 import esa.s1pdgs.cpoc.report.ReportingMessage;
+import esa.s1pdgs.cpoc.report.ReportingUtils;
+import esa.s1pdgs.cpoc.report.message.output.JobOrderReportingOutput;
 
 /**
  * Class for processing product for a given task table
@@ -351,8 +351,8 @@ public abstract class AbstractJobsGenerator implements Runnable {
     public void run() {
         JobGeneration job = null;
         // Get a job to generate
-        final Reporting.Factory reportingFactory = new LoggerReporting.Factory("JobGenerator");
-        final Reporting reporting = reportingFactory.newReporting(0);
+        final Reporting reporting = ReportingUtils.newReportingBuilderFor("JobGenerator")
+    			.newReporting();
         
         try {        	
             final List<AppDataJob<CatalogEvent>> jobs = appDataService
@@ -435,7 +435,7 @@ public abstract class AbstractJobsGenerator implements Runnable {
                 
                 // Check primary input
                 if (job.getGeneration().getState() == AppDataJobGenerationState.INITIAL) {
-                 	final Reporting reportInit = reportingFactory.newReporting(1);
+                 	final Reporting reportInit = reporting.newChild("JobGenerator.Init");
                     reportInit.begin(new ReportingMessage("Start init job generation"));
                     try { 
                         LOGGER.info(
@@ -462,8 +462,7 @@ public abstract class AbstractJobsGenerator implements Runnable {
                 // Search input
                 if (job.getGeneration().getState() == AppDataJobGenerationState.PRIMARY_CHECK) {
                 	
-                	final Reporting reportInputs = reportingFactory                  			
-                			.newReporting(2);
+                	final Reporting reportInputs = reporting.newChild("JobGenerator.Search");
                 	
                 	reportInputs.begin(new ReportingMessage("Start searching inputs"));
                 	
@@ -488,9 +487,7 @@ public abstract class AbstractJobsGenerator implements Runnable {
                 // Prepare and send job if ready
                 if (job.getGeneration().getState() == AppDataJobGenerationState.READY) {
                 	
-                  	final Reporting reportPrep = reportingFactory                       			
-                			.newReporting(3);
-                  	
+                	final Reporting reportPrep = reporting.newChild("JobGenerator.PrepAndSend");                  	
                   	reportPrep.begin(new ReportingMessage("Start job preparation and sending"));
                 	
                     try {
@@ -559,12 +556,12 @@ public abstract class AbstractJobsGenerator implements Runnable {
     )
         throws AbstractCodedException {
     	
-    	report.intermediate(new ReportingMessage("Job generation before update: {} - {} - {} - {}", 
+    	LOGGER.info("Job generation before update: {} - {} - {} - {}", 
     			job.getAppDataJob().getId(),
                 job.getGeneration().getTaskTable(), 
                 newState,
                 job.getGeneration()
-        ));
+        );
         final AppDataJob<CatalogEvent> modifiedJob = appDataService.patchTaskTableOfJob(
                 job.getAppDataJob().getId(),
                 job.getGeneration().getTaskTable(), newState);
@@ -574,9 +571,9 @@ public abstract class AbstractJobsGenerator implements Runnable {
         	throw new InternalErrorException("Catalog query returned null");
         }       
         
-    	report.intermediate(new ReportingMessage("Modified job generations: {}",  modifiedJob.getGenerations()));
+        LOGGER.info("Modified job generations: {}",  modifiedJob.getGenerations());
         job.updateAppDataJob(modifiedJob, taskTableXmlName);        
-    	report.intermediate(new ReportingMessage("Job generation after update: {}", job.getGeneration()));
+        LOGGER.info("Job generation after update: {}", job.getGeneration());
     	
         // Log functional logs, not clear when this is called
         if (job.getAppDataJob().getState() == AppDataJobState.TERMINATED) {

@@ -32,10 +32,10 @@ import esa.s1pdgs.cpoc.mqi.model.queue.CatalogEvent;
 import esa.s1pdgs.cpoc.mqi.model.queue.IpfPreparationJob;
 import esa.s1pdgs.cpoc.mqi.model.rest.GenericMessageDto;
 import esa.s1pdgs.cpoc.mqi.model.rest.GenericPublicationMessageDto;
-import esa.s1pdgs.cpoc.report.FilenameReportingInput;
-import esa.s1pdgs.cpoc.report.LoggerReporting;
 import esa.s1pdgs.cpoc.report.Reporting;
 import esa.s1pdgs.cpoc.report.ReportingMessage;
+import esa.s1pdgs.cpoc.report.ReportingUtils;
+import esa.s1pdgs.cpoc.report.message.input.FilenameReportingInput;
 
 public abstract class AbstractGenericConsumer<T extends AbstractMessage> implements MqiListener<CatalogEvent> {
     protected static final Logger LOGGER = LogManager.getLogger(AbstractGenericConsumer.class);
@@ -86,8 +86,9 @@ public abstract class AbstractGenericConsumer<T extends AbstractMessage> impleme
 
     @Override
     public void onMessage(final GenericMessageDto<CatalogEvent> mqiMessage) {
-    	final Reporting.Factory reportingFactory = new LoggerReporting.Factory("L0_SEGMENTJobGeneration"); 
-        final Reporting reporting = reportingFactory.newReporting(0);
+    	final Reporting reporting = ReportingUtils.newReportingBuilderFor("L0_SEGMENTJobGeneration")
+    			.newReporting();
+
         final CatalogEvent event = mqiMessage.getBody();
         final String productName = event.getProductName();
 

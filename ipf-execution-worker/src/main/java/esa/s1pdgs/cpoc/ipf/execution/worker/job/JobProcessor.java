@@ -52,11 +52,11 @@ import esa.s1pdgs.cpoc.mqi.model.rest.AckMessageDto;
 import esa.s1pdgs.cpoc.mqi.model.rest.GenericMessageDto;
 import esa.s1pdgs.cpoc.obs_sdk.ObsClient;
 import esa.s1pdgs.cpoc.obs_sdk.ObsEmptyFileException;
-import esa.s1pdgs.cpoc.report.JobOrderReportingInput;
-import esa.s1pdgs.cpoc.report.LoggerReporting;
 import esa.s1pdgs.cpoc.report.Reporting;
 import esa.s1pdgs.cpoc.report.ReportingMessage;
 import esa.s1pdgs.cpoc.report.ReportingOutput;
+import esa.s1pdgs.cpoc.report.ReportingUtils;
+import esa.s1pdgs.cpoc.report.message.input.JobOrderReportingInput;
 
 /**
  * Process a jobs
@@ -173,14 +173,16 @@ public class JobProcessor implements MqiListener<IpfExecutionJob> {
 
 
 	@Override
-	public final void onMessage(GenericMessageDto<IpfExecutionJob> message) {
+	public final void onMessage(final GenericMessageDto<IpfExecutionJob> message) {
 		LOGGER.info("Initializing job processing {}", message);
 
 		// ----------------------------------------------------------
 		// Initialize processing
 		// ------------------------------------------------------
-		IpfExecutionJob job = message.getBody();
-		final Reporting.Factory reportingFactory = new LoggerReporting.Factory("JobProcessing");
+		final IpfExecutionJob job = message.getBody();
+		
+		final Reporting reporting = ReportingUtils.newReportingBuilderFor("JobProcessing")
+				.newReporting();
 
 		/*
 		 * If the working directory provided by the job order is outside the expected
@@ -190,11 +192,11 @@ public class JobProcessor implements MqiListener<IpfExecutionJob> {
 		 * Either way, we reject the request.
 		 */
 		if (!job.getWorkDirectory().startsWith(properties.getWorkingDir())) {
-			String errorMessage = String.format(
+			final String errorMessage = String.format(
 					"Attempt to access directory '%s' being outside of working directory '%s'.", job.getWorkDirectory(),
 					properties.getWorkingDir());
 			LOGGER.error(errorMessage);
-			FailedProcessingDto failedProc = new FailedProcessingDto(properties.getHostname(), new Date(), errorMessage,
+			final FailedProcessingDto failedProc = new FailedProcessingDto(properties.getHostname(), new Date(), errorMessage,
 					message);
 
 			ackProcessing(message, failedProc, false, errorMessage);
@@ -203,14 +205,13 @@ public class JobProcessor implements MqiListener<IpfExecutionJob> {
 
 		// Everything is fine with the request, we can start processing it.
 		LOGGER.debug("Everything is fine with the request, start processing job {}", job);
-		final Reporting report = reportingFactory.newReporting(0);		
 		final String jobOrderName = new File(job.getJobOrder()).getName();
-		report.begin(
+		reporting.begin(
 				new JobOrderReportingInput(toReportFilenames(job), jobOrderName, Collections.emptyMap()),				
 				new ReportingMessage("Start job processing")
 		);
 
-		File workdir = new File(job.getWorkDirectory());
+		final File workdir = new File(job.getWorkDirectory());
 		// Clean up the working directory with all of its content
 		eraseWorkingDirectory(properties.getWorkingDir());
 
@@ -225,24 +226,24 @@ public class JobProcessor implements MqiListener<IpfExecutionJob> {
 		LOGGER.debug("Output list build {}", outputListFile);
 		
 		// Initialize the pool processor executor
-		PoolExecutorCallable procExecutor = new PoolExecutorCallable(properties, job,
+		final PoolExecutorCallable procExecutor = new PoolExecutorCallable(properties, job,
 				getPrefixMonitorLog(MonitorLogUtils.LOG_PROCESS, job), this.properties.getLevel());
-		ExecutorService procExecutorSrv = Executors.newSingleThreadExecutor();
-		ExecutorCompletionService<Void> procCompletionSrv = new ExecutorCompletionService<>(procExecutorSrv);
+		final ExecutorService procExecutorSrv = Executors.newSingleThreadExecutor();
+		final ExecutorCompletionService<Void> procCompletionSrv = new ExecutorCompletionService<>(procExecutorSrv);
 		// Initialize the input downloader
-		InputDownloader inputDownloader = new InputDownloader(obsClient, job.getWorkDirectory(), job.getInputs(),
+		final InputDownloader inputDownloader = new InputDownloader(obsClient, job.getWorkDirectory(), job.getInputs(),
 				this.properties.getSizeBatchDownload(), getPrefixMonitorLog(MonitorLogUtils.LOG_INPUT, job),
 				procExecutor, this.properties.getLevel());
 		// Initiliaze the output processor
-		OutputProcessor outputProcessor = new OutputProcessor(obsClient, procuderFactory, message, outputListFile,
+		final OutputProcessor outputProcessor = new OutputProcessor(obsClient, procuderFactory, message, outputListFile,
 				this.properties.getSizeBatchUpload(), getPrefixMonitorLog(MonitorLogUtils.LOG_OUTPUT, job),
 				this.properties.getLevel(), properties);
 
 		// ----------------------------------------------------------
 		// Process message
 		// ----------------------------------------------------------
-		final ReportingOutput repOut = processJob(message, inputDownloader, outputProcessor, procExecutorSrv, procCompletionSrv, procExecutor, report);
-		report.end(repOut, new ReportingMessage("End job processing"));
+		final ReportingOutput repOut = processJob(message, inputDownloader, outputProcessor, procExecutorSrv, procCompletionSrv, procExecutor, reporting);
+		reporting.end(repOut, new ReportingMessage("End job processing"));
 	}
 
 	/**
@@ -271,7 +272,7 @@ public class JobProcessor implements MqiListener<IpfExecutionJob> {
             final PoolExecutorCallable procExecutor,
             final Reporting report) {
         boolean poolProcessing = false;
-        IpfExecutionJob job = message.getBody();
+        final IpfExecutionJob job = message.getBody();
         int step = 0;
         boolean ackOk = false;
         String errorMessage = "";
@@ -314,7 +315,7 @@ public class JobProcessor implements MqiListener<IpfExecutionJob> {
             }
             ackOk = true;
 
-        } catch (AbstractCodedException ace) {
+        } catch (final AbstractCodedException ace) {
             ackOk = false;
             
             errorMessage = String.format("[s1pdgsTask %sProcessing] [subTask processing] [STOP KO] %s [step %d] %s [code %d] %s",
@@ -326,7 +327,7 @@ public class JobProcessor implements MqiListener<IpfExecutionJob> {
             LOGGER.error(LogUtils.toString(ace));            
             failedProc = new FailedProcessingDto(properties.getHostname(),new Date(),errorMessage, message);  
             
-        } catch (InterruptedException e) {
+        } catch (final InterruptedException e) {
             ackOk = false;
             errorMessage = String.format(
                     "%s [step %d] %s [code %d] [s1pdgsTask %sProcessing] [STOP KO] [subTask processing] [msg interrupted exception]",
@@ -373,13 +374,13 @@ public class JobProcessor implements MqiListener<IpfExecutionJob> {
 		checkThreadInterrupted();
 		try {
 			procCompletionSrv.take().get(properties.getTmProcAllTasksS(), TimeUnit.SECONDS);
-		} catch (ExecutionException e) {
+		} catch (final ExecutionException e) {
 			if (e.getCause() instanceof AbstractCodedException) {
 				throw (AbstractCodedException) e.getCause();
 			} else {
 				throw new InternalErrorException(e.getMessage(), e);
 			}
-		} catch (TimeoutException e) {
+		} catch (final TimeoutException e) {
 			throw new InternalErrorException(e.getMessage(), e);
 		}
 	}
@@ -396,7 +397,7 @@ public class JobProcessor implements MqiListener<IpfExecutionJob> {
 			try {
 				procExecutorSrv.awaitTermination(properties.getTmProcStopS(), TimeUnit.SECONDS);
 				// TODO send kill if fails
-			} catch (InterruptedException e) {
+			} catch (final InterruptedException e) {
 				// Conserves the interruption
 				Thread.currentThread().interrupt();
 			}
@@ -407,7 +408,7 @@ public class JobProcessor implements MqiListener<IpfExecutionJob> {
 
 	private void eraseWorkingDirectory(final String workingDirectoryPath) {
 		if (devProperties.getStepsActivation().get("erasing")) {
-			Path workingDir = Paths.get(workingDirectoryPath);
+			final Path workingDir = Paths.get(workingDirectoryPath);
 			if (Files.exists(workingDir)) {
 				try {
 					LOGGER.info("Erasing local working directory '{}'", workingDir.toString());
@@ -415,7 +416,7 @@ public class JobProcessor implements MqiListener<IpfExecutionJob> {
 	                Files.walk(workingDir, FileVisitOption.FOLLOW_LINKS)
                     .sorted(Comparator.reverseOrder()).map(Path::toFile)
                     .peek(System.out::println).forEach(File::delete);
-				} catch (IOException e) {
+				} catch (final IOException e) {
 					LOGGER.error("Failed to erase local working directory '{}: {}'", workingDir.toString(),
 							e.getMessage());
 					this.appStatus.setError("PROCESSING");
@@ -436,7 +437,7 @@ public class JobProcessor implements MqiListener<IpfExecutionJob> {
 	 */
 	protected void ackProcessing(final GenericMessageDto<IpfExecutionJob> dto, final FailedProcessingDto failed,
 			final boolean ackOk, final String errorMessage) {
-		boolean stopping = appStatus.getStatus().isStopping();
+		final boolean stopping = appStatus.getStatus().isStopping();
 
 		// Ack
 		if (ackOk) {
@@ -452,7 +453,7 @@ public class JobProcessor implements MqiListener<IpfExecutionJob> {
 			// TODO send stop to the MQI
 			try {
 				mqiStatusService.stop();
-			} catch (AbstractCodedException ace) {
+			} catch (final AbstractCodedException ace) {
 				LOGGER.error("{} {} Checking status consumer",
 						getPrefixMonitorLog(MonitorLogUtils.LOG_STATUS, dto.getBody()), ace.getLogMessage());
 			}
@@ -474,7 +475,7 @@ public class JobProcessor implements MqiListener<IpfExecutionJob> {
 		try {
 			mqiClient.ack(new AckMessageDto(dto.getId(), Ack.ERROR, errorMessage, stop),
 					ProductCategory.LEVEL_JOBS);
-		} catch (AbstractCodedException ace) {
+		} catch (final AbstractCodedException ace) {
 			LOGGER.error("{} [step 5] {} [code {}] {}", getPrefixMonitorLog(MonitorLogUtils.LOG_DFT, dto.getBody()),
 					getPrefixMonitorLog(MonitorLogUtils.LOG_ERROR, dto.getBody()), ace.getCode().getCode(),
 					ace.getLogMessage());
@@ -486,7 +487,7 @@ public class JobProcessor implements MqiListener<IpfExecutionJob> {
 		LOGGER.info("{} Acknowledging positively", getPrefixMonitorLog(MonitorLogUtils.LOG_ACK, dto.getBody()));
 		try {
 			mqiClient.ack(new AckMessageDto(dto.getId(), Ack.OK, null, stop), ProductCategory.LEVEL_JOBS);
-		} catch (AbstractCodedException ace) {
+		} catch (final AbstractCodedException ace) {
 			LOGGER.error("{} [step 5] {} [code {}] {}", getPrefixMonitorLog(MonitorLogUtils.LOG_DFT, dto.getBody()),
 					getPrefixMonitorLog(MonitorLogUtils.LOG_ERROR, dto.getBody()), ace.getCode().getCode(),
 					ace.getLogMessage());

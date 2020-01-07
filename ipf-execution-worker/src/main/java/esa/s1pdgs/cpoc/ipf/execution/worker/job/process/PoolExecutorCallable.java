@@ -14,9 +14,9 @@ import esa.s1pdgs.cpoc.common.errors.processing.IpfExecutionWorkerProcessTimeout
 import esa.s1pdgs.cpoc.ipf.execution.worker.config.ApplicationProperties;
 import esa.s1pdgs.cpoc.mqi.model.queue.IpfExecutionJob;
 import esa.s1pdgs.cpoc.mqi.model.queue.LevelJobPoolDto;
-import esa.s1pdgs.cpoc.report.LoggerReporting;
 import esa.s1pdgs.cpoc.report.Reporting;
 import esa.s1pdgs.cpoc.report.ReportingMessage;
+import esa.s1pdgs.cpoc.report.ReportingUtils;
 
 /**
  * Executor of all process: - pool one after the other - all tasks of the same
@@ -71,7 +71,7 @@ public class PoolExecutorCallable implements Callable<Void> {
         this.prefixMonitorLogs = prefixLogs;
         int counter = 0;
         this.processors = new ArrayList<>(job.getPools().size());
-        for (LevelJobPoolDto pool : job.getPools()) {
+        for (final LevelJobPoolDto pool : job.getPools()) {
             counter++;
             this.processors.add(new PoolProcessor(pool, job.getJobOrder(),
                     job.getWorkDirectory(),
@@ -87,7 +87,8 @@ public class PoolExecutorCallable implements Callable<Void> {
      * <br/>
      * - For each pool, launch in parallel the tasks executions
      */
-    public Void call() throws AbstractCodedException {
+    @Override
+	public Void call() throws AbstractCodedException {
         int counter = 0;
         try {
             // Wait for being active (i.e. wait for download of at least one
@@ -97,7 +98,7 @@ public class PoolExecutorCallable implements Callable<Void> {
                 Thread.sleep(properties.getWapTempoS() * 1000);
                 counter++;
             }
-        } catch (InterruptedException ie) {
+        } catch (final InterruptedException ie) {
             throw new InternalErrorException(ie.getMessage(), ie);
         }
 
@@ -114,21 +115,21 @@ public class PoolExecutorCallable implements Callable<Void> {
                         "Process executor not set as active after "
                                 + counter * properties.getWapTempoS()
                                 + " seconds");
-            }
-            final Reporting.Factory reportingFactory = new LoggerReporting.Factory("Processing");
-            
-            final Reporting reporting = reportingFactory.newReporting(0);
+            }            
+    		final Reporting reporting = ReportingUtils.newReportingBuilderFor("Processing")
+    				.newReporting();
+    		
             reporting.begin(new ReportingMessage("Start " + appLevel + " processing"));
                        
             try {
-				for (PoolProcessor poolProcessor : processors) {
+				for (final PoolProcessor poolProcessor : processors) {
 				    if (isInterrupted()) {
 				        throw new InternalErrorException(
 				                "Current thread has been interrupted");
 				    }
-				    poolProcessor.process(reportingFactory);
+				    poolProcessor.process(reporting);
 				}
-			} catch (AbstractCodedException e) {
+			} catch (final AbstractCodedException e) {
 				reporting.error(new ReportingMessage("[code {}] {}", e.getCode().getCode(), e.getLogMessage()));
 				throw e;
 			}

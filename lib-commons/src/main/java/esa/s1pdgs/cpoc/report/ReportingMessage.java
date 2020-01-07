@@ -5,13 +5,13 @@ public class ReportingMessage {
 	private final Object[] args;
 	private final long transferAmount;
 	
-	public ReportingMessage(long transferAmount, String message, Object... args) {
+	public ReportingMessage(final long transferAmount, final String message, final Object... args) {
 		this.message = message;
 		this.args = args;
 		this.transferAmount = transferAmount;
 	}
 	
-	public ReportingMessage(String message, Object... args) {
+	public ReportingMessage(final String message, final Object... args) {
 		this(0L,message,args);
 	}
 

@@ -14,11 +14,11 @@ public interface MetadataExtractor {
     
 	public static final MetadataExtractor FAIL = new MetadataExtractor() {
 		@Override
-		public final JSONObject extract(final Reporting.Factory reportingFactory, final GenericMessageDto<CatalogJob> message) {
+		public final JSONObject extract(final Reporting reporting, final GenericMessageDto<CatalogJob> message) {
 			throw new IllegalArgumentException(
 				String.format("No Metadata extractor defined for catalog job %s", message)	
 			);
 		}		
 	};	
-	JSONObject extract(Reporting.Factory reportingFactory, GenericMessageDto<CatalogJob> message) throws AbstractCodedException;
+	JSONObject extract(Reporting reporting, GenericMessageDto<CatalogJob> message) throws AbstractCodedException;
 }

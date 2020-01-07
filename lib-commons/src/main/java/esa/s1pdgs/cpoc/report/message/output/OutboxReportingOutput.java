@@ -1,6 +1,8 @@
-package esa.s1pdgs.cpoc.report;
+package esa.s1pdgs.cpoc.report.message.output;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+
+import esa.s1pdgs.cpoc.report.ReportingOutput;
 
 public class OutboxReportingOutput implements ReportingOutput {	
 	@JsonProperty("outbox_url_string")

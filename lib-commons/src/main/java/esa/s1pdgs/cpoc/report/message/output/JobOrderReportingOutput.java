@@ -1,9 +1,11 @@
-package esa.s1pdgs.cpoc.report;
+package esa.s1pdgs.cpoc.report.message.output;
 
 import java.util.Collections;
 import java.util.Map;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+
+import esa.s1pdgs.cpoc.report.ReportingOutput;
 
 public class JobOrderReportingOutput implements ReportingOutput {	
 	@JsonProperty("job_order_id_string")
