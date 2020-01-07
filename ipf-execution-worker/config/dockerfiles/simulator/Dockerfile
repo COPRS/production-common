@@ -16,7 +16,7 @@ RUN echo "${COMMIT_ID}" >> VERSION
 
 COPY --from=build /app/ipf-execution-worker/target/s1pro-core-ipf-execution-worker-*.jar s1pdgs-ipf-execution-worker.jar
 COPY --from=build /app/ipf-execution-worker/config/start/start.sh /app/start.sh
-RUN chmod +x /app/start_l2.sh
+RUN chmod +x /app/start.sh
 
 # Add Tini as entry point
 ENV TINI_VERSION v0.18.0
