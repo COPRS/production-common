@@ -74,7 +74,7 @@ public class FileUploader {
 
 		try {
 			String zipFileName = job.getOutputKeyObjectStorage();
-			File productPath = new File(workingDir + "/" + zipFileName);
+			File productPath = new File(workingDir + "/" + zipFileName+"/"+ zipFileName);
 			reporting.begin(new ReportingMessage("Start uploading {}", zipFileName));
 			if (!productPath.exists()) {
 				throw new InternalErrorException(
