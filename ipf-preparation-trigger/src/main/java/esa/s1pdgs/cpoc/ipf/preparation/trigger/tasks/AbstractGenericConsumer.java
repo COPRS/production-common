@@ -87,7 +87,7 @@ public abstract class AbstractGenericConsumer<T extends AbstractMessage> impleme
     @Override
     public void onMessage(final GenericMessageDto<CatalogEvent> mqiMessage) {
     	final Reporting reporting = ReportingUtils.newReportingBuilderFor("L0_SEGMENTJobGeneration")
-    			.newReporting();
+    			.newWorkerComponentReporting();
 
         final CatalogEvent event = mqiMessage.getBody();
         final String productName = event.getProductName();
