@@ -297,15 +297,15 @@ public class SwiftObsClient extends AbstractObsClient {
 	public URL createTemporaryDownloadUrl(final ObsObject object, final long expirationTimeInSeconds) throws ObsException {
 		ValidArgumentAssertion.assertValidArgument(object);
 		URL url;
+		final Reporting reporting = ReportingUtils.newReportingBuilderFor("CreateTemporaryDownloadUrl").newReporting();
+		reporting.begin(new ReportingMessage(size(object), "Start creating temporary download URL for username '{}' for product '{}'", "anonymous", object.getKey()));
 		try {
 			url = swiftObsServices.createTemporaryDownloadUrl(getBucketFor(object.getFamily()), object.getKey(), expirationTimeInSeconds);
+			reporting.end(new ReportingMessage(size(object), "End creating temporary download URL for username '{}' for product '{}'", "anonymous", object.getKey()));
 		} catch (final SdkClientException ex) {
+			reporting.error(new ReportingMessage(size(object), "Error on creating temporary download URL for username '{}' for product '{}'", "anonymous", object.getKey()));				
 			throw new ObsException(object.getFamily(), object.getKey(), ex);
-		}
-		final Reporting reporting = ReportingUtils.newReportingBuilderFor("CreateTemporaryDownloadUrl")
-				.newReporting();
-		
-     	reporting.intermediate(new ReportingMessage(size(object), "Created temporary download URL for username '{}' for product '{}'", "anonymous", object.getKey()));
+		}		
      	return url;
 	}
 }
