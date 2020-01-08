@@ -30,19 +30,19 @@ public final class LevelProductMetadataExtractor extends AbstractMetadataExtract
 	}
 
 	@Override
-	public final JSONObject extract(final Reporting reporting, final GenericMessageDto<CatalogJob> message)
+	public final JSONObject extract(final Reporting.ChildFactory reportingChildFactory, final GenericMessageDto<CatalogJob> message)
 			throws AbstractCodedException {
         final CatalogJob job = message.getBody();        
         final ProductFamily family = message.getBody().getProductFamily();
         
-        final File metadataFile = downloadMetadataFileToLocalFolder(reporting, family, job.getKeyObjectStorage());
+        final File metadataFile = downloadMetadataFileToLocalFolder(reportingChildFactory, family, job.getKeyObjectStorage());
         try {
         	final OutputFileDescriptor descriptor = extractFromFilename(
-        			reporting, 
+        			reportingChildFactory,
         			() -> fileDescriptorBuilder.buildOutputFileDescriptor(metadataFile, job, job.getProductFamily())
         	);
         	return extractFromFile(
-        			reporting, 
+        			reportingChildFactory, 
         			() -> mdBuilder.buildOutputFileMetadata(descriptor, metadataFile, job)); 
         }
         finally {

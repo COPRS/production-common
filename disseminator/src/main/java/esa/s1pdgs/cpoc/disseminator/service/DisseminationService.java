@@ -136,7 +136,7 @@ public class DisseminationService implements MqiListener<ProductionEvent> {
 			assertExists(product);
 			final OutboxClient outboxClient = clientForTarget(target);
 
-			final Reporting reportingDl = reporting.newChild("Dissemination.ObsDownload");
+			final Reporting reportingDl = reporting.getChildFactory().newChild("Dissemination.ObsDownload");
 			reportingDl.begin(new ReportingMessage("Start downloading file from OBS {} to {}", product.getKeyObjectStorage(), target));
 			try {
 				targetUrl = Retries.performWithRetries(

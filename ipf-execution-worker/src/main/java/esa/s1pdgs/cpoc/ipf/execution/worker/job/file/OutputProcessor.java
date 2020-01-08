@@ -183,7 +183,7 @@ public class OutputProcessor {
 	 * @throws UnknownFamilyException
 	 */
 	final long sortOutputs(final List<String> lines, final List<ObsUploadObject> uploadBatch,
-			final List<ObsQueueMessage> outputToPublish, final List<FileQueueMessage> reportToPublish, final Reporting reportingParent)
+			final List<ObsQueueMessage> outputToPublish, final List<FileQueueMessage> reportToPublish, final Reporting.ChildFactory reportingChildFactory)
 			throws AbstractCodedException {
 
 		long productSize = 0;
@@ -208,7 +208,7 @@ public class OutputProcessor {
 				final ProductFamily family = ProductFamily.fromValue(matchOutput.getFamily());
 
 				final File file = new File(filePath);
-				final Reporting reporting = reportingParent.newChild("OutputHandling.OQC");				
+				final Reporting reporting = reportingChildFactory.newChild("OutputHandling.OQC");
 				final OQCFlag oqcFlag = executor.executeOQC(Paths.get(getFilePath(line, productName)), matchOutput, new OQCDefaultTaskFactory());
 				LOGGER.info("Result of OQC validation was: {}",oqcFlag);
 				
@@ -502,7 +502,7 @@ public class OutputProcessor {
 	 * @throws AbstractCodedException
 	 * @throws ObsEmptyFileException 
 	 */
-	final void processProducts(final Reporting reportingParent, final List<ObsUploadObject> uploadBatch,
+	final void processProducts(final Reporting.ChildFactory reportingChildFactory, final List<ObsUploadObject> uploadBatch,
 			final List<ObsQueueMessage> outputToPublish) throws AbstractCodedException, ObsEmptyFileException {
 
 		final double size = Double.valueOf(uploadBatch.size());
@@ -514,9 +514,9 @@ public class OutputProcessor {
 			final String listProducts = sublist.stream().map(ObsUploadObject::getKey).collect(Collectors.joining(","));
 
 			if (i > 0) {
-				this.publishAccordingUploadFiles(reportingParent, i - 1, sublist.get(0).getKey(), outputToPublish);
+				this.publishAccordingUploadFiles(reportingChildFactory, i - 1, sublist.get(0).getKey(), outputToPublish);
 			}
-			final Reporting report = reportingParent.newChild("OutputHandling.ObsUpload");
+			final Reporting report = reportingChildFactory.newChild("OutputHandling.ObsUpload");
 			try {
 				report.begin(new ReportingMessage("Start uploading batch " + i + " of outputs " + listProducts));
 
@@ -534,7 +534,7 @@ public class OutputProcessor {
 				throw e;
 			}
 		}
-		publishAccordingUploadFiles(reportingParent, nbPool - 1, NOT_KEY_OBS, outputToPublish);
+		publishAccordingUploadFiles(reportingChildFactory, nbPool - 1, NOT_KEY_OBS, outputToPublish);
 	}
 
 	/**
@@ -546,7 +546,7 @@ public class OutputProcessor {
 	 * @param outputToPublish
 	 * @throws AbstractCodedException
 	 */
-	private void publishAccordingUploadFiles(final Reporting reportingParent, final double nbBatch,
+	private void publishAccordingUploadFiles(final Reporting.ChildFactory reportingChildFactory, final double nbBatch,
 			final String nextKeyUpload, final List<ObsQueueMessage> outputToPublish) throws AbstractCodedException {
 
 		LOGGER.info("{} 3 - Publishing KAFKA messages for batch {}", prefixMonitorLogs, nbBatch);
@@ -560,7 +560,7 @@ public class OutputProcessor {
 			if (nextKeyUpload.startsWith(msg.getKeyObs())) {
 				stop = true;
 			} else {
-				final Reporting report = reportingParent.newChild("OutputHandling.Publish");
+				final Reporting report = reportingChildFactory.newChild("OutputHandling.Publish");
 				report.begin(new ReportingMessage("Start publishing message"));
 				try {
 					procuderFactory.sendOutput(msg, inputMessage);
@@ -627,13 +627,13 @@ public class OutputProcessor {
 		
 		reporting.begin(new ReportingMessage("Start handling of outputs " + result));
 		
-		final long size = sortOutputs(lines, uploadBatch, outputToPublish, reportToPublish, reporting);
+		final long size = sortOutputs(lines, uploadBatch, outputToPublish, reportToPublish, reporting.getChildFactory());
 		
 		result = uploadBatch.stream().map(ObsUploadObject::getKey).collect(Collectors.toList());
 		
 		try {
 			// Upload per batch the output
-			processProducts(reporting, uploadBatch, outputToPublish);
+			processProducts(reporting.getChildFactory(), uploadBatch, outputToPublish);
 			// Publish reports
 			processReports(reportToPublish);
 			

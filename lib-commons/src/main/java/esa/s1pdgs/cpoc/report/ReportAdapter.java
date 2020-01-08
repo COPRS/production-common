@@ -72,30 +72,43 @@ public final class ReportAdapter implements Reporting {
 			
 		}
 	}	
+	
+	public final class ChildFactory implements Reporting.ChildFactory {
+		private final ReportAppender parentAppender;
+		private final UUID parentId;
+		private final List<String> parentTags;
+		public ChildFactory(UUID parentId, ReportAppender parentAppender, List<String> parentTags) {
+			this.parentId = parentId;
+			this.parentAppender = parentAppender;
+			this.parentTags = parentTags;
+		}
+		
+		public final Reporting newChild(final String childActionName) {
+			return new Builder(parentAppender, childActionName, null, parentId, UUID.randomUUID())
+					.addTags(parentTags)
+					.newWorkerComponentReporting();			
+		}
+	}
+	
 	private final List<String> tags;	
 	private final ReportAppender appender;
 	private final String actionName;
 	private final UUID predecessor;
 	private final UUID parent;
 	private final UUID id;
+	private final ChildFactory childFactory;
 	
 	private long actionStart;
 	
 	ReportAdapter(final Builder builder) {
-		tags 		= builder.tags;
-		appender 	= builder.appender;
-		actionName 	= builder.actionName;
-		predecessor = builder.predecessor;
-		parent 		= builder.parent;
-		id 			= builder.id;
-		actionStart = 0L;
-	}
-
-	@Override
-	public final Reporting newChild(final String childActionName) {
-		return new Builder(appender, childActionName, null, id, UUID.randomUUID())
-				.addTags(tags)
-				.newWorkerComponentReporting();
+		tags 		 = builder.tags;
+		appender 	 = builder.appender;
+		actionName 	 = builder.actionName;
+		predecessor  = builder.predecessor;
+		parent 		 = builder.parent;
+		id 			 = builder.id;
+		actionStart  = 0L;
+		childFactory = new ChildFactory(id, appender, tags);
 	}
 	
 	final String toString(final ReportingMessage mess) {
@@ -201,6 +214,11 @@ public final class ReportAdapter implements Reporting {
 		return new BigDecimal((sizeByte / 1048576.0) / (deltaTMillis / 1000.0))
 				.setScale(3, RoundingMode.FLOOR)
 				.doubleValue();
+	}
+
+	@Override
+	public ChildFactory getChildFactory() {
+		return childFactory;
 	}
 	
 }

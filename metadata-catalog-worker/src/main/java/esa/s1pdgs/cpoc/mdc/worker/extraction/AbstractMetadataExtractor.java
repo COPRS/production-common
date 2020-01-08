@@ -47,7 +47,7 @@ public abstract class AbstractMetadataExtractor implements MetadataExtractor {
 	}
 
 	final File downloadMetadataFileToLocalFolder(
-    		final Reporting reporting,  
+    		final Reporting.ChildFactory reportingChildFactory,  
     		final ProductFamily family, 
     		final String keyObs
     ) 
@@ -56,7 +56,7 @@ public abstract class AbstractMetadataExtractor implements MetadataExtractor {
 		// make sure than keyObs contains the metadata file
 		final String metadataKeyObs = getMetadataKeyObs(keyObs);
 		
-        final Reporting reportDownload = reporting.newChild("MetadataExtraction.Download");         
+        final Reporting reportDownload = reportingChildFactory.newChild("MetadataExtraction.Download");         
         reportDownload.begin(new ReportingMessage(
         		"Starting download of {} to local directory {}", metadataKeyObs, localDirectory
         ));
@@ -88,43 +88,34 @@ public abstract class AbstractMetadataExtractor implements MetadataExtractor {
 		}
     }
 
-    final <E> E extractFromFilename(
-			final Reporting reporting,
-			final ThrowingSupplier<E> supplier
-	) 
-		throws AbstractCodedException 
-	{
-    	return extractFrom(reporting.newChild("MetadataExtraction.FilenameExtract"), 2, "filename", supplier);
-	}
-    
-    final JSONObject extractFromFile(
-			final Reporting reporting,
-			final ThrowingSupplier<JSONObject> supplier
-	) 
-		throws AbstractCodedException 
-	{
-    	return extractFrom(reporting.newChild("MetadataExtraction.FileExtract"), 3, "file", supplier);
-	}
-    
-	private final <E> E extractFrom(
-			final Reporting reporting,
-			final int step,
-			final String extraction,
-			final ThrowingSupplier<E> supplier
-	) 
-		throws AbstractCodedException 
-	{
-		reporting.begin(new ReportingMessage("Start extraction from {}", extraction));
+    final <E> E extractFromFilename(final Reporting.ChildFactory reportingChildFactory,
+			final ThrowingSupplier<E> supplier)	throws AbstractCodedException {
+		Reporting reporting = reportingChildFactory.newChild("MetadataExtraction.FilenameExtract");
+		reporting.begin(new ReportingMessage("Start extraction from {}", "filename"));
 		try {
 			final E res = supplier.get();
-			reporting.end(new ReportingMessage("End extraction from {}", extraction));
+			reporting.end(new ReportingMessage("End extraction from {}", "filename"));
 			return res;
 		} catch (final AbstractCodedException e) {
 			reporting.error(new ReportingMessage("[code {}] {}", e.getCode().getCode(), e.getLogMessage()));
 			throw e;
 		}
 	}
-	
+    
+    final JSONObject extractFromFile(final Reporting.ChildFactory reportingChildFactory,
+    		final ThrowingSupplier<JSONObject> supplier) throws AbstractCodedException  {
+		Reporting reporting = reportingChildFactory.newChild("MetadataExtraction.FileExtract");
+		reporting.begin(new ReportingMessage("Start extraction from {}", "file"));
+		try {
+			JSONObject res = supplier.get();		
+			reporting.end(new ReportingMessage("End extraction from {}", "file"));
+			return res;
+		} catch (final AbstractCodedException e) {
+			reporting.error(new ReportingMessage("[code {}] {}", e.getCode().getCode(), e.getLogMessage()));
+			throw e;
+		}
+	}
+    
 	private final String getMetadataKeyObs(final String productKeyObs) {
 		if (productKeyObs.toLowerCase().endsWith(processConfiguration.getFileWithManifestExt())) {
 			return productKeyObs + "/" + processConfiguration.getManifestFilename();

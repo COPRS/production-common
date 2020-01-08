@@ -112,7 +112,7 @@ public class FileUploader {
 		obsClient.upload(Arrays.asList(new ObsUploadObject(uploadFile.getFamily(), uploadFile.getKey(), uploadFile.getFile())));
 
 
-		publishAccordingUploadFiles(reporting, NOT_KEY_OBS, outputToPublish);
+		publishAccordingUploadFiles(reporting.getChildFactory(), NOT_KEY_OBS, outputToPublish);
 	}
 
 	/**
@@ -123,7 +123,7 @@ public class FileUploader {
 	 * @param outputToPublish
 	 * @throws AbstractCodedException
 	 */
-	private void publishAccordingUploadFiles(final Reporting reporting, final String nextKeyUpload,
+	private void publishAccordingUploadFiles(final Reporting.ChildFactory reportingChildFactory, final String nextKeyUpload,
 			final List<CompressedProductQueueMessage> outputToPublish) throws AbstractCodedException {
 
         LOGGER.info("{} 3 - Publishing KAFKA messages for batch ");
@@ -137,7 +137,7 @@ public class FileUploader {
 			if (nextKeyUpload.startsWith(msg.getObjectStorageKey())) {
 				stop = true;
 			} else {
-				final Reporting report = reporting.newChild("FileUploader.Publish");
+				final Reporting report = reportingChildFactory.newChild("FileUploader.Publish");
 
 				report.begin(new ReportingMessage("Start publishing message"));
 				try {

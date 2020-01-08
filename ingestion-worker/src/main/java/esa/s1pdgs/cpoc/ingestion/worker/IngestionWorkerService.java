@@ -90,9 +90,9 @@ public class IngestionWorkerService implements MqiListener<IngestionJob> {
 				throw new Exception("Empty file detected: " + file.getName());
 			}
 			
-			final IngestionResult result = identifyAndUpload(reporting, message, ingestion);
-			publish(result.getIngestedProducts(), message, reporting);
-			delete(ingestion, reporting);
+			final IngestionResult result = identifyAndUpload(reporting.getChildFactory(), message, ingestion);
+			publish(result.getIngestedProducts(), message, reporting.getChildFactory());
+			delete(ingestion, reporting.getChildFactory());
 			reporting.end(
 					new FilenameReportingOutput(ingestion.getKeyObjectStorage()),
 					new ReportingMessage(result.getTransferAmount(),"End processing of {}", ingestion.getKeyObjectStorage())
@@ -107,7 +107,7 @@ public class IngestionWorkerService implements MqiListener<IngestionJob> {
 	}
 
 	final IngestionResult identifyAndUpload(
-			final Reporting reporting,
+			final Reporting.ChildFactory reportingChildFactory,
 			final GenericMessageDto<IngestionJob> message, 
 			final IngestionJob ingestion
 	) throws InternalErrorException, ObsEmptyFileException {
@@ -116,7 +116,7 @@ public class IngestionWorkerService implements MqiListener<IngestionJob> {
 		// TODO: Refactor Exception handling
 		try {
 			final ProductFamily family = getFamilyFor(ingestion);
-			final Reporting reportObs = reporting.newChild("IngestionWorker.ObsUpload");
+			final Reporting reportObs = reportingChildFactory.newChild("IngestionWorker.ObsUpload");
 
 			reportObs.begin(new ReportingMessage("Start uploading {} in OBS", ingestion.getKeyObjectStorage()));
 
@@ -153,7 +153,7 @@ public class IngestionWorkerService implements MqiListener<IngestionJob> {
 	final void publish(
 			final List<Product<IngestionEvent>> products, 
 			final GenericMessageDto<IngestionJob> message,
-			final Reporting reporting
+			final Reporting.ChildFactory reportingChildFactory
 	) throws AbstractCodedException {
 		for (final Product<IngestionEvent> product : products) {
 			final GenericPublicationMessageDto<? extends AbstractMessage> result = new GenericPublicationMessageDto<>(
@@ -162,7 +162,7 @@ public class IngestionWorkerService implements MqiListener<IngestionJob> {
 			result.setOutputKey(product.getFamily().toString());
 			LOG.info("publishing : {}", result);
 
-			final Reporting report = reporting.newChild("IngestionWorker.Publish");
+			final Reporting report = reportingChildFactory.newChild("IngestionWorker.Publish");
 
 			report.begin(new ReportingMessage("Start publishing file {} in topic", message.getBody().getKeyObjectStorage()));
 			try {
@@ -174,11 +174,11 @@ public class IngestionWorkerService implements MqiListener<IngestionJob> {
 		}
 	}
 
-	final void delete(final IngestionJob ingestion, final Reporting reporting)
+	final void delete(final IngestionJob ingestion, final Reporting.ChildFactory reportingChildFactory)
 			throws InternalErrorException, InterruptedException {
 		final File file = Paths.get(ingestion.getPickupPath(), ingestion.getRelativePath()).toFile();
 		if (file.exists()) {
-			final Reporting childReporting = reporting.newChild("IngestionWorker.DeleteFromPickup");
+			final Reporting childReporting = reportingChildFactory.newChild("IngestionWorker.DeleteFromPickup");
 			childReporting.begin(new ReportingMessage("Start removing file {}", file.getPath()));
 
 			try {

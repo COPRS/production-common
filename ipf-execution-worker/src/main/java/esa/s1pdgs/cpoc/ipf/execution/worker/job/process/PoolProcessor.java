@@ -97,19 +97,17 @@ public class PoolProcessor {
      * 
      * @throws AbstractCodedException
      */
-    public void process(final Reporting reportingParent) throws AbstractCodedException {
+    public void process(final Reporting.ChildFactory reportingChildFactory) throws AbstractCodedException {
         boolean stopAllProcessCall = false;     
-        int j=0;
         try {
             try {
                 LOGGER.info("{} 1 - Submitting tasks {}", prefixLogs,
                         pool.getTasks());
                 for (final LevelJobTaskDto task : pool.getTasks()) {
-                	final Reporting reporting = reportingParent.newChild("Processing.Task");
+                	final Reporting reporting = reportingChildFactory.newChild("Processing.Task");
                 	
                     completionSrv.submit(new TaskCallable(task.getBinaryPath(),
                             jobOrderPath, workDirectory, reporting));
-                    j++;
                 }
                 LOGGER.info("{} 2 - Waiting for tasks execution", prefixLogs);
                 for (int i = 0; i < nbTasks; i++) {

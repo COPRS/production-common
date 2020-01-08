@@ -161,7 +161,7 @@ public class TestEdrsMetadataExtractor {
 				.newWorkerComponentReporting();
 		
         final JSONObject expected = extractor.mdBuilder.buildEdrsSessionFileRaw(expectedDescriptor);
-        final JSONObject result = extractor.extract(reporting, inputMessage);
+        final JSONObject result = extractor.extract(reporting.getChildFactory(), inputMessage);
         
         for (final String key: expected.keySet()) {
             if (!"insertionTime".equals(key)) {

@@ -127,7 +127,7 @@ public class PoolExecutorCallable implements Callable<Void> {
 				        throw new InternalErrorException(
 				                "Current thread has been interrupted");
 				    }
-				    poolProcessor.process(reporting);
+				    poolProcessor.process(reporting.getChildFactory());
 				}
 			} catch (final AbstractCodedException e) {
 				reporting.error(new ReportingMessage("[code {}] {}", e.getCode().getCode(), e.getLogMessage()));

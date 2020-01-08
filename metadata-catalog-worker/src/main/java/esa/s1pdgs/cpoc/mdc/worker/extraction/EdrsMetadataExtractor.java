@@ -36,14 +36,14 @@ public class EdrsMetadataExtractor extends AbstractMetadataExtractor {
 	}
 	
 	@Override
-	public JSONObject extract(final Reporting reporting, final GenericMessageDto<CatalogJob> message)
+	public JSONObject extract(final Reporting.ChildFactory reportingChildFactory, final GenericMessageDto<CatalogJob> message)
 			throws AbstractCodedException {
 		final CatalogJob catJob = message.getBody();
         final ProductFamily family = ProductFamily.EDRS_SESSION;        
         final File product = new File(this.localDirectory, catJob.getKeyObjectStorage());
 
         final EdrsSessionFileDescriptor edrsFileDescriptor = extractFromFilename(
-        		reporting, 
+        		reportingChildFactory,
         		() -> fileDescriptorBuilder.buildEdrsSessionFileDescriptor(
         				product, 
         				pathExtractor.metadataFrom(catJob),
@@ -53,13 +53,13 @@ public class EdrsMetadataExtractor extends AbstractMetadataExtractor {
         // Only when it is a DSIB
         if (edrsFileDescriptor.getEdrsSessionFileType() == EdrsSessionFileType.SESSION)
         {
-        	downloadMetadataFileToLocalFolder(reporting, family, catJob.getKeyObjectStorage());
+        	downloadMetadataFileToLocalFolder(reportingChildFactory, family, catJob.getKeyObjectStorage());
 
 			final String dsibName = new File(edrsFileDescriptor.getRelativePath()).getName();			
 			final File dsib = new File(localDirectory, dsibName);
         	try {
     			return extractFromFile(
-    					reporting,
+    					reportingChildFactory,
     	        		() -> mdBuilder.buildEdrsSessionFileMetadata(edrsFileDescriptor, dsib)
     	        );
         	}
@@ -69,7 +69,7 @@ public class EdrsMetadataExtractor extends AbstractMetadataExtractor {
         } 
         // RAW files        
         return extractFromFile(
-        		reporting,
+        		reportingChildFactory,
         		() -> mdBuilder.buildEdrsSessionFileRaw(edrsFileDescriptor)
         );
 	}

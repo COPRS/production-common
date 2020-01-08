@@ -137,7 +137,7 @@ public final class TestIngestionWorkerService {
 		final IngestionResult expectedResult = new IngestionResult(Arrays.asList(prod), 0L);
 		doReturn(expectedResult).when(productService).ingest(Mockito.eq(ProductFamily.AUXILIARY_FILE), Mockito.eq(ingestionJob));
 		
-		final IngestionResult result = uut.identifyAndUpload(reporting, message, ingestionJob);
+		final IngestionResult result = uut.identifyAndUpload(reporting.getChildFactory(), message, ingestionJob);
 		assertEquals(expectedResult, result);
 		verify(productService, times(1)).ingest(Mockito.eq(ProductFamily.AUXILIARY_FILE), Mockito.eq(ingestionJob));
 		verify(productService, never()).markInvalid(Mockito.any());
@@ -162,7 +162,7 @@ public final class TestIngestionWorkerService {
 		final IngestionJob ingestionJob = new IngestionJob("foo.bar");
 		message.setBody(ingestionJob);
 		
-		final IngestionResult result = uut.identifyAndUpload(reporting, message, ingestionJob);
+		final IngestionResult result = uut.identifyAndUpload(reporting.getChildFactory(), message, ingestionJob);
 		assertEquals(IngestionResult.NULL, result);
 		verify(productService, never()).ingest(Mockito.any(), Mockito.any());
 		verify(productService, times(1)).markInvalid(Mockito.eq(ingestionJob));
@@ -246,7 +246,7 @@ public final class TestIngestionWorkerService {
 		final List<Product<IngestionEvent>> products = new ArrayList<>();
 		products.add(product);
 		
-		uut.publish(products, message, reporting);
+		uut.publish(products, message, reporting.getChildFactory());
 		
 		final GenericPublicationMessageDto<? extends AbstractMessage> result = new GenericPublicationMessageDto<>(
 				message.getId(), product.getFamily(), product.getDto());

@@ -31,24 +31,24 @@ public final class LevelSegmentMetadataExtractor extends AbstractMetadataExtract
 	}
 
 	@Override
-	public final JSONObject extract(final Reporting reporting, final GenericMessageDto<CatalogJob> message)
+	public final JSONObject extract(final Reporting.ChildFactory reportingChildFactory, final GenericMessageDto<CatalogJob> message)
 			throws AbstractCodedException {
         final CatalogJob job = message.getBody();    
         final String productName = job.getProductName();
         final ProductFamily family = message.getBody().getProductFamily();
         
         logger.debug("starting to download metadatafile for for product: {}", productName);        
-        final File metadataFile = downloadMetadataFileToLocalFolder(reporting, family, job.getKeyObjectStorage());
+        final File metadataFile = downloadMetadataFileToLocalFolder(reportingChildFactory, family, job.getKeyObjectStorage());
         try {
             logger.debug("segment metadata file dowloaded:{} for product: {}", metadataFile.getAbsolutePath(), productName);
             
         	final OutputFileDescriptor l0SegmentDesc = extractFromFilename(
-        			reporting, 
+        			reportingChildFactory,
         			() -> fileDescriptorBuilder.buildOutputFileDescriptor(metadataFile, job, job.getProductFamily())
         	);
         	logger.debug("OutputFileDescriptor:{} for product: {}", l0SegmentDesc.toString(), productName);    	
         	return extractFromFile(
-        			reporting, 
+        			reportingChildFactory,
         			() -> mdBuilder.buildL0SegmentOutputFileMetadata(l0SegmentDesc, metadataFile)
         	); 
         }

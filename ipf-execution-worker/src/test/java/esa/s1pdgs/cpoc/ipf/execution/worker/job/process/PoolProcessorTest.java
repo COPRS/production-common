@@ -34,7 +34,7 @@ public class PoolProcessorTest {
         dto.addTask(new LevelJobTaskDto(SystemUtils.getCmdMkdir()));
         final PoolProcessor processor = new PoolProcessor(dto, "3", "./", "log", 60);
         assertFalse(testDir.exists());
-        processor.process(reporting);
+        processor.process(reporting.getChildFactory());
         assertTrue(testDir.exists() && testDir.isDirectory());
     }
 
@@ -45,7 +45,7 @@ public class PoolProcessorTest {
         dto.addTask(new LevelJobTaskDto(SystemUtils.getCmdLs()));
         final PoolProcessor processor = new PoolProcessor(dto, "3", "./", "log", 60);
         assertFalse(testDir.exists());
-        processor.process(reporting);
+        processor.process(reporting.getChildFactory());
         assertTrue(testDir.exists() && testDir.isDirectory());
     }
 
@@ -58,6 +58,6 @@ public class PoolProcessorTest {
         final LevelJobPoolDto dto = new LevelJobPoolDto();
         dto.addTask(new LevelJobTaskDto(SystemUtils.getCmdFalse()));
         final PoolProcessor processor = new PoolProcessor(dto, "3", "./", "log", 60);
-        processor.process(reporting);
+        processor.process(reporting.getChildFactory());
     }
 }

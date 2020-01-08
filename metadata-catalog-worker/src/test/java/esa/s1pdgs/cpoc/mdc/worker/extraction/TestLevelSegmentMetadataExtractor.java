@@ -192,7 +192,7 @@ public class TestLevelSegmentMetadataExtractor {
         final JSONObject expected = extractor.mdBuilder
                 .buildL0SegmentOutputFileMetadata(descriptor, files.get(0));
 
-        final JSONObject result = extractor.extract(reporting, inputMessageSafe);
+        final JSONObject result = extractor.extract(reporting.getChildFactory(), inputMessageSafe);
         for (final String key : expected.keySet()) {
             if (!("insertionTime".equals(key) || "segmentCoordinates".equals(key) || "creationTime".equals(key))) {
                 assertEquals(expected.get(key), result.get(key));

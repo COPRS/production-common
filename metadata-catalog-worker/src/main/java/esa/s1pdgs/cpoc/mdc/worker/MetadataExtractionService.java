@@ -102,7 +102,7 @@ public class MetadataExtractionService {
 					category,
 					properties.getProductCategories().get(category)
 			);			
-			final JSONObject metadata = extractor.extract(reporting, message);
+			final JSONObject metadata = extractor.extract(reporting.getChildFactory(), message);
         	LOG.debug("Metadata extracted :{} for product: {}", metadata, productName);
         	
         	// TODO move to extractor
@@ -110,7 +110,7 @@ public class MetadataExtractionService {
             	metadata.put("insertionTime", DateUtils.formatToMetadataDateTimeFormat(LocalDateTime.now()));
             }
             
-            final Reporting reportPublish = reporting.newChild("MetadataExtraction.Publish");       
+            final Reporting reportPublish = reporting.getChildFactory().newChild("MetadataExtraction.Publish");       
             reportPublish.begin(new ReportingMessage("Start publishing metadata"));
 
             try {

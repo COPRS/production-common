@@ -17,6 +17,10 @@ public interface Reporting {
 		Reporting newWorkerComponentReporting();
 		void newTriggerComponentReporting(final ReportingMessage reportingMessage);
 	}
+
+	public interface ChildFactory {
+		Reporting newChild(String childActionName);
+	}
 	
 	enum Event {
 		begin,
@@ -50,6 +54,6 @@ public interface Reporting {
 	
 	void begin(ReportingInput input, ReportingMessage reportingMessage);
 	void end(ReportingOutput output, ReportingMessage reportingMessage);
-	void error(ReportingMessage reportingMessage);	
-	Reporting newChild(String childActionName);
+	void error(ReportingMessage reportingMessage);
+	ChildFactory getChildFactory();
 }

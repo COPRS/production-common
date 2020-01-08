@@ -189,7 +189,7 @@ public class TestLevelProductMetadataExtractor {
 
 		final JSONObject expected = extractor.mdBuilder.buildOutputFileMetadata(descriptor, files.get(0), job);
 
-		final JSONObject result = extractor.extract(reporting, inputMessageSafe);
+		final JSONObject result = extractor.extract(reporting.getChildFactory(), inputMessageSafe);
 		for (final String key : expected.keySet()) {
 			if (!("insertionTime".equals(key) || "sliceCoordinates".equals(key) || "creationTime".equals(key))) {
 				System.out.println("Key");
@@ -240,7 +240,7 @@ public class TestLevelProductMetadataExtractor {
 
 		final JSONObject expected = extractor.mdBuilder.buildOutputFileMetadata(descriptor, files.get(0), job);
 
-		final JSONObject result = extractor.extract(reporting, inputMessageSafe);
+		final JSONObject result = extractor.extract(reporting.getChildFactory(), inputMessageSafe);
 		for (final String key : expected.keySet()) {
 			if (!("insertionTime".equals(key) || "sliceCoordinates".equals(key) || "creationTime".equals(key))) {
 				assertEquals(expected.get(key), result.get(key));
@@ -286,7 +286,7 @@ public class TestLevelProductMetadataExtractor {
 
 		final JSONObject expected = extractor.mdBuilder.buildOutputFileMetadata(descriptor, files.get(0), job);
 
-		final JSONObject result = extractor.extract(reporting, inputMessageSafe);
+		final JSONObject result = extractor.extract(reporting.getChildFactory(), inputMessageSafe);
 		for (final String key : expected.keySet()) {
 			if (!("insertionTime".equals(key) || "sliceCoordinates".equals(key) || "creationTime".equals(key))) {
 				assertEquals(expected.get(key), result.get(key));
@@ -330,7 +330,7 @@ public class TestLevelProductMetadataExtractor {
 
 		final JSONObject expected = extractor.mdBuilder.buildOutputFileMetadata(descriptor, files.get(0), job);
 
-		final JSONObject result = extractor.extract(reporting, inputMessageSafe);
+		final JSONObject result = extractor.extract(reporting.getChildFactory(), inputMessageSafe);
 		for (final String key : expected.keySet()) {
 			if (!("insertionTime".equals(key) || "sliceCoordinates".equals(key) || "creationTime".equals(key))) {
 				assertEquals(expected.get(key), result.get(key));
@@ -374,7 +374,7 @@ public class TestLevelProductMetadataExtractor {
 
 		final JSONObject expected = extractor.mdBuilder.buildOutputFileMetadata(descriptor, files.get(0), job);
 
-		final JSONObject result = extractor.extract(reporting, inputMessageSafe);
+		final JSONObject result = extractor.extract(reporting.getChildFactory(), inputMessageSafe);
 		for (final String key : expected.keySet()) {
 			if (!("insertionTime".equals(key) || "sliceCoordinates".equals(key) || "creationTime".equals(key))) {
 				assertEquals(expected.get(key), result.get(key));
@@ -418,7 +418,7 @@ public class TestLevelProductMetadataExtractor {
 
 		final JSONObject expected = extractor.mdBuilder.buildOutputFileMetadata(descriptor, files.get(0), job);
 
-		final JSONObject result = extractor.extract(reporting, inputMessageSafe);
+		final JSONObject result = extractor.extract(reporting.getChildFactory(), inputMessageSafe);
 		for (final String key : expected.keySet()) {
 			if (!("insertionTime".equals(key) || "sliceCoordinates".equals(key) || "creationTime".equals(key))) {
 				assertEquals(expected.get(key), result.get(key));

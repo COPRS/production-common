@@ -17,13 +17,11 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
 import esa.s1pdgs.cpoc.common.ProductFamily;
-import esa.s1pdgs.cpoc.common.errors.processing.MetadataQueryException;
 import esa.s1pdgs.cpoc.common.utils.DateUtils;
 import esa.s1pdgs.cpoc.metadata.client.MetadataClient;
 import esa.s1pdgs.cpoc.metadata.model.SearchMetadata;
 import esa.s1pdgs.cpoc.obs_sdk.ObsClient;
 import esa.s1pdgs.cpoc.obs_sdk.ObsObject;
-import esa.s1pdgs.cpoc.obs_sdk.SdkClientException;
 import esa.s1pdgs.cpoc.report.Reporting;
 import esa.s1pdgs.cpoc.report.ReportingUtils;
 
@@ -56,7 +54,7 @@ public class ValidationServiceTest {
 	}
 
 	@Test
-	public void testObsValidation() throws SdkClientException, MetadataQueryException {
+	public void testObsValidation() throws Exception {
 		final LocalDateTime localDateTimeStart = LocalDateTime.parse("2000-01-01T00:00:00.000000Z",
 				DateUtils.METADATA_DATE_FORMATTER);
 		final LocalDateTime localDateTimeStop = LocalDateTime.parse("2020-01-03T00:00:00.000000Z",
@@ -113,7 +111,7 @@ public class ValidationServiceTest {
 		// OBS does have 6 elements, but two are actually the same product
 		assertEquals(5,validationService.extractRealKeys(obsResults.values(),ProductFamily.AUXILIARY_FILE).size());
 
-		validationService.validateProductFamily(reporting, ProductFamily.AUXILIARY_FILE, localDateTimeStart,
+		validationService.validateProductFamily(reporting.getChildFactory(), ProductFamily.AUXILIARY_FILE, localDateTimeStart,
 				localDateTimeStop);
 	}
 }

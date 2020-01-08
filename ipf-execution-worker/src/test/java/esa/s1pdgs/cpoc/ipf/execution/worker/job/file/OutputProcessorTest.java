@@ -347,7 +347,7 @@ public class OutputProcessorTest {
         lines.add("S1A_BLANK_FILE.SAFE");
 
         processor.sortOutputs(lines, uploadBatch, outputToPublish,
-                reportToPublish, reporting);
+                reportToPublish, reporting.getChildFactory());
 
         // Check products
         assertEquals(4, uploadBatch.size());
@@ -417,7 +417,7 @@ public class OutputProcessorTest {
         lines.add("S1A_BLANK_FILE.SAFE");
 
         processor.sortOutputs(lines, uploadBatch, outputToPublish,
-                reportToPublish, reporting);
+                reportToPublish, reporting.getChildFactory());
 
         // Check products
         assertEquals(5, uploadBatch.size());
@@ -497,7 +497,7 @@ public class OutputProcessorTest {
         lines.add("S1A_BLANK_FILE.SAFE");
 
         processor.sortOutputs(lines, uploadBatch, outputToPublish,
-                reportToPublish, reporting);
+                reportToPublish, reporting.getChildFactory());
 
         // Check products
         assertEquals(4, uploadBatch.size());
@@ -565,7 +565,7 @@ public class OutputProcessorTest {
         lines.add("S1A_BLANK_FILE.SAFE");
 
         processor.sortOutputs(lines, uploadBatch, outputToPublish,
-                reportToPublish, reporting);
+                reportToPublish, reporting.getChildFactory());
 
         // Check products
         assertEquals(4, uploadBatch.size());
@@ -716,7 +716,7 @@ public class OutputProcessorTest {
 
     @Test
     public void testProcessProducts() throws AbstractCodedException, ObsEmptyFileException {    	
-        processor.processProducts(reporting, uploadBatch, outputToPublish);
+        processor.processProducts(reporting.getChildFactory(), uploadBatch, outputToPublish);
 
         // check publication
         verify(procuderFactory, times(3))

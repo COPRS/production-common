@@ -222,7 +222,7 @@ public class TestAuxMetadataExtractor {
 
 		
 		final JSONObject expected = extractor.mdBuilder.buildConfigFileMetadata(expectedDescriptor, files.get(0));
-		final JSONObject result = extractor.extract(reporting, inputMessage);
+		final JSONObject result = extractor.extract(reporting.getChildFactory(), inputMessage);
 		for (final String key : expected.keySet()) {
 			if (!"insertionTime".equals(key)) {
 				assertEquals(expected.get(key), result.get(key));

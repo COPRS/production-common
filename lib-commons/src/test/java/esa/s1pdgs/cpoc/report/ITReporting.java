@@ -21,7 +21,7 @@ public final class ITReporting {
 		uut.begin(new ReportingMessage("Foo"));		
 		uut.end(new ReportingMessage(42000L, "baz"));	
 		
-		uut = uut.newChild("test.child");
+		uut = uut.getChildFactory().newChild("test.child");
 		uut.begin(new ReportingMessage("Foo"));		
 		uut.end(new JobOrderReportingOutput(UUID.randomUUID().toString(), Collections.singletonMap("foo_string", "bar")), new ReportingMessage(42000L, "baz"));
 		
