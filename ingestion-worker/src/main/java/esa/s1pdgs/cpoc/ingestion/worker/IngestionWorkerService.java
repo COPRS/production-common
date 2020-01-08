@@ -178,14 +178,14 @@ public class IngestionWorkerService implements MqiListener<IngestionJob> {
 			throws InternalErrorException, InterruptedException {
 		final File file = Paths.get(ingestion.getPickupPath(), ingestion.getRelativePath()).toFile();
 		if (file.exists()) {
-			final Reporting report = reporting.newChild("IngestionWorker.DeleteFromPickup");
-			reporting.begin(new ReportingMessage("Start removing file {}", file.getPath()));
+			final Reporting childReporting = reporting.newChild("IngestionWorker.DeleteFromPickup");
+			childReporting.begin(new ReportingMessage("Start removing file {}", file.getPath()));
 
 			try {
 				FileUtils.deleteWithRetries(file, properties.getMaxRetries(), properties.getTempoRetryMs());
-				reporting.end(new ReportingMessage("End removing file {}", file.getPath()));
+				childReporting.end(new ReportingMessage("End removing file {}", file.getPath()));
 			} catch (final Exception e) {
-				reporting.error(new ReportingMessage("Error on removing file {}: {}", LogUtils.toString(e)));
+				childReporting.error(new ReportingMessage("Error on removing file {}: {}", LogUtils.toString(e)));
 			}
 		}
 	}
