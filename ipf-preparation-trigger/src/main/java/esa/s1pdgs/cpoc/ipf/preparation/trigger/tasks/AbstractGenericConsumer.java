@@ -86,9 +86,6 @@ public abstract class AbstractGenericConsumer<T extends AbstractMessage> impleme
 
     @Override
     public void onMessage(final GenericMessageDto<CatalogEvent> mqiMessage) {
-    	final Reporting reporting = ReportingUtils.newReportingBuilderFor("L0_SEGMENTJobGeneration")
-    			.newWorkerComponentReporting();
-
         final CatalogEvent event = mqiMessage.getBody();
         final String productName = event.getProductName();
 
@@ -100,22 +97,20 @@ public abstract class AbstractGenericConsumer<T extends AbstractMessage> impleme
         	
             // Check if a job is already created for message identifier
             LOGGER.info("Creating/updating job for product {}", productName);
-            reporting.begin(
-            		new FilenameReportingInput(Collections.singletonList(event.getKeyObjectStorage())),            		
-            		new ReportingMessage("Start job generation using {}", event.getKeyObjectStorage())
-            );
+            ReportingUtils.newReportingBuilderFor("L0_SEGMENTJobGeneration")
+        			.newTriggerComponentReporting(
+        					new ReportingMessage("Generating job using {}", event.getKeyObjectStorage()));
             final AppDataJob<CatalogEvent> appDataJob = dispatch(mqiMessage);
             publish(appDataJob, event.getProductFamily(), mqiMessage.getInputKey());
             LOGGER.debug("Done handling consumption of {} product {}", category, productName);
-            reporting.end(new ReportingMessage("End job generation using {}", productName));
-        } catch (final AbstractCodedException ace) {            
+        } catch (final AbstractCodedException ace) {
             final String errorMessage = String.format(
             		"[productName %s] [code %d] %s",
             		productName, 
             		ace.getCode().getCode(),
             		ace.getLogMessage()
             );
-            reporting.error(new ReportingMessage("[code {}] {}", ace.getCode().getCode(), ace.getLogMessage()));
+            LOGGER.error(errorMessage);
             errorRepoAppender.send(
             	new FailedProcessingDto(processSettings.getHostname(),new Date(), errorMessage, mqiMessage)
             );
