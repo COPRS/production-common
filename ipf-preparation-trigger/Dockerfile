@@ -13,7 +13,7 @@ RUN echo "${VERSION}" >> VERSION
 RUN echo "${BRANCH_TEXT}" >> VERSION
 RUN echo "${COMMIT_ID}" >> VERSION
 
-COPY --from=build /app/ipf-preparation-trigger/target/s1pro-core-ipf-preparation-trigger-*.jar s1pdgs-ipf-preparation-trigger.jar
+COPY --from=build /app/production-trigger/target/s1pro-core-production-trigger-*.jar s1pdgs-production-trigger.jar
 COPY /config/start.sh start.sh
 
 ENTRYPOINT "/app/start.sh"

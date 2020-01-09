@@ -18,7 +18,7 @@ COPY archives/ /app/archives
 COPY disseminator/ /app/disseminator
 COPY ingestion-trigger/ /app/ingestion-trigger
 COPY ingestion-worker/ /app/ingestion-worker
-COPY ipf-preparation-trigger/ /app/ipf-preparation-trigger
+COPY production-trigger/ /app/production-trigger
 COPY ipf-preparation-worker/ /app/ipf-preparation-worker
 COPY lib-commons/ /app/lib-commons
 COPY app-status /app/app-status
@@ -62,7 +62,7 @@ COPY --from=buildenv /app/archives/target /app/archives/target
 COPY --from=buildenv /app/disseminator/target /app/disseminator/target
 COPY --from=buildenv /app/ingestion-trigger/target /app/ingestion-trigger/target
 COPY --from=buildenv /app/ingestion-worker/target /app/ingestion-worker/target
-COPY --from=buildenv /app/ipf-preparation-trigger/target /app/ipf-preparation-trigger/target
+COPY --from=buildenv /app/production-trigger/target /app/production-trigger/target
 COPY --from=buildenv /app/ipf-preparation-worker/target /app/ipf-preparation-worker/target
 COPY --from=buildenv /app/metadata-catalog-trigger /app/metadata-catalog-trigger
 COPY --from=buildenv /app/metadata-catalog-worker /app/metadata-catalog-worker

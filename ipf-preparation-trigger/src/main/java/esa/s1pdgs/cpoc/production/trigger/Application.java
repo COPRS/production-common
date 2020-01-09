@@ -1,4 +1,4 @@
-package esa.s1pdgs.cpoc.ipf.preparation.trigger;
+package esa.s1pdgs.cpoc.production.trigger;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;

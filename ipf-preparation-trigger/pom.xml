@@ -7,13 +7,13 @@
 		<artifactId>s1pro-core</artifactId>
 		<version>0.12.0-SNAPSHOT</version>
 	</parent>
-	<artifactId>s1pro-core-ipf-preparation-trigger</artifactId>
+	<artifactId>s1pro-core-production-trigger</artifactId>
 
 	<properties>
 		<docker.image.prefix>springio</docker.image.prefix>
-		<project.build.finalName>s1pdgs-ipf-preparation-trigger-app</project.build.finalName>
-		<project.artifactId>s1pdgs-ipf-preparation-trigger-app</project.artifactId>
-		<start-class>esa.s1pdgs.cpoc.ipf.preparation.trigger.Application</start-class>
+		<project.build.finalName>s1pdgs-production-trigger-app</project.build.finalName>
+		<project.artifactId>s1pdgs-production-trigger-app</project.artifactId>
+		<start-class>esa.s1pdgs.cpoc.production.trigger.Application</start-class>
 	</properties>
 
 	<dependencies>

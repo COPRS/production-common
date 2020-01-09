@@ -1,4 +1,4 @@
-package esa.s1pdgs.cpoc.ipf.preparation.trigger.config;
+package esa.s1pdgs.cpoc.production.trigger.config;
 
 import java.util.Arrays;
 
@@ -12,14 +12,14 @@ import esa.s1pdgs.cpoc.appcatalog.client.job.AppCatalogJobClient;
 import esa.s1pdgs.cpoc.appstatus.AppStatus;
 import esa.s1pdgs.cpoc.common.ProductCategory;
 import esa.s1pdgs.cpoc.errorrepo.ErrorRepoAppender;
-import esa.s1pdgs.cpoc.ipf.preparation.trigger.tasks.AbstractGenericConsumer;
-import esa.s1pdgs.cpoc.ipf.preparation.trigger.tasks.EdrsSessionConsumer;
-import esa.s1pdgs.cpoc.ipf.preparation.trigger.tasks.L0SegmentConsumer;
-import esa.s1pdgs.cpoc.ipf.preparation.trigger.tasks.L0SliceConsumer;
 import esa.s1pdgs.cpoc.metadata.client.MetadataClient;
 import esa.s1pdgs.cpoc.mqi.client.GenericMqiClient;
 import esa.s1pdgs.cpoc.mqi.client.StatusService;
 import esa.s1pdgs.cpoc.mqi.model.queue.CatalogEvent;
+import esa.s1pdgs.cpoc.production.trigger.tasks.AbstractGenericConsumer;
+import esa.s1pdgs.cpoc.production.trigger.tasks.EdrsSessionConsumer;
+import esa.s1pdgs.cpoc.production.trigger.tasks.L0SegmentConsumer;
+import esa.s1pdgs.cpoc.production.trigger.tasks.L0SliceConsumer;
 
 @Configuration
 public class TriggerConfig {	

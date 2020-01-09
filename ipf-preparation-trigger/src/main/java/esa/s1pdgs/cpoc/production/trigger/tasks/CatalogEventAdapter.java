@@ -1,4 +1,4 @@
-package esa.s1pdgs.cpoc.ipf.preparation.trigger.tasks;
+package esa.s1pdgs.cpoc.production.trigger.tasks;
 
 import java.util.List;
 

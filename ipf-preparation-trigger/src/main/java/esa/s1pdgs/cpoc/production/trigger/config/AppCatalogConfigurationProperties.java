@@ -1,4 +1,4 @@
-package esa.s1pdgs.cpoc.ipf.preparation.trigger.config;
+package esa.s1pdgs.cpoc.production.trigger.config;
 
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Configuration;

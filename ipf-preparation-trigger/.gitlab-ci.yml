@@ -2,9 +2,9 @@
 # Official docker image.
 image: docker:latest
 
-ipf-preparation-trigger-build:
+production-trigger-build:
   stage: module
   script:
-    - cd ipf-preparation-trigger
-    - dockerbuild --cache-from registry.tools.s1pdgs.eu/werum/processing/s1pro-core:final -t "$CI_REGISTRY/$CI_PROJECT_NAMESPACE/s1pro-core-ipf-preparation-trigger:$CI_COMMIT_REF_SLUG" .
-    - docker push "$CI_REGISTRY/$CI_PROJECT_NAMESPACE/s1pro-core-ipf-preparation-trigger:$CI_COMMIT_REF_SLUG"
+    - cd production-trigger
+    - dockerbuild --cache-from registry.tools.s1pdgs.eu/werum/processing/s1pro-core:final -t "$CI_REGISTRY/$CI_PROJECT_NAMESPACE/s1pro-core-production-trigger:$CI_COMMIT_REF_SLUG" .
+    - docker push "$CI_REGISTRY/$CI_PROJECT_NAMESPACE/s1pro-core-production-trigger:$CI_COMMIT_REF_SLUG"

@@ -33,7 +33,7 @@ include:
   - local: request-repository/.gitlab-ci.yml
   - local: ingestion-trigger/.gitlab-ci.yml
   - local: ingestion-worker/.gitlab-ci.yml
-  - local: ipf-preparation-trigger/.gitlab-ci.yml
+  - local: production-trigger/.gitlab-ci.yml
   - local: ipf-preparation-worker/.gitlab-ci.yml
   - local: metadata-catalog-trigger/.gitlab-ci.yml
   - local: metadata-catalog-worker/.gitlab-ci.yml

@@ -1,4 +1,4 @@
-package esa.s1pdgs.cpoc.ipf.preparation.trigger.config;
+package esa.s1pdgs.cpoc.production.trigger.config;
 
 import java.util.HashMap;
 import java.util.Map;
