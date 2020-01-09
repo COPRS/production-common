@@ -286,7 +286,7 @@
 		<module>disseminator</module>
 		<module>ingestion-trigger</module>
 		<module>ingestion-worker</module>
-		<module>ipf-preparation-trigger</module>
+		<module>production-trigger</module>
 		<module>ipf-preparation-worker</module>
 		<module>lib-commons</module>
 		<module>ipf-execution-worker</module>
