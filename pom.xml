@@ -289,7 +289,7 @@
 		<module>production-trigger</module>
 		<module>ipf-preparation-worker</module>
 		<module>lib-commons</module>
-		<module>ipf-execution-worker</module>
+		<module>execution-worker</module>
 		<module>request-repository</module>
 		<module>queue-watcher</module>
 		<module>metadata-catalog-trigger</module>
