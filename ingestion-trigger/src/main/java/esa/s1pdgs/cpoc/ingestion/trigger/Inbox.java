@@ -82,13 +82,15 @@ public final class Inbox {
 					if(org.apache.commons.io.FileUtils.sizeOf(file) == 0) {						
 						String errorMessage = "Empty file detected, skipping: " + file.getName();
 						ReportingUtils.newReportingBuilderFor("Inbox").newTriggerComponentReporting(new ReportingMessage(errorMessage));
+						
+						// ensure that the empty file is persisted so it is not found again
+						final InboxEntry persisted = ingestionTriggerServiceTransactional.add(e);
+						LOG.debug("Added {} to persistence", persisted);
 						continue;
 					}
 					handleNew(e);
 				}
-				
-				
-				
+						
 			}
 			if (logMessage.length() != 0) {
 				LOG.info(logMessage.toString());
