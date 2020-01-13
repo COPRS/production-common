@@ -1,8 +1,10 @@
 package esa.s1pdgs.cpoc.obs_sdk.s3;
 
+import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -35,6 +37,7 @@ import com.amazonaws.util.IOUtils;
 
 import esa.s1pdgs.cpoc.obs_sdk.AbstractObsClient;
 import esa.s1pdgs.cpoc.obs_sdk.ObsServiceException;
+import esa.s1pdgs.cpoc.obs_sdk.ObsValidationException;
 import esa.s1pdgs.cpoc.obs_sdk.SdkClientException;
 import esa.s1pdgs.cpoc.obs_sdk.swift.SwiftSdkClientException;
 
@@ -150,14 +153,14 @@ public class S3ObsServices {
 	}
 
 	/**
-     * Check if bucket exists
-     * 
-     * @param bucketName
-     * @return
-	 * @throws S3SdkClientException 
-	 * @throws S3ObsServiceException 
+	 * Check if bucket exists
+	 * 
+	 * @param bucketName
+	 * @return
+	 * @throws S3SdkClientException
+	 * @throws S3ObsServiceException
 	 * @throws SwiftSdkClientException
-     */
+	 */
 	public boolean bucketExist(final String bucketName) throws S3SdkClientException, S3ObsServiceException {
 		for (int retryCount = 1;; retryCount++) {
 			try {
@@ -183,7 +186,7 @@ public class S3ObsServices {
 			}
 		}
 	}
-	
+
 	/**
 	 * Get the number of objects in the bucket whose key matches with prefix
 	 * 
@@ -228,6 +231,30 @@ public class S3ObsServices {
 		}
 	}
 
+	protected List<String> getExpectedFiles(String bucketName, String prefixKey) {
+		List<String> result = new ArrayList<>();
+		// try to identify the MD5 summary file
+		final S3Object md5file = s3client.getObject(bucketName, prefixKey + AbstractObsClient.MD5SUM_SUFFIX);
+		S3ObsInputStream md5stream = new S3ObsInputStream(md5file, md5file.getObjectContent());
+
+		try (BufferedReader reader = new BufferedReader(new InputStreamReader(md5stream))) {
+			String line;
+			while ((line = reader.readLine()) != null) {
+				final int idx = line.indexOf("  ");
+				if (idx >= 0 && line.length() > (idx + 2)) {
+					// final String md5 = line.substring(0, idx);
+					final String key = line.substring(idx + 2);
+					result.add(key);
+				}
+			}
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+
+		return result;
+	}
+
 	/**
 	 * Download objects of the given bucket with a key matching the prefix
 	 * 
@@ -250,57 +277,54 @@ public class S3ObsServices {
 			nbObj = 0;
 			// List all objects with given prefix
 			try {
-				ObjectListing objectListing = s3client.listObjects(bucketName, prefixKey);
-				if (objectListing != null && !CollectionUtils.isEmpty(objectListing.getObjectSummaries())) {
-					// Download each object
-					for (S3ObjectSummary objectSummary : objectListing.getObjectSummaries()) {
+				List<String> expectedFiles = getExpectedFiles(bucketName, prefixKey);
+				log(String.format("Expected files for prefix %s is %s", prefixKey, expectedFiles.size()));
+				// TODO: How to handle MD5 SUM files???
 
-						String key = objectSummary.getKey();
-
-						// only download md5sum files if it has been explicitly asked for a md5sum file
-						if (!prefixKey.endsWith(AbstractObsClient.MD5SUM_SUFFIX)
-								&& key.endsWith(AbstractObsClient.MD5SUM_SUFFIX)) {
-							continue;
-						}
-
-						// Build temporarly filename
-						String targetDir = directoryPath;
-						if (!targetDir.endsWith(File.separator)) {
-							targetDir += File.separator;
-						}
-
-						String localFilePath = targetDir + key;
-						// Download object
-						log(String.format("Downloading object %s from bucket %s in %s", key, bucketName,
-								localFilePath));
-						File localFile = new File(localFilePath);
-						if (localFile.getParentFile() != null) {
-							localFile.getParentFile().mkdirs();
-						}
-						try {
-							localFile.createNewFile();
-						} catch (IOException ioe) {
-							throw new S3ObsServiceException(bucketName, key,
-									"Directory creation fails for " + localFilePath, ioe);
-						}
-						s3client.getObject(new GetObjectRequest(bucketName, key), localFile);
-						// If needed move in the target directory
-						if (ignoreFolders) {
-							String filename = key;
-							int lastIndex = key.lastIndexOf('/');
-							if (lastIndex != -1) {
-								filename = key.substring(lastIndex + 1);
-							}
-							if (!key.equals(filename)) {
-								File fTo = new File(targetDir + filename);
-								localFile.renameTo(fTo);
-								localFile = fTo;
-							}
-						}
-						files.add(localFile);
-						nbObj++;
+				for (String key : expectedFiles) {
+					// only download md5sum files if it has been explicitly asked for a md5sum file
+					if (!prefixKey.endsWith(AbstractObsClient.MD5SUM_SUFFIX)
+							&& key.endsWith(AbstractObsClient.MD5SUM_SUFFIX)) {
+						continue;
 					}
+
+					// Build temporarly filename
+					String targetDir = directoryPath;
+					if (!targetDir.endsWith(File.separator)) {
+						targetDir += File.separator;
+					}
+
+					String localFilePath = targetDir + key;
+					// Download object
+					log(String.format("Downloading object %s from bucket %s in %s", key, bucketName, localFilePath));
+					File localFile = new File(localFilePath);
+					if (localFile.getParentFile() != null) {
+						localFile.getParentFile().mkdirs();
+					}
+					try {
+						localFile.createNewFile();
+					} catch (IOException ioe) {
+						throw new S3ObsServiceException(bucketName, key,
+								"Directory creation fails for " + localFilePath, ioe);
+					}
+					s3client.getObject(new GetObjectRequest(bucketName, key), localFile);
+					// If needed move in the target directory
+					if (ignoreFolders) {
+						String filename = key;
+						int lastIndex = key.lastIndexOf('/');
+						if (lastIndex != -1) {
+							filename = key.substring(lastIndex + 1);
+						}
+						if (!key.equals(filename)) {
+							File fTo = new File(targetDir + filename);
+							localFile.renameTo(fTo);
+							localFile = fTo;
+						}
+					}
+					files.add(localFile);
+					nbObj++;
 				}
+
 				log(String.format("Download %d objects with prefix %s from bucket %s in %s succeeded", nbObj, prefixKey,
 						bucketName, directoryPath));
 				return files;
@@ -479,7 +503,8 @@ public class S3ObsServices {
 		return fileList;
 	}
 
-	public void createBucket(String bucketName) throws SwiftSdkClientException, ObsServiceException, S3SdkClientException {
+	public void createBucket(String bucketName)
+			throws SwiftSdkClientException, ObsServiceException, S3SdkClientException {
 		for (int retryCount = 1;; retryCount++) {
 			try {
 				s3client.createBucket(bucketName);
@@ -504,7 +529,7 @@ public class S3ObsServices {
 			}
 		}
 	}
-	
+
 	/**
 	 * @param bucketName
 	 * @return
@@ -615,32 +640,32 @@ public class S3ObsServices {
 		}
 		return results.get(0).getSize();
 	}
-	
+
 	public String getChecksum(final String bucketName, final String prefix) throws S3SdkClientException {
 		log(String.format("Get checksum of object %s from bucket %s", prefix, bucketName));
 		List<S3ObjectSummary> results = getAll(bucketName, prefix);
 		if (results.size() != 1) {
-			throw new S3SdkClientException(bucketName, prefix, String.format(
-					"Checksum query for object %s from bucket %s returned %s results", prefix, bucketName, results.size()));
+			throw new S3SdkClientException(bucketName, prefix,
+					String.format("Checksum query for object %s from bucket %s returned %s results", prefix, bucketName,
+							results.size()));
 		}
 		return results.get(0).getETag();
 	}
 
-	public URL createTemporaryDownloadUrl(String bucketName, String key, long expirationTimeInSeconds) throws S3SdkClientException {
-        try {
-            java.util.Date expiration = new java.util.Date();
-            long expTimeMillis = expiration.getTime();
-            expTimeMillis += 1000 * expirationTimeInSeconds;
-            expiration.setTime(expTimeMillis);
+	public URL createTemporaryDownloadUrl(String bucketName, String key, long expirationTimeInSeconds)
+			throws S3SdkClientException {
+		try {
+			java.util.Date expiration = new java.util.Date();
+			long expTimeMillis = expiration.getTime();
+			expTimeMillis += 1000 * expirationTimeInSeconds;
+			expiration.setTime(expTimeMillis);
 
-            GeneratePresignedUrlRequest generatePresignedUrlRequest =
-                    new GeneratePresignedUrlRequest(bucketName, key)
-                            .withMethod(HttpMethod.GET)
-                            .withExpiration(expiration);
-            return s3client.generatePresignedUrl(generatePresignedUrlRequest);
-        } catch (AmazonServiceException e) {
-            throw new S3SdkClientException(bucketName, key, "Could not create temporary download URL");
-        }
-    }
+			GeneratePresignedUrlRequest generatePresignedUrlRequest = new GeneratePresignedUrlRequest(bucketName, key)
+					.withMethod(HttpMethod.GET).withExpiration(expiration);
+			return s3client.generatePresignedUrl(generatePresignedUrlRequest);
+		} catch (AmazonServiceException e) {
+			throw new S3SdkClientException(bucketName, key, "Could not create temporary download URL");
+		}
+	}
 
 }
