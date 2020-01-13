@@ -91,7 +91,6 @@ public final class MqiConsumer<E extends AbstractMessage> implements Runnable {
 				message = client.next(category);	
 				appStatus.setWaiting();
 				if (message == null || message.getBody() == null) {
-					ReportingUtils.newReportingBuilder().newEventReporting(new ReportingMessage("Failed to handle MQI message: {}", message));
 					LOG.trace("No message received: continue");
 					continue;
 				}
