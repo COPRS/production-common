@@ -731,7 +731,7 @@ public class OutputProcessorTest {
 
     @Test
     public void testProcessOutputs() throws AbstractCodedException, ObsEmptyFileException {
-        processor.processOutput();
+        processor.processOutput(reporting.getChildFactory());
 
         // check publication
         verify(procuderFactory, times(3))

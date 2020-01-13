@@ -30,6 +30,7 @@ import esa.s1pdgs.cpoc.ipf.execution.worker.job.process.PoolExecutorCallable;
 import esa.s1pdgs.cpoc.mqi.model.queue.IpfExecutionJob;
 import esa.s1pdgs.cpoc.obs_sdk.ObsClient;
 import esa.s1pdgs.cpoc.obs_sdk.ObsDownloadObject;
+import esa.s1pdgs.cpoc.report.Reporting;
 
 /**
  * Test the input downloader
@@ -142,7 +143,7 @@ public class InputDownloaderTest {
     public void testProcessInputsL0()
             throws AbstractCodedException, IOException {
 
-        downloaderL0.processInputs();
+        downloaderL0.processInputs(Reporting.ChildFactory.NULL);
 
         List<ObsDownloadObject> downloadToBatch = TestUtils.getL0DownloadFile();
 
@@ -177,7 +178,7 @@ public class InputDownloaderTest {
     @Test
     public void testProcessInputsL1()
             throws AbstractCodedException, IOException {
-        downloaderL1.processInputs();
+        downloaderL1.processInputs(Reporting.ChildFactory.NULL);
 
         List<ObsDownloadObject> downloadToBatch = TestUtils.getL0DownloadFile();
 

@@ -16,7 +16,6 @@ import esa.s1pdgs.cpoc.mqi.model.queue.IpfExecutionJob;
 import esa.s1pdgs.cpoc.mqi.model.queue.LevelJobPoolDto;
 import esa.s1pdgs.cpoc.report.Reporting;
 import esa.s1pdgs.cpoc.report.ReportingMessage;
-import esa.s1pdgs.cpoc.report.ReportingUtils;
 
 /**
  * Executor of all process: - pool one after the other - all tasks of the same
@@ -32,6 +31,8 @@ public class PoolExecutorCallable implements Callable<Void> {
     private static final Logger LOGGER =
             LogManager.getLogger(PoolExecutorCallable.class);
 
+    private final Reporting.ChildFactory reportingChildFactory;
+    
     /**
      * Indicate if the working directory is ready and the processes can be
      * launched
@@ -65,7 +66,8 @@ public class PoolExecutorCallable implements Callable<Void> {
      * @param prefixMonitorLogs
      */
     public PoolExecutorCallable(final ApplicationProperties properties,
-            final IpfExecutionJob job, final String prefixLogs, final ApplicationLevel appLevel) {
+            final IpfExecutionJob job, final String prefixLogs, final ApplicationLevel appLevel,
+            final Reporting.ChildFactory reportingChildFactory) {
         this.active = false;
         this.properties = properties;
         this.prefixMonitorLogs = prefixLogs;
@@ -79,6 +81,7 @@ public class PoolExecutorCallable implements Callable<Void> {
                     properties.getTmProcOneTaskS()));
         }
         this.appLevel = appLevel;
+        this.reportingChildFactory = reportingChildFactory;
     }
 
     /**
@@ -116,7 +119,7 @@ public class PoolExecutorCallable implements Callable<Void> {
                                 + counter * properties.getWapTempoS()
                                 + " seconds");
             }            
-    		final Reporting reporting = ReportingUtils.newReportingBuilder().newTaskReporting("Processing");
+    		final Reporting reporting = reportingChildFactory.newChild("Processing");
     		
             reporting.begin(new ReportingMessage("Start " + appLevel + " processing"));
                        
@@ -139,7 +142,7 @@ public class PoolExecutorCallable implements Callable<Void> {
     }
 
     /**
-     * chekc if thread is interrupted
+     * check if thread is interrupted
      * 
      * @return
      */

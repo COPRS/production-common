@@ -48,7 +48,7 @@ public class TaskCallable implements Callable<TaskResult> {
     private final Consumer<String> stdOutConsumer;
     private final Consumer<String> stdErrConsumer;
     
-    private final Reporting reporting;
+    private final Reporting.ChildFactory reportingChildFactory;
 
     /**
      * @param binaryPath
@@ -56,8 +56,8 @@ public class TaskCallable implements Callable<TaskResult> {
      * @param workDirectory
      */
     public TaskCallable(final String binaryPath, final String jobOrderPath,
-            final String workDirectory, final Reporting reporting) {
-    	this(binaryPath, jobOrderPath, workDirectory, DEFAULT_OUTPUT_CONSUMER, DEFAULT_OUTPUT_CONSUMER, reporting);
+            final String workDirectory, final Reporting.ChildFactory reportingChildFactory) {
+    	this(binaryPath, jobOrderPath, workDirectory, DEFAULT_OUTPUT_CONSUMER, DEFAULT_OUTPUT_CONSUMER, reportingChildFactory);
     }
     
     TaskCallable(
@@ -66,21 +66,22 @@ public class TaskCallable implements Callable<TaskResult> {
     		String workDirectory, 
 			Consumer<String> stdOutConsumer, 
 			Consumer<String> stdErrConsumer,
-			Reporting reporting
+			Reporting.ChildFactory reportingChildFactory
 	) {
 		this.binaryPath = binaryPath;
 		this.jobOrderPath = jobOrderPath;
 		this.workDirectory = workDirectory;
 		this.stdOutConsumer = stdOutConsumer;
 		this.stdErrConsumer = stdErrConsumer;
-		this.reporting = reporting;
+		this.reportingChildFactory = reportingChildFactory;
 	}
 
 	/**
      * Execution of the binary
      */
     @Override
-    public TaskResult call() throws InternalErrorException {        
+    public TaskResult call() throws InternalErrorException {
+    	Reporting reporting = reportingChildFactory.newChild("ProcessingTask");
         reporting.begin(new ReportingMessage("Start Task " + binaryPath));
         
         int r = -1;

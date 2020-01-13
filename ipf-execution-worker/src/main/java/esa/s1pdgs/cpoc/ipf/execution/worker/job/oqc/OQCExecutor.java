@@ -13,7 +13,6 @@ import esa.s1pdgs.cpoc.mqi.model.queue.LevelJobOutputDto;
 import esa.s1pdgs.cpoc.mqi.model.queue.OQCFlag;
 import esa.s1pdgs.cpoc.report.Reporting;
 import esa.s1pdgs.cpoc.report.ReportingMessage;
-import esa.s1pdgs.cpoc.report.ReportingUtils;
 
 public class OQCExecutor {
 	/**
@@ -27,21 +26,22 @@ public class OQCExecutor {
 		this.properties = properties;
 	}
 
-	public OQCFlag executeOQC(final Path originalProduct, final LevelJobOutputDto output, final OQCTaskFactory factory) {
-		final Reporting reporting = ReportingUtils.newReportingBuilder().newTaskReporting("Online Quality Check");
+	public OQCFlag executeOQC(final Path originalProduct, final LevelJobOutputDto output, final OQCTaskFactory factory,
+			final Reporting.ChildFactory reportingChildFactory) {
+		final Reporting reporting = reportingChildFactory.newChild("Online Quality Check");
 		
 		// Just check if OQC is enabled after all
 		if (properties.isOqcEnabled() && output.isOqcCheck()) {
 			// This output needs to be quality checked
 			LOGGER.info("Executing OQC check for product {}", originalProduct);
 			
-			reporting.begin(new ReportingMessage("Start of oqc execution for product {}",
+			reporting.begin(new ReportingMessage("Start of OQC execution for product {}",
 					originalProduct.getFileName()));
 			final ExecutorService executor = Executors.newSingleThreadExecutor();
 
 			try {
 				final OQCFlag flag = executor.submit(factory.createOQCTask(properties, originalProduct)).get();
-				reporting.end(new ReportingMessage("End of oqc execution for product {} ({})",
+				reporting.end(new ReportingMessage("End of OQC execution for product {} ({})",
 						originalProduct.getFileName(), flag));
 				return flag;
 			} catch (final Exception e) {

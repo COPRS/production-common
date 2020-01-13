@@ -23,7 +23,6 @@ import esa.s1pdgs.cpoc.obs_sdk.ObsClient;
 import esa.s1pdgs.cpoc.obs_sdk.ObsDownloadObject;
 import esa.s1pdgs.cpoc.report.Reporting;
 import esa.s1pdgs.cpoc.report.ReportingMessage;
-import esa.s1pdgs.cpoc.report.ReportingUtils;
 
 /**
  * Class which create the local working directory and download all the inputs
@@ -115,7 +114,7 @@ public class InputDownloader {
      * 
      * @throws AbstractCodedException
      */
-    public void processInputs() throws AbstractCodedException {
+    public void processInputs(final Reporting.ChildFactory reportingChildFactory) throws AbstractCodedException {
 
         // Initialize
         initializeDownload();
@@ -124,7 +123,7 @@ public class InputDownloader {
         // message
         final List<ObsDownloadObject> downloadToBatch = sortInputs();
         
-		final Reporting reporting = ReportingUtils.newReportingBuilder().newTaskReporting("InputDownloader");
+		final Reporting reporting = reportingChildFactory.newChild("InputDownloader");
         
         final StringBuilder stringBuilder = new StringBuilder();
         for (final ObsDownloadObject input : downloadToBatch) {

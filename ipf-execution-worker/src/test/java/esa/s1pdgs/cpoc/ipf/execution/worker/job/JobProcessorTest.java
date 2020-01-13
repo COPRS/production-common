@@ -263,9 +263,9 @@ public class JobProcessorTest extends MockPropertiesTest {
                     .when(procExecutor).call();
         } 
         // Step 2
-        doNothing().when(inputDownloader).processInputs();
+        doNothing().when(inputDownloader).processInputs(reporting.getChildFactory());
         // Step 4
-        doReturn(ReportingOutput.NULL).when(outputProcessor).processOutput();
+        doReturn(ReportingOutput.NULL).when(outputProcessor).processOutput(reporting.getChildFactory());
         // Step 5
         final File folder1 =
                 new File(inputMessage.getBody().getWorkDirectory() + "folder1");
@@ -309,9 +309,9 @@ public class JobProcessorTest extends MockPropertiesTest {
         // Check step 3
         verify(procExecutor, times(1)).call();
         // Check step 2
-        verify(inputDownloader, times(1)).processInputs();
+        verify(inputDownloader, times(1)).processInputs(reporting.getChildFactory());
         // Check step 4
-        verify(outputProcessor, times(1)).processOutput();
+        verify(outputProcessor, times(1)).processOutput(reporting.getChildFactory());
         // Check step 5
         assertFalse(workingDir.exists());
         // Check step 6
@@ -337,9 +337,9 @@ public class JobProcessorTest extends MockPropertiesTest {
         // Check step 3
         verify(procExecutor, times(1)).call();
         // Check step 2
-        verify(inputDownloader, times(0)).processInputs();
+        verify(inputDownloader, times(0)).processInputs(reporting.getChildFactory());
         // Check step 4
-        verify(outputProcessor, times(1)).processOutput();
+        verify(outputProcessor, times(1)).processOutput(reporting.getChildFactory());
         // Check step 5
         assertFalse(workingDir.exists());
         // Check step 6
@@ -365,9 +365,9 @@ public class JobProcessorTest extends MockPropertiesTest {
         // Check step 3
         verify(procExecutor, times(1)).call();
         // Check step 2
-        verify(inputDownloader, times(1)).processInputs();
+        verify(inputDownloader, times(1)).processInputs(reporting.getChildFactory());
         // Check step 4
-        verify(outputProcessor, times(0)).processOutput();
+        verify(outputProcessor, times(0)).processOutput(reporting.getChildFactory());
         // Check step 5
         assertFalse(workingDir.exists());
         // Check step 6
@@ -394,9 +394,9 @@ public class JobProcessorTest extends MockPropertiesTest {
         // Check step 3
         verify(procExecutor, times(1)).call();
         // Check step 2
-        verify(inputDownloader, times(1)).processInputs();
+        verify(inputDownloader, times(1)).processInputs(reporting.getChildFactory());
         // Check step 4
-        verify(outputProcessor, times(1)).processOutput();
+        verify(outputProcessor, times(1)).processOutput(reporting.getChildFactory());
         // Check step 5
         assertTrue(workingDir.exists());
         // Check step 6
@@ -425,11 +425,11 @@ public class JobProcessorTest extends MockPropertiesTest {
         // Check step 3
         verify(procExecutor, times(1)).call();
         // Check step 2
-        verify(inputDownloader, times(1)).processInputs();
+        verify(inputDownloader, times(1)).processInputs(reporting.getChildFactory());
         // Check status set to error
         verify(appStatus, times(1)).setError("PROCESSING");
         // Check step 4
-        verify(outputProcessor, never()).processOutput();
+        verify(outputProcessor, never()).processOutput(reporting.getChildFactory());
         // Check step 5
         assertFalse(workingDir.exists());
         // Check step 6

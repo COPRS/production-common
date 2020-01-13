@@ -103,11 +103,9 @@ public class PoolProcessor {
             try {
                 LOGGER.info("{} 1 - Submitting tasks {}", prefixLogs,
                         pool.getTasks());
-                for (final LevelJobTaskDto task : pool.getTasks()) {
-                	final Reporting reporting = reportingChildFactory.newChild("Processing.Task");
-                	
+                for (final LevelJobTaskDto task : pool.getTasks()) {               	
                     completionSrv.submit(new TaskCallable(task.getBinaryPath(),
-                            jobOrderPath, workDirectory, reporting));
+                            jobOrderPath, workDirectory, reportingChildFactory));
                 }
                 LOGGER.info("{} 2 - Waiting for tasks execution", prefixLogs);
                 for (int i = 0; i < nbTasks; i++) {
