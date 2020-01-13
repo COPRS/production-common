@@ -15,6 +15,8 @@ import esa.s1pdgs.cpoc.mqi.model.queue.AbstractMessage;
 import esa.s1pdgs.cpoc.mqi.model.rest.Ack;
 import esa.s1pdgs.cpoc.mqi.model.rest.AckMessageDto;
 import esa.s1pdgs.cpoc.mqi.model.rest.GenericMessageDto;
+import esa.s1pdgs.cpoc.report.ReportingMessage;
+import esa.s1pdgs.cpoc.report.ReportingUtils;
 
 public final class MqiConsumer<E extends AbstractMessage> implements Runnable {
 	private static final Logger LOG = LogManager.getLogger(MqiConsumer.class);
@@ -51,7 +53,7 @@ public final class MqiConsumer<E extends AbstractMessage> implements Runnable {
 			final long pollingIntervalMillis,
 			final long initialDelay,
 			final AppStatus appStatus) {
-		this(client, category, mqiListener, Collections.EMPTY_LIST, pollingIntervalMillis, initialDelay, appStatus);
+		this(client, category, mqiListener, Collections.emptyList(), pollingIntervalMillis, initialDelay, appStatus);
 	}
 
 	public MqiConsumer(
@@ -59,7 +61,7 @@ public final class MqiConsumer<E extends AbstractMessage> implements Runnable {
 			final ProductCategory category,
 			final MqiListener<E> mqiListener,
 			final long pollingIntervalMillis) {
-		this(client, category, mqiListener, Collections.EMPTY_LIST, pollingIntervalMillis, 0L, AppStatus.NULL);
+		this(client, category, mqiListener, Collections.emptyList(), pollingIntervalMillis, 0L, AppStatus.NULL);
 	}
 
 	@Override
@@ -78,6 +80,7 @@ public final class MqiConsumer<E extends AbstractMessage> implements Runnable {
 		// generic polling loop
 		LOG.info("Starting {}", this);
 		do {
+			GenericMessageDto<E> message = null;
 			try {
 				if (appStatus.isShallBeStopped()) {
 					LOG.info("MQI has been commanded to be stopped");
@@ -85,30 +88,33 @@ public final class MqiConsumer<E extends AbstractMessage> implements Runnable {
 					return;
 				}
 				LOG.trace("{} polls MQI", this);
-				final GenericMessageDto<E> message = client.next(category);	
+				message = client.next(category);	
 				appStatus.setWaiting();
 				if (message == null || message.getBody() == null) {
-					LOG.trace("No message received: continue");					
+					ReportingUtils.newReportingBuilder().newEventReporting(new ReportingMessage("Failed to handle MQI message: {}", message));
+					LOG.trace("No message received: continue");
 					continue;
 				}
 				if (!allowConsumption(message)) {
+					ReportingUtils.newReportingBuilder().newEventReporting(new ReportingMessage("Ignored MQI message:{}", message));
 					LOG.trace("Filter does not allow consumption: continue");
 					continue;
 				}
 				appStatus.setProcessing(message.getId());
 				LOG.debug("{} received {} from MQI", this, message);
-				AckMessageDto ackMess;			
 				try {
 					mqiListener.onMessage(message);
-					ackMess = new AckMessageDto(message.getId(), Ack.OK, null, false);
+					client.ack(new AckMessageDto(message.getId(), Ack.OK, null, false), category);
+					ReportingUtils.newReportingBuilder().newEventReporting(new ReportingMessage("Handled MQI message: {}", message));
 				// any other error --> dump prominently into log file but continue	
 				} catch (final Exception e) {
 					LOG.error(String.format("Error handling message %s", message), e);
-					ackMess = new AckMessageDto(message.getId(), Ack.ERROR, LogUtils.toString(e), false);
-				}			
-				client.ack(ackMess, category);
+					client.ack(new AckMessageDto(message.getId(), Ack.ERROR, LogUtils.toString(e), false), category);
+					ReportingUtils.newReportingBuilder().newEventReporting(new ReportingMessage("Failed to handle MQI message: {}", message));
+				}
 			// on communication errors with Mqi --> just dump warning and retry on next polling attempt
 			} catch (final AbstractCodedException ace) {
+				ReportingUtils.newReportingBuilder().newEventReporting(new ReportingMessage("Failed to handle MQI message: {}", message));
 				LOG.warn("Error Code: {}, Message: {}", ace.getCode().getCode(), ace.getLogMessage());
 				appStatus.setError("NEXT_MESSAGE");
 			}

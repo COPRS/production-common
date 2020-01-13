@@ -45,8 +45,7 @@ public final class TestIngestionWorkerService {
 	@Mock
 	GenericMqiClient mqiClient;
 
-	Reporting reporting = ReportingUtils.newReportingBuilderFor("Test")
-			.newWorkerComponentReporting();
+	Reporting reporting = ReportingUtils.newReportingBuilder().newTaskReporting("Test");
 	
 	@Mock
 	Logger logger;
@@ -75,10 +74,10 @@ public final class TestIngestionWorkerService {
 		
 		final ProductService fakeProductService = new ProductService() {			
 			@Override
-			public void markInvalid(final IngestionJob ingestion) {}
+			public void markInvalid(final IngestionJob ingestion, final Reporting.ChildFactory reportingChildFactory) {}
 			
 			@Override
-			public IngestionResult ingest(final ProductFamily family, final IngestionJob ingestion)
+			public IngestionResult ingest(final ProductFamily family, final IngestionJob ingestion, final Reporting.ChildFactory reportingChildFactory)
 					throws ProductException, InternalErrorException {
 				return IngestionResult.NULL;
 			}
@@ -135,12 +134,12 @@ public final class TestIngestionWorkerService {
 		prod.setDto(dto);
 		
 		final IngestionResult expectedResult = new IngestionResult(Arrays.asList(prod), 0L);
-		doReturn(expectedResult).when(productService).ingest(Mockito.eq(ProductFamily.AUXILIARY_FILE), Mockito.eq(ingestionJob));
+		doReturn(expectedResult).when(productService).ingest(Mockito.eq(ProductFamily.AUXILIARY_FILE), Mockito.eq(ingestionJob), Mockito.any());
 		
-		final IngestionResult result = uut.identifyAndUpload(reporting.getChildFactory(), message, ingestionJob);
+		final IngestionResult result = uut.identifyAndUpload(message, ingestionJob, Reporting.ChildFactory.NULL);
 		assertEquals(expectedResult, result);
-		verify(productService, times(1)).ingest(Mockito.eq(ProductFamily.AUXILIARY_FILE), Mockito.eq(ingestionJob));
-		verify(productService, never()).markInvalid(Mockito.any());
+		verify(productService, times(1)).ingest(Mockito.eq(ProductFamily.AUXILIARY_FILE), Mockito.eq(ingestionJob), Mockito.any());
+		verify(productService, never()).markInvalid(Mockito.any(), Mockito.any());
 	}
 	
 	@Test
@@ -162,10 +161,10 @@ public final class TestIngestionWorkerService {
 		final IngestionJob ingestionJob = new IngestionJob("foo.bar");
 		message.setBody(ingestionJob);
 		
-		final IngestionResult result = uut.identifyAndUpload(reporting.getChildFactory(), message, ingestionJob);
+		final IngestionResult result = uut.identifyAndUpload(message, ingestionJob, Reporting.ChildFactory.NULL);
 		assertEquals(IngestionResult.NULL, result);
-		verify(productService, never()).ingest(Mockito.any(), Mockito.any());
-		verify(productService, times(1)).markInvalid(Mockito.eq(ingestionJob));
+		verify(productService, never()).ingest(Mockito.any(), Mockito.any(), Mockito.any());
+		verify(productService, times(1)).markInvalid(Mockito.eq(ingestionJob), Mockito.any());
 	}
 
 	@Test

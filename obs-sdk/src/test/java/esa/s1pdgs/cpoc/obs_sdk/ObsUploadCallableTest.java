@@ -85,7 +85,7 @@ public class ObsUploadCallableTest {
             throws ObsServiceException, SdkClientException, AbstractCodedException, ObsEmptyFileException {
         callable = new ObsUploadCallable(obsClient, object);
         callable.call();
-        verify(obsClient, times(1)).upload(Mockito.eq(Arrays.asList(object)));
+        verify(obsClient, times(1)).upload(Mockito.eq(Arrays.asList(object)), Mockito.any());
     }
 
 // FIXME: Enable tests

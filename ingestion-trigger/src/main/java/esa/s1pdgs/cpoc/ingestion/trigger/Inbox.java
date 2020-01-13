@@ -81,7 +81,7 @@ public final class Inbox {
 					final File file = Paths.get(e.getPickupPath(), e.getRelativePath()).toFile();
 					if(org.apache.commons.io.FileUtils.sizeOf(file) == 0) {						
 						String errorMessage = "Empty file detected, skipping: " + file.getName();
-						ReportingUtils.newReportingBuilderFor("Inbox").newTriggerComponentReporting(new ReportingMessage(errorMessage));
+						ReportingUtils.newReportingBuilder().newEventReporting(new ReportingMessage(errorMessage));
 						
 						// ensure that the empty file is persisted so it is not found again
 						final InboxEntry persisted = ingestionTriggerServiceTransactional.add(e);

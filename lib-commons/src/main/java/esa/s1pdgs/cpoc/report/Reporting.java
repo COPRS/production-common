@@ -14,12 +14,17 @@ public interface Reporting {
 			return addTags(Collections.singleton(tag));
 		}
 		Builder addTags(Collection<String> tags);
-		Reporting newWorkerComponentReporting();
-		void newTriggerComponentReporting(final ReportingMessage reportingMessage);
+		Reporting newTaskReporting(String taskName);
+		void newEventReporting(final ReportingMessage reportingMessage);
 	}
 
 	public interface ChildFactory {
-		Reporting newChild(String childActionName);
+		public static final ChildFactory NULL = new ChildFactory() {
+			@Override
+			public Reporting newChild(String taskName) { return Reporting.NULL; }
+		};
+
+		Reporting newChild(String taskName);
 	}
 	
 	enum Event {
@@ -42,8 +47,27 @@ public interface Reporting {
 		}
 	}
 	
-	public static final Logger REPORT_LOG = LogManager.getLogger(Reporting.class); 
+	public static final Logger REPORT_LOG = LogManager.getLogger(Reporting.class);
+	
+	public static final Reporting NULL = new Reporting() {
+		
+		/* Discarding Reporting Implementation */
 
+		@Override
+		public void begin(ReportingInput input, ReportingMessage reportingMessage) {}
+
+		@Override
+		public void end(ReportingOutput output, ReportingMessage reportingMessage) {}
+
+		@Override
+		public void error(ReportingMessage reportingMessage) {}
+
+		@Override
+		public ChildFactory getChildFactory() {
+			return Reporting.ChildFactory.NULL;
+		}		
+	};
+		
 	default void begin(final ReportingMessage reportingMessage) {
 		begin(ReportingInput.NULL, reportingMessage);
 	}

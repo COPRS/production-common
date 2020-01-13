@@ -14,6 +14,7 @@ import java.util.Map;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 
 import esa.s1pdgs.cpoc.common.ProductFamily;
@@ -35,8 +36,7 @@ public class ValidationServiceTest {
 
 	private ValidationService validationService;
 	
-	final Reporting reporting = ReportingUtils.newReportingBuilderFor("ValidationService")
-			.newWorkerComponentReporting();
+	final Reporting reporting = ReportingUtils.newReportingBuilder().newTaskReporting("ValidationService");
 
 	@Mock
 	Reporting report;
@@ -104,9 +104,10 @@ public class ValidationServiceTest {
 
 		doReturn(metadataResults).when(metadataClient).query(ProductFamily.AUXILIARY_FILE, localDateTimeStart,
 				localDateTimeStop);
-		doReturn(obsResults).when(obsClient).listInterval(ProductFamily.AUXILIARY_FILE,
-				Date.from(localDateTimeStart.atZone(ZoneId.of("UTC")).toInstant()),
-				Date.from(localDateTimeStop.atZone(ZoneId.of("UTC")).toInstant()));
+		doReturn(obsResults).when(obsClient).listInterval(Mockito.eq(ProductFamily.AUXILIARY_FILE),
+				Mockito.eq(Date.from(localDateTimeStart.atZone(ZoneId.of("UTC")).toInstant())),
+				Mockito.eq(Date.from(localDateTimeStop.atZone(ZoneId.of("UTC")).toInstant())),
+				Mockito.any());
 		
 		// OBS does have 6 elements, but two are actually the same product
 		assertEquals(5,validationService.extractRealKeys(obsResults.values(),ProductFamily.AUXILIARY_FILE).size());

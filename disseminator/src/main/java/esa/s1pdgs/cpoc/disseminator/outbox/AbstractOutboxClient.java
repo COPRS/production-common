@@ -13,6 +13,7 @@ import esa.s1pdgs.cpoc.disseminator.path.PathEvaluater;
 import esa.s1pdgs.cpoc.obs_sdk.ObsClient;
 import esa.s1pdgs.cpoc.obs_sdk.ObsObject;
 import esa.s1pdgs.cpoc.obs_sdk.SdkClientException;
+import esa.s1pdgs.cpoc.report.Reporting;
 
 public abstract class AbstractOutboxClient implements OutboxClient {	
 	protected final Logger logger = LogManager.getLogger(getClass());
@@ -32,8 +33,8 @@ public abstract class AbstractOutboxClient implements OutboxClient {
 		return "OutboxClient-" + config.getProtocol();
 	}
 	
-	protected final Iterable<Map.Entry<String, InputStream>> entries(final ObsObject obsObject) throws SdkClientException {
-		return obsClient.getAllAsInputStream(obsObject.getFamily(), obsObject.getKey()).entrySet();
+	protected final Iterable<Map.Entry<String, InputStream>> entries(final ObsObject obsObject, final Reporting.ChildFactory reportingChildFactory) throws SdkClientException {
+		return obsClient.getAllAsInputStream(obsObject.getFamily(), obsObject.getKey(), reportingChildFactory).entrySet();
 	}
 
 	protected final void createParentIfRequired(final File file) {

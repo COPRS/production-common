@@ -93,8 +93,7 @@ public class MetadataExtractionService {
 		
 		final ProductCategory category = ProductCategory.of(family);
 
-		final Reporting reporting = ReportingUtils.newReportingBuilderFor("MetadataExtraction")
-				.newWorkerComponentReporting();
+		final Reporting reporting = ReportingUtils.newReportingBuilder().newTaskReporting("MetadataExtraction");
     
 		reporting.begin(new FilenameReportingInput(productName), new ReportingMessage("Starting metadata extraction"));   
 		try {
@@ -110,7 +109,7 @@ public class MetadataExtractionService {
             	metadata.put("insertionTime", DateUtils.formatToMetadataDateTimeFormat(LocalDateTime.now()));
             }
             
-            final Reporting reportPublish = reporting.getChildFactory().newChild("MetadataExtraction.Publish");       
+            final Reporting reportPublish = reporting.getChildFactory().newChild("MetadataPublish");       
             reportPublish.begin(new ReportingMessage("Start publishing metadata"));
 
             try {

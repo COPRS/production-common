@@ -134,8 +134,7 @@ public class CompressProcessor implements MqiListener<CompressionJob> {
 		// ----------------------------------------------------------
 		// Initialize processing
 		// ------------------------------------------------------
-		final Reporting report = ReportingUtils.newReportingBuilderFor("CompressionProcessing")
-				.newWorkerComponentReporting();
+		final Reporting report = ReportingUtils.newReportingBuilder().newTaskReporting("CompressionProcessing");
 
 		final String workDir = properties.getWorkingDirectory();
 		report.begin(
@@ -148,7 +147,7 @@ public class CompressProcessor implements MqiListener<CompressionJob> {
 		// Initialize the pool processor executor
 		final CompressExecutorCallable procExecutor = new CompressExecutorCallable(job, // getPrefixMonitorLog(MonitorLogUtils.LOG_PROCESS,
 																					// job),
-				"CompressionProcessor - process", properties);
+				"CompressionProcessor - process", properties, report.getChildFactory());
 		final ExecutorService procExecutorSrv = Executors.newSingleThreadExecutor();
 		final ExecutorCompletionService<Void> procCompletionSrv = new ExecutorCompletionService<>(procExecutorSrv);
 
@@ -189,7 +188,7 @@ public class CompressProcessor implements MqiListener<CompressionJob> {
 			checkThreadInterrupted();
 			LOGGER.info("{} Preparing local working directory", "LOG_INPUT", // getPrefixMonitorLog(MonitorLogUtils.LOG_INPUT
 					job);
-			fileDownloader.processInputs();
+			fileDownloader.processInputs(report.getChildFactory());
 
 			step = 3;
 			LOGGER.info("{} Starting process executor", "LOG PROCESS"// getPrefixMonitorLog(MonitorLogUtils.LOG_PROCESS
@@ -203,7 +202,7 @@ public class CompressProcessor implements MqiListener<CompressionJob> {
 			LOGGER.info("{} Processing l0 outputs", "LOG_OUTPUT", // getPrefixMonitorLog(MonitorLogUtils.LOG_OUTPUT
 					job);
 
-			filename = fileUploader.processOutput();
+			filename = fileUploader.processOutput(report.getChildFactory());
 
 			ackOk = true;
 		} catch (final AbstractCodedException ace) {

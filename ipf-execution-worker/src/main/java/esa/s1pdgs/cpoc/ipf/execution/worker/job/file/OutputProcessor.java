@@ -523,7 +523,7 @@ public class OutputProcessor {
 				if (Thread.currentThread().isInterrupted()) {
 					throw new InternalErrorException("The current thread as been interrupted");
 				}
-				this.obsClient.upload(sublist);
+				this.obsClient.upload(sublist, reportingChildFactory);
 				report.end(new ReportingMessage("End uploading batch " + i + " of outputs " + listProducts));
 
 			} catch (final AbstractCodedException e) {
@@ -611,8 +611,7 @@ public class OutputProcessor {
 	 * @throws ObsEmptyFileException 
 	 */
 	public ReportingOutput processOutput() throws AbstractCodedException, ObsEmptyFileException {
-		final Reporting reporting = ReportingUtils.newReportingBuilderFor("OutputHandling")
-				.newWorkerComponentReporting();
+		final Reporting reporting = ReportingUtils.newReportingBuilder().newTaskReporting("OutputHandling");
 
 		List<String> result = new ArrayList<>();
 		final List<Segment> segments = new ArrayList<>();

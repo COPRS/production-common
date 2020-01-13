@@ -4,6 +4,7 @@ import java.util.Arrays;
 import java.util.concurrent.Callable;
 
 import esa.s1pdgs.cpoc.common.errors.AbstractCodedException;
+import esa.s1pdgs.cpoc.report.Reporting;
 
 /**
  * Callable to upload a file / folder in the OBS
@@ -41,7 +42,7 @@ public class ObsUploadCallable implements Callable<Void> {
      */
     @Override
     public Void call() throws AbstractCodedException, ObsEmptyFileException {
-    	obsClient.upload(Arrays.asList(object));
+    	obsClient.upload(Arrays.asList(object), Reporting.ChildFactory.NULL); // reporting shall not be done here but by the executor thread
         return null;
     }
 

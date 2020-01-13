@@ -30,6 +30,7 @@ import esa.s1pdgs.cpoc.disseminator.FakeObsClient;
 import esa.s1pdgs.cpoc.disseminator.config.DisseminationProperties.OutboxConfiguration;
 import esa.s1pdgs.cpoc.disseminator.path.PathEvaluater;
 import esa.s1pdgs.cpoc.obs_sdk.ObsObject;
+import esa.s1pdgs.cpoc.report.Reporting;
 
 public class TestSftpOutboxClient {
 	static final class SimplePasswordAuthenticator implements PasswordAuthenticator {
@@ -103,7 +104,7 @@ public class TestSftpOutboxClient {
 	public final void testUpload_OnNonExistingDirectory_ShallCreateParentDirectoriesLazily() throws Exception {
 		final FakeObsClient fakeObsClient = new FakeObsClient() {
 			@Override
-			public Map<String, InputStream> getAllAsInputStream(ProductFamily family, String keyPrefix) {
+			public Map<String, InputStream> getAllAsInputStream(ProductFamily family, String keyPrefix, Reporting.ChildFactory reportingChildFactory) {
 				return Collections.singletonMap("my/little/file", new ByteArrayInputStream("expected file content".getBytes()));
 			}			
 		};		
@@ -116,7 +117,7 @@ public class TestSftpOutboxClient {
 		final File dir = new File(rootDir, testDir.toPath().toString());
 		
 		final SftpOutboxClient uut = new SftpOutboxClient(fakeObsClient, config, PathEvaluater.NULL);		
-		uut.transfer(new ObsObject(ProductFamily.BLANK, "my/little/file"));
+		uut.transfer(new ObsObject(ProductFamily.BLANK, "my/little/file"), Reporting.ChildFactory.NULL);
 		
 		final File expectedFile = new File(dir, "my/little/file");
 		assertEquals(true, expectedFile.exists());
@@ -128,7 +129,7 @@ public class TestSftpOutboxClient {
 	public final void testUpload_OnExistingDirectory_ShallTransferFile() throws Exception {
 		final FakeObsClient fakeObsClient = new FakeObsClient() {
 			@Override
-			public Map<String, InputStream> getAllAsInputStream(ProductFamily family, String keyPrefix) {
+			public Map<String, InputStream> getAllAsInputStream(ProductFamily family, String keyPrefixReporting, Reporting.ChildFactory reportingChildFactory) {
 				return Collections.singletonMap("my/little/file", new ByteArrayInputStream("expected file content".getBytes()));
 			}			
 		};	
@@ -143,7 +144,7 @@ public class TestSftpOutboxClient {
 		dir.mkdirs();
 		
 		final SftpOutboxClient uut = new SftpOutboxClient(fakeObsClient, config, PathEvaluater.NULL);		
-		uut.transfer(new ObsObject(ProductFamily.BLANK, "my/little/file"));
+		uut.transfer(new ObsObject(ProductFamily.BLANK, "my/little/file"), Reporting.ChildFactory.NULL);
 		
 		final File expectedFile = new File(dir, "my/little/file");
 		assertEquals(true, expectedFile.exists());

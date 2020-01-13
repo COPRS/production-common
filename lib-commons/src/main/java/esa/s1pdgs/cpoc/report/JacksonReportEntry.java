@@ -10,13 +10,13 @@ import esa.s1pdgs.cpoc.report.message.Task;
 
 public class JacksonReportEntry implements ReportEntry {
 	private final Header header;
-	private final Task task;
 	private final Message message;
+	private final Task task;
 	
-	public JacksonReportEntry(final Header header, final Task task, final Message message) {
+	public JacksonReportEntry(final Header header, final Message message, final Task task) {
 		this.header = header;
-		this.task = task;
 		this.message = message;
+		this.task = task;
 	}
 	
 	@Override
@@ -35,11 +35,12 @@ public class JacksonReportEntry implements ReportEntry {
 		return header;
 	}
 
+	public Message getMessage() {
+		return message;
+	}
+
 	public Task getTask() {
 		return task;
 	}
 
-	public Message getMessage() {
-		return message;
-	}
 }

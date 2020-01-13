@@ -21,27 +21,25 @@ public final class ReportAdapter implements Reporting {
 
 		private final ReportAppender appender;
 		private final UUID id;
-		private final String actionName;
 		
+		private String taskName;		
 		private UUID predecessor;
 		private UUID parent;
 
 		Builder(
 				final ReportAppender appender, 
-				final String actionName, 
 				final UUID predecessor, 
 				final UUID parent, 
 				final UUID id
 		) {
 			this.appender = appender;
-			this.actionName = actionName;
 			this.predecessor = predecessor;
 			this.parent = parent;
 			this.id = id;
 		}
 		
-		public Builder(final ReportAppender appender, final String actionName) {
-			this(appender, actionName, null, null, UUID.randomUUID());
+		public Builder(final ReportAppender appender) {
+			this(appender, null, null, UUID.randomUUID());
 		}
 
 		@Override
@@ -57,17 +55,18 @@ public final class ReportAdapter implements Reporting {
 		}
 
 		@Override
-		public Reporting newWorkerComponentReporting() {
+		public Reporting newTaskReporting(String taskName) {
+			this.taskName = taskName;
 			return new ReportAdapter(this);
 		}
 		
 		@Override
-		public void newTriggerComponentReporting(final ReportingMessage reportingMessage) {
+		public void newEventReporting(final ReportingMessage reportingMessage) {
 			ReportAdapter reportAdapter = new ReportAdapter(this);
 			reportAdapter.appender.report(new JacksonReportEntry(
-					new Header(reportAdapter.actionName, Level.INFO), 
-					null,
-					new Message(reportAdapter.toString(reportingMessage))
+					new Header(Level.INFO), 
+					new Message(reportAdapter.toString(reportingMessage)),
+					null
 			));
 			
 		}
@@ -83,16 +82,16 @@ public final class ReportAdapter implements Reporting {
 			this.parentTags = parentTags;
 		}
 		
-		public final Reporting newChild(final String childActionName) {
-			return new Builder(parentAppender, childActionName, null, parentId, UUID.randomUUID())
+		public final Reporting newChild(final String taskName) { // TODO
+			return new Builder(parentAppender, null, parentId, UUID.randomUUID())
 					.addTags(parentTags)
-					.newWorkerComponentReporting();			
+					.newTaskReporting(taskName);			
 		}
 	}
 	
 	private final List<String> tags;	
 	private final ReportAppender appender;
-	private final String actionName;
+	private final String taskName;
 	private final UUID predecessor;
 	private final UUID parent;
 	private final UUID id;
@@ -103,7 +102,7 @@ public final class ReportAdapter implements Reporting {
 	ReportAdapter(final Builder builder) {
 		tags 		 = builder.tags;
 		appender 	 = builder.appender;
-		actionName 	 = builder.actionName;
+		taskName 	 = builder.taskName;
 		predecessor  = builder.predecessor;
 		parent 		 = builder.parent;
 		id 			 = builder.id;
@@ -122,7 +121,7 @@ public final class ReportAdapter implements Reporting {
 	@Override
 	public final void begin(final ReportingInput in, final ReportingMessage reportingMessage) {
 		actionStart = System.currentTimeMillis();
-		final BeginTask task = new BeginTask(id.toString(), actionName, in);
+		final BeginTask task = new BeginTask(id.toString(), taskName, in);
 		if (predecessor != null) {
 			task.setFollowsFromTask(parent.toString());
 		}
@@ -130,9 +129,9 @@ public final class ReportAdapter implements Reporting {
 			task.setChildOfTask(parent.toString());
 		}		
 		appender.report(new JacksonReportEntry(
-				new Header(actionName, Level.INFO), 
-				task, 
-				new Message(toString(reportingMessage))
+				new Header(Level.INFO), 
+				new Message(toString(reportingMessage)),
+				task
 		));	
 	}
 	
@@ -142,7 +141,7 @@ public final class ReportAdapter implements Reporting {
 		final long transferAmount = reportingMessage.getTransferAmount();
 		final Task endTask = new EndTask(
 				id.toString(), 
-				actionName, 
+				taskName, 
 				Status.OK, 
 				calcDuration(deltaTMillis),
 				out
@@ -152,9 +151,9 @@ public final class ReportAdapter implements Reporting {
 			endTask.setRate(calcRate(transferAmount, deltaTMillis));
 		}
 		appender.report(new JacksonReportEntry(		
-				new Header(actionName, Level.INFO), 
-				endTask, 
-				new Message(toString(reportingMessage))
+				new Header(Level.INFO), 
+				new Message(toString(reportingMessage)),
+				endTask
 		));
 		actionStart = 0;
 	}
@@ -163,15 +162,15 @@ public final class ReportAdapter implements Reporting {
 	public final void error(final ReportingMessage reportingMessage) {
 		final Task endTask = new EndTask(
 				id.toString(), 
-				actionName, 
+				taskName, 
 				Status.NOK, 
 				0,
 				ReportingOutput.NULL
 		);
 		appender.report(new JacksonReportEntry(		
-				new Header(actionName, Level.ERROR), 
-				endTask, 
-				new Message(toString(reportingMessage))
+				new Header(Level.ERROR), 
+				new Message(toString(reportingMessage)),
+				endTask
 		));
 		actionStart = 0;
 	}

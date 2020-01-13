@@ -17,6 +17,7 @@ import esa.s1pdgs.cpoc.mqi.model.queue.ProductionEvent;
 import esa.s1pdgs.cpoc.mqi.model.rest.GenericMessageDto;
 import esa.s1pdgs.cpoc.obs_sdk.ObsObject;
 import esa.s1pdgs.cpoc.obs_sdk.ObsServiceException;
+import esa.s1pdgs.cpoc.report.Reporting;
 
 public class TestDisseminationService {
 	@Test
@@ -91,7 +92,7 @@ public class TestDisseminationService {
 		};		
 		final OutboxClient failOuboxClient = new OutboxClient() {			
 			@Override
-			public String transfer(final ObsObject obsObjext) throws SdkClientException, ObsException {
+			public String transfer(final ObsObject obsObjext, Reporting.ChildFactory reportingChildFactory) throws SdkClientException, ObsException {
 				throw new SdkClientException("EXPECTED");
 			}
 		};

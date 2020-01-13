@@ -80,8 +80,7 @@ public abstract class AbstractObsClient implements ObsClient {
 	            }
             }
         } else {
-    		final Reporting reporting = ReportingUtils.newReportingBuilderFor("Read")
-    				.newWorkerComponentReporting();
+    		final Reporting reporting = ReportingUtils.newReportingBuilder().newTaskReporting("Read");
       	
             // Download object in sequential
             for (final ObsDownloadObject object : objects) {            
@@ -122,8 +121,7 @@ public abstract class AbstractObsClient implements ObsClient {
             waitForCompletion(workerThread, service, objects.size(), configuration.getTimeoutUpExec());
 
         } else {
-      		final Reporting reporting = ReportingUtils.newReportingBuilderFor("Write")
-    				.newWorkerComponentReporting();
+      		final Reporting reporting = ReportingUtils.newReportingBuilder().newTaskReporting("Write");
         	
             // Upload object in sequential
             for (final ObsUploadObject object : objects) {            	
@@ -188,13 +186,25 @@ public abstract class AbstractObsClient implements ObsClient {
      * @throws IllegalArgumentException
      */
     @Override
-	public List<File> download(final List<ObsDownloadObject> objects) throws AbstractCodedException {
-    	ValidArgumentAssertion.assertValidArgument(objects);
-        try {
-            return downloadObjects(objects, true);
-        } catch (final SdkClientException exc) {
-            throw new ObsParallelAccessException(exc);
-        }
+	public List<File> download(final List<ObsDownloadObject> objects, final Reporting.ChildFactory reportingChildFactory) throws AbstractCodedException {
+    	final Reporting reporting = reportingChildFactory.newChild("ObsDownload");
+    	reporting.begin(new ReportingMessage("Start download of objects {}", objects));
+    	try {
+	    	ValidArgumentAssertion.assertValidArgument(objects);
+	        try {
+	        	List<File> res = downloadObjects(objects, true);
+	        	reporting.end(new ReportingMessage("End download of objects {}", objects));
+	            return res;
+	        } catch (final SdkClientException exc) {
+	            throw new ObsParallelAccessException(exc);
+	        }
+    	} catch (AbstractCodedException e) {
+    		reporting.error(new ReportingMessage("[code {}] {}", e.getCode().getCode(), e.getLogMessage()));
+    		throw e;
+	    } catch (Exception e) {
+			reporting.error(new ReportingMessage(LogUtils.toString(e)));
+			throw e;
+		}
     }
 
 	/**
@@ -204,76 +214,102 @@ public abstract class AbstractObsClient implements ObsClient {
 	 * @throws AbstractCodedException
 	 * @throws ObsEmptyFileException
 	 */
-	public void upload(final List<ObsUploadObject> objects) throws AbstractCodedException, ObsEmptyFileException {
-		ValidArgumentAssertion.assertValidArgument(objects);
-
-		for (ObsUploadObject o : objects) {
-			if (FileUtils.size(o.getFile()) == 0) {
-				throw new ObsEmptyFileException("Empty file detected: " + o.getFile().getName());
-			}
-		}
-
+	public void upload(final List<ObsUploadObject> objects, final Reporting.ChildFactory reportingChildFactory) throws AbstractCodedException, ObsEmptyFileException {
+		final Reporting reporting = reportingChildFactory.newChild("ObsUpload");
+    	reporting.begin(new ReportingMessage("Start upload of objects {}", objects));
 		try {
-			uploadObjects(objects, true);
-		} catch (SdkClientException exc) {
-			throw new ObsParallelAccessException(exc);
+			ValidArgumentAssertion.assertValidArgument(objects);
+	
+			for (ObsUploadObject o : objects) {
+				if (FileUtils.size(o.getFile()) == 0) {
+					throw new ObsEmptyFileException("Empty file detected: " + o.getFile().getName());
+				}
+			}
+	
+			try {
+				uploadObjects(objects, true);
+		    	reporting.end(new ReportingMessage("End upload of objects {}", objects));
+			} catch (SdkClientException exc) {
+				throw new ObsParallelAccessException(exc);
+			}
+		} catch (final AbstractCodedException e) {
+			reporting.error(new ReportingMessage("[code {}] {}", e.getCode().getCode(), e.getLogMessage()));
+			throw e;
+		} catch (Exception e) {
+			reporting.error(new ReportingMessage(LogUtils.toString(e)));
+			throw e;
 		}
 	}
 
     @Override
-	public Map<String,ObsObject> listInterval(final ProductFamily family, final Date intervalStart, final Date intervalEnd) throws SdkClientException {
-    	ValidArgumentAssertion.assertValidArgument(family);
-    	ValidArgumentAssertion.assertValidArgument(intervalStart);
-    	ValidArgumentAssertion.assertValidArgument(intervalEnd);
-    	
-    	final List<ObsObject> results = getObsObjectsOfFamilyWithinTimeFrame(family, intervalStart, intervalEnd);
-    	final Map<String, ObsObject> map = results.stream()
-    		      .collect(Collectors.toMap(ObsObject::getKey, obsObject -> obsObject));
-    	    	
-    	return map;
+	public Map<String,ObsObject> listInterval(final ProductFamily family, final Date intervalStart, final Date intervalEnd, final Reporting.ChildFactory reportingChildFactory) throws SdkClientException {
+    	Reporting reporting = reportingChildFactory.newChild("ObsListInterval");
+    	reporting.begin(new ReportingMessage("Start list interval for product family {} from {} to {}", ProductFamily.valueOf(family.name()), intervalStart, intervalEnd));
+    	try {
+	    	ValidArgumentAssertion.assertValidArgument(family);
+	    	ValidArgumentAssertion.assertValidArgument(intervalStart);
+	    	ValidArgumentAssertion.assertValidArgument(intervalEnd);
+	    	
+	    	final List<ObsObject> results = getObsObjectsOfFamilyWithinTimeFrame(family, intervalStart, intervalEnd);
+	    	final Map<String, ObsObject> map = results.stream()
+	    		      .collect(Collectors.toMap(ObsObject::getKey, obsObject -> obsObject));
+	    	reporting.end(new ReportingMessage("Start list interval for product family {} from {} to {}", ProductFamily.valueOf(family.name()), intervalStart, intervalEnd));
+	    	return map;
+		} catch (Exception e) {
+        	reporting.error(new ReportingMessage(LogUtils.toString(e)));
+    		throw e;
+    	}
     }
 	
 	@Override
-    public void validate(final ObsObject object) throws ObsServiceException, ObsValidationException {
-		ValidArgumentAssertion.assertValidArgument(object);
+    public void validate(final ObsObject object, final Reporting.ChildFactory reportingChildFactory) throws ObsServiceException, ObsValidationException {
+		Reporting reporting = reportingChildFactory.newChild("ObsValidate");
 		try {
-			final Map<String, InputStream> isMap = getAllAsInputStream(object.getFamily(), object.getKey() + MD5SUM_SUFFIX);
-			if (isMap.size() > 1) {
-				Utils.closeQuietly(isMap.values());
-				throw new ObsValidationException("More than one checksum file returned");
-			}	
-			if (isMap.isEmpty()) {
-				throw new ObsValidationException("Checksum file not found for: {} of family {}", object.getKey(), object.getFamily());
-			} 
-			try(final InputStream is = isMap.get(object.getKey() + MD5SUM_SUFFIX)) {
-				final Map<String,String> md5sums = collectMd5Sums(object);
-				try(BufferedReader reader = new BufferedReader(new InputStreamReader(is))) {
-					String line;
-	                while ((line = reader.readLine()) != null) {    
-	                	final int idx = line.indexOf("  ");
-	                	if (idx >= 0 && line.length() > (idx + 2)) {
-	                		final String md5 = line.substring(0, idx);
-	                		final String key = line.substring(idx + 2);
-	                		final String currentMd5 = md5sums.get(key);
-	                		if (null == currentMd5) {
-	                			throw new ObsValidationException("Object not found: {} of family {}", key, object.getFamily());
-	                		}
-	                		if (!md5.equals(currentMd5)) {
-	                			throw new ObsValidationException("Checksum is wrong for object: {} of family {}", key, object.getFamily());
-	                		}
-	                		md5sums.remove(key);
-	                	}
-		            }
-                }
-				for (final String key : md5sums.keySet()) {
-					throw new ObsValidationException("Unexpected object found: {} for {} of family {}", key, object.getKey(), object.getFamily());
+			reporting.begin(new ReportingMessage("Start validation of object {}", object));
+			ValidArgumentAssertion.assertValidArgument(object);			
+			try {
+				final Map<String, InputStream> isMap = getAllAsInputStream(object.getFamily(), object.getKey() + MD5SUM_SUFFIX, reportingChildFactory);
+				if (isMap.size() > 1) {
+					Utils.closeQuietly(isMap.values());
+					throw new ObsValidationException("More than one checksum file returned");
+				}	
+				if (isMap.isEmpty()) {
+					throw new ObsValidationException("Checksum file not found for: {} of family {}", object.getKey(), object.getFamily());
+				} 
+				try(final InputStream is = isMap.get(object.getKey() + MD5SUM_SUFFIX)) {
+					final Map<String,String> md5sums = collectMd5Sums(object);
+					try(BufferedReader reader = new BufferedReader(new InputStreamReader(is))) {
+						String line;
+		                while ((line = reader.readLine()) != null) {    
+		                	final int idx = line.indexOf("  ");
+		                	if (idx >= 0 && line.length() > (idx + 2)) {
+		                		final String md5 = line.substring(0, idx);
+		                		final String key = line.substring(idx + 2);
+		                		final String currentMd5 = md5sums.get(key);
+		                		if (null == currentMd5) {
+		                			throw new ObsValidationException("Object not found: {} of family {}", key, object.getFamily());
+		                		}
+		                		if (!md5.equals(currentMd5)) {
+		                			throw new ObsValidationException("Checksum is wrong for object: {} of family {}", key, object.getFamily());
+		                		}
+		                		md5sums.remove(key);
+		                	}
+			            }
+	                }
+					for (final String key : md5sums.keySet()) {
+						throw new ObsValidationException("Unexpected object found: {} for {} of family {}", key, object.getKey(), object.getFamily());
+					}
 				}
+				finally {
+					Utils.closeQuietly(isMap.values());
+				}			
+			} catch (SdkClientException | ObsException | IOException e) {
+				throw new ObsServiceException("Unexpected error: " + e.getMessage(), e);
 			}
-			finally {
-				Utils.closeQuietly(isMap.values());
-			}			
-		} catch (SdkClientException | ObsException | IOException e) {
-			throw new ObsServiceException("Unexpected error: " + e.getMessage(), e);
+			reporting.end(new ReportingMessage("End validation of object {}", object));
+		} catch (Exception e) {
+			reporting.error(new ReportingMessage(LogUtils.toString(e)));
+			throw e;
 		}
     }
 	

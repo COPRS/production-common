@@ -1,6 +1,5 @@
 package esa.s1pdgs.cpoc.production.trigger.tasks;
 
-import java.util.Collections;
 import java.util.Date;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -32,10 +31,8 @@ import esa.s1pdgs.cpoc.mqi.model.queue.IpfPreparationJob;
 import esa.s1pdgs.cpoc.mqi.model.rest.GenericMessageDto;
 import esa.s1pdgs.cpoc.mqi.model.rest.GenericPublicationMessageDto;
 import esa.s1pdgs.cpoc.production.trigger.config.ProcessSettings;
-import esa.s1pdgs.cpoc.report.Reporting;
 import esa.s1pdgs.cpoc.report.ReportingMessage;
 import esa.s1pdgs.cpoc.report.ReportingUtils;
-import esa.s1pdgs.cpoc.report.message.input.FilenameReportingInput;
 
 public abstract class AbstractGenericConsumer<T extends AbstractMessage> implements MqiListener<CatalogEvent> {
     protected static final Logger LOGGER = LogManager.getLogger(AbstractGenericConsumer.class);
@@ -97,9 +94,7 @@ public abstract class AbstractGenericConsumer<T extends AbstractMessage> impleme
         	
             // Check if a job is already created for message identifier
             LOGGER.info("Creating/updating job for product {}", productName);
-            ReportingUtils.newReportingBuilderFor("L0_SEGMENTJobGeneration")
-        			.newTriggerComponentReporting(
-        					new ReportingMessage("Generating job using {}", event.getKeyObjectStorage()));
+            ReportingUtils.newReportingBuilder().newEventReporting(new ReportingMessage("Generating job using {}", event.getKeyObjectStorage()));
             final AppDataJob<CatalogEvent> appDataJob = dispatch(mqiMessage);
             publish(appDataJob, event.getProductFamily(), mqiMessage.getInputKey());
             LOGGER.debug("Done handling consumption of {} product {}", category, productName);
