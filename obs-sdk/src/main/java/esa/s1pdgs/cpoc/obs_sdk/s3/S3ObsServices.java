@@ -233,8 +233,10 @@ public class S3ObsServices {
 
 	protected List<String> getExpectedFiles(String bucketName, String prefixKey) {
 		List<String> result = new ArrayList<>();
-		// try to identify the MD5 summary file
-		final S3Object md5file = s3client.getObject(bucketName, prefixKey + AbstractObsClient.MD5SUM_SUFFIX);
+		// try to identify the MD5 summary file		
+		String md5FileName = (prefixKey.substring(0,prefixKey.indexOf("/")) + AbstractObsClient.MD5SUM_SUFFIX);
+		log(String.format("Try to list expected files from file {}",md5FileName));
+		final S3Object md5file = s3client.getObject(bucketName, md5FileName);
 		S3ObsInputStream md5stream = new S3ObsInputStream(md5file, md5file.getObjectContent());
 
 		try (BufferedReader reader = new BufferedReader(new InputStreamReader(md5stream))) {
