@@ -233,11 +233,16 @@ public class S3ObsServices {
 
 	protected List<String> getExpectedFiles(String bucketName, String prefixKey) {
 		List<String> result = new ArrayList<>();
+			
 		// try to identify the MD5 summary file
-		int index = prefixKey.indexOf("/");
-		if (index == -1) {
-			index = prefixKey.length();
-		}
+		int index = prefixKey.length();
+		if (!(prefixKey.contains("raw") || prefixKey.contains("DSIB"))) {
+			index = prefixKey.indexOf("/");
+			if (index == -1) {
+				index = prefixKey.length();
+			}	
+		}			
+		
 		String md5FileName = (prefixKey.substring(0, index) + AbstractObsClient.MD5SUM_SUFFIX);
 		log(String.format("Try to list expected files from file %s", md5FileName));
 		final S3Object md5file = s3client.getObject(bucketName, md5FileName);
