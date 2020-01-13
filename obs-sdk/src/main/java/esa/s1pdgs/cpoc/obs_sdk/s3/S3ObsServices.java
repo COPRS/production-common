@@ -233,12 +233,18 @@ public class S3ObsServices {
 
 	protected List<String> getExpectedFiles(String bucketName, String prefixKey) {
 		List<String> result = new ArrayList<>();
-		// try to identify the MD5 summary file		
-		String md5FileName = (prefixKey.substring(0,prefixKey.indexOf("/")) + AbstractObsClient.MD5SUM_SUFFIX);
-		log(String.format("Try to list expected files from file %s",md5FileName));
+		// try to identify the MD5 summary file
+		int index = prefixKey.indexOf("/");
+		if (index == -1) {
+			index = prefixKey.length();
+		}
+		String md5FileName = (prefixKey.substring(0, index) + AbstractObsClient.MD5SUM_SUFFIX);
+		log(String.format("Try to list expected files from file %s", md5FileName));
 		final S3Object md5file = s3client.getObject(bucketName, md5FileName);
+		if (md5file == null) {
+			throw new com.amazonaws.SdkClientException(String.format("Tried to access md5sum file %s, but it odes not exist",md5FileName));
+		}
 		S3ObsInputStream md5stream = new S3ObsInputStream(md5file, md5file.getObjectContent());
-
 		try (BufferedReader reader = new BufferedReader(new InputStreamReader(md5stream))) {
 			String line;
 			while ((line = reader.readLine()) != null) {
@@ -246,7 +252,8 @@ public class S3ObsServices {
 				if (idx >= 0 && line.length() > (idx + 2)) {
 					// final String md5 = line.substring(0, idx);
 					final String key = line.substring(idx + 2);
-					// If the prefix is found in the key it is valid. This should work for single files as well as directories
+					// If the prefix is found in the key it is valid. This should work for single
+					// files as well as directories
 					if (key.contains(prefixKey)) {
 						result.add(key);
 					}
@@ -341,14 +348,17 @@ public class S3ObsServices {
 					LOGGER.warn(
 							String.format("Download objects with prefix %s from bucket %s failed: Attempt : %d / %d",
 									prefixKey, bucketName, retryCount, numRetries));
+					System.out.println(String.format("Download objects with prefix %s from bucket %s failed: Attempt : %d / %d",
+									prefixKey, bucketName, retryCount, numRetries));
 					try {
-						Thread.sleep(retryDelay);
+						Thread.sleep(retryDelay);						
 					} catch (InterruptedException e) {
 						throw new S3SdkClientException(bucketName, prefixKey,
 								String.format("Download in %s fails: %s", directoryPath, ase.getMessage()), ase);
 					}
 					continue;
 				} else {
+					System.out.println("Giving up finally");
 					throw new S3SdkClientException(bucketName, prefixKey,
 							String.format("Download in %s fails: %s", directoryPath, ase.getMessage()), ase);
 				}
