@@ -14,6 +14,7 @@ import esa.s1pdgs.cpoc.disseminator.config.DisseminationProperties.OutboxConfigu
 import esa.s1pdgs.cpoc.disseminator.path.PathEvaluater;
 import esa.s1pdgs.cpoc.obs_sdk.ObsClient;
 import esa.s1pdgs.cpoc.obs_sdk.ObsObject;
+import esa.s1pdgs.cpoc.report.Reporting;
 
 public final class LocalOutboxClient extends AbstractOutboxClient {	
 	public static final class Factory implements OutboxClient.Factory {
@@ -28,9 +29,9 @@ public final class LocalOutboxClient extends AbstractOutboxClient {
 	}
 
 	@Override
-	public final String transfer(final ObsObject obsObject) throws Exception {		
+	public final String transfer(final ObsObject obsObject, final Reporting.ChildFactory reportingChildFactory) throws Exception {		
 		final Path path = evaluatePathFor(obsObject);	
-		for (final Map.Entry<String, InputStream> entry : entries(obsObject)) {
+		for (final Map.Entry<String, InputStream> entry : entries(obsObject, reportingChildFactory)) {
 			
 			final File destination = path.resolve(entry.getKey()).toFile();
 			createParentIfRequired(destination);

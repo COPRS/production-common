@@ -4,6 +4,7 @@ import esa.s1pdgs.cpoc.disseminator.config.DisseminationProperties.OutboxConfigu
 import esa.s1pdgs.cpoc.disseminator.path.PathEvaluater;
 import esa.s1pdgs.cpoc.obs_sdk.ObsClient;
 import esa.s1pdgs.cpoc.obs_sdk.ObsObject;
+import esa.s1pdgs.cpoc.report.Reporting;
 
 public interface OutboxClient {		
 	public static interface Factory {
@@ -18,11 +19,11 @@ public interface OutboxClient {
 	
 	public static final OutboxClient NULL = new OutboxClient() {
 		@Override
-		public final String transfer(ObsObject obsObject) throws Exception {
+		public final String transfer(ObsObject obsObject, Reporting.ChildFactory reportingChildFactory) throws Exception {
 			// do nothing
 			return "";
 		}		
 	};
 	
-	String transfer(ObsObject obsObject) throws Exception;
+	String transfer(ObsObject obsObject, Reporting.ChildFactory reportingChildFactory) throws Exception;
 }

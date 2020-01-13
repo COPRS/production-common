@@ -26,6 +26,7 @@ import esa.s1pdgs.cpoc.obs_sdk.ObsEmptyFileException;
 import esa.s1pdgs.cpoc.obs_sdk.ObsObject;
 import esa.s1pdgs.cpoc.obs_sdk.ObsUploadObject;
 import esa.s1pdgs.cpoc.obs_sdk.SdkClientException;
+import esa.s1pdgs.cpoc.report.Reporting;
 
 public class TestObsAdapter {
 	@Mock
@@ -38,22 +39,22 @@ public class TestObsAdapter {
 	
 	@Test
 	public final void testToObsKey() {
-		final ObsAdapter uut = new ObsAdapter(obsClient, Paths.get("/tmp/foo"));
+		final ObsAdapter uut = new ObsAdapter(obsClient, Paths.get("/tmp/foo"), Reporting.ChildFactory.NULL);
 		assertEquals("bar/baaaaar", uut.toObsKey(new File("/tmp/foo/bar/baaaaar")));
 	}
 	
 	@Test
 	public final void testUpload() throws AbstractCodedException, ObsEmptyFileException {
-		final ObsAdapter uut = new ObsAdapter(obsClient, Paths.get("/tmp/foo"));
+		final ObsAdapter uut = new ObsAdapter(obsClient, Paths.get("/tmp/foo"), Reporting.ChildFactory.NULL);
 		uut.upload(ProductFamily.AUXILIARY_FILE, new File("/tmp/foo/bar/baaaaar"), "bar/baaaaar");
 		final List<ObsUploadObject> expectedArg = Arrays.asList(
 				new ObsUploadObject(ProductFamily.AUXILIARY_FILE, "bar/baaaaar", new File("/tmp/foo/bar/baaaaar")));
-		verify(obsClient, times(1)).upload(Mockito.eq(expectedArg));
+		verify(obsClient, times(1)).upload(Mockito.eq(expectedArg), Mockito.any());
 	}
 	
 	@Test
 	public final void testMove() throws ObsException, SdkClientException {
-		final ObsAdapter uut = new ObsAdapter(obsClient, Paths.get("/tmp/foo"));
+		final ObsAdapter uut = new ObsAdapter(obsClient, Paths.get("/tmp/foo"), Reporting.ChildFactory.NULL);
 		doReturn(true).when(obsClient).exists(new ObsObject(ProductFamily.AUXILIARY_FILE, "bar/baaaaar"));
 		uut.move(ProductFamily.AUXILIARY_FILE, ProductFamily.GHOST, new File("/tmp/foo/bar/baaaaar"), "bar/baaaaar");
 		verify(obsClient, times(1)).move(Mockito.eq(new ObsObject(ProductFamily.AUXILIARY_FILE, "bar/baaaaar")), Mockito.eq(ProductFamily.GHOST));
@@ -61,7 +62,7 @@ public class TestObsAdapter {
 	
 	@Test
 	public final void testMoveOnSourceDoesNotExists() throws ObsException, SdkClientException {
-		final ObsAdapter uut = new ObsAdapter(obsClient, Paths.get("/tmp/foo"));
+		final ObsAdapter uut = new ObsAdapter(obsClient, Paths.get("/tmp/foo"), Reporting.ChildFactory.NULL);
 		doReturn(false).when(obsClient).exists(new ObsObject(ProductFamily.AUXILIARY_FILE, "bar/baaaaar"));
 		doReturn(false).when(obsClient).exists(new ObsObject(ProductFamily.GHOST, "bar/baaaaar"));
 		assertThatThrownBy(() ->  uut.move(ProductFamily.AUXILIARY_FILE, ProductFamily.GHOST, new File("/tmp/foo/bar/baaaaar"), "bar/baaaaar"))
@@ -71,7 +72,7 @@ public class TestObsAdapter {
 	
 	@Test
 	public final void testMoveOnDestinationAlreadyExists() throws ObsException, SdkClientException {
-		final ObsAdapter uut = new ObsAdapter(obsClient, Paths.get("/tmp/foo"));
+		final ObsAdapter uut = new ObsAdapter(obsClient, Paths.get("/tmp/foo"), Reporting.ChildFactory.NULL);
 		doReturn(true).when(obsClient).exists(new ObsObject(ProductFamily.AUXILIARY_FILE, "bar/baaaaar"));
 		doReturn(true).when(obsClient).exists(new ObsObject(ProductFamily.GHOST, "bar/baaaaar"));
 		assertThatThrownBy(() ->  uut.move(ProductFamily.AUXILIARY_FILE, ProductFamily.GHOST, new File("/tmp/foo/bar/baaaaar"), "bar/baaaaar"))

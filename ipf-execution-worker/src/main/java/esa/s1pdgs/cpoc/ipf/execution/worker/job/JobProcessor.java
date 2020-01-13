@@ -181,8 +181,7 @@ public class JobProcessor implements MqiListener<IpfExecutionJob> {
 		// ------------------------------------------------------
 		final IpfExecutionJob job = message.getBody();
 		
-		final Reporting reporting = ReportingUtils.newReportingBuilderFor("JobProcessing")
-				.newWorkerComponentReporting();
+		final Reporting reporting = ReportingUtils.newReportingBuilder().newTaskReporting("JobProcessing");
 
 		/*
 		 * If the working directory provided by the job order is outside the expected
@@ -242,19 +241,11 @@ public class JobProcessor implements MqiListener<IpfExecutionJob> {
 		// ----------------------------------------------------------
 		// Process message
 		// ----------------------------------------------------------
-		final ReportingOutput repOut = processJob(message, inputDownloader, outputProcessor, procExecutorSrv, procCompletionSrv, procExecutor, reporting);
-		reporting.end(repOut, new ReportingMessage("End job processing"));
+		 processJob(message, inputDownloader, outputProcessor, procExecutorSrv, procCompletionSrv, procExecutor, reporting);
+
 	}
 
-	/**
-	 * Get the prefix for monitor logs according the step for this class instance
-	 * 
-	 * @param step
-	 * @return
-	 */
-	protected String getPrefixMonitorLog(final String step, final IpfExecutionJob job) {
-		return MonitorLogUtils.getPrefixMonitorLog(step, job);
-	}
+
 
 	/**
      * @param job
@@ -264,20 +255,20 @@ public class JobProcessor implements MqiListener<IpfExecutionJob> {
      * @param procCompletionSrv
      * @param procExecutor
      */
-    protected ReportingOutput processJob(final GenericMessageDto<IpfExecutionJob> message,
+    protected void processJob(final GenericMessageDto<IpfExecutionJob> message,
             final InputDownloader inputDownloader,
             final OutputProcessor outputProcessor,
             final ExecutorService procExecutorSrv,
             final ExecutorCompletionService<Void> procCompletionSrv,
             final PoolExecutorCallable procExecutor,
-            final Reporting report) {
+            final Reporting reporting /* TODO: Refactor to not expect an already begun reporting... */) {
         boolean poolProcessing = false;
         final IpfExecutionJob job = message.getBody();
         int step = 0;
         boolean ackOk = false;
         String errorMessage = "";
         
-        ReportingOutput result = ReportingOutput.NULL;
+        ReportingOutput reportingOutput = ReportingOutput.NULL;
         
         FailedProcessingDto failedProc =  new FailedProcessingDto();
         
@@ -308,12 +299,13 @@ public class JobProcessor implements MqiListener<IpfExecutionJob> {
                 checkThreadInterrupted();
                 LOGGER.info("{} Processing l0 outputs",
                         getPrefixMonitorLog(MonitorLogUtils.LOG_OUTPUT, job));
-                result = outputProcessor.processOutput();
+                reportingOutput = outputProcessor.processOutput();
             } else {
                 LOGGER.info("{} Processing l0 outputs bypasssed",
                         getPrefixMonitorLog(MonitorLogUtils.LOG_OUTPUT, job));
             }
             ackOk = true;
+            reporting.end(reportingOutput, new ReportingMessage("End job processing"));
 
         } catch (final AbstractCodedException ace) {
             ackOk = false;
@@ -323,7 +315,7 @@ public class JobProcessor implements MqiListener<IpfExecutionJob> {
                     getPrefixMonitorLog(MonitorLogUtils.LOG_DFT, job), step,
                     getPrefixMonitorLog(MonitorLogUtils.LOG_ERROR, job),
                     ace.getCode().getCode(), ace.getLogMessage());
-            report.error(new ReportingMessage("[code {}] {}", ace.getCode().getCode(), ace.getLogMessage()));            
+            reporting.error(new ReportingMessage("[code {}] {}", ace.getCode().getCode(), ace.getLogMessage()));            
             LOGGER.error(LogUtils.toString(ace));            
             failedProc = new FailedProcessingDto(properties.getHostname(),new Date(),errorMessage, message);  
             
@@ -335,12 +327,12 @@ public class JobProcessor implements MqiListener<IpfExecutionJob> {
                     getPrefixMonitorLog(MonitorLogUtils.LOG_ERROR, job),
                     ErrorCode.INTERNAL_ERROR.getCode(),
                     properties.getLevel());
-            report.error(new ReportingMessage("Interrupted job processing"));
+            reporting.error(new ReportingMessage("Interrupted job processing"));
             LOGGER.error(LogUtils.toString(e));    
             failedProc = new FailedProcessingDto(properties.getHostname(),new Date(),errorMessage, message);  
         } catch (ObsEmptyFileException e) {
         	 ackOk = false;
-             report.error(new ReportingMessage(LogUtils.toString(e)));            
+             reporting.error(new ReportingMessage(LogUtils.toString(e)));            
              LOGGER.error(LogUtils.toString(e));            
              failedProc = new FailedProcessingDto(properties.getHostname(),new Date(),errorMessage, message); 
 		} finally {
@@ -349,9 +341,18 @@ public class JobProcessor implements MqiListener<IpfExecutionJob> {
 
         // Ack and check if application shall stopped
         ackProcessing(message, failedProc, ackOk, errorMessage);
-        return result;
     }
 
+	/**
+	 * Get the prefix for monitor logs according the step for this class instance
+	 * 
+	 * @param step
+	 * @return
+	 */
+	protected String getPrefixMonitorLog(final String step, final IpfExecutionJob job) {
+		return MonitorLogUtils.getPrefixMonitorLog(step, job);
+	}
+	
 	/**
 	 * Check if thread interrupted
 	 * 

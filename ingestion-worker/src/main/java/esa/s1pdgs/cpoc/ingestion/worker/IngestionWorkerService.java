@@ -74,8 +74,7 @@ public class IngestionWorkerService implements MqiListener<IngestionJob> {
 
 	@Override
 	public void onMessage(final GenericMessageDto<IngestionJob> message) {
-		final Reporting reporting = ReportingUtils.newReportingBuilderFor("IngestionWorker")
-				.newWorkerComponentReporting();
+		final Reporting reporting = ReportingUtils.newReportingBuilder().newTaskReporting("IngestionWorker");
 
 		final IngestionJob ingestion = message.getBody();
 		LOG.debug("received Ingestion: {}", ingestion.getKeyObjectStorage());
@@ -90,7 +89,7 @@ public class IngestionWorkerService implements MqiListener<IngestionJob> {
 				throw new Exception("Empty file detected: " + file.getName());
 			}
 			
-			final IngestionResult result = identifyAndUpload(reporting.getChildFactory(), message, ingestion);
+			final IngestionResult result = identifyAndUpload(message, ingestion, reporting.getChildFactory());
 			publish(result.getIngestedProducts(), message, reporting.getChildFactory());
 			delete(ingestion, reporting.getChildFactory());
 			reporting.end(
@@ -107,41 +106,24 @@ public class IngestionWorkerService implements MqiListener<IngestionJob> {
 	}
 
 	final IngestionResult identifyAndUpload(
-			final Reporting.ChildFactory reportingChildFactory,
 			final GenericMessageDto<IngestionJob> message, 
-			final IngestionJob ingestion
+			final IngestionJob ingestion,
+			final Reporting.ChildFactory reportingChildFactory
 	) throws InternalErrorException, ObsEmptyFileException {
 		IngestionResult result = IngestionResult.NULL;
-
-		// TODO: Refactor Exception handling
 		try {
 			final ProductFamily family = getFamilyFor(ingestion);
-			final Reporting reportObs = reportingChildFactory.newChild("IngestionWorker.ObsUpload");
-
-			reportObs.begin(new ReportingMessage("Start uploading {} in OBS", ingestion.getKeyObjectStorage()));
-
 			try {
-				reportObs.begin(new ReportingMessage("Start uploading {} in OBS", ingestion.getKeyObjectStorage()));
-
-				try {
-					result = productService.ingest(family, ingestion);
-				} catch (final ProductException | ObsEmptyFileException e) {
-					reportObs.error(new ReportingMessage("Error uploading {} in OBS: {}",
-							ingestion.getKeyObjectStorage(), e.getMessage()));
-					throw e;
-				}
-				reportObs.end(new ReportingMessage("End uploading {} in OBS", ingestion.getKeyObjectStorage()));
-				// is thrown if product shall be marked as invalid
+				result = productService.ingest(family, ingestion, reportingChildFactory);
 			} catch (final ProductException e) {
 				LOG.warn(e.getMessage());
-				productService.markInvalid(ingestion);
+				productService.markInvalid(ingestion, reportingChildFactory);
 				message.getBody().setProductFamily(ProductFamily.INVALID);
 				final FailedProcessingDto failed = new FailedProcessingDto(properties.getHostname(), new Date(),
 						e.getMessage(), message);
 				errorRepoAppender.send(failed);
 			}
 		} catch (ObsEmptyFileException e) {
-
 			final FailedProcessingDto failed = new FailedProcessingDto(properties.getHostname(), new Date(),
 					e.getMessage(), message);
 			errorRepoAppender.send(failed);
@@ -162,12 +144,12 @@ public class IngestionWorkerService implements MqiListener<IngestionJob> {
 			result.setOutputKey(product.getFamily().toString());
 			LOG.info("publishing : {}", result);
 
-			final Reporting report = reportingChildFactory.newChild("IngestionWorker.Publish");
+			final Reporting report = reportingChildFactory.newChild("KafkaPublish");
 
-			report.begin(new ReportingMessage("Start publishing file {} in topic", message.getBody().getKeyObjectStorage()));
+			report.begin(new ReportingMessage("Start publishing file {}", message.getBody().getKeyObjectStorage()));
 			try {
 				mqiClient.publish(result, ProductCategory.INGESTION_EVENT);
-				report.end(new ReportingMessage("End publishing file {} in topic", message.getBody().getKeyObjectStorage()));
+				report.end(new ReportingMessage("End publishing file {}", message.getBody().getKeyObjectStorage()));
 			} catch (final AbstractCodedException e) {
 				report.error(new ReportingMessage("[code {}] {}", e.getCode().getCode(), e.getLogMessage()));
 			}
@@ -178,7 +160,7 @@ public class IngestionWorkerService implements MqiListener<IngestionJob> {
 			throws InternalErrorException, InterruptedException {
 		final File file = Paths.get(ingestion.getPickupPath(), ingestion.getRelativePath()).toFile();
 		if (file.exists()) {
-			final Reporting childReporting = reportingChildFactory.newChild("IngestionWorker.DeleteFromPickup");
+			final Reporting childReporting = reportingChildFactory.newChild("DeleteFromPickup");
 			childReporting.begin(new ReportingMessage("Start removing file {}", file.getPath()));
 
 			try {

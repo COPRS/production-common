@@ -123,8 +123,7 @@ public class DisseminationService implements MqiListener<ProductionEvent> {
 	final void handleTransferTo(final GenericMessageDto<ProductionEvent> message, final String target) {		
 		final ProductionEvent product = message.getBody();
 		
-		final Reporting reporting = ReportingUtils.newReportingBuilderFor("Dissemination")
-				.newWorkerComponentReporting();
+		final Reporting reporting = ReportingUtils.newReportingBuilder().newTaskReporting("Dissemination");
 		
 		String targetUrl = "";
 		
@@ -135,22 +134,12 @@ public class DisseminationService implements MqiListener<ProductionEvent> {
 		try {
 			assertExists(product);
 			final OutboxClient outboxClient = clientForTarget(target);
-
-			final Reporting reportingDl = reporting.getChildFactory().newChild("Dissemination.ObsDownload");
-			reportingDl.begin(new ReportingMessage("Start downloading file from OBS {} to {}", product.getKeyObjectStorage(), target));
-			try {
-				targetUrl = Retries.performWithRetries(
-						() -> outboxClient.transfer(new ObsObject(product.getProductFamily(), product.getKeyObjectStorage())), 
-						"Transfer of " + product.getKeyObjectStorage() + " to " + target,
-						properties.getMaxRetries(), 
-						properties.getTempoRetryMs()
-				);
-				reportingDl.end(new ReportingMessage("End downloading file from OBS {} to {}", product.getKeyObjectStorage(), target));
-			} catch (final Exception e) {
-				reportingDl.error(new ReportingMessage("Error downloading file from OBS {} to {}: {} ", 
-						product.getKeyObjectStorage(), target, LogUtils.toString(e)));
-				throw e;
-			}							
+			targetUrl = Retries.performWithRetries(
+					() -> outboxClient.transfer(new ObsObject(product.getProductFamily(), product.getKeyObjectStorage()), reporting.getChildFactory()), 
+					"Transfer of " + product.getKeyObjectStorage() + " to " + target,
+					properties.getMaxRetries(), 
+					properties.getTempoRetryMs()
+			);
 		} catch (final Exception e) {					
 			final String errMessage = (e instanceof DisseminationException) ? e.getMessage() : LogUtils.toString(e); 
 			final String messageString = String.format(

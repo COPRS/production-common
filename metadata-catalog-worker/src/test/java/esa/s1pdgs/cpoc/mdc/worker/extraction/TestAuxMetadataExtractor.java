@@ -203,10 +203,9 @@ public class TestAuxMetadataExtractor {
 			final String productType) throws AbstractCodedException {
 		final List<File> files = Arrays.asList(new File(testDir,metadataFile));
 		
-		final Reporting reporting = ReportingUtils.newReportingBuilderFor("TestMetadataExtraction")
-				.newWorkerComponentReporting();
+		final Reporting reporting = ReportingUtils.newReportingBuilder().newTaskReporting("TestMetadataExtraction");
 
-		doReturn(files).when(obsClient).download(Mockito.anyList());
+		doReturn(files).when(obsClient).download(Mockito.anyList(), Mockito.any());
 
 		final AuxDescriptor expectedDescriptor = new AuxDescriptor();
 		expectedDescriptor.setExtension(fileExtension);

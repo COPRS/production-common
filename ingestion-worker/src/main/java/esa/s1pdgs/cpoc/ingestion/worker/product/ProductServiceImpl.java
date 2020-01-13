@@ -18,6 +18,7 @@ import esa.s1pdgs.cpoc.mqi.model.queue.IngestionEvent;
 import esa.s1pdgs.cpoc.mqi.model.queue.IngestionJob;
 import esa.s1pdgs.cpoc.obs_sdk.ObsClient;
 import esa.s1pdgs.cpoc.obs_sdk.ObsEmptyFileException;
+import esa.s1pdgs.cpoc.report.Reporting;
 
 @Service
 public class ProductServiceImpl implements ProductService {	
@@ -31,12 +32,12 @@ public class ProductServiceImpl implements ProductService {
 	}
 	
 	@Override
-	public IngestionResult ingest(final ProductFamily family, final IngestionJob ingestion) 
+	public IngestionResult ingest(final ProductFamily family, final IngestionJob ingestion, final Reporting.ChildFactory reportingChildFactory) 
 			throws ProductException, InternalErrorException, ObsEmptyFileException {
 		final File file = toFile(ingestion);		
 		assertPermissions(ingestion, file);
 		
-		final ObsAdapter obsAdapter = newObsAdapterFor(Paths.get(ingestion.getPickupPath()));
+		final ObsAdapter obsAdapter = newObsAdapterFor(Paths.get(ingestion.getPickupPath()), reportingChildFactory);
 		
 		final IngestionEvent dto = new IngestionEvent();		
 		dto.setProductName(ingestion.getKeyObjectStorage());
@@ -67,9 +68,10 @@ public class ProductServiceImpl implements ProductService {
 	}
 
 	@Override
-	public void markInvalid(final IngestionJob ingestion) throws ObsEmptyFileException {	
+	public void markInvalid(final IngestionJob ingestion, final Reporting.ChildFactory reportingChildFactory) throws ObsEmptyFileException {	
 		final File file = toFile(ingestion);
-		newObsAdapterFor(Paths.get(ingestion.getPickupPath())).upload(ProductFamily.INVALID, file, ingestion.getKeyObjectStorage());		
+		ObsAdapter obsAdapter = newObsAdapterFor(Paths.get(ingestion.getPickupPath()), reportingChildFactory);
+		obsAdapter.upload(ProductFamily.INVALID, file, ingestion.getKeyObjectStorage());
 	}
 	
 	final String toObsKey(final Path relPath) {
@@ -80,8 +82,8 @@ public class ProductServiceImpl implements ProductService {
 		return Paths.get(ingestion.getPickupPath(), ingestion.getRelativePath()).toFile();
 	}
 	
-	private final ObsAdapter newObsAdapterFor(final Path inboxPath) {	
-		return new ObsAdapter(obsClient, inboxPath);		
+	private final ObsAdapter newObsAdapterFor(final Path inboxPath, final Reporting.ChildFactory reportingChildFactory) {
+		return new ObsAdapter(obsClient, inboxPath, reportingChildFactory);		
 	}
 	
 	static void assertPermissions(final IngestionJob ingestion, final File file) {

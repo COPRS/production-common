@@ -17,6 +17,7 @@ import esa.s1pdgs.cpoc.obs_sdk.ObsObject;
 import esa.s1pdgs.cpoc.obs_sdk.ObsServiceException;
 import esa.s1pdgs.cpoc.obs_sdk.ObsUploadObject;
 import esa.s1pdgs.cpoc.obs_sdk.SdkClientException;
+import esa.s1pdgs.cpoc.report.Reporting;
 
 // dummy impl - doin nothin
 public class FakeObsClient implements ObsClient {	
@@ -33,13 +34,13 @@ public class FakeObsClient implements ObsClient {
 	}
 
 	@Override
-	public List<File> download(final List<ObsDownloadObject> objects) throws AbstractCodedException {
+	public List<File> download(final List<ObsDownloadObject> objects, final Reporting.ChildFactory reportingChildFactory) throws AbstractCodedException {
 		// TODO Auto-generated method stub
 		return null;
 	}
 
 	@Override
-	public void upload(final List<ObsUploadObject> objects) throws AbstractCodedException {
+	public void upload(final List<ObsUploadObject> objects, final Reporting.ChildFactory reportingChildFactory) throws AbstractCodedException {
 		// TODO Auto-generated method stub
 	}
 
@@ -57,20 +58,21 @@ public class FakeObsClient implements ObsClient {
 	}
 
 	@Override
-	public Map<String, ObsObject> listInterval(ProductFamily family, Date intervalStart, Date intervalEnd)
+	public Map<String, ObsObject> listInterval(ProductFamily family, Date intervalStart, Date intervalEnd, Reporting.ChildFactory reportingChildFactory)
 			throws SdkClientException {
 		// TODO Auto-generated method stub
 		return null;
 	}
 
 	@Override
-	public Map<String, InputStream> getAllAsInputStream(ProductFamily family, String keyPrefix)
+	public Map<String, InputStream> getAllAsInputStream(ProductFamily family, String keyPrefix,
+			final Reporting.ChildFactory reportingChildFactory)
 			throws SdkClientException {
 		return null;
 	}
 	
 	@Override
-	public void validate(ObsObject object) throws ObsServiceException {
+	public void validate(ObsObject object, final Reporting.ChildFactory reportingChildFactory) throws ObsServiceException {
 	    // TODO Auto-generated method stub
 
 	}

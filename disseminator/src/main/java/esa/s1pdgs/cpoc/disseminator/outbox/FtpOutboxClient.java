@@ -16,6 +16,7 @@ import esa.s1pdgs.cpoc.disseminator.util.LogPrintWriter;
 import esa.s1pdgs.cpoc.obs_sdk.ObsClient;
 import esa.s1pdgs.cpoc.obs_sdk.ObsObject;
 import esa.s1pdgs.cpoc.obs_sdk.SdkClientException;
+import esa.s1pdgs.cpoc.report.Reporting;
 
 public class FtpOutboxClient extends AbstractOutboxClient {
 	public static final class Factory implements OutboxClient.Factory {
@@ -32,7 +33,7 @@ public class FtpOutboxClient extends AbstractOutboxClient {
 	}
 	
 	@Override
-	public String transfer(final ObsObject obsObject) throws Exception {
+	public String transfer(final ObsObject obsObject, final Reporting.ChildFactory reportingChildFactory) throws Exception {
 		final FTPClient ftpClient = new FTPClient();
 		ftpClient.addProtocolCommandListener(
 				new PrintCommandListener(new LogPrintWriter(s -> logger.debug(s)), true)
@@ -41,10 +42,10 @@ public class FtpOutboxClient extends AbstractOutboxClient {
 		ftpClient.connect(config.getHostname(), port);
 	    assertPositiveCompletion(ftpClient);
         
-        return performTransfer(obsObject, ftpClient);
+        return performTransfer(obsObject, ftpClient, reportingChildFactory);
 	}
 
-	protected String performTransfer(final ObsObject obsObject, final FTPClient ftpClient)
+	protected String performTransfer(final ObsObject obsObject, final FTPClient ftpClient, final Reporting.ChildFactory reportingChildFactory)
 			throws IOException, SdkClientException {
 		if (!ftpClient.login(config.getUsername(), config.getPassword())) {
         	throw new RuntimeException("Could not authenticate user " + config.getUsername());
@@ -66,7 +67,7 @@ public class FtpOutboxClient extends AbstractOutboxClient {
 			final String retVal = config.getProtocol().toString().toLowerCase() + "://" + config.getHostname() + 
 					path.toString();
 					
-			for (final Map.Entry<String, InputStream> entry : entries(obsObject)) {
+			for (final Map.Entry<String, InputStream> entry : entries(obsObject, reportingChildFactory)) {
 				
 				final Path dest = path.resolve(entry.getKey());
     			

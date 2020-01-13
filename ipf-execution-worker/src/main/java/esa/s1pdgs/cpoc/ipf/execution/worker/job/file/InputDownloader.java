@@ -124,8 +124,7 @@ public class InputDownloader {
         // message
         final List<ObsDownloadObject> downloadToBatch = sortInputs();
         
-		final Reporting reporting = ReportingUtils.newReportingBuilderFor("InputDownloader")
-				.newWorkerComponentReporting();
+		final Reporting reporting = ReportingUtils.newReportingBuilder().newTaskReporting("InputDownloader");
         
         final StringBuilder stringBuilder = new StringBuilder();
         for (final ObsDownloadObject input : downloadToBatch) {
@@ -137,7 +136,7 @@ public class InputDownloader {
 
         // Download input from object storage in batch
         try {
-			downloadInputs(downloadToBatch);
+			downloadInputs(downloadToBatch, reporting.getChildFactory());
 			 // Complete download
 	        completeDownload();	      	
 	        reporting.end(new ReportingMessage(getWorkdirSize(), "End download of products {}", listinputs));			
@@ -253,7 +252,7 @@ public class InputDownloader {
      * @param downloadToBatch
      * @throws AbstractCodedException
      */
-    private final void downloadInputs(final List<ObsDownloadObject> downloadToBatch)
+    private final void downloadInputs(final List<ObsDownloadObject> downloadToBatch, final Reporting.ChildFactory reportingChildFactory)
             throws AbstractCodedException {
 
         final int numberOfBatches = (int) Math.ceil(((double) downloadToBatch.size()) / ((double) sizeDownBatch));
@@ -266,7 +265,7 @@ public class InputDownloader {
                 LOGGER.info("{} 4 - Starting downloading batch {}", prefixMonitorLogs, i);
                 final int lastIndex = Math.min((i + 1) * sizeDownBatch, downloadToBatch.size());                
                 final List<ObsDownloadObject> subListS3 = downloadToBatch.subList(i * sizeDownBatch, lastIndex);
-                this.obsClient.download(subListS3);
+                this.obsClient.download(subListS3, reportingChildFactory);
                 if (appLevel == ApplicationLevel.L0 && nbUploadedRaw < 2) {
                     nbUploadedRaw += subListS3.stream().filter(
                             file -> file.getFamily() == ProductFamily.EDRS_SESSION)

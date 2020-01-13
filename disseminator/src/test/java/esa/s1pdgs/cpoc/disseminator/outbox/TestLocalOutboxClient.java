@@ -22,6 +22,7 @@ import esa.s1pdgs.cpoc.disseminator.path.IsipPathEvaluater;
 import esa.s1pdgs.cpoc.disseminator.path.PathEvaluater;
 import esa.s1pdgs.cpoc.obs_sdk.ObsObject;
 import esa.s1pdgs.cpoc.obs_sdk.SdkClientException;
+import esa.s1pdgs.cpoc.report.Reporting;
 
 public class TestLocalOutboxClient {
 	private File testDir;
@@ -40,7 +41,7 @@ public class TestLocalOutboxClient {
 	public final void testTransfer() throws Exception {
 		final FakeObsClient fakeObsClient = new FakeObsClient() {			
 			@Override
-			public Map<String, InputStream> getAllAsInputStream(ProductFamily family, String keyPrefix)
+			public Map<String, InputStream> getAllAsInputStream(ProductFamily family, String keyPrefix, Reporting.ChildFactory reportingChildFactory)
 					throws SdkClientException {
 				return Collections.singletonMap(keyPrefix, new ByteArrayInputStream("expected content".getBytes()));
 			}		
@@ -49,7 +50,7 @@ public class TestLocalOutboxClient {
 		config.setPath(testDir.getPath());
 		
 		final LocalOutboxClient outbox = new LocalOutboxClient(fakeObsClient, config, PathEvaluater.NULL);
-		outbox.transfer(new ObsObject(ProductFamily.BLANK, "foo.bar"));
+		outbox.transfer(new ObsObject(ProductFamily.BLANK, "foo.bar"), Reporting.ChildFactory.NULL);
 		
 		final File expected = new File(testDir, "foo.bar");
 		assertEquals(true, expected.exists());
@@ -61,7 +62,7 @@ public class TestLocalOutboxClient {
 	public final void testTransfer_ISIP() throws Exception {
 		final FakeObsClient fakeObsClient = new FakeObsClient() {
 			@Override
-			public Map<String, InputStream> getAllAsInputStream(ProductFamily family, String keyPrefix)
+			public Map<String, InputStream> getAllAsInputStream(ProductFamily family, String keyPrefix, Reporting.ChildFactory reportingChildFactory)
 					throws SdkClientException {
 				return Collections.singletonMap(keyPrefix, new ByteArrayInputStream("expected content".getBytes()));
 			}			
@@ -70,7 +71,7 @@ public class TestLocalOutboxClient {
 		config.setPath(testDir.getPath());
 		
 		final LocalOutboxClient outbox = new LocalOutboxClient(fakeObsClient, config, new IsipPathEvaluater());
-		outbox.transfer(new ObsObject(ProductFamily.BLANK, "S1A_AUX_CAL_V20171017T080000_G20180622T082918.SAFE"));
+		outbox.transfer(new ObsObject(ProductFamily.BLANK, "S1A_AUX_CAL_V20171017T080000_G20180622T082918.SAFE"), Reporting.ChildFactory.NULL);
 		
 		final File expected = new File(testDir, "S1A_AUX_CAL_V20171017T080000_G20180622T082918.ISIP/S1A_AUX_CAL_V20171017T080000_G20180622T082918.SAFE");
 		assertEquals(true, expected.exists());

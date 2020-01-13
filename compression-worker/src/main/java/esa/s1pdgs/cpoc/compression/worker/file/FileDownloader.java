@@ -17,8 +17,6 @@ import esa.s1pdgs.cpoc.mqi.model.queue.CompressionJob;
 import esa.s1pdgs.cpoc.obs_sdk.ObsClient;
 import esa.s1pdgs.cpoc.obs_sdk.ObsDownloadObject;
 import esa.s1pdgs.cpoc.report.Reporting;
-import esa.s1pdgs.cpoc.report.ReportingMessage;
-import esa.s1pdgs.cpoc.report.ReportingUtils;
 
 public class FileDownloader {
 	/**
@@ -59,39 +57,18 @@ public class FileDownloader {
 	 * 
 	 * @throws AbstractCodedException
 	 */
-	public void processInputs() throws AbstractCodedException {
-
-		// Initialize
-		initializeDownload();
-
-		// Create necessary directories and download input with content in
-		// message
-		final ObsDownloadObject inputProduct = buildInput();
-
-		final Reporting reporting = ReportingUtils.newReportingBuilderFor("FileDownloader")
-				.newWorkerComponentReporting();
-
-		reporting.begin(new ReportingMessage("Start download of product to compress {}", inputProduct));
-
-		// Download input from object storage in batch
-		try {
-			downloadInputs(inputProduct);
-			reporting.end(new ReportingMessage(getWorkdirSize(), "End download of products {}", inputProduct));
-		} catch (final AbstractCodedException e) {
-			reporting.error(new ReportingMessage("[code {}] {}", e.getCode().getCode(), e.getLogMessage()));
-			throw e;
-		}
-	}
-
-	/**
-	 * Create the working directory and the status file
-	 * 
-	 * @throws InternalErrorException
-	 */
-	private void initializeDownload() throws InternalErrorException {
+	public void processInputs(final Reporting.ChildFactory reportingChildFactory) throws AbstractCodedException {
+		// prepare directory structure
 		LOGGER.info("{} 1 - Creating working directory", prefixMonitorLogs);
 		final File workingDir = new File(localWorkingDir);
 		workingDir.mkdirs();
+
+		// organize inputs
+		final ObsDownloadObject inputProduct = buildInput();
+
+		// download input from object storage in batch
+		LOGGER.info("4 - Starting downloading input product {}", inputProduct);
+		obsClient.download(Arrays.asList(new ObsDownloadObject(inputProduct.getFamily(), inputProduct.getKey(), inputProduct.getTargetDir())), reportingChildFactory);
 	}
 
 	/**
@@ -114,18 +91,6 @@ public class FileDownloader {
 		LOGGER.info("Input {} will be stored in {}", job.getKeyObjectStorage(), targetFile);
 		return new ObsDownloadObject(job.getProductFamily(), job.getKeyObjectStorage(),targetFile);
 
-	}
-
-	/**
-	 * Download input from OBS per batch. If we have download 2 raw, the processor
-	 * executor can start launch proceses
-	 * 
-	 * @param inputProduct
-	 * @throws AbstractCodedException
-	 */
-	private final void downloadInputs(final ObsDownloadObject inputProduct) throws AbstractCodedException {
-		LOGGER.info("4 - Starting downloading input product {}", inputProduct);
-		this.obsClient.download(Arrays.asList(new ObsDownloadObject(inputProduct.getFamily(), inputProduct.getKey(), inputProduct.getTargetDir())));
 	}
 
 	private final long getWorkdirSize() throws InternalErrorException {

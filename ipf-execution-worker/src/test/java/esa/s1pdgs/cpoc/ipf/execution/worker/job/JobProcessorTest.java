@@ -108,8 +108,7 @@ public class JobProcessorTest extends MockPropertiesTest {
     @Rule
     public ExpectedException thrown = ExpectedException.none();
     
-    private final Reporting reporting = ReportingUtils.newReportingBuilderFor("TestOutputHandling")
-			.newWorkerComponentReporting();
+    private final Reporting reporting = ReportingUtils.newReportingBuilder().newTaskReporting("TestOutputHandling");
 	
     private final ErrorRepoAppender errorAppender = ErrorRepoAppender.NULL;
 
@@ -171,7 +170,7 @@ public class JobProcessorTest extends MockPropertiesTest {
     }
 
     /**
-     * Test ack when exception
+     * Test ack when exceptionjob
      * 
      * @throws AbstractCodedException
      */

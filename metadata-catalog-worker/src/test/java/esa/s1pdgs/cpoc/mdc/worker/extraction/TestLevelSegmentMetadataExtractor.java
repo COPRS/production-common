@@ -86,8 +86,7 @@ public class TestLevelSegmentMetadataExtractor {
     private GenericMessageDto<CatalogJob> inputMessageSafe;
 
     
-	final Reporting reporting = ReportingUtils.newReportingBuilderFor("TestMetadataExtraction")
-			.newWorkerComponentReporting();
+	final Reporting reporting = ReportingUtils.newReportingBuilder().newTaskReporting("TestMetadataExtraction");
     
     private static final File inputDir = new File("src/test/resources/workDir/");
     
@@ -167,7 +166,7 @@ public class TestLevelSegmentMetadataExtractor {
                         "S1A_WV_RAW__0SSV_20180913T214325_20180913T214422_023685_0294F4_41D5.SAFE",
                         ProductFamily.L0_SEGMENT, "FAST"));
 
-        doReturn(files).when(obsClient).download(Mockito.anyList());
+        doReturn(files).when(obsClient).download(Mockito.anyList(), Mockito.any());
 
         final OutputFileDescriptor descriptor = new OutputFileDescriptor();
         descriptor.setExtension(FileExtension.SAFE);
@@ -198,7 +197,7 @@ public class TestLevelSegmentMetadataExtractor {
                 assertEquals(expected.get(key), result.get(key));
             }
         }
-        verify(obsClient, times(1)).download(Mockito.any());
+        verify(obsClient, times(1)).download(Mockito.any(), Mockito.any());
     }
 
 }

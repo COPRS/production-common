@@ -16,6 +16,7 @@ import esa.s1pdgs.cpoc.disseminator.config.DisseminationProperties.OutboxConfigu
 import esa.s1pdgs.cpoc.disseminator.path.PathEvaluater;
 import esa.s1pdgs.cpoc.obs_sdk.ObsClient;
 import esa.s1pdgs.cpoc.obs_sdk.ObsObject;
+import esa.s1pdgs.cpoc.report.Reporting;
 
 public final class SftpOutboxClient extends AbstractOutboxClient {
 	public static final class Factory implements OutboxClient.Factory {				
@@ -34,7 +35,7 @@ public final class SftpOutboxClient extends AbstractOutboxClient {
 	}
 
 	@Override
-	public final String transfer(final ObsObject obsObject) throws Exception {	
+	public final String transfer(final ObsObject obsObject, final Reporting.ChildFactory reportingChildFactory) throws Exception {	
 		final JSch client = new JSch();
 		final int port = config.getPort() > 0 ? config.getPort() : DEFAULT_PORT;
 		
@@ -57,7 +58,7 @@ public final class SftpOutboxClient extends AbstractOutboxClient {
 				final String retVal = config.getProtocol().toString().toLowerCase() + "://" + config.getHostname() + 
 						path.toString();
 				
-				for (final Map.Entry<String, InputStream> entry : entries(obsObject)) {					
+				for (final Map.Entry<String, InputStream> entry : entries(obsObject, reportingChildFactory)) {					
 					final Path dest = path.resolve(entry.getKey());
 	    			String currentPath = "";
 	    			

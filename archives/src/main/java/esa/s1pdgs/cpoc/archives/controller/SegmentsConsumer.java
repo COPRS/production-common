@@ -16,6 +16,7 @@ import esa.s1pdgs.cpoc.common.errors.obs.ObsException;
 import esa.s1pdgs.cpoc.mqi.model.queue.ProductionEvent;
 import esa.s1pdgs.cpoc.obs_sdk.ObsClient;
 import esa.s1pdgs.cpoc.obs_sdk.ObsDownloadObject;
+import esa.s1pdgs.cpoc.report.Reporting;
 
 /**
  * @author Viveris Technologies
@@ -67,11 +68,11 @@ public class SegmentsConsumer {
                 this.obsClient.download(Arrays.asList(new ObsDownloadObject(dto.getProductFamily(),
                         dto.getKeyObjectStorage() + "/manifest.safe",
                         this.sharedVolume + "/"
-                                + dto.getProductFamily().name().toLowerCase())));
+                                + dto.getProductFamily().name().toLowerCase())), Reporting.ChildFactory.NULL);
             } else {
                 this.obsClient.download(Arrays.asList(new ObsDownloadObject(dto.getProductFamily(),
                         dto.getKeyObjectStorage(), this.sharedVolume + "/"
-                                + dto.getProductFamily().name().toLowerCase())));
+                                + dto.getProductFamily().name().toLowerCase())), Reporting.ChildFactory.NULL);
             }
             acknowledgment.acknowledge();
         } catch (ObsException e) {        	

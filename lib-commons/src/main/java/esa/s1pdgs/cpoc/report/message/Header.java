@@ -24,19 +24,14 @@ public class Header {
 
 	}
 	
-	public Header(final String type, final Level level) {
-		this.type = type;
+	public Header(final Level level) {
 		this.level = level;
 	}
 
 	public String getType() {
 		return type;
 	}
-	
-	public void setType(final String type) {
-		this.type = type;
-	}
-	
+		
 	public Date getTimestamp() {
 		return timestamp;
 	}

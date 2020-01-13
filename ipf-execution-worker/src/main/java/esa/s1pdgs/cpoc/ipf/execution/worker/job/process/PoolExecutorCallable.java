@@ -116,8 +116,7 @@ public class PoolExecutorCallable implements Callable<Void> {
                                 + counter * properties.getWapTempoS()
                                 + " seconds");
             }            
-    		final Reporting reporting = ReportingUtils.newReportingBuilderFor("Processing")
-    				.newWorkerComponentReporting();
+    		final Reporting reporting = ReportingUtils.newReportingBuilder().newTaskReporting("Processing");
     		
             reporting.begin(new ReportingMessage("Start " + appLevel + " processing"));
                        

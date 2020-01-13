@@ -17,7 +17,6 @@ import esa.s1pdgs.cpoc.compression.worker.config.ApplicationProperties;
 import esa.s1pdgs.cpoc.mqi.model.queue.CompressionJob;
 import esa.s1pdgs.cpoc.report.Reporting;
 import esa.s1pdgs.cpoc.report.ReportingMessage;
-import esa.s1pdgs.cpoc.report.ReportingUtils;
 
 public class CompressExecutorCallable implements Callable<Void> {
 
@@ -28,8 +27,11 @@ public class CompressExecutorCallable implements Callable<Void> {
 	
 	private static final Consumer<String> DEFAULT_OUTPUT_CONSUMER = LOGGER::info;
 
+	private Reporting.ChildFactory reportingChildFactory;
+
 	private CompressionJob job;
 
+	
 	/**
 	 * Application properties
 	 */
@@ -42,9 +44,10 @@ public class CompressExecutorCallable implements Callable<Void> {
 	 * @param job
 	 * @param prefixMonitorLogs
 	 */
-	public CompressExecutorCallable(final CompressionJob job, final String prefixLogs, final ApplicationProperties properties) {
+	public CompressExecutorCallable(final CompressionJob job, final String prefixLogs, final ApplicationProperties properties, final Reporting.ChildFactory reportingChildFactory) {
 		this.job = job;
 		this.properties = properties;
+		this.reportingChildFactory = reportingChildFactory;
 	}
 
 	/**
@@ -66,8 +69,7 @@ public class CompressExecutorCallable implements Callable<Void> {
 	public TaskResult execute(final String binaryPath, final String inputPath, final String outputPath,
             final String workDirectory) throws InternalErrorException {
 		
-		final Reporting reporting = ReportingUtils.newReportingBuilderFor("Compression")
-				.newWorkerComponentReporting();
+		final Reporting reporting = reportingChildFactory.newChild("Compression");
 		
 		LOGGER.info("Starting compression task using '{}' with input {} and output {} in {}", binaryPath, inputPath, outputPath, workDirectory);
         reporting.begin(new ReportingMessage("Start Task {}", binaryPath));

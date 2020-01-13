@@ -92,8 +92,8 @@ public class TestLevelProductMetadataExtractor {
     
     private final File testDir = FileUtils.createTmpDir();
     
-	final Reporting reporting = ReportingUtils.newReportingBuilderFor("TestMetadataExtraction")
-			.newWorkerComponentReporting();
+	final Reporting reporting = ReportingUtils.newReportingBuilder()
+			.newTaskReporting("TestMetadataExtraction");
 
 	/**
 	 * Initialization
@@ -166,7 +166,7 @@ public class TestLevelProductMetadataExtractor {
 						"NRT"
 				)
 		);
-		doReturn(files).when(obsClient).download(Mockito.anyList());
+		doReturn(files).when(obsClient).download(Mockito.anyList(), Mockito.any());
 
 		final OutputFileDescriptor descriptor = new OutputFileDescriptor();
 		descriptor.setExtension(FileExtension.SAFE);
@@ -197,7 +197,7 @@ public class TestLevelProductMetadataExtractor {
 			}
 		}
 
-		verify(obsClient, times(1)).download(Mockito.any());
+		verify(obsClient, times(1)).download(Mockito.any(), Mockito.any());
 
 	}
 
@@ -217,7 +217,7 @@ public class TestLevelProductMetadataExtractor {
 						"NRT"
 				)
 		);
-		doReturn(files).when(obsClient).download(Mockito.anyList());
+		doReturn(files).when(obsClient).download(Mockito.anyList(), Mockito.any());
 
 		final OutputFileDescriptor descriptor = new OutputFileDescriptor();
 		descriptor.setExtension(FileExtension.SAFE);
@@ -247,7 +247,7 @@ public class TestLevelProductMetadataExtractor {
 			}
 		}
 
-		verify(obsClient, times(1)).download(Mockito.any());
+		verify(obsClient, times(1)).download(Mockito.any(), Mockito.any());
 
 	}
 
@@ -263,7 +263,7 @@ public class TestLevelProductMetadataExtractor {
 						"S1A_IW_RAW__0SDV_20171213T121623_20171213T121656_019684_021735_C6DB.SAFE/manifest.safe",
 						ProductFamily.L1_SLICE, "NRT"));
 
-		doReturn(files).when(obsClient).download(Mockito.anyList());
+		doReturn(files).when(obsClient).download(Mockito.anyList(), Mockito.any());
 
 		final OutputFileDescriptor descriptor = new OutputFileDescriptor();
 		descriptor.setExtension(FileExtension.SAFE);
@@ -293,7 +293,7 @@ public class TestLevelProductMetadataExtractor {
 			}
 		}
 
-		verify(obsClient, times(1)).download(Mockito.any());
+		verify(obsClient, times(1)).download(Mockito.any(), Mockito.any());
 
 	}
 
@@ -307,7 +307,7 @@ public class TestLevelProductMetadataExtractor {
 		final GenericMessageDto<CatalogJob> inputMessageSafe = new GenericMessageDto<CatalogJob>(123, "",
 				Utils.newCatalogJob(l1acnName, l1acnName + "/manifest.safe", ProductFamily.L1_ACN, "NRT"));
 
-		doReturn(files).when(obsClient).download(Mockito.anyList());
+		doReturn(files).when(obsClient).download(Mockito.anyList(), Mockito.any());
 
 		final OutputFileDescriptor descriptor = new OutputFileDescriptor();
 		descriptor.setExtension(FileExtension.SAFE);
@@ -337,7 +337,7 @@ public class TestLevelProductMetadataExtractor {
 			}
 		}
 
-		verify(obsClient, times(1)).download(Mockito.any());
+		verify(obsClient, times(1)).download(Mockito.any(), Mockito.any());
 
 	}
 
@@ -351,7 +351,7 @@ public class TestLevelProductMetadataExtractor {
 		final GenericMessageDto<CatalogJob> inputMessageSafe = new GenericMessageDto<CatalogJob>(123, "",
 				Utils.newCatalogJob(l2SliceName, l2SliceName+ "/manifest.safe", ProductFamily.L2_SLICE, "NRT"));
 
-		doReturn(files).when(obsClient).download(Mockito.anyList());
+		doReturn(files).when(obsClient).download(Mockito.anyList(), Mockito.any());
 
 		final OutputFileDescriptor descriptor = new OutputFileDescriptor();
 		descriptor.setExtension(FileExtension.SAFE);
@@ -381,7 +381,7 @@ public class TestLevelProductMetadataExtractor {
 			}
 		}
 
-		verify(obsClient, times(1)).download(Mockito.any());
+		verify(obsClient, times(1)).download(Mockito.any(), Mockito.any());
 
 	}
 
@@ -395,7 +395,7 @@ public class TestLevelProductMetadataExtractor {
 		final GenericMessageDto<CatalogJob> inputMessageSafe = new GenericMessageDto<CatalogJob>(123, "",
 				Utils.newCatalogJob(l2acnName, l2acnName+ "/manifest.safe", ProductFamily.L2_ACN, "NRT"));
 
-		doReturn(files).when(obsClient).download(Mockito.anyList());
+		doReturn(files).when(obsClient).download(Mockito.anyList(), Mockito.any());
 
 		final OutputFileDescriptor descriptor = new OutputFileDescriptor();
 		descriptor.setExtension(FileExtension.SAFE);
@@ -424,7 +424,7 @@ public class TestLevelProductMetadataExtractor {
 				assertEquals(expected.get(key), result.get(key));
 			}
 		}
-		verify(obsClient, times(1)).download(Mockito.any());
+		verify(obsClient, times(1)).download(Mockito.any(), Mockito.any());
 	}
 
 }

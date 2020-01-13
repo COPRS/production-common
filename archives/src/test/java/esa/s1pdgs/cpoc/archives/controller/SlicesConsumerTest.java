@@ -30,6 +30,7 @@ import esa.s1pdgs.cpoc.common.errors.obs.ObsUnknownObject;
 import esa.s1pdgs.cpoc.mqi.model.queue.ProductionEvent;
 import esa.s1pdgs.cpoc.obs_sdk.ObsClient;
 import esa.s1pdgs.cpoc.obs_sdk.ObsDownloadObject;
+import esa.s1pdgs.cpoc.report.Reporting;
 
 public class SlicesConsumerTest {
 
@@ -63,19 +64,19 @@ public class SlicesConsumerTest {
 
     private void mockSliceDownloadFiles(List<File> result)
             throws AbstractCodedException {
-        doReturn(result).when(obsClient).download(Mockito.anyList());
+        doReturn(result).when(obsClient).download(Mockito.anyList(), Reporting.ChildFactory.NULL);
     }
 
     private void mockSliceObjectStorageException()
             throws AbstractCodedException {
         doThrow(new ObsException(ProductFamily.L0_SLICE, "kobs",
-                new Throwable())).when(obsClient).download(Mockito.anyList());
+                new Throwable())).when(obsClient).download(Mockito.anyList(), Reporting.ChildFactory.NULL);
     }
 
     private void mockSliceObsUnknownObjectException()
             throws AbstractCodedException {
         doThrow(new ObsUnknownObject(ProductFamily.BLANK, "kobs"))
-                .when(obsClient).download(Mockito.anyList());
+                .when(obsClient).download(Mockito.anyList(), Reporting.ChildFactory.NULL);
     }
 
     @SuppressWarnings("unchecked")
@@ -94,7 +95,7 @@ public class SlicesConsumerTest {
                 ack, "topic");
         verify(ack, times(1)).acknowledge();
         verify(obsClient, times(1)).download((List<ObsDownloadObject>) ArgumentMatchers.argThat(s -> ((List<ObsDownloadObject>) s).contains(new ObsDownloadObject(
-        		ProductFamily.L0_SLICE, "kobs", "test/data/slices/l0_slice"))));
+        		ProductFamily.L0_SLICE, "kobs", "test/data/slices/l0_slice"))), Reporting.ChildFactory.NULL);
     }
 
     @SuppressWarnings("unchecked")
@@ -112,7 +113,7 @@ public class SlicesConsumerTest {
                 ack, "topic");
         verify(ack, times(1)).acknowledge();
         verify(obsClient, times(1)).download((List<ObsDownloadObject>) ArgumentMatchers.argThat(s -> ((List<ObsDownloadObject>) s).contains(new ObsDownloadObject(
-        		ProductFamily.L0_SLICE, "kobs/manifest.safe", "test/data/slices/l0_slice"))));
+        		ProductFamily.L0_SLICE, "kobs/manifest.safe", "test/data/slices/l0_slice"))), Reporting.ChildFactory.NULL);
     }
 
     @Test
@@ -171,7 +172,7 @@ public class SlicesConsumerTest {
                 ack, "topic");
         verify(ack, times(1)).acknowledge();
         verify(obsClient, times(1)).download((List<ObsDownloadObject>) ArgumentMatchers.argThat(s -> ((List<ObsDownloadObject>) s).contains(new ObsDownloadObject(
-        		ProductFamily.L1_SLICE, "kobs/manifest.safe", "test/data/slices/l1_slice"))));
+        		ProductFamily.L1_SLICE, "kobs/manifest.safe", "test/data/slices/l1_slice"))), Reporting.ChildFactory.NULL);
     }
 
     @Test
@@ -241,7 +242,7 @@ public class SlicesConsumerTest {
                 ack, "topic");
         verify(ack, times(1)).acknowledge();
         verify(obsClient, times(1)).download((List<ObsDownloadObject>) ArgumentMatchers.argThat(s -> ((List<ObsDownloadObject>) s).contains(new ObsDownloadObject(
-        		ProductFamily.L2_SLICE, "kobs/manifest.safe", "test/data/slices/l2_slice"))));
+        		ProductFamily.L2_SLICE, "kobs/manifest.safe", "test/data/slices/l2_slice"))), Reporting.ChildFactory.NULL);
     }
     
     @SuppressWarnings("unchecked")
@@ -259,7 +260,7 @@ public class SlicesConsumerTest {
                 ack, "topic");
         verify(ack, times(1)).acknowledge();
         verify(obsClient, times(1)).download((List<ObsDownloadObject>) ArgumentMatchers.argThat(s -> ((List<ObsDownloadObject>) s).contains(new ObsDownloadObject(
-        		ProductFamily.L2_ACN, "kobs/manifest.safe", "test/data/slices/l2_acn"))));
+        		ProductFamily.L2_ACN, "kobs/manifest.safe", "test/data/slices/l2_acn"))), Reporting.ChildFactory.NULL);
     }
 
 }

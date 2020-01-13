@@ -73,7 +73,7 @@ public class InputDownloaderTest {
         MockitoAnnotations.initMocks(this);
 
         
-        doReturn(Collections.emptyList()).when(this.obsClient).download(Mockito.any());
+        doReturn(Collections.emptyList()).when(this.obsClient).download(Mockito.any(), Mockito.any());
         doNothing().when(this.poolProcessorExecutor)
                 .setActive(Mockito.anyBoolean());
 
@@ -153,11 +153,11 @@ public class InputDownloaderTest {
 
         // We have one file per input + status.txt
         assertEquals(0, workDirectory.list().length);
-        verify(obsClient, times(2)).download(Mockito.any());
+        verify(obsClient, times(2)).download(Mockito.any(), Mockito.any());
         verify(obsClient, times(1)).download(
-                Mockito.eq(downloadToBatch.subList(0, 5)));
+                Mockito.eq(downloadToBatch.subList(0, 5)), Mockito.any());
         verify(obsClient, times(1)).download(
-                Mockito.eq(downloadToBatch.subList(5, 8)));
+                Mockito.eq(downloadToBatch.subList(5, 8)), Mockito.any());
 
         // Check jobOrder.txt
         assertTrue(jobOrder.exists() && jobOrder.isFile());
@@ -188,11 +188,11 @@ public class InputDownloaderTest {
 
         // We have one file per input + status.txt
         assertEquals(0, workDirectory.list().length);
-        verify(this.obsClient, times(2)).download(Mockito.any());
+        verify(this.obsClient, times(2)).download(Mockito.any(), Mockito.any());
         verify(this.obsClient, times(1)).download(
-                Mockito.eq(downloadToBatch.subList(0, 5)));
+                Mockito.eq(downloadToBatch.subList(0, 5)), Mockito.any());
         verify(this.obsClient, times(1)).download(
-                Mockito.eq(downloadToBatch.subList(5, 8)));
+                Mockito.eq(downloadToBatch.subList(5, 8)), Mockito.any());
 
         // Check jobOrder.txt
         assertTrue(jobOrder.exists() && jobOrder.isFile());

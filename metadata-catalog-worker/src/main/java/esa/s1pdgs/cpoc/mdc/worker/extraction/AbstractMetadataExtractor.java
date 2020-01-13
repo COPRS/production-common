@@ -53,22 +53,16 @@ public abstract class AbstractMetadataExtractor implements MetadataExtractor {
     ) 
     	throws AbstractCodedException
     {
-		// make sure than keyObs contains the metadata file
+		// make sure that keyObs contains the metadata file
 		final String metadataKeyObs = getMetadataKeyObs(keyObs);
 		
-        final Reporting reportDownload = reportingChildFactory.newChild("MetadataExtraction.Download");         
-        reportDownload.begin(new ReportingMessage(
-        		"Starting download of {} to local directory {}", metadataKeyObs, localDirectory
-        ));
-
 		try {
 			final List<File> files = Retries.performWithRetries(
-					() -> obsClient.download(Collections.singletonList(new ObsDownloadObject(family, metadataKeyObs, this.localDirectory))), 
+					() -> obsClient.download(Collections.singletonList(new ObsDownloadObject(family, metadataKeyObs, this.localDirectory)), reportingChildFactory), 
 					"Download of metadata file " + metadataKeyObs + " to " + localDirectory, 
 					processConfiguration.getNumObsDownloadRetries(), 
 					processConfiguration.getSleepBetweenObsRetriesMillis()
 			);
-			reportDownload.end(new ReportingMessage("End download of " + metadataKeyObs));
 			if (files.size() != 1) {
 				throw new IllegalArgumentException(
 						String.format("Expected to download one metadata file '%s', but found: %s", metadataKeyObs, files.size())
@@ -78,19 +72,13 @@ public abstract class AbstractMetadataExtractor implements MetadataExtractor {
 			logger.debug("Downloaded metadata file {} to {}", metadataKeyObs, metadataFile);
 			return metadataFile;
 		} catch (final Exception e) {
-			if (e instanceof AbstractCodedException) {
-				final AbstractCodedException ace = (AbstractCodedException) e;
-				reportDownload.error(new ReportingMessage("[code {}] {}", ace.getCode().getCode(), ace.getLogMessage()));
-				throw ace;
-			}
-			reportDownload.error(new ReportingMessage("Error downloading {} to local directory {}", metadataKeyObs, localDirectory));
 			throw new RuntimeException(e);     
 		}
     }
 
     final <E> E extractFromFilename(final Reporting.ChildFactory reportingChildFactory,
 			final ThrowingSupplier<E> supplier)	throws AbstractCodedException {
-		Reporting reporting = reportingChildFactory.newChild("MetadataExtraction.FilenameExtract");
+		Reporting reporting = reportingChildFactory.newChild("FilenameExtract");
 		reporting.begin(new ReportingMessage("Start extraction from {}", "filename"));
 		try {
 			final E res = supplier.get();
@@ -104,7 +92,7 @@ public abstract class AbstractMetadataExtractor implements MetadataExtractor {
     
     final JSONObject extractFromFile(final Reporting.ChildFactory reportingChildFactory,
     		final ThrowingSupplier<JSONObject> supplier) throws AbstractCodedException  {
-		Reporting reporting = reportingChildFactory.newChild("MetadataExtraction.FileExtract");
+		Reporting reporting = reportingChildFactory.newChild("FileExtract");
 		reporting.begin(new ReportingMessage("Start extraction from {}", "file"));
 		try {
 			JSONObject res = supplier.get();		
