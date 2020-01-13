@@ -246,7 +246,10 @@ public class S3ObsServices {
 				if (idx >= 0 && line.length() > (idx + 2)) {
 					// final String md5 = line.substring(0, idx);
 					final String key = line.substring(idx + 2);
-					result.add(key);
+					// If the prefix is found in the key it is valid. This should work for single files as well as directories
+					if (key.contains(prefixKey)) {
+						result.add(key);
+					}
 				}
 			}
 		} catch (IOException e) {
