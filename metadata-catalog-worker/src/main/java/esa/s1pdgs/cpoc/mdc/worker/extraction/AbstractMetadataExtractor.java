@@ -65,7 +65,7 @@ public abstract class AbstractMetadataExtractor implements MetadataExtractor {
 			);
 			if (files.size() != 1) {
 				throw new IllegalArgumentException(
-						String.format("Expected to download metadata file '%s' but was: %s", metadataKeyObs, files)
+						String.format("Expected to download one metadata file '%s', but found: %s", metadataKeyObs, files.size())
 				);
 			}
 			final File metadataFile = files.get(0);
