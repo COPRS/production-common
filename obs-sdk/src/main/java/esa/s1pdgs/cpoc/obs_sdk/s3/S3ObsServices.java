@@ -280,7 +280,7 @@ public class S3ObsServices {
 			// List all objects with given prefix
 			try {
 				List<String> expectedFiles = getExpectedFiles(bucketName, prefixKey);
-				log(String.format("Expected files for prefix %s is %s", prefixKey, expectedFiles.size()));
+				log(String.format("Expected files for prefix %s is %s", prefixKey, String.join(", ", expectedFiles)));
 				// TODO: How to handle MD5 SUM files???
 
 				for (String key : expectedFiles) {
