@@ -30,7 +30,6 @@ import esa.s1pdgs.cpoc.common.errors.obs.ObsUnknownObject;
 import esa.s1pdgs.cpoc.mqi.model.queue.ProductionEvent;
 import esa.s1pdgs.cpoc.obs_sdk.ObsClient;
 import esa.s1pdgs.cpoc.obs_sdk.ObsDownloadObject;
-import esa.s1pdgs.cpoc.report.Reporting;
 
 public class SegmentsConsumerTest {
 
@@ -64,19 +63,19 @@ public class SegmentsConsumerTest {
 
     private void mockSliceDownloadFiles(List<File> result)
             throws AbstractCodedException {
-        doReturn(result).when(obsClient).download(Mockito.anyList(), Reporting.ChildFactory.NULL);
+        doReturn(result).when(obsClient).download(Mockito.anyList(), Mockito.any());
     }
 
     private void mockSliceObjectStorageException()
             throws AbstractCodedException {
         doThrow(new ObsException(ProductFamily.L0_SEGMENT, "kobs",
-                new Throwable())).when(obsClient).download(Mockito.anyList(), Reporting.ChildFactory.NULL);
+                new Throwable())).when(obsClient).download(Mockito.anyList(), Mockito.any());
     }
 
     private void mockSliceObsUnknownObjectException()
             throws AbstractCodedException {
         doThrow(new ObsUnknownObject(ProductFamily.BLANK, "kobs"))
-                .when(obsClient).download(Mockito.anyList(), Reporting.ChildFactory.NULL);
+                .when(obsClient).download(Mockito.anyList(), Mockito.any());
     }
 
 	@Test
@@ -96,7 +95,7 @@ public class SegmentsConsumerTest {
         verify(ack, times(1)).acknowledge();
         
         verify(obsClient, times(1)).download((List<ObsDownloadObject>) ArgumentMatchers.argThat(s -> ((List<ObsDownloadObject>) s).contains(new ObsDownloadObject(
-        		ProductFamily.L0_SEGMENT, "kobs","test/data/segments/l0_segment"))), Reporting.ChildFactory.NULL);
+        		ProductFamily.L0_SEGMENT, "kobs","test/data/segments/l0_segment"))), Mockito.any());
     }
 
     @Test
@@ -114,7 +113,7 @@ public class SegmentsConsumerTest {
                 ack, "topic");
         verify(ack, times(1)).acknowledge();
         verify(obsClient, times(1)).download((List<ObsDownloadObject>) ArgumentMatchers.argThat(s -> ((List<ObsDownloadObject>) s).contains(new ObsDownloadObject(
-        		ProductFamily.L0_SEGMENT, "kobs/manifest.safe", "test/data/segments/l0_segment"))), Reporting.ChildFactory.NULL);
+        		ProductFamily.L0_SEGMENT, "kobs/manifest.safe", "test/data/segments/l0_segment"))), Mockito.any());
     }
 
     @Test

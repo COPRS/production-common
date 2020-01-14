@@ -27,6 +27,7 @@ import esa.s1pdgs.cpoc.ipf.execution.worker.job.oqc.OQCExecutor;
 import esa.s1pdgs.cpoc.ipf.execution.worker.job.oqc.OQCTask;
 import esa.s1pdgs.cpoc.mqi.model.queue.LevelJobOutputDto;
 import esa.s1pdgs.cpoc.mqi.model.queue.OQCFlag;
+import esa.s1pdgs.cpoc.report.Reporting;
 
 public class OQCTaskTest {    
 	
@@ -55,7 +56,7 @@ public class OQCTaskTest {
 		
 		Path productDir = Files.createTempDirectory("OQCTASK");
 
-		OQCFlag flag = executor.executeOQC(productDir, dto, new OQCDefaultTaskFactory());
+		OQCFlag flag = executor.executeOQC(productDir, dto, new OQCDefaultTaskFactory(), Reporting.ChildFactory.NULL);
 		
 		assertThat(flag, is(notNullValue()));
 		assertThat(flag, is(OQCFlag.NOT_CHECKED));
@@ -71,7 +72,7 @@ public class OQCTaskTest {
 		
 		Path productDir = Files.createTempDirectory("OQCTASK");
 
-		OQCFlag flag = executor.executeOQC(productDir, dto, new OQCDefaultTaskFactory());
+		OQCFlag flag = executor.executeOQC(productDir, dto, new OQCDefaultTaskFactory(), Reporting.ChildFactory.NULL);
 		
 		assertThat(flag, is(notNullValue()));
 		assertThat(flag, is(OQCFlag.CHECKED_OK));

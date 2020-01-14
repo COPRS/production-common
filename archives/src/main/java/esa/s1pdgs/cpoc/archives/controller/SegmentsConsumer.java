@@ -17,6 +17,8 @@ import esa.s1pdgs.cpoc.mqi.model.queue.ProductionEvent;
 import esa.s1pdgs.cpoc.obs_sdk.ObsClient;
 import esa.s1pdgs.cpoc.obs_sdk.ObsDownloadObject;
 import esa.s1pdgs.cpoc.report.Reporting;
+import esa.s1pdgs.cpoc.report.ReportingMessage;
+import esa.s1pdgs.cpoc.report.ReportingUtils;
 
 /**
  * @author Viveris Technologies
@@ -62,17 +64,21 @@ public class SegmentsConsumer {
             final Acknowledgment acknowledgment,
             @Header(KafkaHeaders.RECEIVED_TOPIC) final String topic) {
   	
-        //this.appStatus.setProcessing("SLICES"); // Commented out because AppStatusImpl can currently only track one thing and is used by the ReportsConsumer
+    	//this.appStatus.setProcessing("SLICES"); // Commented out because AppStatusImpl can currently only track one thing and is used by the ReportsConsumer
+
+    	Reporting reporting = ReportingUtils.newReportingBuilder().newTaskReporting("Archives");
+    	reporting.begin(new ReportingMessage("Start archiving"));
+    	
         try {
             if (!devProperties.getActivations().get("download-all")) {
                 this.obsClient.download(Arrays.asList(new ObsDownloadObject(dto.getProductFamily(),
                         dto.getKeyObjectStorage() + "/manifest.safe",
                         this.sharedVolume + "/"
-                                + dto.getProductFamily().name().toLowerCase())), Reporting.ChildFactory.NULL);
+                                + dto.getProductFamily().name().toLowerCase())), reporting.getChildFactory());
             } else {
                 this.obsClient.download(Arrays.asList(new ObsDownloadObject(dto.getProductFamily(),
                         dto.getKeyObjectStorage(), this.sharedVolume + "/"
-                                + dto.getProductFamily().name().toLowerCase())), Reporting.ChildFactory.NULL);
+                                + dto.getProductFamily().name().toLowerCase())), reporting.getChildFactory());
             }
             acknowledgment.acknowledge();
         } catch (ObsException e) {        	
@@ -80,6 +86,9 @@ public class SegmentsConsumer {
         } catch (Exception exc) {
             //this.appStatus.setError("SLICES"); // Commented out because AppStatusImpl can currently only track one thing and is used by the ReportsConsumer
         }
-        this.appStatus.setWaiting();
+        //this.appStatus.setWaiting(); ; // Commented out because AppStatusImpl can currently only track one thing and is used by the ReportsConsumer
+        
+    	reporting.end(new ReportingMessage("End archiving"));
+
     }
 }

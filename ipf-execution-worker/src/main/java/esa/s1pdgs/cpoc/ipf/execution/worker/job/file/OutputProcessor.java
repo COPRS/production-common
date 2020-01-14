@@ -42,7 +42,6 @@ import esa.s1pdgs.cpoc.obs_sdk.ObsUploadObject;
 import esa.s1pdgs.cpoc.report.Reporting;
 import esa.s1pdgs.cpoc.report.ReportingMessage;
 import esa.s1pdgs.cpoc.report.ReportingOutput;
-import esa.s1pdgs.cpoc.report.ReportingUtils;
 import esa.s1pdgs.cpoc.report.message.output.FilenameReportingOutput;
 import esa.s1pdgs.cpoc.report.message.output.IpfExecutionWorkerReportingOutput;
 import esa.s1pdgs.cpoc.report.message.output.IpfExecutionWorkerReportingOutput.Segment;
@@ -208,10 +207,10 @@ public class OutputProcessor {
 				final ProductFamily family = ProductFamily.fromValue(matchOutput.getFamily());
 
 				final File file = new File(filePath);
-				final Reporting reporting = reportingChildFactory.newChild("OutputHandling.OQC");
-				final OQCFlag oqcFlag = executor.executeOQC(Paths.get(getFilePath(line, productName)), matchOutput, new OQCDefaultTaskFactory());
+				final OQCFlag oqcFlag = executor.executeOQC(Paths.get(getFilePath(line, productName)), matchOutput, new OQCDefaultTaskFactory(), reportingChildFactory);
 				LOGGER.info("Result of OQC validation was: {}",oqcFlag);
-				
+
+				final Reporting reporting = reportingChildFactory.newChild("GhostCandidateDetection");				
 				switch (family) {
 				case L0_REPORT:
 				case L1_REPORT:
@@ -274,7 +273,6 @@ public class OutputProcessor {
 				case L0_ACN:
 				case L0_BLANK:
 					// Specific case of the L0 wrapper
-					// Specific case of the L0 wrapper
 					reporting.begin(new ReportingMessage("Starting ghost candidate detection"));
 					if (appLevel == ApplicationLevel.L0) {
 						final boolean ghostCandidate = isGhostCandidate(productName);
@@ -312,6 +310,7 @@ public class OutputProcessor {
 								inputMessage.getBody().getProductProcessMode(),oqcFlag));
 						productSize += size(file);
 					}
+					reporting.end(new ReportingMessage("End of ghost candidate detection"));
 					break;
 				case L1_SLICE:
 				case L1_ACN:
@@ -511,26 +510,17 @@ public class OutputProcessor {
 		for (int i = 0; i < nbPool; i++) {
 			final int lastIndex = Math.min((i + 1) * sizeUploadBatch, uploadBatch.size());
 			final List<ObsUploadObject> sublist = uploadBatch.subList(i * sizeUploadBatch, lastIndex);
-			final String listProducts = sublist.stream().map(ObsUploadObject::getKey).collect(Collectors.joining(","));
 
 			if (i > 0) {
 				this.publishAccordingUploadFiles(reportingChildFactory, i - 1, sublist.get(0).getKey(), outputToPublish);
 			}
-			final Reporting report = reportingChildFactory.newChild("OutputHandling.ObsUpload");
 			try {
-				report.begin(new ReportingMessage("Start uploading batch " + i + " of outputs " + listProducts));
 
 				if (Thread.currentThread().isInterrupted()) {
 					throw new InternalErrorException("The current thread as been interrupted");
 				}
 				this.obsClient.upload(sublist, reportingChildFactory);
-				report.end(new ReportingMessage("End uploading batch " + i + " of outputs " + listProducts));
-
-			} catch (final AbstractCodedException e) {
-				report.error(new ReportingMessage("[code {}] {}", e.getCode().getCode(), e.getLogMessage()));
-				throw e;
-			} catch (ObsEmptyFileException e) {
-				report.error(new ReportingMessage(LogUtils.toString(e)));
+			} catch (final AbstractCodedException | ObsEmptyFileException e) {
 				throw e;
 			}
 		}
@@ -560,11 +550,11 @@ public class OutputProcessor {
 			if (nextKeyUpload.startsWith(msg.getKeyObs())) {
 				stop = true;
 			} else {
-				final Reporting report = reportingChildFactory.newChild("OutputHandling.Publish");
-				report.begin(new ReportingMessage("Start publishing message"));
+				final Reporting report = reportingChildFactory.newChild("KafkaPublish");
+				report.begin(new ReportingMessage("Start publishing file: {}", msg.getKeyObs()));
 				try {
 					procuderFactory.sendOutput(msg, inputMessage);
-					report.end(new ReportingMessage("End publishing message"));
+					report.end(new ReportingMessage("End publishing file: {}", msg.getKeyObs()));
 				} catch (final MqiPublicationError ace) {
 					report.error(new ReportingMessage("[code {}] {}", ace.getCode().getCode(), ace.getLogMessage()));
 				}
@@ -610,8 +600,8 @@ public class OutputProcessor {
 	 * @throws IOException
 	 * @throws ObsEmptyFileException 
 	 */
-	public ReportingOutput processOutput() throws AbstractCodedException, ObsEmptyFileException {
-		final Reporting reporting = ReportingUtils.newReportingBuilder().newTaskReporting("OutputHandling");
+	public ReportingOutput processOutput(final Reporting.ChildFactory reportingChildFactory) throws AbstractCodedException, ObsEmptyFileException {
+		final Reporting reporting = reportingChildFactory.newChild("OutputHandling");
 
 		List<String> result = new ArrayList<>();
 		final List<Segment> segments = new ArrayList<>();

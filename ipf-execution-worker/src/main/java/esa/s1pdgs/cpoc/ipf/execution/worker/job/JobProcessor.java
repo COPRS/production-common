@@ -226,7 +226,7 @@ public class JobProcessor implements MqiListener<IpfExecutionJob> {
 		
 		// Initialize the pool processor executor
 		final PoolExecutorCallable procExecutor = new PoolExecutorCallable(properties, job,
-				getPrefixMonitorLog(MonitorLogUtils.LOG_PROCESS, job), this.properties.getLevel());
+				getPrefixMonitorLog(MonitorLogUtils.LOG_PROCESS, job), this.properties.getLevel(), reporting.getChildFactory());
 		final ExecutorService procExecutorSrv = Executors.newSingleThreadExecutor();
 		final ExecutorCompletionService<Void> procCompletionSrv = new ExecutorCompletionService<>(procExecutorSrv);
 		// Initialize the input downloader
@@ -284,7 +284,7 @@ public class JobProcessor implements MqiListener<IpfExecutionJob> {
                 checkThreadInterrupted();
                 LOGGER.info("{} Preparing local working directory",
                         getPrefixMonitorLog(MonitorLogUtils.LOG_INPUT, job));
-                inputDownloader.processInputs();
+                inputDownloader.processInputs(reporting.getChildFactory());
             } else {
                 LOGGER.info("{} Preparing local working directory bypassed",
                         getPrefixMonitorLog(MonitorLogUtils.LOG_INPUT, job));
@@ -299,7 +299,7 @@ public class JobProcessor implements MqiListener<IpfExecutionJob> {
                 checkThreadInterrupted();
                 LOGGER.info("{} Processing l0 outputs",
                         getPrefixMonitorLog(MonitorLogUtils.LOG_OUTPUT, job));
-                reportingOutput = outputProcessor.processOutput();
+                reportingOutput = outputProcessor.processOutput(reporting.getChildFactory());
             } else {
                 LOGGER.info("{} Processing l0 outputs bypasssed",
                         getPrefixMonitorLog(MonitorLogUtils.LOG_OUTPUT, job));

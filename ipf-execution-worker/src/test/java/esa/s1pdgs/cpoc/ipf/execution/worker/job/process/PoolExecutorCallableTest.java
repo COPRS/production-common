@@ -26,6 +26,7 @@ import esa.s1pdgs.cpoc.ipf.execution.worker.test.SystemUtils;
 import esa.s1pdgs.cpoc.mqi.model.queue.IpfExecutionJob;
 import esa.s1pdgs.cpoc.mqi.model.queue.LevelJobPoolDto;
 import esa.s1pdgs.cpoc.mqi.model.queue.LevelJobTaskDto;
+import esa.s1pdgs.cpoc.report.Reporting;
 
 public class PoolExecutorCallableTest extends MockPropertiesTest {
 
@@ -60,7 +61,7 @@ public class PoolExecutorCallableTest extends MockPropertiesTest {
         job.getPools().get(2)
                 .addTask(new LevelJobTaskDto(SystemUtils.getCmdRmdir()));
 
-        callable = new PoolExecutorCallable(properties, job, "log", ApplicationLevel.L0);
+        callable = new PoolExecutorCallable(properties, job, "log", ApplicationLevel.L0, Reporting.ChildFactory.NULL);
     }
 
     @Test
