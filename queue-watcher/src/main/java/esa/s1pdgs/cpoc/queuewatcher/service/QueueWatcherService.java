@@ -24,12 +24,12 @@ import esa.s1pdgs.cpoc.common.utils.LogUtils;
 import esa.s1pdgs.cpoc.mqi.client.GenericMqiClient;
 import esa.s1pdgs.cpoc.mqi.client.MqiConsumer;
 import esa.s1pdgs.cpoc.mqi.client.MqiListener;
-import esa.s1pdgs.cpoc.mqi.model.queue.ProductionEvent;
+import esa.s1pdgs.cpoc.mqi.model.queue.CompressionEvent;
 import esa.s1pdgs.cpoc.mqi.model.rest.GenericMessageDto;
 import esa.s1pdgs.cpoc.queuewatcher.config.ApplicationProperties;
 
 @Service
-public class QueueWatcherService implements MqiListener<ProductionEvent> {
+public class QueueWatcherService implements MqiListener<CompressionEvent> {
 
 	private static final Logger LOGGER = LogManager.getLogger(QueueWatcherService.class);
 
@@ -78,19 +78,19 @@ public class QueueWatcherService implements MqiListener<ProductionEvent> {
 
 		final ExecutorService service = Executors.newFixedThreadPool(4);
 		if (auxFilesPollingIntervalMs > 0) {
-			service.execute(new MqiConsumer<ProductionEvent>(mqiClient, ProductCategory.AUXILIARY_FILES, this,
+			service.execute(new MqiConsumer<CompressionEvent>(mqiClient, ProductCategory.AUXILIARY_FILES, this,
 					auxFilesPollingIntervalMs, auxFilesPollingInitialDelayMs, AppStatus.NULL));
 		}
 		if (levelProductsPollingIntervalMs > 0) {
-			service.execute(new MqiConsumer<ProductionEvent>(mqiClient, ProductCategory.LEVEL_PRODUCTS, this,
+			service.execute(new MqiConsumer<CompressionEvent>(mqiClient, ProductCategory.LEVEL_PRODUCTS, this,
 					levelProductsPollingIntervalMs, levelProductsPollingInitialDelayMs, AppStatus.NULL));
 		}
 		if (levelSegmentsPollingIntervalMs > 0) {
-			service.execute(new MqiConsumer<ProductionEvent>(mqiClient, ProductCategory.LEVEL_SEGMENTS, this,
+			service.execute(new MqiConsumer<CompressionEvent>(mqiClient, ProductCategory.LEVEL_SEGMENTS, this,
 					levelSegmentsPollingIntervalMs, levelSegmentsPollingInitialDelayMs, AppStatus.NULL));
 		}
 		if (compressedProductsPollingIntervalMs > 0) {
-			service.execute(new MqiConsumer<ProductionEvent>(mqiClient, ProductCategory.COMPRESSED_PRODUCTS, this,
+			service.execute(new MqiConsumer<CompressionEvent>(mqiClient, ProductCategory.COMPRESSED_PRODUCTS, this,
 					compressedProductsPollingIntervalMs, compressedProductsPollingInitialDelayMs, AppStatus.NULL));
 		}
 		// Seems to be not relevant for EDRS_SESSIONS
@@ -124,8 +124,8 @@ public class QueueWatcherService implements MqiListener<ProductionEvent> {
 	}
 
 	@Override
-	public void onMessage(GenericMessageDto<ProductionEvent> message) {
-		final ProductionEvent product = message.getBody();
+	public void onMessage(GenericMessageDto<CompressionEvent> message) {
+		final CompressionEvent product = message.getBody();
 		String productName = product.getKeyObjectStorage();
 		ProductCategory category = ProductCategory.of(product.getProductFamily());
 
