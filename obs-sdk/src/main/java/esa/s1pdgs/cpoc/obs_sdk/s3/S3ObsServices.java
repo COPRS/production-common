@@ -353,8 +353,6 @@ public class S3ObsServices {
 					LOGGER.warn(
 							String.format("Download objects with prefix %s from bucket %s failed: Attempt : %d / %d",
 									prefixKey, bucketName, retryCount, numRetries));
-					System.out.println(String.format("Download objects with prefix %s from bucket %s failed: Attempt : %d / %d",
-									prefixKey, bucketName, retryCount, numRetries));
 					try {
 						Thread.sleep(retryDelay);						
 					} catch (InterruptedException e) {
@@ -363,7 +361,6 @@ public class S3ObsServices {
 					}
 					continue;
 				} else {
-					System.out.println("Giving up finally");
 					throw new S3SdkClientException(bucketName, prefixKey,
 							String.format("Download in %s fails: %s", directoryPath, ase.getMessage()), ase);
 				}
