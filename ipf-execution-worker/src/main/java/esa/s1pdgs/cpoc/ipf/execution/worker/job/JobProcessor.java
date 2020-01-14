@@ -10,6 +10,7 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
+import java.util.UUID;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorCompletionService;
 import java.util.concurrent.ExecutorService;
@@ -181,8 +182,9 @@ public class JobProcessor implements MqiListener<IpfExecutionJob> {
 		// ------------------------------------------------------
 		final IpfExecutionJob job = message.getBody();
 		
-		final Reporting reporting = ReportingUtils.newReportingBuilder().newTaskReporting("JobProcessing");
-
+		final Reporting reporting = ReportingUtils.newReportingBuilder()
+				.predecessor(job.getReportingTaskUID()).newTaskReporting("JobProcessing");		
+		
 		/*
 		 * If the working directory provided by the job order is outside the expected
 		 * and configured working directory of the wrapper, something is going on

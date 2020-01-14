@@ -8,6 +8,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 public interface Reporting {
+	
 	public interface Builder {				
 		Builder predecessor(UUID predecessor);
 		default Builder addTag(final String tag) {
@@ -17,7 +18,7 @@ public interface Reporting {
 		Reporting newTaskReporting(String taskName);
 		void newEventReporting(final ReportingMessage reportingMessage);
 	}
-
+	
 	public interface ChildFactory {
 		public static final ChildFactory NULL = new ChildFactory() {
 			@Override
@@ -52,6 +53,11 @@ public interface Reporting {
 	public static final Reporting NULL = new Reporting() {
 		
 		/* Discarding Reporting Implementation */
+		
+		@Override
+		public UUID getRootUID() {
+			return null;
+		}
 
 		@Override
 		public void begin(ReportingInput input, ReportingMessage reportingMessage) {}
@@ -65,9 +71,11 @@ public interface Reporting {
 		@Override
 		public ChildFactory getChildFactory() {
 			return Reporting.ChildFactory.NULL;
-		}		
+		}
 	};
-		
+
+	UUID getRootUID();
+	
 	default void begin(final ReportingMessage reportingMessage) {
 		begin(ReportingInput.NULL, reportingMessage);
 	}
