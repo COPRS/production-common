@@ -28,7 +28,7 @@ public class OQCExecutor {
 
 	public OQCFlag executeOQC(final Path originalProduct, final LevelJobOutputDto output, final OQCTaskFactory factory,
 			final Reporting.ChildFactory reportingChildFactory) {
-		final Reporting reporting = reportingChildFactory.newChild("Online Quality Check");
+		final Reporting reporting = reportingChildFactory.newChild("OnlineQualityCheck");
 		
 		// Just check if OQC is enabled after all
 		if (properties.isOqcEnabled() && output.isOqcCheck()) {

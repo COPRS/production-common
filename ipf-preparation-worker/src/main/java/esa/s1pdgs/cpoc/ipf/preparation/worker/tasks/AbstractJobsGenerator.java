@@ -435,7 +435,7 @@ public abstract class AbstractJobsGenerator implements Runnable {
                 
                 // Check primary input
                 if (job.getGeneration().getState() == AppDataJobGenerationState.INITIAL) {
-                 	final Reporting reportInit = reporting.getChildFactory().newChild("JobGenerator.Init");
+                 	final Reporting reportInit = reporting.getChildFactory().newChild("JobGeneratorInit");
                     reportInit.begin(new ReportingMessage("Start init job generation"));
                     try { 
                         LOGGER.info(
@@ -462,7 +462,7 @@ public abstract class AbstractJobsGenerator implements Runnable {
                 // Search input
                 if (job.getGeneration().getState() == AppDataJobGenerationState.PRIMARY_CHECK) {
                 	
-                	final Reporting reportInputs = reporting.getChildFactory().newChild("JobGenerator.Search");
+                	final Reporting reportInputs = reporting.getChildFactory().newChild("JobGeneratorSearch");
                 	
                 	reportInputs.begin(new ReportingMessage("Start searching inputs"));
                 	
@@ -487,7 +487,7 @@ public abstract class AbstractJobsGenerator implements Runnable {
                 // Prepare and send job if ready
                 if (job.getGeneration().getState() == AppDataJobGenerationState.READY) {
                 	
-                	final Reporting reportPrep = reporting.getChildFactory().newChild("JobGenerator.PrepAndSend");                  	
+                	final Reporting reportPrep = reporting.getChildFactory().newChild("JobGeneratorPrepAndSend");                  	
                   	reportPrep.begin(new ReportingMessage("Start job preparation and sending"));
                 	
                     try {
