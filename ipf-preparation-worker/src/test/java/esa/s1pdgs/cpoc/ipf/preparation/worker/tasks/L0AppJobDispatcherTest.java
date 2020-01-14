@@ -15,6 +15,7 @@ import java.io.File;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.UUID;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -171,13 +172,13 @@ public class L0AppJobDispatcherTest {
                         Mockito.anyBoolean(), Mockito.anyBoolean(), Mockito.anyBoolean());
         doReturn(primaryCheckAppJob).when(appDataService).patchTaskTableOfJob(
                 Mockito.eq(123L), Mockito.eq("TaskTable.AIOP.xml"),
-                Mockito.eq(AppDataJobGenerationState.PRIMARY_CHECK));
+                Mockito.eq(AppDataJobGenerationState.PRIMARY_CHECK), Mockito.eq(new UUID(23L, 42L)));
         doReturn(readyAppJob).when(appDataService).patchTaskTableOfJob(
                 Mockito.eq(123L), Mockito.eq("TaskTable.AIOP.xml"),
-                Mockito.eq(AppDataJobGenerationState.READY));
+                Mockito.eq(AppDataJobGenerationState.READY), Mockito.eq(new UUID(23L, 42L)));
         doReturn(sentAppJob).when(appDataService).patchTaskTableOfJob(
                 Mockito.eq(123L), Mockito.eq("TaskTable.AIOP.xml"),
-                Mockito.eq(AppDataJobGenerationState.SENT));
+                Mockito.eq(AppDataJobGenerationState.SENT), Mockito.eq(new UUID(23L, 42L)));
     }
 
     @Test

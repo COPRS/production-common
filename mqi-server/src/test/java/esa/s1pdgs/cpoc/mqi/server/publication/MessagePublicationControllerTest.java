@@ -9,6 +9,7 @@ import static org.mockito.Mockito.doReturn;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.UUID;
 
 import javax.xml.bind.JAXBException;
 
@@ -274,7 +275,7 @@ public class MessagePublicationControllerTest {
     @Test
     public void publishLevelJobs() throws Exception {
         final IpfExecutionJob dto = new IpfExecutionJob(ProductFamily.L1_JOB, "product-name", "NRT",
-                "work-directory", "job-order");
+                "work-directory", "job-order", new UUID(23L, 42L));
         initCustomControllerForAllPublication();
 
         customController.publish(ProductCategory.LEVEL_JOBS, dto, "t-pdgs-aio-l0-slice-production-events-nrt", "L1_JOB");
@@ -288,7 +289,7 @@ public class MessagePublicationControllerTest {
     @Test
     public void publishLevelJobs1() throws Exception {
         final IpfExecutionJob dto = new IpfExecutionJob(ProductFamily.L0_JOB, "product-name", "NRT",
-                "work-directory", "job-order");
+                "work-directory", "job-order", new UUID(23L, 42L));
         initCustomControllerForAllPublication();
 
         customController.publish(ProductCategory.LEVEL_JOBS, dto, "NONE", "NONE");
@@ -302,7 +303,7 @@ public class MessagePublicationControllerTest {
     @Test
     public void publishLevelJobsL2() throws Exception {
         final IpfExecutionJob dto = new IpfExecutionJob(ProductFamily.L2_JOB, "product-name", "FAST",
-                "work-directory", "job-order");
+                "work-directory", "job-order", new UUID(23L, 42L));
         initCustomControllerForAllPublication();
 
         customController.publish(ProductCategory.LEVEL_JOBS, dto, "NONE", "NONE");

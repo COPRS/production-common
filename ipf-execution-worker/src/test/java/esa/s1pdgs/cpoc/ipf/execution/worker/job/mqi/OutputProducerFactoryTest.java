@@ -8,6 +8,7 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
 import java.io.File;
+import java.util.UUID;
 
 import org.junit.After;
 import org.junit.Before;
@@ -74,7 +75,7 @@ public class OutputProducerFactoryTest {
         inputMessage = new GenericMessageDto<IpfExecutionJob>(
         		123, 
         		"",
-                new IpfExecutionJob(ProductFamily.L0_JOB, "product-name", "FAST","work-dir", "job-order")
+                new IpfExecutionJob(ProductFamily.L0_JOB, "product-name", "FAST","work-dir", "job-order", new UUID(23L, 42L))
         );
         inputMessage.setInputKey(null);
     }

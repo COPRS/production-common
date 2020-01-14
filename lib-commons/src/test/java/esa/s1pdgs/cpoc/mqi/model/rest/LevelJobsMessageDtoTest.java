@@ -3,6 +3,8 @@ package esa.s1pdgs.cpoc.mqi.model.rest;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
+import java.util.UUID;
+
 import org.junit.Test;
 
 import esa.s1pdgs.cpoc.common.ProductFamily;
@@ -24,7 +26,7 @@ public class LevelJobsMessageDtoTest {
     public void testGettersSettersConstructors() {
         IpfExecutionJob body = new IpfExecutionJob(ProductFamily.L0_JOB,
                 "testEqualsFunction", "NRT", "/data/localWD/123456",
-                "/data/localWD/123456/JobOrder.xml");
+                "/data/localWD/123456/JobOrder.xml", new UUID(23L, 42L));
         GenericMessageDto<IpfExecutionJob> dto = new GenericMessageDto<IpfExecutionJob>(123, "input-key", body);
 
         assertEquals(123, dto.getId());
@@ -47,7 +49,7 @@ public class LevelJobsMessageDtoTest {
     public void testToString() {
         IpfExecutionJob body = new IpfExecutionJob(ProductFamily.L0_JOB,
                 "testEqualsFunction", "NRT", "/data/localWD/123456",
-                "/data/localWD/123456/JobOrder.xml");
+                "/data/localWD/123456/JobOrder.xml", new UUID(23L, 42L));
         GenericMessageDto<IpfExecutionJob> dto =
                 new GenericMessageDto<IpfExecutionJob>(123, "input-key", body);
         String str = dto.toString();

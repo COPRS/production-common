@@ -13,6 +13,7 @@ import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.UUID;
 import java.util.concurrent.Callable;
 
 import org.junit.Before;
@@ -339,7 +340,8 @@ public class AppCatalogJobClientTest {
         client.patchTaskTableOfJob(
         		job.getId(),
                 job.getGenerations().get(0).getTaskTable(),
-                AppDataJobGenerationState.SENT
+                AppDataJobGenerationState.SENT,
+                new UUID(23L, 42L)
         );
 	}
 
@@ -357,7 +359,8 @@ public class AppCatalogJobClientTest {
 	    client.patchTaskTableOfJob(
                 job.getId(), 
                 "tasktable2",
-                AppDataJobGenerationState.SENT
+                AppDataJobGenerationState.SENT,
+                new UUID(23L, 42L)
         );
 		final ResolvableType appCatMessageType = ResolvableType.forClassWithGenerics(
 				AppDataJob.class, 

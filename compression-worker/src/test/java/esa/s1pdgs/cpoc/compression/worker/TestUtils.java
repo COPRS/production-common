@@ -3,6 +3,7 @@ package esa.s1pdgs.cpoc.compression.worker;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 import esa.s1pdgs.cpoc.common.ProductFamily;
 import esa.s1pdgs.cpoc.mqi.model.queue.IpfExecutionJob;
@@ -17,7 +18,7 @@ public class TestUtils {
     public final static String WORKDIR = "./test_work_dir/";
 
     public static IpfExecutionJob buildL0IpfExecutionJob() {
-        IpfExecutionJob job = new IpfExecutionJob(ProductFamily.L0_JOB, "SESSIONID", "FAST", WORKDIR, WORKDIR + "JobOrder.xml");
+        IpfExecutionJob job = new IpfExecutionJob(ProductFamily.L0_JOB, "SESSIONID", "FAST", WORKDIR, WORKDIR + "JobOrder.xml", new UUID(23L, 42L));
 
         job.addInput(buildAuxiliaryInputDto("AUX_OBMEMC.xml"));
         job.addInput(buildAuxiliaryInputDto("MPL_OBRP.xml"));

@@ -2,6 +2,8 @@ package esa.s1pdgs.cpoc.ipf.execution.worker.job.file;
 
 import static org.junit.Assert.assertEquals;
 
+import java.util.UUID;
+
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mock;
@@ -9,7 +11,6 @@ import org.mockito.Mock;
 import esa.s1pdgs.cpoc.common.ApplicationLevel;
 import esa.s1pdgs.cpoc.common.ProductFamily;
 import esa.s1pdgs.cpoc.ipf.execution.worker.config.ApplicationProperties;
-import esa.s1pdgs.cpoc.ipf.execution.worker.job.file.OutputProcessor;
 import esa.s1pdgs.cpoc.ipf.execution.worker.job.mqi.OutputProcuderFactory;
 import esa.s1pdgs.cpoc.mqi.model.queue.IpfExecutionJob;
 import esa.s1pdgs.cpoc.mqi.model.rest.GenericMessageDto;
@@ -26,7 +27,7 @@ public class GhostTest {
 	@Before
 	public void setup() {
 		GenericMessageDto<IpfExecutionJob> inputMessage = new GenericMessageDto<IpfExecutionJob>(123, "",
-				new IpfExecutionJob(ProductFamily.L0_JOB, "product-name", "FAST24", "", "job-order"));
+				new IpfExecutionJob(ProductFamily.L0_JOB, "product-name", "FAST24", "", "job-order", new UUID(23L, 42L)));
 		
 		ApplicationProperties properties = new ApplicationProperties();
 		properties.setThresholdEw(2);

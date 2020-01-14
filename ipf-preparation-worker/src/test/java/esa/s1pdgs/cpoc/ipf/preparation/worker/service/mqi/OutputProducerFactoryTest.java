@@ -4,6 +4,8 @@ import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
+import java.util.UUID;
+
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mock;
@@ -39,7 +41,7 @@ public class OutputProducerFactoryTest {
     @Test
     public void testSendJob() throws AbstractCodedException {
         IpfExecutionJob dto = new IpfExecutionJob(ProductFamily.L1_JOB, "product-name", "NRT",
-                "work-dir", "job-order");
+                "work-dir", "job-order", new UUID(23L, 42L));
         GenericMessageDto<ProductionEvent> message =
                 new GenericMessageDto<ProductionEvent>(123, "key",
                         new ProductionEvent("level-name", "key-obs",

@@ -18,6 +18,7 @@ import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.UUID;
 
 import org.junit.Before;
 import org.junit.ClassRule;
@@ -365,7 +366,7 @@ public class MessageConsumptionControllerTest {
             throws AbstractCodedException, InterruptedException {
 
         final IpfExecutionJob dto = new IpfExecutionJob(ProductFamily.L1_JOB, "product-name", "NRT",
-                "work-dir", "job-order");
+                "work-dir", "job-order", new UUID(23L, 42L));
         final AppCatMessageDto<IpfExecutionJob> message =
                 new AppCatMessageDto<IpfExecutionJob>(
                         ProductCategory.LEVEL_JOBS, 123, "topic", 1, 22, dto);
@@ -394,7 +395,7 @@ public class MessageConsumptionControllerTest {
     public void testAckWhenStopNotAskButTopicUnknown()
             throws AbstractCodedException, InterruptedException {
 
-        final IpfExecutionJob dto = new IpfExecutionJob(ProductFamily.L1_JOB, "product-name", "NRT", "work-dir", "job-order");
+        final IpfExecutionJob dto = new IpfExecutionJob(ProductFamily.L1_JOB, "product-name", "NRT", "work-dir", "job-order", new UUID(23L, 42L));
         final AppCatMessageDto<IpfExecutionJob> message = new AppCatMessageDto<IpfExecutionJob>(
         		ProductCategory.LEVEL_JOBS, 
         		123, 
@@ -431,7 +432,7 @@ public class MessageConsumptionControllerTest {
             throws AbstractCodedException, InterruptedException {
 
         final IpfExecutionJob dto = new IpfExecutionJob(ProductFamily.L1_JOB, "product-name", "NRT",
-                "work-dir", "job-order");
+                "work-dir", "job-order", new UUID(23L, 42L));
         final AppCatMessageDto<IpfExecutionJob> message =
                 new AppCatMessageDto<IpfExecutionJob>(
                         ProductCategory.LEVEL_JOBS, 123, "topic4", 1, 22, dto);
@@ -454,7 +455,7 @@ public class MessageConsumptionControllerTest {
     
     @Test
     public void testAckWhenStopAskL2() throws AbstractCodedException, InterruptedException {
-        final IpfExecutionJob dto = new IpfExecutionJob(ProductFamily.L2_JOB, "product-name", "NRT", "work-dir", "job-order");
+        final IpfExecutionJob dto = new IpfExecutionJob(ProductFamily.L2_JOB, "product-name", "NRT", "work-dir", "job-order", new UUID(23L, 42L));
         final AppCatMessageDto<IpfExecutionJob> message =
                 new AppCatMessageDto<IpfExecutionJob>(
                         ProductCategory.LEVEL_JOBS, 123, "topic5", 1, 22, dto);
