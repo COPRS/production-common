@@ -13,7 +13,10 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -98,10 +101,11 @@ public class S3ObsServicesTest {
      * @throws InterruptedException
      * @throws AmazonClientException
      * @throws AmazonServiceException
+     * @throws S3ObsServiceException 
      */
     @Before
     public void init() throws AmazonServiceException, AmazonClientException,
-            InterruptedException {
+            InterruptedException, S3ObsServiceException {
         // Init mocks
         MockitoAnnotations.initMocks(this);
 
@@ -155,8 +159,9 @@ public class S3ObsServicesTest {
 
     /**
      * Mock the amazon S3 client
+     * @throws S3ObsServiceException 
      */
-    private void mockAmazonS3Client() {
+    private void mockAmazonS3Client() throws S3ObsServiceException {
         // doesObjectExist
         doReturn(true).when(s3client).doesObjectExist(Mockito.eq(BCK_OBJ_EXIST),
                 Mockito.anyString());
@@ -562,4 +567,81 @@ public class S3ObsServicesTest {
 
         file3.delete();
     }
+    
+    @Test
+    public void testIdentifyMd5File() {
+    	
+    	String md5file1 = service.identifyMd5File("L20180724144436762001030/ch01/DCS_02_L20180724144436762001030_ch1_DSIB.xml");
+    	assertEquals("L20180724144436762001030/ch01/DCS_02_L20180724144436762001030_ch1_DSIB.xml.md5sum", md5file1);
+    	
+    	String md5file2 = service.identifyMd5File("L20180724144436762001030/ch01/DCS_02_L20180724144436762001030_ch1_DSDB_00035.raw");
+    	assertEquals("L20180724144436762001030/ch01/DCS_02_L20180724144436762001030_ch1_DSDB_00035.raw.md5sum", md5file2);
+    	
+    	String md5file3 = service.identifyMd5File("S1__AUX_WND_V20181002T210000_G20180929T181057.SAFE/");
+    	assertEquals("S1__AUX_WND_V20181002T210000_G20180929T181057.SAFE.md5sum", md5file3);
+    	
+    	String md5file4 = service.identifyMd5File("S1B_OPER_MPL_ORBPRE_20190711T200257_20190718T200257_0001.EOF");
+    	assertEquals("S1B_OPER_MPL_ORBPRE_20190711T200257_20190718T200257_0001.EOF.md5sum", md5file4);
+    	
+    	String md5file5 = service.identifyMd5File("S1__AUX_WND_V20181002T120000_G20180929T061310.SAFE/manifest.safe");
+    	assertEquals("S1__AUX_WND_V20181002T120000_G20180929T061310.SAFE.md5sum", md5file5);
+    }
+    
+	@Test
+	public void testReadMd5StreamAndGetFiles_OneFile_1() throws IOException {
+
+		try (FileInputStream md5stream = new FileInputStream(
+				new File("src/test/resources/S1__AUX_WND_V20181002T120000_G20180929T061310.SAFE.md5sum"))) {
+
+			List<String> files = service.readMd5StreamAndGetFiles(
+					"S1__AUX_WND_V20181002T120000_G20180929T061310.SAFE/manifest.safe", md5stream);
+			
+			assertEquals(1, files.size());
+			assertEquals("S1__AUX_WND_V20181002T120000_G20180929T061310.SAFE/manifest.safe", files.get(0) );
+		}
+	}
+	
+	@Test
+	public void testReadMd5StreamAndGetFiles_OneFile_2() throws IOException {
+
+		try (FileInputStream md5stream = new FileInputStream(
+				new File("src/test/resources/S1__AUX_WND_V20181002T120000_G20180929T061310.SAFE.md5sum"))) {
+
+			List<String> files = service.readMd5StreamAndGetFiles(
+					"S1__AUX_WND_V20181002T120000_G20180929T061310.SAFE/data/D1D09290000100212001", md5stream);
+			
+			assertEquals(1, files.size());
+			assertEquals("S1__AUX_WND_V20181002T120000_G20180929T061310.SAFE/data/D1D09290000100212001", files.get(0) );
+		}
+	}
+	
+	@Test
+	public void testReadMd5StreamAndGetFiles_OneFile_notexist() throws IOException {
+
+		try (FileInputStream md5stream = new FileInputStream(
+				new File("src/test/resources/S1__AUX_WND_V20181002T120000_G20180929T061310.SAFE.md5sum"))) {
+
+			List<String> files = service.readMd5StreamAndGetFiles(
+					"S1__AUX_WND_V20181002T120000_G20180929T061310.SAFE/notexist", md5stream);
+			
+			assertEquals(0, files.size());
+		}
+	}
+	
+	@Test
+	public void testReadMd5StreamAndGetFiles_Directory() throws IOException {
+		
+		try (FileInputStream md5stream = new FileInputStream(
+				new File("src/test/resources/S1__AUX_WND_V20181002T120000_G20180929T061310.SAFE.md5sum"))) {
+			
+			List<String> files = service.readMd5StreamAndGetFiles(
+					"S1__AUX_WND_V20181002T120000_G20180929T061310.SAFE", md5stream);
+			
+			assertEquals(3, files.size());
+			assertEquals("S1__AUX_WND_V20181002T120000_G20180929T061310.SAFE/data/D1D09290000100212001", files.get(0));
+			assertEquals("S1__AUX_WND_V20181002T120000_G20180929T061310.SAFE/manifest.safe", files.get(1));
+			assertEquals("S1__AUX_WND_V20181002T120000_G20180929T061310.SAFE/support/s1-aux-wnd.xsd", files.get(2));
+		}
+		
+	}
 }

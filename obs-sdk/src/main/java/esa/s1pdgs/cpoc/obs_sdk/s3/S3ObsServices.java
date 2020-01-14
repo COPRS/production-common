@@ -231,47 +231,6 @@ public class S3ObsServices {
 		}
 	}
 
-	protected List<String> getExpectedFiles(String bucketName, String prefixKey) {
-		List<String> result = new ArrayList<>();
-			
-		// try to identify the MD5 summary file
-		int index = prefixKey.length();
-		if (!(prefixKey.contains("raw") || prefixKey.contains("DSIB"))) {
-			index = prefixKey.indexOf("/");
-			if (index == -1) {
-				index = prefixKey.length();
-			}	
-		}			
-		
-		String md5FileName = (prefixKey.substring(0, index) + AbstractObsClient.MD5SUM_SUFFIX);
-		log(String.format("Try to list expected files from file %s", md5FileName));
-		final S3Object md5file = s3client.getObject(bucketName, md5FileName);
-		if (md5file == null) {
-			throw new com.amazonaws.SdkClientException(String.format("Tried to access md5sum file %s, but it odes not exist",md5FileName));
-		}
-		S3ObsInputStream md5stream = new S3ObsInputStream(md5file, md5file.getObjectContent());
-		try (BufferedReader reader = new BufferedReader(new InputStreamReader(md5stream))) {
-			String line;
-			while ((line = reader.readLine()) != null) {
-				final int idx = line.indexOf("  ");
-				if (idx >= 0 && line.length() > (idx + 2)) {
-					// final String md5 = line.substring(0, idx);
-					final String key = line.substring(idx + 2);
-					// If the prefix is found in the key it is valid. This should work for single
-					// files as well as directories
-					if (key.contains(prefixKey)) {
-						result.add(key);
-					}
-				}
-			}
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-
-		return result;
-	}
-
 	/**
 	 * Download objects of the given bucket with a key matching the prefix
 	 * 
@@ -366,6 +325,62 @@ public class S3ObsServices {
 				}
 			}
 		}
+	}
+	
+	List<String> getExpectedFiles(String bucketName, String prefixKey) throws S3ObsServiceException {
+
+		String md5FileName = identifyMd5File(prefixKey);
+		log(String.format("Try to list expected files from file %s", md5FileName));
+
+		final S3Object md5file = s3client.getObject(bucketName, md5FileName);
+		if (md5file == null) {
+			throw new com.amazonaws.SdkClientException(
+					String.format("Tried to access md5sum file %s, but it odes not exist", md5FileName));
+		}
+		S3ObsInputStream md5stream = new S3ObsInputStream(md5file, md5file.getObjectContent());
+		List<String> result = new ArrayList<>();
+		try {
+			result = readMd5StreamAndGetFiles(prefixKey, md5stream);
+
+		} catch (IOException e) {
+			throw new S3ObsServiceException(bucketName, prefixKey,
+					String.format("Error getting expected files from file %s", md5FileName), e);
+		}
+		return result;
+	}
+	
+	String identifyMd5File(String prefixKey) {
+		int index = prefixKey.length();
+		if (!(prefixKey.contains("raw") || prefixKey.contains("DSIB"))) {
+			index = prefixKey.indexOf('/');
+			if (index == -1) {
+				index = prefixKey.length();
+			}
+		}
+		return (prefixKey.substring(0, index) + AbstractObsClient.MD5SUM_SUFFIX);
+	}
+	
+	List<String> readMd5StreamAndGetFiles(String prefixKey, InputStream md5stream) throws IOException {
+
+		List<String> result = new ArrayList<>();
+		try (BufferedReader reader = new BufferedReader(new InputStreamReader(md5stream))) {
+			String line;
+			while ((line = reader.readLine()) != null) {
+				final int idx = line.indexOf("  ");
+				if (idx >= 0 && line.length() > (idx + 2)) {
+					final String key = line.substring(idx + 2);
+					/*
+					 * If the prefix is found in the key it is valid. This should work for single
+					 * files as well as directories
+					 */
+					if (key.contains(prefixKey)) {
+						result.add(key);
+					}
+				}
+			}
+		}
+
+		return result;
 	}
 
 	private final List<S3ObjectSummary> getAll(final String bucketName, final String prefix) {
