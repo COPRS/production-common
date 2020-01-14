@@ -14,6 +14,8 @@ import static org.mockito.Mockito.verify;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import org.junit.After;
@@ -75,6 +77,8 @@ public class S3ObsServicesTest {
      * Service to test
      */
     private S3ObsServices service;
+    
+    private S3ObsServices serviceSpy;
 
     /**
      * To check the raised custom exceptions
@@ -85,7 +89,8 @@ public class S3ObsServicesTest {
     /**
      * List of OBs objects
      */
-    private ObjectListing listObjects;
+    private ObjectListing listObjects1;
+    private List<String> listObjects2;
 
     /**
      * Initialization
@@ -101,19 +106,25 @@ public class S3ObsServicesTest {
         MockitoAnnotations.initMocks(this);
 
         // Init useful objects
-        listObjects = new ObjectListing();
+        listObjects1 = new ObjectListing();
         S3ObjectSummary obj1 = new S3ObjectSummary();
         obj1.setKey("key1");
         S3ObjectSummary obj2 = new S3ObjectSummary();
         obj2.setKey("key2");
         S3ObjectSummary obj3 = new S3ObjectSummary();
         obj3.setKey("root/key3");
-        listObjects.getObjectSummaries().add(obj1);
-        listObjects.getObjectSummaries().add(obj2);
-        listObjects.getObjectSummaries().add(obj3);
+        listObjects1.getObjectSummaries().add(obj1);
+        listObjects1.getObjectSummaries().add(obj2);
+        listObjects1.getObjectSummaries().add(obj3);
+        
+        listObjects2 = new ArrayList<String>();
+        listObjects2.add("key1");
+        listObjects2.add("key2");
+        listObjects2.add("root/key3");
 
         // Build service
         service = new S3ObsServices(s3client, s3tm, 3, 500);
+        serviceSpy = Mockito.spy(service);
         mockAmazonS3Client();
         mockAmazonS3TransactionManager();
     }
@@ -159,7 +170,7 @@ public class S3ObsServicesTest {
                         Mockito.eq(BCK_EXC_AWS), Mockito.anyString());
 
         // list objects
-        doReturn(listObjects).when(s3client)
+        doReturn(listObjects1).when(s3client)
                 .listObjects(Mockito.eq(BCK_OBJ_EXIST), Mockito.anyString());
         doThrow(new com.amazonaws.SdkClientException("amazon SDK exception"))
                 .when(s3client).listObjects(Mockito.eq(BCK_OBJ_NOT_EXIST),
@@ -178,6 +189,16 @@ public class S3ObsServicesTest {
         // get objects
         doReturn(null).when(s3client).getObject(
                 Mockito.any(GetObjectRequest.class), Mockito.any(File.class));
+        
+        
+        doReturn(listObjects2).when(serviceSpy).getExpectedFiles(Mockito.eq(BCK_OBJ_EXIST), Mockito.anyString());
+        doThrow(new com.amazonaws.SdkClientException("amazon SDK exception")).when(serviceSpy).getExpectedFiles(Mockito.eq(BCK_OBJ_NOT_EXIST),
+                Mockito.anyString());
+        doReturn(Collections.EMPTY_LIST).when(serviceSpy).getExpectedFiles(Mockito.eq(BCK_OBJ_NOT_EXIST),
+                Mockito.eq("null-prefix"));
+        doReturn(Collections.EMPTY_LIST).when(serviceSpy).getExpectedFiles( Mockito.eq(BCK_OBJ_NOT_EXIST), Mockito.eq("prefix"));
+        doThrow(new com.amazonaws.SdkClientException("amazon SDK exception")).when(serviceSpy).getExpectedFiles(Mockito.eq(BCK_EXC_SDK), Mockito.anyString());
+        doThrow(new com.amazonaws.AmazonServiceException("amazon SDK exception")).when(serviceSpy).getExpectedFiles(Mockito.eq(BCK_EXC_AWS), Mockito.anyString());
 
     }
 
@@ -305,13 +326,13 @@ public class S3ObsServicesTest {
     @Test
     public void testNominaldownloadObjectsWithPrefixNoObjects()
             throws S3ObsServiceException, S3SdkClientException {
-    	List<File> files = service.downloadObjectsWithPrefix(BCK_OBJ_NOT_EXIST,
+    	List<File> files = serviceSpy.downloadObjectsWithPrefix(BCK_OBJ_NOT_EXIST,
                 "null-prefix", "directory-path", true);
         assertEquals(0, files.size());
         verify(s3client, never()).getObject(Mockito.any(GetObjectRequest.class),
                 Mockito.any(File.class));
 
-        files = service.downloadObjectsWithPrefix(
+        files = serviceSpy.downloadObjectsWithPrefix(
                 BCK_OBJ_NOT_EXIST, "prefix", "directory-path", true);
         assertEquals(0, files.size());
         verify(s3client, never()).getObject(Mockito.any(GetObjectRequest.class),
@@ -327,7 +348,7 @@ public class S3ObsServicesTest {
     @Test
     public void testNominaldownloadObjectsWithPrefixIgnoreFolder()
             throws S3ObsServiceException, S3SdkClientException {
-    	List<File> files = service.downloadObjectsWithPrefix(BCK_OBJ_EXIST, "key", tmpDir.getPath(), true);
+    	List<File> files = serviceSpy.downloadObjectsWithPrefix(BCK_OBJ_EXIST, "key", tmpDir.getPath(), true);
         assertEquals(3, files.size());
         verify(s3client, times(3)).getObject(
                 Mockito.any(GetObjectRequest.class), Mockito.any(File.class));
@@ -353,7 +374,7 @@ public class S3ObsServicesTest {
     @Test
     public void testNominaldownloadObjectsWithPrefixNotIgnoreFolder()
             throws S3ObsServiceException, S3SdkClientException {
-    	List<File> files = service.downloadObjectsWithPrefix(BCK_OBJ_EXIST, "key",
+    	List<File> files = serviceSpy.downloadObjectsWithPrefix(BCK_OBJ_EXIST, "key",
     			tmpDir.getPath(), false);
         assertEquals(3, files.size());
         verify(s3client, times(3)).getObject(
@@ -386,7 +407,7 @@ public class S3ObsServicesTest {
         thrown.expect(hasProperty("key", is("prefix")));
         thrown.expectCause(isA(AmazonServiceException.class));
 
-        service.downloadObjectsWithPrefix(BCK_EXC_AWS, "prefix", "directory",
+        serviceSpy.downloadObjectsWithPrefix(BCK_EXC_AWS, "prefix", "directory",
                 true);
     }
 
