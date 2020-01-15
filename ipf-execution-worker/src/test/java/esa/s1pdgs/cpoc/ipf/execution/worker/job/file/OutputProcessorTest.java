@@ -18,6 +18,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 import org.junit.After;
 import org.junit.Before;
@@ -114,7 +115,7 @@ public class OutputProcessorTest {
         // Objects
         inputMessage = new GenericMessageDto<IpfExecutionJob>(123, "",
                 new IpfExecutionJob(ProductFamily.L0_JOB, "product-name", "FAST24",
-                        PATH_DIRECTORY_TEST, "job-order"));
+                        PATH_DIRECTORY_TEST, "job-order", new UUID(23L, 42L)));
         authorizedOutputs = new ArrayList<>();
         authorizedOutputs.add(TestUtils.buildProductOutputDto(
                 PATH_DIRECTORY_TEST + "^.*SM_RAW__0S.*$"));

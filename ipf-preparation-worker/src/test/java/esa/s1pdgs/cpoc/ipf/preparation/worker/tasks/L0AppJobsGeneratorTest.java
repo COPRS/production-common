@@ -12,6 +12,7 @@ import java.util.Calendar;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.UUID;
 
 import javax.xml.bind.JAXBException;
 
@@ -362,13 +363,13 @@ public class L0AppJobsGeneratorTest {
 
         doReturn(primaryCheckAppJob).when(appDataService).patchTaskTableOfJob(
                 Mockito.eq(123L), Mockito.eq("TaskTable.AIOP.xml"),
-                Mockito.eq(AppDataJobGenerationState.PRIMARY_CHECK));
+                Mockito.eq(AppDataJobGenerationState.PRIMARY_CHECK), Mockito.eq(new UUID(23L, 42L)));
         doReturn(readyAppJob).when(appDataService).patchTaskTableOfJob(
                 Mockito.eq(123L), Mockito.eq("TaskTable.AIOP.xml"),
-                Mockito.eq(AppDataJobGenerationState.READY));
+                Mockito.eq(AppDataJobGenerationState.READY), Mockito.eq(new UUID(23L, 42L)));
         doReturn(sentAppJob).when(appDataService).patchTaskTableOfJob(
                 Mockito.eq(123L), Mockito.eq("TaskTable.AIOP.xml"),
-                Mockito.eq(AppDataJobGenerationState.SENT));
+                Mockito.eq(AppDataJobGenerationState.SENT), Mockito.eq(new UUID(23L, 42L)));
         Mockito.doAnswer(i -> {
             return i.getArgument(1);
         }).when(appDataService).patchJob(Mockito.anyLong(), Mockito.any(),

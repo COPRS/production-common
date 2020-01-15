@@ -2,6 +2,7 @@ package esa.s1pdgs.cpoc.appcatalog;
 
 import java.util.Date;
 import java.util.Objects;
+import java.util.UUID;
 
 /**
  * Object used for persisting data around job generation per task table
@@ -34,10 +35,12 @@ public class AppDataJobGeneration {
      * Number of consecutive errors
      */
     private int nbErrors;
-
+    
     /**
-     * 
+     * UID of the reporting (root layer) task
      */
+    private UUID reportingTaskUID;
+
     public AppDataJobGeneration() {
         super();
         this.state = AppDataJobGenerationState.INITIAL;
@@ -120,6 +123,20 @@ public class AppDataJobGeneration {
         this.nbErrors = nbErrors;
     }
 
+	/**
+	 * @return the reportingTaskUID
+	 */
+	public UUID getReportingTaskUID() {
+		return reportingTaskUID;
+	}
+
+	/**
+	 * @param reportingTaskUID the reportingTaskUID to set
+	 */
+	public void setReportingTaskUID(UUID reportingTaskUID) {
+		this.reportingTaskUID = reportingTaskUID;
+	}
+	
     /**
      * (non-Javadoc)
      * 
@@ -128,8 +145,8 @@ public class AppDataJobGeneration {
     @Override
     public String toString() {
         return String.format(
-                "{creationDate: %s, lastUpdateDate: %s, taskTable: %s, state: %s, nbErrors: %s}",
-                creationDate, lastUpdateDate, taskTable, state, nbErrors);
+                "{creationDate: %s, lastUpdateDate: %s, taskTable: %s, state: %s, nbErrors: %s, reportingTaskUID: %s}",
+                creationDate, lastUpdateDate, taskTable, state, nbErrors, reportingTaskUID);
     }
 
     /**
@@ -138,7 +155,7 @@ public class AppDataJobGeneration {
     @Override
     public int hashCode() {
         return Objects.hash(creationDate, lastUpdateDate, taskTable, state,
-                nbErrors);
+                nbErrors, reportingTaskUID);
     }
 
     /**
@@ -157,7 +174,8 @@ public class AppDataJobGeneration {
                     && Objects.equals(lastUpdateDate, other.lastUpdateDate)
                     && Objects.equals(taskTable, other.taskTable)
                     && Objects.equals(state, other.state)
-                    && nbErrors == other.nbErrors;
+                    && nbErrors == other.nbErrors
+                    && Objects.equals(reportingTaskUID, other.reportingTaskUID);
         }
         return ret;
     }

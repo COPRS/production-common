@@ -6,6 +6,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -462,7 +463,7 @@ public class AppCatalogJobClient<E extends AbstractMessage> {
      * @throws AbstractCodedException
      */
 	public AppDataJob<E> patchTaskTableOfJob(final long identifier,
-            final String taskTable, final AppDataJobGenerationState state)
+            final String taskTable, final AppDataJobGenerationState state, UUID reportingRootUID)
             throws AbstractCodedException {
         int retries = 0;
         while (true) {
@@ -472,6 +473,7 @@ public class AppCatalogJobClient<E extends AbstractMessage> {
             AppDataJobGeneration body = new AppDataJobGeneration();
             body.setTaskTable(taskTable);
             body.setState(state);
+            body.setReportingTaskUID(reportingRootUID);
             LogUtils.traceLog(LOGGER, String.format("[uri %s]", uri));
             try {
             	final ResolvableType appCatMessageType = ResolvableType.forClassWithGenerics(

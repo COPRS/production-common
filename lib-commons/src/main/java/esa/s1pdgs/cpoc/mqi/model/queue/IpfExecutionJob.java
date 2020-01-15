@@ -3,6 +3,7 @@ package esa.s1pdgs.cpoc.mqi.model.queue;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import java.util.UUID;
 
 import esa.s1pdgs.cpoc.common.ProductFamily;
 
@@ -47,6 +48,25 @@ public class IpfExecutionJob extends AbstractMessage {
     private List<LevelJobPoolDto> pools= new ArrayList<>();
 
     /**
+     * UID of the reporting (root layer) task
+     */
+    private UUID reportingTaskUID;
+    
+    /**
+	 * @return the reportingTaskUID
+	 */
+	public UUID getReportingTaskUID() {
+		return reportingTaskUID;
+	}
+
+	/**
+	 * @param reportingTaskUID the reportingTaskUID to set
+	 */
+	public void setReportingTaskUID(UUID reportingTaskUID) {
+		this.reportingTaskUID = reportingTaskUID;
+	}
+	
+    /**
      * Default constructor
      */
     public IpfExecutionJob() {
@@ -58,11 +78,12 @@ public class IpfExecutionJob extends AbstractMessage {
      */
     public IpfExecutionJob(final ProductFamily productFamily,
             final String keyObjectStorage, final String productProcessMode, final String workDirectory,
-            final String jobOrder) {
+            final String jobOrder, final UUID reportingTaskUID) {
         super(productFamily, keyObjectStorage);
         this.productProcessMode = productProcessMode;
         this.workDirectory = workDirectory;
         this.jobOrder = jobOrder;
+        this.reportingTaskUID = reportingTaskUID;
     }
 
     /**
@@ -199,7 +220,7 @@ public class IpfExecutionJob extends AbstractMessage {
 	@Override
 	public int hashCode() {
 		return Objects.hash(creationDate, hostname, inputs, jobOrder, keyObjectStorage, outputs, pools, productFamily,
-				productProcessMode, workDirectory);
+				productProcessMode, workDirectory, reportingTaskUID);
 	}
 
 	@Override
@@ -223,7 +244,8 @@ public class IpfExecutionJob extends AbstractMessage {
 				&& Objects.equals(pools, other.pools) 
 				&& productFamily == other.productFamily
 				&& Objects.equals(productProcessMode, other.productProcessMode)
-				&& Objects.equals(workDirectory, other.workDirectory);
+				&& Objects.equals(workDirectory, other.workDirectory)
+				&& Objects.equals(reportingTaskUID, other.reportingTaskUID);
 	}
 
 	@Override
@@ -231,6 +253,6 @@ public class IpfExecutionJob extends AbstractMessage {
 		return "IpfExecutionJob [productFamily=" + productFamily + ", keyObjectStorage=" + keyObjectStorage
 				+ ", creationDate=" + creationDate + ", hostname=" + hostname + ", productProcessMode="
 				+ productProcessMode + ", workDirectory=" + workDirectory + ", jobOrder=" + jobOrder + ", inputs="
-				+ inputs + ", outputs=" + outputs + ", pools=" + pools + "]";
+				+ inputs + ", outputs=" + outputs + ", pools=" + pools + ", reportingTaskUID=" + reportingTaskUID + "]";
 	}
 }

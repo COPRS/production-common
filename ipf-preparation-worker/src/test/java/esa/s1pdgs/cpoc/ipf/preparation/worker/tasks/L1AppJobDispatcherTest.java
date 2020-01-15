@@ -21,6 +21,7 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 
 import javax.xml.bind.JAXBException;
 
@@ -235,13 +236,13 @@ public class L1AppJobDispatcherTest {
                         Mockito.anyBoolean(), Mockito.anyBoolean());
         doReturn(primaryCheckAppJob).when(appDataService).patchTaskTableOfJob(
                 Mockito.eq(123L), Mockito.eq("IW_RAW__0_GRDH_1.xml"),
-                Mockito.eq(AppDataJobGenerationState.PRIMARY_CHECK));
+                Mockito.eq(AppDataJobGenerationState.PRIMARY_CHECK), Mockito.eq(new UUID(23L, 42L)));
         doReturn(readyAppJob).when(appDataService).patchTaskTableOfJob(
                 Mockito.eq(123L), Mockito.eq("IW_RAW__0_GRDH_1.xml"),
-                Mockito.eq(AppDataJobGenerationState.READY));
+                Mockito.eq(AppDataJobGenerationState.READY), Mockito.eq(new UUID(23L, 42L)));
         doReturn(sentAppJob).when(appDataService).patchTaskTableOfJob(
                 Mockito.eq(123L), Mockito.eq("IW_RAW__0_GRDH_1.xml"),
-                Mockito.eq(AppDataJobGenerationState.SENT));
+                Mockito.eq(AppDataJobGenerationState.SENT), Mockito.eq(new UUID(23L, 42L)));
     }
 
     @Test

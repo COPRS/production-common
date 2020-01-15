@@ -13,7 +13,12 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import org.junit.After;
@@ -75,6 +80,8 @@ public class S3ObsServicesTest {
      * Service to test
      */
     private S3ObsServices service;
+    
+    private S3ObsServices serviceSpy;
 
     /**
      * To check the raised custom exceptions
@@ -85,7 +92,8 @@ public class S3ObsServicesTest {
     /**
      * List of OBs objects
      */
-    private ObjectListing listObjects;
+    private ObjectListing listObjects1;
+    private List<String> listObjects2;
 
     /**
      * Initialization
@@ -93,27 +101,34 @@ public class S3ObsServicesTest {
      * @throws InterruptedException
      * @throws AmazonClientException
      * @throws AmazonServiceException
+     * @throws S3ObsServiceException 
      */
     @Before
     public void init() throws AmazonServiceException, AmazonClientException,
-            InterruptedException {
+            InterruptedException, S3ObsServiceException {
         // Init mocks
         MockitoAnnotations.initMocks(this);
 
         // Init useful objects
-        listObjects = new ObjectListing();
+        listObjects1 = new ObjectListing();
         S3ObjectSummary obj1 = new S3ObjectSummary();
         obj1.setKey("key1");
         S3ObjectSummary obj2 = new S3ObjectSummary();
         obj2.setKey("key2");
         S3ObjectSummary obj3 = new S3ObjectSummary();
         obj3.setKey("root/key3");
-        listObjects.getObjectSummaries().add(obj1);
-        listObjects.getObjectSummaries().add(obj2);
-        listObjects.getObjectSummaries().add(obj3);
+        listObjects1.getObjectSummaries().add(obj1);
+        listObjects1.getObjectSummaries().add(obj2);
+        listObjects1.getObjectSummaries().add(obj3);
+        
+        listObjects2 = new ArrayList<String>();
+        listObjects2.add("key1");
+        listObjects2.add("key2");
+        listObjects2.add("root/key3");
 
         // Build service
         service = new S3ObsServices(s3client, s3tm, 3, 500);
+        serviceSpy = Mockito.spy(service);
         mockAmazonS3Client();
         mockAmazonS3TransactionManager();
     }
@@ -144,8 +159,9 @@ public class S3ObsServicesTest {
 
     /**
      * Mock the amazon S3 client
+     * @throws S3ObsServiceException 
      */
-    private void mockAmazonS3Client() {
+    private void mockAmazonS3Client() throws S3ObsServiceException {
         // doesObjectExist
         doReturn(true).when(s3client).doesObjectExist(Mockito.eq(BCK_OBJ_EXIST),
                 Mockito.anyString());
@@ -159,7 +175,7 @@ public class S3ObsServicesTest {
                         Mockito.eq(BCK_EXC_AWS), Mockito.anyString());
 
         // list objects
-        doReturn(listObjects).when(s3client)
+        doReturn(listObjects1).when(s3client)
                 .listObjects(Mockito.eq(BCK_OBJ_EXIST), Mockito.anyString());
         doThrow(new com.amazonaws.SdkClientException("amazon SDK exception"))
                 .when(s3client).listObjects(Mockito.eq(BCK_OBJ_NOT_EXIST),
@@ -178,6 +194,16 @@ public class S3ObsServicesTest {
         // get objects
         doReturn(null).when(s3client).getObject(
                 Mockito.any(GetObjectRequest.class), Mockito.any(File.class));
+        
+        
+        doReturn(listObjects2).when(serviceSpy).getExpectedFiles(Mockito.eq(BCK_OBJ_EXIST), Mockito.anyString());
+        doThrow(new com.amazonaws.SdkClientException("amazon SDK exception")).when(serviceSpy).getExpectedFiles(Mockito.eq(BCK_OBJ_NOT_EXIST),
+                Mockito.anyString());
+        doReturn(Collections.EMPTY_LIST).when(serviceSpy).getExpectedFiles(Mockito.eq(BCK_OBJ_NOT_EXIST),
+                Mockito.eq("null-prefix"));
+        doReturn(Collections.EMPTY_LIST).when(serviceSpy).getExpectedFiles( Mockito.eq(BCK_OBJ_NOT_EXIST), Mockito.eq("prefix"));
+        doThrow(new com.amazonaws.SdkClientException("amazon SDK exception")).when(serviceSpy).getExpectedFiles(Mockito.eq(BCK_EXC_SDK), Mockito.anyString());
+        doThrow(new com.amazonaws.AmazonServiceException("amazon SDK exception")).when(serviceSpy).getExpectedFiles(Mockito.eq(BCK_EXC_AWS), Mockito.anyString());
 
     }
 
@@ -305,13 +331,13 @@ public class S3ObsServicesTest {
     @Test
     public void testNominaldownloadObjectsWithPrefixNoObjects()
             throws S3ObsServiceException, S3SdkClientException {
-    	List<File> files = service.downloadObjectsWithPrefix(BCK_OBJ_NOT_EXIST,
+    	List<File> files = serviceSpy.downloadObjectsWithPrefix(BCK_OBJ_NOT_EXIST,
                 "null-prefix", "directory-path", true);
         assertEquals(0, files.size());
         verify(s3client, never()).getObject(Mockito.any(GetObjectRequest.class),
                 Mockito.any(File.class));
 
-        files = service.downloadObjectsWithPrefix(
+        files = serviceSpy.downloadObjectsWithPrefix(
                 BCK_OBJ_NOT_EXIST, "prefix", "directory-path", true);
         assertEquals(0, files.size());
         verify(s3client, never()).getObject(Mockito.any(GetObjectRequest.class),
@@ -327,7 +353,7 @@ public class S3ObsServicesTest {
     @Test
     public void testNominaldownloadObjectsWithPrefixIgnoreFolder()
             throws S3ObsServiceException, S3SdkClientException {
-    	List<File> files = service.downloadObjectsWithPrefix(BCK_OBJ_EXIST, "key", tmpDir.getPath(), true);
+    	List<File> files = serviceSpy.downloadObjectsWithPrefix(BCK_OBJ_EXIST, "key", tmpDir.getPath(), true);
         assertEquals(3, files.size());
         verify(s3client, times(3)).getObject(
                 Mockito.any(GetObjectRequest.class), Mockito.any(File.class));
@@ -353,7 +379,7 @@ public class S3ObsServicesTest {
     @Test
     public void testNominaldownloadObjectsWithPrefixNotIgnoreFolder()
             throws S3ObsServiceException, S3SdkClientException {
-    	List<File> files = service.downloadObjectsWithPrefix(BCK_OBJ_EXIST, "key",
+    	List<File> files = serviceSpy.downloadObjectsWithPrefix(BCK_OBJ_EXIST, "key",
     			tmpDir.getPath(), false);
         assertEquals(3, files.size());
         verify(s3client, times(3)).getObject(
@@ -386,7 +412,7 @@ public class S3ObsServicesTest {
         thrown.expect(hasProperty("key", is("prefix")));
         thrown.expectCause(isA(AmazonServiceException.class));
 
-        service.downloadObjectsWithPrefix(BCK_EXC_AWS, "prefix", "directory",
+        serviceSpy.downloadObjectsWithPrefix(BCK_EXC_AWS, "prefix", "directory",
                 true);
     }
 
@@ -541,4 +567,81 @@ public class S3ObsServicesTest {
 
         file3.delete();
     }
+    
+    @Test
+    public void testIdentifyMd5File() {
+    	
+    	String md5file1 = service.identifyMd5File("L20180724144436762001030/ch01/DCS_02_L20180724144436762001030_ch1_DSIB.xml");
+    	assertEquals("L20180724144436762001030/ch01/DCS_02_L20180724144436762001030_ch1_DSIB.xml.md5sum", md5file1);
+    	
+    	String md5file2 = service.identifyMd5File("L20180724144436762001030/ch01/DCS_02_L20180724144436762001030_ch1_DSDB_00035.raw");
+    	assertEquals("L20180724144436762001030/ch01/DCS_02_L20180724144436762001030_ch1_DSDB_00035.raw.md5sum", md5file2);
+    	
+    	String md5file3 = service.identifyMd5File("S1__AUX_WND_V20181002T210000_G20180929T181057.SAFE/");
+    	assertEquals("S1__AUX_WND_V20181002T210000_G20180929T181057.SAFE.md5sum", md5file3);
+    	
+    	String md5file4 = service.identifyMd5File("S1B_OPER_MPL_ORBPRE_20190711T200257_20190718T200257_0001.EOF");
+    	assertEquals("S1B_OPER_MPL_ORBPRE_20190711T200257_20190718T200257_0001.EOF.md5sum", md5file4);
+    	
+    	String md5file5 = service.identifyMd5File("S1__AUX_WND_V20181002T120000_G20180929T061310.SAFE/manifest.safe");
+    	assertEquals("S1__AUX_WND_V20181002T120000_G20180929T061310.SAFE.md5sum", md5file5);
+    }
+    
+	@Test
+	public void testReadMd5StreamAndGetFiles_OneFile_1() throws IOException {
+
+		try (FileInputStream md5stream = new FileInputStream(
+				new File("src/test/resources/S1__AUX_WND_V20181002T120000_G20180929T061310.SAFE.md5sum"))) {
+
+			List<String> files = service.readMd5StreamAndGetFiles(
+					"S1__AUX_WND_V20181002T120000_G20180929T061310.SAFE/manifest.safe", md5stream);
+			
+			assertEquals(1, files.size());
+			assertEquals("S1__AUX_WND_V20181002T120000_G20180929T061310.SAFE/manifest.safe", files.get(0) );
+		}
+	}
+	
+	@Test
+	public void testReadMd5StreamAndGetFiles_OneFile_2() throws IOException {
+
+		try (FileInputStream md5stream = new FileInputStream(
+				new File("src/test/resources/S1__AUX_WND_V20181002T120000_G20180929T061310.SAFE.md5sum"))) {
+
+			List<String> files = service.readMd5StreamAndGetFiles(
+					"S1__AUX_WND_V20181002T120000_G20180929T061310.SAFE/data/D1D09290000100212001", md5stream);
+			
+			assertEquals(1, files.size());
+			assertEquals("S1__AUX_WND_V20181002T120000_G20180929T061310.SAFE/data/D1D09290000100212001", files.get(0) );
+		}
+	}
+	
+	@Test
+	public void testReadMd5StreamAndGetFiles_OneFile_notexist() throws IOException {
+
+		try (FileInputStream md5stream = new FileInputStream(
+				new File("src/test/resources/S1__AUX_WND_V20181002T120000_G20180929T061310.SAFE.md5sum"))) {
+
+			List<String> files = service.readMd5StreamAndGetFiles(
+					"S1__AUX_WND_V20181002T120000_G20180929T061310.SAFE/notexist", md5stream);
+			
+			assertEquals(0, files.size());
+		}
+	}
+	
+	@Test
+	public void testReadMd5StreamAndGetFiles_Directory() throws IOException {
+		
+		try (FileInputStream md5stream = new FileInputStream(
+				new File("src/test/resources/S1__AUX_WND_V20181002T120000_G20180929T061310.SAFE.md5sum"))) {
+			
+			List<String> files = service.readMd5StreamAndGetFiles(
+					"S1__AUX_WND_V20181002T120000_G20180929T061310.SAFE", md5stream);
+			
+			assertEquals(3, files.size());
+			assertEquals("S1__AUX_WND_V20181002T120000_G20180929T061310.SAFE/data/D1D09290000100212001", files.get(0));
+			assertEquals("S1__AUX_WND_V20181002T120000_G20180929T061310.SAFE/manifest.safe", files.get(1));
+			assertEquals("S1__AUX_WND_V20181002T120000_G20180929T061310.SAFE/support/s1-aux-wnd.xsd", files.get(2));
+		}
+		
+	}
 }

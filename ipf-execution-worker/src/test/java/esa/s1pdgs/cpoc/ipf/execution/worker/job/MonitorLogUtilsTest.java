@@ -2,10 +2,11 @@ package esa.s1pdgs.cpoc.ipf.execution.worker.job;
 
 import static org.junit.Assert.assertEquals;
 
+import java.util.UUID;
+
 import org.junit.Test;
 
 import esa.s1pdgs.cpoc.common.ProductFamily;
-import esa.s1pdgs.cpoc.ipf.execution.worker.job.MonitorLogUtils;
 import esa.s1pdgs.cpoc.mqi.model.queue.IpfExecutionJob;
 
 public class MonitorLogUtilsTest {
@@ -18,7 +19,7 @@ public class MonitorLogUtilsTest {
     public void testGetPrefixMonitorLogs() {
         
         IpfExecutionJob job = new IpfExecutionJob(ProductFamily.L0_JOB, "SESSIONID", "FAST",
-                "./test_work_dir/", "job-order");
+                "./test_work_dir/", "job-order", new UUID(23L, 42L));
         String baseLog = "[MONITOR]";
         String productLog =
                 "[productName SESSIONID] [workDir ./test_work_dir/]";
