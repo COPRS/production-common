@@ -306,8 +306,21 @@ public class S3ObsServices {
 						bucketName, directoryPath));
 				return files;
 			} catch (com.amazonaws.AmazonServiceException ase) {
-				throw new S3ObsServiceException(bucketName, prefixKey,
+				if (retryCount <= numRetries) {
+					LOGGER.warn(
+							String.format("Download objects with prefix %s from bucket %s failed (AmazonServiceException): Attempt : %d / %d",
+									prefixKey, bucketName, retryCount, numRetries));
+					try {
+						Thread.sleep(retryDelay);						
+					} catch (InterruptedException e) {
+						throw new S3ObsServiceException(bucketName, prefixKey,
+								String.format("Download in %s fails: %s", directoryPath, ase.getMessage()), ase);
+					}
+					continue;
+				} else {
+					throw new S3ObsServiceException(bucketName, prefixKey,
 						String.format("Download in %s fails: %s", directoryPath, ase.getMessage()), ase);
+				}
 			} catch (com.amazonaws.SdkClientException ase) {
 				if (retryCount <= numRetries) {
 					LOGGER.warn(
