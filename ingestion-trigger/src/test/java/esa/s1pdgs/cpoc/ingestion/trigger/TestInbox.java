@@ -4,12 +4,15 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 
+import org.junit.Ignore;
 import org.junit.Test;
 
 import esa.s1pdgs.cpoc.ingestion.trigger.entity.InboxEntry;
 import esa.s1pdgs.cpoc.ingestion.trigger.filter.InboxFilter;
 
 public class TestInbox {
+	
+	@Ignore
 	@Test
 	public final void testPoll_OnFindingNewProducts_ShallStoreProductsAndPutInKafkaQueue() {
 		final InboxAdapter fakeAdapter = new InboxAdapter() {
