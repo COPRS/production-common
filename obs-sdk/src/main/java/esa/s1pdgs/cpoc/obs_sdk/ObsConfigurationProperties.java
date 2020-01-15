@@ -49,10 +49,10 @@ public class ObsConfigurationProperties {
 	@Value("${transfer.manager.minimum-upload-part-size-mb:100}")
 	private long minUploadPartSize;
 	
-	@Value("${retry-policy.condition.max-retries:3}")
+	@Value("${retry-policy.condition.max-retries:100}")
 	private int maxRetries;
 	
-	@Value("${retry-policy.backoff.base-delay-ms:100}")
+	@Value("${retry-policy.backoff.base-delay-ms:1000}")
 	private int backoffBaseDelay;
 	
 	@Value("${retry-policy.backoff.throttled-base-delay-ms:500 }")
