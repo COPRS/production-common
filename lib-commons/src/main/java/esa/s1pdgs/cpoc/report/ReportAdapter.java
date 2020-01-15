@@ -29,7 +29,7 @@ public final class ReportAdapter implements Reporting {
 
 		Builder(
 				final ReportAppender appender, 
-				final UUID predecessor, 
+				final UUID predecessorUid, 
 				final UUID rootUid, 
 				final UUID parentUid, 
 				final UUID uid
@@ -46,7 +46,7 @@ public final class ReportAdapter implements Reporting {
 		}
 
 		@Override
-		public final Reporting.Builder predecessor(final UUID predecessor) {
+		public final Reporting.Builder predecessor(final UUID predecessorUid) {
 			this.predecessorUid = predecessorUid;
 			return this;
 		}

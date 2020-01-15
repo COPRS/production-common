@@ -38,7 +38,7 @@ public class EndTask extends Task {
 			final double duration,
 			final ReportingOutput output
 	) {
-		super(uid, name, Event.end);
+		super(uid, name, Event.END);
 		this.status = status;
 		this.errorCode = status.errCode();
 		this.output = output;

@@ -29,8 +29,8 @@ public interface Reporting {
 	}
 	
 	enum Event {
-		begin,
-		end
+		BEGIN,
+		END
 	}
 	
 	enum Status {
@@ -70,7 +70,7 @@ public interface Reporting {
 
 		@Override
 		public ChildFactory getChildFactory() {
-			return Reporting.ChildFactory.NULL;
+			return ChildFactory.NULL;
 		}
 	};
 

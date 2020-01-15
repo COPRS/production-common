@@ -21,7 +21,7 @@ public class BeginTask extends Task {
 	}
 
 	public BeginTask(final String uid, final String name, final ReportingInput input) {
-		super(uid, name, Event.begin);
+		super(uid, name, Event.BEGIN);
 		this.input = input;
 	}
 
