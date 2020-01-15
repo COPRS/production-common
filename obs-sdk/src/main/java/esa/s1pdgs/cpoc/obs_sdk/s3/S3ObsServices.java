@@ -292,7 +292,7 @@ public class S3ObsServices {
 							filename = key.substring(lastIndex + 1);
 						}
 						if (!key.equals(filename)) {
-							log(String.format("==debug filename=%s, key=%key", filename, key));
+							log(String.format("==debug filename=%s, key=%s", filename, key));
 							File fTo = new File(targetDir + filename);
 							localFile.renameTo(fTo);
 							localFile = fTo;
