@@ -253,7 +253,7 @@ public abstract class AbstractObsClient implements ObsClient {
 	    	final List<ObsObject> results = getObsObjectsOfFamilyWithinTimeFrame(family, intervalStart, intervalEnd);
 	    	final Map<String, ObsObject> map = results.stream()
 	    		      .collect(Collectors.toMap(ObsObject::getKey, obsObject -> obsObject));
-	    	reporting.end(new ReportingMessage("Start list interval for product family {} from {} to {}", ProductFamily.valueOf(family.name()), intervalStart, intervalEnd));
+	    	reporting.end(new ReportingMessage("End list interval for product family {} from {} to {}", ProductFamily.valueOf(family.name()), intervalStart, intervalEnd));
 	    	return map;
 		} catch (Exception e) {
         	reporting.error(new ReportingMessage(LogUtils.toString(e)));
