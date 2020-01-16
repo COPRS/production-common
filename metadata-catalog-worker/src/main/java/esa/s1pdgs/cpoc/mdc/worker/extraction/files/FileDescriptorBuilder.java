@@ -1,6 +1,7 @@
 package esa.s1pdgs.cpoc.mdc.worker.extraction.files;
 
 import java.io.File;
+import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.List;
@@ -153,7 +154,7 @@ public class FileDescriptorBuilder {
 		String relativePath = absolutePath.substring(localDirectory.getAbsolutePath().length() + 1);
 		relativePath = relativePath.replace("\\", "/");
 
-		final String dsiborDsdbName = Paths.get(relativePath).getFileName().toString();
+		final String dsiborDsdbName = getFilename(relativePath);
 		
 		// Ignored if directory
 		if (file.isDirectory()) {
@@ -188,6 +189,20 @@ public class FileDescriptorBuilder {
 					String.format("File %s does not match the configuration file pattern %s", relativePath, pattern)
 			);
 		}
+	}
+
+	private final String getFilename(final String relativePath) {
+		final Path path = Paths.get(relativePath);
+		
+		if (path == null) {
+			throw new IllegalArgumentException(String.format("Path %s evaluated to null", path));
+		}
+		
+		final Path filename = path.getFileName();
+		if (filename == null) {
+			throw new IllegalArgumentException(String.format("Filename from Path %s evaluated to null", path));
+		}
+		return filename.toString();
 	}
 	
 	public OutputFileDescriptor buildOutputFileDescriptor(final File file, final CatalogJob product, final ProductFamily productFamily)

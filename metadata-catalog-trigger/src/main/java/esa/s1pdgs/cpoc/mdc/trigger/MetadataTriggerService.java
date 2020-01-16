@@ -1,5 +1,6 @@
 package esa.s1pdgs.cpoc.mdc.trigger;
 
+import java.util.Arrays;
 import java.util.Map;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -92,7 +93,13 @@ public class MetadataTriggerService {
 					appStatus
 			);
 		} else {
-			throw new IllegalArgumentException(String.format("Invalid product category %s. Available are %s", cat, ProductCategory.values()));
+			throw new IllegalArgumentException(
+					String.format(
+							"Invalid product category %s. Available are %s", 
+							cat, 
+							Arrays.toString(ProductCategory.values())
+					)
+			);
 		}
 	}
 		
