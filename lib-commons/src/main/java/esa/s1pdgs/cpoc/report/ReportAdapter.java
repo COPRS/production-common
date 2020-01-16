@@ -58,14 +58,14 @@ public final class ReportAdapter implements Reporting {
 		}
 
 		@Override
-		public Reporting newTaskReporting(String taskName) {
+		public Reporting newTaskReporting(final String taskName) {
 			this.taskName = taskName;
 			return new ReportAdapter(this);
 		}
 		
 		@Override
 		public void newEventReporting(final ReportingMessage reportingMessage) {
-			ReportAdapter reportAdapter = new ReportAdapter(this);
+			final ReportAdapter reportAdapter = new ReportAdapter(this);
 			reportAdapter.appender.report(new JacksonReportEntry(
 					new Header(Level.INFO), 
 					new Message(reportAdapter.toString(reportingMessage)),
@@ -79,13 +79,14 @@ public final class ReportAdapter implements Reporting {
 		private final UUID rootUid;
 		private final UUID parentUid;
 		private final List<String> parentTags;
-		public ChildFactory(UUID rootUid, UUID parentUid, ReportAppender parentAppender, List<String> parentTags) {
+		public ChildFactory(final UUID rootUid, final UUID parentUid, final ReportAppender parentAppender, final List<String> parentTags) {
 			this.rootUid = rootUid;
 			this.parentUid = parentUid;
 			this.parentAppender = parentAppender;
 			this.parentTags = parentTags;
 		}
 		
+		@Override
 		public final Reporting newChild(final String taskName) {
 			return new Builder(parentAppender, null, rootUid, parentUid, UUID.randomUUID())
 					.addTags(parentTags)
@@ -134,7 +135,7 @@ public final class ReportAdapter implements Reporting {
 		actionStart = System.currentTimeMillis();
 		final BeginTask task = new BeginTask(uid.toString(), taskName, in);
 		if (predecessorUid != null) {
-			task.setFollowsFromTask(parentUid.toString());
+			task.setFollowsFromTask(predecessorUid.toString());
 		}
 		if (parentUid != null) {
 			task.setChildOfTask(parentUid.toString());
