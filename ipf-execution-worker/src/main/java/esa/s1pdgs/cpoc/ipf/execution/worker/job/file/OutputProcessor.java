@@ -25,7 +25,6 @@ import esa.s1pdgs.cpoc.common.errors.InternalErrorException;
 import esa.s1pdgs.cpoc.common.errors.UnknownFamilyException;
 import esa.s1pdgs.cpoc.common.errors.mqi.MqiPublicationError;
 import esa.s1pdgs.cpoc.common.errors.obs.ObsException;
-import esa.s1pdgs.cpoc.common.utils.LogUtils;
 import esa.s1pdgs.cpoc.ipf.execution.worker.config.ApplicationProperties;
 import esa.s1pdgs.cpoc.ipf.execution.worker.job.model.mqi.FileQueueMessage;
 import esa.s1pdgs.cpoc.ipf.execution.worker.job.model.mqi.ObsQueueMessage;
@@ -601,8 +600,6 @@ public class OutputProcessor {
 	 * @throws ObsEmptyFileException 
 	 */
 	public ReportingOutput processOutput(final Reporting.ChildFactory reportingChildFactory) throws AbstractCodedException, ObsEmptyFileException {
-		final Reporting reporting = reportingChildFactory.newChild("OutputHandling");
-
 		List<String> result = new ArrayList<>();
 		final List<Segment> segments = new ArrayList<>();
 		
@@ -613,16 +610,14 @@ public class OutputProcessor {
 		final List<ObsUploadObject> uploadBatch = new ArrayList<>();
 		final List<ObsQueueMessage> outputToPublish = new ArrayList<>();
 		final List<FileQueueMessage> reportToPublish = new ArrayList<>();
-		
-		reporting.begin(new ReportingMessage("Start handling of outputs " + result));
-		
-		final long size = sortOutputs(lines, uploadBatch, outputToPublish, reportToPublish, reporting.getChildFactory());
+			
+		final long size = sortOutputs(lines, uploadBatch, outputToPublish, reportToPublish, reportingChildFactory);
 		
 		result = uploadBatch.stream().map(ObsUploadObject::getKey).collect(Collectors.toList());
 		
 		try {
 			// Upload per batch the output
-			processProducts(reporting.getChildFactory(), uploadBatch, outputToPublish);
+			processProducts(reportingChildFactory, uploadBatch, outputToPublish);
 			// Publish reports
 			processReports(reportToPublish);
 			
@@ -631,12 +626,7 @@ public class OutputProcessor {
 					segments.add(new Segment(obj.getKey(), "TODO", "TODO"));
 				}
 			}
-			reporting.end(new ReportingMessage(size, "End handling of outputs " + result));
-		} catch (final AbstractCodedException e) {
-			reporting.error(new ReportingMessage("[code {}] {}", e.getCode().getCode(), e.getLogMessage()));
-			throw e;
-		} catch (ObsEmptyFileException e) {
-			reporting.error(new ReportingMessage(LogUtils.toString(e)));
+		} catch (final AbstractCodedException | ObsEmptyFileException e) {
 			throw e;
 		}
 		
