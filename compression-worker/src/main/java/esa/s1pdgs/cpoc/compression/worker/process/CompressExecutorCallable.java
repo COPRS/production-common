@@ -15,7 +15,6 @@ import esa.s1pdgs.cpoc.common.errors.AbstractCodedException;
 import esa.s1pdgs.cpoc.common.errors.InternalErrorException;
 import esa.s1pdgs.cpoc.compression.worker.config.ApplicationProperties;
 import esa.s1pdgs.cpoc.mqi.model.queue.CompressionJob;
-import esa.s1pdgs.cpoc.report.Reporting;
 
 public class CompressExecutorCallable implements Callable<Void> {
 
@@ -25,8 +24,6 @@ public class CompressExecutorCallable implements Callable<Void> {
 	private static final Logger LOGGER = LogManager.getLogger(CompressExecutorCallable.class);
 	
 	private static final Consumer<String> DEFAULT_OUTPUT_CONSUMER = LOGGER::info;
-
-	private Reporting.ChildFactory reportingChildFactory;
 
 	private CompressionJob job;
 
@@ -43,10 +40,9 @@ public class CompressExecutorCallable implements Callable<Void> {
 	 * @param job
 	 * @param prefixMonitorLogs
 	 */
-	public CompressExecutorCallable(final CompressionJob job, final String prefixLogs, final ApplicationProperties properties, final Reporting.ChildFactory reportingChildFactory) {
+	public CompressExecutorCallable(final CompressionJob job, final String prefixLogs, final ApplicationProperties properties) {
 		this.job = job;
 		this.properties = properties;
-		this.reportingChildFactory = reportingChildFactory;
 	}
 
 	/**
