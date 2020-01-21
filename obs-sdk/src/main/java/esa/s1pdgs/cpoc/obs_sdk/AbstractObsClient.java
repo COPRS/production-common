@@ -186,22 +186,14 @@ public abstract class AbstractObsClient implements ObsClient {
      */
     @Override
 	public List<File> download(final List<ObsDownloadObject> objects, final Reporting.ChildFactory reportingChildFactory) throws AbstractCodedException {
-    	final Reporting reporting = reportingChildFactory.newChild("ObsDownload");
-    	reporting.begin(new ReportingMessage("Start download of objects {}", objects));
     	try {
 	    	ValidArgumentAssertion.assertValidArgument(objects);
 	        try {
-	        	List<File> res = downloadObjects(objects, true, reportingChildFactory);
-	        	reporting.end(new ReportingMessage("End download of objects {}", objects));
-	            return res;
+	        	return downloadObjects(objects, true, reportingChildFactory);
 	        } catch (final SdkClientException exc) {
 	            throw new ObsParallelAccessException(exc);
 	        }
-    	} catch (AbstractCodedException e) {
-    		reporting.error(new ReportingMessage("[code {}] {}", e.getCode().getCode(), e.getLogMessage()));
-    		throw e;
 	    } catch (Exception e) {
-			reporting.error(new ReportingMessage(LogUtils.toString(e)));
 			throw e;
 		}
     }
@@ -214,8 +206,6 @@ public abstract class AbstractObsClient implements ObsClient {
 	 * @throws ObsEmptyFileException
 	 */
 	public void upload(final List<ObsUploadObject> objects, final Reporting.ChildFactory reportingChildFactory) throws AbstractCodedException, ObsEmptyFileException {
-		final Reporting reporting = reportingChildFactory.newChild("ObsUpload");
-    	reporting.begin(new ReportingMessage("Start upload of objects {}", objects));
 		try {
 			ValidArgumentAssertion.assertValidArgument(objects);
 	
@@ -226,16 +216,11 @@ public abstract class AbstractObsClient implements ObsClient {
 			}
 	
 			try {
-				uploadObjects(objects, true, reporting.getChildFactory());
-		    	reporting.end(new ReportingMessage("End upload of objects {}", objects));
+				uploadObjects(objects, true, reportingChildFactory);
 			} catch (SdkClientException exc) {
 				throw new ObsParallelAccessException(exc);
 			}
-		} catch (final AbstractCodedException e) {
-			reporting.error(new ReportingMessage("[code {}] {}", e.getCode().getCode(), e.getLogMessage()));
-			throw e;
 		} catch (Exception e) {
-			reporting.error(new ReportingMessage(LogUtils.toString(e)));
 			throw e;
 		}
 	}
