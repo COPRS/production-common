@@ -28,7 +28,6 @@ import esa.s1pdgs.cpoc.common.utils.FileUtils;
 import esa.s1pdgs.cpoc.common.utils.LogUtils;
 import esa.s1pdgs.cpoc.report.Reporting;
 import esa.s1pdgs.cpoc.report.ReportingMessage;
-import esa.s1pdgs.cpoc.report.ReportingUtils;
 import esa.s1pdgs.cpoc.report.message.input.ObsReportingInput;
 
 /**
@@ -55,7 +54,7 @@ public abstract class AbstractObsClient implements ObsClient {
     protected abstract void uploadObject(ObsUploadObject object) throws SdkClientException, ObsServiceException, ObsException;
 
     private final List<File> downloadObjects(final List<ObsDownloadObject> objects,
-            final boolean parallel)
+            final boolean parallel, final Reporting.ChildFactory reportingChildFactory)
             throws SdkClientException, ObsServiceException, ObsException {
     	
     	final List<File> files = new ArrayList<>();
@@ -80,7 +79,7 @@ public abstract class AbstractObsClient implements ObsClient {
 	            }
             }
         } else {
-    		final Reporting reporting = ReportingUtils.newReportingBuilder().newTaskReporting("Read");
+    		final Reporting reporting = reportingChildFactory.newChild("ObsRead");
       	
             // Download object in sequential
             for (final ObsDownloadObject object : objects) {            
@@ -106,7 +105,7 @@ public abstract class AbstractObsClient implements ObsClient {
     }
 
     private final void uploadObjects(final List<ObsUploadObject> objects,
-            final boolean parallel)
+            final boolean parallel, final Reporting.ChildFactory reportingChildFactory)
             throws SdkClientException, ObsServiceException, ObsException {
         if (objects.size() > 1 && parallel) {
             // Upload objects in parallel
@@ -121,7 +120,7 @@ public abstract class AbstractObsClient implements ObsClient {
             waitForCompletion(workerThread, service, objects.size(), configuration.getTimeoutUpExec());
 
         } else {
-      		final Reporting reporting = ReportingUtils.newReportingBuilder().newTaskReporting("Write");
+      		final Reporting reporting = reportingChildFactory.newChild("ObsWrite");
         	
             // Upload object in sequential
             for (final ObsUploadObject object : objects) {            	
@@ -132,8 +131,8 @@ public abstract class AbstractObsClient implements ObsClient {
              	
              	try {
     				uploadObject(object);
-    				final long dlSize =	FileUtils.size(object.getFile());
-    				reporting.end(new ReportingMessage(dlSize, "End uploading to OBS"));             	
+    				final long ulSize =	FileUtils.size(object.getFile());
+    				reporting.end(new ReportingMessage(ulSize, "End uploading to OBS"));             	
     			} catch (SdkClientException | RuntimeException e) {
     				reporting.error(new ReportingMessage("Error on uploading to OBS: {}", LogUtils.toString(e)));
     				throw e;
@@ -192,7 +191,7 @@ public abstract class AbstractObsClient implements ObsClient {
     	try {
 	    	ValidArgumentAssertion.assertValidArgument(objects);
 	        try {
-	        	List<File> res = downloadObjects(objects, true);
+	        	List<File> res = downloadObjects(objects, true, reportingChildFactory);
 	        	reporting.end(new ReportingMessage("End download of objects {}", objects));
 	            return res;
 	        } catch (final SdkClientException exc) {
@@ -227,7 +226,7 @@ public abstract class AbstractObsClient implements ObsClient {
 			}
 	
 			try {
-				uploadObjects(objects, true);
+				uploadObjects(objects, true, reporting.getChildFactory());
 		    	reporting.end(new ReportingMessage("End upload of objects {}", objects));
 			} catch (SdkClientException exc) {
 				throw new ObsParallelAccessException(exc);
