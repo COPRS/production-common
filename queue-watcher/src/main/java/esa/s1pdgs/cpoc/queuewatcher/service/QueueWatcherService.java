@@ -33,9 +33,6 @@ public class QueueWatcherService implements MqiListener<ProductionEvent> {
 
 	private static final Logger LOGGER = LogManager.getLogger(QueueWatcherService.class);
 
-	/**
-	 * MQI service for reading message ProductionEvent
-	 */
 	@Autowired
 	private GenericMqiClient mqiClient;
 
@@ -45,33 +42,27 @@ public class QueueWatcherService implements MqiListener<ProductionEvent> {
 	private final long auxFilesPollingIntervalMs;
 	private final long levelProductsPollingIntervalMs;
 	private final long levelSegmentsPollingIntervalMs;
-	//private final long compressedProductsPollingIntervalMs;
-
+	
 	private final long auxFilesPollingInitialDelayMs;
 	private final long levelProductsPollingInitialDelayMs;
 	private final long levelSegmentsPollingInitialDelayMs;
-	//private final long compressedProductsPollingInitialDelayMs;
 
 	@Autowired
 	public QueueWatcherService(
 			@Value("${file.product-categories.auxiliary-files.fixed-delay-ms}") final long auxFilesPollingIntervalMs,
 			@Value("${file.product-categories.level-products.fixed-delay-ms}") final long levelProductsPollingIntervalMs,
 			@Value("${file.product-categories.level-segments.fixed-delay-ms}") final long levelSegmentsPollingIntervalMs,
-			//@Value("${file.product-categories.compressed-products.fixed-delay-ms}") final long compressedProductsPollingIntervalMs,
 			@Value("${file.product-categories.auxiliary-files.init-delay-poll-ms}") final long auxFilesPollingInitialDelayMs,
 			@Value("${file.product-categories.level-products.init-delay-poll-ms}") final long levelProductsPollingInitialDelayMs,
 			@Value("${file.product-categories.level-segments.init-delay-poll-ms}") final long levelSegmentsPollingInitialDelayMs
-			//@Value("${file.product-categories.compressed-products.init-delay-poll-ms}") final long compressedProductsPollingInitialDelayMs
-			) {
+	) {
 		this.auxFilesPollingIntervalMs = auxFilesPollingIntervalMs;
 		this.levelProductsPollingIntervalMs = levelProductsPollingIntervalMs;
 		this.levelSegmentsPollingIntervalMs = levelSegmentsPollingIntervalMs;
-//		this.compressedProductsPollingIntervalMs = compressedProductsPollingIntervalMs;
 
 		this.auxFilesPollingInitialDelayMs = auxFilesPollingInitialDelayMs;
 		this.levelProductsPollingInitialDelayMs = levelProductsPollingInitialDelayMs;
 		this.levelSegmentsPollingInitialDelayMs = levelSegmentsPollingInitialDelayMs;
-//		this.compressedProductsPollingInitialDelayMs = compressedProductsPollingInitialDelayMs;
 	}
 
 	@PostConstruct
@@ -90,18 +81,13 @@ public class QueueWatcherService implements MqiListener<ProductionEvent> {
 			service.execute(new MqiConsumer<ProductionEvent>(mqiClient, ProductCategory.LEVEL_SEGMENTS, this,
 					levelSegmentsPollingIntervalMs, levelSegmentsPollingInitialDelayMs, AppStatus.NULL));
 		}
-		/*if (compressedProductsPollingIntervalMs > 0) {
-			service.execute(new MqiConsumer<ProductionEvent>(mqiClient, ProductCategory.COMPRESSED_PRODUCTS, this,
-					compressedProductsPollingIntervalMs, compressedProductsPollingInitialDelayMs, AppStatus.NULL));
-		}*/
-		// Seems to be not relevant for EDRS_SESSIONS
 	}
 
-	protected synchronized void writeCSV(String dateTimeStamp, String productName) throws IOException {
+	protected synchronized void writeCSV(final String dateTimeStamp, final String productName) throws IOException {
 		CSVPrinter csvPrinter = null;
 		FileWriter writer = null;
 		try {
-			File csvFile = new File(properties.getCsvFile());
+			final File csvFile = new File(properties.getCsvFile());
 			if (csvFile.exists()) {
 				writer = new FileWriter(csvFile, true);
 				csvPrinter = new CSVPrinter(writer, CSVFormat.DEFAULT.withDelimiter(','));
@@ -125,16 +111,16 @@ public class QueueWatcherService implements MqiListener<ProductionEvent> {
 	}
 
 	@Override
-	public void onMessage(GenericMessageDto<ProductionEvent> message) {
+	public void onMessage(final GenericMessageDto<ProductionEvent> message) {
 		final ProductionEvent product = message.getBody();
-		String productName = product.getKeyObjectStorage();
-		ProductCategory category = ProductCategory.of(product.getProductFamily());
+		final String productName = product.getKeyObjectStorage();
+		final ProductCategory category = ProductCategory.of(product.getProductFamily());
 
 		LOGGER.info("received {}: {}", category, productName);
 
 		try {
 			writeCSV(DateUtils.formatToMetadataDateTimeFormat(LocalDateTime.now()), productName);
-		} catch (IOException e) {
+		} catch (final IOException e) {
 			LOGGER.error("Error occured while writing to CSV {}", LogUtils.toString(e));
 		}
 	}
