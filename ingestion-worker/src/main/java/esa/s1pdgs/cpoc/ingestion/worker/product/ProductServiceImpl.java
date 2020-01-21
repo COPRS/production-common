@@ -53,11 +53,10 @@ public class ProductServiceImpl implements ProductService {
 		long transferAmount = 0L;
 
 		if (ingestion.getProductFamily() == ProductFamily.INVALID) {
-			
-			// has been already restarted before?
 			if (family == ProductFamily.INVALID) {
-				
+				LOG.debug("Product ingestion of file {} has been already restarted before", file);
 			} else {
+				LOG.debug("Moving file {} with obs key {} from family {} to family {}", file, ingestion.getKeyObjectStorage(), ProductFamily.INVALID, family);
 				obsAdapter.move(ProductFamily.INVALID, family, file, ingestion.getKeyObjectStorage());	
 			}
 		} else {
