@@ -435,8 +435,6 @@ public abstract class AbstractJobsGenerator implements Runnable {
                 
                 // Check primary input
                 if (job.getGeneration().getState() == AppDataJobGenerationState.INITIAL) {
-                 	final Reporting reportInit = reporting.getChildFactory().newChild("JobGeneratorInit");
-                    reportInit.begin(new ReportingMessage("Start init job generation"));
                     try { 
                         LOGGER.info(
                                 "{} [productName {}] 1 - Checking the pre-requirements",
@@ -447,40 +445,31 @@ public abstract class AbstractJobsGenerator implements Runnable {
                                 job.getAppDataJob().getId(),
                                 job.getAppDataJob(), false, true, false);
                         job.setAppDataJob(modifiedJob);
-                        updateState(job, AppDataJobGenerationState.PRIMARY_CHECK, reportInit.getRootUID());
-                        reportInit.end(new ReportingMessage("End init job generation"));
+                        updateState(job, AppDataJobGenerationState.PRIMARY_CHECK, reporting.getRootUID());
                     } catch (final AbstractCodedException e) {
                         LOGGER.error(
                                 "{} [productName {}] 1 - Pre-requirements not checked: {}",
                                 this.prefixLogMonitor, productName,
                                 e.getLogMessage());                      
-                        updateState(job, AppDataJobGenerationState.INITIAL, reportInit.getRootUID());
-                        reportInit.error(new ReportingMessage("[code {}] {}", e.getCode().getCode(), e.getLogMessage()));
+                        updateState(job, AppDataJobGenerationState.INITIAL, reporting.getRootUID());
                     }
                 }
 
                 // Search input
                 if (job.getGeneration().getState() == AppDataJobGenerationState.PRIMARY_CHECK) {
-                	
-                	final Reporting reportInputs = reporting.getChildFactory().newChild("JobGeneratorSearch");
-                	
-                	reportInputs.begin(new ReportingMessage("Start searching inputs"));
-                	
                     try {
                         LOGGER.info("{} [productName {}] 2 - Searching inputs",
                                 this.prefixLogMonitor, job.getAppDataJob()
                                         .getProduct().getProductName());
                         this.inputsSearch(job);
-                        updateState(job, AppDataJobGenerationState.READY, reportInputs.getRootUID());
-                        reportInputs.end(new ReportingMessage("End searching inputs"));
+                        updateState(job, AppDataJobGenerationState.READY, reporting.getRootUID());
                         
                     } catch (final AbstractCodedException e) {
                         LOGGER.error(
                                 "{} [productName {}] 2 - Inputs not found: {}",
                                 this.prefixLogMonitor, productName,
                                 e.getLogMessage());
-                        updateState(job,AppDataJobGenerationState.PRIMARY_CHECK, reportInputs.getRootUID());
-                        reportInputs.error(new ReportingMessage("[code {}] {}", e.getCode().getCode(), e.getLogMessage()));
+                        updateState(job,AppDataJobGenerationState.PRIMARY_CHECK, reporting.getRootUID());
                     }
                 }
 
