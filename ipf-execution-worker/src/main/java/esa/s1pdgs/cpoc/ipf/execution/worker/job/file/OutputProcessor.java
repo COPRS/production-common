@@ -549,7 +549,7 @@ public class OutputProcessor {
 			if (nextKeyUpload.startsWith(msg.getKeyObs())) {
 				stop = true;
 			} else {
-				final Reporting report = reportingChildFactory.newChild("KafkaPublish");
+				final Reporting report = reportingChildFactory.newChild("Publish");
 				report.begin(new ReportingMessage("Start publishing file: {}", msg.getKeyObs()));
 				try {
 					procuderFactory.sendOutput(msg, inputMessage);

@@ -115,7 +115,7 @@ public class FileUploader {
 			if (nextKeyUpload.startsWith(msg.getObjectStorageKey())) {
 				stop = true;
 			} else {
-				final Reporting report = reportingChildFactory.newChild("KafkaPublish");
+				final Reporting report = reportingChildFactory.newChild("Publish");
 
 				report.begin(new ReportingMessage("Start publishing file {}", msg.getObjectStorageKey()));
 				try {
