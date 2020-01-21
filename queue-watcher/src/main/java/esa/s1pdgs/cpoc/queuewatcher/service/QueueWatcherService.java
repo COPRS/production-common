@@ -46,6 +46,8 @@ public class QueueWatcherService implements MqiListener<ProductionEvent> {
 	private final long auxFilesPollingInitialDelayMs;
 	private final long levelProductsPollingInitialDelayMs;
 	private final long levelSegmentsPollingInitialDelayMs;
+	
+	private final AppStatus appStatus;
 
 	@Autowired
 	public QueueWatcherService(
@@ -54,7 +56,8 @@ public class QueueWatcherService implements MqiListener<ProductionEvent> {
 			@Value("${file.product-categories.level-segments.fixed-delay-ms}") final long levelSegmentsPollingIntervalMs,
 			@Value("${file.product-categories.auxiliary-files.init-delay-poll-ms}") final long auxFilesPollingInitialDelayMs,
 			@Value("${file.product-categories.level-products.init-delay-poll-ms}") final long levelProductsPollingInitialDelayMs,
-			@Value("${file.product-categories.level-segments.init-delay-poll-ms}") final long levelSegmentsPollingInitialDelayMs
+			@Value("${file.product-categories.level-segments.init-delay-poll-ms}") final long levelSegmentsPollingInitialDelayMs,
+			final AppStatus appStatus
 	) {
 		this.auxFilesPollingIntervalMs = auxFilesPollingIntervalMs;
 		this.levelProductsPollingIntervalMs = levelProductsPollingIntervalMs;
@@ -63,6 +66,7 @@ public class QueueWatcherService implements MqiListener<ProductionEvent> {
 		this.auxFilesPollingInitialDelayMs = auxFilesPollingInitialDelayMs;
 		this.levelProductsPollingInitialDelayMs = levelProductsPollingInitialDelayMs;
 		this.levelSegmentsPollingInitialDelayMs = levelSegmentsPollingInitialDelayMs;
+		this.appStatus = appStatus;
 	}
 
 	@PostConstruct
@@ -71,15 +75,15 @@ public class QueueWatcherService implements MqiListener<ProductionEvent> {
 		final ExecutorService service = Executors.newFixedThreadPool(4);
 		if (auxFilesPollingIntervalMs > 0) {
 			service.execute(new MqiConsumer<ProductionEvent>(mqiClient, ProductCategory.AUXILIARY_FILES, this,
-					auxFilesPollingIntervalMs, auxFilesPollingInitialDelayMs, AppStatus.NULL));
+					auxFilesPollingIntervalMs, auxFilesPollingInitialDelayMs, appStatus));
 		}
 		if (levelProductsPollingIntervalMs > 0) {
 			service.execute(new MqiConsumer<ProductionEvent>(mqiClient, ProductCategory.LEVEL_PRODUCTS, this,
-					levelProductsPollingIntervalMs, levelProductsPollingInitialDelayMs, AppStatus.NULL));
+					levelProductsPollingIntervalMs, levelProductsPollingInitialDelayMs, appStatus));
 		}
 		if (levelSegmentsPollingIntervalMs > 0) {
 			service.execute(new MqiConsumer<ProductionEvent>(mqiClient, ProductCategory.LEVEL_SEGMENTS, this,
-					levelSegmentsPollingIntervalMs, levelSegmentsPollingInitialDelayMs, AppStatus.NULL));
+					levelSegmentsPollingIntervalMs, levelSegmentsPollingInitialDelayMs, appStatus));
 		}
 	}
 
