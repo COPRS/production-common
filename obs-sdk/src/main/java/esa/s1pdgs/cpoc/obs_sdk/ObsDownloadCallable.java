@@ -24,7 +24,9 @@ public class ObsDownloadCallable implements Callable<List<File>> {
      * Objects to download
      */
     private final ObsDownloadObject object;
-
+    
+    private final Reporting.ChildFactory reportingChildFactory;
+    
     /**
      * Default constructor
      * 
@@ -32,9 +34,10 @@ public class ObsDownloadCallable implements Callable<List<File>> {
      * @param object
      */
     public ObsDownloadCallable(final ObsClient obsClient,
-            final ObsDownloadObject object) {
+            final ObsDownloadObject object, final Reporting.ChildFactory reportingChildFactory) {
         this.obsClient = obsClient;
         this.object = object;
+        this.reportingChildFactory = reportingChildFactory;
     }
 
     /**
@@ -43,7 +46,7 @@ public class ObsDownloadCallable implements Callable<List<File>> {
      */
     @Override
     public List<File> call() throws ObsServiceException, AbstractCodedException {
-        final List<File> files = obsClient.download(Arrays.asList(object), Reporting.ChildFactory.NULL); // reporting shall not be done here but by the executor thread
+        final List<File> files = obsClient.download(Arrays.asList(object), reportingChildFactory);
 		if (files.size() <= 0) {
 			throw new ObsServiceException(
 					String.format("Unknown object %s with family %s", object.getKey(), object.getFamily()));

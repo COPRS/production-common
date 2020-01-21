@@ -65,7 +65,7 @@ public abstract class AbstractObsClient implements ObsClient {
             // Launch all downloads
             final List<Future<List<File>>> futures = new ArrayList<>();
             for (final ObsDownloadObject object : objects) {
-            	futures.add(service.submit(new ObsDownloadCallable(this, object)));
+            	futures.add(service.submit(new ObsDownloadCallable(this, object, reportingChildFactory)));
             }
             
             waitForCompletion(workerThread, service, objects.size(),configuration.getTimeoutDownExec());
@@ -115,7 +115,7 @@ public abstract class AbstractObsClient implements ObsClient {
                     new ExecutorCompletionService<>(workerThread);
             // Launch all downloads
             for (final ObsUploadObject object : objects) {
-                service.submit(new ObsUploadCallable(this, object));
+                service.submit(new ObsUploadCallable(this, object, reportingChildFactory));
             }
             waitForCompletion(workerThread, service, objects.size(), configuration.getTimeoutUpExec());
 

@@ -22,6 +22,8 @@ public class ObsUploadCallable implements Callable<Void> {
      * Objects to upload
      */
     private final ObsUploadObject object;
+    
+    private final Reporting.ChildFactory reportingChildFactory;
 
     /**
      * Constructor
@@ -30,9 +32,10 @@ public class ObsUploadCallable implements Callable<Void> {
      * @param object
      */
     public ObsUploadCallable(final ObsClient obsClient,
-            final ObsUploadObject object) {
+            final ObsUploadObject object, final Reporting.ChildFactory reportingChildFactory) {
         this.obsClient = obsClient;
         this.object = object;
+        this.reportingChildFactory = reportingChildFactory;
     }
 
     /**
@@ -42,7 +45,7 @@ public class ObsUploadCallable implements Callable<Void> {
      */
     @Override
     public Void call() throws AbstractCodedException, ObsEmptyFileException {
-    	obsClient.upload(Arrays.asList(object), Reporting.ChildFactory.NULL); // reporting shall not be done here but by the executor thread
+    	obsClient.upload(Arrays.asList(object), reportingChildFactory);
         return null;
     }
 
