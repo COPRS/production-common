@@ -18,6 +18,7 @@ import org.mockito.MockitoAnnotations;
 import esa.s1pdgs.cpoc.common.ProductFamily;
 import esa.s1pdgs.cpoc.common.errors.AbstractCodedException;
 import esa.s1pdgs.cpoc.common.utils.FileUtils;
+import esa.s1pdgs.cpoc.report.Reporting;
 
 /**
  * Test the class ObsUploadCallable
@@ -83,7 +84,7 @@ public class ObsUploadCallableTest {
     @Test
     public void testNominalCall()
             throws ObsServiceException, SdkClientException, AbstractCodedException, ObsEmptyFileException {
-        callable = new ObsUploadCallable(obsClient, object);
+        callable = new ObsUploadCallable(obsClient, object, Reporting.ChildFactory.NULL);
         callable.call();
         verify(obsClient, times(1)).upload(Mockito.eq(Arrays.asList(object)), Mockito.any());
     }
