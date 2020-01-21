@@ -53,8 +53,7 @@ public class PripElasticSearchMetadataRepo implements PripMetadataRepository {
 	@Override
 	public void save(PripMetadata pripMetadata) {
 
-		LOGGER.info("saving PRIP metadata");
-		LOGGER.debug("saving PRIP metadata {}", pripMetadata);
+		LOGGER.info("saving PRIP metadata {}", pripMetadata);
 
 		IndexRequest request = new IndexRequest(ES_INDEX, ES_PRIP_TYPE, pripMetadata.getName())
 				.source(pripMetadata.toString(), XContentType.JSON);
