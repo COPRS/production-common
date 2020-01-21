@@ -88,6 +88,7 @@ public final class Inbox {
 						LOG.debug("Added {} to persistence", persisted);
 						continue;
 					}
+					ReportingUtils.newReportingBuilder().newEventReporting(new ReportingMessage("Handling file: " + file.getName()));
 					handleNew(e);
 				}
 						
