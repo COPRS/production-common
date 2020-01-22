@@ -1,8 +1,11 @@
 package esa.s1pdgs.cpoc.mqi.client;
 
-import esa.s1pdgs.cpoc.common.ProductFamily;
+import java.util.regex.Pattern;
 
-public class MqiMessageFilter {
+import esa.s1pdgs.cpoc.common.ProductFamily;
+import esa.s1pdgs.cpoc.mqi.model.queue.AbstractMessage;
+
+public class MqiMessageFilter implements MessageFilter {
 
 	private ProductFamily productFamily;
 	private String matchRegex;
@@ -11,7 +14,7 @@ public class MqiMessageFilter {
 		return productFamily;
 	}
 
-	public void setProductFamily(ProductFamily productFamily) {
+	public void setProductFamily(final ProductFamily productFamily) {
 		this.productFamily = productFamily;
 	}
 
@@ -19,8 +22,16 @@ public class MqiMessageFilter {
 		return matchRegex;
 	}
 
-	public void setMatchRegex(String matchRegex) {
+	public void setMatchRegex(final String matchRegex) {
 		this.matchRegex = matchRegex;
 	}
 
+	@Override
+	public final boolean accept(final AbstractMessage message) {
+		// evaluate only if the filter is specified for the given family
+		if (productFamily == message.getProductFamily()) {
+			return Pattern.matches(matchRegex, message.getKeyObjectStorage());
+		}		
+		return true;
+	}
 }

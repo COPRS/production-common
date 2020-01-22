@@ -27,8 +27,8 @@ import esa.s1pdgs.cpoc.appstatus.AppStatus;
 import esa.s1pdgs.cpoc.common.ProductCategory;
 import esa.s1pdgs.cpoc.common.errors.AbstractCodedException;
 import esa.s1pdgs.cpoc.common.errors.AbstractCodedException.ErrorCode;
-import esa.s1pdgs.cpoc.common.utils.LogUtils;
 import esa.s1pdgs.cpoc.common.errors.InternalErrorException;
+import esa.s1pdgs.cpoc.common.utils.LogUtils;
 import esa.s1pdgs.cpoc.compression.worker.config.ApplicationProperties;
 import esa.s1pdgs.cpoc.compression.worker.file.FileDownloader;
 import esa.s1pdgs.cpoc.compression.worker.file.FileUploader;
@@ -40,8 +40,6 @@ import esa.s1pdgs.cpoc.mqi.client.MqiConsumer;
 import esa.s1pdgs.cpoc.mqi.client.MqiListener;
 import esa.s1pdgs.cpoc.mqi.client.StatusService;
 import esa.s1pdgs.cpoc.mqi.model.queue.CompressionJob;
-import esa.s1pdgs.cpoc.mqi.model.rest.Ack;
-import esa.s1pdgs.cpoc.mqi.model.rest.AckMessageDto;
 import esa.s1pdgs.cpoc.mqi.model.rest.GenericMessageDto;
 import esa.s1pdgs.cpoc.obs_sdk.ObsClient;
 import esa.s1pdgs.cpoc.obs_sdk.ObsEmptyFileException;
@@ -117,11 +115,10 @@ public class CompressProcessor implements MqiListener<CompressionJob> {
 	public void initService() {
 		if (pollingIntervalMs > 0) {
 			final ExecutorService service = Executors.newFixedThreadPool(1);
-			service.execute(new MqiConsumer<CompressionJob>(mqiClient, ProductCategory.COMPRESSION_JOBS, this,
-					pollingIntervalMs, pollingInitialDelayMs, esa.s1pdgs.cpoc.appstatus.AppStatus.NULL));
+			service.execute(newMqiConsumer());
 		}
 	}
-
+	
 	/**
 	 * Consume and execute jobs
 	 */
@@ -145,17 +142,23 @@ public class CompressProcessor implements MqiListener<CompressionJob> {
 		final CompressionJob job = message.getBody();
 
 		// Initialize the pool processor executor
-		final CompressExecutorCallable procExecutor = new CompressExecutorCallable(job, // getPrefixMonitorLog(MonitorLogUtils.LOG_PROCESS,
-																					// job),
-				"CompressionProcessor - process", properties, report.getChildFactory());
+		final CompressExecutorCallable procExecutor = new CompressExecutorCallable(
+				job,
+				"CompressionProcessor - process", 
+				properties, 
+				report.getChildFactory()
+		);
 		final ExecutorService procExecutorSrv = Executors.newSingleThreadExecutor();
 		final ExecutorCompletionService<Void> procCompletionSrv = new ExecutorCompletionService<>(procExecutorSrv);
 
 		// Initialize the input downloader
-		final FileDownloader fileDownloader = new FileDownloader(obsClient, workDir, job,
-				this.properties.getSizeBatchDownload(),
-				// getPrefixMonitorLog(MonitorLogUtils.LOG_INPUT, job),
-				"CompressionProcessor");
+		final FileDownloader fileDownloader = new FileDownloader(
+				obsClient, 
+				workDir, 
+				job,
+				properties.getSizeBatchDownload(),
+				"CompressionProcessor"
+		);
 
 		final FileUploader fileUploader = new FileUploader(obsClient, producerFactory, workDir, message, job);
 
@@ -227,7 +230,7 @@ public class CompressProcessor implements MqiListener<CompressionJob> {
 			report.error(new ReportingMessage("Interrupted job processing"));
 			failedProc = new FailedProcessingDto(properties.getHostname(), new Date(), errorMessage, message);
 			cleanCompressionProcessing(job, procExecutorSrv);
-		} catch (ObsEmptyFileException e) {
+		} catch (final ObsEmptyFileException e) {
 			ackOk = false;
 			report.error(new ReportingMessage(LogUtils.toString(e)));
 			failedProc = new FailedProcessingDto(properties.getHostname(), new Date(), errorMessage, message);
@@ -309,7 +312,7 @@ public class CompressProcessor implements MqiListener<CompressionJob> {
 	 * @param ackOk
 	 * @param errorMessage
 	 */
-	protected void ackProcessing(final GenericMessageDto<CompressionJob> dto,
+	protected void xackProcessing(final GenericMessageDto<CompressionJob> dto,
 			final FailedProcessingDto failed, final boolean ackOk,
 			final String errorMessage) {
 		final boolean stopping = appStatus.getStatus().isStopping();
@@ -338,32 +341,15 @@ public class CompressProcessor implements MqiListener<CompressionJob> {
 			appStatus.setWaiting();
 		}
 	}
-
-	/**
-	 * @param dto
-	 * @param errorMessage
-	 */
-	protected void ackNegatively(final boolean stop, final GenericMessageDto<CompressionJob> dto,
-			final String errorMessage) {
-        LOGGER.info("Acknowledging negatively {} ",dto.getBody());
-		try {
-			mqiClient.ack(new AckMessageDto(dto.getId(), Ack.ERROR, errorMessage, stop), 
-					ProductCategory.COMPRESSION_JOBS);
-		} catch (final AbstractCodedException ace) {
-			LOGGER.error("Unable to confirm negatively request:{}",ace);
-		}
-		appStatus.setError("PROCESSING");
+	
+	private final MqiConsumer<CompressionJob> newMqiConsumer() {
+		return new MqiConsumer<CompressionJob>(
+				mqiClient, 
+				ProductCategory.COMPRESSION_JOBS, 
+				this,
+				pollingIntervalMs, 
+				pollingInitialDelayMs, 
+				appStatus
+		);
 	}
-
-	protected void ackPositively(final boolean stop, final GenericMessageDto<CompressionJob> dto) {
-		LOGGER.info("Acknowledging positively {}", dto.getBody());
-		try {
-			mqiClient.ack(new AckMessageDto(dto.getId(), Ack.OK, null, stop), 
-					ProductCategory.COMPRESSION_JOBS);
-		} catch (final AbstractCodedException ace) {
-			LOGGER.error("Unable to confirm positively request:{}",ace);
-			appStatus.setError("PROCESSING");
-		}
-	}
-
 }

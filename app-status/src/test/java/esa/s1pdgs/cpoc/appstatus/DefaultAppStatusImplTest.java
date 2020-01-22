@@ -11,18 +11,18 @@ import org.mockito.MockitoAnnotations;
 import esa.s1pdgs.cpoc.common.AppState;
 import esa.s1pdgs.cpoc.common.errors.AbstractCodedException;
 
-public class AppStatusImplTest {
+public class DefaultAppStatusImplTest {
     
     /**
      * Application status for test
      */
-    private AppStatusImpl appStatus;
+    private DefaultAppStatusImpl appStatus;
     
     @Before
     public void init() throws AbstractCodedException {
         MockitoAnnotations.initMocks(this);
               
-        appStatus = new AppStatusImpl(3,3);
+        appStatus = new DefaultAppStatusImpl(3,3);
     }
     
     /**
@@ -93,7 +93,7 @@ public class AppStatusImplTest {
         assertTrue(timeBefore <= appStatus.getStatus().getDateLastChangeMs());
         assertEquals(0, appStatus.getStatus().getErrorCounterNextMessage());
         
-        appStatus = new AppStatusImpl(3,3);
+        appStatus = new DefaultAppStatusImpl(3,3);
         appStatus.setWaiting();
         assertEquals(0, appStatus.getStatus().getErrorCounterNextMessage());
         timeBefore = appStatus.getStatus().getDateLastChangeMs();
