@@ -445,13 +445,13 @@ public abstract class AbstractJobsGenerator implements Runnable {
                                 job.getAppDataJob().getId(),
                                 job.getAppDataJob(), false, true, false);
                         job.setAppDataJob(modifiedJob);
-                        updateState(job, AppDataJobGenerationState.PRIMARY_CHECK, reporting.getRootUID());
+                        updateState(job, AppDataJobGenerationState.PRIMARY_CHECK);
                     } catch (final AbstractCodedException e) {
                         LOGGER.error(
                                 "{} [productName {}] 1 - Pre-requirements not checked: {}",
                                 this.prefixLogMonitor, productName,
                                 e.getLogMessage());                      
-                        updateState(job, AppDataJobGenerationState.INITIAL, reporting.getRootUID());
+                        updateState(job, AppDataJobGenerationState.INITIAL);
                     }
                 }
 
@@ -462,14 +462,14 @@ public abstract class AbstractJobsGenerator implements Runnable {
                                 this.prefixLogMonitor, job.getAppDataJob()
                                         .getProduct().getProductName());
                         this.inputsSearch(job);
-                        updateState(job, AppDataJobGenerationState.READY, reporting.getRootUID());
+                        updateState(job, AppDataJobGenerationState.READY);
                         
                     } catch (final AbstractCodedException e) {
                         LOGGER.error(
                                 "{} [productName {}] 2 - Inputs not found: {}",
                                 this.prefixLogMonitor, productName,
                                 e.getLogMessage());
-                        updateState(job,AppDataJobGenerationState.PRIMARY_CHECK, reporting.getRootUID());
+                        updateState(job,AppDataJobGenerationState.PRIMARY_CHECK);
                     }
                 }
 
@@ -487,9 +487,9 @@ public abstract class AbstractJobsGenerator implements Runnable {
                         LOGGER.info("{} [productName {}] 3 - Sending job",
                                 this.prefixLogMonitor, job.getAppDataJob()
                                         .getProduct().getProductName());
-                        jobOrderName = this.send(job);
+                        jobOrderName = send(job, reporting.getRootUID());
                 
-                        updateState(job, AppDataJobGenerationState.SENT, reportPrep.getRootUID());
+                        updateState(job, AppDataJobGenerationState.SENT);
                        
 						if (job.getGeneration().getState() == AppDataJobGenerationState.SENT) {
 							reportPrep.end(new ReportingMessage("End job preparation and sending"));
@@ -501,7 +501,7 @@ public abstract class AbstractJobsGenerator implements Runnable {
                         LOGGER.error("{} [productName {}] 3 - Job not send: {}",
                                 this.prefixLogMonitor, productName,
                                 e.getLogMessage());
-                        updateState(job, AppDataJobGenerationState.READY, reportPrep.getRootUID());
+                        updateState(job, AppDataJobGenerationState.READY);
                         reportPrep.error(new ReportingMessage("[code {}] {}", e.getCode().getCode(), e.getLogMessage()));
                     }
                 }
@@ -540,8 +540,7 @@ public abstract class AbstractJobsGenerator implements Runnable {
     }
 
     private void updateState(final JobGeneration job,
-            final AppDataJobGenerationState newState,
-            final UUID reportingRootUID
+            final AppDataJobGenerationState newState
     )
         throws AbstractCodedException {
     	
@@ -553,7 +552,7 @@ public abstract class AbstractJobsGenerator implements Runnable {
         );
         final AppDataJob<CatalogEvent> modifiedJob = appDataService.patchTaskTableOfJob(
                 job.getAppDataJob().getId(),
-                job.getGeneration().getTaskTable(), newState, reportingRootUID);
+                job.getGeneration().getTaskTable(), newState);
         
         if (modifiedJob == null)
         {
@@ -818,7 +817,7 @@ public abstract class AbstractJobsGenerator implements Runnable {
         }
     }
 
-    protected String send(final JobGeneration job) throws AbstractCodedException {
+    protected String send(final JobGeneration job, UUID reportingRootTaskUID) throws AbstractCodedException {
         LOGGER.info("{} [productName {}] 3a - Building common job",
                 this.prefixLogMonitor,
                 job.getAppDataJob().getProduct().getProductName());
@@ -887,7 +886,7 @@ public abstract class AbstractJobsGenerator implements Runnable {
         final IpfExecutionJob r = new IpfExecutionJob(family,
                 job.getAppDataJob().getProduct().getProductName(),
                 job.getAppDataJob().getProduct().getProcessMode(), workingDir,
-                jobOrder, job.getGeneration().getReportingTaskUID());
+                jobOrder, reportingRootTaskUID);
         
         r.setCreationDate(new Date());
         r.setHostname(hostname);
