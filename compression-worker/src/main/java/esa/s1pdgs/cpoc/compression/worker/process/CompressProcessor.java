@@ -145,8 +145,7 @@ public class CompressProcessor implements MqiListener<CompressionJob> {
 		final CompressExecutorCallable procExecutor = new CompressExecutorCallable(
 				job,
 				"CompressionProcessor - process", 
-				properties, 
-				report.getChildFactory()
+				properties
 		);
 		final ExecutorService procExecutorSrv = Executors.newSingleThreadExecutor();
 		final ExecutorCompletionService<Void> procCompletionSrv = new ExecutorCompletionService<>(procExecutorSrv);

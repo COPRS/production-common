@@ -45,12 +45,11 @@ public final class AuxMetadataExtractor extends AbstractMetadataExtractor {
 		);
 		try {			
 			final AuxDescriptor configFileDesc = extractFromFilename(
-					reportingChildFactory,
 					() -> fileDescriptorBuilder.buildAuxDescriptor(metadataFile)
 			);
 
 			// Build metadata from file and extracted
-			final JSONObject obj = extractFromFile(reportingChildFactory,
+			final JSONObject obj = extractFromFile(
 					() -> mdBuilder.buildConfigFileMetadata(configFileDesc, metadataFile));
 
 			/*

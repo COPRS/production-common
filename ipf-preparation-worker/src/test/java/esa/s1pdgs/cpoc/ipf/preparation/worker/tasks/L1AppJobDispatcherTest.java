@@ -21,7 +21,6 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.UUID;
 
 import javax.xml.bind.JAXBException;
 
@@ -46,9 +45,6 @@ import esa.s1pdgs.cpoc.ipf.preparation.worker.config.IpfPreparationWorkerSetting
 import esa.s1pdgs.cpoc.ipf.preparation.worker.config.ProcessSettings;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.model.routing.LevelProductsRouting;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.service.XmlConverter;
-import esa.s1pdgs.cpoc.ipf.preparation.worker.tasks.JobsGeneratorFactory;
-import esa.s1pdgs.cpoc.ipf.preparation.worker.tasks.LevelProductsJobDispatcher;
-import esa.s1pdgs.cpoc.ipf.preparation.worker.tasks.LevelProductsJobsGenerator;
 
 public class L1AppJobDispatcherTest {
 
@@ -236,13 +232,13 @@ public class L1AppJobDispatcherTest {
                         Mockito.anyBoolean(), Mockito.anyBoolean());
         doReturn(primaryCheckAppJob).when(appDataService).patchTaskTableOfJob(
                 Mockito.eq(123L), Mockito.eq("IW_RAW__0_GRDH_1.xml"),
-                Mockito.eq(AppDataJobGenerationState.PRIMARY_CHECK), Mockito.eq(new UUID(23L, 42L)));
+                Mockito.eq(AppDataJobGenerationState.PRIMARY_CHECK));
         doReturn(readyAppJob).when(appDataService).patchTaskTableOfJob(
                 Mockito.eq(123L), Mockito.eq("IW_RAW__0_GRDH_1.xml"),
-                Mockito.eq(AppDataJobGenerationState.READY), Mockito.eq(new UUID(23L, 42L)));
+                Mockito.eq(AppDataJobGenerationState.READY));
         doReturn(sentAppJob).when(appDataService).patchTaskTableOfJob(
                 Mockito.eq(123L), Mockito.eq("IW_RAW__0_GRDH_1.xml"),
-                Mockito.eq(AppDataJobGenerationState.SENT), Mockito.eq(new UUID(23L, 42L)));
+                Mockito.eq(AppDataJobGenerationState.SENT));
     }
 
     @Test

@@ -109,7 +109,7 @@ public class MetadataExtractionService {
             	metadata.put("insertionTime", DateUtils.formatToMetadataDateTimeFormat(LocalDateTime.now()));
             }
             
-            final Reporting reportPublish = reporting.getChildFactory().newChild("MetadataPublish");       
+            final Reporting reportPublish = reporting.getChildFactory().newChild("Publish");       
             reportPublish.begin(new ReportingMessage("Start publishing metadata"));
 
             try {

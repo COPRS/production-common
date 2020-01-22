@@ -43,7 +43,6 @@ public class EdrsMetadataExtractor extends AbstractMetadataExtractor {
         final File product = new File(this.localDirectory, catJob.getKeyObjectStorage());
 
         final EdrsSessionFileDescriptor edrsFileDescriptor = extractFromFilename(
-        		reportingChildFactory,
         		() -> fileDescriptorBuilder.buildEdrsSessionFileDescriptor(
         				product, 
         				pathExtractor.metadataFrom(catJob),
@@ -59,7 +58,6 @@ public class EdrsMetadataExtractor extends AbstractMetadataExtractor {
 			final File dsib = new File(localDirectory, dsibName);
         	try {
     			return extractFromFile(
-    					reportingChildFactory,
     	        		() -> mdBuilder.buildEdrsSessionFileMetadata(edrsFileDescriptor, dsib)
     	        );
         	}
@@ -69,7 +67,6 @@ public class EdrsMetadataExtractor extends AbstractMetadataExtractor {
         } 
         // RAW files        
         return extractFromFile(
-        		reportingChildFactory,
         		() -> mdBuilder.buildEdrsSessionFileRaw(edrsFileDescriptor)
         );
 	}
