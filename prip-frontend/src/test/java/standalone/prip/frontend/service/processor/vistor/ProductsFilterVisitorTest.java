@@ -16,6 +16,14 @@ public class ProductsFilterVisitorTest {
 
 	@Test
 	public void testConvertToLocalDateTime() throws ExpressionVisitException {
+		final String datetime0 = "2012-01-01T00:00:00Z";
+		LocalDateTime result0 = ProductsFilterVisitor.convertToLocalDateTime(datetime0);
+		assertEquals(LocalDateTime.ofInstant(Instant.parse(datetime0), ZoneOffset.UTC), result0);		
+
+		final String datetime1 = "2012-01-01T00:00:00.1Z";
+		LocalDateTime result1 = ProductsFilterVisitor.convertToLocalDateTime(datetime1);
+		assertEquals(LocalDateTime.ofInstant(Instant.parse(datetime1), ZoneOffset.UTC), result1);		
+
 		final String datetime2 = "2012-01-01T00:00:00.12Z";
 		LocalDateTime result2 = ProductsFilterVisitor.convertToLocalDateTime(datetime2);
 		assertEquals(LocalDateTime.ofInstant(Instant.parse(datetime2), ZoneOffset.UTC), result2);		
