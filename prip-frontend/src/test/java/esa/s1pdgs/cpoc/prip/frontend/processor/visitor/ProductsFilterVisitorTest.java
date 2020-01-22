@@ -1,4 +1,4 @@
-package standalone.prip.frontend.service.processor.vistor;
+package esa.s1pdgs.cpoc.prip.frontend.processor.visitor;
 
 import static org.junit.Assert.assertEquals;
 
