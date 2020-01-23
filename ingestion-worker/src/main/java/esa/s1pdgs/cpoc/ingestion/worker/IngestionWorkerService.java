@@ -123,7 +123,8 @@ public class IngestionWorkerService implements MqiListener<IngestionJob> {
 						e.getMessage(), message);
 				errorRepoAppender.send(failed);
 			}
-		} catch (ObsEmptyFileException|RuntimeException e) {
+		} catch (Exception e) {
+			LOG.error("Error during ingestion: {}",LogUtils.toString(e));
 			final FailedProcessingDto failed = new FailedProcessingDto(properties.getHostname(), new Date(),
 					e.getMessage(), message);
 			errorRepoAppender.send(failed);
