@@ -28,7 +28,6 @@ import esa.s1pdgs.cpoc.common.utils.FileUtils;
 import esa.s1pdgs.cpoc.common.utils.LogUtils;
 import esa.s1pdgs.cpoc.report.Reporting;
 import esa.s1pdgs.cpoc.report.ReportingMessage;
-import esa.s1pdgs.cpoc.report.ReportingUtils;
 import esa.s1pdgs.cpoc.report.message.input.ObsReportingInput;
 
 /**
@@ -55,7 +54,7 @@ public abstract class AbstractObsClient implements ObsClient {
     protected abstract void uploadObject(ObsUploadObject object) throws SdkClientException, ObsServiceException, ObsException;
 
     private final List<File> downloadObjects(final List<ObsDownloadObject> objects,
-            final boolean parallel)
+            final boolean parallel, final Reporting.ChildFactory reportingChildFactory)
             throws SdkClientException, ObsServiceException, ObsException {
     	
     	final List<File> files = new ArrayList<>();
@@ -66,7 +65,7 @@ public abstract class AbstractObsClient implements ObsClient {
             // Launch all downloads
             final List<Future<List<File>>> futures = new ArrayList<>();
             for (final ObsDownloadObject object : objects) {
-            	futures.add(service.submit(new ObsDownloadCallable(this, object)));
+            	futures.add(service.submit(new ObsDownloadCallable(this, object, reportingChildFactory)));
             }
             
             waitForCompletion(workerThread, service, objects.size(),configuration.getTimeoutDownExec());
@@ -80,7 +79,7 @@ public abstract class AbstractObsClient implements ObsClient {
 	            }
             }
         } else {
-    		final Reporting reporting = ReportingUtils.newReportingBuilder().newTaskReporting("Read");
+    		final Reporting reporting = reportingChildFactory.newChild("ObsRead");
       	
             // Download object in sequential
             for (final ObsDownloadObject object : objects) {            
@@ -106,7 +105,7 @@ public abstract class AbstractObsClient implements ObsClient {
     }
 
     private final void uploadObjects(final List<ObsUploadObject> objects,
-            final boolean parallel)
+            final boolean parallel, final Reporting.ChildFactory reportingChildFactory)
             throws SdkClientException, ObsServiceException, ObsException {
         if (objects.size() > 1 && parallel) {
             // Upload objects in parallel
@@ -116,12 +115,12 @@ public abstract class AbstractObsClient implements ObsClient {
                     new ExecutorCompletionService<>(workerThread);
             // Launch all downloads
             for (final ObsUploadObject object : objects) {
-                service.submit(new ObsUploadCallable(this, object));
+                service.submit(new ObsUploadCallable(this, object, reportingChildFactory));
             }
             waitForCompletion(workerThread, service, objects.size(), configuration.getTimeoutUpExec());
 
         } else {
-      		final Reporting reporting = ReportingUtils.newReportingBuilder().newTaskReporting("Write");
+      		final Reporting reporting = reportingChildFactory.newChild("ObsWrite");
         	
             // Upload object in sequential
             for (final ObsUploadObject object : objects) {            	
@@ -132,8 +131,8 @@ public abstract class AbstractObsClient implements ObsClient {
              	
              	try {
     				uploadObject(object);
-    				final long dlSize =	FileUtils.size(object.getFile());
-    				reporting.end(new ReportingMessage(dlSize, "End uploading to OBS"));             	
+    				final long ulSize =	FileUtils.size(object.getFile());
+    				reporting.end(new ReportingMessage(ulSize, "End uploading to OBS"));             	
     			} catch (SdkClientException | RuntimeException e) {
     				reporting.error(new ReportingMessage("Error on uploading to OBS: {}", LogUtils.toString(e)));
     				throw e;
@@ -187,22 +186,14 @@ public abstract class AbstractObsClient implements ObsClient {
      */
     @Override
 	public List<File> download(final List<ObsDownloadObject> objects, final Reporting.ChildFactory reportingChildFactory) throws AbstractCodedException {
-    	final Reporting reporting = reportingChildFactory.newChild("ObsDownload");
-    	reporting.begin(new ReportingMessage("Start download of objects {}", objects));
     	try {
 	    	ValidArgumentAssertion.assertValidArgument(objects);
 	        try {
-	        	List<File> res = downloadObjects(objects, true);
-	        	reporting.end(new ReportingMessage("End download of objects {}", objects));
-	            return res;
+	        	return downloadObjects(objects, true, reportingChildFactory);
 	        } catch (final SdkClientException exc) {
 	            throw new ObsParallelAccessException(exc);
 	        }
-    	} catch (AbstractCodedException e) {
-    		reporting.error(new ReportingMessage("[code {}] {}", e.getCode().getCode(), e.getLogMessage()));
-    		throw e;
 	    } catch (Exception e) {
-			reporting.error(new ReportingMessage(LogUtils.toString(e)));
 			throw e;
 		}
     }
@@ -215,8 +206,6 @@ public abstract class AbstractObsClient implements ObsClient {
 	 * @throws ObsEmptyFileException
 	 */
 	public void upload(final List<ObsUploadObject> objects, final Reporting.ChildFactory reportingChildFactory) throws AbstractCodedException, ObsEmptyFileException {
-		final Reporting reporting = reportingChildFactory.newChild("ObsUpload");
-    	reporting.begin(new ReportingMessage("Start upload of objects {}", objects));
 		try {
 			ValidArgumentAssertion.assertValidArgument(objects);
 	
@@ -227,16 +216,11 @@ public abstract class AbstractObsClient implements ObsClient {
 			}
 	
 			try {
-				uploadObjects(objects, true);
-		    	reporting.end(new ReportingMessage("End upload of objects {}", objects));
+				uploadObjects(objects, true, reportingChildFactory);
 			} catch (SdkClientException exc) {
 				throw new ObsParallelAccessException(exc);
 			}
-		} catch (final AbstractCodedException e) {
-			reporting.error(new ReportingMessage("[code {}] {}", e.getCode().getCode(), e.getLogMessage()));
-			throw e;
 		} catch (Exception e) {
-			reporting.error(new ReportingMessage(LogUtils.toString(e)));
 			throw e;
 		}
 	}

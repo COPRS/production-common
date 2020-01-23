@@ -89,6 +89,7 @@ public final class Inbox {
 						continue;
 					}
 					handleNew(e);
+					ReportingUtils.newReportingBuilder().newEventReporting(new ReportingMessage("Handled file: " + file.getName()));
 				}
 						
 			}

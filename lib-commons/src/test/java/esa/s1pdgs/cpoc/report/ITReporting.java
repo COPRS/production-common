@@ -1,5 +1,8 @@
 package esa.s1pdgs.cpoc.report;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+
 import java.util.Collections;
 import java.util.UUID;
 
@@ -29,6 +32,14 @@ public final class ITReporting {
 		uut.end(new FilenameReportingOutput(Collections.singletonList("fooBar.txt")), new ReportingMessage(230000000L,"Foo"));
 		
 		//LOG.debug("foo bar");
+	}
+	
+	@Test
+	public final void testRootUID() {
+		Reporting uut =  ReportingUtils.newReportingBuilder().newTaskReporting("root");		
+		assertNotNull(uut.getRootUID());
+		Reporting uutChild = uut.getChildFactory().newChild("childOfRoot");
+		assertEquals(uut.getRootUID(), uutChild.getRootUID());
 	}
 
 }

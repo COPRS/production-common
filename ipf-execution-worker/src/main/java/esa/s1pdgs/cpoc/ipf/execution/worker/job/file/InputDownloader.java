@@ -22,7 +22,6 @@ import esa.s1pdgs.cpoc.mqi.model.queue.LevelJobInputDto;
 import esa.s1pdgs.cpoc.obs_sdk.ObsClient;
 import esa.s1pdgs.cpoc.obs_sdk.ObsDownloadObject;
 import esa.s1pdgs.cpoc.report.Reporting;
-import esa.s1pdgs.cpoc.report.ReportingMessage;
 
 /**
  * Class which create the local working directory and download all the inputs
@@ -115,34 +114,10 @@ public class InputDownloader {
      * @throws AbstractCodedException
      */
     public void processInputs(final Reporting.ChildFactory reportingChildFactory) throws AbstractCodedException {
-
-        // Initialize
         initializeDownload();
-
-        // Create necessary directories and download input with content in
-        // message
-        final List<ObsDownloadObject> downloadToBatch = sortInputs();
-        
-		final Reporting reporting = reportingChildFactory.newChild("InputDownloader");
-        
-        final StringBuilder stringBuilder = new StringBuilder();
-        for (final ObsDownloadObject input : downloadToBatch) {
-        	stringBuilder.append(input.getKey()).append(' ');
-        }        
-        final String listinputs = stringBuilder.toString().trim();
-  
-        reporting.begin(new ReportingMessage("Start download of products {}", listinputs));
-
-        // Download input from object storage in batch
-        try {
-			downloadInputs(downloadToBatch, reporting.getChildFactory());
-			 // Complete download
-	        completeDownload();	      	
-	        reporting.end(new ReportingMessage(getWorkdirSize(), "End download of products {}", listinputs));			
-		} catch (final AbstractCodedException e) {
-			reporting.error(new ReportingMessage("[code {}] {}", e.getCode().getCode(), e.getLogMessage()));
-			throw e;
-		}       
+        final List<ObsDownloadObject> downloadToBatch = sortInputs(); // also creates necessary directories
+		downloadInputs(downloadToBatch, reportingChildFactory);
+        completeDownload();	      	
     }
 
     /**
@@ -280,22 +255,5 @@ public class InputDownloader {
                 }
             }
         }
-    }
-    
-    private final long getWorkdirSize() throws InternalErrorException
-    {
-        try {
-			final Path folder = Paths.get(localWorkingDir);
-			return Files.walk(folder)
-			  .filter(p -> p.toFile().isFile())
-			  .mapToLong(p -> p.toFile().length())
-			  .sum();
-			
-		} catch (final IOException e) {
-			throw new InternalErrorException(
-					String.format("Error on determining size of %s: %s", localWorkingDir, e.getMessage()),
-					e
-			);
-		}
     }
 }

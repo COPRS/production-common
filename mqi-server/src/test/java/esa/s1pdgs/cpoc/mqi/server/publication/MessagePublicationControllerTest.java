@@ -204,6 +204,8 @@ public class MessagePublicationControllerTest {
     public void publishEdrsSessions() throws Exception {
         final IngestionEvent ingestionEvent = newIngestionEvent("obs-key", "/path/of/inbox", 2,
                 EdrsSessionFileType.RAW, "S1", "A", "WILE", "sessionId");
+        ingestionEvent.setProductFamily(ProductFamily.EDRS_SESSION);
+        
         initCustomControllerForAllPublication();
 
         customController.publish(ProductCategory.EDRS_SESSIONS, ingestionEvent, "NONE", "NONE");

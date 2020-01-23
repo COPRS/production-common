@@ -144,7 +144,7 @@ public class IngestionWorkerService implements MqiListener<IngestionJob> {
 			result.setOutputKey(product.getFamily().toString());
 			LOG.info("publishing : {}", result);
 
-			final Reporting report = reportingChildFactory.newChild("KafkaPublish");
+			final Reporting report = reportingChildFactory.newChild("Publish");
 
 			report.begin(new ReportingMessage("Start publishing file {}", message.getBody().getKeyObjectStorage()));
 			try {

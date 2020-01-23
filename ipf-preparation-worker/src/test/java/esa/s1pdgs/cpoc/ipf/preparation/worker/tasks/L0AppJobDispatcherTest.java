@@ -15,7 +15,6 @@ import java.io.File;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.UUID;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -33,9 +32,6 @@ import esa.s1pdgs.cpoc.common.errors.AbstractCodedException;
 import esa.s1pdgs.cpoc.common.errors.InternalErrorException;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.config.IpfPreparationWorkerSettings;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.config.ProcessSettings;
-import esa.s1pdgs.cpoc.ipf.preparation.worker.tasks.JobsGeneratorFactory;
-import esa.s1pdgs.cpoc.ipf.preparation.worker.tasks.L0AppJobDispatcher;
-import esa.s1pdgs.cpoc.ipf.preparation.worker.tasks.L0AppJobsGenerator;
 
 /**
  * Test the class JobDispatcher
@@ -172,13 +168,13 @@ public class L0AppJobDispatcherTest {
                         Mockito.anyBoolean(), Mockito.anyBoolean(), Mockito.anyBoolean());
         doReturn(primaryCheckAppJob).when(appDataService).patchTaskTableOfJob(
                 Mockito.eq(123L), Mockito.eq("TaskTable.AIOP.xml"),
-                Mockito.eq(AppDataJobGenerationState.PRIMARY_CHECK), Mockito.eq(new UUID(23L, 42L)));
+                Mockito.eq(AppDataJobGenerationState.PRIMARY_CHECK));
         doReturn(readyAppJob).when(appDataService).patchTaskTableOfJob(
                 Mockito.eq(123L), Mockito.eq("TaskTable.AIOP.xml"),
-                Mockito.eq(AppDataJobGenerationState.READY), Mockito.eq(new UUID(23L, 42L)));
+                Mockito.eq(AppDataJobGenerationState.READY));
         doReturn(sentAppJob).when(appDataService).patchTaskTableOfJob(
                 Mockito.eq(123L), Mockito.eq("TaskTable.AIOP.xml"),
-                Mockito.eq(AppDataJobGenerationState.SENT), Mockito.eq(new UUID(23L, 42L)));
+                Mockito.eq(AppDataJobGenerationState.SENT));
     }
 
     @Test

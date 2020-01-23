@@ -25,7 +25,6 @@ import esa.s1pdgs.cpoc.common.errors.InternalErrorException;
 import esa.s1pdgs.cpoc.common.errors.UnknownFamilyException;
 import esa.s1pdgs.cpoc.common.errors.mqi.MqiPublicationError;
 import esa.s1pdgs.cpoc.common.errors.obs.ObsException;
-import esa.s1pdgs.cpoc.common.utils.LogUtils;
 import esa.s1pdgs.cpoc.ipf.execution.worker.config.ApplicationProperties;
 import esa.s1pdgs.cpoc.ipf.execution.worker.job.model.mqi.FileQueueMessage;
 import esa.s1pdgs.cpoc.ipf.execution.worker.job.model.mqi.ObsQueueMessage;
@@ -42,6 +41,7 @@ import esa.s1pdgs.cpoc.obs_sdk.ObsUploadObject;
 import esa.s1pdgs.cpoc.report.Reporting;
 import esa.s1pdgs.cpoc.report.ReportingMessage;
 import esa.s1pdgs.cpoc.report.ReportingOutput;
+import esa.s1pdgs.cpoc.report.ReportingUtils;
 import esa.s1pdgs.cpoc.report.message.output.FilenameReportingOutput;
 import esa.s1pdgs.cpoc.report.message.output.IpfExecutionWorkerReportingOutput;
 import esa.s1pdgs.cpoc.report.message.output.IpfExecutionWorkerReportingOutput.Segment;
@@ -210,7 +210,6 @@ public class OutputProcessor {
 				final OQCFlag oqcFlag = executor.executeOQC(Paths.get(getFilePath(line, productName)), matchOutput, new OQCDefaultTaskFactory(), reportingChildFactory);
 				LOGGER.info("Result of OQC validation was: {}",oqcFlag);
 
-				final Reporting reporting = reportingChildFactory.newChild("GhostCandidateDetection");				
 				switch (family) {
 				case L0_REPORT:
 				case L1_REPORT:
@@ -223,7 +222,6 @@ public class OutputProcessor {
 					productSize += size(file);
 					break;
 				case L0_SLICE:		
-					reporting.begin(new ReportingMessage("Starting ghost candidate detection"));
 					// Specific case of the L0 wrapper
 					if (appLevel == ApplicationLevel.L0) {
 						final boolean ghostCandidate = isGhostCandidate(productName);
@@ -236,11 +234,13 @@ public class OutputProcessor {
 							 */
 							if (!ghostCandidate) {
 								LOGGER.info("Product {} is not a ghost candidate in NRT scenario", productName);
+								ReportingUtils.newReportingBuilder().newEventReporting(new ReportingMessage("Product %s of family %s is not a ghost candidate in NRT scenario", productName, matchOutput.getFamily()));
 								uploadBatch.add(new ObsUploadObject(family, productName, file));
 								outputToPublish.add(new ObsQueueMessage(family, productName, productName, "NRT",oqcFlag));
 								productSize += size(file);
 							} else {
 								LOGGER.info("Product {} is a ghost candidate in NRT scenario", productName);
+								ReportingUtils.newReportingBuilder().newEventReporting(new ReportingMessage("Product %s of family %s is a ghost candidate in NRT scenario", productName, matchOutput.getFamily()));
 							}
 
 						} else if (line.contains("FAST24")) {
@@ -248,12 +248,14 @@ public class OutputProcessor {
 									ProductFamily.L0_SEGMENT);
 							if (!ghostCandidate) {
 								LOGGER.info("Product {} is not a ghost candidate in FAST scenario", productName);
+								ReportingUtils.newReportingBuilder().newEventReporting(new ReportingMessage("Product %s of family %s is not a ghost candidate in FAST scenario", productName, ProductFamily.L0_SEGMENT));
 								uploadBatch.add(new ObsUploadObject(ProductFamily.L0_SEGMENT, productName, file));
 								outputToPublish.add(
 									new ObsQueueMessage(ProductFamily.L0_SEGMENT, productName, productName, "FAST24",oqcFlag));
 
 							} else {
 								LOGGER.info("Product {} is a ghost candidate in FAST scenario", productName);
+								ReportingUtils.newReportingBuilder().newEventReporting(new ReportingMessage("Product %s of family %s is a ghost candidate in FAST scenario", productName, ProductFamily.L0_SEGMENT));
 								uploadBatch.add(new ObsUploadObject(ProductFamily.GHOST, productName, file));
 							}
 							productSize += size(file);
@@ -268,12 +270,10 @@ public class OutputProcessor {
 								inputMessage.getBody().getProductProcessMode(),oqcFlag));
 						productSize += size(file);
 					}
-					reporting.end(new ReportingMessage("End of ghost candidate detection"));
 					break;
 				case L0_ACN:
 				case L0_BLANK:
 					// Specific case of the L0 wrapper
-					reporting.begin(new ReportingMessage("Starting ghost candidate detection"));
 					if (appLevel == ApplicationLevel.L0) {
 						final boolean ghostCandidate = isGhostCandidate(productName);
 						if (line.contains("NRT")) {
@@ -281,11 +281,13 @@ public class OutputProcessor {
 									matchOutput.getFamily());
 							if (!ghostCandidate) {
 								LOGGER.info("Product {} is not a ghost candidate in NRT scenario", productName);
+								ReportingUtils.newReportingBuilder().newEventReporting(new ReportingMessage("Product %s of family %s is not a ghost candidate in NRT scenario", productName, matchOutput.getFamily()));
 								uploadBatch.add(new ObsUploadObject(family, productName, file));
 								outputToPublish.add(new ObsQueueMessage(family, productName, productName, "NRT",oqcFlag));
 								productSize += size(file);
 							} else {
 								LOGGER.info("Product {} is a ghost candidate in NRT scenario", productName);
+								ReportingUtils.newReportingBuilder().newEventReporting(new ReportingMessage("Product %s of family %s is a ghost candidate in NRT scenario", productName, matchOutput.getFamily()));
 							}
 						} else if (line.contains("FAST24")) {
 							LOGGER.info("Output {} (ACN, BLANK) is considered as belonging to the family {}", productName,
@@ -293,11 +295,13 @@ public class OutputProcessor {
 							
 							if (!ghostCandidate) {
 								LOGGER.info("Product {} is not a ghost candidate in FAST scenario", productName);
+								ReportingUtils.newReportingBuilder().newEventReporting(new ReportingMessage("Product %s of family %s is not a ghost candidate in FAST scenario", productName, matchOutput.getFamily()));
 								uploadBatch.add(new ObsUploadObject(family, productName, file));
 								outputToPublish.add(new ObsQueueMessage(family, productName, productName, "FAST24",oqcFlag));
 								productSize += size(file);
 							} else {
 								LOGGER.info("Product {} is a ghost candidate in FAST scenario", productName);
+								ReportingUtils.newReportingBuilder().newEventReporting(new ReportingMessage("Product %s of family %s is a ghost candidate in FAST scenario", productName, matchOutput.getFamily()));
 							}
 						} else {
 							LOGGER.warn("Output {} (ACN, BLANK) ignored because unknown mode", productName);
@@ -310,7 +314,6 @@ public class OutputProcessor {
 								inputMessage.getBody().getProductProcessMode(),oqcFlag));
 						productSize += size(file);
 					}
-					reporting.end(new ReportingMessage("End of ghost candidate detection"));
 					break;
 				case L1_SLICE:
 				case L1_ACN:
@@ -550,7 +553,7 @@ public class OutputProcessor {
 			if (nextKeyUpload.startsWith(msg.getKeyObs())) {
 				stop = true;
 			} else {
-				final Reporting report = reportingChildFactory.newChild("KafkaPublish");
+				final Reporting report = reportingChildFactory.newChild("Publish");
 				report.begin(new ReportingMessage("Start publishing file: {}", msg.getKeyObs()));
 				try {
 					procuderFactory.sendOutput(msg, inputMessage);
@@ -601,8 +604,6 @@ public class OutputProcessor {
 	 * @throws ObsEmptyFileException 
 	 */
 	public ReportingOutput processOutput(final Reporting.ChildFactory reportingChildFactory) throws AbstractCodedException, ObsEmptyFileException {
-		final Reporting reporting = reportingChildFactory.newChild("OutputHandling");
-
 		List<String> result = new ArrayList<>();
 		final List<Segment> segments = new ArrayList<>();
 		
@@ -613,16 +614,14 @@ public class OutputProcessor {
 		final List<ObsUploadObject> uploadBatch = new ArrayList<>();
 		final List<ObsQueueMessage> outputToPublish = new ArrayList<>();
 		final List<FileQueueMessage> reportToPublish = new ArrayList<>();
-		
-		reporting.begin(new ReportingMessage("Start handling of outputs " + result));
-		
-		final long size = sortOutputs(lines, uploadBatch, outputToPublish, reportToPublish, reporting.getChildFactory());
+			
+		final long size = sortOutputs(lines, uploadBatch, outputToPublish, reportToPublish, reportingChildFactory);
 		
 		result = uploadBatch.stream().map(ObsUploadObject::getKey).collect(Collectors.toList());
 		
 		try {
 			// Upload per batch the output
-			processProducts(reporting.getChildFactory(), uploadBatch, outputToPublish);
+			processProducts(reportingChildFactory, uploadBatch, outputToPublish);
 			// Publish reports
 			processReports(reportToPublish);
 			
@@ -631,12 +630,7 @@ public class OutputProcessor {
 					segments.add(new Segment(obj.getKey(), "TODO", "TODO"));
 				}
 			}
-			reporting.end(new ReportingMessage(size, "End handling of outputs " + result));
-		} catch (final AbstractCodedException e) {
-			reporting.error(new ReportingMessage("[code {}] {}", e.getCode().getCode(), e.getLogMessage()));
-			throw e;
-		} catch (ObsEmptyFileException e) {
-			reporting.error(new ReportingMessage(LogUtils.toString(e)));
+		} catch (final AbstractCodedException | ObsEmptyFileException e) {
 			throw e;
 		}
 		

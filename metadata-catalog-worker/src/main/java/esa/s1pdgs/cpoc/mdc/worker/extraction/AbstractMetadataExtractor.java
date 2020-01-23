@@ -18,7 +18,6 @@ import esa.s1pdgs.cpoc.mdc.worker.extraction.files.MetadataBuilder;
 import esa.s1pdgs.cpoc.obs_sdk.ObsClient;
 import esa.s1pdgs.cpoc.obs_sdk.ObsDownloadObject;
 import esa.s1pdgs.cpoc.report.Reporting;
-import esa.s1pdgs.cpoc.report.ReportingMessage;
 
 public abstract class AbstractMetadataExtractor implements MetadataExtractor {
 	protected final Logger logger = LogManager.getLogger(getClass());
@@ -76,32 +75,12 @@ public abstract class AbstractMetadataExtractor implements MetadataExtractor {
 		}
     }
 
-    final <E> E extractFromFilename(final Reporting.ChildFactory reportingChildFactory,
-			final ThrowingSupplier<E> supplier)	throws AbstractCodedException {
-		Reporting reporting = reportingChildFactory.newChild("FilenameExtract");
-		reporting.begin(new ReportingMessage("Start extraction from {}", "filename"));
-		try {
-			final E res = supplier.get();
-			reporting.end(new ReportingMessage("End extraction from {}", "filename"));
-			return res;
-		} catch (final AbstractCodedException e) {
-			reporting.error(new ReportingMessage("[code {}] {}", e.getCode().getCode(), e.getLogMessage()));
-			throw e;
-		}
+    final <E> E extractFromFilename(final ThrowingSupplier<E> supplier)	throws AbstractCodedException {
+		return supplier.get();
 	}
     
-    final JSONObject extractFromFile(final Reporting.ChildFactory reportingChildFactory,
-    		final ThrowingSupplier<JSONObject> supplier) throws AbstractCodedException  {
-		Reporting reporting = reportingChildFactory.newChild("FileExtract");
-		reporting.begin(new ReportingMessage("Start extraction from {}", "file"));
-		try {
-			JSONObject res = supplier.get();		
-			reporting.end(new ReportingMessage("End extraction from {}", "file"));
-			return res;
-		} catch (final AbstractCodedException e) {
-			reporting.error(new ReportingMessage("[code {}] {}", e.getCode().getCode(), e.getLogMessage()));
-			throw e;
-		}
+    final JSONObject extractFromFile(final ThrowingSupplier<JSONObject> supplier) throws AbstractCodedException  {
+    	return supplier.get();		
 	}
     
 	private final String getMetadataKeyObs(final String productKeyObs) {

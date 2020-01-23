@@ -6,7 +6,7 @@
 	<parent>
 	  <groupId>de.werum.s1pdgs</groupId>
 	  <artifactId>s1pro-core</artifactId>
-	  <version>0.12.0-SNAPSHOT</version>
+	  <version>0.13.0-SNAPSHOT</version>
 	</parent>
 	<artifactId>s1pro-core-metadata-catalog-worker</artifactId>
 	<packaging>jar</packaging>
@@ -151,6 +151,9 @@
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-surefire-plugin</artifactId>
+				<configuration>
+		          <skipTests>true</skipTests>
+		        </configuration>
 			</plugin>
 			<plugin>
 				<groupId>org.codehaus.mojo</groupId>
