@@ -20,6 +20,7 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 
+import esa.s1pdgs.cpoc.appstatus.AppStatus;
 import esa.s1pdgs.cpoc.common.ProductCategory;
 import esa.s1pdgs.cpoc.common.ProductFamily;
 import esa.s1pdgs.cpoc.common.errors.AbstractCodedException;
@@ -64,7 +65,7 @@ public final class TestIngestionWorkerService {
 
 	@Test
 	@Ignore
-	public final void testOnMessage() {
+	public final void testOnMessage() throws Exception {
 		final IngestionJob ingestion = new IngestionJob("fooBar");
 		ingestion.setRelativePath("fooBar");
 		ingestion.setPickupPath("/tmp");
@@ -83,12 +84,17 @@ public final class TestIngestionWorkerService {
 					throws ProductException, InternalErrorException {
 				return IngestionResult.NULL;
 			}
+
+			@Override
+			public void assertFileIsNotEmpty(final IngestionJob ingestion) throws ObsEmptyFileException {				
+			}
 		};		
 		final IngestionWorkerService uut = new IngestionWorkerService(
 				null, 
 				ErrorRepoAppender.NULL, 
 				new IngestionWorkerServiceConfigurationProperties(), 
-				fakeProductService
+				fakeProductService,
+				AppStatus.NULL
 		);
 		uut.onMessage(mess);
 	}
@@ -106,7 +112,7 @@ public final class TestIngestionWorkerService {
 	}
 	
 	@Test
-	public final void testIdentifyAndUpload() throws InternalErrorException, ProductException, ObsEmptyFileException {
+	public final void testIdentifyAndUpload() throws Exception {
 		final IngestionWorkerServiceConfigurationProperties properties = new IngestionWorkerServiceConfigurationProperties();
 		final IngestionTypeConfiguration itc = new IngestionTypeConfiguration();
 		itc.setFamily(ProductFamily.AUXILIARY_FILE.name());
@@ -116,7 +122,8 @@ public final class TestIngestionWorkerService {
 				mqiClient, 
 				ErrorRepoAppender.NULL, 
 				properties,
-				productService
+				productService,
+				AppStatus.NULL
 		);
 		final GenericMessageDto<IngestionJob> message = new GenericMessageDto<>();
 		message.setId(123L);
@@ -146,7 +153,7 @@ public final class TestIngestionWorkerService {
 	
 	@Test
 	@Ignore
-	public final void testIdentifyAndUploadOnInvalidFamily() throws InternalErrorException, ObsEmptyFileException {
+	public final void testIdentifyAndUploadOnInvalidFamily() throws Exception {
 		final IngestionWorkerServiceConfigurationProperties properties = new IngestionWorkerServiceConfigurationProperties();
 		final IngestionTypeConfiguration itc = new IngestionTypeConfiguration();
 		itc.setFamily("FOO");
@@ -156,7 +163,8 @@ public final class TestIngestionWorkerService {
 				mqiClient, 
 				ErrorRepoAppender.NULL, 
 				properties,
-				productService
+				productService,
+				AppStatus.NULL
 		);
 		final GenericMessageDto<IngestionJob> message = new GenericMessageDto<>();
 		message.setId(123L);
@@ -181,7 +189,8 @@ public final class TestIngestionWorkerService {
 				mqiClient, 
 				ErrorRepoAppender.NULL, 
 				properties,
-				productService
+				productService,
+				AppStatus.NULL
 		);
 		
 		uut.getFamilyFor(new IngestionJob("foo.bar"));
@@ -198,7 +207,8 @@ public final class TestIngestionWorkerService {
 				mqiClient, 
 				ErrorRepoAppender.NULL, 
 				properties,
-				productService
+				productService,
+				AppStatus.NULL
 		);
 		
 		assertThatThrownBy(() -> uut.getFamilyFor(new IngestionJob("fu.bar")))
@@ -217,7 +227,8 @@ public final class TestIngestionWorkerService {
 				mqiClient, 
 				ErrorRepoAppender.NULL, 
 				properties,
-				productService
+				productService,
+				AppStatus.NULL
 		);
 		
 		assertThatThrownBy(() -> uut.getFamilyFor(new IngestionJob("foo.bar")))
@@ -231,7 +242,8 @@ public final class TestIngestionWorkerService {
 				mqiClient, 
 				ErrorRepoAppender.NULL, 
 				new IngestionWorkerServiceConfigurationProperties(),
-				productService
+				productService,
+				AppStatus.NULL
 		);
 
 		final GenericMessageDto<IngestionJob> message = new GenericMessageDto<>();

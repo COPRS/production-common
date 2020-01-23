@@ -15,7 +15,6 @@ import esa.s1pdgs.cpoc.common.errors.AbstractCodedException;
 import esa.s1pdgs.cpoc.errorrepo.ErrorRepoAppender;
 import esa.s1pdgs.cpoc.metadata.client.MetadataClient;
 import esa.s1pdgs.cpoc.mqi.client.GenericMqiClient;
-import esa.s1pdgs.cpoc.mqi.client.StatusService;
 import esa.s1pdgs.cpoc.mqi.model.queue.CatalogEvent;
 import esa.s1pdgs.cpoc.mqi.model.rest.GenericMessageDto;
 import esa.s1pdgs.cpoc.production.trigger.config.ProcessSettings;
@@ -24,7 +23,6 @@ public final class L0SegmentConsumer extends AbstractGenericConsumer<CatalogEven
 	public L0SegmentConsumer(
 			final ProcessSettings processSettings, 
 			final GenericMqiClient mqiClient,
-			final StatusService mqiStatusService, 
 			final AppCatalogJobClient<CatalogEvent> appDataService,
 			final ErrorRepoAppender errorRepoAppender, 
 			final AppStatus appStatus,
@@ -33,7 +31,6 @@ public final class L0SegmentConsumer extends AbstractGenericConsumer<CatalogEven
 		super(
 				processSettings, 
 				mqiClient, 
-				mqiStatusService, 
 				appDataService, 
 				appStatus, 
 				errorRepoAppender,

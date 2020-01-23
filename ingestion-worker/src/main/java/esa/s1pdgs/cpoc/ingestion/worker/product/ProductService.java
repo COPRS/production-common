@@ -12,4 +12,5 @@ public interface ProductService {
 
 	void markInvalid(IngestionJob ingestion, final Reporting.ChildFactory reportingChildFactory) throws ObsEmptyFileException;
 
+	void assertFileIsNotEmpty(IngestionJob ingestion) throws ObsEmptyFileException;
 }

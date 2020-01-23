@@ -74,18 +74,29 @@ public class QueueWatcherService implements MqiListener<ProductionEvent> {
 
 		final ExecutorService service = Executors.newFixedThreadPool(4);
 		if (auxFilesPollingIntervalMs > 0) {
-			service.execute(new MqiConsumer<ProductionEvent>(mqiClient, ProductCategory.AUXILIARY_FILES, this,
-					auxFilesPollingIntervalMs, auxFilesPollingInitialDelayMs, appStatus));
+			service.execute(newConsumerFor(
+					ProductCategory.AUXILIARY_FILES, 
+					auxFilesPollingIntervalMs, 
+					auxFilesPollingInitialDelayMs
+			));
 		}
 		if (levelProductsPollingIntervalMs > 0) {
-			service.execute(new MqiConsumer<ProductionEvent>(mqiClient, ProductCategory.LEVEL_PRODUCTS, this,
-					levelProductsPollingIntervalMs, levelProductsPollingInitialDelayMs, appStatus));
+			service.execute(newConsumerFor(
+					ProductCategory.LEVEL_PRODUCTS, 
+					levelProductsPollingIntervalMs, 
+					levelProductsPollingInitialDelayMs
+			));
 		}
 		if (levelSegmentsPollingIntervalMs > 0) {
-			service.execute(new MqiConsumer<ProductionEvent>(mqiClient, ProductCategory.LEVEL_SEGMENTS, this,
-					levelSegmentsPollingIntervalMs, levelSegmentsPollingInitialDelayMs, appStatus));
+			service.execute(newConsumerFor(
+					ProductCategory.LEVEL_SEGMENTS, 
+					levelSegmentsPollingIntervalMs, 
+					levelSegmentsPollingInitialDelayMs
+			));
 		}
 	}
+	
+
 
 	protected synchronized void writeCSV(final String dateTimeStamp, final String productName) throws IOException {
 		CSVPrinter csvPrinter = null;
@@ -127,6 +138,17 @@ public class QueueWatcherService implements MqiListener<ProductionEvent> {
 		} catch (final IOException e) {
 			LOGGER.error("Error occured while writing to CSV {}", LogUtils.toString(e));
 		}
+	}
+	
+	private final MqiConsumer<ProductionEvent> newConsumerFor(final ProductCategory category, final long interval, final long delay) {
+		return new MqiConsumer<ProductionEvent>(
+				mqiClient, 
+				category, 
+				this,
+				interval, 
+				delay, 
+				appStatus
+		);
 	}
 
 }

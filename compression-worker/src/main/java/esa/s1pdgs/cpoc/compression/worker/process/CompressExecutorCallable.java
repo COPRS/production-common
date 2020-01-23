@@ -40,7 +40,7 @@ public class CompressExecutorCallable implements Callable<Void> {
 	 * @param job
 	 * @param prefixMonitorLogs
 	 */
-	public CompressExecutorCallable(final CompressionJob job, final String prefixLogs, final ApplicationProperties properties) {
+	public CompressExecutorCallable(final CompressionJob job, final ApplicationProperties properties) {
 		this.job = job;
 		this.properties = properties;
 	}

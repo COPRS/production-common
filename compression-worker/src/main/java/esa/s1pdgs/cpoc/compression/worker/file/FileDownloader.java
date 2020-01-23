@@ -1,10 +1,6 @@
 package esa.s1pdgs.cpoc.compression.worker.file;
 
 import java.io.File;
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.Arrays;
 
 import org.apache.logging.log4j.LogManager;
@@ -39,17 +35,12 @@ public class FileDownloader {
 	 */
 	private final CompressionJob job;
 
-	/**
-	 * Prefix to concatene to monitor logs
-	 */
-	private final String prefixMonitorLogs;
 
 	public FileDownloader(final ObsClient obsClient, final String localWorkingDir, final CompressionJob job,
-			final int sizeDownBatch, final String prefixMonitorLogs) {
+			final int sizeDownBatch) {
 		this.obsClient = obsClient;
 		this.localWorkingDir = localWorkingDir;
 		this.job = job;
-		this.prefixMonitorLogs = prefixMonitorLogs;
 	}
 
 	/**
@@ -59,7 +50,7 @@ public class FileDownloader {
 	 */
 	public void processInputs(final Reporting.ChildFactory reportingChildFactory) throws AbstractCodedException {
 		// prepare directory structure
-		LOGGER.info("{} 1 - Creating working directory", prefixMonitorLogs);
+		LOGGER.info("CompressionProcessor 1 - Creating working directory");
 		final File workingDir = new File(localWorkingDir);
 		workingDir.mkdirs();
 
@@ -81,7 +72,7 @@ public class FileDownloader {
 	 * @throws UnknownFamilyException
 	 */
 	protected ObsDownloadObject buildInput() throws InternalErrorException, UnknownFamilyException {
-		LOGGER.info("{} 3 - Starting organizing inputs", prefixMonitorLogs);
+		LOGGER.info("CompressionProcessor 3 - Starting organizing inputs");
 		
 		if (job.getKeyObjectStorage() == null) {
 			throw new InternalErrorException("productName to download cannot be null");
@@ -91,16 +82,5 @@ public class FileDownloader {
 		LOGGER.info("Input {} will be stored in {}", job.getKeyObjectStorage(), targetFile);
 		return new ObsDownloadObject(job.getProductFamily(), job.getKeyObjectStorage(),targetFile);
 
-	}
-
-	private final long getWorkdirSize() throws InternalErrorException {
-		try {
-			final Path folder = Paths.get(localWorkingDir);
-			return Files.walk(folder).filter(p -> p.toFile().isFile()).mapToLong(p -> p.toFile().length()).sum();
-
-		} catch (final IOException e) {
-			throw new InternalErrorException(
-					String.format("Error on determining size of %s: %s", localWorkingDir, e.getMessage()), e);
-		}
 	}
 }

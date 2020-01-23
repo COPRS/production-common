@@ -42,7 +42,6 @@ import esa.s1pdgs.cpoc.mqi.client.StatusService;
 import esa.s1pdgs.cpoc.mqi.model.queue.CompressionJob;
 import esa.s1pdgs.cpoc.mqi.model.rest.GenericMessageDto;
 import esa.s1pdgs.cpoc.obs_sdk.ObsClient;
-import esa.s1pdgs.cpoc.obs_sdk.ObsEmptyFileException;
 import esa.s1pdgs.cpoc.report.Reporting;
 import esa.s1pdgs.cpoc.report.ReportingMessage;
 import esa.s1pdgs.cpoc.report.ReportingUtils;
@@ -51,55 +50,30 @@ import esa.s1pdgs.cpoc.report.message.output.FilenameReportingOutput;
 
 @Service
 public class CompressProcessor implements MqiListener<CompressionJob> {
-	/**
-	 * Logger
-	 */
 	private static final Logger LOGGER = LogManager.getLogger(CompressProcessor.class);
 
-	/**
-	 * Application properties
-	 */
 	private final ApplicationProperties properties;
-
-	/**
-	 * Application status
-	 */
 	private final AppStatus appStatus;
-
-	/**
-	 * Output processsor
-	 */
 	private final ObsClient obsClient;
-
-	/**
-	 * Output processsor
-	 */
 	private final OutputProducerFactory producerFactory;
-
-	/**
-	 * MQI service for reading message
-	 */
 	private final GenericMqiClient mqiClient;
-
-	/**
-	 * MQI service for stopping the MQI
-	 */
 	private final StatusService mqiStatusService;
-
 	private final ErrorRepoAppender errorAppender;
-	
 	private final long pollingIntervalMs;
-	
 	private final long pollingInitialDelayMs;
 
 	@Autowired
-	public CompressProcessor(final AppStatus appStatus, final ApplicationProperties properties,
-			final ObsClient obsClient, final OutputProducerFactory producerFactory,
+	public CompressProcessor(
+			final AppStatus appStatus, 
+			final ApplicationProperties properties,
+			final ObsClient obsClient, 
+			final OutputProducerFactory producerFactory,
 			final GenericMqiClient mqiClient,
 			final ErrorRepoAppender errorAppender,
 			final StatusService mqiStatusService,
 			@Value("${compression-worker.fixed-delay-ms}") final long pollingIntervalMs,
-			@Value("${compression-worker.init-delay-poll-ms}") final long pollingInitialDelayMs) {
+			@Value("${compression-worker.init-delay-poll-ms}") final long pollingInitialDelayMs
+	) {
 		this.appStatus = appStatus;
 		this.properties = properties;
 		this.obsClient = obsClient;
@@ -118,35 +92,15 @@ public class CompressProcessor implements MqiListener<CompressionJob> {
 			service.execute(newMqiConsumer());
 		}
 	}
-	
-	/**
-	 * Consume and execute jobs
-	 */
+
 	@Override
-	public void onMessage(final GenericMessageDto<CompressionJob> message) {
-
-		appStatus.setProcessing(message.getId());
-		LOGGER.info("Initializing job processing {}", message);
-
-		// ----------------------------------------------------------
-		// Initialize processing
-		// ------------------------------------------------------
+	public final void onMessage(final GenericMessageDto<CompressionJob> message) throws Exception {
 		final Reporting report = ReportingUtils.newReportingBuilder().newTaskReporting("CompressionProcessing");
-
 		final String workDir = properties.getWorkingDirectory();
-		report.begin(
-				new FilenameReportingInput(message.getBody().getKeyObjectStorage()),
-				new ReportingMessage("Start compression processing")
-		);
-
 		final CompressionJob job = message.getBody();
 
 		// Initialize the pool processor executor
-		final CompressExecutorCallable procExecutor = new CompressExecutorCallable(
-				job,
-				"CompressionProcessor - process", 
-				properties
-		);
+		final CompressExecutorCallable procExecutor = new CompressExecutorCallable(job, properties);
 		final ExecutorService procExecutorSrv = Executors.newSingleThreadExecutor();
 		final ExecutorCompletionService<Void> procCompletionSrv = new ExecutorCompletionService<>(procExecutorSrv);
 
@@ -155,89 +109,51 @@ public class CompressProcessor implements MqiListener<CompressionJob> {
 				obsClient, 
 				workDir, 
 				job,
-				properties.getSizeBatchDownload(),
-				"CompressionProcessor"
+				properties.getSizeBatchDownload()
 		);
-
-		final FileUploader fileUploader = new FileUploader(obsClient, producerFactory, workDir, message, job);
-
-		// ----------------------------------------------------------
-		// Process message
-		// ----------------------------------------------------------
-		final String outputName = processTask(message, fileDownloader, fileUploader, procExecutorSrv, procCompletionSrv, procExecutor, report);
-
-		report.end(
-				new FilenameReportingOutput(outputName), 
-				new ReportingMessage("End compression processing")
+		final FileUploader fileUploader = new FileUploader(obsClient, producerFactory, workDir, message, job);	
+		report.begin(
+				new FilenameReportingInput(message.getBody().getKeyObjectStorage()),
+				new ReportingMessage("Start compression processing")
 		);
-	}
-
-	protected String processTask(final GenericMessageDto<CompressionJob> message, final FileDownloader fileDownloader,
-			final FileUploader fileUploader, final ExecutorService procExecutorSrv,
-			final ExecutorCompletionService<Void> procCompletionSrv, final CompressExecutorCallable procExecutor,
-			final Reporting report) {
-		final CompressionJob job = message.getBody();
-		int step = 0;
-		boolean ackOk = false;
-		String errorMessage = "";
-		String filename = "NOT_DEFINED";
-		
-		FailedProcessingDto failedProc = null;
-
-		try {
-			step = 2;
-
+		try {			
 			checkThreadInterrupted();
-			LOGGER.info("{} Preparing local working directory", "LOG_INPUT", // getPrefixMonitorLog(MonitorLogUtils.LOG_INPUT
-					job);
+			LOGGER.info("Downloading inputs for {}", job);
 			fileDownloader.processInputs(report.getChildFactory());
 
-			step = 3;
-			LOGGER.info("{} Starting process executor", "LOG PROCESS"// getPrefixMonitorLog(MonitorLogUtils.LOG_PROCESS
-					, job);
-			procCompletionSrv.submit(procExecutor);
-
-			step = 3;
-			this.waitForPoolProcessesEnding(procCompletionSrv);
-			step = 4;
 			checkThreadInterrupted();
-			LOGGER.info("{} Processing l0 outputs", "LOG_OUTPUT", // getPrefixMonitorLog(MonitorLogUtils.LOG_OUTPUT
-					job);
+			LOGGER.info("Compressing inputs for {}", job);
+			procCompletionSrv.submit(procExecutor);
+			waitForPoolProcessesEnding(procCompletionSrv);
 
-			filename = fileUploader.processOutput(report.getChildFactory());
-
-			ackOk = true;
-		} catch (final AbstractCodedException ace) {
-			ackOk = false;
-
-			errorMessage = String.format(
-					"[s1pdgsCompressionTask] [subTask processing] [STOP KO] %s [step %d] %s [code %d] %s", "LOG_DFT", // getPrefixMonitorLog(MonitorLogUtils.LOG_DFT,
-																														// job),
-					step, "LOG_ERROR", // getPrefixMonitorLog(MonitorLogUtils.LOG_ERROR, job),
-					ace.getCode().getCode(), ace.getLogMessage());
-			report.error(new ReportingMessage("[code {}] {}", ace.getCode().getCode(), ace.getLogMessage()));
-
-			failedProc = new FailedProcessingDto(properties.getHostname(), new Date(), errorMessage, message);
-
-		} catch (final InterruptedException e) {
-			ackOk = false;
-			errorMessage = String.format(
-					"%s [step %d] %s [code %d] [s1pdgsCompressionTask] [STOP KO] [subTask processing] [msg interrupted exception]",
-					"LOG_DFT", // getPrefixMonitorLog(MonitorLogUtils.LOG_DFT, job),
-					step, "LOG_ERROR", // getPrefixMonitorLog(MonitorLogUtils.LOG_ERROR, job),
-					ErrorCode.INTERNAL_ERROR.getCode());
-			report.error(new ReportingMessage("Interrupted job processing"));
-			failedProc = new FailedProcessingDto(properties.getHostname(), new Date(), errorMessage, message);
-			cleanCompressionProcessing(job, procExecutorSrv);
-		} catch (final ObsEmptyFileException e) {
-			ackOk = false;
-			report.error(new ReportingMessage(LogUtils.toString(e)));
-			failedProc = new FailedProcessingDto(properties.getHostname(), new Date(), errorMessage, message);
+			checkThreadInterrupted();
+			LOGGER.info("Uploading compressed outputs for {}", job);
+			final String filename = fileUploader.processOutput(report.getChildFactory());
+			report.end(
+					new FilenameReportingOutput(filename), 
+					new ReportingMessage("End compression processing")
+			);
+		} catch (final Exception e) {
+			report.error(errorReportMessage(e));
+			throw e;
 		}
-
-		// Ack and check if application shall stopped
-		ackProcessing(message, failedProc, ackOk, errorMessage);
-		return filename;
+		finally {
+			// initially, this has only been performed on InterruptedException but we discussed that it makes sense to
+			// always perform the cleanup, also see S1PRO-988 
+			cleanCompressionProcessing(job, procExecutorSrv);
+		}
+	}
+		
+	@Override
+	public final void onTerminalError(final GenericMessageDto<CompressionJob> message, final Exception error) {		
+		LOGGER.error(error);
+		errorAppender.send(new FailedProcessingDto(
+				properties.getHostname(), 
+				new Date(), 
+				String.format("Error on handling compression for message %s: %s", message.getId(), LogUtils.toString(error)), 
+				message
+		));
+		exitOnAppStatusStopOrWait();
 	}
 
 	/**
@@ -245,7 +161,7 @@ public class CompressProcessor implements MqiListener<CompressionJob> {
 	 * 
 	 * @throws InterruptedException
 	 */
-	protected void checkThreadInterrupted() throws InterruptedException {
+	private final void checkThreadInterrupted() throws InterruptedException {
 		if (Thread.currentThread().isInterrupted()) {
 			throw new InterruptedException("Current thread is interrupted");
 		}
@@ -257,7 +173,7 @@ public class CompressProcessor implements MqiListener<CompressionJob> {
 	 * @throws InterruptedException
 	 * @throws AbstractCodedException
 	 */
-	protected void waitForPoolProcessesEnding(final ExecutorCompletionService<?> procCompletionSrv)
+	private final void waitForPoolProcessesEnding(final ExecutorCompletionService<?> procCompletionSrv)
 			throws InterruptedException, AbstractCodedException {
 		checkThreadInterrupted();
 		try {
@@ -273,12 +189,7 @@ public class CompressProcessor implements MqiListener<CompressionJob> {
 		}
 	}
 
-	/**
-	 * @param job
-	 * @param poolProcessing
-	 * @param procExecutorSrv
-	 */
-	protected void cleanCompressionProcessing(final CompressionJob job, final ExecutorService procExecutorSrv) {
+	private final void cleanCompressionProcessing(final CompressionJob job, final ExecutorService procExecutorSrv) {
 		procExecutorSrv.shutdownNow();
 		try {
 			procExecutorSrv.awaitTermination(properties.getTmProcStopS(), TimeUnit.SECONDS);
@@ -287,11 +198,6 @@ public class CompressProcessor implements MqiListener<CompressionJob> {
 			// Conserves the interruption
 			Thread.currentThread().interrupt();
 		}
-
-		this.eraseDirectory(job);
-	}
-
-	private void eraseDirectory(final CompressionJob job) {
 		try {
 			LOGGER.info("Erasing local working directory for job {}", job);
 			final Path p = Paths.get(properties.getWorkingDirectory());
@@ -301,43 +207,6 @@ public class CompressProcessor implements MqiListener<CompressionJob> {
 			LOGGER.error("{} [code {}] Failed to erase local working directory", job,
 					ErrorCode.INTERNAL_ERROR.getCode());
 			this.appStatus.setError("PROCESSING");
-		}
-	}
-
-	/**
-	 * Ack job processing and stop app if needed
-	 * 
-	 * @param dto
-	 * @param ackOk
-	 * @param errorMessage
-	 */
-	protected void xackProcessing(final GenericMessageDto<CompressionJob> dto,
-			final FailedProcessingDto failed, final boolean ackOk,
-			final String errorMessage) {
-		final boolean stopping = appStatus.getStatus().isStopping();
-
-		// Ack
-		if (ackOk) {
-			ackPositively(stopping, dto);
-		} else {
-			ackNegatively(stopping, dto, errorMessage);
-			errorAppender.send(failed);
-		}
-
-		// Check status
-        LOGGER.info("Checking status consumer {}", dto.getBody());
-		if (appStatus.getStatus().isStopping()) {
-			// TODO send stop to the MQI
-			try {
-				mqiStatusService.stop();
-			} catch (final AbstractCodedException ace) {
-				LOGGER.error("MQI service couldn't be stopped {}",ace);
-			}
-			System.exit(0);
-		} else if (appStatus.getStatus().isFatalError()) {
-			System.exit(-1);
-		} else {
-			appStatus.setWaiting();
 		}
 	}
 	
@@ -350,5 +219,34 @@ public class CompressProcessor implements MqiListener<CompressionJob> {
 				pollingInitialDelayMs, 
 				appStatus
 		);
+	}
+	
+	private final ReportingMessage errorReportMessage(final Exception e) {
+		if (e instanceof AbstractCodedException) {
+			final AbstractCodedException ace = (AbstractCodedException) e;
+			return new ReportingMessage("[code {}] {}", ace.getCode().getCode(), ace.getLogMessage());
+		}
+		if (e instanceof InterruptedException) {
+			return new ReportingMessage("Interrupted job processing");				
+		}
+		// any other Exception
+		return new ReportingMessage("[code {}] {}", ErrorCode.INTERNAL_ERROR, LogUtils.toString(e));
+	}
+	
+	// checks AppStatus, whether app shall be stopped and in that case, shut down this service as well
+	private final void exitOnAppStatusStopOrWait() {
+		if (appStatus.getStatus().isStopping()) {
+			// TODO send stop to the MQI
+			try {
+				mqiStatusService.stop();
+			} catch (final AbstractCodedException ace) {
+				LOGGER.error("MQI service couldn't be stopped {}", ace);
+			}
+			System.exit(0);
+		} else if (appStatus.getStatus().isFatalError()) {
+			System.exit(-1);
+		} else {
+			appStatus.setWaiting();
+		}
 	}
 }

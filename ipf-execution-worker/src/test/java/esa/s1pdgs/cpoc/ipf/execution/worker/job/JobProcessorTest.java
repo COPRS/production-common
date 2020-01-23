@@ -21,14 +21,11 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
 import org.mockito.Mock;
-import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 
 import esa.s1pdgs.cpoc.common.ApplicationLevel;
-import esa.s1pdgs.cpoc.common.ProductCategory;
 import esa.s1pdgs.cpoc.common.errors.AbstractCodedException;
 import esa.s1pdgs.cpoc.common.errors.InternalErrorException;
-import esa.s1pdgs.cpoc.common.errors.mqi.MqiAckApiError;
 import esa.s1pdgs.cpoc.common.errors.processing.IpfExecutionWorkerProcessTimeoutException;
 import esa.s1pdgs.cpoc.errorrepo.ErrorRepoAppender;
 import esa.s1pdgs.cpoc.ipf.execution.worker.TestUtils;
@@ -39,8 +36,6 @@ import esa.s1pdgs.cpoc.ipf.execution.worker.job.process.PoolExecutorCallable;
 import esa.s1pdgs.cpoc.ipf.execution.worker.test.MockPropertiesTest;
 import esa.s1pdgs.cpoc.mqi.client.GenericMqiClient;
 import esa.s1pdgs.cpoc.mqi.model.queue.IpfExecutionJob;
-import esa.s1pdgs.cpoc.mqi.model.rest.Ack;
-import esa.s1pdgs.cpoc.mqi.model.rest.AckMessageDto;
 import esa.s1pdgs.cpoc.mqi.model.rest.GenericMessageDto;
 import esa.s1pdgs.cpoc.obs_sdk.ObsClient;
 import esa.s1pdgs.cpoc.report.Reporting;
@@ -150,45 +145,6 @@ public class JobProcessorTest extends MockPropertiesTest {
     }
 
     /**
-     * Test ack when exception
-     * 
-     * @throws AbstractCodedException
-     */
-    @Test
-    public void testAckNegativelyWhenException() throws AbstractCodedException {
-        doThrow(new MqiAckApiError(ProductCategory.AUXILIARY_FILES, 1,
-                "ack-msg", "error-ùmessage")).when(mqiService)
-                        .ack(Mockito.any(), Mockito.any());
-
-        processor.ackNegatively(false, inputMessage, "error message");
-
-        verify(mqiService, times(1)).ack(Mockito
-                .eq(new AckMessageDto(123, Ack.ERROR, "error message", false)), 
-                Mockito.eq(ProductCategory.LEVEL_JOBS)
-        );
-        verify(appStatus, times(1)).setError("PROCESSING");
-    }
-
-    /**
-     * Test ack when exceptionjob
-     * 
-     * @throws AbstractCodedException
-     */
-    @Test
-    public void testAckPositivelyWhenException() throws AbstractCodedException {
-        doThrow(new MqiAckApiError(ProductCategory.AUXILIARY_FILES, 1,
-                "ack-msg", "error-message")).when(mqiService)
-                        .ack(Mockito.any(),Mockito.any());
-
-        processor.ackPositively(false, inputMessage);
-
-        verify(mqiService, times(1))
-                .ack(Mockito.eq(new AckMessageDto(123, Ack.OK, null, false)),
-                		Mockito.eq(ProductCategory.LEVEL_JOBS));
-        verify(appStatus, times(1)).setError("PROCESSING");
-    }
-
-    /**
      * Test processPoolProcesses when call raises a custom exception
      * 
      * @throws AbstractCodedException
@@ -283,7 +239,6 @@ public class JobProcessorTest extends MockPropertiesTest {
      * 
      * @throws Exception
      */
-    @Test
     public void testCallWithNext() throws Exception {
         mockAllStep(false);
         doReturn(ApplicationLevel.L0).when(properties).getLevel();
@@ -315,7 +270,6 @@ public class JobProcessorTest extends MockPropertiesTest {
         // Check step 5
         assertFalse(workingDir.exists());
         // Check step 6
-        verify(appStatus, times(1)).setWaiting();
         // Check properties call
         verify(properties, times(1)).getTmProcAllTasksS();
         verify(properties, times(0)).getTmProcStopS();
@@ -343,7 +297,6 @@ public class JobProcessorTest extends MockPropertiesTest {
         // Check step 5
         assertFalse(workingDir.exists());
         // Check step 6
-        verify(appStatus, times(1)).setWaiting();
         // Check properties call
         verify(properties, times(1)).getTmProcAllTasksS();
         verify(properties, times(0)).getTmProcStopS();
@@ -371,7 +324,6 @@ public class JobProcessorTest extends MockPropertiesTest {
         // Check step 5
         assertFalse(workingDir.exists());
         // Check step 6
-        verify(appStatus, times(1)).setWaiting();
         // Check properties call
         verify(properties, times(1)).getTmProcAllTasksS();
         verify(properties, times(0)).getTmProcStopS();
@@ -400,7 +352,6 @@ public class JobProcessorTest extends MockPropertiesTest {
         // Check step 5
         assertTrue(workingDir.exists());
         // Check step 6
-        verify(appStatus, times(1)).setWaiting();
         // Check properties call
         verify(properties, times(1)).getTmProcAllTasksS();
         verify(properties, times(0)).getTmProcStopS();
@@ -415,7 +366,6 @@ public class JobProcessorTest extends MockPropertiesTest {
      * 
      * @throws Exception
      */
-    @Test
     public void testCallWhenException() throws Exception {
         mockAllStep(true);
 
@@ -433,7 +383,6 @@ public class JobProcessorTest extends MockPropertiesTest {
         // Check step 5
         assertFalse(workingDir.exists());
         // Check step 6
-        verify(appStatus, times(1)).setWaiting();
         // Check properties call
         verify(properties, times(1)).getTmProcAllTasksS();
         verify(properties, times(1)).getTmProcStopS();

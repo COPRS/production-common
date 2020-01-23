@@ -15,6 +15,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
+import esa.s1pdgs.cpoc.appstatus.AppStatus;
 import esa.s1pdgs.cpoc.common.ProductCategory;
 import esa.s1pdgs.cpoc.common.ProductFamily;
 import esa.s1pdgs.cpoc.common.errors.obs.ObsException;
@@ -35,45 +36,53 @@ public class PripPublishingJobListener implements MqiListener<PripPublishingJob>
 	private static final Logger LOGGER = LogManager.getLogger(PripPublishingJobListener.class);
 
 	private final GenericMqiClient mqiClient;
-
 	private final ObsClient obsClient;
-
 	private final long pollingIntervalMs;
-
 	private final long pollingInitialDelayMs;
-
 	private final PripMetadataRepository pripMetadataRepo;
+	private final AppStatus appStatus;
 
 	@Autowired
-	public PripPublishingJobListener(final GenericMqiClient mqiClient, final ObsClient obsClient,
+	public PripPublishingJobListener(
+			final GenericMqiClient mqiClient, 
+			final ObsClient obsClient,
 			final PripMetadataRepository pripMetadataRepo,
 			@Value("${prip-worker.publishing-job-listener.polling-interval-ms}") final long pollingIntervalMs,
-			@Value("${prip-worker.publishing-job-listener.polling-initial-delay-ms}") final long pollingInitialDelayMs) {
+			@Value("${prip-worker.publishing-job-listener.polling-initial-delay-ms}") final long pollingInitialDelayMs,
+			final AppStatus appStatus
+	) {
 		this.mqiClient = mqiClient;
 		this.obsClient = obsClient;
 		this.pripMetadataRepo = pripMetadataRepo;
 		this.pollingIntervalMs = pollingIntervalMs;
 		this.pollingInitialDelayMs = pollingInitialDelayMs;
+		this.appStatus = appStatus;
 	}
 
 	@PostConstruct
 	public void initService() {
 		if (pollingIntervalMs > 0) {
 			final ExecutorService service = Executors.newFixedThreadPool(1);
-			service.execute(new MqiConsumer<PripPublishingJob>(mqiClient, ProductCategory.PRIP_JOBS, this,
-					pollingIntervalMs, pollingInitialDelayMs, esa.s1pdgs.cpoc.appstatus.AppStatus.NULL));
+			service.execute(new MqiConsumer<PripPublishingJob>(
+					mqiClient, 
+					ProductCategory.PRIP_JOBS, 
+					this,
+					pollingIntervalMs, 
+					pollingInitialDelayMs, 
+					appStatus
+			));
 		}
 	}
 
 	@Override
-	public void onMessage(GenericMessageDto<PripPublishingJob> message) {
+	public void onMessage(final GenericMessageDto<PripPublishingJob> message) {
 
 		LOGGER.debug("starting saving PRIP metadata, got message: {}", message);
 
-		PripPublishingJob publishingJob = message.getBody();
-		LocalDateTime creationDate = LocalDateTime.now();
+		final PripPublishingJob publishingJob = message.getBody();
+		final LocalDateTime creationDate = LocalDateTime.now();
 
-		PripMetadata pripMetadata = new PripMetadata();
+		final PripMetadata pripMetadata = new PripMetadata();
 		pripMetadata.setId(UUID.randomUUID());
 		pripMetadata.setObsKey(publishingJob.getKeyObjectStorage());
 		pripMetadata.setName(publishingJob.getKeyObjectStorage());
@@ -89,26 +98,26 @@ public class PripPublishingJobListener implements MqiListener<PripPublishingJob>
 		LOGGER.debug("end of saving PRIP metadata: {}", pripMetadata);
 	}
 
-	private long getContentLength(ProductFamily family, String key) {
+	private long getContentLength(final ProductFamily family, final String key) {
 		long contentLength = 0;
 		try {
 			contentLength = obsClient.size(new ObsObject(family, key));
 
-		} catch (ObsException e) {
+		} catch (final ObsException e) {
 			LOGGER.warn(String.format("could not determine content length of %s", key), e);
 		}
 		return contentLength;
 	}
 
-	private List<Checksum> getChecksums(ProductFamily family, String key) {
-		Checksum checksum = new Checksum();
+	private List<Checksum> getChecksums(final ProductFamily family, final String key) {
+		final Checksum checksum = new Checksum();
 		checksum.setAlgorithm("");
 		checksum.setValue("");
 		try {
-			String value = obsClient.getChecksum(new ObsObject(family, key));
+			final String value = obsClient.getChecksum(new ObsObject(family, key));
 			checksum.setAlgorithm(Checksum.DEFAULT_ALGORITHM);
 			checksum.setValue(value);
-		} catch (ObsException e) {
+		} catch (final ObsException e) {
 			LOGGER.warn(String.format("could not determine checksum of %s", key), e);
 
 		}

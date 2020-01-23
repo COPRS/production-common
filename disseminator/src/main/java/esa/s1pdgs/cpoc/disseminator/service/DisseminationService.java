@@ -15,6 +15,7 @@ import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import esa.s1pdgs.cpoc.appstatus.AppStatus;
 import esa.s1pdgs.cpoc.common.ProductCategory;
 import esa.s1pdgs.cpoc.common.ProductFamily;
 import esa.s1pdgs.cpoc.common.utils.LogUtils;
@@ -64,18 +65,21 @@ public class DisseminationService implements MqiListener<ProductionEvent> {
 	private final DisseminationProperties properties;
 	private final ErrorRepoAppender errorAppender;
 	private final Map<String,OutboxClient> clientForTargets = new HashMap<>();
+	private final AppStatus appStatus;
 
 	@Autowired
 	public DisseminationService(
 			final GenericMqiClient client,
 		    final ObsClient obsClient,
 			final DisseminationProperties properties,
-			final ErrorRepoAppender errorAppender
+			final ErrorRepoAppender errorAppender,
+			final AppStatus appStatus
 	) {
 		this.client = client;
 		this.obsClient = obsClient;
 		this.properties = properties;
 		this.errorAppender = errorAppender;
+		this.appStatus = appStatus;
 	}
 	
     @PostConstruct
@@ -98,7 +102,14 @@ public class DisseminationService implements MqiListener<ProductionEvent> {
     	for (final Map.Entry<ProductCategory, List<DisseminationTypeConfiguration>> entry : properties.getCategories().entrySet()) {	
     		// start consumer for each category
     		LOG.debug("Starting consumer for {}", entry);
-    		service.execute(new MqiConsumer<ProductionEvent>(client, entry.getKey(),this, properties.getPollingIntervalMs()));
+    		service.execute(new MqiConsumer<ProductionEvent>(
+    				client, 
+    				entry.getKey(),
+    				this, 
+    				properties.getPollingIntervalMs(),
+    				0L,
+    				appStatus    				
+    		));
     	}
     }
     
@@ -116,52 +127,49 @@ public class DisseminationService implements MqiListener<ProductionEvent> {
 		}			
 	}
 	
-    final List<DisseminationTypeConfiguration> configsFor(final ProductFamily family) {
+    @Override
+	public final void onTerminalError(final GenericMessageDto<ProductionEvent> message, final Exception error) {
+    	LOG.error(error);    	
+		errorAppender.send(new FailedProcessingDto(
+				properties.getHostname(), 
+				new Date(), 
+				error.getMessage(), 
+				message
+		));		
+	}
+
+	final List<DisseminationTypeConfiguration> configsFor(final ProductFamily family) {
     	return properties.getCategories().getOrDefault(ProductCategory.of(family), Collections.emptyList());	
     }
 
 	final void handleTransferTo(final GenericMessageDto<ProductionEvent> message, final String target) {		
 		final ProductionEvent product = message.getBody();
 		
-		final Reporting reporting = ReportingUtils.newReportingBuilder().newTaskReporting("Dissemination");
-		
-		String targetUrl = "";
-		
+		final Reporting reporting = ReportingUtils.newReportingBuilder().newTaskReporting("Dissemination");		
 		reporting.begin(
 				new FilenameReportingInput(product.getKeyObjectStorage()),
 				new ReportingMessage("Start dissemination of product to outbox {}", target) 
 		);
+		
 		try {
 			assertExists(product);
 			final OutboxClient outboxClient = clientForTarget(target);
-			targetUrl = Retries.performWithRetries(
+			final String targetUrl = Retries.performWithRetries(
 					() -> outboxClient.transfer(new ObsObject(product.getProductFamily(), product.getKeyObjectStorage()), reporting.getChildFactory()), 
 					"Transfer of " + product.getKeyObjectStorage() + " to " + target,
 					properties.getMaxRetries(), 
 					properties.getTempoRetryMs()
 			);
-		} catch (final Exception e) {					
-			final String errMessage = (e instanceof DisseminationException) ? e.getMessage() : LogUtils.toString(e); 
-			final String messageString = String.format(
-					"Error on dissemination of product to outbox %s: %s", 
-					target, 
-					errMessage
+			reporting.end(
+					new OutboxReportingOutput(targetUrl),
+					new ReportingMessage("End dissemination of product to outbox {}", target)
 			);
-			LOG.error(messageString,e);
-			reporting.error(new ReportingMessage(messageString));									
-			errorAppender.send(new FailedProcessingDto(
-					properties.getHostname(), 
-					new Date(), 
-					messageString, 
-					message
-			));									
+		} catch (final Exception e) {					
+			final String messageString = errorMessageFor(e, target);			
+			reporting.error(new ReportingMessage(messageString));																	
 			throw new RuntimeException(messageString, e);
 		} 
-		reporting.end(
-				new OutboxReportingOutput(targetUrl),
-				new ReportingMessage("End dissemination of product to outbox {}", target)
-		);
-	}
+	}	
 
 	final void assertExists(final ProductionEvent product) throws ObsServiceException, SdkClientException {
 		if (!obsClient.prefixExists(new ObsObject(product.getProductFamily(), product.getKeyObjectStorage()))) {
@@ -192,5 +200,15 @@ public class DisseminationService implements MqiListener<ProductionEvent> {
 		}
 		return outboxClient;
 	}
+	
+	private final String errorMessageFor(final Exception e, final String target) {
+		final String errMessage = (e instanceof DisseminationException) ? e.getMessage() : LogUtils.toString(e); 
+		return String.format(
+				"Error on dissemination of product to outbox %s: %s", 
+				target, 
+				errMessage
+		);
+	}
+
 }
 

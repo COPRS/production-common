@@ -23,7 +23,7 @@ public final class MqiConsumer<E extends AbstractMessage> implements Runnable {
 	private final MqiClient client;
 	private final ProductCategory category;
 	private final MqiListener<E> mqiListener;
-	private final List<MessageFilter> mqiMessageFilter;
+	private final List<? extends MessageFilter> mqiMessageFilter;
 	private final long pollingIntervalMillis;
 	private final long initialDelay;
 	private final AppStatus appStatus;
@@ -32,10 +32,11 @@ public final class MqiConsumer<E extends AbstractMessage> implements Runnable {
 			final MqiClient client,
 			final ProductCategory category,
 			final MqiListener<E> mqiListener,
-			final List<MessageFilter> mqiMessageFilter,
+			final List<? extends MessageFilter> mqiMessageFilter,
 			final long pollingIntervalMillis,
 			final long initialDelay,
-			final AppStatus appStatus) {
+			final AppStatus appStatus
+	) {
 		this.client = client;
 		this.category = category;
 		this.mqiListener = mqiListener;
@@ -100,7 +101,11 @@ public final class MqiConsumer<E extends AbstractMessage> implements Runnable {
 				} catch (final Exception e) {
 					LOG.error(String.format("Error handling message %s", message), e);
 					client.ack(new AckMessageDto(message.getId(), Ack.ERROR, LogUtils.toString(e), false), category);
-					ReportingUtils.newReportingBuilder().newEventReporting(new ReportingMessage("Failed to handle MQI message: {}", message));
+					ReportingUtils.newReportingBuilder().newEventReporting(new ReportingMessage("Failed to handle MQI message: {}", message));					
+					
+					// S1PRO-1045: as this implementation is used for e.g. appending something to the ErrorQueue, it must only be called 
+					// on errors if ack call was successful
+					mqiListener.onTerminalError(message, e);					
 				}
 			// on communication errors with Mqi --> just dump warning and retry on next polling attempt
 			} catch (final AbstractCodedException ace) {

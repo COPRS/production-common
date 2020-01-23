@@ -24,7 +24,6 @@ import esa.s1pdgs.cpoc.metadata.client.MetadataClient;
 import esa.s1pdgs.cpoc.mqi.client.GenericMqiClient;
 import esa.s1pdgs.cpoc.mqi.client.MqiConsumer;
 import esa.s1pdgs.cpoc.mqi.client.MqiListener;
-import esa.s1pdgs.cpoc.mqi.client.StatusService;
 import esa.s1pdgs.cpoc.mqi.model.queue.AbstractMessage;
 import esa.s1pdgs.cpoc.mqi.model.queue.CatalogEvent;
 import esa.s1pdgs.cpoc.mqi.model.queue.IpfPreparationJob;
@@ -38,12 +37,11 @@ public abstract class AbstractGenericConsumer<T extends AbstractMessage> impleme
     protected static final Logger LOGGER = LogManager.getLogger(AbstractGenericConsumer.class);
     
     protected final ProcessSettings processSettings;
-    protected final GenericMqiClient mqiClient;
-    protected final AppCatalogJobClient<CatalogEvent> appDataService;
-    protected final StatusService mqiStatusService;
-    protected final AppStatus appStatus;    
-    protected final ErrorRepoAppender errorRepoAppender;    
-    protected final ProductCategory category;
+    protected final AppCatalogJobClient<CatalogEvent> appDataService;    
+    private final GenericMqiClient mqiClient;
+    private final AppStatus appStatus;    
+    private final ErrorRepoAppender errorRepoAppender;    
+    private final ProductCategory category;
     private final Pattern blackList;    
     private final Pattern seaCoverageCheckPattern;    
     private final MetadataClient metadataClient;
@@ -51,7 +49,6 @@ public abstract class AbstractGenericConsumer<T extends AbstractMessage> impleme
     public AbstractGenericConsumer(
             final ProcessSettings processSettings,
             final GenericMqiClient mqiService,
-            final StatusService mqiStatusService,
             final AppCatalogJobClient<CatalogEvent> appDataService,
             final AppStatus appStatus,
             final ErrorRepoAppender errorRepoAppender,
@@ -60,7 +57,6 @@ public abstract class AbstractGenericConsumer<T extends AbstractMessage> impleme
     ) {
         this.processSettings = processSettings;
         this.mqiClient = mqiService;
-        this.mqiStatusService = mqiStatusService;
         this.appDataService = appDataService;
         this.appStatus = appStatus;
         this.errorRepoAppender = errorRepoAppender;
@@ -105,13 +101,20 @@ public abstract class AbstractGenericConsumer<T extends AbstractMessage> impleme
             		ace.getCode().getCode(),
             		ace.getLogMessage()
             );
-            LOGGER.error(errorMessage);
-            errorRepoAppender.send(
-            	new FailedProcessingDto(processSettings.getHostname(),new Date(), errorMessage, mqiMessage)
-            );
+            throw new RuntimeException(errorMessage, ace);
         }
     }
     
+    
+    
+	@Override
+	public void onTerminalError(final GenericMessageDto<CatalogEvent> message, final Exception error) {
+        LOGGER.error(error);
+        errorRepoAppender.send(
+        	new FailedProcessingDto(processSettings.getHostname(),new Date(), error.getMessage(), message)
+        );
+	}
+
 	protected abstract AppDataJob<CatalogEvent> dispatch(final GenericMessageDto<CatalogEvent> mqiMessage) throws AbstractCodedException;
 	    
     private final void publish(

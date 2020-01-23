@@ -13,6 +13,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.junit4.SpringRunner;
 
+import esa.s1pdgs.cpoc.appstatus.AppStatus;
 import esa.s1pdgs.cpoc.common.ProductCategory;
 import esa.s1pdgs.cpoc.common.ProductFamily;
 import esa.s1pdgs.cpoc.disseminator.FakeObsClient;
@@ -65,7 +66,7 @@ public class TestApplication {
 	
 	@Test
 	public final void testConfigsFor() {
-		final DisseminationService uut = new DisseminationService(null, null, properties, ErrorRepoAppender.NULL);
+		final DisseminationService uut = new DisseminationService(null, null, properties, ErrorRepoAppender.NULL, AppStatus.NULL);
 		
 		// noting should be configured for EDRS_SESSION
 		assertEquals(Collections.emptyList(), uut.configsFor(ProductFamily.EDRS_SESSION));
@@ -76,9 +77,8 @@ public class TestApplication {
 		
 	@Test
 	public final void testOnMessage_OnNotConfiguredFamily_ShallDoNothing() {	
-		final DisseminationService uut = new DisseminationService(null, null, properties, ErrorRepoAppender.NULL);
-		
-		//final GenericMq
+		final DisseminationService uut = new DisseminationService(null, null, properties, ErrorRepoAppender.NULL, AppStatus.NULL);
+
 		final ProductionEvent fakeProduct = new ProductionEvent("fakeProduct", "my/key", ProductFamily.BLANK);
 		final GenericMessageDto<ProductionEvent> fakeMessage = new GenericMessageDto<ProductionEvent>(123, "myKey", fakeProduct); 
 		uut.onMessage(fakeMessage);
@@ -87,13 +87,12 @@ public class TestApplication {
 	@Test
 	public final void testOnMessage_OnConfiguredFamily_ShallEvaluatedConfiguredRegex() {
 		final FakeObsClient fakeObsClient = new FakeObsClient() {
-			@Override public final boolean exists(ObsObject object) throws SdkClientException, ObsServiceException {
+			@Override public final boolean exists(final ObsObject object) throws SdkClientException, ObsServiceException {
 				return true;
 			}			
 		};		
-		final DisseminationService uut = new DisseminationService(null, fakeObsClient, properties, ErrorRepoAppender.NULL);
-		
-		//final GenericMq
+		final DisseminationService uut = new DisseminationService(null, fakeObsClient, properties, ErrorRepoAppender.NULL, AppStatus.NULL);
+
 		final ProductionEvent fakeProduct = new ProductionEvent("fakeProduct", "my/key", ProductFamily.BLANK);
 		final GenericMessageDto<ProductionEvent> fakeMessage = new GenericMessageDto<ProductionEvent>(123, "myKey", fakeProduct); 
 		uut.onMessage(fakeMessage);

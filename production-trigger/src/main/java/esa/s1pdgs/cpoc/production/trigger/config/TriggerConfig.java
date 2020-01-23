@@ -14,7 +14,6 @@ import esa.s1pdgs.cpoc.common.ProductCategory;
 import esa.s1pdgs.cpoc.errorrepo.ErrorRepoAppender;
 import esa.s1pdgs.cpoc.metadata.client.MetadataClient;
 import esa.s1pdgs.cpoc.mqi.client.GenericMqiClient;
-import esa.s1pdgs.cpoc.mqi.client.StatusService;
 import esa.s1pdgs.cpoc.mqi.model.queue.CatalogEvent;
 import esa.s1pdgs.cpoc.production.trigger.tasks.AbstractGenericConsumer;
 import esa.s1pdgs.cpoc.production.trigger.tasks.EdrsSessionConsumer;
@@ -27,7 +26,6 @@ public class TriggerConfig {
 	private final RestTemplate restTemplate;
 	private final ProcessSettings processSettings; 
 	private final GenericMqiClient mqiService;
-	private final StatusService mqiStatusService;
 	private final ErrorRepoAppender errorRepoAppender;
 	private final AppStatus appStatus;
 	private final MetadataClient metadataClient;
@@ -38,14 +36,12 @@ public class TriggerConfig {
 			final RestTemplateBuilder restTemplateBuilder,
 			final ProcessSettings processSettings, 
 			final GenericMqiClient mqiService, 
-			final StatusService mqiStatusService,
 			final ErrorRepoAppender errorRepoAppender, 
 			final AppStatus appStatus,
 			final MetadataClient metadataClient
 	) {
 		this.processSettings = processSettings;
 		this.mqiService = mqiService;
-		this.mqiStatusService = mqiStatusService;
 		this.errorRepoAppender = errorRepoAppender;
 		this.appStatus = appStatus;
 		this.metadataClient = metadataClient;
@@ -70,7 +66,6 @@ public class TriggerConfig {
 				return new EdrsSessionConsumer(
 						processSettings, 
 						mqiService, 
-						mqiStatusService, 
 						appCatClient,
 						errorRepoAppender, 
 						appStatus, 
@@ -80,7 +75,6 @@ public class TriggerConfig {
 				return new L0SegmentConsumer(
 						processSettings, 
 						mqiService, 
-						mqiStatusService, 
 						appCatClient,
 						errorRepoAppender, 
 						appStatus, 
@@ -90,7 +84,6 @@ public class TriggerConfig {
 				return new L0SliceConsumer(
 						processSettings, 
 						mqiService, 
-						mqiStatusService, 
 						appCatClient,
 						errorRepoAppender, 
 						appStatus,
