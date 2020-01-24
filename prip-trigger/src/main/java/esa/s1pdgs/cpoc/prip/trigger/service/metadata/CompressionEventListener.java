@@ -11,6 +11,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
+import esa.s1pdgs.cpoc.appstatus.AppStatus;
 import esa.s1pdgs.cpoc.common.ProductCategory;
 import esa.s1pdgs.cpoc.common.errors.AbstractCodedException;
 import esa.s1pdgs.cpoc.mqi.client.GenericMqiClient;
@@ -29,27 +30,36 @@ public class CompressionEventListener implements MqiListener<CompressionEvent> {
 	private final GenericMqiClient mqiClient;
 	private final long pollingIntervalMs;
 	private final long pollingInitialDelayMs;
+	private final AppStatus appStatus;
 
 	@Autowired
 	public CompressionEventListener(final GenericMqiClient mqiClient,
 			@Value("${prip-trigger.compression-event-listener.polling-interval-ms}") final long pollingIntervalMs,
-			@Value("${prip-trigger.compression-event-listener.polling-initial-delay-ms}") final long pollingInitialDelayMs) {
+			@Value("${prip-trigger.compression-event-listener.polling-initial-delay-ms}") final long pollingInitialDelayMs,
+			final AppStatus appStatus) {
 		this.mqiClient = mqiClient;
 		this.pollingIntervalMs = pollingIntervalMs;
 		this.pollingInitialDelayMs = pollingInitialDelayMs;
+		this.appStatus = appStatus;
 	}
 	
 	@PostConstruct
 	public void initService() {
 		if (pollingIntervalMs > 0) {
 			final ExecutorService service = Executors.newFixedThreadPool(1);
-			service.execute(new MqiConsumer<CompressionEvent>(mqiClient, ProductCategory.COMPRESSED_PRODUCTS, this,
-					pollingIntervalMs, pollingInitialDelayMs, esa.s1pdgs.cpoc.appstatus.AppStatus.NULL));
+			service.execute(new MqiConsumer<CompressionEvent>(
+					mqiClient, 
+					ProductCategory.COMPRESSED_PRODUCTS, 
+					this,
+					pollingIntervalMs, 
+					pollingInitialDelayMs, 
+					appStatus
+			));
 		}
 	}
 
 	@Override
-	public void onMessage(GenericMessageDto<CompressionEvent> inputMessage) throws AbstractCodedException {
+	public void onMessage(final GenericMessageDto<CompressionEvent> inputMessage) throws AbstractCodedException {
 		LOGGER.debug("starting conversion of CompressionEvent to PublishingJob, got message: {}", inputMessage);
 		
 		final CompressionEvent compressionEvent = inputMessage.getBody();
@@ -58,7 +68,7 @@ public class CompressionEventListener implements MqiListener<CompressionEvent> {
 		publishingJob.setKeyObjectStorage(compressionEvent.getKeyObjectStorage());
 		publishingJob.setProductFamily(compressionEvent.getProductFamily());
 		
-		GenericPublicationMessageDto<PripPublishingJob> outputMessage =
+		final GenericPublicationMessageDto<PripPublishingJob> outputMessage =
 				new GenericPublicationMessageDto<PripPublishingJob>(inputMessage.getId(),
 				compressionEvent.getProductFamily(), publishingJob);
 		

@@ -15,9 +15,11 @@ import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import esa.s1pdgs.cpoc.appstatus.AppStatus;
 import esa.s1pdgs.cpoc.common.ProductCategory;
 import esa.s1pdgs.cpoc.common.ProductFamily;
 import esa.s1pdgs.cpoc.common.errors.AbstractCodedException;
+import esa.s1pdgs.cpoc.common.errors.AbstractCodedException.ErrorCode;
 import esa.s1pdgs.cpoc.common.errors.InternalErrorException;
 import esa.s1pdgs.cpoc.common.utils.FileUtils;
 import esa.s1pdgs.cpoc.common.utils.LogUtils;
@@ -29,7 +31,6 @@ import esa.s1pdgs.cpoc.ingestion.worker.product.IngestionResult;
 import esa.s1pdgs.cpoc.ingestion.worker.product.Product;
 import esa.s1pdgs.cpoc.ingestion.worker.product.ProductException;
 import esa.s1pdgs.cpoc.ingestion.worker.product.ProductService;
-import esa.s1pdgs.cpoc.ingestion.worker.product.ProductServiceImpl;
 import esa.s1pdgs.cpoc.mqi.client.GenericMqiClient;
 import esa.s1pdgs.cpoc.mqi.client.MqiConsumer;
 import esa.s1pdgs.cpoc.mqi.client.MqiListener;
@@ -53,27 +54,40 @@ public class IngestionWorkerService implements MqiListener<IngestionJob> {
 	private final ErrorRepoAppender errorRepoAppender;
 	private final IngestionWorkerServiceConfigurationProperties properties;
 	private final ProductService productService;
+	private final AppStatus appStatus;
 
 	@Autowired
-	public IngestionWorkerService(final GenericMqiClient mqiClient, final ErrorRepoAppender errorRepoAppender,
-			final IngestionWorkerServiceConfigurationProperties properties, final ProductService productService) {
+	public IngestionWorkerService(
+			final GenericMqiClient mqiClient, 
+			final ErrorRepoAppender errorRepoAppender,
+			final IngestionWorkerServiceConfigurationProperties properties, 
+			final ProductService productService,
+			final AppStatus appStatus
+	) {
 		this.mqiClient = mqiClient;
 		this.errorRepoAppender = errorRepoAppender;
 		this.properties = properties;
 		this.productService = productService;
+		this.appStatus = appStatus;
 	}
 	
 	@PostConstruct
 	public void initService() {
 		if (properties.getPollingIntervalMs() > 0) {
 			final ExecutorService service = Executors.newFixedThreadPool(1);
-			service.execute(new MqiConsumer<IngestionJob>(mqiClient, ProductCategory.INGESTION, this,
-					properties.getPollingIntervalMs()));
+			service.execute(new MqiConsumer<IngestionJob>(
+					mqiClient,
+					ProductCategory.INGESTION, 
+					this,
+					properties.getPollingIntervalMs(),
+					0L,
+					appStatus
+			));
 		}
 	}
 
 	@Override
-	public void onMessage(final GenericMessageDto<IngestionJob> message) {
+	public final void onMessage(final GenericMessageDto<IngestionJob> message) throws Exception {
 		final Reporting reporting = ReportingUtils.newReportingBuilder().newTaskReporting("IngestionWorker");
 
 		final IngestionJob ingestion = message.getBody();
@@ -83,54 +97,45 @@ public class IngestionWorkerService implements MqiListener<IngestionJob> {
 				new ReportingMessage("Start processing of {}", ingestion.getKeyObjectStorage())
 		);
 
-		try {
-			File file = ProductServiceImpl.toFile(ingestion);
-			if(org.apache.commons.io.FileUtils.sizeOf(file) == 0) {
-				throw new Exception("Empty file detected: " + file.getName());
-			}
-			
+		try {	
 			final IngestionResult result = identifyAndUpload(message, ingestion, reporting.getChildFactory());
 			publish(result.getIngestedProducts(), message, reporting.getChildFactory());
-			delete(ingestion, reporting.getChildFactory());
+			delete(ingestion, reporting.getChildFactory());			
 			reporting.end(
 					new FilenameReportingOutput(ingestion.getKeyObjectStorage()),
 					new ReportingMessage(result.getTransferAmount(),"End processing of {}", ingestion.getKeyObjectStorage())
 			);
 		} catch (final Exception e) {
-			reporting.error(new ReportingMessage(LogUtils.toString(e)));
-			throw new RuntimeException(
-					String.format("Error on ingestion of %s: %s", ingestion, LogUtils.toString(e)),
-					e
-			);
+			reporting.error(errorReportMessage(e));
+			throw e;
 		}
+	}
+	
+	@Override
+	public final void onTerminalError(final GenericMessageDto<IngestionJob> message, final Exception error) {
+		LOG.error(error);
+		errorRepoAppender.send(new FailedProcessingDto(
+				properties.getHostname(), 
+				new Date(),
+				String.format("Error on handling IngestionJob message %s: %s", message.getId(), LogUtils.toString(error)), 
+				message
+		));
 	}
 
 	final IngestionResult identifyAndUpload(
 			final GenericMessageDto<IngestionJob> message, 
 			final IngestionJob ingestion,
 			final Reporting.ChildFactory reportingChildFactory
-	) throws InternalErrorException, ObsEmptyFileException {
-		IngestionResult result = IngestionResult.NULL;
+	) throws Exception {
+		final ProductFamily family = getFamilyFor(ingestion);
 		try {
-			final ProductFamily family = getFamilyFor(ingestion);
-			try {
-				result = productService.ingest(family, ingestion, reportingChildFactory);
-			} catch (final ProductException e) {
-				LOG.warn(e.getMessage());
-				productService.markInvalid(ingestion, reportingChildFactory);
-				message.getBody().setProductFamily(ProductFamily.INVALID);
-				final FailedProcessingDto failed = new FailedProcessingDto(properties.getHostname(), new Date(),
-						e.getMessage(), message);
-				errorRepoAppender.send(failed);
-			}
-		} catch (Exception e) {
-			LOG.error("Error during ingestion: {}",LogUtils.toString(e));
-			final FailedProcessingDto failed = new FailedProcessingDto(properties.getHostname(), new Date(),
-					e.getMessage(), message);
-			errorRepoAppender.send(failed);
+			return productService.ingest(family, ingestion, reportingChildFactory);
+		} 
+		catch (final Exception e) {
+			productService.markInvalid(ingestion, reportingChildFactory);
+			message.getBody().setProductFamily(ProductFamily.INVALID);
 			throw e;
 		}
-		return result;
 	}
 
 	final void publish(
@@ -140,7 +145,10 @@ public class IngestionWorkerService implements MqiListener<IngestionJob> {
 	) throws AbstractCodedException {
 		for (final Product<IngestionEvent> product : products) {
 			final GenericPublicationMessageDto<? extends AbstractMessage> result = new GenericPublicationMessageDto<>(
-					message.getId(), product.getFamily(), product.getDto());
+					message.getId(), 
+					product.getFamily(), 
+					product.getDto()
+			);
 			result.setInputKey(message.getInputKey());
 			result.setOutputKey(product.getFamily().toString());
 			LOG.info("publishing : {}", result);
@@ -163,7 +171,6 @@ public class IngestionWorkerService implements MqiListener<IngestionJob> {
 		if (file.exists()) {
 			final Reporting childReporting = reportingChildFactory.newChild("DeleteFromPickup");
 			childReporting.begin(new ReportingMessage("Start removing file {}", file.getPath()));
-
 			try {
 				FileUtils.deleteWithRetries(file, properties.getMaxRetries(), properties.getTempoRetryMs());
 				childReporting.end(new ReportingMessage("End removing file {}", file.getPath()));
@@ -194,15 +201,19 @@ public class IngestionWorkerService implements MqiListener<IngestionJob> {
 		throw new ProductException(String.format("No matching config found for %s in: %s", dto, properties.getTypes()));
 	}
 	
-//	private void handleProductAsInvalid(IngestionJob ingestion, GenericMessageDto<IngestionJob> ingestMessage,
-//			String errorMessage) {
-//
-//		LOG.warn(errorMessage);
-//		productService.markInvalid(ingestion);
-//		ingestMessage.getBody().setProductFamily(ProductFamily.INVALID);
-//		final FailedProcessingDto failed = new FailedProcessingDto(properties.getHostname(), new Date(), errorMessage,
-//				ingestMessage);
-//		errorRepoAppender.send(failed);
-//	}
-
+	private final ReportingMessage errorReportMessage(final Exception e) {
+		if (e instanceof AbstractCodedException) {
+			final AbstractCodedException ace = (AbstractCodedException) e;
+			return new ReportingMessage("[code {}] {}", ace.getCode().getCode(), ace.getLogMessage());
+		}
+		if (e instanceof InterruptedException) {
+			return new ReportingMessage("Interrupted job processing");				
+		}
+		if (e instanceof ProductException || e instanceof ObsEmptyFileException) {
+			return new ReportingMessage("[code {}] {}", ErrorCode.INTERNAL_ERROR, e.getMessage());
+		}
+		// any other Exception
+		return new ReportingMessage("[code {}] {}", ErrorCode.INTERNAL_ERROR, LogUtils.toString(e));
+	}
+	
 }

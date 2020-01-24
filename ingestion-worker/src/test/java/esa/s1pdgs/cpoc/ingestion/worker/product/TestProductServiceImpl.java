@@ -114,7 +114,7 @@ public class TestProductServiceImpl {
 		final IngestionJob ingestionJob = new IngestionJob();
 		ingestionJob.setPickupPath("/tmp/foo");
 		ingestionJob.setRelativePath("bar/baaaaar");
-		assertEquals(new File("/tmp/foo/bar/baaaaar"), uut.toFile(ingestionJob));
+		assertEquals(new File("/tmp/foo/bar/baaaaar"), ProductServiceImpl.toFile(ingestionJob));
 	}
 
 	@Test

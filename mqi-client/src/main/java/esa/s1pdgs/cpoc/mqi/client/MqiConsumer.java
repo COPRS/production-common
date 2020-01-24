@@ -2,7 +2,6 @@ package esa.s1pdgs.cpoc.mqi.client;
 
 import java.util.Collections;
 import java.util.List;
-import java.util.regex.Pattern;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -24,7 +23,7 @@ public final class MqiConsumer<E extends AbstractMessage> implements Runnable {
 	private final MqiClient client;
 	private final ProductCategory category;
 	private final MqiListener<E> mqiListener;
-	private final List<MqiMessageFilter> mqiMessageFilter;
+	private final List<? extends MessageFilter> mqiMessageFilter;
 	private final long pollingIntervalMillis;
 	private final long initialDelay;
 	private final AppStatus appStatus;
@@ -33,10 +32,11 @@ public final class MqiConsumer<E extends AbstractMessage> implements Runnable {
 			final MqiClient client,
 			final ProductCategory category,
 			final MqiListener<E> mqiListener,
-			final List<MqiMessageFilter> mqiMessageFilter,
+			final List<? extends MessageFilter> mqiMessageFilter,
 			final long pollingIntervalMillis,
 			final long initialDelay,
-			final AppStatus appStatus) {
+			final AppStatus appStatus
+	) {
 		this.client = client;
 		this.category = category;
 		this.mqiListener = mqiListener;
@@ -54,14 +54,6 @@ public final class MqiConsumer<E extends AbstractMessage> implements Runnable {
 			final long initialDelay,
 			final AppStatus appStatus) {
 		this(client, category, mqiListener, Collections.emptyList(), pollingIntervalMillis, initialDelay, appStatus);
-	}
-
-	public MqiConsumer(
-			final MqiClient client,
-			final ProductCategory category,
-			final MqiListener<E> mqiListener,
-			final long pollingIntervalMillis) {
-		this(client, category, mqiListener, Collections.emptyList(), pollingIntervalMillis, 0L, AppStatus.NULL);
 	}
 
 	@Override
@@ -109,7 +101,11 @@ public final class MqiConsumer<E extends AbstractMessage> implements Runnable {
 				} catch (final Exception e) {
 					LOG.error(String.format("Error handling message %s", message), e);
 					client.ack(new AckMessageDto(message.getId(), Ack.ERROR, LogUtils.toString(e), false), category);
-					ReportingUtils.newReportingBuilder().newEventReporting(new ReportingMessage("Failed to handle MQI message: {}", message));
+					ReportingUtils.newReportingBuilder().newEventReporting(new ReportingMessage("Failed to handle MQI message: {}", message));					
+					
+					// S1PRO-1045: as this implementation is used for e.g. appending something to the ErrorQueue, it must only be called 
+					// on errors if ack call was successful
+					mqiListener.onTerminalError(message, e);					
 				}
 			// on communication errors with Mqi --> just dump warning and retry on next polling attempt
 			} catch (final AbstractCodedException ace) {
@@ -127,21 +123,13 @@ public final class MqiConsumer<E extends AbstractMessage> implements Runnable {
 		LOG.info("Exiting {}", this);
 	}
 
-	boolean allowConsumption(GenericMessageDto<E> message) {
-
-		boolean allowConsumption = true;
-
-		for (MqiMessageFilter f : mqiMessageFilter) {
-
-			if (f.getProductFamily().equals(message.getBody().getProductFamily())) {
-				if (!Pattern.matches(f.getMatchRegex(), message.getBody().getKeyObjectStorage())) {
-					allowConsumption = false;
-				}
-				break;
+	final boolean allowConsumption(final GenericMessageDto<E> message) {
+		for (final MessageFilter filter : mqiMessageFilter) {
+			if (!filter.accept(message.getBody())) {
+				return false;
 			}
 		}
-
-		return allowConsumption;
+		return true;
 	}
 
 	@Override

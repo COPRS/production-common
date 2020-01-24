@@ -13,6 +13,6 @@ public class AppStatusConfiguration {
 			@Value("${status.max-error-counter-processing:100}") final int maxErrorCounterProcessing, 
 			@Value("${status.max-error-counter-mqi:100}") final int maxErrorCounterNextMessage
 	) {
-		return new AppStatusImpl(maxErrorCounterProcessing, maxErrorCounterNextMessage);
+		return new DefaultAppStatusImpl(maxErrorCounterProcessing, maxErrorCounterNextMessage);
 	}
 }

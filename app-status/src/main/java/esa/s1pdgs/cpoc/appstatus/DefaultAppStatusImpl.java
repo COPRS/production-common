@@ -3,9 +3,9 @@ package esa.s1pdgs.cpoc.appstatus;
 import org.springframework.scheduling.annotation.Scheduled;
 
 
-public class AppStatusImpl extends AbstractAppStatus {
+public class DefaultAppStatusImpl extends AbstractAppStatus {
 
-    public AppStatusImpl(final int maxErrorCounterProcessing, final int maxErrorCounterNextMessage) {
+    public DefaultAppStatusImpl(final int maxErrorCounterProcessing, final int maxErrorCounterNextMessage) {
     	super(new Status(maxErrorCounterProcessing, maxErrorCounterNextMessage));
     }    
 

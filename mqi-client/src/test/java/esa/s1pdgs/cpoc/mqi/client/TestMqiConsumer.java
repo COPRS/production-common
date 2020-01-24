@@ -21,10 +21,6 @@ import esa.s1pdgs.cpoc.appstatus.AppStatus;
 import esa.s1pdgs.cpoc.common.ProductCategory;
 import esa.s1pdgs.cpoc.common.ProductFamily;
 import esa.s1pdgs.cpoc.common.errors.mqi.MqiAckApiError;
-import esa.s1pdgs.cpoc.mqi.client.MqiClient;
-import esa.s1pdgs.cpoc.mqi.client.MqiConsumer;
-import esa.s1pdgs.cpoc.mqi.client.MqiListener;
-import esa.s1pdgs.cpoc.mqi.model.queue.AbstractMessage;
 import esa.s1pdgs.cpoc.mqi.model.queue.ProductionEvent;
 import esa.s1pdgs.cpoc.mqi.model.rest.Ack;
 import esa.s1pdgs.cpoc.mqi.model.rest.AckMessageDto;
@@ -189,19 +185,19 @@ public class TestMqiConsumer {
 	public final void testAllowConsumption() {
 		
 		
-		MqiMessageFilter filter1 = new MqiMessageFilter();
+		final MqiMessageFilter filter1 = new MqiMessageFilter();
 		filter1.setMatchRegex("a.*");
 		filter1.setProductFamily(ProductFamily.AUXILIARY_FILE);
 		
-		MqiMessageFilter filter2 = new MqiMessageFilter();
+		final MqiMessageFilter filter2 = new MqiMessageFilter();
 		filter2.setMatchRegex("s.*");
 		filter2.setProductFamily(ProductFamily.EDRS_SESSION);
 		
-		List<MqiMessageFilter> mqiMessageFilter = new ArrayList<>();
+		final List<MqiMessageFilter> mqiMessageFilter = new ArrayList<>();
 		mqiMessageFilter.add(filter1);
 		mqiMessageFilter.add(filter2);		
 		
-		MqiConsumer<ProductionEvent> uut = new MqiConsumer<>(
+		final MqiConsumer<ProductionEvent> uut = new MqiConsumer<>(
 				fakeClient, 
 				ProductCategory.AUXILIARY_FILES, 
 				fakeListener,
@@ -211,34 +207,34 @@ public class TestMqiConsumer {
 				fakeappStatus
 		);
 		
-		ProductionEvent body1 = new ProductionEvent(); 
+		final ProductionEvent body1 = new ProductionEvent(); 
 		body1.setKeyObjectStorage("auxfoo");
 		body1.setProductFamily(ProductFamily.AUXILIARY_FILE);
-		GenericMessageDto<ProductionEvent> message1 = new GenericMessageDto<>();
+		final GenericMessageDto<ProductionEvent> message1 = new GenericMessageDto<>();
 		message1.setBody(body1);
 		
 		Assert.assertTrue(uut.allowConsumption(message1));
 		
-		ProductionEvent body2 = new ProductionEvent(); 
+		final ProductionEvent body2 = new ProductionEvent(); 
 		body2.setKeyObjectStorage("session");
 		body2.setProductFamily(ProductFamily.EDRS_SESSION);
-		GenericMessageDto<ProductionEvent> message2 = new GenericMessageDto<>();
+		final GenericMessageDto<ProductionEvent> message2 = new GenericMessageDto<>();
 		message2.setBody(body2);
 		
 		Assert.assertTrue(uut.allowConsumption(message2));
 		
-		ProductionEvent body3 = new ProductionEvent(); 
+		final ProductionEvent body3 = new ProductionEvent(); 
 		body3.setKeyObjectStorage("notexpectedtomatch");
 		body3.setProductFamily(ProductFamily.EDRS_SESSION);
-		GenericMessageDto<ProductionEvent> message3 = new GenericMessageDto<>();
+		final GenericMessageDto<ProductionEvent> message3 = new GenericMessageDto<>();
 		message3.setBody(body3);
 		
 		Assert.assertFalse(uut.allowConsumption(message3));
 		
-		ProductionEvent body4 = new ProductionEvent(); 
+		final ProductionEvent body4 = new ProductionEvent(); 
 		body4.setKeyObjectStorage("l1foo");
 		body4.setProductFamily(ProductFamily.L1_SLICE);
-		GenericMessageDto<ProductionEvent> message4 = new GenericMessageDto<>();
+		final GenericMessageDto<ProductionEvent> message4 = new GenericMessageDto<>();
 		message4.setBody(body4);
 		
 		Assert.assertTrue(uut.allowConsumption(message4));

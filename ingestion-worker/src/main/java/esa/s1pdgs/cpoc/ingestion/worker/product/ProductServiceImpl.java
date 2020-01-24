@@ -69,18 +69,22 @@ public class ProductServiceImpl implements ProductService {
 	@Override
 	public void markInvalid(final IngestionJob ingestion, final Reporting.ChildFactory reportingChildFactory) throws ObsEmptyFileException {	
 		final File file = toFile(ingestion);
-		ObsAdapter obsAdapter = newObsAdapterFor(Paths.get(ingestion.getPickupPath()), reportingChildFactory);
+		final ObsAdapter obsAdapter = newObsAdapterFor(Paths.get(ingestion.getPickupPath()), reportingChildFactory);
 		obsAdapter.upload(ProductFamily.INVALID, file, ingestion.getKeyObjectStorage());
 	}
 	
+	@Override
+	public void assertFileIsNotEmpty(final IngestionJob ingestion) throws ObsEmptyFileException {
+		final File file = toFile(ingestion);		
+		if(FileUtils.sizeOf(file) == 0) {
+			throw new ObsEmptyFileException("Empty file detected: " + file.getName());
+		}	
+	}
+
 	final String toObsKey(final Path relPath) {
 		return relPath.toString();
 	}
-	
-	public static final File toFile(final IngestionJob ingestion) {
-		return Paths.get(ingestion.getPickupPath(), ingestion.getRelativePath()).toFile();
-	}
-	
+		
 	private final ObsAdapter newObsAdapterFor(final Path inboxPath, final Reporting.ChildFactory reportingChildFactory) {
 		return new ObsAdapter(obsClient, inboxPath, reportingChildFactory);		
 	}
@@ -95,5 +99,9 @@ public class ProductServiceImpl implements ProductService {
 		if (!file.canWrite()) {
 			throw new RuntimeException(String.format("File %s of %s is not writeable", file, ingestion));
 		}
+	}
+	
+	static final File toFile(final IngestionJob ingestion) {
+		return Paths.get(ingestion.getPickupPath(), ingestion.getRelativePath()).toFile();
 	}
 }
