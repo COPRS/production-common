@@ -44,6 +44,7 @@ public class SDKCustomDefaultRetryCondition
     @Override
     public boolean shouldRetry(final AmazonWebServiceRequest originalRequest,
             final AmazonClientException exception, final int retriesAttempted) {
+    	LOGGER.info("=== DEBUG: shouldRetry exception:{}",exception);
     	if(retriesAttempted < maxNumberRetries) {
     		LOGGER.info(String.format("[MONITOR] retry attempt number %s", retriesAttempted));
     	} else {
