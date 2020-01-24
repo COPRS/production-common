@@ -28,10 +28,8 @@ public class MqiMessageFilter implements MessageFilter {
 
 	@Override
 	public final boolean accept(final AbstractMessage message) {
-		// evaluate only if the filter is specified for the given family
-		if (productFamily == message.getProductFamily()) {
-			return Pattern.matches(matchRegex, message.getKeyObjectStorage());
-		}		
-		return true;
+		// should only return true, if the product shall NOT be handled.
+		return (productFamily == message.getProductFamily()) && 
+				Pattern.matches(matchRegex, message.getKeyObjectStorage());
 	}
 }

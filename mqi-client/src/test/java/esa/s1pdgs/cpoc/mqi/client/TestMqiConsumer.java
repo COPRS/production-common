@@ -213,7 +213,7 @@ public class TestMqiConsumer {
 		final GenericMessageDto<ProductionEvent> message1 = new GenericMessageDto<>();
 		message1.setBody(body1);
 		
-		Assert.assertTrue(uut.allowConsumption(message1));
+		Assert.assertFalse(uut.allowConsumption(message1));
 		
 		final ProductionEvent body2 = new ProductionEvent(); 
 		body2.setKeyObjectStorage("session");
@@ -221,7 +221,7 @@ public class TestMqiConsumer {
 		final GenericMessageDto<ProductionEvent> message2 = new GenericMessageDto<>();
 		message2.setBody(body2);
 		
-		Assert.assertTrue(uut.allowConsumption(message2));
+		Assert.assertFalse(uut.allowConsumption(message2));
 		
 		final ProductionEvent body3 = new ProductionEvent(); 
 		body3.setKeyObjectStorage("notexpectedtomatch");
@@ -229,7 +229,7 @@ public class TestMqiConsumer {
 		final GenericMessageDto<ProductionEvent> message3 = new GenericMessageDto<>();
 		message3.setBody(body3);
 		
-		Assert.assertFalse(uut.allowConsumption(message3));
+		Assert.assertTrue(uut.allowConsumption(message3));
 		
 		final ProductionEvent body4 = new ProductionEvent(); 
 		body4.setKeyObjectStorage("l1foo");
@@ -237,9 +237,6 @@ public class TestMqiConsumer {
 		final GenericMessageDto<ProductionEvent> message4 = new GenericMessageDto<>();
 		message4.setBody(body4);
 		
-		Assert.assertTrue(uut.allowConsumption(message4));
-		
+		Assert.assertTrue(uut.allowConsumption(message4));		
 	}
-	
-
 }
