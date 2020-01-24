@@ -125,7 +125,7 @@ public final class MqiConsumer<E extends AbstractMessage> implements Runnable {
 
 	final boolean allowConsumption(final GenericMessageDto<E> message) {
 		for (final MessageFilter filter : mqiMessageFilter) {
-			if (!filter.accept(message.getBody())) {
+			if (filter.accept(message.getBody())) {
 				return false;
 			}
 		}
