@@ -20,7 +20,6 @@ import com.amazonaws.AmazonServiceException;
 import com.amazonaws.HttpMethod;
 import com.amazonaws.event.ProgressEvent;
 import com.amazonaws.services.s3.AmazonS3;
-import com.amazonaws.services.s3.model.AmazonS3Exception;
 import com.amazonaws.services.s3.model.CopyObjectRequest;
 import com.amazonaws.services.s3.model.GeneratePresignedUrlRequest;
 import com.amazonaws.services.s3.model.GetObjectRequest;
@@ -126,14 +125,7 @@ public class S3ObsServices {
 			throws S3ObsServiceException, S3SdkClientException {
 		for (int retryCount = 1;; retryCount++) {
 			try {
-				try {
-					return s3client.doesObjectExist(bucketName, keyName);
-				} catch (AmazonS3Exception e) {
-					LOGGER.error("lutzi ", e);
-		            if (e.getStatusCode() == 404) {
-		                return false;
-		            }
-				}
+				return s3client.doesObjectExist(bucketName, keyName);		
 			} catch (final com.amazonaws.SdkClientException sce) {
 				if (retryCount <= numRetries) {
 					LOGGER.warn(String.format("Checking object existance %s failed: Attempt : %d / %d", keyName,
