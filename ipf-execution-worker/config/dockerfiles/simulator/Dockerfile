@@ -23,9 +23,7 @@ COPY --from=build /app/ipf-execution-worker/config/start/start.sh /app/start.sh
 RUN chmod +x /app/start.sh
 
 # Add Tini as entry point
-ENV TINI_VERSION v0.18.0
-ADD https://github.com/krallin/tini/releases/download/${TINI_VERSION}/tini /tini
-RUN chmod +x /tini
-ENTRYPOINT ["/tini", "--"]
+RUN apk add --no-cache tini
+ENTRYPOINT ["/sbin/tini", "--"]
 
 CMD ["/app/start.sh"]
