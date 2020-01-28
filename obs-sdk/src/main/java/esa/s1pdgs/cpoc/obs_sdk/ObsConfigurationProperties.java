@@ -49,8 +49,11 @@ public class ObsConfigurationProperties {
 	@Value("${transfer.manager.minimum-upload-part-size-mb:100}")
 	private long minUploadPartSize;
 	
-	@Value("${retry-policy.condition.max-retries:100}")
+	@Value("${retry-policy.condition.max-retries:3}")
 	private int maxRetries;
+	
+	@Value("${storage_retry_obs_max-retries:100}")
+	private int maxObsRetries;
 	
 	@Value("${retry-policy.backoff.base-delay-ms:1000}")
 	private int backoffBaseDelay;
@@ -130,6 +133,14 @@ public class ObsConfigurationProperties {
 
 	public void setMaxRetries(int maxRetries) {
 		this.maxRetries = maxRetries;
+	}
+
+	public int getMaxObsRetries() {
+		return maxObsRetries;
+	}
+
+	public void setMaxObsRetries(int maxObsRetries) {
+		this.maxObsRetries = maxObsRetries;
 	}
 
 	public int getBackoffBaseDelay() {
@@ -225,7 +236,7 @@ public class ObsConfigurationProperties {
 		return "ObsConfigurationProperties [backend=" + backend + ", userId=" + userId + ", userSecret=" + userSecret
 				+ ", endpoint=" + endpoint + ", endpointRegion=" + endpointRegion + ", tenantId=" + tenantId
 				+ ", tenantName=" + tenantName + ", authMethod=" + authMethod + ", multipartUploadThreshold="
-				+ multipartUploadThreshold + ", minUploadPartSize=" + minUploadPartSize + ", maxRetries=" + maxRetries
+				+ multipartUploadThreshold + ", minUploadPartSize=" + minUploadPartSize + ", maxRetries=" + maxRetries+ ", maxObsRetries=" + maxObsRetries
 				+ ", backoffBaseDelay=" + backoffBaseDelay + ", backoffThrottledBaseDelay=" + backoffThrottledBaseDelay
 				+ ", backoffMaxDelay=" + backoffMaxDelay + ", timeoutShutdown=" + timeoutShutdown + ", timeoutDownExec="
 				+ timeoutDownExec + ", timeoutUpExec=" + timeoutUpExec + ", bucket=" + bucket + "]";

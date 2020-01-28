@@ -94,7 +94,7 @@ public class S3ObsClient extends AbstractObsClient {
 					.withMultipartUploadThreshold(config.getMultipartUploadThreshold() * 1024 * 1024)
 					.withS3Client(client).build();
 
-			final S3ObsServices s3Services = new S3ObsServices(client, manager, config.getMaxRetries(),
+			final S3ObsServices s3Services = new S3ObsServices(client, manager, config.getMaxObsRetries(),
 					config.getBackoffThrottledBaseDelay());
 			return new S3ObsClient(config, s3Services);
 		}
