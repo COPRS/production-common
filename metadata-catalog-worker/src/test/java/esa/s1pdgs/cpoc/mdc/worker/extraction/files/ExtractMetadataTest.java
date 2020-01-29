@@ -1115,6 +1115,16 @@ public class ExtractMetadataTest {
     }
     
     @Test
+    public void testTotalNumberOfSliceEWSmallerThanSliceOverlap() {
+    	
+    	String startTime = "2019-12-09T00:34:49.567000Z";
+    	String stopTime = "2019-12-09T00:42:04.379000Z";
+    	String sliceType = "EW";
+    	
+        assertEquals(7, extractor.totalNumberOfSlice(startTime, stopTime, sliceType));
+    }
+    
+    @Test
     public void testTotalNumberOfSliceEWDuationLessThanSliceLength() {
     	
     	String startTime = "2019-12-09T00:34:00.000000Z";
