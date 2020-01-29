@@ -1103,5 +1103,79 @@ public class ExtractMetadataTest {
 
         extractor.processProduct(descriptor, ProductFamily.L1_ACN, file);
     }
+    
+    @Test
+    public void testTotalNumberOfSliceEW() {
+    	
+    	String startTime = "2019-12-09T00:34:49.567000Z";
+    	String stopTime = "2019-12-09T00:42:06.379000Z";
+    	String sliceType = "EW";
+    	
+        assertEquals(8, extractor.totalNumberOfSlice(startTime, stopTime, sliceType));
+    }
+    
+    @Test
+    public void testTotalNumberOfSliceEWDuationLessThanSliceLength() {
+    	
+    	String startTime = "2019-12-09T00:34:00.000000Z";
+    	String stopTime = "2019-12-09T00:35:00.000000Z";
+    	String sliceType = "EW";
+    	
+        assertEquals(1, extractor.totalNumberOfSlice(startTime, stopTime, sliceType));
+    }
+    
+    @Test
+    public void testTotalNumberOfSliceEWDuationOneSliceLength() {
+    	
+    	String startTime = "2019-12-09T00:34:00.000000Z";
+    	String stopTime = "2019-12-09T00:35:08.200000Z";
+    	String sliceType = "EW";
+    	
+        assertEquals(1, extractor.totalNumberOfSlice(startTime, stopTime, sliceType));
+    }
+    
+    
+    @Test
+    public void testTotalNumberOfSliceEWDurationOnlyOneSecond() {
+    	
+    	String startTime = "2019-12-09T00:34:49.379000Z";
+    	String stopTime = "2019-12-09T00:34:50.379000Z";
+    	String sliceType = "EW";
+    	
+        assertEquals(1, extractor.totalNumberOfSlice(startTime, stopTime, sliceType));
+    }
+    
+    
+    @Test
+    public void testTotalNumberOfSliceIW() {
+    	
+    	String startTime = "2019-12-09T00:34:49.567000Z";
+    	String stopTime = "2019-12-09T00:36:00.379000Z";
+    	String sliceType = "IW";
+    	
+        assertEquals(3, extractor.totalNumberOfSlice(startTime, stopTime, sliceType));
+    }
+    
+    @Test
+    public void testTotalNumberOfSliceSM() {
+    	
+    	String startTime = "2019-12-09T00:34:49.567000Z";
+    	String stopTime = "2019-12-09T00:36:00.379000Z";
+    	String sliceType = "SM";
+    	
+        assertEquals(3, extractor.totalNumberOfSlice(startTime, stopTime, sliceType));
+    }
+    
+    
+    @Test
+    public void testTotalNumberOfSliceWV() {
+    	
+    	String startTime = "2019-12-09T00:34:49.567000Z";
+    	String stopTime = "2019-12-09T00:36:00.379000Z";
+    	String sliceType = "WV";
+    	
+        assertEquals(1, extractor.totalNumberOfSlice(startTime, stopTime, sliceType));
+    }
+    
 
 }
