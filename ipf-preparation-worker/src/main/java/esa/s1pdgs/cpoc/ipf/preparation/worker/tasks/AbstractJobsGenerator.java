@@ -443,7 +443,11 @@ public abstract class AbstractJobsGenerator implements Runnable {
 
 						final AppDataJob<CatalogEvent> modifiedJob = appDataService.patchJob(
                                 job.getAppDataJob().getId(),
-                                job.getAppDataJob(), false, true, false);
+                                job.getAppDataJob(), 
+                                false, 
+                                true, 
+                                false
+                        );
                         job.setAppDataJob(modifiedJob);
                         updateState(job, AppDataJobGenerationState.PRIMARY_CHECK);
                     } catch (final AbstractCodedException e) {
@@ -817,7 +821,7 @@ public abstract class AbstractJobsGenerator implements Runnable {
         }
     }
 
-    protected String send(final JobGeneration job, UUID reportingRootTaskUID) throws AbstractCodedException {
+    protected String send(final JobGeneration job, final UUID reportingRootTaskUID) throws AbstractCodedException {
         LOGGER.info("{} [productName {}] 3a - Building common job",
                 this.prefixLogMonitor,
                 job.getAppDataJob().getProduct().getProductName());
@@ -883,11 +887,14 @@ public abstract class AbstractJobsGenerator implements Runnable {
                 family = ProductFamily.L2_JOB;
                 break;
         }
-        final IpfExecutionJob r = new IpfExecutionJob(family,
+        final IpfExecutionJob r = new IpfExecutionJob(
+        		family,
                 job.getAppDataJob().getProduct().getProductName(),
-                job.getAppDataJob().getProduct().getProcessMode(), workingDir,
-                jobOrder, reportingRootTaskUID);
-        
+                job.getAppDataJob().getProduct().getProcessMode(), 
+                workingDir,
+                jobOrder, 
+                reportingRootTaskUID
+        );        
         r.setCreationDate(new Date());
         r.setHostname(hostname);
 
@@ -895,27 +902,30 @@ public abstract class AbstractJobsGenerator implements Runnable {
 
             // Add jobOrder inputs to the DTO
             final List<JobOrderInput> distinctInputJobOrder = job.getJobOrder()
-                    .getProcs().stream()
-                    .filter(proc -> proc != null
-                            && !CollectionUtils.isEmpty(proc.getInputs()))
-                    .flatMap(proc -> proc.getInputs().stream()).distinct()
+                    .getProcs()
+                    .stream()
+                    .filter(proc -> proc != null && !CollectionUtils.isEmpty(proc.getInputs()))
+                    .flatMap(proc -> proc.getInputs().stream())
+                    .distinct()
                     .collect(Collectors.toList());
+            
             distinctInputJobOrder.forEach(input -> {
                 for (final JobOrderInputFile file : input.getFilenames()) {
-                    r.addInput(new LevelJobInputDto(input.getFamily().name(),
-                            file.getFilename(), file.getKeyObjectStorage()));
+                    r.addInput(new LevelJobInputDto(
+                    		input.getFamily().name(),
+                            file.getFilename(), 
+                            file.getKeyObjectStorage()
+                    ));
                 }
             });
 
-            final String jobOrderXml = xmlConverter
-            .convertFromObjectToXMLString(job.getJobOrder());
+            final String jobOrderXml = xmlConverter.convertFromObjectToXMLString(job.getJobOrder());
             
-            LOGGER.trace("Adding input JobOrderXml '{}' for product '{}'",
-            		jobOrderXml, job.getAppDataJob().getProduct().getProductName());
+            LOGGER.trace("Adding input JobOrderXml '{}' for product '{}'", jobOrderXml, 
+            		job.getAppDataJob().getProduct().getProductName());
             
             // Add the jobOrder itself in inputs
-            r.addInput(new LevelJobInputDto(ProductFamily.JOB_ORDER.name(),
-                    jobOrder, jobOrderXml));
+            r.addInput(new LevelJobInputDto(ProductFamily.JOB_ORDER.name(), jobOrder, jobOrderXml));
 
             // Add joborder output to the DTO
             final List<JobOrderOutput> distinctOutputJobOrder = job.getJobOrder().getProcs().stream()
@@ -985,6 +995,8 @@ public abstract class AbstractJobsGenerator implements Runnable {
 		@SuppressWarnings("unchecked")
 		final AppDataJob<CatalogEvent> dto = job.getAppDataJob();
 
+		// ok, first message is only used here to determine the ID and input key
+		// -> TODO cleanup to reduce obfuscation here
         this.outputFactory.sendJob(dto.getMessages().get(0), r);
         
         return joborderName;

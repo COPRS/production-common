@@ -72,16 +72,16 @@ public class L0AppJobsGenerator extends AbstractJobsGenerator {
     }
 
     @Override
-    protected void preSearch(final JobGeneration job)
-            throws IpfPrepWorkerInputsMissingException {
+    protected void preSearch(final JobGeneration job) throws IpfPrepWorkerInputsMissingException {
         final Map<String, String> missingRaws = new HashMap<>();
-        if (job.getAppDataJob() != null
-                && job.getAppDataJob().getProduct() != null) {
+        if (job.getAppDataJob() != null && job.getAppDataJob().getProduct() != null) {
             // Channel 1
             job.getAppDataJob().getProduct().getRaws1().forEach(raw -> {
                 try {
-                    final EdrsSessionMetadata file = this.metadataClient
-                            .getEdrsSession("RAW", new File(raw.getFilename()).getName());
+                    final EdrsSessionMetadata file = this.metadataClient.getEdrsSession(
+                    		"RAW", 
+                    		new File(raw.getFilename()).getName()
+                    );
                     if (file != null) {
                         raw.setKeyObs(file.getKeyObjectStorage());
                     } else {
@@ -94,8 +94,10 @@ public class L0AppJobsGenerator extends AbstractJobsGenerator {
             // Channel 2
             job.getAppDataJob().getProduct().getRaws2().forEach(raw -> {
                 try {
-                    final EdrsSessionMetadata file = this.metadataClient
-                            .getEdrsSession("RAW", new File(raw.getFilename()).getName());
+                    final EdrsSessionMetadata file = this.metadataClient.getEdrsSession(
+                    		"RAW", 
+                    		new File(raw.getFilename()).getName()
+                    );
                     if (file != null) {
                         raw.setKeyObs(file.getKeyObjectStorage());
                     } else {
@@ -106,7 +108,11 @@ public class L0AppJobsGenerator extends AbstractJobsGenerator {
                 }
             });
         }
-        if (!missingRaws.isEmpty()) {
+        
+	    if (!missingRaws.isEmpty() || 
+	    	job.getAppDataJob().getProduct().getRaws1().isEmpty() ||    
+	    	job.getAppDataJob().getProduct().getRaws2().isEmpty()
+	    ) {
             throw new IpfPrepWorkerInputsMissingException(missingRaws);
         }
     }
@@ -172,8 +178,7 @@ public class L0AppJobsGenerator extends AbstractJobsGenerator {
     		if (!found) {
         		conf.addProcParam(new JobOrderProcParam(newParam.getKey(), newParam.getValue()));
 			}
-		}
-    	
+		}    	
     	LOGGER.debug("Configured AIOP for product {} with configuration {}", product.getProductName(), conf);
     }
 
@@ -197,23 +202,19 @@ public class L0AppJobsGenerator extends AbstractJobsGenerator {
             final int nb = Math.max(nb1, nb2);
             for (int i = 0; i < nb; i++) {
                 if (i < nb1) {
-                    final AppDataJobFile raw =
-                            job.getAppDataJob().getProduct().getRaws1().get(i);
+                    final AppDataJobFile raw = job.getAppDataJob().getProduct().getRaws1().get(i);
                     dto.addInput(
                             new LevelJobInputDto(
                                     ProductFamily.EDRS_SESSION.name(),
-                                    dto.getWorkDirectory() + "ch01/"
-                                            + raw.getFilename(),
+                                    dto.getWorkDirectory() + "ch01/" + raw.getFilename(),
                                     raw.getKeyObs()));
                 }
                 if (i < nb2) {
-                    final AppDataJobFile raw =
-                            job.getAppDataJob().getProduct().getRaws2().get(i);
+                    final AppDataJobFile raw = job.getAppDataJob().getProduct().getRaws2().get(i);
                     dto.addInput(
                             new LevelJobInputDto(
                                     ProductFamily.EDRS_SESSION.name(),
-                                    dto.getWorkDirectory() + "ch02/"
-                                            + raw.getFilename(),
+                                    dto.getWorkDirectory() + "ch02/" + raw.getFilename(),
                                     raw.getKeyObs()));
                 }
             }
