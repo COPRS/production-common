@@ -215,7 +215,7 @@ public class JobProcessor implements MqiListener<IpfExecutionJob> {
 			outputListFile = job.getWorkDirectory() + "AIOProc.LIST";
 		} else if (properties.getLevel() == ApplicationLevel.L0_SEGMENT) {
 			outputListFile = job.getWorkDirectory() + "L0ASProcList.LIST";
-		}		
+		}
 		LOGGER.debug("Output list build {}", outputListFile);
 
 		final PoolExecutorCallable procExecutor = new PoolExecutorCallable(properties, job,

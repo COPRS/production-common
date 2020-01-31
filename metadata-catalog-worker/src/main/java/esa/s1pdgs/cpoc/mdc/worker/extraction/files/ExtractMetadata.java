@@ -680,26 +680,42 @@ public class ExtractMetadata {
 	 * @param type
 	 * @return an int which is the number of Slices
 	 */
-	private int totalNumberOfSlice(final String startTime, final String stopTime, final String type) {
-		final Duration duration = Duration.between(DateUtils.parse(startTime), DateUtils.parse(stopTime));
-
+	int totalNumberOfSlice(final String startTime, final String stopTime, final String type) {
+		LOGGER.trace("start time: {}, stop time: {}", startTime, stopTime);
+		
+		int totalNumberOfSlices = 1;
+		
 		final float sliceLength = this.typeSliceLength.get(type);
+		LOGGER.trace("slice length for type {}: {}s", type, sliceLength);
 
-		// Case of their is no slice information in manifest
 		if (sliceLength <= 0) {
-			return 1;
+			LOGGER.info("no slice information or slice length = 0s");
+			LOGGER.info("total number of slices: {}", totalNumberOfSlices);
+			return totalNumberOfSlices;
 		}
 		final float overlap = this.typeOverlap.get(type);
+		LOGGER.trace("slice overlap for type {}: {}s", type, overlap);
 
-		final float tmpNumberOfSlices = (duration.get(ChronoUnit.SECONDS) - overlap) / sliceLength;
-		final double fracNumberOfSlices = tmpNumberOfSlices - Math.floor(tmpNumberOfSlices);
-		int totalNumberOfSlices = 0;
-		if ((fracNumberOfSlices * sliceLength) < overlap) {
-			totalNumberOfSlices = (int) Math.floor(tmpNumberOfSlices);
+		final float durationSeconds = ChronoUnit.MICROS.between(DateUtils.parse(startTime), DateUtils.parse(stopTime))/1000000f;
+		LOGGER.trace("duration: {}s", durationSeconds);
+		
+		final float numberOfSlices = (durationSeconds - overlap) / sliceLength;
+		LOGGER.trace("number of slices: {}", numberOfSlices);
+		
+		final double fracNumberOfSlices = (numberOfSlices - Math.floor(numberOfSlices)) * sliceLength;
+		LOGGER.trace("FRAC(number of slices) * slice length = {}", fracNumberOfSlices);
+		
+		
+		if (fracNumberOfSlices  < overlap) {
+			LOGGER.trace("{} < {} (slice overlap) ==> total number of slices = FLOOR({})", fracNumberOfSlices, overlap, numberOfSlices);
+			totalNumberOfSlices = (int) Math.floor(numberOfSlices);
 		} else {
-			totalNumberOfSlices = (int) Math.ceil(tmpNumberOfSlices);
+			LOGGER.trace("{} >= {} (slice overlap) ==> total number of slices = CEIL({})", fracNumberOfSlices, overlap, numberOfSlices);
+			totalNumberOfSlices = (int) Math.ceil(numberOfSlices);
 		}
-		return Math.max(totalNumberOfSlices, 1);
+		totalNumberOfSlices = Math.max(totalNumberOfSlices, 1);
+		LOGGER.info("total number of slices: {}", totalNumberOfSlices);
+		return totalNumberOfSlices;
 	}
 
 }

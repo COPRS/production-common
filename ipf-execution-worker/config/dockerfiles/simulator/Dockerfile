@@ -8,8 +8,12 @@ ARG COMMIT_ID
 ARG BRANCH_TEXT
 
 USER root
-WORKDIR /app
 
+# Create dummy /var/tmp/conf.sh to be used by /app/start.sh
+WORKDIR /var/tmp
+RUN echo "#!/bin/sh" >> /var/tmp/conf.sh && chmod +x /var/tmp/conf.sh
+
+WORKDIR /app
 RUN echo "${VERSION}" >> VERSION
 RUN echo "${BRANCH_TEXT}" >> VERSION
 RUN echo "${COMMIT_ID}" >> VERSION
@@ -19,9 +23,7 @@ COPY --from=build /app/ipf-execution-worker/config/start/start.sh /app/start.sh
 RUN chmod +x /app/start.sh
 
 # Add Tini as entry point
-ENV TINI_VERSION v0.18.0
-ADD https://github.com/krallin/tini/releases/download/${TINI_VERSION}/tini /tini
-RUN chmod +x /tini
-ENTRYPOINT ["/tini", "--"]
+RUN apk add --no-cache tini
+ENTRYPOINT ["/sbin/tini", "--"]
 
 CMD ["/app/start.sh"]
