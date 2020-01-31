@@ -2,6 +2,7 @@ package esa.s1pdgs.cpoc.ipf.preparation.worker.tasks;
 
 import java.io.File;
 import java.time.format.DateTimeFormatter;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -109,12 +110,27 @@ public class L0AppJobsGenerator extends AbstractJobsGenerator {
             });
         }
         
-	    if (!missingRaws.isEmpty() || 
-	    	job.getAppDataJob().getProduct().getRaws1().isEmpty() ||    
-	    	job.getAppDataJob().getProduct().getRaws2().isEmpty()
-	    ) {
+	    if (!missingRaws.isEmpty()) {
             throw new IpfPrepWorkerInputsMissingException(missingRaws);
         }
+	    
+	    // S1PRO-1065: Make sure that there is at least one RAW for each channel
+	    if (job.getAppDataJob().getProduct().getRaws1().isEmpty()) {
+	    	  throw new IpfPrepWorkerInputsMissingException(
+	    			  Collections.singletonMap(
+	    					  job.getAppDataJob().getProduct().getProductName(), 
+	    					  "No raws for channel 1"
+	    			  )
+	    	);
+	    }
+	    if (job.getAppDataJob().getProduct().getRaws2().isEmpty()) {
+	    	  throw new IpfPrepWorkerInputsMissingException(
+	    			  Collections.singletonMap(
+	    					  job.getAppDataJob().getProduct().getProductName(), 
+	    					  "No raws for channel 2"
+	    			  )
+	    	);
+	    }	    
     }
 
     @Override
