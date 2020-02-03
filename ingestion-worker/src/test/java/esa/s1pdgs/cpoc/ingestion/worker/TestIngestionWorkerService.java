@@ -14,7 +14,6 @@ import java.util.List;
 
 import org.apache.logging.log4j.Logger;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.mockito.Mock;
 import org.mockito.Mockito;
@@ -64,11 +63,11 @@ public final class TestIngestionWorkerService {
 	}
 
 	@Test
-	@Ignore
 	public final void testOnMessage() throws Exception {
 		final IngestionJob ingestion = new IngestionJob("fooBar");
 		ingestion.setRelativePath("fooBar");
 		ingestion.setPickupPath("/tmp");
+		ingestion.setProductFamily(ProductFamily.AUXILIARY_FILE);
 		
 		final GenericMessageDto<IngestionJob> mess = new GenericMessageDto<IngestionJob>();
 		mess.setId(123);
@@ -88,11 +87,18 @@ public final class TestIngestionWorkerService {
 			@Override
 			public void assertFileIsNotEmpty(final IngestionJob ingestion) throws ObsEmptyFileException {				
 			}
-		};		
+		};
+		
+		final IngestionWorkerServiceConfigurationProperties properties = new IngestionWorkerServiceConfigurationProperties();
+		final IngestionTypeConfiguration itc = new IngestionTypeConfiguration();
+		itc.setFamily(ProductFamily.AUXILIARY_FILE.name());
+		itc.setRegex("fooBar");
+		properties.setTypes(Arrays.asList(itc));
+		
 		final IngestionWorkerService uut = new IngestionWorkerService(
 				null, 
 				ErrorRepoAppender.NULL, 
-				new IngestionWorkerServiceConfigurationProperties(), 
+				properties, 
 				fakeProductService,
 				AppStatus.NULL
 		);
@@ -151,8 +157,7 @@ public final class TestIngestionWorkerService {
 		verify(productService, never()).markInvalid(Mockito.any(), Mockito.any());
 	}
 	
-	@Test
-	@Ignore
+	@Test(expected=ProductException.class)
 	public final void testIdentifyAndUploadOnInvalidFamily() throws Exception {
 		final IngestionWorkerServiceConfigurationProperties properties = new IngestionWorkerServiceConfigurationProperties();
 		final IngestionTypeConfiguration itc = new IngestionTypeConfiguration();
@@ -173,9 +178,6 @@ public final class TestIngestionWorkerService {
 		message.setBody(ingestionJob);
 		
 		final IngestionResult result = uut.identifyAndUpload(message, ingestionJob, Reporting.ChildFactory.NULL);
-		assertEquals(IngestionResult.NULL, result);
-		verify(productService, never()).ingest(Mockito.any(), Mockito.any(), Mockito.any());
-		verify(productService, times(1)).markInvalid(Mockito.eq(ingestionJob), Mockito.any());
 	}
 
 	@Test
