@@ -12,7 +12,6 @@ import java.util.Arrays;
 import java.util.Date;
 
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.mockito.Mock;
 import org.mockito.Mockito;
@@ -22,6 +21,7 @@ import esa.s1pdgs.cpoc.common.ProductFamily;
 import esa.s1pdgs.cpoc.common.errors.AbstractCodedException;
 import esa.s1pdgs.cpoc.common.errors.InternalErrorException;
 import esa.s1pdgs.cpoc.ingestion.worker.config.ProcessConfiguration;
+import esa.s1pdgs.cpoc.mqi.model.queue.AbstractMessage;
 import esa.s1pdgs.cpoc.mqi.model.queue.IngestionEvent;
 import esa.s1pdgs.cpoc.mqi.model.queue.IngestionJob;
 import esa.s1pdgs.cpoc.obs_sdk.ObsClient;
@@ -94,13 +94,13 @@ public class TestProductServiceImpl {
 	}
 
 	@Test
-	@Ignore
 	public void testMarkInvalid() throws AbstractCodedException, ObsEmptyFileException {
 		final IngestionJob ingestionJob = new IngestionJob();
 		ingestionJob.setPickupPath("pickup/path");
 		ingestionJob.setRelativePath("relative/path");
 		uut.markInvalid(ingestionJob, Reporting.ChildFactory.NULL);
-		final ObsUploadObject uploadObj = new ObsUploadObject(ProductFamily.INVALID, "relative/path", new File("pickup/path/relative/path"));
+		final ObsUploadObject uploadObj = new ObsUploadObject(ProductFamily.INVALID, AbstractMessage.NOT_DEFINED,
+				new File("pickup/path/relative/path"));
 		verify(obsClient, times(1)).upload(Mockito.eq(Arrays.asList(uploadObj)), Mockito.any());
 	}
 
