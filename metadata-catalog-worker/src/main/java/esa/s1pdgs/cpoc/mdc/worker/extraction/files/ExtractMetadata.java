@@ -4,7 +4,6 @@ import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
 import java.nio.charset.Charset;
-import java.time.Duration;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeParseException;
 import java.time.temporal.ChronoUnit;
@@ -702,15 +701,15 @@ public class ExtractMetadata {
 		final float numberOfSlices = (durationSeconds - overlap) / sliceLength;
 		LOGGER.trace("number of slices: {}", numberOfSlices);
 		
-		final double fracNumberOfSlices = (numberOfSlices - Math.floor(numberOfSlices)) * sliceLength;
-		LOGGER.trace("FRAC(number of slices) * slice length = {}", fracNumberOfSlices);
+		final double fracNumberOfSlicesMultipliedBySliceLength = (numberOfSlices - Math.floor(numberOfSlices)) * sliceLength;
+		LOGGER.trace("FRAC(number of slices) * slice length = {}", fracNumberOfSlicesMultipliedBySliceLength);
 		
 		
-		if (fracNumberOfSlices  < overlap) {
-			LOGGER.trace("{} < {} (slice overlap) ==> total number of slices = FLOOR({})", fracNumberOfSlices, overlap, numberOfSlices);
+		if (fracNumberOfSlicesMultipliedBySliceLength < overlap) {
+			LOGGER.trace("{} < {} (slice overlap) ==> total number of slices = FLOOR({})", fracNumberOfSlicesMultipliedBySliceLength, overlap, numberOfSlices);
 			totalNumberOfSlices = (int) Math.floor(numberOfSlices);
 		} else {
-			LOGGER.trace("{} >= {} (slice overlap) ==> total number of slices = CEIL({})", fracNumberOfSlices, overlap, numberOfSlices);
+			LOGGER.trace("{} >= {} (slice overlap) ==> total number of slices = CEIL({})", fracNumberOfSlicesMultipliedBySliceLength, overlap, numberOfSlices);
 			totalNumberOfSlices = (int) Math.ceil(numberOfSlices);
 		}
 		totalNumberOfSlices = Math.max(totalNumberOfSlices, 1);

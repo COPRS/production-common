@@ -67,6 +67,7 @@ public final class L0SegmentConsumer extends AbstractGenericConsumer<CatalogEven
             // Search job for given datatake id
             final List<AppDataJob<CatalogEvent>> existingJobsForDatatake =
                     appDataService.findByProductDataTakeId(eventAdapter.datatakeId());
+            LOGGER.debug("Found {} jobs with datatakeid {}",existingJobs.size(), eventAdapter.datatakeId());
 
             if (CollectionUtils.isEmpty(existingJobsForDatatake)) {
 
@@ -86,6 +87,8 @@ public final class L0SegmentConsumer extends AbstractGenericConsumer<CatalogEven
                 productDto.setProcessMode(eventAdapter.processMode());
                 productDto.setSatelliteId(eventAdapter.satelliteId());
                 jobDto.setProduct(productDto);
+                
+                LOGGER.debug("Creating new job for datatakeid {}:{}",eventAdapter.datatakeId(), jobDto);
 
                 return appDataService.newJob(jobDto);
             } else {
@@ -95,6 +98,9 @@ public final class L0SegmentConsumer extends AbstractGenericConsumer<CatalogEven
                     jobDto.setPod(processSettings.getHostname());
                 }
                 jobDto.getMessages().add(mqiMessage);
+                
+                LOGGER.debug("Merging job for datatakeid {}:{}", eventAdapter.datatakeId(), jobDto);
+                
                 return appDataService.patchJob(jobDto.getId(), jobDto,
                         true, false, false);
 
