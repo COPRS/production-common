@@ -16,7 +16,6 @@ import org.springframework.stereotype.Service;
 
 import esa.s1pdgs.cpoc.common.ProductCategory;
 import esa.s1pdgs.cpoc.common.ProductFamily;
-import esa.s1pdgs.cpoc.common.errors.AbstractCodedException;
 import esa.s1pdgs.cpoc.common.errors.AbstractCodedException.ErrorCode;
 import esa.s1pdgs.cpoc.common.utils.DateUtils;
 import esa.s1pdgs.cpoc.common.utils.LogUtils;
@@ -32,6 +31,7 @@ import esa.s1pdgs.cpoc.mdc.worker.extraction.MetadataExtractorFactory;
 import esa.s1pdgs.cpoc.mdc.worker.status.AppStatusImpl;
 import esa.s1pdgs.cpoc.mqi.client.MqiClient;
 import esa.s1pdgs.cpoc.mqi.client.MqiConsumer;
+import esa.s1pdgs.cpoc.mqi.client.MqiListener;
 import esa.s1pdgs.cpoc.mqi.model.queue.CatalogEvent;
 import esa.s1pdgs.cpoc.mqi.model.queue.CatalogJob;
 import esa.s1pdgs.cpoc.mqi.model.rest.GenericMessageDto;
@@ -42,7 +42,7 @@ import esa.s1pdgs.cpoc.report.ReportingUtils;
 import esa.s1pdgs.cpoc.report.message.input.FilenameReportingInput;
 
 @Service
-public class MetadataExtractionService {
+public class MetadataExtractionService implements MqiListener<CatalogJob> {
 	private static final Logger LOG = LogManager.getLogger(MetadataExtractionService.class);
 
     private final AppStatusImpl appStatus;
@@ -85,85 +85,96 @@ public class MetadataExtractionService {
 		}
     }
 	
-	public final void consume(final GenericMessageDto<CatalogJob> message, final CategoryConfig config)
-			throws AbstractCodedException {		
+	@Override
+	public final void onMessage(final GenericMessageDto<CatalogJob> message) throws Exception {	
 		final CatalogJob catJob = message.getBody();	
 		final String productName = catJob.getProductName();
-		final ProductFamily family = catJob.getProductFamily();
-		
+		final ProductFamily family = catJob.getProductFamily();		
 		final ProductCategory category = ProductCategory.of(family);
-
 		final Reporting reporting = ReportingUtils.newReportingBuilder().newTaskReporting("MetadataExtraction");
     
 		reporting.begin(new FilenameReportingInput(productName), new ReportingMessage("Starting metadata extraction"));   
+				
 		try {
 			final MetadataExtractor extractor = extractorFactory.newMetadataExtractorFor(
 					category,
 					properties.getProductCategories().get(category)
 			);			
 			final JSONObject metadata = extractor.extract(reporting.getChildFactory(), message);
-        	LOG.debug("Metadata extracted :{} for product: {}", metadata, productName);
-        	
-        	// TODO move to extractor
-            if (!metadata.has("insertionTime")) {
-            	metadata.put("insertionTime", DateUtils.formatToMetadataDateTimeFormat(LocalDateTime.now()));
-            }
-            
-            final Reporting reportPublish = reporting.getChildFactory().newChild("Publish");       
-            reportPublish.begin(new ReportingMessage("Start publishing metadata"));
-
-            try {
-				if (!esServices.isMetadataExist(metadata)) {
-					LOG.debug("Creating metatadata in ES for product {}", productName);
-				    esServices.createMetadata(metadata);
-				}
-				else{
-					LOG.debug("ES already contains metadata for product {}", productName);
-				}
-				final CatalogEvent event = toCatalogEvent(catJob, metadata);
-		    	final GenericPublicationMessageDto<CatalogEvent> messageDto = new GenericPublicationMessageDto<CatalogEvent>(
-		    			message.getId(), 
-		    			event.getProductFamily(), 
-		    			event
-		    	);
-		    	messageDto.setInputKey(message.getInputKey());
-		    	messageDto.setOutputKey(event.getProductFamily().name());		    	
-				mqiClient.publish(messageDto, ProductCategory.CATALOG_EVENT);		
-				
-			    reportPublish.end(new ReportingMessage("End publishing metadata"));
-				
-			} catch (final Exception e) {
-				reportPublish.error(new ReportingMessage("[code {}] {}", ErrorCode.INTERNAL_ERROR.getCode(), LogUtils.toString(e)));
-				throw e;
+	    	LOG.debug("Metadata extracted: {} for product: {}", metadata, productName);
+	    	
+	    	// TODO move to extractor
+	        if (!metadata.has("insertionTime")) {
+	        	metadata.put("insertionTime", DateUtils.formatToMetadataDateTimeFormat(LocalDateTime.now()));
+	        }
+	        
+			if (!esServices.isMetadataExist(metadata)) {
+				LOG.debug("Creating metatadata in ES for product {}", productName);
+			    esServices.createMetadata(metadata);
 			}
-            reporting.end(new ReportingMessage("End metadata extraction"));
+			else{
+				LOG.debug("ES already contains metadata for product {}", productName);
+			}
+			publish(message, catJob, reporting, metadata);
+	        reporting.end(new ReportingMessage("End metadata extraction"));
+            
 		}
-		catch (final Exception e) {
-			final String errorMessage = String.format(
-					"Failed to extract metadata from product %s of family %s: %s", 
+		catch (final Exception e) {			
+			final String shortMessage = String.format(
+					"Failed to extract metadata from product %s of family %s",
 					productName,
-					family,
-					LogUtils.toString(e)
-					
+					family
 			);
-			LOG.error(errorMessage);
-            errorAppender.send(new FailedProcessingDto(
-            		processConfiguration.getHostname(),
-	        		new Date(),
-	        		errorMessage,
-	        		message
-	        )); 
-            reporting.error(new ReportingMessage(errorMessage));
-            throw new RuntimeException(errorMessage);
+			final String errorMessage = String.format("%s: %s", shortMessage, LogUtils.toString(e));
+	        reporting.error(new ReportingMessage(errorMessage));	        
+	        throw new MetadataExtractException(shortMessage, e);
 		}    
 	}
 	
+	@Override
+	public void onTerminalError(final GenericMessageDto<CatalogJob> message, final Exception error) {
+		LOG.error(error);
+        errorAppender.send(new FailedProcessingDto(
+        		processConfiguration.getHostname(),
+        		new Date(),
+        		LogUtils.toString(error),
+        		message
+        )); 
+	}
+	
+	private final void publish(
+			final GenericMessageDto<CatalogJob> message, 
+			final CatalogJob catJob,
+			final Reporting reporting, 
+			final JSONObject metadata
+	) throws Exception {
+		final Reporting reportPublish = reporting.getChildFactory().newChild("Publish");       
+		reportPublish.begin(new ReportingMessage("Start publishing metadata"));
+
+		try {
+			final CatalogEvent event = toCatalogEvent(catJob, metadata);
+			final GenericPublicationMessageDto<CatalogEvent> messageDto = new GenericPublicationMessageDto<CatalogEvent>(
+					message.getId(), 
+					event.getProductFamily(), 
+					event
+			);
+			messageDto.setInputKey(message.getInputKey());
+			messageDto.setOutputKey(event.getProductFamily().name());		    	
+			mqiClient.publish(messageDto, ProductCategory.CATALOG_EVENT);
+		    reportPublish.end(new ReportingMessage("End publishing metadata"));
+			
+		} catch (final Exception e) {
+			reportPublish.error(new ReportingMessage("[code {}] {}", ErrorCode.INTERNAL_ERROR.getCode(), LogUtils.toString(e)));
+			throw e;
+		}
+	}
+
 	private final MqiConsumer<CatalogJob> newConsumerFor(final ProductCategory category, final CategoryConfig config) {
 		LOG.debug("Creating MQI consumer for category {} using {}", category, config);
 		return new MqiConsumer<CatalogJob>(
 				mqiClient, 
 				category, 
-				m -> consume(m, config),
+				this,
 				config.getFixedDelayMs(),
 				config.getInitDelayPollMs(),
 				appStatus
