@@ -132,7 +132,7 @@ public class MetadataExtractionService implements MqiListener<CatalogJob> {
 	}
 	
 	@Override
-	public void onTerminalError(final GenericMessageDto<CatalogJob> message, final Exception error) {
+	public final void onTerminalError(final GenericMessageDto<CatalogJob> message, final Exception error) {
 		LOG.error(error);
         errorAppender.send(new FailedProcessingDto(
         		processConfiguration.getHostname(),
@@ -181,7 +181,7 @@ public class MetadataExtractionService implements MqiListener<CatalogJob> {
 		);
 	}
 	
-	private CatalogEvent toCatalogEvent(final CatalogJob catJob, final JSONObject metadata) {
+	private final CatalogEvent toCatalogEvent(final CatalogJob catJob, final JSONObject metadata) {
 		final CatalogEvent catEvent = new CatalogEvent();
 		catEvent.setProductName(catJob.getProductName());
 		catEvent.setKeyObjectStorage(catJob.getKeyObjectStorage());
