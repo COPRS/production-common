@@ -26,12 +26,10 @@
 		<json.version>20171018</json.version>
 		<moxy.version>2.5.0</moxy.version>
 		<equalsverifier.version>2.4.6</equalsverifier.version>
-		<aws.version>1.11.271</aws.version>
-		
+		<aws.version>1.11.271</aws.version>		
 		<jsch.version>0.1.53</jsch.version>
-
 		<elasticsearch.version>6.1.3</elasticsearch.version>
-		
+		<pmd.failOnViolation>false</pmd.failOnViolation>		
 		<odata.version>4.6.0</odata.version>
 	</properties>
 
