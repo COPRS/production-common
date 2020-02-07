@@ -37,6 +37,7 @@ import esa.s1pdgs.cpoc.mqi.model.queue.CatalogJob;
 import esa.s1pdgs.cpoc.mqi.model.rest.GenericMessageDto;
 import esa.s1pdgs.cpoc.mqi.model.rest.GenericPublicationMessageDto;
 import esa.s1pdgs.cpoc.report.Reporting;
+import esa.s1pdgs.cpoc.report.ReportingFactory;
 import esa.s1pdgs.cpoc.report.ReportingMessage;
 import esa.s1pdgs.cpoc.report.ReportingUtils;
 import esa.s1pdgs.cpoc.report.message.input.FilenameReportingInput;
@@ -91,7 +92,7 @@ public class MetadataExtractionService implements MqiListener<CatalogJob> {
 		final String productName = catJob.getProductName();
 		final ProductFamily family = catJob.getProductFamily();		
 		final ProductCategory category = ProductCategory.of(family);
-		final Reporting reporting = ReportingUtils.newReportingBuilder().newTaskReporting("MetadataExtraction");
+		final Reporting reporting = ReportingUtils.newReportingBuilder().newReporting("MetadataExtraction");
     
 		reporting.begin(new FilenameReportingInput(productName), new ReportingMessage("Starting metadata extraction"));   
 				
@@ -100,7 +101,7 @@ public class MetadataExtractionService implements MqiListener<CatalogJob> {
 					category,
 					properties.getProductCategories().get(category)
 			);			
-			final JSONObject metadata = extractor.extract(reporting.getChildFactory(), message);
+			final JSONObject metadata = extractor.extract(reporting, message);
 	    	LOG.debug("Metadata extracted: {} for product: {}", metadata, productName);
 	    	
 	    	// TODO move to extractor
@@ -145,10 +146,10 @@ public class MetadataExtractionService implements MqiListener<CatalogJob> {
 	private final void publish(
 			final GenericMessageDto<CatalogJob> message, 
 			final CatalogJob catJob,
-			final Reporting reporting, 
+			final ReportingFactory reporting, 
 			final JSONObject metadata
 	) throws Exception {
-		final Reporting reportPublish = reporting.getChildFactory().newChild("Publish");       
+		final Reporting reportPublish = reporting.newReporting("Publish");       
 		reportPublish.begin(new ReportingMessage("Start publishing metadata"));
 
 		try {

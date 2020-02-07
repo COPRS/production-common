@@ -16,24 +16,24 @@ import esa.s1pdgs.cpoc.disseminator.util.LogPrintWriter;
 import esa.s1pdgs.cpoc.obs_sdk.ObsClient;
 import esa.s1pdgs.cpoc.obs_sdk.ObsObject;
 import esa.s1pdgs.cpoc.obs_sdk.SdkClientException;
-import esa.s1pdgs.cpoc.report.Reporting;
+import esa.s1pdgs.cpoc.report.ReportingFactory;
 
 public class FtpOutboxClient extends AbstractOutboxClient {
 	public static final class Factory implements OutboxClient.Factory {
 		@Override
-		public OutboxClient newClient(ObsClient obsClient, OutboxConfiguration config, final PathEvaluater eval) {
+		public OutboxClient newClient(final ObsClient obsClient, final OutboxConfiguration config, final PathEvaluater eval) {
 			return new FtpOutboxClient(obsClient, config, eval);
 		}			
 	}
 	
 	private static final int DEFAULT_PORT = 21;
 	
-	public FtpOutboxClient(ObsClient obsClient, OutboxConfiguration config, PathEvaluater pathEvaluator) {
+	public FtpOutboxClient(final ObsClient obsClient, final OutboxConfiguration config, final PathEvaluater pathEvaluator) {
 		super(obsClient, config, pathEvaluator);
 	}
 	
 	@Override
-	public String transfer(final ObsObject obsObject, final Reporting.ChildFactory reportingChildFactory) throws Exception {
+	public String transfer(final ObsObject obsObject, final ReportingFactory reportingFactory) throws Exception {
 		final FTPClient ftpClient = new FTPClient();
 		ftpClient.addProtocolCommandListener(
 				new PrintCommandListener(new LogPrintWriter(s -> logger.debug(s)), true)
@@ -42,10 +42,10 @@ public class FtpOutboxClient extends AbstractOutboxClient {
 		ftpClient.connect(config.getHostname(), port);
 	    assertPositiveCompletion(ftpClient);
         
-        return performTransfer(obsObject, ftpClient, reportingChildFactory);
+        return performTransfer(obsObject, ftpClient, reportingFactory);
 	}
 
-	protected String performTransfer(final ObsObject obsObject, final FTPClient ftpClient, final Reporting.ChildFactory reportingChildFactory)
+	protected String performTransfer(final ObsObject obsObject, final FTPClient ftpClient, final ReportingFactory reportingFactory)
 			throws IOException, SdkClientException {
 		if (!ftpClient.login(config.getUsername(), config.getPassword())) {
         	throw new RuntimeException("Could not authenticate user " + config.getUsername());
@@ -67,7 +67,7 @@ public class FtpOutboxClient extends AbstractOutboxClient {
 			final String retVal = config.getProtocol().toString().toLowerCase() + "://" + config.getHostname() + 
 					path.toString();
 					
-			for (final Map.Entry<String, InputStream> entry : entries(obsObject, reportingChildFactory)) {
+			for (final Map.Entry<String, InputStream> entry : entries(obsObject, reportingFactory)) {
 				
 				final Path dest = path.resolve(entry.getKey());
     			
@@ -83,7 +83,7 @@ public class FtpOutboxClient extends AbstractOutboxClient {
     	 	    	 			
 	 				logger.debug("current path is {}", currentPath);
 	 				
-	 				boolean directoryExists = ftpClient.changeWorkingDirectory(currentPath);
+	 				final boolean directoryExists = ftpClient.changeWorkingDirectory(currentPath);
 	 				if (directoryExists) {
 	 					continue;
 	 				}

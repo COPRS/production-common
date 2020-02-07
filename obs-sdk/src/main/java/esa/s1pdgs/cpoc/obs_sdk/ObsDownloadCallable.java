@@ -6,7 +6,7 @@ import java.util.List;
 import java.util.concurrent.Callable;
 
 import esa.s1pdgs.cpoc.common.errors.AbstractCodedException;
-import esa.s1pdgs.cpoc.report.Reporting;
+import esa.s1pdgs.cpoc.report.ReportingFactory;
 
 /**
  * Callable to download a file / folder from the OBS
@@ -25,7 +25,7 @@ public class ObsDownloadCallable implements Callable<List<File>> {
      */
     private final ObsDownloadObject object;
     
-    private final Reporting.ChildFactory reportingChildFactory;
+    private final ReportingFactory reportingFactory;
     
     /**
      * Default constructor
@@ -34,10 +34,10 @@ public class ObsDownloadCallable implements Callable<List<File>> {
      * @param object
      */
     public ObsDownloadCallable(final ObsClient obsClient,
-            final ObsDownloadObject object, final Reporting.ChildFactory reportingChildFactory) {
+            final ObsDownloadObject object, final ReportingFactory reportingFactory) {
         this.obsClient = obsClient;
         this.object = object;
-        this.reportingChildFactory = reportingChildFactory;
+        this.reportingFactory = reportingFactory;
     }
 
     /**
@@ -46,7 +46,7 @@ public class ObsDownloadCallable implements Callable<List<File>> {
      */
     @Override
     public List<File> call() throws ObsServiceException, AbstractCodedException {
-        final List<File> files = obsClient.download(Arrays.asList(object), reportingChildFactory);
+        final List<File> files = obsClient.download(Arrays.asList(object), reportingFactory);
 		if (files.size() <= 0) {
 			throw new ObsServiceException(
 					String.format("Unknown object %s with family %s", object.getKey(), object.getFamily()));

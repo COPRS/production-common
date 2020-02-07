@@ -145,7 +145,7 @@ public class DisseminationService implements MqiListener<ProductionEvent> {
 	final void handleTransferTo(final GenericMessageDto<ProductionEvent> message, final String target) {		
 		final ProductionEvent product = message.getBody();
 		
-		final Reporting reporting = ReportingUtils.newReportingBuilder().newTaskReporting("Dissemination");		
+		final Reporting reporting = ReportingUtils.newReportingBuilder().newReporting("Dissemination");		
 		reporting.begin(
 				new FilenameReportingInput(product.getKeyObjectStorage()),
 				new ReportingMessage("Start dissemination of product to outbox {}", target) 
@@ -155,7 +155,7 @@ public class DisseminationService implements MqiListener<ProductionEvent> {
 			assertExists(product);
 			final OutboxClient outboxClient = clientForTarget(target);
 			final String targetUrl = Retries.performWithRetries(
-					() -> outboxClient.transfer(new ObsObject(product.getProductFamily(), product.getKeyObjectStorage()), reporting.getChildFactory()), 
+					() -> outboxClient.transfer(new ObsObject(product.getProductFamily(), product.getKeyObjectStorage()), reporting), 
 					"Transfer of " + product.getKeyObjectStorage() + " to " + target,
 					properties.getMaxRetries(), 
 					properties.getTempoRetryMs()

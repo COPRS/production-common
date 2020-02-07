@@ -21,6 +21,7 @@ import esa.s1pdgs.cpoc.obs_sdk.ObsClient;
 import esa.s1pdgs.cpoc.obs_sdk.ObsEmptyFileException;
 import esa.s1pdgs.cpoc.obs_sdk.ObsUploadObject;
 import esa.s1pdgs.cpoc.report.Reporting;
+import esa.s1pdgs.cpoc.report.ReportingFactory;
 import esa.s1pdgs.cpoc.report.ReportingMessage;
 
 public class FileUploader {
@@ -64,11 +65,11 @@ public class FileUploader {
 		this.job = job;
 	}
 
-	public String processOutput(final Reporting.ChildFactory reportingChildFactory) throws AbstractCodedException, ObsEmptyFileException {
+	public String processOutput(final ReportingFactory reportingFactory) throws AbstractCodedException, ObsEmptyFileException {
 
 		final List<CompressedProductQueueMessage> outputToPublish = new ArrayList<>();
 
-		String zipFileName = job.getOutputKeyObjectStorage();
+		final String zipFileName = job.getOutputKeyObjectStorage();
 		final File productPath = new File(workingDir + "/" + zipFileName + "/" + zipFileName);
 		if (!productPath.exists()) {
 			throw new InternalErrorException(
@@ -86,9 +87,9 @@ public class FileUploader {
 		if (Thread.currentThread().isInterrupted()) {
 			throw new InternalErrorException("The current thread as been interrupted");
 		}
-		obsClient.upload(Arrays.asList(new ObsUploadObject(uploadObject.getFamily(), uploadObject.getKey(), uploadObject.getFile())), reportingChildFactory);
+		obsClient.upload(Arrays.asList(new ObsUploadObject(uploadObject.getFamily(), uploadObject.getKey(), uploadObject.getFile())), reportingFactory);
 		
-		publishAccordingUploadFiles(reportingChildFactory, NOT_KEY_OBS, outputToPublish);
+		publishAccordingUploadFiles(reportingFactory, NOT_KEY_OBS, outputToPublish);
         
         return zipFileName;
 	}
@@ -101,7 +102,7 @@ public class FileUploader {
 	 * @param outputToPublish
 	 * @throws AbstractCodedException
 	 */
-	private void publishAccordingUploadFiles(final Reporting.ChildFactory reportingChildFactory, final String nextKeyUpload,
+	private void publishAccordingUploadFiles(final ReportingFactory reportingFactory, final String nextKeyUpload,
 			final List<CompressedProductQueueMessage> outputToPublish) throws AbstractCodedException {
 
         LOGGER.info("{} 3 - Publishing KAFKA messages for batch ");
@@ -115,7 +116,7 @@ public class FileUploader {
 			if (nextKeyUpload.startsWith(msg.getObjectStorageKey())) {
 				stop = true;
 			} else {
-				final Reporting report = reportingChildFactory.newChild("Publish");
+				final Reporting report = reportingFactory.newReporting("Publish");
 
 				report.begin(new ReportingMessage("Start publishing file {}", msg.getObjectStorageKey()));
 				try {

@@ -20,7 +20,7 @@ import esa.s1pdgs.cpoc.mdc.worker.extraction.model.AuxDescriptor;
 import esa.s1pdgs.cpoc.mqi.model.queue.CatalogJob;
 import esa.s1pdgs.cpoc.mqi.model.rest.GenericMessageDto;
 import esa.s1pdgs.cpoc.obs_sdk.ObsClient;
-import esa.s1pdgs.cpoc.report.Reporting;
+import esa.s1pdgs.cpoc.report.ReportingFactory;
 
 public final class AuxMetadataExtractor extends AbstractMetadataExtractor {	
 	private static final List<String> AUX_ECE_TYPES = Arrays.asList("AMV_ERRMAT", "AMH_ERRMAT");
@@ -36,10 +36,10 @@ public final class AuxMetadataExtractor extends AbstractMetadataExtractor {
 	}
 
 	@Override
-	public JSONObject extract(final Reporting.ChildFactory reportingChildFactory, final GenericMessageDto<CatalogJob> message) throws AbstractCodedException {
+	public JSONObject extract(final ReportingFactory reportingFactory, final GenericMessageDto<CatalogJob> message) throws AbstractCodedException {
 		final CatalogJob job = message.getBody();
 		final File metadataFile = downloadMetadataFileToLocalFolder(
-				reportingChildFactory,
+				reportingFactory,
 				ProductFamily.AUXILIARY_FILE, 
 				job.getKeyObjectStorage()
 		);

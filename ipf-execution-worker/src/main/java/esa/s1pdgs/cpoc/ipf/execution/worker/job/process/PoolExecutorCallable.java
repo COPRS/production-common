@@ -15,6 +15,7 @@ import esa.s1pdgs.cpoc.ipf.execution.worker.config.ApplicationProperties;
 import esa.s1pdgs.cpoc.mqi.model.queue.IpfExecutionJob;
 import esa.s1pdgs.cpoc.mqi.model.queue.LevelJobPoolDto;
 import esa.s1pdgs.cpoc.report.Reporting;
+import esa.s1pdgs.cpoc.report.ReportingFactory;
 import esa.s1pdgs.cpoc.report.ReportingMessage;
 
 /**
@@ -31,7 +32,7 @@ public class PoolExecutorCallable implements Callable<Void> {
     private static final Logger LOGGER =
             LogManager.getLogger(PoolExecutorCallable.class);
 
-    private final Reporting.ChildFactory reportingChildFactory;
+    private final ReportingFactory reportingFactory;
     
     /**
      * Indicate if the working directory is ready and the processes can be
@@ -67,7 +68,7 @@ public class PoolExecutorCallable implements Callable<Void> {
      */
     public PoolExecutorCallable(final ApplicationProperties properties,
             final IpfExecutionJob job, final String prefixLogs, final ApplicationLevel appLevel,
-            final Reporting.ChildFactory reportingChildFactory) {
+            final ReportingFactory reportingFactory) {
         this.active = false;
         this.properties = properties;
         this.prefixMonitorLogs = prefixLogs;
@@ -81,7 +82,7 @@ public class PoolExecutorCallable implements Callable<Void> {
                     properties.getTmProcOneTaskS()));
         }
         this.appLevel = appLevel;
-        this.reportingChildFactory = reportingChildFactory;
+        this.reportingFactory = reportingFactory;
     }
 
     /**
@@ -119,7 +120,7 @@ public class PoolExecutorCallable implements Callable<Void> {
                                 + counter * properties.getWapTempoS()
                                 + " seconds");
             }            
-    		final Reporting reporting = reportingChildFactory.newChild("Processing");
+    		final Reporting reporting = reportingFactory.newReporting("Processing");
     		
             reporting.begin(new ReportingMessage("Start " + appLevel + " processing"));
                        
@@ -129,7 +130,7 @@ public class PoolExecutorCallable implements Callable<Void> {
 				        throw new InternalErrorException(
 				                "Current thread has been interrupted");
 				    }
-				    poolProcessor.process(reporting.getChildFactory());
+				    poolProcessor.process(reporting);
 				}
 			} catch (final AbstractCodedException e) {
 				reporting.error(new ReportingMessage("[code {}] {}", e.getCode().getCode(), e.getLogMessage()));

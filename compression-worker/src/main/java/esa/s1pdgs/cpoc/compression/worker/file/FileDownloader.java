@@ -12,7 +12,7 @@ import esa.s1pdgs.cpoc.common.errors.UnknownFamilyException;
 import esa.s1pdgs.cpoc.mqi.model.queue.CompressionJob;
 import esa.s1pdgs.cpoc.obs_sdk.ObsClient;
 import esa.s1pdgs.cpoc.obs_sdk.ObsDownloadObject;
-import esa.s1pdgs.cpoc.report.Reporting;
+import esa.s1pdgs.cpoc.report.ReportingFactory;
 
 public class FileDownloader {
 	/**
@@ -48,7 +48,7 @@ public class FileDownloader {
 	 * 
 	 * @throws AbstractCodedException
 	 */
-	public void processInputs(final Reporting.ChildFactory reportingChildFactory) throws AbstractCodedException {
+	public void processInputs(final ReportingFactory reportingFactory) throws AbstractCodedException {
 		// prepare directory structure
 		LOGGER.info("CompressionProcessor 1 - Creating working directory");
 		final File workingDir = new File(localWorkingDir);
@@ -59,7 +59,7 @@ public class FileDownloader {
 
 		// download input from object storage in batch
 		LOGGER.info("4 - Starting downloading input product {}", inputProduct);
-		obsClient.download(Arrays.asList(new ObsDownloadObject(inputProduct.getFamily(), inputProduct.getKey(), inputProduct.getTargetDir())), reportingChildFactory);
+		obsClient.download(Arrays.asList(new ObsDownloadObject(inputProduct.getFamily(), inputProduct.getKey(), inputProduct.getTargetDir())), reportingFactory);
 	}
 
 	/**

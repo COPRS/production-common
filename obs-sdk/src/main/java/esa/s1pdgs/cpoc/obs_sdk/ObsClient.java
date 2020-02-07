@@ -13,7 +13,7 @@ import org.apache.logging.log4j.Logger;
 import esa.s1pdgs.cpoc.common.ProductFamily;
 import esa.s1pdgs.cpoc.common.errors.AbstractCodedException;
 import esa.s1pdgs.cpoc.common.errors.obs.ObsException;
-import esa.s1pdgs.cpoc.report.Reporting;
+import esa.s1pdgs.cpoc.report.ReportingFactory;
 
 /**
  * <p>
@@ -70,22 +70,22 @@ public interface ObsClient {
 	List<ObsObject> getObsObjectsOfFamilyWithinTimeFrame(ProductFamily obsFamily, Date timeFrameBegin, Date timeFrameEnd)
 			throws SdkClientException, ObsServiceException;
 	
-	List<File> download(final List<ObsDownloadObject> objects, final Reporting.ChildFactory reportingChildFactory) throws AbstractCodedException;
+	List<File> download(final List<ObsDownloadObject> objects, final ReportingFactory reportingFactory) throws AbstractCodedException;
 	
-	void upload(final List<ObsUploadObject> objects, final Reporting.ChildFactory reportingChildFactory) throws AbstractCodedException, ObsEmptyFileException;
+	void upload(final List<ObsUploadObject> objects, final ReportingFactory reportingFactory) throws AbstractCodedException, ObsEmptyFileException;
 	
 	void move(final ObsObject from, final ProductFamily to) throws ObsException, ObsServiceException;
 
-	Map<String,ObsObject> listInterval(final ProductFamily family, Date intervalStart, Date intervalEnd, final Reporting.ChildFactory reportingChildFactory) throws SdkClientException;
+	Map<String,ObsObject> listInterval(final ProductFamily family, Date intervalStart, Date intervalEnd, final ReportingFactory reportingFactory) throws SdkClientException;
 	
-    Map<String, InputStream> getAllAsInputStream(final ProductFamily family, final String keyPrefix, final Reporting.ChildFactory reportingChildFactory) throws SdkClientException;
+    Map<String, InputStream> getAllAsInputStream(final ProductFamily family, final String keyPrefix, final ReportingFactory reportingFactory) throws SdkClientException;
 
     /**
      * Performing a validation check on the given product. All checksum of the product manifest are verified and it
      * is checked if there are superfluous files stored for directory products.
      * @param object
      * A ObsObject containing family and key of the object that shall be validated
-     * @param reportingChildFactory
+     * @param reportingFactory
      * Factory for creating reporting objects
      * @throws ObsServiceException
      * If a consistency issue is found an exception is raised providing the product name it occured
@@ -93,7 +93,7 @@ public interface ObsClient {
      * @throws ObsValidationException
      * @throws IllegalArgumentException
      */
-    void validate(ObsObject object, Reporting.ChildFactory reportingChildFactory) throws ObsServiceException, ObsValidationException;
+    void validate(ObsObject object, ReportingFactory reportingFactory) throws ObsServiceException, ObsValidationException;
     
     /**
      * Returns the size of the OBS object requested

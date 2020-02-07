@@ -63,7 +63,7 @@ public class SlicesConsumer {
    
     	//this.appStatus.setProcessing("SLICES"); // Commented out because AppStatusImpl can currently only track one thing and is used by the ReportsConsumer
 
-    	Reporting reporting = ReportingUtils.newReportingBuilder().newTaskReporting("Archives");
+    	Reporting reporting = ReportingUtils.newReportingBuilder().newReporting("Archives");
     	reporting.begin(new ReportingMessage("Start archiving"));
 
         try {
@@ -71,11 +71,11 @@ public class SlicesConsumer {
                 this.obsClient.download(Arrays.asList(new ObsDownloadObject(dto.getProductFamily(),
                         dto.getKeyObjectStorage() + "/manifest.safe",
                         this.sharedVolume + "/"
-                                + dto.getProductFamily().name().toLowerCase())), reporting.getChildFactory());
+                                + dto.getProductFamily().name().toLowerCase())), reporting);
             } else {
                 this.obsClient.download(Arrays.asList(new ObsDownloadObject(dto.getProductFamily(),
                         dto.getKeyObjectStorage(), this.sharedVolume + "/"
-                                + dto.getProductFamily().name().toLowerCase())), reporting.getChildFactory());
+                                + dto.getProductFamily().name().toLowerCase())), reporting);
             }
             acknowledgment.acknowledge();
         } catch (ObsException e) {

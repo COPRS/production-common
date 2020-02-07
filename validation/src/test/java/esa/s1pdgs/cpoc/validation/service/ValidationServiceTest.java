@@ -36,7 +36,7 @@ public class ValidationServiceTest {
 
 	private ValidationService validationService;
 	
-	final Reporting reporting = ReportingUtils.newReportingBuilder().newTaskReporting("ValidationService");
+	final Reporting reporting = ReportingUtils.newReportingBuilder().newReporting("ValidationService");
 
 	@Mock
 	Reporting report;
@@ -112,7 +112,7 @@ public class ValidationServiceTest {
 		// OBS does have 6 elements, but two are actually the same product
 		assertEquals(5,validationService.extractRealKeys(obsResults.values(),ProductFamily.AUXILIARY_FILE).size());
 
-		validationService.validateProductFamily(reporting.getChildFactory(), ProductFamily.AUXILIARY_FILE, localDateTimeStart,
+		validationService.validateProductFamily(reporting, ProductFamily.AUXILIARY_FILE, localDateTimeStart,
 				localDateTimeStop);
 	}
 }

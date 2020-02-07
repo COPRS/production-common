@@ -203,7 +203,7 @@ public class TestAuxMetadataExtractor {
 			final String productType) throws AbstractCodedException {
 		final List<File> files = Arrays.asList(new File(testDir,metadataFile));
 		
-		final Reporting reporting = ReportingUtils.newReportingBuilder().newTaskReporting("TestMetadataExtraction");
+		final Reporting reporting = ReportingUtils.newReportingBuilder().newReporting("TestMetadataExtraction");
 
 		doReturn(files).when(obsClient).download(Mockito.anyList(), Mockito.any());
 
@@ -221,7 +221,7 @@ public class TestAuxMetadataExtractor {
 
 		
 		final JSONObject expected = extractor.mdBuilder.buildConfigFileMetadata(expectedDescriptor, files.get(0));
-		final JSONObject result = extractor.extract(reporting.getChildFactory(), inputMessage);
+		final JSONObject result = extractor.extract(reporting, inputMessage);
 		for (final String key : expected.keySet()) {
 			if (!"insertionTime".equals(key)) {
 				assertEquals(expected.get(key), result.get(key));

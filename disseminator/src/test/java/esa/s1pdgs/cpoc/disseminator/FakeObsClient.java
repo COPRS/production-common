@@ -16,79 +16,79 @@ import esa.s1pdgs.cpoc.obs_sdk.ObsObject;
 import esa.s1pdgs.cpoc.obs_sdk.ObsServiceException;
 import esa.s1pdgs.cpoc.obs_sdk.ObsUploadObject;
 import esa.s1pdgs.cpoc.obs_sdk.SdkClientException;
-import esa.s1pdgs.cpoc.report.Reporting;
+import esa.s1pdgs.cpoc.report.ReportingFactory;
 
 // dummy impl - doin nothin
 public abstract class FakeObsClient implements ObsClient {	
 	@Override
-	public boolean exists(ObsObject object) throws SdkClientException, ObsServiceException {
+	public boolean exists(final ObsObject object) throws SdkClientException, ObsServiceException {
 		// TODO Auto-generated method stub
 		return false;
 	}
 
 	@Override
-	public boolean prefixExists(ObsObject object) throws SdkClientException, ObsServiceException {
+	public boolean prefixExists(final ObsObject object) throws SdkClientException, ObsServiceException {
 		// TODO Auto-generated method stub
 		return false;
 	}
 
 	@Override
-	public List<File> download(final List<ObsDownloadObject> objects, Reporting.ChildFactory reportingChildFactory) throws AbstractCodedException {
+	public List<File> download(final List<ObsDownloadObject> objects, final ReportingFactory reportingFactory) throws AbstractCodedException {
 		// TODO Auto-generated method stub
 		return null;
 	}
 
 	@Override
-	public void upload(final List<ObsUploadObject> objects, Reporting.ChildFactory reportingChildFactory) throws AbstractCodedException {
+	public void upload(final List<ObsUploadObject> objects, final ReportingFactory reportingFactory) throws AbstractCodedException {
 		// TODO Auto-generated method stub
 	}
 
 	@Override
-	public List<ObsObject> getObsObjectsOfFamilyWithinTimeFrame(ProductFamily obsFamily,
-			Date timeFrameBegin, Date timeFrameEnd) throws SdkClientException, ObsServiceException {
+	public List<ObsObject> getObsObjectsOfFamilyWithinTimeFrame(final ProductFamily obsFamily,
+			final Date timeFrameBegin, final Date timeFrameEnd) throws SdkClientException, ObsServiceException {
 		// TODO Auto-generated method stub
 		return null;
 	}
 
 	@Override
-	public void move(ObsObject from, ProductFamily to) throws ObsException {
+	public void move(final ObsObject from, final ProductFamily to) throws ObsException {
 		// TODO Auto-generated method stub
 
 	}
 
 	@Override
-	public Map<String, ObsObject> listInterval(ProductFamily family, Date intervalStart, Date intervalEnd, Reporting.ChildFactory reportingChildFactory)
+	public Map<String, ObsObject> listInterval(final ProductFamily family, final Date intervalStart, final Date intervalEnd, final ReportingFactory reportingFactory)
 			throws SdkClientException {
 		// TODO Auto-generated method stub
 		return null;
 	}
 
 	@Override
-	public Map<String, InputStream> getAllAsInputStream(ProductFamily family, String keyPrefix, Reporting.ChildFactory reportingChildFactory)
+	public Map<String, InputStream> getAllAsInputStream(final ProductFamily family, final String keyPrefix, final ReportingFactory reportingFactory)
 			throws SdkClientException {
 		return null;
 	}
 	
 	@Override
-	public void validate(ObsObject object, Reporting.ChildFactory reportingChildFactory) throws ObsServiceException {
+	public void validate(final ObsObject object, final ReportingFactory reportingFactory) throws ObsServiceException {
 	    // TODO Auto-generated method stub
 
 	}
 
 	@Override
-	public long size(ObsObject object) throws ObsException {
+	public long size(final ObsObject object) throws ObsException {
 		// TODO Auto-generated method stub
 		return 0;
 	}
 
 	@Override
-	public String getChecksum(ObsObject object) throws ObsException {
+	public String getChecksum(final ObsObject object) throws ObsException {
 		// TODO Auto-generated method stub
 		return null;
 	}
 	
 	@Override
-	public URL createTemporaryDownloadUrl(ObsObject object, long expirationTimeInSeconds)
+	public URL createTemporaryDownloadUrl(final ObsObject object, final long expirationTimeInSeconds)
 			throws ObsException, ObsServiceException {
 		// TODO Auto-generated method stub
 		return null;

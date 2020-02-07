@@ -25,12 +25,11 @@ import esa.s1pdgs.cpoc.common.errors.InternalErrorException;
 import esa.s1pdgs.cpoc.common.errors.UnknownFamilyException;
 import esa.s1pdgs.cpoc.common.utils.FileUtils;
 import esa.s1pdgs.cpoc.ipf.execution.worker.TestUtils;
-import esa.s1pdgs.cpoc.ipf.execution.worker.job.file.InputDownloader;
 import esa.s1pdgs.cpoc.ipf.execution.worker.job.process.PoolExecutorCallable;
 import esa.s1pdgs.cpoc.mqi.model.queue.IpfExecutionJob;
 import esa.s1pdgs.cpoc.obs_sdk.ObsClient;
 import esa.s1pdgs.cpoc.obs_sdk.ObsDownloadObject;
-import esa.s1pdgs.cpoc.report.Reporting;
+import esa.s1pdgs.cpoc.report.ReportingFactory;
 
 /**
  * Test the input downloader
@@ -97,8 +96,8 @@ public class InputDownloaderTest {
     public void testSortInputs() throws AbstractCodedException, IOException {
         jobL0.addInput(TestUtils.buildBlankInputDto());
 
-        List<ObsDownloadObject> downloadToBatch = TestUtils.getL0DownloadFile();
-        List<ObsDownloadObject> result = downloaderL0.sortInputs();
+        final List<ObsDownloadObject> downloadToBatch = TestUtils.getL0DownloadFile();
+        final List<ObsDownloadObject> result = downloaderL0.sortInputs();
 
         // Check work directory and subdirectories are created     
         
@@ -143,9 +142,9 @@ public class InputDownloaderTest {
     public void testProcessInputsL0()
             throws AbstractCodedException, IOException {
 
-        downloaderL0.processInputs(Reporting.ChildFactory.NULL);
+        downloaderL0.processInputs(ReportingFactory.NULL);
 
-        List<ObsDownloadObject> downloadToBatch = TestUtils.getL0DownloadFile();
+        final List<ObsDownloadObject> downloadToBatch = TestUtils.getL0DownloadFile();
 
         // Check work directory and subdirectories are created
         assertTrue(workDirectory.isDirectory());
@@ -178,9 +177,9 @@ public class InputDownloaderTest {
     @Test
     public void testProcessInputsL1()
             throws AbstractCodedException, IOException {
-        downloaderL1.processInputs(Reporting.ChildFactory.NULL);
+        downloaderL1.processInputs(ReportingFactory.NULL);
 
-        List<ObsDownloadObject> downloadToBatch = TestUtils.getL0DownloadFile();
+        final List<ObsDownloadObject> downloadToBatch = TestUtils.getL0DownloadFile();
 
         // Check work directory and subdirectories are created
         assertTrue(workDirectory.isDirectory());

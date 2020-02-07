@@ -86,7 +86,7 @@ public final class MqiConsumer<E extends AbstractMessage> implements Runnable {
 					LOG.trace("No message received: continue");
 					continue;
 				}
-				if (!allowConsumption(message)) {
+				if (!allowConsumption(message)) {					
 					ReportingUtils.newReportingBuilder().newEventReporting(new ReportingMessage("Ignored MQI message: {}", message));
 					LOG.trace("Filter does not allow consumption: continue");
 					continue;

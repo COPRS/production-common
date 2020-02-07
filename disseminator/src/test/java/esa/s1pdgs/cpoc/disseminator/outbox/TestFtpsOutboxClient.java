@@ -35,7 +35,7 @@ import esa.s1pdgs.cpoc.disseminator.FakeObsClient;
 import esa.s1pdgs.cpoc.disseminator.config.DisseminationProperties.OutboxConfiguration;
 import esa.s1pdgs.cpoc.disseminator.path.PathEvaluater;
 import esa.s1pdgs.cpoc.obs_sdk.ObsObject;
-import esa.s1pdgs.cpoc.report.Reporting;
+import esa.s1pdgs.cpoc.report.ReportingFactory;
 
 public class TestFtpsOutboxClient {	
 	private static final String USER = "user";
@@ -152,7 +152,7 @@ public class TestFtpsOutboxClient {
 	public final void testFoo() throws Exception {
 		final FakeObsClient fakeObsClient = new FakeObsClient() {
 			@Override
-			public Map<String, InputStream> getAllAsInputStream(ProductFamily family, String keyPrefix, Reporting.ChildFactory reportingChildFactory) {
+			public Map<String, InputStream> getAllAsInputStream(final ProductFamily family, final String keyPrefix, final ReportingFactory reportingFactory) {
 				return Collections.singletonMap("my/little/file", new ByteArrayInputStream("expected file content".getBytes()));
 			}			
 		};		
@@ -167,7 +167,7 @@ public class TestFtpsOutboxClient {
 		final File dir = new File(userDir, testDir.toPath().toString());
 		
 		final FtpsOutboxClient uut = new FtpsOutboxClient(fakeObsClient, config, PathEvaluater.NULL);		
-		uut.transfer(new ObsObject(ProductFamily.BLANK, "my/little/file"), Reporting.ChildFactory.NULL);
+		uut.transfer(new ObsObject(ProductFamily.BLANK, "my/little/file"), ReportingFactory.NULL);
 		
 		final File expectedFile = new File(dir, "my/little/file");
 		assertEquals(true, expectedFile.exists());

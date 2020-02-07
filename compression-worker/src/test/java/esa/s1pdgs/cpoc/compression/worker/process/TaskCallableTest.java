@@ -19,7 +19,7 @@ import esa.s1pdgs.cpoc.report.Reporting;
 import esa.s1pdgs.cpoc.report.ReportingUtils;
 
 public class TaskCallableTest {
-	final Reporting report = ReportingUtils.newReportingBuilder().newTaskReporting("TestProcessing");
+	final Reporting report = ReportingUtils.newReportingBuilder().newReporting("TestProcessing");
 	  
 	private File testDir;
 	private File script;

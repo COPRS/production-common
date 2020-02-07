@@ -157,10 +157,10 @@ public class TestEdrsMetadataExtractor {
         expectedDescriptor.setKeyObjectStorage("123/ch01/D_123_ch01_D.RAW");
         expectedDescriptor.setProductFamily(ProductFamily.EDRS_SESSION);
         
-		final Reporting reporting = ReportingUtils.newReportingBuilder().newTaskReporting("TestMetadataExtraction");
+		final Reporting reporting = ReportingUtils.newReportingBuilder().newReporting("TestMetadataExtraction");
 		
         final JSONObject expected = extractor.mdBuilder.buildEdrsSessionFileRaw(expectedDescriptor);
-        final JSONObject result = extractor.extract(reporting.getChildFactory(), inputMessage);
+        final JSONObject result = extractor.extract(reporting, inputMessage);
         
         for (final String key: expected.keySet()) {
             if (!"insertionTime".equals(key)) {

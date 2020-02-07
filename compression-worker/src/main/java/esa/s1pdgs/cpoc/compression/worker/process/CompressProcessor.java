@@ -95,7 +95,7 @@ public class CompressProcessor implements MqiListener<CompressionJob> {
 
 	@Override
 	public final void onMessage(final GenericMessageDto<CompressionJob> message) throws Exception {
-		final Reporting report = ReportingUtils.newReportingBuilder().newTaskReporting("CompressionProcessing");
+		final Reporting report = ReportingUtils.newReportingBuilder().newReporting("CompressionProcessing");
 		final String workDir = properties.getWorkingDirectory();
 		final CompressionJob job = message.getBody();
 
@@ -119,7 +119,7 @@ public class CompressProcessor implements MqiListener<CompressionJob> {
 		try {			
 			checkThreadInterrupted();
 			LOGGER.info("Downloading inputs for {}", job);
-			fileDownloader.processInputs(report.getChildFactory());
+			fileDownloader.processInputs(report);
 
 			checkThreadInterrupted();
 			LOGGER.info("Compressing inputs for {}", job);
@@ -128,7 +128,7 @@ public class CompressProcessor implements MqiListener<CompressionJob> {
 
 			checkThreadInterrupted();
 			LOGGER.info("Uploading compressed outputs for {}", job);
-			final String filename = fileUploader.processOutput(report.getChildFactory());
+			final String filename = fileUploader.processOutput(report);
 			report.end(
 					new FilenameReportingOutput(filename), 
 					new ReportingMessage("End compression processing")

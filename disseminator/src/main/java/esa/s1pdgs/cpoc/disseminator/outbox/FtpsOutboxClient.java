@@ -14,24 +14,24 @@ import esa.s1pdgs.cpoc.disseminator.config.DisseminationProperties.OutboxConfigu
 import esa.s1pdgs.cpoc.disseminator.path.PathEvaluater;
 import esa.s1pdgs.cpoc.obs_sdk.ObsClient;
 import esa.s1pdgs.cpoc.obs_sdk.ObsObject;
-import esa.s1pdgs.cpoc.report.Reporting;
+import esa.s1pdgs.cpoc.report.ReportingFactory;
 
 public final class FtpsOutboxClient extends FtpOutboxClient {
 	public static final class Factory implements OutboxClient.Factory {
 		@Override
-		public OutboxClient newClient(ObsClient obsClient, OutboxConfiguration config, final PathEvaluater eval) {
+		public OutboxClient newClient(final ObsClient obsClient, final OutboxConfiguration config, final PathEvaluater eval) {
 			return new FtpsOutboxClient(obsClient, config, eval);
 		}			
 	}
 	
 	private static final int DEFAULT_PORT = 990;
 
-	public FtpsOutboxClient(ObsClient obsClient, OutboxConfiguration config, PathEvaluater pathEvaluator) {
+	public FtpsOutboxClient(final ObsClient obsClient, final OutboxConfiguration config, final PathEvaluater pathEvaluator) {
 		super(obsClient, config, pathEvaluator);
 	}
 
 	@Override
-	public String transfer(final ObsObject obsObject, final Reporting.ChildFactory reportingChildFactory) throws Exception {
+	public String transfer(final ObsObject obsObject, final ReportingFactory reportingFactory) throws Exception {
 		final FTPSClient ftpsClient = new FTPSClient("TLS", true);
 
 		// if a keystore is configured, client authentication will be enabled. If it shall not be used, simply
@@ -71,7 +71,7 @@ public final class FtpsOutboxClient extends FtpOutboxClient {
 	    ftpsClient.execPROT("P");
         assertPositiveCompletion(ftpsClient);
         
-        return performTransfer(obsObject, ftpsClient, reportingChildFactory);
+        return performTransfer(obsObject, ftpsClient, reportingFactory);
 	}	
 	
 	static final KeyStore newKeyStore(final InputStream in, final String password)

@@ -86,7 +86,7 @@ public class TestLevelSegmentMetadataExtractor {
     private GenericMessageDto<CatalogJob> inputMessageSafe;
 
     
-	final Reporting reporting = ReportingUtils.newReportingBuilder().newTaskReporting("TestMetadataExtraction");
+	final Reporting reporting = ReportingUtils.newReportingBuilder().newReporting("TestMetadataExtraction");
     
     private static final File inputDir = new File("src/test/resources/workDir/");
     
@@ -191,7 +191,7 @@ public class TestLevelSegmentMetadataExtractor {
         final JSONObject expected = extractor.mdBuilder
                 .buildL0SegmentOutputFileMetadata(descriptor, files.get(0));
 
-        final JSONObject result = extractor.extract(reporting.getChildFactory(), inputMessageSafe);
+        final JSONObject result = extractor.extract(reporting, inputMessageSafe);
         for (final String key : expected.keySet()) {
             if (!("insertionTime".equals(key) || "segmentCoordinates".equals(key) || "creationTime".equals(key))) {
                 assertEquals(expected.get(key), result.get(key));

@@ -23,7 +23,7 @@ import esa.s1pdgs.cpoc.report.Reporting;
 import esa.s1pdgs.cpoc.report.ReportingUtils;
 
 public class TaskCallableTest {
-    private final Reporting reporting = ReportingUtils.newReportingBuilder().newTaskReporting("TestProcessing");
+    private final Reporting reporting = ReportingUtils.newReportingBuilder().newReporting("TestProcessing");
 	  
 	private File testDir;
 	private File ipf;
@@ -54,7 +54,7 @@ public class TaskCallableTest {
 	@Test
 	public void testRun_Nominal() throws Exception {		
 		final Future<TaskResult> future = completionService.submit(
-				new TaskCallable(ipf.getPath(), "0", testDir.getPath(), reporting.getChildFactory())
+				new TaskCallable(ipf.getPath(), "0", testDir.getPath(), reporting)
 		);
 		final TaskResult result = future.get();
 		assertEquals(ipf.getPath(), result.getBinary());
@@ -68,7 +68,7 @@ public class TaskCallableTest {
 		final Consumer<String> outputConsumer = m -> builder.append(m).append(';');
 
 		final Future<TaskResult> future = completionService
-				.submit(new TaskCallable(ipf.getPath(), "0", testDir.getPath(), outputConsumer, outputConsumer, reporting.getChildFactory()));
+				.submit(new TaskCallable(ipf.getPath(), "0", testDir.getPath(), outputConsumer, outputConsumer, reporting));
 		final TaskResult result = future.get();
 		assertEquals(ipf.getPath(), result.getBinary());
 		assertEquals(0, result.getExitCode());

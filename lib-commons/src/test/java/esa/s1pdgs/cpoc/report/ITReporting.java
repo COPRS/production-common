@@ -18,16 +18,16 @@ public final class ITReporting {
 	
 	@Test
 	public final void testReportingVsLogging() {
-		Reporting uut = ReportingUtils.newReportingBuilder().newTaskReporting("test");
+		Reporting uut = ReportingUtils.newReportingBuilder().newReporting("test");
 		
 		uut.begin(new ReportingMessage("Foo"));		
 		uut.end(new ReportingMessage(42000L, "baz"));	
 		
-		uut = uut.getChildFactory().newChild("test.child");
+		uut = uut.newReporting("test.child");
 		uut.begin(new ReportingMessage("Foo"));		
 		uut.end(new JobOrderReportingOutput(UUID.randomUUID().toString(), Collections.singletonMap("foo_string", "bar")), new ReportingMessage(42000L, "baz"));
 		
-		uut = ReportingUtils.newReportingBuilder().newTaskReporting("test2");
+		uut = ReportingUtils.newReportingBuilder().newReporting("test2");
 		uut.begin(new ReportingMessage("Foo"));
 		uut.end(new FilenameReportingOutput(Collections.singletonList("fooBar.txt")), new ReportingMessage(230000000L,"Foo"));
 		
@@ -36,9 +36,9 @@ public final class ITReporting {
 	
 	@Test
 	public final void testRootUID() {
-		Reporting uut =  ReportingUtils.newReportingBuilder().newTaskReporting("root");		
+		final Reporting uut =  ReportingUtils.newReportingBuilder().newReporting("root");		
 		assertNotNull(uut.getRootUID());
-		Reporting uutChild = uut.getChildFactory().newChild("childOfRoot");
+		final Reporting uutChild = uut.newReporting("childOfRoot");
 		assertEquals(uut.getRootUID(), uutChild.getRootUID());
 	}
 

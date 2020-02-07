@@ -26,7 +26,7 @@ import esa.s1pdgs.cpoc.ipf.execution.worker.test.SystemUtils;
 import esa.s1pdgs.cpoc.mqi.model.queue.IpfExecutionJob;
 import esa.s1pdgs.cpoc.mqi.model.queue.LevelJobPoolDto;
 import esa.s1pdgs.cpoc.mqi.model.queue.LevelJobTaskDto;
-import esa.s1pdgs.cpoc.report.Reporting;
+import esa.s1pdgs.cpoc.report.ReportingFactory;
 
 public class PoolExecutorCallableTest extends MockPropertiesTest {
 
@@ -61,7 +61,7 @@ public class PoolExecutorCallableTest extends MockPropertiesTest {
         job.getPools().get(2)
                 .addTask(new LevelJobTaskDto(SystemUtils.getCmdRmdir()));
 
-        callable = new PoolExecutorCallable(properties, job, "log", ApplicationLevel.L0, Reporting.ChildFactory.NULL);
+        callable = new PoolExecutorCallable(properties, job, "log", ApplicationLevel.L0, ReportingFactory.NULL);
     }
 
     @Test
@@ -73,8 +73,8 @@ public class PoolExecutorCallableTest extends MockPropertiesTest {
     @Test
     public void testInterruptedDuringWaiting()
             throws InterruptedException, ExecutionException {
-        ExecutorService service = Executors.newSingleThreadExecutor();
-        CompletionService<Void> completionService =
+        final ExecutorService service = Executors.newSingleThreadExecutor();
+        final CompletionService<Void> completionService =
                 new ExecutorCompletionService<>(service);
         completionService.submit(callable);
         service.shutdownNow();
@@ -88,8 +88,8 @@ public class PoolExecutorCallableTest extends MockPropertiesTest {
     public void testInterruptedDuringProcessing()
             throws InterruptedException, ExecutionException {
         callable.setActive(true);
-        ExecutorService service = Executors.newSingleThreadExecutor();
-        CompletionService<Void> completionService = new ExecutorCompletionService<>(service);
+        final ExecutorService service = Executors.newSingleThreadExecutor();
+        final CompletionService<Void> completionService = new ExecutorCompletionService<>(service);
         completionService.submit(callable);
         service.shutdownNow();
 
@@ -101,8 +101,8 @@ public class PoolExecutorCallableTest extends MockPropertiesTest {
     @Test
     public void testWaitForActiveTooLong()
             throws InterruptedException, ExecutionException {
-        ExecutorService service = Executors.newSingleThreadExecutor();
-        CompletionService<Void> completionService =
+        final ExecutorService service = Executors.newSingleThreadExecutor();
+        final CompletionService<Void> completionService =
                 new ExecutorCompletionService<>(service);
         completionService.submit(callable);
 
@@ -113,8 +113,8 @@ public class PoolExecutorCallableTest extends MockPropertiesTest {
 
     @Test
     public void testProcess() throws InterruptedException, ExecutionException {
-        ExecutorService service = Executors.newSingleThreadExecutor();
-        CompletionService<Void> completionService =
+        final ExecutorService service = Executors.newSingleThreadExecutor();
+        final CompletionService<Void> completionService =
                 new ExecutorCompletionService<>(service);
         completionService.submit(callable);
         callable.setActive(true);

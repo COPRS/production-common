@@ -22,12 +22,9 @@ import org.w3c.dom.Node;
 
 import esa.s1pdgs.cpoc.common.utils.FileUtils;
 import esa.s1pdgs.cpoc.ipf.execution.worker.config.ApplicationProperties;
-import esa.s1pdgs.cpoc.ipf.execution.worker.job.oqc.OQCDefaultTaskFactory;
-import esa.s1pdgs.cpoc.ipf.execution.worker.job.oqc.OQCExecutor;
-import esa.s1pdgs.cpoc.ipf.execution.worker.job.oqc.OQCTask;
 import esa.s1pdgs.cpoc.mqi.model.queue.LevelJobOutputDto;
 import esa.s1pdgs.cpoc.mqi.model.queue.OQCFlag;
-import esa.s1pdgs.cpoc.report.Reporting;
+import esa.s1pdgs.cpoc.report.ReportingFactory;
 
 public class OQCTaskTest {    
 	
@@ -38,7 +35,7 @@ public class OQCTaskTest {
 		defaultProperties = new ApplicationProperties();
 		defaultProperties.setOqcEnabled(true);
 		defaultProperties.setOqcTimeoutInSeconds(2); // yes, it is very short, but we want fast junit tests!
-		File ipf = new File(getClass().getClassLoader().getResource("ipf-oqc.sh").getFile());
+		final File ipf = new File(getClass().getClassLoader().getResource("ipf-oqc.sh").getFile());
 		ipf.setExecutable(true);
 		defaultProperties.setOqcBinaryPath(ipf.getAbsolutePath());
 		defaultProperties.setOqcWorkingDir("/tmp");
@@ -46,17 +43,17 @@ public class OQCTaskTest {
 
 	@Test(timeout = 3000)
 	public void testTimeout() throws Exception {
-		File ipf = new File(getClass().getClassLoader().getResource("ipf-oqc-block.sh").getFile());
+		final File ipf = new File(getClass().getClassLoader().getResource("ipf-oqc-block.sh").getFile());
 		ipf.setExecutable(true);
 		defaultProperties.setOqcBinaryPath(ipf.getAbsolutePath());
 		
-		OQCExecutor executor = new OQCExecutor(defaultProperties);
-		LevelJobOutputDto dto = new LevelJobOutputDto();
+		final OQCExecutor executor = new OQCExecutor(defaultProperties);
+		final LevelJobOutputDto dto = new LevelJobOutputDto();
 		dto.setOqcCheck(true);
 		
-		Path productDir = Files.createTempDirectory("OQCTASK");
+		final Path productDir = Files.createTempDirectory("OQCTASK");
 
-		OQCFlag flag = executor.executeOQC(productDir, dto, new OQCDefaultTaskFactory(), Reporting.ChildFactory.NULL);
+		final OQCFlag flag = executor.executeOQC(productDir, dto, new OQCDefaultTaskFactory(), ReportingFactory.NULL);
 		
 		assertThat(flag, is(notNullValue()));
 		assertThat(flag, is(OQCFlag.NOT_CHECKED));
@@ -66,13 +63,13 @@ public class OQCTaskTest {
 	
 	@Test
 	public void testOQCExecutorService() throws Exception {
-		OQCExecutor executor = new OQCExecutor(defaultProperties);
-		LevelJobOutputDto dto = new LevelJobOutputDto();
+		final OQCExecutor executor = new OQCExecutor(defaultProperties);
+		final LevelJobOutputDto dto = new LevelJobOutputDto();
 		dto.setOqcCheck(true);
 		
-		Path productDir = Files.createTempDirectory("OQCTASK");
+		final Path productDir = Files.createTempDirectory("OQCTASK");
 
-		OQCFlag flag = executor.executeOQC(productDir, dto, new OQCDefaultTaskFactory(), Reporting.ChildFactory.NULL);
+		final OQCFlag flag = executor.executeOQC(productDir, dto, new OQCDefaultTaskFactory(), ReportingFactory.NULL);
 		
 		assertThat(flag, is(notNullValue()));
 		assertThat(flag, is(OQCFlag.CHECKED_OK));
@@ -82,21 +79,21 @@ public class OQCTaskTest {
 	
 	@Test
 	public void testOQCJobOrderGeneration() throws Exception {
-		Path productDir = Files.createTempDirectory(Paths.get("/tmp"), "OQCTASK");
-		Path workingDir = Files.createTempDirectory(Paths.get("/tmp"), "OQCWORKDIR");
+		final Path productDir = Files.createTempDirectory(Paths.get("/tmp"), "OQCTASK");
+		final Path workingDir = Files.createTempDirectory(Paths.get("/tmp"), "OQCWORKDIR");
 		
-		OQCTask task = new OQCTask(defaultProperties, productDir);
-		Path jobOrder = task.generateJobOrder(workingDir);
+		final OQCTask task = new OQCTask(defaultProperties, productDir);
+		final Path jobOrder = task.generateJobOrder(workingDir);
 		
 		// After the generation, it is expected that a job order file is there
 		assertThat(Files.exists(jobOrder), is(true));
 		
-		DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
-		Document document = dbf.newDocumentBuilder().parse(Files.newInputStream(jobOrder));
-		XPathFactory xpf = XPathFactory.newInstance();
-		XPath xpath = xpf.newXPath();
-		String input = ((Node) xpath.compile("//Input/List_of_File_Names/File_Name/text()").evaluate(document, XPathConstants.NODE)).getTextContent();
-		String output = ((Node) xpath.compile("//Output/File_Name/text()").evaluate(document, XPathConstants.NODE)).getTextContent();
+		final DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
+		final Document document = dbf.newDocumentBuilder().parse(Files.newInputStream(jobOrder));
+		final XPathFactory xpf = XPathFactory.newInstance();
+		final XPath xpath = xpf.newXPath();
+		final String input = ((Node) xpath.compile("//Input/List_of_File_Names/File_Name/text()").evaluate(document, XPathConstants.NODE)).getTextContent();
+		final String output = ((Node) xpath.compile("//Output/File_Name/text()").evaluate(document, XPathConstants.NODE)).getTextContent();
 		
 		// verify that the content of the job order is as expected
 		assertThat(input,is(equalTo(productDir.toString())));
@@ -110,10 +107,10 @@ public class OQCTaskTest {
 
 	@Test
 	public void testCompleteTask() throws Exception {
-		Path productDir = Files.createTempDirectory("OQCTASK");
+		final Path productDir = Files.createTempDirectory("OQCTASK");
 		
-		OQCTask task = new OQCTask(defaultProperties, productDir);
-		OQCFlag flag = task.call();
+		final OQCTask task = new OQCTask(defaultProperties, productDir);
+		final OQCFlag flag = task.call();
 		assertThat(flag,is(notNullValue()));
 		assertThat(flag,is(OQCFlag.CHECKED_OK));
 		
