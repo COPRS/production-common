@@ -4,6 +4,7 @@ import java.util.Map;
 
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
+import org.springframework.boot.context.properties.NestedConfigurationProperty;
 import org.springframework.context.annotation.Configuration;
 
 /**
@@ -25,6 +26,40 @@ public class MetadataExtractorConfig {
 
     private String xsltDirectory;
 
+    @NestedConfigurationProperty
+    PacketStoreType packetStoreType; 
+    
+    public static class PacketStoreType {
+    	private Map<String, String> s1a;
+    	private Map<String, String> s1b;
+    	private Map<String, String> toTimeliness;
+
+    	public Map<String, String> getS1a() {
+			return s1a;
+		}
+
+    	public void setS1a(Map<String, String> s1a) {
+			this.s1a = s1a;
+		}
+		
+    	public Map<String, String> getS1b() {
+			return s1b;
+		}
+
+    	public void setS1b(Map<String, String> s1b) {
+			this.s1b = s1b;
+		}
+
+    	public Map<String, String> getToTimeliness() {
+			return toTimeliness;
+		}
+
+    	public void setToTimeliness(Map<String, String> toTimeliness) {
+			this.toTimeliness = toTimeliness;
+		}
+    	
+    }
+    
     public MetadataExtractorConfig() {
     }
 
@@ -72,5 +107,19 @@ public class MetadataExtractorConfig {
     public void setXsltDirectory(String xsltDirectory) {
         this.xsltDirectory = xsltDirectory;
     }
+
+	/**
+	 * @return the packetStoreType
+	 */
+	public PacketStoreType getPacketStoreType() {
+		return packetStoreType;
+	}
+
+	/**
+	 * @param packetStoreType the packetStoreType to set
+	 */
+	public void setPacketStoreType(PacketStoreType packetStoreType) {
+		this.packetStoreType = packetStoreType;
+	}
 
 }
