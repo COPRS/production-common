@@ -32,6 +32,12 @@ mqi:
   host-uri: http://localhost:8081
   max-retries: 3
   tempo-retry-ms: 1000
+
+trigger:
+  product-categories:
+    catalog-jobs:
+      fixed-delay-ms: 500                                         # (fixed delay) Period in milliseconds between 2 polls of next message
+      init-delay-poll-ms: 2000                                    # Initial delay in milliseconds before starting consuming message
     
 worker:
   product-categories:
