@@ -16,6 +16,7 @@ public class OutputFileDescriptor extends AbstractFileDescriptor {
 	private String swathtype;
 	private String polarisation;
 	private String dataTakeId;
+	private String timeliness;
 
 	@Override
 	public String getProductType() {
@@ -69,10 +70,18 @@ public class OutputFileDescriptor extends AbstractFileDescriptor {
 		this.dataTakeId = dataTakeId;
 	}
 
+	public String getTimeliness() {
+		return timeliness;
+	}
+
+	public void setTimeliness(String timeliness) {
+		this.timeliness = timeliness;
+	}
+
 	@Override
 	public int hashCode() {
 		return Objects.hash(dataTakeId, extension, filename, keyObjectStorage, missionId, mode, polarisation,
-				productClass, productFamily, productName, productType, relativePath, resolution, satelliteId,
+				productClass, productFamily, productName, productType, relativePath, resolution, satelliteId, timeliness,
 				swathtype);
 	}
 
@@ -95,6 +104,7 @@ public class OutputFileDescriptor extends AbstractFileDescriptor {
 				&& productFamily == other.productFamily && Objects.equals(productName, other.productName)
 				&& Objects.equals(productType, other.productType) && Objects.equals(relativePath, other.relativePath)
 				&& Objects.equals(resolution, other.resolution) && Objects.equals(satelliteId, other.satelliteId)
+				&& Objects.equals(timeliness, other.timeliness)
 				&& Objects.equals(swathtype, other.swathtype);
 	}
 
@@ -104,6 +114,7 @@ public class OutputFileDescriptor extends AbstractFileDescriptor {
 				+ relativePath + ", filename=" + filename + ", extension=" + extension + ", productName=" + productName
 				+ ", missionId=" + missionId + ", satelliteId=" + satelliteId + ", keyObjectStorage=" + keyObjectStorage
 				+ ", productFamily=" + productFamily + ", mode=" + mode + ", resolution=" + resolution + ", swathtype="
-				+ swathtype + ", polarisation=" + polarisation + ", dataTakeId=" + dataTakeId + "]";
+				+ swathtype + ", polarisation=" + polarisation + ", dataTakeId=" + dataTakeId + ", timeliness=" + timeliness + "]";
 	}
+
 }
