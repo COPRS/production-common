@@ -17,6 +17,7 @@ public class OutputFileDescriptor extends AbstractFileDescriptor {
 	private String polarisation;
 	private String dataTakeId;
 	private String timeliness;
+	private String productConsolidation;
 
 	@Override
 	public String getProductType() {
@@ -78,11 +79,19 @@ public class OutputFileDescriptor extends AbstractFileDescriptor {
 		this.timeliness = timeliness;
 	}
 
+	public String getProductConsolidation() {
+		return productConsolidation;
+	}
+
+	public void setProductConsolidation(String productConsolidation) {
+		this.productConsolidation = productConsolidation;
+	}
+
 	@Override
 	public int hashCode() {
 		return Objects.hash(dataTakeId, extension, filename, keyObjectStorage, missionId, mode, polarisation,
-				productClass, productFamily, productName, productType, relativePath, resolution, satelliteId, timeliness,
-				swathtype);
+				productClass, productFamily, productName, productType, relativePath, resolution, satelliteId,
+				timeliness, productConsolidation, swathtype);
 	}
 
 	@Override
@@ -105,6 +114,7 @@ public class OutputFileDescriptor extends AbstractFileDescriptor {
 				&& Objects.equals(productType, other.productType) && Objects.equals(relativePath, other.relativePath)
 				&& Objects.equals(resolution, other.resolution) && Objects.equals(satelliteId, other.satelliteId)
 				&& Objects.equals(timeliness, other.timeliness)
+				&& Objects.equals(productConsolidation, other.productConsolidation)
 				&& Objects.equals(swathtype, other.swathtype);
 	}
 
@@ -114,7 +124,8 @@ public class OutputFileDescriptor extends AbstractFileDescriptor {
 				+ relativePath + ", filename=" + filename + ", extension=" + extension + ", productName=" + productName
 				+ ", missionId=" + missionId + ", satelliteId=" + satelliteId + ", keyObjectStorage=" + keyObjectStorage
 				+ ", productFamily=" + productFamily + ", mode=" + mode + ", resolution=" + resolution + ", swathtype="
-				+ swathtype + ", polarisation=" + polarisation + ", dataTakeId=" + dataTakeId + ", timeliness=" + timeliness + "]";
+				+ swathtype + ", polarisation=" + polarisation + ", dataTakeId=" + dataTakeId + ", timeliness="
+				+ timeliness + ", productConsolidation=" + productConsolidation + "]";
 	}
 
 }
