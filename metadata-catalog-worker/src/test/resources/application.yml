@@ -80,7 +80,11 @@ mdextractor:
     IW: 25.0F
     SM: 25.0F
     WV: 0.0F
-  xslt-directory: config/xsltDir/ # Must contains the last /
+  xslt-directory: config/xsltDir/ # Must contains the last / 
+  timeliness-priority-from-high-to-low:
+    - PT
+    - NRT
+    - Fast-24
   packet-store-type:
     S1A:
       PS-0: Emergency
