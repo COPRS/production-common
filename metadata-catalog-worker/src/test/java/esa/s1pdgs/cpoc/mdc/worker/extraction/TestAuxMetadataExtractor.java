@@ -124,7 +124,7 @@ public class TestAuxMetadataExtractor {
         packetStoreType.setToTimeliness(new HashMap<>());
         doReturn(packetStoreType).when(extractorConfig).getPacketStoreType();
         
-        final List<String> timelinessPriorityFromHighToLow = Arrays.asList("PT", "NRT", "Fast-24");
+        final List<String> timelinessPriorityFromHighToLow = Arrays.asList("PT", "NRT", "FAST24");
         doReturn(timelinessPriorityFromHighToLow).when(extractorConfig).getTimelinessPriorityFromHighToLow();
         
 		final ExtractMetadata extract = new ExtractMetadata(

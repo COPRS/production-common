@@ -83,16 +83,16 @@ public class ExtractMetadataTest {
         toTimeliness.put("NRT", "NRT");
         toTimeliness.put("GPS", "NRT");
         toTimeliness.put("PassThrough", "PT");
-        toTimeliness.put("Standard", "Fast-24");
-        toTimeliness.put("RFC", "Fast-24");
-        toTimeliness.put("WV", "Fast-24");
-        toTimeliness.put("Filler", "Fast-24");
-        toTimeliness.put("Spare", "Fast-24");        
+        toTimeliness.put("Standard", "FAST24");
+        toTimeliness.put("RFC", "FAST24");
+        toTimeliness.put("WV", "FAST24");
+        toTimeliness.put("Filler", "FAST24");
+        toTimeliness.put("Spare", "FAST24");        
         packetStoreType.setS1a(s1aPacketStoreTypes);
         packetStoreType.setS1b(s1bPacketStoreTypes);
         packetStoreType.setToTimeliness(toTimeliness);
         
-        final List<String> timelinessPriorityFromHighToLow = Arrays.asList("PT", "NRT", "Fast-24");
+        final List<String> timelinessPriorityFromHighToLow = Arrays.asList("PT", "NRT", "FAST24");
         
         extractor = new ExtractMetadata(
         		typeOverlap, 
@@ -709,7 +709,7 @@ public class ExtractMetadataTest {
         descriptor.setDataTakeId("021735");
         descriptor.setProductFamily(ProductFamily.L0_ACN);
         descriptor.setMode("FAST");
-////        descriptor.setTimeliness("Fast-24");
+////        descriptor.setTimeliness("FAST24");
 
         File file = new File(testDir,
                 "S1A_IW_RAW__0ADV_20171213T121123_20171213T121947_019684_021735_51B1.SAFE/manifest.safe");

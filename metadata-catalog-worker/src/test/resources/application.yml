@@ -84,7 +84,7 @@ mdextractor:
   timeliness-priority-from-high-to-low:
     - PT
     - NRT
-    - Fast-24
+    - FAST24
   packet-store-type:
     S1A:
       PS-0: Emergency
@@ -196,11 +196,11 @@ mdextractor:
       NRT: NRT
       GPS: NRT
       PassThrough: PT
-      Standard: Fast-24
-      RFC: Fast-24
-      WV: Fast-24
-      Filler: Fast-24
-      Spare: Fast-24
+      Standard: FAST24
+      RFC: FAST24
+      WV: FAST24
+      Filler: FAST24
+      Spare: FAST24
       
 status:
   max-error-counter-processing: 3
