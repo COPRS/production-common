@@ -174,7 +174,7 @@ public class TestLevelSegmentMetadataExtractor {
         descriptor.setExtension(FileExtension.SAFE);
         descriptor.setFilename("manifest.safe");
         descriptor.setKeyObjectStorage(
-                "S1A_WV_RAW__0SSV_20180913T214325_20180913T214422_023685_0294F4_41D5.SAFE/manifest.safe");
+                "S1A_WV_RAW__0SSV_20180913T214325_20180913T214422_023685_0294F4_41D5.SAFE");
         descriptor.setMissionId("S1");
         descriptor.setSatelliteId("A");
         descriptor.setProductName(
