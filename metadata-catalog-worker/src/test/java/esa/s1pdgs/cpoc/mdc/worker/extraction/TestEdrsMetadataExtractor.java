@@ -103,7 +103,7 @@ public class TestEdrsMetadataExtractor {
         doReturn(true).when(mqiService).ack(Mockito.any(), Mockito.any());
 
         inputMessage = new GenericMessageDto<CatalogJob>(123, "",
-                Utils.newCatalogJob("D_123_ch01_D.RAW", "WILE/S1A/123/ch01/D_123_ch01_DSDB.RAW", ProductFamily.EDRS_SESSION, null));
+                Utils.newCatalogJob("D_123_ch01_DSDB.RAW", "WILE/S1A/123/ch01/D_123_ch01_DSDB.RAW", ProductFamily.EDRS_SESSION, null, "WILE/S1A/123/ch01/D_123_ch01_DSDB.RAW"));
         
 		final FileDescriptorBuilder fileDescriptorBuilder = new FileDescriptorBuilder(
 				testDir, 
@@ -135,7 +135,7 @@ public class TestEdrsMetadataExtractor {
     			new ProcessConfiguration(), 
     			obsClient,
     			new PathMetadataExtractorImpl(
-    					Pattern.compile("^([a-z_]{4})/([0-9a-z_]{2})([0-9a-z_]{1})/([0-9a-z_]+)/ch0([1-2])/.+"), 
+    					Pattern.compile("^([a-z_]{4})/([0-9a-z_]{2})([0-9a-z_]{1})/([0-9a-z_]+)/ch0([1-2])/.+", Pattern.CASE_INSENSITIVE), 
     					conf
     			)
     	);
@@ -146,9 +146,9 @@ public class TestEdrsMetadataExtractor {
         final EdrsSessionFileDescriptor expectedDescriptor =
                 new EdrsSessionFileDescriptor();
         
-        expectedDescriptor.setFilename("D_123_ch01_D.RAW");
+        expectedDescriptor.setFilename("D_123_ch01_DSDB.RAW");
         expectedDescriptor.setRelativePath("WILE/S1A/123/ch01/D_123_ch01_DSDB.RAW");
-        expectedDescriptor.setProductName("D_123_ch01_D.RAW");
+        expectedDescriptor.setProductName("D_123_ch01_DSDB.RAW");
         expectedDescriptor.setExtension(FileExtension.RAW);
         expectedDescriptor.setEdrsSessionFileType(EdrsSessionFileType.RAW);
         expectedDescriptor.setMissionId("S1");
@@ -156,7 +156,7 @@ public class TestEdrsMetadataExtractor {
         expectedDescriptor.setChannel(1);
         expectedDescriptor.setSessionIdentifier("123");
         expectedDescriptor.setStationCode("WILE");
-        expectedDescriptor.setKeyObjectStorage("123/ch01/D_123_ch01_D.RAW");
+        expectedDescriptor.setKeyObjectStorage("WILE/S1A/123/ch01/D_123_ch01_DSDB.RAW");
         expectedDescriptor.setProductFamily(ProductFamily.EDRS_SESSION);
         
 		final Reporting reporting = ReportingUtils.newReportingBuilder().newReporting("TestMetadataExtraction");
