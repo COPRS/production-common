@@ -1,5 +1,6 @@
 package esa.s1pdgs.cpoc.mdc.worker.config;
 
+import java.util.List;
 import java.util.Map;
 
 import org.springframework.boot.context.properties.ConfigurationProperties;
@@ -25,6 +26,8 @@ public class MetadataExtractorConfig {
     private Map<String, Float> typeSliceLength;
 
     private String xsltDirectory;
+    
+    private List<String> timelinessPriorityFromHighToLow;
 
     @NestedConfigurationProperty
     PacketStoreType packetStoreType; 
@@ -120,6 +123,20 @@ public class MetadataExtractorConfig {
 	 */
 	public void setPacketStoreType(PacketStoreType packetStoreType) {
 		this.packetStoreType = packetStoreType;
+	}
+
+	/**
+	 * @return the timelinessPriorityFromHighToLow
+	 */
+	public List<String> getTimelinessPriorityFromHighToLow() {
+		return timelinessPriorityFromHighToLow;
+	}
+
+	/**
+	 * @param timelinessPriorityFromHighToLow the timelinessPriorityFromHighToLow to set
+	 */
+	public void setTimelinessPriorityFromHighToLow(List<String> timelinessPriorityFromHighToLow) {
+		this.timelinessPriorityFromHighToLow = timelinessPriorityFromHighToLow;
 	}
 
 }

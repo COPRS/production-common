@@ -8,7 +8,9 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.fail;
 
 import java.io.File;
+import java.util.Arrays;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -24,6 +26,7 @@ import esa.s1pdgs.cpoc.common.ProductFamily;
 import esa.s1pdgs.cpoc.common.errors.AbstractCodedException;
 import esa.s1pdgs.cpoc.common.errors.processing.MetadataExtractionException;
 import esa.s1pdgs.cpoc.common.errors.processing.MetadataMalformedException;
+import esa.s1pdgs.cpoc.mdc.worker.config.MetadataExtractorConfig.PacketStoreType;
 import esa.s1pdgs.cpoc.mdc.worker.extraction.model.AuxDescriptor;
 import esa.s1pdgs.cpoc.mdc.worker.extraction.model.EdrsSessionFileDescriptor;
 import esa.s1pdgs.cpoc.mdc.worker.extraction.model.OutputFileDescriptor;
@@ -64,9 +67,38 @@ public class ExtractMetadataTest {
         typeSliceLength.put("IW", 25.0F);
         typeSliceLength.put("SM", 25.0F);
         typeSliceLength.put("WV", 0.0F);
+        
+        PacketStoreType packetStoreType = new PacketStoreType();
+        final Map<String, String> s1aPacketStoreTypes = new HashMap<>();
+        s1aPacketStoreTypes.put("PS-0", "Emergency");
+        s1aPacketStoreTypes.put("PS-1", "Emergency");
+        s1aPacketStoreTypes.put("PS-2", "RFC");
+        final Map<String, String> s1bPacketStoreTypes = new HashMap<>();
+        s1bPacketStoreTypes.put("PS-0", "Emergency");
+        s1bPacketStoreTypes.put("PS-1", "Emergency");
+        s1bPacketStoreTypes.put("PS-2", "RFC");
+        final Map<String, String> toTimeliness = new HashMap<>();
+        toTimeliness.put("Emergency", "PT");
+        toTimeliness.put("HKTM", "NRT");
+        toTimeliness.put("NRT", "NRT");
+        toTimeliness.put("GPS", "NRT");
+        toTimeliness.put("PassThrough", "PT");
+        toTimeliness.put("Standard", "Fast-24");
+        toTimeliness.put("RFC", "Fast-24");
+        toTimeliness.put("WV", "Fast-24");
+        toTimeliness.put("Filler", "Fast-24");
+        toTimeliness.put("Spare", "Fast-24");        
+        packetStoreType.setS1a(s1aPacketStoreTypes);
+        packetStoreType.setS1b(s1bPacketStoreTypes);
+        packetStoreType.setToTimeliness(toTimeliness);
+        
+        final List<String> timelinessPriorityFromHighToLow = Arrays.asList("PT", "NRT", "Fast-24");
+        
         extractor = new ExtractMetadata(
         		typeOverlap, 
-        		typeSliceLength, 
+        		typeSliceLength,
+        		packetStoreType,
+        		timelinessPriorityFromHighToLow,
         		"config/xsltDir/", 
         		xmlConverter
         );

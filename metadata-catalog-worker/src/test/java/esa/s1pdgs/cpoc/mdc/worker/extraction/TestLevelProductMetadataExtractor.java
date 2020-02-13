@@ -136,6 +136,8 @@ public class TestLevelProductMetadataExtractor {
 		final ExtractMetadata extract = new ExtractMetadata(
 				extractorConfig.getTypeOverlap(), 
 				extractorConfig.getTypeSliceLength(),
+				extractorConfig.getPacketStoreType(),
+				extractorConfig.getTimelinessPriorityFromHighToLow(),
 				extractorConfig.getXsltDirectory(), 
 				xmlConverter
 		);		
