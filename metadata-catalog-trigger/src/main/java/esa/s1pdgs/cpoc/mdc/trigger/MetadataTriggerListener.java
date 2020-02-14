@@ -48,7 +48,7 @@ final class MetadataTriggerListener<E extends AbstractMessage> implements MqiLis
 		
 		final Reporting reporting = ReportingUtils.newReportingBuilder()
 				.predecessor(dto.getUid())
-				.newReporting("MDCTrigger");
+				.newReporting("MetadataTrigger");
 		
 		reporting.begin(
 				new FilenameReportingInput(dto.getKeyObjectStorage()),
