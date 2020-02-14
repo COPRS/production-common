@@ -46,7 +46,7 @@ public class LevelReportDto extends AbstractMessage {
 
 	@Override
 	public int hashCode() {
-		return Objects.hash(content, creationDate, hostname, keyObjectStorage, productFamily);
+		return Objects.hash(content, creationDate, hostname, keyObjectStorage, productFamily, uid);
 	}
 
 	@Override
@@ -65,12 +65,13 @@ public class LevelReportDto extends AbstractMessage {
 				&& Objects.equals(creationDate, other.creationDate)
 				&& Objects.equals(hostname, other.hostname) 
 				&& Objects.equals(keyObjectStorage, other.keyObjectStorage)
+				&& Objects.equals(uid, other.uid)
 				&& productFamily == other.productFamily;
 	}
 
 	@Override
 	public String toString() {
 		return "LevelReportDto [productFamily=" + productFamily + ", keyObjectStorage=" + keyObjectStorage
-				+ ", creationDate=" + creationDate + ", hostname=" + hostname + ", content=" + content + "]";
+				+ ", creationDate=" + creationDate + ", hostname=" + hostname + ", content=" + content + ", uid=" + uid +"]";
 	}
 }

@@ -36,7 +36,7 @@ public class IngestionJob extends AbstractMessage {
 	@Override
 	public int hashCode() {
 		return Objects.hash(creationDate, hostname, keyObjectStorage, pickupPath, productFamily,
-				relativePath);
+				relativePath, uid);
 	}
 
 	@Override
@@ -56,6 +56,7 @@ public class IngestionJob extends AbstractMessage {
 				&& Objects.equals(keyObjectStorage, other.keyObjectStorage)
 				&& Objects.equals(pickupPath, other.pickupPath)
 				&& productFamily == other.productFamily 
+				&& Objects.equals(uid, other.uid)
 				&& Objects.equals(relativePath, other.relativePath);
 	}
 
@@ -63,6 +64,6 @@ public class IngestionJob extends AbstractMessage {
 	public String toString() {
 		return "IngestionJob [productFamily=" + productFamily + ", keyObjectStorage=" + keyObjectStorage
 				+ ", creationDate=" + creationDate + ", hostname=" + hostname + ", relativePath=" + relativePath
-				+ ", pickupPath=" + pickupPath + "]";
+				+ ", pickupPath=" + pickupPath + ", uid=" + uid +"]";
 	}	
 }

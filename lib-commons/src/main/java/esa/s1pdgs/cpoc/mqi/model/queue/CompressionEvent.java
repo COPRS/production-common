@@ -15,7 +15,7 @@ public class CompressionEvent extends AbstractMessage {
 
 	@Override
 	public int hashCode() {
-		return Objects.hash(creationDate, hostname, keyObjectStorage, productFamily);
+		return Objects.hash(creationDate, hostname, keyObjectStorage, productFamily, uid);
 	}
 
 	@Override
@@ -33,12 +33,13 @@ public class CompressionEvent extends AbstractMessage {
 		return Objects.equals(creationDate, other.creationDate) 
 				&& Objects.equals(hostname, other.hostname)
 				&& Objects.equals(keyObjectStorage, other.keyObjectStorage) 
+				&& Objects.equals(uid, other.uid)
 				&& productFamily == other.productFamily;
 	}
 
 	@Override
 	public String toString() {
 		return "CompressionEvent [productFamily=" + productFamily + ", keyObjectStorage=" + keyObjectStorage
-				+ ", creationDate=" + creationDate + ", hostname=" + hostname + "]";
+				+ ", creationDate=" + creationDate + ", hostname=" + hostname + ", uid=" + uid +"]";
 	}
 }

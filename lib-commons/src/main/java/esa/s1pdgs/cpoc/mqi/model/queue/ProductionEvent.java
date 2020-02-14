@@ -60,7 +60,7 @@ public class ProductionEvent extends AbstractMessage {
 
 	@Override
 	public int hashCode() {
-		return Objects.hash(creationDate, hostname, keyObjectStorage, mode, oqcFlag, productFamily, productName);
+		return Objects.hash(creationDate, hostname, keyObjectStorage, mode, oqcFlag, productFamily, productName, uid);
 	}
 
 	@Override
@@ -81,6 +81,7 @@ public class ProductionEvent extends AbstractMessage {
 				&& Objects.equals(mode, other.mode)
 				&& oqcFlag == other.oqcFlag 
 				&& productFamily == other.productFamily
+				&& Objects.equals(uid, other.uid)
 				&& Objects.equals(productName, other.productName);
 	}
 
@@ -88,6 +89,6 @@ public class ProductionEvent extends AbstractMessage {
 	public String toString() {
 		return "ProductionEvent [productFamily=" + productFamily + ", keyObjectStorage=" + keyObjectStorage
 				+ ", creationDate=" + creationDate + ", hostname=" + hostname + ", productName=" + productName
-				+ ", mode=" + mode + ", oqcFlag=" + oqcFlag + "]";
+				+ ", mode=" + mode + ", oqcFlag=" + oqcFlag + ", uid=" + uid +"]";
 	}
 }
