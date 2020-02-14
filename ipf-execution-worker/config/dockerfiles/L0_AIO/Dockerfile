@@ -8,6 +8,7 @@ ARG COMMIT_ID
 ARG BRANCH_TEXT
 
 WORKDIR /app
+USER root:root
 
 RUN echo "${VERSION}" >> VERSION
 RUN echo "${BRANCH_TEXT}" >> VERSION
@@ -22,5 +23,7 @@ ENV TINI_VERSION v0.18.0
 ADD https://github.com/krallin/tini/releases/download/${TINI_VERSION}/tini /tini
 RUN chmod +x /tini
 ENTRYPOINT ["/tini", "--"]
+
+USER s1pdgs:s1pdgs
 
 CMD ["/app/start.sh"]
