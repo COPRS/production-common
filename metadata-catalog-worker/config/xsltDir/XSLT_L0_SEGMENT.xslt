@@ -47,6 +47,8 @@
 		<segmentCoordinates>
 			<xsl:copy-of select="//*[local-name() = 'coordinates']/text()"/>
 		</segmentCoordinates>
+		<packetStoreID>
+			<xsl:copy-of select="//*[local-name() = 'packetStoreID']/text()"/>
+		</packetStoreID>	
 	</xsl:template>
-
 </xsl:stylesheet>
