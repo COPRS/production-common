@@ -11,6 +11,7 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.UUID;
 
 import org.apache.logging.log4j.Logger;
 import org.junit.Before;
@@ -263,7 +264,7 @@ public final class TestIngestionWorkerService {
 		final List<Product<IngestionEvent>> products = new ArrayList<>();
 		products.add(product);
 		
-		uut.publish(products, message, reporting);
+		uut.publish(products, message, UUID.randomUUID());
 		
 		final GenericPublicationMessageDto<? extends AbstractMessage> result = new GenericPublicationMessageDto<>(
 				message.getId(), product.getFamily(), product.getDto());

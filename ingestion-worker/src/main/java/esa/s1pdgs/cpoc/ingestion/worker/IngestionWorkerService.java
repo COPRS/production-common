@@ -5,6 +5,7 @@ import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
+import java.util.UUID;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -19,7 +20,6 @@ import esa.s1pdgs.cpoc.appstatus.AppStatus;
 import esa.s1pdgs.cpoc.common.ProductCategory;
 import esa.s1pdgs.cpoc.common.ProductFamily;
 import esa.s1pdgs.cpoc.common.errors.AbstractCodedException;
-import esa.s1pdgs.cpoc.common.errors.AbstractCodedException.ErrorCode;
 import esa.s1pdgs.cpoc.common.errors.InternalErrorException;
 import esa.s1pdgs.cpoc.common.utils.FileUtils;
 import esa.s1pdgs.cpoc.common.utils.LogUtils;
@@ -31,21 +31,19 @@ import esa.s1pdgs.cpoc.ingestion.worker.product.IngestionResult;
 import esa.s1pdgs.cpoc.ingestion.worker.product.Product;
 import esa.s1pdgs.cpoc.ingestion.worker.product.ProductException;
 import esa.s1pdgs.cpoc.ingestion.worker.product.ProductService;
+import esa.s1pdgs.cpoc.ingestion.worker.product.report.IngestionWorkerReportingOutput;
 import esa.s1pdgs.cpoc.mqi.client.GenericMqiClient;
 import esa.s1pdgs.cpoc.mqi.client.MqiConsumer;
 import esa.s1pdgs.cpoc.mqi.client.MqiListener;
-import esa.s1pdgs.cpoc.mqi.model.queue.AbstractMessage;
 import esa.s1pdgs.cpoc.mqi.model.queue.IngestionEvent;
 import esa.s1pdgs.cpoc.mqi.model.queue.IngestionJob;
 import esa.s1pdgs.cpoc.mqi.model.rest.GenericMessageDto;
 import esa.s1pdgs.cpoc.mqi.model.rest.GenericPublicationMessageDto;
-import esa.s1pdgs.cpoc.obs_sdk.ObsEmptyFileException;
 import esa.s1pdgs.cpoc.report.Reporting;
 import esa.s1pdgs.cpoc.report.ReportingFactory;
 import esa.s1pdgs.cpoc.report.ReportingMessage;
 import esa.s1pdgs.cpoc.report.ReportingUtils;
 import esa.s1pdgs.cpoc.report.message.input.InboxReportingInput;
-import esa.s1pdgs.cpoc.report.message.output.FilenameReportingOutput;
 
 @Service
 public class IngestionWorkerService implements MqiListener<IngestionJob> {
@@ -89,25 +87,29 @@ public class IngestionWorkerService implements MqiListener<IngestionJob> {
 
 	@Override
 	public final void onMessage(final GenericMessageDto<IngestionJob> message) throws Exception {
-		final Reporting reporting = ReportingUtils.newReportingBuilder().newReporting("IngestionWorker");
-
 		final IngestionJob ingestion = message.getBody();
+		
+		final Reporting reporting = ReportingUtils.newReportingBuilder()
+				.predecessor(ingestion.getUid())				
+				.newReporting("IngestionWorker");
+		
 		LOG.debug("received Ingestion: {}", ingestion.getKeyObjectStorage());
 		reporting.begin(
 				new InboxReportingInput(ingestion.getKeyObjectStorage(), ingestion.getRelativePath(), ingestion.getPickupPath()), 
-				new ReportingMessage("Start processing of {}", ingestion.getKeyObjectStorage())
+				new ReportingMessage("Start processing of %s", ingestion.getKeyObjectStorage())
 		);
 
 		try {	
+			final Date ingestionStartDate = new Date();
 			final IngestionResult result = identifyAndUpload(message, ingestion, reporting);
-			publish(result.getIngestedProducts(), message, reporting);
-			delete(ingestion, reporting);			
+			publish(result.getIngestedProducts(), message, reporting.getUid());
+			delete(ingestion);			
 			reporting.end(
-					new FilenameReportingOutput(ingestion.getKeyObjectStorage()),
-					new ReportingMessage(result.getTransferAmount(),"End processing of {}", ingestion.getKeyObjectStorage())
+					new IngestionWorkerReportingOutput(ingestion.getKeyObjectStorage(), ingestionStartDate),
+					new ReportingMessage(result.getTransferAmount(),"End processing of %s", ingestion.getKeyObjectStorage())
 			);
 		} catch (final Exception e) {
-			reporting.error(errorReportMessage(e));
+			reporting.error(new ReportingMessage("Error processing of %s: %s", ingestion.getKeyObjectStorage(),  LogUtils.toString(e)));
 			throw e;
 		}
 	}
@@ -142,42 +144,29 @@ public class IngestionWorkerService implements MqiListener<IngestionJob> {
 	final void publish(
 			final List<Product<IngestionEvent>> products, 
 			final GenericMessageDto<IngestionJob> message,
-			final ReportingFactory reportingFactory
+			final UUID reportingId
 	) throws AbstractCodedException {
 		for (final Product<IngestionEvent> product : products) {
-			final GenericPublicationMessageDto<? extends AbstractMessage> result = new GenericPublicationMessageDto<>(
+			final IngestionEvent event = product.getDto();
+			event.setUid(reportingId);
+			
+			final GenericPublicationMessageDto<IngestionEvent> result = new GenericPublicationMessageDto<>(
 					message.getId(), 
 					product.getFamily(), 
-					product.getDto()
+					event
 			);
 			result.setInputKey(message.getInputKey());
 			result.setOutputKey(product.getFamily().toString());
 			LOG.info("publishing : {}", result);
-
-			final Reporting report = reportingFactory.newReporting("Publish");
-
-			report.begin(new ReportingMessage("Start publishing file {}", message.getBody().getKeyObjectStorage()));
-			try {
-				mqiClient.publish(result, ProductCategory.INGESTION_EVENT);
-				report.end(new ReportingMessage("End publishing file {}", message.getBody().getKeyObjectStorage()));
-			} catch (final AbstractCodedException e) {
-				report.error(new ReportingMessage("[code {}] {}", e.getCode().getCode(), e.getLogMessage()));
-			}
+			mqiClient.publish(result, ProductCategory.INGESTION_EVENT);
 		}
 	}
 
-	final void delete(final IngestionJob ingestion, final ReportingFactory reportingFactory)
+	final void delete(final IngestionJob ingestion)
 			throws InternalErrorException, InterruptedException {
 		final File file = Paths.get(ingestion.getPickupPath(), ingestion.getRelativePath()).toFile();
 		if (file.exists()) {
-			final Reporting childReporting = reportingFactory.newReporting("DeleteFromPickup");
-			childReporting.begin(new ReportingMessage("Start removing file {}", file.getPath()));
-			try {
-				FileUtils.deleteWithRetries(file, properties.getMaxRetries(), properties.getTempoRetryMs());
-				childReporting.end(new ReportingMessage("End removing file {}", file.getPath()));
-			} catch (final Exception e) {
-				childReporting.error(new ReportingMessage("Error on removing file {}: {}", LogUtils.toString(e)));
-			}
+			FileUtils.deleteWithRetries(file, properties.getMaxRetries(), properties.getTempoRetryMs());
 		}
 	}
 
@@ -200,21 +189,5 @@ public class IngestionWorkerService implements MqiListener<IngestionJob> {
 			}
 		}
 		throw new ProductException(String.format("No matching config found for %s in: %s", dto, properties.getTypes()));
-	}
-	
-	private final ReportingMessage errorReportMessage(final Exception e) {
-		if (e instanceof AbstractCodedException) {
-			final AbstractCodedException ace = (AbstractCodedException) e;
-			return new ReportingMessage("[code {}] {}", ace.getCode().getCode(), ace.getLogMessage());
-		}
-		if (e instanceof InterruptedException) {
-			return new ReportingMessage("Interrupted job processing");				
-		}
-		if (e instanceof ProductException || e instanceof ObsEmptyFileException) {
-			return new ReportingMessage("[code {}] {}", ErrorCode.INTERNAL_ERROR, e.getMessage());
-		}
-		// any other Exception
-		return new ReportingMessage("[code {}] {}", ErrorCode.INTERNAL_ERROR, LogUtils.toString(e));
-	}
-	
+	}	
 }
