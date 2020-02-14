@@ -54,7 +54,7 @@ public class CompressionJob extends AbstractMessage {
 	@Override
 	public int hashCode() {
 		return Objects.hash(compressionDirection, creationDate, hostname, keyObjectStorage, outputKeyObjectStorage,
-				outputProductFamily, productFamily);
+				outputProductFamily, productFamily, uid);
 	}
 
 	@Override
@@ -74,6 +74,7 @@ public class CompressionJob extends AbstractMessage {
 				&& Objects.equals(hostname, other.hostname) 
 				&& Objects.equals(keyObjectStorage, other.keyObjectStorage)
 				&& Objects.equals(outputKeyObjectStorage, other.outputKeyObjectStorage)
+				&& Objects.equals(uid, other.uid)
 				&& outputProductFamily == other.outputProductFamily 
 				&& productFamily == other.productFamily;
 	}
@@ -83,6 +84,6 @@ public class CompressionJob extends AbstractMessage {
 		return "CompressionJob [productFamily=" + productFamily + ", keyObjectStorage=" + keyObjectStorage
 				+ ", creationDate=" + creationDate + ", hostname=" + hostname + ", outputProductFamily="
 				+ outputProductFamily + ", outputKeyObjectStorage=" + outputKeyObjectStorage + ", compressionDirection="
-				+ compressionDirection + "]";
+				+ compressionDirection + ", uid=" + uid +"]";
 	}
 }

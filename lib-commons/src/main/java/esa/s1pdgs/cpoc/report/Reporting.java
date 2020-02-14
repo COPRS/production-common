@@ -41,7 +41,11 @@ public interface Reporting extends ReportingFactory {
 	
 	public static final Logger REPORT_LOG = LogManager.getLogger(Reporting.class);
 	
-	public static final Reporting NULL = new Reporting() {		
+	public static final Reporting NULL = new Reporting() {	
+		@Override
+		public UUID getUid() {
+			return null;
+		}
 		@Override
 		public UUID getRootUID() {
 			return null;
@@ -61,6 +65,8 @@ public interface Reporting extends ReportingFactory {
 			return NULL;
 		}
 	};
+	
+	UUID getUid();
 
 	UUID getRootUID();
 	

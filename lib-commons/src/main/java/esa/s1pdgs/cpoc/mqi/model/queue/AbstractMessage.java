@@ -1,6 +1,7 @@
 package esa.s1pdgs.cpoc.mqi.model.queue;
 
 import java.util.Date;
+import java.util.UUID;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnore;
@@ -21,10 +22,16 @@ public abstract class AbstractMessage {
 	
 	@JsonIgnore
 	public static final String NOT_DEFINED = "NOT_DEFINED";
-		
+	
+	// use a noticeable UUID default value to make it apparent that it has not been set and to have something 
+	// to grep for in the logs
+	@JsonIgnore
+	public static final String DEFAULT_UUID = "00000000-0000-0000-0000-000000000000";
+
 	// use some sane defaults
 	protected ProductFamily productFamily = ProductFamily.BLANK;
 	protected String keyObjectStorage = NOT_DEFINED;
+	protected UUID uid = UUID.fromString(DEFAULT_UUID);
 	
 	/*
 	 * WARNING: the fields below are just for informational purposes and will not be evaluated
@@ -77,5 +84,21 @@ public abstract class AbstractMessage {
 
 	public void setHostname(final String hostname) {
 		this.hostname = hostname;
+	}
+
+	public UUID getUid() {
+		return uid;
+	}
+
+	public void setUid(final UUID uid) {
+		this.uid = uid;
+	}
+
+	@Override
+	public String toString() {
+		return "AbstractMessage [productFamily=" + productFamily + ", keyObjectStorage=" + keyObjectStorage + ", uid="
+				+ uid + ", creationDate=" + creationDate + ", hostname=" + hostname + "]";
 	}	
+	
+	
 }

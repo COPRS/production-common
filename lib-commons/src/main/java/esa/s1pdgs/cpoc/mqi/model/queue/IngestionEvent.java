@@ -29,7 +29,7 @@ public class IngestionEvent extends AbstractMessage {
 	
 	@Override
 	public int hashCode() {
-		return Objects.hash(creationDate, hostname, keyObjectStorage, productFamily, productName, relativePath);
+		return Objects.hash(creationDate, hostname, keyObjectStorage, productFamily, productName, relativePath, uid);
 	}
 
 	@Override
@@ -49,6 +49,7 @@ public class IngestionEvent extends AbstractMessage {
 				&& Objects.equals(keyObjectStorage, other.keyObjectStorage) 
 				&& productFamily == other.productFamily
 				&& Objects.equals(productName, other.productName)
+				&& Objects.equals(uid, other.uid)
 				&& Objects.equals(relativePath, other.relativePath);
 	}
 
@@ -56,6 +57,6 @@ public class IngestionEvent extends AbstractMessage {
 	public String toString() {
 		return "IngestionEvent [productName=" + productName + ", productFamily=" + productFamily + ", keyObjectStorage=" 
 				+ keyObjectStorage + ", creationDate=" + creationDate + ", hostname=" + hostname + ", relativePath=" + 
-				relativePath + "]";
+				relativePath + ", uid=" + uid +"]";
 	}
 }

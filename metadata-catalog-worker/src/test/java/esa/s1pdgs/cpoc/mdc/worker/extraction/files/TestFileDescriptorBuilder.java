@@ -89,7 +89,7 @@ public class TestFileDescriptorBuilder {
         expected.setExtension(FileExtension.RAW);
         expected.setFilename("DCS_02_L20171109180334512000176_ch2_DSDB_00034.raw");
         expected.setKeyObjectStorage("512000176/ch02/DCS_02_L20171109180334512000176_ch2_DSDB_00034.raw");
-        expected.setProductName("512000176");
+        expected.setProductName("DCS_02_L20171109180334512000176_ch2_DSDB_00034.raw");
         expected.setEdrsSessionFileType(EdrsSessionFileType.RAW);
         expected.setRelativePath("512000176/ch02/DCS_02_L20171109180334512000176_ch2_DSDB_00034.raw");
         expected.setChannel(2);
@@ -128,7 +128,7 @@ public class TestFileDescriptorBuilder {
         expected.setExtension(FileExtension.XML);
         expected.setFilename("DCS_93_S1B__SGS__________017076_ch1_DSIB.xml");
         expected.setKeyObjectStorage("L20180724144436762001030/ch01/DCS_93_S1B__SGS__________017076_ch1_DSIB.xml"); 
-        expected.setProductName("L20180724144436762001030");
+        expected.setProductName("DCS_93_S1B__SGS__________017076_ch1_DSIB.xml");
         expected.setEdrsSessionFileType(EdrsSessionFileType.SESSION);
         expected.setRelativePath("L20180724144436762001030/ch01/DCS_93_S1B__SGS__________017076_ch1_DSIB.xml");
         expected.setChannel(1);

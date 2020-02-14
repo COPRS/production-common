@@ -19,7 +19,7 @@ public class PripPublishingJob extends AbstractMessage {
 
 	@Override
 	public int hashCode() {
-		return Objects.hash(creationDate, evictionDate, hostname, keyObjectStorage, productFamily);
+		return Objects.hash(creationDate, evictionDate, hostname, keyObjectStorage, productFamily, uid);
 	}
 
 	@Override
@@ -38,12 +38,13 @@ public class PripPublishingJob extends AbstractMessage {
 				&& Objects.equals(evictionDate, other.evictionDate)
 				&& Objects.equals(hostname, other.hostname) 
 				&& Objects.equals(keyObjectStorage, other.keyObjectStorage)
+				&& Objects.equals(uid, other.uid)
 				&& productFamily == other.productFamily;
 	}
 
 	@Override
 	public String toString() {
 		return "PripPublishingJob [productFamily=" + productFamily + ", keyObjectStorage=" + keyObjectStorage + ", creationDate="
-				+ creationDate + ", hostname=" + hostname + ", evictionDate=" + evictionDate + "]";
+				+ creationDate + ", hostname=" + hostname + ", evictionDate=" + evictionDate + ", uid=" + uid +"]";
 	}
 }

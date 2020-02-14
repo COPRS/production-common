@@ -62,7 +62,7 @@ public class IpfExecutionJob extends AbstractMessage {
 	/**
 	 * @param reportingTaskUID the reportingTaskUID to set
 	 */
-	public void setReportingTaskUID(UUID reportingTaskUID) {
+	public void setReportingTaskUID(final UUID reportingTaskUID) {
 		this.reportingTaskUID = reportingTaskUID;
 	}
 	
@@ -220,7 +220,7 @@ public class IpfExecutionJob extends AbstractMessage {
 	@Override
 	public int hashCode() {
 		return Objects.hash(creationDate, hostname, inputs, jobOrder, keyObjectStorage, outputs, pools, productFamily,
-				productProcessMode, workDirectory, reportingTaskUID);
+				productProcessMode, workDirectory, reportingTaskUID, uid);
 	}
 
 	@Override
@@ -245,6 +245,7 @@ public class IpfExecutionJob extends AbstractMessage {
 				&& productFamily == other.productFamily
 				&& Objects.equals(productProcessMode, other.productProcessMode)
 				&& Objects.equals(workDirectory, other.workDirectory)
+				&& Objects.equals(uid, other.uid)
 				&& Objects.equals(reportingTaskUID, other.reportingTaskUID);
 	}
 
@@ -253,6 +254,7 @@ public class IpfExecutionJob extends AbstractMessage {
 		return "IpfExecutionJob [productFamily=" + productFamily + ", keyObjectStorage=" + keyObjectStorage
 				+ ", creationDate=" + creationDate + ", hostname=" + hostname + ", productProcessMode="
 				+ productProcessMode + ", workDirectory=" + workDirectory + ", jobOrder=" + jobOrder + ", inputs="
-				+ inputs + ", outputs=" + outputs + ", pools=" + pools + ", reportingTaskUID=" + reportingTaskUID + "]";
+				+ inputs + ", outputs=" + outputs + ", pools=" + pools + ", reportingTaskUID=" + reportingTaskUID + 
+				", uid=" + uid +"]";
 	}
 }

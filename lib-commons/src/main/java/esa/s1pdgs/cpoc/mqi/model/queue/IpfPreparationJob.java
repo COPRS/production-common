@@ -48,7 +48,7 @@ public class IpfPreparationJob extends AbstractMessage {
 	@Override
 	public int hashCode() {
 		return Objects.hash(appDataJob, creationDate, hostname, ipfName, ipfVersion, keyObjectStorage, preselectednputs,
-				productFamily);
+				productFamily, uid);
 	}
 
 	@Override
@@ -70,6 +70,7 @@ public class IpfPreparationJob extends AbstractMessage {
 				&& Objects.equals(ipfVersion, other.ipfVersion)
 				&& Objects.equals(keyObjectStorage, other.keyObjectStorage)
 				&& Objects.equals(preselectednputs, other.preselectednputs) 
+				&& Objects.equals(uid, other.uid)
 				&& productFamily == other.productFamily;
 	}
 
@@ -77,6 +78,6 @@ public class IpfPreparationJob extends AbstractMessage {
 	public String toString() {
 		return "IpfPreparationJob [productFamily=" + productFamily + ", keyObjectStorage=" + keyObjectStorage
 				+ ", creationDate=" + creationDate + ", hostname=" + hostname + ", ipfName=" + ipfName + ", ipfVersion="
-				+ ipfVersion + ", preselectednputs=" + preselectednputs + ", appDataJob=" + appDataJob +"]";
+				+ ipfVersion + ", preselectednputs=" + preselectednputs + ", appDataJob=" + appDataJob + ", uid=" + uid +"]";
 	}
 }

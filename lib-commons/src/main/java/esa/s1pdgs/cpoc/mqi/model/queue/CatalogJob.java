@@ -43,7 +43,7 @@ public class CatalogJob extends AbstractMessage {
 	@Override
 	public int hashCode() {
 		return Objects.hash(creationDate, hostname, keyObjectStorage, relativePath, mode, oqcFlag, productFamily,
-				productName);
+				productName, uid);
 	}
 
 	@Override
@@ -65,6 +65,7 @@ public class CatalogJob extends AbstractMessage {
 				&& Objects.equals(mode, other.mode)
 				&& oqcFlag == other.oqcFlag 
 				&& productFamily == other.productFamily
+				&& Objects.equals(uid, other.uid)
 				&& Objects.equals(productName, other.productName);
 	}
 
@@ -72,6 +73,6 @@ public class CatalogJob extends AbstractMessage {
 	public String toString() {
 		return "CatalogJob [productFamily=" + productFamily + ", keyObjectStorage=" + keyObjectStorage
 				+ ", creationDate=" + creationDate + ", hostname=" + hostname + ", productName=" + productName
-				+ ", relativePath=" + relativePath + ", mode=" + mode + ", oqcFlag=" + oqcFlag + "]";
+				+ ", relativePath=" + relativePath + ", mode=" + mode + ", oqcFlag=" + oqcFlag + ", uid=" + uid +"]";
 	}
 }
