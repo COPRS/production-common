@@ -2,6 +2,7 @@ package esa.s1pdgs.cpoc.mdc.trigger;
 
 import java.util.Arrays;
 import java.util.Map;
+import java.util.UUID;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -15,8 +16,10 @@ import org.springframework.stereotype.Service;
 import esa.s1pdgs.cpoc.appstatus.AppStatus;
 import esa.s1pdgs.cpoc.common.ProductCategory;
 import esa.s1pdgs.cpoc.common.errors.AbstractCodedException;
+import esa.s1pdgs.cpoc.errorrepo.ErrorRepoAppender;
 import esa.s1pdgs.cpoc.mdc.trigger.config.MdcTriggerConfigurationProperties;
 import esa.s1pdgs.cpoc.mdc.trigger.config.MdcTriggerConfigurationProperties.CategoryConfig;
+import esa.s1pdgs.cpoc.mdc.trigger.config.ProcessConfiguration;
 import esa.s1pdgs.cpoc.mqi.client.MqiClient;
 import esa.s1pdgs.cpoc.mqi.client.MqiConsumer;
 import esa.s1pdgs.cpoc.mqi.model.queue.CatalogJob;
@@ -27,21 +30,54 @@ import esa.s1pdgs.cpoc.mqi.model.rest.GenericPublicationMessageDto;
 
 @Service
 public class MetadataTriggerService {	
+	private static final CatalogJobMapper<IngestionEvent> INGESTION_MAPPER = new CatalogJobMapper<IngestionEvent>() {
+		@Override
+		public final CatalogJob toCatJob(final IngestionEvent event, final UUID reportingId) {
+			final CatalogJob job = new CatalogJob();
+			job.setProductName(event.getProductName());
+			job.setRelativePath(event.getRelativePath());
+			job.setProductFamily(event.getProductFamily());
+			job.setKeyObjectStorage(event.getKeyObjectStorage());
+			job.setUid(reportingId);
+			return job;
+		}		
+	};
+	private static final CatalogJobMapper<ProductionEvent> PROD_MAPPER = new CatalogJobMapper<ProductionEvent>() {
+		@Override
+		public final CatalogJob toCatJob(final ProductionEvent event, final UUID reportingId) {
+			final CatalogJob job = new CatalogJob();
+			job.setProductName(event.getProductName());
+			// relativ path should not be needed here --> only evaluated for EDRS_SESSION
+			job.setProductFamily(event.getProductFamily());
+			job.setKeyObjectStorage(event.getKeyObjectStorage());
+			job.setMode(event.getMode());
+			job.setUid(reportingId);
+			return job;
+		}		
+	};
+	
 	private static final Logger LOG = LogManager.getLogger(MetadataTriggerService.class);
 	
 	private final MdcTriggerConfigurationProperties properties;
 	private final MqiClient mqiClient;
 	private final AppStatus appStatus;
+	private final ErrorRepoAppender errorAppender;
+	private final ProcessConfiguration processConfig;
 		
 	@Autowired
 	public MetadataTriggerService(
 			final MdcTriggerConfigurationProperties properties, 
 			final MqiClient mqiClient,
-			final AppStatus appStatus
+			final AppStatus appStatus,
+			final ErrorRepoAppender errorAppender,
+			final ProcessConfiguration processConfig
+			
 	) {
 		this.properties = properties;
 		this.mqiClient = mqiClient;
 		this.appStatus = appStatus;
+		this.errorAppender = errorAppender;
+		this.processConfig = processConfig;
 	}
 
 	@PostConstruct
@@ -78,7 +114,7 @@ public class MetadataTriggerService {
 			return new MqiConsumer<IngestionEvent>(
 					mqiClient, 
 					cat, 
-					p -> publish(ProductCategory.CATALOG_JOBS, p, toCatalogJob(p.getBody())),
+					new MetadataTriggerListener<>(INGESTION_MAPPER, mqiClient, errorAppender, processConfig),
 					config.getFixedDelayMs(),
 					config.getInitDelayPolMs(),
 					appStatus
@@ -87,38 +123,18 @@ public class MetadataTriggerService {
 			return new MqiConsumer<ProductionEvent>(
 					mqiClient, 
 					cat, 
-					p -> publish(ProductCategory.CATALOG_JOBS, p, toCatalogJob(p.getBody())),
+					new MetadataTriggerListener<>(PROD_MAPPER, mqiClient, errorAppender, processConfig),
 					config.getFixedDelayMs(),
 					config.getInitDelayPolMs(),
 					appStatus
 			);
-		} else {
-			throw new IllegalArgumentException(
-					String.format(
-							"Invalid product category %s. Available are %s", 
-							cat, 
-							Arrays.toString(ProductCategory.values())
-					)
-			);
-		}
-	}
-		
-	private final CatalogJob toCatalogJob(final IngestionEvent event) {
-		final CatalogJob job = new CatalogJob();
-		job.setProductName(event.getProductName());
-		job.setRelativePath(event.getRelativePath());
-		job.setProductFamily(event.getProductFamily());
-		job.setKeyObjectStorage(event.getKeyObjectStorage());
-		return job;
-	}
-	
-	private final CatalogJob toCatalogJob(final ProductionEvent event) {
-		final CatalogJob job = new CatalogJob();
-		job.setProductName(event.getProductName());
-		// relativ path should not be needed here --> only evaluated for EDRS_SESSION
-		job.setProductFamily(event.getProductFamily());
-		job.setKeyObjectStorage(event.getKeyObjectStorage());
-		job.setMode(event.getMode());
-		return job;
+		} 
+		throw new IllegalArgumentException(
+				String.format(
+						"Invalid product category %s. Available are %s", 
+						cat, 
+						Arrays.asList(ProductCategory.INGESTION_EVENT, ProductCategory.PRODUCTION_EVENT)
+				)
+		);
 	}
 }
