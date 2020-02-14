@@ -3,6 +3,7 @@ package esa.s1pdgs.cpoc.mdc.worker;
 import java.time.LocalDateTime;
 import java.util.Date;
 import java.util.Map;
+import java.util.UUID;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -16,7 +17,6 @@ import org.springframework.stereotype.Service;
 
 import esa.s1pdgs.cpoc.common.ProductCategory;
 import esa.s1pdgs.cpoc.common.ProductFamily;
-import esa.s1pdgs.cpoc.common.errors.AbstractCodedException.ErrorCode;
 import esa.s1pdgs.cpoc.common.utils.DateUtils;
 import esa.s1pdgs.cpoc.common.utils.LogUtils;
 import esa.s1pdgs.cpoc.errorrepo.ErrorRepoAppender;
@@ -37,7 +37,6 @@ import esa.s1pdgs.cpoc.mqi.model.queue.CatalogJob;
 import esa.s1pdgs.cpoc.mqi.model.rest.GenericMessageDto;
 import esa.s1pdgs.cpoc.mqi.model.rest.GenericPublicationMessageDto;
 import esa.s1pdgs.cpoc.report.Reporting;
-import esa.s1pdgs.cpoc.report.ReportingFactory;
 import esa.s1pdgs.cpoc.report.ReportingMessage;
 import esa.s1pdgs.cpoc.report.ReportingUtils;
 import esa.s1pdgs.cpoc.report.message.input.FilenameReportingInput;
@@ -116,19 +115,19 @@ public class MetadataExtractionService implements MqiListener<CatalogJob> {
 			else{
 				LOG.debug("ES already contains metadata for product {}", productName);
 			}
-			publish(message, catJob, reporting, metadata);
+			publish(message, catJob, reporting.getUid(), metadata);
 	        reporting.end(new ReportingMessage("End metadata extraction"));
             
 		}
 		catch (final Exception e) {			
-			final String shortMessage = String.format(
-					"Failed to extract metadata from product %s of family %s",
+			final String errMess = String.format(
+					"Failed to extract metadata from product %s of family %s: %s",
 					productName,
-					family
+					family,
+					LogUtils.toString(e)
 			);
-			final String errorMessage = String.format("%s: %s", shortMessage, LogUtils.toString(e));
-	        reporting.error(new ReportingMessage(errorMessage));	        
-	        throw new MetadataExtractException(shortMessage, e);
+	        reporting.error(new ReportingMessage("Metadata extraction failed: %s", 	LogUtils.toString(e)));	        
+	        throw new MetadataExtractException(errMess, e);
 		}    
 	}
 	
@@ -138,7 +137,7 @@ public class MetadataExtractionService implements MqiListener<CatalogJob> {
         errorAppender.send(new FailedProcessingDto(
         		processConfiguration.getHostname(),
         		new Date(),
-        		LogUtils.toString(error),
+        		error.getMessage(),
         		message
         )); 
 	}
@@ -146,28 +145,19 @@ public class MetadataExtractionService implements MqiListener<CatalogJob> {
 	private final void publish(
 			final GenericMessageDto<CatalogJob> message, 
 			final CatalogJob catJob,
-			final ReportingFactory reporting, 
+			final UUID reportingId,
 			final JSONObject metadata
 	) throws Exception {
-		final Reporting reportPublish = reporting.newReporting("Publish");       
-		reportPublish.begin(new ReportingMessage("Start publishing metadata"));
-
-		try {
-			final CatalogEvent event = toCatalogEvent(catJob, metadata);
-			final GenericPublicationMessageDto<CatalogEvent> messageDto = new GenericPublicationMessageDto<CatalogEvent>(
-					message.getId(), 
-					event.getProductFamily(), 
-					event
-			);
-			messageDto.setInputKey(message.getInputKey());
-			messageDto.setOutputKey(event.getProductFamily().name());		    	
-			mqiClient.publish(messageDto, ProductCategory.CATALOG_EVENT);
-		    reportPublish.end(new ReportingMessage("End publishing metadata"));
-			
-		} catch (final Exception e) {
-			reportPublish.error(new ReportingMessage("[code {}] {}", ErrorCode.INTERNAL_ERROR.getCode(), LogUtils.toString(e)));
-			throw e;
-		}
+		final CatalogEvent event = toCatalogEvent(catJob, metadata);
+		event.setUid(reportingId);
+		final GenericPublicationMessageDto<CatalogEvent> messageDto = new GenericPublicationMessageDto<CatalogEvent>(
+				message.getId(), 
+				event.getProductFamily(), 
+				event
+		);
+		messageDto.setInputKey(message.getInputKey());
+		messageDto.setOutputKey(event.getProductFamily().name());		    	
+		mqiClient.publish(messageDto, ProductCategory.CATALOG_EVENT);
 	}
 
 	private final MqiConsumer<CatalogJob> newConsumerFor(final ProductCategory category, final CategoryConfig config) {
