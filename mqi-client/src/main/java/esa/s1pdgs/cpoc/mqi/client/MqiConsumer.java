@@ -14,8 +14,6 @@ import esa.s1pdgs.cpoc.mqi.model.queue.AbstractMessage;
 import esa.s1pdgs.cpoc.mqi.model.rest.Ack;
 import esa.s1pdgs.cpoc.mqi.model.rest.AckMessageDto;
 import esa.s1pdgs.cpoc.mqi.model.rest.GenericMessageDto;
-import esa.s1pdgs.cpoc.report.ReportingMessage;
-import esa.s1pdgs.cpoc.report.ReportingUtils;
 
 public final class MqiConsumer<E extends AbstractMessage> implements Runnable {
 	private static final Logger LOG = LogManager.getLogger(MqiConsumer.class);
@@ -87,7 +85,6 @@ public final class MqiConsumer<E extends AbstractMessage> implements Runnable {
 					continue;
 				}
 				if (!allowConsumption(message)) {					
-					ReportingUtils.newReportingBuilder().newEventReporting(new ReportingMessage("Ignored MQI message: {}", message));
 					LOG.trace("Filter does not allow consumption: continue");
 					continue;
 				}
@@ -96,20 +93,16 @@ public final class MqiConsumer<E extends AbstractMessage> implements Runnable {
 				try {
 					mqiListener.onMessage(message);
 					client.ack(new AckMessageDto(message.getId(), Ack.OK, null, false), category);
-					ReportingUtils.newReportingBuilder().newEventReporting(new ReportingMessage("Handled MQI message: {}", message));
 				// any other error --> dump prominently into log file but continue	
 				} catch (final Exception e) {
 					LOG.error(String.format("Error handling message %s", message), e);
-					client.ack(new AckMessageDto(message.getId(), Ack.ERROR, LogUtils.toString(e), false), category);
-					ReportingUtils.newReportingBuilder().newEventReporting(new ReportingMessage("Failed to handle MQI message: {}", message));					
-					
+					client.ack(new AckMessageDto(message.getId(), Ack.ERROR, LogUtils.toString(e), false), category);				
 					// S1PRO-1045: as this implementation is used for e.g. appending something to the ErrorQueue, it must only be called 
 					// on errors if ack call was successful
 					mqiListener.onTerminalError(message, e);					
 				}
 			// on communication errors with Mqi --> just dump warning and retry on next polling attempt
 			} catch (final AbstractCodedException ace) {
-				ReportingUtils.newReportingBuilder().newEventReporting(new ReportingMessage("Failed to handle MQI message: {}", message));
 				LOG.warn("Error Code: {}, Message: {}", ace.getCode().getCode(), ace.getLogMessage());
 				appStatus.setError("NEXT_MESSAGE");
 			}
