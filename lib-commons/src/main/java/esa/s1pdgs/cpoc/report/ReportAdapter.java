@@ -115,6 +115,11 @@ public final class ReportAdapter implements Reporting {
 	}
 	
 	@Override
+	public UUID getUid() {
+		return uid;
+	}
+
+	@Override
 	public UUID getRootUID() {
 		return rootUid;
 	}
