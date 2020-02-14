@@ -138,7 +138,8 @@ public class TestLevelSegmentMetadataExtractor {
 		final ExtractMetadata extract = new ExtractMetadata(
 				extractorConfig.getTypeOverlap(), 
 				extractorConfig.getTypeSliceLength(),
-				extractorConfig.getPacketStoreType(),
+				extractorConfig.getPacketStoreTypes(),
+				extractorConfig.getPacketstoreTypeTimelinesses(),
 				extractorConfig.getTimelinessPriorityFromHighToLow(),
 				extractorConfig.getXsltDirectory(), 
 				xmlConverter

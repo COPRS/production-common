@@ -33,7 +33,6 @@ import esa.s1pdgs.cpoc.common.ProductFamily;
 import esa.s1pdgs.cpoc.common.errors.processing.MetadataExtractionException;
 import esa.s1pdgs.cpoc.common.errors.processing.MetadataMalformedException;
 import esa.s1pdgs.cpoc.common.utils.DateUtils;
-import esa.s1pdgs.cpoc.mdc.worker.config.MetadataExtractorConfig.PacketStoreType;
 import esa.s1pdgs.cpoc.mdc.worker.extraction.model.AuxDescriptor;
 import esa.s1pdgs.cpoc.mdc.worker.extraction.model.EdrsSessionFile;
 import esa.s1pdgs.cpoc.mdc.worker.extraction.model.EdrsSessionFileDescriptor;
@@ -76,9 +75,14 @@ public class ExtractMetadata {
 	private Map<String, Float> typeSliceLength;
 
 	/**
-	 * Map packet store id to packet store type and packetStoreType to timeliness
+	 * Map packet stores to packet store type
 	 */
-	private PacketStoreType packetStoreType;
+	private Map<String,String> packetStoreTypes;
+
+	/**
+	 * Map packet store type to timeliness
+	 */
+	private Map<String,String> packetStoreTypeTimelinesses;
 	
 	/**
 	 * Timeliness prioritization
@@ -104,11 +108,15 @@ public class ExtractMetadata {
 	 * Constructor
 	 */
 	public ExtractMetadata(final Map<String, Float> typeOverlap, final Map<String, Float> typeSliceLength,
-			final PacketStoreType packetStoreType, final List<String> timelinessPriorityFromHighToLow,
-			final String xsltDirectory, final XmlConverter xmlConverter) {
+			final Map<String,String> packetStoreTypes, final Map<String,String> packetStoreTypeTimelinesses,
+			final List<String> timelinessPriorityFromHighToLow, final String xsltDirectory,
+			final XmlConverter xmlConverter) {
 		this.transFactory = TransformerFactory.newInstance();
 		this.typeOverlap = typeOverlap;
 		this.typeSliceLength = typeSliceLength;
+		this.packetStoreTypes = packetStoreTypes;
+		this.packetStoreTypeTimelinesses = packetStoreTypeTimelinesses;
+		this.timelinessPriorityFromHighToLow = timelinessPriorityFromHighToLow;
 		this.xsltDirectory = xsltDirectory;
 		this.xmlConverter = xmlConverter;
 		this.xsltMap = new HashMap<>();
@@ -287,7 +295,15 @@ public class ExtractMetadata {
 				}
 			}
 			
-			// TODO: compute timeliness here
+			// TODO: support multiply packet stores
+			if (metadataJSONObject.has("packetStoreID")) {				
+				String psId = metadataJSONObject.get("packetStoreID").toString();
+				String satellite = descriptor.getMissionId() + descriptor.getSatelliteId();
+				String psType =  packetStoreTypes.get(satellite + "-" + psId);
+				String timeliness = packetStoreTypeTimelinesses.get(psType);
+				metadataJSONObject.put("timeliness", timeliness);
+				metadataJSONObject.remove("packetStoreID");
+			}
 
 			LOGGER.debug("composed Json: {} ", metadataJSONObject);
 			return metadataJSONObject;

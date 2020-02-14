@@ -26,7 +26,6 @@ import esa.s1pdgs.cpoc.common.utils.FileUtils;
 import esa.s1pdgs.cpoc.mdc.worker.Utils;
 import esa.s1pdgs.cpoc.mdc.worker.config.MetadataExtractorConfig;
 import esa.s1pdgs.cpoc.mdc.worker.config.ProcessConfiguration;
-import esa.s1pdgs.cpoc.mdc.worker.config.MetadataExtractorConfig.PacketStoreType;
 import esa.s1pdgs.cpoc.mdc.worker.es.EsServices;
 import esa.s1pdgs.cpoc.mdc.worker.extraction.files.ExtractMetadata;
 import esa.s1pdgs.cpoc.mdc.worker.extraction.files.FileDescriptorBuilder;
@@ -118,11 +117,11 @@ public class TestAuxMetadataExtractor {
         doNothing().when(appStatus).setError(Mockito.anyString());
         doReturn(true).when(mqiService).ack(Mockito.any(), Mockito.any());
         
-        PacketStoreType packetStoreType = new PacketStoreType();
-        packetStoreType.setS1a(new HashMap<>());
-        packetStoreType.setS1a(new HashMap<>());
-        packetStoreType.setToTimeliness(new HashMap<>());
-        doReturn(packetStoreType).when(extractorConfig).getPacketStoreType();
+        Map<String,String> packetStoreTypes = new HashMap<>();
+        doReturn(packetStoreTypes).when(extractorConfig).getPacketStoreTypes();
+
+        Map<String,String> packetStoreTypeTimelinesses = new HashMap<>();
+        doReturn(packetStoreTypeTimelinesses).when(extractorConfig).getPacketstoreTypeTimelinesses();
         
         final List<String> timelinessPriorityFromHighToLow = Arrays.asList("PT", "NRT", "FAST24");
         doReturn(timelinessPriorityFromHighToLow).when(extractorConfig).getTimelinessPriorityFromHighToLow();
@@ -130,7 +129,8 @@ public class TestAuxMetadataExtractor {
 		final ExtractMetadata extract = new ExtractMetadata(
 				extractorConfig.getTypeOverlap(), 
 				extractorConfig.getTypeSliceLength(),
-				extractorConfig.getPacketStoreType(),
+				extractorConfig.getPacketStoreTypes(),
+				extractorConfig.getPacketstoreTypeTimelinesses(),
 				extractorConfig.getTimelinessPriorityFromHighToLow(),
 				extractorConfig.getXsltDirectory(), 
 				xmlConverter
