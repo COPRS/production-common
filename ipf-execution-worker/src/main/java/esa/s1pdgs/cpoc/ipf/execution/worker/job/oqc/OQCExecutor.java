@@ -12,6 +12,7 @@ import esa.s1pdgs.cpoc.ipf.execution.worker.config.ApplicationProperties;
 import esa.s1pdgs.cpoc.mqi.model.queue.LevelJobOutputDto;
 import esa.s1pdgs.cpoc.mqi.model.queue.OQCFlag;
 import esa.s1pdgs.cpoc.report.Reporting;
+import esa.s1pdgs.cpoc.report.ReportingFactory;
 import esa.s1pdgs.cpoc.report.ReportingMessage;
 
 public class OQCExecutor {
@@ -27,8 +28,8 @@ public class OQCExecutor {
 	}
 
 	public OQCFlag executeOQC(final Path originalProduct, final LevelJobOutputDto output, final OQCTaskFactory factory,
-			final Reporting.ChildFactory reportingChildFactory) {
-		final Reporting reporting = reportingChildFactory.newChild("OnlineQualityCheck");
+			final ReportingFactory reportingFactory) {
+		final Reporting reporting = reportingFactory.newReporting("OnlineQualityCheck");
 		
 		// Just check if OQC is enabled after all
 		if (properties.isOqcEnabled() && output.isOqcCheck()) {

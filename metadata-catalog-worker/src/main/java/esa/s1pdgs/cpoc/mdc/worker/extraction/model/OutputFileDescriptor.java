@@ -72,8 +72,7 @@ public class OutputFileDescriptor extends AbstractFileDescriptor {
 	@Override
 	public int hashCode() {
 		return Objects.hash(dataTakeId, extension, filename, keyObjectStorage, missionId, mode, polarisation,
-				productClass, productFamily, productName, productType, relativePath, resolution, satelliteId,
-				swathtype);
+				productClass, productFamily, productName, productType, relativePath, resolution, satelliteId, swathtype);
 	}
 
 	@Override
@@ -106,4 +105,5 @@ public class OutputFileDescriptor extends AbstractFileDescriptor {
 				+ ", productFamily=" + productFamily + ", mode=" + mode + ", resolution=" + resolution + ", swathtype="
 				+ swathtype + ", polarisation=" + polarisation + ", dataTakeId=" + dataTakeId + "]";
 	}
+
 }

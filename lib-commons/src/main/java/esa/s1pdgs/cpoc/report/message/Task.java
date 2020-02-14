@@ -2,7 +2,6 @@ package esa.s1pdgs.cpoc.report.message;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
-import com.fasterxml.jackson.annotation.JsonProperty;
 
 import esa.s1pdgs.cpoc.report.Reporting.Event;
 
@@ -10,14 +9,7 @@ import esa.s1pdgs.cpoc.report.Reporting.Event;
 public class Task {
 	private String uid;
 	private String name;
-	private Event event;
-	
-	@JsonProperty("data_rate_mebibytes_sec")
-	private double rate;
-	
-	@JsonProperty("data_volume_mebibytes")
-	private double volume;
-	
+	private Event event;	
 	private String satellite;
 	
 	public Task() {
@@ -51,22 +43,6 @@ public class Task {
 
 	public void setEvent(final Event event) {
 		this.event = event;
-	}
-
-	public double getRate() {
-		return rate;
-	}
-
-	public void setRate(final double rate) {
-		this.rate = rate;
-	}
-
-	public double getVolume() {
-		return volume;
-	}
-
-	public void setVolume(final double volume) {
-		this.volume = volume;
 	}
 
 	public String getSatellite() {

@@ -54,7 +54,9 @@ public class MetadataExtractorFactory {
 		final ExtractMetadata extract = new ExtractMetadata(
 				extractorConfig.getTypeOverlap(), 
 				extractorConfig.getTypeSliceLength(),
-				extractorConfig.getXsltDirectory(), 
+				extractorConfig.getPacketStoreType(),
+				extractorConfig.getTimelinessPriorityFromHighToLow(),
+				extractorConfig.getXsltDirectory(),
 				xmlConverter
 		);		
 		final MetadataBuilder mdBuilder = new MetadataBuilder(extract);

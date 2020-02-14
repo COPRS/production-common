@@ -26,6 +26,7 @@ import esa.s1pdgs.cpoc.obs_sdk.ObsObject;
 import esa.s1pdgs.cpoc.obs_sdk.ObsServiceException;
 import esa.s1pdgs.cpoc.obs_sdk.ObsValidationException;
 import esa.s1pdgs.cpoc.report.Reporting;
+import esa.s1pdgs.cpoc.report.ReportingFactory;
 import esa.s1pdgs.cpoc.report.ReportingMessage;
 import esa.s1pdgs.cpoc.report.ReportingUtils;
 import esa.s1pdgs.cpoc.validation.config.ApplicationProperties;
@@ -76,7 +77,7 @@ public class ValidationService {
 				appStatus.setProcessing(esa.s1pdgs.cpoc.appstatus.Status.PROCESSING_MSG_ID_UNDEFINED);
 			}
 		}
-		final Reporting reporting = ReportingUtils.newReportingBuilder().newTaskReporting("ValidationService");
+		final Reporting reporting = ReportingUtils.newReportingBuilder().newReporting("ValidationService");
 		reporting.begin(new ReportingMessage("Starting validation"));
 		try {		
 			int totalDiscrepancies = 0;
@@ -86,13 +87,13 @@ public class ValidationService {
 				final FamilyIntervalConf conf = properties.getFamilies().get(family);			
 				final LocalDateTime startInterval = LocalDateTime.now().minusSeconds(conf.getLifeTime());
 				final LocalDateTime endInterval = LocalDateTime.now().minusSeconds(conf.getInitialDelay());			
-				int familyDiscrepancies = validateProductFamily(reporting.getChildFactory(), family, startInterval, endInterval);				
+				final int familyDiscrepancies = validateProductFamily(reporting, family, startInterval, endInterval);				
 				totalDiscrepancies += familyDiscrepancies;
 			}
 			LOGGER.info("Found {} discrepancies for all families", totalDiscrepancies);
 			
 			reporting.end(new ReportingMessage("End validation"));
-		} catch (Exception e) {
+		} catch (final Exception e) {
 			reporting.error(new ReportingMessage("Error occured while performing validation: {}", LogUtils.toString(e)));
 		}
 		
@@ -103,9 +104,9 @@ public class ValidationService {
 		}
 	}
 
-	int validateProductFamily(final Reporting.ChildFactory reportingChildFactory, final ProductFamily family, final LocalDateTime startInterval,
+	int validateProductFamily(final ReportingFactory reportingFactory, final ProductFamily family, final LocalDateTime startInterval,
 			final LocalDateTime endInterval) throws Exception {		
-		Reporting reporting = reportingChildFactory.newChild("ValidateMDC");
+		final Reporting reporting = reportingFactory.newReporting("ValidateMDC");
 		reporting.begin(new ReportingMessage("Starting validation from {} to {} for family {}", startInterval, endInterval, family));		
 		try {
 			/*
@@ -120,7 +121,7 @@ public class ValidationService {
 			Map<String, ObsObject> obsResults = null;
 			final Date startDate = Date.from(startInterval.atZone(ZoneId.of("UTC")).toInstant());
 			final Date endDate = Date.from(endInterval.atZone(ZoneId.of("UTC")).toInstant());
-			obsResults = obsClient.listInterval(ProductFamily.valueOf(family.name()), startDate, endDate, reportingChildFactory);
+			obsResults = obsClient.listInterval(ProductFamily.valueOf(family.name()), startDate, endDate, reportingFactory);
 			LOGGER.info("OBS query for family '{}' returned {} results", family, obsResults.size());
 			
 			/*
@@ -135,7 +136,7 @@ public class ValidationService {
 					if (family.name().endsWith("_ZIP")) {
 						key += ".zip";
 					} 
-					obsClient.validate(new ObsObject(family, key), reportingChildFactory);
+					obsClient.validate(new ObsObject(family, key), reportingFactory);
 				} catch (ObsServiceException | ObsValidationException ex) {
 					// Validation failed for that object.
 					LOGGER.debug(ex);
@@ -174,7 +175,7 @@ public class ValidationService {
 			reporting.error(new ReportingMessage("Error occured while performing metadata catalog query task [code {}] {}",
 					e.getCode().getCode(), e.getLogMessage()));
 			throw e;
-		} catch (Exception e) {
+		} catch (final Exception e) {
 			reporting.error(new ReportingMessage(LogUtils.toString(e)));
 			throw e;
 		}

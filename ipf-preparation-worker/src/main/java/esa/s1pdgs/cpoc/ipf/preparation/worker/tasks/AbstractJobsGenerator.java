@@ -352,7 +352,7 @@ public abstract class AbstractJobsGenerator implements Runnable {
     public void run() {
         JobGeneration job = null;
         // Get a job to generate
-        final Reporting reporting = ReportingUtils.newReportingBuilder().newTaskReporting("JobGenerator");
+        final Reporting reporting = ReportingUtils.newReportingBuilder().newReporting("JobGenerator");
         
         try {        	
             final List<AppDataJob<CatalogEvent>> jobs = appDataService
@@ -480,7 +480,7 @@ public abstract class AbstractJobsGenerator implements Runnable {
                 // Prepare and send job if ready
                 if (job.getGeneration().getState() == AppDataJobGenerationState.READY) {
                 	
-                	final Reporting reportPrep = reporting.getChildFactory().newChild("JobGeneratorPrepAndSend");                  	
+                	final Reporting reportPrep = reporting.newReporting("JobGeneratorPrepAndSend");                  	
                   	reportPrep.begin(new ReportingMessage("Start job preparation and sending"));
                 	
                     try {

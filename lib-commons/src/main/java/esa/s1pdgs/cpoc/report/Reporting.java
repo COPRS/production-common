@@ -7,25 +7,16 @@ import java.util.UUID;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-public interface Reporting {
-	
-	public interface Builder {				
+public interface Reporting extends ReportingFactory {	
+	public interface Builder extends ReportingFactory {		
 		Builder predecessor(UUID predecessor);
+		Builder root(UUID root);
+		Builder parent(UUID parent);		
 		default Builder addTag(final String tag) {
 			return addTags(Collections.singleton(tag));
 		}
 		Builder addTags(Collection<String> tags);
-		Reporting newTaskReporting(String taskName);
-		void newEventReporting(final ReportingMessage reportingMessage);
-	}
-	
-	public interface ChildFactory {
-		public static final ChildFactory NULL = new ChildFactory() {
-			@Override
-			public Reporting newChild(String taskName) { return Reporting.NULL; }
-		};
-
-		Reporting newChild(String taskName);
+		void newEventReporting(ReportingMessage reportingMessage);
 	}
 	
 	enum Event {
@@ -50,27 +41,24 @@ public interface Reporting {
 	
 	public static final Logger REPORT_LOG = LogManager.getLogger(Reporting.class);
 	
-	public static final Reporting NULL = new Reporting() {
-		
-		/* Discarding Reporting Implementation */
-		
+	public static final Reporting NULL = new Reporting() {		
 		@Override
 		public UUID getRootUID() {
 			return null;
 		}
 
 		@Override
-		public void begin(ReportingInput input, ReportingMessage reportingMessage) {}
+		public void begin(final ReportingInput input, final ReportingMessage reportingMessage) {}
 
 		@Override
-		public void end(ReportingOutput output, ReportingMessage reportingMessage) {}
+		public void end(final ReportingOutput output, final ReportingMessage reportingMessage) {}
 
 		@Override
-		public void error(ReportingMessage reportingMessage) {}
+		public void error(final ReportingMessage reportingMessage) {}
 
 		@Override
-		public ChildFactory getChildFactory() {
-			return ChildFactory.NULL;
+		public Reporting newReporting(final String taskName) {
+			return NULL;
 		}
 	};
 
@@ -87,5 +75,4 @@ public interface Reporting {
 	void begin(ReportingInput input, ReportingMessage reportingMessage);
 	void end(ReportingOutput output, ReportingMessage reportingMessage);
 	void error(ReportingMessage reportingMessage);
-	ChildFactory getChildFactory();
 }

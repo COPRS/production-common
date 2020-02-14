@@ -39,6 +39,7 @@ import esa.s1pdgs.cpoc.mqi.model.rest.GenericMessageDto;
 import esa.s1pdgs.cpoc.mqi.model.rest.GenericPublicationMessageDto;
 import esa.s1pdgs.cpoc.obs_sdk.ObsEmptyFileException;
 import esa.s1pdgs.cpoc.report.Reporting;
+import esa.s1pdgs.cpoc.report.ReportingFactory;
 import esa.s1pdgs.cpoc.report.ReportingUtils;
 
 public final class TestIngestionWorkerService {
@@ -46,7 +47,7 @@ public final class TestIngestionWorkerService {
 	@Mock
 	GenericMqiClient mqiClient;
 
-	Reporting reporting = ReportingUtils.newReportingBuilder().newTaskReporting("Test");
+	Reporting reporting = ReportingUtils.newReportingBuilder().newReporting("Test");
 	
 	@Mock
 	Logger logger;
@@ -76,10 +77,10 @@ public final class TestIngestionWorkerService {
 		
 		final ProductService fakeProductService = new ProductService() {			
 			@Override
-			public void markInvalid(final IngestionJob ingestion, final Reporting.ChildFactory reportingChildFactory) {}
+			public void markInvalid(final IngestionJob ingestion, final ReportingFactory reportingFactory) {}
 			
 			@Override
-			public IngestionResult ingest(final ProductFamily family, final IngestionJob ingestion, final Reporting.ChildFactory reportingChildFactory)
+			public IngestionResult ingest(final ProductFamily family, final IngestionJob ingestion, final ReportingFactory reportingFactory)
 					throws ProductException, InternalErrorException {
 				return IngestionResult.NULL;
 			}
@@ -151,7 +152,7 @@ public final class TestIngestionWorkerService {
 		final IngestionResult expectedResult = new IngestionResult(Arrays.asList(prod), 0L);
 		doReturn(expectedResult).when(productService).ingest(Mockito.eq(ProductFamily.AUXILIARY_FILE), Mockito.eq(ingestionJob), Mockito.any());
 		
-		final IngestionResult result = uut.identifyAndUpload(message, ingestionJob, Reporting.ChildFactory.NULL);
+		final IngestionResult result = uut.identifyAndUpload(message, ingestionJob, ReportingFactory.NULL);
 		assertEquals(expectedResult, result);
 		verify(productService, times(1)).ingest(Mockito.eq(ProductFamily.AUXILIARY_FILE), Mockito.eq(ingestionJob), Mockito.any());
 		verify(productService, never()).markInvalid(Mockito.any(), Mockito.any());
@@ -177,7 +178,7 @@ public final class TestIngestionWorkerService {
 		final IngestionJob ingestionJob = new IngestionJob("foo.bar");
 		message.setBody(ingestionJob);
 		
-		final IngestionResult result = uut.identifyAndUpload(message, ingestionJob, Reporting.ChildFactory.NULL);
+		final IngestionResult result = uut.identifyAndUpload(message, ingestionJob, ReportingFactory.NULL);
 	}
 
 	@Test
@@ -262,7 +263,7 @@ public final class TestIngestionWorkerService {
 		final List<Product<IngestionEvent>> products = new ArrayList<>();
 		products.add(product);
 		
-		uut.publish(products, message, reporting.getChildFactory());
+		uut.publish(products, message, reporting);
 		
 		final GenericPublicationMessageDto<? extends AbstractMessage> result = new GenericPublicationMessageDto<>(
 				message.getId(), product.getFamily(), product.getDto());

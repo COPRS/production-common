@@ -14,27 +14,27 @@ import esa.s1pdgs.cpoc.obs_sdk.ObsEmptyFileException;
 import esa.s1pdgs.cpoc.obs_sdk.ObsObject;
 import esa.s1pdgs.cpoc.obs_sdk.ObsUploadObject;
 import esa.s1pdgs.cpoc.obs_sdk.SdkClientException;
-import esa.s1pdgs.cpoc.report.Reporting;
+import esa.s1pdgs.cpoc.report.ReportingFactory;
 
 public class ObsAdapter {
     private final ObsClient obsClient;
     private final Path inboxPath;
-    private final Reporting.ChildFactory reportingChildFactory;
+    private final ReportingFactory reportingFactory;
     
 	public ObsAdapter(
 			final ObsClient obsClient, 
 			final Path inboxPath,
-			final Reporting.ChildFactory reportingChildFactory
+			final ReportingFactory reportingFactory
 	) {
 		this.obsClient 	= obsClient;
 		this.inboxPath 	= inboxPath;
-		this.reportingChildFactory = reportingChildFactory;
+		this.reportingFactory = reportingFactory;
 	}
 	
 	public final void upload(final ProductFamily family, final File file, final String obsKey) throws ObsEmptyFileException {
 		try {
 			if (!obsClient.exists(new ObsObject(family, obsKey))) {
-				obsClient.upload(Arrays.asList(new ObsUploadObject(family, obsKey, file)), reportingChildFactory);
+				obsClient.upload(Arrays.asList(new ObsUploadObject(family, obsKey, file)), reportingFactory);
 			}
 		} catch (AbstractCodedException | SdkClientException e) {
 			throw new RuntimeException(

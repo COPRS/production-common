@@ -31,6 +31,7 @@ import esa.s1pdgs.cpoc.obs_sdk.ObsUploadObject;
 import esa.s1pdgs.cpoc.obs_sdk.SdkClientException;
 import esa.s1pdgs.cpoc.obs_sdk.ValidArgumentAssertion;
 import esa.s1pdgs.cpoc.report.Reporting;
+import esa.s1pdgs.cpoc.report.ReportingFactory;
 import esa.s1pdgs.cpoc.report.ReportingMessage;
 import esa.s1pdgs.cpoc.report.ReportingUtils;
 
@@ -230,8 +231,8 @@ public class SwiftObsClient extends AbstractObsClient {
 	
 	@Override
 	public Map<String, InputStream> getAllAsInputStream(final ProductFamily family, final String keyPrefix, 
-			final Reporting.ChildFactory reportingChildFactory) throws SdkClientException {
-		final Reporting reporting = reportingChildFactory.newChild("ObsDownloadAsStream");
+			final ReportingFactory reportingFactory) throws SdkClientException {
+		final Reporting reporting = reportingFactory.newReporting("ObsDownloadAsStream");
 		reporting.begin(new ReportingMessage("Start downloading file '{}'", keyPrefix));
 		try {
 			ValidArgumentAssertion.assertValidArgument(family);
@@ -242,7 +243,7 @@ public class SwiftObsClient extends AbstractObsClient {
 			LOGGER.debug("Found {} elements in bucket {} with prefix {}", result.size(), bucket, keyPrefix);
 			reporting.end(new ReportingMessage("End downloading file '{}'", keyPrefix));
 			return result;
-		} catch (Exception e) {
+		} catch (final Exception e) {
 			reporting.error(new ReportingMessage(LogUtils.toString(e)));
 			throw e;
 		}
@@ -307,7 +308,7 @@ public class SwiftObsClient extends AbstractObsClient {
 	public URL createTemporaryDownloadUrl(final ObsObject object, final long expirationTimeInSeconds) throws ObsException {
 		ValidArgumentAssertion.assertValidArgument(object);
 		URL url;
-		final Reporting reporting = ReportingUtils.newReportingBuilder().newTaskReporting("ObsCreateTemporaryDownloadUrl");
+		final Reporting reporting = ReportingUtils.newReportingBuilder().newReporting("ObsCreateTemporaryDownloadUrl");
 		reporting.begin(new ReportingMessage(size(object), "Start creating temporary download URL for username '{}' for product '{}'", "anonymous", object.getKey()));
 		try {
 			url = swiftObsServices.createTemporaryDownloadUrl(getBucketFor(object.getFamily()), object.getKey(), expirationTimeInSeconds);

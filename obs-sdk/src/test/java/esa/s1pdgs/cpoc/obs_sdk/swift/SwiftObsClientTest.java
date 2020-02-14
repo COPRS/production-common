@@ -38,7 +38,7 @@ import esa.s1pdgs.cpoc.obs_sdk.ObsObject;
 import esa.s1pdgs.cpoc.obs_sdk.ObsServiceException;
 import esa.s1pdgs.cpoc.obs_sdk.ObsUploadObject;
 import esa.s1pdgs.cpoc.obs_sdk.SdkClientException;
-import esa.s1pdgs.cpoc.report.Reporting;
+import esa.s1pdgs.cpoc.report.ReportingFactory;
 
 public class SwiftObsClientTest {
 
@@ -206,20 +206,20 @@ public class SwiftObsClientTest {
     @Test
 	public void testGetListOfObjectsOfTimeFrameOfFamilyOneExists() throws ObsServiceException, SdkClientException {
 
-		Date timeFrameBegin = Date.from(Instant.parse("2020-01-01T00:00:00Z"));
-		Date timeFrameEnd = Date.from(Instant.parse("2020-01-03T00:00:00Z"));
-		Date obj1Date = Date.from(Instant.parse("2020-01-02T00:00:00Z"));
+		final Date timeFrameBegin = Date.from(Instant.parse("2020-01-01T00:00:00Z"));
+		final Date timeFrameEnd = Date.from(Instant.parse("2020-01-03T00:00:00Z"));
+		final Date obj1Date = Date.from(Instant.parse("2020-01-02T00:00:00Z"));
 
-		Container container = new ContainerMock(account, "l0-slices");
-		StoredObject obj1 = new StoredObjectCustomMock(container, "obj1");
+		final Container container = new ContainerMock(account, "l0-slices");
+		final StoredObject obj1 = new StoredObjectCustomMock(container, "obj1");
 		obj1.setLastModified(obj1Date);
 
-		List<StoredObject> objListing1 = new LinkedList<>();
+		final List<StoredObject> objListing1 = new LinkedList<>();
 		objListing1.add(obj1);
 
 		doReturn(objListing1).when(service).listObjectsFromContainer("l0-slices");
 
-		List<ObsObject> returnedObjs = client.getObsObjectsOfFamilyWithinTimeFrame(ProductFamily.L0_SLICE, timeFrameBegin, timeFrameEnd);
+		final List<ObsObject> returnedObjs = client.getObsObjectsOfFamilyWithinTimeFrame(ProductFamily.L0_SLICE, timeFrameBegin, timeFrameEnd);
 
 		assertEquals(1, returnedObjs.size());
 		assertEquals("obj1", returnedObjs.get(0).getKey());
@@ -230,23 +230,23 @@ public class SwiftObsClientTest {
     @Test
 	public void testGetListOfObjectsOfTimeFrameOfFamilyNoneExists() throws ObsServiceException, SdkClientException {
 
-		Date timeFrameBegin = Date.from(Instant.parse("2020-01-01T00:00:00Z"));
-		Date timeFrameEnd = Date.from(Instant.parse("2020-01-03T00:00:00Z"));
-		Date obj1Date = Date.from(Instant.parse("2020-01-04T00:00:00Z"));
+		final Date timeFrameBegin = Date.from(Instant.parse("2020-01-01T00:00:00Z"));
+		final Date timeFrameEnd = Date.from(Instant.parse("2020-01-03T00:00:00Z"));
+		final Date obj1Date = Date.from(Instant.parse("2020-01-04T00:00:00Z"));
 
-		Swift swift = new Swift();
-		AccountMock accountMock = new AccountMock(swift);
+		final Swift swift = new Swift();
+		final AccountMock accountMock = new AccountMock(swift);
 		swift.createContainer("l0-slices");
-		Container container = accountMock.getContainer("l0-slices");
-		StoredObject obj1 = new StoredObjectCustomMock(container, "obj1");
+		final Container container = accountMock.getContainer("l0-slices");
+		final StoredObject obj1 = new StoredObjectCustomMock(container, "obj1");
 		obj1.setLastModified(obj1Date);
 		swift.uploadObject(container, obj1, new UploadInstructions(new byte[0]));
 
-	  	List<StoredObject> objListing1 = new LinkedList<>();
+	  	final List<StoredObject> objListing1 = new LinkedList<>();
 		objListing1.add(obj1);
 
 		doReturn(objListing1).when(service).listObjectsFromContainer("l0-slices");
-		List<ObsObject> returnedObjs = client.getObsObjectsOfFamilyWithinTimeFrame(ProductFamily.L0_SLICE, timeFrameBegin, timeFrameEnd);
+		final List<ObsObject> returnedObjs = client.getObsObjectsOfFamilyWithinTimeFrame(ProductFamily.L0_SLICE, timeFrameBegin, timeFrameEnd);
 
 		assertEquals(0, returnedObjs.size());
 		verify(service, times(1)).listObjectsFromContainer("l0-slices");
@@ -257,29 +257,29 @@ public class SwiftObsClientTest {
 	public void testGetListOfObjectsOfTimeFrameOfFamilyWithTruncatedList()
 			throws ObsServiceException, SdkClientException {
 
-		Date timeFrameBegin = Date.from(Instant.parse("2020-01-01T00:00:00Z"));
-		Date timeFrameEnd = Date.from(Instant.parse("2020-01-03T00:00:00Z"));
+		final Date timeFrameBegin = Date.from(Instant.parse("2020-01-01T00:00:00Z"));
+		final Date timeFrameEnd = Date.from(Instant.parse("2020-01-03T00:00:00Z"));
 
-		Date obj1Date = Date.from(Instant.parse("2020-01-02T00:00:00Z"));
-		Date obj2Date = Date.from(Instant.parse("2020-01-04T00:00:00Z"));
-		Date obj3Date = Date.from(Instant.parse("2020-01-02T03:00:00Z"));
+		final Date obj1Date = Date.from(Instant.parse("2020-01-02T00:00:00Z"));
+		final Date obj2Date = Date.from(Instant.parse("2020-01-04T00:00:00Z"));
+		final Date obj3Date = Date.from(Instant.parse("2020-01-02T03:00:00Z"));
 		
-		Container container = new ContainerMock(account, "l0-slices");
-		StoredObject obj1 = new StoredObjectCustomMock(container, "obj1");
+		final Container container = new ContainerMock(account, "l0-slices");
+		final StoredObject obj1 = new StoredObjectCustomMock(container, "obj1");
 		obj1.setLastModified(obj1Date);
-		StoredObject obj2 = new StoredObjectCustomMock(container, "obj2");
+		final StoredObject obj2 = new StoredObjectCustomMock(container, "obj2");
 		obj2.setLastModified(obj2Date);
-		StoredObject obj3 = new StoredObjectCustomMock(container, "obj3");
+		final StoredObject obj3 = new StoredObjectCustomMock(container, "obj3");
 		obj3.setLastModified(obj3Date);
 
-		List<StoredObject> objListing1 = new ArrayList<>();
+		final List<StoredObject> objListing1 = new ArrayList<>();
 		objListing1.add(obj1);
 		objListing1.add(obj2);
 		objListing1.add(obj3);
 
 		doReturn(objListing1).when(service).listObjectsFromContainer("l0-slices");
 
-		List<ObsObject> returnedObjs = client.getObsObjectsOfFamilyWithinTimeFrame(ProductFamily.L0_SLICE, timeFrameBegin, timeFrameEnd);
+		final List<ObsObject> returnedObjs = client.getObsObjectsOfFamilyWithinTimeFrame(ProductFamily.L0_SLICE, timeFrameBegin, timeFrameEnd);
 
 		assertEquals(2, returnedObjs.size());
 		assertEquals("obj1", returnedObjs.get(0).getKey());
@@ -321,9 +321,9 @@ public class SwiftObsClientTest {
 	
 	@Test
 	public void testGetAllAsInputStreamValidArgumentAssertion() throws AbstractCodedException {
-    	assertThatThrownBy(() -> client.getAllAsInputStream(null, "prefix", Reporting.ChildFactory.NULL)).isInstanceOf(IllegalArgumentException.class).hasMessageContaining("Invalid product family: null");
-    	assertThatThrownBy(() -> client.getAllAsInputStream(ProductFamily.AUXILIARY_FILE, null, Reporting.ChildFactory.NULL)).isInstanceOf(IllegalArgumentException.class).hasMessageContaining("Invalid prefix: null");
-    	assertThatThrownBy(() -> client.getAllAsInputStream(ProductFamily.AUXILIARY_FILE, "", Reporting.ChildFactory.NULL)).isInstanceOf(IllegalArgumentException.class).hasMessageContaining("Invalid prefix (empty)");
+    	assertThatThrownBy(() -> client.getAllAsInputStream(null, "prefix", ReportingFactory.NULL)).isInstanceOf(IllegalArgumentException.class).hasMessageContaining("Invalid product family: null");
+    	assertThatThrownBy(() -> client.getAllAsInputStream(ProductFamily.AUXILIARY_FILE, null, ReportingFactory.NULL)).isInstanceOf(IllegalArgumentException.class).hasMessageContaining("Invalid prefix: null");
+    	assertThatThrownBy(() -> client.getAllAsInputStream(ProductFamily.AUXILIARY_FILE, "", ReportingFactory.NULL)).isInstanceOf(IllegalArgumentException.class).hasMessageContaining("Invalid prefix (empty)");
 	}
 
 }
@@ -333,12 +333,12 @@ class StoredObjectCustomMock extends AbstractStoredObject {
 
 	Date lastModified;
 	
-	public StoredObjectCustomMock(Container container, String name) {
+	public StoredObjectCustomMock(final Container container, final String name) {
 		super(container, name, false);
 	}
 	
 	@Override
-	public void setLastModified(Date date) {
+	public void setLastModified(final Date date) {
 		lastModified = date;
 	}
 	

@@ -17,7 +17,7 @@ import esa.s1pdgs.cpoc.mdc.worker.extraction.path.PathMetadataExtractor;
 import esa.s1pdgs.cpoc.mqi.model.queue.CatalogJob;
 import esa.s1pdgs.cpoc.mqi.model.rest.GenericMessageDto;
 import esa.s1pdgs.cpoc.obs_sdk.ObsClient;
-import esa.s1pdgs.cpoc.report.Reporting;
+import esa.s1pdgs.cpoc.report.ReportingFactory;
 
 public class EdrsMetadataExtractor extends AbstractMetadataExtractor {	
 	private final PathMetadataExtractor pathExtractor;
@@ -36,7 +36,7 @@ public class EdrsMetadataExtractor extends AbstractMetadataExtractor {
 	}
 	
 	@Override
-	public JSONObject extract(final Reporting.ChildFactory reportingChildFactory, final GenericMessageDto<CatalogJob> message)
+	public JSONObject extract(final ReportingFactory reportingFactory, final GenericMessageDto<CatalogJob> message)
 			throws AbstractCodedException {
 		final CatalogJob catJob = message.getBody();
         final ProductFamily family = ProductFamily.EDRS_SESSION;        
@@ -52,7 +52,7 @@ public class EdrsMetadataExtractor extends AbstractMetadataExtractor {
         // Only when it is a DSIB
         if (edrsFileDescriptor.getEdrsSessionFileType() == EdrsSessionFileType.SESSION)
         {
-        	downloadMetadataFileToLocalFolder(reportingChildFactory, family, catJob.getKeyObjectStorage());
+        	downloadMetadataFileToLocalFolder(reportingFactory, family, catJob.getKeyObjectStorage());
 
 			final String dsibName = new File(edrsFileDescriptor.getRelativePath()).getName();			
 			final File dsib = new File(localDirectory, dsibName);

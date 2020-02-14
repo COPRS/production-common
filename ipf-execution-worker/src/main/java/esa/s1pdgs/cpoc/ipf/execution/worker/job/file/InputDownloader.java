@@ -1,10 +1,6 @@
 package esa.s1pdgs.cpoc.ipf.execution.worker.job.file;
 
 import java.io.File;
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -21,7 +17,7 @@ import esa.s1pdgs.cpoc.ipf.execution.worker.job.process.PoolExecutorCallable;
 import esa.s1pdgs.cpoc.mqi.model.queue.LevelJobInputDto;
 import esa.s1pdgs.cpoc.obs_sdk.ObsClient;
 import esa.s1pdgs.cpoc.obs_sdk.ObsDownloadObject;
-import esa.s1pdgs.cpoc.report.Reporting;
+import esa.s1pdgs.cpoc.report.ReportingFactory;
 
 /**
  * Class which create the local working directory and download all the inputs
@@ -113,10 +109,10 @@ public class InputDownloader {
      * 
      * @throws AbstractCodedException
      */
-    public void processInputs(final Reporting.ChildFactory reportingChildFactory) throws AbstractCodedException {
+    public void processInputs(final ReportingFactory reportingFactory) throws AbstractCodedException {
         initializeDownload();
         final List<ObsDownloadObject> downloadToBatch = sortInputs(); // also creates necessary directories
-		downloadInputs(downloadToBatch, reportingChildFactory);
+		downloadInputs(downloadToBatch, reportingFactory);
         completeDownload();	      	
     }
 
@@ -226,7 +222,7 @@ public class InputDownloader {
      * @param downloadToBatch
      * @throws AbstractCodedException
      */
-    private final void downloadInputs(final List<ObsDownloadObject> downloadToBatch, final Reporting.ChildFactory reportingChildFactory)
+    private final void downloadInputs(final List<ObsDownloadObject> downloadToBatch, final ReportingFactory reportingFactory)
             throws AbstractCodedException {
 
         final int numberOfBatches = (int) Math.ceil(((double) downloadToBatch.size()) / ((double) sizeDownBatch));
@@ -239,7 +235,7 @@ public class InputDownloader {
                 LOGGER.info("{} 4 - Starting downloading batch {}", prefixMonitorLogs, i);
                 final int lastIndex = Math.min((i + 1) * sizeDownBatch, downloadToBatch.size());                
                 final List<ObsDownloadObject> subListS3 = downloadToBatch.subList(i * sizeDownBatch, lastIndex);
-                this.obsClient.download(subListS3, reportingChildFactory);
+                this.obsClient.download(subListS3, reportingFactory);
                 if (appLevel == ApplicationLevel.L0 && nbUploadedRaw < 2) {
                     nbUploadedRaw += subListS3.stream().filter(
                             file -> file.getFamily() == ProductFamily.EDRS_SESSION)

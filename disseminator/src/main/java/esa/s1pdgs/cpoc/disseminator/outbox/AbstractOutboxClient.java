@@ -13,7 +13,7 @@ import esa.s1pdgs.cpoc.disseminator.path.PathEvaluater;
 import esa.s1pdgs.cpoc.obs_sdk.ObsClient;
 import esa.s1pdgs.cpoc.obs_sdk.ObsObject;
 import esa.s1pdgs.cpoc.obs_sdk.SdkClientException;
-import esa.s1pdgs.cpoc.report.Reporting;
+import esa.s1pdgs.cpoc.report.ReportingFactory;
 
 public abstract class AbstractOutboxClient implements OutboxClient {	
 	protected final Logger logger = LogManager.getLogger(getClass());
@@ -22,7 +22,7 @@ public abstract class AbstractOutboxClient implements OutboxClient {
 	protected final OutboxConfiguration config;
 	private final PathEvaluater pathEvaluator;
 	
-	public AbstractOutboxClient(ObsClient obsClient, OutboxConfiguration config, final PathEvaluater pathEvaluator) {
+	public AbstractOutboxClient(final ObsClient obsClient, final OutboxConfiguration config, final PathEvaluater pathEvaluator) {
 		this.obsClient = obsClient;
 		this.config = config;
 		this.pathEvaluator = pathEvaluator;
@@ -33,8 +33,8 @@ public abstract class AbstractOutboxClient implements OutboxClient {
 		return "OutboxClient-" + config.getProtocol();
 	}
 	
-	protected final Iterable<Map.Entry<String, InputStream>> entries(final ObsObject obsObject, final Reporting.ChildFactory reportingChildFactory) throws SdkClientException {
-		return obsClient.getAllAsInputStream(obsObject.getFamily(), obsObject.getKey(), reportingChildFactory).entrySet();
+	protected final Iterable<Map.Entry<String, InputStream>> entries(final ObsObject obsObject, final ReportingFactory reportingFactory) throws SdkClientException {
+		return obsClient.getAllAsInputStream(obsObject.getFamily(), obsObject.getKey(), reportingFactory).entrySet();
 	}
 
 	protected final void createParentIfRequired(final File file) {
@@ -47,7 +47,7 @@ public abstract class AbstractOutboxClient implements OutboxClient {
 		mkdirLocal(parent);
 	}
 	
-	protected final Path evaluatePathFor(ObsObject obsObject) {
+	protected final Path evaluatePathFor(final ObsObject obsObject) {
 		final Path path = pathEvaluator.outputPath(config.getPath(), obsObject);	
 		mkdirLocal(path.toFile());
 		return path;

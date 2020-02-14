@@ -14,7 +14,7 @@ public class Header {
 	@JsonFormat(pattern="yyyy-MM-dd'T'HH:mm:ss.SSS'000Z'", timezone="UTC")
 	private Date timestamp = new Date();
 	private Level level;
-	private String workflow;
+	private String workflow = "NOMINAL";
 	@JsonProperty("debug_mode")
 	private Boolean debug;
 	@JsonProperty("tag_list")

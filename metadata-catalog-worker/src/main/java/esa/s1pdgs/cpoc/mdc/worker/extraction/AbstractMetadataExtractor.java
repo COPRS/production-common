@@ -17,7 +17,7 @@ import esa.s1pdgs.cpoc.mdc.worker.extraction.files.FileDescriptorBuilder;
 import esa.s1pdgs.cpoc.mdc.worker.extraction.files.MetadataBuilder;
 import esa.s1pdgs.cpoc.obs_sdk.ObsClient;
 import esa.s1pdgs.cpoc.obs_sdk.ObsDownloadObject;
-import esa.s1pdgs.cpoc.report.Reporting;
+import esa.s1pdgs.cpoc.report.ReportingFactory;
 
 public abstract class AbstractMetadataExtractor implements MetadataExtractor {
 	protected final Logger logger = LogManager.getLogger(getClass());
@@ -46,7 +46,7 @@ public abstract class AbstractMetadataExtractor implements MetadataExtractor {
 	}
 
 	final File downloadMetadataFileToLocalFolder(
-    		final Reporting.ChildFactory reportingChildFactory,  
+    		final ReportingFactory reportingFactory,  
     		final ProductFamily family, 
     		final String keyObs
     ) 
@@ -57,7 +57,7 @@ public abstract class AbstractMetadataExtractor implements MetadataExtractor {
 		
 		try {
 			final List<File> files = Retries.performWithRetries(
-					() -> obsClient.download(Collections.singletonList(new ObsDownloadObject(family, metadataKeyObs, this.localDirectory)), reportingChildFactory), 
+					() -> obsClient.download(Collections.singletonList(new ObsDownloadObject(family, metadataKeyObs, this.localDirectory)), reportingFactory), 
 					"Download of metadata file " + metadataKeyObs + " to " + localDirectory, 
 					processConfiguration.getNumObsDownloadRetries(), 
 					processConfiguration.getSleepBetweenObsRetriesMillis()

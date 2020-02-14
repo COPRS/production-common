@@ -93,7 +93,7 @@ public class TestLevelProductMetadataExtractor {
     private final File testDir = FileUtils.createTmpDir();
     
 	final Reporting reporting = ReportingUtils.newReportingBuilder()
-			.newTaskReporting("TestMetadataExtraction");
+			.newReporting("TestMetadataExtraction");
 
 	/**
 	 * Initialization
@@ -136,6 +136,8 @@ public class TestLevelProductMetadataExtractor {
 		final ExtractMetadata extract = new ExtractMetadata(
 				extractorConfig.getTypeOverlap(), 
 				extractorConfig.getTypeSliceLength(),
+				extractorConfig.getPacketStoreType(),
+				extractorConfig.getTimelinessPriorityFromHighToLow(),
 				extractorConfig.getXsltDirectory(), 
 				xmlConverter
 		);		
@@ -161,7 +163,7 @@ public class TestLevelProductMetadataExtractor {
 				"",
 				Utils.newCatalogJob(
 						"S1A_IW_RAW__0SDV_20171213T121623_20171213T121656_019684_021735_C6DB.SAFE",
-						"S1A_IW_RAW__0SDV_20171213T121623_20171213T121656_019684_021735_C6DB.SAFE/manifest.safe",
+						"S1A_IW_RAW__0SDV_20171213T121623_20171213T121656_019684_021735_C6DB.SAFE",
 						ProductFamily.L0_SLICE, 
 						"NRT"
 				)
@@ -189,7 +191,7 @@ public class TestLevelProductMetadataExtractor {
 
 		final JSONObject expected = extractor.mdBuilder.buildOutputFileMetadata(descriptor, files.get(0), job);
 
-		final JSONObject result = extractor.extract(reporting.getChildFactory(), inputMessageSafe);
+		final JSONObject result = extractor.extract(reporting, inputMessageSafe);
 		for (final String key : expected.keySet()) {
 			if (!("insertionTime".equals(key) || "sliceCoordinates".equals(key) || "creationTime".equals(key))) {
 				System.out.println("Key");
@@ -240,7 +242,7 @@ public class TestLevelProductMetadataExtractor {
 
 		final JSONObject expected = extractor.mdBuilder.buildOutputFileMetadata(descriptor, files.get(0), job);
 
-		final JSONObject result = extractor.extract(reporting.getChildFactory(), inputMessageSafe);
+		final JSONObject result = extractor.extract(reporting, inputMessageSafe);
 		for (final String key : expected.keySet()) {
 			if (!("insertionTime".equals(key) || "sliceCoordinates".equals(key) || "creationTime".equals(key))) {
 				assertEquals(expected.get(key), result.get(key));
@@ -286,7 +288,7 @@ public class TestLevelProductMetadataExtractor {
 
 		final JSONObject expected = extractor.mdBuilder.buildOutputFileMetadata(descriptor, files.get(0), job);
 
-		final JSONObject result = extractor.extract(reporting.getChildFactory(), inputMessageSafe);
+		final JSONObject result = extractor.extract(reporting, inputMessageSafe);
 		for (final String key : expected.keySet()) {
 			if (!("insertionTime".equals(key) || "sliceCoordinates".equals(key) || "creationTime".equals(key))) {
 				assertEquals(expected.get(key), result.get(key));
@@ -330,7 +332,7 @@ public class TestLevelProductMetadataExtractor {
 
 		final JSONObject expected = extractor.mdBuilder.buildOutputFileMetadata(descriptor, files.get(0), job);
 
-		final JSONObject result = extractor.extract(reporting.getChildFactory(), inputMessageSafe);
+		final JSONObject result = extractor.extract(reporting, inputMessageSafe);
 		for (final String key : expected.keySet()) {
 			if (!("insertionTime".equals(key) || "sliceCoordinates".equals(key) || "creationTime".equals(key))) {
 				assertEquals(expected.get(key), result.get(key));
@@ -374,7 +376,7 @@ public class TestLevelProductMetadataExtractor {
 
 		final JSONObject expected = extractor.mdBuilder.buildOutputFileMetadata(descriptor, files.get(0), job);
 
-		final JSONObject result = extractor.extract(reporting.getChildFactory(), inputMessageSafe);
+		final JSONObject result = extractor.extract(reporting, inputMessageSafe);
 		for (final String key : expected.keySet()) {
 			if (!("insertionTime".equals(key) || "sliceCoordinates".equals(key) || "creationTime".equals(key))) {
 				assertEquals(expected.get(key), result.get(key));
@@ -418,7 +420,7 @@ public class TestLevelProductMetadataExtractor {
 
 		final JSONObject expected = extractor.mdBuilder.buildOutputFileMetadata(descriptor, files.get(0), job);
 
-		final JSONObject result = extractor.extract(reporting.getChildFactory(), inputMessageSafe);
+		final JSONObject result = extractor.extract(reporting, inputMessageSafe);
 		for (final String key : expected.keySet()) {
 			if (!("insertionTime".equals(key) || "sliceCoordinates".equals(key) || "creationTime".equals(key))) {
 				assertEquals(expected.get(key), result.get(key));

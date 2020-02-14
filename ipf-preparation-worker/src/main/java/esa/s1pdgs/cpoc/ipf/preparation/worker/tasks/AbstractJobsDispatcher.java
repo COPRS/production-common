@@ -173,7 +173,7 @@ public abstract class AbstractJobsDispatcher {
             throws AbstractCodedException {
     	LOGGER.debug ("== dispatch job {}", job.toString());
         final String productName = job.getProduct().getProductName();
-        final Reporting reporting = ReportingUtils.newReportingBuilder().newTaskReporting("Dispatch");
+        final Reporting reporting = ReportingUtils.newReportingBuilder().newReporting("Dispatch");
 
     	reporting.begin(new ReportingMessage("Start dispatching product"));
     	

@@ -13,6 +13,7 @@ import org.apache.logging.log4j.Logger;
 
 import esa.s1pdgs.cpoc.common.errors.InternalErrorException;
 import esa.s1pdgs.cpoc.report.Reporting;
+import esa.s1pdgs.cpoc.report.ReportingFactory;
 import esa.s1pdgs.cpoc.report.ReportingMessage;
 
 /**
@@ -48,7 +49,7 @@ public class TaskCallable implements Callable<TaskResult> {
     private final Consumer<String> stdOutConsumer;
     private final Consumer<String> stdErrConsumer;
     
-    private final Reporting.ChildFactory reportingChildFactory;
+    private final ReportingFactory reportingFactory;
 
     /**
      * @param binaryPath
@@ -56,24 +57,24 @@ public class TaskCallable implements Callable<TaskResult> {
      * @param workDirectory
      */
     public TaskCallable(final String binaryPath, final String jobOrderPath,
-            final String workDirectory, final Reporting.ChildFactory reportingChildFactory) {
-    	this(binaryPath, jobOrderPath, workDirectory, DEFAULT_OUTPUT_CONSUMER, DEFAULT_OUTPUT_CONSUMER, reportingChildFactory);
+            final String workDirectory, final ReportingFactory reportingFactory) {
+    	this(binaryPath, jobOrderPath, workDirectory, DEFAULT_OUTPUT_CONSUMER, DEFAULT_OUTPUT_CONSUMER, reportingFactory);
     }
     
     TaskCallable(
-    		String binaryPath, 
-    		String jobOrderPath, 
-    		String workDirectory, 
-			Consumer<String> stdOutConsumer, 
-			Consumer<String> stdErrConsumer,
-			Reporting.ChildFactory reportingChildFactory
+    		final String binaryPath, 
+    		final String jobOrderPath, 
+    		final String workDirectory, 
+			final Consumer<String> stdOutConsumer, 
+			final Consumer<String> stdErrConsumer,
+			final ReportingFactory reportingFactory
 	) {
 		this.binaryPath = binaryPath;
 		this.jobOrderPath = jobOrderPath;
 		this.workDirectory = workDirectory;
 		this.stdOutConsumer = stdOutConsumer;
 		this.stdErrConsumer = stdErrConsumer;
-		this.reportingChildFactory = reportingChildFactory;
+		this.reportingFactory = reportingFactory;
 	}
 
 	/**
@@ -81,14 +82,14 @@ public class TaskCallable implements Callable<TaskResult> {
      */
     @Override
     public TaskResult call() throws InternalErrorException {
-    	Reporting reporting = reportingChildFactory.newChild("ProcessingTask");
+    	final Reporting reporting = reportingFactory.newReporting("ProcessingTask");
         reporting.begin(new ReportingMessage("Start Task " + binaryPath));
         
         int r = -1;
 
         Process process = null;
         try {
-            ProcessBuilder builder = new ProcessBuilder();
+            final ProcessBuilder builder = new ProcessBuilder();
             builder.command(binaryPath, jobOrderPath);
             builder.directory(new File(workDirectory));
             process = builder.start();
@@ -105,15 +106,15 @@ public class TaskCallable implements Callable<TaskResult> {
             out.get();
 			err.get();
 
-		} catch (InterruptedException ie) {
+		} catch (final InterruptedException ie) {
 			reporting.error(new ReportingMessage("Interrupted Task {}", binaryPath));
 			LOGGER.warn("[task {}] [workDirectory {}]  InterruptedException", binaryPath, workDirectory);
 			Thread.currentThread().interrupt();
-		} catch (IOException ioe) {
+		} catch (final IOException ioe) {
 			final InternalErrorException ex = new InternalErrorException("Cannot build the command for the task " + binaryPath, ioe);
 			reporting.error(new ReportingMessage("[code {}] {}", ex.getCode().getCode(), ex.getLogMessage()));
 			throw ex;
-		} catch (ExecutionException e) {
+		} catch (final ExecutionException e) {
 			final InternalErrorException ex =  new InternalErrorException("Error on consuming stdout/stderr of task " + binaryPath, e);
 			reporting.error(new ReportingMessage("[code {}] {}", ex.getCode().getCode(), ex.getLogMessage()));
 			throw ex;

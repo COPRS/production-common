@@ -5,6 +5,9 @@
     	<productConsolidation>
 			<xsl:copy-of select="//*[local-name() = 'productConsolidation']/text()"/>
 		</productConsolidation>
+		<productSensingConsolidation>
+			<xsl:copy-of select="//*[local-name() = 'productSensingConsolidation']/text()" />
+		</productSensingConsolidation>
 		<instrumentConfigurationId>
 			<xsl:copy-of select="//*[local-name() = 'instrumentConfigurationID']/text()"/>
 		</instrumentConfigurationId>

@@ -30,14 +30,14 @@ import esa.s1pdgs.cpoc.disseminator.FakeObsClient;
 import esa.s1pdgs.cpoc.disseminator.config.DisseminationProperties.OutboxConfiguration;
 import esa.s1pdgs.cpoc.disseminator.path.PathEvaluater;
 import esa.s1pdgs.cpoc.obs_sdk.ObsObject;
-import esa.s1pdgs.cpoc.report.Reporting;
+import esa.s1pdgs.cpoc.report.ReportingFactory;
 
 public class TestSftpOutboxClient {
 	static final class SimplePasswordAuthenticator implements PasswordAuthenticator {
 		private final String user;
 		private final String pass;
 
-		public SimplePasswordAuthenticator(String user, String pass) {
+		public SimplePasswordAuthenticator(final String user, final String pass) {
 			this.user = user;
 			this.pass = pass;
 		}
@@ -104,7 +104,7 @@ public class TestSftpOutboxClient {
 	public final void testUpload_OnNonExistingDirectory_ShallCreateParentDirectoriesLazily() throws Exception {
 		final FakeObsClient fakeObsClient = new FakeObsClient() {
 			@Override
-			public Map<String, InputStream> getAllAsInputStream(ProductFamily family, String keyPrefix, Reporting.ChildFactory reportingChildFactory) {
+			public Map<String, InputStream> getAllAsInputStream(final ProductFamily family, final String keyPrefix, final ReportingFactory reportingFactory) {
 				return Collections.singletonMap("my/little/file", new ByteArrayInputStream("expected file content".getBytes()));
 			}			
 		};		
@@ -117,7 +117,7 @@ public class TestSftpOutboxClient {
 		final File dir = new File(rootDir, testDir.toPath().toString());
 		
 		final SftpOutboxClient uut = new SftpOutboxClient(fakeObsClient, config, PathEvaluater.NULL);		
-		uut.transfer(new ObsObject(ProductFamily.BLANK, "my/little/file"), Reporting.ChildFactory.NULL);
+		uut.transfer(new ObsObject(ProductFamily.BLANK, "my/little/file"), ReportingFactory.NULL);
 		
 		final File expectedFile = new File(dir, "my/little/file");
 		assertEquals(true, expectedFile.exists());
@@ -129,7 +129,7 @@ public class TestSftpOutboxClient {
 	public final void testUpload_OnExistingDirectory_ShallTransferFile() throws Exception {
 		final FakeObsClient fakeObsClient = new FakeObsClient() {
 			@Override
-			public Map<String, InputStream> getAllAsInputStream(ProductFamily family, String keyPrefixReporting, Reporting.ChildFactory reportingChildFactory) {
+			public Map<String, InputStream> getAllAsInputStream(final ProductFamily family, final String keyPrefixReporting, final ReportingFactory reportingFactory) {
 				return Collections.singletonMap("my/little/file", new ByteArrayInputStream("expected file content".getBytes()));
 			}			
 		};	
@@ -144,7 +144,7 @@ public class TestSftpOutboxClient {
 		dir.mkdirs();
 		
 		final SftpOutboxClient uut = new SftpOutboxClient(fakeObsClient, config, PathEvaluater.NULL);		
-		uut.transfer(new ObsObject(ProductFamily.BLANK, "my/little/file"), Reporting.ChildFactory.NULL);
+		uut.transfer(new ObsObject(ProductFamily.BLANK, "my/little/file"), ReportingFactory.NULL);
 		
 		final File expectedFile = new File(dir, "my/little/file");
 		assertEquals(true, expectedFile.exists());

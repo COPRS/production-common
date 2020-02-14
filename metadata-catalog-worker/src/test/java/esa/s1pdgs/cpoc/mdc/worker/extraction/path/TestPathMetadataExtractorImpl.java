@@ -36,7 +36,8 @@ WILE/S1B/L20180724144436762001030/ch01/DCS_02_L20180724144436762001030_ch1_DSDB_
 		
 		final Map<String,String> actual = uut.metadataFrom(job);
 		assertEquals("WILE", actual.get("stationCode"));
-		assertEquals("S1B", actual.get("satelliteId"));
+		assertEquals("S1", actual.get("missionId"));
+		assertEquals("B", actual.get("satelliteId"));
 		assertEquals("L20180724144436762001030", actual.get("sessionId"));
 		assertEquals("1", actual.get("channelId"));		
 	}

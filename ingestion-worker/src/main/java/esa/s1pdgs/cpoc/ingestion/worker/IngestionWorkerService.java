@@ -41,6 +41,7 @@ import esa.s1pdgs.cpoc.mqi.model.rest.GenericMessageDto;
 import esa.s1pdgs.cpoc.mqi.model.rest.GenericPublicationMessageDto;
 import esa.s1pdgs.cpoc.obs_sdk.ObsEmptyFileException;
 import esa.s1pdgs.cpoc.report.Reporting;
+import esa.s1pdgs.cpoc.report.ReportingFactory;
 import esa.s1pdgs.cpoc.report.ReportingMessage;
 import esa.s1pdgs.cpoc.report.ReportingUtils;
 import esa.s1pdgs.cpoc.report.message.input.InboxReportingInput;
@@ -88,7 +89,7 @@ public class IngestionWorkerService implements MqiListener<IngestionJob> {
 
 	@Override
 	public final void onMessage(final GenericMessageDto<IngestionJob> message) throws Exception {
-		final Reporting reporting = ReportingUtils.newReportingBuilder().newTaskReporting("IngestionWorker");
+		final Reporting reporting = ReportingUtils.newReportingBuilder().newReporting("IngestionWorker");
 
 		final IngestionJob ingestion = message.getBody();
 		LOG.debug("received Ingestion: {}", ingestion.getKeyObjectStorage());
@@ -98,9 +99,9 @@ public class IngestionWorkerService implements MqiListener<IngestionJob> {
 		);
 
 		try {	
-			final IngestionResult result = identifyAndUpload(message, ingestion, reporting.getChildFactory());
-			publish(result.getIngestedProducts(), message, reporting.getChildFactory());
-			delete(ingestion, reporting.getChildFactory());			
+			final IngestionResult result = identifyAndUpload(message, ingestion, reporting);
+			publish(result.getIngestedProducts(), message, reporting);
+			delete(ingestion, reporting);			
 			reporting.end(
 					new FilenameReportingOutput(ingestion.getKeyObjectStorage()),
 					new ReportingMessage(result.getTransferAmount(),"End processing of {}", ingestion.getKeyObjectStorage())
@@ -125,14 +126,14 @@ public class IngestionWorkerService implements MqiListener<IngestionJob> {
 	final IngestionResult identifyAndUpload(
 			final GenericMessageDto<IngestionJob> message, 
 			final IngestionJob ingestion,
-			final Reporting.ChildFactory reportingChildFactory
+			final ReportingFactory reportingFactory
 	) throws Exception {
 		final ProductFamily family = getFamilyFor(ingestion);
 		try {
-			return productService.ingest(family, ingestion, reportingChildFactory);
+			return productService.ingest(family, ingestion, reportingFactory);
 		} 
 		catch (final Exception e) {
-			productService.markInvalid(ingestion, reportingChildFactory);
+			productService.markInvalid(ingestion, reportingFactory);
 			message.getBody().setProductFamily(ProductFamily.INVALID);
 			throw e;
 		}
@@ -141,7 +142,7 @@ public class IngestionWorkerService implements MqiListener<IngestionJob> {
 	final void publish(
 			final List<Product<IngestionEvent>> products, 
 			final GenericMessageDto<IngestionJob> message,
-			final Reporting.ChildFactory reportingChildFactory
+			final ReportingFactory reportingFactory
 	) throws AbstractCodedException {
 		for (final Product<IngestionEvent> product : products) {
 			final GenericPublicationMessageDto<? extends AbstractMessage> result = new GenericPublicationMessageDto<>(
@@ -153,7 +154,7 @@ public class IngestionWorkerService implements MqiListener<IngestionJob> {
 			result.setOutputKey(product.getFamily().toString());
 			LOG.info("publishing : {}", result);
 
-			final Reporting report = reportingChildFactory.newChild("Publish");
+			final Reporting report = reportingFactory.newReporting("Publish");
 
 			report.begin(new ReportingMessage("Start publishing file {}", message.getBody().getKeyObjectStorage()));
 			try {
@@ -165,11 +166,11 @@ public class IngestionWorkerService implements MqiListener<IngestionJob> {
 		}
 	}
 
-	final void delete(final IngestionJob ingestion, final Reporting.ChildFactory reportingChildFactory)
+	final void delete(final IngestionJob ingestion, final ReportingFactory reportingFactory)
 			throws InternalErrorException, InterruptedException {
 		final File file = Paths.get(ingestion.getPickupPath(), ingestion.getRelativePath()).toFile();
 		if (file.exists()) {
-			final Reporting childReporting = reportingChildFactory.newChild("DeleteFromPickup");
+			final Reporting childReporting = reportingFactory.newReporting("DeleteFromPickup");
 			childReporting.begin(new ReportingMessage("Start removing file {}", file.getPath()));
 			try {
 				FileUtils.deleteWithRetries(file, properties.getMaxRetries(), properties.getTempoRetryMs());

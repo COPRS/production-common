@@ -10,21 +10,10 @@ import com.fasterxml.jackson.databind.SerializationFeature;
 
 public class LoggerReportingAppender implements ReportAppender {
 	private static final Logger LOG = Reporting.REPORT_LOG;
-//	private static final List<Class<?>> nativeClasses = Arrays.asList(String.class, Integer.class, Long.class);
 
 	@Override
 	public void report(final ReportEntry reportEntry) {
 		LOG.info(reportEntry.toJsonString());
-//		
-//		for (final Map.Entry<String, Object> entry : reportEntry.props().entrySet()) {
-//			if (nativeClasses.contains(entry.getValue().getClass())) {
-//				ThreadContext.put(entry.getKey(), entry.getValue().toString());	
-//			}			
-//		}
-//		ThreadContext.put("jsonAdditional", toJson(reportEntry.props()));		
-//		final ReportingMessage mess = reportEntry.reportingMessage();		
-//		LOG.log(reportEntry.level(), mess.getMessage(), mess.getArgs());
-//		ThreadContext.clearAll();
 	}
 	
 	static final String toJson(final Map<String,Object> elements) {		

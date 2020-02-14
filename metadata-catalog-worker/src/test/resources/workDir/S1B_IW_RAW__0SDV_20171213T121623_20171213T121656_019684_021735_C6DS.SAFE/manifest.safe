@@ -56,6 +56,7 @@
                      <productClass>S</productClass>
                      <productClassDescription>SAR Standard L0 product</productClassDescription>
                      <productConsolidation>FULL</productConsolidation>
+                     <productSensingConsolidation>DUMMY VALUE (FOR TEST)</productSensingConsolidation>
                      <calISPPresent>TRUE</calISPPresent>
                      <noiseISPPresent>TRUE</noiseISPPresent>
                      <instrumentConfigurationID>1</instrumentConfigurationID>

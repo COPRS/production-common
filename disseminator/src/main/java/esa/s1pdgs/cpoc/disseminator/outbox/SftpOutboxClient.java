@@ -16,12 +16,12 @@ import esa.s1pdgs.cpoc.disseminator.config.DisseminationProperties.OutboxConfigu
 import esa.s1pdgs.cpoc.disseminator.path.PathEvaluater;
 import esa.s1pdgs.cpoc.obs_sdk.ObsClient;
 import esa.s1pdgs.cpoc.obs_sdk.ObsObject;
-import esa.s1pdgs.cpoc.report.Reporting;
+import esa.s1pdgs.cpoc.report.ReportingFactory;
 
 public final class SftpOutboxClient extends AbstractOutboxClient {
 	public static final class Factory implements OutboxClient.Factory {				
 		@Override
-		public OutboxClient newClient(ObsClient obsClient, OutboxConfiguration config, final PathEvaluater eval) {		
+		public OutboxClient newClient(final ObsClient obsClient, final OutboxConfiguration config, final PathEvaluater eval) {		
 			return new SftpOutboxClient(obsClient, config, eval);
 		}			
 	}
@@ -35,7 +35,7 @@ public final class SftpOutboxClient extends AbstractOutboxClient {
 	}
 
 	@Override
-	public final String transfer(final ObsObject obsObject, final Reporting.ChildFactory reportingChildFactory) throws Exception {	
+	public final String transfer(final ObsObject obsObject, final ReportingFactory reportingFactory) throws Exception {	
 		final JSch client = new JSch();
 		final int port = config.getPort() > 0 ? config.getPort() : DEFAULT_PORT;
 		
@@ -58,7 +58,7 @@ public final class SftpOutboxClient extends AbstractOutboxClient {
 				final String retVal = config.getProtocol().toString().toLowerCase() + "://" + config.getHostname() + 
 						path.toString();
 				
-				for (final Map.Entry<String, InputStream> entry : entries(obsObject, reportingChildFactory)) {					
+				for (final Map.Entry<String, InputStream> entry : entries(obsObject, reportingFactory)) {					
 					final Path dest = path.resolve(entry.getKey());
 	    			String currentPath = "";
 	    			
@@ -73,7 +73,7 @@ public final class SftpOutboxClient extends AbstractOutboxClient {
 	    	 			try {	    	 			
 	    	 				LOG.debug("current path is {}", currentPath);
 	    	 				channel.cd(currentPath);
-						} catch (SftpException e) {
+						} catch (final SftpException e) {
 							// thrown, if directory does not exist
 							LOG.info("Creating directory {}", currentPath);
 							channel.mkdir(currentPath);

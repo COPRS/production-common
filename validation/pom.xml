@@ -6,7 +6,7 @@
 	<parent>
 		<groupId>de.werum.s1pdgs</groupId>
 		<artifactId>s1pro-core</artifactId>
-		<version>0.13.0-SNAPSHOT</version>
+		<version>0.14.0-SNAPSHOT</version>
 	</parent>
 	<artifactId>s1pro-core-validation</artifactId>
 	<packaging>jar</packaging>
@@ -143,7 +143,7 @@
 							<goal>cpd-check</goal>
 						</goals>
 						<configuration>
-							<failOnViolation>false</failOnViolation>
+							<failOnViolation>${pmd.failOnViolation}</failOnViolation>
 						</configuration>
 					</execution>
 				</executions>

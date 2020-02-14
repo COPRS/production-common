@@ -21,33 +21,33 @@ public final class ReportAdapter implements Reporting {
 
 		private final ReportAppender appender;
 		private final UUID uid;
+						
+		private String taskName;	
 		
-		private String taskName;		
-		private UUID predecessorUid;
+		private UUID predecessorUid;		
 		private UUID rootUid;
 		private UUID parentUid;
-
-		Builder(
-				final ReportAppender appender, 
-				final UUID predecessorUid, 
-				final UUID rootUid, 
-				final UUID parentUid, 
-				final UUID uid
-		) {
+		
+		public Builder(final ReportAppender appender) {			
 			this.appender = appender;
-			this.predecessorUid = predecessorUid;
-			this.rootUid = rootUid == null ? uid : rootUid;
-			this.parentUid = parentUid;
-			this.uid = uid;
+			this.uid = UUID.randomUUID();
 		}
 		
-		public Builder(final ReportAppender appender) {
-			this(appender, null, null, null, UUID.randomUUID());
+		@Override
+		public final Reporting.Builder predecessor(final UUID predecessor) {
+			predecessorUid = predecessor;
+			return this;
 		}
 
 		@Override
-		public final Reporting.Builder predecessor(final UUID predecessorUid) {
-			this.predecessorUid = predecessorUid;
+		public final Reporting.Builder root(final UUID root) {
+			rootUid = root;
+			return this;
+		}
+		
+		@Override
+		public Reporting.Builder parent(final UUID parent) {
+			parentUid = parent;
 			return this;
 		}
 
@@ -58,41 +58,30 @@ public final class ReportAdapter implements Reporting {
 		}
 
 		@Override
-		public Reporting newTaskReporting(final String taskName) {
-			this.taskName = taskName;
+		public Reporting newReporting(final String task) {
+			taskName = task;
+			assertRootIsSet();
 			return new ReportAdapter(this);
 		}
 		
 		@Override
 		public void newEventReporting(final ReportingMessage reportingMessage) {
 			final ReportAdapter reportAdapter = new ReportAdapter(this);
+			assertRootIsSet();
 			reportAdapter.appender.report(new JacksonReportEntry(
 					new Header(Level.INFO), 
 					new Message(reportAdapter.toString(reportingMessage)),
 					null
 			));			
 		}
-	}	
-	
-	public final class ChildFactory implements Reporting.ChildFactory {
-		private final ReportAppender parentAppender;
-		private final UUID rootUid;
-		private final UUID parentUid;
-		private final List<String> parentTags;
-		public ChildFactory(final UUID rootUid, final UUID parentUid, final ReportAppender parentAppender, final List<String> parentTags) {
-			this.rootUid = rootUid;
-			this.parentUid = parentUid;
-			this.parentAppender = parentAppender;
-			this.parentTags = parentTags;
-		}
 		
-		@Override
-		public final Reporting newChild(final String taskName) {
-			return new Builder(parentAppender, null, rootUid, parentUid, UUID.randomUUID())
-					.addTags(parentTags)
-					.newTaskReporting(taskName);			
+		private void assertRootIsSet() {
+			// if no external rood uid is provided, this uid is the root id
+			if (rootUid == null) {
+				rootUid = uid;
+			}	
 		}
-	}
+	}	
 	
 	private final List<String> tags;	
 	private final ReportAppender appender;
@@ -101,20 +90,20 @@ public final class ReportAdapter implements Reporting {
 	private final UUID rootUid;
 	private final UUID parentUid;
 	private final UUID uid;
-	private final ChildFactory childFactory;
 	
 	private long actionStart;
+	private ReportingInput input = ReportingInput.NULL;
 	
 	ReportAdapter(final Builder builder) {
-		tags           = builder.tags;
-		appender       = builder.appender;
-		taskName       = builder.taskName;
-		predecessorUid = builder.predecessorUid;
-		rootUid        = builder.rootUid;
-		parentUid      = builder.parentUid;
-		uid            = builder.uid;
-		actionStart    = 0L;
-		childFactory   = new ChildFactory(rootUid, uid, appender, tags);			
+		tags           	= builder.tags;
+		appender       	= builder.appender;
+		taskName       	= builder.taskName;
+		predecessorUid 	= builder.predecessorUid;
+		rootUid        	= builder.rootUid;
+		parentUid      	= builder.parentUid;
+		uid            	= builder.uid;
+		actionStart    	= 0L;	
+		input			= ReportingInput.NULL;
 	}
 	
 	final String toString(final ReportingMessage mess) {
@@ -133,6 +122,7 @@ public final class ReportAdapter implements Reporting {
 	@Override
 	public final void begin(final ReportingInput in, final ReportingMessage reportingMessage) {
 		actionStart = System.currentTimeMillis();
+		input = in;
 		final BeginTask task = new BeginTask(uid.toString(), taskName, in);
 		if (predecessorUid != null) {
 			task.setFollowsFromTask(predecessorUid.toString());
@@ -151,12 +141,13 @@ public final class ReportAdapter implements Reporting {
 	public final void end(final ReportingOutput out, final ReportingMessage reportingMessage) {
 		final long deltaTMillis = getDeltaMillis();
 		final long transferAmount = reportingMessage.getTransferAmount();
-		final Task endTask = new EndTask(
+		final EndTask endTask = new EndTask(
 				uid.toString(), 
 				taskName, 
 				Status.OK, 
 				calcDuration(deltaTMillis),
-				out
+				out,
+				input
 		);
 		if (transferAmount != 0) {
 			endTask.setVolume(calcSize(transferAmount));
@@ -168,6 +159,7 @@ public final class ReportAdapter implements Reporting {
 				endTask
 		));
 		actionStart = 0;
+		input = ReportingInput.NULL;
 	}
 
 	@Override
@@ -177,7 +169,8 @@ public final class ReportAdapter implements Reporting {
 				taskName, 
 				Status.NOK, 
 				0,
-				ReportingOutput.NULL
+				ReportingOutput.NULL,
+				input
 		);
 		appender.report(new JacksonReportEntry(		
 				new Header(Level.ERROR), 
@@ -185,8 +178,18 @@ public final class ReportAdapter implements Reporting {
 				endTask
 		));
 		actionStart = 0;
+		input = ReportingInput.NULL;
 	}
-		
+	
+	@Override
+	public final Reporting newReporting(final String taskName) {
+		return new Builder(appender)
+				.root(rootUid)
+				.parent(uid)				
+				.addTags(tags)
+				.newReporting(taskName);	
+	}
+
 	private final long getDeltaMillis() {
 		// S1PRO-752: avoid obscurely high durations if someone didn't call begin()
 		if (actionStart == 0L) {			
@@ -225,11 +228,5 @@ public final class ReportAdapter implements Reporting {
 		return new BigDecimal((sizeByte / 1048576.0) / (deltaTMillis / 1000.0))
 				.setScale(3, RoundingMode.FLOOR)
 				.doubleValue();
-	}
-
-	@Override
-	public ChildFactory getChildFactory() {
-		return childFactory;
-	}
-	
+	}	
 }

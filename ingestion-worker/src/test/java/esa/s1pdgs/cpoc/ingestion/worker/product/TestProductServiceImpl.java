@@ -27,7 +27,7 @@ import esa.s1pdgs.cpoc.mqi.model.queue.IngestionJob;
 import esa.s1pdgs.cpoc.obs_sdk.ObsClient;
 import esa.s1pdgs.cpoc.obs_sdk.ObsEmptyFileException;
 import esa.s1pdgs.cpoc.obs_sdk.ObsUploadObject;
-import esa.s1pdgs.cpoc.report.Reporting;
+import esa.s1pdgs.cpoc.report.ReportingFactory;
 
 public class TestProductServiceImpl {
 	
@@ -88,7 +88,7 @@ public class TestProductServiceImpl {
 		product.setDto(expectedProductionEvent);
 		product.setFile(new File("/dev/null"));		
 		final IngestionResult expectedResult = new IngestionResult(Arrays.asList(product), 0L);
-		final IngestionResult actualResult = uut.ingest(family, ingestionJob, Reporting.ChildFactory.NULL);
+		final IngestionResult actualResult = uut.ingest(family, ingestionJob, ReportingFactory.NULL);
 		assertEquals(expectedResult.getIngestedProducts().size(), actualResult.getIngestedProducts().size());
 		assertEquals(expectedResult.getTransferAmount(), actualResult.getTransferAmount());
 	}
@@ -98,7 +98,7 @@ public class TestProductServiceImpl {
 		final IngestionJob ingestionJob = new IngestionJob();
 		ingestionJob.setPickupPath("pickup/path");
 		ingestionJob.setRelativePath("relative/path");
-		uut.markInvalid(ingestionJob, Reporting.ChildFactory.NULL);
+		uut.markInvalid(ingestionJob, ReportingFactory.NULL);
 		final ObsUploadObject uploadObj = new ObsUploadObject(ProductFamily.INVALID, AbstractMessage.NOT_DEFINED,
 				new File("pickup/path/relative/path"));
 		verify(obsClient, times(1)).upload(Mockito.eq(Arrays.asList(uploadObj)), Mockito.any());

@@ -180,7 +180,7 @@ public class JobProcessor implements MqiListener<IpfExecutionJob> {
 		
 		final Reporting reporting = ReportingUtils.newReportingBuilder()
 				.predecessor(job.getReportingTaskUID())
-				.newTaskReporting("JobProcessing");		
+				.newReporting("JobProcessing");		
 		
 		/*
 		 * If the working directory provided by the job order is outside the expected
@@ -219,7 +219,7 @@ public class JobProcessor implements MqiListener<IpfExecutionJob> {
 		LOGGER.debug("Output list build {}", outputListFile);
 
 		final PoolExecutorCallable procExecutor = new PoolExecutorCallable(properties, job,
-				getPrefixMonitorLog(MonitorLogUtils.LOG_PROCESS, job), this.properties.getLevel(), reporting.getChildFactory());
+				getPrefixMonitorLog(MonitorLogUtils.LOG_PROCESS, job), this.properties.getLevel(), reporting);
 		final ExecutorService procExecutorSrv = Executors.newSingleThreadExecutor();
 		final ExecutorCompletionService<Void> procCompletionSrv = new ExecutorCompletionService<>(procExecutorSrv);
 		final InputDownloader inputDownloader = new InputDownloader(obsClient, job.getWorkDirectory(), job.getInputs(),
@@ -267,7 +267,7 @@ public class JobProcessor implements MqiListener<IpfExecutionJob> {
                 checkThreadInterrupted();
                 LOGGER.info("{} Preparing local working directory",
                         getPrefixMonitorLog(MonitorLogUtils.LOG_INPUT, job));
-                inputDownloader.processInputs(reporting.getChildFactory());
+                inputDownloader.processInputs(reporting);
             } else {
                 LOGGER.info("{} Preparing local working directory bypassed",
                         getPrefixMonitorLog(MonitorLogUtils.LOG_INPUT, job));
@@ -279,7 +279,7 @@ public class JobProcessor implements MqiListener<IpfExecutionJob> {
                 checkThreadInterrupted();
                 LOGGER.info("{} Processing l0 outputs",
                         getPrefixMonitorLog(MonitorLogUtils.LOG_OUTPUT, job));
-                reportingOutput = outputProcessor.processOutput(reporting.getChildFactory());
+                reportingOutput = outputProcessor.processOutput(reporting);
             } else {
                 LOGGER.info("{} Processing l0 outputs bypasssed",
                         getPrefixMonitorLog(MonitorLogUtils.LOG_OUTPUT, job));

@@ -9,6 +9,7 @@ import java.time.format.DateTimeParseException;
 import java.time.temporal.ChronoUnit;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
@@ -32,6 +33,7 @@ import esa.s1pdgs.cpoc.common.ProductFamily;
 import esa.s1pdgs.cpoc.common.errors.processing.MetadataExtractionException;
 import esa.s1pdgs.cpoc.common.errors.processing.MetadataMalformedException;
 import esa.s1pdgs.cpoc.common.utils.DateUtils;
+import esa.s1pdgs.cpoc.mdc.worker.config.MetadataExtractorConfig.PacketStoreType;
 import esa.s1pdgs.cpoc.mdc.worker.extraction.model.AuxDescriptor;
 import esa.s1pdgs.cpoc.mdc.worker.extraction.model.EdrsSessionFile;
 import esa.s1pdgs.cpoc.mdc.worker.extraction.model.EdrsSessionFileDescriptor;
@@ -74,6 +76,16 @@ public class ExtractMetadata {
 	private Map<String, Float> typeSliceLength;
 
 	/**
+	 * Map packet store id to packet store type and packetStoreType to timeliness
+	 */
+	private PacketStoreType packetStoreType;
+	
+	/**
+	 * Timeliness prioritization
+	 */
+	private List<String> timelinessPriorityFromHighToLow;
+	
+	/**
 	 * Directory containing the XSLT files
 	 */
 	private String xsltDirectory;
@@ -92,6 +104,7 @@ public class ExtractMetadata {
 	 * Constructor
 	 */
 	public ExtractMetadata(final Map<String, Float> typeOverlap, final Map<String, Float> typeSliceLength,
+			final PacketStoreType packetStoreType, final List<String> timelinessPriorityFromHighToLow,
 			final String xsltDirectory, final XmlConverter xmlConverter) {
 		this.transFactory = TransformerFactory.newInstance();
 		this.typeOverlap = typeOverlap;
@@ -273,6 +286,8 @@ public class ExtractMetadata {
 					}
 				}
 			}
+			
+			// TODO: compute timeliness here
 
 			LOGGER.debug("composed Json: {} ", metadataJSONObject);
 			return metadataJSONObject;

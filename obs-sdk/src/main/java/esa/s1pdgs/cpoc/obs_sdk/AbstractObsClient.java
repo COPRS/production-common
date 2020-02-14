@@ -27,6 +27,7 @@ import esa.s1pdgs.cpoc.common.errors.obs.ObsUnknownObject;
 import esa.s1pdgs.cpoc.common.utils.FileUtils;
 import esa.s1pdgs.cpoc.common.utils.LogUtils;
 import esa.s1pdgs.cpoc.report.Reporting;
+import esa.s1pdgs.cpoc.report.ReportingFactory;
 import esa.s1pdgs.cpoc.report.ReportingMessage;
 import esa.s1pdgs.cpoc.report.message.input.ObsReportingInput;
 
@@ -54,7 +55,7 @@ public abstract class AbstractObsClient implements ObsClient {
     protected abstract void uploadObject(ObsUploadObject object) throws SdkClientException, ObsServiceException, ObsException;
 
     private final List<File> downloadObjects(final List<ObsDownloadObject> objects,
-            final boolean parallel, final Reporting.ChildFactory reportingChildFactory)
+            final boolean parallel, final ReportingFactory reportingFactory)
             throws SdkClientException, ObsServiceException, ObsException {
     	
     	final List<File> files = new ArrayList<>();
@@ -65,7 +66,7 @@ public abstract class AbstractObsClient implements ObsClient {
             // Launch all downloads
             final List<Future<List<File>>> futures = new ArrayList<>();
             for (final ObsDownloadObject object : objects) {
-            	futures.add(service.submit(new ObsDownloadCallable(this, object, reportingChildFactory)));
+            	futures.add(service.submit(new ObsDownloadCallable(this, object, reportingFactory)));
             }
             
             waitForCompletion(workerThread, service, objects.size(),configuration.getTimeoutDownExec());
@@ -79,7 +80,7 @@ public abstract class AbstractObsClient implements ObsClient {
 	            }
             }
         } else {
-    		final Reporting reporting = reportingChildFactory.newChild("ObsRead");
+    		final Reporting reporting = reportingFactory.newReporting("ObsRead");
       	
             // Download object in sequential
             for (final ObsDownloadObject object : objects) {            
@@ -105,7 +106,7 @@ public abstract class AbstractObsClient implements ObsClient {
     }
 
     private final void uploadObjects(final List<ObsUploadObject> objects,
-            final boolean parallel, final Reporting.ChildFactory reportingChildFactory)
+            final boolean parallel, final ReportingFactory reportingFactory)
             throws SdkClientException, ObsServiceException, ObsException {
         if (objects.size() > 1 && parallel) {
             // Upload objects in parallel
@@ -115,12 +116,12 @@ public abstract class AbstractObsClient implements ObsClient {
                     new ExecutorCompletionService<>(workerThread);
             // Launch all downloads
             for (final ObsUploadObject object : objects) {
-                service.submit(new ObsUploadCallable(this, object, reportingChildFactory));
+                service.submit(new ObsUploadCallable(this, object, reportingFactory));
             }
             waitForCompletion(workerThread, service, objects.size(), configuration.getTimeoutUpExec());
 
         } else {
-      		final Reporting reporting = reportingChildFactory.newChild("ObsWrite");
+      		final Reporting reporting = reportingFactory.newReporting("ObsWrite");
         	
             // Upload object in sequential
             for (final ObsUploadObject object : objects) {            	
@@ -185,15 +186,15 @@ public abstract class AbstractObsClient implements ObsClient {
      * @throws IllegalArgumentException
      */
     @Override
-	public List<File> download(final List<ObsDownloadObject> objects, final Reporting.ChildFactory reportingChildFactory) throws AbstractCodedException {
+	public List<File> download(final List<ObsDownloadObject> objects, final ReportingFactory reportingFactory) throws AbstractCodedException {
     	try {
 	    	ValidArgumentAssertion.assertValidArgument(objects);
 	        try {
-	        	return downloadObjects(objects, true, reportingChildFactory);
+	        	return downloadObjects(objects, true, reportingFactory);
 	        } catch (final SdkClientException exc) {
 	            throw new ObsParallelAccessException(exc);
 	        }
-	    } catch (Exception e) {
+	    } catch (final Exception e) {
 			throw e;
 		}
     }
@@ -205,29 +206,30 @@ public abstract class AbstractObsClient implements ObsClient {
 	 * @throws AbstractCodedException
 	 * @throws ObsEmptyFileException
 	 */
-	public void upload(final List<ObsUploadObject> objects, final Reporting.ChildFactory reportingChildFactory) throws AbstractCodedException, ObsEmptyFileException {
+	@Override
+	public void upload(final List<ObsUploadObject> objects, final ReportingFactory reportingFactory) throws AbstractCodedException, ObsEmptyFileException {
 		try {
 			ValidArgumentAssertion.assertValidArgument(objects);
 	
-			for (ObsUploadObject o : objects) {
+			for (final ObsUploadObject o : objects) {
 				if (FileUtils.size(o.getFile()) == 0) {
 					throw new ObsEmptyFileException("Empty file detected: " + o.getFile().getName());
 				}
 			}
 	
 			try {
-				uploadObjects(objects, true, reportingChildFactory);
-			} catch (SdkClientException exc) {
+				uploadObjects(objects, true, reportingFactory);
+			} catch (final SdkClientException exc) {
 				throw new ObsParallelAccessException(exc);
 			}
-		} catch (Exception e) {
+		} catch (final Exception e) {
 			throw e;
 		}
 	}
 
     @Override
-	public Map<String,ObsObject> listInterval(final ProductFamily family, final Date intervalStart, final Date intervalEnd, final Reporting.ChildFactory reportingChildFactory) throws SdkClientException {
-    	Reporting reporting = reportingChildFactory.newChild("ObsListInterval");
+	public Map<String,ObsObject> listInterval(final ProductFamily family, final Date intervalStart, final Date intervalEnd, final ReportingFactory reportingFactory) throws SdkClientException {
+    	final Reporting reporting = reportingFactory.newReporting("ObsListInterval");
     	reporting.begin(new ReportingMessage("Start list interval for product family {} from {} to {}", ProductFamily.valueOf(family.name()), intervalStart, intervalEnd));
     	try {
 	    	ValidArgumentAssertion.assertValidArgument(family);
@@ -239,20 +241,20 @@ public abstract class AbstractObsClient implements ObsClient {
 	    		      .collect(Collectors.toMap(ObsObject::getKey, obsObject -> obsObject));
 	    	reporting.end(new ReportingMessage("End list interval for product family {} from {} to {}", ProductFamily.valueOf(family.name()), intervalStart, intervalEnd));
 	    	return map;
-		} catch (Exception e) {
+		} catch (final Exception e) {
         	reporting.error(new ReportingMessage(LogUtils.toString(e)));
     		throw e;
     	}
     }
 	
 	@Override
-    public void validate(final ObsObject object, final Reporting.ChildFactory reportingChildFactory) throws ObsServiceException, ObsValidationException {
-		Reporting reporting = reportingChildFactory.newChild("ObsValidate");
+    public void validate(final ObsObject object, final ReportingFactory reportingFactory) throws ObsServiceException, ObsValidationException {
+		final Reporting reporting = reportingFactory.newReporting("ObsValidate");
 		try {
 			reporting.begin(new ReportingMessage("Start validation of object {}", object));
 			ValidArgumentAssertion.assertValidArgument(object);			
 			try {
-				final Map<String, InputStream> isMap = getAllAsInputStream(object.getFamily(), object.getKey() + MD5SUM_SUFFIX, reportingChildFactory);
+				final Map<String, InputStream> isMap = getAllAsInputStream(object.getFamily(), object.getKey() + MD5SUM_SUFFIX, reportingFactory);
 				if (isMap.size() > 1) {
 					Utils.closeQuietly(isMap.values());
 					throw new ObsValidationException("More than one checksum file returned");
@@ -291,7 +293,7 @@ public abstract class AbstractObsClient implements ObsClient {
 				throw new ObsServiceException("Unexpected error: " + e.getMessage(), e);
 			}
 			reporting.end(new ReportingMessage("End validation of object {}", object));
-		} catch (Exception e) {
+		} catch (final Exception e) {
 			reporting.error(new ReportingMessage(LogUtils.toString(e)));
 			throw e;
 		}

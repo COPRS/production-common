@@ -75,12 +75,13 @@ public final class Inbox {
 					.append(" new elements (")
 					.append(summarize(newElements))
 					.append(")");
+				
 				// all products not stored in the repo are considered new and shall be added to
 				// the configured queue.
-				for(InboxEntry e: newElements) {
+				for (final InboxEntry e : newElements) {
 					final File file = Paths.get(e.getPickupPath(), e.getRelativePath()).toFile();
 					if(org.apache.commons.io.FileUtils.sizeOf(file) == 0) {						
-						String errorMessage = "Empty file detected, skipping: " + file.getName();
+						final String errorMessage = "Empty file detected, skipping: " + file.getName();
 						ReportingUtils.newReportingBuilder().newEventReporting(new ReportingMessage(errorMessage));
 						
 						// ensure that the empty file is persisted so it is not found again

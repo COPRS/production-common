@@ -8,7 +8,9 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.fail;
 
 import java.io.File;
+import java.util.Arrays;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -24,6 +26,7 @@ import esa.s1pdgs.cpoc.common.ProductFamily;
 import esa.s1pdgs.cpoc.common.errors.AbstractCodedException;
 import esa.s1pdgs.cpoc.common.errors.processing.MetadataExtractionException;
 import esa.s1pdgs.cpoc.common.errors.processing.MetadataMalformedException;
+import esa.s1pdgs.cpoc.mdc.worker.config.MetadataExtractorConfig.PacketStoreType;
 import esa.s1pdgs.cpoc.mdc.worker.extraction.model.AuxDescriptor;
 import esa.s1pdgs.cpoc.mdc.worker.extraction.model.EdrsSessionFileDescriptor;
 import esa.s1pdgs.cpoc.mdc.worker.extraction.model.OutputFileDescriptor;
@@ -64,9 +67,38 @@ public class ExtractMetadataTest {
         typeSliceLength.put("IW", 25.0F);
         typeSliceLength.put("SM", 25.0F);
         typeSliceLength.put("WV", 0.0F);
+        
+        PacketStoreType packetStoreType = new PacketStoreType();
+        final Map<String, String> s1aPacketStoreTypes = new HashMap<>();
+        s1aPacketStoreTypes.put("PS-0", "Emergency");
+        s1aPacketStoreTypes.put("PS-1", "Emergency");
+        s1aPacketStoreTypes.put("PS-2", "RFC");
+        final Map<String, String> s1bPacketStoreTypes = new HashMap<>();
+        s1bPacketStoreTypes.put("PS-0", "Emergency");
+        s1bPacketStoreTypes.put("PS-1", "Emergency");
+        s1bPacketStoreTypes.put("PS-2", "RFC");
+        final Map<String, String> toTimeliness = new HashMap<>();
+        toTimeliness.put("Emergency", "PT");
+        toTimeliness.put("HKTM", "NRT");
+        toTimeliness.put("NRT", "NRT");
+        toTimeliness.put("GPS", "NRT");
+        toTimeliness.put("PassThrough", "PT");
+        toTimeliness.put("Standard", "FAST24");
+        toTimeliness.put("RFC", "FAST24");
+        toTimeliness.put("WV", "FAST24");
+        toTimeliness.put("Filler", "FAST24");
+        toTimeliness.put("Spare", "FAST24");        
+        packetStoreType.setS1a(s1aPacketStoreTypes);
+        packetStoreType.setS1b(s1bPacketStoreTypes);
+        packetStoreType.setToTimeliness(toTimeliness);
+        
+        final List<String> timelinessPriorityFromHighToLow = Arrays.asList("PT", "NRT", "FAST24");
+        
         extractor = new ExtractMetadata(
         		typeOverlap, 
-        		typeSliceLength, 
+        		typeSliceLength,
+        		packetStoreType,
+        		timelinessPriorityFromHighToLow,
         		"config/xsltDir/", 
         		xmlConverter
         );
@@ -577,7 +609,7 @@ public class ExtractMetadataTest {
     public void testProcessL0SegmentFile() {
 
         final JSONObject expectedResult = new JSONObject(
-                "{\"missionDataTakeId\":72627,\"productFamily\":\"L0_SEGMENT\",\"insertionTime\":\"2018-10-15T11:44:03.000000Z\",\"creationTime\":\"2018-10-15T11:44:03.000000Z\",\"polarisation\":\"DV\",\"absoluteStopOrbit\":9809,\"resolution\":\"_\",\"circulationFlag\":7,\"productName\":\"S1B_IW_RAW__0SDV_20171213T121623_20171213T121656_019684_021735_C6DS.SAFE\",\"dataTakeId\":\"021735\",\"productConsolidation\":\"FULL\",\"absoluteStartOrbit\":9809,\"validityStopTime\":\"2018-02-27T12:53:00.422905Z\",\"instrumentConfigurationId\":1,\"relativeStopOrbit\":158,\"relativeStartOrbit\":158,\"startTime\":\"2018-02-27T12:51:14.794304Z\",\"stopTime\":\"2018-02-27T12:53:00.422905Z\",\"productType\":\"IW_RAW__0S\",\"productClass\":\"S\",\"missionId\":\"S1\",\"swathtype\":\"IW\",\"pass\":\"DESCENDING\",\"satelliteId\":\"B\",\"stopTimeANX\":1849446.881,\"url\":\"S1B_IW_RAW__0SDV_20171213T121623_20171213T121656_019684_021735_C6DS.SAFE\",\"startTimeANX\":1743818.281,\"validityStartTime\":\"2018-02-27T12:51:14.794304Z\",\"segmentCoordinates\":{\"coordinates\":[[[-94.8783,73.8984],[-98.2395,67.6029],[-88.9623,66.8368],[-82.486,72.8925],[-94.8783,73.8984]]],\"type\":\"polygon\"},\"processMode\":\"FAST\"}");
+                "{\"missionDataTakeId\":72627,\"productFamily\":\"L0_SEGMENT\",\"insertionTime\":\"2018-10-15T11:44:03.000000Z\",\"creationTime\":\"2018-10-15T11:44:03.000000Z\",\"polarisation\":\"DV\",\"absoluteStopOrbit\":9809,\"resolution\":\"_\",\"circulationFlag\":7,\"productName\":\"S1B_IW_RAW__0SDV_20171213T121623_20171213T121656_019684_021735_C6DS.SAFE\",\"dataTakeId\":\"021735\",\"productConsolidation\":\"FULL\",\"productSensingConsolidation\":\"DUMMY VALUE (FOR TEST)\",\"absoluteStartOrbit\":9809,\"validityStopTime\":\"2018-02-27T12:53:00.422905Z\",\"instrumentConfigurationId\":1,\"relativeStopOrbit\":158,\"relativeStartOrbit\":158,\"startTime\":\"2018-02-27T12:51:14.794304Z\",\"stopTime\":\"2018-02-27T12:53:00.422905Z\",\"productType\":\"IW_RAW__0S\",\"productClass\":\"S\",\"missionId\":\"S1\",\"swathtype\":\"IW\",\"pass\":\"DESCENDING\",\"satelliteId\":\"B\",\"stopTimeANX\":1849446.881,\"url\":\"S1B_IW_RAW__0SDV_20171213T121623_20171213T121656_019684_021735_C6DS.SAFE\",\"startTimeANX\":1743818.281,\"validityStartTime\":\"2018-02-27T12:51:14.794304Z\",\"segmentCoordinates\":{\"coordinates\":[[[-94.8783,73.8984],[-98.2395,67.6029],[-88.9623,66.8368],[-82.486,72.8925],[-94.8783,73.8984]]],\"type\":\"polygon\"},\"processMode\":\"FAST\"}");
 
         final OutputFileDescriptor descriptor = new OutputFileDescriptor();
         descriptor.setExtension(FileExtension.SAFE);
@@ -608,8 +640,17 @@ public class ExtractMetadataTest {
             assertEquals("JSON object are not equals", expectedResult.length(),
                     result.length());
             assertEquals("JSON object value validityStartTime are not equals",
+                    expectedResult.getString("validityStartTime"),
+                    result.getString("validityStartTime"));
+            assertEquals("JSON object value validityStopTime are not equals",
+                    expectedResult.getString("validityStopTime"),
+                    result.getString("validityStopTime"));
+            assertEquals("JSON object value productConsolidation are not equals",
                     expectedResult.getString("productConsolidation"),
                     result.getString("productConsolidation"));
+            assertEquals("JSON object value productSensingConsolidation are not equals",
+                    expectedResult.getString("productSensingConsolidation"),
+                    result.getString("productSensingConsolidation"));
         } catch (final AbstractCodedException fe) {
             fail("Exception occurred: " + fe.getMessage());
         }
@@ -668,6 +709,7 @@ public class ExtractMetadataTest {
         descriptor.setDataTakeId("021735");
         descriptor.setProductFamily(ProductFamily.L0_ACN);
         descriptor.setMode("FAST");
+////        descriptor.setTimeliness("FAST24");
 
         File file = new File(testDir,
                 "S1A_IW_RAW__0ADV_20171213T121123_20171213T121947_019684_021735_51B1.SAFE/manifest.safe");

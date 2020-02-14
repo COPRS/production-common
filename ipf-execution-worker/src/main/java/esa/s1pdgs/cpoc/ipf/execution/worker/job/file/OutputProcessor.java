@@ -39,6 +39,7 @@ import esa.s1pdgs.cpoc.obs_sdk.ObsClient;
 import esa.s1pdgs.cpoc.obs_sdk.ObsEmptyFileException;
 import esa.s1pdgs.cpoc.obs_sdk.ObsUploadObject;
 import esa.s1pdgs.cpoc.report.Reporting;
+import esa.s1pdgs.cpoc.report.ReportingFactory;
 import esa.s1pdgs.cpoc.report.ReportingMessage;
 import esa.s1pdgs.cpoc.report.ReportingOutput;
 import esa.s1pdgs.cpoc.report.ReportingUtils;
@@ -182,7 +183,7 @@ public class OutputProcessor {
 	 * @throws UnknownFamilyException
 	 */
 	final long sortOutputs(final List<String> lines, final List<ObsUploadObject> uploadBatch,
-			final List<ObsQueueMessage> outputToPublish, final List<FileQueueMessage> reportToPublish, final Reporting.ChildFactory reportingChildFactory)
+			final List<ObsQueueMessage> outputToPublish, final List<FileQueueMessage> reportToPublish, final ReportingFactory reportingFactory)
 			throws AbstractCodedException {
 
 		long productSize = 0;
@@ -207,7 +208,7 @@ public class OutputProcessor {
 				final ProductFamily family = ProductFamily.fromValue(matchOutput.getFamily());
 
 				final File file = new File(filePath);
-				final OQCFlag oqcFlag = executor.executeOQC(Paths.get(getFilePath(line, productName)), matchOutput, new OQCDefaultTaskFactory(), reportingChildFactory);
+				final OQCFlag oqcFlag = executor.executeOQC(Paths.get(getFilePath(line, productName)), matchOutput, new OQCDefaultTaskFactory(), reportingFactory);
 				LOGGER.info("Result of OQC validation was: {}",oqcFlag);
 
 				switch (family) {
@@ -504,7 +505,7 @@ public class OutputProcessor {
 	 * @throws AbstractCodedException
 	 * @throws ObsEmptyFileException 
 	 */
-	final void processProducts(final Reporting.ChildFactory reportingChildFactory, final List<ObsUploadObject> uploadBatch,
+	final void processProducts(final ReportingFactory reportingFactory, final List<ObsUploadObject> uploadBatch,
 			final List<ObsQueueMessage> outputToPublish) throws AbstractCodedException, ObsEmptyFileException {
 
 		final double size = Double.valueOf(uploadBatch.size());
@@ -515,19 +516,19 @@ public class OutputProcessor {
 			final List<ObsUploadObject> sublist = uploadBatch.subList(i * sizeUploadBatch, lastIndex);
 
 			if (i > 0) {
-				this.publishAccordingUploadFiles(reportingChildFactory, i - 1, sublist.get(0).getKey(), outputToPublish);
+				this.publishAccordingUploadFiles(reportingFactory, i - 1, sublist.get(0).getKey(), outputToPublish);
 			}
 			try {
 
 				if (Thread.currentThread().isInterrupted()) {
 					throw new InternalErrorException("The current thread as been interrupted");
 				}
-				this.obsClient.upload(sublist, reportingChildFactory);
+				this.obsClient.upload(sublist, reportingFactory);
 			} catch (final AbstractCodedException | ObsEmptyFileException e) {
 				throw e;
 			}
 		}
-		publishAccordingUploadFiles(reportingChildFactory, nbPool - 1, NOT_KEY_OBS, outputToPublish);
+		publishAccordingUploadFiles(reportingFactory, nbPool - 1, NOT_KEY_OBS, outputToPublish);
 	}
 
 	/**
@@ -539,7 +540,7 @@ public class OutputProcessor {
 	 * @param outputToPublish
 	 * @throws AbstractCodedException
 	 */
-	private void publishAccordingUploadFiles(final Reporting.ChildFactory reportingChildFactory, final double nbBatch,
+	private void publishAccordingUploadFiles(final ReportingFactory reportingFactory, final double nbBatch,
 			final String nextKeyUpload, final List<ObsQueueMessage> outputToPublish) throws AbstractCodedException {
 
 		LOGGER.info("{} 3 - Publishing KAFKA messages for batch {}", prefixMonitorLogs, nbBatch);
@@ -553,7 +554,7 @@ public class OutputProcessor {
 			if (nextKeyUpload.startsWith(msg.getKeyObs())) {
 				stop = true;
 			} else {
-				final Reporting report = reportingChildFactory.newChild("Publish");
+				final Reporting report = reportingFactory.newReporting("Publish");
 				report.begin(new ReportingMessage("Start publishing file: {}", msg.getKeyObs()));
 				try {
 					procuderFactory.sendOutput(msg, inputMessage);
@@ -603,7 +604,7 @@ public class OutputProcessor {
 	 * @throws IOException
 	 * @throws ObsEmptyFileException 
 	 */
-	public ReportingOutput processOutput(final Reporting.ChildFactory reportingChildFactory) throws AbstractCodedException, ObsEmptyFileException {
+	public ReportingOutput processOutput(final ReportingFactory reportingFactory) throws AbstractCodedException, ObsEmptyFileException {
 		List<String> result = new ArrayList<>();
 		final List<Segment> segments = new ArrayList<>();
 		
@@ -615,13 +616,13 @@ public class OutputProcessor {
 		final List<ObsQueueMessage> outputToPublish = new ArrayList<>();
 		final List<FileQueueMessage> reportToPublish = new ArrayList<>();
 			
-		final long size = sortOutputs(lines, uploadBatch, outputToPublish, reportToPublish, reportingChildFactory);
+		final long size = sortOutputs(lines, uploadBatch, outputToPublish, reportToPublish, reportingFactory);
 		
 		result = uploadBatch.stream().map(ObsUploadObject::getKey).collect(Collectors.toList());
 		
 		try {
 			// Upload per batch the output
-			processProducts(reportingChildFactory, uploadBatch, outputToPublish);
+			processProducts(reportingFactory, uploadBatch, outputToPublish);
 			// Publish reports
 			processReports(reportToPublish);
 			

@@ -86,7 +86,7 @@ public class TestLevelSegmentMetadataExtractor {
     private GenericMessageDto<CatalogJob> inputMessageSafe;
 
     
-	final Reporting reporting = ReportingUtils.newReportingBuilder().newTaskReporting("TestMetadataExtraction");
+	final Reporting reporting = ReportingUtils.newReportingBuilder().newReporting("TestMetadataExtraction");
     
     private static final File inputDir = new File("src/test/resources/workDir/");
     
@@ -138,6 +138,8 @@ public class TestLevelSegmentMetadataExtractor {
 		final ExtractMetadata extract = new ExtractMetadata(
 				extractorConfig.getTypeOverlap(), 
 				extractorConfig.getTypeSliceLength(),
+				extractorConfig.getPacketStoreType(),
+				extractorConfig.getTimelinessPriorityFromHighToLow(),
 				extractorConfig.getXsltDirectory(), 
 				xmlConverter
 		);		
@@ -172,7 +174,7 @@ public class TestLevelSegmentMetadataExtractor {
         descriptor.setExtension(FileExtension.SAFE);
         descriptor.setFilename("manifest.safe");
         descriptor.setKeyObjectStorage(
-                "S1A_WV_RAW__0SSV_20180913T214325_20180913T214422_023685_0294F4_41D5.SAFE/manifest.safe");
+                "S1A_WV_RAW__0SSV_20180913T214325_20180913T214422_023685_0294F4_41D5.SAFE");
         descriptor.setMissionId("S1");
         descriptor.setSatelliteId("A");
         descriptor.setProductName(
@@ -191,7 +193,7 @@ public class TestLevelSegmentMetadataExtractor {
         final JSONObject expected = extractor.mdBuilder
                 .buildL0SegmentOutputFileMetadata(descriptor, files.get(0));
 
-        final JSONObject result = extractor.extract(reporting.getChildFactory(), inputMessageSafe);
+        final JSONObject result = extractor.extract(reporting, inputMessageSafe);
         for (final String key : expected.keySet()) {
             if (!("insertionTime".equals(key) || "segmentCoordinates".equals(key) || "creationTime".equals(key))) {
                 assertEquals(expected.get(key), result.get(key));

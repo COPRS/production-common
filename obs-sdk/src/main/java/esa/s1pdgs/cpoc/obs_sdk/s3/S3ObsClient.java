@@ -42,6 +42,7 @@ import esa.s1pdgs.cpoc.obs_sdk.ValidArgumentAssertion;
 import esa.s1pdgs.cpoc.obs_sdk.s3.retry.SDKCustomDefaultRetryCondition;
 import esa.s1pdgs.cpoc.obs_sdk.swift.SwiftSdkClientException;
 import esa.s1pdgs.cpoc.report.Reporting;
+import esa.s1pdgs.cpoc.report.ReportingFactory;
 import esa.s1pdgs.cpoc.report.ReportingMessage;
 import esa.s1pdgs.cpoc.report.ReportingUtils;
 
@@ -254,9 +255,9 @@ public class S3ObsClient extends AbstractObsClient {
 	}
 
 	@Override
-	public Map<String, InputStream> getAllAsInputStream(final ProductFamily family, final String keyPrefix, final Reporting.ChildFactory reportingChildFactory)
+	public Map<String, InputStream> getAllAsInputStream(final ProductFamily family, final String keyPrefix, final ReportingFactory reportingFactory)
 			throws SdkClientException {
-		final Reporting reporting = reportingChildFactory.newChild("ObsDownloadAsStream");
+		final Reporting reporting = reportingFactory.newReporting("ObsDownloadAsStream");
 		reporting.begin(new ReportingMessage("Start downloading file '{}'", keyPrefix));
 		try {
 			ValidArgumentAssertion.assertValidArgument(family);
@@ -267,7 +268,7 @@ public class S3ObsClient extends AbstractObsClient {
 			LOGGER.debug("Found {} elements in bucket {} with prefix {}", result.size(), bucket, keyPrefix);			
 			reporting.end(new ReportingMessage("End downloading file '{}'", keyPrefix));
 			return result;
-		} catch (Exception e) {
+		} catch (final Exception e) {
 			reporting.error(new ReportingMessage(LogUtils.toString(e)));
 			throw e;
 		}
@@ -332,7 +333,7 @@ public class S3ObsClient extends AbstractObsClient {
 	public URL createTemporaryDownloadUrl(final ObsObject object, final long expirationTimeInSeconds) throws ObsException, ObsServiceException {
 		ValidArgumentAssertion.assertValidArgument(object);
 		URL url;		
-		final Reporting reporting = ReportingUtils.newReportingBuilder().newTaskReporting("ObsCreateTemporaryDownloadUrl");
+		final Reporting reporting = ReportingUtils.newReportingBuilder().newReporting("ObsCreateTemporaryDownloadUrl");
 		reporting.begin(new ReportingMessage(size(object), "Start creating temporary download URL for username '{}' for product '{}'", "anonymous", object.getKey()));
 
 		try {

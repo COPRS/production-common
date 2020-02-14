@@ -97,7 +97,7 @@ public class GenericConsumer<T> {
 	    	final ErrorHandlingDeserializer2<T> deserializer = new ErrorHandlingDeserializer2<>(deser);
 
 	    	deserializer.setFailedDeserializationFunction( (b,h) -> {	    	
-	    		final Reporting reporting = ReportingUtils.newReportingBuilder().newTaskReporting("MQI_Kafka_Deserialization");
+	    		final Reporting reporting = ReportingUtils.newReportingBuilder().newReporting("MQI_Kafka_Deserialization");
 	    		LOGGER.error(
 	    				"Error on deserializing element from queue '{}'. Expected json of class {} but was: {}", 
 	    				topic,
