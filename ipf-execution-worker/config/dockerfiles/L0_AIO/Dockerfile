@@ -28,5 +28,6 @@ RUN chmod +x /tini
 ENTRYPOINT ["/tini", "--"]
 
 USER s1pdgs:s1pdgs
+WORKDIR /data/localWD/
 
 CMD ["/app/start.sh"]
