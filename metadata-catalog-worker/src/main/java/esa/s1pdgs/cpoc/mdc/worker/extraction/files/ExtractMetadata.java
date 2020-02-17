@@ -7,6 +7,7 @@ import java.nio.charset.Charset;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeParseException;
 import java.time.temporal.ChronoUnit;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
@@ -295,14 +296,32 @@ public class ExtractMetadata {
 				}
 			}
 			
-			// TODO: support multiply packet stores
-			if (metadataJSONObject.has("packetStoreID")) {				
-				String psId = metadataJSONObject.get("packetStoreID").toString();
-				String satellite = descriptor.getMissionId() + descriptor.getSatelliteId();
-				String psType =  packetStoreTypes.get(satellite + "-" + psId);
-				String timeliness = packetStoreTypeTimelinesses.get(psType);
-				metadataJSONObject.put("timeliness", timeliness);
-				metadataJSONObject.remove("packetStoreID");
+			if (metadataJSONObject.has("packetStoreID")) {
+				List<String> packetStoreIDs = new ArrayList<>();
+				if (metadataJSONObject.get("packetStoreID") instanceof JSONArray) {
+					JSONArray jsonArray = ((JSONArray)metadataJSONObject.get("packetStoreID"));
+					for (int i = 0; i < jsonArray.length(); i++) {
+						packetStoreIDs.add(Integer.toString(jsonArray.getInt(i)));
+					}
+				} else {
+					packetStoreIDs.add(Integer.toString(metadataJSONObject.getInt("packetStoreID")));
+				}
+				
+				List<String> timelinesses = new ArrayList<>();
+				for (String packetStoreID : packetStoreIDs) {
+					String satellite = descriptor.getMissionId() + descriptor.getSatelliteId();
+					String packetStoreType = packetStoreTypes.get(satellite + "-" + packetStoreID);
+					String timeliness = packetStoreTypeTimelinesses.get(packetStoreType);
+					if (null == timeliness) {
+						Exception e = new RuntimeException(String.format("No timeliness configured for packetStoreID %s with packetStoreType %s", packetStoreID, packetStoreType));
+						LOGGER.error("Extraction of L0 segment file metadata failed", e);
+						throw new MetadataExtractionException(e);
+					}
+					timelinesses.add(timeliness);
+				}
+				
+				metadataJSONObject.put("timeliness", maxTimeliness(timelinesses));
+				metadataJSONObject.remove("packetStoreID"); // the packetStoreID was only needed to compute timeliness
 			}
 
 			LOGGER.debug("composed Json: {} ", metadataJSONObject);
@@ -312,6 +331,15 @@ public class ExtractMetadata {
 			LOGGER.error("Extraction of L0 segment file metadata failed", e);
 			throw new MetadataExtractionException(e);
 		}
+	}
+	
+	public String maxTimeliness(List<String> timelinesses) {
+		for (String currentPriorityTimeliness : timelinessPriorityFromHighToLow) {
+			if (timelinesses.contains(currentPriorityTimeliness)) {
+				return currentPriorityTimeliness;
+			}
+		}	
+		throw new RuntimeException("Invalid timeliness values: " + timelinesses);
 	}
 
 	/**

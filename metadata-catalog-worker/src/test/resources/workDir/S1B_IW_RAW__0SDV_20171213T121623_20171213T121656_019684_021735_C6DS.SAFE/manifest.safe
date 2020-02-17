@@ -68,6 +68,7 @@
                      <calCompressionType>BYPASS</calCompressionType>
                      <transmitterReceiverPolarisation dataObjectID="measurementData">HV</transmitterReceiverPolarisation>
                      <packetStoreID dataObjectID="measurementData">22</packetStoreID>
+                     <packetStoreID dataObjectID="measurementData2">37</packetStoreID>
                      <byteOrder dataObjectID="measurementData">BIG_ENDIAN</byteOrder>
                      <averageBitRate dataObjectID="measurementData">62919475</averageBitRate>
                   </standAloneProductInformation>
