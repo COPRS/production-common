@@ -39,6 +39,9 @@ import esa.s1pdgs.cpoc.mdc.worker.extraction.model.EdrsSessionFile;
 import esa.s1pdgs.cpoc.mdc.worker.extraction.model.EdrsSessionFileDescriptor;
 import esa.s1pdgs.cpoc.mdc.worker.extraction.model.OutputFileDescriptor;
 import esa.s1pdgs.cpoc.mdc.worker.extraction.xml.XmlConverter;
+import esa.s1pdgs.cpoc.report.Reporting;
+import esa.s1pdgs.cpoc.report.ReportingFactory;
+import esa.s1pdgs.cpoc.report.ReportingMessage;
 
 /**
  * Class to extract the metadata from various types of files
@@ -269,9 +272,10 @@ public class ExtractMetadata {
 	 * @throws MetadataExtractionException
 	 * @throws MetadataMalformedException
 	 */
-	public JSONObject processL0Segment(final OutputFileDescriptor descriptor, final File manifestFile)
-			throws MetadataExtractionException, MetadataMalformedException {
-
+	public JSONObject processL0Segment(final OutputFileDescriptor descriptor, final File manifestFile,
+			final ReportingFactory reportingFactory) throws MetadataExtractionException, MetadataMalformedException {
+		Reporting timelinessComputationReporting = Reporting.NULL;
+		
 		final File xsltFile = new File(this.xsltDirectory + XSLT_L0_SEGMENT_MANIFEST);
 		LOGGER.debug("extracting metadata for descriptor: {} ", descriptor);
 		JSONObject metadataJSONObject = transformXMLWithXSLTToJSON(manifestFile, xsltFile);
@@ -307,9 +311,12 @@ public class ExtractMetadata {
 					packetStoreIDs.add(Integer.toString(metadataJSONObject.getInt("packetStoreID")));
 				}
 				
+				String satellite = descriptor.getMissionId() + descriptor.getSatelliteId(); // e. g. S1A or S1B (used in configuration file as prefix before PacketStore ID)
+				timelinessComputationReporting = reportingFactory.newReporting("Timeliness computation");
+				timelinessComputationReporting.begin(new ReportingMessage("Start computing timeliness for DataTake Id {} with PacketStores {} of Satellite {}", descriptor.getDataTakeId(), packetStoreIDs, satellite));
+
 				List<String> timelinesses = new ArrayList<>();
 				for (String packetStoreID : packetStoreIDs) {
-					String satellite = descriptor.getMissionId() + descriptor.getSatelliteId();
 					String packetStoreType = packetStoreTypes.get(satellite + "-" + packetStoreID);
 					String timeliness = packetStoreTypeTimelinesses.get(packetStoreType);
 					if (null == timeliness) {
@@ -317,14 +324,18 @@ public class ExtractMetadata {
 							throw new RuntimeException(String.format("No timeliness configured for packetStoreID %s with packetStoreType %s", packetStoreID, packetStoreType));
 						} catch (final Exception e) {
 							LOGGER.error("Extraction of L0 segment file metadata failed", e);
+							timelinessComputationReporting.error(new ReportingMessage("Computing timeliness failed"));
 							throw new MetadataExtractionException(e);
 						}
 					}
 					timelinesses.add(timeliness);
 				}
 				
-				metadataJSONObject.put("timeliness", maxTimeliness(timelinesses));
+				String timeliness = maxTimeliness(timelinesses);
+				metadataJSONObject.put("timeliness", timeliness);
 				metadataJSONObject.remove("packetStoreID"); // the packetStoreID was only needed to compute timeliness
+				
+				timelinessComputationReporting.end(new ReportingMessage("Computed timeliness {} for DataTake Id {} with PacketStores {} of Satellite {}", timeliness, descriptor.getDataTakeId(), packetStoreIDs, satellite));
 			}
 
 			LOGGER.debug("composed Json: {} ", metadataJSONObject);
@@ -332,6 +343,9 @@ public class ExtractMetadata {
 
 		} catch (final JSONException e) {
 			LOGGER.error("Extraction of L0 segment file metadata failed", e);
+			if (timelinessComputationReporting != Reporting.NULL) {
+				timelinessComputationReporting.error(new ReportingMessage("Computing timeliness failed"));
+			}			
 			throw new MetadataExtractionException(e);
 		}
 	}

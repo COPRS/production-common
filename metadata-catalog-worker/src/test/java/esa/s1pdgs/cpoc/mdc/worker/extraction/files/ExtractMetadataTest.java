@@ -30,6 +30,7 @@ import esa.s1pdgs.cpoc.mdc.worker.extraction.model.AuxDescriptor;
 import esa.s1pdgs.cpoc.mdc.worker.extraction.model.EdrsSessionFileDescriptor;
 import esa.s1pdgs.cpoc.mdc.worker.extraction.model.OutputFileDescriptor;
 import esa.s1pdgs.cpoc.mdc.worker.extraction.xml.XmlConverter;
+import esa.s1pdgs.cpoc.report.ReportingFactory;
 
 /**
  * @author Olivier BEX-CHAUVET
@@ -633,7 +634,7 @@ public class ExtractMetadataTest {
         final File file = new File(testDir,"S1B_IW_RAW__0SDV_20171213T121623_20171213T121656_019684_021735_C6DS.SAFE/manifest.safe");
 
         try {
-            final JSONObject result = extractor.processL0Segment(descriptor, file);
+            final JSONObject result = extractor.processL0Segment(descriptor, file, ReportingFactory.NULL);
             assertNotNull("JSON object should not be null", result);
             assertEquals("JSON object are not equals", expectedResult.length(),
                     result.length());
@@ -707,7 +708,7 @@ public class ExtractMetadataTest {
         final File file = new File(testDir,
                 "S1B_IW_RAW__0SDV_20171213T121623_20171213T121656_019684_021735_C6DD.SAFE/manifest.safe");
 
-        extractor.processL0Segment(descriptor, file);
+        extractor.processL0Segment(descriptor, file, ReportingFactory.NULL);
     }
 
     @Test

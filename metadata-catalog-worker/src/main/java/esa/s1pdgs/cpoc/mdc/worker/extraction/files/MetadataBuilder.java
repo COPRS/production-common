@@ -12,6 +12,7 @@ import esa.s1pdgs.cpoc.mdc.worker.extraction.model.AuxDescriptor;
 import esa.s1pdgs.cpoc.mdc.worker.extraction.model.EdrsSessionFileDescriptor;
 import esa.s1pdgs.cpoc.mdc.worker.extraction.model.OutputFileDescriptor;
 import esa.s1pdgs.cpoc.mqi.model.queue.CatalogJob;
+import esa.s1pdgs.cpoc.report.ReportingFactory;
 
 /**
  * Class to build metadata for configuration and ERDS session files
@@ -107,9 +108,9 @@ public class MetadataBuilder {
      * @throws MetadataExtractionException
 	 * @throws MetadataMalformedException 
      */
-    public JSONObject buildL0SegmentOutputFileMetadata(final OutputFileDescriptor descriptor, final File file)
-            throws MetadataExtractionException, MetadataMalformedException {
-        final JSONObject metadataToIndex = extractor.processL0Segment(descriptor, file);        
+    public JSONObject buildL0SegmentOutputFileMetadata(final OutputFileDescriptor descriptor, final File file,
+    		final ReportingFactory reportingFactory) throws MetadataExtractionException, MetadataMalformedException {
+        final JSONObject metadataToIndex = extractor.processL0Segment(descriptor, file, reportingFactory);        
         LOGGER.debug("JSON OBJECT:{}",metadataToIndex.toString());
         return metadataToIndex;
     }
