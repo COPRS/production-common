@@ -313,9 +313,12 @@ public class ExtractMetadata {
 					String packetStoreType = packetStoreTypes.get(satellite + "-" + packetStoreID);
 					String timeliness = packetStoreTypeTimelinesses.get(packetStoreType);
 					if (null == timeliness) {
-						Exception e = new RuntimeException(String.format("No timeliness configured for packetStoreID %s with packetStoreType %s", packetStoreID, packetStoreType));
-						LOGGER.error("Extraction of L0 segment file metadata failed", e);
-						throw new MetadataExtractionException(e);
+						try {
+							throw new RuntimeException(String.format("No timeliness configured for packetStoreID %s with packetStoreType %s", packetStoreID, packetStoreType));
+						} catch (final Exception e) {
+							LOGGER.error("Extraction of L0 segment file metadata failed", e);
+							throw new MetadataExtractionException(e);
+						}
 					}
 					timelinesses.add(timeliness);
 				}
