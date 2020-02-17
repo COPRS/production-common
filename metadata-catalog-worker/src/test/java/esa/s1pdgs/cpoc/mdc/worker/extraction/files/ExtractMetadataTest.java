@@ -660,6 +660,27 @@ public class ExtractMetadataTest {
             fail("Exception occurred: " + fe.getMessage());
         }
     }
+    
+    @Test
+    public void testMaxTimeliness() {
+    	assertEquals("PT", extractor.maxTimeliness(Arrays.asList("PT")));
+    	assertEquals("NRT", extractor.maxTimeliness(Arrays.asList("NRT")));
+    	assertEquals("FAST24", extractor.maxTimeliness(Arrays.asList("FAST24")));
+
+    	assertEquals("PT", extractor.maxTimeliness(Arrays.asList("NRT", "PT")));
+    	assertEquals("PT", extractor.maxTimeliness(Arrays.asList("PT", "NRT")));
+    	assertEquals("PT", extractor.maxTimeliness(Arrays.asList("FAST24", "PT")));
+    	assertEquals("PT", extractor.maxTimeliness(Arrays.asList("PT", "FAST24")));
+    	assertEquals("NRT", extractor.maxTimeliness(Arrays.asList("FAST24", "NRT")));
+    	assertEquals("NRT", extractor.maxTimeliness(Arrays.asList("NRT", "FAST24")));
+
+    	assertEquals("PT", extractor.maxTimeliness(Arrays.asList("FAST24", "NRT", "PT")));
+    	assertEquals("PT", extractor.maxTimeliness(Arrays.asList("FAST24", "PT", "NRT")));
+    	assertEquals("PT", extractor.maxTimeliness(Arrays.asList("NRT", "FAST24", "PT")));
+    	assertEquals("PT", extractor.maxTimeliness(Arrays.asList("PT", "FAST24", "NRT")));
+    	assertEquals("PT", extractor.maxTimeliness(Arrays.asList("NRT", "PT", "FAST24")));
+    	assertEquals("PT", extractor.maxTimeliness(Arrays.asList("PT", "NRT", "FAST24")));
+    }
 
     @Test(expected = AbstractCodedException.class)
     public void testProcessL0SegmentMissingFileFail()
