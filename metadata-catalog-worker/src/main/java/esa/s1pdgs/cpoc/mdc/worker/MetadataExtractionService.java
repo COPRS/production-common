@@ -115,7 +115,7 @@ public class MetadataExtractionService implements MqiListener<CatalogJob> {
 			else{
 				LOG.debug("ES already contains metadata for product {}", productName);
 			}
-			publish(message, catJob, reporting.getUid(), metadata);
+			publish(message, reporting.getUid(), metadata);
 	        reporting.end(new ReportingMessage("End metadata extraction"));
             
 		}
@@ -144,11 +144,10 @@ public class MetadataExtractionService implements MqiListener<CatalogJob> {
 	
 	private final void publish(
 			final GenericMessageDto<CatalogJob> message, 
-			final CatalogJob catJob,
 			final UUID reportingId,
 			final JSONObject metadata
 	) throws Exception {
-		final CatalogEvent event = toCatalogEvent(catJob, metadata);
+		final CatalogEvent event = toCatalogEvent(message.getBody(), metadata);
 		event.setUid(reportingId);
 		final GenericPublicationMessageDto<CatalogEvent> messageDto = new GenericPublicationMessageDto<CatalogEvent>(
 				message.getId(), 
