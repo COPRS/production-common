@@ -46,7 +46,7 @@ public class PoolExecutorCallableTest extends MockPropertiesTest {
         mockDefaultAppProperties();
         mockWapAppProperties(3, 1);
 
-        job = new IpfExecutionJob(ProductFamily.L0_JOB, "id", "FAST", ".", "3", new UUID(23L, 42L));
+        job = new IpfExecutionJob(ProductFamily.L0_JOB, "id", "FAST", ".", "3", "FAST24", new UUID(23L, 42L));
         job.addPool(new LevelJobPoolDto());
         job.getPools().get(0)
                 .addTask(new LevelJobTaskDto(SystemUtils.getCmdMkdir()));

@@ -277,7 +277,7 @@ public class MessagePublicationControllerTest {
     @Test
     public void publishLevelJobs() throws Exception {
         final IpfExecutionJob dto = new IpfExecutionJob(ProductFamily.L1_JOB, "product-name", "NRT",
-                "work-directory", "job-order", new UUID(23L, 42L));
+                "work-directory", "job-order", "NRT", new UUID(23L, 42L));
         initCustomControllerForAllPublication();
 
         customController.publish(ProductCategory.LEVEL_JOBS, dto, "t-pdgs-aio-l0-slice-production-events-nrt", "L1_JOB");
@@ -291,7 +291,7 @@ public class MessagePublicationControllerTest {
     @Test
     public void publishLevelJobs1() throws Exception {
         final IpfExecutionJob dto = new IpfExecutionJob(ProductFamily.L0_JOB, "product-name", "NRT",
-                "work-directory", "job-order", new UUID(23L, 42L));
+                "work-directory", "job-order", "NRT", new UUID(23L, 42L));
         initCustomControllerForAllPublication();
 
         customController.publish(ProductCategory.LEVEL_JOBS, dto, "NONE", "NONE");
@@ -305,7 +305,7 @@ public class MessagePublicationControllerTest {
     @Test
     public void publishLevelJobsL2() throws Exception {
         final IpfExecutionJob dto = new IpfExecutionJob(ProductFamily.L2_JOB, "product-name", "FAST",
-                "work-directory", "job-order", new UUID(23L, 42L));
+                "work-directory", "job-order", "FAST24", new UUID(23L, 42L));
         initCustomControllerForAllPublication();
 
         customController.publish(ProductCategory.LEVEL_JOBS, dto, "NONE", "NONE");

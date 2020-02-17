@@ -115,7 +115,7 @@ public class OutputProcessorTest {
         // Objects
         inputMessage = new GenericMessageDto<IpfExecutionJob>(123, "",
                 new IpfExecutionJob(ProductFamily.L0_JOB, "product-name", "FAST24",
-                        PATH_DIRECTORY_TEST, "job-order", new UUID(23L, 42L)));
+                        PATH_DIRECTORY_TEST, "job-order", "FAST24", new UUID(23L, 42L)));
         authorizedOutputs = new ArrayList<>();
         authorizedOutputs.add(TestUtils.buildProductOutputDto(
                 PATH_DIRECTORY_TEST + "^.*SM_RAW__0S.*$"));

@@ -19,7 +19,7 @@ public class MonitorLogUtilsTest {
     public void testGetPrefixMonitorLogs() {
         
         IpfExecutionJob job = new IpfExecutionJob(ProductFamily.L0_JOB, "SESSIONID", "FAST",
-                "./test_work_dir/", "job-order", new UUID(23L, 42L));
+                "./test_work_dir/", "job-order", "FAST24", new UUID(23L, 42L));
         String baseLog = "[MONITOR]";
         String productLog =
                 "[productName SESSIONID] [workDir ./test_work_dir/]";

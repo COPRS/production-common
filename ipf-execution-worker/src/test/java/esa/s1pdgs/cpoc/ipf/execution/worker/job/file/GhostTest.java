@@ -27,7 +27,7 @@ public class GhostTest {
 	@Before
 	public void setup() {
 		GenericMessageDto<IpfExecutionJob> inputMessage = new GenericMessageDto<IpfExecutionJob>(123, "",
-				new IpfExecutionJob(ProductFamily.L0_JOB, "product-name", "FAST24", "", "job-order", new UUID(23L, 42L)));
+				new IpfExecutionJob(ProductFamily.L0_JOB, "product-name", "FAST24", "", "job-order", "FAST24", new UUID(23L, 42L)));
 		
 		ApplicationProperties properties = new ApplicationProperties();
 		properties.setThresholdEw(2);

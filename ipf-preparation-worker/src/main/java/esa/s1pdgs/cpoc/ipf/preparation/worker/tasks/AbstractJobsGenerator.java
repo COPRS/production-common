@@ -871,6 +871,8 @@ public abstract class AbstractJobsGenerator implements Runnable {
         // Custom Job order according implementation
         this.customJobOrder(job);
 
+        String timeliness = (String)((AppDataJob<CatalogEvent>)job.getAppDataJob()).getMessages()
+        		.get(0).getBody().getMetadata().get("timeliness");
 
         ProductFamily family = ProductFamily.L0_JOB;
         switch (l0ProcessSettings.getLevel()) {
@@ -892,7 +894,8 @@ public abstract class AbstractJobsGenerator implements Runnable {
                 job.getAppDataJob().getProduct().getProductName(),
                 job.getAppDataJob().getProduct().getProcessMode(), 
                 workingDir,
-                jobOrder, 
+                jobOrder,
+                timeliness,
                 reportingRootTaskUID
         );        
         r.setCreationDate(new Date());
