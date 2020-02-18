@@ -10,7 +10,6 @@ import esa.s1pdgs.cpoc.appcatalog.AppDataJobProduct;
 import esa.s1pdgs.cpoc.appcatalog.AppDataJobState;
 import esa.s1pdgs.cpoc.appcatalog.client.job.AppCatalogJobClient;
 import esa.s1pdgs.cpoc.appstatus.AppStatus;
-import esa.s1pdgs.cpoc.common.ProductCategory;
 import esa.s1pdgs.cpoc.common.errors.AbstractCodedException;
 import esa.s1pdgs.cpoc.errorrepo.ErrorRepoAppender;
 import esa.s1pdgs.cpoc.metadata.client.MetadataClient;
@@ -18,8 +17,11 @@ import esa.s1pdgs.cpoc.mqi.client.GenericMqiClient;
 import esa.s1pdgs.cpoc.mqi.model.queue.CatalogEvent;
 import esa.s1pdgs.cpoc.mqi.model.rest.GenericMessageDto;
 import esa.s1pdgs.cpoc.production.trigger.config.ProcessSettings;
+import esa.s1pdgs.cpoc.report.ReportingFactory;
 
-public final class L0SegmentConsumer extends AbstractGenericConsumer<CatalogEvent> {    
+public final class L0SegmentConsumer extends AbstractGenericConsumer<CatalogEvent> {   
+	private static final String TYPE = "L0Segment";
+	
 	public L0SegmentConsumer(
 			final ProcessSettings processSettings, 
 			final GenericMqiClient mqiClient,
@@ -34,22 +36,26 @@ public final class L0SegmentConsumer extends AbstractGenericConsumer<CatalogEven
 				appDataService, 
 				appStatus, 
 				errorRepoAppender,
-				ProductCategory.EDRS_SESSIONS,
 				metadataClient
 		);
 	}
 	
     @Override
-	protected final AppDataJob<CatalogEvent> dispatch(final GenericMessageDto<CatalogEvent> mqiMessage) throws AbstractCodedException {
+	protected final AppDataJob<CatalogEvent> dispatch(
+			final GenericMessageDto<CatalogEvent> mqiMessage,
+			final ReportingFactory reportingFactory
+	) throws AbstractCodedException {
         final AppDataJob<CatalogEvent> appDataJob = buildJob(mqiMessage);
         final String productName = appDataJob.getProduct().getProductName();
         LOGGER.info("Dispatching product {}", productName);
         
+        // TODO check why 'AppDataJobState.DISPATCHING' is also accepted here
         if (appDataJob.getState() == AppDataJobState.WAITING || appDataJob.getState() == AppDataJobState.DISPATCHING) {
             appDataJob.setState(AppDataJobState.DISPATCHING);
-            return appDataService.patchJob(appDataJob.getId(), appDataJob, false, false, false);
+            patchJob(appDataJob, productName, TYPE, reportingFactory);
         }
-        LOGGER.info("Job for datatake already dispatched, product {}", productName);
+        LOGGER.info("AppDataJob {} ({}) for {} {} already dispatched", appDataJob.getId(), 
+        		appDataJob.getState(), TYPE, productName);
         return appDataJob;
 	}    
 

@@ -30,7 +30,9 @@ import esa.s1pdgs.cpoc.mqi.model.queue.IpfPreparationJob;
 import esa.s1pdgs.cpoc.mqi.model.rest.GenericMessageDto;
 import esa.s1pdgs.cpoc.mqi.model.rest.GenericPublicationMessageDto;
 import esa.s1pdgs.cpoc.production.trigger.config.ProcessSettings;
+import esa.s1pdgs.cpoc.production.trigger.report.DispatchReportInput;
 import esa.s1pdgs.cpoc.report.Reporting;
+import esa.s1pdgs.cpoc.report.ReportingFactory;
 import esa.s1pdgs.cpoc.report.ReportingMessage;
 import esa.s1pdgs.cpoc.report.ReportingUtils;
 import esa.s1pdgs.cpoc.report.message.input.FilenameReportingInput;
@@ -43,8 +45,7 @@ public abstract class AbstractGenericConsumer<T extends AbstractMessage> impleme
     private final GenericMqiClient mqiClient;
     private final AppStatus appStatus;    
     private final ErrorRepoAppender errorRepoAppender;    
-    private final ProductCategory category;
-    private final Pattern blackList;    
+     private final Pattern blackList;    
     private final Pattern seaCoverageCheckPattern;    
     private final MetadataClient metadataClient;
 
@@ -54,7 +55,6 @@ public abstract class AbstractGenericConsumer<T extends AbstractMessage> impleme
             final AppCatalogJobClient<CatalogEvent> appDataService,
             final AppStatus appStatus,
             final ErrorRepoAppender errorRepoAppender,
-            final ProductCategory category,
             final MetadataClient metadataClient
     ) {
         this.processSettings = processSettings;
@@ -62,7 +62,6 @@ public abstract class AbstractGenericConsumer<T extends AbstractMessage> impleme
         this.appDataService = appDataService;
         this.appStatus = appStatus;
         this.errorRepoAppender = errorRepoAppender;
-        this.category = category;
         this.blackList = (processSettings.getBlacklistPattern() == null) ? 
         		null : 
         		Pattern.compile(processSettings.getBlacklistPattern(), Pattern.CASE_INSENSITIVE);
@@ -96,9 +95,9 @@ public abstract class AbstractGenericConsumer<T extends AbstractMessage> impleme
             if (shallBeSkipped(event, reporting)) {
             	return;
             }
-            LOGGER.debug("Handling consumption of {} product {}", category, productName);
+            LOGGER.debug("Handling consumption of product {}", productName);
 
-            final AppDataJob<CatalogEvent> appDataJob = dispatch(mqiMessage);
+            final AppDataJob<CatalogEvent> appDataJob = dispatch(mqiMessage, reporting);
             
         	final IpfPreparationJob job = new IpfPreparationJob();
         	job.setProductFamily(event.getProductFamily());
@@ -115,8 +114,7 @@ public abstract class AbstractGenericConsumer<T extends AbstractMessage> impleme
         	mqiClient.publish(messageDto, ProductCategory.PREPARATION_JOBS);  
         	        	
             reporting.end(new ReportingMessage("IpfPreparationJob for product %s created", productName));            
-            LOGGER.debug("Done handling consumption of {} product {}", category, productName);           
-            
+            LOGGER.debug("Done handling consumption of product {}", productName);
         } catch (final Exception e) {        	
         	reporting.error(new ReportingMessage("Error on handling CatalogEvent: %s", LogUtils.toString(e)));
         	throw e;
@@ -130,8 +128,42 @@ public abstract class AbstractGenericConsumer<T extends AbstractMessage> impleme
         	new FailedProcessingDto(processSettings.getHostname(), new Date(), error.getMessage(), message)
         );
 	}
+	
+	protected final AppDataJob<CatalogEvent> patchJob(
+			final AppDataJob<CatalogEvent> appDataJob,
+			final String productName,
+			final String type,
+			final ReportingFactory reportingFactory
+	) throws AbstractCodedException {
+        final Reporting reporting = reportingFactory.newReporting("Dispatch");
+        
+        reporting.begin(
+        		new DispatchReportInput(appDataJob.getId(), productName, type),
+        		new ReportingMessage("Dispatching AppDataJob %s for %s %s", appDataJob.getId(), type, productName)
+        );     
+        try {
+			final AppDataJob<CatalogEvent> retVal = appDataService.patchJob(appDataJob.getId(), appDataJob, false,false, false);
+			reporting.end(
+					new ReportingMessage("AppDataJob %s for %s %s dispatched", appDataJob.getId(), type, productName)
+			);
+			return retVal;
+		} catch (final AbstractCodedException e) {
+			reporting.error(new ReportingMessage(
+					"Error on dispatching AppDataJob %s for %s %s: %s", 
+					appDataJob.getId(), 
+					type, 
+					productName,
+					LogUtils.toString(e)
+			));
+			throw e;
+		}
+	}
 
-	protected abstract AppDataJob<CatalogEvent> dispatch(final GenericMessageDto<CatalogEvent> mqiMessage) throws AbstractCodedException;
+	protected abstract AppDataJob<CatalogEvent> dispatch(
+			final GenericMessageDto<CatalogEvent> mqiMessage,
+			final ReportingFactory reportingFactory
+	) 
+		throws AbstractCodedException;
 
     private final MqiConsumer<CatalogEvent> newMqiConsumer() {
     	return new MqiConsumer<CatalogEvent>(

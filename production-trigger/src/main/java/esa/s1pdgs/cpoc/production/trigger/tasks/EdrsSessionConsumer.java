@@ -12,7 +12,6 @@ import esa.s1pdgs.cpoc.appcatalog.AppDataJobProduct;
 import esa.s1pdgs.cpoc.appcatalog.AppDataJobState;
 import esa.s1pdgs.cpoc.appcatalog.client.job.AppCatalogJobClient;
 import esa.s1pdgs.cpoc.appstatus.AppStatus;
-import esa.s1pdgs.cpoc.common.ProductCategory;
 import esa.s1pdgs.cpoc.common.errors.AbstractCodedException;
 import esa.s1pdgs.cpoc.errorrepo.ErrorRepoAppender;
 import esa.s1pdgs.cpoc.metadata.client.MetadataClient;
@@ -20,8 +19,11 @@ import esa.s1pdgs.cpoc.mqi.client.GenericMqiClient;
 import esa.s1pdgs.cpoc.mqi.model.queue.CatalogEvent;
 import esa.s1pdgs.cpoc.mqi.model.rest.GenericMessageDto;
 import esa.s1pdgs.cpoc.production.trigger.config.ProcessSettings;
+import esa.s1pdgs.cpoc.report.ReportingFactory;
 
 public final class EdrsSessionConsumer extends AbstractGenericConsumer<CatalogEvent> {	
+	private static final String TYPE = "EdrsSession";
+	
 	public EdrsSessionConsumer(
 			final ProcessSettings processSettings, 
 			final GenericMqiClient mqiClient,
@@ -36,25 +38,33 @@ public final class EdrsSessionConsumer extends AbstractGenericConsumer<CatalogEv
 				appDataService, 
 				appStatus, 
 				errorRepoAppender,
-				ProductCategory.EDRS_SESSIONS,
 				metadataClient
 		);
 	}
 	
     @Override
-	protected final AppDataJob<CatalogEvent> dispatch(final GenericMessageDto<CatalogEvent> mqiMessage) 
-			throws AbstractCodedException {    	
+	protected final AppDataJob<CatalogEvent> dispatch(
+			final GenericMessageDto<CatalogEvent> mqiMessage,
+			final ReportingFactory reportingFactory
+	) throws AbstractCodedException {    	
         final AppDataJob<CatalogEvent> appDataJob = buildJob(mqiMessage);                
-        LOGGER.debug ("== appDataJob(1) {}", appDataJob.toString());
+        LOGGER.trace("== appDataJob(1) {}", appDataJob.toString());
         final String productName = appDataJob.getProduct().getProductName();
     	
     	if (appDataJob.getMessages().size() == 2) {
             LOGGER.info("Dispatching product {}", productName);
+       
             if (appDataJob.getState() == AppDataJobState.WAITING) {
                 appDataJob.setState(AppDataJobState.DISPATCHING);
-                return appDataService.patchJob(appDataJob.getId(), appDataJob, false,false, false);
+                return patchJob(appDataJob, productName, TYPE, reportingFactory);
             }
+            LOGGER.info("AppDataJob {} ({}) for {} {} already dispatched", appDataJob.getId(), 
+            		appDataJob.getState(), TYPE, productName);
         }
+    	else {
+    		 LOGGER.info("AppDataJob {} ({}) for {} {} not ready to be dispatched (# of messages {}/2)", appDataJob.getId(), 
+             		appDataJob.getState(), TYPE, productName, appDataJob.getMessages().size());
+    	}
     	return appDataJob;
 	}
     
