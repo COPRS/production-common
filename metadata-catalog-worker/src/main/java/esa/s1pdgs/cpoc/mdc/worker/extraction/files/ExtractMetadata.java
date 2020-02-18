@@ -328,7 +328,6 @@ public class ExtractMetadata {
 							throw new MetadataExtractionException(e);
 						}
 					}
-					LOGGER.debug("timeliness computed {} for product {} ", timeliness,descriptor.getProductName());
 					timelinesses.add(timeliness);
 				}
 				
@@ -337,6 +336,12 @@ public class ExtractMetadata {
 				metadataJSONObject.remove("packetStoreID"); // the packetStoreID was only needed to compute timeliness
 				
 				timelinessComputationReporting.end(new ReportingMessage("Computed timeliness {} for DataTake Id {} with PacketStores {} of Satellite {}", timeliness, descriptor.getDataTakeId(), packetStoreIDs, satellite));
+			}
+			//S1PRO-1030 GP and HKTM products
+			else if (productType.contains("GP_RAW_") || productType.contains("HK_RAW_")) {
+				LOGGER.debug("Setting timeliness to NRT for {} product {}", productType, descriptor.getFilename());
+				//FIXME S1PRO-1030 should be taken from the application.yaml ??
+				metadataJSONObject.put("timeliness", "NRT");
 			}
 			else {
 				//FIXME S1PRO-1030 what should be exactly done if it is missing
