@@ -47,7 +47,7 @@ public final class LevelSegmentMetadataExtractor extends AbstractMetadataExtract
         	);
         	logger.debug("OutputFileDescriptor:{} for product: {}", l0SegmentDesc.toString(), productName);    	
         	return extractFromFile(
-        			() -> mdBuilder.buildL0SegmentOutputFileMetadata(l0SegmentDesc, metadataFile)
+        			() -> mdBuilder.buildL0SegmentOutputFileMetadata(l0SegmentDesc, metadataFile, reportingFactory)
         	); 
         }
         finally {

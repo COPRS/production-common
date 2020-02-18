@@ -66,7 +66,7 @@ public class IpfPreparationJobListener {
 	}
 	
 	public final void consume(final GenericMessageDto<IpfPreparationJob> message)
-			throws AbstractCodedException {		
+			throws AbstractCodedException {
 		jobsDispatcher.dispatch(message.getBody().getAppDataJob());
 	}
 

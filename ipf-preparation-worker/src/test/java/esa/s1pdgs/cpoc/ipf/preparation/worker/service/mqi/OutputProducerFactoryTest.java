@@ -41,7 +41,7 @@ public class OutputProducerFactoryTest {
     @Test
     public void testSendJob() throws AbstractCodedException {
         IpfExecutionJob dto = new IpfExecutionJob(ProductFamily.L1_JOB, "product-name", "NRT",
-                "work-dir", "job-order", new UUID(23L, 42L));
+                "work-dir", "job-order", "NRT", new UUID(23L, 42L));
         GenericMessageDto<ProductionEvent> message =
                 new GenericMessageDto<ProductionEvent>(123, "key",
                         new ProductionEvent("level-name", "key-obs",

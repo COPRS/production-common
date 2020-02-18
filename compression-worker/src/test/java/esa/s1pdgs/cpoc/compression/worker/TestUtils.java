@@ -18,7 +18,7 @@ public class TestUtils {
     public final static String WORKDIR = "./test_work_dir/";
 
     public static IpfExecutionJob buildL0IpfExecutionJob() {
-        IpfExecutionJob job = new IpfExecutionJob(ProductFamily.L0_JOB, "SESSIONID", "FAST", WORKDIR, WORKDIR + "JobOrder.xml", new UUID(23L, 42L));
+        IpfExecutionJob job = new IpfExecutionJob(ProductFamily.L0_JOB, "SESSIONID", "FAST", WORKDIR, WORKDIR + "JobOrder.xml", "FAST24", new UUID(23L, 42L));
 
         job.addInput(buildAuxiliaryInputDto("AUX_OBMEMC.xml"));
         job.addInput(buildAuxiliaryInputDto("MPL_OBRP.xml"));

@@ -30,6 +30,7 @@ import esa.s1pdgs.cpoc.mdc.worker.extraction.model.AuxDescriptor;
 import esa.s1pdgs.cpoc.mdc.worker.extraction.model.EdrsSessionFileDescriptor;
 import esa.s1pdgs.cpoc.mdc.worker.extraction.model.OutputFileDescriptor;
 import esa.s1pdgs.cpoc.mdc.worker.extraction.xml.XmlConverter;
+import esa.s1pdgs.cpoc.report.ReportingFactory;
 
 /**
  * @author Olivier BEX-CHAUVET
@@ -72,10 +73,12 @@ public class ExtractMetadataTest {
         packetStoreTypes.put("S1A-1", "Emergency");
         packetStoreTypes.put("S1A-2", "RFC");
         packetStoreTypes.put("S1A-22", "Standard");
+        packetStoreTypes.put("S1A-37", "PassThrough");
         packetStoreTypes.put("S1B-0", "Emergency");
         packetStoreTypes.put("S1B-1", "Emergency");
         packetStoreTypes.put("S1B-2", "RFC");
         packetStoreTypes.put("S1B-22", "Standard");
+        packetStoreTypes.put("S1B-37", "PassThrough");
         final Map<String, String> packetStoreTypesTimelinesses = new HashMap<>();
         packetStoreTypesTimelinesses.put("Emergency", "PT");
         packetStoreTypesTimelinesses.put("HKTM", "NRT");
@@ -606,7 +609,7 @@ public class ExtractMetadataTest {
     public void testProcessL0SegmentFile() {
 
         final JSONObject expectedResult = new JSONObject(
-                "{\"missionDataTakeId\":72627,\"productFamily\":\"L0_SEGMENT\",\"insertionTime\":\"2018-10-15T11:44:03.000000Z\",\"creationTime\":\"2018-10-15T11:44:03.000000Z\",\"polarisation\":\"DV\",\"absoluteStopOrbit\":9809,\"resolution\":\"_\",\"circulationFlag\":7,\"productName\":\"S1B_IW_RAW__0SDV_20171213T121623_20171213T121656_019684_021735_C6DS.SAFE\",\"dataTakeId\":\"021735\",\"productConsolidation\":\"FULL\",\"productSensingConsolidation\":\"DUMMY VALUE (FOR TEST)\",\"timeliness\":\"FAST24\",\"absoluteStartOrbit\":9809,\"validityStopTime\":\"2018-02-27T12:53:00.422905Z\",\"instrumentConfigurationId\":1,\"relativeStopOrbit\":158,\"relativeStartOrbit\":158,\"startTime\":\"2018-02-27T12:51:14.794304Z\",\"stopTime\":\"2018-02-27T12:53:00.422905Z\",\"productType\":\"IW_RAW__0S\",\"productClass\":\"S\",\"missionId\":\"S1\",\"swathtype\":\"IW\",\"pass\":\"DESCENDING\",\"satelliteId\":\"B\",\"stopTimeANX\":1849446.881,\"url\":\"S1B_IW_RAW__0SDV_20171213T121623_20171213T121656_019684_021735_C6DS.SAFE\",\"startTimeANX\":1743818.281,\"validityStartTime\":\"2018-02-27T12:51:14.794304Z\",\"segmentCoordinates\":{\"coordinates\":[[[-94.8783,73.8984],[-98.2395,67.6029],[-88.9623,66.8368],[-82.486,72.8925],[-94.8783,73.8984]]],\"type\":\"polygon\"},\"processMode\":\"FAST\"}");
+                "{\"missionDataTakeId\":72627,\"productFamily\":\"L0_SEGMENT\",\"insertionTime\":\"2018-10-15T11:44:03.000000Z\",\"creationTime\":\"2018-10-15T11:44:03.000000Z\",\"polarisation\":\"DV\",\"absoluteStopOrbit\":9809,\"resolution\":\"_\",\"circulationFlag\":7,\"productName\":\"S1B_IW_RAW__0SDV_20171213T121623_20171213T121656_019684_021735_C6DS.SAFE\",\"dataTakeId\":\"021735\",\"productConsolidation\":\"FULL\",\"productSensingConsolidation\":\"DUMMY VALUE (FOR TEST)\",\"timeliness\":\"PT\",\"absoluteStartOrbit\":9809,\"validityStopTime\":\"2018-02-27T12:53:00.422905Z\",\"instrumentConfigurationId\":1,\"relativeStopOrbit\":158,\"relativeStartOrbit\":158,\"startTime\":\"2018-02-27T12:51:14.794304Z\",\"stopTime\":\"2018-02-27T12:53:00.422905Z\",\"productType\":\"IW_RAW__0S\",\"productClass\":\"S\",\"missionId\":\"S1\",\"swathtype\":\"IW\",\"pass\":\"DESCENDING\",\"satelliteId\":\"B\",\"stopTimeANX\":1849446.881,\"url\":\"S1B_IW_RAW__0SDV_20171213T121623_20171213T121656_019684_021735_C6DS.SAFE\",\"startTimeANX\":1743818.281,\"validityStartTime\":\"2018-02-27T12:51:14.794304Z\",\"segmentCoordinates\":{\"coordinates\":[[[-94.8783,73.8984],[-98.2395,67.6029],[-88.9623,66.8368],[-82.486,72.8925],[-94.8783,73.8984]]],\"type\":\"polygon\"},\"processMode\":\"FAST\"}");
 
         final OutputFileDescriptor descriptor = new OutputFileDescriptor();
         descriptor.setExtension(FileExtension.SAFE);
@@ -631,7 +634,7 @@ public class ExtractMetadataTest {
         final File file = new File(testDir,"S1B_IW_RAW__0SDV_20171213T121623_20171213T121656_019684_021735_C6DS.SAFE/manifest.safe");
 
         try {
-            final JSONObject result = extractor.processL0Segment(descriptor, file);
+            final JSONObject result = extractor.processL0Segment(descriptor, file, ReportingFactory.NULL);
             assertNotNull("JSON object should not be null", result);
             assertEquals("JSON object are not equals", expectedResult.length(),
                     result.length());
@@ -657,6 +660,27 @@ public class ExtractMetadataTest {
         } catch (final AbstractCodedException fe) {
             fail("Exception occurred: " + fe.getMessage());
         }
+    }
+    
+    @Test
+    public void testMaxTimeliness() {
+    	assertEquals("PT", extractor.maxTimeliness(Arrays.asList("PT")));
+    	assertEquals("NRT", extractor.maxTimeliness(Arrays.asList("NRT")));
+    	assertEquals("FAST24", extractor.maxTimeliness(Arrays.asList("FAST24")));
+
+    	assertEquals("PT", extractor.maxTimeliness(Arrays.asList("NRT", "PT")));
+    	assertEquals("PT", extractor.maxTimeliness(Arrays.asList("PT", "NRT")));
+    	assertEquals("PT", extractor.maxTimeliness(Arrays.asList("FAST24", "PT")));
+    	assertEquals("PT", extractor.maxTimeliness(Arrays.asList("PT", "FAST24")));
+    	assertEquals("NRT", extractor.maxTimeliness(Arrays.asList("FAST24", "NRT")));
+    	assertEquals("NRT", extractor.maxTimeliness(Arrays.asList("NRT", "FAST24")));
+
+    	assertEquals("PT", extractor.maxTimeliness(Arrays.asList("FAST24", "NRT", "PT")));
+    	assertEquals("PT", extractor.maxTimeliness(Arrays.asList("FAST24", "PT", "NRT")));
+    	assertEquals("PT", extractor.maxTimeliness(Arrays.asList("NRT", "FAST24", "PT")));
+    	assertEquals("PT", extractor.maxTimeliness(Arrays.asList("PT", "FAST24", "NRT")));
+    	assertEquals("PT", extractor.maxTimeliness(Arrays.asList("NRT", "PT", "FAST24")));
+    	assertEquals("PT", extractor.maxTimeliness(Arrays.asList("PT", "NRT", "FAST24")));
     }
 
     @Test(expected = AbstractCodedException.class)
@@ -684,7 +708,7 @@ public class ExtractMetadataTest {
         final File file = new File(testDir,
                 "S1B_IW_RAW__0SDV_20171213T121623_20171213T121656_019684_021735_C6DD.SAFE/manifest.safe");
 
-        extractor.processL0Segment(descriptor, file);
+        extractor.processL0Segment(descriptor, file, ReportingFactory.NULL);
     }
 
     @Test

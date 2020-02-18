@@ -40,6 +40,7 @@ import esa.s1pdgs.cpoc.mqi.model.queue.CatalogJob;
 import esa.s1pdgs.cpoc.mqi.model.rest.GenericMessageDto;
 import esa.s1pdgs.cpoc.obs_sdk.ObsClient;
 import esa.s1pdgs.cpoc.report.Reporting;
+import esa.s1pdgs.cpoc.report.ReportingFactory;
 import esa.s1pdgs.cpoc.report.ReportingUtils;
 
 public class TestLevelSegmentMetadataExtractor {
@@ -117,13 +118,44 @@ public class TestLevelSegmentMetadataExtractor {
         typeSliceLength.put("IW", 25.0F);
         typeSliceLength.put("SM", 25.0F);
         typeSliceLength.put("WV", 0.0F);
+
+        final Map<String, String> packetStoreTypes = new HashMap<>();
+        packetStoreTypes.put("S1A-0", "Emergency");
+        packetStoreTypes.put("S1A-1", "Emergency");
+        packetStoreTypes.put("S1A-2", "RFC");
+        packetStoreTypes.put("S1A-20", "WV");
+        packetStoreTypes.put("S1A-22", "Standard");
+        packetStoreTypes.put("S1A-37", "PassThrough");
+        packetStoreTypes.put("S1B-0", "Emergency");
+        packetStoreTypes.put("S1B-1", "Emergency");
+        packetStoreTypes.put("S1B-2", "RFC");
+        packetStoreTypes.put("S1B-20", "WV");
+        packetStoreTypes.put("S1B-22", "Standard");
+        packetStoreTypes.put("S1B-37", "PassThrough");
+        final Map<String, String> packetStoreTypesTimelinesses = new HashMap<>();
+        packetStoreTypesTimelinesses.put("Emergency", "PT");
+        packetStoreTypesTimelinesses.put("HKTM", "NRT");
+        packetStoreTypesTimelinesses.put("NRT", "NRT");
+        packetStoreTypesTimelinesses.put("GPS", "NRT");
+        packetStoreTypesTimelinesses.put("PassThrough", "PT");
+        packetStoreTypesTimelinesses.put("Standard", "FAST24");
+        packetStoreTypesTimelinesses.put("RFC", "FAST24");
+        packetStoreTypesTimelinesses.put("WV", "FAST24");
+        packetStoreTypesTimelinesses.put("Filler", "FAST24");
+        packetStoreTypesTimelinesses.put("Spare", "FAST24");        
+        final List<String> timelinessPriorityFromHighToLow = Arrays.asList("PT", "NRT", "FAST24");
+        
         doReturn("config/xsltDir/").when(extractorConfig).getXsltDirectory();
         doReturn(typeOverlap).when(extractorConfig).getTypeOverlap();
         doReturn(typeSliceLength).when(extractorConfig).getTypeSliceLength();
+        doReturn(packetStoreTypes).when(extractorConfig).getPacketStoreTypes();
+        doReturn(packetStoreTypesTimelinesses).when(extractorConfig).getPacketstoreTypeTimelinesses();
+        doReturn(timelinessPriorityFromHighToLow).when(extractorConfig).getTimelinessPriorityFromHighToLow();
 
         doNothing().when(appStatus).setError(Mockito.any(), Mockito.anyString());
         doReturn(true).when(mqiService).ack(Mockito.any(), Mockito.any());
 
+               
         inputMessageSafe = new GenericMessageDto<CatalogJob>(123, "",
                 Utils.newCatalogJob(
                         "S1A_AUX_CAL_V20140402T000000_G20140402T133909.SAFE",
@@ -192,7 +224,7 @@ public class TestLevelSegmentMetadataExtractor {
         descriptor.setMode("FAST");
 
         final JSONObject expected = extractor.mdBuilder
-                .buildL0SegmentOutputFileMetadata(descriptor, files.get(0));
+                .buildL0SegmentOutputFileMetadata(descriptor, files.get(0), ReportingFactory.NULL);
 
         final JSONObject result = extractor.extract(reporting, inputMessageSafe);
         for (final String key : expected.keySet()) {

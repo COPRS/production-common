@@ -75,7 +75,7 @@ public class OutputProducerFactoryTest {
         inputMessage = new GenericMessageDto<IpfExecutionJob>(
         		123, 
         		"",
-                new IpfExecutionJob(ProductFamily.L0_JOB, "product-name", "FAST","work-dir", "job-order", new UUID(23L, 42L))
+                new IpfExecutionJob(ProductFamily.L0_JOB, "product-name", "FAST","work-dir", "job-order", "FAST24", new UUID(23L, 42L))
         );
         inputMessage.setInputKey(null);
     }

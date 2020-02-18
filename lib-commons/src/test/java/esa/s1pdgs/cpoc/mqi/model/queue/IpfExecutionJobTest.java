@@ -62,7 +62,7 @@ public class IpfExecutionJobTest {
 	 */
 	@Test
 	public void testConstructorAndGetters() {
-		final IpfExecutionJob job = new IpfExecutionJob(ProductFamily.L0_JOB, "testEqualsFunction", "NRT", "/data/localWD/123456", "/data/localWD/123456/JobOrder.xml", new UUID(23L, 42L));
+		final IpfExecutionJob job = new IpfExecutionJob(ProductFamily.L0_JOB, "testEqualsFunction", "NRT", "/data/localWD/123456", "/data/localWD/123456/JobOrder.xml", "NRT", new UUID(23L, 42L));
 		job.addInput(input1);
 		job.addInput(input2);
 		job.addOutput(output1);

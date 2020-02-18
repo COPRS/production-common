@@ -1,7 +1,11 @@
 <xsl:stylesheet version="1.0" xmlns:xsl="http://www.w3.org/1999/XSL/Transform">
     <xsl:output omit-xml-declaration="yes" method="xml" encoding="utf-8" indent="yes" />
-    
-    <xsl:template match="/">
+
+   <xsl:template match="@*|node()">
+        <xsl:apply-templates select="@*|node()"/>
+   </xsl:template>
+   
+   <xsl:template match="/">
     	<productConsolidation>
 			<xsl:copy-of select="//*[local-name() = 'productConsolidation']/text()"/>
 		</productConsolidation>
@@ -46,9 +50,12 @@
 		</stopTimeANX>
 		<segmentCoordinates>
 			<xsl:copy-of select="//*[local-name() = 'coordinates']/text()"/>
-		</segmentCoordinates>
-		<packetStoreID>
-			<xsl:copy-of select="//*[local-name() = 'packetStoreID']/text()"/>
-		</packetStoreID>	
+		</segmentCoordinates>	
+		<xsl:apply-templates select="node()"/>
 	</xsl:template>
+
+   	<xsl:template match="//*[local-name() = 'packetStoreID']">
+		<packetStoreID><xsl:value-of select="text()"/></packetStoreID>
+	</xsl:template>
+
 </xsl:stylesheet>

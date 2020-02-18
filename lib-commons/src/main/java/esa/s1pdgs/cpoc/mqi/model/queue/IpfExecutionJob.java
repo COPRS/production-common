@@ -28,6 +28,11 @@ public class IpfExecutionJob extends AbstractMessage {
      */
     private String jobOrder;
 
+    /**	
+     * Timeliness
+     */
+    private String timeliness;
+
     /**
      * List of inputs needed to execute the job.<br/>
      * They contain the absolute name on the target host and where we can find
@@ -78,12 +83,13 @@ public class IpfExecutionJob extends AbstractMessage {
      */
     public IpfExecutionJob(final ProductFamily productFamily,
             final String keyObjectStorage, final String productProcessMode, final String workDirectory,
-            final String jobOrder, final UUID reportingTaskUID) {
+            final String jobOrder, final String timeliness, final UUID reportingTaskUID) {
         super(productFamily, keyObjectStorage);
         this.productProcessMode = productProcessMode;
         this.workDirectory = workDirectory;
         this.jobOrder = jobOrder;
         this.reportingTaskUID = reportingTaskUID;
+        this.timeliness = timeliness;
     }
 
     /**
@@ -115,6 +121,20 @@ public class IpfExecutionJob extends AbstractMessage {
     public void setJobOrder(final String jobOrder) {
         this.jobOrder = jobOrder;
     }
+
+	/**
+	 * @return the timeliness
+	 */
+	public String getTimeliness() {
+		return timeliness;
+	}
+
+	/**
+	 * @param timeliness the timeliness to set
+	 */
+	public void setTimeliness(String timeliness) {
+		this.timeliness = timeliness;
+	}
 
     /**
      * @return the productProcessMode
@@ -219,8 +239,8 @@ public class IpfExecutionJob extends AbstractMessage {
 
 	@Override
 	public int hashCode() {
-		return Objects.hash(creationDate, hostname, inputs, jobOrder, keyObjectStorage, outputs, pools, productFamily,
-				productProcessMode, workDirectory, reportingTaskUID, uid);
+		return Objects.hash(creationDate, hostname, inputs, jobOrder, timeliness, keyObjectStorage, outputs, pools,
+				productFamily, productProcessMode, workDirectory, reportingTaskUID, uid);
 	}
 
 	@Override
@@ -239,6 +259,7 @@ public class IpfExecutionJob extends AbstractMessage {
 				&& Objects.equals(hostname, other.hostname)
 				&& Objects.equals(inputs, other.inputs) 
 				&& Objects.equals(jobOrder, other.jobOrder)
+				&& Objects.equals(timeliness, other.timeliness)
 				&& Objects.equals(keyObjectStorage, other.keyObjectStorage) 
 				&& Objects.equals(outputs, other.outputs)
 				&& Objects.equals(pools, other.pools) 
@@ -253,8 +274,9 @@ public class IpfExecutionJob extends AbstractMessage {
 	public String toString() {
 		return "IpfExecutionJob [productFamily=" + productFamily + ", keyObjectStorage=" + keyObjectStorage
 				+ ", creationDate=" + creationDate + ", hostname=" + hostname + ", productProcessMode="
-				+ productProcessMode + ", workDirectory=" + workDirectory + ", jobOrder=" + jobOrder + ", inputs="
-				+ inputs + ", outputs=" + outputs + ", pools=" + pools + ", reportingTaskUID=" + reportingTaskUID + 
-				", uid=" + uid +"]";
+				+ productProcessMode + ", workDirectory=" + workDirectory + ", jobOrder=" + jobOrder +
+				", timeliness=" + timeliness + ", inputs=" + inputs + ", outputs=" + outputs +
+				", pools=" + pools + ", reportingTaskUID=" + reportingTaskUID + ", uid=" + uid +"]";
 	}
+
 }
