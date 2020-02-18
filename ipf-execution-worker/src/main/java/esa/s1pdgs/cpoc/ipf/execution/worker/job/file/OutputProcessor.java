@@ -193,7 +193,7 @@ public class OutputProcessor {
 		LOGGER.info("{} 2 - Starting organizing outputs", prefixMonitorLogs);
 
 		for (final String line : lines) {
-			LOGGER.trace("Processing line of list file: {}", line);
+			LOGGER.debug("Processing line of list file: {}", line);
 
 			// Extract the product name, the complete filepath, job output and
 			// the mode
@@ -226,43 +226,45 @@ public class OutputProcessor {
 					// Specific case of the L0 wrapper
 					if (appLevel == ApplicationLevel.L0) {
 						final boolean ghostCandidate = isGhostCandidate(productName);
-						if (line.contains("NRT")) {
-							LOGGER.info("Output {} (L0_SLICE NRT) is considered as belonging to the family {}", productName,
-									matchOutput.getFamily());
-							/*
-							 * Just if it is not a ghost candidate, we are uploading it and reporting it to MQI queue.
-							 * If it is a ghost in NRT workflow, we simply ignore it.
-							 */
-							if (!ghostCandidate) {
-								LOGGER.info("Product {} is not a ghost candidate in NRT scenario", productName);
-								ReportingUtils.newReportingBuilder().newEventReporting(new ReportingMessage("Product %s of family %s is not a ghost candidate in NRT scenario", productName, matchOutput.getFamily()));
-								uploadBatch.add(new ObsUploadObject(family, productName, file));
-								outputToPublish.add(new ObsQueueMessage(family, productName, productName, "NRT",oqcFlag));
-								productSize += size(file);
-							} else {
-								LOGGER.info("Product {} is a ghost candidate in NRT scenario", productName);
-								ReportingUtils.newReportingBuilder().newEventReporting(new ReportingMessage("Product %s of family %s is a ghost candidate in NRT scenario", productName, matchOutput.getFamily()));
-							}
-
-						} else if (line.contains("FAST24")) {
-							LOGGER.info("Output {} (L0_SLICE FAST24) is considered as belonging to the family {}", productName,
+//						if (line.contains("NRT")) {
+//							LOGGER.info("Output {} (L0_SLICE NRT) is considered as belonging to the family {}", productName,
+//									matchOutput.getFamily());
+//							/*
+//							 * Just if it is not a ghost candidate, we are uploading it and reporting it to MQI queue.
+//							 * If it is a ghost in NRT workflow, we simply ignore it.
+//							 */
+//							if (!ghostCandidate) {
+//								LOGGER.info("Product {} is not a ghost candidate in NRT scenario", productName);
+//								ReportingUtils.newReportingBuilder().newEventReporting(new ReportingMessage("Product %s of family %s is not a ghost candidate in NRT scenario", productName, matchOutput.getFamily()));
+//								uploadBatch.add(new ObsUploadObject(family, productName, file));
+//								outputToPublish.add(new ObsQueueMessage(family, productName, productName, "NRT",oqcFlag));
+//								productSize += size(file);
+//							} else {
+//								LOGGER.info("Product {} is a ghost candidate in NRT scenario", productName);
+//								ReportingUtils.newReportingBuilder().newEventReporting(new ReportingMessage("Product %s of family %s is a ghost candidate in NRT scenario", productName, matchOutput.getFamily()));
+//							}
+//
+//						} else if (line.contains("FAST24")) {
+							LOGGER.info("Output {} is recognized as belonging to the family {}", productName,
 									ProductFamily.L0_SEGMENT);
 							if (!ghostCandidate) {
-								LOGGER.info("Product {} is not a ghost candidate in FAST scenario", productName);
-								ReportingUtils.newReportingBuilder().newEventReporting(new ReportingMessage("Product %s of family %s is not a ghost candidate in FAST scenario", productName, ProductFamily.L0_SEGMENT));
+								LOGGER.info("Product {} is not a ghost candidate and processMode is {}", productName,inputMessage.getBody().getProductProcessMode());
+								//ReportingUtils.newReportingBuilder().newEventReporting(new ReportingMessage("Product %s of family %s is not a ghost candidate in FAST scenario", productName, ProductFamily.L0_SEGMENT));
+								ReportingUtils.newReportingBuilder().newEventReporting(new ReportingMessage("Product %s of family %s is not a ghost candidate", productName, ProductFamily.L0_SEGMENT));
 								uploadBatch.add(new ObsUploadObject(ProductFamily.L0_SEGMENT, productName, file));
 								outputToPublish.add(
-									new ObsQueueMessage(ProductFamily.L0_SEGMENT, productName, productName, "FAST24",oqcFlag));
+									new ObsQueueMessage(ProductFamily.L0_SEGMENT, productName, productName, inputMessage.getBody().getProductProcessMode(),oqcFlag));
 
 							} else {
-								LOGGER.info("Product {} is a ghost candidate in FAST scenario", productName);
-								ReportingUtils.newReportingBuilder().newEventReporting(new ReportingMessage("Product %s of family %s is a ghost candidate in FAST scenario", productName, ProductFamily.L0_SEGMENT));
+								LOGGER.info("Product {} is a ghost candidate", productName);
+								//ReportingUtils.newReportingBuilder().newEventReporting(new ReportingMessage("Product %s of family %s is a ghost candidate in FAST scenario", productName, ProductFamily.L0_SEGMENT));
+								ReportingUtils.newReportingBuilder().newEventReporting(new ReportingMessage("Product %s of family %s is a ghost candidate", productName, ProductFamily.L0_SEGMENT));
 								uploadBatch.add(new ObsUploadObject(ProductFamily.GHOST, productName, file));
 							}
 							productSize += size(file);
-						} else {
-							LOGGER.warn("Output {} ignored because unknown mode", productName);
-						}
+//						} else {
+//							LOGGER.warn("Output {} ignored because unknown mode", productName);
+//						}
 					} else {
 						LOGGER.info("Output {} is considered as belonging to the family {}", productName,
 								matchOutput.getFamily());
@@ -272,41 +274,51 @@ public class OutputProcessor {
 						productSize += size(file);
 					}
 					break;
-				case L0_ACN:
+					//FIXME There shall not be blanks anymore.
 				case L0_BLANK:
+					LOGGER.error("Product {} is consindered blank", productName);
+					//TODO report ERROR
+					//ReportingUtils.newReportingBuilder().newEventReporting(new ReportingMessage("Product %s is considered as blank", productName, matchOutput.getFamily()));
+					break;
+				case L0_ACN:
 					// Specific case of the L0 wrapper
 					if (appLevel == ApplicationLevel.L0) {
-						final boolean ghostCandidate = isGhostCandidate(productName);
-						if (line.contains("NRT")) {
-							LOGGER.info("Output {} (ACN, BLANK) is considered as belonging to the family {}", productName,
-									matchOutput.getFamily());
-							if (!ghostCandidate) {
-								LOGGER.info("Product {} is not a ghost candidate in NRT scenario", productName);
-								ReportingUtils.newReportingBuilder().newEventReporting(new ReportingMessage("Product %s of family %s is not a ghost candidate in NRT scenario", productName, matchOutput.getFamily()));
-								uploadBatch.add(new ObsUploadObject(family, productName, file));
-								outputToPublish.add(new ObsQueueMessage(family, productName, productName, "NRT",oqcFlag));
-								productSize += size(file);
-							} else {
-								LOGGER.info("Product {} is a ghost candidate in NRT scenario", productName);
-								ReportingUtils.newReportingBuilder().newEventReporting(new ReportingMessage("Product %s of family %s is a ghost candidate in NRT scenario", productName, matchOutput.getFamily()));
-							}
-						} else if (line.contains("FAST24")) {
-							LOGGER.info("Output {} (ACN, BLANK) is considered as belonging to the family {}", productName,
-									matchOutput.getFamily());
-							
-							if (!ghostCandidate) {
-								LOGGER.info("Product {} is not a ghost candidate in FAST scenario", productName);
-								ReportingUtils.newReportingBuilder().newEventReporting(new ReportingMessage("Product %s of family %s is not a ghost candidate in FAST scenario", productName, matchOutput.getFamily()));
-								uploadBatch.add(new ObsUploadObject(family, productName, file));
-								outputToPublish.add(new ObsQueueMessage(family, productName, productName, "FAST24",oqcFlag));
-								productSize += size(file);
-							} else {
-								LOGGER.info("Product {} is a ghost candidate in FAST scenario", productName);
-								ReportingUtils.newReportingBuilder().newEventReporting(new ReportingMessage("Product %s of family %s is a ghost candidate in FAST scenario", productName, matchOutput.getFamily()));
-							}
-						} else {
-							LOGGER.warn("Output {} (ACN, BLANK) ignored because unknown mode", productName);
-						}
+						LOGGER.warn("Product {} is not expected as output of AIO", productName);
+						uploadBatch.add(new ObsUploadObject(family, productName, file));
+						outputToPublish.add(new ObsQueueMessage(family, productName, productName,
+								inputMessage.getBody().getProductProcessMode(),oqcFlag));
+						productSize += size(file);
+//						final boolean ghostCandidate = isGhostCandidate(productName);
+//						if (line.contains("NRT")) {
+//							LOGGER.info("Output {} (ACN, BLANK) is considered as belonging to the family {}", productName,
+//									matchOutput.getFamily());
+//							if (!ghostCandidate) {
+//								LOGGER.info("Product {} is not a ghost candidate in NRT scenario", productName);
+//								ReportingUtils.newReportingBuilder().newEventReporting(new ReportingMessage("Product %s of family %s is not a ghost candidate in NRT scenario", productName, matchOutput.getFamily()));
+//								uploadBatch.add(new ObsUploadObject(family, productName, file));
+//								outputToPublish.add(new ObsQueueMessage(family, productName, productName, "NRT",oqcFlag));
+//								productSize += size(file);
+//							} else {
+//								LOGGER.info("Product {} is a ghost candidate in NRT scenario", productName);
+//								ReportingUtils.newReportingBuilder().newEventReporting(new ReportingMessage("Product %s of family %s is a ghost candidate in NRT scenario", productName, matchOutput.getFamily()));
+//							}
+//						} else if (line.contains("FAST24")) {
+//							LOGGER.info("Output {} (ACN, BLANK) is considered as belonging to the family {}", productName,
+//									matchOutput.getFamily());
+//							
+//							if (!ghostCandidate) {
+//								LOGGER.info("Product {} is not a ghost candidate in FAST scenario", productName);
+//								ReportingUtils.newReportingBuilder().newEventReporting(new ReportingMessage("Product %s of family %s is not a ghost candidate in FAST scenario", productName, matchOutput.getFamily()));
+//								uploadBatch.add(new ObsUploadObject(family, productName, file));
+//								outputToPublish.add(new ObsQueueMessage(family, productName, productName, "FAST24",oqcFlag));
+//								productSize += size(file);
+//							} else {
+//								LOGGER.info("Product {} is a ghost candidate in FAST scenario", productName);
+//								ReportingUtils.newReportingBuilder().newEventReporting(new ReportingMessage("Product %s of family %s is a ghost candidate in FAST scenario", productName, matchOutput.getFamily()));
+//							}
+//						} else {
+//							LOGGER.warn("Output {} (ACN, BLANK) ignored because unknown mode", productName);
+//						}
 					} else {
 						LOGGER.info("Output {} (ACN, BLANK) is considered as belonging to the family {}", productName,
 								matchOutput.getFamily());
