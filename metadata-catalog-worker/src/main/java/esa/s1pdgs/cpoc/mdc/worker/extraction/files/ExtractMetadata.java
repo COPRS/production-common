@@ -328,6 +328,7 @@ public class ExtractMetadata {
 							throw new MetadataExtractionException(e);
 						}
 					}
+					LOGGER.debug("timeliness computed {} for product {} ", timeliness,descriptor.getProductName());
 					timelinesses.add(timeliness);
 				}
 				
@@ -337,7 +338,11 @@ public class ExtractMetadata {
 				
 				timelinessComputationReporting.end(new ReportingMessage("Computed timeliness {} for DataTake Id {} with PacketStores {} of Satellite {}", timeliness, descriptor.getDataTakeId(), packetStoreIDs, satellite));
 			}
-
+			else {
+				//FIXME S1PRO-1030 what should be exactly done if it is missing
+				LOGGER.error("No packetStoreID found for product in manifest: {} ", manifestFile);
+			}
+ 
 			LOGGER.debug("composed Json: {} ", metadataJSONObject);
 			return metadataJSONObject;
 
