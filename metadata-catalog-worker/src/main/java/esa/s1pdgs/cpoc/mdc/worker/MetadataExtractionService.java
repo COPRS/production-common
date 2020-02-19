@@ -155,8 +155,22 @@ public class MetadataExtractionService implements MqiListener<CatalogJob> {
 				event
 		);
 		messageDto.setInputKey(message.getInputKey());
-		messageDto.setOutputKey(event.getProductFamily().name());		    	
+		messageDto.setOutputKey(determineOutputKeyDependentOnProductFamilyAndTimeliness(event));		    	
 		mqiClient.publish(messageDto, ProductCategory.CATALOG_EVENT);
+	}
+	
+	private String determineOutputKeyDependentOnProductFamilyAndTimeliness(final CatalogEvent event) {
+
+		String outputKey = "";
+
+		Object timeliness = event.getMetadata().get("timeliness");
+		if (timeliness != null) {
+			outputKey = event.getProductFamily().name() + "@" + timeliness;
+		} else {
+			outputKey = event.getProductFamily().name();
+		}
+
+		return outputKey;
 	}
 
 	private final MqiConsumer<CatalogJob> newConsumerFor(final ProductCategory category, final CategoryConfig config) {
