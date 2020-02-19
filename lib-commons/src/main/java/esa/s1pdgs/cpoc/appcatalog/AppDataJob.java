@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Objects;
+import java.util.UUID;
 
 import esa.s1pdgs.cpoc.common.ApplicationLevel;
 import esa.s1pdgs.cpoc.common.ProductCategory;
@@ -65,6 +66,13 @@ public class AppDataJob<E extends AbstractMessage> {
      * Generations of the job
      */
     private List<AppDataJobGeneration> generations;
+    
+    private UUID reportingId;
+    
+    private long prepJobMessageId;
+    
+    private String prepJobInputQueue;
+    
 
     /**
      * 
@@ -218,28 +226,50 @@ public class AppDataJob<E extends AbstractMessage> {
     public void setGenerations(final List<AppDataJobGeneration> generations) {
         this.generations = generations;
     }
+    
+    public UUID getReportingId() {
+		return reportingId;
+	}
 
-    /**
-     * @see java.lang.Object#toString()
-     */
-    @Override
-    public String toString() {
-        return String.format(
-                "{id: %s, category: %s, level: %s, pod: %s, state: %s, creationDate: %s, lastUpdateDate: %s, messages: %s, product: %s, generations: %s}",
-                id, category, level, pod, state, creationDate,
-                lastUpdateDate, messages, product, generations);
-    }
+	public void setReportingId(final UUID reportingId) {
+		this.reportingId = reportingId;
+	}
+	
+    public long getPrepJobMessageId() {
+		return prepJobMessageId;
+	}
 
-    /**
+	public void setPrepJobMessageId(final long prepJobMessageId) {
+		this.prepJobMessageId = prepJobMessageId;
+	}
+
+	public String getPrepJobInputQueue() {
+		return prepJobInputQueue;
+	}
+
+	public void setPrepJobInputQueue(final String prepJobInputQueue) {
+		this.prepJobInputQueue = prepJobInputQueue;
+	}
+
+
+	/**
      * @see java.lang.Object#hashCode()
      */
     @Override
     public int hashCode() {
         return Objects.hash(id, category, level, pod, state,
-                creationDate, lastUpdateDate, messages, product, generations);
+                creationDate, lastUpdateDate, messages, product, generations, reportingId, prepJobInputQueue, prepJobMessageId);
     }
+    
+    @Override
+	public String toString() {
+		return "AppDataJob [id=" + id + ", category=" + category + ", level=" + level + ", pod=" + pod + ", state="
+				+ state + ", creationDate=" + creationDate + ", lastUpdateDate=" + lastUpdateDate + ", messages="
+				+ messages + ", product=" + product + ", generations=" + generations + ", reportingId=" + reportingId
+				+ ", prepJobMessageId=" + prepJobMessageId + ", prepJobInputQueue=" + prepJobInputQueue + "]";
+	}
 
-    /**
+	/**
      * @see java.lang.Object#equals(java.lang.Object)
      */
     @Override
@@ -260,7 +290,10 @@ public class AppDataJob<E extends AbstractMessage> {
                     && Objects.equals(lastUpdateDate, other.lastUpdateDate)
                     && Objects.equals(messages, other.messages)
                     && Objects.equals(product, other.product)
-                    && Objects.equals(generations, other.generations);
+                    && Objects.equals(generations, other.generations)
+                    && Objects.equals(prepJobInputQueue, other.prepJobInputQueue)
+                    && Objects.equals(prepJobMessageId, other.prepJobMessageId)
+                    && Objects.equals(reportingId, other.reportingId);
         }
         return ret;
     }
