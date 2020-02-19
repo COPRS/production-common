@@ -48,9 +48,8 @@ public final class L0SegmentConsumer extends AbstractGenericConsumer<CatalogEven
         final AppDataJob<CatalogEvent> appDataJob = buildJob(mqiMessage);
         final String productName = appDataJob.getProduct().getProductName();
         LOGGER.info("Dispatching product {}", productName);
-        
-        // TODO check why 'AppDataJobState.DISPATCHING' is also accepted here
-        if (appDataJob.getState() == AppDataJobState.WAITING || appDataJob.getState() == AppDataJobState.DISPATCHING) {
+
+        if (appDataJob.getState() == AppDataJobState.WAITING) {
             appDataJob.setState(AppDataJobState.DISPATCHING);
             patchJob(appDataJob, productName, TYPE, reportingFactory);
         }
