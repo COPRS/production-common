@@ -91,7 +91,7 @@ public class OutputProcuderFactory {
         final GenericPublicationMessageDto<ProductionEvent> messageToPublish = new GenericPublicationMessageDto<ProductionEvent>(
                 inputMessage.getId(), 
                 msg.getFamily(),
-                toProductionEvent(msg)
+                toProductionEvent(msg, inputMessage.getBody().getTimeliness())
 		);
     	    	
         if (msg.getFamily() == ProductFamily.L0_SEGMENT) {
@@ -104,14 +104,15 @@ public class OutputProcuderFactory {
         return messageToPublish;
     }
     
-    private final ProductionEvent toProductionEvent(final ObsQueueMessage msg)
+    private final ProductionEvent toProductionEvent(final ObsQueueMessage msg, final String timeliness)
     {
     	return new ProductionEvent(
     			msg.getProductName(),
         		msg.getKeyObs(),        	
         		msg.getFamily(), 
         		toUppercaseOrNull(msg.getProcessMode()),
-        		msg.getOqcFlag()
+        		msg.getOqcFlag(),
+        		timeliness
         );
     }
     
