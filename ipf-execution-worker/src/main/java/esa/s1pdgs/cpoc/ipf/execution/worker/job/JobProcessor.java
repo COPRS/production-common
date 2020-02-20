@@ -179,7 +179,7 @@ public class JobProcessor implements MqiListener<IpfExecutionJob> {
 		final IpfExecutionJob job = message.getBody();
 		
 		final Reporting reporting = ReportingUtils.newReportingBuilder()
-				.predecessor(job.getReportingTaskUID())
+				.predecessor(job.getUid())
 				.newReporting("JobProcessing");		
 		
 		/*
