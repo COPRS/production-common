@@ -53,7 +53,7 @@ public class OQCTaskTest {
 		
 		final Path productDir = Files.createTempDirectory("OQCTASK");
 
-		final OQCFlag flag = executor.executeOQC(productDir, dto, new OQCDefaultTaskFactory(), ReportingFactory.NULL);
+		final OQCFlag flag = executor.executeOQC(productDir.toFile(), dto, new OQCDefaultTaskFactory(), ReportingFactory.NULL);
 		
 		assertThat(flag, is(notNullValue()));
 		assertThat(flag, is(OQCFlag.NOT_CHECKED));
@@ -69,7 +69,7 @@ public class OQCTaskTest {
 		
 		final Path productDir = Files.createTempDirectory("OQCTASK");
 
-		final OQCFlag flag = executor.executeOQC(productDir, dto, new OQCDefaultTaskFactory(), ReportingFactory.NULL);
+		final OQCFlag flag = executor.executeOQC(productDir.toFile(), dto, new OQCDefaultTaskFactory(), ReportingFactory.NULL);
 		
 		assertThat(flag, is(notNullValue()));
 		assertThat(flag, is(OQCFlag.CHECKED_OK));
@@ -82,7 +82,7 @@ public class OQCTaskTest {
 		final Path productDir = Files.createTempDirectory(Paths.get("/tmp"), "OQCTASK");
 		final Path workingDir = Files.createTempDirectory(Paths.get("/tmp"), "OQCWORKDIR");
 		
-		final OQCTask task = new OQCTask(defaultProperties, productDir);
+		final OQCTask task = new OQCTask(defaultProperties, productDir.toFile());
 		final Path jobOrder = task.generateJobOrder(workingDir);
 		
 		// After the generation, it is expected that a job order file is there
@@ -109,7 +109,7 @@ public class OQCTaskTest {
 	public void testCompleteTask() throws Exception {
 		final Path productDir = Files.createTempDirectory("OQCTASK");
 		
-		final OQCTask task = new OQCTask(defaultProperties, productDir);
+		final OQCTask task = new OQCTask(defaultProperties, productDir.toFile());
 		final OQCFlag flag = task.call();
 		assertThat(flag,is(notNullValue()));
 		assertThat(flag,is(OQCFlag.CHECKED_OK));

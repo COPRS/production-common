@@ -220,6 +220,7 @@ public class JobProcessor implements MqiListener<IpfExecutionJob> {
 
 		final PoolExecutorCallable procExecutor = new PoolExecutorCallable(properties, job,
 				getPrefixMonitorLog(MonitorLogUtils.LOG_PROCESS, job), this.properties.getLevel(), reporting);
+		
 		final ExecutorService procExecutorSrv = Executors.newSingleThreadExecutor();
 		final ExecutorCompletionService<Void> procCompletionSrv = new ExecutorCompletionService<>(procExecutorSrv);
 		final InputDownloader inputDownloader = new InputDownloader(obsClient, job.getWorkDirectory(), job.getInputs(),
