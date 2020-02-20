@@ -104,7 +104,7 @@ public class TestSftpOutboxClient {
 	public final void testUpload_OnNonExistingDirectory_ShallCreateParentDirectoriesLazily() throws Exception {
 		final FakeObsClient fakeObsClient = new FakeObsClient() {
 			@Override
-			public Map<String, InputStream> getAllAsInputStream(final ProductFamily family, final String keyPrefix, final ReportingFactory reportingFactory) {
+			public Map<String, InputStream> getAllAsInputStream(final ProductFamily family, final String keyPrefix) {
 				return Collections.singletonMap("my/little/file", new ByteArrayInputStream("expected file content".getBytes()));
 			}			
 		};		
@@ -129,7 +129,7 @@ public class TestSftpOutboxClient {
 	public final void testUpload_OnExistingDirectory_ShallTransferFile() throws Exception {
 		final FakeObsClient fakeObsClient = new FakeObsClient() {
 			@Override
-			public Map<String, InputStream> getAllAsInputStream(final ProductFamily family, final String keyPrefixReporting, final ReportingFactory reportingFactory) {
+			public Map<String, InputStream> getAllAsInputStream(final ProductFamily family, final String keyPrefixReporting) {
 				return Collections.singletonMap("my/little/file", new ByteArrayInputStream("expected file content".getBytes()));
 			}			
 		};	

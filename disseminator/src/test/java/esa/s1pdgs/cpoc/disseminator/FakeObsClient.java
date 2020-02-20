@@ -57,20 +57,20 @@ public abstract class FakeObsClient implements ObsClient {
 	}
 
 	@Override
-	public Map<String, ObsObject> listInterval(final ProductFamily family, final Date intervalStart, final Date intervalEnd, final ReportingFactory reportingFactory)
+	public Map<String, ObsObject> listInterval(final ProductFamily family, final Date intervalStart, final Date intervalEnd)
 			throws SdkClientException {
 		// TODO Auto-generated method stub
 		return null;
 	}
 
 	@Override
-	public Map<String, InputStream> getAllAsInputStream(final ProductFamily family, final String keyPrefix, final ReportingFactory reportingFactory)
+	public Map<String, InputStream> getAllAsInputStream(final ProductFamily family, final String keyPrefix)
 			throws SdkClientException {
 		return null;
 	}
 	
 	@Override
-	public void validate(final ObsObject object, final ReportingFactory reportingFactory) throws ObsServiceException {
+	public void validate(final ObsObject object) throws ObsServiceException {
 	    // TODO Auto-generated method stub
 
 	}

@@ -141,7 +141,7 @@ public class SwiftObsClientIT {
 		assertTrue(uut.exists(new ObsObject(auxiliaryFiles, testDirectoryName + ".md5sum")));
 
 		// validate complete directory
-		uut.validate(new ObsObject(auxiliaryFiles, testDirectoryName), ReportingFactory.NULL);
+		uut.validate(new ObsObject(auxiliaryFiles, testDirectoryName));
 	}
 	
 	@Test
@@ -162,7 +162,7 @@ public class SwiftObsClientIT {
 
 		// validate directory with unexpected object
 		exception.expect(ObsValidationException.class);
-		uut.validate(new ObsObject(auxiliaryFiles, testDirectoryName), ReportingFactory.NULL);
+		uut.validate(new ObsObject(auxiliaryFiles, testDirectoryName));
 	}
 	
 	@Test
@@ -184,7 +184,7 @@ public class SwiftObsClientIT {
 		// validate incomplete directory
 		exception.expect(ObsValidationException.class);
 		exception.expectMessage("Object not found: " + testDirectoryName + "/" + testFileName1 + " of family " + auxiliaryFiles); 
-		uut.validate(new ObsObject(auxiliaryFiles, testDirectoryName), ReportingFactory.NULL);
+		uut.validate(new ObsObject(auxiliaryFiles, testDirectoryName));
 	}
 	
 	@Test
@@ -208,7 +208,7 @@ public class SwiftObsClientIT {
 		// validate wrong checksum situation
 		exception.expect(ObsValidationException.class);
 		exception.expectMessage("Checksum is wrong for object: " + testDirectoryName + "/" + testFileName1 + " of family " + auxiliaryFiles); 
-		uut.validate(new ObsObject(auxiliaryFiles, testDirectoryName), ReportingFactory.NULL);
+		uut.validate(new ObsObject(auxiliaryFiles, testDirectoryName));
 	}
 	
 	@Test
@@ -217,7 +217,7 @@ public class SwiftObsClientIT {
 		assertFalse(uut.exists(new ObsObject(auxiliaryFiles, "not-existing.md5sum")));
 		exception.expect(ObsValidationException.class);
 		exception.expectMessage("Checksum file not found for: not-existing of family " + auxiliaryFiles); 
-		uut.validate(new ObsObject(auxiliaryFiles, "not-existing"), ReportingFactory.NULL);
+		uut.validate(new ObsObject(auxiliaryFiles, "not-existing"));
 	}
 
 	@Test
@@ -341,7 +341,7 @@ public class SwiftObsClientIT {
 		assertTrue(uut.exists(new ObsObject(auxiliaryFiles, testFilePrefix + testFileName1)));
 		assertTrue(uut.exists(new ObsObject(auxiliaryFiles, testFilePrefix + testFileName2)));
 		
-		final Map<String,InputStream> res = uut.getAllAsInputStream(auxiliaryFiles, testFilePrefix, ReportingFactory.NULL);
+		final Map<String,InputStream> res = uut.getAllAsInputStream(auxiliaryFiles, testFilePrefix);
 		for (final Map.Entry<String,InputStream> entry : res.entrySet()) {
 			try (final InputStream in = entry.getValue()) {
 				final String content = IOUtils.toString(in);

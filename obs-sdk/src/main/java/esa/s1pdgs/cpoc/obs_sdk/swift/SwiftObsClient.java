@@ -20,7 +20,6 @@ import org.javaswift.joss.model.StoredObject;
 
 import esa.s1pdgs.cpoc.common.ProductFamily;
 import esa.s1pdgs.cpoc.common.errors.obs.ObsException;
-import esa.s1pdgs.cpoc.common.utils.LogUtils;
 import esa.s1pdgs.cpoc.obs_sdk.AbstractObsClient;
 import esa.s1pdgs.cpoc.obs_sdk.ObsClient;
 import esa.s1pdgs.cpoc.obs_sdk.ObsConfigurationProperties;
@@ -31,7 +30,6 @@ import esa.s1pdgs.cpoc.obs_sdk.ObsUploadObject;
 import esa.s1pdgs.cpoc.obs_sdk.SdkClientException;
 import esa.s1pdgs.cpoc.obs_sdk.ValidArgumentAssertion;
 import esa.s1pdgs.cpoc.report.Reporting;
-import esa.s1pdgs.cpoc.report.ReportingFactory;
 import esa.s1pdgs.cpoc.report.ReportingMessage;
 import esa.s1pdgs.cpoc.report.ReportingUtils;
 
@@ -230,23 +228,15 @@ public class SwiftObsClient extends AbstractObsClient {
 	}
 	
 	@Override
-	public Map<String, InputStream> getAllAsInputStream(final ProductFamily family, final String keyPrefix, 
-			final ReportingFactory reportingFactory) throws SdkClientException {
-		final Reporting reporting = reportingFactory.newReporting("ObsDownloadAsStream");
-		reporting.begin(new ReportingMessage("Start downloading file '{}'", keyPrefix));
-		try {
-			ValidArgumentAssertion.assertValidArgument(family);
-			ValidArgumentAssertion.assertValidPrefixArgument(keyPrefix);
-			final String bucket = getBucketFor(family);
-			LOGGER.debug("Getting all files in bucket {} with prefix {}", bucket, keyPrefix);		
-			final Map<String, InputStream> result = swiftObsServices.getAllAsInputStream(bucket, keyPrefix);
-			LOGGER.debug("Found {} elements in bucket {} with prefix {}", result.size(), bucket, keyPrefix);
-			reporting.end(new ReportingMessage("End downloading file '{}'", keyPrefix));
-			return result;
-		} catch (final Exception e) {
-			reporting.error(new ReportingMessage(LogUtils.toString(e)));
-			throw e;
-		}
+	public Map<String, InputStream> getAllAsInputStream(final ProductFamily family, final String keyPrefix
+			) throws SdkClientException {	
+		ValidArgumentAssertion.assertValidArgument(family);
+		ValidArgumentAssertion.assertValidPrefixArgument(keyPrefix);
+		final String bucket = getBucketFor(family);
+		LOGGER.debug("Getting all files in bucket {} with prefix {}", bucket, keyPrefix);		
+		final Map<String, InputStream> result = swiftObsServices.getAllAsInputStream(bucket, keyPrefix);
+		LOGGER.debug("Found {} elements in bucket {} with prefix {}", result.size(), bucket, keyPrefix);
+		return result;
 	}
 
 	@Override

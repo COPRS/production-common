@@ -34,7 +34,7 @@ public abstract class AbstractOutboxClient implements OutboxClient {
 	}
 	
 	protected final Iterable<Map.Entry<String, InputStream>> entries(final ObsObject obsObject, final ReportingFactory reportingFactory) throws SdkClientException {
-		return obsClient.getAllAsInputStream(obsObject.getFamily(), obsObject.getKey(), reportingFactory).entrySet();
+		return obsClient.getAllAsInputStream(obsObject.getFamily(), obsObject.getKey()).entrySet();
 	}
 
 	protected final void createParentIfRequired(final File file) {

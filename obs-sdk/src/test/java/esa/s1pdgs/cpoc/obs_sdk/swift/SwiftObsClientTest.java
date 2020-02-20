@@ -38,7 +38,6 @@ import esa.s1pdgs.cpoc.obs_sdk.ObsObject;
 import esa.s1pdgs.cpoc.obs_sdk.ObsServiceException;
 import esa.s1pdgs.cpoc.obs_sdk.ObsUploadObject;
 import esa.s1pdgs.cpoc.obs_sdk.SdkClientException;
-import esa.s1pdgs.cpoc.report.ReportingFactory;
 
 public class SwiftObsClientTest {
 
@@ -321,9 +320,9 @@ public class SwiftObsClientTest {
 	
 	@Test
 	public void testGetAllAsInputStreamValidArgumentAssertion() throws AbstractCodedException {
-    	assertThatThrownBy(() -> client.getAllAsInputStream(null, "prefix", ReportingFactory.NULL)).isInstanceOf(IllegalArgumentException.class).hasMessageContaining("Invalid product family: null");
-    	assertThatThrownBy(() -> client.getAllAsInputStream(ProductFamily.AUXILIARY_FILE, null, ReportingFactory.NULL)).isInstanceOf(IllegalArgumentException.class).hasMessageContaining("Invalid prefix: null");
-    	assertThatThrownBy(() -> client.getAllAsInputStream(ProductFamily.AUXILIARY_FILE, "", ReportingFactory.NULL)).isInstanceOf(IllegalArgumentException.class).hasMessageContaining("Invalid prefix (empty)");
+    	assertThatThrownBy(() -> client.getAllAsInputStream(null, "prefix")).isInstanceOf(IllegalArgumentException.class).hasMessageContaining("Invalid product family: null");
+    	assertThatThrownBy(() -> client.getAllAsInputStream(ProductFamily.AUXILIARY_FILE, null)).isInstanceOf(IllegalArgumentException.class).hasMessageContaining("Invalid prefix: null");
+    	assertThatThrownBy(() -> client.getAllAsInputStream(ProductFamily.AUXILIARY_FILE, "")).isInstanceOf(IllegalArgumentException.class).hasMessageContaining("Invalid prefix (empty)");
 	}
 
 }

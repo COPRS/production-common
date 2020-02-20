@@ -76,9 +76,9 @@ public interface ObsClient {
 	
 	void move(final ObsObject from, final ProductFamily to) throws ObsException, ObsServiceException;
 
-	Map<String,ObsObject> listInterval(final ProductFamily family, Date intervalStart, Date intervalEnd, final ReportingFactory reportingFactory) throws SdkClientException;
+	Map<String,ObsObject> listInterval(final ProductFamily family, Date intervalStart, Date intervalEnd) throws SdkClientException;
 	
-    Map<String, InputStream> getAllAsInputStream(final ProductFamily family, final String keyPrefix, final ReportingFactory reportingFactory) throws SdkClientException;
+    Map<String, InputStream> getAllAsInputStream(final ProductFamily family, final String keyPrefix) throws SdkClientException;
 
     /**
      * Performing a validation check on the given product. All checksum of the product manifest are verified and it
@@ -93,7 +93,7 @@ public interface ObsClient {
      * @throws ObsValidationException
      * @throws IllegalArgumentException
      */
-    void validate(ObsObject object, ReportingFactory reportingFactory) throws ObsServiceException, ObsValidationException;
+    void validate(ObsObject object) throws ObsServiceException, ObsValidationException;
     
     /**
      * Returns the size of the OBS object requested

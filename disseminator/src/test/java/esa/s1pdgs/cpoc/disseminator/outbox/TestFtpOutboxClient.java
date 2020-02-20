@@ -115,7 +115,7 @@ public class TestFtpOutboxClient {
 	public final void testFoo() throws Exception {
 		final FakeObsClient fakeObsClient = new FakeObsClient() {
 			@Override
-			public Map<String, InputStream> getAllAsInputStream(final ProductFamily family, final String keyPrefix, final ReportingFactory reportingFactory) {
+			public Map<String, InputStream> getAllAsInputStream(final ProductFamily family, final String keyPrefix) {
 				return Collections.singletonMap("my/little/file", new ByteArrayInputStream("expected file content".getBytes()));
 			}			
 		};		

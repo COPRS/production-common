@@ -106,8 +106,7 @@ public class ValidationServiceTest {
 				localDateTimeStop);
 		doReturn(obsResults).when(obsClient).listInterval(Mockito.eq(ProductFamily.AUXILIARY_FILE),
 				Mockito.eq(Date.from(localDateTimeStart.atZone(ZoneId.of("UTC")).toInstant())),
-				Mockito.eq(Date.from(localDateTimeStop.atZone(ZoneId.of("UTC")).toInstant())),
-				Mockito.any());
+				Mockito.eq(Date.from(localDateTimeStop.atZone(ZoneId.of("UTC")).toInstant())));
 		
 		// OBS does have 6 elements, but two are actually the same product
 		assertEquals(5,validationService.extractRealKeys(obsResults.values(),ProductFamily.AUXILIARY_FILE).size());

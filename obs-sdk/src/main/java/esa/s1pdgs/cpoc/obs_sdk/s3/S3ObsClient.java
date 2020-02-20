@@ -29,7 +29,6 @@ import com.amazonaws.services.s3.transfer.TransferManagerBuilder;
 
 import esa.s1pdgs.cpoc.common.ProductFamily;
 import esa.s1pdgs.cpoc.common.errors.obs.ObsException;
-import esa.s1pdgs.cpoc.common.utils.LogUtils;
 import esa.s1pdgs.cpoc.obs_sdk.AbstractObsClient;
 import esa.s1pdgs.cpoc.obs_sdk.ObsClient;
 import esa.s1pdgs.cpoc.obs_sdk.ObsConfigurationProperties;
@@ -41,10 +40,6 @@ import esa.s1pdgs.cpoc.obs_sdk.SdkClientException;
 import esa.s1pdgs.cpoc.obs_sdk.ValidArgumentAssertion;
 import esa.s1pdgs.cpoc.obs_sdk.s3.retry.SDKCustomDefaultRetryCondition;
 import esa.s1pdgs.cpoc.obs_sdk.swift.SwiftSdkClientException;
-import esa.s1pdgs.cpoc.report.Reporting;
-import esa.s1pdgs.cpoc.report.ReportingFactory;
-import esa.s1pdgs.cpoc.report.ReportingMessage;
-import esa.s1pdgs.cpoc.report.ReportingUtils;
 
 /**
  * <p>
@@ -255,23 +250,15 @@ public class S3ObsClient extends AbstractObsClient {
 	}
 
 	@Override
-	public Map<String, InputStream> getAllAsInputStream(final ProductFamily family, final String keyPrefix, final ReportingFactory reportingFactory)
+	public Map<String, InputStream> getAllAsInputStream(final ProductFamily family, final String keyPrefix)
 			throws SdkClientException {
-		final Reporting reporting = reportingFactory.newReporting("ObsDownloadAsStream");
-		reporting.begin(new ReportingMessage("Start downloading file '{}'", keyPrefix));
-		try {
-			ValidArgumentAssertion.assertValidArgument(family);
-			ValidArgumentAssertion.assertValidPrefixArgument(keyPrefix);
-			final String bucket = getBucketFor(family);
-			LOGGER.debug("Getting all files in bucket {} with prefix {}", bucket, keyPrefix);
-			final Map<String, InputStream> result = s3Services.getAllAsInputStream(bucket, keyPrefix);
-			LOGGER.debug("Found {} elements in bucket {} with prefix {}", result.size(), bucket, keyPrefix);			
-			reporting.end(new ReportingMessage("End downloading file '{}'", keyPrefix));
-			return result;
-		} catch (final Exception e) {
-			reporting.error(new ReportingMessage(LogUtils.toString(e)));
-			throw e;
-		}
+		ValidArgumentAssertion.assertValidArgument(family);
+		ValidArgumentAssertion.assertValidPrefixArgument(keyPrefix);
+		final String bucket = getBucketFor(family);
+		LOGGER.debug("Getting all files in bucket {} with prefix {}", bucket, keyPrefix);
+		final Map<String, InputStream> result = s3Services.getAllAsInputStream(bucket, keyPrefix);
+		LOGGER.debug("Found {} elements in bucket {} with prefix {}", result.size(), bucket, keyPrefix);			
+		return result;
 	}
 
 	@Override
@@ -332,17 +319,10 @@ public class S3ObsClient extends AbstractObsClient {
 	@Override
 	public URL createTemporaryDownloadUrl(final ObsObject object, final long expirationTimeInSeconds) throws ObsException, ObsServiceException {
 		ValidArgumentAssertion.assertValidArgument(object);
-		URL url;		
-		final Reporting reporting = ReportingUtils.newReportingBuilder().newReporting("ObsCreateTemporaryDownloadUrl");
-		reporting.begin(new ReportingMessage(size(object), "Start creating temporary download URL for username '{}' for product '{}'", "anonymous", object.getKey()));
-
 		try {
-			url = s3Services.createTemporaryDownloadUrl(getBucketFor(object.getFamily()), object.getKey(), expirationTimeInSeconds);
-			reporting.end(new ReportingMessage(size(object), "End creating temporary download URL for username '{}' for product '{}'", "anonymous", object.getKey()));				
-		} catch (final S3SdkClientException ex) {
-			reporting.error(new ReportingMessage(size(object), "Error on creating temporary download URL for username '{}' for product '{}'", "anonymous", object.getKey()));				
+			return s3Services.createTemporaryDownloadUrl(getBucketFor(object.getFamily()), object.getKey(), expirationTimeInSeconds);			
+		} catch (final S3SdkClientException ex) {			
 			throw new ObsException(object.getFamily(), object.getKey(), ex);			
 		}
-     	return url;
 	}
 }

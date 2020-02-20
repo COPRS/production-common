@@ -121,7 +121,7 @@ public class ValidationService {
 			Map<String, ObsObject> obsResults = null;
 			final Date startDate = Date.from(startInterval.atZone(ZoneId.of("UTC")).toInstant());
 			final Date endDate = Date.from(endInterval.atZone(ZoneId.of("UTC")).toInstant());
-			obsResults = obsClient.listInterval(ProductFamily.valueOf(family.name()), startDate, endDate, reportingFactory);
+			obsResults = obsClient.listInterval(ProductFamily.valueOf(family.name()), startDate, endDate);
 			LOGGER.info("OBS query for family '{}' returned {} results", family, obsResults.size());
 			
 			/*
@@ -136,7 +136,7 @@ public class ValidationService {
 					if (family.name().endsWith("_ZIP")) {
 						key += ".zip";
 					} 
-					obsClient.validate(new ObsObject(family, key), reportingFactory);
+					obsClient.validate(new ObsObject(family, key));
 				} catch (ObsServiceException | ObsValidationException ex) {
 					// Validation failed for that object.
 					LOGGER.debug(ex);

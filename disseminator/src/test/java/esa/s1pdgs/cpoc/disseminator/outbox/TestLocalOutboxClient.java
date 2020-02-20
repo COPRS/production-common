@@ -41,7 +41,7 @@ public class TestLocalOutboxClient {
 	public final void testTransfer() throws Exception {
 		final FakeObsClient fakeObsClient = new FakeObsClient() {			
 			@Override
-			public Map<String, InputStream> getAllAsInputStream(final ProductFamily family, final String keyPrefix, final ReportingFactory reportingFactory)
+			public Map<String, InputStream> getAllAsInputStream(final ProductFamily family, final String keyPrefix)
 					throws SdkClientException {
 				return Collections.singletonMap(keyPrefix, new ByteArrayInputStream("expected content".getBytes()));
 			}		
@@ -62,7 +62,7 @@ public class TestLocalOutboxClient {
 	public final void testTransfer_ISIP() throws Exception {
 		final FakeObsClient fakeObsClient = new FakeObsClient() {
 			@Override
-			public Map<String, InputStream> getAllAsInputStream(final ProductFamily family, final String keyPrefix, final ReportingFactory reportingFactory)
+			public Map<String, InputStream> getAllAsInputStream(final ProductFamily family, final String keyPrefix)
 					throws SdkClientException {
 				return Collections.singletonMap(keyPrefix, new ByteArrayInputStream("expected content".getBytes()));
 			}			
