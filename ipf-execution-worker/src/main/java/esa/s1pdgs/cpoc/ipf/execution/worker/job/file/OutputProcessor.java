@@ -261,7 +261,7 @@ public class OutputProcessor {
 					break;
 					//FIXME There shall not be blanks anymore.
 				case L0_BLANK:
-					LOGGER.error("Product {} is consindered blank", productName);
+					LOGGER.error("Product {} is considered blank", productName);
 					//TODO report ERROR
 					//ReportingUtils.newReportingBuilder().newEventReporting(new ReportingMessage("Product %s is considered as blank", productName, matchOutput.getFamily()));
 					break;
