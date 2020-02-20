@@ -106,7 +106,7 @@ public class AppDataJobProduct {
     /**
      * Process mode
      */
-    private String processMode;
+    private String processMode = "NOMINAL";
     
     private String polarisation = "NONE";
 
