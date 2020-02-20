@@ -8,6 +8,7 @@ public class ProductionEvent extends AbstractMessage {
 	private String productName = NOT_DEFINED;
 	private String mode = "NOMINAL";
 	private OQCFlag oqcFlag = OQCFlag.NOT_CHECKED;
+	private String timeliness;
 
 	public ProductionEvent() {
 		super();
@@ -18,15 +19,16 @@ public class ProductionEvent extends AbstractMessage {
 	}
 
 	public ProductionEvent(final String productName, final String keyObjectStorage, final ProductFamily family, final String mode) {
-		this(productName, keyObjectStorage, family, mode, OQCFlag.NOT_CHECKED);
+		this(productName, keyObjectStorage, family, mode, OQCFlag.NOT_CHECKED, null);
 	}
 	
 	public ProductionEvent(
 			final String productName, 
 			final String keyObjectStorage, 
 			final ProductFamily family, 
-			final String mode, final 
-			OQCFlag oqcFlag
+			final String mode, 
+			final OQCFlag oqcFlag,
+			final String timeliness
 	) {
 		super(family, keyObjectStorage);
 		this.productName = productName;
@@ -57,10 +59,18 @@ public class ProductionEvent extends AbstractMessage {
 	public void setProductName(final String productName) {
 		this.productName = productName;
 	}
+	
+	public String getTimeliness() {
+		return timeliness;
+	}
+
+	public void setTimeliness(final String timeliness) {
+		this.timeliness = timeliness;
+	}
 
 	@Override
 	public int hashCode() {
-		return Objects.hash(creationDate, hostname, keyObjectStorage, mode, oqcFlag, productFamily, productName, uid);
+		return Objects.hash(creationDate, hostname, keyObjectStorage, mode, timeliness, oqcFlag, productFamily, productName, uid);
 	}
 
 	@Override
@@ -81,6 +91,7 @@ public class ProductionEvent extends AbstractMessage {
 				&& Objects.equals(mode, other.mode)
 				&& oqcFlag == other.oqcFlag 
 				&& productFamily == other.productFamily
+				&& Objects.equals(timeliness, other.timeliness)
 				&& Objects.equals(uid, other.uid)
 				&& Objects.equals(productName, other.productName);
 	}
@@ -89,6 +100,6 @@ public class ProductionEvent extends AbstractMessage {
 	public String toString() {
 		return "ProductionEvent [productFamily=" + productFamily + ", keyObjectStorage=" + keyObjectStorage
 				+ ", creationDate=" + creationDate + ", hostname=" + hostname + ", productName=" + productName
-				+ ", mode=" + mode + ", oqcFlag=" + oqcFlag + ", uid=" + uid +"]";
+				+ ", mode=" + mode + ", oqcFlag=" + oqcFlag + ", uid=" + uid +", timeliness=" + timeliness + "]";
 	}
 }
