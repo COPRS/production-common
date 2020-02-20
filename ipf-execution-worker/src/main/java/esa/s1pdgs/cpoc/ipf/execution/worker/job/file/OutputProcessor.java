@@ -228,7 +228,7 @@ public class OutputProcessor {
 						final Reporting reporting = reportingFactory.newReporting("GhostHandling");						
 						reporting.begin(
 								new FilenameReportingInput(productName),
-								new ReportingMessage("Checking if %s is a ghost candidate")
+								new ReportingMessage("Checking if %s is a ghost candidate", productName)
 						);
 						
 						final boolean ghostCandidate = isGhostCandidate(productName);
