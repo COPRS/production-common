@@ -53,25 +53,6 @@ public class IpfExecutionJob extends AbstractMessage {
     private List<LevelJobPoolDto> pools= new ArrayList<>();
 
     /**
-     * UID of the reporting (root layer) task
-     */
-    private UUID reportingTaskUID;
-    
-    /**
-	 * @return the reportingTaskUID
-	 */
-	public UUID getReportingTaskUID() {
-		return reportingTaskUID;
-	}
-
-	/**
-	 * @param reportingTaskUID the reportingTaskUID to set
-	 */
-	public void setReportingTaskUID(final UUID reportingTaskUID) {
-		this.reportingTaskUID = reportingTaskUID;
-	}
-	
-    /**
      * Default constructor
      */
     public IpfExecutionJob() {
@@ -88,7 +69,7 @@ public class IpfExecutionJob extends AbstractMessage {
         this.productProcessMode = productProcessMode;
         this.workDirectory = workDirectory;
         this.jobOrder = jobOrder;
-        this.reportingTaskUID = reportingTaskUID;
+        this.uid = reportingTaskUID;
         this.timeliness = timeliness;
     }
 
@@ -132,7 +113,7 @@ public class IpfExecutionJob extends AbstractMessage {
 	/**
 	 * @param timeliness the timeliness to set
 	 */
-	public void setTimeliness(String timeliness) {
+	public void setTimeliness(final String timeliness) {
 		this.timeliness = timeliness;
 	}
 
@@ -240,7 +221,7 @@ public class IpfExecutionJob extends AbstractMessage {
 	@Override
 	public int hashCode() {
 		return Objects.hash(creationDate, hostname, inputs, jobOrder, timeliness, keyObjectStorage, outputs, pools,
-				productFamily, productProcessMode, workDirectory, reportingTaskUID, uid);
+				productFamily, productProcessMode, workDirectory,  uid);
 	}
 
 	@Override
@@ -266,8 +247,7 @@ public class IpfExecutionJob extends AbstractMessage {
 				&& productFamily == other.productFamily
 				&& Objects.equals(productProcessMode, other.productProcessMode)
 				&& Objects.equals(workDirectory, other.workDirectory)
-				&& Objects.equals(uid, other.uid)
-				&& Objects.equals(reportingTaskUID, other.reportingTaskUID);
+				&& Objects.equals(uid, other.uid);
 	}
 
 	@Override
@@ -276,7 +256,7 @@ public class IpfExecutionJob extends AbstractMessage {
 				+ ", creationDate=" + creationDate + ", hostname=" + hostname + ", productProcessMode="
 				+ productProcessMode + ", workDirectory=" + workDirectory + ", jobOrder=" + jobOrder +
 				", timeliness=" + timeliness + ", inputs=" + inputs + ", outputs=" + outputs +
-				", pools=" + pools + ", reportingTaskUID=" + reportingTaskUID + ", uid=" + uid +"]";
+				", pools=" + pools + ", uid=" + uid +"]";
 	}
 
 }

@@ -1011,7 +1011,7 @@ public abstract class AbstractJobsGenerator implements Runnable {
     				execJob
     		);
             messageToPublish.setInputKey(dto.getPrepJobInputQueue());
-            messageToPublish.setOutputKey(execJob.getProductFamily().name());		
+            messageToPublish.setOutputKey(execJob.getProductFamily().name());	
     		mqiClient.publish(messageToPublish, ProductCategory.LEVEL_JOBS);
         	
             reporting.end(
