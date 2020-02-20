@@ -156,7 +156,7 @@ public class MetadataClientTest {
 		LevelSegmentMetadata expectedResult = new LevelSegmentMetadata(
 				"S1A_IW_RAW__0SDV_20171213T121623_20171213T121656_019684_021735_C6DB.SAFE", "IW_RAW__0S",
 				"S1A_IW_RAW__0SDV_20171213T121623_20171213T121656_019684_021735_C6DB.SAFE", "20171213T121623",
-				"20171213T121656", "S1", "A", "WILE", "HV", "FULL", "021735");
+				"20171213T121656", "S1", "A", "WILE", "HV", "FULL","", "021735");
 		ResponseEntity<LevelSegmentMetadata> r = new ResponseEntity<LevelSegmentMetadata>(expectedResult,
 				HttpStatus.OK);
 		String uri = "http://" + METADATA_HOST + "/level_segment/L0_SEGMENT/" + file;
@@ -176,7 +176,7 @@ public class MetadataClientTest {
 	public void testGetLevelSegmentOk() throws MetadataQueryException {
 		String file = "S1A_IW_RAW__0SDV_20171213T121623_20171213T121656_019684_021735_C6DB.SAFE";
 		LevelSegmentMetadata expectedResult = new LevelSegmentMetadata(file, "IW_RAW__0S", file, "2017-12-13T12:16:23",
-				"2017-12-13T12:16:56", "S1", "A", "WILE", "HV", "START", "021735");
+				"2017-12-13T12:16:56", "S1", "A", "WILE", "HV", "PARTIAL","START", "021735");
 		ResponseEntity<LevelSegmentMetadata> r = new ResponseEntity<LevelSegmentMetadata>(expectedResult,
 				HttpStatus.OK);
 		when(restTemplate.exchange(any(URI.class), eq(HttpMethod.GET), eq(null), any(
@@ -191,7 +191,8 @@ public class MetadataClientTest {
 		assertEquals("2017-12-13T12:16:23", f.getValidityStart());
 		assertEquals("2017-12-13T12:16:56", f.getValidityStop());
 		assertEquals("HV", f.getPolarisation());
-		assertEquals("START", f.getConsolidation());
+		assertEquals("PARTIAL", f.getConsolidation());
+		assertEquals("START", f.getProductSensingConsolidation());
 		assertEquals("021735", f.getDatatakeId());
 	}
 

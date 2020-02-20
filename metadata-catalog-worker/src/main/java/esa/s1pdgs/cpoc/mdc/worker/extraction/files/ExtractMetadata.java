@@ -337,7 +337,17 @@ public class ExtractMetadata {
 				
 				timelinessComputationReporting.end(new ReportingMessage("Computed timeliness {} for DataTake Id {} with PacketStores {} of Satellite {}", timeliness, descriptor.getDataTakeId(), packetStoreIDs, satellite));
 			}
-
+			//S1PRO-1030 GP and HKTM products
+			else if (productType.contains("GP_RAW_") || productType.contains("HK_RAW_")) {
+				LOGGER.debug("Setting timeliness to NRT for {} product {}", productType, descriptor.getFilename());
+				//FIXME S1PRO-1030 should be taken from the application.yaml ??
+				metadataJSONObject.put("timeliness", "NRT");
+			}
+			else {
+				//FIXME S1PRO-1030 what should be exactly done if it is missing
+				LOGGER.error("No packetStoreID found for product in manifest: {} ", manifestFile);
+			}
+ 
 			LOGGER.debug("composed Json: {} ", metadataJSONObject);
 			return metadataJSONObject;
 
@@ -533,7 +543,8 @@ public class ExtractMetadata {
 			metadataJSONObject.put("insertionTime", dt);
 			metadataJSONObject.put("creationTime", dt);
 			metadataJSONObject.put("productFamily", descriptor.getProductFamily().name());
-			metadataJSONObject.put("processMode", descriptor.getMode());
+			//TODO S1PRO-1030 in future it can be DEBUG or REPROCESSING as well
+			metadataJSONObject.put("processMode", "NOMINAL");
 
 			return metadataJSONObject;
 

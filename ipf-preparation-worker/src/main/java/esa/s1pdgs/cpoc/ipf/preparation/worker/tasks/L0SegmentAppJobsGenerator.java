@@ -118,7 +118,7 @@ public class L0SegmentAppJobsGenerator extends AbstractJobsGenerator {
                             job.getAppDataJob().getProduct().getProductName(),
                             "Missing segments for the coverage of polarisation "
                                     + polA + ": "
-                                    + extractConsolidation(segmentsA));
+                                    + extractProductSensingConsolidation(segmentsA));
                 }
             } else {
                 fullCoverage = false;
@@ -150,7 +150,7 @@ public class L0SegmentAppJobsGenerator extends AbstractJobsGenerator {
                             job.getAppDataJob().getProduct().getProductName(),
                             "Missing segments for the coverage of polarisation "
                                     + polA + ": "
-                                    + extractConsolidation(segmentsA));
+                                    + extractProductSensingConsolidation(segmentsA));
                 }
                 boolean fullCoverageB = false;
                 sortSegmentsPerStartDate(segmentsB);
@@ -162,7 +162,7 @@ public class L0SegmentAppJobsGenerator extends AbstractJobsGenerator {
                             job.getAppDataJob().getProduct().getProductName(),
                             "Missing segments for the coverage of polarisation "
                                     + polB + ": "
-                                    + extractConsolidation(segmentsB));
+                                    + extractProductSensingConsolidation(segmentsB));
                 }
                 fullCoverage = fullCoverageA && fullCoverageB;
             } else {
@@ -278,12 +278,13 @@ public class L0SegmentAppJobsGenerator extends AbstractJobsGenerator {
         } else if (sortedSegments.size() == 1) {
             if ("FULL".equals(sortedSegments.get(0).getConsolidation())) {
                 return true;
-            } else {
+            } else {//PARTIAL
                 return false;
             }
         } else {
             // Check consolidation first
-            if ("START".equals(sortedSegments.get(0).getConsolidation())
+        	//S1PRO-1135 BEGIN instead of START
+            if ("BEGIN".equals(sortedSegments.get(0).getProductSensingConsolidation())
                     && "END".equals(
                             sortedSegments.get(sortedSegments.size() - 1)
                                     .getConsolidation())) {
@@ -358,11 +359,11 @@ public class L0SegmentAppJobsGenerator extends AbstractJobsGenerator {
                 : (b == null ? a : (timeA.isAfter(timeB) ? a : b));
     }
 
-    protected String extractConsolidation(
+    protected String extractProductSensingConsolidation(
             final List<LevelSegmentMetadata> sortedSegments) {
         String ret = "";
         for (final LevelSegmentMetadata segment : sortedSegments) {
-            ret += segment.getConsolidation() + " " + segment.getValidityStart()
+            ret += segment.getProductSensingConsolidation() + " " + segment.getValidityStart()
                     + " " + segment.getValidityStop() + " | ";
         }
         return ret;

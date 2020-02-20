@@ -948,6 +948,11 @@ public class EsServices {
 		} else {
 			throw new MetadataMalformedException("productConsolidation");
 		}
+		if (source.containsKey("productSensingConsolidation")) {
+			r.setConsolidation(source.get("productSensingConsolidation").toString());
+		} else {
+			throw new MetadataMalformedException("productSensingConsolidation");
+		}
 		return r;
 	}
 
