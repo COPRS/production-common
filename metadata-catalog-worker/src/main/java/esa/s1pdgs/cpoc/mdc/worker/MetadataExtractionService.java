@@ -104,7 +104,7 @@ public class MetadataExtractionService implements MqiListener<CatalogJob> {
 			
 			// TODO move to extractor
 			if (null != catJob.getTimeliness() && !metadata.has("timeliness")) {
-				metadata.put("timeless", catJob.getTimeliness()); 
+				metadata.put("timeliness", catJob.getTimeliness()); 
 			}
 			
 			// TODO move to extractor
