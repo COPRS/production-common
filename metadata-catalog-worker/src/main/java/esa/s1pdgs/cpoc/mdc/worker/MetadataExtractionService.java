@@ -101,13 +101,19 @@ public class MetadataExtractionService implements MqiListener<CatalogJob> {
 					properties.getProductCategories().get(category)
 			);			
 			final JSONObject metadata = extractor.extract(reporting, message);
+			
+			// TODO move to extractor
+			if (null != catJob.getTimeliness() && !metadata.has("timeliness")) {
+				metadata.put("timeliness", catJob.getTimeliness()); 
+			}
+			
+			// TODO move to extractor
+			if (!metadata.has("insertionTime")) {
+				metadata.put("insertionTime", DateUtils.formatToMetadataDateTimeFormat(LocalDateTime.now()));
+			}
+			
 	    	LOG.debug("Metadata extracted: {} for product: {}", metadata, productName);
 	    	
-	    	// TODO move to extractor
-	        if (!metadata.has("insertionTime")) {
-	        	metadata.put("insertionTime", DateUtils.formatToMetadataDateTimeFormat(LocalDateTime.now()));
-	        }
-	        
 			if (!esServices.isMetadataExist(metadata)) {
 				LOG.debug("Creating metatadata in ES for product {}", productName);
 			    esServices.createMetadata(metadata);
