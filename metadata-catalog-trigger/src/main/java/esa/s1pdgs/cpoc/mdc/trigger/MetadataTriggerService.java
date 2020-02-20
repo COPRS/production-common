@@ -52,6 +52,7 @@ public class MetadataTriggerService {
 			job.setKeyObjectStorage(event.getKeyObjectStorage());
 			job.setMode(event.getMode());
 			job.setUid(reportingId);
+			job.setTimeliness(event.getTimeliness());
 			return job;
 		}		
 	};
