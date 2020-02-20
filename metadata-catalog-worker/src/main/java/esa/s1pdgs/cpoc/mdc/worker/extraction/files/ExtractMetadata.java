@@ -38,6 +38,8 @@ import esa.s1pdgs.cpoc.mdc.worker.extraction.model.AuxDescriptor;
 import esa.s1pdgs.cpoc.mdc.worker.extraction.model.EdrsSessionFile;
 import esa.s1pdgs.cpoc.mdc.worker.extraction.model.EdrsSessionFileDescriptor;
 import esa.s1pdgs.cpoc.mdc.worker.extraction.model.OutputFileDescriptor;
+import esa.s1pdgs.cpoc.mdc.worker.extraction.report.TimelinessReportingInput;
+import esa.s1pdgs.cpoc.mdc.worker.extraction.report.TimelinessReportingOutput;
 import esa.s1pdgs.cpoc.mdc.worker.extraction.xml.XmlConverter;
 import esa.s1pdgs.cpoc.report.Reporting;
 import esa.s1pdgs.cpoc.report.ReportingFactory;
@@ -272,9 +274,11 @@ public class ExtractMetadata {
 	 * @throws MetadataExtractionException
 	 * @throws MetadataMalformedException
 	 */
-	public JSONObject processL0Segment(final OutputFileDescriptor descriptor, final File manifestFile,
-			final ReportingFactory reportingFactory) throws MetadataExtractionException, MetadataMalformedException {
-		Reporting timelinessComputationReporting = Reporting.NULL;
+	public JSONObject processL0Segment(
+			final OutputFileDescriptor descriptor, 
+			final File manifestFile,
+			final ReportingFactory reportingFactory
+	) throws MetadataExtractionException, MetadataMalformedException {
 		
 		final File xsltFile = new File(this.xsltDirectory + XSLT_L0_SEGMENT_MANIFEST);
 		LOGGER.debug("extracting metadata for descriptor: {} ", descriptor);
@@ -301,9 +305,13 @@ public class ExtractMetadata {
 			}
 			
 			if (metadataJSONObject.has("packetStoreID")) {
-				List<String> packetStoreIDs = new ArrayList<>();
+				
+				final Reporting reporting = reportingFactory
+						.newReporting("SegmentTimeliness");
+				
+				final List<String> packetStoreIDs = new ArrayList<>();
 				if (metadataJSONObject.get("packetStoreID") instanceof JSONArray) {
-					JSONArray jsonArray = ((JSONArray)metadataJSONObject.get("packetStoreID"));
+					final JSONArray jsonArray = ((JSONArray)metadataJSONObject.get("packetStoreID"));
 					for (int i = 0; i < jsonArray.length(); i++) {
 						packetStoreIDs.add(Integer.toString(jsonArray.getInt(i)));
 					}
@@ -311,31 +319,39 @@ public class ExtractMetadata {
 					packetStoreIDs.add(Integer.toString(metadataJSONObject.getInt("packetStoreID")));
 				}
 				
-				String satellite = descriptor.getMissionId() + descriptor.getSatelliteId(); // e. g. S1A or S1B (used in configuration file as prefix before PacketStore ID)
-				timelinessComputationReporting = reportingFactory.newReporting("Timeliness computation");
-				timelinessComputationReporting.begin(new ReportingMessage("Start computing timeliness for DataTake Id {} with PacketStores {} of Satellite {}", descriptor.getDataTakeId(), packetStoreIDs, satellite));
-
-				List<String> timelinesses = new ArrayList<>();
-				for (String packetStoreID : packetStoreIDs) {
-					String packetStoreType = packetStoreTypes.get(satellite + "-" + packetStoreID);
-					String timeliness = packetStoreTypeTimelinesses.get(packetStoreType);
-					if (null == timeliness) {
-						try {
-							throw new RuntimeException(String.format("No timeliness configured for packetStoreID %s with packetStoreType %s", packetStoreID, packetStoreType));
-						} catch (final Exception e) {
-							LOGGER.error("Extraction of L0 segment file metadata failed", e);
-							timelinessComputationReporting.error(new ReportingMessage("Computing timeliness failed"));
-							throw new MetadataExtractionException(e);
-						}
+				final String satellite = descriptor.getMissionId() + descriptor.getSatelliteId(); 
+				// e. g. S1A or S1B (used in configuration file as prefix before PacketStore ID)
+				
+				reporting.begin(
+						new TimelinessReportingInput(descriptor.getDataTakeId(), packetStoreIDs, satellite), 
+						new ReportingMessage("Start timeliness lookup for %s", descriptor.getProductName())
+				);
+					
+				final List<String> timelinesses = new ArrayList<>();
+				
+				for (final String packetStoreID : packetStoreIDs) {
+					
+					final String packetStoreType = packetStoreTypes.get(satellite + "-" + packetStoreID);
+					final String timeliness = packetStoreTypeTimelinesses.get(packetStoreType);
+					
+					if (timeliness == null) {
+						final String errMess = String.format(
+								"No timeliness configured for packetStoreID %s with packetStoreType %s", 
+								packetStoreID,
+								packetStoreType
+						);
+						reporting.error(new ReportingMessage(errMess));
+						throw new MetadataExtractionException(new RuntimeException(errMess));
 					}
 					timelinesses.add(timeliness);
-				}
-				
-				String timeliness = maxTimeliness(timelinesses);
+				}				
+				final String timeliness = maxTimeliness(timelinesses);
+				reporting.end(
+						new TimelinessReportingOutput(timeliness), 
+						new ReportingMessage("Timeliness for %s is: %s", descriptor.getProductName(), timeliness)
+				);
 				metadataJSONObject.put("timeliness", timeliness);
 				metadataJSONObject.remove("packetStoreID"); // the packetStoreID was only needed to compute timeliness
-				
-				timelinessComputationReporting.end(new ReportingMessage("Computed timeliness {} for DataTake Id {} with PacketStores {} of Satellite {}", timeliness, descriptor.getDataTakeId(), packetStoreIDs, satellite));
 			}
 			//S1PRO-1030 GP and HKTM products
 			else if (productType.contains("GP_RAW_") || productType.contains("HK_RAW_")) {
@@ -352,16 +368,13 @@ public class ExtractMetadata {
 			return metadataJSONObject;
 
 		} catch (final JSONException e) {
-			LOGGER.error("Extraction of L0 segment file metadata failed", e);
-			if (timelinessComputationReporting != Reporting.NULL) {
-				timelinessComputationReporting.error(new ReportingMessage("Computing timeliness failed"));
-			}			
+			LOGGER.error("Extraction of L0 segment file metadata failed", e);		
 			throw new MetadataExtractionException(e);
 		}
 	}
 	
-	public String maxTimeliness(List<String> timelinesses) {
-		for (String currentPriorityTimeliness : timelinessPriorityFromHighToLow) {
+	public String maxTimeliness(final List<String> timelinesses) {
+		for (final String currentPriorityTimeliness : timelinessPriorityFromHighToLow) {
 			if (timelinesses.contains(currentPriorityTimeliness)) {
 				return currentPriorityTimeliness;
 			}

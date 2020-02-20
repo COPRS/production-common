@@ -13,13 +13,7 @@ import esa.s1pdgs.cpoc.mqi.client.StatusService;
 @Configuration
 public class MqiConfiguration {
 	private final MqiClientFactory mqiClientFactory;
-    /**
-     * Constructor
-     * 
-     * @param hostUri
-     * @param maxRetries
-     * @param tempoRetryMs
-     */
+
     @Autowired
     public MqiConfiguration(
             @Value("${compression-trigger.mqi.host-uri}") final String hostUri,
