@@ -5,7 +5,7 @@ import java.util.Objects;
 public class CatalogJob extends AbstractMessage {	
 	private String productName = NOT_DEFINED;
 	private String relativePath = NOT_DEFINED;
-    private String mode;
+	private String mode = "NOMINAL";
     private OQCFlag oqcFlag = OQCFlag.NOT_CHECKED;
     
 	public String getProductName() {

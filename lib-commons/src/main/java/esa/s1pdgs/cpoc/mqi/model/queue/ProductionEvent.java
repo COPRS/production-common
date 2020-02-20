@@ -6,7 +6,7 @@ import esa.s1pdgs.cpoc.common.ProductFamily;
 
 public class ProductionEvent extends AbstractMessage {
 	private String productName = NOT_DEFINED;
-	private String mode = null;
+	private String mode = "NOMINAL";
 	private OQCFlag oqcFlag = OQCFlag.NOT_CHECKED;
 	private String timeliness;
 
