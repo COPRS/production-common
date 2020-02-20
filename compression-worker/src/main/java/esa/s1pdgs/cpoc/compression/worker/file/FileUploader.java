@@ -12,7 +12,6 @@ import org.apache.logging.log4j.Logger;
 import esa.s1pdgs.cpoc.common.ProductFamily;
 import esa.s1pdgs.cpoc.common.errors.AbstractCodedException;
 import esa.s1pdgs.cpoc.common.errors.InternalErrorException;
-import esa.s1pdgs.cpoc.common.errors.mqi.MqiPublicationError;
 import esa.s1pdgs.cpoc.compression.worker.model.mqi.CompressedProductQueueMessage;
 import esa.s1pdgs.cpoc.compression.worker.mqi.OutputProducerFactory;
 import esa.s1pdgs.cpoc.mqi.model.queue.CompressionJob;
@@ -20,9 +19,7 @@ import esa.s1pdgs.cpoc.mqi.model.rest.GenericMessageDto;
 import esa.s1pdgs.cpoc.obs_sdk.ObsClient;
 import esa.s1pdgs.cpoc.obs_sdk.ObsEmptyFileException;
 import esa.s1pdgs.cpoc.obs_sdk.ObsUploadObject;
-import esa.s1pdgs.cpoc.report.Reporting;
 import esa.s1pdgs.cpoc.report.ReportingFactory;
-import esa.s1pdgs.cpoc.report.ReportingMessage;
 
 public class FileUploader {
 	/**
@@ -89,7 +86,7 @@ public class FileUploader {
 		}
 		obsClient.upload(Arrays.asList(new ObsUploadObject(uploadObject.getFamily(), uploadObject.getKey(), uploadObject.getFile())), reportingFactory);
 		
-		publishAccordingUploadFiles(reportingFactory, NOT_KEY_OBS, outputToPublish);
+		publishAccordingUploadFiles(NOT_KEY_OBS, outputToPublish);
         
         return zipFileName;
 	}
@@ -102,7 +99,7 @@ public class FileUploader {
 	 * @param outputToPublish
 	 * @throws AbstractCodedException
 	 */
-	private void publishAccordingUploadFiles(final ReportingFactory reportingFactory, final String nextKeyUpload,
+	private void publishAccordingUploadFiles(final String nextKeyUpload,
 			final List<CompressedProductQueueMessage> outputToPublish) throws AbstractCodedException {
 
         LOGGER.info("{} 3 - Publishing KAFKA messages for batch ");
@@ -116,15 +113,7 @@ public class FileUploader {
 			if (nextKeyUpload.startsWith(msg.getObjectStorageKey())) {
 				stop = true;
 			} else {
-				final Reporting report = reportingFactory.newReporting("Publish");
-
-				report.begin(new ReportingMessage("Start publishing file {}", msg.getObjectStorageKey()));
-				try {
-					producerFactory.sendOutput(msg, inputMessage);
-					report.end(new ReportingMessage("End publishing file {}", msg.getObjectStorageKey()));
-				} catch (final MqiPublicationError ace) {
-					report.error(new ReportingMessage("[code {}] {}", ace.getCode().getCode(), ace.getLogMessage()));
-				}
+				producerFactory.sendOutput(msg, inputMessage);
 				iter.remove();
 			}
 

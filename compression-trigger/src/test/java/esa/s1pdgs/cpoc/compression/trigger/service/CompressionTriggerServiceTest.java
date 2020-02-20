@@ -9,8 +9,8 @@ import esa.s1pdgs.cpoc.common.ProductFamily;
 public class CompressionTriggerServiceTest {
 
 	@Test
-	public void testGetCompressedKeyObjectStorage() {
-		CompressionTriggerService t = new CompressionTriggerService(null,null,null,null);
+	public void testGetCompressedKeyObjectStorage() {				
+		final CompressionTriggerService t = new CompressionTriggerService(null,null,null,null, null,null); // Seriously?????
 
 		assertEquals(t.getCompressedProductFamily(ProductFamily.L0_ACN), ProductFamily.L0_ACN_ZIP);
 		assertEquals(t.getCompressedProductFamily(ProductFamily.L1_ACN), ProductFamily.L1_ACN_ZIP);
