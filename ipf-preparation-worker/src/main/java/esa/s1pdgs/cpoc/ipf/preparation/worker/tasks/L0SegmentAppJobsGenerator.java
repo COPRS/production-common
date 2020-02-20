@@ -96,6 +96,7 @@ public class L0SegmentAppJobsGenerator extends AbstractJobsGenerator {
             throw new IpfPrepWorkerInputsMissingException(missingMetadata);
         }
 
+        LOGGER.debug("== preSearch00 -segment  {}",segmentsGroupByPol);
         // Check polarisation right
         String sensingStart = null;
         String sensingStop = null;
