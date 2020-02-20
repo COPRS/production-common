@@ -51,7 +51,7 @@ public final class L0SegmentConsumer extends AbstractGenericConsumer<CatalogEven
 
         if (appDataJob.getState() == AppDataJobState.WAITING) {
             appDataJob.setState(AppDataJobState.DISPATCHING);
-            patchJob(appDataJob, productName, TYPE, reportingFactory);
+            return patchJob(appDataJob, productName, TYPE, reportingFactory);
         }
         LOGGER.info("AppDataJob {} ({}) for {} {} already dispatched", appDataJob.getId(), 
         		appDataJob.getState(), TYPE, productName);
