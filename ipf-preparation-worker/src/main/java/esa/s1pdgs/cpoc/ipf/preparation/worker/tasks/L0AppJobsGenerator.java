@@ -25,9 +25,9 @@ import esa.s1pdgs.cpoc.ipf.preparation.worker.model.JobGeneration;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.model.joborder.AbstractJobOrderConf;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.model.joborder.JobOrderProcParam;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.service.XmlConverter;
-import esa.s1pdgs.cpoc.ipf.preparation.worker.service.mqi.OutputProducerFactory;
 import esa.s1pdgs.cpoc.metadata.client.MetadataClient;
 import esa.s1pdgs.cpoc.metadata.model.EdrsSessionMetadata;
+import esa.s1pdgs.cpoc.mqi.client.MqiClient;
 import esa.s1pdgs.cpoc.mqi.model.queue.CatalogEvent;
 import esa.s1pdgs.cpoc.mqi.model.queue.IpfExecutionJob;
 import esa.s1pdgs.cpoc.mqi.model.queue.LevelJobInputDto;
@@ -40,14 +40,17 @@ public class L0AppJobsGenerator extends AbstractJobsGenerator {
 	
 	private Map<String,Map<String,String>> aiopProperties;
 	
-    public L0AppJobsGenerator(final XmlConverter xmlConverter,
-    		final MetadataClient metadataClient, final ProcessSettings l0ProcessSettings,
+    public L0AppJobsGenerator(
+    		final XmlConverter xmlConverter,
+    		final MetadataClient metadataClient, 
+    		final ProcessSettings l0ProcessSettings,
             final IpfPreparationWorkerSettings taskTablesSettings,
-            final OutputProducerFactory outputFactory,
             final AppCatalogJobClient<CatalogEvent> appDataService,
-            final AiopProperties aiopProperties, final ProcessConfiguration processConfiguration) {
-        super(xmlConverter, metadataClient, l0ProcessSettings,
-                taskTablesSettings, outputFactory, appDataService, processConfiguration);
+            final AiopProperties aiopProperties, 
+            final ProcessConfiguration processConfiguration,
+            final MqiClient mqiClient
+    ) {
+        super(xmlConverter, metadataClient, l0ProcessSettings, taskTablesSettings, appDataService, processConfiguration, mqiClient);
         
         this.aiopProperties = new HashMap<>();
         final Map<String, String> stationCodes = aiopProperties.getStationCodes();

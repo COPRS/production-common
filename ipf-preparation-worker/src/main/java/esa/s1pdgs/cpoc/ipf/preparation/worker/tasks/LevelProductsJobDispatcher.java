@@ -59,7 +59,7 @@ public class LevelProductsJobDispatcher extends AbstractJobsDispatcher {
     }
 
     @PostConstruct
-    public void initialize() throws AbstractCodedException {
+    public void initialize() throws Exception {
 
         // Init the routing map from XML file located in the task table folder
         try {

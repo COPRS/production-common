@@ -38,7 +38,7 @@ public class L0SegmentAppJobDispatcher extends AbstractJobsDispatcher {
     }
 
     @PostConstruct
-    public void initialize() throws AbstractCodedException {
+    public void initialize() throws Exception {
         super.initTaskTables();
     }
 

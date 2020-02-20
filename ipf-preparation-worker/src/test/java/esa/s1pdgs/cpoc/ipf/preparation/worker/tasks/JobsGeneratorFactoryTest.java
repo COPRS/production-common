@@ -36,9 +36,9 @@ import esa.s1pdgs.cpoc.ipf.preparation.worker.model.tasktable.TaskTable;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.model.tasktable.TaskTableOuput;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.model.tasktable.TaskTableTask;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.service.XmlConverter;
-import esa.s1pdgs.cpoc.ipf.preparation.worker.service.mqi.OutputProducerFactory;
 import esa.s1pdgs.cpoc.metadata.client.MetadataClient;
 import esa.s1pdgs.cpoc.metadata.client.SearchMetadataQuery;
+import esa.s1pdgs.cpoc.mqi.client.MqiClient;
 
 public class JobsGeneratorFactoryTest {
 
@@ -61,7 +61,7 @@ public class JobsGeneratorFactoryTest {
     private AiopProperties aiopProperties;
     
     @Mock
-    private OutputProducerFactory JobsSender;
+    private MqiClient mqiClient;
 
     @Mock
     private AppCatalogJobClient appDataEService;
@@ -148,7 +148,7 @@ public class JobsGeneratorFactoryTest {
 
             final JobsGeneratorFactory factory = new JobsGeneratorFactory(
                     l0ProcessSettings, ipfPreparationWorkerSettings, aiopProperties,
-                    xmlConverter, metadataClient, JobsSender, processConfiguration);
+                    xmlConverter, metadataClient, processConfiguration, mqiClient);
 
             final AbstractJobsGenerator generator =
                     factory.createJobGeneratorForEdrsSession(new File(
@@ -397,7 +397,7 @@ public class JobsGeneratorFactoryTest {
 
             final JobsGeneratorFactory factory = new JobsGeneratorFactory(
                     l0ProcessSettings, ipfPreparationWorkerSettings, aiopProperties,
-                    xmlConverter, metadataClient, JobsSender, processConfiguration);
+                    xmlConverter, metadataClient, processConfiguration, mqiClient);
 
             final AbstractJobsGenerator generator =
                     factory.createJobGeneratorForL0Slice(new File(

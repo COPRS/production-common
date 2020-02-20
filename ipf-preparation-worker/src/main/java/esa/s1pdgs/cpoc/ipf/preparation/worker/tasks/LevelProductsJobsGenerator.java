@@ -15,10 +15,10 @@ import esa.s1pdgs.cpoc.ipf.preparation.worker.model.joborder.JobOrder;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.model.joborder.JobOrderProcParam;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.model.joborder.JobOrderSensingTime;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.service.XmlConverter;
-import esa.s1pdgs.cpoc.ipf.preparation.worker.service.mqi.OutputProducerFactory;
 import esa.s1pdgs.cpoc.metadata.client.MetadataClient;
 import esa.s1pdgs.cpoc.metadata.model.L0AcnMetadata;
 import esa.s1pdgs.cpoc.metadata.model.L0SliceMetadata;
+import esa.s1pdgs.cpoc.mqi.client.MqiClient;
 import esa.s1pdgs.cpoc.mqi.model.queue.CatalogEvent;
 import esa.s1pdgs.cpoc.mqi.model.queue.IpfExecutionJob;
 
@@ -38,10 +38,16 @@ public class LevelProductsJobsGenerator extends AbstractJobsGenerator {
 	 * @param outputFactory
 	 * @param appDataService
 	 */
-	public LevelProductsJobsGenerator(final XmlConverter xmlConverter, final MetadataClient metadataClient, final ProcessSettings processSettings,
-			final IpfPreparationWorkerSettings taskTablesSettings, final OutputProducerFactory outputFactory,
-			final AppCatalogJobClient<CatalogEvent>  appDataService, final ProcessConfiguration processConfiguration) {
-		super(xmlConverter, metadataClient, processSettings, taskTablesSettings, outputFactory, appDataService, processConfiguration);
+	public LevelProductsJobsGenerator(
+			final XmlConverter xmlConverter, 
+			final MetadataClient metadataClient, 
+			final ProcessSettings processSettings,
+			final IpfPreparationWorkerSettings taskTablesSettings, 
+			final AppCatalogJobClient<CatalogEvent>  appDataService, 
+			final ProcessConfiguration processConfiguration,
+			final MqiClient mqiClient
+	) {
+		super(xmlConverter, metadataClient, processSettings, taskTablesSettings, appDataService, processConfiguration, mqiClient);
 	}
 
 	/**

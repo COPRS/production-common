@@ -24,10 +24,10 @@ import esa.s1pdgs.cpoc.ipf.preparation.worker.model.JobGeneration;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.model.joborder.JobOrder;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.model.joborder.JobOrderProcParam;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.service.XmlConverter;
-import esa.s1pdgs.cpoc.ipf.preparation.worker.service.mqi.OutputProducerFactory;
 import esa.s1pdgs.cpoc.metadata.client.MetadataClient;
 import esa.s1pdgs.cpoc.metadata.model.AbstractMetadata;
 import esa.s1pdgs.cpoc.metadata.model.LevelSegmentMetadata;
+import esa.s1pdgs.cpoc.mqi.client.MqiClient;
 import esa.s1pdgs.cpoc.mqi.model.queue.CatalogEvent;
 import esa.s1pdgs.cpoc.mqi.model.queue.IpfExecutionJob;
 import esa.s1pdgs.cpoc.mqi.model.rest.GenericMessageDto;
@@ -43,11 +43,12 @@ public class L0SegmentAppJobsGenerator extends AbstractJobsGenerator {
             final MetadataClient metadataClient,
             final ProcessSettings l0ProcessSettings,
             final IpfPreparationWorkerSettings taskTablesSettings,
-            final OutputProducerFactory outputFactory,
             final AppCatalogJobClient<CatalogEvent> appDataService,
-            final ProcessConfiguration processConfiguration) {
+            final ProcessConfiguration processConfiguration,
+            final MqiClient mqiClient
+    ) {
         super(xmlConverter, metadataClient, l0ProcessSettings,
-                taskTablesSettings, outputFactory, appDataService, processConfiguration);
+                taskTablesSettings, appDataService, processConfiguration, mqiClient);
     }
 
     @Override

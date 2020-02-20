@@ -35,7 +35,7 @@ public class L0AppJobDispatcher extends AbstractJobsDispatcher {
     }
 
     @PostConstruct
-    public void initialize() throws AbstractCodedException {
+    public void initialize() throws Exception {
         // Init job generators from task tables
         super.initTaskTables();
     }

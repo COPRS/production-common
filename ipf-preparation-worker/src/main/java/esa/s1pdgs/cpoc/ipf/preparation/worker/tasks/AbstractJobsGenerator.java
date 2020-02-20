@@ -13,6 +13,7 @@ import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import javax.xml.bind.JAXBException;
@@ -27,6 +28,7 @@ import esa.s1pdgs.cpoc.appcatalog.AppDataJobGenerationState;
 import esa.s1pdgs.cpoc.appcatalog.AppDataJobProduct;
 import esa.s1pdgs.cpoc.appcatalog.AppDataJobState;
 import esa.s1pdgs.cpoc.appcatalog.client.job.AppCatalogJobClient;
+import esa.s1pdgs.cpoc.common.ProductCategory;
 import esa.s1pdgs.cpoc.common.ProductFamily;
 import esa.s1pdgs.cpoc.common.errors.AbstractCodedException;
 import esa.s1pdgs.cpoc.common.errors.InternalErrorException;
@@ -60,17 +62,18 @@ import esa.s1pdgs.cpoc.ipf.preparation.worker.model.tasktable.TaskTableTask;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.model.tasktable.enums.TaskTableInputOrigin;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.model.tasktable.enums.TaskTableMandatoryEnum;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.service.XmlConverter;
-import esa.s1pdgs.cpoc.ipf.preparation.worker.service.mqi.OutputProducerFactory;
 import esa.s1pdgs.cpoc.metadata.client.MetadataClient;
 import esa.s1pdgs.cpoc.metadata.client.SearchMetadataQuery;
 import esa.s1pdgs.cpoc.metadata.model.AbstractMetadata;
 import esa.s1pdgs.cpoc.metadata.model.SearchMetadata;
+import esa.s1pdgs.cpoc.mqi.client.MqiClient;
 import esa.s1pdgs.cpoc.mqi.model.queue.CatalogEvent;
 import esa.s1pdgs.cpoc.mqi.model.queue.IpfExecutionJob;
 import esa.s1pdgs.cpoc.mqi.model.queue.LevelJobInputDto;
 import esa.s1pdgs.cpoc.mqi.model.queue.LevelJobOutputDto;
 import esa.s1pdgs.cpoc.mqi.model.queue.LevelJobPoolDto;
 import esa.s1pdgs.cpoc.mqi.model.queue.LevelJobTaskDto;
+import esa.s1pdgs.cpoc.mqi.model.rest.GenericPublicationMessageDto;
 import esa.s1pdgs.cpoc.report.Reporting;
 import esa.s1pdgs.cpoc.report.ReportingMessage;
 import esa.s1pdgs.cpoc.report.ReportingUtils;
@@ -82,49 +85,19 @@ import esa.s1pdgs.cpoc.report.message.output.JobOrderReportingOutput;
  * @author Cyrielle Gailliard
  */
 public abstract class AbstractJobsGenerator implements Runnable {
-
-    /**
-     * Logger
-     */
     protected static final Logger LOGGER = LogManager.getLogger(AbstractJobsGenerator.class);
 
     /**
      * Use to generate an incremental id for locally upload session files
      */
     private static final AtomicInteger INCREMENT_JOB = new AtomicInteger(0);
-
-    /**
-     * Producer in topic
-     */
-    private final OutputProducerFactory outputFactory;
-
-    /**
-     * XML converter
-     */
     protected final XmlConverter xmlConverter;
-
-    /**
-     * 
-     */
     protected final MetadataClient metadataClient;
-
-    /**
-     * 
-     */
     protected final ProcessSettings l0ProcessSettings;
-
     protected final IpfPreparationWorkerSettings ipfPreparationWorkerSettings;
-
-    /**
-     * Applicative data service
-     */
     private final AppCatalogJobClient<CatalogEvent> appDataService;
-
+    private final MqiClient mqiClient;
     private final String hostname;
-
-    /**
-     * Task table
-     */
     protected String taskTableXmlName;
     protected TaskTable taskTable;
     protected List<List<String>> tasks;
@@ -149,24 +122,21 @@ public abstract class AbstractJobsGenerator implements Runnable {
      */
     protected final Map<Integer, SearchMetadataQuery> metadataSearchQueries;
 
-    /**
-     * Constructor
-     * 
-     * @param xmlConverter
-     */
-    public AbstractJobsGenerator(final XmlConverter xmlConverter,
+    public AbstractJobsGenerator(
+    		final XmlConverter xmlConverter,
             final MetadataClient metadataClient,
             final ProcessSettings l0ProcessSettings,
             final IpfPreparationWorkerSettings taskTablesSettings,
-            final OutputProducerFactory outputFactory,
             final AppCatalogJobClient<CatalogEvent> appDataService,
-            final ProcessConfiguration processConfiguration) {
+            final ProcessConfiguration processConfiguration,
+            final MqiClient mqiClient
+    ) {
         this.xmlConverter = xmlConverter;
         this.metadataClient = metadataClient;
         this.l0ProcessSettings = l0ProcessSettings;
         this.ipfPreparationWorkerSettings = taskTablesSettings;
         this.metadataSearchQueries = new HashMap<>();
-        this.outputFactory = outputFactory;
+        this.mqiClient = mqiClient;
         this.tasks = new ArrayList<>();
         this.mode = ProductMode.BLANK;
         this.appDataService = appDataService;
@@ -225,8 +195,7 @@ public abstract class AbstractJobsGenerator implements Runnable {
             throws IpfPrepWorkerBuildTaskTableException {
         // Retrieve task table
         try {
-            this.taskTable = (TaskTable) xmlConverter
-                    .convertFromXMLToObject(xmlFile.getAbsolutePath());
+            this.taskTable = (TaskTable) xmlConverter.convertFromXMLToObject(xmlFile.getAbsolutePath());
             this.taskTable.setLevel(this.l0ProcessSettings.getLevel());
         } catch (IOException | JAXBException e) {
             throw new IpfPrepWorkerBuildTaskTableException(this.taskTableXmlName,
@@ -343,6 +312,97 @@ public abstract class AbstractJobsGenerator implements Runnable {
                             .collect(Collectors.toList()));
         });
     }
+    
+    private final JobGeneration initialToPrimaryCheck(final JobGeneration job) {
+        try {
+			this.preSearch(job);
+			@SuppressWarnings("unchecked")
+			final AppDataJob<CatalogEvent> modifiedJob = appDataService.patchJob(
+					job.getAppDataJob().getId(),
+					job.getAppDataJob(), 
+			        false, 
+			        true, 
+			        false
+			);
+			job.setAppDataJob(modifiedJob);
+			return job;
+		// FIXME cleanup exception handling	
+		} catch (final IpfPrepWorkerInputsMissingException e) {									
+			throw new RuntimeException(
+					String.format("Missing inputs: %s", e.getMissingMetadata())
+			);
+		} catch (final Exception e) {
+			throw new RuntimeException(
+					String.format("Error on preSearch(): %s", LogUtils.toString(e))
+			);
+		}
+    }
+    
+    private final JobGeneration primaryCheckToReady(final JobGeneration job) {
+        try {
+        	inputsSearch(job);
+        	return job;
+		// FIXME cleanup exception handling	
+		} catch (final IpfPrepWorkerInputsMissingException e) {									
+			throw new RuntimeException(
+					String.format("Missing inputs: %s", e.getMissingMetadata())
+			);
+		} catch (final Exception e) {
+			throw new RuntimeException(
+					String.format("Error on inputsSearch(): %s", LogUtils.toString(e))
+			);
+		}
+    }
+    
+    private final JobGeneration readyToSend(final JobGeneration job, final UUID reportingId) {
+        try {
+        	// it is not clear, why inputSearch() is called here again. This has been taken from 
+        	// legacy CPOC implementation 
+            inputsSearch(job);
+            send(job, reportingId);            
+            return job;
+
+		// FIXME cleanup exception handling	
+		} catch (final IpfPrepWorkerInputsMissingException e) {									
+			throw new RuntimeException(
+					String.format("Missing inputs: %s", e.getMissingMetadata())
+			);
+		} catch (final Exception e) {
+			throw new RuntimeException(
+					String.format("Error on inputsSearch(): %s", LogUtils.toString(e))
+			);
+		}
+    }
+
+    private final void stateTransition(
+    		final JobGeneration job,
+//    		final Reporting reporting, 
+    		final AppDataJobGenerationState state, 
+    		final AppDataJobGenerationState nextState,
+    		final Function<JobGeneration, JobGeneration> transitionFunction
+    ) throws AbstractCodedException {
+    	@SuppressWarnings("unchecked")
+		final AppDataJob<CatalogEvent> appDataJob = job.getAppDataJob();    	
+    	LOGGER.info("Start job {} state transition, state {} -> {}", appDataJob.getId(), state, nextState);
+        try {    
+        	final JobGeneration updatedJob = transitionFunction.apply(job);
+        	// This is pretty dirty here but we have to make sure that exception scenario below also sees the updated AppDataJob
+            job.setAppDataJob(updatedJob.getAppDataJob());
+            updateState(job, nextState);   
+            LOGGER.info("End job {} state transition, state {} -> {}", appDataJob.getId(), state, nextState);
+//            reporting.end(
+//            		new ReportingMessage("End job %s state transition, state %s", appDataJob.getId(), state)
+//            );
+        } 
+        // FIXME there is actually no real error scenario handled here as every exception will cause to stay in the old state.
+        // this may be addressed later once this is conceptually overhauled.
+        catch (final Exception e) {
+    		// keep old state
+            updateState(job, state);
+            LOGGER.warn("Prerequisites for job {} state transition not met - staying in state {}: {}", 
+            		appDataJob.getId(), state, LogUtils.toString(e));
+        }
+    }
 
     // ----------------------------------------------------
     // JOB GENERATION
@@ -351,9 +411,7 @@ public abstract class AbstractJobsGenerator implements Runnable {
     @Override
     public void run() {
         JobGeneration job = null;
-        // Get a job to generate
-        final Reporting reporting = ReportingUtils.newReportingBuilder().newReporting("JobGenerator");
-        
+        // Get a job to generate        
         try {        	
             final List<AppDataJob<CatalogEvent>> jobs = appDataService
                     .findNByPodAndGenerationTaskTableWithNotSentGeneration(
@@ -365,8 +423,8 @@ public abstract class AbstractJobsGenerator implements Runnable {
 						taskTableXmlName);
 		
                 job = null;
-            } else {
-                for (final AppDataJob<CatalogEvent> appDataJob : jobs) {
+            } else {            	
+                for (final AppDataJob<CatalogEvent> appDataJob : jobs) { 
                     // Check if we can do a loop
                     final long currentTimestamp = System.currentTimeMillis();
                     boolean todo = false;
@@ -397,11 +455,9 @@ public abstract class AbstractJobsGenerator implements Runnable {
                             break;
                     }
                     if (todo) {
-                        job.setJobOrder(new JobOrder(this.jobOrderTemplate,
-                                this.l0ProcessSettings.getLevel()));
+                        job.setJobOrder(new JobOrder(jobOrderTemplate,l0ProcessSettings.getLevel()));
                         for (final Integer key : metadataSearchQueries.keySet()) {
-                            final SearchMetadataQuery query =
-                                    metadataSearchQueries.get(key);
+                            final SearchMetadataQuery query = metadataSearchQueries.get(key);
                             job.getMetadataQueries().put(
                             		key,
                                     new SearchMetadataResult(new SearchMetadataQuery(query))
@@ -419,106 +475,55 @@ public abstract class AbstractJobsGenerator implements Runnable {
         }
 
         if (job != null) {
-            final String productName =
-                    job.getAppDataJob().getProduct().getProductName();
+           	@SuppressWarnings("unchecked")
+			final AppDataJob<CatalogEvent> appDataJob = job.getAppDataJob();
             
             // Joborder name for reporting
-            String jobOrderName = "NOT_KNOWN";
+            final String jobOrderName = "NOT_KNOWN";
                   
-            try {
+            try {            	
                 LOGGER.debug(
                         "{} [productName {}] [status {}] Trying job generation",
-                        this.prefixLogMonitor, productName,
+                        this.prefixLogMonitor, appDataJob.getProduct().getProductName(),
                         job.getGeneration().getState());
 
-                reporting.begin(new ReportingMessage("Start job generation"));        
-                
                 // Check primary input
-                if (job.getGeneration().getState() == AppDataJobGenerationState.INITIAL) {
-                    try { 
-                        LOGGER.info(
-                                "{} [productName {}] 1 - Checking the pre-requirements",
-                                this.prefixLogMonitor, productName);
-                        this.preSearch(job);
-
-						final AppDataJob<CatalogEvent> modifiedJob = appDataService.patchJob(
-                                job.getAppDataJob().getId(),
-                                job.getAppDataJob(), 
-                                false, 
-                                true, 
-                                false
-                        );
-                        job.setAppDataJob(modifiedJob);
-                        updateState(job, AppDataJobGenerationState.PRIMARY_CHECK);
-                    } catch (final AbstractCodedException e) {
-                        LOGGER.error(
-                                "{} [productName {}] 1 - Pre-requirements not checked: {}",
-                                this.prefixLogMonitor, productName,
-                                e.getLogMessage());                      
-                        updateState(job, AppDataJobGenerationState.INITIAL);
-                    }
+                if (job.getGeneration().getState() == AppDataJobGenerationState.INITIAL) {                	
+                	stateTransition(
+                			job,
+                			AppDataJobGenerationState.INITIAL,
+                			AppDataJobGenerationState.PRIMARY_CHECK,
+                			j -> initialToPrimaryCheck(j)
+                	);
                 }
-
                 // Search input
                 if (job.getGeneration().getState() == AppDataJobGenerationState.PRIMARY_CHECK) {
-                    try {
-                        LOGGER.info("{} [productName {}] 2 - Searching inputs",
-                                this.prefixLogMonitor, job.getAppDataJob()
-                                        .getProduct().getProductName());
-                        this.inputsSearch(job);
-                        updateState(job, AppDataJobGenerationState.READY);
-                        
-                    } catch (final AbstractCodedException e) {
-                        LOGGER.error(
-                                "{} [productName {}] 2 - Inputs not found: {}",
-                                this.prefixLogMonitor, productName,
-                                e.getLogMessage());
-                        updateState(job,AppDataJobGenerationState.PRIMARY_CHECK);
-                    }
+                	stateTransition(
+                			job,
+                			AppDataJobGenerationState.PRIMARY_CHECK,
+                			AppDataJobGenerationState.READY,
+                			j -> primaryCheckToReady(j)
+                	);
                 }
-
                 // Prepare and send job if ready
                 if (job.getGeneration().getState() == AppDataJobGenerationState.READY) {
-                	
-                	final Reporting reportPrep = reporting.newReporting("JobGeneratorPrepAndSend");                  	
-                  	reportPrep.begin(new ReportingMessage("Start job preparation and sending"));
-                	
-                    try {
-                        LOGGER.info("{} [productName {}] 2 - Searching inputs",
-                                this.prefixLogMonitor, job.getAppDataJob()
-                                        .getProduct().getProductName());
-                        this.inputsSearch(job);
-                        LOGGER.info("{} [productName {}] 3 - Sending job",
-                                this.prefixLogMonitor, job.getAppDataJob()
-                                        .getProduct().getProductName());
-                        jobOrderName = send(job, reporting.getRootUID());
-                
-                        updateState(job, AppDataJobGenerationState.SENT);
-                       
-						if (job.getGeneration().getState() == AppDataJobGenerationState.SENT) {
-							reportPrep.end(new ReportingMessage("End job preparation and sending"));
-
-						} else {
-							reportPrep.error(new ReportingMessage("Job generation finished but job not sent"));
-						}
-                    } catch (final AbstractCodedException e) {
-                        LOGGER.error("{} [productName {}] 3 - Job not send: {}",
-                                this.prefixLogMonitor, productName,
-                                e.getLogMessage());
-                        updateState(job, AppDataJobGenerationState.READY);
-                        reportPrep.error(new ReportingMessage("[code {}] {}", e.getCode().getCode(), e.getLogMessage()));
-                    }
+                	stateTransition(
+                			job,
+                			AppDataJobGenerationState.READY,
+                			AppDataJobGenerationState.SENT,
+                			j -> readyToSend(j, appDataJob.getReportingId())
+                	);
                 }
-                reporting.end(
-                		new JobOrderReportingOutput(jobOrderName, toProcParamMap(job)), 
-                		new ReportingMessage("End job generation")
-                );
+//
+//                reporting.end(
+//                		new JobOrderReportingOutput(jobOrderName, toProcParamMap(job)), 
+//                		new ReportingMessage("End job generation")
+//                );
             } catch (final AbstractCodedException ace) {
                 LOGGER.error(
                         "{} [productName {}] [code ] Cannot generate job: {}",
-                        this.prefixLogMonitor, productName,
+                        this.prefixLogMonitor, appDataJob.getProduct().getProductName(),
                         ace.getCode().getCode(), ace.getLogMessage());
-                reporting.error(new ReportingMessage("[code {}] {}", ace.getCode().getCode(), ace.getLogMessage()));
             }        
         }
     }
@@ -543,11 +548,7 @@ public abstract class AbstractJobsGenerator implements Runnable {
 		}
     }
 
-    private void updateState(final JobGeneration job,
-            final AppDataJobGenerationState newState
-    )
-        throws AbstractCodedException {
-    	
+    private void updateState(final JobGeneration job, final AppDataJobGenerationState newState) throws AbstractCodedException {    	
     	LOGGER.info("Job generation before update: {} - {} - {} - {}", 
     			job.getAppDataJob().getId(),
                 job.getGeneration().getTaskTable(), 
@@ -821,7 +822,7 @@ public abstract class AbstractJobsGenerator implements Runnable {
         }
     }
 
-    protected String send(final JobGeneration job, final UUID reportingRootTaskUID) throws AbstractCodedException {
+    protected void send(final JobGeneration job, final UUID reportingId) throws AbstractCodedException {
         LOGGER.info("{} [productName {}] 3a - Building common job",
                 this.prefixLogMonitor,
                 job.getAppDataJob().getProduct().getProductName());
@@ -830,179 +831,197 @@ public abstract class AbstractJobsGenerator implements Runnable {
         final String joborderName = "JobOrder." + inc + ".xml";
         final String jobOrder = workingDir +  joborderName;
         
-        // Second, build the DTO
-
-
-        // For each input and output of the job order, prefix by the working
-        // directory
-        job.getJobOrder().getProcs().stream()
-                .filter(proc -> proc != null
-                        && !CollectionUtils.isEmpty(proc.getInputs()))
-                .flatMap(proc -> proc.getInputs().stream()).forEach(input -> {
-                    input.getFilenames().forEach(filename -> {
-                        filename.setFilename(
-                                workingDir + filename.getFilename());
-                    });
-                    input.getTimeIntervals().forEach(interval -> {
-                        interval.setFileName(
-                                workingDir + interval.getFileName());
-                    });
-                });
-        job.getJobOrder().getProcs().stream()
-                .filter(proc -> proc != null
-                        && !CollectionUtils.isEmpty(proc.getOutputs()))
-                .flatMap(proc -> proc.getOutputs().stream()).forEach(output -> {
-                    output.setFileName(workingDir + output.getFileName());
-                });
-
-        // Apply implementation build job
-        job.getJobOrder().getConf()
-                .setSensingTime(new JobOrderSensingTime(
-                        DateUtils.convertToAnotherFormat(
-                                job.getAppDataJob().getProduct().getStartTime(),
-                                AppDataJobProduct.TIME_FORMATTER,
-                                JobOrderSensingTime.DATETIME_FORMATTER),
-
-                        DateUtils.convertToAnotherFormat(
-                                job.getAppDataJob().getProduct().getStopTime(),
-                                AppDataJobProduct.TIME_FORMATTER,
-                                JobOrderSensingTime.DATETIME_FORMATTER)));
-
-        // Custom Job order according implementation
-        this.customJobOrder(job);
-
-        String timeliness = (String)((AppDataJob<CatalogEvent>)job.getAppDataJob()).getMessages()
-        		.get(0).getBody().getMetadata().get("timeliness");
-
-        ProductFamily family = ProductFamily.L0_JOB;
-        switch (l0ProcessSettings.getLevel()) {
-            case L0:
-                family = ProductFamily.L0_JOB;
-                break;
-            case L0_SEGMENT:
-                family = ProductFamily.L0_SEGMENT_JOB;
-                break;
-            case L1:
-                family = ProductFamily.L1_JOB;
-                break;
-            case L2:
-                family = ProductFamily.L2_JOB;
-                break;
-        }
-        final IpfExecutionJob r = new IpfExecutionJob(
-        		family,
-                job.getAppDataJob().getProduct().getProductName(),
-                job.getAppDataJob().getProduct().getProcessMode(), 
-                workingDir,
-                jobOrder,
-                timeliness,
-                reportingRootTaskUID
-        );        
-        r.setCreationDate(new Date());
-        r.setHostname(hostname);
-
+        final Reporting reporting = ReportingUtils.newReportingBuilder()
+        		.predecessor(reportingId)
+        		.newReporting("JobGenerator");
+        
+        reporting.begin(new ReportingMessage("Start job generation"));
+        
         try {
+            // Second, build the DTO
 
-            // Add jobOrder inputs to the DTO
-            final List<JobOrderInput> distinctInputJobOrder = job.getJobOrder()
-                    .getProcs()
-                    .stream()
-                    .filter(proc -> proc != null && !CollectionUtils.isEmpty(proc.getInputs()))
-                    .flatMap(proc -> proc.getInputs().stream())
-                    .distinct()
-                    .collect(Collectors.toList());
-            
-            distinctInputJobOrder.forEach(input -> {
-                for (final JobOrderInputFile file : input.getFilenames()) {
-                    r.addInput(new LevelJobInputDto(
-                    		input.getFamily().name(),
-                            file.getFilename(), 
-                            file.getKeyObjectStorage()
-                    ));
-                }
-            });
-
-            final String jobOrderXml = xmlConverter.convertFromObjectToXMLString(job.getJobOrder());
-            
-            LOGGER.trace("Adding input JobOrderXml '{}' for product '{}'", jobOrderXml, 
-            		job.getAppDataJob().getProduct().getProductName());
-            
-            // Add the jobOrder itself in inputs
-            r.addInput(new LevelJobInputDto(ProductFamily.JOB_ORDER.name(), jobOrder, jobOrderXml));
-
-            // Add joborder output to the DTO
-            final List<JobOrderOutput> distinctOutputJobOrder = job.getJobOrder().getProcs().stream()
-                    .filter(proc -> proc != null && !CollectionUtils.isEmpty(proc.getOutputs()))
-                    .flatMap(proc -> proc.getOutputs().stream())
-                    .filter(output -> output.getFileNameType() == JobOrderFileNameType.REGEXP && output.getDestination() == JobOrderDestination.DB)
-                    .distinct()
-                    .collect(Collectors.toList());
-            
-            r.addOutputs(distinctOutputJobOrder.stream()
-                    .map(output -> new LevelJobOutputDto(
-                            output.getFamily().name(), output.getFileName()))
-                    .collect(Collectors.toList()));
-            
-            final List<JobOrderOutput> distinctOutputJobOrderNotRegexp = job.getJobOrder().getProcs().stream()
-                    .filter(proc -> proc != null && !CollectionUtils.isEmpty(proc.getOutputs()))
-                    .flatMap(proc -> proc.getOutputs().stream())
-                    .filter(output -> output.getFileNameType() == JobOrderFileNameType.DIRECTORY && output.getDestination() == JobOrderDestination.DB)
-                    .distinct()
-                    .collect(Collectors.toList());
-            
-            r.addOutputs(distinctOutputJobOrderNotRegexp
-                    .stream().map(
-                            output -> new LevelJobOutputDto(
-                                    output.getFamily().name(),
-                                    output.getFileName() + "^.*"
-                                            + output.getFileType() + ".*$"))
-                    .collect(Collectors.toList()));
-
-            for (final LevelJobOutputDto output: r.getOutputs()) {
-            	// Iterate over the outputs and identify if an OQC check is required
-            	final ProductFamily outputFamily = ProductFamily.valueOf(output.getFamily());
-            	if (this.ipfPreparationWorkerSettings.getOqcCheck().contains(outputFamily)) {
-            		// Hit, we found a product family that had been configured as oqc check. Flag it.
-            		LOGGER.info("Found output of family {}, flagging it as oqcCheck",outputFamily);
-            		output.setOqcCheck(true);
-            	} else {
-            		// No hit
-            		LOGGER.debug("Found output of family {}, no oqcCheck required",outputFamily);
-            	}
-            }
-            
-            // Add the tasks
-            this.tasks.forEach(pool -> {
-                final LevelJobPoolDto poolDto = new LevelJobPoolDto();
-                pool.forEach(task -> {
-                    poolDto.addTask(new LevelJobTaskDto(task));
-                });
-                r.addPool(poolDto);
-            });
+            // For each input and output of the job order, prefix by the working
+            // directory
+            job.getJobOrder().getProcs().stream()
+                    .filter(proc -> proc != null
+                            && !CollectionUtils.isEmpty(proc.getInputs()))
+                    .flatMap(proc -> proc.getInputs().stream()).forEach(input -> {
+                        input.getFilenames().forEach(filename -> {
+                            filename.setFilename(
+                                    workingDir + filename.getFilename());
+                        });
+                        input.getTimeIntervals().forEach(interval -> {
+                            interval.setFileName(
+                                    workingDir + interval.getFileName());
+                        });
+                    });
+            job.getJobOrder().getProcs().stream()
+                    .filter(proc -> proc != null
+                            && !CollectionUtils.isEmpty(proc.getOutputs()))
+                    .flatMap(proc -> proc.getOutputs().stream()).forEach(output -> {
+                        output.setFileName(workingDir + output.getFileName());
+                    });
 
             // Apply implementation build job
-            LOGGER.info("{} [productName {}] 3b - Building custom job",
+            job.getJobOrder().getConf()
+                    .setSensingTime(new JobOrderSensingTime(
+                            DateUtils.convertToAnotherFormat(
+                                    job.getAppDataJob().getProduct().getStartTime(),
+                                    AppDataJobProduct.TIME_FORMATTER,
+                                    JobOrderSensingTime.DATETIME_FORMATTER),
+
+                            DateUtils.convertToAnotherFormat(
+                                    job.getAppDataJob().getProduct().getStopTime(),
+                                    AppDataJobProduct.TIME_FORMATTER,
+                                    JobOrderSensingTime.DATETIME_FORMATTER)));
+
+            // Custom Job order according implementation
+            this.customJobOrder(job);
+
+            final String timeliness = (String)((AppDataJob<CatalogEvent>)job.getAppDataJob()).getMessages()
+            		.get(0).getBody().getMetadata().get("timeliness");
+
+            ProductFamily family = ProductFamily.L0_JOB;
+            switch (l0ProcessSettings.getLevel()) {
+                case L0:
+                    family = ProductFamily.L0_JOB;
+                    break;
+                case L0_SEGMENT:
+                    family = ProductFamily.L0_SEGMENT_JOB;
+                    break;
+                case L1:
+                    family = ProductFamily.L1_JOB;
+                    break;
+                case L2:
+                    family = ProductFamily.L2_JOB;
+                    break;
+            }
+            final IpfExecutionJob execJob = new IpfExecutionJob(
+            		family,
+                    job.getAppDataJob().getProduct().getProductName(),
+                    job.getAppDataJob().getProduct().getProcessMode(), 
+                    workingDir,
+                    jobOrder,
+                    timeliness,
+                    reporting.getUid()
+            );        
+            execJob.setCreationDate(new Date());
+            execJob.setHostname(hostname);
+
+            try {
+
+                // Add jobOrder inputs to the DTO
+                final List<JobOrderInput> distinctInputJobOrder = job.getJobOrder()
+                        .getProcs()
+                        .stream()
+                        .filter(proc -> proc != null && !CollectionUtils.isEmpty(proc.getInputs()))
+                        .flatMap(proc -> proc.getInputs().stream())
+                        .distinct()
+                        .collect(Collectors.toList());
+                
+                distinctInputJobOrder.forEach(input -> {
+                    for (final JobOrderInputFile file : input.getFilenames()) {
+                        execJob.addInput(new LevelJobInputDto(
+                        		input.getFamily().name(),
+                                file.getFilename(), 
+                                file.getKeyObjectStorage()
+                        ));
+                    }
+                });
+
+                final String jobOrderXml = xmlConverter.convertFromObjectToXMLString(job.getJobOrder());
+                
+                LOGGER.trace("Adding input JobOrderXml '{}' for product '{}'", jobOrderXml, 
+                		job.getAppDataJob().getProduct().getProductName());
+                
+                // Add the jobOrder itself in inputs
+                execJob.addInput(new LevelJobInputDto(ProductFamily.JOB_ORDER.name(), jobOrder, jobOrderXml));
+
+                // Add joborder output to the DTO
+                final List<JobOrderOutput> distinctOutputJobOrder = job.getJobOrder().getProcs().stream()
+                        .filter(proc -> proc != null && !CollectionUtils.isEmpty(proc.getOutputs()))
+                        .flatMap(proc -> proc.getOutputs().stream())
+                        .filter(output -> output.getFileNameType() == JobOrderFileNameType.REGEXP && output.getDestination() == JobOrderDestination.DB)
+                        .distinct()
+                        .collect(Collectors.toList());
+                
+                execJob.addOutputs(distinctOutputJobOrder.stream()
+                        .map(output -> new LevelJobOutputDto(
+                                output.getFamily().name(), output.getFileName()))
+                        .collect(Collectors.toList()));
+                
+                final List<JobOrderOutput> distinctOutputJobOrderNotRegexp = job.getJobOrder().getProcs().stream()
+                        .filter(proc -> proc != null && !CollectionUtils.isEmpty(proc.getOutputs()))
+                        .flatMap(proc -> proc.getOutputs().stream())
+                        .filter(output -> output.getFileNameType() == JobOrderFileNameType.DIRECTORY && output.getDestination() == JobOrderDestination.DB)
+                        .distinct()
+                        .collect(Collectors.toList());
+                
+                execJob.addOutputs(distinctOutputJobOrderNotRegexp
+                        .stream().map(
+                                output -> new LevelJobOutputDto(
+                                        output.getFamily().name(),
+                                        output.getFileName() + "^.*"
+                                                + output.getFileType() + ".*$"))
+                        .collect(Collectors.toList()));
+
+                for (final LevelJobOutputDto output: execJob.getOutputs()) {
+                	// Iterate over the outputs and identify if an OQC check is required
+                	final ProductFamily outputFamily = ProductFamily.valueOf(output.getFamily());
+                	if (this.ipfPreparationWorkerSettings.getOqcCheck().contains(outputFamily)) {
+                		// Hit, we found a product family that had been configured as oqc check. Flag it.
+                		LOGGER.info("Found output of family {}, flagging it as oqcCheck",outputFamily);
+                		output.setOqcCheck(true);
+                	} else {
+                		// No hit
+                		LOGGER.debug("Found output of family {}, no oqcCheck required",outputFamily);
+                	}
+                }
+                
+                // Add the tasks
+                this.tasks.forEach(pool -> {
+                    final LevelJobPoolDto poolDto = new LevelJobPoolDto();
+                    pool.forEach(task -> {
+                        poolDto.addTask(new LevelJobTaskDto(task));
+                    });
+                    execJob.addPool(poolDto);
+                });
+
+                // Apply implementation build job
+                LOGGER.info("{} [productName {}] 3b - Building custom job",
+                        this.prefixLogMonitor,
+                        job.getAppDataJob().getProduct().getProductName());
+                this.customJobDto(job, execJob);
+
+            } catch (IOException | JAXBException e) {
+                throw new InternalErrorException("Cannot send the job", e);
+            }
+
+            // Third, send the job
+            LOGGER.info("{} [productName {}] 3c - Publishing job",
                     this.prefixLogMonitor,
                     job.getAppDataJob().getProduct().getProductName());
-            this.customJobDto(job, r);
-
-        } catch (IOException | JAXBException e) {
-            throw new InternalErrorException("Cannot send the job", e);
+            
+    		@SuppressWarnings("unchecked")
+    		final AppDataJob<CatalogEvent> dto = job.getAppDataJob();
+    		
+    		final GenericPublicationMessageDto<IpfExecutionJob> messageToPublish = new GenericPublicationMessageDto<IpfExecutionJob>(
+    				dto.getPrepJobMessageId(), 
+    				execJob.getProductFamily(), 
+    				execJob
+    		);
+            messageToPublish.setInputKey(dto.getPrepJobInputQueue());
+            messageToPublish.setOutputKey(execJob.getProductFamily().name());		
+    		mqiClient.publish(messageToPublish, ProductCategory.LEVEL_JOBS);
+        	
+            reporting.end(
+            		new JobOrderReportingOutput(joborderName, toProcParamMap(job)), 
+            		new ReportingMessage("End job generation")
+            );
         }
-
-        // Third, send the job
-        LOGGER.info("{} [productName {}] 3c - Publishing job",
-                this.prefixLogMonitor,
-                job.getAppDataJob().getProduct().getProductName());
-        
-		@SuppressWarnings("unchecked")
-		final AppDataJob<CatalogEvent> dto = job.getAppDataJob();
-
-		// ok, first message is only used here to determine the ID and input key
-		// -> TODO cleanup to reduce obfuscation here
-        this.outputFactory.sendJob(dto.getMessages().get(0), r);
-        
-        return joborderName;
+        catch (final AbstractCodedException e) {
+        	reporting.error(new ReportingMessage("Error on job generation"));
+		}
     }
 
     protected abstract void customJobOrder(JobGeneration job);

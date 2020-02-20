@@ -53,12 +53,12 @@ import esa.s1pdgs.cpoc.ipf.preparation.worker.model.joborder.JobOrderProcParam;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.model.joborder.L0JobOrderConf;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.model.tasktable.TaskTable;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.service.XmlConverter;
-import esa.s1pdgs.cpoc.ipf.preparation.worker.service.mqi.OutputProducerFactory;
 import esa.s1pdgs.cpoc.metadata.client.MetadataClient;
 import esa.s1pdgs.cpoc.metadata.client.SearchMetadataQuery;
 import esa.s1pdgs.cpoc.metadata.model.L0AcnMetadata;
 import esa.s1pdgs.cpoc.metadata.model.L0SliceMetadata;
 import esa.s1pdgs.cpoc.metadata.model.SearchMetadata;
+import esa.s1pdgs.cpoc.mqi.client.MqiClient;
 import esa.s1pdgs.cpoc.mqi.model.queue.IpfExecutionJob;
 
 public class L1AppJobsGeneratorTest {
@@ -85,7 +85,7 @@ public class L1AppJobsGeneratorTest {
     private AiopProperties aiopProperties;
     
     @Mock
-    private OutputProducerFactory JobsSender;
+    private MqiClient mqiClient;
 
     @Mock
     private ProcessConfiguration processConfiguration;
@@ -125,9 +125,9 @@ public class L1AppJobsGeneratorTest {
         this.mockKafkaSender();
         this.mockAppDataService();
 
-        JobsGeneratorFactory factory =
+        final JobsGeneratorFactory factory =
                 new JobsGeneratorFactory(processSettings, ipfPreparationWorkerSettings,
-                		aiopProperties, xmlConverter, metadataClient, JobsSender, processConfiguration);
+                		aiopProperties, xmlConverter, metadataClient, processConfiguration, mqiClient);
         generator = (LevelProductsJobsGenerator) factory.createJobGeneratorForL0Slice(
                 new File(
                         "./test/data/generic_config/task_tables/IW_RAW__0_GRDH_1.xml"),
@@ -140,7 +140,7 @@ public class L1AppJobsGeneratorTest {
 
     private void mockProcessSettings() {
         Mockito.doAnswer(i -> {
-            Map<String, String> r = new HashMap<String, String>(2);
+            final Map<String, String> r = new HashMap<String, String>(2);
             return r;
         }).when(processSettings).getParams();
         Mockito.doAnswer(i -> {
@@ -148,7 +148,7 @@ public class L1AppJobsGeneratorTest {
         }).when(processSettings).getLevel();
         doReturn("hostname").when(processSettings).getHostname();
         Mockito.doAnswer(i -> {
-            Map<String, String> r = new HashMap<String, String>(5);
+            final Map<String, String> r = new HashMap<String, String>(5);
             r.put("SM_RAW__0S", "^S1[A-B]_S[1-6]_RAW__0S.*$");
             r.put("AN_RAW__0S", "^S1[A-B]_N[1-6]_RAW__0S.*$");
             r.put("ZS_RAW__0S", "^S1[A-B]_N[1-6]_RAW__0S.*$");
@@ -162,7 +162,7 @@ public class L1AppJobsGeneratorTest {
 
     private void mockJobGeneratorSettings() {
         Mockito.doAnswer(i -> {
-            Map<String, ProductFamily> r = new HashMap<>();
+            final Map<String, ProductFamily> r = new HashMap<>();
             r.put("IW_GRDH_1S", ProductFamily.L1_SLICE);
             r.put("IW_GRDH_1A", ProductFamily.L1_ACN);
             r.put("IW_RAW__0S", ProductFamily.L0_SLICE);
@@ -172,7 +172,7 @@ public class L1AppJobsGeneratorTest {
             return r;
         }).when(ipfPreparationWorkerSettings).getInputfamilies();
         Mockito.doAnswer(i -> {
-            Map<String, ProductFamily> r = new HashMap<>();
+            final Map<String, ProductFamily> r = new HashMap<>();
             r.put("IW_GRDH_1S", ProductFamily.L1_SLICE);
             r.put("IW_GRDH_1A", ProductFamily.L1_ACN);
             r.put("IW_RAW__0S", ProductFamily.L0_SLICE);
@@ -194,13 +194,13 @@ public class L1AppJobsGeneratorTest {
             return new WaitTempo(10000, 3);
         }).when(ipfPreparationWorkerSettings).getWaitmetadatainput();
         Mockito.doAnswer(i -> {
-            Map<String, Float> r = new HashMap<>();
+            final Map<String, Float> r = new HashMap<>();
             r.put("IW", 7.7F);
             r.put("EW", 8.2F);
             return r;
         }).when(ipfPreparationWorkerSettings).getTypeOverlap();
         Mockito.doAnswer(i -> {
-            Map<String, Float> r = new HashMap<>();
+            final Map<String, Float> r = new HashMap<>();
             r.put("IW", 60F);
             r.put("EW", 21F);
             return r;
@@ -213,12 +213,12 @@ public class L1AppJobsGeneratorTest {
                     xmlConverter.convertFromXMLToObject(Mockito.anyString()))
                     .thenReturn(expectedTaskTable);
             Mockito.doAnswer(i -> {
-                AnnotationConfigApplicationContext ctx =
+                final AnnotationConfigApplicationContext ctx =
                         new AnnotationConfigApplicationContext();
                 ctx.register(AppConfig.class);
                 ctx.refresh();
-                XmlConverter xmlConverter = ctx.getBean(XmlConverter.class);
-                String r = xmlConverter
+                final XmlConverter xmlConverter = ctx.getBean(XmlConverter.class);
+                final String r = xmlConverter
                         .convertFromObjectToXMLString(i.getArgument(0));
                 ctx.close();
                 return r;
@@ -259,7 +259,7 @@ public class L1AppJobsGeneratorTest {
             }).when(this.metadataClient).getFirstACN(Mockito.anyString(),
                     Mockito.anyString());
             Mockito.doAnswer(i -> {
-                SearchMetadataQuery query = i.getArgument(0);
+                final SearchMetadataQuery query = i.getArgument(0);
                 if ("IW_RAW__0S".equalsIgnoreCase(query.getProductType())) {
                     return Arrays.asList(new SearchMetadata(
                             "S1A_IW_RAW__0SDV_20171213T121623_20171213T121656_019684_021735_C6DB.SAFE",
@@ -341,21 +341,21 @@ public class L1AppJobsGeneratorTest {
             }).when(this.metadataClient).search(Mockito.any(), Mockito.any(),
                     Mockito.any(), Mockito.anyString(), Mockito.anyInt(),
                     Mockito.anyString(), Mockito.anyString());
-        } catch (MetadataQueryException e) {
+        } catch (final MetadataQueryException e) {
             fail(e.getMessage());
         }
     }
 
     private void mockKafkaSender() throws AbstractCodedException {
         Mockito.doAnswer(i -> {
-            ObjectMapper mapper = new ObjectMapper();
+            final ObjectMapper mapper = new ObjectMapper();
             mapper.writeValue(new File("./tmp/inputMessageL1.json"),
                     i.getArgument(0));
             mapper.writeValue(new File("./tmp/jobDtoL1.json"),
                     i.getArgument(1));
             publishedJob = i.getArgument(1);
             return null;
-        }).when(this.JobsSender).sendJob(Mockito.any(), Mockito.any());
+        }).when(mqiClient).publish(Mockito.any(), Mockito.any());
     }
 
     private void mockAppDataService()
@@ -364,15 +364,15 @@ public class L1AppJobsGeneratorTest {
                 .when(appDataPService)
                 .findNByPodAndGenerationTaskTableWithNotSentGeneration(
                         Mockito.anyString(), Mockito.anyString());
-        AppDataJob<?> primaryCheckAppJob =
+        final AppDataJob<?> primaryCheckAppJob =
                 TestL1Utils.buildJobGeneration(true);
         primaryCheckAppJob.getGenerations().get(0)
                 .setState(AppDataJobGenerationState.PRIMARY_CHECK);
-        AppDataJob<?> readyAppJob =
+        final AppDataJob<?> readyAppJob =
                 TestL1Utils.buildJobGeneration(true);
         readyAppJob.getGenerations().get(0)
                 .setState(AppDataJobGenerationState.READY);
-        AppDataJob<?> sentAppJob =
+        final AppDataJob<?> sentAppJob =
                 TestL1Utils.buildJobGeneration(true);
         sentAppJob.getGenerations().get(0)
                 .setState(AppDataJobGenerationState.SENT);
@@ -445,18 +445,18 @@ public class L1AppJobsGeneratorTest {
 
     @Test
     public void testUpdateProcParam() {
-        AbstractJobOrderConf conf = new L0JobOrderConf();
+        final AbstractJobOrderConf conf = new L0JobOrderConf();
         conf.setProcessorName("AIO_PROCESSOR");
-        JobOrderProcParam procParam1 =
+        final JobOrderProcParam procParam1 =
                 new JobOrderProcParam("Processing_Mode", "FAST24");
-        JobOrderProcParam procParam2 =
+        final JobOrderProcParam procParam2 =
                 new JobOrderProcParam("PT_Assembly", "no");
-        JobOrderProcParam procParam3 = new JobOrderProcParam("Timeout", "360");
+        final JobOrderProcParam procParam3 = new JobOrderProcParam("Timeout", "360");
         conf.addProcParam(procParam1);
         conf.addProcParam(procParam2);
         conf.addProcParam(procParam3);
 
-        JobOrder jobOrder = new JobOrder();
+        final JobOrder jobOrder = new JobOrder();
         jobOrder.setConf(conf);
 
         generator.updateProcParam(jobOrder, "PT_Assembly", "yes");
@@ -484,21 +484,21 @@ public class L1AppJobsGeneratorTest {
 
     @Test
     public void testCustomeJobOrder() {
-        AbstractJobOrderConf conf = new L0JobOrderConf();
+        final AbstractJobOrderConf conf = new L0JobOrderConf();
         conf.setProcessorName("AIO_PROCESSOR");
-        JobOrderProcParam procParam1 =
+        final JobOrderProcParam procParam1 =
                 new JobOrderProcParam("Mission_Id", "S1B");
-        JobOrderProcParam procParam2 =
+        final JobOrderProcParam procParam2 =
                 new JobOrderProcParam("PT_Assembly", "no");
-        JobOrderProcParam procParam3 = new JobOrderProcParam("Timeout", "360");
+        final JobOrderProcParam procParam3 = new JobOrderProcParam("Timeout", "360");
         conf.addProcParam(procParam1);
         conf.addProcParam(procParam2);
         conf.addProcParam(procParam3);
 
-        JobOrder jobOrder = new JobOrder();
+        final JobOrder jobOrder = new JobOrder();
         jobOrder.setConf(conf);
 
-        JobGeneration job =
+        final JobGeneration job =
                 new JobGeneration(appDataJobComplete, "IW_RAW__0_GRDH_1.xml");
         job.setJobOrder(jobOrder);
 
@@ -509,7 +509,7 @@ public class L1AppJobsGeneratorTest {
         assertEquals("20171213_121656224083",
                 job.getJobOrder().getConf().getSensingTime().getStop());
         assertEquals(8, job.getJobOrder().getConf().getNbProcParams());
-        for (JobOrderProcParam param : job.getJobOrder().getConf()
+        for (final JobOrderProcParam param : job.getJobOrder().getConf()
                 .getProcParams()) {
             switch (param.getName()) {
                 case "Mission_Id":

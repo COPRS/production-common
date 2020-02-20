@@ -51,10 +51,10 @@ import esa.s1pdgs.cpoc.ipf.preparation.worker.config.ProcessSettings;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.model.ProductMode;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.model.tasktable.TaskTable;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.service.XmlConverter;
-import esa.s1pdgs.cpoc.ipf.preparation.worker.service.mqi.OutputProducerFactory;
 import esa.s1pdgs.cpoc.metadata.client.MetadataClient;
 import esa.s1pdgs.cpoc.metadata.client.SearchMetadataQuery;
 import esa.s1pdgs.cpoc.metadata.model.SearchMetadata;
+import esa.s1pdgs.cpoc.mqi.client.MqiClient;
 import esa.s1pdgs.cpoc.mqi.model.queue.CatalogEvent;
 
 public class AbstractJobsGeneratorTest {
@@ -73,12 +73,12 @@ public class AbstractJobsGeneratorTest {
 
     @Mock
     private ProcessSettings processSettings;
+    
+    @Mock
+    private MqiClient mqiClient;
 
     @Mock
     private IpfPreparationWorkerSettings ipfPreparationWorkerSettings;
-
-    @Mock
-    private OutputProducerFactory jobSender;
 
     private int nbLoopMetadata;
 
@@ -126,9 +126,9 @@ public class AbstractJobsGeneratorTest {
         		metadataClient,
                 processSettings, 
                 ipfPreparationWorkerSettings, 
-                jobSender,
                 appDataPService, 
-                processConfiguration
+                processConfiguration,
+                mqiClient
         );
         generator.initialize(new File(
                 "./test/data/generic_config/task_tables/IW_RAW__0_GRDH_1.xml"));
@@ -315,7 +315,7 @@ public class AbstractJobsGeneratorTest {
             mapper.writeValue(new File("./tmp/jobDtoGeneric.json"),
                     i.getArgument(0));
             return null;
-        }).when(this.jobSender).sendJob(Mockito.any(), Mockito.any());
+        }).when(this.mqiClient).publish(Mockito.any(), Mockito.any());
     }
 
     private void mockAppDataService()
@@ -359,7 +359,7 @@ public class AbstractJobsGeneratorTest {
                 .convertFromXMLToObject(Mockito.anyString());
         final AbstractJobsGenerator gen = new LevelProductsJobsGenerator(
                 xmlConverter, metadataClient, processSettings,
-                ipfPreparationWorkerSettings, jobSender, appDataPService, processConfiguration);
+                ipfPreparationWorkerSettings, appDataPService, processConfiguration, mqiClient);
         generator.setMode(ProductMode.SLICING);
 
         thrown.expect(IpfPrepWorkerBuildTaskTableException.class);
@@ -377,7 +377,7 @@ public class AbstractJobsGeneratorTest {
                 .convertFromXMLToObject(Mockito.anyString());
         final AbstractJobsGenerator gen = new LevelProductsJobsGenerator(
                 xmlConverter, metadataClient, processSettings,
-                ipfPreparationWorkerSettings, jobSender, appDataPService, processConfiguration);
+                ipfPreparationWorkerSettings, appDataPService, processConfiguration, mqiClient);
         generator.setMode(ProductMode.SLICING);
 
         thrown.expect(IpfPrepWorkerBuildTaskTableException.class);
@@ -406,7 +406,7 @@ public class AbstractJobsGeneratorTest {
                 .findNByPodAndGenerationTaskTableWithNotSentGeneration(
                         Mockito.eq("hostname"),
                         Mockito.eq("IW_RAW__0_GRDH_1.xml"));
-        verifyNoMoreInteractions(appDataPService, jobSender, metadataClient);
+        verifyNoMoreInteractions(appDataPService, mqiClient, metadataClient);
         verify(ipfPreparationWorkerSettings, never()).getWaitprimarycheck();
         verify(ipfPreparationWorkerSettings, never()).getWaitmetadatainput();
     }
@@ -422,7 +422,7 @@ public class AbstractJobsGeneratorTest {
                 .findNByPodAndGenerationTaskTableWithNotSentGeneration(
                         Mockito.eq("hostname"),
                         Mockito.eq("IW_RAW__0_GRDH_1.xml"));
-        verifyNoMoreInteractions(appDataPService, jobSender, metadataClient);
+        verifyNoMoreInteractions(appDataPService, mqiClient, metadataClient);
         verify(ipfPreparationWorkerSettings, never()).getWaitprimarycheck();
         verify(ipfPreparationWorkerSettings, never()).getWaitmetadatainput();
     }
@@ -438,7 +438,7 @@ public class AbstractJobsGeneratorTest {
                 .findNByPodAndGenerationTaskTableWithNotSentGeneration(
                         Mockito.eq("hostname"),
                         Mockito.eq("IW_RAW__0_GRDH_1.xml"));
-        verifyNoMoreInteractions(appDataPService, jobSender, metadataClient);
+        verifyNoMoreInteractions(appDataPService, mqiClient, metadataClient);
         verify(ipfPreparationWorkerSettings, never()).getWaitprimarycheck();
         verify(ipfPreparationWorkerSettings, never()).getWaitmetadatainput();
     }
@@ -470,7 +470,7 @@ public class AbstractJobsGeneratorTest {
                         Mockito.eq("IW_RAW__0_GRDH_1.xml"));
         verify(ipfPreparationWorkerSettings, times(1)).getWaitprimarycheck();
         verify(ipfPreparationWorkerSettings, never()).getWaitmetadatainput();
-        verifyNoMoreInteractions(appDataPService, jobSender, metadataClient);
+        verifyNoMoreInteractions(appDataPService, mqiClient, metadataClient);
     }
 
     @Test
@@ -507,6 +507,6 @@ public class AbstractJobsGeneratorTest {
                         Mockito.eq("IW_RAW__0_GRDH_1.xml"));
         verify(ipfPreparationWorkerSettings, times(1)).getWaitprimarycheck();
         verify(ipfPreparationWorkerSettings, times(1)).getWaitmetadatainput();
-        verifyNoMoreInteractions(appDataPService, jobSender, metadataClient);
+        verifyNoMoreInteractions(appDataPService, mqiClient, metadataClient);
     }
 }

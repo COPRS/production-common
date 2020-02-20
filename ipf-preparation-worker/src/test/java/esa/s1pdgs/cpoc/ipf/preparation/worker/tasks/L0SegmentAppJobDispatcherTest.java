@@ -123,11 +123,11 @@ public class L0SegmentAppJobDispatcherTest {
 
     private void mockProcessSettings() {
         Mockito.doAnswer(i -> {
-            Map<String, String> r = new HashMap<String, String>(2);
+            final Map<String, String> r = new HashMap<String, String>(2);
             return r;
         }).when(processSettings).getParams();
         Mockito.doAnswer(i -> {
-            Map<String, String> r = new HashMap<String, String>(5);
+            final Map<String, String> r = new HashMap<String, String>(5);
             r.put("SM_RAW__0S", "^S1[A-B]_S[1-6]_RAW__0S.*$");
             r.put("AN_RAW__0S", "^S1[A-B]_N[1-6]_RAW__0S.*$");
             r.put("ZS_RAW__0S", "^S1[A-B]_N[1-6]_RAW__0S.*$");
@@ -152,15 +152,15 @@ public class L0SegmentAppJobDispatcherTest {
                 .when(appDataService)
                 .findNByPodAndGenerationTaskTableWithNotSentGeneration(
                         Mockito.anyString(), Mockito.anyString());
-        AppDataJob<?> primaryCheckAppJob =
+        final AppDataJob<?> primaryCheckAppJob =
                 TestL0SegmentUtils.buildAppData();
         primaryCheckAppJob.getGenerations().get(0)
                 .setState(AppDataJobGenerationState.PRIMARY_CHECK);
-        AppDataJob<?> readyAppJob =
+        final AppDataJob<?> readyAppJob =
                 TestL0SegmentUtils.buildAppData();
         readyAppJob.getGenerations().get(0)
                 .setState(AppDataJobGenerationState.READY);
-        AppDataJob<?> sentAppJob =
+        final AppDataJob<?> sentAppJob =
                 TestL0SegmentUtils.buildAppData();
         sentAppJob.getGenerations().get(0)
                 .setState(AppDataJobGenerationState.SENT);
@@ -180,18 +180,18 @@ public class L0SegmentAppJobDispatcherTest {
 
     @Test
     public void testCreate() {
-        File taskTable1 = new File(
+        final File taskTable1 = new File(
                 "./test/data/l0_segment/config/task_tables/TaskTable.L0ASP.xml");
 
         // Initialize
-        L0SegmentAppJobDispatcher dispatcher = this.createSessionDispatcher();
+        final L0SegmentAppJobDispatcher dispatcher = this.createSessionDispatcher();
         try {
             dispatcher.createJobGenerator(taskTable1);
             verify(jobsGeneratorFactory, times(1))
                     .createJobGeneratorForL0Segment(any(), any());
             verify(jobsGeneratorFactory, times(1))
                     .createJobGeneratorForL0Segment(eq(taskTable1), any());
-        } catch (AbstractCodedException e) {
+        } catch (final AbstractCodedException e) {
             fail("Invalid raised exception: " + e.getMessage());
         }
     }
@@ -201,11 +201,11 @@ public class L0SegmentAppJobDispatcherTest {
      */
     @Test
     public void testInitialize() {
-        File taskTable1 = new File(
+        final File taskTable1 = new File(
                 "./test/data/l0_segment_config/task_tables/TaskTable.L0ASP.xml");
 
         // Intitialize
-        L0SegmentAppJobDispatcher dispatcher = this.createSessionDispatcher();
+        final L0SegmentAppJobDispatcher dispatcher = this.createSessionDispatcher();
         try {
             dispatcher.initialize();
             verify(jobGenerationTaskScheduler, times(1))
@@ -220,7 +220,7 @@ public class L0SegmentAppJobDispatcherTest {
             assertTrue(dispatcher.getGenerators().size() == 1);
             assertTrue(dispatcher.getGenerators()
                     .containsKey(taskTable1.getName()));
-        } catch (AbstractCodedException e) {
+        } catch (final Exception e) {
             fail("Invalid raised exception: " + e.getMessage());
         }
     }
@@ -232,14 +232,14 @@ public class L0SegmentAppJobDispatcherTest {
     @Test
     public void testGetTaskTable() throws IpfPrepWorkerMissingRoutingEntryException {
 
-        AppDataJob appData =
+        final AppDataJob appData =
                 TestL0SegmentUtils.buildAppData();
 
         // Init dispatcher
-        L0SegmentAppJobDispatcher dispatcher = this.createSessionDispatcher();
+        final L0SegmentAppJobDispatcher dispatcher = this.createSessionDispatcher();
         try {
             dispatcher.initialize();
-        } catch (AbstractCodedException e) {
+        } catch (final Exception e) {
             fail("Invalid raised exception: " + e.getMessage());
         }
 

@@ -41,11 +41,11 @@ import esa.s1pdgs.cpoc.ipf.preparation.worker.config.ProcessSettings;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.model.JobGeneration;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.model.tasktable.TaskTable;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.service.XmlConverter;
-import esa.s1pdgs.cpoc.ipf.preparation.worker.service.mqi.OutputProducerFactory;
 import esa.s1pdgs.cpoc.metadata.client.MetadataClient;
 import esa.s1pdgs.cpoc.metadata.client.SearchMetadataQuery;
 import esa.s1pdgs.cpoc.metadata.model.EdrsSessionMetadata;
 import esa.s1pdgs.cpoc.metadata.model.SearchMetadata;
+import esa.s1pdgs.cpoc.mqi.client.MqiClient;
 import esa.s1pdgs.cpoc.mqi.model.queue.IpfExecutionJob;
 
 /**
@@ -72,7 +72,7 @@ public class L0AppJobsGeneratorTest {
     private AiopProperties aiopProperties;
 
     @Mock
-    private OutputProducerFactory jobsSender;
+    private MqiClient mqiClient;
 
     @Mock
     private AppCatalogJobClient appDataService;
@@ -106,9 +106,9 @@ public class L0AppJobsGeneratorTest {
         this.mockKafkaSender();
         this.mockAppDataService();
 
-        JobsGeneratorFactory factory = new JobsGeneratorFactory(
+        final JobsGeneratorFactory factory = new JobsGeneratorFactory(
                 l0ProcessSettings, ipfPreparationWorkerSettings, aiopProperties,
-                xmlConverter, metadataClient, jobsSender, processConfiguration);
+                xmlConverter, metadataClient, processConfiguration, mqiClient);
         generator = (L0AppJobsGenerator) factory
                 .createJobGeneratorForEdrsSession(new File(
                         "./test/data/generic_config/task_tables/TaskTable.AIOP.xml"),
@@ -117,11 +117,11 @@ public class L0AppJobsGeneratorTest {
 
     private void mockProcessSettings() {
         Mockito.doAnswer(i -> {
-            Map<String, String> r = new HashMap<String, String>(2);
+            final Map<String, String> r = new HashMap<String, String>(2);
             return r;
         }).when(l0ProcessSettings).getParams();
         Mockito.doAnswer(i -> {
-            Map<String, String> r = new HashMap<String, String>(5);
+            final Map<String, String> r = new HashMap<String, String>(5);
             r.put("SM_RAW__0S", "^S1[A-B]_S[1-6]_RAW__0S.*$");
             r.put("AN_RAW__0S", "^S1[A-B]_N[1-6]_RAW__0S.*$");
             r.put("ZS_RAW__0S", "^S1[A-B]_N[1-6]_RAW__0S.*$");
@@ -139,15 +139,15 @@ public class L0AppJobsGeneratorTest {
 
     private void mockJobGeneratorSettings() {
         Mockito.doAnswer(i -> {
-            Map<String, ProductFamily> r =
+            final Map<String, ProductFamily> r =
                     new HashMap<String, ProductFamily>(20);
-            String families =
+            final String families =
                     "MPL_ORBPRE:AUXILIARY_FILE||MPL_ORBSCT:AUXILIARY_FILE||AUX_OBMEMC:AUXILIARY_FILE||AUX_CAL:AUXILIARY_FILE||AUX_PP1:AUXILIARY_FILE||AUX_INS:AUXILIARY_FILE||AUX_RESORB:AUXILIARY_FILE||AUX_RES:AUXILIARY_FILE";
             if (!StringUtils.isEmpty(families)) {
-                String[] paramsTmp = families.split("\\|\\|");
+                final String[] paramsTmp = families.split("\\|\\|");
                 for (int k = 0; k < paramsTmp.length; k++) {
                     if (!StringUtils.isEmpty(paramsTmp[k])) {
-                        String[] tmp = paramsTmp[k].split(":", 2);
+                        final String[] tmp = paramsTmp[k].split(":", 2);
                         if (tmp.length == 2) {
                             r.put(tmp[0], ProductFamily.fromValue(tmp[1]));
                         }
@@ -157,7 +157,7 @@ public class L0AppJobsGeneratorTest {
             return r;
         }).when(ipfPreparationWorkerSettings).getInputfamilies();
         Mockito.doAnswer(i -> {
-            Map<String, ProductFamily> r = new HashMap<>();
+            final Map<String, ProductFamily> r = new HashMap<>();
             r.put("", ProductFamily.L0_REPORT);
             r.put("", ProductFamily.L0_ACN);
             return r;
@@ -178,7 +178,7 @@ public class L0AppJobsGeneratorTest {
     
     private void mockAiopProperties() {
     	Mockito.doAnswer(i -> {
-    		Map<String,String> r = new HashMap<>();
+    		final Map<String,String> r = new HashMap<>();
     		r.put("cgs1", "MTI_");
     		r.put("cgs2", "SGS_");
     		r.put("cgs3", "MPS_");
@@ -187,7 +187,7 @@ public class L0AppJobsGeneratorTest {
     		return r;
     	}).when(aiopProperties).getStationCodes();
     	Mockito.doAnswer(i -> {
-    		Map<String,String> r = new HashMap<>();
+    		final Map<String,String> r = new HashMap<>();
     		r.put("cgs1", "yes");
     		r.put("cgs2", "yes");
     		r.put("cgs3", "yes");
@@ -196,7 +196,7 @@ public class L0AppJobsGeneratorTest {
     		return r;
     	}).when(aiopProperties).getPtAssembly();
     	Mockito.doAnswer(i -> {
-    		Map<String,String> r = new HashMap<>();
+    		final Map<String,String> r = new HashMap<>();
     		r.put("cgs1", "NRT");
     		r.put("cgs2", "NRT");
     		r.put("cgs3", "NRT");
@@ -205,7 +205,7 @@ public class L0AppJobsGeneratorTest {
     		return r;
     	}).when(aiopProperties).getProcessingMode();
     	Mockito.doAnswer(i -> {
-    		Map<String,String> r = new HashMap<>();
+    		final Map<String,String> r = new HashMap<>();
     		r.put("cgs1", "FAST24");
     		r.put("cgs2", "FAST24");
     		r.put("cgs3", "FAST24");
@@ -214,7 +214,7 @@ public class L0AppJobsGeneratorTest {
     		return r;
     	}).when(aiopProperties).getReprocessingMode();
     	Mockito.doAnswer(i -> {
-    		Map<String,String> r = new HashMap<>();
+    		final Map<String,String> r = new HashMap<>();
     		r.put("cgs1", "300");
     		r.put("cgs2", "300");
     		r.put("cgs3", "300");
@@ -223,7 +223,7 @@ public class L0AppJobsGeneratorTest {
     		return r;
     	}).when(aiopProperties).getTimeout();
     	Mockito.doAnswer(i -> {
-    		Map<String,String> r = new HashMap<>();
+    		final Map<String,String> r = new HashMap<>();
     		r.put("cgs1", "yes");
     		r.put("cgs2", "yes");
     		r.put("cgs3", "yes");
@@ -232,7 +232,7 @@ public class L0AppJobsGeneratorTest {
     		return r;
     	}).when(aiopProperties).getDescramble();
     	Mockito.doAnswer(i -> {
-    		Map<String,String> r = new HashMap<>();
+    		final Map<String,String> r = new HashMap<>();
     		r.put("cgs1", "no");
     		r.put("cgs2", "no");
     		r.put("cgs3", "no");
@@ -258,10 +258,10 @@ public class L0AppJobsGeneratorTest {
     private void mockMetadataService() {
         try {
             Mockito.doAnswer(i -> {
-                String productName = i.getArgument(1);
-                Calendar start = Calendar.getInstance();
+                final String productName = i.getArgument(1);
+                final Calendar start = Calendar.getInstance();
                 start.set(2017, Calendar.DECEMBER, 5, 20, 3, 9);
-                Calendar stop = Calendar.getInstance();
+                final Calendar stop = Calendar.getInstance();
                 stop.set(2017, Calendar.DECEMBER, 15, 20, 3, 9);
                 if (productName.contains("ch1")) {
                     return new EdrsSessionMetadata(productName, "RAW",
@@ -287,7 +287,7 @@ public class L0AppJobsGeneratorTest {
             }).when(this.metadataClient).getEdrsSession(Mockito.anyString(),
                     Mockito.anyString());
             Mockito.doAnswer(i -> {
-                SearchMetadataQuery query = i.getArgument(0);
+                final SearchMetadataQuery query = i.getArgument(0);
                 if ("MPL_ORBPRE".equalsIgnoreCase(query.getProductType())) {
                     return Arrays.asList(new SearchMetadata(
                             "S1A_OPER_MPL_ORBPRE_20171208T200309_20171215T200309_0001.EOF",
@@ -322,21 +322,21 @@ public class L0AppJobsGeneratorTest {
             }).when(this.metadataClient).search(Mockito.any(), Mockito.any(),
                     Mockito.any(), Mockito.anyString(), Mockito.anyInt(),
                     Mockito.anyString(), Mockito.anyString());
-        } catch (MetadataQueryException e) {
+        } catch (final MetadataQueryException e) {
             fail(e.getMessage());
         }
     }
 
     private void mockKafkaSender() throws AbstractCodedException {
         Mockito.doAnswer(i -> {
-            ObjectMapper mapper = new ObjectMapper();
+            final ObjectMapper mapper = new ObjectMapper();
             mapper.writeValue(new File("./tmp/inputMessageL0.json"),
                     i.getArgument(0));
             mapper.writeValue(new File("./tmp/jobDtoL0.json"),
                     i.getArgument(1));
             publishedJob = i.getArgument(1);
             return null;
-        }).when(this.jobsSender).sendJob(Mockito.any(), Mockito.any());
+        }).when(this.mqiClient).publish(Mockito.any(), Mockito.any());
     }
 
     private void mockAppDataService()
@@ -345,15 +345,15 @@ public class L0AppJobsGeneratorTest {
                 .when(appDataService)
                 .findNByPodAndGenerationTaskTableWithNotSentGeneration(
                         Mockito.anyString(), Mockito.anyString());
-        AppDataJob<?> primaryCheckAppJob =
+        final AppDataJob<?> primaryCheckAppJob =
                 TestL0Utils.buildAppDataEdrsSession(true);
         primaryCheckAppJob.getGenerations().get(0)
                 .setState(AppDataJobGenerationState.PRIMARY_CHECK);
-        AppDataJob<?> readyAppJob =
+        final AppDataJob<?> readyAppJob =
                 TestL0Utils.buildAppDataEdrsSession(true);
         readyAppJob.getGenerations().get(0)
                 .setState(AppDataJobGenerationState.READY);
-        AppDataJob<?> sentAppJob =
+        final AppDataJob<?> sentAppJob =
                 TestL0Utils.buildAppDataEdrsSession(true);
         sentAppJob.getGenerations().get(0)
                 .setState(AppDataJobGenerationState.SENT);
@@ -376,11 +376,11 @@ public class L0AppJobsGeneratorTest {
 
     @Test
     public void testPreSearch() {
-        AppDataJob appDataJob =
+        final AppDataJob appDataJob =
                 TestL0Utils.buildAppDataEdrsSession(true);
-        AppDataJob appDataJobComplete =
+        final AppDataJob appDataJobComplete =
                 TestL0Utils.buildAppDataEdrsSession(false);
-        JobGeneration job =
+        final JobGeneration job =
                 new JobGeneration(appDataJob, "TaskTable.AIOP.xml");
 
         try {
@@ -399,7 +399,7 @@ public class L0AppJobsGeneratorTest {
                                 .getKeyObs(),
                         appDataJob.getProduct().getRaws2().get(i).getKeyObs());
             }
-        } catch (IpfPrepWorkerInputsMissingException e) {
+        } catch (final IpfPrepWorkerInputsMissingException e) {
             fail("MetadataMissingException raised: " + e.getMessage());
         }
     }
@@ -411,14 +411,14 @@ public class L0AppJobsGeneratorTest {
         }).when(this.metadataClient).getEdrsSession(Mockito.anyString(),
                 Mockito.anyString());
 
-        AppDataJob appDataJob =
+        final AppDataJob appDataJob =
                 TestL0Utils.buildAppDataEdrsSession(true);
-        JobGeneration job =
+        final JobGeneration job =
                 new JobGeneration(appDataJob, "TaskTable.AIOP.xml");
         try {
             generator.preSearch(job);
             fail("MetadataMissingException shall be raised");
-        } catch (IpfPrepWorkerInputsMissingException e) {
+        } catch (final IpfPrepWorkerInputsMissingException e) {
             assertTrue(e.getMissingMetadata().containsKey(
                     "DCS_02_L20171109175634707000125_ch1_DSDB_00001.raw"));
             assertTrue(e.getMissingMetadata().containsKey(

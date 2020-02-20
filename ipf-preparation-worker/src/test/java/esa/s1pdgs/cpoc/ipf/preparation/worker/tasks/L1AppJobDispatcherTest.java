@@ -113,7 +113,7 @@ public class L1AppJobDispatcherTest {
         this.mockProcessSettings();
 
         // Mock the converter
-        LevelProductsRouting routing = TestL1Utils.buildL1Routing();
+        final LevelProductsRouting routing = TestL1Utils.buildL1Routing();
         try {
             Mockito.when(
                     xmlConverter.convertFromXMLToObject(Mockito.anyString()))
@@ -144,14 +144,14 @@ public class L1AppJobDispatcherTest {
             }).when(jobsGeneratorFactory).createJobGeneratorForEdrsSession(
                     Mockito.any(), Mockito.any());
             doAnswer(i -> {
-                File f = (File) i.getArgument(0);
+                final File f = (File) i.getArgument(0);
                 if (f.getName().startsWith("IW")) {
                     return this.mockGeneratorIW;
                 }
                 return this.mockGeneratorOther;
             }).when(jobsGeneratorFactory)
                     .createJobGeneratorForL0Slice(Mockito.any(), Mockito.any());
-        } catch (IpfPrepWorkerBuildTaskTableException e) {
+        } catch (final IpfPrepWorkerBuildTaskTableException e) {
             fail("Exception occurred: " + e.getMessage());
         }
 
@@ -162,9 +162,9 @@ public class L1AppJobDispatcherTest {
                 .scheduleWithFixedDelay(Mockito.any(), Mockito.anyLong());
 
         // Retrieve number of tasktables
-        File taskTableDirectory = new File("./test/data/l1_config/task_tables");
+        final File taskTableDirectory = new File("./test/data/l1_config/task_tables");
         if (taskTableDirectory.isDirectory()) {
-            String[] files = taskTableDirectory.list();
+            final String[] files = taskTableDirectory.list();
             if (files != null) {
                 this.nbTaskTables = files.length;
             } else {
@@ -186,11 +186,11 @@ public class L1AppJobDispatcherTest {
 
     private void mockProcessSettings() {
         Mockito.doAnswer(i -> {
-            Map<String, String> r = new HashMap<String, String>(2);
+            final Map<String, String> r = new HashMap<String, String>(2);
             return r;
         }).when(processSettings).getParams();
         Mockito.doAnswer(i -> {
-            Map<String, String> r = new HashMap<String, String>(5);
+            final Map<String, String> r = new HashMap<String, String>(5);
             r.put("SM_RAW__0S", "^S1[A-B]_S[1-6]_RAW__0S.*$");
             r.put("AN_RAW__0S", "^S1[A-B]_N[1-6]_RAW__0S.*$");
             r.put("ZS_RAW__0S", "^S1[A-B]_N[1-6]_RAW__0S.*$");
@@ -215,15 +215,15 @@ public class L1AppJobDispatcherTest {
                 .when(appDataService)
                 .findNByPodAndGenerationTaskTableWithNotSentGeneration(
                         Mockito.anyString(), Mockito.anyString());
-        AppDataJob<?> primaryCheckAppJob =
+        final AppDataJob<?> primaryCheckAppJob =
                 TestL1Utils.buildJobGeneration(true);
         primaryCheckAppJob.getGenerations().get(0)
                 .setState(AppDataJobGenerationState.PRIMARY_CHECK);
-        AppDataJob<?> readyAppJob =
+        final AppDataJob<?> readyAppJob =
                 TestL1Utils.buildJobGeneration(true);
         readyAppJob.getGenerations().get(0)
                 .setState(AppDataJobGenerationState.READY);
-        AppDataJob<?> sentAppJob =
+        final AppDataJob<?> sentAppJob =
                 TestL1Utils.buildJobGeneration(true);
         sentAppJob.getGenerations().get(0)
                 .setState(AppDataJobGenerationState.SENT);
@@ -249,7 +249,7 @@ public class L1AppJobDispatcherTest {
                     .createJobGeneratorForL0Slice(any(), any());
             verify(jobsGeneratorFactory, times(1))
                     .createJobGeneratorForL0Slice(eq(taskTable1), any());
-        } catch (AbstractCodedException e) {
+        } catch (final AbstractCodedException e) {
             fail("Invalid raised exception: " + e.getMessage());
         }
     }
@@ -290,12 +290,12 @@ public class L1AppJobDispatcherTest {
                     .containsKey(taskTable4.getName()));
 
             // Verify creation of routing creation
-            LevelProductsRouting routing = TestL1Utils.buildL1Routing();
-            Map<String, List<String>> expectedRoutingMap = new HashMap<>();
+            final LevelProductsRouting routing = TestL1Utils.buildL1Routing();
+            final Map<String, List<String>> expectedRoutingMap = new HashMap<>();
             assertTrue("Invalid number of routes",
                     routing.getRoutes().size() == dispatcher.routingMap.size());
             routing.getRoutes().forEach(route -> {
-                String key = route.getRouteFrom().getAcquisition() + "_"
+                final String key = route.getRouteFrom().getAcquisition() + "_"
                         + route.getRouteFrom().getSatelliteId();
                 expectedRoutingMap.put(key, route.getRouteTo().getTaskTables());
             });
@@ -307,7 +307,7 @@ public class L1AppJobDispatcherTest {
                         expectedRoutingMap.get(k.pattern()).size() == v.size());
             });
 
-        } catch (AbstractCodedException e) {
+        } catch (final Exception e) {
             fail("Invalid raised exception: " + e.getMessage());
         }
     }
@@ -321,8 +321,7 @@ public class L1AppJobDispatcherTest {
      * @throws AbstractCodedException
      */
     @Test
-    public void testInitializeKoJAXBException()
-            throws IOException, JAXBException, AbstractCodedException {
+    public void testInitializeKoJAXBException() throws Exception {
         // Mock the XML converter to send error
         doThrow(new JAXBException("raise exception")).when(xmlConverter)
                 .convertFromXMLToObject(Mockito.anyString());
@@ -344,8 +343,7 @@ public class L1AppJobDispatcherTest {
      * @throws AbstractCodedException
      */
     @Test
-    public void testInitializeKoIOException()
-            throws IOException, JAXBException, AbstractCodedException {
+    public void testInitializeKoIOException() throws Exception {
         // Mock the XML converter to send error
         doThrow(new IOException("raise exception")).when(xmlConverter)
                 .convertFromXMLToObject(Mockito.anyString());
@@ -359,9 +357,9 @@ public class L1AppJobDispatcherTest {
     }
 
     private AppDataJob buildAppDataJobDto(
-            String satelliteId, String acquisition)
+            final String satelliteId, final String acquisition)
             throws InternalErrorException {
-        AppDataJob appDataJob =
+        final AppDataJob appDataJob =
                 TestL1Utils.buildJobGeneration(false);
         appDataJob.getProduct().setAcquisition(acquisition);
         appDataJob.getProduct().setSatelliteId(satelliteId);
@@ -371,11 +369,11 @@ public class L1AppJobDispatcherTest {
     @Test
     public void testGetTaskTablesIWA() throws ParseException {
         try {
-            AppDataJob jobA = buildAppDataJobDto("A", "IW");
+            final AppDataJob jobA = buildAppDataJobDto("A", "IW");
             this.dispatcher.initialize();
             assertEquals(5, this.dispatcher.getTaskTables(jobA).size());
 
-        } catch (AbstractCodedException e) {
+        } catch (final Exception e) {
             fail("Invalid raised exception: " + e.getMessage());
         }
     }
@@ -383,11 +381,11 @@ public class L1AppJobDispatcherTest {
     @Test
     public void testDispatchIWB() throws ParseException {
         try {
-            AppDataJob jobA = buildAppDataJobDto("B", "IW");
+            final AppDataJob jobA = buildAppDataJobDto("B", "IW");
             this.dispatcher.initialize();
             assertEquals(3, this.dispatcher.getTaskTables(jobA).size());
 
-        } catch (AbstractCodedException e) {
+        } catch (final Exception e) {
             fail("Invalid raised exception: " + e.getMessage());
         }
     }
@@ -395,11 +393,11 @@ public class L1AppJobDispatcherTest {
     @Test
     public void testDispatchS3A() throws ParseException {
         try {
-            AppDataJob jobA = buildAppDataJobDto("A", "S3");
+            final AppDataJob jobA = buildAppDataJobDto("A", "S3");
             this.dispatcher.initialize();
             assertEquals(6, this.dispatcher.getTaskTables(jobA).size());
 
-        } catch (AbstractCodedException e) {
+        } catch (final Exception e) {
             fail("Invalid raised exception: " + e.getMessage());
         }
     }
@@ -407,11 +405,11 @@ public class L1AppJobDispatcherTest {
     @Test
     public void testDispatchS5B() throws ParseException {
         try {
-            AppDataJob jobA = buildAppDataJobDto("B", "S5");
+            final AppDataJob jobA = buildAppDataJobDto("B", "S5");
             this.dispatcher.initialize();
             assertEquals(3, this.dispatcher.getTaskTables(jobA).size());
 
-        } catch (AbstractCodedException e) {
+        } catch (final Exception e) {
             fail("Invalid raised exception: " + e.getMessage());
         }
     }
@@ -419,11 +417,11 @@ public class L1AppJobDispatcherTest {
     @Test
     public void testDispatchOther() throws ParseException {
         try {
-            AppDataJob jobA = buildAppDataJobDto("A", "EW");
+            final AppDataJob jobA = buildAppDataJobDto("A", "EW");
             this.dispatcher.initialize();
             assertEquals(5, this.dispatcher.getTaskTables(jobA).size());
 
-        } catch (AbstractCodedException e) {
+        } catch (final Exception e) {
             fail("Invalid raised exception: " + e.getMessage());
         }
     }

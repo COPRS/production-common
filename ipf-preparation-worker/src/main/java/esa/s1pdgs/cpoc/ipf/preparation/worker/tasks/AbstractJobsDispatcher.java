@@ -6,6 +6,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -19,9 +20,13 @@ import esa.s1pdgs.cpoc.appcatalog.client.job.AppCatalogJobClient;
 import esa.s1pdgs.cpoc.common.ApplicationMode;
 import esa.s1pdgs.cpoc.common.errors.AbstractCodedException;
 import esa.s1pdgs.cpoc.common.errors.processing.IpfPrepWorkerMaxNumberTaskTablesReachException;
+import esa.s1pdgs.cpoc.common.utils.LogUtils;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.config.IpfPreparationWorkerSettings;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.config.ProcessSettings;
+import esa.s1pdgs.cpoc.ipf.preparation.worker.report.TaskTableLookupReportingOutput;
 import esa.s1pdgs.cpoc.mqi.model.queue.CatalogEvent;
+import esa.s1pdgs.cpoc.mqi.model.queue.IpfPreparationJob;
+import esa.s1pdgs.cpoc.mqi.model.rest.GenericMessageDto;
 import esa.s1pdgs.cpoc.report.Reporting;
 import esa.s1pdgs.cpoc.report.ReportingMessage;
 import esa.s1pdgs.cpoc.report.ReportingUtils;
@@ -112,12 +117,11 @@ public abstract class AbstractJobsDispatcher {
      * 
      * @throws AbstractCodedException
      */
-    protected void initTaskTables() throws AbstractCodedException {
+    protected void initTaskTables() throws Exception {
         // Retrieve list of XML files in the directory
         final File directoryXml = new File(this.settings.getDiroftasktables());
         if (directoryXml != null && directoryXml.isDirectory()) {
-            final File[] taskTableFiles =
-                    directoryXml.listFiles(parameter -> parameter.isFile());
+            final File[] taskTableFiles = directoryXml.listFiles(parameter -> parameter.isFile());
             if (taskTableFiles != null) {
                 if (taskTableFiles.length > this.settings
                         .getMaxnboftasktable()) {
@@ -131,7 +135,8 @@ public abstract class AbstractJobsDispatcher {
                 }
             }
         }
-
+        
+        // FIXME: check if test code below can be removed from operational code
         // Dispatch existing job with current task table configuration
         if (processSettings.getMode() != ApplicationMode.TEST) {
             final List<AppDataJob<CatalogEvent>> generatingJobs = appDataService
@@ -139,15 +144,21 @@ public abstract class AbstractJobsDispatcher {
             if (!CollectionUtils.isEmpty(generatingJobs)) {
                 for (final AppDataJob<CatalogEvent> generation : generatingJobs) {
                     // TODO ask if bypass error
-                    dispatch(generation);
+                	final GenericMessageDto<IpfPreparationJob> mess = new GenericMessageDto<IpfPreparationJob>();
+                	final IpfPreparationJob prepJob = new IpfPreparationJob();
+                	prepJob.setAppDataJob(generation);
+                	mess.setBody(prepJob);
+                    dispatch(mess);
                 }
             }
         }
 
         // Launch generators
         for (final String taskTable : generators.keySet()) {
-            taskScheduler.scheduleWithFixedDelay(generators.get(taskTable),
-                    settings.getJobgenfixedrate());
+            taskScheduler.scheduleWithFixedDelay(
+            		generators.get(taskTable),
+                    settings.getJobgenfixedrate()
+            );
         }
     }
 
@@ -169,20 +180,27 @@ public abstract class AbstractJobsDispatcher {
      * @param job
      * @throws AbstractCodedException
      */
-    public void dispatch(final AppDataJob<CatalogEvent> job)
-            throws AbstractCodedException {
-    	LOGGER.debug ("== dispatch job {}", job.toString());
-        final String productName = job.getProduct().getProductName();
-        final Reporting reporting = ReportingUtils.newReportingBuilder().newReporting("Dispatch");
-
-    	reporting.begin(new ReportingMessage("Start dispatching product"));
+    public void dispatch(final GenericMessageDto<IpfPreparationJob> message) throws Exception {
+    	final IpfPreparationJob prepJob = message.getBody();
+    	final AppDataJob<CatalogEvent> job = prepJob.getAppDataJob();    	
+    	LOGGER.trace("== dispatch job {}", job.toString());
+        
+        final Reporting reporting = ReportingUtils.newReportingBuilder()
+        		.predecessor(prepJob.getUid())
+        		.newReporting("TaskTableLookup");
+        
+    	reporting.begin(new ReportingMessage("Start associating TaskTables to AppDataJob %s", job.getId()));
     	
         try {
             final List<String> taskTables = getTaskTables(job);
             if (taskTables.isEmpty())
             {
-             LOGGER.info("Nothing to do as no TaskTables found for {}.",productName);
+            	final String errMess = String.format("No TaskTables found for AppDataJob %s", job.getId());
+            	reporting.error(new ReportingMessage(errMess));            	
+            	throw new IllegalStateException(errMess);
             }
+            LOGGER.trace("Got TaskTables {}", taskTables);
+            
             final List<String> notDealTaskTables = new ArrayList<>(taskTables);
             final List<AppDataJobGeneration> jobGens = job.getGenerations();
             LOGGER.debug ("== job.getGenerations() {}", jobGens.toString());
@@ -193,16 +211,13 @@ public abstract class AbstractJobsDispatcher {
                 // No current generation, add the new ones
                 for (final String table : taskTables) {
                     needUpdate = true;
-                    final AppDataJobGeneration jobGen =
-                            new AppDataJobGeneration();
+                    final AppDataJobGeneration jobGen = new AppDataJobGeneration();
                     jobGen.setTaskTable(table);
                     job.getGenerations().add(jobGen);
                 }
             } else {
-                // Some generation already exists, update or delete the useless
-                // ones
-                for (final Iterator<AppDataJobGeneration> iterator =
-                        jobGens.iterator(); iterator.hasNext();) {
+                // Some generation already exists, update or delete the useless ones
+                for (final Iterator<AppDataJobGeneration> iterator = jobGens.iterator(); iterator.hasNext();) {
                     final AppDataJobGeneration jobGen = iterator.next();
                     if (taskTables.contains(jobGen.getTaskTable())) {
                         notDealTaskTables.remove(jobGen.getTaskTable());
@@ -214,8 +229,7 @@ public abstract class AbstractJobsDispatcher {
                 // Create the new ones
                 for (final String taskTable : notDealTaskTables) {
                     needUpdate = true;
-                    final AppDataJobGeneration jobGen =
-                            new AppDataJobGeneration();
+                    final AppDataJobGeneration jobGen = new AppDataJobGeneration();
                     jobGen.setTaskTable(taskTable);
                     job.getGenerations().add(jobGen);
                 }
@@ -224,15 +238,27 @@ public abstract class AbstractJobsDispatcher {
             // Update task tables
             if (needUpdate) {
                 job.setState(AppDataJobState.GENERATING);
+                job.setPrepJobMessageId(message.getId());
+                job.setPrepJobInputQueue(message.getInputKey());
+                job.setReportingId(reporting.getUid());
                 appDataService.patchJob(job.getId(), job, false, false, true);
             }
-            LOGGER.debug ("== dispatched job {}", job.toString());
-            reporting.end(new ReportingMessage("End dispatching product"));
-
-
-        } catch (final AbstractCodedException ace) {
-        	reporting.error(new ReportingMessage("[code {}] {}", ace.getCode().getCode(), ace.getLogMessage()));
-            throw ace;
+            LOGGER.debug ("== dispatched job {}", job.toString());            
+            final List<String> taskTableNames = job.getGenerations().stream()
+            	.map(p -> p.getTaskTable())
+            	.collect(Collectors.toList()); 
+            
+            reporting.end(
+            		new TaskTableLookupReportingOutput(taskTableNames),
+            		new ReportingMessage("End associating TaskTables to AppDataJob %s", job.getId())
+            );
+        } catch (final Exception e) {        	
+        	reporting.error(new ReportingMessage(
+        			"Error associating TaskTables to AppDataJob %s: %s", 
+        			job.getId(),
+        			LogUtils.toString(e)
+        	));
+            throw e;
         }
     }
 
