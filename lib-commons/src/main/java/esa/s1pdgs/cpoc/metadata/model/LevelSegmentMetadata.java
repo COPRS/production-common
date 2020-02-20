@@ -13,18 +13,22 @@ public class LevelSegmentMetadata extends AbstractMetadata {
 
     private String consolidation;
 
-    private String datatakeId;
+    private String productSensingConsolidation;
+    
+
+	private String datatakeId;
 
     public LevelSegmentMetadata(final String productName,
             final String productType, final String keyObjectStorage,
             final String validityStart, final String validityStop,
             final String missionId, final String satelliteId, final String stationCode,
-            final String polarisation, final String consolidation,
+            final String polarisation, final String consolidation, final String productSensingConsolidation,
             final String datatakeId) {
         super(productName, productType, keyObjectStorage, validityStart,
                 validityStop, missionId, satelliteId, stationCode);
         this.polarisation = polarisation;
         this.consolidation = consolidation;
+        this.productSensingConsolidation = productSensingConsolidation;
         this.datatakeId = datatakeId;
     }
     
@@ -84,11 +88,20 @@ public class LevelSegmentMetadata extends AbstractMetadata {
     public void setDatatakeId(String datatakeId) {
         this.datatakeId = datatakeId;
     }
+    
+    public String getProductSensingConsolidation() {
+		return productSensingConsolidation;
+	}
+
+	public void setProductSensingConsolidation(String productSensingConsolidation) {
+		this.productSensingConsolidation = productSensingConsolidation;
+	}
+	
 
 	public String toJsonString() {
 		String superToString = super.toAbstractString();
-		return String.format("{%s,\"datatakeId\":\"%s\",\"polarisation\":\"%s\",\"consolidation\":\"%s\"}",
-				superToString, datatakeId, polarisation, consolidation);
+		return String.format("{%s,\"datatakeId\":\"%s\",\"polarisation\":\"%s\",\"consolidation\":\"%s\",\"productSensingConsolidation\":\"%s\"}",
+				superToString, datatakeId, polarisation, consolidation, productSensingConsolidation);
 	}
 
     /**
@@ -97,7 +110,7 @@ public class LevelSegmentMetadata extends AbstractMetadata {
     @Override
     public int hashCode() {
         return Objects.hash(super.hashCode(), datatakeId, polarisation,
-                consolidation);
+                consolidation,productSensingConsolidation);
     }
 
     /**
@@ -115,7 +128,8 @@ public class LevelSegmentMetadata extends AbstractMetadata {
             ret = super.equals(obj)
                     && Objects.equals(datatakeId, other.datatakeId)
                     && Objects.equals(polarisation, other.polarisation)
-                    && Objects.equals(consolidation, other.consolidation);
+                    && Objects.equals(consolidation, other.consolidation)
+                    && Objects.equals(productSensingConsolidation, other.productSensingConsolidation);
         }
         return ret;
     }
@@ -123,9 +137,9 @@ public class LevelSegmentMetadata extends AbstractMetadata {
 	@Override
 	public String toString() {
 		return "LevelSegmentMetadata [polarisation=" + polarisation + ", consolidation=" + consolidation
-				+ ", datatakeId=" + datatakeId + ", productName=" + productName + ", productType=" + productType
-				+ ", keyObjectStorage=" + keyObjectStorage + ", validityStart=" + validityStart + ", validityStop="
-				+ validityStop + ", missionId=" + missionId + ", satelliteId=" + satelliteId + ", stationCode="
-				+ stationCode + "]";
+				+ ", productSensingConsolidation=" + productSensingConsolidation + ", datatakeId=" + datatakeId 
+				+ ", productName=" + productName + ", productType=" + productType + ", keyObjectStorage=" 
+				+ keyObjectStorage + ", validityStart=" + validityStart + ", validityStop="	+ validityStop
+				+ ", missionId=" + missionId + ", satelliteId=" + satelliteId + ", stationCode=" + stationCode + "]";
 	}
 }
