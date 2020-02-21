@@ -41,7 +41,7 @@ public final class CatalogEventAdapter {
 	}
 	
 	public final String processMode() {
-		return getStringValue("processMode", null);
+		return getStringValue("processMode", "NOMINAL");
 	}
 	
 	public final String startTime() {

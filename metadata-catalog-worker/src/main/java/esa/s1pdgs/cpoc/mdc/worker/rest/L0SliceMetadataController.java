@@ -44,7 +44,7 @@ public class L0SliceMetadataController extends AbstractMetadataController<L0Slic
 	@RequestMapping(method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_UTF8_VALUE, path = "/{productName:.+}/acns")
 	public ResponseEntity<List<L0AcnMetadata>> getAcns(
 			@PathVariable(name = "productName") String productName,
-			@RequestParam(name = "processMode", defaultValue = "NONE") String processMode,
+			@RequestParam(name = "processMode", defaultValue = "NOMINAL") String processMode,
 			@RequestParam(value = "mode", defaultValue = "ALL") String mode) {
 		
 		final Callable<List<L0AcnMetadata>> acnsSupplier = new Callable<List<L0AcnMetadata>>() {
