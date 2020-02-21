@@ -145,6 +145,10 @@ public class AppDataJobService {
             update = true;
             jobDb.setPod(patchJob.getPod());
         }
+        
+        jobDb.setPrepJobInputQueue(patchJob.getPrepJobInputQueue());
+        jobDb.setPrepJobMessageId(patchJob.getPrepJobMessageId());
+        jobDb.setReportingId(patchJob.getReportingId());
 
         // Update message if needed
         if (!CollectionUtils.isEmpty(patchJob.getMessages())) {
