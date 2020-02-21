@@ -58,7 +58,7 @@ public final class SftpOutboxClient extends AbstractOutboxClient {
 				final String retVal = config.getProtocol().toString().toLowerCase() + "://" + config.getHostname() + 
 						path.toString();
 				
-				for (final Map.Entry<String, InputStream> entry : entries(obsObject, reportingFactory)) {					
+				for (final Map.Entry<String, InputStream> entry : entries(obsObject)) {					
 					final Path dest = path.resolve(entry.getKey());
 	    			String currentPath = "";
 	    			

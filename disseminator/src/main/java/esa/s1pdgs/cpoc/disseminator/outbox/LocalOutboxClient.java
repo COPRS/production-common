@@ -31,7 +31,7 @@ public final class LocalOutboxClient extends AbstractOutboxClient {
 	@Override
 	public final String transfer(final ObsObject obsObject, final ReportingFactory reportingFactory) throws Exception {		
 		final Path path = evaluatePathFor(obsObject);	
-		for (final Map.Entry<String, InputStream> entry : entries(obsObject, reportingFactory)) {
+		for (final Map.Entry<String, InputStream> entry : entries(obsObject)) {
 			
 			final File destination = path.resolve(entry.getKey()).toFile();
 			createParentIfRequired(destination);
