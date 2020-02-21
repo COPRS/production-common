@@ -238,12 +238,16 @@ public abstract class AbstractJobsDispatcher {
                 }
             }
 
+            job.setPrepJobMessageId(message.getId());
+            job.setPrepJobInputQueue(message.getInputKey());
+            job.setReportingId(reporting.getUid());
+        
             // Update task tables
             if (needUpdate) {
                 job.setState(AppDataJobState.GENERATING);
-                job.setPrepJobMessageId(message.getId());
-                job.setPrepJobInputQueue(message.getInputKey());
-                job.setReportingId(reporting.getUid());
+//                job.setPrepJobMessageId(message.getId());
+//                job.setPrepJobInputQueue(message.getInputKey());
+//                job.setReportingId(reporting.getUid());
                 appDataService.patchJob(job.getId(), job, false, false, true);
             }
             LOGGER.debug ("== dispatched job {}", job.toString());            
