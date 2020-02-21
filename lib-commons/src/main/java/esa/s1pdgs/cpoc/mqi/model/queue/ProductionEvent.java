@@ -34,6 +34,7 @@ public class ProductionEvent extends AbstractMessage {
 		this.productName = productName;
 		this.mode = mode;
 		this.oqcFlag = oqcFlag;
+		this.timeliness = timeliness;
 	}
 
 	public String getMode() {
