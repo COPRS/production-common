@@ -93,7 +93,9 @@ public class CompressionTriggerService implements MqiListener<ProductionEvent> {
 				new ReportingMessage("Start handling of event for %s", event.getProductName())
 		);
 		try {
-			publish(ProductCategory.COMPRESSION_JOBS, message, toCompressionJob(event));
+			final CompressionJob job = toCompressionJob(event);
+			job.setUid(reporting.getUid());
+			publish(ProductCategory.COMPRESSION_JOBS, message, job);
 			reporting.end(new ReportingMessage("Finished handling of event for %s", event.getProductName()));
 		} catch (final Exception e) {
 			reporting.error(new ReportingMessage("Error on handling event for %s: %s", 
@@ -131,7 +133,7 @@ public class CompressionTriggerService implements MqiListener<ProductionEvent> {
 		);
 	}
 	
-	final void publish(final ProductCategory cat, final GenericMessageDto<?> mess, final CompressionJob job) {
+	final void publish(final ProductCategory cat, final GenericMessageDto<ProductionEvent> mess, final CompressionJob job) {
     	final GenericPublicationMessageDto<CompressionJob> messageDto = new GenericPublicationMessageDto<CompressionJob>(
     			mess.getId(), 
     			job.getProductFamily(), 

@@ -95,10 +95,13 @@ public class CompressProcessor implements MqiListener<CompressionJob> {
 
 	@Override
 	public final void onMessage(final GenericMessageDto<CompressionJob> message) throws Exception {
-		final Reporting report = ReportingUtils.newReportingBuilder().newReporting("CompressionProcessing");
 		final String workDir = properties.getWorkingDirectory();
 		final CompressionJob job = message.getBody();
-
+		
+		final Reporting report = ReportingUtils.newReportingBuilder()
+				.predecessor(job.getUid())				
+				.newReporting("CompressionProcessing");
+		
 		// Initialize the pool processor executor
 		final CompressExecutorCallable procExecutor = new CompressExecutorCallable(job, properties);
 		final ExecutorService procExecutorSrv = Executors.newSingleThreadExecutor();
@@ -111,7 +114,7 @@ public class CompressProcessor implements MqiListener<CompressionJob> {
 				job,
 				properties.getSizeBatchDownload()
 		);
-		final FileUploader fileUploader = new FileUploader(obsClient, producerFactory, workDir, message, job);	
+		final FileUploader fileUploader = new FileUploader(obsClient, producerFactory, workDir, message, job, report.getUid());	
 		report.begin(
 				new FilenameReportingInput(message.getBody().getKeyObjectStorage()),
 				new ReportingMessage("Start compression processing")

@@ -1,5 +1,7 @@
 package esa.s1pdgs.cpoc.compression.worker.file;
 
+import java.util.UUID;
+
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mock;
@@ -27,11 +29,11 @@ public class FileUploaderTest {
 		// Init mocks
 		MockitoAnnotations.initMocks(this);
 
-		GenericMessageDto<CompressionJob> inputMessage = new GenericMessageDto<CompressionJob>(123, "",
+		final GenericMessageDto<CompressionJob> inputMessage = new GenericMessageDto<CompressionJob>(123, "",
 				new CompressionJob("input_key", ProductFamily.L0_ACN, "input_key.zip", ProductFamily.L0_ACN_ZIP, CompressionDirection.COMPRESS));
 
 		fileUploader = new FileUploader(obsClient, producerFactory, "/tmp/compressed", inputMessage,
-				inputMessage.getBody());
+				inputMessage.getBody(), UUID.randomUUID());
 	}
 
 	@Test

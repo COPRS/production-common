@@ -1,5 +1,7 @@
 package esa.s1pdgs.cpoc.compression.worker.mqi;
 
+import java.util.UUID;
+
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -45,11 +47,18 @@ public class OutputProducerFactory {
      * @param msg
      * @throws AbstractCodedException
      */
-    public void sendOutput(final CompressedProductQueueMessage msg, final GenericMessageDto<CompressionJob> inputMessage) throws AbstractCodedException {
+    public void sendOutput(
+    		final CompressedProductQueueMessage msg, 
+    		final GenericMessageDto<CompressionJob> inputMessage,
+    		final UUID reportingId
+    ) throws AbstractCodedException {
+    	final CompressionEvent event = toCompressionEvent(msg);
+    	event.setUid(reportingId);
+    	    	
     	final GenericPublicationMessageDto<CompressionEvent> messageDto = new GenericPublicationMessageDto<CompressionEvent>(
     			inputMessage.getId(), 
     			msg.getFamily(), 
-    			toCompressionEvent(msg)
+    			event
     	);
     	messageDto.setInputKey(inputMessage.getInputKey());
     	messageDto.setOutputKey(msg.getFamily().name());

@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
+import java.util.UUID;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -51,15 +52,18 @@ public class FileUploader {
 	 * OBS service
 	 */
 	private final ObsClient obsClient;
+	
+	private final UUID reportingUuid;
 
 	public FileUploader(final ObsClient obsClient, final OutputProducerFactory producerFactory,
 			final String workingDir, final GenericMessageDto<CompressionJob> inputMessage,
-			final CompressionJob job) {
+			final CompressionJob job, final UUID reportingUuid) {
 		this.obsClient = obsClient;
 		this.producerFactory = producerFactory;
 		this.workingDir = workingDir;
 		this.inputMessage = inputMessage;
 		this.job = job;
+		this.reportingUuid = reportingUuid;
 	}
 
 	public String processOutput(final ReportingFactory reportingFactory) throws AbstractCodedException, ObsEmptyFileException {
@@ -113,7 +117,7 @@ public class FileUploader {
 			if (nextKeyUpload.startsWith(msg.getObjectStorageKey())) {
 				stop = true;
 			} else {
-				producerFactory.sendOutput(msg, inputMessage);
+				producerFactory.sendOutput(msg, inputMessage, reportingUuid);
 				iter.remove();
 			}
 

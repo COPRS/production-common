@@ -145,7 +145,10 @@ public class DisseminationService implements MqiListener<ProductionEvent> {
 	final void handleTransferTo(final GenericMessageDto<ProductionEvent> message, final String target) {		
 		final ProductionEvent product = message.getBody();
 		
-		final Reporting reporting = ReportingUtils.newReportingBuilder().newReporting("Dissemination");		
+		final Reporting reporting = ReportingUtils.newReportingBuilder()
+				.predecessor(product.getUid())				
+				.newReporting("Dissemination");	
+		
 		reporting.begin(
 				new FilenameReportingInput(product.getKeyObjectStorage()),
 				new ReportingMessage("Start dissemination of product to outbox {}", target) 

@@ -1,8 +1,5 @@
 package esa.s1pdgs.cpoc.report;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-
 import java.util.Collections;
 import java.util.UUID;
 
@@ -33,13 +30,4 @@ public final class ITReporting {
 		
 		//LOG.debug("foo bar");
 	}
-	
-	@Test
-	public final void testRootUID() {
-		final Reporting uut =  ReportingUtils.newReportingBuilder().newReporting("root");		
-		assertNotNull(uut.getRootUID());
-		final Reporting uutChild = uut.newReporting("childOfRoot");
-		assertEquals(uut.getRootUID(), uutChild.getRootUID());
-	}
-
 }
