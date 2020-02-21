@@ -130,14 +130,18 @@ public class ValidationService {
 			 */
 			final List<Discrepancy> discrepancies = new ArrayList<>();
 			for (final SearchMetadata smd : metadataResults) {
-				try {
-					// If its a zipped family, we need to extend the filename
-					String key = smd.getKeyObjectStorage();					
-					if (family.name().endsWith("_ZIP")) {
-						key += ".zip";
-					} 
+				// If its a zipped family, we need to extend the filename
+				String key = smd.getKeyObjectStorage();					
+				if (family.name().endsWith("_ZIP")) {
+					key += ".zip";
+				} 
+				final Reporting obsReporting = reporting.newReporting("ValidateObs");
+				try {	
+					obsReporting.begin(new ReportingMessage("Validating %s", key));
 					obsClient.validate(new ObsObject(family, key));
+					obsReporting.end(new ReportingMessage("%s is valid", key));
 				} catch (ObsServiceException | ObsValidationException ex) {
+					obsReporting.error(new ReportingMessage("%s is invalid: %s", key, ex.getMessage()));
 					// Validation failed for that object.
 					LOGGER.debug(ex);
 					discrepancies.add(new Discrepancy(smd.getKeyObjectStorage(), ex.getMessage()));
