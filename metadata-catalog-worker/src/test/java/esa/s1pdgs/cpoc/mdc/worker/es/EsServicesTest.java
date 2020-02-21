@@ -881,13 +881,15 @@ public class EsServicesTest{
         expectedResult.setValidityStart("2000-01-01T00:00:00.000000Z");
         expectedResult.setValidityStop("2001-01-01T00:00:00.000000Z");
         expectedResult.setConsolidation("FULL");
+        expectedResult.setProductSensingConsolidation("NOT_DEFINED");
         expectedResult.setPolarisation("SV");
         expectedResult.setDatatakeId("datatakeId");
         
         //Response 
         BytesReference source = new BytesArray("{\"productName\":\"name\",\"url\""
                 + ":\"url\",\"startTime\":\"2000-01-01T00:00:00.000000Z\",\"stopTime\":"
-                + "\"2001-01-01T00:00:00.000000Z\", \"productConsolidation\":\"FULL\", \"polarisation\":\"SV\", "
+                + "\"2001-01-01T00:00:00.000000Z\", \"productConsolidation\":\"FULL\", "
+                + "\"productSensingConsolidation\":\"NOT_DEFINED\", \"polarisation\":\"SV\", "
                 + "\"dataTakeId\":\"datatakeId\","
                 + "\"productType\": \"product_type\"}");
         GetResult getResult = new GetResult("index", "l0_segment", "id", 0, true, source, null);
