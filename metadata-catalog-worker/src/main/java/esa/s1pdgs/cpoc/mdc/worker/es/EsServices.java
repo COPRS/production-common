@@ -949,9 +949,9 @@ public class EsServices {
 			throw new MetadataMalformedException("productConsolidation");
 		}
 		if (source.containsKey("productSensingConsolidation")) {
-			r.setConsolidation(source.get("productSensingConsolidation").toString());
+			r.setProductSensingConsolidation(source.get("productSensingConsolidation").toString());
 		} else {
-			throw new MetadataMalformedException("productSensingConsolidation");
+			r.setProductSensingConsolidation("NOT_DEFINED");
 		}
 		return r;
 	}
