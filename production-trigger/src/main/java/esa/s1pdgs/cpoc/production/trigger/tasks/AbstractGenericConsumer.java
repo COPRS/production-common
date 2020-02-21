@@ -202,7 +202,7 @@ public abstract class AbstractGenericConsumer<T extends AbstractMessage> impleme
 			if (seaCoverageCheckPattern.matcher(productName).matches()) {   
 				seaReport.begin(new FilenameReportingInput(productName), new ReportingMessage("Checking sea coverage"));				
 				if (metadataClient.getSeaCoverage(family, productName) <= processSettings.getMinSeaCoveragePercentage()) {
-					seaReport.end(new ReportingMessage("Product %s is not over sea"));
+					seaReport.end(new ReportingMessage("Product %s is not over sea", productName));
 					reporting.end(new ReportingMessage("Product %s is not over sea, skipping", productName));
 					LOGGER.warn("Skipping job generation for product {} because it is not over sea", productName);
 			        return true;
