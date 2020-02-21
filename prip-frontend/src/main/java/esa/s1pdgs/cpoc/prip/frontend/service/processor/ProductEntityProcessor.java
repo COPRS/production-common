@@ -29,13 +29,19 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import esa.s1pdgs.cpoc.common.errors.obs.ObsException;
+import esa.s1pdgs.cpoc.common.utils.LogUtils;
 import esa.s1pdgs.cpoc.obs_sdk.ObsClient;
 import esa.s1pdgs.cpoc.obs_sdk.ObsObject;
 import esa.s1pdgs.cpoc.obs_sdk.ObsServiceException;
+import esa.s1pdgs.cpoc.prip.frontend.report.PripReportingInput;
+import esa.s1pdgs.cpoc.prip.frontend.report.PripReportingOutput;
 import esa.s1pdgs.cpoc.prip.frontend.service.edm.EdmProvider;
 import esa.s1pdgs.cpoc.prip.frontend.service.mapping.MappingUtil;
 import esa.s1pdgs.cpoc.prip.metadata.PripMetadataRepository;
 import esa.s1pdgs.cpoc.prip.model.PripMetadata;
+import esa.s1pdgs.cpoc.report.Reporting;
+import esa.s1pdgs.cpoc.report.ReportingMessage;
+import esa.s1pdgs.cpoc.report.ReportingUtils;
 
 public class ProductEntityProcessor implements EntityProcessor, MediaEntityProcessor {
 
@@ -47,39 +53,39 @@ public class ProductEntityProcessor implements EntityProcessor, MediaEntityProce
 	private ObsClient obsClient;
 	private long downloadUrlExpirationTimeInSeconds;
 
-	public ProductEntityProcessor(PripMetadataRepository pripMetadataRepository,
-			ObsClient obsClient, long downloadUrlExpirationTimeInSeconds) {
+	public ProductEntityProcessor(final PripMetadataRepository pripMetadataRepository,
+			final ObsClient obsClient, final long downloadUrlExpirationTimeInSeconds) {
 		this.pripMetadataRepository = pripMetadataRepository;
 		this.obsClient = obsClient;
 		this.downloadUrlExpirationTimeInSeconds = downloadUrlExpirationTimeInSeconds;
 	}
 	
 	@Override
-	public void init(OData odata, ServiceMetadata serviceMetadata) {
+	public void init(final OData odata, final ServiceMetadata serviceMetadata) {
 		this.odata = odata;
 		this.serviceMetadata = serviceMetadata;
 	}
 
 	@Override
-	public void readEntity(ODataRequest request, ODataResponse response, UriInfo uriInfo, ContentType responseFormat)
+	public void readEntity(final ODataRequest request, final ODataResponse response, final UriInfo uriInfo, final ContentType responseFormat)
 			throws ODataApplicationException, ODataLibraryException {
-		List<UriResource> resourcePaths = uriInfo.getUriResourceParts();
-		UriResourceEntitySet uriResourceEntitySet = (UriResourceEntitySet) resourcePaths.get(0);
-		EdmEntitySet edmEntitySet = uriResourceEntitySet.getEntitySet();
+		final List<UriResource> resourcePaths = uriInfo.getUriResourceParts();
+		final UriResourceEntitySet uriResourceEntitySet = (UriResourceEntitySet) resourcePaths.get(0);
+		final EdmEntitySet edmEntitySet = uriResourceEntitySet.getEntitySet();
 		
-		List<UriParameter> keyPredicates = uriResourceEntitySet.getKeyPredicates();
+		final List<UriParameter> keyPredicates = uriResourceEntitySet.getKeyPredicates();
 		if (EdmProvider.ES_PRODUCTS_NAME.equals(edmEntitySet.getName()) && keyPredicates.size() >= 1) {
-			String uuid = keyPredicates.get(0).getText().replace("'", "");
-			PripMetadata foundPripMetadata = pripMetadataRepository.findById(uuid);
+			final String uuid = keyPredicates.get(0).getText().replace("'", "");
+			final PripMetadata foundPripMetadata = pripMetadataRepository.findById(uuid);
 			if (null != foundPripMetadata) {
-				Entity entity = MappingUtil.pripMetadataToEntity(foundPripMetadata, request.getRawBaseUri());
+				final Entity entity = MappingUtil.pripMetadataToEntity(foundPripMetadata, request.getRawBaseUri());
 							
-				ContextURL contextUrl = ContextURL.with().entitySet(edmEntitySet).build();
-				EntitySerializerOptions options = EntitySerializerOptions.with().contextURL(contextUrl).build();
+				final ContextURL contextUrl = ContextURL.with().entitySet(edmEntitySet).build();
+				final EntitySerializerOptions options = EntitySerializerOptions.with().contextURL(contextUrl).build();
 				
-				ODataSerializer serializer = odata.createSerializer(responseFormat);
-				SerializerResult serializerResult = serializer.entity(serviceMetadata, edmEntitySet.getEntityType(), entity, options);
-				InputStream entityStream = serializerResult.getContent();
+				final ODataSerializer serializer = odata.createSerializer(responseFormat);
+				final SerializerResult serializerResult = serializer.entity(serviceMetadata, edmEntitySet.getEntityType(), entity, options);
+				final InputStream entityStream = serializerResult.getContent();
 				
 				response.setContent(entityStream);
 				response.setStatusCode(HttpStatusCode.OK.getStatusCode());
@@ -94,23 +100,45 @@ public class ProductEntityProcessor implements EntityProcessor, MediaEntityProce
 	}
 
 	@Override
-	public void readMediaEntity(ODataRequest request, ODataResponse response, UriInfo uriInfo,
-			ContentType responseFormat) throws ODataApplicationException, ODataLibraryException {
-		List<UriResource> resourcePaths = uriInfo.getUriResourceParts();
-		UriResourceEntitySet uriResourceEntitySet = (UriResourceEntitySet) resourcePaths.get(0);
-		EdmEntitySet edmEntitySet = uriResourceEntitySet.getEntitySet();
+	public void readMediaEntity(final ODataRequest request, final ODataResponse response, final UriInfo uriInfo,
+			final ContentType responseFormat) throws ODataApplicationException, ODataLibraryException {
+		final List<UriResource> resourcePaths = uriInfo.getUriResourceParts();
+		final UriResourceEntitySet uriResourceEntitySet = (UriResourceEntitySet) resourcePaths.get(0);
+		final EdmEntitySet edmEntitySet = uriResourceEntitySet.getEntitySet();
 		
-		List<UriParameter> keyPredicates = uriResourceEntitySet.getKeyPredicates();
+		final List<UriParameter> keyPredicates = uriResourceEntitySet.getKeyPredicates();
 		if (EdmProvider.ES_PRODUCTS_NAME.equals(edmEntitySet.getName()) && keyPredicates.size() >= 1) {
-			String uuid = keyPredicates.get(0).getText().replace("'", "");
-			PripMetadata foundPripMetadata = pripMetadataRepository.findById(uuid);
-			if (null != foundPripMetadata) {
+			final String uuid = keyPredicates.get(0).getText().replace("'", "");
+			final PripMetadata foundPripMetadata = pripMetadataRepository.findById(uuid);
+			if (null != foundPripMetadata) {		
+				final Reporting reporting = ReportingUtils.newReportingBuilder()
+						.newReporting("PripTempDownloadUrl");
+				// currently used username
+				final String username = "anonymous";
+				
+				reporting.begin(
+						new PripReportingInput(foundPripMetadata.getObsKey(), username),
+						new ReportingMessage("Creating temporary download URL for obsKey %s for user %s", foundPripMetadata.getObsKey(), username)
+				);
 				URL url;
 				try {
 					url = obsClient.createTemporaryDownloadUrl(new ObsObject(foundPripMetadata.getProductFamily(),
 							foundPripMetadata.getObsKey()), downloadUrlExpirationTimeInSeconds);
+					final String urlString = url.toString();
+					reporting.end(
+							new PripReportingOutput(urlString),
+							new ReportingMessage("Temporary download URL for obsKey %s for user %s", foundPripMetadata.getObsKey(), username)
+					);
 				} catch (ObsException | ObsServiceException e) {
 					LOGGER.error("Could not create temporary download URL for product with id '{}'", uuid);
+					reporting.error(
+							new ReportingMessage(
+									"Error on creating download URL for obsKey %s for user %s: %s",
+									foundPripMetadata.getObsKey(),
+									username,
+									LogUtils.toString(e)
+							)
+					);
 					response.setStatusCode(HttpStatusCode.INTERNAL_SERVER_ERROR.getStatusCode());
 					return;
 				}
@@ -128,39 +156,39 @@ public class ProductEntityProcessor implements EntityProcessor, MediaEntityProce
 	}
 	
 	@Override
-	public void createEntity(ODataRequest request, ODataResponse response, UriInfo uriInfo, ContentType requestFormat,
-			ContentType responseFormat) throws ODataApplicationException, ODataLibraryException {
+	public void createEntity(final ODataRequest request, final ODataResponse response, final UriInfo uriInfo, final ContentType requestFormat,
+			final ContentType responseFormat) throws ODataApplicationException, ODataLibraryException {
 		// Not supported
 	}
 
 	@Override
-	public void updateEntity(ODataRequest request, ODataResponse response, UriInfo uriInfo, ContentType requestFormat,
-			ContentType responseFormat) throws ODataApplicationException, ODataLibraryException {
+	public void updateEntity(final ODataRequest request, final ODataResponse response, final UriInfo uriInfo, final ContentType requestFormat,
+			final ContentType responseFormat) throws ODataApplicationException, ODataLibraryException {
 		// Not supported
 	}
 
 	@Override
-	public void deleteEntity(ODataRequest request, ODataResponse response, UriInfo uriInfo)
+	public void deleteEntity(final ODataRequest request, final ODataResponse response, final UriInfo uriInfo)
 			throws ODataApplicationException, ODataLibraryException {
 		// Not supported
 	}
 
 	@Override
-	public void createMediaEntity(ODataRequest request, ODataResponse response, UriInfo uriInfo,
-			ContentType requestFormat, ContentType responseFormat)
+	public void createMediaEntity(final ODataRequest request, final ODataResponse response, final UriInfo uriInfo,
+			final ContentType requestFormat, final ContentType responseFormat)
 			throws ODataApplicationException, ODataLibraryException {
 		// Not supported
 	}
 
 	@Override
-	public void updateMediaEntity(ODataRequest request, ODataResponse response, UriInfo uriInfo,
-			ContentType requestFormat, ContentType responseFormat)
+	public void updateMediaEntity(final ODataRequest request, final ODataResponse response, final UriInfo uriInfo,
+			final ContentType requestFormat, final ContentType responseFormat)
 			throws ODataApplicationException, ODataLibraryException {
 		// Not supported
 	}
 
 	@Override
-	public void deleteMediaEntity(ODataRequest request, ODataResponse response, UriInfo uriInfo)
+	public void deleteMediaEntity(final ODataRequest request, final ODataResponse response, final UriInfo uriInfo)
 			throws ODataApplicationException, ODataLibraryException {
 		// Not supported
 	}
