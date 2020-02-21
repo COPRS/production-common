@@ -16,7 +16,6 @@ public interface Reporting extends ReportingFactory {
 			return addTags(Collections.singleton(tag));
 		}
 		Builder addTags(Collection<String> tags);
-		void newEventReporting(ReportingMessage reportingMessage);
 	}
 	
 	enum Event {
@@ -47,11 +46,6 @@ public interface Reporting extends ReportingFactory {
 			return null;
 		}
 		@Override
-		public UUID getRootUID() {
-			return null;
-		}
-
-		@Override
 		public void begin(final ReportingInput input, final ReportingMessage reportingMessage) {}
 
 		@Override
@@ -67,8 +61,6 @@ public interface Reporting extends ReportingFactory {
 	};
 	
 	UUID getUid();
-
-	UUID getRootUID();
 	
 	default void begin(final ReportingMessage reportingMessage) {
 		begin(ReportingInput.NULL, reportingMessage);

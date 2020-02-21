@@ -64,17 +64,6 @@ public final class ReportAdapter implements Reporting {
 			return new ReportAdapter(this);
 		}
 		
-		@Override
-		public void newEventReporting(final ReportingMessage reportingMessage) {
-			final ReportAdapter reportAdapter = new ReportAdapter(this);
-			assertRootIsSet();
-			reportAdapter.appender.report(new JacksonReportEntry(
-					new Header(Level.INFO), 
-					new Message(reportAdapter.toString(reportingMessage)),
-					null
-			));			
-		}
-		
 		private void assertRootIsSet() {
 			// if no external rood uid is provided, this uid is the root id
 			if (rootUid == null) {
@@ -119,11 +108,6 @@ public final class ReportAdapter implements Reporting {
 		return uid;
 	}
 
-	@Override
-	public UUID getRootUID() {
-		return rootUid;
-	}
-	
 	@Override
 	public final void begin(final ReportingInput in, final ReportingMessage reportingMessage) {
 		actionStart = System.currentTimeMillis();
