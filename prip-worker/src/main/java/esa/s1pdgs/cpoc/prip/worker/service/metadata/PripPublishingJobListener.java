@@ -2,6 +2,7 @@ package esa.s1pdgs.cpoc.prip.worker.service.metadata;
 
 import java.time.LocalDateTime;
 import java.util.Arrays;
+import java.util.Date;
 import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.ExecutorService;
@@ -19,6 +20,7 @@ import esa.s1pdgs.cpoc.appstatus.AppStatus;
 import esa.s1pdgs.cpoc.common.ProductCategory;
 import esa.s1pdgs.cpoc.common.ProductFamily;
 import esa.s1pdgs.cpoc.common.errors.obs.ObsException;
+import esa.s1pdgs.cpoc.common.utils.LogUtils;
 import esa.s1pdgs.cpoc.mqi.client.GenericMqiClient;
 import esa.s1pdgs.cpoc.mqi.client.MqiConsumer;
 import esa.s1pdgs.cpoc.mqi.client.MqiListener;
@@ -29,6 +31,10 @@ import esa.s1pdgs.cpoc.obs_sdk.ObsObject;
 import esa.s1pdgs.cpoc.prip.metadata.PripMetadataRepository;
 import esa.s1pdgs.cpoc.prip.model.Checksum;
 import esa.s1pdgs.cpoc.prip.model.PripMetadata;
+import esa.s1pdgs.cpoc.prip.worker.report.PripReportingInput;
+import esa.s1pdgs.cpoc.report.Reporting;
+import esa.s1pdgs.cpoc.report.ReportingMessage;
+import esa.s1pdgs.cpoc.report.ReportingUtils;
 
 @Service
 public class PripPublishingJobListener implements MqiListener<PripPublishingJob> {
@@ -58,7 +64,7 @@ public class PripPublishingJobListener implements MqiListener<PripPublishingJob>
 		this.pollingInitialDelayMs = pollingInitialDelayMs;
 		this.appStatus = appStatus;
 	}
-
+	
 	@PostConstruct
 	public void initService() {
 		if (pollingIntervalMs > 0) {
@@ -73,6 +79,8 @@ public class PripPublishingJobListener implements MqiListener<PripPublishingJob>
 			));
 		}
 	}
+	
+
 
 	@Override
 	public void onMessage(final GenericMessageDto<PripPublishingJob> message) {
@@ -80,22 +88,40 @@ public class PripPublishingJobListener implements MqiListener<PripPublishingJob>
 		LOGGER.debug("starting saving PRIP metadata, got message: {}", message);
 
 		final PripPublishingJob publishingJob = message.getBody();
-		final LocalDateTime creationDate = LocalDateTime.now();
+		
+		final Reporting reporting = ReportingUtils.newReportingBuilder()
+				.predecessor(publishingJob.getUid())
+				.newReporting("PripWorker");
+		
+		final String name = removeZipSuffix(publishingJob.getKeyObjectStorage());
+		
+		reporting.begin(
+				new PripReportingInput(name, new Date()),
+				new ReportingMessage("Publishing file %s in PRIP", name)
+		);
+		
+		try {
+			final LocalDateTime creationDate = LocalDateTime.now();
 
-		final PripMetadata pripMetadata = new PripMetadata();
-		pripMetadata.setId(UUID.randomUUID());
-		pripMetadata.setObsKey(publishingJob.getKeyObjectStorage());
-		pripMetadata.setName(publishingJob.getKeyObjectStorage());
-		pripMetadata.setProductFamily(publishingJob.getProductFamily());
-		pripMetadata.setContentType(PripMetadata.DEFAULT_CONTENTTYPE);
-		pripMetadata.setContentLength(getContentLength(publishingJob.getProductFamily(), publishingJob.getKeyObjectStorage()));
-		pripMetadata.setCreationDate(creationDate);
-		pripMetadata.setEvictionDate(creationDate.plusDays(PripMetadata.DEFAULT_EVICTION_DAYS));
-		pripMetadata.setChecksums(getChecksums(publishingJob.getProductFamily(), publishingJob.getKeyObjectStorage()));
+			final PripMetadata pripMetadata = new PripMetadata();
+			pripMetadata.setId(UUID.randomUUID());
+			pripMetadata.setObsKey(publishingJob.getKeyObjectStorage());
+			pripMetadata.setName(publishingJob.getKeyObjectStorage());
+			pripMetadata.setProductFamily(publishingJob.getProductFamily());
+			pripMetadata.setContentType(PripMetadata.DEFAULT_CONTENTTYPE);
+			pripMetadata.setContentLength(getContentLength(publishingJob.getProductFamily(), publishingJob.getKeyObjectStorage()));
+			pripMetadata.setCreationDate(creationDate);
+			pripMetadata.setEvictionDate(creationDate.plusDays(PripMetadata.DEFAULT_EVICTION_DAYS));
+			pripMetadata.setChecksums(getChecksums(publishingJob.getProductFamily(), publishingJob.getKeyObjectStorage()));
 
-		pripMetadataRepo.save(pripMetadata);
+			pripMetadataRepo.save(pripMetadata);
 
-		LOGGER.debug("end of saving PRIP metadata: {}", pripMetadata);
+			LOGGER.debug("end of saving PRIP metadata: {}", pripMetadata);
+			reporting.end(new ReportingMessage("Finished publishing file %s in PRIP", name));
+		} catch (final Exception e) {
+			reporting.end(new ReportingMessage("Error on publishing file %s in PRIP: %s", name, LogUtils.toString(e)));
+			throw e;
+		}
 	}
 
 	private long getContentLength(final ProductFamily family, final String key) {
@@ -122,5 +148,12 @@ public class PripPublishingJobListener implements MqiListener<PripPublishingJob>
 
 		}
 		return Arrays.asList(checksum);
+	}
+	
+	static final String removeZipSuffix(final String name) {
+		if (name.toLowerCase().endsWith(".zip")){
+			return name.substring(0, name.length() - ".zip".length());
+		}
+		return name;
 	}
 }
