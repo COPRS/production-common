@@ -114,7 +114,7 @@ public class ProductEntityProcessor implements EntityProcessor, MediaEntityProce
 				final Reporting reporting = ReportingUtils.newReportingBuilder()
 						.newReporting("PripTempDownloadUrl");
 				// currently used username
-				final String username = "anonymous";
+				final String username = "not defined";
 				
 				reporting.begin(
 						new PripReportingInput(foundPripMetadata.getObsKey(), username),
