@@ -70,16 +70,16 @@ public class AppDataJobTest {
         
         // check toString
         String str = obj.toString();
-        assertTrue(str.contains("id: 123"));
-        assertTrue(str.contains("level: L1"));
-        assertTrue(str.contains("state: DISPATCHING"));
-        assertTrue(str.contains("pod: pod-name"));
-        assertTrue(str.contains("creationDate: "));
-        assertTrue(str.contains("lastUpdateDate: "));
-        assertTrue(str.contains("category: AUXILIARY_FILES"));
-        assertTrue(str.contains("product: " + product.toString()));
-        assertTrue(str.contains("messages: " + Arrays.asList(message1, message2).toString()));
-        assertTrue(str.contains("generations: " + Arrays.asList(gen1, gen2, gen3).toString()));
+        assertTrue(str.contains("id=123"));
+        assertTrue(str.contains("level=L1"));
+        assertTrue(str.contains("state=DISPATCHING"));
+        assertTrue(str.contains("pod=pod-name"));
+        assertTrue(str.contains("creationDate="));
+        assertTrue(str.contains("lastUpdateDate="));
+        assertTrue(str.contains("category=AUXILIARY_FILES"));
+        assertTrue(str.contains("product=" + product.toString()));
+        assertTrue(str.contains("messages=" + Arrays.asList(message1, message2).toString()));
+        assertTrue(str.contains("generations=" + Arrays.asList(gen1, gen2, gen3).toString()));
     }
 
     /**
