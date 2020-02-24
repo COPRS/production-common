@@ -121,15 +121,19 @@ public class OutputProducerFactoryTest {
      */
     @Test
     public void testSendProduct() throws AbstractCodedException {
+    	final UUID uid = UUID.randomUUID();
+    	
     	final GenericPublicationMessageDto<ProductionEvent> actualMessage = this.outputProcuderFactory.sendOutput(
         		new ObsQueueMessage(ProductFamily.L0_SLICE,"test.txt", "test.txt", "NRT"), 
         		inputMessage,
-                UUID.randomUUID()
+        		uid
         );
     	
     	final ProductionEvent expectedEvent = new ProductionEvent("test.txt","test.txt", ProductFamily.L0_SLICE, "NRT");    	
     	// for equals to work, creation time needs to be equal as well
     	expectedEvent.setCreationDate(actualMessage.getMessageToPublish().getCreationDate());
+    	expectedEvent.setUid(uid);
+    	expectedEvent.setTimeliness("FAST24");
         final GenericPublicationMessageDto<ProductionEvent> expectedMessage = new GenericPublicationMessageDto<ProductionEvent>(
         		123,
         		ProductFamily.L0_SLICE, 
@@ -149,14 +153,19 @@ public class OutputProducerFactoryTest {
      */
     @Test
     public void testSendSegment() throws AbstractCodedException {
+    	final UUID uid = UUID.randomUUID();
+    	
     	final GenericPublicationMessageDto<ProductionEvent> actualMessage = this.outputProcuderFactory.sendOutput(
         		new ObsQueueMessage(ProductFamily.L0_SEGMENT,"test.txt", "test.txt", "NRT"), 
         		inputMessage,
-                UUID.randomUUID()
+        		uid
         );
         final ProductionEvent expectedEvent = new ProductionEvent("test.txt","test.txt", ProductFamily.L0_SEGMENT, "NRT");
     	// for equals to work, creation time needs to be equal as well
     	expectedEvent.setCreationDate(actualMessage.getMessageToPublish().getCreationDate());
+        expectedEvent.setTimeliness("FAST24");
+        expectedEvent.setUid(uid);
+        
         final GenericPublicationMessageDto<ProductionEvent> expectedMessage = new GenericPublicationMessageDto<ProductionEvent>(
         		123,
         		ProductFamily.L0_SEGMENT, 
@@ -173,14 +182,19 @@ public class OutputProducerFactoryTest {
      */
     @Test
     public void testSendAcn() throws AbstractCodedException {
+    	final UUID uuid = UUID.randomUUID();
+    	
     	final GenericPublicationMessageDto<ProductionEvent> actualMessage = this.outputProcuderFactory.sendOutput(
         		new ObsQueueMessage(ProductFamily.L0_ACN,"test.txt", "test.txt", "FAST"), 
         		inputMessage,
-                UUID.randomUUID()
+        		uuid
         );
         final ProductionEvent expectedEvent = new ProductionEvent("test.txt","test.txt", ProductFamily.L0_ACN, "FAST");
     	// for equals to work, creation time needs to be equal as well
     	expectedEvent.setCreationDate(actualMessage.getMessageToPublish().getCreationDate());
+        expectedEvent.setTimeliness("FAST24");
+        expectedEvent.setUid(uuid);
+        
         final GenericPublicationMessageDto<ProductionEvent> expectedMessage = new GenericPublicationMessageDto<ProductionEvent>(
         		123,
         		ProductFamily.L0_ACN, 
@@ -226,14 +240,17 @@ public class OutputProducerFactoryTest {
      */
     @Test
     public void testSendL1Product() throws AbstractCodedException {
+       	final UUID uuid = UUID.randomUUID();
         final GenericPublicationMessageDto<ProductionEvent> actualMessage = this.outputProcuderFactory.sendOutput(
         		new ObsQueueMessage(ProductFamily.L1_SLICE, "test.txt", "test.txt", "FAST"), 
         		inputMessage,
-                UUID.randomUUID()
+        		uuid
         );
         final ProductionEvent expectedEvent = new ProductionEvent("test.txt", "test.txt", ProductFamily.L1_SLICE, "FAST");        
     	// for equals to work, creation time needs to be equal as well
         expectedEvent.setCreationDate(actualMessage.getMessageToPublish().getCreationDate());
+        expectedEvent.setTimeliness("FAST24");
+        expectedEvent.setUid(uuid);
         
         final GenericPublicationMessageDto<ProductionEvent> expectedMessage = new GenericPublicationMessageDto<ProductionEvent>(
         		123,
@@ -241,6 +258,7 @@ public class OutputProducerFactoryTest {
         		expectedEvent
         );
         expectedMessage.setOutputKey("L1_SLICE");
+
         
         verify(this.sender, times(1)).publish(Mockito.eq(expectedMessage), Mockito.eq(ProductCategory.LEVEL_PRODUCTS));
         verify(this.sender, never()).publish(Mockito.any(), Mockito.eq(ProductCategory.LEVEL_REPORTS));        
@@ -253,14 +271,19 @@ public class OutputProducerFactoryTest {
      */
     @Test
     public void testSendL1Acn() throws AbstractCodedException {
+    	final UUID uuid = UUID.randomUUID();
+    	
     	 final GenericPublicationMessageDto<ProductionEvent> actualMessage = this.outputProcuderFactory.sendOutput(
         		new ObsQueueMessage(ProductFamily.L1_ACN,"test.txt", "test.txt", "NRT"), 
         		inputMessage,
-                UUID.randomUUID()
+        		uuid
         );
         final ProductionEvent expectedEvent = new ProductionEvent("test.txt","test.txt", ProductFamily.L1_ACN, "NRT");
     	// for equals to work, creation time needs to be equal as well
         expectedEvent.setCreationDate(actualMessage.getMessageToPublish().getCreationDate());
+        expectedEvent.setTimeliness("FAST24");
+        expectedEvent.setUid(uuid);
+        
         final GenericPublicationMessageDto<ProductionEvent> expectedMessage = new GenericPublicationMessageDto<ProductionEvent>(
         		123,
         		ProductFamily.L1_ACN, 
