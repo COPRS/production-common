@@ -9,6 +9,11 @@ ARG BRANCH_TEXT
 
 WORKDIR /app
 
+# Workaround. As we are not running as user anymore, we will need to enforce permission to /app folder as logging will fail
+USER root:root
+RUN chown s1pdgs:s1pdgs /app -R
+RUN chown s1pdgs:s1pdgs /data/localWD -R
+
 RUN echo "${VERSION}" >> VERSION
 RUN echo "${BRANCH_TEXT}" >> VERSION
 RUN echo "${COMMIT_ID}" >> VERSION
@@ -22,5 +27,7 @@ ENV TINI_VERSION v0.18.0
 ADD https://github.com/krallin/tini/releases/download/${TINI_VERSION}/tini /tini
 RUN chmod +x /tini
 ENTRYPOINT ["/tini", "--"]
+
+USER s1pdgs:s1pdgs
 
 CMD ["/app/start.sh"]
