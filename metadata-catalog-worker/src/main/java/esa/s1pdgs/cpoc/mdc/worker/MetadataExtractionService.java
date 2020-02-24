@@ -91,7 +91,9 @@ public class MetadataExtractionService implements MqiListener<CatalogJob> {
 		final String productName = catJob.getProductName();
 		final ProductFamily family = catJob.getProductFamily();		
 		final ProductCategory category = ProductCategory.of(family);
-		final Reporting reporting = ReportingUtils.newReportingBuilder().newReporting("MetadataExtraction");
+		final Reporting reporting = ReportingUtils.newReportingBuilder()
+				.predecessor(catJob.getUid())				
+				.newReporting("MetadataExtraction");
     
 		reporting.begin(new FilenameReportingInput(productName), new ReportingMessage("Starting metadata extraction"));   
 				
@@ -169,7 +171,7 @@ public class MetadataExtractionService implements MqiListener<CatalogJob> {
 
 		String outputKey = "";
 
-		Object timeliness = event.getMetadata().get("timeliness");
+		final Object timeliness = event.getMetadata().get("timeliness");
 		if (timeliness != null) {
 			outputKey = event.getProductFamily().name() + "@" + timeliness;
 		} else {
