@@ -208,7 +208,7 @@ public abstract class AbstractGenericConsumer<T extends AbstractMessage> impleme
 			        return true;
 			    }
 				else {
-					seaReport.end(new ReportingMessage("Product %s is over sea"));
+					seaReport.end(new ReportingMessage("Product %s is over sea", productName));
 				}
 			}
 		} catch (final Exception e) {
