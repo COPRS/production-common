@@ -40,6 +40,7 @@ import esa.s1pdgs.cpoc.mqi.model.queue.IpfExecutionJob;
 import esa.s1pdgs.cpoc.mqi.model.rest.GenericMessageDto;
 import esa.s1pdgs.cpoc.obs_sdk.ObsClient;
 import esa.s1pdgs.cpoc.report.Reporting;
+import esa.s1pdgs.cpoc.report.ReportingFactory;
 import esa.s1pdgs.cpoc.report.ReportingOutput;
 import esa.s1pdgs.cpoc.report.ReportingUtils;
 
@@ -265,9 +266,9 @@ public class JobProcessorTest extends MockPropertiesTest {
         // Check step 3
         verify(procExecutor, times(1)).call();
         // Check step 2
-        verify(inputDownloader, times(1)).processInputs(reporting);
+        verify(inputDownloader, times(1)).processInputs(ReportingFactory.NULL);
         // Check step 4
-        verify(outputProcessor, times(1)).processOutput(reporting, UUID.randomUUID());
+        verify(outputProcessor, times(1)).processOutput(ReportingFactory.NULL, UUID.randomUUID());
         // Check step 5
         assertFalse(workingDir.exists());
         // Check step 6
@@ -292,9 +293,9 @@ public class JobProcessorTest extends MockPropertiesTest {
         // Check step 3
         verify(procExecutor, times(1)).call();
         // Check step 2
-        verify(inputDownloader, times(0)).processInputs(reporting);
+        verify(inputDownloader, times(0)).processInputs(ReportingFactory.NULL);
         // Check step 4
-        verify(outputProcessor, times(1)).processOutput(reporting, UUID.randomUUID());
+        verify(outputProcessor, times(1)).processOutput(ReportingFactory.NULL, UUID.randomUUID());
         // Check step 5
         assertFalse(workingDir.exists());
         // Check step 6
@@ -347,9 +348,9 @@ public class JobProcessorTest extends MockPropertiesTest {
         // Check step 3
         verify(procExecutor, times(1)).call();
         // Check step 2
-        verify(inputDownloader, times(1)).processInputs(reporting);
+        verify(inputDownloader, times(1)).processInputs(ReportingFactory.NULL);
         // Check step 4
-        verify(outputProcessor, times(1)).processOutput(reporting, UUID.randomUUID());
+        verify(outputProcessor, times(1)).processOutput(ReportingFactory.NULL, UUID.randomUUID());
         // Check step 5
         assertTrue(workingDir.exists());
         // Check step 6
