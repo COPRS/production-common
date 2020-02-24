@@ -20,13 +20,13 @@ public class EndTask extends Task {
 	private int errorCode;
 	
 	@JsonProperty("duration_in_seconds")
-	private double durationSec;
+	private Double durationSec;
 	
 	@JsonProperty("data_rate_mebibytes_sec")
-	private double rate;
+	private Double rate;
 	
 	@JsonProperty("data_volume_mebibytes")
-	private double volume;
+	private Double volume;
 	
 	// mandatory, but default is just empty
 	private ReportingOutput output = ReportingOutput.NULL;
@@ -72,11 +72,11 @@ public class EndTask extends Task {
 		this.errorCode = errorCode;
 	}
 
-	public double getDurationSec() {
+	public Double getDurationSec() {
 		return durationSec;
 	}
 
-	public void setDurationSec(final double durationSec) {
+	public void setDurationSec(final Double durationSec) {
 		this.durationSec = durationSec;
 	}
 
@@ -104,19 +104,19 @@ public class EndTask extends Task {
 		this.quality = quality;
 	}
 	
-	public double getRate() {
+	public Double getRate() {
 		return rate;
 	}
 
-	public void setRate(final double rate) {
+	public void setRate(final Double rate) {
 		this.rate = rate;
 	}
 
-	public double getVolume() {
+	public Double getVolume() {
 		return volume;
 	}
 
-	public void setVolume(final double volume) {
+	public void setVolume(final Double volume) {
 		this.volume = volume;
 	}
 }
