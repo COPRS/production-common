@@ -1,6 +1,7 @@
 package esa.s1pdgs.cpoc.mqi.model.queue;
 
 import java.util.Objects;
+import java.util.UUID;
 
 import esa.s1pdgs.cpoc.common.ProductFamily;
 
@@ -19,7 +20,7 @@ public class ProductionEvent extends AbstractMessage {
 	}
 
 	public ProductionEvent(final String productName, final String keyObjectStorage, final ProductFamily family, final String mode) {
-		this(productName, keyObjectStorage, family, mode, OQCFlag.NOT_CHECKED, null);
+		this(productName, keyObjectStorage, family, mode, OQCFlag.NOT_CHECKED, null, UUID.randomUUID());
 	}
 	
 	public ProductionEvent(
@@ -28,11 +29,13 @@ public class ProductionEvent extends AbstractMessage {
 			final ProductFamily family, 
 			final String mode, 
 			final OQCFlag oqcFlag,
-			final String timeliness
+			final String timeliness,
+			final UUID reportUid
 	) {
 		super(family, keyObjectStorage);
 		this.productName = productName;
 		this.mode = mode;
+		this.uid = reportUid;
 		this.oqcFlag = oqcFlag;
 		this.timeliness = timeliness;
 	}

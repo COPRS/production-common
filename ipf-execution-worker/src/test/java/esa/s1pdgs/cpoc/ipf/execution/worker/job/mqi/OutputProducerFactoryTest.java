@@ -97,7 +97,8 @@ public class OutputProducerFactoryTest {
     	
     	final GenericPublicationMessageDto<LevelReportDto> actualMessage = this.outputProcuderFactory.sendOutput(
                 new FileQueueMessage(ProductFamily.L0_REPORT, "test.txt", outputFile),
-                inputMessage
+                inputMessage,
+                UUID.randomUUID()
         );
         verify(this.sender, never()).publish(Mockito.any(), Mockito.eq(ProductCategory.LEVEL_PRODUCTS));
         final LevelReportDto expectedDto = new LevelReportDto("test.txt","Test report file", ProductFamily.L0_REPORT);
@@ -122,7 +123,8 @@ public class OutputProducerFactoryTest {
     public void testSendProduct() throws AbstractCodedException {
     	final GenericPublicationMessageDto<ProductionEvent> actualMessage = this.outputProcuderFactory.sendOutput(
         		new ObsQueueMessage(ProductFamily.L0_SLICE,"test.txt", "test.txt", "NRT"), 
-        		inputMessage
+        		inputMessage,
+                UUID.randomUUID()
         );
     	
     	final ProductionEvent expectedEvent = new ProductionEvent("test.txt","test.txt", ProductFamily.L0_SLICE, "NRT");    	
@@ -149,7 +151,8 @@ public class OutputProducerFactoryTest {
     public void testSendSegment() throws AbstractCodedException {
     	final GenericPublicationMessageDto<ProductionEvent> actualMessage = this.outputProcuderFactory.sendOutput(
         		new ObsQueueMessage(ProductFamily.L0_SEGMENT,"test.txt", "test.txt", "NRT"), 
-        		inputMessage
+        		inputMessage,
+                UUID.randomUUID()
         );
         final ProductionEvent expectedEvent = new ProductionEvent("test.txt","test.txt", ProductFamily.L0_SEGMENT, "NRT");
     	// for equals to work, creation time needs to be equal as well
@@ -172,7 +175,8 @@ public class OutputProducerFactoryTest {
     public void testSendAcn() throws AbstractCodedException {
     	final GenericPublicationMessageDto<ProductionEvent> actualMessage = this.outputProcuderFactory.sendOutput(
         		new ObsQueueMessage(ProductFamily.L0_ACN,"test.txt", "test.txt", "FAST"), 
-        		inputMessage
+        		inputMessage,
+                UUID.randomUUID()
         );
         final ProductionEvent expectedEvent = new ProductionEvent("test.txt","test.txt", ProductFamily.L0_ACN, "FAST");
     	// for equals to work, creation time needs to be equal as well
@@ -199,7 +203,8 @@ public class OutputProducerFactoryTest {
     	FileUtils.writeFile(outputFile, "Test report file");
         final GenericPublicationMessageDto<LevelReportDto> actualMessage = this.outputProcuderFactory.sendOutput(
         		new FileQueueMessage(ProductFamily.L1_REPORT, "test.txt",outputFile),
-        		inputMessage
+        		inputMessage,
+                UUID.randomUUID()
         );        
         final LevelReportDto expectedDto = new LevelReportDto("test.txt","Test report file", ProductFamily.L1_REPORT);
     	// for equals to work, creation time needs to be equal as well
@@ -223,7 +228,8 @@ public class OutputProducerFactoryTest {
     public void testSendL1Product() throws AbstractCodedException {
         final GenericPublicationMessageDto<ProductionEvent> actualMessage = this.outputProcuderFactory.sendOutput(
         		new ObsQueueMessage(ProductFamily.L1_SLICE, "test.txt", "test.txt", "FAST"), 
-        		inputMessage
+        		inputMessage,
+                UUID.randomUUID()
         );
         final ProductionEvent expectedEvent = new ProductionEvent("test.txt", "test.txt", ProductFamily.L1_SLICE, "FAST");        
     	// for equals to work, creation time needs to be equal as well
@@ -249,7 +255,8 @@ public class OutputProducerFactoryTest {
     public void testSendL1Acn() throws AbstractCodedException {
     	 final GenericPublicationMessageDto<ProductionEvent> actualMessage = this.outputProcuderFactory.sendOutput(
         		new ObsQueueMessage(ProductFamily.L1_ACN,"test.txt", "test.txt", "NRT"), 
-        		inputMessage
+        		inputMessage,
+                UUID.randomUUID()
         );
         final ProductionEvent expectedEvent = new ProductionEvent("test.txt","test.txt", ProductFamily.L1_ACN, "NRT");
     	// for equals to work, creation time needs to be equal as well

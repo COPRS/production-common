@@ -183,9 +183,9 @@ public class OutputProcessorTest {
         // Mocks
         doNothing().when(obsClient).upload(Mockito.any(), Mockito.any());
         doReturn(null).when(procuderFactory)
-                .sendOutput(Mockito.any(ObsQueueMessage.class), Mockito.any());
+                .sendOutput(Mockito.any(ObsQueueMessage.class), Mockito.any(), Mockito.any());
         doReturn(null).when(procuderFactory)
-                .sendOutput(Mockito.any(FileQueueMessage.class), Mockito.any());
+                .sendOutput(Mockito.any(FileQueueMessage.class), Mockito.any(), Mockito.any());
 
         try (final InputStream in = Streams.getInputStream("outputs.list");
         	 final OutputStream out = new BufferedOutputStream(new FileOutputStream(new File(tmpDir, "outputs.list")))) {
@@ -613,20 +613,20 @@ public class OutputProcessorTest {
     @Test
     public void testProcessReports() throws AbstractCodedException {
 
-        processor.processReports(new ArrayList<>());
+        processor.processReports(new ArrayList<>(), UUID.randomUUID());
         verify(procuderFactory, times(0))
-                .sendOutput(Mockito.any(FileQueueMessage.class), Mockito.any());
+                .sendOutput(Mockito.any(FileQueueMessage.class), Mockito.any(), Mockito.any());
 
-        processor.processReports(reportToPublish);
+        processor.processReports(reportToPublish, UUID.randomUUID());
 
         verify(procuderFactory, times(3))
-                .sendOutput(Mockito.any(FileQueueMessage.class), Mockito.any());
+                .sendOutput(Mockito.any(FileQueueMessage.class), Mockito.any(), Mockito.any());
         verify(procuderFactory, times(1)).sendOutput(
-                Mockito.eq(reportToPublish.get(0)), Mockito.eq(inputMessage));
+                Mockito.eq(reportToPublish.get(0)), Mockito.eq(inputMessage), Mockito.any());
         verify(procuderFactory, times(1)).sendOutput(
-                Mockito.eq(reportToPublish.get(1)), Mockito.eq(inputMessage));
+                Mockito.eq(reportToPublish.get(1)), Mockito.eq(inputMessage), Mockito.any());
         verify(procuderFactory, times(1)).sendOutput(
-                Mockito.eq(reportToPublish.get(2)), Mockito.eq(inputMessage));
+                Mockito.eq(reportToPublish.get(2)), Mockito.eq(inputMessage), Mockito.any());
     }
 
     /**
@@ -639,19 +639,18 @@ public class OutputProcessorTest {
             throws AbstractCodedException {
         doThrow(new MqiPublicationError("topic", "dto", "name", "message",
                 new IllegalArgumentException("cause"))).when(procuderFactory)
-                        .sendOutput(Mockito.eq(reportToPublish.get(0)),
-                                Mockito.any());
+                        .sendOutput(Mockito.eq(reportToPublish.get(0)),  Mockito.any(), Mockito.any());
 
-        processor.processReports(reportToPublish);
+        processor.processReports(reportToPublish, UUID.randomUUID());
 
         verify(procuderFactory, times(3))
-                .sendOutput(Mockito.any(FileQueueMessage.class), Mockito.any());
+                .sendOutput(Mockito.any(FileQueueMessage.class), Mockito.any(), Mockito.any());
         verify(procuderFactory, times(1)).sendOutput(
-                Mockito.eq(reportToPublish.get(0)), Mockito.eq(inputMessage));
+                Mockito.eq(reportToPublish.get(0)), Mockito.eq(inputMessage), Mockito.any());
         verify(procuderFactory, times(1)).sendOutput(
-                Mockito.eq(reportToPublish.get(1)), Mockito.eq(inputMessage));
+                Mockito.eq(reportToPublish.get(1)), Mockito.eq(inputMessage), Mockito.any());
         verify(procuderFactory, times(1)).sendOutput(
-                Mockito.eq(reportToPublish.get(2)), Mockito.eq(inputMessage));
+                Mockito.eq(reportToPublish.get(2)), Mockito.eq(inputMessage), Mockito.any());
     }
 
     public void testPublishAccordingUploadFiles1() throws Exception {
@@ -691,8 +690,7 @@ public class OutputProcessorTest {
             throws Exception {
         doThrow(new MqiPublicationError("topic", "dto", "name", "message",
                 new IllegalArgumentException("cause"))).when(procuderFactory)
-                        .sendOutput(Mockito.eq(outputToPublish.get(0)),
-                                Mockito.any());
+                        .sendOutput(Mockito.eq(outputToPublish.get(0)),  Mockito.any(), Mockito.any());
      // FIXME: Fix this crap
 //        final Method method = getMethodForPublishAccodingUpload();
 //
@@ -722,11 +720,11 @@ public class OutputProcessorTest {
 
     @Test
     public void testProcessProducts() throws AbstractCodedException, ObsEmptyFileException {    	
-        processor.processProducts(reporting, uploadBatch, outputToPublish);
+        processor.processProducts(reporting, uploadBatch, outputToPublish, UUID.randomUUID());
 
         // check publication
         verify(procuderFactory, times(3))
-                .sendOutput(Mockito.any(ObsQueueMessage.class), Mockito.any());
+                .sendOutput(Mockito.any(ObsQueueMessage.class), Mockito.any(), Mockito.any());
 
         // check OBS service
         verify(obsClient, times(2)).upload(Mockito.any(), Mockito.any());
@@ -738,13 +736,13 @@ public class OutputProcessorTest {
 
     @Test
     public void testProcessOutputs() throws AbstractCodedException, ObsEmptyFileException {
-        processor.processOutput(reporting);
+        processor.processOutput(reporting, UUID.randomUUID());
 
         // check publication
         verify(procuderFactory, times(4))
-                .sendOutput(Mockito.any(ObsQueueMessage.class), Mockito.any());
+                .sendOutput(Mockito.any(ObsQueueMessage.class), Mockito.any(), Mockito.any());
         verify(procuderFactory, times(3))
-                .sendOutput(Mockito.any(FileQueueMessage.class), Mockito.any());
+                .sendOutput(Mockito.any(FileQueueMessage.class), Mockito.any(), Mockito.any());
 
         // check OBS service
         verify(obsClient, times(2)).upload(Mockito.any(), Mockito.any());

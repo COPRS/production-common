@@ -12,6 +12,7 @@ import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+import java.util.UUID;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
@@ -471,8 +472,12 @@ public class OutputProcessor {
 	 * @throws AbstractCodedException
 	 * @throws ObsEmptyFileException 
 	 */
-	final void processProducts(final ReportingFactory reportingFactory, final List<ObsUploadObject> uploadBatch,
-			final List<ObsQueueMessage> outputToPublish) throws AbstractCodedException, ObsEmptyFileException {
+	final void processProducts(
+			final ReportingFactory reportingFactory, 
+			final List<ObsUploadObject> uploadBatch,
+			final List<ObsQueueMessage> outputToPublish,
+			final UUID uuid
+	) throws AbstractCodedException, ObsEmptyFileException {
 
 		final double size = Double.valueOf(uploadBatch.size());
 		final double nbPool = Math.ceil(size / sizeUploadBatch);
@@ -482,7 +487,7 @@ public class OutputProcessor {
 			final List<ObsUploadObject> sublist = uploadBatch.subList(i * sizeUploadBatch, lastIndex);
 
 			if (i > 0) {
-				this.publishAccordingUploadFiles(i - 1, sublist.get(0).getKey(), outputToPublish);
+				this.publishAccordingUploadFiles(i - 1, sublist.get(0).getKey(), outputToPublish, uuid);
 			}
 			try {
 
@@ -494,7 +499,7 @@ public class OutputProcessor {
 				throw e;
 			}
 		}
-		publishAccordingUploadFiles(nbPool - 1, NOT_KEY_OBS, outputToPublish);
+		publishAccordingUploadFiles(nbPool - 1, NOT_KEY_OBS, outputToPublish, uuid);
 	}
 
 	/**
@@ -506,8 +511,12 @@ public class OutputProcessor {
 	 * @param outputToPublish
 	 * @throws AbstractCodedException
 	 */
-	private void publishAccordingUploadFiles(final double nbBatch,
-			final String nextKeyUpload, final List<ObsQueueMessage> outputToPublish) throws AbstractCodedException {
+	private void publishAccordingUploadFiles(
+			final double nbBatch,
+			final String nextKeyUpload, 
+			final List<ObsQueueMessage> outputToPublish,
+			final UUID uuid
+	) throws AbstractCodedException {
 
 		LOGGER.info("{} 3 - Publishing KAFKA messages for batch {}", prefixMonitorLogs, nbBatch);
 		final Iterator<ObsQueueMessage> iter = outputToPublish.iterator();
@@ -521,7 +530,7 @@ public class OutputProcessor {
 				stop = true;
 			} else {
 				try {
-					procuderFactory.sendOutput(msg, inputMessage);
+					procuderFactory.sendOutput(msg, inputMessage, uuid);
 				} catch (final MqiPublicationError ace) {
 				}
 				iter.remove();
@@ -536,7 +545,7 @@ public class OutputProcessor {
 	 * @param reportToPublish
 	 * @throws AbstractCodedException
 	 */
-	protected void processReports(final List<FileQueueMessage> reportToPublish) throws AbstractCodedException {
+	protected void processReports(final List<FileQueueMessage> reportToPublish,	final UUID uuid) throws AbstractCodedException {
 
 		LOGGER.info("{} 4 - Starting processing not object storage compatible outputs", prefixMonitorLogs);
 		if (!reportToPublish.isEmpty()) {
@@ -547,7 +556,7 @@ public class OutputProcessor {
 					LOGGER.info("{} 4 - Publishing KAFKA message for output {}", prefixMonitorLogs,
 							msg.getProductName());
 					try {
-						procuderFactory.sendOutput(msg, inputMessage);
+						procuderFactory.sendOutput(msg, inputMessage, uuid);
 					} catch (final MqiPublicationError ace) {
 						final String message = String.format("%s [code %d] %s", prefixMonitorLogs, ace.getCode().getCode(),
 								ace.getLogMessage());
@@ -566,7 +575,7 @@ public class OutputProcessor {
 	 * @throws IOException
 	 * @throws ObsEmptyFileException 
 	 */
-	public ReportingOutput processOutput(final ReportingFactory reportingFactory) throws AbstractCodedException, ObsEmptyFileException {
+	public ReportingOutput processOutput(final ReportingFactory reportingFactory, final UUID uuid) throws AbstractCodedException, ObsEmptyFileException {
 		List<String> result = new ArrayList<>();
 		final List<Segment> segments = new ArrayList<>();
 		
@@ -584,9 +593,9 @@ public class OutputProcessor {
 		
 		try {
 			// Upload per batch the output
-			processProducts(reportingFactory, uploadBatch, outputToPublish);
+			processProducts(reportingFactory, uploadBatch, outputToPublish, uuid);
 			// Publish reports
-			processReports(reportToPublish);
+			processReports(reportToPublish, uuid);
 			
 			for (final ObsUploadObject obj : uploadBatch) {
 				if (obj.getFamily() == ProductFamily.L0_SEGMENT) {

@@ -1,6 +1,7 @@
 package esa.s1pdgs.cpoc.ipf.execution.worker.job.mqi;
 
 import java.util.Date;
+import java.util.UUID;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -54,13 +55,21 @@ public class OutputProcuderFactory {
         this.hostname = processConfiguration.getHostname();
     }
 
+    
+    // FIXME!!!
+    // remove duplication below, 
+    
     /**
      * Send an output in right topic according its family
      * 
      * @param msg
      * @throws AbstractCodedException
      */
-    public GenericPublicationMessageDto<LevelReportDto> sendOutput(final FileQueueMessage msg, final GenericMessageDto<IpfExecutionJob> inputMessage)
+    public GenericPublicationMessageDto<LevelReportDto> sendOutput(
+    		final FileQueueMessage msg, 
+    		final GenericMessageDto<IpfExecutionJob> inputMessage,
+    		final UUID reportUid
+    )
             throws AbstractCodedException {
         final LevelReportDto dtoReport = new LevelReportDto(
         		msg.getProductName(),
@@ -85,26 +94,30 @@ public class OutputProcuderFactory {
      * @param msg
      * @throws AbstractCodedException
      */
-    public GenericPublicationMessageDto<ProductionEvent> sendOutput(final ObsQueueMessage msg, final GenericMessageDto<IpfExecutionJob> inputMessage)
+    public GenericPublicationMessageDto<ProductionEvent> sendOutput(
+    		final ObsQueueMessage msg, 
+    		final GenericMessageDto<IpfExecutionJob> inputMessage,
+    		final UUID reportUid
+    )
             throws AbstractCodedException {
     	
         final GenericPublicationMessageDto<ProductionEvent> messageToPublish = new GenericPublicationMessageDto<ProductionEvent>(
                 inputMessage.getId(), 
                 msg.getFamily(),
-                toProductionEvent(msg, inputMessage.getBody().getTimeliness())
+                toProductionEvent(msg, inputMessage.getBody().getTimeliness(), reportUid)
 		);
     	    	
         if (msg.getFamily() == ProductFamily.L0_SEGMENT) {
             sender.publish(messageToPublish, ProductCategory.LEVEL_SEGMENTS);
         } else {
     		messageToPublish.setInputKey(inputMessage.getInputKey());
-    		messageToPublish.setOutputKey(msg.getFamily().name());
+    		messageToPublish.setOutputKey(msg.getFamily().name());    		
             sender.publish(messageToPublish, ProductCategory.LEVEL_PRODUCTS);
         }
         return messageToPublish;
     }
     
-    private final ProductionEvent toProductionEvent(final ObsQueueMessage msg, final String timeliness)
+    private final ProductionEvent toProductionEvent(final ObsQueueMessage msg, final String timeliness, final UUID uid)
     {
     	return new ProductionEvent(
     			msg.getProductName(),
@@ -112,7 +125,8 @@ public class OutputProcuderFactory {
         		msg.getFamily(), 
         		toUppercaseOrNull(msg.getProcessMode()),
         		msg.getOqcFlag(),
-        		timeliness
+        		timeliness,
+        		uid
         );
     }
     
