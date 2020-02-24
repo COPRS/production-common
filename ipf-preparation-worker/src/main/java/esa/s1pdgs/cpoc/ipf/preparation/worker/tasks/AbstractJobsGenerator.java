@@ -377,19 +377,19 @@ public abstract class AbstractJobsGenerator implements Runnable {
     private final void stateTransition(
     		final JobGeneration job,
 //    		final Reporting reporting, 
-    		final AppDataJobGenerationState state, 
     		final AppDataJobGenerationState nextState,
     		final Function<JobGeneration, JobGeneration> transitionFunction
     ) throws AbstractCodedException {
+    	final AppDataJobGenerationState oldState = job.getGeneration().getState();
     	@SuppressWarnings("unchecked")
 		final AppDataJob<CatalogEvent> appDataJob = job.getAppDataJob();    	
-    	LOGGER.info("Start job {} state transition, state {} -> {}", appDataJob.getId(), state, nextState);
+    	LOGGER.info("Start job {} state transition, state {} -> {}", appDataJob.getId(), oldState, nextState);
         try {    
         	final JobGeneration updatedJob = transitionFunction.apply(job);
         	// This is pretty dirty here but we have to make sure that exception scenario below also sees the updated AppDataJob
             job.setAppDataJob(updatedJob.getAppDataJob());
             updateState(job, nextState);   
-            LOGGER.info("End job {} state transition, state {} -> {}", appDataJob.getId(), state, nextState);
+            LOGGER.info("End job {} state transition, state {} -> {}", appDataJob.getId(), oldState, nextState);
 //            reporting.end(
 //            		new ReportingMessage("End job %s state transition, state %s", appDataJob.getId(), state)
 //            );
@@ -398,9 +398,9 @@ public abstract class AbstractJobsGenerator implements Runnable {
         // this may be addressed later once this is conceptually overhauled.
         catch (final Exception e) {
     		// keep old state
-            updateState(job, state);
+            updateState(job, oldState);
             LOGGER.warn("Prerequisites for job {} state transition not met - staying in state {}: {}", 
-            		appDataJob.getId(), state, LogUtils.toString(e));
+            		appDataJob.getId(), oldState, LogUtils.toString(e));
         }
     }
 
@@ -491,7 +491,6 @@ public abstract class AbstractJobsGenerator implements Runnable {
                 if (job.getGeneration().getState() == AppDataJobGenerationState.INITIAL) {                	
                 	stateTransition(
                 			job,
-                			AppDataJobGenerationState.INITIAL,
                 			AppDataJobGenerationState.PRIMARY_CHECK,
                 			j -> initialToPrimaryCheck(j)
                 	);
@@ -500,7 +499,6 @@ public abstract class AbstractJobsGenerator implements Runnable {
                 if (job.getGeneration().getState() == AppDataJobGenerationState.PRIMARY_CHECK) {
                 	stateTransition(
                 			job,
-                			AppDataJobGenerationState.PRIMARY_CHECK,
                 			AppDataJobGenerationState.READY,
                 			j -> primaryCheckToReady(j)
                 	);
@@ -509,7 +507,6 @@ public abstract class AbstractJobsGenerator implements Runnable {
                 if (job.getGeneration().getState() == AppDataJobGenerationState.READY) {
                 	stateTransition(
                 			job,
-                			AppDataJobGenerationState.READY,
                 			AppDataJobGenerationState.SENT,
                 			j -> readyToSend(j, appDataJob.getReportingId())
                 	);
