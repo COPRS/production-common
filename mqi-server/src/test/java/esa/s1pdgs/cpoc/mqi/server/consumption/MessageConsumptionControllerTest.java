@@ -15,8 +15,11 @@ import static org.mockito.Mockito.verifyZeroInteractions;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
@@ -46,6 +49,7 @@ import esa.s1pdgs.cpoc.common.ResumeDetails;
 import esa.s1pdgs.cpoc.common.errors.AbstractCodedException;
 import esa.s1pdgs.cpoc.common.errors.mqi.MqiCategoryNotAvailable;
 import esa.s1pdgs.cpoc.common.errors.processing.StatusProcessingApiError;
+import esa.s1pdgs.cpoc.mqi.model.queue.AbstractMessage;
 import esa.s1pdgs.cpoc.mqi.model.queue.IngestionEvent;
 import esa.s1pdgs.cpoc.mqi.model.queue.IpfExecutionJob;
 import esa.s1pdgs.cpoc.mqi.model.queue.LevelReportDto;
@@ -622,5 +626,23 @@ public class MessageConsumptionControllerTest {
                 Mockito.eq(expected));
         verify(service, times(1)).send( Mockito.eq(ProductCategory.AUXILIARY_FILES),Mockito.eq(1235L),
                 Mockito.eq(expected));
+    }
+    
+    @Test
+    public void testPriorityComperator() {
+    	Comparator<AppCatMessageDto<? extends AbstractMessage>> c = manager.priorityComparatorFor(ProductCategory.AUXILIARY_FILES);
+    	
+    	AppCatMessageDto o1 = new AppCatMessageDto<>();
+    	o1.setTopic("topic"); // has prio 100
+    	
+    	AppCatMessageDto o2 = new AppCatMessageDto<>();
+    	o2.setTopic("topic-other"); // has prio 10 
+    	
+    	List<AppCatMessageDto<? extends AbstractMessage>> list = new ArrayList<>();
+    	list.add(o2);    	
+    	list.add(o1);
+    	Collections.sort(list, c);
+    	assertEquals(o1, list.get(0));
+    	assertEquals(o2, list.get(1));
     }
 }

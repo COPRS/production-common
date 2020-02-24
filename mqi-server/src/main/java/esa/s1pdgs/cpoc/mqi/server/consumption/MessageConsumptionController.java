@@ -150,7 +150,7 @@ public class MessageConsumptionController {
         return message;
     }
     
-    private final Comparator<AppCatMessageDto<? extends AbstractMessage>> priorityComparatorFor(final ProductCategory category)
+    final Comparator<AppCatMessageDto<? extends AbstractMessage>> priorityComparatorFor(final ProductCategory category)
     {
     	return new Comparator<AppCatMessageDto<? extends AbstractMessage>>() {
             @Override
