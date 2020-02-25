@@ -142,10 +142,11 @@ public class TestHandlingOfInvalidQueueElementsIT {
 
 	@Test
 	public void testNominalConsumption_ShallNotFail() throws Exception {		
-        final ProductionEvent expected = new ProductionEvent("1", "2", ProductFamily.AUXILIARY_FILE);          
+        final ProductionEvent expected = new ProductionEvent("1", "2", ProductFamily.AUXILIARY_FILE); 
         send(expected);                
         final ProductionEvent actual = elements.poll(10, TimeUnit.SECONDS);         
         // make equals work
+        expected.setUid(actual.getUid());
         expected.setCreationDate(actual.getCreationDate());
         assertEquals(expected, actual);
 	}

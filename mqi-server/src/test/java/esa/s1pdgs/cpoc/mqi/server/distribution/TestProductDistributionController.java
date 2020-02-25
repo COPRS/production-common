@@ -37,7 +37,7 @@ import esa.s1pdgs.cpoc.mqi.server.publication.MessagePublicationController;
 public class TestProductDistributionController {
 	
 	static final class StringDto extends AbstractMessage {
-		public StringDto(String productName) {			
+		public StringDto(final String productName) {			
 		}		
 	}
 
@@ -98,7 +98,7 @@ public class TestProductDistributionController {
         try {
 			controller.next(ProductCategory.AUXILIARY_FILES.name().toString());
 			fail();
-		} catch (ProductDistributionException e) {
+		} catch (final ProductDistributionException e) {
 			// expected
 		}
         verify(messages, times(1))
@@ -119,7 +119,7 @@ public class TestProductDistributionController {
         try {
 		    controller.ack(new AckMessageDto(123L, Ack.OK, "message", false), ProductCategory.AUXILIARY_FILES.name().toString());
 			fail();
-		} catch (ProductDistributionException e) {
+		} catch (final ProductDistributionException e) {
 			// expected
 		}
         verify(messages, times(1)).ackMessage(
@@ -153,7 +153,7 @@ public class TestProductDistributionController {
 		    
 		    controller.publish(json, ProductCategory.AUXILIARY_FILES.name().toString());
 			fail();
-		} catch (ProductDistributionException e) {
+		} catch (final ProductDistributionException e) {
 			// expected
 		}
         verify(publication, times(1)).publish(
@@ -179,16 +179,18 @@ public class TestProductDistributionController {
         final ProductionEvent dto = new ProductionEvent("test321", "bar", ProductFamily.AUXILIARY_FILE);
         
         try {
+        	final ProductionEvent event = new ProductionEvent("test321", "bar", ProductFamily.AUXILIARY_FILE);
+        	event.setUid(dto.getUid());
 		    final GenericPublicationMessageDto<? extends AbstractMessage> mess = new GenericPublicationMessageDto<ProductionEvent>(
 		    		ProductFamily.AUXILIARY_FILE,
-		    		new ProductionEvent("test321", "bar", ProductFamily.AUXILIARY_FILE)
+		    		event
 		    );
         	final ObjectMapper objMapper = new ObjectMapper();
         	final JsonNode json = objMapper.convertValue(mess, JsonNode.class);	
 		    
 		    controller.publish(json, ProductCategory.AUXILIARY_FILES.name().toString());
 			fail();
-		} catch (ProductDistributionException e) {
+		} catch (final ProductDistributionException e) {
 			// expected
 	        assertEquals(HttpStatus.GATEWAY_TIMEOUT, e.getStatus());
 		}   
