@@ -10,6 +10,16 @@ status:
   delete-fixed-delay-ms: 1800000                                   # (fixed delay) period in milliseconds between 2 check if application shall be stopped or not
   max-error-counter-processing: 3                                  # the number of consecutive processing errors leading to the state FATALERROR
   max-error-counter-mqi: 30                                        # the number of consecutive MQI errors leading to the state FATALERROR
+
+# KAFKA config for error queue
+kafka:
+  bootstrap-servers: ${kafka_bootstrap-servers:kafka-headless:9092}   # the bootstrap servers for KAFKA
+  group-id: error                                                # the group identifier to use for KAFKA publishers  
+  max-retries: 10                                                # number of retries if kafka is not available
+  error-topic: t-pdgs-errors  
+
+process:
+  hostname: ${HOSTNAME}                   # Hostname 
   
 trigger:
   product-categories:
