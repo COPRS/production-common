@@ -18,9 +18,12 @@ COPY --from=build /app/ipf-execution-worker/config/start/start.sh /app/start.sh
 #RUN chmod +x /app/start.sh
 
 # Add Tini as entry point
+USER root:root
 ENV TINI_VERSION v0.18.0
 ADD https://github.com/krallin/tini/releases/download/${TINI_VERSION}/tini /tini
 RUN chmod +x /tini
 ENTRYPOINT ["/tini", "--"]
+
+USER s1pdgs:s1pdgs
 
 CMD ["/app/start.sh"]
