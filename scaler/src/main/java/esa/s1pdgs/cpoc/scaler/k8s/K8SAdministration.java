@@ -11,6 +11,7 @@ import org.springframework.util.CollectionUtils;
 import esa.s1pdgs.cpoc.common.errors.k8s.K8sUnknownResourceException;
 import esa.s1pdgs.cpoc.common.errors.k8s.PodResourceException;
 import esa.s1pdgs.cpoc.common.errors.k8s.WrapperStopException;
+import esa.s1pdgs.cpoc.scaler.config.WrapperProperties;
 import esa.s1pdgs.cpoc.scaler.k8s.model.PodDesc;
 import esa.s1pdgs.cpoc.scaler.k8s.model.PodStatus;
 import esa.s1pdgs.cpoc.scaler.k8s.services.NodeService;

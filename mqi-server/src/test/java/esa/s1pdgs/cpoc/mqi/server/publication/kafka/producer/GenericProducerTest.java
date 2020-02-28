@@ -24,7 +24,7 @@ import org.springframework.util.concurrent.ListenableFuture;
 import esa.s1pdgs.cpoc.common.ProductFamily;
 import esa.s1pdgs.cpoc.common.errors.mqi.MqiPublicationError;
 import esa.s1pdgs.cpoc.mqi.model.queue.ProductionEvent;
-import esa.s1pdgs.cpoc.mqi.server.KafkaProperties;
+import esa.s1pdgs.cpoc.mqi.server.config.KafkaProperties;
 
 /**
  * Test the producer LevelJobProducerTest

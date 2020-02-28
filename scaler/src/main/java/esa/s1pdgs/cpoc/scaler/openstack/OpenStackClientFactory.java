@@ -5,6 +5,8 @@ import org.openstack4j.model.common.Identifier;
 import org.openstack4j.openstack.OSFactory;
 import org.springframework.stereotype.Component;
 
+import esa.s1pdgs.cpoc.scaler.config.OpenStackServerProperties;
+
 /**
  * 
  * @author Cyrielle

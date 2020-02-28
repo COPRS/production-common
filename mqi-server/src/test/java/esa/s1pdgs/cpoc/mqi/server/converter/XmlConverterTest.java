@@ -12,7 +12,7 @@ import org.junit.Test;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 
 import esa.s1pdgs.cpoc.common.ProductFamily;
-import esa.s1pdgs.cpoc.mqi.server.converter.ConverterConfiguration;
+import esa.s1pdgs.cpoc.mqi.server.config.ConverterConfiguration;
 import esa.s1pdgs.cpoc.mqi.server.converter.XmlConverter;
 import esa.s1pdgs.cpoc.mqi.server.publication.routing.DefaultRoute;
 import esa.s1pdgs.cpoc.mqi.server.publication.routing.RouteTo;

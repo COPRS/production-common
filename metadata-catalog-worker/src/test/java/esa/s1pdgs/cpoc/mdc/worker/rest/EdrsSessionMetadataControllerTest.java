@@ -18,8 +18,8 @@ import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 
 import esa.s1pdgs.cpoc.common.errors.processing.MetadataMalformedException;
 import esa.s1pdgs.cpoc.common.errors.processing.MetadataNotPresentException;
-import esa.s1pdgs.cpoc.mdc.worker.es.EsServices;
 import esa.s1pdgs.cpoc.mdc.worker.rest.EdrsSessionMetadataController;
+import esa.s1pdgs.cpoc.mdc.worker.service.EsServices;
 import esa.s1pdgs.cpoc.metadata.model.EdrsSessionMetadata;
 
 public class EdrsSessionMetadataControllerTest  extends RestControllerTest  {

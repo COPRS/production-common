@@ -16,6 +16,7 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 
+import esa.s1pdgs.cpoc.scaler.config.KafkaMonitoringProperties;
 import esa.s1pdgs.cpoc.scaler.kafka.model.ConsumerDescription;
 import esa.s1pdgs.cpoc.scaler.kafka.model.ConsumerGroupsDescription;
 import esa.s1pdgs.cpoc.scaler.kafka.model.KafkaPerGroupMonitor;

@@ -15,10 +15,10 @@ import esa.s1pdgs.cpoc.common.MessageState;
 import esa.s1pdgs.cpoc.common.ProductCategory;
 import esa.s1pdgs.cpoc.common.errors.AbstractCodedException;
 import esa.s1pdgs.cpoc.common.utils.LogUtils;
-import esa.s1pdgs.cpoc.mqi.server.KafkaProperties;
+import esa.s1pdgs.cpoc.mqi.server.config.KafkaProperties;
 import esa.s1pdgs.cpoc.mqi.server.consumption.kafka.consumer.GenericConsumer;
 import esa.s1pdgs.cpoc.mqi.server.consumption.kafka.consumer.MessageConsumer;
-import esa.s1pdgs.cpoc.mqi.server.persistence.OtherApplicationService;
+import esa.s1pdgs.cpoc.mqi.server.service.OtherApplicationService;
 
 /**
  * Kafka message listener<br/>

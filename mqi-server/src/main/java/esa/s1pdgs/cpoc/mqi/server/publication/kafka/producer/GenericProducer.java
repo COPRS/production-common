@@ -19,7 +19,7 @@ import org.springframework.stereotype.Component;
 import esa.s1pdgs.cpoc.common.errors.mqi.MqiPublicationError;
 import esa.s1pdgs.cpoc.mqi.model.queue.AbstractMessage;
 import esa.s1pdgs.cpoc.mqi.model.queue.ProductionEvent;
-import esa.s1pdgs.cpoc.mqi.server.KafkaProperties;
+import esa.s1pdgs.cpoc.mqi.server.config.KafkaProperties;
 
 /**
  * Generic producer on a topic

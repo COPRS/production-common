@@ -9,6 +9,8 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.junit4.SpringRunner;
 
+import esa.s1pdgs.cpoc.appcatalog.server.config.JobsProperties;
+
 @RunWith(SpringRunner.class)
 @SpringBootTest
 @DirtiesContext

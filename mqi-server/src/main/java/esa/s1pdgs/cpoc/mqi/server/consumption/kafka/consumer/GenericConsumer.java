@@ -21,10 +21,10 @@ import org.springframework.kafka.support.serializer.JsonDeserializer;
 import esa.s1pdgs.cpoc.appcatalog.client.mqi.AppCatalogMqiService;
 import esa.s1pdgs.cpoc.appstatus.AppStatus;
 import esa.s1pdgs.cpoc.common.ProductCategory;
-import esa.s1pdgs.cpoc.mqi.server.KafkaProperties;
+import esa.s1pdgs.cpoc.mqi.server.config.KafkaProperties;
 import esa.s1pdgs.cpoc.mqi.server.consumption.kafka.listener.GenericMessageListener;
 import esa.s1pdgs.cpoc.mqi.server.consumption.kafka.listener.MemoryConsumerAwareRebalanceListener;
-import esa.s1pdgs.cpoc.mqi.server.persistence.OtherApplicationService;
+import esa.s1pdgs.cpoc.mqi.server.service.OtherApplicationService;
 import esa.s1pdgs.cpoc.report.Reporting;
 import esa.s1pdgs.cpoc.report.ReportingUtils;
 

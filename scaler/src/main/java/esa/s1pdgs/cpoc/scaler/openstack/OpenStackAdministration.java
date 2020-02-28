@@ -14,6 +14,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
 import esa.s1pdgs.cpoc.common.errors.os.OsEntityException;
+import esa.s1pdgs.cpoc.scaler.config.OpenStackServerProperties;
 import esa.s1pdgs.cpoc.scaler.openstack.model.ServerDesc;
 import esa.s1pdgs.cpoc.scaler.openstack.model.ServerDesc.ServerDescBuilder;
 import esa.s1pdgs.cpoc.scaler.openstack.model.VolumeDesc;

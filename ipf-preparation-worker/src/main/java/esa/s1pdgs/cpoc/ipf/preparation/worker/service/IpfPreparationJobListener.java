@@ -20,7 +20,6 @@ import esa.s1pdgs.cpoc.ipf.preparation.worker.config.IpfPreparationWorkerSetting
 import esa.s1pdgs.cpoc.ipf.preparation.worker.config.IpfPreparationWorkerSettings.CategoryConfig;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.config.ProcessConfiguration;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.status.AppStatusImpl;
-import esa.s1pdgs.cpoc.ipf.preparation.worker.tasks.AbstractJobsDispatcher;
 import esa.s1pdgs.cpoc.mqi.client.MqiClient;
 import esa.s1pdgs.cpoc.mqi.client.MqiConsumer;
 import esa.s1pdgs.cpoc.mqi.client.MqiListener;

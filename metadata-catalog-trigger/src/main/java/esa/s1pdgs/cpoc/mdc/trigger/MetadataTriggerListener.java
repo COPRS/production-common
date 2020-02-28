@@ -21,7 +21,7 @@ import esa.s1pdgs.cpoc.report.ReportingMessage;
 import esa.s1pdgs.cpoc.report.ReportingUtils;
 import esa.s1pdgs.cpoc.report.message.input.FilenameReportingInput;
 
-final class MetadataTriggerListener<E extends AbstractMessage> implements MqiListener<E> {
+public final class MetadataTriggerListener<E extends AbstractMessage> implements MqiListener<E> {
 	private static final Logger LOG = LogManager.getLogger(MetadataTriggerListener.class);
 	
 	private final CatalogJobMapper<E> mapper;

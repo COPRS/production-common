@@ -30,8 +30,8 @@ import esa.s1pdgs.cpoc.common.ProductFamily;
 import esa.s1pdgs.cpoc.common.errors.AbstractCodedException;
 import esa.s1pdgs.cpoc.mqi.model.queue.ProductionEvent;
 import esa.s1pdgs.cpoc.mqi.server.GenericKafkaUtils;
-import esa.s1pdgs.cpoc.mqi.server.KafkaProperties;
-import esa.s1pdgs.cpoc.mqi.server.persistence.OtherApplicationService;
+import esa.s1pdgs.cpoc.mqi.server.config.KafkaProperties;
+import esa.s1pdgs.cpoc.mqi.server.service.OtherApplicationService;
 import esa.s1pdgs.cpoc.mqi.server.test.DataUtils;
 
 @RunWith(SpringRunner.class)

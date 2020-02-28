@@ -20,7 +20,7 @@ import org.springframework.web.bind.annotation.RestController;
 import esa.s1pdgs.cpoc.common.ProductFamily;
 import esa.s1pdgs.cpoc.common.errors.AbstractCodedException;
 import esa.s1pdgs.cpoc.common.utils.LogUtils;
-import esa.s1pdgs.cpoc.mdc.worker.es.EsServices;
+import esa.s1pdgs.cpoc.mdc.worker.service.EsServices;
 import esa.s1pdgs.cpoc.metadata.model.SearchMetadata;
 
 @RestController

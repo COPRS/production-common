@@ -3,6 +3,8 @@ package esa.s1pdgs.cpoc.ingestion.trigger;
 import org.slf4j.Logger;
 import org.springframework.scheduling.annotation.Scheduled;
 
+import esa.s1pdgs.cpoc.ingestion.trigger.service.IngestionTriggerService;
+
 public class PollingTrigger {
 	private static final Logger LOG = org.slf4j.LoggerFactory.getLogger(PollingTrigger.class);
 	
