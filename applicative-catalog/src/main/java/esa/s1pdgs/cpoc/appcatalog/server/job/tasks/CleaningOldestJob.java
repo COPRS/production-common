@@ -12,8 +12,8 @@ import org.springframework.stereotype.Component;
 
 import esa.s1pdgs.cpoc.appcatalog.AppDataJob;
 import esa.s1pdgs.cpoc.appcatalog.AppDataJobState;
-import esa.s1pdgs.cpoc.appcatalog.server.job.JobsProperties;
-import esa.s1pdgs.cpoc.appcatalog.server.job.db.AppDataJobService;
+import esa.s1pdgs.cpoc.appcatalog.server.config.JobsProperties;
+import esa.s1pdgs.cpoc.appcatalog.server.service.AppDataJobService;
 import esa.s1pdgs.cpoc.common.ProductCategory;
 
 @Component

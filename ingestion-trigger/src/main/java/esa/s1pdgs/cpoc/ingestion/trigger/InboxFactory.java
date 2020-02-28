@@ -12,6 +12,7 @@ import esa.s1pdgs.cpoc.ingestion.trigger.filter.BlacklistRegexRelativePathInboxF
 import esa.s1pdgs.cpoc.ingestion.trigger.filter.JoinedFilter;
 import esa.s1pdgs.cpoc.ingestion.trigger.filter.WhitelistRegexRelativePathInboxFilter;
 import esa.s1pdgs.cpoc.ingestion.trigger.kafka.producer.KafkaSubmissionClient;
+import esa.s1pdgs.cpoc.ingestion.trigger.service.IngestionTriggerServiceTransactional;
 import esa.s1pdgs.cpoc.mqi.model.queue.IngestionJob;
 
 @Component

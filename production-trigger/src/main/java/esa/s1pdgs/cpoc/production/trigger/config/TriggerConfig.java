@@ -15,10 +15,10 @@ import esa.s1pdgs.cpoc.errorrepo.ErrorRepoAppender;
 import esa.s1pdgs.cpoc.metadata.client.MetadataClient;
 import esa.s1pdgs.cpoc.mqi.client.GenericMqiClient;
 import esa.s1pdgs.cpoc.mqi.model.queue.CatalogEvent;
-import esa.s1pdgs.cpoc.production.trigger.tasks.AbstractGenericConsumer;
-import esa.s1pdgs.cpoc.production.trigger.tasks.EdrsSessionConsumer;
-import esa.s1pdgs.cpoc.production.trigger.tasks.L0SegmentConsumer;
-import esa.s1pdgs.cpoc.production.trigger.tasks.L0SliceConsumer;
+import esa.s1pdgs.cpoc.production.trigger.service.AbstractGenericConsumer;
+import esa.s1pdgs.cpoc.production.trigger.service.EdrsSessionConsumer;
+import esa.s1pdgs.cpoc.production.trigger.service.L0SegmentConsumer;
+import esa.s1pdgs.cpoc.production.trigger.service.L0SliceConsumer;
 
 @Configuration
 public class TriggerConfig {	

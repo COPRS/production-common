@@ -15,7 +15,7 @@ import org.springframework.context.annotation.Configuration;
 
 import esa.s1pdgs.cpoc.ingestion.trigger.Inbox;
 import esa.s1pdgs.cpoc.ingestion.trigger.InboxFactory;
-import esa.s1pdgs.cpoc.ingestion.trigger.IngestionTriggerService;
+import esa.s1pdgs.cpoc.ingestion.trigger.service.IngestionTriggerService;
 
 @Configuration
 public class IngestionTriggerServiceConfiguration {

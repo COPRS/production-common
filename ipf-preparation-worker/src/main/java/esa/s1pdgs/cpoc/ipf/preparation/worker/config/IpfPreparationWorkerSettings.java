@@ -22,12 +22,12 @@ import esa.s1pdgs.cpoc.appcatalog.client.job.AppCatalogJobClient;
 import esa.s1pdgs.cpoc.common.ApplicationLevel;
 import esa.s1pdgs.cpoc.common.ProductCategory;
 import esa.s1pdgs.cpoc.common.ProductFamily;
+import esa.s1pdgs.cpoc.ipf.preparation.worker.service.AbstractJobsDispatcher;
+import esa.s1pdgs.cpoc.ipf.preparation.worker.service.JobsGeneratorFactory;
+import esa.s1pdgs.cpoc.ipf.preparation.worker.service.L0AppJobDispatcher;
+import esa.s1pdgs.cpoc.ipf.preparation.worker.service.L0SegmentAppJobDispatcher;
+import esa.s1pdgs.cpoc.ipf.preparation.worker.service.LevelProductsJobDispatcher;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.service.XmlConverter;
-import esa.s1pdgs.cpoc.ipf.preparation.worker.tasks.AbstractJobsDispatcher;
-import esa.s1pdgs.cpoc.ipf.preparation.worker.tasks.JobsGeneratorFactory;
-import esa.s1pdgs.cpoc.ipf.preparation.worker.tasks.L0AppJobDispatcher;
-import esa.s1pdgs.cpoc.ipf.preparation.worker.tasks.L0SegmentAppJobDispatcher;
-import esa.s1pdgs.cpoc.ipf.preparation.worker.tasks.LevelProductsJobDispatcher;
 import esa.s1pdgs.cpoc.mqi.model.queue.CatalogEvent;
 
 /**

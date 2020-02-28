@@ -22,7 +22,7 @@ import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import esa.s1pdgs.cpoc.scaler.kafka.KafkaMonitoringProperties;
+import esa.s1pdgs.cpoc.scaler.config.KafkaMonitoringProperties;
 import esa.s1pdgs.cpoc.scaler.kafka.model.ConsumerDescription;
 import esa.s1pdgs.cpoc.scaler.kafka.model.ConsumerGroupsDescription;
 import esa.s1pdgs.cpoc.scaler.kafka.model.PartitionDescription;

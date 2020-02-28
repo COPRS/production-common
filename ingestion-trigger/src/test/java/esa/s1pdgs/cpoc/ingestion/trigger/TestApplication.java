@@ -22,6 +22,7 @@ import esa.s1pdgs.cpoc.ingestion.trigger.config.IngestionTriggerConfigurationPro
 import esa.s1pdgs.cpoc.ingestion.trigger.entity.InboxEntry;
 import esa.s1pdgs.cpoc.ingestion.trigger.entity.InboxEntryRepository;
 import esa.s1pdgs.cpoc.ingestion.trigger.fs.FilesystemInboxEntryFactory;
+import esa.s1pdgs.cpoc.ingestion.trigger.service.IngestionTriggerService;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest

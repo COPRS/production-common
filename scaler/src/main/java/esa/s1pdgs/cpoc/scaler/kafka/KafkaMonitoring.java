@@ -6,6 +6,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 
+import esa.s1pdgs.cpoc.scaler.config.KafkaMonitoringProperties;
 import esa.s1pdgs.cpoc.scaler.kafka.model.ConsumerGroupsDescription;
 import esa.s1pdgs.cpoc.scaler.kafka.model.KafkaPerGroupMonitor;
 import esa.s1pdgs.cpoc.scaler.kafka.model.KafkaPerGroupPerTopicMonitor;

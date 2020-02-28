@@ -19,8 +19,6 @@ import esa.s1pdgs.cpoc.ipf.preparation.worker.model.tasktable.TaskTableInputAlte
 import esa.s1pdgs.cpoc.ipf.preparation.worker.model.tasktable.TaskTableOuput;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.model.tasktable.TaskTablePool;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.model.tasktable.TaskTableTask;
-import esa.s1pdgs.cpoc.ipf.preparation.worker.tasks.TestL0Utils;
-import esa.s1pdgs.cpoc.ipf.preparation.worker.tasks.TestL1Utils;
 
 /**
  * Test XML conversion and mapping

@@ -36,6 +36,7 @@ import esa.s1pdgs.cpoc.appcatalog.server.job.exception.AppCatalogJobGenerationNo
 import esa.s1pdgs.cpoc.appcatalog.server.job.exception.AppCatalogJobGenerationTerminatedException;
 import esa.s1pdgs.cpoc.appcatalog.server.job.exception.AppCatalogJobNotFoundException;
 import esa.s1pdgs.cpoc.appcatalog.server.sequence.db.SequenceDao;
+import esa.s1pdgs.cpoc.appcatalog.server.service.AppDataJobService;
 import esa.s1pdgs.cpoc.common.ApplicationLevel;
 import esa.s1pdgs.cpoc.common.ProductCategory;
 import esa.s1pdgs.cpoc.common.filter.FilterCriterion;

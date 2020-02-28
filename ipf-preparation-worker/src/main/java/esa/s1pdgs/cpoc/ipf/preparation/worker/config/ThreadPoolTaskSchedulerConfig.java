@@ -6,7 +6,7 @@ import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
 
-import esa.s1pdgs.cpoc.ipf.preparation.worker.tasks.AbstractJobsDispatcher;
+import esa.s1pdgs.cpoc.ipf.preparation.worker.service.AbstractJobsDispatcher;
 
 @Configuration
 @ComponentScan(basePackages = "esa.s1pdgs.cpoc.ipf.preparation.worker.service", basePackageClasses = { AbstractJobsDispatcher.class })

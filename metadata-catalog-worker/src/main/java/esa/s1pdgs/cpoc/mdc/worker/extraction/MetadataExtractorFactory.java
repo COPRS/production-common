@@ -12,13 +12,13 @@ import esa.s1pdgs.cpoc.mdc.worker.config.MdcWorkerConfigurationProperties;
 import esa.s1pdgs.cpoc.mdc.worker.config.MdcWorkerConfigurationProperties.CategoryConfig;
 import esa.s1pdgs.cpoc.mdc.worker.config.MetadataExtractorConfig;
 import esa.s1pdgs.cpoc.mdc.worker.config.ProcessConfiguration;
-import esa.s1pdgs.cpoc.mdc.worker.es.EsServices;
 import esa.s1pdgs.cpoc.mdc.worker.extraction.files.ExtractMetadata;
 import esa.s1pdgs.cpoc.mdc.worker.extraction.files.FileDescriptorBuilder;
 import esa.s1pdgs.cpoc.mdc.worker.extraction.files.MetadataBuilder;
 import esa.s1pdgs.cpoc.mdc.worker.extraction.path.PathMetadataExtractor;
 import esa.s1pdgs.cpoc.mdc.worker.extraction.path.PathMetadataExtractorImpl;
 import esa.s1pdgs.cpoc.mdc.worker.extraction.xml.XmlConverter;
+import esa.s1pdgs.cpoc.mdc.worker.service.EsServices;
 import esa.s1pdgs.cpoc.obs_sdk.ObsClient;
 
 @Component

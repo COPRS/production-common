@@ -19,6 +19,7 @@ import esa.s1pdgs.cpoc.ingestion.trigger.filter.InboxFilter;
 import esa.s1pdgs.cpoc.ingestion.trigger.kafka.producer.SubmissionClient;
 import esa.s1pdgs.cpoc.ingestion.trigger.report.IngestionTriggerReportingInput;
 import esa.s1pdgs.cpoc.ingestion.trigger.report.IngestionTriggerReportingOutput;
+import esa.s1pdgs.cpoc.ingestion.trigger.service.IngestionTriggerServiceTransactional;
 import esa.s1pdgs.cpoc.mqi.model.queue.IngestionJob;
 import esa.s1pdgs.cpoc.report.Reporting;
 import esa.s1pdgs.cpoc.report.ReportingMessage;
