@@ -5,9 +5,9 @@ import java.io.File;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import esa.s1pdgs.cpoc.ingestion.trigger.InboxAdapter;
-import esa.s1pdgs.cpoc.ingestion.trigger.InboxAdapterFactory;
-import esa.s1pdgs.cpoc.ingestion.trigger.InboxEntryFactory;
+import esa.s1pdgs.cpoc.ingestion.trigger.inbox.InboxAdapter;
+import esa.s1pdgs.cpoc.ingestion.trigger.inbox.InboxAdapterFactory;
+import esa.s1pdgs.cpoc.ingestion.trigger.inbox.InboxEntryFactory;
 
 @Component
 public class FilesystemInboxAdapterFactory implements InboxAdapterFactory {	

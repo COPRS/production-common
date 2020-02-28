@@ -1,4 +1,4 @@
-package esa.s1pdgs.cpoc.ingestion.trigger;
+package esa.s1pdgs.cpoc.ingestion.trigger.inbox;
 
 import java.util.Arrays;
 import java.util.Collection;
@@ -9,6 +9,8 @@ import org.junit.Test;
 
 import esa.s1pdgs.cpoc.ingestion.trigger.entity.InboxEntry;
 import esa.s1pdgs.cpoc.ingestion.trigger.filter.InboxFilter;
+import esa.s1pdgs.cpoc.ingestion.trigger.inbox.Inbox;
+import esa.s1pdgs.cpoc.ingestion.trigger.inbox.InboxAdapter;
 import esa.s1pdgs.cpoc.ingestion.trigger.service.IngestionTriggerServiceTransactional;
 
 public class TestInbox {

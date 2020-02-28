@@ -1,4 +1,4 @@
-package esa.s1pdgs.cpoc.mdc.worker;
+package esa.s1pdgs.cpoc.mdc.worker.service;
 
 import java.time.LocalDateTime;
 import java.util.Date;
@@ -21,13 +21,13 @@ import esa.s1pdgs.cpoc.common.utils.DateUtils;
 import esa.s1pdgs.cpoc.common.utils.LogUtils;
 import esa.s1pdgs.cpoc.errorrepo.ErrorRepoAppender;
 import esa.s1pdgs.cpoc.errorrepo.model.rest.FailedProcessingDto;
+import esa.s1pdgs.cpoc.mdc.worker.MetadataExtractException;
 import esa.s1pdgs.cpoc.mdc.worker.config.MdcWorkerConfigurationProperties;
 import esa.s1pdgs.cpoc.mdc.worker.config.ProcessConfiguration;
 import esa.s1pdgs.cpoc.mdc.worker.config.TriggerConfigurationProperties;
 import esa.s1pdgs.cpoc.mdc.worker.config.TriggerConfigurationProperties.CategoryConfig;
 import esa.s1pdgs.cpoc.mdc.worker.extraction.MetadataExtractor;
 import esa.s1pdgs.cpoc.mdc.worker.extraction.MetadataExtractorFactory;
-import esa.s1pdgs.cpoc.mdc.worker.service.EsServices;
 import esa.s1pdgs.cpoc.mdc.worker.status.AppStatusImpl;
 import esa.s1pdgs.cpoc.mqi.client.MqiClient;
 import esa.s1pdgs.cpoc.mqi.client.MqiConsumer;
