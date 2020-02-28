@@ -26,6 +26,8 @@ import esa.s1pdgs.cpoc.common.AppState;
 import esa.s1pdgs.cpoc.common.errors.AbstractCodedException;
 import esa.s1pdgs.cpoc.common.errors.mqi.MqiStatusApiError;
 import esa.s1pdgs.cpoc.common.errors.mqi.MqiStopApiError;
+import esa.s1pdgs.cpoc.mqi.client.config.MqiClientConfiguration;
+import esa.s1pdgs.cpoc.mqi.client.config.MqiConfigurationProperties;
 import esa.s1pdgs.cpoc.mqi.model.rest.StatusDto;
 
 /**
@@ -64,10 +66,13 @@ public class StatusServiceTest {
     public void init() {
         MockitoAnnotations.initMocks(this);
         
-        final MqiClientFactory factory = new MqiClientFactory("uri", 2, 500)
-        		.restTemplateSupplier(() -> restTemplate);
+        final MqiConfigurationProperties props = new MqiConfigurationProperties();
+        props.setHostUri("uri");
+        props.setMaxRetries(2);
+        props.setTempoRetryMs(500);        
+        final MqiClientConfiguration config = new MqiClientConfiguration(props);
         
-        service = factory.newStatusService();
+        service = config.newStatusService(() -> restTemplate);
         message = new StatusDto(AppState.ERROR, 123, 1);
     }
     
@@ -137,7 +142,7 @@ public class StatusServiceTest {
         try {
             service.stop();
             fail("An exception shall be raised");
-        } catch (MqiStopApiError mpee) {
+        } catch (final MqiStopApiError mpee) {
             verify(restTemplate, times(2)).exchange(Mockito.eq("uri/app/stop"),
                     Mockito.eq(HttpMethod.POST), Mockito.eq(null),
                     Mockito.eq(String.class));
@@ -239,7 +244,7 @@ public class StatusServiceTest {
                                 Mockito.any(HttpMethod.class), Mockito.isNull(),
                                 Mockito.any(Class.class));
 
-        StatusDto ret = service.status();
+        final StatusDto ret = service.status();
         assertEquals(message, ret);
         verify(restTemplate, times(2)).exchange(Mockito.eq("uri/app/status"),
                 Mockito.eq(HttpMethod.GET), Mockito.eq(null),
@@ -260,7 +265,7 @@ public class StatusServiceTest {
                         Mockito.any(HttpMethod.class), Mockito.isNull(),
                         Mockito.any(Class.class));
 
-        StatusDto ret = service.status();
+        final StatusDto ret = service.status();
         assertEquals(message, ret);
         verify(restTemplate, times(1)).exchange(Mockito.eq("uri/app/status"),
                 Mockito.eq(HttpMethod.GET), Mockito.eq(null),

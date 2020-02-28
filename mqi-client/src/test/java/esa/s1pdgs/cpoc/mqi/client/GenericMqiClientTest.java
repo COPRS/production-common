@@ -35,6 +35,8 @@ import esa.s1pdgs.cpoc.common.errors.AbstractCodedException;
 import esa.s1pdgs.cpoc.common.errors.mqi.MqiAckApiError;
 import esa.s1pdgs.cpoc.common.errors.mqi.MqiNextApiError;
 import esa.s1pdgs.cpoc.common.errors.mqi.MqiPublishApiError;
+import esa.s1pdgs.cpoc.mqi.client.config.MqiClientConfiguration;
+import esa.s1pdgs.cpoc.mqi.client.config.MqiConfigurationProperties;
 import esa.s1pdgs.cpoc.mqi.model.queue.ProductionEvent;
 import esa.s1pdgs.cpoc.mqi.model.rest.Ack;
 import esa.s1pdgs.cpoc.mqi.model.rest.AckMessageDto;
@@ -63,7 +65,7 @@ public class GenericMqiClientTest {
     /**
      * Service to test
      */
-    private GenericMqiClient service;
+    private GenericMqiClient client;
 
     /**
      * DTO
@@ -79,10 +81,14 @@ public class GenericMqiClientTest {
     @Before
     public void init() {
         MockitoAnnotations.initMocks(this);
-        final MqiClientFactory factory = new MqiClientFactory("uri", 2, 500)
-        		.restTemplateSupplier(() -> restTemplate);
+        final MqiConfigurationProperties props = new MqiConfigurationProperties();
+        props.setHostUri("uri");
+        props.setMaxRetries(2);
+        props.setTempoRetryMs(500);
         
-        service = factory.newGenericMqiService();
+        final MqiClientConfiguration config =  new MqiClientConfiguration(props);
+        
+        client = config.newGenericMqiService(() -> restTemplate);
         ackMessage = new AckMessageDto(1, Ack.OK, "message", true);
 
         pubMessage = new GenericPublicationMessageDto<ProductionEvent>(
@@ -109,7 +115,7 @@ public class GenericMqiClientTest {
 
         thrown.expect(MqiPublishApiError.class);
 
-        service.publish(pubMessage, ProductCategory.LEVEL_PRODUCTS);
+        client.publish(pubMessage, ProductCategory.LEVEL_PRODUCTS);
     }
 
     /**
@@ -132,7 +138,7 @@ public class GenericMqiClientTest {
         thrown.expectMessage(
                 containsString("" + HttpStatus.INTERNAL_SERVER_ERROR.value()));
 
-        service.publish(pubMessage, ProductCategory.LEVEL_PRODUCTS);
+        client.publish(pubMessage, ProductCategory.LEVEL_PRODUCTS);
     }
 
     /**
@@ -152,9 +158,9 @@ public class GenericMqiClientTest {
                                 Mockito.any(Class.class));
 
         try {
-            service.publish(pubMessage, ProductCategory.LEVEL_PRODUCTS);
+            client.publish(pubMessage, ProductCategory.LEVEL_PRODUCTS);
             fail("An exception shall be raised");
-        } catch (MqiPublishApiError mpee) {
+        } catch (final MqiPublishApiError mpee) {
             verify(restTemplate, times(2)).exchange(
                     Mockito.eq("uri/messages/level_products/publish"),
                     Mockito.eq(HttpMethod.POST),
@@ -181,7 +187,7 @@ public class GenericMqiClientTest {
                                 Mockito.any(HttpEntity.class),
                                 Mockito.any(Class.class));
 
-        service.publish(pubMessage, ProductCategory.LEVEL_PRODUCTS);
+        client.publish(pubMessage, ProductCategory.LEVEL_PRODUCTS);
         verify(restTemplate, times(2)).exchange(
                 Mockito.eq("uri/messages/level_products/publish"),
                 Mockito.eq(HttpMethod.POST),
@@ -205,7 +211,7 @@ public class GenericMqiClientTest {
                         Mockito.any(HttpEntity.class),
                         Mockito.any(Class.class));
 
-        service.publish(pubMessage, ProductCategory.LEVEL_PRODUCTS);
+        client.publish(pubMessage, ProductCategory.LEVEL_PRODUCTS);
         verify(restTemplate, times(1)).exchange(
                 Mockito.eq("uri/messages/level_products/publish"),
                 Mockito.eq(HttpMethod.POST),
@@ -232,7 +238,7 @@ public class GenericMqiClientTest {
 
         thrown.expect(MqiAckApiError.class);
 
-        service.ack(ackMessage, ProductCategory.LEVEL_PRODUCTS);
+        client.ack(ackMessage, ProductCategory.LEVEL_PRODUCTS);
     }
 
     /**
@@ -255,7 +261,7 @@ public class GenericMqiClientTest {
         thrown.expectMessage(
                 containsString("" + HttpStatus.INTERNAL_SERVER_ERROR.value()));
 
-        service.ack(ackMessage, ProductCategory.LEVEL_PRODUCTS);
+        client.ack(ackMessage, ProductCategory.LEVEL_PRODUCTS);
     }
 
     /**
@@ -273,7 +279,7 @@ public class GenericMqiClientTest {
                                 Mockito.any(HttpEntity.class),
                                 Mockito.any(Class.class));
 
-        assertTrue(service.ack(ackMessage, ProductCategory.LEVEL_PRODUCTS));
+        assertTrue(client.ack(ackMessage, ProductCategory.LEVEL_PRODUCTS));
         verify(restTemplate, times(2)).exchange(
                 Mockito.eq("uri/messages/level_products/ack"),
                 Mockito.eq(HttpMethod.POST),
@@ -297,7 +303,7 @@ public class GenericMqiClientTest {
                         Mockito.any(HttpEntity.class),
                         Mockito.any(Class.class));
 
-        assertFalse(service.ack(ackMessage, ProductCategory.LEVEL_PRODUCTS));
+        assertFalse(client.ack(ackMessage, ProductCategory.LEVEL_PRODUCTS));
         verify(restTemplate, times(1)).exchange(
                 Mockito.eq("uri/messages/level_products/ack"),
                 Mockito.eq(HttpMethod.POST),
@@ -321,7 +327,7 @@ public class GenericMqiClientTest {
                         Mockito.any(HttpEntity.class),
                         Mockito.any(Class.class));
 
-        assertFalse(service.ack(ackMessage, ProductCategory.LEVEL_PRODUCTS));
+        assertFalse(client.ack(ackMessage, ProductCategory.LEVEL_PRODUCTS));
         verify(restTemplate, times(1)).exchange(
                 Mockito.eq("uri/messages/level_products/ack"),
                 Mockito.eq(HttpMethod.POST),
@@ -352,7 +358,7 @@ public class GenericMqiClientTest {
         thrown.expect(
                 hasProperty("category", is(ProductCategory.AUXILIARY_FILES)));
 
-        service.next(ProductCategory.AUXILIARY_FILES);
+        client.next(ProductCategory.AUXILIARY_FILES);
     }
 
     /**
@@ -381,7 +387,7 @@ public class GenericMqiClientTest {
         thrown.expectMessage(
                 containsString("" + HttpStatus.INTERNAL_SERVER_ERROR.value()));
 
-        service.next(ProductCategory.AUXILIARY_FILES);
+        client.next(ProductCategory.AUXILIARY_FILES);
     }
 
     /**
@@ -402,7 +408,7 @@ public class GenericMqiClientTest {
                                 Mockito.isNull(),
                                 Mockito.any(ParameterizedTypeReference.class));
 
-        GenericMessageDto<ProductionEvent> ret = service.next(ProductCategory.AUXILIARY_FILES);
+        final GenericMessageDto<ProductionEvent> ret = client.next(ProductCategory.AUXILIARY_FILES);
         assertEquals(message, ret);
         
     	final ResolvableType type = ResolvableType.forClassWithGenerics(
@@ -430,7 +436,7 @@ public class GenericMqiClientTest {
                         Mockito.isNull(),
                         Mockito.any(ParameterizedTypeReference.class));
 
-        GenericMessageDto<ProductionEvent> ret = service.next(ProductCategory.AUXILIARY_FILES);
+        final GenericMessageDto<ProductionEvent> ret = client.next(ProductCategory.AUXILIARY_FILES);
         
     	final ResolvableType type = ResolvableType.forClassWithGenerics(
     			GenericMessageDto.class, 

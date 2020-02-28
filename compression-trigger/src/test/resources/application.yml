@@ -35,12 +35,11 @@ compression-trigger:
     production-event-listener:
         polling-interval-ms: 200
         polling-initial-delay-ms: 5000
-    mqi:
-        host-uri: http://localhost:8081       # the host and port for querying MQI server
-        max-retries: 45                        # the maximal number of consecutive retries following a MQI request error 
-        tempo-retry-ms: 1000                  #
-
+        
 mqi:
+  host-uri: http://localhost:8081       # the host and port for querying MQI server
+  max-retries: 45                        # the maximal number of consecutive retries following a MQI request error 
+  tempo-retry-ms: 1000                  #  
   message-filter:
   - productFamily: L1_SLICE
     matchRegex: .*

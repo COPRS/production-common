@@ -517,7 +517,7 @@ public abstract class AbstractJobsGenerator implements Runnable {
 //                );
             } catch (final AbstractCodedException ace) {
                 LOGGER.error(
-                        "{} [productName {}] [code ] Cannot generate job: {}",
+                        "{} [productName {}] [code {}] Cannot generate job: {}",
                         this.prefixLogMonitor, appDataJob.getProduct().getProductName(),
                         ace.getCode().getCode(), ace.getLogMessage());
             }        
