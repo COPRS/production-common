@@ -42,7 +42,7 @@ trigger:
 worker:
   product-categories:
     auxiliary-files:
-      pattern-config: ^([0-9a-z][0-9a-z]){1}([0-9a-z_]){1}(_(OPER|TEST))?_(AUX_OBMEMC|AUX_PP1|AUX_PP2|AUX_CAL|AUX_INS|AUX_RESORB|AUX_WND|AUX_ICE|AUX_SCS|AMV_ERRMAT|AMH_ERRMAT|AUX_WAV|MPL_ORBPRE|MPL_ORBSCT|MSK__LAND_)_\w{1,}\.(XML|EOF|SAFE)(/.*)?$
+      pattern-config: ^([0-9a-z][0-9a-z]){1}([0-9a-z_]){1}(_(OPER|TEST))?_(AMH_ERRMAT|AMV_ERRMAT|AUX_CAL|AUX_ICE|AUX_INS|AUX_OBMEMC|AUX_PP1|AUX_PP2|AUX_POEORB|AUX_PREORB|AUX_RESORB|AUX_SCS|AUX_WAV|AUX_WND|MPL_ORBPRE|MPL_ORBSCT|MSK__LAND_)_\w{1,}\.(XML|EOF|SAFE)(/.*)?$
       local-directory: /data/local-catalog/auxiliary_files/ # Must contains the last /
       fixed-delay-ms: 500
       init-delay-poll-ms: 2000
