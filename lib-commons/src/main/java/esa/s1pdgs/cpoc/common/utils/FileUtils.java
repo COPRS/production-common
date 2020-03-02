@@ -14,7 +14,6 @@ import java.util.Collection;
 import java.util.Comparator;
 
 import esa.s1pdgs.cpoc.common.errors.InternalErrorException;
-import esa.s1pdgs.cpoc.common.errors.utils.MaxAmountOfRetriesExceededException;
 
 /**
  * Class for managing files (read / write / delete)
@@ -90,7 +89,7 @@ public class FileUtils {
     }
     
     public static void deleteWithRetries(final File file, int numRetries, long retrySleep) 
-    		throws InterruptedException, MaxAmountOfRetriesExceededException {
+    		throws InterruptedException {
     	Retries.performWithRetries(
     			() -> {	delete(file.getPath()) ; return null;}, 
     			"Deletion of " + file,

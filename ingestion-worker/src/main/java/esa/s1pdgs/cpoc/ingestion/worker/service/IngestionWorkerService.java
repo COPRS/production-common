@@ -21,7 +21,6 @@ import esa.s1pdgs.cpoc.common.ProductCategory;
 import esa.s1pdgs.cpoc.common.ProductFamily;
 import esa.s1pdgs.cpoc.common.errors.AbstractCodedException;
 import esa.s1pdgs.cpoc.common.errors.InternalErrorException;
-import esa.s1pdgs.cpoc.common.errors.utils.MaxAmountOfRetriesExceededException;
 import esa.s1pdgs.cpoc.common.utils.FileUtils;
 import esa.s1pdgs.cpoc.common.utils.LogUtils;
 import esa.s1pdgs.cpoc.errorrepo.ErrorRepoAppender;
@@ -164,7 +163,7 @@ public class IngestionWorkerService implements MqiListener<IngestionJob> {
 	}
 
 	final void delete(final IngestionJob ingestion)
-			throws InternalErrorException, InterruptedException, MaxAmountOfRetriesExceededException {
+			throws InternalErrorException, InterruptedException {
 		final File file = Paths.get(ingestion.getPickupPath(), ingestion.getRelativePath()).toFile();
 		if (file.exists()) {
 			FileUtils.deleteWithRetries(file, properties.getMaxRetries(), properties.getTempoRetryMs());
