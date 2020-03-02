@@ -48,6 +48,7 @@ import esa.s1pdgs.cpoc.common.errors.processing.MetadataMalformedException;
 import esa.s1pdgs.cpoc.common.errors.processing.MetadataNotPresentException;
 import esa.s1pdgs.cpoc.common.utils.DateUtils;
 import esa.s1pdgs.cpoc.common.utils.LogUtils;
+import esa.s1pdgs.cpoc.common.utils.Retries;
 import esa.s1pdgs.cpoc.mdc.worker.es.ElasticsearchDAO;
 import esa.s1pdgs.cpoc.metadata.model.EdrsSessionMetadata;
 import esa.s1pdgs.cpoc.metadata.model.L0AcnMetadata;
@@ -124,6 +125,15 @@ public class EsServices {
 		} catch (final IOException io) {
 			throw new Exception(io.getMessage());
 		}
+	}
+	
+	public void createMetadataWithRetries(final JSONObject product, int numRetries, long retrySleep) throws InterruptedException {
+		Retries.performWithRetries(
+			() -> {	createMetadata(product); return null; }, 
+			"Create metadata " + product,
+			numRetries,
+			retrySleep
+    	);    	
 	}
 
 	/**

@@ -57,8 +57,30 @@ public class MdcWorkerConfigurationProperties {
 					+ pathPattern + ", pathMetadataElements=" + pathMetadataElements + "]";
 		}
 	}
+	
+	public static class ProductInsertionConfig {
+		private int maxRetries;
+		private int tempoRetryMs;
+		
+		public int getMaxRetries() {
+			return maxRetries;
+		}
+		
+		public void setMaxRetries(int maxRetries) {
+			this.maxRetries = maxRetries;
+		}
+
+		public int getTempoRetryMs() {
+			return tempoRetryMs;
+		}
+		
+		public void setTempoRetryMs(int tempoRetryMs) {
+			this.tempoRetryMs = tempoRetryMs;
+		}
+	}
 
 	private Map<ProductCategory, CategoryConfig> productCategories = new LinkedHashMap<>();
+	private ProductInsertionConfig productInsertionConfig = new ProductInsertionConfig(); 
 	
 	public Map<ProductCategory, CategoryConfig> getProductCategories() {
 		return productCategories;
@@ -67,4 +89,13 @@ public class MdcWorkerConfigurationProperties {
 	public void setProductCategories(final Map<ProductCategory, CategoryConfig> productCategories) {
 		this.productCategories = productCategories;
 	}
+
+	public ProductInsertionConfig getProductInsertionConfig() {
+		return productInsertionConfig;
+	}
+
+	public void setProductInsertionConfig(ProductInsertionConfig productInsertionConfig) {
+		this.productInsertionConfig = productInsertionConfig;
+	}
+	
 }

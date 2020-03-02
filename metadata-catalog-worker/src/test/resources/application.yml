@@ -67,6 +67,9 @@ worker:
       local-directory: /data/local-catalog/level_products/ # Must contains the last /
       fixed-delay-ms: 500
       init-delay-poll-ms: 2000
+  product-insertion:
+    max-retries: 3
+    tempo-retry-ms: 1000
     
 # Metadata Extractor
 mdextractor:
