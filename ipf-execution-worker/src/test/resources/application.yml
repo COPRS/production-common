@@ -33,10 +33,11 @@ process:
   threshold-iw : 2
   threshold-sm : 2
   threshold-wv : 30
-  mqi:
-    host-uri: http://localhost:8081
-    max-retries: 3
-    tempo-retry-ms: 1000
+  
+mqi:
+  host-uri: http://localhost:8081
+  max-retries: 3
+  tempo-retry-ms: 1000
 
 status:
   delete-fixed-delay-ms: 3000
