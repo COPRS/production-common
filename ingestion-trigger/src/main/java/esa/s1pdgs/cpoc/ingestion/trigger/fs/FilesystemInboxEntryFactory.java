@@ -4,8 +4,8 @@ import java.nio.file.Path;
 
 import org.springframework.stereotype.Component;
 
-import esa.s1pdgs.cpoc.ingestion.trigger.InboxEntryFactory;
 import esa.s1pdgs.cpoc.ingestion.trigger.entity.InboxEntry;
+import esa.s1pdgs.cpoc.ingestion.trigger.inbox.InboxEntryFactory;
 
 @Component
 public class FilesystemInboxEntryFactory implements InboxEntryFactory {	

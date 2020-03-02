@@ -1,4 +1,4 @@
-package esa.s1pdgs.cpoc.ingestion.trigger;
+package esa.s1pdgs.cpoc.ingestion.trigger.inbox;
 
 import java.util.Collections;
 import java.util.Optional;

@@ -23,7 +23,8 @@ process:
   size-batch-download: 5
   wap-nb-max-loop: 60
   wap-tempo-s: 10
-  mqi:
-    host-uri: http://localhost:8081
-    max-retries: 3
-    tempo-retry-ms: 1000
+  
+mqi:
+  host-uri: http://localhost:8081
+  max-retries: 3
+  tempo-retry-ms: 1000

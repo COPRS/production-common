@@ -13,8 +13,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
-import esa.s1pdgs.cpoc.ingestion.trigger.Inbox;
-import esa.s1pdgs.cpoc.ingestion.trigger.InboxFactory;
+import esa.s1pdgs.cpoc.ingestion.trigger.inbox.Inbox;
+import esa.s1pdgs.cpoc.ingestion.trigger.inbox.InboxFactory;
 import esa.s1pdgs.cpoc.ingestion.trigger.service.IngestionTriggerService;
 
 @Configuration

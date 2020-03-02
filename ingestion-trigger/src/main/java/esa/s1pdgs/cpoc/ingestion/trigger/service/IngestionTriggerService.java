@@ -5,7 +5,7 @@ import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import esa.s1pdgs.cpoc.ingestion.trigger.Inbox;
+import esa.s1pdgs.cpoc.ingestion.trigger.inbox.Inbox;
 
 public final class IngestionTriggerService {		
 	private static final Logger LOG = LoggerFactory.getLogger(IngestionTriggerService.class);

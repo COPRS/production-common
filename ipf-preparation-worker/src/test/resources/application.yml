@@ -96,11 +96,7 @@ process:
     AN_RAW__0S: ^S1[A-B]_N[1-6]_RAW__0S.*$
     ZS_RAW__0S: ^S1[A-B]_Z[1-6]_RAW__0S.*$
     REP_L0PSA_: ^S1[A|B|_]_OPER_REP_ACQ.*$
-    REP_EFEP_: ^S1[A|B|_]_OPER_REP_PASS.*.EOF$
-  mqi:
-    host-uri: http://localhost:8081
-    max-retries: 3
-    tempo-retry-ms: 1000
+    REP_EFEP_: ^S1[A|B|_]_OPER_REP_PASS.*.EOF$  
   appcatalog:
     host-uri: http://localhost:8080
     max-retries: 5
@@ -108,6 +104,11 @@ process:
     tm-connect-ms: 200
   fixed-delay-ms: 200
   initial-delay-ms: 500
+  
+mqi:
+  host-uri: http://localhost:8081
+  max-retries: 3
+  tempo-retry-ms: 1000  
     
 pattern-l0-slices:
   regexp: "^([0-9a-z]{2})([0-9a-z]){1}_(([0-9a-z]{2})_RAW__0([0-9a-z_]{3}))_([0-9a-z]{15})_([0-9a-z]{15})_([0-9a-z_]{6})\\w{1,}\\.SAFE(/.*)?$"

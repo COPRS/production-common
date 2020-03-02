@@ -15,12 +15,13 @@ watcher:
   csvFile: /data/notificationSimulatorService.csv     
   kafkaFolder: /data/kafka
   
+mqi:
+  host-uri: http://localhost:8081                               # the host and port for querying MQI server
+  max-retries: 3                                                # the maximal number of consecutive retries following a MQI request error 
+  tempo-retry-ms: 1000                                          # 
+      
 # File
-file:
-  mqi:
-    host-uri: http://localhost:8081                               # the host and port for querying MQI server
-    max-retries: 3                                                # the maximal number of consecutive retries following a MQI request error 
-    tempo-retry-ms: 1000                                          # 
+file:  
   product-categories:
     auxiliary-files:
       fixed-delay-ms: 500                                         # (fixed delay) Period in milliseconds between 2 polls of next message

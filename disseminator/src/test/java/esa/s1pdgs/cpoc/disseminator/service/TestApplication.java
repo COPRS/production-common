@@ -22,6 +22,7 @@ import esa.s1pdgs.cpoc.disseminator.config.DisseminationProperties.Dissemination
 import esa.s1pdgs.cpoc.disseminator.config.DisseminationProperties.OutboxConfiguration;
 import esa.s1pdgs.cpoc.disseminator.config.DisseminationProperties.OutboxConfiguration.Protocol;
 import esa.s1pdgs.cpoc.errorrepo.ErrorRepoAppender;
+import esa.s1pdgs.cpoc.mqi.client.config.MqiConfigurationProperties;
 import esa.s1pdgs.cpoc.mqi.model.queue.ProductionEvent;
 import esa.s1pdgs.cpoc.mqi.model.rest.GenericMessageDto;
 import esa.s1pdgs.cpoc.obs_sdk.ObsObject;
@@ -39,6 +40,7 @@ public class TestApplication {
 	@Test
 	public final void testDisseminationProperties() {
 		// check that properties have been loaded successfully by spot checking some elements
+		final MqiConfigurationProperties configProps;
 		
 		System.out.println(properties);
 		

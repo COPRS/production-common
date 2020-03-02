@@ -11,10 +11,10 @@ import java.util.stream.Collectors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import esa.s1pdgs.cpoc.ingestion.trigger.InboxAdapter;
-import esa.s1pdgs.cpoc.ingestion.trigger.InboxEntryFactory;
 import esa.s1pdgs.cpoc.ingestion.trigger.entity.InboxEntry;
 import esa.s1pdgs.cpoc.ingestion.trigger.filter.InboxFilter;
+import esa.s1pdgs.cpoc.ingestion.trigger.inbox.InboxAdapter;
+import esa.s1pdgs.cpoc.ingestion.trigger.inbox.InboxEntryFactory;
 
 public class FilesystemInboxAdapter implements InboxAdapter {
 	private static final Logger LOG = LoggerFactory.getLogger(FilesystemInboxAdapter.class);

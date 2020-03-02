@@ -1,6 +1,7 @@
 package esa.s1pdgs.cpoc.compression.trigger.service;
 
 import java.util.Date;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -23,9 +24,9 @@ import esa.s1pdgs.cpoc.compression.trigger.config.TriggerConfigurationProperties
 import esa.s1pdgs.cpoc.errorrepo.ErrorRepoAppender;
 import esa.s1pdgs.cpoc.errorrepo.model.rest.FailedProcessingDto;
 import esa.s1pdgs.cpoc.mqi.client.GenericMqiClient;
+import esa.s1pdgs.cpoc.mqi.client.MessageFilter;
 import esa.s1pdgs.cpoc.mqi.client.MqiConsumer;
 import esa.s1pdgs.cpoc.mqi.client.MqiListener;
-import esa.s1pdgs.cpoc.mqi.client.MqiMessageFilterConfiguration;
 import esa.s1pdgs.cpoc.mqi.model.queue.CompressionDirection;
 import esa.s1pdgs.cpoc.mqi.model.queue.CompressionJob;
 import esa.s1pdgs.cpoc.mqi.model.queue.ProductionEvent;
@@ -46,7 +47,7 @@ public class CompressionTriggerService implements MqiListener<ProductionEvent> {
 
 	private final GenericMqiClient mqiClient;
 	private final TriggerConfigurationProperties properties;
-	private final MqiMessageFilterConfiguration mqiMessageFilterConfiguration;
+	private final List<MessageFilter> messageFilter;
 	private final ErrorRepoAppender errorAppender;
 	private final ProcessConfiguration settings;
 	
@@ -55,14 +56,14 @@ public class CompressionTriggerService implements MqiListener<ProductionEvent> {
 	@Autowired
 	public CompressionTriggerService(
 			final GenericMqiClient mqiClient,
-			final MqiMessageFilterConfiguration mqiMessageFilterConfiguration,
+			final List<MessageFilter> messageFilter,
 			final AppStatus appStatus,
 			final TriggerConfigurationProperties properties,
 			final ErrorRepoAppender errorAppender,
 			final ProcessConfiguration settings
 	) {
 		this.mqiClient = mqiClient;
-		this.mqiMessageFilterConfiguration = mqiMessageFilterConfiguration;
+		this.messageFilter = messageFilter;
 		this.appStatus = appStatus;
 		this.properties = properties;
 		this.errorAppender = errorAppender;
@@ -126,7 +127,7 @@ public class CompressionTriggerService implements MqiListener<ProductionEvent> {
 				mqiClient, 
 				cat, 
 				this,
-				mqiMessageFilterConfiguration.getMessageFilter(),
+				messageFilter,
 				config.getFixedDelayMs(),
 				config.getInitDelayPolMs(),
 				appStatus

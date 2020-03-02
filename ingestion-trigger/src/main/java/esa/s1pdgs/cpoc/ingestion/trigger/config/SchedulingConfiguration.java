@@ -6,7 +6,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.scheduling.annotation.EnableScheduling;
 
-import esa.s1pdgs.cpoc.ingestion.trigger.PollingTrigger;
+import esa.s1pdgs.cpoc.ingestion.trigger.inbox.PollingTrigger;
 import esa.s1pdgs.cpoc.ingestion.trigger.service.IngestionTriggerService;
 
 // make scheduling configurable via property to allow disabling it in unit tests
