@@ -18,6 +18,7 @@ import org.springframework.web.util.UriComponentsBuilder;
 
 import esa.s1pdgs.cpoc.common.ProductFamily;
 import esa.s1pdgs.cpoc.common.errors.processing.MetadataQueryException;
+import esa.s1pdgs.cpoc.common.errors.utils.MaxAmountOfRetriesExceededException;
 import esa.s1pdgs.cpoc.common.utils.DateUtils;
 import esa.s1pdgs.cpoc.common.utils.Retries;
 import esa.s1pdgs.cpoc.metadata.model.EdrsSessionMetadata;
@@ -327,6 +328,10 @@ public class MetadataClient {
 			}
 			// otherwise simply pass through exception
 			throw e;
+		} catch (MaxAmountOfRetriesExceededException e) {
+			throw new RuntimeException(
+					String.format("Amount of retries (%d) exceeded on command execution of '%s'", maxRetries, commandDescription)
+			);
 		} catch (InterruptedException e) {
 			throw new RuntimeException(
 					String.format("Interrupted on command execution of '%s'", commandDescription)

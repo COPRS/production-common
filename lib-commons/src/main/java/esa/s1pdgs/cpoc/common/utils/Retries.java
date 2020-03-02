@@ -5,6 +5,8 @@ import java.util.concurrent.Callable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import esa.s1pdgs.cpoc.common.errors.utils.MaxAmountOfRetriesExceededException;
+
 public class Retries {
 	private static final Logger LOG = LoggerFactory.getLogger(Retries.class);
 	
@@ -13,7 +15,7 @@ public class Retries {
 			final String name,
 			final int numRetries, 
 			final long retrySleep
-	) throws InterruptedException {
+	) throws InterruptedException, MaxAmountOfRetriesExceededException {
     	int attempt = 0;
     	while (true) {
     		try {
@@ -21,7 +23,7 @@ public class Retries {
     		} catch (Exception e) {
     			attempt++;  
     			if (attempt > numRetries) {
-    				throw new RuntimeException(
+    				throw new MaxAmountOfRetriesExceededException(
     						String.format(
     								"Error on performing %s after %s attempts: %s", 
     								 name,
