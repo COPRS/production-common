@@ -127,9 +127,18 @@ public class EsServices {
 		}
 	}
 	
-	public void createMetadataWithRetries(final JSONObject product, int numRetries, long retrySleep) throws InterruptedException {
+	public void createMetadataWithRetries(final JSONObject product, String productName, int numRetries, long retrySleep) throws InterruptedException {
 		Retries.performWithRetries(
-			() -> {	createMetadata(product); return null; }, 
+			() -> {
+		    	if (!isMetadataExist(product)) {
+		    		LOGGER.debug("Creating metatadata in ES for product {}", productName);
+					createMetadata(product);
+				}
+				else{
+					LOGGER.debug("ES already contains metadata for product {}", productName);
+				}
+				return null;
+			}, 
 			"Create metadata " + product,
 			numRetries,
 			retrySleep

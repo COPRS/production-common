@@ -116,14 +116,10 @@ public class MetadataExtractionService implements MqiListener<CatalogJob> {
 			
 	    	LOG.debug("Metadata extracted: {} for product: {}", metadata, productName);
 	    	
-			if (!esServices.isMetadataExist(metadata)) {
-				LOG.debug("Creating metatadata in ES for product {}", productName);
-			    esServices.createMetadata(metadata);
-			}
-			else{
-				LOG.debug("ES already contains metadata for product {}", productName);
-			}
-			publish(message, reporting.getUid(), metadata);
+	    	esServices.createMetadataWithRetries(metadata, productName, properties.getProductInsertionConfig().getMaxRetries(),
+	    			properties.getProductInsertionConfig().getTempoRetryMs());
+
+	    	publish(message, reporting.getUid(), metadata);
 	        reporting.end(new ReportingMessage("End metadata extraction"));
             
 		}
