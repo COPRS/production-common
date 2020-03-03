@@ -26,6 +26,10 @@ ENTRYPOINT ["/tini", "--"]
 # Workaround: This needs to be executed as root and was extracted from start_custom.sh
 /app/airbus/entrypoint.sh pac1 8 && ulimit -s unlimited
 
+# TBD who generates the oqcWD?
+RUN mkdir -p /data/oqcWD
+RUN chown s1pdgs:s1pdgs /data/oqcWD
+
 USER s1pdgs:s1pdgs
 
 CMD ["/app/start_custom.sh"]
