@@ -23,7 +23,7 @@ public class Retries {
     			if (attempt > numRetries) {
     				throw new RuntimeException(
     						String.format(
-    								"Error on performing %s after %s attempts: %s", 
+    								"Error: Number of retries has exceeded while performing %s after %s attempts: %s", 
     								 name,
     								 String.valueOf(attempt),
     								 LogUtils.toString(e)
