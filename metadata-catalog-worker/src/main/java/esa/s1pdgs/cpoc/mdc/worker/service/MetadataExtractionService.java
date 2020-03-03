@@ -116,8 +116,8 @@ public class MetadataExtractionService implements MqiListener<CatalogJob> {
 			
 	    	LOG.debug("Metadata extracted: {} for product: {}", metadata, productName);
 	    	
-	    	esServices.createMetadataWithRetries(metadata, productName, properties.getProductInsertionConfig().getMaxRetries(),
-	    			properties.getProductInsertionConfig().getTempoRetryMs());
+	    	esServices.createMetadataWithRetries(metadata, productName, properties.getProductInsertion().getMaxRetries(),
+	    			properties.getProductInsertion().getTempoRetryMs());
 
 	    	publish(message, reporting.getUid(), metadata);
 	        reporting.end(new ReportingMessage("End metadata extraction"));
