@@ -23,7 +23,9 @@ ADD https://github.com/krallin/tini/releases/download/${TINI_VERSION}/tini /tini
 RUN chmod +x /tini
 ENTRYPOINT ["/tini", "--"]
 
-# This is a workaround. Entrypoint script seems to require root privileges at the moment
-#USER s1pdgs:s1pdgs
+# Workaround: This needs to be executed as root and was extracted from start_custom.sh
+/app/airbus/entrypoint.sh pac1 8 && ulimit -s unlimited
+
+USER s1pdgs:s1pdgs
 
 CMD ["/app/start_custom.sh"]
