@@ -24,7 +24,7 @@ RUN chmod +x /tini
 ENTRYPOINT ["/tini", "--"]
 
 # Workaround: This needs to be executed as root and was extracted from start_custom.sh
-/app/airbus/entrypoint.sh pac1 8 && ulimit -s unlimited
+RUN /app/airbus/entrypoint.sh pac1 8 && ulimit -s unlimited
 
 USER s1pdgs:s1pdgs
 
