@@ -80,7 +80,7 @@ public class MdcWorkerConfigurationProperties {
 	}
 
 	private Map<ProductCategory, CategoryConfig> productCategories = new LinkedHashMap<>();
-	private ProductInsertionConfig productInsertionConfig = new ProductInsertionConfig(); 
+	private ProductInsertionConfig productInsertion = new ProductInsertionConfig(); 
 	
 	public Map<ProductCategory, CategoryConfig> getProductCategories() {
 		return productCategories;
@@ -90,12 +90,12 @@ public class MdcWorkerConfigurationProperties {
 		this.productCategories = productCategories;
 	}
 
-	public ProductInsertionConfig getProductInsertionConfig() {
-		return productInsertionConfig;
+	public ProductInsertionConfig getProductInsertion() {
+		return productInsertion;
 	}
 
-	public void setProductInsertionConfig(ProductInsertionConfig productInsertionConfig) {
-		this.productInsertionConfig = productInsertionConfig;
+	public void setProductInsertion(ProductInsertionConfig productInsertion) {
+		this.productInsertion = productInsertion;
 	}
 	
 }
