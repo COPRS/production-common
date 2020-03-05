@@ -1,5 +1,6 @@
 package esa.s1pdgs.cpoc.ipf.preparation.worker.model.tasktable;
 
+import java.util.Comparator;
 import java.util.Objects;
 
 import javax.xml.bind.annotation.XmlAccessType;
@@ -17,6 +18,13 @@ import esa.s1pdgs.cpoc.ipf.preparation.worker.model.tasktable.enums.TaskTableInp
 @XmlAccessorType(XmlAccessType.NONE)
 public class TaskTableInputAlternative {
 
+	public static final Comparator<TaskTableInputAlternative> ORDER = new Comparator<TaskTableInputAlternative>() {
+		@Override
+		public int compare(final TaskTableInputAlternative o1, final TaskTableInputAlternative o2) {
+			return o1.order - o2.order;
+		}		
+	};
+	
 	/**
 	 * 
 	 */
@@ -97,6 +105,12 @@ public class TaskTableInputAlternative {
 		this.deltaTime1 = deltaTime1;
 		this.fileType = fileType;
 		this.fileNameType = fileNameType;
+	}
+	
+	
+	// for comparator test
+	TaskTableInputAlternative(final int order) {
+		this.order = order;
 	}
 
 	/**
@@ -183,7 +197,7 @@ public class TaskTableInputAlternative {
 		} else if (obj == null || getClass() != obj.getClass()) {
 			ret = false;
 		} else {
-			TaskTableInputAlternative other = (TaskTableInputAlternative) obj;
+			final TaskTableInputAlternative other = (TaskTableInputAlternative) obj;
 			ret = order == other.order && Objects.equals(origin, other.origin)
 					&& Objects.equals(retrievalMode, other.retrievalMode)
 					&& Objects.equals(deltaTime0, other.deltaTime0) && Objects.equals(deltaTime1, other.deltaTime1)
@@ -191,6 +205,15 @@ public class TaskTableInputAlternative {
 					&& idSearchMetadataQuery == other.idSearchMetadataQuery;
 		}
 		return ret;
+	}
+	
+	
+
+	@Override
+	public String toString() {
+		return "TaskTableInputAlternative [order=" + order + ", origin=" + origin + ", retrievalMode=" + retrievalMode
+				+ ", deltaTime0=" + deltaTime0 + ", deltaTime1=" + deltaTime1 + ", fileType=" + fileType
+				+ ", fileNameType=" + fileNameType + ", idSearchMetadataQuery=" + idSearchMetadataQuery + "]";
 	}
 
 	public TaskTableInputAltKey getTaskTableInputAltKey() {
@@ -284,7 +307,7 @@ public class TaskTableInputAlternative {
 			} else if (obj == null || getClass() != obj.getClass()) {
 				ret = false;
 			} else {
-				TaskTableInputAltKey other = (TaskTableInputAltKey) obj;
+				final TaskTableInputAltKey other = (TaskTableInputAltKey) obj;
 				ret = Objects.equals(retrievalMode, other.retrievalMode) && Objects.equals(deltaTime0, other.deltaTime0)
 						&& Objects.equals(deltaTime1, other.deltaTime1) && Objects.equals(fileType, other.fileType);
 			}

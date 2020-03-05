@@ -6,14 +6,17 @@ import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.TreeSet;
 import java.util.UUID;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Function;
+import java.util.stream.Collector;
 import java.util.stream.Collectors;
 
 import javax.xml.bind.JAXBException;
@@ -263,9 +266,11 @@ public abstract class AbstractJobsGenerator implements Runnable {
 //    		return "string";
 //    	}
 //    }
-
-
     
+    static <T> Collector<T,?,List<T>> toSortedList(final Comparator<? super T> c) {
+        return Collectors.collectingAndThen(
+            Collectors.toCollection(()->new TreeSet<>(c)), ArrayList::new);
+    }
     
     private void buildMetadataSearchQuery() {
         final AtomicInteger counter = new AtomicInteger(0);
@@ -274,29 +279,27 @@ public abstract class AbstractJobsGenerator implements Runnable {
                 .flatMap(pool -> pool.getTasks().stream())
                 .filter(task -> !CollectionUtils.isEmpty(task.getInputs()))
                 .flatMap(task -> task.getInputs().stream())
-                .filter(input -> !CollectionUtils
-                        .isEmpty(input.getAlternatives()))
+                .filter(input -> !CollectionUtils.isEmpty(input.getAlternatives()))
                 .flatMap(input -> input.getAlternatives().stream())
                 .filter(alt -> alt.getOrigin() == TaskTableInputOrigin.DB)
                 .collect(Collectors.groupingBy(
-                        TaskTableInputAlternative::getTaskTableInputAltKey))
+                		TaskTableInputAlternative::getTaskTableInputAltKey,
+                		toSortedList(TaskTableInputAlternative.ORDER)
+                ))
                 .forEach((k, v) -> {
-                    String fileType = k.getFileType();
-                    if (this.ipfPreparationWorkerSettings.getMapTypeMeta()
-                            .containsKey(k.getFileType())) {
-                        fileType = this.ipfPreparationWorkerSettings.getMapTypeMeta()
-                                .get(k.getFileType());
-                    }
-                    ProductFamily family = ProductFamily.BLANK;
-                    if (this.ipfPreparationWorkerSettings.getInputfamilies()
-                            .containsKey(fileType)) {
-                        family = this.ipfPreparationWorkerSettings.getInputfamilies()
-                                .get(fileType);
-                    }
-                    final SearchMetadataQuery query =
-                            new SearchMetadataQuery(counter.incrementAndGet(),
-                                    k.getRetrievalMode(), k.getDeltaTime0(),
-                                    k.getDeltaTime1(), fileType, family);
+                    final String fileType = ipfPreparationWorkerSettings.getMapTypeMeta()
+                            .getOrDefault(k.getFileType(), k.getFileType());                    
+                    final ProductFamily family = ipfPreparationWorkerSettings.getInputfamilies()
+                			.getOrDefault(fileType, ProductFamily.BLANK);
+
+                    final SearchMetadataQuery query = new SearchMetadataQuery(
+                    		counter.incrementAndGet(),
+                    		k.getRetrievalMode(), 
+                    		k.getDeltaTime0(),
+                    		k.getDeltaTime1(), 
+                    		fileType, 
+                    		family
+                    );
                     this.metadataSearchQueries.put(counter.get(), query);
                     v.forEach(alt -> {
                         alt.setIdSearchMetadataQuery(counter.get());
