@@ -6,17 +6,14 @@ import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.TreeSet;
 import java.util.UUID;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Function;
-import java.util.stream.Collector;
 import java.util.stream.Collectors;
 
 import javax.xml.bind.JAXBException;
@@ -267,11 +264,6 @@ public abstract class AbstractJobsGenerator implements Runnable {
 //    	}
 //    }
     
-    static <T> Collector<T,?,List<T>> toSortedList(final Comparator<? super T> c) {
-        return Collectors.collectingAndThen(
-            Collectors.toCollection(()->new TreeSet<>(c)), ArrayList::new);
-    }
-    
     private void buildMetadataSearchQuery() {
         final AtomicInteger counter = new AtomicInteger(0);
         this.taskTable.getPools().stream()
@@ -280,12 +272,9 @@ public abstract class AbstractJobsGenerator implements Runnable {
                 .filter(task -> !CollectionUtils.isEmpty(task.getInputs()))
                 .flatMap(task -> task.getInputs().stream())
                 .filter(input -> !CollectionUtils.isEmpty(input.getAlternatives()))
-                .flatMap(input -> input.getAlternatives().stream())
+                .flatMap(input -> input.getAlternatives().stream().sorted(TaskTableInputAlternative.ORDER))
                 .filter(alt -> alt.getOrigin() == TaskTableInputOrigin.DB)
-                .collect(Collectors.groupingBy(
-                		TaskTableInputAlternative::getTaskTableInputAltKey,
-                		toSortedList(TaskTableInputAlternative.ORDER)
-                ))
+                .collect(Collectors.groupingBy(TaskTableInputAlternative::getTaskTableInputAltKey))
                 .forEach((k, v) -> {
                     final String fileType = ipfPreparationWorkerSettings.getMapTypeMeta()
                             .getOrDefault(k.getFileType(), k.getFileType());                    
