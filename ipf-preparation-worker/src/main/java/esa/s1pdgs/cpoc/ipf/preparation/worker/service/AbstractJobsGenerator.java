@@ -282,21 +282,25 @@ public abstract class AbstractJobsGenerator implements Runnable {
                         TaskTableInputAlternative::getTaskTableInputAltKey))
                 .forEach((k, v) -> {
                     String fileType = k.getFileType();
+                    System.out.println("Input FileType: " + fileType);
                     if (this.ipfPreparationWorkerSettings.getMapTypeMeta()
                             .containsKey(k.getFileType())) {
                         fileType = this.ipfPreparationWorkerSettings.getMapTypeMeta()
                                 .get(k.getFileType());
+                        System.out.println("Changed: " + fileType);
                     }
                     ProductFamily family = ProductFamily.BLANK;
                     if (this.ipfPreparationWorkerSettings.getInputfamilies()
                             .containsKey(fileType)) {
                         family = this.ipfPreparationWorkerSettings.getInputfamilies()
                                 .get(fileType);
+                        System.out.println("Family: " + family);
                     }
                     final SearchMetadataQuery query =
                             new SearchMetadataQuery(counter.incrementAndGet(),
                                     k.getRetrievalMode(), k.getDeltaTime0(),
                                     k.getDeltaTime1(), fileType, family);
+                    System.out.println("Query: " + query);
                     this.metadataSearchQueries.put(counter.get(), query);
                     v.forEach(alt -> {
                         alt.setIdSearchMetadataQuery(counter.get());

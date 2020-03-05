@@ -23,7 +23,7 @@ ingestion-trigger:
   polling-interval-ms: 10000
   polling:
     - directory: /tmp/test123
-      matchRegex: (WILE|MTI_|SGS_|INU_)/S1(A|B)/([A-Za-z0-9]+)/ch0(1|2)/(.+DSIB\\.(xml|XML)|.+DSDB.*\\.(raw|RAW|aisp|AISP))
+      matchRegex: (WILE|MTI_|SGS_|INU_)/S1(A|B)/([A-Za-z0-9]+)/ch0?(1|2)/(.+DSIB\\.(xml|XML)|.+DSDB.*\\.(raw|RAW|aisp|AISP))
       ignoreRegex: (^\..*|.*\.tmp$|db.*|^lost\+found$)
       topic: t-pdgs-ingestion-${HOSTNAME}
   

@@ -8,7 +8,7 @@ import org.junit.Test;
 // Test filter regex
 public class TestRegex {
 
-	private final String REGEX = "(WILE|MTI_|SGS_|INU_)/S1(A|B)/([A-Za-z0-9_]+)/ch0(1|2)/([0-9a-zA-Z_]+DSIB\\.(xml|XML)|[0-9a-zA-Z_]+DSDB.*\\.(raw|RAW|aisp|AISP))$";
+	private final String REGEX = "(WILE|MTI_|SGS_|INU_)/S1(A|B)/([A-Za-z0-9_]+)/ch0?(1|2)/([0-9a-zA-Z_]+DSIB\\.(xml|XML)|[0-9a-zA-Z_]+DSDB.*\\.(raw|RAW|aisp|AISP))$";
 	
 	@Test
 	public final void testMatches() {

@@ -51,7 +51,7 @@ worker:
       local-directory: /data/local-catalog/edrs_sessions/ # Must contains the last /
       fixed-delay-ms: 500
       init-delay-poll-ms: 2000
-      path-pattern: ^([a-z_]{4})/([0-9a-z_]{3})/([0-9a-z_]+)/ch0([1-2])/.+
+      path-pattern: ^([a-z_]{4})/([0-9a-z_]{3})/([0-9a-z_]+)/ch0?([1-2])/.+
       path-metadata-elements:
         stationCode: 1
         satelliteId: 2

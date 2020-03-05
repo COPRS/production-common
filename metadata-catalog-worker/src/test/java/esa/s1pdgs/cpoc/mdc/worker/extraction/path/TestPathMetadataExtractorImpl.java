@@ -20,7 +20,7 @@ WILE/S1B/L20180724144436762001030/ch01/DCS_02_L20180724144436762001030_ch1_DSDB_
 
 	@Test
 	public final void test() {
-		final String regex = "^([a-z_]{4})/([0-9a-z_]{2})([0-9a-z_]{1})/([0-9a-z_]+)/ch0([1-2])/.+";
+		final String regex = "^([a-z_]{4})/([0-9a-z_]{2})([0-9a-z_]{1})/([0-9a-z_]+)/ch0?([1-2])/.+";
 		final Pattern pattern = Pattern.compile(regex, Pattern.CASE_INSENSITIVE);
 		
 		final Map<String,Integer> conf = new HashMap<>();

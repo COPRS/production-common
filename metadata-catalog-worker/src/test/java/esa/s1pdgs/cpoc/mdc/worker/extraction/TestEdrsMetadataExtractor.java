@@ -42,7 +42,7 @@ import esa.s1pdgs.cpoc.report.ReportingUtils;
 
 public class TestEdrsMetadataExtractor {
 	
-	private static final String PATTERN = "(WILE|MTI_|SGS_|INU_)/S1(A|B)/([A-Za-z0-9]+)/ch0(1|2)/(.+DSIB\\.(xml|XML)|.+DSDB.*\\.(raw|RAW|aisp|AISP))";
+	private static final String PATTERN = "(WILE|MTI_|SGS_|INU_)/S1(A|B)/([A-Za-z0-9]+)/ch0?(1|2)/(.+DSIB\\.(xml|XML)|.+DSDB.*\\.(raw|RAW|aisp|AISP))";
 
     /**
      * Elasticsearch services
@@ -136,7 +136,7 @@ public class TestEdrsMetadataExtractor {
     			new ProcessConfiguration(), 
     			obsClient,
     			new PathMetadataExtractorImpl(
-    					Pattern.compile("^([a-z_]{4})/([0-9a-z_]{2})([0-9a-z_]{1})/([0-9a-z_]+)/ch0([1-2])/.+", Pattern.CASE_INSENSITIVE), 
+    					Pattern.compile("^([a-z_]{4})/([0-9a-z_]{2})([0-9a-z_]{1})/([0-9a-z_]+)/ch0?([1-2])/.+", Pattern.CASE_INSENSITIVE), 
     					conf
     			)
     	);

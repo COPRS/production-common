@@ -35,7 +35,7 @@ public class TestFilesystemInboxAdapter {
 	
 	//@Test
 	public final void testRegex() {
-		final Pattern patternToTest = Pattern.compile("(WILE|MTI_|SGS_|INU_)/S1(A|B)/([A-Za-z0-9]+)/ch0(1|2)/.*\\.(xml|raw)",Pattern.CASE_INSENSITIVE);
+		final Pattern patternToTest = Pattern.compile("(WILE|MTI_|SGS_|INU_)/S1(A|B)/([A-Za-z0-9]+)/ch0?(1|2)/.*\\.(xml|raw)",Pattern.CASE_INSENSITIVE);
 		assertEquals(true, patternToTest.matcher("WILE/S1B/L20180724144436762001030/ch01/DCS_02_L20180724144436762001030_ch1_DSDB_00027.raw").matches());
 	}
 
@@ -55,7 +55,7 @@ public class TestFilesystemInboxAdapter {
 		
 		final InboxFilter edrsFilter = new JoinedFilter(
 				new BlacklistRegexRelativePathInboxFilter(Pattern.compile("(^\\..*|.*\\.tmp$|db.*|^lost\\+found$)")),
-				new WhitelistRegexRelativePathInboxFilter(Pattern.compile("(WILE|MTI_|SGS_|INU_)/S1(A|B)/([A-Za-z0-9]+)/ch0(1|2)/(.+DSIB\\.(xml|XML)|.+DSDB.*\\.(raw|RAW|aisp|AISP))"))
+				new WhitelistRegexRelativePathInboxFilter(Pattern.compile("(WILE|MTI_|SGS_|INU_)/S1(A|B)/([A-Za-z0-9]+)/ch0?(1|2)/(.+DSIB\\.(xml|XML)|.+DSDB.*\\.(raw|RAW|aisp|AISP))"))
 		);
 		final FilesystemInboxAdapter uutEdrs = new FilesystemInboxAdapter(testDir.toPath(), factory, 2);
 		final Collection<InboxEntry> actualEdrs = uutEdrs.read(edrsFilter);
