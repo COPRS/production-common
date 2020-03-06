@@ -17,11 +17,13 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import javax.xml.bind.JAXBException;
 
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
@@ -35,6 +37,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import esa.s1pdgs.cpoc.appcatalog.AppDataJob;
 import esa.s1pdgs.cpoc.appcatalog.AppDataJobGeneration;
 import esa.s1pdgs.cpoc.appcatalog.AppDataJobGenerationState;
+import esa.s1pdgs.cpoc.appcatalog.AppDataJobProduct;
 import esa.s1pdgs.cpoc.appcatalog.client.job.AppCatalogJobClient;
 import esa.s1pdgs.cpoc.common.ApplicationLevel;
 import esa.s1pdgs.cpoc.common.ProductFamily;
@@ -42,17 +45,17 @@ import esa.s1pdgs.cpoc.common.errors.AbstractCodedException;
 import esa.s1pdgs.cpoc.common.errors.InternalErrorException;
 import esa.s1pdgs.cpoc.common.errors.appcatalog.AppCatalogJobSearchApiError;
 import esa.s1pdgs.cpoc.common.errors.processing.IpfPrepWorkerBuildTaskTableException;
+import esa.s1pdgs.cpoc.common.errors.processing.IpfPrepWorkerInputsMissingException;
 import esa.s1pdgs.cpoc.common.errors.processing.MetadataQueryException;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.config.AppConfig;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.config.IpfPreparationWorkerSettings;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.config.IpfPreparationWorkerSettings.WaitTempo;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.config.ProcessConfiguration;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.config.ProcessSettings;
+import esa.s1pdgs.cpoc.ipf.preparation.worker.model.JobGeneration;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.model.ProductMode;
+import esa.s1pdgs.cpoc.ipf.preparation.worker.model.metadata.SearchMetadataResult;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.model.tasktable.TaskTable;
-import esa.s1pdgs.cpoc.ipf.preparation.worker.service.AbstractJobsGenerator;
-import esa.s1pdgs.cpoc.ipf.preparation.worker.service.LevelProductsJobsGenerator;
-import esa.s1pdgs.cpoc.ipf.preparation.worker.service.XmlConverter;
 import esa.s1pdgs.cpoc.metadata.client.MetadataClient;
 import esa.s1pdgs.cpoc.metadata.client.SearchMetadataQuery;
 import esa.s1pdgs.cpoc.metadata.model.SearchMetadata;
@@ -61,6 +64,78 @@ import esa.s1pdgs.cpoc.mqi.model.queue.CatalogEvent;
 
 public class AbstractJobsGeneratorTest {
 
+	static final List<SearchMetadata> IW_RAW__0S = Arrays.asList(new SearchMetadata(
+    		"S1A_IW_RAW__0SDV_20171213T121623_20171213T121656_019684_021735_C6DB.SAFE",
+    		"IW_RAW__0S",
+    		"S1A_IW_RAW__0SDV_20171213T121623_20171213T121656_019684_021735_C6DB.SAFE",
+    		"2017-12-13T12:16:23.00000", "2017-12-13T12:16:56",
+    		"S1",
+    		"A",
+    		"WILE"));
+    
+	static final List<SearchMetadata> IW_RAW__0A = Arrays.asList(new SearchMetadata(
+    		"S1A_IW_RAW__0ADV_20171213T121123_20171213T121947_019684_021735_51B1.SAFE",
+    		"IW_RAW__0A",
+    		"S1A_IW_RAW__0ADV_20171213T121123_20171213T121947_019684_021735_51B1.SAFE",
+    		"2017-12-13T12:11:23", "2017-12-13T12:19:47",
+    		"S1",
+    		"A",
+    		"WILE"));
+    
+	static final List<SearchMetadata> IW_RAW__0C = Arrays.asList(new SearchMetadata(
+    		"S1A_IW_RAW__0CDV_20171213T121123_20171213T121947_019684_021735_E131.SAFE",
+    		"IW_RAW__0C",
+    		"S1A_IW_RAW__0CDV_20171213T121123_20171213T121947_019684_021735_E131.SAFE",
+    		"2017-12-13T12:11:23", "2017-12-13T12:19:47",
+    		"S1",
+    		"A",
+    		"WILE"));
+    
+	static final List<SearchMetadata> IW_RAW__0N = Arrays.asList(new SearchMetadata(
+    		"S1A_IW_RAW__0NDV_20171213T121123_20171213T121947_019684_021735_87D4.SAFE",
+    		"IW_RAW__0N",
+    		"S1A_IW_RAW__0NDV_20171213T121123_20171213T121947_019684_021735_87D4.SAFE",
+    		"2017-12-13T12:11:23", "2017-12-13T12:19:47",
+    		"S1",
+    		"A",
+    		"WILE"));
+
+	static final List<SearchMetadata> AUX_CAL = Arrays.asList(new SearchMetadata(
+    		"S1A_AUX_CAL_V20171017T080000_G20171013T101200.SAFE",
+    		"AUX_CAL",
+    		"S1A_AUX_CAL_V20171017T080000_G20171013T101200.SAFE",
+    		"2017-10-17T08:00:00", "9999-12-31T23:59:59",
+    		"S1",
+    		"A",
+    		"WILE"));
+    
+	static final List<SearchMetadata> AUX_INS = Arrays.asList(new SearchMetadata(
+    		"S1A_AUX_INS_V20171017T080000_G20171013T101216.SAFE",
+    		"AUX_INS",
+    		"S1A_AUX_INS_V20171017T080000_G20171013T101216.SAFE",
+    		"2017-10-17T08:00:00", "9999-12-31T23:59:59",
+    		"S1",
+    		"A",
+    		"WILE"));
+
+	static final List<SearchMetadata> AUX_PP1 = Arrays.asList(new SearchMetadata(
+    		"S1A_AUX_PP1_V20171017T080000_G20171013T101236.SAFE",
+    		"AUX_PP1",
+    		"S1A_AUX_PP1_V20171017T080000_G20171013T101236.SAFE",
+    		"2017-10-17T08:00:00", "9999-12-31T23:59:59",
+    		"S1",
+    		"A",
+    		"WILE"));
+
+	static final List<SearchMetadata> AUX_RES = Arrays.asList(new SearchMetadata(
+    		"S1A_OPER_AUX_RESORB_OPOD_20171213T143838_V20171213T102737_20171213T134507.EOF",
+    		"AUX_OBMEMC",
+    		"S1A_OPER_AUX_RESORB_OPOD_20171213T143838_V20171213T102737_20171213T134507.EOF",
+    		"2017-12-13T10:27:37", "2017-12-13T13:45:07",
+    		"S1",
+    		"A",
+    		"WILE"));
+	
     /**
      * To check the raised custom exceptions
      */
@@ -91,6 +166,23 @@ public class AbstractJobsGeneratorTest {
 
     @Mock
     private ProcessConfiguration processConfiguration;
+
+    @Mock
+    private JobGeneration jobGeneration;
+    
+    @Mock
+    private AppDataJob appDataJob;
+
+    @Mock
+    private AppDataJobProduct appDataJobProduct;
+    
+	@Mock
+	SearchMetadataQuery query1, query2, query3;
+
+	@Mock
+	SearchMetadataResult result1, result2, result3;
+
+	private Map<String, List<SearchMetadata>> metadataBrain;
     
     private TaskTable expectedTaskTable;
 
@@ -101,6 +193,17 @@ public class AbstractJobsGeneratorTest {
      */
     @Before
     public void init() throws Exception {
+    	
+    	metadataBrain = new HashMap<>();
+    	metadataBrain.put("IW_RAW__0S", IW_RAW__0S);
+    	metadataBrain.put("IW_RAW__0A", IW_RAW__0A);
+    	metadataBrain.put("IW_RAW__0C", IW_RAW__0C);
+    	metadataBrain.put("IW_RAW__0N", IW_RAW__0N);
+    	metadataBrain.put("AUX_CAL", AUX_CAL);
+    	metadataBrain.put("AUX_INS", AUX_INS);
+    	metadataBrain.put("AUX_PP1", AUX_PP1);
+    	metadataBrain.put("AUX_RES", AUX_RES);
+    	
         this.nbLoopMetadata = 0;
         expectedTaskTable = TestGenericUtils.buildTaskTableIW();
 
@@ -221,86 +324,7 @@ public class AbstractJobsGeneratorTest {
                 if (this.nbLoopMetadata >= maxLoop2) {
                     this.nbLoopMetadata = 0;
                     final SearchMetadataQuery query = i.getArgument(0);
-                    if ("IW_RAW__0S".equalsIgnoreCase(query.getProductType())) {
-                        return Arrays.asList(new SearchMetadata(
-                                "S1A_IW_RAW__0SDV_20171213T121623_20171213T121656_019684_021735_C6DB.SAFE",
-                                "IW_RAW__0S",
-                                "S1A_IW_RAW__0SDV_20171213T121623_20171213T121656_019684_021735_C6DB.SAFE",
-                                "2017-12-13T12:16:23.00000", "2017-12-13T12:16:56",
-                                "S1",
-                                "A",
-                                "WILE"));
-                    } else if ("IW_RAW__0A"
-                            .equalsIgnoreCase(query.getProductType())) {
-                        return Arrays.asList(new SearchMetadata(
-                                "S1A_IW_RAW__0ADV_20171213T121123_20171213T121947_019684_021735_51B1.SAFE",
-                                "IW_RAW__0A",
-                                "S1A_IW_RAW__0ADV_20171213T121123_20171213T121947_019684_021735_51B1.SAFE",
-                                "2017-12-13T12:11:23", "2017-12-13T12:19:47",
-                                "S1",
-                                "A",
-                                "WILE"));
-                    } else if ("IW_RAW__0C"
-                            .equalsIgnoreCase(query.getProductType())) {
-                        return Arrays.asList(new SearchMetadata(
-                                "S1A_IW_RAW__0CDV_20171213T121123_20171213T121947_019684_021735_E131.SAFE",
-                                "IW_RAW__0C",
-                                "S1A_IW_RAW__0CDV_20171213T121123_20171213T121947_019684_021735_E131.SAFE",
-                                "2017-12-13T12:11:23", "2017-12-13T12:19:47",
-                                "S1",
-                                "A",
-                                "WILE"));
-                    } else if ("IW_RAW__0N"
-                            .equalsIgnoreCase(query.getProductType())) {
-                        return Arrays.asList(new SearchMetadata(
-                                "S1A_IW_RAW__0NDV_20171213T121123_20171213T121947_019684_021735_87D4.SAFE",
-                                "IW_RAW__0N",
-                                "S1A_IW_RAW__0NDV_20171213T121123_20171213T121947_019684_021735_87D4.SAFE",
-                                "2017-12-13T12:11:23", "2017-12-13T12:19:47",
-                                "S1",
-                                "A",
-                                "WILE"));
-                    } else if ("AUX_CAL"
-                            .equalsIgnoreCase(query.getProductType())) {
-                        return Arrays.asList(new SearchMetadata(
-                                "S1A_AUX_CAL_V20171017T080000_G20171013T101200.SAFE",
-                                "AUX_CAL",
-                                "S1A_AUX_CAL_V20171017T080000_G20171013T101200.SAFE",
-                                "2017-10-17T08:00:00", "9999-12-31T23:59:59",
-                                "S1",
-                                "A",
-                                "WILE"));
-                    } else if ("AUX_INS"
-                            .equalsIgnoreCase(query.getProductType())) {
-                        return Arrays.asList(new SearchMetadata(
-                                "S1A_AUX_INS_V20171017T080000_G20171013T101216.SAFE",
-                                "AUX_INS",
-                                "S1A_AUX_INS_V20171017T080000_G20171013T101216.SAFE",
-                                "2017-10-17T08:00:00", "9999-12-31T23:59:59",
-                                "S1",
-                                "A",
-                                "WILE"));
-                    } else if ("AUX_PP1"
-                            .equalsIgnoreCase(query.getProductType())) {
-                        return Arrays.asList(new SearchMetadata(
-                                "S1A_AUX_PP1_V20171017T080000_G20171013T101236.SAFE",
-                                "AUX_PP1",
-                                "S1A_AUX_PP1_V20171017T080000_G20171013T101236.SAFE",
-                                "2017-10-17T08:00:00", "9999-12-31T23:59:59",
-                                "S1",
-                                "A",
-                                "WILE"));
-                    } else if ("AUX_RES"
-                            .equalsIgnoreCase(query.getProductType())) {
-                        return Arrays.asList(new SearchMetadata(
-                                "S1A_OPER_AUX_RESORB_OPOD_20171213T143838_V20171213T102737_20171213T134507.EOF",
-                                "AUX_OBMEMC",
-                                "S1A_OPER_AUX_RESORB_OPOD_20171213T143838_V20171213T102737_20171213T134507.EOF",
-                                "2017-12-13T10:27:37", "2017-12-13T13:45:07",
-                                "S1",
-                                "A",
-                                "WILE"));
-                    }
+                    return metadataBrain.get(query.getProductType().toUpperCase());
                 }
                 return null;
             }).when(this.metadataClient).search(Mockito.any(), Mockito.any(),
@@ -510,5 +534,43 @@ public class AbstractJobsGeneratorTest {
         verify(ipfPreparationWorkerSettings, times(1)).getWaitprimarycheck();
         verify(ipfPreparationWorkerSettings, times(1)).getWaitmetadatainput();
         verifyNoMoreInteractions(appDataPService, mqiClient, metadataClient);
+    }
+    
+    @Ignore
+    public void waitingTest() throws IpfPrepWorkerInputsMissingException, MetadataQueryException {
+    	Map<Integer, SearchMetadataResult> metadataQueries = new HashMap<>();
+    	
+    	Mockito.when(jobGeneration.getAppDataJob()).thenReturn(appDataJob);
+    	Mockito.when(appDataJob.getId()).thenReturn(23L);
+    	Mockito.when(appDataJob.getProduct()).thenReturn(appDataJobProduct);
+    	Mockito.when(jobGeneration.getMetadataQueries()).thenReturn(metadataQueries);
+    	   	
+    	Mockito.when(result1.getQuery()).thenReturn(query1);
+    	
+    	Mockito.when(result2.getResult()).thenReturn(null);
+    	Mockito.when(result2.getQuery()).thenReturn(query2);
+    	Mockito.when(query2.getProductType()).thenReturn("ABCD");
+    	
+    	List<SearchMetadata> file = new ArrayList<>();
+    	    	
+    	// TODO: Configure metadataBrain (remove some products
+    	
+    	
+    	metadataQueries.put(1, result1);
+    	metadataQueries.put(2, result2);
+    	metadataQueries.put(3, null);
+    	metadataQueries.put(4, null);
+    	metadataQueries.put(5, null);
+    	metadataQueries.put(6, null);
+    	metadataQueries.put(7, null);
+    	metadataQueries.put(8, null);
+    	metadataQueries.put(9, null);
+    	metadataQueries.put(10, null);
+    	
+    	try {
+    		generator.inputsSearch(jobGeneration);
+    	} catch (IpfPrepWorkerInputsMissingException e) {
+    		System.out.println("Missing inputs..."); //FIXME
+    	}
     }
 }
