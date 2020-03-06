@@ -97,8 +97,69 @@ public class IpfPreparationWorkerSettings {
 			return "CategoryConfig [fixedDelayMs=" + fixedDelayMs + ", initDelayPollMs=" + initDelayPollMs + "]";
 		}
 	}
+	
+	public static class InputWaitingConfig
+	{
+		private String processorNameRegexp;
+		private String processorVersionRegexp;
+		private String inputIdRegexp;
+		private String timelinessRegexp;
+		private int waitingInSeconds;
+		private int delayInSeconds;		
+
+		public String getProcessorNameRegexp() {
+			return processorNameRegexp;
+		}
+		
+		public void setProcessorNameRegexp(String processorNameRegexp) {
+			this.processorNameRegexp = processorNameRegexp;
+		}
+		
+		public String getProcessorVersionRegexp() {
+			return processorVersionRegexp;
+		}
+		
+		public void setProcessorVersionRegexp(String processorVersionRegexp) {
+			this.processorVersionRegexp = processorVersionRegexp;
+		}
+		
+		public String getInputIdRegexp() {
+			return inputIdRegexp;
+		}
+		
+		public void setInputIdRegexp(String inputIdRegexp) {
+			this.inputIdRegexp = inputIdRegexp;
+		}
+		
+		public String getTimelinessRegexp() {
+			return timelinessRegexp;
+		}
+		
+		public void setTimelinessRegexp(String timelinessRegexp) {
+			this.timelinessRegexp = timelinessRegexp;
+		}
+		
+		public int getWaitingInSeconds() {
+			return waitingInSeconds;
+		}
+		
+		public void setWaitingInSeconds(int waitingInSeconds) {
+			this.waitingInSeconds = waitingInSeconds;
+		}
+
+		public int getDelayInSeconds() {
+			return delayInSeconds;
+		}
+
+		public void setDelayInSeconds(int delayInSeconds) {
+			this.delayInSeconds = delayInSeconds;
+		}
+
+	}
 
 	private Map<ProductCategory, CategoryConfig> productCategories = new LinkedHashMap<>();
+	
+	private List<InputWaitingConfig> inputWaiting = new ArrayList<>();
 	
 	public Map<ProductCategory, CategoryConfig> getProductCategories() {
 		return productCategories;
@@ -106,6 +167,14 @@ public class IpfPreparationWorkerSettings {
 
 	public void setProductCategories(final Map<ProductCategory, CategoryConfig> productCategories) {
 		this.productCategories = productCategories;
+	}
+
+	public List<InputWaitingConfig> getInputWaiting() {
+		return inputWaiting;
+	}
+
+	public void setInputWaiting(List<InputWaitingConfig> inputWaiting) {
+		this.inputWaiting = inputWaiting;
 	}
 	
 	/**
@@ -511,8 +580,8 @@ public class IpfPreparationWorkerSettings {
 				+ ", diroftasktables: " + diroftasktables + ", jobgenfixedrate: " + jobgenfixedrate
 				+ ", defaultfamily: " + defaultfamily + ", outputfamiliesstr: " + outputfamiliesstr
 				+ ", outputfamilies: " + outputfamilies + ", typeOverlap: " + typeOverlap + ", typeSliceLength: "
-				+ typeSliceLength + ", mapTypeMeta: " + mapTypeMeta
-				+ ", oqcCheck: "+oqcCheck
+				+ typeSliceLength + ", mapTypeMeta: " + mapTypeMeta + ", oqcCheck: " + oqcCheck
+				+ ", productCategories: " + productCategories + ", inputWaiting: " + inputWaiting
 				+ "}";
 	}
 

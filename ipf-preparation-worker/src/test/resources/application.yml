@@ -29,6 +29,25 @@ level-products:
 
 ipf-preparation-worker:
   diroftasktables: ./test/data/l0_config/task_tables/
+  inputWaiting:
+  - processorNameRegexp: .._RAW__0_(SLC|GRD).*_1
+    processorVersionRegexp: .*
+    inputIdRegexp: Orbit
+    timelinessRegexp: (PT|NRT)
+    waitingInSeconds: 0
+    delayInSeconds: 3600
+  - processorNameRegexp: .._RAW__0_(SLC|GRD).*_1
+    processorVersionRegexp: .*
+    inputIdRegexp: Orbit
+    timelinessRegexp: (NRT|PT)
+    waitingInSeconds: 57600
+    delayInSeconds: 3600
+  - processorNameRegexp: ".._RAW__0_OCN__2"
+    processorVersionRegexp: .*
+    inputIdRegexp: Orbit
+    timelinessRegexp: (PT|NRT|FAST)
+    waitingInSeconds: 57600
+    delayInSeconds: 3600
   maxnboftasktable: 2
   maxnumberofjobs: 20
   jobgenfixedrate: 500
