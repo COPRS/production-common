@@ -784,10 +784,15 @@ public abstract class AbstractJobsGenerator implements Runnable {
                                 }
 
                             } else {
+                            	//nothing found in none of the alternatives
                                 if (input
                                         .getMandatory() == TaskTableMandatoryEnum.YES) {
                                     missingMetadata.put(input.toLogMessage(),
                                             "");
+                                } else {
+                                	//optional input
+                                	
+                                	//TODO: wait until configured timeout (re-submit job...)
                                 }
                             }
                         }
