@@ -3,6 +3,10 @@ package esa.s1pdgs.cpoc.ipf.preparation.worker.config;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
+import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
+
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -10,8 +14,11 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.junit4.SpringRunner;
 
+import esa.s1pdgs.cpoc.common.ProductCategory;
 import esa.s1pdgs.cpoc.common.ProductFamily;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.config.IpfPreparationWorkerSettings;
+import esa.s1pdgs.cpoc.ipf.preparation.worker.config.IpfPreparationWorkerSettings.CategoryConfig;
+import esa.s1pdgs.cpoc.ipf.preparation.worker.config.IpfPreparationWorkerSettings.InputWaitingConfig;
 
 /**
  * Test the class JobGeneratorSettings
@@ -46,6 +53,8 @@ public class IpfPreparationWorkerSettingsTest {
 		assertEquals("Invalid default output family", "L0_ACN", jobGenSettings.getDefaultfamily());
 		assertEquals("Invalid size of output families", 8, jobGenSettings.getInputfamilies().size());
         assertEquals("Invalid size of input families", 18, jobGenSettings.getOutputfamilies().size());
+        assertEquals("Invalid size of product categories", 4, jobGenSettings.getProductCategories().size());
+        assertEquals("Invalid size of input waiting", 3, jobGenSettings.getInputWaiting().size());
 	}
 
 	/**
@@ -111,5 +120,47 @@ public class IpfPreparationWorkerSettingsTest {
 		assertTrue("Should contain typeOverlap", settings.contains("typeOverlap"));
 		assertTrue("Should contain typeSliceLength", settings.contains("typeSliceLength"));
 		assertTrue("Should contain mapTypeMeta", settings.contains("mapTypeMeta"));
+		assertTrue("Should contain productCategories", settings.contains("productCategories"));
+		assertTrue("Should contain inputWaiting", settings.contains("inputWaiting"));
 	}
+	
+	@Test
+	public void testProductCategoriesAttributes() {
+		Map<ProductCategory, CategoryConfig> productCategories = jobGenSettings.getProductCategories();
+		assertEquals(500, productCategories.get(ProductCategory.AUXILIARY_FILES).getFixedDelayMs());
+		assertEquals(2000, productCategories.get(ProductCategory.AUXILIARY_FILES).getInitDelayPollMs());
+		assertEquals(500, productCategories.get(ProductCategory.EDRS_SESSIONS).getFixedDelayMs());
+		assertEquals(2000, productCategories.get(ProductCategory.EDRS_SESSIONS).getInitDelayPollMs());
+		assertEquals(500, productCategories.get(ProductCategory.LEVEL_SEGMENTS).getFixedDelayMs());
+		assertEquals(2000, productCategories.get(ProductCategory.LEVEL_SEGMENTS).getInitDelayPollMs());
+		assertEquals(500, productCategories.get(ProductCategory.LEVEL_PRODUCTS).getFixedDelayMs());
+		assertEquals(2000, productCategories.get(ProductCategory.LEVEL_PRODUCTS).getInitDelayPollMs());
+	}
+
+	@Test
+	public void testInputWaitingAttributes() 	
+	{
+		List<InputWaitingConfig> inputWaiting = jobGenSettings.getInputWaiting();
+		assertEquals(".._RAW__0_(SLC|GRD).*_1", inputWaiting.get(0).getProcessorNameRegexp());
+		assertEquals(".*", inputWaiting.get(0).getProcessorVersionRegexp());
+		assertEquals("Orbit", inputWaiting.get(0).getInputIdRegexp());
+		assertEquals("(PT|NRT)", inputWaiting.get(0).getTimelinessRegexp());
+		assertEquals(0, inputWaiting.get(0).getWaitingInSeconds());
+		assertEquals(3600, inputWaiting.get(0).getDelayInSeconds());
+
+		assertEquals(".._RAW__0_(SLC|GRD).*_1", inputWaiting.get(1).getProcessorNameRegexp());
+		assertEquals(".*", inputWaiting.get(1).getProcessorVersionRegexp());
+		assertEquals("Orbit", inputWaiting.get(1).getInputIdRegexp());
+		assertEquals("FAST24", inputWaiting.get(1).getTimelinessRegexp());
+		assertEquals(57600, inputWaiting.get(1).getWaitingInSeconds());
+		assertEquals(3600, inputWaiting.get(1).getDelayInSeconds());
+
+		assertEquals(".._RAW__0_OCN__2", inputWaiting.get(2).getProcessorNameRegexp());
+		assertEquals(".*", inputWaiting.get(2).getProcessorVersionRegexp());
+		assertEquals("Orbit", inputWaiting.get(2).getInputIdRegexp());
+		assertEquals("(PT|NRT|FAST24)", inputWaiting.get(2).getTimelinessRegexp());
+		assertEquals(57600, inputWaiting.get(2).getWaitingInSeconds());
+		assertEquals(3600, inputWaiting.get(2).getDelayInSeconds());
+	}
+
 }

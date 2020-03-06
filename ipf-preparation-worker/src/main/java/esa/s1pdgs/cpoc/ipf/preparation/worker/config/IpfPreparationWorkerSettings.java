@@ -155,6 +155,12 @@ public class IpfPreparationWorkerSettings {
 			this.delayInSeconds = delayInSeconds;
 		}
 
+		@Override
+		public String toString() {
+			return "InputWaitingConfig [processorNameRegexp=" + processorNameRegexp + ", processorVersionRegexp="
+					+ processorVersionRegexp + ", inputIdRegexp=" + inputIdRegexp + ", timelinessRegexp=" + timelinessRegexp 
+					+ ", waitingInSeconds=" + waitingInSeconds + ", delayInSeconds=" + delayInSeconds + "]";
+		}
 	}
 
 	private Map<ProductCategory, CategoryConfig> productCategories = new LinkedHashMap<>();
@@ -576,13 +582,13 @@ public class IpfPreparationWorkerSettings {
 	@Override
 	public String toString() {
 		return "{maxnboftasktable: " + maxnboftasktable + ", maxnumberofjobs: " + maxnumberofjobs
-				+ ", waitprimarycheck: " + waitprimarycheck + ", waitmetadatainput: " + waitmetadatainput
-				+ ", diroftasktables: " + diroftasktables + ", jobgenfixedrate: " + jobgenfixedrate
-				+ ", defaultfamily: " + defaultfamily + ", outputfamiliesstr: " + outputfamiliesstr
-				+ ", outputfamilies: " + outputfamilies + ", typeOverlap: " + typeOverlap + ", typeSliceLength: "
-				+ typeSliceLength + ", mapTypeMeta: " + mapTypeMeta + ", oqcCheck: " + oqcCheck
-				+ ", productCategories: " + productCategories + ", inputWaiting: " + inputWaiting
-				+ "}";
+				+ ", waitprimarycheck: \"" + waitprimarycheck + "\", waitmetadatainput: \"" + waitmetadatainput
+				+ "\", diroftasktables: \"" + diroftasktables + "\", jobgenfixedrate: " + jobgenfixedrate
+				+ ", defaultfamily: \"" + defaultfamily + "\", outputfamiliesstr: \"" + outputfamiliesstr
+				+ "\", outputfamilies: \"" + outputfamilies + "\", typeOverlap: \"" + typeOverlap + "\", typeSliceLength: \""
+				+ typeSliceLength + "\", mapTypeMeta: \"" + mapTypeMeta + "\", oqcCheck: \"" + oqcCheck
+				+ "\", productCategories: \"" + productCategories + "\", inputWaiting: \"" + inputWaiting
+				+ "\"}";
 	}
 
 }
