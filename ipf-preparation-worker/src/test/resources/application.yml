@@ -39,13 +39,13 @@ ipf-preparation-worker:
   - processorNameRegexp: .._RAW__0_(SLC|GRD).*_1
     processorVersionRegexp: .*
     inputIdRegexp: Orbit
-    timelinessRegexp: (NRT|PT)
+    timelinessRegexp: FAST24
     waitingInSeconds: 57600
     delayInSeconds: 3600
   - processorNameRegexp: ".._RAW__0_OCN__2"
     processorVersionRegexp: .*
     inputIdRegexp: Orbit
-    timelinessRegexp: (PT|NRT|FAST)
+    timelinessRegexp: (PT|NRT|FAST24)
     waitingInSeconds: 57600
     delayInSeconds: 3600
   maxnboftasktable: 2
