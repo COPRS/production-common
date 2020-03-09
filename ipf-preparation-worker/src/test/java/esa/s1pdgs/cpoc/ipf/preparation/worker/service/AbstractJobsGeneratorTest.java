@@ -54,6 +54,8 @@ import esa.s1pdgs.cpoc.ipf.preparation.worker.config.ProcessConfiguration;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.config.ProcessSettings;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.model.JobGeneration;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.model.ProductMode;
+import esa.s1pdgs.cpoc.ipf.preparation.worker.model.joborder.JobOrder;
+import esa.s1pdgs.cpoc.ipf.preparation.worker.model.joborder.JobOrderProc;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.model.metadata.SearchMetadataResult;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.model.tasktable.TaskTable;
 import esa.s1pdgs.cpoc.metadata.client.MetadataClient;
@@ -171,17 +173,29 @@ public class AbstractJobsGeneratorTest {
     private JobGeneration jobGeneration;
     
     @Mock
+    private AppDataJobProduct appDataJobProduct;
+    
+    @Mock
     private AppDataJob appDataJob;
 
     @Mock
-    private AppDataJobProduct appDataJobProduct;
+    private JobOrder jobOrder;
+
+    @Mock
+    private List<JobOrderProc> jobOrderProcList;
     
-	@Mock
-	SearchMetadataQuery query1, query2, query3;
+    @Mock
+    private JobOrderProc jobOrderProc;
+
+    @Mock
+	SearchMetadataQuery query1, query2, query3, query4, query5, query6, query7, query8, query9, query10;
 
 	@Mock
-	SearchMetadataResult result1, result2, result3;
+	SearchMetadataResult result1, result2, result3, result4, result5, result6, result7, result8, result9, result10;
 
+	@Mock
+	SearchMetadata metadata1, metadata2, metadata3, metadata4, metadata5, metadata6, metadata7, metadata8, metadata9, metadata10;
+	
 	private Map<String, List<SearchMetadata>> metadataBrain;
     
     private TaskTable expectedTaskTable;
@@ -541,31 +555,46 @@ public class AbstractJobsGeneratorTest {
     	Map<Integer, SearchMetadataResult> metadataQueries = new HashMap<>();
     	
     	Mockito.when(jobGeneration.getAppDataJob()).thenReturn(appDataJob);
+    	Mockito.when(jobGeneration.getMetadataQueries()).thenReturn(metadataQueries);
     	Mockito.when(appDataJob.getId()).thenReturn(23L);
     	Mockito.when(appDataJob.getProduct()).thenReturn(appDataJobProduct);
-    	Mockito.when(jobGeneration.getMetadataQueries()).thenReturn(metadataQueries);
-    	   	
-    	Mockito.when(result1.getQuery()).thenReturn(query1);
+    	Mockito.when(appDataJobProduct.getStartTime()).thenReturn("2000-01-01T00:00:00.000000Z");
+    	Mockito.when(appDataJobProduct.getStopTime()).thenReturn("2000-01-01T00:00:00.000000Z");
+    	Mockito.when(appDataJobProduct.getMissionId()).thenReturn("S1");
+    	Mockito.when(appDataJobProduct.getSatelliteId()).thenReturn("B");
+    	Mockito.when(appDataJobProduct.getInsConfId()).thenReturn(0);
+    	Mockito.when(appDataJobProduct.getProcessMode()).thenReturn("NRT");
     	
-    	Mockito.when(result2.getResult()).thenReturn(null);
-    	Mockito.when(result2.getQuery()).thenReturn(query2);
-    	Mockito.when(query2.getProductType()).thenReturn("ABCD");
+    	Mockito.when(jobGeneration.getJobOrder()).thenReturn(jobOrder);
+    	
+    	Mockito.when(jobOrder.getProcs()).thenReturn(jobOrderProcList);
+    	Mockito.when(jobOrderProcList.get(Mockito.anyInt())).thenReturn(jobOrderProc);
+    	
+    	List<SearchMetadataQuery> queryMocks = Arrays.asList(query1, query2, query3, query4, query5, query6, query7, query8, query9, query10);
+    	List<SearchMetadataResult> resultMocks = Arrays.asList(result1, result2, result3, result4, result5, result6, result7, result8, result9, result10);
+    	List<SearchMetadata> metadataMocks = Arrays.asList(metadata1, metadata2, metadata3, metadata4, metadata5, metadata6, metadata7, metadata8, metadata9, metadata10);
+    	
+    	for (int i = 0; i < queryMocks.size(); i++) {
+    		SearchMetadataQuery query = queryMocks.get(i);
+    		SearchMetadataResult result = resultMocks.get(i);
+    		SearchMetadata metadata = metadataMocks.get(i);
+        	Mockito.when(result.getQuery()).thenReturn(query);
+        	Mockito.when(result.getResult()).thenReturn(Arrays.asList(metadata));
+        	Mockito.when(query.getProductType()).thenReturn("foobar");
+        	Mockito.when(metadata.getValidityStart()).thenReturn("2000-01-01T00:00:00.000000Z");
+        	Mockito.when(metadata.getValidityStop()).thenReturn("2000-01-01T00:00:00.000000Z");
+        	Mockito.when(metadata.getMissionId()).thenReturn("S1");
+        	Mockito.when(metadata.getSatelliteId()).thenReturn("B");
+        	Mockito.when(metadata.getProductName()).thenReturn("foobar");
+        	Mockito.when(metadata.getStationCode()).thenReturn("WILE");
+        	Mockito.when(metadata.getKeyObjectStorage()).thenReturn("foobar");
+        	metadataQueries.put(i + 1, result);
+    	}
     	
     	List<SearchMetadata> file = new ArrayList<>();
     	    	
     	// TODO: Configure metadataBrain (remove some products
     	
-    	
-    	metadataQueries.put(1, result1);
-    	metadataQueries.put(2, result2);
-    	metadataQueries.put(3, null);
-    	metadataQueries.put(4, null);
-    	metadataQueries.put(5, null);
-    	metadataQueries.put(6, null);
-    	metadataQueries.put(7, null);
-    	metadataQueries.put(8, null);
-    	metadataQueries.put(9, null);
-    	metadataQueries.put(10, null);
     	
     	try {
     		generator.inputsSearch(jobGeneration);
