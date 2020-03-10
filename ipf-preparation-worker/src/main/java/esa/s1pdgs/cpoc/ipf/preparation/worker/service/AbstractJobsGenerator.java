@@ -552,7 +552,8 @@ public abstract class AbstractJobsGenerator implements Runnable {
 						if (ProductMode.isCompatibleWithTaskTableMode(this.mode, input.getMode())) {
 							final int currentOrder = 99;
 							List<JobOrderInput> inputsToAdd = new ArrayList<>();
-							for (final TaskTableInputAlternative alt : input.getAlternatives()) {
+							for (final TaskTableInputAlternative alt : input.getAlternatives()
+									.stream().sorted(TaskTableInputAlternative.ORDER).collect(Collectors.toList())) {
 								// We ignore input not DB
 								if (alt.getOrigin() == TaskTableInputOrigin.DB) {
 									if (!CollectionUtils.isEmpty(
