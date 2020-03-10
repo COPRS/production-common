@@ -15,10 +15,12 @@ import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Stream;
 
 import javax.xml.bind.JAXBException;
 
@@ -70,7 +72,7 @@ public class AbstractJobsGeneratorTest {
     		"S1A_IW_RAW__0SDV_20171213T121623_20171213T121656_019684_021735_C6DB.SAFE",
     		"IW_RAW__0S",
     		"S1A_IW_RAW__0SDV_20171213T121623_20171213T121656_019684_021735_C6DB.SAFE",
-    		"2017-12-13T12:16:23.00000", "2017-12-13T12:16:56",
+    		"2017-12-13T12:16:23.00000Z", "2017-12-13T12:16:56.00000Z",
     		"S1",
     		"A",
     		"WILE"));
@@ -79,7 +81,7 @@ public class AbstractJobsGeneratorTest {
     		"S1A_IW_RAW__0ADV_20171213T121123_20171213T121947_019684_021735_51B1.SAFE",
     		"IW_RAW__0A",
     		"S1A_IW_RAW__0ADV_20171213T121123_20171213T121947_019684_021735_51B1.SAFE",
-    		"2017-12-13T12:11:23", "2017-12-13T12:19:47",
+    		"2017-12-13T12:11:23.00000Z", "2017-12-13T12:19:47.00000Z",
     		"S1",
     		"A",
     		"WILE"));
@@ -88,7 +90,7 @@ public class AbstractJobsGeneratorTest {
     		"S1A_IW_RAW__0CDV_20171213T121123_20171213T121947_019684_021735_E131.SAFE",
     		"IW_RAW__0C",
     		"S1A_IW_RAW__0CDV_20171213T121123_20171213T121947_019684_021735_E131.SAFE",
-    		"2017-12-13T12:11:23", "2017-12-13T12:19:47",
+    		"2017-12-13T12:11:23.00000Z", "2017-12-13T12:19:47.00000Z",
     		"S1",
     		"A",
     		"WILE"));
@@ -97,7 +99,7 @@ public class AbstractJobsGeneratorTest {
     		"S1A_IW_RAW__0NDV_20171213T121123_20171213T121947_019684_021735_87D4.SAFE",
     		"IW_RAW__0N",
     		"S1A_IW_RAW__0NDV_20171213T121123_20171213T121947_019684_021735_87D4.SAFE",
-    		"2017-12-13T12:11:23", "2017-12-13T12:19:47",
+    		"2017-12-13T12:11:23.00000Z", "2017-12-13T12:19:47.00000Z",
     		"S1",
     		"A",
     		"WILE"));
@@ -106,7 +108,7 @@ public class AbstractJobsGeneratorTest {
     		"S1A_AUX_CAL_V20171017T080000_G20171013T101200.SAFE",
     		"AUX_CAL",
     		"S1A_AUX_CAL_V20171017T080000_G20171013T101200.SAFE",
-    		"2017-10-17T08:00:00", "9999-12-31T23:59:59",
+    		"2017-10-17T08:00:00.00000Z", "9999-12-31T23:59:59.00000Z",
     		"S1",
     		"A",
     		"WILE"));
@@ -115,7 +117,7 @@ public class AbstractJobsGeneratorTest {
     		"S1A_AUX_INS_V20171017T080000_G20171013T101216.SAFE",
     		"AUX_INS",
     		"S1A_AUX_INS_V20171017T080000_G20171013T101216.SAFE",
-    		"2017-10-17T08:00:00", "9999-12-31T23:59:59",
+    		"2017-10-17T08:00:00.00000Z", "9999-12-31T23:59:59.00000Z",
     		"S1",
     		"A",
     		"WILE"));
@@ -124,7 +126,7 @@ public class AbstractJobsGeneratorTest {
     		"S1A_AUX_PP1_V20171017T080000_G20171013T101236.SAFE",
     		"AUX_PP1",
     		"S1A_AUX_PP1_V20171017T080000_G20171013T101236.SAFE",
-    		"2017-10-17T08:00:00", "9999-12-31T23:59:59",
+    		"2017-10-17T08:00:00.00000Z", "9999-12-31T23:59:59.00000Z",
     		"S1",
     		"A",
     		"WILE"));
@@ -133,7 +135,7 @@ public class AbstractJobsGeneratorTest {
     		"S1A_OPER_AUX_RESORB_OPOD_20171213T143838_V20171213T102737_20171213T134507.EOF",
     		"AUX_OBMEMC",
     		"S1A_OPER_AUX_RESORB_OPOD_20171213T143838_V20171213T102737_20171213T134507.EOF",
-    		"2017-12-13T10:27:37", "2017-12-13T13:45:07",
+    		"2017-12-13T10:27:37.00000Z", "2017-12-13T13:45:07.00000Z",
     		"S1",
     		"A",
     		"WILE"));
@@ -142,7 +144,7 @@ public class AbstractJobsGeneratorTest {
     		"S1A_OPER_AUX_POEORB_OPOD_20171213T143838_V20171213T102737_20171213T134507.EOF",
     		"AUX_OBMEMC",
     		"S1A_OPER_AUX_POEORB_OPOD_20171213T143838_V20171213T102737_20171213T134507.EOF",
-    		"2017-12-13T10:27:37", "2017-12-13T13:45:07",
+    		"2017-12-13T10:27:37.00000Z", "2017-12-13T13:45:07.00000Z",
     		"S1",
     		"A",
     		"WILE"));
@@ -151,7 +153,7 @@ public class AbstractJobsGeneratorTest {
     		"S1A_OPER_AUX_ATTORB_OPOD_20171213T143838_V20171213T102737_20171213T134507.EOF",
     		"AUX_OBMEMC",
     		"S1A_OPER_AUX_ATTORB_OPOD_20171213T143838_V20171213T102737_20171213T134507.EOF",
-    		"2017-12-13T10:27:37", "2017-12-13T13:45:07",
+    		"2017-12-13T10:27:37.00000Z", "2017-12-13T13:45:07.00000Z",
     		"S1",
     		"A",
     		"WILE"));
@@ -349,7 +351,8 @@ public class AbstractJobsGeneratorTest {
                 if (this.nbLoopMetadata >= maxLoop2) {
                     this.nbLoopMetadata = 0;
                     final SearchMetadataQuery query = i.getArgument(0);
-                    return metadataBrain.get(query.getProductType().toUpperCase());
+                    List<SearchMetadata> result = metadataBrain.get(query.getProductType().toUpperCase());
+                    return result != null ? result : Collections.emptyList();
                 }
                 return null;
             }).when(this.metadataClient).search(Mockito.any(), Mockito.any(),
@@ -563,22 +566,21 @@ public class AbstractJobsGeneratorTest {
     
     @Ignore
     public void waitingTest() throws IpfPrepWorkerInputsMissingException, MetadataQueryException {
-    	SearchMetadataQuery query1 = new SearchMetadataQuery(1, "LatestValCover", 0.0, 0.0, "AUX_INS", ProductFamily.BLANK);
-    	SearchMetadataQuery query2 = new SearchMetadataQuery(2, "LatestValCover", 0.0, 0.0, "AUX_CAL", ProductFamily.BLANK);
-    	SearchMetadataQuery query3 = new SearchMetadataQuery(3, "LatestValCover", 0.0, 0.0, "AUX_POE", ProductFamily.BLANK);
-    	SearchMetadataQuery query4 = new SearchMetadataQuery(4, "LatestValCover", 0.0, 0.0, "IW_RAW__0N", ProductFamily.L0_ACN);
-    	SearchMetadataQuery query5 = new SearchMetadataQuery(5, "LatestValCover", 0.0, 0.0, "AUX_PP1", ProductFamily.BLANK);
-    	SearchMetadataQuery query6 = new SearchMetadataQuery(6, "LatestValCover", 0.0, 0.0, "IW_RAW__0C", ProductFamily.L0_ACN);
-    	SearchMetadataQuery query7 = new SearchMetadataQuery(7, "LatestValCover", 0.0, 0.0, "IW_RAW__0S", ProductFamily.L0_SLICE);
-    	SearchMetadataQuery query8 = new SearchMetadataQuery(8, "LatestValCover", 0.0, 0.0, "AUX_ATT", ProductFamily.BLANK);
-    	SearchMetadataQuery query9 = new SearchMetadataQuery(9, "LatestValCover", 0.0, 0.0, "AUX_RES", ProductFamily.BLANK);
-    	SearchMetadataQuery query10 = new SearchMetadataQuery(10, "LatestValCover", 0.0, 0.0, "IW_RAW__0A", ProductFamily.L0_ACN);
-    	List<SearchMetadataQuery> querys = Arrays.asList(query1, query2, query3, query4, query5, query6, query7, query8, query9, query10);
-
-    	Map<Integer, SearchMetadataResult> metadataQueries = new HashMap<>();
-    	for (int i = 0; i < querys.size(); i++) {
-    		metadataQueries.put(i + 1, new SearchMetadataResult(querys.get(i)));
-    	}
+    	final Map<Integer, SearchMetadataResult> metadataQueries = new HashMap<>();
+    	Stream.of(
+    		new SearchMetadataQuery(1, "LatestValCover", 0.0, 0.0, "AUX_INS", ProductFamily.BLANK), //
+    		new SearchMetadataQuery(2, "LatestValCover", 0.0, 0.0, "AUX_CAL", ProductFamily.BLANK), //
+    		new SearchMetadataQuery(3, "LatestValCover", 0.0, 0.0, "AUX_POE", ProductFamily.BLANK), //
+    		new SearchMetadataQuery(4, "LatestValCover", 0.0, 0.0, "IW_RAW__0N", ProductFamily.L0_ACN), //
+    		new SearchMetadataQuery(5, "LatestValCover", 0.0, 0.0, "AUX_PP1", ProductFamily.BLANK), //
+    		new SearchMetadataQuery(6, "LatestValCover", 0.0, 0.0, "IW_RAW__0C", ProductFamily.L0_ACN), //
+    		new SearchMetadataQuery(7, "LatestValCover", 0.0, 0.0, "IW_RAW__0S", ProductFamily.L0_SLICE), //
+    		new SearchMetadataQuery(8, "LatestValCover", 0.0, 0.0, "AUX_ATT", ProductFamily.BLANK), //
+    		new SearchMetadataQuery(9, "LatestValCover", 0.0, 0.0, "AUX_RES", ProductFamily.BLANK), //
+    		new SearchMetadataQuery(10, "LatestValCover", 0.0, 0.0, "IW_RAW__0A", ProductFamily.L0_ACN) //
+    	).forEach(s -> {
+    		metadataQueries.put(s.getIdentifier(), new SearchMetadataResult(s));
+    	});
     	
     	Mockito.when(jobGeneration.getAppDataJob()).thenReturn(appDataJob);
     	Mockito.when(jobGeneration.getMetadataQueries()).thenReturn(metadataQueries);
