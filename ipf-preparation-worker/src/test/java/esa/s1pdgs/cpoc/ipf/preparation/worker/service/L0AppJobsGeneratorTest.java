@@ -1,12 +1,14 @@
 package esa.s1pdgs.cpoc.ipf.preparation.worker.service;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 import static org.mockito.Mockito.doReturn;
 
 import java.io.File;
 import java.io.IOException;
+import java.time.ZoneOffset;
 import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Collections;
@@ -33,6 +35,7 @@ import esa.s1pdgs.cpoc.common.errors.AbstractCodedException;
 import esa.s1pdgs.cpoc.common.errors.InternalErrorException;
 import esa.s1pdgs.cpoc.common.errors.processing.IpfPrepWorkerInputsMissingException;
 import esa.s1pdgs.cpoc.common.errors.processing.MetadataQueryException;
+import esa.s1pdgs.cpoc.common.utils.DateUtils;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.config.AiopProperties;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.config.IpfPreparationWorkerSettings;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.config.IpfPreparationWorkerSettings.WaitTempo;
@@ -223,7 +226,7 @@ public class L0AppJobsGeneratorTest {
     		r.put("cgs4", "360");
     		r.put("erds", "360");
     		return r;
-    	}).when(aiopProperties).getTimeout();
+    	}).when(aiopProperties).getTimeoutSec();
     	Mockito.doAnswer(i -> {
     		final Map<String,String> r = new HashMap<>();
     		r.put("cgs1", "yes");
@@ -242,6 +245,7 @@ public class L0AppJobsGeneratorTest {
     		r.put("erds", "yes");
     		return r;
     	}).when(aiopProperties).getRsEncode();
+    	Mockito.doReturn(true).when(aiopProperties).getDisableTimeout();
     }
 
     private void mockXmlConverter() {
@@ -427,6 +431,72 @@ public class L0AppJobsGeneratorTest {
                     "DCS_02_L20171109175634707000125_ch1_DSDB_00023.raw"));
         }
     }
+    
+	@Test
+	public void testTimeoutReachedForPrimarySearch_reached() {
+
+		String downlinkEndTime = "2020-01-01T00:00:00.000000Z";
+		long startToWaitMs = DateUtils.parse("2020-01-01T00:20:00.000000Z").toInstant(ZoneOffset.UTC).toEpochMilli();
+		long currentTimeMs = DateUtils.parse("2020-01-01T01:30:00.000000Z").toInstant(ZoneOffset.UTC).toEpochMilli();
+
+		long minimalWaitingTimeMs = 30 * 60 * 1000;
+		long timeoutForDownlinkStationMs = 55 * 60 * 1000;
+
+		boolean timeoutReached = generator.timeoutReachedForPrimarySearch(downlinkEndTime, currentTimeMs, startToWaitMs,
+				minimalWaitingTimeMs, timeoutForDownlinkStationMs);
+		
+		assertTrue(timeoutReached);
+	}
+	
+	@Test
+	public void testTimeoutReachedForPrimarySearch_not_reached() {
+
+		String downlinkEndTime = "2020-01-01T00:00:00.000000Z";
+		long startToWaitMs =  DateUtils.parse("2020-01-01T00:20:00.000000Z").toInstant(ZoneOffset.UTC).toEpochMilli();
+		long currentTimeMs = DateUtils.parse("2020-01-01T00:50:00.000000Z").toInstant(ZoneOffset.UTC).toEpochMilli();
+
+		long minimalWaitingTimeMs = 30 * 60 * 1000;
+		long timeoutForDownlinkStationMs = 55 * 60 * 1000;
+
+		boolean timeoutReached = generator.timeoutReachedForPrimarySearch(downlinkEndTime, currentTimeMs, startToWaitMs,
+				minimalWaitingTimeMs, timeoutForDownlinkStationMs);
+		
+		assertFalse(timeoutReached);
+	}
+	
+	
+	@Test
+	public void testTimeoutReachedForPrimarySearch_minimal_waiting_not_reached() {
+
+		String downlinkEndTime = "2020-01-01T00:00:00.000000Z";
+		long startToWaitMs = DateUtils.parse("2020-01-01T01:20:00.000000Z").toInstant(ZoneOffset.UTC).toEpochMilli();
+		long currentTimeMs = DateUtils.parse("2020-01-01T01:30:00.000000Z").toInstant(ZoneOffset.UTC).toEpochMilli();
+
+		long minimalWaitingTimeMs = 30 * 60 * 1000;
+		long timeoutForDownlinkStationMs = 55 * 60 * 1000;
+
+		boolean timeoutReached = generator.timeoutReachedForPrimarySearch(downlinkEndTime, currentTimeMs, startToWaitMs,
+				minimalWaitingTimeMs, timeoutForDownlinkStationMs);
+		
+		assertFalse(timeoutReached);
+	}
+	
+	@Test
+	public void testTimeoutReachedForPrimarySearch_minimal_waiting_reached() {
+
+		String downlinkEndTime = "2020-01-01T00:00:00.000000Z";
+		long startToWaitMs = DateUtils.parse("2020-01-01T01:20:00.000000Z").toInstant(ZoneOffset.UTC).toEpochMilli();
+		long currentTimeMs = DateUtils.parse("2020-01-01T01:55:00.000000Z").toInstant(ZoneOffset.UTC).toEpochMilli();
+
+		long minimalWaitingTimeMs = 30 * 60 * 1000;
+		long timeoutForDownlinkStationMs = 55 * 60 * 1000;
+
+		boolean timeoutReached = generator.timeoutReachedForPrimarySearch(downlinkEndTime, currentTimeMs, startToWaitMs,
+				minimalWaitingTimeMs, timeoutForDownlinkStationMs);
+		
+		assertTrue(timeoutReached);
+	}
+
 
 // FIXME: Enable test
 //    @Test

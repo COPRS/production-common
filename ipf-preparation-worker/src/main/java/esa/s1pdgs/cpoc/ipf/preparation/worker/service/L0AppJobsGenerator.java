@@ -1,6 +1,7 @@
 package esa.s1pdgs.cpoc.ipf.preparation.worker.service;
 
 import java.io.File;
+import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
 import java.util.Collections;
 import java.util.HashMap;
@@ -39,6 +40,10 @@ public class L0AppJobsGenerator extends AbstractJobsGenerator {
 	
 	private Map<String,Map<String,String>> aiopProperties;
 	
+	private long minimalWaitingTimeSec;
+	
+	private boolean disableTimeout;
+	
     public L0AppJobsGenerator(
     		final XmlConverter xmlConverter,
     		final MetadataClient metadataClient, 
@@ -51,6 +56,9 @@ public class L0AppJobsGenerator extends AbstractJobsGenerator {
     ) {
         super(xmlConverter, metadataClient, l0ProcessSettings, taskTablesSettings, appDataService, processConfiguration, mqiClient);
         
+        minimalWaitingTimeSec = aiopProperties.getMinimalWaitingTimeSec();
+        disableTimeout = aiopProperties.getDisableTimeout();
+        
         this.aiopProperties = new HashMap<>();
         final Map<String, String> stationCodes = aiopProperties.getStationCodes();
         for (final String key : stationCodes.keySet()) {
@@ -58,15 +66,15 @@ public class L0AppJobsGenerator extends AbstractJobsGenerator {
         	map.put("PT_Assembly", aiopProperties.getPtAssembly().get(key));
         	map.put("Processing_Mode", aiopProperties.getProcessingMode().get(key));
         	map.put("Reprocessing_Mode", aiopProperties.getReprocessingMode().get(key));
-        	map.put("Timeout", aiopProperties.getTimeout().get(key));
+        	map.put("TimeoutSec", aiopProperties.getTimeoutSec().get(key));
         	map.put("Descramble", aiopProperties.getDescramble().get(key));
         	map.put("RSEncode", aiopProperties.getRsEncode().get(key));
         	
         	if (null == map.get("PT_Assembly") || null == map.get("Processing_Mode") ||
-        	    null == map.get("Reprocessing_Mode") || null == map.get("Timeout") ||
+        	    null == map.get("Reprocessing_Mode") || null == map.get("TimeoutSec") ||
         	    null == map.get("Descramble") || null == map.get("RSEncode")) {
-        	    	throw new RuntimeException(String.format("Invalid AIOP configuration for %s: Station_Code=%s, PT_Assembly=%s, Processing_Mode=%s, Reprocessing_Mode=%s, Timeout=%s, Descramble=%s, RSEncode=%s",
-        	    			key, stationCodes.get(key), map.get("PT_Assembly"), map.get("Processing_Mode"), map.get("Reprocessing_Mode"), map.get("Timeout"), map.get("Descramble"), map.get("RSEncode")));
+        	    	throw new RuntimeException(String.format("Invalid AIOP configuration for %s: Station_Code=%s, PT_Assembly=%s, Processing_Mode=%s, Reprocessing_Mode=%s, TimeoutSec=%s, Descramble=%s, RSEncode=%s",
+        	    			key, stationCodes.get(key), map.get("PT_Assembly"), map.get("Processing_Mode"), map.get("Reprocessing_Mode"), map.get("TimeoutSec"), map.get("Descramble"), map.get("RSEncode")));
         	    }
         	
         	LOGGER.trace("Initializing AIOP parameter {} for station {} ", map, stationCodes.get(key));
@@ -76,8 +84,16 @@ public class L0AppJobsGenerator extends AbstractJobsGenerator {
 
     @Override
     protected void preSearch(final JobGeneration job) throws IpfPrepWorkerInputsMissingException {
+    	
         final Map<String, String> missingRaws = new HashMap<>();
+        
         if (job.getAppDataJob() != null && job.getAppDataJob().getProduct() != null) {
+        	
+        	// S1PRO-1101: if timeout for primary search is reached -> just start the job 
+			if (!disableTimeout && checkTimeoutReached(job)) {
+				return;
+			}
+
             // Channel 1
             job.getAppDataJob().getProduct().getRaws1().forEach(raw -> {
                 try {
@@ -238,5 +254,63 @@ public class L0AppJobsGenerator extends AbstractJobsGenerator {
             }
         }
     }
+    
+	private boolean checkTimeoutReached(final JobGeneration job) {
+
+		String stationCode = job.getAppDataJob().getProduct().getStationCode();
+		Map<String, String> propForStationCode = aiopProperties.get(stationCode);
+		if (propForStationCode == null) {
+			LOGGER.warn("no configuration found for station code -> not timeout check");
+			return false;
+		}
+		long timeoutForDownlinkStationMs = Long.valueOf(propForStationCode.get("TimeoutSec")) * 1000;
+		long minimalWaitingTimeMs = this.minimalWaitingTimeSec * 1000;
+
+		// the creation date of the job is used for the start of waiting
+		long startToWaitMs = job.getGeneration().getCreationDate().toInstant().toEpochMilli();
+
+		// the "stop time" of the product (DSIB) is the downlink-end time
+		String downlinkEndTimeUTC = job.getAppDataJob().getProduct().getStopTime();
+		long currentTimeMs = System.currentTimeMillis();
+
+		if (timeoutReachedForPrimarySearch(downlinkEndTimeUTC, currentTimeMs, startToWaitMs, minimalWaitingTimeMs,
+				timeoutForDownlinkStationMs)) {
+			AppDataJobProduct product = job.getAppDataJob().getProduct();
+			LOGGER.warn("Timeout reached for stationCode {} and product {}", product.getStationCode(),
+					product.getProductName());
+			return true;
+		}
+		return false;
+	}
+
+	boolean timeoutReachedForPrimarySearch(String downlinkEndTimeUTC, long currentTimeMs, long startToWaitMs,
+			long minimalWaitingTimeMs, long timeoutForDownlinkStationMs) {
+
+		boolean timeout = false;
+
+		long downlinkEndTimeMs = DateUtils.parse(downlinkEndTimeUTC).toInstant(ZoneOffset.UTC).toEpochMilli();
+
+		long timeoutEndTimestampMs = Math.max(startToWaitMs + minimalWaitingTimeMs,
+				downlinkEndTimeMs + timeoutForDownlinkStationMs);
+
+		LOGGER.trace("downlink-end time in epoch millis: {}", downlinkEndTimeMs);
+		LOGGER.trace("starting-to-wait time in epoch millis: {}", startToWaitMs);
+		LOGGER.trace("minimal waiting time in millis: {}", minimalWaitingTimeMs);
+		LOGGER.trace("timeout for downlink station in millis: {}", timeoutForDownlinkStationMs);
+		LOGGER.trace("timeout-end timestamp in epoch millis MAX({} + {}, {} + {} = {}", startToWaitMs,
+				minimalWaitingTimeMs, downlinkEndTimeMs, timeoutForDownlinkStationMs, timeoutEndTimestampMs);
+
+		if (currentTimeMs > timeoutEndTimestampMs) {
+			LOGGER.trace("current time {} is greater than timeout-end timestamp {}", currentTimeMs,
+					timeoutEndTimestampMs);
+			timeout = true;
+		} else {
+			LOGGER.trace("current time {} is less than timeout-end timestamp {}", currentTimeMs, timeoutEndTimestampMs);
+		}
+
+		LOGGER.debug("timeout reached: {}", timeout);
+
+		return timeout;
+	}
 
 }

@@ -14,9 +14,11 @@ public class AiopProperties {
 	private Map<String,String> ptAssembly;
 	private Map<String,String> processingMode;
 	private Map<String,String> reprocessingMode;
-	private Map<String,String> timeout;
+	private Map<String,String> timeoutSec;
 	private Map<String,String> descramble;
 	private Map<String,String> rsEncode;
+	private long minimalWaitingTimeSec;
+	private boolean disableTimeout;
 	
 	/**
 	 * @return the stationCodes
@@ -77,15 +79,15 @@ public class AiopProperties {
 	/**
 	 * @return the timeout
 	 */
-	public Map<String, String> getTimeout() {
-		return timeout;
+	public Map<String, String> getTimeoutSec() {
+		return timeoutSec;
 	}
 	
 	/**
-	 * @param timeout the timeout to set
+	 * @param timeoutSec the timeout to set
 	 */
-	public void setTimeout(Map<String, String> timeout) {
-		this.timeout = timeout;
+	public void setTimeoutSec(Map<String, String> timeoutSec) {
+		this.timeoutSec = timeoutSec;
 	}
 	
 	/**
@@ -114,5 +116,21 @@ public class AiopProperties {
 	 */
 	public void setRsEncode(Map<String, String> rsEncode) {
 		this.rsEncode = rsEncode;
+	}
+
+	public long getMinimalWaitingTimeSec() {
+		return minimalWaitingTimeSec;
+	}
+
+	public void setMinimalWaitingTimeSec(long minimalWaitingTimeSec) {
+		this.minimalWaitingTimeSec = minimalWaitingTimeSec;
+	}
+
+	public boolean getDisableTimeout() {
+		return disableTimeout;
+	}
+
+	public void setDisableTimeout(boolean disableTimeout) {
+		this.disableTimeout = disableTimeout;
 	}
 }
