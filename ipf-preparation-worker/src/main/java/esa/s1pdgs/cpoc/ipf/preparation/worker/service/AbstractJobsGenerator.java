@@ -498,7 +498,6 @@ public abstract class AbstractJobsGenerator implements Runnable {
 		// First, we evaluate each input query with no found file
 		LOGGER.info("{} [productName {}] 2a - Requesting metadata", this.prefixLogMonitor,
 				job.getAppDataJob().getProduct().getProductName());
-		Map<Integer, SearchMetadataResult> a = job.getMetadataQueries();
 		job.getMetadataQueries().forEach((k, v) -> {
 			if (v != null && v.getResult() == null) {
 				try {
@@ -512,7 +511,7 @@ public abstract class AbstractJobsGenerator implements Runnable {
 						polarisation = getPolarisationFor(job.getAppDataJob().getProduct());
 					} else {
 						polarisation = null;
-					}				
+					}
 					final List<SearchMetadata> file = this.metadataClient.search(v.getQuery(),
 							DateUtils.convertToAnotherFormat(job.getAppDataJob().getProduct().getStartTime(),
 									AppDataJobProduct.TIME_FORMATTER, AbstractMetadata.METADATA_DATE_FORMATTER),
@@ -549,7 +548,7 @@ public abstract class AbstractJobsGenerator implements Runnable {
 				for (final TaskTableInput input : task.getInputs()) {
 					// If it is a reference
 					if (StringUtils.isEmpty(input.getReference())) {
-System.out.println(">" + input.getReference());
+
 						if (ProductMode.isCompatibleWithTaskTableMode(this.mode, input.getMode())) {
 							final int currentOrder = 99;
 							List<JobOrderInput> inputsToAdd = new ArrayList<>();
@@ -603,10 +602,10 @@ System.out.println(">" + input.getReference());
 												.collect(Collectors.toList());
 
 										if (currentOrder == alt.getOrder()) {
+
 											inputsToAdd.add(new JobOrderInput(alt.getFileType(), type,
 													jobOrderInputFiles, jobOrderTimeIntervals, family));
 										} else if (currentOrder > alt.getOrder()) {
-//System.out.println("---, currentOrder: " + currentOrder + ", altOrder: " + alt.getOrder());
 											inputsToAdd = new ArrayList<>();
 											inputsToAdd.add(new JobOrderInput(alt.getFileType(), type,
 													jobOrderInputFiles, jobOrderTimeIntervals, family));
@@ -642,15 +641,13 @@ System.out.println(">" + input.getReference());
 								if (!StringUtils.isEmpty(input.getId())) {
 									referenceInputs.put(input.getId(), inputsToAdd.get(indexToTake));
 								}
-System.out.println(">>>RANDOM");
+
 							} else {
 								// nothing found in none of the alternatives
 								if (input.getMandatory() == TaskTableMandatoryEnum.YES) {
-System.out.println(">>>MISSING: " + input.getId());
 									missingMetadata.put(input.toLogMessage(), "");
 								} else {
 									// optional input
-System.out.println(">>>OPTIONAL: " + input.getId());
 
 									// TODO: wait until configured timeout (re-submit job...)
 								}
