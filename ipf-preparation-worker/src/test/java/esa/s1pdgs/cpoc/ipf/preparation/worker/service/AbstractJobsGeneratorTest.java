@@ -3,6 +3,10 @@ package esa.s1pdgs.cpoc.ipf.preparation.worker.service;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.isA;
 import static org.hamcrest.Matchers.hasProperty;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.doThrow;
@@ -20,6 +24,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import javax.xml.bind.JAXBException;
@@ -57,6 +62,7 @@ import esa.s1pdgs.cpoc.ipf.preparation.worker.config.ProcessSettings;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.model.JobGeneration;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.model.ProductMode;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.model.joborder.JobOrder;
+import esa.s1pdgs.cpoc.ipf.preparation.worker.model.joborder.JobOrderInput;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.model.joborder.JobOrderProc;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.model.metadata.SearchMetadataResult;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.model.tasktable.TaskTable;
@@ -200,12 +206,6 @@ public class AbstractJobsGeneratorTest {
 
     @Mock
     private JobOrder jobOrder;
-
-    @Mock
-    private List<JobOrderProc> jobOrderProcList;
-    
-    @Mock
-    private JobOrderProc jobOrderProc;
 
 	private Map<String, List<SearchMetadata>> metadataBrain;
     
@@ -564,9 +564,10 @@ public class AbstractJobsGeneratorTest {
         verifyNoMoreInteractions(appDataPService, mqiClient, metadataClient);
     }
     
-    @Ignore
-    public void waitingTest() throws IpfPrepWorkerInputsMissingException, MetadataQueryException {
+    @Test
+    public void testUseOptionalInputAlterantiveOfOrder1WhenItExistsExclusively() throws IpfPrepWorkerInputsMissingException {
     	final Map<Integer, SearchMetadataResult> metadataQueries = new HashMap<>();
+    	final List<JobOrderProc> jobOrderProcList = new ArrayList<>();
     	Stream.of(
     		new SearchMetadataQuery(1, "LatestValCover", 0.0, 0.0, "AUX_INS", ProductFamily.BLANK), //
     		new SearchMetadataQuery(2, "LatestValCover", 0.0, 0.0, "AUX_CAL", ProductFamily.BLANK), //
@@ -580,8 +581,9 @@ public class AbstractJobsGeneratorTest {
     		new SearchMetadataQuery(10, "LatestValCover", 0.0, 0.0, "IW_RAW__0A", ProductFamily.L0_ACN) //
     	).forEach(s -> {
     		metadataQueries.put(s.getIdentifier(), new SearchMetadataResult(s));
+    		jobOrderProcList.add(new JobOrderProc());
     	});
-    	
+
     	Mockito.when(jobGeneration.getAppDataJob()).thenReturn(appDataJob);
     	Mockito.when(jobGeneration.getMetadataQueries()).thenReturn(metadataQueries);
     	Mockito.when(appDataJob.getId()).thenReturn(23L);
@@ -594,17 +596,161 @@ public class AbstractJobsGeneratorTest {
     	Mockito.when(appDataJobProduct.getProcessMode()).thenReturn("NRT");    	
     	Mockito.when(jobGeneration.getJobOrder()).thenReturn(jobOrder);    	
     	Mockito.when(jobOrder.getProcs()).thenReturn(jobOrderProcList);
-    	Mockito.when(jobOrderProcList.get(Mockito.anyInt())).thenReturn(jobOrderProc);
     	
-    //	metadataBrain.remove("AUX_RES");
-    //	metadataBrain.clear();
+    	metadataBrain.remove("AUX_RES"); // removal of AUX_RES (order 2) will leave only AUX_POE (order 1) in DB
+    	
+    	// preconditions
+    	assertNotNull(metadataBrain.get("AUX_POE"));
+    	assertNull(metadataBrain.get("AUX_RES"));
+    	
     	generator.inputsSearch(jobGeneration);
     	
-    	/*
-    	try {
-    		generator.inputsSearch(jobGeneration);
-    	} catch (IpfPrepWorkerInputsMissingException e) {
-    		System.out.println("Missing inputs..."); //FIXME
-    	}*/
+    	List<String> inputs = jobOrderProcList.stream().flatMap(r -> r.getInputs().stream())
+    			.map(JobOrderInput::getFileType).distinct().collect(Collectors.toList());
+    	
+    	// postconditions
+    	assertTrue(inputs.contains("AUX_POE"));
+    	assertFalse(inputs.contains("AUX_RES"));
     }
-}
+    
+    @Test
+    public void testUseOptionalInputAlterantiveOfOrder2WhenItExistsExclusively() throws IpfPrepWorkerInputsMissingException {
+    	final Map<Integer, SearchMetadataResult> metadataQueries = new HashMap<>();
+    	final List<JobOrderProc> jobOrderProcList = new ArrayList<>();
+    	Stream.of(
+    		new SearchMetadataQuery(1, "LatestValCover", 0.0, 0.0, "AUX_INS", ProductFamily.BLANK), //
+    		new SearchMetadataQuery(2, "LatestValCover", 0.0, 0.0, "AUX_CAL", ProductFamily.BLANK), //
+    		new SearchMetadataQuery(3, "LatestValCover", 0.0, 0.0, "AUX_POE", ProductFamily.BLANK), //
+    		new SearchMetadataQuery(4, "LatestValCover", 0.0, 0.0, "IW_RAW__0N", ProductFamily.L0_ACN), //
+    		new SearchMetadataQuery(5, "LatestValCover", 0.0, 0.0, "AUX_PP1", ProductFamily.BLANK), //
+    		new SearchMetadataQuery(6, "LatestValCover", 0.0, 0.0, "IW_RAW__0C", ProductFamily.L0_ACN), //
+    		new SearchMetadataQuery(7, "LatestValCover", 0.0, 0.0, "IW_RAW__0S", ProductFamily.L0_SLICE), //
+    		new SearchMetadataQuery(8, "LatestValCover", 0.0, 0.0, "AUX_ATT", ProductFamily.BLANK), //
+    		new SearchMetadataQuery(9, "LatestValCover", 0.0, 0.0, "AUX_RES", ProductFamily.BLANK), //
+    		new SearchMetadataQuery(10, "LatestValCover", 0.0, 0.0, "IW_RAW__0A", ProductFamily.L0_ACN) //
+    	).forEach(s -> {
+    		metadataQueries.put(s.getIdentifier(), new SearchMetadataResult(s));
+    		jobOrderProcList.add(new JobOrderProc());
+    	});
+
+    	Mockito.when(jobGeneration.getAppDataJob()).thenReturn(appDataJob);
+    	Mockito.when(jobGeneration.getMetadataQueries()).thenReturn(metadataQueries);
+    	Mockito.when(appDataJob.getId()).thenReturn(23L);
+    	Mockito.when(appDataJob.getProduct()).thenReturn(appDataJobProduct);
+    	Mockito.when(appDataJobProduct.getStartTime()).thenReturn("2000-01-01T00:00:00.000000Z");
+    	Mockito.when(appDataJobProduct.getStopTime()).thenReturn("2000-01-01T00:00:00.000000Z");
+    	Mockito.when(appDataJobProduct.getMissionId()).thenReturn("S1");
+    	Mockito.when(appDataJobProduct.getSatelliteId()).thenReturn("A");
+    	Mockito.when(appDataJobProduct.getInsConfId()).thenReturn(0);
+    	Mockito.when(appDataJobProduct.getProcessMode()).thenReturn("NRT");    	
+    	Mockito.when(jobGeneration.getJobOrder()).thenReturn(jobOrder);    	
+    	Mockito.when(jobOrder.getProcs()).thenReturn(jobOrderProcList);
+
+    	metadataBrain.remove("AUX_POE"); // removal of AUX_POE (order 1) will leave only AUX_RES (order 2) in DB
+
+    	// preconditions
+    	assertNull(metadataBrain.get("AUX_POE"));
+    	assertNotNull(metadataBrain.get("AUX_RES"));
+    	
+    	generator.inputsSearch(jobGeneration);
+    	
+    	List<String> inputs = jobOrderProcList.stream().flatMap(r -> r.getInputs().stream())
+    			.map(JobOrderInput::getFileType).distinct().collect(Collectors.toList());
+    	
+    	// postconditions
+    	assertFalse(inputs.contains("AUX_POE"));
+    	assertTrue(inputs.contains("AUX_RES"));
+    }
+    
+    @Test
+    public void testUseOptionalInputAlterantiveOfOrder1WhenMultipleOrdersExist() throws IpfPrepWorkerInputsMissingException {
+    	final Map<Integer, SearchMetadataResult> metadataQueries = new HashMap<>();
+    	final List<JobOrderProc> jobOrderProcList = new ArrayList<>();
+    	Stream.of(
+    		new SearchMetadataQuery(1, "LatestValCover", 0.0, 0.0, "AUX_INS", ProductFamily.BLANK), //
+    		new SearchMetadataQuery(2, "LatestValCover", 0.0, 0.0, "AUX_CAL", ProductFamily.BLANK), //
+    		new SearchMetadataQuery(3, "LatestValCover", 0.0, 0.0, "AUX_POE", ProductFamily.BLANK), //
+    		new SearchMetadataQuery(4, "LatestValCover", 0.0, 0.0, "IW_RAW__0N", ProductFamily.L0_ACN), //
+    		new SearchMetadataQuery(5, "LatestValCover", 0.0, 0.0, "AUX_PP1", ProductFamily.BLANK), //
+    		new SearchMetadataQuery(6, "LatestValCover", 0.0, 0.0, "IW_RAW__0C", ProductFamily.L0_ACN), //
+    		new SearchMetadataQuery(7, "LatestValCover", 0.0, 0.0, "IW_RAW__0S", ProductFamily.L0_SLICE), //
+    		new SearchMetadataQuery(8, "LatestValCover", 0.0, 0.0, "AUX_ATT", ProductFamily.BLANK), //
+    		new SearchMetadataQuery(9, "LatestValCover", 0.0, 0.0, "AUX_RES", ProductFamily.BLANK), //
+    		new SearchMetadataQuery(10, "LatestValCover", 0.0, 0.0, "IW_RAW__0A", ProductFamily.L0_ACN) //
+    	).forEach(s -> {
+    		metadataQueries.put(s.getIdentifier(), new SearchMetadataResult(s));
+    		jobOrderProcList.add(new JobOrderProc());
+    	});
+
+    	Mockito.when(jobGeneration.getAppDataJob()).thenReturn(appDataJob);
+    	Mockito.when(jobGeneration.getMetadataQueries()).thenReturn(metadataQueries);
+    	Mockito.when(appDataJob.getId()).thenReturn(23L);
+    	Mockito.when(appDataJob.getProduct()).thenReturn(appDataJobProduct);
+    	Mockito.when(appDataJobProduct.getStartTime()).thenReturn("2000-01-01T00:00:00.000000Z");
+    	Mockito.when(appDataJobProduct.getStopTime()).thenReturn("2000-01-01T00:00:00.000000Z");
+    	Mockito.when(appDataJobProduct.getMissionId()).thenReturn("S1");
+    	Mockito.when(appDataJobProduct.getSatelliteId()).thenReturn("A");
+    	Mockito.when(appDataJobProduct.getInsConfId()).thenReturn(0);
+    	Mockito.when(appDataJobProduct.getProcessMode()).thenReturn("NRT");    	
+    	Mockito.when(jobGeneration.getJobOrder()).thenReturn(jobOrder);    	
+    	Mockito.when(jobOrder.getProcs()).thenReturn(jobOrderProcList);
+
+    	// preconditions
+    	assertNotNull(metadataBrain.get("AUX_POE"));
+    	assertNotNull(metadataBrain.get("AUX_RES"));
+
+    	generator.inputsSearch(jobGeneration);
+    	
+    	List<String> inputs = jobOrderProcList.stream().flatMap(r -> r.getInputs().stream())
+    			.map(JobOrderInput::getFileType).distinct().collect(Collectors.toList());
+    	
+    	// postconditions
+    	assertTrue(inputs.contains("AUX_POE"));
+    	assertFalse(inputs.contains("AUX_RES"));
+    }
+    
+    @Ignore
+    public void waitingTest() throws IpfPrepWorkerInputsMissingException, MetadataQueryException {
+    	final Map<Integer, SearchMetadataResult> metadataQueries = new HashMap<>();
+    	final List<JobOrderProc> jobOrderProcList = new ArrayList<>();
+    	Stream.of(
+    		new SearchMetadataQuery(1, "LatestValCover", 0.0, 0.0, "AUX_INS", ProductFamily.BLANK), //
+    		new SearchMetadataQuery(2, "LatestValCover", 0.0, 0.0, "AUX_CAL", ProductFamily.BLANK), //
+    		new SearchMetadataQuery(3, "LatestValCover", 0.0, 0.0, "AUX_POE", ProductFamily.BLANK), //
+    		new SearchMetadataQuery(4, "LatestValCover", 0.0, 0.0, "IW_RAW__0N", ProductFamily.L0_ACN), //
+    		new SearchMetadataQuery(5, "LatestValCover", 0.0, 0.0, "AUX_PP1", ProductFamily.BLANK), //
+    		new SearchMetadataQuery(6, "LatestValCover", 0.0, 0.0, "IW_RAW__0C", ProductFamily.L0_ACN), //
+    		new SearchMetadataQuery(7, "LatestValCover", 0.0, 0.0, "IW_RAW__0S", ProductFamily.L0_SLICE), //
+    		new SearchMetadataQuery(8, "LatestValCover", 0.0, 0.0, "AUX_ATT", ProductFamily.BLANK), //
+    		new SearchMetadataQuery(9, "LatestValCover", 0.0, 0.0, "AUX_RES", ProductFamily.BLANK), //
+    		new SearchMetadataQuery(10, "LatestValCover", 0.0, 0.0, "IW_RAW__0A", ProductFamily.L0_ACN) //
+    	).forEach(s -> {
+    		metadataQueries.put(s.getIdentifier(), new SearchMetadataResult(s));
+    		jobOrderProcList.add(new JobOrderProc());
+    	});
+
+    	Mockito.when(jobGeneration.getAppDataJob()).thenReturn(appDataJob);
+    	Mockito.when(jobGeneration.getMetadataQueries()).thenReturn(metadataQueries);
+    	Mockito.when(appDataJob.getId()).thenReturn(23L);
+    	Mockito.when(appDataJob.getProduct()).thenReturn(appDataJobProduct);
+    	Mockito.when(appDataJobProduct.getStartTime()).thenReturn("2000-01-01T00:00:00.000000Z");
+    	Mockito.when(appDataJobProduct.getStopTime()).thenReturn("2000-01-01T00:00:00.000000Z");
+    	Mockito.when(appDataJobProduct.getMissionId()).thenReturn("S1");
+    	Mockito.when(appDataJobProduct.getSatelliteId()).thenReturn("A");
+    	Mockito.when(appDataJobProduct.getInsConfId()).thenReturn(0);
+    	Mockito.when(appDataJobProduct.getProcessMode()).thenReturn("NRT");    	
+    	Mockito.when(jobGeneration.getJobOrder()).thenReturn(jobOrder);    	
+    	Mockito.when(jobOrder.getProcs()).thenReturn(jobOrderProcList);
+    	
+        //	metadataBrain.remove("AUX_RES");
+        //	metadataBrain.clear();
+        	generator.inputsSearch(jobGeneration);
+        	
+        	/*
+        	try {
+        		generator.inputsSearch(jobGeneration);
+        	} catch (IpfPrepWorkerInputsMissingException e) {
+        		System.out.println("Missing inputs..."); //FIXME
+        	}*/
+        }
+    }
