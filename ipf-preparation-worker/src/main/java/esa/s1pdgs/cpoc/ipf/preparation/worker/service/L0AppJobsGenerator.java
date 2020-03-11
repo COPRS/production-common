@@ -1,6 +1,7 @@
 package esa.s1pdgs.cpoc.ipf.preparation.worker.service;
 
 import java.io.File;
+import java.time.Instant;
 import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
 import java.util.Collections;
@@ -293,19 +294,33 @@ public class L0AppJobsGenerator extends AbstractJobsGenerator {
 		long timeoutEndTimestampMs = Math.max(startToWaitMs + minimalWaitingTimeMs,
 				downlinkEndTimeMs + timeoutForDownlinkStationMs);
 
-		LOGGER.trace("downlink-end time in epoch millis: {}", downlinkEndTimeMs);
-		LOGGER.trace("starting-to-wait time in epoch millis: {}", startToWaitMs);
-		LOGGER.trace("minimal waiting time in millis: {}", minimalWaitingTimeMs);
-		LOGGER.trace("timeout for downlink station in millis: {}", timeoutForDownlinkStationMs);
-		LOGGER.trace("timeout-end timestamp in epoch millis MAX({} + {}, {} + {} = {}", startToWaitMs,
-				minimalWaitingTimeMs, downlinkEndTimeMs, timeoutForDownlinkStationMs, timeoutEndTimestampMs);
+		String timeoutEndTimestampUTC = DateUtils.formatToMetadataDateTimeFormat(
+				Instant.ofEpochMilli(timeoutEndTimestampMs).atOffset(ZoneOffset.UTC).toLocalDateTime());
+
+		String currentTimeUTC = DateUtils.formatToMetadataDateTimeFormat(
+				Instant.ofEpochMilli(currentTimeMs).atOffset(ZoneOffset.UTC).toLocalDateTime());
+
+		if (LOGGER.isTraceEnabled()) {
+
+			String startToWaitUTC = DateUtils.formatToMetadataDateTimeFormat(
+					Instant.ofEpochMilli(startToWaitMs).atOffset(ZoneOffset.UTC).toLocalDateTime());
+
+			LOGGER.trace("downlink-end time: {}", downlinkEndTimeUTC);
+			LOGGER.trace("starting-to-wait time: {}", startToWaitUTC);
+			LOGGER.trace("minimal waiting time in millis: {}", minimalWaitingTimeMs);
+			LOGGER.trace("timeout for downlink station in millis: {}", timeoutForDownlinkStationMs);
+			LOGGER.trace("timeout-end timestamp in epoch millis MAX({} + {}, {} + {}) = {}", startToWaitUTC,
+					minimalWaitingTimeMs, downlinkEndTimeUTC, timeoutForDownlinkStationMs, timeoutEndTimestampUTC);
+
+		}
 
 		if (currentTimeMs > timeoutEndTimestampMs) {
-			LOGGER.trace("current time {} is greater than timeout-end timestamp {}", currentTimeMs,
-					timeoutEndTimestampMs);
+			LOGGER.debug("current time {} is greater than timeout-end timestamp {}", currentTimeUTC,
+					timeoutEndTimestampUTC);
 			timeout = true;
 		} else {
-			LOGGER.trace("current time {} is less than timeout-end timestamp {}", currentTimeMs, timeoutEndTimestampMs);
+			LOGGER.debug("current time {} is less than timeout-end timestamp {}", currentTimeUTC,
+					timeoutEndTimestampUTC);
 		}
 
 		LOGGER.debug("timeout reached: {}", timeout);
