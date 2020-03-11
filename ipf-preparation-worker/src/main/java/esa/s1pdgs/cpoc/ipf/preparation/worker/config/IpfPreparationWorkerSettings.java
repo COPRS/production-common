@@ -104,8 +104,8 @@ public class IpfPreparationWorkerSettings {
 		private String processorVersionRegexp;
 		private String inputIdRegexp;
 		private String timelinessRegexp;
-		private int waitingInSeconds;
-		private int delayInSeconds;		
+		private long waitingInSeconds;
+		private long delayInSeconds;		
 
 		public String getProcessorNameRegexp() {
 			return processorNameRegexp;
@@ -139,19 +139,19 @@ public class IpfPreparationWorkerSettings {
 			this.timelinessRegexp = timelinessRegexp;
 		}
 		
-		public int getWaitingInSeconds() {
+		public long getWaitingInSeconds() {
 			return waitingInSeconds;
 		}
 		
-		public void setWaitingInSeconds(int waitingInSeconds) {
+		public void setWaitingInSeconds(long waitingInSeconds) {
 			this.waitingInSeconds = waitingInSeconds;
 		}
 
-		public int getDelayInSeconds() {
+		public long getDelayInSeconds() {
 			return delayInSeconds;
 		}
 
-		public void setDelayInSeconds(int delayInSeconds) {
+		public void setDelayInSeconds(long delayInSeconds) {
 			this.delayInSeconds = delayInSeconds;
 		}
 
