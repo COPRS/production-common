@@ -1,5 +1,6 @@
 package esa.s1pdgs.cpoc.ipf.preparation.worker.service;
 
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.isA;
 import static org.hamcrest.Matchers.hasProperty;
@@ -17,6 +18,7 @@ import static org.mockito.Mockito.verifyNoMoreInteractions;
 
 import java.io.File;
 import java.io.IOException;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -24,13 +26,13 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import javax.xml.bind.JAXBException;
 
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
@@ -54,8 +56,10 @@ import esa.s1pdgs.cpoc.common.errors.appcatalog.AppCatalogJobSearchApiError;
 import esa.s1pdgs.cpoc.common.errors.processing.IpfPrepWorkerBuildTaskTableException;
 import esa.s1pdgs.cpoc.common.errors.processing.IpfPrepWorkerInputsMissingException;
 import esa.s1pdgs.cpoc.common.errors.processing.MetadataQueryException;
+import esa.s1pdgs.cpoc.common.utils.DateUtils;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.config.AppConfig;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.config.IpfPreparationWorkerSettings;
+import esa.s1pdgs.cpoc.ipf.preparation.worker.config.IpfPreparationWorkerSettings.InputWaitingConfig;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.config.IpfPreparationWorkerSettings.WaitTempo;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.config.ProcessConfiguration;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.config.ProcessSettings;
@@ -71,6 +75,7 @@ import esa.s1pdgs.cpoc.metadata.client.SearchMetadataQuery;
 import esa.s1pdgs.cpoc.metadata.model.SearchMetadata;
 import esa.s1pdgs.cpoc.mqi.client.MqiClient;
 import esa.s1pdgs.cpoc.mqi.model.queue.CatalogEvent;
+import esa.s1pdgs.cpoc.mqi.model.rest.GenericMessageDto;
 
 public class AbstractJobsGeneratorTest {
 
@@ -202,11 +207,14 @@ public class AbstractJobsGeneratorTest {
     private AppDataJobProduct appDataJobProduct;
     
     @Mock
-    private AppDataJob appDataJob;
-
+    private AppDataJob<CatalogEvent> appDataJob;
+    
     @Mock
     private JobOrder jobOrder;
 
+    @Mock
+    private InputWaitingConfig inputWaitingConfig;
+    
 	private Map<String, List<SearchMetadata>> metadataBrain;
     
     private TaskTable expectedTaskTable;
@@ -300,6 +308,7 @@ public class AbstractJobsGeneratorTest {
             r.put("IW_RAW__0N", ProductFamily.L0_ACN);
             return r;
         }).when(ipfPreparationWorkerSettings).getOutputfamilies();
+        
         Mockito.doAnswer(i -> {
             final Map<String, ProductFamily> r = new HashMap<>();
             r.put("IW_GRDH_1S", ProductFamily.L1_SLICE);
@@ -310,18 +319,31 @@ public class AbstractJobsGeneratorTest {
             r.put("IW_RAW__0N", ProductFamily.L0_ACN);
             return r;
         }).when(ipfPreparationWorkerSettings).getInputfamilies();
+        
         Mockito.doAnswer(i -> {
             return ProductFamily.AUXILIARY_FILE.name();
         }).when(ipfPreparationWorkerSettings).getDefaultfamily();
+        
         Mockito.doAnswer(i -> {
             return 2;
         }).when(ipfPreparationWorkerSettings).getMaxnumberofjobs();
+        
         Mockito.doAnswer(i -> {
             return new WaitTempo(2000, 3);
         }).when(ipfPreparationWorkerSettings).getWaitprimarycheck();
+        
         Mockito.doAnswer(i -> {
             return new WaitTempo(10000, 3);
         }).when(ipfPreparationWorkerSettings).getWaitmetadatainput();
+        
+        InputWaitingConfig inputWaitingConfig = new InputWaitingConfig();
+        inputWaitingConfig.setProcessorNameRegexp(".*");
+        inputWaitingConfig.setProcessorVersionRegexp(".*");
+        inputWaitingConfig.setInputIdRegexp("Orbit");
+        inputWaitingConfig.setTimelinessRegexp(".*");
+        inputWaitingConfig.setWaitingInSeconds(600);
+        inputWaitingConfig.setDelayInSeconds(0);
+        Mockito.when(ipfPreparationWorkerSettings.getInputWaiting()).thenReturn(Arrays.asList(inputWaitingConfig));
     }
 
     private void mockXmlConverter(final TaskTable table)
@@ -565,7 +587,7 @@ public class AbstractJobsGeneratorTest {
     }
     
     @Test
-    public void testUseOptionalInputAlterantiveOfOrder1WhenItExistsExclusively() throws IpfPrepWorkerInputsMissingException {
+    public void testUseOptionalInputAlternativeOfOrder1WhenItExistsExclusively() throws IpfPrepWorkerInputsMissingException {
     	final Map<Integer, SearchMetadataResult> metadataQueries = new HashMap<>();
     	final List<JobOrderProc> jobOrderProcList = new ArrayList<>();
     	Stream.of(
@@ -588,6 +610,13 @@ public class AbstractJobsGeneratorTest {
     	Mockito.when(jobGeneration.getMetadataQueries()).thenReturn(metadataQueries);
     	Mockito.when(appDataJob.getId()).thenReturn(23L);
     	Mockito.when(appDataJob.getProduct()).thenReturn(appDataJobProduct);
+    	Mockito.when(appDataJob.getMessages()).thenReturn(Arrays.asList(
+    		new GenericMessageDto<CatalogEvent>() {{
+    			setBody(new CatalogEvent() {{
+    				setMetadata(Collections.singletonMap("timeliness", "NRT"));
+    			}});
+    		}}
+    	));
     	Mockito.when(appDataJobProduct.getStartTime()).thenReturn("2000-01-01T00:00:00.000000Z");
     	Mockito.when(appDataJobProduct.getStopTime()).thenReturn("2000-01-01T00:00:00.000000Z");
     	Mockito.when(appDataJobProduct.getMissionId()).thenReturn("S1");
@@ -605,16 +634,15 @@ public class AbstractJobsGeneratorTest {
     	
     	generator.inputsSearch(jobGeneration);
     	
+    	// postconditions
     	List<String> inputs = jobOrderProcList.stream().flatMap(r -> r.getInputs().stream())
     			.map(JobOrderInput::getFileType).distinct().collect(Collectors.toList());
-    	
-    	// postconditions
     	assertTrue(inputs.contains("AUX_POE"));
     	assertFalse(inputs.contains("AUX_RES"));
     }
     
     @Test
-    public void testUseOptionalInputAlterantiveOfOrder2WhenItExistsExclusively() throws IpfPrepWorkerInputsMissingException {
+    public void testUseOptionalInputAlternativeOfOrder2WhenItExistsExclusively() throws IpfPrepWorkerInputsMissingException {
     	final Map<Integer, SearchMetadataResult> metadataQueries = new HashMap<>();
     	final List<JobOrderProc> jobOrderProcList = new ArrayList<>();
     	Stream.of(
@@ -637,6 +665,13 @@ public class AbstractJobsGeneratorTest {
     	Mockito.when(jobGeneration.getMetadataQueries()).thenReturn(metadataQueries);
     	Mockito.when(appDataJob.getId()).thenReturn(23L);
     	Mockito.when(appDataJob.getProduct()).thenReturn(appDataJobProduct);
+    	Mockito.when(appDataJob.getMessages()).thenReturn(Arrays.asList(
+    		new GenericMessageDto<CatalogEvent>() {{
+    			setBody(new CatalogEvent() {{
+    				setMetadata(Collections.singletonMap("timeliness", "NRT"));
+    			}});
+    		}}
+    	));
     	Mockito.when(appDataJobProduct.getStartTime()).thenReturn("2000-01-01T00:00:00.000000Z");
     	Mockito.when(appDataJobProduct.getStopTime()).thenReturn("2000-01-01T00:00:00.000000Z");
     	Mockito.when(appDataJobProduct.getMissionId()).thenReturn("S1");
@@ -654,16 +689,15 @@ public class AbstractJobsGeneratorTest {
     	
     	generator.inputsSearch(jobGeneration);
     	
+    	// postconditions
     	List<String> inputs = jobOrderProcList.stream().flatMap(r -> r.getInputs().stream())
     			.map(JobOrderInput::getFileType).distinct().collect(Collectors.toList());
-    	
-    	// postconditions
     	assertFalse(inputs.contains("AUX_POE"));
     	assertTrue(inputs.contains("AUX_RES"));
     }
     
     @Test
-    public void testUseOptionalInputAlterantiveOfOrder1WhenMultipleOrdersExist() throws IpfPrepWorkerInputsMissingException {
+    public void testUseOptionalInputAlternativeOfOrder1WhenMultipleOrdersExist() throws IpfPrepWorkerInputsMissingException {
     	final Map<Integer, SearchMetadataResult> metadataQueries = new HashMap<>();
     	final List<JobOrderProc> jobOrderProcList = new ArrayList<>();
     	Stream.of(
@@ -686,6 +720,13 @@ public class AbstractJobsGeneratorTest {
     	Mockito.when(jobGeneration.getMetadataQueries()).thenReturn(metadataQueries);
     	Mockito.when(appDataJob.getId()).thenReturn(23L);
     	Mockito.when(appDataJob.getProduct()).thenReturn(appDataJobProduct);
+    	Mockito.when(appDataJob.getMessages()).thenReturn(Arrays.asList(
+    		new GenericMessageDto<CatalogEvent>() {{
+    			setBody(new CatalogEvent() {{
+    				setMetadata(Collections.singletonMap("timeliness", "NRT"));
+    			}});
+    		}}
+    	));
     	Mockito.when(appDataJobProduct.getStartTime()).thenReturn("2000-01-01T00:00:00.000000Z");
     	Mockito.when(appDataJobProduct.getStopTime()).thenReturn("2000-01-01T00:00:00.000000Z");
     	Mockito.when(appDataJobProduct.getMissionId()).thenReturn("S1");
@@ -701,16 +742,15 @@ public class AbstractJobsGeneratorTest {
 
     	generator.inputsSearch(jobGeneration);
     	
+    	// postconditions
     	List<String> inputs = jobOrderProcList.stream().flatMap(r -> r.getInputs().stream())
     			.map(JobOrderInput::getFileType).distinct().collect(Collectors.toList());
-    	
-    	// postconditions
     	assertTrue(inputs.contains("AUX_POE"));
     	assertFalse(inputs.contains("AUX_RES"));
     }
     
-    @Ignore
-    public void waitingTest() throws IpfPrepWorkerInputsMissingException, MetadataQueryException {
+    @Test
+    public void testWaiting() throws IpfPrepWorkerInputsMissingException, MetadataQueryException {
     	final Map<Integer, SearchMetadataResult> metadataQueries = new HashMap<>();
     	final List<JobOrderProc> jobOrderProcList = new ArrayList<>();
     	Stream.of(
@@ -733,6 +773,14 @@ public class AbstractJobsGeneratorTest {
     	Mockito.when(jobGeneration.getMetadataQueries()).thenReturn(metadataQueries);
     	Mockito.when(appDataJob.getId()).thenReturn(23L);
     	Mockito.when(appDataJob.getProduct()).thenReturn(appDataJobProduct);
+    	Mockito.when(appDataJob.getMessages()).thenReturn(Arrays.asList(
+    		new GenericMessageDto<CatalogEvent>() {{
+    			setBody(new CatalogEvent() {{
+    				setMetadata(Collections.singletonMap("timeliness", "NRT"));
+    			}});
+    		}}
+    	));
+    	
     	Mockito.when(appDataJobProduct.getStartTime()).thenReturn("2000-01-01T00:00:00.000000Z");
     	Mockito.when(appDataJobProduct.getStopTime()).thenReturn("2000-01-01T00:00:00.000000Z");
     	Mockito.when(appDataJobProduct.getMissionId()).thenReturn("S1");
@@ -742,15 +790,38 @@ public class AbstractJobsGeneratorTest {
     	Mockito.when(jobGeneration.getJobOrder()).thenReturn(jobOrder);    	
     	Mockito.when(jobOrder.getProcs()).thenReturn(jobOrderProcList);
     	
-        //	metadataBrain.remove("AUX_RES");
-        //	metadataBrain.clear();
-        	generator.inputsSearch(jobGeneration);
-        	
-        	/*
-        	try {
-        		generator.inputsSearch(jobGeneration);
-        	} catch (IpfPrepWorkerInputsMissingException e) {
-        		System.out.println("Missing inputs..."); //FIXME
-        	}*/
-        }
+    	metadataBrain.remove("AUX_POE");
+    	metadataBrain.remove("AUX_RES");
+    	
+    	// preconditions
+    	assertNull(metadataBrain.get("AUX_POE"));
+    	assertNull(metadataBrain.get("AUX_RES"));
+
+    	// Part 1: Exactly before timeout exceeds
+    	
+    	generator.setClock(new Supplier<LocalDateTime>() {
+    		public LocalDateTime get() {
+				return DateUtils.parse("2000-01-01T00:09:59.999999Z");
+    		}
+    	});
+
+    	assertThatThrownBy(() -> generator.inputsSearch(jobGeneration)).isInstanceOf(IpfPrepWorkerInputsMissingException.class);
+    	
+    	// Part 2: Exactly when timeout is exceeded
+    	
+    	generator.setClock(new Supplier<LocalDateTime>() {
+			public LocalDateTime get() {
+				return DateUtils.parse("2000-01-01T00:10:00.000000Z");
+			}
+    	});
+    	
+    	generator.inputsSearch(jobGeneration);
+    	    	
+    	// postconditions
+    	List<String> inputs = jobOrderProcList.stream().flatMap(r -> r.getInputs().stream())
+    			.map(JobOrderInput::getFileType).distinct().collect(Collectors.toList());
+    	assertFalse(inputs.contains("AUX_POE"));
+    	assertFalse(inputs.contains("AUX_RES"));    	
     }
+
+}
