@@ -2,6 +2,7 @@ package esa.s1pdgs.cpoc.ipf.preparation.worker.service;
 
 import java.io.File;
 import java.io.IOException;
+import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -14,6 +15,8 @@ import java.util.UUID;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Function;
+import java.util.function.Supplier;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 import javax.xml.bind.JAXBException;
@@ -38,6 +41,7 @@ import esa.s1pdgs.cpoc.common.errors.processing.MetadataQueryException;
 import esa.s1pdgs.cpoc.common.utils.DateUtils;
 import esa.s1pdgs.cpoc.common.utils.LogUtils;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.config.IpfPreparationWorkerSettings;
+import esa.s1pdgs.cpoc.ipf.preparation.worker.config.IpfPreparationWorkerSettings.InputWaitingConfig;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.config.ProcessConfiguration;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.config.ProcessSettings;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.model.JobGeneration;
@@ -94,6 +98,7 @@ public abstract class AbstractJobsGenerator implements Runnable {
 	protected final MetadataClient metadataClient;
 	protected final ProcessSettings l0ProcessSettings;
 	protected final IpfPreparationWorkerSettings ipfPreparationWorkerSettings;
+	protected final List<CompiledInputWaitingConfig> compiledInputWaitingConfig;
 	private final AppCatalogJobClient<CatalogEvent> appDataService;
 	private final MqiClient mqiClient;
 	private final String hostname;
@@ -103,6 +108,7 @@ public abstract class AbstractJobsGenerator implements Runnable {
 	protected ProductMode mode;
 	protected String prefixLogMonitor;
 	protected String prefixLogMonitorRemove;
+	protected Supplier<LocalDateTime> clock; // mockable for testing timeouts
 
 	/**
 	 * Template of job order. Contains all information except ones specific to the
@@ -121,6 +127,55 @@ public abstract class AbstractJobsGenerator implements Runnable {
 	 */
 	protected final Map<Integer, SearchMetadataQuery> metadataSearchQueries;
 
+	private static class CompiledInputWaitingConfig {
+		Pattern processorNameRegexpPattern;
+		Pattern processorVersionRegexpPattern;
+		Pattern inputIdRegexpPattern;
+		Pattern timelinessRegexpPattern;
+		long waitingInSeconds;
+		long delayInSeconds;
+		
+		public CompiledInputWaitingConfig(String processorNameRegexp, String processorVersionRegexp, String inputIdRegexp,
+				String timelinessRegexp, long waitingInSeconds, long delayInSeconds) {
+			processorNameRegexpPattern = Pattern.compile(processorNameRegexp);
+			processorVersionRegexpPattern = Pattern.compile(processorVersionRegexp);
+			inputIdRegexpPattern = Pattern.compile(inputIdRegexp);
+			timelinessRegexpPattern = Pattern.compile(timelinessRegexp);
+			this.waitingInSeconds = waitingInSeconds;
+			this.delayInSeconds = delayInSeconds;
+		}
+		
+		@SuppressWarnings("unused")
+		public Pattern getProcessorNameRegexpPattern() {
+			return processorNameRegexpPattern;
+		}
+		
+		@SuppressWarnings("unused")
+		public Pattern getProcessorVersionRegexpPattern() {
+			return processorVersionRegexpPattern;
+		}
+		
+		@SuppressWarnings("unused")
+		public Pattern getInputIdRegexpPattern() {
+			return inputIdRegexpPattern;
+		}
+		
+		@SuppressWarnings("unused")
+		public Pattern getTimelinessRegexpPattern() {
+			return timelinessRegexpPattern;
+		}
+		
+		@SuppressWarnings("unused")
+		public long getWaitingInSeconds() {
+			return waitingInSeconds;
+		}
+		
+		@SuppressWarnings("unused")
+		public long getDelayInSeconds() {
+			return delayInSeconds;
+		}
+	}
+
 	public AbstractJobsGenerator(final XmlConverter xmlConverter, final MetadataClient metadataClient,
 			final ProcessSettings l0ProcessSettings, final IpfPreparationWorkerSettings taskTablesSettings,
 			final AppCatalogJobClient<CatalogEvent> appDataService, final ProcessConfiguration processConfiguration,
@@ -135,8 +190,19 @@ public abstract class AbstractJobsGenerator implements Runnable {
 		this.mode = ProductMode.BLANK;
 		this.appDataService = appDataService;
 		this.hostname = processConfiguration.getHostname();
+		compiledInputWaitingConfig = new ArrayList<>();
+		for (InputWaitingConfig iwc : ipfPreparationWorkerSettings.getInputWaiting()) {
+			compiledInputWaitingConfig.add(new CompiledInputWaitingConfig(iwc.getProcessorNameRegexp(),
+					iwc.getProcessorVersionRegexp(), iwc.getInputIdRegexp(), iwc.getTimelinessRegexp(),
+					iwc.getWaitingInSeconds(), iwc.getDelayInSeconds()));
+		}
+		clock = new Supplier<LocalDateTime>() {
+			public LocalDateTime get() {
+				return LocalDateTime.now();
+			}
+		};
 	}
-
+	
 	// ----------------------------------------------------
 	// INITIALIZATION
 	// ----------------------------------------------------
@@ -495,6 +561,9 @@ public abstract class AbstractJobsGenerator implements Runnable {
 	protected abstract void preSearch(JobGeneration job) throws IpfPrepWorkerInputsMissingException;
 
 	protected void inputsSearch(final JobGeneration job) throws IpfPrepWorkerInputsMissingException {
+		final String timeliness = (String) ((AppDataJob<CatalogEvent>) job.getAppDataJob()).getMessages().get(0)
+				.getBody().getMetadata().get("timeliness");
+		
 		// First, we evaluate each input query with no found file
 		LOGGER.info("{} [productName {}] 2a - Requesting metadata", this.prefixLogMonitor,
 				job.getAppDataJob().getProduct().getProductName());
@@ -634,7 +703,8 @@ public abstract class AbstractJobsGenerator implements Runnable {
 													outFormatter)),
 											ProductFamily.BLANK));
 								}
-							}
+							}						
+							
 							if (!inputsToAdd.isEmpty()) {
 								// We take a random one
 								final int indexToTake = ThreadLocalRandom.current().nextInt(0, inputsToAdd.size());
@@ -649,8 +719,19 @@ public abstract class AbstractJobsGenerator implements Runnable {
 									missingMetadata.put(input.toLogMessage(), "");
 								} else {
 									// optional input
-
-									// TODO: wait until configured timeout (re-submit job...)
+									for (CompiledInputWaitingConfig config : compiledInputWaitingConfig) {
+										if (config.getInputIdRegexpPattern().matcher(input.getId()).matches()
+											&& config.getTimelinessRegexpPattern().matcher(timeliness).matches()
+											&& config.getProcessorNameRegexpPattern().matcher(taskTable.getProcessorName()).matches()
+											&& config.getProcessorVersionRegexpPattern().matcher(taskTable.getVersion()).matches()
+										) {
+											LocalDateTime sensingStart = DateUtils.parse(job.getAppDataJob().getProduct().getStartTime());
+											LocalDateTime threshold = sensingStart.plusSeconds(config.getWaitingInSeconds());
+											if (clock.get().isBefore(threshold)) {
+												throw new IpfPrepWorkerInputsMissingException(missingMetadata); // re-submit until threshold is reached
+											}
+										}
+									}
 								}
 							}
 						}
@@ -872,4 +953,9 @@ public abstract class AbstractJobsGenerator implements Runnable {
 		}
 		return "_string";
 	}
+	
+	public void setClock(Supplier<LocalDateTime> clock) {
+		this.clock = clock;
+	}
+
 }
