@@ -90,11 +90,6 @@ public class L0AppJobsGenerator extends AbstractJobsGenerator {
         
         if (job.getAppDataJob() != null && job.getAppDataJob().getProduct() != null) {
         	
-        	// S1PRO-1101: if timeout for primary search is reached -> just start the job 
-			if (!disableTimeout && checkTimeoutReached(job)) {
-				return;
-			}
-
             // Channel 1
             job.getAppDataJob().getProduct().getRaws1().forEach(raw -> {
                 try {
@@ -127,6 +122,11 @@ public class L0AppJobsGenerator extends AbstractJobsGenerator {
                     missingRaws.put(raw.getFilename(), me.getMessage());
                 }
             });
+            
+            // S1PRO-1101: if timeout for primary search is reached -> just start the job 
+ 			if (!disableTimeout && checkTimeoutReached(job)) {
+ 				return;
+ 			}
         }
         
 	    if (!missingRaws.isEmpty()) {
