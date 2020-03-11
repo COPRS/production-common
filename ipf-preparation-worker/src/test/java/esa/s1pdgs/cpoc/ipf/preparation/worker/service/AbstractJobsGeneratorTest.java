@@ -63,6 +63,7 @@ import esa.s1pdgs.cpoc.ipf.preparation.worker.config.IpfPreparationWorkerSetting
 import esa.s1pdgs.cpoc.ipf.preparation.worker.config.IpfPreparationWorkerSettings.WaitTempo;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.config.ProcessConfiguration;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.config.ProcessSettings;
+import esa.s1pdgs.cpoc.ipf.preparation.worker.config.XmlConfig;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.model.JobGeneration;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.model.ProductMode;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.model.joborder.JobOrder;
@@ -219,6 +220,8 @@ public class AbstractJobsGeneratorTest {
     
     private TaskTable expectedTaskTable;
 
+    private TaskTableFactory ttFactory = new TaskTableFactory(new XmlConfig().xmlConverter());
+    
     /**
      * Test set up
      * 
@@ -261,19 +264,33 @@ public class AbstractJobsGeneratorTest {
 
         this.mockAppDataService();
 
-        generator = new LevelProductsJobsGenerator(
+        generator = makeUut();
+        generator.initialize();
+    }
+    
+	private LevelProductsJobsGenerator makeUut() throws IpfPrepWorkerBuildTaskTableException {
+		return makeUut(() -> LocalDateTime.now());
+	}
+
+	private LevelProductsJobsGenerator makeUut(final Supplier<LocalDateTime> sup) throws IpfPrepWorkerBuildTaskTableException {
+		return new LevelProductsJobsGenerator(
         		xmlConverter, 
         		metadataClient,
                 processSettings, 
                 ipfPreparationWorkerSettings, 
                 appDataPService, 
                 processConfiguration,
-                mqiClient
+                mqiClient,
+                (x, y) -> 0L,
+                sup,
+                "IW_RAW__0_GRDH_1.xml",
+                ttFactory.buildTaskTable(
+                		new File("./test/data/generic_config/task_tables/IW_RAW__0_GRDH_1.xml"), 
+                		ApplicationLevel.L1
+                ),
+                ProductMode.SLICING            
         );
-        generator.initialize(new File(
-                "./test/data/generic_config/task_tables/IW_RAW__0_GRDH_1.xml"));
-        generator.setMode(ProductMode.SLICING);
-    }
+	}
 
     private void mockProcessSettings() {
         Mockito.doAnswer(i -> {
@@ -336,7 +353,7 @@ public class AbstractJobsGeneratorTest {
             return new WaitTempo(10000, 3);
         }).when(ipfPreparationWorkerSettings).getWaitmetadatainput();
         
-        InputWaitingConfig inputWaitingConfig = new InputWaitingConfig();
+        final InputWaitingConfig inputWaitingConfig = new InputWaitingConfig();
         inputWaitingConfig.setProcessorNameRegexp(".*");
         inputWaitingConfig.setProcessorVersionRegexp(".*");
         inputWaitingConfig.setInputIdRegexp("Orbit");
@@ -373,7 +390,7 @@ public class AbstractJobsGeneratorTest {
                 if (this.nbLoopMetadata >= maxLoop2) {
                     this.nbLoopMetadata = 0;
                     final SearchMetadataQuery query = i.getArgument(0);
-                    List<SearchMetadata> result = metadataBrain.get(query.getProductType().toUpperCase());
+                    final List<SearchMetadata> result = metadataBrain.get(query.getProductType().toUpperCase());
                     return result != null ? result : Collections.emptyList();
                 }
                 return null;
@@ -433,17 +450,14 @@ public class AbstractJobsGeneratorTest {
             throws IOException, JAXBException, IpfPrepWorkerBuildTaskTableException {
         doThrow(new IOException("IO exception raised")).when(xmlConverter)
                 .convertFromXMLToObject(Mockito.anyString());
-        final AbstractJobsGenerator gen = new LevelProductsJobsGenerator(
-                xmlConverter, metadataClient, processSettings,
-                ipfPreparationWorkerSettings, appDataPService, processConfiguration, mqiClient);
-        generator.setMode(ProductMode.SLICING);
-
+        
+        ttFactory = new TaskTableFactory(xmlConverter);
         thrown.expect(IpfPrepWorkerBuildTaskTableException.class);
         thrown.expect(hasProperty("taskTable", is("IW_RAW__0_GRDH_1.xml")));
         thrown.expectMessage("IO exception raised");
         thrown.expectCause(isA(IOException.class));
-        gen.initialize(new File(
-                "./test/data/generic_config/task_tables/IW_RAW__0_GRDH_1.xml"));
+        final AbstractJobsGenerator gen = makeUut();
+        gen.initialize();
     }
 
     @Test
@@ -451,17 +465,14 @@ public class AbstractJobsGeneratorTest {
             throws IOException, JAXBException, IpfPrepWorkerBuildTaskTableException {
         doThrow(new JAXBException("JAXB exception raised")).when(xmlConverter)
                 .convertFromXMLToObject(Mockito.anyString());
-        final AbstractJobsGenerator gen = new LevelProductsJobsGenerator(
-                xmlConverter, metadataClient, processSettings,
-                ipfPreparationWorkerSettings, appDataPService, processConfiguration, mqiClient);
-        generator.setMode(ProductMode.SLICING);
-
+        
+        ttFactory = new TaskTableFactory(xmlConverter);        
         thrown.expect(IpfPrepWorkerBuildTaskTableException.class);
         thrown.expect(hasProperty("taskTable", is("IW_RAW__0_GRDH_1.xml")));
         thrown.expectMessage("JAXB exception raised");
         thrown.expectCause(isA(JAXBException.class));
-        gen.initialize(new File(
-                "./test/data/generic_config/task_tables/IW_RAW__0_GRDH_1.xml"));
+        final AbstractJobsGenerator gen = makeUut();
+        gen.initialize();
     }
 
     // ---------------------------------------------------------
@@ -635,7 +646,7 @@ public class AbstractJobsGeneratorTest {
     	generator.inputsSearch(jobGeneration);
     	
     	// postconditions
-    	List<String> inputs = jobOrderProcList.stream().flatMap(r -> r.getInputs().stream())
+    	final List<String> inputs = jobOrderProcList.stream().flatMap(r -> r.getInputs().stream())
     			.map(JobOrderInput::getFileType).distinct().collect(Collectors.toList());
     	assertTrue(inputs.contains("AUX_POE"));
     	assertFalse(inputs.contains("AUX_RES"));
@@ -690,7 +701,7 @@ public class AbstractJobsGeneratorTest {
     	generator.inputsSearch(jobGeneration);
     	
     	// postconditions
-    	List<String> inputs = jobOrderProcList.stream().flatMap(r -> r.getInputs().stream())
+    	final List<String> inputs = jobOrderProcList.stream().flatMap(r -> r.getInputs().stream())
     			.map(JobOrderInput::getFileType).distinct().collect(Collectors.toList());
     	assertFalse(inputs.contains("AUX_POE"));
     	assertTrue(inputs.contains("AUX_RES"));
@@ -743,14 +754,13 @@ public class AbstractJobsGeneratorTest {
     	generator.inputsSearch(jobGeneration);
     	
     	// postconditions
-    	List<String> inputs = jobOrderProcList.stream().flatMap(r -> r.getInputs().stream())
+    	final List<String> inputs = jobOrderProcList.stream().flatMap(r -> r.getInputs().stream())
     			.map(JobOrderInput::getFileType).distinct().collect(Collectors.toList());
     	assertTrue(inputs.contains("AUX_POE"));
     	assertFalse(inputs.contains("AUX_RES"));
     }
     
-    @Test
-    public void testWaiting() throws IpfPrepWorkerInputsMissingException, MetadataQueryException {
+    private List<JobOrderProc> mockWaiting() {
     	final Map<Integer, SearchMetadataResult> metadataQueries = new HashMap<>();
     	final List<JobOrderProc> jobOrderProcList = new ArrayList<>();
     	Stream.of(
@@ -796,32 +806,38 @@ public class AbstractJobsGeneratorTest {
     	// preconditions
     	assertNull(metadataBrain.get("AUX_POE"));
     	assertNull(metadataBrain.get("AUX_RES"));
-
+    	return jobOrderProcList;
+    }
+    
+    @Test
+    public void testWaiting() throws Exception {    	
     	// Part 1: Exactly before timeout exceeds
-    	
-    	generator.setClock(new Supplier<LocalDateTime>() {
-    		public LocalDateTime get() {
+    	generator = makeUut(new Supplier<LocalDateTime>() {
+    		@Override
+			public LocalDateTime get() {
 				return DateUtils.parse("2000-01-01T00:09:59.999999Z");
     		}
     	});
-
-    	assertThatThrownBy(() -> generator.inputsSearch(jobGeneration)).isInstanceOf(IpfPrepWorkerInputsMissingException.class);
+    	final List<JobOrderProc> jobOrderProcList = mockWaiting();
+    	assertThatThrownBy(() -> generator.inputsSearch(jobGeneration))
+    		.isInstanceOf(IpfPrepWorkerInputsMissingException.class);
     	
     	// Part 2: Exactly when timeout is exceeded
-    	
-    	generator.setClock(new Supplier<LocalDateTime>() {
+    	generator = makeUut(new Supplier<LocalDateTime>() {
+    		@Override
 			public LocalDateTime get() {
 				return DateUtils.parse("2000-01-01T00:10:00.000000Z");
-			}
-    	});
-    	
+    		}
+    	});    	
     	generator.inputsSearch(jobGeneration);
     	    	
     	// postconditions
-    	List<String> inputs = jobOrderProcList.stream().flatMap(r -> r.getInputs().stream())
+    	final List<String> inputs = jobOrderProcList.stream().flatMap(r -> r.getInputs().stream())
     			.map(JobOrderInput::getFileType).distinct().collect(Collectors.toList());
     	assertFalse(inputs.contains("AUX_POE"));
     	assertFalse(inputs.contains("AUX_RES"));    	
     }
+    
+    
 
 }

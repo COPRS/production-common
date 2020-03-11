@@ -32,9 +32,6 @@ import esa.s1pdgs.cpoc.common.errors.AbstractCodedException;
 import esa.s1pdgs.cpoc.common.errors.InternalErrorException;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.config.IpfPreparationWorkerSettings;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.config.ProcessSettings;
-import esa.s1pdgs.cpoc.ipf.preparation.worker.service.JobsGeneratorFactory;
-import esa.s1pdgs.cpoc.ipf.preparation.worker.service.L0AppJobDispatcher;
-import esa.s1pdgs.cpoc.ipf.preparation.worker.service.L0AppJobsGenerator;
 
 /**
  * Test the class JobDispatcher
@@ -89,8 +86,7 @@ public class L0AppJobDispatcherTest {
         // Mcok
         doAnswer(i -> {
             return mockGenerator;
-        }).when(jobsGeneratorFactory).createJobGeneratorForEdrsSession(any(),
-                any());
+        }).when(jobsGeneratorFactory).newJobGenerator(any(),any(), any());
         doAnswer(i -> {
             return null;
         }).when(jobGenerationTaskScheduler).scheduleAtFixedRate(any(), any());
@@ -190,9 +186,9 @@ public class L0AppJobDispatcherTest {
         try {
             dispatcher.createJobGenerator(taskTable1);
             verify(jobsGeneratorFactory, times(1))
-                    .createJobGeneratorForEdrsSession(any(), any());
+                    .newJobGenerator(any(),any(), any());
             verify(jobsGeneratorFactory, times(1))
-                    .createJobGeneratorForEdrsSession(eq(taskTable1), any());
+                    .newJobGenerator(eq(taskTable1), any(), any());
         } catch (final AbstractCodedException e) {
             fail("Invalid raised exception: " + e.getMessage());
         }
@@ -215,9 +211,9 @@ public class L0AppJobDispatcherTest {
             verify(jobGenerationTaskScheduler, times(1))
                     .scheduleWithFixedDelay(any(), eq(2000L));
             verify(jobsGeneratorFactory, times(1))
-                    .createJobGeneratorForEdrsSession(any(), any());
+                    .newJobGenerator(any(),any(), any());
             verify(jobsGeneratorFactory, times(1))
-                    .createJobGeneratorForEdrsSession(eq(taskTable1), any());
+                    .newJobGenerator(eq(taskTable1), any(), any());
 
             assertTrue(dispatcher.getGenerators().size() == 1);
             assertTrue(dispatcher.getGenerators().containsKey(taskTable1.getName()));

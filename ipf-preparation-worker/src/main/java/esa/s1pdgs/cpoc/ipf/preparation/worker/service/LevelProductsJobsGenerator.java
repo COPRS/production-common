@@ -1,6 +1,9 @@
 package esa.s1pdgs.cpoc.ipf.preparation.worker.service;
 
+import java.time.LocalDateTime;
 import java.util.Collections;
+import java.util.function.BiFunction;
+import java.util.function.Supplier;
 
 import esa.s1pdgs.cpoc.appcatalog.AppDataJobProduct;
 import esa.s1pdgs.cpoc.appcatalog.client.job.AppCatalogJobClient;
@@ -11,9 +14,12 @@ import esa.s1pdgs.cpoc.ipf.preparation.worker.config.IpfPreparationWorkerSetting
 import esa.s1pdgs.cpoc.ipf.preparation.worker.config.ProcessConfiguration;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.config.ProcessSettings;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.model.JobGeneration;
+import esa.s1pdgs.cpoc.ipf.preparation.worker.model.ProductMode;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.model.joborder.JobOrder;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.model.joborder.JobOrderProcParam;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.model.joborder.JobOrderSensingTime;
+import esa.s1pdgs.cpoc.ipf.preparation.worker.model.tasktable.TaskTable;
+import esa.s1pdgs.cpoc.ipf.preparation.worker.model.tasktable.TaskTableInput;
 import esa.s1pdgs.cpoc.metadata.client.MetadataClient;
 import esa.s1pdgs.cpoc.metadata.model.L0AcnMetadata;
 import esa.s1pdgs.cpoc.metadata.model.L0SliceMetadata;
@@ -44,9 +50,27 @@ public class LevelProductsJobsGenerator extends AbstractJobsGenerator {
 			final IpfPreparationWorkerSettings taskTablesSettings, 
 			final AppCatalogJobClient<CatalogEvent>  appDataService, 
 			final ProcessConfiguration processConfiguration,
-			final MqiClient mqiClient
+			final MqiClient mqiClient,
+			final BiFunction<String,TaskTableInput, Long> inputWaitTimeout, 
+			final Supplier<LocalDateTime> dateSupplier,
+			final String taskTableXmlName,
+			final TaskTable taskTable,
+			final ProductMode mode
 	) {
-		super(xmlConverter, metadataClient, processSettings, taskTablesSettings, appDataService, processConfiguration, mqiClient);
+		super(
+				xmlConverter, 
+				metadataClient, 
+				processSettings, 
+				taskTablesSettings, 
+				appDataService, 
+				processConfiguration,
+				mqiClient,
+        		inputWaitTimeout,
+        		dateSupplier,
+        		taskTableXmlName,
+        		taskTable,
+        		mode        		
+		);
 	}
 
 	/**

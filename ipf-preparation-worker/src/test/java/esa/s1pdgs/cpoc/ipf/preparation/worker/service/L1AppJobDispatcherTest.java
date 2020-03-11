@@ -44,10 +44,7 @@ import esa.s1pdgs.cpoc.common.errors.processing.IpfPrepWorkerBuildTaskTableExcep
 import esa.s1pdgs.cpoc.ipf.preparation.worker.config.IpfPreparationWorkerSettings;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.config.ProcessSettings;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.model.routing.LevelProductsRouting;
-import esa.s1pdgs.cpoc.ipf.preparation.worker.service.JobsGeneratorFactory;
-import esa.s1pdgs.cpoc.ipf.preparation.worker.service.LevelProductsJobDispatcher;
-import esa.s1pdgs.cpoc.ipf.preparation.worker.service.LevelProductsJobsGenerator;
-import esa.s1pdgs.cpoc.ipf.preparation.worker.service.XmlConverter;
+import esa.s1pdgs.cpoc.ipf.preparation.worker.service.JobsGeneratorFactory.JobGenType;
 
 public class L1AppJobDispatcherTest {
 
@@ -144,16 +141,16 @@ public class L1AppJobDispatcherTest {
         try {
             doAnswer(i -> {
                 return null;
-            }).when(jobsGeneratorFactory).createJobGeneratorForEdrsSession(
-                    Mockito.any(), Mockito.any());
+            }).when(jobsGeneratorFactory).newJobGenerator(
+                    Mockito.any(), Mockito.any(), Mockito.any());
             doAnswer(i -> {
                 final File f = (File) i.getArgument(0);
                 if (f.getName().startsWith("IW")) {
                     return this.mockGeneratorIW;
                 }
                 return this.mockGeneratorOther;
-            }).when(jobsGeneratorFactory)
-                    .createJobGeneratorForL0Slice(Mockito.any(), Mockito.any());
+            }).when(jobsGeneratorFactory).newJobGenerator(
+                    Mockito.any(), Mockito.any(), Mockito.any());
         } catch (final IpfPrepWorkerBuildTaskTableException e) {
             fail("Exception occurred: " + e.getMessage());
         }
@@ -248,10 +245,10 @@ public class L1AppJobDispatcherTest {
     public void testCreate() {
         try {
             this.dispatcher.createJobGenerator(taskTable1);
+            verify(jobsGeneratorFactory, times(1)).newJobGenerator(
+                    Mockito.any(), Mockito.any(), Mockito.any());
             verify(jobsGeneratorFactory, times(1))
-                    .createJobGeneratorForL0Slice(any(), any());
-            verify(jobsGeneratorFactory, times(1))
-                    .createJobGeneratorForL0Slice(eq(taskTable1), any());
+                    .newJobGenerator(eq(taskTable1), any(), any());
         } catch (final AbstractCodedException e) {
             fail("Invalid raised exception: " + e.getMessage());
         }
@@ -271,17 +268,17 @@ public class L1AppJobDispatcherTest {
             verify(jobGenerationTaskScheduler, times(this.nbTaskTables))
                     .scheduleWithFixedDelay(any(), eq(2000L));
             verify(jobsGeneratorFactory, never())
-                    .createJobGeneratorForEdrsSession(any(), any());
+                    .newJobGenerator(any(), any(), JobGenType.LEVEL_0);
             verify(jobsGeneratorFactory, times(this.nbTaskTables))
-                    .createJobGeneratorForL0Slice(any(), any());
+                    .newJobGenerator(any(), any(), JobGenType.LEVEL_PRODUCT);
             verify(jobsGeneratorFactory, times(1))
-                    .createJobGeneratorForL0Slice(eq(taskTable1), any());
+                    .newJobGenerator(eq(taskTable1), any(), JobGenType.LEVEL_PRODUCT);
             verify(jobsGeneratorFactory, times(1))
-                    .createJobGeneratorForL0Slice(eq(taskTable2), any());
+                    .newJobGenerator(eq(taskTable2), any(), JobGenType.LEVEL_PRODUCT);
             verify(jobsGeneratorFactory, times(1))
-                    .createJobGeneratorForL0Slice(eq(taskTable3), any());
+                    .newJobGenerator(eq(taskTable3), any(), JobGenType.LEVEL_PRODUCT);
             verify(jobsGeneratorFactory, times(1))
-                    .createJobGeneratorForL0Slice(eq(taskTable4), any());
+                    .newJobGenerator(eq(taskTable4), any(), JobGenType.LEVEL_PRODUCT);
             assertTrue(dispatcher.getGenerators().size() == this.nbTaskTables);
             assertTrue(dispatcher.getGenerators()
                     .containsKey(taskTable1.getName()));
