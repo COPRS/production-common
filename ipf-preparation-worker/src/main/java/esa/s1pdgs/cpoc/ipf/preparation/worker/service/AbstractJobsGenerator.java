@@ -1,6 +1,5 @@
 package esa.s1pdgs.cpoc.ipf.preparation.worker.service;
 
-import java.io.File;
 import java.io.IOException;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -14,9 +13,9 @@ import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.function.Supplier;
-import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 import javax.xml.bind.JAXBException;
@@ -41,7 +40,6 @@ import esa.s1pdgs.cpoc.common.errors.processing.MetadataQueryException;
 import esa.s1pdgs.cpoc.common.utils.DateUtils;
 import esa.s1pdgs.cpoc.common.utils.LogUtils;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.config.IpfPreparationWorkerSettings;
-import esa.s1pdgs.cpoc.ipf.preparation.worker.config.IpfPreparationWorkerSettings.InputWaitingConfig;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.config.ProcessConfiguration;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.config.ProcessSettings;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.model.JobGeneration;
@@ -98,17 +96,22 @@ public abstract class AbstractJobsGenerator implements Runnable {
 	protected final MetadataClient metadataClient;
 	protected final ProcessSettings l0ProcessSettings;
 	protected final IpfPreparationWorkerSettings ipfPreparationWorkerSettings;
-	protected final List<CompiledInputWaitingConfig> compiledInputWaitingConfig;
+	
 	private final AppCatalogJobClient<CatalogEvent> appDataService;
 	private final MqiClient mqiClient;
 	private final String hostname;
-	protected String taskTableXmlName;
-	protected TaskTable taskTable;
+	private final BiFunction<String,TaskTableInput, Long> inputWaitTimeout;
+	private final Supplier<LocalDateTime> dateSupplier; // mockable for testing timeouts
+	private final ProductMode mode;
+	
+	protected final String taskTableXmlName;
+	protected final TaskTable taskTable;
+	
 	protected List<List<String>> tasks;
-	protected ProductMode mode;
+
 	protected String prefixLogMonitor;
 	protected String prefixLogMonitorRemove;
-	protected Supplier<LocalDateTime> clock; // mockable for testing timeouts
+
 
 	/**
 	 * Template of job order. Contains all information except ones specific to the
@@ -127,59 +130,21 @@ public abstract class AbstractJobsGenerator implements Runnable {
 	 */
 	protected final Map<Integer, SearchMetadataQuery> metadataSearchQueries;
 
-	private static class CompiledInputWaitingConfig {
-		Pattern processorNameRegexpPattern;
-		Pattern processorVersionRegexpPattern;
-		Pattern inputIdRegexpPattern;
-		Pattern timelinessRegexpPattern;
-		long waitingInSeconds;
-		long delayInSeconds;
-		
-		public CompiledInputWaitingConfig(String processorNameRegexp, String processorVersionRegexp, String inputIdRegexp,
-				String timelinessRegexp, long waitingInSeconds, long delayInSeconds) {
-			processorNameRegexpPattern = Pattern.compile(processorNameRegexp);
-			processorVersionRegexpPattern = Pattern.compile(processorVersionRegexp);
-			inputIdRegexpPattern = Pattern.compile(inputIdRegexp);
-			timelinessRegexpPattern = Pattern.compile(timelinessRegexp);
-			this.waitingInSeconds = waitingInSeconds;
-			this.delayInSeconds = delayInSeconds;
-		}
-		
-		@SuppressWarnings("unused")
-		public Pattern getProcessorNameRegexpPattern() {
-			return processorNameRegexpPattern;
-		}
-		
-		@SuppressWarnings("unused")
-		public Pattern getProcessorVersionRegexpPattern() {
-			return processorVersionRegexpPattern;
-		}
-		
-		@SuppressWarnings("unused")
-		public Pattern getInputIdRegexpPattern() {
-			return inputIdRegexpPattern;
-		}
-		
-		@SuppressWarnings("unused")
-		public Pattern getTimelinessRegexpPattern() {
-			return timelinessRegexpPattern;
-		}
-		
-		@SuppressWarnings("unused")
-		public long getWaitingInSeconds() {
-			return waitingInSeconds;
-		}
-		
-		@SuppressWarnings("unused")
-		public long getDelayInSeconds() {
-			return delayInSeconds;
-		}
-	}
 
-	public AbstractJobsGenerator(final XmlConverter xmlConverter, final MetadataClient metadataClient,
-			final ProcessSettings l0ProcessSettings, final IpfPreparationWorkerSettings taskTablesSettings,
-			final AppCatalogJobClient<CatalogEvent> appDataService, final ProcessConfiguration processConfiguration,
-			final MqiClient mqiClient) {
+	public AbstractJobsGenerator(
+			final XmlConverter xmlConverter, 
+			final MetadataClient metadataClient,
+			final ProcessSettings l0ProcessSettings, 
+			final IpfPreparationWorkerSettings taskTablesSettings,
+			final AppCatalogJobClient<CatalogEvent> appDataService, 
+			final ProcessConfiguration processConfiguration,
+			final MqiClient mqiClient,
+			final BiFunction<String,TaskTableInput, Long> inputWaitTimeout, 
+			final Supplier<LocalDateTime> dateSupplier,
+			final String taskTableXmlName,
+			final TaskTable taskTable,
+			final ProductMode mode
+	) {
 		this.xmlConverter = xmlConverter;
 		this.metadataClient = metadataClient;
 		this.l0ProcessSettings = l0ProcessSettings;
@@ -187,20 +152,13 @@ public abstract class AbstractJobsGenerator implements Runnable {
 		this.metadataSearchQueries = new HashMap<>();
 		this.mqiClient = mqiClient;
 		this.tasks = new ArrayList<>();
-		this.mode = ProductMode.BLANK;
 		this.appDataService = appDataService;
 		this.hostname = processConfiguration.getHostname();
-		compiledInputWaitingConfig = new ArrayList<>();
-		for (InputWaitingConfig iwc : ipfPreparationWorkerSettings.getInputWaiting()) {
-			compiledInputWaitingConfig.add(new CompiledInputWaitingConfig(iwc.getProcessorNameRegexp(),
-					iwc.getProcessorVersionRegexp(), iwc.getInputIdRegexp(), iwc.getTimelinessRegexp(),
-					iwc.getWaitingInSeconds(), iwc.getDelayInSeconds()));
-		}
-		clock = new Supplier<LocalDateTime>() {
-			public LocalDateTime get() {
-				return LocalDateTime.now();
-			}
-		};
+		this.inputWaitTimeout = inputWaitTimeout;
+		this.dateSupplier = dateSupplier;
+		this.taskTableXmlName = taskTableXmlName;
+		this.taskTable = taskTable;
+		this.mode = mode;
 	}
 	
 	// ----------------------------------------------------
@@ -208,22 +166,11 @@ public abstract class AbstractJobsGenerator implements Runnable {
 	// ----------------------------------------------------
 
 	/**
-	 * @param mode the mode to set
-	 */
-	public void setMode(final ProductMode mode) {
-		this.mode = mode;
-	}
-
-	/**
 	 * Initialize the processor from the tasktable XML file
 	 * 
 	 * @param xmlFile
 	 */
-	public void initialize(final File xmlFile) throws IpfPrepWorkerBuildTaskTableException {
-
-		// Build task table
-		this.taskTableXmlName = xmlFile.getName();
-		this.buildTaskTable(xmlFile);
+	public void initialize() throws IpfPrepWorkerBuildTaskTableException {
 		this.prefixLogMonitor = "[MONITOR] [step 3] [taskTable " + this.taskTableXmlName + "]";
 		this.prefixLogMonitorRemove = "[MONITOR] [step 4] [taskTable " + this.taskTableXmlName + "]";
 
@@ -239,22 +186,6 @@ public abstract class AbstractJobsGenerator implements Runnable {
 
 		// Retrieve list of inputs
 		LOGGER.info(String.format("TaskTable %s initialized", taskTable.getProcessorName()));
-	}
-
-	/**
-	 * Build the object TaskTable from XML file
-	 * 
-	 * @param xmlFile
-	 * @throws BuildTaskTableException
-	 */
-	private void buildTaskTable(final File xmlFile) throws IpfPrepWorkerBuildTaskTableException {
-		// Retrieve task table
-		try {
-			this.taskTable = (TaskTable) xmlConverter.convertFromXMLToObject(xmlFile.getAbsolutePath());
-			this.taskTable.setLevel(this.l0ProcessSettings.getLevel());
-		} catch (IOException | JAXBException e) {
-			throw new IpfPrepWorkerBuildTaskTableException(this.taskTableXmlName, e.getMessage(), e);
-		}
 	}
 
 	private void buildJobOrderTemplate() {
@@ -299,16 +230,6 @@ public abstract class AbstractJobsGenerator implements Runnable {
 //        	parameterTypes.put(param.getName(), tasktableParameterTypeToReportingString(param.getType()));        	
 //        }
 	}
-
-//    private final String tasktableParameterTypeToReportingString(final String type) {
-//    	String or number or
-//    	datenumber
-//    	
-//    	
-//    	if ("string".equalsIgnoreCase(type)) {
-//    		return "string";
-//    	}
-//    }
 
 	private void buildMetadataSearchQuery() {
 		final AtomicInteger counter = new AtomicInteger(0);
@@ -561,6 +482,8 @@ public abstract class AbstractJobsGenerator implements Runnable {
 	protected abstract void preSearch(JobGeneration job) throws IpfPrepWorkerInputsMissingException;
 
 	protected void inputsSearch(final JobGeneration job) throws IpfPrepWorkerInputsMissingException {
+		
+		@SuppressWarnings("unchecked")
 		final String timeliness = (String) ((AppDataJob<CatalogEvent>) job.getAppDataJob()).getMessages().get(0)
 				.getBody().getMetadata().get("timeliness");
 		
@@ -717,19 +640,15 @@ public abstract class AbstractJobsGenerator implements Runnable {
 								// nothing found in none of the alternatives
 								if (input.getMandatory() == TaskTableMandatoryEnum.YES) {
 									missingMetadata.put(input.toLogMessage(), "");
-								} else {
+								} else {			
 									// optional input
-									for (CompiledInputWaitingConfig config : compiledInputWaitingConfig) {
-										if (config.getInputIdRegexpPattern().matcher(input.getId()).matches()
-											&& config.getTimelinessRegexpPattern().matcher(timeliness).matches()
-											&& config.getProcessorNameRegexpPattern().matcher(taskTable.getProcessorName()).matches()
-											&& config.getProcessorVersionRegexpPattern().matcher(taskTable.getVersion()).matches()
-										) {
-											LocalDateTime sensingStart = DateUtils.parse(job.getAppDataJob().getProduct().getStartTime());
-											LocalDateTime threshold = sensingStart.plusSeconds(config.getWaitingInSeconds());
-											if (clock.get().isBefore(threshold)) {
-												throw new IpfPrepWorkerInputsMissingException(missingMetadata); // re-submit until threshold is reached
-											}
+									final long timeout = inputWaitTimeout.apply(timeliness, input);
+									
+									if (timeout > 0) {
+										final LocalDateTime sensingStart = DateUtils.parse(job.getAppDataJob().getProduct().getStartTime());
+										final LocalDateTime threshold = sensingStart.plusSeconds(timeout);
+										if (dateSupplier.get().isBefore(threshold)) {
+											throw new IpfPrepWorkerInputsMissingException(missingMetadata); 						
 										}
 									}
 								}
@@ -752,7 +671,10 @@ public abstract class AbstractJobsGenerator implements Runnable {
 		}
 	}
 
-	protected void send(final JobGeneration job, final UUID reportingId) throws AbstractCodedException {
+	protected void send(final JobGeneration job, final UUID reportingId) throws AbstractCodedException {		
+		final String timeliness = (String) ((AppDataJob<CatalogEvent>) job.getAppDataJob()).getMessages().get(0)
+				.getBody().getMetadata().get("timeliness");
+		
 		LOGGER.info("{} [productName {}] 3a - Building common job", this.prefixLogMonitor,
 				job.getAppDataJob().getProduct().getProductName());
 		final int inc = INCREMENT_JOB.incrementAndGet();
@@ -797,9 +719,6 @@ public abstract class AbstractJobsGenerator implements Runnable {
 
 			// Custom Job order according implementation
 			this.customJobOrder(job);
-
-			final String timeliness = (String) ((AppDataJob<CatalogEvent>) job.getAppDataJob()).getMessages().get(0)
-					.getBody().getMetadata().get("timeliness");
 
 			ProductFamily family = ProductFamily.L0_JOB;
 			switch (l0ProcessSettings.getLevel()) {
@@ -953,9 +872,4 @@ public abstract class AbstractJobsGenerator implements Runnable {
 		}
 		return "_string";
 	}
-	
-	public void setClock(Supplier<LocalDateTime> clock) {
-		this.clock = clock;
-	}
-
 }

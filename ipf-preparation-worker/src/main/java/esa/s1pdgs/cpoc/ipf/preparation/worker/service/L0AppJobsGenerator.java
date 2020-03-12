@@ -2,12 +2,15 @@ package esa.s1pdgs.cpoc.ipf.preparation.worker.service;
 
 import java.io.File;
 import java.time.Instant;
+import java.time.LocalDateTime;
 import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.function.BiFunction;
+import java.util.function.Supplier;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -24,8 +27,11 @@ import esa.s1pdgs.cpoc.ipf.preparation.worker.config.IpfPreparationWorkerSetting
 import esa.s1pdgs.cpoc.ipf.preparation.worker.config.ProcessConfiguration;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.config.ProcessSettings;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.model.JobGeneration;
+import esa.s1pdgs.cpoc.ipf.preparation.worker.model.ProductMode;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.model.joborder.AbstractJobOrderConf;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.model.joborder.JobOrderProcParam;
+import esa.s1pdgs.cpoc.ipf.preparation.worker.model.tasktable.TaskTable;
+import esa.s1pdgs.cpoc.ipf.preparation.worker.model.tasktable.TaskTableInput;
 import esa.s1pdgs.cpoc.metadata.client.MetadataClient;
 import esa.s1pdgs.cpoc.metadata.model.EdrsSessionMetadata;
 import esa.s1pdgs.cpoc.mqi.client.MqiClient;
@@ -53,9 +59,26 @@ public class L0AppJobsGenerator extends AbstractJobsGenerator {
             final AppCatalogJobClient<CatalogEvent> appDataService,
             final AiopProperties aiopProperties, 
             final ProcessConfiguration processConfiguration,
-            final MqiClient mqiClient
+            final MqiClient mqiClient,
+			final BiFunction<String,TaskTableInput, Long> inputWaitTimeout, 
+			final Supplier<LocalDateTime> dateSupplier,
+			final String taskTableXmlName,
+			final TaskTable taskTable,
+			final ProductMode mode
     ) {
-        super(xmlConverter, metadataClient, l0ProcessSettings, taskTablesSettings, appDataService, processConfiguration, mqiClient);
+        super(xmlConverter, 
+        		metadataClient, 
+        		l0ProcessSettings, 
+        		taskTablesSettings, 
+        		appDataService, 
+        		processConfiguration, 
+        		mqiClient,
+        		inputWaitTimeout,
+        		dateSupplier,
+        		taskTableXmlName,
+        		taskTable,
+        		mode    
+        );
         
         minimalWaitingTimeSec = aiopProperties.getMinimalWaitingTimeSec();
         disableTimeout = aiopProperties.getDisableTimeout();
@@ -258,25 +281,25 @@ public class L0AppJobsGenerator extends AbstractJobsGenerator {
     
 	private boolean checkTimeoutReached(final JobGeneration job) {
 
-		String stationCode = job.getAppDataJob().getProduct().getStationCode();
-		Map<String, String> propForStationCode = aiopProperties.get(stationCode);
+		final String stationCode = job.getAppDataJob().getProduct().getStationCode();
+		final Map<String, String> propForStationCode = aiopProperties.get(stationCode);
 		if (propForStationCode == null) {
 			LOGGER.warn("no configuration found for station code -> not timeout check");
 			return false;
 		}
-		long timeoutForDownlinkStationMs = Long.valueOf(propForStationCode.get("TimeoutSec")) * 1000;
-		long minimalWaitingTimeMs = this.minimalWaitingTimeSec * 1000;
+		final long timeoutForDownlinkStationMs = Long.valueOf(propForStationCode.get("TimeoutSec")) * 1000;
+		final long minimalWaitingTimeMs = this.minimalWaitingTimeSec * 1000;
 
 		// the creation date of the job is used for the start of waiting
-		long startToWaitMs = job.getGeneration().getCreationDate().toInstant().toEpochMilli();
+		final long startToWaitMs = job.getGeneration().getCreationDate().toInstant().toEpochMilli();
 
 		// the "stop time" of the product (DSIB) is the downlink-end time
-		String downlinkEndTimeUTC = job.getAppDataJob().getProduct().getStopTime();
-		long currentTimeMs = System.currentTimeMillis();
+		final String downlinkEndTimeUTC = job.getAppDataJob().getProduct().getStopTime();
+		final long currentTimeMs = System.currentTimeMillis();
 
 		if (timeoutReachedForPrimarySearch(downlinkEndTimeUTC, currentTimeMs, startToWaitMs, minimalWaitingTimeMs,
 				timeoutForDownlinkStationMs)) {
-			AppDataJobProduct product = job.getAppDataJob().getProduct();
+			final AppDataJobProduct product = job.getAppDataJob().getProduct();
 			LOGGER.warn("Timeout reached for stationCode {} and product {}", product.getStationCode(),
 					product.getProductName());
 			return true;
@@ -284,25 +307,25 @@ public class L0AppJobsGenerator extends AbstractJobsGenerator {
 		return false;
 	}
 
-	boolean timeoutReachedForPrimarySearch(String downlinkEndTimeUTC, long currentTimeMs, long startToWaitMs,
-			long minimalWaitingTimeMs, long timeoutForDownlinkStationMs) {
+	boolean timeoutReachedForPrimarySearch(final String downlinkEndTimeUTC, final long currentTimeMs, final long startToWaitMs,
+			final long minimalWaitingTimeMs, final long timeoutForDownlinkStationMs) {
 
 		boolean timeout = false;
 
-		long downlinkEndTimeMs = DateUtils.parse(downlinkEndTimeUTC).toInstant(ZoneOffset.UTC).toEpochMilli();
+		final long downlinkEndTimeMs = DateUtils.parse(downlinkEndTimeUTC).toInstant(ZoneOffset.UTC).toEpochMilli();
 
-		long timeoutEndTimestampMs = Math.max(startToWaitMs + minimalWaitingTimeMs,
+		final long timeoutEndTimestampMs = Math.max(startToWaitMs + minimalWaitingTimeMs,
 				downlinkEndTimeMs + timeoutForDownlinkStationMs);
 
-		String timeoutEndTimestampUTC = DateUtils.formatToMetadataDateTimeFormat(
+		final String timeoutEndTimestampUTC = DateUtils.formatToMetadataDateTimeFormat(
 				Instant.ofEpochMilli(timeoutEndTimestampMs).atOffset(ZoneOffset.UTC).toLocalDateTime());
 
-		String currentTimeUTC = DateUtils.formatToMetadataDateTimeFormat(
+		final String currentTimeUTC = DateUtils.formatToMetadataDateTimeFormat(
 				Instant.ofEpochMilli(currentTimeMs).atOffset(ZoneOffset.UTC).toLocalDateTime());
 
 		if (LOGGER.isTraceEnabled()) {
 
-			String startToWaitUTC = DateUtils.formatToMetadataDateTimeFormat(
+			final String startToWaitUTC = DateUtils.formatToMetadataDateTimeFormat(
 					Instant.ofEpochMilli(startToWaitMs).atOffset(ZoneOffset.UTC).toLocalDateTime());
 
 			LOGGER.trace("downlink-end time: {}", downlinkEndTimeUTC);

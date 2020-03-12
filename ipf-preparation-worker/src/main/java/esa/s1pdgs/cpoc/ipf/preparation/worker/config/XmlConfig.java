@@ -17,11 +17,7 @@ public class XmlConfig {
 	 */
 	@Bean
 	public XmlConverter xmlConverter() {
-		final XmlConverter xmlConverter = new XmlConverter();
-		xmlConverter.setMarshaller(jaxb2Marshaller());
-		xmlConverter.setUnmarshaller(jaxb2Marshaller());
-		
-		return xmlConverter;
+		return new XmlConverter(jaxb2Marshaller(),jaxb2Marshaller());
 	}
 
 	/**

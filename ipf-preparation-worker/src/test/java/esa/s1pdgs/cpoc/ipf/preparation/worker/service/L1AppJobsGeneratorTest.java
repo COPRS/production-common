@@ -46,15 +46,14 @@ import esa.s1pdgs.cpoc.ipf.preparation.worker.config.IpfPreparationWorkerSetting
 import esa.s1pdgs.cpoc.ipf.preparation.worker.config.IpfPreparationWorkerSettings.WaitTempo;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.config.ProcessConfiguration;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.config.ProcessSettings;
+import esa.s1pdgs.cpoc.ipf.preparation.worker.config.XmlConfig;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.model.JobGeneration;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.model.joborder.AbstractJobOrderConf;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.model.joborder.JobOrder;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.model.joborder.JobOrderProcParam;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.model.joborder.L0JobOrderConf;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.model.tasktable.TaskTable;
-import esa.s1pdgs.cpoc.ipf.preparation.worker.service.JobsGeneratorFactory;
-import esa.s1pdgs.cpoc.ipf.preparation.worker.service.LevelProductsJobsGenerator;
-import esa.s1pdgs.cpoc.ipf.preparation.worker.service.XmlConverter;
+import esa.s1pdgs.cpoc.ipf.preparation.worker.service.JobsGeneratorFactory.JobGenType;
 import esa.s1pdgs.cpoc.metadata.client.MetadataClient;
 import esa.s1pdgs.cpoc.metadata.client.SearchMetadataQuery;
 import esa.s1pdgs.cpoc.metadata.model.L0AcnMetadata;
@@ -128,12 +127,21 @@ public class L1AppJobsGeneratorTest {
         this.mockAppDataService();
 
         final JobsGeneratorFactory factory =
-                new JobsGeneratorFactory(processSettings, ipfPreparationWorkerSettings,
-                		aiopProperties, xmlConverter, metadataClient, processConfiguration, mqiClient);
-        generator = (LevelProductsJobsGenerator) factory.createJobGeneratorForL0Slice(
-                new File(
-                        "./test/data/generic_config/task_tables/IW_RAW__0_GRDH_1.xml"),
-                appDataPService);
+                new JobsGeneratorFactory(
+                		processSettings, 
+                		ipfPreparationWorkerSettings,
+                		aiopProperties, 
+                		xmlConverter, 
+                		metadataClient, 
+                		processConfiguration, 
+                		mqiClient,
+                        new TaskTableFactory(new XmlConfig().xmlConverter())
+                		);
+        generator = (LevelProductsJobsGenerator) factory.newJobGenerator(
+                new File("./test/data/generic_config/task_tables/IW_RAW__0_GRDH_1.xml"),
+                appDataPService,
+                JobGenType.LEVEL_PRODUCT
+        );
 
         appDataJob = TestL1Utils.buildJobGeneration(false);
         appDataJobComplete = TestL1Utils.buildJobGeneration(true);

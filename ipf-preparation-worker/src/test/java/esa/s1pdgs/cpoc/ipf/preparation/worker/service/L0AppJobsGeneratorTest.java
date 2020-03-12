@@ -41,11 +41,10 @@ import esa.s1pdgs.cpoc.ipf.preparation.worker.config.IpfPreparationWorkerSetting
 import esa.s1pdgs.cpoc.ipf.preparation.worker.config.IpfPreparationWorkerSettings.WaitTempo;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.config.ProcessConfiguration;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.config.ProcessSettings;
+import esa.s1pdgs.cpoc.ipf.preparation.worker.config.XmlConfig;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.model.JobGeneration;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.model.tasktable.TaskTable;
-import esa.s1pdgs.cpoc.ipf.preparation.worker.service.JobsGeneratorFactory;
-import esa.s1pdgs.cpoc.ipf.preparation.worker.service.L0AppJobsGenerator;
-import esa.s1pdgs.cpoc.ipf.preparation.worker.service.XmlConverter;
+import esa.s1pdgs.cpoc.ipf.preparation.worker.service.JobsGeneratorFactory.JobGenType;
 import esa.s1pdgs.cpoc.metadata.client.MetadataClient;
 import esa.s1pdgs.cpoc.metadata.client.SearchMetadataQuery;
 import esa.s1pdgs.cpoc.metadata.model.EdrsSessionMetadata;
@@ -112,12 +111,18 @@ public class L0AppJobsGeneratorTest {
         this.mockAppDataService();
 
         final JobsGeneratorFactory factory = new JobsGeneratorFactory(
-                l0ProcessSettings, ipfPreparationWorkerSettings, aiopProperties,
-                xmlConverter, metadataClient, processConfiguration, mqiClient);
-        generator = (L0AppJobsGenerator) factory
-                .createJobGeneratorForEdrsSession(new File(
-                        "./test/data/generic_config/task_tables/TaskTable.AIOP.xml"),
-                        appDataService);
+                l0ProcessSettings, 
+                ipfPreparationWorkerSettings, 
+                aiopProperties,
+                xmlConverter, 
+                metadataClient, 
+                processConfiguration, 
+                mqiClient,
+                new TaskTableFactory(new XmlConfig().xmlConverter())
+        );
+        final File file = new File("./test/data/generic_config/task_tables/TaskTable.AIOP.xml");
+        
+        generator = (L0AppJobsGenerator) factory.newJobGenerator(file, appDataService, JobGenType.LEVEL_0);
     }
 
     private void mockProcessSettings() {
@@ -435,14 +440,14 @@ public class L0AppJobsGeneratorTest {
 	@Test
 	public void testTimeoutReachedForPrimarySearch_reached() {
 
-		String downlinkEndTime = "2020-01-01T00:00:00.000000Z";
-		long startToWaitMs = DateUtils.parse("2020-01-01T00:20:00.000000Z").toInstant(ZoneOffset.UTC).toEpochMilli();
-		long currentTimeMs = DateUtils.parse("2020-01-01T01:30:00.000000Z").toInstant(ZoneOffset.UTC).toEpochMilli();
+		final String downlinkEndTime = "2020-01-01T00:00:00.000000Z";
+		final long startToWaitMs = DateUtils.parse("2020-01-01T00:20:00.000000Z").toInstant(ZoneOffset.UTC).toEpochMilli();
+		final long currentTimeMs = DateUtils.parse("2020-01-01T01:30:00.000000Z").toInstant(ZoneOffset.UTC).toEpochMilli();
 
-		long minimalWaitingTimeMs = 30 * 60 * 1000;
-		long timeoutForDownlinkStationMs = 55 * 60 * 1000;
+		final long minimalWaitingTimeMs = 30 * 60 * 1000;
+		final long timeoutForDownlinkStationMs = 55 * 60 * 1000;
 
-		boolean timeoutReached = generator.timeoutReachedForPrimarySearch(downlinkEndTime, currentTimeMs, startToWaitMs,
+		final boolean timeoutReached = generator.timeoutReachedForPrimarySearch(downlinkEndTime, currentTimeMs, startToWaitMs,
 				minimalWaitingTimeMs, timeoutForDownlinkStationMs);
 		
 		assertTrue(timeoutReached);
@@ -451,14 +456,14 @@ public class L0AppJobsGeneratorTest {
 	@Test
 	public void testTimeoutReachedForPrimarySearch_not_reached() {
 
-		String downlinkEndTime = "2020-01-01T00:00:00.000000Z";
-		long startToWaitMs =  DateUtils.parse("2020-01-01T00:20:00.000000Z").toInstant(ZoneOffset.UTC).toEpochMilli();
-		long currentTimeMs = DateUtils.parse("2020-01-01T00:50:00.000000Z").toInstant(ZoneOffset.UTC).toEpochMilli();
+		final String downlinkEndTime = "2020-01-01T00:00:00.000000Z";
+		final long startToWaitMs =  DateUtils.parse("2020-01-01T00:20:00.000000Z").toInstant(ZoneOffset.UTC).toEpochMilli();
+		final long currentTimeMs = DateUtils.parse("2020-01-01T00:50:00.000000Z").toInstant(ZoneOffset.UTC).toEpochMilli();
 
-		long minimalWaitingTimeMs = 30 * 60 * 1000;
-		long timeoutForDownlinkStationMs = 55 * 60 * 1000;
+		final long minimalWaitingTimeMs = 30 * 60 * 1000;
+		final long timeoutForDownlinkStationMs = 55 * 60 * 1000;
 
-		boolean timeoutReached = generator.timeoutReachedForPrimarySearch(downlinkEndTime, currentTimeMs, startToWaitMs,
+		final boolean timeoutReached = generator.timeoutReachedForPrimarySearch(downlinkEndTime, currentTimeMs, startToWaitMs,
 				minimalWaitingTimeMs, timeoutForDownlinkStationMs);
 		
 		assertFalse(timeoutReached);
@@ -468,14 +473,14 @@ public class L0AppJobsGeneratorTest {
 	@Test
 	public void testTimeoutReachedForPrimarySearch_minimal_waiting_not_reached() {
 
-		String downlinkEndTime = "2020-01-01T00:00:00.000000Z";
-		long startToWaitMs = DateUtils.parse("2020-01-01T01:20:00.000000Z").toInstant(ZoneOffset.UTC).toEpochMilli();
-		long currentTimeMs = DateUtils.parse("2020-01-01T01:30:00.000000Z").toInstant(ZoneOffset.UTC).toEpochMilli();
+		final String downlinkEndTime = "2020-01-01T00:00:00.000000Z";
+		final long startToWaitMs = DateUtils.parse("2020-01-01T01:20:00.000000Z").toInstant(ZoneOffset.UTC).toEpochMilli();
+		final long currentTimeMs = DateUtils.parse("2020-01-01T01:30:00.000000Z").toInstant(ZoneOffset.UTC).toEpochMilli();
 
-		long minimalWaitingTimeMs = 30 * 60 * 1000;
-		long timeoutForDownlinkStationMs = 55 * 60 * 1000;
+		final long minimalWaitingTimeMs = 30 * 60 * 1000;
+		final long timeoutForDownlinkStationMs = 55 * 60 * 1000;
 
-		boolean timeoutReached = generator.timeoutReachedForPrimarySearch(downlinkEndTime, currentTimeMs, startToWaitMs,
+		final boolean timeoutReached = generator.timeoutReachedForPrimarySearch(downlinkEndTime, currentTimeMs, startToWaitMs,
 				minimalWaitingTimeMs, timeoutForDownlinkStationMs);
 		
 		assertFalse(timeoutReached);
@@ -484,14 +489,14 @@ public class L0AppJobsGeneratorTest {
 	@Test
 	public void testTimeoutReachedForPrimarySearch_minimal_waiting_reached() {
 
-		String downlinkEndTime = "2020-01-01T00:00:00.000000Z";
-		long startToWaitMs = DateUtils.parse("2020-01-01T01:20:00.000000Z").toInstant(ZoneOffset.UTC).toEpochMilli();
-		long currentTimeMs = DateUtils.parse("2020-01-01T01:55:00.000000Z").toInstant(ZoneOffset.UTC).toEpochMilli();
+		final String downlinkEndTime = "2020-01-01T00:00:00.000000Z";
+		final long startToWaitMs = DateUtils.parse("2020-01-01T01:20:00.000000Z").toInstant(ZoneOffset.UTC).toEpochMilli();
+		final long currentTimeMs = DateUtils.parse("2020-01-01T01:55:00.000000Z").toInstant(ZoneOffset.UTC).toEpochMilli();
 
-		long minimalWaitingTimeMs = 30 * 60 * 1000;
-		long timeoutForDownlinkStationMs = 55 * 60 * 1000;
+		final long minimalWaitingTimeMs = 30 * 60 * 1000;
+		final long timeoutForDownlinkStationMs = 55 * 60 * 1000;
 
-		boolean timeoutReached = generator.timeoutReachedForPrimarySearch(downlinkEndTime, currentTimeMs, startToWaitMs,
+		final boolean timeoutReached = generator.timeoutReachedForPrimarySearch(downlinkEndTime, currentTimeMs, startToWaitMs,
 				minimalWaitingTimeMs, timeoutForDownlinkStationMs);
 		
 		assertTrue(timeoutReached);

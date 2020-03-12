@@ -7,6 +7,8 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.function.BiFunction;
+import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 import org.springframework.util.CollectionUtils;
@@ -21,8 +23,11 @@ import esa.s1pdgs.cpoc.ipf.preparation.worker.config.IpfPreparationWorkerSetting
 import esa.s1pdgs.cpoc.ipf.preparation.worker.config.ProcessConfiguration;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.config.ProcessSettings;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.model.JobGeneration;
+import esa.s1pdgs.cpoc.ipf.preparation.worker.model.ProductMode;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.model.joborder.JobOrder;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.model.joborder.JobOrderProcParam;
+import esa.s1pdgs.cpoc.ipf.preparation.worker.model.tasktable.TaskTable;
+import esa.s1pdgs.cpoc.ipf.preparation.worker.model.tasktable.TaskTableInput;
 import esa.s1pdgs.cpoc.metadata.client.MetadataClient;
 import esa.s1pdgs.cpoc.metadata.model.AbstractMetadata;
 import esa.s1pdgs.cpoc.metadata.model.LevelSegmentMetadata;
@@ -38,16 +43,34 @@ import esa.s1pdgs.cpoc.mqi.model.rest.GenericMessageDto;
  */
 public class L0SegmentAppJobsGenerator extends AbstractJobsGenerator {
 	
-    public L0SegmentAppJobsGenerator(final XmlConverter xmlConverter,
+    public L0SegmentAppJobsGenerator(
+    		final XmlConverter xmlConverter,
             final MetadataClient metadataClient,
             final ProcessSettings l0ProcessSettings,
             final IpfPreparationWorkerSettings taskTablesSettings,
             final AppCatalogJobClient<CatalogEvent> appDataService,
             final ProcessConfiguration processConfiguration,
-            final MqiClient mqiClient
+            final MqiClient mqiClient,
+			final BiFunction<String,TaskTableInput, Long> inputWaitTimeout, 
+			final Supplier<LocalDateTime> dateSupplier,
+			final String taskTableXmlName,
+			final TaskTable taskTable,
+			final ProductMode mode
     ) {
-        super(xmlConverter, metadataClient, l0ProcessSettings,
-                taskTablesSettings, appDataService, processConfiguration, mqiClient);
+        super(
+        		xmlConverter,
+        		metadataClient, 
+        		l0ProcessSettings,
+                taskTablesSettings, 
+                appDataService, 
+                processConfiguration,
+                mqiClient,
+        		inputWaitTimeout,
+        		dateSupplier,
+        		taskTableXmlName,
+        		taskTable,
+        		mode    
+        );
     }
 
     @Override

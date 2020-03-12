@@ -19,30 +19,11 @@ import org.springframework.xml.transform.StringResult;
  *
  */
 public class XmlConverter {
-
-	/**
-	 * Marshaller
-	 */
-	private Marshaller marshaller;
-
-	/**
-	 * Unmarshaller
-	 */
-	private Unmarshaller unmarshaller;
-
-	/**
-	 * @param marshaller
-	 *            the marshaller to set
-	 */
-	public void setMarshaller(final Marshaller marshaller) {
+	private final Marshaller marshaller;
+	private final Unmarshaller unmarshaller;
+	
+	public XmlConverter(final Marshaller marshaller, final Unmarshaller unmarshaller) {
 		this.marshaller = marshaller;
-	}
-
-	/**
-	 * @param unmarshaller
-	 *            the unmarshaller to set
-	 */
-	public void setUnmarshaller(final Unmarshaller unmarshaller) {
 		this.unmarshaller = unmarshaller;
 	}
 
@@ -55,7 +36,7 @@ public class XmlConverter {
 	 * @throws JAXBException
 	 */
 	public void convertFromObjectToXML(final Object object, final String filepath) throws IOException, JAXBException {
-		FileOutputStream os = new FileOutputStream(filepath);
+		final FileOutputStream os = new FileOutputStream(filepath);
 		marshaller.marshal(object, new StreamResult(os));
 	}
 
@@ -68,7 +49,7 @@ public class XmlConverter {
 	 * @throws JAXBException
 	 */
 	public String convertFromObjectToXMLString(final Object object) throws IOException, JAXBException {
-		StringResult ret = new StringResult();
+		final StringResult ret = new StringResult();
 		marshaller.marshal(object, ret);
 		return ret.toString();
 	}
@@ -81,8 +62,8 @@ public class XmlConverter {
 	 * @throws IOException
 	 * @throws JAXBException
 	 */
-	public Object convertFromXMLToObject(String xmlfile) throws IOException, JAXBException {
-		FileInputStream is = new FileInputStream(xmlfile);
+	public Object convertFromXMLToObject(final String xmlfile) throws IOException, JAXBException {
+		final FileInputStream is = new FileInputStream(xmlfile);
 		return unmarshaller.unmarshal(new StreamSource(is));
 	}
 }

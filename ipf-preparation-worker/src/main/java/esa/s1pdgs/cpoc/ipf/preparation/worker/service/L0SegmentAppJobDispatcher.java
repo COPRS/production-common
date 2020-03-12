@@ -14,6 +14,7 @@ import esa.s1pdgs.cpoc.common.errors.AbstractCodedException;
 import esa.s1pdgs.cpoc.common.errors.processing.IpfPrepWorkerMissingRoutingEntryException;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.config.IpfPreparationWorkerSettings;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.config.ProcessSettings;
+import esa.s1pdgs.cpoc.ipf.preparation.worker.service.JobsGeneratorFactory.JobGenType;
 import esa.s1pdgs.cpoc.mqi.model.queue.CatalogEvent;
 
 /**
@@ -46,7 +47,7 @@ public class L0SegmentAppJobDispatcher extends AbstractJobsDispatcher {
     protected AbstractJobsGenerator createJobGenerator(
             final File xmlFile
     ) throws AbstractCodedException {
-        return this.factory.createJobGeneratorForL0Segment(xmlFile, appDataService);
+        return factory.newJobGenerator(xmlFile, appDataService, JobGenType.LEVEL_SEGMENT);
     }
 
     /**

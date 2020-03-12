@@ -100,8 +100,8 @@ public class IpfPreparationWorkerSettings {
 	
 	public static class InputWaitingConfig
 	{
-		private String processorNameRegexp;
-		private String processorVersionRegexp;
+		private String processorNameRegexp 		= ".*";
+		private String processorVersionRegexp	= ".*";
 		private String inputIdRegexp;
 		private String timelinessRegexp;
 		private long waitingInSeconds;
@@ -111,7 +111,7 @@ public class IpfPreparationWorkerSettings {
 			return processorNameRegexp;
 		}
 		
-		public void setProcessorNameRegexp(String processorNameRegexp) {
+		public void setProcessorNameRegexp(final String processorNameRegexp) {
 			this.processorNameRegexp = processorNameRegexp;
 		}
 		
@@ -119,7 +119,7 @@ public class IpfPreparationWorkerSettings {
 			return processorVersionRegexp;
 		}
 		
-		public void setProcessorVersionRegexp(String processorVersionRegexp) {
+		public void setProcessorVersionRegexp(final String processorVersionRegexp) {
 			this.processorVersionRegexp = processorVersionRegexp;
 		}
 		
@@ -127,7 +127,7 @@ public class IpfPreparationWorkerSettings {
 			return inputIdRegexp;
 		}
 		
-		public void setInputIdRegexp(String inputIdRegexp) {
+		public void setInputIdRegexp(final String inputIdRegexp) {
 			this.inputIdRegexp = inputIdRegexp;
 		}
 		
@@ -135,7 +135,7 @@ public class IpfPreparationWorkerSettings {
 			return timelinessRegexp;
 		}
 		
-		public void setTimelinessRegexp(String timelinessRegexp) {
+		public void setTimelinessRegexp(final String timelinessRegexp) {
 			this.timelinessRegexp = timelinessRegexp;
 		}
 		
@@ -143,7 +143,7 @@ public class IpfPreparationWorkerSettings {
 			return waitingInSeconds;
 		}
 		
-		public void setWaitingInSeconds(long waitingInSeconds) {
+		public void setWaitingInSeconds(final long waitingInSeconds) {
 			this.waitingInSeconds = waitingInSeconds;
 		}
 
@@ -151,7 +151,7 @@ public class IpfPreparationWorkerSettings {
 			return delayInSeconds;
 		}
 
-		public void setDelayInSeconds(long delayInSeconds) {
+		public void setDelayInSeconds(final long delayInSeconds) {
 			this.delayInSeconds = delayInSeconds;
 		}
 
@@ -179,7 +179,7 @@ public class IpfPreparationWorkerSettings {
 		return inputWaiting;
 	}
 
-	public void setInputWaiting(List<InputWaitingConfig> inputWaiting) {
+	public void setInputWaiting(final List<InputWaitingConfig> inputWaiting) {
 		this.inputWaiting = inputWaiting;
 	}
 	
