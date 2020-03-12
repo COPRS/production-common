@@ -1,4 +1,4 @@
-package esa.s1pdgs.cpoc.ipf.preparation.worker.service;
+package esa.s1pdgs.cpoc.ipf.preparation.worker.model.tasktable;
 
 import java.io.File;
 import java.io.IOException;
@@ -10,7 +10,7 @@ import org.springframework.stereotype.Component;
 
 import esa.s1pdgs.cpoc.common.ApplicationLevel;
 import esa.s1pdgs.cpoc.common.errors.processing.IpfPrepWorkerBuildTaskTableException;
-import esa.s1pdgs.cpoc.ipf.preparation.worker.model.tasktable.TaskTable;
+import esa.s1pdgs.cpoc.ipf.preparation.worker.service.XmlConverter;
 
 @Component
 public class TaskTableFactory {	

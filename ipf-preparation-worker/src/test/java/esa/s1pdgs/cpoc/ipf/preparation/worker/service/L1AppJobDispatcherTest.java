@@ -43,8 +43,9 @@ import esa.s1pdgs.cpoc.common.errors.InternalErrorException;
 import esa.s1pdgs.cpoc.common.errors.processing.IpfPrepWorkerBuildTaskTableException;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.config.IpfPreparationWorkerSettings;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.config.ProcessSettings;
+import esa.s1pdgs.cpoc.ipf.preparation.worker.model.joborder.JobsGeneratorFactory;
+import esa.s1pdgs.cpoc.ipf.preparation.worker.model.joborder.JobsGeneratorFactory.JobGenType;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.model.routing.LevelProductsRouting;
-import esa.s1pdgs.cpoc.ipf.preparation.worker.service.JobsGeneratorFactory.JobGenType;
 
 public class L1AppJobDispatcherTest {
 
@@ -268,17 +269,17 @@ public class L1AppJobDispatcherTest {
             verify(jobGenerationTaskScheduler, times(this.nbTaskTables))
                     .scheduleWithFixedDelay(any(), eq(2000L));
             verify(jobsGeneratorFactory, never())
-                    .newJobGenerator(any(), any(), JobGenType.LEVEL_0);
+                    .newJobGenerator(any(), any(), eq(JobGenType.LEVEL_0));
             verify(jobsGeneratorFactory, times(this.nbTaskTables))
-                    .newJobGenerator(any(), any(), JobGenType.LEVEL_PRODUCT);
+                    .newJobGenerator(any(), any(), eq(JobGenType.LEVEL_PRODUCT));
             verify(jobsGeneratorFactory, times(1))
-                    .newJobGenerator(eq(taskTable1), any(), JobGenType.LEVEL_PRODUCT);
+                    .newJobGenerator(eq(taskTable1), any(), eq(JobGenType.LEVEL_PRODUCT));
             verify(jobsGeneratorFactory, times(1))
-                    .newJobGenerator(eq(taskTable2), any(), JobGenType.LEVEL_PRODUCT);
+                    .newJobGenerator(eq(taskTable2), any(), eq(JobGenType.LEVEL_PRODUCT));
             verify(jobsGeneratorFactory, times(1))
-                    .newJobGenerator(eq(taskTable3), any(), JobGenType.LEVEL_PRODUCT);
+                    .newJobGenerator(eq(taskTable3), any(), eq(JobGenType.LEVEL_PRODUCT));
             verify(jobsGeneratorFactory, times(1))
-                    .newJobGenerator(eq(taskTable4), any(), JobGenType.LEVEL_PRODUCT);
+                    .newJobGenerator(eq(taskTable4), any(), eq(JobGenType.LEVEL_PRODUCT));
             assertTrue(dispatcher.getGenerators().size() == this.nbTaskTables);
             assertTrue(dispatcher.getGenerators()
                     .containsKey(taskTable1.getName()));

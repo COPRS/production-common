@@ -1,7 +1,6 @@
 package esa.s1pdgs.cpoc.ipf.preparation.worker.service;
 
 import java.io.IOException;
-import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -13,9 +12,7 @@ import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.concurrent.atomic.AtomicInteger;
-import java.util.function.BiFunction;
 import java.util.function.Function;
-import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 import javax.xml.bind.JAXBException;
@@ -63,6 +60,7 @@ import esa.s1pdgs.cpoc.ipf.preparation.worker.model.tasktable.TaskTablePool;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.model.tasktable.TaskTableTask;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.model.tasktable.enums.TaskTableInputOrigin;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.model.tasktable.enums.TaskTableMandatoryEnum;
+import esa.s1pdgs.cpoc.ipf.preparation.worker.timeout.InputTimeoutChecker;
 import esa.s1pdgs.cpoc.metadata.client.MetadataClient;
 import esa.s1pdgs.cpoc.metadata.client.SearchMetadataQuery;
 import esa.s1pdgs.cpoc.metadata.model.AbstractMetadata;
@@ -100,8 +98,7 @@ public abstract class AbstractJobsGenerator implements Runnable {
 	private final AppCatalogJobClient<CatalogEvent> appDataService;
 	private final MqiClient mqiClient;
 	private final String hostname;
-	private final BiFunction<String,TaskTableInput, Long> inputWaitTimeout;
-	private final Supplier<LocalDateTime> dateSupplier; // mockable for testing timeouts
+	private final InputTimeoutChecker timeoutChecker;
 	private final ProductMode mode;
 	
 	protected final String taskTableXmlName;
@@ -139,8 +136,7 @@ public abstract class AbstractJobsGenerator implements Runnable {
 			final AppCatalogJobClient<CatalogEvent> appDataService, 
 			final ProcessConfiguration processConfiguration,
 			final MqiClient mqiClient,
-			final BiFunction<String,TaskTableInput, Long> inputWaitTimeout, 
-			final Supplier<LocalDateTime> dateSupplier,
+			final InputTimeoutChecker timeoutChecker, 
 			final String taskTableXmlName,
 			final TaskTable taskTable,
 			final ProductMode mode
@@ -154,8 +150,7 @@ public abstract class AbstractJobsGenerator implements Runnable {
 		this.tasks = new ArrayList<>();
 		this.appDataService = appDataService;
 		this.hostname = processConfiguration.getHostname();
-		this.inputWaitTimeout = inputWaitTimeout;
-		this.dateSupplier = dateSupplier;
+		this.timeoutChecker = timeoutChecker;
 		this.taskTableXmlName = taskTableXmlName;
 		this.taskTable = taskTable;
 		this.mode = mode;
@@ -483,10 +478,6 @@ public abstract class AbstractJobsGenerator implements Runnable {
 
 	protected void inputsSearch(final JobGeneration job) throws IpfPrepWorkerInputsMissingException {
 		
-		@SuppressWarnings("unchecked")
-		final String timeliness = (String) ((AppDataJob<CatalogEvent>) job.getAppDataJob()).getMessages().get(0)
-				.getBody().getMetadata().get("timeliness");
-		
 		// First, we evaluate each input query with no found file
 		LOGGER.info("{} [productName {}] 2a - Requesting metadata", this.prefixLogMonitor,
 				job.getAppDataJob().getProduct().getProductName());
@@ -642,14 +633,16 @@ public abstract class AbstractJobsGenerator implements Runnable {
 									missingMetadata.put(input.toLogMessage(), "");
 								} else {			
 									// optional input
-									final long timeout = inputWaitTimeout.apply(timeliness, input);
 									
-									if (timeout > 0) {
-										final LocalDateTime sensingStart = DateUtils.parse(job.getAppDataJob().getProduct().getStartTime());
-										final LocalDateTime threshold = sensingStart.plusSeconds(timeout);
-										if (dateSupplier.get().isBefore(threshold)) {
-											throw new IpfPrepWorkerInputsMissingException(missingMetadata); 						
-										}
+									// if the timeout is not expired, we want to continue waiting. To do that, 
+									// a IpfPrepWorkerInputsMissingException needs to be thrown. Otherwise,
+									// we log that timeout is expired and we continue anyway.
+									if (timeoutChecker.isTimeoutExpiredFor(job.getAppDataJob(), input)) {
+										LOGGER.info("Timeout is expired for Input {}. Continue without it...", 
+												input.toLogMessage());
+									}
+									else {
+										throw new IpfPrepWorkerInputsMissingException(missingMetadata); 
 									}
 								}
 							}
@@ -670,7 +663,7 @@ public abstract class AbstractJobsGenerator implements Runnable {
 			}
 		}
 	}
-
+	
 	protected void send(final JobGeneration job, final UUID reportingId) throws AbstractCodedException {		
 		final String timeliness = (String) ((AppDataJob<CatalogEvent>) job.getAppDataJob()).getMessages().get(0)
 				.getBody().getMetadata().get("timeliness");

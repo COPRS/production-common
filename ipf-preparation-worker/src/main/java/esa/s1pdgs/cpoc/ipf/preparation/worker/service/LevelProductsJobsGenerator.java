@@ -1,9 +1,6 @@
 package esa.s1pdgs.cpoc.ipf.preparation.worker.service;
 
-import java.time.LocalDateTime;
 import java.util.Collections;
-import java.util.function.BiFunction;
-import java.util.function.Supplier;
 
 import esa.s1pdgs.cpoc.appcatalog.AppDataJobProduct;
 import esa.s1pdgs.cpoc.appcatalog.client.job.AppCatalogJobClient;
@@ -19,7 +16,7 @@ import esa.s1pdgs.cpoc.ipf.preparation.worker.model.joborder.JobOrder;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.model.joborder.JobOrderProcParam;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.model.joborder.JobOrderSensingTime;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.model.tasktable.TaskTable;
-import esa.s1pdgs.cpoc.ipf.preparation.worker.model.tasktable.TaskTableInput;
+import esa.s1pdgs.cpoc.ipf.preparation.worker.timeout.InputTimeoutChecker;
 import esa.s1pdgs.cpoc.metadata.client.MetadataClient;
 import esa.s1pdgs.cpoc.metadata.model.L0AcnMetadata;
 import esa.s1pdgs.cpoc.metadata.model.L0SliceMetadata;
@@ -51,8 +48,7 @@ public class LevelProductsJobsGenerator extends AbstractJobsGenerator {
 			final AppCatalogJobClient<CatalogEvent>  appDataService, 
 			final ProcessConfiguration processConfiguration,
 			final MqiClient mqiClient,
-			final BiFunction<String,TaskTableInput, Long> inputWaitTimeout, 
-			final Supplier<LocalDateTime> dateSupplier,
+		    final InputTimeoutChecker timeoutChecker,
 			final String taskTableXmlName,
 			final TaskTable taskTable,
 			final ProductMode mode
@@ -65,8 +61,7 @@ public class LevelProductsJobsGenerator extends AbstractJobsGenerator {
 				appDataService, 
 				processConfiguration,
 				mqiClient,
-        		inputWaitTimeout,
-        		dateSupplier,
+				timeoutChecker,
         		taskTableXmlName,
         		taskTable,
         		mode        		

@@ -71,6 +71,8 @@ import esa.s1pdgs.cpoc.ipf.preparation.worker.model.joborder.JobOrderInput;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.model.joborder.JobOrderProc;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.model.metadata.SearchMetadataResult;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.model.tasktable.TaskTable;
+import esa.s1pdgs.cpoc.ipf.preparation.worker.model.tasktable.TaskTableFactory;
+import esa.s1pdgs.cpoc.ipf.preparation.worker.timeout.InputTimeoutChecker;
 import esa.s1pdgs.cpoc.metadata.client.MetadataClient;
 import esa.s1pdgs.cpoc.metadata.client.SearchMetadataQuery;
 import esa.s1pdgs.cpoc.metadata.model.SearchMetadata;
@@ -221,7 +223,7 @@ public class AbstractJobsGeneratorTest {
     private TaskTable expectedTaskTable;
 
     private TaskTableFactory ttFactory = new TaskTableFactory(new XmlConfig().xmlConverter());
-    
+
     /**
      * Test set up
      * 
@@ -281,8 +283,7 @@ public class AbstractJobsGeneratorTest {
                 appDataPService, 
                 processConfiguration,
                 mqiClient,
-                (x, y) -> 0L,
-                sup,
+                InputTimeoutChecker.NULL,
                 "IW_RAW__0_GRDH_1.xml",
                 ttFactory.buildTaskTable(
                 		new File("./test/data/generic_config/task_tables/IW_RAW__0_GRDH_1.xml"), 

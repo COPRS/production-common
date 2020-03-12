@@ -14,6 +14,7 @@ import java.util.Calendar;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.function.Function;
 
 import javax.xml.bind.JAXBException;
 
@@ -43,8 +44,11 @@ import esa.s1pdgs.cpoc.ipf.preparation.worker.config.ProcessConfiguration;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.config.ProcessSettings;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.config.XmlConfig;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.model.JobGeneration;
+import esa.s1pdgs.cpoc.ipf.preparation.worker.model.joborder.JobsGeneratorFactory;
+import esa.s1pdgs.cpoc.ipf.preparation.worker.model.joborder.JobsGeneratorFactory.JobGenType;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.model.tasktable.TaskTable;
-import esa.s1pdgs.cpoc.ipf.preparation.worker.service.JobsGeneratorFactory.JobGenType;
+import esa.s1pdgs.cpoc.ipf.preparation.worker.model.tasktable.TaskTableFactory;
+import esa.s1pdgs.cpoc.ipf.preparation.worker.timeout.InputTimeoutChecker;
 import esa.s1pdgs.cpoc.metadata.client.MetadataClient;
 import esa.s1pdgs.cpoc.metadata.client.SearchMetadataQuery;
 import esa.s1pdgs.cpoc.metadata.model.EdrsSessionMetadata;
@@ -88,6 +92,8 @@ public class L0AppJobsGeneratorTest {
     private L0AppJobsGenerator generator;
     
     private IpfExecutionJob publishedJob;
+    
+    private final Function<TaskTable, InputTimeoutChecker> timeoutChecker = t -> InputTimeoutChecker.NULL;
 
     /**
      * Test set up
@@ -118,7 +124,8 @@ public class L0AppJobsGeneratorTest {
                 metadataClient, 
                 processConfiguration, 
                 mqiClient,
-                new TaskTableFactory(new XmlConfig().xmlConverter())
+                new TaskTableFactory(new XmlConfig().xmlConverter()),
+                timeoutChecker
         );
         final File file = new File("./test/data/generic_config/task_tables/TaskTable.AIOP.xml");
         

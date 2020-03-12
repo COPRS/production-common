@@ -7,8 +7,6 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.function.BiFunction;
-import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 import org.springframework.util.CollectionUtils;
@@ -27,7 +25,7 @@ import esa.s1pdgs.cpoc.ipf.preparation.worker.model.ProductMode;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.model.joborder.JobOrder;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.model.joborder.JobOrderProcParam;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.model.tasktable.TaskTable;
-import esa.s1pdgs.cpoc.ipf.preparation.worker.model.tasktable.TaskTableInput;
+import esa.s1pdgs.cpoc.ipf.preparation.worker.timeout.InputTimeoutChecker;
 import esa.s1pdgs.cpoc.metadata.client.MetadataClient;
 import esa.s1pdgs.cpoc.metadata.model.AbstractMetadata;
 import esa.s1pdgs.cpoc.metadata.model.LevelSegmentMetadata;
@@ -51,8 +49,7 @@ public class L0SegmentAppJobsGenerator extends AbstractJobsGenerator {
             final AppCatalogJobClient<CatalogEvent> appDataService,
             final ProcessConfiguration processConfiguration,
             final MqiClient mqiClient,
-			final BiFunction<String,TaskTableInput, Long> inputWaitTimeout, 
-			final Supplier<LocalDateTime> dateSupplier,
+            final InputTimeoutChecker timeoutChecker,
 			final String taskTableXmlName,
 			final TaskTable taskTable,
 			final ProductMode mode
@@ -65,8 +62,7 @@ public class L0SegmentAppJobsGenerator extends AbstractJobsGenerator {
                 appDataService, 
                 processConfiguration,
                 mqiClient,
-        		inputWaitTimeout,
-        		dateSupplier,
+                timeoutChecker,
         		taskTableXmlName,
         		taskTable,
         		mode    

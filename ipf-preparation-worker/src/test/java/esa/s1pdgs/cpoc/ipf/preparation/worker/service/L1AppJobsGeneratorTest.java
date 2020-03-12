@@ -16,6 +16,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.function.Function;
 
 import javax.xml.bind.JAXBException;
 
@@ -51,9 +52,12 @@ import esa.s1pdgs.cpoc.ipf.preparation.worker.model.JobGeneration;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.model.joborder.AbstractJobOrderConf;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.model.joborder.JobOrder;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.model.joborder.JobOrderProcParam;
+import esa.s1pdgs.cpoc.ipf.preparation.worker.model.joborder.JobsGeneratorFactory;
+import esa.s1pdgs.cpoc.ipf.preparation.worker.model.joborder.JobsGeneratorFactory.JobGenType;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.model.joborder.L0JobOrderConf;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.model.tasktable.TaskTable;
-import esa.s1pdgs.cpoc.ipf.preparation.worker.service.JobsGeneratorFactory.JobGenType;
+import esa.s1pdgs.cpoc.ipf.preparation.worker.model.tasktable.TaskTableFactory;
+import esa.s1pdgs.cpoc.ipf.preparation.worker.timeout.InputTimeoutChecker;
 import esa.s1pdgs.cpoc.metadata.client.MetadataClient;
 import esa.s1pdgs.cpoc.metadata.client.SearchMetadataQuery;
 import esa.s1pdgs.cpoc.metadata.model.L0AcnMetadata;
@@ -106,6 +110,8 @@ public class L1AppJobsGeneratorTest {
 
     private IpfExecutionJob publishedJob;
 
+    private final Function<TaskTable, InputTimeoutChecker> timeoutChecker = t -> InputTimeoutChecker.NULL;
+    
     /**
      * Test set up
      * 
@@ -135,7 +141,8 @@ public class L1AppJobsGeneratorTest {
                 		metadataClient, 
                 		processConfiguration, 
                 		mqiClient,
-                        new TaskTableFactory(new XmlConfig().xmlConverter())
+                        new TaskTableFactory(new XmlConfig().xmlConverter()),
+                        timeoutChecker
                 		);
         generator = (LevelProductsJobsGenerator) factory.newJobGenerator(
                 new File("./test/data/generic_config/task_tables/IW_RAW__0_GRDH_1.xml"),

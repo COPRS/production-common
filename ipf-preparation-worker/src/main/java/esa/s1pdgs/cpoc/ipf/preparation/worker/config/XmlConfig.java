@@ -20,12 +20,7 @@ public class XmlConfig {
 		return new XmlConverter(jaxb2Marshaller(),jaxb2Marshaller());
 	}
 
-	/**
-	 * JAXb2 marshaller
-	 * @return
-	 */
-	@Bean
-	public Jaxb2Marshaller jaxb2Marshaller() {
+	private final Jaxb2Marshaller jaxb2Marshaller() {
 		final Jaxb2Marshaller jaxb2Marshaller = new Jaxb2Marshaller();
 		jaxb2Marshaller.setPackagesToScan("esa.s1pdgs.cpoc.ipf.preparation.worker.model");
 		final Map<String, Object> map = new ConcurrentHashMap<String, Object>();

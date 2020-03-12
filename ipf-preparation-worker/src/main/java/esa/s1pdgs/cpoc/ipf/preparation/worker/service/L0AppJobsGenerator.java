@@ -2,15 +2,12 @@ package esa.s1pdgs.cpoc.ipf.preparation.worker.service;
 
 import java.io.File;
 import java.time.Instant;
-import java.time.LocalDateTime;
 import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
-import java.util.function.BiFunction;
-import java.util.function.Supplier;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -31,7 +28,7 @@ import esa.s1pdgs.cpoc.ipf.preparation.worker.model.ProductMode;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.model.joborder.AbstractJobOrderConf;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.model.joborder.JobOrderProcParam;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.model.tasktable.TaskTable;
-import esa.s1pdgs.cpoc.ipf.preparation.worker.model.tasktable.TaskTableInput;
+import esa.s1pdgs.cpoc.ipf.preparation.worker.timeout.InputTimeoutChecker;
 import esa.s1pdgs.cpoc.metadata.client.MetadataClient;
 import esa.s1pdgs.cpoc.metadata.model.EdrsSessionMetadata;
 import esa.s1pdgs.cpoc.mqi.client.MqiClient;
@@ -60,8 +57,7 @@ public class L0AppJobsGenerator extends AbstractJobsGenerator {
             final AiopProperties aiopProperties, 
             final ProcessConfiguration processConfiguration,
             final MqiClient mqiClient,
-			final BiFunction<String,TaskTableInput, Long> inputWaitTimeout, 
-			final Supplier<LocalDateTime> dateSupplier,
+            final InputTimeoutChecker timeoutChecker,
 			final String taskTableXmlName,
 			final TaskTable taskTable,
 			final ProductMode mode
@@ -73,8 +69,7 @@ public class L0AppJobsGenerator extends AbstractJobsGenerator {
         		appDataService, 
         		processConfiguration, 
         		mqiClient,
-        		inputWaitTimeout,
-        		dateSupplier,
+        		timeoutChecker,
         		taskTableXmlName,
         		taskTable,
         		mode    

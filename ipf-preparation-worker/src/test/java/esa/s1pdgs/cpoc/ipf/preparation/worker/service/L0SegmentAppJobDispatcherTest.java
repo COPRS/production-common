@@ -33,6 +33,7 @@ import esa.s1pdgs.cpoc.common.errors.InternalErrorException;
 import esa.s1pdgs.cpoc.common.errors.processing.IpfPrepWorkerMissingRoutingEntryException;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.config.IpfPreparationWorkerSettings;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.config.ProcessSettings;
+import esa.s1pdgs.cpoc.ipf.preparation.worker.model.joborder.JobsGeneratorFactory;
 
 /**
  * Test the class JobDispatcher
@@ -63,7 +64,7 @@ public class L0SegmentAppJobDispatcherTest {
     private ThreadPoolTaskScheduler jobGenerationTaskScheduler;
 
     @Mock
-    private L0SegmentAppJobDispatcher mockGenerator;
+    private L0SegmentAppJobsGenerator mockGenerator;
 
     @Mock
     private AppCatalogJobClient appDataService;
@@ -195,29 +196,28 @@ public class L0SegmentAppJobDispatcherTest {
 
     /**
      * Test the initialize function
+     * @throws Exception 
      */
     @Test
-    public void testInitialize() {
+    public void testInitialize() throws Exception {
         final File taskTable1 = new File(
                 "./test/data/l0_segment_config/task_tables/TaskTable.L0ASP.xml");
 
         // Intitialize
         final L0SegmentAppJobDispatcher dispatcher = this.createSessionDispatcher();
-        try {
-            dispatcher.initialize();
-            verify(jobGenerationTaskScheduler, times(1))
-                    .scheduleWithFixedDelay(any(), anyLong());
-            verify(jobGenerationTaskScheduler, times(1))
-                    .scheduleWithFixedDelay(any(), eq(2000L));
-            verify(jobsGeneratorFactory, times(1)).newJobGenerator(any(),any(), any());
-            verify(jobsGeneratorFactory, times(1)).newJobGenerator(eq(taskTable1), any(), any());
 
-            assertTrue(dispatcher.getGenerators().size() == 1);
-            assertTrue(dispatcher.getGenerators()
-                    .containsKey(taskTable1.getName()));
-        } catch (final Exception e) {
-            fail("Invalid raised exception: " + e.getMessage());
-        }
+        dispatcher.initialize();
+        verify(jobGenerationTaskScheduler, times(1))
+                .scheduleWithFixedDelay(any(), anyLong());
+        verify(jobGenerationTaskScheduler, times(1))
+                .scheduleWithFixedDelay(any(), eq(2000L));
+        verify(jobsGeneratorFactory, times(1)).newJobGenerator(any(),any(), any());
+        verify(jobsGeneratorFactory, times(1)).newJobGenerator(eq(taskTable1), any(), any());
+
+        assertTrue(dispatcher.getGenerators().size() == 1);
+        assertTrue(dispatcher.getGenerators()
+                .containsKey(taskTable1.getName()));
+
     }
 
     /**
@@ -225,18 +225,14 @@ public class L0SegmentAppJobDispatcherTest {
      * @throws IpfPrepWorkerMissingRoutingEntryException 
      */
     @Test
-    public void testGetTaskTable() throws IpfPrepWorkerMissingRoutingEntryException {
+    public void testGetTaskTable() throws Exception {
 
         final AppDataJob appData =
                 TestL0SegmentUtils.buildAppData();
 
         // Init dispatcher
         final L0SegmentAppJobDispatcher dispatcher = this.createSessionDispatcher();
-        try {
-            dispatcher.initialize();
-        } catch (final Exception e) {
-            fail("Invalid raised exception: " + e.getMessage());
-        }
+        dispatcher.initialize();
 
         // Dispatch
         assertEquals(1, dispatcher.getTaskTables(appData).size());

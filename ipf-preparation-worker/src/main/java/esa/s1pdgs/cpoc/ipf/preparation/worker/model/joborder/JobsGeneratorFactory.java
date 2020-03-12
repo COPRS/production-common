@@ -1,9 +1,8 @@
-package esa.s1pdgs.cpoc.ipf.preparation.worker.service;
+package esa.s1pdgs.cpoc.ipf.preparation.worker.model.joborder;
 
 import java.io.File;
-import java.time.LocalDateTime;
 import java.util.Arrays;
-import java.util.function.BiFunction;
+import java.util.function.Function;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -12,12 +11,17 @@ import esa.s1pdgs.cpoc.appcatalog.client.job.AppCatalogJobClient;
 import esa.s1pdgs.cpoc.common.errors.processing.IpfPrepWorkerBuildTaskTableException;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.config.AiopProperties;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.config.IpfPreparationWorkerSettings;
-import esa.s1pdgs.cpoc.ipf.preparation.worker.config.IpfPreparationWorkerSettings.InputWaitingConfig;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.config.ProcessConfiguration;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.config.ProcessSettings;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.model.ProductMode;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.model.tasktable.TaskTable;
-import esa.s1pdgs.cpoc.ipf.preparation.worker.model.tasktable.TaskTableInput;
+import esa.s1pdgs.cpoc.ipf.preparation.worker.model.tasktable.TaskTableFactory;
+import esa.s1pdgs.cpoc.ipf.preparation.worker.service.AbstractJobsGenerator;
+import esa.s1pdgs.cpoc.ipf.preparation.worker.service.L0AppJobsGenerator;
+import esa.s1pdgs.cpoc.ipf.preparation.worker.service.L0SegmentAppJobsGenerator;
+import esa.s1pdgs.cpoc.ipf.preparation.worker.service.LevelProductsJobsGenerator;
+import esa.s1pdgs.cpoc.ipf.preparation.worker.service.XmlConverter;
+import esa.s1pdgs.cpoc.ipf.preparation.worker.timeout.InputTimeoutChecker;
 import esa.s1pdgs.cpoc.metadata.client.MetadataClient;
 import esa.s1pdgs.cpoc.mqi.client.MqiClient;
 import esa.s1pdgs.cpoc.mqi.model.queue.CatalogEvent;
@@ -39,6 +43,7 @@ public class JobsGeneratorFactory {
 	private final ProcessConfiguration processConfiguration;
 	private final MqiClient mqiClient;
 	private final TaskTableFactory taskTableFactory;
+	private final Function<TaskTable, InputTimeoutChecker> timeoutCheckerFactory; 
 
 	@Autowired
 	public JobsGeneratorFactory(
@@ -49,7 +54,8 @@ public class JobsGeneratorFactory {
 			final MetadataClient metadataClient,
 			final ProcessConfiguration processConfiguration,
 			final MqiClient mqiClient,
-			final TaskTableFactory taskTableFactory
+			final TaskTableFactory taskTableFactory,
+			final Function<TaskTable, InputTimeoutChecker> timeoutCheckerFactory
 	) {
 		this.l0ProcessSettings = l0ProcessSettings;
 		this.ipfPreparationWorkerSettings = ipfPreparationWorkerSettings;
@@ -59,6 +65,7 @@ public class JobsGeneratorFactory {
 		this.processConfiguration = processConfiguration;
 		this.mqiClient = mqiClient;
 		this.taskTableFactory = taskTableFactory;
+		this.timeoutCheckerFactory = timeoutCheckerFactory;
 	}
 	
 	public AbstractJobsGenerator newJobGenerator(
@@ -78,6 +85,8 @@ public class JobsGeneratorFactory {
 			final TaskTable taskTable,
 			final JobGenType type
 	) {
+		final InputTimeoutChecker timeoutChecker = timeoutCheckerFactory.apply(taskTable);
+		
 		switch (type) {
 			case LEVEL_0:
 				return new L0AppJobsGenerator(
@@ -89,8 +98,7 @@ public class JobsGeneratorFactory {
 						aiopProperties, 
 						processConfiguration,
 						mqiClient,
-						inputWaitTimeoutFor(taskTable),
-						() -> LocalDateTime.now(),
+						timeoutChecker,
 						xmlFile.getName(),
 						taskTable,
 						ProductMode.SLICING
@@ -104,8 +112,7 @@ public class JobsGeneratorFactory {
 						appDataService, 
 						processConfiguration,
 						mqiClient,
-						inputWaitTimeoutFor(taskTable),
-						() -> LocalDateTime.now(),
+						timeoutChecker,
 						xmlFile.getName(),
 						taskTable,
 						ProductMode.SLICING	
@@ -119,32 +126,20 @@ public class JobsGeneratorFactory {
 						appDataService, 
 						processConfiguration,
 						mqiClient,
-						inputWaitTimeoutFor(taskTable),
-						() -> LocalDateTime.now(),
+						timeoutChecker,
 						xmlFile.getName(),
 						taskTable,
 						ProductMode.SLICING	
 				);
 			default:
 			  throw new IllegalArgumentException(
-					  String.format("Unknown type %s. Available are: %s", type, Arrays.toString(JobGenType.values()))
+					  String.format(
+							  "Unknown type %s. Available are: %s", 
+							  type, 
+							  Arrays.toString(JobGenType.values())
+					  )
 			  );		
 		}
 	}
-	
-	private final BiFunction<String,TaskTableInput, Long> inputWaitTimeoutFor(final TaskTable taskTable) {
-		for (final InputWaitingConfig config : ipfPreparationWorkerSettings.getInputWaiting()) {
-			if (taskTable.getProcessorName().equals(config.getProcessorNameRegexp()) &&
-				taskTable.getVersion().matches(config.getProcessorVersionRegexp())) 
-			{
-				return (t, i) -> {
-					if (t.matches(config.getTimelinessRegexp()) && i.getId().matches(config.getInputIdRegexp())) {
-						return config.getWaitingInSeconds();
-					}
-					return 0L;
-				};						
-			}					
-		}
-		return (t, i) -> 0L;
-	}	
+
 }
