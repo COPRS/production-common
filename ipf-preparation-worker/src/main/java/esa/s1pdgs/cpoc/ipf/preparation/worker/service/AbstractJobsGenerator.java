@@ -198,54 +198,65 @@ public abstract class AbstractJobsGenerator implements Runnable {
 		jobOrderTemplate.getConf().setProcessingStation(l0ProcessSettings.getProcessingstation());
 
 		// Update outputs from configuration file
-		this.jobOrderTemplate.getProcs().stream().filter(proc -> !proc.getOutputs().isEmpty())
-				.flatMap(proc -> proc.getOutputs().stream())
-				.filter(output -> output.getFileNameType() == JobOrderFileNameType.REGEXP).forEach(output -> {
-					if (this.l0ProcessSettings.getOutputregexps().containsKey(output.getFileType())) {
-						output.setFileName(this.l0ProcessSettings.getOutputregexps().get(output.getFileType()));
-					} else {
-						output.setFileName("^.*" + output.getFileType() + ".*$");
-					}
-				});
+		this.jobOrderTemplate.getProcs().stream()
+			.filter(proc -> !proc.getOutputs().isEmpty())
+			.flatMap(proc -> proc.getOutputs().stream())
+			.filter(output -> output.getFileNameType() == JobOrderFileNameType.REGEXP)
+			.forEach(output -> {
+				if (this.l0ProcessSettings.getOutputregexps().containsKey(output.getFileType())) {
+					output.setFileName(this.l0ProcessSettings.getOutputregexps().get(output.getFileType()));
+				} else {
+					output.setFileName("^.*" + output.getFileType() + ".*$");
+				}
+		});
 
 		// Update the output family according configuration file
-		this.jobOrderTemplate.getProcs().stream().filter(proc -> !proc.getOutputs().isEmpty())
-				.flatMap(proc -> proc.getOutputs().stream()).forEach(output -> {
-					if (this.ipfPreparationWorkerSettings.getOutputfamilies().containsKey(output.getFileType())) {
-						output.setFamily(
-								this.ipfPreparationWorkerSettings.getOutputfamilies().get(output.getFileType()));
-					} else {
-						output.setFamily(ProductFamily.fromValue(this.ipfPreparationWorkerSettings.getDefaultfamily()));
-					}
-				});
-
-		// S1PRO-642: createParameter type map
-//        for (final TaskTableDynProcParam param : taskTable.getDynProcParams()) {
-//        	parameterTypes.put(param.getName(), tasktableParameterTypeToReportingString(param.getType()));        	
-//        }
+		this.jobOrderTemplate.getProcs().stream()
+			.filter(proc -> !proc.getOutputs().isEmpty())
+			.flatMap(proc -> proc.getOutputs().stream())
+			.forEach(output -> {
+				if (this.ipfPreparationWorkerSettings.getOutputfamilies().containsKey(output.getFileType())) {
+					output.setFamily(
+							this.ipfPreparationWorkerSettings.getOutputfamilies().get(output.getFileType()));
+				} else {
+					output.setFamily(ProductFamily.fromValue(this.ipfPreparationWorkerSettings.getDefaultfamily()));
+				}
+		});
 	}
 
 	private void buildMetadataSearchQuery() {
 		final AtomicInteger counter = new AtomicInteger(0);
-		this.taskTable.getPools().stream().filter(pool -> !CollectionUtils.isEmpty(pool.getTasks()))
-				.flatMap(pool -> pool.getTasks().stream()).filter(task -> !CollectionUtils.isEmpty(task.getInputs()))
-				.flatMap(task -> task.getInputs().stream())
-				.filter(input -> !CollectionUtils.isEmpty(input.getAlternatives()))
-				.flatMap(input -> alternatives(input))
-				.filter(alt -> alt.getOrigin() == TaskTableInputOrigin.DB)
-				.collect(Collectors.groupingBy(TaskTableInputAlternative::getTaskTableInputAltKey)).forEach((k, v) -> {
-					final String fileType = ipfPreparationWorkerSettings.getMapTypeMeta().getOrDefault(k.getFileType(),
-							k.getFileType());
-					final ProductFamily family = ipfPreparationWorkerSettings.getInputfamilies().getOrDefault(fileType,
-							ProductFamily.BLANK);
-
-					final SearchMetadataQuery query = new SearchMetadataQuery(counter.incrementAndGet(),
-							k.getRetrievalMode(), k.getDeltaTime0(), k.getDeltaTime1(), fileType, family);
-					this.metadataSearchQueries.put(counter.get(), query);
-					v.forEach(alt -> {
-						alt.setIdSearchMetadataQuery(counter.get());
-					});
+		this.taskTable.getPools().stream()
+			.filter(pool -> !CollectionUtils.isEmpty(pool.getTasks()))
+			.flatMap(pool -> pool.getTasks().stream())
+			.filter(task -> !CollectionUtils.isEmpty(task.getInputs()))
+			.flatMap(task -> task.getInputs().stream())
+			.filter(input -> !CollectionUtils.isEmpty(input.getAlternatives()))
+			.flatMap(input -> alternatives(input))
+			.filter(alt -> alt.getOrigin() == TaskTableInputOrigin.DB)
+			.collect(Collectors.groupingBy(TaskTableInputAlternative::getTaskTableInputAltKey))
+			.forEach((k, v) -> {
+				final String fileType = ipfPreparationWorkerSettings.getMapTypeMeta().getOrDefault(
+						k.getFileType(),
+						k.getFileType()
+				);
+				final ProductFamily family = ipfPreparationWorkerSettings.getInputfamilies().getOrDefault(
+						fileType,
+						ProductFamily.BLANK
+				);
+				final SearchMetadataQuery query = new SearchMetadataQuery(
+						counter.incrementAndGet(),
+						k.getRetrievalMode(), 
+						k.getDeltaTime0(), 
+						k.getDeltaTime1(), 
+						fileType, 
+						family
+				);
+				this.metadataSearchQueries.put(counter.get(), query);
+				v.forEach(alt -> {
+					alt.setIdSearchMetadataQuery(counter.get());
 				});
+			});
 	}
 
 	private final Stream<TaskTableInputAlternative> alternatives(final TaskTableInput input) {
@@ -294,7 +305,6 @@ public abstract class AbstractJobsGenerator implements Runnable {
 			inputsSearch(job);
 			send(job, reportingId);
 			return job;
-
 			// FIXME cleanup exception handling
 		} catch (final IpfPrepWorkerInputsMissingException e) {
 			throw new RuntimeException(String.format("Missing inputs: %s", e.getMissingMetadata()));
@@ -343,13 +353,14 @@ public abstract class AbstractJobsGenerator implements Runnable {
 		// Get a job to generate
 		try {
 			final List<AppDataJob<CatalogEvent>> jobs = appDataService
-					.findNByPodAndGenerationTaskTableWithNotSentGeneration(l0ProcessSettings.getTriggerHostname(),
-							taskTableXmlName);
+					.findNByPodAndGenerationTaskTableWithNotSentGeneration(
+							l0ProcessSettings.getTriggerHostname(),
+							taskTableXmlName
+					);
 
 			// Determine job to process
 			if (CollectionUtils.isEmpty(jobs)) {
 				LOGGER.trace("==  no job found in AppCatalog for taskTableXmlName {}", taskTableXmlName);
-
 				job = null;
 			} else {
 				for (final AppDataJob<CatalogEvent> appDataJob : jobs) {
@@ -360,15 +371,15 @@ public abstract class AbstractJobsGenerator implements Runnable {
 					LOGGER.debug("== new JobGeneration of job {}", job.toString());
 					switch (job.getGeneration().getState()) {
 					case INITIAL:
-						if (job.getGeneration().getLastUpdateDate() == null
-								|| job.getGeneration().getLastUpdateDate().getTime() < currentTimestamp
-										- ipfPreparationWorkerSettings.getWaitprimarycheck().getTempo()) {
+						if (job.getGeneration().getLastUpdateDate() == null || 
+							job.getGeneration().getLastUpdateDate().getTime() < 
+								currentTimestamp- ipfPreparationWorkerSettings.getWaitprimarycheck().getTempo()) {
 							todo = true;
 						}
 						break;
 					case PRIMARY_CHECK:
-						if (job.getGeneration().getLastUpdateDate().getTime() < currentTimestamp
-								- ipfPreparationWorkerSettings.getWaitmetadatainput().getTempo()) {
+						if (job.getGeneration().getLastUpdateDate().getTime() < 
+								currentTimestamp - ipfPreparationWorkerSettings.getWaitmetadatainput().getTempo()) {
 							todo = true;
 						}
 						break;
