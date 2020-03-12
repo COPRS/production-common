@@ -63,7 +63,7 @@ public class L0SegmentAppJobDispatcherTest {
     private ThreadPoolTaskScheduler jobGenerationTaskScheduler;
 
     @Mock
-    private L0SegmentAppJobDispatcher mockGenerator;
+    private L0SegmentAppJobsGenerator mockGenerator;
 
     @Mock
     private AppCatalogJobClient appDataService;
