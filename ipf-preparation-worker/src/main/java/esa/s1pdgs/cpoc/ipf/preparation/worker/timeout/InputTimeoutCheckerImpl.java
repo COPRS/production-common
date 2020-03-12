@@ -38,7 +38,7 @@ public final class InputTimeoutCheckerImpl implements InputTimeoutChecker {
 
 		} catch (final Exception e) {
 			LOG.error("Exception on evaluating timeout, assuming there's no timeout configured.", e);
-		}
+		}		
 		// per default, timeout is expired instantly
 		return true;
 	}
