@@ -1,6 +1,5 @@
 package esa.s1pdgs.cpoc.ipf.preparation.worker.model.joborder;
 
-import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Objects;
 
@@ -18,10 +17,6 @@ import javax.xml.bind.annotation.XmlRootElement;
 @XmlRootElement(name = "Time_Interval")
 @XmlAccessorType(XmlAccessType.NONE)
 public class JobOrderTimeInterval {
-
-	/**
-	 * 
-	 */
 	public static final DateTimeFormatter DATE_FORMATTER = DateTimeFormatter.ofPattern("yyyyMMdd_HHmmssSSSSSS");
 
 	/**
@@ -60,23 +55,6 @@ public class JobOrderTimeInterval {
 		this();
 		this.start = start;
 		this.stop = stop;
-		this.fileName = fileName;
-	}
-
-	/**
-	 * Constructor using fields
-	 * 
-	 * @param start
-	 * @param stop
-	 * @param fileName
-	 */
-	public JobOrderTimeInterval(final String start, final String stop, final String fileName,
-			final DateTimeFormatter formatInputs) {
-		this();
-		LocalDateTime startDate = LocalDateTime.parse(start, formatInputs);
-		this.start = startDate.format(DATE_FORMATTER);
-		LocalDateTime stopDate = LocalDateTime.parse(stop, formatInputs);
-		this.stop = stopDate.format(DATE_FORMATTER);
 		this.fileName = fileName;
 	}
 
@@ -163,7 +141,7 @@ public class JobOrderTimeInterval {
 		} else if (obj == null || getClass() != obj.getClass()) {
 			ret = false;
 		} else {
-			JobOrderTimeInterval other = (JobOrderTimeInterval) obj;
+			final JobOrderTimeInterval other = (JobOrderTimeInterval) obj;
 			ret = Objects.equals(start, other.start) && Objects.equals(stop, other.stop)
 					&& Objects.equals(fileName, other.fileName);
 		}

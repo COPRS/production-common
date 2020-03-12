@@ -1,9 +1,7 @@
 package esa.s1pdgs.cpoc.ipf.preparation.worker.service;
 
 import java.io.IOException;
-import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
@@ -538,73 +536,54 @@ public abstract class AbstractJobsGenerator implements Runnable {
 					// If it is NOT a reference
 					if (StringUtils.isEmpty(input.getReference())) {
 						if (ProductMode.isCompatibleWithTaskTableMode(this.mode, input.getMode())) {
-							
-							final int currentOrder = 99;
 							List<JobOrderInput> inputsToAdd = new ArrayList<>();
 							for (final TaskTableInputAlternative alt : alternatives(input).collect(Collectors.toList())) {
 								// We ignore input not DB
 								if (alt.getOrigin() == TaskTableInputOrigin.DB) {
-									if (!CollectionUtils.isEmpty(
-											job.getMetadataQueries().get(alt.getIdSearchMetadataQuery()).getResult())) {
-
-										JobOrderFileNameType type = JobOrderFileNameType.BLANK;
-										switch (alt.getFileNameType()) {
-										case PHYSICAL:
-											type = JobOrderFileNameType.PHYSICAL;
-											break;
-										case DIRECTORY:
-											type = JobOrderFileNameType.DIRECTORY;
-											break;
-										case REGEXP:
-											type = JobOrderFileNameType.REGEXP;
-											break;
-										default:
-											break;
-										}
-
+									// has queries defined?
+									if (!CollectionUtils.isEmpty(getSearchMetadataResult(job, alt).getResult())) {
+										final JobOrderFileNameType type = getFileNameTypeFor(alt);
 										// Retrieve family										
-//										final String fileType = ipfPreparationWorkerSettings.getMapTypeMeta().getOrDefault(
-//												k.getFileType(),
-//												k.getFileType()
-//										);
 										final ProductFamily family = ipfPreparationWorkerSettings.getInputfamilies().getOrDefault(
 												alt.getFileType(),
 												ProductFamily.fromValue(ipfPreparationWorkerSettings.getDefaultfamily())
 										);	
 										final List<JobOrderInputFile> jobOrderInputFiles = getJoborderInputsFor(job, alt);										
 										final List<JobOrderTimeInterval> jobOrderTimeIntervals = getJoborderTimeIntervalsFor(job, alt);
-
-										if (currentOrder == alt.getOrder()) {
-
-											inputsToAdd.add(new JobOrderInput(alt.getFileType(), type,
-													jobOrderInputFiles, jobOrderTimeIntervals, family));
-										} else if (currentOrder > alt.getOrder()) {
-											inputsToAdd = new ArrayList<>();
-											inputsToAdd.add(new JobOrderInput(alt.getFileType(), type,
-													jobOrderInputFiles, jobOrderTimeIntervals, family));
-										}
+					
+										inputsToAdd = new ArrayList<>();
+										inputsToAdd.add(new JobOrderInput(
+												alt.getFileType(), 
+												type,
+												jobOrderInputFiles, 
+												jobOrderTimeIntervals, 
+												family
+										));									
 										break;
 									}
+								// is PROC input?
 								} else {
-									final DateTimeFormatter outFormatter = DateTimeFormatter
-											.ofPattern("yyyyMMdd_HHmmssSSSSSS");
-									final String startDate = DateUtils.convertToAnotherFormat(
-											job.getAppDataJob().getProduct().getStartTime(),
-											AppDataJobProduct.TIME_FORMATTER, outFormatter);
-									final String stopDate = DateUtils.convertToAnotherFormat(
-											job.getAppDataJob().getProduct().getStopTime(),
-											AppDataJobProduct.TIME_FORMATTER, outFormatter);
-									String filename = alt.getFileType();
-									if (this.ipfPreparationWorkerSettings.getMapTypeMeta()
-											.containsKey(alt.getFileType())) {
-										filename = this.ipfPreparationWorkerSettings.getMapTypeMeta()
-												.get(alt.getFileType());
-									}
-									inputsToAdd.add(new JobOrderInput(alt.getFileType(), JobOrderFileNameType.REGEXP,
-											Arrays.asList(new JobOrderInputFile(filename, "")),
-											Arrays.asList(new JobOrderTimeInterval(startDate, stopDate, filename,
-													outFormatter)),
-											ProductFamily.BLANK));
+									final String startDate = convertDateToJoborderFormat(
+											job.getAppDataJob().getProduct().getStartTime()
+									);
+									final String stopDate = convertDateToJoborderFormat(
+											job.getAppDataJob().getProduct().getStopTime()
+									);											
+									final String fileType = ipfPreparationWorkerSettings.getMapTypeMeta().getOrDefault(
+											alt.getFileType(),
+											alt.getFileType()
+									);
+									inputsToAdd.add(new JobOrderInput(
+											alt.getFileType(), 
+											JobOrderFileNameType.REGEXP,
+											Collections.singletonList(new JobOrderInputFile(fileType, "")),
+											Collections.singletonList(new JobOrderTimeInterval(
+													startDate, 
+													stopDate, 
+													fileType
+											)),
+											ProductFamily.BLANK
+									));
 								}
 							}						
 							
@@ -654,12 +633,32 @@ public abstract class AbstractJobsGenerator implements Runnable {
 		}
 	}
 
+	private final JobOrderFileNameType getFileNameTypeFor(final TaskTableInputAlternative alt) {
+		switch (alt.getFileNameType()) {
+			case PHYSICAL:
+				return JobOrderFileNameType.PHYSICAL;
+			case DIRECTORY:
+				return JobOrderFileNameType.DIRECTORY;
+			case REGEXP:
+				return JobOrderFileNameType.REGEXP;
+			default:
+				// fall through
+		}
+		return JobOrderFileNameType.BLANK;
+	}
+	
+	private final SearchMetadataResult getSearchMetadataResult(
+			final JobGeneration job,
+			final TaskTableInputAlternative alt
+	) {
+		return job.getMetadataQueries().get(alt.getIdSearchMetadataQuery());
+	}
+
 	private final List<JobOrderTimeInterval> getJoborderTimeIntervalsFor(
 			final JobGeneration job,
 			final TaskTableInputAlternative alt
 	) {
-		final SearchMetadataResult searchResult = job.getMetadataQueries().get(alt.getIdSearchMetadataQuery());
-		return searchResult.getResult().stream()
+		return getSearchMetadataResult(job, alt).getResult().stream()
 				.map(m -> newJobOrderTimeIntervalFor(m))
 				.collect(Collectors.toList());
 	}
