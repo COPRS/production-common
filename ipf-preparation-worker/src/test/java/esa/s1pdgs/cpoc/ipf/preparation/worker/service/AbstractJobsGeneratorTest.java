@@ -1,6 +1,5 @@
 package esa.s1pdgs.cpoc.ipf.preparation.worker.service;
 
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.isA;
 import static org.hamcrest.Matchers.hasProperty;
@@ -56,7 +55,6 @@ import esa.s1pdgs.cpoc.common.errors.appcatalog.AppCatalogJobSearchApiError;
 import esa.s1pdgs.cpoc.common.errors.processing.IpfPrepWorkerBuildTaskTableException;
 import esa.s1pdgs.cpoc.common.errors.processing.IpfPrepWorkerInputsMissingException;
 import esa.s1pdgs.cpoc.common.errors.processing.MetadataQueryException;
-import esa.s1pdgs.cpoc.common.utils.DateUtils;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.config.AppConfig;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.config.IpfPreparationWorkerSettings;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.config.IpfPreparationWorkerSettings.InputWaitingConfig;
@@ -761,84 +759,84 @@ public class AbstractJobsGeneratorTest {
     	assertFalse(inputs.contains("AUX_RES"));
     }
     
-    private List<JobOrderProc> mockWaiting() {
-    	final Map<Integer, SearchMetadataResult> metadataQueries = new HashMap<>();
-    	final List<JobOrderProc> jobOrderProcList = new ArrayList<>();
-    	Stream.of(
-    		new SearchMetadataQuery(1, "LatestValCover", 0.0, 0.0, "AUX_INS", ProductFamily.BLANK), //
-    		new SearchMetadataQuery(2, "LatestValCover", 0.0, 0.0, "AUX_CAL", ProductFamily.BLANK), //
-    		new SearchMetadataQuery(3, "LatestValCover", 0.0, 0.0, "AUX_POE", ProductFamily.BLANK), //
-    		new SearchMetadataQuery(4, "LatestValCover", 0.0, 0.0, "IW_RAW__0N", ProductFamily.L0_ACN), //
-    		new SearchMetadataQuery(5, "LatestValCover", 0.0, 0.0, "AUX_PP1", ProductFamily.BLANK), //
-    		new SearchMetadataQuery(6, "LatestValCover", 0.0, 0.0, "IW_RAW__0C", ProductFamily.L0_ACN), //
-    		new SearchMetadataQuery(7, "LatestValCover", 0.0, 0.0, "IW_RAW__0S", ProductFamily.L0_SLICE), //
-    		new SearchMetadataQuery(8, "LatestValCover", 0.0, 0.0, "AUX_ATT", ProductFamily.BLANK), //
-    		new SearchMetadataQuery(9, "LatestValCover", 0.0, 0.0, "AUX_RES", ProductFamily.BLANK), //
-    		new SearchMetadataQuery(10, "LatestValCover", 0.0, 0.0, "IW_RAW__0A", ProductFamily.L0_ACN) //
-    	).forEach(s -> {
-    		metadataQueries.put(s.getIdentifier(), new SearchMetadataResult(s));
-    		jobOrderProcList.add(new JobOrderProc());
-    	});
-
-    	Mockito.when(jobGeneration.getAppDataJob()).thenReturn(appDataJob);
-    	Mockito.when(jobGeneration.getMetadataQueries()).thenReturn(metadataQueries);
-    	Mockito.when(appDataJob.getId()).thenReturn(23L);
-    	Mockito.when(appDataJob.getProduct()).thenReturn(appDataJobProduct);
-    	Mockito.when(appDataJob.getMessages()).thenReturn(Arrays.asList(
-    		new GenericMessageDto<CatalogEvent>() {{
-    			setBody(new CatalogEvent() {{
-    				setMetadata(Collections.singletonMap("timeliness", "NRT"));
-    			}});
-    		}}
-    	));
-    	
-    	Mockito.when(appDataJobProduct.getStartTime()).thenReturn("2000-01-01T00:00:00.000000Z");
-    	Mockito.when(appDataJobProduct.getStopTime()).thenReturn("2000-01-01T00:00:00.000000Z");
-    	Mockito.when(appDataJobProduct.getMissionId()).thenReturn("S1");
-    	Mockito.when(appDataJobProduct.getSatelliteId()).thenReturn("A");
-    	Mockito.when(appDataJobProduct.getInsConfId()).thenReturn(0);
-    	Mockito.when(appDataJobProduct.getProcessMode()).thenReturn("NRT");    	
-    	Mockito.when(jobGeneration.getJobOrder()).thenReturn(jobOrder);    	
-    	Mockito.when(jobOrder.getProcs()).thenReturn(jobOrderProcList);
-    	
-    	metadataBrain.remove("AUX_POE");
-    	metadataBrain.remove("AUX_RES");
-    	
-    	// preconditions
-    	assertNull(metadataBrain.get("AUX_POE"));
-    	assertNull(metadataBrain.get("AUX_RES"));
-    	return jobOrderProcList;
-    }
-    
-    @Test
-    public void testWaiting() throws Exception {    	
-    	// Part 1: Exactly before timeout exceeds
-    	generator = makeUut(new Supplier<LocalDateTime>() {
-    		@Override
-			public LocalDateTime get() {
-				return DateUtils.parse("2000-01-01T00:09:59.999999Z");
-    		}
-    	});
-    	final List<JobOrderProc> jobOrderProcList = mockWaiting();
-    	assertThatThrownBy(() -> generator.inputsSearch(jobGeneration))
-    		.isInstanceOf(IpfPrepWorkerInputsMissingException.class);
-    	
-    	// Part 2: Exactly when timeout is exceeded
-    	generator = makeUut(new Supplier<LocalDateTime>() {
-    		@Override
-			public LocalDateTime get() {
-				return DateUtils.parse("2000-01-01T00:10:00.000000Z");
-    		}
-    	});    	
-    	generator.inputsSearch(jobGeneration);
-    	    	
-    	// postconditions
-    	final List<String> inputs = jobOrderProcList.stream().flatMap(r -> r.getInputs().stream())
-    			.map(JobOrderInput::getFileType).distinct().collect(Collectors.toList());
-    	assertFalse(inputs.contains("AUX_POE"));
-    	assertFalse(inputs.contains("AUX_RES"));    	
-    }
-    
+//    private List<JobOrderProc> mockWaiting() {
+//    	final Map<Integer, SearchMetadataResult> metadataQueries = new HashMap<>();
+//    	final List<JobOrderProc> jobOrderProcList = new ArrayList<>();
+//    	Stream.of(
+//    		new SearchMetadataQuery(1, "LatestValCover", 0.0, 0.0, "AUX_INS", ProductFamily.BLANK), //
+//    		new SearchMetadataQuery(2, "LatestValCover", 0.0, 0.0, "AUX_CAL", ProductFamily.BLANK), //
+//    		new SearchMetadataQuery(3, "LatestValCover", 0.0, 0.0, "AUX_POE", ProductFamily.BLANK), //
+//    		new SearchMetadataQuery(4, "LatestValCover", 0.0, 0.0, "IW_RAW__0N", ProductFamily.L0_ACN), //
+//    		new SearchMetadataQuery(5, "LatestValCover", 0.0, 0.0, "AUX_PP1", ProductFamily.BLANK), //
+//    		new SearchMetadataQuery(6, "LatestValCover", 0.0, 0.0, "IW_RAW__0C", ProductFamily.L0_ACN), //
+//    		new SearchMetadataQuery(7, "LatestValCover", 0.0, 0.0, "IW_RAW__0S", ProductFamily.L0_SLICE), //
+//    		new SearchMetadataQuery(8, "LatestValCover", 0.0, 0.0, "AUX_ATT", ProductFamily.BLANK), //
+//    		new SearchMetadataQuery(9, "LatestValCover", 0.0, 0.0, "AUX_RES", ProductFamily.BLANK), //
+//    		new SearchMetadataQuery(10, "LatestValCover", 0.0, 0.0, "IW_RAW__0A", ProductFamily.L0_ACN) //
+//    	).forEach(s -> {
+//    		metadataQueries.put(s.getIdentifier(), new SearchMetadataResult(s));
+//    		jobOrderProcList.add(new JobOrderProc());
+//    	});
+//
+//    	Mockito.when(jobGeneration.getAppDataJob()).thenReturn(appDataJob);
+//    	Mockito.when(jobGeneration.getMetadataQueries()).thenReturn(metadataQueries);
+//    	Mockito.when(appDataJob.getId()).thenReturn(23L);
+//    	Mockito.when(appDataJob.getProduct()).thenReturn(appDataJobProduct);
+//    	Mockito.when(appDataJob.getMessages()).thenReturn(Arrays.asList(
+//    		new GenericMessageDto<CatalogEvent>() {{
+//    			setBody(new CatalogEvent() {{
+//    				setMetadata(Collections.singletonMap("timeliness", "NRT"));
+//    			}});
+//    		}}
+//    	));
+//    	
+//    	Mockito.when(appDataJobProduct.getStartTime()).thenReturn("2000-01-01T00:00:00.000000Z");
+//    	Mockito.when(appDataJobProduct.getStopTime()).thenReturn("2000-01-01T00:00:00.000000Z");
+//    	Mockito.when(appDataJobProduct.getMissionId()).thenReturn("S1");
+//    	Mockito.when(appDataJobProduct.getSatelliteId()).thenReturn("A");
+//    	Mockito.when(appDataJobProduct.getInsConfId()).thenReturn(0);
+//    	Mockito.when(appDataJobProduct.getProcessMode()).thenReturn("NRT");    	
+//    	Mockito.when(jobGeneration.getJobOrder()).thenReturn(jobOrder);    	
+//    	Mockito.when(jobOrder.getProcs()).thenReturn(jobOrderProcList);
+//    	
+//    	metadataBrain.remove("AUX_POE");
+//    	metadataBrain.remove("AUX_RES");
+//    	
+//    	// preconditions
+//    	assertNull(metadataBrain.get("AUX_POE"));
+//    	assertNull(metadataBrain.get("AUX_RES"));
+//    	return jobOrderProcList;
+//    }
+//    
+//    @Test
+//    public void testWaiting() throws Exception {    	
+//    	// Part 1: Exactly before timeout exceeds
+//    	generator = makeUut(new Supplier<LocalDateTime>() {
+//    		@Override
+//			public LocalDateTime get() {
+//				return DateUtils.parse("2000-01-01T00:09:59.999999Z");
+//    		}
+//    	});
+//    	final List<JobOrderProc> jobOrderProcList = mockWaiting();
+//    	assertThatThrownBy(() -> generator.inputsSearch(jobGeneration))
+//    		.isInstanceOf(IpfPrepWorkerInputsMissingException.class);
+//    	
+//    	// Part 2: Exactly when timeout is exceeded
+//    	generator = makeUut(new Supplier<LocalDateTime>() {
+//    		@Override
+//			public LocalDateTime get() {
+//				return DateUtils.parse("2000-01-01T00:10:00.000000Z");
+//    		}
+//    	});
+//    	generator.inputsSearch(jobGeneration);
+//    	    	
+//    	// postconditions
+//    	final List<String> inputs = jobOrderProcList.stream().flatMap(r -> r.getInputs().stream())
+//    			.map(JobOrderInput::getFileType).distinct().collect(Collectors.toList());
+//    	assertFalse(inputs.contains("AUX_POE"));
+//    	assertFalse(inputs.contains("AUX_RES"));    	
+//    }
+//    
     
 
 }
