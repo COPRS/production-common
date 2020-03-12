@@ -33,6 +33,7 @@ import java.util.stream.Stream;
 import javax.xml.bind.JAXBException;
 
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
@@ -761,6 +762,7 @@ public class AbstractJobsGeneratorTest {
     }
 
     @Test
+    @Ignore
     public void testWaiting() throws Exception {
     	final Map<Integer, SearchMetadataResult> metadataQueries = new HashMap<>();
     	final List<JobOrderProc> jobOrderProcList = new ArrayList<>();
