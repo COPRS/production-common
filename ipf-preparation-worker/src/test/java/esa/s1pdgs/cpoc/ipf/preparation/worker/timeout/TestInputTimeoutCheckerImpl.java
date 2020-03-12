@@ -3,6 +3,7 @@ package esa.s1pdgs.cpoc.ipf.preparation.worker.timeout;
 import static org.junit.Assert.assertEquals;
 
 import java.util.Collections;
+import java.util.Date;
 import java.util.Map;
 
 import org.junit.Test;
@@ -148,7 +149,8 @@ public class TestInputTimeoutCheckerImpl {
 		
 		final AppDataJobProduct appDataJob = new AppDataJobProduct();
 		appDataJob.setStartTime("2010-01-01T00:10:00.000000Z");		
-		job.setProduct(appDataJob);
+		job.setProduct(appDataJob);		
+		job.setCreationDate(new Date());
 		
 		return job;
 	}

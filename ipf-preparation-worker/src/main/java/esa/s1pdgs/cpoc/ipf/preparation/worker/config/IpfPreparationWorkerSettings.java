@@ -105,7 +105,7 @@ public class IpfPreparationWorkerSettings {
 		private String inputIdRegexp;
 		private String timelinessRegexp;
 		private long waitingInSeconds;
-		private long delayInSeconds;		
+		private long delayInSeconds = 0;		
 
 		public String getProcessorNameRegexp() {
 			return processorNameRegexp;

@@ -1,5 +1,6 @@
 package esa.s1pdgs.cpoc.ipf.preparation.worker.timeout;
 
+import java.sql.Timestamp;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
@@ -32,7 +33,11 @@ public final class InputTimeoutCheckerImpl implements InputTimeoutChecker {
 				if (isMatchingConfiguredInputIdRegex(config, input) && 
 					isMatchingConfiguredTimeliness(config, job)) {			
 					final LocalDateTime sensingStart = DateUtils.parse(job.getProduct().getStartTime());
-					return !timeSupplier.get().isBefore(sensingStart.plusSeconds(config.getWaitingInSeconds()));
+					final LocalDateTime now = timeSupplier.get();
+					final LocalDateTime defaultTimeout = getDefaultTimeoutFor(job, config);
+										
+					return !now.isBefore(sensingStart.plusSeconds(config.getWaitingInSeconds())) ||
+						   !now.isBefore(defaultTimeout);
 				}
 			}
 
@@ -41,6 +46,11 @@ public final class InputTimeoutCheckerImpl implements InputTimeoutChecker {
 		}		
 		// per default, timeout is expired instantly
 		return true;
+	}
+
+	final LocalDateTime getDefaultTimeoutFor(final AppDataJob<CatalogEvent> job, final InputWaitingConfig config) {
+		return new Timestamp(job.getCreationDate().getTime())
+				.toLocalDateTime().plusSeconds(config.getDelayInSeconds());
 	}
 	
 	final boolean isMatchingConfiguredTimeliness(final InputWaitingConfig config, final AppDataJob<CatalogEvent> job) {
