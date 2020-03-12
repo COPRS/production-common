@@ -28,6 +28,6 @@ ENTRYPOINT ["/tini", "--"]
 RUN mkdir -p /data/oqcWD
 RUN chown s1pdgs:s1pdgs /data/oqcWD
 
-#USER s1pdgs:s1pdgs
+USER s1pdgs:s1pdgs
 
 CMD ["/app/start.sh"]
