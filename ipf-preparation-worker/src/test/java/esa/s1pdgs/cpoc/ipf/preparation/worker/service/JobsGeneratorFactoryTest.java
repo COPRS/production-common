@@ -411,7 +411,7 @@ public class JobsGeneratorFactoryTest {
                     metadataClient, 
                     processConfiguration, 
                     mqiClient,
-                    new TaskTableFactory(new XmlConfig().xmlConverter())
+                    new TaskTableFactory(xmlConverter)
             );
             
             
