@@ -21,7 +21,7 @@ public final class InputTimeoutCheckerImpl implements InputTimeoutChecker {
 
 	@Override
 	public final boolean isTimeoutExpiredFor(final AppDataJob<CatalogEvent> job, final TaskTableInput input) {
-		if (isMatchingConfiguredInputIdRegec(input) &&
+		if (isMatchingConfiguredInputIdRegex(input) &&
 			isMatchingConfiguredTimeliness(job)) {			
 			final LocalDateTime sensingStart = DateUtils.parse(
 					job.getProduct().getStartTime());
@@ -34,14 +34,12 @@ public final class InputTimeoutCheckerImpl implements InputTimeoutChecker {
 	private final boolean isMatchingConfiguredTimeliness(final AppDataJob<CatalogEvent> job) {
 		final String timeliness = (String) job.getMessages().get(0)
 				.getBody().getMetadata().get("timeliness");
-		
-		return timeliness.matches(config.getTimelinessRegexp());
+		return timeliness.matches(Optional.ofNullable(config.getTimelinessRegexp()).orElse(".*"));
 	}
 	
-	private final boolean isMatchingConfiguredInputIdRegec(final TaskTableInput input) {
-		return Optional.ofNullable(input.getId())
-				.orElse("")
-				.matches(config.getInputIdRegexp());
+	private final boolean isMatchingConfiguredInputIdRegex(final TaskTableInput input) {
+		return Optional.ofNullable(input.getId()).orElse("")
+				.matches(Optional.ofNullable(config.getInputIdRegexp()).orElse(".*"));
 	}
 
 }
