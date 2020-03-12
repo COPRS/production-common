@@ -11,6 +11,7 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Function;
 
 import javax.xml.bind.JAXBException;
 
@@ -32,11 +33,14 @@ import esa.s1pdgs.cpoc.ipf.preparation.worker.config.ProcessSettings;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.config.XmlConfig;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.model.joborder.JobOrder;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.model.joborder.JobOrderOutput;
+import esa.s1pdgs.cpoc.ipf.preparation.worker.model.joborder.JobsGeneratorFactory;
+import esa.s1pdgs.cpoc.ipf.preparation.worker.model.joborder.JobsGeneratorFactory.JobGenType;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.model.joborder.enums.JobOrderFileNameType;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.model.tasktable.TaskTable;
+import esa.s1pdgs.cpoc.ipf.preparation.worker.model.tasktable.TaskTableFactory;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.model.tasktable.TaskTableOuput;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.model.tasktable.TaskTableTask;
-import esa.s1pdgs.cpoc.ipf.preparation.worker.service.JobsGeneratorFactory.JobGenType;
+import esa.s1pdgs.cpoc.ipf.preparation.worker.timeout.InputTimeoutChecker;
 import esa.s1pdgs.cpoc.metadata.client.MetadataClient;
 import esa.s1pdgs.cpoc.metadata.client.SearchMetadataQuery;
 import esa.s1pdgs.cpoc.mqi.client.MqiClient;
@@ -72,6 +76,8 @@ public class JobsGeneratorFactoryTest {
     
     @Mock
     private ProcessConfiguration processConfiguration;
+    
+    private final Function<TaskTable, InputTimeoutChecker> timeoutChecker = t -> InputTimeoutChecker.NULL;
 
     /**
      * Test set up
@@ -155,7 +161,9 @@ public class JobsGeneratorFactoryTest {
                     metadataClient, 
                     processConfiguration, 
                     mqiClient,
-                    new TaskTableFactory(new XmlConfig().xmlConverter())
+                    new TaskTableFactory(new XmlConfig().xmlConverter()),
+                    timeoutChecker
+                    
             );
             
             final File ttFile = new File("./test/data/generic_config/task_tables/TaskTable.AIOP.xml");
@@ -411,7 +419,8 @@ public class JobsGeneratorFactoryTest {
                     metadataClient, 
                     processConfiguration, 
                     mqiClient,
-                    new TaskTableFactory(xmlConverter)
+                    new TaskTableFactory(xmlConverter),
+                    timeoutChecker
             );
             
             
