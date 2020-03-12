@@ -360,6 +360,7 @@ public class AbstractJobsGeneratorTest {
         inputWaitingConfig.setInputIdRegexp("Orbit");
         inputWaitingConfig.setTimelinessRegexp(".*");
         inputWaitingConfig.setWaitingInSeconds(600);
+        inputWaitingConfig.setDelayInSeconds(0);
         Mockito.when(ipfPreparationWorkerSettings.getInputWaiting()).thenReturn(Arrays.asList(inputWaitingConfig));
     }
 
