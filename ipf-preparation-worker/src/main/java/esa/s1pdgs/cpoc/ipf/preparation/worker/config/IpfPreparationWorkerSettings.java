@@ -105,7 +105,6 @@ public class IpfPreparationWorkerSettings {
 		private String inputIdRegexp;
 		private String timelinessRegexp;
 		private long waitingInSeconds;
-		private long delayInSeconds;		
 
 		public String getProcessorNameRegexp() {
 			return processorNameRegexp;
@@ -147,40 +146,76 @@ public class IpfPreparationWorkerSettings {
 			this.waitingInSeconds = waitingInSeconds;
 		}
 
-		public long getDelayInSeconds() {
-			return delayInSeconds;
-		}
-
-		public void setDelayInSeconds(final long delayInSeconds) {
-			this.delayInSeconds = delayInSeconds;
-		}
-
 		@Override
 		public String toString() {
 			return "InputWaitingConfig [processorNameRegexp=" + processorNameRegexp + ", processorVersionRegexp="
 					+ processorVersionRegexp + ", inputIdRegexp=" + inputIdRegexp + ", timelinessRegexp=" + timelinessRegexp 
-					+ ", waitingInSeconds=" + waitingInSeconds + ", delayInSeconds=" + delayInSeconds + "]";
+					+ ", waitingInSeconds=" + waitingInSeconds + "]";
 		}
 	}
 
-	private Map<ProductCategory, CategoryConfig> productCategories = new LinkedHashMap<>();
-	
-	private List<InputWaitingConfig> inputWaiting = new ArrayList<>();
-	
-	public Map<ProductCategory, CategoryConfig> getProductCategories() {
-		return productCategories;
-	}
+	/**
+	 * Class of delay configuration
+	 * 
+	 * @author Cyrielle Gailliard
+	 */
+	public static class WaitTempo {
+		/**
+		 * Delay between 2 retries
+		 */
+		private int tempo;
 
-	public void setProductCategories(final Map<ProductCategory, CategoryConfig> productCategories) {
-		this.productCategories = productCategories;
-	}
+		/**
+		 * Number of maximal retries
+		 */
+		private int maxTimelifeS;
 
-	public List<InputWaitingConfig> getInputWaiting() {
-		return inputWaiting;
-	}
+		/**
+		 * Default constructor
+		 */
+		public WaitTempo() {
+			this.tempo = 0;
+			this.maxTimelifeS = 0;
+		}
 
-	public void setInputWaiting(final List<InputWaitingConfig> inputWaiting) {
-		this.inputWaiting = inputWaiting;
+		/**
+		 * Constructor using field
+		 * 
+		 * @param tempo
+		 * @param retries
+		 */
+		public WaitTempo(final int tempo, final int retries) {
+			this.tempo = tempo;
+			this.maxTimelifeS = retries;
+		}
+
+		/**
+		 * @return the tempo
+		 */
+		public int getTempo() {
+			return tempo;
+		}
+
+		/**
+		 * @param tempo the tempo to set
+		 */
+		public void setTempo(final int tempo) {
+			this.tempo = tempo;
+		}
+
+		/**
+		 * @return the retries
+		 */
+		public int getMaxTimelifeS() {
+			return maxTimelifeS;
+		}
+
+		/**
+		 * @param retries the retries to set
+		 */
+		public void setMaxTimelifeS(final int maxTimelifeS) {
+			this.maxTimelifeS = maxTimelifeS;
+		}
 	}
 	
 	/**
@@ -194,6 +229,12 @@ public class IpfPreparationWorkerSettings {
 	 */
 	protected static final String MAP_KEY_VAL_SEP = ":";
 
+	private Map<ProductCategory, CategoryConfig> productCategories = new LinkedHashMap<>();
+	
+	private long jobPreparationDelayInSeconds;		
+	
+	private List<InputWaitingConfig> inputWaiting = new ArrayList<>();
+	
 	/**
 	 * Maximal number of task tables
 	 */
@@ -318,71 +359,22 @@ public class IpfPreparationWorkerSettings {
 		}
 	}
 
-	/**
-	 * Class of delay configuration
-	 * 
-	 * @author Cyrielle Gailliard
-	 */
-	public static class WaitTempo {
-		/**
-		 * Delay between 2 retries
-		 */
-		private int tempo;
-
-		/**
-		 * Number of maximal retries
-		 */
-		private int maxTimelifeS;
-
-		/**
-		 * Default constructor
-		 */
-		public WaitTempo() {
-			this.tempo = 0;
-			this.maxTimelifeS = 0;
-		}
-
-		/**
-		 * Constructor using field
-		 * 
-		 * @param tempo
-		 * @param retries
-		 */
-		public WaitTempo(final int tempo, final int retries) {
-			this.tempo = tempo;
-			this.maxTimelifeS = retries;
-		}
-
-		/**
-		 * @return the tempo
-		 */
-		public int getTempo() {
-			return tempo;
-		}
-
-		/**
-		 * @param tempo the tempo to set
-		 */
-		public void setTempo(final int tempo) {
-			this.tempo = tempo;
-		}
-
-		/**
-		 * @return the retries
-		 */
-		public int getMaxTimelifeS() {
-			return maxTimelifeS;
-		}
-
-		/**
-		 * @param retries the retries to set
-		 */
-		public void setMaxTimelifeS(final int maxTimelifeS) {
-			this.maxTimelifeS = maxTimelifeS;
-		}
-
+	public Map<ProductCategory, CategoryConfig> getProductCategories() {
+		return productCategories;
 	}
 
+	public void setProductCategories(final Map<ProductCategory, CategoryConfig> productCategories) {
+		this.productCategories = productCategories;
+	}
+
+	public List<InputWaitingConfig> getInputWaiting() {
+		return inputWaiting;
+	}
+
+	public void setInputWaiting(final List<InputWaitingConfig> inputWaiting) {
+		this.inputWaiting = inputWaiting;
+	}
+	
 	/**
 	 * @return the maxnboftasktable
 	 */
@@ -575,6 +567,14 @@ public class IpfPreparationWorkerSettings {
 	public void setOqcCheck(final List<ProductFamily> oqcCheck) {
 		this.oqcCheck = oqcCheck;
 	}
+	
+	public long getJobPreparationDelayInSeconds() {
+		return jobPreparationDelayInSeconds;
+	}
+
+	public void setJobPreparationDelayInSeconds(final long jobPreparationDelayInSeconds) {
+		this.jobPreparationDelayInSeconds = jobPreparationDelayInSeconds;
+	}
 
 	/**
 	 * Display object in JSON format
@@ -587,8 +587,8 @@ public class IpfPreparationWorkerSettings {
 				+ ", defaultfamily: \"" + defaultfamily + "\", outputfamiliesstr: \"" + outputfamiliesstr
 				+ "\", outputfamilies: \"" + outputfamilies + "\", typeOverlap: \"" + typeOverlap + "\", typeSliceLength: \""
 				+ typeSliceLength + "\", mapTypeMeta: \"" + mapTypeMeta + "\", oqcCheck: \"" + oqcCheck
-				+ "\", productCategories: \"" + productCategories + "\", inputWaiting: \"" + inputWaiting
-				+ "\"}";
+				+ "\", productCategories: \"" + productCategories + "\", jobPreparationDelayInSeconds: \""
+				+ jobPreparationDelayInSeconds + "\", inputWaiting: \"" + inputWaiting + "\"}";
 	}
 
 }
