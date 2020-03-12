@@ -14,6 +14,7 @@ import java.util.concurrent.ThreadLocalRandom;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Function;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import javax.xml.bind.JAXBException;
 
@@ -232,7 +233,7 @@ public abstract class AbstractJobsGenerator implements Runnable {
 				.flatMap(pool -> pool.getTasks().stream()).filter(task -> !CollectionUtils.isEmpty(task.getInputs()))
 				.flatMap(task -> task.getInputs().stream())
 				.filter(input -> !CollectionUtils.isEmpty(input.getAlternatives()))
-				.flatMap(input -> input.getAlternatives().stream().sorted(TaskTableInputAlternative.ORDER))
+				.flatMap(input -> alternatives(input))
 				.filter(alt -> alt.getOrigin() == TaskTableInputOrigin.DB)
 				.collect(Collectors.groupingBy(TaskTableInputAlternative::getTaskTableInputAltKey)).forEach((k, v) -> {
 					final String fileType = ipfPreparationWorkerSettings.getMapTypeMeta().getOrDefault(k.getFileType(),
@@ -249,6 +250,10 @@ public abstract class AbstractJobsGenerator implements Runnable {
 				});
 	}
 
+	private final Stream<TaskTableInputAlternative> alternatives(final TaskTableInput input) {
+		return input.getAlternatives().stream().sorted(TaskTableInputAlternative.ORDER);
+	}
+	
 	protected void buildTasks() {
 		this.taskTable.getPools().forEach(pool -> {
 			this.tasks.add(pool.getTasks().stream().map(TaskTableTask::getFileName).collect(Collectors.toList()));
@@ -529,14 +534,14 @@ public abstract class AbstractJobsGenerator implements Runnable {
 				final Map<String, String> missingMetadata = new HashMap<>();
 				final List<JobOrderInput> futureInputs = new ArrayList<>();
 				for (final TaskTableInput input : task.getInputs()) {
-					// If it is a reference
+					
+					// If it is NOT a reference
 					if (StringUtils.isEmpty(input.getReference())) {
-
 						if (ProductMode.isCompatibleWithTaskTableMode(this.mode, input.getMode())) {
+							
 							final int currentOrder = 99;
 							List<JobOrderInput> inputsToAdd = new ArrayList<>();
-							for (final TaskTableInputAlternative alt : input.getAlternatives()
-									.stream().sorted(TaskTableInputAlternative.ORDER).collect(Collectors.toList())) {
+							for (final TaskTableInputAlternative alt : alternatives(input).collect(Collectors.toList())) {
 								// We ignore input not DB
 								if (alt.getOrigin() == TaskTableInputOrigin.DB) {
 									if (!CollectionUtils.isEmpty(
@@ -557,33 +562,17 @@ public abstract class AbstractJobsGenerator implements Runnable {
 											break;
 										}
 
-										// Retrieve family
-										ProductFamily family = ProductFamily
-												.fromValue(this.ipfPreparationWorkerSettings.getDefaultfamily());
-										if (this.ipfPreparationWorkerSettings.getInputfamilies()
-												.containsKey(alt.getFileType())) {
-											family = this.ipfPreparationWorkerSettings.getInputfamilies()
-													.get(alt.getFileType());
-										}
-
-										// Check order
-										final List<JobOrderInputFile> jobOrderInputFiles = job.getMetadataQueries()
-												.get(alt.getIdSearchMetadataQuery()).getResult().stream()
-												.map(file -> new JobOrderInputFile(file.getProductName(),
-														file.getKeyObjectStorage()))
-												.collect(Collectors.toList());
-										final List<JobOrderTimeInterval> jobOrderTimeIntervals = job
-												.getMetadataQueries().get(alt.getIdSearchMetadataQuery()).getResult()
-												.stream()
-												.map(file -> new JobOrderTimeInterval(
-														DateUtils.convertToAnotherFormat(file.getValidityStart(),
-																AbstractMetadata.METADATA_DATE_FORMATTER,
-																JobOrderTimeInterval.DATE_FORMATTER),
-														DateUtils.convertToAnotherFormat(file.getValidityStop(),
-																AbstractMetadata.METADATA_DATE_FORMATTER,
-																JobOrderTimeInterval.DATE_FORMATTER),
-														file.getProductName()))
-												.collect(Collectors.toList());
+										// Retrieve family										
+//										final String fileType = ipfPreparationWorkerSettings.getMapTypeMeta().getOrDefault(
+//												k.getFileType(),
+//												k.getFileType()
+//										);
+										final ProductFamily family = ipfPreparationWorkerSettings.getInputfamilies().getOrDefault(
+												alt.getFileType(),
+												ProductFamily.fromValue(ipfPreparationWorkerSettings.getDefaultfamily())
+										);	
+										final List<JobOrderInputFile> jobOrderInputFiles = getJoborderInputsFor(job, alt);										
+										final List<JobOrderTimeInterval> jobOrderTimeIntervals = getJoborderTimeIntervalsFor(job, alt);
 
 										if (currentOrder == alt.getOrder()) {
 
@@ -636,9 +625,10 @@ public abstract class AbstractJobsGenerator implements Runnable {
 									
 									// if the timeout is not expired, we want to continue waiting. To do that, 
 									// a IpfPrepWorkerInputsMissingException needs to be thrown. Otherwise,
-									// we log that timeout is expired and we continue anyway.
+									// we log that timeout is expired and we continue anyway behaving as if 
+									// the input was there
 									if (timeoutChecker.isTimeoutExpiredFor(job.getAppDataJob(), input)) {
-										LOGGER.info("Timeout is expired for Input {}. Continue without it...", 
+										LOGGER.info("Non-Mandatory Input {} is not available. Continue without it...", 
 												input.toLogMessage());
 									}
 									else {
@@ -662,6 +652,38 @@ public abstract class AbstractJobsGenerator implements Runnable {
 				}
 			}
 		}
+	}
+
+	private final List<JobOrderTimeInterval> getJoborderTimeIntervalsFor(
+			final JobGeneration job,
+			final TaskTableInputAlternative alt
+	) {
+		final SearchMetadataResult searchResult = job.getMetadataQueries().get(alt.getIdSearchMetadataQuery());
+		return searchResult.getResult().stream()
+				.map(m -> newJobOrderTimeIntervalFor(m))
+				.collect(Collectors.toList());
+	}
+	
+	private final JobOrderTimeInterval newJobOrderTimeIntervalFor(final SearchMetadata searchMetadata) {
+		return new JobOrderTimeInterval(
+				convertDateToJoborderFormat(searchMetadata.getValidityStart()),
+				convertDateToJoborderFormat(searchMetadata.getValidityStop()),
+				searchMetadata.getProductName()
+		);
+	}
+	
+	private final String convertDateToJoborderFormat(final String metadataFormat) {
+		return DateUtils.convertToAnotherFormat(
+				metadataFormat,
+				AbstractMetadata.METADATA_DATE_FORMATTER,
+				JobOrderTimeInterval.DATE_FORMATTER
+		);
+	}
+	private final List<JobOrderInputFile> getJoborderInputsFor(final JobGeneration job, final TaskTableInputAlternative alt) {
+		return job.getMetadataQueries()
+				.get(alt.getIdSearchMetadataQuery()).getResult().stream()
+				.map(file -> new JobOrderInputFile(file.getProductName(), file.getKeyObjectStorage()))
+				.collect(Collectors.toList());
 	}
 	
 	protected void send(final JobGeneration job, final UUID reportingId) throws AbstractCodedException {		

@@ -1,8 +1,12 @@
 package esa.s1pdgs.cpoc.ipf.preparation.worker.timeout;
 
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Optional;
 import java.util.function.Supplier;
+
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import esa.s1pdgs.cpoc.appcatalog.AppDataJob;
 import esa.s1pdgs.cpoc.common.utils.DateUtils;
@@ -11,34 +15,41 @@ import esa.s1pdgs.cpoc.ipf.preparation.worker.model.tasktable.TaskTableInput;
 import esa.s1pdgs.cpoc.mqi.model.queue.CatalogEvent;
 
 public final class InputTimeoutCheckerImpl implements InputTimeoutChecker {	
-	private final InputWaitingConfig config;
+	private static final Logger LOG = LogManager.getLogger(InputTimeoutChecker.class);
+	
+	private final List<InputWaitingConfig> configs;
 	private final Supplier<LocalDateTime> timeSupplier;
 	
-	public InputTimeoutCheckerImpl(final InputWaitingConfig config, final Supplier<LocalDateTime> timeSupplier) {
-		this.config = config;
+	public InputTimeoutCheckerImpl(final List<InputWaitingConfig> configs, final Supplier<LocalDateTime> timeSupplier) {
+		this.configs = configs;
 		this.timeSupplier = timeSupplier;
 	}
 
 	@Override
 	public final boolean isTimeoutExpiredFor(final AppDataJob<CatalogEvent> job, final TaskTableInput input) {
-		if (isMatchingConfiguredInputIdRegec(input) &&
-			isMatchingConfiguredTimeliness(job)) {			
-			final LocalDateTime sensingStart = DateUtils.parse(
-					job.getProduct().getStartTime());
-			return timeSupplier.get().isAfter(sensingStart.plusSeconds(config.getWaitingInSeconds()));
+		try {
+			for (final InputWaitingConfig config : configs) {
+				if (isMatchingConfiguredInputIdRegex(config, input) && isMatchingConfiguredTimeliness(config, job)) {			
+					final LocalDateTime sensingStart = DateUtils.parse(job.getProduct().getStartTime());
+					return timeSupplier.get().isAfter(sensingStart.plusSeconds(config.getWaitingInSeconds()));
+				}
+			}
+
+		} catch (final Exception e) {
+			LOG.error("Exception on evaluating timeout, assuming there's no timeout configured.", e);
 		}
 		// per default, timeout is expired instantly
 		return true;
 	}
 	
-	private final boolean isMatchingConfiguredTimeliness(final AppDataJob<CatalogEvent> job) {
+	final boolean isMatchingConfiguredTimeliness(final InputWaitingConfig config, final AppDataJob<CatalogEvent> job) {
 		final String timeliness = (String) job.getMessages().get(0)
 				.getBody().getMetadata().get("timeliness");
 		
 		return timeliness.matches(config.getTimelinessRegexp());
 	}
 	
-	private final boolean isMatchingConfiguredInputIdRegec(final TaskTableInput input) {
+	final boolean isMatchingConfiguredInputIdRegex(final InputWaitingConfig config, final TaskTableInput input) {
 		return Optional.ofNullable(input.getId())
 				.orElse("")
 				.matches(config.getInputIdRegexp());

@@ -1,6 +1,8 @@
 package esa.s1pdgs.cpoc.ipf.preparation.worker.config;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.function.Function;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -27,14 +29,15 @@ public class IpfPreparationWorkerConfiguration {
 	}
 
 	private final InputTimeoutChecker inputWaitTimeoutFor(final TaskTable taskTable) {
+		final List<InputWaitingConfig> configsForTasktable = new ArrayList<>();
 		for (final InputWaitingConfig config : ipfPreparationWorkerSettings.getInputWaiting()) {
 			if (taskTable.getProcessorName().equals(config.getProcessorNameRegexp()) &&
 				taskTable.getVersion().matches(config.getProcessorVersionRegexp())) 
 			{			
-				return new InputTimeoutCheckerImpl(config, () -> LocalDateTime.now());				
+				configsForTasktable.add(config);
 			}					
 		}
 		// default: always time out
-		return (timeliness, input) -> true;
+		return new InputTimeoutCheckerImpl(configsForTasktable, () -> LocalDateTime.now());	
 	}
 }
