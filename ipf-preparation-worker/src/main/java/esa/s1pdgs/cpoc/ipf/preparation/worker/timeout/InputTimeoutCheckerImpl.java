@@ -32,7 +32,7 @@ public final class InputTimeoutCheckerImpl implements InputTimeoutChecker {
 				if (isMatchingConfiguredInputIdRegex(config, input) && 
 					isMatchingConfiguredTimeliness(config, job)) {			
 					final LocalDateTime sensingStart = DateUtils.parse(job.getProduct().getStartTime());
-					return timeSupplier.get().isAfter(sensingStart.plusSeconds(config.getWaitingInSeconds()));
+					return !timeSupplier.get().isBefore(sensingStart.plusSeconds(config.getWaitingInSeconds()));
 				}
 			}
 
