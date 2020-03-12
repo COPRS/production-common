@@ -1,5 +1,6 @@
 package esa.s1pdgs.cpoc.ipf.preparation.worker.service;
 
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.isA;
 import static org.hamcrest.Matchers.hasProperty;
@@ -55,6 +56,7 @@ import esa.s1pdgs.cpoc.common.errors.appcatalog.AppCatalogJobSearchApiError;
 import esa.s1pdgs.cpoc.common.errors.processing.IpfPrepWorkerBuildTaskTableException;
 import esa.s1pdgs.cpoc.common.errors.processing.IpfPrepWorkerInputsMissingException;
 import esa.s1pdgs.cpoc.common.errors.processing.MetadataQueryException;
+import esa.s1pdgs.cpoc.common.utils.DateUtils;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.config.AppConfig;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.config.IpfPreparationWorkerSettings;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.config.IpfPreparationWorkerSettings.InputWaitingConfig;
@@ -71,6 +73,7 @@ import esa.s1pdgs.cpoc.ipf.preparation.worker.model.metadata.SearchMetadataResul
 import esa.s1pdgs.cpoc.ipf.preparation.worker.model.tasktable.TaskTable;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.model.tasktable.TaskTableFactory;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.timeout.InputTimeoutChecker;
+import esa.s1pdgs.cpoc.ipf.preparation.worker.timeout.InputTimeoutCheckerImpl;
 import esa.s1pdgs.cpoc.metadata.client.MetadataClient;
 import esa.s1pdgs.cpoc.metadata.client.SearchMetadataQuery;
 import esa.s1pdgs.cpoc.metadata.model.SearchMetadata;
@@ -212,9 +215,6 @@ public class AbstractJobsGeneratorTest {
     
     @Mock
     private JobOrder jobOrder;
-
-    @Mock
-    private InputWaitingConfig inputWaitingConfig;
     
 	private Map<String, List<SearchMetadata>> metadataBrain;
     
@@ -269,10 +269,11 @@ public class AbstractJobsGeneratorTest {
     }
     
 	private LevelProductsJobsGenerator makeUut() throws IpfPrepWorkerBuildTaskTableException {
-		return makeUut(() -> LocalDateTime.now());
+		return makeUut(InputTimeoutChecker.NULL);
 	}
 
-	private LevelProductsJobsGenerator makeUut(final Supplier<LocalDateTime> sup) throws IpfPrepWorkerBuildTaskTableException {
+	private LevelProductsJobsGenerator makeUut(final InputTimeoutChecker inputTimeoutChecker)
+			throws IpfPrepWorkerBuildTaskTableException {
 		return new LevelProductsJobsGenerator(
         		xmlConverter, 
         		metadataClient,
@@ -281,7 +282,7 @@ public class AbstractJobsGeneratorTest {
                 appDataPService, 
                 processConfiguration,
                 mqiClient,
-                InputTimeoutChecker.NULL,
+                inputTimeoutChecker,
                 "IW_RAW__0_GRDH_1.xml",
                 ttFactory.buildTaskTable(
                 		new File("./test/data/generic_config/task_tables/IW_RAW__0_GRDH_1.xml"), 
@@ -358,7 +359,7 @@ public class AbstractJobsGeneratorTest {
         inputWaitingConfig.setInputIdRegexp("Orbit");
         inputWaitingConfig.setTimelinessRegexp(".*");
         inputWaitingConfig.setWaitingInSeconds(600);
-        inputWaitingConfig.setDelayInSeconds(0);
+        inputWaitingConfig.setDelayInSeconds(0L);
         Mockito.when(ipfPreparationWorkerSettings.getInputWaiting()).thenReturn(Arrays.asList(inputWaitingConfig));
     }
 
@@ -758,85 +759,95 @@ public class AbstractJobsGeneratorTest {
     	assertTrue(inputs.contains("AUX_POE"));
     	assertFalse(inputs.contains("AUX_RES"));
     }
+
+    @Test
+    public void testWaiting() throws Exception {
+    	final Map<Integer, SearchMetadataResult> metadataQueries = new HashMap<>();
+    	final List<JobOrderProc> jobOrderProcList = new ArrayList<>();
+    	Stream.of(
+    		new SearchMetadataQuery(1, "LatestValCover", 0.0, 0.0, "AUX_INS", ProductFamily.BLANK), //
+    		new SearchMetadataQuery(2, "LatestValCover", 0.0, 0.0, "AUX_CAL", ProductFamily.BLANK), //
+    		new SearchMetadataQuery(3, "LatestValCover", 0.0, 0.0, "AUX_POE", ProductFamily.BLANK), //
+    		new SearchMetadataQuery(4, "LatestValCover", 0.0, 0.0, "IW_RAW__0N", ProductFamily.L0_ACN), //
+    		new SearchMetadataQuery(5, "LatestValCover", 0.0, 0.0, "AUX_PP1", ProductFamily.BLANK), //
+    		new SearchMetadataQuery(6, "LatestValCover", 0.0, 0.0, "IW_RAW__0C", ProductFamily.L0_ACN), //
+    		new SearchMetadataQuery(7, "LatestValCover", 0.0, 0.0, "IW_RAW__0S", ProductFamily.L0_SLICE), //
+    		new SearchMetadataQuery(8, "LatestValCover", 0.0, 0.0, "AUX_ATT", ProductFamily.BLANK), //
+    		new SearchMetadataQuery(9, "LatestValCover", 0.0, 0.0, "AUX_RES", ProductFamily.BLANK), //
+    		new SearchMetadataQuery(10, "LatestValCover", 0.0, 0.0, "IW_RAW__0A", ProductFamily.L0_ACN) //
+    	).forEach(s -> {
+    		metadataQueries.put(s.getIdentifier(), new SearchMetadataResult(s));
+    		jobOrderProcList.add(new JobOrderProc());
+    	});
+
+    	Mockito.when(jobGeneration.getAppDataJob()).thenReturn(appDataJob);
+    	Mockito.when(jobGeneration.getMetadataQueries()).thenReturn(metadataQueries);
+    	Mockito.when(appDataJob.getId()).thenReturn(23L);
+    	Mockito.when(appDataJob.getProduct()).thenReturn(appDataJobProduct);
+    	Mockito.when(appDataJob.getMessages()).thenReturn(Arrays.asList(
+    		new GenericMessageDto<CatalogEvent>() {{
+    			setBody(new CatalogEvent() {{
+    				setMetadata(Collections.singletonMap("timeliness", "NRT"));
+    			}});
+    		}}
+    	));
+    	
+    	Mockito.when(appDataJobProduct.getStartTime()).thenReturn("2000-01-01T00:00:00.000000Z");
+    	Mockito.when(appDataJobProduct.getStopTime()).thenReturn("2000-01-01T00:00:00.000000Z");
+    	Mockito.when(appDataJobProduct.getMissionId()).thenReturn("S1");
+    	Mockito.when(appDataJobProduct.getSatelliteId()).thenReturn("A");
+    	Mockito.when(appDataJobProduct.getInsConfId()).thenReturn(0);
+    	Mockito.when(appDataJobProduct.getProcessMode()).thenReturn("NRT");    	
+    	Mockito.when(jobGeneration.getJobOrder()).thenReturn(jobOrder);    	
+    	Mockito.when(jobOrder.getProcs()).thenReturn(jobOrderProcList);
+    	
+    	metadataBrain.remove("AUX_POE");
+    	metadataBrain.remove("AUX_RES");
+    	
+    	// preconditions
+    	assertNull(metadataBrain.get("AUX_POE"));
+    	assertNull(metadataBrain.get("AUX_RES"));
     
-//    private List<JobOrderProc> mockWaiting() {
-//    	final Map<Integer, SearchMetadataResult> metadataQueries = new HashMap<>();
-//    	final List<JobOrderProc> jobOrderProcList = new ArrayList<>();
-//    	Stream.of(
-//    		new SearchMetadataQuery(1, "LatestValCover", 0.0, 0.0, "AUX_INS", ProductFamily.BLANK), //
-//    		new SearchMetadataQuery(2, "LatestValCover", 0.0, 0.0, "AUX_CAL", ProductFamily.BLANK), //
-//    		new SearchMetadataQuery(3, "LatestValCover", 0.0, 0.0, "AUX_POE", ProductFamily.BLANK), //
-//    		new SearchMetadataQuery(4, "LatestValCover", 0.0, 0.0, "IW_RAW__0N", ProductFamily.L0_ACN), //
-//    		new SearchMetadataQuery(5, "LatestValCover", 0.0, 0.0, "AUX_PP1", ProductFamily.BLANK), //
-//    		new SearchMetadataQuery(6, "LatestValCover", 0.0, 0.0, "IW_RAW__0C", ProductFamily.L0_ACN), //
-//    		new SearchMetadataQuery(7, "LatestValCover", 0.0, 0.0, "IW_RAW__0S", ProductFamily.L0_SLICE), //
-//    		new SearchMetadataQuery(8, "LatestValCover", 0.0, 0.0, "AUX_ATT", ProductFamily.BLANK), //
-//    		new SearchMetadataQuery(9, "LatestValCover", 0.0, 0.0, "AUX_RES", ProductFamily.BLANK), //
-//    		new SearchMetadataQuery(10, "LatestValCover", 0.0, 0.0, "IW_RAW__0A", ProductFamily.L0_ACN) //
-//    	).forEach(s -> {
-//    		metadataQueries.put(s.getIdentifier(), new SearchMetadataResult(s));
-//    		jobOrderProcList.add(new JobOrderProc());
-//    	});
-//
-//    	Mockito.when(jobGeneration.getAppDataJob()).thenReturn(appDataJob);
-//    	Mockito.when(jobGeneration.getMetadataQueries()).thenReturn(metadataQueries);
-//    	Mockito.when(appDataJob.getId()).thenReturn(23L);
-//    	Mockito.when(appDataJob.getProduct()).thenReturn(appDataJobProduct);
-//    	Mockito.when(appDataJob.getMessages()).thenReturn(Arrays.asList(
-//    		new GenericMessageDto<CatalogEvent>() {{
-//    			setBody(new CatalogEvent() {{
-//    				setMetadata(Collections.singletonMap("timeliness", "NRT"));
-//    			}});
-//    		}}
-//    	));
-//    	
-//    	Mockito.when(appDataJobProduct.getStartTime()).thenReturn("2000-01-01T00:00:00.000000Z");
-//    	Mockito.when(appDataJobProduct.getStopTime()).thenReturn("2000-01-01T00:00:00.000000Z");
-//    	Mockito.when(appDataJobProduct.getMissionId()).thenReturn("S1");
-//    	Mockito.when(appDataJobProduct.getSatelliteId()).thenReturn("A");
-//    	Mockito.when(appDataJobProduct.getInsConfId()).thenReturn(0);
-//    	Mockito.when(appDataJobProduct.getProcessMode()).thenReturn("NRT");    	
-//    	Mockito.when(jobGeneration.getJobOrder()).thenReturn(jobOrder);    	
-//    	Mockito.when(jobOrder.getProcs()).thenReturn(jobOrderProcList);
-//    	
-//    	metadataBrain.remove("AUX_POE");
-//    	metadataBrain.remove("AUX_RES");
-//    	
-//    	// preconditions
-//    	assertNull(metadataBrain.get("AUX_POE"));
-//    	assertNull(metadataBrain.get("AUX_RES"));
-//    	return jobOrderProcList;
-//    }
-//    
-//    @Test
-//    public void testWaiting() throws Exception {    	
-//    	// Part 1: Exactly before timeout exceeds
-//    	generator = makeUut(new Supplier<LocalDateTime>() {
-//    		@Override
-//			public LocalDateTime get() {
-//				return DateUtils.parse("2000-01-01T00:09:59.999999Z");
-//    		}
-//    	});
-//    	final List<JobOrderProc> jobOrderProcList = mockWaiting();
-//    	assertThatThrownBy(() -> generator.inputsSearch(jobGeneration))
-//    		.isInstanceOf(IpfPrepWorkerInputsMissingException.class);
-//    	
-//    	// Part 2: Exactly when timeout is exceeded
-//    	generator = makeUut(new Supplier<LocalDateTime>() {
-//    		@Override
-//			public LocalDateTime get() {
-//				return DateUtils.parse("2000-01-01T00:10:00.000000Z");
-//    		}
-//    	});
-//    	generator.inputsSearch(jobGeneration);
-//    	    	
-//    	// postconditions
-//    	final List<String> inputs = jobOrderProcList.stream().flatMap(r -> r.getInputs().stream())
-//    			.map(JobOrderInput::getFileType).distinct().collect(Collectors.toList());
-//    	assertFalse(inputs.contains("AUX_POE"));
-//    	assertFalse(inputs.contains("AUX_RES"));    	
-//    }
-//    
-    
+    	// Part 1: Exactly before timeout exceeds
+    	   	
+    	final InputTimeoutChecker inputTimeoutChecker1 = new InputTimeoutCheckerImpl(
+    			ipfPreparationWorkerSettings.getInputWaiting(),
+			new Supplier<LocalDateTime>() {
+	    		@Override
+				public LocalDateTime get() {
+					return DateUtils.parse("2000-01-01T00:09:59.999999Z");
+	    		}
+	    	}
+    	);
+    	
+    	generator = makeUut(inputTimeoutChecker1);
+    	generator.initialize();
+    	
+    	assertThatThrownBy(() -> generator.inputsSearch(jobGeneration))
+    		.isInstanceOf(IpfPrepWorkerInputsMissingException.class);
+
+    	// Part 2: Exactly when timeout is exceeded
+    	
+    	final InputTimeoutChecker inputTimeoutChecker2 = new InputTimeoutCheckerImpl(
+    			ipfPreparationWorkerSettings.getInputWaiting(),
+			new Supplier<LocalDateTime>() {
+	    		@Override
+				public LocalDateTime get() {
+					return DateUtils.parse("2000-01-01T00:10:00.000000Z");
+	    		}
+	    	}
+    	);
+    	
+    	generator = makeUut(inputTimeoutChecker2);
+    	generator.initialize();
+    	
+    	generator.inputsSearch(jobGeneration);
+    	    	
+    	// postconditions
+    	final List<String> inputs = jobOrderProcList.stream().flatMap(r -> r.getInputs().stream())
+    			.map(JobOrderInput::getFileType).distinct().collect(Collectors.toList());
+    	assertFalse(inputs.contains("AUX_POE"));
+    	assertFalse(inputs.contains("AUX_RES"));    	
+    }
 
 }
