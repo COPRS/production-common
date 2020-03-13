@@ -31,13 +31,19 @@ public final class InputTimeoutCheckerImpl implements InputTimeoutChecker {
 		try {
 			for (final InputWaitingConfig config : configs) {
 				if (isMatchingConfiguredInputIdRegex(config, input) && 
-					isMatchingConfiguredTimeliness(config, job)) {			
-					final LocalDateTime sensingStart = DateUtils.parse(job.getProduct().getStartTime());
+					isMatchingConfiguredTimeliness(config, job)) {
+
 					final LocalDateTime now = timeSupplier.get();
-					final LocalDateTime defaultTimeout = getDefaultTimeoutFor(job, config);
-										
-					return !now.isBefore(sensingStart.plusSeconds(config.getWaitingInSeconds())) ||
-						   !now.isBefore(defaultTimeout);
+					
+					// job creation relative timeout (for development/testing purposes)
+					final LocalDateTime jobCreationTime = new Timestamp(job.getCreationDate().getTime()).toLocalDateTime();
+					final LocalDateTime jobCreationRelativeTimeoutMoment = jobCreationTime.plusSeconds(config.getDelayInSeconds());
+					
+					// sensing relative timeout (for waiting for missing inputs)
+					final LocalDateTime sensingStart = DateUtils.parse(job.getProduct().getStartTime());
+					final LocalDateTime sensingRelativeTimeoutMoment = sensingStart.plusSeconds(config.getWaitingInSeconds());
+					
+					return !(now.isBefore(jobCreationRelativeTimeoutMoment) || now.isBefore(sensingRelativeTimeoutMoment));
 				}
 			}
 
@@ -48,11 +54,6 @@ public final class InputTimeoutCheckerImpl implements InputTimeoutChecker {
 		return true;
 	}
 
-	final LocalDateTime getDefaultTimeoutFor(final AppDataJob<CatalogEvent> job, final InputWaitingConfig config) {
-		return new Timestamp(job.getCreationDate().getTime())
-				.toLocalDateTime().plusSeconds(config.getDelayInSeconds());
-	}
-	
 	final boolean isMatchingConfiguredTimeliness(final InputWaitingConfig config, final AppDataJob<CatalogEvent> job) {
 		final String timeliness = (String) job.getMessages().get(0)
 				.getBody().getMetadata().get("timeliness");

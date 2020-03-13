@@ -18,6 +18,8 @@ import static org.mockito.Mockito.verifyNoMoreInteractions;
 
 import java.io.File;
 import java.io.IOException;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -33,7 +35,6 @@ import java.util.stream.Stream;
 import javax.xml.bind.JAXBException;
 
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
@@ -84,6 +85,8 @@ import esa.s1pdgs.cpoc.mqi.model.rest.GenericMessageDto;
 
 public class AbstractJobsGeneratorTest {
 
+	public final static String METADATA_DATE_FORMAT = "yyyy-MM-dd'T'HH:mm:ss.SSSSSS'Z'";
+	
 	static final List<SearchMetadata> IW_RAW__0S = Arrays.asList(new SearchMetadata(
     		"S1A_IW_RAW__0SDV_20171213T121623_20171213T121656_019684_021735_C6DB.SAFE",
     		"IW_RAW__0S",
@@ -599,7 +602,7 @@ public class AbstractJobsGeneratorTest {
     }
     
     @Test
-    public void testUseOptionalInputAlternativeOfOrder1WhenItExistsExclusively() throws IpfPrepWorkerInputsMissingException {
+    public void testUseOptionalInputAlternativeOfOrder1WhenItExistsExclusively() throws IpfPrepWorkerInputsMissingException, ParseException {
     	final Map<Integer, SearchMetadataResult> metadataQueries = new HashMap<>();
     	final List<JobOrderProc> jobOrderProcList = new ArrayList<>();
     	Stream.of(
@@ -621,6 +624,8 @@ public class AbstractJobsGeneratorTest {
     	Mockito.when(jobGeneration.getAppDataJob()).thenReturn(appDataJob);
     	Mockito.when(jobGeneration.getMetadataQueries()).thenReturn(metadataQueries);
     	Mockito.when(appDataJob.getId()).thenReturn(23L);
+    	Mockito.when(appDataJob.getCreationDate()).thenReturn(new SimpleDateFormat(METADATA_DATE_FORMAT)
+    			.parse("2000-01-01T00:00:00.000000Z"));
     	Mockito.when(appDataJob.getProduct()).thenReturn(appDataJobProduct);
     	Mockito.when(appDataJob.getMessages()).thenReturn(Arrays.asList(
     		new GenericMessageDto<CatalogEvent>() {{
@@ -654,7 +659,8 @@ public class AbstractJobsGeneratorTest {
     }
     
     @Test
-    public void testUseOptionalInputAlternativeOfOrder2WhenItExistsExclusively() throws IpfPrepWorkerInputsMissingException {
+    public void testUseOptionalInputAlternativeOfOrder2WhenItExistsExclusively()
+    		throws IpfPrepWorkerInputsMissingException, ParseException {
     	final Map<Integer, SearchMetadataResult> metadataQueries = new HashMap<>();
     	final List<JobOrderProc> jobOrderProcList = new ArrayList<>();
     	Stream.of(
@@ -676,6 +682,8 @@ public class AbstractJobsGeneratorTest {
     	Mockito.when(jobGeneration.getAppDataJob()).thenReturn(appDataJob);
     	Mockito.when(jobGeneration.getMetadataQueries()).thenReturn(metadataQueries);
     	Mockito.when(appDataJob.getId()).thenReturn(23L);
+    	Mockito.when(appDataJob.getCreationDate()).thenReturn(new SimpleDateFormat(METADATA_DATE_FORMAT)
+    			.parse("2000-01-01T00:00:00.000000Z"));
     	Mockito.when(appDataJob.getProduct()).thenReturn(appDataJobProduct);
     	Mockito.when(appDataJob.getMessages()).thenReturn(Arrays.asList(
     		new GenericMessageDto<CatalogEvent>() {{
@@ -709,7 +717,8 @@ public class AbstractJobsGeneratorTest {
     }
     
     @Test
-    public void testUseOptionalInputAlternativeOfOrder1WhenMultipleOrdersExist() throws IpfPrepWorkerInputsMissingException {
+    public void testUseOptionalInputAlternativeOfOrder1WhenMultipleOrdersExist()
+    		throws IpfPrepWorkerInputsMissingException, ParseException {
     	final Map<Integer, SearchMetadataResult> metadataQueries = new HashMap<>();
     	final List<JobOrderProc> jobOrderProcList = new ArrayList<>();
     	Stream.of(
@@ -731,6 +740,8 @@ public class AbstractJobsGeneratorTest {
     	Mockito.when(jobGeneration.getAppDataJob()).thenReturn(appDataJob);
     	Mockito.when(jobGeneration.getMetadataQueries()).thenReturn(metadataQueries);
     	Mockito.when(appDataJob.getId()).thenReturn(23L);
+    	Mockito.when(appDataJob.getCreationDate()).thenReturn(new SimpleDateFormat(METADATA_DATE_FORMAT)
+    			.parse("2000-01-01T00:00:00.000000Z"));
     	Mockito.when(appDataJob.getProduct()).thenReturn(appDataJobProduct);
     	Mockito.when(appDataJob.getMessages()).thenReturn(Arrays.asList(
     		new GenericMessageDto<CatalogEvent>() {{
@@ -762,7 +773,6 @@ public class AbstractJobsGeneratorTest {
     }
 
     @Test
-    @Ignore
     public void testWaiting() throws Exception {
     	final Map<Integer, SearchMetadataResult> metadataQueries = new HashMap<>();
     	final List<JobOrderProc> jobOrderProcList = new ArrayList<>();
@@ -781,10 +791,12 @@ public class AbstractJobsGeneratorTest {
     		metadataQueries.put(s.getIdentifier(), new SearchMetadataResult(s));
     		jobOrderProcList.add(new JobOrderProc());
     	});
-
+    	
     	Mockito.when(jobGeneration.getAppDataJob()).thenReturn(appDataJob);
     	Mockito.when(jobGeneration.getMetadataQueries()).thenReturn(metadataQueries);
     	Mockito.when(appDataJob.getId()).thenReturn(23L);
+    	Mockito.when(appDataJob.getCreationDate()).thenReturn(new SimpleDateFormat(METADATA_DATE_FORMAT)
+    			.parse("2000-01-01T00:00:00.000000Z"));
     	Mockito.when(appDataJob.getProduct()).thenReturn(appDataJobProduct);
     	Mockito.when(appDataJob.getMessages()).thenReturn(Arrays.asList(
     		new GenericMessageDto<CatalogEvent>() {{
