@@ -2,8 +2,9 @@ package esa.s1pdgs.cpoc.ipf.preparation.worker.timeout;
 
 import static org.junit.Assert.assertEquals;
 
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.Collections;
-import java.util.Date;
 import java.util.Map;
 
 import org.junit.Test;
@@ -18,8 +19,10 @@ import esa.s1pdgs.cpoc.mqi.model.rest.GenericMessageDto;
 
 public class TestInputTimeoutCheckerImpl {
 
+	public final static String METADATA_DATE_FORMAT = "yyyy-MM-dd'T'HH:mm:ss.SSSSSS'Z'";
+	
 	@Test
-	public final void testIsMatchingConfiguredTimeliness_IfSameTimeliness_ShallReturnTrue() {		
+	public final void testIsMatchingConfiguredTimeliness_IfSameTimeliness_ShallReturnTrue() throws ParseException {		
 		final InputWaitingConfig config = new InputWaitingConfig();
 		config.setTimelinessRegexp("NRT");
 		
@@ -28,13 +31,15 @@ public class TestInputTimeoutCheckerImpl {
 				null
 		);
 		final AppDataJob<CatalogEvent> job = newJobWithMetadata(
+				"2000-01-01T00:00:00.000000Z",
+				"2000-01-01T00:10:00.000000Z",
 				Collections.singletonMap("timeliness", "NRT")
 		);		
 		assertEquals(true, uut.isMatchingConfiguredTimeliness(config, job));
 	}
 	
 	@Test
-	public final void testIsMatchingConfiguredTimeliness_IfDifferentTimeliness_ShallReturnFalse() {		
+	public final void testIsMatchingConfiguredTimeliness_IfDifferentTimeliness_ShallReturnFalse() throws ParseException {		
 		final InputWaitingConfig config = new InputWaitingConfig();
 		config.setTimelinessRegexp("NRT");
 		
@@ -43,13 +48,15 @@ public class TestInputTimeoutCheckerImpl {
 				null
 		);
 		final AppDataJob<CatalogEvent> job = newJobWithMetadata(
+				"2000-01-01T00:00:00.000000Z",
+				"2000-01-01T00:10:00.000000Z",
 				Collections.singletonMap("timeliness", "FOO")
 		);		
 		assertEquals(false, uut.isMatchingConfiguredTimeliness(config,job));
 	}
 	
 	@Test
-	public final void testIsMatchingConfiguredInputIdRegex_OnSameId_ShallReturnTrue() {		
+	public final void testIsMatchingConfiguredInputIdRegex_OnSameId_ShallReturnTrue() throws ParseException {		
 		final InputWaitingConfig config = new InputWaitingConfig();
 		config.setInputIdRegexp("123");
 	
@@ -63,7 +70,7 @@ public class TestInputTimeoutCheckerImpl {
 	}
 	
 	@Test
-	public final void testIsMatchingConfiguredInputIdRegex_OnDifferentId_ShallReturnFalse() {		
+	public final void testIsMatchingConfiguredInputIdRegex_OnDifferentId_ShallReturnFalse() throws ParseException {		
 		final InputWaitingConfig config = new InputWaitingConfig();
 		config.setInputIdRegexp("123");
 
@@ -77,49 +84,151 @@ public class TestInputTimeoutCheckerImpl {
 	}
 	
 	@Test
-	public final void testIsTimeoutExpiredFor_NotExpired_ShallReturnFalse() {
+	public final void testIsTimeoutExpiredFor_NotExpired_WhenNowBeforeMinwaitBeforeTimeout_ShallReturnFalse() throws ParseException {
 		final InputWaitingConfig config = new InputWaitingConfig();
 		config.setInputIdRegexp("123");
 		config.setTimelinessRegexp("NRT");
+		config.setDelayInSeconds(300L);
+		config.setWaitingInSeconds(600L);
 				
 		final InputTimeoutCheckerImpl uut = new InputTimeoutCheckerImpl(
 				Collections.singletonList(config),
-				() -> DateUtils.parse("2000-01-01T00:10:00.000000Z")
+				() -> DateUtils.parse("2000-01-01T00:04:59.999999Z")
 		);
 		
 		final TaskTableInput input = new TaskTableInput();
 		input.setId("123");	
 		
 		final AppDataJob<CatalogEvent> job = newJobWithMetadata(
+				"2000-01-01T00:00:00.000000Z",
+				"2000-01-01T00:10:00.000000Z",
 				Collections.singletonMap("timeliness", "NRT")
 		);		
 		assertEquals(false, uut.isTimeoutExpiredFor(job, input));
 	}
 	
 	@Test
-	public final void testIsTimeoutExpiredFor_Expired_ShallReturnTrue() {
+	public final void testIsTimeoutExpiredFor_NotExpired_WhenNowBeforeTimeoutBeforeMinwait_ShallReturnFalse() throws ParseException {
 		final InputWaitingConfig config = new InputWaitingConfig();
 		config.setInputIdRegexp("123");
 		config.setTimelinessRegexp("NRT");
-		config.setDelayInSeconds(0L);
-		config.setWaitingInSeconds(0L);
+		config.setDelayInSeconds(1200L);
+		config.setWaitingInSeconds(300L);
 				
 		final InputTimeoutCheckerImpl uut = new InputTimeoutCheckerImpl(
 				Collections.singletonList(config),
-				() -> DateUtils.parse("2920-01-01T01:10:00.000000Z")
+				() -> DateUtils.parse("2000-01-01T00:14:59.999999Z")
 		);
 		
 		final TaskTableInput input = new TaskTableInput();
 		input.setId("123");	
 		
 		final AppDataJob<CatalogEvent> job = newJobWithMetadata(
+				"2000-01-01T00:00:00.000000Z",
+				"2000-01-01T00:10:00.000000Z",
+				Collections.singletonMap("timeliness", "NRT")
+		);		
+		assertEquals(false, uut.isTimeoutExpiredFor(job, input));
+	}
+	
+	@Test
+	public final void testIsTimeoutExpiredFor_NotExpired_WhenMinwaitBeforeNowBeforeTimeout_ShallReturnFalse() throws ParseException {
+		final InputWaitingConfig config = new InputWaitingConfig();
+		config.setInputIdRegexp("123");
+		config.setTimelinessRegexp("NRT");
+		config.setDelayInSeconds(300L);
+		config.setWaitingInSeconds(600L);
+				
+		final InputTimeoutCheckerImpl uut = new InputTimeoutCheckerImpl(
+				Collections.singletonList(config),
+				() -> DateUtils.parse("2000-01-01T00:05:00.000000Z")
+		);
+		
+		final TaskTableInput input = new TaskTableInput();
+		input.setId("123");	
+		
+		final AppDataJob<CatalogEvent> job = newJobWithMetadata(
+				"2000-01-01T00:00:00.000000Z",
+				"2000-01-01T00:10:00.000000Z",
+				Collections.singletonMap("timeliness", "NRT")
+		);		
+		assertEquals(false, uut.isTimeoutExpiredFor(job, input));
+	}
+	
+	@Test
+	public final void testIsTimeoutExpiredFor_NotExpired_WhenTimeoutBeforeNowBeforeMinwait_ShallReturnFalse() throws ParseException {
+		final InputWaitingConfig config = new InputWaitingConfig();
+		config.setInputIdRegexp("123");
+		config.setTimelinessRegexp("NRT");
+		config.setDelayInSeconds(1200L);
+		config.setWaitingInSeconds(300L);
+				
+		final InputTimeoutCheckerImpl uut = new InputTimeoutCheckerImpl(
+				Collections.singletonList(config),
+				() -> DateUtils.parse("2000-01-01T00:15:00.000000Z")
+		);
+		
+		final TaskTableInput input = new TaskTableInput();
+		input.setId("123");	
+		
+		final AppDataJob<CatalogEvent> job = newJobWithMetadata(
+				"2000-01-01T00:00:00.000000Z",
+				"2000-01-01T00:10:00.000000Z",
+				Collections.singletonMap("timeliness", "NRT")
+		);		
+		assertEquals(false, uut.isTimeoutExpiredFor(job, input));
+	}
+	
+	@Test
+	public final void testIsTimeoutExpiredFor_Expired_WhenMinwaitBeforeTimeoutBeforeNow_ShallReturnTrue() throws ParseException {
+		final InputWaitingConfig config = new InputWaitingConfig();
+		config.setInputIdRegexp("123");
+		config.setTimelinessRegexp("NRT");
+		config.setDelayInSeconds(300L);
+		config.setWaitingInSeconds(600L);
+				
+		final InputTimeoutCheckerImpl uut = new InputTimeoutCheckerImpl(
+				Collections.singletonList(config),
+				() -> DateUtils.parse("2000-01-01T00:20:00.000000Z")
+		);
+		
+		final TaskTableInput input = new TaskTableInput();
+		input.setId("123");	
+		
+		final AppDataJob<CatalogEvent> job = newJobWithMetadata(
+				"2000-01-01T00:00:00.000000Z",
+				"2000-01-01T00:10:00.000000Z",
 				Collections.singletonMap("timeliness", "NRT")
 		);		
 		assertEquals(true, uut.isTimeoutExpiredFor(job, input));
 	}
 	
 	@Test
-	public final void testIsTimeoutExpiredFor_OnException_ShallReturnTrue() {
+	public final void testIsTimeoutExpiredFor_Expired_WhenTimeoutBeforeMinwaitBeforeNow_ShallReturnTrue() throws ParseException {
+		final InputWaitingConfig config = new InputWaitingConfig();
+		config.setInputIdRegexp("123");
+		config.setTimelinessRegexp("NRT");
+		config.setDelayInSeconds(1200L);
+		config.setWaitingInSeconds(300L);
+				
+		final InputTimeoutCheckerImpl uut = new InputTimeoutCheckerImpl(
+				Collections.singletonList(config),
+				() -> DateUtils.parse("2000-01-01T00:20:00.000000Z")
+		);
+		
+		final TaskTableInput input = new TaskTableInput();
+		input.setId("123");	
+		
+		final AppDataJob<CatalogEvent> job = newJobWithMetadata(
+				"2000-01-01T00:00:00.000000Z",
+				"2000-01-01T00:10:00.000000Z",
+				Collections.singletonMap("timeliness", "NRT")
+		);		
+		assertEquals(true, uut.isTimeoutExpiredFor(job, input));
+	}
+	
+	@Test
+	public final void testIsTimeoutExpiredFor_OnException_ShallReturnTrue() throws ParseException {
 		final InputWaitingConfig config = new InputWaitingConfig();
 		config.setInputIdRegexp("123");
 		config.setTimelinessRegexp("NRT");
@@ -134,14 +243,15 @@ public class TestInputTimeoutCheckerImpl {
 		input.setId("123");	
 		
 		final AppDataJob<CatalogEvent> job = newJobWithMetadata(
+				"2000-01-01T00:00:00.000000Z",
+				"2000-01-01T00:10:00.000000Z",
 				Collections.singletonMap("timeliness", "NRT")
 		);	
 		assertEquals(true, uut.isTimeoutExpiredFor(job, input));		
 	}
-	
-	
 		
-	private final AppDataJob<CatalogEvent> newJobWithMetadata(final Map<String,Object> metadata) {
+	private final AppDataJob<CatalogEvent> newJobWithMetadata(final String jobCreationDate,
+			final String sensingStartTime, final Map<String,Object> metadata) throws ParseException {
 		final AppDataJob<CatalogEvent> job = new AppDataJob<>();
 		final CatalogEvent event = new CatalogEvent();
 		event.setMetadata(metadata);	
@@ -150,10 +260,9 @@ public class TestInputTimeoutCheckerImpl {
 		job.getMessages().add(mess);
 		
 		final AppDataJobProduct appDataJob = new AppDataJobProduct();
-		appDataJob.setStartTime("2010-01-01T00:10:00.000000Z");		
-		job.setProduct(appDataJob);		
-		job.setCreationDate(new Date());
-		
+		appDataJob.setStartTime(sensingStartTime);		
+		job.setProduct(appDataJob);
+		job.setCreationDate(new SimpleDateFormat(METADATA_DATE_FORMAT).parse(jobCreationDate));
 		return job;
 	}
 }
