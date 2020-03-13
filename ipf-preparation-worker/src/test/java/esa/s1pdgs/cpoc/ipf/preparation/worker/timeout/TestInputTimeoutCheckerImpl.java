@@ -101,10 +101,12 @@ public class TestInputTimeoutCheckerImpl {
 		final InputWaitingConfig config = new InputWaitingConfig();
 		config.setInputIdRegexp("123");
 		config.setTimelinessRegexp("NRT");
+		config.setDelayInSeconds(0L);
+		config.setWaitingInSeconds(0L);
 				
 		final InputTimeoutCheckerImpl uut = new InputTimeoutCheckerImpl(
 				Collections.singletonList(config),
-				() -> DateUtils.parse("2020-01-01T00:10:00.000000Z")
+				() -> DateUtils.parse("2920-01-01T01:10:00.000000Z")
 		);
 		
 		final TaskTableInput input = new TaskTableInput();

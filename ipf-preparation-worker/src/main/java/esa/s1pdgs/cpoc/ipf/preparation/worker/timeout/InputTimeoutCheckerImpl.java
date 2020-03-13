@@ -43,7 +43,8 @@ public final class InputTimeoutCheckerImpl implements InputTimeoutChecker {
 					final LocalDateTime sensingStart = DateUtils.parse(job.getProduct().getStartTime());
 					final LocalDateTime sensingRelativeTimeoutMoment = sensingStart.plusSeconds(config.getWaitingInSeconds());
 					
-					return !(now.isBefore(jobCreationRelativeMinimalWaitingTimeMoment) || now.isBefore(sensingRelativeTimeoutMoment));
+					return !(now.isBefore(jobCreationRelativeMinimalWaitingTimeMoment) ||
+							 now.isBefore(sensingRelativeTimeoutMoment));
 				}
 			}
 

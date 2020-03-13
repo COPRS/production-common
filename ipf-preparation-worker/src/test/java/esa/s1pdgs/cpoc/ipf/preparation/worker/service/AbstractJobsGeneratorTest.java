@@ -823,13 +823,21 @@ public class AbstractJobsGeneratorTest {
     	assertNull(metadataBrain.get("AUX_RES"));
     
     	// Part 1: Exactly before timeout exceeds
+    	
+        final InputWaitingConfig inputWaitingConfig = new InputWaitingConfig();
+        inputWaitingConfig.setProcessorNameRegexp(".*");
+        inputWaitingConfig.setProcessorVersionRegexp(".*");
+        inputWaitingConfig.setInputIdRegexp("Orbit");
+        inputWaitingConfig.setTimelinessRegexp(".*");
+        inputWaitingConfig.setWaitingInSeconds(600);
+        inputWaitingConfig.setDelayInSeconds(0L);
     	   	
     	final InputTimeoutChecker inputTimeoutChecker1 = new InputTimeoutCheckerImpl(
-    			ipfPreparationWorkerSettings.getInputWaiting(),
+    			Collections.singletonList(inputWaitingConfig),
 			new Supplier<LocalDateTime>() {
 	    		@Override
 				public LocalDateTime get() {
-					return DateUtils.parse("2000-01-01T00:09:59.999999Z");
+					return DateUtils.parse("2000-01-01T00:05:59.999999Z");
 	    		}
 	    	}
     	);
