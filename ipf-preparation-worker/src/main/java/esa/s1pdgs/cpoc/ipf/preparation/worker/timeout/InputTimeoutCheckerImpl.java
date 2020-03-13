@@ -35,15 +35,15 @@ public final class InputTimeoutCheckerImpl implements InputTimeoutChecker {
 
 					final LocalDateTime now = timeSupplier.get();
 					
-					// job creation relative timeout (for development/testing purposes)
+					// job creation relative minimal waiting time (wait at least this time! this is for development/testing purposes)
 					final LocalDateTime jobCreationTime = new Timestamp(job.getCreationDate().getTime()).toLocalDateTime();
-					final LocalDateTime jobCreationRelativeTimeoutMoment = jobCreationTime.plusSeconds(config.getDelayInSeconds());
+					final LocalDateTime jobCreationRelativeMinimalWaitingTimeMoment = jobCreationTime.plusSeconds(config.getDelayInSeconds());
 					
 					// sensing relative timeout (for waiting for missing inputs)
 					final LocalDateTime sensingStart = DateUtils.parse(job.getProduct().getStartTime());
 					final LocalDateTime sensingRelativeTimeoutMoment = sensingStart.plusSeconds(config.getWaitingInSeconds());
 					
-					return !(now.isBefore(jobCreationRelativeTimeoutMoment) || now.isBefore(sensingRelativeTimeoutMoment));
+					return !(now.isBefore(jobCreationRelativeMinimalWaitingTimeMoment) || now.isBefore(sensingRelativeTimeoutMoment));
 				}
 			}
 
