@@ -28,6 +28,7 @@ import esa.s1pdgs.cpoc.mdc.worker.config.TriggerConfigurationProperties;
 import esa.s1pdgs.cpoc.mdc.worker.config.TriggerConfigurationProperties.CategoryConfig;
 import esa.s1pdgs.cpoc.mdc.worker.extraction.MetadataExtractor;
 import esa.s1pdgs.cpoc.mdc.worker.extraction.MetadataExtractorFactory;
+import esa.s1pdgs.cpoc.mdc.worker.extraction.report.SegmentReportingOutput;
 import esa.s1pdgs.cpoc.mdc.worker.status.AppStatusImpl;
 import esa.s1pdgs.cpoc.mqi.client.MqiClient;
 import esa.s1pdgs.cpoc.mqi.client.MqiConsumer;
@@ -38,6 +39,7 @@ import esa.s1pdgs.cpoc.mqi.model.rest.GenericMessageDto;
 import esa.s1pdgs.cpoc.mqi.model.rest.GenericPublicationMessageDto;
 import esa.s1pdgs.cpoc.report.Reporting;
 import esa.s1pdgs.cpoc.report.ReportingMessage;
+import esa.s1pdgs.cpoc.report.ReportingOutput;
 import esa.s1pdgs.cpoc.report.ReportingUtils;
 import esa.s1pdgs.cpoc.report.message.input.FilenameReportingInput;
 
@@ -114,13 +116,27 @@ public class MetadataExtractionService implements MqiListener<CatalogJob> {
 				metadata.put("insertionTime", DateUtils.formatToMetadataDateTimeFormat(LocalDateTime.now()));
 			}
 			
+			final ReportingOutput reportingOutput;
+			
+			// S1PRO-1247: deal with segment scenario
+			if (family == ProductFamily.L0_SEGMENT) {				
+				reportingOutput = new SegmentReportingOutput(
+						productName,
+						metadata.getString("productConsolidation"),
+						metadata.getString("productSensingConsolidation")
+				);			
+			}
+			else {
+				reportingOutput = ReportingOutput.NULL;
+			}
+			
 	    	LOG.debug("Metadata extracted: {} for product: {}", metadata, productName);
 	    	
 	    	esServices.createMetadataWithRetries(metadata, productName, properties.getProductInsertion().getMaxRetries(),
 	    			properties.getProductInsertion().getTempoRetryMs());
 
 	    	publish(message, reporting.getUid(), metadata);
-	        reporting.end(new ReportingMessage("End metadata extraction"));
+	        reporting.end(reportingOutput, new ReportingMessage("End metadata extraction"));
             
 		}
 		catch (final Exception e) {			
