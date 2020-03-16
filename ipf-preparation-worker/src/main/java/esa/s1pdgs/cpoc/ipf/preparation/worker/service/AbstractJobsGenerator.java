@@ -9,7 +9,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
-import java.util.concurrent.ThreadLocalRandom;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -576,60 +575,15 @@ public abstract class AbstractJobsGenerator implements Runnable {
 				for (final TaskTableInput input : task.getInputs()) {					
 					// If it is NOT a reference
 					if (StringUtils.isEmpty(input.getReference())) {
-						if (ProductMode.isCompatibleWithTaskTableMode(this.mode, input.getMode())) {
-							List<JobOrderInput> inputsToAdd = new ArrayList<>();
-							for (final TaskTableInputAlternative alt : alternatives(input).collect(Collectors.toList())) {
-								// We ignore input not DB
-								if (alt.getOrigin() == TaskTableInputOrigin.DB) {
-									// has queries defined?
-									if (!CollectionUtils.isEmpty(getSearchMetadataResult(job, alt).getResult())) {
-										final JobOrderFileNameType type = getFileNameTypeFor(alt);
-										// Retrieve family										
-										final ProductFamily family = elementMapper.inputFamilyOf(alt.getFileType());
-										final List<JobOrderInputFile> jobOrderInputFiles = getJoborderInputsFor(job, alt);										
-										final List<JobOrderTimeInterval> jobOrderTimeIntervals = getJoborderTimeIntervalsFor(job, alt);
-					
-										inputsToAdd = new ArrayList<>();
-										inputsToAdd.add(new JobOrderInput(
-												alt.getFileType(), 
-												type,
-												jobOrderInputFiles, 
-												jobOrderTimeIntervals, 
-												family
-										));									
-										break;
-									}
-								// is PROC input?
-								} else {
-									final String startDate = convertDateToJoborderFormat(
-											job.getAppDataJob().getProduct().getStartTime()
-									);
-									final String stopDate = convertDateToJoborderFormat(
-											job.getAppDataJob().getProduct().getStopTime()
-									);											
-									final String fileType = elementMapper.mappedFileType(alt.getFileType());
-									inputsToAdd.add(new JobOrderInput(
-											alt.getFileType(), // not clear, why this is used and not the mapped filetype 
-											JobOrderFileNameType.REGEXP,
-											Collections.singletonList(new JobOrderInputFile(fileType, "")),
-											Collections.singletonList(new JobOrderTimeInterval(
-													startDate, 
-													stopDate, 
-													fileType
-											)),
-											ProductFamily.BLANK
-									));
-								}
-							}						
-							
-							if (!inputsToAdd.isEmpty()) {
-								// We take a random one
-								final int indexToTake = ThreadLocalRandom.current().nextInt(0, inputsToAdd.size());
-								futureInputs.add(inputsToAdd.get(indexToTake));
+						if (ProductMode.isCompatibleWithTaskTableMode(mode, input.getMode())) {			
+							// returns null, if not found
+							final JobOrderInput foundInput = findInput(job, input);
+														
+							if (foundInput != null) {
+								futureInputs.add(foundInput);
 								if (!StringUtils.isEmpty(input.getId())) {
-									referenceInputs.put(input.getId(), inputsToAdd.get(indexToTake));
+									referenceInputs.put(input.getId(), foundInput);
 								}
-
 							} else {
 								// nothing found in none of the alternatives
 								if (input.getMandatory() == TaskTableMandatoryEnum.YES) {
@@ -651,6 +605,7 @@ public abstract class AbstractJobsGenerator implements Runnable {
 								}
 							}
 						}
+					// handle Input 'references'
 					} else {
 						// We shall add inputs of the reference
 						if (referenceInputs.containsKey(input.getReference())) {
@@ -666,6 +621,56 @@ public abstract class AbstractJobsGenerator implements Runnable {
 				}
 			}
 		}
+	}
+
+	private final JobOrderInput findInput(final JobGeneration job, final TaskTableInput input) {
+		JobOrderInput result = null;
+		
+		for (final TaskTableInputAlternative alt : alternatives(input).collect(Collectors.toList())) {
+			// We ignore input not DB
+			if (alt.getOrigin() == TaskTableInputOrigin.DB) {
+				// has queries defined?
+				if (!CollectionUtils.isEmpty(getSearchMetadataResult(job, alt).getResult())) {
+					final JobOrderFileNameType type = getFileNameTypeFor(alt);
+					// Retrieve family										
+					final ProductFamily family = elementMapper.inputFamilyOf(alt.getFileType());
+					final List<JobOrderInputFile> jobOrderInputFiles = getJoborderInputsFor(job, alt);										
+					final List<JobOrderTimeInterval> jobOrderTimeIntervals = getJoborderTimeIntervalsFor(job, alt);
+					
+					return new JobOrderInput(
+							alt.getFileType(), 
+							type,
+							jobOrderInputFiles, 
+							jobOrderTimeIntervals, 
+							family
+					);
+				}
+			// is PROC input?
+			} else {
+				final String startDate = convertDateToJoborderFormat(
+						job.getAppDataJob().getProduct().getStartTime()
+				);
+				final String stopDate = convertDateToJoborderFormat(
+						job.getAppDataJob().getProduct().getStopTime()
+				);											
+				final String fileType = elementMapper.mappedFileType(alt.getFileType());
+				result = new JobOrderInput(
+						alt.getFileType(), // not clear, why this is used and not the mapped filetype 
+						JobOrderFileNameType.REGEXP,
+						Collections.singletonList(new JobOrderInputFile(fileType, "")),
+						Collections.singletonList(new JobOrderTimeInterval(
+								startDate, 
+								stopDate, 
+								fileType
+						)),
+						ProductFamily.BLANK
+				);
+				// continue with the loop as we still might find a DB alternative
+				// no idea, why this was done this way but we keep it for the time being and I've created
+				// S1PRO-1273 to cover this observation
+			}
+		}
+		return result;
 	}
 
 	private final JobOrderFileNameType getFileNameTypeFor(final TaskTableInputAlternative alt) {
