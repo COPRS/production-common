@@ -99,13 +99,13 @@ public class IngestionWorkerService implements MqiListener<IngestionJob> {
 				new ReportingMessage("Start processing of %s", ingestion.getKeyObjectStorage())
 		);
 
-		try {	
-			final Date ingestionStartDate = new Date();
+		try {				
 			final IngestionResult result = identifyAndUpload(message, ingestion, reporting);
+			final Date ingestionFinishedDate = new Date();
 			publish(result.getIngestedProducts(), message, reporting.getUid());
 			delete(ingestion);			
 			reporting.end(
-					new IngestionWorkerReportingOutput(ingestion.getKeyObjectStorage(), ingestionStartDate),
+					new IngestionWorkerReportingOutput(ingestion.getKeyObjectStorage(), ingestionFinishedDate),
 					new ReportingMessage(result.getTransferAmount(),"End processing of %s", ingestion.getKeyObjectStorage())
 			);
 		} catch (final Exception e) {
