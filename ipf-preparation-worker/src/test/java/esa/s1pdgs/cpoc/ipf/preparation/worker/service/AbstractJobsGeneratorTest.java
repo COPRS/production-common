@@ -20,7 +20,6 @@ import java.io.File;
 import java.io.IOException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -28,7 +27,6 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -177,6 +175,8 @@ public class AbstractJobsGeneratorTest {
     		"A",
     		"WILE"));
 	
+	Map<Integer, SearchMetadataResult> metadataQueryResults;
+	
     /**
      * To check the raised custom exceptions
      */
@@ -246,6 +246,19 @@ public class AbstractJobsGeneratorTest {
     	metadataBrain.put("AUX_POE", AUX_POE);
     	metadataBrain.put("AUX_ATT", AUX_ATT);
     	
+    	metadataQueryResults = Stream.of(
+    		new SearchMetadataQuery(1, "LatestValCover", 0.0, 0.0, "AUX_INS", ProductFamily.BLANK), //
+    		new SearchMetadataQuery(2, "LatestValCover", 0.0, 0.0, "AUX_CAL", ProductFamily.BLANK), //
+    		new SearchMetadataQuery(3, "LatestValCover", 0.0, 0.0, "AUX_POE", ProductFamily.BLANK), //
+    		new SearchMetadataQuery(4, "LatestValCover", 0.0, 0.0, "IW_RAW__0N", ProductFamily.L0_ACN), //
+    		new SearchMetadataQuery(5, "LatestValCover", 0.0, 0.0, "AUX_PP1", ProductFamily.BLANK), //
+    		new SearchMetadataQuery(6, "LatestValCover", 0.0, 0.0, "IW_RAW__0C", ProductFamily.L0_ACN), //
+    		new SearchMetadataQuery(7, "LatestValCover", 0.0, 0.0, "IW_RAW__0S", ProductFamily.L0_SLICE), //
+    		new SearchMetadataQuery(8, "LatestValCover", 0.0, 0.0, "AUX_ATT", ProductFamily.BLANK), //
+    		new SearchMetadataQuery(9, "LatestValCover", 0.0, 0.0, "AUX_RES", ProductFamily.BLANK), //
+    		new SearchMetadataQuery(10, "LatestValCover", 0.0, 0.0, "IW_RAW__0A", ProductFamily.L0_ACN) //
+    	).collect(Collectors.toMap(s -> s.getIdentifier(), s -> new SearchMetadataResult(s)));
+    	
         this.nbLoopMetadata = 0;
         expectedTaskTable = TestGenericUtils.buildTaskTableIW();
 
@@ -267,7 +280,27 @@ public class AbstractJobsGeneratorTest {
         this.mockKafkaSender();
 
         this.mockAppDataService();
+        
+        // Mock appDataJob
+    	Mockito.when(appDataJob.getId()).thenReturn(23L);
+    	Mockito.when(appDataJob.getCreationDate()).thenReturn(new SimpleDateFormat(METADATA_DATE_FORMAT)
+    			.parse("2000-01-01T00:00:00.000000Z"));
+    	Mockito.when(appDataJob.getProduct()).thenReturn(appDataJobProduct);
+    	Mockito.when(appDataJob.getMessages()).thenReturn(Arrays.asList(
+    		new GenericMessageDto<CatalogEvent>() {{
+    			setBody(new CatalogEvent() {{
+    				setMetadata(Collections.singletonMap("timeliness", "NRT"));
+    			}});
+    		}}
+    	));
+    	Mockito.when(appDataJobProduct.getStartTime()).thenReturn("2000-01-01T00:00:00.000000Z");
+    	Mockito.when(appDataJobProduct.getStopTime()).thenReturn("2000-01-01T00:00:00.000000Z");
+    	Mockito.when(appDataJobProduct.getMissionId()).thenReturn("S1");
+    	Mockito.when(appDataJobProduct.getSatelliteId()).thenReturn("A");
+    	Mockito.when(appDataJobProduct.getInsConfId()).thenReturn(0);
+    	Mockito.when(appDataJobProduct.getProcessMode()).thenReturn("NRT");
 
+    	// create and init generator
         generator = makeUut();
         generator.initialize();
     }
@@ -603,43 +636,11 @@ public class AbstractJobsGeneratorTest {
     
     @Test
     public void testUseOptionalInputAlternativeOfOrder1WhenItExistsExclusively() throws IpfPrepWorkerInputsMissingException, ParseException {
-    	final Map<Integer, SearchMetadataResult> metadataQueries = new HashMap<>();
-    	final List<JobOrderProc> jobOrderProcList = new ArrayList<>();
-    	Stream.of(
-    		new SearchMetadataQuery(1, "LatestValCover", 0.0, 0.0, "AUX_INS", ProductFamily.BLANK), //
-    		new SearchMetadataQuery(2, "LatestValCover", 0.0, 0.0, "AUX_CAL", ProductFamily.BLANK), //
-    		new SearchMetadataQuery(3, "LatestValCover", 0.0, 0.0, "AUX_POE", ProductFamily.BLANK), //
-    		new SearchMetadataQuery(4, "LatestValCover", 0.0, 0.0, "IW_RAW__0N", ProductFamily.L0_ACN), //
-    		new SearchMetadataQuery(5, "LatestValCover", 0.0, 0.0, "AUX_PP1", ProductFamily.BLANK), //
-    		new SearchMetadataQuery(6, "LatestValCover", 0.0, 0.0, "IW_RAW__0C", ProductFamily.L0_ACN), //
-    		new SearchMetadataQuery(7, "LatestValCover", 0.0, 0.0, "IW_RAW__0S", ProductFamily.L0_SLICE), //
-    		new SearchMetadataQuery(8, "LatestValCover", 0.0, 0.0, "AUX_ATT", ProductFamily.BLANK), //
-    		new SearchMetadataQuery(9, "LatestValCover", 0.0, 0.0, "AUX_RES", ProductFamily.BLANK), //
-    		new SearchMetadataQuery(10, "LatestValCover", 0.0, 0.0, "IW_RAW__0A", ProductFamily.L0_ACN) //
-    	).forEach(s -> {
-    		metadataQueries.put(s.getIdentifier(), new SearchMetadataResult(s));
-    		jobOrderProcList.add(new JobOrderProc());
-    	});
-
+    	final List<JobOrderProc> jobOrderProcList = metadataQueryResults.values().stream()
+    			.map(s -> new JobOrderProc()).collect(Collectors.toList());
+    	
     	Mockito.when(jobGeneration.getAppDataJob()).thenReturn(appDataJob);
-    	Mockito.when(jobGeneration.getMetadataQueries()).thenReturn(metadataQueries);
-    	Mockito.when(appDataJob.getId()).thenReturn(23L);
-    	Mockito.when(appDataJob.getCreationDate()).thenReturn(new SimpleDateFormat(METADATA_DATE_FORMAT)
-    			.parse("2000-01-01T00:00:00.000000Z"));
-    	Mockito.when(appDataJob.getProduct()).thenReturn(appDataJobProduct);
-    	Mockito.when(appDataJob.getMessages()).thenReturn(Arrays.asList(
-    		new GenericMessageDto<CatalogEvent>() {{
-    			setBody(new CatalogEvent() {{
-    				setMetadata(Collections.singletonMap("timeliness", "NRT"));
-    			}});
-    		}}
-    	));
-    	Mockito.when(appDataJobProduct.getStartTime()).thenReturn("2000-01-01T00:00:00.000000Z");
-    	Mockito.when(appDataJobProduct.getStopTime()).thenReturn("2000-01-01T00:00:00.000000Z");
-    	Mockito.when(appDataJobProduct.getMissionId()).thenReturn("S1");
-    	Mockito.when(appDataJobProduct.getSatelliteId()).thenReturn("A");
-    	Mockito.when(appDataJobProduct.getInsConfId()).thenReturn(0);
-    	Mockito.when(appDataJobProduct.getProcessMode()).thenReturn("NRT");    	
+    	Mockito.when(jobGeneration.getMetadataQueries()).thenReturn(metadataQueryResults);
     	Mockito.when(jobGeneration.getJobOrder()).thenReturn(jobOrder);    	
     	Mockito.when(jobOrder.getProcs()).thenReturn(jobOrderProcList);
     	
@@ -661,26 +662,11 @@ public class AbstractJobsGeneratorTest {
     @Test
     public void testUseOptionalInputAlternativeOfOrder2WhenItExistsExclusively()
     		throws IpfPrepWorkerInputsMissingException, ParseException {
-    	final Map<Integer, SearchMetadataResult> metadataQueries = new HashMap<>();
-    	final List<JobOrderProc> jobOrderProcList = new ArrayList<>();
-    	Stream.of(
-    		new SearchMetadataQuery(1, "LatestValCover", 0.0, 0.0, "AUX_INS", ProductFamily.BLANK), //
-    		new SearchMetadataQuery(2, "LatestValCover", 0.0, 0.0, "AUX_CAL", ProductFamily.BLANK), //
-    		new SearchMetadataQuery(3, "LatestValCover", 0.0, 0.0, "AUX_POE", ProductFamily.BLANK), //
-    		new SearchMetadataQuery(4, "LatestValCover", 0.0, 0.0, "IW_RAW__0N", ProductFamily.L0_ACN), //
-    		new SearchMetadataQuery(5, "LatestValCover", 0.0, 0.0, "AUX_PP1", ProductFamily.BLANK), //
-    		new SearchMetadataQuery(6, "LatestValCover", 0.0, 0.0, "IW_RAW__0C", ProductFamily.L0_ACN), //
-    		new SearchMetadataQuery(7, "LatestValCover", 0.0, 0.0, "IW_RAW__0S", ProductFamily.L0_SLICE), //
-    		new SearchMetadataQuery(8, "LatestValCover", 0.0, 0.0, "AUX_ATT", ProductFamily.BLANK), //
-    		new SearchMetadataQuery(9, "LatestValCover", 0.0, 0.0, "AUX_RES", ProductFamily.BLANK), //
-    		new SearchMetadataQuery(10, "LatestValCover", 0.0, 0.0, "IW_RAW__0A", ProductFamily.L0_ACN) //
-    	).forEach(s -> {
-    		metadataQueries.put(s.getIdentifier(), new SearchMetadataResult(s));
-    		jobOrderProcList.add(new JobOrderProc());
-    	});
+    	final List<JobOrderProc> jobOrderProcList = metadataQueryResults.values().stream()
+    			.map(s -> new JobOrderProc()).collect(Collectors.toList());
 
     	Mockito.when(jobGeneration.getAppDataJob()).thenReturn(appDataJob);
-    	Mockito.when(jobGeneration.getMetadataQueries()).thenReturn(metadataQueries);
+    	Mockito.when(jobGeneration.getMetadataQueries()).thenReturn(metadataQueryResults);
     	Mockito.when(appDataJob.getId()).thenReturn(23L);
     	Mockito.when(appDataJob.getCreationDate()).thenReturn(new SimpleDateFormat(METADATA_DATE_FORMAT)
     			.parse("2000-01-01T00:00:00.000000Z"));
@@ -719,26 +705,11 @@ public class AbstractJobsGeneratorTest {
     @Test
     public void testUseOptionalInputAlternativeOfOrder1WhenMultipleOrdersExist()
     		throws IpfPrepWorkerInputsMissingException, ParseException {
-    	final Map<Integer, SearchMetadataResult> metadataQueries = new HashMap<>();
-    	final List<JobOrderProc> jobOrderProcList = new ArrayList<>();
-    	Stream.of(
-    		new SearchMetadataQuery(1, "LatestValCover", 0.0, 0.0, "AUX_INS", ProductFamily.BLANK), //
-    		new SearchMetadataQuery(2, "LatestValCover", 0.0, 0.0, "AUX_CAL", ProductFamily.BLANK), //
-    		new SearchMetadataQuery(3, "LatestValCover", 0.0, 0.0, "AUX_POE", ProductFamily.BLANK), //
-    		new SearchMetadataQuery(4, "LatestValCover", 0.0, 0.0, "IW_RAW__0N", ProductFamily.L0_ACN), //
-    		new SearchMetadataQuery(5, "LatestValCover", 0.0, 0.0, "AUX_PP1", ProductFamily.BLANK), //
-    		new SearchMetadataQuery(6, "LatestValCover", 0.0, 0.0, "IW_RAW__0C", ProductFamily.L0_ACN), //
-    		new SearchMetadataQuery(7, "LatestValCover", 0.0, 0.0, "IW_RAW__0S", ProductFamily.L0_SLICE), //
-    		new SearchMetadataQuery(8, "LatestValCover", 0.0, 0.0, "AUX_ATT", ProductFamily.BLANK), //
-    		new SearchMetadataQuery(9, "LatestValCover", 0.0, 0.0, "AUX_RES", ProductFamily.BLANK), //
-    		new SearchMetadataQuery(10, "LatestValCover", 0.0, 0.0, "IW_RAW__0A", ProductFamily.L0_ACN) //
-    	).forEach(s -> {
-    		metadataQueries.put(s.getIdentifier(), new SearchMetadataResult(s));
-    		jobOrderProcList.add(new JobOrderProc());
-    	});
+    	final List<JobOrderProc> jobOrderProcList = metadataQueryResults.values().stream()
+    			.map(s -> new JobOrderProc()).collect(Collectors.toList());
 
     	Mockito.when(jobGeneration.getAppDataJob()).thenReturn(appDataJob);
-    	Mockito.when(jobGeneration.getMetadataQueries()).thenReturn(metadataQueries);
+    	Mockito.when(jobGeneration.getMetadataQueries()).thenReturn(metadataQueryResults);
     	Mockito.when(appDataJob.getId()).thenReturn(23L);
     	Mockito.when(appDataJob.getCreationDate()).thenReturn(new SimpleDateFormat(METADATA_DATE_FORMAT)
     			.parse("2000-01-01T00:00:00.000000Z"));
@@ -774,26 +745,11 @@ public class AbstractJobsGeneratorTest {
 
     @Test
     public void testWaiting() throws Exception {
-    	final Map<Integer, SearchMetadataResult> metadataQueries = new HashMap<>();
-    	final List<JobOrderProc> jobOrderProcList = new ArrayList<>();
-    	Stream.of(
-    		new SearchMetadataQuery(1, "LatestValCover", 0.0, 0.0, "AUX_INS", ProductFamily.BLANK), //
-    		new SearchMetadataQuery(2, "LatestValCover", 0.0, 0.0, "AUX_CAL", ProductFamily.BLANK), //
-    		new SearchMetadataQuery(3, "LatestValCover", 0.0, 0.0, "AUX_POE", ProductFamily.BLANK), //
-    		new SearchMetadataQuery(4, "LatestValCover", 0.0, 0.0, "IW_RAW__0N", ProductFamily.L0_ACN), //
-    		new SearchMetadataQuery(5, "LatestValCover", 0.0, 0.0, "AUX_PP1", ProductFamily.BLANK), //
-    		new SearchMetadataQuery(6, "LatestValCover", 0.0, 0.0, "IW_RAW__0C", ProductFamily.L0_ACN), //
-    		new SearchMetadataQuery(7, "LatestValCover", 0.0, 0.0, "IW_RAW__0S", ProductFamily.L0_SLICE), //
-    		new SearchMetadataQuery(8, "LatestValCover", 0.0, 0.0, "AUX_ATT", ProductFamily.BLANK), //
-    		new SearchMetadataQuery(9, "LatestValCover", 0.0, 0.0, "AUX_RES", ProductFamily.BLANK), //
-    		new SearchMetadataQuery(10, "LatestValCover", 0.0, 0.0, "IW_RAW__0A", ProductFamily.L0_ACN) //
-    	).forEach(s -> {
-    		metadataQueries.put(s.getIdentifier(), new SearchMetadataResult(s));
-    		jobOrderProcList.add(new JobOrderProc());
-    	});
+    	final List<JobOrderProc> jobOrderProcList = metadataQueryResults.values().stream()
+    			.map(s -> new JobOrderProc()).collect(Collectors.toList());
     	
     	Mockito.when(jobGeneration.getAppDataJob()).thenReturn(appDataJob);
-    	Mockito.when(jobGeneration.getMetadataQueries()).thenReturn(metadataQueries);
+    	Mockito.when(jobGeneration.getMetadataQueries()).thenReturn(metadataQueryResults);
     	Mockito.when(appDataJob.getId()).thenReturn(23L);
     	Mockito.when(appDataJob.getCreationDate()).thenReturn(new SimpleDateFormat(METADATA_DATE_FORMAT)
     			.parse("2000-01-01T00:00:00.000000Z"));
@@ -832,17 +788,10 @@ public class AbstractJobsGeneratorTest {
         inputWaitingConfig.setWaitingInSeconds(600);
         inputWaitingConfig.setDelayInSeconds(0L);
     	   	
-    	final InputTimeoutChecker inputTimeoutChecker1 = new InputTimeoutCheckerImpl(
+    	generator = makeUut(new InputTimeoutCheckerImpl(
     			Collections.singletonList(inputWaitingConfig),
-			new Supplier<LocalDateTime>() {
-	    		@Override
-				public LocalDateTime get() {
-					return DateUtils.parse("2000-01-01T00:05:59.999999Z");
-	    		}
-	    	}
-    	);
-    	
-    	generator = makeUut(inputTimeoutChecker1);
+    			() -> DateUtils.parse("2000-01-01T00:05:59.999999Z")
+    	));
     	generator.initialize();
     	
     	assertThatThrownBy(() -> generator.inputsSearch(jobGeneration))
@@ -850,17 +799,10 @@ public class AbstractJobsGeneratorTest {
 
     	// Part 2: Exactly when timeout is exceeded
     	
-    	final InputTimeoutChecker inputTimeoutChecker2 = new InputTimeoutCheckerImpl(
+    	generator = makeUut(new InputTimeoutCheckerImpl(
     			ipfPreparationWorkerSettings.getInputWaiting(),
-			new Supplier<LocalDateTime>() {
-	    		@Override
-				public LocalDateTime get() {
-					return DateUtils.parse("2000-01-01T00:10:00.000000Z");
-	    		}
-	    	}
-    	);
-    	
-    	generator = makeUut(inputTimeoutChecker2);
+    			() -> DateUtils.parse("2000-01-01T00:10:00.000000Z")
+    	));
     	generator.initialize();
     	
     	generator.inputsSearch(jobGeneration);
