@@ -703,7 +703,7 @@ public class AbstractJobsGeneratorTest {
     }
     
     @Test
-    public void testUseOptionalInputAlternativeOfOrder1WhenMultipleOrdersExist()
+    public void testUseOptionalInputAlternativeWithLowestOrderValueWhenMultipleInputsExist()
     		throws IpfPrepWorkerInputsMissingException, ParseException {
     	final List<JobOrderProc> jobOrderProcList = metadataQueryResults.values().stream()
     			.map(s -> new JobOrderProc()).collect(Collectors.toList());
