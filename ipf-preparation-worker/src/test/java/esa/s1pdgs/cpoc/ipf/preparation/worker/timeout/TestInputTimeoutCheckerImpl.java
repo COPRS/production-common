@@ -84,12 +84,12 @@ public class TestInputTimeoutCheckerImpl {
 	}
 	
 	@Test
-	public final void testIsTimeoutExpiredFor_NotExpired_WhenNowBeforeMinwaitBeforeTimeout_ShallReturnFalse() throws ParseException {
+	public final void testIsTimeoutExpiredFor_NotExpired_WhenNowBeforeIngestionwaitBeforeDownlinkwait_ShallReturnFalse() throws ParseException {
 		final InputWaitingConfig config = new InputWaitingConfig();
 		config.setInputIdRegexp("123");
 		config.setTimelinessRegexp("NRT");
-		config.setDelayInSeconds(300L);
-		config.setWaitingInSeconds(600L);
+		config.setWaitingFromIngestionInSeconds(300L);
+		config.setWaitingFromDownlinkInSeconds(600L);
 				
 		final InputTimeoutCheckerImpl uut = new InputTimeoutCheckerImpl(
 				Collections.singletonList(config),
@@ -108,12 +108,12 @@ public class TestInputTimeoutCheckerImpl {
 	}
 	
 	@Test
-	public final void testIsTimeoutExpiredFor_NotExpired_WhenNowBeforeTimeoutBeforeMinwait_ShallReturnFalse() throws ParseException {
+	public final void testIsTimeoutExpiredFor_NotExpired_WhenNowBeforeDownlinkwaitBeforeIngestionwait_ShallReturnFalse() throws ParseException {
 		final InputWaitingConfig config = new InputWaitingConfig();
 		config.setInputIdRegexp("123");
 		config.setTimelinessRegexp("NRT");
-		config.setDelayInSeconds(1200L);
-		config.setWaitingInSeconds(300L);
+		config.setWaitingFromIngestionInSeconds(1200L);
+		config.setWaitingFromDownlinkInSeconds(300L);
 				
 		final InputTimeoutCheckerImpl uut = new InputTimeoutCheckerImpl(
 				Collections.singletonList(config),
@@ -132,12 +132,12 @@ public class TestInputTimeoutCheckerImpl {
 	}
 	
 	@Test
-	public final void testIsTimeoutExpiredFor_NotExpired_WhenMinwaitBeforeNowBeforeTimeout_ShallReturnFalse() throws ParseException {
+	public final void testIsTimeoutExpiredFor_NotExpired_WhenIngestionwaitBeforeNowBeforeDownlinkwait_ShallReturnFalse() throws ParseException {
 		final InputWaitingConfig config = new InputWaitingConfig();
 		config.setInputIdRegexp("123");
 		config.setTimelinessRegexp("NRT");
-		config.setDelayInSeconds(300L);
-		config.setWaitingInSeconds(600L);
+		config.setWaitingFromIngestionInSeconds(300L);
+		config.setWaitingFromDownlinkInSeconds(600L);
 				
 		final InputTimeoutCheckerImpl uut = new InputTimeoutCheckerImpl(
 				Collections.singletonList(config),
@@ -156,12 +156,12 @@ public class TestInputTimeoutCheckerImpl {
 	}
 	
 	@Test
-	public final void testIsTimeoutExpiredFor_NotExpired_WhenTimeoutBeforeNowBeforeMinwait_ShallReturnFalse() throws ParseException {
+	public final void testIsTimeoutExpiredFor_NotExpired_WhenDownlinkwaitBeforeNowBeforeIngestionwait_ShallReturnFalse() throws ParseException {
 		final InputWaitingConfig config = new InputWaitingConfig();
 		config.setInputIdRegexp("123");
 		config.setTimelinessRegexp("NRT");
-		config.setDelayInSeconds(1200L);
-		config.setWaitingInSeconds(300L);
+		config.setWaitingFromIngestionInSeconds(1200L);
+		config.setWaitingFromDownlinkInSeconds(300L);
 				
 		final InputTimeoutCheckerImpl uut = new InputTimeoutCheckerImpl(
 				Collections.singletonList(config),
@@ -180,12 +180,12 @@ public class TestInputTimeoutCheckerImpl {
 	}
 	
 	@Test
-	public final void testIsTimeoutExpiredFor_Expired_WhenMinwaitBeforeTimeoutBeforeNow_ShallReturnTrue() throws ParseException {
+	public final void testIsTimeoutExpiredFor_Expired_WhenIngestionwaitBeforeDownlinkwaitBeforeNow_ShallReturnTrue() throws ParseException {
 		final InputWaitingConfig config = new InputWaitingConfig();
 		config.setInputIdRegexp("123");
 		config.setTimelinessRegexp("NRT");
-		config.setDelayInSeconds(300L);
-		config.setWaitingInSeconds(600L);
+		config.setWaitingFromIngestionInSeconds(300L);
+		config.setWaitingFromDownlinkInSeconds(600L);
 				
 		final InputTimeoutCheckerImpl uut = new InputTimeoutCheckerImpl(
 				Collections.singletonList(config),
@@ -204,12 +204,12 @@ public class TestInputTimeoutCheckerImpl {
 	}
 	
 	@Test
-	public final void testIsTimeoutExpiredFor_Expired_WhenTimeoutBeforeMinwaitBeforeNow_ShallReturnTrue() throws ParseException {
+	public final void testIsTimeoutExpiredFor_Expired_WhenDownlinkwaitBeforeIngestionwaitBeforeNow_ShallReturnTrue() throws ParseException {
 		final InputWaitingConfig config = new InputWaitingConfig();
 		config.setInputIdRegexp("123");
 		config.setTimelinessRegexp("NRT");
-		config.setDelayInSeconds(1200L);
-		config.setWaitingInSeconds(300L);
+		config.setWaitingFromIngestionInSeconds(1200L);
+		config.setWaitingFromDownlinkInSeconds(300L);
 				
 		final InputTimeoutCheckerImpl uut = new InputTimeoutCheckerImpl(
 				Collections.singletonList(config),

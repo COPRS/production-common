@@ -395,8 +395,8 @@ public class AbstractJobsGeneratorTest {
         inputWaitingConfig.setProcessorVersionRegexp(".*");
         inputWaitingConfig.setInputIdRegexp("Orbit");
         inputWaitingConfig.setTimelinessRegexp(".*");
-        inputWaitingConfig.setWaitingInSeconds(600);
-        inputWaitingConfig.setDelayInSeconds(0L);
+        inputWaitingConfig.setWaitingFromDownlinkInSeconds(600);
+        inputWaitingConfig.setWaitingFromIngestionInSeconds(0L);
         Mockito.when(ipfPreparationWorkerSettings.getInputWaiting()).thenReturn(Arrays.asList(inputWaitingConfig));
     }
 
@@ -785,8 +785,8 @@ public class AbstractJobsGeneratorTest {
         inputWaitingConfig.setProcessorVersionRegexp(".*");
         inputWaitingConfig.setInputIdRegexp("Orbit");
         inputWaitingConfig.setTimelinessRegexp(".*");
-        inputWaitingConfig.setWaitingInSeconds(600);
-        inputWaitingConfig.setDelayInSeconds(0L);
+        inputWaitingConfig.setWaitingFromDownlinkInSeconds(600);
+        inputWaitingConfig.setWaitingFromIngestionInSeconds(0L);
     	   	
     	generator = makeUut(new InputTimeoutCheckerImpl(
     			Collections.singletonList(inputWaitingConfig),

@@ -143,22 +143,22 @@ public class IpfPreparationWorkerSettingsTest {
 		assertEquals(".*", inputWaiting.get(0).getProcessorVersionRegexp());
 		assertEquals("Orbit", inputWaiting.get(0).getInputIdRegexp());
 		assertEquals("(PT|NRT)", inputWaiting.get(0).getTimelinessRegexp());
-		assertEquals(0, inputWaiting.get(0).getWaitingInSeconds());
-		assertEquals(3600, inputWaiting.get(0).getDelayInSeconds());
+		assertEquals(0, inputWaiting.get(0).getWaitingFromDownlinkInSeconds());
+		assertEquals(1800, inputWaiting.get(0).getWaitingFromIngestionInSeconds());
 
 		assertEquals(".._RAW__0_(SLC|GRD).*_1", inputWaiting.get(1).getProcessorNameRegexp());
 		assertEquals(".*", inputWaiting.get(1).getProcessorVersionRegexp());
 		assertEquals("Orbit", inputWaiting.get(1).getInputIdRegexp());
 		assertEquals("FAST24", inputWaiting.get(1).getTimelinessRegexp());
-		assertEquals(57600, inputWaiting.get(1).getWaitingInSeconds());
-		assertEquals(3600, inputWaiting.get(1).getDelayInSeconds());
+		assertEquals(57600, inputWaiting.get(1).getWaitingFromDownlinkInSeconds());
+		assertEquals(1800, inputWaiting.get(1).getWaitingFromIngestionInSeconds());
 
 		assertEquals(".._RAW__0_OCN__2", inputWaiting.get(2).getProcessorNameRegexp());
 		assertEquals(".*", inputWaiting.get(2).getProcessorVersionRegexp());
 		assertEquals("Orbit", inputWaiting.get(2).getInputIdRegexp());
 		assertEquals("(PT|NRT|FAST24)", inputWaiting.get(2).getTimelinessRegexp());
-		assertEquals(57600, inputWaiting.get(2).getWaitingInSeconds());
-		assertEquals(3600, inputWaiting.get(2).getDelayInSeconds());
+		assertEquals(57600, inputWaiting.get(2).getWaitingFromDownlinkInSeconds());
+		assertEquals(1800, inputWaiting.get(2).getWaitingFromIngestionInSeconds());
 	}
 
 }

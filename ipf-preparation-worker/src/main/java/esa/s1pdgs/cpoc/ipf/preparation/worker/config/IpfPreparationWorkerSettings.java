@@ -104,8 +104,8 @@ public class IpfPreparationWorkerSettings {
 		private String processorVersionRegexp	= ".*";
 		private String inputIdRegexp;
 		private String timelinessRegexp;
-		private long waitingInSeconds;
-		private long delayInSeconds = 0;		
+		private long waitingFromDownlinkInSeconds;
+		private long waitingFromIngestionInSeconds = 0;		
 
 		public String getProcessorNameRegexp() {
 			return processorNameRegexp;
@@ -139,27 +139,27 @@ public class IpfPreparationWorkerSettings {
 			this.timelinessRegexp = timelinessRegexp;
 		}
 		
-		public long getWaitingInSeconds() {
-			return waitingInSeconds;
+		public long getWaitingFromDownlinkInSeconds() {
+			return waitingFromDownlinkInSeconds;
 		}
 		
-		public void setWaitingInSeconds(final long waitingInSeconds) {
-			this.waitingInSeconds = waitingInSeconds;
+		public void setWaitingFromDownlinkInSeconds(final long waitingFromDownlinkInSeconds) {
+			this.waitingFromDownlinkInSeconds = waitingFromDownlinkInSeconds;
 		}
 
-		public long getDelayInSeconds() {
-			return delayInSeconds;
+		public long getWaitingFromIngestionInSeconds() {
+			return waitingFromIngestionInSeconds;
 		}
 
-		public void setDelayInSeconds(final long delayInSeconds) {
-			this.delayInSeconds = delayInSeconds;
+		public void setWaitingFromIngestionInSeconds(final long waitingFromIngestionInSeconds) {
+			this.waitingFromIngestionInSeconds = waitingFromIngestionInSeconds;
 		}
 
 		@Override
 		public String toString() {
 			return "InputWaitingConfig [processorNameRegexp=" + processorNameRegexp + ", processorVersionRegexp="
 					+ processorVersionRegexp + ", inputIdRegexp=" + inputIdRegexp + ", timelinessRegexp=" + timelinessRegexp 
-					+ ", waitingInSeconds=" + waitingInSeconds + ", delayInSeconds=" + delayInSeconds + "]";
+					+ ", waitingFromDownlinkInSeconds=" + waitingFromDownlinkInSeconds + ", waitingFromIngestionInSeconds=" + waitingFromIngestionInSeconds + "]";
 		}
 	}
 
