@@ -32,6 +32,8 @@ import esa.s1pdgs.cpoc.ipf.execution.worker.job.model.mqi.ObsQueueMessage;
 import esa.s1pdgs.cpoc.ipf.execution.worker.job.mqi.OutputProcuderFactory;
 import esa.s1pdgs.cpoc.ipf.execution.worker.job.oqc.OQCDefaultTaskFactory;
 import esa.s1pdgs.cpoc.ipf.execution.worker.job.oqc.OQCExecutor;
+import esa.s1pdgs.cpoc.ipf.execution.worker.job.oqc.report.IpfExecutionWorkerReportingOutput;
+import esa.s1pdgs.cpoc.ipf.execution.worker.job.oqc.report.IpfExecutionWorkerReportingOutput.Segment;
 import esa.s1pdgs.cpoc.mqi.model.queue.IpfExecutionJob;
 import esa.s1pdgs.cpoc.mqi.model.queue.LevelJobOutputDto;
 import esa.s1pdgs.cpoc.mqi.model.queue.OQCFlag;
@@ -575,7 +577,7 @@ public class OutputProcessor {
 	 */
 	public ReportingOutput processOutput(final ReportingFactory reportingFactory, final UUID uuid) throws AbstractCodedException, ObsEmptyFileException {
 		List<String> result = new ArrayList<>();
-		
+		final List<Segment> segments = new ArrayList<>();
 		// Extract files
 		final List<String> lines = extractFiles();
 
@@ -593,10 +595,21 @@ public class OutputProcessor {
 			processProducts(reportingFactory, uploadBatch, outputToPublish, uuid);
 			// Publish reports
 			processReports(reportToPublish, uuid);
+			for (final ObsUploadObject obj : uploadBatch) {
+				if (obj.getFamily() == ProductFamily.L0_SEGMENT) {
+					segments.add(new Segment(obj.getKey()));
+				}
+			}
 		} catch (final AbstractCodedException | ObsEmptyFileException e) {
 			throw e;
 		}
-		return new FilenameReportingOutput(result);
+		final ReportingOutput reportOut;
+		if (!segments.isEmpty()) {
+			reportOut = new IpfExecutionWorkerReportingOutput(result, segments);
+		} else {
+			reportOut = new FilenameReportingOutput(result);
+		}
+		return reportOut;
 	}
 
 	private long size(final File file) throws InternalErrorException {
