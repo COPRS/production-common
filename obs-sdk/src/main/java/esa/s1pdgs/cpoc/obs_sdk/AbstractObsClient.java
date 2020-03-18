@@ -85,7 +85,7 @@ public abstract class AbstractObsClient implements ObsClient {
             // Download object in sequential
             for (final ObsDownloadObject object : objects) {            
              	reporting.begin(
-             			new ObsReportingInput(getBucketFor(object.getFamily()), object.getKey()),
+             			new ObsReportingInput(getBucketFor(object.getFamily()), object.getFamily(), object.getKey()),
              			new ReportingMessage("Start downloading from OBS")
              	);
              	try {
@@ -126,7 +126,7 @@ public abstract class AbstractObsClient implements ObsClient {
             // Upload object in sequential
             for (final ObsUploadObject object : objects) {            	
              	reporting.begin(
-             			new ObsReportingInput(getBucketFor(object.getFamily()), object.getKey()),
+             			new ObsReportingInput(getBucketFor(object.getFamily()), object.getFamily(), object.getKey()),
              			new ReportingMessage("Start uploading to OBS")
              	);
              	
