@@ -5,7 +5,7 @@ public class InboxConfiguration {
 	private String matchRegex;
 	private String ignoreRegex;
 	private String topic;
-	private int productInDirectoryLevel = 0;
+	private int productInDirectoryLevel = 1;
 
 	public String getDirectory() {
 		return directory;
