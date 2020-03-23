@@ -41,7 +41,6 @@ import esa.s1pdgs.cpoc.report.Reporting;
 import esa.s1pdgs.cpoc.report.ReportingMessage;
 import esa.s1pdgs.cpoc.report.ReportingOutput;
 import esa.s1pdgs.cpoc.report.ReportingUtils;
-import esa.s1pdgs.cpoc.report.message.input.FilenameReportingInput;
 
 @Service
 public class MetadataExtractionService implements MqiListener<CatalogJob> {
@@ -97,7 +96,10 @@ public class MetadataExtractionService implements MqiListener<CatalogJob> {
 				.predecessor(catJob.getUid())				
 				.newReporting("MetadataExtraction");
     
-		reporting.begin(new FilenameReportingInput(productName), new ReportingMessage("Starting metadata extraction"));   
+		reporting.begin(
+				ReportingUtils.newFilenameReportingInputFor(family, productName),
+				new ReportingMessage("Starting metadata extraction")
+		);   
 				
 		try {
 			final MetadataExtractor extractor = extractorFactory.newMetadataExtractorFor(

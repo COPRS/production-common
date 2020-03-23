@@ -31,12 +31,13 @@ import esa.s1pdgs.cpoc.mqi.model.rest.GenericMessageDto;
 import esa.s1pdgs.cpoc.mqi.model.rest.GenericPublicationMessageDto;
 import esa.s1pdgs.cpoc.production.trigger.config.ProcessSettings;
 import esa.s1pdgs.cpoc.production.trigger.report.DispatchReportInput;
+import esa.s1pdgs.cpoc.production.trigger.report.DispatchSegmentReportInput;
 import esa.s1pdgs.cpoc.production.trigger.report.SeaCoverageCheckReportingOutput;
 import esa.s1pdgs.cpoc.report.Reporting;
 import esa.s1pdgs.cpoc.report.ReportingFactory;
+import esa.s1pdgs.cpoc.report.ReportingInput;
 import esa.s1pdgs.cpoc.report.ReportingMessage;
 import esa.s1pdgs.cpoc.report.ReportingUtils;
-import esa.s1pdgs.cpoc.report.message.input.FilenameReportingInput;
 
 public abstract class AbstractGenericConsumer<T extends AbstractMessage> implements MqiListener<CatalogEvent> {
     protected static final Logger LOGGER = LogManager.getLogger(AbstractGenericConsumer.class);
@@ -46,7 +47,7 @@ public abstract class AbstractGenericConsumer<T extends AbstractMessage> impleme
     private final GenericMqiClient mqiClient;
     private final AppStatus appStatus;    
     private final ErrorRepoAppender errorRepoAppender;    
-     private final Pattern blackList;    
+    private final Pattern blackList;    
     private final Pattern seaCoverageCheckPattern;    
     private final MetadataClient metadataClient;
 
@@ -89,7 +90,7 @@ public abstract class AbstractGenericConsumer<T extends AbstractMessage> impleme
         		.newReporting("ProductionTrigger");
 
         reporting.begin(
-        		new FilenameReportingInput(productName),
+        		ReportingUtils.newFilenameReportingInputFor(event.getProductFamily(), productName),
         		new ReportingMessage("Received CatalogEvent for %s", productName)
         );
         try {
@@ -138,8 +139,15 @@ public abstract class AbstractGenericConsumer<T extends AbstractMessage> impleme
 	) throws AbstractCodedException {
         final Reporting reporting = reportingFactory.newReporting("Dispatch");
         
+        final ReportingInput reportIn;
+        if (type.equals(L0SegmentConsumer.TYPE)) {
+        	reportIn = new DispatchSegmentReportInput(appDataJob.getId(), productName, type);
+        }
+        else {
+        	reportIn = new DispatchReportInput(appDataJob.getId(), productName, type);
+        }               
         reporting.begin(
-        		new DispatchReportInput(appDataJob.getId(), productName, type),
+        		reportIn,
         		new ReportingMessage("Dispatching AppDataJob %s for %s %s", appDataJob.getId(), type, productName)
         );     
         try {
@@ -201,7 +209,10 @@ public abstract class AbstractGenericConsumer<T extends AbstractMessage> impleme
 		final Reporting seaReport = reporting.newReporting("SeaCoverageCheck");
         try {
 			if (seaCoverageCheckPattern.matcher(productName).matches()) {   
-				seaReport.begin(new FilenameReportingInput(productName), new ReportingMessage("Checking sea coverage"));	
+				seaReport.begin(
+						ReportingUtils.newFilenameReportingInputFor(family, productName),
+						new ReportingMessage("Checking sea coverage")
+				);	
 				if (metadataClient.getSeaCoverage(family, productName) <= processSettings.getMinSeaCoveragePercentage()) {
 					seaReport.end(
 							new SeaCoverageCheckReportingOutput(productName, false), 

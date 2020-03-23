@@ -19,7 +19,6 @@ import esa.s1pdgs.cpoc.mqi.model.rest.GenericPublicationMessageDto;
 import esa.s1pdgs.cpoc.report.Reporting;
 import esa.s1pdgs.cpoc.report.ReportingMessage;
 import esa.s1pdgs.cpoc.report.ReportingUtils;
-import esa.s1pdgs.cpoc.report.message.input.FilenameReportingInput;
 
 public final class MetadataTriggerListener<E extends AbstractMessage> implements MqiListener<E> {
 	private static final Logger LOG = LogManager.getLogger(MetadataTriggerListener.class);
@@ -51,7 +50,7 @@ public final class MetadataTriggerListener<E extends AbstractMessage> implements
 				.newReporting("MetadataTrigger");
 		
 		reporting.begin(
-				new FilenameReportingInput(dto.getKeyObjectStorage()),
+				ReportingUtils.newFilenameReportingInputFor(dto.getProductFamily(), dto.getKeyObjectStorage()),
 				new ReportingMessage("Received %s", eventType)
 		);			
 		try {				

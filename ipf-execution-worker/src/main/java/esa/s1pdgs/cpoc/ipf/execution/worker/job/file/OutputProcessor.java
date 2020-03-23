@@ -45,7 +45,7 @@ import esa.s1pdgs.cpoc.report.Reporting;
 import esa.s1pdgs.cpoc.report.ReportingFactory;
 import esa.s1pdgs.cpoc.report.ReportingMessage;
 import esa.s1pdgs.cpoc.report.ReportingOutput;
-import esa.s1pdgs.cpoc.report.message.input.FilenameReportingInput;
+import esa.s1pdgs.cpoc.report.ReportingUtils;
 import esa.s1pdgs.cpoc.report.message.output.FilenameReportingOutput;
 
 /**
@@ -173,6 +173,14 @@ public class OutputProcessor {
 		}
 	}
 
+	private final ProductFamily familyOf(final LevelJobOutputDto output) {
+		final ProductFamily family = ProductFamily.fromValue(output.getFamily());
+		if (family == ProductFamily.L0_SLICE && appLevel == ApplicationLevel.L0) {
+			return ProductFamily.L0_SEGMENT;
+		}
+		return family;
+	}
+	
 	/**
 	 * Sort outputs and convert them into object for message queue system or OBS
 	 * according the output define in the job they match
@@ -206,10 +214,10 @@ public class OutputProcessor {
 			if (matchOutput == null) {
 				LOGGER.warn("Output {} ignored because no found matching regular expression", productName);
 			} else {
-				final ProductFamily family = ProductFamily.fromValue(matchOutput.getFamily());
+				final ProductFamily family = familyOf(matchOutput);
 
 				final File file = new File(filePath);
-				final OQCFlag oqcFlag = executor.executeOQC(file, matchOutput, new OQCDefaultTaskFactory(), reportingFactory);
+				final OQCFlag oqcFlag = executor.executeOQC(file, family, matchOutput, new OQCDefaultTaskFactory(), reportingFactory);
 				LOGGER.info("Result of OQC validation was: {}", oqcFlag);
 
 				switch (family) {
@@ -223,30 +231,31 @@ public class OutputProcessor {
 					reportToPublish.add(new FileQueueMessage(family, productName, file));
 					productSize += size(file);
 					break;
-				case L0_SLICE:		
+				case L0_SLICE:
+				case L0_SEGMENT:	
 					// Specific case of the L0 wrapper
 					if (appLevel == ApplicationLevel.L0) {						
 						final Reporting reporting = reportingFactory.newReporting("GhostHandling");						
 						reporting.begin(
-								new FilenameReportingInput(productName),
+								ReportingUtils.newFilenameReportingInputFor(family, productName),
 								new ReportingMessage("Checking if %s is a ghost candidate", productName)
 						);
 						
 						final boolean ghostCandidate = isGhostCandidate(productName);
 
-						LOGGER.info("Output {} is recognized as belonging to the family {}", productName, ProductFamily.L0_SEGMENT);
+						LOGGER.info("Output {} is recognized as belonging to the family {}", productName, family);
 						
 						if (!ghostCandidate) {
 							LOGGER.info("Product {} is not a ghost candidate and processMode is {}", productName,inputMessage.getBody().getProductProcessMode());							
-							reporting.end(new ReportingMessage("%s (%s) is not a ghost candidate", productName, ProductFamily.L0_SEGMENT));
-							uploadBatch.add(new ObsUploadObject(ProductFamily.L0_SEGMENT, productName, file));
+							reporting.end(new ReportingMessage("%s (%s) is not a ghost candidate", productName, family));
+							uploadBatch.add(new ObsUploadObject(family, productName, file));
 							outputToPublish.add(
-								new ObsQueueMessage(ProductFamily.L0_SEGMENT, productName, productName, inputMessage.getBody().getProductProcessMode(),oqcFlag));
+								new ObsQueueMessage(family, productName, productName, inputMessage.getBody().getProductProcessMode(),oqcFlag));
 
 						} 
 						else {
 							LOGGER.info("Product {} is a ghost candidate", productName);
-							reporting.end(new ReportingMessage("%s (%s) is a ghost candidate", productName, ProductFamily.L0_SEGMENT));
+							reporting.end(new ReportingMessage("%s (%s) is a ghost candidate", productName, family));
 							uploadBatch.add(new ObsUploadObject(ProductFamily.GHOST, productName, file));
 						}
 						productSize += size(file);

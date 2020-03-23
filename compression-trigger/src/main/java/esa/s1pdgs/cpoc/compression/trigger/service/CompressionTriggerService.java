@@ -35,7 +35,6 @@ import esa.s1pdgs.cpoc.mqi.model.rest.GenericPublicationMessageDto;
 import esa.s1pdgs.cpoc.report.Reporting;
 import esa.s1pdgs.cpoc.report.ReportingMessage;
 import esa.s1pdgs.cpoc.report.ReportingUtils;
-import esa.s1pdgs.cpoc.report.message.input.FilenameReportingInput;
 
 @Service
 public class CompressionTriggerService implements MqiListener<ProductionEvent> {
@@ -90,7 +89,7 @@ public class CompressionTriggerService implements MqiListener<ProductionEvent> {
 				.newReporting("CompressionTrigger");
 		
 		reporting.begin(
-				new FilenameReportingInput(event.getProductName()),
+				ReportingUtils.newFilenameReportingInputFor(event.getProductFamily(), event.getProductName()),
 				new ReportingMessage("Start handling of event for %s", event.getProductName())
 		);
 		try {

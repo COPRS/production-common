@@ -20,6 +20,7 @@ import org.junit.Test;
 import org.w3c.dom.Document;
 import org.w3c.dom.Node;
 
+import esa.s1pdgs.cpoc.common.ProductFamily;
 import esa.s1pdgs.cpoc.common.utils.FileUtils;
 import esa.s1pdgs.cpoc.ipf.execution.worker.config.ApplicationProperties;
 import esa.s1pdgs.cpoc.mqi.model.queue.LevelJobOutputDto;
@@ -29,6 +30,8 @@ import esa.s1pdgs.cpoc.report.ReportingFactory;
 public class OQCTaskTest {    
 	
 	private ApplicationProperties defaultProperties;
+	
+	private final ProductFamily fam = ProductFamily.BLANK;
 	
 	@Before
 	public void setup() {
@@ -53,7 +56,7 @@ public class OQCTaskTest {
 		
 		final Path productDir = Files.createTempDirectory("OQCTASK");
 
-		final OQCFlag flag = executor.executeOQC(productDir.toFile(), dto, new OQCDefaultTaskFactory(), ReportingFactory.NULL);
+		final OQCFlag flag = executor.executeOQC(productDir.toFile(), fam, dto, new OQCDefaultTaskFactory(), ReportingFactory.NULL);
 		
 		assertThat(flag, is(notNullValue()));
 		assertThat(flag, is(OQCFlag.NOT_CHECKED));
@@ -69,7 +72,7 @@ public class OQCTaskTest {
 		
 		final Path productDir = Files.createTempDirectory("OQCTASK");
 
-		final OQCFlag flag = executor.executeOQC(productDir.toFile(), dto, new OQCDefaultTaskFactory(), ReportingFactory.NULL);
+		final OQCFlag flag = executor.executeOQC(productDir.toFile(), fam, dto, new OQCDefaultTaskFactory(), ReportingFactory.NULL);
 		
 		assertThat(flag, is(notNullValue()));
 		assertThat(flag, is(OQCFlag.CHECKED_OK));
