@@ -99,7 +99,7 @@ public class S3ObsClient extends AbstractObsClient {
 
 	public static final String BACKEND_NAME = "aws-s3";
 
-	private final S3ObsServices s3Services;
+	final S3ObsServices s3Services;
 
 	S3ObsClient(final ObsConfigurationProperties configuration, final S3ObsServices s3Services, final ReportingProductFactory factory) {
 		super(configuration, factory);
