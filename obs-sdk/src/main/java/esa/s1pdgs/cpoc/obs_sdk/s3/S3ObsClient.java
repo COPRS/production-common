@@ -38,6 +38,7 @@ import esa.s1pdgs.cpoc.obs_sdk.ObsServiceException;
 import esa.s1pdgs.cpoc.obs_sdk.ObsUploadObject;
 import esa.s1pdgs.cpoc.obs_sdk.SdkClientException;
 import esa.s1pdgs.cpoc.obs_sdk.ValidArgumentAssertion;
+import esa.s1pdgs.cpoc.obs_sdk.report.ReportingProductFactory;
 import esa.s1pdgs.cpoc.obs_sdk.s3.retry.SDKCustomDefaultRetryCondition;
 import esa.s1pdgs.cpoc.obs_sdk.swift.SwiftSdkClientException;
 
@@ -53,7 +54,7 @@ public class S3ObsClient extends AbstractObsClient {
 
 	public static final class Factory implements ObsClient.Factory {
 		@Override
-		public final ObsClient newObsClient(final ObsConfigurationProperties config) {
+		public final ObsClient newObsClient(final ObsConfigurationProperties config, final ReportingProductFactory factory) {
 			final BasicAWSCredentials awsCreds = new BasicAWSCredentials(config.getUserId(), config.getUserSecret());
 			final ClientConfiguration clientConfig = new ClientConfiguration();
 			clientConfig.setProtocol(Protocol.HTTP);
@@ -92,7 +93,7 @@ public class S3ObsClient extends AbstractObsClient {
 
 			final S3ObsServices s3Services = new S3ObsServices(client, manager, config.getMaxObsRetries(),
 					config.getBackoffThrottledBaseDelay());
-			return new S3ObsClient(config, s3Services);
+			return new S3ObsClient(config, s3Services, factory);
 		}
 	}
 
@@ -100,8 +101,8 @@ public class S3ObsClient extends AbstractObsClient {
 
 	private final S3ObsServices s3Services;
 
-	S3ObsClient(final ObsConfigurationProperties configuration, final S3ObsServices s3Services) {
-		super(configuration);
+	S3ObsClient(final ObsConfigurationProperties configuration, final S3ObsServices s3Services, final ReportingProductFactory factory) {
+		super(configuration, factory);
 		this.s3Services = s3Services;
 	}
 	

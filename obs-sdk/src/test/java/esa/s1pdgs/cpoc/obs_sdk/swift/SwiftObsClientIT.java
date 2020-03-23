@@ -36,6 +36,7 @@ import esa.s1pdgs.cpoc.obs_sdk.ObsObject;
 import esa.s1pdgs.cpoc.obs_sdk.ObsUploadObject;
 import esa.s1pdgs.cpoc.obs_sdk.ObsValidationException;
 import esa.s1pdgs.cpoc.obs_sdk.SdkClientException;
+import esa.s1pdgs.cpoc.obs_sdk.report.ReportingProductFactory;
 import esa.s1pdgs.cpoc.report.ReportingFactory;
 
 @Ignore
@@ -72,7 +73,7 @@ public class SwiftObsClientIT {
 	
 	@Before
 	public void setUp() throws ObsException, SdkClientException {	
-		uut = (SwiftObsClient) new SwiftObsClient.Factory().newObsClient(configuration);
+		uut = (SwiftObsClient) new SwiftObsClient.Factory().newObsClient(configuration, new ReportingProductFactory());
 		
 		// prepare environment
 		if (!uut.containerExists(auxiliaryFiles)) {

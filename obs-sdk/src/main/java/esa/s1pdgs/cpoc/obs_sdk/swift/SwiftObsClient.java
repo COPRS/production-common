@@ -29,6 +29,7 @@ import esa.s1pdgs.cpoc.obs_sdk.ObsServiceException;
 import esa.s1pdgs.cpoc.obs_sdk.ObsUploadObject;
 import esa.s1pdgs.cpoc.obs_sdk.SdkClientException;
 import esa.s1pdgs.cpoc.obs_sdk.ValidArgumentAssertion;
+import esa.s1pdgs.cpoc.obs_sdk.report.ReportingProductFactory;
 import esa.s1pdgs.cpoc.report.Reporting;
 import esa.s1pdgs.cpoc.report.ReportingMessage;
 import esa.s1pdgs.cpoc.report.ReportingUtils;
@@ -37,7 +38,7 @@ public class SwiftObsClient extends AbstractObsClient {
 	public static final class Factory implements ObsClient.Factory {
 
 		@Override
-		public final ObsClient newObsClient(final ObsConfigurationProperties config) {
+		public final ObsClient newObsClient(final ObsConfigurationProperties config, final ReportingProductFactory factory) {
 	    	final AccountConfig accConf = new AccountConfig();
 	    	accConf.setUsername(config.getUserId());
 	        accConf.setPassword(config.getUserSecret());
@@ -94,7 +95,7 @@ public class SwiftObsClient extends AbstractObsClient {
 					config.getMaxRetries(),
 					config.getBackoffThrottledBaseDelay()
 			);
-			return new SwiftObsClient(config, services);
+			return new SwiftObsClient(config, services, factory);
 		}		
 	}
 	
@@ -102,8 +103,8 @@ public class SwiftObsClient extends AbstractObsClient {
 
     protected final SwiftObsServices swiftObsServices;
      
-	SwiftObsClient(final ObsConfigurationProperties configuration, final SwiftObsServices swiftObsServices) {
-		super(configuration);
+	SwiftObsClient(final ObsConfigurationProperties configuration, final SwiftObsServices swiftObsServices, final ReportingProductFactory factory) {
+		super(configuration, factory);
 		this.swiftObsServices = swiftObsServices;
 	}
 

@@ -13,6 +13,7 @@ import org.apache.logging.log4j.Logger;
 import esa.s1pdgs.cpoc.common.ProductFamily;
 import esa.s1pdgs.cpoc.common.errors.AbstractCodedException;
 import esa.s1pdgs.cpoc.common.errors.obs.ObsException;
+import esa.s1pdgs.cpoc.obs_sdk.report.ReportingProductFactory;
 import esa.s1pdgs.cpoc.report.ReportingFactory;
 
 /**
@@ -25,7 +26,7 @@ import esa.s1pdgs.cpoc.report.ReportingFactory;
 public interface ObsClient {
 	
 	static interface Factory {
-		ObsClient newObsClient(ObsConfigurationProperties config);
+		ObsClient newObsClient(ObsConfigurationProperties config, ReportingProductFactory factory);
 	}
 	
 	static final Logger LOGGER = LogManager.getLogger(ObsClient.class);

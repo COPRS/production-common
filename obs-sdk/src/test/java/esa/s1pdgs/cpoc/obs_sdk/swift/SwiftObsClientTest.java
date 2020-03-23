@@ -38,6 +38,7 @@ import esa.s1pdgs.cpoc.obs_sdk.ObsObject;
 import esa.s1pdgs.cpoc.obs_sdk.ObsServiceException;
 import esa.s1pdgs.cpoc.obs_sdk.ObsUploadObject;
 import esa.s1pdgs.cpoc.obs_sdk.SdkClientException;
+import esa.s1pdgs.cpoc.obs_sdk.report.ReportingProductFactory;
 
 public class SwiftObsClientTest {
 
@@ -106,7 +107,7 @@ public class SwiftObsClientTest {
         	.getBucketFor(Mockito.eq(ProductFamily.L0_BLANK));
         
         // Build client
-        client = new SwiftObsClient(configuration, service);
+        client = new SwiftObsClient(configuration, service, new ReportingProductFactory());
     }
 
     /**
