@@ -31,6 +31,7 @@ import esa.s1pdgs.cpoc.mqi.model.rest.GenericMessageDto;
 import esa.s1pdgs.cpoc.mqi.model.rest.GenericPublicationMessageDto;
 import esa.s1pdgs.cpoc.production.trigger.config.ProcessSettings;
 import esa.s1pdgs.cpoc.production.trigger.report.DispatchReportInput;
+import esa.s1pdgs.cpoc.production.trigger.report.SeaCoverageCheckReportingOutput;
 import esa.s1pdgs.cpoc.report.Reporting;
 import esa.s1pdgs.cpoc.report.ReportingFactory;
 import esa.s1pdgs.cpoc.report.ReportingMessage;
@@ -200,15 +201,22 @@ public abstract class AbstractGenericConsumer<T extends AbstractMessage> impleme
 		final Reporting seaReport = reporting.newReporting("SeaCoverageCheck");
         try {
 			if (seaCoverageCheckPattern.matcher(productName).matches()) {   
-				seaReport.begin(new FilenameReportingInput(productName), new ReportingMessage("Checking sea coverage"));				
+				seaReport.begin(new FilenameReportingInput(productName), new ReportingMessage("Checking sea coverage"));	
 				if (metadataClient.getSeaCoverage(family, productName) <= processSettings.getMinSeaCoveragePercentage()) {
-					seaReport.end(new ReportingMessage("Product %s is not over sea", productName));
+					seaReport.end(
+							new SeaCoverageCheckReportingOutput(productName, false), 
+							new ReportingMessage("Product %s is not over sea", productName)
+					);
+					
 					reporting.end(new ReportingMessage("Product %s is not over sea, skipping", productName));
 					LOGGER.warn("Skipping job generation for product {} because it is not over sea", productName);
 			        return true;
 			    }
 				else {
-					seaReport.end(new ReportingMessage("Product %s is over sea", productName));
+					seaReport.end(
+							new SeaCoverageCheckReportingOutput(productName, true), 
+							new ReportingMessage("Product %s is over sea", productName)
+					);
 				}
 			}
 		} catch (final Exception e) {
