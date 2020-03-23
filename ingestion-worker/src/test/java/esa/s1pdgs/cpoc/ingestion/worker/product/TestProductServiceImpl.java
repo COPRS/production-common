@@ -71,7 +71,7 @@ public class TestProductServiceImpl {
 	@Test
 	public void testIngest() throws ProductException, InternalErrorException, ObsEmptyFileException {
 		final ProductFamily family = ProductFamily.AUXILIARY_FILE;
-		final IngestionJob ingestionJob = new IngestionJob("productName");
+		final IngestionJob ingestionJob = new IngestionJob(family, "productName");
 		ingestionJob.setPickupPath("/dev");
 		ingestionJob.setRelativePath("null");
 		ingestionJob.setProductFamily(family);

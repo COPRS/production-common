@@ -1,6 +1,5 @@
 package esa.s1pdgs.cpoc.ingestion.worker.service;
 
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.Assert.assertEquals;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.never;
@@ -26,13 +25,11 @@ import esa.s1pdgs.cpoc.common.ProductFamily;
 import esa.s1pdgs.cpoc.common.errors.AbstractCodedException;
 import esa.s1pdgs.cpoc.common.errors.InternalErrorException;
 import esa.s1pdgs.cpoc.errorrepo.ErrorRepoAppender;
-import esa.s1pdgs.cpoc.ingestion.worker.config.IngestionTypeConfiguration;
 import esa.s1pdgs.cpoc.ingestion.worker.config.IngestionWorkerServiceConfigurationProperties;
 import esa.s1pdgs.cpoc.ingestion.worker.product.IngestionResult;
 import esa.s1pdgs.cpoc.ingestion.worker.product.Product;
 import esa.s1pdgs.cpoc.ingestion.worker.product.ProductException;
 import esa.s1pdgs.cpoc.ingestion.worker.product.ProductService;
-import esa.s1pdgs.cpoc.ingestion.worker.service.IngestionWorkerService;
 import esa.s1pdgs.cpoc.mqi.client.GenericMqiClient;
 import esa.s1pdgs.cpoc.mqi.model.queue.AbstractMessage;
 import esa.s1pdgs.cpoc.mqi.model.queue.IngestionEvent;
@@ -67,10 +64,9 @@ public final class TestIngestionWorkerService {
 
 	@Test
 	public final void testOnMessage() throws Exception {
-		final IngestionJob ingestion = new IngestionJob("fooBar");
+		final IngestionJob ingestion = new IngestionJob(ProductFamily.AUXILIARY_FILE, "fooBar");
 		ingestion.setRelativePath("fooBar");
 		ingestion.setPickupPath("/tmp");
-		ingestion.setProductFamily(ProductFamily.AUXILIARY_FILE);
 		
 		final GenericMessageDto<IngestionJob> mess = new GenericMessageDto<IngestionJob>();
 		mess.setId(123);
@@ -93,10 +89,6 @@ public final class TestIngestionWorkerService {
 		};
 		
 		final IngestionWorkerServiceConfigurationProperties properties = new IngestionWorkerServiceConfigurationProperties();
-		final IngestionTypeConfiguration itc = new IngestionTypeConfiguration();
-		itc.setFamily(ProductFamily.AUXILIARY_FILE.name());
-		itc.setRegex("fooBar");
-		properties.setTypes(Arrays.asList(itc));
 		
 		final IngestionWorkerService uut = new IngestionWorkerService(
 				null, 
@@ -123,10 +115,6 @@ public final class TestIngestionWorkerService {
 	@Test
 	public final void testIdentifyAndUpload() throws Exception {
 		final IngestionWorkerServiceConfigurationProperties properties = new IngestionWorkerServiceConfigurationProperties();
-		final IngestionTypeConfiguration itc = new IngestionTypeConfiguration();
-		itc.setFamily(ProductFamily.AUXILIARY_FILE.name());
-		itc.setRegex("fo+\\.bar");
-		properties.setTypes(Arrays.asList(itc));
 		final IngestionWorkerService uut = new IngestionWorkerService(
 				mqiClient, 
 				ErrorRepoAppender.NULL, 
@@ -137,7 +125,7 @@ public final class TestIngestionWorkerService {
 		final GenericMessageDto<IngestionJob> message = new GenericMessageDto<>();
 		message.setId(123L);
 		message.setBody(null);
-		final IngestionJob ingestionJob = new IngestionJob("foo.bar");
+		final IngestionJob ingestionJob = new IngestionJob(ProductFamily.AUXILIARY_FILE, "foo.bar");
 		message.setBody(ingestionJob);
 		
 		final File file = new File("foo.bar");
@@ -159,88 +147,7 @@ public final class TestIngestionWorkerService {
 		verify(productService, times(1)).ingest(Mockito.eq(ProductFamily.AUXILIARY_FILE), Mockito.eq(ingestionJob), Mockito.any());
 		verify(productService, never()).markInvalid(Mockito.any(), Mockito.any());
 	}
-	
-	@Test(expected=ProductException.class)
-	public final void testIdentifyAndUploadOnInvalidFamily() throws Exception {
-		final IngestionWorkerServiceConfigurationProperties properties = new IngestionWorkerServiceConfigurationProperties();
-		final IngestionTypeConfiguration itc = new IngestionTypeConfiguration();
-		itc.setFamily("FOO");
-		itc.setRegex("fo+\\.bar");
-		properties.setTypes(Arrays.asList(itc));
-		final IngestionWorkerService uut = new IngestionWorkerService(
-				mqiClient, 
-				ErrorRepoAppender.NULL, 
-				properties,
-				productService,
-				AppStatus.NULL
-		);
-		final GenericMessageDto<IngestionJob> message = new GenericMessageDto<>();
-		message.setId(123L);
-		message.setBody(null);
-		final IngestionJob ingestionJob = new IngestionJob("foo.bar");
-		message.setBody(ingestionJob);
-		
-		final IngestionResult result = uut.identifyAndUpload(message, ingestionJob, ReportingFactory.NULL);
-	}
 
-	@Test
-	public final void testGetFamilyForNominal() {
-		final IngestionWorkerServiceConfigurationProperties properties = new IngestionWorkerServiceConfigurationProperties();
-		final IngestionTypeConfiguration itc = new IngestionTypeConfiguration();
-		itc.setFamily(ProductFamily.AUXILIARY_FILE.name());
-		itc.setRegex("fo+\\.bar");
-		properties.setTypes(Arrays.asList(itc));
-		final IngestionWorkerService uut = new IngestionWorkerService(
-				mqiClient, 
-				ErrorRepoAppender.NULL, 
-				properties,
-				productService,
-				AppStatus.NULL
-		);
-		
-		uut.getFamilyFor(new IngestionJob("foo.bar"));
-	}
-	
-	@Test
-	public final void testGetFamilyForNotMatching() {
-		final IngestionWorkerServiceConfigurationProperties properties = new IngestionWorkerServiceConfigurationProperties();
-		final IngestionTypeConfiguration itc = new IngestionTypeConfiguration();
-		itc.setFamily(ProductFamily.AUXILIARY_FILE.name());
-		itc.setRegex("fo+\\.bar");
-		properties.setTypes(Arrays.asList(itc));
-		final IngestionWorkerService uut = new IngestionWorkerService(
-				mqiClient, 
-				ErrorRepoAppender.NULL, 
-				properties,
-				productService,
-				AppStatus.NULL
-		);
-		
-		assertThatThrownBy(() -> uut.getFamilyFor(new IngestionJob("fu.bar")))
-			.isInstanceOf(ProductException.class)
-			.hasMessageContaining("No matching config found for IngestionJob");
-	}
-	
-	@Test
-	public final void testGetFamilyForInvalid() {
-		final IngestionWorkerServiceConfigurationProperties properties = new IngestionWorkerServiceConfigurationProperties();
-		final IngestionTypeConfiguration itc = new IngestionTypeConfiguration();
-		itc.setFamily("FOO");
-		itc.setRegex("fo+\\.bar");
-		properties.setTypes(Arrays.asList(itc));
-		final IngestionWorkerService uut = new IngestionWorkerService(
-				mqiClient, 
-				ErrorRepoAppender.NULL, 
-				properties,
-				productService,
-				AppStatus.NULL
-		);
-		
-		assertThatThrownBy(() -> uut.getFamilyFor(new IngestionJob("foo.bar")))
-			.isInstanceOf(ProductException.class)
-			.hasMessageContaining("Invalid IngestionTypeConfiguration [family=FOO, regex=fo+\\.bar] for IngestionJob [");
-	}
-	
 	@Test
 	public final void testPublish() throws AbstractCodedException {
 		final IngestionWorkerService uut = new IngestionWorkerService(

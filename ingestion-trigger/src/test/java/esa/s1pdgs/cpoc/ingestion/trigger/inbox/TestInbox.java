@@ -7,10 +7,9 @@ import java.util.List;
 import org.junit.Ignore;
 import org.junit.Test;
 
+import esa.s1pdgs.cpoc.common.ProductFamily;
 import esa.s1pdgs.cpoc.ingestion.trigger.entity.InboxEntry;
 import esa.s1pdgs.cpoc.ingestion.trigger.filter.InboxFilter;
-import esa.s1pdgs.cpoc.ingestion.trigger.inbox.Inbox;
-import esa.s1pdgs.cpoc.ingestion.trigger.inbox.InboxAdapter;
 import esa.s1pdgs.cpoc.ingestion.trigger.service.IngestionTriggerServiceTransactional;
 
 public class TestInbox {
@@ -42,7 +41,8 @@ public class TestInbox {
 				fakeAdapter, 
 				InboxFilter.ALLOW_ALL,
 				new IngestionTriggerServiceTransactional(fakeRepo), 
-				fakeKafkaClient
+				fakeKafkaClient,
+				ProductFamily.EDRS_SESSION
 		);
 		uut.poll();
 		fakeRepo.verify();
@@ -78,8 +78,13 @@ public class TestInbox {
 		};
 		final MockSubmissionClient fakeKafkaClient = new MockSubmissionClient(0);
 
-		final Inbox uut = new Inbox(fakeAdapter, InboxFilter.ALLOW_ALL,
-				new IngestionTriggerServiceTransactional(fakeRepo), fakeKafkaClient);
+		final Inbox uut = new Inbox(
+				fakeAdapter, 
+				InboxFilter.ALLOW_ALL,
+				new IngestionTriggerServiceTransactional(fakeRepo), 
+				fakeKafkaClient,
+				ProductFamily.EDRS_SESSION
+		);
 		uut.poll();
 		fakeRepo.verify();
 		fakeKafkaClient.verify();

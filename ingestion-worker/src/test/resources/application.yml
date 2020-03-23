@@ -13,9 +13,6 @@ ingestion-worker:
   polling-interval-ms: 10000
   max-retries: 10                                                # the maximal number of consecutive retries for unsuccessful deletion
   tempo-retry-ms: 10000  
-  types:
-    - family: AUXILIARY_FILE 
-      regex: ^[0-9a-zA-Z][0-9a-zA-Z][0-9a-zA-Z_]_((OPER|TEST|REPR)_)?(AUX_OBMEMC|AUX_PP1|AUX_PP2|AUX_CAL|AUX_INS|AUX_RESORB|AUX_WND|AUX_SCS|AMV_ERRMAT|AMH_ERRMAT|AUX_ICE|AUX_WAV|MPL_ORBPRE|MPL_ORBSCT|MSK__LAND)_.*\.(xml|XML|EOF|SAFE)?$
 
 # KAFKA
 kafka:

@@ -13,6 +13,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.util.StringUtils;
 
+import esa.s1pdgs.cpoc.common.ProductFamily;
 import esa.s1pdgs.cpoc.common.utils.LogUtils;
 import esa.s1pdgs.cpoc.ingestion.trigger.entity.InboxEntry;
 import esa.s1pdgs.cpoc.ingestion.trigger.filter.InboxFilter;
@@ -32,17 +33,20 @@ public final class Inbox {
 	private final InboxFilter filter;
 	private final IngestionTriggerServiceTransactional ingestionTriggerServiceTransactional;
 	private final SubmissionClient client;
+	private final ProductFamily family;
 
 	Inbox(
 			final InboxAdapter inboxAdapter, 
 			final InboxFilter filter,
 			final IngestionTriggerServiceTransactional ingestionTriggerServiceTransactional, 
-			final SubmissionClient client
+			final SubmissionClient client,
+			final ProductFamily family
 	) {
 		this.inboxAdapter = inboxAdapter;
 		this.filter = filter;
 		this.ingestionTriggerServiceTransactional = ingestionTriggerServiceTransactional;
 		this.client = client;
+		this.family = family;
 	}
 	
 	public final void poll() {
@@ -130,7 +134,7 @@ public final class Inbox {
 		
 		try {
 			LOG.debug("Publishing new entry to kafka queue: {}", entry);					
-			final IngestionJob dto = new IngestionJob(entry.getName());
+			final IngestionJob dto = new IngestionJob(family, entry.getName());
 		    dto.setRelativePath(entry.getRelativePath());
 		    dto.setPickupPath(entry.getPickupPath());
 		    dto.setUid(reporting.getUid());

@@ -1,10 +1,13 @@
 package esa.s1pdgs.cpoc.ingestion.trigger.config;
 
+import esa.s1pdgs.cpoc.common.ProductFamily;
+
 public class InboxConfiguration {
 	private String directory;
 	private String matchRegex;
 	private String ignoreRegex;
 	private String topic;
+	private ProductFamily family = ProductFamily.BLANK;
 	private int productInDirectoryLevel = 1;
 
 	public String getDirectory() {
@@ -46,10 +49,19 @@ public class InboxConfiguration {
 	public void setProductInDirectoryLevel(final int productInDirectoryLevel) {
 		this.productInDirectoryLevel = productInDirectoryLevel;
 	}
+	
+	public ProductFamily getFamily() {
+		return family;
+	}
+
+	public void setFamily(final ProductFamily family) {
+		this.family = family;
+	}
 
 	@Override
 	public String toString() {
 		return "InboxConfiguration [directory=" + directory + ", matchRegex=" + matchRegex + ", ignoreRegex="
-				+ ignoreRegex + ", topic=" + topic + ", productInDirectoryLevel=" + productInDirectoryLevel + "]";
+				+ ignoreRegex + ", topic=" + topic + ", productInDirectoryLevel=" + productInDirectoryLevel + 
+				", family=" + family + "]";
 	}
 }

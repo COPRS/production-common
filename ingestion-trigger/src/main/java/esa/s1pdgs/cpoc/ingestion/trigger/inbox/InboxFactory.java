@@ -40,7 +40,8 @@ public class InboxFactory {
 						new WhitelistRegexRelativePathInboxFilter(Pattern.compile(config.getMatchRegex()))
 				),
 				ingestionTriggerServiceTransactional, 
-				new KafkaSubmissionClient(kafkaTemplate, config.getTopic())
+				new KafkaSubmissionClient(kafkaTemplate, config.getTopic()),
+				config.getFamily()
 		);
 	}	
 }
