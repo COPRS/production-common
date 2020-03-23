@@ -169,7 +169,7 @@ public class S3ObsClient extends AbstractObsClient {
 			throw new S3ObsServiceException(getBucketFor(object.getFamily()), object.getKey(),
 					"Could not store md5sum temp file", e);
 		}
-		s3Services.uploadFile(getBucketFor(object.getFamily()), object.getKey() + MD5SUM_SUFFIX, file);
+		s3Services.uploadFile(getBucketFor(object.getFamily()),  s3Services.identifyMd5File(object.getKey()), file);
 
 		try {
 			Files.delete(file.toPath());
