@@ -74,7 +74,7 @@ public class S3ObsServices {
 	/**
 	 * Amazon S3 client
 	 */
-	protected final AmazonS3 s3client;
+	public final AmazonS3 s3client;
 
 	/**
 	 * Amazon S3 client
