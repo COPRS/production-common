@@ -12,7 +12,6 @@ import java.net.URISyntaxException;
 import java.nio.file.Files;
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.List;
 import java.util.Map;
 
 import org.apache.commons.io.IOUtils;
@@ -27,10 +26,6 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit4.SpringRunner;
 
-import com.amazonaws.services.s3.model.Bucket;
-import com.amazonaws.services.s3.model.ObjectListing;
-import com.amazonaws.services.s3.model.S3ObjectSummary;
-
 import esa.s1pdgs.cpoc.common.ProductFamily;
 import esa.s1pdgs.cpoc.common.errors.AbstractCodedException;
 import esa.s1pdgs.cpoc.common.errors.obs.ObsException;
@@ -38,7 +33,6 @@ import esa.s1pdgs.cpoc.obs_sdk.ObsConfigurationProperties;
 import esa.s1pdgs.cpoc.obs_sdk.ObsDownloadObject;
 import esa.s1pdgs.cpoc.obs_sdk.ObsEmptyFileException;
 import esa.s1pdgs.cpoc.obs_sdk.ObsObject;
-import esa.s1pdgs.cpoc.obs_sdk.ObsServiceException;
 import esa.s1pdgs.cpoc.obs_sdk.ObsUploadObject;
 import esa.s1pdgs.cpoc.obs_sdk.ObsValidationException;
 import esa.s1pdgs.cpoc.obs_sdk.SdkClientException;
@@ -119,27 +113,7 @@ public class S3ObsClientIT {
 			uut.s3Services.s3client.deleteObject(auxiliaryFilesBucketName, testDirectoryName + ".md5sum");
 		}
 	}
-	
-	@Test
-	public void veryBasicTest() throws ObsServiceException, SdkClientException, AbstractCodedException {
-		System.out.println("Buckets:");
-		for (Bucket bucket : uut.s3Services.s3client.listBuckets()) {
-			System.out.println(bucket);
-		}
-		System.out.println("\nBucket " + auxiliaryFilesBucketName + " exists = " + uut.bucketExists(auxiliaryFiles));
-		
-		String fileName = "testfile";
-		System.out.println("\n" + fileName + " in bucket " + auxiliaryFilesBucketName + " exists = " +
-				//uut.exists(new ObsObject(auxiliaryFiles, fileName))
-				uut.s3Services.exist(auxiliaryFilesBucketName, fileName)
-		);
-		
-		System.out.println("\nFiles in bucket " + auxiliaryFilesBucketName + ":");
-		ObjectListing objListing = uut.s3Services.listObjectsFromBucket(auxiliaryFilesBucketName);
-		final List<S3ObjectSummary> objSum = objListing.getObjectSummaries();
-		objSum.forEach(s -> { System.out.println(s);});
-	}
-	
+
 	@Test
 	public void uploadWithoutPrefixTest() throws Exception {	
 		// upload
