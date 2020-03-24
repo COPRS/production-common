@@ -42,9 +42,7 @@ public class IngestionTriggerServiceConfiguration {
 
 		for (final InboxConfiguration config : properties.getPolling()) {
 			try {
-				final Path inboxPath = Paths.get(config.getDirectory());
 				inboxes.add(inboxFactory.newInbox(config));
-				Files.createDirectories(inboxPath);
 			} catch (IllegalArgumentException | IOException e) {
 				LOG.error(e.getMessage());
 			}
