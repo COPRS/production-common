@@ -18,16 +18,13 @@ import esa.s1pdgs.cpoc.report.ReportingFactory;
 
 public class ObsAdapter {
     private final ObsClient obsClient;
-    private final Path inboxPath;
     private final ReportingFactory reportingFactory;
     
 	public ObsAdapter(
-			final ObsClient obsClient, 
-			final Path inboxPath,
+			final ObsClient obsClient,
 			final ReportingFactory reportingFactory
 	) {
 		this.obsClient 	= obsClient;
-		this.inboxPath 	= inboxPath;
 		this.reportingFactory = reportingFactory;
 	}
 	
@@ -61,10 +58,6 @@ public class ObsAdapter {
 					String.format("Error moving file %s from %s to %s: %s", obsKey, from, to, LogUtils.toString(e))
 			);
 		}
-	}
-	
-	public String toObsKey(final File file) {
-		return inboxPath.relativize(file.toPath()).toString();
 	}
 	
 }

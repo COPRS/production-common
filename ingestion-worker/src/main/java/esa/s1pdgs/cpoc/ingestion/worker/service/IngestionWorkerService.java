@@ -1,6 +1,8 @@
 package esa.s1pdgs.cpoc.ingestion.worker.service;
 
 import java.io.File;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.Date;
@@ -93,10 +95,10 @@ public class IngestionWorkerService implements MqiListener<IngestionJob> {
 				.predecessor(ingestion.getUid())				
 				.newReporting("IngestionWorker");
 		
-		LOG.debug("received Ingestion: {}", ingestion.getKeyObjectStorage());
+		LOG.debug("received Ingestion: {}", ingestion.getProductName());
 		reporting.begin(
-				new InboxReportingInput(ingestion.getKeyObjectStorage(), ingestion.getRelativePath(), ingestion.getPickupPath()), 
-				new ReportingMessage("Start processing of %s", ingestion.getKeyObjectStorage())
+				new InboxReportingInput(ingestion.getProductName(), ingestion.getRelativePath(), ingestion.getPickupBaseURL()), 
+				new ReportingMessage("Start processing of %s", ingestion.getProductName())
 		);
 
 		try {				
@@ -163,8 +165,13 @@ public class IngestionWorkerService implements MqiListener<IngestionJob> {
 	}
 
 	final void delete(final IngestionJob ingestion)
-			throws InternalErrorException, InterruptedException {
-		final File file = Paths.get(ingestion.getPickupPath(), ingestion.getRelativePath()).toFile();
+			throws InterruptedException, URISyntaxException {
+		URI ingestionBaseURL = new URI(ingestion.getPickupBaseURL());
+		if (!ingestionBaseURL.getScheme().equals("file")) {
+			LOG.debug("skipping deletion of file {}",ingestion.getProductName());
+			return;
+		}		
+		final File file = Paths.get(ingestionBaseURL).resolve(ingestion.getRelativePath()).toFile();
 		if (file.exists()) {
 			FileUtils.deleteWithRetries(file, properties.getMaxRetries(), properties.getTempoRetryMs());
 		}

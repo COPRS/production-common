@@ -72,9 +72,10 @@ public class TestProductServiceImpl {
 	public void testIngest() throws ProductException, InternalErrorException, ObsEmptyFileException {
 		final ProductFamily family = ProductFamily.AUXILIARY_FILE;
 		final IngestionJob ingestionJob = new IngestionJob("productName");
-		ingestionJob.setPickupPath("/dev");
+		ingestionJob.setPickupBaseURL("file:/dev");
 		ingestionJob.setRelativePath("null");
 		ingestionJob.setProductFamily(family);
+		ingestionJob.setProductName("productName");
 		ingestionJob.setCreationDate(new Date());
 		ingestionJob.setHostname("hostname");
 		final Product<IngestionEvent> product = new Product<>();
@@ -96,23 +97,23 @@ public class TestProductServiceImpl {
 	@Test
 	public void testMarkInvalid() throws AbstractCodedException, ObsEmptyFileException {
 		final IngestionJob ingestionJob = new IngestionJob();
-		ingestionJob.setPickupPath("pickup/path");
+		ingestionJob.setPickupBaseURL("file:/pickup/path");
 		ingestionJob.setRelativePath("relative/path");
 		uut.markInvalid(ingestionJob, ReportingFactory.NULL);
 		final ObsUploadObject uploadObj = new ObsUploadObject(ProductFamily.INVALID, AbstractMessage.NOT_DEFINED,
-				new File("pickup/path/relative/path"));
+				new File("/pickup/path/relative/path"));
 		verify(obsClient, times(1)).upload(Mockito.eq(Arrays.asList(uploadObj)), Mockito.any());
 	}
 
 	@Test
 	public void testToObsKey() {
-		assertEquals("/tmp/foo/bar/baaaaar", uut.toObsKey(Paths.get("/tmp/foo/bar/baaaaar")));
+		assertEquals(Paths.get("/tmp/foo/bar/baaaaar").toString(), uut.toObsKey(Paths.get("/tmp/foo/bar/baaaaar")));
 	}
 
 	@Test
-	public void testToFile() {
+	public void testToFile() throws InternalErrorException {
 		final IngestionJob ingestionJob = new IngestionJob();
-		ingestionJob.setPickupPath("/tmp/foo");
+		ingestionJob.setPickupBaseURL("file:/tmp/foo");
 		ingestionJob.setRelativePath("bar/baaaaar");
 		assertEquals(new File("/tmp/foo/bar/baaaaar"), ProductServiceImpl.toFile(ingestionJob));
 	}

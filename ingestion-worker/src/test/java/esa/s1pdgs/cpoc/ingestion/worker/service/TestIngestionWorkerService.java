@@ -69,7 +69,8 @@ public final class TestIngestionWorkerService {
 	public final void testOnMessage() throws Exception {
 		final IngestionJob ingestion = new IngestionJob("fooBar");
 		ingestion.setRelativePath("fooBar");
-		ingestion.setPickupPath("/tmp");
+		ingestion.setPickupBaseURL("file:/tmp");
+		ingestion.setProductName("fooBar");
 		ingestion.setProductFamily(ProductFamily.AUXILIARY_FILE);
 		
 		final GenericMessageDto<IngestionJob> mess = new GenericMessageDto<IngestionJob>();

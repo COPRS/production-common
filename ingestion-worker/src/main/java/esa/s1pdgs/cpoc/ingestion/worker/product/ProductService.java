@@ -10,7 +10,7 @@ public interface ProductService {
 	IngestionResult ingest(ProductFamily family, IngestionJob ingestion, final ReportingFactory reportingFactory)
 			throws ProductException, InternalErrorException, ObsEmptyFileException;
 
-	void markInvalid(IngestionJob ingestion, final ReportingFactory reportingFactory) throws ObsEmptyFileException;
+	void markInvalid(IngestionJob ingestion, final ReportingFactory reportingFactory) throws ObsEmptyFileException, InternalErrorException;
 
-	void assertFileIsNotEmpty(IngestionJob ingestion) throws ObsEmptyFileException;
+	void assertFileIsNotEmpty(IngestionJob ingestion) throws ObsEmptyFileException, InternalErrorException;
 }

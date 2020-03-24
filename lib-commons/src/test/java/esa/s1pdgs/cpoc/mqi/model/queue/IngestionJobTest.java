@@ -29,9 +29,9 @@ public class IngestionJobTest {
     @Test
     public void testToStringAndSetters() {
     	IngestionJob dto = new IngestionJob();
-        dto.setKeyObjectStorage("product-name");
+        dto.setProductName("product-name");
         dto.setRelativePath("product-name");
-        dto.setPickupPath("/fooBar");
+        dto.setPickupBaseURL("/fooBar");
  
         String str = dto.toString();
         assertTrue(str.contains("product-name"));

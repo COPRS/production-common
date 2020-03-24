@@ -5,8 +5,22 @@ import java.util.Objects;
 import esa.s1pdgs.cpoc.common.ProductFamily;
 
 public class IngestionJob extends AbstractMessage {	
+	
+	/**
+	 * either file:// or https://, base-URL of XBIP or inbox
+	 */
+	private String pickupBaseURL;
+
+	/**
+	 * path to file/folder relative to pickupBaseURL
+	 */
 	private String relativePath;
-	private String pickupPath;
+	
+	/**
+	 * name of file/folder to be ingested (to be used by IngestionWorker instead of keyObjectStorage
+	 */
+	private String productName;
+	
 	
 	public IngestionJob() {
 		super();
@@ -16,6 +30,14 @@ public class IngestionJob extends AbstractMessage {
 		super(ProductFamily.BLANK, keyObjectStorage);
 	}
 
+	public String getPickupBaseURL() {
+		return pickupBaseURL;
+	}
+
+	public void setPickupBaseURL(final String pickupBaseURL) {
+		this.pickupBaseURL = pickupBaseURL;
+	}
+	
 	public String getRelativePath() {
 		return relativePath;
 	}
@@ -24,19 +46,18 @@ public class IngestionJob extends AbstractMessage {
 		this.relativePath = relativePath;
 	}
 
-
-	public String getPickupPath() {
-		return pickupPath;
+	public String getProductName() {
+		return productName;
 	}
 
-	public void setPickupPath(final String pickupPath) {
-		this.pickupPath = pickupPath;
+	public void setProductName(String productName) {
+		this.productName = productName;
 	}
 
 	@Override
 	public int hashCode() {
-		return Objects.hash(creationDate, hostname, keyObjectStorage, pickupPath, productFamily,
-				relativePath, uid);
+		return Objects.hash(creationDate, hostname, keyObjectStorage, pickupBaseURL, productFamily,
+				relativePath, productName, uid);
 	}
 
 	@Override
@@ -54,16 +75,17 @@ public class IngestionJob extends AbstractMessage {
 		return Objects.equals(creationDate, other.creationDate) 
 				&& Objects.equals(hostname, other.hostname)
 				&& Objects.equals(keyObjectStorage, other.keyObjectStorage)
-				&& Objects.equals(pickupPath, other.pickupPath)
+				&& Objects.equals(pickupBaseURL, other.pickupBaseURL)
 				&& productFamily == other.productFamily 
 				&& Objects.equals(uid, other.uid)
-				&& Objects.equals(relativePath, other.relativePath);
+				&& Objects.equals(relativePath, other.relativePath)
+				&& Objects.equals(productName, other.productName);
 	}
 
 	@Override
 	public String toString() {
 		return "IngestionJob [productFamily=" + productFamily + ", keyObjectStorage=" + keyObjectStorage
 				+ ", creationDate=" + creationDate + ", hostname=" + hostname + ", relativePath=" + relativePath
-				+ ", pickupPath=" + pickupPath + ", uid=" + uid +"]";
+				+ ", pickupBaseURL=" + pickupBaseURL + ", productName=" + productName + ", uid=" + uid +"]";
 	}	
 }

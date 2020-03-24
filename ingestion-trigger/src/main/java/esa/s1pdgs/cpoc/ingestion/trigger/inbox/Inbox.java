@@ -110,7 +110,8 @@ public final class Inbox {
 						LOG.debug("Publishing new entry to kafka queue: {}", entry);					
 						final IngestionJob dto = new IngestionJob(entry.getName());
 					    dto.setRelativePath(entry.getRelativePath());
-					    dto.setPickupPath(entry.getPickupPath());
+					    dto.setPickupBaseURL(entry.getPickupPath());
+					    dto.setProductName(entry.getName());
 					    dto.setUid(reporting.getUid());
 						client.publish(dto);
 						persist(entry);		
