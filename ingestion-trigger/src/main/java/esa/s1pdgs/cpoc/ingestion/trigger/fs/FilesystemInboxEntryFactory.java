@@ -16,7 +16,7 @@ public class FilesystemInboxEntryFactory implements InboxEntryFactory {
 		final Path relativePath = inbox.relativize(path);		
 		inboxEntry.setName(productName(relativePath, productInDirectory));		
 		inboxEntry.setRelativePath(relativePath.toString());		
-		inboxEntry.setPickupPath(inbox.toString());
+		inboxEntry.setPickupPath("file://"+inbox.toString());
 		return inboxEntry;
 	}
 	
