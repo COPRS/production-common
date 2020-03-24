@@ -4,7 +4,6 @@ import java.io.File;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.nio.file.Paths;
-import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 import java.util.UUID;
@@ -27,11 +26,9 @@ import esa.s1pdgs.cpoc.common.utils.FileUtils;
 import esa.s1pdgs.cpoc.common.utils.LogUtils;
 import esa.s1pdgs.cpoc.errorrepo.ErrorRepoAppender;
 import esa.s1pdgs.cpoc.errorrepo.model.rest.FailedProcessingDto;
-import esa.s1pdgs.cpoc.ingestion.worker.config.IngestionTypeConfiguration;
 import esa.s1pdgs.cpoc.ingestion.worker.config.IngestionWorkerServiceConfigurationProperties;
 import esa.s1pdgs.cpoc.ingestion.worker.product.IngestionResult;
 import esa.s1pdgs.cpoc.ingestion.worker.product.Product;
-import esa.s1pdgs.cpoc.ingestion.worker.product.ProductException;
 import esa.s1pdgs.cpoc.ingestion.worker.product.ProductService;
 import esa.s1pdgs.cpoc.ingestion.worker.product.report.IngestionWorkerReportingOutput;
 import esa.s1pdgs.cpoc.mqi.client.GenericMqiClient;
@@ -132,9 +129,8 @@ public class IngestionWorkerService implements MqiListener<IngestionJob> {
 			final IngestionJob ingestion,
 			final ReportingFactory reportingFactory
 	) throws Exception {
-		final ProductFamily family = getFamilyFor(ingestion);
 		try {
-			return productService.ingest(family, ingestion, reportingFactory);
+			return productService.ingest(ingestion.getProductFamily(), ingestion, reportingFactory);
 		} 
 		catch (final Exception e) {
 			productService.markInvalid(ingestion, reportingFactory);
@@ -175,26 +171,5 @@ public class IngestionWorkerService implements MqiListener<IngestionJob> {
 		if (file.exists()) {
 			FileUtils.deleteWithRetries(file, properties.getMaxRetries(), properties.getTempoRetryMs());
 		}
-	}
-
-	final ProductFamily getFamilyFor(final IngestionJob dto) throws ProductException {
-		for (final IngestionTypeConfiguration config : properties.getTypes()) {
-			if (dto.getKeyObjectStorage().matches(config.getRegex())) {
-				LOG.debug("Found {} for {}", config, dto);
-				try {
-					return ProductFamily.valueOf(config.getFamily());
-				} catch (final Exception e) {
-					throw new ProductException(
-							String.format(
-									"Invalid %s for %s (allowed: %s)", 
-									config, 
-									dto,
-									Arrays.toString(ProductFamily.values())
-							)
-					);
-				}
-			}
-		}
-		throw new ProductException(String.format("No matching config found for %s in: %s", dto, properties.getTypes()));
 	}	
 }

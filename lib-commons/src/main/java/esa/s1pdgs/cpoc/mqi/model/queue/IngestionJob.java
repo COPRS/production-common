@@ -26,8 +26,8 @@ public class IngestionJob extends AbstractMessage {
 		super();
 	}
 
-	public IngestionJob(final String keyObjectStorage) {
-		super(ProductFamily.BLANK, keyObjectStorage);
+	public IngestionJob(final ProductFamily family, final String keyObjectStorage) {
+		super(family, keyObjectStorage);
 	}
 
 	public String getPickupBaseURL() {

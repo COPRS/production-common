@@ -31,7 +31,6 @@ import esa.s1pdgs.cpoc.mqi.model.rest.GenericMessageDto;
 import esa.s1pdgs.cpoc.report.Reporting;
 import esa.s1pdgs.cpoc.report.ReportingMessage;
 import esa.s1pdgs.cpoc.report.ReportingUtils;
-import esa.s1pdgs.cpoc.report.message.input.FilenameReportingInput;
 
 /**
  * Job dispatcher<br/>
@@ -192,7 +191,7 @@ public abstract class AbstractJobsDispatcher {
         		.newReporting("TaskTableLookup");
         
     	reporting.begin(
-    			new FilenameReportingInput(job.getProduct().getProductName()),
+    			ReportingUtils.newFilenameReportingInputFor(prepJob.getProductFamily(), job.getProduct().getProductName()),
     			new ReportingMessage("Start associating TaskTables to AppDataJob %s", job.getId())
     	);    	
         try {

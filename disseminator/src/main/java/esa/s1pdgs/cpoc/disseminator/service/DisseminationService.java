@@ -44,7 +44,6 @@ import esa.s1pdgs.cpoc.obs_sdk.SdkClientException;
 import esa.s1pdgs.cpoc.report.Reporting;
 import esa.s1pdgs.cpoc.report.ReportingMessage;
 import esa.s1pdgs.cpoc.report.ReportingUtils;
-import esa.s1pdgs.cpoc.report.message.input.FilenameReportingInput;
 import esa.s1pdgs.cpoc.report.message.output.OutboxReportingOutput;
 
 @Service
@@ -150,7 +149,7 @@ public class DisseminationService implements MqiListener<ProductionEvent> {
 				.newReporting("Dissemination");	
 		
 		reporting.begin(
-				new FilenameReportingInput(product.getKeyObjectStorage()),
+				ReportingUtils.newFilenameReportingInputFor(product.getProductFamily(), product.getKeyObjectStorage()),
 				new ReportingMessage("Start dissemination of product to outbox {}", target) 
 		);
 		

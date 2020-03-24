@@ -24,6 +24,7 @@ import esa.s1pdgs.cpoc.obs_sdk.ObsConfigurationProperties;
 import esa.s1pdgs.cpoc.obs_sdk.ObsObject;
 import esa.s1pdgs.cpoc.obs_sdk.ObsServiceException;
 import esa.s1pdgs.cpoc.obs_sdk.SdkClientException;
+import esa.s1pdgs.cpoc.obs_sdk.report.ReportingProductFactory;
 
 @Ignore
 @RunWith(SpringRunner.class)
@@ -42,17 +43,17 @@ public class SwiftGetTempDownloadUrlTest {
 	
 	private SwiftObsClient uut;
 	
-	public static File getResource(String fileName) {
+	public static File getResource(final String fileName) {
 		try {
 			return new File(SwiftGetTempDownloadUrlTest.class.getClass().getResource(fileName).toURI());
-		} catch (URISyntaxException e) {
+		} catch (final URISyntaxException e) {
 			throw new RuntimeException("Could not get resource");
 		}
 	}
 	
 	@Before
 	public void setUp() throws SdkClientException, AbstractCodedException {	
-		uut = (SwiftObsClient) new SwiftObsClient.Factory().newObsClient(configuration);
+		uut = (SwiftObsClient) new SwiftObsClient.Factory().newObsClient(configuration, new ReportingProductFactory());
 		// prepare environment
 		if (!uut.containerExists(PRODUCT_FAMILY)) {
 			uut.createContainer(PRODUCT_FAMILY);
@@ -67,9 +68,9 @@ public class SwiftGetTempDownloadUrlTest {
 	
 	@Test
 	public void tempUrlDownloadTest_OnDownloadFinishesBeforeExpirationDate () throws ObsServiceException, SdkClientException, AbstractCodedException, IOException {		
-		long expirationTimeInSeconds = 10L;
-		URL url = uut.createTemporaryDownloadUrl(OBS_OBJECT, expirationTimeInSeconds);
-		Instant expirationDate = Instant.now().plus(Duration.standardSeconds(expirationTimeInSeconds));
+		final long expirationTimeInSeconds = 10L;
+		final URL url = uut.createTemporaryDownloadUrl(OBS_OBJECT, expirationTimeInSeconds);
+		final Instant expirationDate = Instant.now().plus(Duration.standardSeconds(expirationTimeInSeconds));
 		System.out.println(String.format("expirationDate: %s", expirationDate.toString()));
 		System.out.println(String.format("curl -v -o /tmp/file.tmp \"%s\"", url.toString()));
 	}

@@ -6,7 +6,6 @@ import java.nio.file.FileVisitOption;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
@@ -42,6 +41,8 @@ import esa.s1pdgs.cpoc.ipf.execution.worker.job.file.InputDownloader;
 import esa.s1pdgs.cpoc.ipf.execution.worker.job.file.OutputProcessor;
 import esa.s1pdgs.cpoc.ipf.execution.worker.job.mqi.OutputProcuderFactory;
 import esa.s1pdgs.cpoc.ipf.execution.worker.job.process.PoolExecutorCallable;
+import esa.s1pdgs.cpoc.ipf.execution.worker.service.report.JobReportingInput;
+import esa.s1pdgs.cpoc.ipf.execution.worker.service.report.SegmentJobReportingInput;
 import esa.s1pdgs.cpoc.mqi.client.GenericMqiClient;
 import esa.s1pdgs.cpoc.mqi.client.MqiClient;
 import esa.s1pdgs.cpoc.mqi.client.MqiConsumer;
@@ -51,10 +52,10 @@ import esa.s1pdgs.cpoc.mqi.model.queue.IpfExecutionJob;
 import esa.s1pdgs.cpoc.mqi.model.rest.GenericMessageDto;
 import esa.s1pdgs.cpoc.obs_sdk.ObsClient;
 import esa.s1pdgs.cpoc.report.Reporting;
+import esa.s1pdgs.cpoc.report.ReportingInput;
 import esa.s1pdgs.cpoc.report.ReportingMessage;
 import esa.s1pdgs.cpoc.report.ReportingOutput;
 import esa.s1pdgs.cpoc.report.ReportingUtils;
-import esa.s1pdgs.cpoc.report.message.input.JobOrderReportingInput;
 
 /**
  * Process a jobs
@@ -200,23 +201,25 @@ public class JobProcessor implements MqiListener<IpfExecutionJob> {
 
 		// Everything is fine with the request, we can start processing it.
 		LOGGER.debug("Everything is fine with the request, start processing job {}", job);
-		final String jobOrderName = new File(job.getJobOrder()).getName();
-		reporting.begin(
-				new JobOrderReportingInput(toReportFilenames(job), jobOrderName, Collections.emptyMap()),				
-				new ReportingMessage("Start job processing")
-		);
-
+		
 		final File workdir = new File(job.getWorkDirectory());
-		// Clean up the working directory with all of its content
-		eraseWorkingDirectory(properties.getWorkingDir());
-
+		final String jobOrderName = new File(job.getJobOrder()).getName();
+		
+		ReportingInput input = new JobReportingInput(toReportFilenames(job), jobOrderName);
+		
 		// Build output list filename
 		String outputListFile = job.getWorkDirectory() + workdir.getName() + ".LIST";
 		if (properties.getLevel() == ApplicationLevel.L0) {
 			outputListFile = job.getWorkDirectory() + "AIOProc.LIST";
 		} else if (properties.getLevel() == ApplicationLevel.L0_SEGMENT) {
 			outputListFile = job.getWorkDirectory() + "L0ASProcList.LIST";
-		}
+			input = new SegmentJobReportingInput(toReportFilenames(job), jobOrderName);
+		}		
+		reporting.begin(input,	new ReportingMessage("Start job processing"));
+		
+		// Clean up the working directory with all of its content
+		eraseWorkingDirectory(properties.getWorkingDir());
+
 		LOGGER.debug("Output list build {}", outputListFile);
 
 		final PoolExecutorCallable procExecutor = new PoolExecutorCallable(properties, job,

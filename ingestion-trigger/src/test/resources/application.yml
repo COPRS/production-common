@@ -26,6 +26,7 @@ ingestion-trigger:
       matchRegex: (WILE|MTI_|SGS_|INU_)/S1(A|B)/([A-Za-z0-9]+)/ch0?(1|2)/(.+DSIB\\.(xml|XML)|.+DSDB.*\\.(raw|RAW|aisp|AISP))
       ignoreRegex: (^\..*|.*\.tmp$|db.*|^lost\+found$)
       topic: t-pdgs-ingestion-${HOSTNAME}
+      family: EDRS_SESSION
   
 # KAFKA
 kafka:

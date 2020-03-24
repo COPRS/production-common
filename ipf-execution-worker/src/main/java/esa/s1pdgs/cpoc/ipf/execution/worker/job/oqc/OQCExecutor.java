@@ -7,6 +7,7 @@ import java.util.concurrent.Executors;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import esa.s1pdgs.cpoc.common.ProductFamily;
 import esa.s1pdgs.cpoc.common.utils.LogUtils;
 import esa.s1pdgs.cpoc.ipf.execution.worker.config.ApplicationProperties;
 import esa.s1pdgs.cpoc.ipf.execution.worker.job.oqc.report.OqcReportingOutput;
@@ -15,7 +16,7 @@ import esa.s1pdgs.cpoc.mqi.model.queue.OQCFlag;
 import esa.s1pdgs.cpoc.report.Reporting;
 import esa.s1pdgs.cpoc.report.ReportingFactory;
 import esa.s1pdgs.cpoc.report.ReportingMessage;
-import esa.s1pdgs.cpoc.report.message.input.FilenameReportingInput;
+import esa.s1pdgs.cpoc.report.ReportingUtils;
 
 public class OQCExecutor {
 	/**
@@ -29,7 +30,7 @@ public class OQCExecutor {
 		this.properties = properties;
 	}
 
-	public OQCFlag executeOQC(final File file, final LevelJobOutputDto output, final OQCTaskFactory factory,
+	public OQCFlag executeOQC(final File file, final ProductFamily family, final LevelJobOutputDto output, final OQCTaskFactory factory,
 			final ReportingFactory reportingFactory) {
 		final Reporting reporting = reportingFactory.newReporting("OQC");
 		
@@ -38,8 +39,8 @@ public class OQCExecutor {
 			// This output needs to be quality checked
 			LOGGER.info("Executing OQC check for product {}", file);
 			
-			reporting.begin(
-					new FilenameReportingInput(file.getName()), 
+			reporting.begin(					
+					ReportingUtils.newFilenameReportingInputFor(family, file.getName()),
 					new ReportingMessage("Start OQC for product %s", file.getName())
 			);
 			final ExecutorService executor = Executors.newSingleThreadExecutor();

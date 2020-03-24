@@ -26,10 +26,10 @@ import esa.s1pdgs.cpoc.common.errors.obs.ObsParallelAccessException;
 import esa.s1pdgs.cpoc.common.errors.obs.ObsUnknownObject;
 import esa.s1pdgs.cpoc.common.utils.FileUtils;
 import esa.s1pdgs.cpoc.common.utils.LogUtils;
+import esa.s1pdgs.cpoc.obs_sdk.report.ReportingProductFactory;
 import esa.s1pdgs.cpoc.report.Reporting;
 import esa.s1pdgs.cpoc.report.ReportingFactory;
 import esa.s1pdgs.cpoc.report.ReportingMessage;
-import esa.s1pdgs.cpoc.report.message.input.ObsReportingInput;
 
 /**
  * Provides an implementation of the ObsClient where the download / upload in
@@ -41,9 +41,14 @@ public abstract class AbstractObsClient implements ObsClient {
 	public static final String MD5SUM_SUFFIX = ".md5sum";
 	
 	private final ObsConfigurationProperties configuration;
+	private final ReportingProductFactory reportingProductFactory;
 	
-	public AbstractObsClient(final ObsConfigurationProperties configuration) {
+	public AbstractObsClient(
+			final ObsConfigurationProperties configuration, 
+			final ReportingProductFactory reportingProductFactory
+	) {
 		this.configuration = configuration;
+		this.reportingProductFactory = reportingProductFactory;
 	}
 
 	protected final String getBucketFor(final ProductFamily family) throws ObsServiceException {
@@ -85,7 +90,7 @@ public abstract class AbstractObsClient implements ObsClient {
             // Download object in sequential
             for (final ObsDownloadObject object : objects) {            
              	reporting.begin(
-             			new ObsReportingInput(getBucketFor(object.getFamily()), object.getFamily(), object.getKey()),
+             			reportingProductFactory.reportingInputFor(object, getBucketFor(object.getFamily())),
              			new ReportingMessage("Start downloading from OBS")
              	);
              	try {
@@ -126,7 +131,7 @@ public abstract class AbstractObsClient implements ObsClient {
             // Upload object in sequential
             for (final ObsUploadObject object : objects) {            	
              	reporting.begin(
-             			new ObsReportingInput(getBucketFor(object.getFamily()), object.getFamily(), object.getKey()),
+             			reportingProductFactory.reportingInputFor(object, getBucketFor(object.getFamily())),
              			new ReportingMessage("Start uploading to OBS")
              	);
              	

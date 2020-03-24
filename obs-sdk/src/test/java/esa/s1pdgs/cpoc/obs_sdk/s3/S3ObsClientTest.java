@@ -33,6 +33,7 @@ import esa.s1pdgs.cpoc.obs_sdk.ObsObject;
 import esa.s1pdgs.cpoc.obs_sdk.ObsServiceException;
 import esa.s1pdgs.cpoc.obs_sdk.ObsUploadObject;
 import esa.s1pdgs.cpoc.obs_sdk.SdkClientException;
+import esa.s1pdgs.cpoc.obs_sdk.report.ReportingProductFactory;
 
 /**
  * Test the client Amazon S3
@@ -112,7 +113,7 @@ public class S3ObsClientTest {
         		.getBucketFor(Mockito.eq(ProductFamily.L0_BLANK));
 
         // Build client
-        client = new S3ObsClient(configuration, service);
+        client = new S3ObsClient(configuration, service, new ReportingProductFactory());
     }
 
     /**

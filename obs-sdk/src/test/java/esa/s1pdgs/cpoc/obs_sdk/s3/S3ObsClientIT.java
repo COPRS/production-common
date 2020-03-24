@@ -1,4 +1,4 @@
-package esa.s1pdgs.cpoc.obs_sdk.swift;
+package esa.s1pdgs.cpoc.obs_sdk.s3;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -41,11 +41,12 @@ import esa.s1pdgs.cpoc.report.ReportingFactory;
 
 @Ignore
 @RunWith(SpringRunner.class)
-@TestPropertySource("classpath:obs-swift.properties")
+@TestPropertySource("classpath:obs-aws-s3.properties")
 @ContextConfiguration(classes = {ObsConfigurationProperties.class})
-public class SwiftObsClientIT {
+public class S3ObsClientIT {
 
 	public final static ProductFamily auxiliaryFiles = ProductFamily.AUXILIARY_FILE;
+	public final static String auxiliaryFilesBucketName = "auxiliary-files";
 	public final static String testFilePrefix = "abc/def/";
 	public final static String testFileName1 = "testfile1.txt";
 	public final static String testFileName2 = "testfile2.txt";
@@ -61,11 +62,11 @@ public class SwiftObsClientIT {
 	@Autowired
 	private ObsConfigurationProperties configuration;
 	
-	private SwiftObsClient uut;
+	private S3ObsClient uut;
 	
 	public static File getResource(final String fileName) {
 		try {
-			return new File(SwiftObsClientIT.class.getClass().getResource(fileName).toURI());
+			return new File(S3ObsClientIT.class.getClass().getResource(fileName).toURI());
 		} catch (final URISyntaxException e) {
 			throw new RuntimeException("Could not get resource");
 		}
@@ -73,43 +74,43 @@ public class SwiftObsClientIT {
 	
 	@Before
 	public void setUp() throws ObsException, SdkClientException {	
-		uut = (SwiftObsClient) new SwiftObsClient.Factory().newObsClient(configuration, new ReportingProductFactory());
+		uut = (S3ObsClient) new S3ObsClient.Factory().newObsClient(configuration, new ReportingProductFactory());
 		
 		// prepare environment
-		if (!uut.containerExists(auxiliaryFiles)) {
-			uut.createContainer(auxiliaryFiles);
+		if (!uut.bucketExists(auxiliaryFiles)) {
+			uut.createBucket(auxiliaryFiles);
 		}
 
 		if (uut.exists(new ObsObject(auxiliaryFiles, testFileName1))) {
-			uut.deleteObject(auxiliaryFiles, testFileName1);
+			uut.s3Services.s3client.deleteObject(auxiliaryFilesBucketName, testFileName1);
 		}
 
 		if (uut.exists(new ObsObject(auxiliaryFiles, testFileName2))) {
-			uut.deleteObject(auxiliaryFiles, testFileName2);
+			uut.s3Services.s3client.deleteObject(auxiliaryFilesBucketName, testFileName2);
 		}
 
 		if (uut.exists(new ObsObject(auxiliaryFiles, testFilePrefix + testFileName1))) {
-			uut.deleteObject(auxiliaryFiles, testFilePrefix + testFileName1);
+			uut.s3Services.s3client.deleteObject(auxiliaryFilesBucketName, testFilePrefix + testFileName1);
 		}
 
 		if (uut.exists(new ObsObject(auxiliaryFiles, testFilePrefix + testFileName2))) {
-			uut.deleteObject(auxiliaryFiles, testFilePrefix + testFileName2);
+			uut.s3Services.s3client.deleteObject(auxiliaryFilesBucketName, testFilePrefix + testFileName2);
 		}
 
 		if (uut.exists(new ObsObject(auxiliaryFiles, testDirectoryName + "/" + testFileName1))) {
-			uut.deleteObject(auxiliaryFiles, testDirectoryName + "/" + testFileName1);
+			uut.s3Services.s3client.deleteObject(auxiliaryFilesBucketName, testDirectoryName + "/" + testFileName1);
 		}
 
 		if (uut.exists(new ObsObject(auxiliaryFiles, testDirectoryName + "/" + testFileName2))) {
-			uut.deleteObject(auxiliaryFiles, testDirectoryName + "/" + testFileName2);
+			uut.s3Services.s3client.deleteObject(auxiliaryFilesBucketName, testDirectoryName + "/" + testFileName2);
 		}
 
 		if (uut.exists(new ObsObject(auxiliaryFiles, testDirectoryName + "/" + testUnexptectedFileName))) {
-			uut.deleteObject(auxiliaryFiles, testDirectoryName + "/" + testUnexptectedFileName);
+			uut.s3Services.s3client.deleteObject(auxiliaryFilesBucketName, testDirectoryName + "/" + testUnexptectedFileName);
 		}
 
 		if (uut.exists(new ObsObject(auxiliaryFiles, testDirectoryName + ".md5sum"))) {
-			uut.deleteObject(auxiliaryFiles, testDirectoryName + ".md5sum");
+			uut.s3Services.s3client.deleteObject(auxiliaryFilesBucketName, testDirectoryName + ".md5sum");
 		}
 	}
 	
@@ -179,7 +180,7 @@ public class SwiftObsClientIT {
 		assertTrue(uut.exists(new ObsObject(auxiliaryFiles, testDirectoryName + ".md5sum")));
 
 		// remove object from directory
-		uut.deleteObject(auxiliaryFiles, testDirectoryName + "/" + testFileName1);
+		uut.s3Services.s3client.deleteObject(auxiliaryFilesBucketName, testDirectoryName + "/" + testFileName1);
 		assertFalse(uut.exists(new ObsObject(auxiliaryFiles, testDirectoryName + "/" + testFileName1)));
 
 		// validate incomplete directory
@@ -201,9 +202,9 @@ public class SwiftObsClientIT {
 		assertTrue(uut.exists(new ObsObject(auxiliaryFiles, testDirectoryName + ".md5sum")));
 
 		// replace object with bad one
-		uut.deleteObject(auxiliaryFiles, testDirectoryName + "/" + testFileName1);
+		uut.s3Services.s3client.deleteObject(auxiliaryFilesBucketName, testDirectoryName + "/" + testFileName1);
 		assertFalse(uut.exists(new ObsObject(auxiliaryFiles, testDirectoryName + "/" + testFileName1)));
-		uut.upload(Arrays.asList(new ObsUploadObject(auxiliaryFiles, testDirectoryName + "/" + testFileName1, testFile2)), ReportingFactory.NULL);		
+		uut.s3Services.uploadFile(auxiliaryFilesBucketName, testDirectoryName + "/" + testFileName1, testFile2);
 		assertTrue(uut.exists(new ObsObject(auxiliaryFiles, testDirectoryName + "/" + testFileName1)));
 
 		// validate wrong checksum situation
@@ -230,7 +231,7 @@ public class SwiftObsClientIT {
 
 		// delete
 		if (uut.exists(new ObsObject(auxiliaryFiles, testFileName1))) {
-			uut.deleteObject(auxiliaryFiles, testFileName1);
+			uut.s3Services.s3client.deleteObject(auxiliaryFilesBucketName, testFileName1);
 		}
 	}
 	
@@ -243,7 +244,7 @@ public class SwiftObsClientIT {
 
 		// delete
 		if (uut.exists(new ObsObject(auxiliaryFiles, testFileName1))) {
-			uut.deleteObject(auxiliaryFiles, testFilePrefix + testFileName1);
+			uut.s3Services.s3client.deleteObject(auxiliaryFilesBucketName, testFilePrefix + testFileName1);
 		}
 	}
 
@@ -266,11 +267,15 @@ public class SwiftObsClientIT {
 	public void downloadFileWithPrefixTest() throws Exception {	
 		// upload
 		assertFalse(uut.exists(new ObsObject(auxiliaryFiles, testFilePrefix + testFileName1)));
+		System.out.println(uut.exists(new ObsObject(auxiliaryFiles, testFilePrefix + testFileName1)));
 		uut.upload(Arrays.asList(new ObsUploadObject(auxiliaryFiles, testFilePrefix + testFileName1, testFile1)), ReportingFactory.NULL);
 		assertTrue(uut.exists(new ObsObject(auxiliaryFiles, testFilePrefix + testFileName1)));
+		System.out.println(uut.exists(new ObsObject(auxiliaryFiles, testFilePrefix + testFileName1)));
+		System.out.println(new ObsObject(auxiliaryFiles, testFilePrefix + testFileName1));
 		
 		// single file download
         final String targetDir = Files.createTempDirectory(this.getClass().getCanonicalName() + "-").toString();
+        System.out.println("Download from " + auxiliaryFiles + " : " + testFilePrefix + testFileName1);
 		uut.download(Arrays.asList(new ObsDownloadObject(auxiliaryFiles, testFilePrefix + testFileName1, targetDir)), ReportingFactory.NULL);
 		final String send1 = new String(Files.readAllBytes(testFile1.toPath()));
 		final String received1 = new String(Files.readAllBytes((new File(targetDir + "/" + testFilePrefix + testFileName1)).toPath()));
@@ -314,7 +319,7 @@ public class SwiftObsClientIT {
 		assertTrue(uut.exists(new ObsObject(auxiliaryFiles, testFileName2)));
 		
 		// count
-		final int count = uut.numberOfObjects(auxiliaryFiles, "");
+		final int count = uut.s3Services.getNbObjects(auxiliaryFilesBucketName, "");
 		assertEquals(2, count);
 	}
 
@@ -329,7 +334,7 @@ public class SwiftObsClientIT {
 		assertTrue(uut.exists(new ObsObject(auxiliaryFiles, testFilePrefix + testFileName2)));
 		
 		// count
-		final int count = uut.numberOfObjects(auxiliaryFiles, testFilePrefix);
+		final int count = uut.s3Services.getNbObjects(auxiliaryFilesBucketName, testFilePrefix);
 		assertEquals(2, count);
 	}
 	

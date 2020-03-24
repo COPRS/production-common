@@ -25,7 +25,6 @@ import esa.s1pdgs.cpoc.mqi.model.rest.GenericPublicationMessageDto;
 import esa.s1pdgs.cpoc.report.Reporting;
 import esa.s1pdgs.cpoc.report.ReportingMessage;
 import esa.s1pdgs.cpoc.report.ReportingUtils;
-import esa.s1pdgs.cpoc.report.message.input.FilenameReportingInput;
 
 @Service
 public class CompressionEventListener implements MqiListener<CompressionEvent> {
@@ -73,7 +72,7 @@ public class CompressionEventListener implements MqiListener<CompressionEvent> {
 				.newReporting("PripTrigger");
 		
 		reporting.begin(
-				new FilenameReportingInput(compressionEvent.getKeyObjectStorage()),
+				ReportingUtils.newFilenameReportingInputFor(compressionEvent.getProductFamily(), compressionEvent.getKeyObjectStorage()),
 				new ReportingMessage("Handling event for %s", compressionEvent.getKeyObjectStorage())
 		);
 		

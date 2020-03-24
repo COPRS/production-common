@@ -24,6 +24,7 @@ import esa.s1pdgs.cpoc.obs_sdk.ObsConfigurationProperties;
 import esa.s1pdgs.cpoc.obs_sdk.ObsObject;
 import esa.s1pdgs.cpoc.obs_sdk.ObsServiceException;
 import esa.s1pdgs.cpoc.obs_sdk.SdkClientException;
+import esa.s1pdgs.cpoc.obs_sdk.report.ReportingProductFactory;
 
 @Ignore
 @RunWith(SpringRunner.class)
@@ -42,17 +43,17 @@ public class S3GetTempDownloadUrlTest {
 	
 	private S3ObsClient uut;
 	
-	public static File getResource(String fileName) {
+	public static File getResource(final String fileName) {
 		try {
 			return new File(S3GetTempDownloadUrlTest.class.getClass().getResource(fileName).toURI());
-		} catch (URISyntaxException e) {
+		} catch (final URISyntaxException e) {
 			throw new RuntimeException("Could not get resource");
 		}
 	}
 	
 	@Before
 	public void setUp() throws SdkClientException, AbstractCodedException {	
-		uut = (S3ObsClient) new S3ObsClient.Factory().newObsClient(configuration);
+		uut = (S3ObsClient) new S3ObsClient.Factory().newObsClient(configuration, new ReportingProductFactory());
 		// prepare environment
 		if (!uut.bucketExists(PRODUCT_FAMILY)) {
 			uut.createBucket(PRODUCT_FAMILY);
@@ -67,9 +68,9 @@ public class S3GetTempDownloadUrlTest {
 	
 	@Test
 	public void tempUrlDownloadTest_OnDownloadFinishesBeforeExpirationDate () throws ObsServiceException, SdkClientException, AbstractCodedException, IOException {		
-		long expirationTimeInSeconds = 10L;
-		URL url = uut.createTemporaryDownloadUrl(OBS_OBJECT, expirationTimeInSeconds);
-		Instant expirationDate = Instant.now().plus(Duration.standardSeconds(expirationTimeInSeconds));
+		final long expirationTimeInSeconds = 10L;
+		final URL url = uut.createTemporaryDownloadUrl(OBS_OBJECT, expirationTimeInSeconds);
+		final Instant expirationDate = Instant.now().plus(Duration.standardSeconds(expirationTimeInSeconds));
 		System.out.println(String.format("expirationDate: %s", expirationDate.toString()));
 		System.out.println(String.format("curl -v -o /tmp/file.tmp \"%s\"", url.toString()));
 		
