@@ -1,6 +1,8 @@
 package esa.s1pdgs.cpoc.ingestion.trigger.inbox;
 
 import java.io.File;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.nio.file.Paths;
 import java.util.Collection;
 import java.util.Date;
@@ -115,7 +117,18 @@ public final class Inbox {
 	}
 	
 	private final void handleEntry(final InboxEntry entry) {
-		final File file = Paths.get(entry.getPickupPath(), entry.getRelativePath()).toFile();
+		
+		// FIXME: dirty workaround, file size and last modified time need to be abstracted when using http://
+		// instead of file://
+		URI pickupURL;
+		try {
+			pickupURL = new URI(entry.getPickupPath());
+		} catch (URISyntaxException e) {
+			LOG.error("URL syntax not correct for {}", entry.getName());
+			return;
+		}
+		
+		final File file = Paths.get(pickupURL).resolve(entry.getRelativePath()).toFile();
 		final String filename = file.getName();
 		
 		final Reporting reporting = ReportingUtils.newReportingBuilder()
