@@ -57,7 +57,7 @@ public final class Inbox {
 					.getAllForPath(inboxAdapter.inboxPath());
 						
 			// read all entries that have not been persisted before
-			final Set<InboxEntry> pickupContent = new HashSet<>(inboxAdapter.read(e -> !persistedContent.contains(e)));
+			final Set<InboxEntry> pickupContent = new HashSet<>(inboxAdapter.read(InboxFilter.ALLOW_ALL));
 			
 			// determine the entries that have been deleted from inbox to remove them from persistence
 			final Set<InboxEntry> finishedElements = new HashSet<>(persistedContent);
@@ -75,8 +75,11 @@ public final class Inbox {
 				LOG.debug("Deleting all {} from persistence", summarize(finishedElements));
 				ingestionTriggerServiceTransactional.removeFinished(finishedElements);
 			}
+			
+			final Set<InboxEntry> newElements = new HashSet<>(persistedContent);
+			newElements.removeAll(persistedContent);
 
-			for (final InboxEntry newEntry : pickupContent) {
+			for (final InboxEntry newEntry : newElements) {
 				if (filter.accept(newEntry)) {
 					LOG.debug("adding {}", newEntry);	
 					handleEntry(newEntry);	
@@ -87,15 +90,15 @@ public final class Inbox {
 				persist(newEntry);
 			}
 
-			if (!pickupContent.isEmpty()) {
+			if (!newElements.isEmpty()) {
 				if (logMessage.length() == 0) {
 					logMessage.append("Handled ");
 				} else {
 					logMessage.append(" and ");
 				}
-				logMessage.append(pickupContent.size())
+				logMessage.append(newElements.size())
 					.append(" new elements (")
-					.append(summarize(pickupContent))
+					.append(summarize(newElements))
 					.append(")");	
 			}
 			if (logMessage.length() != 0) {
@@ -123,7 +126,7 @@ public final class Inbox {
 		URI pickupURL;
 		try {
 			pickupURL = new URI(entry.getPickupPath());
-		} catch (URISyntaxException e) {
+		} catch (final URISyntaxException e) {
 			LOG.error("URL syntax not correct for {}", entry.getName());
 			return;
 		}
