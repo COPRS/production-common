@@ -1,12 +1,15 @@
 package esa.s1pdgs.cpoc.mdc.worker.extraction.report;
 
+import java.util.Collections;
+import java.util.List;
+
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 import esa.s1pdgs.cpoc.report.ReportingOutput;
 
 public class SegmentReportingOutput implements ReportingOutput {
 	public static class Segment {
-		@JsonProperty("filename_string")
+		@JsonProperty("segment_string")
 		private String segmentName;
 		
 		@JsonProperty("product_consolidation_string")
@@ -50,22 +53,22 @@ public class SegmentReportingOutput implements ReportingOutput {
 		}
 	}
 	
-	@JsonProperty("segment_object")
-	private Segment segment;
+	@JsonProperty("segment_objects")
+	private List<Segment> segments;
 
 	public SegmentReportingOutput(final Segment segment) {
-		this.segment = segment;
+		this.segments = Collections.singletonList(segment);
 	}
 	
 	public SegmentReportingOutput(final String segmentName, final String productConsolidation, final String productSensingConsolidation) {
 		this(new Segment(segmentName, productConsolidation, productSensingConsolidation));
 	}
 
-	public Segment getSegment() {
-		return segment;
+	public List<Segment> getSegments() {
+		return segments;
 	}
 
-	public void setSegment(final Segment segment) {
-		this.segment = segment;
+	public void setSegments(final List<Segment> segments) {
+		this.segments = segments;
 	}
 }
