@@ -15,4 +15,11 @@ public final class ReportingUtils {
 		}
 		return new FilenameReportingInput(filename);
 	}
+	
+//	public static final ReportingOutput newFilenameReportingOutputFor(final ProductFamily family, final String filename) {
+//		if (family == ProductFamily.L0_SEGMENT) {
+//			return new SegmentReportingOutput(filename);
+//		}
+//		return new FilenameReportingOutput(filename);
+//	}
 }

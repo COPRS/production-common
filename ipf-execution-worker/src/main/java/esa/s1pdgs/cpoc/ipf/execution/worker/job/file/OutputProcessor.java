@@ -33,7 +33,7 @@ import esa.s1pdgs.cpoc.ipf.execution.worker.job.mqi.OutputProcuderFactory;
 import esa.s1pdgs.cpoc.ipf.execution.worker.job.oqc.OQCDefaultTaskFactory;
 import esa.s1pdgs.cpoc.ipf.execution.worker.job.oqc.OQCExecutor;
 import esa.s1pdgs.cpoc.ipf.execution.worker.job.oqc.report.IpfExecutionWorkerReportingOutput;
-import esa.s1pdgs.cpoc.ipf.execution.worker.job.oqc.report.IpfExecutionWorkerReportingOutput.Segment;
+import esa.s1pdgs.cpoc.ipf.execution.worker.service.report.GhostHandlingSegmentReportingOutput;
 import esa.s1pdgs.cpoc.mqi.model.queue.IpfExecutionJob;
 import esa.s1pdgs.cpoc.mqi.model.queue.LevelJobOutputDto;
 import esa.s1pdgs.cpoc.mqi.model.queue.OQCFlag;
@@ -246,7 +246,10 @@ public class OutputProcessor {
 						
 						if (!ghostCandidate) {
 							LOGGER.info("Product {} is not a ghost candidate and processMode is {}", productName,inputMessage.getBody().getProductProcessMode());							
-							reporting.end(new ReportingMessage("%s (%s) is not a ghost candidate", productName, family));
+							reporting.end(
+									new GhostHandlingSegmentReportingOutput(productName, false),
+									new ReportingMessage("%s (%s) is not a ghost candidate", productName, family)
+							);
 							uploadBatch.add(new ObsUploadObject(family, productName, file));
 							outputToPublish.add(
 								new ObsQueueMessage(family, productName, productName, inputMessage.getBody().getProductProcessMode(),oqcFlag));
@@ -254,12 +257,15 @@ public class OutputProcessor {
 						} 
 						else {
 							LOGGER.info("Product {} is a ghost candidate", productName);
-							reporting.end(new ReportingMessage("%s (%s) is a ghost candidate", productName, family));
+							reporting.end(
+									new GhostHandlingSegmentReportingOutput(productName, false),
+									new ReportingMessage("%s (%s) is a ghost candidate", productName, family)
+							);
 							uploadBatch.add(new ObsUploadObject(ProductFamily.GHOST, productName, file));
 						}
 						productSize += size(file);
-
-					} else {
+					}
+					else {
 						LOGGER.info("Output {} is considered as belonging to the family {}", productName,
 								matchOutput.getFamily());
 						uploadBatch.add(new ObsUploadObject(family, productName, file));
@@ -585,7 +591,7 @@ public class OutputProcessor {
 	 */
 	public ReportingOutput processOutput(final ReportingFactory reportingFactory, final UUID uuid) throws AbstractCodedException, ObsEmptyFileException {
 		final List<String> filenames = new ArrayList<>();
-		final List<Segment> segments = new ArrayList<>();
+		final List<String> segments = new ArrayList<>();
 		// Extract files
 		final List<String> lines = extractFiles();
 
@@ -602,7 +608,7 @@ public class OutputProcessor {
 			processReports(reportToPublish, uuid);
 			for (final ObsUploadObject obj : uploadBatch) {
 				if (obj.getFamily() == ProductFamily.L0_SEGMENT) {
-					segments.add(new Segment(obj.getKey()));
+					segments.add(obj.getKey());
 				}
 				else {
 					filenames.add(obj.getKey());
