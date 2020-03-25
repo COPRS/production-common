@@ -32,7 +32,9 @@ import esa.s1pdgs.cpoc.prip.metadata.PripMetadataRepository;
 import esa.s1pdgs.cpoc.prip.model.Checksum;
 import esa.s1pdgs.cpoc.prip.model.PripMetadata;
 import esa.s1pdgs.cpoc.prip.worker.report.PripReportingInput;
+import esa.s1pdgs.cpoc.prip.worker.report.PripSegmentReportingInput;
 import esa.s1pdgs.cpoc.report.Reporting;
+import esa.s1pdgs.cpoc.report.ReportingInput;
 import esa.s1pdgs.cpoc.report.ReportingMessage;
 import esa.s1pdgs.cpoc.report.ReportingUtils;
 
@@ -95,10 +97,14 @@ public class PripPublishingJobListener implements MqiListener<PripPublishingJob>
 		
 		final String name = removeZipSuffix(publishingJob.getKeyObjectStorage());
 		
-		reporting.begin(
-				new PripReportingInput(name, new Date()),
-				new ReportingMessage("Publishing file %s in PRIP", name)
-		);
+		final ReportingInput in;
+		if (publishingJob.getProductFamily() == ProductFamily.L0_SEGMENT) {
+			in = new PripSegmentReportingInput(name, new Date());
+		}
+		else  {
+			in = new PripReportingInput(name, new Date());
+		}		
+		reporting.begin(in,new ReportingMessage("Publishing file %s in PRIP", name));
 		
 		try {
 			final LocalDateTime creationDate = LocalDateTime.now();
