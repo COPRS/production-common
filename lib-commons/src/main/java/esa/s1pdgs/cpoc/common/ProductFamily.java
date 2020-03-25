@@ -12,6 +12,7 @@ public enum ProductFamily {
     INVALID,
     GHOST,
     JOB_ORDER, //
+    PLAN_AND_REPORT, //
     L0_ACN, //
     L0_BLANK, //
     L0_JOB, //

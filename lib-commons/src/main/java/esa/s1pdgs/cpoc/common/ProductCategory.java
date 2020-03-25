@@ -22,6 +22,7 @@ import esa.s1pdgs.cpoc.mqi.model.queue.ProductionEvent;
 public enum ProductCategory {
     AUXILIARY_FILES(ProductionEvent.class), 
     EDRS_SESSIONS(IngestionEvent.class), 
+    PLANS_AND_REPORTS(IngestionEvent.class),
     LEVEL_JOBS(IpfExecutionJob.class), 
     LEVEL_PRODUCTS(ProductionEvent.class), 
     LEVEL_REPORTS(LevelReportDto.class), 
@@ -56,6 +57,8 @@ public enum ProductCategory {
 	        case INVALID: // --> failed ingestion    
 	        case BLANK: // --> nominal polling ingestion
 	        	return ProductCategory.INGESTION;
+	        case PLAN_AND_REPORT:
+	        	return ProductCategory.PLANS_AND_REPORTS;
 	        case L0_JOB:
 	        case L1_JOB:
 	        case L2_JOB:
@@ -117,6 +120,9 @@ public enum ProductCategory {
             case EDRS_SESSION:
                 ret = ProductCategory.EDRS_SESSIONS;
                 break;
+            case PLAN_AND_REPORT:
+            	ret = ProductCategory.PLANS_AND_REPORTS;
+            	break;
             case INVALID: // --> failed ingestion    
             case BLANK: // --> nominal polling ingestion
             	ret = ProductCategory.INGESTION;
