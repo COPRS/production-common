@@ -279,6 +279,7 @@
 	<modules>
 		<module>applicative-catalog</module>
 		<module>app-catalog-client</module>
+		<module>xbip-client</module>
 		<module>app-status</module>
 		<module>archives</module>
 		<module>disseminator</module>
@@ -303,6 +304,6 @@
 		<module>validation</module>
 		<module>compression-trigger</module>
 		<module>compression-worker</module>
-		<module>scaler</module>
+		<module>scaler</module>		
 	</modules>
 </project>
