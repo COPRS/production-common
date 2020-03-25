@@ -46,7 +46,6 @@ import esa.s1pdgs.cpoc.report.ReportingFactory;
 import esa.s1pdgs.cpoc.report.ReportingMessage;
 import esa.s1pdgs.cpoc.report.ReportingOutput;
 import esa.s1pdgs.cpoc.report.ReportingUtils;
-import esa.s1pdgs.cpoc.report.message.output.FilenameReportingOutput;
 
 /**
  * Process outputs according their family: - publication in message queue system
@@ -585,7 +584,7 @@ public class OutputProcessor {
 	 * @throws ObsEmptyFileException 
 	 */
 	public ReportingOutput processOutput(final ReportingFactory reportingFactory, final UUID uuid) throws AbstractCodedException, ObsEmptyFileException {
-		List<String> result = new ArrayList<>();
+		final List<String> filenames = new ArrayList<>();
 		final List<Segment> segments = new ArrayList<>();
 		// Extract files
 		final List<String> lines = extractFiles();
@@ -595,10 +594,7 @@ public class OutputProcessor {
 		final List<ObsQueueMessage> outputToPublish = new ArrayList<>();
 		final List<FileQueueMessage> reportToPublish = new ArrayList<>();
 			
-		final long size = sortOutputs(lines, uploadBatch, outputToPublish, reportToPublish, reportingFactory);
-		
-		result = uploadBatch.stream().map(ObsUploadObject::getKey).collect(Collectors.toList());
-		
+		sortOutputs(lines, uploadBatch, outputToPublish, reportToPublish, reportingFactory);
 		try {
 			// Upload per batch the output
 			processProducts(reportingFactory, uploadBatch, outputToPublish, uuid);
@@ -608,17 +604,14 @@ public class OutputProcessor {
 				if (obj.getFamily() == ProductFamily.L0_SEGMENT) {
 					segments.add(new Segment(obj.getKey()));
 				}
+				else {
+					filenames.add(obj.getKey());
+				}
 			}
 		} catch (final AbstractCodedException | ObsEmptyFileException e) {
 			throw e;
 		}
-		final ReportingOutput reportOut;
-		if (!segments.isEmpty()) {
-			reportOut = new IpfExecutionWorkerReportingOutput(result, segments);
-		} else {
-			reportOut = new FilenameReportingOutput(result);
-		}
-		return reportOut;
+		return new IpfExecutionWorkerReportingOutput(filenames, segments);
 	}
 
 	private long size(final File file) throws InternalErrorException {
