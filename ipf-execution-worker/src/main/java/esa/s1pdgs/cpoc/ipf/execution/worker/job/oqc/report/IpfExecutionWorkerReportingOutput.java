@@ -6,37 +6,20 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 
 import esa.s1pdgs.cpoc.report.message.output.FilenameReportingOutput;
 
-public class IpfExecutionWorkerReportingOutput extends FilenameReportingOutput {
-	public static class Segment {
-		@JsonProperty("filename_string")
-		private String segmentName;
-		
-		public Segment(final String segmentName) {
-			this.segmentName = segmentName;
-		}
-
-		public String getSegmentName() {
-			return segmentName;
-		}
-
-		public void setSegmentName(final String segmentName) {
-			this.segmentName = segmentName;
-		}
-	}
-	
+public class IpfExecutionWorkerReportingOutput extends FilenameReportingOutput {	
 	@JsonProperty("segment_objects")
-	private List<Segment> segments;
+	private List<String> segments;
 
-	public IpfExecutionWorkerReportingOutput(final List<String> filenames, final List<Segment> segments) {
+	public IpfExecutionWorkerReportingOutput(final List<String> filenames, final List<String> segments) {
 		super(filenames);
 		this.segments = segments;
 	}
 
-	public List<Segment> getSegments() {
+	public List<String> getSegments() {
 		return segments;
 	}
 
-	public void setSegments(final List<Segment> segments) {
+	public void setSegments(final List<String> segments) {
 		this.segments = segments;
 	}
 }

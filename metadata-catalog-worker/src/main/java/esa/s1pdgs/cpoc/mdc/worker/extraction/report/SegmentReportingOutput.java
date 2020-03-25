@@ -6,7 +6,7 @@ import esa.s1pdgs.cpoc.report.ReportingOutput;
 
 public class SegmentReportingOutput implements ReportingOutput {
 	public static class Segment {
-		@JsonProperty("filename_string")
+		@JsonProperty("segment_string")
 		private String segmentName;
 		
 		@JsonProperty("product_consolidation_string")

@@ -3,6 +3,8 @@ package esa.s1pdgs.cpoc.report;
 import esa.s1pdgs.cpoc.common.ProductFamily;
 import esa.s1pdgs.cpoc.report.message.input.FilenameReportingInput;
 import esa.s1pdgs.cpoc.report.message.input.SegmentReportingInput;
+import esa.s1pdgs.cpoc.report.message.output.FilenameReportingOutput;
+import esa.s1pdgs.cpoc.report.message.output.SegmentReportingOutput;
 
 public final class ReportingUtils {
 	public static final Reporting.Builder newReportingBuilder() {
@@ -14,5 +16,12 @@ public final class ReportingUtils {
 			return new SegmentReportingInput(filename);
 		}
 		return new FilenameReportingInput(filename);
+	}
+	
+	public static final ReportingOutput newFilenameReportingOutputFor(final ProductFamily family, final String filename) {
+		if (family == ProductFamily.L0_SEGMENT) {
+			return new SegmentReportingOutput(filename);
+		}
+		return new FilenameReportingOutput(filename);
 	}
 }

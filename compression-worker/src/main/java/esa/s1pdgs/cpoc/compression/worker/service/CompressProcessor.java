@@ -46,7 +46,6 @@ import esa.s1pdgs.cpoc.obs_sdk.ObsClient;
 import esa.s1pdgs.cpoc.report.Reporting;
 import esa.s1pdgs.cpoc.report.ReportingMessage;
 import esa.s1pdgs.cpoc.report.ReportingUtils;
-import esa.s1pdgs.cpoc.report.message.output.FilenameReportingOutput;
 
 @Service
 public class CompressProcessor implements MqiListener<CompressionJob> {
@@ -133,7 +132,7 @@ public class CompressProcessor implements MqiListener<CompressionJob> {
 			LOGGER.info("Uploading compressed outputs for {}", job);
 			final String filename = fileUploader.processOutput(report);
 			report.end(
-					new FilenameReportingOutput(filename), 
+					ReportingUtils.newFilenameReportingOutputFor(job.getProductFamily(), filename), 
 					new ReportingMessage("End compression processing")
 			);
 		} catch (final Exception e) {
