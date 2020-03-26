@@ -1,6 +1,8 @@
 package esa.s1pdgs.cpoc.ingestion.trigger.inbox;
 
 import java.io.IOException;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.regex.Pattern;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -11,37 +13,49 @@ import esa.s1pdgs.cpoc.ingestion.trigger.config.InboxConfiguration;
 import esa.s1pdgs.cpoc.ingestion.trigger.filter.BlacklistRegexRelativePathInboxFilter;
 import esa.s1pdgs.cpoc.ingestion.trigger.filter.JoinedFilter;
 import esa.s1pdgs.cpoc.ingestion.trigger.filter.WhitelistRegexRelativePathInboxFilter;
+import esa.s1pdgs.cpoc.ingestion.trigger.fs.FilesystemInboxAdapterFactory;
+import esa.s1pdgs.cpoc.ingestion.trigger.fs.FilesystemInboxEntryFactory;
 import esa.s1pdgs.cpoc.ingestion.trigger.kafka.producer.KafkaSubmissionClient;
 import esa.s1pdgs.cpoc.ingestion.trigger.service.IngestionTriggerServiceTransactional;
+import esa.s1pdgs.cpoc.ingestion.trigger.xbip.XbipInboxAdapterFactory;
+import esa.s1pdgs.cpoc.ingestion.trigger.xbip.XbipInboxEntryFactory;
 import esa.s1pdgs.cpoc.mqi.model.queue.IngestionJob;
 
 @Component
 public class InboxFactory {
 	private final KafkaTemplate<String, IngestionJob> kafkaTemplate;
-	private final InboxAdapterFactory inboxAdapterFactory;
+	private final InboxAdapterFactory fileSystemInboxAdapterFactory;
+	private final InboxAdapterFactory xbipInboxAdapterFactory;
 	private final IngestionTriggerServiceTransactional ingestionTriggerServiceTransactional;
 
 	@Autowired
-	public InboxFactory(
-			final KafkaTemplate<String, IngestionJob> kafkaTemplate,
-			final IngestionTriggerServiceTransactional inboxPollingServiceTransactional,
-			final InboxAdapterFactory inboxAdapterFactory
-	) {
+	public InboxFactory(final KafkaTemplate<String, IngestionJob> kafkaTemplate,
+			final IngestionTriggerServiceTransactional inboxPollingServiceTransactional) {
 		this.kafkaTemplate = kafkaTemplate;
 		this.ingestionTriggerServiceTransactional = inboxPollingServiceTransactional;
-		this.inboxAdapterFactory = inboxAdapterFactory;
+		this.fileSystemInboxAdapterFactory = new FilesystemInboxAdapterFactory(new FilesystemInboxEntryFactory());
+		this.xbipInboxAdapterFactory = new XbipInboxAdapterFactory(new XbipInboxEntryFactory());
 	}
 
-	public Inbox newInbox(final InboxConfiguration config) throws IOException {
-		return new Inbox(
-				inboxAdapterFactory.newInboxAdapter(config.getDirectory(), config.getProductInDirectoryLevel()), 
-				new JoinedFilter(
-						new BlacklistRegexRelativePathInboxFilter(Pattern.compile(config.getIgnoreRegex())),
-						new WhitelistRegexRelativePathInboxFilter(Pattern.compile(config.getMatchRegex()))
-				),
-				ingestionTriggerServiceTransactional, 
-				new KafkaSubmissionClient(kafkaTemplate, config.getTopic()),
-				config.getFamily()
-		);
-	}	
+	public Inbox newInbox(final InboxConfiguration config) throws IOException, URISyntaxException {
+
+		URI pollingDirectoryURI = new URI(config.getDirectory());
+		InboxAdapter inboxAdapter;
+		if (pollingDirectoryURI.getScheme().equalsIgnoreCase(InboxURIScheme.FILE.getScheme())) {
+			inboxAdapter = fileSystemInboxAdapterFactory.newInboxAdapter(config.getDirectory(),
+					config.getProductInDirectoryLevel());
+		} else if (pollingDirectoryURI.getScheme().equalsIgnoreCase(InboxURIScheme.HTTPS.getScheme())) {
+			inboxAdapter = xbipInboxAdapterFactory.newInboxAdapter(config.getDirectory(),
+					config.getProductInDirectoryLevel());
+		} else {
+			throw new IllegalArgumentException(
+					String.format("URI scheme not supported %s", pollingDirectoryURI.getScheme()));
+		}
+
+		return new Inbox(inboxAdapter,
+				new JoinedFilter(new BlacklistRegexRelativePathInboxFilter(Pattern.compile(config.getIgnoreRegex())),
+						new WhitelistRegexRelativePathInboxFilter(Pattern.compile(config.getMatchRegex()))),
+				ingestionTriggerServiceTransactional, new KafkaSubmissionClient(kafkaTemplate, config.getTopic()),
+				config.getFamily());
+	}
 }
