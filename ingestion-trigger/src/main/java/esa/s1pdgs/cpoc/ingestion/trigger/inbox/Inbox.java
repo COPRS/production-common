@@ -76,7 +76,7 @@ public final class Inbox {
 				ingestionTriggerServiceTransactional.removeFinished(finishedElements);
 			}
 			
-			final Set<InboxEntry> newElements = new HashSet<>(persistedContent);
+			final Set<InboxEntry> newElements = new HashSet<>(pickupContent);
 			newElements.removeAll(persistedContent);
 
 			for (final InboxEntry newEntry : newElements) {
@@ -111,7 +111,7 @@ public final class Inbox {
 	}
 
 	public final String description() {
-		return inboxAdapter.description() + " (" + filter + ")";
+		return inboxAdapter.description() + " for productFamily " + family + "";
 	}
 
 	@Override
