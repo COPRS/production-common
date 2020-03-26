@@ -247,7 +247,7 @@ public class OutputProcessor {
 						if (!ghostCandidate) {
 							LOGGER.info("Product {} is not a ghost candidate and processMode is {}", productName,inputMessage.getBody().getProductProcessMode());							
 							reporting.end(
-									new GhostHandlingSegmentReportingOutput(productName, false),
+									new GhostHandlingSegmentReportingOutput(false),
 									new ReportingMessage("%s (%s) is not a ghost candidate", productName, family)
 							);
 							uploadBatch.add(new ObsUploadObject(family, productName, file));
@@ -258,7 +258,7 @@ public class OutputProcessor {
 						else {
 							LOGGER.info("Product {} is a ghost candidate", productName);
 							reporting.end(
-									new GhostHandlingSegmentReportingOutput(productName, false),
+									new GhostHandlingSegmentReportingOutput(true),
 									new ReportingMessage("%s (%s) is a ghost candidate", productName, family)
 							);
 							uploadBatch.add(new ObsUploadObject(ProductFamily.GHOST, productName, file));

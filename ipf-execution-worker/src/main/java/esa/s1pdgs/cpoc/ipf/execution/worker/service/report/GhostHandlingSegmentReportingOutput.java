@@ -2,14 +2,13 @@ package esa.s1pdgs.cpoc.ipf.execution.worker.service.report;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
-import esa.s1pdgs.cpoc.report.message.output.SegmentReportingOutput;
+import esa.s1pdgs.cpoc.report.ReportingOutput;
 
-public class GhostHandlingSegmentReportingOutput extends SegmentReportingOutput {
+public class GhostHandlingSegmentReportingOutput implements ReportingOutput {
 	@JsonProperty("is_ghost_candidate_boolean")
 	private boolean isGhostCandidate;
 
-	public GhostHandlingSegmentReportingOutput(final String filename, final boolean isGhostCandidate) {
-		super(filename);
+	public GhostHandlingSegmentReportingOutput(final boolean isGhostCandidate) {
 		this.isGhostCandidate = isGhostCandidate;
 	}
 

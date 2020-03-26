@@ -123,7 +123,6 @@ public class MetadataExtractionService implements MqiListener<CatalogJob> {
 			// S1PRO-1247: deal with segment scenario
 			if (family == ProductFamily.L0_SEGMENT) {				
 				reportingOutput = new SegmentReportingOutput(
-						productName,
 						metadata.getString("productConsolidation"),
 						metadata.getString("productSensingConsolidation")
 				);			

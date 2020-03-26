@@ -215,7 +215,7 @@ public abstract class AbstractGenericConsumer<T extends AbstractMessage> impleme
 				);	
 				if (metadataClient.getSeaCoverage(family, productName) <= processSettings.getMinSeaCoveragePercentage()) {
 					seaReport.end(
-							new SeaCoverageCheckReportingOutput(productName, false), 
+							new SeaCoverageCheckReportingOutput(false), 
 							new ReportingMessage("Product %s is not over sea", productName)
 					);
 					
@@ -225,7 +225,7 @@ public abstract class AbstractGenericConsumer<T extends AbstractMessage> impleme
 			    }
 				else {
 					seaReport.end(
-							new SeaCoverageCheckReportingOutput(productName, true), 
+							new SeaCoverageCheckReportingOutput(true), 
 							new ReportingMessage("Product %s is over sea", productName)
 					);
 				}
