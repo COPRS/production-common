@@ -47,7 +47,7 @@ public class TestApplication {
 		}		
 		final FilesystemInboxEntryFactory fact = new FilesystemInboxEntryFactory();	
 		final InboxEntry content = fact.newInboxEntry(inbox, inbox.resolve("WILE/S1B/L20180724144436762001030/ch01/DCS_02_L20180724144436762001030_ch1_DSIB.xml"), 2);
-		final InboxEntry content2 = fact.newInboxEntry(inbox, inbox.resolve("S1__AUX_ICE_V20160501T120000_G20160502T043607.SAFE"), 0);
+		final InboxEntry content2 = fact.newInboxEntry(inbox, inbox.resolve("AUX/S1__AUX_ICE_V20160501T120000_G20160502T043607.SAFE"), 1);
 		
 		repo.save(content);
 		repo.save(content2);

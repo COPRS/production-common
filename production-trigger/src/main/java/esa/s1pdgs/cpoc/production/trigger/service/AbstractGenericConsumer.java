@@ -31,11 +31,9 @@ import esa.s1pdgs.cpoc.mqi.model.rest.GenericMessageDto;
 import esa.s1pdgs.cpoc.mqi.model.rest.GenericPublicationMessageDto;
 import esa.s1pdgs.cpoc.production.trigger.config.ProcessSettings;
 import esa.s1pdgs.cpoc.production.trigger.report.DispatchReportInput;
-import esa.s1pdgs.cpoc.production.trigger.report.DispatchSegmentReportInput;
 import esa.s1pdgs.cpoc.production.trigger.report.SeaCoverageCheckReportingOutput;
 import esa.s1pdgs.cpoc.report.Reporting;
 import esa.s1pdgs.cpoc.report.ReportingFactory;
-import esa.s1pdgs.cpoc.report.ReportingInput;
 import esa.s1pdgs.cpoc.report.ReportingMessage;
 import esa.s1pdgs.cpoc.report.ReportingUtils;
 
@@ -139,15 +137,8 @@ public abstract class AbstractGenericConsumer<T extends AbstractMessage> impleme
 	) throws AbstractCodedException {
         final Reporting reporting = reportingFactory.newReporting("Dispatch");
         
-        final ReportingInput reportIn;
-        if (type.equals(L0SegmentConsumer.TYPE)) {
-        	reportIn = new DispatchSegmentReportInput(appDataJob.getId(), productName, type);
-        }
-        else {
-        	reportIn = new DispatchReportInput(appDataJob.getId(), productName, type);
-        }               
         reporting.begin(
-        		reportIn,
+        		DispatchReportInput.newInstance(appDataJob.getId(), productName, type),
         		new ReportingMessage("Dispatching AppDataJob %s for %s %s", appDataJob.getId(), type, productName)
         );     
         try {

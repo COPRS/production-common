@@ -36,6 +36,7 @@ public class FilesystemInboxAdapter implements InboxAdapter {
 	public Collection<InboxEntry> read(final InboxFilter filter) throws IOException {
 		LOG.trace("Reading inbox filesystem directory '{}'", inboxDirectory);
 		final Set<InboxEntry> entries = Files.walk(inboxDirectory, FileVisitOption.FOLLOW_LINKS)
+				.filter(p -> !inboxDirectory.equals(p))
 				.filter(p -> exceedsMinConfiguredDirectoryDepth(p)).map(p -> newInboxEntryFor(p))
 				.filter(e -> filter.accept(e)).collect(Collectors.toSet());
 		LOG.trace("Found {} entries in inbox filesystem directory '{}': {}", entries.size(), inboxDirectory, entries);
@@ -49,7 +50,7 @@ public class FilesystemInboxAdapter implements InboxAdapter {
 
 	@Override
 	public String inboxPath() {
-		return String.format("%s%s", FILE.getSchemeWithSlashes(), inboxDirectory.toString());
+		return FILE.getSchemeWithSlashes() + inboxDirectory.toString();
 	}
 
 	@Override
