@@ -33,6 +33,7 @@ public class FilesystemInboxAdapter implements InboxAdapter {
 	public Collection<InboxEntry> read(final InboxFilter filter) throws IOException {
 		LOG.trace("Reading inbox filesystem directory '{}'", inboxDirectory);
 		final Set<InboxEntry> entries = Files.walk(inboxDirectory, FileVisitOption.FOLLOW_LINKS)
+				.filter(p -> !inboxDirectory.equals(p))
 				.filter(p -> exceedsMinConfiguredDirectoryDepth(p))
 				.map(p -> newInboxEntryFor(p))
 				.filter(e -> filter.accept(e))
