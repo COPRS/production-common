@@ -39,6 +39,7 @@ COPY prip-client /app/prip-client
 COPY prip-trigger /app/prip-trigger
 COPY prip-worker /app/prip-worker
 COPY prip-frontend /app/prip-frontend
+COPY xbip-client /app/xbip-client
 
 
 RUN mvn -DskipTests=true -Dpmd.skip=true -Dfindbugs.skip=true -B -f /app/pom.xml -s /usr/share/maven/ref/settings-docker.xml install 
