@@ -20,7 +20,7 @@ import esa.s1pdgs.cpoc.production.trigger.config.ProcessSettings;
 import esa.s1pdgs.cpoc.report.ReportingFactory;
 
 public final class L0SegmentConsumer extends AbstractGenericConsumer<CatalogEvent> {   
-	static final String TYPE = "L0Segment";
+	public static final String TYPE = "L0Segment";
 	
 	public L0SegmentConsumer(
 			final ProcessSettings processSettings, 

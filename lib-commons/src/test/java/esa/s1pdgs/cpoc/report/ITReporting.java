@@ -26,7 +26,7 @@ public final class ITReporting {
 		
 		uut = ReportingUtils.newReportingBuilder().newReporting("test2");
 		uut.begin(new ReportingMessage("Foo"));
-		uut.end(new FilenameReportingOutput(Collections.singletonList("fooBar.txt")), new ReportingMessage(230000000L,"Foo"));
+		uut.end(new FilenameReportingOutput(Collections.singletonList("fooBar.txt"), Collections.emptyList()), new ReportingMessage(230000000L,"Foo"));
 		
 		//LOG.debug("foo bar");
 	}

@@ -32,7 +32,6 @@ import esa.s1pdgs.cpoc.ipf.execution.worker.job.model.mqi.ObsQueueMessage;
 import esa.s1pdgs.cpoc.ipf.execution.worker.job.mqi.OutputProcuderFactory;
 import esa.s1pdgs.cpoc.ipf.execution.worker.job.oqc.OQCDefaultTaskFactory;
 import esa.s1pdgs.cpoc.ipf.execution.worker.job.oqc.OQCExecutor;
-import esa.s1pdgs.cpoc.ipf.execution.worker.job.oqc.report.IpfExecutionWorkerReportingOutput;
 import esa.s1pdgs.cpoc.ipf.execution.worker.service.report.GhostHandlingSegmentReportingOutput;
 import esa.s1pdgs.cpoc.mqi.model.queue.IpfExecutionJob;
 import esa.s1pdgs.cpoc.mqi.model.queue.LevelJobOutputDto;
@@ -46,6 +45,7 @@ import esa.s1pdgs.cpoc.report.ReportingFactory;
 import esa.s1pdgs.cpoc.report.ReportingMessage;
 import esa.s1pdgs.cpoc.report.ReportingOutput;
 import esa.s1pdgs.cpoc.report.ReportingUtils;
+import esa.s1pdgs.cpoc.report.message.output.FilenameReportingOutput;
 
 /**
  * Process outputs according their family: - publication in message queue system
@@ -617,7 +617,7 @@ public class OutputProcessor {
 		} catch (final AbstractCodedException | ObsEmptyFileException e) {
 			throw e;
 		}
-		return new IpfExecutionWorkerReportingOutput(filenames, segments);
+		return new FilenameReportingOutput(filenames, segments);
 	}
 
 	private long size(final File file) throws InternalErrorException {
