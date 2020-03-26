@@ -8,7 +8,7 @@ public class InboxConfiguration {
 	private String ignoreRegex;
 	private String topic;
 	private ProductFamily family = ProductFamily.BLANK;
-	private int productInDirectoryLevel = 1;
+	private int productInDirectoryLevel = 0;
 
 	public String getDirectory() {
 		return directory;
