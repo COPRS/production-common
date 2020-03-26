@@ -72,7 +72,7 @@ public class TestProductServiceImpl {
 	public void testIngest() throws ProductException, InternalErrorException, ObsEmptyFileException {
 		final ProductFamily family = ProductFamily.AUXILIARY_FILE;
 		final IngestionJob ingestionJob = new IngestionJob(family, "productName");
-		ingestionJob.setPickupBaseURL("file:/dev");
+		ingestionJob.setPickupBaseURL("file:///dev");
 		ingestionJob.setRelativePath("null");
 		ingestionJob.setProductFamily(family);
 		ingestionJob.setProductName("productName");
@@ -97,7 +97,7 @@ public class TestProductServiceImpl {
 	@Test
 	public void testMarkInvalid() throws AbstractCodedException, ObsEmptyFileException {
 		final IngestionJob ingestionJob = new IngestionJob();
-		ingestionJob.setPickupBaseURL("file:/pickup/path");
+		ingestionJob.setPickupBaseURL("file:///pickup/path");
 		ingestionJob.setRelativePath("relative/path");
 		uut.markInvalid(ingestionJob, ReportingFactory.NULL);
 		final ObsUploadObject uploadObj = new ObsUploadObject(ProductFamily.INVALID, AbstractMessage.NOT_DEFINED,
@@ -113,7 +113,7 @@ public class TestProductServiceImpl {
 	@Test
 	public void testToFile() throws InternalErrorException {
 		final IngestionJob ingestionJob = new IngestionJob();
-		ingestionJob.setPickupBaseURL("file:/tmp/foo");
+		ingestionJob.setPickupBaseURL("file:///tmp/foo");
 		ingestionJob.setRelativePath("bar/baaaaar");
 		assertEquals(new File("/tmp/foo/bar/baaaaar"), ProductServiceImpl.toFile(ingestionJob));
 	}
