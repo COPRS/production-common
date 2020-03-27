@@ -45,12 +45,12 @@ public class FilesystemInboxAdapter implements InboxAdapter {
 
 	@Override
 	public String description() {
-		return String.format("Inbox at %s%s", FILE.getSchemeWithSlashes(), inboxDirectory.toString());
+		return String.format("Inbox at %s%s", FILE.getSchemeWithSlashes(), inboxDirectory);
 	}
 
 	@Override
 	public String inboxPath() {
-		return FILE.getSchemeWithSlashes() + inboxDirectory.toString();
+		return FILE.getSchemeWithSlashes() + inboxDirectory;
 	}
 
 	@Override

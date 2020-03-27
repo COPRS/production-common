@@ -20,21 +20,24 @@ import esa.s1pdgs.cpoc.ingestion.trigger.service.IngestionTriggerServiceTransact
 import esa.s1pdgs.cpoc.ingestion.trigger.xbip.XbipInboxAdapterFactory;
 import esa.s1pdgs.cpoc.ingestion.trigger.xbip.XbipInboxEntryFactory;
 import esa.s1pdgs.cpoc.mqi.model.queue.IngestionJob;
+import esa.s1pdgs.cpoc.xbip.client.XbipClientFactory;
 
 @Component
 public class InboxFactory {
 	private final KafkaTemplate<String, IngestionJob> kafkaTemplate;
-	private final InboxAdapterFactory fileSystemInboxAdapterFactory;
-	private final InboxAdapterFactory xbipInboxAdapterFactory;
 	private final IngestionTriggerServiceTransactional ingestionTriggerServiceTransactional;
+	private final FilesystemInboxAdapterFactory fileSystemInboxAdapterFactory;
+	private final XbipInboxAdapterFactory xbipInboxAdapterFactory;
 
 	@Autowired
 	public InboxFactory(final KafkaTemplate<String, IngestionJob> kafkaTemplate,
-			final IngestionTriggerServiceTransactional inboxPollingServiceTransactional) {
+			final IngestionTriggerServiceTransactional inboxPollingServiceTransactional,
+			final FilesystemInboxAdapterFactory fileSystemInboxAdapterFactory,
+			final XbipInboxAdapterFactory xbipInboxAdapterFactory) {
 		this.kafkaTemplate = kafkaTemplate;
 		this.ingestionTriggerServiceTransactional = inboxPollingServiceTransactional;
-		this.fileSystemInboxAdapterFactory = new FilesystemInboxAdapterFactory(new FilesystemInboxEntryFactory());
-		this.xbipInboxAdapterFactory = new XbipInboxAdapterFactory(new XbipInboxEntryFactory());
+		this.fileSystemInboxAdapterFactory = fileSystemInboxAdapterFactory;
+		this.xbipInboxAdapterFactory = xbipInboxAdapterFactory;
 	}
 
 	public Inbox newInbox(final InboxConfiguration config) throws IOException, URISyntaxException {
