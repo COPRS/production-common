@@ -60,8 +60,8 @@ public final class XbipEntryImpl implements XbipEntry {
 			return false;
 		final XbipEntryImpl other = (XbipEntryImpl) obj;
 		return Objects.equals(lastModified, other.lastModified) && 
-				Objects.equals(name, other.name)
-				&& Objects.equals(path, other.path) && 
+				Objects.equals(name, other.name) && 
+				Objects.equals(path, other.path) && 
 				size == other.size && 
 				Objects.equals(uri, other.uri);
 	}
