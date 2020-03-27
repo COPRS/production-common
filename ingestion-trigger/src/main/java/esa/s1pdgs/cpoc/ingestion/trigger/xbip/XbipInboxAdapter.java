@@ -49,7 +49,8 @@ public class XbipInboxAdapter implements InboxAdapter {
 				.filter(x -> !inboxDirectory.equals(x.getPath()))
 				.filter(x -> exceedsMinConfiguredDirectoryDepth(x.getPath()))
 				.map(x -> newInboxEntryFor(x))
-				.filter(e -> filter.accept(e)).collect(Collectors.toSet());
+				.filter(e -> filter.accept(e))
+				.collect(Collectors.toSet());
 
 		LOG.trace("Found {} entries in inbox XBIP directory '{}': {}", entries.size(), inboxDirectory, entries);
 		return entries;
