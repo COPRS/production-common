@@ -2,6 +2,7 @@ package esa.s1pdgs.cpoc.ingestion.trigger.inbox;
 
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Date;
 import java.util.List;
 
 import org.junit.Ignore;
@@ -20,8 +21,8 @@ public class TestInbox {
 		final InboxAdapter fakeAdapter = new InboxAdapter() {
 			@Override
 			public Collection<InboxEntry> read(final InboxFilter filter) {
-				return Arrays.asList(new InboxEntry("foo1", "foo1", "/tmp"),
-						new InboxEntry("foo2", "foo2", "/tmp"));
+				return Arrays.asList(new InboxEntry("foo1", "foo1", "/tmp", new Date(), 0),
+						new InboxEntry("foo2", "foo2", "/tmp", new Date(), 0));
 			}
 
 			@Override
@@ -55,8 +56,8 @@ public class TestInbox {
 			@Override
 			public Collection<InboxEntry> read(final InboxFilter filter) {
 				return Arrays.asList(
-						new InboxEntry("foo1", "foo1", "/tmp"),
-						new InboxEntry("foo2", "foo2", "/tmp"));
+						new InboxEntry("foo1", "foo1", "/tmp", new Date(), 0),
+						new InboxEntry("foo2", "foo2", "/tmp", new Date(), 0));
 			}
 
 			@Override
@@ -72,8 +73,8 @@ public class TestInbox {
 		final MockInboxEntryRepository fakeRepo = new MockInboxEntryRepository(0) {
 			@Override
 			public List<InboxEntry> findByPickupPath(final String pickupPath) {
-				return Arrays.asList(new InboxEntry("foo2", "foo2", "/tmp"),
-						new InboxEntry("foo1", "foo1", "/tmp"));
+				return Arrays.asList(new InboxEntry("foo2", "foo2", "/tmp", new Date(), 0),
+						new InboxEntry("foo1", "foo1", "/tmp", new Date(), 0));
 			}
 		};
 		final MockSubmissionClient fakeKafkaClient = new MockSubmissionClient(0);

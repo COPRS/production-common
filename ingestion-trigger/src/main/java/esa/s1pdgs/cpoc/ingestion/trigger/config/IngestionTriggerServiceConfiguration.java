@@ -1,9 +1,7 @@
 package esa.s1pdgs.cpoc.ingestion.trigger.config;
 
 import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
+import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -43,7 +41,7 @@ public class IngestionTriggerServiceConfiguration {
 		for (final InboxConfiguration config : properties.getPolling()) {
 			try {
 				inboxes.add(inboxFactory.newInbox(config));
-			} catch (IllegalArgumentException | IOException e) {
+			} catch (IllegalArgumentException | IOException | URISyntaxException e) {
 				LOG.error(e.getMessage());
 			}
 		}

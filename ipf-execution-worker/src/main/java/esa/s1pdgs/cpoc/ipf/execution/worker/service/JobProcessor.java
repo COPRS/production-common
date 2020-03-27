@@ -42,7 +42,6 @@ import esa.s1pdgs.cpoc.ipf.execution.worker.job.file.OutputProcessor;
 import esa.s1pdgs.cpoc.ipf.execution.worker.job.mqi.OutputProcuderFactory;
 import esa.s1pdgs.cpoc.ipf.execution.worker.job.process.PoolExecutorCallable;
 import esa.s1pdgs.cpoc.ipf.execution.worker.service.report.JobReportingInput;
-import esa.s1pdgs.cpoc.ipf.execution.worker.service.report.SegmentJobReportingInput;
 import esa.s1pdgs.cpoc.mqi.client.GenericMqiClient;
 import esa.s1pdgs.cpoc.mqi.client.MqiClient;
 import esa.s1pdgs.cpoc.mqi.client.MqiConsumer;
@@ -52,7 +51,6 @@ import esa.s1pdgs.cpoc.mqi.model.queue.IpfExecutionJob;
 import esa.s1pdgs.cpoc.mqi.model.rest.GenericMessageDto;
 import esa.s1pdgs.cpoc.obs_sdk.ObsClient;
 import esa.s1pdgs.cpoc.report.Reporting;
-import esa.s1pdgs.cpoc.report.ReportingInput;
 import esa.s1pdgs.cpoc.report.ReportingMessage;
 import esa.s1pdgs.cpoc.report.ReportingOutput;
 import esa.s1pdgs.cpoc.report.ReportingUtils;
@@ -204,18 +202,18 @@ public class JobProcessor implements MqiListener<IpfExecutionJob> {
 		
 		final File workdir = new File(job.getWorkDirectory());
 		final String jobOrderName = new File(job.getJobOrder()).getName();
-		
-		ReportingInput input = new JobReportingInput(toReportFilenames(job), jobOrderName);
-		
+
 		// Build output list filename
 		String outputListFile = job.getWorkDirectory() + workdir.getName() + ".LIST";
 		if (properties.getLevel() == ApplicationLevel.L0) {
 			outputListFile = job.getWorkDirectory() + "AIOProc.LIST";
 		} else if (properties.getLevel() == ApplicationLevel.L0_SEGMENT) {
 			outputListFile = job.getWorkDirectory() + "L0ASProcList.LIST";
-			input = new SegmentJobReportingInput(toReportFilenames(job), jobOrderName);
-		}		
-		reporting.begin(input,	new ReportingMessage("Start job processing"));
+		}			
+		reporting.begin(
+				JobReportingInput.newInstance(toReportFilenames(job), jobOrderName, properties.getLevel()),	
+				new ReportingMessage("Start job processing")
+		);
 		
 		// Clean up the working directory with all of its content
 		eraseWorkingDirectory(properties.getWorkingDir());

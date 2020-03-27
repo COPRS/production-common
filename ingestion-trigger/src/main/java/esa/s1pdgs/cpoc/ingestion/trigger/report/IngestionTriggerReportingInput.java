@@ -1,5 +1,6 @@
 package esa.s1pdgs.cpoc.ingestion.trigger.report;
 
+import java.util.Collections;
 import java.util.Date;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
@@ -17,13 +18,9 @@ public class IngestionTriggerReportingInput extends FilenameReportingInput {
 	@JsonFormat(pattern="yyyy-MM-dd'T'HH:mm:ss.SSS'000Z'", timezone="UTC")
 	private Date availDate = new Date();
 	
-	public IngestionTriggerReportingInput()
-	{
-		super();
-	}
 
 	public IngestionTriggerReportingInput(final String filename, final Date pollingDate, final Date availDate) {
-		super(filename);
+		super(Collections.singletonList(filename), Collections.emptyList());
 		this.pollingDate = pollingDate;
 		this.availDate = availDate;
 	}

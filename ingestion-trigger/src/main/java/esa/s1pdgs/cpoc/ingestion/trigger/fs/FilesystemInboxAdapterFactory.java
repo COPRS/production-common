@@ -1,5 +1,7 @@
 package esa.s1pdgs.cpoc.ingestion.trigger.fs;
 
+import static esa.s1pdgs.cpoc.ingestion.trigger.inbox.InboxURIScheme.FILE;
+
 import java.io.File;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14,14 +16,14 @@ public class FilesystemInboxAdapterFactory implements InboxAdapterFactory {
 	private final InboxEntryFactory inboxEntryFactory;
 	
 	@Autowired
-	public FilesystemInboxAdapterFactory(final InboxEntryFactory inboxEntryFactory) {
+	public FilesystemInboxAdapterFactory(final FilesystemInboxEntryFactory inboxEntryFactory) {
 		this.inboxEntryFactory = inboxEntryFactory;
 	}
 	
 	@Override
 	public InboxAdapter newInboxAdapter(final String inboxPath, final int productInDirectoryLevel) {
 		return new FilesystemInboxAdapter(
-				new File(inboxPath.replace("file://", "")).toPath(), 
+				new File(inboxPath.replace(FILE.getSchemeWithSlashes(), "")).toPath(), 
 				inboxEntryFactory,
 				productInDirectoryLevel
 		);

@@ -1,13 +1,18 @@
 package esa.s1pdgs.cpoc.ingestion.trigger.fs;
 
+import static esa.s1pdgs.cpoc.ingestion.trigger.inbox.InboxURIScheme.FILE;
+
+import java.io.File;
 import java.io.IOException;
 import java.nio.file.FileVisitOption;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Collection;
+import java.util.Date;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import org.apache.commons.io.FileUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -23,7 +28,8 @@ public class FilesystemInboxAdapter implements InboxAdapter {
 	private final Path inboxDirectory;
 	private final int productInDirectoryLevel;
 
-	public FilesystemInboxAdapter(final Path inboxDirectory, final InboxEntryFactory inboxEntryFactory, final int productInDirectoryLevel) {
+	public FilesystemInboxAdapter(final Path inboxDirectory, final InboxEntryFactory inboxEntryFactory,
+			final int productInDirectoryLevel) {
 		this.inboxDirectory = inboxDirectory;
 		this.inboxEntryFactory = inboxEntryFactory;
 		this.productInDirectoryLevel = productInDirectoryLevel;
@@ -33,33 +39,37 @@ public class FilesystemInboxAdapter implements InboxAdapter {
 	public Collection<InboxEntry> read(final InboxFilter filter) throws IOException {
 		LOG.trace("Reading inbox filesystem directory '{}'", inboxDirectory);
 		final Set<InboxEntry> entries = Files.walk(inboxDirectory, FileVisitOption.FOLLOW_LINKS)
-				.filter(p -> exceedsMinConfiguredDirectoryDepth(p))
-				.map(p -> newInboxEntryFor(p))
-				.filter(e -> filter.accept(e))
-				.collect(Collectors.toSet());			
+				.filter(p -> !inboxDirectory.equals(p))
+				.filter(p -> exceedsMinConfiguredDirectoryDepth(p)).map(p -> newInboxEntryFor(p))
+				.filter(e -> filter.accept(e)).collect(Collectors.toSet());
 		LOG.trace("Found {} entries in inbox filesystem directory '{}': {}", entries.size(), inboxDirectory, entries);
 		return entries;
 	}
 
 	@Override
 	public String description() {
-		return "Inbox at file://" + inboxDirectory;
+		return String.format("Inbox at %s%s", FILE.getSchemeWithSlashes(), inboxDirectory);
 	}
-	
+
 	@Override
 	public String inboxPath() {
-		return "file://" + inboxDirectory.toString();
+		return FILE.getSchemeWithSlashes() + inboxDirectory;
 	}
 
 	@Override
 	public String toString() {
-		return "FilesystemInboxAdapter [inboxDirectory=" + inboxDirectory + "]";
+		return String.format("FilesystemInboxAdapter [inboxDirectory=%s]", inboxDirectory);
 	}
-		
+
 	private final InboxEntry newInboxEntryFor(final Path path) {
-		return inboxEntryFactory.newInboxEntry(inboxDirectory, path, productInDirectoryLevel);
+		
+		File file = path.toFile();
+		Date lastModified = new Date(file.lastModified());
+		long size = FileUtils.sizeOf(file);
+		
+		return inboxEntryFactory.newInboxEntry(inboxDirectory, path, productInDirectoryLevel, lastModified, size);
 	}
-	
+
 	private final boolean exceedsMinConfiguredDirectoryDepth(final Path path) {
 		return inboxDirectory.relativize(path).getNameCount() > productInDirectoryLevel;
 	}

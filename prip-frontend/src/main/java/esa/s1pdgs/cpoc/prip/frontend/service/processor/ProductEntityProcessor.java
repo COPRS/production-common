@@ -117,13 +117,26 @@ public class ProductEntityProcessor implements EntityProcessor, MediaEntityProce
 				final String username = "not defined";
 				
 				reporting.begin(
-						new PripReportingInput(foundPripMetadata.getObsKey(), username),
-						new ReportingMessage("Creating temporary download URL for obsKey %s for user %s", foundPripMetadata.getObsKey(), username)
+						PripReportingInput.newInstance(
+								foundPripMetadata.getObsKey(), 
+								username, 
+								foundPripMetadata.getProductFamily()
+						),
+						new ReportingMessage(
+								"Creating temporary download URL for obsKey %s for user %s", 
+								foundPripMetadata.getObsKey(), 
+								username
+						)
 				);
 				URL url;
 				try {
-					url = obsClient.createTemporaryDownloadUrl(new ObsObject(foundPripMetadata.getProductFamily(),
-							foundPripMetadata.getObsKey()), downloadUrlExpirationTimeInSeconds);
+					url = obsClient.createTemporaryDownloadUrl(
+							new ObsObject(
+									foundPripMetadata.getProductFamily(),
+									foundPripMetadata.getObsKey()
+							), 
+							downloadUrlExpirationTimeInSeconds
+					);
 					final String urlString = url.toString();
 					reporting.end(
 							new PripReportingOutput(urlString),

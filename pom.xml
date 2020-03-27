@@ -22,6 +22,8 @@
 		<commons.logging.version>1.2</commons.logging.version>
 		<commons.configuration.version>1.10</commons.configuration.version>
 		<commons.net.version>3.3</commons.net.version>
+		<commons.io.version>2.6</commons.io.version>
+		
 		<jacoco.version>0.7.5.201505241946</jacoco.version>
 		<json.version>20171018</json.version>
 		<moxy.version>2.5.0</moxy.version>
@@ -185,7 +187,20 @@
 		        <artifactId>commons-net</artifactId>
 		        <version>${commons.net.version}</version>
 		        <classifier>ftp</classifier>
-	      	</dependency>			
+	      	</dependency>
+	      	
+	      	<dependency>
+		        <groupId>commons-io</groupId>
+		        <artifactId>commons-io</artifactId>
+		        <version>${commons.io.version}</version>
+	      	</dependency>
+
+			<dependency>
+				<groupId>com.github.lookfirst</groupId>
+				<artifactId>sardine</artifactId>
+				<version>5.9</version>
+			</dependency>
+	      			
 			<dependency>
 				<groupId>com.amazonaws</groupId>
 				<artifactId>aws-java-sdk-s3</artifactId>
