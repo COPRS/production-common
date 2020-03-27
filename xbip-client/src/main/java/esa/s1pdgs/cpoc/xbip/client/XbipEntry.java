@@ -7,6 +7,7 @@ import java.util.Date;
 public interface XbipEntry {
 	String getName();
 	Path getPath();
+	long getSize();
 	URI getUri();
 	Date getLastModified();
 }
