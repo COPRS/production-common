@@ -13,7 +13,6 @@ import esa.s1pdgs.cpoc.ingestion.trigger.inbox.InboxAdapter;
 import esa.s1pdgs.cpoc.ingestion.trigger.inbox.InboxAdapterFactory;
 import esa.s1pdgs.cpoc.ingestion.trigger.inbox.InboxEntryFactory;
 import esa.s1pdgs.cpoc.xbip.client.XbipClientFactory;
-import esa.s1pdgs.cpoc.xbip.client.sardine.SardineXbipClientFactory;
 
 @Component
 public class XbipInboxAdapterFactory implements InboxAdapterFactory {
@@ -21,19 +20,21 @@ public class XbipInboxAdapterFactory implements InboxAdapterFactory {
 	private final XbipClientFactory xbipClientFactory;
 
 	@Autowired
-	public XbipInboxAdapterFactory(XbipInboxEntryFactory inboxEntryFactory,
-			SardineXbipClientFactory xbipClientFactory) {
+	public XbipInboxAdapterFactory(
+			final XbipInboxEntryFactory inboxEntryFactory,
+			final XbipClientFactory xbipClientFactory
+	) {
 		this.inboxEntryFactory = inboxEntryFactory;
 		this.xbipClientFactory = xbipClientFactory;
 	}
 
 	@Override
-	public InboxAdapter newInboxAdapter(String inboxPath, int productInDirectoryLevel) {
+	public InboxAdapter newInboxAdapter(final String inboxPath, final int productInDirectoryLevel) {
 		try {
 			return new XbipInboxAdapter(new File(inboxPath.replace(HTTPS.getSchemeWithSlashes(), "")).toPath(),
 					this.xbipClientFactory.newXbipClient(new URI(inboxPath)), inboxEntryFactory,
 					productInDirectoryLevel);
-		} catch (URISyntaxException e) {
+		} catch (final URISyntaxException e) {
 			throw new IllegalArgumentException(e);
 		}
 	}
