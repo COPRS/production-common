@@ -1,5 +1,8 @@
 package esa.s1pdgs.cpoc.xbip.client;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+
 import java.net.URI;
 
 import org.junit.Test;
@@ -19,11 +22,15 @@ public class ITXbipClient {
 	private XbipClientConfigurationProperties config;
 	
 	@Test
+	public final void testConfigProperties() {
+		assertNotNull(config);
+		assertEquals(1, config.getHostConfigs().size());
+	}
+	
+	@Test
 	public final void testFoo() throws Exception {
-		System.out.println(config);
 		final XbipClientConfiguration c = new XbipClientConfiguration(config);		
-		final XbipClientFactory factory = c.xbipClientFactory();
-		
+		final XbipClientFactory factory = c.xbipClientFactory();		
 		final XbipClient uut = factory.newXbipClient(new URI("https://cgs02.sentinel1.eo.esa.int/RETRANSFER/"));
 		
 		uut.list(XbipEntryFilter.ALLOW_ALL).stream()

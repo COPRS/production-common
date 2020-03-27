@@ -61,7 +61,7 @@ public class SardineXbipClient implements XbipClient {
 						.build();
 			} catch (final URISyntaxException e) {
 				throw new IllegalArgumentException(
-						String.format("Could not create URI for {}: {}", davResource.getHref(), e.getMessage()), 
+						String.format("Could not create URI for %s: %s", davResource.getHref(), e.getMessage()), 
 						e
 				);
 			}
