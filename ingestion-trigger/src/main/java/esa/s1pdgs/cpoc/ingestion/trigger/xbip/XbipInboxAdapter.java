@@ -66,7 +66,9 @@ public class XbipInboxAdapter implements InboxAdapter {
 	}
 
 	private final InboxEntry newInboxEntryFor(final XbipEntry xbipEntry) {
-		return inboxEntryFactory.newInboxEntry(inboxDirectory, xbipEntry.getPath(), productInDirectoryLevel);
+		// TODO file size
+		return inboxEntryFactory.newInboxEntry(inboxDirectory, xbipEntry.getPath(), productInDirectoryLevel,
+				xbipEntry.getLastModified(), 0);
 	}
 
 	private final boolean exceedsMinConfiguredDirectoryDepth(final Path path) {
