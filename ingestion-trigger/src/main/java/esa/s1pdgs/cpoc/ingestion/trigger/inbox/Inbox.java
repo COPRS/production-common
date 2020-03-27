@@ -120,31 +120,18 @@ public final class Inbox {
 	}
 	
 	private final void handleEntry(final InboxEntry entry) {
-		
-		// FIXME: dirty workaround, file size and last modified time need to be abstracted when using http://
-		// instead of file://
-		URI pickupURL;
-		try {
-			pickupURL = new URI(entry.getPickupPath());
-		} catch (final URISyntaxException e) {
-			LOG.error("URL syntax not correct for {}", entry.getName());
-			return;
-		}
-		
-		final File file = Paths.get(pickupURL).resolve(entry.getRelativePath()).toFile();
-		final String filename = file.getName();
-		
+				
 		final Reporting reporting = ReportingUtils.newReportingBuilder()
 				.newReporting("IngestionTrigger");
 			
 		reporting.begin(
-				new IngestionTriggerReportingInput(file.getName(), new Date(), new Date(file.lastModified())),
-				new ReportingMessage("New file detected %s", filename)
+				new IngestionTriggerReportingInput(entry.getName(), new Date(), entry.getLastModified()),
+				new ReportingMessage("New file detected %s", entry.getName())
 		);
 		
 		// empty files are not accepted!
-		if (FileUtils.sizeOf(file) == 0) {	
-			reporting.error(new ReportingMessage("File %s is empty, ignored.", filename));						
+		if (entry.getSize() == 0) {	
+			reporting.error(new ReportingMessage("File %s is empty, ignored.", entry.getName()));						
 			return;
 		}
 		
@@ -157,11 +144,11 @@ public final class Inbox {
 		    dto.setUid(reporting.getUid());
 			client.publish(dto);	
 			reporting.end(
-					new IngestionTriggerReportingOutput("file://" + file.getAbsolutePath()), 
-					new ReportingMessage("File %s created IngestionJob", filename)
+					new IngestionTriggerReportingOutput(entry.getPickupPath() + "/" + entry.getRelativePath()), 
+					new ReportingMessage("File %s created IngestionJob", entry.getName())
 			);
 		} catch (final Exception e) {
-			reporting.error(new ReportingMessage("File %s could not be handled: %s", filename, LogUtils.toString(e)));
+			reporting.error(new ReportingMessage("File %s could not be handled: %s", entry.getName(), LogUtils.toString(e)));
 			LOG.error(String.format("Error on handling %s in %s: %s", entry, description(), LogUtils.toString(e)));
 		}		
 	}

@@ -2,14 +2,17 @@ package esa.s1pdgs.cpoc.ingestion.trigger.fs;
 
 import static esa.s1pdgs.cpoc.ingestion.trigger.inbox.InboxURIScheme.FILE;
 
+import java.io.File;
 import java.io.IOException;
 import java.nio.file.FileVisitOption;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Collection;
+import java.util.Date;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import org.apache.commons.io.FileUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -45,12 +48,12 @@ public class FilesystemInboxAdapter implements InboxAdapter {
 
 	@Override
 	public String description() {
-		return String.format("Inbox at %s%s", FILE.getSchemeWithSlashes(), inboxDirectory.toString());
+		return String.format("Inbox at %s%s", FILE.getSchemeWithSlashes(), inboxDirectory);
 	}
 
 	@Override
 	public String inboxPath() {
-		return FILE.getSchemeWithSlashes() + inboxDirectory.toString();
+		return FILE.getSchemeWithSlashes() + inboxDirectory;
 	}
 
 	@Override
@@ -59,7 +62,12 @@ public class FilesystemInboxAdapter implements InboxAdapter {
 	}
 
 	private final InboxEntry newInboxEntryFor(final Path path) {
-		return inboxEntryFactory.newInboxEntry(inboxDirectory, path, productInDirectoryLevel);
+		
+		File file = path.toFile();
+		Date lastModified = new Date(file.lastModified());
+		long size = FileUtils.sizeOf(file);
+		
+		return inboxEntryFactory.newInboxEntry(inboxDirectory, path, productInDirectoryLevel, lastModified, size);
 	}
 
 	private final boolean exceedsMinConfiguredDirectoryDepth(final Path path) {
