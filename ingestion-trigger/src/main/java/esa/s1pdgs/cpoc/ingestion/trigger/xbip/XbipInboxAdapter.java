@@ -43,7 +43,6 @@ public class XbipInboxAdapter implements InboxAdapter {
 
 	@Override
 	public Collection<InboxEntry> read(final InboxFilter filter) throws IOException {
-
 		LOG.trace("Reading inbox XBIP directory '{}'", inboxDirectory);
 		final Set<InboxEntry> entries = xbipClient.list(XbipEntryFilter.ALLOW_ALL).stream()
 				.filter(x -> !inboxDirectory.equals(x.getPath()))
