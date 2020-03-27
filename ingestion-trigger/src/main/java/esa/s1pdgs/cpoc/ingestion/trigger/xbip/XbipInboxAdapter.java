@@ -28,8 +28,12 @@ public class XbipInboxAdapter implements InboxAdapter {
 	private final int productInDirectoryLevel;
 	private final XbipClient xbipClient;
 
-	public XbipInboxAdapter(final Path inboxDirectory, XbipClient xbipClient, InboxEntryFactory inboxEntryFactory,
-			int productInDirectoryLevel) {
+	public XbipInboxAdapter(
+			final Path inboxDirectory, 
+			final XbipClient xbipClient, 
+			final InboxEntryFactory inboxEntryFactory,
+			final int productInDirectoryLevel
+	) {
 
 		this.inboxDirectory = inboxDirectory;
 		this.xbipClient = xbipClient;
@@ -38,12 +42,13 @@ public class XbipInboxAdapter implements InboxAdapter {
 	}
 
 	@Override
-	public Collection<InboxEntry> read(InboxFilter filter) throws IOException {
+	public Collection<InboxEntry> read(final InboxFilter filter) throws IOException {
 
 		LOG.trace("Reading inbox XBIP directory '{}'", inboxDirectory);
 		final Set<InboxEntry> entries = xbipClient.list(XbipEntryFilter.ALLOW_ALL).stream()
 				.filter(x -> !inboxDirectory.equals(x.getPath()))
-				.filter(x -> exceedsMinConfiguredDirectoryDepth(x.getPath())).map(x -> newInboxEntryFor(x))
+				.filter(x -> exceedsMinConfiguredDirectoryDepth(x.getPath()))
+				.map(x -> newInboxEntryFor(x))
 				.filter(e -> filter.accept(e)).collect(Collectors.toSet());
 
 		LOG.trace("Found {} entries in inbox XBIP directory '{}': {}", entries.size(), inboxDirectory, entries);
@@ -66,8 +71,13 @@ public class XbipInboxAdapter implements InboxAdapter {
 	}
 
 	private final InboxEntry newInboxEntryFor(final XbipEntry xbipEntry) {
-		return inboxEntryFactory.newInboxEntry(inboxDirectory, xbipEntry.getPath(), productInDirectoryLevel,
-				xbipEntry.getLastModified(), xbipEntry.getSize());
+		return inboxEntryFactory.newInboxEntry(
+				inboxDirectory, 
+				xbipEntry.getPath(), 
+				productInDirectoryLevel,
+				xbipEntry.getLastModified(), 
+				xbipEntry.getSize()
+		);
 	}
 
 	private final boolean exceedsMinConfiguredDirectoryDepth(final Path path) {

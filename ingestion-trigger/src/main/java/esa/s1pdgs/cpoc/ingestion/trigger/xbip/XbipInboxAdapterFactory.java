@@ -31,9 +31,12 @@ public class XbipInboxAdapterFactory implements InboxAdapterFactory {
 	@Override
 	public InboxAdapter newInboxAdapter(final String inboxPath, final int productInDirectoryLevel) {
 		try {
-			return new XbipInboxAdapter(new File(inboxPath.replace(HTTPS.getSchemeWithSlashes(), "")).toPath(),
-					this.xbipClientFactory.newXbipClient(new URI(inboxPath)), inboxEntryFactory,
-					productInDirectoryLevel);
+			return new XbipInboxAdapter(
+					new File(inboxPath.replace(HTTPS.getSchemeWithSlashes(), "")).toPath(),
+					this.xbipClientFactory.newXbipClient(new URI(inboxPath)), 
+					inboxEntryFactory,
+					productInDirectoryLevel
+			);
 		} catch (final URISyntaxException e) {
 			throw new IllegalArgumentException(e);
 		}

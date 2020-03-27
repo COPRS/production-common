@@ -9,10 +9,14 @@ import esa.s1pdgs.cpoc.ingestion.trigger.entity.InboxEntry;
 import esa.s1pdgs.cpoc.ingestion.trigger.inbox.InboxEntryFactory;
 
 public class XbipInboxEntryFactory implements InboxEntryFactory {
-
 	@Override
-	public InboxEntry newInboxEntry(final Path inbox, final Path path, final int productInDirectory,
-			final Date lastModified, final long size) {
+	public InboxEntry newInboxEntry(
+			final Path inbox, 
+			final Path path, 
+			final int productInDirectory,
+			final Date lastModified, 
+			final long size
+	) {
 		final InboxEntry inboxEntry = new InboxEntry();
 		final Path relativePath = inbox.relativize(path);
 		inboxEntry.setName(productName(relativePath, productInDirectory));
