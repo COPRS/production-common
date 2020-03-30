@@ -42,7 +42,7 @@ public class TestApplication {
 
 	@Test
 	public void testPollAll_OnEmptyInboxAndPersistedEntries_ShallDeletePersistedEntries() throws InterruptedException {		
-		final Path inbox = Paths.get(props.getPolling().get(0).getDirectory());
+		final Path inbox = Paths.get(props.getPolling().get(0).getDirectory().replace("file://", ""));
 		if (!inbox.toFile().exists()) {
 			inbox.toFile().mkdirs();
 		}		
