@@ -1,8 +1,5 @@
 package esa.s1pdgs.cpoc.ingestion.trigger.xbip;
 
-import static esa.s1pdgs.cpoc.ingestion.trigger.inbox.InboxURIScheme.HTTPS;
-
-import java.io.File;
 import java.net.URI;
 import java.net.URISyntaxException;
 
@@ -20,23 +17,18 @@ public class XbipInboxAdapterFactory implements InboxAdapterFactory {
 	private final XbipClientFactory xbipClientFactory;
 
 	@Autowired
-	public XbipInboxAdapterFactory(
-			final XbipInboxEntryFactory inboxEntryFactory,
-			final XbipClientFactory xbipClientFactory
-	) {
+	public XbipInboxAdapterFactory(final InboxEntryFactory inboxEntryFactory,
+			final XbipClientFactory xbipClientFactory) {
 		this.inboxEntryFactory = inboxEntryFactory;
 		this.xbipClientFactory = xbipClientFactory;
 	}
 
 	@Override
-	public InboxAdapter newInboxAdapter(final String inboxPath, final int productInDirectoryLevel) {
+	public InboxAdapter newInboxAdapter(final String inboxURL, final int productInDirectoryLevel) {
 		try {
-			return new XbipInboxAdapter(
-					new File(inboxPath.replace(HTTPS.getSchemeWithSlashes(), "")).toPath(),
-					this.xbipClientFactory.newXbipClient(new URI(inboxPath)), 
-					inboxEntryFactory,
-					productInDirectoryLevel
-			);
+			URI inbox = new URI(inboxURL);
+			return new XbipInboxAdapter(inbox, this.xbipClientFactory.newXbipClient(inbox), inboxEntryFactory,
+					productInDirectoryLevel);
 		} catch (final URISyntaxException e) {
 			throw new IllegalArgumentException(e);
 		}

@@ -31,7 +31,7 @@ public class TestInbox {
 			}
 
 			@Override
-			public String inboxPath() {
+			public String inboxURL() {
 				return "/tmp";
 			}
 		};
@@ -66,13 +66,13 @@ public class TestInbox {
 			}
 			
 			@Override
-			public String inboxPath() {
+			public String inboxURL() {
 				return "/tmp";
 			}
 		};
 		final MockInboxEntryRepository fakeRepo = new MockInboxEntryRepository(0) {
 			@Override
-			public List<InboxEntry> findByPickupPath(final String pickupPath) {
+			public List<InboxEntry> findByPickupURL(final String pickupPath) {
 				return Arrays.asList(new InboxEntry("foo2", "foo2", "/tmp", new Date(), 0),
 						new InboxEntry("foo1", "foo1", "/tmp", new Date(), 0));
 			}

@@ -54,7 +54,7 @@ public final class Inbox {
 	public final void poll() {
 		try {
 			final Set<InboxEntry> persistedContent = ingestionTriggerServiceTransactional
-					.getAllForPath(inboxAdapter.inboxPath());
+					.getAllForPath(inboxAdapter.inboxURL());
 						
 			// read all entries that have not been persisted before
 			final Set<InboxEntry> pickupContent = new HashSet<>(inboxAdapter.read(InboxFilter.ALLOW_ALL));
@@ -139,12 +139,12 @@ public final class Inbox {
 			LOG.debug("Publishing new entry to kafka queue: {}", entry);					
 			final IngestionJob dto = new IngestionJob(family, entry.getName());
 		    dto.setRelativePath(entry.getRelativePath());
-		    dto.setPickupBaseURL(entry.getPickupPath());
+		    dto.setPickupBaseURL(entry.getPickupURL());
 		    dto.setProductName(entry.getName());
 		    dto.setUid(reporting.getUid());
 			client.publish(dto);	
 			reporting.end(
-					new IngestionTriggerReportingOutput(entry.getPickupPath() + "/" + entry.getRelativePath()), 
+					new IngestionTriggerReportingOutput(entry.getPickupURL() + "/" + entry.getRelativePath()), 
 					new ReportingMessage("File %s created IngestionJob", entry.getName())
 			);
 		} catch (final Exception e) {

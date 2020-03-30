@@ -18,7 +18,6 @@ import esa.s1pdgs.cpoc.ingestion.trigger.fs.FilesystemInboxEntryFactory;
 import esa.s1pdgs.cpoc.ingestion.trigger.kafka.producer.KafkaSubmissionClient;
 import esa.s1pdgs.cpoc.ingestion.trigger.service.IngestionTriggerServiceTransactional;
 import esa.s1pdgs.cpoc.ingestion.trigger.xbip.XbipInboxAdapterFactory;
-import esa.s1pdgs.cpoc.ingestion.trigger.xbip.XbipInboxEntryFactory;
 import esa.s1pdgs.cpoc.mqi.model.queue.IngestionJob;
 import esa.s1pdgs.cpoc.xbip.client.XbipClientFactory;
 

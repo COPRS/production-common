@@ -1,9 +1,9 @@
 package esa.s1pdgs.cpoc.ingestion.trigger.xbip;
 
-import static esa.s1pdgs.cpoc.ingestion.trigger.inbox.InboxURIScheme.HTTPS;
-
 import java.io.IOException;
+import java.net.URI;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.Collection;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -24,18 +24,17 @@ public class XbipInboxAdapter implements InboxAdapter {
 	private static final Logger LOG = LoggerFactory.getLogger(XbipInboxAdapter.class);
 
 	private final InboxEntryFactory inboxEntryFactory;
-	private final Path inboxDirectory;
+	private final URI inboxURL;
 	private final int productInDirectoryLevel;
 	private final XbipClient xbipClient;
 
 	public XbipInboxAdapter(
-			final Path inboxDirectory, 
+			final URI inboxURL, 
 			final XbipClient xbipClient, 
 			final InboxEntryFactory inboxEntryFactory,
 			final int productInDirectoryLevel
 	) {
-
-		this.inboxDirectory = inboxDirectory;
+		this.inboxURL = inboxURL;
 		this.xbipClient = xbipClient;
 		this.inboxEntryFactory = inboxEntryFactory;
 		this.productInDirectoryLevel = productInDirectoryLevel;
@@ -43,36 +42,36 @@ public class XbipInboxAdapter implements InboxAdapter {
 
 	@Override
 	public Collection<InboxEntry> read(final InboxFilter filter) throws IOException {
-		LOG.trace("Reading inbox XBIP directory '{}'", inboxDirectory);
+		LOG.trace("Reading inbox XBIP directory '{}'", inboxURL.toString());
 		final Set<InboxEntry> entries = xbipClient.list(XbipEntryFilter.ALLOW_ALL).stream()
-				.filter(x -> !inboxDirectory.equals(x.getPath()))
+				.filter(x -> !Paths.get(inboxURL.getPath()).equals(x.getPath()))
 				.filter(x -> exceedsMinConfiguredDirectoryDepth(x.getPath()))
 				.map(x -> newInboxEntryFor(x))
 				.filter(e -> filter.accept(e))
 				.collect(Collectors.toSet());
 
-		LOG.trace("Found {} entries in inbox XBIP directory '{}': {}", entries.size(), inboxDirectory, entries);
+		LOG.trace("Found {} entries in inbox XBIP directory '{}': {}", entries.size(), inboxURL.toString(), entries);
 		return entries;
 	}
 
 	@Override
 	public String description() {
-		return String.format("Inbox at %s%s", HTTPS.getSchemeWithSlashes(), inboxDirectory);
+		return String.format("Inbox at %s", inboxURL.toString());
 	}
 
 	@Override
-	public String inboxPath() {
-		return HTTPS.getSchemeWithSlashes() + inboxDirectory;
+	public String inboxURL() {
+		return inboxURL.toString();
 	}
 
 	@Override
 	public String toString() {
-		return String.format("XbipInboxAdapter [inboxDirectory=%s]", inboxDirectory);
+		return String.format("XbipInboxAdapter [inboxDirectory=%s]", inboxURL.toString());
 	}
 
 	private final InboxEntry newInboxEntryFor(final XbipEntry xbipEntry) {
 		return inboxEntryFactory.newInboxEntry(
-				inboxDirectory, 
+				inboxURL, 
 				xbipEntry.getPath(), 
 				productInDirectoryLevel,
 				xbipEntry.getLastModified(), 
@@ -81,6 +80,6 @@ public class XbipInboxAdapter implements InboxAdapter {
 	}
 
 	private final boolean exceedsMinConfiguredDirectoryDepth(final Path path) {
-		return inboxDirectory.relativize(path).getNameCount() > productInDirectoryLevel;
+		return Paths.get(inboxURL.getPath()).relativize(path).getNameCount() > productInDirectoryLevel;
 	}
 }

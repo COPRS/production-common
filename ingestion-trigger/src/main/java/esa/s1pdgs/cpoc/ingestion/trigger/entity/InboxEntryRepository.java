@@ -7,5 +7,5 @@ import org.springframework.stereotype.Component;
 
 @Component
 public interface InboxEntryRepository extends CrudRepository<InboxEntry, Long>{	
-	List<InboxEntry> findByPickupPath(final String pickupPath);
+	List<InboxEntry> findByPickupURL(final String pickupURL);
 }

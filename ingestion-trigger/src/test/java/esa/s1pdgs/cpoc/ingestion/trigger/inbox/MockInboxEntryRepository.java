@@ -28,7 +28,7 @@ class MockInboxEntryRepository extends AbstractInboxEntryRepository
 	}
 
 	@Override
-	public List<InboxEntry> findByPickupPath(String pickupPath) {
+	public List<InboxEntry> findByPickupURL(String pickupURL) {
 		return Collections.emptyList();
 	}
 }

@@ -11,5 +11,5 @@ public interface InboxAdapter {
 
 	public String description();
 	
-	public String inboxPath();
+	public String inboxURL();
 }

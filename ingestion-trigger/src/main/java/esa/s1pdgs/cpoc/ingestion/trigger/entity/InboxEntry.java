@@ -16,18 +16,18 @@ public class InboxEntry {
 	private long id;
 	private String name;
 	private String relativePath;
-	private String pickupPath;
+	private String pickupURL;
 	private Date lastModified;
 	private long size;
 
 	public InboxEntry() {
 	}
 
-	public InboxEntry(final String name, final String relativePath, final String pickupPath, final Date lastModified,
+	public InboxEntry(final String name, final String relativePath, final String pickupURL, final Date lastModified,
 			final long size) {
 		this.name = name;
 		this.relativePath = relativePath;
-		this.pickupPath = pickupPath;
+		this.pickupURL = pickupURL;
 		this.lastModified = lastModified;
 		this.setSize(size);
 	}
@@ -56,12 +56,12 @@ public class InboxEntry {
 		this.relativePath = relativePath;
 	}
 
-	public String getPickupPath() {
-		return pickupPath;
+	public String getPickupURL() {
+		return pickupURL;
 	}
 
-	public void setPickupPath(final String pickupPath) {
-		this.pickupPath = pickupPath;
+	public void setPickupURL(final String pickupURL) {
+		this.pickupURL = pickupURL;
 	}
 
 	public Date getLastModified() {
@@ -94,19 +94,19 @@ public class InboxEntry {
 		// WARNING: Don't take 'id' into account when implementing equals/hashCode
 		// because it's always 0 when created from Inbox
 		final InboxEntry other = (InboxEntry) obj;
-		return Objects.equals(name, other.name) && Objects.equals(pickupPath, other.pickupPath)
-				&& Objects.equals(relativePath, other.relativePath) && Objects.equals(lastModified, other.lastModified)
+		return Objects.equals(name, other.name) && Objects.equals(pickupURL, other.pickupURL)
+				&& Objects.equals(relativePath, other.relativePath)
 				&& size == other.size;
 	}
 
 	@Override
 	public int hashCode() {
-		return Objects.hash(name, pickupPath, relativePath, lastModified, size);
+		return Objects.hash(name, pickupURL, relativePath, size);
 	}
 
 	@Override
 	public String toString() {
-		return String.format("InboxEntry [name=%s, relativePath=%s, pickupPath=%s, lastModified=%s, size=%s]", name,
-				relativePath, pickupPath, lastModified, size);
+		return String.format("InboxEntry [name=%s, relativePath=%s, pickupURL=%s, lastModified=%s, size=%s]", name,
+				relativePath, pickupURL, lastModified, size);
 	}
 }

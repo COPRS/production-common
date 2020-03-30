@@ -5,10 +5,13 @@ import static org.junit.Assert.assertTrue;
 
 import java.io.File;
 import java.io.IOException;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.Collection;
 import java.util.regex.Pattern;
 
 import org.junit.After;
+import org.junit.Before;
 import org.junit.Test;
 
 import esa.s1pdgs.cpoc.common.utils.FileUtils;
@@ -21,7 +24,12 @@ import esa.s1pdgs.cpoc.ingestion.trigger.filter.WhitelistRegexRelativePathInboxF
 public class TestFilesystemInboxAdapter {
 	private final FilesystemInboxEntryFactory factory = new FilesystemInboxEntryFactory();
 	private final File testDir = FileUtils.createTmpDir();	
-	private final FilesystemInboxAdapter uut = new FilesystemInboxAdapter(testDir.toPath(), factory, 0);
+	private FilesystemInboxAdapter uut;
+			
+    @Before 
+    public final void init() throws URISyntaxException {
+		uut = new FilesystemInboxAdapter(testDir.toPath().toUri(), factory, 0);
+	}
 
 	@After
 	public final void tearDown() throws IOException {
@@ -40,7 +48,7 @@ public class TestFilesystemInboxAdapter {
 	}
 
 	@Test
-	public final void testRead_WithConfiguredFilters_ShallReturnProperProductss() throws IOException {
+	public final void testRead_WithConfiguredFilters_ShallReturnProperProductss() throws IOException, URISyntaxException {
 		// create some content in test directory
 		final File product1 = newTestProduct("WILE/S1B/L20180724144436762001030/ch01/DCS_02_L20180724144436762001030_ch1_DSIB.xml");
 		assertTrue(product1.createNewFile());
@@ -57,7 +65,7 @@ public class TestFilesystemInboxAdapter {
 				new BlacklistRegexRelativePathInboxFilter(Pattern.compile("(^\\..*|.*\\.tmp$|db.*|^lost\\+found$)")),
 				new WhitelistRegexRelativePathInboxFilter(Pattern.compile("(WILE|MTI_|SGS_|INU_)/S1(A|B)/([A-Za-z0-9]+)/ch0?(1|2)/(.+DSIB\\.(xml|XML)|.+DSDB.*\\.(raw|RAW|aisp|AISP))"))
 		);
-		final FilesystemInboxAdapter uutEdrs = new FilesystemInboxAdapter(testDir.toPath(), factory, 2);
+		final FilesystemInboxAdapter uutEdrs = new FilesystemInboxAdapter(testDir.toPath().toUri(), factory, 2);
 		final Collection<InboxEntry> actualEdrs = uutEdrs.read(edrsFilter);
 		assertEquals(2, actualEdrs.size());
 
@@ -65,7 +73,7 @@ public class TestFilesystemInboxAdapter {
 				new BlacklistRegexRelativePathInboxFilter(Pattern.compile("(^\\..*|.*\\.tmp$|db.*|^lost\\+found$)")),
 				new WhitelistRegexRelativePathInboxFilter(Pattern.compile("AUX/[0-9a-zA-Z][0-9a-zA-Z][0-9a-zA-Z_]_((OPER|TEST|REPR)_)?(AUX_OBMEMC|AUX_PP1|AUX_PP2|AUX_CAL|AUX_INS|AUX_RESORB|AUX_WND|AUX_SCS|AMV_ERRMAT|AMH_ERRMAT|AUX_ICE|AUX_WAV|MPL_ORBPRE|MPL_ORBSCT|MSK__LAND)_.*\\.(xml|XML|EOF|SAFE)"))
 		);
-		final FilesystemInboxAdapter uutAux = new FilesystemInboxAdapter(testDir.toPath(), factory, 1);
+		final FilesystemInboxAdapter uutAux = new FilesystemInboxAdapter(testDir.toPath().toUri(), factory, 1);
 		final Collection<InboxEntry> actualAux = uutAux.read(auxFilter);
 		assertEquals(1, actualAux.size());
 	}
