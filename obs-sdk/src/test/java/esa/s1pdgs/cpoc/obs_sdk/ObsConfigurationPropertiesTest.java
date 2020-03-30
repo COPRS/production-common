@@ -21,7 +21,7 @@ public class ObsConfigurationPropertiesTest {
 	public final void testConfigurationLoading() {
 		// only spot check some configurations
 		assertEquals("http://oss.eu-west-0.prod-cloud-ocb.orange-business.com/", uut.getEndpoint());
-		assertEquals("session-files", uut.getBucket().get(ProductFamily.EDRS_SESSION));
+		assertEquals("werum-ut-session-files", uut.getBucket().get(ProductFamily.EDRS_SESSION));
 		assertEquals("aws-s3", uut.getBackend());
 	}
 	

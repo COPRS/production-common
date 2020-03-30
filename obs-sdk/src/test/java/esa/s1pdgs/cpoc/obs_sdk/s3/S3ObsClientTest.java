@@ -93,6 +93,7 @@ public class S3ObsClientTest {
                 Mockito.eq("key-not-exist"));
         doReturn("dummy").when(service).uploadFile(Mockito.anyString(),
                 Mockito.anyString(), Mockito.any());
+        doReturn("dummy.md5sum").when(service).identifyMd5File(Mockito.anyString());
 
         // Mock configuration
         doReturn("auxiliary-files").when(configuration)
@@ -176,6 +177,7 @@ public class S3ObsClientTest {
     @Test
     public void testUploadObjectDirectory() throws ObsServiceException, SdkClientException, ObsException {
         client.uploadObject(new ObsUploadObject(ProductFamily.L0_ACN, "key-exist", new File("target")));
+        
         verify(service, times(1)).uploadDirectory(Mockito.eq("l0-acns"),
                 Mockito.eq("key-exist"), Mockito.eq(new File("target")));
         verify(service, times(1)).uploadFile(Mockito.anyString(),
