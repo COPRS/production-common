@@ -5,9 +5,12 @@ import static esa.s1pdgs.cpoc.ingestion.trigger.inbox.InboxURIScheme.HTTPS;
 import java.nio.file.Path;
 import java.util.Date;
 
+import org.springframework.stereotype.Component;
+
 import esa.s1pdgs.cpoc.ingestion.trigger.entity.InboxEntry;
 import esa.s1pdgs.cpoc.ingestion.trigger.inbox.InboxEntryFactory;
 
+@Component
 public class XbipInboxEntryFactory implements InboxEntryFactory {
 	@Override
 	public InboxEntry newInboxEntry(
