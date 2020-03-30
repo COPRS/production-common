@@ -106,7 +106,7 @@ public class InboxEntry {
 
 	@Override
 	public String toString() {
-		return String.format("InboxEntry [name=%s, relativePath=%s, pickupPath=%s, lastModified=%t, size=%d]", name,
+		return String.format("InboxEntry [name=%s, relativePath=%s, pickupPath=%s, lastModified=%s, size=%s]", name,
 				relativePath, pickupPath, lastModified, size);
 	}
 }
