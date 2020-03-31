@@ -10,12 +10,14 @@ import java.util.Map;
 import esa.s1pdgs.cpoc.common.ProductFamily;
 import esa.s1pdgs.cpoc.common.errors.AbstractCodedException;
 import esa.s1pdgs.cpoc.common.errors.obs.ObsException;
+import esa.s1pdgs.cpoc.obs_sdk.FileObsUploadObject;
 import esa.s1pdgs.cpoc.obs_sdk.ObsClient;
 import esa.s1pdgs.cpoc.obs_sdk.ObsDownloadObject;
+import esa.s1pdgs.cpoc.obs_sdk.ObsEmptyFileException;
 import esa.s1pdgs.cpoc.obs_sdk.ObsObject;
 import esa.s1pdgs.cpoc.obs_sdk.ObsServiceException;
-import esa.s1pdgs.cpoc.obs_sdk.FileObsUploadObject;
 import esa.s1pdgs.cpoc.obs_sdk.SdkClientException;
+import esa.s1pdgs.cpoc.obs_sdk.StreamObsUploadObject;
 import esa.s1pdgs.cpoc.report.ReportingFactory;
 
 // dummy impl - doin nothin
@@ -24,6 +26,11 @@ public abstract class FakeObsClient implements ObsClient {
 	public boolean exists(final ObsObject object) throws SdkClientException, ObsServiceException {
 		// TODO Auto-generated method stub
 		return false;
+	}
+	
+	@Override
+	public void uploadStreams(final List<StreamObsUploadObject> objects, final ReportingFactory reportingFactory)
+			throws AbstractCodedException, ObsEmptyFileException {		
 	}
 
 	@Override
