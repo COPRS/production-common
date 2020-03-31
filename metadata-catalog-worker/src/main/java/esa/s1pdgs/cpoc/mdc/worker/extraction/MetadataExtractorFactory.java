@@ -82,6 +82,15 @@ public class MetadataExtractorFactory {
 		    			obsClient,
 		    			newPathMetadataExtractor(config)
 		    	);
+		    case PLANS_AND_REPORTS:
+		    	return new PlanAndReportMetadataExtractor(
+		    			esServices, 
+		    			mdBuilder, 
+		    			fileDescriptorBuilder, 
+		    			config.getLocalDirectory(), 
+		    			processConfiguration, 
+		    			obsClient
+		    	);
 		    case LEVEL_SEGMENTS:
 		    	return new LevelSegmentMetadataExtractor(
 		    			esServices, 
