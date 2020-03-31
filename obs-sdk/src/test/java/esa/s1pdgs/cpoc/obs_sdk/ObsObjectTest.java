@@ -14,7 +14,7 @@ import esa.s1pdgs.cpoc.common.ProductFamily;
 import esa.s1pdgs.cpoc.obs_sdk.ObsDownloadObject;
 import esa.s1pdgs.cpoc.obs_sdk.ObsObject;
 import esa.s1pdgs.cpoc.obs_sdk.ObsServiceException;
-import esa.s1pdgs.cpoc.obs_sdk.ObsUploadObject;
+import esa.s1pdgs.cpoc.obs_sdk.FileObsUploadObject;
 import esa.s1pdgs.cpoc.obs_sdk.SdkClientException;
 import nl.jqno.equalsverifier.EqualsVerifier;
 import nl.jqno.equalsverifier.Warning;
@@ -159,8 +159,8 @@ public class ObsObjectTest {
     @Test
     public void obsUpObjTest() {
         File file = new File("./test");
-        ObsUploadObject obj =
-                new ObsUploadObject(ProductFamily.L0_ACN, "key-t", file);
+        FileObsUploadObject obj =
+                new FileObsUploadObject(ProductFamily.L0_ACN, "key-t", file);
         assertEquals("key-t", obj.getKey());
         assertEquals(ProductFamily.L0_ACN, obj.getFamily());
         assertEquals(file, obj.getFile());
@@ -182,8 +182,8 @@ public class ObsObjectTest {
     @Test
     public void obsUpObjTestToString() {
         File file = new File("./test");
-        ObsUploadObject obj =
-                new ObsUploadObject(ProductFamily.EDRS_SESSION, "key-t", file);
+        FileObsUploadObject obj =
+                new FileObsUploadObject(ProductFamily.EDRS_SESSION, "key-t", file);
         String str = obj.toString();
         assertTrue(str.contains("key: key-t"));
         assertTrue(str.contains("family: EDRS_SESSION"));
@@ -195,7 +195,7 @@ public class ObsObjectTest {
      */
     @Test
     public void obsUpObjCheckEqualsAndHash() {
-        EqualsVerifier.forClass(ObsUploadObject.class).usingGetClass()
+        EqualsVerifier.forClass(FileObsUploadObject.class).usingGetClass()
                 .suppress(Warning.NONFINAL_FIELDS).verify();
     }
 

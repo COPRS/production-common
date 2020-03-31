@@ -35,7 +35,7 @@ import esa.s1pdgs.cpoc.obs_sdk.ObsConfigurationProperties;
 import esa.s1pdgs.cpoc.obs_sdk.ObsDownloadObject;
 import esa.s1pdgs.cpoc.obs_sdk.ObsObject;
 import esa.s1pdgs.cpoc.obs_sdk.ObsServiceException;
-import esa.s1pdgs.cpoc.obs_sdk.ObsUploadObject;
+import esa.s1pdgs.cpoc.obs_sdk.FileObsUploadObject;
 import esa.s1pdgs.cpoc.obs_sdk.SdkClientException;
 import esa.s1pdgs.cpoc.obs_sdk.ValidArgumentAssertion;
 import esa.s1pdgs.cpoc.obs_sdk.report.ReportingProductFactory;
@@ -143,7 +143,7 @@ public class S3ObsClient extends AbstractObsClient {
 	}
 
 	@Override
-	public void uploadObject(final ObsUploadObject object)
+	public void uploadObject(final FileObsUploadObject object)
 			throws SdkClientException, ObsServiceException, ObsException {
 		final List<String> fileList = new ArrayList<>();
 		if (object.getFile().isDirectory()) {

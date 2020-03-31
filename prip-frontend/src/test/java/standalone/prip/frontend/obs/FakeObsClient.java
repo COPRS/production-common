@@ -15,7 +15,7 @@ import esa.s1pdgs.cpoc.obs_sdk.ObsClient;
 import esa.s1pdgs.cpoc.obs_sdk.ObsDownloadObject;
 import esa.s1pdgs.cpoc.obs_sdk.ObsObject;
 import esa.s1pdgs.cpoc.obs_sdk.ObsServiceException;
-import esa.s1pdgs.cpoc.obs_sdk.ObsUploadObject;
+import esa.s1pdgs.cpoc.obs_sdk.FileObsUploadObject;
 import esa.s1pdgs.cpoc.obs_sdk.SdkClientException;
 import esa.s1pdgs.cpoc.report.ReportingFactory;
 
@@ -40,7 +40,7 @@ public class FakeObsClient implements ObsClient {
 	}
 
 	@Override
-	public void upload(final List<ObsUploadObject> objects, final ReportingFactory reportingFactory) throws AbstractCodedException {
+	public void upload(final List<FileObsUploadObject> objects, final ReportingFactory reportingFactory) throws AbstractCodedException {
 		// TODO Auto-generated method stub
 	}
 

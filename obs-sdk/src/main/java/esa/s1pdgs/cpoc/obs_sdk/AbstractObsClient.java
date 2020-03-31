@@ -57,7 +57,7 @@ public abstract class AbstractObsClient implements ObsClient {
 
     protected abstract List<File> downloadObject(ObsDownloadObject object) throws SdkClientException, ObsServiceException;
     
-    protected abstract void uploadObject(ObsUploadObject object) throws SdkClientException, ObsServiceException, ObsException;
+    protected abstract void uploadObject(FileObsUploadObject object) throws SdkClientException, ObsServiceException, ObsException;
 
     private final List<File> downloadObjects(final List<ObsDownloadObject> objects,
             final boolean parallel, final ReportingFactory reportingFactory)
@@ -110,7 +110,7 @@ public abstract class AbstractObsClient implements ObsClient {
         return files;
     }
 
-    private final void uploadObjects(final List<ObsUploadObject> objects,
+    private final void uploadObjects(final List<FileObsUploadObject> objects,
             final boolean parallel, final ReportingFactory reportingFactory)
             throws SdkClientException, ObsServiceException, ObsException {
         if (objects.size() > 1 && parallel) {
@@ -120,7 +120,7 @@ public abstract class AbstractObsClient implements ObsClient {
             final CompletionService<Void> service =
                     new ExecutorCompletionService<>(workerThread);
             // Launch all downloads
-            for (final ObsUploadObject object : objects) {
+            for (final FileObsUploadObject object : objects) {
                 service.submit(new ObsUploadCallable(this, object, reportingFactory));
             }
             waitForCompletion(workerThread, service, objects.size(), configuration.getTimeoutUpExec());
@@ -129,7 +129,7 @@ public abstract class AbstractObsClient implements ObsClient {
       		final Reporting reporting = reportingFactory.newReporting("ObsWrite");
         	
             // Upload object in sequential
-            for (final ObsUploadObject object : objects) {            	
+            for (final FileObsUploadObject object : objects) {            	
              	reporting.begin(
              			reportingProductFactory.reportingInputFor(object, getBucketFor(object.getFamily())),
              			new ReportingMessage("Start uploading to OBS")
@@ -212,11 +212,11 @@ public abstract class AbstractObsClient implements ObsClient {
 	 * @throws ObsEmptyFileException
 	 */
 	@Override
-	public void upload(final List<ObsUploadObject> objects, final ReportingFactory reportingFactory) throws AbstractCodedException, ObsEmptyFileException {
+	public void upload(final List<FileObsUploadObject> objects, final ReportingFactory reportingFactory) throws AbstractCodedException, ObsEmptyFileException {
 		try {
 			ValidArgumentAssertion.assertValidArgument(objects);
 	
-			for (final ObsUploadObject o : objects) {
+			for (final FileObsUploadObject o : objects) {
 				if (FileUtils.size(o.getFile()) == 0) {
 					throw new ObsEmptyFileException("Empty file detected: " + o.getFile().getName());
 				}
@@ -231,8 +231,14 @@ public abstract class AbstractObsClient implements ObsClient {
 			throw e;
 		}
 	}
+	
+	@Override
+	public void uploadStreams(final List<StreamObsUploadObject> objects, final ReportingFactory reportingFactory)
+			throws AbstractCodedException, ObsEmptyFileException {
+		throw new UnsupportedOperationException(String.format("Not implemented for %s", getClass()));		
+	}
 
-    @Override
+	@Override
 	public Map<String,ObsObject> listInterval(final ProductFamily family, final Date intervalStart, final Date intervalEnd) throws SdkClientException {
     	ValidArgumentAssertion.assertValidArgument(family);
     	ValidArgumentAssertion.assertValidArgument(intervalStart);

@@ -19,7 +19,7 @@ import esa.s1pdgs.cpoc.mqi.model.queue.CompressionJob;
 import esa.s1pdgs.cpoc.mqi.model.rest.GenericMessageDto;
 import esa.s1pdgs.cpoc.obs_sdk.ObsClient;
 import esa.s1pdgs.cpoc.obs_sdk.ObsEmptyFileException;
-import esa.s1pdgs.cpoc.obs_sdk.ObsUploadObject;
+import esa.s1pdgs.cpoc.obs_sdk.FileObsUploadObject;
 import esa.s1pdgs.cpoc.report.ReportingFactory;
 
 public class FileUploader {
@@ -79,7 +79,7 @@ public class FileUploader {
 					
 		LOGGER.info("Uploading compressed product {} [{}]",productPath, job.getProductFamily());
 		final ProductFamily zipProductFamily = job.getOutputProductFamily();
-		final ObsUploadObject uploadObject = new ObsUploadObject(zipProductFamily, zipFileName, productPath);
+		final FileObsUploadObject uploadObject = new FileObsUploadObject(zipProductFamily, zipFileName, productPath);
 		
 		final CompressedProductQueueMessage cpqm = new CompressedProductQueueMessage(zipProductFamily, zipFileName, zipFileName);
 		outputToPublish.add(cpqm);
@@ -88,7 +88,7 @@ public class FileUploader {
 		if (Thread.currentThread().isInterrupted()) {
 			throw new InternalErrorException("The current thread as been interrupted");
 		}
-		obsClient.upload(Arrays.asList(new ObsUploadObject(uploadObject.getFamily(), uploadObject.getKey(), uploadObject.getFile())), reportingFactory);
+		obsClient.upload(Arrays.asList(new FileObsUploadObject(uploadObject.getFamily(), uploadObject.getKey(), uploadObject.getFile())), reportingFactory);
 		
 		publishAccordingUploadFiles(NOT_KEY_OBS, outputToPublish);
         

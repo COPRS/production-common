@@ -21,7 +21,7 @@ public class ObsUploadCallable implements Callable<Void> {
     /**
      * Objects to upload
      */
-    private final ObsUploadObject object;
+    private final FileObsUploadObject object;
     
     private final ReportingFactory reportingFactory;
 
@@ -32,7 +32,7 @@ public class ObsUploadCallable implements Callable<Void> {
      * @param object
      */
     public ObsUploadCallable(final ObsClient obsClient,
-            final ObsUploadObject object, final ReportingFactory reportingFactory) {
+            final FileObsUploadObject object, final ReportingFactory reportingFactory) {
         this.obsClient = obsClient;
         this.object = object;
         this.reportingFactory = reportingFactory;

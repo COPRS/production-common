@@ -45,7 +45,7 @@ import esa.s1pdgs.cpoc.mqi.model.queue.LevelJobOutputDto;
 import esa.s1pdgs.cpoc.mqi.model.rest.GenericMessageDto;
 import esa.s1pdgs.cpoc.obs_sdk.ObsClient;
 import esa.s1pdgs.cpoc.obs_sdk.ObsEmptyFileException;
-import esa.s1pdgs.cpoc.obs_sdk.ObsUploadObject;
+import esa.s1pdgs.cpoc.obs_sdk.FileObsUploadObject;
 import esa.s1pdgs.cpoc.report.Reporting;
 import esa.s1pdgs.cpoc.report.ReportingUtils;
 
@@ -92,7 +92,7 @@ public class OutputProcessorTest {
     /**
      * Product outputs to publish
      */
-    private List<ObsUploadObject> uploadBatch;
+    private List<FileObsUploadObject> uploadBatch;
     private List<ObsQueueMessage> outputToPublish;
 
     /**
@@ -153,12 +153,12 @@ public class OutputProcessorTest {
 
         // Outputs product
         uploadBatch = new ArrayList<>();
-        uploadBatch.add(new ObsUploadObject(ProductFamily.L0_SLICE, "o1",
+        uploadBatch.add(new FileObsUploadObject(ProductFamily.L0_SLICE, "o1",
                 new File("o1")));
         uploadBatch.add(
-                new ObsUploadObject(ProductFamily.L1_ACN, "o2", new File("o2")));
+                new FileObsUploadObject(ProductFamily.L1_ACN, "o2", new File("o2")));
         uploadBatch.add(
-                new ObsUploadObject(ProductFamily.L0_ACN, "o3", new File("o3")));
+                new FileObsUploadObject(ProductFamily.L0_ACN, "o3", new File("o3")));
         outputToPublish = new ArrayList<>();
         outputToPublish
                 .add(new ObsQueueMessage(ProductFamily.L0_SLICE, "p1", "o1", "FAST"));
@@ -328,7 +328,7 @@ public class OutputProcessorTest {
      */
     @Test
     public void testSortOutputsForL0() throws AbstractCodedException {
-        final List<ObsUploadObject> uploadBatch = new ArrayList<>();
+        final List<FileObsUploadObject> uploadBatch = new ArrayList<>();
         final List<ObsQueueMessage> outputToPublish = new ArrayList<>();
         final List<FileQueueMessage> reportToPublish = new ArrayList<>();
         final List<String> lines = new ArrayList<>();
@@ -351,7 +351,7 @@ public class OutputProcessorTest {
 
         // Check products
         assertEquals(4, uploadBatch.size());
-        assertEquals(new ObsUploadObject(ProductFamily.L0_ACN,
+        assertEquals(new FileObsUploadObject(ProductFamily.L0_ACN,
                 "S1A_IW_RAW__0ADV_20171213T121123_20171213T121947_019684_021735_51B1.SAFE",
                 new File(PATH_DIRECTORY_TEST
                         + "FAST24/S1A_IW_RAW__0ADV_20171213T121123_20171213T121947_019684_021735_51B1.ISIP"
@@ -396,7 +396,7 @@ public class OutputProcessorTest {
                 new OutputProcessor(obsClient, procuderFactory, inputMessage,
                         PATH_DIRECTORY_TEST + "outputs.list", 2, "MONITOR", ApplicationLevel.L0_SEGMENT, properties);
         
-        final List<ObsUploadObject> uploadBatch = new ArrayList<>();
+        final List<FileObsUploadObject> uploadBatch = new ArrayList<>();
         final List<ObsQueueMessage> outputToPublish = new ArrayList<>();
         final List<FileQueueMessage> reportToPublish = new ArrayList<>();
         final List<String> lines = new ArrayList<>();
@@ -422,14 +422,14 @@ public class OutputProcessorTest {
         System.out.print("===="+uploadBatch);
         // Check products
         assertEquals(5, uploadBatch.size());
-        assertEquals(new ObsUploadObject(ProductFamily.L0_ACN,
+        assertEquals(new FileObsUploadObject(ProductFamily.L0_ACN,
                 "S1A_IW_RAW__0ADV_20171213T121123_20171213T121947_019684_021735_51B1.SAFE",
                 new File(PATH_DIRECTORY_TEST
                         + "FAST24/S1A_IW_RAW__0ADV_20171213T121123_20171213T121947_019684_021735_51B1.ISIP"
                         + File.separator
                         + "S1A_IW_RAW__0ADV_20171213T121123_20171213T121947_019684_021735_51B1.SAFE")),
                 uploadBatch.get(0));
-        assertEquals(new ObsUploadObject(ProductFamily.L0_SLICE,
+        assertEquals(new FileObsUploadObject(ProductFamily.L0_SLICE,
                 "S1A_GP_RAW__0SDV_20171213T121123_20171213T121947_019684_021735_51B2.SAFE",
                 new File(PATH_DIRECTORY_TEST
                         + "FAST24/S1A_GP_RAW__0SDV_20171213T121123_20171213T121947_019684_021735_51B2.ISIP"
@@ -479,7 +479,7 @@ public class OutputProcessorTest {
                 new OutputProcessor(obsClient, procuderFactory, inputMessage,
                         PATH_DIRECTORY_TEST + "outputs.list", 2, "MONITOR", ApplicationLevel.L1, properties);
         
-        final List<ObsUploadObject> uploadBatch = new ArrayList<>();
+        final List<FileObsUploadObject> uploadBatch = new ArrayList<>();
         final List<ObsQueueMessage> outputToPublish = new ArrayList<>();
         final List<FileQueueMessage> reportToPublish = new ArrayList<>();
         final List<String> lines = new ArrayList<>();
@@ -502,7 +502,7 @@ public class OutputProcessorTest {
 
         // Check products
         assertEquals(4, uploadBatch.size());
-        assertEquals(new ObsUploadObject(ProductFamily.L0_ACN,
+        assertEquals(new FileObsUploadObject(ProductFamily.L0_ACN,
                 "S1A_IW_RAW__0ADV_20171213T121123_20171213T121947_019684_021735_51B1.SAFE",
                 new File(PATH_DIRECTORY_TEST
                         + "FAST24/S1A_IW_RAW__0ADV_20171213T121123_20171213T121947_019684_021735_51B1.ISIP"
@@ -547,7 +547,7 @@ public class OutputProcessorTest {
                 new OutputProcessor(obsClient, procuderFactory, inputMessage,
                         PATH_DIRECTORY_TEST + "outputs.list", 2, "MONITOR", ApplicationLevel.L1, properties);
         
-        final List<ObsUploadObject> uploadBatch = new ArrayList<>();
+        final List<FileObsUploadObject> uploadBatch = new ArrayList<>();
         final List<ObsQueueMessage> outputToPublish = new ArrayList<>();
         final List<FileQueueMessage> reportToPublish = new ArrayList<>();
         final List<String> lines = new ArrayList<>();
@@ -570,7 +570,7 @@ public class OutputProcessorTest {
 
         // Check products
         assertEquals(4, uploadBatch.size());
-        assertEquals(new ObsUploadObject(ProductFamily.L1_ACN,
+        assertEquals(new FileObsUploadObject(ProductFamily.L1_ACN,
                 "S1A_IW_SLC__1ADV_20171213T121123_20171213T121947_019684_021735_51B1.SAFE",
                 new File(PATH_DIRECTORY_TEST
                         + "FAST24/S1A_IW_SLC__1ADV_20171213T121123_20171213T121947_019684_021735_51B1.ISIP"
@@ -728,9 +728,9 @@ public class OutputProcessorTest {
 
         // check OBS service
         verify(obsClient, times(2)).upload(Mockito.any(), Mockito.any());
-        final List<ObsUploadObject> batch1 = uploadBatch.subList(0, 2);
+        final List<FileObsUploadObject> batch1 = uploadBatch.subList(0, 2);
         verify(obsClient, times(1)).upload(Mockito.eq(batch1), Mockito.any());
-        final List<ObsUploadObject> batch2 = uploadBatch.subList(2, 3);
+        final List<FileObsUploadObject> batch2 = uploadBatch.subList(2, 3);
         verify(obsClient, times(1)).upload(Mockito.eq(batch2), Mockito.any());
     }
 

@@ -28,8 +28,8 @@ public class ObsUploadObjectTest {
      */
     @Test
     public void testConstructors() {
-        ObsUploadObject obj =
-                new ObsUploadObject(ProductFamily.AUXILIARY_FILE, "key-obs", FILE);
+        FileObsUploadObject obj =
+                new FileObsUploadObject(ProductFamily.AUXILIARY_FILE, "key-obs", FILE);
         assertEquals(ProductFamily.AUXILIARY_FILE, obj.getFamily());
         assertEquals("key-obs", obj.getKey());
         assertEquals(FILE, obj.getFile());
@@ -40,8 +40,8 @@ public class ObsUploadObjectTest {
      */
     @Test
     public void testToString() {
-    	ObsUploadObject obj =
-                new ObsUploadObject(ProductFamily.L0_SLICE, "key-obs", FILE);
+    	FileObsUploadObject obj =
+                new FileObsUploadObject(ProductFamily.L0_SLICE, "key-obs", FILE);
         String str = obj.toString();
         assertTrue(str.contains("family: L0_SLICE"));
         assertTrue(str.contains("key: key-obs"));
@@ -53,7 +53,7 @@ public class ObsUploadObjectTest {
      */
     @Test
     public void testEquals() {
-        EqualsVerifier.forClass(ObsUploadObject.class).usingGetClass()
+        EqualsVerifier.forClass(FileObsUploadObject.class).usingGetClass()
                 .suppress(Warning.NONFINAL_FIELDS).verify();
     }
 

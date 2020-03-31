@@ -24,7 +24,7 @@ import esa.s1pdgs.cpoc.ingestion.worker.product.ProductException;
 import esa.s1pdgs.cpoc.obs_sdk.ObsClient;
 import esa.s1pdgs.cpoc.obs_sdk.ObsEmptyFileException;
 import esa.s1pdgs.cpoc.obs_sdk.ObsObject;
-import esa.s1pdgs.cpoc.obs_sdk.ObsUploadObject;
+import esa.s1pdgs.cpoc.obs_sdk.FileObsUploadObject;
 import esa.s1pdgs.cpoc.obs_sdk.SdkClientException;
 import esa.s1pdgs.cpoc.report.ReportingFactory;
 
@@ -41,8 +41,8 @@ public class TestObsAdapter {
 	public final void testUpload() throws AbstractCodedException, ObsEmptyFileException {
 		final ObsAdapter uut = new ObsAdapter(obsClient, ReportingFactory.NULL);
 		uut.upload(ProductFamily.AUXILIARY_FILE, new File("/tmp/foo/bar/baaaaar"), "bar/baaaaar");
-		final List<ObsUploadObject> expectedArg = Arrays.asList(
-				new ObsUploadObject(ProductFamily.AUXILIARY_FILE, "bar/baaaaar", new File("/tmp/foo/bar/baaaaar")));
+		final List<FileObsUploadObject> expectedArg = Arrays.asList(
+				new FileObsUploadObject(ProductFamily.AUXILIARY_FILE, "bar/baaaaar", new File("/tmp/foo/bar/baaaaar")));
 		verify(obsClient, times(1)).upload(Mockito.eq(expectedArg), Mockito.any());
 	}
 	

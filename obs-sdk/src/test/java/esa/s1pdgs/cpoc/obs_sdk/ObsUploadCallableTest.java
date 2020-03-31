@@ -49,9 +49,9 @@ public class ObsUploadCallableTest {
     /**
      * Download object used when nominal case
      */
-    private ObsUploadObject object = new ObsUploadObject(ProductFamily.AUXILIARY_FILE, "key1", new File(tmpDir, "key1"));
-    private ObsUploadObject objectSdk = new ObsUploadObject(ProductFamily.EDRS_SESSION, "key2", new File(tmpDir,"key2"));
-    private ObsUploadObject objectAws = new ObsUploadObject(ProductFamily.AUXILIARY_FILE, "key3", new File(tmpDir,"key3"));
+    private FileObsUploadObject object = new FileObsUploadObject(ProductFamily.AUXILIARY_FILE, "key1", new File(tmpDir, "key1"));
+    private FileObsUploadObject objectSdk = new FileObsUploadObject(ProductFamily.EDRS_SESSION, "key2", new File(tmpDir,"key2"));
+    private FileObsUploadObject objectAws = new FileObsUploadObject(ProductFamily.AUXILIARY_FILE, "key3", new File(tmpDir,"key3"));
 
     /**
      * Initialization

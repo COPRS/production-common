@@ -12,7 +12,7 @@ import esa.s1pdgs.cpoc.ingestion.worker.product.ProductException;
 import esa.s1pdgs.cpoc.obs_sdk.ObsClient;
 import esa.s1pdgs.cpoc.obs_sdk.ObsEmptyFileException;
 import esa.s1pdgs.cpoc.obs_sdk.ObsObject;
-import esa.s1pdgs.cpoc.obs_sdk.ObsUploadObject;
+import esa.s1pdgs.cpoc.obs_sdk.FileObsUploadObject;
 import esa.s1pdgs.cpoc.obs_sdk.SdkClientException;
 import esa.s1pdgs.cpoc.report.ReportingFactory;
 
@@ -31,7 +31,7 @@ public class ObsAdapter {
 	public final void upload(final ProductFamily family, final File file, final String obsKey) throws ObsEmptyFileException {
 		try {
 			if (!obsClient.exists(new ObsObject(family, obsKey))) {
-				obsClient.upload(Arrays.asList(new ObsUploadObject(family, obsKey, file)), reportingFactory);
+				obsClient.upload(Arrays.asList(new FileObsUploadObject(family, obsKey, file)), reportingFactory);
 			}
 		} catch (AbstractCodedException | SdkClientException e) {
 			throw new RuntimeException(

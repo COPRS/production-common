@@ -33,7 +33,7 @@ import esa.s1pdgs.cpoc.obs_sdk.ObsConfigurationProperties;
 import esa.s1pdgs.cpoc.obs_sdk.ObsDownloadObject;
 import esa.s1pdgs.cpoc.obs_sdk.ObsEmptyFileException;
 import esa.s1pdgs.cpoc.obs_sdk.ObsObject;
-import esa.s1pdgs.cpoc.obs_sdk.ObsUploadObject;
+import esa.s1pdgs.cpoc.obs_sdk.FileObsUploadObject;
 import esa.s1pdgs.cpoc.obs_sdk.ObsValidationException;
 import esa.s1pdgs.cpoc.obs_sdk.SdkClientException;
 import esa.s1pdgs.cpoc.obs_sdk.report.ReportingProductFactory;
@@ -117,7 +117,7 @@ public class SwiftObsClientIT {
 	public void uploadWithoutPrefixTest() throws Exception {	
 		// upload
 		assertFalse(uut.exists(new ObsObject(auxiliaryFiles, testFileName1)));
-		uut.upload(Collections.singletonList(new ObsUploadObject(auxiliaryFiles, testFileName1, testFile1)), ReportingFactory.NULL);
+		uut.upload(Collections.singletonList(new FileObsUploadObject(auxiliaryFiles, testFileName1, testFile1)), ReportingFactory.NULL);
 		assertTrue(uut.exists(new ObsObject(auxiliaryFiles, testFileName1)));
 	}
 
@@ -125,7 +125,7 @@ public class SwiftObsClientIT {
 	public void uploadWithPrefixTest() throws Exception {	
 		// upload
 		assertFalse(uut.exists(new ObsObject(auxiliaryFiles, testFilePrefix + testFileName1)));
-		uut.upload(Collections.singletonList(new ObsUploadObject(auxiliaryFiles, testFilePrefix + testFileName1, testFile1)), ReportingFactory.NULL);
+		uut.upload(Collections.singletonList(new FileObsUploadObject(auxiliaryFiles, testFilePrefix + testFileName1, testFile1)), ReportingFactory.NULL);
 		assertTrue(uut.exists(new ObsObject(auxiliaryFiles, testFilePrefix + testFileName1)));
 	}
 
@@ -136,7 +136,7 @@ public class SwiftObsClientIT {
 		assertFalse(uut.exists(new ObsObject(auxiliaryFiles, testDirectoryName + "/" + testFileName2)));
 		assertFalse(uut.exists(new ObsObject(auxiliaryFiles, testDirectoryName + "/" + testUnexptectedFileName)));
 		assertFalse(uut.exists(new ObsObject(auxiliaryFiles, testDirectoryName + ".md5sum")));
-		uut.upload(Arrays.asList(new ObsUploadObject(auxiliaryFiles, testDirectoryName, testDirectory)), ReportingFactory.NULL);
+		uut.upload(Arrays.asList(new FileObsUploadObject(auxiliaryFiles, testDirectoryName, testDirectory)), ReportingFactory.NULL);
 		assertTrue(uut.exists(new ObsObject(auxiliaryFiles, testDirectoryName + "/" + testFileName1)));
 		assertTrue(uut.exists(new ObsObject(auxiliaryFiles, testDirectoryName + "/" + testFileName2)));
 		assertTrue(uut.exists(new ObsObject(auxiliaryFiles, testDirectoryName + ".md5sum")));
@@ -152,13 +152,13 @@ public class SwiftObsClientIT {
 		assertFalse(uut.exists(new ObsObject(auxiliaryFiles, testDirectoryName + "/" + testFileName2)));
 		assertFalse(uut.exists(new ObsObject(auxiliaryFiles, testDirectoryName + "/" + testUnexptectedFileName)));
 		assertFalse(uut.exists(new ObsObject(auxiliaryFiles, testDirectoryName + ".md5sum")));
-		uut.upload(Arrays.asList(new ObsUploadObject(auxiliaryFiles, testDirectoryName, testDirectory)), ReportingFactory.NULL);
+		uut.upload(Arrays.asList(new FileObsUploadObject(auxiliaryFiles, testDirectoryName, testDirectory)), ReportingFactory.NULL);
 		assertTrue(uut.exists(new ObsObject(auxiliaryFiles, testDirectoryName + "/" + testFileName1)));
 		assertTrue(uut.exists(new ObsObject(auxiliaryFiles, testDirectoryName + "/" + testFileName2)));
 		assertTrue(uut.exists(new ObsObject(auxiliaryFiles, testDirectoryName + ".md5sum")));
 
 		// upload unexpected object
-		uut.upload(Arrays.asList(new ObsUploadObject(auxiliaryFiles, testDirectoryName + "/" + testUnexptectedFileName, testFile1)), ReportingFactory.NULL);		
+		uut.upload(Arrays.asList(new FileObsUploadObject(auxiliaryFiles, testDirectoryName + "/" + testUnexptectedFileName, testFile1)), ReportingFactory.NULL);		
 		assertTrue(uut.exists(new ObsObject(auxiliaryFiles, testDirectoryName + "/" + testUnexptectedFileName)));
 
 		// validate directory with unexpected object
@@ -173,7 +173,7 @@ public class SwiftObsClientIT {
 		assertFalse(uut.exists(new ObsObject(auxiliaryFiles, testDirectoryName + "/" + testFileName2)));
 		assertFalse(uut.exists(new ObsObject(auxiliaryFiles, testDirectoryName + "/" + testUnexptectedFileName)));
 		assertFalse(uut.exists(new ObsObject(auxiliaryFiles, testDirectoryName + ".md5sum")));
-		uut.upload(Arrays.asList(new ObsUploadObject(auxiliaryFiles, testDirectoryName, testDirectory)), ReportingFactory.NULL);
+		uut.upload(Arrays.asList(new FileObsUploadObject(auxiliaryFiles, testDirectoryName, testDirectory)), ReportingFactory.NULL);
 		assertTrue(uut.exists(new ObsObject(auxiliaryFiles, testDirectoryName + "/" + testFileName1)));
 		assertTrue(uut.exists(new ObsObject(auxiliaryFiles, testDirectoryName + "/" + testFileName2)));
 		assertTrue(uut.exists(new ObsObject(auxiliaryFiles, testDirectoryName + ".md5sum")));
@@ -195,7 +195,7 @@ public class SwiftObsClientIT {
 		assertFalse(uut.exists(new ObsObject(auxiliaryFiles, testDirectoryName + "/" + testFileName2)));
 		assertFalse(uut.exists(new ObsObject(auxiliaryFiles, testDirectoryName + "/" + testUnexptectedFileName)));
 		assertFalse(uut.exists(new ObsObject(auxiliaryFiles, testDirectoryName + ".md5sum")));
-		uut.upload(Arrays.asList(new ObsUploadObject(auxiliaryFiles, testDirectoryName, testDirectory)), ReportingFactory.NULL);
+		uut.upload(Arrays.asList(new FileObsUploadObject(auxiliaryFiles, testDirectoryName, testDirectory)), ReportingFactory.NULL);
 		assertTrue(uut.exists(new ObsObject(auxiliaryFiles, testDirectoryName + "/" + testFileName1)));
 		assertTrue(uut.exists(new ObsObject(auxiliaryFiles, testDirectoryName + "/" + testFileName2)));
 		assertTrue(uut.exists(new ObsObject(auxiliaryFiles, testDirectoryName + ".md5sum")));
@@ -203,7 +203,7 @@ public class SwiftObsClientIT {
 		// replace object with bad one
 		uut.deleteObject(auxiliaryFiles, testDirectoryName + "/" + testFileName1);
 		assertFalse(uut.exists(new ObsObject(auxiliaryFiles, testDirectoryName + "/" + testFileName1)));
-		uut.upload(Arrays.asList(new ObsUploadObject(auxiliaryFiles, testDirectoryName + "/" + testFileName1, testFile2)), ReportingFactory.NULL);		
+		uut.upload(Arrays.asList(new FileObsUploadObject(auxiliaryFiles, testDirectoryName + "/" + testFileName1, testFile2)), ReportingFactory.NULL);		
 		assertTrue(uut.exists(new ObsObject(auxiliaryFiles, testDirectoryName + "/" + testFileName1)));
 
 		// validate wrong checksum situation
@@ -225,7 +225,7 @@ public class SwiftObsClientIT {
 	public void deleteWithoutPrefixTest() throws Exception {	
 		// upload
 		assertFalse(uut.exists(new ObsObject(auxiliaryFiles, testFileName1)));
-		uut.upload(Arrays.asList(new ObsUploadObject(auxiliaryFiles, testFileName1, testFile1)), ReportingFactory.NULL);
+		uut.upload(Arrays.asList(new FileObsUploadObject(auxiliaryFiles, testFileName1, testFile1)), ReportingFactory.NULL);
 		assertTrue(uut.exists(new ObsObject(auxiliaryFiles, testFileName1)));
 
 		// delete
@@ -238,7 +238,7 @@ public class SwiftObsClientIT {
 	public void deleteWithPrefixTest() throws Exception {	
 		// upload
 		assertFalse(uut.exists(new ObsObject(auxiliaryFiles, testFilePrefix + testFileName1)));
-		uut.upload(Arrays.asList(new ObsUploadObject(auxiliaryFiles, testFilePrefix + testFileName1, testFile1)), ReportingFactory.NULL);
+		uut.upload(Arrays.asList(new FileObsUploadObject(auxiliaryFiles, testFilePrefix + testFileName1, testFile1)), ReportingFactory.NULL);
 		assertTrue(uut.exists(new ObsObject(auxiliaryFiles, testFilePrefix + testFileName1)));
 
 		// delete
@@ -251,7 +251,7 @@ public class SwiftObsClientIT {
 	public void downloadFileWithoutPrefixTest() throws Exception {	
 		// upload
 		assertFalse(uut.exists(new ObsObject(auxiliaryFiles, testFileName1)));
-		uut.upload(Arrays.asList(new ObsUploadObject(auxiliaryFiles, testFileName1, testFile1)), ReportingFactory.NULL);
+		uut.upload(Arrays.asList(new FileObsUploadObject(auxiliaryFiles, testFileName1, testFile1)), ReportingFactory.NULL);
 		assertTrue(uut.exists(new ObsObject(auxiliaryFiles, testFileName1)));
 		
 		// single file download
@@ -266,7 +266,7 @@ public class SwiftObsClientIT {
 	public void downloadFileWithPrefixTest() throws Exception {	
 		// upload
 		assertFalse(uut.exists(new ObsObject(auxiliaryFiles, testFilePrefix + testFileName1)));
-		uut.upload(Arrays.asList(new ObsUploadObject(auxiliaryFiles, testFilePrefix + testFileName1, testFile1)), ReportingFactory.NULL);
+		uut.upload(Arrays.asList(new FileObsUploadObject(auxiliaryFiles, testFilePrefix + testFileName1, testFile1)), ReportingFactory.NULL);
 		assertTrue(uut.exists(new ObsObject(auxiliaryFiles, testFilePrefix + testFileName1)));
 		
 		// single file download
@@ -283,7 +283,7 @@ public class SwiftObsClientIT {
 		assertFalse(uut.exists(new ObsObject(auxiliaryFiles, testDirectoryName + "/" + testFileName1)));
 		assertFalse(uut.exists(new ObsObject(auxiliaryFiles, testDirectoryName + "/" + testFileName2)));
 		assertFalse(uut.exists(new ObsObject(auxiliaryFiles, testDirectoryName + ".md5sum")));
-		uut.upload(Arrays.asList(new ObsUploadObject(auxiliaryFiles, testDirectoryName, testDirectory)), ReportingFactory.NULL);
+		uut.upload(Arrays.asList(new FileObsUploadObject(auxiliaryFiles, testDirectoryName, testDirectory)), ReportingFactory.NULL);
 		assertTrue(uut.exists(new ObsObject(auxiliaryFiles, testDirectoryName + "/" + testFileName1)));
 		assertTrue(uut.exists(new ObsObject(auxiliaryFiles, testDirectoryName + "/" + testFileName2)));
 		assertTrue(uut.exists(new ObsObject(auxiliaryFiles, testDirectoryName + ".md5sum")));
@@ -308,8 +308,8 @@ public class SwiftObsClientIT {
 		// upload
 		assertFalse(uut.exists(new ObsObject(auxiliaryFiles, testFileName1)));
 		assertFalse(uut.exists(new ObsObject(auxiliaryFiles, testFileName2)));
-		uut.upload(Arrays.asList(new ObsUploadObject(auxiliaryFiles, testFileName1, testFile1)), ReportingFactory.NULL);
-		uut.upload(Arrays.asList(new ObsUploadObject(auxiliaryFiles, testFileName2, testFile2)), ReportingFactory.NULL);
+		uut.upload(Arrays.asList(new FileObsUploadObject(auxiliaryFiles, testFileName1, testFile1)), ReportingFactory.NULL);
+		uut.upload(Arrays.asList(new FileObsUploadObject(auxiliaryFiles, testFileName2, testFile2)), ReportingFactory.NULL);
 		assertTrue(uut.exists(new ObsObject(auxiliaryFiles, testFileName1)));
 		assertTrue(uut.exists(new ObsObject(auxiliaryFiles, testFileName2)));
 		
@@ -323,8 +323,8 @@ public class SwiftObsClientIT {
 		// upload
 		assertFalse(uut.exists(new ObsObject(auxiliaryFiles, testFilePrefix + testFileName1)));
 		assertFalse(uut.exists(new ObsObject(auxiliaryFiles, testFilePrefix + testFileName2)));
-		uut.upload(Arrays.asList(new ObsUploadObject(auxiliaryFiles, testFilePrefix + testFileName1, testFile1)), ReportingFactory.NULL);
-		uut.upload(Arrays.asList(new ObsUploadObject(auxiliaryFiles, testFilePrefix + testFileName2, testFile2)), ReportingFactory.NULL);
+		uut.upload(Arrays.asList(new FileObsUploadObject(auxiliaryFiles, testFilePrefix + testFileName1, testFile1)), ReportingFactory.NULL);
+		uut.upload(Arrays.asList(new FileObsUploadObject(auxiliaryFiles, testFilePrefix + testFileName2, testFile2)), ReportingFactory.NULL);
 		assertTrue(uut.exists(new ObsObject(auxiliaryFiles, testFilePrefix + testFileName1)));
 		assertTrue(uut.exists(new ObsObject(auxiliaryFiles, testFilePrefix + testFileName2)));
 		
@@ -337,8 +337,8 @@ public class SwiftObsClientIT {
 	public final void getAllAsStreamTest() throws Exception {
 		assertFalse(uut.exists(new ObsObject(auxiliaryFiles, testFilePrefix + testFileName1)));
 		assertFalse(uut.exists(new ObsObject(auxiliaryFiles, testFilePrefix + testFileName2)));
-		uut.upload(Arrays.asList(new ObsUploadObject(auxiliaryFiles, testFilePrefix + testFileName1, testFile1)), ReportingFactory.NULL);
-		uut.upload(Arrays.asList(new ObsUploadObject(auxiliaryFiles, testFilePrefix + testFileName2, testFile2)), ReportingFactory.NULL);
+		uut.upload(Arrays.asList(new FileObsUploadObject(auxiliaryFiles, testFilePrefix + testFileName1, testFile1)), ReportingFactory.NULL);
+		uut.upload(Arrays.asList(new FileObsUploadObject(auxiliaryFiles, testFilePrefix + testFileName2, testFile2)), ReportingFactory.NULL);
 		assertTrue(uut.exists(new ObsObject(auxiliaryFiles, testFilePrefix + testFileName1)));
 		assertTrue(uut.exists(new ObsObject(auxiliaryFiles, testFilePrefix + testFileName2)));
 		

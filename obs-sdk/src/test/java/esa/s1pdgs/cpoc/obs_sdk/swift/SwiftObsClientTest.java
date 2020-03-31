@@ -36,7 +36,7 @@ import esa.s1pdgs.cpoc.obs_sdk.ObsConfigurationProperties;
 import esa.s1pdgs.cpoc.obs_sdk.ObsDownloadObject;
 import esa.s1pdgs.cpoc.obs_sdk.ObsObject;
 import esa.s1pdgs.cpoc.obs_sdk.ObsServiceException;
-import esa.s1pdgs.cpoc.obs_sdk.ObsUploadObject;
+import esa.s1pdgs.cpoc.obs_sdk.FileObsUploadObject;
 import esa.s1pdgs.cpoc.obs_sdk.SdkClientException;
 import esa.s1pdgs.cpoc.obs_sdk.report.ReportingProductFactory;
 
@@ -175,13 +175,13 @@ public class SwiftObsClientTest {
      */
     @Test
     public void testUploadObjectDirectory() throws ObsServiceException, SdkClientException, ObsException {
-        client.uploadObject(new ObsUploadObject(ProductFamily.L0_ACN, "key-exist", new File("target")));
+        client.uploadObject(new FileObsUploadObject(ProductFamily.L0_ACN, "key-exist", new File("target")));
         verify(service, times(1)).uploadDirectory(Mockito.eq("l0-acns"),
                 Mockito.eq("key-exist"), Mockito.eq(new File("target")));
         verify(service, times(1)).uploadFile(Mockito.anyString(),
                 Mockito.anyString(), Mockito.any()); // for the 1st md5sum
         
-        client.uploadObject(new ObsUploadObject(ProductFamily.L0_ACN, "key-not-exist", new File("target")));
+        client.uploadObject(new FileObsUploadObject(ProductFamily.L0_ACN, "key-not-exist", new File("target")));
         verify(service, times(1)).uploadDirectory(Mockito.eq("l0-acns"),
                 Mockito.eq("key-not-exist"), Mockito.eq(new File("target")));
         verify(service, times(2)).uploadFile(Mockito.anyString(),
@@ -196,7 +196,7 @@ public class SwiftObsClientTest {
      */
     @Test
     public void testUploadObjectFile() throws ObsServiceException, SdkClientException, ObsException {
-        client.uploadObject(new ObsUploadObject(ProductFamily.L0_ACN, "key-exist", new File("pom.xml")));
+        client.uploadObject(new FileObsUploadObject(ProductFamily.L0_ACN, "key-exist", new File("pom.xml")));
         verify(service, times(1)).uploadFile(Mockito.eq("l0-acns"),
                 Mockito.eq("key-exist"), Mockito.eq(new File("pom.xml")));
         verify(service, never()).uploadDirectory(Mockito.anyString(),

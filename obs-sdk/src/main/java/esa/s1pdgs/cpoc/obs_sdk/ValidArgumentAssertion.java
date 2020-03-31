@@ -34,8 +34,8 @@ public class ValidArgumentAssertion {
         	if (targetDir.isEmpty()) {
         		throw new IllegalArgumentException("Invalid targetDir (empty)");
         	}
-    	} else if (obsObject instanceof ObsUploadObject) {
-    		File f = ((ObsUploadObject) obsObject).getFile();
+    	} else if (obsObject instanceof FileObsUploadObject) {
+    		File f = ((FileObsUploadObject) obsObject).getFile();
     		if (null == f) {
     			throw new IllegalArgumentException("Invalid file: null");
     		}
