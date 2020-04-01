@@ -43,8 +43,10 @@ public class SardineXbipClientFactory implements XbipClientFactory {
 
 	@Override
 	public XbipClient newXbipClient(final URI serverUrl) {	
+		final Sardine sardine = newSardineFor(hostConfigFor(serverUrl.getHost()));
+		sardine.enablePreemptiveAuthentication(serverUrl.getHost());
 		return new SardineXbipClient(				
-				newSardineFor(hostConfigFor(serverUrl.getHost())), 
+				sardine, 
 				serverUrl
 		);
 	}
