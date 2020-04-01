@@ -1,4 +1,4 @@
-package esa.s1pdgs.cpoc.disseminator.service;
+package esa.s1pdgs.cpoc.disseminator;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
@@ -7,12 +7,11 @@ import org.junit.Test;
 
 import com.amazonaws.SdkClientException;
 
-import esa.s1pdgs.cpoc.appstatus.AppStatus;
 import esa.s1pdgs.cpoc.common.ProductFamily;
 import esa.s1pdgs.cpoc.common.errors.obs.ObsException;
-import esa.s1pdgs.cpoc.disseminator.FakeObsClient;
 import esa.s1pdgs.cpoc.disseminator.config.DisseminationProperties;
 import esa.s1pdgs.cpoc.disseminator.outbox.OutboxClient;
+import esa.s1pdgs.cpoc.disseminator.service.DisseminationException;
 import esa.s1pdgs.cpoc.errorrepo.ErrorRepoAppender;
 import esa.s1pdgs.cpoc.mqi.model.queue.ProductionEvent;
 import esa.s1pdgs.cpoc.mqi.model.rest.GenericMessageDto;
@@ -20,7 +19,7 @@ import esa.s1pdgs.cpoc.obs_sdk.ObsObject;
 import esa.s1pdgs.cpoc.obs_sdk.ObsServiceException;
 import esa.s1pdgs.cpoc.report.ReportingFactory;
 
-public class TestDisseminationService {
+public class TestDisseminationTriggerListener {
 	@Test
 	public final void testAssertExists_OnNonExistingFile_ShallThrowException() throws ObsException, ObsServiceException, esa.s1pdgs.cpoc.obs_sdk.SdkClientException {
 		final FakeObsClient fakeObsClient = new FakeObsClient() {
@@ -28,7 +27,7 @@ public class TestDisseminationService {
 				return false;
 			}			
 		};		
-		final DisseminationService uut = new DisseminationService(null, fakeObsClient, new DisseminationProperties(), ErrorRepoAppender.NULL, AppStatus.NULL);
+		final DisseminationTriggerListener uut = new DisseminationTriggerListener(fakeObsClient, new DisseminationProperties(), ErrorRepoAppender.NULL);
 		final ProductionEvent fakeProduct = new ProductionEvent("fakeProduct", "my/key", ProductFamily.BLANK);
 		
 		try {
@@ -46,21 +45,21 @@ public class TestDisseminationService {
 				return true;
 			}			
 		};		
-		final DisseminationService uut = new DisseminationService(null, fakeObsClient, new DisseminationProperties(), ErrorRepoAppender.NULL, AppStatus.NULL);
+		final DisseminationTriggerListener uut = new DisseminationTriggerListener(fakeObsClient, new DisseminationProperties(), ErrorRepoAppender.NULL);
 		final ProductionEvent fakeProduct = new ProductionEvent("fakeProduct", "my/key", ProductFamily.BLANK);
 		uut.assertExists(fakeProduct);
 	}
 	
 	@Test
 	public final void testClientForTarget_OnValidTarget_ShallReturnClientForTarget() {
-		final DisseminationService uut = new DisseminationService(null, null, new DisseminationProperties(), ErrorRepoAppender.NULL, AppStatus.NULL);
+		final DisseminationTriggerListener uut = new DisseminationTriggerListener(null, new DisseminationProperties(), ErrorRepoAppender.NULL);
 		uut.put("foo", OutboxClient.NULL);		
 		assertEquals(OutboxClient.NULL, uut.clientForTarget("foo"));		
 	}
 	
 	@Test
 	public final void testClientForTarget_OnInvalidTarget_ShallThrowException() {
-		final DisseminationService uut = new DisseminationService(null, null, new DisseminationProperties(), ErrorRepoAppender.NULL, AppStatus.NULL);
+		final DisseminationTriggerListener uut = new DisseminationTriggerListener(null, new DisseminationProperties(), ErrorRepoAppender.NULL);
 		uut.put("foo", OutboxClient.NULL);		
 		try {
 			uut.clientForTarget("bar");
@@ -77,7 +76,7 @@ public class TestDisseminationService {
 				return true;
 			}			
 		};		
-		final DisseminationService uut = new DisseminationService(null, fakeObsClient, new DisseminationProperties(), ErrorRepoAppender.NULL, AppStatus.NULL);
+		final DisseminationTriggerListener uut = new DisseminationTriggerListener(fakeObsClient, new DisseminationProperties(), ErrorRepoAppender.NULL);
 		uut.put("foo", OutboxClient.NULL);		
 		final ProductionEvent fakeProduct = new ProductionEvent("fakeProduct", "my/key", ProductFamily.BLANK);
 		final GenericMessageDto<ProductionEvent> fakeMessage = new GenericMessageDto<ProductionEvent>(123, "myKey", fakeProduct); 
@@ -98,7 +97,7 @@ public class TestDisseminationService {
 			}
 		};
 		
-		final DisseminationService uut = new DisseminationService(null, fakeObsClient, new DisseminationProperties(), ErrorRepoAppender.NULL, AppStatus.NULL);
+		final DisseminationTriggerListener uut = new DisseminationTriggerListener(fakeObsClient, new DisseminationProperties(), ErrorRepoAppender.NULL);
 		uut.put("foo", failOuboxClient);		
 		final ProductionEvent fakeProduct = new ProductionEvent("fakeProduct", "my/key", ProductFamily.BLANK);
 		final GenericMessageDto<ProductionEvent> fakeMessage = new GenericMessageDto<ProductionEvent>(123, "myKey", fakeProduct); 
