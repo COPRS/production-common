@@ -7,7 +7,7 @@ import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.PropertySource;
 
-@PropertySource({"classpath:${xbipConfigFile:xbip.properties}"})
+@PropertySource({"${xbipConfigFile:classpath:xbip.properties}"})
 @EnableConfigurationProperties
 @Configuration
 @ConfigurationProperties(prefix = "xbip")

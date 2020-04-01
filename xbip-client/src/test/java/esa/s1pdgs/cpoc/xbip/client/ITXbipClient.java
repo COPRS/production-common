@@ -25,6 +25,7 @@ public class ITXbipClient {
 	public final void testConfigProperties() {
 		assertNotNull(config);
 		assertEquals(1, config.getHostConfigs().size());
+		System.out.println(config);
 	}
 	
 	@Test
