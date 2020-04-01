@@ -55,14 +55,14 @@ public abstract class AbstractInboxAdapter implements InboxAdapter {
 	
 	@Override
 	public Collection<InboxEntry> read(final InboxFilter filter) throws IOException {
-		LOG.trace("Reading inbox XBIP directory '{}'", inboxURL.toString());
+		LOG.trace("Reading inbox directory '{}'", inboxURL.toString());
 		final Set<InboxEntry> entries = list(filter)
 				.filter(x -> !Paths.get(inboxURL.getPath()).equals(x.getPath()))
 				.filter(x -> exceedsMinConfiguredDirectoryDepth(x.getPath()))
 				.map(x -> x.getEntry())
 				.filter(e -> filter.accept(e))
 				.collect(Collectors.toSet());
-		LOG.trace("Found {} entries in inbox XBIP directory '{}': {}", entries.size(), inboxURL.toString(), entries);
+		LOG.trace("Found {} entries in inbox directory '{}': {}", entries.size(), inboxURL.toString(), entries);
 		return entries;
 	}
 
