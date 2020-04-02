@@ -6,14 +6,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.*;
-import java.util.concurrent.CompletionService;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.ExecutorCompletionService;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.Future;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.TimeoutException;
+import java.util.concurrent.*;
 import java.util.stream.Collectors;
 
 import esa.s1pdgs.cpoc.common.ProductFamily;
@@ -29,6 +22,8 @@ import esa.s1pdgs.cpoc.obs_sdk.swift.SwiftSdkClientException;
 import esa.s1pdgs.cpoc.report.Reporting;
 import esa.s1pdgs.cpoc.report.ReportingFactory;
 import esa.s1pdgs.cpoc.report.ReportingMessage;
+
+import static esa.s1pdgs.cpoc.obs_sdk.AbstractObsClient.VoidCallable.wrap;
 
 /**
  * Provides an implementation of the ObsClient where the download / upload in
@@ -60,8 +55,8 @@ public abstract class AbstractObsClient implements ObsClient {
 
 	protected abstract void uploadObject(final StreamObsUploadObject object) throws ObsServiceException, S3SdkClientException, SwiftSdkClientException;
 
-    private final List<File> downloadObjects(final List<ObsDownloadObject> objects,
-            final boolean parallel, final ReportingFactory reportingFactory)
+    private List<File> downloadObjects(final List<ObsDownloadObject> objects,
+									   final boolean parallel, final ReportingFactory reportingFactory)
             throws SdkClientException, ObsServiceException, ObsException {
     	
     	final List<File> files = new ArrayList<>();
@@ -72,7 +67,7 @@ public abstract class AbstractObsClient implements ObsClient {
             // Launch all downloads
             final List<Future<List<File>>> futures = new ArrayList<>();
             for (final ObsDownloadObject object : objects) {
-            	futures.add(service.submit(new ObsDownloadCallable(this, object, reportingFactory)));
+            	futures.add(service.submit(downloadCall(reportingFactory, object)));
             }
             
             waitForCompletion(workerThread, service, objects.size(),configuration.getTimeoutDownExec());
@@ -111,8 +106,21 @@ public abstract class AbstractObsClient implements ObsClient {
         return files;
     }
 
-    private final void uploadObjects(final List<FileObsUploadObject> objects,
-            final boolean parallel, final ReportingFactory reportingFactory)
+	private Callable<List<File>> downloadCall(ReportingFactory reportingFactory, ObsDownloadObject object) {
+		return () -> {
+			{
+				final List<File> downloaded = download(Collections.singletonList(object), reportingFactory);
+				if (downloaded.size() <= 0) {
+					throw new ObsServiceException(
+							String.format("Unknown object %s with family %s", object.getKey(), object.getFamily()));
+				}
+				return downloaded;
+			}
+		};
+	}
+
+	private void uploadObjects(final List<FileObsUploadObject> objects,
+							   final boolean parallel, final ReportingFactory reportingFactory)
             throws SdkClientException, ObsServiceException, ObsException {
         if (objects.size() > 1 && parallel) {
             // Upload objects in parallel
@@ -122,7 +130,7 @@ public abstract class AbstractObsClient implements ObsClient {
                     new ExecutorCompletionService<>(workerThread);
             // Launch all downloads
             for (final FileObsUploadObject object : objects) {
-                service.submit(new ObsUploadCallable(this, object, reportingFactory));
+                service.submit(wrap(()  -> upload(Collections.singletonList(object), reportingFactory)));
             }
             waitForCompletion(workerThread, service, objects.size(), configuration.getTimeoutUpExec());
 
@@ -193,17 +201,13 @@ public abstract class AbstractObsClient implements ObsClient {
      */
     @Override
 	public List<File> download(final List<ObsDownloadObject> objects, final ReportingFactory reportingFactory) throws AbstractCodedException {
-    	try {
-	    	ValidArgumentAssertion.assertValidArgument(objects);
-	        try {
-	        	return downloadObjects(objects, true, reportingFactory);
-	        } catch (final SdkClientException exc) {
-	            throw new ObsParallelAccessException(exc);
-	        }
-	    } catch (final Exception e) {
-			throw e;
+		ValidArgumentAssertion.assertValidArgument(objects);
+		try {
+			return downloadObjects(objects, true, reportingFactory);
+		} catch (final SdkClientException exc) {
+			throw new ObsParallelAccessException(exc);
 		}
-    }
+	}
 
 	/**
 	 * Upload files per batch
@@ -214,44 +218,36 @@ public abstract class AbstractObsClient implements ObsClient {
 	 */
 	@Override
 	public void upload(final List<FileObsUploadObject> objects, final ReportingFactory reportingFactory) throws AbstractCodedException, ObsEmptyFileException {
+		ValidArgumentAssertion.assertValidArgument(objects);
+
+		for (final FileObsUploadObject o : objects) {
+			if (FileUtils.size(o.getFile()) == 0) {
+				throw new ObsEmptyFileException("Empty file detected: " + o.getFile().getName());
+			}
+		}
+
 		try {
-			ValidArgumentAssertion.assertValidArgument(objects);
-	
-			for (final FileObsUploadObject o : objects) {
-				if (FileUtils.size(o.getFile()) == 0) {
-					throw new ObsEmptyFileException("Empty file detected: " + o.getFile().getName());
-				}
-			}
-	
-			try {
-				uploadObjects(objects, true, reportingFactory);
-			} catch (final SdkClientException exc) {
-				throw new ObsParallelAccessException(exc);
-			}
-		} catch (final Exception e) {
-			throw e;
+			uploadObjects(objects, true, reportingFactory);
+		} catch (final SdkClientException exc) {
+			throw new ObsParallelAccessException(exc);
 		}
 	}
 	
 	@Override
 	public void uploadStreams(final List<StreamObsUploadObject> objects, final ReportingFactory reportingFactory)
 			throws AbstractCodedException, ObsEmptyFileException {
+		ValidArgumentAssertion.assertValidArgument(objects);
+
+		for (final StreamObsUploadObject o : objects) {
+			if (o.getContentLength() == 0) {
+				throw new ObsEmptyFileException("Empty stream detected: " + o.getKey());
+			}
+		}
+
 		try {
-			ValidArgumentAssertion.assertValidArgument(objects);
-
-			for (final StreamObsUploadObject o : objects) {
-				if (o.getContentLength() == 0) {
-					throw new ObsEmptyFileException("Empty stream detected: " + o.getKey());
-				}
-			}
-
-			try {
-				uploadStreams(objects, true, reportingFactory);
-			} catch (final SdkClientException exc) {
-				throw new ObsParallelAccessException(exc);
-			}
-		} catch (final Exception e) {
-			throw e;
+			uploadStreams(objects, true, reportingFactory);
+		} catch (final SdkClientException exc) {
+			throw new ObsParallelAccessException(exc);
 		}
 	}
 
@@ -264,7 +260,7 @@ public abstract class AbstractObsClient implements ObsClient {
 					new ExecutorCompletionService<>(workerThread);
 			// Launch all downloads
 			for (final StreamObsUploadObject object : objects) {
-				service.submit(new ObsUploadStreamCallable(this, object, reportingFactory));
+				service.submit(wrap(() -> uploadStreams(Collections.singletonList(object), reportingFactory)));
 			}
 			waitForCompletion(workerThread, service, objects.size(), configuration.getTimeoutUpExec());
 
@@ -346,5 +342,18 @@ public abstract class AbstractObsClient implements ObsClient {
     }
 	
 	protected abstract Map<String,String> collectMd5Sums(ObsObject object) throws ObsServiceException, ObsException;
+
+	@FunctionalInterface
+	interface VoidCallable {
+
+		static Callable<Void> wrap(VoidCallable callable) {
+			return () -> {
+				callable.call();
+				return null;
+			};
+		}
+
+		void call() throws Exception;
+	}
 	
 }
