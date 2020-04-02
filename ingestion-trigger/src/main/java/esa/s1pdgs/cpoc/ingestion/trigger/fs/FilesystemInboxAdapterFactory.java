@@ -22,7 +22,7 @@ public class FilesystemInboxAdapterFactory implements InboxAdapterFactory {
 	@Override
 	public InboxAdapter newInboxAdapter(final String inboxURL, final int productInDirectoryLevel) {
 		try {
-			return new FilesystemInboxAdapter(new URI(inboxURL), inboxEntryFactory, productInDirectoryLevel);
+			return new FilesystemInboxAdapter(inboxEntryFactory, new URI(inboxURL), productInDirectoryLevel);
 		} catch (final URISyntaxException e) {
 			throw new IllegalArgumentException(e);
 		}

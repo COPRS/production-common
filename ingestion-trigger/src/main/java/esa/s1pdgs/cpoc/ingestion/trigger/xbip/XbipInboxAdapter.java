@@ -2,71 +2,33 @@ package esa.s1pdgs.cpoc.ingestion.trigger.xbip;
 
 import java.io.IOException;
 import java.net.URI;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.util.Collection;
-import java.util.Set;
-import java.util.stream.Collectors;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import java.util.stream.Stream;
 
 import esa.s1pdgs.cpoc.ingestion.trigger.entity.InboxEntry;
 import esa.s1pdgs.cpoc.ingestion.trigger.filter.InboxFilter;
-import esa.s1pdgs.cpoc.ingestion.trigger.inbox.InboxAdapter;
+import esa.s1pdgs.cpoc.ingestion.trigger.inbox.AbstractInboxAdapter;
 import esa.s1pdgs.cpoc.ingestion.trigger.inbox.InboxEntryFactory;
 import esa.s1pdgs.cpoc.xbip.client.XbipClient;
 import esa.s1pdgs.cpoc.xbip.client.XbipEntry;
 import esa.s1pdgs.cpoc.xbip.client.XbipEntryFilter;
 
-public class XbipInboxAdapter implements InboxAdapter {
-
-	private static final Logger LOG = LoggerFactory.getLogger(XbipInboxAdapter.class);
-
-	private final InboxEntryFactory inboxEntryFactory;
-	private final URI inboxURL;
-	private final int productInDirectoryLevel;
+public class XbipInboxAdapter extends AbstractInboxAdapter {
 	private final XbipClient xbipClient;
-
+	
 	public XbipInboxAdapter(
 			final URI inboxURL, 
 			final XbipClient xbipClient, 
 			final InboxEntryFactory inboxEntryFactory,
 			final int productInDirectoryLevel
 	) {
-		this.inboxURL = inboxURL;
+		super(inboxEntryFactory, inboxURL, productInDirectoryLevel);
 		this.xbipClient = xbipClient;
-		this.inboxEntryFactory = inboxEntryFactory;
-		this.productInDirectoryLevel = productInDirectoryLevel;
 	}
-
+	
 	@Override
-	public Collection<InboxEntry> read(final InboxFilter filter) throws IOException {
-		LOG.trace("Reading inbox XBIP directory '{}'", inboxURL.toString());
-		final Set<InboxEntry> entries = xbipClient.list(XbipEntryFilter.ALLOW_ALL).stream()
-				.filter(x -> !Paths.get(inboxURL.getPath()).equals(x.getPath()))
-				.filter(x -> exceedsMinConfiguredDirectoryDepth(x.getPath()))
-				.map(x -> newInboxEntryFor(x))
-				.filter(e -> filter.accept(e))
-				.collect(Collectors.toSet());
-
-		LOG.trace("Found {} entries in inbox XBIP directory '{}': {}", entries.size(), inboxURL.toString(), entries);
-		return entries;
-	}
-
-	@Override
-	public String description() {
-		return String.format("Inbox at %s", inboxURL.toString());
-	}
-
-	@Override
-	public String inboxURL() {
-		return inboxURL.toString();
-	}
-
-	@Override
-	public String toString() {
-		return String.format("XbipInboxAdapter [inboxDirectory=%s]", inboxURL.toString());
+	protected Stream<EntrySupplier> list(final InboxFilter filter) throws IOException {
+		return xbipClient.list(XbipEntryFilter.ALLOW_ALL).stream()
+				.map(p -> new EntrySupplier(p.getPath(), () -> newInboxEntryFor(p)));
 	}
 
 	private final InboxEntry newInboxEntryFor(final XbipEntry xbipEntry) {
@@ -77,9 +39,5 @@ public class XbipInboxAdapter implements InboxAdapter {
 				xbipEntry.getLastModified(), 
 				xbipEntry.getSize()
 		);
-	}
-
-	private final boolean exceedsMinConfiguredDirectoryDepth(final Path path) {
-		return Paths.get(inboxURL.getPath()).relativize(path).getNameCount() > productInDirectoryLevel;
 	}
 }

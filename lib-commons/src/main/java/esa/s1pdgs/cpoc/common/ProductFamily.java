@@ -8,11 +8,11 @@ package esa.s1pdgs.cpoc.common;
 public enum ProductFamily {
     EDRS_SESSION, //
     AUXILIARY_FILE, //
+    PLAN_AND_REPORT, //
     BLANK, //
     INVALID,
     GHOST,
     JOB_ORDER, //
-    PLAN_AND_REPORT, //
     L0_ACN, //
     L0_BLANK, //
     L0_JOB, //
