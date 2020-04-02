@@ -30,7 +30,7 @@ import esa.s1pdgs.cpoc.disseminator.service.DisseminationService;
 import esa.s1pdgs.cpoc.errorrepo.ErrorRepoAppender;
 import esa.s1pdgs.cpoc.errorrepo.model.rest.FailedProcessingDto;
 import esa.s1pdgs.cpoc.mqi.client.MqiListener;
-import esa.s1pdgs.cpoc.mqi.model.queue.ProductionEvent;
+import esa.s1pdgs.cpoc.mqi.model.queue.AbstractMessage;
 import esa.s1pdgs.cpoc.mqi.model.rest.GenericMessageDto;
 import esa.s1pdgs.cpoc.obs_sdk.ObsClient;
 import esa.s1pdgs.cpoc.obs_sdk.ObsObject;
@@ -41,8 +41,7 @@ import esa.s1pdgs.cpoc.report.ReportingMessage;
 import esa.s1pdgs.cpoc.report.ReportingUtils;
 import esa.s1pdgs.cpoc.report.message.output.OutboxReportingOutput;
 
-//public class DisseminationTriggerListener<E extends AbstractMessage> implements MqiListener<E>{
-public class DisseminationTriggerListener implements MqiListener<ProductionEvent>{
+public class DisseminationTriggerListener<E extends AbstractMessage> implements MqiListener<E>{
 	private static final Logger LOG = LogManager.getLogger(DisseminationService.class);
 	
 	// list of all outbox client factories for protocols. For newly implemented protocols, add factory here
@@ -59,6 +58,15 @@ public class DisseminationTriggerListener implements MqiListener<ProductionEvent
 	private final ErrorRepoAppender errorAppender;
 	private final Map<String,OutboxClient> clientForTargets = new HashMap<>();
 
+	public static <E extends AbstractMessage> DisseminationTriggerListener<E> valueOf(
+			final Class<E> dtoClass,
+		    final ObsClient obsClient,
+			final DisseminationProperties properties,
+			final ErrorRepoAppender errorAppender
+	) {
+		return new DisseminationTriggerListener<E>(obsClient, properties, errorAppender);
+	}
+	
 	public DisseminationTriggerListener(
 		    final ObsClient obsClient,
 			final DisseminationProperties properties,
@@ -85,21 +93,21 @@ public class DisseminationTriggerListener implements MqiListener<ProductionEvent
 	}
     
 	@Override
-	public void onMessage(final GenericMessageDto<ProductionEvent> message) {
-		final ProductionEvent product = message.getBody();
+	public void onMessage(final GenericMessageDto<E> message) {
+		final AbstractMessage body = message.getBody();
 		LOG.debug("Handling {}", message);
 		
-		for (final DisseminationTypeConfiguration config : configsFor(product.getProductFamily())) {	
-			LOG.trace("Checking if product {} matches {}", product.getKeyObjectStorage(), config.getRegex());
-			if (product.getKeyObjectStorage().matches(config.getRegex())) {
-				LOG.debug("Found config {} for product {}", config, product.getKeyObjectStorage());
+		for (final DisseminationTypeConfiguration config : configsFor(body.getProductFamily())) {	
+			LOG.trace("Checking if product {} matches {}", body.getKeyObjectStorage(), config.getRegex());
+			if (body.getKeyObjectStorage().matches(config.getRegex())) {
+				LOG.debug("Found config {} for product {}", config, body.getKeyObjectStorage());
 				handleTransferTo(message, config.getTarget());
 			}			
 		}			
 	}
 	
     @Override
-	public final void onTerminalError(final GenericMessageDto<ProductionEvent> message, final Exception error) {
+	public final void onTerminalError(final GenericMessageDto<E> message, final Exception error) {
     	LOG.error(error);    	
 		errorAppender.send(new FailedProcessingDto(
 				properties.getHostname(), 
@@ -113,24 +121,24 @@ public class DisseminationTriggerListener implements MqiListener<ProductionEvent
     	return properties.getCategories().getOrDefault(ProductCategory.of(family), Collections.emptyList());	
     }
 
-	final void handleTransferTo(final GenericMessageDto<ProductionEvent> message, final String target) {		
-		final ProductionEvent product = message.getBody();
+	final void handleTransferTo(final GenericMessageDto<E> message, final String target) {		
+		AbstractMessage body = message.getBody();
 		
 		final Reporting reporting = ReportingUtils.newReportingBuilder()
-				.predecessor(product.getUid())				
+				.predecessor(body.getUid())				
 				.newReporting("Dissemination");	
 		
 		reporting.begin(
-				ReportingUtils.newFilenameReportingInputFor(product.getProductFamily(), product.getKeyObjectStorage()),
+				ReportingUtils.newFilenameReportingInputFor(body.getProductFamily(), body.getKeyObjectStorage()),
 				new ReportingMessage("Start dissemination of product to outbox {}", target) 
 		);
 		
 		try {
-			assertExists(product);
+			assertExists(body);
 			final OutboxClient outboxClient = clientForTarget(target);
 			final String targetUrl = Retries.performWithRetries(
-					() -> outboxClient.transfer(new ObsObject(product.getProductFamily(), product.getKeyObjectStorage()), reporting), 
-					"Transfer of " + product.getKeyObjectStorage() + " to " + target,
+					() -> outboxClient.transfer(new ObsObject(body.getProductFamily(), body.getKeyObjectStorage()), reporting), 
+					"Transfer of " + body.getKeyObjectStorage() + " to " + target,
 					properties.getMaxRetries(), 
 					properties.getTempoRetryMs()
 			);
@@ -145,13 +153,13 @@ public class DisseminationTriggerListener implements MqiListener<ProductionEvent
 		} 
 	}	
 
-	final void assertExists(final ProductionEvent product) throws ObsServiceException, SdkClientException {
-		if (!obsClient.prefixExists(new ObsObject(product.getProductFamily(), product.getKeyObjectStorage()))) {
+	final void assertExists(final AbstractMessage message) throws ObsServiceException, SdkClientException {
+		if (!obsClient.prefixExists(new ObsObject(message.getProductFamily(), message.getKeyObjectStorage()))) {
 			throw new DisseminationException(
 					String.format(
 							"OBS file '%s' (%s) does not exist", 
-							product.getKeyObjectStorage(), 
-							product.getProductFamily()
+							message.getKeyObjectStorage(), 
+							message.getProductFamily()
 					)
 			);
 		}

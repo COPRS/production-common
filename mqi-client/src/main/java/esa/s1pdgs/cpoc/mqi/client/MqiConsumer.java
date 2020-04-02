@@ -25,7 +25,7 @@ public final class MqiConsumer<E extends AbstractMessage> implements Runnable {
 	private final long pollingIntervalMillis;
 	private final long initialDelay;
 	private final AppStatus appStatus;
-	
+
 	public MqiConsumer(
 			final MqiClient client,
 			final ProductCategory category,
@@ -42,6 +42,17 @@ public final class MqiConsumer<E extends AbstractMessage> implements Runnable {
 		this.pollingIntervalMillis = pollingIntervalMillis;
 		this.initialDelay = initialDelay;
 		this.appStatus = appStatus;
+	}
+
+	public static <E extends AbstractMessage> MqiConsumer<E> valueOf(
+			final Class<E> dtoClass,
+			final MqiClient client,
+			final ProductCategory category,
+			final MqiListener<E> mqiListener,
+			final long pollingIntervalMillis,
+			final long initialDelay,
+			final AppStatus appStatus) {
+		return new MqiConsumer<E>(client, category, mqiListener, Collections.emptyList(), pollingIntervalMillis, initialDelay, appStatus);
 	}
 
 	public MqiConsumer(
