@@ -266,7 +266,7 @@ public class SwiftObsServices {
 	/**
 	 * @param containerName
 	 * @param keyName
-	 * @param uploadDirectory
+	 * @param uploadFile
 	 * @return file information (md5 sum with filename)
 	 * @throws SwiftObsServiceException
 	 * @throws SwiftSdkClientException
@@ -315,10 +315,53 @@ public class SwiftObsServices {
 	    return md5 + "  " + keyName;
 	}
 
+	public String uploadStream(String containerName, String keyName, final InputStream in, long contentLength) throws SwiftSdkClientException {
+		String md5 = null;
+		for (int retryCount = 1;; retryCount++) {
+			try {
+				log(String.format("Uploading object %s in container %s", keyName,
+						containerName));
+
+				Container container = client.getContainer(containerName);
+				if (!container.exists()) {
+					throw new SwiftObsServiceException(containerName, keyName,
+							String.format("Upload fails: %s", keyName));
+				}
+
+				StoredObject object = container.getObject(keyName);
+				UploadInstructions uploadInstructions = new UploadInstructions(in, contentLength);
+				uploadInstructions.setSegmentationSize(MAX_SEGMENT_SIZE);
+				object.uploadObject(uploadInstructions);
+				md5 = object.getEtag();
+
+				log(String.format("Upload object %s in container %s succeeded",
+						keyName, containerName));
+				break;
+			} catch (Exception e) {
+				if (retryCount <= numRetries) {
+					LOGGER.warn(String.format(
+							"Upload object %s from container %s failed: Attempt : %d / %d",
+							keyName, containerName, retryCount, numRetries));
+					try {
+						Thread.sleep(retryDelay);
+					} catch (InterruptedException ie) {
+						throw new SwiftSdkClientException(containerName, keyName,
+								String.format("Upload fails: %s", e.getMessage()), e);
+					}
+					continue;
+				} else {
+					throw new SwiftSdkClientException(containerName, keyName,
+							String.format("Upload fails: %s", e.getMessage()), e);
+				}
+			}
+		}
+		return md5 + "  " + keyName;
+	}
+
 	/**
      * @param containerName
      * @param keyName
-     * @param uploadFile
+     * @param uploadDirectory
      * @return file informations (list of md5 sums with filenames)
 	 * @throws SwiftSdkClientException 
 	 * @throws SwiftObsServiceException 
@@ -435,7 +478,7 @@ public class SwiftObsServices {
 
 	/**
 	 * @param containerName
-	 * @param marker
+	 * @param leMarker
 	 * @return
 	 * @throws SwiftSdkClientException 
 	 */

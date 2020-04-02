@@ -5,10 +5,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.CompletionService;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorCompletionService;
@@ -27,6 +24,8 @@ import esa.s1pdgs.cpoc.common.errors.obs.ObsUnknownObject;
 import esa.s1pdgs.cpoc.common.utils.FileUtils;
 import esa.s1pdgs.cpoc.common.utils.LogUtils;
 import esa.s1pdgs.cpoc.obs_sdk.report.ReportingProductFactory;
+import esa.s1pdgs.cpoc.obs_sdk.s3.S3SdkClientException;
+import esa.s1pdgs.cpoc.obs_sdk.swift.SwiftSdkClientException;
 import esa.s1pdgs.cpoc.report.Reporting;
 import esa.s1pdgs.cpoc.report.ReportingFactory;
 import esa.s1pdgs.cpoc.report.ReportingMessage;
@@ -58,6 +57,8 @@ public abstract class AbstractObsClient implements ObsClient {
     protected abstract List<File> downloadObject(ObsDownloadObject object) throws SdkClientException, ObsServiceException;
     
     protected abstract void uploadObject(FileObsUploadObject object) throws SdkClientException, ObsServiceException, ObsException;
+
+	protected abstract void uploadObject(final StreamObsUploadObject object) throws ObsServiceException, S3SdkClientException, SwiftSdkClientException;
 
     private final List<File> downloadObjects(final List<ObsDownloadObject> objects,
             final boolean parallel, final ReportingFactory reportingFactory)
@@ -235,7 +236,57 @@ public abstract class AbstractObsClient implements ObsClient {
 	@Override
 	public void uploadStreams(final List<StreamObsUploadObject> objects, final ReportingFactory reportingFactory)
 			throws AbstractCodedException, ObsEmptyFileException {
-		throw new UnsupportedOperationException(String.format("Not implemented for %s", getClass()));		
+		try {
+			ValidArgumentAssertion.assertValidArgument(objects);
+
+			for (final StreamObsUploadObject o : objects) {
+				if (o.getContentLength() == 0) {
+					throw new ObsEmptyFileException("Empty stream detected: " + o.getKey());
+				}
+			}
+
+			try {
+				uploadStreams(objects, true, reportingFactory);
+			} catch (final SdkClientException exc) {
+				throw new ObsParallelAccessException(exc);
+			}
+		} catch (final Exception e) {
+			throw e;
+		}
+	}
+
+	private void uploadStreams(List<StreamObsUploadObject> objects, boolean parallel, ReportingFactory reportingFactory) throws ObsServiceException, S3SdkClientException, SwiftSdkClientException {
+		if (objects.size() > 1 && parallel) {
+			// Upload objects in parallel
+			final ExecutorService workerThread =
+					Executors.newFixedThreadPool(objects.size());
+			final CompletionService<Void> service =
+					new ExecutorCompletionService<>(workerThread);
+			// Launch all downloads
+			for (final StreamObsUploadObject object : objects) {
+				service.submit(new ObsUploadStreamCallable(this, object, reportingFactory));
+			}
+			waitForCompletion(workerThread, service, objects.size(), configuration.getTimeoutUpExec());
+
+		} else {
+			final Reporting reporting = reportingFactory.newReporting("ObsWrite");
+
+			// Upload object in sequential
+			for (final StreamObsUploadObject object : objects) {
+				reporting.begin(
+						reportingProductFactory.reportingInputFor(object, getBucketFor(object.getFamily())),
+						new ReportingMessage("Start uploading to OBS")
+				);
+
+				try {
+					uploadObject(object);
+					reporting.end(new ReportingMessage(object.getContentLength(), "End uploading to OBS"));
+				} catch (SdkClientException | RuntimeException e) {
+					reporting.error(new ReportingMessage("Error on uploading to OBS: {}", LogUtils.toString(e)));
+					throw e;
+				}
+			}
+		}
 	}
 
 	@Override

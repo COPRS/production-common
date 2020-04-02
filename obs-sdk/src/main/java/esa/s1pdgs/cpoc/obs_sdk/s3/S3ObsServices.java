@@ -514,6 +514,52 @@ public class S3ObsServices {
 		return fileList;
 	}
 
+	public String uploadStream(final String bucketName, final String keyName, final InputStream in, final long contentLength) throws S3ObsServiceException, S3SdkClientException {
+		{
+			String md5 = null;
+			for (int retryCount = 1;; retryCount++) {
+				try {
+					log(String.format("Uploading object %s in bucket %s", keyName, bucketName));
+
+					ObjectMetadata metadata = new ObjectMetadata();
+					metadata.setContentLength(contentLength);
+					final Upload upload = s3tm.upload(bucketName, keyName, in, metadata);
+					upload.addProgressListener((final ProgressEvent progressEvent) -> {
+						LOGGER.trace(String.format("Uploading object %s in bucket %s: progress %s", keyName, bucketName,
+								progressEvent.toString()));
+					});
+
+					try {
+						final UploadResult uploadResult = upload.waitForUploadResult();
+						md5 = uploadResult.getETag();
+					} catch (final InterruptedException e) {
+						throw new S3ObsServiceException(bucketName, keyName,
+								"Upload fails: interrupted during waiting multipart upload completion", e);
+					}
+
+					log(String.format("Upload object %s in bucket %s succeeded", keyName, bucketName));
+					break;
+				} catch (final com.amazonaws.SdkClientException sce) {
+					if (retryCount <= numRetries) {
+						LOGGER.warn(String.format("Upload object %s from bucket %s failed: Attempt : %d / %d", keyName,
+								bucketName, retryCount, numRetries));
+						try {
+							Thread.sleep(retryDelay);
+						} catch (final InterruptedException e) {
+							throw new S3SdkClientException(bucketName, keyName,
+									String.format("Upload fails: %s", sce.getMessage()), sce);
+						}
+						continue;
+					} else {
+						throw new S3SdkClientException(bucketName, keyName,
+								String.format("Upload fails: %s", sce.getMessage()), sce);
+					}
+				}
+			}
+			return md5 + "  " + keyName;
+		}
+	}
+
 	public void createBucket(final String bucketName)
 			throws SwiftSdkClientException, ObsServiceException, S3SdkClientException {
 		for (int retryCount = 1;; retryCount++) {

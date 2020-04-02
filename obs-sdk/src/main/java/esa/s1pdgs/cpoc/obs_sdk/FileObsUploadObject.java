@@ -22,7 +22,7 @@ public class FileObsUploadObject extends ObsUploadObject {
      * 
      * @param key
      * @param family
-     * @param localPath
+     * @param file
      */
     public FileObsUploadObject(final ProductFamily family, final String key, final File file) {
         super(family, key);
