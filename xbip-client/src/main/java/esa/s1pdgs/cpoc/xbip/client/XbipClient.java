@@ -14,11 +14,11 @@ public interface XbipClient {
 		}
 
 		@Override
-		public final InputStream read(final XbipEntry entry) throws IOException {
+		public final InputStream read(final XbipEntry entry){
 			return new ByteArrayInputStream(new byte[] {});
 		}		
 	};
 
 	List<XbipEntry> list(XbipEntryFilter filter) throws IOException;	
-	InputStream read(XbipEntry entry) throws IOException;
+	InputStream read(XbipEntry entry);
 }
