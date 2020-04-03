@@ -12,6 +12,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
+import esa.s1pdgs.cpoc.obs_sdk.Md5;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.util.CollectionUtils;
@@ -193,7 +194,7 @@ public class S3ObsServices {
 				final ObjectListing objectListing = s3client.listObjects(bucketName, prefixKey);
 				if (objectListing != null && !CollectionUtils.isEmpty(objectListing.getObjectSummaries())) {
 					for (final S3ObjectSummary s : objectListing.getObjectSummaries()) {
-						if (!s.getKey().endsWith(AbstractObsClient.MD5SUM_SUFFIX)) {
+						if (!s.getKey().endsWith(Md5.MD5SUM_SUFFIX)) {
 							nbObj++;
 						}
 					}
@@ -246,8 +247,8 @@ public class S3ObsServices {
 
 				for (final String key : expectedFiles) {
 					// only download md5sum files if it has been explicitly asked for a md5sum file
-					if (!prefixKey.endsWith(AbstractObsClient.MD5SUM_SUFFIX)
-							&& key.endsWith(AbstractObsClient.MD5SUM_SUFFIX)) {
+					if (!prefixKey.endsWith(Md5.MD5SUM_SUFFIX)
+							&& key.endsWith(Md5.MD5SUM_SUFFIX)) {
 						continue;
 					}
 
@@ -314,7 +315,7 @@ public class S3ObsServices {
 	
 	List<String> getExpectedFiles(final String bucketName, final String prefixKey) throws S3ObsServiceException {
 
-		final String md5FileName = identifyMd5File(prefixKey);
+		final String md5FileName = Md5.md5KeyFor(prefixKey);
 		log(String.format("Try to list expected files from file %s", md5FileName));
 
 		final S3Object md5file = s3client.getObject(bucketName, md5FileName);
@@ -332,17 +333,6 @@ public class S3ObsServices {
 					String.format("Error getting expected files from file %s", md5FileName), e);
 		}
 		return result;
-	}
-	
-	String identifyMd5File(final String prefixKey) {
-		int index = prefixKey.length();
-		if (!(prefixKey.contains("raw") || prefixKey.contains("DSIB"))) {
-			index = prefixKey.indexOf('/');
-			if (index == -1) {
-				index = prefixKey.length();
-			}
-		}
-		return (prefixKey.substring(0, index) + AbstractObsClient.MD5SUM_SUFFIX);
 	}
 	
 	List<String> readMd5StreamAndGetFiles(final String prefixKey, final InputStream md5stream) throws IOException {
@@ -376,8 +366,8 @@ public class S3ObsServices {
 					: s3client.listNextBatchOfObjects(listing);
 			for (final S3ObjectSummary object : listing.getObjectSummaries()) {
 				// only download md5sum files if it has been explicitly asked for a md5sum file
-				if (!prefix.endsWith(AbstractObsClient.MD5SUM_SUFFIX)
-						&& object.getKey().endsWith(AbstractObsClient.MD5SUM_SUFFIX)) {
+				if (!prefix.endsWith(Md5.MD5SUM_SUFFIX)
+						&& object.getKey().endsWith(Md5.MD5SUM_SUFFIX)) {
 					continue;
 				}
 				result.add(object);
@@ -412,7 +402,7 @@ public class S3ObsServices {
 			try {
 				for (final S3ObjectSummary summary : getAll(bucketName, prefix)) {
 					final String key = summary.getKey();
-					if (!key.endsWith(AbstractObsClient.MD5SUM_SUFFIX)) {
+					if (!key.endsWith(Md5.MD5SUM_SUFFIX)) {
 						final ObjectMetadata objectMetadata = s3client.getObjectMetadata(bucketName, key);
 						result.put(key, objectMetadata.getETag());
 					}
@@ -502,9 +492,9 @@ public class S3ObsServices {
 			if (childs != null) {
 				for (final File child : childs) {
 					if (child.isDirectory()) {
-						fileList.addAll(uploadDirectory(bucketName, keyName + File.separator + child.getName(), child));
+						fileList.addAll(uploadDirectory(bucketName, keyName + "/" + child.getName(), child));
 					} else {
-						fileList.add(uploadFile(bucketName, keyName + File.separator + child.getName(), child));
+						fileList.add(uploadFile(bucketName, keyName + "/" + child.getName(), child));
 					}
 				}
 			}
@@ -512,6 +502,52 @@ public class S3ObsServices {
 			fileList.add(uploadFile(bucketName, keyName, uploadDirectory));
 		}
 		return fileList;
+	}
+
+	public String uploadStream(final String bucketName, final String keyName, final InputStream in, final long contentLength) throws S3ObsServiceException, S3SdkClientException {
+		{
+			String md5 = null;
+			for (int retryCount = 1;; retryCount++) {
+				try {
+					log(String.format("Uploading object %s in bucket %s", keyName, bucketName));
+
+					ObjectMetadata metadata = new ObjectMetadata();
+					metadata.setContentLength(contentLength);
+					final Upload upload = s3tm.upload(bucketName, keyName, in, metadata);
+					upload.addProgressListener((final ProgressEvent progressEvent) -> {
+						LOGGER.trace(String.format("Uploading object %s in bucket %s: progress %s", keyName, bucketName,
+								progressEvent.toString()));
+					});
+
+					try {
+						final UploadResult uploadResult = upload.waitForUploadResult();
+						md5 = uploadResult.getETag();
+					} catch (final InterruptedException e) {
+						throw new S3ObsServiceException(bucketName, keyName,
+								"Upload fails: interrupted during waiting multipart upload completion", e);
+					}
+
+					log(String.format("Upload object %s in bucket %s succeeded", keyName, bucketName));
+					break;
+				} catch (final com.amazonaws.SdkClientException sce) {
+					if (retryCount <= numRetries) {
+						LOGGER.warn(String.format("Upload object %s from bucket %s failed: Attempt : %d / %d", keyName,
+								bucketName, retryCount, numRetries));
+						try {
+							Thread.sleep(retryDelay);
+						} catch (final InterruptedException e) {
+							throw new S3SdkClientException(bucketName, keyName,
+									String.format("Upload fails: %s", sce.getMessage()), sce);
+						}
+						continue;
+					} else {
+						throw new S3SdkClientException(bucketName, keyName,
+								String.format("Upload fails: %s", sce.getMessage()), sce);
+					}
+				}
+			}
+			return md5 + "  " + keyName;
+		}
 	}
 
 	public void createBucket(final String bucketName)

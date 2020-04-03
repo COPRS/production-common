@@ -1,48 +1,44 @@
 package esa.s1pdgs.cpoc.obs_sdk.s3;
 
-import static org.hamcrest.CoreMatchers.is;
-import static org.hamcrest.CoreMatchers.isA;
-import static org.hamcrest.Matchers.hasProperty;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
-import static org.mockito.Mockito.doReturn;
-import static org.mockito.Mockito.doThrow;
-import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.nio.file.Files;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.ExpectedException;
-import org.mockito.Mock;
-import org.mockito.Mockito;
-import org.mockito.MockitoAnnotations;
-
 import com.amazonaws.AmazonClientException;
 import com.amazonaws.AmazonServiceException;
 import com.amazonaws.SdkClientException;
 import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.model.GetObjectRequest;
 import com.amazonaws.services.s3.model.ObjectListing;
+import com.amazonaws.services.s3.model.ObjectMetadata;
 import com.amazonaws.services.s3.model.S3ObjectSummary;
 import com.amazonaws.services.s3.transfer.TransferManager;
 import com.amazonaws.services.s3.transfer.Upload;
 import com.amazonaws.services.s3.transfer.model.UploadResult;
-
 import esa.s1pdgs.cpoc.common.errors.InternalErrorException;
 import esa.s1pdgs.cpoc.common.utils.FileUtils;
+import esa.s1pdgs.cpoc.obs_sdk.Md5;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Rule;
+import org.junit.Test;
+import org.junit.rules.ExpectedException;
+import org.mockito.ArgumentMatcher;
+import org.mockito.Mock;
+import org.mockito.Mockito;
+import org.mockito.MockitoAnnotations;
+
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
+
+import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.CoreMatchers.isA;
+import static org.hamcrest.Matchers.hasProperty;
+import static org.junit.Assert.*;
+import static org.mockito.ArgumentMatchers.*;
+import static org.mockito.Mockito.*;
 
 /**
  * Test the services to access to the OBS via the amazon S3 API
@@ -130,7 +126,7 @@ public class S3ObsServicesTest {
         service = new S3ObsServices(s3client, s3tm, 3, 500);
         serviceSpy = Mockito.spy(service);
         mockAmazonS3Client();
-        mockAmazonS3TransactionManager();
+        mockAmazonS3TransferManager();
     }
 
     /**
@@ -141,20 +137,24 @@ public class S3ObsServicesTest {
     	FileUtils.delete(tmpDir.getPath());
     }
 
-    private void mockAmazonS3TransactionManager() throws AmazonServiceException,
+    private void mockAmazonS3TransferManager() throws AmazonServiceException,
             AmazonClientException, InterruptedException {
 
-        doReturn(upload).when(s3tm).upload(Mockito.anyString(),
-                Mockito.anyString(), Mockito.any());
+        doReturn(upload).when(s3tm).upload(anyString(),
+                anyString(), any());
+        doReturn(upload).when(s3tm).upload(
+                eq(BCK_OBJ_EXIST), anyString(), any(InputStream.class), any(ObjectMetadata.class));
         doThrow(new com.amazonaws.SdkClientException("amazon SDK exception"))
-                .when(s3tm).upload(Mockito.eq(BCK_EXC_SDK), Mockito.anyString(),
-                        Mockito.any());
+                .when(s3tm).upload(eq(BCK_EXC_SDK), anyString(),
+                        any());
+        doThrow(new com.amazonaws.SdkClientException("amazon SDK exception"))
+                .when(s3tm).upload(eq(BCK_EXC_SDK), anyString(),
+                any(InputStream.class), any(ObjectMetadata.class));
         doThrow(new com.amazonaws.AmazonServiceException(
                 "amazon SDK exception")).when(s3tm).upload(
-                        Mockito.eq(BCK_EXC_AWS), Mockito.anyString(),
-                        Mockito.any());
+                        eq(BCK_EXC_AWS), anyString(),
+                        any());
         doReturn(new UploadResult()).when(upload).waitForUploadResult();
-
     }
 
     /**
@@ -163,47 +163,47 @@ public class S3ObsServicesTest {
      */
     private void mockAmazonS3Client() throws S3ObsServiceException {
         // doesObjectExist
-        doReturn(true).when(s3client).doesObjectExist(Mockito.eq(BCK_OBJ_EXIST),
-                Mockito.anyString());
+        doReturn(true).when(s3client).doesObjectExist(eq(BCK_OBJ_EXIST),
+                anyString());
         doReturn(false).when(s3client).doesObjectExist(
-                Mockito.eq(BCK_OBJ_NOT_EXIST), Mockito.anyString());
+                eq(BCK_OBJ_NOT_EXIST), anyString());
         doThrow(new com.amazonaws.SdkClientException("amazon SDK exception"))
                 .when(s3client)
-                .doesObjectExist(Mockito.eq(BCK_EXC_SDK), Mockito.anyString());
+                .doesObjectExist(eq(BCK_EXC_SDK), anyString());
         doThrow(new com.amazonaws.AmazonServiceException(
                 "amazon SDK exception")).when(s3client).doesObjectExist(
-                        Mockito.eq(BCK_EXC_AWS), Mockito.anyString());
+                        eq(BCK_EXC_AWS), anyString());
 
         // list objects
         doReturn(listObjects1).when(s3client)
-                .listObjects(Mockito.eq(BCK_OBJ_EXIST), Mockito.anyString());
+                .listObjects(eq(BCK_OBJ_EXIST), anyString());
         doThrow(new com.amazonaws.SdkClientException("amazon SDK exception"))
-                .when(s3client).listObjects(Mockito.eq(BCK_OBJ_NOT_EXIST),
-                        Mockito.anyString());
-        doReturn(null).when(s3client).listObjects(Mockito.eq(BCK_OBJ_NOT_EXIST),
-                Mockito.eq("null-prefix"));
+                .when(s3client).listObjects(eq(BCK_OBJ_NOT_EXIST),
+                        anyString());
+        doReturn(null).when(s3client).listObjects(eq(BCK_OBJ_NOT_EXIST),
+                eq("null-prefix"));
         doReturn(new ObjectListing()).when(s3client).listObjects(
-                Mockito.eq(BCK_OBJ_NOT_EXIST), Mockito.eq("prefix"));
+                eq(BCK_OBJ_NOT_EXIST), eq("prefix"));
         doThrow(new com.amazonaws.SdkClientException("amazon SDK exception"))
                 .when(s3client)
-                .listObjects(Mockito.eq(BCK_EXC_SDK), Mockito.anyString());
+                .listObjects(eq(BCK_EXC_SDK), anyString());
         doThrow(new com.amazonaws.AmazonServiceException(
                 "amazon SDK exception")).when(s3client).listObjects(
-                        Mockito.eq(BCK_EXC_AWS), Mockito.anyString());
+                        eq(BCK_EXC_AWS), anyString());
 
         // get objects
         doReturn(null).when(s3client).getObject(
-                Mockito.any(GetObjectRequest.class), Mockito.any(File.class));
+                any(GetObjectRequest.class), any(File.class));
         
         
-        doReturn(listObjects2).when(serviceSpy).getExpectedFiles(Mockito.eq(BCK_OBJ_EXIST), Mockito.anyString());
-        doThrow(new com.amazonaws.SdkClientException("amazon SDK exception")).when(serviceSpy).getExpectedFiles(Mockito.eq(BCK_OBJ_NOT_EXIST),
-                Mockito.anyString());
-        doReturn(Collections.EMPTY_LIST).when(serviceSpy).getExpectedFiles(Mockito.eq(BCK_OBJ_NOT_EXIST),
-                Mockito.eq("null-prefix"));
-        doReturn(Collections.EMPTY_LIST).when(serviceSpy).getExpectedFiles( Mockito.eq(BCK_OBJ_NOT_EXIST), Mockito.eq("prefix"));
-        doThrow(new com.amazonaws.SdkClientException("amazon SDK exception")).when(serviceSpy).getExpectedFiles(Mockito.eq(BCK_EXC_SDK), Mockito.anyString());
-        doThrow(new com.amazonaws.AmazonServiceException("amazon SDK exception")).when(serviceSpy).getExpectedFiles(Mockito.eq(BCK_EXC_AWS), Mockito.anyString());
+        doReturn(listObjects2).when(serviceSpy).getExpectedFiles(eq(BCK_OBJ_EXIST), anyString());
+        doThrow(new com.amazonaws.SdkClientException("amazon SDK exception")).when(serviceSpy).getExpectedFiles(eq(BCK_OBJ_NOT_EXIST),
+                anyString());
+        doReturn(Collections.EMPTY_LIST).when(serviceSpy).getExpectedFiles(eq(BCK_OBJ_NOT_EXIST),
+                eq("null-prefix"));
+        doReturn(Collections.EMPTY_LIST).when(serviceSpy).getExpectedFiles( eq(BCK_OBJ_NOT_EXIST), eq("prefix"));
+        doThrow(new com.amazonaws.SdkClientException("amazon SDK exception")).when(serviceSpy).getExpectedFiles(eq(BCK_EXC_SDK), anyString());
+        doThrow(new com.amazonaws.AmazonServiceException("amazon SDK exception")).when(serviceSpy).getExpectedFiles(eq(BCK_EXC_AWS), anyString());
 
     }
 
@@ -223,13 +223,13 @@ public class S3ObsServicesTest {
 
         boolean retTrue = service.exist(BCK_OBJ_EXIST, "test-key");
         assertTrue(retTrue);
-        verify(s3client, times(1)).doesObjectExist(Mockito.eq(BCK_OBJ_EXIST),
-                Mockito.eq("test-key"));
+        verify(s3client, times(1)).doesObjectExist(eq(BCK_OBJ_EXIST),
+                eq("test-key"));
 
         boolean retFalse = service.exist(BCK_OBJ_NOT_EXIST, "test-key");
         assertFalse(retFalse);
         verify(s3client, times(1)).doesObjectExist(
-                Mockito.eq(BCK_OBJ_NOT_EXIST), Mockito.eq("test-key"));
+                eq(BCK_OBJ_NOT_EXIST), eq("test-key"));
     }
 
     /**
@@ -334,14 +334,14 @@ public class S3ObsServicesTest {
     	List<File> files = serviceSpy.downloadObjectsWithPrefix(BCK_OBJ_NOT_EXIST,
                 "null-prefix", "directory-path", true);
         assertEquals(0, files.size());
-        verify(s3client, never()).getObject(Mockito.any(GetObjectRequest.class),
-                Mockito.any(File.class));
+        verify(s3client, never()).getObject(any(GetObjectRequest.class),
+                any(File.class));
 
         files = serviceSpy.downloadObjectsWithPrefix(
                 BCK_OBJ_NOT_EXIST, "prefix", "directory-path", true);
         assertEquals(0, files.size());
-        verify(s3client, never()).getObject(Mockito.any(GetObjectRequest.class),
-                Mockito.any(File.class));
+        verify(s3client, never()).getObject(any(GetObjectRequest.class),
+                any(File.class));
     }
 
     /**
@@ -356,16 +356,16 @@ public class S3ObsServicesTest {
     	List<File> files = serviceSpy.downloadObjectsWithPrefix(BCK_OBJ_EXIST, "key", tmpDir.getPath(), true);
         assertEquals(3, files.size());
         verify(s3client, times(3)).getObject(
-                Mockito.any(GetObjectRequest.class), Mockito.any(File.class));
+                any(GetObjectRequest.class), any(File.class));
         verify(s3client, times(1)).getObject(
-                Mockito.any(GetObjectRequest.class),
-                Mockito.eq(new File(tmpDir,"key1")));
+                any(GetObjectRequest.class),
+                eq(new File(tmpDir,"key1")));
         verify(s3client, times(1)).getObject(
-                Mockito.any(GetObjectRequest.class),
-                Mockito.eq(new File(tmpDir,"key2")));
+                any(GetObjectRequest.class),
+                eq(new File(tmpDir,"key2")));
         verify(s3client, times(1)).getObject(
-                Mockito.any(GetObjectRequest.class),
-                Mockito.eq(new File(tmpDir,"root/key3")));
+                any(GetObjectRequest.class),
+                eq(new File(tmpDir,"root/key3")));
         assertTrue((new File(tmpDir,"key3")).exists());
         assertFalse((new File(tmpDir,"root/key3")).exists());
     }
@@ -383,16 +383,16 @@ public class S3ObsServicesTest {
     			tmpDir.getPath(), false);
         assertEquals(3, files.size());
         verify(s3client, times(3)).getObject(
-                Mockito.any(GetObjectRequest.class), Mockito.any(File.class));
+                any(GetObjectRequest.class), any(File.class));
         verify(s3client, times(1)).getObject(
-                Mockito.any(GetObjectRequest.class),
-                Mockito.eq(new File(tmpDir,"key1")));
+                any(GetObjectRequest.class),
+                eq(new File(tmpDir,"key1")));
         verify(s3client, times(1)).getObject(
-                Mockito.any(GetObjectRequest.class),
-                Mockito.eq(new File(tmpDir,"key2")));
+                any(GetObjectRequest.class),
+                eq(new File(tmpDir,"key2")));
         verify(s3client, times(1)).getObject(
-                Mockito.any(GetObjectRequest.class),
-                Mockito.eq(new File(tmpDir,"root/key3")));
+                any(GetObjectRequest.class),
+                eq(new File(tmpDir,"root/key3")));
         assertFalse((new File(tmpDir,"key3")).exists());
         assertTrue((new File(tmpDir,"root/key3")).exists());
     }
@@ -449,8 +449,8 @@ public class S3ObsServicesTest {
     public void testUploadFileNominal()
             throws S3ObsServiceException, S3SdkClientException {
         service.uploadFile(BCK_OBJ_EXIST, "key-test", tmpDir);
-        verify(s3tm, times(1)).upload(Mockito.eq(BCK_OBJ_EXIST),
-                Mockito.eq("key-test"), Mockito.eq(tmpDir));
+        verify(s3tm, times(1)).upload(eq(BCK_OBJ_EXIST),
+                eq("key-test"), eq(tmpDir));
     }
 
     /**
@@ -501,7 +501,7 @@ public class S3ObsServicesTest {
     	
         List<String> ret = service.uploadDirectory(BCK_OBJ_EXIST, "key-test", testFile);
         assertEquals(1, ret.size());
-        verify(s3tm, times(1)).upload(Mockito.eq(BCK_OBJ_EXIST), Mockito.eq("key-test"), Mockito.eq(testFile));
+        verify(s3tm, times(1)).upload(eq(BCK_OBJ_EXIST), eq("key-test"), eq(testFile));
     }
 
     /**
@@ -527,18 +527,18 @@ public class S3ObsServicesTest {
         file5.mkdirs();
         
         service.uploadDirectory(BCK_OBJ_EXIST, "key-test", tmpDir);
-        verify(s3tm, times(3)).upload(Mockito.eq(BCK_OBJ_EXIST),
-                Mockito.anyString(), Mockito.any(File.class));
-        verify(s3tm, times(1)).upload(Mockito.eq(BCK_OBJ_EXIST),
-                Mockito.eq("key-test" + File.separator + "key1"),
-                Mockito.eq(new File(tmpDir,"key1")));
-        verify(s3tm, times(1)).upload(Mockito.eq(BCK_OBJ_EXIST),
-                Mockito.eq("key-test" + File.separator + "key2"),
-                Mockito.eq(new File(tmpDir,"key2")));
+        verify(s3tm, times(3)).upload(eq(BCK_OBJ_EXIST),
+                anyString(), any(File.class));
+        verify(s3tm, times(1)).upload(eq(BCK_OBJ_EXIST),
+                eq("key-test" + "/" + "key1"),
+                eq(new File(tmpDir,"key1")));
+        verify(s3tm, times(1)).upload(eq(BCK_OBJ_EXIST),
+                eq("key-test" + "/" + "key2"),
+                eq(new File(tmpDir,"key2")));
         verify(s3tm, times(1)).upload(
-                Mockito.eq(BCK_OBJ_EXIST), Mockito.eq("key-test"
-                        + File.separator + "key" + File.separator + "key3"),
-                Mockito.eq(new File(tmpDir,"key/key3")));
+                eq(BCK_OBJ_EXIST), eq("key-test"
+                        + "/" + "key" + "/" + "key3"),
+                eq(new File(tmpDir,"key/key3")));
 
         file1.delete();
         file2.delete();
@@ -562,29 +562,44 @@ public class S3ObsServicesTest {
 
         List<String> ret = service.uploadDirectory(BCK_OBJ_EXIST, "key-test", file3);
         assertEquals(0, ret.size());
-        verify(s3tm, never()).upload(Mockito.anyString(), Mockito.anyString(),
-                Mockito.any(File.class));
+        verify(s3tm, never()).upload(anyString(), anyString(),
+                any(File.class));
 
         file3.delete();
     }
-    
+
     @Test
-    public void testIdentifyMd5File() {
-    	
-    	String md5file1 = service.identifyMd5File("L20180724144436762001030/ch01/DCS_02_L20180724144436762001030_ch1_DSIB.xml");
-    	assertEquals("L20180724144436762001030/ch01/DCS_02_L20180724144436762001030_ch1_DSIB.xml.md5sum", md5file1);
-    	
-    	String md5file2 = service.identifyMd5File("L20180724144436762001030/ch01/DCS_02_L20180724144436762001030_ch1_DSDB_00035.raw");
-    	assertEquals("L20180724144436762001030/ch01/DCS_02_L20180724144436762001030_ch1_DSDB_00035.raw.md5sum", md5file2);
-    	
-    	String md5file3 = service.identifyMd5File("S1__AUX_WND_V20181002T210000_G20180929T181057.SAFE/");
-    	assertEquals("S1__AUX_WND_V20181002T210000_G20180929T181057.SAFE.md5sum", md5file3);
-    	
-    	String md5file4 = service.identifyMd5File("S1B_OPER_MPL_ORBPRE_20190711T200257_20190718T200257_0001.EOF");
-    	assertEquals("S1B_OPER_MPL_ORBPRE_20190711T200257_20190718T200257_0001.EOF.md5sum", md5file4);
-    	
-    	String md5file5 = service.identifyMd5File("S1__AUX_WND_V20181002T120000_G20180929T061310.SAFE/manifest.safe");
-    	assertEquals("S1__AUX_WND_V20181002T120000_G20180929T061310.SAFE.md5sum", md5file5);
+    public void testUploadStreamNominal() throws S3ObsServiceException, S3SdkClientException, IOException {
+        try (InputStream in = getClass().getResourceAsStream("/testfile1.txt")) {
+            service.uploadStream(BCK_OBJ_EXIST, "key-test", in, 100);
+            verify(s3tm, times(1)).upload(eq(BCK_OBJ_EXIST),
+                    eq("key-test"), any(InputStream.class), argThat(hasContentLength(100)));
+        }
+    }
+
+    @Test
+    public void testUploadStreamSDKException() throws IOException, S3ObsServiceException, S3SdkClientException {
+        try (InputStream in = getClass().getResourceAsStream("/testfile1.txt")) {
+            thrown.expect(S3SdkClientException.class);
+            thrown.expect(hasProperty("bucket", is(BCK_EXC_SDK)));
+            thrown.expect(hasProperty("key", is("key-test")));
+            thrown.expectCause(isA(SdkClientException.class));
+            service.uploadStream(BCK_EXC_SDK, "key-test", in, 100);
+        }
+    }
+
+    private ArgumentMatcher<ObjectMetadata> hasContentLength(long contentLength) {
+        return new ArgumentMatcher<ObjectMetadata>() {
+            @Override
+            public boolean matches(ObjectMetadata objectMetadata) {
+                return objectMetadata != null && objectMetadata.getContentLength() == contentLength;
+            }
+
+            @Override
+            public String toString() {
+                return "any metadata with contentLength = " + contentLength;
+            }
+        };
     }
     
 	@Test

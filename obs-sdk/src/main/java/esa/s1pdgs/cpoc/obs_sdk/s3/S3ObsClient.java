@@ -6,11 +6,9 @@ import java.io.InputStream;
 import java.io.PrintWriter;
 import java.net.URL;
 import java.nio.file.Files;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.regex.Pattern;
+import java.util.stream.Stream;
 
 import com.amazonaws.ClientConfiguration;
 import com.amazonaws.Protocol;
@@ -29,15 +27,7 @@ import com.amazonaws.services.s3.transfer.TransferManagerBuilder;
 
 import esa.s1pdgs.cpoc.common.ProductFamily;
 import esa.s1pdgs.cpoc.common.errors.obs.ObsException;
-import esa.s1pdgs.cpoc.obs_sdk.AbstractObsClient;
-import esa.s1pdgs.cpoc.obs_sdk.ObsClient;
-import esa.s1pdgs.cpoc.obs_sdk.ObsConfigurationProperties;
-import esa.s1pdgs.cpoc.obs_sdk.ObsDownloadObject;
-import esa.s1pdgs.cpoc.obs_sdk.ObsObject;
-import esa.s1pdgs.cpoc.obs_sdk.ObsServiceException;
-import esa.s1pdgs.cpoc.obs_sdk.FileObsUploadObject;
-import esa.s1pdgs.cpoc.obs_sdk.SdkClientException;
-import esa.s1pdgs.cpoc.obs_sdk.ValidArgumentAssertion;
+import esa.s1pdgs.cpoc.obs_sdk.*;
 import esa.s1pdgs.cpoc.obs_sdk.report.ReportingProductFactory;
 import esa.s1pdgs.cpoc.obs_sdk.s3.retry.SDKCustomDefaultRetryCondition;
 import esa.s1pdgs.cpoc.obs_sdk.swift.SwiftSdkClientException;
@@ -46,8 +36,7 @@ import esa.s1pdgs.cpoc.obs_sdk.swift.SwiftSdkClientException;
  * <p>
  * Implement of the object storage client using AmazonS3
  * </p>
- * To configure, use the file {@link S3Configuration#CONFIG_FILE}
- * 
+ *
  * @author Viveris Technologies
  */
 public class S3ObsClient extends AbstractObsClient {
@@ -110,27 +99,18 @@ public class S3ObsClient extends AbstractObsClient {
 		return s3Services.bucketExist(getBucketFor(family));
 	}
 
-	/**
-	 * @see ObsClient#doesObjectExist(ObsObject)
-	 */
 	@Override
 	public boolean exists(final ObsObject object) throws SdkClientException, ObsServiceException {
 		ValidArgumentAssertion.assertValidArgument(object);
 		return s3Services.exist(getBucketFor(object.getFamily()), object.getKey());
 	}
 
-	/**
-	 * @see ObsClient#doesPrefixExist(ObsObject)
-	 */
 	@Override
 	public boolean prefixExists(final ObsObject object) throws SdkClientException, ObsServiceException {
 		ValidArgumentAssertion.assertValidArgument(object);
 		return s3Services.getNbObjects(getBucketFor(object.getFamily()), object.getKey()) > 0;
 	}
 
-	/**
-	 * @see ObsClient#downloadObject(ObsDownloadObject)
-	 */
 	@Override
 	public List<File> downloadObject(final ObsDownloadObject object) throws SdkClientException, ObsServiceException {
 		final String bucket = getBucketFor(object.getFamily());
@@ -155,11 +135,25 @@ public class S3ObsClient extends AbstractObsClient {
 		uploadMd5Sum(object, fileList);
 	}
 
+	/**
+	 * @param object
+	 * @throws ObsServiceException
+	 * @throws S3SdkClientException
+	 *
+	 * Note: The stream is not closed here. It should be closed after upload.
+	 *
+	 */
+	@Override
+	public void uploadObject(final StreamObsUploadObject object) throws ObsServiceException, S3SdkClientException {
+		final String md5 = s3Services.uploadStream(getBucketFor(object.getFamily()), object.getKey(), object.getInput(), object.getContentLength());
+		uploadMd5Sum(object, Arrays.asList(md5));
+	}
+
 	private void uploadMd5Sum(final ObsObject object, final List<String> fileList)
 			throws ObsServiceException, S3SdkClientException {
 		File file;
 		try {
-			file = File.createTempFile(object.getKey(), MD5SUM_SUFFIX);
+			file = File.createTempFile(object.getKey(), Md5.MD5SUM_SUFFIX);
 			try (PrintWriter writer = new PrintWriter(file)) {
 				for (final String fileInfo : fileList) {
 					writer.println(fileInfo);
@@ -169,7 +163,7 @@ public class S3ObsClient extends AbstractObsClient {
 			throw new S3ObsServiceException(getBucketFor(object.getFamily()), object.getKey(),
 					"Could not store md5sum temp file", e);
 		}
-		s3Services.uploadFile(getBucketFor(object.getFamily()),  s3Services.identifyMd5File(object.getKey()), file);
+		s3Services.uploadFile(getBucketFor(object.getFamily()),  Md5.md5KeyFor(object), file);
 
 		try {
 			Files.delete(file.toPath());
@@ -224,7 +218,7 @@ public class S3ObsClient extends AbstractObsClient {
 			}
 
 			for (final S3ObjectSummary s : objSum) {
-				if (s.getKey().endsWith(MD5SUM_SUFFIX)) {
+				if (s.getKey().endsWith(Md5.MD5SUM_SUFFIX)) {
 					continue;
 				}
 

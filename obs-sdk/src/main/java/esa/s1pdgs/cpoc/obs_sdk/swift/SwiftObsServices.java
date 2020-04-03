@@ -12,6 +12,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
+import esa.s1pdgs.cpoc.obs_sdk.Md5;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.javaswift.joss.instructions.UploadInstructions;
@@ -120,7 +121,7 @@ public class SwiftObsServices {
 	       				}
 	       				lastNonSegmentName = o.getName();
                 		
-                		if (!o.getName().endsWith(AbstractObsClient.MD5SUM_SUFFIX)) {
+                		if (!o.getName().endsWith(Md5.MD5SUM_SUFFIX)) {
                 			nbObj++;
                 		}
                 	}
@@ -189,7 +190,7 @@ public class SwiftObsServices {
 	       				 lastNonSegmentName = object.getName();
 	       				 
 	       				 // only download md5sum files if it has been explicitly asked for a md5sum file
-	       				 if (!prefixKey.endsWith(AbstractObsClient.MD5SUM_SUFFIX) && object.getName().endsWith(AbstractObsClient.MD5SUM_SUFFIX)) {
+	       				 if (!prefixKey.endsWith(Md5.MD5SUM_SUFFIX) && object.getName().endsWith(Md5.MD5SUM_SUFFIX)) {
 	       					 continue;
 	       				 }
 	       				 
@@ -266,7 +267,7 @@ public class SwiftObsServices {
 	/**
 	 * @param containerName
 	 * @param keyName
-	 * @param uploadDirectory
+	 * @param uploadFile
 	 * @return file information (md5 sum with filename)
 	 * @throws SwiftObsServiceException
 	 * @throws SwiftSdkClientException
@@ -315,10 +316,53 @@ public class SwiftObsServices {
 	    return md5 + "  " + keyName;
 	}
 
+	public String uploadStream(String containerName, String keyName, final InputStream in, long contentLength) throws SwiftSdkClientException {
+		String md5 = null;
+		for (int retryCount = 1;; retryCount++) {
+			try {
+				log(String.format("Uploading object %s in container %s", keyName,
+						containerName));
+
+				Container container = client.getContainer(containerName);
+				if (!container.exists()) {
+					throw new SwiftObsServiceException(containerName, keyName,
+							String.format("Upload fails: %s", keyName));
+				}
+
+				StoredObject object = container.getObject(keyName);
+				UploadInstructions uploadInstructions = new UploadInstructions(in, contentLength);
+				uploadInstructions.setSegmentationSize(MAX_SEGMENT_SIZE);
+				object.uploadObject(uploadInstructions);
+				md5 = object.getEtag();
+
+				log(String.format("Upload object %s in container %s succeeded",
+						keyName, containerName));
+				break;
+			} catch (Exception e) {
+				if (retryCount <= numRetries) {
+					LOGGER.warn(String.format(
+							"Upload object %s from container %s failed: Attempt : %d / %d",
+							keyName, containerName, retryCount, numRetries));
+					try {
+						Thread.sleep(retryDelay);
+					} catch (InterruptedException ie) {
+						throw new SwiftSdkClientException(containerName, keyName,
+								String.format("Upload fails: %s", e.getMessage()), e);
+					}
+					continue;
+				} else {
+					throw new SwiftSdkClientException(containerName, keyName,
+							String.format("Upload fails: %s", e.getMessage()), e);
+				}
+			}
+		}
+		return md5 + "  " + keyName;
+	}
+
 	/**
      * @param containerName
      * @param keyName
-     * @param uploadFile
+     * @param uploadDirectory
      * @return file informations (list of md5 sums with filenames)
 	 * @throws SwiftSdkClientException 
 	 * @throws SwiftObsServiceException 
@@ -333,10 +377,10 @@ public class SwiftObsServices {
                 for (File child : childs) {
                     if (child.isDirectory()) {
                         fileList.addAll(uploadDirectory(containerName,
-                        		keyName + File.separator + child.getName(), child));
+                        		keyName + "/" + child.getName(), child));
                     } else {
                         fileList.add(uploadFile(containerName,
-                        		keyName + File.separator + child.getName(), child));
+                        		keyName + "/" + child.getName(), child));
                     }
                 }
             }           
@@ -435,7 +479,7 @@ public class SwiftObsServices {
 
 	/**
 	 * @param containerName
-	 * @param marker
+	 * @param leMarker
 	 * @return
 	 * @throws SwiftSdkClientException 
 	 */
@@ -451,7 +495,7 @@ public class SwiftObsServices {
 					objects = container.list("", marker, MAX_RESULTS_PER_LIST);
 					for (StoredObject object : objects) {
 						marker = object.getName();
-						if (!object.getName().endsWith(AbstractObsClient.MD5SUM_SUFFIX)) {
+						if (!object.getName().endsWith(Md5.MD5SUM_SUFFIX)) {
 							result.add(object);
 						}
 					}
@@ -485,7 +529,7 @@ public class SwiftObsServices {
 			for (final StoredObject thisObject : batch) {
 				final String key = thisObject.getName();
 				// only download md5sum files if it has been explicitly asked for a md5sum file
-        		if (!prefix.endsWith(AbstractObsClient.MD5SUM_SUFFIX) && key.endsWith(AbstractObsClient.MD5SUM_SUFFIX)) {
+        		if (!prefix.endsWith(Md5.MD5SUM_SUFFIX) && key.endsWith(Md5.MD5SUM_SUFFIX)) {
    					continue;
    				}
 

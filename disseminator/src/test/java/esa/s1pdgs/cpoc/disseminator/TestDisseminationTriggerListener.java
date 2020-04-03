@@ -27,7 +27,7 @@ public class TestDisseminationTriggerListener {
 				return false;
 			}			
 		};		
-		final DisseminationTriggerListener uut = new DisseminationTriggerListener(fakeObsClient, new DisseminationProperties(), ErrorRepoAppender.NULL);
+		final DisseminationTriggerListener<ProductionEvent> uut = new DisseminationTriggerListener<>(fakeObsClient, new DisseminationProperties(), ErrorRepoAppender.NULL);
 		final ProductionEvent fakeProduct = new ProductionEvent("fakeProduct", "my/key", ProductFamily.BLANK);
 		
 		try {
@@ -45,21 +45,21 @@ public class TestDisseminationTriggerListener {
 				return true;
 			}			
 		};		
-		final DisseminationTriggerListener uut = new DisseminationTriggerListener(fakeObsClient, new DisseminationProperties(), ErrorRepoAppender.NULL);
+		final DisseminationTriggerListener<ProductionEvent> uut = new DisseminationTriggerListener<>(fakeObsClient, new DisseminationProperties(), ErrorRepoAppender.NULL);
 		final ProductionEvent fakeProduct = new ProductionEvent("fakeProduct", "my/key", ProductFamily.BLANK);
 		uut.assertExists(fakeProduct);
 	}
 	
 	@Test
 	public final void testClientForTarget_OnValidTarget_ShallReturnClientForTarget() {
-		final DisseminationTriggerListener uut = new DisseminationTriggerListener(null, new DisseminationProperties(), ErrorRepoAppender.NULL);
+		final DisseminationTriggerListener<ProductionEvent> uut = new DisseminationTriggerListener<>(null, new DisseminationProperties(), ErrorRepoAppender.NULL);
 		uut.put("foo", OutboxClient.NULL);		
 		assertEquals(OutboxClient.NULL, uut.clientForTarget("foo"));		
 	}
 	
 	@Test
 	public final void testClientForTarget_OnInvalidTarget_ShallThrowException() {
-		final DisseminationTriggerListener uut = new DisseminationTriggerListener(null, new DisseminationProperties(), ErrorRepoAppender.NULL);
+		final DisseminationTriggerListener<ProductionEvent> uut = new DisseminationTriggerListener<>(null, new DisseminationProperties(), ErrorRepoAppender.NULL);
 		uut.put("foo", OutboxClient.NULL);		
 		try {
 			uut.clientForTarget("bar");
@@ -76,7 +76,7 @@ public class TestDisseminationTriggerListener {
 				return true;
 			}			
 		};		
-		final DisseminationTriggerListener uut = new DisseminationTriggerListener(fakeObsClient, new DisseminationProperties(), ErrorRepoAppender.NULL);
+		final DisseminationTriggerListener<ProductionEvent> uut = new DisseminationTriggerListener<>(fakeObsClient, new DisseminationProperties(), ErrorRepoAppender.NULL);
 		uut.put("foo", OutboxClient.NULL);		
 		final ProductionEvent fakeProduct = new ProductionEvent("fakeProduct", "my/key", ProductFamily.BLANK);
 		final GenericMessageDto<ProductionEvent> fakeMessage = new GenericMessageDto<ProductionEvent>(123, "myKey", fakeProduct); 
@@ -97,7 +97,7 @@ public class TestDisseminationTriggerListener {
 			}
 		};
 		
-		final DisseminationTriggerListener uut = new DisseminationTriggerListener(fakeObsClient, new DisseminationProperties(), ErrorRepoAppender.NULL);
+		final DisseminationTriggerListener<ProductionEvent> uut = new DisseminationTriggerListener<>(fakeObsClient, new DisseminationProperties(), ErrorRepoAppender.NULL);
 		uut.put("foo", failOuboxClient);		
 		final ProductionEvent fakeProduct = new ProductionEvent("fakeProduct", "my/key", ProductFamily.BLANK);
 		final GenericMessageDto<ProductionEvent> fakeMessage = new GenericMessageDto<ProductionEvent>(123, "myKey", fakeProduct); 

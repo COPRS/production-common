@@ -4,18 +4,21 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
 import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
 import java.time.Instant;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.LinkedList;
-import java.util.List;
+import java.util.*;
 
+import esa.s1pdgs.cpoc.obs_sdk.*;
+import esa.s1pdgs.cpoc.obs_sdk.s3.S3SdkClientException;
+import esa.s1pdgs.cpoc.report.ReportingFactory;
 import org.javaswift.joss.client.core.AbstractStoredObject;
 import org.javaswift.joss.client.mock.AccountMock;
 import org.javaswift.joss.client.mock.ContainerMock;
@@ -24,7 +27,9 @@ import org.javaswift.joss.model.Container;
 import org.javaswift.joss.model.StoredObject;
 import org.javaswift.joss.swift.Swift;
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.ExpectedException;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
@@ -32,17 +37,14 @@ import org.mockito.MockitoAnnotations;
 import esa.s1pdgs.cpoc.common.ProductFamily;
 import esa.s1pdgs.cpoc.common.errors.AbstractCodedException;
 import esa.s1pdgs.cpoc.common.errors.obs.ObsException;
-import esa.s1pdgs.cpoc.obs_sdk.ObsConfigurationProperties;
-import esa.s1pdgs.cpoc.obs_sdk.ObsDownloadObject;
-import esa.s1pdgs.cpoc.obs_sdk.ObsObject;
-import esa.s1pdgs.cpoc.obs_sdk.ObsServiceException;
-import esa.s1pdgs.cpoc.obs_sdk.FileObsUploadObject;
-import esa.s1pdgs.cpoc.obs_sdk.SdkClientException;
 import esa.s1pdgs.cpoc.obs_sdk.report.ReportingProductFactory;
 
 public class SwiftObsClientTest {
 
-    /**
+	@Rule
+	public ExpectedException thrown = ExpectedException.none();
+
+	/**
      * Mock configuration
      */
     @Mock
@@ -202,8 +204,31 @@ public class SwiftObsClientTest {
         verify(service, never()).uploadDirectory(Mockito.anyString(),
                 Mockito.anyString(), Mockito.any());
     }
-    
-    @Test
+
+	@Test
+	public void testUploadStream() throws IOException, ObsServiceException, SwiftSdkClientException {
+		try(InputStream in = getClass().getResourceAsStream("/testfile1.txt")) {
+			client.uploadObject(new StreamObsUploadObject(ProductFamily.L0_ACN, "key-exist", in, 100));
+		}
+
+		verify(service, times(1))
+				.uploadStream(eq("l0-acns"), eq("key-exist"), any(InputStream.class), anyLong());
+	}
+
+	@Test
+	public void testUploadStreamNoContent() throws IOException, AbstractCodedException, ObsEmptyFileException, SwiftSdkClientException {
+		thrown.expect(ObsEmptyFileException.class);
+		thrown.expectMessage("key-exist");
+
+		try (InputStream in = getClass().getResourceAsStream("/testfile1.txt")) {
+			client.uploadStreams(Collections.singletonList(new StreamObsUploadObject(ProductFamily.L0_ACN, "key-exist", in, 0)), ReportingFactory.NULL);
+		}
+
+		verify(service, times(0))
+				.uploadStream(any(), any(), any(InputStream.class), anyLong());
+	}
+
+	@Test
 	public void testGetListOfObjectsOfTimeFrameOfFamilyOneExists() throws ObsServiceException, SdkClientException {
 
 		final Date timeFrameBegin = Date.from(Instant.parse("2020-01-01T00:00:00Z"));

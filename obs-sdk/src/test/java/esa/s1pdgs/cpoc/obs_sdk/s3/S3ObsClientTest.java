@@ -1,39 +1,34 @@
 package esa.s1pdgs.cpoc.obs_sdk.s3;
 
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
-import static org.mockito.Mockito.doReturn;
-import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-
-import java.io.File;
-import java.time.Instant;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-
+import com.amazonaws.services.s3.model.ObjectListing;
+import com.amazonaws.services.s3.model.S3ObjectSummary;
+import esa.s1pdgs.cpoc.common.ProductFamily;
+import esa.s1pdgs.cpoc.common.errors.AbstractCodedException;
+import esa.s1pdgs.cpoc.common.errors.obs.ObsException;
+import esa.s1pdgs.cpoc.obs_sdk.*;
+import esa.s1pdgs.cpoc.obs_sdk.report.ReportingProductFactory;
+import esa.s1pdgs.cpoc.report.ReportingFactory;
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.ExpectedException;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 
-import com.amazonaws.services.s3.model.ObjectListing;
-import com.amazonaws.services.s3.model.S3ObjectSummary;
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
+import java.time.Instant;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Date;
+import java.util.List;
 
-import esa.s1pdgs.cpoc.common.ProductFamily;
-import esa.s1pdgs.cpoc.common.errors.AbstractCodedException;
-import esa.s1pdgs.cpoc.common.errors.obs.ObsException;
-import esa.s1pdgs.cpoc.obs_sdk.ObsConfigurationProperties;
-import esa.s1pdgs.cpoc.obs_sdk.ObsDownloadObject;
-import esa.s1pdgs.cpoc.obs_sdk.ObsObject;
-import esa.s1pdgs.cpoc.obs_sdk.ObsServiceException;
-import esa.s1pdgs.cpoc.obs_sdk.FileObsUploadObject;
-import esa.s1pdgs.cpoc.obs_sdk.SdkClientException;
-import esa.s1pdgs.cpoc.obs_sdk.report.ReportingProductFactory;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.junit.Assert.*;
+import static org.mockito.ArgumentMatchers.*;
+import static org.mockito.Mockito.*;
 
 /**
  * Test the client Amazon S3
@@ -42,7 +37,10 @@ import esa.s1pdgs.cpoc.obs_sdk.report.ReportingProductFactory;
  */
 public class S3ObsClientTest {
 
-    /**
+	@Rule
+	public ExpectedException thrown = ExpectedException.none();
+
+	/**
      * Mock configuration
      */
     @Mock
@@ -84,34 +82,35 @@ public class S3ObsClientTest {
 
         // Mock service
         doReturn(true).when(service).exist(Mockito.anyString(),
-                Mockito.eq("key-exist"));
+                eq("key-exist"));
         doReturn(false).when(service).exist(Mockito.anyString(),
-                Mockito.eq("key-not-exist"));
+                eq("key-not-exist"));
         doReturn(2).when(service).getNbObjects(Mockito.anyString(),
-                Mockito.eq("key-exist"));
+                eq("key-exist"));
         doReturn(0).when(service).getNbObjects(Mockito.anyString(),
-                Mockito.eq("key-not-exist"));
+                eq("key-not-exist"));
         doReturn("dummy").when(service).uploadFile(Mockito.anyString(),
-                Mockito.anyString(), Mockito.any());
-        doReturn("dummy.md5sum").when(service).identifyMd5File(Mockito.anyString());
+                Mockito.anyString(), any());
+		doReturn("dummy").when(service).uploadStream(Mockito.anyString(),
+				Mockito.anyString(), any(InputStream.class), anyLong());
 
         // Mock configuration
         doReturn("auxiliary-files").when(configuration)
-        		.getBucketFor(Mockito.eq(ProductFamily.AUXILIARY_FILE));
+        		.getBucketFor(eq(ProductFamily.AUXILIARY_FILE));
         doReturn("edrs-sessions").when(configuration)
-                .getBucketFor(Mockito.eq(ProductFamily.EDRS_SESSION));
+                .getBucketFor(eq(ProductFamily.EDRS_SESSION));
         doReturn("l0-slices").when(configuration)
-                .getBucketFor(Mockito.eq(ProductFamily.L0_SLICE));
+                .getBucketFor(eq(ProductFamily.L0_SLICE));
         doReturn("l0-acns").when(configuration)
-                .getBucketFor(Mockito.eq(ProductFamily.L0_ACN));
+                .getBucketFor(eq(ProductFamily.L0_ACN));
         doReturn("l1-slices").when(configuration)
-                .getBucketFor(Mockito.eq(ProductFamily.L1_SLICE));
+                .getBucketFor(eq(ProductFamily.L1_SLICE));
         doReturn("l1-acns").when(configuration)
-                .getBucketFor(Mockito.eq(ProductFamily.L1_ACN));
+                .getBucketFor(eq(ProductFamily.L1_ACN));
         doReturn("l0-segments").when(configuration)
-        		.getBucketFor(Mockito.eq(ProductFamily.L0_SEGMENT));
+        		.getBucketFor(eq(ProductFamily.L0_SEGMENT));
         doReturn("l0-blanks").when(configuration)
-        		.getBucketFor(Mockito.eq(ProductFamily.L0_BLANK));
+        		.getBucketFor(eq(ProductFamily.L0_BLANK));
 
         // Build client
         client = new S3ObsClient(configuration, service, new ReportingProductFactory());
@@ -127,11 +126,11 @@ public class S3ObsClientTest {
     public void testExist() throws ObsServiceException, SdkClientException {
         boolean ret = client.exists(new ObsObject(ProductFamily.L0_ACN, "key-exist"));
         assertTrue(ret);
-        verify(service, times(1)).exist(Mockito.eq("l0-acns"), Mockito.eq("key-exist"));
+        verify(service, times(1)).exist(eq("l0-acns"), eq("key-exist"));
 
         ret = client.exists( new ObsObject(ProductFamily.L1_SLICE, "key-not-exist"));
         assertFalse(ret);
-        verify(service, times(1)).exist(Mockito.eq("l1-slices"), Mockito.eq("key-not-exist"));
+        verify(service, times(1)).exist(eq("l1-slices"), eq("key-not-exist"));
     }
 
     /**
@@ -144,12 +143,12 @@ public class S3ObsClientTest {
     public void testPrefixExist() throws ObsServiceException, SdkClientException {
         boolean ret = client.prefixExists(new ObsObject(ProductFamily.L0_SLICE, "key-exist"));
         assertTrue(ret);
-        verify(service, times(1)).getNbObjects(Mockito.eq("l0-slices"),
-                Mockito.eq("key-exist"));
+        verify(service, times(1)).getNbObjects(eq("l0-slices"),
+                eq("key-exist"));
 
         ret = client.prefixExists(new ObsObject(ProductFamily.L1_SLICE, "key-not-exist"));
         assertFalse(ret);
-        verify(service, times(1)).getNbObjects(Mockito.eq("l1-slices"),Mockito.eq("key-not-exist"));
+        verify(service, times(1)).getNbObjects(eq("l1-slices"), eq("key-not-exist"));
     }
 
     /**
@@ -160,12 +159,12 @@ public class S3ObsClientTest {
     @Test
     public void testDownloadObject() throws ObsServiceException, SdkClientException {
         client.downloadObject(new ObsDownloadObject(ProductFamily.AUXILIARY_FILE, "key-exist", "target-dir"));
-        verify(service, times(1)).downloadObjectsWithPrefix(Mockito.eq("auxiliary-files"),
-                Mockito.eq("key-exist"), Mockito.eq("target-dir"), Mockito.eq(false));
+        verify(service, times(1)).downloadObjectsWithPrefix(eq("auxiliary-files"),
+                eq("key-exist"), eq("target-dir"), eq(false));
 
         client.downloadObject(new ObsDownloadObject(ProductFamily.EDRS_SESSION, "key-not-exist", "target-dir"));
-        verify(service, times(1)).downloadObjectsWithPrefix(Mockito.eq("edrs-sessions"),
-                Mockito.eq("key-not-exist"), Mockito.eq("target-dir"), Mockito.eq(true));
+        verify(service, times(1)).downloadObjectsWithPrefix(eq("edrs-sessions"),
+                eq("key-not-exist"), eq("target-dir"), eq(true));
     }
     
     /**
@@ -178,16 +177,16 @@ public class S3ObsClientTest {
     public void testUploadObjectDirectory() throws ObsServiceException, SdkClientException, ObsException {
         client.uploadObject(new FileObsUploadObject(ProductFamily.L0_ACN, "key-exist", new File("target")));
         
-        verify(service, times(1)).uploadDirectory(Mockito.eq("l0-acns"),
-                Mockito.eq("key-exist"), Mockito.eq(new File("target")));
+        verify(service, times(1)).uploadDirectory(eq("l0-acns"),
+                eq("key-exist"), eq(new File("target")));
         verify(service, times(1)).uploadFile(Mockito.anyString(),
-                Mockito.anyString(), Mockito.any()); // for the 1st md5sum
+                Mockito.anyString(), any()); // for the 1st md5sum
         
         client.uploadObject(new FileObsUploadObject(ProductFamily.L0_ACN, "key-not-exist", new File("target")));
-        verify(service, times(1)).uploadDirectory(Mockito.eq("l0-acns"),
-                Mockito.eq("key-not-exist"), Mockito.eq(new File("target")));
+        verify(service, times(1)).uploadDirectory(eq("l0-acns"),
+                eq("key-not-exist"), eq(new File("target")));
         verify(service, times(2)).uploadFile(Mockito.anyString(),
-                Mockito.anyString(), Mockito.any()); // for the 2nd md5sum
+                Mockito.anyString(), any()); // for the 2nd md5sum
     }
     
     /**
@@ -200,11 +199,34 @@ public class S3ObsClientTest {
     public void testUploadObjectFile() throws ObsServiceException, SdkClientException, ObsException {
         client.uploadObject(new FileObsUploadObject(ProductFamily.L0_ACN, "key-exist", new File("pom.xml")));
         verify(service, times(1))
-        	.uploadFile(Mockito.eq("l0-acns"), Mockito.eq("key-exist"), Mockito.eq(new File("pom.xml")));
+        	.uploadFile(eq("l0-acns"), eq("key-exist"), eq(new File("pom.xml")));
         verify(service, never()).uploadDirectory(Mockito.anyString(),
-                Mockito.anyString(), Mockito.any());
+                Mockito.anyString(), any());
     }
-    
+
+    @Test
+    public void testUploadStream() throws IOException, ObsServiceException, S3SdkClientException {
+    	try(InputStream in = getClass().getResourceAsStream("/testfile1.txt")) {
+			client.uploadObject(new StreamObsUploadObject(ProductFamily.L0_ACN, "key-exist", in, 100));
+		}
+
+		verify(service, times(1))
+				.uploadStream(eq("l0-acns"), eq("key-exist"), any(InputStream.class), anyLong());
+	}
+
+	@Test
+	public void testUploadStreamNoContent() throws IOException, ObsServiceException, S3SdkClientException, AbstractCodedException, ObsEmptyFileException {
+    	thrown.expect(ObsEmptyFileException.class);
+    	thrown.expectMessage("key-exist");
+
+		try (InputStream in = getClass().getResourceAsStream("/testfile1.txt")) {
+			client.uploadStreams(Collections.singletonList(new StreamObsUploadObject(ProductFamily.L0_ACN, "key-exist", in, 0)), ReportingFactory.NULL);
+		}
+
+		verify(service, times(0))
+				.uploadStream(any(), any(), any(InputStream.class), anyLong());
+	}
+
 	@Test
 	public void testGetListOfObjectsOfTimeFrameOfFamilyOneExists() throws ObsServiceException, SdkClientException {
 
@@ -228,7 +250,7 @@ public class S3ObsClientTest {
 		assertEquals(1, returnedObjs.size());
 		assertEquals("obj1", returnedObjs.get(0).getKey());
 		verify(service, times(1)).listObjectsFromBucket("l0-slices");
-		verify(service, never()).listNextBatchOfObjectsFromBucket(Mockito.anyString(), Mockito.any());
+		verify(service, never()).listNextBatchOfObjectsFromBucket(Mockito.anyString(), any());
 	}
 
 	@Test
@@ -253,7 +275,7 @@ public class S3ObsClientTest {
 
 		assertEquals(0, returnedObjs.size());
 		verify(service, times(1)).listObjectsFromBucket("l0-slices");
-		verify(service, never()).listNextBatchOfObjectsFromBucket(Mockito.anyString(), Mockito.any());
+		verify(service, never()).listNextBatchOfObjectsFromBucket(Mockito.anyString(), any());
 	}
 
 	@Test
@@ -300,7 +322,7 @@ public class S3ObsClientTest {
 		assertEquals("obj1", returnedObjs.get(0).getKey());
 		assertEquals("obj3", returnedObjs.get(1).getKey());
 		verify(service, times(1)).listObjectsFromBucket(Mockito.anyString());
-		verify(service, times(1)).listNextBatchOfObjectsFromBucket(Mockito.anyString(), Mockito.any());
+		verify(service, times(1)).listNextBatchOfObjectsFromBucket(Mockito.anyString(), any());
 	}
 	
 	@Test

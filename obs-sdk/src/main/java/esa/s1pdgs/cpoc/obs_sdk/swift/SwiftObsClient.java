@@ -6,13 +6,11 @@ import java.io.InputStream;
 import java.io.PrintWriter;
 import java.net.URL;
 import java.nio.file.Files;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Date;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.regex.Pattern;
 
+import esa.s1pdgs.cpoc.obs_sdk.*;
+import esa.s1pdgs.cpoc.obs_sdk.s3.S3SdkClientException;
 import org.javaswift.joss.client.factory.AccountConfig;
 import org.javaswift.joss.client.factory.AccountFactory;
 import org.javaswift.joss.model.Account;
@@ -20,15 +18,6 @@ import org.javaswift.joss.model.StoredObject;
 
 import esa.s1pdgs.cpoc.common.ProductFamily;
 import esa.s1pdgs.cpoc.common.errors.obs.ObsException;
-import esa.s1pdgs.cpoc.obs_sdk.AbstractObsClient;
-import esa.s1pdgs.cpoc.obs_sdk.ObsClient;
-import esa.s1pdgs.cpoc.obs_sdk.ObsConfigurationProperties;
-import esa.s1pdgs.cpoc.obs_sdk.ObsDownloadObject;
-import esa.s1pdgs.cpoc.obs_sdk.ObsObject;
-import esa.s1pdgs.cpoc.obs_sdk.ObsServiceException;
-import esa.s1pdgs.cpoc.obs_sdk.FileObsUploadObject;
-import esa.s1pdgs.cpoc.obs_sdk.SdkClientException;
-import esa.s1pdgs.cpoc.obs_sdk.ValidArgumentAssertion;
 import esa.s1pdgs.cpoc.obs_sdk.report.ReportingProductFactory;
 import esa.s1pdgs.cpoc.report.Reporting;
 import esa.s1pdgs.cpoc.report.ReportingMessage;
@@ -150,11 +139,25 @@ public class SwiftObsClient extends AbstractObsClient {
         }
         uploadMd5Sum(object, fileList);
 	}
-	
+
+	/**
+	 * @param object
+	 * @throws ObsServiceException
+	 * @throws SwiftSdkClientException
+	 *
+	 *  Note: The stream is not closed here. It should be closed after upload.
+	 *
+	 */
+	@Override
+	protected void uploadObject(StreamObsUploadObject object) throws ObsServiceException, SwiftSdkClientException {
+		String md5 = swiftObsServices.uploadStream(getBucketFor(object.getFamily()), object.getKey(), object.getInput(), object.getContentLength());
+		uploadMd5Sum(object, Arrays.asList(md5));
+	}
+
 	private void uploadMd5Sum(final ObsObject object, final List<String> fileList) throws ObsServiceException, SwiftSdkClientException {
 		File file;
 		try {
-			file = File.createTempFile(object.getKey(), AbstractObsClient.MD5SUM_SUFFIX);
+			file = File.createTempFile(object.getKey(), Md5.MD5SUM_SUFFIX);
 			try(PrintWriter writer = new PrintWriter(file)) {
 				for (final String fileInfo : fileList) {
 					writer.println(fileInfo);
@@ -163,7 +166,7 @@ public class SwiftObsClient extends AbstractObsClient {
 		} catch (final IOException e) {
 			throw new SwiftObsServiceException(getBucketFor(object.getFamily()), object.getKey(), "Could not store md5sum temp file", e);
 		}
-		swiftObsServices.uploadFile(getBucketFor(object.getFamily()), object.getKey() + AbstractObsClient.MD5SUM_SUFFIX, file);
+		swiftObsServices.uploadFile(getBucketFor(object.getFamily()), Md5.md5KeyFor(object), file);
 		
 		try {
 			Files.delete(file.toPath());
