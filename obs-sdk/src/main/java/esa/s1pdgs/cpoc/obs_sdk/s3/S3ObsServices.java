@@ -502,9 +502,9 @@ public class S3ObsServices {
 			if (childs != null) {
 				for (final File child : childs) {
 					if (child.isDirectory()) {
-						fileList.addAll(uploadDirectory(bucketName, keyName + File.separator + child.getName(), child));
+						fileList.addAll(uploadDirectory(bucketName, keyName + "/" + child.getName(), child));
 					} else {
-						fileList.add(uploadFile(bucketName, keyName + File.separator + child.getName(), child));
+						fileList.add(uploadFile(bucketName, keyName + "/" + child.getName(), child));
 					}
 				}
 			}

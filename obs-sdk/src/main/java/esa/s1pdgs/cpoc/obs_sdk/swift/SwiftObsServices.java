@@ -376,10 +376,10 @@ public class SwiftObsServices {
                 for (File child : childs) {
                     if (child.isDirectory()) {
                         fileList.addAll(uploadDirectory(containerName,
-                        		keyName + File.separator + child.getName(), child));
+                        		keyName + "/" + child.getName(), child));
                     } else {
                         fileList.add(uploadFile(containerName,
-                        		keyName + File.separator + child.getName(), child));
+                        		keyName + "/" + child.getName(), child));
                     }
                 }
             }           
