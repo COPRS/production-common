@@ -7,10 +7,12 @@ import java.io.InputStream;
 public final class InboxAdapterEntry implements Closeable {
 	private final String key;
 	private final InputStream in;
-	
-	public InboxAdapterEntry(final String key, final InputStream in) {
+	private final long size;
+
+	public InboxAdapterEntry(final String key, final InputStream in, final long size) {
 		this.key = key;
 		this.in = in;
+		this.size = size;
 	}
 
 	public final String key() {
@@ -20,6 +22,10 @@ public final class InboxAdapterEntry implements Closeable {
 	public final InputStream inputStream() {
 		return in;
 	}
+	
+	public final long size() {
+		return size;
+	}
 
 	@Override
 	public final void close() throws IOException {
@@ -28,6 +34,6 @@ public final class InboxAdapterEntry implements Closeable {
 
 	@Override
 	public String toString() {
-		return "InboxAdapterEntry [key=" + key + ", in=" + in + "]";
+		return "InboxAdapterEntry [key=" + key + ", in=" + in + ", size=" + size + "]";
 	}
 }

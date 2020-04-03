@@ -60,7 +60,7 @@ public class ObsAdapter {
 	
 	private final List<StreamObsUploadObject> toUploadObjects(final ProductFamily family, final List<InboxAdapterEntry> entries) {
 		return entries.stream()
-			.map(e -> new StreamObsUploadObject(family, e.key(), e.inputStream()))
+			.map(e -> new StreamObsUploadObject(family, e.key(), e.inputStream(), e.size()))
 			.collect(Collectors.toList());
 	}
 }
