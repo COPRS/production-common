@@ -1,4 +1,4 @@
-package esa.s1pdgs.cpoc.disseminator.service;
+package esa.s1pdgs.cpoc.disseminator;
 
 import static org.junit.Assert.assertEquals;
 
@@ -13,7 +13,6 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.junit4.SpringRunner;
 
-import esa.s1pdgs.cpoc.appstatus.AppStatus;
 import esa.s1pdgs.cpoc.common.ProductCategory;
 import esa.s1pdgs.cpoc.common.ProductFamily;
 import esa.s1pdgs.cpoc.disseminator.config.DisseminationProperties;
@@ -22,6 +21,11 @@ import esa.s1pdgs.cpoc.disseminator.config.DisseminationProperties.OutboxConfigu
 import esa.s1pdgs.cpoc.disseminator.config.DisseminationProperties.OutboxConfiguration.Protocol;
 import esa.s1pdgs.cpoc.errorrepo.ErrorRepoAppender;
 import esa.s1pdgs.cpoc.mqi.client.config.MqiConfigurationProperties;
+import esa.s1pdgs.cpoc.mqi.model.queue.ProductionEvent;
+import esa.s1pdgs.cpoc.mqi.model.rest.GenericMessageDto;
+import esa.s1pdgs.cpoc.obs_sdk.ObsObject;
+import esa.s1pdgs.cpoc.obs_sdk.ObsServiceException;
+import esa.s1pdgs.cpoc.obs_sdk.SdkClientException;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest
@@ -62,7 +66,7 @@ public class TestApplication {
 	
 	@Test
 	public final void testConfigsFor() {
-		final DisseminationService uut = new DisseminationService(null, null, properties, ErrorRepoAppender.NULL, AppStatus.NULL);
+		final DisseminationTriggerListener<ProductionEvent> uut = new DisseminationTriggerListener<>(null, properties, ErrorRepoAppender.NULL);
 		
 		// noting should be configured for EDRS_SESSION
 		assertEquals(Collections.emptyList(), uut.configsFor(ProductFamily.EDRS_SESSION));
@@ -70,29 +74,27 @@ public class TestApplication {
 		final List<DisseminationTypeConfiguration> actual = uut.configsFor(ProductFamily.AUXILIARY_FILE);
 		assertEquals(1, actual.size());
 	}
-
-// FIXME @jedelmann: Get this running again
 	
-//	@Test
-//	public final void testOnMessage_OnNotConfiguredFamily_ShallDoNothing() {	
-//		final DisseminationService uut = new DisseminationService(null, null, properties, ErrorRepoAppender.NULL, AppStatus.NULL);
-//
-//		final ProductionEvent fakeProduct = new ProductionEvent("fakeProduct", "my/key", ProductFamily.BLANK);
-//		final GenericMessageDto<ProductionEvent> fakeMessage = new GenericMessageDto<ProductionEvent>(123, "myKey", fakeProduct); 
-//		uut.onMessage(fakeMessage);
-//	}
-//	
-//	@Test
-//	public final void testOnMessage_OnConfiguredFamily_ShallEvaluatedConfiguredRegex() {
-//		final FakeObsClient fakeObsClient = new FakeObsClient() {
-//			@Override public final boolean exists(final ObsObject object) throws SdkClientException, ObsServiceException {
-//				return true;
-//			}			
-//		};		
-//		final DisseminationService uut = new DisseminationService(null, fakeObsClient, properties, ErrorRepoAppender.NULL, AppStatus.NULL);
-//
-//		final ProductionEvent fakeProduct = new ProductionEvent("fakeProduct", "my/key", ProductFamily.BLANK);
-//		final GenericMessageDto<ProductionEvent> fakeMessage = new GenericMessageDto<ProductionEvent>(123, "myKey", fakeProduct); 
-//		uut.onMessage(fakeMessage);
-//	}
+	@Test
+	public final void testOnMessage_OnNotConfiguredFamily_ShallDoNothing() {	
+		final DisseminationTriggerListener<ProductionEvent> uut = new DisseminationTriggerListener<>(null, properties, ErrorRepoAppender.NULL);
+
+		final ProductionEvent fakeProduct = new ProductionEvent("fakeProduct", "my/key", ProductFamily.BLANK);
+		final GenericMessageDto<ProductionEvent> fakeMessage = new GenericMessageDto<ProductionEvent>(123, "myKey", fakeProduct); 
+		uut.onMessage(fakeMessage);
+	}
+	
+	@Test
+	public final void testOnMessage_OnConfiguredFamily_ShallEvaluatedConfiguredRegex() {
+		final FakeObsClient fakeObsClient = new FakeObsClient() {
+			@Override public final boolean exists(final ObsObject object) throws SdkClientException, ObsServiceException {
+				return true;
+			}			
+		};		
+		final DisseminationTriggerListener<ProductionEvent> uut = new DisseminationTriggerListener<>(fakeObsClient, properties, ErrorRepoAppender.NULL);
+
+		final ProductionEvent fakeProduct = new ProductionEvent("fakeProduct", "my/key", ProductFamily.BLANK);
+		final GenericMessageDto<ProductionEvent> fakeMessage = new GenericMessageDto<ProductionEvent>(123, "myKey", fakeProduct); 
+		uut.onMessage(fakeMessage);
+	}
 }

@@ -127,7 +127,7 @@ public class GenericMqiClient implements MqiClient {
             retries++;
             final String uri = nextUri(category);
             try {
-            	final Class<T> clazz = category.getDtoClass();
+            	final Class<T > clazz = category.getDtoClass();
             	final ResolvableType type = ResolvableType.forClassWithGenerics(
             			GenericMessageDto.class, 
             			clazz
