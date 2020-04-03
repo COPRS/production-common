@@ -66,8 +66,6 @@ public class TestApplication {
 	
 	@Test
 	public final void testConfigsFor() {
-		/////final DisseminationService uut = new DisseminationService(null, null, properties, ErrorRepoAppender.NULL, AppStatus.NULL);
-		
 		final DisseminationTriggerListener<ProductionEvent> uut = new DisseminationTriggerListener<>(null, properties, ErrorRepoAppender.NULL);
 		
 		// noting should be configured for EDRS_SESSION
