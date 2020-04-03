@@ -1,20 +1,5 @@
 package esa.s1pdgs.cpoc.ingestion.trigger.inbox;
 
-import java.io.File;
-import java.net.URI;
-import java.net.URISyntaxException;
-import java.nio.file.Paths;
-import java.util.Collection;
-import java.util.Date;
-import java.util.HashSet;
-import java.util.Set;
-import java.util.stream.Collectors;
-
-import org.apache.commons.io.FileUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.util.StringUtils;
-
 import esa.s1pdgs.cpoc.common.ProductFamily;
 import esa.s1pdgs.cpoc.common.utils.LogUtils;
 import esa.s1pdgs.cpoc.ingestion.trigger.entity.InboxEntry;
@@ -27,6 +12,15 @@ import esa.s1pdgs.cpoc.mqi.model.queue.IngestionJob;
 import esa.s1pdgs.cpoc.report.Reporting;
 import esa.s1pdgs.cpoc.report.ReportingMessage;
 import esa.s1pdgs.cpoc.report.ReportingUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.util.StringUtils;
+
+import java.util.Collection;
+import java.util.Date;
+import java.util.HashSet;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 public final class Inbox {
 	private static final Logger LOG = LoggerFactory.getLogger(Inbox.class);
@@ -119,7 +113,7 @@ public final class Inbox {
 		return "Inbox [inboxAdapter=" + inboxAdapter + ", filter=" + filter + ", client=" + client + "]";
 	}
 	
-	private final void handleEntry(final InboxEntry entry) {
+	private void handleEntry(final InboxEntry entry) {
 				
 		final Reporting reporting = ReportingUtils.newReportingBuilder()
 				.newReporting("IngestionTrigger");
@@ -153,15 +147,15 @@ public final class Inbox {
 		}		
 	}
 	
-	private final InboxEntry persist(final InboxEntry toBePersisted) {
+	private InboxEntry persist(final InboxEntry toBePersisted) {
 		final InboxEntry persisted = ingestionTriggerServiceTransactional.add(toBePersisted);
 		LOG.debug("Added {} to persistence", persisted);
 		return persisted;
 	}
 	
-	private final String summarize(final Collection<InboxEntry> entries) {
+	private String summarize(final Collection<InboxEntry> entries) {
 		final String summary = entries.stream()
-			.map(p -> p.getName())
+			.map(InboxEntry::getName)
 			.collect(Collectors.joining(", "));
 		
 		if (StringUtils.isEmpty(summary)) {
