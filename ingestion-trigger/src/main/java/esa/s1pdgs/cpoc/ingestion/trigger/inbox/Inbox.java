@@ -1,16 +1,11 @@
 package esa.s1pdgs.cpoc.ingestion.trigger.inbox;
 
-import java.io.File;
-import java.net.URI;
-import java.net.URISyntaxException;
-import java.nio.file.Paths;
 import java.util.Collection;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import org.apache.commons.io.FileUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.util.StringUtils;
@@ -119,8 +114,7 @@ public final class Inbox {
 		return "Inbox [inboxAdapter=" + inboxAdapter + ", filter=" + filter + ", client=" + client + "]";
 	}
 	
-	private final void handleEntry(final InboxEntry entry) {
-				
+	private final void handleEntry(final InboxEntry entry) {				
 		final Reporting reporting = ReportingUtils.newReportingBuilder()
 				.newReporting("IngestionTrigger");
 			
@@ -136,13 +130,17 @@ public final class Inbox {
 		}
 		
 		try {
-			LOG.debug("Publishing new entry to kafka queue: {}", entry);					
-			final IngestionJob dto = new IngestionJob(family, entry.getName());
-		    dto.setRelativePath(entry.getRelativePath());
-		    dto.setPickupBaseURL(entry.getPickupURL());
-		    dto.setProductName(entry.getName());
-		    dto.setUid(reporting.getUid());
-			client.publish(dto);	
+			LOG.debug("Publishing new entry to kafka queue: {}", entry);		    
+			client.publish(
+					new IngestionJob(
+						family, 
+						entry.getName(), 
+						entry.getPickupURL(), 
+						entry.getRelativePath(), 
+						entry.getSize(),
+						reporting.getUid()
+					)					
+			);	
 			reporting.end(
 					new IngestionTriggerReportingOutput(entry.getPickupURL() + "/" + entry.getRelativePath()), 
 					new ReportingMessage("File %s created IngestionJob", entry.getName())

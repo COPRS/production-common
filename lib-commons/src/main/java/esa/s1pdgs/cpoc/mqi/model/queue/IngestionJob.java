@@ -1,6 +1,7 @@
 package esa.s1pdgs.cpoc.mqi.model.queue;
 
 import java.util.Objects;
+import java.util.UUID;
 
 import esa.s1pdgs.cpoc.common.ProductFamily;
 
@@ -21,13 +22,27 @@ public class IngestionJob extends AbstractMessage {
 	 */
 	private String productName;
 	
+	private long productSizeByte = 0L;
+	
 	
 	public IngestionJob() {
 		super();
 	}
 
-	public IngestionJob(final ProductFamily family, final String keyObjectStorage) {
-		super(family, keyObjectStorage);
+	public IngestionJob(
+			final ProductFamily family, 
+			final String productName, 
+			final String pickupBaseURL, 
+			final String relativePath, 	
+			final long productSizeByte,
+			final UUID uuid
+	) {
+		super(family, productName);
+		this.pickupBaseURL 		= pickupBaseURL;
+		this.relativePath 		= relativePath;
+		this.productName 		= productName;
+		this.productSizeByte 	= productSizeByte;
+		this.uid				= uuid;
 	}
 
 	public String getPickupBaseURL() {
@@ -50,14 +65,22 @@ public class IngestionJob extends AbstractMessage {
 		return productName;
 	}
 
-	public void setProductName(String productName) {
+	public void setProductName(final String productName) {
 		this.productName = productName;
+	}
+	
+	public long getProductSizeByte() {
+		return productSizeByte;
+	}
+
+	public void setProductSizeByte(final long productSizeByte) {
+		this.productSizeByte = productSizeByte;
 	}
 
 	@Override
 	public int hashCode() {
 		return Objects.hash(creationDate, hostname, keyObjectStorage, pickupBaseURL, productFamily,
-				relativePath, productName, uid);
+				relativePath, productName, uid, productSizeByte);
 	}
 
 	@Override
@@ -79,6 +102,7 @@ public class IngestionJob extends AbstractMessage {
 				&& productFamily == other.productFamily 
 				&& Objects.equals(uid, other.uid)
 				&& Objects.equals(relativePath, other.relativePath)
+				&& productSizeByte == other.productSizeByte 
 				&& Objects.equals(productName, other.productName);
 	}
 
@@ -86,6 +110,7 @@ public class IngestionJob extends AbstractMessage {
 	public String toString() {
 		return "IngestionJob [productFamily=" + productFamily + ", keyObjectStorage=" + keyObjectStorage
 				+ ", creationDate=" + creationDate + ", hostname=" + hostname + ", relativePath=" + relativePath
-				+ ", pickupBaseURL=" + pickupBaseURL + ", productName=" + productName + ", uid=" + uid +"]";
+				+ ", pickupBaseURL=" + pickupBaseURL + ", productName=" + productName + ", uid=" + uid +
+				", productSizeByte="+productSizeByte+"]";
 	}	
 }

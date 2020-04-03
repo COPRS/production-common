@@ -2,7 +2,6 @@ package esa.s1pdgs.cpoc.ingestion.worker.service;
 
 import java.io.File;
 import java.net.URI;
-import java.net.URISyntaxException;
 import java.nio.file.Paths;
 import java.util.Date;
 import java.util.List;
@@ -27,7 +26,9 @@ import esa.s1pdgs.cpoc.common.utils.LogUtils;
 import esa.s1pdgs.cpoc.errorrepo.ErrorRepoAppender;
 import esa.s1pdgs.cpoc.errorrepo.model.rest.FailedProcessingDto;
 import esa.s1pdgs.cpoc.ingestion.worker.config.IngestionWorkerServiceConfigurationProperties;
-import esa.s1pdgs.cpoc.ingestion.worker.product.IngestionResult;
+import esa.s1pdgs.cpoc.ingestion.worker.inbox.InboxAdapter;
+import esa.s1pdgs.cpoc.ingestion.worker.inbox.InboxAdapterManager;
+import esa.s1pdgs.cpoc.ingestion.worker.product.IngestionJobs;
 import esa.s1pdgs.cpoc.ingestion.worker.product.Product;
 import esa.s1pdgs.cpoc.ingestion.worker.product.ProductService;
 import esa.s1pdgs.cpoc.ingestion.worker.product.report.IngestionWorkerReportingOutput;
@@ -53,6 +54,7 @@ public class IngestionWorkerService implements MqiListener<IngestionJob> {
 	private final IngestionWorkerServiceConfigurationProperties properties;
 	private final ProductService productService;
 	private final AppStatus appStatus;
+	private final InboxAdapterManager inboxAdapterManager;
 
 	@Autowired
 	public IngestionWorkerService(
@@ -60,13 +62,15 @@ public class IngestionWorkerService implements MqiListener<IngestionJob> {
 			final ErrorRepoAppender errorRepoAppender,
 			final IngestionWorkerServiceConfigurationProperties properties, 
 			final ProductService productService,
-			final AppStatus appStatus
+			final AppStatus appStatus,
+			final InboxAdapterManager inboxAdapterManager
 	) {
 		this.mqiClient = mqiClient;
 		this.errorRepoAppender = errorRepoAppender;
 		this.properties = properties;
 		this.productService = productService;
 		this.appStatus = appStatus;
+		this.inboxAdapterManager = inboxAdapterManager;
 	}
 	
 	@PostConstruct
@@ -98,14 +102,20 @@ public class IngestionWorkerService implements MqiListener<IngestionJob> {
 				new ReportingMessage("Start processing of %s", ingestion.getProductName())
 		);
 
-		try {				
-			final IngestionResult result = identifyAndUpload(message, ingestion, reporting);
+		try {		
+			final URI productUri = IngestionJobs.toUri(ingestion);
+			
+			final InboxAdapter inboxAdapter = inboxAdapterManager.getInboxAdapterFor(productUri);
+			
+			final List<Product<IngestionEvent>> result = identifyAndUpload(message, inboxAdapter, ingestion, reporting);
 			final Date ingestionFinishedDate = new Date();
-			publish(result.getIngestedProducts(), message, reporting.getUid());
+			publish(result, message, reporting.getUid());
 			delete(ingestion);			
+			
+			inboxAdapter.delete(productUri);
 			reporting.end(
 					new IngestionWorkerReportingOutput(ingestion.getKeyObjectStorage(), ingestionFinishedDate),
-					new ReportingMessage(result.getTransferAmount(),"End processing of %s", ingestion.getKeyObjectStorage())
+					new ReportingMessage(ingestion.getProductSizeByte(),"End processing of %s", ingestion.getKeyObjectStorage())
 			);
 		} catch (final Exception e) {
 			reporting.error(new ReportingMessage("Error processing of %s: %s", ingestion.getKeyObjectStorage(),  LogUtils.toString(e)));
@@ -124,16 +134,17 @@ public class IngestionWorkerService implements MqiListener<IngestionJob> {
 		));
 	}
 
-	final IngestionResult identifyAndUpload(
+	final List<Product<IngestionEvent>> identifyAndUpload(
 			final GenericMessageDto<IngestionJob> message, 
+			final InboxAdapter inboxAdapter,
 			final IngestionJob ingestion,
 			final ReportingFactory reportingFactory
 	) throws Exception {
 		try {
-			return productService.ingest(ingestion.getProductFamily(), ingestion, reportingFactory);
+			return productService.ingest(ingestion.getProductFamily(), inboxAdapter, ingestion, reportingFactory);
 		} 
 		catch (final Exception e) {
-			productService.markInvalid(ingestion, reportingFactory);
+			productService.markInvalid(inboxAdapter, ingestion, reportingFactory);
 			message.getBody().setProductFamily(ProductFamily.INVALID);
 			throw e;
 		}
@@ -161,15 +172,23 @@ public class IngestionWorkerService implements MqiListener<IngestionJob> {
 	}
 
 	final void delete(final IngestionJob ingestion)
-			throws InterruptedException, URISyntaxException {
-		URI ingestionBaseURL = new URI(ingestion.getPickupBaseURL());
-		if (!ingestionBaseURL.getScheme().equals("file")) {
+			throws InterruptedException,  InternalErrorException {
+		final URI uri = IngestionJobs.toUri(ingestion);
+		if (!uri.getScheme().equals("file")) {
 			LOG.debug("skipping deletion of file {}",ingestion.getProductName());
 			return;
 		}		
-		final File file = Paths.get(ingestionBaseURL).resolve(ingestion.getRelativePath()).toFile();
+		final File file = Paths.get(uri)
+				.resolve(ingestion.getRelativePath())
+				.toFile();
+		
 		if (file.exists()) {
-			FileUtils.deleteWithRetries(file, properties.getMaxRetries(), properties.getTempoRetryMs());
+			LOG.debug("Deleting file {}", file);
+			FileUtils.deleteWithRetries(
+					file, 
+					properties.getMaxRetries(), 
+					properties.getTempoRetryMs()
+			);
 		}
 	}	
 }

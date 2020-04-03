@@ -32,7 +32,7 @@ public class ITXbipClient {
 	public final void testFoo() throws Exception {
 		final XbipClientConfiguration c = new XbipClientConfiguration(config);		
 		final XbipClientFactory factory = c.xbipClientFactory();		
-		final XbipClient uut = factory.newXbipClient(new URI("https://cgs02.sentinel1.eo.esa.int/RETRANSFER/"));
+		final XbipClient uut = factory.newXbipClient(new URI("https://cgs01.sentinel1.eo.esa.int/NOMINAL/"));
 		
 		uut.list(XbipEntryFilter.ALLOW_ALL).stream()
 			.forEach(e -> System.out.println(e));

@@ -1,6 +1,6 @@
 package esa.s1pdgs.cpoc.ingestion.worker.product;
 
-import java.io.File;
+import java.net.URI;
 import java.util.Objects;
 
 import esa.s1pdgs.cpoc.common.ProductFamily;
@@ -8,9 +8,18 @@ import esa.s1pdgs.cpoc.mqi.model.queue.AbstractMessage;
 
 public class Product<E extends AbstractMessage> {	
 	private ProductFamily family;
-	private File file;
+	private URI uri;
 	private E dto;
-	
+		
+	public Product() {
+	}
+
+	public Product(final ProductFamily family, final URI uri, final E dto) {
+		this.family = family;
+		this.uri = uri;
+		this.dto = dto;
+	}
+
 	public ProductFamily getFamily() {
 		return family;
 	}
@@ -27,17 +36,10 @@ public class Product<E extends AbstractMessage> {
 		this.dto = dto;
 	}
 
-	public File getFile() {
-		return file;
-	}
-
-	public void setFile(final File file) {
-		this.file = file;
-	}
 	
 	@Override
 	public int hashCode() {
-		return Objects.hash(dto, family, file);
+		return Objects.hash(dto, family, uri);
 	}
 
 	@Override
@@ -52,11 +54,13 @@ public class Product<E extends AbstractMessage> {
 			return false;
 		}
 		final Product other = (Product) obj;
-		return Objects.equals(dto, other.dto) && family == other.family && Objects.equals(file, other.file);
+		return Objects.equals(dto, other.dto) && 
+				family == other.family && 
+				Objects.equals(uri, other.uri);
 	}
 
 	@Override
 	public String toString() {
-		return "Product [family=" + family + ", file=" + file + ", dto=" + dto + "]";
+		return "Product [family=" + family + ", uri=" + uri + ", dto=" + dto + "]";
 	}
 }
