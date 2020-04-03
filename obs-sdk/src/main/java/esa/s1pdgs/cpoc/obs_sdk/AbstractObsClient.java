@@ -32,8 +32,6 @@ import static esa.s1pdgs.cpoc.obs_sdk.AbstractObsClient.VoidCallable.wrap;
  * @author Viveris Technologies
  */
 public abstract class AbstractObsClient implements ObsClient {
-	public static final String MD5SUM_SUFFIX = ".md5sum";
-	
 	private final ObsConfigurationProperties configuration;
 	private final ReportingProductFactory reportingProductFactory;
 	
@@ -300,7 +298,7 @@ public abstract class AbstractObsClient implements ObsClient {
     public void validate(final ObsObject object) throws ObsServiceException, ObsValidationException {
 		ValidArgumentAssertion.assertValidArgument(object);			
 		try {
-			final Map<String, InputStream> isMap = getAllAsInputStream(object.getFamily(), object.getKey() + MD5SUM_SUFFIX);
+			final Map<String, InputStream> isMap = getAllAsInputStream(object.getFamily(), Md5.md5KeyFor(object));
 			if (isMap.size() > 1) {
 				Utils.closeQuietly(isMap.values());
 				throw new ObsValidationException("More than one checksum file returned");
@@ -308,7 +306,7 @@ public abstract class AbstractObsClient implements ObsClient {
 			if (isMap.isEmpty()) {
 				throw new ObsValidationException("Checksum file not found for: {} of family {}", object.getKey(), object.getFamily());
 			} 
-			try(final InputStream is = isMap.get(object.getKey() + MD5SUM_SUFFIX)) {
+			try(final InputStream is = isMap.get(Md5.md5KeyFor(object))) {
 				final Map<String,String> md5sums = collectMd5Sums(object);
 				try(BufferedReader reader = new BufferedReader(new InputStreamReader(is))) {
 					String line;

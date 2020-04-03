@@ -12,6 +12,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
+import esa.s1pdgs.cpoc.obs_sdk.Md5;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.util.CollectionUtils;
@@ -193,7 +194,7 @@ public class S3ObsServices {
 				final ObjectListing objectListing = s3client.listObjects(bucketName, prefixKey);
 				if (objectListing != null && !CollectionUtils.isEmpty(objectListing.getObjectSummaries())) {
 					for (final S3ObjectSummary s : objectListing.getObjectSummaries()) {
-						if (!s.getKey().endsWith(AbstractObsClient.MD5SUM_SUFFIX)) {
+						if (!s.getKey().endsWith(Md5.MD5SUM_SUFFIX)) {
 							nbObj++;
 						}
 					}
@@ -246,8 +247,8 @@ public class S3ObsServices {
 
 				for (final String key : expectedFiles) {
 					// only download md5sum files if it has been explicitly asked for a md5sum file
-					if (!prefixKey.endsWith(AbstractObsClient.MD5SUM_SUFFIX)
-							&& key.endsWith(AbstractObsClient.MD5SUM_SUFFIX)) {
+					if (!prefixKey.endsWith(Md5.MD5SUM_SUFFIX)
+							&& key.endsWith(Md5.MD5SUM_SUFFIX)) {
 						continue;
 					}
 
@@ -314,7 +315,7 @@ public class S3ObsServices {
 	
 	List<String> getExpectedFiles(final String bucketName, final String prefixKey) throws S3ObsServiceException {
 
-		final String md5FileName = identifyMd5File(prefixKey);
+		final String md5FileName = Md5.md5KeyFor(prefixKey);
 		log(String.format("Try to list expected files from file %s", md5FileName));
 
 		final S3Object md5file = s3client.getObject(bucketName, md5FileName);
@@ -332,17 +333,6 @@ public class S3ObsServices {
 					String.format("Error getting expected files from file %s", md5FileName), e);
 		}
 		return result;
-	}
-	
-	String identifyMd5File(final String prefixKey) {
-		int index = prefixKey.length();
-		if (!(prefixKey.contains("raw") || prefixKey.contains("DSIB"))) {
-			index = prefixKey.indexOf('/');
-			if (index == -1) {
-				index = prefixKey.length();
-			}
-		}
-		return (prefixKey.substring(0, index) + AbstractObsClient.MD5SUM_SUFFIX);
 	}
 	
 	List<String> readMd5StreamAndGetFiles(final String prefixKey, final InputStream md5stream) throws IOException {
@@ -376,8 +366,8 @@ public class S3ObsServices {
 					: s3client.listNextBatchOfObjects(listing);
 			for (final S3ObjectSummary object : listing.getObjectSummaries()) {
 				// only download md5sum files if it has been explicitly asked for a md5sum file
-				if (!prefix.endsWith(AbstractObsClient.MD5SUM_SUFFIX)
-						&& object.getKey().endsWith(AbstractObsClient.MD5SUM_SUFFIX)) {
+				if (!prefix.endsWith(Md5.MD5SUM_SUFFIX)
+						&& object.getKey().endsWith(Md5.MD5SUM_SUFFIX)) {
 					continue;
 				}
 				result.add(object);
@@ -412,7 +402,7 @@ public class S3ObsServices {
 			try {
 				for (final S3ObjectSummary summary : getAll(bucketName, prefix)) {
 					final String key = summary.getKey();
-					if (!key.endsWith(AbstractObsClient.MD5SUM_SUFFIX)) {
+					if (!key.endsWith(Md5.MD5SUM_SUFFIX)) {
 						final ObjectMetadata objectMetadata = s3client.getObjectMetadata(bucketName, key);
 						result.put(key, objectMetadata.getETag());
 					}

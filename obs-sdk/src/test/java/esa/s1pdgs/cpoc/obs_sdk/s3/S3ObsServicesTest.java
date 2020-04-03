@@ -13,6 +13,7 @@ import com.amazonaws.services.s3.transfer.Upload;
 import com.amazonaws.services.s3.transfer.model.UploadResult;
 import esa.s1pdgs.cpoc.common.errors.InternalErrorException;
 import esa.s1pdgs.cpoc.common.utils.FileUtils;
+import esa.s1pdgs.cpoc.obs_sdk.Md5;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Rule;
@@ -601,25 +602,6 @@ public class S3ObsServicesTest {
         };
     }
     
-    @Test
-    public void testIdentifyMd5File() {
-    	
-    	String md5file1 = service.identifyMd5File("L20180724144436762001030/ch01/DCS_02_L20180724144436762001030_ch1_DSIB.xml");
-    	assertEquals("L20180724144436762001030/ch01/DCS_02_L20180724144436762001030_ch1_DSIB.xml.md5sum", md5file1);
-    	
-    	String md5file2 = service.identifyMd5File("L20180724144436762001030/ch01/DCS_02_L20180724144436762001030_ch1_DSDB_00035.raw");
-    	assertEquals("L20180724144436762001030/ch01/DCS_02_L20180724144436762001030_ch1_DSDB_00035.raw.md5sum", md5file2);
-    	
-    	String md5file3 = service.identifyMd5File("S1__AUX_WND_V20181002T210000_G20180929T181057.SAFE/");
-    	assertEquals("S1__AUX_WND_V20181002T210000_G20180929T181057.SAFE.md5sum", md5file3);
-    	
-    	String md5file4 = service.identifyMd5File("S1B_OPER_MPL_ORBPRE_20190711T200257_20190718T200257_0001.EOF");
-    	assertEquals("S1B_OPER_MPL_ORBPRE_20190711T200257_20190718T200257_0001.EOF.md5sum", md5file4);
-    	
-    	String md5file5 = service.identifyMd5File("S1__AUX_WND_V20181002T120000_G20180929T061310.SAFE/manifest.safe");
-    	assertEquals("S1__AUX_WND_V20181002T120000_G20180929T061310.SAFE.md5sum", md5file5);
-    }
-
 	@Test
 	public void testReadMd5StreamAndGetFiles_OneFile_1() throws IOException {
 

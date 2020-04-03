@@ -157,7 +157,7 @@ public class SwiftObsClient extends AbstractObsClient {
 	private void uploadMd5Sum(final ObsObject object, final List<String> fileList) throws ObsServiceException, SwiftSdkClientException {
 		File file;
 		try {
-			file = File.createTempFile(object.getKey(), AbstractObsClient.MD5SUM_SUFFIX);
+			file = File.createTempFile(object.getKey(), Md5.MD5SUM_SUFFIX);
 			try(PrintWriter writer = new PrintWriter(file)) {
 				for (final String fileInfo : fileList) {
 					writer.println(fileInfo);
@@ -166,7 +166,7 @@ public class SwiftObsClient extends AbstractObsClient {
 		} catch (final IOException e) {
 			throw new SwiftObsServiceException(getBucketFor(object.getFamily()), object.getKey(), "Could not store md5sum temp file", e);
 		}
-		swiftObsServices.uploadFile(getBucketFor(object.getFamily()), object.getKey() + AbstractObsClient.MD5SUM_SUFFIX, file);
+		swiftObsServices.uploadFile(getBucketFor(object.getFamily()), Md5.md5KeyFor(object), file);
 		
 		try {
 			Files.delete(file.toPath());

@@ -218,7 +218,7 @@ public class SwiftObsClientTest {
 	@Test
 	public void testUploadStreamNoContent() throws IOException, AbstractCodedException, ObsEmptyFileException, SwiftSdkClientException {
 		thrown.expect(ObsEmptyFileException.class);
-		thrown.expectMessage(endsWith("key-exist"));
+		thrown.expectMessage("key-exist");
 
 		try (InputStream in = getClass().getResourceAsStream("/testfile1.txt")) {
 			client.uploadStreams(Collections.singletonList(new StreamObsUploadObject(ProductFamily.L0_ACN, "key-exist", in, 0)), ReportingFactory.NULL);

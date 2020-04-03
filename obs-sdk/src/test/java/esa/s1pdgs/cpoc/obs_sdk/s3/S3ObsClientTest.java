@@ -93,7 +93,6 @@ public class S3ObsClientTest {
                 Mockito.anyString(), any());
 		doReturn("dummy").when(service).uploadStream(Mockito.anyString(),
 				Mockito.anyString(), any(InputStream.class), anyLong());
-        doReturn("dummy.md5sum").when(service).identifyMd5File(Mockito.anyString());
 
         // Mock configuration
         doReturn("auxiliary-files").when(configuration)

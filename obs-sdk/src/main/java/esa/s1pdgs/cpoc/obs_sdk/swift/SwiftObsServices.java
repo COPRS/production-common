@@ -12,6 +12,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
+import esa.s1pdgs.cpoc.obs_sdk.Md5;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.javaswift.joss.instructions.UploadInstructions;
@@ -120,7 +121,7 @@ public class SwiftObsServices {
 	       				}
 	       				lastNonSegmentName = o.getName();
                 		
-                		if (!o.getName().endsWith(AbstractObsClient.MD5SUM_SUFFIX)) {
+                		if (!o.getName().endsWith(Md5.MD5SUM_SUFFIX)) {
                 			nbObj++;
                 		}
                 	}
@@ -189,7 +190,7 @@ public class SwiftObsServices {
 	       				 lastNonSegmentName = object.getName();
 	       				 
 	       				 // only download md5sum files if it has been explicitly asked for a md5sum file
-	       				 if (!prefixKey.endsWith(AbstractObsClient.MD5SUM_SUFFIX) && object.getName().endsWith(AbstractObsClient.MD5SUM_SUFFIX)) {
+	       				 if (!prefixKey.endsWith(Md5.MD5SUM_SUFFIX) && object.getName().endsWith(Md5.MD5SUM_SUFFIX)) {
 	       					 continue;
 	       				 }
 	       				 
@@ -494,7 +495,7 @@ public class SwiftObsServices {
 					objects = container.list("", marker, MAX_RESULTS_PER_LIST);
 					for (StoredObject object : objects) {
 						marker = object.getName();
-						if (!object.getName().endsWith(AbstractObsClient.MD5SUM_SUFFIX)) {
+						if (!object.getName().endsWith(Md5.MD5SUM_SUFFIX)) {
 							result.add(object);
 						}
 					}
@@ -528,7 +529,7 @@ public class SwiftObsServices {
 			for (final StoredObject thisObject : batch) {
 				final String key = thisObject.getName();
 				// only download md5sum files if it has been explicitly asked for a md5sum file
-        		if (!prefix.endsWith(AbstractObsClient.MD5SUM_SUFFIX) && key.endsWith(AbstractObsClient.MD5SUM_SUFFIX)) {
+        		if (!prefix.endsWith(Md5.MD5SUM_SUFFIX) && key.endsWith(Md5.MD5SUM_SUFFIX)) {
    					continue;
    				}
 
