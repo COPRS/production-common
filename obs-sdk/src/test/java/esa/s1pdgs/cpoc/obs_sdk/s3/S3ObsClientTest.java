@@ -1,37 +1,34 @@
 package esa.s1pdgs.cpoc.obs_sdk.s3;
 
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
-import static org.mockito.ArgumentMatchers.*;
-import static org.mockito.Mockito.doReturn;
-import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
+import com.amazonaws.services.s3.model.ObjectListing;
+import com.amazonaws.services.s3.model.S3ObjectSummary;
+import esa.s1pdgs.cpoc.common.ProductFamily;
+import esa.s1pdgs.cpoc.common.errors.AbstractCodedException;
+import esa.s1pdgs.cpoc.common.errors.obs.ObsException;
+import esa.s1pdgs.cpoc.obs_sdk.*;
+import esa.s1pdgs.cpoc.obs_sdk.report.ReportingProductFactory;
+import esa.s1pdgs.cpoc.report.ReportingFactory;
+import org.junit.Before;
+import org.junit.Rule;
+import org.junit.Test;
+import org.junit.rules.ExpectedException;
+import org.mockito.Mock;
+import org.mockito.Mockito;
+import org.mockito.MockitoAnnotations;
 
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.time.Instant;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 
-import esa.s1pdgs.cpoc.obs_sdk.*;
-import org.junit.Before;
-import org.junit.Test;
-import org.mockito.Mock;
-import org.mockito.Mockito;
-import org.mockito.MockitoAnnotations;
-
-import com.amazonaws.services.s3.model.ObjectListing;
-import com.amazonaws.services.s3.model.S3ObjectSummary;
-
-import esa.s1pdgs.cpoc.common.ProductFamily;
-import esa.s1pdgs.cpoc.common.errors.AbstractCodedException;
-import esa.s1pdgs.cpoc.common.errors.obs.ObsException;
-import esa.s1pdgs.cpoc.obs_sdk.report.ReportingProductFactory;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.junit.Assert.*;
+import static org.mockito.ArgumentMatchers.*;
+import static org.mockito.Mockito.*;
 
 /**
  * Test the client Amazon S3
@@ -40,7 +37,10 @@ import esa.s1pdgs.cpoc.obs_sdk.report.ReportingProductFactory;
  */
 public class S3ObsClientTest {
 
-    /**
+	@Rule
+	public ExpectedException thrown = ExpectedException.none();
+
+	/**
      * Mock configuration
      */
     @Mock
@@ -214,7 +214,20 @@ public class S3ObsClientTest {
 		verify(service, times(1))
 				.uploadStream(eq("l0-acns"), eq("key-exist"), any(InputStream.class), anyLong());
 	}
-    
+
+	@Test
+	public void testUploadStreamNoContent() throws IOException, ObsServiceException, S3SdkClientException, AbstractCodedException, ObsEmptyFileException {
+    	thrown.expect(ObsEmptyFileException.class);
+    	thrown.expectMessage("key-exist");
+
+		try (InputStream in = getClass().getResourceAsStream("/testfile1.txt")) {
+			client.uploadStreams(Collections.singletonList(new StreamObsUploadObject(ProductFamily.L0_ACN, "key-exist", in, 0)), ReportingFactory.NULL);
+		}
+
+		verify(service, times(0))
+				.uploadStream(any(), any(), any(InputStream.class), anyLong());
+	}
+
 	@Test
 	public void testGetListOfObjectsOfTimeFrameOfFamilyOneExists() throws ObsServiceException, SdkClientException {
 
