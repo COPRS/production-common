@@ -24,8 +24,7 @@ import org.mockito.MockitoAnnotations;
 
 import esa.s1pdgs.cpoc.appcatalog.common.MqiMessage;
 import esa.s1pdgs.cpoc.appcatalog.server.mqi.db.MqiMessageDao;
-import esa.s1pdgs.cpoc.appcatalog.server.sequence.db.SequenceDao;
-import esa.s1pdgs.cpoc.appcatalog.server.service.MqiMessageService;
+import esa.s1pdgs.cpoc.common.mongodb.sequence.SequenceDao;
 import esa.s1pdgs.cpoc.common.MessageState;
 import esa.s1pdgs.cpoc.common.ProductCategory;
 

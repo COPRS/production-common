@@ -1,4 +1,4 @@
-package esa.s1pdgs.cpoc.appcatalog.server.sequence.db;
+package esa.s1pdgs.cpoc.common.mongodb.sequence;
 
 import org.springframework.data.annotation.Id;
 

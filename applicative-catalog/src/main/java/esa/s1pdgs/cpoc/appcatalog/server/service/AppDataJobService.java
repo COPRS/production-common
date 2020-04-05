@@ -18,7 +18,7 @@ import esa.s1pdgs.cpoc.appcatalog.server.job.exception.AppCatalogJobGenerationIn
 import esa.s1pdgs.cpoc.appcatalog.server.job.exception.AppCatalogJobGenerationNotFoundException;
 import esa.s1pdgs.cpoc.appcatalog.server.job.exception.AppCatalogJobGenerationTerminatedException;
 import esa.s1pdgs.cpoc.appcatalog.server.job.exception.AppCatalogJobNotFoundException;
-import esa.s1pdgs.cpoc.appcatalog.server.sequence.db.SequenceDao;
+import esa.s1pdgs.cpoc.common.mongodb.sequence.SequenceDao;
 import esa.s1pdgs.cpoc.common.ProductCategory;
 import esa.s1pdgs.cpoc.common.filter.FilterCriterion;
 import esa.s1pdgs.cpoc.mqi.model.queue.AbstractMessage;
@@ -48,7 +48,8 @@ public class AppDataJobService {
     /**
      * Constructor for the Services
      * 
-     * @param mongoDBDAO
+     * @param appDataJobDao
+     * @param sequenceDao
      */
     @Autowired
     public AppDataJobService(final AppDataJobRepository appDataJobDao,
@@ -122,10 +123,10 @@ public class AppDataJobService {
 
     /**
      * Patch a job
-     * 
+     *
      * @param jobId
-     * @param state
-     * @param pod
+     * @param patchJob
+     *
      * @return
      * @throws AppCatalogJobNotFoundException
      */
