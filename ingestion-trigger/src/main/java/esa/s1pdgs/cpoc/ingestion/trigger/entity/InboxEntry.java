@@ -7,7 +7,7 @@ import org.springframework.data.mongodb.core.mapping.Document;
 import java.util.Date;
 import java.util.Objects;
 
-@Document
+@Document(collection = "#{@collectionName.name}")
 public class InboxEntry {
 
 	@Transient
