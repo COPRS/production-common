@@ -26,12 +26,12 @@ public class TestFilesystemInboxAdapter {
 	private FilesystemInboxAdapter uut;
 			
     @Before 
-    public final void init() throws URISyntaxException {
+    public final void init() {
 		uut = new FilesystemInboxAdapter(factory, testDir.toPath().toUri(), 0);
 	}
 
 	@After
-	public final void tearDown() throws IOException {
+	public final void tearDown() {
 		FileUtils.delete(testDir.getPath());
 	}
 
@@ -43,11 +43,11 @@ public class TestFilesystemInboxAdapter {
 	//@Test
 	public final void testRegex() {
 		final Pattern patternToTest = Pattern.compile("(WILE|MTI_|SGS_|INU_)/S1(A|B)/([A-Za-z0-9]+)/ch0?(1|2)/.*\\.(xml|raw)",Pattern.CASE_INSENSITIVE);
-		assertEquals(true, patternToTest.matcher("WILE/S1B/L20180724144436762001030/ch01/DCS_02_L20180724144436762001030_ch1_DSDB_00027.raw").matches());
+		assertTrue(patternToTest.matcher("WILE/S1B/L20180724144436762001030/ch01/DCS_02_L20180724144436762001030_ch1_DSDB_00027.raw").matches());
 	}
 
 	@Test
-	public final void testRead_WithConfiguredFilters_ShallReturnProperProductss() throws IOException, URISyntaxException {
+	public final void testRead_WithConfiguredFilters_ShallReturnProperProducts() throws IOException, URISyntaxException {
 		// create some content in test directory
 		final File product1 = newTestProduct("WILE/S1B/L20180724144436762001030/ch01/DCS_02_L20180724144436762001030_ch1_DSIB.xml");
 		assertTrue(product1.createNewFile());
@@ -77,7 +77,7 @@ public class TestFilesystemInboxAdapter {
 		assertEquals(1, actualAux.size());
 	}
 	
-	private final File newTestProduct(final String name) {
+	private File newTestProduct(final String name) {
 		final File product = new File(testDir, name);
 		product.getParentFile().mkdirs();
 		return product;

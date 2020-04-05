@@ -37,8 +37,8 @@ public class TestInbox {
     @Test
     public final void testPoll_OnFindingNewProducts_ShallStoreProductsAndPutInKafkaQueue() throws IOException {
 
-        when(fakeAdapter.read(any())).thenReturn(Arrays.asList(new InboxEntry("foo1", "foo1", "/tmp", new Date(), 10),
-                new InboxEntry("foo2", "foo2", "/tmp", new Date(), 10)));
+        when(fakeAdapter.read(any())).thenReturn(Arrays.asList(new InboxEntry(0, "foo1", "foo1", "/tmp", new Date(), 10),
+                new InboxEntry(0, "foo2", "foo2", "/tmp", new Date(), 10)));
         when(fakeAdapter.description()).thenReturn("fakeAdapter");
         when(fakeAdapter.inboxURL()).thenReturn("/tmp");
 
@@ -59,14 +59,14 @@ public class TestInbox {
     public final void testPoll_OnFindingAlreadyStoredProducts_ShallDoNothing() throws IOException {
 
         when(fakeAdapter.read(any())).thenReturn(Arrays.asList(
-                new InboxEntry("foo1", "foo1", "/tmp", new Date(), 0),
-                new InboxEntry("foo2", "foo2", "/tmp", new Date(), 0)));
+                new InboxEntry(0, "foo1", "foo1", "/tmp", new Date(), 0),
+                new InboxEntry(0, "foo2", "foo2", "/tmp", new Date(), 0)));
         when(fakeAdapter.description()).thenReturn("fakeAdapter");
         when(fakeAdapter.inboxURL()).thenReturn("/tmp");
 
 
-        when(fakeRepo.findByPickupURL(anyString())).thenReturn(Arrays.asList(new InboxEntry("foo2", "foo2", "/tmp", new Date(), 0),
-                new InboxEntry("foo1", "foo1", "/tmp", new Date(), 0)));
+        when(fakeRepo.findByPickupURL(anyString())).thenReturn(Arrays.asList(new InboxEntry(0, "foo2", "foo2", "/tmp", new Date(), 0),
+                new InboxEntry(0, "foo1", "foo1", "/tmp", new Date(), 0)));
 
         final Inbox uut = new Inbox(
                 fakeAdapter,

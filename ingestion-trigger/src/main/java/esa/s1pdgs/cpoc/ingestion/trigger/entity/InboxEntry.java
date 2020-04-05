@@ -1,18 +1,19 @@
 package esa.s1pdgs.cpoc.ingestion.trigger.entity;
 
+import org.springframework.data.annotation.Id;
+import org.springframework.data.annotation.Transient;
+import org.springframework.data.mongodb.core.mapping.Document;
+
 import java.util.Date;
 import java.util.Objects;
 
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
-
-@Entity
+@Document
 public class InboxEntry {
 
+	@Transient
+	public static final String ENTRY_SEQ_KEY = "inboxEntry";
+
 	@Id
-	@GeneratedValue(strategy = GenerationType.AUTO)
 	private long id;
 	private String name;
 	private String relativePath;
@@ -23,8 +24,9 @@ public class InboxEntry {
 	public InboxEntry() {
 	}
 
-	public InboxEntry(final String name, final String relativePath, final String pickupURL, final Date lastModified,
+	public InboxEntry(final long id, final String name, final String relativePath, final String pickupURL, final Date lastModified,
 			final long size) {
+		this.id = id;
 		this.name = name;
 		this.relativePath = relativePath;
 		this.pickupURL = pickupURL;
@@ -36,7 +38,7 @@ public class InboxEntry {
 		return id;
 	}
 
-	public void setId(final long id) {
+	public void setId(long id) {
 		this.id = id;
 	}
 
