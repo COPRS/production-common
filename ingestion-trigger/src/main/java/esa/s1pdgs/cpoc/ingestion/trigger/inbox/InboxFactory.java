@@ -48,7 +48,8 @@ public class InboxFactory {
 				),
 				ingestionTriggerServiceTransactional, 
 				new KafkaSubmissionClient(kafkaTemplate, config.getTopic()),
-				config.getFamily()
+				config.getFamily(),
+				config.getStationName()
 		);
 	}
 	
@@ -73,7 +74,8 @@ public class InboxFactory {
 			return fileSystemInboxAdapterFactory; 
 		}
 		throw new IllegalArgumentException(
-				String.format("URI scheme not supported for URI %s", url));
+				String.format("URI scheme not supported for URI %s", url)
+		);
 	}
 	
 	private final InboxAdapter newInboxAdapter(final InboxConfiguration config) throws URISyntaxException {		
@@ -81,7 +83,8 @@ public class InboxFactory {
 		final InboxAdapterFactory inboxAdapterFactory = newInboxAdapterFactory(sanitizedUrl);
 		
 		return inboxAdapterFactory.newInboxAdapter(
-				new URI(sanitizedUrl), config.getProductInDirectoryLevel()
+				new URI(sanitizedUrl), 
+				config.getProductInDirectoryLevel()
 		);
 	}
 }

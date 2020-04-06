@@ -24,6 +24,8 @@ public class IngestionJob extends AbstractMessage {
 	
 	private long productSizeByte = 0L;
 	
+	private String stationName;
+	
 	
 	public IngestionJob() {
 		super();
@@ -35,7 +37,8 @@ public class IngestionJob extends AbstractMessage {
 			final String pickupBaseURL, 
 			final String relativePath, 	
 			final long productSizeByte,
-			final UUID uuid
+			final UUID uuid,
+			final String stationName
 	) {
 		super(family, productName);
 		this.pickupBaseURL 		= pickupBaseURL;
@@ -43,6 +46,7 @@ public class IngestionJob extends AbstractMessage {
 		this.productName 		= productName;
 		this.productSizeByte 	= productSizeByte;
 		this.uid				= uuid;
+		this.stationName		= stationName;
 	}
 
 	public String getPickupBaseURL() {
@@ -80,7 +84,7 @@ public class IngestionJob extends AbstractMessage {
 	@Override
 	public int hashCode() {
 		return Objects.hash(creationDate, hostname, keyObjectStorage, pickupBaseURL, productFamily,
-				relativePath, productName, uid, productSizeByte);
+				relativePath, productName, uid, productSizeByte, stationName);
 	}
 
 	@Override
@@ -102,6 +106,7 @@ public class IngestionJob extends AbstractMessage {
 				&& productFamily == other.productFamily 
 				&& Objects.equals(uid, other.uid)
 				&& Objects.equals(relativePath, other.relativePath)
+				&& Objects.equals(stationName, other.stationName)
 				&& productSizeByte == other.productSizeByte 
 				&& Objects.equals(productName, other.productName);
 	}
@@ -111,6 +116,6 @@ public class IngestionJob extends AbstractMessage {
 		return "IngestionJob [productFamily=" + productFamily + ", keyObjectStorage=" + keyObjectStorage
 				+ ", creationDate=" + creationDate + ", hostname=" + hostname + ", relativePath=" + relativePath
 				+ ", pickupBaseURL=" + pickupBaseURL + ", productName=" + productName + ", uid=" + uid +
-				", productSizeByte="+productSizeByte+"]";
+				", productSizeByte="+productSizeByte+", stationName=" + stationName + "]";
 	}	
 }

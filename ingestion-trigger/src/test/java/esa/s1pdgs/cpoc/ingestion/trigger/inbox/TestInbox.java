@@ -43,7 +43,8 @@ public class TestInbox {
 				InboxFilter.ALLOW_ALL,
 				new IngestionTriggerServiceTransactional(fakeRepo), 
 				fakeKafkaClient,
-				ProductFamily.EDRS_SESSION
+				ProductFamily.EDRS_SESSION,
+				"WILE"
 		);
 		uut.poll();
 		fakeRepo.verify();
@@ -84,7 +85,8 @@ public class TestInbox {
 				InboxFilter.ALLOW_ALL,
 				new IngestionTriggerServiceTransactional(fakeRepo), 
 				fakeKafkaClient,
-				ProductFamily.EDRS_SESSION
+				ProductFamily.EDRS_SESSION,
+				"WILE"
 		);
 		uut.poll();
 		fakeRepo.verify();
