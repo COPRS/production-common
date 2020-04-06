@@ -79,6 +79,9 @@ public class ApplicationProperties {
     private String oqcBinaryPath;
     private String oqcWorkingDir;
     private long oqcTimeoutInSeconds = 60;
+    
+    private String segmentBlacklistPattern = "^S1([A-Z_]{1}).*(GP|HK|RF).*SAFE$";
+    
 
     /**
      * Default constructor
@@ -226,7 +229,7 @@ public class ApplicationProperties {
 		return hostname;
 	}
 
-	public void setHostname(String hostname) {
+	public void setHostname(final String hostname) {
 		this.hostname = hostname;
 	}
 
@@ -234,7 +237,7 @@ public class ApplicationProperties {
 		return workingDir;
 	}
 
-	public void setWorkingDir(String workingDir) {
+	public void setWorkingDir(final String workingDir) {
 		this.workingDir = workingDir;
 	}
 
@@ -242,7 +245,7 @@ public class ApplicationProperties {
 		return thresholdEw;
 	}
 
-	public void setThresholdEw(long thresholdEw) {
+	public void setThresholdEw(final long thresholdEw) {
 		this.thresholdEw = thresholdEw;
 	}
 
@@ -250,7 +253,7 @@ public class ApplicationProperties {
 		return thresholdIw;
 	}
 
-	public void setThresholdIw(long thresholdIw) {
+	public void setThresholdIw(final long thresholdIw) {
 		this.thresholdIw = thresholdIw;
 	}
 
@@ -258,7 +261,7 @@ public class ApplicationProperties {
 		return thresholdSm;
 	}
 
-	public void setThresholdSm(long thresholdSm) {
+	public void setThresholdSm(final long thresholdSm) {
 		this.thresholdSm = thresholdSm;
 	}
 
@@ -266,7 +269,7 @@ public class ApplicationProperties {
 		return thresholdWv;
 	}
 
-	public void setThresholdWv(long thresholdWv) {
+	public void setThresholdWv(final long thresholdWv) {
 		this.thresholdWv = thresholdWv;
 	}
 
@@ -274,7 +277,7 @@ public class ApplicationProperties {
 		return oqcTimeoutInSeconds;
 	}
 
-	public void setOqcTimeoutInSeconds(long oqcTimeoutInSeconds) {
+	public void setOqcTimeoutInSeconds(final long oqcTimeoutInSeconds) {
 		this.oqcTimeoutInSeconds = oqcTimeoutInSeconds;
 	}
 
@@ -282,7 +285,7 @@ public class ApplicationProperties {
 		return oqcBinaryPath;
 	}
 
-	public void setOqcBinaryPath(String oqcBinaryPath) {
+	public void setOqcBinaryPath(final String oqcBinaryPath) {
 		this.oqcBinaryPath = oqcBinaryPath;
 	}
 
@@ -290,7 +293,7 @@ public class ApplicationProperties {
 		return oqcWorkingDir;
 	}
 
-	public void setOqcWorkingDir(String oqcWorkingDir) {
+	public void setOqcWorkingDir(final String oqcWorkingDir) {
 		this.oqcWorkingDir = oqcWorkingDir;
 	}
 
@@ -298,8 +301,15 @@ public class ApplicationProperties {
 		return oqcEnabled;
 	}
 
-	public void setOqcEnabled(boolean oqcEnabled) {
+	public void setOqcEnabled(final boolean oqcEnabled) {
 		this.oqcEnabled = oqcEnabled;
 	}
-		
+
+	public String getSegmentBlacklistPattern() {
+		return segmentBlacklistPattern;
+	}
+
+	public void setSegmentBlacklistPattern(final String segmentBlacklistPattern) {
+		this.segmentBlacklistPattern = segmentBlacklistPattern;
+	}
 }
