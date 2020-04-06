@@ -1,12 +1,26 @@
 package esa.s1pdgs.cpoc.obs_sdk;
 
+import static esa.s1pdgs.cpoc.obs_sdk.AbstractObsClient.VoidCallable.wrap;
+
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.util.*;
-import java.util.concurrent.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Date;
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.Callable;
+import java.util.concurrent.CompletionService;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorCompletionService;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 import java.util.stream.Collectors;
 
 import esa.s1pdgs.cpoc.common.ProductFamily;
@@ -22,8 +36,6 @@ import esa.s1pdgs.cpoc.obs_sdk.swift.SwiftSdkClientException;
 import esa.s1pdgs.cpoc.report.Reporting;
 import esa.s1pdgs.cpoc.report.ReportingFactory;
 import esa.s1pdgs.cpoc.report.ReportingMessage;
-
-import static esa.s1pdgs.cpoc.obs_sdk.AbstractObsClient.VoidCallable.wrap;
 
 /**
  * Provides an implementation of the ObsClient where the download / upload in
@@ -104,7 +116,7 @@ public abstract class AbstractObsClient implements ObsClient {
         return files;
     }
 
-	private Callable<List<File>> downloadCall(ReportingFactory reportingFactory, ObsDownloadObject object) {
+	private Callable<List<File>> downloadCall(final ReportingFactory reportingFactory, final ObsDownloadObject object) {
 		return () -> {
 			{
 				final List<File> downloaded = download(Collections.singletonList(object), reportingFactory);
@@ -249,7 +261,7 @@ public abstract class AbstractObsClient implements ObsClient {
 		}
 	}
 
-	private void uploadStreams(List<StreamObsUploadObject> objects, boolean parallel, ReportingFactory reportingFactory) throws ObsServiceException, S3SdkClientException, SwiftSdkClientException {
+	private void uploadStreams(final List<StreamObsUploadObject> objects, final boolean parallel, final ReportingFactory reportingFactory) throws ObsServiceException, S3SdkClientException, SwiftSdkClientException {
 		if (objects.size() > 1 && parallel) {
 			// Upload objects in parallel
 			final ExecutorService workerThread =
@@ -272,13 +284,15 @@ public abstract class AbstractObsClient implements ObsClient {
 						new ReportingMessage("Start uploading to OBS")
 				);
 
-				try {
-					uploadObject(object);
-					reporting.end(new ReportingMessage(object.getContentLength(), "End uploading to OBS"));
+				try (final StreamObsUploadObject closeableStream = object) {	
+					uploadObject(closeableStream);	
 				} catch (SdkClientException | RuntimeException e) {
 					reporting.error(new ReportingMessage("Error on uploading to OBS: {}", LogUtils.toString(e)));
 					throw e;
+				} catch (final IOException e1) {
+					// on close, just ignore it
 				}
+				reporting.end(new ReportingMessage(object.getContentLength(), "End uploading to OBS"));
 			}
 		}
 	}
@@ -344,7 +358,7 @@ public abstract class AbstractObsClient implements ObsClient {
 	@FunctionalInterface
 	interface VoidCallable {
 
-		static Callable<Void> wrap(VoidCallable callable) {
+		static Callable<Void> wrap(final VoidCallable callable) {
 			return () -> {
 				callable.call();
 				return null;
