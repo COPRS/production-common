@@ -80,6 +80,14 @@ public class IngestionJob extends AbstractMessage {
 	public void setProductSizeByte(final long productSizeByte) {
 		this.productSizeByte = productSizeByte;
 	}
+	
+	public String getStationName() {
+		return stationName;
+	}
+
+	public void setStationName(final String stationName) {
+		this.stationName = stationName;
+	}
 
 	@Override
 	public int hashCode() {

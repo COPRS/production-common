@@ -13,6 +13,7 @@ public class IngestionEvent extends AbstractMessage {
 	private String productName = NOT_DEFINED;
 	private String relativePath = NOT_DEFINED;
 	private long productSizeByte = 0L;
+	private String stationName;
 	
 	public IngestionEvent() {
 		super();
@@ -22,12 +23,14 @@ public class IngestionEvent extends AbstractMessage {
 			final ProductFamily productFamily, 
 			final String productName, 
 			final String relativePath, 
-			final long productSizeByte
+			final long productSizeByte,
+			final String stationName
 	) {
 		super(productFamily, productName);
 		this.productName = productName;
 		this.relativePath = relativePath;
 		this.productSizeByte = productSizeByte;
+		this.stationName = stationName;
 	}
 
 	public String getProductName() {
@@ -52,6 +55,14 @@ public class IngestionEvent extends AbstractMessage {
 
 	public void setProductSizeByte(final long productSizeByte) {
 		this.productSizeByte = productSizeByte;
+	}	
+
+	public String getStationName() {
+		return stationName;
+	}
+
+	public void setStationName(final String stationName) {
+		this.stationName = stationName;
 	}
 
 	@Override
@@ -64,7 +75,8 @@ public class IngestionEvent extends AbstractMessage {
 				productName, 
 				relativePath, 
 				uid,
-				productSizeByte
+				productSizeByte,
+				stationName
 		);
 	}
 
@@ -85,6 +97,7 @@ public class IngestionEvent extends AbstractMessage {
 				&& Objects.equals(keyObjectStorage, other.keyObjectStorage) 
 				&& productFamily == other.productFamily
 				&& Objects.equals(productName, other.productName)
+				&& Objects.equals(stationName, other.stationName)
 				&& Objects.equals(uid, other.uid)
 				&& productSizeByte == other.productSizeByte
 				&& Objects.equals(relativePath, other.relativePath);
@@ -94,6 +107,6 @@ public class IngestionEvent extends AbstractMessage {
 	public String toString() {
 		return "IngestionEvent [productName=" + productName + ", productFamily=" + productFamily + ", keyObjectStorage=" 
 				+ keyObjectStorage + ", creationDate=" + creationDate + ", hostname=" + hostname + ", relativePath=" + 
-				relativePath + ", uid=" + uid +", productSizeByte=" + productSizeByte + "]";
+				relativePath + ", uid=" + uid +", productSizeByte=" + productSizeByte + ", stationName=" + stationName + "]";
 	}
 }
