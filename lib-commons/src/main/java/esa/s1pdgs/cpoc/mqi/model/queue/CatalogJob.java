@@ -8,6 +8,7 @@ public class CatalogJob extends AbstractMessage {
 	private String mode = "NOMINAL";
     private OQCFlag oqcFlag = OQCFlag.NOT_CHECKED;
     private String timeliness;
+    private String stationName;
     
 	public String getProductName() {
 		return productName;
@@ -45,14 +46,22 @@ public class CatalogJob extends AbstractMessage {
 		return timeliness;
 	}
 
-	public void setTimeliness(String timeliness) {
+	public void setTimeliness(final String timeliness) {
 		this.timeliness = timeliness;
 	}
 	
+	public String getStationName() {
+		return stationName;
+	}
+
+	public void setStationName(final String stationName) {
+		this.stationName = stationName;
+	}
+
 	@Override
 	public int hashCode() {
 		return Objects.hash(creationDate, hostname, keyObjectStorage, relativePath, mode, oqcFlag, timeliness,
-				productFamily, productName, uid);
+				productFamily, productName, uid, stationName);
 	}
 
 	@Override
@@ -76,6 +85,7 @@ public class CatalogJob extends AbstractMessage {
 				&& Objects.equals(timeliness, other.timeliness) 
 				&& productFamily == other.productFamily
 				&& Objects.equals(uid, other.uid)
+				&& Objects.equals(stationName, other.stationName)
 				&& Objects.equals(productName, other.productName);
 	}
 
@@ -84,7 +94,7 @@ public class CatalogJob extends AbstractMessage {
 		return "CatalogJob [productFamily=" + productFamily + ", keyObjectStorage=" + keyObjectStorage
 				+ ", creationDate=" + creationDate + ", hostname=" + hostname + ", productName=" + productName
 				+ ", relativePath=" + relativePath + ", mode=" + mode + ", oqcFlag=" + oqcFlag
-				+ ", timeliness=" + timeliness + ", uid=" + uid + "]";
+				+ ", timeliness=" + timeliness + ", uid=" + uid + ", stationName=" + stationName + "]";
 	}
 
 }
