@@ -3,12 +3,11 @@ package esa.s1pdgs.cpoc.ingestion.trigger.inbox;
 import java.util.Collection;
 import java.util.Date;
 import java.util.HashSet;
+import java.util.Optional;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.util.StringUtils;
 
 import esa.s1pdgs.cpoc.common.ProductFamily;
 import esa.s1pdgs.cpoc.common.utils.LogUtils;
@@ -46,7 +45,7 @@ public final class Inbox {
 		this.family = family;
 	}
 	
-	public final void poll() {
+	public final void poll() {	
 		try {
 			final Set<InboxEntry> persistedContent = ingestionTriggerServiceTransactional
 					.getAllForPath(inboxAdapter.inboxURL());
@@ -58,47 +57,22 @@ public final class Inbox {
 			final Set<InboxEntry> finishedElements = new HashSet<>(persistedContent);
 			finishedElements.removeAll(pickupContent);
 			
-			final StringBuilder logMessage = new StringBuilder();
-			if (!finishedElements.isEmpty()) {
-				logMessage.append("Handled ")
-					.append(finishedElements.size())
-					.append(" finished elements (")
-					.append(summarize(finishedElements))
-					.append(")");
-				// when a product has been removed from the inbox directory, it shall be removed
-				// from the persistence so it will not be ignored if it occurs again on the inbox
-				LOG.debug("Deleting all {} from persistence", summarize(finishedElements));
-				ingestionTriggerServiceTransactional.removeFinished(finishedElements);
-			}
-			
+			// detect all elements that are considered "new" on the inbox
 			final Set<InboxEntry> newElements = new HashSet<>(pickupContent);
 			newElements.removeAll(persistedContent);
-
-			for (final InboxEntry newEntry : newElements) {
-				if (filter.accept(newEntry)) {
-					LOG.debug("adding {}", newEntry);	
-					handleEntry(newEntry);	
-				}
-				else {
-					LOG.debug("{} is ignored by {}", newEntry, filter);
-				}	
+						
+			// when a product has been removed from the inbox directory, it shall be removed
+			// from the persistence so it will not be ignored if it occurs again on the inbox
+			ingestionTriggerServiceTransactional.removeFinished(finishedElements);			
+			
+			final Set<InboxEntry> handledElements = new HashSet<>();
+			for (final InboxEntry newEntry : newElements) {			
+				handleEntry(newEntry).
+					ifPresent(e -> handledElements.add(e));				
 				persist(newEntry);
-			}
+			}		
+			appendMessagesToLog(finishedElements, newElements, handledElements);
 
-			if (!newElements.isEmpty()) {
-				if (logMessage.length() == 0) {
-					logMessage.append("Handled ");
-				} else {
-					logMessage.append(" and ");
-				}
-				logMessage.append(newElements.size())
-					.append(" new elements (")
-					.append(summarize(newElements))
-					.append(")");	
-			}
-			if (logMessage.length() != 0) {
-				LOG.info(logMessage.toString());
-			}
 		} catch (final Exception e) {			
 			// thrown on error reading the Inbox. No real retry here as it will be retried on next polling attempt anyway	
 			LOG.error(String.format("Error on polling %s", description()), e);
@@ -113,8 +87,51 @@ public final class Inbox {
 	public final String toString() {
 		return "Inbox [inboxAdapter=" + inboxAdapter + ", filter=" + filter + ", client=" + client + "]";
 	}
+
+	private final void appendMessagesToLog(
+			final Set<InboxEntry> finishedElements,
+			final Set<InboxEntry> newElements,
+			final Set<InboxEntry> handledElements
+	) {
+		final StringBuilder logMessage = new StringBuilder();
+		
+		if (!finishedElements.isEmpty()) {			
+			logMessage.append("Handled ")
+				.append(finishedElements.size())
+				.append(" finished elements");
+			
+			dumpToDebugLog("deleting {} from persistence",finishedElements);			
+		}
+		
+		if (!newElements.isEmpty()) {
+			final Set<InboxEntry> ignoredElements = new HashSet<>(newElements);
+			newElements.removeAll(handledElements);
+			
+			if (logMessage.length() == 0) {
+				logMessage.append("Handled ");
+			} else {
+				logMessage.append(" and ");
+			}	
+			logMessage.append(newElements.size())
+				.append(" new elements (processed: ")
+				.append(handledElements.size())
+				.append(" / ignored: ")
+				.append(ignoredElements.size())
+				.append(").");
+			
+			if (!handledElements.isEmpty()) {
+				dumpToDebugLog("processed {} from inbox", newElements);		
+			}				
+			if (!ignoredElements.isEmpty()) {
+				dumpToDebugLog("ignored {} in inbox", newElements);		
+			}
+		}		
+		if (logMessage.length() != 0) {
+			LOG.info(logMessage.toString());
+		}
+	}
 	
-	private final void handleEntry(final InboxEntry entry) {				
+	private final Optional<InboxEntry> handleEntry(final InboxEntry entry) {				
 		final Reporting reporting = ReportingUtils.newReportingBuilder()
 				.newReporting("IngestionTrigger");
 			
@@ -123,14 +140,19 @@ public final class Inbox {
 				new ReportingMessage("New file detected %s", entry.getName())
 		);
 		
+		if (!filter.accept(entry)) {
+			reporting.end(new ReportingMessage("File %s is ignored by filter.", entry.getName()));						
+			return Optional.empty();
+		}
+		
 		// empty files are not accepted!
 		if (entry.getSize() == 0) {	
 			reporting.error(new ReportingMessage("File %s is empty, ignored.", entry.getName()));						
-			return;
+			return Optional.empty();
 		}
 		
 		try {
-			LOG.info("Publishing new entry to kafka queue: {}", entry);		    
+			LOG.debug("Publishing new entry to kafka queue: {}", entry);		    
 			client.publish(
 					new IngestionJob(
 						family, 
@@ -145,26 +167,44 @@ public final class Inbox {
 					new IngestionTriggerReportingOutput(entry.getPickupURL() + "/" + entry.getRelativePath()), 
 					new ReportingMessage("File %s created IngestionJob", entry.getName())
 			);
+			return Optional.of(entry);
 		} catch (final Exception e) {
 			reporting.error(new ReportingMessage("File %s could not be handled: %s", entry.getName(), LogUtils.toString(e)));
 			LOG.error(String.format("Error on handling %s in %s: %s", entry, description(), LogUtils.toString(e)));
-		}		
+		}	
+		return Optional.empty();
 	}
 	
 	private final InboxEntry persist(final InboxEntry toBePersisted) {
 		final InboxEntry persisted = ingestionTriggerServiceTransactional.add(toBePersisted);
-		LOG.debug("Added {} to persistence", persisted);
+		LOG.trace("Added {} to persistence", persisted);
 		return persisted;
 	}
 	
-	private final String summarize(final Collection<InboxEntry> entries) {
-		final String summary = entries.stream()
-			.map(p -> p.getName())
-			.collect(Collectors.joining(", "));
-		
-		if (StringUtils.isEmpty(summary)) {
-			return "[none]";
+//	private final String summarizeAndLog(final String logTemplate, final Collection<InboxEntry> entries) {
+//		final String summary = entries.stream()
+//			.map(e -> extractNameAndLog(logTemplate,e))
+//			.collect(Collectors.joining(", "));
+//		
+//		if (StringUtils.isEmpty(summary)) {
+//			return "[none]";
+//		}
+//		return summary;
+//	}
+//	
+//	private static String extractNameAndLog(final String logTemplate, final InboxEntry entry) {
+//		final String name = entry.getName();
+//		LOG.debug("PickupAction - " + logTemplate, name);
+//		return name;
+//	}
+	
+	private static final void dumpToDebugLog(final String logTemplate, final Collection<InboxEntry> entries) {
+		if (LOG.isDebugEnabled()) {
+			entries.stream()
+				.map(p -> p.getName())
+				.forEach(e -> LOG.debug("PickupAction - " + logTemplate, e));
 		}
-		return summary;
+		
 	}
+	
 }
