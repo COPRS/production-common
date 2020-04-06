@@ -31,7 +31,7 @@ public class PlanAndReportMetadataExtractor extends AbstractMetadataExtractor {
 		JSONObject metadata = new JSONObject();
 		metadata.put("productFamily", message.getBody().getProductFamily().name());
 		metadata.put("productName", message.getBody().getProductName());
-		metadata.put("productType", "NONE");
+		metadata.put("productType", message.getBody().getProductFamily().name());
 		metadata.put("insertionTime", message.getBody().getCreationDate());
 		metadata.put("url", message.getBody().getKeyObjectStorage());
 		return metadata;
