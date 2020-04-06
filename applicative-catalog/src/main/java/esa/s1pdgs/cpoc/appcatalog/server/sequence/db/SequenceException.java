@@ -1,4 +1,4 @@
-package esa.s1pdgs.cpoc.common.mongodb.sequence;
+package esa.s1pdgs.cpoc.appcatalog.server.sequence.db;
 
 public class SequenceException extends RuntimeException {
 	

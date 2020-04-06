@@ -11,9 +11,9 @@ import org.mockito.MockitoAnnotations;
 import org.springframework.data.mongodb.core.FindAndModifyOptions;
 import org.springframework.data.mongodb.core.MongoTemplate;
 
-import esa.s1pdgs.cpoc.common.mongodb.sequence.SequenceDaoImp;
-import esa.s1pdgs.cpoc.common.mongodb.sequence.SequenceException;
-import esa.s1pdgs.cpoc.common.mongodb.sequence.SequenceId;
+import esa.s1pdgs.cpoc.appcatalog.server.sequence.db.SequenceDaoImp;
+import esa.s1pdgs.cpoc.appcatalog.server.sequence.db.SequenceException;
+import esa.s1pdgs.cpoc.appcatalog.server.sequence.db.SequenceId;
 
 public class SequenceDaoImplTest {
 

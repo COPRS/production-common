@@ -1,4 +1,4 @@
-package esa.s1pdgs.cpoc.common.mongodb.sequence;
+package esa.s1pdgs.cpoc.appcatalog.server.sequence.db;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.mongodb.core.FindAndModifyOptions;
@@ -46,7 +46,6 @@ public class SequenceDaoImp implements SequenceDao {
 	  //return new increased id
 	  FindAndModifyOptions options = new FindAndModifyOptions();
 	  options.returnNew(true);
-	  options.upsert(true);
 
 	  //this is the magic happened.
 	  SequenceId seqId = 

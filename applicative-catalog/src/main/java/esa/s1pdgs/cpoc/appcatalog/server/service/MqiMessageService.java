@@ -1,3 +1,6 @@
+/**
+ * 
+ */
 package esa.s1pdgs.cpoc.appcatalog.server.service;
 
 import java.util.List;
@@ -9,7 +12,7 @@ import org.springframework.stereotype.Service;
 
 import esa.s1pdgs.cpoc.appcatalog.common.MqiMessage;
 import esa.s1pdgs.cpoc.appcatalog.server.mqi.db.MqiMessageDao;
-import esa.s1pdgs.cpoc.common.mongodb.sequence.SequenceDao;
+import esa.s1pdgs.cpoc.appcatalog.server.sequence.db.SequenceDao;
 import esa.s1pdgs.cpoc.common.MessageState;
 import esa.s1pdgs.cpoc.common.ProductCategory;
 
@@ -101,7 +104,8 @@ public class MqiMessageService {
      * category but its not in the states
      * 
      * @param pod
-     * @param topic
+     * @param category
+     * @param states
      * @return the list of message
      */
     public int countReadingMessages(final String pod, final String topic) {
