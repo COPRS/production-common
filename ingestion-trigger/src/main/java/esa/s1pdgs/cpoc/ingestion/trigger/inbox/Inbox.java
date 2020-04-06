@@ -80,7 +80,7 @@ public final class Inbox {
 					handleEntry(newEntry);	
 				}
 				else {
-					LOG.info("{} is ignored by {}", newEntry, filter);
+					LOG.debug("{} is ignored by {}", newEntry, filter);
 				}	
 				persist(newEntry);
 			}
@@ -130,7 +130,7 @@ public final class Inbox {
 		}
 		
 		try {
-			LOG.debug("Publishing new entry to kafka queue: {}", entry);		    
+			LOG.info("Publishing new entry to kafka queue: {}", entry);		    
 			client.publish(
 					new IngestionJob(
 						family, 
