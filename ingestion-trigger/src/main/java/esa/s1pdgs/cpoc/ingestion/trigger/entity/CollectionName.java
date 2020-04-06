@@ -10,11 +10,11 @@ import org.springframework.stereotype.Component;
 @Component
 public class CollectionName {
 
-    @Value("${spring.application.name}")
-    private String appName;
+    @Value("inboxEntry-${process.hostname}")
+    private String name;
 
     public String getName() {
-        return "appName";
+        return name;
     }
 
 }
