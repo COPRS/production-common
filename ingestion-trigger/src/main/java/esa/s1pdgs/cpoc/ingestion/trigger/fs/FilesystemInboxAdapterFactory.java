@@ -1,7 +1,6 @@
 package esa.s1pdgs.cpoc.ingestion.trigger.fs;
 
 import java.net.URI;
-import java.net.URISyntaxException;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -20,11 +19,7 @@ public class FilesystemInboxAdapterFactory implements InboxAdapterFactory {
 	}
 
 	@Override
-	public InboxAdapter newInboxAdapter(final String inboxURL, final int productInDirectoryLevel) {
-		try {
-			return new FilesystemInboxAdapter(inboxEntryFactory, new URI(inboxURL), productInDirectoryLevel);
-		} catch (final URISyntaxException e) {
-			throw new IllegalArgumentException(e);
-		}
+	public InboxAdapter newInboxAdapter(final URI inbox, final int productInDirectoryLevel) {
+		return new FilesystemInboxAdapter(inboxEntryFactory, inbox, productInDirectoryLevel);
 	}
 }

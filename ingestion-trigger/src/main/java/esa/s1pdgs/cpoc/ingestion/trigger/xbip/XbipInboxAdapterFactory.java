@@ -1,7 +1,6 @@
 package esa.s1pdgs.cpoc.ingestion.trigger.xbip;
 
 import java.net.URI;
-import java.net.URISyntaxException;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -17,21 +16,21 @@ public class XbipInboxAdapterFactory implements InboxAdapterFactory {
 	private final XbipClientFactory xbipClientFactory;
 
 	@Autowired
-	public XbipInboxAdapterFactory(final InboxEntryFactory inboxEntryFactory,
-			final XbipClientFactory xbipClientFactory) {
+	public XbipInboxAdapterFactory(
+			final InboxEntryFactory inboxEntryFactory,
+			final XbipClientFactory xbipClientFactory
+	) {
 		this.inboxEntryFactory = inboxEntryFactory;
 		this.xbipClientFactory = xbipClientFactory;
 	}
 
 	@Override
-	public InboxAdapter newInboxAdapter(final String inboxURL, final int productInDirectoryLevel) {
-		try {
-			URI inbox = new URI(inboxURL);
-			return new XbipInboxAdapter(inbox, this.xbipClientFactory.newXbipClient(inbox), inboxEntryFactory,
-					productInDirectoryLevel);
-		} catch (final URISyntaxException e) {
-			throw new IllegalArgumentException(e);
-		}
+	public InboxAdapter newInboxAdapter(final URI inbox, final int productInDirectoryLevel) {
+		return new XbipInboxAdapter(
+				inbox, 
+				xbipClientFactory.newXbipClient(inbox), 
+				inboxEntryFactory,
+				productInDirectoryLevel
+		);
 	}
-
 }

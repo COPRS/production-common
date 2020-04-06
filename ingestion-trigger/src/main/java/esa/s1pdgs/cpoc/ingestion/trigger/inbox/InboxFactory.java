@@ -14,12 +14,10 @@ import esa.s1pdgs.cpoc.ingestion.trigger.filter.BlacklistRegexRelativePathInboxF
 import esa.s1pdgs.cpoc.ingestion.trigger.filter.JoinedFilter;
 import esa.s1pdgs.cpoc.ingestion.trigger.filter.WhitelistRegexRelativePathInboxFilter;
 import esa.s1pdgs.cpoc.ingestion.trigger.fs.FilesystemInboxAdapterFactory;
-import esa.s1pdgs.cpoc.ingestion.trigger.fs.FilesystemInboxEntryFactory;
 import esa.s1pdgs.cpoc.ingestion.trigger.kafka.producer.KafkaSubmissionClient;
 import esa.s1pdgs.cpoc.ingestion.trigger.service.IngestionTriggerServiceTransactional;
 import esa.s1pdgs.cpoc.ingestion.trigger.xbip.XbipInboxAdapterFactory;
 import esa.s1pdgs.cpoc.mqi.model.queue.IngestionJob;
-import esa.s1pdgs.cpoc.xbip.client.XbipClientFactory;
 
 @Component
 public class InboxFactory {
@@ -29,35 +27,61 @@ public class InboxFactory {
 	private final XbipInboxAdapterFactory xbipInboxAdapterFactory;
 
 	@Autowired
-	public InboxFactory(final KafkaTemplate<String, IngestionJob> kafkaTemplate,
+	public InboxFactory(
+			final KafkaTemplate<String, IngestionJob> kafkaTemplate,
 			final IngestionTriggerServiceTransactional inboxPollingServiceTransactional,
 			final FilesystemInboxAdapterFactory fileSystemInboxAdapterFactory,
-			final XbipInboxAdapterFactory xbipInboxAdapterFactory) {
+			final XbipInboxAdapterFactory xbipInboxAdapterFactory
+	) {
 		this.kafkaTemplate = kafkaTemplate;
 		this.ingestionTriggerServiceTransactional = inboxPollingServiceTransactional;
 		this.fileSystemInboxAdapterFactory = fileSystemInboxAdapterFactory;
 		this.xbipInboxAdapterFactory = xbipInboxAdapterFactory;
 	}
-
+	
 	public Inbox newInbox(final InboxConfiguration config) throws IOException, URISyntaxException {
-
-		URI pollingDirectoryURI = new URI(config.getDirectory());
-		InboxAdapter inboxAdapter;
-		if (pollingDirectoryURI.getScheme().equalsIgnoreCase(InboxURIScheme.FILE.getScheme())) {
-			inboxAdapter = fileSystemInboxAdapterFactory.newInboxAdapter(config.getDirectory(),
-					config.getProductInDirectoryLevel());
-		} else if (pollingDirectoryURI.getScheme().equalsIgnoreCase(InboxURIScheme.HTTPS.getScheme())) {
-			inboxAdapter = xbipInboxAdapterFactory.newInboxAdapter(config.getDirectory(),
-					config.getProductInDirectoryLevel());
-		} else {
-			throw new IllegalArgumentException(
-					String.format("URI scheme not supported %s", pollingDirectoryURI.getScheme()));
+		return new Inbox(
+				newInboxAdapter(config),
+				new JoinedFilter(
+						new BlacklistRegexRelativePathInboxFilter(Pattern.compile(config.getIgnoreRegex())),
+						new WhitelistRegexRelativePathInboxFilter(Pattern.compile(config.getMatchRegex()))
+				),
+				ingestionTriggerServiceTransactional, 
+				new KafkaSubmissionClient(kafkaTemplate, config.getTopic()),
+				config.getFamily()
+		);
+	}
+	
+	private final String normalizeInputUrl(final String configuredUrl) {
+		String result = configuredUrl;
+		
+		if (configuredUrl.startsWith("/")) {
+			result = "file://" + configuredUrl;
+		}		
+		if (configuredUrl.endsWith("/")) {
+			result = configuredUrl.substring(0, configuredUrl.length()-1);
 		}
-
-		return new Inbox(inboxAdapter,
-				new JoinedFilter(new BlacklistRegexRelativePathInboxFilter(Pattern.compile(config.getIgnoreRegex())),
-						new WhitelistRegexRelativePathInboxFilter(Pattern.compile(config.getMatchRegex()))),
-				ingestionTriggerServiceTransactional, new KafkaSubmissionClient(kafkaTemplate, config.getTopic()),
-				config.getFamily());
+		return result;		
+	}
+	
+	
+	private final InboxAdapterFactory newInboxAdapterFactory(final String url) throws URISyntaxException {	
+		if (url.startsWith("https://")) {
+			return xbipInboxAdapterFactory;			
+		}
+		else if (url.startsWith("file://")) {
+			return fileSystemInboxAdapterFactory; 
+		}
+		throw new IllegalArgumentException(
+				String.format("URI scheme not supported for URI %s", url));
+	}
+	
+	private final InboxAdapter newInboxAdapter(final InboxConfiguration config) throws URISyntaxException {		
+		final String sanitizedUrl = normalizeInputUrl(config.getDirectory());
+		final InboxAdapterFactory inboxAdapterFactory = newInboxAdapterFactory(sanitizedUrl);
+		
+		return inboxAdapterFactory.newInboxAdapter(
+				new URI(sanitizedUrl), config.getProductInDirectoryLevel()
+		);
 	}
 }
