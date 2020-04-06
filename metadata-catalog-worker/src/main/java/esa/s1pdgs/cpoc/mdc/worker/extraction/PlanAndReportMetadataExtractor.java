@@ -32,7 +32,7 @@ public class PlanAndReportMetadataExtractor extends AbstractMetadataExtractor {
 		metadata.put("productFamily", message.getBody().getProductFamily().name());
 		metadata.put("productName", message.getBody().getProductName());
 		metadata.put("insertionTime", message.getBody().getCreationDate());
-		metadata.put("keyObjectStorage", message.getBody().getKeyObjectStorage());
+		metadata.put("url", message.getBody().getKeyObjectStorage());
 		return metadata;
 	}
 
