@@ -11,9 +11,7 @@ import esa.s1pdgs.cpoc.mqi.model.queue.IngestionJob;
 public class IngestionJobs {
 	public static final URI toUri(final IngestionJob ingestion) throws InternalErrorException {
 		try {
-			return new URIBuilder(ingestion.getPickupBaseURL())
-					.setPath(ingestion.getRelativePath())
-					.build();
+			return new URIBuilder(ingestion.getPickupBaseURL() + ingestion.getRelativePath()).build();
 		} catch (final URISyntaxException e) {
 			throw new InternalErrorException(
 					String.format(
