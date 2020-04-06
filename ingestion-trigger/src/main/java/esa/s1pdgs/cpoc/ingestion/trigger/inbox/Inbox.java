@@ -108,7 +108,7 @@ public final class Inbox {
 		
 		if (!newElements.isEmpty()) {
 			final Set<InboxEntry> ignoredElements = new HashSet<>(newElements);
-			newElements.removeAll(handledElements);
+			ignoredElements.removeAll(handledElements);
 			
 			if (logMessage.length() == 0) {
 				logMessage.append("Handled ");
@@ -123,10 +123,10 @@ public final class Inbox {
 				.append(").");
 			
 			if (!handledElements.isEmpty()) {
-				dumpToDebugLog("processed {} from inbox", newElements);		
+				dumpToDebugLog("processed {} from inbox", handledElements);		
 			}				
 			if (!ignoredElements.isEmpty()) {
-				dumpToDebugLog("ignored {} in inbox", newElements);		
+				dumpToDebugLog("ignored {} in inbox", ignoredElements);		
 			}
 		}		
 		if (logMessage.length() != 0) {
