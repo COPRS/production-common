@@ -1,5 +1,6 @@
 package esa.s1pdgs.cpoc.ingestion.trigger.entity;
 
+import org.bson.types.ObjectId;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.annotation.Transient;
 import org.springframework.data.mongodb.core.mapping.Document;
@@ -14,7 +15,8 @@ public class InboxEntry {
 	public static final String ENTRY_SEQ_KEY = "inboxEntry";
 
 	@Id
-	private long id;
+	private ObjectId id; //necessary for repository.delete(entry)
+
 	private String name;
 	private String relativePath;
 	private String pickupURL;
@@ -24,22 +26,13 @@ public class InboxEntry {
 	public InboxEntry() {
 	}
 
-	public InboxEntry(final long id, final String name, final String relativePath, final String pickupURL, final Date lastModified,
-			final long size) {
-		this.id = id;
+	public InboxEntry(final String name, final String relativePath, final String pickupURL, final Date lastModified,
+					  final long size) {
 		this.name = name;
 		this.relativePath = relativePath;
 		this.pickupURL = pickupURL;
 		this.lastModified = lastModified;
 		this.setSize(size);
-	}
-
-	public long getId() {
-		return id;
-	}
-
-	public void setId(long id) {
-		this.id = id;
 	}
 
 	public String getName() {
