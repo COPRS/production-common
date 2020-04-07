@@ -5,16 +5,21 @@ import static org.junit.Assert.assertEquals;
 import java.io.Closeable;
 import java.io.File;
 import java.io.InputStream;
+import java.net.URI;
 import java.nio.charset.Charset;
 import java.util.List;
+import java.util.UUID;
 
 import org.apache.commons.io.IOUtils;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
+import esa.s1pdgs.cpoc.common.ProductFamily;
 import esa.s1pdgs.cpoc.common.utils.FileUtils;
 import esa.s1pdgs.cpoc.ingestion.worker.config.IngestionWorkerServiceConfigurationProperties;
+import esa.s1pdgs.cpoc.ingestion.worker.product.IngestionJobs;
+import esa.s1pdgs.cpoc.mqi.model.queue.IngestionJob;
 
 public class TestFilesystemInboxAdapter {
 	private static final String SINGLE_FILE_CONTENT = "Hello123";
@@ -64,5 +69,47 @@ public class TestFilesystemInboxAdapter {
 	@Test(expected = RuntimeException.class)
 	public final void testToInputStream_OnNonExistingFile_ShallThrowException() throws Exception {
 		FilesystemInboxAdapter.toInputStream(new File("/tmp/totally/Non/Existing/file"));
+	}
+	
+	/*
+	 * 
+	 * productFamily=EDRS_SESSION, 
+	 * keyObjectStorage=S1B__MPS__________017080/ch01/DCS_95_S1B__MPS__________017080_ch1_DSIB.xml, 
+	 * creationDate=Tue Apr 07 11:25:57 GMT 2020, hostname=s1pro-ingestion-0, 
+	 * relativePath=MPS_/S1B/S1B__MPS__________017080/ch01/DCS_95_S1B__MPS__________017080_ch1_DSIB.xml, 
+	 * pickupBaseURL=file:///data/inbox, 
+	 * productName=S1B__MPS__________017080/ch01/DCS_95_S1B__MPS__________017080_ch1_DSIB.xml, 
+	 * uid=c7fe6f46-ab9f-4265-a953-1a35712e014d, 
+	 * productSizeByte=592, 
+	 * stationName=MPS_]} 
+	 * from MQI 
+
+	 * 
+	 */
+	
+	
+	@Test
+	public final void testRead_OnSingleFile_ShallReturnCorrectObsKey() throws Exception {				
+		final File inbox = new File(tmpDir, "inbox");
+		final File prod = new File(inbox, "MPS_/S1B/S1B__MPS__________017080/ch01");
+		prod.mkdirs();		
+		final File dsib = new File(prod, "DCS_95_S1B__MPS__________017080_ch1_DSIB.xml");
+		FileUtils.writeFile(dsib, "foo");
+		
+		final IngestionJob job = new IngestionJob(
+				ProductFamily.EDRS_SESSION, 
+				"S1B__MPS__________017080/ch01/DCS_95_S1B__MPS__________017080_ch1_DSIB.xml", 
+				"file://" + inbox.getPath(), 
+				"MPS_/S1B/S1B__MPS__________017080/ch01/DCS_95_S1B__MPS__________017080_ch1_DSIB.xml", 
+				42L, 
+				UUID.randomUUID(), 
+				"MPS_"
+		);		
+		final URI uri = IngestionJobs.toUri(job);
+		
+		final List<InboxAdapterEntry> entries = uut.read(uri, job.getProductName());		
+		assertEquals(1, entries.size());		
+		final InboxAdapterEntry entry = entries.get(0);
+		assertEquals("S1B__MPS__________017080/ch01/DCS_95_S1B__MPS__________017080_ch1_DSIB.xml", entry.key());
 	}
 }

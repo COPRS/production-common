@@ -31,4 +31,11 @@ public class IngestionJobs {
 			);
 		}
 	}
+	
+	/**
+	 * 'substracts' {@code name} from the path given in {@code uri} 
+	 */
+	public static Path basePath(final URI uri, final String name) {	
+		return Paths.get(uri.getPath().toString().substring(0, uri.getPath().toString().indexOf(name)));
+	}
 }
