@@ -31,6 +31,11 @@ public class TestRegex {
 		//          WILE/S1B/S1B__MPS__________017080/ch01/DCS_95_S1B__MPS__________017080_ch1_DSDB_00001.raw
 		assertTrue("WILE/S1B/S1B__MPS__________017080/ch01/DCS_95_S1B__MPS__________017080_ch1_DSDB_00002.raw".matches(NEW_REGEX));
 	}
+	
+	@Test
+	public final void testFlorian() {
+		assertTrue("S1A_OPER_REP_MP_MP__PDMC_20200303T093232_V20200303T170000_20200319T190000.xml".matches("^S1[ABCD_]_OPER_REP_MP_MP__PDMC.*$"));
+	}
 }
 
 
