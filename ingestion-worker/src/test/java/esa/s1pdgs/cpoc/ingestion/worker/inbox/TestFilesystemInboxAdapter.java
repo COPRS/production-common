@@ -112,4 +112,41 @@ public class TestFilesystemInboxAdapter {
 		final InboxAdapterEntry entry = entries.get(0);
 		assertEquals("S1B__MPS__________017080/ch01/DCS_95_S1B__MPS__________017080_ch1_DSIB.xml", entry.key());
 	}
+	
+	@Test
+	public final void testRead_OnDirectory_ShallReturnCorrectObsKeyForEachElement() throws Exception {				
+		final File inbox = new File(tmpDir, "inbox/AUX");
+		final File prod = new File(inbox, "S1__AUX_ICE_V20180930T120000_G20181001T042911.SAFE/data");
+		prod.mkdirs();		
+		final File mnf = new File(prod.getParentFile(), "manifest.safe");
+		FileUtils.writeFile(mnf, "foo");		
+		final File d1 = new File(prod, "ice_edge_sh_polstere-100_multi_201809301200.nc");
+		FileUtils.writeFile(d1, "bar");		
+		final File dat = new File(prod, "ice_edge_nh_polstere-100_multi_201809301200.nc");
+		FileUtils.writeFile(dat, "baz");
+		
+		final File toBeIgnored = new File(inbox, "ignoreMe");
+		FileUtils.writeFile(toBeIgnored, "baz");
+		
+		final IngestionJob job = new IngestionJob(
+				ProductFamily.EDRS_SESSION, 
+				"S1__AUX_ICE_V20180930T120000_G20181001T042911.SAFE", 
+				"file://" + inbox.getPath(), 
+				"S1__AUX_ICE_V20180930T120000_G20181001T042911.SAFE", 
+				42L, 
+				UUID.randomUUID(), 
+				"MPS_"
+		);		
+		final URI uri = IngestionJobs.toUri(job);
+		
+		final List<InboxAdapterEntry> entries = uut.read(uri, job.getProductName());		
+		entries.stream()
+			.forEach(e -> System.out.println(e));
+		
+		System.out.println(entries);
+		
+//		assertEquals(1, entries.size());		
+//		final InboxAdapterEntry entry = entries.get(0);
+//		assertEquals("S1B__MPS__________017080/ch01/DCS_95_S1B__MPS__________017080_ch1_DSIB.xml", entry.key());
+	}
 }
