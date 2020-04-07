@@ -9,7 +9,6 @@ import java.nio.file.FileVisitOption;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -32,11 +31,7 @@ public final class FilesystemInboxAdapter implements InboxAdapter {
 	@Override
 	public final List<InboxAdapterEntry> read(final URI uri, final String name) throws Exception {	
 		final Path basePath = IngestionJobs.basePath(uri, name);
-		final File file = basePath.toFile();
-		
-		if (!file.isDirectory()) {
-			return Collections.singletonList(new InboxAdapterEntry(name, toInputStream(file), file.length()));
-		}		
+	
 		return Files.walk(Paths.get(uri.getPath()), FileVisitOption.FOLLOW_LINKS)
 			.map(Path::toFile)
 			.filter(f -> !f.isDirectory())
