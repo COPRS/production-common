@@ -40,6 +40,8 @@ public class IngestionTriggerServiceConfiguration {
 
 		for (final InboxConfiguration config : properties.getPolling()) {
 			try {
+				final Inbox newInbox = inboxFactory.newInbox(config);
+				LOG.info("Adding new inbox to be polled: {}",newInbox);
 				inboxes.add(inboxFactory.newInbox(config));
 			} catch (IllegalArgumentException | IOException | URISyntaxException e) {
 				LOG.error(e.getMessage());
