@@ -19,15 +19,17 @@ import esa.s1pdgs.cpoc.ingestion.trigger.filter.BlacklistRegexRelativePathInboxF
 import esa.s1pdgs.cpoc.ingestion.trigger.filter.InboxFilter;
 import esa.s1pdgs.cpoc.ingestion.trigger.filter.JoinedFilter;
 import esa.s1pdgs.cpoc.ingestion.trigger.filter.WhitelistRegexRelativePathInboxFilter;
+import esa.s1pdgs.cpoc.ingestion.trigger.inbox.InboxEntryFactory;
+import esa.s1pdgs.cpoc.ingestion.trigger.inbox.InboxEntryFactoryImpl;
 
 public class TestFilesystemInboxAdapter {
-	private final FilesystemInboxEntryFactory factory = new FilesystemInboxEntryFactory();
+	private final InboxEntryFactory factory = new InboxEntryFactoryImpl();
 	private final File testDir = FileUtils.createTmpDir();	
 	private FilesystemInboxAdapter uut;
-			
+
     @Before 
     public final void init() throws URISyntaxException {
-		uut = new FilesystemInboxAdapter(factory, testDir.toPath().toUri(), 0, null);
+		uut = new FilesystemInboxAdapter(factory, testDir.toPath().toUri(), null);
 	}
 
 	@After
@@ -64,7 +66,11 @@ public class TestFilesystemInboxAdapter {
 				new BlacklistRegexRelativePathInboxFilter(Pattern.compile("(^\\..*|.*\\.tmp$|db.*|^lost\\+found$)")),
 				new WhitelistRegexRelativePathInboxFilter(Pattern.compile("(WILE|MTI_|SGS_|INU_)/S1(A|B)/([A-Za-z0-9]+)/ch0?(1|2)/(.+DSIB\\.(xml|XML)|.+DSDB.*\\.(raw|RAW|aisp|AISP))"))
 		);
-		final FilesystemInboxAdapter uutEdrs = new FilesystemInboxAdapter(factory,testDir.toPath().toUri(),2, null);
+		final FilesystemInboxAdapter uutEdrs = new FilesystemInboxAdapter(
+				factory, 
+				testDir.toPath().toUri(),
+				null
+		);
 		final Collection<InboxEntry> actualEdrs = uutEdrs.read(edrsFilter);
 		assertEquals(2, actualEdrs.size());
 
@@ -72,7 +78,7 @@ public class TestFilesystemInboxAdapter {
 				new BlacklistRegexRelativePathInboxFilter(Pattern.compile("(^\\..*|.*\\.tmp$|db.*|^lost\\+found$)")),
 				new WhitelistRegexRelativePathInboxFilter(Pattern.compile("AUX/[0-9a-zA-Z][0-9a-zA-Z][0-9a-zA-Z_]_((OPER|TEST|REPR)_)?(AUX_OBMEMC|AUX_PP1|AUX_PP2|AUX_CAL|AUX_INS|AUX_RESORB|AUX_WND|AUX_SCS|AMV_ERRMAT|AMH_ERRMAT|AUX_ICE|AUX_WAV|MPL_ORBPRE|MPL_ORBSCT|MSK__LAND)_.*\\.(xml|XML|EOF|SAFE)"))
 		);
-		final FilesystemInboxAdapter uutAux = new FilesystemInboxAdapter(factory,testDir.toPath().toUri(),1, null);
+		final FilesystemInboxAdapter uutAux = new FilesystemInboxAdapter(factory, testDir.toPath().toUri(), null);
 		final Collection<InboxEntry> actualAux = uutAux.read(auxFilter);
 		assertEquals(1, actualAux.size());
 	}

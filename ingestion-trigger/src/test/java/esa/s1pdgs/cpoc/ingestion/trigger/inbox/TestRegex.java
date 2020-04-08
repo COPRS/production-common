@@ -1,15 +1,11 @@
 package esa.s1pdgs.cpoc.ingestion.trigger.inbox;
 
-import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
-import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import org.junit.Test;
-
-import esa.s1pdgs.cpoc.ingestion.trigger.xbip.XbipInboxEntryFactory;
 
 // Test filter regex
 public class TestRegex {	
@@ -50,20 +46,6 @@ public class TestRegex {
 			+ "(DCS_[0-9]{2}_([a-zA-Z0-9_]*)_ch([12])_(DSDB|DSIB).*\\.(raw|aisp|xml))", 
 			Pattern.CASE_INSENSITIVE
 	);	
-	
-	@Test
-	public final void testMagicRegex() {
-		final String path = "S1A/DCS_04_20200407131322032022_dat/ch_2/DCS_04_20200407131322032022_ch2_DSDB_00057.raw";
-		final Matcher matcher = XbipInboxEntryFactory.SESSION_PATTERN.matcher(path);		
-		assertTrue(matcher.matches());	
-		
-		final String actual = matcher.group(4);		
-		assertEquals("DCS_04_20200407131322032022_dat", actual);
-		
-		System.out.println(path.substring(path.indexOf(actual)));
-		
-		
-	}
 }
 
 

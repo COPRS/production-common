@@ -21,10 +21,12 @@ import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit4.SpringRunner;
 
+import esa.s1pdgs.cpoc.ingestion.trigger.config.InboxConfiguration;
 import esa.s1pdgs.cpoc.ingestion.trigger.config.IngestionTriggerConfigurationProperties;
 import esa.s1pdgs.cpoc.ingestion.trigger.entity.InboxEntry;
 import esa.s1pdgs.cpoc.ingestion.trigger.entity.InboxEntryRepository;
-import esa.s1pdgs.cpoc.ingestion.trigger.fs.FilesystemInboxEntryFactory;
+import esa.s1pdgs.cpoc.ingestion.trigger.inbox.InboxEntryFactory;
+import esa.s1pdgs.cpoc.ingestion.trigger.inbox.InboxEntryFactoryImpl;
 import esa.s1pdgs.cpoc.ingestion.trigger.service.IngestionTriggerService;
 
 @RunWith(SpringRunner.class)
@@ -42,29 +44,30 @@ public class TestApplication {
 	@Autowired
 	private InboxEntryRepository repo;
 
+
+		
 	@Test
 	public void testPollAll_OnEmptyInboxAndPersistedEntries_ShallDeletePersistedEntries() throws InterruptedException, URISyntaxException {		
+		final InboxConfiguration inbConf = props.getPolling().get(0);
 		
-		final URI inboxURL = new URI(props.getPolling().get(0).getDirectory());
+		final URI inboxURL = new URI(inbConf.getDirectory());
 		final Path inboxPath = Paths.get(inboxURL.getPath());
 		
 		if (!inboxPath.toFile().exists()) {
 			inboxPath.toFile().mkdirs();
 		}
 		
-		final FilesystemInboxEntryFactory fact = new FilesystemInboxEntryFactory();	
+		final InboxEntryFactory fact = new InboxEntryFactoryImpl();	
 		final InboxEntry content = fact.newInboxEntry(
 				inboxURL, 
 				inboxPath.resolve("WILE/S1B/L20180724144436762001030/ch01/DCS_02_L20180724144436762001030_ch1_DSIB.xml"), 
-				2, 
 				new Date(), 
 				0,
-				"WILE"
+				null
 		);
 		final InboxEntry content2 = fact.newInboxEntry(
 				inboxURL, 
 				inboxPath.resolve("AUX/S1__AUX_ICE_V20160501T120000_G20160502T043607.SAFE"), 
-				1, 
 				new Date(),
 				0,
 				null

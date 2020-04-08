@@ -1,5 +1,6 @@
 package esa.s1pdgs.cpoc.ingestion.trigger.inbox;
 
+import java.nio.file.Paths;
 import java.util.Collection;
 import java.util.Date;
 import java.util.HashSet;
@@ -14,6 +15,7 @@ import esa.s1pdgs.cpoc.common.utils.LogUtils;
 import esa.s1pdgs.cpoc.ingestion.trigger.entity.InboxEntry;
 import esa.s1pdgs.cpoc.ingestion.trigger.filter.InboxFilter;
 import esa.s1pdgs.cpoc.ingestion.trigger.kafka.producer.SubmissionClient;
+import esa.s1pdgs.cpoc.ingestion.trigger.name.ProductNameEvaluator;
 import esa.s1pdgs.cpoc.ingestion.trigger.report.IngestionTriggerReportingInput;
 import esa.s1pdgs.cpoc.ingestion.trigger.report.IngestionTriggerReportingOutput;
 import esa.s1pdgs.cpoc.ingestion.trigger.service.IngestionTriggerServiceTransactional;
@@ -31,6 +33,7 @@ public final class Inbox {
 	private final SubmissionClient client;
 	private final ProductFamily family;
 	private final String stationName;
+	private final ProductNameEvaluator nameEvaluator;
 
 	Inbox(
 			final InboxAdapter inboxAdapter, 
@@ -38,7 +41,8 @@ public final class Inbox {
 			final IngestionTriggerServiceTransactional ingestionTriggerServiceTransactional, 
 			final SubmissionClient client,
 			final ProductFamily family,
-			final String stationName
+			final String stationName,
+			final ProductNameEvaluator nameEvaluator
 	) {
 		this.inboxAdapter = inboxAdapter;
 		this.filter = filter;
@@ -46,6 +50,7 @@ public final class Inbox {
 		this.client = client;
 		this.family = family;
 		this.stationName = stationName;
+		this.nameEvaluator = nameEvaluator;
 		this.log = LoggerFactory.getLogger(String.format("%s (%s) for %s", getClass().getName(), stationName, family));
 	}
 	
@@ -156,11 +161,12 @@ public final class Inbox {
 		}
 		
 		try {
-			log.debug("Publishing new entry to kafka queue: {}", entry);		    
+			log.debug("Publishing new entry to kafka queue: {}", entry);	
+			final String publishedName = nameEvaluator.evaluateFrom(Paths.get(entry.getRelativePath()));
 			client.publish(
 					new IngestionJob(
 						family, 
-						entry.getName(), 
+						publishedName, 
 						entry.getPickupURL(), 
 						entry.getRelativePath(), 
 						entry.getSize(),
