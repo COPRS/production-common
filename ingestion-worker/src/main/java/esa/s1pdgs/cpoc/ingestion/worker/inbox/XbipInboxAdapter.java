@@ -7,6 +7,7 @@ import java.nio.file.Paths;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import esa.s1pdgs.cpoc.ingestion.worker.product.IngestionJobs;
 import esa.s1pdgs.cpoc.xbip.client.XbipClient;
 import esa.s1pdgs.cpoc.xbip.client.XbipClientFactory;
 import esa.s1pdgs.cpoc.xbip.client.XbipEntry;
@@ -22,11 +23,11 @@ public final class XbipInboxAdapter implements InboxAdapter {
 	@Override
 	public final List<InboxAdapterEntry> read(final URI uri, final String name) throws Exception {
 		final XbipClient client = xbipClientFactory.newXbipClient(uri);		
-		final Path basePath = Paths.get(uri.getPath());
+		final Path basePath = IngestionJobs.basePath(uri, name);
 		
 		// only list the content of the specified url
 		return client.list(XbipEntryFilter.ALLOW_ALL).stream()
-			.map(x -> toInboxAdapterEntry(basePath.getParent(), x, client.read(x)))
+			.map(x -> toInboxAdapterEntry(basePath, x, client.read(x)))
 			.collect(Collectors.toList());
 	}
 

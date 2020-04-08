@@ -17,6 +17,7 @@ import org.apache.logging.log4j.Logger;
 
 import esa.s1pdgs.cpoc.common.utils.FileUtils;
 import esa.s1pdgs.cpoc.ingestion.worker.config.IngestionWorkerServiceConfigurationProperties;
+import esa.s1pdgs.cpoc.ingestion.worker.product.IngestionJobs;
 
 public final class FilesystemInboxAdapter implements InboxAdapter {
 	static final Logger LOG = LogManager.getLogger(FilesystemInboxAdapter.class); 
@@ -26,15 +27,15 @@ public final class FilesystemInboxAdapter implements InboxAdapter {
 	public FilesystemInboxAdapter(final IngestionWorkerServiceConfigurationProperties properties) {
 		this.properties = properties;
 	}
-
+	
 	@Override
 	public final List<InboxAdapterEntry> read(final URI uri, final String name) throws Exception {	
-		final Path basePath = Paths.get(uri);
-		
-		return Files.walk(basePath, FileVisitOption.FOLLOW_LINKS)
+		final Path basePath = IngestionJobs.basePath(uri, name);
+	
+		return Files.walk(Paths.get(uri.getPath()), FileVisitOption.FOLLOW_LINKS)
 			.map(Path::toFile)
 			.filter(f -> !f.isDirectory())
-			.map(f -> toInboxAdapterEntry(basePath.getParent(),f))
+			.map(f -> toInboxAdapterEntry(basePath,f))
 			.collect(Collectors.toList());
 	}
 	

@@ -7,14 +7,13 @@ import org.springframework.stereotype.Component;
 
 import esa.s1pdgs.cpoc.ingestion.trigger.inbox.InboxAdapter;
 import esa.s1pdgs.cpoc.ingestion.trigger.inbox.InboxAdapterFactory;
-import esa.s1pdgs.cpoc.ingestion.trigger.inbox.InboxEntryFactory;
 
 @Component
 public class FilesystemInboxAdapterFactory implements InboxAdapterFactory {
-	private final InboxEntryFactory inboxEntryFactory;
+	private final FilesystemInboxEntryFactory inboxEntryFactory;
 
 	@Autowired
-	public FilesystemInboxAdapterFactory(final InboxEntryFactory inboxEntryFactory) {
+	public FilesystemInboxAdapterFactory(final FilesystemInboxEntryFactory inboxEntryFactory) {
 		this.inboxEntryFactory = inboxEntryFactory;
 	}
 

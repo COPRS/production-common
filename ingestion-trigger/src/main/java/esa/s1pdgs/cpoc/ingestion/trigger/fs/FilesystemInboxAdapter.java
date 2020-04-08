@@ -15,11 +15,10 @@ import org.apache.commons.io.FileUtils;
 import esa.s1pdgs.cpoc.ingestion.trigger.entity.InboxEntry;
 import esa.s1pdgs.cpoc.ingestion.trigger.filter.InboxFilter;
 import esa.s1pdgs.cpoc.ingestion.trigger.inbox.AbstractInboxAdapter;
-import esa.s1pdgs.cpoc.ingestion.trigger.inbox.InboxEntryFactory;
 
 public class FilesystemInboxAdapter extends AbstractInboxAdapter {	
 	public FilesystemInboxAdapter(
-			final InboxEntryFactory inboxEntryFactory, 
+			final FilesystemInboxEntryFactory inboxEntryFactory, 
 			final URI inboxURL, 
 			final int productInDirectoryLevel
 	) {
