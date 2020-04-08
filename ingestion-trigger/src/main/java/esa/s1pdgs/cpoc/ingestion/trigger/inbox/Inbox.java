@@ -23,7 +23,7 @@ import esa.s1pdgs.cpoc.report.ReportingMessage;
 import esa.s1pdgs.cpoc.report.ReportingUtils;
 
 public final class Inbox {
-	private static final Logger LOG = LoggerFactory.getLogger(Inbox.class);
+	private final Logger log;
 	
 	private final InboxAdapter inboxAdapter;
 	private final InboxFilter filter;
@@ -46,6 +46,7 @@ public final class Inbox {
 		this.client = client;
 		this.family = family;
 		this.stationName = stationName;
+		this.log = LoggerFactory.getLogger(String.format("%s:", description()));
 	}
 	
 	public final void poll() {	
@@ -78,7 +79,7 @@ public final class Inbox {
 
 		} catch (final Exception e) {			
 			// thrown on error reading the Inbox. No real retry here as it will be retried on next polling attempt anyway	
-			LOG.error(String.format("Error on polling %s", description()), e);
+			log.error(String.format("Error on polling %s", description()), e);
 		}
 	}
 
@@ -130,7 +131,7 @@ public final class Inbox {
 			}
 		}		
 		if (logMessage.length() != 0) {
-			LOG.info(logMessage.toString());
+			log.info(logMessage.toString());
 		}
 	}
 	
@@ -155,7 +156,7 @@ public final class Inbox {
 		}
 		
 		try {
-			LOG.debug("Publishing new entry to kafka queue: {}", entry);		    
+			log.debug("Publishing new entry to kafka queue: {}", entry);		    
 			client.publish(
 					new IngestionJob(
 						family, 
@@ -174,14 +175,14 @@ public final class Inbox {
 			return Optional.of(entry);
 		} catch (final Exception e) {
 			reporting.error(new ReportingMessage("File %s could not be handled: %s", entry.getName(), LogUtils.toString(e)));
-			LOG.error(String.format("Error on handling %s in %s: %s", entry, description(), LogUtils.toString(e)));
+			log.error(String.format("Error on handling %s in %s: %s", entry, description(), LogUtils.toString(e)));
 		}	
 		return Optional.empty();
 	}
 	
 	private final InboxEntry persist(final InboxEntry toBePersisted) {
 		final InboxEntry persisted = ingestionTriggerServiceTransactional.add(toBePersisted);
-		LOG.trace("Added {} to persistence", persisted);
+		log.trace("Added {} to persistence", persisted);
 		return persisted;
 	}
 	
@@ -202,11 +203,11 @@ public final class Inbox {
 //		return name;
 //	}
 	
-	private static final void dumpToDebugLog(final String logTemplate, final Collection<InboxEntry> entries) {
-		if (LOG.isDebugEnabled()) {
+	private final void dumpToDebugLog(final String logTemplate, final Collection<InboxEntry> entries) {
+		if (log.isDebugEnabled()) {
 			entries.stream()
-				.map(p -> p.getName())
-				.forEach(e -> LOG.debug("PickupAction - " + logTemplate, e));
+				.map(p -> p.getRelativePath())
+				.forEach(e -> log.debug("PickupAction - " + logTemplate, e));
 		}
 		
 	}
