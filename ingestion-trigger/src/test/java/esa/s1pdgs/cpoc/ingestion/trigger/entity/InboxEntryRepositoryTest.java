@@ -26,10 +26,10 @@ public class InboxEntryRepositoryTest {
         InboxEntry entry = new InboxEntry("tehName", "tehPath", "tehPickUrl", new Date(), 100);
         repository.save(entry);
 
-        assertThat(repository.findByPickupURL("tehPickUrl"), is(not(empty())));
-        assertThat(repository.findByPickupURL("tehPickUrl33"), is(empty()));
+        assertThat(repository.findByPickupURLAndStationName("tehPickUrl", null), is(not(empty())));
+        assertThat(repository.findByPickupURLAndStationName("tehPickUrl33", null), is(empty()));
 
-        final InboxEntry fetchedEntry = repository.findByPickupURL("tehPickUrl").get(0);
+        final InboxEntry fetchedEntry = repository.findByPickupURLAndStationName("tehPickUrl", null).get(0);
         assertThat(fetchedEntry.getPickupURL(), is(equalTo("tehPickUrl")));
     }
 

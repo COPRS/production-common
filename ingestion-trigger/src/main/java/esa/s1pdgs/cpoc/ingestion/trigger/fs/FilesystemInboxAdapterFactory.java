@@ -1,30 +1,24 @@
 package esa.s1pdgs.cpoc.ingestion.trigger.fs;
 
 import java.net.URI;
-import java.net.URISyntaxException;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import esa.s1pdgs.cpoc.ingestion.trigger.inbox.InboxAdapter;
 import esa.s1pdgs.cpoc.ingestion.trigger.inbox.InboxAdapterFactory;
-import esa.s1pdgs.cpoc.ingestion.trigger.inbox.InboxEntryFactory;
 
 @Component
 public class FilesystemInboxAdapterFactory implements InboxAdapterFactory {
-	private final InboxEntryFactory inboxEntryFactory;
+	private final FilesystemInboxEntryFactory inboxEntryFactory;
 
 	@Autowired
-	public FilesystemInboxAdapterFactory(final InboxEntryFactory inboxEntryFactory) {
+	public FilesystemInboxAdapterFactory(final FilesystemInboxEntryFactory inboxEntryFactory) {
 		this.inboxEntryFactory = inboxEntryFactory;
 	}
 
 	@Override
-	public InboxAdapter newInboxAdapter(final String inboxURL, final int productInDirectoryLevel) {
-		try {
-			return new FilesystemInboxAdapter(inboxEntryFactory, new URI(inboxURL), productInDirectoryLevel);
-		} catch (final URISyntaxException e) {
-			throw new IllegalArgumentException(e);
-		}
+	public InboxAdapter newInboxAdapter(final URI inbox, final int productInDirectoryLevel,	final String stationName) {
+		return new FilesystemInboxAdapter(inboxEntryFactory, inbox, productInDirectoryLevel, stationName);
 	}
 }

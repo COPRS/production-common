@@ -1,15 +1,16 @@
 package esa.s1pdgs.cpoc.ingestion.worker.product;
 
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.Assert.assertEquals;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
+import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.Date;
+import java.util.List;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -18,15 +19,13 @@ import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 
 import esa.s1pdgs.cpoc.common.ProductFamily;
-import esa.s1pdgs.cpoc.common.errors.AbstractCodedException;
-import esa.s1pdgs.cpoc.common.errors.InternalErrorException;
 import esa.s1pdgs.cpoc.ingestion.worker.config.ProcessConfiguration;
-import esa.s1pdgs.cpoc.mqi.model.queue.AbstractMessage;
+import esa.s1pdgs.cpoc.ingestion.worker.inbox.InboxAdapter;
+import esa.s1pdgs.cpoc.ingestion.worker.inbox.InboxAdapterEntry;
 import esa.s1pdgs.cpoc.mqi.model.queue.IngestionEvent;
 import esa.s1pdgs.cpoc.mqi.model.queue.IngestionJob;
 import esa.s1pdgs.cpoc.obs_sdk.ObsClient;
-import esa.s1pdgs.cpoc.obs_sdk.ObsEmptyFileException;
-import esa.s1pdgs.cpoc.obs_sdk.FileObsUploadObject;
+import esa.s1pdgs.cpoc.obs_sdk.StreamObsUploadObject;
 import esa.s1pdgs.cpoc.report.ReportingFactory;
 
 public class TestProductServiceImpl {
@@ -44,6 +43,9 @@ public class TestProductServiceImpl {
 
 	@Mock
 	File notWritableFile;
+	
+	@Mock
+	InboxAdapter inboxAdapter;
 
 	ProcessConfiguration processConfiguration;
 	
@@ -69,9 +71,9 @@ public class TestProductServiceImpl {
 	}
 	
 	@Test
-	public void testIngest() throws ProductException, InternalErrorException, ObsEmptyFileException {
+	public void testIngest() throws Exception {
 		final ProductFamily family = ProductFamily.AUXILIARY_FILE;
-		final IngestionJob ingestionJob = new IngestionJob(family, "productName");
+		final IngestionJob ingestionJob = new IngestionJob();
 		ingestionJob.setPickupBaseURL("file:///dev");
 		ingestionJob.setRelativePath("null");
 		ingestionJob.setProductFamily(family);
@@ -87,50 +89,27 @@ public class TestProductServiceImpl {
 		expectedProductionEvent.setHostname("hostname");
 		expectedProductionEvent.setCreationDate(new Date());
 		product.setDto(expectedProductionEvent);
-		product.setFile(new File("/dev/null"));		
-		final IngestionResult expectedResult = new IngestionResult(Arrays.asList(product), 0L);
-		final IngestionResult actualResult = uut.ingest(family, ingestionJob, ReportingFactory.NULL);
-		assertEquals(expectedResult.getIngestedProducts().size(), actualResult.getIngestedProducts().size());
-		assertEquals(expectedResult.getTransferAmount(), actualResult.getTransferAmount());
+		final List<Product<IngestionEvent>> expectedResult = Arrays.asList(product);
+		final List<Product<IngestionEvent>> actualResult = uut.ingest(family, inboxAdapter, ingestionJob, ReportingFactory.NULL);
+		assertEquals(expectedResult.size(), actualResult.size());
 	}
 
 	@Test
-	public void testMarkInvalid() throws AbstractCodedException, ObsEmptyFileException {
+	public void testMarkInvalid() throws Exception {
 		final IngestionJob ingestionJob = new IngestionJob();
+		ingestionJob.setProductName("productName");
 		ingestionJob.setPickupBaseURL("file:///pickup/path");
 		ingestionJob.setRelativePath("relative/path");
-		uut.markInvalid(ingestionJob, ReportingFactory.NULL);
-		final FileObsUploadObject uploadObj = new FileObsUploadObject(ProductFamily.INVALID, AbstractMessage.NOT_DEFINED,
-				new File("/pickup/path/relative/path"));
-		verify(obsClient, times(1)).upload(Mockito.eq(Arrays.asList(uploadObj)), Mockito.any());
+		InboxAdapterEntry inboxAdapterEntry = new InboxAdapterEntry("key",	new ByteArrayInputStream("test".getBytes()), 0L);
+		doReturn(Arrays.asList(inboxAdapterEntry)).when(inboxAdapter).read(Mockito.any(), Mockito.anyString());
+		uut.markInvalid(inboxAdapter, ingestionJob, ReportingFactory.NULL);
+		final StreamObsUploadObject uploadObj = new StreamObsUploadObject(ProductFamily.INVALID, "key",
+				new ByteArrayInputStream("test".getBytes()), 0L);
+		verify(obsClient, times(1)).uploadStreams(Mockito.eq(Arrays.asList(uploadObj)), Mockito.any());
 	}
 
 	@Test
 	public void testToObsKey() {
 		assertEquals(Paths.get("/tmp/foo/bar/baaaaar").toString(), uut.toObsKey(Paths.get("/tmp/foo/bar/baaaaar")));
-	}
-
-	@Test
-	public void testToFile() throws InternalErrorException {
-		final IngestionJob ingestionJob = new IngestionJob();
-		ingestionJob.setPickupBaseURL("file:///tmp/foo");
-		ingestionJob.setRelativePath("bar/baaaaar");
-		assertEquals(new File("/tmp/foo/bar/baaaaar"), ProductServiceImpl.toFile(ingestionJob));
-	}
-
-	@Test
-	public void testAssertPermissions() {
-		final IngestionJob ingestionJob = new IngestionJob();
-		assertThatThrownBy(() -> ProductServiceImpl.assertPermissions(ingestionJob, nonExistentFile))
-			.isInstanceOf(RuntimeException.class)
-			.hasMessageContaining("File nonExistentFile of " + ingestionJob + " does not exist");
-
-		assertThatThrownBy(() -> ProductServiceImpl.assertPermissions(ingestionJob, notReadableFile))
-			.isInstanceOf(RuntimeException.class)
-			.hasMessageContaining("File notReadableFile of " + ingestionJob + " is not readable");
-		
-		assertThatThrownBy(() -> ProductServiceImpl.assertPermissions(ingestionJob, notWritableFile))
-			.isInstanceOf(RuntimeException.class)
-			.hasMessageContaining("File notWritableFile of " + ingestionJob + " is not writeable");
 	}
 }

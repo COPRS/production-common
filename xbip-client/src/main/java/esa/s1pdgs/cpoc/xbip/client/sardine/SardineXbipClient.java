@@ -37,8 +37,15 @@ public class SardineXbipClient implements XbipClient {
 	}
 
 	@Override
-	public final InputStream read(final XbipEntry entry) throws IOException {
-		return sardine.get(entry.getUri().toString());
+	public final InputStream read(final XbipEntry entry) {
+		try {
+			return sardine.get(entry.getUri().toString());
+		} catch (final IOException e) {
+			throw new RuntimeException(
+					String.format("Error on retrieving input stream for %s: %s", entry, e.getMessage()),
+					e
+			);
+		}
 	}
 	
 	private final XbipEntry toXbipEntry(final DavResource davResource) {			

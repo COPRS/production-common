@@ -2,6 +2,8 @@ package esa.s1pdgs.cpoc.mqi.model.queue;
 
 import java.util.Objects;
 
+import esa.s1pdgs.cpoc.common.ProductFamily;
+
 /**
  * DTO object used to transfer EDRS session files between MQI and application
  * 
@@ -10,6 +12,26 @@ import java.util.Objects;
 public class IngestionEvent extends AbstractMessage {
 	private String productName = NOT_DEFINED;
 	private String relativePath = NOT_DEFINED;
+	private long productSizeByte = 0L;
+	private String stationName;
+	
+	public IngestionEvent() {
+		super();
+	}
+
+	public IngestionEvent(
+			final ProductFamily productFamily, 
+			final String productName, 
+			final String relativePath, 
+			final long productSizeByte,
+			final String stationName
+	) {
+		super(productFamily, productName);
+		this.productName = productName;
+		this.relativePath = relativePath;
+		this.productSizeByte = productSizeByte;
+		this.stationName = stationName;
+	}
 
 	public String getProductName() {
 		return productName;
@@ -27,9 +49,35 @@ public class IngestionEvent extends AbstractMessage {
 		this.relativePath = relativePath;
 	}
 	
+	public long getProductSizeByte() {
+		return productSizeByte;
+	}
+
+	public void setProductSizeByte(final long productSizeByte) {
+		this.productSizeByte = productSizeByte;
+	}	
+
+	public String getStationName() {
+		return stationName;
+	}
+
+	public void setStationName(final String stationName) {
+		this.stationName = stationName;
+	}
+
 	@Override
 	public int hashCode() {
-		return Objects.hash(creationDate, hostname, keyObjectStorage, productFamily, productName, relativePath, uid);
+		return Objects.hash(
+				creationDate, 
+				hostname, 
+				keyObjectStorage, 
+				productFamily, 
+				productName, 
+				relativePath, 
+				uid,
+				productSizeByte,
+				stationName
+		);
 	}
 
 	@Override
@@ -49,7 +97,9 @@ public class IngestionEvent extends AbstractMessage {
 				&& Objects.equals(keyObjectStorage, other.keyObjectStorage) 
 				&& productFamily == other.productFamily
 				&& Objects.equals(productName, other.productName)
+				&& Objects.equals(stationName, other.stationName)
 				&& Objects.equals(uid, other.uid)
+				&& productSizeByte == other.productSizeByte
 				&& Objects.equals(relativePath, other.relativePath);
 	}
 
@@ -57,6 +107,6 @@ public class IngestionEvent extends AbstractMessage {
 	public String toString() {
 		return "IngestionEvent [productName=" + productName + ", productFamily=" + productFamily + ", keyObjectStorage=" 
 				+ keyObjectStorage + ", creationDate=" + creationDate + ", hostname=" + hostname + ", relativePath=" + 
-				relativePath + ", uid=" + uid +"]";
+				relativePath + ", uid=" + uid +", productSizeByte=" + productSizeByte + ", stationName=" + stationName + "]";
 	}
 }

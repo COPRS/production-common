@@ -24,23 +24,23 @@ public class FileUtils {
     /**
      * Write the string into the file
      * 
-     * @param fileToComplete
+     * @param file
      * @param data
      * @throws InternalErrorException
      */
-    public static void writeFile(final File fileToComplete, final String data)
+    public static void writeFile(final File file, final String data)
             throws InternalErrorException {
         try {
-            FileWriter fileWriter = new FileWriter(fileToComplete);
-            BufferedWriter bufferedWriter = new BufferedWriter(fileWriter);
+            final FileWriter fileWriter = new FileWriter(file);
+            final BufferedWriter bufferedWriter = new BufferedWriter(fileWriter);
             try {
                 bufferedWriter.write(data);
                 bufferedWriter.flush();
                 bufferedWriter.close();
                 fileWriter.close();
-            } catch (IOException e) {
+            } catch (final IOException e) {
                 throw new InternalErrorException(
-                        "Cannot write file " + fileToComplete.getAbsolutePath(),
+                        "Cannot write file " + file.getAbsolutePath(),
                         e);
             } finally {
                 if (fileWriter != null) {
@@ -51,9 +51,9 @@ public class FileUtils {
                 }
 
             }
-        } catch (IOException e) {
+        } catch (final IOException e) {
             throw new InternalErrorException(
-                    "Cannot close file " + fileToComplete.getAbsolutePath(), e);
+                    "Cannot close file " + file.getAbsolutePath(), e);
         }
     }
 
@@ -66,7 +66,7 @@ public class FileUtils {
      */
     public static void writeFile(final String filePath, final String data)
             throws InternalErrorException {
-        File file = new File(filePath);
+        final File file = new File(filePath);
         writeFile(file, data);
     }
 
@@ -82,13 +82,13 @@ public class FileUtils {
         try {
             return new String(Files.readAllBytes(file.toPath()),
                     Charset.defaultCharset());
-        } catch (IOException ioe) {
+        } catch (final IOException ioe) {
             throw new InternalErrorException("Cannot read file for "
                     + file.getName() + ": " + ioe.getMessage(), ioe);
         }
     }
     
-    public static void deleteWithRetries(final File file, int numRetries, long retrySleep) 
+    public static void deleteWithRetries(final File file, final int numRetries, final long retrySleep) 
     		throws InterruptedException {
     	Retries.performWithRetries(
     			() -> {	delete(file.getPath()) ; return null;}, 
@@ -106,12 +106,12 @@ public class FileUtils {
      */
     public static void delete(final String path){
         try {
-			Path pathObj = Paths.get(path);
+			final Path pathObj = Paths.get(path);
 			Files.walk(pathObj, FileVisitOption.FOLLOW_LINKS)
 			        .sorted(Comparator.reverseOrder())
 			        .map(Path::toFile)
 			        .forEach(File::delete);
-		} catch (IOException e) {
+		} catch (final IOException e) {
 			throw new RuntimeException(e);
 		}
     }
@@ -138,7 +138,7 @@ public class FileUtils {
     public static final File createTmpDir() {
     	try {
 			return Files.createTempDirectory("tmp").toFile();
-		} catch (IOException e) {
+		} catch (final IOException e) {
 			throw new RuntimeException(e);
 		}
     }

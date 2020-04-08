@@ -15,7 +15,6 @@ import org.springframework.stereotype.Service;
 
 import esa.s1pdgs.cpoc.appstatus.AppStatus;
 import esa.s1pdgs.cpoc.common.ProductCategory;
-import esa.s1pdgs.cpoc.common.errors.AbstractCodedException;
 import esa.s1pdgs.cpoc.errorrepo.ErrorRepoAppender;
 import esa.s1pdgs.cpoc.mdc.trigger.CatalogJobMapper;
 import esa.s1pdgs.cpoc.mdc.trigger.MetadataTriggerListener;
@@ -27,8 +26,6 @@ import esa.s1pdgs.cpoc.mqi.client.MqiConsumer;
 import esa.s1pdgs.cpoc.mqi.model.queue.CatalogJob;
 import esa.s1pdgs.cpoc.mqi.model.queue.IngestionEvent;
 import esa.s1pdgs.cpoc.mqi.model.queue.ProductionEvent;
-import esa.s1pdgs.cpoc.mqi.model.rest.GenericMessageDto;
-import esa.s1pdgs.cpoc.mqi.model.rest.GenericPublicationMessageDto;
 
 @Service
 public class MetadataTriggerService {	
@@ -41,6 +38,7 @@ public class MetadataTriggerService {
 			job.setProductFamily(event.getProductFamily());
 			job.setKeyObjectStorage(event.getKeyObjectStorage());
 			job.setUid(reportingId);
+			job.setStationName(event.getStationName());
 			return job;
 		}		
 	};
@@ -90,24 +88,6 @@ public class MetadataTriggerService {
 		
 		for (final Map.Entry<ProductCategory, CategoryConfig> entry : entries.entrySet()) {			
 			service.execute(newMqiConsumerFor(entry.getKey(), entry.getValue()));
-		}
-	}
-	
-	final void publish(final ProductCategory cat, final GenericMessageDto<?> mess, final CatalogJob job) {
-    	final GenericPublicationMessageDto<CatalogJob> messageDto = new GenericPublicationMessageDto<CatalogJob>(
-    			mess.getId(), 
-    			job.getProductFamily(), 
-    			job
-    	);
-    	messageDto.setInputKey(mess.getInputKey());
-    	messageDto.setOutputKey(job.getProductFamily().name());
-		try {
-			mqiClient.publish(messageDto, cat);
-		} catch (final AbstractCodedException e) {
-			throw new RuntimeException(
-					String.format("Error publishing %s message %s: %s", cat, messageDto, e.getLogMessage()),
-					e
-			);
 		}
 	}
 	

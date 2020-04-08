@@ -21,6 +21,7 @@ import esa.s1pdgs.cpoc.disseminator.config.DisseminationProperties;
 import esa.s1pdgs.cpoc.disseminator.config.DisseminationProperties.DisseminationTypeConfiguration;
 import esa.s1pdgs.cpoc.errorrepo.ErrorRepoAppender;
 import esa.s1pdgs.cpoc.mqi.client.GenericMqiClient;
+import esa.s1pdgs.cpoc.mqi.client.MessageFilter;
 import esa.s1pdgs.cpoc.mqi.client.MqiConsumer;
 import esa.s1pdgs.cpoc.obs_sdk.ObsClient;
 
@@ -37,15 +38,19 @@ public class DisseminationService {
 	private final ErrorRepoAppender errorAppender;
 	private final AppStatus appStatus;
 	
+	private final List<MessageFilter> messageFilter;
+	
 	@Autowired
 	public DisseminationService(
 			final GenericMqiClient client,
+			final List<MessageFilter> messageFilter,
 		    final ObsClient obsClient,
 			final DisseminationProperties properties,
 			final ErrorRepoAppender errorAppender,
 			final AppStatus appStatus
 	) {
 		this.client = client;
+		this.messageFilter = messageFilter;
 		this.obsClient = obsClient;
 		this.properties = properties;
 		this.errorAppender = errorAppender;
@@ -73,12 +78,15 @@ public class DisseminationService {
 				));
 			}
 			
+			mqiListener.initListener();
+			
 			service.execute(
 					MqiConsumer.valueOf(
 					category.getDtoClass(),
 					client,
 					category,
 					mqiListener,
+					messageFilter,
 					properties.getPollingIntervalMs(),
 					0L,
 					appStatus

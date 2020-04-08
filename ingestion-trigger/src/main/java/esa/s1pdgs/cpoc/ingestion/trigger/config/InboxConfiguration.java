@@ -7,6 +7,8 @@ public class InboxConfiguration {
 	private String matchRegex;
 	private String ignoreRegex;
 	private String topic;
+	private String stationName;
+	
 	private ProductFamily family = ProductFamily.BLANK;
 	private int productInDirectoryLevel = 0;
 
@@ -57,11 +59,19 @@ public class InboxConfiguration {
 	public void setFamily(final ProductFamily family) {
 		this.family = family;
 	}
+	
+	public String getStationName() {
+		return stationName;
+	}
+
+	public void setStationName(final String stationName) {
+		this.stationName = stationName;
+	}
 
 	@Override
 	public String toString() {
 		return "InboxConfiguration [directory=" + directory + ", matchRegex=" + matchRegex + ", ignoreRegex="
-				+ ignoreRegex + ", topic=" + topic + ", productInDirectoryLevel=" + productInDirectoryLevel + 
-				", family=" + family + "]";
-	}
+				+ ignoreRegex + ", topic=" + topic + ", stationName=" + stationName + ", family=" + family
+				+ ", productInDirectoryLevel=" + productInDirectoryLevel + "]";
+	}	
 }

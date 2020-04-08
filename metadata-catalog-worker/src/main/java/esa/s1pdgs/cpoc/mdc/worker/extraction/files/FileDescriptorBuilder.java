@@ -178,7 +178,7 @@ public class FileDescriptorBuilder {
 	        descriptor.setSessionIdentifier(metadataFromPath.get("sessionId"));
 	    	//descriptor.setProductName(descriptor.getSessionIdentifier());       
 	        descriptor.setProductName(dsiborDsdbName);
-	        descriptor.setStationCode(metadataFromPath.get("stationCode"));
+	        descriptor.setStationCode(catJob.getStationName());
 	        descriptor.setChannel(Integer.parseInt(metadataFromPath.get("channelId")));
 			
 			return descriptor;

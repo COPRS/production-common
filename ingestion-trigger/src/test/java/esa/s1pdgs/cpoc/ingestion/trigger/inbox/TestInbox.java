@@ -47,7 +47,8 @@ public class TestInbox {
                 InboxFilter.ALLOW_ALL,
                 new IngestionTriggerServiceTransactional(fakeRepo),
                 fakeKafkaClient,
-                ProductFamily.EDRS_SESSION
+                ProductFamily.EDRS_SESSION,
+				"WILE"
         );
         uut.poll();
 
@@ -65,7 +66,7 @@ public class TestInbox {
         when(fakeAdapter.inboxURL()).thenReturn("/tmp");
 
 
-        when(fakeRepo.findByPickupURL(anyString())).thenReturn(Arrays.asList(new InboxEntry("foo2", "foo2", "/tmp", new Date(), 0),
+        when(fakeRepo.findByPickupURLAndStationName(anyString(), anyString())).thenReturn(Arrays.asList(new InboxEntry("foo2", "foo2", "/tmp", new Date(), 0),
                 new InboxEntry("foo1", "foo1", "/tmp", new Date(), 0)));
 
         final Inbox uut = new Inbox(
@@ -73,7 +74,8 @@ public class TestInbox {
                 InboxFilter.ALLOW_ALL,
                 new IngestionTriggerServiceTransactional(fakeRepo),
                 fakeKafkaClient,
-                ProductFamily.EDRS_SESSION
+                ProductFamily.EDRS_SESSION,
+				"WILE"
         );
         uut.poll();
 

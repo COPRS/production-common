@@ -22,6 +22,7 @@ public class InboxEntry {
 	private String pickupURL;
 	private Date lastModified;
 	private long size;
+	private String stationName;
 
 	public InboxEntry() {
 	}
@@ -32,7 +33,7 @@ public class InboxEntry {
 		this.relativePath = relativePath;
 		this.pickupURL = pickupURL;
 		this.lastModified = lastModified;
-		this.setSize(size);
+		this.size = size;
 	}
 
 	public String getName() {
@@ -63,7 +64,7 @@ public class InboxEntry {
 		return lastModified;
 	}
 
-	public void setLastModified(Date lastModified) {
+	public void setLastModified(final Date lastModified) {
 		this.lastModified = lastModified;
 	}
 
@@ -71,8 +72,16 @@ public class InboxEntry {
 		return size;
 	}
 
-	public void setSize(long size) {
+	public void setSize(final long size) {
 		this.size = size;
+	}
+	
+	public String getStationName() {
+		return stationName;
+	}
+
+	public void setStationName(final String stationName) {
+		this.stationName = stationName;
 	}
 
 	@Override
@@ -89,19 +98,21 @@ public class InboxEntry {
 		// WARNING: Don't take 'id' into account when implementing equals/hashCode
 		// because it's always 0 when created from Inbox
 		final InboxEntry other = (InboxEntry) obj;
-		return Objects.equals(name, other.name) && Objects.equals(pickupURL, other.pickupURL)
+		return Objects.equals(name, other.name) && 
+				Objects.equals(pickupURL, other.pickupURL)
 				&& Objects.equals(relativePath, other.relativePath)
+				&& Objects.equals(stationName, other.stationName)
 				&& size == other.size;
 	}
 
 	@Override
 	public int hashCode() {
-		return Objects.hash(name, pickupURL, relativePath, size);
+		return Objects.hash(name, pickupURL, relativePath, size, stationName);
 	}
 
 	@Override
 	public String toString() {
-		return String.format("InboxEntry [name=%s, relativePath=%s, pickupURL=%s, lastModified=%s, size=%s]", name,
-				relativePath, pickupURL, lastModified, size);
+		return String.format("InboxEntry [name=%s, relativePath=%s, pickupURL=%s, lastModified=%s, size=%s, stationName=%s]", name,
+				relativePath, pickupURL, lastModified, size, stationName);
 	}
 }

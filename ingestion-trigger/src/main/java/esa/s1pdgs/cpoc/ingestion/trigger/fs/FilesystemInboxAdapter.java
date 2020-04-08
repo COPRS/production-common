@@ -15,15 +15,15 @@ import org.apache.commons.io.FileUtils;
 import esa.s1pdgs.cpoc.ingestion.trigger.entity.InboxEntry;
 import esa.s1pdgs.cpoc.ingestion.trigger.filter.InboxFilter;
 import esa.s1pdgs.cpoc.ingestion.trigger.inbox.AbstractInboxAdapter;
-import esa.s1pdgs.cpoc.ingestion.trigger.inbox.InboxEntryFactory;
 
 public class FilesystemInboxAdapter extends AbstractInboxAdapter {	
 	public FilesystemInboxAdapter(
-			final InboxEntryFactory inboxEntryFactory, 
+			final FilesystemInboxEntryFactory inboxEntryFactory, 
 			final URI inboxURL, 
-			final int productInDirectoryLevel
+			final int productInDirectoryLevel,			
+			final String stationName
 	) {
-		super(inboxEntryFactory, inboxURL, productInDirectoryLevel);
+		super(inboxEntryFactory, inboxURL, productInDirectoryLevel, stationName);
 	}
 	
 	@Override
@@ -36,6 +36,13 @@ public class FilesystemInboxAdapter extends AbstractInboxAdapter {
 		final File file = path.toFile();
 		final Date lastModified = new Date(file.lastModified());
 		final long size = FileUtils.sizeOf(file);		
-		return inboxEntryFactory.newInboxEntry(inboxURL, path, productInDirectoryLevel, lastModified, size);
+		return inboxEntryFactory.newInboxEntry(
+				inboxURL, 
+				path, 
+				productInDirectoryLevel, 
+				lastModified, 
+				size,
+				stationName
+		);
 	}
 }

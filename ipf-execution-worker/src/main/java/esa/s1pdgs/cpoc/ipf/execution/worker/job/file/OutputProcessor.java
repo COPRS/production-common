@@ -37,9 +37,9 @@ import esa.s1pdgs.cpoc.mqi.model.queue.IpfExecutionJob;
 import esa.s1pdgs.cpoc.mqi.model.queue.LevelJobOutputDto;
 import esa.s1pdgs.cpoc.mqi.model.queue.OQCFlag;
 import esa.s1pdgs.cpoc.mqi.model.rest.GenericMessageDto;
+import esa.s1pdgs.cpoc.obs_sdk.FileObsUploadObject;
 import esa.s1pdgs.cpoc.obs_sdk.ObsClient;
 import esa.s1pdgs.cpoc.obs_sdk.ObsEmptyFileException;
-import esa.s1pdgs.cpoc.obs_sdk.FileObsUploadObject;
 import esa.s1pdgs.cpoc.report.Reporting;
 import esa.s1pdgs.cpoc.report.ReportingFactory;
 import esa.s1pdgs.cpoc.report.ReportingMessage;
@@ -172,9 +172,12 @@ public class OutputProcessor {
 		}
 	}
 
-	private final ProductFamily familyOf(final LevelJobOutputDto output) {
+	private final ProductFamily familyOf(final LevelJobOutputDto output, final String name) {
 		final ProductFamily family = ProductFamily.fromValue(output.getFamily());
-		if (family == ProductFamily.L0_SLICE && appLevel == ApplicationLevel.L0) {
+		if (family == ProductFamily.L0_SLICE && 
+			appLevel == ApplicationLevel.L0 && 
+			!name.matches(properties.getSegmentBlacklistPattern())
+		) {			
 			return ProductFamily.L0_SEGMENT;
 		}
 		return family;
@@ -213,7 +216,7 @@ public class OutputProcessor {
 			if (matchOutput == null) {
 				LOGGER.warn("Output {} ignored because no found matching regular expression", productName);
 			} else {
-				final ProductFamily family = familyOf(matchOutput);
+				final ProductFamily family = familyOf(matchOutput, productName);
 
 				final File file = new File(filePath);
 				final OQCFlag oqcFlag = executor.executeOQC(file, family, matchOutput, new OQCDefaultTaskFactory(), reportingFactory);

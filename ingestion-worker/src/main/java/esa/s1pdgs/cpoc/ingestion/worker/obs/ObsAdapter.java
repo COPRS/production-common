@@ -1,19 +1,19 @@
 package esa.s1pdgs.cpoc.ingestion.worker.obs;
 
-import java.io.File;
-import java.nio.file.Path;
-import java.util.Arrays;
+import java.util.List;
+import java.util.stream.Collectors;
 
 import esa.s1pdgs.cpoc.common.ProductFamily;
 import esa.s1pdgs.cpoc.common.errors.AbstractCodedException;
 import esa.s1pdgs.cpoc.common.errors.obs.ObsException;
 import esa.s1pdgs.cpoc.common.utils.LogUtils;
+import esa.s1pdgs.cpoc.ingestion.worker.inbox.InboxAdapterEntry;
 import esa.s1pdgs.cpoc.ingestion.worker.product.ProductException;
 import esa.s1pdgs.cpoc.obs_sdk.ObsClient;
 import esa.s1pdgs.cpoc.obs_sdk.ObsEmptyFileException;
 import esa.s1pdgs.cpoc.obs_sdk.ObsObject;
-import esa.s1pdgs.cpoc.obs_sdk.FileObsUploadObject;
 import esa.s1pdgs.cpoc.obs_sdk.SdkClientException;
+import esa.s1pdgs.cpoc.obs_sdk.StreamObsUploadObject;
 import esa.s1pdgs.cpoc.report.ReportingFactory;
 
 public class ObsAdapter {
@@ -28,19 +28,17 @@ public class ObsAdapter {
 		this.reportingFactory = reportingFactory;
 	}
 	
-	public final void upload(final ProductFamily family, final File file, final String obsKey) throws ObsEmptyFileException {
+	public final void upload(final ProductFamily family, final List<InboxAdapterEntry> entries, final String obsKey) throws ObsEmptyFileException {
 		try {
-			if (!obsClient.exists(new ObsObject(family, obsKey))) {
-				obsClient.upload(Arrays.asList(new FileObsUploadObject(family, obsKey, file)), reportingFactory);
-			}
-		} catch (AbstractCodedException | SdkClientException e) {
+			obsClient.uploadStreams(toUploadObjects(family, entries), reportingFactory);
+		} catch (final AbstractCodedException e) {
 			throw new RuntimeException(
-					String.format("Error uploading file %s (%s): %s", file, family, LogUtils.toString(e))
+					String.format("Error uploading %s (%s): %s", obsKey, family, LogUtils.toString(e))
 			);
 		}
 	}
 	
-	public final void move(final ProductFamily from,final ProductFamily to, final File file, final String obsKey) throws ProductException {
+	public final void move(final ProductFamily from,final ProductFamily to, final String obsKey) throws ProductException {
 		try {
 			if (!obsClient.exists(new ObsObject(from, obsKey))) {
 				throw new ProductException(
@@ -60,4 +58,9 @@ public class ObsAdapter {
 		}
 	}
 	
+	private final List<StreamObsUploadObject> toUploadObjects(final ProductFamily family, final List<InboxAdapterEntry> entries) {
+		return entries.stream()
+			.map(e -> new StreamObsUploadObject(family, e.key(), e.inputStream(), e.size()))
+			.collect(Collectors.toList());
+	}
 }
