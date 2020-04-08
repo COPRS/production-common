@@ -63,7 +63,7 @@ public abstract class AbstractObsClient implements ObsClient {
     
     protected abstract void uploadObject(FileObsUploadObject object) throws SdkClientException, ObsServiceException, ObsException;
 
-	protected abstract void uploadObject(final StreamObsUploadObject object) throws ObsServiceException, S3SdkClientException, SwiftSdkClientException;
+	protected abstract String uploadObject(final StreamObsUploadObject object) throws ObsServiceException, S3SdkClientException, SwiftSdkClientException;
 
     private List<File> downloadObjects(final List<ObsDownloadObject> objects,
 									   final boolean parallel, final ReportingFactory reportingFactory)
@@ -142,7 +142,7 @@ public abstract class AbstractObsClient implements ObsClient {
             for (final FileObsUploadObject object : objects) {
                 service.submit(wrap(()  -> upload(Collections.singletonList(object), reportingFactory)));
             }
-            waitForCompletion(workerThread, service, objects.size(), configuration.getTimeoutUpExec());
+            waitForCompletionVoid(workerThread, service, objects.size(), configuration.getTimeoutUpExec());
 
         } else {
       		final Reporting reporting = reportingFactory.newReporting("ObsWrite");
@@ -165,17 +165,8 @@ public abstract class AbstractObsClient implements ObsClient {
             }
         }
     }
-
-    /**
-     * Wait for completion ending of all tasks
-     * 
-     * @param workerThread
-     * @param service
-     * @param nbTasks
-     * @param timeout
-     * @throws ObsServiceException
-     */
-    private void waitForCompletion(final ExecutorService workerThread,
+	
+    private void waitForCompletionVoid(final ExecutorService workerThread,
             final CompletionService<?> service, final int nbTasks,
             final int timeout) throws ObsServiceException {
         try {
@@ -192,6 +183,45 @@ public abstract class AbstractObsClient implements ObsClient {
                         }
                     }
                 }
+            } finally {
+                // Shutdown thread in case of raised exceptions
+                workerThread.shutdownNow();
+                workerThread.awaitTermination(configuration.getTimeoutShutdown(),TimeUnit.SECONDS);
+            }
+        } catch (InterruptedException | TimeoutException e) {
+            throw new ObsServiceException(e.getMessage(), e);
+        }
+    }  
+
+    /**
+     * Wait for completion ending of all tasks
+     * 
+     * @param workerThread
+     * @param service
+     * @param nbTasks
+     * @param timeout
+     * @throws ObsServiceException
+     */
+    private <E> List<E> waitForCompletion(final ExecutorService workerThread,
+            final CompletionService<List<E>> service, final int nbTasks,
+            final int timeout) throws ObsServiceException {
+    	final List<E> results = new ArrayList<>();
+        try {
+            try {
+                // Wait for download endings
+                for (int i = 0; i < nbTasks; i++) {
+                    try {
+                        final List<E> res = service.take().get(timeout, TimeUnit.SECONDS);
+                        results.addAll(res);
+                    } catch (final ExecutionException e) {
+                        if (e.getCause() instanceof ObsServiceException) {
+                            throw (ObsServiceException) e.getCause();
+                        } else {
+                            throw new ObsServiceException(e.getMessage(), e);
+                        }
+                    }
+                }
+                return results;
             } finally {
                 // Shutdown thread in case of raised exceptions
                 workerThread.shutdownNow();
@@ -255,28 +285,47 @@ public abstract class AbstractObsClient implements ObsClient {
 		}
 
 		try {
-			uploadStreams(objects, true, reportingFactory);
+			final List<String> md5s = uploadStreams(objects, true, reportingFactory);
+			uploadMd5Sum(baseKeyOf(objects), md5s);
 		} catch (final SdkClientException exc) {
 			throw new ObsParallelAccessException(exc);
 		}
 	}
 
-	private void uploadStreams(final List<StreamObsUploadObject> objects, final boolean parallel, final ReportingFactory reportingFactory) throws ObsServiceException, S3SdkClientException, SwiftSdkClientException {
+	private final ObsObject baseKeyOf(final List<StreamObsUploadObject> objects) {
+		// TODO this needs a safety net against misusage
+		// currently, the assumpion is that all provided StreamObsUploadObject belong to the same directory
+		for (final StreamObsUploadObject element : objects) {
+			
+			if (element.getKey().contains("/")) {
+				// trim at first slash (inclusive)
+				return new ObsObject(
+						element.getFamily(), 
+						element.getKey().substring(0, element.getKey().indexOf('/'))
+				);
+			}
+			// for the case it's a single file
+			return new ObsObject(element.getFamily(), element.getKey());
+		}		
+		return null;
+	}
+
+	private List<String> uploadStreams(final List<StreamObsUploadObject> objects, final boolean parallel, final ReportingFactory reportingFactory) throws ObsServiceException, S3SdkClientException, SwiftSdkClientException {
 		if (objects.size() > 1 && parallel) {
 			// Upload objects in parallel
-			final ExecutorService workerThread =
-					Executors.newFixedThreadPool(objects.size());
-			final CompletionService<Void> service =
-					new ExecutorCompletionService<>(workerThread);
+			final ExecutorService workerThread = Executors.newFixedThreadPool(objects.size());
+			final CompletionService<List<String>> service = new ExecutorCompletionService<>(workerThread);
 			// Launch all downloads
 			for (final StreamObsUploadObject object : objects) {
-				service.submit(wrap(() -> uploadStreams(Collections.singletonList(object), reportingFactory)));
+				service.submit(wrapStringList(() -> uploadStreams(Collections.singletonList(object), parallel, reportingFactory)));
 			}
-			waitForCompletion(workerThread, service, objects.size(), configuration.getTimeoutUpExec());
+			return waitForCompletion(workerThread, service, objects.size(), configuration.getTimeoutUpExec());
 
 		} else {
 			final Reporting reporting = reportingFactory.newReporting("ObsWrite");
 
+			final List<String> md5 = new ArrayList<>();
+			
 			// Upload object in sequential
 			for (final StreamObsUploadObject object : objects) {
 				reporting.begin(
@@ -285,15 +334,16 @@ public abstract class AbstractObsClient implements ObsClient {
 				);
 
 				try (final StreamObsUploadObject closeableStream = object) {	
-					uploadObject(closeableStream);	
+					md5.add(uploadObject(closeableStream));	
 				} catch (SdkClientException | RuntimeException e) {
 					reporting.error(new ReportingMessage("Error on uploading to OBS: {}", LogUtils.toString(e)));
 					throw e;
 				} catch (final IOException e1) {
 					// on close, just ignore it
 				}
-				reporting.end(new ReportingMessage(object.getContentLength(), "End uploading to OBS"));
+				reporting.end(new ReportingMessage(object.getContentLength(), "End uploading to OBS"));				
 			}
+			return md5;
 		}
 	}
 
@@ -354,7 +404,7 @@ public abstract class AbstractObsClient implements ObsClient {
     }
 	
 	protected abstract Map<String,String> collectMd5Sums(ObsObject object) throws ObsServiceException, ObsException;
-
+//
 	@FunctionalInterface
 	interface VoidCallable {
 
@@ -366,6 +416,22 @@ public abstract class AbstractObsClient implements ObsClient {
 		}
 
 		void call() throws Exception;
+	}
+	
+	static Callable<List<String>> wrapStringList(final StringListCallable callable) {
+		return () -> {
+			return callable.call();
+		};
+	}
+	
+	@FunctionalInterface
+	interface StringListCallable {
+		List<String> call() throws Exception;
+	}
+
+	public void uploadMd5Sum(final ObsObject object, final List<String> fileList) throws ObsServiceException, S3SdkClientException {
+
+		
 	}
 	
 }
