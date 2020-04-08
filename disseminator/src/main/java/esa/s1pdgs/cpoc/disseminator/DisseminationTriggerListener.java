@@ -77,7 +77,6 @@ public class DisseminationTriggerListener<E extends AbstractMessage> implements 
 		this.errorAppender = errorAppender;
 	}
 	
-	@PostConstruct
 	public void initListener() {
 		// Init list of configured outboxes    	
     	for (final Map.Entry<String, OutboxConfiguration> entry : properties.getOutboxes().entrySet()) {	
