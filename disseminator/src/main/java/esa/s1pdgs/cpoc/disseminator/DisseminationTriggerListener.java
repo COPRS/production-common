@@ -118,7 +118,26 @@ public class DisseminationTriggerListener<E extends AbstractMessage> implements 
 	}
 
 	final List<DisseminationTypeConfiguration> configsFor(final ProductFamily family) {
-    	return properties.getCategories().getOrDefault(ProductCategory.of(family), Collections.emptyList());	
+		ProductCategory pc = null;
+		if (family == ProductFamily.PLAN_AND_REPORT) {
+			/* I am so sorry, this is a hotfix: Due to a product category mismatch
+			 * the disiminator is not able to resolve its configuration. The event
+			 * being consumed is a CatalogEvent, however it will resolve here as a PLAN_AND_REPORT
+			 * instead, not able to resolve it. Using this category instead will however consume
+			 * IngestEvent as DTO not able to consume it anymore. After analyze of the problem
+			 * this workaround seems to be best place with less impact for a hotfix.
+			 * 
+			 * We simply map the PC to CATALOG_EVENT if the product family is PLAN_AND_REPORT.
+			 * All others are handled as usual.
+			 */
+			pc = ProductCategory.CATALOG_EVENT;
+		} else {
+			pc = ProductCategory.of(family);	
+		}		
+		
+		List<DisseminationTypeConfiguration> hits = properties.getCategories().getOrDefault(pc, Collections.emptyList());
+		LOG.debug("Family '{}' was resolved to category '{}' finding {} configurations",family, pc, hits.size());
+    	return 	hits;
     }
 
 	final void handleTransferTo(final GenericMessageDto<E> message, final String target) {		
