@@ -6,9 +6,11 @@ import java.io.InputStream;
 import java.io.PrintWriter;
 import java.net.URL;
 import java.nio.file.Files;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
+import java.util.Map;
 import java.util.regex.Pattern;
-import java.util.stream.Stream;
 
 import com.amazonaws.ClientConfiguration;
 import com.amazonaws.Protocol;
@@ -27,7 +29,17 @@ import com.amazonaws.services.s3.transfer.TransferManagerBuilder;
 
 import esa.s1pdgs.cpoc.common.ProductFamily;
 import esa.s1pdgs.cpoc.common.errors.obs.ObsException;
-import esa.s1pdgs.cpoc.obs_sdk.*;
+import esa.s1pdgs.cpoc.obs_sdk.AbstractObsClient;
+import esa.s1pdgs.cpoc.obs_sdk.FileObsUploadObject;
+import esa.s1pdgs.cpoc.obs_sdk.Md5;
+import esa.s1pdgs.cpoc.obs_sdk.ObsClient;
+import esa.s1pdgs.cpoc.obs_sdk.ObsConfigurationProperties;
+import esa.s1pdgs.cpoc.obs_sdk.ObsDownloadObject;
+import esa.s1pdgs.cpoc.obs_sdk.ObsObject;
+import esa.s1pdgs.cpoc.obs_sdk.ObsServiceException;
+import esa.s1pdgs.cpoc.obs_sdk.SdkClientException;
+import esa.s1pdgs.cpoc.obs_sdk.StreamObsUploadObject;
+import esa.s1pdgs.cpoc.obs_sdk.ValidArgumentAssertion;
 import esa.s1pdgs.cpoc.obs_sdk.report.ReportingProductFactory;
 import esa.s1pdgs.cpoc.obs_sdk.s3.retry.SDKCustomDefaultRetryCondition;
 import esa.s1pdgs.cpoc.obs_sdk.swift.SwiftSdkClientException;
@@ -144,12 +156,13 @@ public class S3ObsClient extends AbstractObsClient {
 	 *
 	 */
 	@Override
-	public void uploadObject(final StreamObsUploadObject object) throws ObsServiceException, S3SdkClientException {
-		final String md5 = s3Services.uploadStream(getBucketFor(object.getFamily()), object.getKey(), object.getInput(), object.getContentLength());
-		uploadMd5Sum(object, Arrays.asList(md5));
+	public String uploadObject(final StreamObsUploadObject object) throws ObsServiceException, S3SdkClientException {
+		return s3Services.uploadStream(getBucketFor(object.getFamily()), object.getKey(), object.getInput(), object.getContentLength());
+		//uploadMd5Sum(object, Arrays.asList(md5));
 	}
 
-	private void uploadMd5Sum(final ObsObject object, final List<String> fileList)
+	@Override
+	public final void uploadMd5Sum(final ObsObject object, final List<String> fileList)
 			throws ObsServiceException, S3SdkClientException {
 		File file;
 		try {
