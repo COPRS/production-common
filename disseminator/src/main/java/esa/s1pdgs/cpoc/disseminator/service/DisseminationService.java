@@ -73,6 +73,8 @@ public class DisseminationService {
 				));
 			}
 			
+			mqiListener.initListener();
+			
 			service.execute(
 					MqiConsumer.valueOf(
 					category.getDtoClass(),
