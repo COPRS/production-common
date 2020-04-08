@@ -295,6 +295,13 @@ public abstract class AbstractObsClient implements ObsClient {
 	private final ObsObject baseKeyOf(final List<StreamObsUploadObject> objects) {
 		// TODO this needs a safety net against misusage
 		// currently, the assumpion is that all provided StreamObsUploadObject belong to the same directory
+		
+		// for the case it's a single file
+		if (objects.size() == 1) {
+			final StreamObsUploadObject element = objects.get(0);	
+			return new ObsObject(element.getFamily(), element.getKey());
+		}
+		
 		for (final StreamObsUploadObject element : objects) {
 			
 			if (element.getKey().contains("/")) {
