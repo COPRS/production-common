@@ -17,6 +17,7 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -51,7 +52,7 @@ public class TestApplication {
 	private FilesystemInboxEntryFactory factory;
 
 	@Test
-	public void testPollAll_OnEmptyInboxAndPersistedEntries_ShallDeletePersistedEntries() throws URISyntaxException {
+	public void testPollAll_OnEmptyInboxAndPersistedEntries_ShallDeletePersistedEntriesForInboxStation() throws URISyntaxException {
 		
 		final URI inboxURL = new URI(props.getPolling().get(0).getDirectory());
 		final Path inboxPath = Paths.get(inboxURL.getPath());
@@ -79,14 +80,17 @@ public class TestApplication {
 
 		repo.save(content);
 		repo.save(content2);
+		assertEquals(2, read().size());
+
 		service.pollAll();
-		
-		final List<InboxEntry> actual = read();
-		assertEquals(0, actual.size());
+
+		final List<InboxEntry> inboxEntries = read();
+		assertEquals(1, inboxEntries.size());
+		assertEquals(content, inboxEntries.get(0));
+
 	}
 
 	private List<InboxEntry> read() {
-		return repo.findAll().stream()
-				.collect(Collectors.toList());
+		return new ArrayList<>(repo.findAll());
 	}
 }
