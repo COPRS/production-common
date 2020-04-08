@@ -73,7 +73,7 @@ public class TestInbox {
 		};
 		final MockInboxEntryRepository fakeRepo = new MockInboxEntryRepository(0) {
 			@Override
-			public List<InboxEntry> findByPickupURL(final String pickupPath) {
+			public List<InboxEntry> findByPickupURLAndStationName(final String pickupURL, final String stat) {
 				return Arrays.asList(new InboxEntry("foo2", "foo2", "/tmp", new Date(), 0),
 						new InboxEntry("foo1", "foo1", "/tmp", new Date(), 0));
 			}

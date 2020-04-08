@@ -46,13 +46,13 @@ public final class Inbox {
 		this.client = client;
 		this.family = family;
 		this.stationName = stationName;
-		this.log = LoggerFactory.getLogger(String.format("%s for %s", getClass().getName(),family));
+		this.log = LoggerFactory.getLogger(String.format("%s (%s) for %s", getClass().getName(), stationName, family));
 	}
 	
 	public final void poll() {	
 		try {
 			final Set<InboxEntry> persistedContent = ingestionTriggerServiceTransactional
-					.getAllForPath(inboxAdapter.inboxURL());
+					.getAllForPath(inboxAdapter.inboxURL(), stationName);
 						
 			// read all entries that have not been persisted before
 			final Set<InboxEntry> pickupContent = new HashSet<>(inboxAdapter.read(InboxFilter.ALLOW_ALL));

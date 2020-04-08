@@ -20,9 +20,10 @@ public class FilesystemInboxAdapter extends AbstractInboxAdapter {
 	public FilesystemInboxAdapter(
 			final FilesystemInboxEntryFactory inboxEntryFactory, 
 			final URI inboxURL, 
-			final int productInDirectoryLevel
+			final int productInDirectoryLevel,			
+			final String stationName
 	) {
-		super(inboxEntryFactory, inboxURL, productInDirectoryLevel);
+		super(inboxEntryFactory, inboxURL, productInDirectoryLevel, stationName);
 	}
 	
 	@Override
@@ -35,6 +36,13 @@ public class FilesystemInboxAdapter extends AbstractInboxAdapter {
 		final File file = path.toFile();
 		final Date lastModified = new Date(file.lastModified());
 		final long size = FileUtils.sizeOf(file);		
-		return inboxEntryFactory.newInboxEntry(inboxURL, path, productInDirectoryLevel, lastModified, size);
+		return inboxEntryFactory.newInboxEntry(
+				inboxURL, 
+				path, 
+				productInDirectoryLevel, 
+				lastModified, 
+				size,
+				stationName
+		);
 	}
 }

@@ -24,12 +24,13 @@ public class XbipInboxAdapterFactory implements InboxAdapterFactory {
 	}
 
 	@Override
-	public InboxAdapter newInboxAdapter(final URI inbox, final int productInDirectoryLevel) {
+	public InboxAdapter newInboxAdapter(final URI inbox, final int productInDirectoryLevel,	final String stationName) {
 		return new XbipInboxAdapter(
 				inbox, 
 				xbipClientFactory.newXbipClient(inbox), 
 				inboxEntryFactory,
-				productInDirectoryLevel
+				productInDirectoryLevel,
+				stationName
 		);
 	}
 }

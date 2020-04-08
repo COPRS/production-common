@@ -21,7 +21,7 @@ public class XbipInboxEntryFactory implements InboxEntryFactory {
 	);	
 
 	@Override
-	public InboxEntry newInboxEntry(final URI inboxURL, final Path path, final int productAt, final Date lastModified, final long size) {
+	public InboxEntry newInboxEntry(final URI inboxURL, final Path path, final int productAt, final Date lastModified, final long size, final String stationName) {
 		final InboxEntry inboxEntry = new InboxEntry();
 		final Path relativePath = Paths.get(inboxURL.getPath()).relativize(path);
 		inboxEntry.setName(productName(relativePath.toString()));
@@ -29,6 +29,7 @@ public class XbipInboxEntryFactory implements InboxEntryFactory {
 		inboxEntry.setPickupURL(inboxURL.toString());
 		inboxEntry.setLastModified(lastModified);
 		inboxEntry.setSize(size);
+		inboxEntry.setStationName(stationName);
 		return inboxEntry;
 	}
 	

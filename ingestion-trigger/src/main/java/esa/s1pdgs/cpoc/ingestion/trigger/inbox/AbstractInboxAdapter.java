@@ -40,15 +40,18 @@ public abstract class AbstractInboxAdapter implements InboxAdapter {
 	protected final InboxEntryFactory inboxEntryFactory;
 	protected final URI inboxURL;
 	protected final int productInDirectoryLevel;
+	protected final String stationName;
 	
 	public AbstractInboxAdapter(
 			final InboxEntryFactory inboxEntryFactory, 
 			final URI inboxURL, 
-			final int productInDirectoryLevel
+			final int productInDirectoryLevel,
+			final String stationName
 	) {
 		this.inboxEntryFactory = inboxEntryFactory;
 		this.inboxURL = inboxURL;
 		this.productInDirectoryLevel = productInDirectoryLevel;
+		this.stationName = stationName;
 	}
 	
 	protected abstract Stream<EntrySupplier> list(final InboxFilter filter) throws IOException;

@@ -45,16 +45,30 @@ public class TestApplication {
 	@Test
 	public void testPollAll_OnEmptyInboxAndPersistedEntries_ShallDeletePersistedEntries() throws InterruptedException, URISyntaxException {		
 		
-		URI inboxURL = new URI(props.getPolling().get(0).getDirectory());
-		Path inboxPath = Paths.get(inboxURL.getPath());
+		final URI inboxURL = new URI(props.getPolling().get(0).getDirectory());
+		final Path inboxPath = Paths.get(inboxURL.getPath());
 		
 		if (!inboxPath.toFile().exists()) {
 			inboxPath.toFile().mkdirs();
 		}
 		
 		final FilesystemInboxEntryFactory fact = new FilesystemInboxEntryFactory();	
-		final InboxEntry content = fact.newInboxEntry(inboxURL, inboxPath.resolve("WILE/S1B/L20180724144436762001030/ch01/DCS_02_L20180724144436762001030_ch1_DSIB.xml"), 2, new Date(), 0);
-		final InboxEntry content2 = fact.newInboxEntry(inboxURL, inboxPath.resolve("AUX/S1__AUX_ICE_V20160501T120000_G20160502T043607.SAFE"), 1, new Date(), 0);
+		final InboxEntry content = fact.newInboxEntry(
+				inboxURL, 
+				inboxPath.resolve("WILE/S1B/L20180724144436762001030/ch01/DCS_02_L20180724144436762001030_ch1_DSIB.xml"), 
+				2, 
+				new Date(), 
+				0,
+				"WILE"
+		);
+		final InboxEntry content2 = fact.newInboxEntry(
+				inboxURL, 
+				inboxPath.resolve("AUX/S1__AUX_ICE_V20160501T120000_G20160502T043607.SAFE"), 
+				1, 
+				new Date(),
+				0,
+				null
+		);
 		
 		repo.save(content);
 		repo.save(content2);

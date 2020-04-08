@@ -12,12 +12,9 @@ import org.junit.Test;
 import esa.s1pdgs.cpoc.ingestion.trigger.xbip.XbipInboxEntryFactory;
 
 // Test filter regex
-public class TestRegex {
-
+public class TestRegex {	
 	private final String NEW_REGEX = "WILE/S1(A|B)/([A-Za-z0-9_]+)/ch0?(1|2)/([0-9a-zA-Z_]+DSIB\\.(xml|XML)|[0-9a-zA-Z_]+DSDB.*\\.(raw|RAW|aisp|AISP))$";
-
-	
-	
+		
 	@Test
 	public final void testMatches() {
 		assertTrue("WILE/S1A/L20180724144436762001030/ch02/DCS_02_L20180724144436762001030_ch2_DSIB.xml".matches(NEW_REGEX));
@@ -37,6 +34,12 @@ public class TestRegex {
 		assertTrue("WILE/S1B/S1B__MPS__________017080/ch01/DCS_95_S1B__MPS__________017080_ch1_DSDB_00002.raw".matches(NEW_REGEX));
 	}
 	
+	//private final String NEW_REGEX = "WILE/S1(A|B)/([A-Za-z0-9_]+)/ch0?(1|2)/([0-9a-zA-Z_]+DSIB\\.(xml|XML)|[0-9a-zA-Z_]+DSDB.*\\.(raw|RAW|aisp|AISP))$
+	@Test
+	public final void testAnotherProduct() {
+		assertTrue("WILE/S1B/L20180724144436762001030/ch02/DCS_02_L20180724144436762001030_ch2_DSDB_00025.raw".matches(NEW_REGEX));
+	}
+
 	@Test
 	public final void testFlorian() {
 		assertTrue("S1A_OPER_REP_MP_MP__PDMC_20200303T093232_V20200303T170000_20200319T190000.xml".matches("^S1[ABCD_]_OPER_REP_MP_MP__PDMC.*$"));

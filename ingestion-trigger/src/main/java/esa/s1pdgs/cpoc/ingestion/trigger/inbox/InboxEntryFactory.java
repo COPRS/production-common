@@ -7,5 +7,5 @@ import java.util.Date;
 import esa.s1pdgs.cpoc.ingestion.trigger.entity.InboxEntry;
 
 public interface InboxEntryFactory {
-	public InboxEntry newInboxEntry(URI inboxURL, Path path, int productAt, Date lastModified, long size);
+	public InboxEntry newInboxEntry(URI inboxURL, Path path, int productAt, Date lastModified, long size, String stationName);
 }

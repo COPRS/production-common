@@ -13,12 +13,12 @@ class MockInboxEntryRepository extends AbstractInboxEntryRepository
 	private final List<InboxEntry> saved = new ArrayList<>();
 	private final int expectedSaves;
 	
-	public MockInboxEntryRepository(int expectedSaves) {
+	public MockInboxEntryRepository(final int expectedSaves) {
 		this.expectedSaves = expectedSaves;
 	}
 	
 	@Override
-	public <S extends InboxEntry> S save(S entity) {
+	public <S extends InboxEntry> S save(final S entity) {
 		saved.add(entity);
 		return entity;
 	}
@@ -28,7 +28,7 @@ class MockInboxEntryRepository extends AbstractInboxEntryRepository
 	}
 
 	@Override
-	public List<InboxEntry> findByPickupURL(String pickupURL) {
+	public List<InboxEntry> findByPickupURLAndStationName(final String pickupURL, final String stat) {
 		return Collections.emptyList();
 	}
 }

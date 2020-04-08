@@ -14,7 +14,7 @@ import esa.s1pdgs.cpoc.ingestion.trigger.inbox.InboxEntryFactory;
 public class FilesystemInboxEntryFactory implements InboxEntryFactory {
 	@Override
 	public InboxEntry newInboxEntry(final URI inboxURL, final Path path, final int productInDirectory,
-			final Date lastModified, final long size) {
+			final Date lastModified, final long size, final String stationName) {
 		final InboxEntry inboxEntry = new InboxEntry();
 		final Path relativePath = Paths.get(inboxURL.getPath()).relativize(path);
 		inboxEntry.setName(productName(relativePath, productInDirectory));
@@ -22,6 +22,7 @@ public class FilesystemInboxEntryFactory implements InboxEntryFactory {
 		inboxEntry.setPickupURL(inboxURL.toString());
 		inboxEntry.setLastModified(lastModified);
 		inboxEntry.setSize(size);
+		inboxEntry.setStationName(stationName);
 		return inboxEntry;
 	}
 

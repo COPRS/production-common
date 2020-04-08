@@ -23,8 +23,8 @@ public class IngestionTriggerServiceTransactional {
 		this.repository = repository;
 	}	
 	
-	public Set<InboxEntry> getAllForPath(final String pickupURL) {
-		return StreamSupport.stream(repository.findByPickupURL(pickupURL).spliterator(), false)
+	public Set<InboxEntry> getAllForPath(final String pickupURL, final String stationName) {
+		return StreamSupport.stream(repository.findByPickupURLAndStationName(pickupURL, stationName).spliterator(), false)
 				.collect(Collectors.toCollection(HashSet::new));
 	}
 	

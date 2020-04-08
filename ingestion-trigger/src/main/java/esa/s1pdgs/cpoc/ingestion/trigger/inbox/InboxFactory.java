@@ -84,7 +84,8 @@ public class InboxFactory {
 		
 		return inboxAdapterFactory.newInboxAdapter(
 				new URI(sanitizedUrl), 
-				config.getProductInDirectoryLevel()
+				config.getProductInDirectoryLevel(),
+				config.getStationName()
 		);
 	}
 }

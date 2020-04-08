@@ -18,7 +18,7 @@ public class FilesystemInboxAdapterFactory implements InboxAdapterFactory {
 	}
 
 	@Override
-	public InboxAdapter newInboxAdapter(final URI inbox, final int productInDirectoryLevel) {
-		return new FilesystemInboxAdapter(inboxEntryFactory, inbox, productInDirectoryLevel);
+	public InboxAdapter newInboxAdapter(final URI inbox, final int productInDirectoryLevel,	final String stationName) {
+		return new FilesystemInboxAdapter(inboxEntryFactory, inbox, productInDirectoryLevel, stationName);
 	}
 }
