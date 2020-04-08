@@ -46,7 +46,7 @@ public final class Inbox {
 		this.client = client;
 		this.family = family;
 		this.stationName = stationName;
-		this.log = LoggerFactory.getLogger(String.format("%s:", description()));
+		this.log = LoggerFactory.getLogger(String.format("%s for %s", getClass().getName(),family));
 	}
 	
 	public final void poll() {	
