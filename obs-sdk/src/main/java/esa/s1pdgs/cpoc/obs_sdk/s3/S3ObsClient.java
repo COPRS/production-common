@@ -85,7 +85,9 @@ public class S3ObsClient extends AbstractObsClient {
 			final AmazonS3 client = AmazonS3ClientBuilder.standard().withClientConfiguration(clientConfig)
 					.withEndpointConfiguration(
 							new EndpointConfiguration(config.getEndpoint(), config.getEndpointRegion()))
-					.withCredentials(new AWSStaticCredentialsProvider(awsCreds)).build();
+					.withCredentials(new AWSStaticCredentialsProvider(awsCreds))
+					.withPathStyleAccessEnabled(true)
+					.build();
 
 			final TransferManager manager = TransferManagerBuilder.standard()
 					.withMinimumUploadPartSize(config.getMinUploadPartSize() * 1024 * 1024)
