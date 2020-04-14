@@ -78,7 +78,7 @@ public class TestApplication {
 		assertEquals(0, actual.size());
 	}
 
-	private final List<InboxEntry> read() {
+	private List<InboxEntry> read() {
 		return StreamSupport.stream(repo.findAll().spliterator(), false)
 				.collect(Collectors.toList());
 	}
