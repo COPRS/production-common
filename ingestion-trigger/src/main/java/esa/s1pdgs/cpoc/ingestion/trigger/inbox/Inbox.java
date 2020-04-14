@@ -2,9 +2,13 @@ package esa.s1pdgs.cpoc.ingestion.trigger.inbox;
 
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.Date;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 
@@ -26,6 +30,15 @@ import esa.s1pdgs.cpoc.report.ReportingMessage;
 import esa.s1pdgs.cpoc.report.ReportingUtils;
 
 public final class Inbox {
+	// just make sure top level dirs are handled first
+	static final Comparator<InboxEntry> COMP = new Comparator<InboxEntry>() {
+		@Override
+		public final int compare(final InboxEntry o1, final InboxEntry o2) {			
+			return Paths.get(o1.getRelativePath()).getNameCount() - Paths.get(o2.getRelativePath()).getNameCount();
+		}		
+	};
+	
+	
 	private final Logger log;
 	
 	private final InboxAdapter inboxAdapter;
@@ -76,7 +89,11 @@ public final class Inbox {
 			ingestionTriggerServiceTransactional.removeFinished(finishedElements);			
 			
 			final Set<InboxEntry> handledElements = new HashSet<>();
-			for (final InboxEntry newEntry : newElements) {		
+			
+			final List<InboxEntry> sortedEntries = new ArrayList<>(newElements);
+			Collections.sort(sortedEntries, COMP);			
+			
+			for (final InboxEntry newEntry : sortedEntries) {		
 				// omit files in subdirectories of already matched products
 				if (!isChildOf(newEntry, handledElements)) {
 					handleEntry(newEntry).
