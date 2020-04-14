@@ -16,11 +16,15 @@ public class SessionProductNameEvaluator implements ProductNameEvaluator {
 	@Override
 	public String evaluateFrom(final Path relativePath) {
 		final Matcher matcher = pattern.matcher(relativePath.toString());
-		
-		// if the pattern does not match, it is an invalid file
-		// but we cannot fail here as also the invalid file will be traced so we are simply 
-		if (!matcher.matches()) {
 
+		if (!matcher.matches()) {
+			throw new IllegalArgumentException(
+					String.format(
+							"Could not match relative path %s against regex %s", 
+							relativePath,
+							pattern
+					)
+			);
 		}
 		return matcher.group(groupIndex);
 	}
