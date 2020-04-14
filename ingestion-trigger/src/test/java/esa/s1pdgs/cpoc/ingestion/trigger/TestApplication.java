@@ -62,7 +62,7 @@ public class TestApplication {
 				inboxPath.resolve("WILE/S1B/L20180724144436762001030/ch01/DCS_02_L20180724144436762001030_ch1_DSIB.xml"), 
 				new Date(), 
 				0,
-				null
+				"WILE"
 		);
 		final InboxEntry content2 = fact.newInboxEntry(
 				inboxURL, 
