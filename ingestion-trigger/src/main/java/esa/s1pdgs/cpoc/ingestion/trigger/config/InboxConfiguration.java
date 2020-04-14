@@ -11,7 +11,7 @@ public class InboxConfiguration {
 	private String sessionNamePattern = "^([a-z_]{4}/)?"
 			+ "([0-9a-z_]{2})([0-9a-z_]{1})/([0-9a-z_]+)/(ch[0|_]?[1-2]/)?"
 			+ "(DCS_[0-9]{2}_([a-zA-Z0-9_]*)_ch([12])_(DSDB|DSIB).*\\.(raw|aisp|xml))$";
-	private int sessionNameGroupIndex = 4;
+	private int sessionNameGroupIndex = 7;
 	
 	private ProductFamily family = ProductFamily.BLANK;
 
