@@ -11,6 +11,7 @@ import org.junit.Test;
 import esa.s1pdgs.cpoc.common.ProductFamily;
 import esa.s1pdgs.cpoc.ingestion.trigger.entity.InboxEntry;
 import esa.s1pdgs.cpoc.ingestion.trigger.filter.InboxFilter;
+import esa.s1pdgs.cpoc.ingestion.trigger.name.FlatProductNameEvaluator;
 import esa.s1pdgs.cpoc.ingestion.trigger.service.IngestionTriggerServiceTransactional;
 
 public class TestInbox {
@@ -44,7 +45,8 @@ public class TestInbox {
 				new IngestionTriggerServiceTransactional(fakeRepo), 
 				fakeKafkaClient,
 				ProductFamily.EDRS_SESSION,
-				"WILE"
+				"WILE",
+				new FlatProductNameEvaluator()
 		);
 		uut.poll();
 		fakeRepo.verify();
@@ -86,7 +88,8 @@ public class TestInbox {
 				new IngestionTriggerServiceTransactional(fakeRepo), 
 				fakeKafkaClient,
 				ProductFamily.EDRS_SESSION,
-				"WILE"
+				"WILE",
+				new FlatProductNameEvaluator()
 		);
 		uut.poll();
 		fakeRepo.verify();
