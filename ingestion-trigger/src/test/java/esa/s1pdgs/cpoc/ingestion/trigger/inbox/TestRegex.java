@@ -3,6 +3,7 @@ package esa.s1pdgs.cpoc.ingestion.trigger.inbox;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
+import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import org.junit.Test;
@@ -41,11 +42,22 @@ public class TestRegex {
 		assertTrue("S1A_OPER_REP_MP_MP__PDMC_20200303T093232_V20200303T170000_20200319T190000.xml".matches("^S1[ABCD_]_OPER_REP_MP_MP__PDMC.*$"));
 	}
 	
-	public static final Pattern SESSION_PATTERN = Pattern.compile("^([a-z_]{4}/)?"
+	private static final Pattern SESSION_PATTERN = Pattern.compile("^([a-z_]{4}/)?"
 			+ "([0-9a-z_]{2})([0-9a-z_]{1})/([0-9a-z_]+)/(ch[0|_]?[1-2]/)?"
 			+ "(DCS_[0-9]{2}_([a-zA-Z0-9_]*)_ch([12])_(DSDB|DSIB).*\\.(raw|aisp|xml))", 
 			Pattern.CASE_INSENSITIVE
 	);	
+	
+	@Test
+	public final void tesPAtternt() {
+		final String name = "S1B/L20180724144436762001030/ch02/DCS_02_L20180724144436762001030_ch2_DSDB_00025.raw";
+		final Matcher matcher = SESSION_PATTERN.matcher(name);
+		if (!matcher.matches()) {
+			throw new RuntimeException();
+		}
+		System.out.println(matcher.group(7));
+	}
+
 }
 
 
