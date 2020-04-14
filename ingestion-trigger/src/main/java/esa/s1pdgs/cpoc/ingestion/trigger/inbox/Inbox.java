@@ -1,5 +1,6 @@
 package esa.s1pdgs.cpoc.ingestion.trigger.inbox;
 
+import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Collection;
 import java.util.Date;
@@ -75,9 +76,12 @@ public final class Inbox {
 			ingestionTriggerServiceTransactional.removeFinished(finishedElements);			
 			
 			final Set<InboxEntry> handledElements = new HashSet<>();
-			for (final InboxEntry newEntry : newElements) {			
-				handleEntry(newEntry).
-					ifPresent(e -> handledElements.add(e));				
+			for (final InboxEntry newEntry : newElements) {		
+				// omit files in subdirectories of already matched products
+				if (!isChildOf(newEntry, handledElements)) {
+					handleEntry(newEntry).
+						ifPresent(e -> handledElements.add(e));	
+				}			
 				persist(newEntry);
 			}		
 			appendMessagesToLog(finishedElements, newElements, handledElements);
@@ -86,6 +90,18 @@ public final class Inbox {
 			// thrown on error reading the Inbox. No real retry here as it will be retried on next polling attempt anyway	
 			log.error(String.format("Error on polling %s", description()), e);
 		}
+	}
+	
+	private final boolean isChildOf(final InboxEntry entry, final Set<InboxEntry> handledElements) {
+		final Path thisPath = Paths.get(entry.getRelativePath());
+		
+		for (final InboxEntry handledEntry : handledElements) {
+			// is child ?
+			if (thisPath.startsWith(Paths.get(handledEntry.getRelativePath()))) {
+				return true;
+			}			
+		}
+		return false;		
 	}
 
 	public final String description() {
@@ -191,24 +207,7 @@ public final class Inbox {
 		log.trace("Added {} to persistence", persisted);
 		return persisted;
 	}
-	
-//	private final String summarizeAndLog(final String logTemplate, final Collection<InboxEntry> entries) {
-//		final String summary = entries.stream()
-//			.map(e -> extractNameAndLog(logTemplate,e))
-//			.collect(Collectors.joining(", "));
-//		
-//		if (StringUtils.isEmpty(summary)) {
-//			return "[none]";
-//		}
-//		return summary;
-//	}
-//	
-//	private static String extractNameAndLog(final String logTemplate, final InboxEntry entry) {
-//		final String name = entry.getName();
-//		LOG.debug("PickupAction - " + logTemplate, name);
-//		return name;
-//	}
-	
+
 	private final void dumpToDebugLog(final String logTemplate, final Collection<InboxEntry> entries) {
 		if (log.isDebugEnabled()) {
 			entries.stream()

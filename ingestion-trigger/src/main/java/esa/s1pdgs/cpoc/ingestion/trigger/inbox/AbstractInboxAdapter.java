@@ -51,12 +51,12 @@ public abstract class AbstractInboxAdapter implements InboxAdapter {
 		this.stationName = stationName;
 	}
 	
-	protected abstract Stream<EntrySupplier> list(final InboxFilter filter) throws IOException;
+	protected abstract Stream<EntrySupplier> list() throws IOException;
 	
 	@Override
 	public Collection<InboxEntry> read(final InboxFilter filter) throws IOException {
 		LOG.trace("Reading inbox directory '{}'", inboxURL.toString());
-		final Set<InboxEntry> entries = list(filter)
+		final Set<InboxEntry> entries = list()
 				.filter(x -> !Paths.get(inboxURL.getPath()).equals(x.getPath()))
 				.map(x -> x.getEntry())
 				.filter(e -> filter.accept(e))
