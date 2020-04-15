@@ -4,6 +4,8 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
@@ -29,12 +31,12 @@ import esa.s1pdgs.cpoc.report.ReportingUtils;
 
 public final class Inbox {
 	// just make sure top level dirs are handled first
-//	static final Comparator<InboxEntry> COMP = new Comparator<InboxEntry>() {
-//		@Override
-//		public final int compare(final InboxEntry o1, final InboxEntry o2) {			
-//			return Paths.get(o1.getRelativePath()).getNameCount() - Paths.get(o2.getRelativePath()).getNameCount();
-//		}		
-//	};
+	static final Comparator<InboxEntry> COMP = new Comparator<InboxEntry>() {
+		@Override
+		public final int compare(final InboxEntry o1, final InboxEntry o2) {			
+			return Paths.get(o1.getRelativePath()).getNameCount() - Paths.get(o2.getRelativePath()).getNameCount();
+		}		
+	};
 	
 	
 	private final Logger log;
@@ -92,6 +94,7 @@ public final class Inbox {
 			// detect all elements that are considered "new" on the inbox
 			final List<InboxEntry> newElements = new ArrayList<>(pickupContent);
 			newElements.removeAll(persistedContent);
+			Collections.sort(newElements, COMP);
 			
 			return new PollingRun(
 					persistedContent, 
@@ -105,7 +108,7 @@ public final class Inbox {
 			return finishedElements;
 		}		
 		
-		public List<InboxEntry> newElements() {	
+		public List<InboxEntry> newElements() {				
 			return newElements;
 		}	
 		
