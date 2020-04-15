@@ -231,6 +231,7 @@ public class SwiftObsClientIT {
 
 		// delete
 		uut.deleteObject(auxiliaryFiles, testFileName1);
+		assertFalse(uut.exists(new ObsObject(auxiliaryFiles, testFileName1)));
 	}
 	
 	@Test
@@ -242,6 +243,7 @@ public class SwiftObsClientIT {
 
 		// delete
 		uut.deleteObject(auxiliaryFiles, testFilePrefix + testFileName1);
+		assertFalse(uut.exists(new ObsObject(auxiliaryFiles, testFilePrefix + testFileName1)));
 	}
 
 	@Test
