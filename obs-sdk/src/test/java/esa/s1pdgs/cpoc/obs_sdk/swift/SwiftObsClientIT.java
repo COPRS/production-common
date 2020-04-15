@@ -230,9 +230,7 @@ public class SwiftObsClientIT {
 		assertTrue(uut.exists(new ObsObject(auxiliaryFiles, testFileName1)));
 
 		// delete
-		if (uut.exists(new ObsObject(auxiliaryFiles, testFileName1))) {
-			uut.deleteObject(auxiliaryFiles, testFileName1);
-		}
+		uut.deleteObject(auxiliaryFiles, testFileName1);
 	}
 	
 	@Test
@@ -243,9 +241,7 @@ public class SwiftObsClientIT {
 		assertTrue(uut.exists(new ObsObject(auxiliaryFiles, testFilePrefix + testFileName1)));
 
 		// delete
-		if (uut.exists(new ObsObject(auxiliaryFiles, testFileName1))) {
-			uut.deleteObject(auxiliaryFiles, testFilePrefix + testFileName1);
-		}
+		uut.deleteObject(auxiliaryFiles, testFilePrefix + testFileName1);
 	}
 
 	@Test
@@ -343,21 +339,25 @@ public class SwiftObsClientIT {
 		assertTrue(uut.exists(new ObsObject(auxiliaryFiles, testFilePrefix + testFileName1)));
 		assertTrue(uut.exists(new ObsObject(auxiliaryFiles, testFilePrefix + testFileName2)));
 		
+		String retrievedTestfile1Content = null;
+		String retrievedTestfile2Content = null;
 		final Map<String,InputStream> res = uut.getAllAsInputStream(auxiliaryFiles, testFilePrefix);
 		for (final Map.Entry<String,InputStream> entry : res.entrySet()) {
 			try (final InputStream in = entry.getValue()) {
 				final String content = IOUtils.toString(in, Charset.defaultCharset());
 				
 				if ("abc/def/testfile1.txt".equals(entry.getKey())) {
-					assertEquals("test", content);
+					retrievedTestfile1Content = content;
 				}
 				else if ("abc/def/testfile2.txt".equals(entry.getKey())) {
-					assertEquals("test2", content);
+					retrievedTestfile2Content = content;
 				}
 				else {
 					fail();
 				}
 			}
 		}
+		assertEquals("test", retrievedTestfile1Content);
+		assertEquals("test2", retrievedTestfile2Content);
 	}
 }
