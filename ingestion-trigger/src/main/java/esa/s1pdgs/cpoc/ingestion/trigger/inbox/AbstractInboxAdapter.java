@@ -4,8 +4,7 @@ import java.io.IOException;
 import java.net.URI;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.Collection;
-import java.util.Set;
+import java.util.List;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -54,13 +53,13 @@ public abstract class AbstractInboxAdapter implements InboxAdapter {
 	protected abstract Stream<EntrySupplier> list() throws IOException;
 	
 	@Override
-	public Collection<InboxEntry> read(final InboxFilter filter) throws IOException {
+	public List<InboxEntry> read(final InboxFilter filter) throws IOException {
 		LOG.trace("Reading inbox directory '{}'", inboxURL.toString());
-		final Set<InboxEntry> entries = list()
+		final List<InboxEntry> entries = list()
 				.filter(x -> !Paths.get(inboxURL.getPath()).equals(x.getPath()))
 				.map(x -> x.getEntry())
 				.filter(e -> filter.accept(e))
-				.collect(Collectors.toSet());
+				.collect(Collectors.toList());
 		LOG.trace("Found {} entries in inbox directory '{}': {}", entries.size(), inboxURL.toString(), entries);
 		return entries;
 	}
