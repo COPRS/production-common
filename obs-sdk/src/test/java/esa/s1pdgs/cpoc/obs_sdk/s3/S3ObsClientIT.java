@@ -233,9 +233,7 @@ public class S3ObsClientIT {
 		assertTrue(uut.exists(new ObsObject(auxiliaryFiles, testFileName1)));
 
 		// delete
-		if (uut.exists(new ObsObject(auxiliaryFiles, testFileName1))) {
-			uut.s3Services.s3client.deleteObject(auxiliaryFilesBucketName, testFileName1);
-		}
+		uut.s3Services.s3client.deleteObject(auxiliaryFilesBucketName, testFileName1);
 	}
 
 	@Test
@@ -246,9 +244,7 @@ public class S3ObsClientIT {
 		assertTrue(uut.exists(new ObsObject(auxiliaryFiles, testFilePrefix + testFileName1)));
 
 		// delete
-		if (uut.exists(new ObsObject(auxiliaryFiles, testFileName1))) {
-			uut.s3Services.s3client.deleteObject(auxiliaryFilesBucketName, testFilePrefix + testFileName1);
-		}
+		uut.s3Services.s3client.deleteObject(auxiliaryFilesBucketName, testFilePrefix + testFileName1);
 	}
 
 	@Test
@@ -270,15 +266,11 @@ public class S3ObsClientIT {
 	public void downloadFileWithPrefixTest() throws Exception {
 		// upload
 		assertFalse(uut.exists(new ObsObject(auxiliaryFiles, testFilePrefix + testFileName1)));
-		System.out.println(uut.exists(new ObsObject(auxiliaryFiles, testFilePrefix + testFileName1)));
 		uut.upload(singletonList(new FileObsUploadObject(auxiliaryFiles, testFilePrefix + testFileName1, testFile1)), ReportingFactory.NULL);
 		assertTrue(uut.exists(new ObsObject(auxiliaryFiles, testFilePrefix + testFileName1)));
-		System.out.println(uut.exists(new ObsObject(auxiliaryFiles, testFilePrefix + testFileName1)));
-		System.out.println(new ObsObject(auxiliaryFiles, testFilePrefix + testFileName1));
 
 		// single file download
         final String targetDir = Files.createTempDirectory(this.getClass().getCanonicalName() + "-").toString();
-        System.out.println("Download from " + auxiliaryFiles + " : " + testFilePrefix + testFileName1);
 		uut.download(singletonList(new ObsDownloadObject(auxiliaryFiles, testFilePrefix + testFileName1, targetDir)), ReportingFactory.NULL);
 		final String send1 = new String(Files.readAllBytes(testFile1.toPath()));
 		final String received1 = new String(Files.readAllBytes((new File(targetDir + "/" + testFilePrefix + testFileName1)).toPath()));
@@ -350,21 +342,25 @@ public class S3ObsClientIT {
 		assertTrue(uut.exists(new ObsObject(auxiliaryFiles, testFilePrefix + testFileName1)));
 		assertTrue(uut.exists(new ObsObject(auxiliaryFiles, testFilePrefix + testFileName2)));
 
+		String retrievedTestfile1Content = null;
+		String retrievedTestfile2Content = null;		
 		final Map<String,InputStream> res = uut.getAllAsInputStream(auxiliaryFiles, testFilePrefix);
 		for (final Map.Entry<String,InputStream> entry : res.entrySet()) {
 			try (final InputStream in = entry.getValue()) {
 				final String content = IOUtils.toString(in, Charset.defaultCharset());
 
 				if ("abc/def/testfile1.txt".equals(entry.getKey())) {
-					assertEquals("test", content);
+					retrievedTestfile1Content = content;
 				}
 				else if ("abc/def/testfile2.txt".equals(entry.getKey())) {
-					assertEquals("test2", content);
+					retrievedTestfile2Content = content;
 				}
 				else {
 					fail();
 				}
 			}
 		}
+		assertEquals("test", retrievedTestfile1Content);
+		assertEquals("test2", retrievedTestfile2Content);
 	}
 }
