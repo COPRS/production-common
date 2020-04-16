@@ -294,7 +294,7 @@ public class L0SegmentAppJobsGenerator extends AbstractJobsGenerator {
             if ("BEGIN".equals(sortedSegments.get(0).getProductSensingConsolidation())
                     && "END".equals(
                             sortedSegments.get(sortedSegments.size() - 1)
-                                    .getConsolidation())) {
+                                    .getProductSensingConsolidation())) { //S1PRO-1333
                 LocalDateTime previousStopDate = LocalDateTime.parse(
                         sortedSegments.get(0).getValidityStop(),
                         AbstractMetadata.METADATA_DATE_FORMATTER);
