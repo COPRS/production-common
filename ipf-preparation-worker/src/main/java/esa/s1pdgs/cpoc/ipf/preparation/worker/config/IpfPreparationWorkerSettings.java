@@ -325,12 +325,12 @@ public class IpfPreparationWorkerSettings {
 	 */
 	public static class WaitTempo {
 		/**
-		 * Delay between 2 retries
+		 * Delay between 2 calls
 		 */
 		private int tempo;
 
 		/**
-		 * Number of maximal retries
+		 * Maximal time life in seconds
 		 */
 		private int maxTimelifeS;
 
@@ -346,11 +346,11 @@ public class IpfPreparationWorkerSettings {
 		 * Constructor using field
 		 * 
 		 * @param tempo
-		 * @param retries
+		 * @param maxTimelifeS
 		 */
-		public WaitTempo(final int tempo, final int retries) {
+		public WaitTempo(final int tempo, final int maxTimelifeS) {
 			this.tempo = tempo;
-			this.maxTimelifeS = retries;
+			this.maxTimelifeS = maxTimelifeS;
 		}
 
 		/**
@@ -368,14 +368,14 @@ public class IpfPreparationWorkerSettings {
 		}
 
 		/**
-		 * @return the retries
+		 * @return the maximal time life
 		 */
 		public int getMaxTimelifeS() {
 			return maxTimelifeS;
 		}
 
 		/**
-		 * @param retries the retries to set
+		 * @param maxTimelifeS
 		 */
 		public void setMaxTimelifeS(final int maxTimelifeS) {
 			this.maxTimelifeS = maxTimelifeS;
