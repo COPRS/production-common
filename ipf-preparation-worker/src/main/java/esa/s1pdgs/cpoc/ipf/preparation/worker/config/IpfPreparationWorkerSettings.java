@@ -249,24 +249,24 @@ public class IpfPreparationWorkerSettings {
 	/**
 	 * Map between output product type and product family
 	 */
-	private Map<String, ProductFamily> outputfamilies = new HashMap<>();;
+	private Map<String, ProductFamily> outputfamilies = new HashMap<>();
 
 	/**
 	 * Map of all the overlap for the different slice type
 	 */
-	private Map<String, Float> typeOverlap = new HashMap<>();;
+	private Map<String, Float> typeOverlap = new HashMap<>();
 
 	/**
 	 * Map of all the length for the different slice type<br/>
 	 * Format: acquisition in IW, EW, SM, EM
 	 */
-	private Map<String, Float> typeSliceLength = new HashMap<>();;
+	private Map<String, Float> typeSliceLength = new HashMap<>();
 
 	/**
 	 * Map product type and corresponding metadata index in case of the product type
 	 * in lowercase in not the metadata index (example: aux_resorb use aux_res)<br/>
 	 */
-	private Map<String, String> mapTypeMeta = new HashMap<>();;
+	private Map<String, String> mapTypeMeta = new HashMap<>();
 	
 	private List<ProductFamily> oqcCheck = new ArrayList<>();
 
@@ -290,9 +290,9 @@ public class IpfPreparationWorkerSettings {
 			return;
 		}
 		final String[] paramsTmp = inputfamiliesstr.split(MAP_ELM_SEP);
-		for (int i = 0; i < paramsTmp.length; i++) {
-			final String[] tmp = paramsTmp[i].split(MAP_KEY_VAL_SEP);
-			if (tmp != null && tmp.length == 2) {
+		for (String s : paramsTmp) {
+			final String[] tmp = s.split(MAP_KEY_VAL_SEP);
+			if (tmp.length == 2) {
 				final String key = tmp[0];
 				final String valStr = tmp[1];
 				inputfamilies.put(key, ProductFamily.valueOf(valStr));
@@ -308,9 +308,9 @@ public class IpfPreparationWorkerSettings {
 			return;
 		}
 		final String[] paramsTmp = outputfamiliesstr.split(MAP_ELM_SEP);
-		for (int i = 0; i < paramsTmp.length; i++) {
-			final String[] tmp = paramsTmp[i].split(MAP_KEY_VAL_SEP);
-			if (tmp != null && tmp.length == 2) {
+		for (String s : paramsTmp) {
+			final String[] tmp = s.split(MAP_KEY_VAL_SEP);
+			if (tmp.length == 2) {
 				final String key = tmp[0];
 				final String valStr = tmp[1];
 				outputfamilies.put(key, ProductFamily.valueOf(valStr));
