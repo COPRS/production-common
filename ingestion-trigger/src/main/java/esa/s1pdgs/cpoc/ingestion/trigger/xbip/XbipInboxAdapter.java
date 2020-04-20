@@ -5,8 +5,8 @@ import java.net.URI;
 import java.util.stream.Stream;
 
 import esa.s1pdgs.cpoc.ingestion.trigger.entity.InboxEntry;
-import esa.s1pdgs.cpoc.ingestion.trigger.filter.InboxFilter;
 import esa.s1pdgs.cpoc.ingestion.trigger.inbox.AbstractInboxAdapter;
+import esa.s1pdgs.cpoc.ingestion.trigger.inbox.InboxEntryFactory;
 import esa.s1pdgs.cpoc.xbip.client.XbipClient;
 import esa.s1pdgs.cpoc.xbip.client.XbipEntry;
 import esa.s1pdgs.cpoc.xbip.client.XbipEntryFilter;
@@ -17,16 +17,15 @@ public class XbipInboxAdapter extends AbstractInboxAdapter {
 	public XbipInboxAdapter(
 			final URI inboxURL, 
 			final XbipClient xbipClient, 
-			final XbipInboxEntryFactory inboxEntryFactory,
-			final int productInDirectoryLevel,
+			final InboxEntryFactory inboxEntryFactory,
 			final String stationName
 	) {
-		super(inboxEntryFactory, inboxURL, productInDirectoryLevel, stationName);
+		super(inboxEntryFactory, inboxURL, stationName);
 		this.xbipClient = xbipClient;
 	}
 	
 	@Override
-	protected Stream<EntrySupplier> list(final InboxFilter filter) throws IOException {
+	protected Stream<EntrySupplier> list() throws IOException {
 		return xbipClient.list(XbipEntryFilter.ALLOW_ALL).stream()
 				.map(p -> new EntrySupplier(p.getPath(), () -> newInboxEntryFor(p)));
 	}
@@ -35,7 +34,6 @@ public class XbipInboxAdapter extends AbstractInboxAdapter {
 		return inboxEntryFactory.newInboxEntry(
 				inboxURL, 
 				xbipEntry.getPath(), 
-				productInDirectoryLevel,
 				xbipEntry.getLastModified(), 
 				xbipEntry.getSize(),
 				stationName

@@ -7,16 +7,17 @@ import org.springframework.stereotype.Component;
 
 import esa.s1pdgs.cpoc.ingestion.trigger.inbox.InboxAdapter;
 import esa.s1pdgs.cpoc.ingestion.trigger.inbox.InboxAdapterFactory;
+import esa.s1pdgs.cpoc.ingestion.trigger.inbox.InboxEntryFactory;
 import esa.s1pdgs.cpoc.xbip.client.XbipClientFactory;
 
 @Component
 public class XbipInboxAdapterFactory implements InboxAdapterFactory {
-	private final XbipInboxEntryFactory inboxEntryFactory;
+	private final InboxEntryFactory inboxEntryFactory;
 	private final XbipClientFactory xbipClientFactory;
 
 	@Autowired
 	public XbipInboxAdapterFactory(
-			final XbipInboxEntryFactory inboxEntryFactory,
+			final InboxEntryFactory inboxEntryFactory,
 			final XbipClientFactory xbipClientFactory
 	) {
 		this.inboxEntryFactory = inboxEntryFactory;
@@ -24,12 +25,11 @@ public class XbipInboxAdapterFactory implements InboxAdapterFactory {
 	}
 
 	@Override
-	public InboxAdapter newInboxAdapter(final URI inbox, final int productInDirectoryLevel,	final String stationName) {
+	public InboxAdapter newInboxAdapter(final URI inbox, final String stationName) {
 		return new XbipInboxAdapter(
 				inbox, 
 				xbipClientFactory.newXbipClient(inbox), 
 				inboxEntryFactory,
-				productInDirectoryLevel,
 				stationName
 		);
 	}

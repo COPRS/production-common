@@ -13,21 +13,20 @@ import java.util.stream.Stream;
 import org.apache.commons.io.FileUtils;
 
 import esa.s1pdgs.cpoc.ingestion.trigger.entity.InboxEntry;
-import esa.s1pdgs.cpoc.ingestion.trigger.filter.InboxFilter;
 import esa.s1pdgs.cpoc.ingestion.trigger.inbox.AbstractInboxAdapter;
+import esa.s1pdgs.cpoc.ingestion.trigger.inbox.InboxEntryFactory;
 
 public class FilesystemInboxAdapter extends AbstractInboxAdapter {	
 	public FilesystemInboxAdapter(
-			final FilesystemInboxEntryFactory inboxEntryFactory, 
-			final URI inboxURL, 
-			final int productInDirectoryLevel,			
+			final InboxEntryFactory inboxEntryFactory, 
+			final URI inboxURL, 	
 			final String stationName
 	) {
-		super(inboxEntryFactory, inboxURL, productInDirectoryLevel, stationName);
+		super(inboxEntryFactory, inboxURL, stationName);
 	}
 	
 	@Override
-	protected Stream<EntrySupplier> list(final InboxFilter filter) throws IOException {
+	protected Stream<EntrySupplier> list() throws IOException {
 		return Files.walk(Paths.get(inboxURL.getPath()), FileVisitOption.FOLLOW_LINKS)
 				.map(p -> new EntrySupplier(p, () -> newInboxEntryFor(p)));
 	}
@@ -39,7 +38,6 @@ public class FilesystemInboxAdapter extends AbstractInboxAdapter {
 		return inboxEntryFactory.newInboxEntry(
 				inboxURL, 
 				path, 
-				productInDirectoryLevel, 
 				lastModified, 
 				size,
 				stationName

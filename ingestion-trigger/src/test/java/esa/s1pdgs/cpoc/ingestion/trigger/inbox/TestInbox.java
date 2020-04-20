@@ -1,7 +1,6 @@
 package esa.s1pdgs.cpoc.ingestion.trigger.inbox;
 
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.Date;
 import java.util.List;
 
@@ -11,16 +10,18 @@ import org.junit.Test;
 import esa.s1pdgs.cpoc.common.ProductFamily;
 import esa.s1pdgs.cpoc.ingestion.trigger.entity.InboxEntry;
 import esa.s1pdgs.cpoc.ingestion.trigger.filter.InboxFilter;
+import esa.s1pdgs.cpoc.ingestion.trigger.name.FlatProductNameEvaluator;
 import esa.s1pdgs.cpoc.ingestion.trigger.service.IngestionTriggerServiceTransactional;
 
 public class TestInbox {
+
 	
 	@Ignore
 	@Test
 	public final void testPoll_OnFindingNewProducts_ShallStoreProductsAndPutInKafkaQueue() {
 		final InboxAdapter fakeAdapter = new InboxAdapter() {
 			@Override
-			public Collection<InboxEntry> read(final InboxFilter filter) {
+			public List<InboxEntry> read(final InboxFilter filter) {
 				return Arrays.asList(new InboxEntry("foo1", "foo1", "/tmp", new Date(), 0),
 						new InboxEntry("foo2", "foo2", "/tmp", new Date(), 0));
 			}
@@ -44,7 +45,8 @@ public class TestInbox {
 				new IngestionTriggerServiceTransactional(fakeRepo), 
 				fakeKafkaClient,
 				ProductFamily.EDRS_SESSION,
-				"WILE"
+				"WILE",
+				new FlatProductNameEvaluator()
 		);
 		uut.poll();
 		fakeRepo.verify();
@@ -55,7 +57,7 @@ public class TestInbox {
 	public final void testPoll_OnFindingAlreadyStoredProducts_ShallDoNothing() {
 		final InboxAdapter fakeAdapter = new InboxAdapter() {
 			@Override
-			public Collection<InboxEntry> read(final InboxFilter filter) {
+			public List<InboxEntry> read(final InboxFilter filter) {
 				return Arrays.asList(
 						new InboxEntry("foo1", "foo1", "/tmp", new Date(), 0),
 						new InboxEntry("foo2", "foo2", "/tmp", new Date(), 0));
@@ -86,7 +88,8 @@ public class TestInbox {
 				new IngestionTriggerServiceTransactional(fakeRepo), 
 				fakeKafkaClient,
 				ProductFamily.EDRS_SESSION,
-				"WILE"
+				"WILE",
+				new FlatProductNameEvaluator()
 		);
 		uut.poll();
 		fakeRepo.verify();
