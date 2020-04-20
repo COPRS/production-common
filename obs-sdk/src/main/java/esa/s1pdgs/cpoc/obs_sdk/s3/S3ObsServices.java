@@ -35,7 +35,6 @@ import com.amazonaws.util.IOUtils;
 import esa.s1pdgs.cpoc.obs_sdk.Md5;
 import esa.s1pdgs.cpoc.obs_sdk.ObsServiceException;
 import esa.s1pdgs.cpoc.obs_sdk.SdkClientException;
-import esa.s1pdgs.cpoc.obs_sdk.swift.SwiftSdkClientException;
 
 /**
  * Provides services to manage objects in the object storage wia the AmazonS3
@@ -152,7 +151,6 @@ public class S3ObsServices {
 	 * @return
 	 * @throws S3SdkClientException
 	 * @throws S3ObsServiceException
-	 * @throws SwiftSdkClientException
 	 */
 	public boolean bucketExist(final String bucketName) throws S3SdkClientException, S3ObsServiceException {
 		for (int retryCount = 1;; retryCount++) {
@@ -550,7 +548,7 @@ public class S3ObsServices {
 	}
 
 	public void createBucket(final String bucketName)
-			throws SwiftSdkClientException, ObsServiceException, S3SdkClientException {
+			throws ObsServiceException, S3SdkClientException {
 		for (int retryCount = 1;; retryCount++) {
 			try {
 				s3client.createBucket(bucketName);
