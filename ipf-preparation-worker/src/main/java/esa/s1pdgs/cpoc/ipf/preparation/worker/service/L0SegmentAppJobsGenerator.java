@@ -84,7 +84,7 @@ public class L0SegmentAppJobsGenerator extends AbstractJobsGenerator {
         	@SuppressWarnings("unchecked")
 			final AppDataJob<CatalogEvent> appDataJob = job.getAppDataJob();
 
-            for (final GenericMessageDto<CatalogEvent> message : appDataJob.getMessages().stream().map(s -> s).collect(Collectors.toList())) {
+            for (final GenericMessageDto<CatalogEvent> message : new ArrayList<>(appDataJob.getMessages())) {
                 final CatalogEvent dto = message.getBody();
                 lastName = dto.getKeyObjectStorage();
                 final LevelSegmentMetadata metadata = metadataClient
@@ -159,7 +159,7 @@ public class L0SegmentAppJobsGenerator extends AbstractJobsGenerator {
             final List<LevelSegmentMetadata> segmentsB = segmentsGroupByPol.get(polB);
             // Check coverage ok
             if (isDoublePolarisation(polA, polB)) {
-                boolean fullCoverageA = false;
+                final boolean fullCoverageA;
                 sortSegmentsPerStartDate(segmentsA);
                 if (isCovered(segmentsA)) {
                     fullCoverageA = true;
@@ -171,7 +171,7 @@ public class L0SegmentAppJobsGenerator extends AbstractJobsGenerator {
                                     + polA + ": "
                                     + extractProductSensingConsolidation(segmentsA));
                 }
-                boolean fullCoverageB = false;
+                final boolean fullCoverageB;
                 sortSegmentsPerStartDate(segmentsB);
                 if (isCovered(segmentsB)) {
                     fullCoverageB = true;
@@ -272,41 +272,29 @@ public class L0SegmentAppJobsGenerator extends AbstractJobsGenerator {
     }
 
     protected boolean isSinglePolarisation(final String polA) {
-        if ("SH".equals(polA) || "SV".equals(polA)) {
-            return true;
-        } else {
-            return false;
-        }
+        return "SH".equals(polA) || "SV".equals(polA);
     }
 
     protected boolean isDoublePolarisation(final String polA, final String polB) {
         if (("VH".equals(polA) && "VV".equals(polB))
                 || ("VV".equals(polA) && "VH".equals(polB))) {
             return true;
-        } else if (("HH".equals(polA) && "HV".equals(polB))
-                || ("HV".equals(polA) && "HH".equals(polB))) {
-            return true;
-        } else {
-            return false;
-        }
+        } else return ("HH".equals(polA) && "HV".equals(polB))
+                || ("HV".equals(polA) && "HH".equals(polB));
     }
 
     protected boolean isCovered(final List<LevelSegmentMetadata> sortedSegments) {
         if (CollectionUtils.isEmpty(sortedSegments)) {
             return false;
         } else if (sortedSegments.size() == 1) {
-            if ("FULL".equals(sortedSegments.get(0).getConsolidation())) {
-                return true;
-            } else {//PARTIAL
-                return false;
-            }
+            return "FULL".equals(sortedSegments.get(0).getConsolidation());
         } else {
             // Check consolidation first
         	//S1PRO-1135 BEGIN instead of START
             if ("BEGIN".equals(sortedSegments.get(0).getProductSensingConsolidation())
                     && "END".equals(
                             sortedSegments.get(sortedSegments.size() - 1)
-                                    .getConsolidation())) {
+                                    .getProductSensingConsolidation())) { //S1PRO-1333
                 LocalDateTime previousStopDate = LocalDateTime.parse(
                         sortedSegments.get(0).getValidityStop(),
                         AbstractMetadata.METADATA_DATE_FORMATTER);
@@ -360,8 +348,7 @@ public class L0SegmentAppJobsGenerator extends AbstractJobsGenerator {
     protected String least(final String a, final String b, final DateTimeFormatter formatter) {
         final LocalDateTime timeA = LocalDateTime.parse(a, formatter);
         final LocalDateTime timeB = LocalDateTime.parse(b, formatter);
-        return timeA == null ? b
-                : (b == null ? a : (timeA.isBefore(timeB) ? a : b));
+        return timeA.isBefore(timeB) ? a : b;
     }
 
     /**
@@ -374,18 +361,21 @@ public class L0SegmentAppJobsGenerator extends AbstractJobsGenerator {
     protected String more(final String a, final String b, final DateTimeFormatter formatter) {
         final LocalDateTime timeA = LocalDateTime.parse(a, formatter);
         final LocalDateTime timeB = LocalDateTime.parse(b, formatter);
-        return timeA == null ? b
-                : (b == null ? a : (timeA.isAfter(timeB) ? a : b));
+        return timeA.isAfter(timeB) ? a : b;
     }
 
     protected String extractProductSensingConsolidation(
             final List<LevelSegmentMetadata> sortedSegments) {
-        String ret = "";
+        StringBuilder ret = new StringBuilder();
         for (final LevelSegmentMetadata segment : sortedSegments) {
-            ret += segment.getProductSensingConsolidation() + " " + segment.getValidityStart()
-                    + " " + segment.getValidityStop() + " | ";
+            ret.append(segment.getProductSensingConsolidation());
+            ret.append(" ");
+            ret.append(segment.getValidityStart());
+            ret.append(" ");
+            ret.append(segment.getValidityStop());
+            ret.append(" | ");
         }
-        return ret;
+        return ret.toString();
     }
 
 }

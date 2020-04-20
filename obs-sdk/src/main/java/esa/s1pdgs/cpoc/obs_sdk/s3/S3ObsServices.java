@@ -12,7 +12,6 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
-import esa.s1pdgs.cpoc.obs_sdk.Md5;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.util.CollectionUtils;
@@ -33,10 +32,9 @@ import com.amazonaws.services.s3.transfer.Upload;
 import com.amazonaws.services.s3.transfer.model.UploadResult;
 import com.amazonaws.util.IOUtils;
 
-import esa.s1pdgs.cpoc.obs_sdk.AbstractObsClient;
+import esa.s1pdgs.cpoc.obs_sdk.Md5;
 import esa.s1pdgs.cpoc.obs_sdk.ObsServiceException;
 import esa.s1pdgs.cpoc.obs_sdk.SdkClientException;
-import esa.s1pdgs.cpoc.obs_sdk.swift.SwiftSdkClientException;
 
 /**
  * Provides services to manage objects in the object storage wia the AmazonS3
@@ -153,7 +151,6 @@ public class S3ObsServices {
 	 * @return
 	 * @throws S3SdkClientException
 	 * @throws S3ObsServiceException
-	 * @throws SwiftSdkClientException
 	 */
 	public boolean bucketExist(final String bucketName) throws S3SdkClientException, S3ObsServiceException {
 		for (int retryCount = 1;; retryCount++) {
@@ -551,10 +548,11 @@ public class S3ObsServices {
 	}
 
 	public void createBucket(final String bucketName)
-			throws SwiftSdkClientException, ObsServiceException, S3SdkClientException {
+			throws ObsServiceException, S3SdkClientException {
 		for (int retryCount = 1;; retryCount++) {
 			try {
 				s3client.createBucket(bucketName);
+				break;
 			} catch (final com.amazonaws.SdkClientException sce) {
 				if (retryCount <= numRetries) {
 					LOGGER.warn(String.format("Checking bucket existance %s failed: Attempt : %d / %d", bucketName,
@@ -645,6 +643,7 @@ public class S3ObsServices {
 			try {
 				log(String.format("Performing %s", request));
 				s3client.copyObject(request);
+				break;
 			} catch (final com.amazonaws.SdkClientException sce) {
 				if (retryCount <= numRetries) {
 					LOGGER.warn(String.format("Move of objects from bucket %s failed: Attempt : %d / %d",

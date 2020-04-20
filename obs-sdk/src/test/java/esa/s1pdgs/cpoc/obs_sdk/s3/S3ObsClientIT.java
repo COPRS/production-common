@@ -234,6 +234,7 @@ public class S3ObsClientIT {
 
 		// delete
 		uut.s3Services.s3client.deleteObject(auxiliaryFilesBucketName, testFileName1);
+		assertFalse(uut.exists(new ObsObject(auxiliaryFiles, testFileName1)));
 	}
 
 	@Test
@@ -245,6 +246,7 @@ public class S3ObsClientIT {
 
 		// delete
 		uut.s3Services.s3client.deleteObject(auxiliaryFilesBucketName, testFilePrefix + testFileName1);
+		assertFalse(uut.exists(new ObsObject(auxiliaryFiles, testFilePrefix + testFileName1)));
 	}
 
 	@Test
