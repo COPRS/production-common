@@ -7,7 +7,6 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 import org.springframework.util.CollectionUtils;
 
@@ -90,7 +89,7 @@ public class L0SegmentAppJobsGenerator extends AbstractJobsGenerator {
                 final LevelSegmentMetadata metadata = metadataClient
                         .getLevelSegment(dto.getProductFamily(), dto.getKeyObjectStorage());
                 if (metadata == null) {
-                	LOGGER.debug("== preSearch: metadata is null for {}",dto.getKeyObjectStorage());
+                    LOGGER.debug("== preSearch: metadata is null for {}", dto.getKeyObjectStorage());
                     missingMetadata.put(dto.getKeyObjectStorage(), "Missing segment");
                 } else {
                     if (!segmentsGroupByPol
@@ -104,17 +103,17 @@ public class L0SegmentAppJobsGenerator extends AbstractJobsGenerator {
                 }
             }
         } catch (final MetadataQueryException e) {
-        	LOGGER.debug("== preSearch: Exception- Missing segment for lastname{}",lastName);
+            LOGGER.debug("== preSearch: Exception- Missing segment for lastname {}", lastName);
             missingMetadata.put(lastName, "Missing segment: " + e.getMessage());
         }
 
         // If missing one segment
         if (!missingMetadata.isEmpty()) {
-        	LOGGER.debug("== preSearch: Missing other segment for lastname{}",lastName);
+            LOGGER.debug("== preSearch: Missing other segment for lastname{}", lastName);
             throw new IpfPrepWorkerInputsMissingException(missingMetadata);
         }
 
-        LOGGER.debug("== preSearch00 -segment  {}",segmentsGroupByPol);
+        LOGGER.debug("== preSearch00 -segment  {}", segmentsGroupByPol);
         // Check polarisation right
         String sensingStart = null;
         String sensingStop = null;

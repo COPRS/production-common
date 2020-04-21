@@ -63,7 +63,7 @@ public final class FilesystemInboxAdapter implements InboxAdapter {
 		return new InboxAdapterEntry(parent.relativize(file.toPath()).toString(), toInputStream(file), file.length());
 	}
 
-	static final InputStream toInputStream(final File file){
+	static final InputStream toInputStream(final File file) {
 		try {
 			return new FileInputStream(file);
 		} catch (final FileNotFoundException e) {

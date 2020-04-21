@@ -25,8 +25,6 @@ import esa.s1pdgs.cpoc.mqi.server.config.KafkaProperties;
 import esa.s1pdgs.cpoc.mqi.server.consumption.kafka.listener.GenericMessageListener;
 import esa.s1pdgs.cpoc.mqi.server.consumption.kafka.listener.MemoryConsumerAwareRebalanceListener;
 import esa.s1pdgs.cpoc.mqi.server.service.OtherApplicationService;
-import esa.s1pdgs.cpoc.report.Reporting;
-import esa.s1pdgs.cpoc.report.ReportingUtils;
 
 /**
  * Generic consumer
@@ -96,8 +94,7 @@ public class GenericConsumer<T> {
 	    	deser.addTrustedPackages("*");	    	
 	    	final ErrorHandlingDeserializer2<T> deserializer = new ErrorHandlingDeserializer2<>(deser);
 
-	    	deserializer.setFailedDeserializationFunction( (b,h) -> {	    	
-	    		final Reporting reporting = ReportingUtils.newReportingBuilder().newReporting("MQI_Kafka_Deserialization");
+	    	deserializer.setFailedDeserializationFunction( (b,h) -> {
 	    		LOGGER.error(
 	    				"Error on deserializing element from queue '{}'. Expected json of class {} but was: {}", 
 	    				topic,

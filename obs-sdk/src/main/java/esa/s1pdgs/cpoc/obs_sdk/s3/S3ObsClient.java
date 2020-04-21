@@ -42,7 +42,6 @@ import esa.s1pdgs.cpoc.obs_sdk.StreamObsUploadObject;
 import esa.s1pdgs.cpoc.obs_sdk.ValidArgumentAssertion;
 import esa.s1pdgs.cpoc.obs_sdk.report.ReportingProductFactory;
 import esa.s1pdgs.cpoc.obs_sdk.s3.retry.SDKCustomDefaultRetryCondition;
-import esa.s1pdgs.cpoc.obs_sdk.swift.SwiftSdkClientException;
 
 /**
  * <p>
@@ -200,13 +199,10 @@ public class S3ObsClient extends AbstractObsClient {
 		}
 	}
 	
-	public void createBucket(final ProductFamily family) throws SwiftSdkClientException, ObsServiceException, S3SdkClientException {
+	public void createBucket(final ProductFamily family) throws ObsServiceException, S3SdkClientException {
 		s3Services.createBucket(getBucketFor(family));
 	}
 
-	/**
-	 * 
-	 */
 	@Override
 	public List<ObsObject> getObsObjectsOfFamilyWithinTimeFrame(final ProductFamily family, final Date timeFrameBegin,
 			final Date timeFrameEnd) throws SdkClientException, ObsServiceException {
