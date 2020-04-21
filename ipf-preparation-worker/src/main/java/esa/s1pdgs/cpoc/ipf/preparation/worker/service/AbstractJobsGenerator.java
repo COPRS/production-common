@@ -600,6 +600,7 @@ public abstract class AbstractJobsGenerator implements Runnable {
 												input.toLogMessage());
 									}
 									else {
+										missingMetadata.put(input.toLogMessage(), "");
 										throw new IpfPrepWorkerInputsMissingException(missingMetadata); 
 									}
 								}
