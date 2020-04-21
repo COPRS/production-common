@@ -1,11 +1,10 @@
 package esa.s1pdgs.cpoc.ipf.preparation.worker.service;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Calendar;
+import java.util.Collections;
 import java.util.Date;
 import java.util.List;
-import java.util.stream.Collectors;
 
 import esa.s1pdgs.cpoc.appcatalog.AppDataJob;
 import esa.s1pdgs.cpoc.appcatalog.AppDataJobGeneration;
@@ -21,13 +20,13 @@ import esa.s1pdgs.cpoc.ipf.preparation.worker.model.joborder.JobOrderSensingTime
 import esa.s1pdgs.cpoc.ipf.preparation.worker.model.joborder.JobOrderTimeInterval;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.model.joborder.enums.JobOrderFileNameType;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.model.tasktable.TaskTable;
-import esa.s1pdgs.cpoc.mqi.model.queue.ProductionEvent;
+import esa.s1pdgs.cpoc.mqi.model.queue.CatalogEvent;
 import esa.s1pdgs.cpoc.mqi.model.rest.GenericMessageDto;
 
 public class TestL0SegmentUtils {
 
-    public static TaskTable buildTaskTableAIOP() {
-        return TestGenericUtils.buildTaskTableAIOP();
+    public static TaskTable buildTaskTableL0ASP() {
+        return TestGenericUtils.buildTaskTableL0ASP();
     }
 
     public static JobOrder buildJobOrderL20171109175634707000125() {
@@ -78,21 +77,24 @@ public class TestL0SegmentUtils {
         return template;
     }
 
-    public static AppDataJob buildAppData() {
-        final AppDataJob ret = new AppDataJob();
+    public static AppDataJob<CatalogEvent> buildAppData() {
+        final AppDataJob<CatalogEvent> ret = new AppDataJob<>();
         ret.setId(123);
+        ret.setCreationDate(new Date());
         ret.setState(AppDataJobState.GENERATING);
         ret.setPod("hostname");
         ret.setLevel(ApplicationLevel.L0_SEGMENT);
 
-        final List<GenericMessageDto<ProductionEvent>> messages = new ArrayList<>();
-        final GenericMessageDto<ProductionEvent> message1 =
-                new GenericMessageDto<ProductionEvent>(1, "input-key",
-                        new ProductionEvent(
-                                "S1A_WV_RAW__0SSV_20180913T234452_20180913T235538_023686_0294FC_1BDE.SAFE",
-                                "kobs", ProductFamily.L0_SEGMENT, "FAST"));
+        final List<GenericMessageDto<CatalogEvent>> messages = new ArrayList<>();
+        final CatalogEvent event1 = new CatalogEvent();
+        event1.setProductName("S1A_WV_RAW__0SSV_20180913T234452_20180913T235538_023686_0294FC_1BDE.SAFE");
+        event1.setKeyObjectStorage("kobs");
+        event1.setProductFamily(ProductFamily.L0_SEGMENT);
+
+        final GenericMessageDto<CatalogEvent> message1 =
+                new GenericMessageDto<>(1, "input-key", event1);
         messages.add(message1);
-        ret.setMessages(messages.stream().collect(Collectors.toList()));
+        ret.setMessages(new ArrayList<>(messages));
 
         final Calendar start1 = Calendar.getInstance();
         start1.set(2017, Calendar.DECEMBER, 13, 14, 59, 48);
@@ -108,21 +110,24 @@ public class TestL0SegmentUtils {
         final AppDataJobGeneration gen1 = new AppDataJobGeneration();
         gen1.setTaskTable("TaskTable.L0ASP.xml");
         gen1.setState(AppDataJobGenerationState.INITIAL);
-        gen1.setCreationDate(new Date(0L));
-        ret.setGenerations(Arrays.asList(gen1));
+        gen1.setCreationDate(new Date());
+        ret.setGenerations(Collections.singletonList(gen1));
 
         return ret;
     }
 
-    public static void setMessageToBuildData(final AppDataJob job,
+    public static void setMessageToBuildData(final AppDataJob<CatalogEvent> job,
             final List<String> segmentNames) {
         job.setMessages(new ArrayList<>());
         int id = 1;
         for (final String name : segmentNames) {
+            CatalogEvent event = new CatalogEvent();
+            event.setProductName(name);
+            event.setKeyObjectStorage(name);
+            event.setProductFamily(ProductFamily.L0_SEGMENT);
             job.getMessages()
-                    .add(new GenericMessageDto<ProductionEvent>(id, "input-key",
-                            new ProductionEvent(name, "kobs",
-                                    ProductFamily.L0_SEGMENT, "FAST")));
+                    .add(new GenericMessageDto<>(id, "input-key", event));
+            System.out.println("added message with event " + event);
             id++;
         }
     }
