@@ -566,13 +566,26 @@ public abstract class AbstractJobsGenerator implements Runnable {
 		// Second, for each task check if input is mandatory and if a file exist
 		LOGGER.info("{} [productName {}] 2b - Try building inputs for appJob {}", this.prefixLogMonitor,
 				job.getAppDataJob().getProduct().getProductName(), job.getAppDataJob().getId());
-		int counterProc = 0;
+
 		final Map<String, JobOrderInput> referenceInputs = new HashMap<>();
+		int poolCounter = 0;
 		for (final TaskTablePool pool : this.taskTable.getPools()) {
+			poolCounter++;
+			int procCounter = 0;
 			for (final TaskTableTask task : pool.getTasks()) {
+				procCounter++;
 				final Map<String, String> missingMetadata = new HashMap<>();
 				final List<JobOrderInput> futureInputs = new ArrayList<>();
-				for (final TaskTableInput input : task.getInputs()) {					
+				int inputCounter = 0;
+				for (final TaskTableInput input : task.getInputs()) {				
+					inputCounter++;					
+					final String loggableString = toLoggableString(
+							poolCounter, 
+							procCounter, 
+							inputCounter,
+							input
+					);	
+					
 					// If it is NOT a reference
 					if (StringUtils.isEmpty(input.getReference())) {
 						if (ProductMode.isCompatibleWithTaskTableMode(mode, input.getMode())) {			
@@ -580,14 +593,21 @@ public abstract class AbstractJobsGenerator implements Runnable {
 							final JobOrderInput foundInput = findInput(job, input);
 														
 							if (foundInput != null) {
+								LOGGER.debug("Found input for {}: {}", loggableString, foundInput);
 								futureInputs.add(foundInput);
 								if (!StringUtils.isEmpty(input.getId())) {
 									referenceInputs.put(input.getId(), foundInput);
 								}
 							} else {
+								final String productOptionality = input.getMandatory() == TaskTableMandatoryEnum.YES ?
+										"mandatory" :
+										"non-mandatory";
+								
+								LOGGER.debug("No input found for {}", productOptionality, loggableString);
 								// nothing found in none of the alternatives
 								if (input.getMandatory() == TaskTableMandatoryEnum.YES) {
-									missingMetadata.put(input.toLogMessage(), "");
+									LOGGER.debug("No input found for {} {}", productOptionality, loggableString);
+									missingMetadata.put(loggableString, "");
 								} else {			
 									// optional input
 									
@@ -596,10 +616,13 @@ public abstract class AbstractJobsGenerator implements Runnable {
 									// we log that timeout is expired and we continue anyway behaving as if 
 									// the input was there
 									if (timeoutChecker.isTimeoutExpiredFor(job.getAppDataJob(), input)) {
-										LOGGER.info("Non-Mandatory Input {} is not available. Continue without it...", 
-												input.toLogMessage());
+										LOGGER.info("{} {} is not available. Continue without it...", 
+												 productOptionality, loggableString);
 									}
 									else {
+										LOGGER.debug("Timeout not expired for unavailability of {} {}", 
+												productOptionality, loggableString);
+										missingMetadata.put(loggableString, "");
 										missingMetadata.put(input.toLogMessage(), "");
 										throw new IpfPrepWorkerInputsMissingException(missingMetadata); 
 									}
@@ -608,20 +631,46 @@ public abstract class AbstractJobsGenerator implements Runnable {
 						}
 					// handle Input 'references'
 					} else {
+						LOGGER.debug("Got reference {} for {}", input.getReference(), loggableString);
 						// We shall add inputs of the reference
 						if (referenceInputs.containsKey(input.getReference())) {
 							futureInputs.add(new JobOrderInput(referenceInputs.get(input.getReference())));
 						}
 					}
 				}
-				counterProc++;
 				if (missingMetadata.isEmpty()) {
-					job.getJobOrder().getProcs().get(counterProc - 1).setInputs(futureInputs);
+					LOGGER.debug("Adding results {}", futureInputs);
+					job.getJobOrder().getProcs().get(procCounter - 1).setInputs(futureInputs);
 				} else {
 					throw new IpfPrepWorkerInputsMissingException(missingMetadata);
 				}
 			}
 		}
+	}
+		
+	private final String toLoggableString(
+			final int poolCounter,
+			final int procCounter,
+			final int inputCounter,
+			final TaskTableInput input
+	) {
+		final String description;
+		if (input.toLogMessage() != null) {
+			description = input.toLogMessage();
+		}
+		else {
+			description = input.getAlternatives().stream()
+					.map(a -> a.getFileType())
+					.collect(Collectors.joining(","));
+		}
+		return String.format(
+				"Input of tasktable %s (%s|%s|%s) [%s]", 
+				taskTable.getProcessorName(), 
+				poolCounter,
+				procCounter,
+				inputCounter,
+				description
+		);
 	}
 
 	private final JobOrderInput findInput(final JobGeneration job, final TaskTableInput input) {
