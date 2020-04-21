@@ -95,7 +95,10 @@ public class InboxFactory {
 	
 	private final ProductNameEvaluator newProductNameEvaluatorFor(final InboxConfiguration config) {
 		if (config.getFamily() == ProductFamily.EDRS_SESSION) {
-			return new SessionProductNameEvaluator();			
+			return new SessionProductNameEvaluator(
+					Pattern.compile(config.getSessionNamePattern(), Pattern.CASE_INSENSITIVE), 
+					config.getSessionNameGroupIndex()
+			);			
 		}
 		return new FlatProductNameEvaluator();
 	}
