@@ -124,8 +124,8 @@ public final class Inbox {
 		}
 		
 		try {
-			log.debug("Publishing new entry to kafka queue: {}", entry);	
 			final String publishedName = nameEvaluator.evaluateFrom(Paths.get(entry.getRelativePath()));
+			log.debug("Publishing new entry {} to kafka queue: {}", publishedName, entry);			
 			client.publish(
 					new IngestionJob(
 						family, 
