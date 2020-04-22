@@ -120,8 +120,9 @@ public final class MqiConsumer<E extends AbstractMessage> implements Runnable {
 				} catch (final Exception e) {
 					LOG.error(String.format("Error handling message %s", message), e);
 					client.ack(new AckMessageDto(message.getId(), Ack.ERROR, LogUtils.toString(e), false), category);				
-					// S1PRO-1045: as this implementation is used for e.g. appending something to the ErrorQueue, it must only be called 
-					// on errors if ack call was successful
+					// S1PRO-1045: as this implementation is used for e.g. appending something to the ErrorQueue, 
+					// it must only be called on errors if ack call was successful (otherwise, the message may be 
+					// distributed to another pod)
 					mqiListener.onTerminalError(message, e);					
 				}
 			// on communication errors with Mqi --> just dump warning and retry on next polling attempt

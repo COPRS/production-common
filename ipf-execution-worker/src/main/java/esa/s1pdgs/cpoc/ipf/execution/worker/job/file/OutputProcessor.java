@@ -547,8 +547,15 @@ public class OutputProcessor {
 				stop = true;
 			} else {
 				try {
+					LOGGER.info("{} 3 - Publishing KAFKA messages for output {}", prefixMonitorLogs,
+							msg.getProductName());
 					procuderFactory.sendOutput(msg, inputMessage, uuid);
+					LOGGER.info("{} 3 - Successful published KAFKA messages for output {}", prefixMonitorLogs,
+							msg.getProductName());
 				} catch (final MqiPublicationError ace) {
+					LOGGER.error("{} 3 - Failed publishing KAFKA messages for output {}", prefixMonitorLogs,
+							msg.getProductName());
+					throw ace;
 				}
 				iter.remove();
 			}
@@ -570,14 +577,16 @@ public class OutputProcessor {
 				if (Thread.currentThread().isInterrupted()) {
 					throw new InternalErrorException("The current thread as been interrupted");
 				} else {
-					LOGGER.info("{} 4 - Publishing KAFKA message for output {}", prefixMonitorLogs,
-							msg.getProductName());
 					try {
+						LOGGER.info("{} 4 - Publishing KAFKA message for output {}", prefixMonitorLogs,
+								msg.getProductName());
 						procuderFactory.sendOutput(msg, inputMessage, uuid);
+						LOGGER.info("{} 4 - Successful published KAFKA messages for output {}", prefixMonitorLogs,
+								msg.getProductName());
 					} catch (final MqiPublicationError ace) {
-						final String message = String.format("%s [code %d] %s", prefixMonitorLogs, ace.getCode().getCode(),
-								ace.getLogMessage());
-						LOGGER.error(message);
+						LOGGER.error("{} 4 - Failed publishing KAFKA messages for output {}", prefixMonitorLogs,
+								msg.getProductName());
+						throw ace;
 					}
 				}
 			}
