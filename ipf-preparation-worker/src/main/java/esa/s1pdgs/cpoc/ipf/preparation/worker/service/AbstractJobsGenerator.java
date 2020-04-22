@@ -585,10 +585,9 @@ public abstract class AbstractJobsGenerator implements Runnable {
 									referenceInputs.put(input.getId(), foundInput);
 								}
 							} else {
+								missingMetadata.put(input.toLogMessage(), "");
 								// nothing found in none of the alternatives
-								if (input.getMandatory() == TaskTableMandatoryEnum.YES) {
-									missingMetadata.put(input.toLogMessage(), "");
-								} else {			
+								if (input.getMandatory() != TaskTableMandatoryEnum.YES) {		
 									// optional input
 									
 									// if the timeout is not expired, we want to continue waiting. To do that, 
