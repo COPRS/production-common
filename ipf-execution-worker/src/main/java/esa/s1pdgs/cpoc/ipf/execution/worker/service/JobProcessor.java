@@ -371,7 +371,7 @@ public class JobProcessor implements MqiListener<IpfExecutionJob> {
 					// TODO: possible candidate to use instead, if dumping of deleted files not required: FileUtils.delete(workingDir.toString());
 	                Files.walk(workingDir, FileVisitOption.FOLLOW_LINKS)
                     .sorted(Comparator.reverseOrder()).map(Path::toFile)
-                    .peek(System.out::println).forEach(File::delete);
+                    .forEach(File::delete);
 				} catch (final IOException e) {
 					LOGGER.error("Failed to erase local working directory '{}: {}'", workingDir.toString(),
 							e.getMessage());
