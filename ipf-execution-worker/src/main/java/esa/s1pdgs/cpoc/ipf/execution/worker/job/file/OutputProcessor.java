@@ -24,7 +24,6 @@ import esa.s1pdgs.cpoc.common.ProductFamily;
 import esa.s1pdgs.cpoc.common.errors.AbstractCodedException;
 import esa.s1pdgs.cpoc.common.errors.InternalErrorException;
 import esa.s1pdgs.cpoc.common.errors.UnknownFamilyException;
-import esa.s1pdgs.cpoc.common.errors.mqi.MqiPublicationError;
 import esa.s1pdgs.cpoc.common.errors.obs.ObsException;
 import esa.s1pdgs.cpoc.ipf.execution.worker.config.ApplicationProperties;
 import esa.s1pdgs.cpoc.ipf.execution.worker.job.model.mqi.FileQueueMessage;
@@ -547,15 +546,15 @@ public class OutputProcessor {
 				stop = true;
 			} else {
 				try {
-					LOGGER.info("{} 3 - Publishing KAFKA messages for output {}", prefixMonitorLogs,
+					LOGGER.info("{} 3 - Publishing KAFKA message for output {}", prefixMonitorLogs,
 							msg.getProductName());
 					procuderFactory.sendOutput(msg, inputMessage, uuid);
-					LOGGER.info("{} 3 - Successful published KAFKA messages for output {}", prefixMonitorLogs,
+					LOGGER.info("{} 3 - Successful published KAFKA message for output {}", prefixMonitorLogs,
 							msg.getProductName());
-				} catch (final MqiPublicationError ace) {
-					LOGGER.error("{} 3 - Failed publishing KAFKA messages for output {}", prefixMonitorLogs,
+				} catch (final Exception e) {
+					LOGGER.error("{} 3 - Failed publishing KAFKA message for output {}", prefixMonitorLogs,
 							msg.getProductName());
-					throw ace;
+					throw e;
 				}
 				iter.remove();
 			}
@@ -581,12 +580,12 @@ public class OutputProcessor {
 						LOGGER.info("{} 4 - Publishing KAFKA message for output {}", prefixMonitorLogs,
 								msg.getProductName());
 						procuderFactory.sendOutput(msg, inputMessage, uuid);
-						LOGGER.info("{} 4 - Successful published KAFKA messages for output {}", prefixMonitorLogs,
+						LOGGER.info("{} 4 - Successful published KAFKA message for output {}", prefixMonitorLogs,
 								msg.getProductName());
-					} catch (final MqiPublicationError ace) {
-						LOGGER.error("{} 4 - Failed publishing KAFKA messages for output {}", prefixMonitorLogs,
+					} catch (final Exception e) {
+						LOGGER.error("{} 4 - Failed publishing KAFKA message for output {}", prefixMonitorLogs,
 								msg.getProductName());
-						throw ace;
+						throw e;
 					}
 				}
 			}
