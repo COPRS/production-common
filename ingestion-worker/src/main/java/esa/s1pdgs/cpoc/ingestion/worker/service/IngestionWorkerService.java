@@ -146,6 +146,7 @@ public class IngestionWorkerService implements MqiListener<IngestionJob> {
 			return productService.ingest(ingestion.getProductFamily(), inboxAdapter, ingestion, reportingFactory);
 		} 
 		catch (final Exception e) {
+			LOG.error(e);
 			productService.markInvalid(inboxAdapter, ingestion, reportingFactory);
 			message.getBody().setProductFamily(ProductFamily.INVALID);
 			throw e;
