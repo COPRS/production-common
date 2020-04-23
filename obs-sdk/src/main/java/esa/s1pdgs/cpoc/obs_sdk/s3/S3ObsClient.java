@@ -82,7 +82,7 @@ public class S3ObsClient extends AbstractObsClient {
 			clientConfig.setRetryPolicy(retryPolicy);
 
 			final AmazonS3 client = AmazonS3ClientBuilder.standard().withClientConfiguration(clientConfig)
-					.disableChunkedEncoding()
+//					.disableChunkedEncoding()
 					.withEndpointConfiguration(
 							new EndpointConfiguration(config.getEndpoint(), config.getEndpointRegion()))
 					.withCredentials(new AWSStaticCredentialsProvider(awsCreds))
