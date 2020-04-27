@@ -9,6 +9,9 @@ import org.apache.logging.log4j.Logger;
 import esa.s1pdgs.cpoc.appstatus.AppStatus;
 import esa.s1pdgs.cpoc.common.ProductCategory;
 import esa.s1pdgs.cpoc.common.errors.AbstractCodedException;
+import esa.s1pdgs.cpoc.common.errors.mqi.MqiAckApiError;
+import esa.s1pdgs.cpoc.common.errors.mqi.MqiNextApiError;
+import esa.s1pdgs.cpoc.common.errors.mqi.MqiPublishApiError;
 import esa.s1pdgs.cpoc.common.utils.LogUtils;
 import esa.s1pdgs.cpoc.mqi.model.queue.AbstractMessage;
 import esa.s1pdgs.cpoc.mqi.model.rest.Ack;
@@ -126,6 +129,14 @@ public final class MqiConsumer<E extends AbstractMessage> implements Runnable {
 					mqiListener.onTerminalError(message, e);					
 				}
 			// on communication errors with Mqi --> just dump warning and retry on next polling attempt
+			} catch (final MqiAckApiError | MqiNextApiError | MqiPublishApiError ace) {
+				/*
+				 * S1PRO-1370: It was requested that if an communication with the MQI server fails for the max amount of retries,
+				 * the service is going into fail and being restarted by Kubernetes. All these exceptions are likely raised in
+				 * this scenario and shall be handled before the AbstractCodedException in general is handled!
+				 */
+				LOG.error("Unable to reach the MQI Server for the maximum of retries. Terminating this service now. Error Code: {}, Message: {}", ace.getCode().getCode(), ace.getLogMessage());
+				appStatus.forceStopping();
 			} catch (final AbstractCodedException ace) {
 				LOG.warn("Error Code: {}, Message: {}", ace.getCode().getCode(), ace.getLogMessage());
 				appStatus.setError("NEXT_MESSAGE");
