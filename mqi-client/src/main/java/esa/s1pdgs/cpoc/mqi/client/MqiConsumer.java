@@ -137,7 +137,6 @@ public final class MqiConsumer<E extends AbstractMessage> implements Runnable {
 				 */
 				LOG.error("Unable to reach the MQI Server for the maximum of retries. Terminating this service now. Error Code: {}, Message: {}", ace.getCode().getCode(), ace.getLogMessage());
 				appStatus.setShallBeStopped(true);
-				appStatus.forceStopping();
 			} catch (final AbstractCodedException ace) {
 				LOG.warn("Error Code: {}, Message: {}", ace.getCode().getCode(), ace.getLogMessage());
 				appStatus.setError("NEXT_MESSAGE");
