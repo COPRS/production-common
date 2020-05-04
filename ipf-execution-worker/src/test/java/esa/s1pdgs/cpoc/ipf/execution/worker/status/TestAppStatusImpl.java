@@ -2,11 +2,10 @@ package esa.s1pdgs.cpoc.ipf.execution.worker.status;
 
 import java.util.NoSuchElementException;
 
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.annotation.Profile;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
@@ -16,20 +15,15 @@ import esa.s1pdgs.cpoc.common.ProductCategory;
 import esa.s1pdgs.cpoc.mqi.client.StatusService;
 
 @Component
-public class AppStatusImpl extends AbstractAppStatus {
-
-    /**
-     * Logger
-     */
-    private static final Logger LOGGER = LogManager.getLogger(AppStatusImpl.class);
-
+@Profile("test")
+public class TestAppStatusImpl extends AbstractAppStatus {
     /**
      * MQI service for stopping the MQI
      */
     private final StatusService mqiStatusService;
 
     @Autowired
-    public AppStatusImpl(
+    public TestAppStatusImpl(
             @Value("${status.max-error-counter-processing:100}") final int maxErrorCounterProcessing,
             @Value("${status.max-error-counter-mqi:100}") final int maxErrorCounterNextMessage,
             @Qualifier("systemExitCall") final Runnable systemExitCall,

@@ -15,7 +15,7 @@ import esa.s1pdgs.cpoc.appstatus.Status;
 import esa.s1pdgs.cpoc.common.errors.AbstractCodedException;
 import esa.s1pdgs.cpoc.ipf.execution.worker.config.ApplicationProperties;
 import esa.s1pdgs.cpoc.ipf.execution.worker.config.DevProperties;
-import esa.s1pdgs.cpoc.ipf.execution.worker.status.AppStatusImpl;
+import esa.s1pdgs.cpoc.ipf.execution.worker.status.TestAppStatusImpl;
 import esa.s1pdgs.cpoc.mqi.client.StatusService;
 
 /**
@@ -139,7 +139,7 @@ public class MockPropertiesTest {
      */
     protected void mockDefaultStatus() throws AbstractCodedException {
         doNothing().when(mqiStatusService).stop();
-        mockStatus((new AppStatusImpl(3, 30, () -> {}, mqiStatusService)).getStatus(), 3, false);
+        mockStatus((new TestAppStatusImpl(3, 30, () -> {}, mqiStatusService)).getStatus(), 3, false);
     }
 
     /**
