@@ -3,6 +3,7 @@ package esa.s1pdgs.cpoc.compression.worker.status;
 import java.util.NoSuchElementException;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
@@ -15,8 +16,10 @@ public class AppStatusImpl extends DefaultAppStatusImpl {
     @Autowired
     public AppStatusImpl(
             @Value("${status.max-error-counter-processing:100}") final int maxErrorCounterProcessing,
-            @Value("${status.max-error-counter-mqi:100}") final int maxErrorCounterNextMessage) {
-    	super(maxErrorCounterProcessing, maxErrorCounterNextMessage);
+            @Value("${status.max-error-counter-mqi:100}") final int maxErrorCounterNextMessage,
+            @Qualifier("systemExitCall") final Runnable systemExitCall
+            ) {
+    	super(maxErrorCounterProcessing, maxErrorCounterNextMessage, systemExitCall);
     }
 
     @Override

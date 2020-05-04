@@ -13,7 +13,6 @@ import org.springframework.stereotype.Component;
 import esa.s1pdgs.cpoc.appstatus.AbstractAppStatus;
 import esa.s1pdgs.cpoc.appstatus.Status;
 import esa.s1pdgs.cpoc.common.ProductCategory;
-import esa.s1pdgs.cpoc.common.errors.AbstractCodedException;
 import esa.s1pdgs.cpoc.mqi.client.StatusService;
 
 @Component
@@ -55,14 +54,7 @@ public class AppStatusImpl extends AbstractAppStatus {
     @Override
 	@Scheduled(fixedDelayString = "${status.delete-fixed-delay-ms:3000}")
     public void forceStopping() {
-        if (isShallBeStopped()) {
-            try {
-                mqiStatusService.stop();
-            } catch (final AbstractCodedException ace) {
-                LOGGER.error(ace.getLogMessage());
-            }
-            systemExit();
-        }
+    	// do nothing - otherwise this will break tests
     }
 
 }

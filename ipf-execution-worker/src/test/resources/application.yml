@@ -43,7 +43,8 @@ status:
   delete-fixed-delay-ms: 3000
   max-error-counter-processing: 3
   max-error-counter-mqi: 30
-    
+  block-system-exit: true
+  
 dev:
   steps-activation:
     download: ${wrapper_process_dev-steps-activation_download:true}

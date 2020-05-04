@@ -7,9 +7,11 @@ import org.apache.kafka.clients.consumer.ConsumerConfig;
 import org.apache.kafka.clients.producer.ProducerConfig;
 import org.apache.kafka.common.serialization.StringDeserializer;
 import org.apache.kafka.common.serialization.StringSerializer;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Profile;
 import org.springframework.kafka.annotation.EnableKafka;
 import org.springframework.kafka.config.ConcurrentKafkaListenerContainerFactory;
 import org.springframework.kafka.config.KafkaListenerContainerFactory;
@@ -23,11 +25,14 @@ import org.springframework.kafka.support.serializer.JsonDeserializer;
 import org.springframework.kafka.support.serializer.JsonSerializer;
 
 import esa.s1pdgs.cpoc.errorrepo.model.rest.FailedProcessingDto;
+import esa.s1pdgs.cpoc.reqrepo.kafka.consumption.ErrorQueueConsumer;
 import esa.s1pdgs.cpoc.reqrepo.kafka.producer.KafkaSubmissionClient;
+import esa.s1pdgs.cpoc.reqrepo.service.RequestRepository;
 
 
 @EnableKafka
 @Configuration
+@Profile("!test")
 public class KafkaConfig {
 
     /**
@@ -56,6 +61,7 @@ public class KafkaConfig {
     
     @Value("${kafka.max-retries:10}")
     private int maxRetries;
+    
     /**
      * Consumer configuration
      * 
@@ -63,7 +69,7 @@ public class KafkaConfig {
      */
     @Bean
     public Map<String, Object> consumerConfigs() {
-        Map<String, Object> props = new HashMap<>();
+        final Map<String, Object> props = new HashMap<>();
         props.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, bootstrapServers);
         props.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG,
                 StringDeserializer.class);
@@ -96,7 +102,7 @@ public class KafkaConfig {
      */
 	@Bean
     public KafkaListenerContainerFactory<ConcurrentMessageListenerContainer<String, FailedProcessingDto>> kafkaListenerContainerFactory() {
-        ConcurrentKafkaListenerContainerFactory<String, FailedProcessingDto> factory =
+        final ConcurrentKafkaListenerContainerFactory<String, FailedProcessingDto> factory =
                 new ConcurrentKafkaListenerContainerFactory<>();
         factory.setConsumerFactory(consumerFactory());
         factory.getContainerProperties().setPollTimeout(kafkaPooltimeout);
@@ -118,6 +124,11 @@ public class KafkaConfig {
         return new KafkaSubmissionClient(
         		new KafkaTemplate<String, Object>(new DefaultKafkaProducerFactory<>(props))
         );
+    }
+    
+    @Bean
+    public ErrorQueueConsumer errorConsumer(@Autowired final RequestRepository requestRepository) {
+    	return new ErrorQueueConsumer(requestRepository);
     }
 
 }

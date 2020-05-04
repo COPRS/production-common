@@ -2,9 +2,8 @@ package esa.s1pdgs.cpoc.mdc.worker.status;
 
 import java.util.NoSuchElementException;
 
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
@@ -15,16 +14,13 @@ import esa.s1pdgs.cpoc.common.ProductCategory;
 
 @Component
 public class AppStatusImpl extends AbstractAppStatus {
-
-    /**
-     * Logger
-     */
-    private static final Logger LOGGER = LogManager.getLogger(AppStatusImpl.class);
-
     @Autowired
-    public AppStatusImpl(@Value("${status.max-error-counter-processing}") final int maxErrorCounterProcessing, 
-	        @Value("${status.max-error-counter-mqi}") final int maxErrorCounterNextMessage) {
-    	super(new Status(maxErrorCounterProcessing, maxErrorCounterNextMessage));
+    public AppStatusImpl(
+    		@Value("${status.max-error-counter-processing}") final int maxErrorCounterProcessing, 
+	        @Value("${status.max-error-counter-mqi}") final int maxErrorCounterNextMessage,
+            @Qualifier("systemExitCall") final Runnable systemExitCall
+	) {
+    	super(new Status(maxErrorCounterProcessing, maxErrorCounterNextMessage), systemExitCall);
     	addSubStatus(new Status(ProductCategory.AUXILIARY_FILES, maxErrorCounterProcessing, maxErrorCounterNextMessage));
     	addSubStatus(new Status(ProductCategory.EDRS_SESSIONS, maxErrorCounterProcessing, maxErrorCounterNextMessage));
     	addSubStatus(new Status(ProductCategory.LEVEL_PRODUCTS, maxErrorCounterProcessing, maxErrorCounterNextMessage));
@@ -74,7 +70,7 @@ public class AppStatusImpl extends AbstractAppStatus {
 	}
 		
     @Override
-    public boolean isProcessing(String category, long messageId) {
+    public boolean isProcessing(final String category, final long messageId) {
     	if (!ProductCategory.EDRS_SESSIONS.name().toLowerCase().equals(category) &&
                 !ProductCategory.LEVEL_PRODUCTS.name().toLowerCase().equals(category)) {
     		throw new NoSuchElementException(String.format("Category %s not available for processing", category));

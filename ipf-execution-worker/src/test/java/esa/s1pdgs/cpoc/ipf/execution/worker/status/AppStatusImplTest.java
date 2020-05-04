@@ -12,7 +12,6 @@ import org.mockito.MockitoAnnotations;
 
 import esa.s1pdgs.cpoc.common.AppState;
 import esa.s1pdgs.cpoc.common.errors.AbstractCodedException;
-import esa.s1pdgs.cpoc.ipf.execution.worker.status.AppStatusImpl;
 import esa.s1pdgs.cpoc.mqi.client.StatusService;
 
 public class AppStatusImplTest {
@@ -34,7 +33,7 @@ public class AppStatusImplTest {
         
         doNothing().when(mqiStatusService).stop();
         
-        appStatus = new AppStatusImpl(3, 30, mqiStatusService);
+        appStatus = new AppStatusImpl(3, 30, () -> {}, mqiStatusService);
     }
     
     /**
@@ -174,7 +173,7 @@ public class AppStatusImplTest {
         assertTrue(timeBefore <= appStatus.getStatus().getDateLastChangeMs());
         assertEquals(0, appStatus.getStatus().getErrorCounterProcessing());
         
-        appStatus = new AppStatusImpl(3, 30, mqiStatusService);
+        appStatus = new AppStatusImpl(3, 30, () -> {}, mqiStatusService);
         appStatus.setError("PROCESSING");
         assertEquals(1, appStatus.getStatus().getErrorCounterProcessing());
         timeBefore = appStatus.getStatus().getDateLastChangeMs();
