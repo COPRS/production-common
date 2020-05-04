@@ -72,6 +72,9 @@ public class ObsConfigurationProperties {
 	
 	@Value("${timeout-s.up-exec:20}")
 	private int timeoutUpExec;
+	
+	@Value("${use-chunked-encoding:true}")
+	private boolean useChunkedEncoding;
 
 	private Map<ProductFamily, String> bucket = new HashMap<>();
 	
@@ -231,6 +234,14 @@ public class ObsConfigurationProperties {
 		this.backend = backend;
 	}
 
+	public boolean getUseChunkedEncoding() {
+		return useChunkedEncoding;
+	}
+
+	public void setUseChunkedEncoding(boolean useChunkedEncoding) {
+		this.useChunkedEncoding = useChunkedEncoding;
+	}
+
 	@Override
 	public String toString() {
 		return "ObsConfigurationProperties [backend=" + backend + ", userId=" + userId + ", userSecret=" + userSecret
@@ -239,6 +250,6 @@ public class ObsConfigurationProperties {
 				+ multipartUploadThreshold + ", minUploadPartSize=" + minUploadPartSize + ", maxRetries=" + maxRetries+ ", maxObsRetries=" + maxObsRetries
 				+ ", backoffBaseDelay=" + backoffBaseDelay + ", backoffThrottledBaseDelay=" + backoffThrottledBaseDelay
 				+ ", backoffMaxDelay=" + backoffMaxDelay + ", timeoutShutdown=" + timeoutShutdown + ", timeoutDownExec="
-				+ timeoutDownExec + ", timeoutUpExec=" + timeoutUpExec + ", bucket=" + bucket + "]";
+				+ timeoutDownExec + ", timeoutUpExec=" + timeoutUpExec + ", useChunkedEncoding=" + useChunkedEncoding + ", bucket=" + bucket + "]";
 	}
 }
