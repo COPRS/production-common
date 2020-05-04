@@ -171,12 +171,9 @@ public class OutputProcessor {
 		}
 	}
 
-	private final ProductFamily familyOf(final LevelJobOutputDto output, final String name) {
+	private final ProductFamily familyOf(final LevelJobOutputDto output) {
 		final ProductFamily family = ProductFamily.fromValue(output.getFamily());
-		if (family == ProductFamily.L0_SLICE && 
-			appLevel == ApplicationLevel.L0 && 
-			!name.matches(properties.getSegmentBlacklistPattern())
-		) {			
+		if (family == ProductFamily.L0_SLICE && appLevel == ApplicationLevel.L0){			
 			return ProductFamily.L0_SEGMENT;
 		}
 		return family;
@@ -235,10 +232,18 @@ public class OutputProcessor {
 				case L0_SLICE:
 				case L0_SEGMENT:	
 					// Specific case of the L0 wrapper
-					if (appLevel == ApplicationLevel.L0) {						
-						final Reporting reporting = reportingFactory.newReporting("GhostHandling");						
+					if (appLevel == ApplicationLevel.L0) {				
+						
+						// ==== S1PRO-1406: DIRTY WORKAROUND WARNING as suggested by POs ========
+						// even if GP... products are segments they shall be reported as slices
+						final ProductFamily reportingFamily = productName.matches(properties.getSegmentBlacklistPattern()) ?
+								ProductFamily.L0_SLICE :
+								ProductFamily.L0_SEGMENT;	
+						
+						final Reporting reporting = reportingFactory.newReporting("GhostHandling");	
+
 						reporting.begin(
-								ReportingUtils.newFilenameReportingInputFor(family, productName),
+								ReportingUtils.newFilenameReportingInputFor(reportingFamily, productName),
 								new ReportingMessage("Checking if %s is a ghost candidate", productName)
 						);
 						
