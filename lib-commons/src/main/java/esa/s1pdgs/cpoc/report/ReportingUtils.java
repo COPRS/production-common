@@ -1,6 +1,9 @@
 package esa.s1pdgs.cpoc.report;
 
+import java.io.File;
 import java.util.Collections;
+import java.util.List;
+import java.util.stream.Collectors;
 
 import esa.s1pdgs.cpoc.common.ProductFamily;
 import esa.s1pdgs.cpoc.report.message.input.FilenameReportingInput;
@@ -43,5 +46,16 @@ public final class ReportingUtils {
 				Collections.singletonList(filename),
 				Collections.emptyList()
 		);
+	}	
+	
+	// S1PRO-1395: makes sure that only the actual filename is dumped
+	public static final List<String> toFlatFilenames(final List<String> filenames) {
+		return filenames.stream()
+				.map(p -> toFlatFilename(p))
+				.collect(Collectors.toList());
+	}
+	
+	public static final String toFlatFilename(final String filename) {
+		return new File(filename).getName(); 
 	}
 }
