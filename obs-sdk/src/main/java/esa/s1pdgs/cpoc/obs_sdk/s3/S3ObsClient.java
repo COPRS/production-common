@@ -93,7 +93,7 @@ public class S3ObsClient extends AbstractObsClient {
 					.withCredentials(new AWSStaticCredentialsProvider(awsCreds))
 					.withPathStyleAccessEnabled(true);
 			
-			LOGGER.info(String.format("[CONFIGURATION] Disable chunked encoding: %b", config.getDisableChunkedEncoding()));
+			LOGGER.info("Disable chunked encoding: {}", config.getDisableChunkedEncoding());
 			if (config.getDisableChunkedEncoding()) {
 				clientBuilder.disableChunkedEncoding();
 			}
