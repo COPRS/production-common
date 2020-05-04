@@ -73,8 +73,8 @@ public class ObsConfigurationProperties {
 	@Value("${timeout-s.up-exec:20}")
 	private int timeoutUpExec;
 	
-	@Value("${use-chunked-encoding:true}")
-	private boolean useChunkedEncoding;
+	@Value("${disable-chunked-encoding:false}")
+	private boolean disableChunkedEncoding;
 
 	private Map<ProductFamily, String> bucket = new HashMap<>();
 	
@@ -234,12 +234,12 @@ public class ObsConfigurationProperties {
 		this.backend = backend;
 	}
 
-	public boolean getUseChunkedEncoding() {
-		return useChunkedEncoding;
+	public boolean getDisableChunkedEncoding() {
+		return disableChunkedEncoding;
 	}
 
-	public void setUseChunkedEncoding(boolean useChunkedEncoding) {
-		this.useChunkedEncoding = useChunkedEncoding;
+	public void setDisableChunkedEncoding(boolean disableChunkedEncoding) {
+		this.disableChunkedEncoding = disableChunkedEncoding;
 	}
 
 	@Override
@@ -250,6 +250,6 @@ public class ObsConfigurationProperties {
 				+ multipartUploadThreshold + ", minUploadPartSize=" + minUploadPartSize + ", maxRetries=" + maxRetries+ ", maxObsRetries=" + maxObsRetries
 				+ ", backoffBaseDelay=" + backoffBaseDelay + ", backoffThrottledBaseDelay=" + backoffThrottledBaseDelay
 				+ ", backoffMaxDelay=" + backoffMaxDelay + ", timeoutShutdown=" + timeoutShutdown + ", timeoutDownExec="
-				+ timeoutDownExec + ", timeoutUpExec=" + timeoutUpExec + ", useChunkedEncoding=" + useChunkedEncoding + ", bucket=" + bucket + "]";
+				+ timeoutDownExec + ", timeoutUpExec=" + timeoutUpExec + ", disableChunkedEncoding=" + disableChunkedEncoding + ", bucket=" + bucket + "]";
 	}
 }

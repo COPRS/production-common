@@ -81,8 +81,8 @@ public class OutputProcessorTest {
     @Mock
     private OutputProcuderFactory procuderFactory;
     
-
-    private ApplicationProperties properties = new ApplicationProperties();
+    @Mock
+    private ApplicationProperties properties;
 
     /**
      * List of outputs in job
@@ -646,7 +646,7 @@ public class OutputProcessorTest {
         	processor.processReports(reportToPublish, UUID.randomUUID());
         	fail("expected: MqiPublicationError");
         }
-        catch (MqiPublicationError e) {
+        catch (final MqiPublicationError e) {
         	// expected
         }
 
@@ -700,7 +700,7 @@ public class OutputProcessorTest {
 		try {
 			processor.processProducts(reporting, uploadBatch, outputToPublish, UUID.randomUUID());
 			fail("expected: MqiPublicationError");
-		} catch (MqiPublicationError e) {
+		} catch (final MqiPublicationError e) {
 			// expected
 		}
 

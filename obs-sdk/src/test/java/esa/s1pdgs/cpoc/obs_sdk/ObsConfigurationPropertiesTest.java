@@ -23,7 +23,7 @@ public class ObsConfigurationPropertiesTest {
 		assertEquals("http://storage.gra.cloud.ovh.net", uut.getEndpoint());
 		assertEquals("werum-ut-session-files", uut.getBucket().get(ProductFamily.EDRS_SESSION));
 		assertEquals("aws-s3", uut.getBackend());
-		assertEquals(false, uut.getUseChunkedEncoding());
+		assertEquals(true, uut.getDisableChunkedEncoding());
 	}
 	
 }

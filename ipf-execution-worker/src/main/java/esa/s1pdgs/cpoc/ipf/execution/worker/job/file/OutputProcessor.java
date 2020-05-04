@@ -212,7 +212,7 @@ public class OutputProcessor {
 			if (matchOutput == null) {
 				LOGGER.warn("Output {} ignored because no found matching regular expression", productName);
 			} else {
-				final ProductFamily family = familyOf(matchOutput, productName);
+				final ProductFamily family = familyOf(matchOutput);
 
 				final File file = new File(filePath);
 				final OQCFlag oqcFlag = executor.executeOQC(file, family, matchOutput, new OQCDefaultTaskFactory(), reportingFactory);
@@ -232,18 +232,11 @@ public class OutputProcessor {
 				case L0_SLICE:
 				case L0_SEGMENT:	
 					// Specific case of the L0 wrapper
-					if (appLevel == ApplicationLevel.L0) {				
-						
-						// ==== S1PRO-1406: DIRTY WORKAROUND WARNING as suggested by POs ========
-						// even if GP... products are segments they shall be reported as slices
-						final ProductFamily reportingFamily = productName.matches(properties.getSegmentBlacklistPattern()) ?
-								ProductFamily.L0_SLICE :
-								ProductFamily.L0_SEGMENT;	
-						
+					if (appLevel == ApplicationLevel.L0) {										
 						final Reporting reporting = reportingFactory.newReporting("GhostHandling");	
 
 						reporting.begin(
-								ReportingUtils.newFilenameReportingInputFor(reportingFamily, productName),
+								ReportingUtils.newFilenameReportingInputFor(family, productName),
 								new ReportingMessage("Checking if %s is a ghost candidate", productName)
 						);
 						
