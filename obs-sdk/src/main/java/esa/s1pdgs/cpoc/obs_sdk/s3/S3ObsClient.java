@@ -87,7 +87,7 @@ public class S3ObsClient extends AbstractObsClient {
 					.withCredentials(new AWSStaticCredentialsProvider(awsCreds))
 					.withPathStyleAccessEnabled(true);
 			
-			if (!config.getUseChunkedEncoding()) {
+			if (config.getDisableChunkedEncoding()) {
 				clientBuilder.disableChunkedEncoding();
 			}
 			
