@@ -12,7 +12,7 @@ public class ReportingStaticContextInitializer {
 
 	@Autowired
 	public ReportingStaticContextInitializer(
-			@Value("${report.segment-blacklist-pattern:") final String segmentBlacklistPattern
+			@Value("${report.segment-blacklist-pattern:}") final String segmentBlacklistPattern
 	) {
 		this.segmentBlacklistPattern = segmentBlacklistPattern;
 	}
