@@ -12,6 +12,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.regex.Pattern;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
 import com.amazonaws.ClientConfiguration;
 import com.amazonaws.Protocol;
 import com.amazonaws.auth.AWSStaticCredentialsProvider;
@@ -53,6 +56,9 @@ import esa.s1pdgs.cpoc.obs_sdk.s3.retry.SDKCustomDefaultRetryCondition;
 public class S3ObsClient extends AbstractObsClient {
 
 	public static final class Factory implements ObsClient.Factory {
+		
+		private static final Logger LOGGER = LogManager.getLogger(Factory.class);
+		
 		@Override
 		public final ObsClient newObsClient(final ObsConfigurationProperties config, final ReportingProductFactory factory) {
 			final BasicAWSCredentials awsCreds = new BasicAWSCredentials(config.getUserId(), config.getUserSecret());
@@ -87,6 +93,7 @@ public class S3ObsClient extends AbstractObsClient {
 					.withCredentials(new AWSStaticCredentialsProvider(awsCreds))
 					.withPathStyleAccessEnabled(true);
 			
+			LOGGER.info("Disable chunked encoding: {}", config.getDisableChunkedEncoding());
 			if (config.getDisableChunkedEncoding()) {
 				clientBuilder.disableChunkedEncoding();
 			}
