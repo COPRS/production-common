@@ -7,6 +7,7 @@ import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 import esa.s1pdgs.cpoc.report.ReportingOutput;
+import esa.s1pdgs.cpoc.report.ReportingUtils;
 
 public class FilenameReportingOutput implements ReportingOutput {		
 	@JsonProperty("filename_strings")
@@ -18,8 +19,8 @@ public class FilenameReportingOutput implements ReportingOutput {
 	private List<String> segments;
 	
 	public FilenameReportingOutput(final List<String> filenames, final List<String> segments) {
-		this.filenames = filenames;
-		this.segments = segments;
+		this.filenames = ReportingUtils.toFlatFilenames(filenames);
+		this.segments = ReportingUtils.toFlatFilenames(segments);
 	}
 
 	public List<String> getFilenames() {

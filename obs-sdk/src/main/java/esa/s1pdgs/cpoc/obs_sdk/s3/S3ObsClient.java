@@ -12,6 +12,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.regex.Pattern;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
 import com.amazonaws.ClientConfiguration;
 import com.amazonaws.Protocol;
 import com.amazonaws.auth.AWSStaticCredentialsProvider;
@@ -53,6 +56,9 @@ import esa.s1pdgs.cpoc.obs_sdk.s3.retry.SDKCustomDefaultRetryCondition;
 public class S3ObsClient extends AbstractObsClient {
 
 	public static final class Factory implements ObsClient.Factory {
+		
+		private static final Logger LOGGER = LogManager.getLogger(Factory.class);
+		
 		@Override
 		public final ObsClient newObsClient(final ObsConfigurationProperties config, final ReportingProductFactory factory) {
 			final BasicAWSCredentials awsCreds = new BasicAWSCredentials(config.getUserId(), config.getUserSecret());
@@ -87,15 +93,8 @@ public class S3ObsClient extends AbstractObsClient {
 					.withCredentials(new AWSStaticCredentialsProvider(awsCreds))
 					.withPathStyleAccessEnabled(true);
 			
-			/*
-			 * WARNING!
-			 * This is a last minute hotfix to work arround the problem that was identified when the ChunkedEncoding option
-			 * is used. Originally this was introduced to make OVH S3 backend work correctly, however it was identified that
-			 * this breaks the stream handling for the XBIP when uploading files to Orange cloud instead. In order to make
-			 * it work for XBIP in orange and OVH, we introduce this dirty small hack to enable it when the URL is identified
-			 * to be OVH. This needs to be tackled in some real issue making this one obsolete! 
-			 */
-			if (config.getEndpoint().contains("cloud.ovh.net")) {
+			LOGGER.info("Disable chunked encoding: {}", config.getDisableChunkedEncoding());
+			if (config.getDisableChunkedEncoding()) {
 				clientBuilder.disableChunkedEncoding();
 			}
 			

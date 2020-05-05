@@ -171,12 +171,9 @@ public class OutputProcessor {
 		}
 	}
 
-	private final ProductFamily familyOf(final LevelJobOutputDto output, final String name) {
+	private final ProductFamily familyOf(final LevelJobOutputDto output) {
 		final ProductFamily family = ProductFamily.fromValue(output.getFamily());
-		if (family == ProductFamily.L0_SLICE && 
-			appLevel == ApplicationLevel.L0 && 
-			!name.matches(properties.getSegmentBlacklistPattern())
-		) {			
+		if (family == ProductFamily.L0_SLICE && appLevel == ApplicationLevel.L0){			
 			return ProductFamily.L0_SEGMENT;
 		}
 		return family;
@@ -215,7 +212,7 @@ public class OutputProcessor {
 			if (matchOutput == null) {
 				LOGGER.warn("Output {} ignored because no found matching regular expression", productName);
 			} else {
-				final ProductFamily family = familyOf(matchOutput, productName);
+				final ProductFamily family = familyOf(matchOutput);
 
 				final File file = new File(filePath);
 				final OQCFlag oqcFlag = executor.executeOQC(file, family, matchOutput, new OQCDefaultTaskFactory(), reportingFactory);
@@ -235,8 +232,9 @@ public class OutputProcessor {
 				case L0_SLICE:
 				case L0_SEGMENT:	
 					// Specific case of the L0 wrapper
-					if (appLevel == ApplicationLevel.L0) {						
-						final Reporting reporting = reportingFactory.newReporting("GhostHandling");						
+					if (appLevel == ApplicationLevel.L0) {										
+						final Reporting reporting = reportingFactory.newReporting("GhostHandling");	
+
 						reporting.begin(
 								ReportingUtils.newFilenameReportingInputFor(family, productName),
 								new ReportingMessage("Checking if %s is a ghost candidate", productName)

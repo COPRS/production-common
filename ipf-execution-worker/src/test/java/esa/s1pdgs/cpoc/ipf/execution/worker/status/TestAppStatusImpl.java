@@ -2,8 +2,6 @@ package esa.s1pdgs.cpoc.ipf.execution.worker.status;
 
 import java.util.NoSuchElementException;
 
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
@@ -14,25 +12,18 @@ import org.springframework.stereotype.Component;
 import esa.s1pdgs.cpoc.appstatus.AbstractAppStatus;
 import esa.s1pdgs.cpoc.appstatus.Status;
 import esa.s1pdgs.cpoc.common.ProductCategory;
-import esa.s1pdgs.cpoc.common.errors.AbstractCodedException;
 import esa.s1pdgs.cpoc.mqi.client.StatusService;
 
 @Component
-@Profile("!test")
-public class AppStatusImpl extends AbstractAppStatus {
-
-    /**
-     * Logger
-     */
-    private static final Logger LOGGER = LogManager.getLogger(AppStatusImpl.class);
-
+@Profile("test")
+public class TestAppStatusImpl extends AbstractAppStatus {
     /**
      * MQI service for stopping the MQI
      */
     private final StatusService mqiStatusService;
 
     @Autowired
-    public AppStatusImpl(
+    public TestAppStatusImpl(
             @Value("${status.max-error-counter-processing:100}") final int maxErrorCounterProcessing,
             @Value("${status.max-error-counter-mqi:100}") final int maxErrorCounterNextMessage,
             @Qualifier("systemExitCall") final Runnable systemExitCall,
@@ -57,14 +48,7 @@ public class AppStatusImpl extends AbstractAppStatus {
     @Override
 	@Scheduled(fixedDelayString = "${status.delete-fixed-delay-ms:3000}")
     public void forceStopping() {
-        if (isShallBeStopped()) {
-            try {
-                mqiStatusService.stop();
-            } catch (final AbstractCodedException ace) {
-                LOGGER.error(ace.getLogMessage());
-            }
-            systemExit();
-        }
+    	// do nothing - otherwise this will break tests
     }
 
 }

@@ -79,9 +79,7 @@ public class ApplicationProperties {
     private String oqcBinaryPath;
     private String oqcWorkingDir;
     private long oqcTimeoutInSeconds = 60;
-    
-    private String segmentBlacklistPattern = "^S1([A-Z_]{1}).*(GP|HK|RF).*SAFE$";
-    
+
 
     /**
      * Default constructor
@@ -303,13 +301,5 @@ public class ApplicationProperties {
 
 	public void setOqcEnabled(final boolean oqcEnabled) {
 		this.oqcEnabled = oqcEnabled;
-	}
-
-	public String getSegmentBlacklistPattern() {
-		return segmentBlacklistPattern;
-	}
-
-	public void setSegmentBlacklistPattern(final String segmentBlacklistPattern) {
-		this.segmentBlacklistPattern = segmentBlacklistPattern;
 	}
 }

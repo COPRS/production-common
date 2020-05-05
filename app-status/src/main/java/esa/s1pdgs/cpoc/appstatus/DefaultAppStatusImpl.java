@@ -8,8 +8,12 @@ public class DefaultAppStatusImpl extends AbstractAppStatus {
 	
 	private static final Log LOGGER = LogFactory.getLog(DefaultAppStatusImpl.class);
 
-    public DefaultAppStatusImpl(final int maxErrorCounterProcessing, final int maxErrorCounterNextMessage) {
-    	super(new Status(maxErrorCounterProcessing, maxErrorCounterNextMessage));
+    public DefaultAppStatusImpl(
+    		final int maxErrorCounterProcessing, 
+    		final int maxErrorCounterNextMessage, 
+    		final Runnable systemExitCall
+    ) {
+    	super(new Status(maxErrorCounterProcessing, maxErrorCounterNextMessage), systemExitCall);
     }    
 
     /**
@@ -20,7 +24,7 @@ public class DefaultAppStatusImpl extends AbstractAppStatus {
     public void forceStopping() {
         if (isShallBeStopped()) {
         	LOGGER.info("DefaultAppStatusImpl is doing a forced termination of the application.");
-            System.exit(0);
+        	systemExit();
         }
     }
 }

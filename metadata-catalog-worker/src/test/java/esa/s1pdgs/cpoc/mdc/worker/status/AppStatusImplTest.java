@@ -13,7 +13,6 @@ import org.mockito.MockitoAnnotations;
 import esa.s1pdgs.cpoc.common.AppState;
 import esa.s1pdgs.cpoc.common.ProductCategory;
 import esa.s1pdgs.cpoc.common.errors.AbstractCodedException;
-import esa.s1pdgs.cpoc.mdc.worker.status.AppStatusImpl;
 import esa.s1pdgs.cpoc.mqi.client.StatusService;
 
 public class AppStatusImplTest {
@@ -35,7 +34,7 @@ public class AppStatusImplTest {
         
         doNothing().when(mqiStatusService).stop();
         
-        appStatus = new AppStatusImpl(3,30);
+        appStatus = new AppStatusImpl(3,30, () -> {});
     }
     
     /**

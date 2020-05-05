@@ -22,7 +22,7 @@ public class DefaultAppStatusImplTest {
     public void init() throws AbstractCodedException {
         MockitoAnnotations.initMocks(this);
               
-        appStatus = new DefaultAppStatusImpl(3,3);
+        appStatus = new DefaultAppStatusImpl(3,3, () -> {});
     }
     
     /**
@@ -93,7 +93,7 @@ public class DefaultAppStatusImplTest {
         assertTrue(timeBefore <= appStatus.getStatus().getDateLastChangeMs());
         assertEquals(0, appStatus.getStatus().getErrorCounterNextMessage());
         
-        appStatus = new DefaultAppStatusImpl(3,3);
+        appStatus = new DefaultAppStatusImpl(3,3, () -> {});
         appStatus.setWaiting();
         assertEquals(0, appStatus.getStatus().getErrorCounterNextMessage());
         timeBefore = appStatus.getStatus().getDateLastChangeMs();

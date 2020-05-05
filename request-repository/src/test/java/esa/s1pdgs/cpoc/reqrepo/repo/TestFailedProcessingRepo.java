@@ -3,34 +3,39 @@ package esa.s1pdgs.cpoc.reqrepo.repo;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
 
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.data.mongo.DataMongoTest;
 import org.springframework.data.mongodb.core.MongoOperations;
 import org.springframework.data.mongodb.repository.config.EnableMongoRepositories;
+import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit4.SpringRunner;
 
 import esa.s1pdgs.cpoc.appcatalog.common.FailedProcessing;
-import esa.s1pdgs.cpoc.reqrepo.repo.FailedProcessingRepo;
 
+@Ignore
 @RunWith(SpringRunner.class)
 @DataMongoTest
 @EnableMongoRepositories(basePackageClasses = FailedProcessingRepo.class)
+@ActiveProfiles("test")
 public class TestFailedProcessingRepo {	
     @Autowired
     private MongoOperations ops;
 
     @Autowired
     private FailedProcessingRepo uut;
-    
-    // uncomment, if embedded mongo needs to be updated
-//	{
-//	System.setProperty("http.proxyHost", "proxy.net.werum");
-//	System.setProperty("http.proxyPort", "8080");
-//	System.setProperty("https.proxyHost", "proxy.net.werum");
-//	System.setProperty("https.proxyPort", "8080");
-//}
+
+	{
+		if ("http://proxy.net.werum:8080/".equals(System.getenv("http_proxy"))) {
+			System.setProperty("http.proxyHost", "proxy.net.werum");
+			System.setProperty("http.proxyPort", "8080");
+			System.setProperty("https.proxyHost", "proxy.net.werum");
+			System.setProperty("https.proxyPort", "8080");
+		}
+
+	}
     
     @Test
     public final void testFindById_OnExistingId_ShallReturnObject()
@@ -53,7 +58,7 @@ public class TestFailedProcessingRepo {
     }
         
     
-    private final FailedProcessing newFailedProcessing(long id)
+    private final FailedProcessing newFailedProcessing(final long id)
     {
     	final FailedProcessing proc = new FailedProcessing();
     	proc.setId(id);

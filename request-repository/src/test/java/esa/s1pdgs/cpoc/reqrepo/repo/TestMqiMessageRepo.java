@@ -7,6 +7,7 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,30 +17,35 @@ import org.springframework.data.domain.Sort;
 import org.springframework.data.domain.Sort.Direction;
 import org.springframework.data.mongodb.core.MongoOperations;
 import org.springframework.data.mongodb.repository.config.EnableMongoRepositories;
+import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit4.SpringRunner;
 
 import esa.s1pdgs.cpoc.appcatalog.common.MqiMessage;
 import esa.s1pdgs.cpoc.common.MessageState;
 import esa.s1pdgs.cpoc.reqrepo.service.RequestRepository;
 
+@Ignore
 @RunWith(SpringRunner.class)
 @DataMongoTest
 @EnableMongoRepositories(basePackageClasses = MqiMessageRepo.class)
+@ActiveProfiles("test")
 public class TestMqiMessageRepo {	
     @Autowired
     private MongoOperations ops;
 
     @Autowired
     private MqiMessageRepo uut;
-    
-    // uncomment, if embedded mongo needs to be updated
-//	{
-//	System.setProperty("http.proxyHost", "proxy.net.werum");
-//	System.setProperty("http.proxyPort", "8080");
-//	System.setProperty("https.proxyHost", "proxy.net.werum");
-//	System.setProperty("https.proxyPort", "8080");
-//}
-    
+
+	{
+		if ("http://proxy.net.werum:8080/".equals(System.getenv("http_proxy"))) {
+			System.setProperty("http.proxyHost", "proxy.net.werum");
+			System.setProperty("http.proxyPort", "8080");
+			System.setProperty("https.proxyHost", "proxy.net.werum");
+			System.setProperty("https.proxyPort", "8080");
+		}
+
+	}
+	
     @Test
     public final void testFindByIdentifier_OnExistingId_ShallReturnObject() throws Exception
     {
@@ -61,7 +67,7 @@ public class TestMqiMessageRepo {
     	for (final MqiMessage mess : expected)    	{
     		ops.insert(mess);  
     	}    	
-    	List<MqiMessage> actual = uut.findByStateInAndTopicInOrderByCreationDate(
+    	final List<MqiMessage> actual = uut.findByStateInAndTopicInOrderByCreationDate(
     			RequestRepository.PROCESSING_STATE_LIST, 
     			RequestRepository.PROCESSING_TYPES_LIST
     	);
@@ -88,7 +94,7 @@ public class TestMqiMessageRepo {
     	for (final MqiMessage mess : expected)    	{
     		ops.insert(mess);  
     	}    	
-    	List<MqiMessage> actual = uut.findByStateInAndTopicInOrderByCreationDate(
+    	final List<MqiMessage> actual = uut.findByStateInAndTopicInOrderByCreationDate(
     			Collections.singletonList(MessageState.READ), 
     			RequestRepository.PROCESSING_TYPES_LIST
     	); 
@@ -115,7 +121,7 @@ public class TestMqiMessageRepo {
     	for (final MqiMessage mess : expected)    	{
     		ops.insert(mess);  
     	}    	
-    	List<MqiMessage> actual = uut.findByStateInAndTopicInOrderByCreationDate(
+    	final List<MqiMessage> actual = uut.findByStateInAndTopicInOrderByCreationDate(
     			Collections.singletonList(MessageState.SEND), 
     			RequestRepository.PROCESSING_TYPES_LIST
     	); 
@@ -131,7 +137,7 @@ public class TestMqiMessageRepo {
     	ops.insert(newMqiMessage(5));    
     	ops.insert(newMqiMessage(9));
     	
-    	List<MqiMessage> actual = uut.findByStateInAndTopicInOrderByCreationDate(    			
+    	final List<MqiMessage> actual = uut.findByStateInAndTopicInOrderByCreationDate(    			
     			RequestRepository.PROCESSING_STATE_LIST,
     			Collections.singletonList("t-pdgs-session-file-ingestion-events")
     	);
@@ -154,7 +160,7 @@ public class TestMqiMessageRepo {
     		ops.insert(mess);  
     	}   
     	
-    	List<MqiMessage> actual = uut.findByStateInAndTopicInOrderByCreationDate(    			
+    	final List<MqiMessage> actual = uut.findByStateInAndTopicInOrderByCreationDate(    			
     			RequestRepository.PROCESSING_STATE_LIST,
     			Collections.singletonList("t-pdgs-session-file-ingestion-events")
     	);
@@ -179,7 +185,7 @@ public class TestMqiMessageRepo {
     	for (final MqiMessage mess : expected) {
     		ops.insert(mess);  
     	}    	
-    	List<MqiMessage> actual = uut.findByStateInAndTopicIn(
+    	final List<MqiMessage> actual = uut.findByStateInAndTopicIn(
     			RequestRepository.PROCESSING_STATE_LIST, 
     			RequestRepository.PROCESSING_TYPES_LIST,
     			PageRequest.of(0, Integer.MAX_VALUE)
@@ -200,7 +206,7 @@ public class TestMqiMessageRepo {
     	for (final MqiMessage mess : expected)    	{
     		ops.insert(mess);  
     	}    	
-    	List<MqiMessage> actual = uut.findByStateInAndTopicIn(
+    	final List<MqiMessage> actual = uut.findByStateInAndTopicIn(
     			Collections.singletonList(MessageState.READ), 
     			RequestRepository.PROCESSING_TYPES_LIST,
     			PageRequest.of(0, 2)
@@ -227,7 +233,7 @@ public class TestMqiMessageRepo {
     	for (final MqiMessage mess : expected)    	{
     		ops.insert(mess);  
     	}    	
-    	List<MqiMessage> actual = uut.findByStateInAndTopicIn(
+    	final List<MqiMessage> actual = uut.findByStateInAndTopicIn(
     			Collections.singletonList(MessageState.ACK_KO), 
     			RequestRepository.PROCESSING_TYPES_LIST,
     			PageRequest.of(0, 2, Sort.by(Direction.ASC,"creationDate"))
@@ -274,7 +280,7 @@ public class TestMqiMessageRepo {
     }
     
     
-    private final MqiMessage newMqiMessage(long id) throws InterruptedException
+    private final MqiMessage newMqiMessage(final long id) throws InterruptedException
     {
     	final MqiMessage proc = new MqiMessage();
     	proc.setId(id);

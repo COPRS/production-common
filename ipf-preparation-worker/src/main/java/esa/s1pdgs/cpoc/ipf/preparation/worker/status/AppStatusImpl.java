@@ -33,13 +33,14 @@ public class AppStatusImpl extends AbstractAppStatus {
     public AppStatusImpl(
             @Value("${status.max-error-counter-processing:100}") final int maxErrorCounterProcessing,
             @Value("${status.max-error-counter-mqi:100}") final int maxErrorCounterNextMessage,
+            @Qualifier("systemExitCall") final Runnable systemExitCall,
             @Qualifier("mqiServiceForStatus") final StatusService mqiStatusService) {
-    	super(new Status(maxErrorCounterProcessing, maxErrorCounterNextMessage));
+    	super(new Status(maxErrorCounterProcessing, maxErrorCounterNextMessage), systemExitCall);
         this.mqiStatusService = mqiStatusService;
     }
 
     @Override
-    public boolean isProcessing(String category, long messageId) {
+    public boolean isProcessing(final String category, final long messageId) {
     	if (!ProductCategory.EDRS_SESSIONS.name().toLowerCase().equals(category) &&
                 !ProductCategory.LEVEL_PRODUCTS.name().toLowerCase().equals(category)) {
     		throw new NoSuchElementException(String.format("Category %s not available for processing", category));
@@ -58,10 +59,10 @@ public class AppStatusImpl extends AbstractAppStatus {
         if (isShallBeStopped()) {
             try {
                 mqiStatusService.stop();
-            } catch (AbstractCodedException ace) {
+            } catch (final AbstractCodedException ace) {
                 LOGGER.error(ace.getLogMessage());
             }
-            System.exit(0);
+            systemExit();
         }
     }
 

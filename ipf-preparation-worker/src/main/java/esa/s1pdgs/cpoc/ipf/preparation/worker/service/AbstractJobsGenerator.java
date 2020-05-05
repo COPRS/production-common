@@ -272,18 +272,28 @@ public abstract class AbstractJobsGenerator implements Runnable {
 			.filter(alt -> alt.getOrigin() == TaskTableInputOrigin.DB)
 			.collect(Collectors.groupingBy(TaskTableInputAlternative::getTaskTableInputAltKey))
 			.forEach((k, v) -> {
+				final int queryId = counter.incrementAndGet();
 				final String fileType = elementMapper.mappedFileType(k.getFileType());
 				final ProductFamily family = elementMapper.inputFamilyOf(fileType);				
 				final SearchMetadataQuery query = new SearchMetadataQuery(
-						counter.incrementAndGet(),
+						queryId,
 						k.getRetrievalMode(), 
 						k.getDeltaTime0(), 
 						k.getDeltaTime1(), 
 						fileType, 
 						family
 				);
-				this.metadataSearchQueries.put(counter.get(), query);
-				v.forEach(alt -> alt.setIdSearchMetadataQuery(counter.get()));
+				this.metadataSearchQueries.put(queryId, query);
+				// FIXME: It's a very bad idea to rely on getting the original objects here provided and everything
+				// to be written through properly. Furthermore, altering the tasktable after having it read is also
+				// pretty error-prone and will eventually break at some point in the future (apart from all the WTFs 
+				// this will cause on encountering this logic)
+				// Hence, this should be changed in order to create the queryId uniquely on the alternative once when
+				// reading the tasktable and here, this value can be used as the query id (if no better structure for
+				// storing the queries is found).	
+				// Apart from that, it's sad to see how functional programming is used to mutate the state of a
+				// data structure that doesn't change but here... :(
+				v.forEach(alt -> alt.setIdSearchMetadataQuery(queryId));
 			});
 	}
 
@@ -291,7 +301,7 @@ public abstract class AbstractJobsGenerator implements Runnable {
 		return input.getAlternatives().stream().sorted(TaskTableInputAlternative.ORDER);
 	}
 	
-	protected void buildTasks() {
+	private void buildTasks() {
 		this.taskTable.getPools().forEach(pool -> {
 			this.tasks.add(pool.getTasks().stream().map(TaskTableTask::getFileName).collect(Collectors.toList()));
 		});

@@ -15,7 +15,7 @@ import esa.s1pdgs.cpoc.appstatus.Status;
 import esa.s1pdgs.cpoc.common.errors.AbstractCodedException;
 import esa.s1pdgs.cpoc.ipf.execution.worker.config.ApplicationProperties;
 import esa.s1pdgs.cpoc.ipf.execution.worker.config.DevProperties;
-import esa.s1pdgs.cpoc.ipf.execution.worker.status.AppStatusImpl;
+import esa.s1pdgs.cpoc.ipf.execution.worker.status.TestAppStatusImpl;
 import esa.s1pdgs.cpoc.mqi.client.StatusService;
 
 /**
@@ -72,7 +72,7 @@ public class MockPropertiesTest {
     protected void mockDevProperties(final boolean download,
             final boolean execution, final boolean upload,
             final boolean erasing) {
-        Map<String, Boolean> activations = new HashMap<>();
+        final Map<String, Boolean> activations = new HashMap<>();
         activations.put("download", Boolean.valueOf(download));
         activations.put("execution", Boolean.valueOf(execution));
         activations.put("upload", Boolean.valueOf(upload));
@@ -97,8 +97,8 @@ public class MockPropertiesTest {
      * @param tmProcStopS
      * @param tmProcCheckStopS
      */
-    protected void mockTmAppProperties(long tmProcAllTasksS,
-            long tmProcOneTaskS, long tmProcStopS, long tmProcCheckStopS) {
+    protected void mockTmAppProperties(final long tmProcAllTasksS,
+            final long tmProcOneTaskS, final long tmProcStopS, final long tmProcCheckStopS) {
         doReturn(tmProcAllTasksS).when(properties).getTmProcAllTasksS();
         doReturn(tmProcOneTaskS).when(properties).getTmProcOneTaskS();
         doReturn(tmProcStopS).when(properties).getTmProcStopS();
@@ -111,8 +111,8 @@ public class MockPropertiesTest {
      * @param sizeBatchUpload
      * @param sizeBatchDownload
      */
-    protected void mockSizeAppProperties(int sizeBatchUpload,
-            int sizeBatchDownload) {
+    protected void mockSizeAppProperties(final int sizeBatchUpload,
+            final int sizeBatchDownload) {
         doReturn(sizeBatchUpload).when(properties).getSizeBatchUpload();
         doReturn(sizeBatchDownload).when(properties).getSizeBatchDownload();
     }
@@ -123,12 +123,12 @@ public class MockPropertiesTest {
      * @param wapNbMaxLoop
      * @param wapTempoS
      */
-    protected void mockWapAppProperties(int wapNbMaxLoop, long wapTempoS) {
+    protected void mockWapAppProperties(final int wapNbMaxLoop, final long wapTempoS) {
         doReturn(wapNbMaxLoop).when(properties).getWapNbMaxLoop();
         doReturn(wapTempoS).when(properties).getWapTempoS();
     }
     
-    protected void mockWorkingdirProperties(Path workingdir) {
+    protected void mockWorkingdirProperties(final Path workingdir) {
     	doReturn(workingdir.toString()).when(properties).getWorkingDir();
     }
 
@@ -139,7 +139,7 @@ public class MockPropertiesTest {
      */
     protected void mockDefaultStatus() throws AbstractCodedException {
         doNothing().when(mqiStatusService).stop();
-        mockStatus((new AppStatusImpl(3, 30, mqiStatusService)).getStatus(), 3, false);
+        mockStatus((new TestAppStatusImpl(3, 30, () -> {}, mqiStatusService)).getStatus(), 3, false);
     }
 
     /**
