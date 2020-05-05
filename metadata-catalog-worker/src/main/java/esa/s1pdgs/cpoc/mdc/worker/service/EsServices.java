@@ -20,7 +20,6 @@ import org.elasticsearch.action.index.IndexRequest;
 import org.elasticsearch.action.index.IndexResponse;
 import org.elasticsearch.action.search.SearchRequest;
 import org.elasticsearch.action.search.SearchResponse;
-import org.elasticsearch.common.geo.ShapeRelation;
 import org.elasticsearch.common.geo.builders.CoordinatesBuilder;
 import org.elasticsearch.common.geo.builders.PolygonBuilder;
 import org.elasticsearch.common.xcontent.XContentType;
@@ -879,13 +878,9 @@ public class EsServices {
 				final double lat = coords.get(1);
 				coordBuilder.coordinate(lon, lat);
 			}
-
-
-			final GeoShapeQueryBuilder queryBuilder = QueryBuilders.geoShapeQuery("geometry",
+			final GeoShapeQueryBuilder queryBuilder = QueryBuilders.geoIntersectionQuery("geometry",
 					new PolygonBuilder(coordBuilder));
-			queryBuilder.relation(ShapeRelation.CONTAINS);
 			LOGGER.debug("Using {}", queryBuilder);
-
 			final SearchSourceBuilder sourceBuilder = new SearchSourceBuilder();
 			sourceBuilder.query(queryBuilder);
 			sourceBuilder.size(SIZE_LIMIT);
@@ -896,12 +891,13 @@ public class EsServices {
 
 			final SearchResponse searchResponse = elasticsearchDAO.search(request);
 			if (searchResponse.getHits().totalHits > 0) {
+				// TODO FIXME implement coverage calculation
 				return 0;
 			}
-			return 100; // TODO FIXME implement coverage calculation
 		} catch (final Exception e) {
 			throw new RuntimeException("Failed to check for sea coverage", e);
 		}
+		return 100;
 	}
 
 	public LevelSegmentMetadata getLevelSegment(final ProductFamily family, final String productName) throws Exception {
