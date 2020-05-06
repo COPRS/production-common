@@ -40,6 +40,7 @@ COPY prip-trigger /app/prip-trigger
 COPY prip-worker /app/prip-worker
 COPY prip-frontend /app/prip-frontend
 COPY xbip-client /app/xbip-client
+COPY data-lifecycle-trigger /app/data-lifecycle-trigger
 
 
 RUN mvn -DskipTests=true -Dpmd.skip=true -Dfindbugs.skip=true -B -f /app/pom.xml -s /usr/share/maven/ref/settings-docker.xml install 
@@ -80,3 +81,4 @@ COPY --from=buildenv /app/compression-worker/target /app/compression-worker/targ
 COPY --from=buildenv /app/prip-trigger/target /app/prip-trigger/target
 COPY --from=buildenv /app/prip-worker/target /app/prip-worker/target
 COPY --from=buildenv /app/prip-frontend/target /app/prip-frontend/target
+COPY --from=buildenv /app/data-lifecycle-trigger/target /app/data-lifecycle-trigger/target
