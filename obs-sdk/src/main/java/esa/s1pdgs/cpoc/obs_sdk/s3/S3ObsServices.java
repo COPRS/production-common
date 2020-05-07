@@ -508,7 +508,7 @@ public class S3ObsServices {
 				try {
 					log(String.format("Uploading object %s in bucket %s", keyName, bucketName));
 
-					ObjectMetadata metadata = new ObjectMetadata();
+					final ObjectMetadata metadata = new ObjectMetadata();
 					metadata.setContentLength(contentLength);
 					final Upload upload = s3tm.upload(bucketName, keyName, in, metadata);
 					upload.addProgressListener((final ProgressEvent progressEvent) -> {
@@ -527,9 +527,16 @@ public class S3ObsServices {
 					log(String.format("Upload object %s in bucket %s succeeded", keyName, bucketName));
 					break;
 				} catch (final com.amazonaws.SdkClientException sce) {
-					if (retryCount <= numRetries) {
-						LOGGER.warn(String.format("Upload object %s from bucket %s failed: Attempt : %d / %d", keyName,
-								bucketName, retryCount, numRetries));
+					if (retryCount <= numRetries) {						
+						if (retryCount == 1) {
+							LOGGER.warn("Upload object {} to bucket {} failed: Attempt : {}/{}", keyName,
+									bucketName, retryCount, numRetries);																					
+							LOGGER.debug("Exception is: {}", sce);							
+						}
+						else {
+							LOGGER.warn("Upload object {} to bucket {} failed: Attempt : {}/{}", keyName,
+									bucketName, retryCount, numRetries);
+						}						
 						try {
 							Thread.sleep(retryDelay);
 						} catch (final InterruptedException e) {
