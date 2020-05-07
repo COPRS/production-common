@@ -85,7 +85,7 @@ public class S3ObsClient extends AbstractObsClient {
 					new PredefinedBackoffStrategies.SDKDefaultBackoffStrategy(config.getBackoffBaseDelay(),
 							config.getBackoffThrottledBaseDelay(), config.getBackoffMaxDelay()),
 					config.getMaxRetries(), true);
-			clientConfig.setRetryPolicy(retryPolicy);
+//			clientConfig.setRetryPolicy(retryPolicy);
 			
 			final AmazonS3ClientBuilder clientBuilder = AmazonS3ClientBuilder.standard().withClientConfiguration(clientConfig)
 					.withEndpointConfiguration(
