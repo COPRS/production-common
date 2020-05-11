@@ -111,13 +111,15 @@ public class IngestionWorkerService implements MqiListener<IngestionJob> {
 			final Date ingestionFinishedDate = new Date();
 			publish(result, message, reporting.getUid());
 			delete(ingestion);			
-			
-
-			
+						
 			inboxAdapter.delete(productUri);
+
 			reporting.end(
-					new IngestionWorkerReportingOutput(IngestionJobs.filename(ingestion), ingestionFinishedDate),
-					new ReportingMessage(ingestion.getProductSizeByte(),"End processing of %s", ingestion.getKeyObjectStorage())
+					IngestionWorkerReportingOutput.newInstance(ingestion, ingestionFinishedDate),
+					new ReportingMessage(
+							ingestion.getProductSizeByte(),
+							"End processing of %s", ingestion.getKeyObjectStorage()
+					)
 			);
 		} catch (final Exception e) {
 			reporting.error(new ReportingMessage("Error processing of %s: %s", ingestion.getKeyObjectStorage(),  LogUtils.toString(e)));

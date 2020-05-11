@@ -24,8 +24,6 @@ import com.amazonaws.Protocol;
 import com.amazonaws.auth.AWSStaticCredentialsProvider;
 import com.amazonaws.auth.BasicAWSCredentials;
 import com.amazonaws.client.builder.AwsClientBuilder.EndpointConfiguration;
-import com.amazonaws.retry.PredefinedBackoffStrategies;
-import com.amazonaws.retry.RetryPolicy;
 import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.AmazonS3ClientBuilder;
 import com.amazonaws.services.s3.model.CopyObjectRequest;
@@ -48,7 +46,6 @@ import esa.s1pdgs.cpoc.obs_sdk.SdkClientException;
 import esa.s1pdgs.cpoc.obs_sdk.StreamObsUploadObject;
 import esa.s1pdgs.cpoc.obs_sdk.ValidArgumentAssertion;
 import esa.s1pdgs.cpoc.obs_sdk.report.ReportingProductFactory;
-import esa.s1pdgs.cpoc.obs_sdk.s3.retry.SDKCustomDefaultRetryCondition;
 
 /**
  * <p>
@@ -87,10 +84,10 @@ public class S3ObsClient extends AbstractObsClient {
 				clientConfig.setProxyPort(port);
 			}
 
-			final RetryPolicy retryPolicy = new RetryPolicy(new SDKCustomDefaultRetryCondition(config.getMaxRetries()),
-					new PredefinedBackoffStrategies.SDKDefaultBackoffStrategy(config.getBackoffBaseDelay(),
-							config.getBackoffThrottledBaseDelay(), config.getBackoffMaxDelay()),
-					config.getMaxRetries(), true);
+//			final RetryPolicy retryPolicy = new RetryPolicy(new SDKCustomDefaultRetryCondition(config.getMaxRetries()),
+//					new PredefinedBackoffStrategies.SDKDefaultBackoffStrategy(config.getBackoffBaseDelay(),
+//							config.getBackoffThrottledBaseDelay(), config.getBackoffMaxDelay()),
+//					config.getMaxRetries(), true);
 //			clientConfig.setRetryPolicy(retryPolicy);
 			
 			final AmazonS3ClientBuilder clientBuilder = AmazonS3ClientBuilder.standard().withClientConfiguration(clientConfig)
@@ -185,7 +182,7 @@ public class S3ObsClient extends AbstractObsClient {
 	 * See S1PRO-1441 (S1SYS-724)
 	 * The awsClient however is able to handle this with {@link FileInputStream} input
 	 */
-	private InputStream maybeWithBuffer(StreamObsUploadObject object) throws ObsServiceException {
+	private InputStream maybeWithBuffer(final StreamObsUploadObject object) throws ObsServiceException {
 		if (getConfiguration().getDisableChunkedEncoding() && !(object.getInput() instanceof FileInputStream)) {
 
 			if (object.getContentLength() > getConfiguration().getMaxInputStreamBufferSize()) {
