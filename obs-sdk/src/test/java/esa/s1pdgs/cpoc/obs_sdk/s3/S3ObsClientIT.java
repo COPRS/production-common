@@ -41,7 +41,8 @@ public class S3ObsClientIT {
 
 	public final static ProductFamily auxiliaryFiles = ProductFamily.AUXILIARY_FILE;
 	public final static String auxiliaryFilesBucketName = "werum-ut-auxiliary-files";
-	public final static String testFilePrefix = "abc/def/";
+	public final static String testFilePrefix1 = "abc/def/";
+	public final static String testFilePrefix5mb = "xyz/";
 	public final static String testFileName1 = "testfile1.txt";
 	public final static String testFileName2 = "testfile2.txt";
 	public final static String testFileName5mb = "random-5mb.bin";
@@ -85,16 +86,16 @@ public class S3ObsClientIT {
 			uut.s3Services.s3client.deleteObject(auxiliaryFilesBucketName, testFileName2);
 		}
 		
-		if (uut.exists(new ObsObject(auxiliaryFiles, testFilePrefix + testFileName5mb))) {
-			uut.s3Services.s3client.deleteObject(auxiliaryFilesBucketName, testFilePrefix + testFileName5mb);
+		if (uut.exists(new ObsObject(auxiliaryFiles, testFilePrefix5mb + testFileName5mb))) {
+			uut.s3Services.s3client.deleteObject(auxiliaryFilesBucketName, testFilePrefix5mb + testFileName5mb);
 		}
 
-		if (uut.exists(new ObsObject(auxiliaryFiles, testFilePrefix + testFileName1))) {
-			uut.s3Services.s3client.deleteObject(auxiliaryFilesBucketName, testFilePrefix + testFileName1);
+		if (uut.exists(new ObsObject(auxiliaryFiles, testFilePrefix1 + testFileName1))) {
+			uut.s3Services.s3client.deleteObject(auxiliaryFilesBucketName, testFilePrefix1 + testFileName1);
 		}
 
-		if (uut.exists(new ObsObject(auxiliaryFiles, testFilePrefix + testFileName2))) {
-			uut.s3Services.s3client.deleteObject(auxiliaryFilesBucketName, testFilePrefix + testFileName2);
+		if (uut.exists(new ObsObject(auxiliaryFiles, testFilePrefix1 + testFileName2))) {
+			uut.s3Services.s3client.deleteObject(auxiliaryFilesBucketName, testFilePrefix1 + testFileName2);
 		}
 
 		if (uut.exists(new ObsObject(auxiliaryFiles, testDirectoryName + "/" + testFileName1))) {
@@ -125,10 +126,10 @@ public class S3ObsClientIT {
 	@Test
 	public void uploadWithPrefixTest() throws Exception {
 		// upload
-		assertFalse(uut.exists(new ObsObject(auxiliaryFiles, testFilePrefix + testFileName1)));
-		uut.upload(singletonList(new FileObsUploadObject(auxiliaryFiles, testFilePrefix + testFileName1, testFile1)), ReportingFactory.NULL);
-		assertTrue(uut.exists(new ObsObject(auxiliaryFiles, testFilePrefix + testFileName1)));
-		uut.validate(new FileObsUploadObject(auxiliaryFiles, testFilePrefix + testFileName1, testFile1));
+		assertFalse(uut.exists(new ObsObject(auxiliaryFiles, testFilePrefix1 + testFileName1)));
+		uut.upload(singletonList(new FileObsUploadObject(auxiliaryFiles, testFilePrefix1 + testFileName1, testFile1)), ReportingFactory.NULL);
+		assertTrue(uut.exists(new ObsObject(auxiliaryFiles, testFilePrefix1 + testFileName1)));
+		uut.validate(new FileObsUploadObject(auxiliaryFiles, testFilePrefix1 + testFileName1, testFile1));
 	}
 
 	@Test
@@ -138,10 +139,10 @@ public class S3ObsClientIT {
 		String absolutePath = Paths.get(res.toURI()).toFile().getAbsolutePath();
 		try(InputStream in = new FileInputStream(absolutePath)) {
 			// upload
-			assertFalse(uut.exists(new ObsObject(auxiliaryFiles, testFilePrefix + testFileName5mb)));
-			uut.uploadStreams(singletonList(new StreamObsUploadObject(auxiliaryFiles, testFilePrefix + testFileName5mb, in, contentLength)), ReportingFactory.NULL);
-			assertTrue(uut.exists(new ObsObject(auxiliaryFiles, testFilePrefix + testFileName5mb)));
-			uut.validate(new StreamObsUploadObject(auxiliaryFiles, testFilePrefix + testFileName5mb, in, contentLength));
+			assertFalse(uut.exists(new ObsObject(auxiliaryFiles, testFilePrefix5mb + testFileName5mb)));
+			uut.uploadStreams(singletonList(new StreamObsUploadObject(auxiliaryFiles, testFilePrefix5mb + testFileName5mb, in, contentLength)), ReportingFactory.NULL);
+			assertTrue(uut.exists(new ObsObject(auxiliaryFiles, testFilePrefix5mb + testFileName5mb)));
+			uut.validate(new StreamObsUploadObject(auxiliaryFiles, testFilePrefix5mb + testFileName5mb, in, contentLength));
 		}
 	}
 
@@ -152,10 +153,10 @@ public class S3ObsClientIT {
 		String absolutePath = Paths.get(res.toURI()).toFile().getAbsolutePath();
 		try(InputStream in = new BufferedInputStream(new FileInputStream(absolutePath))) {
 			// upload
-			assertFalse(uut.exists(new ObsObject(auxiliaryFiles, testFilePrefix + testFileName5mb)));
-			uut.uploadStreams(singletonList(new StreamObsUploadObject(auxiliaryFiles, testFilePrefix + testFileName5mb, in, contentLength)), ReportingFactory.NULL);
-			assertTrue(uut.exists(new ObsObject(auxiliaryFiles, testFilePrefix + testFileName5mb)));
-			uut.validate(new StreamObsUploadObject(auxiliaryFiles, testFilePrefix + testFileName5mb, in, contentLength));
+			assertFalse(uut.exists(new ObsObject(auxiliaryFiles, testFilePrefix5mb + testFileName5mb)));
+			uut.uploadStreams(singletonList(new StreamObsUploadObject(auxiliaryFiles, testFilePrefix5mb + testFileName5mb, in, contentLength)), ReportingFactory.NULL);
+			assertTrue(uut.exists(new ObsObject(auxiliaryFiles, testFilePrefix5mb + testFileName5mb)));
+			uut.validate(new StreamObsUploadObject(auxiliaryFiles, testFilePrefix5mb + testFileName5mb, in, contentLength));
 		}
 	}
 
@@ -267,13 +268,13 @@ public class S3ObsClientIT {
 	@Test
 	public void deleteWithPrefixTest() throws Exception {
 		// upload
-		assertFalse(uut.exists(new ObsObject(auxiliaryFiles, testFilePrefix + testFileName1)));
-		uut.upload(singletonList(new FileObsUploadObject(auxiliaryFiles, testFilePrefix + testFileName1, testFile1)), ReportingFactory.NULL);
-		assertTrue(uut.exists(new ObsObject(auxiliaryFiles, testFilePrefix + testFileName1)));
+		assertFalse(uut.exists(new ObsObject(auxiliaryFiles, testFilePrefix1 + testFileName1)));
+		uut.upload(singletonList(new FileObsUploadObject(auxiliaryFiles, testFilePrefix1 + testFileName1, testFile1)), ReportingFactory.NULL);
+		assertTrue(uut.exists(new ObsObject(auxiliaryFiles, testFilePrefix1 + testFileName1)));
 
 		// delete
-		uut.s3Services.s3client.deleteObject(auxiliaryFilesBucketName, testFilePrefix + testFileName1);
-		assertFalse(uut.exists(new ObsObject(auxiliaryFiles, testFilePrefix + testFileName1)));
+		uut.s3Services.s3client.deleteObject(auxiliaryFilesBucketName, testFilePrefix1 + testFileName1);
+		assertFalse(uut.exists(new ObsObject(auxiliaryFiles, testFilePrefix1 + testFileName1)));
 	}
 
 	@Test
@@ -294,15 +295,15 @@ public class S3ObsClientIT {
 	@Test
 	public void downloadFileWithPrefixTest() throws Exception {
 		// upload
-		assertFalse(uut.exists(new ObsObject(auxiliaryFiles, testFilePrefix + testFileName1)));
-		uut.upload(singletonList(new FileObsUploadObject(auxiliaryFiles, testFilePrefix + testFileName1, testFile1)), ReportingFactory.NULL);
-		assertTrue(uut.exists(new ObsObject(auxiliaryFiles, testFilePrefix + testFileName1)));
+		assertFalse(uut.exists(new ObsObject(auxiliaryFiles, testFilePrefix1 + testFileName1)));
+		uut.upload(singletonList(new FileObsUploadObject(auxiliaryFiles, testFilePrefix1 + testFileName1, testFile1)), ReportingFactory.NULL);
+		assertTrue(uut.exists(new ObsObject(auxiliaryFiles, testFilePrefix1 + testFileName1)));
 
 		// single file download
         final String targetDir = Files.createTempDirectory(this.getClass().getCanonicalName() + "-").toString();
-		uut.download(singletonList(new ObsDownloadObject(auxiliaryFiles, testFilePrefix + testFileName1, targetDir)), ReportingFactory.NULL);
+		uut.download(singletonList(new ObsDownloadObject(auxiliaryFiles, testFilePrefix1 + testFileName1, targetDir)), ReportingFactory.NULL);
 		final String send1 = new String(Files.readAllBytes(testFile1.toPath()));
-		final String received1 = new String(Files.readAllBytes((new File(targetDir + "/" + testFilePrefix + testFileName1)).toPath()));
+		final String received1 = new String(Files.readAllBytes((new File(targetDir + "/" + testFilePrefix1 + testFileName1)).toPath()));
 		assertEquals(send1, received1);
 	}
 
@@ -350,30 +351,30 @@ public class S3ObsClientIT {
 	@Test
 	public void numberOfObjectsWithPrefixTest() throws Exception {
 		// upload
-		assertFalse(uut.exists(new ObsObject(auxiliaryFiles, testFilePrefix + testFileName1)));
-		assertFalse(uut.exists(new ObsObject(auxiliaryFiles, testFilePrefix + testFileName2)));
-		uut.upload(singletonList(new FileObsUploadObject(auxiliaryFiles, testFilePrefix + testFileName1, testFile1)), ReportingFactory.NULL);
-		uut.upload(singletonList(new FileObsUploadObject(auxiliaryFiles, testFilePrefix + testFileName2, testFile2)), ReportingFactory.NULL);
-		assertTrue(uut.exists(new ObsObject(auxiliaryFiles, testFilePrefix + testFileName1)));
-		assertTrue(uut.exists(new ObsObject(auxiliaryFiles, testFilePrefix + testFileName2)));
+		assertFalse(uut.exists(new ObsObject(auxiliaryFiles, testFilePrefix1 + testFileName1)));
+		assertFalse(uut.exists(new ObsObject(auxiliaryFiles, testFilePrefix1 + testFileName2)));
+		uut.upload(singletonList(new FileObsUploadObject(auxiliaryFiles, testFilePrefix1 + testFileName1, testFile1)), ReportingFactory.NULL);
+		uut.upload(singletonList(new FileObsUploadObject(auxiliaryFiles, testFilePrefix1 + testFileName2, testFile2)), ReportingFactory.NULL);
+		assertTrue(uut.exists(new ObsObject(auxiliaryFiles, testFilePrefix1 + testFileName1)));
+		assertTrue(uut.exists(new ObsObject(auxiliaryFiles, testFilePrefix1 + testFileName2)));
 
 		// count
-		final int count = uut.s3Services.getNbObjects(auxiliaryFilesBucketName, testFilePrefix);
+		final int count = uut.s3Services.getNbObjects(auxiliaryFilesBucketName, testFilePrefix1);
 		assertEquals(2, count);
 	}
 
 	@Test
 	public final void getAllAsStreamTest() throws Exception {
-		assertFalse(uut.exists(new ObsObject(auxiliaryFiles, testFilePrefix + testFileName1)));
-		assertFalse(uut.exists(new ObsObject(auxiliaryFiles, testFilePrefix + testFileName2)));
-		uut.upload(singletonList(new FileObsUploadObject(auxiliaryFiles, testFilePrefix + testFileName1, testFile1)), ReportingFactory.NULL);
-		uut.upload(singletonList(new FileObsUploadObject(auxiliaryFiles, testFilePrefix + testFileName2, testFile2)), ReportingFactory.NULL);
-		assertTrue(uut.exists(new ObsObject(auxiliaryFiles, testFilePrefix + testFileName1)));
-		assertTrue(uut.exists(new ObsObject(auxiliaryFiles, testFilePrefix + testFileName2)));
+		assertFalse(uut.exists(new ObsObject(auxiliaryFiles, testFilePrefix1 + testFileName1)));
+		assertFalse(uut.exists(new ObsObject(auxiliaryFiles, testFilePrefix1 + testFileName2)));
+		uut.upload(singletonList(new FileObsUploadObject(auxiliaryFiles, testFilePrefix1 + testFileName1, testFile1)), ReportingFactory.NULL);
+		uut.upload(singletonList(new FileObsUploadObject(auxiliaryFiles, testFilePrefix1 + testFileName2, testFile2)), ReportingFactory.NULL);
+		assertTrue(uut.exists(new ObsObject(auxiliaryFiles, testFilePrefix1 + testFileName1)));
+		assertTrue(uut.exists(new ObsObject(auxiliaryFiles, testFilePrefix1 + testFileName2)));
 
 		String retrievedTestfile1Content = null;
 		String retrievedTestfile2Content = null;		
-		final Map<String,InputStream> res = uut.getAllAsInputStream(auxiliaryFiles, testFilePrefix);
+		final Map<String,InputStream> res = uut.getAllAsInputStream(auxiliaryFiles, testFilePrefix1);
 		for (final Map.Entry<String,InputStream> entry : res.entrySet()) {
 			try (final InputStream in = entry.getValue()) {
 				final String content = IOUtils.toString(in, Charset.defaultCharset());
