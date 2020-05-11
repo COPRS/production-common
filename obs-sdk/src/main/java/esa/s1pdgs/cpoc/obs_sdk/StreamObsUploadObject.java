@@ -19,7 +19,7 @@ public class StreamObsUploadObject extends ObsUploadObject implements Closeable 
 
 	public StreamObsUploadObject(final ProductFamily family, final String key, final InputStream input, final long contentLength) {
 		super(family, key);
-		this.input = new TracingInputStream(key, input) ;
+		this.input = input;
 		this.contentLength = contentLength;
 
 		LOGGER.debug("created StreamObsUploadObject for {}, contentLength {} with inputStream markSupported {}", key, contentLength, input.markSupported());

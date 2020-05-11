@@ -4,6 +4,7 @@ import static java.lang.String.format;
 
 import java.io.BufferedInputStream;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.PrintWriter;
@@ -181,9 +182,12 @@ public class S3ObsClient extends AbstractObsClient {
 
 	/**
 	 * If chunked encoding is not allowed the whole content has to be buffered in order to read the stream twice to calculate content hash
+	 * See S1PRO-1441 (S1SYS-724)
+	 * The awsClient however is able to handle this with {@link FileInputStream} input
 	 */
 	private InputStream maybeWithBuffer(StreamObsUploadObject object) throws ObsServiceException {
-		if (getConfiguration().getDisableChunkedEncoding()) {
+		if (getConfiguration().getDisableChunkedEncoding() && !(object.getInput() instanceof FileInputStream)) {
+
 			if (object.getContentLength() > getConfiguration().getMaxInputStreamBufferSize()) {
 				throw new S3ObsServiceException(getBucketFor(object.getFamily()),
 						object.getKey(),
