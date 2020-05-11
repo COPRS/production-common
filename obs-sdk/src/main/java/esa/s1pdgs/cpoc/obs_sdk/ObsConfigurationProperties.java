@@ -76,6 +76,9 @@ public class ObsConfigurationProperties {
 	@Value("${disable-chunked-encoding:false}")
 	private boolean disableChunkedEncoding;
 
+	@Value("${max-input-stream-buffer-size-mb:1024}")
+	private int maxInputStreamBufferSizeMb;
+
 	private Map<ProductFamily, String> bucket = new HashMap<>();
 	
 	public String getBucketFor(final ProductFamily family) {
@@ -240,6 +243,10 @@ public class ObsConfigurationProperties {
 
 	public void setDisableChunkedEncoding(boolean disableChunkedEncoding) {
 		this.disableChunkedEncoding = disableChunkedEncoding;
+	}
+
+	public int getMaxInputStreamBufferSize() {
+		return maxInputStreamBufferSizeMb * 1024 * 1024;
 	}
 
 	@Override

@@ -437,8 +437,10 @@ public abstract class AbstractObsClient implements ObsClient {
 	}
 
 	public void uploadMd5Sum(final ObsObject object, final List<String> fileList) throws ObsServiceException, S3SdkClientException {
+	}
 
-		
+	protected ObsConfigurationProperties getConfiguration() {
+		return this.configuration;
 	}
 	
 }
