@@ -17,19 +17,23 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit4.SpringRunner;
 
+import java.io.BufferedInputStream;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URISyntaxException;
+import java.net.URL;
 import java.nio.charset.Charset;
 import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.Map;
 
 import static java.util.Collections.singletonList;
 import static org.junit.Assert.*;
 
 
-@Ignore
+//@Ignore
 @RunWith(SpringRunner.class)
 @TestPropertySource("classpath:obs-aws-s3.properties")
 @ContextConfiguration(classes = {ObsConfigurationProperties.class})
@@ -40,10 +44,12 @@ public class S3ObsClientIT {
 	public final static String testFilePrefix = "abc/def/";
 	public final static String testFileName1 = "testfile1.txt";
 	public final static String testFileName2 = "testfile2.txt";
+	public final static String testFileName5mb = "random-5mb.bin";
 	public final static String testUnexptectedFileName = "unexpected.txt";
 	public final static String testDirectoryName = "testdir";
 	public final static File testFile1 = getResource("/" + testFileName1);
 	public final static File testFile2 = getResource("/" + testFileName2);
+	public final static File testFile5mb = getResource("/" + testFileName5mb);
 	public final static File testDirectory = getResource("/" + testDirectoryName);
 
 	@Rule
@@ -77,6 +83,10 @@ public class S3ObsClientIT {
 
 		if (uut.exists(new ObsObject(auxiliaryFiles, testFileName2))) {
 			uut.s3Services.s3client.deleteObject(auxiliaryFilesBucketName, testFileName2);
+		}
+		
+		if (uut.exists(new ObsObject(auxiliaryFiles, testFilePrefix + testFileName5mb))) {
+			uut.s3Services.s3client.deleteObject(auxiliaryFilesBucketName, testFilePrefix + testFileName5mb);
 		}
 
 		if (uut.exists(new ObsObject(auxiliaryFiles, testFilePrefix + testFileName1))) {
@@ -122,17 +132,34 @@ public class S3ObsClientIT {
 	}
 
 	@Test
-	public void uploadWithPrefixAsStreamTest() throws IOException, SdkClientException, AbstractCodedException, ObsEmptyFileException, ObsValidationException {
-		long contentLength = testFile1.length();
-		try(InputStream in = getClass().getResourceAsStream("/" + testFileName1)) {
+	public void uploadWithPrefixAsFileInputStreamTest() throws IOException, SdkClientException, AbstractCodedException, ObsEmptyFileException, ObsValidationException, URISyntaxException {
+		long contentLength = testFile5mb.length();
+		URL res = getClass().getResource("/" + testFileName5mb);
+		String absolutePath = Paths.get(res.toURI()).toFile().getAbsolutePath();
+		try(InputStream in = new FileInputStream(absolutePath)) {
 			// upload
-			assertFalse(uut.exists(new ObsObject(auxiliaryFiles, testFilePrefix + testFileName1)));
-			uut.uploadStreams(singletonList(new StreamObsUploadObject(auxiliaryFiles, testFilePrefix + testFileName1, in, contentLength)), ReportingFactory.NULL);
-			assertTrue(uut.exists(new ObsObject(auxiliaryFiles, testFilePrefix + testFileName1)));
-			uut.validate(new StreamObsUploadObject(auxiliaryFiles, testFilePrefix + testFileName1, in, contentLength));
+			assertFalse(uut.exists(new ObsObject(auxiliaryFiles, testFilePrefix + testFileName5mb)));
+			uut.uploadStreams(singletonList(new StreamObsUploadObject(auxiliaryFiles, testFilePrefix + testFileName5mb, in, contentLength)), ReportingFactory.NULL);
+			assertTrue(uut.exists(new ObsObject(auxiliaryFiles, testFilePrefix + testFileName5mb)));
+			uut.validate(new StreamObsUploadObject(auxiliaryFiles, testFilePrefix + testFileName5mb, in, contentLength));
 		}
 	}
 
+	@Test
+	public void uploadWithPrefixAsBufferedInputStreamTest() throws IOException, SdkClientException, AbstractCodedException, ObsEmptyFileException, ObsValidationException, URISyntaxException {
+		long contentLength = testFile5mb.length();
+		URL res = getClass().getResource("/" + testFileName5mb);
+		String absolutePath = Paths.get(res.toURI()).toFile().getAbsolutePath();
+		try(InputStream in = new BufferedInputStream(new FileInputStream(absolutePath))) {
+			// upload
+			assertFalse(uut.exists(new ObsObject(auxiliaryFiles, testFilePrefix + testFileName5mb)));
+			uut.uploadStreams(singletonList(new StreamObsUploadObject(auxiliaryFiles, testFilePrefix + testFileName5mb, in, contentLength)), ReportingFactory.NULL);
+			assertTrue(uut.exists(new ObsObject(auxiliaryFiles, testFilePrefix + testFileName5mb)));
+			uut.validate(new StreamObsUploadObject(auxiliaryFiles, testFilePrefix + testFileName5mb, in, contentLength));
+		}
+	}
+
+	
 	@Test
 	public void uploadAndValidationOfCompleteDirectoryTest() throws SdkClientException, AbstractCodedException, ObsValidationException, ObsEmptyFileException {
 		// upload directory
