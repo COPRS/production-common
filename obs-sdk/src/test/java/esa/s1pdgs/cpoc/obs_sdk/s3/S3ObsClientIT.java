@@ -33,7 +33,7 @@ import static java.util.Collections.singletonList;
 import static org.junit.Assert.*;
 
 
-//@Ignore
+@Ignore
 @RunWith(SpringRunner.class)
 @TestPropertySource("classpath:obs-aws-s3.properties")
 @ContextConfiguration(classes = {ObsConfigurationProperties.class})
