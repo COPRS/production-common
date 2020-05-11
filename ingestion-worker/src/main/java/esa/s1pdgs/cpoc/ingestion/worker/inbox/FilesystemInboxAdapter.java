@@ -65,6 +65,8 @@ public final class FilesystemInboxAdapter implements InboxAdapter {
 
 	static final InputStream toInputStream(final File file) {
 		try {
+			// S1PRO-1441: this shall be a FileInputStream an MUST not be buffered as obs client and 
+			// S3 client performs check on it with instanceof
 			return new FileInputStream(file);
 		} catch (final FileNotFoundException e) {
 			throw new RuntimeException(
