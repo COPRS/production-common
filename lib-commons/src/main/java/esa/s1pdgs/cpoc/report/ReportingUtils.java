@@ -16,7 +16,8 @@ public final class ReportingUtils {
 	private static String segmentBlacklistPattern = "^S1([A-Z_]{1}).*(GP|HK|RF).*SAFE$";
 	
 	private static final Predicate<ReportingFilenameEntry> SEGMENT_FILTER = e -> {
-		return ( e.getFamily().equals(ProductFamily.L0_SEGMENT) && !e.getProductName().matches(segmentBlacklistPattern));
+		return ( e.getFamily().equals(ProductFamily.L0_SEGMENT) && !toFlatFilename(e.getProductName())
+				.matches(segmentBlacklistPattern));
 	};
 
 	// This is dirty but the easiest way without modifying 
