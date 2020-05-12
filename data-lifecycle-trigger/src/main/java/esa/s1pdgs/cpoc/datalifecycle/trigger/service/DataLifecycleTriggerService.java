@@ -51,7 +51,8 @@ public class DataLifecycleTriggerService {
 				.get(ProductCategory.INGESTION_EVENT);
 		MqiConsumer<IngestionEvent> ingestionEventConsumer = new MqiConsumer<IngestionEvent>(mqiClient,
 				ProductCategory.INGESTION_EVENT,
-				new DataLifecycleTriggerListener<>(mqiClient, errorRepoAppender, processConfig),
+				new DataLifecycleTriggerListener<>(mqiClient, errorRepoAppender, processConfig,
+						configurationProperties.getRetentionPolicies()),
 				ingestionEventCategoryConfig.getFixedDelayMs(), ingestionEventCategoryConfig.getInitDelayPolMs(),
 				appStatus);
 
@@ -59,7 +60,8 @@ public class DataLifecycleTriggerService {
 				.get(ProductCategory.PRODUCTION_EVENT);
 		MqiConsumer<ProductionEvent> productionEventConsumer = new MqiConsumer<ProductionEvent>(mqiClient,
 				ProductCategory.PRODUCTION_EVENT,
-				new DataLifecycleTriggerListener<>(mqiClient, errorRepoAppender, processConfig),
+				new DataLifecycleTriggerListener<>(mqiClient, errorRepoAppender, processConfig,
+						configurationProperties.getRetentionPolicies()),
 				productionEventCategoryConfig.getFixedDelayMs(), productionEventCategoryConfig.getInitDelayPolMs(),
 				appStatus);
 
@@ -67,7 +69,8 @@ public class DataLifecycleTriggerService {
 				.get(ProductCategory.COMPRESSED_PRODUCTS);
 		MqiConsumer<CompressionEvent> compressionEventConsumer = new MqiConsumer<CompressionEvent>(mqiClient,
 				ProductCategory.COMPRESSED_PRODUCTS,
-				new DataLifecycleTriggerListener<>(mqiClient, errorRepoAppender, processConfig),
+				new DataLifecycleTriggerListener<>(mqiClient, errorRepoAppender, processConfig,
+						configurationProperties.getRetentionPolicies()),
 				compressionEventCategoryConfig.getFixedDelayMs(), compressionEventCategoryConfig.getInitDelayPolMs(),
 				appStatus);
 
