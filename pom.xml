@@ -317,6 +317,7 @@
 		<module>prip-frontend</module>
 		<module>prip-client</module>
 		<module>data-lifecycle-trigger</module>
+		<module>data-lifecycle-worker</module>
 		<module>validation</module>
 		<module>compression-trigger</module>
 		<module>compression-worker</module>
