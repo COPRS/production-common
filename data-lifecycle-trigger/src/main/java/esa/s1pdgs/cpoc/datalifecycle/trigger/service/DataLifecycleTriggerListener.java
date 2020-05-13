@@ -77,12 +77,15 @@ public class DataLifecycleTriggerListener<E extends AbstractMessage> implements 
 
 			if (r.getProductFamily().equals(productFamily.name()) && Pattern.matches(r.getFilePattern(), fileName)) {
 				if (r.getRetentionTimeDays() > 0) {
+					LOG.info("retention time is {} days for file: {}", r.getRetentionTimeDays(), fileName);
 					return Date.from(creationDate.toInstant().plus(Period.ofDays(r.getRetentionTimeDays())));
 				} else {
+					LOG.info("retention time is unlimited for file: {}", fileName);
 					return null;
 				}
 			}
 		}
+		LOG.warn("no retention time found for file: {}", fileName);
 		return null;
 	}
 
