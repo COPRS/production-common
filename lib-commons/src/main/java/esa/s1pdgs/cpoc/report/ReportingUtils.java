@@ -11,9 +11,8 @@ import esa.s1pdgs.cpoc.report.message.input.FilenameReportingInput;
 import esa.s1pdgs.cpoc.report.message.output.FilenameReportingOutput;
 
 public final class ReportingUtils {
-	
-	//  segment-blacklist-pattern ^S1([A-Z_]{1}).*(GP|HK|RF).*SAFE$: 
-	private static String segmentBlacklistPattern = "^S1([A-Z_]{1}).*(GP|HK|RF).*SAFE$";
+	// default pattern to use if no other is configured
+	private static String segmentBlacklistPattern = "^S1([A-Z_]{1}).*(GP|HK|RF).*SAFE(.zip)?$";
 	
 	private static final Predicate<ReportingFilenameEntry> SEGMENT_FILTER = e -> {
 		return ( e.getFamily().equals(ProductFamily.L0_SEGMENT) && !toFlatFilename(e.getProductName())
@@ -54,7 +53,7 @@ public final class ReportingUtils {
 		return uniqueFlatProducts(products, not(SEGMENT_FILTER));				
 	}
 		
-	private static <E> Predicate<E> not(final Predicate<E> predicate) {
+	private static final <E> Predicate<E> not(final Predicate<E> predicate) {
 		return predicate.negate();
 	}
 	
@@ -70,7 +69,7 @@ public final class ReportingUtils {
 	
 
 	// S1PRO-1395: makes sure that only the actual filename is dumped	
-	public static final String toFlatFilename(final String filename) {
+	private static final String toFlatFilename(final String filename) {
 		return new File(filename).getName(); 
 	}
 }
