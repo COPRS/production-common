@@ -20,6 +20,7 @@ import esa.s1pdgs.cpoc.mqi.client.MqiClient;
 import esa.s1pdgs.cpoc.mqi.client.MqiConsumer;
 import esa.s1pdgs.cpoc.mqi.model.queue.CompressionEvent;
 import esa.s1pdgs.cpoc.mqi.model.queue.IngestionEvent;
+import esa.s1pdgs.cpoc.mqi.model.queue.LtaDownloadEvent;
 import esa.s1pdgs.cpoc.mqi.model.queue.ProductionEvent;
 
 @Service
@@ -74,10 +75,20 @@ public class DataLifecycleTriggerService {
 				compressionEventCategoryConfig.getFixedDelayMs(), compressionEventCategoryConfig.getInitDelayPolMs(),
 				appStatus);
 
-		final ExecutorService executorService = Executors.newFixedThreadPool(3);
+		CategoryConfig ltaDownloadEventCategoryConfig = configurationProperties.getProductCategories()
+				.get(ProductCategory.LTA_DOWNLOAD_EVENT);
+		MqiConsumer<LtaDownloadEvent> ltaDownloadEventConsumer = new MqiConsumer<LtaDownloadEvent>(mqiClient,
+				ProductCategory.LTA_DOWNLOAD_EVENT,
+				new DataLifecycleTriggerListener<>(mqiClient, errorRepoAppender, processConfig,
+						configurationProperties.getRetentionPolicies()),
+				ltaDownloadEventCategoryConfig.getFixedDelayMs(), ltaDownloadEventCategoryConfig.getInitDelayPolMs(),
+				appStatus);
+
+		final ExecutorService executorService = Executors.newFixedThreadPool(4);
 		executorService.execute(ingestionEventConsumer);
 		executorService.execute(productionEventConsumer);
 		executorService.execute(compressionEventConsumer);
+		executorService.execute(ltaDownloadEventConsumer);
 	}
 
 }
