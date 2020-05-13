@@ -1,64 +1,47 @@
 package esa.s1pdgs.cpoc.production.trigger.report;
 
-import java.util.Collections;
-import java.util.List;
-
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
+import esa.s1pdgs.cpoc.common.ProductFamily;
 import esa.s1pdgs.cpoc.production.trigger.service.L0SegmentConsumer;
-import esa.s1pdgs.cpoc.report.message.input.FilenameReportingInput;
+import esa.s1pdgs.cpoc.report.ReportingFilenameEntries;
+import esa.s1pdgs.cpoc.report.ReportingFilenameEntry;
+import esa.s1pdgs.cpoc.report.ReportingInput;
+import esa.s1pdgs.cpoc.report.message.AbstractFilenameReportingProduct;
 
-public class DispatchReportInput extends FilenameReportingInput {
-	
+public final class DispatchReportInput extends AbstractFilenameReportingProduct implements ReportingInput  {	
 	@JsonProperty("job_id_long")
 	private long jobId;
 	
 	@JsonProperty("input_type_string")
 	private String inputType;
 	
-	public DispatchReportInput(
-			final List<String> filenames, 
-			final List<String> segments, 
-			final long jobId, 
-			final String inputType
-	) {
-		super(filenames, segments);
+	public DispatchReportInput(final ReportingFilenameEntries entries, final long jobId, final String inputType) {
+		super(entries);
 		this.jobId = jobId;
 		this.inputType = inputType;
 	}
 	
-	public static final DispatchReportInput newInstance(final long jobId, final String filename, final String inputType) {
-        if (inputType.equals(L0SegmentConsumer.TYPE)) {
-        	return new DispatchReportInput(
-        			Collections.emptyList(),
-        			Collections.singletonList(filename),
-        			jobId, 
-        			inputType
-        	);
-        }
-        return new DispatchReportInput(    		
-    			Collections.singletonList(filename),
-    			Collections.emptyList(),
-    			jobId, 
+	@JsonIgnore
+	public static final DispatchReportInput newInstance(final long jobId, final String filename, final String inputType) {        
+		final ProductFamily family = inputType.equals(L0SegmentConsumer.TYPE) ?
+				ProductFamily.L0_SEGMENT :
+			    ProductFamily.BLANK; // we only care about segments here, everything else will be reported as 'filename'
+		
+		return new DispatchReportInput(
+				new ReportingFilenameEntries(
+						new ReportingFilenameEntry(family, filename)), 
+				jobId, 
     			inputType
-    	); 
+		);
 	}
 	
-
-
 	public String getInputType() {
 		return inputType;
-	}
-
-	public void setInputType(final String inputType) {
-		this.inputType = inputType;
 	}
 
 	public long getJobId() {
 		return jobId;
 	}
-
-	public void setJobId(final long jobId) {
-		this.jobId = jobId;
-	}	
 }

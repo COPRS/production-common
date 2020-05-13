@@ -1,6 +1,10 @@
 package esa.s1pdgs.cpoc.obs_sdk.s3;
 
+import static java.lang.String.format;
+
+import java.io.BufferedInputStream;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.PrintWriter;
@@ -20,8 +24,6 @@ import com.amazonaws.Protocol;
 import com.amazonaws.auth.AWSStaticCredentialsProvider;
 import com.amazonaws.auth.BasicAWSCredentials;
 import com.amazonaws.client.builder.AwsClientBuilder.EndpointConfiguration;
-import com.amazonaws.retry.PredefinedBackoffStrategies;
-import com.amazonaws.retry.RetryPolicy;
 import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.AmazonS3ClientBuilder;
 import com.amazonaws.services.s3.model.CopyObjectRequest;
@@ -44,7 +46,6 @@ import esa.s1pdgs.cpoc.obs_sdk.SdkClientException;
 import esa.s1pdgs.cpoc.obs_sdk.StreamObsUploadObject;
 import esa.s1pdgs.cpoc.obs_sdk.ValidArgumentAssertion;
 import esa.s1pdgs.cpoc.obs_sdk.report.ReportingProductFactory;
-import esa.s1pdgs.cpoc.obs_sdk.s3.retry.SDKCustomDefaultRetryCondition;
 
 /**
  * <p>
@@ -54,6 +55,8 @@ import esa.s1pdgs.cpoc.obs_sdk.s3.retry.SDKCustomDefaultRetryCondition;
  * @author Viveris Technologies
  */
 public class S3ObsClient extends AbstractObsClient {
+
+	public static final int ADDITIONAL_BUFFER = 1024;
 
 	public static final class Factory implements ObsClient.Factory {
 		
@@ -81,11 +84,11 @@ public class S3ObsClient extends AbstractObsClient {
 				clientConfig.setProxyPort(port);
 			}
 
-			final RetryPolicy retryPolicy = new RetryPolicy(new SDKCustomDefaultRetryCondition(config.getMaxRetries()),
-					new PredefinedBackoffStrategies.SDKDefaultBackoffStrategy(config.getBackoffBaseDelay(),
-							config.getBackoffThrottledBaseDelay(), config.getBackoffMaxDelay()),
-					config.getMaxRetries(), true);
-			clientConfig.setRetryPolicy(retryPolicy);
+//			final RetryPolicy retryPolicy = new RetryPolicy(new SDKCustomDefaultRetryCondition(config.getMaxRetries()),
+//					new PredefinedBackoffStrategies.SDKDefaultBackoffStrategy(config.getBackoffBaseDelay(),
+//							config.getBackoffThrottledBaseDelay(), config.getBackoffMaxDelay()),
+//					config.getMaxRetries(), true);
+//			clientConfig.setRetryPolicy(retryPolicy);
 			
 			final AmazonS3ClientBuilder clientBuilder = AmazonS3ClientBuilder.standard().withClientConfiguration(clientConfig)
 					.withEndpointConfiguration(
@@ -170,8 +173,30 @@ public class S3ObsClient extends AbstractObsClient {
 	 */
 	@Override
 	public String uploadObject(final StreamObsUploadObject object) throws ObsServiceException, S3SdkClientException {
-		return s3Services.uploadStream(getBucketFor(object.getFamily()), object.getKey(), object.getInput(), object.getContentLength());
+		return s3Services.uploadStream(getBucketFor(object.getFamily()), object.getKey(), maybeWithBuffer(object), object.getContentLength());
 		//uploadMd5Sum(object, Arrays.asList(md5));
+	}
+
+	/**
+	 * If chunked encoding is not allowed the whole content has to be buffered in order to read the stream twice to calculate content hash
+	 * See S1PRO-1441 (S1SYS-724)
+	 * The awsClient however is able to handle this with {@link FileInputStream} input
+	 */
+	private InputStream maybeWithBuffer(final StreamObsUploadObject object) throws ObsServiceException {
+		if (getConfiguration().getDisableChunkedEncoding() && !(object.getInput() instanceof FileInputStream)) {
+
+			if (object.getContentLength() > getConfiguration().getMaxInputStreamBufferSize()) {
+				throw new S3ObsServiceException(getBucketFor(object.getFamily()),
+						object.getKey(),
+						format("Actual content length %s is greater than max allowed input stream buffer size %s",
+								object.getContentLength(),
+								getConfiguration().getMaxInputStreamBufferSize()));
+			}
+
+			return new BufferedInputStream(object.getInput(), (int) object.getContentLength() + ADDITIONAL_BUFFER);
+		}
+
+		return object.getInput();
 	}
 
 	@Override
@@ -224,7 +249,7 @@ public class S3ObsClient extends AbstractObsClient {
 		final long methodStartTime = System.currentTimeMillis();
 		final List<ObsObject> objectsOfTimeFrame = new ArrayList<>();
 		final String bucket = getBucketFor(family);
-		LOGGER.debug(String.format("listing objects in OBS from bucket %s within last modification time %s to %s",
+		LOGGER.debug(format("listing objects in OBS from bucket %s within last modification time %s to %s",
 				bucket, timeFrameBegin, timeFrameEnd));
 		ObjectListing objListing = s3Services.listObjectsFromBucket(bucket);
 		boolean truncated = false;
@@ -261,7 +286,7 @@ public class S3ObsClient extends AbstractObsClient {
 		} while (truncated);
 
 		final float methodDuration = (System.currentTimeMillis() - methodStartTime) / 1000f;
-		LOGGER.debug(String.format("Time for OBS listing objects from bucket %s within time frame: %.2fs", bucket,
+		LOGGER.debug(format("Time for OBS listing objects from bucket %s within time frame: %.2fs", bucket,
 				methodDuration));
 
 		return objectsOfTimeFrame;
@@ -299,7 +324,7 @@ public class S3ObsClient extends AbstractObsClient {
 			 * a directory. We are not supporting this and thus operations fails
 			 */
 			if (s3Services.getNbObjects(bucketName, object.getKey()) != 1) {
-				throw new IllegalArgumentException(String.format(
+				throw new IllegalArgumentException(format(
 						"Unable to determinate size of object '%s' (family:%s) as more than one result is returned (is a directory?)",
 						object.getKey(), object.getFamily()));
 			}
@@ -322,7 +347,7 @@ public class S3ObsClient extends AbstractObsClient {
 			 * a directory. We are not supporting this and thus operations fails
 			 */
 			if (s3Services.getNbObjects(bucketName, object.getKey()) != 1) {
-				throw new IllegalArgumentException(String.format(
+				throw new IllegalArgumentException(format(
 						"Unable to determinate checksum of object '%s' (family:%s) (is a directory?)",
 						object.getKey(), object.getFamily()));
 			}

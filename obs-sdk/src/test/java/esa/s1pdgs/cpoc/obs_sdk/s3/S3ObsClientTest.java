@@ -17,6 +17,7 @@ import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.time.Instant;
@@ -111,6 +112,8 @@ public class S3ObsClientTest {
         		.getBucketFor(eq(ProductFamily.L0_SEGMENT));
         doReturn("l0-blanks").when(configuration)
         		.getBucketFor(eq(ProductFamily.L0_BLANK));
+        doReturn(100).when(configuration).getMaxInputStreamBufferSize();
+        doReturn(true).when(configuration).getDisableChunkedEncoding();
 
         // Build client
         client = new S3ObsClient(configuration, service, new ReportingProductFactory());
@@ -208,6 +211,26 @@ public class S3ObsClientTest {
     public void testUploadStream() throws IOException, ObsServiceException, S3SdkClientException {
     	try(InputStream in = getClass().getResourceAsStream("/testfile1.txt")) {
 			client.uploadObject(new StreamObsUploadObject(ProductFamily.L0_ACN, "key-exist", in, 100));
+		}
+
+		verify(service, times(1))
+				.uploadStream(eq("l0-acns"), eq("key-exist"), any(InputStream.class), anyLong());
+	}
+
+	@Test
+	public void testUploadStreamFileTooBigToBuffer() throws IOException, ObsServiceException, S3SdkClientException {
+    	thrown.expect(S3ObsServiceException.class);
+    	thrown.expectMessage("Actual content length 110 is greater than max allowed input stream buffer size 100");
+
+		try(InputStream in = getClass().getResourceAsStream("/testfile2.txt")) {
+			client.uploadObject(new StreamObsUploadObject(ProductFamily.L0_ACN, "key-exist", in, 110));
+		}
+	}
+
+	@Test
+	public void testUploadStreamFileNoBufferForFileInputStream() throws IOException, ObsServiceException, S3SdkClientException {
+		try(FileInputStream in = new FileInputStream(getClass().getResource("/testfile2.txt").getFile())) {
+			client.uploadObject(new StreamObsUploadObject(ProductFamily.L0_ACN, "key-exist", in, 110));
 		}
 
 		verify(service, times(1))

@@ -2,7 +2,6 @@ package esa.s1pdgs.cpoc.ingestion.trigger.inbox;
 
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.Date;
 import java.util.HashSet;
 import java.util.Optional;
 import java.util.Set;
@@ -21,6 +20,7 @@ import esa.s1pdgs.cpoc.ingestion.trigger.report.IngestionTriggerReportingOutput;
 import esa.s1pdgs.cpoc.ingestion.trigger.service.IngestionTriggerServiceTransactional;
 import esa.s1pdgs.cpoc.mqi.model.queue.IngestionJob;
 import esa.s1pdgs.cpoc.report.Reporting;
+import esa.s1pdgs.cpoc.report.ReportingInput;
 import esa.s1pdgs.cpoc.report.ReportingMessage;
 import esa.s1pdgs.cpoc.report.ReportingUtils;
 
@@ -106,11 +106,13 @@ public final class Inbox {
 	private final Optional<InboxEntry> handleEntry(final InboxEntry entry) {				
 		final Reporting reporting = ReportingUtils.newReportingBuilder()
 				.newReporting("IngestionTrigger");
-			
-		reporting.begin(
-				new IngestionTriggerReportingInput(entry.getName(), new Date(), entry.getLastModified()),
-				new ReportingMessage("New file detected %s", entry.getName())
-		);
+		
+		final ReportingInput input = IngestionTriggerReportingInput.newInstance(
+				entry.getName(), 
+				family, 
+				entry.getLastModified()
+		);			
+		reporting.begin(input,new ReportingMessage("New file detected %s", entry.getName()));
 		
 		if (!filter.accept(entry)) {
 			reporting.end(new ReportingMessage("File %s is ignored by filter.", entry.getName()));						

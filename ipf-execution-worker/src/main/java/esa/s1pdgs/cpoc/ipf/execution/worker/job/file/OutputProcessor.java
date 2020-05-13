@@ -41,6 +41,8 @@ import esa.s1pdgs.cpoc.obs_sdk.ObsClient;
 import esa.s1pdgs.cpoc.obs_sdk.ObsEmptyFileException;
 import esa.s1pdgs.cpoc.report.Reporting;
 import esa.s1pdgs.cpoc.report.ReportingFactory;
+import esa.s1pdgs.cpoc.report.ReportingFilenameEntries;
+import esa.s1pdgs.cpoc.report.ReportingFilenameEntry;
 import esa.s1pdgs.cpoc.report.ReportingMessage;
 import esa.s1pdgs.cpoc.report.ReportingOutput;
 import esa.s1pdgs.cpoc.report.ReportingUtils;
@@ -599,8 +601,6 @@ public class OutputProcessor {
 	 * @throws ObsEmptyFileException 
 	 */
 	public ReportingOutput processOutput(final ReportingFactory reportingFactory, final UUID uuid) throws AbstractCodedException, ObsEmptyFileException {
-		final List<String> filenames = new ArrayList<>();
-		final List<String> segments = new ArrayList<>();
 		// Extract files
 		final List<String> lines = extractFiles();
 
@@ -615,20 +615,21 @@ public class OutputProcessor {
 			processProducts(reportingFactory, uploadBatch, outputToPublish, uuid);
 			// Publish reports
 			processReports(reportToPublish, uuid);
-			for (final FileObsUploadObject obj : uploadBatch) {
-				if (obj.getFamily() == ProductFamily.L0_SEGMENT) {
-					segments.add(obj.getKey());
-				}
-				else {
-					filenames.add(obj.getKey());
-				}
-			}
+			return toReportingOutput(outputToPublish);
 		} catch (final AbstractCodedException | ObsEmptyFileException e) {
 			throw e;
 		}
-		return new FilenameReportingOutput(filenames, segments);
 	}
 
+	private final ReportingOutput toReportingOutput(final List<ObsQueueMessage> outputToPublish) {		
+		final List<ReportingFilenameEntry> reportingEntries = outputToPublish.stream()
+				.map(m -> new ReportingFilenameEntry(m.getFamily(), m.getProductName()))
+				.collect(Collectors.toList());
+		
+		return new FilenameReportingOutput(new ReportingFilenameEntries(reportingEntries));
+	}
+	
+	
 	private long size(final File file) throws InternalErrorException {
 		try {
 			final Path folder = file.toPath();

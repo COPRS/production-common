@@ -57,6 +57,16 @@ public class TestRegex {
 		}
 		System.out.println(matcher.group(7));
 	}
+	
+	@Test
+	public void testDefaultRegexFor_RF_HK_GP_Products() {
+		final String regex = "^S1([A-Z_]{1}).*(GP|HK|RF).*SAFE(.zip)?$";
+		
+		assertTrue("S1A_RF_RAW__0SDH_20200120T123147_20200120T123148_030884_038B5A_8A67.SAFE.zip".matches(regex));
+		assertTrue("S1A_RF_RAW__0SDH_20200120T123147_20200120T123148_030884_038B5A_8A67.SAFE".matches(regex));
+		assertFalse("S1A_IW_RAW__0SDH_20200120T123147_20200120T123148_030884_038B5A_8A67.SAFE".matches(regex));
+
+	}
 
 }
 
