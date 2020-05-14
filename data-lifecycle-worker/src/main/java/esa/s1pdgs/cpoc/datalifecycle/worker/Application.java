@@ -12,8 +12,6 @@ public class Application {
 
     /**
      * Main application
-     *
-     * @param args
      */
     public static void main(final String[] args) {
         SpringApplication.run(Application.class, args);
