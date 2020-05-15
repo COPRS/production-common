@@ -38,7 +38,7 @@ public enum ProductCategory {
     CATALOG_JOBS(CatalogJob.class),
     PRODUCTION_EVENT(ProductionEvent.class),
     PRIP_JOBS(PripPublishingJob.class),
-    EVICTION_MANAGMENT_JOBS(EvictionManagementJob.class),
+    EVICTION_MANAGEMENT_JOBS(EvictionManagementJob.class),
     LTA_DOWNLOAD_EVENT(LtaDownloadEvent.class);
 	
     /**
