@@ -48,7 +48,7 @@ public class DataLifecycleTriggerListener<E extends AbstractMessage> implements 
 		final GenericPublicationMessageDto<EvictionManagementJob> outputMessage = new GenericPublicationMessageDto<EvictionManagementJob>(
 				inputMessage.getId(), inputEvent.getProductFamily(), evictionManagementJob);
 
-		mqiClient.publish(outputMessage, ProductCategory.EVICTION_MANAGMENT_JOBS);
+		mqiClient.publish(outputMessage, ProductCategory.EVICTION_MANAGEMENT_JOBS);
 
 	}
 
