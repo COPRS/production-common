@@ -3,6 +3,7 @@ package esa.s1pdgs.cpoc.datalifecycle.trigger.service;
 import java.time.Period;
 import java.util.Date;
 import java.util.List;
+import java.util.UUID;
 import java.util.regex.Pattern;
 
 import org.apache.logging.log4j.LogManager;
@@ -10,6 +11,7 @@ import org.apache.logging.log4j.Logger;
 
 import esa.s1pdgs.cpoc.common.ProductCategory;
 import esa.s1pdgs.cpoc.common.ProductFamily;
+import esa.s1pdgs.cpoc.common.utils.LogUtils;
 import esa.s1pdgs.cpoc.datalifecycle.trigger.config.DataLifecycleTriggerConfigurationProperties.RetentionPolicy;
 import esa.s1pdgs.cpoc.datalifecycle.trigger.config.ProcessConfiguration;
 import esa.s1pdgs.cpoc.errorrepo.ErrorRepoAppender;
@@ -20,6 +22,9 @@ import esa.s1pdgs.cpoc.mqi.model.queue.AbstractMessage;
 import esa.s1pdgs.cpoc.mqi.model.queue.EvictionManagementJob;
 import esa.s1pdgs.cpoc.mqi.model.rest.GenericMessageDto;
 import esa.s1pdgs.cpoc.mqi.model.rest.GenericPublicationMessageDto;
+import esa.s1pdgs.cpoc.report.Reporting;
+import esa.s1pdgs.cpoc.report.ReportingMessage;
+import esa.s1pdgs.cpoc.report.ReportingUtils;
 
 public class DataLifecycleTriggerListener<E extends AbstractMessage> implements MqiListener<E> {
 
@@ -43,16 +48,34 @@ public class DataLifecycleTriggerListener<E extends AbstractMessage> implements 
 	public void onMessage(GenericMessageDto<E> inputMessage) throws Exception {
 
 		final E inputEvent = inputMessage.getBody();
-		final EvictionManagementJob evictionManagementJob = toEvictionManagementJob(inputEvent, retentionPolicies);
 
-		final GenericPublicationMessageDto<EvictionManagementJob> outputMessage = new GenericPublicationMessageDto<EvictionManagementJob>(
-				inputMessage.getId(), inputEvent.getProductFamily(), evictionManagementJob);
+		final Reporting reporting = ReportingUtils.newReportingBuilder().predecessor(inputEvent.getUid())
+				.newReporting("DataLifecycleTrigger");
 
-		mqiClient.publish(outputMessage, ProductCategory.EVICTION_MANAGEMENT_JOBS);
+		reporting.begin(
+				ReportingUtils.newFilenameReportingInputFor(inputEvent.getProductFamily(),
+						inputEvent.getKeyObjectStorage()),
+				new ReportingMessage("Handling event for %s", inputEvent.getKeyObjectStorage()));
+
+		try {
+			final EvictionManagementJob evictionManagementJob = toEvictionManagementJob(inputEvent, retentionPolicies,
+					reporting.getUid());
+
+			final GenericPublicationMessageDto<EvictionManagementJob> outputMessage = new GenericPublicationMessageDto<EvictionManagementJob>(
+					inputMessage.getId(), inputEvent.getProductFamily(), evictionManagementJob);
+
+			mqiClient.publish(outputMessage, ProductCategory.EVICTION_MANAGEMENT_JOBS);
+			reporting.end(new ReportingMessage("End handling event for %s", inputEvent.getKeyObjectStorage()));
+		} catch (Exception e) {
+			reporting.error(new ReportingMessage("Error on handling event for %s: %s", inputEvent.getKeyObjectStorage(),
+					LogUtils.toString(e)));
+			throw e;
+		}
 
 	}
 
-	EvictionManagementJob toEvictionManagementJob(final E inputEvent, final List<RetentionPolicy> retentionPolicies) {
+	EvictionManagementJob toEvictionManagementJob(final E inputEvent, final List<RetentionPolicy> retentionPolicies,
+			final UUID reportingUid) {
 		final EvictionManagementJob evictionManagementJob = new EvictionManagementJob();
 
 		final Date evictionDate = calculateEvictionDate(retentionPolicies, inputEvent.getCreationDate(),
@@ -60,6 +83,7 @@ public class DataLifecycleTriggerListener<E extends AbstractMessage> implements 
 		evictionManagementJob.setProductFamily(inputEvent.getProductFamily());
 		evictionManagementJob.setKeyObjectStorage(inputEvent.getKeyObjectStorage());
 		evictionManagementJob.setEvictionDate(evictionDate);
+		evictionManagementJob.setUid(reportingUid);
 		if (evictionDate == null) {
 			evictionManagementJob.setUnlimited(true);
 		} else {
