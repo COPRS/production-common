@@ -6,11 +6,15 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.URL;
+import java.time.Instant;
+import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -20,13 +24,16 @@ import com.amazonaws.AmazonServiceException;
 import com.amazonaws.HttpMethod;
 import com.amazonaws.event.ProgressEvent;
 import com.amazonaws.services.s3.AmazonS3;
+import com.amazonaws.services.s3.model.BucketLifecycleConfiguration;
 import com.amazonaws.services.s3.model.CopyObjectRequest;
 import com.amazonaws.services.s3.model.GeneratePresignedUrlRequest;
+import com.amazonaws.services.s3.model.GetBucketLifecycleConfigurationRequest;
 import com.amazonaws.services.s3.model.GetObjectRequest;
 import com.amazonaws.services.s3.model.ObjectListing;
 import com.amazonaws.services.s3.model.ObjectMetadata;
 import com.amazonaws.services.s3.model.S3Object;
 import com.amazonaws.services.s3.model.S3ObjectSummary;
+import com.amazonaws.services.s3.model.SetBucketLifecycleConfigurationRequest;
 import com.amazonaws.services.s3.transfer.TransferManager;
 import com.amazonaws.services.s3.transfer.Upload;
 import com.amazonaws.services.s3.transfer.model.UploadResult;
@@ -552,6 +559,35 @@ public class S3ObsServices {
 			}
 			return md5 + "  " + keyName;
 		}
+	}
+
+	public void setExpirationTime(final String bucketName, final String prefix, final Instant expirationDate) {
+		BucketLifecycleConfiguration lifecycleConfiguration = s3client.getBucketLifecycleConfiguration(new GetBucketLifecycleConfigurationRequest(bucketName));
+
+		if (lifecycleConfiguration == null) {
+			lifecycleConfiguration = new BucketLifecycleConfiguration();
+		}
+
+		if (lifecycleConfiguration.getRules() == null) {
+			lifecycleConfiguration.withRules(new ArrayList<>());
+		}
+
+		final Optional<BucketLifecycleConfiguration.Rule> optionalRule = lifecycleConfiguration.getRules().stream().filter(r -> r.getId().equals(prefix)).findAny();
+
+		final BucketLifecycleConfiguration.Rule rule;
+		if (!optionalRule.isPresent()) {
+			rule = new BucketLifecycleConfiguration.Rule();
+			lifecycleConfiguration.getRules().add(rule);
+		} else {
+			rule = optionalRule.get();
+		}
+
+		rule.withId(prefix)
+				.withPrefix(prefix) //filter does not work
+				.withExpirationDate(new Date(expirationDate.truncatedTo(ChronoUnit.DAYS).toEpochMilli()))
+				.withStatus(BucketLifecycleConfiguration.ENABLED);
+
+		s3client.setBucketLifecycleConfiguration(new SetBucketLifecycleConfigurationRequest(bucketName, lifecycleConfiguration));
 	}
 
 	public void createBucket(final String bucketName)
