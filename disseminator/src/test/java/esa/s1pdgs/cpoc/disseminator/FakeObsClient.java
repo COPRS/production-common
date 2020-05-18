@@ -3,6 +3,7 @@ package esa.s1pdgs.cpoc.disseminator;
 import java.io.File;
 import java.io.InputStream;
 import java.net.URL;
+import java.time.Instant;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
@@ -83,7 +84,11 @@ public abstract class FakeObsClient implements ObsClient {
 	public String getChecksum(final ObsObject object) throws ObsException {
 		return null;
 	}
-	
+
+	@Override
+	public void setExpirationTime(ObsObject object, Instant expirationTime) throws ObsServiceException {
+	}
+
 	@Override
 	public URL createTemporaryDownloadUrl(final ObsObject object, final long expirationTimeInSeconds)
 			throws ObsException, ObsServiceException {
