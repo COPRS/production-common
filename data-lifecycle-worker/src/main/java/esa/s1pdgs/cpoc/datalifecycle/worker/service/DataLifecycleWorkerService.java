@@ -48,11 +48,11 @@ public class DataLifecycleWorkerService {
     public void initService() {
 
         DataLifecycleWorkerConfigurationProperties.CategoryConfig evictionEventCategoryConfig = configurationProperties.getProductCategories()
-                .get(ProductCategory.EVICTION_MANAGMENT_JOBS);
+                .get(ProductCategory.EVICTION_MANAGEMENT_JOBS);
 
         final MqiConsumer<EvictionManagementJob> evictionEventConsumer = new MqiConsumer<>(
                 mqiClient,
-                ProductCategory.EVICTION_MANAGMENT_JOBS,
+                ProductCategory.EVICTION_MANAGEMENT_JOBS,
                 new DataLifecycleWorkerListener(errorRepoAppender, processConfiguration, obsClient),
                 Collections.emptyList(),
                 evictionEventCategoryConfig.getFixedDelayMs(),

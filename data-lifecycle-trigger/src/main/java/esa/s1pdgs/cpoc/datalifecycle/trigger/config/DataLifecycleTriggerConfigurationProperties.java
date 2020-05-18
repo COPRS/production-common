@@ -100,7 +100,7 @@ public class DataLifecycleTriggerConfigurationProperties {
 	
 	@Override
 	public String toString() {
-		return String.format("DataLifecycleTriggerConfigurationProperties [productCategories=%, retentionPolicies=%s]", productCategories, retentionPolicies);
+		return String.format("DataLifecycleTriggerConfigurationProperties [productCategories=%s, retentionPolicies=%s]", productCategories, retentionPolicies);
 	}
 
 }
