@@ -4,6 +4,7 @@ import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.UUID;
 
 import org.junit.Assert;
 import org.junit.Before;
@@ -73,7 +74,7 @@ public class DataLifecycleTriggerListenerTest {
 		IngestionEvent inputEvent = toInputEvent(creationDate, obsKey, productFamily);
 		
 		DataLifecycleTriggerListener<IngestionEvent> dtl = new DataLifecycleTriggerListener<>(null, null, null, null);
-		EvictionManagementJob evictionManagementJob = dtl.toEvictionManagementJob(inputEvent, retentionPolicies);
+		EvictionManagementJob evictionManagementJob = dtl.toEvictionManagementJob(inputEvent, retentionPolicies, UUID.randomUUID());
 		Assert.assertEquals(productFamily, evictionManagementJob.getProductFamily());
 		Assert.assertEquals(Date.from(Instant.parse("2000-01-05T00:00:00.00z")), evictionManagementJob.getEvictionDate());
 		Assert.assertEquals(false, evictionManagementJob.isUnlimited());
@@ -90,7 +91,7 @@ public class DataLifecycleTriggerListenerTest {
 		IngestionEvent inputEvent = toInputEvent(creationDate, obsKey, productFamily);
 		
 		DataLifecycleTriggerListener<IngestionEvent> dtl = new DataLifecycleTriggerListener<>(null, null, null, null);
-		EvictionManagementJob evictionManagementJob = dtl.toEvictionManagementJob(inputEvent, retentionPolicies);
+		EvictionManagementJob evictionManagementJob = dtl.toEvictionManagementJob(inputEvent, retentionPolicies, UUID.randomUUID());
 		Assert.assertEquals(productFamily, evictionManagementJob.getProductFamily());
 		Assert.assertEquals(null, evictionManagementJob.getEvictionDate());
 		Assert.assertEquals(true, evictionManagementJob.isUnlimited());
@@ -107,7 +108,7 @@ public class DataLifecycleTriggerListenerTest {
 		IngestionEvent inputEvent = toInputEvent(creationDate, obsKey, productFamily);
 		
 		DataLifecycleTriggerListener<IngestionEvent> dtl = new DataLifecycleTriggerListener<>(null, null, null, null);
-		EvictionManagementJob evictionManagementJob = dtl.toEvictionManagementJob(inputEvent, retentionPolicies);
+		EvictionManagementJob evictionManagementJob = dtl.toEvictionManagementJob(inputEvent, retentionPolicies, UUID.randomUUID());
 		Assert.assertEquals(productFamily, evictionManagementJob.getProductFamily());
 		Assert.assertEquals(Date.from(Instant.parse("2000-01-08T00:00:00.00z")), evictionManagementJob.getEvictionDate());
 		Assert.assertEquals(false, evictionManagementJob.isUnlimited());
@@ -125,7 +126,7 @@ public class DataLifecycleTriggerListenerTest {
 		IngestionEvent inputEvent = toInputEvent(creationDate, obsKey, productFamily);
 		
 		DataLifecycleTriggerListener<IngestionEvent> dtl = new DataLifecycleTriggerListener<>(null, null, null, null);
-		EvictionManagementJob evictionManagementJob = dtl.toEvictionManagementJob(inputEvent, retentionPolicies);
+		EvictionManagementJob evictionManagementJob = dtl.toEvictionManagementJob(inputEvent, retentionPolicies, UUID.randomUUID());
 		Assert.assertEquals(productFamily, evictionManagementJob.getProductFamily());
 		Assert.assertEquals(null, evictionManagementJob.getEvictionDate());
 		Assert.assertEquals(true, evictionManagementJob.isUnlimited());

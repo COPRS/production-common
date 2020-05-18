@@ -6,6 +6,7 @@ import java.io.InputStream;
 import java.io.PrintWriter;
 import java.net.URL;
 import java.nio.file.Files;
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
@@ -316,6 +317,11 @@ public class SwiftObsClient extends AbstractObsClient {
 		} catch (final SdkClientException ex) {
 			throw new ObsException(object.getFamily(), object.getKey(), ex);
 		}
+	}
+
+	@Override
+	public void setExpirationTime(ObsObject object, Instant expirationTime) throws ObsServiceException {
+		throw new UnsupportedOperationException("setExpirationTime not implemented yet for swift");
 	}
 
 	@Override

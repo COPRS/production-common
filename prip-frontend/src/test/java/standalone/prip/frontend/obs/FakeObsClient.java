@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.time.Instant;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
@@ -95,7 +96,11 @@ public class FakeObsClient implements ObsClient {
 		// TODO Auto-generated method stub
 		return null;
 	}
-	
+
+	@Override
+	public void setExpirationTime(ObsObject object, Instant expirationTime) throws ObsServiceException {
+	}
+
 	@Override
 	public URL createTemporaryDownloadUrl(final ObsObject object, final long expirationTimeInSeconds)
 			throws ObsException, ObsServiceException {
