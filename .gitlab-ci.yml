@@ -48,3 +48,4 @@ include:
   - local: prip-frontend/.gitlab-ci.yml
   - local: ipf-execution-worker/.gitlab-ci.yml
   - local: data-lifecycle-trigger/.gitlab-ci.yml
+  - local: data-lifecycle-worker/.gitlab-ci.yml

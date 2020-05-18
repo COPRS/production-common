@@ -41,6 +41,7 @@ COPY prip-worker /app/prip-worker
 COPY prip-frontend /app/prip-frontend
 COPY xbip-client /app/xbip-client
 COPY data-lifecycle-trigger /app/data-lifecycle-trigger
+COPY data-lifecycle-worker /app/data-lifecycle-worker
 
 
 RUN mvn -DskipTests=true -Dpmd.skip=true -Dfindbugs.skip=true -B -f /app/pom.xml -s /usr/share/maven/ref/settings-docker.xml install 
