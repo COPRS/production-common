@@ -29,6 +29,7 @@ import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.AmazonS3ClientBuilder;
 import com.amazonaws.services.s3.model.CopyObjectRequest;
 import com.amazonaws.services.s3.model.ObjectListing;
+import com.amazonaws.services.s3.model.ObjectMetadata;
 import com.amazonaws.services.s3.model.S3ObjectSummary;
 import com.amazonaws.services.s3.transfer.TransferManager;
 import com.amazonaws.services.s3.transfer.TransferManagerBuilder;
@@ -42,6 +43,7 @@ import esa.s1pdgs.cpoc.obs_sdk.ObsClient;
 import esa.s1pdgs.cpoc.obs_sdk.ObsConfigurationProperties;
 import esa.s1pdgs.cpoc.obs_sdk.ObsDownloadObject;
 import esa.s1pdgs.cpoc.obs_sdk.ObsObject;
+import esa.s1pdgs.cpoc.obs_sdk.ObsObjectMetadata;
 import esa.s1pdgs.cpoc.obs_sdk.ObsServiceException;
 import esa.s1pdgs.cpoc.obs_sdk.SdkClientException;
 import esa.s1pdgs.cpoc.obs_sdk.StreamObsUploadObject;
@@ -363,6 +365,12 @@ public class S3ObsClient extends AbstractObsClient {
 	@Override
 	public void setExpirationTime(ObsObject object, Instant expirationTime) throws ObsServiceException {
 		s3Services.setExpirationTime(getBucketFor(object.getFamily()), object.getKey(), expirationTime);
+	}
+
+	@Override
+	public ObsObjectMetadata getMetadata(ObsObject object) throws ObsServiceException {
+		final ObjectMetadata metadata = s3Services.getObjectMetadata(getBucketFor(object.getFamily()), object.getKey());
+		return new ObsObjectMetadata(object.getKey(), metadata.getLastModified().toInstant());
 	}
 
 	@Override

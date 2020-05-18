@@ -28,6 +28,7 @@ import esa.s1pdgs.cpoc.obs_sdk.ObsClient;
 import esa.s1pdgs.cpoc.obs_sdk.ObsConfigurationProperties;
 import esa.s1pdgs.cpoc.obs_sdk.ObsDownloadObject;
 import esa.s1pdgs.cpoc.obs_sdk.ObsObject;
+import esa.s1pdgs.cpoc.obs_sdk.ObsObjectMetadata;
 import esa.s1pdgs.cpoc.obs_sdk.ObsServiceException;
 import esa.s1pdgs.cpoc.obs_sdk.SdkClientException;
 import esa.s1pdgs.cpoc.obs_sdk.StreamObsUploadObject;
@@ -322,6 +323,11 @@ public class SwiftObsClient extends AbstractObsClient {
 	@Override
 	public void setExpirationTime(ObsObject object, Instant expirationTime) throws ObsServiceException {
 		throw new UnsupportedOperationException("setExpirationTime not implemented yet for swift");
+	}
+
+	@Override
+	public ObsObjectMetadata getMetadata(ObsObject object) {
+		throw new UnsupportedOperationException("getMetadata not implemented yet for swift");
 	}
 
 	@Override

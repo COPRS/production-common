@@ -15,6 +15,7 @@ import esa.s1pdgs.cpoc.appstatus.AppStatus;
 import esa.s1pdgs.cpoc.common.ProductCategory;
 import esa.s1pdgs.cpoc.datalifecycle.worker.config.DataLifecycleWorkerConfigurationProperties;
 import esa.s1pdgs.cpoc.datalifecycle.worker.config.ProcessConfiguration;
+import esa.s1pdgs.cpoc.datalifecycle.worker.es.ElasticsearchDAO;
 import esa.s1pdgs.cpoc.errorrepo.ErrorRepoAppender;
 import esa.s1pdgs.cpoc.mqi.client.MqiClient;
 import esa.s1pdgs.cpoc.mqi.client.MqiConsumer;
@@ -32,9 +33,10 @@ public class DataLifecycleWorkerService {
     private final ErrorRepoAppender errorRepoAppender;
     private final ProcessConfiguration processConfiguration;
     private final ObsClient obsClient;
+    private final ElasticsearchDAO elasticSearchDAO;
 
     @Autowired
-    public DataLifecycleWorkerService(MqiClient mqiClient, DataLifecycleWorkerConfigurationProperties configurationProperties, AppStatus appStatus, ErrorRepoAppender errorRepoAppender, ProcessConfiguration processConfiguration, ObsClient obsClient) {
+    public DataLifecycleWorkerService(MqiClient mqiClient, DataLifecycleWorkerConfigurationProperties configurationProperties, AppStatus appStatus, ErrorRepoAppender errorRepoAppender, ProcessConfiguration processConfiguration, ObsClient obsClient, ElasticsearchDAO elasticSearchDAO) {
 
         this.mqiClient = mqiClient;
         this.configurationProperties = configurationProperties;
@@ -42,6 +44,7 @@ public class DataLifecycleWorkerService {
         this.errorRepoAppender = errorRepoAppender;
         this.processConfiguration = processConfiguration;
         this.obsClient = obsClient;
+        this.elasticSearchDAO = elasticSearchDAO;
     }
 
     @PostConstruct
@@ -53,7 +56,7 @@ public class DataLifecycleWorkerService {
         final MqiConsumer<EvictionManagementJob> evictionEventConsumer = new MqiConsumer<>(
                 mqiClient,
                 ProductCategory.EVICTION_MANAGEMENT_JOBS,
-                new DataLifecycleWorkerListener(errorRepoAppender, processConfiguration, obsClient),
+                new DataLifecycleWorkerListener(errorRepoAppender, processConfiguration, obsClient, elasticSearchDAO),
                 Collections.emptyList(),
                 evictionEventCategoryConfig.getFixedDelayMs(),
                 evictionEventCategoryConfig.getInitDelayPolMs(),

@@ -25,6 +25,7 @@ import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 
 import com.amazonaws.services.s3.model.ObjectListing;
+import com.amazonaws.services.s3.model.ObjectMetadata;
 import com.amazonaws.services.s3.model.S3ObjectSummary;
 
 import esa.s1pdgs.cpoc.common.ProductFamily;
@@ -35,6 +36,7 @@ import esa.s1pdgs.cpoc.obs_sdk.ObsConfigurationProperties;
 import esa.s1pdgs.cpoc.obs_sdk.ObsDownloadObject;
 import esa.s1pdgs.cpoc.obs_sdk.ObsEmptyFileException;
 import esa.s1pdgs.cpoc.obs_sdk.ObsObject;
+import esa.s1pdgs.cpoc.obs_sdk.ObsObjectMetadata;
 import esa.s1pdgs.cpoc.obs_sdk.ObsServiceException;
 import esa.s1pdgs.cpoc.obs_sdk.SdkClientException;
 import esa.s1pdgs.cpoc.obs_sdk.StreamObsUploadObject;
@@ -80,6 +82,8 @@ public class S3ObsClientTest {
      */
     private S3ObsClient client;
 
+    private final Instant expectedLastModified = Instant.now();
+
     /**
      * Initialization
      *
@@ -104,6 +108,10 @@ public class S3ObsClientTest {
                 Mockito.anyString(), any());
         doReturn("dummy").when(service).uploadStream(Mockito.anyString(),
                 Mockito.anyString(), any(InputStream.class), anyLong());
+
+        final ObjectMetadata objectMetadata = new ObjectMetadata();
+        objectMetadata.setLastModified(new Date(expectedLastModified.toEpochMilli()));
+        doReturn(objectMetadata).when(service).getObjectMetadata("auxiliary-files", "test-key");
 
         // Mock configuration
         doReturn("auxiliary-files").when(configuration)
@@ -268,6 +276,15 @@ public class S3ObsClientTest {
                 "auxiliary-files",
                 "test-key",
                 expirationTime);
+    }
+
+    @Test
+    public void testGetMetadata() throws ObsServiceException {
+        final ObsObjectMetadata metadata = client.getMetadata(new ObsObject(ProductFamily.AUXILIARY_FILE, "test-key"));
+        verify(service, times(1)).getObjectMetadata("auxiliary-files", "test-key");
+
+        assertEquals(expectedLastModified, metadata.getLastModified());
+        assertEquals("test-key", metadata.getKey());
     }
 
     @Test

@@ -590,6 +590,10 @@ public class S3ObsServices {
 		s3client.setBucketLifecycleConfiguration(new SetBucketLifecycleConfigurationRequest(bucketName, lifecycleConfiguration));
 	}
 
+	public ObjectMetadata getObjectMetadata(String bucketName, String key) {
+		return s3client.getObjectMetadata(bucketName, key);
+	}
+
 	public void createBucket(final String bucketName)
 			throws ObsServiceException, S3SdkClientException {
 		for (int retryCount = 1;; retryCount++) {

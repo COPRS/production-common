@@ -128,5 +128,7 @@ public interface ObsClient {
      */
     void setExpirationTime(final ObsObject object, final Instant expirationTime) throws ObsServiceException;
 
+    ObsObjectMetadata getMetadata(final ObsObject object) throws ObsServiceException;
+
     URL createTemporaryDownloadUrl(ObsObject object, long expirationTimeInSeconds) throws ObsException, ObsServiceException;
 }
