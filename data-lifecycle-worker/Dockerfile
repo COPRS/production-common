@@ -13,7 +13,7 @@ RUN echo "${VERSION}" >> VERSION
 RUN echo "${BRANCH_TEXT}" >> VERSION
 RUN echo "${COMMIT_ID}" >> VERSION
 
-COPY --from=build /app/data-lifecycle-trigger/target/s1pro-core-data-lifecycle-worker-*.jar s1pdgs-data-lifecycle-worker.jar
+COPY --from=build /app/data-lifecycle-worker/target/s1pro-core-data-lifecycle-worker-*.jar s1pdgs-data-lifecycle-worker.jar
 COPY /config/start.sh start.sh
 
 ENTRYPOINT "/app/start.sh"

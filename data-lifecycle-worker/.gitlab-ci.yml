@@ -3,11 +3,11 @@
 image: docker:latest
 
 variables:
-  MODULE_DATAL_IFECYCLE_WORKER: s1pro-core-data-lifecylce-worker
+  MODULE_DATA_LIFECYCLE_WORKER: s1pro-core-data-lifecylce-worker
 
 ingestion-worker-build:
   stage: module
   script:
     - cd data-lifecycle-worker
-    - dockerbuild --cache-from registry.tools.s1pdgs.eu/werum/processing/s1pro-core:final -t "$CI_REGISTRY/$CI_PROJECT_NAMESPACE/$MODULE_INGESTION_WORKER:$CI_COMMIT_REF_SLUG" .
+    - dockerbuild --cache-from registry.tools.s1pdgs.eu/werum/processing/s1pro-core:final -t "$CI_REGISTRY/$CI_PROJECT_NAMESPACE/$MODULE_DATA_LIFECYCLE_WORKER:$CI_COMMIT_REF_SLUG" .
     - docker push "$CI_REGISTRY/$CI_PROJECT_NAMESPACE/$MODULE_DATA_LIFECYCLE_WORKER:$CI_COMMIT_REF_SLUG"
