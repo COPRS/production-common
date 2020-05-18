@@ -38,14 +38,14 @@ public class SearchMetadataController {
 
 	@RequestMapping(method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_UTF8_VALUE, path = "/{productFamily}/searchInterval")
 	public ResponseEntity<List<SearchMetadata>> searchTimeInterval(
-			@PathVariable(name = "productFamily") String productFamily,
-			@RequestParam(name = "intervalStart") String intervalStart,
-			@RequestParam(name = "intervalStop") String intervalStop) {
+			@PathVariable(name = "productFamily") final String productFamily,
+			@RequestParam(name = "intervalStart") final String intervalStart,
+			@RequestParam(name = "intervalStop") final String intervalStop) {
 
 		LOGGER.info("Received interval query for family '{}', startTime '{}', stopTime '{}'", productFamily,
 				intervalStart, intervalStop);
 
-		List<SearchMetadata> response = new ArrayList<SearchMetadata>();
+		final List<SearchMetadata> response = new ArrayList<SearchMetadata>();
 		String startTime = null;
 		String stopTime = null;
 		try {
@@ -54,7 +54,7 @@ public class SearchMetadataController {
 
 			stopTime = convertDateForSearch(intervalStop, 0.0f,
 					DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.999999'Z'"));
-		} catch (Exception ex) {
+		} catch (final Exception ex) {
 			LOGGER.error("Parse error while doing intervalSearch: {}", LogUtils.toString(ex));
 			return new ResponseEntity<List<SearchMetadata>>(HttpStatus.BAD_REQUEST);
 		}
@@ -63,13 +63,17 @@ public class SearchMetadataController {
 		try {
 			List<SearchMetadata> results = new ArrayList<>();
 			if (productFamily.equals(ProductFamily.AUXILIARY_FILE.name())) {
-				List<SearchMetadata> results1 = esServices.intervalQuery(startTime, stopTime,
+				final List<SearchMetadata> results1 = esServices.intervalQuery(startTime, stopTime,
 						ProductFamily.fromValue(productFamily), "aux*");
-				List<SearchMetadata> results2 = esServices.intervalQuery(startTime, stopTime,
+				final List<SearchMetadata> results2 = esServices.intervalQuery(startTime, stopTime,
 						ProductFamily.fromValue(productFamily), "mpl*");
-
+				
+				final List<SearchMetadata> results3 = esServices.intervalQuery(startTime, stopTime,
+						ProductFamily.fromValue(productFamily), "msk_*");
+				
 				results.addAll(results1);
 				results.addAll(results2);
+				results.addAll(results3);
 			} else {
 				results = esServices.intervalQuery(startTime, stopTime, ProductFamily.fromValue(productFamily), null);
 			}
@@ -80,12 +84,12 @@ public class SearchMetadataController {
 			}
 			LOGGER.debug("Query returned {} results", results.size());
 
-			for (SearchMetadata result : results) {
+			for (final SearchMetadata result : results) {
 				response.add(new SearchMetadata(result.getProductName(), result.getProductType(),
 						result.getKeyObjectStorage(), result.getValidityStart(), result.getValidityStop(),
 						result.getMissionId(), result.getSatelliteId(), result.getStationCode()));
 			}
-		} catch (Exception ex) {
+		} catch (final Exception ex) {
 			LOGGER.error("Query error while doing intervalSearch: {}", LogUtils.toString(ex));
 			return new ResponseEntity<List<SearchMetadata>>(HttpStatus.INTERNAL_SERVER_ERROR);
 		}
@@ -94,16 +98,16 @@ public class SearchMetadataController {
 	}
 
 	@RequestMapping(method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_UTF8_VALUE, path = "/{productFamily}/search")
-	public ResponseEntity<List<SearchMetadata>> search(@PathVariable(name = "productFamily") String productFamily,
-			@RequestParam(name = "productType", defaultValue = "NONE") String productType,
-			@RequestParam(name = "mode", defaultValue = "NONE") String mode,
-			@RequestParam(name = "satellite", defaultValue = "NONE") String satellite,
-			@RequestParam(name = "t0") String startDate, @RequestParam(name = "t1") String stopDate,
-			@RequestParam(name = "processMode", defaultValue = "NONE") String processMode,
-			@RequestParam(name = "insConfId", defaultValue = "-1") int insConfId,
-			@RequestParam(value = "dt0", defaultValue = "0.0") double dt0,
-			@RequestParam(value = "dt1", defaultValue = "0.0") double dt1,
-			@RequestParam(value = "polarisation", defaultValue = "NONE") String polarisation
+	public ResponseEntity<List<SearchMetadata>> search(@PathVariable(name = "productFamily") final String productFamily,
+			@RequestParam(name = "productType", defaultValue = "NONE") final String productType,
+			@RequestParam(name = "mode", defaultValue = "NONE") final String mode,
+			@RequestParam(name = "satellite", defaultValue = "NONE") final String satellite,
+			@RequestParam(name = "t0") final String startDate, @RequestParam(name = "t1") final String stopDate,
+			@RequestParam(name = "processMode", defaultValue = "NONE") final String processMode,
+			@RequestParam(name = "insConfId", defaultValue = "-1") final int insConfId,
+			@RequestParam(value = "dt0", defaultValue = "0.0") final double dt0,
+			@RequestParam(value = "dt1", defaultValue = "0.0") final double dt1,
+			@RequestParam(value = "polarisation", defaultValue = "NONE") final String polarisation
 	) {
 		LOGGER.info("Received search query for family '{}', product type '{}', mode '{}', satellite '{}'",
 				productFamily, productType, mode, satellite);
@@ -215,21 +219,21 @@ public class SearchMetadataController {
 				LOGGER.error("Invalid selection policy mode {} for product type {}", mode, productType);				
 				return new ResponseEntity<List<SearchMetadata>>(HttpStatus.BAD_REQUEST);
 			}
-		} catch (AbstractCodedException e) {
+		} catch (final AbstractCodedException e) {
 			LOGGER.error("Error on performing selection policy mode {} for product type {}: [code {}] {}", 
 					mode, productType, e.getCode().getCode(), e.getLogMessage());		
 			return new ResponseEntity<List<SearchMetadata>>(HttpStatus.BAD_REQUEST);
-		} catch (Exception e) {
+		} catch (final Exception e) {
 			LOGGER.error("Error on performing selection policy mode {} for product type {}: {}", 
 					mode, productType, LogUtils.toString(e));	
 			return new ResponseEntity<List<SearchMetadata>>(HttpStatus.INTERNAL_SERVER_ERROR);
 		}
 	}
 
-	private String convertDateForSearch(String dateStr, double delta, DateTimeFormatter outFormatter) {
-		LocalDateTime time = LocalDateTime.parse(dateStr,
+	private String convertDateForSearch(final String dateStr, final double delta, final DateTimeFormatter outFormatter) {
+		final LocalDateTime time = LocalDateTime.parse(dateStr,
 				DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSSSSS'Z'"));
-		LocalDateTime timePlus = time.plusSeconds(Math.round(delta));
+		final LocalDateTime timePlus = time.plusSeconds(Math.round(delta));
 		return timePlus.format(outFormatter);
 	}
 }
