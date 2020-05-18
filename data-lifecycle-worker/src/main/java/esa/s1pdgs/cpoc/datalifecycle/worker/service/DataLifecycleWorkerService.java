@@ -19,6 +19,7 @@ import esa.s1pdgs.cpoc.errorrepo.ErrorRepoAppender;
 import esa.s1pdgs.cpoc.mqi.client.MqiClient;
 import esa.s1pdgs.cpoc.mqi.client.MqiConsumer;
 import esa.s1pdgs.cpoc.mqi.model.queue.EvictionManagementJob;
+import esa.s1pdgs.cpoc.obs_sdk.ObsClient;
 
 @Service
 public class DataLifecycleWorkerService {
@@ -30,15 +31,17 @@ public class DataLifecycleWorkerService {
     private final AppStatus appStatus;
     private final ErrorRepoAppender errorRepoAppender;
     private final ProcessConfiguration processConfiguration;
+    private final ObsClient obsClient;
 
     @Autowired
-    public DataLifecycleWorkerService(MqiClient mqiClient, DataLifecycleWorkerConfigurationProperties configurationProperties, AppStatus appStatus, ErrorRepoAppender errorRepoAppender, ProcessConfiguration processConfiguration) {
+    public DataLifecycleWorkerService(MqiClient mqiClient, DataLifecycleWorkerConfigurationProperties configurationProperties, AppStatus appStatus, ErrorRepoAppender errorRepoAppender, ProcessConfiguration processConfiguration, ObsClient obsClient) {
 
         this.mqiClient = mqiClient;
         this.configurationProperties = configurationProperties;
         this.appStatus = appStatus;
         this.errorRepoAppender = errorRepoAppender;
         this.processConfiguration = processConfiguration;
+        this.obsClient = obsClient;
     }
 
     @PostConstruct
@@ -50,7 +53,7 @@ public class DataLifecycleWorkerService {
         final MqiConsumer<EvictionManagementJob> evictionEventConsumer = new MqiConsumer<>(
                 mqiClient,
                 ProductCategory.EVICTION_MANAGMENT_JOBS,
-                new DataLifecycleWorkerListener(errorRepoAppender, processConfiguration),
+                new DataLifecycleWorkerListener(errorRepoAppender, processConfiguration, obsClient),
                 Collections.emptyList(),
                 evictionEventCategoryConfig.getFixedDelayMs(),
                 evictionEventCategoryConfig.getInitDelayPolMs(),

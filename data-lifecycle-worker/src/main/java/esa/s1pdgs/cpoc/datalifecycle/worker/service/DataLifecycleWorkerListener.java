@@ -11,6 +11,9 @@ import esa.s1pdgs.cpoc.errorrepo.model.rest.FailedProcessingDto;
 import esa.s1pdgs.cpoc.mqi.client.MqiListener;
 import esa.s1pdgs.cpoc.mqi.model.queue.EvictionManagementJob;
 import esa.s1pdgs.cpoc.mqi.model.rest.GenericMessageDto;
+import esa.s1pdgs.cpoc.obs_sdk.ObsClient;
+import esa.s1pdgs.cpoc.obs_sdk.ObsObject;
+import esa.s1pdgs.cpoc.obs_sdk.ObsServiceException;
 
 public class DataLifecycleWorkerListener implements MqiListener<EvictionManagementJob> {
 
@@ -18,17 +21,27 @@ public class DataLifecycleWorkerListener implements MqiListener<EvictionManageme
 
     private final ErrorRepoAppender errorRepoAppender;
     private final ProcessConfiguration processConfiguration;
+    private final ObsClient obsClient;
 
-    public DataLifecycleWorkerListener(ErrorRepoAppender errorRepoAppender, ProcessConfiguration processConfiguration) {
+
+    public DataLifecycleWorkerListener(ErrorRepoAppender errorRepoAppender, ProcessConfiguration processConfiguration, ObsClient obsClient) {
         this.errorRepoAppender = errorRepoAppender;
         this.processConfiguration = processConfiguration;
+        this.obsClient = obsClient;
     }
 
     @Override
-    public void onMessage(GenericMessageDto<EvictionManagementJob> message) {
-        //TODO read message
-        //TODO set retention in OBS
-        //TODO set retention in ES
+    public void onMessage(GenericMessageDto<EvictionManagementJob> message) throws ObsServiceException {
+            setRetentionInObs(message.getBody());
+            setRetentionInEs(message.getBody());
+    }
+
+    private void setRetentionInObs(EvictionManagementJob job) throws ObsServiceException {
+        obsClient.setExpirationTime(new ObsObject(job.getProductFamily(), job.getKeyObjectStorage()), job.getEvictionDate().toInstant());
+    }
+
+    private void setRetentionInEs(EvictionManagementJob job) {
+        //TODO
     }
 
     @Override
