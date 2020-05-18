@@ -10,6 +10,7 @@ import java.io.InputStream;
 import java.io.PrintWriter;
 import java.net.URL;
 import java.nio.file.Files;
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -357,6 +358,11 @@ public class S3ObsClient extends AbstractObsClient {
 		} catch (final SdkClientException ex) {
 			throw new ObsException(object.getFamily(), object.getKey(), ex);
 		}
+	}
+
+	@Override
+	public void setExpirationTime(ObsObject object, Instant expirationTime) throws ObsServiceException {
+		s3Services.setExpirationTime(getBucketFor(object.getFamily()), object.getKey(), expirationTime);
 	}
 
 	@Override
