@@ -17,6 +17,7 @@ import esa.s1pdgs.cpoc.obs_sdk.ObsClient;
 import esa.s1pdgs.cpoc.obs_sdk.ObsDownloadObject;
 import esa.s1pdgs.cpoc.obs_sdk.ObsEmptyFileException;
 import esa.s1pdgs.cpoc.obs_sdk.ObsObject;
+import esa.s1pdgs.cpoc.obs_sdk.ObsObjectMetadata;
 import esa.s1pdgs.cpoc.obs_sdk.ObsServiceException;
 import esa.s1pdgs.cpoc.obs_sdk.SdkClientException;
 import esa.s1pdgs.cpoc.obs_sdk.StreamObsUploadObject;
@@ -99,6 +100,11 @@ public class FakeObsClient implements ObsClient {
 
 	@Override
 	public void setExpirationTime(ObsObject object, Instant expirationTime) throws ObsServiceException {
+	}
+
+	@Override
+	public ObsObjectMetadata getMetadata(ObsObject object) throws ObsServiceException {
+		return null;
 	}
 
 	@Override

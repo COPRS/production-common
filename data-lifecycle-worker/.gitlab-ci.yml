@@ -5,7 +5,7 @@ image: docker:latest
 variables:
   MODULE_DATA_LIFECYCLE_WORKER: s1pro-core-data-lifecylce-worker
 
-ingestion-worker-build:
+data-lifecycle-worker-build:
   stage: module
   script:
     - cd data-lifecycle-worker
