@@ -3,7 +3,7 @@
 image: docker:latest
 
 variables:
-  MODULE_DATA_LIFECYCLE_WORKER: s1pro-core-data-lifecylce-worker
+  MODULE_DATA_LIFECYCLE_WORKER: s1pro-core-data-lifecycle-worker
 
 data-lifecycle-worker-build:
   stage: module
