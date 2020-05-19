@@ -8,6 +8,7 @@ import java.util.Date;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.elasticsearch.action.index.IndexRequest;
+import org.elasticsearch.common.xcontent.XContentType;
 import org.json.JSONObject;
 
 import esa.s1pdgs.cpoc.common.utils.DateUtils;
@@ -62,7 +63,9 @@ public class DataLifecycleWorkerListener implements MqiListener<EvictionManageme
                         job.getEvictionDate().toInstant().atOffset(ZoneOffset.UTC).toLocalDateTime()));
         expirationMetadata.put("isUnlimited", job.isUnlimited());
 
-        elasticSearchDAO.index(new IndexRequest("data-lifecycle", "metadata", job.getKeyObjectStorage()).source(expirationMetadata));
+        elasticSearchDAO.index(
+                new IndexRequest("data-lifecycle", "metadata", job.getKeyObjectStorage())
+                        .source(expirationMetadata.toString(), XContentType.JSON));
     }
 
     private Instant lastModifiedFor(EvictionManagementJob job) throws ObsServiceException {
