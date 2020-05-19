@@ -16,10 +16,14 @@ import java.nio.file.Paths;
 import java.time.Duration;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
-import java.util.Date;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
+import java.util.function.IntFunction;
 import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.logging.log4j.LogManager;
@@ -36,9 +40,6 @@ import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit4.SpringRunner;
 
 import com.amazonaws.services.s3.model.BucketLifecycleConfiguration;
-import com.amazonaws.services.s3.model.GetBucketLifecycleConfigurationRequest;
-import com.amazonaws.services.s3.model.ObjectMetadata;
-import com.amazonaws.services.s3.model.S3Object;
 import com.amazonaws.services.s3.model.SetBucketLifecycleConfigurationRequest;
 
 import esa.s1pdgs.cpoc.common.ProductFamily;
@@ -55,6 +56,7 @@ import esa.s1pdgs.cpoc.obs_sdk.StreamObsUploadObject;
 import esa.s1pdgs.cpoc.obs_sdk.report.ReportingProductFactory;
 import esa.s1pdgs.cpoc.report.ReportingFactory;
 
+@Ignore
 @RunWith(SpringRunner.class)
 @TestPropertySource("classpath:obs-aws-s3.properties")
 @ContextConfiguration(classes = {ObsConfigurationProperties.class})
@@ -469,14 +471,5 @@ public class S3ObsClientIT {
         assertEquals(obsKey, metadata.getKey());
         assertTrue(metadata.getLastModified().isAfter(justBeforeCreation));
         assertTrue(metadata.getLastModified().isBefore(justAfterCreation));
-    }
-
-    @Test
-    public void testMarcellReadObjectMetadata() {
-        final ObjectMetadata objectMetadata = uut.s3Services.s3client.getObjectMetadata(auxiliaryFilesBucketName, "S1__OPER_MSK__LAND__V20140403T210200_G20190711T113000.EOF");
-        final S3Object object = uut.s3Services.s3client.getObject(auxiliaryFilesBucketName, "S1__OPER_MSK__LAND__V20140403T210200_G20190711T113000.EOF");
-
-
-
     }
 }
