@@ -53,8 +53,8 @@ public class DataLifecycleWorkerListener implements MqiListener<EvictionManageme
 
     private void setRetentionInEs(EvictionManagementJob job, Instant lastModified) throws IOException {
         JSONObject expirationMetadata = new JSONObject();
-        expirationMetadata.put("productFamily", job.getProductFamily());
         expirationMetadata.put("obsKey", job.getKeyObjectStorage());
+        expirationMetadata.put("productFamily", job.getProductFamily());
         expirationMetadata.put("lastModified", DateUtils.formatToMetadataDateTimeFormat(
                 lastModified.atOffset(ZoneOffset.UTC).toLocalDateTime()));
         expirationMetadata.put("evictionDate",
@@ -62,7 +62,7 @@ public class DataLifecycleWorkerListener implements MqiListener<EvictionManageme
                         job.getEvictionDate().toInstant().atOffset(ZoneOffset.UTC).toLocalDateTime()));
         expirationMetadata.put("isUnlimited", job.isUnlimited());
 
-        elasticSearchDAO.index(new IndexRequest("data-lifecycle", "type", job.getKeyObjectStorage()).source(expirationMetadata));
+        elasticSearchDAO.index(new IndexRequest("data-lifecycle", "metadata", job.getKeyObjectStorage()).source(expirationMetadata));
     }
 
     private Instant lastModifiedFor(EvictionManagementJob job) throws ObsServiceException {
