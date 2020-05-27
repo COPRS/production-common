@@ -199,7 +199,7 @@ public class PripElasticSearchMetadataRepo implements PripMetadataRepository {
 		} else {
 			sourceBuilder.size(maxSearchHits);
 		}
-		sourceBuilder.sort(PripMetadata.FIELD_NAMES.CREATION_DATE.fieldName(), SortOrder.DESC);
+		sourceBuilder.sort(PripMetadata.FIELD_NAMES.CREATION_DATE.fieldName(), SortOrder.ASC);
 
 		SearchRequest searchRequest = new SearchRequest(ES_INDEX);
 		searchRequest.types(ES_PRIP_TYPE);
