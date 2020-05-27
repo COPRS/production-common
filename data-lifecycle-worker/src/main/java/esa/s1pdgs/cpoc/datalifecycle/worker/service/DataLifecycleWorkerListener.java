@@ -2,6 +2,7 @@ package esa.s1pdgs.cpoc.datalifecycle.worker.service;
 
 import java.io.IOException;
 import java.time.Instant;
+import java.time.LocalDateTime;
 import java.time.ZoneOffset;
 import java.util.Date;
 
@@ -24,7 +25,6 @@ import esa.s1pdgs.cpoc.obs_sdk.ObsObject;
 import esa.s1pdgs.cpoc.obs_sdk.ObsServiceException;
 
 public class DataLifecycleWorkerListener implements MqiListener<EvictionManagementJob> {
-
     private static final Logger LOG = LogManager.getLogger(DataLifecycleWorkerListener.class);
 
     private final ErrorRepoAppender errorRepoAppender;
@@ -32,7 +32,12 @@ public class DataLifecycleWorkerListener implements MqiListener<EvictionManageme
     private final ObsClient obsClient;
     private final ElasticsearchDAO elasticSearchDAO;
 
-    public DataLifecycleWorkerListener(ErrorRepoAppender errorRepoAppender, ProcessConfiguration processConfiguration, ObsClient obsClient, ElasticsearchDAO elasticSearchDAO) {
+    public DataLifecycleWorkerListener(
+    		final ErrorRepoAppender errorRepoAppender, 
+    		final ProcessConfiguration processConfiguration, 
+    		final ObsClient obsClient, 
+    		final ElasticsearchDAO elasticSearchDAO
+    ) {
         this.errorRepoAppender = errorRepoAppender;
         this.processConfiguration = processConfiguration;
         this.obsClient = obsClient;
@@ -40,41 +45,43 @@ public class DataLifecycleWorkerListener implements MqiListener<EvictionManageme
     }
 
     @Override
-    public void onMessage(GenericMessageDto<EvictionManagementJob> message) throws ObsServiceException, IOException {
+    public final void onMessage(final GenericMessageDto<EvictionManagementJob> message) throws ObsServiceException, IOException {
         final EvictionManagementJob job = message.getBody();
         LOG.info("set/update eviction time {} for family {} key {}", job.getEvictionDate(), job.getProductFamily(), job.getKeyObjectStorage());
-
-        setRetentionInObs(job);
-        setRetentionInEs(job, lastModifiedFor(job));
+        updateRetentionInObs(job);
+        updateRetentionInEs(job);
+    }
+    
+    @Override
+    public final void onTerminalError(final GenericMessageDto<EvictionManagementJob> message, final Exception error) {
+        LOG.error(error);
+        errorRepoAppender.send(new FailedProcessingDto(processConfiguration.getHostname(), new Date(), error.getMessage(), message));
     }
 
-    private void setRetentionInObs(EvictionManagementJob job) throws ObsServiceException {
-        obsClient.setExpirationTime(new ObsObject(job.getProductFamily(), job.getKeyObjectStorage()), job.getEvictionDate().toInstant());
-    }
-
-    private void setRetentionInEs(EvictionManagementJob job, Instant lastModified) throws IOException {
-        JSONObject expirationMetadata = new JSONObject();
+    private void updateRetentionInEs(final EvictionManagementJob job) throws ObsServiceException, IOException {
+    	final LocalDateTime lastModifiedInObs = lastModifiedInObsFor(job).atOffset(ZoneOffset.UTC).toLocalDateTime();
+    	final LocalDateTime evictionTimeOfJob = job.getEvictionDate().toInstant().atOffset(ZoneOffset.UTC).toLocalDateTime();
+    	
+    	final String lastModified = DateUtils.formatToMetadataDateTimeFormat(lastModifiedInObs);
+    	final String evictionDate = DateUtils.formatToMetadataDateTimeFormat(evictionTimeOfJob);
+    	
+        final JSONObject expirationMetadata = new JSONObject();
         expirationMetadata.put("obsKey", job.getKeyObjectStorage());
         expirationMetadata.put("productFamily", job.getProductFamily());
-        expirationMetadata.put("lastModified", DateUtils.formatToMetadataDateTimeFormat(
-                lastModified.atOffset(ZoneOffset.UTC).toLocalDateTime()));
-        expirationMetadata.put("evictionDate",
-                DateUtils.formatToMetadataDateTimeFormat(
-                        job.getEvictionDate().toInstant().atOffset(ZoneOffset.UTC).toLocalDateTime()));
+        expirationMetadata.put("lastModified", lastModified);
+        expirationMetadata.put("evictionDate",evictionDate);
         expirationMetadata.put("isUnlimited", job.isUnlimited());
 
         elasticSearchDAO.index(
-                new IndexRequest("data-lifecycle", "metadata", job.getKeyObjectStorage())
-                        .source(expirationMetadata.toString(), XContentType.JSON));
+                new IndexRequest("data-lifecycle", "metadata", job.getKeyObjectStorage()).source(expirationMetadata.toString(), XContentType.JSON)
+        );
+    }
+    
+    private final void updateRetentionInObs(final EvictionManagementJob job) throws ObsServiceException {
+        obsClient.setExpirationTime(new ObsObject(job.getProductFamily(), job.getKeyObjectStorage()), job.getEvictionDate().toInstant());
     }
 
-    private Instant lastModifiedFor(EvictionManagementJob job) throws ObsServiceException {
+    private final Instant lastModifiedInObsFor(final EvictionManagementJob job) throws ObsServiceException {
         return obsClient.getMetadata(new ObsObject(job.getProductFamily(), job.getKeyObjectStorage())).getLastModified();
-    }
-
-    @Override
-    public void onTerminalError(GenericMessageDto<EvictionManagementJob> message, Exception error) {
-        LOG.error(error);
-        errorRepoAppender.send(new FailedProcessingDto(processConfiguration.getHostname(), new Date(), error.getMessage(), message));
     }
 }

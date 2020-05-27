@@ -6,8 +6,6 @@ import java.util.concurrent.Executors;
 
 import javax.annotation.PostConstruct;
 
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -24,9 +22,6 @@ import esa.s1pdgs.cpoc.obs_sdk.ObsClient;
 
 @Service
 public class DataLifecycleWorkerService {
-
-    private static final Logger LOG = LogManager.getLogger(DataLifecycleWorkerService.class);
-
     private final MqiClient mqiClient;
     private final DataLifecycleWorkerConfigurationProperties configurationProperties;
     private final AppStatus appStatus;
@@ -36,8 +31,15 @@ public class DataLifecycleWorkerService {
     private final ElasticsearchDAO elasticSearchDAO;
 
     @Autowired
-    public DataLifecycleWorkerService(MqiClient mqiClient, DataLifecycleWorkerConfigurationProperties configurationProperties, AppStatus appStatus, ErrorRepoAppender errorRepoAppender, ProcessConfiguration processConfiguration, ObsClient obsClient, ElasticsearchDAO elasticSearchDAO) {
-
+    public DataLifecycleWorkerService(
+    		final MqiClient mqiClient, 
+    		final DataLifecycleWorkerConfigurationProperties configurationProperties, 
+    		final AppStatus appStatus, 
+    		final ErrorRepoAppender errorRepoAppender,
+    		final ProcessConfiguration processConfiguration,
+    		final ObsClient obsClient, 
+    		final ElasticsearchDAO elasticSearchDAO
+    ) {
         this.mqiClient = mqiClient;
         this.configurationProperties = configurationProperties;
         this.appStatus = appStatus;
@@ -49,8 +51,7 @@ public class DataLifecycleWorkerService {
 
     @PostConstruct
     public void initService() {
-
-        DataLifecycleWorkerConfigurationProperties.CategoryConfig evictionEventCategoryConfig = configurationProperties.getProductCategories()
+        final DataLifecycleWorkerConfigurationProperties.CategoryConfig evictionEventCategoryConfig = configurationProperties.getProductCategories()
                 .get(ProductCategory.EVICTION_MANAGEMENT_JOBS);
 
         final MqiConsumer<EvictionManagementJob> evictionEventConsumer = new MqiConsumer<>(
