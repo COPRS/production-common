@@ -3,6 +3,7 @@ package esa.s1pdgs.cpoc.prip.frontend.service.processor;
 import java.io.InputStream;
 import java.util.Collections;
 import java.util.List;
+import java.util.Locale;
 import java.util.Optional;
 
 import org.apache.olingo.commons.api.data.ContextURL;
@@ -27,7 +28,6 @@ import org.apache.olingo.server.api.uri.UriInfo;
 import org.apache.olingo.server.api.uri.UriResource;
 import org.apache.olingo.server.api.uri.UriResourceEntitySet;
 import org.apache.olingo.server.api.uri.queryoption.FilterOption;
-import org.apache.olingo.server.api.uri.queryoption.SkipOption;
 import org.apache.olingo.server.api.uri.queryoption.SystemQueryOption;
 import org.apache.olingo.server.api.uri.queryoption.SystemQueryOptionKind;
 import org.apache.olingo.server.api.uri.queryoption.expression.Expression;
@@ -90,17 +90,33 @@ public class ProductEntityCollectionProcessor implements EntityCollectionProcess
 				}
 
 			}
-		}		
+		}
+		
+		Optional<Integer> top = Optional.empty();
+		if (null != uriInfo.getTopOption()) {
+			top = Optional.of(uriInfo.getTopOption().getValue());
+			if (top.get() < 0) {
+				throw new ODataApplicationException("Invalid value for $top", HttpStatusCode.BAD_REQUEST.getStatusCode(), Locale.ROOT);
+			}
+		}			
+		
+		Optional<Integer> skip = Optional.empty();
+		if (null != uriInfo.getSkipOption()) {
+			skip = Optional.of(uriInfo.getSkipOption().getValue());
+			if (skip.get() < 0) {
+				throw new ODataApplicationException("Invalid value for $skip", HttpStatusCode.BAD_REQUEST.getStatusCode(), Locale.ROOT);
+			}
+		}
 		
 		List<PripMetadata> queryResult;
 		if (!pripDateTimeFilters.isEmpty() && !pripTextFilters.isEmpty()) {
-			queryResult = pripMetadataRepository.findByCreationDateAndProductName(pripDateTimeFilters, pripTextFilters, Optional.empty(), Optional.empty());
+			queryResult = pripMetadataRepository.findByCreationDateAndProductName(pripDateTimeFilters, pripTextFilters, top, skip);
 		} else if (!pripDateTimeFilters.isEmpty()) {
-			queryResult = pripMetadataRepository.findByCreationDate(pripDateTimeFilters, Optional.empty(), Optional.empty());
+			queryResult = pripMetadataRepository.findByCreationDate(pripDateTimeFilters, top, skip);
 		} else if (!pripTextFilters.isEmpty()) {
-			queryResult = pripMetadataRepository.findByProductName(pripTextFilters, Optional.empty(), Optional.empty());
+			queryResult = pripMetadataRepository.findByProductName(pripTextFilters, top, skip);
 		} else {
-			queryResult = pripMetadataRepository.findAll(Optional.empty(), Optional.empty());
+			queryResult = pripMetadataRepository.findAll(top, skip);
 		}
 
 		List<Entity> productList = entityCollection.getEntities();
