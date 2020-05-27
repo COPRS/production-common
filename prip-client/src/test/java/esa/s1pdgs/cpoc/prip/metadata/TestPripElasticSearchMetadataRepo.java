@@ -25,7 +25,6 @@ import org.elasticsearch.rest.RestStatus;
 import org.elasticsearch.search.SearchHit;
 import org.elasticsearch.search.SearchHits;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.mockito.Mock;
 import org.mockito.Mockito;
@@ -115,7 +114,7 @@ public class TestPripElasticSearchMetadataRepo {
 
 		doReturn(searchResponse).when(restHighLevelClient).search(Mockito.any());
 
-		final List<PripMetadata> result = repo.findAll();
+		final List<PripMetadata> result = repo.findAll(0, 0);
 
 		assertTrue(result.contains(pripMetadata1));
 		assertTrue(result.contains(pripMetadata2));
@@ -132,7 +131,7 @@ public class TestPripElasticSearchMetadataRepo {
 
 		doReturn(searchResponse).when(restHighLevelClient).search(Mockito.any());
 
-		final List<PripMetadata> result = repo.findAll();
+		final List<PripMetadata> result = repo.findAll(0, 0);
 
 		assertEquals(0, result.size());
 	}
@@ -141,7 +140,7 @@ public class TestPripElasticSearchMetadataRepo {
 	public void testFindAllWithFailure() throws IOException {
 
 		doThrow(new IOException("testexecption")).when(restHighLevelClient).search(Mockito.any());
-		final List<PripMetadata> result = repo.findAll();
+		final List<PripMetadata> result = repo.findAll(0, 0);
 		assertEquals(0, result.size());
 	}
 
@@ -180,7 +179,7 @@ public class TestPripElasticSearchMetadataRepo {
 		creationDateIntervals.add(f1);
 		creationDateIntervals.add(f2);
 
-		final List<PripMetadata> result = repo.findByCreationDate(creationDateIntervals);
+		final List<PripMetadata> result = repo.findByCreationDate(creationDateIntervals, 0, 0);
 
 		assertTrue(result.contains(pripMetadata1));
 		assertTrue(result.contains(pripMetadata2));
@@ -226,7 +225,7 @@ public class TestPripElasticSearchMetadataRepo {
 		nameFilters.add(f2);
 		nameFilters.add(f3);
 
-		final List<PripMetadata> result = repo.findByProductName(nameFilters);
+		final List<PripMetadata> result = repo.findByProductName(nameFilters, 0, 0);
 
 		assertTrue(result.contains(pripMetadata1));
 		assertTrue(result.contains(pripMetadata2));
@@ -285,7 +284,7 @@ public class TestPripElasticSearchMetadataRepo {
 		nameFilters.add(n2);
 		nameFilters.add(n3);
 
-		final List<PripMetadata> result = repo.findByCreationDateAndProductName(creationDateFilters, nameFilters);
+		final List<PripMetadata> result = repo.findByCreationDateAndProductName(creationDateFilters, nameFilters, 0, 0);
 
 		assertTrue(result.contains(pripMetadata1));
 		assertTrue(result.contains(pripMetadata2));

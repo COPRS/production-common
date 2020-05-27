@@ -73,7 +73,7 @@ public class TestProductEntityCollectionProcessor {
 		String baseUri = "http://example.org";
 		String odataPath = "/" + entitySetName;
 		
-		doReturn(Collections.emptyList()).when(pripMetadataRepositoryMock).findAll();
+		doReturn(Collections.emptyList()).when(pripMetadataRepositoryMock).findAll(0 ,0);
 		
 		doReturn(baseUri).when(odataRequestMock).getRawBaseUri();
 		doReturn(odataPath).when(odataRequestMock).getRawODataPath();
@@ -94,7 +94,7 @@ public class TestProductEntityCollectionProcessor {
 		ODataResponse odataResponse = new ODataResponse();
 		uut.readEntityCollection(odataRequestMock, odataResponse, uriInfoMock, ContentType.JSON_FULL_METADATA);
 		
-		Mockito.verify(pripMetadataRepositoryMock, times(1)).findAll();
+		Mockito.verify(pripMetadataRepositoryMock, times(1)).findAll(0, 0);
 		assertEquals(HttpStatusCode.OK.getStatusCode(), odataResponse.getStatusCode());
 		assertEquals("expected result", IOUtils.toString(odataResponse.getContent(), StandardCharsets.UTF_8));
 	}

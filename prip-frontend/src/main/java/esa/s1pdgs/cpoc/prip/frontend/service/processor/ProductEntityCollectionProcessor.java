@@ -92,13 +92,13 @@ public class ProductEntityCollectionProcessor implements EntityCollectionProcess
 
 		List<PripMetadata> queryResult;
 		if (!pripDateTimeFilters.isEmpty() && !pripTextFilters.isEmpty()) {
-			queryResult = pripMetadataRepository.findByCreationDateAndProductName(pripDateTimeFilters, pripTextFilters);
+			queryResult = pripMetadataRepository.findByCreationDateAndProductName(pripDateTimeFilters, pripTextFilters, 0, 0);
 		} else if (!pripDateTimeFilters.isEmpty()) {
-			queryResult = pripMetadataRepository.findByCreationDate(pripDateTimeFilters);
+			queryResult = pripMetadataRepository.findByCreationDate(pripDateTimeFilters, 0, 0);
 		} else if (!pripTextFilters.isEmpty()) {
-			queryResult = pripMetadataRepository.findByProductName(pripTextFilters);
+			queryResult = pripMetadataRepository.findByProductName(pripTextFilters, 0, 0);
 		} else {
-			queryResult = pripMetadataRepository.findAll();
+			queryResult = pripMetadataRepository.findAll(0, 0);
 		}
 
 		List<Entity> productList = entityCollection.getEntities();

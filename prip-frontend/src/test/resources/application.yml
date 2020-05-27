@@ -29,7 +29,7 @@ prip-frontend:
 # PRIP Commons config
 prip-client:
   repository:
-    max-search-hits: 1000
+    max-search-hits: 10
 
 status:
   delete-fixed-delay-ms: 3000
