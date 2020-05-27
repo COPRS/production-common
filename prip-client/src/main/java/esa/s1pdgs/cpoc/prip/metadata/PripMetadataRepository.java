@@ -27,6 +27,8 @@ public interface PripMetadataRepository {
 	/**
 	 * Returns all PRIP metadata.
 	 * 
+	 * @param top
+	 * @param skip
 	 * @return
 	 */
 	public List<PripMetadata> findAll(Optional<Integer> top, Optional<Integer> skip);
@@ -36,6 +38,8 @@ public interface PripMetadataRepository {
 	 * Each of the the result matches with all filters provided for the field 'creationDate'.
 	 * 
 	 * @param creationDateFilters
+	 * @param top
+	 * @param skip
 	 * @return
 	 */
 	public List<PripMetadata> findByCreationDate(List<PripDateTimeFilter> creationDateFilters, Optional<Integer> top, Optional<Integer> skip);
@@ -45,6 +49,8 @@ public interface PripMetadataRepository {
 	 * Each of the the result matches with all filters provided for the field 'name'.
 	 * 
 	 * @param nameFilters
+	 * @param top
+	 * @param skip
 	 * @return
 	 */
 	public List<PripMetadata> findByProductName(List<PripTextFilter> nameFilters, Optional<Integer> top, Optional<Integer> skip);
@@ -55,6 +61,8 @@ public interface PripMetadataRepository {
 	 * 
 	 * @param creationDateFilters can be empty
 	 * @param nameFilters can be empty
+	 * @param top
+	 * @param skip
 	 * @return
 	 */
 	public List<PripMetadata> findByCreationDateAndProductName(List<PripDateTimeFilter> creationDateFilters,
