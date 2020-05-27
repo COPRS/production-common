@@ -64,12 +64,13 @@ public class DataLifecycleWorkerListener implements MqiListener<EvictionManageme
     	
     	final String lastModified = DateUtils.formatToMetadataDateTimeFormat(lastModifiedInObs);
     	final String evictionDate = DateUtils.formatToMetadataDateTimeFormat(evictionTimeOfJob);
+    	LOG.debug("Updating ES 'lastModified'='{}' and 'evictionDate'='{}' for product {}", lastModified, evictionDate, job.getKeyObjectStorage());
     	
         final JSONObject expirationMetadata = new JSONObject();
         expirationMetadata.put("obsKey", job.getKeyObjectStorage());
         expirationMetadata.put("productFamily", job.getProductFamily());
         expirationMetadata.put("lastModified", lastModified);
-        expirationMetadata.put("evictionDate",evictionDate);
+        expirationMetadata.put("evictionDate", evictionDate);
         expirationMetadata.put("isUnlimited", job.isUnlimited());
 
         elasticSearchDAO.index(
