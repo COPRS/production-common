@@ -3,6 +3,7 @@ package esa.s1pdgs.cpoc.prip.frontend.service.processor;
 import java.io.InputStream;
 import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 
 import org.apache.olingo.commons.api.data.ContextURL;
 import org.apache.olingo.commons.api.data.Entity;
@@ -26,6 +27,7 @@ import org.apache.olingo.server.api.uri.UriInfo;
 import org.apache.olingo.server.api.uri.UriResource;
 import org.apache.olingo.server.api.uri.UriResourceEntitySet;
 import org.apache.olingo.server.api.uri.queryoption.FilterOption;
+import org.apache.olingo.server.api.uri.queryoption.SkipOption;
 import org.apache.olingo.server.api.uri.queryoption.SystemQueryOption;
 import org.apache.olingo.server.api.uri.queryoption.SystemQueryOptionKind;
 import org.apache.olingo.server.api.uri.queryoption.expression.Expression;
@@ -88,17 +90,17 @@ public class ProductEntityCollectionProcessor implements EntityCollectionProcess
 				}
 
 			}
-		}
-
+		}		
+		
 		List<PripMetadata> queryResult;
 		if (!pripDateTimeFilters.isEmpty() && !pripTextFilters.isEmpty()) {
-			queryResult = pripMetadataRepository.findByCreationDateAndProductName(pripDateTimeFilters, pripTextFilters, 0, 0);
+			queryResult = pripMetadataRepository.findByCreationDateAndProductName(pripDateTimeFilters, pripTextFilters, Optional.empty(), Optional.empty());
 		} else if (!pripDateTimeFilters.isEmpty()) {
-			queryResult = pripMetadataRepository.findByCreationDate(pripDateTimeFilters, 0, 0);
+			queryResult = pripMetadataRepository.findByCreationDate(pripDateTimeFilters, Optional.empty(), Optional.empty());
 		} else if (!pripTextFilters.isEmpty()) {
-			queryResult = pripMetadataRepository.findByProductName(pripTextFilters, 0, 0);
+			queryResult = pripMetadataRepository.findByProductName(pripTextFilters, Optional.empty(), Optional.empty());
 		} else {
-			queryResult = pripMetadataRepository.findAll(0, 0);
+			queryResult = pripMetadataRepository.findAll(Optional.empty(), Optional.empty());
 		}
 
 		List<Entity> productList = entityCollection.getEntities();

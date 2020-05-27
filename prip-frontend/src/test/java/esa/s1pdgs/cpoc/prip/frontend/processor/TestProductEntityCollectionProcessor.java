@@ -9,6 +9,7 @@ import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.Optional;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.olingo.commons.api.edm.EdmEntitySet;
@@ -73,7 +74,7 @@ public class TestProductEntityCollectionProcessor {
 		String baseUri = "http://example.org";
 		String odataPath = "/" + entitySetName;
 		
-		doReturn(Collections.emptyList()).when(pripMetadataRepositoryMock).findAll(0 ,0);
+		doReturn(Collections.emptyList()).when(pripMetadataRepositoryMock).findAll(Optional.empty(), Optional.empty());
 		
 		doReturn(baseUri).when(odataRequestMock).getRawBaseUri();
 		doReturn(odataPath).when(odataRequestMock).getRawODataPath();
@@ -94,7 +95,7 @@ public class TestProductEntityCollectionProcessor {
 		ODataResponse odataResponse = new ODataResponse();
 		uut.readEntityCollection(odataRequestMock, odataResponse, uriInfoMock, ContentType.JSON_FULL_METADATA);
 		
-		Mockito.verify(pripMetadataRepositoryMock, times(1)).findAll(0, 0);
+		Mockito.verify(pripMetadataRepositoryMock, times(1)).findAll(Optional.empty(), Optional.empty());
 		assertEquals(HttpStatusCode.OK.getStatusCode(), odataResponse.getStatusCode());
 		assertEquals("expected result", IOUtils.toString(odataResponse.getContent(), StandardCharsets.UTF_8));
 	}
