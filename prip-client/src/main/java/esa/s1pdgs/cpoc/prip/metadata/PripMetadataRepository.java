@@ -68,5 +68,21 @@ public interface PripMetadataRepository {
 	public List<PripMetadata> findByCreationDateAndProductName(List<PripDateTimeFilter> creationDateFilters,
 			List<PripTextFilter> nameFilters, Optional<Integer> top, Optional<Integer> skip);
 
-
+	/**
+	 * Counts all PRIP metadata.
+	 * 
+	 * @return
+	 */
+	public int countAll();
+	
+	/**
+	 * Counts PRIP metadata by creation date and name using date time and name filters.
+	 * Each of the the result matches with all filters provided for the fields 'creationDate' and 'name'.
+	 * 
+	 * @param creationDateFilters can be empty
+	 * @param nameFilters can be empty
+	 * @return
+	 */
+	public int countByCreationDateAndProductName(List<PripDateTimeFilter> creationDateFilters,
+			List<PripTextFilter> nameFilters);
 }

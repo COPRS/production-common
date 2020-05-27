@@ -255,4 +255,17 @@ public class PripElasticSearchMetadataRepo implements PripMetadataRepository {
 		return pm;
 	}
 
+	@Override
+	public int countAll() {
+		// TODO Auto-generated method stub
+		return 0;
+	}
+
+	@Override
+	public int countByCreationDateAndProductName(List<PripDateTimeFilter> creationDateFilters,
+			List<PripTextFilter> nameFilters) {
+		// TODO Auto-generated method stub
+		return 0;
+	}
+
 }
