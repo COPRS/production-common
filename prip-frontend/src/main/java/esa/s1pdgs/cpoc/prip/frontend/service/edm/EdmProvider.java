@@ -129,9 +129,13 @@ public class EdmProvider extends org.apache.olingo.commons.api.edm.provider.Csdl
 		List<CsdlEntityType> entityTypes = new ArrayList<CsdlEntityType>();
 		entityTypes.add(getEntityType(ET_PRODUCT_FQN));
 
+		List<CsdlComplexType> complexTypes = new ArrayList<CsdlComplexType>();
+		complexTypes.add(getComplexType(CHECKSUM_TYPE_FQN));
+
 		CsdlSchema schema = new CsdlSchema();
 		schema.setNamespace(SERVICE_NAMESPACE);
 		schema.setEntityTypes(entityTypes);
+		schema.setComplexTypes(complexTypes);
 		schema.setEntityContainer(getEntityContainer());
 
 		schemas.add(schema);
