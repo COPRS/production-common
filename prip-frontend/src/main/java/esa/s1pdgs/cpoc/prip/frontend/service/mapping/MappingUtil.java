@@ -4,7 +4,7 @@ import static esa.s1pdgs.cpoc.prip.frontend.service.edm.EntityTypeProperties.Alg
 import static esa.s1pdgs.cpoc.prip.frontend.service.edm.EntityTypeProperties.Checksums;
 import static esa.s1pdgs.cpoc.prip.frontend.service.edm.EntityTypeProperties.ContentLength;
 import static esa.s1pdgs.cpoc.prip.frontend.service.edm.EntityTypeProperties.ContentType;
-import static esa.s1pdgs.cpoc.prip.frontend.service.edm.EntityTypeProperties.CreationDate;
+import static esa.s1pdgs.cpoc.prip.frontend.service.edm.EntityTypeProperties.PublicationDate;
 import static esa.s1pdgs.cpoc.prip.frontend.service.edm.EntityTypeProperties.EvictionDate;
 import static esa.s1pdgs.cpoc.prip.frontend.service.edm.EntityTypeProperties.Id;
 import static esa.s1pdgs.cpoc.prip.frontend.service.edm.EntityTypeProperties.Name;
@@ -37,7 +37,7 @@ public class MappingUtil {
 				.addProperty(new Property(null, Name.name(), ValueType.PRIMITIVE, pripMetadata.getName()))
 				.addProperty(new Property(null, ContentType.name(), ValueType.PRIMITIVE, pripMetadata.getContentType()))
 				.addProperty(new Property(null, ContentLength.name(), ValueType.PRIMITIVE, pripMetadata.getContentLength()))
-				.addProperty(new Property(null, CreationDate.name(), ValueType.PRIMITIVE, convertLocalDateTimeToTimestamp(pripMetadata.getCreationDate())))
+				.addProperty(new Property(null, PublicationDate.name(), ValueType.PRIMITIVE, convertLocalDateTimeToTimestamp(pripMetadata.getCreationDate())))
 				.addProperty(new Property(null, EvictionDate.name(), ValueType.PRIMITIVE, convertLocalDateTimeToTimestamp(pripMetadata.getEvictionDate())))
 				.addProperty(new Property(null, Checksums.name(), ValueType.COLLECTION_COMPLEX, mapToChecksumList(pripMetadata.getChecksums())));
 		entity.setMediaContentType(pripMetadata.getContentType());

@@ -86,7 +86,7 @@ public class TestOdataController {
 		doReturn(l).when(pripMetadataRepository).findByCreationDate(creationDateFilters, Optional.empty(), Optional.empty());
 
 		ResultActions ra = this.mockMvc.perform(get(
-				"/odata/v1/Products?$filter=CreationDate gt 2019-01-01T00:00:00.000Z and CreationDate lt 2020-01-06T02:00:00.000Z")
+				"/odata/v1/Products?$filter=PublicationDate gt 2019-01-01T00:00:00.000Z and PublicationDate lt 2020-01-06T02:00:00.000Z")
 						.contentType(MediaType.APPLICATION_JSON))
 				.andExpect(status().isOk());
 		expectIdAndName(ra, p1);
@@ -114,7 +114,7 @@ public class TestOdataController {
 		doReturn(l).when(pripMetadataRepository).findByCreationDate(creationDateFilters, Optional.empty(), Optional.empty());
 
 		ResultActions ra = this.mockMvc.perform(get(
-				"/odata/v1/Products?$filter=CreationDate gt 2019-01-01T00:00:00.000Z and CreationDate lt 2020-01-04T00:00:00.000Z")
+				"/odata/v1/Products?$filter=PublicationDate gt 2019-01-01T00:00:00.000Z and PublicationDate lt 2020-01-04T00:00:00.000Z")
 						.contentType(MediaType.APPLICATION_JSON))
 				.andExpect(status().isOk());
 		expectIdAndName(ra, p1);
