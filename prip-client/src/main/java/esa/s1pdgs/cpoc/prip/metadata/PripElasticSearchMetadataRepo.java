@@ -234,8 +234,7 @@ public class PripElasticSearchMetadataRepo implements PripMetadataRepository {
 		pm.setProductFamily(
 				ProductFamily.valueOf((String) sourceAsMap.get(PripMetadata.FIELD_NAMES.PRODUCT_FAMILY.fieldName())));
 		pm.setContentType((String) sourceAsMap.get(PripMetadata.FIELD_NAMES.CONTENT_TYPE.fieldName()));
-		pm.setContentLength(
-				Long.valueOf((String) sourceAsMap.get(PripMetadata.FIELD_NAMES.CONTENT_LENGTH.fieldName())));
+		pm.setContentLength((Integer) sourceAsMap.get(PripMetadata.FIELD_NAMES.CONTENT_LENGTH.fieldName()));
 		pm.setCreationDate(
 				DateUtils.parse((String) sourceAsMap.get(PripMetadata.FIELD_NAMES.CREATION_DATE.fieldName())));
 		pm.setEvictionDate(

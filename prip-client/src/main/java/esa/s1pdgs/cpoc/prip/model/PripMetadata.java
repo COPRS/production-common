@@ -1,8 +1,12 @@
 package esa.s1pdgs.cpoc.prip.model;
 
 import java.time.LocalDateTime;
+import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
+import java.util.function.Function;
+
+import org.json.JSONObject;
 
 import esa.s1pdgs.cpoc.common.ProductFamily;
 import esa.s1pdgs.cpoc.common.utils.DateUtils;
@@ -13,14 +17,30 @@ public class PripMetadata {
 	public static final int DEFAULT_EVICTION_DAYS = 7;
 
 	public enum FIELD_NAMES {
-		ID("id"), OBS_KEY("obsKey"), NAME("name"), PRODUCT_FAMILY("productFamily"), CONTENT_TYPE("contentType"),
-		CONTENT_LENGTH("contentLength"), CREATION_DATE("creationDate"), EVICTION_DATE("evictionDate"),
-		CHECKSUM("checksum");
+		ID("id", PripMetadata::getId),
+		OBS_KEY("obsKey", PripMetadata::getObsKey),
+		NAME("name", PripMetadata::getName),
+		PRODUCT_FAMILY("productFamily", m -> m.getProductFamily() != null ? m.getProductFamily().name() : null),
+		CONTENT_TYPE("contentType", PripMetadata::getContentType),
+		CONTENT_LENGTH("contentLength", PripMetadata::getContentLength),
+		CONTENT_DATE_START("contentDateStart", PripMetadata::getContentDateStart),
+		CONTENT_DATE_END("contentDateEnd", PripMetadata::getContentDateEnd),
+		CREATION_DATE("creationDate",
+				m -> (m.getCreationDate() != null) ? DateUtils.formatToMetadataDateTimeFormat(m.getCreationDate()) : null),
+		EVICTION_DATE("evictionDate",
+				m -> (m.getEvictionDate() == null) ? null : DateUtils.formatToMetadataDateTimeFormat(m.getEvictionDate())),
+		CHECKSUM("checksum", PripMetadata::getChecksums);
 
-		private String fieldName;
+		private final String fieldName;
+		private final Function<PripMetadata, Object> toJsonAccessor;
 
-		private FIELD_NAMES(String fieldName) {
+		FIELD_NAMES(String fieldName, Function<PripMetadata, Object> toJsonAccessor) {
 			this.fieldName = fieldName;
+			this.toJsonAccessor = toJsonAccessor;
+		}
+
+		public Function<PripMetadata, Object> toJsonAccessor() {
+			return toJsonAccessor;
 		}
 
 		public String fieldName() {
@@ -39,6 +59,10 @@ public class PripMetadata {
 	private String contentType;
 
 	private long contentLength;
+
+	private LocalDateTime contentDateStart;
+
+	private LocalDateTime contentDateEnd;
 
 	private LocalDateTime creationDate;
 
@@ -97,6 +121,18 @@ public class PripMetadata {
 		this.contentLength = contentLength;
 	}
 
+	public LocalDateTime getContentDateStart() { return contentDateStart; }
+
+	public void setContentDateStart(LocalDateTime contentDateStart) { this.contentDateStart = contentDateStart;}
+
+	public LocalDateTime getContentDateEnd() {
+		return contentDateEnd;
+	}
+
+	public void setContentDateEnd(LocalDateTime contentDateEnd) {
+		this.contentDateEnd = contentDateEnd;
+	}
+
 	public LocalDateTime getCreationDate() {
 		return creationDate;
 	}
@@ -121,18 +157,17 @@ public class PripMetadata {
 		this.checksums = checksums;
 	}
 
+	public JSONObject toJson() {
+		JSONObject json = new JSONObject();
+
+		Arrays.stream(FIELD_NAMES.values()).forEach(field -> json.put(field.fieldName(), field.toJsonAccessor().apply(this)));
+
+		return json;
+	}
+
 	@Override
 	public String toString() {
-		return String.format(
-				"{\"%s\":\"%s\", \"%s\":\"%s\", \"%s\":\"%s\", \"%s\":\"%s\", \"%s\":\"%s\", \"%s\":\"%s\", \"%s\":\"%s\", \"%s\":\"%s\", \"%s\":%s}",
-				FIELD_NAMES.ID.fieldName(), id, FIELD_NAMES.OBS_KEY.fieldName(), obsKey, FIELD_NAMES.NAME.fieldName(),
-				name, FIELD_NAMES.PRODUCT_FAMILY.fieldName(), (productFamily == null) ? null : productFamily.name(),
-				FIELD_NAMES.CONTENT_TYPE.fieldName(), contentType, FIELD_NAMES.CONTENT_LENGTH.fieldName(),
-				contentLength, FIELD_NAMES.CREATION_DATE.fieldName(),
-				(creationDate == null) ? null : DateUtils.formatToMetadataDateTimeFormat(creationDate),
-				FIELD_NAMES.EVICTION_DATE.fieldName(),
-				(evictionDate == null) ? null : DateUtils.formatToMetadataDateTimeFormat(evictionDate),
-				FIELD_NAMES.CHECKSUM.fieldName(), checksums);
+		return toJson().toString();
 	}
 
 	@Override
@@ -142,6 +177,8 @@ public class PripMetadata {
 		result = prime * result + ((checksums == null) ? 0 : checksums.hashCode());
 		result = prime * result + (int) (contentLength ^ (contentLength >>> 32));
 		result = prime * result + ((contentType == null) ? 0 : contentType.hashCode());
+		result = prime * result * (contentDateStart == null ? 0 : contentDateStart.hashCode());
+		result = prime * result * (contentDateEnd == null ? 0 : contentDateEnd.hashCode());
 		result = prime * result + ((creationDate == null) ? 0 : creationDate.hashCode());
 		result = prime * result + ((evictionDate == null) ? 0 : evictionDate.hashCode());
 		result = prime * result + ((id == null) ? 0 : id.hashCode());
@@ -166,6 +203,16 @@ public class PripMetadata {
 		} else if (!checksums.equals(other.checksums))
 			return false;
 		if (contentLength != other.contentLength)
+			return false;
+		if (contentDateStart == null) {
+			if(other.contentDateStart != null)
+				return false;
+		} else if(!contentDateStart.equals(other.contentDateStart))
+			return false;
+		if (contentDateEnd == null) {
+			if(other.contentDateEnd != null)
+				return false;
+		} else if(!contentDateEnd.equals(other.contentDateEnd))
 			return false;
 		if (contentType == null) {
 			if (other.contentType != null)
@@ -197,9 +244,7 @@ public class PripMetadata {
 				return false;
 		} else if (!obsKey.equals(other.obsKey))
 			return false;
-		if (productFamily != other.productFamily)
-			return false;
-		return true;
+		return productFamily == other.productFamily;
 	}
 
 }
