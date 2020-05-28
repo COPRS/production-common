@@ -143,8 +143,12 @@ public class ProductEntityCollectionProcessor implements EntityCollectionProcess
 			// Count Request
 			
 			int count = 0;
-			if (!pripDateTimeFilters.isEmpty() || !pripTextFilters.isEmpty()) {
+			if (!pripDateTimeFilters.isEmpty() && !pripTextFilters.isEmpty()) {
 				count = pripMetadataRepository.countByCreationDateAndProductName(pripDateTimeFilters, pripTextFilters);
+			} else if (!pripDateTimeFilters.isEmpty()) {
+				count = pripMetadataRepository.countByCreationDateAndProductName(pripDateTimeFilters, Collections.emptyList());
+			} else if (!pripTextFilters.isEmpty()) {
+				count = pripMetadataRepository.countByCreationDateAndProductName(Collections.emptyList(), pripTextFilters);
 			} else {
 				count = pripMetadataRepository.countAll();
 			}
