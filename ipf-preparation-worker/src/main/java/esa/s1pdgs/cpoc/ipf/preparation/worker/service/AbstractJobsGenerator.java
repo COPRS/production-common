@@ -59,6 +59,7 @@ import esa.s1pdgs.cpoc.ipf.preparation.worker.model.tasktable.TaskTablePool;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.model.tasktable.TaskTableTask;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.model.tasktable.enums.TaskTableInputOrigin;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.model.tasktable.enums.TaskTableMandatoryEnum;
+import esa.s1pdgs.cpoc.ipf.preparation.worker.state.JobStateTransistionFailed;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.timeout.InputTimeoutChecker;
 import esa.s1pdgs.cpoc.metadata.client.MetadataClient;
 import esa.s1pdgs.cpoc.metadata.client.SearchMetadataQuery;
@@ -351,10 +352,14 @@ public abstract class AbstractJobsGenerator implements Runnable {
 		}
 	}
 
+
+	
 	private final void stateTransition(final JobGeneration job,
-//    		final Reporting reporting, 
-			final AppDataJobGenerationState nextState, final Function<JobGeneration, JobGeneration> transitionFunction)
-			throws AbstractCodedException {
+			final AppDataJobGenerationState nextState, 
+			final Function<JobGeneration, JobGeneration> transitionFunction
+	)
+		throws AbstractCodedException {
+		
 		final AppDataJobGenerationState oldState = job.getGeneration().getState();
 		@SuppressWarnings("unchecked")
 		final AppDataJob<CatalogEvent> appDataJob = job.getAppDataJob();
@@ -366,9 +371,9 @@ public abstract class AbstractJobsGenerator implements Runnable {
 			job.setAppDataJob(updatedJob.getAppDataJob());
 			updateState(job, nextState);
 			LOGGER.info("End job {} state transition, state {} -> {}", appDataJob.getId(), oldState, nextState);
-//            reporting.end(
-//            		new ReportingMessage("End job %s state transition, state %s", appDataJob.getId(), state)
-//            );
+		}
+		catch (final JobStateTransistionFailed e) {
+			
 		}
 		// FIXME there is actually no real error scenario handled here as every
 		// exception will cause to stay in the old state.
@@ -467,11 +472,6 @@ public abstract class AbstractJobsGenerator implements Runnable {
 				if (job.getGeneration().getState() == AppDataJobGenerationState.READY) {
 					stateTransition(job, AppDataJobGenerationState.SENT, j -> readyToSend(j, appDataJob.getReportingId()));
 				}
-//
-//                reporting.end(
-//                		new JobOrderReportingOutput(jobOrderName, toProcParamMap(job)), 
-//                		new ReportingMessage("End job generation")
-//                );
 			} catch (final AbstractCodedException ace) {
 				LOGGER.error("{} [productName {}] [code {}] Cannot generate job: {}", this.prefixLogMonitor,
 						appDataJob.getProduct().getProductName(), ace.getCode().getCode(), ace.getLogMessage());

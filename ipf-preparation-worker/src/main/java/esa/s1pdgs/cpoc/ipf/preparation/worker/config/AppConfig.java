@@ -7,7 +7,6 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.web.client.RestTemplate;
 
 import esa.s1pdgs.cpoc.appcatalog.client.job.AppCatalogJobClient;
-import esa.s1pdgs.cpoc.common.ProductCategory;
 import esa.s1pdgs.cpoc.mqi.model.queue.CatalogEvent;
 
 /**
@@ -37,8 +36,7 @@ public class AppConfig {
 				restTemplate, 
 				properties.getHostUri(), 
 				properties.getMaxRetries(), 
-				properties.getTempoRetryMs(), 
-				ProductCategory.CATALOG_EVENT
+				properties.getTempoRetryMs()
 		);
 	}
 

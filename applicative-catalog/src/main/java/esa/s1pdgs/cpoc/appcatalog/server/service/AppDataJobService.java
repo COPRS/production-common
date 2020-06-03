@@ -21,8 +21,6 @@ import esa.s1pdgs.cpoc.appcatalog.server.job.exception.AppCatalogJobNotFoundExce
 import esa.s1pdgs.cpoc.appcatalog.server.sequence.db.SequenceDao;
 import esa.s1pdgs.cpoc.common.ProductCategory;
 import esa.s1pdgs.cpoc.common.filter.FilterCriterion;
-import esa.s1pdgs.cpoc.mqi.model.queue.AbstractMessage;
-import esa.s1pdgs.cpoc.mqi.model.rest.GenericMessageDto;
 
 /**
  * @author Viveris Technologies
@@ -63,9 +61,8 @@ public class AppDataJobService {
      * @param filters
      * @return
      */
-    public List<AppDataJob> search(final List<FilterCriterion> filters,
-            final ProductCategory category, final Sort sort) {
-        return appDataJobDao.search(filters, category, sort);
+    public List<AppDataJob> search(final List<FilterCriterion> filters, final Sort sort) {
+        return appDataJobDao.search(filters, sort);
     }
 
     /**
@@ -102,7 +99,7 @@ public class AppDataJobService {
      */
     public AppDataJob newJob(final AppDataJob newJob) {
         // Check new job format TODO
-        long sequence = sequenceDao.getNextSequenceId(JOB_SEQ_KEY);
+        final long sequence = sequenceDao.getNextSequenceId(JOB_SEQ_KEY);
         // Save it
         newJob.setId(sequence);
         newJob.setState(AppDataJobState.WAITING);
@@ -132,7 +129,7 @@ public class AppDataJobService {
     public AppDataJob patchJob(final Long jobId, final AppDataJob patchJob)
             throws AppCatalogJobNotFoundException {
         // Find if job exists
-        AppDataJob jobDb = appDataJobDao.findById(jobId)
+        final AppDataJob jobDb = appDataJobDao.findById(jobId)
                 .orElseThrow(() -> new AppCatalogJobNotFoundException(jobId));
 
         boolean update = true;
@@ -180,35 +177,34 @@ public class AppDataJobService {
         return appDataJobDao.save(jobDb);
     }
 
-    public AppDataJob patchGenerationToJob(final Long jobId,
-            final String taskTable, final AppDataJobGeneration patchGen,
-            final int maxNbErrors) throws AppCatalogJobNotFoundException,
+    public AppDataJob patchGenerationToJob(
+    		final Long jobId,
+            final String taskTable, 
+            final AppDataJobGeneration patchGen
+    ) throws AppCatalogJobNotFoundException,
             AppCatalogJobGenerationTerminatedException,
             AppCatalogJobGenerationInvalidTransitionStateException,
             AppCatalogJobGenerationNotFoundException {
+    	
         // Find if job exists
-        AppDataJob<?> jobDb = appDataJobDao.findById(jobId)
+        final AppDataJob jobDb = appDataJobDao.findById(jobId)
                 .orElseThrow(() -> new AppCatalogJobNotFoundException(jobId));
 
         // Find the right generation and update it
-        AppDataJobGeneration foundGenDb = null;
-        for (AppDataJobGeneration genDb : jobDb.getGenerations()) {
-            if (genDb.getTaskTable().equals(taskTable)) {
-                foundGenDb = genDb;
-            }
-        }
+        final List<AppDataJobGeneration> genForTasktable = jobDb.getGenerations().stream()
+        		.filter(g -> g.getTaskTable().equals(taskTable))
+        		.collect(Collectors.toList());
+        
+        if (genForTasktable.isEmpty()) {
+            throw new AppCatalogJobGenerationNotFoundException(jobId, taskTable);
+        }        
+        final AppDataJobGeneration foundGenDb = genForTasktable.get(0);
 
-        if (foundGenDb == null) {
-            throw new AppCatalogJobGenerationNotFoundException(jobId,
-                    taskTable);
-        }
-
-        // Check format
+        // Update state only if it has changed
         if (foundGenDb.getState() != patchGen.getState()) {
             switch (foundGenDb.getState()) {
                 case INITIAL:
-                    if (patchGen
-                            .getState() != AppDataJobGenerationState.PRIMARY_CHECK) {
+                    if (patchGen.getState() != AppDataJobGenerationState.PRIMARY_CHECK) {
                         throw new AppCatalogJobGenerationInvalidTransitionStateException(
                                 foundGenDb.getState().name(),
                                 patchGen.getState().name());
@@ -237,56 +233,42 @@ public class AppDataJobService {
         // Update
         if (patchGen.getState() == AppDataJobGenerationState.SENT) {
             return terminateGeneration(jobDb, foundGenDb);
-        } else {
-            if (foundGenDb.getState() == patchGen.getState()) {
-                int currentNbErrors = foundGenDb.getNbErrors();
-                if (currentNbErrors + 1 >= maxNbErrors) {
-                    terminateGeneration(jobDb, foundGenDb);
-                    throw new AppCatalogJobGenerationTerminatedException(
-                            jobDb.getProduct().getProductName(),
-                            jobDb.getMessages().stream().map(s -> (GenericMessageDto<? extends AbstractMessage>)s).collect(Collectors.toList()));
-                } else {
-                    foundGenDb.setLastUpdateDate(new Date());
-                    foundGenDb.setNbErrors(currentNbErrors + 1);
-                    foundGenDb.setState(patchGen.getState());
-                    appDataJobDao.udpateJobGeneration(jobDb.getId(), foundGenDb);
-                    return jobDb;
-                }
-            } else {
-                foundGenDb.setState(patchGen.getState());
-                foundGenDb.setLastUpdateDate(new Date());
-                foundGenDb.setNbErrors(0);
-                appDataJobDao.udpateJobGeneration(jobDb.getId(), foundGenDb);
-                return jobDb;
-            }
+        } 
+        if (foundGenDb.getState() == patchGen.getState()) {
+            final int currentNbErrors = foundGenDb.getNbErrors();
+            foundGenDb.setLastUpdateDate(new Date());
+            foundGenDb.setNbErrors(currentNbErrors + 1);
+            foundGenDb.setState(patchGen.getState());
+            return appDataJobDao.updateJobGeneration(jobDb.getId(), foundGenDb);
         }
+        foundGenDb.setState(patchGen.getState());
+        foundGenDb.setLastUpdateDate(new Date());
+        foundGenDb.setNbErrors(0);
+        return appDataJobDao.updateJobGeneration(jobDb.getId(), foundGenDb);
     }
 
-    private AppDataJob terminateGeneration(AppDataJob jobDb,
-            AppDataJobGeneration genDb) throws AppCatalogJobNotFoundException {
+    private AppDataJob terminateGeneration(
+    		final AppDataJob jobDb,
+            final AppDataJobGeneration genDb
+    ) throws AppCatalogJobNotFoundException {
         // Update gen
         genDb.setState(AppDataJobGenerationState.SENT);
         genDb.setLastUpdateDate(new Date());
         genDb.setNbErrors(0);
-        appDataJobDao.udpateJobGeneration(jobDb.getId(), genDb);
+        final AppDataJob refreshJobDb = appDataJobDao.updateJobGeneration(jobDb.getId(), genDb);
 
-        // Search if all generation are terminated
-        AppDataJob<?> refreshJobDb = appDataJobDao.findById(jobDb.getId())
-                .orElseThrow(() -> new AppCatalogJobNotFoundException(jobDb.getId()));
         boolean terminated = true;
-        for (AppDataJobGeneration gen : refreshJobDb.getGenerations()) {
+        for (final AppDataJobGeneration gen : refreshJobDb.getGenerations()) {
             if (gen.getState() != AppDataJobGenerationState.SENT) {
                 terminated = false;
             }
         }
-
         // Terminate job if needed
         if (terminated) {
             refreshJobDb.setState(AppDataJobState.TERMINATED);
             refreshJobDb.setLastUpdateDate(new Date());
             return appDataJobDao.save(refreshJobDb);
         }
-
         return refreshJobDb;
     }
 }

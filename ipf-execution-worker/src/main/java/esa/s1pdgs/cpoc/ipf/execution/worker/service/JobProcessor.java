@@ -28,6 +28,7 @@ import org.springframework.stereotype.Service;
 import esa.s1pdgs.cpoc.appstatus.AppStatus;
 import esa.s1pdgs.cpoc.common.ApplicationLevel;
 import esa.s1pdgs.cpoc.common.ProductCategory;
+import esa.s1pdgs.cpoc.common.ProductFamily;
 import esa.s1pdgs.cpoc.common.errors.AbstractCodedException;
 import esa.s1pdgs.cpoc.common.errors.AbstractCodedException.ErrorCode;
 import esa.s1pdgs.cpoc.common.errors.InternalErrorException;
@@ -48,9 +49,11 @@ import esa.s1pdgs.cpoc.mqi.client.MqiConsumer;
 import esa.s1pdgs.cpoc.mqi.client.MqiListener;
 import esa.s1pdgs.cpoc.mqi.client.StatusService;
 import esa.s1pdgs.cpoc.mqi.model.queue.IpfExecutionJob;
+import esa.s1pdgs.cpoc.mqi.model.queue.LevelJobInputDto;
 import esa.s1pdgs.cpoc.mqi.model.rest.GenericMessageDto;
 import esa.s1pdgs.cpoc.obs_sdk.ObsClient;
 import esa.s1pdgs.cpoc.report.Reporting;
+import esa.s1pdgs.cpoc.report.ReportingFilenameEntry;
 import esa.s1pdgs.cpoc.report.ReportingMessage;
 import esa.s1pdgs.cpoc.report.ReportingOutput;
 import esa.s1pdgs.cpoc.report.ReportingUtils;
@@ -384,10 +387,17 @@ public class JobProcessor implements MqiListener<IpfExecutionJob> {
 		}
 	}
 	
-	private final List<String> toReportFilenames(final IpfExecutionJob job) {
+	private final List<ReportingFilenameEntry> toReportFilenames(final IpfExecutionJob job) {
 		return job.getInputs().stream()
-			.map(j -> Paths.get(j.getLocalPath()).getFileName().toString())
+			.map(j -> newEntry(j))
 			.collect(Collectors.toList());
+	}
+	
+	private final ReportingFilenameEntry newEntry(final LevelJobInputDto input) {
+		return new ReportingFilenameEntry(
+				ProductFamily.fromValue(input.getFamily()), 
+				Paths.get(input.getLocalPath()).getFileName().toString()
+		);
 	}
 	
 	// checks AppStatus, whether app shall be stopped and in that case, shut down this service as well

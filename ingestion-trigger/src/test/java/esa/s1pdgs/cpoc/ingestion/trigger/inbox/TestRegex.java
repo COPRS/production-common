@@ -24,6 +24,12 @@ public class TestRegex {
 		assertFalse("WILE/S1A/L20180724144436762001030/ch02/.DCS_02_L20180724144436762001030_ch2_DSDB_00028.raw".matches(NEW_REGEX));
 	}
 	
+	@Test
+	public final void tes() {
+		final String fool = "1590759627";
+		System.out.println(fool);
+		System.out.println(System.currentTimeMillis());
+	}
 	
 	@Test
 	public final void testNewRegex() {

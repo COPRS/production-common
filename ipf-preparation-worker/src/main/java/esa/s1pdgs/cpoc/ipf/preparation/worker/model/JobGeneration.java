@@ -56,12 +56,12 @@ public class JobGeneration {
     public JobGeneration(final AppDataJob appDataJob, final String taskTable) {
         this.appDataJob = appDataJob;
         this.metadataQueries = new HashMap<>();
-        List<AppDataJobGeneration> generations = appDataJob.getGenerations();
+        final List<AppDataJobGeneration> generations = appDataJob.getGenerations();
         if (CollectionUtils.isEmpty(generations)) {
             generation = new AppDataJobGeneration();
             generation.setTaskTable(taskTable);
         } else {
-            for (AppDataJobGeneration jobGen : generations) {
+            for (final AppDataJobGeneration jobGen : generations) {
                 if (taskTable.equals(jobGen.getTaskTable())) {
                     generation = jobGen;
                     break;
@@ -70,21 +70,21 @@ public class JobGeneration {
         }
     }
     
-    public void updateAppDataJob(final AppDataJob appDataJob, final String taskTable) {
-        this.appDataJob = appDataJob;
-        List<AppDataJobGeneration> generations = appDataJob.getGenerations();
-        if (CollectionUtils.isEmpty(generations)) {
-            generation = new AppDataJobGeneration();
-            generation.setTaskTable(taskTable);
-        } else {
-            for (AppDataJobGeneration jobGen : generations) {
-                if (taskTable.equals(jobGen.getTaskTable())) {
-                    generation = jobGen;
-                    break;
-                }
-            }
-        }
-    }
+//    public void updateAppDataJob(final AppDataJob appDataJob, final String taskTable) {
+//        this.appDataJob = appDataJob;
+//        List<AppDataJobGeneration> generations = appDataJob.getGenerations();
+//        if (CollectionUtils.isEmpty(generations)) {
+//            generation = new AppDataJobGeneration();
+//            generation.setTaskTable(taskTable);
+//        } else {
+//            for (AppDataJobGeneration jobGen : generations) {
+//                if (taskTable.equals(jobGen.getTaskTable())) {
+//                    generation = jobGen;
+//                    break;
+//                }
+//            }
+//        }
+//    }
 
     /**
      * @return the appDataJob
@@ -97,7 +97,7 @@ public class JobGeneration {
      * @param appDataJob
      *            the appDataJob to set
      */
-    public void setAppDataJob(final AppDataJob appDataJob) {
+    public void xxxsetAppDataJob(final AppDataJob appDataJob) {
         this.appDataJob = appDataJob;
     }
 
@@ -112,7 +112,7 @@ public class JobGeneration {
      * @param generation
      *            the generation to set
      */
-    public void setGeneration(final AppDataJobGeneration generation) {
+    public void xxxsetGeneration(final AppDataJobGeneration generation) {
         this.generation = generation;
     }
 
@@ -127,7 +127,7 @@ public class JobGeneration {
      * @param jobOrder
      *            the jobOrder to set
      */
-    public void setJobOrder(final JobOrder jobOrder) {
+    public void cccsetJobOrder(final JobOrder jobOrder) {
         this.jobOrder = jobOrder;
     }
 
@@ -142,7 +142,7 @@ public class JobGeneration {
      * @param metadataQueries
      *            the metadataQueries to set
      */
-    public void setMetadataQueries(
+    public void xxxsetMetadataQueries(
             final Map<Integer, SearchMetadataResult> metadataQueries) {
         this.metadataQueries = metadataQueries;
     }
@@ -176,7 +176,7 @@ public class JobGeneration {
         } else if (obj == null || getClass() != obj.getClass()) {
             ret = false;
         } else {
-            JobGeneration other = (JobGeneration) obj;
+            final JobGeneration other = (JobGeneration) obj;
             ret = Objects.equals(appDataJob, other.appDataJob)
                     && Objects.equals(generation, other.generation)
                     && Objects.equals(jobOrder, other.jobOrder)
