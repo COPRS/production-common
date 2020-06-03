@@ -79,11 +79,11 @@ public class InputDownloaderTest {
 
         downloaderL0 = new InputDownloader(obsClient, TestUtils.WORKDIR,
                 jobL0.getInputs(), 5, "prefix-logs", this.poolProcessorExecutor,
-                ApplicationLevel.L0);
+                ApplicationLevel.L0, null);
 
         downloaderL1 = new InputDownloader(obsClient, TestUtils.WORKDIR,
                 jobL1.getInputs(), 5, "prefix-logs", this.poolProcessorExecutor,
-                ApplicationLevel.L1);
+                ApplicationLevel.L1, null);
     }
 
     /**
