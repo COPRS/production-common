@@ -78,7 +78,7 @@ public class TestMappingUtil {
 				.addProperty(new Property(null, "Name", ValueType.PRIMITIVE, "Name"))
 				.addProperty(new Property(null, "ContentType", ValueType.PRIMITIVE, "application/octet-stream"))
 				.addProperty(new Property(null, "ContentLength", ValueType.PRIMITIVE, 123L))
-				.addProperty(new Property(null, "CreationDate", ValueType.PRIMITIVE, new Timestamp(100000000000L)))
+				.addProperty(new Property(null, "PublicationDate", ValueType.PRIMITIVE, new Timestamp(100000000000L)))
 				.addProperty(new Property(null, "EvictionDate", ValueType.PRIMITIVE, new Timestamp(200000000000L)))
 				.addProperty(new Property(null, "Checksums", ValueType.COLLECTION_COMPLEX, Arrays.asList(cv1, cv2)));
 		expectedEntity.setMediaContentType("application/octet-stream");

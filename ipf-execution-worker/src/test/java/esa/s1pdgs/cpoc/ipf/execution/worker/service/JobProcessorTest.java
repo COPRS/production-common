@@ -2,7 +2,6 @@ package esa.s1pdgs.cpoc.ipf.execution.worker.service;
 
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
-import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.never;
@@ -11,6 +10,7 @@ import static org.mockito.Mockito.verify;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.Collections;
 import java.util.UUID;
 import java.util.concurrent.ExecutorCompletionService;
 import java.util.concurrent.ExecutorService;
@@ -34,7 +34,6 @@ import esa.s1pdgs.cpoc.ipf.execution.worker.job.file.InputDownloader;
 import esa.s1pdgs.cpoc.ipf.execution.worker.job.file.OutputProcessor;
 import esa.s1pdgs.cpoc.ipf.execution.worker.job.mqi.OutputProcuderFactory;
 import esa.s1pdgs.cpoc.ipf.execution.worker.job.process.PoolExecutorCallable;
-import esa.s1pdgs.cpoc.ipf.execution.worker.service.JobProcessor;
 import esa.s1pdgs.cpoc.ipf.execution.worker.test.MockPropertiesTest;
 import esa.s1pdgs.cpoc.mqi.client.GenericMqiClient;
 import esa.s1pdgs.cpoc.mqi.model.queue.IpfExecutionJob;
@@ -131,7 +130,7 @@ public class JobProcessorTest extends MockPropertiesTest {
         }
         mockWorkingdirProperties(workingDir.toPath());
         processor = new JobProcessor(appStatus, properties, devProperties,
-                obsClient, procuderFactory, mqiService, errorAppender, mqiStatusService, 0L, 10L);
+                obsClient, procuderFactory, mqiService, errorAppender, mqiStatusService, 0L, 10L, null);
         procExecutorSrv = Executors.newSingleThreadExecutor();
         procCompletionSrv = new ExecutorCompletionService<>(procExecutorSrv);
     }
@@ -221,7 +220,7 @@ public class JobProcessorTest extends MockPropertiesTest {
                     .when(procExecutor).call();
         } 
         // Step 2
-        doNothing().when(inputDownloader).processInputs(reporting);
+        doReturn(Collections.emptyList()).when(inputDownloader).processInputs(reporting);
         // Step 4
         doReturn(ReportingOutput.NULL).when(outputProcessor).processOutput(reporting, UUID.randomUUID());
         // Step 5

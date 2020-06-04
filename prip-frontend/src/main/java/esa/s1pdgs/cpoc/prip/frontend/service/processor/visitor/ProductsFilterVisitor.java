@@ -1,6 +1,6 @@
 package esa.s1pdgs.cpoc.prip.frontend.service.processor.visitor;
 
-import static esa.s1pdgs.cpoc.prip.frontend.service.edm.EntityTypeProperties.CreationDate;
+import static esa.s1pdgs.cpoc.prip.frontend.service.edm.EntityTypeProperties.PublicationDate;
 import static esa.s1pdgs.cpoc.prip.frontend.service.edm.EntityTypeProperties.Name;
 
 import java.time.Instant;
@@ -76,11 +76,11 @@ public class ProductsFilterVisitor implements ExpressionVisitor<Object> {
 			break;
 		case GT:
 			PripDateTimeFilter pripDateTimefilter1 = new PripDateTimeFilter();
-			// one side must be CreationDate, the other a literal
-			if (left instanceof Member && leftOperand.equals(CreationDate.name()) && right instanceof Literal) {
+			// one side must be PublicationDate, the other a literal
+			if (left instanceof Member && leftOperand.equals(PublicationDate.name()) && right instanceof Literal) {
 				pripDateTimefilter1.setDateTime(convertToLocalDateTime(rightOperand));
 				pripDateTimefilter1.setOperator(Operator.GT);
-			} else if (right instanceof Member && rightOperand.equals(CreationDate.name()) && left instanceof Literal) {
+			} else if (right instanceof Member && rightOperand.equals(PublicationDate.name()) && left instanceof Literal) {
 				pripDateTimefilter1.setDateTime(convertToLocalDateTime(leftOperand));
 				pripDateTimefilter1.setOperator(Operator.LT);
 			} else {
@@ -91,11 +91,11 @@ public class ProductsFilterVisitor implements ExpressionVisitor<Object> {
 			break;
 		case LT:
 			PripDateTimeFilter pripDateTimefilter2 = new PripDateTimeFilter();
-			// one side must be CreationDate, the other a literal
-			if (left instanceof Member && leftOperand.equals(CreationDate.name()) && right instanceof Literal) {
+			// one side must be PublicationDate, the other a literal
+			if (left instanceof Member && leftOperand.equals(PublicationDate.name()) && right instanceof Literal) {
 				pripDateTimefilter2.setDateTime(convertToLocalDateTime(rightOperand));
 				pripDateTimefilter2.setOperator(Operator.LT);
-			} else if (right instanceof Member && rightOperand.equals(CreationDate.name()) && left instanceof Literal) {
+			} else if (right instanceof Member && rightOperand.equals(PublicationDate.name()) && left instanceof Literal) {
 				pripDateTimefilter2.setDateTime(convertToLocalDateTime(leftOperand));
 				pripDateTimefilter2.setOperator(Operator.GT);
 			} else {

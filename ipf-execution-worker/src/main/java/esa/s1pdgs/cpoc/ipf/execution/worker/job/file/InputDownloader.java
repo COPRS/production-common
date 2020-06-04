@@ -3,6 +3,7 @@ package esa.s1pdgs.cpoc.ipf.execution.worker.job.file;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -12,8 +13,11 @@ import esa.s1pdgs.cpoc.common.ProductFamily;
 import esa.s1pdgs.cpoc.common.errors.AbstractCodedException;
 import esa.s1pdgs.cpoc.common.errors.InternalErrorException;
 import esa.s1pdgs.cpoc.common.errors.UnknownFamilyException;
+import esa.s1pdgs.cpoc.common.errors.processing.MetadataQueryException;
 import esa.s1pdgs.cpoc.common.utils.FileUtils;
 import esa.s1pdgs.cpoc.ipf.execution.worker.job.process.PoolExecutorCallable;
+import esa.s1pdgs.cpoc.metadata.client.MetadataClient;
+import esa.s1pdgs.cpoc.metadata.model.EdrsSessionMetadata;
 import esa.s1pdgs.cpoc.mqi.model.queue.LevelJobInputDto;
 import esa.s1pdgs.cpoc.obs_sdk.ObsClient;
 import esa.s1pdgs.cpoc.obs_sdk.ObsDownloadObject;
@@ -26,7 +30,14 @@ import esa.s1pdgs.cpoc.report.ReportingFactory;
  * @author Viveris Technologies
  */
 public class InputDownloader {
+    
+//    public static final ObsDownloadObject MISSING_RAW = new ObsDownloadObject(
+//    		ProductFamily.INVALID, 
+//    		"notDefined", 
+//    		"notDefined"
+//    ); 
 
+    
     /**
      * Logger
      */
@@ -78,6 +89,8 @@ public class InputDownloader {
      * Application level
      */
     private final ApplicationLevel appLevel;
+    
+    private final MetadataClient mdcClient;
 
     /**
      * Constructor
@@ -90,11 +103,16 @@ public class InputDownloader {
      * @param poolProcessorExecutor
      * @param appLevel
      */
-    public InputDownloader(final ObsClient obsClient,
-            final String localWorkingDir, final List<LevelJobInputDto> inputs,
-            final int sizeDownBatch, final String prefixMonitorLogs,
+    public InputDownloader(
+    		final ObsClient obsClient,
+            final String localWorkingDir, 
+            final List<LevelJobInputDto> inputs,
+            final int sizeDownBatch, 
+            final String prefixMonitorLogs,
             final PoolExecutorCallable poolProcExecutor,
-            final ApplicationLevel appLevel) {
+            final ApplicationLevel appLevel,
+            final MetadataClient mdcClient
+    ) {
         this.obsClient = obsClient;
         this.localWorkingDir = localWorkingDir;
         this.inputs = inputs;
@@ -102,6 +120,7 @@ public class InputDownloader {
         this.poolProcExecutor = poolProcExecutor;
         this.appLevel = appLevel;
         this.prefixMonitorLogs = prefixMonitorLogs;
+        this.mdcClient = mdcClient;
     }
 
     /**
@@ -109,11 +128,16 @@ public class InputDownloader {
      * 
      * @throws AbstractCodedException
      */
-    public void processInputs(final ReportingFactory reportingFactory) throws AbstractCodedException {
+    public List<ObsDownloadObject> processInputs(final ReportingFactory reportingFactory) throws AbstractCodedException {
         initializeDownload();
-        final List<ObsDownloadObject> downloadToBatch = sortInputs(); // also creates necessary directories
+        final List<ObsDownloadObject> result = sortInputs(); // also creates necessary directories      
+        
+        final List<ObsDownloadObject> downloadToBatch = result.stream()
+        		.filter(o -> o.getFamily() != ProductFamily.INVALID)
+        		.collect(Collectors.toList());        
 		downloadInputs(downloadToBatch, reportingFactory);
         completeDownload();	      	
+        return result;
     }
 
     /**
@@ -196,14 +220,10 @@ public class InputDownloader {
                     LOGGER.info("Input {}-{} will be stored in {}",
                             input.getFamily(), input.getContentRef(),
                             input.getLocalPath());
-                    downloadToBatch.add(new ObsDownloadObject(
-                            ProductFamily.fromValue(input.getFamily()),
-                            input.getContentRef(),
-                            (new File(input.getLocalPath()).getParent())));
+                    downloadToBatch.add(toObsDlObject(input));
                     break;
                 case "BLANK":
-                    LOGGER.info("Input {} will be ignored",
-                            input.getContentRef());
+                    LOGGER.info("Input {} will be ignored", input.getContentRef());
                     break;
                 default:
                     throw new UnknownFamilyException(
@@ -214,6 +234,56 @@ public class InputDownloader {
         }
         return downloadToBatch;
     }
+
+	private final ObsDownloadObject toObsDlObject(final LevelJobInputDto input) {
+		final ProductFamily family = ProductFamily.fromValue(input.getFamily());		
+		final File localFile = new File(input.getLocalPath());
+		
+		// S1PRO-1496 retry querying the required input product to allow restart conditions	
+		final String downloadReference;
+		if (input.getContentRef() != null) {
+			downloadReference = input.getContentRef();
+		}
+		else if (family == ProductFamily.EDRS_SESSION) {
+			LOGGER.debug("Provided input {} has no OBS reference. Trying to query it from MDC...",  
+					input);
+			downloadReference = queryRawFromMdc(localFile.getName());
+			if (downloadReference == null) {
+				LOGGER.warn("Missing RAW {}. Trying to process without it...", localFile.getName());
+				
+				// mark product as invalid but provide the chunk name for logging 
+				return new ObsDownloadObject(
+						ProductFamily.INVALID,
+						localFile.getName(),
+						null				
+				);
+			}
+		}
+		else {
+			throw new IllegalArgumentException(
+					String.format("Missing OBS reference in input %s", input)
+			);
+		}		
+		return new ObsDownloadObject(
+				family,
+				downloadReference,
+				localFile.getParent()
+		);
+	}	
+
+	private final String queryRawFromMdc(final String rawName) {
+		try {
+			final EdrsSessionMetadata rawFile = mdcClient.getEdrsSession("RAW", rawName);			
+			if (rawFile != null && rawFile.getKeyObjectStorage() != null) {
+				LOGGER.info("Found missing RAW {} in metadata catalog: {}", 
+						rawName, rawFile.getKeyObjectStorage());
+				return rawFile.getKeyObjectStorage();
+			}			
+		} catch (final MetadataQueryException e) {
+			// simply fall through
+		}
+		return null;		
+	}
 
     /**
      * Download input from OBS per batch. If we have download 2 raw, the

@@ -131,7 +131,7 @@ public class EsServices {
 		Retries.performWithRetries(
 			() -> {
 		    	if (!isMetadataExist(product)) {
-		    		LOGGER.debug("Creating metatadata in ES for product {}", productName);
+		    		LOGGER.debug("Creating metadata in ES for product {}", productName);
 					createMetadata(product);
 				}
 				else{

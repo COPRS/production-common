@@ -4,7 +4,7 @@ import static esa.s1pdgs.cpoc.prip.frontend.service.edm.EntityTypeProperties.Alg
 import static esa.s1pdgs.cpoc.prip.frontend.service.edm.EntityTypeProperties.Checksums;
 import static esa.s1pdgs.cpoc.prip.frontend.service.edm.EntityTypeProperties.ContentLength;
 import static esa.s1pdgs.cpoc.prip.frontend.service.edm.EntityTypeProperties.ContentType;
-import static esa.s1pdgs.cpoc.prip.frontend.service.edm.EntityTypeProperties.CreationDate;
+import static esa.s1pdgs.cpoc.prip.frontend.service.edm.EntityTypeProperties.PublicationDate;
 import static esa.s1pdgs.cpoc.prip.frontend.service.edm.EntityTypeProperties.EvictionDate;
 import static esa.s1pdgs.cpoc.prip.frontend.service.edm.EntityTypeProperties.Id;
 import static esa.s1pdgs.cpoc.prip.frontend.service.edm.EntityTypeProperties.Name;
@@ -66,7 +66,7 @@ public class EdmProvider extends org.apache.olingo.commons.api.edm.provider.Csdl
 			properties.add(new CsdlProperty().setName(Name.name()).setType(STRING_TYPE_FQN));
 			properties.add(new CsdlProperty().setName(ContentType.name()).setType(STRING_TYPE_FQN));
 			properties.add(new CsdlProperty().setName(ContentLength.name()).setType(INT_64_TYPE_FQN));
-			properties.add(new CsdlProperty().setName(CreationDate.name()).setType(DATE_TIME_OFFSET_TYPE_FQN));
+			properties.add(new CsdlProperty().setName(PublicationDate.name()).setType(DATE_TIME_OFFSET_TYPE_FQN));
 			properties.add(new CsdlProperty().setName(EvictionDate.name()).setType(DATE_TIME_OFFSET_TYPE_FQN));
 			properties.add(new CsdlProperty().setName(Checksums.name()).setType(CHECKSUM_TYPE_FQN).setCollection(true));
 
@@ -129,9 +129,13 @@ public class EdmProvider extends org.apache.olingo.commons.api.edm.provider.Csdl
 		List<CsdlEntityType> entityTypes = new ArrayList<CsdlEntityType>();
 		entityTypes.add(getEntityType(ET_PRODUCT_FQN));
 
+		List<CsdlComplexType> complexTypes = new ArrayList<CsdlComplexType>();
+		complexTypes.add(getComplexType(CHECKSUM_TYPE_FQN));
+
 		CsdlSchema schema = new CsdlSchema();
 		schema.setNamespace(SERVICE_NAMESPACE);
 		schema.setEntityTypes(entityTypes);
+		schema.setComplexTypes(complexTypes);
 		schema.setEntityContainer(getEntityContainer());
 
 		schemas.add(schema);
