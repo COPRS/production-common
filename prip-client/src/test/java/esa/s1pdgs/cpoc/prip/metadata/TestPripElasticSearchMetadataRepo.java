@@ -22,6 +22,7 @@ import org.elasticsearch.action.support.replication.ReplicationResponse.ShardInf
 import org.elasticsearch.client.RestHighLevelClient;
 import org.elasticsearch.common.bytes.BytesArray;
 import org.elasticsearch.common.bytes.BytesReference;
+import org.elasticsearch.index.shard.ShardId;
 import org.elasticsearch.rest.RestStatus;
 import org.elasticsearch.search.SearchHit;
 import org.elasticsearch.search.SearchHits;
@@ -76,8 +77,8 @@ public class TestPripElasticSearchMetadataRepo {
 
 	@Test
 	public void testSaveWithFailure() throws IOException {
-
-		final ShardInfo.Failure failure = new ShardInfo.Failure(null, "", new IOException("testexception"),
+		ShardId shardId = new ShardId("", "", 0);
+		final ShardInfo.Failure failure = new ShardInfo.Failure(shardId, "", new IOException("testexception"),
 				RestStatus.CONFLICT, false);
 		final ShardInfo shardInfo = new ShardInfo(1, 0, failure);
 		indexResponse.setShardInfo(shardInfo);
