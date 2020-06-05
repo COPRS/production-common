@@ -31,7 +31,7 @@ public class EdmProviderTest {
 		CsdlEntityType entityType = uut.getEntityType(new FullQualifiedName("S1PDGS", "Product"));
 		List<CsdlProperty> properties = entityType.getProperties();
 		
-		assertEquals(Arrays.asList("Id", "Name", "ContentType", "ContentLength", "PublicationDate", "EvictionDate", "ProductionType", "Checksums"),
+		assertEquals(Arrays.asList("Id", "Name", "ContentType", "ContentLength", "PublicationDate", "EvictionDate", "Checksums", "ProductionType", "ContentDate"),
 				properties.stream().map(p -> p.getName()).collect(Collectors.toList()));
 		
 		assertEquals(Arrays.asList( //
@@ -41,10 +41,12 @@ public class EdmProviderTest {
 				EdmPrimitiveTypeKind.Int64.getFullQualifiedName(), //
 				EdmPrimitiveTypeKind.DateTimeOffset.getFullQualifiedName(), //
 				EdmPrimitiveTypeKind.DateTimeOffset.getFullQualifiedName(), //
-				new FullQualifiedName("S1PDGS", "Checksums")), //
+				new FullQualifiedName("S1PDGS", "Checksums"), //
+				new FullQualifiedName("S1PDGS", "ProductionType"), //
+				new FullQualifiedName("S1PDGS", "TimeRange")), //
 				properties.stream().map(p -> p.getTypeAsFQNObject()).collect(Collectors.toList()));
 		
-		assertEquals(Arrays.asList(false, false, false, false, false, false, true),
+		assertEquals(Arrays.asList(false, false, false, false, false, false, true, false, false),
 				properties.stream().map(p -> p.isCollection()).collect(Collectors.toList()));
 	}
 	
