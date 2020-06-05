@@ -35,6 +35,7 @@ public class EdmProvider extends org.apache.olingo.commons.api.edm.provider.Csdl
 	public static final String SERVICE_NAMESPACE = "S1PDGS";
 
 	// Types
+	public static final FullQualifiedName INT_32_TYPE_FQN = EdmPrimitiveTypeKind.Int32.getFullQualifiedName();
 	public static final FullQualifiedName INT_64_TYPE_FQN = EdmPrimitiveTypeKind.Int64.getFullQualifiedName();
 	public static final FullQualifiedName STRING_TYPE_FQN = EdmPrimitiveTypeKind.String.getFullQualifiedName();
 	public static final FullQualifiedName DATE_TIME_OFFSET_TYPE_FQN = EdmPrimitiveTypeKind.DateTimeOffset
@@ -43,6 +44,9 @@ public class EdmProvider extends org.apache.olingo.commons.api.edm.provider.Csdl
 			EntityTypeProperties.Checksums.name());
 	
 	public static final FullQualifiedName CONTENT_DATE_TYPE_FQN = new FullQualifiedName(SERVICE_NAMESPACE, ContentDate.name());
+	
+	public static final FullQualifiedName PRODUCTION_TYPE_TYPE_FQN = new FullQualifiedName(SERVICE_NAMESPACE,
+			"ProductionType");
 
 	// EDM Container
 	public static final String CONTAINER_NAME = "PRIPData";
@@ -75,6 +79,7 @@ public class EdmProvider extends org.apache.olingo.commons.api.edm.provider.Csdl
 			properties.add(new CsdlProperty().setName(PublicationDate.name()).setType(DATE_TIME_OFFSET_TYPE_FQN));
 			properties.add(new CsdlProperty().setName(EvictionDate.name()).setType(DATE_TIME_OFFSET_TYPE_FQN));
 			properties.add(new CsdlProperty().setName(Checksums.name()).setType(CHECKSUM_TYPE_FQN).setCollection(true));
+			properties.add(new CsdlProperty().setName(ProductionType.name()).setType(PRODUCTION_TYPE_TYPE_FQN));
 			properties.add(new CsdlProperty().setName(ContentDate.name()).setType(CONTENT_DATE_TYPE_FQN));
 
 			entityType.setProperties(properties);
@@ -115,6 +120,20 @@ public class EdmProvider extends org.apache.olingo.commons.api.edm.provider.Csdl
 	}
 
 	@Override
+	public CsdlEnumType getEnumType(final FullQualifiedName enumTypeName) throws ODataException {
+		if(enumTypeName.equals(PRODUCTION_TYPE_TYPE_FQN)) {
+			CsdlEnumType enumType = new CsdlEnumType();
+			enumType.setName(PRODUCTION_TYPE_TYPE_FQN.getName());
+			enumType.setUnderlyingType(INT_32_TYPE_FQN);
+			List<CsdlEnumMember> productionTypeMembers = Arrays.asList(esa.s1pdgs.cpoc.prip.model.ProductionType.values()).stream()
+					.map(v -> new CsdlEnumMember().setName(v.getName()).setValue(Integer.toString(v.getValue()))).collect(Collectors.toList());
+			enumType.setMembers(productionTypeMembers);
+			return enumType;
+		}
+		return null;
+	}
+	
+	@Override
 	public CsdlEntitySet getEntitySet(FullQualifiedName entityContainer, String entitySetName) throws ODataException {
 		if (entityContainer.equals(CONTAINER)) {
 			if (entitySetName.equals(ES_PRODUCTS_NAME)) {
@@ -150,10 +169,14 @@ public class EdmProvider extends org.apache.olingo.commons.api.edm.provider.Csdl
 		List<CsdlComplexType> complexTypes = new ArrayList<CsdlComplexType>();
 		complexTypes.add(getComplexType(CHECKSUM_TYPE_FQN));
 
+		List<CsdlEnumType> enumTypes = new ArrayList<CsdlEnumType>();
+		enumTypes.add(getEnumType(PRODUCTION_TYPE_TYPE_FQN));
+		
 		CsdlSchema schema = new CsdlSchema();
 		schema.setNamespace(SERVICE_NAMESPACE);
 		schema.setEntityTypes(entityTypes);
 		schema.setComplexTypes(complexTypes);
+		schema.setEnumTypes(enumTypes);
 		schema.setEntityContainer(getEntityContainer());
 
 		schemas.add(schema);
