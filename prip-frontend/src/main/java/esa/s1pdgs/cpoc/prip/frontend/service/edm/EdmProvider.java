@@ -109,7 +109,7 @@ public class EdmProvider extends org.apache.olingo.commons.api.edm.provider.Csdl
 		}
 		if (complexTypeName.equals(CONTENT_DATE_TYPE_FQN)) {
 			CsdlComplexType entityType = new CsdlComplexType();
-			entityType.setName(CHECKSUM_TYPE_FQN.getName());
+			entityType.setName(CONTENT_DATE_TYPE_FQN.getName());
 			List<CsdlProperty> properties = new ArrayList<>();
 			properties.add(new CsdlProperty().setName(Start.name())
 					.setType(DATE_TIME_OFFSET_TYPE_FQN));
@@ -170,6 +170,7 @@ public class EdmProvider extends org.apache.olingo.commons.api.edm.provider.Csdl
 
 		List<CsdlComplexType> complexTypes = new ArrayList<CsdlComplexType>();
 		complexTypes.add(getComplexType(CHECKSUM_TYPE_FQN));
+		complexTypes.add(getComplexType(CONTENT_DATE_TYPE_FQN));
 
 		List<CsdlEnumType> enumTypes = new ArrayList<CsdlEnumType>();
 		enumTypes.add(getEnumType(PRODUCTION_TYPE_TYPE_FQN));
