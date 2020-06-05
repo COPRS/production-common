@@ -4,10 +4,11 @@ import static esa.s1pdgs.cpoc.prip.frontend.service.edm.EntityTypeProperties.Alg
 import static esa.s1pdgs.cpoc.prip.frontend.service.edm.EntityTypeProperties.Checksums;
 import static esa.s1pdgs.cpoc.prip.frontend.service.edm.EntityTypeProperties.ContentLength;
 import static esa.s1pdgs.cpoc.prip.frontend.service.edm.EntityTypeProperties.ContentType;
-import static esa.s1pdgs.cpoc.prip.frontend.service.edm.EntityTypeProperties.PublicationDate;
 import static esa.s1pdgs.cpoc.prip.frontend.service.edm.EntityTypeProperties.EvictionDate;
 import static esa.s1pdgs.cpoc.prip.frontend.service.edm.EntityTypeProperties.Id;
 import static esa.s1pdgs.cpoc.prip.frontend.service.edm.EntityTypeProperties.Name;
+import static esa.s1pdgs.cpoc.prip.frontend.service.edm.EntityTypeProperties.ProductionType;
+import static esa.s1pdgs.cpoc.prip.frontend.service.edm.EntityTypeProperties.PublicationDate;
 import static esa.s1pdgs.cpoc.prip.frontend.service.edm.EntityTypeProperties.Value;
 
 import java.net.URI;
@@ -39,6 +40,7 @@ public class MappingUtil {
 				.addProperty(new Property(null, ContentLength.name(), ValueType.PRIMITIVE, pripMetadata.getContentLength()))
 				.addProperty(new Property(null, PublicationDate.name(), ValueType.PRIMITIVE, convertLocalDateTimeToTimestamp(pripMetadata.getCreationDate())))
 				.addProperty(new Property(null, EvictionDate.name(), ValueType.PRIMITIVE, convertLocalDateTimeToTimestamp(pripMetadata.getEvictionDate())))
+				.addProperty(new Property(null, ProductionType.name(), ValueType.ENUM, mapToProductionType(esa.s1pdgs.cpoc.prip.model.ProductionType.SYSTEMATIC_PRODUCTION)))
 				.addProperty(new Property(null, Checksums.name(), ValueType.COLLECTION_COMPLEX, mapToChecksumList(pripMetadata.getChecksums())));
 		entity.setMediaContentType(pripMetadata.getContentType());
 		entity.setId(uri);
@@ -68,6 +70,10 @@ public class MappingUtil {
 			}
 		}
 		return listOfComplexValues;
+	}
+	
+	public static Integer mapToProductionType(esa.s1pdgs.cpoc.prip.model.ProductionType productionType) {
+		return productionType.getValue();
 	}
 
 }
