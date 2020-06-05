@@ -6,9 +6,13 @@ import static esa.s1pdgs.cpoc.prip.frontend.service.edm.EntityTypeProperties.Con
 import static esa.s1pdgs.cpoc.prip.frontend.service.edm.EntityTypeProperties.ContentType;
 import static esa.s1pdgs.cpoc.prip.frontend.service.edm.EntityTypeProperties.PublicationDate;
 import static esa.s1pdgs.cpoc.prip.frontend.service.edm.EntityTypeProperties.EvictionDate;
+import static esa.s1pdgs.cpoc.prip.frontend.service.edm.EntityTypeProperties.ContentDate;
 import static esa.s1pdgs.cpoc.prip.frontend.service.edm.EntityTypeProperties.Id;
 import static esa.s1pdgs.cpoc.prip.frontend.service.edm.EntityTypeProperties.Name;
 import static esa.s1pdgs.cpoc.prip.frontend.service.edm.EntityTypeProperties.Value;
+import static esa.s1pdgs.cpoc.prip.frontend.service.edm.EntityTypeProperties.Start;
+import static esa.s1pdgs.cpoc.prip.frontend.service.edm.EntityTypeProperties.End;
+
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -37,6 +41,8 @@ public class EdmProvider extends org.apache.olingo.commons.api.edm.provider.Csdl
 			.getFullQualifiedName();
 	public static final FullQualifiedName CHECKSUM_TYPE_FQN = new FullQualifiedName(SERVICE_NAMESPACE,
 			EntityTypeProperties.Checksums.name());
+	
+	public static final FullQualifiedName CONTENT_DATE_TYPE_FQN = new FullQualifiedName(SERVICE_NAMESPACE, ContentDate.name());
 
 	// EDM Container
 	public static final String CONTAINER_NAME = "PRIPData";
@@ -69,6 +75,7 @@ public class EdmProvider extends org.apache.olingo.commons.api.edm.provider.Csdl
 			properties.add(new CsdlProperty().setName(PublicationDate.name()).setType(DATE_TIME_OFFSET_TYPE_FQN));
 			properties.add(new CsdlProperty().setName(EvictionDate.name()).setType(DATE_TIME_OFFSET_TYPE_FQN));
 			properties.add(new CsdlProperty().setName(Checksums.name()).setType(CHECKSUM_TYPE_FQN).setCollection(true));
+			properties.add(new CsdlProperty().setName(ContentDate.name()).setType(CONTENT_DATE_TYPE_FQN));
 
 			entityType.setProperties(properties);
 
@@ -90,6 +97,17 @@ public class EdmProvider extends org.apache.olingo.commons.api.edm.provider.Csdl
 					.setType(EdmPrimitiveTypeKind.String.getFullQualifiedName()));
 			properties.add(new CsdlProperty().setName(Value.name())
 					.setType(EdmPrimitiveTypeKind.String.getFullQualifiedName()));
+			entityType.setProperties(properties);
+			return entityType;
+		}
+		if (complexTypeName.equals(CONTENT_DATE_TYPE_FQN)) {
+			CsdlComplexType entityType = new CsdlComplexType();
+			entityType.setName(CHECKSUM_TYPE_FQN.getName());
+			List<CsdlProperty> properties = new ArrayList<>();
+			properties.add(new CsdlProperty().setName(Start.name())
+					.setType(DATE_TIME_OFFSET_TYPE_FQN));
+			properties.add(new CsdlProperty().setName(End.name())
+					.setType(DATE_TIME_OFFSET_TYPE_FQN));
 			entityType.setProperties(properties);
 			return entityType;
 		}
