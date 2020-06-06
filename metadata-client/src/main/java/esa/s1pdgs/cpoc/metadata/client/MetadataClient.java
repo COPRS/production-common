@@ -243,7 +243,7 @@ public class MetadataClient {
 	 * @return
 	 * @throws MetadataQueryException
 	 */
-	public SearchMetadata queryByFamilyAndProductName(ProductFamily family, String productName)
+	public SearchMetadata queryByFamilyAndProductName(String family, String productName)
 			throws MetadataQueryException {
 
 		String uri = this.metadataBaseUri + MetadataCatalogRestPath.METADATA.path() + "/" + family
