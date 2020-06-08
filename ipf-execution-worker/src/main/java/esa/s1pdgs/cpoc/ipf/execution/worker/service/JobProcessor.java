@@ -51,10 +51,12 @@ import esa.s1pdgs.cpoc.mqi.client.MqiConsumer;
 import esa.s1pdgs.cpoc.mqi.client.MqiListener;
 import esa.s1pdgs.cpoc.mqi.client.StatusService;
 import esa.s1pdgs.cpoc.mqi.model.queue.IpfExecutionJob;
+import esa.s1pdgs.cpoc.mqi.model.queue.LevelJobInputDto;
 import esa.s1pdgs.cpoc.mqi.model.rest.GenericMessageDto;
 import esa.s1pdgs.cpoc.obs_sdk.ObsClient;
 import esa.s1pdgs.cpoc.obs_sdk.ObsDownloadObject;
 import esa.s1pdgs.cpoc.report.Reporting;
+import esa.s1pdgs.cpoc.report.ReportingFilenameEntry;
 import esa.s1pdgs.cpoc.report.ReportingMessage;
 import esa.s1pdgs.cpoc.report.ReportingOutput;
 import esa.s1pdgs.cpoc.report.ReportingUtils;
@@ -219,7 +221,7 @@ public class JobProcessor implements MqiListener<IpfExecutionJob> {
 			outputListFile = job.getWorkDirectory() + "L0ASProcList.LIST";
 		}			
 		reporting.begin(
-				JobReportingInput.newInstance(toReportFilenames(job), jobOrderName, properties.getLevel()),	
+				JobReportingInput.newInstance(toReportFilenames(job), jobOrderName),	
 				new ReportingMessage("Start job processing")
 		);
 		
@@ -424,12 +426,19 @@ public class JobProcessor implements MqiListener<IpfExecutionJob> {
 		}
 	}
 	
-	private final List<String> toReportFilenames(final IpfExecutionJob job) {
+	private final List<ReportingFilenameEntry> toReportFilenames(final IpfExecutionJob job) {
 		return job.getInputs().stream()
-			.map(j -> Paths.get(j.getLocalPath()).getFileName().toString())
+			.map(j -> newEntry(j))
 			.collect(Collectors.toList());
 	}
 	
+	private final ReportingFilenameEntry newEntry(final LevelJobInputDto input) {
+		return new ReportingFilenameEntry(
+				ProductFamily.fromValue(input.getFamily()), 
+				new File(input.getLocalPath()).getName()
+		);
+	}
+
 	// checks AppStatus, whether app shall be stopped and in that case, shut down this service as well
 	private final void exitOnAppStatusStopOrWait() {
 		if (appStatus.getStatus().isStopping()) {
