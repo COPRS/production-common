@@ -15,7 +15,9 @@ import org.elasticsearch.action.index.IndexResponse;
 import org.elasticsearch.action.search.SearchRequest;
 import org.elasticsearch.action.search.SearchResponse;
 import org.elasticsearch.action.support.replication.ReplicationResponse;
+import org.elasticsearch.client.RequestOptions;
 import org.elasticsearch.client.RestHighLevelClient;
+import org.elasticsearch.client.core.CountRequest;
 import org.elasticsearch.common.xcontent.XContentType;
 import org.elasticsearch.index.query.BoolQueryBuilder;
 import org.elasticsearch.index.query.QueryBuilders;
@@ -246,7 +248,7 @@ public class PripElasticSearchMetadataRepo implements PripMetadataRepository {
 		pm.setProductFamily(
 				ProductFamily.valueOf((String) sourceAsMap.get(PripMetadata.FIELD_NAMES.PRODUCT_FAMILY.fieldName())));
 		pm.setContentType((String) sourceAsMap.get(PripMetadata.FIELD_NAMES.CONTENT_TYPE.fieldName()));
-		pm.setContentLength((Integer) sourceAsMap.get(PripMetadata.FIELD_NAMES.CONTENT_LENGTH.fieldName()));
+		pm.setContentLength(Long.parseLong((String)sourceAsMap.get(PripMetadata.FIELD_NAMES.CONTENT_LENGTH.fieldName())));
 		pm.setCreationDate(
 				DateUtils.parse((String) sourceAsMap.get(PripMetadata.FIELD_NAMES.CREATION_DATE.fieldName())));
 		pm.setEvictionDate(
@@ -268,15 +270,39 @@ public class PripElasticSearchMetadataRepo implements PripMetadataRepository {
 
 	@Override
 	public int countAll() {
-		// TODO Auto-generated method stub
-		return 0;
+		LOGGER.info("counting PRIP metadata");
+		return count(null);
 	}
 
 	@Override
 	public int countWithFilters(List<PripDateTimeFilter> creationDateFilters,
 			List<PripTextFilter> nameFilters) {
-		// TODO Auto-generated method stub
-		return 0;
+		LOGGER.info("counting PRIP metadata with creationDate filters {} and name filters {}", creationDateFilters,
+				nameFilters);
+		BoolQueryBuilder queryBuilder = QueryBuilders.boolQuery();
+		buildQueryWithDateTimeFilters(creationDateFilters, queryBuilder, PripMetadata.FIELD_NAMES.CREATION_DATE);
+		buildQueryWithTextFilters(nameFilters, queryBuilder, PripMetadata.FIELD_NAMES.NAME);
+		return count(queryBuilder);
 	}
+	
+	private int count(BoolQueryBuilder queryBuilder) {
+		int count = 0;
+		SearchSourceBuilder searchSourceBuilder = new SearchSourceBuilder();
+		if (queryBuilder != null) {
+			searchSourceBuilder.query(queryBuilder);
+		}
+
+		CountRequest countRequest = new CountRequest(ES_INDEX);
+		countRequest.source(searchSourceBuilder); 
+		countRequest.types(ES_PRIP_TYPE);
+		
+		try {
+			count = new Long(restHighLevelClient.count(countRequest, RequestOptions.DEFAULT).getCount()).intValue();
+			LOGGER.info("counting PRIP metadata successful, number of hits {}", count);
+		} catch (IOException e) {
+			LOGGER.error("error while counting PRIP metadata", e);
+		}
+		return count;
+	}	
 
 }
