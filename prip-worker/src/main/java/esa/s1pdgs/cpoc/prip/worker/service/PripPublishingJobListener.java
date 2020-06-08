@@ -20,7 +20,11 @@ import esa.s1pdgs.cpoc.appstatus.AppStatus;
 import esa.s1pdgs.cpoc.common.ProductCategory;
 import esa.s1pdgs.cpoc.common.ProductFamily;
 import esa.s1pdgs.cpoc.common.errors.obs.ObsException;
+import esa.s1pdgs.cpoc.common.errors.processing.MetadataQueryException;
+import esa.s1pdgs.cpoc.common.utils.DateUtils;
 import esa.s1pdgs.cpoc.common.utils.LogUtils;
+import esa.s1pdgs.cpoc.metadata.client.MetadataClient;
+import esa.s1pdgs.cpoc.metadata.model.SearchMetadata;
 import esa.s1pdgs.cpoc.mqi.client.GenericMqiClient;
 import esa.s1pdgs.cpoc.mqi.client.MqiConsumer;
 import esa.s1pdgs.cpoc.mqi.client.MqiListener;
@@ -44,6 +48,7 @@ public class PripPublishingJobListener implements MqiListener<PripPublishingJob>
 
 	private final GenericMqiClient mqiClient;
 	private final ObsClient obsClient;
+	private final MetadataClient metadataClient;
 	private final long pollingIntervalMs;
 	private final long pollingInitialDelayMs;
 	private final PripMetadataRepository pripMetadataRepo;
@@ -53,6 +58,7 @@ public class PripPublishingJobListener implements MqiListener<PripPublishingJob>
 	public PripPublishingJobListener(
 			final GenericMqiClient mqiClient, 
 			final ObsClient obsClient,
+			final MetadataClient metadataClient,
 			final PripMetadataRepository pripMetadataRepo,
 			@Value("${prip-worker.publishing-job-listener.polling-interval-ms}") final long pollingIntervalMs,
 			@Value("${prip-worker.publishing-job-listener.polling-initial-delay-ms}") final long pollingInitialDelayMs,
@@ -60,6 +66,7 @@ public class PripPublishingJobListener implements MqiListener<PripPublishingJob>
 	) {
 		this.mqiClient = mqiClient;
 		this.obsClient = obsClient;
+		this.metadataClient = metadataClient;
 		this.pripMetadataRepo = pripMetadataRepo;
 		this.pollingIntervalMs = pollingIntervalMs;
 		this.pollingInitialDelayMs = pollingInitialDelayMs;
@@ -89,22 +96,20 @@ public class PripPublishingJobListener implements MqiListener<PripPublishingJob>
 		LOGGER.debug("starting saving PRIP metadata, got message: {}", message);
 
 		final PripPublishingJob publishingJob = message.getBody();
-		
-		final Reporting reporting = ReportingUtils.newReportingBuilder()
-				.predecessor(publishingJob.getUid())
+
+		final Reporting reporting = ReportingUtils.newReportingBuilder().predecessor(publishingJob.getUid())
 				.newReporting("PripWorker");
-		
+
 		final String name = removeZipSuffix(publishingJob.getKeyObjectStorage());
-		
-		final ReportingInput in = PripReportingInput.newInstance(
-				name, 
-				new Date(), 
-				publishingJob.getProductFamily()
-		);		
-		reporting.begin(in,new ReportingMessage("Publishing file %s in PRIP", name));
-		
+
+		final ReportingInput in = PripReportingInput.newInstance(name, new Date(), publishingJob.getProductFamily());
+		reporting.begin(in, new ReportingMessage("Publishing file %s in PRIP", name));
+
 		try {
 			final LocalDateTime creationDate = LocalDateTime.now();
+
+			final SearchMetadata searchMetadata = queryMetadata(publishingJob.getProductFamily(),
+					publishingJob.getKeyObjectStorage());
 
 			final PripMetadata pripMetadata = new PripMetadata();
 			pripMetadata.setId(UUID.randomUUID());
@@ -112,11 +117,14 @@ public class PripPublishingJobListener implements MqiListener<PripPublishingJob>
 			pripMetadata.setName(publishingJob.getKeyObjectStorage());
 			pripMetadata.setProductFamily(publishingJob.getProductFamily());
 			pripMetadata.setContentType(PripMetadata.DEFAULT_CONTENTTYPE);
-			pripMetadata.setContentLength(getContentLength(publishingJob.getProductFamily(), publishingJob.getKeyObjectStorage()));
+			pripMetadata.setContentLength(
+					getContentLength(publishingJob.getProductFamily(), publishingJob.getKeyObjectStorage()));
 			pripMetadata.setCreationDate(creationDate);
 			pripMetadata.setEvictionDate(creationDate.plusDays(PripMetadata.DEFAULT_EVICTION_DAYS));
-			pripMetadata.setChecksums(getChecksums(publishingJob.getProductFamily(), publishingJob.getKeyObjectStorage()));
-
+			pripMetadata
+					.setChecksums(getChecksums(publishingJob.getProductFamily(), publishingJob.getKeyObjectStorage()));
+			pripMetadata.setContentDateStart(DateUtils.parse(searchMetadata.getValidityStart()));
+			pripMetadata.setContentDateEnd(DateUtils.parse(searchMetadata.getValidityStop()));
 			pripMetadataRepo.save(pripMetadata);
 
 			LOGGER.debug("end of saving PRIP metadata: {}", pripMetadata);
@@ -125,6 +133,18 @@ public class PripPublishingJobListener implements MqiListener<PripPublishingJob>
 			reporting.end(new ReportingMessage("Error on publishing file %s in PRIP: %s", name, LogUtils.toString(e)));
 			throw e;
 		}
+	}
+
+	private SearchMetadata queryMetadata(ProductFamily productFamily, String keyObjectStorage) {
+
+		SearchMetadata searchMetadata = new SearchMetadata();
+		try {
+			searchMetadata = metadataClient.queryByFamilyAndProductName(removeZipSuffix(productFamily.name()),
+					removeZipSuffix(keyObjectStorage));
+		} catch (MetadataQueryException e) {
+			LOGGER.warn(String.format("could not determine validity start and stop times of %s", keyObjectStorage), e);
+		}
+		return searchMetadata;
 	}
 
 	private long getContentLength(final ProductFamily family, final String key) {
@@ -154,8 +174,10 @@ public class PripPublishingJobListener implements MqiListener<PripPublishingJob>
 	}
 	
 	static final String removeZipSuffix(final String name) {
-		if (name.toLowerCase().endsWith(".zip")){
+		if (name.toLowerCase().endsWith(".zip")) {
 			return name.substring(0, name.length() - ".zip".length());
+		} else if (name.toLowerCase().endsWith("_zip")) {
+			return name.substring(0, name.length() - "_zip".length());
 		}
 		return name;
 	}

@@ -639,6 +639,53 @@ public class EsServices {
 
 		return null;
 	}
+	
+
+	/**
+	 * Searches for the product with given productName and in the index =
+	 * productFamily. Returns only validity start and stop time.
+	 * 
+	 * @param productFamily
+	 * @param productName
+	 * @return
+	 * @throws MetadataMalformedException
+	 * @throws MetadataNotPresentException
+	 * @throws IOException
+	 */
+	public SearchMetadata productNameQuery(String productFamily, String productName)
+			throws MetadataMalformedException, MetadataNotPresentException, IOException {
+
+		Map<String, Object> source = getRequest(productFamily, productName);
+
+		if (source.isEmpty()) {
+			throw new MetadataNotPresentException(productName);
+		}
+
+		SearchMetadata searchMetadata = new SearchMetadata();
+
+		if (source.containsKey("startTime")) {
+			try {
+				searchMetadata.setValidityStart(
+						DateUtils.convertToMetadataDateTimeFormat(source.get("startTime").toString()));
+			} catch (final DateTimeParseException e) {
+				throw new MetadataMalformedException("startTime");
+			}
+		} else {
+			throw new MetadataMalformedException("startTime");
+		}
+		if (source.containsKey("stopTime")) {
+			try {
+				searchMetadata
+						.setValidityStop(DateUtils.convertToMetadataDateTimeFormat(source.get("stopTime").toString()));
+			} catch (final DateTimeParseException e) {
+				throw new MetadataMalformedException("stopTime");
+			}
+		} else {
+			throw new MetadataMalformedException("stopTime");
+		}
+
+		return searchMetadata;
+	}
 
 	/**
 	 * Function which return the product that correspond to the lastValCover
@@ -729,17 +776,13 @@ public class EsServices {
 		return start.plus(Duration.between(start, stop).dividedBy(2));
 	}
 
-	private Map<String, Object> getRequest(final String index, final String productName) throws Exception {
-		try {
-			final GetRequest getRequest = new GetRequest(index.toLowerCase(), indexType, productName);
+	private Map<String, Object> getRequest(final String index, final String productName) throws IOException {
+		final GetRequest getRequest = new GetRequest(index.toLowerCase(), indexType, productName);
 
-			final GetResponse response = elasticsearchDAO.get(getRequest);
+		final GetResponse response = elasticsearchDAO.get(getRequest);
 
-			if (response.isExists()) {
-				return response.getSourceAsMap();
-			}
-		} catch (final IOException e) {
-			throw new Exception(e.getMessage());
+		if (response.isExists()) {
+			return response.getSourceAsMap();
 		}
 		return new HashMap<>();
 	}
