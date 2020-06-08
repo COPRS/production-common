@@ -8,6 +8,7 @@ import static org.mockito.Mockito.doReturn;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -83,7 +84,7 @@ public class TestOdataController {
 		creationDateFilters.add(f1);
 		creationDateFilters.add(f2);
 		
-		doReturn(l).when(pripMetadataRepository).findByCreationDate(creationDateFilters, Optional.empty(), Optional.empty());
+		doReturn(l).when(pripMetadataRepository).findWithFilters(Collections.EMPTY_LIST, creationDateFilters, Optional.empty(), Optional.empty());
 
 		ResultActions ra = this.mockMvc.perform(get(
 				"/odata/v1/Products?$filter=PublicationDate gt 2019-01-01T00:00:00.000Z and PublicationDate lt 2020-01-06T02:00:00.000Z")
@@ -111,7 +112,7 @@ public class TestOdataController {
 		creationDateFilters.add(f1);
 		creationDateFilters.add(f2);
 		
-		doReturn(l).when(pripMetadataRepository).findByCreationDate(creationDateFilters, Optional.empty(), Optional.empty());
+		doReturn(l).when(pripMetadataRepository).findWithFilters(Collections.EMPTY_LIST, creationDateFilters, Optional.empty(), Optional.empty());
 
 		ResultActions ra = this.mockMvc.perform(get(
 				"/odata/v1/Products?$filter=PublicationDate gt 2019-01-01T00:00:00.000Z and PublicationDate lt 2020-01-04T00:00:00.000Z")
@@ -133,7 +134,7 @@ public class TestOdataController {
 		n1.setText("name1");
 		nameFilters.add(n1);
 		
-		doReturn(l).when(pripMetadataRepository).findByProductName(nameFilters, Optional.empty(), Optional.empty());
+		doReturn(l).when(pripMetadataRepository).findWithFilters(nameFilters, Collections.EMPTY_LIST, Optional.empty(), Optional.empty());
 
 		ResultActions ra = this.mockMvc.perform(get(
 				"/odata/v1/Products?$filter=startswith(Name,'name1')")
@@ -155,7 +156,7 @@ public class TestOdataController {
 		n1.setText("e1a");
 		nameFilters.add(n1);
 		
-		doReturn(l).when(pripMetadataRepository).findByProductName(nameFilters, Optional.empty(), Optional.empty());
+		doReturn(l).when(pripMetadataRepository).findWithFilters(nameFilters, Collections.EMPTY_LIST, Optional.empty(), Optional.empty());
 
 		ResultActions ra = this.mockMvc.perform(get(
 				"/odata/v1/Products?$filter=contains(Name,'e1a')")
@@ -185,7 +186,7 @@ public class TestOdataController {
 		n1.setText("e1a");
 		nameFilters.add(n1);
 		
-		doReturn(l).when(pripMetadataRepository).findByProductName(nameFilters, Optional.empty(), Optional.empty());
+		doReturn(l).when(pripMetadataRepository).findWithFilters(nameFilters, Collections.EMPTY_LIST, Optional.empty(), Optional.empty());
 		
 		ResultActions ra = this.mockMvc.perform(get(
 				"/odata/v1/Products?$filter=startswith(Name,'name') and contains(Name,'e1a')")

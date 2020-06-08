@@ -2,6 +2,7 @@ package esa.s1pdgs.cpoc.prip.frontend.service.processor.visitor;
 
 import static esa.s1pdgs.cpoc.prip.frontend.service.edm.EntityTypeProperties.PublicationDate;
 import static esa.s1pdgs.cpoc.prip.frontend.service.edm.EntityTypeProperties.Name;
+import static esa.s1pdgs.cpoc.prip.frontend.service.edm.EntityTypeProperties.ContentDate;
 
 import java.time.Instant;
 import java.time.LocalDateTime;
@@ -29,6 +30,7 @@ import org.slf4j.LoggerFactory;
 import esa.s1pdgs.cpoc.prip.model.PripDateTimeFilter;
 import esa.s1pdgs.cpoc.prip.model.PripDateTimeFilter.Operator;
 import esa.s1pdgs.cpoc.prip.model.PripTextFilter;
+import esa.s1pdgs.cpoc.prip.model.PripTextFilter.Function;
 
 public class ProductsFilterVisitor implements ExpressionVisitor<Object> {
 
@@ -36,10 +38,15 @@ public class ProductsFilterVisitor implements ExpressionVisitor<Object> {
 
 	private List<PripDateTimeFilter> pripDateTimeFilters;
 	private List<PripTextFilter> pripTextFilters;
+	private List<String> dateTimeEntityTypes;
 
 	public ProductsFilterVisitor() {
 		pripDateTimeFilters = new ArrayList<>();
 		pripTextFilters = new ArrayList<>();
+		dateTimeEntityTypes = new ArrayList<>();
+		
+		dateTimeEntityTypes.add(PublicationDate.name());
+		dateTimeEntityTypes.add(ContentDate.name());
 	}
 
 	public List<PripDateTimeFilter> getPripDateTimeFilters() {
@@ -77,10 +84,10 @@ public class ProductsFilterVisitor implements ExpressionVisitor<Object> {
 		case GT:
 			PripDateTimeFilter pripDateTimefilter1 = new PripDateTimeFilter();
 			// one side must be PublicationDate, the other a literal
-			if (left instanceof Member && leftOperand.equals(PublicationDate.name()) && right instanceof Literal) {
+			if (left instanceof Member && dateTimeEntityTypes.contains(leftOperand) && right instanceof Literal) {
 				pripDateTimefilter1.setDateTime(convertToLocalDateTime(rightOperand));
 				pripDateTimefilter1.setOperator(Operator.GT);
-			} else if (right instanceof Member && rightOperand.equals(PublicationDate.name()) && left instanceof Literal) {
+			} else if (right instanceof Member && dateTimeEntityTypes.contains(rightOperand) && left instanceof Literal) {
 				pripDateTimefilter1.setDateTime(convertToLocalDateTime(leftOperand));
 				pripDateTimefilter1.setOperator(Operator.LT);
 			} else {
@@ -92,10 +99,10 @@ public class ProductsFilterVisitor implements ExpressionVisitor<Object> {
 		case LT:
 			PripDateTimeFilter pripDateTimefilter2 = new PripDateTimeFilter();
 			// one side must be PublicationDate, the other a literal
-			if (left instanceof Member && leftOperand.equals(PublicationDate.name()) && right instanceof Literal) {
+			if (left instanceof Member && dateTimeEntityTypes.contains(leftOperand) && right instanceof Literal) {
 				pripDateTimefilter2.setDateTime(convertToLocalDateTime(rightOperand));
 				pripDateTimefilter2.setOperator(Operator.LT);
-			} else if (right instanceof Member && rightOperand.equals(PublicationDate.name()) && left instanceof Literal) {
+			} else if (right instanceof Member && dateTimeEntityTypes.contains(rightOperand) && left instanceof Literal) {
 				pripDateTimefilter2.setDateTime(convertToLocalDateTime(leftOperand));
 				pripDateTimefilter2.setOperator(Operator.GT);
 			} else {
@@ -103,6 +110,18 @@ public class ProductsFilterVisitor implements ExpressionVisitor<Object> {
 			}
 			pripDateTimeFilters.add(pripDateTimefilter2);
 			LOGGER.debug("using filter {} ", pripDateTimefilter2);
+			break;
+		case EQ:
+			PripTextFilter textFilter = new PripTextFilter();
+			if (left instanceof Member && right instanceof Literal) {
+				textFilter.setFunction(Function.EQUALS);
+				textFilter.setText(rightOperand);
+				
+			} else {
+				throw new ExpressionVisitException("Invalid or unsupported operand");
+			}
+			pripTextFilters.add(textFilter);
+			LOGGER.debug("using filter {} ", textFilter);
 			break;
 		default:
 			throw new UnsupportedOperationException();
