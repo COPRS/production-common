@@ -115,16 +115,11 @@ public class ProductEntityCollectionProcessor implements EntityCollectionProcess
 			}
 				
 			List<PripMetadata> queryResult;
-			if (!pripDateTimeFilters.isEmpty() && !pripTextFilters.isEmpty()) {
-				queryResult = pripMetadataRepository.findByCreationDateAndProductName(pripDateTimeFilters, pripTextFilters, top, skip);
-			} else if (!pripDateTimeFilters.isEmpty()) {
-				queryResult = pripMetadataRepository.findByCreationDate(pripDateTimeFilters, top, skip);
-			} else if (!pripTextFilters.isEmpty()) {
-				queryResult = pripMetadataRepository.findByProductName(pripTextFilters, top, skip);
-			} else {
+			if (pripDateTimeFilters.isEmpty() && pripTextFilters.isEmpty()) {
 				queryResult = pripMetadataRepository.findAll(top, skip);
-			}
-	
+			} else {
+				queryResult = pripMetadataRepository.findWithFilters(pripTextFilters, pripDateTimeFilters, top, skip);
+			} 
 			List<Entity> productList = entityCollection.getEntities();
 			for (PripMetadata pripMetadata : queryResult) {
 				productList.add(MappingUtil.pripMetadataToEntity(pripMetadata, request.getRawBaseUri()));
@@ -143,14 +138,10 @@ public class ProductEntityCollectionProcessor implements EntityCollectionProcess
 			// Count Request
 			
 			int count = 0;
-			if (!pripDateTimeFilters.isEmpty() && !pripTextFilters.isEmpty()) {
-				count = pripMetadataRepository.countByCreationDateAndProductName(pripDateTimeFilters, pripTextFilters);
-			} else if (!pripDateTimeFilters.isEmpty()) {
-				count = pripMetadataRepository.countByCreationDateAndProductName(pripDateTimeFilters, Collections.emptyList());
-			} else if (!pripTextFilters.isEmpty()) {
-				count = pripMetadataRepository.countByCreationDateAndProductName(Collections.emptyList(), pripTextFilters);
-			} else {
+			if (pripDateTimeFilters.isEmpty() && pripTextFilters.isEmpty()) {
 				count = pripMetadataRepository.countAll();
+			} else {
+				count = pripMetadataRepository.countWithFilters(pripDateTimeFilters, pripTextFilters);
 			}
 
 			entityCollection.setCount(count);

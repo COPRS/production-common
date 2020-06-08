@@ -11,7 +11,12 @@ logging:
 mqi:
   host-uri: http://localhost:8081                               # the host and port for querying MQI server
   max-retries: 100                                              # the maximal number of consecutive retries following a MQI request error 
-  tempo-retry-ms: 10000                                         # 
+  tempo-retry-ms: 10000                                         #
+  
+metadata:
+  host: localhost:8080
+  rest-api_nb-retry: 3
+  rest-api_tempo-retry-ms: 1000 
   
 # Elastic Search
 elasticsearch:

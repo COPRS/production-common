@@ -96,6 +96,32 @@ public class SearchMetadataController {
 
 		return new ResponseEntity<List<SearchMetadata>>(response, HttpStatus.OK);
 	}
+	
+	/**
+	 * Searches for the product with given productName and in the index =
+	 * productFamily. Returns only validity start and stop time.
+	 * 
+	 * @param productFamily
+	 * @param productName
+	 * @return
+	 */
+	@RequestMapping(method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_UTF8_VALUE, path = "/{productFamily}/searchProductName")
+	public ResponseEntity<SearchMetadata> searchProductName(
+			@PathVariable(name = "productFamily") final String productFamily,
+			@RequestParam(name = "productName") final String productName) {
+
+		LOGGER.info("Performing search for family '{}', name '{}'", productFamily, productName);
+		SearchMetadata result = null;
+		try {
+			result = esServices.productNameQuery(productFamily, productName);
+
+		} catch (final Exception ex) {
+			LOGGER.error("Query error while doing product name search: {}", LogUtils.toString(ex));
+			return new ResponseEntity<SearchMetadata>(HttpStatus.INTERNAL_SERVER_ERROR);
+		}
+
+		return new ResponseEntity<SearchMetadata>(result, HttpStatus.OK);
+	}
 
 	@RequestMapping(method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_UTF8_VALUE, path = "/{productFamily}/search")
 	public ResponseEntity<List<SearchMetadata>> search(@PathVariable(name = "productFamily") final String productFamily,

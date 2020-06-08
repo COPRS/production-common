@@ -10,6 +10,7 @@ import static org.mockito.Mockito.verify;
 import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -22,6 +23,7 @@ import org.elasticsearch.action.support.replication.ReplicationResponse.ShardInf
 import org.elasticsearch.client.RestHighLevelClient;
 import org.elasticsearch.common.bytes.BytesArray;
 import org.elasticsearch.common.bytes.BytesReference;
+import org.elasticsearch.index.shard.ShardId;
 import org.elasticsearch.rest.RestStatus;
 import org.elasticsearch.search.SearchHit;
 import org.elasticsearch.search.SearchHits;
@@ -35,6 +37,7 @@ import esa.s1pdgs.cpoc.common.ProductFamily;
 import esa.s1pdgs.cpoc.prip.model.Checksum;
 import esa.s1pdgs.cpoc.prip.model.PripDateTimeFilter;
 import esa.s1pdgs.cpoc.prip.model.PripDateTimeFilter.Operator;
+import esa.s1pdgs.cpoc.prip.model.PripMetadata.FIELD_NAMES;
 import esa.s1pdgs.cpoc.prip.model.PripMetadata;
 import esa.s1pdgs.cpoc.prip.model.PripTextFilter;
 
@@ -76,8 +79,8 @@ public class TestPripElasticSearchMetadataRepo {
 
 	@Test
 	public void testSaveWithFailure() throws IOException {
-
-		final ShardInfo.Failure failure = new ShardInfo.Failure(null, "", new IOException("testexception"),
+		ShardId shardId = new ShardId("", "", 0);
+		final ShardInfo.Failure failure = new ShardInfo.Failure(shardId, "", new IOException("testexception"),
 				RestStatus.CONFLICT, false);
 		final ShardInfo shardInfo = new ShardInfo(1, 0, failure);
 		indexResponse.setShardInfo(shardInfo);
@@ -172,15 +175,17 @@ public class TestPripElasticSearchMetadataRepo {
 		final PripDateTimeFilter f1 = new PripDateTimeFilter();
 		f1.setDateTime(LocalDateTime.of(2019, 10, 16, 10, 48, 52));
 		f1.setOperator(Operator.LT);
+		f1.setFieldName(FIELD_NAMES.CREATION_DATE);
 
 		final PripDateTimeFilter f2 = new PripDateTimeFilter();
 		f2.setDateTime(LocalDateTime.of(2019, 10, 16, 10, 48, 50));
 		f2.setOperator(Operator.GT);
+		f2.setFieldName(FIELD_NAMES.CREATION_DATE);
 
 		creationDateIntervals.add(f1);
 		creationDateIntervals.add(f2);
 
-		final List<PripMetadata> result = repo.findByCreationDate(creationDateIntervals, Optional.empty(), Optional.empty());
+		final List<PripMetadata> result = repo.findWithFilters(Collections.EMPTY_LIST, creationDateIntervals, Optional.empty(), Optional.empty());
 
 		assertTrue(result.contains(pripMetadata1));
 		assertTrue(result.contains(pripMetadata2));
@@ -213,20 +218,23 @@ public class TestPripElasticSearchMetadataRepo {
 		final PripTextFilter f1 = new PripTextFilter();
 		f1.setFunction(PripTextFilter.Function.STARTS_WITH);
 		f1.setText("S1B".toLowerCase());
+		f1.setFieldName(FIELD_NAMES.NAME);
 
 		final PripTextFilter f2 = new PripTextFilter();
 		f2.setFunction(PripTextFilter.Function.CONTAINS);
 		f2.setText("1SS".toLowerCase());
+		f2.setFieldName(FIELD_NAMES.NAME);
 
 		final PripTextFilter f3 = new PripTextFilter();
 		f3.setFunction(PripTextFilter.Function.CONTAINS);
 		f3.setText("_001027_".toLowerCase());
+		f3.setFieldName(FIELD_NAMES.NAME);
 
 		nameFilters.add(f1);
 		nameFilters.add(f2);
 		nameFilters.add(f3);
 
-		final List<PripMetadata> result = repo.findByProductName(nameFilters, Optional.empty(), Optional.empty());
+		final List<PripMetadata> result = repo.findWithFilters(nameFilters, Collections.EMPTY_LIST, Optional.empty(), Optional.empty());
 
 		assertTrue(result.contains(pripMetadata1));
 		assertTrue(result.contains(pripMetadata2));
@@ -259,10 +267,12 @@ public class TestPripElasticSearchMetadataRepo {
 		final PripDateTimeFilter f1 = new PripDateTimeFilter();
 		f1.setDateTime(LocalDateTime.of(2019, 10, 16, 10, 48, 53));
 		f1.setOperator(Operator.LT);
+		f1.setFieldName(FIELD_NAMES.CREATION_DATE);
 
 		final PripDateTimeFilter f2 = new PripDateTimeFilter();
 		f2.setDateTime(LocalDateTime.of(2019, 10, 16, 10, 48, 50));
 		f2.setOperator(Operator.GT);
+		f2.setFieldName(FIELD_NAMES.CREATION_DATE);
 
 		creationDateFilters.add(f1);
 		creationDateFilters.add(f2);
@@ -272,20 +282,23 @@ public class TestPripElasticSearchMetadataRepo {
 		final PripTextFilter n1 = new PripTextFilter();
 		n1.setFunction(PripTextFilter.Function.STARTS_WITH);
 		n1.setText("S1B".toLowerCase());
+		n1.setFieldName(FIELD_NAMES.NAME);
 
 		final PripTextFilter n2 = new PripTextFilter();
 		n2.setFunction(PripTextFilter.Function.CONTAINS);
 		n2.setText("1SS".toLowerCase());
+		n2.setFieldName(FIELD_NAMES.NAME);
 
 		final PripTextFilter n3 = new PripTextFilter();
 		n3.setFunction(PripTextFilter.Function.CONTAINS);
 		n3.setText("_001170_".toLowerCase());
+		n3.setFieldName(FIELD_NAMES.NAME);
 
 		nameFilters.add(n1);
 		nameFilters.add(n2);
 		nameFilters.add(n3);
 
-		final List<PripMetadata> result = repo.findByCreationDateAndProductName(creationDateFilters, nameFilters, Optional.empty(), Optional.empty());
+		final List<PripMetadata> result = repo.findWithFilters(nameFilters, creationDateFilters, Optional.empty(), Optional.empty());
 
 		assertTrue(result.contains(pripMetadata1));
 		assertTrue(result.contains(pripMetadata2));

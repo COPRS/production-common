@@ -1,13 +1,16 @@
 package esa.s1pdgs.cpoc.prip.model;
 
+import java.util.Objects;
+
 public class PripTextFilter {
 
 	public enum Function {
-		STARTS_WITH, CONTAINS
+		STARTS_WITH, CONTAINS, EQUALS
 	}
 
 	private Function function;
 	private String text;
+	private PripMetadata.FIELD_NAMES fieldName;
 
 	public Function getFunction() {
 		return function;
@@ -25,6 +28,14 @@ public class PripTextFilter {
 		this.text = text;
 	}
 
+	public PripMetadata.FIELD_NAMES getFieldName() {
+		return fieldName;
+	}
+
+	public void setFieldName(PripMetadata.FIELD_NAMES fieldName) {
+		this.fieldName = fieldName;
+	}
+
 	@Override
 	public String toString() {
 		return String.format("{\"%s\":\"%s\"}", (function == null) ? null : function.name(), text);
@@ -32,30 +43,17 @@ public class PripTextFilter {
 
 	@Override
 	public int hashCode() {
-		final int prime = 31;
-		int result = 1;
-		result = prime * result + ((function == null) ? 0 : function.hashCode());
-		result = prime * result + ((text == null) ? 0 : text.hashCode());
-		return result;
+		return Objects.hash(fieldName, function, text);
 	}
 
 	@Override
 	public boolean equals(Object obj) {
 		if (this == obj)
 			return true;
-		if (obj == null)
-			return false;
-		if (getClass() != obj.getClass())
+		if (!(obj instanceof PripTextFilter))
 			return false;
 		PripTextFilter other = (PripTextFilter) obj;
-		if (function != other.function)
-			return false;
-		if (text == null) {
-			if (other.text != null)
-				return false;
-		} else if (!text.equals(other.text))
-			return false;
-		return true;
+		return fieldName == other.fieldName && function == other.function && Objects.equals(text, other.text);
 	}
-
+	
 }

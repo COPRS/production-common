@@ -232,6 +232,37 @@ public class MetadataClient {
 			return response.getBody();
 		}
 	}
+	
+	/**
+	 * Searches for the product with given productName and in the index =
+	 * productFamily. The returned metadata contains only validity start and stop
+	 * time.
+	 * 
+	 * @param family
+	 * @param productName
+	 * @return
+	 * @throws MetadataQueryException
+	 */
+	public SearchMetadata queryByFamilyAndProductName(String family, String productName)
+			throws MetadataQueryException {
+
+		String uri = this.metadataBaseUri + MetadataCatalogRestPath.METADATA.path() + "/" + family
+				+ "/searchProductName";
+
+		UriComponentsBuilder builder = UriComponentsBuilder.fromUriString(uri).queryParam("productName", productName);
+
+		ResponseEntity<SearchMetadata> response = query(builder.build().toUri(),
+				new ParameterizedTypeReference<SearchMetadata>() {
+				});
+
+		if (response == null) {
+			LOGGER.debug("Metadata query for family '{}' and product name {} returned no result", family, productName);
+			return null;
+		} else {
+			LOGGER.info("Metadata query for family '{}' and product name {} returned 1 result", family, productName);
+			return response.getBody();
+		}
+	}
 
 	/**
 	 * @param family
