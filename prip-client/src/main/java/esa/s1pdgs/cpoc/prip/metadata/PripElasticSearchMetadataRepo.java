@@ -280,8 +280,8 @@ public class PripElasticSearchMetadataRepo implements PripMetadataRepository {
 		LOGGER.info("counting PRIP metadata with creationDate filters {} and name filters {}", creationDateFilters,
 				nameFilters);
 		BoolQueryBuilder queryBuilder = QueryBuilders.boolQuery();
-		buildQueryWithDateTimeFilters(creationDateFilters, queryBuilder, PripMetadata.FIELD_NAMES.CREATION_DATE);
-		buildQueryWithTextFilters(nameFilters, queryBuilder, PripMetadata.FIELD_NAMES.NAME);
+		buildQueryWithDateTimeFilters(creationDateFilters, queryBuilder);
+		buildQueryWithTextFilters(nameFilters, queryBuilder);
 		return count(queryBuilder);
 	}
 	
