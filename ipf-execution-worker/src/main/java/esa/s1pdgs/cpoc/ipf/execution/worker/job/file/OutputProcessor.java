@@ -626,9 +626,6 @@ public class OutputProcessor {
 				.map(m -> new ReportingFilenameEntry(m.getFamily(), m.getProductName()))
 				.collect(Collectors.toList());
 		
-		if (reportingEntries.isEmpty()) {
-			throw new RuntimeException();
-		}
 		return new FilenameReportingOutput(new ReportingFilenameEntries(reportingEntries));
 	}
 	
