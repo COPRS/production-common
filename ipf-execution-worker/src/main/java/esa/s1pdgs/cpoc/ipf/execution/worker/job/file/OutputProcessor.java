@@ -612,10 +612,12 @@ public class OutputProcessor {
 		sortOutputs(lines, uploadBatch, outputToPublish, reportToPublish, reportingFactory);
 		try {
 			// Upload per batch the output
+			// S1PRO-1494: WARNING--- list will be emptied by this method. For reporting, make a copy beforehand
+			final List<ObsQueueMessage> outs = new ArrayList<>(outputToPublish);			
 			processProducts(reportingFactory, uploadBatch, outputToPublish, uuid);
 			// Publish reports
 			processReports(reportToPublish, uuid);
-			return toReportingOutput(outputToPublish);
+			return toReportingOutput(outs);
 		} catch (final AbstractCodedException | ObsEmptyFileException e) {
 			throw e;
 		}
