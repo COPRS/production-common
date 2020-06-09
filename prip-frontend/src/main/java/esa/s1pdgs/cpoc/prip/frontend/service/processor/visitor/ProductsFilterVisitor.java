@@ -92,7 +92,7 @@ public class ProductsFilterVisitor implements ExpressionVisitor<Object> {
 		switch (operator) {
 		case AND:
 			break;
-		case GT:
+		case GT://leftOperand = "ContentDate/Start"; /////////////////////////////////////////////////// DEBUG
 			PripDateTimeFilter pripDateTimeFilter1 = new PripDateTimeFilter();
 			// one side must be a DateTime Field, the other a literal
 			if (left instanceof Member && pripDateTimePropertyFieldNames.containsKey(leftOperand) && right instanceof Literal) {
