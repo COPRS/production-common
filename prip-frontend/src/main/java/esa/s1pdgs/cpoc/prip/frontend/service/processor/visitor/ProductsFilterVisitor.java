@@ -5,6 +5,7 @@ import static esa.s1pdgs.cpoc.prip.frontend.service.edm.EntityTypeProperties.End
 import static esa.s1pdgs.cpoc.prip.frontend.service.edm.EntityTypeProperties.Name;
 import static esa.s1pdgs.cpoc.prip.frontend.service.edm.EntityTypeProperties.PublicationDate;
 import static esa.s1pdgs.cpoc.prip.frontend.service.edm.EntityTypeProperties.Start;
+import static esa.s1pdgs.cpoc.prip.frontend.service.edm.EntityTypeProperties.ProductionType;
 
 import java.time.Instant;
 import java.time.LocalDateTime;
@@ -58,6 +59,8 @@ public class ProductsFilterVisitor implements ExpressionVisitor<Object> {
 
 		pripTextPropertyFieldNames = new HashMap<>();
 		pripTextPropertyFieldNames.put(Name.name(), FIELD_NAMES.NAME);
+		pripTextPropertyFieldNames.put(ProductionType.name(), FIELD_NAMES.PRODUCTION_TYPE);
+		
 	}
 
 	public List<PripDateTimeFilter> getPripDateTimeFilters() {
@@ -130,8 +133,8 @@ public class ProductsFilterVisitor implements ExpressionVisitor<Object> {
 			PripTextFilter textFilter = new PripTextFilter();
 			if (left instanceof Member && right instanceof Literal) {
 				textFilter.setFunction(Function.EQUALS);
-				textFilter.setText(rightOperand);
-				
+				textFilter.setText(rightOperand.substring(1, rightOperand.length() - 1));
+				textFilter.setFieldName(pripTextPropertyFieldNames.get(leftOperand));
 			} else {
 				throw new ExpressionVisitException("Invalid or unsupported operand");
 			}

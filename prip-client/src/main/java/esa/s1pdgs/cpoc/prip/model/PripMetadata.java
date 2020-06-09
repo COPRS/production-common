@@ -3,6 +3,7 @@ package esa.s1pdgs.cpoc.prip.model;
 import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Objects;
 import java.util.UUID;
 import java.util.function.Function;
 
@@ -29,7 +30,8 @@ public class PripMetadata {
 				m -> (m.getCreationDate() != null) ? DateUtils.formatToMetadataDateTimeFormat(m.getCreationDate()) : null),
 		EVICTION_DATE("evictionDate",
 				m -> (m.getEvictionDate() == null) ? null : DateUtils.formatToMetadataDateTimeFormat(m.getEvictionDate())),
-		CHECKSUM("checksum", PripMetadata::getChecksums);
+		CHECKSUM("checksum", PripMetadata::getChecksums),
+		PRODUCTION_TYPE("productionType", PripMetadata::getProductionType);
 
 		private final String fieldName;
 		private final Function<PripMetadata, Object> toJsonAccessor;
@@ -69,6 +71,8 @@ public class PripMetadata {
 	private LocalDateTime evictionDate;
 
 	private List<Checksum> checksums;
+	
+	private ProductionType productionType;
 
 	public PripMetadata() {
 	}
@@ -157,6 +161,14 @@ public class PripMetadata {
 		this.checksums = checksums;
 	}
 
+	public ProductionType getProductionType() {
+		return productionType;
+	}
+
+	public void setProductionType(ProductionType productionType) {
+		this.productionType = productionType;
+	}
+
 	public JSONObject toJson() {
 		JSONObject json = new JSONObject();
 
@@ -172,79 +184,25 @@ public class PripMetadata {
 
 	@Override
 	public int hashCode() {
-		final int prime = 31;
-		int result = 1;
-		result = prime * result + ((checksums == null) ? 0 : checksums.hashCode());
-		result = prime * result + (int) (contentLength ^ (contentLength >>> 32));
-		result = prime * result + ((contentType == null) ? 0 : contentType.hashCode());
-		result = prime * result * (contentDateStart == null ? 0 : contentDateStart.hashCode());
-		result = prime * result * (contentDateEnd == null ? 0 : contentDateEnd.hashCode());
-		result = prime * result + ((creationDate == null) ? 0 : creationDate.hashCode());
-		result = prime * result + ((evictionDate == null) ? 0 : evictionDate.hashCode());
-		result = prime * result + ((id == null) ? 0 : id.hashCode());
-		result = prime * result + ((name == null) ? 0 : name.hashCode());
-		result = prime * result + ((obsKey == null) ? 0 : obsKey.hashCode());
-		result = prime * result + ((productFamily == null) ? 0 : productFamily.hashCode());
-		return result;
+		return Objects.hash(checksums, contentDateEnd, contentDateStart, contentLength, contentType, creationDate,
+				evictionDate, id, name, obsKey, productFamily, productionType);
 	}
 
 	@Override
 	public boolean equals(Object obj) {
 		if (this == obj)
 			return true;
-		if (obj == null)
-			return false;
-		if (getClass() != obj.getClass())
+		if (!(obj instanceof PripMetadata))
 			return false;
 		PripMetadata other = (PripMetadata) obj;
-		if (checksums == null) {
-			if (other.checksums != null)
-				return false;
-		} else if (!checksums.equals(other.checksums))
-			return false;
-		if (contentLength != other.contentLength)
-			return false;
-		if (contentDateStart == null) {
-			if(other.contentDateStart != null)
-				return false;
-		} else if(!contentDateStart.equals(other.contentDateStart))
-			return false;
-		if (contentDateEnd == null) {
-			if(other.contentDateEnd != null)
-				return false;
-		} else if(!contentDateEnd.equals(other.contentDateEnd))
-			return false;
-		if (contentType == null) {
-			if (other.contentType != null)
-				return false;
-		} else if (!contentType.equals(other.contentType))
-			return false;
-		if (creationDate == null) {
-			if (other.creationDate != null)
-				return false;
-		} else if (!creationDate.equals(other.creationDate))
-			return false;
-		if (evictionDate == null) {
-			if (other.evictionDate != null)
-				return false;
-		} else if (!evictionDate.equals(other.evictionDate))
-			return false;
-		if (id == null) {
-			if (other.id != null)
-				return false;
-		} else if (!id.equals(other.id))
-			return false;
-		if (name == null) {
-			if (other.name != null)
-				return false;
-		} else if (!name.equals(other.name))
-			return false;
-		if (obsKey == null) {
-			if (other.obsKey != null)
-				return false;
-		} else if (!obsKey.equals(other.obsKey))
-			return false;
-		return productFamily == other.productFamily;
+		return Objects.equals(checksums, other.checksums) && Objects.equals(contentDateEnd, other.contentDateEnd)
+				&& Objects.equals(contentDateStart, other.contentDateStart) && contentLength == other.contentLength
+				&& Objects.equals(contentType, other.contentType) && Objects.equals(creationDate, other.creationDate)
+				&& Objects.equals(evictionDate, other.evictionDate) && Objects.equals(id, other.id)
+				&& Objects.equals(name, other.name) && Objects.equals(obsKey, other.obsKey)
+				&& productFamily == other.productFamily && productionType == other.productionType;
 	}
+	
+	
 
 }
