@@ -254,6 +254,8 @@ public class PripElasticSearchMetadataRepo implements PripMetadataRepository {
 		pm.setEvictionDate(
 				DateUtils.parse((String) sourceAsMap.get(PripMetadata.FIELD_NAMES.EVICTION_DATE.fieldName())));
 
+		pm.setContentDateStart(DateUtils.parse((String) sourceAsMap.get(PripMetadata.FIELD_NAMES.CONTENT_DATE_START.fieldName())));
+		pm.setContentDateEnd(DateUtils.parse((String) sourceAsMap.get(PripMetadata.FIELD_NAMES.CONTENT_DATE_END.fieldName())));
 		List<Checksum> checksumList = new ArrayList<>();
 		for (Map<String, Object> c : (List<Map<String, Object>>) sourceAsMap
 				.get(PripMetadata.FIELD_NAMES.CHECKSUM.fieldName())) {
