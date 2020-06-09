@@ -30,6 +30,7 @@ import esa.s1pdgs.cpoc.prip.metadata.PripMetadataRepository;
 import esa.s1pdgs.cpoc.prip.model.Checksum;
 import esa.s1pdgs.cpoc.prip.model.PripDateTimeFilter;
 import esa.s1pdgs.cpoc.prip.model.PripMetadata;
+import esa.s1pdgs.cpoc.prip.model.PripMetadata.FIELD_NAMES;
 import esa.s1pdgs.cpoc.prip.model.PripTextFilter;
 import esa.s1pdgs.cpoc.prip.model.PripDateTimeFilter.Operator;
 
@@ -76,10 +77,12 @@ public class TestOdataController {
 		PripDateTimeFilter f1 = new PripDateTimeFilter();
 		f1.setDateTime(LocalDateTime.of(2019, 01, 01, 00, 00, 00));
 		f1.setOperator(Operator.GT);
+		f1.setFieldName(FIELD_NAMES.CREATION_DATE);
 		
 		PripDateTimeFilter f2 = new PripDateTimeFilter();
 		f2.setDateTime(LocalDateTime.of(2020, 01, 06, 02, 00, 00));
 		f2.setOperator(Operator.LT);
+		f2.setFieldName(FIELD_NAMES.CREATION_DATE);
 		
 		creationDateFilters.add(f1);
 		creationDateFilters.add(f2);
@@ -104,10 +107,12 @@ public class TestOdataController {
 		PripDateTimeFilter f1 = new PripDateTimeFilter();
 		f1.setDateTime(LocalDateTime.of(2019, 01, 01, 00, 00, 00));
 		f1.setOperator(Operator.GT);
+		f1.setFieldName(FIELD_NAMES.CREATION_DATE);
 		
 		PripDateTimeFilter f2 = new PripDateTimeFilter();
 		f2.setDateTime(LocalDateTime.of(2020, 01, 04, 00, 00, 00));
 		f2.setOperator(Operator.LT);
+		f2.setFieldName(FIELD_NAMES.CREATION_DATE);
 		
 		creationDateFilters.add(f1);
 		creationDateFilters.add(f2);
@@ -132,6 +137,7 @@ public class TestOdataController {
 		PripTextFilter n1 = new PripTextFilter();
 		n1.setFunction(PripTextFilter.Function.STARTS_WITH);
 		n1.setText("name1");
+		n1.setFieldName(FIELD_NAMES.NAME);
 		nameFilters.add(n1);
 		
 		doReturn(l).when(pripMetadataRepository).findWithFilters(nameFilters, Collections.EMPTY_LIST, Optional.empty(), Optional.empty());
@@ -154,6 +160,7 @@ public class TestOdataController {
 		PripTextFilter n1 = new PripTextFilter();
 		n1.setFunction(PripTextFilter.Function.CONTAINS);
 		n1.setText("e1a");
+		n1.setFieldName(FIELD_NAMES.NAME);
 		nameFilters.add(n1);
 		
 		doReturn(l).when(pripMetadataRepository).findWithFilters(nameFilters, Collections.EMPTY_LIST, Optional.empty(), Optional.empty());
@@ -179,10 +186,12 @@ public class TestOdataController {
 		PripTextFilter n2 = new PripTextFilter();
 		n2.setFunction(PripTextFilter.Function.STARTS_WITH);
 		n2.setText("name");
+		n2.setFieldName(FIELD_NAMES.NAME);
 		nameFilters.add(n2);
 		
 		PripTextFilter n1 = new PripTextFilter();
 		n1.setFunction(PripTextFilter.Function.CONTAINS);
+		n1.setFieldName(FIELD_NAMES.NAME);
 		n1.setText("e1a");
 		nameFilters.add(n1);
 		
