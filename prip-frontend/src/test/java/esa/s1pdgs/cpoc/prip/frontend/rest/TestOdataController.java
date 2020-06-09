@@ -126,6 +126,38 @@ public class TestOdataController {
 		expectIdAndName(ra, p1);
 	}
 	
+	
+	@Test
+	public void testContentDateFiltering() throws Exception {
+		List<PripMetadata> l = new ArrayList<>();
+		PripMetadata p1 = createPripMetadata(LocalDateTime.of(2020, 1, 1, 00, 00, 00), "name1");
+		p1.setContentDateStart(LocalDateTime.of(2020, 1, 1, 00, 00, 00));
+		p1.setContentDateEnd(LocalDateTime.of(2020, 1, 5, 00, 00, 00));
+		l.add(p1);
+
+		List<PripDateTimeFilter> creationDateFilters = new ArrayList<>();
+		PripDateTimeFilter f1 = new PripDateTimeFilter();
+		f1.setDateTime(LocalDateTime.of(2019, 01, 01, 00, 00, 00));
+		f1.setOperator(Operator.GT);
+		f1.setFieldName(FIELD_NAMES.CONTENT_DATE_START);
+		
+		PripDateTimeFilter f2 = new PripDateTimeFilter();
+		f2.setDateTime(LocalDateTime.of(2020, 01, 06, 02, 00, 00));
+		f2.setOperator(Operator.LT);
+		f2.setFieldName(FIELD_NAMES.CONTENT_DATE_END);
+		
+		creationDateFilters.add(f1);
+		creationDateFilters.add(f2);
+		
+		doReturn(l).when(pripMetadataRepository).findWithFilters(Collections.EMPTY_LIST, creationDateFilters, Optional.empty(), Optional.empty());
+
+		ResultActions ra = this.mockMvc.perform(get(
+				"/odata/v1/Products?$filter=ContentDate/Start gt 2019-01-01T00:00:00.000Z and ContentDate/End lt 2020-01-06T02:00:00.000Z")
+						.contentType(MediaType.APPLICATION_JSON))
+				.andExpect(status().isOk());
+		expectIdAndName(ra, p1);
+	}
+	
 	@Test
 	public void testNameFiltering_startswith() throws Exception {
 		List<PripMetadata> l = new ArrayList<>();
@@ -181,7 +213,6 @@ public class TestOdataController {
 		l.add(p2);
 
 		List<PripTextFilter> nameFilters = new ArrayList<>();
-		
 		
 		PripTextFilter n2 = new PripTextFilter();
 		n2.setFunction(PripTextFilter.Function.STARTS_WITH);
