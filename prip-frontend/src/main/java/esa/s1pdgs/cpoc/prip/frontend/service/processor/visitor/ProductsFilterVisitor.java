@@ -9,6 +9,7 @@ import static esa.s1pdgs.cpoc.prip.frontend.service.edm.EntityTypeProperties.Sta
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -47,10 +48,13 @@ public class ProductsFilterVisitor implements ExpressionVisitor<Object> {
 	private Map<String,FIELD_NAMES> pripTextPropertyFieldNames;	
 
 	public ProductsFilterVisitor() {
+		pripDateTimeFilters = new ArrayList<>();
+		pripTextFilters = new ArrayList<>();
+		
 		pripDateTimePropertyFieldNames = new HashMap<>();
 		pripDateTimePropertyFieldNames.put(PublicationDate.name(), FIELD_NAMES.CREATION_DATE);
-		pripDateTimePropertyFieldNames.put(ContentDate.name() + Start.name(), FIELD_NAMES.CONTENT_DATE_START);
-		pripDateTimePropertyFieldNames.put(ContentDate.name() + End.name(), FIELD_NAMES.CONTENT_DATE_END);
+		pripDateTimePropertyFieldNames.put(ContentDate.name() + "/" + Start.name(), FIELD_NAMES.CONTENT_DATE_START);
+		pripDateTimePropertyFieldNames.put(ContentDate.name() + "/" + End.name(), FIELD_NAMES.CONTENT_DATE_END);
 
 		pripTextPropertyFieldNames = new HashMap<>();
 		pripTextPropertyFieldNames.put(Name.name(), FIELD_NAMES.NAME);
@@ -217,12 +221,10 @@ public class ProductsFilterVisitor implements ExpressionVisitor<Object> {
 	}
 
 	private String memberText(Member member) {
-
 		String text = "";
 		List<UriResource> uriResourceParts = member.getResourcePath().getUriResourceParts();
-
-		if (!uriResourceParts.isEmpty()) {
-			text = uriResourceParts.get(0).getSegmentValue();
+		for (int idx = 0; idx < uriResourceParts.size(); idx++) {
+			text += (idx > 0 ? "/" : "") + uriResourceParts.get(idx).getSegmentValue();
 		}
 		return text;
 	}
