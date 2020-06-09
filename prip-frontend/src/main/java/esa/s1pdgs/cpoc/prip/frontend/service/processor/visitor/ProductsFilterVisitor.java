@@ -3,17 +3,19 @@ package esa.s1pdgs.cpoc.prip.frontend.service.processor.visitor;
 import static esa.s1pdgs.cpoc.prip.frontend.service.edm.EntityTypeProperties.ContentDate;
 import static esa.s1pdgs.cpoc.prip.frontend.service.edm.EntityTypeProperties.End;
 import static esa.s1pdgs.cpoc.prip.frontend.service.edm.EntityTypeProperties.Name;
+import static esa.s1pdgs.cpoc.prip.frontend.service.edm.EntityTypeProperties.ProductionType;
 import static esa.s1pdgs.cpoc.prip.frontend.service.edm.EntityTypeProperties.PublicationDate;
 import static esa.s1pdgs.cpoc.prip.frontend.service.edm.EntityTypeProperties.Start;
-import static esa.s1pdgs.cpoc.prip.frontend.service.edm.EntityTypeProperties.ProductionType;
 
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import org.apache.olingo.commons.api.edm.EdmEnumType;
 import org.apache.olingo.commons.api.edm.EdmPrimitiveTypeException;
@@ -46,12 +48,14 @@ public class ProductsFilterVisitor implements ExpressionVisitor<Object> {
 	private List<PripTextFilter> pripTextFilters;
 	
 	private Map<String,FIELD_NAMES> pripDateTimePropertyFieldNames;	
-	private Map<String,FIELD_NAMES> pripTextPropertyFieldNames;	
+	private Map<String,FIELD_NAMES> pripTextPropertyFieldNames;
+	
+	private List<String> pripProductionTypes;
 
 	public ProductsFilterVisitor() {
 		pripDateTimeFilters = new ArrayList<>();
 		pripTextFilters = new ArrayList<>();
-		
+
 		pripDateTimePropertyFieldNames = new HashMap<>();
 		pripDateTimePropertyFieldNames.put(PublicationDate.name(), FIELD_NAMES.CREATION_DATE);
 		pripDateTimePropertyFieldNames.put(ContentDate.name() + "/" + Start.name(), FIELD_NAMES.CONTENT_DATE_START);
@@ -60,7 +64,9 @@ public class ProductsFilterVisitor implements ExpressionVisitor<Object> {
 		pripTextPropertyFieldNames = new HashMap<>();
 		pripTextPropertyFieldNames.put(Name.name(), FIELD_NAMES.NAME);
 		pripTextPropertyFieldNames.put(ProductionType.name(), FIELD_NAMES.PRODUCTION_TYPE);
-		
+
+		pripProductionTypes = Arrays.asList(esa.s1pdgs.cpoc.prip.model.ProductionType.values()).stream()
+				.map(v -> v.getName()).collect(Collectors.toList());
 	}
 
 	public List<PripDateTimeFilter> getPripDateTimeFilters() {
@@ -220,7 +226,11 @@ public class ProductsFilterVisitor implements ExpressionVisitor<Object> {
 	@Override
 	public Object visitEnum(EdmEnumType type, List<String> enumValues)
 			throws ExpressionVisitException, ODataApplicationException {
-		throw new UnsupportedOperationException();
+		ArrayList<Object> acceptedEnumsValues = new ArrayList<>();
+		if (ProductionType.name().equals(type.getName()) && pripProductionTypes.contains(enumValues.get(0))) {
+			acceptedEnumsValues.add(enumValues.get(0));
+		}
+		return acceptedEnumsValues;
 	}
 
 	private String memberText(Member member) {
