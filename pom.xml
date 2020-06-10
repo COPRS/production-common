@@ -31,7 +31,9 @@
 		<aws.version>1.11.271</aws.version>		
 		<jsch.version>0.1.53</jsch.version>
 		<elasticsearch.version>6.7.0</elasticsearch.version>
-		<pmd.failOnViolation>false</pmd.failOnViolation>		
+		<spatial4j.version>0.7</spatial4j.version>
+		<jts.version>1.15.0</jts.version>
+		<pmd.failOnViolation>false</pmd.failOnViolation>
 		<odata.version>4.6.0</odata.version>
 	</properties>
 
@@ -263,6 +265,16 @@
 				<groupId>org.elasticsearch</groupId>
 				<artifactId>elasticsearch</artifactId>
 				<version>${elasticsearch.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.locationtech.spatial4j</groupId>
+				<artifactId>spatial4j</artifactId>
+				<version>${spatial4j.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.locationtech.jts</groupId>
+				<artifactId>jts-core</artifactId>
+				<version>${jts.version}</version>
 			</dependency>
 			
 			<dependency>
