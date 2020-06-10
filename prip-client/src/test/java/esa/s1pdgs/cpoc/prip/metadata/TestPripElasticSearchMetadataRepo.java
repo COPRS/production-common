@@ -327,6 +327,8 @@ public class TestPripElasticSearchMetadataRepo {
 		pripMetadata.setProductFamily(ProductFamily.AUXILIARY_FILE_ZIP);
 		pripMetadata.setContentType(PripMetadata.DEFAULT_CONTENTTYPE);
 		pripMetadata.setContentLength(0);
+		pripMetadata.setContentDateStart(creationDate);
+		pripMetadata.setContentDateEnd(creationDate);
 		pripMetadata.setCreationDate(creationDate);
 		pripMetadata.setEvictionDate(creationDate.plusDays(PripMetadata.DEFAULT_EVICTION_DAYS));
 		pripMetadata.setChecksums(checksums);
