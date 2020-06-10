@@ -193,6 +193,7 @@ public class PripElasticSearchMetadataRepo implements PripMetadataRepository {
 				break;
 			case EQUALS:
 				queryBuilder.must(QueryBuilders.matchQuery(filter.getFieldName().fieldName(), filter.getText()));
+				break;
 			default:
 				throw new IllegalArgumentException(
 						String.format("not supported filter function: %s", filter.getFunction().name()));
