@@ -98,7 +98,7 @@ public class EsServicesTest{
 		product.put("productFamily", "AUXILIARY_FILE");
 		
 		//Result with boolean at true for isExist
-		GetResult getResult = new GetResult("index", "type", "id", 0, true, null, null);
+		GetResult getResult = new GetResult("index", "type", "id", 0L, 0L, 0L, true, null, null);
 		GetResponse getResponse = new GetResponse(getResult);
 		
 		//Mocking the get Request
@@ -121,7 +121,7 @@ public class EsServicesTest{
         product.put("productFamily", "L0_SLICE");
 		
 		//Result with boolean at false for isExist
-		GetResult getResult = new GetResult("index", "type", "id", 0, false, null, null);
+		GetResult getResult = new GetResult("index", "type", "id", 0L, 0L, 0L, false, null, null);
 		GetResponse getResponse = new GetResponse(getResult);
 		
 		//Mocking the get Request
@@ -143,7 +143,7 @@ public class EsServicesTest{
 		product.put("productType", "type");
 		
 		//Result with boolean at false for isExist
-		GetResult getResult = new GetResult("index", "type", "id", 0, false, null, null);
+		GetResult getResult = new GetResult("index", "type", "id", 0L, 0L, 0L, false, null, null);
 		GetResponse getResponse = new GetResponse(getResult);
 		
 		//Mocking the get Request
@@ -463,7 +463,7 @@ public class EsServicesTest{
 		BytesReference source = new BytesArray("{\"productName\":\"name\",\"url\""
 		        + ":\"url\",\"sessionId\":\"session\",\"startTime\":\"2000-01-01T00:00:00.000000Z\",\"stopTime\":\"2001-01-01T00:00:00.000000Z\",\"validityStartTime\":\"2000-01-01T00:00:00.000000Z\",\"validityStopTime\":"
 		        + "\"2001-01-01T00:00:00.000000Z\", \"productType\": \"product_type\", \"missionId\":\"mission\",\"satelliteId\":\"satellite\",\"stationCode\":\"station\"}");
-		GetResult getResult = new GetResult("index", "type", "id", 0, true, source, null);
+		GetResult getResult = new GetResult("index", "type", "id", 0L, 0L, 0L, true, source, null);
 		GetResponse getResponse = new GetResponse(getResult);
 		
 		//Mocking the get Request
@@ -483,7 +483,7 @@ public class EsServicesTest{
 		BytesReference source = new BytesArray("{\"productName\":\"name\",\"url\""
 		        + ":\"url\",\"validityStartTime\":\"validityStartTime\",\"validityStopTime\":"
 		        + "\"validityStopTime\", \"productType\": \"product_type\"}");
-		GetResult getResult = new GetResult("index", "type", "id", 0, false, source, null);
+		GetResult getResult = new GetResult("index", "type", "id", 0L, 0L, 0L, false, source, null);
 		GetResponse getResponse = new GetResponse(getResult);
 		
 		//Mocking the get Request
@@ -517,7 +517,7 @@ public class EsServicesTest{
 		        + "\"2001-01-01T00:00:00.000000Z\", \"instrumentConfigurationId\":0, \"sliceNumber\":2, "
 		        + "\"dataTakeId\":\"datatakeId\","
 		        + "\"productType\": \"product_type\"}");
-		GetResult getResult = new GetResult("index", "type", "id", 0, true, source, null);
+		GetResult getResult = new GetResult("index", "type", "id", 0L, 0L, 0L, true, source, null);
 		GetResponse getResponse = new GetResponse(getResult);
 		
 		//Mocking the get Request
@@ -537,7 +537,7 @@ public class EsServicesTest{
 		        + ":\"url\",\"startTime\":\"validityStartTime\",\"stopTime\":"
 		        + "\"validityStopTime\", \"instrumentConfigurationId\":0, \"sliceNumber\":2, \"dataTakeId\":\"datatakeId\","
                 + "\"productType\": \"product_type\"}");
-		GetResult getResult = new GetResult("index", "type", "id", 0, false, source, null);
+		GetResult getResult = new GetResult("index", "type", "id", 0L, 0L, 0L, false, source, null);
 		GetResponse getResponse = new GetResponse(getResult);
 		
 		//Mocking the get Request
@@ -552,7 +552,7 @@ public class EsServicesTest{
 		BytesReference source = new BytesArray("{\"startTime\":\"validityStartTime\",\"stopTime\":"
 		        + "\"validityStopTime\", \"instrumentConfigurationId\":0, \"sliceNumber\":2, \"dataTakeId\":\"datatakeId\","
                 + "\"productType\": \"product_type\"}");
-		GetResult getResult = new GetResult("index", "type", "id", 0, true, source, null);
+		GetResult getResult = new GetResult("index", "type", "id", 0L, 0L, 0L, true, source, null);
 		GetResponse getResponse = new GetResponse(getResult);
 		this.mockGetRequest(getResponse);
 		try {
@@ -567,7 +567,7 @@ public class EsServicesTest{
 		        + ":\"url\",\"stopTime\":\"2001-01-01T00:00:00.000000Z\", "
 		        + "\"instrumentConfigurationId\":0, \"sliceNumber\":2, \"dataTakeId\":\"datatakeId\","
                 + "\"productType\": \"product_type\"}");
-		getResult = new GetResult("index", "type", "id", 0, true, source, null);
+		getResult = new GetResult("index", "type", "id", 0L, 0L, 0L, true, source, null);
 		getResponse = new GetResponse(getResult);
 		this.mockGetRequest(getResponse);
 		try {
@@ -582,7 +582,7 @@ public class EsServicesTest{
 		        + ":\"url\",\"startTime\":\"2001-01-01T00:00:00.000000Z\","
 		        + " \"instrumentConfigurationId\":0, \"sliceNumber\":2, \"dataTakeId\":\"datatakeId\","
                 + "\"productType\": \"product_type\"}");
-		getResult = new GetResult("index", "type", "id", 0, true, source, null);
+		getResult = new GetResult("index", "type", "id", 0L, 0L, 0L, true, source, null);
 		getResponse = new GetResponse(getResult);
 		this.mockGetRequest(getResponse);
 		try {
@@ -597,7 +597,7 @@ public class EsServicesTest{
 		        + ":\"url\",\"startTime\":\"2000-01-01T00:00:00.000000Z\",\"stopTime\":"
 		        + "\"2001-01-01T00:00:00.000000Z\", \"sliceNumber\":2, \"dataTakeId\":\"datatakeId\","
                 + "\"productType\": \"product_type\"}");
-		getResult = new GetResult("index", "type", "id", 0, true, source, null);
+		getResult = new GetResult("index", "type", "id", 0L, 0L, 0L, true, source, null);
 		getResponse = new GetResponse(getResult);
 		this.mockGetRequest(getResponse);
 		try {
@@ -612,7 +612,7 @@ public class EsServicesTest{
 		        + ":\"url\",\"startTime\":\"2000-01-01T00:00:00.000000Z\",\"stopTime\":"
 		        + "\"2001-01-01T00:00:00.000000Z\", \"instrumentConfigurationId\":0, \"dataTakeId\":\"datatakeId\","
                 + "\"productType\": \"product_type\"}");
-		getResult = new GetResult("index", "type", "id", 0, true, source, null);
+		getResult = new GetResult("index", "type", "id", 0L, 0L, 0L, true, source, null);
 		getResponse = new GetResponse(getResult);
 		this.mockGetRequest(getResponse);
 		try {
@@ -627,7 +627,7 @@ public class EsServicesTest{
 		        + ":\"url\",\"startTime\":\"2000-01-01T00:00:00.000000Z\",\"stopTime\":"
 		        + "\"2001-01-01T00:00:00.000000Z\", \"instrumentConfigurationId\":0, \"sliceNumber\":2,"
                 + "\"productType\": \"product_type\"}");
-		getResult = new GetResult("index", "type", "id", 0, true, source, null);
+		getResult = new GetResult("index", "type", "id", 0L, 0L, 0L, true, source, null);
 		getResponse = new GetResponse(getResult);
 		this.mockGetRequest(getResponse);
 		try {
@@ -641,7 +641,7 @@ public class EsServicesTest{
         source = new BytesArray("{\"url\""
                 + ":\"url\",\"startTime\":\"2000-01-01T00:00:00.000000Z\",\"stopTime\":"
                 + "\"2001-01-01T00:00:00.000000Z\", \"instrumentConfigurationId\":0, \"sliceNumber\":2}");
-        getResult = new GetResult("index", "type", "id", 0, true, source, null);
+        getResult = new GetResult("index", "type", "id", 0L, 0L, 0L, true, source, null);
         getResponse = new GetResponse(getResult);
         this.mockGetRequest(getResponse);
         try {
@@ -892,7 +892,7 @@ public class EsServicesTest{
                 + "\"productSensingConsolidation\":\"NOT_DEFINED\", \"polarisation\":\"SV\", "
                 + "\"dataTakeId\":\"datatakeId\","
                 + "\"productType\": \"product_type\"}");
-        GetResult getResult = new GetResult("index", "l0_segment", "id", 0, true, source, null);
+        GetResult getResult = new GetResult("index", "l0_segment", "id", 0L, 0L, 0L, true, source, null);
         GetResponse getResponse = new GetResponse(getResult);
         
         //Mocking the get Request
@@ -913,7 +913,7 @@ public class EsServicesTest{
                 + "\"2001-01-01T00:00:00.000000Z\", \"productConsolidation\":\"FULL\", \"polarisation\":\"SV\", "
                 + "\"dataTakeId\":\"datatakeId\","
                 + "\"productType\": \"product_type\"}");
-        GetResult getResult = new GetResult("index", "l0_segment", "id", 0, false, source, null);
+        GetResult getResult = new GetResult("index", "l0_segment", "id", 0L, 0L, 0L, false, source, null);
         GetResponse getResponse = new GetResponse(getResult);
         
         //Mocking the get Request
@@ -930,7 +930,7 @@ public class EsServicesTest{
                 + "\"2001-01-01T00:00:00.000000Z\", \"productConsolidation\":\"FULL\", \"polarisation\":\"SV\", "
                 + "\"dataTakeId\":\"datatakeId\","
                 + "\"productType\": \"product_type\"}");
-        GetResult getResult = new GetResult("index", "type", "id", 0, true, source, null);
+        GetResult getResult = new GetResult("index", "type", "id", 0L, 0L, 0L, true, source, null);
         GetResponse getResponse = new GetResponse(getResult);
         this.mockGetRequest(getResponse);
         try {
@@ -946,7 +946,7 @@ public class EsServicesTest{
                 + "\"2001-01-01T00:00:00.000000Z\", \"productConsolidation\":\"FULL\", \"polarisation\":\"SV\", "
                 + "\"dataTakeId\":\"datatakeId\","
                 + "\"productType\": \"product_type\"}");
-        getResult = new GetResult("index", "type", "id", 0, true, source, null);
+        getResult = new GetResult("index", "type", "id", 0L, 0L, 0L, true, source, null);
         getResponse = new GetResponse(getResult);
         this.mockGetRequest(getResponse);
         try {
@@ -962,7 +962,7 @@ public class EsServicesTest{
                 + "\"productConsolidation\":\"FULL\", \"polarisation\":\"SV\", "
                 + "\"dataTakeId\":\"datatakeId\","
                 + "\"productType\": \"product_type\"}");
-        getResult = new GetResult("index", "type", "id", 0, true, source, null);
+        getResult = new GetResult("index", "type", "id", 0L, 0L, 0L, true, source, null);
         getResponse = new GetResponse(getResult);
         this.mockGetRequest(getResponse);
         try {
@@ -978,7 +978,7 @@ public class EsServicesTest{
                 + "\"2001-01-01T00:00:00.000000Z\", \"polarisation\":\"SV\", "
                 + "\"dataTakeId\":\"datatakeId\","
                 + "\"productType\": \"product_type\"}");
-        getResult = new GetResult("index", "type", "id", 0, true, source, null);
+        getResult = new GetResult("index", "type", "id", 0L, 0L, 0L, true, source, null);
         getResponse = new GetResponse(getResult);
         this.mockGetRequest(getResponse);
         try {
@@ -994,7 +994,7 @@ public class EsServicesTest{
                 + "\"2001-01-01T00:00:00.000000Z\", \"productConsolidation\":\"FULL\", "
                 + "\"dataTakeId\":\"datatakeId\","
                 + "\"productType\": \"product_type\"}");
-        getResult = new GetResult("index", "type", "id", 0, true, source, null);
+        getResult = new GetResult("index", "type", "id", 0L, 0L, 0L, true, source, null);
         getResponse = new GetResponse(getResult);
         this.mockGetRequest(getResponse);
         try {
@@ -1009,7 +1009,7 @@ public class EsServicesTest{
                 + ":\"url\",\"startTime\":\"2000-01-01T00:00:00.000000Z\",\"stopTime\":"
                 + "\"2001-01-01T00:00:00.000000Z\", \"productConsolidation\":\"FULL\", \"polarisation\":\"SV\", "
                 + "\"productType\": \"product_type\"}");
-        getResult = new GetResult("index", "type", "id", 0, true, source, null);
+        getResult = new GetResult("index", "type", "id", 0L, 0L, 0L, true, source, null);
         getResponse = new GetResponse(getResult);
         this.mockGetRequest(getResponse);
         try {
@@ -1024,7 +1024,7 @@ public class EsServicesTest{
                 + ":\"url\",\"startTime\":\"2000-01-01T00:00:00.000000Z\",\"stopTime\":"
                 + "\"2001-01-01T00:00:00.000000Z\", \"productConsolidation\":\"FULL\", \"polarisation\":\"SV\", "
                 + "\"dataTakeId\":\"datatakeId\"}");
-        getResult = new GetResult("index", "type", "id", 0, true, source, null);
+        getResult = new GetResult("index", "type", "id", 0L, 0L, 0L, true, source, null);
         getResponse = new GetResponse(getResult);
         this.mockGetRequest(getResponse);
         try {
@@ -1084,7 +1084,7 @@ public class EsServicesTest{
                 + "[ 31.191409132621285, -22.2515096981724 ] ]]}}";        
         BytesReference source = new BytesArray(content);
         
-        final GetResult getResult = new GetResult("index", "type", "id", 0, true, source, null);
+        final GetResult getResult = new GetResult("index", "type", "id", 0L, 0L, 0L, true, source, null);
         final GetResponse getResponse = new GetResponse(getResult);
         this.mockGetRequest(getResponse);
 
@@ -1149,7 +1149,7 @@ public class EsServicesTest{
                 + "[ 31.191409132621285, -22.2515096981724 ] ]]}}";        
         BytesReference source = new BytesArray(content);
         
-        final GetResult getResult = new GetResult("index", "type", "id", 0, true, source, null);
+        final GetResult getResult = new GetResult("index", "type", "id", 0L, 0L, 0L, true, source, null);
         final GetResponse getResponse = new GetResponse(getResult);
         this.mockGetRequest(getResponse);
 
