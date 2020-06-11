@@ -18,8 +18,10 @@ import org.elasticsearch.action.support.replication.ReplicationResponse;
 import org.elasticsearch.client.RequestOptions;
 import org.elasticsearch.client.RestHighLevelClient;
 import org.elasticsearch.client.core.CountRequest;
+import org.elasticsearch.common.unit.Fuzziness;
 import org.elasticsearch.common.xcontent.XContentType;
 import org.elasticsearch.index.query.BoolQueryBuilder;
+import org.elasticsearch.index.query.Operator;
 import org.elasticsearch.index.query.QueryBuilders;
 import org.elasticsearch.index.query.RangeQueryBuilder;
 import org.elasticsearch.search.SearchHit;
@@ -192,7 +194,8 @@ public class PripElasticSearchMetadataRepo implements PripMetadataRepository {
 						String.format("*%s*", filter.getText().toLowerCase())));
 				break;
 			case EQUALS:
-				queryBuilder.must(QueryBuilders.matchQuery(filter.getFieldName().fieldName(), filter.getText()));
+				queryBuilder.must(QueryBuilders.matchQuery(filter.getFieldName().fieldName(), filter.getText()).fuzziness(Fuzziness.ZERO).operator(Operator.AND));
+				break;
 			default:
 				throw new IllegalArgumentException(
 						String.format("not supported filter function: %s", filter.getFunction().name()));
@@ -248,7 +251,7 @@ public class PripElasticSearchMetadataRepo implements PripMetadataRepository {
 		pm.setProductFamily(
 				ProductFamily.valueOf((String) sourceAsMap.get(PripMetadata.FIELD_NAMES.PRODUCT_FAMILY.fieldName())));
 		pm.setContentType((String) sourceAsMap.get(PripMetadata.FIELD_NAMES.CONTENT_TYPE.fieldName()));
-		pm.setContentLength(Long.parseLong((String)sourceAsMap.get(PripMetadata.FIELD_NAMES.CONTENT_LENGTH.fieldName())));
+		pm.setContentLength((Integer) sourceAsMap.get(PripMetadata.FIELD_NAMES.CONTENT_LENGTH.fieldName()));
 		pm.setCreationDate(
 				DateUtils.parse((String) sourceAsMap.get(PripMetadata.FIELD_NAMES.CREATION_DATE.fieldName())));
 		pm.setEvictionDate(

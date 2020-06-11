@@ -24,8 +24,8 @@ public class PripMetadata {
 		PRODUCT_FAMILY("productFamily", m -> m.getProductFamily() != null ? m.getProductFamily().name() : null),
 		CONTENT_TYPE("contentType", PripMetadata::getContentType),
 		CONTENT_LENGTH("contentLength", PripMetadata::getContentLength),
-		CONTENT_DATE_START("contentDateStart", PripMetadata::getContentDateStart),
-		CONTENT_DATE_END("contentDateEnd", PripMetadata::getContentDateEnd),
+		CONTENT_DATE_START("contentDateStart", m -> (m.getContentDateStart() != null) ? DateUtils.formatToMetadataDateTimeFormat(m.getContentDateStart()) : null),
+		CONTENT_DATE_END("contentDateEnd", m -> (m.getContentDateEnd() != null) ? DateUtils.formatToMetadataDateTimeFormat(m.getContentDateEnd()) : null),
 		CREATION_DATE("creationDate",
 				m -> (m.getCreationDate() != null) ? DateUtils.formatToMetadataDateTimeFormat(m.getCreationDate()) : null),
 		EVICTION_DATE("evictionDate",
@@ -202,7 +202,5 @@ public class PripMetadata {
 				&& Objects.equals(name, other.name) && Objects.equals(obsKey, other.obsKey)
 				&& productFamily == other.productFamily && productionType == other.productionType;
 	}
-	
-	
 
 }

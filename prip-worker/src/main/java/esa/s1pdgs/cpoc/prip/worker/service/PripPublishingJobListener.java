@@ -77,12 +77,12 @@ public class PripPublishingJobListener implements MqiListener<PripPublishingJob>
 	public void initService() {
 		if (pollingIntervalMs > 0) {
 			final ExecutorService service = Executors.newFixedThreadPool(1);
-			service.execute(new MqiConsumer<PripPublishingJob>(
-					mqiClient, 
-					ProductCategory.PRIP_JOBS, 
+			service.execute(new MqiConsumer<>(
+					mqiClient,
+					ProductCategory.PRIP_JOBS,
 					this,
-					pollingIntervalMs, 
-					pollingInitialDelayMs, 
+					pollingIntervalMs,
+					pollingInitialDelayMs,
 					appStatus
 			));
 		}
@@ -173,7 +173,7 @@ public class PripPublishingJobListener implements MqiListener<PripPublishingJob>
 		return Arrays.asList(checksum);
 	}
 	
-	static final String removeZipSuffix(final String name) {
+	static String removeZipSuffix(final String name) {
 		if (name.toLowerCase().endsWith(".zip")) {
 			return name.substring(0, name.length() - ".zip".length());
 		} else if (name.toLowerCase().endsWith("_zip")) {

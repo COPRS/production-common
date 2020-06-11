@@ -3,17 +3,20 @@ package esa.s1pdgs.cpoc.prip.frontend.service.processor.visitor;
 import static esa.s1pdgs.cpoc.prip.frontend.service.edm.EntityTypeProperties.ContentDate;
 import static esa.s1pdgs.cpoc.prip.frontend.service.edm.EntityTypeProperties.End;
 import static esa.s1pdgs.cpoc.prip.frontend.service.edm.EntityTypeProperties.Name;
+import static esa.s1pdgs.cpoc.prip.frontend.service.edm.EntityTypeProperties.ProductionType;
 import static esa.s1pdgs.cpoc.prip.frontend.service.edm.EntityTypeProperties.PublicationDate;
 import static esa.s1pdgs.cpoc.prip.frontend.service.edm.EntityTypeProperties.Start;
-import static esa.s1pdgs.cpoc.prip.frontend.service.edm.EntityTypeProperties.ProductionType;
+import static esa.s1pdgs.cpoc.prip.model.ProductionType.SYSTEMATIC_PRODUCTION;
 
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import org.apache.olingo.commons.api.edm.EdmEnumType;
 import org.apache.olingo.commons.api.edm.EdmPrimitiveTypeException;
@@ -42,16 +45,23 @@ public class ProductsFilterVisitor implements ExpressionVisitor<Object> {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(ProductsFilterVisitor.class);
 
+	private List<MethodKind> supportedMethods;
+	
 	private List<PripDateTimeFilter> pripDateTimeFilters;
 	private List<PripTextFilter> pripTextFilters;
 	
 	private Map<String,FIELD_NAMES> pripDateTimePropertyFieldNames;	
-	private Map<String,FIELD_NAMES> pripTextPropertyFieldNames;	
+	private Map<String,FIELD_NAMES> pripTextPropertyFieldNames;
+	
+	private List<String> pripProductionTypes;
 
 	public ProductsFilterVisitor() {
+
+		supportedMethods = Arrays.asList(MethodKind.CONTAINS, MethodKind.STARTSWITH);
+		
 		pripDateTimeFilters = new ArrayList<>();
 		pripTextFilters = new ArrayList<>();
-		
+
 		pripDateTimePropertyFieldNames = new HashMap<>();
 		pripDateTimePropertyFieldNames.put(PublicationDate.name(), FIELD_NAMES.CREATION_DATE);
 		pripDateTimePropertyFieldNames.put(ContentDate.name() + "/" + Start.name(), FIELD_NAMES.CONTENT_DATE_START);
@@ -60,7 +70,9 @@ public class ProductsFilterVisitor implements ExpressionVisitor<Object> {
 		pripTextPropertyFieldNames = new HashMap<>();
 		pripTextPropertyFieldNames.put(Name.name(), FIELD_NAMES.NAME);
 		pripTextPropertyFieldNames.put(ProductionType.name(), FIELD_NAMES.PRODUCTION_TYPE);
-		
+
+		pripProductionTypes = Arrays.asList(esa.s1pdgs.cpoc.prip.model.ProductionType.values()).stream()
+				.map(v -> v.getName()).collect(Collectors.toList());
 	}
 
 	public List<PripDateTimeFilter> getPripDateTimeFilters() {
@@ -70,25 +82,13 @@ public class ProductsFilterVisitor implements ExpressionVisitor<Object> {
 	public List<PripTextFilter> getPripTextFilters() {
 		return pripTextFilters;
 	}
-
+	
 	@Override
 	public Object visitBinaryOperator(BinaryOperatorKind operator, Object left, Object right)
 			throws ExpressionVisitException, ODataApplicationException {
 
-		String leftOperand = "";
-		String rightOperand = "";
-
-		if (left instanceof Member) {
-			leftOperand = memberText((Member) left);
-		} else if (left instanceof Literal) {
-			leftOperand = ((Literal) left).getText();
-		}
-
-		if (right instanceof Member) {
-			rightOperand = memberText((Member) right);
-		} else if (right instanceof Literal) {
-			rightOperand = ((Literal) right).getText();
-		}
+		String leftOperand = operandToString(left);
+		String rightOperand = operandToString(right);
 
 		LOGGER.debug("got left operand: {} operator: {} right operand: {} ", leftOperand, operator, rightOperand);
 
@@ -135,6 +135,22 @@ public class ProductsFilterVisitor implements ExpressionVisitor<Object> {
 				textFilter.setFunction(Function.EQUALS);
 				textFilter.setText(rightOperand.substring(1, rightOperand.length() - 1));
 				textFilter.setFieldName(pripTextPropertyFieldNames.get(leftOperand));
+			} else if(left instanceof Literal && right instanceof Member) {
+				textFilter.setFunction(Function.EQUALS);
+				textFilter.setText(leftOperand.substring(1, leftOperand.length() - 1));
+				textFilter.setFieldName(pripTextPropertyFieldNames.get(rightOperand));
+			} else if (left instanceof Member && right instanceof List || left instanceof List && right instanceof Member) {
+				String memberText = left instanceof Member ? leftOperand : rightOperand;
+				String firstListElementText = left instanceof List ? leftOperand : rightOperand;
+				// BEGIN WORKAROUND TO RETURN EMPTY RESULT FOR ProductionType != systematic_production
+				if (ProductionType.name().equals("ProductionType") && !SYSTEMATIC_PRODUCTION.getName().equals(firstListElementText)) {
+					textFilter.setFunction(Function.EQUALS);					
+					textFilter.setText("NOTEXISTINGPRODUCTNAME");
+					textFilter.setFieldName(FIELD_NAMES.NAME);
+				} else {
+					return null;
+				}
+				// END WORKAROUND TO RETURN EMPTY RESULT FOR ProductionType != systematic_production
 			} else {
 				throw new ExpressionVisitException("Invalid or unsupported operand");
 			}
@@ -147,6 +163,24 @@ public class ProductsFilterVisitor implements ExpressionVisitor<Object> {
 		return null;
 	}
 
+	public String operandToString(Object operand) {
+		String result = "";
+		if (operand instanceof Member) {
+			result = memberText((Member) operand);
+		} else if (operand instanceof Literal) {
+			result = ((Literal) operand).getText();
+		} else if (operand instanceof List){
+			List list = (List)operand;
+			if (!list.isEmpty()) {
+				Object first = list.get(0);
+				if (first instanceof String) {
+					result = (String)first;
+				}
+			}
+		}
+		return result;
+	}
+
 	@Override
 	public Object visitUnaryOperator(UnaryOperatorKind operator, Object operand)
 			throws ExpressionVisitException, ODataApplicationException {
@@ -156,8 +190,8 @@ public class ProductsFilterVisitor implements ExpressionVisitor<Object> {
 	@Override
 	public Object visitMethodCall(MethodKind methodCall, List<Object> parameters)
 			throws ExpressionVisitException, ODataApplicationException {
-
-		if (!methodCall.equals(MethodKind.CONTAINS) && !methodCall.equals(MethodKind.STARTSWITH)) {
+		
+		if (!supportedMethods.contains(methodCall)) {
 			return null;
 		}
 		
@@ -220,7 +254,11 @@ public class ProductsFilterVisitor implements ExpressionVisitor<Object> {
 	@Override
 	public Object visitEnum(EdmEnumType type, List<String> enumValues)
 			throws ExpressionVisitException, ODataApplicationException {
-		throw new UnsupportedOperationException();
+		ArrayList<Object> acceptedEnumsValues = new ArrayList<>();
+		if (ProductionType.name().equals(type.getName()) && pripProductionTypes.contains(enumValues.get(0))) {
+			acceptedEnumsValues.add(enumValues.get(0));
+		}
+		return acceptedEnumsValues;
 	}
 
 	private String memberText(Member member) {
