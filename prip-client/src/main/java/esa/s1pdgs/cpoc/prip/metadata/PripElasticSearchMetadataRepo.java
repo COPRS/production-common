@@ -18,8 +18,10 @@ import org.elasticsearch.action.support.replication.ReplicationResponse;
 import org.elasticsearch.client.RequestOptions;
 import org.elasticsearch.client.RestHighLevelClient;
 import org.elasticsearch.client.core.CountRequest;
+import org.elasticsearch.common.unit.Fuzziness;
 import org.elasticsearch.common.xcontent.XContentType;
 import org.elasticsearch.index.query.BoolQueryBuilder;
+import org.elasticsearch.index.query.Operator;
 import org.elasticsearch.index.query.QueryBuilders;
 import org.elasticsearch.index.query.RangeQueryBuilder;
 import org.elasticsearch.search.SearchHit;
@@ -192,7 +194,7 @@ public class PripElasticSearchMetadataRepo implements PripMetadataRepository {
 						String.format("*%s*", filter.getText().toLowerCase())));
 				break;
 			case EQUALS:
-				queryBuilder.must(QueryBuilders.matchQuery(filter.getFieldName().fieldName(), filter.getText()));
+				queryBuilder.must(QueryBuilders.matchQuery(filter.getFieldName().fieldName(), filter.getText()).fuzziness(Fuzziness.ZERO).operator(Operator.AND));
 				break;
 			default:
 				throw new IllegalArgumentException(
