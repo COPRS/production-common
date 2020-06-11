@@ -160,16 +160,23 @@ public class IngestionWorkerService implements MqiListener<IngestionJob> {
 			final GenericMessageDto<IngestionJob> message,
 			final UUID reportingId
 	) throws AbstractCodedException {
+		// S1PRO-1518: detect original product family for failed requests, which are family INVALID
+		// as later systems consuming the upstream messages rely on the correct family
+		final IngestionJob ingestion = message.getBody();
+		final ProductFamily originalFamily = ingestion.getOriginalFamily();
+		
 		for (final Product<IngestionEvent> product : products) {
 			final IngestionEvent event = product.getDto();
 			event.setUid(reportingId);
+			event.setProductFamily(originalFamily);	
 			
 			final GenericPublicationMessageDto<IngestionEvent> result = new GenericPublicationMessageDto<>(
 					message.getId(), 
-					product.getFamily(), 
+					originalFamily, 
 					event
 			);
 			result.setInputKey(message.getInputKey());
+			// S1PRO-1518: keep family 'INVALID' here in restart scenario to allow possible different routing
 			result.setOutputKey(product.getFamily().toString());
 			LOG.info("publishing : {}", result);
 			mqiClient.publish(result, ProductCategory.INGESTION_EVENT);
