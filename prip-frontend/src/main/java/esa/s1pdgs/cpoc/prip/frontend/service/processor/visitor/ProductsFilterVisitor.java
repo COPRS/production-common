@@ -133,11 +133,11 @@ public class ProductsFilterVisitor implements ExpressionVisitor<Object> {
 			PripTextFilter textFilter = new PripTextFilter();
 			if (left instanceof Member && right instanceof Literal) {
 				textFilter.setFunction(Function.EQUALS);
-				textFilter.setText(rightOperand);
+				textFilter.setText(rightOperand.substring(1, rightOperand.length() - 1));
 				textFilter.setFieldName(pripTextPropertyFieldNames.get(leftOperand));
 			} else if(left instanceof Literal && right instanceof Member) {
 				textFilter.setFunction(Function.EQUALS);
-				textFilter.setText(leftOperand);
+				textFilter.setText(leftOperand.substring(1, leftOperand.length() - 1));
 				textFilter.setFieldName(pripTextPropertyFieldNames.get(rightOperand));
 			} else if (left instanceof Member && right instanceof List || left instanceof List && right instanceof Member) {
 				String memberText = left instanceof Member ? leftOperand : rightOperand;
