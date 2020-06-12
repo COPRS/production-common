@@ -17,6 +17,7 @@ import static esa.s1pdgs.cpoc.prip.frontend.service.edm.EntityTypeProperties.Val
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.sql.Timestamp;
+import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
 import java.util.ArrayList;
@@ -34,6 +35,9 @@ import esa.s1pdgs.cpoc.prip.model.Checksum;
 import esa.s1pdgs.cpoc.prip.model.PripMetadata;
 
 public class MappingUtil {
+	
+	private static final int MILLIS_PER_SECOND = 1000;
+	
 	public static Entity pripMetadataToEntity(PripMetadata pripMetadata, String rawBaseUri) {
 		URI uri = MappingUtil.createId(rawBaseUri, EdmProvider.ES_PRODUCTS_NAME, pripMetadata.getId());
 		Entity entity = new Entity()
@@ -60,7 +64,18 @@ public class MappingUtil {
 	}
 	
 	public static Timestamp convertLocalDateTimeToTimestamp(LocalDateTime localDateTime) {
-		return null == localDateTime ? null : Timestamp.from(localDateTime.toInstant(ZoneOffset.UTC));
+		if (null != localDateTime) {
+			try {
+	            Instant instant = localDateTime.toInstant(ZoneOffset.UTC);
+				Timestamp stamp = new Timestamp(instant .getEpochSecond() * MILLIS_PER_SECOND);
+				stamp.setNanos(instant.getNano() / 1000000 * 1000000);
+	            return stamp;
+	        } catch (ArithmeticException ex) {
+	            throw new IllegalArgumentException(ex);
+	        }
+		} else {
+			return null;
+		}
 	}
 	
 	public static ComplexValue convertToContentDate(LocalDateTime contentDateStart, LocalDateTime contentDateEnd) {
