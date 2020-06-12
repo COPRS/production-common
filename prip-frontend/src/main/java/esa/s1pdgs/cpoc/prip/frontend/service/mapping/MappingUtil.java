@@ -67,8 +67,8 @@ public class MappingUtil {
 		if (null != localDateTime) {
 			try {
 	            Instant instant = localDateTime.toInstant(ZoneOffset.UTC);
-				Timestamp stamp = new Timestamp(instant .getEpochSecond() * MILLIS_PER_SECOND);
-				stamp.setNanos(instant.getNano() / 1000000 * 1000000);
+				Timestamp stamp = new Timestamp(instant.getEpochSecond() * MILLIS_PER_SECOND);
+				stamp.setNanos(instant.getNano() / 1000000 * 1000000); // results in cutting off places
 	            return stamp;
 	        } catch (ArithmeticException ex) {
 	            throw new IllegalArgumentException(ex);
