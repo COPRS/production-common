@@ -60,6 +60,7 @@ public class XbipClientConfigurationProperties {
 	
 	private String proxyHost;
 	private int proxyPort = 80;
+	private int connectTimeoutSec = 10;
 
 	private List<XbipHostConfiguration> hostConfigs;
 
@@ -86,10 +87,18 @@ public class XbipClientConfigurationProperties {
 	public void setProxyPort(final int proxyPort) {
 		this.proxyPort = proxyPort;
 	}
+	
+	public int getConnectTimeoutSec() {
+		return connectTimeoutSec;
+	}
+
+	public void setConnectTimeoutSec(final int connectTimeoutSec) {
+		this.connectTimeoutSec = connectTimeoutSec;
+	}
 
 	@Override
 	public String toString() {
 		return "XbipClientConfigurationProperties [proxyHost=" + proxyHost + ", proxyPort=" + proxyPort
-				+ ", hostConfigs=" + hostConfigs + "]";
+				+ ", connectTimeoutSec=" + connectTimeoutSec + ", hostConfigs=" + hostConfigs + "]";
 	}
 }
