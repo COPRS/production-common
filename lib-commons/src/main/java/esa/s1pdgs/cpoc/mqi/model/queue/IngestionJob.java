@@ -25,8 +25,6 @@ public class IngestionJob extends AbstractMessage {
 	private long productSizeByte = 0L;
 	
 	private String stationName;
-	
-	private ProductFamily originalFamily;
 		
 	public IngestionJob() {
 		super();
@@ -48,7 +46,6 @@ public class IngestionJob extends AbstractMessage {
 		this.productSizeByte 	= productSizeByte;
 		this.uid				= uuid;
 		this.stationName		= stationName;
-		this.originalFamily		= family;
 	}
 
 	public String getPickupBaseURL() {
@@ -90,19 +87,11 @@ public class IngestionJob extends AbstractMessage {
 	public void setStationName(final String stationName) {
 		this.stationName = stationName;
 	}
-	
-	public ProductFamily getOriginalFamily() {
-		return originalFamily;
-	}
-
-	public void setOriginalFamily(final ProductFamily originalFamily) {
-		this.originalFamily = originalFamily;
-	}
 
 	@Override
 	public int hashCode() {
 		return Objects.hash(creationDate, hostname, keyObjectStorage, pickupBaseURL, productFamily,
-				relativePath, productName, uid, productSizeByte, stationName, originalFamily);
+				relativePath, productName, uid, productSizeByte, stationName);
 	}
 
 	@Override
@@ -126,7 +115,6 @@ public class IngestionJob extends AbstractMessage {
 				&& Objects.equals(relativePath, other.relativePath)
 				&& Objects.equals(stationName, other.stationName)
 				&& productSizeByte == other.productSizeByte 
-				&& originalFamily == other.originalFamily
 				&& Objects.equals(productName, other.productName);
 	}
 
@@ -135,7 +123,6 @@ public class IngestionJob extends AbstractMessage {
 		return "IngestionJob [productFamily=" + productFamily + ", keyObjectStorage=" + keyObjectStorage
 				+ ", creationDate=" + creationDate + ", hostname=" + hostname + ", relativePath=" + relativePath
 				+ ", pickupBaseURL=" + pickupBaseURL + ", productName=" + productName + ", uid=" + uid +
-				", productSizeByte="+productSizeByte+", stationName=" + stationName + ", originalFamily=" + 
-				originalFamily + "]";
+				", productSizeByte="+productSizeByte+", stationName=" + stationName + "]";
 	}	
 }

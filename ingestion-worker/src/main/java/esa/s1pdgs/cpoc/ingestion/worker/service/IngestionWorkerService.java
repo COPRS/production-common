@@ -18,7 +18,6 @@ import org.springframework.stereotype.Service;
 
 import esa.s1pdgs.cpoc.appstatus.AppStatus;
 import esa.s1pdgs.cpoc.common.ProductCategory;
-import esa.s1pdgs.cpoc.common.ProductFamily;
 import esa.s1pdgs.cpoc.common.errors.AbstractCodedException;
 import esa.s1pdgs.cpoc.common.errors.InternalErrorException;
 import esa.s1pdgs.cpoc.common.utils.FileUtils;
@@ -110,8 +109,7 @@ public class IngestionWorkerService implements MqiListener<IngestionJob> {
 			final List<Product<IngestionEvent>> result = identifyAndUpload(message, inboxAdapter, ingestion, reporting);
 			final Date ingestionFinishedDate = new Date();
 			publish(result, message, reporting.getUid());
-			delete(ingestion);			
-						
+			delete(ingestion);					
 			inboxAdapter.delete(productUri);
 
 			reporting.end(
@@ -149,8 +147,6 @@ public class IngestionWorkerService implements MqiListener<IngestionJob> {
 		} 
 		catch (final Exception e) {
 			LOG.error(e);
-			productService.markInvalid(inboxAdapter, ingestion, reportingFactory);
-			message.getBody().setProductFamily(ProductFamily.INVALID);
 			throw e;
 		}
 	}
@@ -159,24 +155,17 @@ public class IngestionWorkerService implements MqiListener<IngestionJob> {
 			final List<Product<IngestionEvent>> products, 
 			final GenericMessageDto<IngestionJob> message,
 			final UUID reportingId
-	) throws AbstractCodedException {
-		// S1PRO-1518: detect original product family for failed requests, which are family INVALID
-		// as later systems consuming the upstream messages rely on the correct family
-		final IngestionJob ingestion = message.getBody();
-		final ProductFamily originalFamily = ingestion.getOriginalFamily();
-		
+	) throws AbstractCodedException {		
 		for (final Product<IngestionEvent> product : products) {
 			final IngestionEvent event = product.getDto();
 			event.setUid(reportingId);
-			event.setProductFamily(originalFamily);	
 			
 			final GenericPublicationMessageDto<IngestionEvent> result = new GenericPublicationMessageDto<>(
 					message.getId(), 
-					originalFamily, 
+					product.getFamily(), 
 					event
 			);
 			result.setInputKey(message.getInputKey());
-			// S1PRO-1518: keep family 'INVALID' here in restart scenario to allow possible different routing
 			result.setOutputKey(product.getFamily().toString());
 			LOG.info("publishing : {}", result);
 			mqiClient.publish(result, ProductCategory.INGESTION_EVENT);
