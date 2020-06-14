@@ -15,10 +15,4 @@ public interface ProductService {
 			IngestionJob ingestion, 
 			ReportingFactory reportingFactory
 	) throws Exception;
-
-	void markInvalid(
-			InboxAdapter inboxAdapter,
-			IngestionJob ingestion, 
-			ReportingFactory reportingFactory
-	) throws Exception;
 }

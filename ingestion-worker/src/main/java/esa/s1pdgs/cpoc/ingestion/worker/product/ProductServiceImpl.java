@@ -48,37 +48,12 @@ public class ProductServiceImpl implements ProductService {
 				ingestion.getStationName()
 		);
 		final Product<IngestionEvent> prod = new Product<IngestionEvent>(family, uri, dto);
-
-		if (ingestion.getProductFamily() == ProductFamily.INVALID) {
-			if (family == ProductFamily.INVALID) {
-				LOG.debug("Product ingestion of file {} has been already restarted before", prod);
-			} else {
-				LOG.debug("Moving product with obs key {} from family {} to family {}",
-						ingestion.getKeyObjectStorage(), ProductFamily.INVALID, family);
-				obsAdapter.move(ProductFamily.INVALID, family, ingestion.getProductName());
-			}
-		} else {
-			obsAdapter.upload(
-					family, 
-					inboxAdapter.read(uri, ingestion.getProductName()), 
-					ingestion.getProductName()
-			);
-		}
-		return Collections.singletonList(prod);
-	}
-
-	@Override
-	public void markInvalid(
-			final InboxAdapter inboxAdapter,
-			final IngestionJob ingestion, 
-			final ReportingFactory reportingFactory
-	) throws Exception {
-		final ObsAdapter obsAdapter = newObsAdapterFor(reportingFactory);
 		obsAdapter.upload(
-				ProductFamily.INVALID, 
-				inboxAdapter.read(IngestionJobs.toUri(ingestion), ingestion.getProductName()), 
+				family, 
+				inboxAdapter.read(uri, ingestion.getProductName()), 
 				ingestion.getProductName()
 		);
+		return Collections.singletonList(prod);
 	}
 
 	final String toObsKey(final Path relPath) {
