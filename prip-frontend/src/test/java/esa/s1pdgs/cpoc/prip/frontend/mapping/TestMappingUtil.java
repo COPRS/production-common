@@ -1,10 +1,13 @@
 package esa.s1pdgs.cpoc.prip.frontend.mapping;
 
+import static org.junit.Assert.assertTrue;
+
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.sql.Timestamp;
 import java.time.Instant;
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.Arrays;
 import java.util.List;
 import java.util.TimeZone;
@@ -108,6 +111,15 @@ public class TestMappingUtil {
 		Entity actualEntity = MappingUtil.pripMetadataToEntity(inputPripMetadata, "http://example.org");
 		
 		Assert.assertEquals(expectedEntity, actualEntity);
+	}
+	
+	@Test
+	public void TestConvertLocalDateTimeToTimestampShallReturnPrecisionXXX000Z() {
+		DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSSSSS'Z'");
+		LocalDateTime source = LocalDateTime.parse("2000-01-01T00:00:00.123456Z", dateTimeFormatter);
+		Timestamp destination = MappingUtil.convertLocalDateTimeToTimestamp(source);
+		assertTrue(dateTimeFormatter.format(source).endsWith("123456Z"));
+		assertTrue(dateTimeFormatter.format(destination.toLocalDateTime()).endsWith("123000Z"));
 	}
 
 }
