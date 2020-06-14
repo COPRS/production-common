@@ -38,7 +38,7 @@ include:
   - local: metadata-catalog-trigger/.gitlab-ci.yml
   - local: metadata-catalog-worker/.gitlab-ci.yml
   - local: mqi-server/.gitlab-ci.yml
-  - local: scaler/.gitlab-ci.yml
+#  - local: scaler/.gitlab-ci.yml
   - local: queue-watcher/.gitlab-ci.yml
   - local: validation/.gitlab-ci.yml
   - local: compression-trigger/.gitlab-ci.yml

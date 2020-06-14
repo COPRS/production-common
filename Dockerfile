@@ -28,7 +28,7 @@ COPY metadata-client/ /app/metadata-client
 COPY mqi-client/ /app/mqi-client
 COPY mqi-server/ /app/mqi-server
 COPY obs-sdk/ /app/obs-sdk
-COPY scaler/ /app/scaler
+#COPY scaler/ /app/scaler
 COPY ipf-execution-worker/ /app/ipf-execution-worker
 COPY request-repository/ /app/request-repository
 COPY queue-watcher/ /app/queue-watcher
@@ -71,7 +71,7 @@ COPY --from=buildenv /app/metadata-catalog-trigger /app/metadata-catalog-trigger
 COPY --from=buildenv /app/metadata-catalog-worker /app/metadata-catalog-worker
 COPY --from=buildenv /app/metadata-client /app/metadata-client
 COPY --from=buildenv /app/mqi-server/target /app/mqi-server/target
-COPY --from=buildenv /app/scaler/target /app/scaler/target
+#COPY --from=buildenv /app/scaler/target /app/scaler/target
 COPY --from=buildenv /app/ipf-execution-worker/target /app/ipf-execution-worker/target
 COPY --from=buildenv /app/ipf-execution-worker/config /app/ipf-execution-worker/config
 COPY --from=buildenv /app/request-repository/target /app/request-repository/target
