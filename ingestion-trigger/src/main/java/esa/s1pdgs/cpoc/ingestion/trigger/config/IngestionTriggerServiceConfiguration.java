@@ -11,6 +11,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
+import esa.s1pdgs.cpoc.appstatus.AppStatus;
 import esa.s1pdgs.cpoc.ingestion.trigger.inbox.Inbox;
 import esa.s1pdgs.cpoc.ingestion.trigger.inbox.InboxFactory;
 import esa.s1pdgs.cpoc.ingestion.trigger.service.IngestionTriggerService;
@@ -21,17 +22,20 @@ public class IngestionTriggerServiceConfiguration {
 
 	private final IngestionTriggerConfigurationProperties properties;
 	private final InboxFactory inboxFactory;
+	private final AppStatus status;
 
 	@Autowired
 	public IngestionTriggerServiceConfiguration(
 			final IngestionTriggerConfigurationProperties properties,
-			final InboxFactory inboxFactory
+			final InboxFactory inboxFactory,
+			 final AppStatus status
 	) {
 		this.properties = properties;
 		// InboxFactory is autowired here without a qualifier because there is only one
 		// implementation of it in the classpath. This needs to be changed in the future
 		// when there are other types of inboxes available
 		this.inboxFactory = inboxFactory;
+		this.status = status;
 	}
 
 	@Bean
@@ -47,6 +51,6 @@ public class IngestionTriggerServiceConfiguration {
 				LOG.error(e.getMessage());
 			}
 		}
-		return new IngestionTriggerService(inboxes);
+		return new IngestionTriggerService(inboxes, status);
 	}	
 }
