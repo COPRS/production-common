@@ -52,7 +52,7 @@ public class ObsConfigurationProperties {
 	@Value("${retry-policy.condition.max-retries:3}")
 	private int maxRetries;
 	
-	@Value("${storage_retry_obs_max-retries:100}")
+	@Value("${storage_retry_obs_max-retries:10}")
 	private int maxObsRetries;
 	
 	@Value("${retry-policy.backoff.base-delay-ms:1000}")
