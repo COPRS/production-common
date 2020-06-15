@@ -17,6 +17,7 @@ public class XbipClientConfigurationProperties {
 		private String user;
 		private String pass;
 		private boolean trustSelfSignedCertificate = false;
+		private int connectTimeoutSec = 10;
 		
 		public String getServerName() {
 			return serverName;
@@ -49,18 +50,26 @@ public class XbipClientConfigurationProperties {
 		public void setPass(final String pass) {
 			this.pass = pass;
 		}
+		
+		public int getConnectTimeoutSec() {
+			return connectTimeoutSec;
+		}
+
+		public void setConnectTimeoutSec(final int connectTimeoutSec) {
+			this.connectTimeoutSec = connectTimeoutSec;
+		}
 
 		@Override
 		public String toString() {
 			return "XbipHostConfiguration [serverName=" + serverName + ", user=" + user + 
-					", pass=****, trustSelfSignedCertificate=" + trustSelfSignedCertificate + "]";
+					", pass=****, trustSelfSignedCertificate=" + trustSelfSignedCertificate + 
+					", connectTimeoutSec=" + connectTimeoutSec +"]";
 		}
 		
 	}
 	
 	private String proxyHost;
 	private int proxyPort = 80;
-	private int connectTimeoutSec = 10;
 
 	private List<XbipHostConfiguration> hostConfigs;
 
@@ -87,18 +96,10 @@ public class XbipClientConfigurationProperties {
 	public void setProxyPort(final int proxyPort) {
 		this.proxyPort = proxyPort;
 	}
-	
-	public int getConnectTimeoutSec() {
-		return connectTimeoutSec;
-	}
-
-	public void setConnectTimeoutSec(final int connectTimeoutSec) {
-		this.connectTimeoutSec = connectTimeoutSec;
-	}
 
 	@Override
 	public String toString() {
 		return "XbipClientConfigurationProperties [proxyHost=" + proxyHost + ", proxyPort=" + proxyPort
-				+ ", connectTimeoutSec=" + connectTimeoutSec + ", hostConfigs=" + hostConfigs + "]";
+				+ ", hostConfigs=" + hostConfigs + "]";
 	}
 }
