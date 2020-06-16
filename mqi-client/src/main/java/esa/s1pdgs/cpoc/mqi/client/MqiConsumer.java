@@ -86,7 +86,7 @@ public final class MqiConsumer<E extends AbstractMessage> implements Runnable {
 		if (initialDelay > 0L) {
 			LOG.debug("Start MQI polling in {}ms", initialDelay);
 			try {
-				appStatus.sleep(pollingIntervalMillis);
+				appStatus.sleep(initialDelay);
 			} catch (final InterruptedException e) {
 				LOG.debug("{} has been cancelled", this);
 				LOG.info("Exiting {}", this);
