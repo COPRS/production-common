@@ -36,7 +36,7 @@ import org.apache.olingo.commons.api.ex.ODataException;
 
 public class EdmProvider extends org.apache.olingo.commons.api.edm.provider.CsdlAbstractEdmProvider {
 
-	public static final String SERVICE_NAMESPACE = "S1PDGS";
+	public static final String SERVICE_NAMESPACE = "OData.CSC";
 
 	// Types
 	public static final FullQualifiedName INT_32_TYPE_FQN = EdmPrimitiveTypeKind.Int32.getFullQualifiedName();
