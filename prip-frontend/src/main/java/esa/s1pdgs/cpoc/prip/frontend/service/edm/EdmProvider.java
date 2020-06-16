@@ -42,6 +42,7 @@ public class EdmProvider extends org.apache.olingo.commons.api.edm.provider.Csdl
 	public static final FullQualifiedName INT_32_TYPE_FQN = EdmPrimitiveTypeKind.Int32.getFullQualifiedName();
 	public static final FullQualifiedName INT_64_TYPE_FQN = EdmPrimitiveTypeKind.Int64.getFullQualifiedName();
 	public static final FullQualifiedName STRING_TYPE_FQN = EdmPrimitiveTypeKind.String.getFullQualifiedName();
+	public static final FullQualifiedName GUID_TYPE_FQN = EdmPrimitiveTypeKind.Guid.getFullQualifiedName();
 	public static final FullQualifiedName DATE_TIME_OFFSET_TYPE_FQN = EdmPrimitiveTypeKind.DateTimeOffset
 			.getFullQualifiedName();
 	public static final FullQualifiedName CHECKSUM_TYPE_FQN = new FullQualifiedName(SERVICE_NAMESPACE, "Checksums");
@@ -74,7 +75,7 @@ public class EdmProvider extends org.apache.olingo.commons.api.edm.provider.Csdl
 
 			List<CsdlProperty> properties = new ArrayList<>();
 
-			properties.add(new CsdlProperty().setName(Id.name()).setType(STRING_TYPE_FQN));
+			properties.add(new CsdlProperty().setName(Id.name()).setType(GUID_TYPE_FQN));
 			properties.add(new CsdlProperty().setName(Name.name()).setType(STRING_TYPE_FQN));
 			properties.add(new CsdlProperty().setName(ContentType.name()).setType(STRING_TYPE_FQN));
 			properties.add(new CsdlProperty().setName(ContentLength.name()).setType(INT_64_TYPE_FQN));
