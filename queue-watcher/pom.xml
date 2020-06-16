@@ -6,7 +6,7 @@
 	<parent>
 		<groupId>de.werum.s1pdgs</groupId>
 		<artifactId>s1pro-core</artifactId>
-		<version>0.18.1</version>
+		<version>1.18.1</version>
 	</parent>
 	<artifactId>s1pro-core-queue-watcher</artifactId>
 	<packaging>jar</packaging>
