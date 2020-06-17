@@ -166,8 +166,14 @@ public class PripElasticSearchMetadataRepo implements PripMetadataRepository {
 			RangeQueryBuilder rangeQueryBuilder = QueryBuilders.rangeQuery(filter.getFieldName().fieldName());
 
 			switch (filter.getOperator()) {
+			case LE:
+				rangeQueryBuilder.lte(filter.getDateTime());
+				break;
 			case LT:
 				rangeQueryBuilder.lt(filter.getDateTime());
+				break;
+			case GE:
+				rangeQueryBuilder.gte(filter.getDateTime());
 				break;
 			case GT:
 				rangeQueryBuilder.gt(filter.getDateTime());

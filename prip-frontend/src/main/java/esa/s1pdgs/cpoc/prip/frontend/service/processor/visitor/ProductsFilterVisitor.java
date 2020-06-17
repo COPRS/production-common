@@ -95,16 +95,16 @@ public class ProductsFilterVisitor implements ExpressionVisitor<Object> {
 		switch (operator) {
 		case AND:
 			break;
-		case GT:
+		case GE:
 			PripDateTimeFilter pripDateTimeFilter1 = new PripDateTimeFilter();
 			// one side must be a DateTime Field, the other a literal
 			if (left instanceof Member && pripDateTimePropertyFieldNames.containsKey(leftOperand) && right instanceof Literal) {
 				pripDateTimeFilter1.setDateTime(convertToLocalDateTime(rightOperand));
-				pripDateTimeFilter1.setOperator(Operator.GT);
+				pripDateTimeFilter1.setOperator(Operator.GE);
 				pripDateTimeFilter1.setFieldName(pripDateTimePropertyFieldNames.get(leftOperand));
 			} else if (right instanceof Member && pripDateTimePropertyFieldNames.containsKey(rightOperand) && left instanceof Literal) {
 				pripDateTimeFilter1.setDateTime(convertToLocalDateTime(leftOperand));
-				pripDateTimeFilter1.setOperator(Operator.LT);
+				pripDateTimeFilter1.setOperator(Operator.LE);
 				pripDateTimeFilter1.setFieldName(pripDateTimePropertyFieldNames.get(rightOperand));
 			} else {
 				throw new ExpressionVisitException("Invalid or unsupported operand");
@@ -112,22 +112,56 @@ public class ProductsFilterVisitor implements ExpressionVisitor<Object> {
 			pripDateTimeFilters.add(pripDateTimeFilter1);
 			LOGGER.debug("using filter {} ", pripDateTimeFilter1);
 			break;
-		case LT:
+		case GT:
 			PripDateTimeFilter pripDateTimeFilter2 = new PripDateTimeFilter();
-			// one side must be DateTime Field, the other a literal
+			// one side must be a DateTime Field, the other a literal
 			if (left instanceof Member && pripDateTimePropertyFieldNames.containsKey(leftOperand) && right instanceof Literal) {
 				pripDateTimeFilter2.setDateTime(convertToLocalDateTime(rightOperand));
-				pripDateTimeFilter2.setOperator(Operator.LT);
+				pripDateTimeFilter2.setOperator(Operator.GT);
 				pripDateTimeFilter2.setFieldName(pripDateTimePropertyFieldNames.get(leftOperand));
 			} else if (right instanceof Member && pripDateTimePropertyFieldNames.containsKey(rightOperand) && left instanceof Literal) {
 				pripDateTimeFilter2.setDateTime(convertToLocalDateTime(leftOperand));
-				pripDateTimeFilter2.setOperator(Operator.GT);
+				pripDateTimeFilter2.setOperator(Operator.LT);
 				pripDateTimeFilter2.setFieldName(pripDateTimePropertyFieldNames.get(rightOperand));
 			} else {
 				throw new ExpressionVisitException("Invalid or unsupported operand");
 			}
 			pripDateTimeFilters.add(pripDateTimeFilter2);
 			LOGGER.debug("using filter {} ", pripDateTimeFilter2);
+			break;
+		case LE:
+			PripDateTimeFilter pripDateTimeFilter3 = new PripDateTimeFilter();
+			// one side must be DateTime Field, the other a literal
+			if (left instanceof Member && pripDateTimePropertyFieldNames.containsKey(leftOperand) && right instanceof Literal) {
+				pripDateTimeFilter3.setDateTime(convertToLocalDateTime(rightOperand));
+				pripDateTimeFilter3.setOperator(Operator.LE);
+				pripDateTimeFilter3.setFieldName(pripDateTimePropertyFieldNames.get(leftOperand));
+			} else if (right instanceof Member && pripDateTimePropertyFieldNames.containsKey(rightOperand) && left instanceof Literal) {
+				pripDateTimeFilter3.setDateTime(convertToLocalDateTime(leftOperand));
+				pripDateTimeFilter3.setOperator(Operator.GE);
+				pripDateTimeFilter3.setFieldName(pripDateTimePropertyFieldNames.get(rightOperand));
+			} else {
+				throw new ExpressionVisitException("Invalid or unsupported operand");
+			}
+			pripDateTimeFilters.add(pripDateTimeFilter3);
+			LOGGER.debug("using filter {} ", pripDateTimeFilter3);
+			break;
+		case LT:
+			PripDateTimeFilter pripDateTimeFilter4 = new PripDateTimeFilter();
+			// one side must be DateTime Field, the other a literal
+			if (left instanceof Member && pripDateTimePropertyFieldNames.containsKey(leftOperand) && right instanceof Literal) {
+				pripDateTimeFilter4.setDateTime(convertToLocalDateTime(rightOperand));
+				pripDateTimeFilter4.setOperator(Operator.LT);
+				pripDateTimeFilter4.setFieldName(pripDateTimePropertyFieldNames.get(leftOperand));
+			} else if (right instanceof Member && pripDateTimePropertyFieldNames.containsKey(rightOperand) && left instanceof Literal) {
+				pripDateTimeFilter4.setDateTime(convertToLocalDateTime(leftOperand));
+				pripDateTimeFilter4.setOperator(Operator.GT);
+				pripDateTimeFilter4.setFieldName(pripDateTimePropertyFieldNames.get(rightOperand));
+			} else {
+				throw new ExpressionVisitException("Invalid or unsupported operand");
+			}
+			pripDateTimeFilters.add(pripDateTimeFilter4);
+			LOGGER.debug("using filter {} ", pripDateTimeFilter4);
 			break;
 		case EQ:
 			PripTextFilter textFilter = new PripTextFilter();
