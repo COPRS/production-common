@@ -72,7 +72,7 @@ public class EsServices {
 	 */
 	private static final Logger LOGGER = LogManager.getLogger(EsServices.class);
 
-	private static int SIZE_LIMIT = 1000;
+	private static final int SIZE_LIMIT = 1000;
 
 	/**
 	 * Elasticsearch client
@@ -104,7 +104,7 @@ public class EsServices {
 	 */
 	public boolean isMetadataExist(final JSONObject product) throws Exception {
 		try {
-			String productType = null;
+			final String productType;
 			if (ProductFamily.AUXILIARY_FILE.equals(ProductFamily.valueOf(product.getString("productFamily")))
 					|| ProductFamily.EDRS_SESSION.equals(ProductFamily.valueOf(product.getString("productFamily")))) {
 				productType = product.getString("productType").toLowerCase();
@@ -120,10 +120,8 @@ public class EsServices {
 			LOGGER.debug("Product {} response from ES {}", productName,response);
 
 			return response.isExists();
-		} catch (final JSONException je) {
+		} catch (final JSONException | IOException je) {
 			throw new Exception(je.getMessage());
-		} catch (final IOException io) {
-			throw new Exception(io.getMessage());
 		}
 	}
 	
@@ -131,7 +129,7 @@ public class EsServices {
 		Retries.performWithRetries(
 			() -> {
 		    	if (!isMetadataExist(product)) {
-		    		LOGGER.debug("Creating metatadata in ES for product {}", productName);
+		    		LOGGER.debug("Creating metadata in ES for product {}", productName);
 					createMetadata(product);
 				}
 				else{
@@ -154,7 +152,7 @@ public class EsServices {
 	 */
 	public void createMetadata(final JSONObject product) throws Exception {
 		try {
-			String productType = null;
+			final String productType;
 			final ProductFamily family = ProductFamily.valueOf(product.getString("productFamily"));
 
 			if (ProductFamily.AUXILIARY_FILE.equals(family) || ProductFamily.EDRS_SESSION.equals(family)) {
@@ -168,7 +166,7 @@ public class EsServices {
 					.source(product.toString(),
 					XContentType.JSON);
 
-			IndexResponse response = null;
+			IndexResponse response;
 			try {
 				response = elasticsearchDAO.index(request);
 			} catch (final ElasticsearchStatusException e) {
@@ -183,7 +181,7 @@ public class EsServices {
 				 * issues.
 				 */
 				LOGGER.warn("An exception occured while accessing the elastic search index: {}", LogUtils.toString(e));
-				final String result = e.getMessage().toString();
+				final String result = e.getMessage();
 				boolean fixed = false;
 				if (result.contains("failed to parse field [sliceCoordinates] of type [geo_shape]")) {
 					LOGGER.warn(
@@ -283,7 +281,7 @@ public class EsServices {
 
 		sourceBuilder.query(queryBuilder);
 
-		String index = null;
+		final String index;
 		if (ProductFamily.AUXILIARY_FILE.equals(productFamily) || ProductFamily.EDRS_SESSION.equals(productFamily)) {
 			index = productType.toLowerCase();
 		} else {
@@ -395,7 +393,7 @@ public class EsServices {
 		}
 	}
 
-	private final SearchMetadata toSearchMetadata(final SearchHit hit) {
+	private SearchMetadata toSearchMetadata(final SearchHit hit) {
 		final Map<String, Object> source = hit.getSourceAsMap();
 		final SearchMetadata r = new SearchMetadata();
 		r.setProductName(source.get("productName").toString());
@@ -410,7 +408,7 @@ public class EsServices {
 		return r;
 	}
 
-	private final SearchRequest newQueryFor(final String productType, final ProductFamily productFamily, final int instrumentConfId,
+	private SearchRequest newQueryFor(final String productType, final ProductFamily productFamily, final int instrumentConfId,
 			final String processMode, final RangeQueryBuilder rangeQueryBuilder, final FieldSortBuilder sortOrder, final String polarisation)
 			throws InternalErrorException {
 		final ProductCategory category = ProductCategory.of(productFamily);
@@ -437,7 +435,7 @@ public class EsServices {
 
 		sourceBuilder.query(queryBuilder);
 
-		String index = null;
+		final String index;
 		if (ProductFamily.AUXILIARY_FILE.equals(productFamily) || ProductFamily.EDRS_SESSION.equals(productFamily)) {
 			index = productType.toLowerCase();
 		} else {
@@ -517,8 +515,7 @@ public class EsServices {
 	 * 
 	 * @param beginDate
 	 * @param endDate
-	 * @param dataTakeId
-	 * 
+	 *
 	 * @return the list of the corresponding Segment
 	 * @throws Exception
 	 */
@@ -591,7 +588,7 @@ public class EsServices {
 		sourceBuilder.query(queryBuilder);
 		sourceBuilder.size(SIZE_LIMIT);
 
-		String index = null;
+		final String index;
 		if (ProductFamily.EDRS_SESSION.equals(productFamily)) {
 			index = "raw";
 		} else if (ProductFamily.AUXILIARY_FILE.equals(productFamily)) {
@@ -639,16 +636,60 @@ public class EsServices {
 
 		return null;
 	}
+	
+
+	/**
+	 * Searches for the product with given productName and in the index =
+	 * productFamily. Returns only validity start and stop time.
+	 * 
+	 * @param productFamily
+	 * @param productName
+	 * @return
+	 * @throws MetadataMalformedException
+	 * @throws MetadataNotPresentException
+	 * @throws IOException
+	 */
+	public SearchMetadata productNameQuery(String productFamily, String productName)
+			throws MetadataMalformedException, MetadataNotPresentException, IOException {
+
+		Map<String, Object> source = getRequest(productFamily, productName);
+
+		if (source.isEmpty()) {
+			throw new MetadataNotPresentException(productName);
+		}
+
+		SearchMetadata searchMetadata = new SearchMetadata();
+
+		if (source.containsKey("startTime")) {
+			try {
+				searchMetadata.setValidityStart(
+						DateUtils.convertToMetadataDateTimeFormat(source.get("startTime").toString()));
+			} catch (final DateTimeParseException e) {
+				throw new MetadataMalformedException("startTime");
+			}
+		} else {
+			throw new MetadataMalformedException("startTime");
+		}
+		if (source.containsKey("stopTime")) {
+			try {
+				searchMetadata
+						.setValidityStop(DateUtils.convertToMetadataDateTimeFormat(source.get("stopTime").toString()));
+			} catch (final DateTimeParseException e) {
+				throw new MetadataMalformedException("stopTime");
+			}
+		} else {
+			throw new MetadataMalformedException("stopTime");
+		}
+
+		return searchMetadata;
+	}
 
 	/**
 	 * Function which return the product that correspond to the lastValCover
 	 * specification If there is no corresponding product return null
 	 * 
 	 * @param productType
-	 * @param beginDate
-	 * @param endDate
-	 * @param satelliteId
-	 * 
+	 *
 	 * @return the key object storage of the chosen product
 	 * @throws Exception
 	 */
@@ -729,17 +770,13 @@ public class EsServices {
 		return start.plus(Duration.between(start, stop).dividedBy(2));
 	}
 
-	private Map<String, Object> getRequest(final String index, final String productName) throws Exception {
-		try {
-			final GetRequest getRequest = new GetRequest(index.toLowerCase(), indexType, productName);
+	private Map<String, Object> getRequest(final String index, final String productName) throws IOException {
+		final GetRequest getRequest = new GetRequest(index.toLowerCase(), indexType, productName);
 
-			final GetResponse response = elasticsearchDAO.get(getRequest);
+		final GetResponse response = elasticsearchDAO.get(getRequest);
 
-			if (response.isExists()) {
-				return response.getSourceAsMap();
-			}
-		} catch (final IOException e) {
-			throw new Exception(e.getMessage());
+		if (response.isExists()) {
+			return response.getSourceAsMap();
 		}
 		return new HashMap<>();
 	}
@@ -901,20 +938,18 @@ public class EsServices {
 	}
 
 	public LevelSegmentMetadata getLevelSegment(final ProductFamily family, final String productName) throws Exception {
-		LevelSegmentMetadata ret = null;
 		try {
 			final GetRequest getRequest = new GetRequest(family.name().toLowerCase(), indexType, productName);
 			final GetResponse response = elasticsearchDAO.get(getRequest);
 
 			if (response.isExists()) {
-				ret = this.extractInfoForLevelSegment(response.getSourceAsMap(), productName);
+				return this.extractInfoForLevelSegment(response.getSourceAsMap(), productName);
 			} else {
 				throw new MetadataNotPresentException(productName);
 			}
 		} catch (final IOException e) {
 			throw new Exception(e.getMessage());
 		}
-		return ret;
 	}
 
 	private LevelSegmentMetadata extractInfoForLevelSegment(final Map<String, Object> source, final String productName)
@@ -976,7 +1011,7 @@ public class EsServices {
 		return r;
 	}
 
-	private final QueryBuilder satelliteId(final String satelliteId) {
+	private QueryBuilder satelliteId(final String satelliteId) {
 		return QueryBuilders.boolQuery().should(QueryBuilders.termQuery("satelliteId.keyword", satelliteId))
 				.should(QueryBuilders.termQuery("satelliteId.keyword", "_"));
 

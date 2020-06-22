@@ -104,12 +104,7 @@ public class DataLifecycleWorkerListener implements MqiListener<EvictionManageme
 		elasticSearchDAO.index(
 		        new IndexRequest("data-lifecycle", "metadata", job.getKeyObjectStorage()).source(expirationMetadata.toString(), XContentType.JSON)
 		);
-		return EvictionReportingOutput.newInstance(
-				job.getKeyObjectStorage(), 
-				Date.from(evictionTimeOfJob.toInstant(ZoneOffset.UTC)), 
-				Date.from(lastModifiedInObs.toInstant(ZoneOffset.UTC)), 
-				job.getProductFamily()
-		);
+		return new EvictionReportingOutput(Date.from(evictionTimeOfJob.toInstant(ZoneOffset.UTC)));
     }
     
     private final void updateRetentionInObs(final EvictionManagementJob job) throws ObsServiceException {

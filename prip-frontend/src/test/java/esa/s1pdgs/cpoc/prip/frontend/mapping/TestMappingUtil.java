@@ -1,10 +1,13 @@
 package esa.s1pdgs.cpoc.prip.frontend.mapping;
 
+import static org.junit.Assert.assertTrue;
+
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.sql.Timestamp;
 import java.time.Instant;
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.Arrays;
 import java.util.List;
 import java.util.TimeZone;
@@ -67,6 +70,9 @@ public class TestMappingUtil {
 	@Test
 	public void TestPripMetadataToEntity() {		
 		URI uri = MappingUtil.createId("http://example.org", "Products", UUID.fromString("00000000-0000-0000-0000-000000000001"));
+		ComplexValue contentDate = new ComplexValue();
+		contentDate.getValue().add(new Property(null, "Start", ValueType.PRIMITIVE, new Timestamp(111111111111L)));
+		contentDate.getValue().add(new Property(null, "End", ValueType.PRIMITIVE,new Timestamp(222222222222L)));
 		ComplexValue cv1 = new ComplexValue();
 		cv1.getValue().add(new Property(null, "Algorithm", ValueType.PRIMITIVE, "MD5"));
 		cv1.getValue().add(new Property(null, "Value", ValueType.PRIMITIVE, "d41d8cd98f00b204e9800998ecf8427e"));
@@ -78,8 +84,10 @@ public class TestMappingUtil {
 				.addProperty(new Property(null, "Name", ValueType.PRIMITIVE, "Name"))
 				.addProperty(new Property(null, "ContentType", ValueType.PRIMITIVE, "application/octet-stream"))
 				.addProperty(new Property(null, "ContentLength", ValueType.PRIMITIVE, 123L))
-				.addProperty(new Property(null, "CreationDate", ValueType.PRIMITIVE, new Timestamp(100000000000L)))
+				.addProperty(new Property(null, "ContentDate", ValueType.COMPLEX, contentDate))
+				.addProperty(new Property(null, "PublicationDate", ValueType.PRIMITIVE, new Timestamp(100000000000L)))
 				.addProperty(new Property(null, "EvictionDate", ValueType.PRIMITIVE, new Timestamp(200000000000L)))
+				.addProperty(new Property(null, "ProductionType", ValueType.ENUM, 0))
 				.addProperty(new Property(null, "Checksums", ValueType.COLLECTION_COMPLEX, Arrays.asList(cv1, cv2)));
 		expectedEntity.setMediaContentType("application/octet-stream");
 		expectedEntity.setId(uri);
@@ -89,6 +97,8 @@ public class TestMappingUtil {
 		inputPripMetadata.setName("Name");
 		inputPripMetadata.setContentType("application/octet-stream");
 		inputPripMetadata.setContentLength(123L);
+		inputPripMetadata.setContentDateStart(LocalDateTime.ofInstant(Instant.ofEpochMilli(111111111111L), TimeZone.getTimeZone("UTC").toZoneId()));
+		inputPripMetadata.setContentDateEnd(LocalDateTime.ofInstant(Instant.ofEpochMilli(222222222222L), TimeZone.getTimeZone("UTC").toZoneId()));
 		inputPripMetadata.setCreationDate(LocalDateTime.ofInstant(Instant.ofEpochMilli(100000000000L), TimeZone.getTimeZone("UTC").toZoneId()));
 		inputPripMetadata.setEvictionDate(LocalDateTime.ofInstant(Instant.ofEpochMilli(200000000000L), TimeZone.getTimeZone("UTC").toZoneId()));
 		Checksum c1 = new Checksum();
@@ -101,6 +111,15 @@ public class TestMappingUtil {
 		Entity actualEntity = MappingUtil.pripMetadataToEntity(inputPripMetadata, "http://example.org");
 		
 		Assert.assertEquals(expectedEntity, actualEntity);
+	}
+	
+	@Test
+	public void TestConvertLocalDateTimeToTimestampShallReturnPrecisionXXX000Z() {
+		DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSSSSS'Z'");
+		LocalDateTime source = LocalDateTime.parse("2000-01-01T00:00:00.123456Z", dateTimeFormatter);
+		Timestamp destination = MappingUtil.convertLocalDateTimeToTimestamp(source);
+		assertTrue(dateTimeFormatter.format(source).endsWith("123456Z"));
+		assertTrue(dateTimeFormatter.format(destination.toLocalDateTime()).endsWith("123000Z"));
 	}
 
 }

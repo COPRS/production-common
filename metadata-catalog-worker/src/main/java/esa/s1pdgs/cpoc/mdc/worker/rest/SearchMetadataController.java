@@ -45,9 +45,9 @@ public class SearchMetadataController {
 		LOGGER.info("Received interval query for family '{}', startTime '{}', stopTime '{}'", productFamily,
 				intervalStart, intervalStop);
 
-		final List<SearchMetadata> response = new ArrayList<SearchMetadata>();
-		String startTime = null;
-		String stopTime = null;
+		final List<SearchMetadata> response = new ArrayList<>();
+		String startTime;
+		String stopTime;
 		try {
 			startTime = convertDateForSearch(intervalStart, -0.0f,
 					DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.000000'Z'"));
@@ -56,7 +56,7 @@ public class SearchMetadataController {
 					DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.999999'Z'"));
 		} catch (final Exception ex) {
 			LOGGER.error("Parse error while doing intervalSearch: {}", LogUtils.toString(ex));
-			return new ResponseEntity<List<SearchMetadata>>(HttpStatus.BAD_REQUEST);
+			return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
 		}
 
 		LOGGER.info("Performing metadata interval search in interval between {} and {}", startTime, stopTime);
@@ -80,7 +80,7 @@ public class SearchMetadataController {
 
 			if (results == null) {
 				LOGGER.info("No results returned.");
-				return new ResponseEntity<List<SearchMetadata>>(response, HttpStatus.OK);
+				return new ResponseEntity<>(response, HttpStatus.OK);
 			}
 			LOGGER.debug("Query returned {} results", results.size());
 
@@ -91,10 +91,34 @@ public class SearchMetadataController {
 			}
 		} catch (final Exception ex) {
 			LOGGER.error("Query error while doing intervalSearch: {}", LogUtils.toString(ex));
-			return new ResponseEntity<List<SearchMetadata>>(HttpStatus.INTERNAL_SERVER_ERROR);
+			return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
 		}
 
-		return new ResponseEntity<List<SearchMetadata>>(response, HttpStatus.OK);
+		return new ResponseEntity<>(response, HttpStatus.OK);
+	}
+	
+	/**
+	 * Searches for the product with given productName and in the index =
+	 * productFamily. Returns only validity start and stop time.
+	 * 
+	 * @param productFamily
+	 * @param productName
+	 * @return
+	 */
+	@RequestMapping(method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_UTF8_VALUE, path = "/{productFamily}/searchProductName")
+	public ResponseEntity<SearchMetadata> searchProductName(
+			@PathVariable(name = "productFamily") final String productFamily,
+			@RequestParam(name = "productName") final String productName) {
+
+		LOGGER.info("Performing search for family '{}', name '{}'", productFamily, productName);
+		try {
+			final SearchMetadata result = esServices.productNameQuery(productFamily, productName);
+			return new ResponseEntity<>(result, HttpStatus.OK);
+
+		} catch (final Exception ex) {
+			LOGGER.error("Query error while doing product name search: {}", LogUtils.toString(ex));
+			return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+		}
 	}
 
 	@RequestMapping(method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_UTF8_VALUE, path = "/{productFamily}/search")
@@ -112,7 +136,7 @@ public class SearchMetadataController {
 		LOGGER.info("Received search query for family '{}', product type '{}', mode '{}', satellite '{}'",
 				productFamily, productType, mode, satellite);
 		try {
-			final List<SearchMetadata> response = new ArrayList<SearchMetadata>();
+			final List<SearchMetadata> response = new ArrayList<>();
 			
 			if ("LatestValCover".equals(mode)) {
 				final SearchMetadata f = esServices.lastValCover(
@@ -136,7 +160,7 @@ public class SearchMetadataController {
 							f.getStationCode()
 					));
 				}
-				return new ResponseEntity<List<SearchMetadata>>(response, HttpStatus.OK);
+				return new ResponseEntity<>(response, HttpStatus.OK);
 			} else if ("ValIntersect".equals(mode)) {
 				LOGGER.debug("Using val intersect with productType={}, mode={}, t0={}, t1={}, proccessingMode={}, insConfId={}, dt0={}, dt1={}", productType, mode, startDate, stopDate, processMode, 
 						insConfId, dt0, dt1);
@@ -165,7 +189,7 @@ public class SearchMetadataController {
 						));
 					}
 				}
-				return new ResponseEntity<List<SearchMetadata>>(response, HttpStatus.OK);				
+				return new ResponseEntity<>(response, HttpStatus.OK);
 			} else if ("ClosestStartValidity".equals(mode)) {
 				final SearchMetadata f = esServices.closestStartValidity(
 						productType, 
@@ -189,7 +213,7 @@ public class SearchMetadataController {
 							f.getStationCode()
 					));
 				}
-				return new ResponseEntity<List<SearchMetadata>>(response, HttpStatus.OK);
+				return new ResponseEntity<>(response, HttpStatus.OK);
 			} else if ("ClosestStopValidity".equals(mode)) {
 				final SearchMetadata f = esServices.closestStopValidity(
 						productType, 
@@ -214,19 +238,19 @@ public class SearchMetadataController {
 							f.getStationCode()
 					));
 				}
-				return new ResponseEntity<List<SearchMetadata>>(response, HttpStatus.OK);
+				return new ResponseEntity<>(response, HttpStatus.OK);
 			} else {				
 				LOGGER.error("Invalid selection policy mode {} for product type {}", mode, productType);				
-				return new ResponseEntity<List<SearchMetadata>>(HttpStatus.BAD_REQUEST);
+				return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
 			}
 		} catch (final AbstractCodedException e) {
 			LOGGER.error("Error on performing selection policy mode {} for product type {}: [code {}] {}", 
 					mode, productType, e.getCode().getCode(), e.getLogMessage());		
-			return new ResponseEntity<List<SearchMetadata>>(HttpStatus.BAD_REQUEST);
+			return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
 		} catch (final Exception e) {
 			LOGGER.error("Error on performing selection policy mode {} for product type {}: {}", 
 					mode, productType, LogUtils.toString(e));	
-			return new ResponseEntity<List<SearchMetadata>>(HttpStatus.INTERNAL_SERVER_ERROR);
+			return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
 		}
 	}
 

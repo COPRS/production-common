@@ -18,7 +18,6 @@ import org.springframework.stereotype.Service;
 
 import esa.s1pdgs.cpoc.appstatus.AppStatus;
 import esa.s1pdgs.cpoc.common.ProductCategory;
-import esa.s1pdgs.cpoc.common.ProductFamily;
 import esa.s1pdgs.cpoc.common.errors.AbstractCodedException;
 import esa.s1pdgs.cpoc.common.errors.InternalErrorException;
 import esa.s1pdgs.cpoc.common.utils.FileUtils;
@@ -110,8 +109,7 @@ public class IngestionWorkerService implements MqiListener<IngestionJob> {
 			final List<Product<IngestionEvent>> result = identifyAndUpload(message, inboxAdapter, ingestion, reporting);
 			final Date ingestionFinishedDate = new Date();
 			publish(result, message, reporting.getUid());
-			delete(ingestion);			
-						
+			delete(ingestion);					
 			inboxAdapter.delete(productUri);
 
 			reporting.end(
@@ -149,8 +147,6 @@ public class IngestionWorkerService implements MqiListener<IngestionJob> {
 		} 
 		catch (final Exception e) {
 			LOG.error(e);
-			productService.markInvalid(inboxAdapter, ingestion, reportingFactory);
-			message.getBody().setProductFamily(ProductFamily.INVALID);
 			throw e;
 		}
 	}
@@ -159,7 +155,7 @@ public class IngestionWorkerService implements MqiListener<IngestionJob> {
 			final List<Product<IngestionEvent>> products, 
 			final GenericMessageDto<IngestionJob> message,
 			final UUID reportingId
-	) throws AbstractCodedException {
+	) throws AbstractCodedException {		
 		for (final Product<IngestionEvent> product : products) {
 			final IngestionEvent event = product.getDto();
 			event.setUid(reportingId);

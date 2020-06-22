@@ -24,9 +24,9 @@ public class JobReportingInput extends AbstractFilenameReportingProduct implemen
 			final List<ReportingFilenameEntry> entries,
 			final String jobOrderUuid
 	) {		
-		
 		return new JobReportingInput(new ReportingFilenameEntries(entries), jobOrderUuid);
 	}
+	
 
 	public String getJobOrderUuid() {
 		return jobOrderUuid;

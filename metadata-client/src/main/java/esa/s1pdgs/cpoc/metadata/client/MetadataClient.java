@@ -232,6 +232,37 @@ public class MetadataClient {
 			return response.getBody();
 		}
 	}
+	
+	/**
+	 * Searches for the product with given productName and in the index =
+	 * productFamily. The returned metadata contains only validity start and stop
+	 * time.
+	 * 
+	 * @param family
+	 * @param productName
+	 * @return
+	 * @throws MetadataQueryException
+	 */
+	public SearchMetadata queryByFamilyAndProductName(String family, String productName)
+			throws MetadataQueryException {
+
+		String uri = this.metadataBaseUri + MetadataCatalogRestPath.METADATA.path() + "/" + family
+				+ "/searchProductName";
+
+		UriComponentsBuilder builder = UriComponentsBuilder.fromUriString(uri).queryParam("productName", productName);
+
+		ResponseEntity<SearchMetadata> response = query(builder.build().toUri(),
+				new ParameterizedTypeReference<SearchMetadata>() {
+				});
+
+		if (response == null) {
+			LOGGER.debug("Metadata query for family '{}' and product name {} returned no result", family, productName);
+			return null;
+		} else {
+			LOGGER.info("Metadata query for family '{}' and product name {} returned 1 result", family, productName);
+			return response.getBody();
+		}
+	}
 
 	/**
 	 * @param family
@@ -252,7 +283,7 @@ public class MetadataClient {
 					int notAvailableRetries = 10;					
 					LOGGER.debug(commandDescription);
 					ResponseEntity<Integer> response = this.restTemplate.exchange(uri, HttpMethod.GET, null, Integer.class);
-					while (response == null || response.getStatusCode() == HttpStatus.NOT_FOUND) {
+					while (response.getStatusCode() == HttpStatus.NOT_FOUND) {
 						LOGGER.debug("Product not available yet. Waiting...");
 						try {
 							Thread.sleep(this.retryInMillis);
@@ -290,7 +321,7 @@ public class MetadataClient {
 		);
 	}
 
-	private final <T> void handleReturnValueErrors(String uri, final ResponseEntity<T> response) throws MetadataQueryException {
+	private <T> void handleReturnValueErrors(String uri, final ResponseEntity<T> response) throws MetadataQueryException {
 		if (response == null) {
 			throw new MetadataQueryException(String.format("Rest metadata call %s returned null", uri));
 		}
@@ -304,7 +335,7 @@ public class MetadataClient {
 		}
 	}
 	
-	private final <T> T performWithRetries(
+	private <T> T performWithRetries(
 			final String commandDescription, 
 			final Callable<T> command
 	) throws MetadataQueryException {
@@ -318,8 +349,7 @@ public class MetadataClient {
 		} catch (RuntimeException e) {
 			// unwrap possible metadata exception
 			if (e.getCause() instanceof MetadataQueryException) {
-				final MetadataQueryException metadataException = (MetadataQueryException) e.getCause();
-				throw metadataException;
+				throw (MetadataQueryException) e.getCause();
 			}
 			else if (e.getCause() instanceof RestClientException) {
 				final RestClientException restClientException = (RestClientException) e.getCause();				
@@ -334,7 +364,7 @@ public class MetadataClient {
 		}
 	}	
 
-	private final int numResults(final ResponseEntity<List<SearchMetadata>> response) {
+	private int numResults(final ResponseEntity<List<SearchMetadata>> response) {
 		if (response != null) {
 			final List<SearchMetadata> res = response.getBody();
 			if (res != null) {

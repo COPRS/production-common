@@ -8,6 +8,7 @@ import esa.s1pdgs.cpoc.common.AppState;
 import esa.s1pdgs.cpoc.common.ProductCategory;
 
 public class Status {
+	public static final Status NULL = new Status(0, 0);
 
 	/**
 	 * For waiting state and computations where no MQI is involved
@@ -59,12 +60,12 @@ public class Status {
      */
     private final int maxErrorCounterNextMessage;
     
-    public Status(ProductCategory productCategory, int maxErrorCounterProcessing, int maxErrorCounterNextMessage) {
+    public Status(final ProductCategory productCategory, final int maxErrorCounterProcessing, final int maxErrorCounterNextMessage) {
     	this(maxErrorCounterProcessing, maxErrorCounterNextMessage);
     	category = Optional.ofNullable(productCategory);
     }
     
-    public Status(int maxErrorCounterProcessing, int maxErrorCounterNextMessage) {
+    public Status(final int maxErrorCounterProcessing, final int maxErrorCounterNextMessage) {
     	this.maxErrorCounterProcessing = maxErrorCounterProcessing;
     	this.maxErrorCounterNextMessage = maxErrorCounterNextMessage;
     	processingMsgId = PROCESSING_MSG_ID_UNDEFINED;
@@ -86,7 +87,7 @@ public class Status {
 	/**
 	 * @param category the category to set
 	 */
-	public void setCategory(Optional<ProductCategory> category) {
+	public void setCategory(final Optional<ProductCategory> category) {
 		this.category = category;
 	}
 
@@ -101,7 +102,7 @@ public class Status {
     		boolean isFatalError = false;
     		boolean isError = false;
     		boolean isProcessing = false;
-    		for(Status subStatus : subStatuses.values()) {
+    		for(final Status subStatus : subStatuses.values()) {
     			if (subStatus.isFatalError()) {
     				isFatalError = true;
     			} else if (subStatus.isError()) {
@@ -144,7 +145,7 @@ public class Status {
     		return errorCounterProcessing;
     	} else {
     		int sum = 0;
-			for(Status subStatus : subStatuses.values()) {
+			for(final Status subStatus : subStatuses.values()) {
 				sum +=  subStatus.getErrorCounterProcessing();
 			}
 			return sum;
@@ -159,7 +160,7 @@ public class Status {
     		return errorCounterNextMessage;
     	} else {
     		int sum = 0;
-			for(Status subStatus : subStatuses.values()) {
+			for(final Status subStatus : subStatuses.values()) {
 				sum += subStatus.getErrorCounterNextMessage();						
 			}
 			return sum;
@@ -181,7 +182,7 @@ public class Status {
     /**
      * Set status PROCESSING
      */
-    public void setProcessing(long processingMsgId) {
+    public void setProcessing(final long processingMsgId) {
         if (!isStopping() && !isFatalError()) {
         	this.processingMsgId = processingMsgId;
         	state = AppState.PROCESSING;
@@ -286,7 +287,7 @@ public class Status {
 	/**
 	 * @param subStatuses the subStatuses to set
 	 */
-	public void setSubStatuses(Map<ProductCategory, Status> subStatuses) {
+	public void setSubStatuses(final Map<ProductCategory, Status> subStatuses) {
 		this.subStatuses = subStatuses;
 	}
 

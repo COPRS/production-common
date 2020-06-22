@@ -6,6 +6,7 @@ import java.nio.file.FileVisitOption;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
@@ -43,6 +44,7 @@ import esa.s1pdgs.cpoc.ipf.execution.worker.job.file.OutputProcessor;
 import esa.s1pdgs.cpoc.ipf.execution.worker.job.mqi.OutputProcuderFactory;
 import esa.s1pdgs.cpoc.ipf.execution.worker.job.process.PoolExecutorCallable;
 import esa.s1pdgs.cpoc.ipf.execution.worker.service.report.JobReportingInput;
+import esa.s1pdgs.cpoc.metadata.client.MetadataClient;
 import esa.s1pdgs.cpoc.mqi.client.GenericMqiClient;
 import esa.s1pdgs.cpoc.mqi.client.MqiClient;
 import esa.s1pdgs.cpoc.mqi.client.MqiConsumer;
@@ -52,6 +54,7 @@ import esa.s1pdgs.cpoc.mqi.model.queue.IpfExecutionJob;
 import esa.s1pdgs.cpoc.mqi.model.queue.LevelJobInputDto;
 import esa.s1pdgs.cpoc.mqi.model.rest.GenericMessageDto;
 import esa.s1pdgs.cpoc.obs_sdk.ObsClient;
+import esa.s1pdgs.cpoc.obs_sdk.ObsDownloadObject;
 import esa.s1pdgs.cpoc.report.Reporting;
 import esa.s1pdgs.cpoc.report.ReportingFilenameEntry;
 import esa.s1pdgs.cpoc.report.ReportingMessage;
@@ -117,6 +120,8 @@ public class JobProcessor implements MqiListener<IpfExecutionJob> {
 	private final long pollingIntervalMs;
 	
 	private final long initDelayPollMs;
+	
+	private final MetadataClient mdcClient;
 
 
 	/**
@@ -141,7 +146,8 @@ public class JobProcessor implements MqiListener<IpfExecutionJob> {
 			final ErrorRepoAppender errorAppender,
 			final StatusService mqiStatusService,
 			@Value("${process.init-delay-poll-ms}") final long initDelayPollMs,
-			@Value("${process.fixed-delay-ms}") final long pollingIntervalMs
+			@Value("${process.fixed-delay-ms}") final long pollingIntervalMs,
+			final MetadataClient mdcClient
 	) {
 		this.appStatus = appStatus;
 		this.devProperties = devProperties;
@@ -153,6 +159,7 @@ public class JobProcessor implements MqiListener<IpfExecutionJob> {
 		this.errorAppender = errorAppender;
 		this.initDelayPollMs = initDelayPollMs;
 		this.pollingIntervalMs = pollingIntervalMs;
+		this.mdcClient = mdcClient;
 	}
 	
 	@PostConstruct
@@ -214,7 +221,7 @@ public class JobProcessor implements MqiListener<IpfExecutionJob> {
 			outputListFile = job.getWorkDirectory() + "L0ASProcList.LIST";
 		}			
 		reporting.begin(
-				JobReportingInput.newInstance(toReportFilenames(job), jobOrderName, properties.getLevel()),	
+				JobReportingInput.newInstance(toReportFilenames(job), jobOrderName),	
 				new ReportingMessage("Start job processing")
 		);
 		
@@ -228,9 +235,16 @@ public class JobProcessor implements MqiListener<IpfExecutionJob> {
 		
 		final ExecutorService procExecutorSrv = Executors.newSingleThreadExecutor();
 		final ExecutorCompletionService<Void> procCompletionSrv = new ExecutorCompletionService<>(procExecutorSrv);
-		final InputDownloader inputDownloader = new InputDownloader(obsClient, job.getWorkDirectory(), job.getInputs(),
-				this.properties.getSizeBatchDownload(), getPrefixMonitorLog(MonitorLogUtils.LOG_INPUT, job),
-				procExecutor, this.properties.getLevel());
+		final InputDownloader inputDownloader = new InputDownloader(
+				obsClient, 
+				job.getWorkDirectory(), 
+				job.getInputs(),
+				this.properties.getSizeBatchDownload(), 
+				getPrefixMonitorLog(MonitorLogUtils.LOG_INPUT, job),
+				procExecutor, 
+				this.properties.getLevel(),
+				mdcClient
+		);
 
 		final OutputProcessor outputProcessor = new OutputProcessor(obsClient, procuderFactory, message, outputListFile,
 				this.properties.getSizeBatchUpload(), getPrefixMonitorLog(MonitorLogUtils.LOG_OUTPUT, job),
@@ -269,14 +283,16 @@ public class JobProcessor implements MqiListener<IpfExecutionJob> {
             procCompletionSrv.submit(procExecutor);
             poolProcessing = true;
             
+            final List<ObsDownloadObject> downloadToBatch;
             if (devProperties.getStepsActivation().get("download")) {
                 checkThreadInterrupted();
                 LOGGER.info("{} Preparing local working directory",
                         getPrefixMonitorLog(MonitorLogUtils.LOG_INPUT, job));
-                inputDownloader.processInputs(reporting);
+                downloadToBatch = inputDownloader.processInputs(reporting);
             } else {
                 LOGGER.info("{} Preparing local working directory bypassed",
                         getPrefixMonitorLog(MonitorLogUtils.LOG_INPUT, job));
+                downloadToBatch = Collections.emptyList();
             }
             this.waitForPoolProcessesEnding(procCompletionSrv);
             poolProcessing = false;
@@ -291,6 +307,29 @@ public class JobProcessor implements MqiListener<IpfExecutionJob> {
                         getPrefixMonitorLog(MonitorLogUtils.LOG_OUTPUT, job));
             }
             reporting.end(reportingOutput, new ReportingMessage("End job processing"));
+            
+            // S1PRO-1496: If there was a missing chunk, we simply let this request succeed but in addition
+            // we create an additional failed request in order to deal with the missing chunk and operator
+            // needs to decide, whether to restart it or delete it.
+            
+            final List<String> missingChunks = downloadToBatch.stream()
+            	.filter(o -> o.getFamily() == ProductFamily.INVALID)
+            	.map(o -> o.getKey())
+            	.collect(Collectors.toList());
+            
+            if (!missingChunks.isEmpty()) {
+                errorAppender.send(new FailedProcessingDto(
+                		properties.getHostname(),
+                		new Date(), 
+                		String.format(
+                				"Missing RAWs detected for successful production %s: %s. "
+                				+ "Restart if chunks become available or delete this request if they are lost", 
+                				message.getId(), 
+                				missingChunks
+                		), 
+                		message
+                ));
+            }
         } catch (final Exception e) {
             reporting.error(errorReportMessage(e)); 
             throw e;
@@ -395,11 +434,11 @@ public class JobProcessor implements MqiListener<IpfExecutionJob> {
 	
 	private final ReportingFilenameEntry newEntry(final LevelJobInputDto input) {
 		return new ReportingFilenameEntry(
-				ProductFamily.fromValue(input.getFamily()), 
-				Paths.get(input.getLocalPath()).getFileName().toString()
+				ProductFamily.fromValue(input.getFamily()),
+				new File(input.getLocalPath()).getName()
 		);
 	}
-	
+
 	// checks AppStatus, whether app shall be stopped and in that case, shut down this service as well
 	private final void exitOnAppStatusStopOrWait() {
 		if (appStatus.getStatus().isStopping()) {
