@@ -14,6 +14,7 @@ import org.springframework.stereotype.Component;
 import esa.s1pdgs.cpoc.appcatalog.common.FailedProcessing;
 import esa.s1pdgs.cpoc.appcatalog.common.MqiMessage;
 import esa.s1pdgs.cpoc.appcatalog.common.Processing;
+import esa.s1pdgs.cpoc.appstatus.AppStatus;
 import esa.s1pdgs.cpoc.common.MessageState;
 import esa.s1pdgs.cpoc.errorrepo.model.rest.FailedProcessingDto;
 import esa.s1pdgs.cpoc.mqi.model.rest.GenericMessageDto;
@@ -26,20 +27,23 @@ public class RequestRepositoryImpl implements RequestRepository {
 	private final FailedProcessingRepo failedProcessingRepo;
 	private final MqiMessageRepo mqiMessageRepository;
 	private final SubmissionClient kafkaSubmissionClient;
+	private final AppStatus status;
 
 	@Autowired
 	public RequestRepositoryImpl(
 			final MqiMessageRepo mqiMessageRepository, 
 			final FailedProcessingRepo failedProcessingRepo, 
-			final SubmissionClient kafkaSubmissionClient
+			final SubmissionClient kafkaSubmissionClient,
+			final AppStatus status
 	) {
 		this.mqiMessageRepository = mqiMessageRepository;
 		this.failedProcessingRepo = failedProcessingRepo;
 		this.kafkaSubmissionClient = kafkaSubmissionClient;
+		this.status = status;
 	}
 
 	@Override
-	public synchronized void saveFailedProcessing(FailedProcessingDto failedProcessingDto) {
+	public synchronized void saveFailedProcessing(final FailedProcessingDto failedProcessingDto) {
 		final GenericMessageDto<?> dto = failedProcessingDto.getProcessingDetails();
 		final MqiMessage message = mqiMessageRepository.findById(dto.getId());
 		assertNotNull("original request", message, dto.getId());
@@ -57,23 +61,23 @@ public class RequestRepositoryImpl implements RequestRepository {
 	}
 
 	@Override
-	public FailedProcessing getFailedProcessingById(long id) {
+	public FailedProcessing getFailedProcessingById(final long id) {
 		final FailedProcessing failedProcessing = failedProcessingRepo.findById(id);
 		assertNotNull("failed request", failedProcessing, id);
 		return failedProcessing;
 	}
 
 	@Override
-	public synchronized void restartAndDeleteFailedProcessing(long id) {
+	public synchronized void restartAndDeleteFailedProcessing(final long id) {
 		final FailedProcessing failedProcessing = failedProcessingRepo.findById(id);
 		assertNotNull("failed request", failedProcessing, id);
 		assertTopicDefined(id, failedProcessing);	
-		kafkaSubmissionClient.resubmit(failedProcessing, failedProcessing.getDto());
+		kafkaSubmissionClient.resubmit(failedProcessing, failedProcessing.getDto(), status);
 		failedProcessingRepo.deleteById(id);
 	}
 
 	@Override
-	public synchronized void deleteFailedProcessing(long id) {		
+	public synchronized void deleteFailedProcessing(final long id) {		
 		final FailedProcessing failedProcessing = failedProcessingRepo.findById(id);		
 		assertNotNull("failed request", failedProcessing, id);
 		failedProcessingRepo.deleteById(id);
@@ -85,7 +89,7 @@ public class RequestRepositoryImpl implements RequestRepository {
 	}
 	
 	@Override
-	public Processing getProcessing(long id) {		
+	public Processing getProcessing(final long id) {		
 		final MqiMessage mess = mqiMessageRepository.findById(id);		
 		if (mess == null) {
 			return null;
@@ -94,7 +98,7 @@ public class RequestRepositoryImpl implements RequestRepository {
 	}
 	
 	@Override
-	public List<Processing> getProcessings(Integer pageSize, Integer pageNumber, List<String> processingTypes, List<MessageState> processingStatus) {	
+	public List<Processing> getProcessings(final Integer pageSize, final Integer pageNumber, final List<String> processingTypes, final List<MessageState> processingStatus) {	
 		final List<String> topics = processingTypes == null || processingTypes.isEmpty() ? PROCESSING_TYPES_LIST : processingTypes;
 		final List<MessageState> states = processingStatus.isEmpty() ? PROCESSING_STATE_LIST : processingStatus;
 
@@ -107,7 +111,7 @@ public class RequestRepositoryImpl implements RequestRepository {
 	}
 	
 	@Override
-	public long getProcessingsCount(List<String> processingTypes, List<MessageState> processingStatus) {
+	public long getProcessingsCount(final List<String> processingTypes, final List<MessageState> processingStatus) {
 		final List<String> topics = processingTypes == null || processingTypes.isEmpty() ? PROCESSING_TYPES_LIST : processingTypes;
 		final List<MessageState> states = processingStatus.isEmpty() ? PROCESSING_STATE_LIST : processingStatus;
 
@@ -133,7 +137,7 @@ public class RequestRepositoryImpl implements RequestRepository {
 		}
 	}
 	
-	private static final void assertTopicDefined(long id, final FailedProcessing failedProcessing) {
+	private static final void assertTopicDefined(final long id, final FailedProcessing failedProcessing) {
 		if (failedProcessing.getTopic() == null)
 		{
 			throw new RuntimeException(

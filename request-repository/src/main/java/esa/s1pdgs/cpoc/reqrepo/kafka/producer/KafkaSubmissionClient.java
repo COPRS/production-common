@@ -5,6 +5,7 @@ import org.springframework.kafka.support.SendResult;
 import org.springframework.util.concurrent.ListenableFuture;
 
 import esa.s1pdgs.cpoc.appcatalog.common.FailedProcessing;
+import esa.s1pdgs.cpoc.appstatus.AppStatus;
 import esa.s1pdgs.cpoc.common.utils.Exceptions;
 
 public class KafkaSubmissionClient implements SubmissionClient {
@@ -16,7 +17,7 @@ public class KafkaSubmissionClient implements SubmissionClient {
 	}
 
 	@Override
-	public void resubmit(final FailedProcessing failedProcessing, final Object message) {    		
+	public void resubmit(final FailedProcessing failedProcessing, final Object message, final AppStatus appStatus) {    		
 		final ListenableFuture<SendResult<String, Object>> result = client.send(
 				failedProcessing.getTopic(), 
 				message
@@ -25,6 +26,7 @@ public class KafkaSubmissionClient implements SubmissionClient {
 			result.get();
 		} catch (final Exception e) {
 			final Throwable cause = Exceptions.unwrap(e);
+			appStatus.getStatus().setFatalError();
 			throw new RuntimeException(
 					String.format(
 							"Error restarting failedRequest '%s' on topic '%s': %s",
