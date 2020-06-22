@@ -18,11 +18,11 @@ public class KafkaSubmissionClient implements SubmissionClient {
 
 	@Override
 	public void resubmit(final FailedProcessing failedProcessing, final Object message, final AppStatus appStatus) {    		
-		final ListenableFuture<SendResult<String, Object>> result = client.send(
-				failedProcessing.getTopic(), 
-				message
-		);
 		try {
+			final ListenableFuture<SendResult<String, Object>> result = client.send(
+					failedProcessing.getTopic(), 
+					message
+			);
 			result.get();
 		} catch (final Exception e) {
 			final Throwable cause = Exceptions.unwrap(e);
