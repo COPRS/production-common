@@ -41,7 +41,7 @@ public class ErrorRepoConfiguration {
 	}
 
 	@Bean 
-	@ConditionalOnProperty(name="mqi.host-uri")
+	@ConditionalOnProperty(name="kafka.error-topic")
 	public ErrorRepoAppender kafkaErrorRepoAppender()
 	{
 		return new KafkaErrorRepoAppender(kafkaTemplate(), topic);
