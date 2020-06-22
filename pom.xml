@@ -307,6 +307,7 @@
 		<module>applicative-catalog</module>
 		<module>app-catalog-client</module>
 		<module>xbip-client</module>
+		<module>error-repo-client</module>
 		<module>app-status</module>
 		<module>archives</module>
 		<module>disseminator</module>
