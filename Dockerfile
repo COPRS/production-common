@@ -4,46 +4,7 @@
 FROM maven:3.5.3-jdk-8 as buildenv
 
 WORKDIR /app
-
-# Just used in Werum network
-#ENV https_proxy=http://proxy.net.werum:8080/
-#COPY test.xml /usr/share/maven/ref/settings-docker.xml
-
-COPY pom.xml /app
-COPY PmdJavaRuleset.xml /app
-
-COPY app-catalog-client/ /app/app-catalog-client
-COPY applicative-catalog/ /app/applicative-catalog
-COPY archives/ /app/archives
-COPY disseminator/ /app/disseminator
-COPY ingestion-trigger/ /app/ingestion-trigger
-COPY ingestion-worker/ /app/ingestion-worker
-COPY production-trigger/ /app/production-trigger
-COPY ipf-preparation-worker/ /app/ipf-preparation-worker
-COPY lib-commons/ /app/lib-commons
-COPY app-status /app/app-status
-COPY metadata-catalog-trigger/ /app/metadata-catalog-trigger
-COPY metadata-catalog-worker/ /app/metadata-catalog-worker
-COPY metadata-client/ /app/metadata-client
-COPY mqi-client/ /app/mqi-client
-COPY mqi-server/ /app/mqi-server
-COPY obs-sdk/ /app/obs-sdk
-#COPY scaler/ /app/scaler
-COPY ipf-execution-worker/ /app/ipf-execution-worker
-COPY request-repository/ /app/request-repository
-COPY queue-watcher/ /app/queue-watcher
-COPY validation/ /app/validation
-COPY compression-trigger/ /app/compression-trigger
-COPY compression-worker/ /app/compression-worker
-COPY prip-client /app/prip-client
-COPY prip-trigger /app/prip-trigger
-COPY prip-worker /app/prip-worker
-COPY prip-frontend /app/prip-frontend
-COPY xbip-client /app/xbip-client
-COPY data-lifecycle-trigger /app/data-lifecycle-trigger
-COPY data-lifecycle-worker /app/data-lifecycle-worker
-COPY error-repo-client /app/error-repo-client
-
+COPY . /app/
 
 RUN mvn -DskipTests=true -Dpmd.skip=true -Dfindbugs.skip=true -B -f /app/pom.xml -s /usr/share/maven/ref/settings-docker.xml install 
 
