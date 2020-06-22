@@ -9,17 +9,17 @@ import esa.s1pdgs.cpoc.common.ProductCategory;
 public interface AppStatus {
 	
 	public static final AppStatus NULL = new AppStatus() {		
-		@Override public final Status getStatus() {return null;}		
+		@Override public final Status getStatus() {return Status.NULL;}		
 		@Override public final Map<ProductCategory, Status> getSubStatuses() { return Collections.emptyMap(); }
-		@Override public final void addSubStatus(Status subStatus) {}
+		@Override public final void addSubStatus(final Status subStatus) {}
 		@Override public final void setWaiting() {}		
 		@Override public final void setStopping() {}		
-		@Override public final void setShallBeStopped(boolean shallBeStopped) {}		
-		@Override public final void setProcessing(long processingMsgId) {}
-		@Override public final void setError(String type) {}
+		@Override public final void setShallBeStopped(final boolean shallBeStopped) {}		
+		@Override public final void setProcessing(final long processingMsgId) {}
+		@Override public final void setError(final String type) {}
 		@Override public final boolean isShallBeStopped() {return false;}
 		@Override public final long getProcessingMsgId() { return Status.PROCESSING_MSG_ID_UNDEFINED; }
-		@Override public final boolean isProcessing(String category, long messageId) {return false;}
+		@Override public final boolean isProcessing(final String category, final long messageId) {return false;}
 		@Override public final void forceStopping() {}
 		@Override public boolean getKubernetesReadiness() { return false; }
 	};
