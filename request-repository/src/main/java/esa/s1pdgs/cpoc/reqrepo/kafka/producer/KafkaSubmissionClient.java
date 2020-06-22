@@ -1,8 +1,6 @@
 package esa.s1pdgs.cpoc.reqrepo.kafka.producer;
 
 import org.springframework.kafka.core.KafkaTemplate;
-import org.springframework.kafka.support.SendResult;
-import org.springframework.util.concurrent.ListenableFuture;
 
 import esa.s1pdgs.cpoc.appcatalog.common.FailedProcessing;
 import esa.s1pdgs.cpoc.appstatus.AppStatus;
@@ -19,11 +17,7 @@ public class KafkaSubmissionClient implements SubmissionClient {
 	@Override
 	public void resubmit(final FailedProcessing failedProcessing, final Object message, final AppStatus appStatus) {    		
 		try {
-			final ListenableFuture<SendResult<String, Object>> result = client.send(
-					failedProcessing.getTopic(), 
-					message
-			);
-			result.get();
+			client.send(failedProcessing.getTopic(), message).get();
 		} catch (final Exception e) {
 			final Throwable cause = Exceptions.unwrap(e);
 			appStatus.getStatus().setFatalError();
