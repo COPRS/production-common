@@ -32,7 +32,6 @@ COPY --from=buildenv /app/production-trigger/target /app/production-trigger/targ
 COPY --from=buildenv /app/ipf-preparation-worker/target /app/ipf-preparation-worker/target
 COPY --from=buildenv /app/metadata-catalog-trigger /app/metadata-catalog-trigger
 COPY --from=buildenv /app/metadata-catalog-worker /app/metadata-catalog-worker
-COPY --from=buildenv /app/metadata-client /app/metadata-client
 COPY --from=buildenv /app/mqi-server/target /app/mqi-server/target
 COPY --from=buildenv /app/scaler/target /app/scaler/target
 COPY --from=buildenv /app/ipf-execution-worker/target /app/ipf-execution-worker/target
