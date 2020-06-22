@@ -6,6 +6,7 @@ import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.kafka.support.SendResult;
 import org.springframework.util.concurrent.ListenableFuture;
 
+import esa.s1pdgs.cpoc.common.utils.Exceptions;
 import esa.s1pdgs.cpoc.errorrepo.model.rest.FailedProcessingDto;
 
 public class KafkaErrorRepoAppender implements ErrorRepoAppender {
@@ -23,9 +24,10 @@ public class KafkaErrorRepoAppender implements ErrorRepoAppender {
 		try {
 			sendAndWait(errorRequest);
 		} catch (final Exception e) {
+			final Throwable cause = Exceptions.unwrap(e);
 			throw new RuntimeException(
-					""
-					
+					String.format("Error appending message to error queue '%s': %s", topic, Exceptions.messageOf(cause)),
+					cause
 			);
 		}
 	}
