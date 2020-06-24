@@ -81,7 +81,7 @@ public class PersistenceConfiguration<T extends AbstractMessage> {
     }
 
     @Bean
-    public MessagePersistence<T> messagePersistence(final RestTemplateBuilder builder, final AppCatalogMqiService<T> mqiService, KafkaProperties properties, @Value("${mqi.dft-offset}") final int defaultOffset) {
+    public MessagePersistence<T> messagePersistence(final RestTemplateBuilder builder, final AppCatalogMqiService<T> mqiService, KafkaProperties properties, @Value("${mqi.dft-offset:-3}") final int defaultOffset) {
         if (APP_CATALOG_MESSAGE_PERSISTENCE.getValue().equals(messagePersistenceStrategy)) {
             final MessageConsumer<T> additionalConsumer = MessageConsumer.nullConsumer();
             final OtherApplicationService otherAppService = checkProcessingOtherApp(builder);
