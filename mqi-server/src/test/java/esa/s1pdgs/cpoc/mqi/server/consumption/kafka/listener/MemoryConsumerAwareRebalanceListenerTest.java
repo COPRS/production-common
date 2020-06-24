@@ -20,9 +20,9 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 
-import esa.s1pdgs.cpoc.appcatalog.client.mqi.AppCatalogMqiService;
 import esa.s1pdgs.cpoc.common.errors.AbstractCodedException;
 import esa.s1pdgs.cpoc.common.errors.appcatalog.AppCatalogMqiGetOffsetApiError;
+import esa.s1pdgs.cpoc.mqi.server.service.MessagePersistence;
 
 /**
  * Test the MemoryConsumerAwareRebalanceListener
@@ -41,7 +41,7 @@ public class MemoryConsumerAwareRebalanceListenerTest {
      * Service of applicative data
      */
     @Mock
-    private AppCatalogMqiService service;
+    private MessagePersistence messagePersistence;
 
     /**
      * Listener to test
@@ -70,21 +70,21 @@ public class MemoryConsumerAwareRebalanceListenerTest {
         doNothing().when(consumer).seekToBeginning(Mockito.any());
         doNothing().when(consumer).seekToEnd(Mockito.any());
 
-        doReturn(-3L).when(service).getEarliestOffset(Mockito.anyString(),
+        doReturn(-3L).when(messagePersistence).getEarliestOffset(Mockito.anyString(),
                 Mockito.eq(0), Mockito.anyString());
-        doReturn(-2L).when(service).getEarliestOffset(Mockito.anyString(),
+        doReturn(-2L).when(messagePersistence).getEarliestOffset(Mockito.anyString(),
                 Mockito.eq(1), Mockito.anyString());
-        doReturn(-1L).when(service).getEarliestOffset(Mockito.anyString(),
+        doReturn(-1L).when(messagePersistence).getEarliestOffset(Mockito.anyString(),
                 Mockito.eq(2), Mockito.anyString());
-        doReturn(0L).when(service).getEarliestOffset(Mockito.anyString(),
+        doReturn(0L).when(messagePersistence).getEarliestOffset(Mockito.anyString(),
                 Mockito.eq(3), Mockito.anyString());
-        doReturn(128L).when(service).getEarliestOffset(Mockito.anyString(),
+        doReturn(128L).when(messagePersistence).getEarliestOffset(Mockito.anyString(),
                 Mockito.eq(4), Mockito.anyString());
         doThrow(new AppCatalogMqiGetOffsetApiError("uri", "message"))
-                        .when(service).getEarliestOffset(Mockito.anyString(),
+                        .when(messagePersistence).getEarliestOffset(Mockito.anyString(),
                                 Mockito.eq(5), Mockito.anyString());
 
-        listener = new MemoryConsumerAwareRebalanceListener(service,
+        listener = new MemoryConsumerAwareRebalanceListener(messagePersistence,
                 "groupname", -2);
     }
 
@@ -96,7 +96,7 @@ public class MemoryConsumerAwareRebalanceListenerTest {
     public void testConstructor() {
 
         MemoryConsumerAwareRebalanceListener listener =
-                new MemoryConsumerAwareRebalanceListener(service, "groupname",
+                new MemoryConsumerAwareRebalanceListener(messagePersistence, "groupname",
                         -2);
         assertEquals(-2, listener.getDefaultMode());
         assertEquals("groupname", listener.getGroup());
@@ -108,7 +108,7 @@ public class MemoryConsumerAwareRebalanceListenerTest {
     @Test
     public void testonPartitionsRevokedBeforeCommit() {
         listener.onPartitionsRevokedBeforeCommit(consumer, partitions);
-        verifyZeroInteractions(service);
+        verifyZeroInteractions(messagePersistence);
     }
 
     /**
@@ -117,7 +117,7 @@ public class MemoryConsumerAwareRebalanceListenerTest {
     @Test
     public void testonPartitionsRevokedAfterCommit() {
         listener.onPartitionsRevokedAfterCommit(consumer, partitions);
-        verifyZeroInteractions(service);
+        verifyZeroInteractions(messagePersistence);
     }
 
     /**
@@ -130,7 +130,7 @@ public class MemoryConsumerAwareRebalanceListenerTest {
         listener.onPartitionsAssigned(consumer, partitions);
 
         // Check P0 => startingoffset -3
-        verify(service, times(1)).getEarliestOffset(Mockito.eq("topic"),
+        verify(messagePersistence, times(1)).getEarliestOffset(Mockito.eq("topic"),
                 Mockito.eq(0), Mockito.eq("groupname"));
         verify(consumer, never()).seek(Mockito.eq(partitions.get(0)),
                 Mockito.anyLong());
@@ -140,7 +140,7 @@ public class MemoryConsumerAwareRebalanceListenerTest {
                 .seekToEnd(Mockito.eq(Arrays.asList(partitions.get(0))));
 
         // Check P1 => startingoffset -2
-        verify(service, times(1)).getEarliestOffset(Mockito.eq("topic"),
+        verify(messagePersistence, times(1)).getEarliestOffset(Mockito.eq("topic"),
                 Mockito.eq(1), Mockito.eq("groupname"));
         verify(consumer, never()).seek(Mockito.eq(partitions.get(1)),
                 Mockito.anyLong());
@@ -150,7 +150,7 @@ public class MemoryConsumerAwareRebalanceListenerTest {
                 .seekToEnd(Mockito.eq(Arrays.asList(partitions.get(1))));
 
         // Check P0 => startingoffset -1
-        verify(service, times(1)).getEarliestOffset(Mockito.eq("topic2"),
+        verify(messagePersistence, times(1)).getEarliestOffset(Mockito.eq("topic2"),
                 Mockito.eq(2), Mockito.eq("groupname"));
         verify(consumer, never()).seek(Mockito.eq(partitions.get(2)),
                 Mockito.eq(0L));
@@ -160,7 +160,7 @@ public class MemoryConsumerAwareRebalanceListenerTest {
                 .seekToEnd(Mockito.eq(Arrays.asList(partitions.get(2))));
 
         // Check P0 => startingoffset 0
-        verify(service, times(1)).getEarliestOffset(Mockito.eq("topic"),
+        verify(messagePersistence, times(1)).getEarliestOffset(Mockito.eq("topic"),
                 Mockito.eq(3), Mockito.eq("groupname"));
         verify(consumer, times(1)).seek(Mockito.eq(partitions.get(3)),
                 Mockito.eq(0L));
@@ -170,7 +170,7 @@ public class MemoryConsumerAwareRebalanceListenerTest {
                 .seekToEnd(Mockito.eq(Arrays.asList(partitions.get(3))));
 
         // Check P0 => startingoffset 128
-        verify(service, times(1)).getEarliestOffset(Mockito.eq("topic"),
+        verify(messagePersistence, times(1)).getEarliestOffset(Mockito.eq("topic"),
                 Mockito.eq(4), Mockito.eq("groupname"));
         verify(consumer, times(1)).seek(Mockito.eq(partitions.get(4)),
                 Mockito.eq(128L));
@@ -180,7 +180,7 @@ public class MemoryConsumerAwareRebalanceListenerTest {
                 .seekToEnd(Mockito.eq(Arrays.asList(partitions.get(4))));
 
         // Check P4 => default offset => startingoffset -2
-        verify(service, times(1)).getEarliestOffset(Mockito.eq("topic"),
+        verify(messagePersistence, times(1)).getEarliestOffset(Mockito.eq("topic"),
                 Mockito.eq(5), Mockito.eq("groupname"));
         verify(consumer, never()).seek(Mockito.eq(partitions.get(5)),
                 Mockito.anyLong());

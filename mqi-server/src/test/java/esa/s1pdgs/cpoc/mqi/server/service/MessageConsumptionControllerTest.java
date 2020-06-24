@@ -75,7 +75,7 @@ public class MessageConsumptionControllerTest {
     private KafkaProperties kafkaProperties;
 
     @Mock
-    private AppCatalogMqiService service;
+    private MessagePersistence messagePersistence;
 
     @Mock
     private OtherApplicationService otherService;
@@ -93,7 +93,7 @@ public class MessageConsumptionControllerTest {
         MockitoAnnotations.initMocks(this);
 
         manager = new MessageConsumptionController(appProperties,
-                kafkaProperties, service, otherService, appStatus);
+                kafkaProperties, messagePersistence, otherService, appStatus);
 
         doReturn("pod-name").when(appProperties).getHostname();
 
@@ -267,12 +267,12 @@ public class MessageConsumptionControllerTest {
      * @throws AbstractCodedException
      */
     private void testNextMessageWhenNoResponse(final ProductCategory category) throws AbstractCodedException {
-        doReturn(null, new ArrayList<>()).when(service)
+        doReturn(null, new ArrayList<>()).when(messagePersistence)
                 .next(Mockito.any(), Mockito.anyString());
 
         assertNull(manager.nextMessage(category));
         assertNull(manager.nextMessage(category));
-        verify(service, times(2)).next(Mockito.eq(category), Mockito.eq("pod-name"));
+        verify(messagePersistence, times(2)).next(Mockito.eq(category), Mockito.eq("pod-name"));
     }
 
     /**
@@ -314,22 +314,22 @@ public class MessageConsumptionControllerTest {
                 new AppCatMessageDto<>(category, 2, "topic", 1, 11);
         msg2.setState(MessageState.READ);
         msg2.setCreationDate(new Date());
-        doReturn(true).when(service).send(Mockito.eq(category), Mockito.eq(2L), Mockito.any());
+        doReturn(true).when(messagePersistence).send(Mockito.eq(category), Mockito.eq(2L), Mockito.any());
 
         // Status read
         final AppCatMessageDto<?> msg3 =
                 new AppCatMessageDto<>(category, 3, "topic", 2, 11);
         msg3.setState(MessageState.READ);
         msg3.setCreationDate(new Date());
-        doReturn(true).when(service).send(Mockito.eq(category), Mockito.eq(3L), Mockito.any());
+        doReturn(true).when(messagePersistence).send(Mockito.eq(category), Mockito.eq(3L), Mockito.any());
 
-        doReturn(Arrays.asList(msg1, msg2, msg3)).when(service)
+        doReturn(Arrays.asList(msg1, msg2, msg3)).when(messagePersistence)
                 .next(Mockito.any(), Mockito.anyString());
 
         assertEquals(new GenericMessageDto<>(2, "topic", null),
                 manager.nextMessage(category));
-        verify(service, times(1)).next(Mockito.eq(category), Mockito.eq("pod-name"));
-        verify(service, times(1)).send(Mockito.eq(category), Mockito.eq(2L), Mockito.any());
+        verify(messagePersistence, times(1)).next(Mockito.eq(category), Mockito.eq("pod-name"));
+        verify(messagePersistence, times(1)).send(Mockito.eq(category), Mockito.eq(2L), Mockito.any());
         verify(otherService, times(1)).isProcessing(Mockito.eq("other-pod"),
                 Mockito.eq(category), Mockito.eq(1L));
         verifyNoMoreInteractions(otherService);
@@ -364,10 +364,10 @@ public class MessageConsumptionControllerTest {
                 new AppCatMessageDto<IpfExecutionJob>(
                         ProductCategory.LEVEL_JOBS, 123, "topic", 1, 22, dto);
 
-        doReturn(true).when(service).ack(Mockito.eq(ProductCategory.LEVEL_JOBS),Mockito.eq(123L),
+        doReturn(true).when(messagePersistence).ack(Mockito.eq(ProductCategory.LEVEL_JOBS),Mockito.eq(123L),
                 Mockito.any());
-        doReturn(message).when(service).get(Mockito.eq(ProductCategory.LEVEL_JOBS),Mockito.eq(123L));
-        doReturn(0).when(service)
+        doReturn(message).when(messagePersistence).get(Mockito.eq(ProductCategory.LEVEL_JOBS),Mockito.eq(123L));
+        doReturn(0).when(messagePersistence)
                 .getNbReadingMessages(Mockito.anyString(), Mockito.anyString());
 
         final ResumeDetails expectedRd = new ResumeDetails("topic", dto);
@@ -398,9 +398,9 @@ public class MessageConsumptionControllerTest {
         		dto
         );
 
-        doReturn(true).when(service).ack(Mockito.eq(ProductCategory.LEVEL_JOBS),Mockito.eq(123L),Mockito.any());
-        doReturn(message).when(service).get(Mockito.eq(ProductCategory.LEVEL_JOBS),Mockito.eq(123L));
-        doReturn(0).when(service).getNbReadingMessages(Mockito.anyString(), Mockito.anyString());
+        doReturn(true).when(messagePersistence).ack(Mockito.eq(ProductCategory.LEVEL_JOBS),Mockito.eq(123L),Mockito.any());
+        doReturn(message).when(messagePersistence).get(Mockito.eq(ProductCategory.LEVEL_JOBS),Mockito.eq(123L));
+        doReturn(0).when(messagePersistence).getNbReadingMessages(Mockito.anyString(), Mockito.anyString());
 
         final ResumeDetails expectedRd = new ResumeDetails("topic-unknown", dto);
 
@@ -430,9 +430,9 @@ public class MessageConsumptionControllerTest {
                 new AppCatMessageDto<IpfExecutionJob>(
                         ProductCategory.LEVEL_JOBS, 123, "topic4", 1, 22, dto);
 
-        doReturn(true).when(service).ack(Mockito.eq(ProductCategory.LEVEL_JOBS),Mockito.eq(123L),Mockito.any());
-        doReturn(message).when(service).get(Mockito.eq(ProductCategory.LEVEL_JOBS),Mockito.eq(123L));
-        doReturn(0).when(service).getNbReadingMessages(Mockito.anyString(), Mockito.anyString());
+        doReturn(true).when(messagePersistence).ack(Mockito.eq(ProductCategory.LEVEL_JOBS),Mockito.eq(123L),Mockito.any());
+        doReturn(message).when(messagePersistence).get(Mockito.eq(ProductCategory.LEVEL_JOBS),Mockito.eq(123L));
+        doReturn(0).when(messagePersistence).getNbReadingMessages(Mockito.anyString(), Mockito.anyString());
 
         final ResumeDetails expectedRd = new ResumeDetails("topic4", dto);
         final GenericConsumer<?> consi = manager.consumers.get(ProductCategory.LEVEL_JOBS).get("topic");
@@ -453,9 +453,9 @@ public class MessageConsumptionControllerTest {
                 new AppCatMessageDto<IpfExecutionJob>(
                         ProductCategory.LEVEL_JOBS, 123, "topic5", 1, 22, dto);
 
-        doReturn(true).when(service).ack(Mockito.eq(ProductCategory.LEVEL_JOBS),Mockito.eq(123L), Mockito.any());
-        doReturn(message).when(service).get(Mockito.eq(ProductCategory.LEVEL_JOBS),Mockito.eq(123L));
-        doReturn(0).when(service).getNbReadingMessages(Mockito.anyString(), Mockito.anyString());
+        doReturn(true).when(messagePersistence).ack(Mockito.eq(ProductCategory.LEVEL_JOBS),Mockito.eq(123L), Mockito.any());
+        doReturn(message).when(messagePersistence).get(Mockito.eq(ProductCategory.LEVEL_JOBS),Mockito.eq(123L));
+        doReturn(0).when(messagePersistence).getNbReadingMessages(Mockito.anyString(), Mockito.anyString());
 
         final ResumeDetails expectedRd = new ResumeDetails("topic5", dto);
         
@@ -513,21 +513,21 @@ public class MessageConsumptionControllerTest {
 
         doReturn(true).when(otherService).isProcessing(Mockito.anyString(),
                 Mockito.any(), Mockito.anyLong());
-        doReturn(true).when(service)
+        doReturn(true).when(messagePersistence)
                 .send(Mockito.eq(ProductCategory.AUXILIARY_FILES),Mockito.eq(1234L), Mockito.any());
-        doReturn(false).when(service)
+        doReturn(false).when(messagePersistence)
                 .send(Mockito.eq(ProductCategory.AUXILIARY_FILES),Mockito.eq(1235L), Mockito.any());
 
         final AppCatSendMessageDto expected = new AppCatSendMessageDto("pod-name", false);
 
-        assertTrue(manager.send(ProductCategory.AUXILIARY_FILES, service, msgLight));
-        assertFalse(manager.send(ProductCategory.AUXILIARY_FILES, service, msgLight2));
+        assertTrue(manager.send(ProductCategory.AUXILIARY_FILES, messagePersistence, msgLight));
+        assertFalse(manager.send(ProductCategory.AUXILIARY_FILES, messagePersistence, msgLight2));
         verifyZeroInteractions(otherService);
-        verify(service, times(1)).send(Mockito.eq(ProductCategory.AUXILIARY_FILES),Mockito.eq(1234L),
+        verify(messagePersistence, times(1)).send(Mockito.eq(ProductCategory.AUXILIARY_FILES),Mockito.eq(1234L),
                 Mockito.eq(expected));
-        verify(service, times(1)).send(Mockito.eq(ProductCategory.AUXILIARY_FILES),Mockito.eq(1235L),
+        verify(messagePersistence, times(1)).send(Mockito.eq(ProductCategory.AUXILIARY_FILES),Mockito.eq(1235L),
                 Mockito.eq(expected));
-        verifyNoMoreInteractions(service);
+        verifyNoMoreInteractions(messagePersistence);
     }
 
     /**
@@ -549,7 +549,7 @@ public class MessageConsumptionControllerTest {
                 Mockito.any(), Mockito.anyLong());
 
         // First time: msgLightForceRead
-        assertFalse(manager.send(ProductCategory.AUXILIARY_FILES,service, msgLight));
+        assertFalse(manager.send(ProductCategory.AUXILIARY_FILES,messagePersistence, msgLight));
         verify(otherService, times(1)).isProcessing(Mockito.eq("other-name"),
                 Mockito.eq(ProductCategory.AUXILIARY_FILES), Mockito.eq(1234L));
     }
@@ -598,22 +598,22 @@ public class MessageConsumptionControllerTest {
         msgLight2.setReadingPod("pod-name");
         msgLight2.setSendingPod("other-name");
 
-        doReturn(true).when(service)
+        doReturn(true).when(messagePersistence)
                 .send(Mockito.eq(ProductCategory.AUXILIARY_FILES),Mockito.eq(1234L), Mockito.any());
-        doReturn(false).when(service)
+        doReturn(false).when(messagePersistence)
                 .send(Mockito.eq(ProductCategory.AUXILIARY_FILES),Mockito.eq(1235L), Mockito.any());
 
         final AppCatSendMessageDto expected = new AppCatSendMessageDto("pod-name", true);
 
-        assertTrue(manager.send(ProductCategory.AUXILIARY_FILES,service, msgLight));
-        assertFalse(manager.send(ProductCategory.AUXILIARY_FILES,service, msgLight2));
+        assertTrue(manager.send(ProductCategory.AUXILIARY_FILES,messagePersistence, msgLight));
+        assertFalse(manager.send(ProductCategory.AUXILIARY_FILES,messagePersistence, msgLight2));
         verify(otherService, times(1)).isProcessing(Mockito.eq("other-name"),
                 Mockito.eq(ProductCategory.AUXILIARY_FILES), Mockito.eq(1234L));
         verify(otherService, times(1)).isProcessing(Mockito.eq("other-name"),
                 Mockito.eq(ProductCategory.AUXILIARY_FILES), Mockito.eq(1235L));
-        verify(service, times(1)).send(Mockito.eq(ProductCategory.AUXILIARY_FILES),Mockito.eq(1234L),
+        verify(messagePersistence, times(1)).send(Mockito.eq(ProductCategory.AUXILIARY_FILES),Mockito.eq(1234L),
                 Mockito.eq(expected));
-        verify(service, times(1)).send( Mockito.eq(ProductCategory.AUXILIARY_FILES),Mockito.eq(1235L),
+        verify(messagePersistence, times(1)).send( Mockito.eq(ProductCategory.AUXILIARY_FILES),Mockito.eq(1235L),
                 Mockito.eq(expected));
     }
     

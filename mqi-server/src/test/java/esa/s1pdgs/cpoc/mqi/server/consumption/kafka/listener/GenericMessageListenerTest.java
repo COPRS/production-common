@@ -37,6 +37,7 @@ import esa.s1pdgs.cpoc.mqi.server.config.KafkaProperties;
 import esa.s1pdgs.cpoc.mqi.server.config.KafkaProperties.KafkaConsumerProperties;
 import esa.s1pdgs.cpoc.mqi.server.consumption.kafka.consumer.GenericConsumer;
 import esa.s1pdgs.cpoc.mqi.server.consumption.kafka.consumer.MessageConsumer;
+import esa.s1pdgs.cpoc.mqi.server.service.MessagePersistence;
 import esa.s1pdgs.cpoc.mqi.server.service.OtherApplicationService;
 
 /**
@@ -61,7 +62,7 @@ public class GenericMessageListenerTest {
      * Service for persisting data
      */
     @Mock
-    private AppCatalogMqiService service;
+    private MessagePersistence service;
 
     /**
      * Service for checking if a message is processing or not by another
@@ -188,117 +189,13 @@ public class GenericMessageListenerTest {
     }
 
     /**
-     * Test messageShallBeIgnored when the other app return true
+     * Test onMessage when the message is already ack
      * 
      * @throws AbstractCodedException
      */
     @Test
-    public void testmessageShallBeIgnoredWhenResponseTrue()
-            throws AbstractCodedException {
-
-        final AppCatMessageDto<ProductionEvent> msgLight = new AppCatMessageDto<ProductionEvent>(
-                ProductCategory.AUXILIARY_FILES, 1234, "topic", 1, 111);
-        msgLight.setState(MessageState.SEND);
-        msgLight.setReadingPod("pod-name");
-        msgLight.setSendingPod("other-name");
-
-        doReturn(true).when(otherAppService).isProcessing(Mockito.anyString(),
-                Mockito.any(), Mockito.anyLong());
-
-        // First time: msgLightForceRead
-        assertTrue(listener.messageShallBeIgnored(data, msgLight));
-        verify(otherAppService, times(1)).isProcessing(Mockito.eq("other-name"),
-                Mockito.eq(ProductCategory.AUXILIARY_FILES), Mockito.eq(1234L));
-    }
-
-    /**
-     * Test messageShallBeIgnored when no response from the other app
-     * 
-     * @throws AbstractCodedException
-     */
-    @Test
-    public void testmessageShallBeIgnoredWhenNoResponse()
-            throws AbstractCodedException {
-
-        doThrow(new StatusProcessingApiError("uri", "error message"))
-                .when(otherAppService).isProcessing(Mockito.anyString(),
-                        Mockito.any(), Mockito.anyLong());
-
-        testmessageShallBeIgnoredWhenFalse();
-    }
-
-    /**
-     * Test messageShallBeIgnored when the other app return false
-     * 
-     * @throws AbstractCodedException
-     */
-    @Test
-    public void testmessageShallBeIgnoredWhenResponseFalse()
-            throws AbstractCodedException {
-
-        doReturn(false).when(otherAppService).isProcessing(Mockito.anyString(),
-                Mockito.any(), Mockito.anyLong());
-
-        testmessageShallBeIgnoredWhenFalse();
-    }
-
-    private void testmessageShallBeIgnoredWhenFalse()
-            throws AbstractCodedException {
-
-        final AppCatMessageDto<ProductionEvent> msgLight = new AppCatMessageDto<ProductionEvent>(
-                ProductCategory.AUXILIARY_FILES, 1234, "topic", 1, 111);
-        msgLight.setState(MessageState.SEND);
-        msgLight.setReadingPod("pod-name");
-        msgLight.setSendingPod("other-name");
-
-        final AppCatMessageDto<ProductionEvent> msgLightForceRead = new AppCatMessageDto<ProductionEvent>(
-                ProductCategory.AUXILIARY_FILES, 1234, "topic", 1, 111);
-        msgLightForceRead.setState(MessageState.READ);
-        msgLightForceRead.setReadingPod("pod-name");
-
-        final AppCatMessageDto<ProductionEvent> msgLightForceAck = new AppCatMessageDto<ProductionEvent>(
-                ProductCategory.AUXILIARY_FILES, 1234, "topic", 1, 111);
-        msgLightForceAck.setState(MessageState.ACK_KO);
-        msgLightForceAck.setReadingPod("pod-name");
-        msgLightForceAck.setSendingPod("other-name");
-
-        final AppCatMessageDto<ProductionEvent> msgLightForceSend = new AppCatMessageDto<ProductionEvent>(
-                ProductCategory.AUXILIARY_FILES, 1234, "topic", 1, 111);
-        msgLightForceSend.setState(MessageState.SEND);
-        msgLightForceSend.setReadingPod("pod-name");
-        msgLightForceSend.setSendingPod("other-name");
-
-        final AppCatReadMessageDto<ProductionEvent> expectedReadBody =
-                new AppCatReadMessageDto<ProductionEvent>("group-name", "pod-name",
-                        true, data.value());
-
-        doReturn(msgLightForceRead, msgLightForceAck, msgLightForceSend)
-                .when(service).read(Mockito.any(),Mockito.anyString(), Mockito.anyInt(),
-                        Mockito.anyLong(), Mockito.any());
-
-        // First time: msgLightForceRead
-        assertFalse(listener.messageShallBeIgnored(data, msgLight));
-        verify(otherAppService, times(1)).isProcessing(Mockito.eq("other-name"),
-                Mockito.eq(ProductCategory.AUXILIARY_FILES), Mockito.eq(1234L));
-        verify(service, times(1)).read(Mockito.any(),Mockito.eq(data.topic()),
-                Mockito.eq(data.partition()), Mockito.eq(data.offset()),
-                Mockito.eq(expectedReadBody));
-
-        // Second time msgLightForceAck
-        assertTrue(listener.messageShallBeIgnored(data, msgLight));
-        verify(otherAppService, times(2)).isProcessing(Mockito.eq("other-name"),
-                Mockito.eq(ProductCategory.AUXILIARY_FILES), Mockito.eq(1234L));
-        verify(service, times(2)).read(Mockito.eq(ProductCategory.AUXILIARY_FILES),Mockito.eq(data.topic()),
-                Mockito.eq(data.partition()), Mockito.eq(data.offset()),
-                Mockito.eq(expectedReadBody));
-
-        // Third time msgLightForceSend
-        assertTrue(listener.messageShallBeIgnored(data, msgLight));
-        verify(otherAppService, times(3)).isProcessing(Mockito.eq("other-name"),
-                Mockito.eq(ProductCategory.AUXILIARY_FILES), Mockito.eq(1234L));
-        verify(service, times(3)).read(Mockito.eq(ProductCategory.AUXILIARY_FILES),Mockito.eq(data.topic()),
-                Mockito.eq(data.partition()), Mockito.eq(data.offset()),
-                Mockito.eq(expectedReadBody));
+    public void testOnMessageWhenAlreadyAckKo() throws Exception {
+        checkOnMessageWhenAckRead(MessageState.ACK_KO, false);
     }
 
     /**
@@ -307,18 +204,8 @@ public class GenericMessageListenerTest {
      * @throws AbstractCodedException
      */
     @Test
-    public void testOnMessageWhenAlreadyAckKo() throws AbstractCodedException {
-        checkOnMEssageWhenAckRead(MessageState.ACK_KO, false);
-    }
-
-    /**
-     * Test onMessage when the message is already ack
-     * 
-     * @throws AbstractCodedException
-     */
-    @Test
-    public void testOnMessageWhenAlreadyAckOk() throws AbstractCodedException {
-        checkOnMEssageWhenAckRead(MessageState.ACK_OK, false);
+    public void testOnMessageWhenAlreadyAckOk() throws Exception {
+        checkOnMessageWhenAckRead(MessageState.ACK_OK, false);
     }
 
     /**
@@ -328,8 +215,8 @@ public class GenericMessageListenerTest {
      */
     @Test
     public void testOnMessageWhenAlreadyAckWarn()
-            throws AbstractCodedException {
-        checkOnMEssageWhenAckRead(MessageState.ACK_WARN, false);
+            throws Exception {
+        checkOnMessageWhenAckRead(MessageState.ACK_WARN, false);
     }
 
     /**
@@ -338,8 +225,8 @@ public class GenericMessageListenerTest {
      * @throws AbstractCodedException
      */
     @Test
-    public void testOnMessageWhenRead() throws AbstractCodedException {
-        checkOnMEssageWhenAckRead(MessageState.READ, true);
+    public void testOnMessageWhenRead() throws Exception {
+        checkOnMessageWhenAckRead(MessageState.READ, true);
     }
 
     /**
@@ -349,8 +236,8 @@ public class GenericMessageListenerTest {
      * @param pause
      * @throws AbstractCodedException
      */
-    private void checkOnMEssageWhenAckRead(final MessageState state,
-            final boolean pause) throws AbstractCodedException {
+    private void checkOnMessageWhenAckRead(final MessageState state,
+            final boolean pause) throws Exception {
         final AppCatMessageDto<ProductionEvent> msgLight = new AppCatMessageDto<ProductionEvent>(
                 ProductCategory.AUXILIARY_FILES, 1234, "topic", 1, 111);
         msgLight.setState(state);
@@ -359,17 +246,12 @@ public class GenericMessageListenerTest {
                 new AppCatReadMessageDto<ProductionEvent>("group-name", "pod-name",
                         false, data.value());
 
-        doReturn(msgLight).when(service).read(Mockito.any(), Mockito.anyString(),
-                Mockito.anyInt(), Mockito.anyLong(), Mockito.any());
-
         listener.onMessage(data, acknowledgment, onMsgConsumer);
 
         verifyZeroInteractions(onMsgConsumer);
         verify(acknowledgment, times(1)).acknowledge();
         verifyZeroInteractions(otherAppService);
-        verify(service, times(1)).read(Mockito.eq(ProductCategory.AUXILIARY_FILES),Mockito.eq(data.topic()),
-                Mockito.eq(data.partition()), Mockito.eq(data.offset()),
-                Mockito.eq(expectedReadBody));
+        verify(service, times(1)).read(Mockito.eq(data), Mockito.eq(acknowledgment));
         verify(appStatus, times(1)).setWaiting();
         if (pause) {
             verify(genericConsumer, times(1)).pause();
@@ -385,11 +267,9 @@ public class GenericMessageListenerTest {
      */
     @Test
     public void testOnMessageWhenFirstReadFails()
-            throws AbstractCodedException {
+            throws Exception {
         doThrow(new AppCatalogMqiReadApiError(ProductCategory.AUXILIARY_FILES,
-                "uri", "dto-object", "error-message")).when(service).read(Mockito.any(),
-                        Mockito.anyString(), Mockito.anyInt(),
-                        Mockito.anyLong(), Mockito.any());
+                "uri", "dto-object", "error-message")).when(service).read(Mockito.any(), Mockito.any());
 
         final AppCatReadMessageDto<ProductionEvent> expectedReadBody =
                 new AppCatReadMessageDto<>("group-name", "pod-name",
@@ -402,9 +282,7 @@ public class GenericMessageListenerTest {
         verifyZeroInteractions(onMsgConsumer);
         verifyZeroInteractions(otherAppService);
         verifyZeroInteractions(genericConsumer);
-        verify(service, times(1)).read(Mockito.eq(ProductCategory.AUXILIARY_FILES),Mockito.eq(data.topic()),
-                Mockito.eq(data.partition()), Mockito.eq(data.offset()),
-                Mockito.eq(expectedReadBody));
+        verify(service, times(1)).read(Mockito.eq(data),Mockito.eq(acknowledgment));
     }
 
     /**
@@ -414,7 +292,7 @@ public class GenericMessageListenerTest {
      */
     @Test
     public void testOnMessageWhenProcessingBySamePod()
-            throws AbstractCodedException {
+            throws Exception {
         final AppCatMessageDto<ProductionEvent> msgLight = new AppCatMessageDto<ProductionEvent>(
                 ProductCategory.AUXILIARY_FILES, 1234, "topic", 1, 111);
         msgLight.setState(MessageState.SEND);
@@ -424,14 +302,9 @@ public class GenericMessageListenerTest {
                 new AppCatReadMessageDto<>("group-name", "pod-name",
                         false, data.value());
 
-        doReturn(msgLight).when(service).read(Mockito.any(),Mockito.anyString(),
-                Mockito.anyInt(), Mockito.anyLong(), Mockito.any());
-
         listener.onMessage(data, acknowledgment, onMsgConsumer);
 
-        verify(service, times(1)).read(Mockito.eq(ProductCategory.AUXILIARY_FILES),Mockito.eq(data.topic()),
-                Mockito.eq(data.partition()), Mockito.eq(data.offset()),
-                Mockito.eq(expectedReadBody));
+        verify(service, times(1)).read(Mockito.eq(data),Mockito.eq(acknowledgment));
         verify(appStatus, times(1)).setWaiting();
         verify(acknowledgment, times(1)).acknowledge();
         verify(genericConsumer, times(1)).pause();
@@ -447,7 +320,7 @@ public class GenericMessageListenerTest {
      */
     @Test
     public void testOnMessageWhenProcessingByOtherPod()
-            throws AbstractCodedException {
+            throws Exception {
         final AppCatMessageDto<ProductionEvent> msgLight = new AppCatMessageDto<ProductionEvent>(
                 ProductCategory.AUXILIARY_FILES, 1234, "topic", 1, 111);
         msgLight.setState(MessageState.SEND);
@@ -457,16 +330,12 @@ public class GenericMessageListenerTest {
                 new AppCatReadMessageDto<>("group-name", "pod-name",
                         false, data.value());
 
-        doReturn(msgLight).when(service).read(Mockito.any(),Mockito.anyString(),
-                Mockito.anyInt(), Mockito.anyLong(), Mockito.any());
         doReturn(true).when(otherAppService).isProcessing(Mockito.anyString(),
                 Mockito.any(), Mockito.anyLong());
 
         listener.onMessage(data, acknowledgment, onMsgConsumer);
 
-        verify(service, times(1)).read(Mockito.eq(ProductCategory.AUXILIARY_FILES),Mockito.eq(data.topic()),
-                Mockito.eq(data.partition()), Mockito.eq(data.offset()),
-                Mockito.eq(expectedReadBody));
+        verify(service, times(1)).read(Mockito.eq(data),Mockito.eq(acknowledgment));
         verify(appStatus, times(1)).setWaiting();
         verify(acknowledgment, times(1)).acknowledge();
         verifyNoMoreInteractions(appStatus);
@@ -483,7 +352,7 @@ public class GenericMessageListenerTest {
      */
     @Test
     public void testOnMessageWhenProcessingButNoResponse()
-            throws AbstractCodedException {
+            throws Exception {
         final AppCatMessageDto<ProductionEvent> msgLight = new AppCatMessageDto<ProductionEvent>(
                 ProductCategory.AUXILIARY_FILES, 1234, "topic", 1, 111);
         msgLight.setState(MessageState.SEND);
@@ -502,20 +371,12 @@ public class GenericMessageListenerTest {
                 new AppCatReadMessageDto<>("group-name", "pod-name",
                         true, data.value());
 
-        doReturn(msgLight, msgLightForceRead).when(service).read(Mockito.any(),
-                Mockito.anyString(), Mockito.anyInt(), Mockito.anyLong(),
-                Mockito.any());
         doReturn(false).when(otherAppService).isProcessing(Mockito.anyString(),
                 Mockito.any(), Mockito.anyLong());
 
         listener.onMessage(data, acknowledgment, onMsgConsumer);
 
-        verify(service, times(1)).read(Mockito.eq(ProductCategory.AUXILIARY_FILES),Mockito.eq(data.topic()),
-                Mockito.eq(data.partition()), Mockito.eq(data.offset()),
-                Mockito.eq(expectedReadBody));
-        verify(service, times(1)).read(Mockito.eq(ProductCategory.AUXILIARY_FILES),Mockito.eq(data.topic()),
-                Mockito.eq(data.partition()), Mockito.eq(data.offset()),
-                Mockito.eq(expectedReadBodyForce));
+        verify(service, times(2)).read(Mockito.eq(data),Mockito.eq(acknowledgment));
         verify(appStatus, times(1)).setWaiting();
         verifyNoMoreInteractions(appStatus);
         verify(acknowledgment, times(1)).acknowledge();

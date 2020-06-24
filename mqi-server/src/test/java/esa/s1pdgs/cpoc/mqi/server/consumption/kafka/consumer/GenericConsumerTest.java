@@ -1,11 +1,9 @@
 package esa.s1pdgs.cpoc.mqi.server.consumption.kafka.consumer;
 
 import static org.junit.Assert.assertEquals;
-import static org.mockito.Mockito.doReturn;
-import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.*;
 
+import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.junit.Before;
 import org.junit.ClassRule;
 import org.junit.Test;
@@ -20,7 +18,6 @@ import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit4.SpringRunner;
 
-import esa.s1pdgs.cpoc.appcatalog.client.mqi.AppCatalogMqiService;
 import esa.s1pdgs.cpoc.appcatalog.rest.AppCatMessageDto;
 import esa.s1pdgs.cpoc.appcatalog.rest.AppCatReadMessageDto;
 import esa.s1pdgs.cpoc.appstatus.AppStatus;
@@ -31,6 +28,7 @@ import esa.s1pdgs.cpoc.common.errors.AbstractCodedException;
 import esa.s1pdgs.cpoc.mqi.model.queue.ProductionEvent;
 import esa.s1pdgs.cpoc.mqi.server.GenericKafkaUtils;
 import esa.s1pdgs.cpoc.mqi.server.config.KafkaProperties;
+import esa.s1pdgs.cpoc.mqi.server.service.MessagePersistence;
 import esa.s1pdgs.cpoc.mqi.server.service.OtherApplicationService;
 import esa.s1pdgs.cpoc.mqi.server.test.DataUtils;
 
@@ -55,7 +53,7 @@ public class GenericConsumerTest {
     private AppStatus appStatus;
 
     @Mock
-    private AppCatalogMqiService service;
+    private MessagePersistence messagePersistence;
 
     @Mock
     private OtherApplicationService otherService;
@@ -83,11 +81,7 @@ public class GenericConsumerTest {
         messageLight3.setState(MessageState.SEND);
         messageLight3.setSendingPod("other-host");
 
-        doReturn(messageLight1, messageLight2, messageLight3).when(service)
-                .read(Mockito.any() ,Mockito.anyString(), Mockito.anyInt(), Mockito.anyLong(),
-                        Mockito.any());
-        
-        uut = new GenericConsumer.Factory(properties, service, otherService, appStatus)
+        uut = new GenericConsumer.Factory(properties, messagePersistence, otherService, appStatus)
         		.newConsumerFor(ProductCategory.AUXILIARY_FILES, 100, GenericKafkaUtils.TOPIC_AUXILIARY_FILES);
     }
 
@@ -105,40 +99,43 @@ public class GenericConsumerTest {
 
         uut.start();
         Thread.sleep(5000);
-        verify(service, never()).read(Mockito.any(),Mockito.anyString(), Mockito.anyInt(),
-                Mockito.anyLong(), Mockito.any());
+        verify(messagePersistence, never()).read(Mockito.any(), Mockito.any());
 
         // Send first DTO
         kafkaUtils.sendMessageToKafka(dto,
                 GenericKafkaUtils.TOPIC_AUXILIARY_FILES);
         Thread.sleep(1500);
-        final AppCatReadMessageDto<ProductionEvent> expected =
-                new AppCatReadMessageDto<ProductionEvent>("wrappers",
-                        "test-host", false, dto);
-        verify(service, times(1)).read(Mockito.eq(ProductCategory.AUXILIARY_FILES),
-                Mockito.eq(GenericKafkaUtils.TOPIC_AUXILIARY_FILES),
-                Mockito.anyInt(), Mockito.anyLong(), Mockito.eq(expected));
+
+        final ConsumerRecord<String, AppCatReadMessageDto<ProductionEvent>> expected =
+                new ConsumerRecord("topic",
+                        23,
+                        343,
+                        "key",
+                        new AppCatReadMessageDto<ProductionEvent>("wrappers",
+                                "test-host", false, dto));
+
+        verify(messagePersistence, times(1)).read(Mockito.eq(expected), Mockito.any());
 
         // Send second DTO without resuming consumer
         kafkaUtils.sendMessageToKafka(dto2,
                 GenericKafkaUtils.TOPIC_AUXILIARY_FILES);
         Thread.sleep(1000);
-        verify(service, times(1)).read(Mockito.eq(ProductCategory.AUXILIARY_FILES),
-                Mockito.eq(GenericKafkaUtils.TOPIC_AUXILIARY_FILES),
-                Mockito.anyInt(), Mockito.anyLong(), Mockito.any());
+        verify(messagePersistence, times(1)).read(Mockito.eq(expected), Mockito.any());
 
-        // REsume consumer
+        // Resume consumer
         uut.resume();
         Thread.sleep(1000);
-        final AppCatReadMessageDto<ProductionEvent> expected2 =
-                new AppCatReadMessageDto<ProductionEvent>("wrappers",
-                        "test-host", false, dto2);
-        verify(service, times(2)).read(Mockito.eq(ProductCategory.AUXILIARY_FILES),
-                Mockito.eq(GenericKafkaUtils.TOPIC_AUXILIARY_FILES),
-                Mockito.anyInt(), Mockito.anyLong(), Mockito.any());
-        verify(service, times(1)).read(Mockito.eq(ProductCategory.AUXILIARY_FILES),
-                Mockito.eq(GenericKafkaUtils.TOPIC_AUXILIARY_FILES),
-                Mockito.anyInt(), Mockito.anyLong(), Mockito.eq(expected2));
+
+        final ConsumerRecord<String, AppCatReadMessageDto<ProductionEvent>> expected2 =
+                new ConsumerRecord("topic",
+                        23,
+                        344,
+                        "key",
+                        new AppCatReadMessageDto<ProductionEvent>("wrappers",
+                                "test-host", false, dto2));
+
+        verify(messagePersistence, times(2)).read(Mockito.any(), Mockito.any());
+        verify(messagePersistence, times(1)).read(Mockito.eq(expected2),Mockito.any());
 
     }
 }

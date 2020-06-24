@@ -16,7 +16,6 @@ import org.junit.ClassRule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
-import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -30,7 +29,6 @@ import org.springframework.kafka.test.utils.KafkaTestUtils;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.junit4.SpringRunner;
 
-import esa.s1pdgs.cpoc.appcatalog.client.mqi.AppCatalogMqiService;
 import esa.s1pdgs.cpoc.appcatalog.rest.AppCatMessageDto;
 import esa.s1pdgs.cpoc.appstatus.AppStatus;
 import esa.s1pdgs.cpoc.common.MessageState;
@@ -39,6 +37,7 @@ import esa.s1pdgs.cpoc.common.ProductFamily;
 import esa.s1pdgs.cpoc.mqi.model.queue.ProductionEvent;
 import esa.s1pdgs.cpoc.mqi.server.GenericKafkaUtils;
 import esa.s1pdgs.cpoc.mqi.server.config.KafkaProperties;
+import esa.s1pdgs.cpoc.mqi.server.service.MessagePersistence;
 import esa.s1pdgs.cpoc.mqi.server.service.OtherApplicationService;
 import esa.s1pdgs.cpoc.mqi.server.test.DataUtils;
 
@@ -93,7 +92,7 @@ public class TestHandlingOfInvalidQueueElementsIT {
     private AppStatus appStatus;
 
     @Mock
-    private AppCatalogMqiService service;
+    private MessagePersistence messagePersistence;
 
     @Mock
     private OtherApplicationService otherService;
@@ -114,9 +113,6 @@ public class TestHandlingOfInvalidQueueElementsIT {
         m3.setState(MessageState.SEND);
         m3.setSendingPod("other-host");
 
-        doReturn(m1, m2, m3).when(service)
-                .read(Mockito.any() ,Mockito.anyString(), Mockito.anyInt(), Mockito.anyLong(), Mockito.any());
-        
         elements = new LinkedBlockingQueue<>();
         
         final MessageConsumer<ProductionEvent> messageConsumer = new MessageConsumer<ProductionEvent>() {		
@@ -126,7 +122,7 @@ public class TestHandlingOfInvalidQueueElementsIT {
 			}
 		};
         
-		uut = new GenericConsumer.Factory(properties,service,otherService,appStatus)
+		uut = new GenericConsumer.Factory(properties, messagePersistence,otherService,appStatus)
 				.newConsumerFor(ProductCategory.AUXILIARY_FILES, 100, GenericKafkaUtils.TOPIC_AUXILIARY_FILES, messageConsumer);
 	
 		uut.start();

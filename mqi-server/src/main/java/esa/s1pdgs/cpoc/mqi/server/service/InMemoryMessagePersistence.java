@@ -1,10 +1,12 @@
 package esa.s1pdgs.cpoc.mqi.server.service;
 
+import static java.util.Comparator.comparing;
+
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
-import java.util.Queue;
-import java.util.concurrent.ConcurrentLinkedDeque;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.stream.Collectors;
 
@@ -15,7 +17,6 @@ import esa.s1pdgs.cpoc.appcatalog.rest.AppCatMessageDto;
 import esa.s1pdgs.cpoc.appcatalog.rest.AppCatReadMessageDto;
 import esa.s1pdgs.cpoc.appcatalog.rest.AppCatSendMessageDto;
 import esa.s1pdgs.cpoc.common.ProductCategory;
-import esa.s1pdgs.cpoc.common.errors.AbstractCodedException;
 import esa.s1pdgs.cpoc.mqi.model.queue.AbstractMessage;
 import esa.s1pdgs.cpoc.mqi.model.rest.Ack;
 import esa.s1pdgs.cpoc.mqi.server.config.KafkaProperties;
@@ -23,13 +24,15 @@ import esa.s1pdgs.cpoc.mqi.server.config.KafkaProperties;
 public class InMemoryMessagePersistence<T extends AbstractMessage> implements MessagePersistence<T> {
 
     private final AtomicLong sequence = new AtomicLong(0);
-    private final Queue<MessageAndAcknowledgement<T>> messages = new ConcurrentLinkedDeque<>();
+    private final List<MessageAndAcknowledgement<T>> messages = Collections.synchronizedList(new ArrayList<>());
     private final KafkaProperties properties;
     private final ProductCategory category;
+    private final int defaultOffset;
 
-    public InMemoryMessagePersistence(final KafkaProperties properties, final ProductCategory category) {
+    public InMemoryMessagePersistence(final KafkaProperties properties, final ProductCategory category, int defaultOffset) {
         this.properties = properties;
         this.category = category;
+        this.defaultOffset = defaultOffset;
     }
 
     @Override
@@ -46,6 +49,7 @@ public class InMemoryMessagePersistence<T extends AbstractMessage> implements Me
         newEntry.setDto(body.getDto());
         newEntry.setGroup(body.getGroup());
         newEntry.setReadingPod(body.getPod()); //readingPod = body.getPod (see esa.s1pdgs.cpoc.appcatalog.server.service.MessageManager.insertOrUpdate)
+        newEntry.setLastReadDate(new Date());
         //TODO any else fields to set?
         messages.add(new MessageAndAcknowledgement<>(newEntry, acknowledgment));
 
@@ -62,7 +66,11 @@ public class InMemoryMessagePersistence<T extends AbstractMessage> implements Me
 
     @Override
     public boolean send(ProductCategory category, long messageId, AppCatSendMessageDto body) {
-        get(category, messageId); //just check for existence;
+        final AppCatMessageDto<T> messageDto = get(category, messageId);
+
+        synchronized (messageDto) {
+            messageDto.setLastReadDate(new Date());
+        }
 
         return true; //always true, we don't check double messages here
     }
@@ -72,7 +80,7 @@ public class InMemoryMessagePersistence<T extends AbstractMessage> implements Me
 
         final Optional<MessageAndAcknowledgement<T>> messageDto = getInternal(messageId);
 
-        if(!messageDto.isPresent()) {
+        if (!messageDto.isPresent()) {
             return false;
         }
 
@@ -92,7 +100,7 @@ public class InMemoryMessagePersistence<T extends AbstractMessage> implements Me
     }
 
     private MessageAndAcknowledgement<T> getInternalOrThrow(long messageId) {
-        final Optional<MessageAndAcknowledgement<T>> message =getInternal(messageId);
+        final Optional<MessageAndAcknowledgement<T>> message = getInternal(messageId);
 
         if (!message.isPresent()) {
             throw new IllegalArgumentException("message with id " + messageId + " not found");
@@ -108,7 +116,17 @@ public class InMemoryMessagePersistence<T extends AbstractMessage> implements Me
 
     @Override
     public long getEarliestOffset(String topic, int partition, String group) {
-        return 0;
+
+        final Optional<MessageAndAcknowledgement<T>> earliestMessage = messages.stream()
+                .filter(m -> m.message.getTopic().equals(topic) && m.message.getPartition() == partition && m.message.getGroup().equals(group))
+                .sorted(comparing(a -> a.message.getLastReadDate()))
+                .findFirst();
+
+        if (!earliestMessage.isPresent()) {
+            return defaultOffset;
+        }
+
+        return earliestMessage.get().message.getOffset();
     }
 
     private static class MessageAndAcknowledgement<T> {
