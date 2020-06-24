@@ -186,10 +186,7 @@ public class MetadataClient {
 		if (polarisation != null) {
 			builder.queryParam("polarisation", polarisation);
 		}
-		
-		URI targetUri = builder.build().toUri();
-		LOGGER.info("Target URI for family '{}' and product type '{}': {}", query.getProductFamily(), query.getProductType(), targetUri);
-		ResponseEntity<List<SearchMetadata>> response = query(targetUri,
+		ResponseEntity<List<SearchMetadata>> response = query(builder.build().toUri(),
 				new ParameterizedTypeReference<List<SearchMetadata>>() {
 				});
 
