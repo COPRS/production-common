@@ -1,5 +1,12 @@
 package esa.s1pdgs.cpoc.mqi.server.config;
 
+import static esa.s1pdgs.cpoc.mqi.server.config.MessagePersistenceStrategy.APP_CATALOG_MESSAGE_PERSISTENCE;
+import static esa.s1pdgs.cpoc.mqi.server.config.MessagePersistenceStrategy.IN_MEMORY_MESSAGE_PERSISTENCE;
+
+import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.web.client.RestTemplateBuilder;
@@ -7,6 +14,12 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 import esa.s1pdgs.cpoc.appcatalog.client.mqi.AppCatalogMqiService;
+import esa.s1pdgs.cpoc.common.ProductCategory;
+import esa.s1pdgs.cpoc.mqi.server.consumption.kafka.consumer.GenericConsumer;
+import esa.s1pdgs.cpoc.mqi.server.consumption.kafka.consumer.MessageConsumer;
+import esa.s1pdgs.cpoc.mqi.server.service.AppCatalogMessagePersistence;
+import esa.s1pdgs.cpoc.mqi.server.service.InMemoryMessagePersistence;
+import esa.s1pdgs.cpoc.mqi.server.service.MessagePersistence;
 import esa.s1pdgs.cpoc.mqi.server.service.OtherApplicationService;
 
 /**
@@ -18,6 +31,11 @@ import esa.s1pdgs.cpoc.mqi.server.service.OtherApplicationService;
 @Configuration
 public class PersistenceConfiguration {
 
+	final static List<MessagePersistenceStrategy> SUPPORTED_MESSAGE_PERSISTENCE_STRATEGIES =
+			Stream.of(MessagePersistenceStrategy.values()).collect(Collectors.toList());
+	
+	private final String messagePersistenceStrategy;
+	
     /**
      * Host URI for the applicative catalog
      */
@@ -52,11 +70,13 @@ public class PersistenceConfiguration {
      */
     @Autowired
     public PersistenceConfiguration(
+    		@Value("${persistence.message-persistence-strategy:AppCatalogMessagePersistence}") final String messagePersistenceStrategy,
             @Value("${persistence.host-uri-catalog}") final String hostUriCatalog,
             @Value("${persistence.port-uri-other-app}") final String portUriOtherApp,
             @Value("${persistence.max-retries}") final int maxRetries,
             @Value("${persistence.tempo-retry-ms}") final int tempoRetryMs,
             @Value("${persistence.other-app.suffix-uri}") final String suffixUriOtherApp) {
+    	this.messagePersistenceStrategy = messagePersistenceStrategy;
         this.hostUriCatalog = hostUriCatalog;
         this.maxRetries = maxRetries;
         this.tempoRetryMs = tempoRetryMs;
@@ -64,6 +84,22 @@ public class PersistenceConfiguration {
         this.suffixUriOtherApp = suffixUriOtherApp;
     }
 
+//    @Bean
+//    public MessagePersistence messagePersistence(final RestTemplateBuilder builder) {
+//    	final KafkaProperties properties = null;
+//    	final ProductCategory category = null;
+//    	if (APP_CATALOG_MESSAGE_PERSISTENCE.getValue().equals(messagePersistenceStrategy)) {
+//            final MessageConsumer<T> additionalConsumer = null;
+//            final GenericConsumer<T> genericConsumer = null;
+//            final OtherApplicationService otherAppService = checkProcessingOtherApp(builder);
+//    		return new AppCatalogMessagePersistence(properties, additionalConsumer, genericConsumer, otherAppService);
+//    	} else if  (IN_MEMORY_MESSAGE_PERSISTENCE.getValue().equals(messagePersistenceStrategy)) {
+//    		return new InMemoryMessagePersistence(properties, category);
+//    	} else {
+//    		throw new IllegalArgumentException(String.format("Unknown message persistence strategy %s. Available are %s.", messagePersistenceStrategy, SUPPORTED_MESSAGE_PERSISTENCE_STRATEGIES);
+//    	}
+//    }
+    
     /**
      * Service for querying MQI for LEVEL_PRODUCT category
      * 
