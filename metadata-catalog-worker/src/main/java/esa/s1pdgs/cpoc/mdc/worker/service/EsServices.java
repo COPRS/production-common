@@ -66,6 +66,7 @@ import esa.s1pdgs.cpoc.metadata.model.SearchMetadata;
 public class EsServices {
 
 	private static final String REQUIRED_INSTRUMENT_ID_PATTERN = "(aux_pp1|aux_pp2|aux_cal|aux_ins)";
+	private static final String REQUIRED_SATELLITE_ID_PATTERN = "(aux_ece)";
 
 	/**
 	 * Logger
@@ -346,10 +347,10 @@ public class EsServices {
 		final LocalDateTime cTime = calculateCentreTime(beginDate, endDate);
 		final String centreTime = DateUtils.formatToMetadataDateTimeFormat(cTime);
 
-		final SearchRequest beforeRequest = newQueryFor(productType, productFamily, instrumentConfId, processMode,
+		final SearchRequest beforeRequest = newQueryFor(productType, productFamily, satelliteId, instrumentConfId, processMode,
 				QueryBuilders.rangeQuery("validityStartTime").lt(centreTime),
 				new FieldSortBuilder("validityStartTime").order(SortOrder.DESC), "NONE");
-		final SearchRequest afterRequest = newQueryFor(productType, productFamily, instrumentConfId, processMode,
+		final SearchRequest afterRequest = newQueryFor(productType, productFamily, satelliteId, instrumentConfId, processMode,
 				QueryBuilders.rangeQuery("validityStartTime").gte(centreTime),
 				new FieldSortBuilder("validityStartTime").order(SortOrder.ASC), "NONE");
 		try {
@@ -408,12 +409,16 @@ public class EsServices {
 		return r;
 	}
 
-	private SearchRequest newQueryFor(final String productType, final ProductFamily productFamily, final int instrumentConfId,
+	private SearchRequest newQueryFor(final String productType, final ProductFamily productFamily, final String satelliteId, final int instrumentConfId,
 			final String processMode, final RangeQueryBuilder rangeQueryBuilder, final FieldSortBuilder sortOrder, final String polarisation)
 			throws InternalErrorException {
 		final ProductCategory category = ProductCategory.of(productFamily);
 		final SearchSourceBuilder sourceBuilder = new SearchSourceBuilder();
 		BoolQueryBuilder queryBuilder = QueryBuilders.boolQuery().must(rangeQueryBuilder);
+
+		if (productType.toLowerCase().matches(REQUIRED_SATELLITE_ID_PATTERN)) {
+			queryBuilder = queryBuilder.must(satelliteId(satelliteId));
+		}
 
 		if (category == ProductCategory.LEVEL_PRODUCTS || category == ProductCategory.LEVEL_SEGMENTS) {
 			queryBuilder = queryBuilder.must(QueryBuilders.regexpQuery("productType.keyword", productType));
@@ -466,10 +471,10 @@ public class EsServices {
 		final LocalDateTime cTime = calculateCentreTime(beginDate, endDate);
 		final String centreTime = DateUtils.formatToMetadataDateTimeFormat(cTime);
 
-		final SearchRequest beforeRequest = newQueryFor(productType, productFamily, instrumentConfId, processMode,
+		final SearchRequest beforeRequest = newQueryFor(productType, productFamily, satelliteId, instrumentConfId, processMode,
 				QueryBuilders.rangeQuery("validityStopTime").lt(centreTime),
 				new FieldSortBuilder("validityStopTime").order(SortOrder.DESC), polarisation);
-		final SearchRequest afterRequest = newQueryFor(productType, productFamily, instrumentConfId, processMode,
+		final SearchRequest afterRequest = newQueryFor(productType, productFamily, satelliteId, instrumentConfId, processMode,
 				QueryBuilders.rangeQuery("validityStopTime").gte(centreTime),
 				new FieldSortBuilder("validityStopTime").order(SortOrder.ASC), polarisation);
 		try {
