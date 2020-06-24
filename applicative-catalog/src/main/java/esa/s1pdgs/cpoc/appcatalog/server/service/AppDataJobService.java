@@ -19,88 +19,31 @@ import esa.s1pdgs.cpoc.appcatalog.server.job.exception.AppCatalogJobGenerationNo
 import esa.s1pdgs.cpoc.appcatalog.server.job.exception.AppCatalogJobGenerationTerminatedException;
 import esa.s1pdgs.cpoc.appcatalog.server.job.exception.AppCatalogJobNotFoundException;
 import esa.s1pdgs.cpoc.appcatalog.server.sequence.db.SequenceDao;
-import esa.s1pdgs.cpoc.common.ProductCategory;
 import esa.s1pdgs.cpoc.common.filter.FilterCriterion;
+import esa.s1pdgs.cpoc.mqi.model.queue.CatalogEvent;
+import esa.s1pdgs.cpoc.mqi.model.rest.GenericMessageDto;
 
 /**
  * @author Viveris Technologies
  */
 @Service
 public class AppDataJobService {
-
-    /**
-     * Key used for generating identifiers
-     */
     public static final String JOB_SEQ_KEY = "appDataJob";
-
-    /**
-     * Dao for job
-     */
+    
     private final AppDataJobRepository appDataJobDao;
-
-    /**
-     * Dao for sequence
-     */
     private final SequenceDao sequenceDao;
 
-    /**
-     * Constructor for the Services
-     * 
-     * @param mongoDBDAO
-     */
     @Autowired
-    public AppDataJobService(final AppDataJobRepository appDataJobDao,
-            final SequenceDao sequenceDao) {
+    public AppDataJobService(
+    		final AppDataJobRepository appDataJobDao,
+            final SequenceDao sequenceDao
+    ) {
         this.appDataJobDao = appDataJobDao;
         this.sequenceDao = sequenceDao;
     }
-
-    /**
-     * Search for jobs
-     * 
-     * @param filters
-     * @return
-     */
-    public List<AppDataJob> search(final List<FilterCriterion> filters, final Sort sort) {
-        return appDataJobDao.search(filters, sort);
-    }
-
-    /**
-     * @param state
-     * @param category
-     * @param lastUpdateDate
-     * @return
-     */
-    public List<AppDataJob> findByStateAndCategoryAndLastUpdateDateLessThan(
-            final AppDataJobState state, final ProductCategory category,
-            final Date lastUpdateDate) {
-        return appDataJobDao.findByStateAndCategoryAndLastUpdateDateLessThan(
-                state, category, lastUpdateDate);
-    }
-
-    /**
-     * Get a job from its identifier
-     * 
-     * @param identifier
-     * @return
-     * @throws AppCatalogJobNotFoundException
-     */
-    public AppDataJob getJob(final Long identifier)
-            throws AppCatalogJobNotFoundException {
-        return appDataJobDao.findById(identifier).orElseThrow(
-                () -> new AppCatalogJobNotFoundException(identifier));
-    }
-
-    /**
-     * Create a job
-     * 
-     * @param newJob
-     * @return
-     */
+    
     public AppDataJob newJob(final AppDataJob newJob) {
-        // Check new job format TODO
         final long sequence = sequenceDao.getNextSequenceId(JOB_SEQ_KEY);
-        // Save it
         newJob.setId(sequence);
         newJob.setState(AppDataJobState.WAITING);
         newJob.setCreationDate(new Date());
@@ -108,13 +51,31 @@ public class AppDataJobService {
         return appDataJobDao.save(newJob);
     }
 
-    /**
-     * Delete a job
-     * 
-     * @param jobId
-     */
+    public AppDataJob getJob(final Long identifier) throws AppCatalogJobNotFoundException {
+        return appDataJobDao.findById(identifier).orElseThrow(
+                () -> new AppCatalogJobNotFoundException(identifier));
+    }
+
+    public List<AppDataJob> search(final List<FilterCriterion> filters, final Sort sort) {
+        return appDataJobDao.search(filters, sort);
+    }
+
+    public List<AppDataJob> findByStateAndLastUpdateDateLessThan(
+    		final AppDataJobState state, 
+            final Date lastUpdateDate
+    ) {
+        return appDataJobDao.findByStateAndLastUpdateDateLessThan(state, lastUpdateDate);
+    }
+
     public void deleteJob(final Long jobId) {
         appDataJobDao.deleteById(jobId);
+    }
+    
+    public AppDataJob addMessageToJob(final Long jobId, final GenericMessageDto<CatalogEvent> mess)
+    		throws AppCatalogJobNotFoundException {
+        final AppDataJob jobDb = getJob(jobId);
+        jobDb.getMessages().add(mess);
+        return appDataJobDao.save(jobDb);
     }
 
     /**
@@ -126,11 +87,9 @@ public class AppDataJobService {
      * @return
      * @throws AppCatalogJobNotFoundException
      */
-    public AppDataJob patchJob(final Long jobId, final AppDataJob patchJob)
-            throws AppCatalogJobNotFoundException {
+    public AppDataJob patchJob(final Long jobId, final AppDataJob patchJob) throws AppCatalogJobNotFoundException {
         // Find if job exists
-        final AppDataJob jobDb = appDataJobDao.findById(jobId)
-                .orElseThrow(() -> new AppCatalogJobNotFoundException(jobId));
+        final AppDataJob jobDb = getJob(jobId);
 
         boolean update = true;
 

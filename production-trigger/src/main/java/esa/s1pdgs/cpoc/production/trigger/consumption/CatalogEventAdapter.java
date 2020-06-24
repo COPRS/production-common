@@ -1,8 +1,9 @@
-package esa.s1pdgs.cpoc.production.trigger.service;
+package esa.s1pdgs.cpoc.production.trigger.consumption;
 
 import java.util.List;
 
 import esa.s1pdgs.cpoc.mqi.model.queue.CatalogEvent;
+import esa.s1pdgs.cpoc.mqi.model.rest.GenericMessageDto;
 
 public final class CatalogEventAdapter {
 
@@ -10,6 +11,10 @@ public final class CatalogEventAdapter {
 
 	public CatalogEventAdapter(final CatalogEvent event) {
 		this.event = event;
+	}
+	
+	public static final CatalogEventAdapter of(final GenericMessageDto<CatalogEvent> mqiMessage) {
+		return new CatalogEventAdapter(mqiMessage.getBody());
 	}
 	
 	public final String sessionId() {

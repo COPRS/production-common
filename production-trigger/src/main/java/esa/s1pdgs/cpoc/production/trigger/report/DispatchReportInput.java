@@ -4,7 +4,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 import esa.s1pdgs.cpoc.common.ProductFamily;
-import esa.s1pdgs.cpoc.production.trigger.service.L0SegmentConsumer;
+import esa.s1pdgs.cpoc.production.trigger.consumption.L0SegmentConsumer;
 import esa.s1pdgs.cpoc.report.ReportingFilenameEntries;
 import esa.s1pdgs.cpoc.report.ReportingFilenameEntry;
 import esa.s1pdgs.cpoc.report.ReportingInput;

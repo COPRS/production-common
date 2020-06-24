@@ -17,7 +17,8 @@ import esa.s1pdgs.cpoc.common.filter.FilterCriterion;
 
 @Repository
 public class AppDataJobRepositoryImpl implements AppDataJobRepositoryCustom {
-
+	
+	
     private final MongoTemplate mongoTemplate;
 
     @Autowired
@@ -79,7 +80,5 @@ public class AppDataJobRepositoryImpl implements AppDataJobRepositoryCustom {
         update.set("generations.$.nbErrors", newGeneration.getNbErrors());
         mongoTemplate.updateFirst(query, update, AppDataJob.class);
         return mongoTemplate.findOne(query, AppDataJob.class);
-
     }
-
 }

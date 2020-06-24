@@ -1,6 +1,7 @@
 package esa.s1pdgs.cpoc.production.trigger.config;
 
-import java.util.Arrays;
+import java.util.LinkedHashMap;
+import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.web.client.RestTemplateBuilder;
@@ -15,13 +16,22 @@ import esa.s1pdgs.cpoc.errorrepo.ErrorRepoAppender;
 import esa.s1pdgs.cpoc.metadata.client.MetadataClient;
 import esa.s1pdgs.cpoc.mqi.client.GenericMqiClient;
 import esa.s1pdgs.cpoc.mqi.model.queue.CatalogEvent;
-import esa.s1pdgs.cpoc.production.trigger.service.AbstractGenericConsumer;
-import esa.s1pdgs.cpoc.production.trigger.service.EdrsSessionConsumer;
-import esa.s1pdgs.cpoc.production.trigger.service.L0SegmentConsumer;
-import esa.s1pdgs.cpoc.production.trigger.service.L0SliceConsumer;
+import esa.s1pdgs.cpoc.production.trigger.appcat.AppCatAdapter;
+import esa.s1pdgs.cpoc.production.trigger.consumption.EdrsSessionConsumer;
+import esa.s1pdgs.cpoc.production.trigger.consumption.L0SegmentConsumer;
+import esa.s1pdgs.cpoc.production.trigger.consumption.L0SliceConsumer;
+import esa.s1pdgs.cpoc.production.trigger.consumption.ProductTypeConsumptionHandler;
+import esa.s1pdgs.cpoc.production.trigger.service.GenericConsumer;
 
 @Configuration
 public class TriggerConfig {	
+	private static final Map<ProductCategory, ProductTypeConsumptionHandler> CONSUMPTION_HANDLER_FOR_CATEGORY = new LinkedHashMap<>();
+	static {
+		CONSUMPTION_HANDLER_FOR_CATEGORY.put(ProductCategory.EDRS_SESSIONS,  new EdrsSessionConsumer());
+		CONSUMPTION_HANDLER_FOR_CATEGORY.put(ProductCategory.LEVEL_SEGMENTS,  new L0SegmentConsumer());
+		CONSUMPTION_HANDLER_FOR_CATEGORY.put(ProductCategory.LEVEL_PRODUCTS,  new L0SliceConsumer());
+	}
+	
 	private final AppCatalogConfigurationProperties properties;
 	private final RestTemplate restTemplate;
 	private final ProcessSettings processSettings; 
@@ -50,57 +60,39 @@ public class TriggerConfig {
 				.setConnectTimeout(properties.getTmConnectMs())
 				.build();
 	}
-
+		
 	@Bean
-	public AbstractGenericConsumer<?> newConsumer() {
+	private final ProductTypeConsumptionHandler newProductTypeConsumptionHandler() {		
+		final ProductTypeConsumptionHandler res = CONSUMPTION_HANDLER_FOR_CATEGORY.get(processSettings.getCategory());
+		
+		if (res == null) {
+			throw new IllegalStateException(
+					String.format(
+							"Invalid category %s, configured are: %s", 
+							processSettings.getCategory(),
+							CONSUMPTION_HANDLER_FOR_CATEGORY.keySet()
+					)
+			);
+		}
+		return res;
+	}
+
+	@Bean	
+	public GenericConsumer newConsumer(@Autowired final ProductTypeConsumptionHandler handler) {		
 		final AppCatalogJobClient<CatalogEvent> appCatClient = new AppCatalogJobClient<>(
 				restTemplate, 
 				properties.getHostUri(), 
 				properties.getMaxRetries(), 
-				properties.getTempoRetryMs(), 
-				ProductCategory.CATALOG_EVENT
+				properties.getTempoRetryMs()
+		);		
+		return new GenericConsumer(
+				processSettings, 
+				mqiService, 
+				new AppCatAdapter(appCatClient), 
+				appStatus, 
+				errorRepoAppender, 
+				metadataClient, 
+				handler
 		);
-		
-		switch (processSettings.getCategory()) {
-			case EDRS_SESSIONS:
-				return new EdrsSessionConsumer(
-						processSettings, 
-						mqiService, 
-						appCatClient,
-						errorRepoAppender, 
-						appStatus, 
-						metadataClient
-				);
-			case LEVEL_SEGMENTS:
-				return new L0SegmentConsumer(
-						processSettings, 
-						mqiService, 
-						appCatClient,
-						errorRepoAppender, 
-						appStatus, 
-						metadataClient
-				);
-			case LEVEL_PRODUCTS:
-				return new L0SliceConsumer(
-						processSettings, 
-						mqiService, 
-						appCatClient,
-						errorRepoAppender, 
-						appStatus,
-						metadataClient
-				);
-			default:
-				throw new IllegalStateException(
-						String.format(
-								"Invalid category %s, configured are: %s", 
-								processSettings.getCategory(),
-								Arrays.asList(
-										ProductCategory.EDRS_SESSIONS, 
-										ProductCategory.LEVEL_SEGMENTS,
-										ProductCategory.LEVEL_PRODUCTS
-								)
-						)
-				);
-		}
 	}
 }

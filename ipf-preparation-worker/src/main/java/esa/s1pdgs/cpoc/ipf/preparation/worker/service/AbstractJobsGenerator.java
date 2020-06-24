@@ -312,7 +312,7 @@ public abstract class AbstractJobsGenerator implements Runnable {
 		try {
 			this.preSearch(job);
 			@SuppressWarnings("unchecked")
-			final AppDataJob<CatalogEvent> modifiedJob = appDataService.patchJob(job.getAppDataJob().getId(),
+			final AppDataJob modifiedJob = appDataService.patchJob(job.getAppDataJob().getId(),
 					job.getAppDataJob(), false, true, false);
 			job.setAppDataJob(modifiedJob);
 			return job;

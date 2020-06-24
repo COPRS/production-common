@@ -163,9 +163,7 @@ public class JobController {
      * @throws JsonParseException 
      */
     @RequestMapping(method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE, path = "/jobs")
-    public AppDataJob newJob(@RequestBody final AppDataJob newJob)
-            throws AppCatalogJobInvalidStateException,
-            AppCatalogJobGenerationInvalidStateException, IOException {  	
+    public AppDataJob newJob(@RequestBody final AppDataJob newJob){  	
     	LOGGER.debug ("== newJob {}",newJob.toString());
     	// Create it
     	final AppDataJob jobResult = appDataJobService.newJob(newJob);
@@ -173,7 +171,15 @@ public class JobController {
 
         return jobResult;
     }
-
+//    
+//    @RequestMapping(method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE, path = "/jobs/{jobId}/mess")
+//    public AppDataJob addMessage(
+//    		@PathVariable(name = "jobId") final Long jobId,
+//    		@RequestBody final GenericMessageDto<CatalogEvent> mess
+//    ) throws AppCatalogJobNotFoundException { 
+//        return appDataJobService.addMessageToJob(jobId, mess);
+//    }
+    
     /**
      * Delete a job
      * 

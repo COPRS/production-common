@@ -1,6 +1,7 @@
 package esa.s1pdgs.cpoc.production.trigger.service;
 
 import java.util.Date;
+import java.util.Optional;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.regex.Pattern;
@@ -11,7 +12,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import esa.s1pdgs.cpoc.appcatalog.AppDataJob;
-import esa.s1pdgs.cpoc.appcatalog.client.job.AppCatalogJobClient;
+import esa.s1pdgs.cpoc.appcatalog.AppDataJobState;
 import esa.s1pdgs.cpoc.appstatus.AppStatus;
 import esa.s1pdgs.cpoc.common.EdrsSessionFileType;
 import esa.s1pdgs.cpoc.common.ProductCategory;
@@ -24,12 +25,14 @@ import esa.s1pdgs.cpoc.metadata.client.MetadataClient;
 import esa.s1pdgs.cpoc.mqi.client.GenericMqiClient;
 import esa.s1pdgs.cpoc.mqi.client.MqiConsumer;
 import esa.s1pdgs.cpoc.mqi.client.MqiListener;
-import esa.s1pdgs.cpoc.mqi.model.queue.AbstractMessage;
 import esa.s1pdgs.cpoc.mqi.model.queue.CatalogEvent;
 import esa.s1pdgs.cpoc.mqi.model.queue.IpfPreparationJob;
 import esa.s1pdgs.cpoc.mqi.model.rest.GenericMessageDto;
 import esa.s1pdgs.cpoc.mqi.model.rest.GenericPublicationMessageDto;
+import esa.s1pdgs.cpoc.production.trigger.appcat.AppCatAdapter;
 import esa.s1pdgs.cpoc.production.trigger.config.ProcessSettings;
+import esa.s1pdgs.cpoc.production.trigger.consumption.CatalogEventAdapter;
+import esa.s1pdgs.cpoc.production.trigger.consumption.ProductTypeConsumptionHandler;
 import esa.s1pdgs.cpoc.production.trigger.report.DispatchReportInput;
 import esa.s1pdgs.cpoc.production.trigger.report.SeaCoverageCheckReportingOutput;
 import esa.s1pdgs.cpoc.report.Reporting;
@@ -37,29 +40,31 @@ import esa.s1pdgs.cpoc.report.ReportingFactory;
 import esa.s1pdgs.cpoc.report.ReportingMessage;
 import esa.s1pdgs.cpoc.report.ReportingUtils;
 
-public abstract class AbstractGenericConsumer<T extends AbstractMessage> implements MqiListener<CatalogEvent> {
-    protected static final Logger LOGGER = LogManager.getLogger(AbstractGenericConsumer.class);
+public class GenericConsumer implements MqiListener<CatalogEvent> {
+    static final Logger LOGGER = LogManager.getLogger(GenericConsumer.class);
     
-    protected final ProcessSettings processSettings;
-    protected final AppCatalogJobClient<CatalogEvent> appDataService;    
+    private final ProcessSettings processSettings;
+    private final AppCatAdapter appCat;
     private final GenericMqiClient mqiClient;
     private final AppStatus appStatus;    
     private final ErrorRepoAppender errorRepoAppender;    
     private final Pattern blackList;    
     private final Pattern seaCoverageCheckPattern;    
     private final MetadataClient metadataClient;
-
-    public AbstractGenericConsumer(
+    private final ProductTypeConsumptionHandler consumptionHandler;
+    
+    public GenericConsumer(
             final ProcessSettings processSettings,
             final GenericMqiClient mqiService,
-            final AppCatalogJobClient<CatalogEvent> appDataService,
+            final AppCatAdapter appCat,
             final AppStatus appStatus,
             final ErrorRepoAppender errorRepoAppender,
-            final MetadataClient metadataClient
+            final MetadataClient metadataClient,
+            final ProductTypeConsumptionHandler consumptionHandler
     ) {
         this.processSettings = processSettings;
         this.mqiClient = mqiService;
-        this.appDataService = appDataService;
+        this.appCat = appCat;
         this.appStatus = appStatus;
         this.errorRepoAppender = errorRepoAppender;
         this.blackList = (processSettings.getBlacklistPattern() == null) ? 
@@ -67,14 +72,22 @@ public abstract class AbstractGenericConsumer<T extends AbstractMessage> impleme
         		Pattern.compile(processSettings.getBlacklistPattern(), Pattern.CASE_INSENSITIVE);
 		this.seaCoverageCheckPattern = Pattern.compile(processSettings.getSeaCoverageCheckPattern());
 		this.metadataClient = metadataClient;
+		this.consumptionHandler = consumptionHandler;
     }
-    
+
 	@PostConstruct
 	public void initService() {
 		appStatus.setWaiting();
 		if (processSettings.getFixedDelayMs() > 0) {
 			final ExecutorService service = Executors.newFixedThreadPool(1);
-			service.execute(newMqiConsumer());
+			service.execute(new MqiConsumer<CatalogEvent>(
+	    			mqiClient, 
+	    			ProductCategory.CATALOG_EVENT, 
+	    			this, 
+	    			processSettings.getFixedDelayMs(),
+					processSettings.getInitialDelayMs(), 
+					appStatus
+			));
 		}
 	} 
 
@@ -86,41 +99,38 @@ public abstract class AbstractGenericConsumer<T extends AbstractMessage> impleme
         final Reporting reporting = ReportingUtils.newReportingBuilder()
         		.predecessor(event.getUid())
         		.newReporting("ProductionTrigger");
-
-        reporting.begin(
-        		ReportingUtils.newFilenameReportingInputFor(event.getProductFamily(), productName),
-        		new ReportingMessage("Received CatalogEvent for %s", productName)
-        );
+        
+        LOGGER.debug("Handling consumption of product {}", productName);
         try {
-            if (shallBeSkipped(event, reporting)) {
-            	return;
+            reporting.begin(
+            		ReportingUtils.newFilenameReportingInputFor(event.getProductFamily(), productName),
+            		new ReportingMessage("Received CatalogEvent for %s", productName)
+            );  
+            if (!shallBeSkipped(event, reporting)) {                   
+                final AppDataJob appDataJob = buildJob(mqiMessage, productName);        
+                LOGGER.trace("== appDataJob(1) {}", appDataJob.toString());
+            	
+            	if (consumptionHandler.isReady(appDataJob, productName)) {
+                    LOGGER.info("Dispatching {} product {}", consumptionHandler.type(), productName);
+                    dispatch(mqiMessage, appDataJob, productName, consumptionHandler.type(), reporting);
+                    reporting.end(new ReportingMessage("IpfPreparationJob for product %s created", productName));  
+                    return;
+            	}    
+            	else {
+            		LOGGER.debug("Job {} for {} not ready yet",appDataJob.getId(), productName);
+            	}
             }
-            LOGGER.debug("Handling consumption of product {}", productName);
-
-            final AppDataJob<CatalogEvent> appDataJob = dispatch(mqiMessage, reporting);
-            
-        	final IpfPreparationJob job = new IpfPreparationJob();
-        	job.setProductFamily(event.getProductFamily());
-        	job.setAppDataJob(appDataJob);
-        	job.setUid(reporting.getUid());
-        	
-        	final GenericPublicationMessageDto<IpfPreparationJob> messageDto = new GenericPublicationMessageDto<IpfPreparationJob>(
-        			appDataJob.getId(), 
-        			event.getProductFamily(), 
-        			job
-        	);
-        	messageDto.setInputKey(mqiMessage.getInputKey());
-        	messageDto.setOutputKey(event.getProductFamily().name());
-        	mqiClient.publish(messageDto, ProductCategory.PREPARATION_JOBS);  
-        	        	
-            reporting.end(new ReportingMessage("IpfPreparationJob for product %s created", productName));            
+            else {
+            	LOGGER.debug("CatalogEvent for {} is ignored", productName);
+            }
+            reporting.end(new ReportingMessage("No action for CatalogEvent for product %s", productName)); 
             LOGGER.debug("Done handling consumption of product {}", productName);
         } catch (final Exception e) {        	
         	reporting.error(new ReportingMessage("Error on handling CatalogEvent: %s", LogUtils.toString(e)));
         	throw e;
         }
     }       
-    
+
 	@Override
 	public final void onTerminalError(final GenericMessageDto<CatalogEvent> message, final Exception error) {
         LOGGER.error(error);
@@ -129,12 +139,73 @@ public abstract class AbstractGenericConsumer<T extends AbstractMessage> impleme
         );
 	}
 	
-	protected final AppDataJob<CatalogEvent> patchJob(
-			final AppDataJob<CatalogEvent> appDataJob,
+
+	private final boolean updatePodNameIfRequired(final AppDataJob job) throws AbstractCodedException {
+        if (!job.getPod().equals(processSettings.getHostname())) {
+    		LOGGER.debug("Updating pod name of job {} to {} (was {})", job.getId(), 
+    				processSettings.getHostname(), job.getPod());
+        	job.setPod(processSettings.getHostname());  
+        	return true;
+        }
+		return false;
+	}
+
+	
+	private final AppDataJob buildJob(final GenericMessageDto<CatalogEvent> mqiMessage, final String productName) 
+			throws AbstractCodedException {
+		final Optional<AppDataJob> result = appCat.findJobFor(mqiMessage); 
+		
+		// there is already a job for this message --> possible restart scenario --> just update the pod name 
+		if (result.isPresent()) {		
+			final AppDataJob job = result.get();
+			if (updatePodNameIfRequired(job))
+			{		
+				return appCat.update(job);
+			}		
+			LOGGER.debug("Found job {} already associated to mqiMessage {}. Ignoring new message ...",
+					job.getId(), mqiMessage.getId());
+			return job;  		
+		}
+		
+    	final CatalogEventAdapter eventAdapter = CatalogEventAdapter.of(mqiMessage);
+    	final Optional<AppDataJob> specificJob = consumptionHandler.findAssociatedJobFor(appCat, eventAdapter);
+    	
+    	// no job yet associated to this message --> create job and persist
+    	if (!specificJob.isPresent()) {
+            final AppDataJob job = newJobFor(mqiMessage);
+            
+            if (LOGGER.isTraceEnabled()) {
+            	LOGGER.trace("Created new {} for {}", job, mqiMessage);
+            }
+            else {
+            	LOGGER.debug("Created new appDataJob {} for mqiMessage {}", job.getId(), mqiMessage.getId());
+            }
+            return job;
+    	}
+    	
+    	// job already exists? --> merge new message into job
+    	final AppDataJob job = specificJob.get();
+    	
+    	boolean hasChanged = updatePodNameIfRequired(job);
+    	hasChanged |= consumptionHandler.mergeMessageInto(mqiMessage, job);
+    	
+    	// evaluate both and if either or both of the calls indicate a change, update in DB
+    	if (hasChanged) {
+    		LOGGER.debug("Updating appDataJob {} for mqiMessage {}", job.getId(), mqiMessage.getId());
+    		return appCat.update(job);
+    	}    	
+    	return job;
+	}
+	
+	private final void dispatch(
+			final GenericMessageDto<CatalogEvent> mqiMessage,
+			final AppDataJob appDataJob,
 			final String productName,
 			final String type,
 			final ReportingFactory reportingFactory
 	) throws AbstractCodedException {
+        final CatalogEvent event = mqiMessage.getBody();
+		
         final Reporting reporting = reportingFactory.newReporting("Dispatch");
         
         reporting.begin(
@@ -142,11 +213,24 @@ public abstract class AbstractGenericConsumer<T extends AbstractMessage> impleme
         		new ReportingMessage("Dispatching AppDataJob %s for %s %s", appDataJob.getId(), type, productName)
         );     
         try {
-			final AppDataJob<CatalogEvent> retVal = appDataService.patchJob(appDataJob.getId(), appDataJob, false,false, false);
+            appDataJob.setState(AppDataJobState.DISPATCHING);            
+			final AppDataJob dispatchedJob = appCat.update(appDataJob);
+        	final IpfPreparationJob job = new IpfPreparationJob();
+        	job.setProductFamily(event.getProductFamily());
+        	job.setAppDataJob(dispatchedJob);
+        	job.setUid(reporting.getUid());
+        	
+        	final GenericPublicationMessageDto<IpfPreparationJob> messageDto = new GenericPublicationMessageDto<IpfPreparationJob>(
+        			dispatchedJob.getId(), 
+        			event.getProductFamily(), 
+        			job
+        	);
+        	messageDto.setInputKey(mqiMessage.getInputKey());
+        	messageDto.setOutputKey(event.getProductFamily().name());
+        	mqiClient.publish(messageDto, ProductCategory.PREPARATION_JOBS);  
 			reporting.end(
 					new ReportingMessage("AppDataJob %s for %s %s dispatched", appDataJob.getId(), type, productName)
 			);
-			return retVal;
 		} catch (final AbstractCodedException e) {
 			reporting.error(new ReportingMessage(
 					"Error on dispatching AppDataJob %s for %s %s: %s", 
@@ -158,23 +242,16 @@ public abstract class AbstractGenericConsumer<T extends AbstractMessage> impleme
 			throw e;
 		}
 	}
-
-	protected abstract AppDataJob<CatalogEvent> dispatch(
-			final GenericMessageDto<CatalogEvent> mqiMessage,
-			final ReportingFactory reportingFactory
-	) 
-		throws AbstractCodedException;
-
-    private final MqiConsumer<CatalogEvent> newMqiConsumer() {
-    	return new MqiConsumer<CatalogEvent>(
-    			mqiClient, 
-    			ProductCategory.CATALOG_EVENT, 
-    			this, 
-    			processSettings.getFixedDelayMs(),
-				processSettings.getInitialDelayMs(), 
-				appStatus
-		);
-    }
+	
+    
+	private final AppDataJob newJobFor(final GenericMessageDto<CatalogEvent> mqiMessage) throws AbstractCodedException {
+        final AppDataJob job = new AppDataJob();
+        job.setLevel(processSettings.getLevel());
+        job.setPod(processSettings.getHostname());
+        job.getMessages().add(mqiMessage);
+        job.setProduct(consumptionHandler.newProductFor(mqiMessage));
+        return appCat.create(job);
+	}
 
 	private final boolean shallBeSkipped(final CatalogEvent event, final Reporting reporting) throws Exception {
         final String productName = event.getProductName();

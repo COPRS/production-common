@@ -9,7 +9,6 @@ import org.springframework.stereotype.Service;
 import esa.s1pdgs.cpoc.appcatalog.AppDataJob;
 import esa.s1pdgs.cpoc.appcatalog.AppDataJobGenerationState;
 import esa.s1pdgs.cpoc.appcatalog.AppDataJobState;
-import esa.s1pdgs.cpoc.common.ProductCategory;
 
 /**
  * Access class to AppDataJob in mongo DB
@@ -20,24 +19,13 @@ import esa.s1pdgs.cpoc.common.ProductCategory;
 public interface AppDataJobRepository
         extends MongoRepository<AppDataJob, Long>, AppDataJobRepositoryCustom {
 
-    /**
-     * @param state
-     * @param category
-     * @param lastUpdateDate
-     * @return
-     */
-    public List<AppDataJob> findByStateAndCategoryAndLastUpdateDateLessThan(
-            final AppDataJobState state, final ProductCategory category,
-            final Date lastUpdateDate);
+    public List<AppDataJob> findByStateAndLastUpdateDateLessThan(
+            final AppDataJobState state,
+            final Date lastUpdateDate
+    );
 
-    /**
-     * @param category
-     * @param generationsState
-     * @param nbErrors
-     * @return
-     */
-    public List<AppDataJob> findByCategoryAndGenerationsStateAndGenerationsNbErrorsGreaterThanEqual(
-            final ProductCategory category,
+    public List<AppDataJob> findByGenerationsStateAndGenerationsNbErrorsGreaterThanEqual(
             final AppDataJobGenerationState generationsState,
-            final int nbErrors);
+            final int nbErrors
+    );
 }
