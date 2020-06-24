@@ -14,8 +14,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 import esa.s1pdgs.cpoc.appcatalog.client.mqi.AppCatalogMqiService;
-import esa.s1pdgs.cpoc.common.ProductCategory;
-import esa.s1pdgs.cpoc.mqi.server.consumption.kafka.consumer.GenericConsumer;
+import esa.s1pdgs.cpoc.mqi.model.queue.AbstractMessage;
 import esa.s1pdgs.cpoc.mqi.server.consumption.kafka.consumer.MessageConsumer;
 import esa.s1pdgs.cpoc.mqi.server.service.AppCatalogMessagePersistence;
 import esa.s1pdgs.cpoc.mqi.server.service.InMemoryMessagePersistence;
@@ -29,7 +28,7 @@ import esa.s1pdgs.cpoc.mqi.server.service.OtherApplicationService;
  * @author Viveris Technologies
  */
 @Configuration
-public class PersistenceConfiguration {
+public class PersistenceConfiguration<T extends AbstractMessage> {
 
 	final static List<MessagePersistenceStrategy> SUPPORTED_MESSAGE_PERSISTENCE_STRATEGIES =
 			Stream.of(MessagePersistenceStrategy.values()).collect(Collectors.toList());
@@ -52,7 +51,7 @@ public class PersistenceConfiguration {
     private final int maxRetries;
 
     /**
-     * Temporisation in ms between 2 retries
+     * Temporization in ms between 2 retries
      */
     private final int tempoRetryMs;
 
@@ -64,9 +63,6 @@ public class PersistenceConfiguration {
     /**
      * Constructor
      * 
-     * @param hostUri
-     * @param maxRetries
-     * @param tempoRetryMs
      */
     @Autowired
     public PersistenceConfiguration(
@@ -84,35 +80,30 @@ public class PersistenceConfiguration {
         this.suffixUriOtherApp = suffixUriOtherApp;
     }
 
-//    @Bean
-//    public MessagePersistence messagePersistence(final RestTemplateBuilder builder) {
-//    	final KafkaProperties properties = null;
-//    	final ProductCategory category = null;
-//    	if (APP_CATALOG_MESSAGE_PERSISTENCE.getValue().equals(messagePersistenceStrategy)) {
-//            final MessageConsumer<T> additionalConsumer = null;
-//            final GenericConsumer<T> genericConsumer = null;
-//            final OtherApplicationService otherAppService = checkProcessingOtherApp(builder);
-//    		return new AppCatalogMessagePersistence(properties, additionalConsumer, genericConsumer, otherAppService);
-//    	} else if  (IN_MEMORY_MESSAGE_PERSISTENCE.getValue().equals(messagePersistenceStrategy)) {
-//    		return new InMemoryMessagePersistence(properties, category);
-//    	} else {
-//    		throw new IllegalArgumentException(String.format("Unknown message persistence strategy %s. Available are %s.", messagePersistenceStrategy, SUPPORTED_MESSAGE_PERSISTENCE_STRATEGIES);
-//    	}
-//    }
+    @Bean
+    public MessagePersistence<T> messagePersistence(final RestTemplateBuilder builder, final AppCatalogMqiService<T> mqiService, KafkaProperties properties, @Value("${mqi.dft-offset}") final int defaultOffset) {
+        if (APP_CATALOG_MESSAGE_PERSISTENCE.getValue().equals(messagePersistenceStrategy)) {
+            final MessageConsumer<T> additionalConsumer = MessageConsumer.nullConsumer();
+            final OtherApplicationService otherAppService = checkProcessingOtherApp(builder);
+            return new AppCatalogMessagePersistence<>(mqiService, properties, additionalConsumer, otherAppService);
+        } else if (IN_MEMORY_MESSAGE_PERSISTENCE.getValue().equals(messagePersistenceStrategy)) {
+            return new InMemoryMessagePersistence<>(properties, defaultOffset);
+        } else {
+            throw new IllegalArgumentException(String.format("Unknown message persistence strategy %s. Available are %s.", messagePersistenceStrategy, SUPPORTED_MESSAGE_PERSISTENCE_STRATEGIES));
+        }
+    }
     
     /**
      * Service for querying MQI for LEVEL_PRODUCT category
      * 
-     * @param builder
-     * @return
      */
     @Bean
-    public AppCatalogMqiService appCatService(final RestTemplateBuilder builder) {
-        return new AppCatalogMqiService(builder.build(), hostUriCatalog, maxRetries, tempoRetryMs);
+    public AppCatalogMqiService<T> appCatService(final RestTemplateBuilder builder) {
+        return new AppCatalogMqiService<>(builder.build(), hostUriCatalog, maxRetries, tempoRetryMs);
     }
 
     /**
-     * Service for checkong if a message is processing or not by another app
+     * Service for checking if a message is processing or not by another app
      */
     @Bean(name = "checkProcessingOtherApp")
     public OtherApplicationService checkProcessingOtherApp(final RestTemplateBuilder builder) {

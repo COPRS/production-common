@@ -28,29 +28,24 @@ public class AppCatalogMessagePersistence<T extends AbstractMessage> implements 
     private final AppCatalogMqiService<T> appCatalogMqiService;
     private final KafkaProperties properties;
     private final MessageConsumer<T> additionalConsumer;
-    private final GenericConsumer<T> genericConsumer;
     private final OtherApplicationService otherAppService;
-    private final ProductCategory category;
 
     public AppCatalogMessagePersistence(AppCatalogMqiService<T> appCatalogMqiService,
                                         final KafkaProperties properties,
                                         final MessageConsumer<T> additionalConsumer,
-                                        final GenericConsumer<T> genericConsumer,
-                                        final OtherApplicationService otherAppService, ProductCategory category) {
+                                        final OtherApplicationService otherAppService) {
 
         this.appCatalogMqiService = appCatalogMqiService;
         this.properties = properties;
         this.additionalConsumer = additionalConsumer;
-        this.genericConsumer = genericConsumer;
         this.otherAppService = otherAppService;
-        this.category = category;
     }
 
     @Override
-    public void read(ConsumerRecord<String, T> data, final Acknowledgment acknowledgment) throws Exception {
-        final AppCatMessageDto<T> result = saveInAppCat(data, false);
+    public void read(ConsumerRecord<String, T> data, final Acknowledgment acknowledgment, GenericConsumer<T> genericConsumer, ProductCategory category) throws Exception {
+        final AppCatMessageDto<T> result = saveInAppCat(data, false, category);
         additionalConsumer.consume(data.value());
-        handleMessage(data, acknowledgment, result);
+        handleMessage(data, acknowledgment, result, genericConsumer, category);
     }
 
     @Override
@@ -86,8 +81,9 @@ public class AppCatalogMessagePersistence<T extends AbstractMessage> implements 
     final void handleMessage(
             final ConsumerRecord<String, T> data,
             final Acknowledgment acknowledgment,
-            final AppCatMessageDto<T> result
-    ) throws AbstractCodedException {
+            final AppCatMessageDto<T> result,
+            final GenericConsumer<T> genericConsumer,
+            ProductCategory category) throws AbstractCodedException {
         final T message = data.value();
 
         // Deal with result
@@ -104,10 +100,10 @@ public class AppCatalogMessagePersistence<T extends AbstractMessage> implements 
                     LOGGER.debug("Message {} already processed by this pod (state is SEND). Ignoring and pausing consumption",
                             result.getId());
                     acknowledge(data, acknowledgment);
-                    pause();
+                    genericConsumer.pause();
                 } else {
                     // Message processing by another pod
-                    if (messageShallBeIgnored(data, result)) {
+                    if (messageShallBeIgnored(data, result, category)) {
                         LOGGER.debug("Message {} shall be ignored (state is SEND). Ignoring...", result.getId());
                         acknowledge(data, acknowledgment);
                     } else {
@@ -115,7 +111,7 @@ public class AppCatalogMessagePersistence<T extends AbstractMessage> implements 
                                 result.getId());
                         // We have forced the reading
                         acknowledge(data, acknowledgment);
-                        pause();
+                        genericConsumer.pause();
                     }
                 }
                 break;
@@ -123,7 +119,7 @@ public class AppCatalogMessagePersistence<T extends AbstractMessage> implements 
                 // Message assigned
                 LOGGER.debug("Message {} assigned to this pod. Pausing consumption ...", result.getId());
                 acknowledge(data, acknowledgment);
-                pause();
+                genericConsumer.pause();
                 break;
         }
     }
@@ -133,7 +129,7 @@ public class AppCatalogMessagePersistence<T extends AbstractMessage> implements 
      */
     final boolean messageShallBeIgnored(
             final ConsumerRecord<String, T> data,
-            final AppCatMessageDto<T> mess)
+            final AppCatMessageDto<T> mess, ProductCategory category)
             throws AbstractCodedException {
         boolean ret;
         // Ask to the other application
@@ -145,7 +141,7 @@ public class AppCatalogMessagePersistence<T extends AbstractMessage> implements 
         }
         if (!ret) {
             LOGGER.debug("No other pod is handling the message {}. Enforcing update to state READ...", mess.getId());
-            final AppCatMessageDto<T> resultForce = saveInAppCat(data, true);
+            final AppCatMessageDto<T> resultForce = saveInAppCat(data, true, category);
             if (resultForce.getState() != MessageState.READ) {
                 ret = true;
             }
@@ -177,7 +173,7 @@ public class AppCatalogMessagePersistence<T extends AbstractMessage> implements 
         }
     }
 
-    private AppCatMessageDto<T> saveInAppCat(final ConsumerRecord<String, T> data, final boolean force) throws AbstractCodedException {
+    private AppCatMessageDto<T> saveInAppCat(final ConsumerRecord<String, T> data, final boolean force, ProductCategory category) throws AbstractCodedException {
         return appCatalogMqiService.read(category, data.topic(), data.partition(), data.offset(), new AppCatReadMessageDto<>(
                 properties.getConsumer().getGroupId(),
                 properties.getHostname(),
@@ -186,7 +182,4 @@ public class AppCatalogMessagePersistence<T extends AbstractMessage> implements 
         ));
     }
 
-    private void pause() {
-        genericConsumer.pause();
-    }
 }

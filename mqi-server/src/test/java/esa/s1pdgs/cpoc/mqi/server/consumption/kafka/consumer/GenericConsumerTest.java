@@ -99,7 +99,7 @@ public class GenericConsumerTest {
 
         uut.start();
         Thread.sleep(5000);
-        verify(messagePersistence, never()).read(Mockito.any(), Mockito.any());
+        verify(messagePersistence, never()).read(Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any());
 
         // Send first DTO
         kafkaUtils.sendMessageToKafka(dto,
@@ -114,13 +114,13 @@ public class GenericConsumerTest {
                         new AppCatReadMessageDto<ProductionEvent>("wrappers",
                                 "test-host", false, dto));
 
-        verify(messagePersistence, times(1)).read(Mockito.eq(expected), Mockito.any());
+        verify(messagePersistence, times(1)).read(Mockito.eq(expected), Mockito.any(), Mockito.eq(uut), Mockito.eq(ProductCategory.AUXILIARY_FILES));
 
         // Send second DTO without resuming consumer
         kafkaUtils.sendMessageToKafka(dto2,
                 GenericKafkaUtils.TOPIC_AUXILIARY_FILES);
         Thread.sleep(1000);
-        verify(messagePersistence, times(1)).read(Mockito.eq(expected), Mockito.any());
+        verify(messagePersistence, times(1)).read(Mockito.eq(expected), Mockito.any(), Mockito.eq(uut), Mockito.eq(ProductCategory.AUXILIARY_FILES));
 
         // Resume consumer
         uut.resume();
@@ -134,8 +134,8 @@ public class GenericConsumerTest {
                         new AppCatReadMessageDto<ProductionEvent>("wrappers",
                                 "test-host", false, dto2));
 
-        verify(messagePersistence, times(2)).read(Mockito.any(), Mockito.any());
-        verify(messagePersistence, times(1)).read(Mockito.eq(expected2),Mockito.any());
+        verify(messagePersistence, times(2)).read(Mockito.any(), Mockito.any(), Mockito.eq(uut), Mockito.eq(ProductCategory.AUXILIARY_FILES));
+        verify(messagePersistence, times(1)).read(Mockito.eq(expected2), Mockito.any(), Mockito.eq(uut), Mockito.eq(ProductCategory.AUXILIARY_FILES));
 
     }
 }

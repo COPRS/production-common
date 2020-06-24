@@ -95,7 +95,7 @@ public class AppCatalogMessagePersistenceTest {
                 .when(mqiService).getEarliestOffset(Mockito.anyString(),
                 Mockito.eq(4), Mockito.anyString());
 
-        messagePersistence = new AppCatalogMessagePersistence<>(mqiService, properties, MessageConsumer.nullConsumer(), genericConsumer, otherAppService, ProductCategory.AUXILIARY_FILES);
+        messagePersistence = new AppCatalogMessagePersistence<>(mqiService, properties, MessageConsumer.nullConsumer(), otherAppService);
     }
 
     /**
@@ -117,7 +117,7 @@ public class AppCatalogMessagePersistenceTest {
                 Mockito.any(), Mockito.anyLong());
 
         // First time: msgLightForceRead
-        assertTrue(messagePersistence.messageShallBeIgnored(data, msgLight));
+        assertTrue(messagePersistence.messageShallBeIgnored(data, msgLight, ProductCategory.AUXILIARY_FILES));
         verify(otherAppService, times(1)).isProcessing(Mockito.eq("other-name"),
                 Mockito.eq(ProductCategory.AUXILIARY_FILES), Mockito.eq(1234L));
     }
@@ -188,7 +188,7 @@ public class AppCatalogMessagePersistenceTest {
                 Mockito.anyLong(), Mockito.any());
 
         // First time: msgLightForceRead
-        assertFalse(messagePersistence.messageShallBeIgnored(data, msgLight));
+        assertFalse(messagePersistence.messageShallBeIgnored(data, msgLight, ProductCategory.AUXILIARY_FILES));
         verify(otherAppService, times(1)).isProcessing(Mockito.eq("other-name"),
                 Mockito.eq(ProductCategory.AUXILIARY_FILES), Mockito.eq(1234L));
         verify(mqiService, times(1)).read(Mockito.any(), Mockito.eq(data.topic()),
@@ -196,7 +196,7 @@ public class AppCatalogMessagePersistenceTest {
                 Mockito.eq(expectedReadBody));
 
         // Second time msgLightForceAck
-        assertTrue(messagePersistence.messageShallBeIgnored(data, msgLight));
+        assertTrue(messagePersistence.messageShallBeIgnored(data, msgLight, ProductCategory.AUXILIARY_FILES));
         verify(otherAppService, times(2)).isProcessing(Mockito.eq("other-name"),
                 Mockito.eq(ProductCategory.AUXILIARY_FILES), Mockito.eq(1234L));
         verify(mqiService, times(2)).read(Mockito.eq(ProductCategory.AUXILIARY_FILES), Mockito.eq(data.topic()),
@@ -204,7 +204,7 @@ public class AppCatalogMessagePersistenceTest {
                 Mockito.eq(expectedReadBody));
 
         // Third time msgLightForceSend
-        assertTrue(messagePersistence.messageShallBeIgnored(data, msgLight));
+        assertTrue(messagePersistence.messageShallBeIgnored(data, msgLight, ProductCategory.AUXILIARY_FILES));
         verify(otherAppService, times(3)).isProcessing(Mockito.eq("other-name"),
                 Mockito.eq(ProductCategory.AUXILIARY_FILES), Mockito.eq(1234L));
         verify(mqiService, times(3)).read(Mockito.eq(ProductCategory.AUXILIARY_FILES), Mockito.eq(data.topic()),

@@ -20,23 +20,22 @@ import esa.s1pdgs.cpoc.common.ProductCategory;
 import esa.s1pdgs.cpoc.mqi.model.queue.AbstractMessage;
 import esa.s1pdgs.cpoc.mqi.model.rest.Ack;
 import esa.s1pdgs.cpoc.mqi.server.config.KafkaProperties;
+import esa.s1pdgs.cpoc.mqi.server.consumption.kafka.consumer.GenericConsumer;
 
 public class InMemoryMessagePersistence<T extends AbstractMessage> implements MessagePersistence<T> {
 
     private final AtomicLong sequence = new AtomicLong(0);
     private final List<MessageAndAcknowledgement<T>> messages = Collections.synchronizedList(new ArrayList<>());
     private final KafkaProperties properties;
-    private final ProductCategory category;
     private final int defaultOffset;
 
-    public InMemoryMessagePersistence(final KafkaProperties properties, final ProductCategory category, int defaultOffset) {
+    public InMemoryMessagePersistence(final KafkaProperties properties, int defaultOffset) {
         this.properties = properties;
-        this.category = category;
         this.defaultOffset = defaultOffset;
     }
 
     @Override
-    public void read(ConsumerRecord<String, T> data, Acknowledgment acknowledgment) {
+    public void read(final ConsumerRecord<String, T> data, final Acknowledgment acknowledgment, final GenericConsumer<T> genericConsumer, final ProductCategory category) {
         AppCatReadMessageDto<T> body = new AppCatReadMessageDto<>(
                 properties.getConsumer().getGroupId(),
                 properties.getHostname(),
@@ -68,9 +67,7 @@ public class InMemoryMessagePersistence<T extends AbstractMessage> implements Me
     public boolean send(ProductCategory category, long messageId, AppCatSendMessageDto body) {
         final AppCatMessageDto<T> messageDto = get(category, messageId);
 
-        synchronized (messageDto) {
-            messageDto.setLastReadDate(new Date());
-        }
+        messageDto.setLastReadDate(new Date());
 
         return true; //always true, we don't check double messages here
     }
@@ -119,8 +116,7 @@ public class InMemoryMessagePersistence<T extends AbstractMessage> implements Me
 
         final Optional<MessageAndAcknowledgement<T>> earliestMessage = messages.stream()
                 .filter(m -> m.message.getTopic().equals(topic) && m.message.getPartition() == partition && m.message.getGroup().equals(group))
-                .sorted(comparing(a -> a.message.getLastReadDate()))
-                .findFirst();
+                .min(comparing(a -> a.message.getLastReadDate()));
 
         if (!earliestMessage.isPresent()) {
             return defaultOffset;

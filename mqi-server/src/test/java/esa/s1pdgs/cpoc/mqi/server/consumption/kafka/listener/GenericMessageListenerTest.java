@@ -1,14 +1,6 @@
 package esa.s1pdgs.cpoc.mqi.server.consumption.kafka.listener;
 
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
-import static org.mockito.Mockito.doNothing;
-import static org.mockito.Mockito.doReturn;
-import static org.mockito.Mockito.doThrow;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyNoMoreInteractions;
-import static org.mockito.Mockito.verifyZeroInteractions;
+import static org.mockito.Mockito.*;
 
 import org.apache.kafka.clients.consumer.Consumer;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
@@ -21,7 +13,6 @@ import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 import org.springframework.kafka.support.Acknowledgment;
 
-import esa.s1pdgs.cpoc.appcatalog.client.mqi.AppCatalogMqiService;
 import esa.s1pdgs.cpoc.appcatalog.rest.AppCatMessageDto;
 import esa.s1pdgs.cpoc.appcatalog.rest.AppCatReadMessageDto;
 import esa.s1pdgs.cpoc.appstatus.AppStatus;
@@ -31,7 +22,6 @@ import esa.s1pdgs.cpoc.common.ProductFamily;
 import esa.s1pdgs.cpoc.common.errors.AbstractCodedException;
 import esa.s1pdgs.cpoc.common.errors.appcatalog.AppCatalogMqiGetOffsetApiError;
 import esa.s1pdgs.cpoc.common.errors.appcatalog.AppCatalogMqiReadApiError;
-import esa.s1pdgs.cpoc.common.errors.processing.StatusProcessingApiError;
 import esa.s1pdgs.cpoc.mqi.model.queue.ProductionEvent;
 import esa.s1pdgs.cpoc.mqi.server.config.KafkaProperties;
 import esa.s1pdgs.cpoc.mqi.server.config.KafkaProperties.KafkaConsumerProperties;
@@ -62,7 +52,7 @@ public class GenericMessageListenerTest {
      * Service for persisting data
      */
     @Mock
-    private MessagePersistence service;
+    private MessagePersistence<ProductionEvent> service;
 
     /**
      * Service for checking if a message is processing or not by another
@@ -251,7 +241,7 @@ public class GenericMessageListenerTest {
         verifyZeroInteractions(onMsgConsumer);
         verify(acknowledgment, times(1)).acknowledge();
         verifyZeroInteractions(otherAppService);
-        verify(service, times(1)).read(Mockito.eq(data), Mockito.eq(acknowledgment));
+        verify(service, times(1)).read(Mockito.eq(data), Mockito.eq(acknowledgment), Mockito.eq(genericConsumer), Mockito.eq(ProductCategory.AUXILIARY_FILES));
         verify(appStatus, times(1)).setWaiting();
         if (pause) {
             verify(genericConsumer, times(1)).pause();
@@ -269,7 +259,7 @@ public class GenericMessageListenerTest {
     public void testOnMessageWhenFirstReadFails()
             throws Exception {
         doThrow(new AppCatalogMqiReadApiError(ProductCategory.AUXILIARY_FILES,
-                "uri", "dto-object", "error-message")).when(service).read(Mockito.any(), Mockito.any());
+                "uri", "dto-object", "error-message")).when(service).read(Mockito.any(), Mockito.any(), Mockito.eq(genericConsumer), Mockito.eq(ProductCategory.AUXILIARY_FILES));
 
         final AppCatReadMessageDto<ProductionEvent> expectedReadBody =
                 new AppCatReadMessageDto<>("group-name", "pod-name",
@@ -282,7 +272,7 @@ public class GenericMessageListenerTest {
         verifyZeroInteractions(onMsgConsumer);
         verifyZeroInteractions(otherAppService);
         verifyZeroInteractions(genericConsumer);
-        verify(service, times(1)).read(Mockito.eq(data),Mockito.eq(acknowledgment));
+        verify(service, times(1)).read(Mockito.eq(data), Mockito.eq(acknowledgment), Mockito.eq(genericConsumer), Mockito.eq(ProductCategory.AUXILIARY_FILES));
     }
 
     /**
@@ -304,7 +294,7 @@ public class GenericMessageListenerTest {
 
         listener.onMessage(data, acknowledgment, onMsgConsumer);
 
-        verify(service, times(1)).read(Mockito.eq(data),Mockito.eq(acknowledgment));
+        verify(service, times(1)).read(Mockito.eq(data), Mockito.eq(acknowledgment), Mockito.eq(genericConsumer), Mockito.eq(ProductCategory.AUXILIARY_FILES));
         verify(appStatus, times(1)).setWaiting();
         verify(acknowledgment, times(1)).acknowledge();
         verify(genericConsumer, times(1)).pause();
@@ -335,7 +325,7 @@ public class GenericMessageListenerTest {
 
         listener.onMessage(data, acknowledgment, onMsgConsumer);
 
-        verify(service, times(1)).read(Mockito.eq(data),Mockito.eq(acknowledgment));
+        verify(service, times(1)).read(Mockito.eq(data), Mockito.eq(acknowledgment), Mockito.eq(genericConsumer), Mockito.eq(ProductCategory.AUXILIARY_FILES));
         verify(appStatus, times(1)).setWaiting();
         verify(acknowledgment, times(1)).acknowledge();
         verifyNoMoreInteractions(appStatus);
@@ -376,7 +366,7 @@ public class GenericMessageListenerTest {
 
         listener.onMessage(data, acknowledgment, onMsgConsumer);
 
-        verify(service, times(2)).read(Mockito.eq(data),Mockito.eq(acknowledgment));
+        verify(service, times(2)).read(Mockito.eq(data), Mockito.eq(acknowledgment), Mockito.eq(genericConsumer), Mockito.eq(ProductCategory.AUXILIARY_FILES));
         verify(appStatus, times(1)).setWaiting();
         verifyNoMoreInteractions(appStatus);
         verify(acknowledgment, times(1)).acknowledge();

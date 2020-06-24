@@ -87,7 +87,7 @@ public final class GenericMessageListener<T> implements AcknowledgingConsumerAwa
         	LOGGER.debug("Handling message from kafka queue: {}", message);
         	
             // Save message
-			messagePersistence.read(data, acknowledgment);
+			messagePersistence.read(data, acknowledgment, genericConsumer, category);
             appStatus.setWaiting();
         } catch (final Exception e) {        	
         	if (e instanceof AbstractCodedException) {
