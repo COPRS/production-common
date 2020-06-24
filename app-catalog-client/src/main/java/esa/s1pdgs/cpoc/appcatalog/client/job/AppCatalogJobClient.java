@@ -1,7 +1,6 @@
 package esa.s1pdgs.cpoc.appcatalog.client.job;
 
 import java.net.URI;
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -10,7 +9,6 @@ import java.util.Map;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.core.ParameterizedTypeReference;
-import org.springframework.core.ResolvableType;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
@@ -24,7 +22,6 @@ import esa.s1pdgs.cpoc.appcatalog.AppDataJob;
 import esa.s1pdgs.cpoc.appcatalog.AppDataJobGeneration;
 import esa.s1pdgs.cpoc.appcatalog.AppDataJobGenerationState;
 import esa.s1pdgs.cpoc.appcatalog.AppDataJobState;
-import esa.s1pdgs.cpoc.common.ProductCategory;
 import esa.s1pdgs.cpoc.common.errors.AbstractCodedException;
 import esa.s1pdgs.cpoc.common.errors.appcatalog.AppCatalogJobNewApiError;
 import esa.s1pdgs.cpoc.common.errors.appcatalog.AppCatalogJobPatchApiError;
@@ -87,20 +84,6 @@ public class AppCatalogJobClient<E extends AbstractMessage> {
         this.maxRetries = maxRetries;
         this.tempoRetryMs = tempoRetryMs;
     }    
-    
-	static final <T> ParameterizedTypeReference<T> xxx_forCategory(final ProductCategory category)
-	{
-		final ResolvableType appCatMessageType = ResolvableType.forClassWithGenerics(
-				AppDataJob.class, 
-				category.getDtoClass()
-		);   
-		
-		final ResolvableType type = ResolvableType.forClassWithGenerics(
-				List.class, 
-				appCatMessageType
-		);   
-		return ParameterizedTypeReference.forType(type.getType());
-	}
 
     /**
      * @return the hostUri
@@ -157,9 +140,7 @@ public class AppCatalogJobClient<E extends AbstractMessage> {
         int retries = 0;
         while (true) {
             retries++;
-            final UriComponentsBuilder builder = UriComponentsBuilder.fromUriString(
-            		hostUri + "/jobs/search"
-            );
+            final UriComponentsBuilder builder = UriComponentsBuilder.fromUriString(hostUri + "/jobs/search");
             
             for (final Map.Entry<String, String> entry : filters.entrySet()) {
             	builder.queryParam(entry.getKey(), entry.getValue());
@@ -171,8 +152,8 @@ public class AppCatalogJobClient<E extends AbstractMessage> {
                 		uri, 
                 		HttpMethod.GET, 
                 		null,
-                		forCategory(category)
-                );                
+                		new ParameterizedTypeReference<List<AppDataJob>>() {}
+                );             
                 if (response.getStatusCode() == HttpStatus.OK) {
                     LogUtils.traceLog(LOGGER, String.format("[uri %s] [ret %s]", uri, response.getBody()));
                     return response.getBody();
@@ -247,8 +228,10 @@ public class AppCatalogJobClient<E extends AbstractMessage> {
      * @return
      * @throws AbstractCodedException
      */
-    public List<AppDataJob> findByPodAndState(final String pod,
-            final AppDataJobState state) throws AbstractCodedException {
+    public List<AppDataJob> findByPodAndState(
+    		final String pod, 
+    		final AppDataJobState state
+    ) throws AbstractCodedException {
     	final Map<String, String> filters = new HashMap<>();
     	filters.put("state", state.name());
     	filters.put("pod", pod);
@@ -263,8 +246,7 @@ public class AppCatalogJobClient<E extends AbstractMessage> {
      * @return
      * @throws AbstractCodedException
      */
-    public List<AppDataJob> findNByPodAndGenerationTaskTableWithNotSentGeneration(
-            final String pod, final String taskTable)
+    public List<AppDataJob> findNByPodAndGenerationTaskTableWithNotSentGeneration(final String pod, final String taskTable)
             throws AbstractCodedException {       
     	final Map<String, String> filters = new HashMap<>();  
         filters.put("pod", pod);
@@ -274,27 +256,18 @@ public class AppCatalogJobClient<E extends AbstractMessage> {
         return search(filters);     
     }
 
-    /**
-     * Create a new job from its identifier
-     * 
-     * @param identifier
-     * @return
-     * @throws AbstractCodedException
-     */
-    public AppDataJob newJob(final AppDataJob job)
-            throws AbstractCodedException {
+    public AppDataJob newJob(final AppDataJob job) throws AbstractCodedException {
         int retries = 0;
         while (true) {
             retries++;
-            final String uri = hostUri + "/" + category.name().toLowerCase() + "/jobs";
+            final String uri = hostUri + "/jobs";
             LogUtils.traceLog(LOGGER, String.format("[uri %s]", uri));
-            try {
-        		final ResolvableType appCatMessageType = ResolvableType.forClassWithGenerics(AppDataJob.class, category.getDtoClass());               	
+            try {           	
                 final ResponseEntity<AppDataJob> response = restTemplate.exchange(
                 		uri, 
                 		HttpMethod.POST,
                 		new HttpEntity<AppDataJob>(job),
-                		ParameterizedTypeReference.forType(appCatMessageType.getType())
+                		new ParameterizedTypeReference<AppDataJob>() {}
                 );
                 
                 if (response.getStatusCode() == HttpStatus.OK) {
@@ -324,89 +297,19 @@ public class AppCatalogJobClient<E extends AbstractMessage> {
             }
         }
     }
-    
-//    public <E extends AbstractDto> AppDataJob newJob(final AppDataJob job)
-//            throws AbstractCodedException {
-//        int retries = 0;
-//        while (true) {
-//            retries++;
-//            String uri = hostUri + "/" + category.name().toLowerCase() + "/jobs";
-//            LogUtils.traceLog(LOGGER, String.format("[uri %s]", uri));
-//            try {
-//        		final ResponseEntity<JsonNode> response = restTemplate.exchange(
-//                		uri, 
-//                		HttpMethod.POST,
-//                		new HttpEntity<AppDataJob>(job),
-//                		JsonNode.class
-//                );
-//        		
-//                if (response.getStatusCode() == HttpStatus.OK) {
-//                    LogUtils.traceLog(LOGGER, String.format("[uri %s] [ret %s]",
-//                            uri, response.getBody()));
-//                    
-//                	final ObjectMapper objMapper = new ObjectMapper();
-//                	final TypeFactory typeFactory = objMapper.getTypeFactory();
-//                	final JavaType javaType = typeFactory.constructParametricType(
-//                			AppDataJob.class, 
-//                			category.getDtoClass()
-//                	);            		
-//                	return objMapper
-//                			.readValue(objMapper.treeAsTokens(response.getBody()), javaType);
-//                	
-//                } else {
-//                    waitOrThrow(retries, new AppCatalogJobNewApiError(uri, job,
-//                            "HTTP status code " + response.getStatusCode()),
-//                            "new");
-//                }
-//            } catch (HttpStatusCodeException hsce) {
-//                waitOrThrow(retries,
-//                        new AppCatalogJobNewApiError(uri, job, String.format(
-//                                "HttpStatusCodeException occured: %s - %s",
-//                                hsce.getStatusCode(),
-//                                hsce.getResponseBodyAsString())),
-//                        "new");
-//            } catch (IOException | RestClientException rce) {
-//                waitOrThrow(retries,
-//                        new AppCatalogJobNewApiError(uri, job,
-//                                String.format(
-//                                        "RestClientException occured: %s",
-//                                        rce.getMessage()),
-//                                rce),
-//                        "new");
-//            } 
-//        }
-//    }
 
-	public AppDataJob patchJob(final long identifier,
-            final AppDataJob job, final boolean patchMessages,
-            final boolean patchProduct, final boolean patchGenerations)
-            throws AbstractCodedException {
-    	job.setId(identifier);
-        if (!patchMessages) {
-        	job.setMessages(new ArrayList<>());
-        }
-        if (!patchProduct) {
-        	job.setProduct(null);
-        }
-        if (!patchGenerations) {
-        	job.setGenerations(new ArrayList<>());
-        }        
+	public AppDataJob updateJob(final AppDataJob job) throws AbstractCodedException {  
         int retries = 0;
         while (true) {
             retries++;
-            final String uri = hostUri + "/" + category.name().toLowerCase() + "/jobs/" + identifier;
+            final String uri = hostUri + "/jobs/" + job.getId();
             LogUtils.traceLog(LOGGER, String.format("[uri %s]", uri));
             try {
-            	final ResolvableType appCatMessageType = ResolvableType.forClassWithGenerics(
-        				AppDataJob.class, 
-        				category.getDtoClass()
-        		);  
-            	
                 final ResponseEntity<AppDataJob> response = restTemplate.exchange(
                 		uri, 
                 		HttpMethod.PATCH,
                 		new HttpEntity<AppDataJob>(job),
-                		ParameterizedTypeReference.forType(appCatMessageType.getType())
+                		new ParameterizedTypeReference<AppDataJob>() {}
                 );
                 if (response.getStatusCode() == HttpStatus.OK) {
                     LogUtils.traceLog(LOGGER, String.format("[uri %s] [ret %s]",
@@ -445,28 +348,25 @@ public class AppCatalogJobClient<E extends AbstractMessage> {
      * @return
      * @throws AbstractCodedException
      */
-	public AppDataJob patchTaskTableOfJob(final long identifier,
-            final String taskTable, final AppDataJobGenerationState state)
-            throws AbstractCodedException {
+	public AppDataJob patchTaskTableOfJob(
+			final long identifier,
+            final String taskTable, 
+            final AppDataJobGenerationState state
+    ) throws AbstractCodedException {
         int retries = 0;
         while (true) {
             retries++;
-            final String uri = hostUri + "/" + category.name().toLowerCase() + "/jobs/" + identifier
-                    + "/generations/" + taskTable;
+            final String uri = hostUri + "/jobs/" + identifier + "/generations/" + taskTable;
             final AppDataJobGeneration body = new AppDataJobGeneration();
             body.setTaskTable(taskTable);
             body.setState(state);
             LogUtils.traceLog(LOGGER, String.format("[uri %s]", uri));
-            try {
-            	final ResolvableType appCatMessageType = ResolvableType.forClassWithGenerics(
-        				AppDataJob.class, 
-        				category.getDtoClass()
-        		);              	
+            try {          	
                 final ResponseEntity<AppDataJob> response = restTemplate.exchange(
                 		uri, 
                 		HttpMethod.PATCH,
                 		new HttpEntity<AppDataJobGeneration>(body),
-                		ParameterizedTypeReference.forType(appCatMessageType.getType())
+                		new ParameterizedTypeReference<AppDataJob>() {}
                 );
                 if (response.getStatusCode() == HttpStatus.OK) {
                     LogUtils.traceLog(LOGGER, String.format("[uri %s] [ret %s]",
