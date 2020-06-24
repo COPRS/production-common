@@ -2,16 +2,8 @@ package esa.s1pdgs.cpoc.mqi.server.service;
 
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.Matchers.hasProperty;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
-import static org.mockito.Mockito.doReturn;
-import static org.mockito.Mockito.doThrow;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyNoMoreInteractions;
-import static org.mockito.Mockito.verifyZeroInteractions;
+import static org.junit.Assert.*;
+import static org.mockito.Mockito.*;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -56,14 +48,12 @@ import esa.s1pdgs.cpoc.mqi.model.queue.LevelReportDto;
 import esa.s1pdgs.cpoc.mqi.model.queue.ProductionEvent;
 import esa.s1pdgs.cpoc.mqi.model.rest.Ack;
 import esa.s1pdgs.cpoc.mqi.model.rest.GenericMessageDto;
+import esa.s1pdgs.cpoc.mqi.server.GenericKafkaUtils;
 import esa.s1pdgs.cpoc.mqi.server.config.ApplicationProperties;
-import esa.s1pdgs.cpoc.mqi.server.config.KafkaProperties;
 import esa.s1pdgs.cpoc.mqi.server.config.ApplicationProperties.ProductCategoryConsumptionProperties;
 import esa.s1pdgs.cpoc.mqi.server.config.ApplicationProperties.ProductCategoryProperties;
-import esa.s1pdgs.cpoc.mqi.server.GenericKafkaUtils;
+import esa.s1pdgs.cpoc.mqi.server.config.KafkaProperties;
 import esa.s1pdgs.cpoc.mqi.server.consumption.kafka.consumer.GenericConsumer;
-import esa.s1pdgs.cpoc.mqi.server.service.MessageConsumptionController;
-import esa.s1pdgs.cpoc.mqi.server.service.OtherApplicationService;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest
@@ -273,7 +263,6 @@ public class MessageConsumptionControllerTest {
      * Mock and check next message for a given category when server return no
      * messages
      * 
-     * @param mockedService
      * @param category
      * @throws AbstractCodedException
      */
@@ -306,7 +295,6 @@ public class MessageConsumptionControllerTest {
      * list of objects: the first is processing by another pod, the second and
      * the thrid are ok
      * 
-     * @param mockedService
      * @param category
      * @throws AbstractCodedException
      */
@@ -532,8 +520,8 @@ public class MessageConsumptionControllerTest {
 
         final AppCatSendMessageDto expected = new AppCatSendMessageDto("pod-name", false);
 
-        assertTrue(manager.send(ProductCategory.AUXILIARY_FILES,service, msgLight));
-        assertFalse(manager.send(ProductCategory.AUXILIARY_FILES,service, msgLight2));
+        assertTrue(manager.send(ProductCategory.AUXILIARY_FILES, service, msgLight));
+        assertFalse(manager.send(ProductCategory.AUXILIARY_FILES, service, msgLight2));
         verifyZeroInteractions(otherService);
         verify(service, times(1)).send(Mockito.eq(ProductCategory.AUXILIARY_FILES),Mockito.eq(1234L),
                 Mockito.eq(expected));

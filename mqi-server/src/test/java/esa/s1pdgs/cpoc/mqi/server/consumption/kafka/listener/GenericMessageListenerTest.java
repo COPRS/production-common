@@ -162,7 +162,7 @@ public class GenericMessageListenerTest {
      */
     @Test
     public void testAcknowledge() {
-        listener.acknowlegde(data, acknowledgment);
+        listener.acknowledge(data, acknowledgment);
 
         verify(acknowledgment, times(1)).acknowledge();
         verifyNoMoreInteractions(acknowledgment);
@@ -178,7 +178,7 @@ public class GenericMessageListenerTest {
     public void testAcknowledgeWhenException() {
         doThrow(NullPointerException.class).when(acknowledgment).acknowledge();
 
-        listener.acknowlegde(data, acknowledgment);
+        listener.acknowledge(data, acknowledgment);
 
         verify(acknowledgment, times(1)).acknowledge();
         verifyNoMoreInteractions(acknowledgment);

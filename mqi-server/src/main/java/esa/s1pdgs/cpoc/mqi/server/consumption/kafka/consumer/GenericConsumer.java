@@ -18,12 +18,12 @@ import org.springframework.kafka.listener.MessageListener;
 import org.springframework.kafka.support.serializer.ErrorHandlingDeserializer2;
 import org.springframework.kafka.support.serializer.JsonDeserializer;
 
-import esa.s1pdgs.cpoc.appcatalog.client.mqi.AppCatalogMqiService;
 import esa.s1pdgs.cpoc.appstatus.AppStatus;
 import esa.s1pdgs.cpoc.common.ProductCategory;
 import esa.s1pdgs.cpoc.mqi.server.config.KafkaProperties;
 import esa.s1pdgs.cpoc.mqi.server.consumption.kafka.listener.GenericMessageListener;
 import esa.s1pdgs.cpoc.mqi.server.consumption.kafka.listener.MemoryConsumerAwareRebalanceListener;
+import esa.s1pdgs.cpoc.mqi.server.service.MessagePersistence;
 import esa.s1pdgs.cpoc.mqi.server.service.OtherApplicationService;
 
 /**
@@ -37,18 +37,18 @@ public class GenericConsumer<T> {
 		protected static final Logger LOGGER = LogManager.getLogger(Factory.class);
 		
 	    private final KafkaProperties kafkaProperties;
-	    private final AppCatalogMqiService service;
+	    private final MessagePersistence messagePersistence;
 	    private final OtherApplicationService otherAppService;
 	    private final AppStatus appStatus;	  
 	    	    
 		public Factory(
 				final KafkaProperties kafkaProperties, 
-				final AppCatalogMqiService service,
+				final MessagePersistence messagePersistence,
 				final OtherApplicationService otherAppService, 
 				final AppStatus appStatus
 		) {
 			this.kafkaProperties = kafkaProperties;
-			this.service = service;
+			this.messagePersistence = messagePersistence;
 			this.otherAppService = otherAppService;
 			this.appStatus = appStatus;
 		}
@@ -86,7 +86,13 @@ public class GenericConsumer<T> {
 				final GenericConsumer<T> consumer, 
 				final MessageConsumer<T> additionalConsumer
 		) {
-			return new GenericMessageListener<T>(cat,kafkaProperties,service,otherAppService,consumer,appStatus, additionalConsumer);
+			return new GenericMessageListener<T>(cat,
+					kafkaProperties,
+					messagePersistence,
+					otherAppService,
+					consumer,
+					appStatus,
+					additionalConsumer);
 		}
 		
 	    private final <T> ConsumerFactory<String, T> consumerFactory(final String topic, final Class<T> dtoClass) {	    	
@@ -117,7 +123,7 @@ public class GenericConsumer<T> {
 	        containerProp.setAckMode(AckMode.MANUAL_IMMEDIATE);
 	        containerProp.setConsumerRebalanceListener(
 	                new MemoryConsumerAwareRebalanceListener(
-	                		service,
+	                		messagePersistence,
 	                		kafkaProperties.getConsumer().getGroupId(),
 	                		kafkaProperties.getConsumer().getOffsetDftMode()
 	                )
