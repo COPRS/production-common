@@ -16,9 +16,9 @@ import esa.s1pdgs.cpoc.mqi.model.rest.GenericMessageDto;
 public class AppCatAdapter {
 	private static final Logger LOG = LogManager.getLogger(AppCatAdapter.class);
 	
-    private final AppCatalogJobClient<CatalogEvent> appCatClient;
+    private final AppCatalogJobClient appCatClient;
 
-	public AppCatAdapter(final AppCatalogJobClient<CatalogEvent> appCatClient) {
+	public AppCatAdapter(final AppCatalogJobClient appCatClient) {
 		this.appCatClient = appCatClient;
 	}
 	
@@ -48,7 +48,7 @@ public class AppCatAdapter {
 	}   
 		
 	public final AppDataJob update(final AppDataJob job) throws AbstractCodedException {
-		return appCatClient.patchJob(job.getId(), job, false,false, false);
+		return appCatClient.updateJob(job);
 	}    
 	
 	private final Optional<AppDataJob> first(final List<AppDataJob> result, final String desc) {

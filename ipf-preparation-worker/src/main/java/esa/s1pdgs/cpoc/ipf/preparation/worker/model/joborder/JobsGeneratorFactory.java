@@ -24,7 +24,6 @@ import esa.s1pdgs.cpoc.ipf.preparation.worker.service.XmlConverter;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.timeout.InputTimeoutChecker;
 import esa.s1pdgs.cpoc.metadata.client.MetadataClient;
 import esa.s1pdgs.cpoc.mqi.client.MqiClient;
-import esa.s1pdgs.cpoc.mqi.model.queue.CatalogEvent;
 
 @Service
 public class JobsGeneratorFactory {
@@ -70,7 +69,7 @@ public class JobsGeneratorFactory {
 	
 	public AbstractJobsGenerator newJobGenerator(
 			final File xmlFile,
-			final AppCatalogJobClient<CatalogEvent> appDataService,
+			final AppCatalogJobClient appDataService,
 			final JobGenType type
 	) throws IpfPrepWorkerBuildTaskTableException {		
 		final TaskTable taskTable = taskTableFactory.buildTaskTable(xmlFile, l0ProcessSettings.getLevel());		
@@ -81,7 +80,7 @@ public class JobsGeneratorFactory {
 		
 	private AbstractJobsGenerator newGenerator(
 			final File xmlFile,
-			final AppCatalogJobClient<CatalogEvent> appDataService, 
+			final AppCatalogJobClient appDataService, 
 			final TaskTable taskTable,
 			final JobGenType type
 	) {

@@ -1,7 +1,6 @@
 package esa.s1pdgs.cpoc.ipf.preparation.worker.config;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -9,26 +8,13 @@ import java.util.Map;
 
 import javax.annotation.PostConstruct;
 
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
-import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
 import org.springframework.util.StringUtils;
 
-import esa.s1pdgs.cpoc.appcatalog.client.job.AppCatalogJobClient;
-import esa.s1pdgs.cpoc.common.ApplicationLevel;
 import esa.s1pdgs.cpoc.common.ProductCategory;
 import esa.s1pdgs.cpoc.common.ProductFamily;
-import esa.s1pdgs.cpoc.ipf.preparation.worker.model.joborder.JobsGeneratorFactory;
-import esa.s1pdgs.cpoc.ipf.preparation.worker.service.AbstractJobsDispatcher;
-import esa.s1pdgs.cpoc.ipf.preparation.worker.service.L0AppJobDispatcher;
-import esa.s1pdgs.cpoc.ipf.preparation.worker.service.L0SegmentAppJobDispatcher;
-import esa.s1pdgs.cpoc.ipf.preparation.worker.service.LevelProductsJobDispatcher;
-import esa.s1pdgs.cpoc.ipf.preparation.worker.service.XmlConverter;
-import esa.s1pdgs.cpoc.mqi.model.queue.CatalogEvent;
 
 /**
  * Extraction class of "tasktables" configuration properties
@@ -39,38 +25,6 @@ import esa.s1pdgs.cpoc.mqi.model.queue.CatalogEvent;
 @EnableConfigurationProperties
 @ConfigurationProperties(prefix = "ipf-preparation-worker")
 public class IpfPreparationWorkerSettings {
-
-	@Bean
-	@Autowired
-	public AbstractJobsDispatcher jobsDispatcher(
-			final ProcessSettings processSettings,
-			final JobsGeneratorFactory factory, 
-			final ThreadPoolTaskScheduler taskScheduler,
-			final XmlConverter xmlConverter,
-			@Value("${level-products.pathroutingxmlfile}") final String pathRoutingXmlFile,
-			final AppCatalogJobClient<CatalogEvent> appCatClient
-	) {
-		switch (processSettings.getLevel()) {
-			case L0:
-				return new L0AppJobDispatcher(this, processSettings, factory, taskScheduler, appCatClient);
-			case L0_SEGMENT:
-				return new L0SegmentAppJobDispatcher(this, processSettings, factory, taskScheduler, appCatClient);
-			case L1:
-			case L2:
-				return new LevelProductsJobDispatcher(this, processSettings, factory, taskScheduler, xmlConverter, 
-						pathRoutingXmlFile, appCatClient);
-			default:
-				// fall through to throw exception
-		}
-		throw new IllegalArgumentException(
-				String.format(
-						"Unsupported Application Level '%s'. Available are: %s", 
-						processSettings.getLevel(),
-						Arrays.asList(ApplicationLevel.values())
-				)
-		);
-	}
-	
 	public static class CategoryConfig
 	{
 		private long fixedDelayMs = 500L;
@@ -290,7 +244,7 @@ public class IpfPreparationWorkerSettings {
 			return;
 		}
 		final String[] paramsTmp = inputfamiliesstr.split(MAP_ELM_SEP);
-		for (String s : paramsTmp) {
+		for (final String s : paramsTmp) {
 			final String[] tmp = s.split(MAP_KEY_VAL_SEP);
 			if (tmp.length == 2) {
 				final String key = tmp[0];
@@ -308,7 +262,7 @@ public class IpfPreparationWorkerSettings {
 			return;
 		}
 		final String[] paramsTmp = outputfamiliesstr.split(MAP_ELM_SEP);
-		for (String s : paramsTmp) {
+		for (final String s : paramsTmp) {
 			final String[] tmp = s.split(MAP_KEY_VAL_SEP);
 			if (tmp.length == 2) {
 				final String key = tmp[0];

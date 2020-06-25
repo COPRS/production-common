@@ -1,4 +1,4 @@
-package esa.s1pdgs.cpoc.appcatalog.server.job;
+package esa.s1pdgs.cpoc.appcatalog.server.config;
 
 import static org.junit.Assert.assertEquals;
 

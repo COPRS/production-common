@@ -25,7 +25,6 @@ import esa.s1pdgs.cpoc.ipf.preparation.worker.config.ProcessSettings;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.model.joborder.JobsGeneratorFactory;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.model.joborder.JobsGeneratorFactory.JobGenType;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.model.routing.LevelProductsRouting;
-import esa.s1pdgs.cpoc.mqi.model.queue.CatalogEvent;
 
 /**
  * 
@@ -51,7 +50,7 @@ public class LevelProductsJobDispatcher extends AbstractJobsDispatcher {
             final ThreadPoolTaskScheduler taskScheduler,
             final XmlConverter xmlConverter,
             final String pathRoutingXmlFile,
-            final AppCatalogJobClient<CatalogEvent> appDataService
+            final AppCatalogJobClient appDataService
     ) {
         super(settings, processSettings, factory, taskScheduler, appDataService);
         this.xmlConverter = xmlConverter;
@@ -92,11 +91,10 @@ public class LevelProductsJobDispatcher extends AbstractJobsDispatcher {
     }
 
     @Override
-    protected List<String> getTaskTables(final AppDataJob<CatalogEvent> job)
+    protected List<String> getTaskTables(final AppDataJob job)
             throws IpfPrepWorkerMissingRoutingEntryException {
         final List<String> taskTables = new ArrayList<>();
-        final String key = job.getProduct().getAcquisition() + "_"
-                + job.getProduct().getSatelliteId();
+        final String key = job.getProduct().getAcquisition() + "_"+ job.getProduct().getSatelliteId();
         LOGGER.debug("Searching tasktable for {}", key);
         routingMap.forEach((k,v) -> {
             if (k.matcher(key).matches()) {

@@ -1,5 +1,6 @@
 package esa.s1pdgs.cpoc.appcatalog.server.rest;
 
+import static org.junit.Assert.assertEquals;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.times;
@@ -20,16 +21,8 @@ import org.springframework.data.domain.Sort;
 import org.springframework.data.domain.Sort.Direction;
 
 import esa.s1pdgs.cpoc.appcatalog.AppDataJob;
-import esa.s1pdgs.cpoc.appcatalog.server.config.JobControllerConfiguration;
-import esa.s1pdgs.cpoc.appcatalog.server.job.exception.AppCatalogJobGenerationInvalidStateException;
-import esa.s1pdgs.cpoc.appcatalog.server.job.exception.AppCatalogJobInvalidStateException;
-import esa.s1pdgs.cpoc.appcatalog.server.job.exception.AppCatalogJobNotFoundException;
-import esa.s1pdgs.cpoc.appcatalog.server.rest.JobController;
 import esa.s1pdgs.cpoc.appcatalog.server.service.AppDataJobService;
-import esa.s1pdgs.cpoc.common.ProductCategory;
-import esa.s1pdgs.cpoc.common.errors.InternalErrorException;
 import esa.s1pdgs.cpoc.common.filter.FilterCriterion;
-import esa.s1pdgs.cpoc.mqi.model.queue.IngestionEvent;
 
 public class JobControllerTest extends RestControllerTest{
 
@@ -42,26 +35,29 @@ public class JobControllerTest extends RestControllerTest{
     @Before
     public void init() throws IOException {
         MockitoAnnotations.initMocks(this);
-        this.jobController = new JobController(appDataJobService, new JobControllerConfiguration());
-        this.initMockMvc(this.jobController);
+        jobController = new JobController(appDataJobService);
+        this.initMockMvc(jobController);
     }
     
     @Test
     public void deleteJobTest() throws Exception {
         doNothing().when(appDataJobService).deleteJob(Mockito.eq(123L));
-        this.jobController.deleteJob(123L);
+        jobController.deleteJob(123L);
     }
     
     @Test
-    public void patchJobTest() throws AppCatalogJobInvalidStateException, AppCatalogJobGenerationInvalidStateException, AppCatalogJobNotFoundException {
-        doReturn(new AppDataJob<IngestionEvent>()).when(appDataJobService).patchJob(Mockito.anyLong(), Mockito.any());
-       // FIXME
-        //this.jobController.patchJob(ProductCategory.LEVEL_JOBS.toString().toLowerCase(), 123L, new AppDataJob<IngestionEvent>());
+    public void patchJobTest() throws Exception {
+        final long jobId = 1377;
+    	doReturn(new AppDataJob(jobId))
+        	.when(appDataJobService)
+        	.updateJob(Mockito.any());    	
+    	final AppDataJob actual = jobController.update(jobId, new AppDataJob(jobId));
+    	assertEquals(jobId, actual.getId());
     }
     
     @Test
-    public void searchTest() throws AppCatalogJobNotFoundException, AppCatalogJobInvalidStateException, AppCatalogJobGenerationInvalidStateException, InternalErrorException {
-        Map<String, String> params = new HashMap<>();
+    public void searchTest() throws Exception {
+        final Map<String, String> params = new HashMap<>();
         params.put("[orderByAsc]", "valueFilter");
         params.put("[orderByDesc]", "valueFilter1");
         params.put("_id", "124");
@@ -69,20 +65,22 @@ public class JobControllerTest extends RestControllerTest{
         params.put("creationDate", "20180227T104128");
         params.put("product.stopTime", "20180227T104128");
         
-        List<FilterCriterion> filters = new ArrayList<>();
+        final List<FilterCriterion> filters = new ArrayList<>();
         filters.add(new FilterCriterion("product.stopTime", jobController.convertDateIso("20180227T104128")));
         filters.add(new FilterCriterion("_id", 124L));
         filters.add(new FilterCriterion("creationDate", jobController.convertDateIso("20180227T104128")));
         filters.add(new FilterCriterion("messages.id", 124L));
         
-        List<AppDataJob> jobsDb = new ArrayList<>();
-        doReturn(jobsDb).when(appDataJobService).search(Mockito.any(), Mockito.any(), Mockito.any());
-                
-        this.jobController.search(ProductCategory.LEVEL_JOBS.toString().toLowerCase(), params);
+        final List<AppDataJob> jobsDb = new ArrayList<>();
         
-        verify(appDataJobService, times(1)).search(Mockito.eq(filters), 
-                Mockito.eq(ProductCategory.LEVEL_JOBS), 
-                Mockito.eq(new Sort(Direction.DESC, "valueFilter1")));        
+        doReturn(jobsDb)
+        	.when(appDataJobService)
+        	.search(Mockito.any(), Mockito.any());
+                
+        jobController.search(params);
+        
+        verify(appDataJobService, times(1))
+        	.search(Mockito.eq(filters), Mockito.eq(new Sort(Direction.DESC, "valueFilter1")));        
        
     }
     

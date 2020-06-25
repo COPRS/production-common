@@ -11,13 +11,16 @@ mongodb:
   database: databaseName
   old-entry-ms: 86400000
   clean-cron: 0 0 0 * * *
+
 mqi:
   max-retries: 3
   dft-offset: -2
+  
 status:
   delete-fixed-delay-ms: 3000
   max-error-counter-mqi: 3
   max-error-counter-job: 3
+
 jobs:
   cleaning-jobs-terminated-fixed-rate-ms: 600000
   cleaning-jobs-invalid-fixed-rate-ms: 18000000

@@ -8,11 +8,9 @@ import org.springframework.data.domain.Sort;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
-import org.springframework.data.mongodb.core.query.Update;
 import org.springframework.stereotype.Repository;
 
 import esa.s1pdgs.cpoc.appcatalog.AppDataJob;
-import esa.s1pdgs.cpoc.appcatalog.AppDataJobGeneration;
 import esa.s1pdgs.cpoc.common.filter.FilterCriterion;
 
 @Repository
@@ -66,19 +64,5 @@ public class AppDataJobRepositoryImpl implements AppDataJobRepositoryCustom {
             query.with(sort);
         }
         return mongoTemplate.find(query, AppDataJob.class);
-    }
-
-    @Override
-    public AppDataJob updateJobGeneration(final Long jobId, final AppDataJobGeneration newGeneration) {
-        final Query query = new Query();
-        query.addCriteria(Criteria.where("_id").is(jobId))
-             .addCriteria(Criteria.where("generations.taskTable").is(newGeneration.getTaskTable()));
-        
-        final Update update = new Update();
-        update.set("generations.$.lastUpdateDate", newGeneration.getLastUpdateDate());
-        update.set("generations.$.state", newGeneration.getState());
-        update.set("generations.$.nbErrors", newGeneration.getNbErrors());
-        mongoTemplate.updateFirst(query, update, AppDataJob.class);
-        return mongoTemplate.findOne(query, AppDataJob.class);
     }
 }

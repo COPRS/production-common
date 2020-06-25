@@ -34,7 +34,7 @@ public class L0SegmentAppJobDispatcher extends AbstractJobsDispatcher {
             final ProcessSettings processSettings,
             final JobsGeneratorFactory factory,
             final ThreadPoolTaskScheduler taskScheduler,
-            final AppCatalogJobClient<CatalogEvent> appDataService
+            final AppCatalogJobClient appDataService
     ) {
         super(settings, processSettings, factory, taskScheduler, appDataService);
     }

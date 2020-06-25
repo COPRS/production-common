@@ -182,7 +182,7 @@ public class TestL0Utils {
         gen1.setTaskTable("TaskTable.AIOP.xml");
         gen1.setState(AppDataJobGenerationState.INITIAL);
         gen1.setCreationDate(new Date(0L));
-        ret.setGenerations(Arrays.asList(gen1));
+        ret.setGeneration(gen1);
 
         return ret;
     }

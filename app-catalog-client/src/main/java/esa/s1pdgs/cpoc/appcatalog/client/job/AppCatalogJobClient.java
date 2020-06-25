@@ -28,7 +28,6 @@ import esa.s1pdgs.cpoc.common.errors.appcatalog.AppCatalogJobPatchApiError;
 import esa.s1pdgs.cpoc.common.errors.appcatalog.AppCatalogJobPatchGenerationApiError;
 import esa.s1pdgs.cpoc.common.errors.appcatalog.AppCatalogJobSearchApiError;
 import esa.s1pdgs.cpoc.common.utils.LogUtils;
-import esa.s1pdgs.cpoc.mqi.model.queue.AbstractMessage;
 
 /**
  * Generic client for requesting applicative catalog around job applicative data
@@ -37,7 +36,7 @@ import esa.s1pdgs.cpoc.mqi.model.queue.AbstractMessage;
  * @param <T>
  *            the type of the DTO objects used for a product category
  */
-public class AppCatalogJobClient<E extends AbstractMessage> {
+public class AppCatalogJobClient {
 
     /**
      * Logger
@@ -348,24 +347,18 @@ public class AppCatalogJobClient<E extends AbstractMessage> {
      * @return
      * @throws AbstractCodedException
      */
-	public AppDataJob patchTaskTableOfJob(
-			final long identifier,
-            final String taskTable, 
-            final AppDataJobGenerationState state
-    ) throws AbstractCodedException {
+	public AppDataJob updateJobGeneration(final long identifier,final AppDataJobGeneration jobGeneration) 
+			throws AbstractCodedException {
         int retries = 0;
         while (true) {
             retries++;
-            final String uri = hostUri + "/jobs/" + identifier + "/generations/" + taskTable;
-            final AppDataJobGeneration body = new AppDataJobGeneration();
-            body.setTaskTable(taskTable);
-            body.setState(state);
+            final String uri = hostUri + "/jobs/" + identifier + "/generation";
             LogUtils.traceLog(LOGGER, String.format("[uri %s]", uri));
             try {          	
                 final ResponseEntity<AppDataJob> response = restTemplate.exchange(
                 		uri, 
                 		HttpMethod.PATCH,
-                		new HttpEntity<AppDataJobGeneration>(body),
+                		new HttpEntity<AppDataJobGeneration>(jobGeneration),
                 		new ParameterizedTypeReference<AppDataJob>() {}
                 );
                 if (response.getStatusCode() == HttpStatus.OK) {
@@ -374,14 +367,14 @@ public class AppCatalogJobClient<E extends AbstractMessage> {
                     return response.getBody();
                 } else {
                     waitOrThrow(retries,
-                            new AppCatalogJobPatchGenerationApiError(uri, body,
+                            new AppCatalogJobPatchGenerationApiError(uri, jobGeneration,
                                     "HTTP status code "
                                             + response.getStatusCode()),
                             "patch");
                 }
             } catch (final HttpStatusCodeException hsce) {
                 waitOrThrow(retries, new AppCatalogJobPatchGenerationApiError(
-                        uri, body,
+                        uri, jobGeneration,
                         String.format(
                                 "HttpStatusCodeException occured: %s - %s",
                                 hsce.getStatusCode(),
@@ -389,7 +382,7 @@ public class AppCatalogJobClient<E extends AbstractMessage> {
                         "patch");
             } catch (final RestClientException rce) {
                 waitOrThrow(retries,
-                        new AppCatalogJobPatchGenerationApiError(uri, body,
+                        new AppCatalogJobPatchGenerationApiError(uri, jobGeneration,
                                 String.format(
                                         "HttpStatusCodeException occured: %s",
                                         rce.getMessage()),

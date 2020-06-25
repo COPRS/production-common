@@ -83,7 +83,7 @@ import esa.s1pdgs.cpoc.report.message.output.JobOrderReportingOutput;
  * 
  * @author Cyrielle Gailliard
  */
-public abstract class AbstractJobsGenerator implements Runnable {
+public abstract class AbstractJobsGenerator implements JobGenerator, Runnable {
 	static final class ElementMapper
 	{
 		private final ProcessSettings l0ProcessSettings;

@@ -15,7 +15,6 @@ import esa.s1pdgs.cpoc.common.ProductCategory;
 import esa.s1pdgs.cpoc.errorrepo.ErrorRepoAppender;
 import esa.s1pdgs.cpoc.metadata.client.MetadataClient;
 import esa.s1pdgs.cpoc.mqi.client.GenericMqiClient;
-import esa.s1pdgs.cpoc.mqi.model.queue.CatalogEvent;
 import esa.s1pdgs.cpoc.production.trigger.appcat.AppCatAdapter;
 import esa.s1pdgs.cpoc.production.trigger.consumption.EdrsSessionConsumer;
 import esa.s1pdgs.cpoc.production.trigger.consumption.L0SegmentConsumer;
@@ -76,15 +75,23 @@ public class TriggerConfig {
 		}
 		return res;
 	}
-
-	@Bean	
-	public GenericConsumer newConsumer(@Autowired final ProductTypeConsumptionHandler handler) {		
-		final AppCatalogJobClient<CatalogEvent> appCatClient = new AppCatalogJobClient<>(
+	
+	@Bean
+	public AppCatalogJobClient appCatClient() {
+		return new AppCatalogJobClient(
 				restTemplate, 
 				properties.getHostUri(), 
 				properties.getMaxRetries(), 
 				properties.getTempoRetryMs()
-		);		
+		);	
+	}
+	
+	@Bean	
+	@Autowired
+	public GenericConsumer newConsumer( 
+			final ProductTypeConsumptionHandler handler,
+			final AppCatalogJobClient appCatClient
+	) {		
 		return new GenericConsumer(
 				processSettings, 
 				mqiService, 

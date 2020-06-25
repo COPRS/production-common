@@ -25,7 +25,6 @@ import esa.s1pdgs.cpoc.ipf.preparation.worker.config.IpfPreparationWorkerSetting
 import esa.s1pdgs.cpoc.ipf.preparation.worker.config.ProcessSettings;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.model.joborder.JobsGeneratorFactory;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.report.TaskTableLookupReportingOutput;
-import esa.s1pdgs.cpoc.mqi.model.queue.CatalogEvent;
 import esa.s1pdgs.cpoc.mqi.model.queue.IpfPreparationJob;
 import esa.s1pdgs.cpoc.mqi.model.rest.GenericMessageDto;
 import esa.s1pdgs.cpoc.report.Reporting;
@@ -49,7 +48,7 @@ import esa.s1pdgs.cpoc.report.ReportingUtils;
  * 
  * @param <T>
  */
-public abstract class AbstractJobsDispatcher {
+public abstract class AbstractJobsDispatcher implements JobDispatcher {
 
     /**
      * Logger
@@ -85,7 +84,7 @@ public abstract class AbstractJobsDispatcher {
     /**
      * Applicative data service
      */
-    protected final AppCatalogJobClient<CatalogEvent> appDataService;
+    protected final AppCatalogJobClient appDataService;
 
     /**
      * Constructor
@@ -94,11 +93,13 @@ public abstract class AbstractJobsDispatcher {
      * @param factory
      * @param taskScheduler
      */
-    public AbstractJobsDispatcher(final IpfPreparationWorkerSettings settings,
+    public AbstractJobsDispatcher(
+    		final IpfPreparationWorkerSettings settings,
             final ProcessSettings processSettings,
             final JobsGeneratorFactory factory,
             final ThreadPoolTaskScheduler taskScheduler,
-            final AppCatalogJobClient<CatalogEvent> appDataService) {
+            final AppCatalogJobClient appDataService
+    ) {
         this.factory = factory;
         this.settings = settings;
         this.processSettings = processSettings;
@@ -124,8 +125,7 @@ public abstract class AbstractJobsDispatcher {
         if (directoryXml != null && directoryXml.isDirectory()) {
             final File[] taskTableFiles = directoryXml.listFiles(parameter -> parameter.isFile());
             if (taskTableFiles != null) {
-                if (taskTableFiles.length > this.settings
-                        .getMaxnboftasktable()) {
+                if (taskTableFiles.length > this.settings.getMaxnboftasktable()) {
                     throw new IpfPrepWorkerMaxNumberTaskTablesReachException(
                             String.format("Too much task tables %d",
                                     taskTableFiles.length));
@@ -140,14 +140,16 @@ public abstract class AbstractJobsDispatcher {
         // FIXME: check if test code below can be removed from operational code
         // Dispatch existing job with current task table configuration
         if (processSettings.getMode() != ApplicationMode.TEST) {
-            final List<AppDataJob<CatalogEvent>> generatingJobs = appDataService
-                    .findByPodAndState(processSettings.getTriggerHostname(), AppDataJobState.GENERATING);
+            final List<AppDataJob> generatingJobs = appDataService.findByPodAndState(
+            		processSettings.getTriggerHostname(), 
+            		AppDataJobState.GENERATING
+            );
             if (!CollectionUtils.isEmpty(generatingJobs)) {
-                for (final AppDataJob<CatalogEvent> generation : generatingJobs) {
+                for (final AppDataJob job : generatingJobs) {
                     // TODO ask if bypass error
                 	final GenericMessageDto<IpfPreparationJob> mess = new GenericMessageDto<IpfPreparationJob>();
                 	final IpfPreparationJob prepJob = new IpfPreparationJob();
-                	prepJob.setAppDataJob(generation);
+                	prepJob.setAppDataJob(job);
                 	mess.setBody(prepJob);
                     dispatch(mess);
                 }
@@ -183,7 +185,7 @@ public abstract class AbstractJobsDispatcher {
      */
     public void dispatch(final GenericMessageDto<IpfPreparationJob> message) throws Exception {
     	final IpfPreparationJob prepJob = message.getBody();
-    	final AppDataJob<CatalogEvent> job = prepJob.getAppDataJob();    	
+    	final AppDataJob job = prepJob.getAppDataJob();    	
     	LOGGER.trace("== dispatch job {}", job.toString());
         
         final Reporting reporting = ReportingUtils.newReportingBuilder()
@@ -272,7 +274,7 @@ public abstract class AbstractJobsDispatcher {
     /**
      * Get task tables to generate for given job
      */
-    protected abstract List<String> getTaskTables(final AppDataJob<CatalogEvent> job)
+    protected abstract List<String> getTaskTables(final AppDataJob job)
             throws AbstractCodedException;
 
     /**

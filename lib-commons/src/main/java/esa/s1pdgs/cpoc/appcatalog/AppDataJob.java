@@ -59,7 +59,7 @@ public class AppDataJob {
     /**
      * Generations of the job
      */
-    private List<AppDataJobGeneration> generations;
+    private AppDataJobGeneration generation;
     
     private UUID reportingId;
     
@@ -67,16 +67,21 @@ public class AppDataJob {
     
     private String prepJobInputQueue;
     
-
+    public AppDataJob(final long id) {
+    	this();
+    	this.id = id;
+    }
+    
     /**
      * 
      */
     public AppDataJob() {
-        super();
         this.state = AppDataJobState.WAITING;
         this.messages = new ArrayList<>();
-        this.generations = new ArrayList<>();
+        this.generation = new AppDataJobGeneration();
     }
+    
+    
 
 	public long getId() {
 		return id;
@@ -194,16 +199,16 @@ public class AppDataJob {
     /**
      * @return the generations
      */
-    public List<AppDataJobGeneration> getGenerations() {
-        return generations;
+    public AppDataJobGeneration getGeneration() {
+        return generation;
     }
 
     /**
      * @param generations
      *            the generations to set
      */
-    public void setGenerations(final List<AppDataJobGeneration> generations) {
-        this.generations = generations;
+    public void setGeneration(final AppDataJobGeneration generation) {
+        this.generation = generation;
     }
     
     public UUID getReportingId() {
@@ -237,14 +242,14 @@ public class AppDataJob {
     @Override
     public int hashCode() {
         return Objects.hash(id, level, pod, state,
-                creationDate, lastUpdateDate, messages, product, generations, reportingId, prepJobInputQueue, prepJobMessageId);
+                creationDate, lastUpdateDate, messages, product, generation, reportingId, prepJobInputQueue, prepJobMessageId);
     }
     
     @Override
 	public String toString() {
 		return "AppDataJob [id=" + id + ", level=" + level + ", pod=" + pod + ", state="
 				+ state + ", creationDate=" + creationDate + ", lastUpdateDate=" + lastUpdateDate + ", messages="
-				+ messages + ", product=" + product + ", generations=" + generations + ", reportingId=" + reportingId
+				+ messages + ", product=" + product + ", generation=" + generation + ", reportingId=" + reportingId
 				+ ", prepJobMessageId=" + prepJobMessageId + ", prepJobInputQueue=" + prepJobInputQueue + "]";
 	}
 
@@ -268,7 +273,7 @@ public class AppDataJob {
                     && Objects.equals(lastUpdateDate, other.lastUpdateDate)
                     && Objects.equals(messages, other.messages)
                     && Objects.equals(product, other.product)
-                    && Objects.equals(generations, other.generations)
+                    && Objects.equals(generation, other.generation)
                     && Objects.equals(prepJobInputQueue, other.prepJobInputQueue)
                     && Objects.equals(prepJobMessageId, other.prepJobMessageId)
                     && Objects.equals(reportingId, other.reportingId);

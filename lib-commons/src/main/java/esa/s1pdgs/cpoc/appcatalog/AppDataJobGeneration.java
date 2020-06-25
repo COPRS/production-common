@@ -9,7 +9,6 @@ import java.util.Objects;
  * @author Viveris Technologies
  */
 public class AppDataJobGeneration {
-
     /**
      * Date of the creation of the job generation
      */

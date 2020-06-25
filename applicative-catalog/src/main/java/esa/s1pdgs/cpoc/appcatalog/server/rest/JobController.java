@@ -11,7 +11,6 @@ import java.util.Map;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.domain.Sort.Direction;
 import org.springframework.http.MediaType;
@@ -28,11 +27,9 @@ import com.fasterxml.jackson.databind.JsonMappingException;
 
 import esa.s1pdgs.cpoc.appcatalog.AppDataJob;
 import esa.s1pdgs.cpoc.appcatalog.AppDataJobGeneration;
-import esa.s1pdgs.cpoc.appcatalog.server.config.JobControllerConfiguration;
 import esa.s1pdgs.cpoc.appcatalog.server.job.exception.AppCatalogJobGenerationInvalidStateException;
 import esa.s1pdgs.cpoc.appcatalog.server.job.exception.AppCatalogJobGenerationInvalidTransitionStateException;
 import esa.s1pdgs.cpoc.appcatalog.server.job.exception.AppCatalogJobGenerationNotFoundException;
-import esa.s1pdgs.cpoc.appcatalog.server.job.exception.AppCatalogJobGenerationTerminatedException;
 import esa.s1pdgs.cpoc.appcatalog.server.job.exception.AppCatalogJobInvalidStateException;
 import esa.s1pdgs.cpoc.appcatalog.server.job.exception.AppCatalogJobNotFoundException;
 import esa.s1pdgs.cpoc.appcatalog.server.service.AppDataJobService;
@@ -45,7 +42,6 @@ import esa.s1pdgs.cpoc.common.utils.LogUtils;
  * @author Viveris Technologies
  */
 @RestController
-@EnableConfigurationProperties(JobControllerConfiguration.class)
 public class JobController {
     private static final Logger LOGGER = LogManager.getLogger(JobController.class);
 
@@ -60,38 +56,13 @@ public class JobController {
     private final static String PK_MESSAGES_ID = "messages.id";
     private final static String PK_PRODUCT_START = "product.startTime";
     private final static String PK_PRODUCT_STOP = "product.stopTime";
-    
-    private final JobControllerConfiguration config;
 
-    /**
-     * Constructor
-     * 
-     * @param appDataJobService
-     */
-    public JobController(
-    		final AppDataJobService appDataJobService,
-            final JobControllerConfiguration config
-    ) {
+    public JobController(final AppDataJobService appDataJobService) {
         this.appDataJobService = appDataJobService;
-        this.config = config;
     }
 
-    /**
-     * Search for jobs
-     * 
-     * @param params
-     * @return
-     * @throws AppCatalogJobNotFoundException
-     * @throws AppCatalogJobInvalidStateException
-     * @throws AppCatalogJobGenerationInvalidStateException
-     * @throws InternalErrorException
-     */
     @RequestMapping(method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_UTF8_VALUE, path = "/jobs/search")
-    public List<AppDataJob> search(@RequestParam final Map<String, String> params)
-            throws AppCatalogJobNotFoundException,
-            AppCatalogJobInvalidStateException,
-            AppCatalogJobGenerationInvalidStateException,
-            InternalErrorException {
+    public List<AppDataJob> search(@RequestParam final Map<String, String> params) throws  InternalErrorException {
         // Extract criterion
         final List<FilterCriterion> filters = new ArrayList<>();
         Sort sort = null;
@@ -125,96 +96,42 @@ public class JobController {
                     break;
             }
         }
-        // Search
-        LOGGER.trace ("performing search for input: {} {} {}", filters, sort);
+        LOGGER.trace("performing search for input: {} {} {}", filters, sort);
         final List<AppDataJob> result = appDataJobService.search(filters, sort);
-        LOGGER.trace ("search result: {}", result);
+        LOGGER.trace("search result: {}", result);
         return result;
     }
 
-    /**
-     * Get one job
-     * 
-     * @param jobId
-     * @return
-     * @throws AppCatalogJobNotFoundException
-     * @throws AppCatalogJobGenerationInvalidStateException
-     * @throws AppCatalogJobInvalidStateException
-     */
     @RequestMapping(method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_UTF8_VALUE, path = "/jobs/{jobId}")
-    public AppDataJob one(@PathVariable(name = "jobId") final Long jobId)
-            throws AppCatalogJobNotFoundException,
-            AppCatalogJobInvalidStateException,
-            AppCatalogJobGenerationInvalidStateException {
-    	final AppDataJob result= appDataJobService.getJob(jobId);
-        LOGGER.debug ("Result found for AppDataJob: {}", jobId);
-    	return result;
+    public AppDataJob get(@PathVariable(name = "jobId") final Long jobId)
+            throws AppCatalogJobNotFoundException {
+    	return appDataJobService.getJob(jobId);
     }
 
-    /**
-     * Create a job
-     * 
-     * @param newJob
-     * @return
-     * @throws AppCatalogJobInvalidStateException
-     * @throws AppCatalogJobGenerationInvalidStateException
-     * @throws IOException 
-     * @throws JsonMappingException 
-     * @throws JsonParseException 
-     */
     @RequestMapping(method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE, path = "/jobs")
-    public AppDataJob newJob(@RequestBody final AppDataJob newJob){  	
-    	LOGGER.debug ("== newJob {}",newJob.toString());
-    	// Create it
-    	final AppDataJob jobResult = appDataJobService.newJob(newJob);
-    	LOGGER.debug ("== jobResult {}", jobResult.toString());
-
-        return jobResult;
+    public AppDataJob newJob(@RequestBody final AppDataJob newJob) {  	
+    	return appDataJobService.newJob(newJob);
     }
-//    
-//    @RequestMapping(method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE, path = "/jobs/{jobId}/mess")
-//    public AppDataJob addMessage(
-//    		@PathVariable(name = "jobId") final Long jobId,
-//    		@RequestBody final GenericMessageDto<CatalogEvent> mess
-//    ) throws AppCatalogJobNotFoundException { 
-//        return appDataJobService.addMessageToJob(jobId, mess);
-//    }
-    
-    /**
-     * Delete a job
-     * 
-     * @param jobId
-     */
+
     @DeleteMapping("/{jobId}")
     public void deleteJob(@PathVariable final Long jobId) {
         appDataJobService.deleteJob(jobId);
     }
 
-    /**
-     * Patch a job
-     * 
-     * @param jobId
-     * @param patchJob
-     * @return
-     * @throws AppCatalogJobInvalidStateException
-     * @throws AppCatalogJobNotFoundException
-     * @throws AppCatalogJobGenerationInvalidStateException
-     * @throws IOException 
-     * @throws JsonMappingException 
-     * @throws JsonParseException 
-     */
     @RequestMapping(method = RequestMethod.PATCH, produces = MediaType.APPLICATION_JSON_UTF8_VALUE, path = "/jobs/{jobId}")
-    public AppDataJob patchJob(
+    public AppDataJob update(
             @PathVariable(name = "jobId") final Long jobId,
-            @RequestBody final AppDataJob patchJob)
+            @RequestBody final AppDataJob patchJob
+    )
             throws AppCatalogJobInvalidStateException,
             AppCatalogJobNotFoundException,
             AppCatalogJobGenerationInvalidStateException, JsonParseException, JsonMappingException, IOException {
 
     	try {
-    	 	LOGGER.debug ("patching Job {}, {}",jobId,patchJob);
-			final AppDataJob job = appDataJobService.patchJob(jobId,patchJob);		
-    	 	LOGGER.debug ("job patched {}, {}",jobId,job);
+    	 	LOGGER.trace("patching Job {}, {}",jobId, patchJob);
+    	 	patchJob.setId(jobId);
+			final AppDataJob job = appDataJobService.updateJob(patchJob);	
+    	 	LOGGER.trace("job patched {}, {}", jobId, job);
 			return job;
 		} catch (final Exception e) {
 			LOGGER.error("Exception occured while patching job: {}", LogUtils.toString(e));
@@ -237,26 +154,12 @@ public class JobController {
      * @throws AppCatalogJobGenerationNotFoundException
      * @throws AppCatalogJobGenerationInvalidTransitionStateException
      */
-    @RequestMapping(method = RequestMethod.PATCH, produces = MediaType.APPLICATION_JSON_UTF8_VALUE, path = "/jobs/{jobId}/generations/{taskTable}")
-    public AppDataJob patchGenerationOfJob(
+    @RequestMapping(method = RequestMethod.PATCH, produces = MediaType.APPLICATION_JSON_UTF8_VALUE, path = "/jobs/{jobId}/generation")
+    public AppDataJob updateJobGeneration(
             @PathVariable(name = "jobId") final Long jobId,
-            @PathVariable(name = "taskTable") final String taskTable,
-            @RequestBody final AppDataJobGeneration generation)
-            throws AppCatalogJobInvalidStateException,
-            AppCatalogJobGenerationInvalidStateException,
-            AppCatalogJobNotFoundException,
-            AppCatalogJobGenerationInvalidTransitionStateException,
-            AppCatalogJobGenerationNotFoundException {
-        AppDataJob ret = null;
-        try {
-            ret = appDataJobService.patchGenerationToJob(jobId, taskTable, generation,
-                            getFor(generation.get, generation.getState()));
-        } catch (final AppCatalogJobGenerationTerminatedException e) {
-            LOGGER.error("[jobId {}] [taskTable {}] [code {}] {}", jobId,
-                    taskTable, e.getCode().getCode(), e.getLogMessage());
-            // TODO publish error message in kafka
-        }
-        return ret;
+            @RequestBody final AppDataJobGeneration generation
+    ) throws AppCatalogJobNotFoundException {
+        return appDataJobService.updateJobGeneration(jobId, generation);
     }
     
     final Date convertDateIso(final String dateStr)

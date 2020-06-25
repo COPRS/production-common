@@ -54,7 +54,7 @@ public class AppCatalogJobClientTest {
     /**
      * Client to test
      */
-    private AppCatalogJobClient<CatalogEvent> client;
+    private AppCatalogJobClient client;
     
     private static final CatalogEvent DUMMY = new CatalogEvent();
 
@@ -64,7 +64,7 @@ public class AppCatalogJobClientTest {
     @Before
     public void init() {
         MockitoAnnotations.initMocks(this);
-        client = new AppCatalogJobClient<>(restTemplate, "http://localhost:8080", 3, 200);
+        client = new AppCatalogJobClient(restTemplate, "http://localhost:8080", 3, 200);
     }
 
     @Test
@@ -176,11 +176,7 @@ public class AppCatalogJobClientTest {
         gen1.setTaskTable("tasktable1");
         gen1.setState(AppDataJobGenerationState.INITIAL);
         gen1.setCreationDate(new Date(0L));
-        final AppDataJobGeneration gen2 = new AppDataJobGeneration();
-        gen2.setTaskTable("tasktable2");
-        gen2.setState(AppDataJobGenerationState.READY);
-        gen2.setCreationDate(new Date(0L));
-        job.setGenerations(Arrays.asList(gen1, gen2));
+        job.setGeneration(gen1);
         return job;
     }
 
@@ -273,7 +269,7 @@ public class AppCatalogJobClientTest {
     	);        
         assertEquals(job.getMessages().size(), result.getMessages().size());
         assertEquals(job.getProduct(), result.getProduct());
-        assertEquals(job.getGenerations(), result.getGenerations());
+        assertEquals(job.getGeneration(), result.getGeneration());
     }
         
     @SuppressWarnings("unchecked")
@@ -287,10 +283,9 @@ public class AppCatalogJobClientTest {
 	            Mockito.any(HttpEntity.class),
 	            Mockito.any(ParameterizedTypeReference.class)
 	    );   
-        client.patchTaskTableOfJob(
+        client.updateJobGeneration(
         		job.getId(),
-                job.getGenerations().get(0).getTaskTable(),
-                AppDataJobGenerationState.SENT
+                job.getGeneration()
         );
 	}
 
@@ -305,13 +300,12 @@ public class AppCatalogJobClientTest {
 	                Mockito.any(HttpEntity.class),
 	                Mockito.any(ParameterizedTypeReference.class)
 	    );
-	    client.patchTaskTableOfJob(
+	    client.updateJobGeneration(
                 job.getId(), 
-                "tasktable2",
-                AppDataJobGenerationState.SENT
+                job.getGeneration()
         );
 	    verify(restTemplate, times(1)).exchange(
-	            Mockito.eq("http://localhost:8080/jobs/142/generations/tasktable2"),
+	            Mockito.eq("http://localhost:8080/jobs/142/generation"),
 	            Mockito.eq(HttpMethod.PATCH),
 	            Mockito.any(),
 	              Mockito.eq(new ParameterizedTypeReference<AppDataJob>() {})

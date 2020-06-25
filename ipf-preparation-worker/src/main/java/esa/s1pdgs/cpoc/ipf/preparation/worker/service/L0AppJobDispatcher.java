@@ -15,7 +15,6 @@ import esa.s1pdgs.cpoc.ipf.preparation.worker.config.IpfPreparationWorkerSetting
 import esa.s1pdgs.cpoc.ipf.preparation.worker.config.ProcessSettings;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.model.joborder.JobsGeneratorFactory;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.model.joborder.JobsGeneratorFactory.JobGenType;
-import esa.s1pdgs.cpoc.mqi.model.queue.CatalogEvent;
 
 /**
  * Dispatcher of EdrsSession product<br/>
@@ -31,7 +30,7 @@ public class L0AppJobDispatcher extends AbstractJobsDispatcher {
             final ProcessSettings processSettings,
             final JobsGeneratorFactory factory,
             final ThreadPoolTaskScheduler taskScheduler,
-            final AppCatalogJobClient<CatalogEvent> appDataService
+            final AppCatalogJobClient appDataService
             ) {
         super(settings, processSettings, factory, taskScheduler, appDataService);
     }
@@ -50,7 +49,7 @@ public class L0AppJobDispatcher extends AbstractJobsDispatcher {
     }
 
     @Override
-    protected List<String> getTaskTables(final AppDataJob<CatalogEvent> job) {
+    protected List<String> getTaskTables(final AppDataJob job) {
         return Arrays.asList(TASK_TABLE_NAME);
     }
 }
