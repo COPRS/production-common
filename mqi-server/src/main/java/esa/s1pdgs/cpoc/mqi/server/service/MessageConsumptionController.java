@@ -12,7 +12,6 @@ import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 
-import esa.s1pdgs.cpoc.appcatalog.client.mqi.AppCatalogMqiService;
 import esa.s1pdgs.cpoc.appcatalog.rest.AppCatMessageDto;
 import esa.s1pdgs.cpoc.appcatalog.rest.AppCatSendMessageDto;
 import esa.s1pdgs.cpoc.appstatus.AppStatus;
@@ -37,7 +36,7 @@ import esa.s1pdgs.cpoc.mqi.server.consumption.kafka.consumer.GenericConsumer.Fac
  * @author Viveris Technologies
  */
 @Controller
-public class MessageConsumptionController {
+public class MessageConsumptionController<T extends AbstractMessage> {
 
     /**
      * Logger
@@ -55,21 +54,21 @@ public class MessageConsumptionController {
     private final ApplicationProperties appProperties;
    
     
-    private final MessagePersistence messagePersistence;
+    private final MessagePersistence<T> messagePersistence;
 
     /**
      * Service for checking if a message is processing or not by another
      */
     private final OtherApplicationService otherAppService;
     
-    private final GenericConsumer.Factory consumerFactory;
+    private final GenericConsumer.Factory<T> consumerFactory;
     
     MessageConsumptionController(
     		final Map<ProductCategory, Map<String, GenericConsumer<?>>> consumers,
 			final ApplicationProperties appProperties, 
-			final MessagePersistence messagePersistence,
+			final MessagePersistence<T> messagePersistence,
 			final OtherApplicationService otherAppService,
-			final Factory consumerFactory
+			final Factory<T> consumerFactory
 	) {
 		this.consumers = consumers;
 		this.appProperties = appProperties;
@@ -82,7 +81,7 @@ public class MessageConsumptionController {
     public MessageConsumptionController(
             final ApplicationProperties appProperties,
             final KafkaProperties kafkaProperties,
-            final MessagePersistence messagePersistence,
+            final MessagePersistence<T> messagePersistence,
             final OtherApplicationService otherAppService,
             final AppStatus appStatus) {
 		this(
@@ -90,7 +89,7 @@ public class MessageConsumptionController {
 				appProperties,
                 messagePersistence,
 				otherAppService, 
-				new GenericConsumer.Factory(kafkaProperties, messagePersistence, otherAppService, appStatus)
+				new GenericConsumer.Factory<>(kafkaProperties, messagePersistence, appStatus)
 		);
     }
 
@@ -177,7 +176,7 @@ public class MessageConsumptionController {
      */
     @SuppressWarnings("unchecked")
     private GenericMessageDto<? extends AbstractMessage> nextMessageByCat(final ProductCategory category) throws AbstractCodedException {
-        final List<AppCatMessageDto<? extends AbstractMessage>> messages = messagePersistence.next(category, appProperties.getHostname());
+        final List<AppCatMessageDto<T>> messages = messagePersistence.next(category, appProperties.getHostname());
         if (messages != null)
         {
             messages.sort(priorityComparatorFor(category));
@@ -194,7 +193,7 @@ public class MessageConsumptionController {
      * @param service app catalog mqi service
      * @throws AbstractCodedException on error
      */
-    protected boolean send(final ProductCategory category, final MessagePersistence service, final AppCatMessageDto<?> message)
+    protected boolean send(final ProductCategory category, final MessagePersistence<T> service, final AppCatMessageDto<?> message)
     		throws AbstractCodedException {
         boolean ret;
         if (message.getState() == MessageState.SEND) {

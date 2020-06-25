@@ -15,7 +15,6 @@ import org.springframework.context.annotation.Configuration;
 
 import esa.s1pdgs.cpoc.appcatalog.client.mqi.AppCatalogMqiService;
 import esa.s1pdgs.cpoc.mqi.model.queue.AbstractMessage;
-import esa.s1pdgs.cpoc.mqi.server.consumption.kafka.consumer.MessageConsumer;
 import esa.s1pdgs.cpoc.mqi.server.service.AppCatalogMessagePersistence;
 import esa.s1pdgs.cpoc.mqi.server.service.InMemoryMessagePersistence;
 import esa.s1pdgs.cpoc.mqi.server.service.MessagePersistence;
@@ -83,9 +82,8 @@ public class PersistenceConfiguration<T extends AbstractMessage> {
     @Bean
     public MessagePersistence<T> messagePersistence(final RestTemplateBuilder builder, final AppCatalogMqiService<T> mqiService, KafkaProperties properties, @Value("${mqi.dft-offset:-3}") final int defaultOffset) {
         if (APP_CATALOG_MESSAGE_PERSISTENCE.getValue().equals(messagePersistenceStrategy)) {
-            final MessageConsumer<T> additionalConsumer = MessageConsumer.nullConsumer();
             final OtherApplicationService otherAppService = checkProcessingOtherApp(builder);
-            return new AppCatalogMessagePersistence<>(mqiService, properties, additionalConsumer, otherAppService);
+            return new AppCatalogMessagePersistence<>(mqiService, properties, otherAppService);
         } else if (IN_MEMORY_MESSAGE_PERSISTENCE.getValue().equals(messagePersistenceStrategy)) {
             return new InMemoryMessagePersistence<>(properties, defaultOffset);
         } else {

@@ -7,17 +7,13 @@ import org.apache.logging.log4j.Logger;
 import org.springframework.kafka.listener.AcknowledgingConsumerAwareMessageListener;
 import org.springframework.kafka.support.Acknowledgment;
 
-import esa.s1pdgs.cpoc.appcatalog.client.mqi.AppCatalogMqiService;
 import esa.s1pdgs.cpoc.appstatus.AppStatus;
 import esa.s1pdgs.cpoc.common.ProductCategory;
 import esa.s1pdgs.cpoc.common.errors.AbstractCodedException;
 import esa.s1pdgs.cpoc.common.utils.LogUtils;
-import esa.s1pdgs.cpoc.mqi.server.config.KafkaProperties;
+import esa.s1pdgs.cpoc.mqi.model.queue.AbstractMessage;
 import esa.s1pdgs.cpoc.mqi.server.consumption.kafka.consumer.GenericConsumer;
-import esa.s1pdgs.cpoc.mqi.server.consumption.kafka.consumer.MessageConsumer;
-import esa.s1pdgs.cpoc.mqi.server.service.AppCatalogMessagePersistence;
 import esa.s1pdgs.cpoc.mqi.server.service.MessagePersistence;
-import esa.s1pdgs.cpoc.mqi.server.service.OtherApplicationService;
 
 /**
  * Kafka message listener<br/>
@@ -31,38 +27,26 @@ import esa.s1pdgs.cpoc.mqi.server.service.OtherApplicationService;
  * @author Viveris Technologies
  * @param <T>
  */
-public final class GenericMessageListener<T> implements AcknowledgingConsumerAwareMessageListener<String, T> {
+public final class GenericMessageListener<T extends AbstractMessage> implements AcknowledgingConsumerAwareMessageListener<String, T> {
 
     private static final Logger LOGGER = LogManager.getLogger(GenericMessageListener.class);
 
-    private final KafkaProperties properties;
-    private final MessagePersistence messagePersistence;
-    /**
-     * Service for checking if a message is processing or not by another
-     */
-    private final OtherApplicationService otherAppService;
-    private final GenericConsumer<T> genericConsumer;
+	private final MessagePersistence<T> messagePersistence;
+	private final GenericConsumer<T> genericConsumer;
     private final AppStatus appStatus;    
     private final ProductCategory category;
-    private final MessageConsumer<T> additionalConsumer;
 
-    public GenericMessageListener(
+	public GenericMessageListener(
     		final ProductCategory category,
-    		final KafkaProperties properties,
-            final MessagePersistence messagePersistence,
-            final OtherApplicationService otherAppService,
+            final MessagePersistence<T> messagePersistence,
             final GenericConsumer<T> genericConsumer,
-            final AppStatus appStatus,
-            final MessageConsumer<T> additionalConsumer
+            final AppStatus appStatus
     ) {
     	this.category = category;
-        this.properties = properties;
-        this.messagePersistence = messagePersistence;
-        this.otherAppService = otherAppService;
-        this.genericConsumer = genericConsumer;
+		this.messagePersistence = messagePersistence;
+		this.genericConsumer = genericConsumer;
         this.appStatus = appStatus;
-        this.additionalConsumer = additionalConsumer;
-    }
+	}
     
 
 

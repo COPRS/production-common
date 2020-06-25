@@ -7,7 +7,6 @@ import static org.mockito.Mockito.*;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
 import java.util.HashMap;
@@ -30,7 +29,6 @@ import org.springframework.kafka.test.rule.KafkaEmbedded;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.junit4.SpringRunner;
 
-import esa.s1pdgs.cpoc.appcatalog.client.mqi.AppCatalogMqiService;
 import esa.s1pdgs.cpoc.appcatalog.rest.AppCatMessageDto;
 import esa.s1pdgs.cpoc.appcatalog.rest.AppCatSendMessageDto;
 import esa.s1pdgs.cpoc.appstatus.AppStatus;
@@ -75,7 +73,7 @@ public class MessageConsumptionControllerTest {
     private KafkaProperties kafkaProperties;
 
     @Mock
-    private MessagePersistence messagePersistence;
+    private MessagePersistence<ProductionEvent> messagePersistence;
 
     @Mock
     private OtherApplicationService otherService;
@@ -84,15 +82,15 @@ public class MessageConsumptionControllerTest {
     protected AppStatus appStatus;
 
     @Autowired
-    private MessageConsumptionController autoManager;
+    private MessageConsumptionController<ProductionEvent> autoManager;
 
-    private MessageConsumptionController manager;
+    private MessageConsumptionController<ProductionEvent> manager;
 
     @Before
     public void init() {
         MockitoAnnotations.initMocks(this);
 
-        manager = new MessageConsumptionController(appProperties,
+        manager = new MessageConsumptionController<>(appProperties,
                 kafkaProperties, messagePersistence, otherService, appStatus);
 
         doReturn("pod-name").when(appProperties).getHostname();
@@ -229,7 +227,6 @@ public class MessageConsumptionControllerTest {
     /**
      * Test nextMessage when no available consumer
      * 
-     * @throws AbstractCodedException
      */
     @Test
     public void testNextMessageWhenCategoryNotInit()
@@ -246,7 +243,6 @@ public class MessageConsumptionControllerTest {
     /**
      * Test nextMessages for all categories when app server return no messages
      * 
-     * @throws AbstractCodedException
      */
     @Test
     public void testNextMessageWhenAppServerReturnNull()
@@ -263,8 +259,6 @@ public class MessageConsumptionControllerTest {
      * Mock and check next message for a given category when server return no
      * messages
      * 
-     * @param category
-     * @throws AbstractCodedException
      */
     private void testNextMessageWhenNoResponse(final ProductCategory category) throws AbstractCodedException {
         doReturn(null, new ArrayList<>()).when(messagePersistence)
@@ -278,16 +272,15 @@ public class MessageConsumptionControllerTest {
     /**
      * Test nextMessages for all categories when app server return no messages
      * 
-     * @throws AbstractCodedException
      */
     @Test
     public void testNextMessage() throws AbstractCodedException {
-        testNextMessage(ProductCategory.AUXILIARY_FILES, 1);
-        testNextMessage(ProductCategory.EDRS_SESSIONS, 2);
-        testNextMessage(ProductCategory.LEVEL_JOBS, 3);
-        testNextMessage(ProductCategory.LEVEL_PRODUCTS, 4);
-        testNextMessage(ProductCategory.LEVEL_REPORTS, 5);
-        testNextMessage(ProductCategory.LEVEL_SEGMENTS, 6);
+        testNextMessage(ProductCategory.AUXILIARY_FILES);
+        testNextMessage(ProductCategory.EDRS_SESSIONS);
+        testNextMessage(ProductCategory.LEVEL_JOBS);
+        testNextMessage(ProductCategory.LEVEL_PRODUCTS);
+        testNextMessage(ProductCategory.LEVEL_REPORTS);
+        testNextMessage(ProductCategory.LEVEL_SEGMENTS);
     }
 
     /**
@@ -295,10 +288,8 @@ public class MessageConsumptionControllerTest {
      * list of objects: the first is processing by another pod, the second and
      * the thrid are ok
      * 
-     * @param category
-     * @throws AbstractCodedException
      */
-    private void testNextMessage(final ProductCategory category, final int nbCallOtherService)
+    private void testNextMessage(final ProductCategory category)
             throws AbstractCodedException {
         // Processing by another pod
         final AppCatMessageDto<?> msg1 =
@@ -339,7 +330,6 @@ public class MessageConsumptionControllerTest {
     /**
      * Test ackMessage when no available consumer
      * 
-     * @throws AbstractCodedException
      */
     @Test
     public void testAckMessageWhenCategoryNotInit()
@@ -361,7 +351,7 @@ public class MessageConsumptionControllerTest {
         final IpfExecutionJob dto = new IpfExecutionJob(ProductFamily.L1_JOB, "product-name", "NRT",
                 "work-dir", "job-order", "NRT", new UUID(23L, 42L));
         final AppCatMessageDto<IpfExecutionJob> message =
-                new AppCatMessageDto<IpfExecutionJob>(
+                new AppCatMessageDto<>(
                         ProductCategory.LEVEL_JOBS, 123, "topic", 1, 22, dto);
 
         doReturn(true).when(messagePersistence).ack(Mockito.eq(ProductCategory.LEVEL_JOBS),Mockito.eq(123L),
@@ -386,16 +376,16 @@ public class MessageConsumptionControllerTest {
 
     @Test
     public void testAckWhenStopNotAskButTopicUnknown()
-            throws AbstractCodedException, InterruptedException {
+            throws AbstractCodedException {
 
         final IpfExecutionJob dto = new IpfExecutionJob(ProductFamily.L1_JOB, "product-name", "NRT", "work-dir", "job-order", "NRT", new UUID(23L, 42L));
-        final AppCatMessageDto<IpfExecutionJob> message = new AppCatMessageDto<IpfExecutionJob>(
-        		ProductCategory.LEVEL_JOBS, 
-        		123, 
-        		"topic-unknown", 
-        		1, 
-        		22,
-        		dto
+        final AppCatMessageDto<IpfExecutionJob> message = new AppCatMessageDto<>(
+                ProductCategory.LEVEL_JOBS,
+                123,
+                "topic-unknown",
+                1,
+                22,
+                dto
         );
 
         doReturn(true).when(messagePersistence).ack(Mockito.eq(ProductCategory.LEVEL_JOBS),Mockito.eq(123L),Mockito.any());
@@ -422,12 +412,12 @@ public class MessageConsumptionControllerTest {
 
     @Test
     public void testAckWhenStopAsk()
-            throws AbstractCodedException, InterruptedException {
+            throws AbstractCodedException {
 
         final IpfExecutionJob dto = new IpfExecutionJob(ProductFamily.L1_JOB, "product-name", "NRT",
                 "work-dir", "job-order", "NRT", new UUID(23L, 42L));
         final AppCatMessageDto<IpfExecutionJob> message =
-                new AppCatMessageDto<IpfExecutionJob>(
+                new AppCatMessageDto<>(
                         ProductCategory.LEVEL_JOBS, 123, "topic4", 1, 22, dto);
 
         doReturn(true).when(messagePersistence).ack(Mockito.eq(ProductCategory.LEVEL_JOBS),Mockito.eq(123L),Mockito.any());
@@ -447,10 +437,10 @@ public class MessageConsumptionControllerTest {
 
     
     @Test
-    public void testAckWhenStopAskL2() throws AbstractCodedException, InterruptedException {
+    public void testAckWhenStopAskL2() throws AbstractCodedException {
         final IpfExecutionJob dto = new IpfExecutionJob(ProductFamily.L2_JOB, "product-name", "NRT", "work-dir", "job-order", "NRT", new UUID(23L, 42L));
         final AppCatMessageDto<IpfExecutionJob> message =
-                new AppCatMessageDto<IpfExecutionJob>(
+                new AppCatMessageDto<>(
                         ProductCategory.LEVEL_JOBS, 123, "topic5", 1, 22, dto);
 
         doReturn(true).when(messagePersistence).ack(Mockito.eq(ProductCategory.LEVEL_JOBS),Mockito.eq(123L), Mockito.any());
@@ -472,7 +462,6 @@ public class MessageConsumptionControllerTest {
     /**
      * Test send when message is READ
      * 
-     * @throws AbstractCodedException
      */
     @Test
     public void testSendWhenMessageRead() throws AbstractCodedException {
@@ -482,7 +471,6 @@ public class MessageConsumptionControllerTest {
     /**
      * Test send when message is processing by same pod
      * 
-     * @throws AbstractCodedException
      */
     @Test
     public void testSendWhenMessageProcessingBySamePod()
@@ -493,19 +481,17 @@ public class MessageConsumptionControllerTest {
     /**
      * Internal check when asking for other app is not needed
      * 
-     * @param state
-     * @throws AbstractCodedException
      */
     private void testSendMessageWhenAskOtherAppNotNeeded(
             final MessageState state) throws AbstractCodedException {
 
-        final AppCatMessageDto<ProductionEvent> msgLight = new AppCatMessageDto<ProductionEvent>(
+        final AppCatMessageDto<ProductionEvent> msgLight = new AppCatMessageDto<>(
                 ProductCategory.AUXILIARY_FILES, 1234, "topic", 1, 111);
         msgLight.setState(state);
         msgLight.setReadingPod("pod-name");
         msgLight.setSendingPod("pod-name");
 
-        final AppCatMessageDto<ProductionEvent> msgLight2 = new AppCatMessageDto<ProductionEvent>(
+        final AppCatMessageDto<ProductionEvent> msgLight2 = new AppCatMessageDto<>(
                 ProductCategory.AUXILIARY_FILES, 1235, "topic", 1, 111);
         msgLight2.setState(state);
         msgLight2.setReadingPod("pod-name");
@@ -533,13 +519,12 @@ public class MessageConsumptionControllerTest {
     /**
      * Test send when message is processing
      * 
-     * @throws AbstractCodedException
      */
     @Test
     public void testSendWhenMessageProcessingByAnotherAndResponseTrue()
             throws AbstractCodedException {
 
-        final AppCatMessageDto<ProductionEvent> msgLight = new AppCatMessageDto<ProductionEvent>(
+        final AppCatMessageDto<ProductionEvent> msgLight = new AppCatMessageDto<>(
                 ProductCategory.AUXILIARY_FILES, 1234, "topic", 1, 111);
         msgLight.setState(MessageState.SEND);
         msgLight.setReadingPod("pod-name");
@@ -557,7 +542,6 @@ public class MessageConsumptionControllerTest {
     /**
      * Test messageShallBeIgnored when no response from the other app
      * 
-     * @throws AbstractCodedException
      */
     @Test
     public void testSendWhenNoResponse() throws AbstractCodedException {
@@ -572,7 +556,6 @@ public class MessageConsumptionControllerTest {
     /**
      * Test messageShallBeIgnored when the other app return false
      * 
-     * @throws AbstractCodedException
      */
     @Test
     public void testSendWhenResponseFalse() throws AbstractCodedException {
@@ -586,13 +569,13 @@ public class MessageConsumptionControllerTest {
     private void testSendWhenMessageProcessingByAnotherAndResponseFalse()
             throws AbstractCodedException {
 
-        final AppCatMessageDto<ProductionEvent> msgLight = new AppCatMessageDto<ProductionEvent>(
+        final AppCatMessageDto<ProductionEvent> msgLight = new AppCatMessageDto<>(
                 ProductCategory.AUXILIARY_FILES, 1234L, "topic", 1, 111);
         msgLight.setState(MessageState.SEND);
         msgLight.setReadingPod("pod-name");
         msgLight.setSendingPod("other-name");
 
-        final AppCatMessageDto<ProductionEvent> msgLight2 = new AppCatMessageDto<ProductionEvent>(
+        final AppCatMessageDto<ProductionEvent> msgLight2 = new AppCatMessageDto<>(
                 ProductCategory.AUXILIARY_FILES, 1235L, "topic", 1, 111);
         msgLight2.setState(MessageState.SEND);
         msgLight2.setReadingPod("pod-name");
@@ -618,19 +601,19 @@ public class MessageConsumptionControllerTest {
     }
     
     @Test
-    public void testPriorityComperator() {
+    public void testPriorityComparator() {
     	Comparator<AppCatMessageDto<? extends AbstractMessage>> c = manager.priorityComparatorFor(ProductCategory.AUXILIARY_FILES);
     	
-    	AppCatMessageDto o1 = new AppCatMessageDto<>();
+    	AppCatMessageDto<ProductionEvent> o1 = new AppCatMessageDto<>();
     	o1.setTopic("topic"); // has prio 100
     	
-    	AppCatMessageDto o2 = new AppCatMessageDto<>();
+    	AppCatMessageDto<ProductionEvent> o2 = new AppCatMessageDto<>();
     	o2.setTopic("topic-other"); // has prio 10 
     	
     	List<AppCatMessageDto<? extends AbstractMessage>> list = new ArrayList<>();
     	list.add(o2);    	
     	list.add(o1);
-    	Collections.sort(list, c);
+    	list.sort(c);
     	assertEquals(o1, list.get(0));
     	assertEquals(o2, list.get(1));
     }

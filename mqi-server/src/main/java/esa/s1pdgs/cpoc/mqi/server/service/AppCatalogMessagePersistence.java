@@ -19,7 +19,6 @@ import esa.s1pdgs.cpoc.mqi.model.queue.AbstractMessage;
 import esa.s1pdgs.cpoc.mqi.model.rest.Ack;
 import esa.s1pdgs.cpoc.mqi.server.config.KafkaProperties;
 import esa.s1pdgs.cpoc.mqi.server.consumption.kafka.consumer.GenericConsumer;
-import esa.s1pdgs.cpoc.mqi.server.consumption.kafka.consumer.MessageConsumer;
 
 public class AppCatalogMessagePersistence<T extends AbstractMessage> implements MessagePersistence<T> {
 
@@ -27,24 +26,20 @@ public class AppCatalogMessagePersistence<T extends AbstractMessage> implements 
 
     private final AppCatalogMqiService<T> appCatalogMqiService;
     private final KafkaProperties properties;
-    private final MessageConsumer<T> additionalConsumer;
     private final OtherApplicationService otherAppService;
 
     public AppCatalogMessagePersistence(AppCatalogMqiService<T> appCatalogMqiService,
                                         final KafkaProperties properties,
-                                        final MessageConsumer<T> additionalConsumer,
                                         final OtherApplicationService otherAppService) {
 
         this.appCatalogMqiService = appCatalogMqiService;
         this.properties = properties;
-        this.additionalConsumer = additionalConsumer;
         this.otherAppService = otherAppService;
     }
 
     @Override
     public void read(ConsumerRecord<String, T> data, final Acknowledgment acknowledgment, GenericConsumer<T> genericConsumer, ProductCategory category) throws Exception {
         final AppCatMessageDto<T> result = saveInAppCat(data, false, category);
-        additionalConsumer.consume(data.value());
         handleMessage(data, acknowledgment, result, genericConsumer, category);
     }
 

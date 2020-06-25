@@ -20,11 +20,11 @@ import org.springframework.kafka.support.serializer.JsonDeserializer;
 
 import esa.s1pdgs.cpoc.appstatus.AppStatus;
 import esa.s1pdgs.cpoc.common.ProductCategory;
+import esa.s1pdgs.cpoc.mqi.model.queue.AbstractMessage;
 import esa.s1pdgs.cpoc.mqi.server.config.KafkaProperties;
 import esa.s1pdgs.cpoc.mqi.server.consumption.kafka.listener.GenericMessageListener;
 import esa.s1pdgs.cpoc.mqi.server.consumption.kafka.listener.MemoryConsumerAwareRebalanceListener;
 import esa.s1pdgs.cpoc.mqi.server.service.MessagePersistence;
-import esa.s1pdgs.cpoc.mqi.server.service.OtherApplicationService;
 
 /**
  * Generic consumer
@@ -32,31 +32,24 @@ import esa.s1pdgs.cpoc.mqi.server.service.OtherApplicationService;
  * @author Viveris Technologies
  * @param <T>
  */
-public class GenericConsumer<T> {
-	public static final class Factory {
+public class GenericConsumer<T extends AbstractMessage> {
+	public static final class Factory<T extends AbstractMessage> {
 		protected static final Logger LOGGER = LogManager.getLogger(Factory.class);
 		
 	    private final KafkaProperties kafkaProperties;
-	    private final MessagePersistence messagePersistence;
-	    private final OtherApplicationService otherAppService;
-	    private final AppStatus appStatus;	  
+	    private final MessagePersistence<T> messagePersistence;
+		private final AppStatus appStatus;
 	    	    
 		public Factory(
 				final KafkaProperties kafkaProperties, 
-				final MessagePersistence messagePersistence,
-				final OtherApplicationService otherAppService, 
+				final MessagePersistence<T> messagePersistence,
 				final AppStatus appStatus
 		) {
 			this.kafkaProperties = kafkaProperties;
 			this.messagePersistence = messagePersistence;
-			this.otherAppService = otherAppService;
 			this.appStatus = appStatus;
 		}
 
-		public final <T> GenericConsumer<T> newConsumerFor(final ProductCategory cat, final int prio, final String topic) {        
-			return newConsumerFor(cat, prio, topic, MessageConsumer.nullConsumer());
-		}
-		
    		// use unique clientId to circumvent 'instance already exists' problem
 		public final String clientIdForTopic(final String topic) {
 			return kafkaProperties.getClientId() + "-" + 
@@ -64,15 +57,13 @@ public class GenericConsumer<T> {
 	    			topic;
 		}
 		
-		// for unit test
-		final <T> GenericConsumer<T> newConsumerFor(
+		public final GenericConsumer<T> newConsumerFor(
 				final ProductCategory cat, 
 				final int prio, 
-				final String topic, 
-				final MessageConsumer<T> additionalConsumer
+				final String topic
 		) {
 			final GenericConsumer<T> consumer = new GenericConsumer<>(cat,topic,prio);			
-			final GenericMessageListener<T> listener = newListenerFor(cat, consumer, additionalConsumer);		
+			final GenericMessageListener<T> listener = newListenerFor(cat, consumer);
 	        final ConcurrentMessageListenerContainer<String,T> container = new ConcurrentMessageListenerContainer<>(
 	        		consumerFactory(topic, cat.getDtoClass()),
 	                containerProperties(topic, listener)
@@ -81,21 +72,17 @@ public class GenericConsumer<T> {
 			return consumer;
 		}
 		
-		private final <T> GenericMessageListener<T> newListenerFor(
+		private GenericMessageListener<T> newListenerFor(
 				final ProductCategory cat, 
-				final GenericConsumer<T> consumer, 
-				final MessageConsumer<T> additionalConsumer
+				final GenericConsumer<T> consumer
 		) {
-			return new GenericMessageListener<T>(cat,
-					kafkaProperties,
+			return new GenericMessageListener<>(cat,
 					messagePersistence,
-					otherAppService,
 					consumer,
-					appStatus,
-					additionalConsumer);
+					appStatus);
 		}
 		
-	    private final <T> ConsumerFactory<String, T> consumerFactory(final String topic, final Class<T> dtoClass) {	    	
+	    private ConsumerFactory<String, T> consumerFactory(final String topic, final Class<T> dtoClass) {
 	    	final JsonDeserializer<T> deser = new JsonDeserializer<>(dtoClass);
 	    	deser.addTrustedPackages("*");	    	
 	    	final ErrorHandlingDeserializer2<T> deserializer = new ErrorHandlingDeserializer2<>(deser);
@@ -116,7 +103,7 @@ public class GenericConsumer<T> {
 	        );
 	    }
 
-	    private final <T> ContainerProperties containerProperties(final String topic, final MessageListener<String, T> messageListener) {
+	    private ContainerProperties containerProperties(final String topic, final MessageListener<String, T> messageListener) {
 	        final ContainerProperties containerProp = new ContainerProperties(topic);
 	        containerProp.setMessageListener(messageListener);
 	        containerProp.setPollTimeout(kafkaProperties.getListener().getPollTimeoutMs());
@@ -131,7 +118,7 @@ public class GenericConsumer<T> {
 	        return containerProp;
 	    }
 
-	    private final Map<String, Object> consumerConfig(final String consumerId) {
+	    private Map<String, Object> consumerConfig(final String consumerId) {
 	        final Map<String, Object> props = new HashMap<>();
 	        props.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, kafkaProperties.getBootstrapServers());
 	        props.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class);

@@ -26,7 +26,6 @@ import esa.s1pdgs.cpoc.mqi.model.queue.ProductionEvent;
 import esa.s1pdgs.cpoc.mqi.server.GenericKafkaUtils;
 import esa.s1pdgs.cpoc.mqi.server.config.KafkaProperties;
 import esa.s1pdgs.cpoc.mqi.server.service.MessagePersistence;
-import esa.s1pdgs.cpoc.mqi.server.service.OtherApplicationService;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest
@@ -51,9 +50,6 @@ public class GenericConsumerTest {
     @Mock
     private MessagePersistence<ProductionEvent> messagePersistence;
 
-    @Mock
-    private OtherApplicationService otherService;
-
     @ClassRule
     public static KafkaEmbedded embeddedKafka = new KafkaEmbedded(1, false, CONSUMER_TOPIC, GenericKafkaUtils.TOPIC_AUXILIARY_FILES);
 
@@ -66,7 +62,7 @@ public class GenericConsumerTest {
 
         properties.setHostname("test-host");
 
-        uut = new GenericConsumer.Factory(properties, messagePersistence, otherService, appStatus)
+        uut = new GenericConsumer.Factory<>(properties, messagePersistence, appStatus)
         		.newConsumerFor(ProductCategory.AUXILIARY_FILES, 100, GenericKafkaUtils.TOPIC_AUXILIARY_FILES);
     }
 
