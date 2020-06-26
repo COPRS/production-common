@@ -108,11 +108,4 @@ public final class GenericMessageListener<T extends AbstractMessage> implements 
 			);
 		}
 	}
-
-    /**
-     * Pause the consumer
-     */
-    final void pause() {
-        this.genericConsumer.pause();
-    }
 }

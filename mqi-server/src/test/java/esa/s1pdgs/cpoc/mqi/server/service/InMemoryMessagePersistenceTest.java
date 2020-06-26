@@ -25,6 +25,7 @@ import esa.s1pdgs.cpoc.common.ProductFamily;
 import esa.s1pdgs.cpoc.mqi.model.queue.ProductionEvent;
 import esa.s1pdgs.cpoc.mqi.model.rest.Ack;
 import esa.s1pdgs.cpoc.mqi.server.config.KafkaProperties;
+import esa.s1pdgs.cpoc.mqi.server.config.PersistenceConfiguration;
 import esa.s1pdgs.cpoc.mqi.server.consumption.kafka.consumer.GenericConsumer;
 
 public class InMemoryMessagePersistenceTest {
@@ -41,19 +42,26 @@ public class InMemoryMessagePersistenceTest {
     @Mock
     private GenericConsumer<ProductionEvent> genericConsumer;
 
+    @Mock
+    private PersistenceConfiguration.InMemoryMessagePersistenceConfiguration configuration;
+
     @Before
     public void initMocks() {
         MockitoAnnotations.initMocks(this);
 
-        Mockito.when(kafkaProperties.getHostname()).thenReturn("pod1");
-        Mockito.when(kafkaProperties.getConsumer()).thenReturn(consumerProperties);
-        Mockito.when(consumerProperties.getGroupId()).thenReturn("group1");
+        when(kafkaProperties.getHostname()).thenReturn("pod1");
+        when(kafkaProperties.getConsumer()).thenReturn(consumerProperties);
+        when(consumerProperties.getGroupId()).thenReturn("group1");
+        when(configuration.getDefaultOffset()).thenReturn(-3);
+        when(configuration.getInMemoryPersistenceHighThreshold()).thenReturn(5);
+        when(genericConsumer.isPaused()).thenReturn(false);
+        when(genericConsumer.getTopic()).thenReturn("topic");
     }
 
     @Test
     public void readAndNext() {
 
-        InMemoryMessagePersistence<ProductionEvent> messagePersistence = new InMemoryMessagePersistence<>(kafkaProperties, -3);
+        InMemoryMessagePersistence<ProductionEvent> messagePersistence = new InMemoryMessagePersistence<>(kafkaProperties, configuration);
 
         final ProductionEvent event1 = new ProductionEvent("prod1", "prod1", ProductFamily.AUXILIARY_FILE);
         final ConsumerRecord<String, ProductionEvent> record1 = new ConsumerRecord<>("topic", 1, 1, "string", event1);
@@ -100,9 +108,35 @@ public class InMemoryMessagePersistenceTest {
     }
 
     @Test
+    public void readShouldPauseConsumptionOnThreshold() {
+        InMemoryMessagePersistence<ProductionEvent> messagePersistence = new InMemoryMessagePersistence<>(kafkaProperties, configuration);
+
+        final RecordAndAcknowledgement eventTopic1 = RecordAndAcknowledgement.createNew("topic", 1, 1);
+        final RecordAndAcknowledgement eventTopic2= RecordAndAcknowledgement.createNew("topic", 1, 2 );
+        final RecordAndAcknowledgement eventTropic1= RecordAndAcknowledgement.createNew("tropic", 1, 3 ); //event with other topic should not increase message count
+        final RecordAndAcknowledgement eventTopic3= RecordAndAcknowledgement.createNew("topic", 1, 4);
+        final RecordAndAcknowledgement eventTropic2= RecordAndAcknowledgement.createNew("tropic", 1, 5 ); //event with other topic should not increase message count
+        final RecordAndAcknowledgement eventTopic4= RecordAndAcknowledgement.createNew("topic", 1, 6);
+        final RecordAndAcknowledgement eventTopic5= RecordAndAcknowledgement.createNew("topic", 1, 7);
+
+        messagePersistence.read(eventTopic1.record, eventTopic1.acknowledgment, genericConsumer, ProductCategory.AUXILIARY_FILES);
+        messagePersistence.read(eventTopic2.record, eventTopic2.acknowledgment, genericConsumer, ProductCategory.AUXILIARY_FILES);
+        messagePersistence.read(eventTropic1.record, eventTropic1.acknowledgment, genericConsumer, ProductCategory.AUXILIARY_FILES);
+        messagePersistence.read(eventTopic3.record, eventTopic3.acknowledgment, genericConsumer, ProductCategory.AUXILIARY_FILES);
+        messagePersistence.read(eventTropic2.record, eventTropic2.acknowledgment, genericConsumer, ProductCategory.AUXILIARY_FILES);
+        messagePersistence.read(eventTopic4.record, eventTopic4.acknowledgment, genericConsumer, ProductCategory.AUXILIARY_FILES);
+
+        verify(genericConsumer, times(0)).pause();
+
+        messagePersistence.read(eventTopic5.record, eventTopic5.acknowledgment, genericConsumer, ProductCategory.AUXILIARY_FILES);
+
+        verify(genericConsumer, times(1)).pause();
+    }
+
+    @Test
     public void sendShouldReturnTrue() {
 
-        InMemoryMessagePersistence<ProductionEvent> messagePersistence = new InMemoryMessagePersistence<>(kafkaProperties, -3);
+        InMemoryMessagePersistence<ProductionEvent> messagePersistence = new InMemoryMessagePersistence<>(kafkaProperties, configuration);
 
         final ProductionEvent event1 = new ProductionEvent("prod1", "prod1", ProductFamily.AUXILIARY_FILE);
         final ConsumerRecord<String, ProductionEvent> record1 = new ConsumerRecord<>("topic", 1, 1, "string", event1);
@@ -126,7 +160,7 @@ public class InMemoryMessagePersistenceTest {
     @Test
     public void sendMissingMessageWithIdShouldFail() {
         {
-            InMemoryMessagePersistence<ProductionEvent> messagePersistence = new InMemoryMessagePersistence<>(kafkaProperties, -3);
+            InMemoryMessagePersistence<ProductionEvent> messagePersistence = new InMemoryMessagePersistence<>(kafkaProperties, configuration);
 
             final ProductionEvent event1 = new ProductionEvent("prod1", "prod1", ProductFamily.AUXILIARY_FILE);
             final ConsumerRecord<String, ProductionEvent> record1 = new ConsumerRecord<>("topic", 1, 1, "string", event1);
@@ -153,7 +187,7 @@ public class InMemoryMessagePersistenceTest {
     @Test
     public void ackShouldCallKafkaAcknowledgeAndMessageRemoved() {
 
-        InMemoryMessagePersistence<ProductionEvent> messagePersistence = new InMemoryMessagePersistence<>(kafkaProperties, -3);
+        InMemoryMessagePersistence<ProductionEvent> messagePersistence = new InMemoryMessagePersistence<>(kafkaProperties, configuration);
 
         final ProductionEvent event1 = new ProductionEvent("prod1", "prod1", ProductFamily.AUXILIARY_FILE);
         final ConsumerRecord<String, ProductionEvent> record1 = new ConsumerRecord<>("topic", 1, 1, "string", event1);
@@ -178,7 +212,7 @@ public class InMemoryMessagePersistenceTest {
     @Test
     public void ackWithMissingMessageShouldReturnFalseMessageNotRemoved() {
 
-        InMemoryMessagePersistence<ProductionEvent> messagePersistence = new InMemoryMessagePersistence<>(kafkaProperties, -3);
+        InMemoryMessagePersistence<ProductionEvent> messagePersistence = new InMemoryMessagePersistence<>(kafkaProperties, configuration);
 
         final ProductionEvent event1 = new ProductionEvent("prod1", "prod1", ProductFamily.AUXILIARY_FILE);
         final ConsumerRecord<String, ProductionEvent> record1 = new ConsumerRecord<>("topic", 1, 1, "string", event1);
@@ -204,7 +238,7 @@ public class InMemoryMessagePersistenceTest {
     public void getNbReadingMessagesByTopicAndPod() {
         {
 
-            InMemoryMessagePersistence<ProductionEvent> messagePersistence = new InMemoryMessagePersistence<>(kafkaProperties, -3);
+            InMemoryMessagePersistence<ProductionEvent> messagePersistence = new InMemoryMessagePersistence<>(kafkaProperties, configuration);
 
             final ProductionEvent event1 = new ProductionEvent("prod1", "prod1", ProductFamily.AUXILIARY_FILE);
             final ConsumerRecord<String, ProductionEvent> record1 = new ConsumerRecord<>("topic", 1, 1, "string", event1);
@@ -238,7 +272,7 @@ public class InMemoryMessagePersistenceTest {
     @Test
     public void getEarliestOffsetWithMessagesRead() throws InterruptedException {
 
-        InMemoryMessagePersistence<ProductionEvent> messagePersistence = new InMemoryMessagePersistence<>(kafkaProperties, -3);
+        InMemoryMessagePersistence<ProductionEvent> messagePersistence = new InMemoryMessagePersistence<>(kafkaProperties, configuration);
 
         final ProductionEvent event1 = new ProductionEvent("prod1", "prod1", ProductFamily.AUXILIARY_FILE);
         final ConsumerRecord<String, ProductionEvent> record1 = new ConsumerRecord<>("tropic", 1, 156, "string", event1);
@@ -270,7 +304,7 @@ public class InMemoryMessagePersistenceTest {
     @Test
     public void getEarliestOffsetWithNoMessagesShouldReturnDefaultOffset() {
 
-        InMemoryMessagePersistence<ProductionEvent> messagePersistence = new InMemoryMessagePersistence<>(kafkaProperties, -3);
+        InMemoryMessagePersistence<ProductionEvent> messagePersistence = new InMemoryMessagePersistence<>(kafkaProperties, configuration);
 
         final long earliestOffsetTopic = messagePersistence.getEarliestOffset("topic", 1, "group1");
         final long earliestOffsetTropic = messagePersistence.getEarliestOffset("tropic", 1, "group1");
@@ -279,6 +313,23 @@ public class InMemoryMessagePersistenceTest {
         assertThat(earliestOffsetTopic, is(-3L));
         assertThat(earliestOffsetTropic, is(-3L));
         assertThat(earliestOffsetTopicOtherPartition, is(-3L));
+    }
+
+    private static class RecordAndAcknowledgement {
+        private final ConsumerRecord<String, ProductionEvent> record;
+        private final Acknowledgment acknowledgment;
+
+        private RecordAndAcknowledgement(ConsumerRecord<String, ProductionEvent> record, Acknowledgment acknowledgment) {
+            this.record = record;
+            this.acknowledgment = acknowledgment;
+        }
+
+        private static RecordAndAcknowledgement createNew(final String topic, final int partition, final int offset) {
+            final ProductionEvent event = new ProductionEvent("prod", "prod", ProductFamily.AUXILIARY_FILE);
+            final ConsumerRecord<String, ProductionEvent> record = new ConsumerRecord<>(topic, partition, offset, "string", event);
+            Acknowledgment acknowledgement = Mockito.mock(Acknowledgment.class);
+            return new RecordAndAcknowledgement(record, acknowledgement);
+        }
     }
 
 }

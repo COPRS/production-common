@@ -122,19 +122,6 @@ public class GenericMessageListenerTest {
     }
 
     /**
-     * Test pause
-     */
-    @Test
-    public void testPause() {
-        listener.pause();
-
-        verify(genericConsumer, times(1)).pause();
-        verifyNoMoreInteractions(genericConsumer);
-        verifyZeroInteractions(service);
-        verifyZeroInteractions(acknowledgment);
-    }
-
-    /**
      * Test acknowledge
      */
     @Test

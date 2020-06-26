@@ -11,6 +11,8 @@ import java.util.concurrent.atomic.AtomicLong;
 import java.util.stream.Collectors;
 
 import org.apache.kafka.clients.consumer.ConsumerRecord;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.springframework.kafka.support.Acknowledgment;
 
 import esa.s1pdgs.cpoc.appcatalog.rest.AppCatMessageDto;
@@ -19,18 +21,23 @@ import esa.s1pdgs.cpoc.common.ProductCategory;
 import esa.s1pdgs.cpoc.mqi.model.queue.AbstractMessage;
 import esa.s1pdgs.cpoc.mqi.model.rest.Ack;
 import esa.s1pdgs.cpoc.mqi.server.config.KafkaProperties;
+import esa.s1pdgs.cpoc.mqi.server.config.PersistenceConfiguration;
 import esa.s1pdgs.cpoc.mqi.server.consumption.kafka.consumer.GenericConsumer;
 
 public class InMemoryMessagePersistence<T extends AbstractMessage> implements MessagePersistence<T> {
+
+    private static final Logger LOG = LogManager.getLogger(InMemoryMessagePersistence.class);
 
     private final AtomicLong sequence = new AtomicLong(0);
     private final List<MessageAndAcknowledgement<T>> messages = Collections.synchronizedList(new ArrayList<>());
     private final KafkaProperties properties;
     private final int defaultOffset;
+    private final int messageThresholdHigh;
 
-    public InMemoryMessagePersistence(final KafkaProperties properties, int defaultOffset) {
+    public InMemoryMessagePersistence(final KafkaProperties properties, final PersistenceConfiguration.InMemoryMessagePersistenceConfiguration configuration) {
         this.properties = properties;
-        this.defaultOffset = defaultOffset;
+        this.defaultOffset = configuration.getDefaultOffset();
+        this.messageThresholdHigh = configuration.getInMemoryPersistenceHighThreshold();
     }
 
     @Override
@@ -45,7 +52,7 @@ public class InMemoryMessagePersistence<T extends AbstractMessage> implements Me
         //TODO any else fields to set?
         messages.add(new MessageAndAcknowledgement<>(newEntry, acknowledgment));
 
-        //TODO add check for size of queue in order to avoid memory leak (pause kafka container on certain size)
+        validateMessageSizesForConsumer(genericConsumer);
     }
 
     @Override
@@ -97,6 +104,16 @@ public class InMemoryMessagePersistence<T extends AbstractMessage> implements Me
         }
 
         return message.get();
+    }
+
+    private void validateMessageSizesForConsumer(GenericConsumer<T> genericConsumer) {
+        final long countPerTopic = messages.stream().filter(m -> m.message.getTopic().equals(genericConsumer.getTopic())).count();
+
+        //pause consumer to avoid memory leak, resuming is already handled in MessageConsumptionController
+        if (countPerTopic >= messageThresholdHigh && !genericConsumer.isPaused()) {
+            LOG.info("pausing consumer for topic {} ({} messages >= threshold {})", genericConsumer.getTopic(), countPerTopic, messageThresholdHigh);
+            genericConsumer.pause();
+        }
     }
 
     @Override

@@ -84,13 +84,13 @@ public class PersistenceConfiguration<T extends AbstractMessage> {
     }
 
     @Bean
-    public MessagePersistence<T> messagePersistence(final RestTemplateBuilder builder, final AppCatalogMqiService<T> mqiService, KafkaProperties properties, @Value("${mqi.dft-offset:-3}") final int defaultOffset) {
+    public MessagePersistence<T> messagePersistence(final RestTemplateBuilder builder, final AppCatalogMqiService<T> mqiService, KafkaProperties properties, InMemoryMessagePersistenceConfiguration inMemoryConfig) {
         LOG.info("using message persistence strategy {}", messagePersistenceStrategy);
         if (APP_CATALOG_MESSAGE_PERSISTENCE.getValue().equals(messagePersistenceStrategy)) {
             final OtherApplicationService otherAppService = checkProcessingOtherApp(builder);
             return new AppCatalogMessagePersistence<>(mqiService, properties, otherAppService);
         } else if (IN_MEMORY_MESSAGE_PERSISTENCE.getValue().equals(messagePersistenceStrategy)) {
-            return new InMemoryMessagePersistence<>(properties, defaultOffset);
+            return new InMemoryMessagePersistence<>(properties, inMemoryConfig);
         } else {
             throw new IllegalArgumentException(String.format("Unknown message persistence strategy %s. Available are %s.", messagePersistenceStrategy, SUPPORTED_MESSAGE_PERSISTENCE_STRATEGIES));
         }
@@ -113,6 +113,30 @@ public class PersistenceConfiguration<T extends AbstractMessage> {
         return new OtherApplicationService(builder.build(), portUriOtherApp,
                 maxRetries, tempoRetryMs, suffixUriOtherApp);
     }
+
+    @Bean
+    public InMemoryMessagePersistenceConfiguration inMemoryPersistenceConfiguration() {
+        return new InMemoryMessagePersistenceConfiguration();
+    }
+
+    public static class InMemoryMessagePersistenceConfiguration {
+
+        @Value("${mqi.dft-offset:-3}")
+        private int defaultOffset;
+
+        @Value("${persistence.in-memory-persistence-max-messages-per-topic:200}")
+        private int inMemoryPersistenceHighThreshold;
+
+        public int getDefaultOffset() {
+            return defaultOffset;
+        }
+
+        public int getInMemoryPersistenceHighThreshold() {
+            return inMemoryPersistenceHighThreshold;
+        }
+    }
+
+
     
 
 }
