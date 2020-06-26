@@ -139,18 +139,6 @@ public class GenericConsumer implements MqiListener<CatalogEvent> {
         );
 	}
 	
-
-	private final boolean updatePodNameIfRequired(final AppDataJob job) throws AbstractCodedException {
-        if (!job.getPod().equals(processSettings.getHostname())) {
-    		LOGGER.debug("Updating pod name of job {} to {} (was {})", job.getId(), 
-    				processSettings.getHostname(), job.getPod());
-        	job.setPod(processSettings.getHostname());  
-        	return true;
-        }
-		return false;
-	}
-
-	
 	private final AppDataJob buildJob(final GenericMessageDto<CatalogEvent> mqiMessage, final String productName) 
 			throws AbstractCodedException {
 		final Optional<AppDataJob> result = appCat.findJobFor(mqiMessage); 
@@ -158,10 +146,6 @@ public class GenericConsumer implements MqiListener<CatalogEvent> {
 		// there is already a job for this message --> possible restart scenario --> just update the pod name 
 		if (result.isPresent()) {		
 			final AppDataJob job = result.get();
-			if (updatePodNameIfRequired(job))
-			{		
-				return appCat.update(job);
-			}		
 			LOGGER.debug("Found job {} already associated to mqiMessage {}. Ignoring new message ...",
 					job.getId(), mqiMessage.getId());
 			return job;  		
@@ -186,12 +170,10 @@ public class GenericConsumer implements MqiListener<CatalogEvent> {
     	// job already exists? --> merge new message into job
     	final AppDataJob job = specificJob.get();
     	
-    	boolean hasChanged = updatePodNameIfRequired(job);
-    	hasChanged |= consumptionHandler.mergeMessageInto(mqiMessage, job);
-    	
     	// evaluate both and if either or both of the calls indicate a change, update in DB
-    	if (hasChanged) {
+    	if (consumptionHandler.mergeMessageInto(mqiMessage, job)) {
     		LOGGER.debug("Updating appDataJob {} for mqiMessage {}", job.getId(), mqiMessage.getId());
+    		job.setLastUpdateDate(new Date());
     		return appCat.update(job);
     	}    	
     	return job;

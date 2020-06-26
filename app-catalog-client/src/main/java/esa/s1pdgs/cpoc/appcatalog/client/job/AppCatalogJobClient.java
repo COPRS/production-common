@@ -320,4 +320,31 @@ public class AppCatalogJobClient {
             }
         }
     }
+	
+	public void deleteJob(final AppDataJob job) throws AbstractCodedException {  
+        int retries = 0;
+        while (true) {
+            retries++;
+            final String uri = hostUri + "/jobs/" + job.getId();
+            LogUtils.traceLog(LOGGER, String.format("[uri %s]", uri));
+            try {
+                restTemplate.delete(uri);
+            } catch (final HttpStatusCodeException hsce) {
+                waitOrThrow(retries,
+                        new AppCatalogJobPatchApiError(uri, job, String.format(
+                                "HttpStatusCodeException occured: %s - %s",
+                                hsce.getStatusCode(),
+                                hsce.getResponseBodyAsString())),
+                        "delete");
+            } catch (final RestClientException rce) {
+                waitOrThrow(retries,
+                        new AppCatalogJobPatchApiError(uri, job,
+                                String.format(
+                                        "HttpStatusCodeException occured: %s",
+                                        rce.getMessage()),
+                                rce),
+                        "delete");
+            }
+        }
+	}
 }

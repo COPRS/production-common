@@ -44,7 +44,7 @@ public class AppDataJobService {
         newJob.setId(sequence);
         newJob.setState(AppDataJobState.WAITING);
         newJob.setCreationDate(new Date());
-        newJob.setLastUpdateDate(null);
+        newJob.setLastUpdateDate(new Date());
         return appDataJobDao.save(newJob);
     }
 

@@ -14,7 +14,6 @@ import org.apache.logging.log4j.Logger;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.domain.Sort.Direction;
 import org.springframework.http.MediaType;
-import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -110,7 +109,7 @@ public class JobController {
     	return appDataJobService.newJob(newJob);
     }
 
-    @DeleteMapping("/{jobId}")
+    @RequestMapping(method = RequestMethod.DELETE, produces = MediaType.APPLICATION_JSON_UTF8_VALUE, path = "/jobs/{jobId}")
     public void deleteJob(@PathVariable final Long jobId) {
         appDataJobService.deleteJob(jobId);
     }
