@@ -121,10 +121,10 @@ public class PersistenceConfiguration<T extends AbstractMessage> {
 
     public static class InMemoryMessagePersistenceConfiguration {
 
-        @Value("${mqi.dft-offset:-3}")
+        @Value("${persistence.in-memory-persistence.dft-offset:-3}")
         private int defaultOffset;
 
-        @Value("${persistence.in-memory-persistence-max-messages-per-topic:200}")
+        @Value("${persistence.in-memory-persistence.max-messages-per-topic:50}")
         private int inMemoryPersistenceHighThreshold;
 
         public int getDefaultOffset() {
