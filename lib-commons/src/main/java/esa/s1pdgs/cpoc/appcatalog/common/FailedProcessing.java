@@ -3,7 +3,9 @@ package esa.s1pdgs.cpoc.appcatalog.common;
 import java.io.Serializable;
 import java.util.Comparator;
 import java.util.Date;
+import java.util.List;
 import java.util.Objects;
+import java.util.stream.Collectors;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnore;
@@ -21,7 +23,7 @@ public class FailedProcessing extends AbstractRequest {
 		 * order by ascending creation time
 		 */
 		@Override
-		public int compare(FailedProcessing o1, FailedProcessing o2) {
+		public int compare(final FailedProcessing o1, final FailedProcessing o2) {
 			return o1.getCreationDate().compareTo(o2.getCreationDate());
 		}
 	}
@@ -34,25 +36,31 @@ public class FailedProcessing extends AbstractRequest {
 	private Date lastAssignmentDate; 
 	private Date failureDate;
 	private String failureMessage;
+	private List<Object> dto;
 	
 	public FailedProcessing()	{		
 	}
 
-	public FailedProcessing(long id, ProductCategory category, String topic, int partition, long offset, String group,
-			MessageState state, String sendingPod, Date lastSendDate, Date lastAckDate, int nbRetries, Object dto,
-			Date creationDate, String failedPod, Date lastAssignmentDate, Date failureDate, String failureMessage) {
-		super(category, topic, partition, offset, group, state, sendingPod, lastSendDate, lastAckDate, nbRetries, dto,
+	public FailedProcessing(final long id, final ProductCategory category, final String topic, final int partition, final long offset, final String group,
+			final MessageState state, final String sendingPod, final Date lastSendDate, final Date lastAckDate, final int nbRetries, final List<Object> dto,
+			final Date creationDate, final String failedPod, final Date lastAssignmentDate, final Date failureDate, final String failureMessage) {
+		super(category, topic, partition, offset, group, state, sendingPod, lastSendDate, lastAckDate, nbRetries, null,
 				creationDate);
 		this.id = id;
 		this.failedPod = failedPod;
 		this.lastAssignmentDate = lastAssignmentDate;
 		this.failureDate = failureDate;
 		this.failureMessage = failureMessage;
+		this.dto = dto;
 	}
 	
 	@JsonIgnore
 	public static FailedProcessing valueOf(final MqiMessage message, final FailedProcessingDto failedProc)
 	{
+		final List<Object> originalRequests = failedProc.getProcessingDetails().stream()
+				.map(mess -> mess.getBody())
+				.collect(Collectors.toList());
+		
 		return new FailedProcessing(
 				message.getId(), 
 				message.getCategory(), 
@@ -65,7 +73,7 @@ public class FailedProcessing extends AbstractRequest {
 				message.getLastSendDate(), 
 				message.getLastAckDate(), 
 				message.getNbRetries(), 
-				failedProc.getProcessingDetails().getBody(), 
+				originalRequests, 
 				message.getCreationDate(), 
 				failedProc.getFailedPod(), 
 				message.getLastReadDate(), 
@@ -78,7 +86,7 @@ public class FailedProcessing extends AbstractRequest {
 		return id;
 	}
 	
-	public void setId(long id) {
+	public void setId(final long id) {
 		this.id = id;
 	}
 
@@ -86,7 +94,7 @@ public class FailedProcessing extends AbstractRequest {
 		return failedPod;
 	}
 
-	public void setFailedPod(String failedPod) {
+	public void setFailedPod(final String failedPod) {
 		this.failedPod = failedPod;
 	}
 
@@ -95,7 +103,7 @@ public class FailedProcessing extends AbstractRequest {
 		return lastAssignmentDate;
 	}
 
-	public void setLastAssignmentDate(Date lastAssignmentDate) {
+	public void setLastAssignmentDate(final Date lastAssignmentDate) {
 		this.lastAssignmentDate = lastAssignmentDate;
 	}
 
@@ -104,7 +112,7 @@ public class FailedProcessing extends AbstractRequest {
 		return failureDate;
 	}
 
-	public void setFailureDate(Date failureDate) {
+	public void setFailureDate(final Date failureDate) {
 		this.failureDate = failureDate;
 	}
 
@@ -112,7 +120,7 @@ public class FailedProcessing extends AbstractRequest {
 		return failureMessage;
 	}
 
-	public void setFailureMessage(String failureMessage) {
+	public void setFailureMessage(final String failureMessage) {
 		this.failureMessage = failureMessage;
 	}
 
@@ -149,11 +157,14 @@ public class FailedProcessing extends AbstractRequest {
 	}
 
 	@JsonProperty("processingDetails")
-	@Override
-	public Object getDto() {
-		// TODO Auto-generated method stub
-		return super.getDto();
+	public List<Object> getDto() {
+		return dto;
 	}
+	
+	public void setDto(final List<Object> dto) {
+	    this.dto = dto;
+	}
+	
 
 	@JsonFormat(pattern="yyyy-MM-dd'T'HH:mm:ss.SSS'Z'", timezone="UTC")
 	@Override
@@ -163,7 +174,7 @@ public class FailedProcessing extends AbstractRequest {
 	}
 	
 	@Override
-	public boolean equals(java.lang.Object o) {
+	public boolean equals(final java.lang.Object o) {
 		if (this == o) {
 			return true;
 		}
@@ -188,7 +199,7 @@ public class FailedProcessing extends AbstractRequest {
 				&& Objects.equals(this.getCreationDate(), failedProcessing.getCreationDate())
 				&& Objects.equals(this.failureDate, failedProcessing.failureDate)
 				&& Objects.equals(this.failureMessage, failedProcessing.failureMessage)
-				&& Objects.equals(this.getDto(), failedProcessing.getDto());
+				&& Objects.equals(this.dto, failedProcessing.dto);
 	}
 
 	@Override
@@ -210,7 +221,7 @@ public class FailedProcessing extends AbstractRequest {
 				getCreationDate(), 
 				failureDate,
 				failureMessage,
-				getDto()
+				dto
 		);
 	}
 
@@ -234,7 +245,7 @@ public class FailedProcessing extends AbstractRequest {
 		sb.append("    creationDate: ").append(toIndentedString(getCreationDate())).append("\n");
 		sb.append("    failureDate: ").append(toIndentedString(failureDate)).append("\n");
 		sb.append("    failureMessage: ").append(toIndentedString(failureMessage)).append("\n");
-		sb.append("    processingDetails: ").append(toIndentedString(getDto())).append("\n");		
+		sb.append("    processingDetails: ").append(toIndentedString(dto)).append("\n");		
 		sb.append("}");
 		return sb.toString();
 	}
@@ -243,7 +254,7 @@ public class FailedProcessing extends AbstractRequest {
 	 * Convert the given object to string with each line indented by 4 spaces
 	 * (except the first line).
 	 */
-	private final String toIndentedString(java.lang.Object o) {
+	private final String toIndentedString(final java.lang.Object o) {
 		if (o == null) {
 			return "null";
 		}

@@ -32,11 +32,11 @@ public class MqiMessage extends AbstractRequest {
         super();
     }
 
-    public MqiMessage(ProductCategory category, String topic,
-            int partition, long offset, String group, MessageState state,
-            String readingPod, Date lastReadDate, String sendingPod,
-            Date lastSendDate, Date lastAckDate, int nbRetries, Object dto,
-            Date creationDate) {
+    public MqiMessage(final ProductCategory category, final String topic,
+            final int partition, final long offset, final String group, final MessageState state,
+            final String readingPod, final Date lastReadDate, final String sendingPod,
+            final Date lastSendDate, final Date lastAckDate, final int nbRetries, final Object dto,
+            final Date creationDate) {
         super();
 		this.category = category;
 		this.topic = topic;
@@ -60,8 +60,22 @@ public class MqiMessage extends AbstractRequest {
 	}
 
     @JsonIgnore
-	public void setId(long id) {
+	public void setId(final long id) {
 		this.id = id;
+	}
+    
+	/**
+	 * @return the dto
+	 */
+	public Object getDto() {
+	    return dto;
+	}
+
+	/**
+	 * @param dto the dto to set
+	 */
+	public void setDto(final Object dto) {
+	    this.dto = dto;
 	}
 
     /**
@@ -73,7 +87,7 @@ public class MqiMessage extends AbstractRequest {
     /**
      * @param readingPod the readingPod to set
      */
-    public void setReadingPod(String readingPod) {
+    public void setReadingPod(final String readingPod) {
         this.readingPod = readingPod;
     }
     /**
@@ -85,7 +99,7 @@ public class MqiMessage extends AbstractRequest {
     /**
      * @param lastReadDate the lastReadDate to set
      */
-    public void setLastReadDate(Date lastReadDate) {
+    public void setLastReadDate(final Date lastReadDate) {
         this.lastReadDate = lastReadDate;
     }
 
@@ -140,14 +154,14 @@ public class MqiMessage extends AbstractRequest {
      * @see java.lang.Object#equals(java.lang.Object)
      */
     @Override
-    public boolean equals(Object obj) {
+    public boolean equals(final Object obj) {
         if (this == obj)
             return true;
         if (obj == null)
             return false;
         if (getClass() != obj.getClass())
             return false;
-        MqiMessage other = (MqiMessage) obj;
+        final MqiMessage other = (MqiMessage) obj;
         if (category != other.category)
             return false;
         if (creationDate == null) {

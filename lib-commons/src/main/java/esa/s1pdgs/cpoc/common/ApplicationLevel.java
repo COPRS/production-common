@@ -6,5 +6,18 @@ package esa.s1pdgs.cpoc.common;
  *
  */
 public enum ApplicationLevel {
-	L0, L1, L2, L0_SEGMENT;
+	L0(ProductFamily.L0_JOB), 
+	L0_SEGMENT(ProductFamily.L0_SEGMENT_JOB),
+	L1(ProductFamily.L1_JOB), 
+	L2(ProductFamily.L2_JOB);
+	
+	private final ProductFamily jobFamily;
+	
+	private ApplicationLevel(final ProductFamily jobFamily) {
+		this.jobFamily = jobFamily;
+	}
+
+	public ProductFamily toFamily() {
+		return jobFamily;
+	}
 }
