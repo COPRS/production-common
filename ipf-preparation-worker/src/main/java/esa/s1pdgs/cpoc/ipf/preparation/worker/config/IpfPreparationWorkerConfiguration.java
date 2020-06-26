@@ -22,11 +22,12 @@ import esa.s1pdgs.cpoc.common.ProductCategory;
 import esa.s1pdgs.cpoc.errorrepo.ErrorRepoAppender;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.config.IpfPreparationWorkerSettings.CategoryConfig;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.config.IpfPreparationWorkerSettings.InputWaitingConfig;
+import esa.s1pdgs.cpoc.ipf.preparation.worker.dispatch.JobDispatcherImpl;
+import esa.s1pdgs.cpoc.ipf.preparation.worker.generator.JobGenerator;
+import esa.s1pdgs.cpoc.ipf.preparation.worker.generator.JobsGeneratorFactory;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.model.tasktable.TaskTable;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.model.tasktable.TasktableManager;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.service.IpfPreparationService;
-import esa.s1pdgs.cpoc.ipf.preparation.worker.service.JobDispatcher;
-import esa.s1pdgs.cpoc.ipf.preparation.worker.service.JobGenerator;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.status.AppStatusImpl;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.timeout.InputTimeoutChecker;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.timeout.InputTimeoutCheckerImpl;
@@ -40,15 +41,15 @@ import esa.s1pdgs.cpoc.mqi.model.queue.IpfPreparationJob;
 public class IpfPreparationWorkerConfiguration {
 	private static final Logger LOG = LogManager.getLogger(IpfPreparationWorkerConfiguration.class);
 	
+	private final AppCatalogJobClient appCatClient;
     private final AppStatusImpl appStatus;
     private final MqiClient mqiClient;
     private final IpfPreparationWorkerSettings settings;
     private final ErrorRepoAppender errorAppender;
     private final ProcessConfiguration processConfiguration;
-	private final AppCatalogJobClient appCatClient;
 	private final ProcessSettings processSettings;
-	private final ThreadPoolTaskScheduler taskScheduler;
-    
+    private final JobsGeneratorFactory jobGeneratorFactory;
+        
 	@Autowired
 	public IpfPreparationWorkerConfiguration(
 			final AppStatusImpl appStatus, 
@@ -56,24 +57,37 @@ public class IpfPreparationWorkerConfiguration {
 			final IpfPreparationWorkerSettings settings, 
 			final ErrorRepoAppender errorAppender,
 			final ProcessConfiguration processConfiguration,
-			final AppCatalogJobClient appCatClient,
 			final ProcessSettings processSettings,
-			final ThreadPoolTaskScheduler taskScheduler
+			final AppCatalogJobClient appCatClient,
+		    final JobsGeneratorFactory jobGeneratorFactory
 	) {
 		this.appStatus = appStatus;
 		this.mqiClient = mqiClient;
 		this.settings = settings;
 		this.errorAppender = errorAppender;
 		this.processConfiguration = processConfiguration;
-		this.appCatClient = appCatClient;
 		this.processSettings = processSettings;
-		this.taskScheduler = taskScheduler;
+		this.appCatClient = appCatClient;
+		this.jobGeneratorFactory = jobGeneratorFactory;
 	}
 
 	@Bean
 	public Function<TaskTable, InputTimeoutChecker> timeoutCheckerFor() {
 		return t -> inputWaitTimeoutFor(t);		
 	}
+	
+	@Bean
+	public TasktableManager tasktableManager() {
+		return TasktableManager.of(new File(settings.getDiroftasktables()));
+	}
+		
+	@Bean(name="jobGenerationTaskScheduler", destroyMethod = "shutdown")
+    public ThreadPoolTaskScheduler threadPoolTaskScheduler(final TasktableManager ttManager) {
+        final ThreadPoolTaskScheduler threadPoolTaskScheduler = new ThreadPoolTaskScheduler();
+        threadPoolTaskScheduler.setPoolSize(ttManager.size());
+        threadPoolTaskScheduler.setThreadNamePrefix("JobGenerationTaskScheduler");
+        return threadPoolTaskScheduler;
+    }
 	
 //	@Bean
 //	@Autowired
@@ -108,39 +122,37 @@ public class IpfPreparationWorkerConfiguration {
 	
 	@Bean
 	@Autowired
-	public IpfPreparationService service() {		
-		final TasktableManager ttManager =  TasktableManager.of(new File(settings.getDiroftasktables()));
-		final Map<String, JobGenerator> generators = new HashMap<>(ttManager.size());
-		
+	public IpfPreparationService service(
+			final TasktableManager ttManager, 
+			final ThreadPoolTaskScheduler taskScheduler
+	) {		
+		final Map<String, JobGenerator> generators = new HashMap<>(ttManager.size());		
 		final ProductTypeFactory factory = ProductTypeFactory.forLevel(processSettings.getLevel());		
-		final JobDispatcher jobDispatcher = factory.newJobDispatcher();
-		
-		for (final File taskTable : ttManager.tasktables()) {
-			final JobGenerator jobGen = factory.newJobGenerator(taskTable);
-			generators.put(taskTable.getName(), jobGen);
-		    // Launch generators
-			taskScheduler.scheduleWithFixedDelay(jobGen, settings.getJobgenfixedrate());
-		}
 	
+		for (final File taskTableFile : ttManager.tasktables()) {				
+			final JobGenerator jobGenerator = jobGeneratorFactory.newJobGenerator(taskTableFile, factory);
+			generators.put(taskTableFile.getName(), jobGenerator);
+		    // --> Launch generators
+			taskScheduler.scheduleWithFixedDelay(jobGenerator, settings.getJobgenfixedrate());
+		}
+		
 		final IpfPreparationService service = new IpfPreparationService(
-				jobDispatcher, 
+				new JobDispatcherImpl(factory.tasktableMapper(), processSettings, appCatClient, generators), 
 				errorAppender, 
 				processConfiguration
 		);
 		
-		final ExecutorService executor = Executors.newFixedThreadPool(settings.getProductCategories().size());
+		// TODO add ThreadFactory to give a descriptive name for the consumer
+		final ExecutorService executor = Executors.newFixedThreadPool(
+				settings.getProductCategories().size()
+		);
 		
 		for (final Map.Entry<ProductCategory, CategoryConfig> entry : settings.getProductCategories().entrySet()) {				
 			executor.execute(newConsumerFor(entry.getKey(), entry.getValue(), service));
-		}
-		
+		}		
 		return service;
-		
-		
-		
 	}
-	
-	
+		
 	private final MqiConsumer<IpfPreparationJob> newConsumerFor(
 			final ProductCategory category, 
 			final CategoryConfig config,

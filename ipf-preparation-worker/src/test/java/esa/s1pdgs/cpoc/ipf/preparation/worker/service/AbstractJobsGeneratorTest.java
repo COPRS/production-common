@@ -57,7 +57,7 @@ import esa.s1pdgs.cpoc.common.errors.processing.IpfPrepWorkerBuildTaskTableExcep
 import esa.s1pdgs.cpoc.common.errors.processing.IpfPrepWorkerInputsMissingException;
 import esa.s1pdgs.cpoc.common.errors.processing.MetadataQueryException;
 import esa.s1pdgs.cpoc.common.utils.DateUtils;
-import esa.s1pdgs.cpoc.ipf.preparation.worker.config.AppConfig;
+import esa.s1pdgs.cpoc.ipf.preparation.worker.config.AppCatConfig;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.config.IpfPreparationWorkerSettings;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.config.IpfPreparationWorkerSettings.InputWaitingConfig;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.config.IpfPreparationWorkerSettings.WaitTempo;
@@ -407,7 +407,7 @@ public class AbstractJobsGeneratorTest {
         Mockito.doAnswer(i -> {
             final AnnotationConfigApplicationContext ctx =
                     new AnnotationConfigApplicationContext();
-            ctx.register(AppConfig.class);
+            ctx.register(AppCatConfig.class);
             ctx.refresh();
             final XmlConverter xmlConverter = ctx.getBean(XmlConverter.class);
             final String r =

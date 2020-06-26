@@ -1,25 +1,24 @@
 package esa.s1pdgs.cpoc.ipf.preparation.worker.type;
 
-import java.io.File;
 import java.util.Arrays;
 
 import esa.s1pdgs.cpoc.common.ApplicationLevel;
-import esa.s1pdgs.cpoc.ipf.preparation.worker.model.joborder.JobsGeneratorFactory.JobGenType;
-import esa.s1pdgs.cpoc.ipf.preparation.worker.service.JobDispatcher;
-import esa.s1pdgs.cpoc.ipf.preparation.worker.service.JobGenerator;
+import esa.s1pdgs.cpoc.ipf.preparation.worker.model.tasktable.mapper.TasktableMapper;
 
 public interface ProductTypeFactory {
 	
-	public JobGenType type();
+	public ApplicationLevel level();
 	
-	public JobGenerator newJobGenerator(final File taskTableFile);	
+	public ProductTypeAdapter typeAdapter();
 	
-	public JobDispatcher newJobDispatcher();
+	//public JobDispatcher newJobDispatcher(final Map<String, JobGenerator> generators);
+	
+	public TasktableMapper tasktableMapper();
 
 	public static ProductTypeFactory forLevel(final ApplicationLevel level) {
 		switch (level) {
 			case L0:
-				return new EdrsSessionTypeFactory();
+				return new EdrsSessionFactory(level);
 			case L0_SEGMENT:
 				return null; // FIXME
 			case L1:

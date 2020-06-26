@@ -6,10 +6,12 @@ import java.util.List;
 
 import org.springframework.util.Assert;
 
-public class TasktableManager {	
+public class TasktableManager {
 	private final List<File> tasktables;
 		
-	public TasktableManager(final List<File> tasktables) {
+	public TasktableManager(
+			final List<File> tasktables
+	) {
 		this.tasktables = tasktables;
 	}
 
@@ -19,6 +21,7 @@ public class TasktableManager {
 
         final File[] taskTableFiles = directory.listFiles(parameter -> parameter.isFile());
 		Assert.isTrue(taskTableFiles != null, "Tasktable listing is null (IOError)");
+		
 		return new TasktableManager(Arrays.asList(taskTableFiles));
 	}
 	

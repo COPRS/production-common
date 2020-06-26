@@ -149,11 +149,6 @@ public class IpfPreparationWorkerSettings {
 	protected static final String MAP_KEY_VAL_SEP = ":";
 
 	/**
-	 * Maximal number of task tables
-	 */
-	private int maxnboftasktable;
-
-	/**
 	 * Maximal number of jobs waiting to be sent
 	 */
 	private int maxnumberofjobs;
@@ -337,19 +332,6 @@ public class IpfPreparationWorkerSettings {
 
 	}
 
-	/**
-	 * @return the maxnboftasktable
-	 */
-	public int getMaxnboftasktable() {
-		return maxnboftasktable;
-	}
-
-	/**
-	 * @param maxnboftasktable the maxnboftasktable to set
-	 */
-	public void setMaxnboftasktable(final int maxnboftasktable) {
-		this.maxnboftasktable = maxnboftasktable;
-	}
 
 	/**
 	 * @return the waitprimarycheck
@@ -535,7 +517,7 @@ public class IpfPreparationWorkerSettings {
 	 */
 	@Override
 	public String toString() {
-		return "{maxnboftasktable: " + maxnboftasktable + ", maxnumberofjobs: " + maxnumberofjobs
+		return "{maxnumberofjobs: " + maxnumberofjobs
 				+ ", waitprimarycheck: \"" + waitprimarycheck + "\", waitmetadatainput: \"" + waitmetadatainput
 				+ "\", diroftasktables: \"" + diroftasktables + "\", jobgenfixedrate: " + jobgenfixedrate
 				+ ", defaultfamily: \"" + defaultfamily + "\", outputfamiliesstr: \"" + outputfamiliesstr

@@ -1,144 +1,90 @@
-package esa.s1pdgs.cpoc.ipf.preparation.worker.model.joborder;
+package esa.s1pdgs.cpoc.ipf.preparation.worker.generator;
 
 import java.io.File;
-import java.util.Arrays;
+import java.util.List;
+import java.util.Map;
 import java.util.function.Function;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import esa.s1pdgs.cpoc.appcatalog.client.job.AppCatalogJobClient;
-import esa.s1pdgs.cpoc.common.errors.processing.IpfPrepWorkerBuildTaskTableException;
-import esa.s1pdgs.cpoc.ipf.preparation.worker.config.AiopProperties;
-import esa.s1pdgs.cpoc.ipf.preparation.worker.config.IpfPreparationWorkerSettings;
-import esa.s1pdgs.cpoc.ipf.preparation.worker.config.ProcessConfiguration;
+import esa.s1pdgs.cpoc.errorrepo.ErrorRepoAppender;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.config.ProcessSettings;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.model.ProductMode;
+import esa.s1pdgs.cpoc.ipf.preparation.worker.model.joborder.JobOrder;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.model.tasktable.TaskTable;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.model.tasktable.TaskTableFactory;
-import esa.s1pdgs.cpoc.ipf.preparation.worker.service.AbstractJobsGenerator;
-import esa.s1pdgs.cpoc.ipf.preparation.worker.service.L0AppJobsGenerator;
-import esa.s1pdgs.cpoc.ipf.preparation.worker.service.L0SegmentAppJobsGenerator;
-import esa.s1pdgs.cpoc.ipf.preparation.worker.service.LevelProductsJobsGenerator;
-import esa.s1pdgs.cpoc.ipf.preparation.worker.service.XmlConverter;
+import esa.s1pdgs.cpoc.ipf.preparation.worker.model.tasktable.TasktableAdapter;
+import esa.s1pdgs.cpoc.ipf.preparation.worker.publish.Publisher;
+import esa.s1pdgs.cpoc.ipf.preparation.worker.query.AuxQueryHandler;
+import esa.s1pdgs.cpoc.ipf.preparation.worker.service.ElementMapper;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.timeout.InputTimeoutChecker;
+import esa.s1pdgs.cpoc.ipf.preparation.worker.type.ProductTypeFactory;
 import esa.s1pdgs.cpoc.metadata.client.MetadataClient;
-import esa.s1pdgs.cpoc.mqi.client.MqiClient;
+import esa.s1pdgs.cpoc.metadata.client.SearchMetadataQuery;
 
 @Service
 public class JobsGeneratorFactory {
-	// sorry for the shitty naming but we want to keep it in line with the existing naming scheme
-	public enum JobGenType {
-		LEVEL_0,
-		LEVEL_SEGMENT,
-		LEVEL_PRODUCT
-	}
-	
-	private final ProcessSettings l0ProcessSettings;
-	private final IpfPreparationWorkerSettings ipfPreparationWorkerSettings;
-	private final AiopProperties aiopProperties;
-	private final XmlConverter xmlConverter;
+	private final ProcessSettings settings;
 	private final MetadataClient metadataClient;
-	private final ProcessConfiguration processConfiguration;
-	private final MqiClient mqiClient;
 	private final TaskTableFactory taskTableFactory;
-	private final Function<TaskTable, InputTimeoutChecker> timeoutCheckerFactory; 
-
+	private final Function<TaskTable, InputTimeoutChecker> timeoutCheckerFactory;
+	private final ElementMapper elementMapper;
+    private final GracePeriodHandler gracePeriodHandler;
+    private final Publisher publisher;
+    private final ErrorRepoAppender errorAppender;
+	private final AppCatalogJobClient appCatClient;
+    
 	@Autowired
 	public JobsGeneratorFactory(
-			final ProcessSettings l0ProcessSettings,
-			final IpfPreparationWorkerSettings ipfPreparationWorkerSettings, 
-			final AiopProperties aiopProperties,
-			final XmlConverter xmlConverter, 
+			final ProcessSettings settings,
 			final MetadataClient metadataClient,
-			final ProcessConfiguration processConfiguration,
-			final MqiClient mqiClient,
 			final TaskTableFactory taskTableFactory,
-			final Function<TaskTable, InputTimeoutChecker> timeoutCheckerFactory
+			final Function<TaskTable, InputTimeoutChecker> timeoutCheckerFactory,
+			final ElementMapper elementMapper,
+			final GracePeriodHandler gracePeriodHandler,
+		    final Publisher publisher,
+		    final ErrorRepoAppender errorAppender,
+			final AppCatalogJobClient appCatClient
 	) {
-		this.l0ProcessSettings = l0ProcessSettings;
-		this.ipfPreparationWorkerSettings = ipfPreparationWorkerSettings;
-		this.aiopProperties = aiopProperties;
-		this.xmlConverter = xmlConverter;
+		this.settings = settings;
 		this.metadataClient = metadataClient;
-		this.processConfiguration = processConfiguration;
-		this.mqiClient = mqiClient;
 		this.taskTableFactory = taskTableFactory;
 		this.timeoutCheckerFactory = timeoutCheckerFactory;
+		this.elementMapper = elementMapper;
+		this.gracePeriodHandler = gracePeriodHandler;
+		this.publisher = publisher;
+		this.errorAppender = errorAppender;
+		this.appCatClient = appCatClient;
 	}
 	
-	public AbstractJobsGenerator newJobGenerator(
-			final File xmlFile,
-			final AppCatalogJobClient appDataService,
-			final JobGenType type
-	) throws IpfPrepWorkerBuildTaskTableException {		
-		final TaskTable taskTable = taskTableFactory.buildTaskTable(xmlFile, l0ProcessSettings.getLevel());		
-		final AbstractJobsGenerator processor = newGenerator(xmlFile, appDataService, taskTable, type);
-		processor.initialize();
-		return processor;
+	public final JobGenerator newJobGenerator(final File taskTableFile, final ProductTypeFactory typeFactory) {		
+		final TasktableAdapter tasktableAdapter = new TasktableAdapter(
+				taskTableFile, 
+				taskTableFactory.buildTaskTable(taskTableFile, settings.getLevel()), 
+				elementMapper
+		);		
+	    final JobOrder jobOrderTemplate = tasktableAdapter.newJobOrderTemplate(settings);	    
+	    final Map<Integer, SearchMetadataQuery> metadataQueryTemplate = tasktableAdapter.buildMetadataSearchQuery();	    		
+	    final List<List<String>> tasks = tasktableAdapter.buildTasks();	    
+		final AuxQueryHandler auxQueryHandler = new AuxQueryHandler(
+				metadataClient, 
+				ProductMode.SLICING, 
+				timeoutCheckerFactory.apply(tasktableAdapter.taskTable())
+		);
+		return new JobGeneratorImpl(
+				tasktableAdapter, 
+				typeFactory.typeAdapter(), 
+				appCatClient, 
+				gracePeriodHandler, 
+				settings, 
+				errorAppender, 
+				publisher, 
+				jobOrderTemplate, 
+				metadataQueryTemplate, 
+				tasks, 
+				auxQueryHandler
+		);
 	}
-		
-	private AbstractJobsGenerator newGenerator(
-			final File xmlFile,
-			final AppCatalogJobClient appDataService, 
-			final TaskTable taskTable,
-			final JobGenType type
-	) {
-		final InputTimeoutChecker timeoutChecker = timeoutCheckerFactory.apply(taskTable);
-		
-		switch (type) {
-			case LEVEL_0:
-				return new L0AppJobsGenerator(
-						xmlConverter,
-						metadataClient, 
-						l0ProcessSettings, 
-						ipfPreparationWorkerSettings, 
-						appDataService, 
-						aiopProperties, 
-						processConfiguration,
-						mqiClient,
-						timeoutChecker,
-						xmlFile.getName(),
-						taskTable,
-						ProductMode.SLICING
-				);
-			case LEVEL_SEGMENT:
-				return new L0SegmentAppJobsGenerator(
-						xmlConverter,
-						metadataClient, 
-						l0ProcessSettings, 
-						ipfPreparationWorkerSettings, 
-						appDataService, 
-						processConfiguration,
-						mqiClient,
-						timeoutChecker,
-						xmlFile.getName(),
-						taskTable,
-						ProductMode.SLICING	
-				);
-			case LEVEL_PRODUCT:
-				return new LevelProductsJobsGenerator(
-						xmlConverter,
-						metadataClient, 
-						l0ProcessSettings, 
-						ipfPreparationWorkerSettings, 
-						appDataService, 
-						processConfiguration,
-						mqiClient,
-						timeoutChecker,
-						xmlFile.getName(),
-						taskTable,
-						ProductMode.SLICING	
-				);
-			default:
-			  throw new IllegalArgumentException(
-					  String.format(
-							  "Unknown type %s. Available are: %s", 
-							  type, 
-							  Arrays.toString(JobGenType.values())
-					  )
-			  );		
-		}
-	}
-
 }

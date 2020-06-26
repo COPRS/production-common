@@ -14,12 +14,12 @@ import esa.s1pdgs.cpoc.appcatalog.client.job.AppCatalogJobClient;
  *
  */
 @Configuration
-public class AppConfig {	
+public class AppCatConfig {	
 	private final AppCatalogConfigurationProperties properties;
 	private final RestTemplate restTemplate;
 		
 	@Autowired
-	public AppConfig(
+	public AppCatConfig(
 			final AppCatalogConfigurationProperties properties,
 			final RestTemplateBuilder restTemplateBuilder
 	) {

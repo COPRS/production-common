@@ -7,7 +7,6 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.UUID;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Function;
@@ -38,6 +37,8 @@ import esa.s1pdgs.cpoc.common.utils.LogUtils;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.config.IpfPreparationWorkerSettings;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.config.ProcessConfiguration;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.config.ProcessSettings;
+import esa.s1pdgs.cpoc.ipf.preparation.worker.generator.JobGeneratorImpl;
+import esa.s1pdgs.cpoc.ipf.preparation.worker.generator.state.JobStateTransistionFailed;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.model.JobGeneration;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.model.ProductMode;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.model.converter.TaskTableToJobOrderConverter;
@@ -59,7 +60,6 @@ import esa.s1pdgs.cpoc.ipf.preparation.worker.model.tasktable.TaskTablePool;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.model.tasktable.TaskTableTask;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.model.tasktable.enums.TaskTableInputOrigin;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.model.tasktable.enums.TaskTableMandatoryEnum;
-import esa.s1pdgs.cpoc.ipf.preparation.worker.state.JobStateTransistionFailed;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.timeout.InputTimeoutChecker;
 import esa.s1pdgs.cpoc.metadata.client.MetadataClient;
 import esa.s1pdgs.cpoc.metadata.client.SearchMetadataQuery;
@@ -83,53 +83,7 @@ import esa.s1pdgs.cpoc.report.message.output.JobOrderReportingOutput;
  * 
  * @author Cyrielle Gailliard
  */
-public abstract class AbstractJobsGenerator implements JobGenerator, Runnable {
-	static final class ElementMapper
-	{
-		private final ProcessSettings l0ProcessSettings;
-		private final IpfPreparationWorkerSettings ipfPreparationWorkerSettings;
-
-		public ElementMapper(
-				final ProcessSettings l0ProcessSettings,
-				final IpfPreparationWorkerSettings ipfPreparationWorkerSettings
-		) {
-			this.l0ProcessSettings = l0ProcessSettings;
-			this.ipfPreparationWorkerSettings = ipfPreparationWorkerSettings;
-		}
-
-		public final Optional<String> getParameterValue(final String key) {
-			if (l0ProcessSettings.getParams().containsKey(key)) {
-				return Optional.of(l0ProcessSettings.getParams().get(key));
-			}
-			return Optional.empty();
-		}
-		
-		public final String getRegexFor(final String filetype) {			
-			return l0ProcessSettings.getOutputregexps().getOrDefault(
-					filetype, 
-					"^.*" + filetype + ".*$"
-			);
-		}		
-		
-		public final String mappedFileType(final String filetype) {
-			return ipfPreparationWorkerSettings.getMapTypeMeta().getOrDefault(
-					filetype,
-					filetype
-			);
-		}
-	
-		public final ProductFamily outputFamilyOf(final String fileType) {
-			return ipfPreparationWorkerSettings.getOutputfamilies().getOrDefault(fileType, defaultFamily());
-		}
-		
-		public final ProductFamily inputFamilyOf(final String fileType) {
-			return ipfPreparationWorkerSettings.getInputfamilies().getOrDefault(fileType, defaultFamily());	
-		}
-		
-		final ProductFamily defaultFamily() {
-			return ProductFamily.fromValue(ipfPreparationWorkerSettings.getDefaultfamily());
-		}		
-	}
+public abstract class AbstractJobsGenerator implements JobGeneratorImpl, Runnable {
 	protected static final Logger LOGGER = LogManager.getLogger(AbstractJobsGenerator.class);
 
 	/**
@@ -141,7 +95,7 @@ public abstract class AbstractJobsGenerator implements JobGenerator, Runnable {
 	protected final ProcessSettings l0ProcessSettings;
 	protected final IpfPreparationWorkerSettings ipfPreparationWorkerSettings;
 	
-	private final AppCatalogJobClient<CatalogEvent> appDataService;
+	private final AppCatalogJobClient appDataService;
 	private final MqiClient mqiClient;
 	private final String hostname;
 	private final InputTimeoutChecker timeoutChecker;

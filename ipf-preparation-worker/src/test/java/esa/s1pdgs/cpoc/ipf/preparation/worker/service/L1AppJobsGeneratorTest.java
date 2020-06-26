@@ -42,9 +42,11 @@ import esa.s1pdgs.cpoc.common.errors.processing.IpfPrepWorkerInputsMissingExcept
 import esa.s1pdgs.cpoc.common.errors.processing.IpfPrepWorkerMetadataException;
 import esa.s1pdgs.cpoc.common.errors.processing.MetadataQueryException;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.config.AiopProperties;
-import esa.s1pdgs.cpoc.ipf.preparation.worker.config.AppConfig;
+import esa.s1pdgs.cpoc.ipf.preparation.worker.config.AppCatConfig;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.config.IpfPreparationWorkerSettings;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.config.IpfPreparationWorkerSettings.WaitTempo;
+import esa.s1pdgs.cpoc.ipf.preparation.worker.generator.JobsGeneratorFactory;
+import esa.s1pdgs.cpoc.ipf.preparation.worker.generator.JobsGeneratorFactory.JobGenType;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.config.ProcessConfiguration;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.config.ProcessSettings;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.config.XmlConfig;
@@ -52,8 +54,6 @@ import esa.s1pdgs.cpoc.ipf.preparation.worker.model.JobGeneration;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.model.joborder.AbstractJobOrderConf;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.model.joborder.JobOrder;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.model.joborder.JobOrderProcParam;
-import esa.s1pdgs.cpoc.ipf.preparation.worker.model.joborder.JobsGeneratorFactory;
-import esa.s1pdgs.cpoc.ipf.preparation.worker.model.joborder.JobsGeneratorFactory.JobGenType;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.model.joborder.L0JobOrderConf;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.model.tasktable.TaskTable;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.model.tasktable.TaskTableFactory;
@@ -232,7 +232,7 @@ public class L1AppJobsGeneratorTest {
             Mockito.doAnswer(i -> {
                 final AnnotationConfigApplicationContext ctx =
                         new AnnotationConfigApplicationContext();
-                ctx.register(AppConfig.class);
+                ctx.register(AppCatConfig.class);
                 ctx.refresh();
                 final XmlConverter xmlConverter = ctx.getBean(XmlConverter.class);
                 final String r = xmlConverter

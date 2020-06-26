@@ -13,7 +13,6 @@ import esa.s1pdgs.cpoc.appcatalog.AppDataJob;
 import esa.s1pdgs.cpoc.common.utils.DateUtils;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.config.IpfPreparationWorkerSettings.InputWaitingConfig;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.model.tasktable.TaskTableInput;
-import esa.s1pdgs.cpoc.mqi.model.queue.CatalogEvent;
 
 public final class InputTimeoutCheckerImpl implements InputTimeoutChecker {	
 	private static final Logger LOG = LogManager.getLogger(InputTimeoutChecker.class);
@@ -27,7 +26,7 @@ public final class InputTimeoutCheckerImpl implements InputTimeoutChecker {
 	}
 
 	@Override
-	public final boolean isTimeoutExpiredFor(final AppDataJob<CatalogEvent> job, final TaskTableInput input) {
+	public final boolean isTimeoutExpiredFor(final AppDataJob job, final TaskTableInput input) {
 		try {
 			for (final InputWaitingConfig config : configs) {
 				if (isMatchingConfiguredInputIdRegex(config, input) && 
@@ -55,7 +54,7 @@ public final class InputTimeoutCheckerImpl implements InputTimeoutChecker {
 		return true;
 	}
 
-	final boolean isMatchingConfiguredTimeliness(final InputWaitingConfig config, final AppDataJob<CatalogEvent> job) {
+	final boolean isMatchingConfiguredTimeliness(final InputWaitingConfig config, final AppDataJob job) {
 		final String timeliness = (String) job.getMessages().get(0)
 				.getBody().getMetadata().get("timeliness");
 		return timeliness.matches(Optional.ofNullable(config.getTimelinessRegexp()).orElse(".*"));
