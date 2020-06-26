@@ -19,13 +19,11 @@ import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;
 
 import esa.s1pdgs.cpoc.appcatalog.AppDataJob;
-import esa.s1pdgs.cpoc.appcatalog.AppDataJobGeneration;
 import esa.s1pdgs.cpoc.appcatalog.AppDataJobGenerationState;
 import esa.s1pdgs.cpoc.appcatalog.AppDataJobState;
 import esa.s1pdgs.cpoc.common.errors.AbstractCodedException;
 import esa.s1pdgs.cpoc.common.errors.appcatalog.AppCatalogJobNewApiError;
 import esa.s1pdgs.cpoc.common.errors.appcatalog.AppCatalogJobPatchApiError;
-import esa.s1pdgs.cpoc.common.errors.appcatalog.AppCatalogJobPatchGenerationApiError;
 import esa.s1pdgs.cpoc.common.errors.appcatalog.AppCatalogJobSearchApiError;
 import esa.s1pdgs.cpoc.common.utils.LogUtils;
 
@@ -220,24 +218,6 @@ public class AppCatalogJobClient {
     }
 
     /**
-     * Search by pod and state
-     * 
-     * @param pod
-     * @param state
-     * @return
-     * @throws AbstractCodedException
-     */
-    public List<AppDataJob> findByPodAndState(
-    		final String pod, 
-    		final AppDataJobState state
-    ) throws AbstractCodedException {
-    	final Map<String, String> filters = new HashMap<>();
-    	filters.put("state", state.name());
-    	filters.put("pod", pod);
-        return search(filters);
-    }
-
-    /**
      * Search for job with generating tastables per pod and task table
      * 
      * @param pod
@@ -245,10 +225,11 @@ public class AppCatalogJobClient {
      * @return
      * @throws AbstractCodedException
      */
-    public List<AppDataJob> findNByPodAndGenerationTaskTableWithNotSentGeneration(final String pod, final String taskTable)
-            throws AbstractCodedException {       
+    public List<AppDataJob> findJobInStateGeneratingForPod(final String taskTable, final String pod) 
+    		throws AbstractCodedException {       
     	final Map<String, String> filters = new HashMap<>();  
-        filters.put("pod", pod);
+    	filters.put("pod", pod);
+        filters.put("state", AppDataJobState.GENERATING.name());
         filters.put("generations.state[neq]", AppDataJobGenerationState.SENT.name());
         filters.put("generations.taskTable", taskTable);
         filters.put("[orderByAsc]", "generations.lastUpdateDate");
@@ -331,58 +312,6 @@ public class AppCatalogJobClient {
             } catch (final RestClientException rce) {
                 waitOrThrow(retries,
                         new AppCatalogJobPatchApiError(uri, job,
-                                String.format(
-                                        "HttpStatusCodeException occured: %s",
-                                        rce.getMessage()),
-                                rce),
-                        "patch");
-            }
-        }
-    }
-
-    /**
-     * Patch a generation of a given job
-     * 
-     * @param identifier
-     * @return
-     * @throws AbstractCodedException
-     */
-	public AppDataJob updateJobGeneration(final long identifier,final AppDataJobGeneration jobGeneration) 
-			throws AbstractCodedException {
-        int retries = 0;
-        while (true) {
-            retries++;
-            final String uri = hostUri + "/jobs/" + identifier + "/generation";
-            LogUtils.traceLog(LOGGER, String.format("[uri %s]", uri));
-            try {          	
-                final ResponseEntity<AppDataJob> response = restTemplate.exchange(
-                		uri, 
-                		HttpMethod.PATCH,
-                		new HttpEntity<AppDataJobGeneration>(jobGeneration),
-                		new ParameterizedTypeReference<AppDataJob>() {}
-                );
-                if (response.getStatusCode() == HttpStatus.OK) {
-                    LogUtils.traceLog(LOGGER, String.format("[uri %s] [ret %s]",
-                            uri, response.getBody()));
-                    return response.getBody();
-                } else {
-                    waitOrThrow(retries,
-                            new AppCatalogJobPatchGenerationApiError(uri, jobGeneration,
-                                    "HTTP status code "
-                                            + response.getStatusCode()),
-                            "patch");
-                }
-            } catch (final HttpStatusCodeException hsce) {
-                waitOrThrow(retries, new AppCatalogJobPatchGenerationApiError(
-                        uri, jobGeneration,
-                        String.format(
-                                "HttpStatusCodeException occured: %s - %s",
-                                hsce.getStatusCode(),
-                                hsce.getResponseBodyAsString())),
-                        "patch");
-            } catch (final RestClientException rce) {
-                waitOrThrow(retries,
-                        new AppCatalogJobPatchGenerationApiError(uri, jobGeneration,
                                 String.format(
                                         "HttpStatusCodeException occured: %s",
                                         rce.getMessage()),

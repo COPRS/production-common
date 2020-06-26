@@ -3,8 +3,6 @@
  */
 package esa.s1pdgs.cpoc.appcatalog.server.job.db;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.times;
@@ -27,12 +25,8 @@ import org.springframework.data.domain.Sort.Direction;
 
 import esa.s1pdgs.cpoc.appcatalog.AppDataJob;
 import esa.s1pdgs.cpoc.appcatalog.AppDataJobGeneration;
-import esa.s1pdgs.cpoc.appcatalog.AppDataJobGenerationState;
 import esa.s1pdgs.cpoc.appcatalog.AppDataJobProduct;
 import esa.s1pdgs.cpoc.appcatalog.AppDataJobState;
-import esa.s1pdgs.cpoc.appcatalog.server.job.exception.AppCatalogJobGenerationInvalidTransitionStateException;
-import esa.s1pdgs.cpoc.appcatalog.server.job.exception.AppCatalogJobGenerationNotFoundException;
-import esa.s1pdgs.cpoc.appcatalog.server.job.exception.AppCatalogJobGenerationTerminatedException;
 import esa.s1pdgs.cpoc.appcatalog.server.job.exception.AppCatalogJobNotFoundException;
 import esa.s1pdgs.cpoc.appcatalog.server.sequence.db.SequenceDao;
 import esa.s1pdgs.cpoc.appcatalog.server.service.AppDataJobService;
@@ -142,41 +136,5 @@ public class AppDataJobServiceTest {
         
         verify(appDataJobDao, times(1)).findById(Mockito.eq(123L));
         verify(appDataJobDao, times(1)).save(Mockito.eq(obj));
-    }
-    
-    @Test
-    public void patchGenerationToJobTest() throws AppCatalogJobNotFoundException, AppCatalogJobGenerationTerminatedException, AppCatalogJobGenerationInvalidTransitionStateException, AppCatalogJobGenerationNotFoundException {
-        final AppDataJob obj = new AppDataJob();
-        final AppDataJobProduct product = new AppDataJobProduct();
-        product.setSessionId("session-id");
-        final AppDataJobGeneration gen1 = new AppDataJobGeneration();
-        gen1.setTaskTable("task-table-1");
-        final GenericMessageDto<CatalogEvent> message1 = new GenericMessageDto<CatalogEvent>(1, "topic1", null);
-        final GenericMessageDto<CatalogEvent> message2 = new GenericMessageDto<CatalogEvent>(2, "topic1", null);
-        obj.setId(123);
-        obj.setLevel(ApplicationLevel.L1);
-        obj.setPod("pod-name");
-        obj.setState(AppDataJobState.WAITING);
-        obj.setCreationDate(new Date());
-        obj.setLastUpdateDate(new Date());
-        obj.setProduct(product);
-        obj.setMessages(Arrays.asList(message1, message2));
-        obj.setGeneration(gen1);
-        
-        doReturn(Optional.of(obj)).when(appDataJobDao).findById(Mockito.any());
-        doReturn(obj).when(appDataJobDao).save(Mockito.any());
-        
-        final AppDataJobGeneration newGen = new AppDataJobGeneration();
-        newGen.setTaskTable("task-table-1");
-        newGen.setState(AppDataJobGenerationState.PRIMARY_CHECK);
-        final AppDataJob newJob = appDataJobService.updateJobGeneration(123L, newGen);
-        		
-        verify(appDataJobDao, times(1)).findById(Mockito.eq(123L));
-        verify(appDataJobDao, times(1)).save(Mockito.any());
-  
-        assertEquals(AppDataJobGenerationState.PRIMARY_CHECK, newJob.getGeneration().getState());
-        assertEquals(0, newJob.getGeneration().getNbErrors());
-        assertEquals("task-table-1", newJob.getGeneration().getTaskTable());
-        assertNotNull(newJob.getGeneration().getLastUpdateDate());
     }
 }

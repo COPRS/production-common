@@ -26,10 +26,7 @@ import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.databind.JsonMappingException;
 
 import esa.s1pdgs.cpoc.appcatalog.AppDataJob;
-import esa.s1pdgs.cpoc.appcatalog.AppDataJobGeneration;
 import esa.s1pdgs.cpoc.appcatalog.server.job.exception.AppCatalogJobGenerationInvalidStateException;
-import esa.s1pdgs.cpoc.appcatalog.server.job.exception.AppCatalogJobGenerationInvalidTransitionStateException;
-import esa.s1pdgs.cpoc.appcatalog.server.job.exception.AppCatalogJobGenerationNotFoundException;
 import esa.s1pdgs.cpoc.appcatalog.server.job.exception.AppCatalogJobInvalidStateException;
 import esa.s1pdgs.cpoc.appcatalog.server.job.exception.AppCatalogJobNotFoundException;
 import esa.s1pdgs.cpoc.appcatalog.server.service.AppDataJobService;
@@ -140,26 +137,6 @@ public class JobController {
 					e
 			);
 		}
-    }
-
-    /**
-     * Set messages of a given job
-     * 
-     * @param jobId
-     * @param messages
-     * @return
-     * @throws AppCatalogJobInvalidStateException
-     * @throws AppCatalogJobGenerationInvalidStateException
-     * @throws AppCatalogJobNotFoundException
-     * @throws AppCatalogJobGenerationNotFoundException
-     * @throws AppCatalogJobGenerationInvalidTransitionStateException
-     */
-    @RequestMapping(method = RequestMethod.PATCH, produces = MediaType.APPLICATION_JSON_UTF8_VALUE, path = "/jobs/{jobId}/generation")
-    public AppDataJob updateJobGeneration(
-            @PathVariable(name = "jobId") final Long jobId,
-            @RequestBody final AppDataJobGeneration generation
-    ) throws AppCatalogJobNotFoundException {
-        return appDataJobService.updateJobGeneration(jobId, generation);
     }
     
     final Date convertDateIso(final String dateStr)

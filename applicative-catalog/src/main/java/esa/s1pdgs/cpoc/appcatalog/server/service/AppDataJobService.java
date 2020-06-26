@@ -10,8 +10,6 @@ import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import esa.s1pdgs.cpoc.appcatalog.AppDataJob;
-import esa.s1pdgs.cpoc.appcatalog.AppDataJobGeneration;
-import esa.s1pdgs.cpoc.appcatalog.AppDataJobGenerationState;
 import esa.s1pdgs.cpoc.appcatalog.AppDataJobState;
 import esa.s1pdgs.cpoc.appcatalog.server.job.db.AppDataJobRepository;
 import esa.s1pdgs.cpoc.appcatalog.server.job.exception.AppCatalogJobNotFoundException;
@@ -79,43 +77,7 @@ public class AppDataJobService {
     public AppDataJob updateJob(final AppDataJob patchJob) throws AppCatalogJobNotFoundException {
     	// assert job exists
         getJob(patchJob.getId());
-        LOGGER.debug("Updating appDataJob {}", patchJob);
-        patchJob.setLastUpdateDate(new Date());
-        return update(patchJob);
-    }
-
-
-    public AppDataJob updateJobGeneration(
-    		final Long jobId,
-            final AppDataJobGeneration patchGen
-    ) throws AppCatalogJobNotFoundException {
-
-        final AppDataJob job = getJob(jobId);
-        final AppDataJobGeneration oldGeneration = job.getGeneration();        
-        patchGen.setLastUpdateDate(new Date());
-        
-        // is finished?
-        if (patchGen.getState() == AppDataJobGenerationState.SENT) {
-        	LOGGER.info("Finished job generation for appDataJob {}", jobId);
-        	job.setState(AppDataJobState.TERMINATED);  
-        	job.setLastUpdateDate(new Date());
-        } 
-        // only update the state if it has changed
-        else if (oldGeneration.getState() != patchGen.getState()) {
-        	LOGGER.info("AppDataJob {} changed from {} to {}", jobId, oldGeneration.getState(), patchGen.getState());
-        	patchGen.setNbErrors(0);
-        	job.setLastUpdateDate(new Date());
-        }
-        // state did not change? only update modification date and increment error counter
-        else {
-        	LOGGER.info("AppDataJob {} no transition, staying in {}", jobId, oldGeneration.getState());
-        	patchGen.setNbErrors(oldGeneration.getNbErrors()+1);        	
-        }
-      	job.setGeneration(patchGen);  
-      	return update(job);
-    }
-
-    private final AppDataJob update(final AppDataJob job) {
-    	   return appDataJobDao.save(job);
+        LOGGER.debug("Updating appDataJob {}", patchJob.getId());
+        return appDataJobDao.save(patchJob);
     }
 }

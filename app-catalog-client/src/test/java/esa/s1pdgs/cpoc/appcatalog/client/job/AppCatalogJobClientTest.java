@@ -36,7 +36,6 @@ import esa.s1pdgs.cpoc.appcatalog.AppDataJobState;
 import esa.s1pdgs.cpoc.common.errors.AbstractCodedException;
 import esa.s1pdgs.cpoc.common.errors.appcatalog.AppCatalogJobNewApiError;
 import esa.s1pdgs.cpoc.common.errors.appcatalog.AppCatalogJobPatchApiError;
-import esa.s1pdgs.cpoc.common.errors.appcatalog.AppCatalogJobPatchGenerationApiError;
 import esa.s1pdgs.cpoc.common.errors.appcatalog.AppCatalogJobSearchApiError;
 import esa.s1pdgs.cpoc.mqi.model.queue.CatalogEvent;
 import esa.s1pdgs.cpoc.mqi.model.rest.GenericMessageDto;
@@ -136,26 +135,15 @@ public class AppCatalogJobClientTest {
     	);
     } 
 
-	@Test
-    public void testfindByPodAndState() throws Exception {
-    	runSearchTest(
-    			() -> {
-    				client.findByPodAndState("pod-name", AppDataJobState.DISPATCHING);
-    		        return null;
-    			}, 
-    			"pod=pod-name&state=DISPATCHING"
-    	);
-    }
-
     @Test
-    public void testfindNByPodAndGenerationTaskTableWithNotSentGeneration() throws Exception {
+    public void testFindJobInStateGeneratingFor() throws Exception {
     	runSearchTest(
     			() -> {
-    			    client.findNByPodAndGenerationTaskTableWithNotSentGeneration("pod-name","task-table");
+    			    client.findJobInStateGeneratingForPod("task-table", "myPod");
     		        return null;
     			}, 
-    			"[orderByAsc]=generations.lastUpdateDate&pod=pod-name&"
-    			+ "generations.state[neq]=SENT&generations.taskTable=task-table"
+    			"[orderByAsc]=generations.lastUpdateDate&pod=myPod&"
+    			+ "generations.state[neq]=SENT&generations.taskTable=task-table&state=GENERATING"
     	);
     }
 
@@ -270,46 +258,5 @@ public class AppCatalogJobClientTest {
         assertEquals(job.getMessages().size(), result.getMessages().size());
         assertEquals(job.getProduct(), result.getProduct());
         assertEquals(job.getGeneration(), result.getGeneration());
-    }
-        
-    @SuppressWarnings("unchecked")
-	@Test(expected = AppCatalogJobPatchGenerationApiError.class)
-    public void testPatchTaskTableWhenError() throws AbstractCodedException {
-        final AppDataJob job = buildJob();
-        doThrow(new RestClientException("rest client exception"))
-	    	.when(restTemplate).exchange(
-	    		Mockito.anyString(),
-	            Mockito.eq(HttpMethod.PATCH),
-	            Mockito.any(HttpEntity.class),
-	            Mockito.any(ParameterizedTypeReference.class)
-	    );   
-        client.updateJobGeneration(
-        		job.getId(),
-                job.getGeneration()
-        );
-	}
-
-    @SuppressWarnings("unchecked")
-	@Test
-    public void testPatchTaskTable() throws Exception {
-    	final AppDataJob job = buildJob();    	
-    	doReturn(new ResponseEntity<AppDataJob>(job, HttpStatus.OK))
-	    	.when(restTemplate).exchange(
-	        		Mockito.anyString(),
-	                Mockito.eq(HttpMethod.PATCH),
-	                Mockito.any(HttpEntity.class),
-	                Mockito.any(ParameterizedTypeReference.class)
-	    );
-	    client.updateJobGeneration(
-                job.getId(), 
-                job.getGeneration()
-        );
-	    verify(restTemplate, times(1)).exchange(
-	            Mockito.eq("http://localhost:8080/jobs/142/generation"),
-	            Mockito.eq(HttpMethod.PATCH),
-	            Mockito.any(),
-	              Mockito.eq(new ParameterizedTypeReference<AppDataJob>() {})
-	    );
-	    verifyNoMoreInteractions(restTemplate);
     }
 }
