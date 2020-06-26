@@ -81,7 +81,7 @@ public class RequestRepositoryControllerTest {
 		failedProcessingToReturn.setCreationDate(dateFormat.parse("2019-06-18T11:09:03.805Z"));
 		failedProcessingToReturn.setFailureDate(dateFormat.parse("2019-06-18T11:09:03.805Z"));
 		failedProcessingToReturn.setFailureMessage("dummyMessage");
-		failedProcessingToReturn.setDto(new GenericMessageDto<Object>()); 
+		failedProcessingToReturn.setDto(Collections.singletonList(new GenericMessageDto<Object>())); 
 		return failedProcessingToReturn;
 	}
 

@@ -260,7 +260,7 @@ public class RequestRepositoryTest {
 		mess.setId(id);
 		
 		final FailedProcessingDto fpDto = new FailedProcessingDto();
-		fpDto.setProcessingDetails(mess);
+		fpDto.setProcessingDetails(Collections.singletonList(mess));
 		fpDto.setFailureMessage("expected error");
 		return fpDto;
 	}
@@ -272,7 +272,7 @@ public class RequestRepositoryTest {
 	private final FailedProcessing newFailedProcessing(final long id, final AbstractMessage mess) {
 		final FailedProcessing fpDto = new FailedProcessing();
 		fpDto.setId(123);
-		fpDto.setDto(mess);
+		fpDto.setDto(Collections.singletonList(mess));
 		fpDto.setTopic("myTopic");
 		return fpDto;
 	}

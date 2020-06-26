@@ -44,12 +44,9 @@ public class RequestRepositoryImpl implements RequestRepository {
 
 	@Override
 	public synchronized void saveFailedProcessing(final FailedProcessingDto failedProcessingDto) {
-		final GenericMessageDto<?> dto = failedProcessingDto.getProcessingDetails();
-		final MqiMessage message = mqiMessageRepository.findById(dto.getId());
-		assertNotNull("original request", message, dto.getId());
-		failedProcessingRepo.save(FailedProcessing.valueOf(message, failedProcessingDto));
+		failedProcessingRepo.save(FailedProcessing.valueOf(firstMessageOf(failedProcessingDto), failedProcessingDto));
 	}
-
+	
 	@Override
 	public List<FailedProcessing> getFailedProcessings() {
 		return failedProcessingRepo.findAll(Sort.by(Direction.ASC, "creationTime"));
@@ -136,6 +133,19 @@ public class RequestRepositoryImpl implements RequestRepository {
 			);
 		}
 	}
+	
+	private final MqiMessage firstMessageOf(final FailedProcessingDto failedProcessingDto) {
+		final List<GenericMessageDto<?>> dtos = failedProcessingDto.getProcessingDetails();
+		for (final GenericMessageDto<?> dto : dtos) {
+			final MqiMessage message = mqiMessageRepository.findById(dto.getId());
+			assertNotNull("original request", message, dto.getId());
+			return message;
+		}
+		throw new IllegalArgumentException(
+				String.format("No message found in FailedProcessingDto: %s", failedProcessingDto) 
+		);
+	}
+
 	
 	private static final void assertTopicDefined(final long id, final FailedProcessing failedProcessing) {
 		if (failedProcessing.getTopic() == null)
