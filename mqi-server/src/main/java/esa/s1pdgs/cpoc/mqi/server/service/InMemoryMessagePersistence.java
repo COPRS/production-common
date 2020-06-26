@@ -14,7 +14,6 @@ import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.springframework.kafka.support.Acknowledgment;
 
 import esa.s1pdgs.cpoc.appcatalog.rest.AppCatMessageDto;
-import esa.s1pdgs.cpoc.appcatalog.rest.AppCatReadMessageDto;
 import esa.s1pdgs.cpoc.appcatalog.rest.AppCatSendMessageDto;
 import esa.s1pdgs.cpoc.common.ProductCategory;
 import esa.s1pdgs.cpoc.mqi.model.queue.AbstractMessage;
@@ -36,18 +35,12 @@ public class InMemoryMessagePersistence<T extends AbstractMessage> implements Me
 
     @Override
     public void read(final ConsumerRecord<String, T> data, final Acknowledgment acknowledgment, final GenericConsumer<T> genericConsumer, final ProductCategory category) {
-        AppCatReadMessageDto<T> body = new AppCatReadMessageDto<>(
-                properties.getConsumer().getGroupId(),
-                properties.getHostname(),
-                false,
-                data.value()
-        );
 
         final AppCatMessageDto<T> newEntry = new AppCatMessageDto<>(category, sequence.incrementAndGet(), data.topic(), data.partition(), data.offset());
         newEntry.setCreationDate(new Date());
-        newEntry.setDto(body.getDto());
-        newEntry.setGroup(body.getGroup());
-        newEntry.setReadingPod(body.getPod()); //readingPod = body.getPod (see esa.s1pdgs.cpoc.appcatalog.server.service.MessageManager.insertOrUpdate)
+        newEntry.setDto(data.value());
+        newEntry.setGroup(properties.getConsumer().getGroupId());
+        newEntry.setReadingPod(properties.getHostname()); //readingPod = body.getPod (see esa.s1pdgs.cpoc.appcatalog.server.service.MessageManager.insertOrUpdate)
         newEntry.setLastReadDate(new Date());
         //TODO any else fields to set?
         messages.add(new MessageAndAcknowledgement<>(newEntry, acknowledgment));

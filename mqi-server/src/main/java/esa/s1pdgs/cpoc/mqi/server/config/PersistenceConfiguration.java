@@ -7,6 +7,8 @@ import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.web.client.RestTemplateBuilder;
@@ -28,6 +30,8 @@ import esa.s1pdgs.cpoc.mqi.server.service.OtherApplicationService;
  */
 @Configuration
 public class PersistenceConfiguration<T extends AbstractMessage> {
+
+    private static final Logger LOG = LogManager.getLogger(PersistenceConfiguration.class);
 
 	final static List<MessagePersistenceStrategy> SUPPORTED_MESSAGE_PERSISTENCE_STRATEGIES =
 			Stream.of(MessagePersistenceStrategy.values()).collect(Collectors.toList());
@@ -81,6 +85,7 @@ public class PersistenceConfiguration<T extends AbstractMessage> {
 
     @Bean
     public MessagePersistence<T> messagePersistence(final RestTemplateBuilder builder, final AppCatalogMqiService<T> mqiService, KafkaProperties properties, @Value("${mqi.dft-offset:-3}") final int defaultOffset) {
+        LOG.info("using message persistence strategy {}", messagePersistenceStrategy);
         if (APP_CATALOG_MESSAGE_PERSISTENCE.getValue().equals(messagePersistenceStrategy)) {
             final OtherApplicationService otherAppService = checkProcessingOtherApp(builder);
             return new AppCatalogMessagePersistence<>(mqiService, properties, otherAppService);
