@@ -69,7 +69,7 @@ public class RequestRepositoryImpl implements RequestRepository {
 		final FailedProcessing failedProcessing = failedProcessingRepo.findById(id);
 		assertNotNull("failed request", failedProcessing, id);
 		assertTopicDefined(id, failedProcessing);	
-		kafkaSubmissionClient.resubmit(failedProcessing, failedProcessing.getDto(), status);
+		kafkaSubmissionClient.resubmit(failedProcessing, failedProcessing.getDtos(), status);
 		failedProcessingRepo.deleteById(id);
 	}
 

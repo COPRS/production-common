@@ -36,7 +36,7 @@ public class FailedProcessing extends AbstractRequest {
 	private Date lastAssignmentDate; 
 	private Date failureDate;
 	private String failureMessage;
-	private List<Object> dto;
+	private List<Object> dtos;
 	
 	public FailedProcessing()	{		
 	}
@@ -157,12 +157,12 @@ public class FailedProcessing extends AbstractRequest {
 	}
 
 	@JsonProperty("processingDetails")
-	public List<Object> getDto() {
-		return dto;
+	public List<Object> getDtos() {
+		return dtos;
 	}
 	
-	public void setDto(final List<Object> dto) {
-	    this.dto = dto;
+	public void setDto(final List<Object> dtos) {
+	    this.dtos = dtos;
 	}
 	
 
@@ -199,7 +199,7 @@ public class FailedProcessing extends AbstractRequest {
 				&& Objects.equals(this.getCreationDate(), failedProcessing.getCreationDate())
 				&& Objects.equals(this.failureDate, failedProcessing.failureDate)
 				&& Objects.equals(this.failureMessage, failedProcessing.failureMessage)
-				&& Objects.equals(this.dto, failedProcessing.dto);
+				&& Objects.equals(this.dtos, failedProcessing.dtos);
 	}
 
 	@Override
@@ -221,7 +221,7 @@ public class FailedProcessing extends AbstractRequest {
 				getCreationDate(), 
 				failureDate,
 				failureMessage,
-				dto
+				dtos
 		);
 	}
 
@@ -245,7 +245,7 @@ public class FailedProcessing extends AbstractRequest {
 		sb.append("    creationDate: ").append(toIndentedString(getCreationDate())).append("\n");
 		sb.append("    failureDate: ").append(toIndentedString(failureDate)).append("\n");
 		sb.append("    failureMessage: ").append(toIndentedString(failureMessage)).append("\n");
-		sb.append("    processingDetails: ").append(toIndentedString(dto)).append("\n");		
+		sb.append("    processingDetails: ").append(toIndentedString(dtos)).append("\n");		
 		sb.append("}");
 		return sb.toString();
 	}

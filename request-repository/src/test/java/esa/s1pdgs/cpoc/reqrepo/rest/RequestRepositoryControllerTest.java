@@ -108,7 +108,7 @@ public class RequestRepositoryControllerTest {
 				"    \"creationDate\": \"2019-06-18T11:09:03.805Z\",\n" + 
 				"    \"failureDate\": \"2019-06-18T11:09:03.805Z\",\n" + 
 				"    \"failureMessage\": \"dummyMessage\",\n" + 
-				"    \"processingDetails\": {}\n" + 
+				"    \"processingDetails\": [{}]\n" + 
 				"  }]";
 		
 		uut.perform(get("/api/v1/failedProcessings")
@@ -156,7 +156,7 @@ public class RequestRepositoryControllerTest {
 				"    \"creationDate\": \"2019-06-18T11:09:03.805Z\",\n" + 
 				"    \"failureDate\": \"2019-06-18T11:09:03.805Z\",\n" + 
 				"    \"failureMessage\": \"dummyMessage\",\n" + 
-				"    \"processingDetails\": {}\n" + 
+				"    \"processingDetails\": [{}]\n" + 
 				"  }";
 		uut.perform(get("/api/v1/failedProcessings/1")
 			      .contentType(MediaType.APPLICATION_JSON)
