@@ -27,13 +27,20 @@ import esa.s1pdgs.cpoc.errorrepo.ErrorRepoAppender;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.config.IpfPreparationWorkerSettings.CategoryConfig;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.config.IpfPreparationWorkerSettings.InputWaitingConfig;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.dispatch.JobDispatcherImpl;
+import esa.s1pdgs.cpoc.ipf.preparation.worker.generator.GracePeriodHandler;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.generator.JobGenerator;
-import esa.s1pdgs.cpoc.ipf.preparation.worker.generator.JobsGeneratorFactory;
+import esa.s1pdgs.cpoc.ipf.preparation.worker.generator.JobGeneratorImpl;
+import esa.s1pdgs.cpoc.ipf.preparation.worker.model.ProductMode;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.model.converter.XmlConverter;
+import esa.s1pdgs.cpoc.ipf.preparation.worker.model.tasktable.ElementMapper;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.model.tasktable.TaskTable;
+import esa.s1pdgs.cpoc.ipf.preparation.worker.model.tasktable.TaskTableFactory;
+import esa.s1pdgs.cpoc.ipf.preparation.worker.model.tasktable.TasktableAdapter;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.model.tasktable.TasktableManager;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.model.tasktable.mapper.RoutingBasedTasktableMapper;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.model.tasktable.mapper.SingleTasktableMapper;
+import esa.s1pdgs.cpoc.ipf.preparation.worker.publish.Publisher;
+import esa.s1pdgs.cpoc.ipf.preparation.worker.query.AuxQueryHandler;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.service.IpfPreparationService;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.status.AppStatusImpl;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.timeout.InputTimeoutChecker;
@@ -44,6 +51,7 @@ import esa.s1pdgs.cpoc.ipf.preparation.worker.type.L0Segment;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.type.LevelProduct;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.type.ProductTypeAdapter;
 import esa.s1pdgs.cpoc.metadata.client.MetadataClient;
+import esa.s1pdgs.cpoc.metadata.client.SearchMetadataQuery;
 import esa.s1pdgs.cpoc.mqi.client.MqiClient;
 import esa.s1pdgs.cpoc.mqi.client.MqiConsumer;
 import esa.s1pdgs.cpoc.mqi.client.MqiListener;
@@ -60,10 +68,13 @@ public class IpfPreparationWorkerConfiguration {
     private final ErrorRepoAppender errorAppender;
     private final ProcessConfiguration processConfiguration;
 	private final ProcessSettings processSettings;
-    private final JobsGeneratorFactory jobGeneratorFactory;
     private final MetadataClient metadataClient;
     private final AiopProperties aiopProperties;
     private final XmlConverter xmlConverter;
+	private final TaskTableFactory taskTableFactory;
+	private final ElementMapper elementMapper;
+    private final GracePeriodHandler gracePeriodHandler;
+    private final Publisher publisher;
         
 	@Autowired
 	public IpfPreparationWorkerConfiguration(
@@ -74,10 +85,13 @@ public class IpfPreparationWorkerConfiguration {
 			final ProcessConfiguration processConfiguration,
 			final ProcessSettings processSettings,
 			final AppCatalogJobClient appCatClient,
-		    final JobsGeneratorFactory jobGeneratorFactory,
 		    final MetadataClient metadataClient,
 		    final AiopProperties aiopProperties,
-		    final XmlConverter xmlConverter
+		    final XmlConverter xmlConverter,
+			final TaskTableFactory taskTableFactory,
+			final ElementMapper elementMapper,
+		    final GracePeriodHandler gracePeriodHandler,
+		    final Publisher publisher
 	) {
 		this.appStatus = appStatus;
 		this.mqiClient = mqiClient;
@@ -86,10 +100,13 @@ public class IpfPreparationWorkerConfiguration {
 		this.processConfiguration = processConfiguration;
 		this.processSettings = processSettings;
 		this.appCatClient = appCatClient;
-		this.jobGeneratorFactory = jobGeneratorFactory;
 		this.metadataClient = metadataClient;
 		this.aiopProperties = aiopProperties;
 		this.xmlConverter = xmlConverter;
+		this.taskTableFactory = taskTableFactory;
+		this.elementMapper = elementMapper;
+		this.gracePeriodHandler = gracePeriodHandler;
+		this.publisher = publisher;
 	}
 
 	@Bean
@@ -193,12 +210,13 @@ public class IpfPreparationWorkerConfiguration {
 	public IpfPreparationService service(
 			final TasktableManager ttManager, 
 			final ThreadPoolTaskScheduler taskScheduler,
-			final ProductTypeAdapter typeAdapter
+			final ProductTypeAdapter typeAdapter,
+			final Function<TaskTable, InputTimeoutChecker> timeoutCheckerFactory
 	) {		
 		final Map<String, JobGenerator> generators = new HashMap<>(ttManager.size());		
 	
 		for (final File taskTableFile : ttManager.tasktables()) {				
-			final JobGenerator jobGenerator = jobGeneratorFactory.newJobGenerator(taskTableFile, typeAdapter);
+			final JobGenerator jobGenerator = newJobGenerator(taskTableFile, typeAdapter, timeoutCheckerFactory);
 			generators.put(taskTableFile.getName(), jobGenerator);
 		    // --> Launch generators
 			taskScheduler.scheduleWithFixedDelay(jobGenerator, settings.getJobgenfixedrate());
@@ -219,6 +237,37 @@ public class IpfPreparationWorkerConfiguration {
 			executor.execute(newConsumerFor(entry.getKey(), entry.getValue(), service));
 		}		
 		return service;
+	}
+	
+	private final JobGenerator newJobGenerator(
+			final File taskTableFile, 
+			final ProductTypeAdapter typeAdapter,
+			final Function<TaskTable, InputTimeoutChecker> timeoutCheckerFactory
+	) {		
+		final TasktableAdapter tasktableAdapter = new TasktableAdapter(
+				taskTableFile, 
+				taskTableFactory.buildTaskTable(taskTableFile, processSettings.getLevel()), 
+				elementMapper
+		);			    
+	    final Map<Integer, SearchMetadataQuery> metadataQueryTemplate = tasktableAdapter.buildMetadataSearchQuery();	    		
+	    final List<List<String>> tasks = tasktableAdapter.buildTasks();	    
+		final AuxQueryHandler auxQueryHandler = new AuxQueryHandler(
+				metadataClient, 
+				ProductMode.SLICING, 
+				timeoutCheckerFactory.apply(tasktableAdapter.taskTable())
+		);
+		return new JobGeneratorImpl(
+				tasktableAdapter, 
+				typeAdapter, 
+				appCatClient, 
+				gracePeriodHandler, 
+				processSettings, 
+				errorAppender, 
+				publisher, 
+				metadataQueryTemplate, 
+				tasks, 
+				auxQueryHandler
+		);
 	}
 		
 	private final MqiConsumer<IpfPreparationJob> newConsumerFor(

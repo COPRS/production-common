@@ -1,4 +1,4 @@
-package esa.s1pdgs.cpoc.ipf.preparation.worker.service;
+package esa.s1pdgs.cpoc.ipf.preparation.worker.model.converter;
 
 import static org.assertj.core.api.Assertions.fail;
 import static org.junit.Assert.assertEquals;
@@ -12,7 +12,6 @@ import javax.xml.bind.JAXBException;
 import org.junit.Test;
 
 import esa.s1pdgs.cpoc.ipf.preparation.worker.config.XmlConfig;
-import esa.s1pdgs.cpoc.ipf.preparation.worker.model.converter.XmlConverter;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.model.routing.LevelProductsRouting;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.model.tasktable.TaskTable;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.model.tasktable.TaskTableInput;
@@ -20,6 +19,8 @@ import esa.s1pdgs.cpoc.ipf.preparation.worker.model.tasktable.TaskTableInputAlte
 import esa.s1pdgs.cpoc.ipf.preparation.worker.model.tasktable.TaskTableOuput;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.model.tasktable.TaskTablePool;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.model.tasktable.TaskTableTask;
+import esa.s1pdgs.cpoc.ipf.preparation.worker.service.TestL0Utils;
+import esa.s1pdgs.cpoc.ipf.preparation.worker.service.TestL1Utils;
 
 /**
  * Test XML conversion and mapping
@@ -304,20 +305,6 @@ public class XmlConverterTest {
 
             assertEquals("0", expected.getRoutes().get(0),
                     converted.getRoutes().get(0));
-            assertEquals("1", expected.getRoutes().get(1),
-                    converted.getRoutes().get(1));
-            assertEquals("2", expected.getRoutes().get(2),
-                    converted.getRoutes().get(2));
-            assertEquals("3", expected.getRoutes().get(3),
-                    converted.getRoutes().get(3));
-            assertEquals("4", expected.getRoutes().get(4),
-                    converted.getRoutes().get(4));
-            assertEquals("5", expected.getRoutes().get(5),
-                    converted.getRoutes().get(5));
-            assertEquals("6", expected.getRoutes().get(6),
-                    converted.getRoutes().get(6));
-            assertEquals("7", expected.getRoutes().get(7),
-                    converted.getRoutes().get(7));
         } catch (IOException | JAXBException e) {
             fail("Exception raised", e);
         }

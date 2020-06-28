@@ -105,7 +105,6 @@ public class IpfPreparationWorkerSettingsTest {
 	@Test
 	public void testToString() {
 		final String settings = this.jobGenSettings.toString();
-		assertTrue("Should contain maxnboftasktable", settings.contains("maxnboftasktable"));
 		assertTrue("Should contain maxnumberofjobs", settings.contains("maxnumberofjobs"));
 		assertTrue("Should contain waitprimarycheck", settings.contains("waitprimarycheck"));
 		assertTrue("Should contain waitmetadatainput", settings.contains("waitmetadatainput"));

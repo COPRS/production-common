@@ -24,10 +24,7 @@ public class TestL1Utils {
     public static LevelProductsRouting buildL1Routing() {
         final LevelProductsRouting r = new LevelProductsRouting();
         r.addRoute(new LevelProductsRoute(new LevelProductsRouteFrom("EN", "A"),
-                new LevelProductsRouteTo(Arrays.asList("EN_RAW__0_GRDF_1.xml",
-                        "EN_RAW__0_GRDH_1.xml", "EN_RAW__0_GRDM_1.xml",
-                        "EN_RAW__0_SLC__1.xml", "EN_RAW__0_SLC__1_GRDF_1.xml",
-                        "EN_RAW__0_SLC__1_GRDH_1.xml"))));
+                new LevelProductsRouteTo(Arrays.asList("EN_RAW__0_GRDF_1.xml"))));
         r.addRoute(new LevelProductsRoute(new LevelProductsRouteFrom("EN", "B"),
                 new LevelProductsRouteTo(Arrays.asList("EN_RAW__0_SLC__1.xml",
                         "EN_RAW__0_SLC__1_GRDF_1.xml",
