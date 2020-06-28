@@ -13,6 +13,8 @@ import org.springframework.kafka.listener.ConsumerAwareRebalanceListener;
 import esa.s1pdgs.cpoc.appcatalog.client.mqi.AppCatalogMqiService;
 import esa.s1pdgs.cpoc.common.errors.AbstractCodedException;
 import esa.s1pdgs.cpoc.common.utils.LogUtils;
+import esa.s1pdgs.cpoc.mqi.server.service.MessagePersistence;
+import esa.s1pdgs.cpoc.report.message.Message;
 
 /**
  * Rebalance listener when messages are in memory
@@ -31,7 +33,7 @@ public class MemoryConsumerAwareRebalanceListener
     /**
      * Service for checking if a message is processing or not by another
      */
-    private final AppCatalogMqiService service;
+    private final MessagePersistence messagePersistence;
 
     /**
      * Group name
@@ -47,10 +49,10 @@ public class MemoryConsumerAwareRebalanceListener
      * Default constructor
      */
     public MemoryConsumerAwareRebalanceListener(
-            final AppCatalogMqiService service, final String group,
+            final MessagePersistence messagePersistence, final String group,
             final int defaultMode) {
         super();
-        this.service = service;
+        this.messagePersistence = messagePersistence;
         this.group = group;
         this.defaultMode = defaultMode;
     }
@@ -106,7 +108,7 @@ public class MemoryConsumerAwareRebalanceListener
             long startingOffset = defaultMode;
             try {
                 startingOffset =
-                        service.getEarliestOffset(topicPartition.topic(), topicPartition.partition(), group);
+                        messagePersistence.getEarliestOffset(topicPartition.topic(), topicPartition.partition(), group);
             } catch (AbstractCodedException ace) {
                 LOGGER.error(
                         "[MONITOR] [rebalance] Exception occurred, set default mode {}: {}",

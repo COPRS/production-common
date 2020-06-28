@@ -40,7 +40,7 @@ public class TestMappingUtil {
 
 	@Test
 	public void TestCreateId() throws URISyntaxException {
-		URI expectedResult = new URI("http://example.org/Entity('00000000-0000-0000-0000-000000000001')");
+		URI expectedResult = new URI("http://example.org/Entity(00000000-0000-0000-0000-000000000001)");
 		URI actualResult = MappingUtil.createId("http://example.org", "Entity", UUID.fromString("00000000-0000-0000-0000-000000000001"));
 		Assert.assertEquals(expectedResult, actualResult);
 	}
@@ -80,7 +80,7 @@ public class TestMappingUtil {
 		cv2.getValue().add(new Property(null, "Algorithm", ValueType.PRIMITIVE, "SHA256"));
 		cv2.getValue().add(new Property(null, "Value", ValueType.PRIMITIVE, "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"));
 		Entity expectedEntity = new Entity()
-				.addProperty(new Property(null, "Id", ValueType.PRIMITIVE, "00000000-0000-0000-0000-000000000001"))
+				.addProperty(new Property(null, "Id", ValueType.PRIMITIVE, UUID.fromString("00000000-0000-0000-0000-000000000001")))
 				.addProperty(new Property(null, "Name", ValueType.PRIMITIVE, "Name"))
 				.addProperty(new Property(null, "ContentType", ValueType.PRIMITIVE, "application/octet-stream"))
 				.addProperty(new Property(null, "ContentLength", ValueType.PRIMITIVE, 123L))

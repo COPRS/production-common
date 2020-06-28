@@ -41,6 +41,10 @@ public class DateUtils {
     public static String convertToMetadataDateTimeFormat(String dateString) {
     	return formatToMetadataDateTimeFormat(parse(dateString));
     }
+    
+    public static final String formatToOdataDateTimeFormat(final LocalDateTime _dateTime) {
+    	return _dateTime.format(ODATA_DATE_FORMATTER);
+    }
 
     private static final DateTimeFormatter formatterFor(final String dateString) 
     		throws IllegalArgumentException {

@@ -53,7 +53,6 @@ public class OtherApplicationService {
     /**
      * Constructor
      * 
-     * @param hostUri
      * @param maxRetries
      * @param tempoRetryMs
      */
@@ -118,7 +117,6 @@ public class OtherApplicationService {
     /**
      * Check if the application is processing the message
      * 
-     * @param message
      * @throws AbstractCodedException
      */
     public boolean isProcessing(final String podName,

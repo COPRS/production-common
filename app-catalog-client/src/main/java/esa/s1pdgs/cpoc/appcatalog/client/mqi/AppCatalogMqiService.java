@@ -36,7 +36,7 @@ import esa.s1pdgs.cpoc.mqi.model.rest.Ack;
  * @author Viveris Technologies
  * @param <T>
  */
-public class AppCatalogMqiService {
+public class AppCatalogMqiService<T extends  AbstractMessage> {
     /**
      * Logger
      */
@@ -66,7 +66,6 @@ public class AppCatalogMqiService {
      * Constructor
      * 
      * @param restTemplate
-     * @param category
      * @param hostUri
      * @param maxRetries
      * @param tempoRetryMs
@@ -150,12 +149,12 @@ public class AppCatalogMqiService {
      * @throws AbstractCodedException
      */
 	@SuppressWarnings("unchecked")
-	public AppCatMessageDto<? extends AbstractMessage> read(
+	public AppCatMessageDto<T> read(
     		final ProductCategory category,
     		final String topic, 
     		final int partition,
             final long offset, 
-            final AppCatReadMessageDto<?> body
+            final AppCatReadMessageDto<T> body
     )
             throws AbstractCodedException {
         int retries = 0;
@@ -202,7 +201,6 @@ public class AppCatalogMqiService {
     /**
      * Publish a message
      * 
-     * @param message
      * @throws AbstractCodedException
      */
     public boolean send(final ProductCategory category, final long messageId, final AppCatSendMessageDto body)
@@ -245,9 +243,7 @@ public class AppCatalogMqiService {
     /**
      * Ack a message
      * 
-     * @param identifier
      * @param ack
-     * @param message
      * @return
      * @throws AbstractCodedException
      */
@@ -292,7 +288,6 @@ public class AppCatalogMqiService {
     /**
      * Publish a message
      * 
-     * @param message
      * @throws AbstractCodedException
      */
     public long getEarliestOffset(final String topic, final int partition,
@@ -386,7 +381,7 @@ public class AppCatalogMqiService {
         }
     }
 
-    public List<AppCatMessageDto<? extends AbstractMessage>> next(final ProductCategory category, String podName)
+    public List<AppCatMessageDto<T>> next(final ProductCategory category, String podName)
             throws AbstractCodedException {
         int retries = 0;
         while (true) {
@@ -398,7 +393,7 @@ public class AppCatalogMqiService {
             URI uri = builder.build().toUri();
             try {
     	
-                final ResponseEntity<List<AppCatMessageDto<? extends AbstractMessage>>> response =
+                final ResponseEntity<List<AppCatMessageDto<T>>> response =
                         restTemplate.exchange(
                         		uri, 
                         		HttpMethod.GET, 
@@ -406,11 +401,11 @@ public class AppCatalogMqiService {
                         		forCategory(category)
                 );
                 if (response.getStatusCode() == HttpStatus.OK) {
-                    List<AppCatMessageDto<? extends AbstractMessage>> body = response.getBody();
+                    List<AppCatMessageDto<T>> body = response.getBody();
                     if (body == null) {
                         return new ArrayList<>();
                     } else {
-                    	List<AppCatMessageDto<? extends AbstractMessage>> ret = new ArrayList<AppCatMessageDto<? extends AbstractMessage>>();
+                    	List<AppCatMessageDto<T>> ret = new ArrayList<>();
                         ret.addAll(body);
                         return ret;
                     }
@@ -429,7 +424,7 @@ public class AppCatalogMqiService {
         }
     }
 
-    public AppCatMessageDto<?> get(final ProductCategory category, final long messageId)
+    public AppCatMessageDto<T> get(final ProductCategory category, final long messageId)
             throws AbstractCodedException {
         int retries = 0;
         while (true) {

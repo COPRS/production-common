@@ -166,8 +166,14 @@ public class PripElasticSearchMetadataRepo implements PripMetadataRepository {
 			RangeQueryBuilder rangeQueryBuilder = QueryBuilders.rangeQuery(filter.getFieldName().fieldName());
 
 			switch (filter.getOperator()) {
+			case LE:
+				rangeQueryBuilder.lte(filter.getDateTime());
+				break;
 			case LT:
 				rangeQueryBuilder.lt(filter.getDateTime());
+				break;
+			case GE:
+				rangeQueryBuilder.gte(filter.getDateTime());
 				break;
 			case GT:
 				rangeQueryBuilder.gt(filter.getDateTime());
@@ -187,11 +193,11 @@ public class PripElasticSearchMetadataRepo implements PripMetadataRepository {
 			switch (filter.getFunction()) {
 			case STARTS_WITH:
 				queryBuilder.must(QueryBuilders.wildcardQuery(filter.getFieldName().fieldName(),
-						String.format("%s*", filter.getText().toLowerCase())));
+						String.format("%s*", filter.getText())));
 				break;
 			case CONTAINS:
 				queryBuilder.must(QueryBuilders.wildcardQuery(filter.getFieldName().fieldName(),
-						String.format("*%s*", filter.getText().toLowerCase())));
+						String.format("*%s*", filter.getText())));
 				break;
 			case EQUALS:
 				queryBuilder.must(QueryBuilders.matchQuery(filter.getFieldName().fieldName(), filter.getText()).fuzziness(Fuzziness.ZERO).operator(Operator.AND));

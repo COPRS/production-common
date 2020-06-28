@@ -28,22 +28,22 @@ public class EdmProviderTest {
 	
 	@Test
 	public void testGetEntityType() throws ODataException {
-		CsdlEntityType entityType = uut.getEntityType(new FullQualifiedName("S1PDGS", "Product"));
+		CsdlEntityType entityType = uut.getEntityType(new FullQualifiedName("OData.CSC", "Product"));
 		List<CsdlProperty> properties = entityType.getProperties();
 		
 		assertEquals(Arrays.asList("Id", "Name", "ContentType", "ContentLength", "PublicationDate", "EvictionDate", "Checksums", "ProductionType", "ContentDate"),
 				properties.stream().map(p -> p.getName()).collect(Collectors.toList()));
 		
 		assertEquals(Arrays.asList( //
-				EdmPrimitiveTypeKind.String.getFullQualifiedName(), //
+				EdmPrimitiveTypeKind.Guid.getFullQualifiedName(), //
 				EdmPrimitiveTypeKind.String.getFullQualifiedName(), //
 				EdmPrimitiveTypeKind.String.getFullQualifiedName(), //
 				EdmPrimitiveTypeKind.Int64.getFullQualifiedName(), //
 				EdmPrimitiveTypeKind.DateTimeOffset.getFullQualifiedName(), //
 				EdmPrimitiveTypeKind.DateTimeOffset.getFullQualifiedName(), //
-				new FullQualifiedName("S1PDGS", "Checksums"), //
-				new FullQualifiedName("S1PDGS", "ProductionType"), //
-				new FullQualifiedName("S1PDGS", "TimeRange")), //
+				new FullQualifiedName("OData.CSC", "Checksums"), //
+				new FullQualifiedName("OData.CSC", "ProductionType"), //
+				new FullQualifiedName("OData.CSC", "TimeRange")), //
 				properties.stream().map(p -> p.getTypeAsFQNObject()).collect(Collectors.toList()));
 		
 		assertEquals(Arrays.asList(false, false, false, false, false, false, true, false, false),
@@ -52,7 +52,7 @@ public class EdmProviderTest {
 	
 	@Test
 	public void testGetComplexType() throws ODataException {
-		CsdlComplexType complexType = uut.getComplexType(new FullQualifiedName("S1PDGS", "Checksums"));
+		CsdlComplexType complexType = uut.getComplexType(new FullQualifiedName("OData.CSC", "Checksums"));
 		List<CsdlProperty> properties = complexType.getProperties();
 		assertEquals("Algorithm", properties.get(0).getName());
 		assertEquals(EdmPrimitiveTypeKind.String.getFullQualifiedName(), properties.get(0).getTypeAsFQNObject());

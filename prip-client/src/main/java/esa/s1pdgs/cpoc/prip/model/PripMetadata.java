@@ -14,7 +14,7 @@ import esa.s1pdgs.cpoc.common.utils.DateUtils;
 
 public class PripMetadata {
 
-	public static final String DEFAULT_CONTENTTYPE = "application/zip";
+	public static final String DEFAULT_CONTENTTYPE = "application/octet-stream";
 	public static final int DEFAULT_EVICTION_DAYS = 7;
 
 	public enum FIELD_NAMES {
@@ -24,12 +24,12 @@ public class PripMetadata {
 		PRODUCT_FAMILY("productFamily", m -> m.getProductFamily() != null ? m.getProductFamily().name() : null),
 		CONTENT_TYPE("contentType", PripMetadata::getContentType),
 		CONTENT_LENGTH("contentLength", PripMetadata::getContentLength),
-		CONTENT_DATE_START("contentDateStart", m -> (m.getContentDateStart() != null) ? DateUtils.formatToMetadataDateTimeFormat(m.getContentDateStart()) : null),
-		CONTENT_DATE_END("contentDateEnd", m -> (m.getContentDateEnd() != null) ? DateUtils.formatToMetadataDateTimeFormat(m.getContentDateEnd()) : null),
+		CONTENT_DATE_START("contentDateStart", m -> (m.getContentDateStart() != null) ? DateUtils.formatToOdataDateTimeFormat(m.getContentDateStart()) : null),
+		CONTENT_DATE_END("contentDateEnd", m -> (m.getContentDateEnd() != null) ? DateUtils.formatToOdataDateTimeFormat(m.getContentDateEnd()) : null),
 		CREATION_DATE("creationDate",
-				m -> (m.getCreationDate() != null) ? DateUtils.formatToMetadataDateTimeFormat(m.getCreationDate()) : null),
+				m -> (m.getCreationDate() != null) ? DateUtils.formatToOdataDateTimeFormat(m.getCreationDate()) : null),
 		EVICTION_DATE("evictionDate",
-				m -> (m.getEvictionDate() == null) ? null : DateUtils.formatToMetadataDateTimeFormat(m.getEvictionDate())),
+				m -> (m.getEvictionDate() == null) ? null : DateUtils.formatToOdataDateTimeFormat(m.getEvictionDate())),
 		CHECKSUM("checksum", PripMetadata::getChecksums),
 		PRODUCTION_TYPE("productionType", PripMetadata::getProductionType);
 
