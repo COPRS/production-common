@@ -2,7 +2,6 @@ package esa.s1pdgs.cpoc.ipf.preparation.worker.service;
 
 import java.util.ArrayList;
 import java.util.Calendar;
-import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 
@@ -77,8 +76,8 @@ public class TestL0SegmentUtils {
         return template;
     }
 
-    public static AppDataJob<CatalogEvent> buildAppData() {
-        final AppDataJob<CatalogEvent> ret = new AppDataJob<>();
+    public static AppDataJob buildAppData() {
+        final AppDataJob ret = new AppDataJob();
         ret.setId(123);
         ret.setCreationDate(new Date());
         ret.setState(AppDataJobState.GENERATING);
@@ -111,17 +110,17 @@ public class TestL0SegmentUtils {
         gen1.setTaskTable("TaskTable.L0ASP.xml");
         gen1.setState(AppDataJobGenerationState.INITIAL);
         gen1.setCreationDate(new Date());
-        ret.setGenerations(Collections.singletonList(gen1));
+        ret.setGeneration(gen1);
 
         return ret;
     }
 
-    public static void setMessageToBuildData(final AppDataJob<CatalogEvent> job,
+    public static void setMessageToBuildData(final AppDataJob job,
             final List<String> segmentNames) {
         job.setMessages(new ArrayList<>());
         int id = 1;
         for (final String name : segmentNames) {
-            CatalogEvent event = new CatalogEvent();
+            final CatalogEvent event = new CatalogEvent();
             event.setProductName(name);
             event.setKeyObjectStorage(name);
             event.setProductFamily(ProductFamily.L0_SEGMENT);

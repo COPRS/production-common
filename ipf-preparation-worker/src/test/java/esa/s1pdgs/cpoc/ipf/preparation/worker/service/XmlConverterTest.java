@@ -12,6 +12,7 @@ import javax.xml.bind.JAXBException;
 import org.junit.Test;
 
 import esa.s1pdgs.cpoc.ipf.preparation.worker.config.XmlConfig;
+import esa.s1pdgs.cpoc.ipf.preparation.worker.model.converter.XmlConverter;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.model.routing.LevelProductsRouting;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.model.tasktable.TaskTable;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.model.tasktable.TaskTableInput;

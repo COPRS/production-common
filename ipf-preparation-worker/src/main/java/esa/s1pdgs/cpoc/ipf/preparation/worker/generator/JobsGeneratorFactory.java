@@ -12,15 +12,14 @@ import esa.s1pdgs.cpoc.appcatalog.client.job.AppCatalogJobClient;
 import esa.s1pdgs.cpoc.errorrepo.ErrorRepoAppender;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.config.ProcessSettings;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.model.ProductMode;
-import esa.s1pdgs.cpoc.ipf.preparation.worker.model.joborder.JobOrder;
+import esa.s1pdgs.cpoc.ipf.preparation.worker.model.tasktable.ElementMapper;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.model.tasktable.TaskTable;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.model.tasktable.TaskTableFactory;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.model.tasktable.TasktableAdapter;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.publish.Publisher;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.query.AuxQueryHandler;
-import esa.s1pdgs.cpoc.ipf.preparation.worker.service.ElementMapper;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.timeout.InputTimeoutChecker;
-import esa.s1pdgs.cpoc.ipf.preparation.worker.type.ProductTypeFactory;
+import esa.s1pdgs.cpoc.ipf.preparation.worker.type.ProductTypeAdapter;
 import esa.s1pdgs.cpoc.metadata.client.MetadataClient;
 import esa.s1pdgs.cpoc.metadata.client.SearchMetadataQuery;
 
@@ -59,13 +58,12 @@ public class JobsGeneratorFactory {
 		this.appCatClient = appCatClient;
 	}
 	
-	public final JobGenerator newJobGenerator(final File taskTableFile, final ProductTypeFactory typeFactory) {		
+	public final JobGenerator newJobGenerator(final File taskTableFile, final ProductTypeAdapter typeAdapter) {		
 		final TasktableAdapter tasktableAdapter = new TasktableAdapter(
 				taskTableFile, 
 				taskTableFactory.buildTaskTable(taskTableFile, settings.getLevel()), 
 				elementMapper
-		);		
-	    final JobOrder jobOrderTemplate = tasktableAdapter.newJobOrderTemplate(settings);	    
+		);			    
 	    final Map<Integer, SearchMetadataQuery> metadataQueryTemplate = tasktableAdapter.buildMetadataSearchQuery();	    		
 	    final List<List<String>> tasks = tasktableAdapter.buildTasks();	    
 		final AuxQueryHandler auxQueryHandler = new AuxQueryHandler(
@@ -75,13 +73,12 @@ public class JobsGeneratorFactory {
 		);
 		return new JobGeneratorImpl(
 				tasktableAdapter, 
-				typeFactory.typeAdapter(), 
+				typeAdapter, 
 				appCatClient, 
 				gracePeriodHandler, 
 				settings, 
 				errorAppender, 
 				publisher, 
-				jobOrderTemplate, 
 				metadataQueryTemplate, 
 				tasks, 
 				auxQueryHandler

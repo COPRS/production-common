@@ -7,9 +7,9 @@ import java.util.concurrent.Callable;
 import org.springframework.util.CollectionUtils;
 
 import esa.s1pdgs.cpoc.appcatalog.AppDataJob;
+import esa.s1pdgs.cpoc.appcatalog.AppDataJobGeneration;
 import esa.s1pdgs.cpoc.appcatalog.AppDataJobGenerationState;
 import esa.s1pdgs.cpoc.appcatalog.AppDataJobProduct;
-import esa.s1pdgs.cpoc.common.ProductFamily;
 import esa.s1pdgs.cpoc.common.errors.processing.IpfPrepWorkerInputsMissingException;
 import esa.s1pdgs.cpoc.common.utils.DateUtils;
 import esa.s1pdgs.cpoc.common.utils.Exceptions;
@@ -63,12 +63,12 @@ public class JobGen {
 		return job;
 	}
 	
-	public final List<List<String>> tasks() {
-		return tasks;
+	public final JobOrder jobOrder() {
+		return jobOrder;
 	}
 	
-	public final ProductFamily jobFamily() {
-		return typeAdapter.jobFamily();
+	public final List<List<String>> tasks() {
+		return tasks;
 	}
 	
 	public final TasktableAdapter taskTableAdapter() {
@@ -81,6 +81,18 @@ public class JobGen {
 	
 	public final String processMode() {
 		return job.getProduct().getProcessMode();
+	}
+	
+	public AppDataJobGenerationState state() {
+		return job.getGeneration().getState();
+	}
+	
+	public void state(final AppDataJobGenerationState state) {
+		job.getGeneration().setState(state);
+	}
+	
+	public AppDataJobGeneration generation() {
+		return job.getGeneration();
 	}
 	
 	public final String timeliness() {
@@ -129,19 +141,8 @@ public class JobGen {
 	public final void customJobDto(final IpfExecutionJob execJob) {
 		typeAdapter.customJobDto(this, execJob);
 	}
+	
 
-	public final JobOrder jobOrder() {
-		return jobOrder;
-	};
-	
-	public AppDataJobGenerationState state() {
-		return job.getGeneration().getState();
-	}
-	
-	public void state(final AppDataJobGenerationState state) {
-		job.getGeneration().setState(state);
-	}
-	
 	public final JobGen mainInputSearch() throws JobStateTransistionFailed {
 		return perform(typeAdapter.mainInputSearch(this), "querying input " + productName());
 	}
@@ -154,9 +155,9 @@ public class JobGen {
 		return perform(publisher.send(this), "publishing Job");
 	}
 	
-	private final JobGen perform(final Callable<Void> command, final String name) throws JobStateTransistionFailed {
+	private final JobGen perform(final Callable<JobGen> command, final String name) throws JobStateTransistionFailed {
 		try {
-			command.call();
+			return command.call();
 		} 
 		// expected
 		catch (final IpfPrepWorkerInputsMissingException e) {
@@ -170,6 +171,5 @@ public class JobGen {
 					e
 			);
 		}
-		return this;
 	}
 }

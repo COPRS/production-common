@@ -42,7 +42,6 @@ public class IpfPreparationWorkerSettingsTest {
 	public void testGeneralSettings() {
 		assertEquals("Invalid directory", "./test/data/l0_config/task_tables/", jobGenSettings.getDiroftasktables());
 		assertEquals("Invalid directory", 500, jobGenSettings.getJobgenfixedrate());
-		assertEquals("Invalid maxnumberoftasktables", 2, jobGenSettings.getMaxnboftasktable());
 		assertEquals("Invalid maxnumberofjobs", 20, jobGenSettings.getMaxnumberofjobs());
 		assertEquals("Invalid waitmedataraw tempo", 2000, jobGenSettings.getWaitprimarycheck().getTempo());
 		assertEquals("Invalid waitmedataraw retries", 2, jobGenSettings.getWaitprimarycheck().getMaxTimelifeS());
@@ -93,7 +92,7 @@ public class IpfPreparationWorkerSettingsTest {
 	
 	@Test
 	public void testSimulateMapStrEmpty() {
-		IpfPreparationWorkerSettings settings = new IpfPreparationWorkerSettings();
+		final IpfPreparationWorkerSettings settings = new IpfPreparationWorkerSettings();
 		
 		// Test map product type / family: Force str to null
 		settings.setOutputfamiliesstr(null);
@@ -105,7 +104,7 @@ public class IpfPreparationWorkerSettingsTest {
 	
 	@Test
 	public void testToString() {
-		String settings = this.jobGenSettings.toString();
+		final String settings = this.jobGenSettings.toString();
 		assertTrue("Should contain maxnboftasktable", settings.contains("maxnboftasktable"));
 		assertTrue("Should contain maxnumberofjobs", settings.contains("maxnumberofjobs"));
 		assertTrue("Should contain waitprimarycheck", settings.contains("waitprimarycheck"));
@@ -124,7 +123,7 @@ public class IpfPreparationWorkerSettingsTest {
 	
 	@Test
 	public void testProductCategoriesAttributes() {
-		Map<ProductCategory, CategoryConfig> productCategories = jobGenSettings.getProductCategories();
+		final Map<ProductCategory, CategoryConfig> productCategories = jobGenSettings.getProductCategories();
 		assertEquals(500, productCategories.get(ProductCategory.AUXILIARY_FILES).getFixedDelayMs());
 		assertEquals(2000, productCategories.get(ProductCategory.AUXILIARY_FILES).getInitDelayPollMs());
 		assertEquals(500, productCategories.get(ProductCategory.EDRS_SESSIONS).getFixedDelayMs());
@@ -138,7 +137,7 @@ public class IpfPreparationWorkerSettingsTest {
 	@Test
 	public void testInputWaitingAttributes() 	
 	{
-		List<InputWaitingConfig> inputWaiting = jobGenSettings.getInputWaiting();
+		final List<InputWaitingConfig> inputWaiting = jobGenSettings.getInputWaiting();
 		assertEquals(".._RAW__0_(SLC|GRD).*_1", inputWaiting.get(0).getProcessorNameRegexp());
 		assertEquals(".*", inputWaiting.get(0).getProcessorVersionRegexp());
 		assertEquals("Orbit", inputWaiting.get(0).getInputIdRegexp());

@@ -1,4 +1,4 @@
-package esa.s1pdgs.cpoc.ipf.preparation.worker.service;
+package esa.s1pdgs.cpoc.ipf.preparation.worker.model.converter;
 
 import java.io.FileInputStream;
 import java.io.FileOutputStream;

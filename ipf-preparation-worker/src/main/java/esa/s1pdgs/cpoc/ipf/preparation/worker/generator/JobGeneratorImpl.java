@@ -2,6 +2,7 @@ package esa.s1pdgs.cpoc.ipf.preparation.worker.generator;
 
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -19,7 +20,7 @@ import esa.s1pdgs.cpoc.errorrepo.model.rest.FailedProcessingDto;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.config.ProcessSettings;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.generator.state.JobGenerationStateTransitions;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.model.JobGen;
-import esa.s1pdgs.cpoc.ipf.preparation.worker.model.joborder.JobOrder;
+import esa.s1pdgs.cpoc.ipf.preparation.worker.model.metadata.SearchMetadataResult;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.model.tasktable.TasktableAdapter;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.publish.Publisher;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.query.AuxQueryHandler;
@@ -35,8 +36,7 @@ public final class JobGeneratorImpl implements JobGenerator {
     private final ProcessSettings settings;
     private final ErrorRepoAppender errorAppender;
     private final Publisher publisher;
-    private final JobOrder jobOrderTemplate;
-    private final Map<Integer, SearchMetadataQuery> metadataQueries;
+    private final Map<Integer, SearchMetadataQuery> metadataQueriesTemplate;
     private final List<List<String>> tasks;
     private final AuxQueryHandler auxQueryHandler;
         
@@ -48,8 +48,7 @@ public final class JobGeneratorImpl implements JobGenerator {
 			final ProcessSettings settings,
 			final ErrorRepoAppender errorAppender,
 			final Publisher publisher,
-			final JobOrder jobOrderTemplate,
-			final Map<Integer, SearchMetadataQuery> metadataQueries,
+			final Map<Integer, SearchMetadataQuery> metadataQueriesTemplate,
 			final List<List<String>> tasks,
 			final AuxQueryHandler auxQueryHandler
 	) {
@@ -60,8 +59,7 @@ public final class JobGeneratorImpl implements JobGenerator {
 		this.settings = settings;
 		this.errorAppender = errorAppender;
 		this.publisher = publisher;
-		this.jobOrderTemplate = jobOrderTemplate;
-		this.metadataQueries = metadataQueries;
+		this.metadataQueriesTemplate = metadataQueriesTemplate;
 		this.tasks = tasks;
 		this.auxQueryHandler = auxQueryHandler;				
 	}
@@ -75,15 +73,8 @@ public final class JobGeneratorImpl implements JobGenerator {
 				return;
 			}
 			try {			
-				final JobGen jobGenOld = typeAdapter.newJobGenFor(
-						job, 
-						tasktableAdapter, 
-						publisher,
-						jobOrderTemplate,
-						metadataQueries,
-						tasks,
-						auxQueryHandler
-				);			
+				LOGGER.debug("Trying job generation for appDataJob {}", job.getId());
+				final JobGen jobGenOld = newJobGenFor(job);		
 				final JobGen jobGenNew = JobGenerationStateTransitions.ofInputState(jobGenOld.state())
 						.performTransitionOn(jobGenOld);
 						
@@ -98,6 +89,7 @@ public final class JobGeneratorImpl implements JobGenerator {
 						.map(m -> String.valueOf(m.getId()))
 						.collect(Collectors.joining(", "));	
 	
+				// 751: Error handling of job comprises of sending all messages of this job to the failedRequest repo
 				LOGGER.error("Error on handling job {} and creating failed request for it's messages {}: {}",
 						job.getId(), ids, LogUtils.toString(error));
 
@@ -182,5 +174,23 @@ public final class JobGeneratorImpl implements JobGenerator {
         }
       	job.setGeneration(patchGen);	
       	return appCatClient.updateJob(job);
+	}
+
+	private final JobGen newJobGenFor(final AppDataJob job) {
+		final Map<Integer, SearchMetadataResult> queries = new HashMap<>(metadataQueriesTemplate.size());
+		
+		for (final Map.Entry<Integer, SearchMetadataQuery> entry : metadataQueriesTemplate.entrySet() ) {
+			queries.put(entry.getKey(), new SearchMetadataResult(new SearchMetadataQuery(entry.getValue())));
+		}
+		return new JobGen(
+				job, 
+				typeAdapter, 
+				queries, 
+				tasks, 
+				tasktableAdapter, 
+				auxQueryHandler, 
+				tasktableAdapter.newJobOrder(settings), 
+				publisher
+		);
 	}
 }

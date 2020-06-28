@@ -8,6 +8,7 @@ import esa.s1pdgs.cpoc.errorrepo.ErrorRepoAppender;
 import esa.s1pdgs.cpoc.errorrepo.model.rest.FailedProcessingDto;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.config.ProcessConfiguration;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.dispatch.JobDispatcher;
+import esa.s1pdgs.cpoc.ipf.preparation.worker.generator.JobGenerator;
 import esa.s1pdgs.cpoc.mqi.client.MqiListener;
 import esa.s1pdgs.cpoc.mqi.model.queue.IpfPreparationJob;
 import esa.s1pdgs.cpoc.mqi.model.rest.GenericMessageDto;
@@ -20,7 +21,7 @@ public class IpfPreparationService implements MqiListener<IpfPreparationJob> {
     /**
      * Available job generators (one per task tables)
      */
-    protected Map<String, AbstractJobsGenerator> generators;
+    protected Map<String, JobGenerator> generators;
 
     public IpfPreparationService(
 			final JobDispatcher jobDispatcher,

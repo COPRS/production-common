@@ -13,9 +13,9 @@ import org.apache.logging.log4j.Logger;
 import org.springframework.util.Assert;
 
 import esa.s1pdgs.cpoc.appcatalog.AppDataJob;
+import esa.s1pdgs.cpoc.ipf.preparation.worker.model.converter.XmlConverter;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.model.routing.LevelProductsRoute;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.model.routing.LevelProductsRouting;
-import esa.s1pdgs.cpoc.ipf.preparation.worker.service.XmlConverter;
 
 public class RoutingBasedTasktableMapper implements TasktableMapper {	
 	public static final class Factory {

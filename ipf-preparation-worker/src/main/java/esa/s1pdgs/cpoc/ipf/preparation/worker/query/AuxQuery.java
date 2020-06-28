@@ -29,7 +29,7 @@ import esa.s1pdgs.cpoc.metadata.client.SearchMetadataQuery;
 import esa.s1pdgs.cpoc.metadata.model.AbstractMetadata;
 import esa.s1pdgs.cpoc.metadata.model.SearchMetadata;
 
-public class AuxQuery implements Callable<Void> {
+public class AuxQuery implements Callable<JobGen> {
 	private static final Logger LOGGER = LogManager.getLogger(AuxQuery.class);
 	
 	private final MetadataClient metadataClient;
@@ -50,12 +50,12 @@ public class AuxQuery implements Callable<Void> {
 	}
 
 	@Override
-	public final Void call() throws Exception {	
+	public final JobGen call() throws Exception {	
 		LOGGER.debug("Searching required AUX for job {} (product: {})", jobGen.id(), jobGen.productName());
 		performAuxQueries();
 		LOGGER.info("Distributing required AUX for job {} (product: {})", jobGen.id(), jobGen.productName());
 		distributeResults();	
-		return null;
+		return jobGen;
 	}
 
 	private final void performAuxQueries() {	

@@ -26,13 +26,13 @@ import esa.s1pdgs.cpoc.common.utils.LogUtils;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.config.IpfPreparationWorkerSettings;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.config.ProcessSettings;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.model.JobGen;
+import esa.s1pdgs.cpoc.ipf.preparation.worker.model.converter.XmlConverter;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.model.joborder.JobOrderInput;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.model.joborder.JobOrderInputFile;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.model.joborder.JobOrderOutput;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.model.joborder.JobOrderProcParam;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.model.joborder.enums.JobOrderDestination;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.model.joborder.enums.JobOrderFileNameType;
-import esa.s1pdgs.cpoc.ipf.preparation.worker.service.XmlConverter;
 import esa.s1pdgs.cpoc.mqi.client.MqiClient;
 import esa.s1pdgs.cpoc.mqi.model.queue.IpfExecutionJob;
 import esa.s1pdgs.cpoc.mqi.model.queue.LevelJobInputDto;
@@ -67,12 +67,12 @@ public class Publisher {
 		this.mqiClient = mqiClient;
 	}
 
-	public Callable<Void> send(final JobGen job)  {
-		return new Callable<Void>() {
+	public Callable<JobGen> send(final JobGen job)  {
+		return new Callable<JobGen>() {
 			@Override
-			public Void call() throws Exception {
+			public JobGen call() throws Exception {
 				doSend(job);
-				return null;
+				return job;
 			}
 		};		
 	}
@@ -89,14 +89,13 @@ public class Publisher {
 				.newReporting("JobGenerator");
 
 		reporting.begin(new ReportingMessage("Start job generation"));
-
 		
 		try {
 			// Second, build the DTO
 			job.buildJobOrder(workingDir);
 			
 			final IpfExecutionJob execJob = new IpfExecutionJob(
-					job.jobFamily(),
+					settings.getLevel().toFamily(),
 					job.productName(),
 					job.processMode(), 
 					workingDir, 

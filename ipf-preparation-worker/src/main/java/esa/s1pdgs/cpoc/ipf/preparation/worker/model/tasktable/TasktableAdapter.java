@@ -23,7 +23,6 @@ import esa.s1pdgs.cpoc.ipf.preparation.worker.model.joborder.JobOrderInputFile;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.model.joborder.JobOrderTimeInterval;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.model.joborder.enums.JobOrderFileNameType;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.model.tasktable.enums.TaskTableInputOrigin;
-import esa.s1pdgs.cpoc.ipf.preparation.worker.service.ElementMapper;
 import esa.s1pdgs.cpoc.metadata.client.SearchMetadataQuery;
 import esa.s1pdgs.cpoc.metadata.model.AbstractMetadata;
 import esa.s1pdgs.cpoc.metadata.model.SearchMetadata;
@@ -71,7 +70,7 @@ public class TasktableAdapter {
 		return tasks;
 	}
 	
-	public final JobOrder newJobOrderTemplate(final ProcessSettings settings) {
+	public final JobOrder newJobOrder(final ProcessSettings settings) {
 		// Build from task table
 		final TaskTableToJobOrderConverter converter = new TaskTableToJobOrderConverter();
 		final JobOrder jobOrderTemplate = converter.apply(taskTable);
@@ -98,7 +97,7 @@ public class TasktableAdapter {
 			.flatMap(proc -> proc.getOutputs().stream())
 			.forEach(output -> output.setFamily(elementMapper.outputFamilyOf(output.getFileType())));
 		
-		return jobOrderTemplate;
+		return new JobOrder(jobOrderTemplate, settings.getLevel());
 	}
 	
 	public final Map<Integer, SearchMetadataQuery> buildMetadataSearchQuery() {
