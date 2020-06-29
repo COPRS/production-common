@@ -37,9 +37,11 @@ import esa.s1pdgs.cpoc.prip.metadata.PripMetadataRepository;
 import esa.s1pdgs.cpoc.prip.model.Checksum;
 import esa.s1pdgs.cpoc.prip.model.PripMetadata;
 import esa.s1pdgs.cpoc.prip.worker.report.PripReportingInput;
+import esa.s1pdgs.cpoc.prip.worker.report.PripReportingOutput;
 import esa.s1pdgs.cpoc.report.Reporting;
 import esa.s1pdgs.cpoc.report.ReportingInput;
 import esa.s1pdgs.cpoc.report.ReportingMessage;
+import esa.s1pdgs.cpoc.report.ReportingOutput;
 import esa.s1pdgs.cpoc.report.ReportingUtils;
 
 @Service
@@ -103,7 +105,7 @@ public class PripPublishingJobListener implements MqiListener<PripPublishingJob>
 
 		final String name = removeZipSuffix(publishingJob.getKeyObjectStorage());
 
-		final ReportingInput in = PripReportingInput.newInstance(name, new Date(), publishingJob.getProductFamily());
+		final ReportingInput in = PripReportingInput.newInstance(name, publishingJob.getProductFamily());
 		reporting.begin(in, new ReportingMessage("Publishing file %s in PRIP", name));
 
 		try {
@@ -129,9 +131,11 @@ public class PripPublishingJobListener implements MqiListener<PripPublishingJob>
 			pripMetadataRepo.save(pripMetadata);
 
 			LOGGER.debug("end of saving PRIP metadata: {}", pripMetadata);
-			reporting.end(new ReportingMessage("Finished publishing file %s in PRIP", name));
+			final ReportingOutput out = PripReportingOutput.newInstance(new Date());
+			reporting.end(out, new ReportingMessage("Finished publishing file %s in PRIP", name));
 		} catch (final Exception e) {
-			reporting.end(new ReportingMessage("Error on publishing file %s in PRIP: %s", name, LogUtils.toString(e)));
+			final ReportingOutput out = PripReportingOutput.newInstance(new Date());
+			reporting.end(out, new ReportingMessage("Error on publishing file %s in PRIP: %s", name, LogUtils.toString(e)));
 			throw e;
 		}
 	}
