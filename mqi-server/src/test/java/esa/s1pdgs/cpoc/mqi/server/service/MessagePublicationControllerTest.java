@@ -117,7 +117,7 @@ public class MessagePublicationControllerTest {
                  xmlConverter, producer);
         try {
             customController.initialize();
-        } catch (IOException | JAXBException e) {
+        } catch (IOException e) {
             fail(e.getMessage());
         }
     }
@@ -147,7 +147,7 @@ public class MessagePublicationControllerTest {
         customController = new MessagePublicationController(appProperties, xmlConverter, producer);
         try {
             customController.initialize();
-        } catch (IOException | JAXBException e) {
+        } catch (IOException e) {
             fail(e.getMessage());
         }
     }

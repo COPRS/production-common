@@ -3,15 +3,8 @@ package esa.s1pdgs.cpoc.mqi.server.service;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.hasProperty;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
-import static org.mockito.Mockito.doReturn;
-import static org.mockito.Mockito.doThrow;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyNoMoreInteractions;
+import static org.junit.Assert.*;
+import static org.mockito.Mockito.*;
 
 import org.junit.Before;
 import org.junit.Rule;
@@ -29,7 +22,6 @@ import org.springframework.web.client.RestTemplate;
 import esa.s1pdgs.cpoc.common.ProductCategory;
 import esa.s1pdgs.cpoc.common.errors.AbstractCodedException;
 import esa.s1pdgs.cpoc.common.errors.processing.StatusProcessingApiError;
-import esa.s1pdgs.cpoc.mqi.server.service.OtherApplicationService;
 
 /**
  * Test the service OtherApplicationService
@@ -86,7 +78,6 @@ public class OtherApplicationServiceTest {
     /**
      * Test isProcessing when no response from the rest server
      * 
-     * @throws AbstractCodedException
      */
     @SuppressWarnings("unchecked")
     @Test
@@ -106,7 +97,6 @@ public class OtherApplicationServiceTest {
     /**
      * Test isProcessing when the rest server respond an error
      * 
-     * @throws AbstractCodedException
      */
     @SuppressWarnings("unchecked")
     @Test
@@ -130,7 +120,6 @@ public class OtherApplicationServiceTest {
     /**
      * Test the max retries applied before launching an exception
      * 
-     * @throws AbstractCodedException
      */
     @SuppressWarnings("unchecked")
     @Test
@@ -157,13 +146,12 @@ public class OtherApplicationServiceTest {
     /**
      * Test isProcessing when the first time fails and the second works
      * 
-     * @throws AbstractCodedException
      */
     @SuppressWarnings("unchecked")
     @Test
     public void testIsProcessing1() throws AbstractCodedException {
         doReturn(new ResponseEntity<Boolean>(HttpStatus.BAD_GATEWAY),
-                new ResponseEntity<Boolean>(true, HttpStatus.OK))
+                new ResponseEntity<>(true, HttpStatus.OK))
                         .when(restTemplate).exchange(Mockito.anyString(),
                                 Mockito.any(HttpMethod.class), Mockito.isNull(),
                                 Mockito.any(Class.class));
@@ -180,12 +168,11 @@ public class OtherApplicationServiceTest {
     /**
      * Test isProcessing when the first time works
      * 
-     * @throws AbstractCodedException
      */
     @SuppressWarnings("unchecked")
     @Test
     public void testIsProcessing2() throws AbstractCodedException {
-        doReturn(new ResponseEntity<Boolean>(false, HttpStatus.OK))
+        doReturn(new ResponseEntity<>(false, HttpStatus.OK))
                 .when(restTemplate).exchange(Mockito.anyString(),
                         Mockito.any(HttpMethod.class), Mockito.isNull(),
                         Mockito.any(Class.class));
@@ -202,7 +189,6 @@ public class OtherApplicationServiceTest {
     /**
      * Test isProcessing when server returns an empty body
      * 
-     * @throws AbstractCodedException
      */
     @SuppressWarnings("unchecked")
     @Test

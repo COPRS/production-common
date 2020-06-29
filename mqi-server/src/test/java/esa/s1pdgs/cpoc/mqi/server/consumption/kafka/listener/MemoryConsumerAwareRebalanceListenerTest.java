@@ -1,13 +1,8 @@
 package esa.s1pdgs.cpoc.mqi.server.consumption.kafka.listener;
 
+import static java.util.Collections.singletonList;
 import static org.junit.Assert.assertEquals;
-import static org.mockito.Mockito.doNothing;
-import static org.mockito.Mockito.doReturn;
-import static org.mockito.Mockito.doThrow;
-import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyZeroInteractions;
+import static org.mockito.Mockito.*;
 
 import java.util.Arrays;
 import java.util.List;
@@ -56,7 +51,6 @@ public class MemoryConsumerAwareRebalanceListenerTest {
     /**
      * Initialization
      * 
-     * @throws AbstractCodedException
      */
     @Before
     public void init() throws AbstractCodedException {
@@ -123,7 +117,6 @@ public class MemoryConsumerAwareRebalanceListenerTest {
     /**
      * Test onPartitionsRevokedAfterCommit
      * 
-     * @throws AbstractCodedException
      */
     @Test
     public void testAssigned() throws AbstractCodedException {
@@ -135,9 +128,9 @@ public class MemoryConsumerAwareRebalanceListenerTest {
         verify(consumer, never()).seek(Mockito.eq(partitions.get(0)),
                 Mockito.anyLong());
         verify(consumer, never())
-                .seekToBeginning(Mockito.eq(Arrays.asList(partitions.get(0))));
+                .seekToBeginning(Mockito.eq(singletonList(partitions.get(0))));
         verify(consumer, never())
-                .seekToEnd(Mockito.eq(Arrays.asList(partitions.get(0))));
+                .seekToEnd(Mockito.eq(singletonList(partitions.get(0))));
 
         // Check P1 => startingoffset -2
         verify(messagePersistence, times(1)).getEarliestOffset(Mockito.eq("topic"),
@@ -145,9 +138,9 @@ public class MemoryConsumerAwareRebalanceListenerTest {
         verify(consumer, never()).seek(Mockito.eq(partitions.get(1)),
                 Mockito.anyLong());
         verify(consumer, never())
-                .seekToBeginning(Mockito.eq(Arrays.asList(partitions.get(1))));
+                .seekToBeginning(Mockito.eq(singletonList(partitions.get(1))));
         verify(consumer, times(1))
-                .seekToEnd(Mockito.eq(Arrays.asList(partitions.get(1))));
+                .seekToEnd(Mockito.eq(singletonList(partitions.get(1))));
 
         // Check P0 => startingoffset -1
         verify(messagePersistence, times(1)).getEarliestOffset(Mockito.eq("topic2"),
@@ -155,9 +148,9 @@ public class MemoryConsumerAwareRebalanceListenerTest {
         verify(consumer, never()).seek(Mockito.eq(partitions.get(2)),
                 Mockito.eq(0L));
         verify(consumer, times(1))
-                .seekToBeginning(Mockito.eq(Arrays.asList(partitions.get(2))));
+                .seekToBeginning(Mockito.eq(singletonList(partitions.get(2))));
         verify(consumer, never())
-                .seekToEnd(Mockito.eq(Arrays.asList(partitions.get(2))));
+                .seekToEnd(Mockito.eq(singletonList(partitions.get(2))));
 
         // Check P0 => startingoffset 0
         verify(messagePersistence, times(1)).getEarliestOffset(Mockito.eq("topic"),
@@ -165,9 +158,9 @@ public class MemoryConsumerAwareRebalanceListenerTest {
         verify(consumer, times(1)).seek(Mockito.eq(partitions.get(3)),
                 Mockito.eq(0L));
         verify(consumer, never())
-                .seekToBeginning(Mockito.eq(Arrays.asList(partitions.get(3))));
+                .seekToBeginning(Mockito.eq(singletonList(partitions.get(3))));
         verify(consumer, never())
-                .seekToEnd(Mockito.eq(Arrays.asList(partitions.get(3))));
+                .seekToEnd(Mockito.eq(singletonList(partitions.get(3))));
 
         // Check P0 => startingoffset 128
         verify(messagePersistence, times(1)).getEarliestOffset(Mockito.eq("topic"),
@@ -175,9 +168,9 @@ public class MemoryConsumerAwareRebalanceListenerTest {
         verify(consumer, times(1)).seek(Mockito.eq(partitions.get(4)),
                 Mockito.eq(128L));
         verify(consumer, never())
-                .seekToBeginning(Mockito.eq(Arrays.asList(partitions.get(4))));
+                .seekToBeginning(Mockito.eq(singletonList(partitions.get(4))));
         verify(consumer, never())
-                .seekToEnd(Mockito.eq(Arrays.asList(partitions.get(4))));
+                .seekToEnd(Mockito.eq(singletonList(partitions.get(4))));
 
         // Check P4 => default offset => startingoffset -2
         verify(messagePersistence, times(1)).getEarliestOffset(Mockito.eq("topic"),
@@ -185,8 +178,8 @@ public class MemoryConsumerAwareRebalanceListenerTest {
         verify(consumer, never()).seek(Mockito.eq(partitions.get(5)),
                 Mockito.anyLong());
         verify(consumer, never())
-                .seekToBeginning(Mockito.eq(Arrays.asList(partitions.get(5))));
+                .seekToBeginning(Mockito.eq(singletonList(partitions.get(5))));
         verify(consumer, times(1))
-                .seekToEnd(Mockito.eq(Arrays.asList(partitions.get(5))));
+                .seekToEnd(Mockito.eq(singletonList(partitions.get(5))));
     }
 }
