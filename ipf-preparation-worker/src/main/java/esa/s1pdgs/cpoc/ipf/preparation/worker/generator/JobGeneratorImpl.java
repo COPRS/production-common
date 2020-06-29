@@ -99,8 +99,7 @@ public final class JobGeneratorImpl implements JobGenerator {
 						LogUtils.toString(error), 
 						messages
 				));
-				// only delete job, if error request has been created successfully
-				appCatClient.deleteJob(job);	
+				terminate(job);	
 			}		
 			// TODO check if it makes sense to evaluate the error counter here to limit the amount of
 			// failed transition attempts	
@@ -145,6 +144,13 @@ public final class JobGeneratorImpl implements JobGenerator {
 		}
 		// no job found
 		return null;
+	}
+	
+	private final AppDataJob terminate(final AppDataJob job) throws AbstractCodedException {
+    	LOGGER.info("Terminating appDataJob {}", job.getId());
+    	job.setState(AppDataJobState.TERMINATED);  
+    	job.setLastUpdateDate(new Date());
+    	return appCatClient.updateJob(job);
 	}
 	
 	private final AppDataJob update(

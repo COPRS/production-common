@@ -131,7 +131,7 @@ public class AppCatalogJobClientTest {
     		        client.findByMessagesId(12L);
     		        return null;
     			}, 
-    			"messages.id=12"
+    			"messages.id=12&state[neq]=TERMINATED"
     	);
     } 
 
@@ -142,8 +142,11 @@ public class AppCatalogJobClientTest {
     			    client.findJobInStateGeneratingForPod("task-table", "myPod");
     		        return null;
     			}, 
-    			"[orderByAsc]=generations.lastUpdateDate&pod=myPod&"
-    			+ "generations.state[neq]=SENT&generations.taskTable=task-table&state=GENERATING"
+    			"pod=myPod"
+    			+ "&state=GENERATING"
+    			+ "&generations.state[neq]=SENT"
+    			+ "&generations.taskTable=task-table"
+    			+ "&[orderByAsc]=generations.lastUpdateDate"
     	);
     }
 

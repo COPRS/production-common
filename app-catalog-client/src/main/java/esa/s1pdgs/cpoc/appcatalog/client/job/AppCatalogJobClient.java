@@ -1,8 +1,10 @@
 package esa.s1pdgs.cpoc.appcatalog.client.job;
 
 import java.net.URI;
+import java.util.Arrays;
 import java.util.Collections;
-import java.util.HashMap;
+import java.util.Iterator;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -125,6 +127,8 @@ public class AppCatalogJobClient {
             throw cause;
         }
     }
+    
+
 
     /**
      * Search for jobs
@@ -190,7 +194,10 @@ public class AppCatalogJobClient {
      */
     public List<AppDataJob> findByMessagesId(final long messageId)
             throws AbstractCodedException {   	
-        return search(Collections.singletonMap("messages.id", Long.toString(messageId)));        
+        return search(mapOf(
+        		"messages.id", Long.toString(messageId),
+                "state[neq]", AppDataJobState.TERMINATED.name()
+        ));        
     }
 
     /**
@@ -202,7 +209,10 @@ public class AppCatalogJobClient {
      */
     public List<AppDataJob> findByProductSessionId(final String sessionId)
             throws AbstractCodedException {
-        return search(Collections.singletonMap("product.sessionId", sessionId));
+        return search(mapOf(
+        		"product.sessionId", sessionId,
+        		"state[neq]", AppDataJobState.TERMINATED.name()
+        ));
     }
 
     /**
@@ -214,7 +224,10 @@ public class AppCatalogJobClient {
      */
     public List<AppDataJob> findByProductDataTakeId(final String dataTakeId)
             throws AbstractCodedException {
-        return search(Collections.singletonMap("product.dataTakeId", dataTakeId));
+        return search(mapOf(
+        		"product.dataTakeId", dataTakeId,
+        		"state[neq]", AppDataJobState.TERMINATED.name()
+        ));
     }
 
     /**
@@ -227,13 +240,13 @@ public class AppCatalogJobClient {
      */
     public List<AppDataJob> findJobInStateGeneratingForPod(final String taskTable, final String pod) 
     		throws AbstractCodedException {       
-    	final Map<String, String> filters = new HashMap<>();  
-    	filters.put("pod", pod);
-        filters.put("state", AppDataJobState.GENERATING.name());
-        filters.put("generations.state[neq]", AppDataJobGenerationState.SENT.name());
-        filters.put("generations.taskTable", taskTable);
-        filters.put("[orderByAsc]", "generations.lastUpdateDate");
-        return search(filters);     
+        return search(mapOf(
+            	"pod", pod,
+                "state", AppDataJobState.GENERATING.name(),
+                "generations.state[neq]", AppDataJobGenerationState.SENT.name(),
+                "generations.taskTable", taskTable,
+                "[orderByAsc]", "generations.lastUpdateDate"
+        ));     
     }
 
     public AppDataJob newJob(final AppDataJob job) throws AbstractCodedException {
@@ -347,4 +360,24 @@ public class AppCatalogJobClient {
             }
         }
 	}
+	
+    private final static Map<String, String> mapOf(final String ... args) {
+    	// usually, this is a bit dangerous but since the method is only used internally, the risk
+    	// is greatly reduced because any errors in using it should become apparent in unit tests
+    	if (args == null || args.length % 2 != 0) {
+    		throw new IllegalArgumentException(
+    				String.format("Expected even number of entries but was %s", Arrays.toString(args))
+    		);
+    	}
+    	final Map<String, String> result = new LinkedHashMap<>(args.length /2);
+    	
+    	//final Iterator<String> it = Arrays.asList(args).iterator();
+    	
+    	for (final Iterator<String> it = Arrays.asList(args).iterator(); it.hasNext();) {
+    		final String key = it.next();
+    		final String val = it.next();
+    		result.put(key, val);
+    	}    	
+    	return Collections.unmodifiableMap(result);    	
+    }
 }
