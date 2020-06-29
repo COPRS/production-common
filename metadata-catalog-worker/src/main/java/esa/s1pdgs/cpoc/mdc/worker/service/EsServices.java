@@ -126,7 +126,7 @@ public class EsServices {
 		}
 	}
 	
-	public void createMetadataWithRetries(final JSONObject product, String productName, int numRetries, long retrySleep) throws InterruptedException {
+	public void createMetadataWithRetries(final JSONObject product, final String productName, final int numRetries, final long retrySleep) throws InterruptedException {
 		Retries.performWithRetries(
 			() -> {
 		    	if (!isMetadataExist(product)) {
@@ -654,16 +654,16 @@ public class EsServices {
 	 * @throws MetadataNotPresentException
 	 * @throws IOException
 	 */
-	public SearchMetadata productNameQuery(String productFamily, String productName)
+	public SearchMetadata productNameQuery(final String productFamily, final String productName)
 			throws MetadataMalformedException, MetadataNotPresentException, IOException {
 
-		Map<String, Object> source = getRequest(productFamily, productName);
+		final Map<String, Object> source = getRequest(productFamily, productName);
 
 		if (source.isEmpty()) {
 			throw new MetadataNotPresentException(productName);
 		}
 
-		SearchMetadata searchMetadata = new SearchMetadata();
+		final SearchMetadata searchMetadata = new SearchMetadata();
 
 		if (source.containsKey("startTime")) {
 			try {
@@ -702,37 +702,36 @@ public class EsServices {
 		final Map<String, Object> source = this.getRequest(productType.toLowerCase(), productName);
 		final EdrsSessionMetadata r = new EdrsSessionMetadata();
 		r.setProductType(productType);
-		r.setProductName(productName);
-		if (source.isEmpty()) {
-			throw new MetadataNotPresentException(productName);
-		}
-		r.setKeyObjectStorage(source.get("url").toString());
-		if (source.containsKey("validityStartTime")) {
-			try {
-				r.setValidityStart(
-						DateUtils.convertToMetadataDateTimeFormat(source.get("validityStartTime").toString()));
-			} catch (final DateTimeParseException e) {
-				throw new MetadataMalformedException("validityStartTime");
+		r.setProductName(null);
+		if (!source.isEmpty()) {
+			r.setProductName(productName);
+			r.setKeyObjectStorage(source.get("url").toString());
+			if (source.containsKey("validityStartTime")) {
+				try {
+					r.setValidityStart(
+							DateUtils.convertToMetadataDateTimeFormat(source.get("validityStartTime").toString()));
+				} catch (final DateTimeParseException e) {
+					throw new MetadataMalformedException("validityStartTime");
+				}
 			}
-		}
-		if (source.containsKey("validityStopTime")) {
-			try {
-				r.setValidityStop(DateUtils.convertToMetadataDateTimeFormat(source.get("validityStopTime").toString()));
-			} catch (final DateTimeParseException e) {
-				throw new MetadataMalformedException("validityStopTime");
+			if (source.containsKey("validityStopTime")) {
+				try {
+					r.setValidityStop(DateUtils.convertToMetadataDateTimeFormat(source.get("validityStopTime").toString()));
+				} catch (final DateTimeParseException e) {
+					throw new MetadataMalformedException("validityStopTime");
+				}
 			}
-		}
-		r.setStartTime(source.getOrDefault("startTime", "NOT_FOUND").toString());
-		r.setSessionId(source.getOrDefault("sessionId", "NOT_FOUND").toString());
-		r.setStopTime(source.getOrDefault("stopTime", "NOT_FOUND").toString());
-		r.setStationCode(source.getOrDefault("stationCode", "NOT_FOUND").toString());
-		r.setSatelliteId(source.getOrDefault("satelliteId", "NOT_FOUND").toString());
-		r.setMissionId(source.getOrDefault("missionId", "NOT_FOUND").toString());
+			r.setStartTime(source.getOrDefault("startTime", "NOT_FOUND").toString());
+			r.setSessionId(source.getOrDefault("sessionId", "NOT_FOUND").toString());
+			r.setStopTime(source.getOrDefault("stopTime", "NOT_FOUND").toString());
+			r.setStationCode(source.getOrDefault("stationCode", "NOT_FOUND").toString());
+			r.setSatelliteId(source.getOrDefault("satelliteId", "NOT_FOUND").toString());
+			r.setMissionId(source.getOrDefault("missionId", "NOT_FOUND").toString());
 
-		@SuppressWarnings("unchecked")
-		final
-		List<String> rawNames = (List<String>) source.getOrDefault("rawNames", Collections.emptyList());
-		r.setRawNames(rawNames);
+			@SuppressWarnings("unchecked")
+			final List<String> rawNames = (List<String>) source.getOrDefault("rawNames", Collections.emptyList());
+			r.setRawNames(rawNames);
+		}
 		return r;
 	}
 
