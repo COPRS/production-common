@@ -8,7 +8,6 @@ import esa.s1pdgs.cpoc.appcatalog.AppDataJobFile;
 import esa.s1pdgs.cpoc.common.ProductFamily;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.model.JobGen;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.model.joborder.AbstractJobOrderConf;
-import esa.s1pdgs.cpoc.ipf.preparation.worker.model.joborder.JobOrderProcParam;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.model.tasktable.mapper.TasktableMapper;
 import esa.s1pdgs.cpoc.metadata.client.MetadataClient;
 import esa.s1pdgs.cpoc.mqi.model.queue.IpfExecutionJob;
@@ -38,42 +37,21 @@ public final class EdrsSession extends AbstractProductTypeAdapter implements Pro
     	LOGGER.trace("New AIOP parameters: {}", aiopParams);
     	
     	for (final Entry<String, String> newParam : aiopParams.entrySet()) {
-    		boolean found = false;
-    		if (null != conf.getProcParams()) {
-        		for (final JobOrderProcParam existingParam : conf.getProcParams()) {
-    				if (newParam.getKey().equals(existingParam.getName())) {
-    					found = true;
-    					existingParam.setValue(newParam.getValue());
-    				}
-        		}
-        	}
-    		if (!found) {
-        		conf.addProcParam(new JobOrderProcParam(newParam.getKey(), newParam.getValue()));
-			}
+    		updateProcParam(job.jobOrder(), newParam.getKey(), newParam.getValue());
 		}    	
-    	LOGGER.debug("Configured AIOP for product {} of job {} with configuration {}", job.productName(), job.id(), conf);
-		
+    	LOGGER.debug("Configured AIOP for product {} of job {} with configuration {}", 
+    			job.productName(), job.id(), conf);		
 	}
 
 	@Override
 	public final void customJobDto(final JobGen job, final IpfExecutionJob dto) {
         // Add input relative to the channels
         if (job.job().getProduct() != null) {
-            int nb1 = 0;
-            int nb2 = 0;
+            final int nb1 = job.job().getProduct().getRaws1().size();
+            final int nb2 = job.job().getProduct().getRaws2().size();
 
-            // Retrieve number of channels and sort them per alphabetic order
-            nb1 = job.job().getProduct().getRaws1().size();
-            job.job().getProduct().getRaws1().stream().sorted(
-                    (p1, p2) -> p1.getFilename().compareTo(p2.getFilename()));
-
-            nb2 = job.job().getProduct().getRaws2().size();
-            job.job().getProduct().getRaws2().stream().sorted(
-                    (p1, p2) -> p1.getFilename().compareTo(p2.getFilename()));
-
-            // Add raw to the job order, one file per channel
-            final int nb = Math.max(nb1, nb2);
-            for (int i = 0; i < nb; i++) {
+            // Add raw to the job order, one file per channel, alterating and in alphabetic order
+            for (int i = 0; i < Math.max(nb1, nb2); i++) {
                 if (i < nb1) {
                     final AppDataJobFile raw = job.job().getProduct().getRaws1().get(i);
                     dto.addInput(

@@ -40,6 +40,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
+import esa.s1pdgs.cpoc.common.EdrsSessionFileType;
 import esa.s1pdgs.cpoc.common.ProductCategory;
 import esa.s1pdgs.cpoc.common.ProductFamily;
 import esa.s1pdgs.cpoc.common.errors.InternalErrorException;
@@ -688,7 +689,79 @@ public class EsServices {
 
 		return searchMetadata;
 	}
+	
+	public final List<LevelSegmentMetadata> getLevelSegmentMetadataFor(
+			final String productType, 
+			final String dataTakeId
+	) throws Exception {
+		final SearchSourceBuilder sourceBuilder = new SearchSourceBuilder();
 
+		final BoolQueryBuilder queryBuilder = QueryBuilders.boolQuery()
+				.must(QueryBuilders.termQuery("dataTakeId", dataTakeId))
+				.must(QueryBuilders.termQuery("productType", productType));
+		sourceBuilder.query(queryBuilder);
+		LOGGER.debug("LevelSegmentQuery: query composed is {}", queryBuilder);
+		sourceBuilder.size(SIZE_LIMIT);
+		final SearchRequest searchRequest = new SearchRequest(ProductFamily.L0_SEGMENT.name().toLowerCase());
+		searchRequest.types(indexType);
+		searchRequest.source(sourceBuilder);
+		
+		try {
+			final SearchResponse searchResponse = elasticsearchDAO.search(searchRequest);
+			LOGGER.debug("LevelSegmentQuery: Total Hits Found  {}", searchResponse.getHits().totalHits);
+			final List<LevelSegmentMetadata> results = new ArrayList<>();
+						
+			if (searchResponse.getHits().totalHits >= 1) {
+				for (final SearchHit hit : searchResponse.getHits().getHits()) {
+					final Map<String, Object> source = hit.getSourceAsMap();
+					if (!source.isEmpty()) {
+						results.add(toLevelSegmentMetadata(source));
+					}
+				}		
+			}
+			return results;
+		} 
+		catch (final IOException e) {
+			throw new Exception(e.getMessage());
+		}
+	}
+
+	public final List<EdrsSessionMetadata> getEdrsSessionsFor(final String sessionId) throws Exception {
+		final SearchSourceBuilder sourceBuilder = new SearchSourceBuilder();
+		// Generic fields
+		final BoolQueryBuilder queryBuilder = QueryBuilders.boolQuery()
+				.must(QueryBuilders.termQuery("sessionId", sessionId));
+		sourceBuilder.query(queryBuilder);
+		LOGGER.debug("EdrsSessionQuery: query composed is {}", queryBuilder);
+		sourceBuilder.size(SIZE_LIMIT);
+		final List<EdrsSessionMetadata> results = new ArrayList<>();
+		
+		for (final EdrsSessionFileType sessionType : EdrsSessionFileType.values()) {
+			final SearchRequest searchRequest = new SearchRequest(sessionType.name().toLowerCase());
+			searchRequest.types(indexType);
+			searchRequest.source(sourceBuilder);
+			
+			try {
+				final SearchResponse searchResponse = elasticsearchDAO.search(searchRequest);
+				LOGGER.debug("EdrsSessionQuery {}: Total Hits Found  {}", sessionType.name().toLowerCase(), 
+						searchResponse.getHits().totalHits);
+							
+				if (searchResponse.getHits().totalHits >= 1) {
+					for (final SearchHit hit : searchResponse.getHits().getHits()) {
+						final Map<String, Object> source = hit.getSourceAsMap();
+						if (!source.isEmpty()) {
+							results.add(toSessionMetadata(source));
+						}
+					}		
+				}			
+			} 
+			catch (final IOException e) {
+				throw new Exception(e.getMessage());
+			}
+		}
+		return results;
+	}
+	
 	/**
 	 * Function which return the product that correspond to the lastValCover
 	 * specification If there is no corresponding product return null
@@ -698,40 +771,48 @@ public class EsServices {
 	 * @return the key object storage of the chosen product
 	 * @throws Exception
 	 */
-	public EdrsSessionMetadata getEdrsSession(final String productType, final String productName) throws Exception {
+	public EdrsSessionMetadata delme_getEdrsSession(final String productType, final String productName) throws Exception {
 		final Map<String, Object> source = this.getRequest(productType.toLowerCase(), productName);
-		final EdrsSessionMetadata r = new EdrsSessionMetadata();
-		r.setProductType(productType);
-		r.setProductName(null);
-		if (!source.isEmpty()) {
-			r.setProductName(productName);
-			r.setKeyObjectStorage(source.get("url").toString());
-			if (source.containsKey("validityStartTime")) {
-				try {
-					r.setValidityStart(
-							DateUtils.convertToMetadataDateTimeFormat(source.get("validityStartTime").toString()));
-				} catch (final DateTimeParseException e) {
-					throw new MetadataMalformedException("validityStartTime");
-				}
-			}
-			if (source.containsKey("validityStopTime")) {
-				try {
-					r.setValidityStop(DateUtils.convertToMetadataDateTimeFormat(source.get("validityStopTime").toString()));
-				} catch (final DateTimeParseException e) {
-					throw new MetadataMalformedException("validityStopTime");
-				}
-			}
-			r.setStartTime(source.getOrDefault("startTime", "NOT_FOUND").toString());
-			r.setSessionId(source.getOrDefault("sessionId", "NOT_FOUND").toString());
-			r.setStopTime(source.getOrDefault("stopTime", "NOT_FOUND").toString());
-			r.setStationCode(source.getOrDefault("stationCode", "NOT_FOUND").toString());
-			r.setSatelliteId(source.getOrDefault("satelliteId", "NOT_FOUND").toString());
-			r.setMissionId(source.getOrDefault("missionId", "NOT_FOUND").toString());
 
-			@SuppressWarnings("unchecked")
-			final List<String> rawNames = (List<String>) source.getOrDefault("rawNames", Collections.emptyList());
-			r.setRawNames(rawNames);
+		if (!source.isEmpty()) {
+			return toSessionMetadata(source);
 		}
+		return new EdrsSessionMetadata();
+	}
+
+	private EdrsSessionMetadata toSessionMetadata(
+			final Map<String, Object> source
+	) throws MetadataMalformedException {
+		final EdrsSessionMetadata r = new EdrsSessionMetadata();
+		r.setProductName(source.get("productName").toString());
+		r.setProductType(source.get("productType").toString());
+		r.setKeyObjectStorage(source.get("url").toString());
+		if (source.containsKey("validityStartTime")) {
+			try {
+				r.setValidityStart(
+						DateUtils.convertToMetadataDateTimeFormat(source.get("validityStartTime").toString()));
+			} catch (final DateTimeParseException e) {
+				throw new MetadataMalformedException("validityStartTime");
+			}
+		}
+		if (source.containsKey("validityStopTime")) {
+			try {
+				r.setValidityStop(DateUtils.convertToMetadataDateTimeFormat(source.get("validityStopTime").toString()));
+			} catch (final DateTimeParseException e) {
+				throw new MetadataMalformedException("validityStopTime");
+			}
+		}
+		r.setStartTime(source.getOrDefault("startTime", "NOT_FOUND").toString());
+		r.setSessionId(source.getOrDefault("sessionId", "NOT_FOUND").toString());
+		r.setStopTime(source.getOrDefault("stopTime", "NOT_FOUND").toString());
+		r.setStationCode(source.getOrDefault("stationCode", "NOT_FOUND").toString());
+		r.setSatelliteId(source.getOrDefault("satelliteId", "NOT_FOUND").toString());
+		r.setMissionId(source.getOrDefault("missionId", "NOT_FOUND").toString());
+		r.setChannelId(Integer.parseInt(source.get("channelId").toString()));
+
+		@SuppressWarnings("unchecked")
+		final List<String> rawNames = (List<String>) source.getOrDefault("rawNames", Collections.emptyList());
+		r.setRawNames(rawNames);
 		return r;
 	}
 
@@ -941,7 +1022,7 @@ public class EsServices {
 		return 100;
 	}
 
-	public LevelSegmentMetadata getLevelSegment(final ProductFamily family, final String productName) throws Exception {
+	public LevelSegmentMetadata delme_getLevelSegment(final ProductFamily family, final String productName) throws Exception {
 		try {
 			final GetRequest getRequest = new GetRequest(family.name().toLowerCase(), indexType, productName);
 			final GetResponse response = elasticsearchDAO.get(getRequest);
@@ -958,12 +1039,16 @@ public class EsServices {
 
 	private LevelSegmentMetadata extractInfoForLevelSegment(final Map<String, Object> source, final String productName)
 			throws MetadataMalformedException, MetadataNotPresentException {
-
-		final LevelSegmentMetadata r = new LevelSegmentMetadata();
 		if (source.isEmpty()) {
 			throw new MetadataNotPresentException(productName);
 		}
-		r.setProductName(productName);
+		return toLevelSegmentMetadata(source);
+	}
+
+	private final LevelSegmentMetadata toLevelSegmentMetadata(final Map<String, Object> source)
+			throws MetadataMalformedException {
+		final LevelSegmentMetadata r = new LevelSegmentMetadata();
+		r.setProductName(source.get("productName").toString());
 		if (source.containsKey("productType")) {
 			r.setProductType(source.get("productType").toString());
 		} else {

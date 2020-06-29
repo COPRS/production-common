@@ -1,16 +1,17 @@
 package esa.s1pdgs.cpoc.ipf.preparation.worker.type;
 
-import java.io.File;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.Callable;
 
+import esa.s1pdgs.cpoc.appcatalog.AppDataJobFile;
 import esa.s1pdgs.cpoc.common.errors.processing.IpfPrepWorkerInputsMissingException;
 import esa.s1pdgs.cpoc.common.errors.processing.MetadataQueryException;
+import esa.s1pdgs.cpoc.common.utils.Exceptions;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.model.JobGen;
 import esa.s1pdgs.cpoc.metadata.client.MetadataClient;
-import esa.s1pdgs.cpoc.metadata.model.EdrsSessionMetadata;
 
 final class EdrsRawQuery implements Callable<JobGen> {
 	private final JobGen job;
@@ -24,71 +25,74 @@ final class EdrsRawQuery implements Callable<JobGen> {
 	}
 	
 	@Override
-	public JobGen call() throws Exception {
-        final Map<String, String> missingRaws = new HashMap<>();
+	public final JobGen call() throws Exception {		
+        // S1PRO-1101: if timeout for primary search is reached -> just start the job 
+    	if (aiopAdapter.isTimedOut(job.job())) {	        		
+    		return job;
+    	}
         
         if (job.job() != null && job.job().getProduct() != null) {
-        	
-            // Channel 1
-        	job.job().getProduct().getRaws1().forEach(raw -> {
-                try {
-                    final EdrsSessionMetadata file = metadataClient.getEdrsSession(
-                    		"RAW", 
-                    		new File(raw.getFilename()).getName()
-                    );
-                    if (file != null) {
-                        raw.setKeyObs(file.getKeyObjectStorage());
-                    } else {
-                        missingRaws.put(raw.getFilename(), "No raw with name");
-                    }
-                } catch (final MetadataQueryException me) {
-                    missingRaws.put(raw.getFilename(), me.getMessage());
+            try {
+            	// in case of EDRS session, the product name is the sessionId
+            	final EdrsSessionMetadataAdapter edrsMetadata = EdrsSessionMetadataAdapter.parse(        			
+            			metadataClient.getEdrsSessionFor(job.productName())
+            	);       	
+            	final List<AppDataJobFile> raws1 = edrsMetadata.expectedRaws1();
+            	if (raws1 == null) {
+            	  	job.job().getProduct().setRaws1(edrsMetadata.availableRaws1());
+            	  	throw new IpfPrepWorkerInputsMissingException(
+						  Collections.singletonMap(
+								  job.job().getProduct().getProductName(), 
+								  "No DSIB for channel 1"
+						  )
+            	  	);
+            	}        	
+            	job.job().getProduct().setRaws1(raws1);
+            	
+            	final List<AppDataJobFile> raws2 = edrsMetadata.expectedRaws2();
+            	if (raws2 == null) {      	 
+               	  	job.job().getProduct().setRaws2(edrsMetadata.availableRaws2());
+            		throw new IpfPrepWorkerInputsMissingException(
+      					  Collections.singletonMap(
+      							  job.job().getProduct().getProductName(), 
+      							  "No DSIB for channel 2"
+      					  )
+                  	);
+            	}        	
+            	job.job().getProduct().setRaws2(raws2);
+            	
+            	final Map<String, String> missingRaws = collectMissingRaws();            	
+                
+        	    if (!missingRaws.isEmpty()) {
+                    throw new IpfPrepWorkerInputsMissingException(missingRaws);
                 }
-            });
-            // Channel 2
-        	job.job().getProduct().getRaws2().forEach(raw -> {
-                try {
-                    final EdrsSessionMetadata file = metadataClient.getEdrsSession(
-                    		"RAW", 
-                    		new File(raw.getFilename()).getName()
-                    );
-                    if (file != null) {
-                        raw.setKeyObs(file.getKeyObjectStorage());
-                    } else {
-                        missingRaws.put(raw.getFilename(), "No raw with name");
-                    }
-                } catch (final MetadataQueryException me) {
-                    missingRaws.put(raw.getFilename(), me.getMessage());
-                }
-            });
-            
-            // S1PRO-1101: if timeout for primary search is reached -> just start the job 
-        	if (aiopAdapter.isTimedOut(job.job())) {	        		
-        		return job;
-        	}
+            } 
+            catch (final MetadataQueryException me) {
+            	 throw new IpfPrepWorkerInputsMissingException(
+   	    			  Collections.singletonMap(
+   	    					  job.job().getProduct().getProductName(), 
+   	    					  String.format("Query error: %s", Exceptions.messageOf(me))
+   	    			  )
+     	    	  );
+            }
         }
-        
-	    if (!missingRaws.isEmpty()) {
-            throw new IpfPrepWorkerInputsMissingException(missingRaws);
-        }
-	    
-	    // S1PRO-1065: Make sure that there is at least one RAW for each channel
-	    if (job.job().getProduct().getRaws1().isEmpty()) {
-	    	  throw new IpfPrepWorkerInputsMissingException(
-	    			  Collections.singletonMap(
-	    					  job.job().getProduct().getProductName(), 
-	    					  "No raws for channel 1"
-	    			  )
-	    	);
-	    }
-	    if (job.job().getProduct().getRaws2().isEmpty()) {
-	    	  throw new IpfPrepWorkerInputsMissingException(
-	    			  Collections.singletonMap(
-	    					  job.job().getProduct().getProductName(), 
-	    					  "No raws for channel 2"
-	    			  )
-	    	);
-	    }	
 		return job;
+	}
+	
+	private final Map<String, String> collectMissingRaws() {
+		  final Map<String, String> missingRaws = new HashMap<>();
+		  
+		  for (final AppDataJobFile raw : job.job().getProduct().getRaws1()) {
+			  if (raw.getKeyObs() == null) {
+				  missingRaws.put(raw.getFilename(), "No raw1 with name");
+			  }			  
+		  }
+		  
+		  for (final AppDataJobFile raw : job.job().getProduct().getRaws2()) {
+			  if (raw.getKeyObs() == null) {
+				  missingRaws.put(raw.getFilename(), "No raw2 with name");
+			  }			  
+		  }
+		  return missingRaws;
 	}
 }

@@ -165,18 +165,8 @@ public class GenericConsumer implements MqiListener<CatalogEvent> {
             	LOGGER.debug("Created new appDataJob {} for mqiMessage {}", job.getId(), mqiMessage.getId());
             }
             return job;
-    	}
-    	
-    	// job already exists? --> merge new message into job
-    	final AppDataJob job = specificJob.get();
-    	
-    	// evaluate both and if either or both of the calls indicate a change, update in DB
-    	if (consumptionHandler.mergeMessageInto(mqiMessage, job)) {
-    		LOGGER.debug("Updating appDataJob {} for mqiMessage {}", job.getId(), mqiMessage.getId());
-    		job.setLastUpdateDate(new Date());
-    		return appCat.update(job);
-    	}    	
-    	return job;
+    	}  	
+    	return specificJob.get();
 	}
 	
 	private final void dispatch(

@@ -60,10 +60,4 @@ public final class L0SliceConsumer implements ProductTypeConsumptionHandler {
        	productDto.setPolarisation(eventAdapter.polarisation()); 
        	return productDto;
 	}
-
-	@Override
-	public final boolean mergeMessageInto(final GenericMessageDto<CatalogEvent> mqiMessage, final AppDataJob job) {
-		// no mergin required. There will be a 1:1 relation, i.e. one message --> one job
-		return false;
-	}
 }

@@ -16,7 +16,5 @@ public interface ProductTypeConsumptionHandler {
 
 	Optional<AppDataJob> findAssociatedJobFor(final AppCatAdapter appCat, final CatalogEventAdapter catEvent) throws AbstractCodedException;
 
-	AppDataJobProduct newProductFor(final GenericMessageDto<CatalogEvent> mqiMessage) ;
-	
-	boolean mergeMessageInto(final GenericMessageDto<CatalogEvent> mqiMessage, final AppDataJob job);
+	AppDataJobProduct newProductFor(final GenericMessageDto<CatalogEvent> mqiMessage);
 }

@@ -17,6 +17,10 @@ public abstract class AbstractProductTypeAdapter implements ProductTypeAdapter {
 	}
 	
     final void updateProcParam(final JobOrder jobOrder, final String name, final String newValue) {
+        if (jobOrder.getConf().getProcParams() == null) {
+        	return;
+        }
+        
         boolean update = false;
         for (final JobOrderProcParam param : jobOrder.getConf().getProcParams()) {
             if (name.equals(param.getName())) {

@@ -1,6 +1,5 @@
 package esa.s1pdgs.cpoc.metadata.model;
 
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
@@ -17,6 +16,7 @@ public class EdrsSessionMetadata extends AbstractMetadata {
     protected String startTime;
     protected String stopTime;
     protected List<String> rawNames = Collections.emptyList();
+    private int channelId;
     
 	/**
 	 * @param productName
@@ -56,7 +56,7 @@ public class EdrsSessionMetadata extends AbstractMetadata {
 	/**
 	 * @param startTime the startTime to set
 	 */
-	public void setStartTime(String startTime) {
+	public void setStartTime(final String startTime) {
 		this.startTime = startTime;
 	}
 
@@ -70,7 +70,7 @@ public class EdrsSessionMetadata extends AbstractMetadata {
 	/**
 	 * @param stopTime the stopTime to set
 	 */
-	public void setStopTime(String stopTime) {
+	public void setStopTime(final String stopTime) {
 		this.stopTime = stopTime;
 	}
 
@@ -84,7 +84,7 @@ public class EdrsSessionMetadata extends AbstractMetadata {
 	/**
 	 * @param rawNames the rawNames to set
 	 */
-	public void setRawNames(List<String> rawNames) {
+	public void setRawNames(final List<String> rawNames) {
 		this.rawNames = rawNames;
 	}
 
@@ -96,15 +96,25 @@ public class EdrsSessionMetadata extends AbstractMetadata {
 		return sessionId;
 	}
 	
+	
+	
+	public int getChannelId() {
+		return channelId;
+	}
+
+	public void setChannelId(final int channelId) {
+		this.channelId = channelId;
+	}
+
 	/**
 	 * @param sessionId the sessionId to set
 	 */
-	public void setSessionId(String sessionId) {
+	public void setSessionId(final String sessionId) {
 		this.sessionId = sessionId;
 	}
 	
 	public String toJsonString() {
-		String superToString = super.toAbstractString();
+		final String superToString = super.toAbstractString();
 		return String.format("{%s,\"sessionId\":\"%s\",\"startTime\":\"%s\",\"stopTime\":\"%s\",\"rawNames\":[%s]}", superToString, sessionId, startTime, stopTime, rawNames.stream().map(s -> "\"" + s + "\"").collect(Collectors.joining(",")));
 	}
 	
@@ -113,7 +123,7 @@ public class EdrsSessionMetadata extends AbstractMetadata {
 	 */
 	@Override
 	public int hashCode() {
-		return Objects.hash(super.hashCode(), sessionId, startTime, stopTime, rawNames);
+		return Objects.hash(super.hashCode(), sessionId, startTime, stopTime, rawNames, channelId);
 	}
 
 	/**
@@ -127,9 +137,13 @@ public class EdrsSessionMetadata extends AbstractMetadata {
 		} else if (obj == null || getClass() != obj.getClass()) {
 			ret = false;
 		} else {
-			EdrsSessionMetadata other = (EdrsSessionMetadata) obj;
-			ret = super.equals(other) && Objects.equals(sessionId, other.sessionId) && Objects.equals(startTime, other.startTime) && Objects.equals(stopTime, other.stopTime)
-					&& Objects.equals(rawNames, other.rawNames);
+			final EdrsSessionMetadata other = (EdrsSessionMetadata) obj;
+			ret = super.equals(other) && 
+					Objects.equals(sessionId, other.sessionId) &&
+					Objects.equals(startTime, other.startTime) && 
+					Objects.equals(stopTime, other.stopTime)
+					&& Objects.equals(rawNames, other.rawNames) && 
+					channelId == other.channelId;
 		}
 		return ret;
 	}

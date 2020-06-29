@@ -60,13 +60,4 @@ public final class L0SegmentConsumer implements ProductTypeConsumptionHandler {
         productDto.setSatelliteId(eventAdapter.satelliteId());
         return productDto;
 	}
-	
-	@Override
-	public final boolean mergeMessageInto(final GenericMessageDto<CatalogEvent> mqiMessage, final AppDataJob job) {
-		final CatalogEventAdapter eventAdapter = CatalogEventAdapter.of(mqiMessage);
-        LOGGER.debug("Merging message {} into job {} for datatakeid {}",
-        		mqiMessage.getId(), job.getId(), eventAdapter.datatakeId());
-		job.getMessages().add(mqiMessage);
-		return true;
-	}
 }

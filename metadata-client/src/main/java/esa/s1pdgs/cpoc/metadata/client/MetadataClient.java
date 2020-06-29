@@ -52,18 +52,19 @@ public class MetadataClient {
 	 * @return
 	 * @throws MetadataQueryException
 	 */
-	public EdrsSessionMetadata getEdrsSession(final String productType, final String productName)
+	public List<EdrsSessionMetadata> getEdrsSessionFor(final String sessionId)
 			throws MetadataQueryException {
 
-		String uri = this.metadataBaseUri + MetadataCatalogRestPath.EDRS_SESSION.path() + "/" + productType + "/"
-				+ productName;
+		final String uri = this.metadataBaseUri + MetadataCatalogRestPath.EDRS_SESSION.path() + 
+				"/sessionId/"+ sessionId;
 
-		ResponseEntity<EdrsSessionMetadata> response = query(UriComponentsBuilder.fromUriString(uri).build().toUri(),
-				new ParameterizedTypeReference<EdrsSessionMetadata>() {
-				});
+		final ResponseEntity<List<EdrsSessionMetadata>> response = query(
+				UriComponentsBuilder.fromUriString(uri).build().toUri(),
+				new ParameterizedTypeReference<List<EdrsSessionMetadata>>() {}
+		);
 
 		if (response == null) {
-			LOGGER.debug("Edrs session not found for product type {} and product name {}", productType, productName);
+			LOGGER.debug("Edrs session not found for sessionId {}", sessionId);
 			return null;
 		} else {
 			LOGGER.debug("Returning Edrs session: {}", response.getBody());
@@ -79,9 +80,9 @@ public class MetadataClient {
 	 */
 	public L0SliceMetadata getL0Slice(final String productName) throws MetadataQueryException {
 
-		String uri = this.metadataBaseUri + MetadataCatalogRestPath.L0_SLICE.path() + "/" + productName;
+		final String uri = this.metadataBaseUri + MetadataCatalogRestPath.L0_SLICE.path() + "/" + productName;
 
-		ResponseEntity<L0SliceMetadata> response = query(UriComponentsBuilder.fromUriString(uri).build().toUri(),
+		final ResponseEntity<L0SliceMetadata> response = query(UriComponentsBuilder.fromUriString(uri).build().toUri(),
 				new ParameterizedTypeReference<L0SliceMetadata>() {
 				});
 
@@ -101,17 +102,18 @@ public class MetadataClient {
 	 * @return
 	 * @throws MetadataQueryException
 	 */
-	public LevelSegmentMetadata getLevelSegment(final ProductFamily family, final String productName)
+	public List<LevelSegmentMetadata> getLevelSegments(final String productType, final String dataTakeId)
 			throws MetadataQueryException {
-		String uri = this.metadataBaseUri + MetadataCatalogRestPath.LEVEL_SEGMENT.path() + "/" + family + "/"
-				+ productName;
+		final String uri = this.metadataBaseUri + MetadataCatalogRestPath.LEVEL_SEGMENT.path() + "/" + productType + "/"
+				+ dataTakeId;
 
-		ResponseEntity<LevelSegmentMetadata> response = query(UriComponentsBuilder.fromUriString(uri).build().toUri(),
-				new ParameterizedTypeReference<LevelSegmentMetadata>() {
-				});
+		final ResponseEntity<List<LevelSegmentMetadata>> response = query(
+				UriComponentsBuilder.fromUriString(uri).build().toUri(),
+				new ParameterizedTypeReference<List<LevelSegmentMetadata>>() {}
+		);
 
 		if (response == null) {
-			LOGGER.debug("Level segment not found for family {} and product name {}", family, productName);
+			LOGGER.debug("Level segment not found for type {} and dataTakeId {}", productType, dataTakeId);
 			return null;
 		} else {
 			LOGGER.debug("Returning level segment: {}", response.getBody());
@@ -127,12 +129,12 @@ public class MetadataClient {
 	 */
 	public L0AcnMetadata getFirstACN(final String productName, final String processMode) throws MetadataQueryException {
 
-		String uri = this.metadataBaseUri + MetadataCatalogRestPath.L0_SLICE.path() + "/" + productName + "/acns";
+		final String uri = this.metadataBaseUri + MetadataCatalogRestPath.L0_SLICE.path() + "/" + productName + "/acns";
 
-		UriComponentsBuilder builder = UriComponentsBuilder.fromUriString(uri).queryParam("mode", "ONE")
+		final UriComponentsBuilder builder = UriComponentsBuilder.fromUriString(uri).queryParam("mode", "ONE")
 				.queryParam("processMode", processMode);
 
-		ResponseEntity<L0AcnMetadata[]> response = query(builder.build().toUri(),
+		final ResponseEntity<L0AcnMetadata[]> response = query(builder.build().toUri(),
 				new ParameterizedTypeReference<L0AcnMetadata[]>() {
 				});
 
@@ -140,7 +142,7 @@ public class MetadataClient {
 			LOGGER.debug("First ACN not found for product name {} and process mode {}", productName, processMode);
 			return null;
 		} else {
-			L0AcnMetadata[] objects = response.getBody();
+			final L0AcnMetadata[] objects = response.getBody();
 			if (objects != null && objects.length > 0) {
 				LOGGER.debug("Returning first ACN: {}", objects[0]);
 				return objects[0];
@@ -162,12 +164,12 @@ public class MetadataClient {
 	 * @throws MetadataQueryException
 	 */
 	public List<SearchMetadata> search(final SearchMetadataQuery query, final String t0, final String t1,
-			final String satelliteId, final int instrumentConfigurationId, final String processMode, String polarisation)
+			final String satelliteId, final int instrumentConfigurationId, final String processMode, final String polarisation)
 			throws MetadataQueryException {
 
-		String uri = this.metadataBaseUri + MetadataCatalogRestPath.METADATA.path() + "/"
+		final String uri = this.metadataBaseUri + MetadataCatalogRestPath.METADATA.path() + "/"
 				+ query.getProductFamily().toString() + "/search";
-		UriComponentsBuilder builder = UriComponentsBuilder.fromUriString(uri)
+		final UriComponentsBuilder builder = UriComponentsBuilder.fromUriString(uri)
 				.queryParam("productType", query.getProductType())
 				.queryParam("mode", query.getRetrievalMode())
 				.queryParam("t0", t0)
@@ -186,7 +188,7 @@ public class MetadataClient {
 		if (polarisation != null) {
 			builder.queryParam("polarisation", polarisation);
 		}
-		ResponseEntity<List<SearchMetadata>> response = query(builder.build().toUri(),
+		final ResponseEntity<List<SearchMetadata>> response = query(builder.build().toUri(),
 				new ParameterizedTypeReference<List<SearchMetadata>>() {
 				});
 
@@ -208,19 +210,19 @@ public class MetadataClient {
 	 * @return
 	 * @throws MetadataQueryException
 	 */
-	public List<SearchMetadata> query(ProductFamily family, LocalDateTime intervalStart, LocalDateTime intervalStop)
+	public List<SearchMetadata> query(final ProductFamily family, final LocalDateTime intervalStart, final LocalDateTime intervalStop)
 			throws MetadataQueryException {
 
-		String uri = this.metadataBaseUri + MetadataCatalogRestPath.METADATA.path() + "/" + family.toString()
+		final String uri = this.metadataBaseUri + MetadataCatalogRestPath.METADATA.path() + "/" + family.toString()
 				+ "/searchInterval";
 
-		UriComponentsBuilder builder = UriComponentsBuilder.fromUriString(uri)
+		final UriComponentsBuilder builder = UriComponentsBuilder.fromUriString(uri)
 				// FIXME: Maybe we not need a productType anyways!
 				// .queryParam("productType", productType)
 				.queryParam("intervalStart", intervalStart.format(DateUtils.METADATA_DATE_FORMATTER))
 				.queryParam("intervalStop", intervalStop.format(DateUtils.METADATA_DATE_FORMATTER));
 
-		ResponseEntity<List<SearchMetadata>> response = query(builder.build().toUri(),
+		final ResponseEntity<List<SearchMetadata>> response = query(builder.build().toUri(),
 				new ParameterizedTypeReference<List<SearchMetadata>>() {
 				});
 
@@ -243,15 +245,15 @@ public class MetadataClient {
 	 * @return
 	 * @throws MetadataQueryException
 	 */
-	public SearchMetadata queryByFamilyAndProductName(String family, String productName)
+	public SearchMetadata queryByFamilyAndProductName(final String family, final String productName)
 			throws MetadataQueryException {
 
-		String uri = this.metadataBaseUri + MetadataCatalogRestPath.METADATA.path() + "/" + family
+		final String uri = this.metadataBaseUri + MetadataCatalogRestPath.METADATA.path() + "/" + family
 				+ "/searchProductName";
 
-		UriComponentsBuilder builder = UriComponentsBuilder.fromUriString(uri).queryParam("productName", productName);
+		final UriComponentsBuilder builder = UriComponentsBuilder.fromUriString(uri).queryParam("productName", productName);
 
-		ResponseEntity<SearchMetadata> response = query(builder.build().toUri(),
+		final ResponseEntity<SearchMetadata> response = query(builder.build().toUri(),
 				new ParameterizedTypeReference<SearchMetadata>() {
 				});
 
@@ -270,7 +272,7 @@ public class MetadataClient {
 	 * @return
 	 * @throws MetadataQueryException
 	 */
-	public int getSeaCoverage(ProductFamily family, String productName) throws MetadataQueryException {
+	public int getSeaCoverage(final ProductFamily family, final String productName) throws MetadataQueryException {
 
 		final String uri = this.metadataBaseUri + MetadataCatalogRestPath.L0_SLICE.path() + "/" 
 				+ family + "/" + productName + "/seaCoverage";
@@ -287,7 +289,7 @@ public class MetadataClient {
 						LOGGER.debug("Product not available yet. Waiting...");
 						try {
 							Thread.sleep(this.retryInMillis);
-						} catch (InterruptedException e) {
+						} catch (final InterruptedException e) {
 							throw new MetadataQueryException(e.getMessage(), e);
 						}
 						notAvailableRetries--;
@@ -306,7 +308,7 @@ public class MetadataClient {
 		);
 	}
 
-	private <T> ResponseEntity<T> query(URI uri, ParameterizedTypeReference<T> responseType) throws MetadataQueryException {
+	private <T> ResponseEntity<T> query(final URI uri, final ParameterizedTypeReference<T> responseType) throws MetadataQueryException {
 		final String commandDescription = String.format("call rest metadata on %s", uri);
 		
 		return performWithRetries(
@@ -321,7 +323,7 @@ public class MetadataClient {
 		);
 	}
 
-	private <T> void handleReturnValueErrors(String uri, final ResponseEntity<T> response) throws MetadataQueryException {
+	private <T> void handleReturnValueErrors(final String uri, final ResponseEntity<T> response) throws MetadataQueryException {
 		if (response == null) {
 			throw new MetadataQueryException(String.format("Rest metadata call %s returned null", uri));
 		}
@@ -346,7 +348,7 @@ public class MetadataClient {
 					maxRetries, 
 					retryInMillis
 			);
-		} catch (RuntimeException e) {
+		} catch (final RuntimeException e) {
 			// unwrap possible metadata exception
 			if (e.getCause() instanceof MetadataQueryException) {
 				throw (MetadataQueryException) e.getCause();
@@ -357,7 +359,7 @@ public class MetadataClient {
 			}
 			// otherwise simply pass through exception
 			throw e;
-		} catch (InterruptedException e) {
+		} catch (final InterruptedException e) {
 			throw new RuntimeException(
 					String.format("Interrupted on command execution of '%s'", commandDescription)
 			);

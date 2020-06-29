@@ -3,6 +3,7 @@ package esa.s1pdgs.cpoc.ipf.execution.worker.job.file;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 import org.apache.logging.log4j.LogManager;
@@ -91,6 +92,10 @@ public class InputDownloader {
     private final ApplicationLevel appLevel;
     
     private final MetadataClient mdcClient;
+    
+    private List<EdrsSessionMetadata> sessionMetadata;
+    
+    private final String inputKey;
 
     /**
      * Constructor
@@ -111,7 +116,8 @@ public class InputDownloader {
             final String prefixMonitorLogs,
             final PoolExecutorCallable poolProcExecutor,
             final ApplicationLevel appLevel,
-            final MetadataClient mdcClient
+            final MetadataClient mdcClient,
+            final String inputKey
     ) {
         this.obsClient = obsClient;
         this.localWorkingDir = localWorkingDir;
@@ -121,6 +127,7 @@ public class InputDownloader {
         this.appLevel = appLevel;
         this.prefixMonitorLogs = prefixMonitorLogs;
         this.mdcClient = mdcClient;
+        this.inputKey = inputKey;
     }
 
     /**
@@ -177,6 +184,8 @@ public class InputDownloader {
         FileUtils.writeFile(localWorkingDir + "Status.txt", status);
     }
 
+ 
+    
     /**
      * Sort inputs: - if JOB => create the file - if RAW / CONFIG / L0_PRODUCT /
      * L0_ACN => convert into S3DownloadFile - if BLANK => ignore - else =>
@@ -191,7 +200,8 @@ public class InputDownloader {
         LOGGER.info("{} 3 - Starting organizing inputs", prefixMonitorLogs);
 
         final List<ObsDownloadObject> downloadToBatch = new ArrayList<>();
-
+        sessionMetadata = new ArrayList<>(); 
+        
         for (final LevelJobInputDto input : inputs) {
             // Check if a directory shall be created
             final File parent = (new File(input.getLocalPath())).getParentFile();
@@ -247,7 +257,9 @@ public class InputDownloader {
 		else if (family == ProductFamily.EDRS_SESSION) {
 			LOGGER.debug("Provided input {} has no OBS reference. Trying to query it from MDC...",  
 					input);
-			downloadReference = queryRawFromMdc(localFile.getName());
+			
+			// FIXME dirty workaround warning: input key is in case of sessions the session id
+			downloadReference = queryRawFromMdc(inputKey, localFile.getName());
 			if (downloadReference == null) {
 				LOGGER.warn("Missing RAW {}. Trying to process without it...", localFile.getName());
 				
@@ -271,10 +283,19 @@ public class InputDownloader {
 		);
 	}	
 
-	private final String queryRawFromMdc(final String rawName) {
+	private final String queryRawFromMdc(final String sessionId, final String rawName) {
 		try {
-			final EdrsSessionMetadata rawFile = mdcClient.getEdrsSession("RAW", rawName);			
-			if (rawFile != null && rawFile.getKeyObjectStorage() != null) {
+			// only query once lazily
+			if (sessionMetadata.isEmpty()) {
+				sessionMetadata.addAll(mdcClient.getEdrsSessionFor(sessionId));
+			}
+						
+			final Optional<EdrsSessionMetadata> raw = sessionMetadata.stream()
+					.filter(p -> p.getProductName().equals(rawName))
+					.findFirst();
+		
+			if (raw.isPresent()) {
+				final EdrsSessionMetadata rawFile = raw.get();
 				LOGGER.info("Found missing RAW {} in metadata catalog: {}", 
 						rawName, rawFile.getKeyObjectStorage());
 				return rawFile.getKeyObjectStorage();

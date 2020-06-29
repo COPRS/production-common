@@ -243,7 +243,8 @@ public class JobProcessor implements MqiListener<IpfExecutionJob> {
 				getPrefixMonitorLog(MonitorLogUtils.LOG_INPUT, job),
 				procExecutor, 
 				this.properties.getLevel(),
-				mdcClient
+				mdcClient,
+				job.getKeyObjectStorage()
 		);
 
 		final OutputProcessor outputProcessor = new OutputProcessor(obsClient, procuderFactory, message, outputListFile,

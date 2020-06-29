@@ -51,26 +51,28 @@ final class L0SegmentPolarisationQuery implements Callable<JobGen> {
 		final List<String> pols = new ArrayList<>();
 		final Map<String, List<LevelSegmentMetadata>> segmentsGroupByPol = new HashMap<>();
 		String lastName = "";
+		String dataTakeId = "null";
+		String productType = "null";
 		final AppDataJob appDataJob = job.job();
+		
 		try {
-
-			for (final GenericMessageDto<CatalogEvent> message : new ArrayList<>(appDataJob.getMessages())) {
+			for (final GenericMessageDto<CatalogEvent> message : appDataJob.getMessages()) {
 				final CatalogEvent dto = message.getBody();
 				lastName = dto.getKeyObjectStorage();
-				final LevelSegmentMetadata metadata = metadataClient.getLevelSegment(dto.getProductFamily(),
-						dto.getKeyObjectStorage());
-				if (metadata == null) {
-					LOGGER.debug("== preSearch: metadata is null for {}", dto.getKeyObjectStorage());
-					missingMetadata.put(dto.getKeyObjectStorage(), "Missing segment");
-				} else {
-					if (!segmentsGroupByPol.containsKey(metadata.getPolarisation())) {
-						pols.add(metadata.getPolarisation());
-						segmentsGroupByPol.put(metadata.getPolarisation(), new ArrayList<>());
-					}
-					segmentsGroupByPol.get(metadata.getPolarisation()).add(metadata);
-				}
+				dataTakeId = dto.getMetadata().get("dataTakeId").toString();
+				productType =  dto.getMetadata().get("productType").toString();
+				break;
 			}
-		} catch (final MetadataQueryException e) {
+			
+			for (final LevelSegmentMetadata metadata : metadataClient.getLevelSegments(productType, dataTakeId)) {
+				if (!segmentsGroupByPol.containsKey(metadata.getPolarisation())) {
+					pols.add(metadata.getPolarisation());
+					segmentsGroupByPol.put(metadata.getPolarisation(), new ArrayList<>());
+				}
+				segmentsGroupByPol.get(metadata.getPolarisation()).add(metadata);
+			}			
+		}
+		catch (final MetadataQueryException e) {
 			LOGGER.debug("== preSearch: Exception- Missing segment for lastname {}", lastName);
 			missingMetadata.put(lastName, "Missing segment: " + e.getMessage());
 		}

@@ -27,11 +27,6 @@ public final class EdrsSessionConsumer implements ProductTypeConsumptionHandler 
 
 	@Override
 	public final boolean isReady(final AppDataJob job, final String productName) {
-		if (job.getMessages().size() != 2) {
-			 LOGGER.info("AppDataJob {} ({}) for {} {} not ready to be dispatched (# of messages {}/2)", 
-					 job.getId(), job.getState(), TYPE, productName, job.getMessages().size());
-			 return false;
-		}
 		if (job.getState() != AppDataJobState.WAITING) {
              LOGGER.info("AppDataJob {} ({}) for {} {} already dispatched", job.getId(), 
             		job.getState(), TYPE, productName);
@@ -56,47 +51,17 @@ public final class EdrsSessionConsumer implements ProductTypeConsumptionHandler 
         productDto.setSessionId(eventAdapter.sessionId());
         productDto.setMissionId(eventAdapter.missionId());
         productDto.setStationCode(eventAdapter.stationCode());
-        productDto.setProductName(eventAdapter.sessionId());
+        
+        productDto.setProductName(eventAdapter.sessionId()); // IMPORTANT workaround!!! Allows to get the
+        // session identifier in exec-worker
+        
         productDto.setSatelliteId(eventAdapter.satelliteId());
         productDto.setStartTime(eventAdapter.startTime());
         productDto.setStopTime(eventAdapter.stopTime());
         addRawsFor(productDto, eventAdapter);
         return productDto;
 	}
-	 
-    @Override
-    public boolean mergeMessageInto(final GenericMessageDto<CatalogEvent> mqiMessage, final AppDataJob job) {	 	
-		final CatalogEventAdapter eventAdapter = new CatalogEventAdapter(mqiMessage.getBody());
-		
-		LOGGER.trace("== existing message {}", job.getMessages());
-		if (job.getMessages().size() != 1) {
-	        LOGGER.warn("Expected one message at job {} but was {}. Ignoring incoming message {}...",
-	        		job.getId(), job.getMessages().size(), mqiMessage.getId());
-	        return false;
-		}
-		final int channelIdOfExistingMess =  preExistingChannelIdFor(job);
-		LOGGER.trace("channel id of existing message at job {} is {}", job.getId(), channelIdOfExistingMess);
-		if (channelIdOfExistingMess == eventAdapter.channelId()) {
-	        LOGGER.warn("Message for channel {} at job {} has already been consumed before. "
-	        		+ "Ignoring incoming message {}...",
-	        		channelIdOfExistingMess, job.getId(), mqiMessage.getId());	        
-	        return false;
-		}
-	
-		LOGGER.info("Adding message {} and raws for channel {} to appDataJob {}", mqiMessage.getId(), 
-				eventAdapter.channelId(), job.getId());        	
-    	// add the new message and the new raws
-    	job.getMessages().add(mqiMessage);
-    	addRawsFor(job.getProduct(), eventAdapter);
-    	return true;
-	}
-    
-    private final int preExistingChannelIdFor(final AppDataJob job) {
-		final GenericMessageDto<CatalogEvent> firstMess = job.getMessages().get(0);        
-		LOGGER.trace("== firstMessage {}", firstMess.toString());
-	 	return new CatalogEventAdapter(firstMess.getBody()).channelId();
-    }
-             
+     
 	private final void addRawsFor(final AppDataJobProduct product, final CatalogEventAdapter eventAdapter) {
         if (eventAdapter.channelId() == 1) {
             LOGGER.debug ("== ch1 ");    
