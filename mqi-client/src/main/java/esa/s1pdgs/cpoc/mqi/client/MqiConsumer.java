@@ -111,7 +111,8 @@ public final class MqiConsumer<E extends AbstractMessage> implements Runnable {
 					continue;
 				}
 				if (!allowConsumption(message)) {					
-					LOG.trace("Filter does not allow consumption: continue");
+					LOG.trace("Filter does not allow consumption of message {}: sending ack and continue", message);
+					client.ack(new AckMessageDto(message.getId(), Ack.OK, null, false), category);
 					continue;
 				}
 				appStatus.setProcessing(message.getId());
