@@ -267,10 +267,10 @@ public class MessageConsumptionController<T extends AbstractMessage> {
         AppCatMessageDto<?> message = null;
         if (consumers.containsKey(category)) {
             try {
-            	messagePersistence.ack(category, identifier, ack);
-      
                 // Get resume details and topic
                 message = messagePersistence.get(category, identifier);
+
+                messagePersistence.ack(category, identifier, ack);
 
                 // Get remaining message read
                 nbReadingMsg = messagePersistence.getNbReadingMessages(message.getTopic(), appProperties.getHostname());

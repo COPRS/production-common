@@ -110,7 +110,7 @@ public class AppCatalogMessagePersistenceTest {
      *
      */
     @Test
-    public void testmessageShallBeIgnoredWhenResponseTrue()
+    public void testMessageShallBeIgnoredWhenResponseTrue()
             throws AbstractCodedException {
 
         final AppCatMessageDto<ProductionEvent> msgLight = new AppCatMessageDto<>(
@@ -309,12 +309,12 @@ public class AppCatalogMessagePersistenceTest {
     @Test
     public void testOnMessageWhenProcessingButNoResponse()
             throws Exception {
-        final AppCatMessageDto<ProductionEvent> msgLight = new AppCatMessageDto<ProductionEvent>(
+        final AppCatMessageDto<ProductionEvent> msgLight = new AppCatMessageDto<>(
                 ProductCategory.AUXILIARY_FILES, 1234, "topic", 1, 111);
         msgLight.setState(MessageState.SEND);
         msgLight.setSendingPod("other-name");
 
-        final AppCatMessageDto<ProductionEvent> msgLightForceRead = new AppCatMessageDto<ProductionEvent>(
+        final AppCatMessageDto<ProductionEvent> msgLightForceRead = new AppCatMessageDto<>(
                 ProductCategory.AUXILIARY_FILES, 1234, "topic", 1, 111);
         msgLightForceRead.setState(MessageState.READ);
         msgLightForceRead.setReadingPod("pod-name");

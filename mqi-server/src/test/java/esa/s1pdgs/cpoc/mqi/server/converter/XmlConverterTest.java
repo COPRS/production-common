@@ -4,8 +4,6 @@ import static org.junit.Assert.assertEquals;
 
 import java.io.IOException;
 
-import javax.xml.bind.JAXBException;
-
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -13,7 +11,6 @@ import org.springframework.context.annotation.AnnotationConfigApplicationContext
 
 import esa.s1pdgs.cpoc.common.ProductFamily;
 import esa.s1pdgs.cpoc.mqi.server.config.ConverterConfiguration;
-import esa.s1pdgs.cpoc.mqi.server.converter.XmlConverter;
 import esa.s1pdgs.cpoc.mqi.server.publication.routing.DefaultRoute;
 import esa.s1pdgs.cpoc.mqi.server.publication.routing.RouteTo;
 import esa.s1pdgs.cpoc.mqi.server.publication.routing.Routing;
@@ -57,11 +54,9 @@ public class XmlConverterTest {
     
     /**
      * Test marshalling of routing file
-     * @throws JAXBException 
-     * @throws IOException 
      */
     @Test
-    public void testUnmarshalingRouting() throws IOException, JAXBException {
+    public void testUnmarshalingRouting() throws IOException {
         Routing routing = (Routing) xmlConverter.convertFromXMLToObject("./src/test/resources/routing-files/level-jobs.xml");
         
         DefaultRoute route0 = new DefaultRoute();

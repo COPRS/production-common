@@ -1,8 +1,12 @@
 package esa.s1pdgs.cpoc.mqi.server.consumption.kafka.consumer;
 
 import static org.junit.Assert.assertEquals;
-import static org.mockito.ArgumentMatchers.*;
-import static org.mockito.Mockito.*;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.argThat;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.junit.Before;

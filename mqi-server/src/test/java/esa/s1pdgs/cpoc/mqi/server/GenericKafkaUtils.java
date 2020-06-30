@@ -22,10 +22,8 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-import esa.s1pdgs.cpoc.mqi.model.queue.ProductionEvent;
 import esa.s1pdgs.cpoc.mqi.model.queue.IngestionEvent;
 import esa.s1pdgs.cpoc.mqi.model.queue.IpfExecutionJob;
-import esa.s1pdgs.cpoc.mqi.model.queue.ProductionEvent;
 import esa.s1pdgs.cpoc.mqi.model.queue.LevelReportDto;
 import esa.s1pdgs.cpoc.mqi.model.queue.ProductionEvent;
 
@@ -55,8 +53,7 @@ public class GenericKafkaUtils<T> {
         this.embeddedKafka = embeddedKafka;
     }
 
-    public ConsumerRecord<String, T> getReceivedRecord(String topic)
-            throws Exception {
+    public ConsumerRecord<String, T> getReceivedRecord(String topic) {
         Consumer<String, T> consumer =
                 new DefaultKafkaConsumerFactory<String, T>(consumerProps())
                         .createConsumer();
@@ -65,9 +62,9 @@ public class GenericKafkaUtils<T> {
     }
 
     public ConsumerRecord<String, IngestionEvent> getReceivedRecordEdrsSession(
-            String topic) throws Exception {
+            String topic) {
         Consumer<String, IngestionEvent> consumer =
-                new DefaultKafkaConsumerFactory<String, IngestionEvent>(
+                new DefaultKafkaConsumerFactory<>(
                         consumerProps(), new StringDeserializer(),
                         new JsonDeserializer<>(IngestionEvent.class)).createConsumer();
         embeddedKafka.consumeFromAnEmbeddedTopic(consumer, topic);
@@ -75,9 +72,9 @@ public class GenericKafkaUtils<T> {
     }
 
     public ConsumerRecord<String, ProductionEvent> getReceivedRecordAux(
-            String topic) throws Exception {
+            String topic) {
         Consumer<String, ProductionEvent> consumer =
-                new DefaultKafkaConsumerFactory<String, ProductionEvent>(
+                new DefaultKafkaConsumerFactory<>(
                         consumerProps(), new StringDeserializer(),
                         new JsonDeserializer<>(ProductionEvent.class)).createConsumer();
         embeddedKafka.consumeFromAnEmbeddedTopic(consumer, topic);
@@ -85,9 +82,9 @@ public class GenericKafkaUtils<T> {
     }
 
     public ConsumerRecord<String, IpfExecutionJob> getReceivedRecordJobs(
-            String topic) throws Exception {
+            String topic) {
         Consumer<String, IpfExecutionJob> consumer =
-                new DefaultKafkaConsumerFactory<String, IpfExecutionJob>(
+                new DefaultKafkaConsumerFactory<>(
                         consumerProps(), new StringDeserializer(),
                         new JsonDeserializer<>(IpfExecutionJob.class)).createConsumer();
         embeddedKafka.consumeFromAnEmbeddedTopic(consumer, topic);
@@ -95,9 +92,9 @@ public class GenericKafkaUtils<T> {
     }
 
     public ConsumerRecord<String, ProductionEvent> getReceivedRecordProducts(
-            String topic) throws Exception {
+            String topic) {
         Consumer<String, ProductionEvent> consumer =
-                new DefaultKafkaConsumerFactory<String, ProductionEvent>(
+                new DefaultKafkaConsumerFactory<>(
                         consumerProps(), new StringDeserializer(),
                         new JsonDeserializer<>(ProductionEvent.class)).createConsumer();
         embeddedKafka.consumeFromAnEmbeddedTopic(consumer, topic);
@@ -105,9 +102,9 @@ public class GenericKafkaUtils<T> {
     }
 
     public ConsumerRecord<String, ProductionEvent> getReceivedRecordSegments(
-            String topic) throws Exception {
+            String topic) {
         Consumer<String, ProductionEvent> consumer =
-                new DefaultKafkaConsumerFactory<String, ProductionEvent>(
+                new DefaultKafkaConsumerFactory<>(
                         consumerProps(), new StringDeserializer(),
                         new JsonDeserializer<>(ProductionEvent.class)).createConsumer();
         embeddedKafka.consumeFromAnEmbeddedTopic(consumer, topic);
@@ -115,9 +112,9 @@ public class GenericKafkaUtils<T> {
     }
 
     public ConsumerRecord<String, LevelReportDto> getReceivedRecordReports(
-            String topic) throws Exception {
+            String topic) {
         Consumer<String, LevelReportDto> consumer =
-                new DefaultKafkaConsumerFactory<String, LevelReportDto>(
+                new DefaultKafkaConsumerFactory<>(
                         consumerProps(), new StringDeserializer(),
                         new JsonDeserializer<>(LevelReportDto.class)).createConsumer();
         embeddedKafka.consumeFromAnEmbeddedTopic(consumer, topic);

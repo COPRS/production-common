@@ -5,7 +5,6 @@ import java.util.HashMap;
 import java.util.Map;
 
 import javax.annotation.PostConstruct;
-import javax.xml.bind.JAXBException;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -55,7 +54,7 @@ public class MessagePublicationController {
 	}
 
 	@PostConstruct
-	public void initialize() throws IOException, JAXBException {
+	public void initialize() throws IOException {
 		for (final Map.Entry<ProductCategory, ProductCategoryProperties> entry : appProperties.getProductCategories().entrySet()) {					
 			final ProductCategory cat = entry.getKey();		
 			final ProductCategoryProperties catProp = entry.getValue();
@@ -75,11 +74,6 @@ public class MessagePublicationController {
 	/**
 	 * Publish a message of a given category
 	 * 
-	 * @param category
-	 * @param dto
-	 * @throws MqiPublicationError
-	 * @throws MqiCategoryNotAvailable
-	 * @throws MqiRouteNotAvailable
 	 */
 	public void publish(ProductCategory category, AbstractMessage dto, String inputKey, String outputKey)
 			throws MqiPublicationError, MqiCategoryNotAvailable, MqiRouteNotAvailable {		
@@ -91,17 +85,12 @@ public class MessagePublicationController {
 	/**
 	 * Get the topic to use for publication according the routing map
 	 * 
-	 * @param category
-	 * @param family
-	 * @return
-	 * @throws MqiCategoryNotAvailable
-	 * @throws MqiRouteNotAvailable
 	 */
 	final String getTopic(final ProductCategory category, final ProductFamily family, final String inputKey,
 			final String outputKey) throws MqiCategoryNotAvailable, MqiRouteNotAvailable {		
 		final Routing thisRouting = routing.get(category);
 		
-		LOGGER.debug("getTopic inpputKey={}, outputKey={}, family={}, category={}", inputKey, outputKey, family, category);
+		LOGGER.debug("getTopic inputKey={}, outputKey={}, family={}, category={}", inputKey, outputKey, family, category);
 		
 		if (thisRouting == null) {
 			throw new MqiCategoryNotAvailable(category, "publisher");

@@ -53,8 +53,6 @@ public class OtherApplicationService {
     /**
      * Constructor
      * 
-     * @param maxRetries
-     * @param tempoRetryMs
      */
     public OtherApplicationService(final RestTemplate restTemplate,
             final String portUri, final int maxRetries,
@@ -94,9 +92,6 @@ public class OtherApplicationService {
     /**
      * Wait or throw an error according the number of retries
      * 
-     * @param retries
-     * @param cause
-     * @throws AbstractCodedException
      */
     protected void waitOrThrow(final int retries,
             final AbstractCodedException cause, final String api)
@@ -117,7 +112,6 @@ public class OtherApplicationService {
     /**
      * Check if the application is processing the message
      * 
-     * @throws AbstractCodedException
      */
     public boolean isProcessing(final String podName,
             final ProductCategory category, final long messageId)
@@ -136,7 +130,7 @@ public class OtherApplicationService {
                     if (ret == null) {
                         return false;
                     } else {
-                        return ret.booleanValue();
+                        return ret;
                     }
                 } else {
                     waitOrThrow(retries,

@@ -10,7 +10,7 @@ import org.springframework.context.annotation.Configuration;
 import esa.s1pdgs.cpoc.common.ProductCategory;
 
 /**
- * Configuration of the application: product cagtegories
+ * Configuration of the application: product categories
  * 
  * @author Viveris Technologies
  */
@@ -214,7 +214,7 @@ public class ApplicationProperties {
         }
 
         /**
-         * @param topics
+         * @param topicsWithPriority
          *            the topics to set
          */
         public void setTopicsWithPriority(final Map<String, Integer> topicsWithPriority) {
