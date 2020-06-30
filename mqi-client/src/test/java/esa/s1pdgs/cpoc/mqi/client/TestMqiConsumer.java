@@ -184,13 +184,12 @@ public class TestMqiConsumer {
 	@Test
 	public final void testAllowConsumption() {
 		
-		
 		final MqiMessageFilter filter1 = new MqiMessageFilter();
-		filter1.setMatchRegex("a.*");
+		filter1.setDisallowRegex("a.*");
 		filter1.setProductFamily(ProductFamily.AUXILIARY_FILE);
 		
 		final MqiMessageFilter filter2 = new MqiMessageFilter();
-		filter2.setMatchRegex("s.*");
+		filter2.setDisallowRegex("s.*");
 		filter2.setProductFamily(ProductFamily.EDRS_SESSION);
 		
 		final List<MqiMessageFilter> mqiMessageFilter = new ArrayList<>();
