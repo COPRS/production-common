@@ -19,7 +19,6 @@ public class ConverterConfiguration {
 
 	/**
 	 * XML converter
-	 * @return
 	 */
 	@Bean
 	public XmlConverter xmlConverter() {
@@ -28,13 +27,12 @@ public class ConverterConfiguration {
 
 	/**
 	 * JAXb2 marshaller
-	 * @return
 	 */
 	@Bean
 	public Jaxb2Marshaller jaxb2Marshaller() {
 		Jaxb2Marshaller jaxb2Marshaller = new Jaxb2Marshaller();
 		jaxb2Marshaller.setPackagesToScan("esa.s1pdgs.cpoc.mqi.server.publication.routing");
-		Map<String, Object> map = new ConcurrentHashMap<String, Object>();
+		Map<String, Object> map = new ConcurrentHashMap<>();
 		map.put("jaxb.formatted.output", true);
 		map.put("jaxb.encoding", "UTF-8");
 		jaxb2Marshaller.setMarshallerProperties(map);

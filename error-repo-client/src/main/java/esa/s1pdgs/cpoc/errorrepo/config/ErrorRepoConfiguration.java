@@ -1,4 +1,4 @@
-package esa.s1pdgs.cpoc.ipf.execution.worker.config;
+package esa.s1pdgs.cpoc.errorrepo.config;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -6,6 +6,7 @@ import java.util.Map;
 import org.apache.kafka.clients.producer.ProducerConfig;
 import org.apache.kafka.common.serialization.StringSerializer;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.kafka.core.DefaultKafkaProducerFactory;
@@ -24,7 +25,7 @@ public class ErrorRepoConfiguration {
     
     @Value("${kafka.max-retries}")
     private int maxRetries;
-    
+
     @Value("${kafka.error-topic}")
     private String topic;
 
@@ -36,10 +37,11 @@ public class ErrorRepoConfiguration {
         props.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, JsonSerializer.class);
         props.put(JsonSerializer.ADD_TYPE_INFO_HEADERS, false);
         props.put(ProducerConfig.RETRIES_CONFIG, maxRetries);        
-        return new KafkaTemplate<String, FailedProcessingDto>(new DefaultKafkaProducerFactory<>(props));
+        return new KafkaTemplate<>(new DefaultKafkaProducerFactory<>(props));
 	}
-	
+
 	@Bean 
+	@ConditionalOnProperty(name="kafka.error-topic")
 	public ErrorRepoAppender kafkaErrorRepoAppender()
 	{
 		return new KafkaErrorRepoAppender(kafkaTemplate(), topic);

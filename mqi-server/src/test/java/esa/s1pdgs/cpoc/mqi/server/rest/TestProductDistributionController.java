@@ -2,10 +2,7 @@ package esa.s1pdgs.cpoc.mqi.server.rest;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
-import static org.mockito.Mockito.doReturn;
-import static org.mockito.Mockito.doThrow;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.*;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -30,7 +27,6 @@ import esa.s1pdgs.cpoc.mqi.model.rest.AckMessageDto;
 import esa.s1pdgs.cpoc.mqi.model.rest.GenericMessageDto;
 import esa.s1pdgs.cpoc.mqi.model.rest.GenericPublicationMessageDto;
 import esa.s1pdgs.cpoc.mqi.server.config.ApplicationProperties;
-import esa.s1pdgs.cpoc.mqi.server.rest.ProductDistributionController;
 import esa.s1pdgs.cpoc.mqi.server.rest.ProductDistributionController.ProductDistributionException;
 import esa.s1pdgs.cpoc.mqi.server.service.MessageConsumptionController;
 import esa.s1pdgs.cpoc.mqi.server.service.MessagePublicationController;
@@ -38,7 +34,7 @@ import esa.s1pdgs.cpoc.mqi.server.service.MessagePublicationController;
 public class TestProductDistributionController {
 	
 	static final class StringDto extends AbstractMessage {
-		public StringDto(final String productName) {			
+		public StringDto() {
 		}		
 	}
 
@@ -46,7 +42,7 @@ public class TestProductDistributionController {
      * Mock the controller of consumed messages
      */
     @Mock
-    private MessageConsumptionController messages;
+    private MessageConsumptionController<StringDto> messages;
 
     /**
      * Mock the controller of published messages
@@ -61,24 +57,18 @@ public class TestProductDistributionController {
     private ApplicationProperties properties;
 
     /**
-     * The consumed messsage
-     */
-    private GenericMessageDto<StringDto> consumedMessage;
-
-    /**
      * The controller to test
      */
     private ProductDistributionController controller;
 
     /**
      * Initialization
-     * @throws AbstractCodedException 
      */
     @Before
     public void init() throws AbstractCodedException {
         MockitoAnnotations.initMocks(this);
 
-        consumedMessage = new GenericMessageDto<StringDto>(123, "input-key", new StringDto("message-test"));
+        GenericMessageDto<StringDto> consumedMessage = new GenericMessageDto<>(123, "input-key", new StringDto());
 
         doReturn(consumedMessage).when(messages).nextMessage(Mockito.any());
 
@@ -89,7 +79,6 @@ public class TestProductDistributionController {
 
     /**
      * Test when nextMessage throw an error
-     * @throws AbstractCodedException 
      */
     @Test
     public void testNextApiCategoryNotAvailable()
@@ -97,7 +86,7 @@ public class TestProductDistributionController {
         doThrow(new MqiCategoryNotAvailable(ProductCategory.AUXILIARY_FILES,
                 "consumer")).when(messages).nextMessage(Mockito.any());
         try {
-			controller.next(ProductCategory.AUXILIARY_FILES.name().toString());
+			controller.next(ProductCategory.AUXILIARY_FILES.name());
 			fail();
 		} catch (final ProductDistributionException e) {
 			// expected
@@ -108,7 +97,6 @@ public class TestProductDistributionController {
 
     /**
      * Test when nextMessage throw an error
-     * @throws AbstractCodedException 
      */
     @Test
     public void testAckApiCategoryNotAvailable()
@@ -118,7 +106,7 @@ public class TestProductDistributionController {
                         Mockito.anyLong(), Mockito.any(), Mockito.anyBoolean());
         
         try {
-		    controller.ack(new AckMessageDto(123L, Ack.OK, "message", false), ProductCategory.AUXILIARY_FILES.name().toString());
+		    controller.ack(new AckMessageDto(123L, Ack.OK, "message", false), ProductCategory.AUXILIARY_FILES.name());
 			fail();
 		} catch (final ProductDistributionException e) {
 			// expected
@@ -131,9 +119,6 @@ public class TestProductDistributionController {
     /**
      * Test when nextMessage throw an error
      * 
-     * @throws MqiCategoryNotAvailable
-     * @throws MqiPublicationError
-     * @throws MqiRouteNotAvailable 
      */
     @Test
     public void testPublishApiCategoryNotAvailable()
@@ -145,14 +130,14 @@ public class TestProductDistributionController {
         final ProductionEvent dto = new ProductionEvent("test321", "bar", ProductFamily.AUXILIARY_FILE);
         
         try {
-		    final GenericPublicationMessageDto<? extends AbstractMessage> mess = new GenericPublicationMessageDto<ProductionEvent>(
-		    		ProductFamily.AUXILIARY_FILE,
-		    		dto
-		    );
+		    final GenericPublicationMessageDto<? extends AbstractMessage> mess = new GenericPublicationMessageDto<>(
+                    ProductFamily.AUXILIARY_FILE,
+                    dto
+            );
         	final ObjectMapper objMapper = new ObjectMapper();
         	final JsonNode json = objMapper.convertValue(mess, JsonNode.class);		    
 		    
-		    controller.publish(json, ProductCategory.AUXILIARY_FILES.name().toString());
+		    controller.publish(json, ProductCategory.AUXILIARY_FILES.name());
 			fail();
 		} catch (final ProductDistributionException e) {
 			// expected
@@ -167,9 +152,6 @@ public class TestProductDistributionController {
     /**
      * Test when nextMessage throw an error
      * 
-     * @throws MqiCategoryNotAvailable
-     * @throws MqiPublicationError
-     * @throws MqiRouteNotAvailable 
      */
     @Test
     public void testPublishApiError()
@@ -182,14 +164,14 @@ public class TestProductDistributionController {
         try {
         	final ProductionEvent event = new ProductionEvent("test321", "bar", ProductFamily.AUXILIARY_FILE);
         	event.setUid(dto.getUid());
-		    final GenericPublicationMessageDto<? extends AbstractMessage> mess = new GenericPublicationMessageDto<ProductionEvent>(
-		    		ProductFamily.AUXILIARY_FILE,
-		    		event
-		    );
+		    final GenericPublicationMessageDto<? extends AbstractMessage> mess = new GenericPublicationMessageDto<>(
+                    ProductFamily.AUXILIARY_FILE,
+                    event
+            );
         	final ObjectMapper objMapper = new ObjectMapper();
         	final JsonNode json = objMapper.convertValue(mess, JsonNode.class);	
 		    
-		    controller.publish(json, ProductCategory.AUXILIARY_FILES.name().toString());
+		    controller.publish(json, ProductCategory.AUXILIARY_FILES.name());
 			fail();
 		} catch (final ProductDistributionException e) {
 			// expected

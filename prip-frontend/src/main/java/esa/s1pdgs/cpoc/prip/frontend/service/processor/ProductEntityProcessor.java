@@ -37,6 +37,7 @@ import esa.s1pdgs.cpoc.prip.frontend.report.PripReportingInput;
 import esa.s1pdgs.cpoc.prip.frontend.report.PripReportingOutput;
 import esa.s1pdgs.cpoc.prip.frontend.service.edm.EdmProvider;
 import esa.s1pdgs.cpoc.prip.frontend.service.mapping.MappingUtil;
+import esa.s1pdgs.cpoc.prip.frontend.utils.OlingoUtil;
 import esa.s1pdgs.cpoc.prip.metadata.PripMetadataRepository;
 import esa.s1pdgs.cpoc.prip.model.PripMetadata;
 import esa.s1pdgs.cpoc.report.Reporting;
@@ -80,7 +81,7 @@ public class ProductEntityProcessor implements EntityProcessor, MediaEntityProce
 			if (null != foundPripMetadata) {
 				final Entity entity = MappingUtil.pripMetadataToEntity(foundPripMetadata, request.getRawBaseUri());
 							
-				final ContextURL contextUrl = ContextURL.with().entitySet(edmEntitySet).build();
+				final ContextURL contextUrl = OlingoUtil.getContextUrl(edmEntitySet, edmEntitySet.getEntityType(), true);
 				final EntitySerializerOptions options = EntitySerializerOptions.with().contextURL(contextUrl).build();
 				
 				final ODataSerializer serializer = odata.createSerializer(responseFormat);
@@ -99,6 +100,8 @@ public class ProductEntityProcessor implements EntityProcessor, MediaEntityProce
 		}
 	}
 
+	
+	
 	@Override
 	public void readMediaEntity(final ODataRequest request, final ODataResponse response, final UriInfo uriInfo,
 			final ContentType responseFormat) throws ODataApplicationException, ODataLibraryException {

@@ -41,7 +41,7 @@ public class MappingUtil {
 	public static Entity pripMetadataToEntity(PripMetadata pripMetadata, String rawBaseUri) {
 		URI uri = MappingUtil.createId(rawBaseUri, EdmProvider.ES_PRODUCTS_NAME, pripMetadata.getId());
 		Entity entity = new Entity()
-				.addProperty(new Property(null, Id.name(), ValueType.PRIMITIVE, pripMetadata.getId().toString()))
+				.addProperty(new Property(null, Id.name(), ValueType.PRIMITIVE, pripMetadata.getId()))
 				.addProperty(new Property(null, Name.name(), ValueType.PRIMITIVE, pripMetadata.getName()))
 				.addProperty(new Property(null, ContentType.name(), ValueType.PRIMITIVE, pripMetadata.getContentType()))
 				.addProperty(new Property(null, ContentLength.name(), ValueType.PRIMITIVE, pripMetadata.getContentLength()))
@@ -57,7 +57,7 @@ public class MappingUtil {
 
 	public static URI createId(String rawBaseUri, String entitySetName, UUID id) {
 		try {
-			return new URI(rawBaseUri + "/" + entitySetName + "('" + id.toString() + "')");
+			return new URI(rawBaseUri + "/" + entitySetName + "(" + id.toString() + ")");
 		} catch (URISyntaxException e) {
 			throw new ODataRuntimeException("Unable to create id for entity: " + entitySetName, e);
 		}

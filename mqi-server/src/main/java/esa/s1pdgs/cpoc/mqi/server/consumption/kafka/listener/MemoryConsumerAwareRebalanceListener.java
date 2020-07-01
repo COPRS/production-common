@@ -1,8 +1,8 @@
 package esa.s1pdgs.cpoc.mqi.server.consumption.kafka.listener;
 
-import java.util.Arrays;
+import static java.util.Collections.singletonList;
+
 import java.util.Collection;
-import java.util.Iterator;
 
 import org.apache.kafka.clients.consumer.Consumer;
 import org.apache.kafka.common.TopicPartition;
@@ -10,9 +10,9 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.kafka.listener.ConsumerAwareRebalanceListener;
 
-import esa.s1pdgs.cpoc.appcatalog.client.mqi.AppCatalogMqiService;
 import esa.s1pdgs.cpoc.common.errors.AbstractCodedException;
 import esa.s1pdgs.cpoc.common.utils.LogUtils;
+import esa.s1pdgs.cpoc.mqi.server.service.MessagePersistence;
 
 /**
  * Rebalance listener when messages are in memory
@@ -31,7 +31,7 @@ public class MemoryConsumerAwareRebalanceListener
     /**
      * Service for checking if a message is processing or not by another
      */
-    private final AppCatalogMqiService service;
+    private final MessagePersistence messagePersistence;
 
     /**
      * Group name
@@ -47,10 +47,10 @@ public class MemoryConsumerAwareRebalanceListener
      * Default constructor
      */
     public MemoryConsumerAwareRebalanceListener(
-            final AppCatalogMqiService service, final String group,
+            final MessagePersistence messagePersistence, final String group,
             final int defaultMode) {
         super();
-        this.service = service;
+        this.messagePersistence = messagePersistence;
         this.group = group;
         this.defaultMode = defaultMode;
     }
@@ -96,9 +96,7 @@ public class MemoryConsumerAwareRebalanceListener
             final Collection<TopicPartition> partitions) {
         LOGGER.info("[MONITOR] [rebalance] onPartitionsAssigned call");
         // We seek the consumer on the right offset
-        Iterator<TopicPartition> topicPartitionIterator = partitions.iterator();
-        while (topicPartitionIterator.hasNext()) {
-            TopicPartition topicPartition = topicPartitionIterator.next();
+        for (TopicPartition topicPartition : partitions) {
             LOGGER.debug(
                     "[MONITOR] [rebalance] Current offset is {} committed offset is -> {}",
                     consumer.position(topicPartition),
@@ -106,7 +104,7 @@ public class MemoryConsumerAwareRebalanceListener
             long startingOffset = defaultMode;
             try {
                 startingOffset =
-                        service.getEarliestOffset(topicPartition.topic(), topicPartition.partition(), group);
+                        messagePersistence.getEarliestOffset(topicPartition.topic(), topicPartition.partition(), group);
             } catch (AbstractCodedException ace) {
                 LOGGER.error(
                         "[MONITOR] [rebalance] Exception occurred, set default mode {}: {}",
@@ -120,10 +118,10 @@ public class MemoryConsumerAwareRebalanceListener
                 LOGGER.info("[MONITOR] [rebalance] Leaving it alone");
             } else if (startingOffset == -2) {
                 LOGGER.info("[MONITOR] [rebalance] Setting offset to end");
-                consumer.seekToEnd(Arrays.asList(topicPartition));
+                consumer.seekToEnd(singletonList(topicPartition));
             } else if (startingOffset == -1) {
                 LOGGER.info("[MONITOR] [rebalance] Setting offset to begining");
-                consumer.seekToBeginning(Arrays.asList(topicPartition));
+                consumer.seekToBeginning(singletonList(topicPartition));
             } else {
                 LOGGER.info("[MONITOR] [rebalance] Resetting offset to {}",
                         startingOffset);

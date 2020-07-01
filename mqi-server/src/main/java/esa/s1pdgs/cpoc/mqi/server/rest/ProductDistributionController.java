@@ -79,11 +79,7 @@ public class ProductDistributionController {
      * Application properties
      */
     private final ApplicationProperties properties;
-    /**
-     * Constructor
-     * 
-     * @param messages
-     */
+
     @Autowired
     public ProductDistributionController(
             final MessageConsumptionController messages,
@@ -99,7 +95,6 @@ public class ProductDistributionController {
     /**
      * Get the next message to proceed for auxiliary files
      * 
-     * @return
      */
     @RequestMapping(method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_UTF8_VALUE, path = "/{category}/next")
     public GenericMessageDto<? extends AbstractMessage> next(@PathVariable("category") String categoryName) throws ProductDistributionException {
@@ -120,7 +115,6 @@ public class ProductDistributionController {
     /**
      * Get the next message to proceed for auxiliary files
      * 
-     * @return
      */
     @RequestMapping(method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE, path = "/{category}/ack")
     public void ack(@RequestBody final AckMessageDto ackDto, @PathVariable("category") String categoryName) 
@@ -155,7 +149,6 @@ public class ProductDistributionController {
     /**
      * Publish a message
      * 
-     * @return
      */
     @RequestMapping(method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE, path = "/{category}/publish")
     public void publish(
@@ -198,7 +191,7 @@ public class ProductDistributionController {
 		} 
     }
     
-    private final GenericMessageDto<? extends AbstractMessage> nextMessage(final ProductCategory category) throws ProductDistributionException
+    private GenericMessageDto<? extends AbstractMessage> nextMessage(final ProductCategory category) throws ProductDistributionException
     {
     	try {
 			final GenericMessageDto<? extends AbstractMessage> res = messages.nextMessage(category);

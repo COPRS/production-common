@@ -8,7 +8,7 @@ import esa.s1pdgs.cpoc.common.utils.DateUtils;
 public class PripDateTimeFilter {
 
 	public enum Operator {
-		LT("<"), GT(">");
+		LT("<"), GT(">"), LE("<="), GE(">=");
 
 		private String o;
 
@@ -27,8 +27,14 @@ public class PripDateTimeFilter {
 			if (operator.equals(LT.o)) {
 				return LT;
 			}
+			if (operator.equals(LE.o)) {
+				return LE;
+			}
 			if (operator.equals(GT.o)) {
 				return GT;
+			}
+			if (operator.equals(GE.o)) {
+				return GE;
 			}
 			throw new IllegalArgumentException(String.format("operator not supported: %s", operator));
 		}

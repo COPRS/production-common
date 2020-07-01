@@ -17,7 +17,7 @@ public class Route {
 
     
     /**
-     * Inputkey, represent the consumed topic
+     * Input key, represent the consumed topic
      */
     @XmlElement(name = "input_key")
     private String inputKey;
@@ -29,7 +29,7 @@ public class Route {
     private String outputKey;
     
     /**
-     * Routeto, where the message shall be sent
+     * Route to, where the message shall be sent
      */
     @XmlElement(name = "route_to")
     private RouteTo routeTo;
@@ -51,17 +51,17 @@ public class Route {
     }
 
     /**
-     * @return the inpyutKey
+     * @return the input key
      */
     public String getInputKey() {
         return inputKey;
     }
 
     /**
-     * @param inpyutKey the inpyutKey to set
+     * @param inputKey the input key to set
      */
-    public void setInputKey(String inpyutKey) {
-        this.inputKey = inpyutKey;
+    public void setInputKey(String inputKey) {
+        this.inputKey = inputKey;
     }
 
     /**
@@ -139,11 +139,8 @@ public class Route {
         } else if (!outputKey.equals(other.outputKey))
             return false;
         if (routeTo == null) {
-            if (other.routeTo != null)
-                return false;
-        } else if (!routeTo.equals(other.routeTo))
-            return false;
-        return true;
+            return other.routeTo == null;
+        } else return routeTo.equals(other.routeTo);
     }
     
     

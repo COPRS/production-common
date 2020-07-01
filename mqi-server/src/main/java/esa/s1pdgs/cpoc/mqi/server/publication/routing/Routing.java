@@ -48,7 +48,7 @@ public class Routing {
     }
 
     /**
-     * @param defaultRoutes
+     * @param routes
      *            the defaultRoutes to set
      */
     public void setDefaultRoutes(final List<DefaultRoute> routes) {
@@ -56,7 +56,7 @@ public class Routing {
     }
 
     /**
-     * @param defaultRoutes
+     * @param route
      *            the routes to set
      */
     public void addRoute(final DefaultRoute route) {
@@ -93,15 +93,13 @@ public class Routing {
     /**
      * Add a route to the list of route
      *
-     * @param route
      */
     public void addRoute(final Route route) {
         this.routes.add(route);
     }
     
     /**
-     * @param inputKey
-     * 
+     *
      * @return the route
      * 
      */
@@ -154,10 +152,7 @@ public class Routing {
         } else if (!defaultRoutes.equals(other.defaultRoutes))
             return false;
         if (routes == null) {
-            if (other.routes != null)
-                return false;
-        } else if (!routes.equals(other.routes))
-            return false;
-        return true;
+            return other.routes == null;
+        } else return routes.equals(other.routes);
     }
 }

@@ -86,7 +86,7 @@ public final class MqiConsumer<E extends AbstractMessage> implements Runnable {
 		if (initialDelay > 0L) {
 			LOG.debug("Start MQI polling in {}ms", initialDelay);
 			try {
-				appStatus.sleep(pollingIntervalMillis);
+				appStatus.sleep(initialDelay);
 			} catch (final InterruptedException e) {
 				LOG.debug("{} has been cancelled", this);
 				LOG.info("Exiting {}", this);
@@ -111,7 +111,8 @@ public final class MqiConsumer<E extends AbstractMessage> implements Runnable {
 					continue;
 				}
 				if (!allowConsumption(message)) {					
-					LOG.trace("Filter does not allow consumption: continue");
+					LOG.trace("Filter does not allow consumption of message {}: sending ack and continue", message);
+					client.ack(new AckMessageDto(message.getId(), Ack.OK, null, false), category);
 					continue;
 				}
 				appStatus.setProcessing(message.getId());
@@ -154,7 +155,7 @@ public final class MqiConsumer<E extends AbstractMessage> implements Runnable {
 
 	final boolean allowConsumption(final GenericMessageDto<E> message) {
 		for (final MessageFilter filter : mqiMessageFilter) {
-			if (filter.accept(message.getBody())) {
+			if (!filter.accept(message.getBody())) {
 				return false;
 			}
 		}
