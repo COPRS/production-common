@@ -40,8 +40,20 @@ public class AppDataJobGeneration {
         this.creationDate = new Date();
         this.nbErrors = 0;
     }
+    
+    
 
-    /**
+    public AppDataJobGeneration(final AppDataJobGeneration clone) {
+		this.creationDate = clone.creationDate;
+		this.lastUpdateDate = clone.lastUpdateDate;
+		this.taskTable = clone.taskTable;
+		this.state = clone.state;
+		this.nbErrors = clone.nbErrors;
+	}
+
+
+
+	/**
      * @return the creationDate
      */
     public Date getCreationDate() {

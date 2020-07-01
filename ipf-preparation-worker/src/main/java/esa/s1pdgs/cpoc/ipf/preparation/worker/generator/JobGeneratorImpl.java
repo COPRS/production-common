@@ -74,11 +74,11 @@ public final class JobGeneratorImpl implements JobGenerator {
 			}
 			try {			
 				LOGGER.debug("Trying job generation for appDataJob {}", job.getId());
-				final JobGen jobGenOld = newJobGenFor(job);		
-				final JobGen jobGenNew = JobGenerationStateTransitions.ofInputState(jobGenOld.state())
-						.performTransitionOn(jobGenOld);
+				final AppDataJobGeneration oldGen = new AppDataJobGeneration(job.getGeneration());
+				final JobGen jobGenNew = JobGenerationStateTransitions.ofInputState(oldGen.getState())
+						.performTransitionOn(newJobGenFor(job));
 						
-				update(jobGenOld.job().getGeneration(), jobGenNew.job());
+				update(oldGen, jobGenNew.job());
 			}
 			catch (final Exception e) {
 				final Throwable error = Exceptions.unwrap(e);
