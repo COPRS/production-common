@@ -243,8 +243,8 @@ public class AppCatalogJobClient {
         return search(mapOf(
             	"pod", pod,
                 "state", AppDataJobState.GENERATING.name(),
-                "generations.state[neq]", AppDataJobGenerationState.SENT.name(),
-                "generations.taskTable", taskTable,
+                "generation.state[neq]", AppDataJobGenerationState.SENT.name(),
+                "generation.taskTable", taskTable,
                 "[orderByAsc]", "generations.lastUpdateDate"
         ));     
     }
