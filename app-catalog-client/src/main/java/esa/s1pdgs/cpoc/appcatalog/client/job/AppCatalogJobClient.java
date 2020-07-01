@@ -245,7 +245,7 @@ public class AppCatalogJobClient {
                 "state", AppDataJobState.GENERATING.name(),
                 "generation.state[neq]", AppDataJobGenerationState.SENT.name(),
                 "generation.taskTable", taskTable,
-                "[orderByAsc]", "generations.lastUpdateDate"
+                "[orderByAsc]", "generation.lastUpdateDate"
         ));     
     }
 

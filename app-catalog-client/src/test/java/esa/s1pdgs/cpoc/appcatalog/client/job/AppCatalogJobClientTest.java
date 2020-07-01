@@ -144,9 +144,9 @@ public class AppCatalogJobClientTest {
     			}, 
     			"pod=myPod"
     			+ "&state=GENERATING"
-    			+ "&generations.state[neq]=SENT"
-    			+ "&generations.taskTable=task-table"
-    			+ "&[orderByAsc]=generations.lastUpdateDate"
+    			+ "&generation.state[neq]=SENT"
+    			+ "&generation.taskTable=task-table"
+    			+ "&[orderByAsc]=generation.lastUpdateDate"
     	);
     }
 
