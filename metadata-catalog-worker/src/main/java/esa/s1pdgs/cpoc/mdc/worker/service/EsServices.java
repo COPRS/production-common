@@ -66,7 +66,7 @@ import esa.s1pdgs.cpoc.metadata.model.SearchMetadata;
 public class EsServices {
 
 	private static final String REQUIRED_INSTRUMENT_ID_PATTERN = "(aux_pp1|aux_pp2|aux_cal|aux_ins)";
-	private static final String REQUIRED_SATELLITE_ID_PATTERN = "(aux_.*)";
+	static final String REQUIRED_SATELLITE_ID_PATTERN = "(aux_.*)";
 
 	/**
 	 * Logger
@@ -126,7 +126,7 @@ public class EsServices {
 		}
 	}
 	
-	public void createMetadataWithRetries(final JSONObject product, String productName, int numRetries, long retrySleep) throws InterruptedException {
+	public void createMetadataWithRetries(final JSONObject product, final String productName, final int numRetries, final long retrySleep) throws InterruptedException {
 		Retries.performWithRetries(
 			() -> {
 		    	if (!isMetadataExist(product)) {
@@ -654,16 +654,16 @@ public class EsServices {
 	 * @throws MetadataNotPresentException
 	 * @throws IOException
 	 */
-	public SearchMetadata productNameQuery(String productFamily, String productName)
+	public SearchMetadata productNameQuery(final String productFamily, final String productName)
 			throws MetadataMalformedException, MetadataNotPresentException, IOException {
 
-		Map<String, Object> source = getRequest(productFamily, productName);
+		final Map<String, Object> source = getRequest(productFamily, productName);
 
 		if (source.isEmpty()) {
 			throw new MetadataNotPresentException(productName);
 		}
 
-		SearchMetadata searchMetadata = new SearchMetadata();
+		final SearchMetadata searchMetadata = new SearchMetadata();
 
 		if (source.containsKey("startTime")) {
 			try {
