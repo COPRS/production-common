@@ -61,7 +61,7 @@ public class TriggerConfig {
 	}
 		
 	@Bean
-	private final ProductTypeConsumptionHandler newProductTypeConsumptionHandler() {		
+	public ProductTypeConsumptionHandler newProductTypeConsumptionHandler() {		
 		final ProductTypeConsumptionHandler res = CONSUMPTION_HANDLER_FOR_CATEGORY.get(processSettings.getCategory());
 		
 		if (res == null) {
