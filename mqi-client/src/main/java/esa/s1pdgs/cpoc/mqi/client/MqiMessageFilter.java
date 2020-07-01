@@ -2,13 +2,19 @@ package esa.s1pdgs.cpoc.mqi.client;
 
 import java.util.regex.Pattern;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
 import esa.s1pdgs.cpoc.common.ProductFamily;
 import esa.s1pdgs.cpoc.mqi.model.queue.AbstractMessage;
 
 public class MqiMessageFilter implements MessageFilter {
 
+	private static final Logger LOG = LogManager.getLogger(MqiMessageFilter.class);
+
 	private ProductFamily productFamily;
-	private String matchRegex;
+	private String allowRegex;
+	private String disallowRegex;
 
 	public ProductFamily getProductFamily() {
 		return productFamily;
@@ -18,18 +24,66 @@ public class MqiMessageFilter implements MessageFilter {
 		this.productFamily = productFamily;
 	}
 
-	public String getMatchRegex() {
-		return matchRegex;
+	public String getAllowRegex() {
+		return allowRegex;
 	}
 
-	public void setMatchRegex(final String matchRegex) {
-		this.matchRegex = matchRegex;
+	public void setAllowRegex(final String allowRegex) {
+		this.allowRegex = allowRegex;
+	}
+
+	public String getDisallowRegex() {
+		return disallowRegex;
+	}
+
+	public void setDisallowRegex(final String disallowRegex) {
+		this.disallowRegex = disallowRegex;
 	}
 
 	@Override
 	public final boolean accept(final AbstractMessage message) {
-		// should only return true, if the product shall NOT be handled.
-		return (productFamily == message.getProductFamily()) && 
-				Pattern.matches(matchRegex, message.getKeyObjectStorage());
+
+		if (productFamily == null) {
+			LOG.warn("productFamily not set, filter is disabled");
+			return true;
+		}
+
+		if (productFamily != message.getProductFamily()) {
+			return true;
+		}
+
+		if (allowRegex == null && disallowRegex == null) {
+			LOG.warn("allowRegex and disallowRegex not set, filter is disabled");
+			return true;
+		}
+
+		if (allowRegex == null) {
+			if (Pattern.matches(disallowRegex, message.getKeyObjectStorage())) {
+				LOG.debug("message not accepted, {} matches disallowRegex: {}", message.getKeyObjectStorage(), disallowRegex);
+				return false;
+			} else {
+				LOG.debug("message accepted, {} not matches disallowRegex: {}", message.getKeyObjectStorage(), disallowRegex);
+				return true;
+			}
+		}
+
+		if (disallowRegex == null) {
+			if (Pattern.matches(allowRegex, message.getKeyObjectStorage())) {
+				LOG.debug("message accepted, {} matches allowRegex: {}", message.getKeyObjectStorage(), allowRegex);
+				return true;
+			} else {
+				LOG.debug("message not accepted, {} not matches allowRegex: {}", message.getKeyObjectStorage(), allowRegex);
+				return false;
+			}
+		}
+
+		if (Pattern.matches(allowRegex, message.getKeyObjectStorage())
+				&& !Pattern.matches(disallowRegex, message.getKeyObjectStorage())) {
+			LOG.debug("message accepted, {} matches allowRegex: {} and not matches disallowRegex: {}", message.getKeyObjectStorage(), allowRegex, disallowRegex);
+			return true;
+		} else {
+			LOG.debug("message not accepted, {} not matches allowRegex: {} or matches disallowRegex: {}", message.getKeyObjectStorage(), allowRegex, disallowRegex);
+			return false;
+		}
 	}
 }

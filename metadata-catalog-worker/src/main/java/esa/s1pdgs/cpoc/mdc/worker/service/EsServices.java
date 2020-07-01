@@ -67,7 +67,7 @@ import esa.s1pdgs.cpoc.metadata.model.SearchMetadata;
 public class EsServices {
 
 	private static final String REQUIRED_INSTRUMENT_ID_PATTERN = "(aux_pp1|aux_pp2|aux_cal|aux_ins)";
-	private static final String REQUIRED_SATELLITE_ID_PATTERN = "(aux_)";
+	static final String REQUIRED_SATELLITE_ID_PATTERN = "(aux_.*)";
 
 	/**
 	 * Logger

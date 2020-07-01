@@ -475,26 +475,6 @@ public class EsServicesTest{
 			fail("Exception occurred: " + e.getMessage());
 		}
 	}
-//	
-//	@Test(expected = Exception.class)
-//	public void getEdrsSessionNoHitTest() throws Exception {
-//		BytesReference source = new BytesArray("{\"productName\":\"name\",\"url\""
-//		        + ":\"url\",\"validityStartTime\":\"validityStartTime\",\"validityStopTime\":"
-//		        + "\"validityStopTime\", \"productType\": \"product_type\"}");
-//		GetResult getResult = new GetResult("index", "type", "id", SequenceNumbers.UNASSIGNED_SEQ_NO, SequenceNumbers.UNASSIGNED_PRIMARY_TERM, 0L, false, source, null);
-//		GetResponse getResponse = new GetResponse(getResult);
-//		
-//		//Mocking the get Request
-//		this.mockGetRequest(getResponse);
-//		
-//		esServices.getEdrsSessionFor("type", "name");
-//	}
-//	
-//	@Test(expected = Exception.class)
-//	public void getEdrsSessionIOExceptionTest() throws Exception {
-//		this.mockGetRequestThrowIOException();
-//		esServices.getEdrsSession("type", "name");
-//	}
 	
 	@Test
 	public void getL0SliceTest() throws IOException {
@@ -719,6 +699,13 @@ public class EsServicesTest{
 	}
 	
 	@Test
+	public final void testRegex() {
+		assertEquals(true, "aux_ece".matches(EsServices.REQUIRED_SATELLITE_ID_PATTERN));
+		assertEquals(true, "aux_ins".matches(EsServices.REQUIRED_SATELLITE_ID_PATTERN));
+		assertEquals(false, "foo_bar".matches(EsServices.REQUIRED_SATELLITE_ID_PATTERN));
+	}
+	
+	@Test
 	public void getL0AcnMalformedTest() throws Exception {
 		//MISSING productName
 		BytesReference source = new BytesArray("{\"url\":\"url\",\"startTime\":\"2000-01-01T00:00:00.000000Z\","
@@ -868,172 +855,6 @@ public class EsServicesTest{
 		final MetadataMalformedException cause = (MetadataMalformedException) e.getCause();		
 		assertEquals("Raised exception shall concern name",element, cause.getMissingField());		
 	}
-//
-//	@Test
-//    public void getLevelSegmentTest() throws IOException {
-//        //Expected result
-//        final LevelSegmentMetadata expectedResult = new LevelSegmentMetadata();
-//        expectedResult.setProductName("name");
-//        expectedResult.setProductType("product_type");
-//        expectedResult.setKeyObjectStorage("url");
-//        expectedResult.setValidityStart("2000-01-01T00:00:00.000000Z");
-//        expectedResult.setValidityStop("2001-01-01T00:00:00.000000Z");
-//        expectedResult.setConsolidation("FULL");
-//        expectedResult.setProductSensingConsolidation("NOT_DEFINED");
-//        expectedResult.setPolarisation("SV");
-//        expectedResult.setDatatakeId("datatakeId");
-//        
-//        //Response 
-//        final BytesReference source = new BytesArray("{\"productName\":\"name\",\"url\""
-//                + ":\"url\",\"startTime\":\"2000-01-01T00:00:00.000000Z\",\"stopTime\":"
-//                + "\"2001-01-01T00:00:00.000000Z\", \"productConsolidation\":\"FULL\", "
-//                + "\"productSensingConsolidation\":\"NOT_DEFINED\", \"polarisation\":\"SV\", "
-//                + "\"dataTakeId\":\"datatakeId\","
-//                + "\"productType\": \"product_type\"}");
-//        final GetResult getResult = new GetResult("index", "l0_segment", "id", SequenceNumbers.UNASSIGNED_SEQ_NO, SequenceNumbers.UNASSIGNED_PRIMARY_TERM, 0L, true, source, null);
-//        final GetResponse getResponse = new GetResponse(getResult);
-//        
-//        //Mocking the get Request
-//        this.mockGetRequest(getResponse);
-//        
-//        try {
-//            final LevelSegmentMetadata result = esServices.getLevelSegment(ProductFamily.L0_SEGMENT, "name");
-//            assertEquals("Search metadata are not equals", expectedResult, result);
-//        } catch (final Exception e) {
-//            fail("Exception occurred: " + e.getMessage());
-//        }
-//    }
-//    
-//    @Test(expected = MetadataNotPresentException.class)
-//    public void getLevelSegmentNoHitTest() throws Exception {
-//        final BytesReference source = new BytesArray("{\"productName\":\"name\",\"url\""
-//                + ":\"url\",\"startTime\":\"2000-01-01T00:00:00.000000Z\",\"stopTime\":"
-//                + "\"2001-01-01T00:00:00.000000Z\", \"productConsolidation\":\"FULL\", \"polarisation\":\"SV\", "
-//                + "\"dataTakeId\":\"datatakeId\","
-//                + "\"productType\": \"product_type\"}");
-//        final GetResult getResult = new GetResult("index", "l0_segment", "id", SequenceNumbers.UNASSIGNED_SEQ_NO, SequenceNumbers.UNASSIGNED_PRIMARY_TERM, 0L, false, source, null);
-//        final GetResponse getResponse = new GetResponse(getResult);
-//        
-//        //Mocking the get Request
-//        this.mockGetRequest(getResponse);
-//        
-//        esServices.getLevelSegment(ProductFamily.L0_SEGMENT, "name");
-//    }
-//    
-//    @Test
-//    public void getLevelSegmentMalformedTest() throws Exception {
-//        //MISSING URL
-//        BytesReference source = new BytesArray("{\"productName\":\"name\","
-//                + "\"startTime\":\"2000-01-01T00:00:00.000000Z\",\"stopTime\":"
-//                + "\"2001-01-01T00:00:00.000000Z\", \"productConsolidation\":\"FULL\", \"polarisation\":\"SV\", "
-//                + "\"dataTakeId\":\"datatakeId\","
-//                + "\"productType\": \"product_type\"}");
-//        GetResult getResult = new GetResult("index", "type", "id", SequenceNumbers.UNASSIGNED_SEQ_NO, SequenceNumbers.UNASSIGNED_PRIMARY_TERM, 0L, true, source, null);
-//        GetResponse getResponse = new GetResponse(getResult);
-//        this.mockGetRequest(getResponse);
-//        try {
-//            esServices.getLevelSegment(ProductFamily.L0_SEGMENT, "name");
-//            fail("An exception should occur");
-//        } catch (final Exception e) {
-//            assertEquals("Raised exception shall concern name",
-//                    "url", ((MetadataMalformedException) e).getMissingField());
-//        }
-//        //MISSING startTime
-//        source = new BytesArray("{\"productName\":\"name\",\"url\""
-//                + ":\"url\",\"stopTime\":"
-//                + "\"2001-01-01T00:00:00.000000Z\", \"productConsolidation\":\"FULL\", \"polarisation\":\"SV\", "
-//                + "\"dataTakeId\":\"datatakeId\","
-//                + "\"productType\": \"product_type\"}");
-//        getResult = new GetResult("index", "type", "id", SequenceNumbers.UNASSIGNED_SEQ_NO, SequenceNumbers.UNASSIGNED_PRIMARY_TERM, 0L, true, source, null);
-//        getResponse = new GetResponse(getResult);
-//        this.mockGetRequest(getResponse);
-//        try {
-//            esServices.getLevelSegment(ProductFamily.L0_SEGMENT, "name");
-//            fail("An exception should occur");
-//        } catch (final Exception e) {
-//            assertEquals("Raised exception shall concern name",
-//                    "startTime", ((MetadataMalformedException) e).getMissingField());
-//        }
-//        //MISSING stopTime
-//        source = new BytesArray("{\"productName\":\"name\",\"url\""
-//                + ":\"url\",\"startTime\":\"2000-01-01T00:00:00.000000Z\","
-//                + "\"productConsolidation\":\"FULL\", \"polarisation\":\"SV\", "
-//                + "\"dataTakeId\":\"datatakeId\","
-//                + "\"productType\": \"product_type\"}");
-//        getResult = new GetResult("index", "type", "id", SequenceNumbers.UNASSIGNED_SEQ_NO, SequenceNumbers.UNASSIGNED_PRIMARY_TERM, 0L, true, source, null);
-//        getResponse = new GetResponse(getResult);
-//        this.mockGetRequest(getResponse);
-//        try {
-//            esServices.getLevelSegment(ProductFamily.L0_SEGMENT, "name");
-//            fail("An exception should occur");
-//        } catch (final Exception e) {
-//            assertEquals("Raised exception shall concern name",
-//                    "stopTime", ((MetadataMalformedException) e).getMissingField());
-//        }
-//        //MISSING instrumentConfigurationId
-//        source = new BytesArray("{\"productName\":\"name\",\"url\""
-//                + ":\"url\",\"startTime\":\"2000-01-01T00:00:00.000000Z\",\"stopTime\":"
-//                + "\"2001-01-01T00:00:00.000000Z\", \"polarisation\":\"SV\", "
-//                + "\"dataTakeId\":\"datatakeId\","
-//                + "\"productType\": \"product_type\"}");
-//        getResult = new GetResult("index", "type", "id", SequenceNumbers.UNASSIGNED_SEQ_NO, SequenceNumbers.UNASSIGNED_PRIMARY_TERM, 0L, true, source, null);
-//        getResponse = new GetResponse(getResult);
-//        this.mockGetRequest(getResponse);
-//        try {
-//            esServices.getLevelSegment(ProductFamily.L0_SEGMENT, "name");
-//            fail("An exception should occur");
-//        } catch (final Exception e) {
-//            assertEquals("Raised exception shall concern name",
-//                    "productConsolidation", ((MetadataMalformedException) e).getMissingField());
-//        }
-//        //MISSING sliceNumber
-//        source = new BytesArray("{\"productName\":\"name\",\"url\""
-//                + ":\"url\",\"startTime\":\"2000-01-01T00:00:00.000000Z\",\"stopTime\":"
-//                + "\"2001-01-01T00:00:00.000000Z\", \"productConsolidation\":\"FULL\", "
-//                + "\"dataTakeId\":\"datatakeId\","
-//                + "\"productType\": \"product_type\"}");
-//        getResult = new GetResult("index", "type", "id", SequenceNumbers.UNASSIGNED_SEQ_NO, SequenceNumbers.UNASSIGNED_PRIMARY_TERM, 0L, true, source, null);
-//        getResponse = new GetResponse(getResult);
-//        this.mockGetRequest(getResponse);
-//        try {
-//            esServices.getLevelSegment(ProductFamily.L0_SEGMENT, "name");
-//            fail("An exception should occur");
-//        } catch (final Exception e) {
-//            assertEquals("Raised exception shall concern name",
-//                    "polarisation", ((MetadataMalformedException) e).getMissingField());
-//        }
-//        //MISSING dataTakeId
-//        source = new BytesArray("{\"productName\":\"name\",\"url\""
-//                + ":\"url\",\"startTime\":\"2000-01-01T00:00:00.000000Z\",\"stopTime\":"
-//                + "\"2001-01-01T00:00:00.000000Z\", \"productConsolidation\":\"FULL\", \"polarisation\":\"SV\", "
-//                + "\"productType\": \"product_type\"}");
-//        getResult = new GetResult("index", "type", "id", SequenceNumbers.UNASSIGNED_SEQ_NO, SequenceNumbers.UNASSIGNED_PRIMARY_TERM, 0L, true, source, null);
-//        getResponse = new GetResponse(getResult);
-//        this.mockGetRequest(getResponse);
-//        try {
-//            esServices.getLevelSegment(ProductFamily.L0_SEGMENT, "name");
-//            fail("An exception should occur");
-//        } catch (final Exception e) {
-//            assertEquals("Raised exception shall concern name",
-//                    "dataTakeId", ((MetadataMalformedException) e).getMissingField());
-//        }
-//        //MISSING product type
-//        source = new BytesArray("{\"productName\":\"name\",\"url\""
-//                + ":\"url\",\"startTime\":\"2000-01-01T00:00:00.000000Z\",\"stopTime\":"
-//                + "\"2001-01-01T00:00:00.000000Z\", \"productConsolidation\":\"FULL\", \"polarisation\":\"SV\", "
-//                + "\"dataTakeId\":\"datatakeId\"}");
-//        getResult = new GetResult("index", "type", "id", SequenceNumbers.UNASSIGNED_SEQ_NO, SequenceNumbers.UNASSIGNED_PRIMARY_TERM, 0L, true, source, null);
-//        getResponse = new GetResponse(getResult);
-//        this.mockGetRequest(getResponse);
-//        try {
-//            esServices.getLevelSegment(ProductFamily.L0_SEGMENT, "name");
-//            fail("An exception should occur");
-//        } catch (final Exception e) {
-//            assertEquals("Raised exception shall concern name",
-//                    "productType", ((MetadataMalformedException) e).getMissingField());
-//        }
-//        
-//    }
     
     @Test
     public final void getSeaCoverageTest_OnIntersection_ShallReturnZero() throws Exception {
