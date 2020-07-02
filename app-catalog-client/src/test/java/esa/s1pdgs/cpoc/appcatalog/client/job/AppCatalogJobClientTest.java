@@ -139,11 +139,10 @@ public class AppCatalogJobClientTest {
     public void testFindJobInStateGeneratingFor() throws Exception {
     	runSearchTest(
     			() -> {
-    			    client.findJobInStateGeneratingForPod("task-table", "myPod");
+    			    client.findJobInStateGenerating("task-table");
     		        return null;
     			}, 
-    			"pod=myPod"
-    			+ "&state=GENERATING"
+    			"state=GENERATING"
     			+ "&generation.state[neq]=SENT"
     			+ "&generation.taskTable=task-table"
     			+ "&[orderByAsc]=generation.lastUpdateDate"

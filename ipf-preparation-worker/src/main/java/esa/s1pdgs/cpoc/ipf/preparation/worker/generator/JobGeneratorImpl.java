@@ -121,10 +121,7 @@ public final class JobGeneratorImpl implements JobGenerator {
 
 	
 	private final AppDataJob next(final String tasktableName) throws AbstractCodedException {
-		final List<AppDataJob> jobs = appCatClient.findJobInStateGeneratingForPod(
-				tasktableName, 
-				settings.getHostname()
-		);
+		final List<AppDataJob> jobs = appCatClient.findJobInStateGenerating(tasktableName);
 		
 		if (jobs == null || jobs.isEmpty()) {
 			LOGGER.trace("==  no job found in AppCatalog for taskTableXmlName {}", tasktableName);

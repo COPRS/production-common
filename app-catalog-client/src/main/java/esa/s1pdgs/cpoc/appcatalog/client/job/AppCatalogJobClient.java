@@ -238,10 +238,9 @@ public class AppCatalogJobClient {
      * @return
      * @throws AbstractCodedException
      */
-    public List<AppDataJob> findJobInStateGeneratingForPod(final String taskTable, final String pod) 
+    public List<AppDataJob> findJobInStateGenerating(final String taskTable) 
     		throws AbstractCodedException {       
         return search(mapOf(
-            	"pod", pod,
                 "state", AppDataJobState.GENERATING.name(),
                 "generation.state[neq]", AppDataJobGenerationState.SENT.name(),
                 "generation.taskTable", taskTable,
