@@ -130,7 +130,7 @@ public class JobProcessorTest extends MockPropertiesTest {
         }
         mockWorkingdirProperties(workingDir.toPath());
         processor = new JobProcessor(appStatus, properties, devProperties,
-                obsClient, procuderFactory, mqiService, errorAppender, mqiStatusService, 0L, 10L, null);
+                obsClient, procuderFactory, mqiService, Collections.EMPTY_LIST, errorAppender, mqiStatusService, 0L, 10L, null);
         procExecutorSrv = Executors.newSingleThreadExecutor();
         procCompletionSrv = new ExecutorCompletionService<>(procExecutorSrv);
     }

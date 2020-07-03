@@ -52,6 +52,7 @@ import esa.s1pdgs.cpoc.ipf.preparation.worker.type.LevelProduct;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.type.ProductTypeAdapter;
 import esa.s1pdgs.cpoc.metadata.client.MetadataClient;
 import esa.s1pdgs.cpoc.metadata.client.SearchMetadataQuery;
+import esa.s1pdgs.cpoc.mqi.client.MessageFilter;
 import esa.s1pdgs.cpoc.mqi.client.MqiClient;
 import esa.s1pdgs.cpoc.mqi.client.MqiConsumer;
 import esa.s1pdgs.cpoc.mqi.client.MqiListener;
@@ -64,6 +65,7 @@ public class IpfPreparationWorkerConfiguration {
 	private final AppCatalogJobClient appCatClient;
     private final AppStatusImpl appStatus;
     private final MqiClient mqiClient;
+    private final List<MessageFilter> messageFilter;
     private final IpfPreparationWorkerSettings settings;
     private final ErrorRepoAppender errorAppender;
     private final ProcessConfiguration processConfiguration;
@@ -80,6 +82,7 @@ public class IpfPreparationWorkerConfiguration {
 	public IpfPreparationWorkerConfiguration(
 			final AppStatusImpl appStatus, 
 			final MqiClient mqiClient,
+			final List<MessageFilter> messageFilter,
 			final IpfPreparationWorkerSettings settings, 
 			final ErrorRepoAppender errorAppender,
 			final ProcessConfiguration processConfiguration,
@@ -95,6 +98,7 @@ public class IpfPreparationWorkerConfiguration {
 	) {
 		this.appStatus = appStatus;
 		this.mqiClient = mqiClient;
+		this.messageFilter = messageFilter;
 		this.settings = settings;
 		this.errorAppender = errorAppender;
 		this.processConfiguration = processConfiguration;
@@ -281,6 +285,7 @@ public class IpfPreparationWorkerConfiguration {
 				mqiClient, 
 				category, 
 				listener,
+				messageFilter,
 				config.getFixedDelayMs(),
 				config.getInitDelayPollMs(),
 				appStatus

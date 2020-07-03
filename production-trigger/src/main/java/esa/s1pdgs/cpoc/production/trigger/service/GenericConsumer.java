@@ -1,6 +1,7 @@
 package esa.s1pdgs.cpoc.production.trigger.service;
 
 import java.util.Date;
+import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -23,6 +24,7 @@ import esa.s1pdgs.cpoc.errorrepo.ErrorRepoAppender;
 import esa.s1pdgs.cpoc.errorrepo.model.rest.FailedProcessingDto;
 import esa.s1pdgs.cpoc.metadata.client.MetadataClient;
 import esa.s1pdgs.cpoc.mqi.client.GenericMqiClient;
+import esa.s1pdgs.cpoc.mqi.client.MessageFilter;
 import esa.s1pdgs.cpoc.mqi.client.MqiConsumer;
 import esa.s1pdgs.cpoc.mqi.client.MqiListener;
 import esa.s1pdgs.cpoc.mqi.model.queue.CatalogEvent;
@@ -46,6 +48,7 @@ public class GenericConsumer implements MqiListener<CatalogEvent> {
     private final ProcessSettings processSettings;
     private final AppCatAdapter appCat;
     private final GenericMqiClient mqiClient;
+    private final List<MessageFilter> messageFilter;
     private final AppStatus appStatus;    
     private final ErrorRepoAppender errorRepoAppender;    
     private final Pattern blackList;    
@@ -56,6 +59,7 @@ public class GenericConsumer implements MqiListener<CatalogEvent> {
     public GenericConsumer(
             final ProcessSettings processSettings,
             final GenericMqiClient mqiService,
+            final List<MessageFilter> messageFilter,
             final AppCatAdapter appCat,
             final AppStatus appStatus,
             final ErrorRepoAppender errorRepoAppender,
@@ -64,6 +68,7 @@ public class GenericConsumer implements MqiListener<CatalogEvent> {
     ) {
         this.processSettings = processSettings;
         this.mqiClient = mqiService;
+        this.messageFilter = messageFilter;
         this.appCat = appCat;
         this.appStatus = appStatus;
         this.errorRepoAppender = errorRepoAppender;
@@ -83,7 +88,8 @@ public class GenericConsumer implements MqiListener<CatalogEvent> {
 			service.execute(new MqiConsumer<CatalogEvent>(
 	    			mqiClient, 
 	    			ProductCategory.CATALOG_EVENT, 
-	    			this, 
+	    			this,
+	    			messageFilter,
 	    			processSettings.getFixedDelayMs(),
 					processSettings.getInitialDelayMs(), 
 					appStatus

@@ -32,6 +32,7 @@ import esa.s1pdgs.cpoc.ingestion.worker.product.Product;
 import esa.s1pdgs.cpoc.ingestion.worker.product.ProductService;
 import esa.s1pdgs.cpoc.ingestion.worker.product.report.IngestionWorkerReportingOutput;
 import esa.s1pdgs.cpoc.mqi.client.GenericMqiClient;
+import esa.s1pdgs.cpoc.mqi.client.MessageFilter;
 import esa.s1pdgs.cpoc.mqi.client.MqiConsumer;
 import esa.s1pdgs.cpoc.mqi.client.MqiListener;
 import esa.s1pdgs.cpoc.mqi.model.queue.IngestionEvent;
@@ -49,6 +50,7 @@ public class IngestionWorkerService implements MqiListener<IngestionJob> {
 	static final Logger LOG = LogManager.getLogger(IngestionWorkerService.class);
 
 	private final GenericMqiClient mqiClient;
+	private final List<MessageFilter> messageFilter;
 	private final ErrorRepoAppender errorRepoAppender;
 	private final IngestionWorkerServiceConfigurationProperties properties;
 	private final ProductService productService;
@@ -58,6 +60,7 @@ public class IngestionWorkerService implements MqiListener<IngestionJob> {
 	@Autowired
 	public IngestionWorkerService(
 			final GenericMqiClient mqiClient, 
+			final List<MessageFilter> messageFilter,
 			final ErrorRepoAppender errorRepoAppender,
 			final IngestionWorkerServiceConfigurationProperties properties, 
 			final ProductService productService,
@@ -65,6 +68,7 @@ public class IngestionWorkerService implements MqiListener<IngestionJob> {
 			final InboxAdapterManager inboxAdapterManager
 	) {
 		this.mqiClient = mqiClient;
+		this.messageFilter = messageFilter;
 		this.errorRepoAppender = errorRepoAppender;
 		this.properties = properties;
 		this.productService = productService;
@@ -80,6 +84,7 @@ public class IngestionWorkerService implements MqiListener<IngestionJob> {
 					mqiClient,
 					ProductCategory.INGESTION, 
 					this,
+					messageFilter,
 					properties.getPollingIntervalMs(),
 					0L,
 					appStatus

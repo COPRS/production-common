@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -22,6 +23,7 @@ import esa.s1pdgs.cpoc.common.ProductCategory;
 import esa.s1pdgs.cpoc.common.utils.DateUtils;
 import esa.s1pdgs.cpoc.common.utils.LogUtils;
 import esa.s1pdgs.cpoc.mqi.client.GenericMqiClient;
+import esa.s1pdgs.cpoc.mqi.client.MessageFilter;
 import esa.s1pdgs.cpoc.mqi.client.MqiConsumer;
 import esa.s1pdgs.cpoc.mqi.client.MqiListener;
 import esa.s1pdgs.cpoc.mqi.model.queue.ProductionEvent;
@@ -35,6 +37,10 @@ public class QueueWatcherService implements MqiListener<ProductionEvent> {
 
 	@Autowired
 	private GenericMqiClient mqiClient;
+	
+	@Autowired
+	private List<MessageFilter> messageFilter;
+	
 
 	@Autowired
 	private ApplicationProperties properties;
@@ -145,6 +151,7 @@ public class QueueWatcherService implements MqiListener<ProductionEvent> {
 				mqiClient, 
 				category, 
 				this,
+				messageFilter,
 				interval, 
 				delay, 
 				appStatus

@@ -1,6 +1,7 @@
 package esa.s1pdgs.cpoc.datalifecycle.worker.service;
 
 import java.util.Collections;
+import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -15,6 +16,7 @@ import esa.s1pdgs.cpoc.datalifecycle.worker.config.DataLifecycleWorkerConfigurat
 import esa.s1pdgs.cpoc.datalifecycle.worker.config.ProcessConfiguration;
 import esa.s1pdgs.cpoc.datalifecycle.worker.es.ElasticsearchDAO;
 import esa.s1pdgs.cpoc.errorrepo.ErrorRepoAppender;
+import esa.s1pdgs.cpoc.mqi.client.MessageFilter;
 import esa.s1pdgs.cpoc.mqi.client.MqiClient;
 import esa.s1pdgs.cpoc.mqi.client.MqiConsumer;
 import esa.s1pdgs.cpoc.mqi.model.queue.EvictionManagementJob;
@@ -23,6 +25,7 @@ import esa.s1pdgs.cpoc.obs_sdk.ObsClient;
 @Service
 public class DataLifecycleWorkerService {
     private final MqiClient mqiClient;
+    private final List<MessageFilter> messageFilter;
     private final DataLifecycleWorkerConfigurationProperties configurationProperties;
     private final AppStatus appStatus;
     private final ErrorRepoAppender errorRepoAppender;
@@ -33,6 +36,7 @@ public class DataLifecycleWorkerService {
     @Autowired
     public DataLifecycleWorkerService(
     		final MqiClient mqiClient, 
+    		final List<MessageFilter> messageFilter,
     		final DataLifecycleWorkerConfigurationProperties configurationProperties, 
     		final AppStatus appStatus, 
     		final ErrorRepoAppender errorRepoAppender,
@@ -41,6 +45,7 @@ public class DataLifecycleWorkerService {
     		final ElasticsearchDAO elasticSearchDAO
     ) {
         this.mqiClient = mqiClient;
+        this.messageFilter = messageFilter;
         this.configurationProperties = configurationProperties;
         this.appStatus = appStatus;
         this.errorRepoAppender = errorRepoAppender;
@@ -58,7 +63,7 @@ public class DataLifecycleWorkerService {
                 mqiClient,
                 ProductCategory.EVICTION_MANAGEMENT_JOBS,
                 new DataLifecycleWorkerListener(errorRepoAppender, processConfiguration, obsClient, elasticSearchDAO),
-                Collections.emptyList(),
+                messageFilter,
                 evictionEventCategoryConfig.getFixedDelayMs(),
                 evictionEventCategoryConfig.getInitDelayPolMs(),
                 appStatus);

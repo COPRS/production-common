@@ -46,6 +46,7 @@ import esa.s1pdgs.cpoc.ipf.execution.worker.job.process.PoolExecutorCallable;
 import esa.s1pdgs.cpoc.ipf.execution.worker.service.report.JobReportingInput;
 import esa.s1pdgs.cpoc.metadata.client.MetadataClient;
 import esa.s1pdgs.cpoc.mqi.client.GenericMqiClient;
+import esa.s1pdgs.cpoc.mqi.client.MessageFilter;
 import esa.s1pdgs.cpoc.mqi.client.MqiClient;
 import esa.s1pdgs.cpoc.mqi.client.MqiConsumer;
 import esa.s1pdgs.cpoc.mqi.client.MqiListener;
@@ -110,6 +111,7 @@ public class JobProcessor implements MqiListener<IpfExecutionJob> {
 	 */
 	private final MqiClient mqiClient;
 
+	private final List<MessageFilter> messageFilter;
 	/**
 	 * MQI service for stopping the MQI
 	 */
@@ -143,6 +145,7 @@ public class JobProcessor implements MqiListener<IpfExecutionJob> {
 			final ObsClient obsClient, 
 			final OutputProcuderFactory procuderFactory,
 			final GenericMqiClient mqiClient, 
+			final List<MessageFilter> messageFilter,
 			final ErrorRepoAppender errorAppender,
 			final StatusService mqiStatusService,
 			@Value("${process.init-delay-poll-ms}") final long initDelayPollMs,
@@ -155,6 +158,7 @@ public class JobProcessor implements MqiListener<IpfExecutionJob> {
 		this.obsClient = obsClient;
 		this.procuderFactory = procuderFactory;
 		this.mqiClient = mqiClient;
+		this.messageFilter = messageFilter;
 		this.mqiStatusService = mqiStatusService;
 		this.errorAppender = errorAppender;
 		this.initDelayPollMs = initDelayPollMs;
@@ -170,7 +174,8 @@ public class JobProcessor implements MqiListener<IpfExecutionJob> {
 			service.execute(new MqiConsumer<IpfExecutionJob>(
 					mqiClient,
 					ProductCategory.LEVEL_JOBS, 
-					this, 
+					this,
+					messageFilter,
 					pollingIntervalMs,
 					initDelayPollMs,
 					appStatus

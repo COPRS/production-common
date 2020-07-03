@@ -2,6 +2,7 @@ package esa.s1pdgs.cpoc.mdc.worker.service;
 
 import java.time.LocalDateTime;
 import java.util.Date;
+import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.ExecutorService;
@@ -30,6 +31,7 @@ import esa.s1pdgs.cpoc.mdc.worker.extraction.MetadataExtractor;
 import esa.s1pdgs.cpoc.mdc.worker.extraction.MetadataExtractorFactory;
 import esa.s1pdgs.cpoc.mdc.worker.extraction.report.SegmentReportingOutput;
 import esa.s1pdgs.cpoc.mdc.worker.status.AppStatusImpl;
+import esa.s1pdgs.cpoc.mqi.client.MessageFilter;
 import esa.s1pdgs.cpoc.mqi.client.MqiClient;
 import esa.s1pdgs.cpoc.mqi.client.MqiConsumer;
 import esa.s1pdgs.cpoc.mqi.client.MqiListener;
@@ -51,6 +53,7 @@ public class MetadataExtractionService implements MqiListener<CatalogJob> {
     private final ProcessConfiguration processConfiguration;
     private final EsServices esServices;
     private final MqiClient mqiClient;
+    private final List<MessageFilter> messageFilter;
     private final MdcWorkerConfigurationProperties properties;
     private final MetadataExtractorFactory extractorFactory;
     private final TriggerConfigurationProperties triggerConfiguration;
@@ -62,6 +65,7 @@ public class MetadataExtractionService implements MqiListener<CatalogJob> {
 			final ProcessConfiguration processConfiguration, 
 			final EsServices esServices,
 			final MqiClient mqiClient,
+			final List<MessageFilter> messageFilter,
 			final MdcWorkerConfigurationProperties properties,
 			final MetadataExtractorFactory extractorFactory,
 			final TriggerConfigurationProperties triggerConfiguration
@@ -71,6 +75,7 @@ public class MetadataExtractionService implements MqiListener<CatalogJob> {
 		this.processConfiguration = processConfiguration;
 		this.esServices = esServices;
 		this.mqiClient = mqiClient;
+		this.messageFilter = messageFilter;
 		this.properties = properties;
 		this.extractorFactory = extractorFactory;
 		this.triggerConfiguration = triggerConfiguration;
@@ -200,6 +205,7 @@ public class MetadataExtractionService implements MqiListener<CatalogJob> {
 				mqiClient, 
 				category, 
 				this,
+				messageFilter,
 				config.getFixedDelayMs(),
 				config.getInitDelayPollMs(),
 				appStatus
