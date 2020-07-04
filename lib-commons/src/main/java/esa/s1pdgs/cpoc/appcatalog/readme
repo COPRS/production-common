@@ -1,4 +1,0 @@
-For this version,  the object used for database is the same as the ones used for the rest API
-
-
-https://docs.spring.io/spring-data/mongodb/docs/1.2.0.RELEASE/reference/html/mongo.repositories.html

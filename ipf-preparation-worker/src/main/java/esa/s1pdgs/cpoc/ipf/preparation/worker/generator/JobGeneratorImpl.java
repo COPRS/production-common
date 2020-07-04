@@ -9,14 +9,12 @@ import java.util.stream.Collectors;
 
 import esa.s1pdgs.cpoc.appcatalog.AppDataJob;
 import esa.s1pdgs.cpoc.appcatalog.AppDataJobGeneration;
-import esa.s1pdgs.cpoc.appcatalog.AppDataJobGenerationState;
-import esa.s1pdgs.cpoc.appcatalog.AppDataJobState;
-import esa.s1pdgs.cpoc.appcatalog.client.job.AppCatalogJobClient;
 import esa.s1pdgs.cpoc.common.errors.AbstractCodedException;
 import esa.s1pdgs.cpoc.common.utils.Exceptions;
 import esa.s1pdgs.cpoc.common.utils.LogUtils;
 import esa.s1pdgs.cpoc.errorrepo.ErrorRepoAppender;
 import esa.s1pdgs.cpoc.errorrepo.model.rest.FailedProcessingDto;
+import esa.s1pdgs.cpoc.ipf.preparation.worker.appcat.AppCatAdapter;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.config.ProcessSettings;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.generator.state.JobGenerationStateTransitions;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.model.JobGen;
@@ -31,8 +29,7 @@ import esa.s1pdgs.cpoc.mqi.model.rest.GenericMessageDto;
 public final class JobGeneratorImpl implements JobGenerator {
 	private final TasktableAdapter tasktableAdapter;
 	private final ProductTypeAdapter typeAdapter;	
-    private final AppCatalogJobClient appCatClient;
-    private final GracePeriodHandler gracePeriodHandler;
+    private final AppCatAdapter appCat;
     private final ProcessSettings settings;
     private final ErrorRepoAppender errorAppender;
     private final Publisher publisher;
@@ -43,8 +40,7 @@ public final class JobGeneratorImpl implements JobGenerator {
 	public JobGeneratorImpl(
 			final TasktableAdapter tasktableAdapter,
 			final ProductTypeAdapter typeAdapter, 
-			final AppCatalogJobClient appCatClient,
-			final GracePeriodHandler gracePeriodHandler, 
+			final AppCatAdapter appCat,
 			final ProcessSettings settings,
 			final ErrorRepoAppender errorAppender,
 			final Publisher publisher,
@@ -54,8 +50,7 @@ public final class JobGeneratorImpl implements JobGenerator {
 	) {
 		this.tasktableAdapter = tasktableAdapter;
 		this.typeAdapter = typeAdapter;
-		this.appCatClient = appCatClient;
-		this.gracePeriodHandler = gracePeriodHandler;
+		this.appCat = appCat;
 		this.settings = settings;
 		this.errorAppender = errorAppender;
 		this.publisher = publisher;
@@ -67,7 +62,7 @@ public final class JobGeneratorImpl implements JobGenerator {
 	@Override
 	public final void run() {
 		try {
-			final AppDataJob job = next(tasktableAdapter.file().getName());
+			final AppDataJob job = appCat.next(tasktableAdapter.file().getName());
 			if (job == null) {
 				LOGGER.trace("Found no applicable job to handle");
 				return;
@@ -76,9 +71,8 @@ public final class JobGeneratorImpl implements JobGenerator {
 				LOGGER.debug("Trying job generation for appDataJob {}", job.getId());
 				final AppDataJobGeneration oldGen = new AppDataJobGeneration(job.getGeneration());
 				final JobGen jobGenNew = JobGenerationStateTransitions.ofInputState(oldGen.getState())
-						.performTransitionOn(newJobGenFor(job));
-						
-				update(oldGen, jobGenNew.job());
+						.performTransitionOn(newJobGenFor(job));						
+				appCat.update(oldGen, jobGenNew.job());
 			}
 			catch (final Exception e) {
 				final Throwable error = Exceptions.unwrap(e);
@@ -99,7 +93,7 @@ public final class JobGeneratorImpl implements JobGenerator {
 						LogUtils.toString(error), 
 						messages
 				));
-				terminate(job);	
+				appCat.terminate(job);	
 			}		
 			// TODO check if it makes sense to evaluate the error counter here to limit the amount of
 			// failed transition attempts	
@@ -117,66 +111,6 @@ public final class JobGeneratorImpl implements JobGenerator {
 			final String errorMessage = Exceptions.messageOf(e);
 			LOGGER.error("Omitting job generation attempt due to unexpected error: {}", errorMessage);
 		}
-	}
-
-	
-	private final AppDataJob next(final String tasktableName) throws AbstractCodedException {
-		final List<AppDataJob> jobs = appCatClient.findJobInStateGenerating(tasktableName);
-		
-		if (jobs == null || jobs.isEmpty()) {
-			LOGGER.trace("==  no job found in AppCatalog for taskTableXmlName {}", tasktableName);
-			return null;
-		}		
-		
-		for (final AppDataJob appDataJob : jobs) {			
-			final AppDataJobGeneration jobGen = appDataJob.getGeneration();
-			
-			// check if grace period for state INITIAL and PRIMARY_CHECK is exceeded	
-			if (gracePeriodHandler.isWithinGracePeriod(jobGen)) {
-				LOGGER.trace("Job {} is still in grace period...", appDataJob.getId());
-				continue;
-			}
-			LOGGER.trace("Found job {} to handle", appDataJob);
-			return appDataJob;
-		}
-		// no job found
-		return null;
-	}
-	
-	private final AppDataJob terminate(final AppDataJob job) throws AbstractCodedException {
-    	LOGGER.info("Terminating appDataJob {}", job.getId());
-    	job.setState(AppDataJobState.TERMINATED);  
-    	job.setLastUpdateDate(new Date());
-    	return appCatClient.updateJob(job);
-	}
-	
-	private final AppDataJob update(
-			final AppDataJobGeneration oldGeneration,
-			final AppDataJob job
-	) throws AbstractCodedException {
-		final AppDataJobGeneration patchGen = job.getGeneration();
-        patchGen.setLastUpdateDate(new Date());
-        
-        // is finished?
-        if (patchGen.getState() == AppDataJobGenerationState.SENT) {
-        	LOGGER.info("Finished job generation for appDataJob {}", job.getId());
-        	job.setState(AppDataJobState.TERMINATED);  
-        	job.setLastUpdateDate(new Date());
-        } 
-        // only update the state if it has changed
-        else if (oldGeneration.getState() != patchGen.getState()) {
-        	LOGGER.info("AppDataJob {} changed from {} to {}", job.getId(), oldGeneration.getState(), patchGen.getState());
-        	patchGen.setNbErrors(0);
-        	job.setLastUpdateDate(new Date());
-        }
-        // state did not change? only update modification date and increment error counter
-        else {
-        	LOGGER.info("AppDataJob {} no transition, staying in {}", job.getId(), oldGeneration.getState());
-        	patchGen.setNbErrors(oldGeneration.getNbErrors()+1);   
-        	// don't update jobs last modified date here to enable timeout
-        }
-      	job.setGeneration(patchGen);	
-      	return appCatClient.updateJob(job);
 	}
 
 	private final JobGen newJobGenFor(final AppDataJob job) {

@@ -1,20 +1,15 @@
 package esa.s1pdgs.cpoc.production.trigger.consumption;
 
 import java.util.List;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import esa.s1pdgs.cpoc.appcatalog.AppDataJob;
 import esa.s1pdgs.cpoc.appcatalog.AppDataJobFile;
 import esa.s1pdgs.cpoc.appcatalog.AppDataJobProduct;
-import esa.s1pdgs.cpoc.appcatalog.AppDataJobState;
-import esa.s1pdgs.cpoc.common.errors.AbstractCodedException;
 import esa.s1pdgs.cpoc.mqi.model.queue.CatalogEvent;
 import esa.s1pdgs.cpoc.mqi.model.rest.GenericMessageDto;
-import esa.s1pdgs.cpoc.production.trigger.appcat.AppCatAdapter;
 
 public final class EdrsSessionConsumer implements ProductTypeConsumptionHandler {	
 	private static final String TYPE = "EdrsSession";
@@ -23,22 +18,6 @@ public final class EdrsSessionConsumer implements ProductTypeConsumptionHandler 
     @Override
 	public final String type() {
 		return TYPE;
-	}
-
-	@Override
-	public final boolean isReady(final AppDataJob job, final String productName) {
-		if (job.getState() != AppDataJobState.WAITING) {
-             LOGGER.info("AppDataJob {} ({}) for {} {} already dispatched", job.getId(), 
-            		job.getState(), TYPE, productName);
-			 return false;
-		}
-		return true;
-	}
-    
-	@Override
-	public Optional<AppDataJob> findAssociatedJobFor(final AppCatAdapter appCat, final CatalogEventAdapter catEvent) 
-			throws AbstractCodedException {
-		return appCat.findJobForSession(catEvent.sessionId());
 	}
 	
 	@Override

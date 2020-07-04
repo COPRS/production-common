@@ -17,7 +17,6 @@ import esa.s1pdgs.cpoc.errorrepo.ErrorRepoAppender;
 import esa.s1pdgs.cpoc.metadata.client.MetadataClient;
 import esa.s1pdgs.cpoc.mqi.client.GenericMqiClient;
 import esa.s1pdgs.cpoc.mqi.client.MessageFilter;
-import esa.s1pdgs.cpoc.production.trigger.appcat.AppCatAdapter;
 import esa.s1pdgs.cpoc.production.trigger.consumption.EdrsSessionConsumer;
 import esa.s1pdgs.cpoc.production.trigger.consumption.L0SegmentConsumer;
 import esa.s1pdgs.cpoc.production.trigger.consumption.L0SliceConsumer;
@@ -101,7 +100,6 @@ public class TriggerConfig {
 				processSettings, 
 				mqiService, 
 				messageFilter,
-				new AppCatAdapter(appCatClient), 
 				appStatus,
 				errorRepoAppender, 
 				metadataClient, 
