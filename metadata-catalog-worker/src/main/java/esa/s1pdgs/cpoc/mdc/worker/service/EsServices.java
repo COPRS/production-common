@@ -729,8 +729,7 @@ public class EsServices {
 	public final List<EdrsSessionMetadata> getEdrsSessionsFor(final String sessionId) throws Exception {
 		final SearchSourceBuilder sourceBuilder = new SearchSourceBuilder();
 		// Generic fields
-		final BoolQueryBuilder queryBuilder = QueryBuilders.boolQuery()
-				.must(QueryBuilders.termQuery("sessionId", sessionId));
+		final QueryBuilder queryBuilder = QueryBuilders.termQuery("sessionId", sessionId);
 		sourceBuilder.query(queryBuilder);
 		LOGGER.debug("EdrsSessionQuery: query composed is {}", queryBuilder);
 		sourceBuilder.size(SIZE_LIMIT);
