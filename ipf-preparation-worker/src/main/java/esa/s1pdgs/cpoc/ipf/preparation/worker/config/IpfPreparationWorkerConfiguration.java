@@ -24,6 +24,7 @@ import esa.s1pdgs.cpoc.appcatalog.client.job.AppCatalogJobClient;
 import esa.s1pdgs.cpoc.common.ApplicationLevel;
 import esa.s1pdgs.cpoc.common.ProductCategory;
 import esa.s1pdgs.cpoc.errorrepo.ErrorRepoAppender;
+import esa.s1pdgs.cpoc.ipf.preparation.worker.appcat.AppCatAdapter;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.config.IpfPreparationWorkerSettings.CategoryConfig;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.config.IpfPreparationWorkerSettings.InputWaitingConfig;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.dispatch.JobDispatcherImpl;
@@ -217,17 +218,23 @@ public class IpfPreparationWorkerConfiguration {
 			final ProductTypeAdapter typeAdapter,
 			final Function<TaskTable, InputTimeoutChecker> timeoutCheckerFactory
 	) {		
-		final Map<String, JobGenerator> generators = new HashMap<>(ttManager.size());		
+		final Map<String, JobGenerator> generators = new HashMap<>(ttManager.size());	
+		final AppCatAdapter appCat = new AppCatAdapter(appCatClient, gracePeriodHandler);
 	
 		for (final File taskTableFile : ttManager.tasktables()) {				
-			final JobGenerator jobGenerator = newJobGenerator(taskTableFile, typeAdapter, timeoutCheckerFactory);
+			final JobGenerator jobGenerator = newJobGenerator(taskTableFile, typeAdapter, appCat, timeoutCheckerFactory);
 			generators.put(taskTableFile.getName(), jobGenerator);
 		    // --> Launch generators
 			taskScheduler.scheduleWithFixedDelay(jobGenerator, settings.getJobgenfixedrate());
 		}
 		
 		final IpfPreparationService service = new IpfPreparationService(
-				new JobDispatcherImpl(typeAdapter.taskTableMapper(), processSettings, appCatClient, generators), 
+				new JobDispatcherImpl(
+						typeAdapter, 
+						processSettings, 
+						appCat, 
+						generators.keySet()
+				), 
 				errorAppender, 
 				processConfiguration
 		);
@@ -246,6 +253,7 @@ public class IpfPreparationWorkerConfiguration {
 	private final JobGenerator newJobGenerator(
 			final File taskTableFile, 
 			final ProductTypeAdapter typeAdapter,
+			final AppCatAdapter appCat,
 			final Function<TaskTable, InputTimeoutChecker> timeoutCheckerFactory
 	) {		
 		final TasktableAdapter tasktableAdapter = new TasktableAdapter(
@@ -263,8 +271,7 @@ public class IpfPreparationWorkerConfiguration {
 		return new JobGeneratorImpl(
 				tasktableAdapter, 
 				typeAdapter, 
-				appCatClient, 
-				gracePeriodHandler, 
+				appCat, 
 				processSettings, 
 				errorAppender, 
 				publisher, 

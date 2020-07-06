@@ -1,18 +1,12 @@
 package esa.s1pdgs.cpoc.production.trigger.consumption;
 
 
-import java.util.Optional;
-
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import esa.s1pdgs.cpoc.appcatalog.AppDataJob;
 import esa.s1pdgs.cpoc.appcatalog.AppDataJobProduct;
-import esa.s1pdgs.cpoc.appcatalog.AppDataJobState;
-import esa.s1pdgs.cpoc.common.errors.AbstractCodedException;
 import esa.s1pdgs.cpoc.mqi.model.queue.CatalogEvent;
 import esa.s1pdgs.cpoc.mqi.model.rest.GenericMessageDto;
-import esa.s1pdgs.cpoc.production.trigger.appcat.AppCatAdapter;
 
 public final class L0SegmentConsumer implements ProductTypeConsumptionHandler {   
 	public static final String TYPE = "L0Segment";
@@ -21,24 +15,6 @@ public final class L0SegmentConsumer implements ProductTypeConsumptionHandler {
 	@Override
 	public final String type() {
 		return TYPE;
-	}
-
-	@Override
-	public final Optional<AppDataJob> findAssociatedJobFor(final AppCatAdapter appCat, final CatalogEventAdapter catEvent)
-			throws AbstractCodedException {
-		return appCat.findJobForDatatakeId(catEvent.datatakeId());
-	}
-	
-    @Override
-    public boolean isReady(final AppDataJob job, final String productName) {
-		if (job.getState() != AppDataJobState.WAITING) {
-	        LOGGER.info("AppDataJob {} ({}) for {} {} already dispatched", job.getId(), 
-	        		job.getState(), TYPE, productName);	        
-	        return false;
-		}
-		LOGGER.info("AppDataJob {} ({}) for {} {} will be dispatched", job.getId(), 
-        		job.getState(), TYPE, productName);
-		return true;
 	}
 
 

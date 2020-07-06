@@ -42,7 +42,6 @@ public class AppDataJobService {
         final long sequence = sequenceDao.getNextSequenceId(JOB_SEQ_KEY);
         LOGGER.debug("Creating new appDataJob {}", sequence);
         newJob.setId(sequence);
-        newJob.setState(AppDataJobState.WAITING);
         newJob.setCreationDate(new Date());
         newJob.setLastUpdateDate(new Date());
         return appDataJobDao.save(newJob);
@@ -76,7 +75,14 @@ public class AppDataJobService {
 
     public AppDataJob updateJob(final AppDataJob patchJob) throws AppCatalogJobNotFoundException {
     	// assert job exists
-        getJob(patchJob.getId());
+        final AppDataJob existingJob = getJob(patchJob.getId());
+        // has been modified concurrently?
+        // FIXME needs to be implemented in 940
+//        if (existingJob.getLastUpdateDate().after(patchJob.getLastUpdateDate())) {
+//        	throw new AppCatalogJobGenerationInvalidStateException();
+//        }
+        patchJob.setLastUpdateDate(new Date());
+        
         LOGGER.debug("Updating appDataJob {}", patchJob.getId());
         return appDataJobDao.save(patchJob);
     }

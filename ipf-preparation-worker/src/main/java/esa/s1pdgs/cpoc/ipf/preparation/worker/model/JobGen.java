@@ -152,7 +152,8 @@ public class JobGen {
 	}
 	
 	public final JobGen send() throws JobStateTransistionFailed {
-		return perform(publisher.send(this), "publishing Job");
+		// FIXME applied same dirty workaround viveris did, auxSearch needs to be cleaned up
+		return perform(publisher.send(auxSearch()), "publishing Job");
 	}
 	
 	private final JobGen perform(final Callable<JobGen> command, final String name) throws JobStateTransistionFailed {

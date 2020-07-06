@@ -697,8 +697,8 @@ public class EsServices {
 		final SearchSourceBuilder sourceBuilder = new SearchSourceBuilder();
 
 		final BoolQueryBuilder queryBuilder = QueryBuilders.boolQuery()
-				.must(QueryBuilders.termQuery("dataTakeId", dataTakeId))
-				.must(QueryBuilders.termQuery("productType", productType));
+				.must(QueryBuilders.termQuery("dataTakeId.keyword", dataTakeId))
+				.must(QueryBuilders.termQuery("productType.keyword", productType));
 		sourceBuilder.query(queryBuilder);
 		LOGGER.debug("LevelSegmentQuery: query composed is {}", queryBuilder);
 		sourceBuilder.size(SIZE_LIMIT);
@@ -729,8 +729,7 @@ public class EsServices {
 	public final List<EdrsSessionMetadata> getEdrsSessionsFor(final String sessionId) throws Exception {
 		final SearchSourceBuilder sourceBuilder = new SearchSourceBuilder();
 		// Generic fields
-		final BoolQueryBuilder queryBuilder = QueryBuilders.boolQuery()
-				.must(QueryBuilders.termQuery("sessionId", sessionId));
+		final QueryBuilder queryBuilder = QueryBuilders.termQuery("sessionId.keyword", sessionId);
 		sourceBuilder.query(queryBuilder);
 		LOGGER.debug("EdrsSessionQuery: query composed is {}", queryBuilder);
 		sourceBuilder.size(SIZE_LIMIT);
