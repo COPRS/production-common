@@ -10,6 +10,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.client.RestTemplate;
 
+import esa.s1pdgs.cpoc.appcatalog.client.config.AppCatalogConfigurationProperties;
 import esa.s1pdgs.cpoc.appcatalog.client.job.AppCatalogJobClient;
 import esa.s1pdgs.cpoc.appstatus.AppStatus;
 import esa.s1pdgs.cpoc.common.ProductCategory;
@@ -33,8 +34,6 @@ public class TriggerConfig {
 		CONSUMPTION_HANDLER_FOR_CATEGORY.put(ProductCategory.LEVEL_PRODUCTS,  new L0SliceConsumer());
 	}
 	
-	private final AppCatalogConfigurationProperties properties;
-	private final RestTemplate restTemplate;
 	private final ProcessSettings processSettings; 
 	private final GenericMqiClient mqiService;
 	private final List<MessageFilter> messageFilter;
@@ -44,7 +43,6 @@ public class TriggerConfig {
 	
 	@Autowired
 	public TriggerConfig(
-			final AppCatalogConfigurationProperties properties,
 			final RestTemplateBuilder restTemplateBuilder,
 			final ProcessSettings processSettings, 
 			final GenericMqiClient mqiService,
@@ -59,10 +57,6 @@ public class TriggerConfig {
 		this.errorRepoAppender = errorRepoAppender;
 		this.appStatus = appStatus;
 		this.metadataClient = metadataClient;
-		this.properties = properties;
-		this.restTemplate = restTemplateBuilder
-				.setConnectTimeout(properties.getTmConnectMs())
-				.build();
 	}
 		
 	@Bean
@@ -79,16 +73,6 @@ public class TriggerConfig {
 			);
 		}
 		return res;
-	}
-	
-	@Bean
-	public AppCatalogJobClient appCatClient() {
-		return new AppCatalogJobClient(
-				restTemplate, 
-				properties.getHostUri(), 
-				properties.getMaxRetries(), 
-				properties.getTempoRetryMs()
-		);	
 	}
 	
 	@Bean	

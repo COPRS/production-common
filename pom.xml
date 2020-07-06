@@ -93,20 +93,20 @@
 						<includeTests>false</includeTests>
 					</configuration>
 				</plugin>
-				<plugin>
-					<groupId>org.apache.maven.plugins</groupId>
-					<artifactId>maven-pmd-plugin</artifactId>
-					<version>3.8</version>
-					<configuration>
-						<rulesets>
-							<ruleset>${project.basedir}/../PmdJavaRuleset.xml</ruleset>
-						</rulesets>
-						<verbose>true</verbose>
-						<failurePriority>2</failurePriority>
-						<includeTests>false</includeTests>
-						<outputDirectory>target/html-reports</outputDirectory>
-					</configuration>
-				</plugin>	
+<!-- 				<plugin> -->
+<!-- 					<groupId>org.apache.maven.plugins</groupId> -->
+<!-- 					<artifactId>maven-pmd-plugin</artifactId> -->
+<!-- 					<version>3.8</version> -->
+<!-- 					<configuration> -->
+<!-- 						<rulesets> -->
+<!-- 							<ruleset>${project.basedir}/../PmdJavaRuleset.xml</ruleset> -->
+<!-- 						</rulesets> -->
+<!-- 						<verbose>true</verbose> -->
+<!-- 						<failurePriority>2</failurePriority> -->
+<!-- 						<includeTests>false</includeTests> -->
+<!-- 						<outputDirectory>target/html-reports</outputDirectory> -->
+<!-- 					</configuration> -->
+<!-- 				</plugin>	 -->
 				<plugin>
 					<groupId>org.jacoco</groupId>
 					<artifactId>jacoco-maven-plugin</artifactId>
