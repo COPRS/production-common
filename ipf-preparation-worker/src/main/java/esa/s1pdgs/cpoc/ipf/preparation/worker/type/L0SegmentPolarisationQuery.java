@@ -148,25 +148,26 @@ final class L0SegmentPolarisationQuery implements Callable<JobGen> {
 					formatter);
 			sensingStop = more(getStopSensingDate(segmentsA, formatter), getStopSensingDate(segmentsB, formatter),
 					formatter);
-
-			// Check if we add the coverage
-			if (!fullCoverage) {
-				final Date currentDate = new Date();
-				if (job.generation().getCreationDate().getTime() < currentDate.getTime() - timeoutInputSearchMs) {
-					LOGGER.warn("Continue generation of {} {} even if sensing gaps", job.productName(),
-							job.generation());
-					appDataJob.getProduct().setStartTime(sensingStart);
-					appDataJob.getProduct().setStopTime(sensingStop);
-				} else {
-					throw new IpfPrepWorkerInputsMissingException(missingMetadata);
-				}
-			} 
-			else {
+		}
+		
+		// Check if we add the coverage
+		if (!fullCoverage) {
+			final Date currentDate = new Date();
+			if (job.generation().getCreationDate().getTime() < currentDate.getTime() - timeoutInputSearchMs) {
+				LOGGER.warn("Continue generation of {} {} even if sensing gaps", job.productName(),
+						job.generation());
 				appDataJob.getProduct().setStartTime(sensingStart);
 				appDataJob.getProduct().setStopTime(sensingStop);
+			} else {
+				throw new IpfPrepWorkerInputsMissingException(missingMetadata);
 			}
-			LOGGER.debug("== preSearch: performed lastName: {},fullCoverage= {} ", lastName, fullCoverage);
+		} 
+		else {
+			appDataJob.getProduct().setStartTime(sensingStart);
+			appDataJob.getProduct().setStopTime(sensingStop);
 		}
+		LOGGER.debug("== preSearch: performed lastName: {},fullCoverage= {} ", lastName, fullCoverage);
+				
 		return job;
 	}
 
