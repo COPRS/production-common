@@ -2,10 +2,15 @@ package esa.s1pdgs.cpoc.appstatus;
 
 import java.util.Map;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
 import esa.s1pdgs.cpoc.common.ProductCategory;
 
 public abstract class AbstractAppStatus implements AppStatus {
-
+	
+	private static final Logger LOG = LogManager.getLogger(AbstractAppStatus.class);
+	
     /**
      * Status of application
      */
@@ -14,11 +19,13 @@ public abstract class AbstractAppStatus implements AppStatus {
     /**
      * Indicate if the application shall be stopped
      */
-    private boolean shallBeStopped;
+    private boolean shallBeStopped = false;
+    	
+	private final Runnable systemExitCall;
 
-    public AbstractAppStatus(Status status) {
+    public AbstractAppStatus(final Status status, final Runnable systemExitCall) {
 		this.status = status;
-		shallBeStopped = false;
+		this.systemExitCall = systemExitCall;
 	}
     
     /**
@@ -38,7 +45,7 @@ public abstract class AbstractAppStatus implements AppStatus {
 	}
 	
 	@Override
-	public void addSubStatus(Status status) {
+	public void addSubStatus(final Status status) {
 		if (!status.getCategory().isPresent()) {
 			throw new IllegalArgumentException("Assignment as a substatus failed because category attribute is not present");
 		}
@@ -84,7 +91,7 @@ public abstract class AbstractAppStatus implements AppStatus {
      * Set application as error
      */
     @Override
-	public synchronized void setError(String type) {
+	public synchronized void setError(final String type) {
     	if("NEXT_MESSAGE".equals(type) || "MQI".equals(type)) { // TODO: Refactor these MQI client error synonyms
     		this.status.incrementErrorCounterNextMessage();
     	} else if("PROCESSING".equals(type) || "JOB".equals(type)) { // TODO: Refactor these main task synonyms
@@ -110,7 +117,7 @@ public abstract class AbstractAppStatus implements AppStatus {
     }
 
 	@Override
-	public boolean isProcessing(String category, long messageId) {
+	public boolean isProcessing(final String category, final long messageId) {
 		throw new UnsupportedOperationException();
 	}
 	
@@ -124,5 +131,10 @@ public abstract class AbstractAppStatus implements AppStatus {
 	
 	@Override
 	abstract public void forceStopping();
+	
+	protected final void systemExit() {
+		LOG.warn("========== System exit called ========== ");
+		systemExitCall.run();
+	}
 
 }

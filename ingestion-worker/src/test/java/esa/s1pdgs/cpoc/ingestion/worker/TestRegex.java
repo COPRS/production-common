@@ -1,6 +1,8 @@
 package esa.s1pdgs.cpoc.ingestion.worker;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
 import java.util.Arrays;
@@ -77,5 +79,14 @@ public class TestRegex {
 			}
 		}
 		
+	}
+	
+	@Test
+	public final void testNegativeLookahead() {
+		final String pattern = "^S1A_(?!IW|WV|EW|S[1-6])[A-Z][A-Z]_RAW__0S.*";
+		assertTrue("S1A_XX_RAW__0S123".matches(pattern));
+		assertFalse("S1A_EW_RAW__0S123".matches(pattern));
+		assertFalse("S1A_WV_RAW__0S123".matches(pattern));
+		assertFalse("S1A_S4_RAW__0S123".matches(pattern));
 	}
 }

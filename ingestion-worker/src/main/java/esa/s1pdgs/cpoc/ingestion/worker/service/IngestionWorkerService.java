@@ -18,7 +18,6 @@ import org.springframework.stereotype.Service;
 
 import esa.s1pdgs.cpoc.appstatus.AppStatus;
 import esa.s1pdgs.cpoc.common.ProductCategory;
-import esa.s1pdgs.cpoc.common.ProductFamily;
 import esa.s1pdgs.cpoc.common.errors.AbstractCodedException;
 import esa.s1pdgs.cpoc.common.errors.InternalErrorException;
 import esa.s1pdgs.cpoc.common.utils.FileUtils;
@@ -33,6 +32,7 @@ import esa.s1pdgs.cpoc.ingestion.worker.product.Product;
 import esa.s1pdgs.cpoc.ingestion.worker.product.ProductService;
 import esa.s1pdgs.cpoc.ingestion.worker.product.report.IngestionWorkerReportingOutput;
 import esa.s1pdgs.cpoc.mqi.client.GenericMqiClient;
+import esa.s1pdgs.cpoc.mqi.client.MessageFilter;
 import esa.s1pdgs.cpoc.mqi.client.MqiConsumer;
 import esa.s1pdgs.cpoc.mqi.client.MqiListener;
 import esa.s1pdgs.cpoc.mqi.model.queue.IngestionEvent;
@@ -50,6 +50,7 @@ public class IngestionWorkerService implements MqiListener<IngestionJob> {
 	static final Logger LOG = LogManager.getLogger(IngestionWorkerService.class);
 
 	private final GenericMqiClient mqiClient;
+	private final List<MessageFilter> messageFilter;
 	private final ErrorRepoAppender errorRepoAppender;
 	private final IngestionWorkerServiceConfigurationProperties properties;
 	private final ProductService productService;
@@ -59,6 +60,7 @@ public class IngestionWorkerService implements MqiListener<IngestionJob> {
 	@Autowired
 	public IngestionWorkerService(
 			final GenericMqiClient mqiClient, 
+			final List<MessageFilter> messageFilter,
 			final ErrorRepoAppender errorRepoAppender,
 			final IngestionWorkerServiceConfigurationProperties properties, 
 			final ProductService productService,
@@ -66,6 +68,7 @@ public class IngestionWorkerService implements MqiListener<IngestionJob> {
 			final InboxAdapterManager inboxAdapterManager
 	) {
 		this.mqiClient = mqiClient;
+		this.messageFilter = messageFilter;
 		this.errorRepoAppender = errorRepoAppender;
 		this.properties = properties;
 		this.productService = productService;
@@ -81,6 +84,7 @@ public class IngestionWorkerService implements MqiListener<IngestionJob> {
 					mqiClient,
 					ProductCategory.INGESTION, 
 					this,
+					messageFilter,
 					properties.getPollingIntervalMs(),
 					0L,
 					appStatus
@@ -110,12 +114,15 @@ public class IngestionWorkerService implements MqiListener<IngestionJob> {
 			final List<Product<IngestionEvent>> result = identifyAndUpload(message, inboxAdapter, ingestion, reporting);
 			final Date ingestionFinishedDate = new Date();
 			publish(result, message, reporting.getUid());
-			delete(ingestion);			
-			
+			delete(ingestion);					
 			inboxAdapter.delete(productUri);
+
 			reporting.end(
-					new IngestionWorkerReportingOutput(ingestion.getKeyObjectStorage(), ingestionFinishedDate),
-					new ReportingMessage(ingestion.getProductSizeByte(),"End processing of %s", ingestion.getKeyObjectStorage())
+					IngestionWorkerReportingOutput.newInstance(ingestion, ingestionFinishedDate),
+					new ReportingMessage(
+							ingestion.getProductSizeByte(),
+							"End processing of %s", ingestion.getKeyObjectStorage()
+					)
 			);
 		} catch (final Exception e) {
 			reporting.error(new ReportingMessage("Error processing of %s: %s", ingestion.getKeyObjectStorage(),  LogUtils.toString(e)));
@@ -144,8 +151,7 @@ public class IngestionWorkerService implements MqiListener<IngestionJob> {
 			return productService.ingest(ingestion.getProductFamily(), inboxAdapter, ingestion, reportingFactory);
 		} 
 		catch (final Exception e) {
-			productService.markInvalid(inboxAdapter, ingestion, reportingFactory);
-			message.getBody().setProductFamily(ProductFamily.INVALID);
+			LOG.error(e);
 			throw e;
 		}
 	}
@@ -154,7 +160,7 @@ public class IngestionWorkerService implements MqiListener<IngestionJob> {
 			final List<Product<IngestionEvent>> products, 
 			final GenericMessageDto<IngestionJob> message,
 			final UUID reportingId
-	) throws AbstractCodedException {
+	) throws AbstractCodedException {		
 		for (final Product<IngestionEvent> product : products) {
 			final IngestionEvent event = product.getDto();
 			event.setUid(reportingId);

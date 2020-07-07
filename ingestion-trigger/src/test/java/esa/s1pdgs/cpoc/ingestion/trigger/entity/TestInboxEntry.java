@@ -1,5 +1,8 @@
 package esa.s1pdgs.cpoc.ingestion.trigger.entity;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotEquals;
+
 import java.io.File;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -7,61 +10,66 @@ import java.nio.file.Paths;
 import java.util.Date;
 
 import org.junit.Test;
-
-import esa.s1pdgs.cpoc.ingestion.trigger.fs.FilesystemInboxEntryFactory;
 import org.junit.runner.RunWith;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.annotation.DirtiesContext;
-import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit4.SpringRunner;
 
-import static org.junit.Assert.*;
+import esa.s1pdgs.cpoc.ingestion.trigger.inbox.InboxEntryFactory;
+import esa.s1pdgs.cpoc.ingestion.trigger.inbox.InboxEntryFactoryImpl;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest
 public class TestInboxEntry {
-
-	@Autowired
-	private FilesystemInboxEntryFactory factory;
+	private final InboxEntryFactory factory = new InboxEntryFactoryImpl();
 
 	@Test
 	public final void testGetName_OnValidName_ShallReturnName() throws URISyntaxException {
-		final InboxEntry uut = factory.newInboxEntry(new URI("/tmp"), Paths.get("/tmp/fooBar"), 0, new Date(), 0, null);
+		final InboxEntry uut = newInboxEntry("/tmp/fooBar");
+
 		assertEquals("fooBar", uut.getName());
 	}
 
 	@Test
 	public final void testHashCode_OnSameObject_ShallReturnSameHashCode() throws URISyntaxException {
-		final InboxEntry uut1 = factory.newInboxEntry(new URI("/tmp"), Paths.get("/tmp/fooBar"), 0, new Date(), 0, null);
-		final InboxEntry uut2 = factory.newInboxEntry(new URI("/tmp"), Paths.get("/tmp/fooBar"), 0, new Date(), 0, null);
+		final InboxEntry uut1 = newInboxEntry("/tmp/fooBar");
+		final InboxEntry uut2 = newInboxEntry("/tmp/fooBar");
 		assertEquals(uut1.hashCode(), uut2.hashCode());
 	}
 
 	@Test
 	public final void testHashCode_OnDifferentObject_ShallReturnDifferentHashCode() throws URISyntaxException {
-		final InboxEntry uut1 = factory.newInboxEntry(new URI("/tmp"), Paths.get("/tmp/foo"), 0, new Date(), 0, null);
-		final InboxEntry uut2 = factory.newInboxEntry(new URI("/tmp"), Paths.get("/tmp/bar"), 0, new Date(), 0, null);
+		final InboxEntry uut1 = newInboxEntry("/tmp/foo");
+		final InboxEntry uut2 = newInboxEntry("/tmp/bar");
 		assertNotEquals(uut1.hashCode(), uut2.hashCode());
 	}
 
 	@Test
 	public final void testEquals_OnSameObject_ShallReturnTrue() throws URISyntaxException {
-		final InboxEntry uut1 = factory.newInboxEntry(new URI("/tmp"), Paths.get("/tmp/foo"), 0, new Date(), 0, null);
-		final InboxEntry uut2 = factory.newInboxEntry(new URI("/tmp"), Paths.get("/tmp/foo"), 0, new Date(), 0, null);
-		assertTrue(uut1.equals(uut2));
+		final InboxEntry uut1 = newInboxEntry("/tmp/foo");
+		final InboxEntry uut2 = newInboxEntry("/tmp/foo");
+		assertEquals(uut1, uut2);
 	}
 
 	@Test
 	public final void testEquals_OnNull_ShallReturnFalse() throws URISyntaxException {
-		final InboxEntry uut = factory.newInboxEntry(new URI("/tmp"), Paths.get("/tmp/fooBar"), 0, new Date(), 0, null);
-		assertFalse(uut.equals(null));
+		final InboxEntry uut = newInboxEntry("/tmp/fooBar");
+		assertNotEquals(null, uut);
 	}
 
 	@SuppressWarnings("unlikely-arg-type")
 	@Test
-	public final void testEquals_OnDifferntClass_ShallReturnFalse() throws URISyntaxException {
-		final InboxEntry uut = factory.newInboxEntry(new URI("/tmp"), Paths.get("/tmp/fooBar2"), 0, new Date(), 0, null);
-		assertFalse(uut.equals(new File("/tmp/fooBar2")));
+	public final void testEquals_OnDifferentClass_ShallReturnFalse() throws URISyntaxException {
+		final InboxEntry uut = newInboxEntry("/tmp/fooBar2");
+		assertNotEquals(uut, new File("/tmp/fooBar2"));
+	}
+
+	private InboxEntry newInboxEntry(final String path) throws URISyntaxException {
+		return factory.newInboxEntry(
+				new URI("/tmp"),
+				Paths.get(path),
+				new Date(),
+				0,
+				null
+		);
 	}
 }

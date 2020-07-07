@@ -1,5 +1,7 @@
 package esa.s1pdgs.cpoc.prip.model;
 
+import org.json.JSONObject;
+
 public class Checksum {
 
 	public static final String DEFAULT_ALGORITHM = "MD5";
@@ -9,7 +11,7 @@ public class Checksum {
 
 		private String fieldName;
 
-		private FIELD_NAMES(String fieldName) {
+		FIELD_NAMES(String fieldName) {
 			this.fieldName = fieldName;
 		}
 
@@ -39,8 +41,10 @@ public class Checksum {
 
 	@Override
 	public String toString() {
-		return String.format("{\"%s\":\"%s\", \"%s\":\"%s\"}", FIELD_NAMES.ALGORITHM.fieldName, algorithm,
-				FIELD_NAMES.VALUE.fieldName, value);
+		JSONObject json = new JSONObject();
+		json.put(FIELD_NAMES.ALGORITHM.fieldName, algorithm);
+		json.put(FIELD_NAMES.VALUE.fieldName, value);
+		return json.toString();
 	}
 
 	@Override
@@ -67,11 +71,8 @@ public class Checksum {
 		} else if (!algorithm.equals(other.algorithm))
 			return false;
 		if (value == null) {
-			if (other.value != null)
-				return false;
-		} else if (!value.equals(other.value))
-			return false;
-		return true;
+			return other.value == null;
+		} else return value.equals(other.value);
 	}
 
 }

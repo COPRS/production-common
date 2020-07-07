@@ -1,6 +1,5 @@
 package esa.s1pdgs.cpoc.ingestion.trigger.inbox;
 
-import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
@@ -8,8 +7,6 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import org.junit.Test;
-
-import esa.s1pdgs.cpoc.ingestion.trigger.xbip.XbipInboxEntryFactory;
 
 // Test filter regex
 public class TestRegex {	
@@ -27,6 +24,12 @@ public class TestRegex {
 		assertFalse("WILE/S1A/L20180724144436762001030/ch02/.DCS_02_L20180724144436762001030_ch2_DSDB_00028.raw".matches(NEW_REGEX));
 	}
 	
+	@Test
+	public final void tes() {
+		final String fool = "1590759627";
+		System.out.println(fool);
+		System.out.println(System.currentTimeMillis());
+	}
 	
 	@Test
 	public final void testNewRegex() {
@@ -45,25 +48,32 @@ public class TestRegex {
 		assertTrue("S1A_OPER_REP_MP_MP__PDMC_20200303T093232_V20200303T170000_20200319T190000.xml".matches("^S1[ABCD_]_OPER_REP_MP_MP__PDMC.*$"));
 	}
 	
-	public static final Pattern SESSION_PATTERN = Pattern.compile("^([a-z_]{4}/)?"
+	private static final Pattern SESSION_PATTERN = Pattern.compile("^([a-z_]{4}/)?"
 			+ "([0-9a-z_]{2})([0-9a-z_]{1})/([0-9a-z_]+)/(ch[0|_]?[1-2]/)?"
 			+ "(DCS_[0-9]{2}_([a-zA-Z0-9_]*)_ch([12])_(DSDB|DSIB).*\\.(raw|aisp|xml))", 
 			Pattern.CASE_INSENSITIVE
 	);	
 	
 	@Test
-	public final void testMagicRegex() {
-		final String path = "S1A/DCS_04_20200407131322032022_dat/ch_2/DCS_04_20200407131322032022_ch2_DSDB_00057.raw";
-		final Matcher matcher = XbipInboxEntryFactory.SESSION_PATTERN.matcher(path);		
-		assertTrue(matcher.matches());	
-		
-		final String actual = matcher.group(4);		
-		assertEquals("DCS_04_20200407131322032022_dat", actual);
-		
-		System.out.println(path.substring(path.indexOf(actual)));
-		
-		
+	public final void tesPAtternt() {
+		final String name = "S1B/L20180724144436762001030/ch02/DCS_02_L20180724144436762001030_ch2_DSDB_00025.raw";
+		final Matcher matcher = SESSION_PATTERN.matcher(name);
+		if (!matcher.matches()) {
+			throw new RuntimeException();
+		}
+		System.out.println(matcher.group(7));
 	}
+	
+	@Test
+	public void testDefaultRegexFor_RF_HK_GP_Products() {
+		final String regex = "^S1([A-Z_]{1}).*(GP|HK|RF).*SAFE(.zip)?$";
+		
+		assertTrue("S1A_RF_RAW__0SDH_20200120T123147_20200120T123148_030884_038B5A_8A67.SAFE.zip".matches(regex));
+		assertTrue("S1A_RF_RAW__0SDH_20200120T123147_20200120T123148_030884_038B5A_8A67.SAFE".matches(regex));
+		assertFalse("S1A_IW_RAW__0SDH_20200120T123147_20200120T123148_030884_038B5A_8A67.SAFE".matches(regex));
+
+	}
+
 }
 
 

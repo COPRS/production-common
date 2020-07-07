@@ -13,6 +13,8 @@ import esa.s1pdgs.cpoc.mqi.model.queue.IpfPreparationJob;
 import esa.s1pdgs.cpoc.mqi.model.queue.LevelReportDto;
 import esa.s1pdgs.cpoc.mqi.model.queue.PripPublishingJob;
 import esa.s1pdgs.cpoc.mqi.model.queue.ProductionEvent;
+import esa.s1pdgs.cpoc.mqi.model.queue.EvictionManagementJob;
+import esa.s1pdgs.cpoc.mqi.model.queue.LtaDownloadEvent;
 
 /**
  * Group products per category
@@ -35,7 +37,9 @@ public enum ProductCategory {
     CATALOG_EVENT(CatalogEvent.class),
     CATALOG_JOBS(CatalogJob.class),
     PRODUCTION_EVENT(ProductionEvent.class),
-    PRIP_JOBS(PripPublishingJob.class);
+    PRIP_JOBS(PripPublishingJob.class),
+    EVICTION_MANAGEMENT_JOBS(EvictionManagementJob.class),
+    LTA_DOWNLOAD_EVENT(LtaDownloadEvent.class);
 	
     /**
      * Get the category for a given product family.

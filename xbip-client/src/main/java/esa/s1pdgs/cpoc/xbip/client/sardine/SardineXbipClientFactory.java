@@ -15,10 +15,13 @@ import java.security.NoSuchAlgorithmException;
 import java.util.Collections;
 import java.util.List;
 
+import org.apache.http.client.CredentialsProvider;
+import org.apache.http.client.config.RequestConfig;
 import org.apache.http.conn.socket.ConnectionSocketFactory;
 import org.apache.http.conn.ssl.NoopHostnameVerifier;
 import org.apache.http.conn.ssl.SSLConnectionSocketFactory;
 import org.apache.http.conn.ssl.TrustSelfSignedStrategy;
+import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.ssl.SSLContextBuilder;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -104,10 +107,31 @@ public class SardineXbipClientFactory implements XbipClientFactory {
 						builder.build(),
 			            NoopHostnameVerifier.INSTANCE
 			    );
+				
+				final int timeout = 5*60; // seconds (5 minutes)
+		
+				
 				return new SardineImpl(hostConfig.getUser(), hostConfig.getPass(), proxy()) {
 					@Override
 					protected ConnectionSocketFactory createDefaultSecureSocketFactory() {
 						return sslsf;
+					}
+					
+					@Override
+					protected HttpClientBuilder configure(
+							final ProxySelector selector, 
+							final CredentialsProvider credentials
+					) {			
+						final HttpClientBuilder res = super.configure(selector, credentials);
+						
+						final RequestConfig config = RequestConfig.custom()
+							      .setConnectTimeout(timeout * 1000)
+							      .setConnectionRequestTimeout(timeout * 1000)
+							      .setSocketTimeout(timeout * 1000)
+							      .build();
+							
+						res.setDefaultRequestConfig(config);
+						return res;
 					}
 				};
 			} catch (NoSuchAlgorithmException | KeyStoreException | KeyManagementException e) {

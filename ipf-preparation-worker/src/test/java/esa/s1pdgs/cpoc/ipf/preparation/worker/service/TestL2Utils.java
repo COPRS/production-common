@@ -16,7 +16,7 @@ import esa.s1pdgs.cpoc.ipf.preparation.worker.model.routing.LevelProductsRoute;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.model.routing.LevelProductsRouteFrom;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.model.routing.LevelProductsRouteTo;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.model.routing.LevelProductsRouting;
-import esa.s1pdgs.cpoc.mqi.model.queue.ProductionEvent;
+import esa.s1pdgs.cpoc.mqi.model.queue.CatalogEvent;
 import esa.s1pdgs.cpoc.mqi.model.rest.GenericMessageDto;
 
 public class TestL2Utils {
@@ -66,12 +66,12 @@ public class TestL2Utils {
         ret.setPod("hostname");
         ret.setLevel(ApplicationLevel.L2);
 
-        final GenericMessageDto<ProductionEvent> message1 =
-                new GenericMessageDto<ProductionEvent>(1, "input-key",
-                        new ProductionEvent(
-                                "S1A_IW_RAW__0SDV_20171213T142312_20171213T142344_019685_02173E_07F5.SAFE",
-                                "S1A_IW_RAW__0SDV_20171213T142312_20171213T142344_019685_02173E_07F5.SAFE",
-                                ProductFamily.L0_ACN, "NRT"));
+        final CatalogEvent cat = new CatalogEvent();
+        cat.setProductName("S1A_IW_RAW__0SDV_20171213T142312_20171213T142344_019685_02173E_07F5.SAFE");
+        cat.setKeyObjectStorage("S1A_IW_RAW__0SDV_20171213T142312_20171213T142344_019685_02173E_07F5.SAFE");
+        cat.setProductFamily(ProductFamily.L0_ACN);
+        
+        final GenericMessageDto<CatalogEvent> message1 =  new GenericMessageDto<CatalogEvent>(1, "input-key",cat);
         ret.setMessages(Arrays.asList(message1));
 
         final Calendar start1 = Calendar.getInstance();
@@ -114,7 +114,7 @@ public class TestL2Utils {
         gen4.setTaskTable("IW_RAW__0_SLC__1_GRDH_1.xml");
         gen4.setState(AppDataJobGenerationState.SENT);
         gen4.setCreationDate(new Date(0L));
-        ret.setGenerations(Arrays.asList(gen1, gen2, gen3, gen4));
+        ret.setGeneration(gen1);
 
         return ret;
     }

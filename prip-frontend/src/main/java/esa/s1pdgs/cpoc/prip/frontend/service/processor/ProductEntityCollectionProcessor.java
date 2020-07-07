@@ -3,6 +3,8 @@ package esa.s1pdgs.cpoc.prip.frontend.service.processor;
 import java.io.InputStream;
 import java.util.Collections;
 import java.util.List;
+import java.util.Locale;
+import java.util.Optional;
 
 import org.apache.olingo.commons.api.data.ContextURL;
 import org.apache.olingo.commons.api.data.Entity;
@@ -19,12 +21,14 @@ import org.apache.olingo.server.api.ODataResponse;
 import org.apache.olingo.server.api.ServiceMetadata;
 import org.apache.olingo.server.api.processor.EntityCollectionProcessor;
 import org.apache.olingo.server.api.serializer.EntityCollectionSerializerOptions;
+import org.apache.olingo.server.api.serializer.EntityCollectionSerializerOptions.Builder;
 import org.apache.olingo.server.api.serializer.ODataSerializer;
 import org.apache.olingo.server.api.serializer.SerializerException;
 import org.apache.olingo.server.api.serializer.SerializerResult;
 import org.apache.olingo.server.api.uri.UriInfo;
 import org.apache.olingo.server.api.uri.UriResource;
 import org.apache.olingo.server.api.uri.UriResourceEntitySet;
+import org.apache.olingo.server.api.uri.queryoption.CountOption;
 import org.apache.olingo.server.api.uri.queryoption.FilterOption;
 import org.apache.olingo.server.api.uri.queryoption.SystemQueryOption;
 import org.apache.olingo.server.api.uri.queryoption.SystemQueryOptionKind;
@@ -89,38 +93,80 @@ public class ProductEntityCollectionProcessor implements EntityCollectionProcess
 
 			}
 		}
+		
+		if (null == uriInfo.getCountOption() || !uriInfo.getCountOption().getValue()) {
 
-		List<PripMetadata> queryResult;
-		if (!pripDateTimeFilters.isEmpty() && !pripTextFilters.isEmpty()) {
-			queryResult = pripMetadataRepository.findByCreationDateAndProductName(pripDateTimeFilters, pripTextFilters);
-		} else if (!pripDateTimeFilters.isEmpty()) {
-			queryResult = pripMetadataRepository.findByCreationDate(pripDateTimeFilters);
-		} else if (!pripTextFilters.isEmpty()) {
-			queryResult = pripMetadataRepository.findByProductName(pripTextFilters);
+			// List of Entities Request
+			
+			Optional<Integer> top = Optional.empty();
+			if (null != uriInfo.getTopOption()) {
+				top = Optional.of(uriInfo.getTopOption().getValue());
+				if (top.get() < 0) {
+					throw new ODataApplicationException("Invalid value for $top", HttpStatusCode.BAD_REQUEST.getStatusCode(), Locale.ROOT);
+				}
+			}
+			
+			Optional<Integer> skip = Optional.empty();
+			if (null != uriInfo.getSkipOption()) {
+				skip = Optional.of(uriInfo.getSkipOption().getValue());
+				if (skip.get() < 0) {
+					throw new ODataApplicationException("Invalid value for $skip", HttpStatusCode.BAD_REQUEST.getStatusCode(), Locale.ROOT);
+				}
+			}
+				
+			List<PripMetadata> queryResult;
+			if (pripDateTimeFilters.isEmpty() && pripTextFilters.isEmpty()) {
+				queryResult = pripMetadataRepository.findAll(top, skip);
+			} else {
+				queryResult = pripMetadataRepository.findWithFilters(pripTextFilters, pripDateTimeFilters, top, skip);
+			} 
+			List<Entity> productList = entityCollection.getEntities();
+			for (PripMetadata pripMetadata : queryResult) {
+				productList.add(MappingUtil.pripMetadataToEntity(pripMetadata, request.getRawBaseUri()));
+			}
+	
+			InputStream serializedContent = serializeEntityCollection(entityCollection, edmEntitySet,
+					request.getRawBaseUri(), responseFormat, Optional.empty());
+	
+			response.setContent(serializedContent);
+			response.setStatusCode(HttpStatusCode.OK.getStatusCode());
+			response.setHeader(HttpHeader.CONTENT_TYPE, responseFormat.toContentTypeString());
+			LOGGER.debug("Serving product metadata collection with {} items", entityCollection.getEntities().size());
+			
 		} else {
-			queryResult = pripMetadataRepository.findAll();
+			
+			// Count Request
+			
+			int count = 0;
+			if (pripDateTimeFilters.isEmpty() && pripTextFilters.isEmpty()) {
+				count = pripMetadataRepository.countAll();
+			} else {
+				count = pripMetadataRepository.countWithFilters(pripDateTimeFilters, pripTextFilters);
+			}
+
+			entityCollection.setCount(count);
+			InputStream serializedContent = serializeEntityCollection(entityCollection, edmEntitySet,
+					request.getRawBaseUri(), responseFormat, Optional.of(uriInfo.getCountOption()));
+			
+			response.setContent(serializedContent);
+			response.setStatusCode(HttpStatusCode.OK.getStatusCode());
+			response.setHeader(HttpHeader.CONTENT_TYPE, responseFormat.toContentTypeString());
+			
+			LOGGER.debug("Serving product metadata collection with {} items", entityCollection.getEntities().size());
+			
 		}
-
-		List<Entity> productList = entityCollection.getEntities();
-		for (PripMetadata pripMetadata : queryResult) {
-			productList.add(MappingUtil.pripMetadataToEntity(pripMetadata, request.getRawBaseUri()));
-		}
-
-		InputStream serializedContent = serializeEntityCollection(entityCollection, edmEntitySet,
-				request.getRawBaseUri(), responseFormat);
-
-		response.setContent(serializedContent);
-		response.setStatusCode(HttpStatusCode.OK.getStatusCode());
-		response.setHeader(HttpHeader.CONTENT_TYPE, responseFormat.toContentTypeString());
-		LOGGER.debug("Serving product metadata collection with {} items", entityCollection.getEntities().size());
 	}
 
 	private InputStream serializeEntityCollection(EntityCollection entityCollection, EdmEntitySet edmEntitySet,
-			String rawBaseUri, ContentType format) throws SerializerException {
+			String rawBaseUri, ContentType format, Optional<CountOption> countOption) throws SerializerException {
 		ODataSerializer serializer = odata.createSerializer(format);
 		ContextURL contextUrl = ContextURL.with().entitySet(edmEntitySet).build();
-		EntityCollectionSerializerOptions opts = EntityCollectionSerializerOptions.with()
-				.id(rawBaseUri + "/" + edmEntitySet.getName()).contextURL(contextUrl).build();
+		Builder builder = EntityCollectionSerializerOptions.with()
+		.id(rawBaseUri + "/" + edmEntitySet.getName()).contextURL(contextUrl);
+		if (countOption.isPresent()) {
+			builder = builder.count(countOption.get());
+		}
+		EntityCollectionSerializerOptions opts = builder.build();
 		SerializerResult serializerResult = serializer.entityCollection(serviceMetadata, edmEntitySet.getEntityType(),
 				entityCollection, opts);
 		return serializerResult.getContent();

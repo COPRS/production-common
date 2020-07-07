@@ -1,40 +1,32 @@
 package esa.s1pdgs.cpoc.ipf.execution.worker.service.report;
 
-import java.util.Collections;
 import java.util.List;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
-import esa.s1pdgs.cpoc.common.ApplicationLevel;
-import esa.s1pdgs.cpoc.report.message.input.FilenameReportingInput;
+import esa.s1pdgs.cpoc.report.ReportingFilenameEntries;
+import esa.s1pdgs.cpoc.report.ReportingFilenameEntry;
+import esa.s1pdgs.cpoc.report.ReportingInput;
+import esa.s1pdgs.cpoc.report.message.AbstractFilenameReportingProduct;
 
-public class JobReportingInput extends FilenameReportingInput {	
+public class JobReportingInput extends AbstractFilenameReportingProduct implements ReportingInput {	
 	@JsonProperty("job_order_id_string")
 	private String jobOrderUuid;
 	
-	public JobReportingInput(final List<String> filenames, final List<String> segments, final String jobOrderUuid) {
-		super(filenames, segments);
+	public JobReportingInput(final ReportingFilenameEntries entries, final String jobOrderUuid) {
+		super(entries);
 		this.jobOrderUuid = jobOrderUuid;
 	}
 	
+	@JsonIgnore
 	public static final JobReportingInput newInstance(
-			final List<String> filenames,
-			final String jobOrderUuid, 
-			final ApplicationLevel level
-	) {
-		if (level == ApplicationLevel.L0_SEGMENT) {
-			return new JobReportingInput(
-					Collections.emptyList(),
-					filenames,
-					jobOrderUuid
-			);
-		}
-		return new JobReportingInput(			
-				filenames,
-				Collections.emptyList(),
-				jobOrderUuid
-		);
+			final List<ReportingFilenameEntry> entries,
+			final String jobOrderUuid
+	) {		
+		return new JobReportingInput(new ReportingFilenameEntries(entries), jobOrderUuid);
 	}
+	
 
 	public String getJobOrderUuid() {
 		return jobOrderUuid;

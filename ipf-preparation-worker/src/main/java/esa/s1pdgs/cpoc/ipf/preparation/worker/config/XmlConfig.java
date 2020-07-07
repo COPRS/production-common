@@ -7,7 +7,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.oxm.jaxb.Jaxb2Marshaller;
 
-import esa.s1pdgs.cpoc.ipf.preparation.worker.service.XmlConverter;
+import esa.s1pdgs.cpoc.ipf.preparation.worker.model.converter.XmlConverter;
 
 @Configuration
 public class XmlConfig {

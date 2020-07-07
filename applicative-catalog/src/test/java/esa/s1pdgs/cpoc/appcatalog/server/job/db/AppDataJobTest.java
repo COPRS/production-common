@@ -15,8 +15,7 @@ import esa.s1pdgs.cpoc.appcatalog.AppDataJobGeneration;
 import esa.s1pdgs.cpoc.appcatalog.AppDataJobProduct;
 import esa.s1pdgs.cpoc.appcatalog.AppDataJobState;
 import esa.s1pdgs.cpoc.common.ApplicationLevel;
-import esa.s1pdgs.cpoc.common.ProductCategory;
-import esa.s1pdgs.cpoc.mqi.model.queue.ProductionEvent;
+import esa.s1pdgs.cpoc.mqi.model.queue.CatalogEvent;
 import esa.s1pdgs.cpoc.mqi.model.rest.GenericMessageDto;
 import nl.jqno.equalsverifier.EqualsVerifier;
 import nl.jqno.equalsverifier.Warning;
@@ -28,18 +27,18 @@ public class AppDataJobTest {
      */
     @Test
     public void testConstructors() {
-        AppDataJob obj = new AppDataJob();
+        final AppDataJob obj = new AppDataJob();
         
-        AppDataJobProduct product = new AppDataJobProduct();
+        final AppDataJobProduct product = new AppDataJobProduct();
         product.setSessionId("session-id");
-        AppDataJobGeneration gen1 = new AppDataJobGeneration();
+        final AppDataJobGeneration gen1 = new AppDataJobGeneration();
         gen1.setTaskTable("tast-table-1");
-        AppDataJobGeneration gen2 = new AppDataJobGeneration();
+        final AppDataJobGeneration gen2 = new AppDataJobGeneration();
         gen2.setTaskTable("tast-table-2");
-        AppDataJobGeneration gen3 = new AppDataJobGeneration();
+        final AppDataJobGeneration gen3 = new AppDataJobGeneration();
         gen3.setTaskTable("tast-table-3");
-        GenericMessageDto<ProductionEvent> message1 = new GenericMessageDto<ProductionEvent>(1, "topic1", null);
-        GenericMessageDto<ProductionEvent> message2 = new GenericMessageDto<ProductionEvent>(2, "topic1", null);
+        final GenericMessageDto<CatalogEvent> message1 = new GenericMessageDto<CatalogEvent>(1, "topic1", null);
+        final GenericMessageDto<CatalogEvent> message2 = new GenericMessageDto<CatalogEvent>(2, "topic1", null);
         
         // check default constructor
         assertEquals(0, obj.getMessages().size());
@@ -55,8 +54,7 @@ public class AppDataJobTest {
         obj.setLastUpdateDate(new Date());
         obj.setProduct(product);
         obj.setMessages(Arrays.asList(message1, message2));
-        obj.setGenerations(Arrays.asList(gen1, gen2, gen3));
-        obj.setCategory(ProductCategory.AUXILIARY_FILES);
+        obj.setGeneration(gen1);
 
         // check setters
         assertEquals(123, obj.getId());
@@ -66,20 +64,18 @@ public class AppDataJobTest {
         assertNotNull(obj.getCreationDate());
         assertNotNull(obj.getLastUpdateDate());
         assertEquals("pod-name", obj.getPod());
-        assertEquals(ProductCategory.AUXILIARY_FILES, obj.getCategory());
         
         // check toString
-        String str = obj.toString();
+        final String str = obj.toString();
         assertTrue(str.contains("id=123"));
         assertTrue(str.contains("level=L1"));
         assertTrue(str.contains("state=DISPATCHING"));
         assertTrue(str.contains("pod=pod-name"));
         assertTrue(str.contains("creationDate="));
         assertTrue(str.contains("lastUpdateDate="));
-        assertTrue(str.contains("category=AUXILIARY_FILES"));
         assertTrue(str.contains("product=" + product.toString()));
         assertTrue(str.contains("messages=" + Arrays.asList(message1, message2).toString()));
-        assertTrue(str.contains("generations=" + Arrays.asList(gen1, gen2, gen3).toString()));
+        assertTrue(str.contains("generation=" + gen1.toString()));
     }
 
     /**

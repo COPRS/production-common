@@ -25,8 +25,7 @@ public class IngestionJob extends AbstractMessage {
 	private long productSizeByte = 0L;
 	
 	private String stationName;
-	
-	
+		
 	public IngestionJob() {
 		super();
 	}

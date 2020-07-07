@@ -1,27 +1,20 @@
 package esa.s1pdgs.cpoc.obs_sdk.report;
 
-import java.util.Collections;
-
 import org.springframework.stereotype.Component;
 
-import esa.s1pdgs.cpoc.common.ProductFamily;
 import esa.s1pdgs.cpoc.obs_sdk.ObsObject;
+import esa.s1pdgs.cpoc.report.ReportingFilenameEntries;
+import esa.s1pdgs.cpoc.report.ReportingFilenameEntry;
 import esa.s1pdgs.cpoc.report.ReportingInput;
 
 @Component
 public class ReportingProductFactory {	
-	public ReportingInput reportingInputFor(final ObsObject obsObject, final String bucketName) {		
-		if (obsObject.getFamily() == ProductFamily.L0_SEGMENT) {			
-			return new ObsReportingInput(
-					Collections.emptyList(), 
-					Collections.singletonList(obsObject.getKey()), 
-					bucketName
-			);
-		}
+	public ReportingInput reportingInputFor(final ObsObject obsObject, final String bucketName) {			
 		return new ObsReportingInput(
-				Collections.singletonList(obsObject.getKey()), 
-				Collections.emptyList(), 				
+				new ReportingFilenameEntries(
+						new ReportingFilenameEntry(obsObject.getFamily(), obsObject.getKey())
+				), 
 				bucketName
-		);		
+		);	
 	}
 }

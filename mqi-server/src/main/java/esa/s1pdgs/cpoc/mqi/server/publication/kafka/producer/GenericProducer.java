@@ -25,8 +25,6 @@ import esa.s1pdgs.cpoc.mqi.server.config.KafkaProperties;
  * Generic producer on a topic
  * 
  * @author Viveris Technologies
- * @param <T>
- *            the type of the published message
  */
 @Component
 public class GenericProducer {
@@ -45,8 +43,6 @@ public class GenericProducer {
 
     /**
      * Constructor for test
-     * @param properties
-     * @param template
      */
     protected GenericProducer(final KafkaProperties properties, final KafkaTemplate<String, Object> template) {
         this.properties = properties;
@@ -56,7 +52,6 @@ public class GenericProducer {
     /**
      * Send a message to a topic and wait until one is published
      * 
-     * @param descriptor
      */
     public void send(final String topic, final AbstractMessage dto)
             throws MqiPublicationError {
@@ -75,7 +70,6 @@ public class GenericProducer {
     /**
      * Producer configuration
      * 
-     * @return
      */
     private Map<String, Object> producerConfigs() {
         final Map<String, Object> props = new ConcurrentHashMap<>();

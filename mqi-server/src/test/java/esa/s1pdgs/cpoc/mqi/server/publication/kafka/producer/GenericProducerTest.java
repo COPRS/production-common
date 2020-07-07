@@ -79,13 +79,9 @@ public class GenericProducerTest {
     /**
      * Test send when exceptions
      * 
-     * @throws ExecutionException
-     * @throws InterruptedException
-     * @throws MqiPublicationError
      */
     @Test
-    public void sendWhenCancellationException() throws InterruptedException,
-            ExecutionException, MqiPublicationError {
+    public void sendWhenCancellationException() throws MqiPublicationError {
 
         doThrow(CancellationException.class).when(template)
                 .send(Mockito.anyString(), Mockito.any());
@@ -101,9 +97,6 @@ public class GenericProducerTest {
     /**
      * Test send when exceptions
      * 
-     * @throws ExecutionException
-     * @throws InterruptedException
-     * @throws MqiPublicationError
      */
     @Test
     public void sendWhenInterruptedException() throws InterruptedException,
@@ -124,9 +117,6 @@ public class GenericProducerTest {
     /**
      * Test send when exceptions
      * 
-     * @throws ExecutionException
-     * @throws InterruptedException
-     * @throws MqiPublicationError
      */
     @Test
     public void sendWhenExecutionException() throws InterruptedException,
@@ -148,9 +138,6 @@ public class GenericProducerTest {
     /**
      * Test nominal send
      * 
-     * @throws ExecutionException
-     * @throws InterruptedException
-     * @throws MqiPublicationError
      */
     @Test
     public void send() throws InterruptedException, ExecutionException,

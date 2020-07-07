@@ -70,6 +70,138 @@ public class TestGenericUtils {
 		return t;
 	}
 
+	public static TaskTable buildTaskTableL0ASP() {
+
+		TaskTable t = new TaskTable();
+		t.setProcessorName("L0_ASSEMBLY_SLICING_PROC");
+		t.setVersion("01.00");
+		t.setTest(TaskTableTestEnum.NO);
+		t.setLevel(ApplicationLevel.L0_SEGMENT);
+
+		t.addDynProcParam(new TaskTableDynProcParam("Processing_Station", "String", "WILE"));
+
+		t.addCfgFile(new TaskTableCfgFile("/usr/local/conf/L0ASP/Sentinel1L0ASProcessor.xml", "01.00"));
+		t.addCfgFile(new TaskTableCfgFile("/usr/local/conf/L0ASP/Sentinel1CCSDSTelemetry.xml", "01.00"));
+		t.addCfgFile(new TaskTableCfgFile("/usr/local/conf/L0ASP/DISSlotConf.xml", "01.00"));
+		t.addCfgFile(new TaskTableCfgFile("/usr/local/conf/L0ASP/Sentinel1Generation.xml", "01.00"));
+		t.addCfgFile(new TaskTableCfgFile("/usr/local/conf/L0ASP/Sentinel1L0ProductDescriptor.xml", "01.00"));
+		t.addCfgFile(new TaskTableCfgFile("/usr/local/conf/L0ASP/Sentinel1ProductFileName.xml", "01.00"));
+		t.addCfgFile(new TaskTableCfgFile("/usr/local/conf/L0ASP/SafeProduct.xml", "01.00"));
+		t.addCfgFile(new TaskTableCfgFile("/usr/local/conf/L0ASP/ISIPFormat.xml", "01.00"));
+		t.addCfgFile(new TaskTableCfgFile("/usr/local/conf/L0ASP/DISConfiguration.xml", "01.00"));
+		t.addCfgFile(new TaskTableCfgFile("/usr/local/conf/L0ASP/ExplorerWrapper.xml", "01.00"));
+
+		TaskTablePool pool1 = new TaskTablePool();
+		pool1.setDetached(false);
+		pool1.setKillingSignal(15);
+		pool1.addTask(buildS1L0AsWrapperProcessor());
+		pool1.addTask(buildS1L0AsProcessor());
+		t.addPool(pool1);
+
+		return t;
+	}
+
+	private static TaskTableTask buildS1L0AsWrapperProcessor() {
+
+		TaskTableTask task11 = new TaskTableTask();
+		task11.setName("S1L0_AS_WRAPPER");
+		task11.setVersion("01.00");
+		task11.setCritical(true);
+		task11.setCriticityLevel(2);
+		task11.setFileName("/usr/local/components/L0ASP/bin/S1L0ASProcessorWrapper");
+
+		task11.addInput(new TaskTableInput(TaskTableInputMode.ALWAYS, TaskTableMandatoryEnum.YES));
+		task11.getInputs().get(0).addAlternative(new TaskTableInputAlternative(1, TaskTableInputOrigin.DB,
+				"ValIntersect", 0, 0, "SM_RAW__0S", TaskTableFileNameType.PHYSICAL));
+		task11.getInputs().get(0).addAlternative(new TaskTableInputAlternative(2, TaskTableInputOrigin.DB,
+				"ValIntersect", 0, 0, "IW_RAW__0S", TaskTableFileNameType.PHYSICAL));
+		task11.getInputs().get(0).addAlternative(new TaskTableInputAlternative(3, TaskTableInputOrigin.DB,
+				"ValIntersect", 0, 0, "EW_RAW__0S", TaskTableFileNameType.PHYSICAL));
+		task11.getInputs().get(0).addAlternative(new TaskTableInputAlternative(4, TaskTableInputOrigin.DB,
+				"ValIntersect", 0, 0, "WV_RAW__0S", TaskTableFileNameType.PHYSICAL));
+		task11.getInputs().get(0).addAlternative(new TaskTableInputAlternative(5, TaskTableInputOrigin.DB,
+				"ValIntersect", 0, 0, "RF_RAW__0S", TaskTableFileNameType.PHYSICAL));
+		task11.getInputs().get(0).addAlternative(new TaskTableInputAlternative(6, TaskTableInputOrigin.DB,
+				"ValIntersect", 0, 0, "EN_RAW__0S", TaskTableFileNameType.PHYSICAL));
+
+
+		task11.addOutput(new TaskTableOuput(TaskTableOutputDestination.PROC, TaskTableMandatoryEnum.YES, "ProcessorConfiguration",
+				TaskTableFileNameType.PHYSICAL));
+
+		return task11;
+	}
+
+	private	static TaskTableTask buildS1L0AsProcessor() {
+
+		TaskTableTask task11 = new TaskTableTask();
+		task11.setName("S1L0_AS");
+		task11.setVersion("01.00");
+		task11.setCritical(true);
+		task11.setCriticityLevel(2);
+		task11.setFileName("/usr/local/components/L0ASP/bin/S1L0ASProcessor");
+
+		task11.addInput(new TaskTableInput(TaskTableInputMode.ALWAYS, TaskTableMandatoryEnum.YES));
+		task11.getInputs().get(0).addAlternative(new TaskTableInputAlternative(1, TaskTableInputOrigin.DB,
+				"LatestValCover", 0, 0, "MPL_ORBSCT", TaskTableFileNameType.PHYSICAL));
+
+		task11.addInput(new TaskTableInput(TaskTableInputMode.ALWAYS, TaskTableMandatoryEnum.YES));
+		task11.getInputs().get(1).addAlternative(new TaskTableInputAlternative(1, TaskTableInputOrigin.DB,
+				"LatestValCover", 7200, 0, "MPL_ORBPRE", TaskTableFileNameType.PHYSICAL));
+
+		task11.addInput(new TaskTableInput(TaskTableInputMode.ALWAYS, TaskTableMandatoryEnum.YES));
+		task11.getInputs().get(2).addAlternative(new TaskTableInputAlternative(1, TaskTableInputOrigin.DB,
+				"ValIntersect", 0, 0, "SM_RAW__0S", TaskTableFileNameType.PHYSICAL));
+		task11.getInputs().get(2).addAlternative(new TaskTableInputAlternative(2, TaskTableInputOrigin.DB,
+				"ValIntersect", 0, 0, "IW_RAW__0S", TaskTableFileNameType.PHYSICAL));
+		task11.getInputs().get(2).addAlternative(new TaskTableInputAlternative(3, TaskTableInputOrigin.DB,
+				"ValIntersect", 0, 0, "EW_RAW__0S", TaskTableFileNameType.PHYSICAL));
+		task11.getInputs().get(2).addAlternative(new TaskTableInputAlternative(4, TaskTableInputOrigin.DB,
+				"ValIntersect", 0, 0, "WV_RAW__0S", TaskTableFileNameType.PHYSICAL));
+		task11.getInputs().get(2).addAlternative(new TaskTableInputAlternative(5, TaskTableInputOrigin.DB,
+				"ValIntersect", 0, 0, "RF_RAW__0S", TaskTableFileNameType.PHYSICAL));
+		task11.getInputs().get(2).addAlternative(new TaskTableInputAlternative(6, TaskTableInputOrigin.DB,
+				"ValIntersect", 0, 0, "EN_RAW__0S", TaskTableFileNameType.PHYSICAL));
+
+		task11.addOutput(new TaskTableOuput(TaskTableOutputDestination.DB, TaskTableMandatoryEnum.NO, "SM_RAW__0S",
+				TaskTableFileNameType.DIRECTORY));
+		task11.addOutput(new TaskTableOuput(TaskTableOutputDestination.DB, TaskTableMandatoryEnum.NO, "SM_RAW__0C",
+				TaskTableFileNameType.DIRECTORY));
+		task11.addOutput(new TaskTableOuput(TaskTableOutputDestination.DB, TaskTableMandatoryEnum.NO, "SM_RAW__0N",
+				TaskTableFileNameType.DIRECTORY));
+		task11.addOutput(new TaskTableOuput(TaskTableOutputDestination.DB, TaskTableMandatoryEnum.NO, "SM_RAW__0A",
+				TaskTableFileNameType.DIRECTORY));
+		task11.addOutput(new TaskTableOuput(TaskTableOutputDestination.DB, TaskTableMandatoryEnum.NO, "IW_RAW__0S",
+				TaskTableFileNameType.DIRECTORY));
+		task11.addOutput(new TaskTableOuput(TaskTableOutputDestination.DB, TaskTableMandatoryEnum.NO, "IW_RAW__0C",
+				TaskTableFileNameType.DIRECTORY));
+		task11.addOutput(new TaskTableOuput(TaskTableOutputDestination.DB, TaskTableMandatoryEnum.NO, "IW_RAW__0N",
+				TaskTableFileNameType.DIRECTORY));
+		task11.addOutput(new TaskTableOuput(TaskTableOutputDestination.DB, TaskTableMandatoryEnum.NO, "IW_RAW__0A",
+				TaskTableFileNameType.DIRECTORY));
+		task11.addOutput(new TaskTableOuput(TaskTableOutputDestination.DB, TaskTableMandatoryEnum.NO, "EW_RAW__0S",
+				TaskTableFileNameType.DIRECTORY));
+		task11.addOutput(new TaskTableOuput(TaskTableOutputDestination.DB, TaskTableMandatoryEnum.NO, "EW_RAW__0C",
+				TaskTableFileNameType.DIRECTORY));
+		task11.addOutput(new TaskTableOuput(TaskTableOutputDestination.DB, TaskTableMandatoryEnum.NO, "EW_RAW__0N",
+				TaskTableFileNameType.DIRECTORY));
+		task11.addOutput(new TaskTableOuput(TaskTableOutputDestination.DB, TaskTableMandatoryEnum.NO, "EW_RAW__0A",
+				TaskTableFileNameType.DIRECTORY));
+		task11.addOutput(new TaskTableOuput(TaskTableOutputDestination.DB, TaskTableMandatoryEnum.NO, "WV_RAW__0S",
+				TaskTableFileNameType.DIRECTORY));
+		task11.addOutput(new TaskTableOuput(TaskTableOutputDestination.DB, TaskTableMandatoryEnum.NO, "WV_RAW__0C",
+				TaskTableFileNameType.DIRECTORY));
+		task11.addOutput(new TaskTableOuput(TaskTableOutputDestination.DB, TaskTableMandatoryEnum.NO, "WV_RAW__0N",
+				TaskTableFileNameType.DIRECTORY));
+		task11.addOutput(new TaskTableOuput(TaskTableOutputDestination.DB, TaskTableMandatoryEnum.NO, "WV_RAW__0A",
+				TaskTableFileNameType.DIRECTORY));
+		task11.addOutput(new TaskTableOuput(TaskTableOutputDestination.DB, TaskTableMandatoryEnum.NO, "RF_RAW__0S",
+				TaskTableFileNameType.DIRECTORY));
+		task11.addOutput(new TaskTableOuput(TaskTableOutputDestination.DB, TaskTableMandatoryEnum.NO, "EN_RAW__0S",
+				TaskTableFileNameType.DIRECTORY));
+
+		return task11;
+	}
+
 	private static TaskTableTask buildTaskAIOProcessor() {
 
 		TaskTableTask task11 = new TaskTableTask();

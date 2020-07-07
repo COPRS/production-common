@@ -1,14 +1,18 @@
 package esa.s1pdgs.cpoc.ingestion.trigger.report;
 
-import java.util.Collections;
 import java.util.Date;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
-import esa.s1pdgs.cpoc.report.message.input.FilenameReportingInput;
+import esa.s1pdgs.cpoc.common.ProductFamily;
+import esa.s1pdgs.cpoc.report.ReportingFilenameEntries;
+import esa.s1pdgs.cpoc.report.ReportingFilenameEntry;
+import esa.s1pdgs.cpoc.report.ReportingInput;
+import esa.s1pdgs.cpoc.report.message.AbstractFilenameReportingProduct;
 
-public class IngestionTriggerReportingInput extends FilenameReportingInput {
+public final class IngestionTriggerReportingInput extends AbstractFilenameReportingProduct implements ReportingInput {
 	
 	@JsonProperty("pickup_point_detection_date")
 	@JsonFormat(pattern="yyyy-MM-dd'T'HH:mm:ss.SSS'000Z'", timezone="UTC")
@@ -17,12 +21,24 @@ public class IngestionTriggerReportingInput extends FilenameReportingInput {
 	@JsonProperty("pickup_point_available_date")
 	@JsonFormat(pattern="yyyy-MM-dd'T'HH:mm:ss.SSS'000Z'", timezone="UTC")
 	private Date availDate = new Date();
-	
 
-	public IngestionTriggerReportingInput(final String filename, final Date pollingDate, final Date availDate) {
-		super(Collections.singletonList(filename), Collections.emptyList());
+	public IngestionTriggerReportingInput(final ReportingFilenameEntries entry, final Date pollingDate, final Date availDate) {
+		super(entry);
 		this.pollingDate = pollingDate;
 		this.availDate = availDate;
+	}
+	
+	@JsonIgnore
+	public static final IngestionTriggerReportingInput newInstance(
+			final String productName,
+			final ProductFamily family,
+			final Date availDate
+	) {
+		return new IngestionTriggerReportingInput(
+				new ReportingFilenameEntries(new ReportingFilenameEntry(family, productName)), 
+				new Date(), 
+				availDate
+		);
 	}
 
 	public Date getPollingDate() {

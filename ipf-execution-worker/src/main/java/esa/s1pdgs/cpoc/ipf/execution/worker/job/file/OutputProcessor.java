@@ -24,7 +24,6 @@ import esa.s1pdgs.cpoc.common.ProductFamily;
 import esa.s1pdgs.cpoc.common.errors.AbstractCodedException;
 import esa.s1pdgs.cpoc.common.errors.InternalErrorException;
 import esa.s1pdgs.cpoc.common.errors.UnknownFamilyException;
-import esa.s1pdgs.cpoc.common.errors.mqi.MqiPublicationError;
 import esa.s1pdgs.cpoc.common.errors.obs.ObsException;
 import esa.s1pdgs.cpoc.ipf.execution.worker.config.ApplicationProperties;
 import esa.s1pdgs.cpoc.ipf.execution.worker.job.model.mqi.FileQueueMessage;
@@ -42,6 +41,8 @@ import esa.s1pdgs.cpoc.obs_sdk.ObsClient;
 import esa.s1pdgs.cpoc.obs_sdk.ObsEmptyFileException;
 import esa.s1pdgs.cpoc.report.Reporting;
 import esa.s1pdgs.cpoc.report.ReportingFactory;
+import esa.s1pdgs.cpoc.report.ReportingFilenameEntries;
+import esa.s1pdgs.cpoc.report.ReportingFilenameEntry;
 import esa.s1pdgs.cpoc.report.ReportingMessage;
 import esa.s1pdgs.cpoc.report.ReportingOutput;
 import esa.s1pdgs.cpoc.report.ReportingUtils;
@@ -172,12 +173,9 @@ public class OutputProcessor {
 		}
 	}
 
-	private final ProductFamily familyOf(final LevelJobOutputDto output, final String name) {
+	private final ProductFamily familyOf(final LevelJobOutputDto output) {
 		final ProductFamily family = ProductFamily.fromValue(output.getFamily());
-		if (family == ProductFamily.L0_SLICE && 
-			appLevel == ApplicationLevel.L0 && 
-			!name.matches(properties.getSegmentBlacklistPattern())
-		) {			
+		if (family == ProductFamily.L0_SLICE && appLevel == ApplicationLevel.L0){			
 			return ProductFamily.L0_SEGMENT;
 		}
 		return family;
@@ -216,7 +214,7 @@ public class OutputProcessor {
 			if (matchOutput == null) {
 				LOGGER.warn("Output {} ignored because no found matching regular expression", productName);
 			} else {
-				final ProductFamily family = familyOf(matchOutput, productName);
+				final ProductFamily family = familyOf(matchOutput);
 
 				final File file = new File(filePath);
 				final OQCFlag oqcFlag = executor.executeOQC(file, family, matchOutput, new OQCDefaultTaskFactory(), reportingFactory);
@@ -236,8 +234,9 @@ public class OutputProcessor {
 				case L0_SLICE:
 				case L0_SEGMENT:	
 					// Specific case of the L0 wrapper
-					if (appLevel == ApplicationLevel.L0) {						
-						final Reporting reporting = reportingFactory.newReporting("GhostHandling");						
+					if (appLevel == ApplicationLevel.L0) {										
+						final Reporting reporting = reportingFactory.newReporting("GhostHandling");	
+
 						reporting.begin(
 								ReportingUtils.newFilenameReportingInputFor(family, productName),
 								new ReportingMessage("Checking if %s is a ghost candidate", productName)
@@ -547,8 +546,15 @@ public class OutputProcessor {
 				stop = true;
 			} else {
 				try {
+					LOGGER.info("{} 3 - Publishing KAFKA message for output {}", prefixMonitorLogs,
+							msg.getProductName());
 					procuderFactory.sendOutput(msg, inputMessage, uuid);
-				} catch (final MqiPublicationError ace) {
+					LOGGER.info("{} 3 - Successful published KAFKA message for output {}", prefixMonitorLogs,
+							msg.getProductName());
+				} catch (final Exception e) {
+					LOGGER.error("{} 3 - Failed publishing KAFKA message for output {}", prefixMonitorLogs,
+							msg.getProductName());
+					throw e;
 				}
 				iter.remove();
 			}
@@ -570,14 +576,16 @@ public class OutputProcessor {
 				if (Thread.currentThread().isInterrupted()) {
 					throw new InternalErrorException("The current thread as been interrupted");
 				} else {
-					LOGGER.info("{} 4 - Publishing KAFKA message for output {}", prefixMonitorLogs,
-							msg.getProductName());
 					try {
+						LOGGER.info("{} 4 - Publishing KAFKA message for output {}", prefixMonitorLogs,
+								msg.getProductName());
 						procuderFactory.sendOutput(msg, inputMessage, uuid);
-					} catch (final MqiPublicationError ace) {
-						final String message = String.format("%s [code %d] %s", prefixMonitorLogs, ace.getCode().getCode(),
-								ace.getLogMessage());
-						LOGGER.error(message);
+						LOGGER.info("{} 4 - Successful published KAFKA message for output {}", prefixMonitorLogs,
+								msg.getProductName());
+					} catch (final Exception e) {
+						LOGGER.error("{} 4 - Failed publishing KAFKA message for output {}", prefixMonitorLogs,
+								msg.getProductName());
+						throw e;
 					}
 				}
 			}
@@ -593,8 +601,6 @@ public class OutputProcessor {
 	 * @throws ObsEmptyFileException 
 	 */
 	public ReportingOutput processOutput(final ReportingFactory reportingFactory, final UUID uuid) throws AbstractCodedException, ObsEmptyFileException {
-		final List<String> filenames = new ArrayList<>();
-		final List<String> segments = new ArrayList<>();
 		// Extract files
 		final List<String> lines = extractFiles();
 
@@ -606,23 +612,26 @@ public class OutputProcessor {
 		sortOutputs(lines, uploadBatch, outputToPublish, reportToPublish, reportingFactory);
 		try {
 			// Upload per batch the output
+			// S1PRO-1494: WARNING--- list will be emptied by this method. For reporting, make a copy beforehand
+			final List<ObsQueueMessage> outs = new ArrayList<>(outputToPublish);			
 			processProducts(reportingFactory, uploadBatch, outputToPublish, uuid);
 			// Publish reports
 			processReports(reportToPublish, uuid);
-			for (final FileObsUploadObject obj : uploadBatch) {
-				if (obj.getFamily() == ProductFamily.L0_SEGMENT) {
-					segments.add(obj.getKey());
-				}
-				else {
-					filenames.add(obj.getKey());
-				}
-			}
+			return toReportingOutput(outs);
 		} catch (final AbstractCodedException | ObsEmptyFileException e) {
 			throw e;
 		}
-		return new FilenameReportingOutput(filenames, segments);
 	}
 
+	private final ReportingOutput toReportingOutput(final List<ObsQueueMessage> outputToPublish) {		
+		final List<ReportingFilenameEntry> reportingEntries = outputToPublish.stream()
+				.map(m -> new ReportingFilenameEntry(m.getFamily(), m.getProductName()))
+				.collect(Collectors.toList());
+		
+		return new FilenameReportingOutput(new ReportingFilenameEntries(reportingEntries));
+	}
+	
+	
 	private long size(final File file) throws InternalErrorException {
 		try {
 			final Path folder = file.toPath();

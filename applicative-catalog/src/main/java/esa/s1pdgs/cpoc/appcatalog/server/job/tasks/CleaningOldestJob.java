@@ -14,7 +14,7 @@ import esa.s1pdgs.cpoc.appcatalog.AppDataJob;
 import esa.s1pdgs.cpoc.appcatalog.AppDataJobState;
 import esa.s1pdgs.cpoc.appcatalog.server.config.JobsProperties;
 import esa.s1pdgs.cpoc.appcatalog.server.service.AppDataJobService;
-import esa.s1pdgs.cpoc.common.ProductCategory;
+import esa.s1pdgs.cpoc.common.ApplicationLevel;
 
 @Component
 public class CleaningOldestJob {
@@ -88,17 +88,32 @@ public class CleaningOldestJob {
      */
     private void cleanJobsByState(final AppDataJobState state, final boolean isError) {
         // EDRS sessions
-        cleanJobsByStateAndCategory(state, ProductCategory.EDRS_SESSIONS,
+        cleanJobsByStateAndCategory(
+        		state, 
+        		ApplicationLevel.L0,
                 maxAgeJobsEdrsSessions.get(state.name().toLowerCase()),
-                isError);
-        // Level products
-        cleanJobsByStateAndCategory(state, ProductCategory.LEVEL_PRODUCTS,
-                maxAgeJobsLevelProducts.get(state.name().toLowerCase()),
-                isError);
+                isError
+        );
         // Level segments
-        cleanJobsByStateAndCategory(state, ProductCategory.LEVEL_SEGMENTS,
+        cleanJobsByStateAndCategory(
+        		state, 
+        		ApplicationLevel.L0_SEGMENT,
                 maxAgeJobsLevelSegments.get(state.name().toLowerCase()),
-                isError);
+                isError
+        );        
+        // Level products
+        cleanJobsByStateAndCategory(
+        		state, 
+        		ApplicationLevel.L1,
+                maxAgeJobsLevelProducts.get(state.name().toLowerCase()),
+                isError
+        );
+        cleanJobsByStateAndCategory(
+        		state, 
+        		ApplicationLevel.L2,
+                maxAgeJobsLevelProducts.get(state.name().toLowerCase()),
+                isError
+        );
     }
 
     /**
@@ -108,23 +123,27 @@ public class CleaningOldestJob {
      * @param maxAge
      * @param isError
      */
-    private void cleanJobsByStateAndCategory(final AppDataJobState state,
-            final ProductCategory category, final long maxAge, final boolean isError) {
-        Date dateCompareS = new Date(System.currentTimeMillis() - maxAge);
-        List<AppDataJob> jobsS = appDataJobService
-                .findByStateAndCategoryAndLastUpdateDateLessThan(state,
-                        category, dateCompareS);
-        for (AppDataJob jobS : jobsS) {
+    private void cleanJobsByStateAndCategory(
+    		final AppDataJobState state,
+    		final ApplicationLevel level,
+            final long maxAge, 
+            final boolean isError
+     ) {
+        final Date dateCompareS = new Date(System.currentTimeMillis() - maxAge);
+        final List<AppDataJob> jobsS = appDataJobService.findByStateAndLastUpdateDateLessThan(
+        		state, 
+        		level, 
+        		dateCompareS
+        );
+        for (final AppDataJob jobS : jobsS) {
             if (isError) {
                 LOGGER.error(
-                        "[productName {}] [category {}] [level {}] Remove {} job for enough time",
-                        jobS.getProduct().getProductName(), category,
-                        jobS.getLevel(), state);
+                        "[productName {}] [level {}] Remove {} job for enough time",
+                        jobS.getProduct().getProductName(),  jobS.getLevel(), state);
             } else {
                 LOGGER.info(
-                        "[productName {}] [category {}] [level {}] Remove {} job for enough time",
-                        jobS.getProduct().getProductName(), category,
-                        jobS.getLevel(), state);
+                        "[productName {}] [level {}] Remove {} job for enough time",
+                        jobS.getProduct().getProductName(), jobS.getLevel(), state);
             }
             appDataJobService.deleteJob(jobS.getId());
         }

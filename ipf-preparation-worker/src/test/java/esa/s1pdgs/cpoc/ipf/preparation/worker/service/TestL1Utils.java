@@ -24,10 +24,7 @@ public class TestL1Utils {
     public static LevelProductsRouting buildL1Routing() {
         final LevelProductsRouting r = new LevelProductsRouting();
         r.addRoute(new LevelProductsRoute(new LevelProductsRouteFrom("EN", "A"),
-                new LevelProductsRouteTo(Arrays.asList("EN_RAW__0_GRDF_1.xml",
-                        "EN_RAW__0_GRDH_1.xml", "EN_RAW__0_GRDM_1.xml",
-                        "EN_RAW__0_SLC__1.xml", "EN_RAW__0_SLC__1_GRDF_1.xml",
-                        "EN_RAW__0_SLC__1_GRDH_1.xml"))));
+                new LevelProductsRouteTo(Arrays.asList("EN_RAW__0_GRDF_1.xml"))));
         r.addRoute(new LevelProductsRoute(new LevelProductsRouteFrom("EN", "B"),
                 new LevelProductsRouteTo(Arrays.asList("EN_RAW__0_SLC__1.xml",
                         "EN_RAW__0_SLC__1_GRDF_1.xml",
@@ -63,9 +60,9 @@ public class TestL1Utils {
         return r;
     }
 
-    public static  AppDataJob<CatalogEvent> buildJobGeneration(
+    public static  AppDataJob buildJobGeneration(
             final boolean preSearchInfo) throws InternalErrorException {
-        final AppDataJob<CatalogEvent> ret = new AppDataJob<>();
+        final AppDataJob ret = new AppDataJob();
         ret.setId(123);
         ret.setState(AppDataJobState.GENERATING);
         ret.setPod("hostname");
@@ -123,7 +120,7 @@ public class TestL1Utils {
         gen4.setTaskTable("IW_RAW__0_SLC__1_GRDH_1.xml");
         gen4.setState(AppDataJobGenerationState.SENT);
         gen4.setCreationDate(new Date(0L));
-        ret.setGenerations(Arrays.asList(gen1, gen2, gen3, gen4));
+        ret.setGeneration(gen1);
 
         return ret;
     }

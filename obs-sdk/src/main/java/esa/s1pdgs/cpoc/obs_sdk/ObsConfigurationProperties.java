@@ -52,7 +52,7 @@ public class ObsConfigurationProperties {
 	@Value("${retry-policy.condition.max-retries:3}")
 	private int maxRetries;
 	
-	@Value("${storage_retry_obs_max-retries:100}")
+	@Value("${storage_retry_obs_max-retries:10}")
 	private int maxObsRetries;
 	
 	@Value("${retry-policy.backoff.base-delay-ms:1000}")
@@ -72,6 +72,12 @@ public class ObsConfigurationProperties {
 	
 	@Value("${timeout-s.up-exec:20}")
 	private int timeoutUpExec;
+	
+	@Value("${disable-chunked-encoding:false}")
+	private boolean disableChunkedEncoding;
+
+	@Value("${max-input-stream-buffer-size-mb:1024}")
+	private int maxInputStreamBufferSizeMb;
 
 	private Map<ProductFamily, String> bucket = new HashMap<>();
 	
@@ -231,6 +237,18 @@ public class ObsConfigurationProperties {
 		this.backend = backend;
 	}
 
+	public boolean getDisableChunkedEncoding() {
+		return disableChunkedEncoding;
+	}
+
+	public void setDisableChunkedEncoding(boolean disableChunkedEncoding) {
+		this.disableChunkedEncoding = disableChunkedEncoding;
+	}
+
+	public int getMaxInputStreamBufferSize() {
+		return maxInputStreamBufferSizeMb * 1024 * 1024;
+	}
+
 	@Override
 	public String toString() {
 		return "ObsConfigurationProperties [backend=" + backend + ", userId=" + userId + ", userSecret=" + userSecret
@@ -239,6 +257,6 @@ public class ObsConfigurationProperties {
 				+ multipartUploadThreshold + ", minUploadPartSize=" + minUploadPartSize + ", maxRetries=" + maxRetries+ ", maxObsRetries=" + maxObsRetries
 				+ ", backoffBaseDelay=" + backoffBaseDelay + ", backoffThrottledBaseDelay=" + backoffThrottledBaseDelay
 				+ ", backoffMaxDelay=" + backoffMaxDelay + ", timeoutShutdown=" + timeoutShutdown + ", timeoutDownExec="
-				+ timeoutDownExec + ", timeoutUpExec=" + timeoutUpExec + ", bucket=" + bucket + "]";
+				+ timeoutDownExec + ", timeoutUpExec=" + timeoutUpExec + ", disableChunkedEncoding=" + disableChunkedEncoding + ", bucket=" + bucket + "]";
 	}
 }

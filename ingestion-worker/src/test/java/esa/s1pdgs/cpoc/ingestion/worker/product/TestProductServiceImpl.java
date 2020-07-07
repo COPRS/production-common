@@ -2,10 +2,7 @@ package esa.s1pdgs.cpoc.ingestion.worker.product;
 
 import static org.junit.Assert.assertEquals;
 import static org.mockito.Mockito.doReturn;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
 
-import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.nio.file.Paths;
 import java.util.Arrays;
@@ -15,17 +12,14 @@ import java.util.List;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mock;
-import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 
 import esa.s1pdgs.cpoc.common.ProductFamily;
 import esa.s1pdgs.cpoc.ingestion.worker.config.ProcessConfiguration;
 import esa.s1pdgs.cpoc.ingestion.worker.inbox.InboxAdapter;
-import esa.s1pdgs.cpoc.ingestion.worker.inbox.InboxAdapterEntry;
 import esa.s1pdgs.cpoc.mqi.model.queue.IngestionEvent;
 import esa.s1pdgs.cpoc.mqi.model.queue.IngestionJob;
 import esa.s1pdgs.cpoc.obs_sdk.ObsClient;
-import esa.s1pdgs.cpoc.obs_sdk.StreamObsUploadObject;
 import esa.s1pdgs.cpoc.report.ReportingFactory;
 
 public class TestProductServiceImpl {
@@ -92,20 +86,6 @@ public class TestProductServiceImpl {
 		final List<Product<IngestionEvent>> expectedResult = Arrays.asList(product);
 		final List<Product<IngestionEvent>> actualResult = uut.ingest(family, inboxAdapter, ingestionJob, ReportingFactory.NULL);
 		assertEquals(expectedResult.size(), actualResult.size());
-	}
-
-	@Test
-	public void testMarkInvalid() throws Exception {
-		final IngestionJob ingestionJob = new IngestionJob();
-		ingestionJob.setProductName("productName");
-		ingestionJob.setPickupBaseURL("file:///pickup/path");
-		ingestionJob.setRelativePath("relative/path");
-		InboxAdapterEntry inboxAdapterEntry = new InboxAdapterEntry("key",	new ByteArrayInputStream("test".getBytes()), 0L);
-		doReturn(Arrays.asList(inboxAdapterEntry)).when(inboxAdapter).read(Mockito.any(), Mockito.anyString());
-		uut.markInvalid(inboxAdapter, ingestionJob, ReportingFactory.NULL);
-		final StreamObsUploadObject uploadObj = new StreamObsUploadObject(ProductFamily.INVALID, "key",
-				new ByteArrayInputStream("test".getBytes()), 0L);
-		verify(obsClient, times(1)).uploadStreams(Mockito.eq(Arrays.asList(uploadObj)), Mockito.any());
 	}
 
 	@Test

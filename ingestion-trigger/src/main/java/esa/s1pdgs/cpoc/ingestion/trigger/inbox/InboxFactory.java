@@ -9,12 +9,16 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Component;
 
+import esa.s1pdgs.cpoc.common.ProductFamily;
 import esa.s1pdgs.cpoc.ingestion.trigger.config.InboxConfiguration;
 import esa.s1pdgs.cpoc.ingestion.trigger.filter.BlacklistRegexRelativePathInboxFilter;
 import esa.s1pdgs.cpoc.ingestion.trigger.filter.JoinedFilter;
 import esa.s1pdgs.cpoc.ingestion.trigger.filter.WhitelistRegexRelativePathInboxFilter;
 import esa.s1pdgs.cpoc.ingestion.trigger.fs.FilesystemInboxAdapterFactory;
 import esa.s1pdgs.cpoc.ingestion.trigger.kafka.producer.KafkaSubmissionClient;
+import esa.s1pdgs.cpoc.ingestion.trigger.name.FlatProductNameEvaluator;
+import esa.s1pdgs.cpoc.ingestion.trigger.name.ProductNameEvaluator;
+import esa.s1pdgs.cpoc.ingestion.trigger.name.SessionProductNameEvaluator;
 import esa.s1pdgs.cpoc.ingestion.trigger.service.IngestionTriggerServiceTransactional;
 import esa.s1pdgs.cpoc.ingestion.trigger.xbip.XbipInboxAdapterFactory;
 import esa.s1pdgs.cpoc.mqi.model.queue.IngestionJob;
@@ -49,7 +53,8 @@ public class InboxFactory {
 				ingestionTriggerServiceTransactional, 
 				new KafkaSubmissionClient(kafkaTemplate, config.getTopic()),
 				config.getFamily(),
-				config.getStationName()
+				config.getStationName(),
+				newProductNameEvaluatorFor(config)
 		);
 	}
 	
@@ -84,8 +89,17 @@ public class InboxFactory {
 		
 		return inboxAdapterFactory.newInboxAdapter(
 				new URI(sanitizedUrl), 
-				config.getProductInDirectoryLevel(),
 				config.getStationName()
 		);
+	}
+	
+	final ProductNameEvaluator newProductNameEvaluatorFor(final InboxConfiguration config) {
+		if (config.getFamily() == ProductFamily.EDRS_SESSION) {
+			return new SessionProductNameEvaluator(
+					Pattern.compile(config.getSessionNamePattern(), Pattern.CASE_INSENSITIVE), 
+					config.getSessionNameGroupIndex()
+			);			
+		}
+		return new FlatProductNameEvaluator();
 	}
 }

@@ -6,13 +6,16 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.URL;
+import java.time.Instant;
+import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
-import esa.s1pdgs.cpoc.obs_sdk.Md5;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.util.CollectionUtils;
@@ -21,22 +24,24 @@ import com.amazonaws.AmazonServiceException;
 import com.amazonaws.HttpMethod;
 import com.amazonaws.event.ProgressEvent;
 import com.amazonaws.services.s3.AmazonS3;
+import com.amazonaws.services.s3.model.BucketLifecycleConfiguration;
 import com.amazonaws.services.s3.model.CopyObjectRequest;
 import com.amazonaws.services.s3.model.GeneratePresignedUrlRequest;
+import com.amazonaws.services.s3.model.GetBucketLifecycleConfigurationRequest;
 import com.amazonaws.services.s3.model.GetObjectRequest;
 import com.amazonaws.services.s3.model.ObjectListing;
 import com.amazonaws.services.s3.model.ObjectMetadata;
 import com.amazonaws.services.s3.model.S3Object;
 import com.amazonaws.services.s3.model.S3ObjectSummary;
+import com.amazonaws.services.s3.model.SetBucketLifecycleConfigurationRequest;
 import com.amazonaws.services.s3.transfer.TransferManager;
 import com.amazonaws.services.s3.transfer.Upload;
 import com.amazonaws.services.s3.transfer.model.UploadResult;
 import com.amazonaws.util.IOUtils;
 
-import esa.s1pdgs.cpoc.obs_sdk.AbstractObsClient;
+import esa.s1pdgs.cpoc.obs_sdk.Md5;
 import esa.s1pdgs.cpoc.obs_sdk.ObsServiceException;
 import esa.s1pdgs.cpoc.obs_sdk.SdkClientException;
-import esa.s1pdgs.cpoc.obs_sdk.swift.SwiftSdkClientException;
 
 /**
  * Provides services to manage objects in the object storage wia the AmazonS3
@@ -153,7 +158,6 @@ public class S3ObsServices {
 	 * @return
 	 * @throws S3SdkClientException
 	 * @throws S3ObsServiceException
-	 * @throws SwiftSdkClientException
 	 */
 	public boolean bucketExist(final String bucketName) throws S3SdkClientException, S3ObsServiceException {
 		for (int retryCount = 1;; retryCount++) {
@@ -511,7 +515,7 @@ public class S3ObsServices {
 				try {
 					log(String.format("Uploading object %s in bucket %s", keyName, bucketName));
 
-					ObjectMetadata metadata = new ObjectMetadata();
+					final ObjectMetadata metadata = new ObjectMetadata();
 					metadata.setContentLength(contentLength);
 					final Upload upload = s3tm.upload(bucketName, keyName, in, metadata);
 					upload.addProgressListener((final ProgressEvent progressEvent) -> {
@@ -530,9 +534,16 @@ public class S3ObsServices {
 					log(String.format("Upload object %s in bucket %s succeeded", keyName, bucketName));
 					break;
 				} catch (final com.amazonaws.SdkClientException sce) {
-					if (retryCount <= numRetries) {
-						LOGGER.warn(String.format("Upload object %s from bucket %s failed: Attempt : %d / %d", keyName,
-								bucketName, retryCount, numRetries));
+					if (retryCount <= numRetries) {						
+						if (retryCount == 1) {
+							LOGGER.warn("Upload object {} to bucket {} failed: Attempt : {}/{}", keyName,
+									bucketName, retryCount, numRetries);																					
+							LOGGER.debug("Exception is: {}", sce);							
+						}
+						else {
+							LOGGER.warn("Upload object {} to bucket {} failed: Attempt : {}/{}", keyName,
+									bucketName, retryCount, numRetries);
+						}						
 						try {
 							Thread.sleep(retryDelay);
 						} catch (final InterruptedException e) {
@@ -550,11 +561,45 @@ public class S3ObsServices {
 		}
 	}
 
+	public void setExpirationTime(final String bucketName, final String prefix, final Instant expirationDate) {
+		BucketLifecycleConfiguration lifecycleConfiguration = s3client.getBucketLifecycleConfiguration(new GetBucketLifecycleConfigurationRequest(bucketName));
+
+		if (lifecycleConfiguration == null) {
+			lifecycleConfiguration = new BucketLifecycleConfiguration();
+		}
+
+		if (lifecycleConfiguration.getRules() == null) {
+			lifecycleConfiguration.withRules(new ArrayList<>());
+		}
+
+		final Optional<BucketLifecycleConfiguration.Rule> optionalRule = lifecycleConfiguration.getRules().stream().filter(r -> r.getId().equals(prefix)).findAny();
+
+		final BucketLifecycleConfiguration.Rule rule;
+		if (!optionalRule.isPresent()) {
+			rule = new BucketLifecycleConfiguration.Rule();
+			lifecycleConfiguration.getRules().add(rule);
+		} else {
+			rule = optionalRule.get();
+		}
+
+		rule.withId(prefix)
+				.withPrefix(prefix) //filter does not work
+				.withExpirationDate(new Date(expirationDate.truncatedTo(ChronoUnit.DAYS).toEpochMilli()))
+				.withStatus(BucketLifecycleConfiguration.ENABLED);
+
+		s3client.setBucketLifecycleConfiguration(new SetBucketLifecycleConfigurationRequest(bucketName, lifecycleConfiguration));
+	}
+
+	public ObjectMetadata getObjectMetadata(String bucketName, String key) {
+		return s3client.getObjectMetadata(bucketName, key);
+	}
+
 	public void createBucket(final String bucketName)
-			throws SwiftSdkClientException, ObsServiceException, S3SdkClientException {
+			throws ObsServiceException, S3SdkClientException {
 		for (int retryCount = 1;; retryCount++) {
 			try {
 				s3client.createBucket(bucketName);
+				break;
 			} catch (final com.amazonaws.SdkClientException sce) {
 				if (retryCount <= numRetries) {
 					LOGGER.warn(String.format("Checking bucket existance %s failed: Attempt : %d / %d", bucketName,
@@ -645,6 +690,7 @@ public class S3ObsServices {
 			try {
 				log(String.format("Performing %s", request));
 				s3client.copyObject(request);
+				break;
 			} catch (final com.amazonaws.SdkClientException sce) {
 				if (retryCount <= numRetries) {
 					LOGGER.warn(String.format("Move of objects from bucket %s failed: Attempt : %d / %d",

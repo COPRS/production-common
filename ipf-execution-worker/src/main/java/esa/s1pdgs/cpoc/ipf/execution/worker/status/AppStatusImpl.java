@@ -7,6 +7,7 @@ import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.annotation.Profile;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
@@ -17,6 +18,7 @@ import esa.s1pdgs.cpoc.common.errors.AbstractCodedException;
 import esa.s1pdgs.cpoc.mqi.client.StatusService;
 
 @Component
+@Profile("!test")
 public class AppStatusImpl extends AbstractAppStatus {
 
     /**
@@ -33,13 +35,14 @@ public class AppStatusImpl extends AbstractAppStatus {
     public AppStatusImpl(
             @Value("${status.max-error-counter-processing:100}") final int maxErrorCounterProcessing,
             @Value("${status.max-error-counter-mqi:100}") final int maxErrorCounterNextMessage,
+            @Qualifier("systemExitCall") final Runnable systemExitCall,
             @Qualifier("mqiServiceForStatus") final StatusService mqiStatusService) {
-    	super(new Status(maxErrorCounterProcessing, maxErrorCounterNextMessage));
+    	super(new Status(maxErrorCounterProcessing, maxErrorCounterNextMessage), systemExitCall);
         this.mqiStatusService = mqiStatusService;
     }
 
     @Override
-    public boolean isProcessing(String category, long messageId) {
+    public boolean isProcessing(final String category, final long messageId) {
     	if (!ProductCategory.LEVEL_JOBS.name().toLowerCase().equals(category)) {
     		throw new NoSuchElementException(String.format("Category %s not available for processing", category));
     	} else if (messageId < 0) {
@@ -57,10 +60,10 @@ public class AppStatusImpl extends AbstractAppStatus {
         if (isShallBeStopped()) {
             try {
                 mqiStatusService.stop();
-            } catch (AbstractCodedException ace) {
+            } catch (final AbstractCodedException ace) {
                 LOGGER.error(ace.getLogMessage());
             }
-            System.exit(0);
+            systemExit();
         }
     }
 

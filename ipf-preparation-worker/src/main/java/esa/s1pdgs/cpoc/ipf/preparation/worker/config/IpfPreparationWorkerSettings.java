@@ -1,7 +1,6 @@
 package esa.s1pdgs.cpoc.ipf.preparation.worker.config;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -9,26 +8,13 @@ import java.util.Map;
 
 import javax.annotation.PostConstruct;
 
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
-import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
 import org.springframework.util.StringUtils;
 
-import esa.s1pdgs.cpoc.appcatalog.client.job.AppCatalogJobClient;
-import esa.s1pdgs.cpoc.common.ApplicationLevel;
 import esa.s1pdgs.cpoc.common.ProductCategory;
 import esa.s1pdgs.cpoc.common.ProductFamily;
-import esa.s1pdgs.cpoc.ipf.preparation.worker.model.joborder.JobsGeneratorFactory;
-import esa.s1pdgs.cpoc.ipf.preparation.worker.service.AbstractJobsDispatcher;
-import esa.s1pdgs.cpoc.ipf.preparation.worker.service.L0AppJobDispatcher;
-import esa.s1pdgs.cpoc.ipf.preparation.worker.service.L0SegmentAppJobDispatcher;
-import esa.s1pdgs.cpoc.ipf.preparation.worker.service.LevelProductsJobDispatcher;
-import esa.s1pdgs.cpoc.ipf.preparation.worker.service.XmlConverter;
-import esa.s1pdgs.cpoc.mqi.model.queue.CatalogEvent;
 
 /**
  * Extraction class of "tasktables" configuration properties
@@ -39,38 +25,6 @@ import esa.s1pdgs.cpoc.mqi.model.queue.CatalogEvent;
 @EnableConfigurationProperties
 @ConfigurationProperties(prefix = "ipf-preparation-worker")
 public class IpfPreparationWorkerSettings {
-
-	@Bean
-	@Autowired
-	public AbstractJobsDispatcher jobsDispatcher(
-			final ProcessSettings processSettings,
-			final JobsGeneratorFactory factory, 
-			final ThreadPoolTaskScheduler taskScheduler,
-			final XmlConverter xmlConverter,
-			@Value("${level-products.pathroutingxmlfile}") final String pathRoutingXmlFile,
-			final AppCatalogJobClient<CatalogEvent> appCatClient
-	) {
-		switch (processSettings.getLevel()) {
-			case L0:
-				return new L0AppJobDispatcher(this, processSettings, factory, taskScheduler, appCatClient);
-			case L0_SEGMENT:
-				return new L0SegmentAppJobDispatcher(this, processSettings, factory, taskScheduler, appCatClient);
-			case L1:
-			case L2:
-				return new LevelProductsJobDispatcher(this, processSettings, factory, taskScheduler, xmlConverter, 
-						pathRoutingXmlFile, appCatClient);
-			default:
-				// fall through to throw exception
-		}
-		throw new IllegalArgumentException(
-				String.format(
-						"Unsupported Application Level '%s'. Available are: %s", 
-						processSettings.getLevel(),
-						Arrays.asList(ApplicationLevel.values())
-				)
-		);
-	}
-	
 	public static class CategoryConfig
 	{
 		private long fixedDelayMs = 500L;
@@ -195,11 +149,6 @@ public class IpfPreparationWorkerSettings {
 	protected static final String MAP_KEY_VAL_SEP = ":";
 
 	/**
-	 * Maximal number of task tables
-	 */
-	private int maxnboftasktable;
-
-	/**
 	 * Maximal number of jobs waiting to be sent
 	 */
 	private int maxnumberofjobs;
@@ -249,24 +198,24 @@ public class IpfPreparationWorkerSettings {
 	/**
 	 * Map between output product type and product family
 	 */
-	private Map<String, ProductFamily> outputfamilies = new HashMap<>();;
+	private Map<String, ProductFamily> outputfamilies = new HashMap<>();
 
 	/**
 	 * Map of all the overlap for the different slice type
 	 */
-	private Map<String, Float> typeOverlap = new HashMap<>();;
+	private Map<String, Float> typeOverlap = new HashMap<>();
 
 	/**
 	 * Map of all the length for the different slice type<br/>
 	 * Format: acquisition in IW, EW, SM, EM
 	 */
-	private Map<String, Float> typeSliceLength = new HashMap<>();;
+	private Map<String, Float> typeSliceLength = new HashMap<>();
 
 	/**
 	 * Map product type and corresponding metadata index in case of the product type
 	 * in lowercase in not the metadata index (example: aux_resorb use aux_res)<br/>
 	 */
-	private Map<String, String> mapTypeMeta = new HashMap<>();;
+	private Map<String, String> mapTypeMeta = new HashMap<>();
 	
 	private List<ProductFamily> oqcCheck = new ArrayList<>();
 
@@ -290,9 +239,9 @@ public class IpfPreparationWorkerSettings {
 			return;
 		}
 		final String[] paramsTmp = inputfamiliesstr.split(MAP_ELM_SEP);
-		for (int i = 0; i < paramsTmp.length; i++) {
-			final String[] tmp = paramsTmp[i].split(MAP_KEY_VAL_SEP);
-			if (tmp != null && tmp.length == 2) {
+		for (final String s : paramsTmp) {
+			final String[] tmp = s.split(MAP_KEY_VAL_SEP);
+			if (tmp.length == 2) {
 				final String key = tmp[0];
 				final String valStr = tmp[1];
 				inputfamilies.put(key, ProductFamily.valueOf(valStr));
@@ -308,9 +257,9 @@ public class IpfPreparationWorkerSettings {
 			return;
 		}
 		final String[] paramsTmp = outputfamiliesstr.split(MAP_ELM_SEP);
-		for (int i = 0; i < paramsTmp.length; i++) {
-			final String[] tmp = paramsTmp[i].split(MAP_KEY_VAL_SEP);
-			if (tmp != null && tmp.length == 2) {
+		for (final String s : paramsTmp) {
+			final String[] tmp = s.split(MAP_KEY_VAL_SEP);
+			if (tmp.length == 2) {
 				final String key = tmp[0];
 				final String valStr = tmp[1];
 				outputfamilies.put(key, ProductFamily.valueOf(valStr));
@@ -325,12 +274,12 @@ public class IpfPreparationWorkerSettings {
 	 */
 	public static class WaitTempo {
 		/**
-		 * Delay between 2 retries
+		 * Delay between 2 calls
 		 */
 		private int tempo;
 
 		/**
-		 * Number of maximal retries
+		 * Maximal time life in seconds
 		 */
 		private int maxTimelifeS;
 
@@ -346,11 +295,11 @@ public class IpfPreparationWorkerSettings {
 		 * Constructor using field
 		 * 
 		 * @param tempo
-		 * @param retries
+		 * @param maxTimelifeS
 		 */
-		public WaitTempo(final int tempo, final int retries) {
+		public WaitTempo(final int tempo, final int maxTimelifeS) {
 			this.tempo = tempo;
-			this.maxTimelifeS = retries;
+			this.maxTimelifeS = maxTimelifeS;
 		}
 
 		/**
@@ -368,14 +317,14 @@ public class IpfPreparationWorkerSettings {
 		}
 
 		/**
-		 * @return the retries
+		 * @return the maximal time life
 		 */
 		public int getMaxTimelifeS() {
 			return maxTimelifeS;
 		}
 
 		/**
-		 * @param retries the retries to set
+		 * @param maxTimelifeS
 		 */
 		public void setMaxTimelifeS(final int maxTimelifeS) {
 			this.maxTimelifeS = maxTimelifeS;
@@ -383,19 +332,6 @@ public class IpfPreparationWorkerSettings {
 
 	}
 
-	/**
-	 * @return the maxnboftasktable
-	 */
-	public int getMaxnboftasktable() {
-		return maxnboftasktable;
-	}
-
-	/**
-	 * @param maxnboftasktable the maxnboftasktable to set
-	 */
-	public void setMaxnboftasktable(final int maxnboftasktable) {
-		this.maxnboftasktable = maxnboftasktable;
-	}
 
 	/**
 	 * @return the waitprimarycheck
@@ -581,7 +517,7 @@ public class IpfPreparationWorkerSettings {
 	 */
 	@Override
 	public String toString() {
-		return "{maxnboftasktable: " + maxnboftasktable + ", maxnumberofjobs: " + maxnumberofjobs
+		return "{maxnumberofjobs: " + maxnumberofjobs
 				+ ", waitprimarycheck: \"" + waitprimarycheck + "\", waitmetadatainput: \"" + waitmetadatainput
 				+ "\", diroftasktables: \"" + diroftasktables + "\", jobgenfixedrate: " + jobgenfixedrate
 				+ ", defaultfamily: \"" + defaultfamily + "\", outputfamiliesstr: \"" + outputfamiliesstr

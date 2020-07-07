@@ -9,7 +9,6 @@ import java.util.Objects;
  * @author Viveris Technologies
  */
 public class AppDataJobGeneration {
-
     /**
      * Date of the creation of the job generation
      */
@@ -41,8 +40,20 @@ public class AppDataJobGeneration {
         this.creationDate = new Date();
         this.nbErrors = 0;
     }
+    
+    
 
-    /**
+    public AppDataJobGeneration(final AppDataJobGeneration clone) {
+		this.creationDate = clone.creationDate;
+		this.lastUpdateDate = clone.lastUpdateDate;
+		this.taskTable = clone.taskTable;
+		this.state = clone.state;
+		this.nbErrors = clone.nbErrors;
+	}
+
+
+
+	/**
      * @return the creationDate
      */
     public Date getCreationDate() {

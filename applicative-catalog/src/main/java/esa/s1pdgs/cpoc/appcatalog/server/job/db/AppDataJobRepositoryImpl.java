@@ -8,17 +8,15 @@ import org.springframework.data.domain.Sort;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
-import org.springframework.data.mongodb.core.query.Update;
 import org.springframework.stereotype.Repository;
 
 import esa.s1pdgs.cpoc.appcatalog.AppDataJob;
-import esa.s1pdgs.cpoc.appcatalog.AppDataJobGeneration;
-import esa.s1pdgs.cpoc.common.ProductCategory;
 import esa.s1pdgs.cpoc.common.filter.FilterCriterion;
 
 @Repository
 public class AppDataJobRepositoryImpl implements AppDataJobRepositoryCustom {
-
+	
+	
     private final MongoTemplate mongoTemplate;
 
     @Autowired
@@ -27,16 +25,14 @@ public class AppDataJobRepositoryImpl implements AppDataJobRepositoryCustom {
     }
 
     @Override
-    public List<AppDataJob> search(List<FilterCriterion> filters,
-            ProductCategory category, Sort sort) {
+    public List<AppDataJob> search(final List<FilterCriterion> filters, final Sort sort) {
         final Query query = new Query();
         final List<Criteria> criteria = new ArrayList<>();
-        criteria.add(Criteria.where("category").is(category));
-        for (FilterCriterion criterion : filters) {
+        for (final FilterCriterion criterion : filters) {
             switch (criterion.getOperator()) {
                 case LT:
-                    criteria.add(Criteria.where(criterion.getKey())
-                            .lt(criterion.getValue()));
+                    criteria.add(Criteria.where(criterion.getKey()).
+                    		lt(criterion.getValue()));
                     break;
                 case LTE:
                     criteria.add(Criteria.where(criterion.getKey())
@@ -69,26 +65,4 @@ public class AppDataJobRepositoryImpl implements AppDataJobRepositoryCustom {
         }
         return mongoTemplate.find(query, AppDataJob.class);
     }
-
-    @Override
-    public void udpateJobGeneration(Long jobId,
-            AppDataJobGeneration newGeneration) {
-        // db.jobs.updateOne(
-        // { _id: jobId, "generations.taskTable": "taskTAble" },
-        // { $set: { "generations.$.lastUpdateDate" : 6, "generations.$.state" :
-        // 6, "generations.$.nbErrors" : 6} }
-        // )
-        // filter: _id = jobId, generations.taskTabgle: taskTableName
-        Query query = new Query();
-        query.addCriteria(Criteria.where("_id").is(jobId))
-                .addCriteria(Criteria.where("generations.taskTable")
-                        .is(newGeneration.getTaskTable()));
-        Update update = new Update();
-        update.set("generations.$.lastUpdateDate",
-                newGeneration.getLastUpdateDate());
-        update.set("generations.$.state", newGeneration.getState());
-        update.set("generations.$.nbErrors", newGeneration.getNbErrors());
-        mongoTemplate.updateFirst(query, update, AppDataJob.class);
-    }
-
 }

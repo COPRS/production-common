@@ -34,7 +34,6 @@ public abstract class RestControllerTest {
 
 	protected <T> T createFromResult(MvcResult result, Class<T> clazz) throws Exception {
 		ObjectMapper mapper = new ObjectMapper();
-		T response = mapper.readValue(result.getResponse().getContentAsString(), clazz);
-		return response;
+		return mapper.readValue(result.getResponse().getContentAsString(), clazz);
 	}
 }

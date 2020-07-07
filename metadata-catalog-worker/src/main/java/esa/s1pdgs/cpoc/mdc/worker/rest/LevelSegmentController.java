@@ -1,5 +1,7 @@
 package esa.s1pdgs.cpoc.mdc.worker.rest;
 
+import java.util.List;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -21,11 +23,25 @@ public class LevelSegmentController extends AbstractMetadataController<LevelSegm
     	super(LevelSegmentMetadata.class, esServices);
     }
  
-    @RequestMapping(method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_UTF8_VALUE, path = "/{family}/{productName:.+}")
-    public ResponseEntity<LevelSegmentMetadata> get(
-            @PathVariable(name = "family") ProductFamily family,
-            @PathVariable(name = "productName") String productName
+//    @RequestMapping(method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_UTF8_VALUE, path = "/{family}/{productName:.+}")
+//    public ResponseEntity<LevelSegmentMetadata> get(
+//            @PathVariable(name = "family") final ProductFamily family,
+//            @PathVariable(name = "productName") final String productName
+//    ) {
+//    	return getResponse(productName, family, () -> esServices.getLevelSegment(family, productName));
+//    }
+    
+    @RequestMapping(method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_UTF8_VALUE, path = "/{productType}/{dataTakeId}")
+    public ResponseEntity<List<LevelSegmentMetadata>> get(
+            @PathVariable(name = "productType") final String productType,
+            @PathVariable(name = "dataTakeId") final String dataTakeId
     ) {
-    	return getResponse(productName, family, () -> esServices.getLevelSegment(family, productName));
+    	return getResponse(
+    			productType +" products for dataTakeId=" + dataTakeId, 
+    			ProductFamily.L0_SEGMENT, 
+    			() -> esServices.getLevelSegmentMetadataFor(productType, dataTakeId)
+    	);
     }
+    
+    
 }

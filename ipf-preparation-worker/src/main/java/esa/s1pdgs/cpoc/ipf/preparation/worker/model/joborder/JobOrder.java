@@ -68,7 +68,9 @@ public class JobOrder {
 		} else {
 			this.conf = new L1JobOrderConf(obj.getConf());
 		}
-		this.procs.addAll(obj.getProcs().stream().filter(item -> item != null).map(item -> new JobOrderProc(item))
+		this.procs.addAll(obj.getProcs().stream()
+				.filter(item -> item != null)
+				.map(item -> new JobOrderProc(item))
 				.collect(Collectors.toList()));
 		this.nbProcs = this.procs.size();
 	}
@@ -142,7 +144,7 @@ public class JobOrder {
 		} else if (obj == null || getClass() != obj.getClass()) {
 			ret = false;
 		} else {
-			JobOrder other = (JobOrder) obj;
+			final JobOrder other = (JobOrder) obj;
 			ret = Objects.equals(conf, other.conf) && Objects.equals(procs, other.procs) && nbProcs == other.nbProcs;
 		}
 		return ret;

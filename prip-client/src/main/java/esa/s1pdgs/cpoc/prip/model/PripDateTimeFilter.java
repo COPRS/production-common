@@ -1,13 +1,14 @@
 package esa.s1pdgs.cpoc.prip.model;
 
 import java.time.LocalDateTime;
+import java.util.Objects;
 
 import esa.s1pdgs.cpoc.common.utils.DateUtils;
 
 public class PripDateTimeFilter {
 
 	public enum Operator {
-		LT("<"), GT(">");
+		LT("<"), GT(">"), LE("<="), GE(">=");
 
 		private String o;
 
@@ -26,8 +27,14 @@ public class PripDateTimeFilter {
 			if (operator.equals(LT.o)) {
 				return LT;
 			}
+			if (operator.equals(LE.o)) {
+				return LE;
+			}
 			if (operator.equals(GT.o)) {
 				return GT;
+			}
+			if (operator.equals(GE.o)) {
+				return GE;
 			}
 			throw new IllegalArgumentException(String.format("operator not supported: %s", operator));
 		}
@@ -35,6 +42,7 @@ public class PripDateTimeFilter {
 
 	private LocalDateTime dateTime;
 	private Operator operator;
+	private PripMetadata.FIELD_NAMES fieldName;
 
 	public LocalDateTime getDateTime() {
 		return dateTime;
@@ -52,6 +60,14 @@ public class PripDateTimeFilter {
 		this.operator = operator;
 	}
 
+	public PripMetadata.FIELD_NAMES getFieldName() {
+		return fieldName;
+	}
+
+	public void setFieldName(PripMetadata.FIELD_NAMES fieldName) {
+		this.fieldName = fieldName;
+	}
+
 	@Override
 	public String toString() {
 		return String.format("{\"%s\":\"%s\"}", (operator == null) ? null : operator.getOperator(),
@@ -60,30 +76,17 @@ public class PripDateTimeFilter {
 
 	@Override
 	public int hashCode() {
-		final int prime = 31;
-		int result = 1;
-		result = prime * result + ((dateTime == null) ? 0 : dateTime.hashCode());
-		result = prime * result + ((operator == null) ? 0 : operator.hashCode());
-		return result;
+		return Objects.hash(dateTime, fieldName, operator);
 	}
 
 	@Override
 	public boolean equals(Object obj) {
 		if (this == obj)
 			return true;
-		if (obj == null)
-			return false;
-		if (getClass() != obj.getClass())
+		if (!(obj instanceof PripDateTimeFilter))
 			return false;
 		PripDateTimeFilter other = (PripDateTimeFilter) obj;
-		if (dateTime == null) {
-			if (other.dateTime != null)
-				return false;
-		} else if (!dateTime.equals(other.dateTime))
-			return false;
-		if (operator != other.operator)
-			return false;
-		return true;
+		return Objects.equals(dateTime, other.dateTime) && fieldName == other.fieldName && operator == other.operator;
 	}
 
 }

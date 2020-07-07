@@ -1,22 +1,24 @@
 package esa.s1pdgs.cpoc.ingestion.trigger.inbox;
 
-import esa.s1pdgs.cpoc.common.ProductFamily;
-import esa.s1pdgs.cpoc.ingestion.trigger.entity.InboxEntry;
-import esa.s1pdgs.cpoc.ingestion.trigger.entity.InboxEntryRepository;
-import esa.s1pdgs.cpoc.ingestion.trigger.filter.InboxFilter;
-import esa.s1pdgs.cpoc.ingestion.trigger.kafka.producer.SubmissionClient;
-import esa.s1pdgs.cpoc.ingestion.trigger.service.IngestionTriggerServiceTransactional;
-import org.junit.Before;
-import org.junit.Test;
-import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.*;
 
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.Date;
 
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.*;
+import org.junit.Before;
+import org.junit.Test;
+import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
+
+import esa.s1pdgs.cpoc.common.ProductFamily;
+import esa.s1pdgs.cpoc.ingestion.trigger.entity.InboxEntry;
+import esa.s1pdgs.cpoc.ingestion.trigger.entity.InboxEntryRepository;
+import esa.s1pdgs.cpoc.ingestion.trigger.filter.InboxFilter;
+import esa.s1pdgs.cpoc.ingestion.trigger.kafka.producer.SubmissionClient;
+import esa.s1pdgs.cpoc.ingestion.trigger.name.FlatProductNameEvaluator;
+import esa.s1pdgs.cpoc.ingestion.trigger.service.IngestionTriggerServiceTransactional;
 
 public class TestInbox {
 
@@ -48,8 +50,8 @@ public class TestInbox {
                 new IngestionTriggerServiceTransactional(fakeRepo),
                 fakeKafkaClient,
                 ProductFamily.EDRS_SESSION,
-				"WILE"
-        );
+                "WILE",
+                new FlatProductNameEvaluator());
         uut.poll();
 
         verify(fakeRepo, times(2)).save(any());
@@ -75,8 +77,8 @@ public class TestInbox {
                 new IngestionTriggerServiceTransactional(fakeRepo),
                 fakeKafkaClient,
                 ProductFamily.EDRS_SESSION,
-				"WILE"
-        );
+				"WILE",
+        new FlatProductNameEvaluator());
         uut.poll();
 
         verify(fakeRepo, times(0)).save(any());

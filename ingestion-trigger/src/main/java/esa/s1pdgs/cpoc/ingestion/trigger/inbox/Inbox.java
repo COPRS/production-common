@@ -1,38 +1,28 @@
 package esa.s1pdgs.cpoc.ingestion.trigger.inbox;
 
-import java.io.File;
-import java.net.URI;
-import java.net.URISyntaxException;
+import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.*;
-import java.util.stream.Collectors;
+import java.util.HashSet;
+import java.util.Optional;
+import java.util.Set;
 
-import org.apache.commons.io.FileUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.util.StringUtils;
 
 import esa.s1pdgs.cpoc.common.ProductFamily;
 import esa.s1pdgs.cpoc.common.utils.LogUtils;
 import esa.s1pdgs.cpoc.ingestion.trigger.entity.InboxEntry;
 import esa.s1pdgs.cpoc.ingestion.trigger.filter.InboxFilter;
 import esa.s1pdgs.cpoc.ingestion.trigger.kafka.producer.SubmissionClient;
+import esa.s1pdgs.cpoc.ingestion.trigger.name.ProductNameEvaluator;
 import esa.s1pdgs.cpoc.ingestion.trigger.report.IngestionTriggerReportingInput;
 import esa.s1pdgs.cpoc.ingestion.trigger.report.IngestionTriggerReportingOutput;
 import esa.s1pdgs.cpoc.ingestion.trigger.service.IngestionTriggerServiceTransactional;
 import esa.s1pdgs.cpoc.mqi.model.queue.IngestionJob;
 import esa.s1pdgs.cpoc.report.Reporting;
+import esa.s1pdgs.cpoc.report.ReportingInput;
 import esa.s1pdgs.cpoc.report.ReportingMessage;
 import esa.s1pdgs.cpoc.report.ReportingUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.util.StringUtils;
-
-import java.util.Collection;
-import java.util.Date;
-import java.util.HashSet;
-import java.util.Set;
-import java.util.stream.Collectors;
 
 public final class Inbox {
 	private final Logger log;
@@ -43,6 +33,7 @@ public final class Inbox {
 	private final SubmissionClient client;
 	private final ProductFamily family;
 	private final String stationName;
+	private final ProductNameEvaluator nameEvaluator;
 
 	Inbox(
 			final InboxAdapter inboxAdapter, 
@@ -50,7 +41,8 @@ public final class Inbox {
 			final IngestionTriggerServiceTransactional ingestionTriggerServiceTransactional, 
 			final SubmissionClient client,
 			final ProductFamily family,
-			final String stationName
+			final String stationName,
+			final ProductNameEvaluator nameEvaluator
 	) {
 		this.inboxAdapter = inboxAdapter;
 		this.filter = filter;
@@ -58,43 +50,37 @@ public final class Inbox {
 		this.client = client;
 		this.family = family;
 		this.stationName = stationName;
+		this.nameEvaluator = nameEvaluator;
 		this.log = LoggerFactory.getLogger(String.format("%s (%s) for %s", getClass().getName(), stationName, family));
 	}
 	
 	public final void poll() {
 		try {
-			final Set<InboxEntry> persistedContent = ingestionTriggerServiceTransactional
-					.getAllForPath(inboxAdapter.inboxURL(), stationName);
+			final PollingRun pollingRun = PollingRun.newInstance(
+					ingestionTriggerServiceTransactional.getAllForPath(inboxAdapter.inboxURL(), stationName),
+					inboxAdapter.read(InboxFilter.ALLOW_ALL)
+			);
 						
-			// read all entries that have not been persisted before
-			final Set<InboxEntry> pickupContent = new HashSet<>(inboxAdapter.read(InboxFilter.ALLOW_ALL));
-			
-			// determine the entries that have been deleted from inbox to remove them from persistence
-			final Set<InboxEntry> finishedElements = new HashSet<>(persistedContent);
-			finishedElements.removeAll(pickupContent);
-			
-			// detect all elements that are considered "new" on the inbox
-			final Set<InboxEntry> newElements = new HashSet<>(pickupContent);
-			newElements.removeAll(persistedContent);
-
 			// when a product has been removed from the inbox directory, it shall be removed
 			// from the persistence so it will not be ignored if it occurs again on the inbox
-			ingestionTriggerServiceTransactional.removeFinished(finishedElements);
+			ingestionTriggerServiceTransactional.removeFinished(pollingRun.finishedElements());
 			
 			final Set<InboxEntry> handledElements = new HashSet<>();
-			for (final InboxEntry newEntry : newElements) {
+
+			for (final InboxEntry newEntry : pollingRun.newElements()) {
+				// omit files in subdirectories of already matched products
+				if (!isChildOf(newEntry, handledElements)) {
 				handleEntry(newEntry).
-					ifPresent(e -> handledElements.add(e));
+					ifPresent(handledElements::add);}
 				persist(newEntry);
 			}
-			appendMessagesToLog(finishedElements, newElements, handledElements);
-
+			pollingRun.dumpTo(handledElements, log);
+			log.trace(pollingRun.toString());
 		} catch (final Exception e) {			
 			// thrown on error reading the Inbox. No real retry here as it will be retried on next polling attempt anyway	
 			log.error(String.format("Error on polling %s", description()), e);
 		}
 	}
-
 	public final String description() {
 		return inboxAdapter.description() + " for productFamily " + family + "";
 	}
@@ -104,57 +90,28 @@ public final class Inbox {
 		return "Inbox [inboxAdapter=" + inboxAdapter + ", filter=" + filter + ", client=" + client + "]";
 	}
 
-	private void appendMessagesToLog(
-			final Set<InboxEntry> finishedElements,
-			final Set<InboxEntry> newElements,
-			final Set<InboxEntry> handledElements
-	) {
-		final StringBuilder logMessage = new StringBuilder();
+	private boolean isChildOf(final InboxEntry entry, final Set<InboxEntry> handledElements) {
+		final Path thisPath = Paths.get(entry.getRelativePath());
 
-		if (!finishedElements.isEmpty()) {
-			logMessage.append("Handled ")
-				.append(finishedElements.size())
-				.append(" finished elements");
-
-			dumpToDebugLog("deleting {} from persistence",finishedElements);
-		}
-
-		if (!newElements.isEmpty()) {
-			final Set<InboxEntry> ignoredElements = new HashSet<>(newElements);
-			ignoredElements.removeAll(handledElements);
-
-			if (logMessage.length() == 0) {
-				logMessage.append("Handled ");
-			} else {
-				logMessage.append(" and ");
-			}
-			logMessage.append(newElements.size())
-				.append(" new elements (processed: ")
-				.append(handledElements.size())
-				.append(" / ignored: ")
-				.append(ignoredElements.size())
-				.append(").");
-
-			if (!handledElements.isEmpty()) {
-				dumpToDebugLog("processed {} from inbox", handledElements);
-			}
-			if (!ignoredElements.isEmpty()) {
-				dumpToDebugLog("ignored {} in inbox", ignoredElements);
+		for (final InboxEntry handledEntry : handledElements) {
+			// is child ?
+			if (thisPath.startsWith(Paths.get(handledEntry.getRelativePath()))) {
+				return true;
 			}
 		}
-		if (logMessage.length() != 0) {
-			log.info(logMessage.toString());
-		}
+		return false;
 	}
 
-	private final Optional<InboxEntry> handleEntry(final InboxEntry entry) {
+	private Optional<InboxEntry> handleEntry(final InboxEntry entry) {
 		final Reporting reporting = ReportingUtils.newReportingBuilder()
 				.newReporting("IngestionTrigger");
-			
-		reporting.begin(
-				new IngestionTriggerReportingInput(entry.getName(), new Date(), entry.getLastModified()),
-				new ReportingMessage("New file detected %s", entry.getName())
+
+		final ReportingInput input = IngestionTriggerReportingInput.newInstance(
+				entry.getName(),
+				family,
+				entry.getLastModified()
 		);
+		reporting.begin(input,new ReportingMessage("New file detected %s", entry.getName()));
 		
 		if (!filter.accept(entry)) {
 			reporting.end(new ReportingMessage("File %s is ignored by filter.", entry.getName()));
@@ -168,13 +125,14 @@ public final class Inbox {
 		}
 		
 		try {
-			log.debug("Publishing new entry to kafka queue: {}", entry);
+			final String publishedName = nameEvaluator.evaluateFrom(Paths.get(entry.getRelativePath()));
+			log.debug("Publishing new entry {} to kafka queue: {}", publishedName, entry);
 			client.publish(
 					new IngestionJob(
-						family,
-						entry.getName(),
-						entry.getPickupURL(),
-						entry.getRelativePath(),
+						family, 
+						publishedName,
+						entry.getPickupURL(), 
+						entry.getRelativePath(), 
 						entry.getSize(),
 						reporting.getUid(),
 						stationName
@@ -197,31 +155,4 @@ public final class Inbox {
 		log.trace("Added {} to persistence", persisted);
 		return persisted;
 	}
-	
-//	private final String summarizeAndLog(final String logTemplate, final Collection<InboxEntry> entries) {
-//		final String summary = entries.stream()
-//			.map(e -> extractNameAndLog(logTemplate,e))
-//			.collect(Collectors.joining(", "));
-//
-//		if (StringUtils.isEmpty(summary)) {
-//			return "[none]";
-//		}
-//		return summary;
-//	}
-//
-//	private static String extractNameAndLog(final String logTemplate, final InboxEntry entry) {
-//		final String name = entry.getName();
-//		LOG.debug("PickupAction - " + logTemplate, name);
-//		return name;
-//	}
-
-	private final void dumpToDebugLog(final String logTemplate, final Collection<InboxEntry> entries) {
-		if (log.isDebugEnabled()) {
-			entries.stream()
-				.map(p -> p.getRelativePath())
-				.forEach(e -> log.debug("PickupAction - " + logTemplate, e));
-		}
-
-	}
-
 }

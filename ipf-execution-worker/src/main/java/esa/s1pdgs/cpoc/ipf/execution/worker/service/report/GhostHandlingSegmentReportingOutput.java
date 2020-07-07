@@ -12,11 +12,11 @@ public class GhostHandlingSegmentReportingOutput implements ReportingOutput {
 		this.isGhostCandidate = isGhostCandidate;
 	}
 
-	public boolean isGhostCandidate() {
+	public boolean getIsGhostCandidate() {
 		return isGhostCandidate;
 	}
 
-	public void setGhostCandidate(final boolean isGhostCandidate) {
+	public void setIsGhostCandidate(final boolean isGhostCandidate) {
 		this.isGhostCandidate = isGhostCandidate;
 	}	
 }

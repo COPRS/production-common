@@ -8,6 +8,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Comparator;
 import java.util.Date;
+import java.util.List;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorCompletionService;
 import java.util.concurrent.ExecutorService;
@@ -37,6 +38,7 @@ import esa.s1pdgs.cpoc.compression.worker.process.CompressExecutorCallable;
 import esa.s1pdgs.cpoc.errorrepo.ErrorRepoAppender;
 import esa.s1pdgs.cpoc.errorrepo.model.rest.FailedProcessingDto;
 import esa.s1pdgs.cpoc.mqi.client.GenericMqiClient;
+import esa.s1pdgs.cpoc.mqi.client.MessageFilter;
 import esa.s1pdgs.cpoc.mqi.client.MqiConsumer;
 import esa.s1pdgs.cpoc.mqi.client.MqiListener;
 import esa.s1pdgs.cpoc.mqi.client.StatusService;
@@ -56,6 +58,7 @@ public class CompressProcessor implements MqiListener<CompressionJob> {
 	private final ObsClient obsClient;
 	private final OutputProducerFactory producerFactory;
 	private final GenericMqiClient mqiClient;
+	private final List<MessageFilter> messageFilter;
 	private final StatusService mqiStatusService;
 	private final ErrorRepoAppender errorAppender;
 	private final long pollingIntervalMs;
@@ -68,6 +71,7 @@ public class CompressProcessor implements MqiListener<CompressionJob> {
 			final ObsClient obsClient, 
 			final OutputProducerFactory producerFactory,
 			final GenericMqiClient mqiClient,
+			final List<MessageFilter> messageFilter,
 			final ErrorRepoAppender errorAppender,
 			final StatusService mqiStatusService,
 			@Value("${compression-worker.fixed-delay-ms}") final long pollingIntervalMs,
@@ -78,6 +82,7 @@ public class CompressProcessor implements MqiListener<CompressionJob> {
 		this.obsClient = obsClient;
 		this.producerFactory = producerFactory;
 		this.mqiClient = mqiClient;
+		this.messageFilter = messageFilter;
 		this.mqiStatusService = mqiStatusService;
 		this.errorAppender = errorAppender;
 		this.pollingIntervalMs = pollingIntervalMs;
@@ -204,7 +209,7 @@ public class CompressProcessor implements MqiListener<CompressionJob> {
 			LOGGER.info("Erasing local working directory for job {}", job);
 			final Path p = Paths.get(properties.getWorkingDirectory());
 			Files.walk(p, FileVisitOption.FOLLOW_LINKS).sorted(Comparator.reverseOrder()).map(Path::toFile)
-					.peek(System.out::println).forEach(File::delete);
+					.forEach(File::delete);
 		} catch (final IOException e) {
 			LOGGER.error("{} [code {}] Failed to erase local working directory", job,
 					ErrorCode.INTERNAL_ERROR.getCode());
@@ -217,6 +222,7 @@ public class CompressProcessor implements MqiListener<CompressionJob> {
 				mqiClient, 
 				ProductCategory.COMPRESSION_JOBS, 
 				this,
+				messageFilter,
 				pollingIntervalMs, 
 				pollingInitialDelayMs, 
 				appStatus

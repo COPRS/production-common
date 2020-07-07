@@ -7,6 +7,7 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import org.junit.Assert;
@@ -54,6 +55,7 @@ public class TestMqiConsumer {
 				fakeClient, 
 				ProductCategory.AUXILIARY_FILES, 
 				fakeListener, 
+				Collections.EMPTY_LIST,
 				1000L,
 				0L,
 				fakeappStatus
@@ -73,7 +75,8 @@ public class TestMqiConsumer {
 		final MqiConsumer<?> uut = new MqiConsumer<>(
 				fakeClient, 
 				ProductCategory.AUXILIARY_FILES, 
-				fakeListener, 
+				fakeListener,
+				Collections.EMPTY_LIST,
 				1000L,
 				0L,
 				fakeappStatus
@@ -90,7 +93,8 @@ public class TestMqiConsumer {
 		final MqiConsumer<?> uut = new MqiConsumer<>(
 				fakeClient, 
 				ProductCategory.AUXILIARY_FILES, 
-				fakeListener, 
+				fakeListener,
+				Collections.EMPTY_LIST,
 				1000L,
 				1L,
 				fakeappStatus
@@ -105,7 +109,8 @@ public class TestMqiConsumer {
 		final MqiConsumer<?> uut = new MqiConsumer<>(
 				fakeClient, 
 				ProductCategory.AUXILIARY_FILES, 
-				fakeListener, 
+				fakeListener,
+				Collections.EMPTY_LIST,
 				1000L,
 				1L,
 				fakeappStatus
@@ -122,6 +127,7 @@ public class TestMqiConsumer {
 				fakeClient, 
 				ProductCategory.AUXILIARY_FILES, 
 				fakeListener, 
+				Collections.EMPTY_LIST,
 				1000L,
 				0L,
 				fakeappStatus
@@ -138,6 +144,7 @@ public class TestMqiConsumer {
 				fakeClient, 
 				ProductCategory.AUXILIARY_FILES, 
 				fakeListener, 
+				Collections.EMPTY_LIST,
 				1000L,
 				0L,
 				fakeappStatus
@@ -157,6 +164,7 @@ public class TestMqiConsumer {
 				fakeClient, 
 				ProductCategory.AUXILIARY_FILES, 
 				fakeListener, 
+				Collections.EMPTY_LIST,
 				1000L,
 				0L,
 				fakeappStatus
@@ -174,6 +182,7 @@ public class TestMqiConsumer {
 				fakeClient, 
 				ProductCategory.AUXILIARY_FILES, 
 				fakeListener, 
+				Collections.EMPTY_LIST,
 				1000L,
 				0L,
 				fakeappStatus
@@ -184,13 +193,12 @@ public class TestMqiConsumer {
 	@Test
 	public final void testAllowConsumption() {
 		
-		
 		final MqiMessageFilter filter1 = new MqiMessageFilter();
-		filter1.setMatchRegex("a.*");
+		filter1.setDisallowRegex("a.*");
 		filter1.setProductFamily(ProductFamily.AUXILIARY_FILE);
 		
 		final MqiMessageFilter filter2 = new MqiMessageFilter();
-		filter2.setMatchRegex("s.*");
+		filter2.setDisallowRegex("s.*");
 		filter2.setProductFamily(ProductFamily.EDRS_SESSION);
 		
 		final List<MqiMessageFilter> mqiMessageFilter = new ArrayList<>();

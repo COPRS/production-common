@@ -2,7 +2,7 @@ Configuration:
   status: warn
   name: YAMLConfigTest
   thresholdFilter:
-    level: debug
+    level: trace
   appenders:
     Console:
       name: STDOUT
@@ -12,6 +12,16 @@ Configuration:
     logger:
       - name: esa.s1pdgs.cpoc
         level: debug
+        additivity: false
+        AppenderRef:
+          - ref: STDOUT
+      - name: esa.s1pdgs.cpoc.obs_sdk.StreamObsUploadObject
+        level: trace
+        additivity: false
+        AppenderRef:
+          - ref: STDOUT
+      - name: org.apache.http
+        level: warn
         additivity: false
         AppenderRef:
           - ref: STDOUT

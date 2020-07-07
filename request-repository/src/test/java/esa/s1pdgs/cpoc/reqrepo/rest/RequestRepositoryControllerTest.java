@@ -20,6 +20,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
+import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 
@@ -34,6 +35,7 @@ import esa.s1pdgs.cpoc.reqrepo.service.RequestRepository;
 
 @RunWith(SpringRunner.class)
 @WebMvcTest(RequestRepositoryController.class)
+@ActiveProfiles("test")
 public class RequestRepositoryControllerTest {
 	
 	private static final String API_KEY = RequestRepositoryController.API_KEY;
@@ -79,7 +81,7 @@ public class RequestRepositoryControllerTest {
 		failedProcessingToReturn.setCreationDate(dateFormat.parse("2019-06-18T11:09:03.805Z"));
 		failedProcessingToReturn.setFailureDate(dateFormat.parse("2019-06-18T11:09:03.805Z"));
 		failedProcessingToReturn.setFailureMessage("dummyMessage");
-		failedProcessingToReturn.setDto(new GenericMessageDto<Object>()); 
+		failedProcessingToReturn.setDto(Collections.singletonList(new GenericMessageDto<Object>())); 
 		return failedProcessingToReturn;
 	}
 
@@ -89,7 +91,7 @@ public class RequestRepositoryControllerTest {
 			.when(requestRepository)
 			.getFailedProcessings();
 
-		String jsonContent = "[{\n" + 
+		final String jsonContent = "[{\n" + 
 				"    \"id\": 1001,\n" +
 				"    \"processingType\": \"dummyProcessingType\",\n" + 
 				"    \"processingStatus\": \"READ\",\n" + 
@@ -106,7 +108,7 @@ public class RequestRepositoryControllerTest {
 				"    \"creationDate\": \"2019-06-18T11:09:03.805Z\",\n" + 
 				"    \"failureDate\": \"2019-06-18T11:09:03.805Z\",\n" + 
 				"    \"failureMessage\": \"dummyMessage\",\n" + 
-				"    \"processingDetails\": {}\n" + 
+				"    \"processingDetails\": [{}]\n" + 
 				"  }]";
 		
 		uut.perform(get("/api/v1/failedProcessings")
@@ -137,7 +139,7 @@ public class RequestRepositoryControllerTest {
 
 		doReturn(failedProcessing).when(requestRepository).getFailedProcessingById(Mockito.anyLong());
 		
-		String jsonContent = "{\n" + 
+		final String jsonContent = "{\n" + 
 				"    \"id\": 1001,\n" +
 				"    \"processingType\": \"dummyProcessingType\",\n" + 
 				"    \"processingStatus\": \"READ\",\n" + 
@@ -154,7 +156,7 @@ public class RequestRepositoryControllerTest {
 				"    \"creationDate\": \"2019-06-18T11:09:03.805Z\",\n" + 
 				"    \"failureDate\": \"2019-06-18T11:09:03.805Z\",\n" + 
 				"    \"failureMessage\": \"dummyMessage\",\n" + 
-				"    \"processingDetails\": {}\n" + 
+				"    \"processingDetails\": [{}]\n" + 
 				"  }";
 		uut.perform(get("/api/v1/failedProcessings/1")
 			      .contentType(MediaType.APPLICATION_JSON)

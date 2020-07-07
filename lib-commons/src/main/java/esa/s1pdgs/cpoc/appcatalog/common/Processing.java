@@ -16,7 +16,7 @@ public class Processing {
 		 * order by ascending creation time
 		 */
 		@Override
-		public int compare(Processing o1, Processing o2) {
+		public int compare(final Processing o1, final Processing o2) {
 			return o1.getCreationDate().compareTo(o2.getCreationDate());
 		}
 	}
@@ -26,7 +26,7 @@ public class Processing {
 
 	private final MqiMessage mqiMessage;
 
-	public Processing(MqiMessage mqiMessage) {
+	public Processing(final MqiMessage mqiMessage) {
 		this.mqiMessage = mqiMessage;
 	}
 
@@ -100,8 +100,4 @@ public class Processing {
 	public Date getCreationDate() {
 		return mqiMessage.getCreationDate();
 	}
-	
-	
-	
-
 }

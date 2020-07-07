@@ -1,5 +1,6 @@
 package esa.s1pdgs.cpoc.prip.trigger.service;
 
+import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -16,6 +17,7 @@ import esa.s1pdgs.cpoc.common.ProductCategory;
 import esa.s1pdgs.cpoc.common.errors.AbstractCodedException;
 import esa.s1pdgs.cpoc.common.utils.LogUtils;
 import esa.s1pdgs.cpoc.mqi.client.GenericMqiClient;
+import esa.s1pdgs.cpoc.mqi.client.MessageFilter;
 import esa.s1pdgs.cpoc.mqi.client.MqiConsumer;
 import esa.s1pdgs.cpoc.mqi.client.MqiListener;
 import esa.s1pdgs.cpoc.mqi.model.queue.CompressionEvent;
@@ -32,16 +34,19 @@ public class CompressionEventListener implements MqiListener<CompressionEvent> {
 	private static final Logger LOGGER = LogManager.getLogger(CompressionEventListener.class);
 
 	private final GenericMqiClient mqiClient;
+	private final List<MessageFilter> messageFilter;
 	private final long pollingIntervalMs;
 	private final long pollingInitialDelayMs;
 	private final AppStatus appStatus;
 
 	@Autowired
 	public CompressionEventListener(final GenericMqiClient mqiClient,
+		    final List<MessageFilter> messageFilter,
 			@Value("${prip-trigger.compression-event-listener.polling-interval-ms}") final long pollingIntervalMs,
 			@Value("${prip-trigger.compression-event-listener.polling-initial-delay-ms}") final long pollingInitialDelayMs,
 			final AppStatus appStatus) {
 		this.mqiClient = mqiClient;
+		this.messageFilter = messageFilter;
 		this.pollingIntervalMs = pollingIntervalMs;
 		this.pollingInitialDelayMs = pollingInitialDelayMs;
 		this.appStatus = appStatus;
@@ -55,6 +60,7 @@ public class CompressionEventListener implements MqiListener<CompressionEvent> {
 					mqiClient, 
 					ProductCategory.COMPRESSED_PRODUCTS, 
 					this,
+					messageFilter,
 					pollingIntervalMs, 
 					pollingInitialDelayMs, 
 					appStatus

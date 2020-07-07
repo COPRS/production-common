@@ -30,7 +30,7 @@ public class TestInputTimeoutCheckerImpl {
 				Collections.singletonList(config),
 				null
 		);
-		final AppDataJob<CatalogEvent> job = newJobWithMetadata(
+		final AppDataJob job = newJobWithMetadata(
 				"2000-01-01T00:00:00.000000Z",
 				"2000-01-01T00:10:00.000000Z",
 				Collections.singletonMap("timeliness", "NRT")
@@ -47,7 +47,7 @@ public class TestInputTimeoutCheckerImpl {
 				Collections.singletonList(config),
 				null
 		);
-		final AppDataJob<CatalogEvent> job = newJobWithMetadata(
+		final AppDataJob job = newJobWithMetadata(
 				"2000-01-01T00:00:00.000000Z",
 				"2000-01-01T00:10:00.000000Z",
 				Collections.singletonMap("timeliness", "FOO")
@@ -99,7 +99,7 @@ public class TestInputTimeoutCheckerImpl {
 		final TaskTableInput input = new TaskTableInput();
 		input.setId("123");	
 		
-		final AppDataJob<CatalogEvent> job = newJobWithMetadata(
+		final AppDataJob job = newJobWithMetadata(
 				"2000-01-01T00:00:00.000000Z",
 				"2000-01-01T00:10:00.000000Z",
 				Collections.singletonMap("timeliness", "NRT")
@@ -123,7 +123,7 @@ public class TestInputTimeoutCheckerImpl {
 		final TaskTableInput input = new TaskTableInput();
 		input.setId("123");	
 		
-		final AppDataJob<CatalogEvent> job = newJobWithMetadata(
+		final AppDataJob job = newJobWithMetadata(
 				"2000-01-01T00:00:00.000000Z",
 				"2000-01-01T00:10:00.000000Z",
 				Collections.singletonMap("timeliness", "NRT")
@@ -147,7 +147,7 @@ public class TestInputTimeoutCheckerImpl {
 		final TaskTableInput input = new TaskTableInput();
 		input.setId("123");	
 		
-		final AppDataJob<CatalogEvent> job = newJobWithMetadata(
+		final AppDataJob job = newJobWithMetadata(
 				"2000-01-01T00:00:00.000000Z",
 				"2000-01-01T00:10:00.000000Z",
 				Collections.singletonMap("timeliness", "NRT")
@@ -171,7 +171,7 @@ public class TestInputTimeoutCheckerImpl {
 		final TaskTableInput input = new TaskTableInput();
 		input.setId("123");	
 		
-		final AppDataJob<CatalogEvent> job = newJobWithMetadata(
+		final AppDataJob job = newJobWithMetadata(
 				"2000-01-01T00:00:00.000000Z",
 				"2000-01-01T00:10:00.000000Z",
 				Collections.singletonMap("timeliness", "NRT")
@@ -195,7 +195,7 @@ public class TestInputTimeoutCheckerImpl {
 		final TaskTableInput input = new TaskTableInput();
 		input.setId("123");	
 		
-		final AppDataJob<CatalogEvent> job = newJobWithMetadata(
+		final AppDataJob job = newJobWithMetadata(
 				"2000-01-01T00:00:00.000000Z",
 				"2000-01-01T00:10:00.000000Z",
 				Collections.singletonMap("timeliness", "NRT")
@@ -219,7 +219,7 @@ public class TestInputTimeoutCheckerImpl {
 		final TaskTableInput input = new TaskTableInput();
 		input.setId("123");	
 		
-		final AppDataJob<CatalogEvent> job = newJobWithMetadata(
+		final AppDataJob job = newJobWithMetadata(
 				"2000-01-01T00:00:00.000000Z",
 				"2000-01-01T00:10:00.000000Z",
 				Collections.singletonMap("timeliness", "NRT")
@@ -242,7 +242,7 @@ public class TestInputTimeoutCheckerImpl {
 		final TaskTableInput input = new TaskTableInput();
 		input.setId("123");	
 		
-		final AppDataJob<CatalogEvent> job = newJobWithMetadata(
+		final AppDataJob job = newJobWithMetadata(
 				"2000-01-01T00:00:00.000000Z",
 				"2000-01-01T00:10:00.000000Z",
 				Collections.singletonMap("timeliness", "NRT")
@@ -250,9 +250,9 @@ public class TestInputTimeoutCheckerImpl {
 		assertEquals(true, uut.isTimeoutExpiredFor(job, input));		
 	}
 		
-	private final AppDataJob<CatalogEvent> newJobWithMetadata(final String jobCreationDate,
+	private final AppDataJob newJobWithMetadata(final String jobCreationDate,
 			final String sensingStartTime, final Map<String,Object> metadata) throws ParseException {
-		final AppDataJob<CatalogEvent> job = new AppDataJob<>();
+		final AppDataJob job = new AppDataJob();
 		final CatalogEvent event = new CatalogEvent();
 		event.setMetadata(metadata);	
 		

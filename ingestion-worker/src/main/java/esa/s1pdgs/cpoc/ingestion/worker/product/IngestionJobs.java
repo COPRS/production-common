@@ -38,4 +38,18 @@ public class IngestionJobs {
 	public static Path basePath(final URI uri, final String name) {	
 		return Paths.get(uri.getPath().toString().substring(0, uri.getPath().toString().indexOf(name)));
 	}
+	
+	public static final String filename(final IngestionJob ingestion) {		
+		final String nameWithoutTrailingSlash = ingestion.getKeyObjectStorage().endsWith("/") ?
+				ingestion.getKeyObjectStorage().substring(0,ingestion.getKeyObjectStorage().length()-1) :
+			    ingestion.getKeyObjectStorage();
+		
+		final int lastIndexOfSlash = nameWithoutTrailingSlash.lastIndexOf('/');
+		
+		// contains slash?
+		if (lastIndexOfSlash != -1) {
+			return nameWithoutTrailingSlash.substring(lastIndexOfSlash+1);
+		}		
+		return nameWithoutTrailingSlash;	
+	}
 }

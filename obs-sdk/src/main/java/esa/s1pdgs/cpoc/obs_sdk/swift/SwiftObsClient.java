@@ -6,6 +6,7 @@ import java.io.InputStream;
 import java.io.PrintWriter;
 import java.net.URL;
 import java.nio.file.Files;
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
@@ -27,6 +28,7 @@ import esa.s1pdgs.cpoc.obs_sdk.ObsClient;
 import esa.s1pdgs.cpoc.obs_sdk.ObsConfigurationProperties;
 import esa.s1pdgs.cpoc.obs_sdk.ObsDownloadObject;
 import esa.s1pdgs.cpoc.obs_sdk.ObsObject;
+import esa.s1pdgs.cpoc.obs_sdk.ObsObjectMetadata;
 import esa.s1pdgs.cpoc.obs_sdk.ObsServiceException;
 import esa.s1pdgs.cpoc.obs_sdk.SdkClientException;
 import esa.s1pdgs.cpoc.obs_sdk.StreamObsUploadObject;
@@ -316,6 +318,16 @@ public class SwiftObsClient extends AbstractObsClient {
 		} catch (final SdkClientException ex) {
 			throw new ObsException(object.getFamily(), object.getKey(), ex);
 		}
+	}
+
+	@Override
+	public void setExpirationTime(ObsObject object, Instant expirationTime) throws ObsServiceException {
+		throw new UnsupportedOperationException("setExpirationTime not implemented yet for swift");
+	}
+
+	@Override
+	public ObsObjectMetadata getMetadata(ObsObject object) {
+		throw new UnsupportedOperationException("getMetadata not implemented yet for swift");
 	}
 
 	@Override

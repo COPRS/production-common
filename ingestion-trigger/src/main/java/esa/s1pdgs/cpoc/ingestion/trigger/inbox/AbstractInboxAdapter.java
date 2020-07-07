@@ -4,8 +4,7 @@ import java.io.IOException;
 import java.net.URI;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.Collection;
-import java.util.Set;
+import java.util.List;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -39,32 +38,28 @@ public abstract class AbstractInboxAdapter implements InboxAdapter {
 	
 	protected final InboxEntryFactory inboxEntryFactory;
 	protected final URI inboxURL;
-	protected final int productInDirectoryLevel;
 	protected final String stationName;
 	
 	public AbstractInboxAdapter(
 			final InboxEntryFactory inboxEntryFactory, 
 			final URI inboxURL, 
-			final int productInDirectoryLevel,
 			final String stationName
 	) {
 		this.inboxEntryFactory = inboxEntryFactory;
 		this.inboxURL = inboxURL;
-		this.productInDirectoryLevel = productInDirectoryLevel;
 		this.stationName = stationName;
 	}
 	
-	protected abstract Stream<EntrySupplier> list(final InboxFilter filter) throws IOException;
+	protected abstract Stream<EntrySupplier> list() throws IOException;
 	
 	@Override
-	public Collection<InboxEntry> read(final InboxFilter filter) throws IOException {
+	public List<InboxEntry> read(final InboxFilter filter) throws IOException {
 		LOG.trace("Reading inbox directory '{}'", inboxURL.toString());
-		final Set<InboxEntry> entries = list(filter)
+		final List<InboxEntry> entries = list()
 				.filter(x -> !Paths.get(inboxURL.getPath()).equals(x.getPath()))
-				.filter(x -> exceedsMinConfiguredDirectoryDepth(x.getPath()))
 				.map(x -> x.getEntry())
 				.filter(e -> filter.accept(e))
-				.collect(Collectors.toSet());
+				.collect(Collectors.toList());
 		LOG.trace("Found {} entries in inbox directory '{}': {}", entries.size(), inboxURL.toString(), entries);
 		return entries;
 	}
@@ -83,8 +78,5 @@ public abstract class AbstractInboxAdapter implements InboxAdapter {
 	public final String toString() {
 		return String.format("%s [inboxDirectory=%s]", getClass().getSimpleName(), inboxURL.toString());
 	}	
-	
-	protected final boolean exceedsMinConfiguredDirectoryDepth(final Path path) {
-		return Paths.get(inboxURL.getPath()).relativize(path).getNameCount() > productInDirectoryLevel;
-	}
+
 }

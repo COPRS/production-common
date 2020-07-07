@@ -3,6 +3,7 @@ package esa.s1pdgs.cpoc.disseminator;
 import java.io.File;
 import java.io.InputStream;
 import java.net.URL;
+import java.time.Instant;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
@@ -15,6 +16,7 @@ import esa.s1pdgs.cpoc.obs_sdk.ObsClient;
 import esa.s1pdgs.cpoc.obs_sdk.ObsDownloadObject;
 import esa.s1pdgs.cpoc.obs_sdk.ObsEmptyFileException;
 import esa.s1pdgs.cpoc.obs_sdk.ObsObject;
+import esa.s1pdgs.cpoc.obs_sdk.ObsObjectMetadata;
 import esa.s1pdgs.cpoc.obs_sdk.ObsServiceException;
 import esa.s1pdgs.cpoc.obs_sdk.SdkClientException;
 import esa.s1pdgs.cpoc.obs_sdk.StreamObsUploadObject;
@@ -83,7 +85,16 @@ public abstract class FakeObsClient implements ObsClient {
 	public String getChecksum(final ObsObject object) throws ObsException {
 		return null;
 	}
-	
+
+	@Override
+	public void setExpirationTime(ObsObject object, Instant expirationTime) throws ObsServiceException {
+	}
+
+	@Override
+	public ObsObjectMetadata getMetadata(ObsObject object) throws ObsServiceException {
+		return null;
+	}
+
 	@Override
 	public URL createTemporaryDownloadUrl(final ObsObject object, final long expirationTimeInSeconds)
 			throws ObsException, ObsServiceException {

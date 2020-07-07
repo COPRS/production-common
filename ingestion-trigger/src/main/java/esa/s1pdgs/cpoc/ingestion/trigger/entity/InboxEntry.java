@@ -101,13 +101,12 @@ public class InboxEntry {
 		return Objects.equals(name, other.name) && 
 				Objects.equals(pickupURL, other.pickupURL)
 				&& Objects.equals(relativePath, other.relativePath)
-				&& Objects.equals(stationName, other.stationName)
-				&& size == other.size;
+				&& Objects.equals(stationName, other.stationName);
 	}
 
 	@Override
 	public int hashCode() {
-		return Objects.hash(name, pickupURL, relativePath, size, stationName);
+		return Objects.hash(name, pickupURL, relativePath, stationName);
 	}
 
 	@Override

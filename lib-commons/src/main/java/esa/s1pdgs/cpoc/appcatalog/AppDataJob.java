@@ -7,8 +7,7 @@ import java.util.Objects;
 import java.util.UUID;
 
 import esa.s1pdgs.cpoc.common.ApplicationLevel;
-import esa.s1pdgs.cpoc.common.ProductCategory;
-import esa.s1pdgs.cpoc.mqi.model.queue.AbstractMessage;
+import esa.s1pdgs.cpoc.mqi.model.queue.CatalogEvent;
 import esa.s1pdgs.cpoc.mqi.model.rest.GenericMessageDto;
 
 /**
@@ -16,15 +15,10 @@ import esa.s1pdgs.cpoc.mqi.model.rest.GenericMessageDto;
  * 
  * @author Viveris Technologies
  */
-public class AppDataJob<E extends AbstractMessage> {
+public class AppDataJob {
 
 	// dirty workaround to have the mongodb id mapped
 	private long id;
-
-    /**
-     * Product category
-     */
-    private ProductCategory category;
 
     /**
      * Application Level: L0 or L1
@@ -55,7 +49,7 @@ public class AppDataJob<E extends AbstractMessage> {
     /**
      * MQI messages linked to this job
      */
-    private List<GenericMessageDto<E>> messages;
+    private List<GenericMessageDto<CatalogEvent>> messages;
 
     /**
      * Product of this job
@@ -65,7 +59,7 @@ public class AppDataJob<E extends AbstractMessage> {
     /**
      * Generations of the job
      */
-    private List<AppDataJobGeneration> generations;
+    private AppDataJobGeneration generation;
     
     private UUID reportingId;
     
@@ -73,16 +67,21 @@ public class AppDataJob<E extends AbstractMessage> {
     
     private String prepJobInputQueue;
     
-
+    public AppDataJob(final long id) {
+    	this();
+    	this.id = id;
+    }
+    
     /**
      * 
      */
     public AppDataJob() {
-        super();
         this.state = AppDataJobState.WAITING;
         this.messages = new ArrayList<>();
-        this.generations = new ArrayList<>();
+        this.generation = new AppDataJobGeneration();
     }
+    
+    
 
 	public long getId() {
 		return id;
@@ -91,21 +90,6 @@ public class AppDataJob<E extends AbstractMessage> {
 	public void setId(final long id) {
 		this.id = id;
 	}
-
-    /**
-     * @return the category
-     */
-    public ProductCategory getCategory() {
-        return category;
-    }
-
-    /**
-     * @param category
-     *            the category to set
-     */
-    public void setCategory(final ProductCategory category) {
-        this.category = category;
-    }
 
     /**
      * @return the level
@@ -185,7 +169,7 @@ public class AppDataJob<E extends AbstractMessage> {
     /**
      * @return the messages
      */
-    public List<GenericMessageDto<E>> getMessages() {
+    public List<GenericMessageDto<CatalogEvent>> getMessages() {
         return messages;
     }
 
@@ -193,7 +177,7 @@ public class AppDataJob<E extends AbstractMessage> {
      * @param messages
      *            the messages to set
      */
-    public void setMessages(final List<GenericMessageDto<E>> messages) {
+    public void setMessages(final List<GenericMessageDto<CatalogEvent>> messages) {
         this.messages = messages;
     }
 
@@ -215,16 +199,16 @@ public class AppDataJob<E extends AbstractMessage> {
     /**
      * @return the generations
      */
-    public List<AppDataJobGeneration> getGenerations() {
-        return generations;
+    public AppDataJobGeneration getGeneration() {
+        return generation;
     }
 
     /**
      * @param generations
      *            the generations to set
      */
-    public void setGenerations(final List<AppDataJobGeneration> generations) {
-        this.generations = generations;
+    public void setGeneration(final AppDataJobGeneration generation) {
+        this.generation = generation;
     }
     
     public UUID getReportingId() {
@@ -257,15 +241,15 @@ public class AppDataJob<E extends AbstractMessage> {
      */
     @Override
     public int hashCode() {
-        return Objects.hash(id, category, level, pod, state,
-                creationDate, lastUpdateDate, messages, product, generations, reportingId, prepJobInputQueue, prepJobMessageId);
+        return Objects.hash(id, level, pod, state,
+                creationDate, lastUpdateDate, messages, product, generation, reportingId, prepJobInputQueue, prepJobMessageId);
     }
     
     @Override
 	public String toString() {
-		return "AppDataJob [id=" + id + ", category=" + category + ", level=" + level + ", pod=" + pod + ", state="
+		return "AppDataJob [id=" + id + ", level=" + level + ", pod=" + pod + ", state="
 				+ state + ", creationDate=" + creationDate + ", lastUpdateDate=" + lastUpdateDate + ", messages="
-				+ messages + ", product=" + product + ", generations=" + generations + ", reportingId=" + reportingId
+				+ messages + ", product=" + product + ", generation=" + generation + ", reportingId=" + reportingId
 				+ ", prepJobMessageId=" + prepJobMessageId + ", prepJobInputQueue=" + prepJobInputQueue + "]";
 	}
 
@@ -282,7 +266,6 @@ public class AppDataJob<E extends AbstractMessage> {
         } else {
             final AppDataJob other = (AppDataJob) obj;
             ret =  id == other.id
-                    && Objects.equals(category, other.category)
                     && Objects.equals(level, other.level)
                     && Objects.equals(pod, other.pod)
                     && Objects.equals(state, other.state)
@@ -290,7 +273,7 @@ public class AppDataJob<E extends AbstractMessage> {
                     && Objects.equals(lastUpdateDate, other.lastUpdateDate)
                     && Objects.equals(messages, other.messages)
                     && Objects.equals(product, other.product)
-                    && Objects.equals(generations, other.generations)
+                    && Objects.equals(generation, other.generation)
                     && Objects.equals(prepJobInputQueue, other.prepJobInputQueue)
                     && Objects.equals(prepJobMessageId, other.prepJobMessageId)
                     && Objects.equals(reportingId, other.reportingId);

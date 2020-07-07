@@ -9,7 +9,7 @@ logging:
   config: classpath:log4j2-test.yml
 
 process:
-  hostname: ${HOSTNAME}                                          # Hostname
+  hostname: test                                          # Hostname
 
 ingestion-trigger:
   polling-interval-ms: 10000

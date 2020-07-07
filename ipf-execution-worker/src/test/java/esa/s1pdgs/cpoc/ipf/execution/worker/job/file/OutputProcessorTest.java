@@ -3,6 +3,7 @@ package esa.s1pdgs.cpoc.ipf.execution.worker.job.file;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
+import static org.junit.Assert.fail;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.doThrow;
@@ -80,8 +81,8 @@ public class OutputProcessorTest {
     @Mock
     private OutputProcuderFactory procuderFactory;
     
-
-    private ApplicationProperties properties = new ApplicationProperties();
+    @Mock
+    private ApplicationProperties properties;
 
     /**
      * List of outputs in job
@@ -641,15 +642,21 @@ public class OutputProcessorTest {
                 new IllegalArgumentException("cause"))).when(procuderFactory)
                         .sendOutput(Mockito.eq(reportToPublish.get(0)),  Mockito.any(), Mockito.any());
 
-        processor.processReports(reportToPublish, UUID.randomUUID());
+        try {
+        	processor.processReports(reportToPublish, UUID.randomUUID());
+        	fail("expected: MqiPublicationError");
+        }
+        catch (final MqiPublicationError e) {
+        	// expected
+        }
 
-        verify(procuderFactory, times(3))
+        verify(procuderFactory, times(1))
                 .sendOutput(Mockito.any(FileQueueMessage.class), Mockito.any(), Mockito.any());
         verify(procuderFactory, times(1)).sendOutput(
                 Mockito.eq(reportToPublish.get(0)), Mockito.eq(inputMessage), Mockito.any());
-        verify(procuderFactory, times(1)).sendOutput(
+        verify(procuderFactory, times(0)).sendOutput(
                 Mockito.eq(reportToPublish.get(1)), Mockito.eq(inputMessage), Mockito.any());
-        verify(procuderFactory, times(1)).sendOutput(
+        verify(procuderFactory, times(0)).sendOutput(
                 Mockito.eq(reportToPublish.get(2)), Mockito.eq(inputMessage), Mockito.any());
     }
 
@@ -686,26 +693,28 @@ public class OutputProcessorTest {
 //        assertEquals(0, outputToPublish.size());
     }
 
-    public void testPublishAccordingUploadFilesWhenKafkaError()
-            throws Exception {
-        doThrow(new MqiPublicationError("topic", "dto", "name", "message",
-                new IllegalArgumentException("cause"))).when(procuderFactory)
-                        .sendOutput(Mockito.eq(outputToPublish.get(0)),  Mockito.any(), Mockito.any());
-     // FIXME: Fix this crap
-//        final Method method = getMethodForPublishAccodingUpload();
-//
-//        method.invoke(processor, reporting, 2, "", new ArrayList<>());
-//        verify(procuderFactory, times(0))
-//                .sendOutput(Mockito.any(ObsQueueMessage.class), Mockito.any());
-//
-//        method.invoke(processor, reporting, 2, OutputProcessor.NOT_KEY_OBS,
-//                outputToPublish);
-//        verify(procuderFactory, times(3))
-//                .sendOutput(Mockito.any(ObsQueueMessage.class), Mockito.any());
-//        assertEquals(0, outputToPublish.size());
-    }
+	@Test
+	public void testPublishAccordingUploadFilesWhenKafkaError() throws Exception {
+		doThrow(new MqiPublicationError("topic", "dto", "name", "message", new IllegalArgumentException("cause")))
+				.when(procuderFactory).sendOutput(Mockito.eq(outputToPublish.get(0)), Mockito.any(), Mockito.any());
+		try {
+			processor.processProducts(reporting, uploadBatch, outputToPublish, UUID.randomUUID());
+			fail("expected: MqiPublicationError");
+		} catch (final MqiPublicationError e) {
+			// expected
+		}
 
-    private Method xgetMethodForPublishAccodingUpload()
+		verify(procuderFactory, times(1)).sendOutput(Mockito.any(ObsQueueMessage.class), Mockito.any(), Mockito.any());
+		verify(procuderFactory, times(1)).sendOutput(Mockito.eq(outputToPublish.get(0)), Mockito.eq(inputMessage),
+				Mockito.any());
+		verify(procuderFactory, times(0)).sendOutput(Mockito.eq(outputToPublish.get(1)), Mockito.eq(inputMessage),
+				Mockito.any());
+		verify(procuderFactory, times(0)).sendOutput(Mockito.eq(outputToPublish.get(2)), Mockito.eq(inputMessage),
+				Mockito.any());
+
+	}
+
+    private Method getMethodForPublishAccodingUpload()
             throws NoSuchMethodException, SecurityException {
 
     	// FIXME: Fix this crap

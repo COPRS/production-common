@@ -23,7 +23,6 @@ import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
 
 import esa.s1pdgs.cpoc.appcatalog.AppDataJob;
-import esa.s1pdgs.cpoc.common.ProductCategory;
 import esa.s1pdgs.cpoc.common.filter.FilterCriterion;
 import esa.s1pdgs.cpoc.common.filter.FilterOperator;
 
@@ -47,7 +46,7 @@ public class AppDataJobRepositoryImplTest {
     
     @Test 
     public void searchTest() {
-        List<FilterCriterion> filterCriterion = new ArrayList<>();
+        final List<FilterCriterion> filterCriterion = new ArrayList<>();
         filterCriterion.add(new FilterCriterion("key-filter", 1, FilterOperator.LTE));
         filterCriterion.add(new FilterCriterion("key-filter2", 2, FilterOperator.LT));
         filterCriterion.add(new FilterCriterion("key-filter3", 3, FilterOperator.GTE));
@@ -55,8 +54,7 @@ public class AppDataJobRepositoryImplTest {
         filterCriterion.add(new FilterCriterion("key-filter5", 5, FilterOperator.NEQ));
         filterCriterion.add(new FilterCriterion("key-filter6", 6, FilterOperator.EQ));
         
-        List<Criteria> criteria = new ArrayList<>();
-        criteria.add(Criteria.where("category").is(ProductCategory.LEVEL_JOBS));
+        final List<Criteria> criteria = new ArrayList<>();
         criteria.add(Criteria.where("key-filter").lte(1));
         criteria.add(Criteria.where("key-filter2").lt(2));
         criteria.add(Criteria.where("key-filter3").gte(3));
@@ -64,19 +62,18 @@ public class AppDataJobRepositoryImplTest {
         criteria.add(Criteria.where("key-filter5").ne(5));
         criteria.add(Criteria.where("key-filter6").is(6));
         
-        Query query = new Query();
+        final Query query = new Query();
         query.addCriteria(new Criteria().andOperator(
                 criteria.toArray(new Criteria[criteria.size()])));
         
-        Sort sort = new Sort(Direction.ASC, "valueFilter");
+        final Sort sort = new Sort(Direction.ASC, "valueFilter");
         
         query.with(sort);
         
         doReturn(new ArrayList<AppDataJob>()).when(mongoTemplate).find(Mockito.any(), Mockito.any());
-        this.appDataJobRepositoryImpl.search(filterCriterion, ProductCategory.LEVEL_JOBS, sort);
+        appDataJobRepositoryImpl.search(filterCriterion, sort);
         
-        verify(mongoTemplate, times(1)).find(Mockito.eq(query), Mockito.eq(AppDataJob.class));
-        
+        verify(mongoTemplate, times(1)).find(Mockito.eq(query), Mockito.eq(AppDataJob.class));    
         
     }
     

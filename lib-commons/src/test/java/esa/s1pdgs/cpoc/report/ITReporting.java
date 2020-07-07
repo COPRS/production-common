@@ -7,7 +7,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.junit.Test;
 
-import esa.s1pdgs.cpoc.report.message.output.FilenameReportingOutput;
+import esa.s1pdgs.cpoc.common.ProductFamily;
 import esa.s1pdgs.cpoc.report.message.output.JobOrderReportingOutput;
 
 public final class ITReporting {
@@ -26,7 +26,10 @@ public final class ITReporting {
 		
 		uut = ReportingUtils.newReportingBuilder().newReporting("test2");
 		uut.begin(new ReportingMessage("Foo"));
-		uut.end(new FilenameReportingOutput(Collections.singletonList("fooBar.txt"), Collections.emptyList()), new ReportingMessage(230000000L,"Foo"));
+
+		
+		
+		uut.end(ReportingUtils.newFilenameReportingOutputFor(ProductFamily.BLANK, "fooBar.txt"), new ReportingMessage(230000000L,"Foo"));
 		
 		//LOG.debug("foo bar");
 	}
