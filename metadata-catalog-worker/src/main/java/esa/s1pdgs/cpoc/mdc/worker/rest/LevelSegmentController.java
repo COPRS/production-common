@@ -31,15 +31,14 @@ public class LevelSegmentController extends AbstractMetadataController<LevelSegm
 //    	return getResponse(productName, family, () -> esServices.getLevelSegment(family, productName));
 //    }
     
-    @RequestMapping(method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_UTF8_VALUE, path = "/{productType}/{dataTakeId}")
+    @RequestMapping(method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_UTF8_VALUE, path = "/{dataTakeId}")
     public ResponseEntity<List<LevelSegmentMetadata>> get(
-            @PathVariable(name = "productType") final String productType,
             @PathVariable(name = "dataTakeId") final String dataTakeId
     ) {
     	return getResponse(
-    			productType +" products for dataTakeId=" + dataTakeId, 
+    			"Products for dataTakeId=" + dataTakeId, 
     			ProductFamily.L0_SEGMENT, 
-    			() -> esServices.getLevelSegmentMetadataFor(productType, dataTakeId)
+    			() -> esServices.getLevelSegmentMetadataFor(dataTakeId)
     	);
     }
     

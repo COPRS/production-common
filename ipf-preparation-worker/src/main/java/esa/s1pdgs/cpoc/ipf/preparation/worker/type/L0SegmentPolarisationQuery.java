@@ -52,7 +52,6 @@ final class L0SegmentPolarisationQuery implements Callable<JobGen> {
 		final Map<String, List<LevelSegmentMetadata>> segmentsGroupByPol = new HashMap<>();
 		String lastName = "";
 		String dataTakeId = "null";
-		String productType = "null";
 		final AppDataJob appDataJob = job.job();
 		
 		try {
@@ -60,11 +59,10 @@ final class L0SegmentPolarisationQuery implements Callable<JobGen> {
 				final CatalogEvent dto = message.getBody();
 				lastName = dto.getKeyObjectStorage();
 				dataTakeId = dto.getMetadata().get("dataTakeId").toString();
-				productType =  dto.getMetadata().get("productType").toString();
 				break;
 			}
 			
-			for (final LevelSegmentMetadata metadata : metadataClient.getLevelSegments(productType, dataTakeId)) {
+			for (final LevelSegmentMetadata metadata : metadataClient.getLevelSegments(dataTakeId)) {
 				if (!segmentsGroupByPol.containsKey(metadata.getPolarisation())) {
 					pols.add(metadata.getPolarisation());
 					segmentsGroupByPol.put(metadata.getPolarisation(), new ArrayList<>());

@@ -10,6 +10,7 @@ import static org.mockito.Mockito.verify;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 
 import java.io.IOException;
+import java.util.Collections;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -18,7 +19,6 @@ import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 
-import esa.s1pdgs.cpoc.common.ProductFamily;
 import esa.s1pdgs.cpoc.common.errors.processing.MetadataMalformedException;
 import esa.s1pdgs.cpoc.common.errors.processing.MetadataNotPresentException;
 import esa.s1pdgs.cpoc.mdc.worker.service.EsServices;
@@ -58,34 +58,34 @@ public class LevelSegmentControllerTest extends RestControllerTest {
         result.setConsolidation("consol");
         result.setPolarisation("pol");
         
-        doReturn(result).when(esServices).getLevelSegmentMetadataFor(Mockito.any(), Mockito.any());
+        doReturn(Collections.singletonList(result)).when(esServices).getLevelSegmentMetadataFor(Mockito.anyString());
         
-        request(get("/level_segment/L0_SEGMENT/name"))
+        request(get("/level_segment/name"))
         .andExpect(MockMvcResultMatchers.status().isOk());
-        verify(esServices, times(1)).getLevelSegmentMetadataFor(Mockito.eq(ProductFamily.L0_SEGMENT.name()), Mockito.eq("name"));
+        verify(esServices, times(1)).getLevelSegmentMetadataFor(Mockito.eq("name"));
     }
     
     @Test
     public void metadataNotPresentTest() throws Exception {
-        doThrow(new MetadataNotPresentException("name")).when(esServices).getLevelSegmentMetadataFor(Mockito.any(), Mockito.any());
-        request(get("/level_segment/L0_SEGMENT/name"))
+        doThrow(new MetadataNotPresentException("name")).when(esServices).getLevelSegmentMetadataFor(Mockito.anyString());
+        request(get("/level_segment/name"))
         .andExpect(MockMvcResultMatchers.status().is4xxClientError());
-        verify(esServices, times(1)).getLevelSegmentMetadataFor(Mockito.eq(ProductFamily.L0_SEGMENT.name()), Mockito.eq("name"));
+        verify(esServices, times(1)).getLevelSegmentMetadataFor(Mockito.eq("name"));
     }
     
     @Test
     public void abstrcatExceptionTest() throws Exception {
-        doThrow(new MetadataMalformedException("name")).when(esServices).getLevelSegmentMetadataFor(Mockito.any(), Mockito.any());
-        request(get("/level_segment/L0_SEGMENT/name"))
+        doThrow(new MetadataMalformedException("name")).when(esServices).getLevelSegmentMetadataFor(Mockito.anyString());
+        request(get("/level_segment/name"))
         .andExpect(MockMvcResultMatchers.status().is5xxServerError());
-        verify(esServices, times(1)).getLevelSegmentMetadataFor(Mockito.eq(ProductFamily.L0_SEGMENT.name()), Mockito.eq("name"));
+        verify(esServices, times(1)).getLevelSegmentMetadataFor(Mockito.eq("name"));
     }
     
     @Test
     public void exceptionTest() throws Exception {
-        doThrow(new Exception("name")).when(esServices).getLevelSegmentMetadataFor(Mockito.any(), Mockito.any());
-        request(get("/level_segment/L0_SEGMENT/name"))
+        doThrow(new Exception("name")).when(esServices).getLevelSegmentMetadataFor(Mockito.anyString());
+        request(get("/level_segment/name"))
         .andExpect(MockMvcResultMatchers.status().is5xxServerError());
-        verify(esServices, times(1)).getLevelSegmentMetadataFor(Mockito.eq(ProductFamily.L0_SEGMENT.name()), Mockito.eq("name"));
+        verify(esServices, times(1)).getLevelSegmentMetadataFor(Mockito.eq("name"));
     }
 }

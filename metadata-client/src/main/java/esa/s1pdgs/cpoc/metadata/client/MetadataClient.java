@@ -102,10 +102,9 @@ public class MetadataClient {
 	 * @return
 	 * @throws MetadataQueryException
 	 */
-	public List<LevelSegmentMetadata> getLevelSegments(final String productType, final String dataTakeId)
+	public List<LevelSegmentMetadata> getLevelSegments(final String dataTakeId)
 			throws MetadataQueryException {
-		final String uri = this.metadataBaseUri + MetadataCatalogRestPath.LEVEL_SEGMENT.path() + "/" + productType + "/"
-				+ dataTakeId;
+		final String uri = this.metadataBaseUri + MetadataCatalogRestPath.LEVEL_SEGMENT.path() + "/" + dataTakeId;
 
 		final ResponseEntity<List<LevelSegmentMetadata>> response = query(
 				UriComponentsBuilder.fromUriString(uri).build().toUri(),
@@ -113,7 +112,7 @@ public class MetadataClient {
 		);
 
 		if (response == null) {
-			LOGGER.debug("Level segment not found for type {} and dataTakeId {}", productType, dataTakeId);
+			LOGGER.debug("Level segment not found for dataTakeId {}",  dataTakeId);
 			return null;
 		} else {
 			LOGGER.debug("Returning level segment: {}", response.getBody());
