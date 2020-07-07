@@ -14,8 +14,7 @@ import esa.s1pdgs.cpoc.ingestion.trigger.entity.InboxEntry;
 import esa.s1pdgs.cpoc.ingestion.trigger.entity.InboxEntryRepository;
 
 @Component
-@Transactional
-public class IngestionTriggerServiceTransactional {	
+public class IngestionTriggerServiceTransactional {
 	private final InboxEntryRepository repository;
 
 	@Autowired

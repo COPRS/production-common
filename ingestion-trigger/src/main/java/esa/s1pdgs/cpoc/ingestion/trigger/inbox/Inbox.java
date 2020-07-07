@@ -24,7 +24,7 @@ import esa.s1pdgs.cpoc.report.ReportingInput;
 import esa.s1pdgs.cpoc.report.ReportingMessage;
 import esa.s1pdgs.cpoc.report.ReportingUtils;
 
-public final class Inbox {	
+public final class Inbox {
 	private final Logger log;
 	
 	private final InboxAdapter inboxAdapter;
@@ -54,27 +54,26 @@ public final class Inbox {
 		this.log = LoggerFactory.getLogger(String.format("%s (%s) for %s", getClass().getName(), stationName, family));
 	}
 	
-	public final void poll() {	
+	public final void poll() {
 		try {
 			final PollingRun pollingRun = PollingRun.newInstance(
-					ingestionTriggerServiceTransactional.getAllForPath(inboxAdapter.inboxURL(), stationName), 
+					ingestionTriggerServiceTransactional.getAllForPath(inboxAdapter.inboxURL(), stationName),
 					inboxAdapter.read(InboxFilter.ALLOW_ALL)
 			);
 						
 			// when a product has been removed from the inbox directory, it shall be removed
 			// from the persistence so it will not be ignored if it occurs again on the inbox
-			ingestionTriggerServiceTransactional.removeFinished(pollingRun.finishedElements());			
+			ingestionTriggerServiceTransactional.removeFinished(pollingRun.finishedElements());
 			
 			final Set<InboxEntry> handledElements = new HashSet<>();
-			
-			for (final InboxEntry newEntry : pollingRun.newElements()) {		
+
+			for (final InboxEntry newEntry : pollingRun.newElements()) {
 				// omit files in subdirectories of already matched products
 				if (!isChildOf(newEntry, handledElements)) {
-					handleEntry(newEntry).
-						ifPresent(e -> handledElements.add(e));	
-				}			
+				handleEntry(newEntry).
+					ifPresent(handledElements::add);}
 				persist(newEntry);
-			}		
+			}
 			pollingRun.dumpTo(handledElements, log);
 			log.trace(pollingRun.toString());
 		} catch (final Exception e) {			
@@ -90,35 +89,35 @@ public final class Inbox {
 	public final String toString() {
 		return "Inbox [inboxAdapter=" + inboxAdapter + ", filter=" + filter + ", client=" + client + "]";
 	}
-		
-	private final boolean isChildOf(final InboxEntry entry, final Set<InboxEntry> handledElements) {
+
+	private boolean isChildOf(final InboxEntry entry, final Set<InboxEntry> handledElements) {
 		final Path thisPath = Paths.get(entry.getRelativePath());
-		
+
 		for (final InboxEntry handledEntry : handledElements) {
 			// is child ?
 			if (thisPath.startsWith(Paths.get(handledEntry.getRelativePath()))) {
 				return true;
-			}			
+			}
 		}
-		return false;		
+		return false;
 	}
 
-	private final Optional<InboxEntry> handleEntry(final InboxEntry entry) {				
+	private Optional<InboxEntry> handleEntry(final InboxEntry entry) {
 		final Reporting reporting = ReportingUtils.newReportingBuilder()
 				.newReporting("IngestionTrigger");
-		
+
 		final ReportingInput input = IngestionTriggerReportingInput.newInstance(
-				entry.getName(), 
-				family, 
+				entry.getName(),
+				family,
 				entry.getLastModified()
-		);			
+		);
 		reporting.begin(input,new ReportingMessage("New file detected %s", entry.getName()));
 		
 		if (!filter.accept(entry)) {
-			reporting.end(new ReportingMessage("File %s is ignored by filter.", entry.getName()));						
+			reporting.end(new ReportingMessage("File %s is ignored by filter.", entry.getName()));
 			return Optional.empty();
 		}
-		
+
 		// empty files are not accepted!
 		if (entry.getSize() == 0) {	
 			reporting.error(new ReportingMessage("File %s is empty, ignored.", entry.getName()));						
@@ -127,18 +126,18 @@ public final class Inbox {
 		
 		try {
 			final String publishedName = nameEvaluator.evaluateFrom(Paths.get(entry.getRelativePath()));
-			log.debug("Publishing new entry {} to kafka queue: {}", publishedName, entry);			
+			log.debug("Publishing new entry {} to kafka queue: {}", publishedName, entry);
 			client.publish(
 					new IngestionJob(
 						family, 
-						publishedName, 
+						publishedName,
 						entry.getPickupURL(), 
 						entry.getRelativePath(), 
 						entry.getSize(),
 						reporting.getUid(),
 						stationName
-					)					
-			);	
+					)
+			);
 			reporting.end(
 					new IngestionTriggerReportingOutput(entry.getPickupURL() + "/" + entry.getRelativePath()), 
 					new ReportingMessage("File %s created IngestionJob", entry.getName())
@@ -147,11 +146,11 @@ public final class Inbox {
 		} catch (final Exception e) {
 			reporting.error(new ReportingMessage("File %s could not be handled: %s", entry.getName(), LogUtils.toString(e)));
 			log.error(String.format("Error on handling %s in %s: %s", entry, description(), LogUtils.toString(e)));
-		}	
+		}
 		return Optional.empty();
 	}
 	
-	private final InboxEntry persist(final InboxEntry toBePersisted) {
+	private InboxEntry persist(final InboxEntry toBePersisted) {
 		final InboxEntry persisted = ingestionTriggerServiceTransactional.add(toBePersisted);
 		log.trace("Added {} to persistence", persisted);
 		return persisted;
