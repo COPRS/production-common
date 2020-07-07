@@ -13,6 +13,7 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
 import esa.s1pdgs.cpoc.common.ProductFamily;
+import esa.s1pdgs.cpoc.ingestion.trigger.config.ProcessConfiguration;
 import esa.s1pdgs.cpoc.ingestion.trigger.entity.InboxEntry;
 import esa.s1pdgs.cpoc.ingestion.trigger.entity.InboxEntryRepository;
 import esa.s1pdgs.cpoc.ingestion.trigger.filter.InboxFilter;
@@ -31,6 +32,9 @@ public class TestInbox {
     @Mock
     InboxEntryRepository fakeRepo;
 
+    @Mock
+    ProcessConfiguration processConfiguration;
+
     @Before
     public void initMocks() {
         MockitoAnnotations.initMocks(this);
@@ -39,6 +43,7 @@ public class TestInbox {
     @Test
     public final void testPoll_OnFindingNewProducts_ShallStoreProductsAndPutInKafkaQueue() throws IOException {
 
+        when(processConfiguration.getHostname()).thenReturn("ingestor-01");
         when(fakeAdapter.read(any())).thenReturn(Arrays.asList(new InboxEntry("foo1", "foo1", "/tmp", new Date(), 10),
                 new InboxEntry("foo2", "foo2", "/tmp", new Date(), 10)));
         when(fakeAdapter.description()).thenReturn("fakeAdapter");
@@ -47,7 +52,7 @@ public class TestInbox {
         final Inbox uut = new Inbox(
                 fakeAdapter,
                 InboxFilter.ALLOW_ALL,
-                new IngestionTriggerServiceTransactional(fakeRepo),
+                new IngestionTriggerServiceTransactional(fakeRepo, processConfiguration),
                 fakeKafkaClient,
                 ProductFamily.EDRS_SESSION,
                 "WILE",
@@ -61,20 +66,23 @@ public class TestInbox {
     @Test
     public final void testPoll_OnFindingAlreadyStoredProducts_ShallDoNothing() throws IOException {
 
+        when(processConfiguration.getHostname()).thenReturn("ingestor-01");
         when(fakeAdapter.read(any())).thenReturn(Arrays.asList(
-                new InboxEntry("foo1", "foo1", "/tmp", new Date(), 0),
-                new InboxEntry("foo2", "foo2", "/tmp", new Date(), 0)));
+                new InboxEntry("foo1", "foo1", "/tmp", new Date(), 0, "ingestor-01"),
+                new InboxEntry("foo2", "foo2", "/tmp", new Date(), 0, "ingestor-01")));
         when(fakeAdapter.description()).thenReturn("fakeAdapter");
         when(fakeAdapter.inboxURL()).thenReturn("/tmp");
 
 
-        when(fakeRepo.findByPickupURLAndStationName(anyString(), anyString())).thenReturn(Arrays.asList(new InboxEntry("foo2", "foo2", "/tmp", new Date(), 0),
-                new InboxEntry("foo1", "foo1", "/tmp", new Date(), 0)));
+        when(fakeRepo.findByPickupURLAndStationNameAndProcessingPod(anyString(), anyString(), anyString()))
+                .thenReturn(Arrays.asList(
+                        new InboxEntry("foo2", "foo2", "/tmp", new Date(), 0, "ingestor-01"),
+                        new InboxEntry("foo1", "foo1", "/tmp", new Date(), 0, "ingestor-01")));
 
         final Inbox uut = new Inbox(
                 fakeAdapter,
                 InboxFilter.ALLOW_ALL,
-                new IngestionTriggerServiceTransactional(fakeRepo),
+                new IngestionTriggerServiceTransactional(fakeRepo, processConfiguration),
                 fakeKafkaClient,
                 ProductFamily.EDRS_SESSION,
 				"WILE",

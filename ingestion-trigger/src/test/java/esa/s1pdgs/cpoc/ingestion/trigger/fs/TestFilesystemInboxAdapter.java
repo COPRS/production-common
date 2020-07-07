@@ -14,6 +14,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 import esa.s1pdgs.cpoc.common.utils.FileUtils;
+import esa.s1pdgs.cpoc.ingestion.trigger.config.ProcessConfiguration;
 import esa.s1pdgs.cpoc.ingestion.trigger.entity.InboxEntry;
 import esa.s1pdgs.cpoc.ingestion.trigger.filter.BlacklistRegexRelativePathInboxFilter;
 import esa.s1pdgs.cpoc.ingestion.trigger.filter.InboxFilter;
@@ -23,13 +24,16 @@ import esa.s1pdgs.cpoc.ingestion.trigger.inbox.InboxEntryFactory;
 import esa.s1pdgs.cpoc.ingestion.trigger.inbox.InboxEntryFactoryImpl;
 
 public class TestFilesystemInboxAdapter {
-	private final InboxEntryFactory factory = new InboxEntryFactoryImpl();
+	private InboxEntryFactory factory;
 	private final File testDir = FileUtils.createTmpDir();	
 	private FilesystemInboxAdapter uut;
 
     @Before 
     public final void init() {
-		uut = new FilesystemInboxAdapter(factory, testDir.toPath().toUri(), null);
+		final ProcessConfiguration processConfiguration = new ProcessConfiguration();
+		processConfiguration.setHostname("ingestor-01");
+		factory  = new InboxEntryFactoryImpl(processConfiguration);
+    	uut = new FilesystemInboxAdapter(factory, testDir.toPath().toUri(), null);
 	}
 
 	@After

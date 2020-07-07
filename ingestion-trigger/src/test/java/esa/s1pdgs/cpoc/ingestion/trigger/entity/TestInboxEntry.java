@@ -9,18 +9,29 @@ import java.net.URISyntaxException;
 import java.nio.file.Paths;
 import java.util.Date;
 
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit4.SpringRunner;
 
+import esa.s1pdgs.cpoc.ingestion.trigger.config.ProcessConfiguration;
 import esa.s1pdgs.cpoc.ingestion.trigger.inbox.InboxEntryFactory;
 import esa.s1pdgs.cpoc.ingestion.trigger.inbox.InboxEntryFactoryImpl;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest
 public class TestInboxEntry {
-	private final InboxEntryFactory factory = new InboxEntryFactoryImpl();
+
+	private InboxEntryFactory factory;
+
+	@Before
+	public void setup() {
+
+		final ProcessConfiguration processConfiguration = new ProcessConfiguration();
+		processConfiguration.setHostname("ingestor-01");
+		factory = new InboxEntryFactoryImpl(processConfiguration);
+	}
 
 	@Test
 	public final void testGetName_OnValidName_ShallReturnName() throws URISyntaxException {

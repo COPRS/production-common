@@ -1,5 +1,7 @@
 package esa.s1pdgs.cpoc.ingestion.trigger.entity;
 
+import static java.lang.String.format;
+
 import org.bson.types.ObjectId;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.annotation.Transient;
@@ -8,7 +10,7 @@ import org.springframework.data.mongodb.core.mapping.Document;
 import java.util.Date;
 import java.util.Objects;
 
-@Document(collection = "#{@collectionName.name}")
+@Document(collection = "inboxEntry")
 public class InboxEntry {
 
 	@Transient
@@ -23,6 +25,7 @@ public class InboxEntry {
 	private Date lastModified;
 	private long size;
 	private String stationName;
+	private String processingPod;
 
 	public InboxEntry() {
 	}
@@ -34,6 +37,16 @@ public class InboxEntry {
 		this.pickupURL = pickupURL;
 		this.lastModified = lastModified;
 		this.size = size;
+	}
+
+	public InboxEntry(final String name, final String relativePath, final String pickupURL, final Date lastModified,
+					  final long size, final String processingPod) {
+		this.name = name;
+		this.relativePath = relativePath;
+		this.pickupURL = pickupURL;
+		this.lastModified = lastModified;
+		this.size = size;
+		this.processingPod = processingPod;
 	}
 
 	public String getName() {
@@ -84,6 +97,10 @@ public class InboxEntry {
 		this.stationName = stationName;
 	}
 
+	public String getProcessingPod() { return processingPod; }
+
+	public void setProcessingPod(String processingPod) { this.processingPod = processingPod; }
+
 	@Override
 	public boolean equals(final Object obj) {
 		if (this == obj) {
@@ -101,17 +118,18 @@ public class InboxEntry {
 		return Objects.equals(name, other.name) && 
 				Objects.equals(pickupURL, other.pickupURL)
 				&& Objects.equals(relativePath, other.relativePath)
-				&& Objects.equals(stationName, other.stationName);
+				&& Objects.equals(stationName, other.stationName)
+				&& Objects.equals(processingPod, other.processingPod);
 	}
 
 	@Override
 	public int hashCode() {
-		return Objects.hash(name, pickupURL, relativePath, stationName);
+		return Objects.hash(name, pickupURL, relativePath, stationName, processingPod);
 	}
 
 	@Override
 	public String toString() {
-		return String.format("InboxEntry [name=%s, relativePath=%s, pickupURL=%s, lastModified=%s, size=%s, stationName=%s]", name,
-				relativePath, pickupURL, lastModified, size, stationName);
+		return format("InboxEntry [name=%s, relativePath=%s, pickupURL=%s, lastModified=%s, size=%s, stationName=%s, processingPod=%s]", name,
+				relativePath, pickupURL, lastModified, size, stationName, processingPod);
 	}
 }

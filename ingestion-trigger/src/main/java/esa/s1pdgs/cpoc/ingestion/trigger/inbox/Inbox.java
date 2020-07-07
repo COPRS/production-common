@@ -70,8 +70,9 @@ public final class Inbox {
 			for (final InboxEntry newEntry : pollingRun.newElements()) {
 				// omit files in subdirectories of already matched products
 				if (!isChildOf(newEntry, handledElements)) {
-				handleEntry(newEntry).
-					ifPresent(handledElements::add);}
+					handleEntry(newEntry).
+							ifPresent(handledElements::add);
+				}
 				persist(newEntry);
 			}
 			pollingRun.dumpTo(handledElements, log);
