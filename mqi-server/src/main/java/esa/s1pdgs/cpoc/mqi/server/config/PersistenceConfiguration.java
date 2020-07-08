@@ -16,6 +16,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 import esa.s1pdgs.cpoc.appcatalog.client.mqi.AppCatalogMqiService;
+import esa.s1pdgs.cpoc.appstatus.AppStatus;
 import esa.s1pdgs.cpoc.mqi.model.queue.AbstractMessage;
 import esa.s1pdgs.cpoc.mqi.server.service.AppCatalogMessagePersistence;
 import esa.s1pdgs.cpoc.mqi.server.service.InMemoryMessagePersistence;
@@ -35,6 +36,8 @@ public class PersistenceConfiguration<T extends AbstractMessage> {
 
 	final static List<MessagePersistenceStrategy> SUPPORTED_MESSAGE_PERSISTENCE_STRATEGIES =
 			Stream.of(MessagePersistenceStrategy.values()).collect(Collectors.toList());
+	
+	private final AppStatus appStatus;
 	
 	private final String messagePersistenceStrategy;
 	
@@ -69,12 +72,14 @@ public class PersistenceConfiguration<T extends AbstractMessage> {
      */
     @Autowired
     public PersistenceConfiguration(
+    		final AppStatus appStatus,
     		@Value("${persistence.message-persistence-strategy:AppCatalogMessagePersistence}") final String messagePersistenceStrategy,
             @Value("${persistence.host-uri-catalog}") final String hostUriCatalog,
             @Value("${persistence.port-uri-other-app}") final String portUriOtherApp,
             @Value("${persistence.max-retries}") final int maxRetries,
             @Value("${persistence.tempo-retry-ms}") final int tempoRetryMs,
             @Value("${persistence.other-app.suffix-uri}") final String suffixUriOtherApp) {
+    	this.appStatus = appStatus;
     	this.messagePersistenceStrategy = messagePersistenceStrategy;
         this.hostUriCatalog = hostUriCatalog;
         this.maxRetries = maxRetries;
@@ -102,7 +107,7 @@ public class PersistenceConfiguration<T extends AbstractMessage> {
      */
     @Bean
     public AppCatalogMqiService<T> appCatService(final RestTemplateBuilder builder) {
-        return new AppCatalogMqiService<>(builder.build(), hostUriCatalog, maxRetries, tempoRetryMs);
+        return new AppCatalogMqiService<>(appStatus, builder.build(), hostUriCatalog, maxRetries, tempoRetryMs);
     }
 
     /**
