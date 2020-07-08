@@ -8,6 +8,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.web.client.RestTemplate;
 
 import esa.s1pdgs.cpoc.appcatalog.client.mqi.AppCatalogMqiService;
+import esa.s1pdgs.cpoc.appstatus.AppStatus;
 
 /**
  * Configuration of applicative catalog client for data persistence.<br/>
@@ -18,6 +19,8 @@ import esa.s1pdgs.cpoc.appcatalog.client.mqi.AppCatalogMqiService;
 @Configuration
 public class PersistenceConfiguration {
 
+	private final AppStatus appStatus;
+	
     /**
      * Host URI for the applicative catalog
      */
@@ -42,9 +45,11 @@ public class PersistenceConfiguration {
      */
     @Autowired
     public PersistenceConfiguration(
+    		final AppStatus appStatus,
             @Value("${persistence.host-uri-catalog}") final String hostUriCatalog,
             @Value("${persistence.max-retries}") final int maxRetries,
             @Value("${persistence.tempo-retry-ms}") final int tempoRetryMs) {
+    	this.appStatus = appStatus;
         this.hostUriCatalog = hostUriCatalog;
         this.maxRetries = maxRetries;
         this.tempoRetryMs = tempoRetryMs;
@@ -60,7 +65,7 @@ public class PersistenceConfiguration {
     public AppCatalogMqiService persistenceServiceForLevelJobs(
             final RestTemplateBuilder builder) {
         RestTemplate template = builder.build();
-        return new AppCatalogMqiService(template, hostUriCatalog,
+        return new AppCatalogMqiService(appStatus, template, hostUriCatalog,
                 maxRetries, tempoRetryMs);
     }
     

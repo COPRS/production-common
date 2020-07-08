@@ -21,7 +21,7 @@ public class GracePeriodHandler {
 	
 	public final boolean isWithinGracePeriod(final AppDataJobGeneration jobGen) {
 		final Date gracePeriodOverAt = new Date(jobGen.getLastUpdateDate().getTime() + getGracePeriodMillis(jobGen));
-		return gracePeriodOverAt.before(new Date());
+		return new Date().before(gracePeriodOverAt);
 	}
 	
 	private final long getGracePeriodMillis(final AppDataJobGeneration jobGen) {

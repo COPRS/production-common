@@ -37,6 +37,7 @@ import org.springframework.web.util.UriComponentsBuilder;
 import esa.s1pdgs.cpoc.appcatalog.rest.AppCatMessageDto;
 import esa.s1pdgs.cpoc.appcatalog.rest.AppCatReadMessageDto;
 import esa.s1pdgs.cpoc.appcatalog.rest.AppCatSendMessageDto;
+import esa.s1pdgs.cpoc.appstatus.AppStatus;
 import esa.s1pdgs.cpoc.common.ProductCategory;
 import esa.s1pdgs.cpoc.common.ProductFamily;
 import esa.s1pdgs.cpoc.common.errors.AbstractCodedException;
@@ -67,6 +68,9 @@ public class AppCatalogMqiServiceTest {
      */
     @Mock
     private RestTemplate restTemplate;
+    
+    @Mock
+    private AppStatus appStatus;
 
     /**
      * Service to test
@@ -90,7 +94,7 @@ public class AppCatalogMqiServiceTest {
     public void init() {
         MockitoAnnotations.initMocks(this);
 
-        service = new AppCatalogMqiService(restTemplate, "uri", 2, 500);
+        service = new AppCatalogMqiService(appStatus, restTemplate, "uri", 2, 500);
         message = new AppCatMessageDto<>(ProductCategory.LEVEL_PRODUCTS, 1234, "topic", 2, 9876);
         messages = Collections.singletonList(message);
         readMessage = new AppCatReadMessageDto<ProductionEvent>("group","pod", false, dto);
@@ -102,9 +106,9 @@ public class AppCatalogMqiServiceTest {
         assertEquals(2, service.getMaxRetries());
         assertEquals(500, service.getTempoRetryMs());
         assertEquals("uri", service.getHostUri());
-        service = new AppCatalogMqiService(restTemplate, "uri", 0, 500);
+        service = new AppCatalogMqiService(appStatus, restTemplate, "uri", 0, 500);
         assertEquals(0, service.getMaxRetries());
-        service = new AppCatalogMqiService(restTemplate, "uri", 15, 500);
+        service = new AppCatalogMqiService(appStatus, restTemplate, "uri", 15, 500);
         assertEquals(15, service.getMaxRetries());
     }
 

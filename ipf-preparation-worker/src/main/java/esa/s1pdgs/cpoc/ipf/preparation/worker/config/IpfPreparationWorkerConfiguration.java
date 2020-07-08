@@ -24,6 +24,7 @@ import esa.s1pdgs.cpoc.appcatalog.client.job.AppCatalogJobClient;
 import esa.s1pdgs.cpoc.common.ApplicationLevel;
 import esa.s1pdgs.cpoc.common.ProductCategory;
 import esa.s1pdgs.cpoc.errorrepo.ErrorRepoAppender;
+import esa.s1pdgs.cpoc.ipf.preparation.worker.appcat.AppCatAdapter;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.config.IpfPreparationWorkerSettings.CategoryConfig;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.config.IpfPreparationWorkerSettings.InputWaitingConfig;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.dispatch.JobDispatcherImpl;
@@ -52,6 +53,7 @@ import esa.s1pdgs.cpoc.ipf.preparation.worker.type.LevelProduct;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.type.ProductTypeAdapter;
 import esa.s1pdgs.cpoc.metadata.client.MetadataClient;
 import esa.s1pdgs.cpoc.metadata.client.SearchMetadataQuery;
+import esa.s1pdgs.cpoc.mqi.client.MessageFilter;
 import esa.s1pdgs.cpoc.mqi.client.MqiClient;
 import esa.s1pdgs.cpoc.mqi.client.MqiConsumer;
 import esa.s1pdgs.cpoc.mqi.client.MqiListener;
@@ -64,6 +66,7 @@ public class IpfPreparationWorkerConfiguration {
 	private final AppCatalogJobClient appCatClient;
     private final AppStatusImpl appStatus;
     private final MqiClient mqiClient;
+    private final List<MessageFilter> messageFilter;
     private final IpfPreparationWorkerSettings settings;
     private final ErrorRepoAppender errorAppender;
     private final ProcessConfiguration processConfiguration;
@@ -80,6 +83,7 @@ public class IpfPreparationWorkerConfiguration {
 	public IpfPreparationWorkerConfiguration(
 			final AppStatusImpl appStatus, 
 			final MqiClient mqiClient,
+			final List<MessageFilter> messageFilter,
 			final IpfPreparationWorkerSettings settings, 
 			final ErrorRepoAppender errorAppender,
 			final ProcessConfiguration processConfiguration,
@@ -95,6 +99,7 @@ public class IpfPreparationWorkerConfiguration {
 	) {
 		this.appStatus = appStatus;
 		this.mqiClient = mqiClient;
+		this.messageFilter = messageFilter;
 		this.settings = settings;
 		this.errorAppender = errorAppender;
 		this.processConfiguration = processConfiguration;
@@ -213,17 +218,23 @@ public class IpfPreparationWorkerConfiguration {
 			final ProductTypeAdapter typeAdapter,
 			final Function<TaskTable, InputTimeoutChecker> timeoutCheckerFactory
 	) {		
-		final Map<String, JobGenerator> generators = new HashMap<>(ttManager.size());		
+		final Map<String, JobGenerator> generators = new HashMap<>(ttManager.size());	
+		final AppCatAdapter appCat = new AppCatAdapter(appCatClient, gracePeriodHandler);
 	
 		for (final File taskTableFile : ttManager.tasktables()) {				
-			final JobGenerator jobGenerator = newJobGenerator(taskTableFile, typeAdapter, timeoutCheckerFactory);
+			final JobGenerator jobGenerator = newJobGenerator(taskTableFile, typeAdapter, appCat, timeoutCheckerFactory);
 			generators.put(taskTableFile.getName(), jobGenerator);
 		    // --> Launch generators
 			taskScheduler.scheduleWithFixedDelay(jobGenerator, settings.getJobgenfixedrate());
 		}
 		
 		final IpfPreparationService service = new IpfPreparationService(
-				new JobDispatcherImpl(typeAdapter.taskTableMapper(), processSettings, appCatClient, generators), 
+				new JobDispatcherImpl(
+						typeAdapter, 
+						processSettings, 
+						appCat, 
+						generators.keySet()
+				), 
 				errorAppender, 
 				processConfiguration
 		);
@@ -242,6 +253,7 @@ public class IpfPreparationWorkerConfiguration {
 	private final JobGenerator newJobGenerator(
 			final File taskTableFile, 
 			final ProductTypeAdapter typeAdapter,
+			final AppCatAdapter appCat,
 			final Function<TaskTable, InputTimeoutChecker> timeoutCheckerFactory
 	) {		
 		final TasktableAdapter tasktableAdapter = new TasktableAdapter(
@@ -259,8 +271,7 @@ public class IpfPreparationWorkerConfiguration {
 		return new JobGeneratorImpl(
 				tasktableAdapter, 
 				typeAdapter, 
-				appCatClient, 
-				gracePeriodHandler, 
+				appCat, 
 				processSettings, 
 				errorAppender, 
 				publisher, 
@@ -281,6 +292,7 @@ public class IpfPreparationWorkerConfiguration {
 				mqiClient, 
 				category, 
 				listener,
+				messageFilter,
 				config.getFixedDelayMs(),
 				config.getInitDelayPollMs(),
 				appStatus

@@ -19,6 +19,7 @@ import org.springframework.web.util.UriComponentsBuilder;
 import esa.s1pdgs.cpoc.appcatalog.rest.AppCatMessageDto;
 import esa.s1pdgs.cpoc.appcatalog.rest.AppCatReadMessageDto;
 import esa.s1pdgs.cpoc.appcatalog.rest.AppCatSendMessageDto;
+import esa.s1pdgs.cpoc.appstatus.AppStatus;
 import esa.s1pdgs.cpoc.common.ProductCategory;
 import esa.s1pdgs.cpoc.common.errors.AbstractCodedException;
 import esa.s1pdgs.cpoc.common.errors.appcatalog.AppCatalogMqiAckApiError;
@@ -41,6 +42,8 @@ public class AppCatalogMqiService<T extends  AbstractMessage> {
      * Logger
      */
     static final Log LOGGER = LogFactory.getLog(AppCatalogMqiService.class);
+    
+    private final AppStatus appStatus;
 
     /**
      * Rest template
@@ -70,9 +73,12 @@ public class AppCatalogMqiService<T extends  AbstractMessage> {
      * @param maxRetries
      * @param tempoRetryMs
      */
-    public AppCatalogMqiService(final RestTemplate restTemplate,
+    public AppCatalogMqiService(
+    		final AppStatus appStatus,
+    		final RestTemplate restTemplate,
             final String hostUri,
             final int maxRetries, final int tempoRetryMs) {
+    	this.appStatus = appStatus;
         this.restTemplate = restTemplate;
         this.hostUri = hostUri;
         this.maxRetries = maxRetries;
@@ -133,6 +139,9 @@ public class AppCatalogMqiService<T extends  AbstractMessage> {
                 throw cause;
             }
         } else {
+        	// S1PRO-1547: Restart MQI when Applicative Catalog is not reachable
+        	appStatus.setError(api);
+        	appStatus.setShallBeStopped(true);
             throw cause;
         }
     }

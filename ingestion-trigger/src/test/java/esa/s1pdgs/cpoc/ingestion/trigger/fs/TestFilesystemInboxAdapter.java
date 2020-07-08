@@ -14,6 +14,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 import esa.s1pdgs.cpoc.common.utils.FileUtils;
+import esa.s1pdgs.cpoc.ingestion.trigger.config.ProcessConfiguration;
 import esa.s1pdgs.cpoc.ingestion.trigger.entity.InboxEntry;
 import esa.s1pdgs.cpoc.ingestion.trigger.filter.BlacklistRegexRelativePathInboxFilter;
 import esa.s1pdgs.cpoc.ingestion.trigger.filter.InboxFilter;
@@ -23,17 +24,20 @@ import esa.s1pdgs.cpoc.ingestion.trigger.inbox.InboxEntryFactory;
 import esa.s1pdgs.cpoc.ingestion.trigger.inbox.InboxEntryFactoryImpl;
 
 public class TestFilesystemInboxAdapter {
-	private final InboxEntryFactory factory = new InboxEntryFactoryImpl();
+	private InboxEntryFactory factory;
 	private final File testDir = FileUtils.createTmpDir();	
 	private FilesystemInboxAdapter uut;
 
     @Before 
-    public final void init() throws URISyntaxException {
-		uut = new FilesystemInboxAdapter(factory, testDir.toPath().toUri(), null);
+    public final void init() {
+		final ProcessConfiguration processConfiguration = new ProcessConfiguration();
+		processConfiguration.setHostname("ingestor-01");
+		factory  = new InboxEntryFactoryImpl(processConfiguration);
+    	uut = new FilesystemInboxAdapter(factory, testDir.toPath().toUri(), null);
 	}
 
 	@After
-	public final void tearDown() throws IOException {
+	public final void tearDown() {
 		FileUtils.delete(testDir.getPath());
 	}
 
@@ -45,11 +49,11 @@ public class TestFilesystemInboxAdapter {
 	//@Test
 	public final void testRegex() {
 		final Pattern patternToTest = Pattern.compile("(WILE|MTI_|SGS_|INU_)/S1(A|B)/([A-Za-z0-9]+)/ch0?(1|2)/.*\\.(xml|raw)",Pattern.CASE_INSENSITIVE);
-		assertEquals(true, patternToTest.matcher("WILE/S1B/L20180724144436762001030/ch01/DCS_02_L20180724144436762001030_ch1_DSDB_00027.raw").matches());
+		assertTrue(patternToTest.matcher("WILE/S1B/L20180724144436762001030/ch01/DCS_02_L20180724144436762001030_ch1_DSDB_00027.raw").matches());
 	}
 
 	@Test
-	public final void testRead_WithConfiguredFilters_ShallReturnProperProductss() throws IOException, URISyntaxException {
+	public final void testRead_WithConfiguredFilters_ShallReturnProperProducts() throws IOException, URISyntaxException {
 		// create some content in test directory
 		final File product1 = newTestProduct("WILE/S1B/L20180724144436762001030/ch01/DCS_02_L20180724144436762001030_ch1_DSIB.xml");
 		assertTrue(product1.createNewFile());
@@ -67,7 +71,7 @@ public class TestFilesystemInboxAdapter {
 				new WhitelistRegexRelativePathInboxFilter(Pattern.compile("(WILE|MTI_|SGS_|INU_)/S1(A|B)/([A-Za-z0-9]+)/ch0?(1|2)/(.+DSIB\\.(xml|XML)|.+DSDB.*\\.(raw|RAW|aisp|AISP))"))
 		);
 		final FilesystemInboxAdapter uutEdrs = new FilesystemInboxAdapter(
-				factory, 
+				factory,
 				testDir.toPath().toUri(),
 				null
 		);
@@ -83,7 +87,7 @@ public class TestFilesystemInboxAdapter {
 		assertEquals(1, actualAux.size());
 	}
 	
-	private final File newTestProduct(final String name) {
+	private File newTestProduct(final String name) {
 		final File product = new File(testDir, name);
 		product.getParentFile().mkdirs();
 		return product;

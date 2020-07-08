@@ -1,18 +1,21 @@
 package esa.s1pdgs.cpoc.ipf.preparation.worker.dispatch;
 
+import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
-import java.util.Map;
+import java.util.Optional;
 
 import esa.s1pdgs.cpoc.appcatalog.AppDataJob;
+import esa.s1pdgs.cpoc.appcatalog.AppDataJobGeneration;
 import esa.s1pdgs.cpoc.appcatalog.AppDataJobGenerationState;
 import esa.s1pdgs.cpoc.appcatalog.AppDataJobState;
-import esa.s1pdgs.cpoc.appcatalog.client.job.AppCatalogJobClient;
 import esa.s1pdgs.cpoc.common.utils.LogUtils;
+import esa.s1pdgs.cpoc.ipf.preparation.worker.appcat.AppCatAdapter;
+import esa.s1pdgs.cpoc.ipf.preparation.worker.appcat.CatalogEventAdapter;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.config.ProcessSettings;
-import esa.s1pdgs.cpoc.ipf.preparation.worker.generator.JobGenerator;
-import esa.s1pdgs.cpoc.ipf.preparation.worker.model.tasktable.mapper.TasktableMapper;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.report.TaskTableLookupReportingOutput;
+import esa.s1pdgs.cpoc.ipf.preparation.worker.type.ProductTypeAdapter;
+import esa.s1pdgs.cpoc.mqi.model.queue.CatalogEvent;
 import esa.s1pdgs.cpoc.mqi.model.queue.IpfPreparationJob;
 import esa.s1pdgs.cpoc.mqi.model.rest.GenericMessageDto;
 import esa.s1pdgs.cpoc.report.Reporting;
@@ -28,75 +31,100 @@ import esa.s1pdgs.cpoc.report.ReportingUtils;
  * @param <T>
  */
 public class JobDispatcherImpl implements JobDispatcher {
-    private final AppCatalogJobClient appCatClient;
-    private final TasktableMapper tasktableMapper;
+    private final AppCatAdapter appCat;    
     private final ProcessSettings settings;
-    private final Map<String, JobGenerator> generators; 
+    private final ProductTypeAdapter typeAdapter;
+    private final Collection<String> generatorAvailableForTasktableNames;
 
     public JobDispatcherImpl(
-    		final TasktableMapper tasktableMapper,
+    		final ProductTypeAdapter typeAdapter,
     		final ProcessSettings settings,
-            final AppCatalogJobClient appCatClient,
-            final Map<String, JobGenerator> generators
+            final AppCatAdapter appCat,         
+            final Collection<String> generatorAvailableForTasktableNames
     ) {
-        this.tasktableMapper = tasktableMapper;
-        this.appCatClient = appCatClient;
-        this.generators = generators;
+        this.appCat = appCat;
+        this.generatorAvailableForTasktableNames = generatorAvailableForTasktableNames;
         this.settings = settings;
+        this.typeAdapter = typeAdapter;
     }
 
 	@Override
 	public final void dispatch(final GenericMessageDto<IpfPreparationJob> message) throws Exception {
     	final IpfPreparationJob prepJob = message.getBody();
-    	final AppDataJob job = prepJob.getAppDataJob();    	
-    	LOGGER.trace("== dispatch job {}", job.toString());
+    	final AppDataJob jobFromMessage = prepJob.getAppDataJob();    	
+    	final GenericMessageDto<CatalogEvent> firstMessage = jobFromMessage.getMessages().get(0);
+    	
+    	LOGGER.trace("== dispatch job {}", jobFromMessage.toString());
         
         final Reporting reporting = ReportingUtils.newReportingBuilder()
         		.predecessor(prepJob.getUid())
         		.newReporting("TaskTableLookup");
         
     	reporting.begin(
-    			ReportingUtils.newFilenameReportingInputFor(prepJob.getProductFamily(), job.getProduct().getProductName()),
-    			new ReportingMessage("Start associating TaskTables to AppDataJob %s", job.getId())
+    			ReportingUtils.newFilenameReportingInputFor(prepJob.getProductFamily(), jobFromMessage.getProduct().getProductName()),
+    			new ReportingMessage("Start associating TaskTables to AppDataJob", jobFromMessage.getId())
     	);    	
-        try {
-            final String tasktableFilename = tasktableMapper.tasktableFor(job);
+        try {        	
+            final String tasktableFilename = typeAdapter.taskTableMapper().tasktableFor(jobFromMessage);
             LOGGER.trace("Got TaskTable {}", tasktableFilename);
             
             // assert that there is a job generator for the assigned tasktable
-            if (!generators.containsKey(tasktableFilename)) {
+            if (!generatorAvailableForTasktableNames.contains(tasktableFilename))  {
             	throw new IllegalStateException(
             			String.format(
             					"No job generator found for tasktable %s. Available are: %s", 
             					tasktableFilename,
-            					generators.keySet()
+            					generatorAvailableForTasktableNames
             			)
             	);
-            }
+            }       
             
-            final Date now = new Date();            
-            job.getGeneration().setState(AppDataJobGenerationState.INITIAL);
-            job.getGeneration().setTaskTable(tasktableFilename);
-            job.getGeneration().setNbErrors(0);
-            job.getGeneration().setCreationDate(now);
-            job.getGeneration().setLastUpdateDate(now);
-
-            job.setPrepJobMessageId(message.getId());
-            job.setPrepJobInputQueue(message.getInputKey());
-            job.setReportingId(reporting.getUid());
-            job.setState(AppDataJobState.GENERATING); // will activate that this request can be polled
-            job.setPod(settings.getHostname()); // will ensure that this pod will handled the job
-            
-            appCatClient.updateJob(job);
-            LOGGER.debug ("== dispatched job {}", job.toString());
-            reporting.end(
+    		final Optional<AppDataJob> jobForMess = appCat.findJobFor(firstMessage); 
+         	final CatalogEventAdapter eventAdapter = CatalogEventAdapter.of(firstMessage);
+         	final Optional<AppDataJob> specificJob = typeAdapter.findAssociatedJobFor(appCat, eventAdapter);
+    		
+    		// there is already a job for this message --> possible restart scenario --> just update the pod name 
+    		if (jobForMess.isPresent()) {		
+    			final AppDataJob job = jobForMess.get();
+    			LOGGER.info("Found job {} already associated to mqiMessage {}. Ignoring new message ...",
+    					job.getId(), firstMessage.getId());		
+    		}
+    		else if (specificJob.isPresent()) {
+        		final AppDataJob existingJob = specificJob.get(); 
+        		LOGGER.info("Found job {} already being handled. Appending new message ...",
+        				existingJob.getId(), firstMessage.getId());
+        		appCat.appendMessage(existingJob, firstMessage);
+    		}
+    		else {
+        		LOGGER.info("Persisting new job for message {} (catalog event message {}) ...",
+        				message.getId(), firstMessage.getId());
+        		
+            	// no job yet associated to this message --> create job and persist
+                final Date now = new Date();         
+                final AppDataJobGeneration gen = new AppDataJobGeneration();
+                gen.setState(AppDataJobGenerationState.INITIAL);
+                gen.setTaskTable(tasktableFilename);
+                gen.setNbErrors(0);
+                gen.setCreationDate(now);
+                gen.setLastUpdateDate(now);
+                
+                jobFromMessage.setGeneration(gen);
+                jobFromMessage.setPrepJobMessageId(message.getId());
+                jobFromMessage.setPrepJobInputQueue(message.getInputKey());
+                jobFromMessage.setReportingId(reporting.getUid());
+                jobFromMessage.setState(AppDataJobState.GENERATING); // will activate that this request can be polled
+                jobFromMessage.setPod(settings.getHostname()); 
+                
+                final AppDataJob newlyCreatedJob = appCat.create(jobFromMessage);
+                LOGGER.info("dispatched job {}", newlyCreatedJob.getId());                
+    		}
+    		reporting.end(
             		new TaskTableLookupReportingOutput(Collections.singletonList(tasktableFilename)),
-            		new ReportingMessage("End associating TaskTables to AppDataJob %s", job.getId())
+            		new ReportingMessage("End associating TaskTables to AppDataJob")
             );
         } catch (final Exception e) {        	
         	reporting.error(new ReportingMessage(
-        			"Error associating TaskTables to AppDataJob %s: %s", 
-        			job.getId(),
+        			"Error associating TaskTables to AppDataJob: %s", 
         			LogUtils.toString(e)
         	));
             throw e;

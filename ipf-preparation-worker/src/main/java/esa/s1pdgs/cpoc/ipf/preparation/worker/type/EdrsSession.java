@@ -2,10 +2,15 @@ package esa.s1pdgs.cpoc.ipf.preparation.worker.type;
 
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Optional;
 import java.util.concurrent.Callable;
 
+import esa.s1pdgs.cpoc.appcatalog.AppDataJob;
 import esa.s1pdgs.cpoc.appcatalog.AppDataJobFile;
 import esa.s1pdgs.cpoc.common.ProductFamily;
+import esa.s1pdgs.cpoc.common.errors.AbstractCodedException;
+import esa.s1pdgs.cpoc.ipf.preparation.worker.appcat.AppCatAdapter;
+import esa.s1pdgs.cpoc.ipf.preparation.worker.appcat.CatalogEventAdapter;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.model.JobGen;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.model.joborder.AbstractJobOrderConf;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.model.tasktable.mapper.TasktableMapper;
@@ -17,10 +22,20 @@ public final class EdrsSession extends AbstractProductTypeAdapter implements Pro
 	private final MetadataClient metadataClient;
     private final AiopPropertiesAdapter aiopAdapter;
       
-	public EdrsSession(final TasktableMapper taskTableMapper, final MetadataClient metadataClient, final AiopPropertiesAdapter aiopAdapter) {
+	public EdrsSession(
+			final TasktableMapper taskTableMapper, 
+			final MetadataClient metadataClient, 
+			final AiopPropertiesAdapter aiopAdapter
+	) {
 		super(taskTableMapper);
 		this.metadataClient = metadataClient;
 		this.aiopAdapter = aiopAdapter;
+	}
+	
+	@Override
+	public final Optional<AppDataJob> findAssociatedJobFor(final AppCatAdapter appCat,final CatalogEventAdapter catEvent) 
+			throws AbstractCodedException {
+		return appCat.findJobForSession(catEvent.sessionId());
 	}
 
 	@Override

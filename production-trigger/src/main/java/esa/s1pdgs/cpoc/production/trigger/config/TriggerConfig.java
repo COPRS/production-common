@@ -1,6 +1,7 @@
 package esa.s1pdgs.cpoc.production.trigger.config;
 
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -9,13 +10,14 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.client.RestTemplate;
 
+import esa.s1pdgs.cpoc.appcatalog.client.config.AppCatalogConfigurationProperties;
 import esa.s1pdgs.cpoc.appcatalog.client.job.AppCatalogJobClient;
 import esa.s1pdgs.cpoc.appstatus.AppStatus;
 import esa.s1pdgs.cpoc.common.ProductCategory;
 import esa.s1pdgs.cpoc.errorrepo.ErrorRepoAppender;
 import esa.s1pdgs.cpoc.metadata.client.MetadataClient;
 import esa.s1pdgs.cpoc.mqi.client.GenericMqiClient;
-import esa.s1pdgs.cpoc.production.trigger.appcat.AppCatAdapter;
+import esa.s1pdgs.cpoc.mqi.client.MessageFilter;
 import esa.s1pdgs.cpoc.production.trigger.consumption.EdrsSessionConsumer;
 import esa.s1pdgs.cpoc.production.trigger.consumption.L0SegmentConsumer;
 import esa.s1pdgs.cpoc.production.trigger.consumption.L0SliceConsumer;
@@ -31,33 +33,29 @@ public class TriggerConfig {
 		CONSUMPTION_HANDLER_FOR_CATEGORY.put(ProductCategory.LEVEL_PRODUCTS,  new L0SliceConsumer());
 	}
 	
-	private final AppCatalogConfigurationProperties properties;
-	private final RestTemplate restTemplate;
 	private final ProcessSettings processSettings; 
 	private final GenericMqiClient mqiService;
+	private final List<MessageFilter> messageFilter;
 	private final ErrorRepoAppender errorRepoAppender;
 	private final AppStatus appStatus;
 	private final MetadataClient metadataClient;
 	
 	@Autowired
 	public TriggerConfig(
-			final AppCatalogConfigurationProperties properties,
 			final RestTemplateBuilder restTemplateBuilder,
 			final ProcessSettings processSettings, 
-			final GenericMqiClient mqiService, 
+			final GenericMqiClient mqiService,
+			final List<MessageFilter> messageFilter,
 			final ErrorRepoAppender errorRepoAppender, 
 			final AppStatus appStatus,
 			final MetadataClient metadataClient
 	) {
 		this.processSettings = processSettings;
 		this.mqiService = mqiService;
+		this.messageFilter = messageFilter;
 		this.errorRepoAppender = errorRepoAppender;
 		this.appStatus = appStatus;
 		this.metadataClient = metadataClient;
-		this.properties = properties;
-		this.restTemplate = restTemplateBuilder
-				.setConnectTimeout(properties.getTmConnectMs())
-				.build();
 	}
 		
 	@Bean
@@ -76,16 +74,6 @@ public class TriggerConfig {
 		return res;
 	}
 	
-	@Bean
-	public AppCatalogJobClient appCatClient() {
-		return new AppCatalogJobClient(
-				restTemplate, 
-				properties.getHostUri(), 
-				properties.getMaxRetries(), 
-				properties.getTempoRetryMs()
-		);	
-	}
-	
 	@Bean	
 	@Autowired
 	public GenericConsumer newConsumer( 
@@ -95,8 +83,8 @@ public class TriggerConfig {
 		return new GenericConsumer(
 				processSettings, 
 				mqiService, 
-				new AppCatAdapter(appCatClient), 
-				appStatus, 
+				messageFilter,
+				appStatus,
 				errorRepoAppender, 
 				metadataClient, 
 				handler

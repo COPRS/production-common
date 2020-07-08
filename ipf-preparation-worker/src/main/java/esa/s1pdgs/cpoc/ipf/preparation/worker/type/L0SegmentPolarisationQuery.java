@@ -52,7 +52,6 @@ final class L0SegmentPolarisationQuery implements Callable<JobGen> {
 		final Map<String, List<LevelSegmentMetadata>> segmentsGroupByPol = new HashMap<>();
 		String lastName = "";
 		String dataTakeId = "null";
-		String productType = "null";
 		final AppDataJob appDataJob = job.job();
 		
 		try {
@@ -60,11 +59,10 @@ final class L0SegmentPolarisationQuery implements Callable<JobGen> {
 				final CatalogEvent dto = message.getBody();
 				lastName = dto.getKeyObjectStorage();
 				dataTakeId = dto.getMetadata().get("dataTakeId").toString();
-				productType =  dto.getMetadata().get("productType").toString();
 				break;
 			}
 			
-			for (final LevelSegmentMetadata metadata : metadataClient.getLevelSegments(productType, dataTakeId)) {
+			for (final LevelSegmentMetadata metadata : metadataClient.getLevelSegments(dataTakeId)) {
 				if (!segmentsGroupByPol.containsKey(metadata.getPolarisation())) {
 					pols.add(metadata.getPolarisation());
 					segmentsGroupByPol.put(metadata.getPolarisation(), new ArrayList<>());
@@ -148,25 +146,26 @@ final class L0SegmentPolarisationQuery implements Callable<JobGen> {
 					formatter);
 			sensingStop = more(getStopSensingDate(segmentsA, formatter), getStopSensingDate(segmentsB, formatter),
 					formatter);
-
-			// Check if we add the coverage
-			if (!fullCoverage) {
-				final Date currentDate = new Date();
-				if (job.generation().getCreationDate().getTime() < currentDate.getTime() - timeoutInputSearchMs) {
-					LOGGER.warn("Continue generation of {} {} even if sensing gaps", job.productName(),
-							job.generation());
-					appDataJob.getProduct().setStartTime(sensingStart);
-					appDataJob.getProduct().setStopTime(sensingStop);
-				} else {
-					throw new IpfPrepWorkerInputsMissingException(missingMetadata);
-				}
-			} 
-			else {
+		}
+		
+		// Check if we add the coverage
+		if (!fullCoverage) {
+			final Date currentDate = new Date();
+			if (job.generation().getCreationDate().getTime() < currentDate.getTime() - timeoutInputSearchMs) {
+				LOGGER.warn("Continue generation of {} {} even if sensing gaps", job.productName(),
+						job.generation());
 				appDataJob.getProduct().setStartTime(sensingStart);
 				appDataJob.getProduct().setStopTime(sensingStop);
+			} else {
+				throw new IpfPrepWorkerInputsMissingException(missingMetadata);
 			}
-			LOGGER.debug("== preSearch: performed lastName: {},fullCoverage= {} ", lastName, fullCoverage);
+		} 
+		else {
+			appDataJob.getProduct().setStartTime(sensingStart);
+			appDataJob.getProduct().setStopTime(sensingStop);
 		}
+		LOGGER.debug("== preSearch: performed lastName: {},fullCoverage= {} ", lastName, fullCoverage);
+				
 		return job;
 	}
 

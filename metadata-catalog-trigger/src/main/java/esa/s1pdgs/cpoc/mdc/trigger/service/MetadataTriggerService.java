@@ -1,6 +1,7 @@
 package esa.s1pdgs.cpoc.mdc.trigger.service;
 
 import java.util.Arrays;
+import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.ExecutorService;
@@ -21,6 +22,7 @@ import esa.s1pdgs.cpoc.mdc.trigger.MetadataTriggerListener;
 import esa.s1pdgs.cpoc.mdc.trigger.config.MdcTriggerConfigurationProperties;
 import esa.s1pdgs.cpoc.mdc.trigger.config.MdcTriggerConfigurationProperties.CategoryConfig;
 import esa.s1pdgs.cpoc.mdc.trigger.config.ProcessConfiguration;
+import esa.s1pdgs.cpoc.mqi.client.MessageFilter;
 import esa.s1pdgs.cpoc.mqi.client.MqiClient;
 import esa.s1pdgs.cpoc.mqi.client.MqiConsumer;
 import esa.s1pdgs.cpoc.mqi.model.queue.CatalogJob;
@@ -61,6 +63,7 @@ public class MetadataTriggerService {
 	
 	private final MdcTriggerConfigurationProperties properties;
 	private final MqiClient mqiClient;
+	private final List<MessageFilter> messageFilter;
 	private final AppStatus appStatus;
 	private final ErrorRepoAppender errorAppender;
 	private final ProcessConfiguration processConfig;
@@ -69,6 +72,7 @@ public class MetadataTriggerService {
 	public MetadataTriggerService(
 			final MdcTriggerConfigurationProperties properties, 
 			final MqiClient mqiClient,
+			final List<MessageFilter> messageFilter,
 			final AppStatus appStatus,
 			final ErrorRepoAppender errorAppender,
 			final ProcessConfiguration processConfig
@@ -76,6 +80,7 @@ public class MetadataTriggerService {
 	) {
 		this.properties = properties;
 		this.mqiClient = mqiClient;
+		this.messageFilter = messageFilter;
 		this.appStatus = appStatus;
 		this.errorAppender = errorAppender;
 		this.processConfig = processConfig;
@@ -98,6 +103,7 @@ public class MetadataTriggerService {
 					mqiClient, 
 					cat, 
 					new MetadataTriggerListener<>(INGESTION_MAPPER, mqiClient, errorAppender, processConfig),
+					messageFilter,
 					config.getFixedDelayMs(),
 					config.getInitDelayPolMs(),
 					appStatus
@@ -107,6 +113,7 @@ public class MetadataTriggerService {
 					mqiClient, 
 					cat, 
 					new MetadataTriggerListener<>(PROD_MAPPER, mqiClient, errorAppender, processConfig),
+					messageFilter,
 					config.getFixedDelayMs(),
 					config.getInitDelayPolMs(),
 					appStatus

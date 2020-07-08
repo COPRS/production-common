@@ -27,6 +27,7 @@ import esa.s1pdgs.cpoc.common.utils.LogUtils;
 import esa.s1pdgs.cpoc.metadata.client.MetadataClient;
 import esa.s1pdgs.cpoc.metadata.model.SearchMetadata;
 import esa.s1pdgs.cpoc.mqi.client.GenericMqiClient;
+import esa.s1pdgs.cpoc.mqi.client.MessageFilter;
 import esa.s1pdgs.cpoc.mqi.client.MqiConsumer;
 import esa.s1pdgs.cpoc.mqi.client.MqiListener;
 import esa.s1pdgs.cpoc.mqi.model.queue.PripPublishingJob;
@@ -50,6 +51,7 @@ public class PripPublishingJobListener implements MqiListener<PripPublishingJob>
 	private static final Logger LOGGER = LogManager.getLogger(PripPublishingJobListener.class);
 
 	private final GenericMqiClient mqiClient;
+	private final List<MessageFilter> messageFilter;
 	private final ObsClient obsClient;
 	private final MetadataClient metadataClient;
 	private final long pollingIntervalMs;
@@ -59,7 +61,8 @@ public class PripPublishingJobListener implements MqiListener<PripPublishingJob>
 
 	@Autowired
 	public PripPublishingJobListener(
-			final GenericMqiClient mqiClient, 
+			final GenericMqiClient mqiClient,
+			final List<MessageFilter> messageFilter,
 			final ObsClient obsClient,
 			final MetadataClient metadataClient,
 			final PripMetadataRepository pripMetadataRepo,
@@ -68,6 +71,7 @@ public class PripPublishingJobListener implements MqiListener<PripPublishingJob>
 			final AppStatus appStatus
 	) {
 		this.mqiClient = mqiClient;
+		this.messageFilter = messageFilter;
 		this.obsClient = obsClient;
 		this.metadataClient = metadataClient;
 		this.pripMetadataRepo = pripMetadataRepo;
@@ -84,6 +88,7 @@ public class PripPublishingJobListener implements MqiListener<PripPublishingJob>
 					mqiClient,
 					ProductCategory.PRIP_JOBS,
 					this,
+					messageFilter,
 					pollingIntervalMs,
 					pollingInitialDelayMs,
 					appStatus

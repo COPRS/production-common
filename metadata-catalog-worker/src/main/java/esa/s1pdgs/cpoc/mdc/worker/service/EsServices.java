@@ -690,15 +690,11 @@ public class EsServices {
 		return searchMetadata;
 	}
 	
-	public final List<LevelSegmentMetadata> getLevelSegmentMetadataFor(
-			final String productType, 
-			final String dataTakeId
-	) throws Exception {
+	public List<LevelSegmentMetadata> getLevelSegmentMetadataFor(final String dataTakeId) 
+			throws Exception {
 		final SearchSourceBuilder sourceBuilder = new SearchSourceBuilder();
 
-		final BoolQueryBuilder queryBuilder = QueryBuilders.boolQuery()
-				.must(QueryBuilders.termQuery("dataTakeId", dataTakeId))
-				.must(QueryBuilders.termQuery("productType", productType));
+		final QueryBuilder queryBuilder = QueryBuilders.termQuery("dataTakeId.keyword", dataTakeId);
 		sourceBuilder.query(queryBuilder);
 		LOGGER.debug("LevelSegmentQuery: query composed is {}", queryBuilder);
 		sourceBuilder.size(SIZE_LIMIT);
@@ -726,11 +722,10 @@ public class EsServices {
 		}
 	}
 
-	public final List<EdrsSessionMetadata> getEdrsSessionsFor(final String sessionId) throws Exception {
+	public List<EdrsSessionMetadata> getEdrsSessionsFor(final String sessionId) throws Exception {
 		final SearchSourceBuilder sourceBuilder = new SearchSourceBuilder();
 		// Generic fields
-		final BoolQueryBuilder queryBuilder = QueryBuilders.boolQuery()
-				.must(QueryBuilders.termQuery("sessionId", sessionId));
+		final QueryBuilder queryBuilder = QueryBuilders.termQuery("sessionId.keyword", sessionId);
 		sourceBuilder.query(queryBuilder);
 		LOGGER.debug("EdrsSessionQuery: query composed is {}", queryBuilder);
 		sourceBuilder.size(SIZE_LIMIT);

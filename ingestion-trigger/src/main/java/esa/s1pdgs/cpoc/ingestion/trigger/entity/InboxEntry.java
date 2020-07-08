@@ -1,31 +1,37 @@
 package esa.s1pdgs.cpoc.ingestion.trigger.entity;
 
+import static java.lang.String.format;
+
+import org.bson.types.ObjectId;
+import org.springframework.data.annotation.Id;
+import org.springframework.data.annotation.Transient;
+import org.springframework.data.mongodb.core.mapping.Document;
+
 import java.util.Date;
 import java.util.Objects;
 
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
-
-@Entity
+@Document(collection = "inboxEntry")
 public class InboxEntry {
 
+	@Transient
+	public static final String ENTRY_SEQ_KEY = "inboxEntry";
+
 	@Id
-	@GeneratedValue(strategy = GenerationType.AUTO)
-	private long id;
+	private ObjectId id; //necessary for repository.delete(entry)
+
 	private String name;
 	private String relativePath;
 	private String pickupURL;
 	private Date lastModified;
 	private long size;
 	private String stationName;
+	private String processingPod;
 
 	public InboxEntry() {
 	}
 
 	public InboxEntry(final String name, final String relativePath, final String pickupURL, final Date lastModified,
-			final long size) {
+					  final long size) {
 		this.name = name;
 		this.relativePath = relativePath;
 		this.pickupURL = pickupURL;
@@ -33,12 +39,14 @@ public class InboxEntry {
 		this.size = size;
 	}
 
-	public long getId() {
-		return id;
-	}
-
-	public void setId(final long id) {
-		this.id = id;
+	public InboxEntry(final String name, final String relativePath, final String pickupURL, final Date lastModified,
+					  final long size, final String processingPod) {
+		this.name = name;
+		this.relativePath = relativePath;
+		this.pickupURL = pickupURL;
+		this.lastModified = lastModified;
+		this.size = size;
+		this.processingPod = processingPod;
 	}
 
 	public String getName() {
@@ -89,6 +97,10 @@ public class InboxEntry {
 		this.stationName = stationName;
 	}
 
+	public String getProcessingPod() { return processingPod; }
+
+	public void setProcessingPod(String processingPod) { this.processingPod = processingPod; }
+
 	@Override
 	public boolean equals(final Object obj) {
 		if (this == obj) {
@@ -106,17 +118,18 @@ public class InboxEntry {
 		return Objects.equals(name, other.name) && 
 				Objects.equals(pickupURL, other.pickupURL)
 				&& Objects.equals(relativePath, other.relativePath)
-				&& Objects.equals(stationName, other.stationName);
+				&& Objects.equals(stationName, other.stationName)
+				&& Objects.equals(processingPod, other.processingPod);
 	}
 
 	@Override
 	public int hashCode() {
-		return Objects.hash(name, pickupURL, relativePath, stationName);
+		return Objects.hash(name, pickupURL, relativePath, stationName, processingPod);
 	}
 
 	@Override
 	public String toString() {
-		return String.format("InboxEntry [name=%s, relativePath=%s, pickupURL=%s, lastModified=%s, size=%s, stationName=%s]", name,
-				relativePath, pickupURL, lastModified, size, stationName);
+		return format("InboxEntry [name=%s, relativePath=%s, pickupURL=%s, lastModified=%s, size=%s, stationName=%s, processingPod=%s]", name,
+				relativePath, pickupURL, lastModified, size, stationName, processingPod);
 	}
 }
