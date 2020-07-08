@@ -44,13 +44,10 @@ public final class AuxMetadataExtractor extends AbstractMetadataExtractor {
 				job.getKeyObjectStorage()
 		);
 		try {			
-			final AuxDescriptor configFileDesc = extractFromFilename(
-					() -> fileDescriptorBuilder.buildAuxDescriptor(metadataFile)
-			);
+			final AuxDescriptor configFileDesc = fileDescriptorBuilder.buildAuxDescriptor(metadataFile);
 
 			// Build metadata from file and extracted
-			final JSONObject obj = extractFromFile(
-					() -> mdBuilder.buildConfigFileMetadata(configFileDesc, metadataFile));
+			final JSONObject obj = mdBuilder.buildConfigFileMetadata(configFileDesc, metadataFile);
 
 			/*
 			 * In case we are having a land mask file, we are uploading the geo shape information

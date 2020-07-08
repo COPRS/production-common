@@ -42,12 +42,10 @@ public class EdrsMetadataExtractor extends AbstractMetadataExtractor {
         final ProductFamily family = ProductFamily.EDRS_SESSION;        
         final File product = new File(this.localDirectory, catJob.getKeyObjectStorage());
 
-        final EdrsSessionFileDescriptor edrsFileDescriptor = extractFromFilename(
-        		() -> fileDescriptorBuilder.buildEdrsSessionFileDescriptor(
-        				product, 
-        				pathExtractor.metadataFrom(catJob),
-        				catJob
-        		)
+        final EdrsSessionFileDescriptor edrsFileDescriptor = fileDescriptorBuilder.buildEdrsSessionFileDescriptor(
+			product, 
+			pathExtractor.metadataFrom(catJob),
+			catJob
         );        
         // Only when it is a DSIB
         if (edrsFileDescriptor.getEdrsSessionFileType() == EdrsSessionFileType.SESSION)
@@ -57,18 +55,14 @@ public class EdrsMetadataExtractor extends AbstractMetadataExtractor {
 			final String dsibName = new File(edrsFileDescriptor.getRelativePath()).getName();			
 			final File dsib = new File(localDirectory, dsibName);
         	try {
-    			return extractFromFile(
-    	        		() -> mdBuilder.buildEdrsSessionFileMetadata(edrsFileDescriptor, dsib)
-    	        );
+    			return mdBuilder.buildEdrsSessionFileMetadata(edrsFileDescriptor, dsib);
         	}
         	finally {
         		FileUtils.delete(dsib.getPath());
         	}
         } 
         // RAW files        
-        return extractFromFile(
-        		() -> mdBuilder.buildEdrsSessionFileRaw(edrsFileDescriptor)
-        );
+        return mdBuilder.buildEdrsSessionFileRaw(edrsFileDescriptor);
 	}
 
 }
