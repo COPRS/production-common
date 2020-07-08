@@ -38,7 +38,17 @@ public enum ProductFamily {
     L1_ACN_ZIP, //
     L1_SLICE_ZIP, //
     L2_ACN_ZIP, //
-    L2_SLICE_ZIP;
+    L2_SLICE_ZIP,
+    
+    // S2QT types
+    L1C,
+    L2A,
+    L2A_ZIP,
+    
+    // S3 Types
+    S3_AUXILIARY_FILE,
+    S3_GRANULES,
+    S3_SAFE;
 
     /**
      * Get product family from value in string format
