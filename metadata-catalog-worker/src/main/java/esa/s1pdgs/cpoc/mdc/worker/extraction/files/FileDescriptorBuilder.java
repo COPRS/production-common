@@ -96,7 +96,7 @@ public class FileDescriptorBuilder {
 			// Extract filename
 			String filename = relativePath;
 			final int indexLastSeparator = relativePath.lastIndexOf("/");
-			if (indexFirstSeparator != -1) {
+			if (indexLastSeparator != -1) {
 				filename = relativePath.substring(indexLastSeparator + 1);
 			}
 			// Build descriptor
