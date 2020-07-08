@@ -54,6 +54,8 @@ public class MqiMessageDao {
         return mongoClient.find(query, MqiMessage.class);
     }
 
+    
+    //FIXME: Remove
     /**
      * Return a list of message which contains the right topic, partition,
      * offset and group
@@ -64,6 +66,7 @@ public class MqiMessageDao {
      * @param group
      * @return the list of message
      */
+    @Deprecated // by esa.s1pdgs.cpoc.appcatalog.server.mqi.db.MqiMessageRepository.findByTopicAndPartitionAndOffsetAndGroup(String, int, long, String)
     public List<MqiMessage> searchByTopicPartitionOffsetGroup(
             final String topic, final int partition, final long offset,
             final String group) {
@@ -72,6 +75,7 @@ public class MqiMessageDao {
         return find(query);
     }
 
+    //FIXME: Remove
     /**
      * Return a list of message which contains the right topic, partition and
      * group
@@ -81,6 +85,7 @@ public class MqiMessageDao {
      * @param group
      * @return the list of message
      */
+    @Deprecated // by esa.s1pdgs.cpoc.appcatalog.server.mqi.db.MqiMessageRepository.findByTopicAndPartitionAndGroupAndStateNotInOrderByLastReadDateAsc(String, int, String, Set<MessageState>)
     public List<MqiMessage> searchByTopicPartitionGroup(final String topic,
             final int partition, final String group,
             final Set<MessageState> states) {
@@ -90,6 +95,7 @@ public class MqiMessageDao {
         return find(query);
     }
 
+    //FIXME: Remove
     /**
      * Return a list of message which contains the right pod name, product
      * category but its not in the states
@@ -99,6 +105,7 @@ public class MqiMessageDao {
      * @param states
      * @return the list of message
      */
+    @Deprecated // by esa.s1pdgs.cpoc.appcatalog.server.mqi.db.MqiMessageRepository.findByReadingPodAndCategoryAndStateNotInOrderByCreationDateAsc(String, ProductCategory, Set<MessageState>)
     public List<MqiMessage> searchByPodStateCategory(final String pod,
             final ProductCategory category,
             final Set<MessageState> states) {
@@ -108,6 +115,7 @@ public class MqiMessageDao {
         return find(query);
     }
 
+    // FIXME: Remove
     /**
      * Return a list of message which contains the right pod name, product
      * category but its not in the states
@@ -117,6 +125,7 @@ public class MqiMessageDao {
      * @param states
      * @return the list of message
      */
+    @Deprecated // by esa.s1pdgs.cpoc.appcatalog.server.mqi.db.MqiMessageRepository.countByReadingPodAndTopicAndStateIsRead(String, String)
     public int countReadingMessages(final String pod, final String topic) {
         Query query = query(where("readingPod").is(pod).and("state")
                 .is(MessageState.READ).and("topic").is(topic));
@@ -124,26 +133,31 @@ public class MqiMessageDao {
         return find(query).size();
     }
 
+    // FIXME: Remove
     /**
      * Return a list of message which contains the right ID
      * 
      * @param messageID
      * @return the list of message
      */
+    @Deprecated // by esa.s1pdgs.cpoc.appcatalog.server.mqi.db.MqiMessageRepository.findById()
     public List<MqiMessage> searchByID(final long messageID) {
         Query query = query(where(ID_NAME).is(messageID));
         return find(query);
     }
 
+    // FIXME: Remove
     /**
      * Insert a MQI message
      * 
      * @param messageToInsert
      */
+    @Deprecated // by esa.s1pdgs.cpoc.appcatalog.server.mqi.db.MqiMessageRepository.save()
     public void insert(final MqiMessage messageToInsert) {
         mongoClient.insert(messageToInsert);
     }
 
+    //FIXME: Remove
     /**
      * @param query
      * @param update
@@ -152,12 +166,14 @@ public class MqiMessageDao {
         mongoClient.updateFirst(query, update, MqiMessage.class);
     }
 
+    // FIXME: Remove
     /**
      * Function which update a MqiMessage
      * 
      * @param messageID
      * @param updateMap
      */
+    @Deprecated // by esa.s1pdgs.cpoc.appcatalog.server.mqi.db.MqiMessageRepository.ssave()
     public void updateByID(final long messageID,
             final Map<String, Object> updateMap) {
         Query query = query(where(ID_NAME).is(messageID));
@@ -166,9 +182,11 @@ public class MqiMessageDao {
         updateFirst(query, update);
     }
 
+    // FIXME: Remove
     /**
      * @param query
      */
+    @Deprecated // by esa.s1pdgs.cpoc.appcatalog.server.mqi.db.MqiMessageRepository.truncateBefore(Date)
     public void findAllAndRemove(final Query query) {
         mongoClient.findAllAndRemove(query, MqiMessage.class);
     }

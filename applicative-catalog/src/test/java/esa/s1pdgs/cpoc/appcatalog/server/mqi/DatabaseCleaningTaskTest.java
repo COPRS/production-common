@@ -15,8 +15,7 @@ import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.junit4.SpringRunner;
 
-import esa.s1pdgs.cpoc.appcatalog.server.mqi.DatabaseCleaningTask;
-import esa.s1pdgs.cpoc.appcatalog.server.mqi.db.MqiMessageDao;
+import esa.s1pdgs.cpoc.appcatalog.server.mqi.db.MqiMessageRepository;
 
 
 /**
@@ -30,26 +29,23 @@ import esa.s1pdgs.cpoc.appcatalog.server.mqi.db.MqiMessageDao;
 public class DatabaseCleaningTaskTest {
     
     @Mock
-    private MqiMessageDao mongoDBDAO;
+    private MqiMessageRepository mqiMessageRepository;
     
     private int oldms = 86400;
     
     private DatabaseCleaningTask mongoDBClean;
     
-    /**
-     * Initialization
-     */
     @Before
     public void init() {
         MockitoAnnotations.initMocks(this);
-        mongoDBClean = new DatabaseCleaningTask(mongoDBDAO, oldms);
+        mongoDBClean = new DatabaseCleaningTask(mqiMessageRepository, oldms);
     }
     
     @Test
     public void testClean() {
-        doNothing().when(mongoDBDAO).findAllAndRemove(Mockito.any(Query.class));
+        doNothing().when(mqiMessageRepository).truncateBefore(Mockito.any());
         mongoDBClean.clean();
-        verify(mongoDBDAO, times(1)).findAllAndRemove(Mockito.any(Query.class));
+        verify(mqiMessageRepository, times(1)).truncateBefore(Mockito.any());
     }
 
 }

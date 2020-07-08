@@ -1,17 +1,13 @@
 package esa.s1pdgs.cpoc.appcatalog.server.mqi;
 
-import static org.springframework.data.mongodb.core.query.Criteria.where;
-import static org.springframework.data.mongodb.core.query.Query.query;
-
 import java.util.Date;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
-import esa.s1pdgs.cpoc.appcatalog.server.mqi.db.MqiMessageDao;
+import esa.s1pdgs.cpoc.appcatalog.server.mqi.db.MqiMessageRepository;
 
 /**
  * Component that will clean the mongoDB entries that are older
@@ -22,10 +18,7 @@ import esa.s1pdgs.cpoc.appcatalog.server.mqi.db.MqiMessageDao;
 @Component
 public class DatabaseCleaningTask {
 
-    /**
-     * DAO for mongoDB
-     */
-    private MqiMessageDao mongoDBDAO;
+    private MqiMessageRepository mqiMessageRepository;
     
     /**
      * Second after an entry is considered old
@@ -38,9 +31,9 @@ public class DatabaseCleaningTask {
      * @param mongoDBDAO
      */
     @Autowired
-    public DatabaseCleaningTask(final MqiMessageDao mongoDBDAO,
+    public DatabaseCleaningTask(final MqiMessageRepository mqiMessageRepository,
             @Value("${mongodb.old-entry-ms}") int oldms) {
-        this.mongoDBDAO = mongoDBDAO;
+        this.mqiMessageRepository = mqiMessageRepository;
         this.oldms = oldms;
     }
     
@@ -50,9 +43,7 @@ public class DatabaseCleaningTask {
     @Scheduled(cron = "${mongodb.clean-cron}")
     public void clean() {
         Date oldDate = new Date(System.currentTimeMillis() - oldms);
-        Query query = query(where("lastReadDate").lt(oldDate).and("lastSendDate").lt(oldDate)
-                .and("lastAckDate").lt(oldDate));
-        mongoDBDAO.findAllAndRemove(query);
+        mqiMessageRepository.truncateBefore(oldDate);
     }
     
     
