@@ -25,7 +25,6 @@ import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 
 import esa.s1pdgs.cpoc.appcatalog.common.MqiMessage;
-import esa.s1pdgs.cpoc.appcatalog.server.mqi.db.MqiMessageDao;
 import esa.s1pdgs.cpoc.appcatalog.server.mqi.db.MqiMessageRepository;
 import esa.s1pdgs.cpoc.appcatalog.server.sequence.db.SequenceDao;
 import esa.s1pdgs.cpoc.common.MessageState;
@@ -40,9 +39,6 @@ public class MqiMessageServiceTest {
 
     @Mock
     private MqiMessageRepository mqiMessageRepository;
-
-    @Mock
-    private MqiMessageDao mongoDBDAO;
 
     @Mock
     private SequenceDao sequenceDao;

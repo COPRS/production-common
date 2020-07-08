@@ -3,7 +3,6 @@
  */
 package esa.s1pdgs.cpoc.appcatalog.server.service;
 
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
@@ -16,7 +15,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import esa.s1pdgs.cpoc.appcatalog.common.MqiMessage;
-import esa.s1pdgs.cpoc.appcatalog.server.mqi.db.MqiMessageDao;
 import esa.s1pdgs.cpoc.appcatalog.server.mqi.db.MqiMessageRepository;
 import esa.s1pdgs.cpoc.appcatalog.server.sequence.db.SequenceDao;
 import esa.s1pdgs.cpoc.common.MessageState;
@@ -40,11 +38,6 @@ public class MqiMessageService {
     /**
      * DAO for mongoDB
      */
-    private final MqiMessageDao mongoDBDAO;
-
-    /**
-     * DAO for mongoDB
-     */
     private final SequenceDao sequenceDao;
 
     /**
@@ -55,10 +48,8 @@ public class MqiMessageService {
     @Autowired
     public MqiMessageService(
     		final MqiMessageRepository mqiMessageRepository,
-    		final MqiMessageDao mongoDBDAO,
             final SequenceDao sequenceDao) {
     	this.mqiMessageRepository = mqiMessageRepository;
-        this.mongoDBDAO = mongoDBDAO;
         this.sequenceDao = sequenceDao;
     }
 
