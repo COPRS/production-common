@@ -2,9 +2,7 @@ package esa.s1pdgs.cpoc.ipf.preparation.worker.generator;
 
 import java.util.ArrayList;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.stream.Collectors;
 
 import esa.s1pdgs.cpoc.appcatalog.AppDataJob;
@@ -18,33 +16,29 @@ import esa.s1pdgs.cpoc.ipf.preparation.worker.appcat.AppCatAdapter;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.config.ProcessSettings;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.generator.state.JobGenerationStateTransitions;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.model.JobGen;
-import esa.s1pdgs.cpoc.ipf.preparation.worker.model.metadata.SearchMetadataResult;
-import esa.s1pdgs.cpoc.ipf.preparation.worker.model.tasktable.TasktableAdapter;
+import esa.s1pdgs.cpoc.ipf.preparation.worker.model.tasktable.TaskTableAdapter;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.publish.Publisher;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.query.AuxQueryHandler;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.type.ProductTypeAdapter;
-import esa.s1pdgs.cpoc.metadata.client.SearchMetadataQuery;
 import esa.s1pdgs.cpoc.mqi.model.rest.GenericMessageDto;
 
 public final class JobGeneratorImpl implements JobGenerator {
-	private final TasktableAdapter tasktableAdapter;
+	private final TaskTableAdapter tasktableAdapter;
 	private final ProductTypeAdapter typeAdapter;	
     private final AppCatAdapter appCat;
     private final ProcessSettings settings;
     private final ErrorRepoAppender errorAppender;
     private final Publisher publisher;
-    private final Map<Integer, SearchMetadataQuery> metadataQueriesTemplate;
     private final List<List<String>> tasks;
     private final AuxQueryHandler auxQueryHandler;
         
 	public JobGeneratorImpl(
-			final TasktableAdapter tasktableAdapter,
+			final TaskTableAdapter tasktableAdapter,
 			final ProductTypeAdapter typeAdapter, 
 			final AppCatAdapter appCat,
 			final ProcessSettings settings,
 			final ErrorRepoAppender errorAppender,
 			final Publisher publisher,
-			final Map<Integer, SearchMetadataQuery> metadataQueriesTemplate,
 			final List<List<String>> tasks,
 			final AuxQueryHandler auxQueryHandler
 	) {
@@ -54,7 +48,6 @@ public final class JobGeneratorImpl implements JobGenerator {
 		this.settings = settings;
 		this.errorAppender = errorAppender;
 		this.publisher = publisher;
-		this.metadataQueriesTemplate = metadataQueriesTemplate;
 		this.tasks = tasks;
 		this.auxQueryHandler = auxQueryHandler;				
 	}
@@ -101,7 +94,7 @@ public final class JobGeneratorImpl implements JobGenerator {
 		// on app-cat connection issues
 		catch (final AbstractCodedException e) {
 			// no use for further actions here as app-cat is mandatory for operation. Hence, we simply dump the message
-			// and wait for the next attemt
+			// and wait for the next attempt
 			final String errorMessage = Exceptions.messageOf(e);
 			LOGGER.error("Omitting job generation attempt due to error on app-cat access: {}", errorMessage);
 		}
@@ -113,17 +106,17 @@ public final class JobGeneratorImpl implements JobGenerator {
 		}
 	}
 
-	private final JobGen newJobGenFor(final AppDataJob job) {
-		final Map<Integer, SearchMetadataResult> queries = new HashMap<>(metadataQueriesTemplate.size());
-		
-		for (final Map.Entry<Integer, SearchMetadataQuery> entry : metadataQueriesTemplate.entrySet() ) {
-			queries.put(entry.getKey(), new SearchMetadataResult(new SearchMetadataQuery(entry.getValue())));
-		}
+	private JobGen newJobGenFor(final AppDataJob job) {
+		//TODO remove
+		//final Map<Integer, SearchMetadataResult> queries = new HashMap<>(metadataQueriesTemplate.size());
+		//
+		//for (final Map.Entry<Integer, SearchMetadataQuery> entry : metadataQueriesTemplate.entrySet() ) {
+		//	queries.put(entry.getKey(), new SearchMetadataResult(new SearchMetadataQuery(entry.getValue())));
+		//}
 		return new JobGen(
 				job, 
 				typeAdapter, 
-				queries, 
-				tasks, 
+				tasks,
 				tasktableAdapter, 
 				auxQueryHandler, 
 				tasktableAdapter.newJobOrder(settings), 

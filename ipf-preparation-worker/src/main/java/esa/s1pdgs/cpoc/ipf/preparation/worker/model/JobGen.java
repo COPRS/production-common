@@ -1,7 +1,6 @@
 package esa.s1pdgs.cpoc.ipf.preparation.worker.model;
 
 import java.util.List;
-import java.util.Map;
 import java.util.concurrent.Callable;
 
 import org.springframework.util.CollectionUtils;
@@ -16,9 +15,7 @@ import esa.s1pdgs.cpoc.common.utils.Exceptions;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.generator.state.JobStateTransistionFailed;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.model.joborder.JobOrder;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.model.joborder.JobOrderSensingTime;
-import esa.s1pdgs.cpoc.ipf.preparation.worker.model.metadata.SearchMetadataResult;
-import esa.s1pdgs.cpoc.ipf.preparation.worker.model.tasktable.TaskTableInputAlternative;
-import esa.s1pdgs.cpoc.ipf.preparation.worker.model.tasktable.TasktableAdapter;
+import esa.s1pdgs.cpoc.ipf.preparation.worker.model.tasktable.TaskTableAdapter;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.publish.Publisher;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.query.AuxQueryHandler;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.type.ProductTypeAdapter;
@@ -27,9 +24,8 @@ import esa.s1pdgs.cpoc.mqi.model.queue.IpfExecutionJob;
 public class JobGen {	
 	private final AppDataJob job;
 	private final ProductTypeAdapter typeAdapter;
-    private final Map<Integer, SearchMetadataResult> metadataQueries;	
 	private final List<List<String>> tasks;
-	private final TasktableAdapter taskTableAdapter;
+	private final TaskTableAdapter taskTableAdapter;
     private final AuxQueryHandler auxQueryHandler;
     private final JobOrder jobOrder;
     private final Publisher publisher;
@@ -37,9 +33,8 @@ public class JobGen {
 	public JobGen(
 			final AppDataJob job, 
 			final ProductTypeAdapter typeAdapter, 
-			final Map<Integer, SearchMetadataResult> metadataQueries,
 			final List<List<String>> tasks,
-			final TasktableAdapter taskTableAdapter,
+			final TaskTableAdapter taskTableAdapter,
 			final AuxQueryHandler auxQueryHandler,
 			final JobOrder jobOrder,
 			final Publisher publisher
@@ -47,7 +42,6 @@ public class JobGen {
 	) {
 		this.job = job;
 		this.typeAdapter = typeAdapter;
-		this.metadataQueries = metadataQueries;
 		this.tasks = tasks;
 		this.taskTableAdapter = taskTableAdapter;
 		this.auxQueryHandler = auxQueryHandler;
@@ -71,7 +65,7 @@ public class JobGen {
 		return tasks;
 	}
 	
-	public final TasktableAdapter taskTableAdapter() {
+	public final TaskTableAdapter taskTableAdapter() {
 		return taskTableAdapter;
 	}
 	
@@ -103,31 +97,17 @@ public class JobGen {
 		}
 		return "";
 	}
-	
-	public final Iterable<SearchMetadataResult> queries() {
-		return metadataQueries.values();
-	}
-	
-	public SearchMetadataResult getQueryResultFor(final TaskTableInputAlternative alt) {
-		return metadataQueries.get(alt.getIdSearchMetadataQuery());
-	}
-	
+
 	public final void buildJobOrder(final String workingDir) {
 		jobOrder.getProcs().stream()
 			.filter(proc -> proc != null && !CollectionUtils.isEmpty(proc.getInputs()))
 			.flatMap(proc -> proc.getInputs().stream()).forEach(input -> {
-				input.getFilenames().forEach(filename -> {
-					filename.setFilename(workingDir + filename.getFilename());
-				});
-				input.getTimeIntervals().forEach(interval -> {
-					interval.setFileName(workingDir + interval.getFileName());
-				});
+				input.getFilenames().forEach(filename -> filename.setFilename(workingDir + filename.getFilename()));
+				input.getTimeIntervals().forEach(interval -> interval.setFileName(workingDir + interval.getFileName()));
 			});
 		jobOrder.getProcs().stream()
 				.filter(proc -> proc != null && !CollectionUtils.isEmpty(proc.getOutputs()))
-				.flatMap(proc -> proc.getOutputs().stream()).forEach(output -> {
-					output.setFileName(workingDir + output.getFileName());
-				});
+				.flatMap(proc -> proc.getOutputs().stream()).forEach(output -> output.setFileName(workingDir + output.getFileName()));
 
 		// Apply implementation build job
 		jobOrder.getConf().setSensingTime(new JobOrderSensingTime(
@@ -156,7 +136,7 @@ public class JobGen {
 		return perform(publisher.send(auxSearch()), "publishing Job");
 	}
 	
-	private final JobGen perform(final Callable<JobGen> command, final String name) throws JobStateTransistionFailed {
+	private JobGen perform(final Callable<JobGen> command, final String name) throws JobStateTransistionFailed {
 		try {
 			return command.call();
 		} 

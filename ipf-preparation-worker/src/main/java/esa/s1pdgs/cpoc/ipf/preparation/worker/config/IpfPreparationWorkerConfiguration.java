@@ -36,7 +36,7 @@ import esa.s1pdgs.cpoc.ipf.preparation.worker.model.converter.XmlConverter;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.model.tasktable.ElementMapper;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.model.tasktable.TaskTable;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.model.tasktable.TaskTableFactory;
-import esa.s1pdgs.cpoc.ipf.preparation.worker.model.tasktable.TasktableAdapter;
+import esa.s1pdgs.cpoc.ipf.preparation.worker.model.tasktable.TaskTableAdapter;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.model.tasktable.TasktableManager;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.model.tasktable.mapper.RoutingBasedTasktableMapper;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.model.tasktable.mapper.SingleTasktableMapper;
@@ -52,7 +52,6 @@ import esa.s1pdgs.cpoc.ipf.preparation.worker.type.L0Segment;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.type.LevelProduct;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.type.ProductTypeAdapter;
 import esa.s1pdgs.cpoc.metadata.client.MetadataClient;
-import esa.s1pdgs.cpoc.metadata.client.SearchMetadataQuery;
 import esa.s1pdgs.cpoc.mqi.client.MessageFilter;
 import esa.s1pdgs.cpoc.mqi.client.MqiClient;
 import esa.s1pdgs.cpoc.mqi.client.MqiConsumer;
@@ -116,7 +115,7 @@ public class IpfPreparationWorkerConfiguration {
 
 	@Bean
 	public Function<TaskTable, InputTimeoutChecker> timeoutCheckerFor() {
-		return t -> inputWaitTimeoutFor(t);		
+		return this::inputWaitTimeoutFor;
 	}
 	
 	@Bean
@@ -250,24 +249,23 @@ public class IpfPreparationWorkerConfiguration {
 		return service;
 	}
 	
-	private final JobGenerator newJobGenerator(
+	private JobGenerator newJobGenerator(
 			final File taskTableFile, 
 			final ProductTypeAdapter typeAdapter,
 			final AppCatAdapter appCat,
 			final Function<TaskTable, InputTimeoutChecker> timeoutCheckerFactory
 	) {		
-		final TasktableAdapter tasktableAdapter = new TasktableAdapter(
+		final TaskTableAdapter tasktableAdapter = new TaskTableAdapter(
 				taskTableFile, 
 				taskTableFactory.buildTaskTable(taskTableFile, processSettings.getLevel()), 
 				elementMapper
 		);			    
-	    final Map<Integer, SearchMetadataQuery> metadataQueryTemplate = tasktableAdapter.buildMetadataSearchQuery();	    		
-	    final List<List<String>> tasks = tasktableAdapter.buildTasks();	    
+	    final List<List<String>> tasks = tasktableAdapter.buildTasks();
 		final AuxQueryHandler auxQueryHandler = new AuxQueryHandler(
 				metadataClient, 
 				ProductMode.SLICING, 
-				timeoutCheckerFactory.apply(tasktableAdapter.taskTable())
-		);
+				timeoutCheckerFactory.apply(tasktableAdapter.taskTable()),
+				elementMapper);
 		return new JobGeneratorImpl(
 				tasktableAdapter, 
 				typeAdapter, 
@@ -275,22 +273,21 @@ public class IpfPreparationWorkerConfiguration {
 				processSettings, 
 				errorAppender, 
 				publisher, 
-				metadataQueryTemplate, 
-				tasks, 
+				tasks,
 				auxQueryHandler
 		);
 	}
 		
-	private final MqiConsumer<IpfPreparationJob> newConsumerFor(
+	private MqiConsumer<IpfPreparationJob> newConsumerFor(
 			final ProductCategory category, 
 			final CategoryConfig config,
 			final MqiListener<IpfPreparationJob> listener
 			
 	) {
 		LOG.debug("Creating MQI consumer for category {} using {}", category, config);
-		return new MqiConsumer<IpfPreparationJob>(
-				mqiClient, 
-				category, 
+		return new MqiConsumer<>(
+				mqiClient,
+				category,
 				listener,
 				messageFilter,
 				config.getFixedDelayMs(),
@@ -299,16 +296,16 @@ public class IpfPreparationWorkerConfiguration {
 		);
 	}	
 
-	private final InputTimeoutChecker inputWaitTimeoutFor(final TaskTable taskTable) {
-		final List<InputWaitingConfig> configsForTasktable = new ArrayList<>();
+	private InputTimeoutChecker inputWaitTimeoutFor(final TaskTable taskTable) {
+		final List<InputWaitingConfig> configsForTaskTable = new ArrayList<>();
 		for (final InputWaitingConfig config : settings.getInputWaiting()) {
 			if (taskTable.getProcessorName().equals(config.getProcessorNameRegexp()) &&
 				taskTable.getVersion().matches(config.getProcessorVersionRegexp())) 
 			{			
-				configsForTasktable.add(config);
+				configsForTaskTable.add(config);
 			}					
 		}
 		// default: always time out
-		return new InputTimeoutCheckerImpl(configsForTasktable, () -> LocalDateTime.now());	
+		return new InputTimeoutCheckerImpl(configsForTaskTable, LocalDateTime::now);
 	}
 }

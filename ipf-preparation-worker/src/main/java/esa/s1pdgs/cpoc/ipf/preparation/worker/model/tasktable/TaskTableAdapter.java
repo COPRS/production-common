@@ -3,10 +3,8 @@ package esa.s1pdgs.cpoc.ipf.preparation.worker.model.tasktable;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -22,17 +20,17 @@ import esa.s1pdgs.cpoc.ipf.preparation.worker.model.joborder.JobOrderInput;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.model.joborder.JobOrderInputFile;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.model.joborder.JobOrderTimeInterval;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.model.joborder.enums.JobOrderFileNameType;
+import esa.s1pdgs.cpoc.ipf.preparation.worker.model.metadata.SearchMetadataResult;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.model.tasktable.enums.TaskTableInputOrigin;
-import esa.s1pdgs.cpoc.metadata.client.SearchMetadataQuery;
 import esa.s1pdgs.cpoc.metadata.model.AbstractMetadata;
 import esa.s1pdgs.cpoc.metadata.model.SearchMetadata;
 
-public class TasktableAdapter {
+public class TaskTableAdapter {
 	private final File file;
 	private final TaskTable taskTable;
 	private final ElementMapper elementMapper;
 	
-	public TasktableAdapter(final File file, final TaskTable taskTable, final ElementMapper elementMapper) {
+	public TaskTableAdapter(final File file, final TaskTable taskTable, final ElementMapper elementMapper) {
 		this.file = file;
 		this.taskTable = taskTable;
 		this.elementMapper = elementMapper;
@@ -62,11 +60,9 @@ public class TasktableAdapter {
 	public final List<List<String>> buildTasks() {
 		final List<List<String>> tasks = new ArrayList<>();
 		
-		taskTable.getPools().forEach(pool -> {
-			tasks.add(pool.getTasks().stream()
-					.map(TaskTableTask::getFileName)
-					.collect(Collectors.toList()));
-		});		
+		taskTable.getPools().forEach(pool -> tasks.add(pool.getTasks().stream()
+				.map(TaskTableTask::getFileName)
+				.collect(Collectors.toList())));
 		return tasks;
 	}
 	
@@ -76,10 +72,8 @@ public class TasktableAdapter {
 		final JobOrder jobOrderTemplate = converter.apply(taskTable);
 
 		// Update values from configuration file
-		jobOrderTemplate.getConf().getProcParams().forEach(item -> {
-			elementMapper.getParameterValue(item.getName())
-				.ifPresent(val -> item.setValue(val));
-		});
+		jobOrderTemplate.getConf().getProcParams().forEach(item -> elementMapper.getParameterValue(item.getName())
+			.ifPresent(item::setValue));
 		jobOrderTemplate.getConf().setStdoutLogLevel(settings.getLoglevelstdout());
 		jobOrderTemplate.getConf().setStderrLogLevel(settings.getLoglevelstderr());
 		jobOrderTemplate.getConf().setProcessingStation(settings.getProcessingstation());
@@ -100,54 +94,13 @@ public class TasktableAdapter {
 		return new JobOrder(jobOrderTemplate, settings.getLevel());
 	}
 	
-	public final Map<Integer, SearchMetadataQuery> buildMetadataSearchQuery() {
-		final AtomicInteger counter = new AtomicInteger(0);
-	    final Map<Integer, SearchMetadataQuery> metadataQueryTemplate =  new HashMap<>();
-		
-	    taskTable.getPools().stream()
-			.filter(pool -> !CollectionUtils.isEmpty(pool.getTasks()))
-			.flatMap(pool -> pool.getTasks().stream())
-			.filter(task -> !CollectionUtils.isEmpty(task.getInputs()))
-			.flatMap(task -> task.getInputs().stream())
-			.filter(input -> !CollectionUtils.isEmpty(input.getAlternatives()))
-			.flatMap(input -> alternatives(input))
-			.filter(alt -> alt.getOrigin() == TaskTableInputOrigin.DB)
-			.collect(Collectors.groupingBy(TaskTableInputAlternative::getTaskTableInputAltKey))
-			.forEach((k, v) -> {
-				final int queryId = counter.incrementAndGet();
-				final String fileType = elementMapper.mappedFileType(k.getFileType());
-				final ProductFamily family = elementMapper.inputFamilyOf(fileType);				
-				final SearchMetadataQuery query = new SearchMetadataQuery(
-						queryId,
-						k.getRetrievalMode(), 
-						k.getDeltaTime0(), 
-						k.getDeltaTime1(), 
-						fileType, 
-						family
-				);
-				metadataQueryTemplate.put(queryId, query);
-				// FIXME: It's a very bad idea to rely on getting the original objects here provided and everything
-				// to be written through properly. Furthermore, altering the tasktable after having it read is also
-				// pretty error-prone and will eventually break at some point in the future (apart from all the WTFs 
-				// this will cause on encountering this logic)
-				// Hence, this should be changed in order to create the queryId uniquely on the alternative once when
-				// reading the tasktable and here, this value can be used as the query id (if no better structure for
-				// storing the queries is found).	
-				// Apart from that, it's sad to see how functional programming is used to mutate the state of a
-				// data structure that doesn't change but here... :(
-				v.forEach(alt -> alt.setIdSearchMetadataQuery(queryId));
-			});
-	    return metadataQueryTemplate;
-	}
-	
-	
-	public final JobOrderInput findInput(final JobGen job, final TaskTableInput input) {
+	public final JobOrderInput findInput(final JobGen job, final TaskTableInput input, Map<Integer, SearchMetadataResult> results) {
 		JobOrderInput result = null;
-		
+
 		for (final TaskTableInputAlternative alt : alternatives(input).collect(Collectors.toList())) {
 			// We ignore input not DB
 			if (alt.getOrigin() == TaskTableInputOrigin.DB) {							
-				final List<SearchMetadata> queryResults = job.getQueryResultFor(alt).getResult();
+				final List<SearchMetadata> queryResults = results.get(alt.getIdSearchMetadataQuery()).getResult();
 				
 				// has queries defined?
 				if (!CollectionUtils.isEmpty(queryResults)) {
@@ -160,7 +113,7 @@ public class TasktableAdapter {
 							.collect(Collectors.toList());
 
 					final List<JobOrderTimeInterval> jobOrderTimeIntervals = queryResults.stream()
-						.map(m -> newJobOrderTimeIntervalFor(m))
+						.map(this::newJobOrderTimeIntervalFor)
 						.collect(Collectors.toList());
 					
 					return new JobOrderInput(
@@ -173,15 +126,15 @@ public class TasktableAdapter {
 				}
 			// is PROC input?
 			} else {
-				final String startDate = convertDateToJoborderFormat(
+				final String startDate = convertDateToJobOrderFormat(
 						job.job().getProduct().getStartTime()
 				);
-				final String stopDate = convertDateToJoborderFormat(
+				final String stopDate = convertDateToJobOrderFormat(
 						job.job().getProduct().getStopTime()
 				);											
 				final String fileType = elementMapper.mappedFileType(alt.getFileType());
 				result = new JobOrderInput(
-						alt.getFileType(), // not clear, why this is used and not the mapped filetype 
+						alt.getFileType(), // not clear, why this is used and not the mapped fileType
 						JobOrderFileNameType.REGEXP,
 						Collections.singletonList(new JobOrderInputFile(fileType, "")),
 						Collections.singletonList(new JobOrderTimeInterval(
@@ -198,13 +151,24 @@ public class TasktableAdapter {
 		}
 		return result;
 	}
-	
 
-	private final Stream<TaskTableInputAlternative> alternatives(final TaskTableInput input) {
+	private Stream<TaskTableInputAlternative> alternatives(final TaskTableInput input) {
 		return input.getAlternatives().stream().sorted(TaskTableInputAlternative.ORDER);
 	}
-	
-	private final JobOrderFileNameType getFileNameTypeFor(final TaskTableInputAlternative alt) {
+
+	public Map<TaskTableInputAlternative.TaskTableInputAltKey, List<TaskTableInputAlternative>> allTaskTableInputs() {
+		return taskTable.getPools().stream()
+				.filter(pool -> !CollectionUtils.isEmpty(pool.getTasks()))
+				.flatMap(pool -> pool.getTasks().stream())
+				.filter(task -> !CollectionUtils.isEmpty(task.getInputs()))
+				.flatMap(task -> task.getInputs().stream())
+				.filter(input -> !CollectionUtils.isEmpty(input.getAlternatives()))
+				.flatMap(this::alternatives)
+				.filter(alt -> alt.getOrigin() == TaskTableInputOrigin.DB)
+				.collect(Collectors.groupingBy(TaskTableInputAlternative::getTaskTableInputAltKey));
+	}
+
+	private JobOrderFileNameType getFileNameTypeFor(final TaskTableInputAlternative alt) {
 		switch (alt.getFileNameType()) {
 			case PHYSICAL:
 				return JobOrderFileNameType.PHYSICAL;
@@ -218,22 +182,19 @@ public class TasktableAdapter {
 		return JobOrderFileNameType.BLANK;
 	}
 	
-	
-
-	private final JobOrderTimeInterval newJobOrderTimeIntervalFor(final SearchMetadata searchMetadata) {
+	private JobOrderTimeInterval newJobOrderTimeIntervalFor(final SearchMetadata searchMetadata) {
 		return new JobOrderTimeInterval(
-				convertDateToJoborderFormat(searchMetadata.getValidityStart()),
-				convertDateToJoborderFormat(searchMetadata.getValidityStop()),
+				convertDateToJobOrderFormat(searchMetadata.getValidityStart()),
+				convertDateToJobOrderFormat(searchMetadata.getValidityStop()),
 				searchMetadata.getProductName()
 		);
 	}
 	
-	private final String convertDateToJoborderFormat(final String metadataFormat) {
+	private String convertDateToJobOrderFormat(final String metadataFormat) {
 		return DateUtils.convertToAnotherFormat(
 				metadataFormat,
 				AbstractMetadata.METADATA_DATE_FORMATTER,
 				JobOrderTimeInterval.DATE_FORMATTER
 		);
 	}
-
 }
