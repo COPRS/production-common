@@ -74,7 +74,7 @@ public class TestInbox {
         when(fakeAdapter.inboxURL()).thenReturn("/tmp");
 
 
-        when(fakeRepo.findByPickupURLAndStationNameAndProcessingPod(anyString(), anyString(), anyString()))
+        when(fakeRepo.findByProcessingPodAndPickupURLAndStationName(anyString(), anyString(), anyString()))
                 .thenReturn(Arrays.asList(
                         new InboxEntry("foo2", "foo2", "/tmp", new Date(), 0, "ingestor-01"),
                         new InboxEntry("foo1", "foo1", "/tmp", new Date(), 0, "ingestor-01")));
