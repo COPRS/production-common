@@ -8,21 +8,16 @@ import static org.mockito.Mockito.verify;
 
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
-import org.springframework.data.domain.Sort;
-import org.springframework.data.domain.Sort.Direction;
 
 import esa.s1pdgs.cpoc.appcatalog.AppDataJob;
 import esa.s1pdgs.cpoc.appcatalog.server.service.AppDataJobService;
-import esa.s1pdgs.cpoc.common.filter.FilterCriterion;
 
 public class JobControllerTest extends RestControllerTest{
 
@@ -56,32 +51,55 @@ public class JobControllerTest extends RestControllerTest{
     }
     
     @Test
-    public void searchTest() throws Exception {
-        final Map<String, String> params = new HashMap<>();
-        params.put("[orderByAsc]", "valueFilter");
-        params.put("[orderByDesc]", "valueFilter1");
-        params.put("_id", "124");
-        params.put("messages.id", "124");
-        params.put("creationDate", "20180227T104128");
-        params.put("product.stopTime", "20180227T104128");
-        
-        final List<FilterCriterion> filters = new ArrayList<>();
-        filters.add(new FilterCriterion("product.stopTime", jobController.convertDateIso("20180227T104128")));
-        filters.add(new FilterCriterion("_id", 124L));
-        filters.add(new FilterCriterion("creationDate", jobController.convertDateIso("20180227T104128")));
-        filters.add(new FilterCriterion("messages.id", 124L));
-        
-        final List<AppDataJob> jobsDb = new ArrayList<>();
+    public void findByMessagesId() {
+    	final List<AppDataJob> jobsDb = new ArrayList<>();
         
         doReturn(jobsDb)
         	.when(appDataJobService)
-        	.search(Mockito.any(), Mockito.any());
+        	.findByMessagesId(Mockito.anyLong());
                 
-        jobController.search(params);
+        appDataJobService.findByMessagesId(123L);
         
-        verify(appDataJobService, times(1))
-        	.search(Mockito.eq(filters), Mockito.eq(new Sort(Direction.DESC, "valueFilter1")));        
-       
+        verify(appDataJobService, times(1)).findByMessagesId(Mockito.eq(123L));
+    }
+
+    @Test
+    public void findByProductSessionId() {
+    	final List<AppDataJob> jobsDb = new ArrayList<>();
+
+    	doReturn(jobsDb)
+    		.when(appDataJobService)
+    		.findByProductSessionId(Mockito.anyString());
+
+    	appDataJobService.findByProductSessionId("sessionId");
+    	
+    	verify(appDataJobService, times(1)).findByProductSessionId(Mockito.eq("sessionId"));
+    }
+    
+    @Test
+    public void findByProductDataTakeId() {
+    	final List<AppDataJob> jobsDb = new ArrayList<>();
+    	
+    	doReturn(jobsDb)
+			.when(appDataJobService)
+			.findByProductDataTakeId(Mockito.anyString());
+    	
+    	appDataJobService.findByProductDataTakeId("dataTakeId");
+    	
+    	verify(appDataJobService, times(1)).findByProductDataTakeId(Mockito.eq("dataTakeId"));
+    }
+    
+    @Test
+    public void findJobInStateGenerating() {
+    	final List<AppDataJob> jobsDb = new ArrayList<>();
+    	
+    	doReturn(jobsDb)
+			.when(appDataJobService)
+			.findJobInStateGenerating(Mockito.anyString());
+    	
+    	appDataJobService.findJobInStateGenerating("taskTable");
+    	
+    	verify(appDataJobService, times(1)).findJobInStateGenerating(Mockito.eq("taskTable"));
     }
     
 }
