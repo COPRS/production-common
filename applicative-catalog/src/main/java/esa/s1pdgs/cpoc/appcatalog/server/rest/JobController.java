@@ -41,22 +41,22 @@ public class JobController {
     }
     
     @RequestMapping(method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_UTF8_VALUE, path = "/jobs/findByMessagesId/{messageId}")
-    public List<AppDataJob> findByMessagesId(@PathVariable final long messageId) {
+    public List<AppDataJob> findByMessagesId(@PathVariable(name = "messageId") final Long messageId) {
     	return appDataJobService.findByMessagesId(messageId);
     }
 
     @RequestMapping(method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_UTF8_VALUE, path = "/jobs/findByProductSessionId/{sessionId}")
-    public List<AppDataJob> findByProductSessionId(@PathVariable final String sessionId) {
+    public List<AppDataJob> findByProductSessionId(@PathVariable(name = "sessionId") final String sessionId) {
     	return appDataJobService.findByProductSessionId(sessionId);
     }
     
     @RequestMapping(method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_UTF8_VALUE, path = "/jobs/findByProductDataTakeId/{dataTakeId}")
-    public List<AppDataJob> findByProductDataTakeId(@PathVariable final String dataTakeId) {
+    public List<AppDataJob> findByProductDataTakeId(@PathVariable(name = "dataTakeId") final String dataTakeId) {
     	return appDataJobService.findByProductDataTakeId(dataTakeId);
     }
     
     @RequestMapping(method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_UTF8_VALUE, path = "/jobs/findJobInStateGenerating/{taskTable}")
-    public List<AppDataJob> findJobInStateGenerating(@PathVariable final String taskTable) {
+    public List<AppDataJob> findJobInStateGenerating(@PathVariable(name = "taskTable") final String taskTable) {
     	return appDataJobService.findJobInStateGenerating(taskTable);
     }
 
@@ -72,7 +72,7 @@ public class JobController {
     }
 
     @RequestMapping(method = RequestMethod.DELETE, produces = MediaType.APPLICATION_JSON_UTF8_VALUE, path = "/jobs/{jobId}")
-    public void deleteJob(@PathVariable final Long jobId) {
+    public void deleteJob(@PathVariable(name = "jobId") final Long jobId) {
         appDataJobService.deleteJob(jobId);
     }
 
