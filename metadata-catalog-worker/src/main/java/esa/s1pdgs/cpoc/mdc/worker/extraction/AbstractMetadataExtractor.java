@@ -6,7 +6,6 @@ import java.util.List;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.json.JSONObject;
 
 import esa.s1pdgs.cpoc.common.ProductFamily;
 import esa.s1pdgs.cpoc.common.errors.AbstractCodedException;
@@ -74,14 +73,6 @@ public abstract class AbstractMetadataExtractor implements MetadataExtractor {
 			throw new RuntimeException(e);     
 		}
     }
-
-    final <E> E extractFromFilename(final ThrowingSupplier<E> supplier)	throws AbstractCodedException {
-		return supplier.get();
-	}
-    
-    final JSONObject extractFromFile(final ThrowingSupplier<JSONObject> supplier) throws AbstractCodedException  {
-    	return supplier.get();		
-	}
     
 	private final String getMetadataKeyObs(final String productKeyObs) {
 		if (productKeyObs.toLowerCase().endsWith(processConfiguration.getFileWithManifestExt())) {

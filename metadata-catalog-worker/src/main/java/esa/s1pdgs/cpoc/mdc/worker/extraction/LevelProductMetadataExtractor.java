@@ -37,11 +37,12 @@ public final class LevelProductMetadataExtractor extends AbstractMetadataExtract
         
         final File metadataFile = downloadMetadataFileToLocalFolder(reportingFactory, family, job.getKeyObjectStorage());
         try {
-        	final OutputFileDescriptor descriptor = extractFromFilename(
-        			() -> fileDescriptorBuilder.buildOutputFileDescriptor(metadataFile, job, job.getProductFamily())
+        	final OutputFileDescriptor descriptor = fileDescriptorBuilder.buildOutputFileDescriptor(
+        			metadataFile, 
+        			job, 
+        			job.getProductFamily()
         	);
-        	return extractFromFile(
-        			() -> mdBuilder.buildOutputFileMetadata(descriptor, metadataFile, job)); 
+        	return mdBuilder.buildOutputFileMetadata(descriptor, metadataFile, job); 
         }
         finally {
         	FileUtils.delete(metadataFile.getPath());

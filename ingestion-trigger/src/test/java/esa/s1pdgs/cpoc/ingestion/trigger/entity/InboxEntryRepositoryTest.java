@@ -6,7 +6,6 @@ import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.data.mongo.DataMongoTest;
 import org.springframework.data.mongodb.repository.config.EnableMongoRepositories;
-import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringRunner;
 
 import java.util.Date;
@@ -30,13 +29,13 @@ public class InboxEntryRepositoryTest {
         entry.setProcessingPod("ingestor-01");
         repository.save(entry);
 
-        assertThat(repository.findByPickupURLAndStationNameAndProcessingPod("tehPickUrl", null, "ingestor-01"), is(not(empty())));
-        assertThat(repository.findByPickupURLAndStationNameAndProcessingPod("tehPickUrl33", null, "ingestor-01"), is(empty()));
+        assertThat(repository.findByProcessingPodAndPickupURLAndStationName("ingestor-01", "tehPickUrl", null), is(not(empty())));
+        assertThat(repository.findByProcessingPodAndPickupURLAndStationName("ingestor-01", "tehPickUrl33", null), is(empty()));
 
-        final InboxEntry fetchedEntry = repository.findByPickupURLAndStationNameAndProcessingPod(
-                "tehPickUrl",
-                null,
-                "ingestor-01").get(0);
+        final InboxEntry fetchedEntry = repository.findByProcessingPodAndPickupURLAndStationName(
+                "ingestor-01", "tehPickUrl",
+                null
+        ).get(0);
         assertThat(fetchedEntry.getPickupURL(), is(equalTo("tehPickUrl")));
     }
 

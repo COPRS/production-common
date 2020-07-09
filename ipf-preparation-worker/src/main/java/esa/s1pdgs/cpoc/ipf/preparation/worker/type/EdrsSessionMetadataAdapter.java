@@ -1,6 +1,7 @@
 package esa.s1pdgs.cpoc.ipf.preparation.worker.type;
 
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
@@ -64,21 +65,30 @@ public class EdrsSessionMetadataAdapter {
 		return new EdrsSessionMetadataAdapter(channel1, channel2, raws1, raws2);		
 	}
 	
-	public final List<AppDataJobFile> expectedRaws1() {
-		if (channel1 == null) {
-			// return null here to disinguish if a channel DISB is not there or has no chunks
-			return null;
-		}
-		return raws(channel1.getRawNames(), raws1);
+	public final EdrsSessionMetadata getChannel1() {
+		return channel1;
 	}
-
-	public final List<AppDataJobFile> expectedRaws2() {
-		if (channel2 == null) {
-			// return null here to disinguish if a channel DISB is not there or has no chunks
-			return null;
-		}
-		return raws(channel2.getRawNames(), raws2);
-	}	
+	public final EdrsSessionMetadata getChannel2() {
+		return channel2;
+	}
+		
+	public final Map<String,String> missingRaws() {
+		final List<AppDataJobFile> expected1 = raws(channel1.getRawNames(), raws1);
+		final List<AppDataJobFile> expected2 = raws(channel2.getRawNames(), raws2);
+		
+    	final Map<String,String> missingRaws = new HashMap<>();
+    	for (final AppDataJobFile raw : availableRaws1()) {
+    		if (!expected1.contains(raw)) {
+    			missingRaws.put(raw.getFilename(), "Missing RAW1 " + raw.getFilename());
+    		}
+    	}
+    	for (final AppDataJobFile raw : availableRaws2()) {
+    		if (!expected2.contains(raw)) {
+    			missingRaws.put(raw.getFilename(), "Missing RAW2 " + raw.getFilename());
+    		}
+    	}
+    	return missingRaws;
+	}
 	
 	public final List<AppDataJobFile> availableRaws1() {
 		return raws(raws1.keySet(), raws1);

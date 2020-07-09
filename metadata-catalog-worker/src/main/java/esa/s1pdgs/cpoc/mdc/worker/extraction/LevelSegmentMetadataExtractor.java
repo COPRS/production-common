@@ -42,13 +42,10 @@ public final class LevelSegmentMetadataExtractor extends AbstractMetadataExtract
         try {
             logger.debug("segment metadata file dowloaded:{} for product: {}", metadataFile.getAbsolutePath(), productName);
             
-        	final OutputFileDescriptor l0SegmentDesc = extractFromFilename(
-        			() -> fileDescriptorBuilder.buildOutputFileDescriptor(metadataFile, job, job.getProductFamily())
-        	);
+        	final OutputFileDescriptor l0SegmentDesc = fileDescriptorBuilder.buildOutputFileDescriptor(metadataFile, job, job.getProductFamily());
+        			
         	logger.debug("OutputFileDescriptor:{} for product: {}", l0SegmentDesc.toString(), productName);    	
-        	return extractFromFile(
-        			() -> mdBuilder.buildL0SegmentOutputFileMetadata(l0SegmentDesc, metadataFile, reportingFactory)
-        	); 
+        	return mdBuilder.buildL0SegmentOutputFileMetadata(l0SegmentDesc, metadataFile, reportingFactory); 
         }
         finally {
         	FileUtils.delete(metadataFile.getPath());

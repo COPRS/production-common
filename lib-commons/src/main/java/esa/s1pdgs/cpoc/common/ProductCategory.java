@@ -39,7 +39,9 @@ public enum ProductCategory {
     PRODUCTION_EVENT(ProductionEvent.class),
     PRIP_JOBS(PripPublishingJob.class),
     EVICTION_MANAGEMENT_JOBS(EvictionManagementJob.class),
-    LTA_DOWNLOAD_EVENT(LtaDownloadEvent.class);
+    LTA_DOWNLOAD_EVENT(LtaDownloadEvent.class),    
+    // S2 based categories
+    LEVEL_INPUT(IngestionEvent.class); // represent level product that has been ingested
 	
     /**
      * Get the category for a given product family.
@@ -54,6 +56,7 @@ public enum ProductCategory {
             throw new IllegalArgumentException("Cannot determine product category for a null family");
         }
         switch (family) {
+        	case S3_AUXILIARY_FILE:
 	        case AUXILIARY_FILE:
 	            return ProductCategory.AUXILIARY_FILES;
 	        case EDRS_SESSION:
@@ -80,10 +83,14 @@ public enum ProductCategory {
 	        case L0_BLANK:
 	        case L2_SLICE:
 	        case L2_ACN:
+	        case S3_SAFE:
 	            return ProductCategory.LEVEL_PRODUCTS;
 	        case L0_SEGMENT:
 	            return ProductCategory.LEVEL_SEGMENTS;
-	            
+	        case S3_GRANULES:
+	        case L1C:
+	        case L2A:
+	        	return ProductCategory.LEVEL_INPUT;	            
 			case AUXILIARY_FILE_ZIP:
 			case L0_ACN_ZIP:
 			case L0_BLANK_ZIP:
@@ -93,6 +100,7 @@ public enum ProductCategory {
 			case L1_SLICE_ZIP:
 			case L2_ACN_ZIP:
 			case L2_SLICE_ZIP:
+			case L2A_ZIP:
 				return ProductCategory.COMPRESSION_JOBS; 
 	        default:
 	        	throw new IllegalArgumentException(
@@ -118,6 +126,7 @@ public enum ProductCategory {
         }
         ProductCategory ret = null;
         switch (family) {
+        	case S3_AUXILIARY_FILE:
             case AUXILIARY_FILE:
                 ret = ProductCategory.AUXILIARY_FILES;
                 break;

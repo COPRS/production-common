@@ -990,9 +990,9 @@ public class EsServices {
 			final CoordinatesBuilder coordBuilder = new CoordinatesBuilder();
 
 			for (final Object arr : secondArray) {
-				final List<Double> coords = (List<Double>) arr;
-				final double lon = coords.get(0);
-				final double lat = coords.get(1);
+				final List<Number> coords = (List<Number>) arr;
+				final double lon = coords.get(0).doubleValue();
+				final double lat = coords.get(1).doubleValue();
 				coordBuilder.coordinate(lon, lat);
 			}
 			final GeoShapeQueryBuilder queryBuilder = QueryBuilders.geoIntersectionQuery("geometry",

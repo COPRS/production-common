@@ -982,4 +982,33 @@ public class EsServicesTest{
         
         assertEquals(100, esServices.getSeaCoverage(ProductFamily.L0_SEGMENT, "name"));
     }
+    
+    
+    @Test
+    public final void getSeaCoverageTest_Integer_Coordinates() throws Exception {
+        final String content = "{\"productName\":\"name\","
+                + "\"startTime\":\"2000-01-01T00:00:00.000000Z\",\"stopTime\":"
+                + "\"2001-01-01T00:00:00.000000Z\", \"productConsolidation\":\"FULL\", \"polarisation\":\"SV\", "
+                + "\"dataTakeId\":\"datatakeId\","
+                + "\"productType\": \"product_type\","
+                + "\"sliceCoordinates\": { \"type\":\"Polygon\","
+                + "\"coordinates\": [["
+                + "[ -1, 52.6289 ], [ -1.4946, 54.5767 ], [ -5.2745, 54.2683 ], [ -4.6105, 52.3285 ], [ -1, 52.6289 ]"
+                + "]]}}";        
+        final BytesReference source = new BytesArray(content);
+        
+        final GetResult getResult = new GetResult("index", "type", "id", SequenceNumbers.UNASSIGNED_SEQ_NO, SequenceNumbers.UNASSIGNED_PRIMARY_TERM, 0L, true, source, null);
+        final GetResponse getResponse = new GetResponse(getResult);
+        this.mockGetRequest(getResponse);
+
+
+		final SearchHit hit = new SearchHit(0);
+		final SearchHit[] hits = {hit};
+		final SearchHits searchHits = new SearchHits(hits, 0, 1.0F);
+		final SearchResponseSections searchResponsSections = new SearchResponseSections(searchHits, null, null, false, Boolean.FALSE, null, 0);
+		final SearchResponse response = new SearchResponse(searchResponsSections, "1", 1,1,0,25,null,null);
+        this.mockSearchRequest(response);
+        
+        assertEquals(100, esServices.getSeaCoverage(ProductFamily.L0_SEGMENT, "name"));
+    }
 }
