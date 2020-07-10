@@ -41,7 +41,7 @@ public interface AppDataJobRepository
     @Query(value = "{ 'product.dataTakeId' : ?0, 'state' : { $ne: 'TERMINATED' } }")
     List<AppDataJob> findByProductDataTakeId(final String dataTakeId);
     
-    @Query(value = "{ 'state' : 'GENERATING', 'generations.state' : { $ne: 'SENT' }, 'generation.taskTable' : ?0 }", sort = "{ 'generation.lastUpdateDate': 1 }")
+    @Query(value = "{ 'state' : 'GENERATING', 'generation.state' : { $ne: 'SENT' }, 'generation.taskTable' : ?0 }", sort = "{ 'generation.lastUpdateDate': 1 }")
     List<AppDataJob> findJobInStateGenerating(final String taskTable);
 
 }
