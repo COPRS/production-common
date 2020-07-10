@@ -1,6 +1,5 @@
 package esa.s1pdgs.cpoc.appcatalog.client.job;
 
-import java.net.URI;
 import java.util.List;
 
 import org.apache.commons.logging.Log;
@@ -13,7 +12,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.client.HttpStatusCodeException;
 import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
-import org.springframework.web.util.UriComponentsBuilder;
 
 import esa.s1pdgs.cpoc.appcatalog.AppDataJob;
 import esa.s1pdgs.cpoc.common.errors.AbstractCodedException;
