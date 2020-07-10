@@ -125,8 +125,7 @@ public class AppCatalogJobClient {
         int retries = 0;
         while (true) {
             retries++;
-            final UriComponentsBuilder builder = UriComponentsBuilder.fromUriString(hostUri + "/jobs/" + apiMethod + "/" + apiParameterValue);
-            final URI uri = builder.build().toUri();
+            final String uri = hostUri + "/jobs/" + apiMethod + "/" + apiParameterValue;
             LogUtils.traceLog(LOGGER, String.format("[uri %s]", uri));
             try {
                 final ResponseEntity<List<AppDataJob>> response = restTemplate.exchange(
@@ -140,14 +139,14 @@ public class AppCatalogJobClient {
                     return response.getBody();
                 } else {
                     waitOrThrow(retries,
-                            new AppCatalogJobSearchApiError(uri.toString(),
+                            new AppCatalogJobSearchApiError(uri,
                                     "HTTP status code "
                                             + response.getStatusCode()),
                             apiMethod);
                 }
             } catch (final HttpStatusCodeException hsce) {
                 waitOrThrow(retries, new AppCatalogJobSearchApiError(
-                        uri.toString(),
+                        uri,
                         String.format(
                                 "HttpStatusCodeException occured: %s - %s",
                                 hsce.getStatusCode(),
@@ -155,7 +154,7 @@ public class AppCatalogJobClient {
                 		apiMethod);
             } catch (final RestClientException rce) {
                 waitOrThrow(retries,
-                        new AppCatalogJobSearchApiError(uri.toString(),
+                        new AppCatalogJobSearchApiError(uri,
                                 String.format(
                                         "RestClientException occured: %s",
                                         rce.getMessage()),
