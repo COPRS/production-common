@@ -95,13 +95,13 @@ public class TaskTableAdapter {
 		return new JobOrder(jobOrderTemplate, settings.getLevel());
 	}
 	
-	public final JobOrderInput findInput(final JobGen job, final TaskTableInput input, Map<Integer, SearchMetadataResult> results) {
+	public final JobOrderInput findInput(final JobGen job, final TaskTableInput input, Map<TaskTableInputAlternative.TaskTableInputAltKey, SearchMetadataResult> results) {
 		JobOrderInput result = null;
 
 		for (final TaskTableInputAlternative alt : input.alternativesOrdered().collect(toList())) {
 			// We ignore input not DB
 			if (alt.getOrigin() == TaskTableInputOrigin.DB) {							
-				final List<SearchMetadata> queryResults = results.get(alt.getIdSearchMetadataQuery()).getResult();
+				final List<SearchMetadata> queryResults = results.get(alt.getTaskTableInputAltKey()).getResult();
 				
 				// has queries defined?
 				if (!CollectionUtils.isEmpty(queryResults)) {

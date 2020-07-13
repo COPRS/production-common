@@ -7,7 +7,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.Callable;
-import java.util.concurrent.atomic.AtomicInteger;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -26,6 +25,7 @@ import esa.s1pdgs.cpoc.ipf.preparation.worker.model.metadata.SearchMetadataResul
 import esa.s1pdgs.cpoc.ipf.preparation.worker.model.tasktable.ElementMapper;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.model.tasktable.TaskTableAdapter;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.model.tasktable.TaskTableInput;
+import esa.s1pdgs.cpoc.ipf.preparation.worker.model.tasktable.TaskTableInputAlternative;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.model.tasktable.TaskTablePool;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.model.tasktable.TaskTableTask;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.model.tasktable.enums.TaskTableMandatoryEnum;
@@ -45,7 +45,7 @@ public class AuxQuery implements Callable<JobGen> {
 	private final TaskTableAdapter taskTableAdapter;
 	//TODO clarify if elementMapper or parts of it are mission specific
 	private final ElementMapper elementMapper;
-	private final Map<Integer, SearchMetadataQuery> queryTemplates;
+	private final Map<TaskTableInputAlternative.TaskTableInputAltKey, SearchMetadataQuery> queryTemplates;
 
 	public AuxQuery(
 			final MetadataClient metadataClient,
@@ -64,46 +64,34 @@ public class AuxQuery implements Callable<JobGen> {
 	@Override
 	public final JobGen call() throws Exception {	
 		LOGGER.debug("Searching required AUX for job {} (product: {})", jobGen.id(), jobGen.productName());
-		final Map<Integer, SearchMetadataResult> results = performAuxQueries();
+		final Map<TaskTableInputAlternative.TaskTableInputAltKey, SearchMetadataResult> results = performAuxQueries();
 		LOGGER.info("Distributing required AUX for job {} (product: {})", jobGen.id(), jobGen.productName());
 		distributeResults(results);
 		return jobGen;
 	}
 
 	//TODO check if some stuff from here can be put back again to TaskTableAdapter
-	private Map<Integer, SearchMetadataQuery> buildMetadataSearchQuery() {
-		final AtomicInteger counter = new AtomicInteger(0);
-		final Map<Integer, SearchMetadataQuery> metadataQueryTemplate =  new HashMap<>();
+	private Map<TaskTableInputAlternative.TaskTableInputAltKey, SearchMetadataQuery> buildMetadataSearchQuery() {
+		final Map<TaskTableInputAlternative.TaskTableInputAltKey, SearchMetadataQuery> metadataQueryTemplate =  new HashMap<>();
 
 		taskTableAdapter.allTaskTableInputs()
 				.forEach((inputAltKey, alternatives) -> {
-					final int queryId = counter.incrementAndGet();
 					final String fileType = elementMapper.mappedFileType(inputAltKey.getFileType());
 					final ProductFamily family = elementMapper.inputFamilyOf(fileType);
 					final SearchMetadataQuery query = new SearchMetadataQuery(
-							queryId,
+							0,
 							inputAltKey.getRetrievalMode(),
 							inputAltKey.getDeltaTime0(),
 							inputAltKey.getDeltaTime1(),
 							fileType,
 							family
 					);
-					metadataQueryTemplate.put(queryId, query);
-					// FIXME: It's a very bad idea to rely on getting the original objects here provided and everything
-					// to be written through properly. Furthermore, altering the taskTable after having it read is also
-					// pretty error-prone and will eventually break at some point in the future (apart from all the WTFs
-					// this will cause on encountering this logic)
-					// Hence, this should be changed in order to create the queryId uniquely on the alternative once when
-					// reading the taskTable and here, this value can be used as the query id (if no better structure for
-					// storing the queries is found).
-					// Apart from that, it's sad to see how functional programming is used to mutate the state of a
-					// data structure that doesn't change but here... :(
-					alternatives.forEach(alt -> alt.setIdSearchMetadataQuery(queryId));
+					metadataQueryTemplate.put(inputAltKey, query);
 				});
 		return metadataQueryTemplate;
 	}
 
-	private Map<Integer, SearchMetadataResult> toQueries(Map<Integer, SearchMetadataQuery> metadataQueriesTemplate) {
+	private Map<TaskTableInputAlternative.TaskTableInputAltKey, SearchMetadataResult> toQueries(Map<TaskTableInputAlternative.TaskTableInputAltKey, SearchMetadataQuery> metadataQueriesTemplate) {
 		return metadataQueriesTemplate.entrySet().stream().collect(
 				toMap(
 						Map.Entry::getKey,
@@ -111,8 +99,8 @@ public class AuxQuery implements Callable<JobGen> {
 		);
 	}
 
-	private Map<Integer, SearchMetadataResult> performAuxQueries() {
-		final Map<Integer, SearchMetadataResult> queries = toQueries(queryTemplates);
+	private Map<TaskTableInputAlternative.TaskTableInputAltKey, SearchMetadataResult> performAuxQueries() {
+		final Map<TaskTableInputAlternative.TaskTableInputAltKey, SearchMetadataResult> queries = toQueries(queryTemplates);
 
 		for (final SearchMetadataResult result : queries.values()) {
 			if (result.hasResult()) {
@@ -146,7 +134,7 @@ public class AuxQuery implements Callable<JobGen> {
 		return queries;
 	}
 	
-	private void distributeResults(Map<Integer, SearchMetadataResult> metadataQueries) throws IpfPrepWorkerInputsMissingException {
+	private void distributeResults(Map<TaskTableInputAlternative.TaskTableInputAltKey, SearchMetadataResult> metadataQueries) throws IpfPrepWorkerInputsMissingException {
 		int counterProc = 0;
 		final Map<String, JobOrderInput> referenceInputs = new HashMap<>();
 		//for each pool

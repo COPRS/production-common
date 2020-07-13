@@ -63,11 +63,6 @@ public class TaskTableInputAlternative {
 	private TaskTableFileNameType fileNameType;
 
 	/**
-	 * Used to distinct queries according the natural key
-	 */
-	private int idSearchMetadataQuery;
-
-	/**
 	 * 
 	 */
 	public TaskTableInputAlternative() {
@@ -77,7 +72,6 @@ public class TaskTableInputAlternative {
 		this.deltaTime0 = 0.0;
 		this.deltaTime1 = 0.0;
 		this.fileNameType = TaskTableFileNameType.BLANK;
-		this.idSearchMetadataQuery = 0;
 	}
 
 	/**
@@ -151,27 +145,11 @@ public class TaskTableInputAlternative {
 	}
 
 	/**
-	 * @return the idSearchMetadataQuery
-	 */
-	public int getIdSearchMetadataQuery() {
-		return idSearchMetadataQuery;
-	}
-
-	/**
-	 * @param idSearchMetadataQuery
-	 *            the idSearchMetadataQuery to set
-	 */
-	public void setIdSearchMetadataQuery(final int idSearchMetadataQuery) {
-		this.idSearchMetadataQuery = idSearchMetadataQuery;
-	}
-
-	/**
 	 * @see java.lang.Object#hashCode()
 	 */
 	@Override
 	public int hashCode() {
-		return Objects.hash(order, origin, retrievalMode, deltaTime0, deltaTime1, fileType, fileNameType,
-				idSearchMetadataQuery);
+		return Objects.hash(order, origin, retrievalMode, deltaTime0, deltaTime1, fileType, fileNameType);
 	}
 
 	/**
@@ -189,8 +167,7 @@ public class TaskTableInputAlternative {
 			ret = order == other.order && Objects.equals(origin, other.origin)
 					&& Objects.equals(retrievalMode, other.retrievalMode)
 					&& Objects.equals(deltaTime0, other.deltaTime0) && Objects.equals(deltaTime1, other.deltaTime1)
-					&& Objects.equals(fileType, other.fileType) && Objects.equals(fileNameType, other.fileNameType)
-					&& idSearchMetadataQuery == other.idSearchMetadataQuery;
+					&& Objects.equals(fileType, other.fileType) && Objects.equals(fileNameType, other.fileNameType);
 		}
 		return ret;
 	}
@@ -201,7 +178,7 @@ public class TaskTableInputAlternative {
 	public String toString() {
 		return "TaskTableInputAlternative [order=" + order + ", origin=" + origin + ", retrievalMode=" + retrievalMode
 				+ ", deltaTime0=" + deltaTime0 + ", deltaTime1=" + deltaTime1 + ", fileType=" + fileType
-				+ ", fileNameType=" + fileNameType + ", idSearchMetadataQuery=" + idSearchMetadataQuery + "]";
+				+ ", fileNameType=" + fileNameType + "]";
 	}
 
 	public TaskTableInputAltKey getTaskTableInputAltKey() {
