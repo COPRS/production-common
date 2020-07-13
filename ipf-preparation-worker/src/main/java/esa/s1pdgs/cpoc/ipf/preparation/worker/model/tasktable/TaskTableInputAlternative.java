@@ -18,12 +18,7 @@ import esa.s1pdgs.cpoc.ipf.preparation.worker.model.tasktable.enums.TaskTableInp
 @XmlAccessorType(XmlAccessType.NONE)
 public class TaskTableInputAlternative {
 
-	public static final Comparator<TaskTableInputAlternative> ORDER = new Comparator<TaskTableInputAlternative>() {
-		@Override
-		public int compare(final TaskTableInputAlternative o1, final TaskTableInputAlternative o2) {
-			return o1.order - o2.order;
-		}		
-	};
+	public static final Comparator<TaskTableInputAlternative> ORDER = Comparator.comparingInt(TaskTableInputAlternative::getOrder);
 	
 	/**
 	 * 
@@ -86,13 +81,6 @@ public class TaskTableInputAlternative {
 	}
 
 	/**
-	 * @param order
-	 * @param origin
-	 * @param retrievalMode
-	 * @param deltaTime0
-	 * @param deltaTime1
-	 * @param fileType
-	 * @param fileNameType
 	 */
 	public TaskTableInputAlternative(final int order, final TaskTableInputOrigin origin, final String retrievalMode,
 			final double deltaTime0, final double deltaTime1, final String fileType,
@@ -247,10 +235,6 @@ public class TaskTableInputAlternative {
 
 		/**
 		 * 
-		 * @param retrievalMode
-		 * @param deltaTime0
-		 * @param deltaTime1
-		 * @param fileType
 		 */
 		public TaskTableInputAltKey(final String retrievalMode, final double deltaTime0, final double deltaTime1,
 				final String fileType) {
@@ -286,6 +270,16 @@ public class TaskTableInputAlternative {
 		 */
 		public String getFileType() {
 			return fileType;
+		}
+
+		@Override
+		public String toString() {
+			return "TaskTableInputAltKey{" +
+					"retrievalMode='" + retrievalMode + '\'' +
+					", deltaTime0=" + deltaTime0 +
+					", deltaTime1=" + deltaTime1 +
+					", fileType='" + fileType + '\'' +
+					'}';
 		}
 
 		/**

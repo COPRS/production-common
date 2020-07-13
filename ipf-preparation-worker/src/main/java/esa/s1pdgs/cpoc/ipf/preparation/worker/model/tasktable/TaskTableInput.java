@@ -3,6 +3,7 @@ package esa.s1pdgs.cpoc.ipf.preparation.worker.model.tasktable;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import java.util.stream.Stream;
 
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
@@ -73,8 +74,6 @@ public class TaskTableInput {
 	}
 
 	/**
-	 * @param mode
-	 * @param mandatory
 	 */
 	public TaskTableInput(final TaskTableInputMode mode, final TaskTableMandatoryEnum mandatory) {
 		this();
@@ -125,8 +124,21 @@ public class TaskTableInput {
 		return alternatives;
 	}
 
+	//this has been taken from TaskTableAdapter to ensure
+	//it is always used, but getAlternatives is still used in tests
+	//also I'm not sure if this method is right in this place
+	public Stream<TaskTableInputAlternative> alternativesOrdered() {
+		if(alternatives == null) {
+			return Stream.empty();
+		}
+
+		return alternatives.stream().sorted(TaskTableInputAlternative.ORDER);
+	}
+
 	/**
-	 * @param alternatives
+	 *
+	 * For test purposes only
+	 * @param alternative
 	 *            the alternatives to set
 	 */
 	public void addAlternative(final TaskTableInputAlternative alternative) {
@@ -135,7 +147,6 @@ public class TaskTableInput {
 	
 	/**
 	 * 
-	 * @return
 	 */
 	public String toLogMessage() {
 		if (StringUtils.isEmpty(reference)) {

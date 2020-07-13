@@ -1,5 +1,7 @@
 package esa.s1pdgs.cpoc.ipf.preparation.worker.query;
 
+import static java.util.stream.Collectors.toMap;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -74,15 +76,15 @@ public class AuxQuery implements Callable<JobGen> {
 		final Map<Integer, SearchMetadataQuery> metadataQueryTemplate =  new HashMap<>();
 
 		taskTableAdapter.allTaskTableInputs()
-				.forEach((k, v) -> {
+				.forEach((inputAltKey, alternatives) -> {
 					final int queryId = counter.incrementAndGet();
-					final String fileType = elementMapper.mappedFileType(k.getFileType());
+					final String fileType = elementMapper.mappedFileType(inputAltKey.getFileType());
 					final ProductFamily family = elementMapper.inputFamilyOf(fileType);
 					final SearchMetadataQuery query = new SearchMetadataQuery(
 							queryId,
-							k.getRetrievalMode(),
-							k.getDeltaTime0(),
-							k.getDeltaTime1(),
+							inputAltKey.getRetrievalMode(),
+							inputAltKey.getDeltaTime0(),
+							inputAltKey.getDeltaTime1(),
 							fileType,
 							family
 					);
@@ -96,29 +98,27 @@ public class AuxQuery implements Callable<JobGen> {
 					// storing the queries is found).
 					// Apart from that, it's sad to see how functional programming is used to mutate the state of a
 					// data structure that doesn't change but here... :(
-					v.forEach(alt -> alt.setIdSearchMetadataQuery(queryId));
+					alternatives.forEach(alt -> alt.setIdSearchMetadataQuery(queryId));
 				});
 		return metadataQueryTemplate;
 	}
 
 	private Map<Integer, SearchMetadataResult> toQueries(Map<Integer, SearchMetadataQuery> metadataQueriesTemplate) {
-		final Map<Integer, SearchMetadataResult> queries = new HashMap<>(metadataQueriesTemplate.size());
-
-		for (final Map.Entry<Integer, SearchMetadataQuery> entry : metadataQueriesTemplate.entrySet() ) {
-			queries.put(entry.getKey(), new SearchMetadataResult(new SearchMetadataQuery(entry.getValue())));
-		}
-
-		return queries;
+		return metadataQueriesTemplate.entrySet().stream().collect(
+				toMap(
+						Map.Entry::getKey,
+						e -> new SearchMetadataResult(new SearchMetadataQuery(e.getValue())))
+		);
 	}
 
 	private Map<Integer, SearchMetadataResult> performAuxQueries() {
 		final Map<Integer, SearchMetadataResult> queries = toQueries(queryTemplates);
 
 		for (final SearchMetadataResult result : queries.values()) {
-			// TODO make this prettier
-			if (result == null || result.getResult() != null) {
+			if (result.hasResult()) {
 				continue;
 			}
+
 			final SearchMetadataQuery query = result.getQuery();
 			try {				
 				LOGGER.debug("Querying input product of type {}, AppJobId {}: {}", 
@@ -126,6 +126,10 @@ public class AuxQuery implements Callable<JobGen> {
 
 				final List<SearchMetadata> results = queryAux(query);
 				// save query results
+				// this means, only if query has found something, the result is set
+				// otherwise query again later
+				// so the same behaviour can be achieved by simply passing result and change getResult()
+				// to check null and isEmpty()
 				if (!results.isEmpty()) {
 					result.setResult(results);
 				}
@@ -145,14 +149,18 @@ public class AuxQuery implements Callable<JobGen> {
 	private void distributeResults(Map<Integer, SearchMetadataResult> metadataQueries) throws IpfPrepWorkerInputsMissingException {
 		int counterProc = 0;
 		final Map<String, JobOrderInput> referenceInputs = new HashMap<>();
+		//for each pool
 		for (final TaskTablePool pool : jobGen.taskTableAdapter().pools()) {
+			// and each task in this pool
 			for (final TaskTableTask task : pool.getTasks()) {
 				final Map<String, String> missingMetadata = new HashMap<>();
 				final List<JobOrderInput> futureInputs = new ArrayList<>();
+				//take each input
 				for (final TaskTableInput input : task.getInputs()) {					
 					// If it is NOT a reference
 					if (StringUtils.isEmpty(input.getReference())) {
-						if (ProductMode.isCompatibleWithTaskTableMode(mode, input.getMode())) {			
+						//check if input mode matches the product mode
+						if (mode.isCompatibleWithTaskTableMode(input.getMode())) {
 							// returns null, if not found
 							final JobOrderInput foundInput = taskTableAdapter.findInput(jobGen, input, metadataQueries);
 														
@@ -190,9 +198,9 @@ public class AuxQuery implements Callable<JobGen> {
 						}
 					}
 				}
-				counterProc++;
 				if (missingMetadata.isEmpty()) {
-					jobGen.jobOrder().getProcs().get(counterProc - 1).setInputs(futureInputs);
+					jobGen.jobOrder().getProcs().get(counterProc).setInputs(futureInputs);
+					counterProc++;
 				} else {
 					throw new IpfPrepWorkerInputsMissingException(missingMetadata);
 				}

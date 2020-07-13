@@ -3,6 +3,7 @@ package esa.s1pdgs.cpoc.ipf.preparation.worker.model.tasktable;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import java.util.stream.Stream;
 
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
@@ -154,17 +155,17 @@ public class TaskTableTask {
 		return inputs;
 	}
 
-	/**
-	 * @param inputs
-	 *            the inputs to set
-	 */
-	public void setInputs(final List<TaskTableInput> inputs) {
-		this.inputs = inputs;
+	public Stream<TaskTableInput> inputs() {
+		if(inputs == null) {
+			return Stream.empty();
+		}
+
+		return inputs.stream();
 	}
 
 	/**
-	 * @param inputs
-	 *            the inputs to set
+	 * @param input
+	 *            the input to add
 	 */
 	public void addInput(final TaskTableInput input) {
 		this.inputs.add(input);
@@ -178,16 +179,8 @@ public class TaskTableTask {
 	}
 
 	/**
-	 * @param outputs
-	 *            the outputs to set
-	 */
-	public void setOutputs(final List<TaskTableOuput> outputs) {
-		this.outputs = outputs;
-	}
-
-	/**
-	 * @param outputs
-	 *            the outputs to set
+	 * @param output
+	 *            the output to add
 	 */
 	public void addOutput(final TaskTableOuput output) {
 		this.outputs.add(output);

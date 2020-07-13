@@ -3,6 +3,7 @@ package esa.s1pdgs.cpoc.ipf.preparation.worker.model.tasktable;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import java.util.stream.Stream;
 
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
@@ -83,9 +84,17 @@ public class TaskTablePool {
 		return tasks;
 	}
 
+	public Stream<TaskTableTask> tasks() {
+		if(tasks == null) {
+			return Stream.empty();
+		}
+
+		return tasks.stream();
+	}
+
 	/**
-	 * @param tasks
-	 *            the tasks to set
+	 * @param task
+	 *            the task to add
 	 */
 	public void addTask(final TaskTableTask task) {
 		this.tasks.add(task);

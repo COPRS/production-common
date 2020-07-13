@@ -1,12 +1,13 @@
 package esa.s1pdgs.cpoc.ipf.preparation.worker.model.tasktable;
 
+import static java.util.stream.Collectors.groupingBy;
+import static java.util.stream.Collectors.toList;
+
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 import org.springframework.util.CollectionUtils;
 
@@ -60,9 +61,9 @@ public class TaskTableAdapter {
 	public final List<List<String>> buildTasks() {
 		final List<List<String>> tasks = new ArrayList<>();
 		
-		taskTable.getPools().forEach(pool -> tasks.add(pool.getTasks().stream()
+		taskTable.getPools().forEach(pool -> tasks.add(pool.tasks()
 				.map(TaskTableTask::getFileName)
-				.collect(Collectors.toList())));
+				.collect(toList())));
 		return tasks;
 	}
 	
@@ -97,7 +98,7 @@ public class TaskTableAdapter {
 	public final JobOrderInput findInput(final JobGen job, final TaskTableInput input, Map<Integer, SearchMetadataResult> results) {
 		JobOrderInput result = null;
 
-		for (final TaskTableInputAlternative alt : alternatives(input).collect(Collectors.toList())) {
+		for (final TaskTableInputAlternative alt : input.alternativesOrdered().collect(toList())) {
 			// We ignore input not DB
 			if (alt.getOrigin() == TaskTableInputOrigin.DB) {							
 				final List<SearchMetadata> queryResults = results.get(alt.getIdSearchMetadataQuery()).getResult();
@@ -110,11 +111,11 @@ public class TaskTableAdapter {
 					
 					final List<JobOrderInputFile> jobOrderInputFiles = queryResults.stream()
 							.map(file -> new JobOrderInputFile(file.getProductName(), file.getKeyObjectStorage()))
-							.collect(Collectors.toList());
+							.collect(toList());
 
 					final List<JobOrderTimeInterval> jobOrderTimeIntervals = queryResults.stream()
 						.map(this::newJobOrderTimeIntervalFor)
-						.collect(Collectors.toList());
+						.collect(toList());
 					
 					return new JobOrderInput(
 							alt.getFileType(), 
@@ -152,20 +153,13 @@ public class TaskTableAdapter {
 		return result;
 	}
 
-	private Stream<TaskTableInputAlternative> alternatives(final TaskTableInput input) {
-		return input.getAlternatives().stream().sorted(TaskTableInputAlternative.ORDER);
-	}
-
 	public Map<TaskTableInputAlternative.TaskTableInputAltKey, List<TaskTableInputAlternative>> allTaskTableInputs() {
 		return taskTable.getPools().stream()
-				.filter(pool -> !CollectionUtils.isEmpty(pool.getTasks()))
-				.flatMap(pool -> pool.getTasks().stream())
-				.filter(task -> !CollectionUtils.isEmpty(task.getInputs()))
-				.flatMap(task -> task.getInputs().stream())
-				.filter(input -> !CollectionUtils.isEmpty(input.getAlternatives()))
-				.flatMap(this::alternatives)
+				.flatMap(TaskTablePool::tasks)
+				.flatMap(TaskTableTask::inputs)
+				.flatMap(TaskTableInput::alternativesOrdered)
 				.filter(alt -> alt.getOrigin() == TaskTableInputOrigin.DB)
-				.collect(Collectors.groupingBy(TaskTableInputAlternative::getTaskTableInputAltKey));
+				.collect(groupingBy(TaskTableInputAlternative::getTaskTableInputAltKey));
 	}
 
 	private JobOrderFileNameType getFileNameTypeFor(final TaskTableInputAlternative alt) {

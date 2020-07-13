@@ -29,7 +29,7 @@ public class TaskTableFactory {
 			
 		} catch (IOException | JAXBException e) {
 			throw new RuntimeException(
-					String.format("Error reading tasktable %s: %s", xmlFile.getPath(), e.getMessage()),
+					String.format("Error reading taskTable %s: %s", xmlFile.getPath(), e.getMessage()),
 					e
 			);
 		}

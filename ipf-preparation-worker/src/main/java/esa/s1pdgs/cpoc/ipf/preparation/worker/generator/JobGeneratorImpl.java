@@ -107,12 +107,6 @@ public final class JobGeneratorImpl implements JobGenerator {
 	}
 
 	private JobGen newJobGenFor(final AppDataJob job) {
-		//TODO remove
-		//final Map<Integer, SearchMetadataResult> queries = new HashMap<>(metadataQueriesTemplate.size());
-		//
-		//for (final Map.Entry<Integer, SearchMetadataQuery> entry : metadataQueriesTemplate.entrySet() ) {
-		//	queries.put(entry.getKey(), new SearchMetadataResult(new SearchMetadataQuery(entry.getValue())));
-		//}
 		return new JobGen(
 				job, 
 				typeAdapter, 

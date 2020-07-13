@@ -263,7 +263,7 @@ public class IpfPreparationWorkerConfiguration {
 	    final List<List<String>> tasks = tasktableAdapter.buildTasks();
 		final AuxQueryHandler auxQueryHandler = new AuxQueryHandler(
 				metadataClient, 
-				ProductMode.SLICING, 
+				ProductMode.SLICING, //TODO clarify why mode is always slicing
 				timeoutCheckerFactory.apply(tasktableAdapter.taskTable()),
 				elementMapper);
 		return new JobGeneratorImpl(
