@@ -1,0 +1,426 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<xfdu:XFDU version="esa/safe/sentinel/1.1/sentinel-3/level-0" xmlns:xfdu="urn:ccsds:schema:xfdu:1">
+   <informationPackageMap>
+      <xfdu:contentUnit unitType="SAFE Archive Information Package" textInfo="S3BOL_1_EFR___" dmdID="_dmdID">
+         <xfdu:contentUnit unitType="Measurement Data Unit" repID="_repId" dmdID="_dmdID">
+            <dataObjectPointer ID="measurementData1"/>
+         </xfdu:contentUnit>
+         <xfdu:contentUnit unitType="Measurement Data Unit" repID="_repId" dmdID="_dmdID">
+            <dataObjectPointer ID="measurementData2"/>
+         </xfdu:contentUnit>
+         <xfdu:contentUnit unitType="Measurement Data Unit" repID="_repId" dmdID="_dmdID">
+            <dataObjectPointer ID="measurementData3"/>
+         </xfdu:contentUnit>
+         <xfdu:contentUnit unitType="Measurement Data Unit" repID="_repId" dmdID="_dmdID">
+            <dataObjectPointer ID="measurementData4"/>
+         </xfdu:contentUnit>
+         <xfdu:contentUnit unitType="Measurement Data Unit" repID="_repId" dmdID="_dmdID">
+            <dataObjectPointer ID="measurementData5"/>
+         </xfdu:contentUnit>
+         <xfdu:contentUnit unitType="Measurement Data Unit" repID="_repId" dmdID="_dmdID">
+            <dataObjectPointer ID="measurementData6"/>
+         </xfdu:contentUnit>
+         <xfdu:contentUnit unitType="Measurement Data Unit" repID="_repId" dmdID="_dmdID">
+            <dataObjectPointer ID="measurementData7"/>
+         </xfdu:contentUnit>
+         <xfdu:contentUnit unitType="Measurement Data Unit" repID="_repId" dmdID="_dmdID">
+            <dataObjectPointer ID="measurementData8"/>
+         </xfdu:contentUnit>
+         <xfdu:contentUnit unitType="Measurement Data Unit" repID="_repId" dmdID="_dmdID">
+            <dataObjectPointer ID="measurementData9"/>
+         </xfdu:contentUnit>
+         <xfdu:contentUnit unitType="Measurement Data Unit" repID="_repId" dmdID="_dmdID">
+            <dataObjectPointer ID="measurementData10"/>
+         </xfdu:contentUnit>
+         <xfdu:contentUnit unitType="Measurement Data Unit" repID="_repId" dmdID="_dmdID">
+            <dataObjectPointer ID="measurementData11"/>
+         </xfdu:contentUnit>
+         <xfdu:contentUnit unitType="Measurement Data Unit" repID="_repId" dmdID="_dmdID">
+            <dataObjectPointer ID="measurementData12"/>
+         </xfdu:contentUnit>
+         <xfdu:contentUnit unitType="Measurement Data Unit" repID="_repId" dmdID="_dmdID">
+            <dataObjectPointer ID="measurementData13"/>
+         </xfdu:contentUnit>
+         <xfdu:contentUnit unitType="Measurement Data Unit" repID="_repId" dmdID="_dmdID">
+            <dataObjectPointer ID="measurementData14"/>
+         </xfdu:contentUnit>
+         <xfdu:contentUnit unitType="Measurement Data Unit" repID="_repId" dmdID="_dmdID">
+            <dataObjectPointer ID="measurementData15"/>
+         </xfdu:contentUnit>
+         <xfdu:contentUnit unitType="Measurement Data Unit" repID="_repId" dmdID="_dmdID">
+            <dataObjectPointer ID="measurementData16"/>
+         </xfdu:contentUnit>
+         <xfdu:contentUnit unitType="Measurement Data Unit" repID="_repId" dmdID="_dmdID">
+            <dataObjectPointer ID="measurementData17"/>
+         </xfdu:contentUnit>
+         <xfdu:contentUnit unitType="Measurement Data Unit" repID="_repId" dmdID="_dmdID">
+            <dataObjectPointer ID="measurementData18"/>
+         </xfdu:contentUnit>
+         <xfdu:contentUnit unitType="Measurement Data Unit" repID="_repId" dmdID="_dmdID">
+            <dataObjectPointer ID="measurementData19"/>
+         </xfdu:contentUnit>
+         <xfdu:contentUnit unitType="Measurement Data Unit" repID="_repId" dmdID="_dmdID">
+            <dataObjectPointer ID="measurementData20"/>
+         </xfdu:contentUnit>
+         <xfdu:contentUnit unitType="Measurement Data Unit" repID="_repId" dmdID="_dmdID">
+            <dataObjectPointer ID="measurementData21"/>
+         </xfdu:contentUnit>
+         <xfdu:contentUnit unitType="Measurement Data Unit" repID="_repId" dmdID="_dmdID">
+            <dataObjectPointer ID="measurementData22"/>
+         </xfdu:contentUnit>
+         <xfdu:contentUnit unitType="Metadata Unit" repID="_repId" dmdID="_dmdID">
+            <dataObjectPointer ID="annotationData1"/>
+         </xfdu:contentUnit>
+         <xfdu:contentUnit unitType="Metadata Unit" repID="_repId" dmdID="_dmdID">
+            <dataObjectPointer ID="annotationData2"/>
+         </xfdu:contentUnit>
+         <xfdu:contentUnit unitType="Metadata Unit" repID="_repId" dmdID="_dmdID">
+            <dataObjectPointer ID="annotationData3"/>
+         </xfdu:contentUnit>
+         <xfdu:contentUnit unitType="Metadata Unit" repID="_repId" dmdID="_dmdID">
+            <dataObjectPointer ID="annotationData4"/>
+         </xfdu:contentUnit>
+         <xfdu:contentUnit unitType="Metadata Unit" repID="_repId" dmdID="_dmdID">
+            <dataObjectPointer ID="annotationData5"/>
+         </xfdu:contentUnit>
+         <xfdu:contentUnit unitType="Metadata Unit" repID="_repId" dmdID="_dmdID">
+            <dataObjectPointer ID="annotationData6"/>
+         </xfdu:contentUnit>
+         <xfdu:contentUnit unitType="Metadata Unit" repID="_repId" dmdID="_dmdID">
+            <dataObjectPointer ID="annotationData7"/>
+         </xfdu:contentUnit>
+      </xfdu:contentUnit>
+   </informationPackageMap>
+   <metadataSection>
+      <metadataObject ID="acquistionPeriod">
+         <metadataWrap mimeType="text/xml" vocabularyName="DC" textInfo="Acquistion Period">
+            <xmlData>
+               <acquisitionPeriod xmlns="http://www.esa.int/safe/sentinel/1.1">
+                  <startTime>2004-07-03T00:30:00.906000Z</startTime>
+                  <stopTime>2004-07-03T00:32:00.906000Z</stopTime>
+               </acquisitionPeriod>
+            </xmlData>
+         </metadataWrap>
+      </metadataObject>
+      <metadataObject ID="platform">
+         <metadataWrap mimeType="text/xml" vocabularyName="DC" textInfo="Platform Description">
+            <xmlData>
+               <platform xmlns="http://www.esa.int/safe/sentinel/1.1">
+                  <nssdcIdentifier>dummy-text</nssdcIdentifier>
+                  <familyName>Ocean and Land Colour Instrument</familyName>
+                  <number>dummy-text</number>
+                  <instrument>
+                     <familyName abbreviation="OLCI">Ocean and Land Colour Instrument</familyName>
+                     <mode identifier="dummy-text">FR</mode>
+                  </instrument>
+                  <leapSecond occurrenceUTC="2013-04-11T11:56:50.906000Z" xmlns="http://www.esa.int/safe/1.3">1</leapSecond>
+               </platform>
+            </xmlData>
+         </metadataWrap>
+      </metadataObject>
+      <metadataObject ID="generalProductInformation">
+         <metadataWrap mimeType="text/xml" vocabularyName="DC" textInfo="General Product Information">
+            <xmlData>
+               <generalProductInformation xmlns="http://www.esa.int/safe/sentinel/1.1/sentinel-3">
+                  <productName>S3B_OL_1_EFR____20040703T003000_20040703T003200_20160204T070933_DDDD_001_002_FFFF_WER_D_NR_NNN.SEN3</productName>
+                  <productType>OL_1_EFR___</productType>
+                  <timeliness>NR</timeliness>
+                  <baselineCollection>NNN</baselineCollection>
+                  <creationTime>20160204T070933</creationTime>
+                  <productSize>1</productSize>
+                  <dumpInformation>
+                     <granuleNumber>1</granuleNumber>
+                     <granulePosition>FIRST</granulePosition>
+                     <dumpStart>2004-07-03T00:28:17.706000Z</dumpStart>
+                     <receivingGroundStation>dummy-text</receivingGroundStation>
+                     <receivingStartTime>dummy-text</receivingStartTime>
+                     <receivingStopTime>dummy-text</receivingStopTime>
+                  </dumpInformation>
+                  <dispositionMode>dummy-text</dispositionMode>
+                  <productUnit>
+                     <type>FRAME</type>
+                     <duration>1</duration>
+                     <alongtrackCoordinate>1</alongtrackCoordinate>
+                     <tileIdentifier>1</tileIdentifier>
+                  </productUnit>
+               </generalProductInformation>
+            </xmlData>
+         </metadataWrap>
+      </metadataObject>
+      <metadataObject ID="measurementOrbitReference">
+         <metadataWrap mimeType="text/xml" vocabularyName="DC" textInfo="Orbit Reference">
+            <xmlData>
+               <orbitReference xmlns="http://www.esa.int/safe/sentinel/1.1">
+                  <orbitNumber type="start" groundTrackDirection="dummy-text">9895</orbitNumber>
+                  <relativeOrbitNumber type="start" groundTrackDirection="dummy-text">2</relativeOrbitNumber>
+                  <passNumber type="start" groundTrackDirection="dummy-text">1</passNumber>
+                  <relativePassNumber type="start" groundTrackDirection="dummy-text">1</relativePassNumber>
+                  <cycleNumber>1</cycleNumber>
+                  <phaseIdentifier>dummy-text</phaseIdentifier>
+                  <elementSet>
+                     <ephemeris>
+                        <epoch type="TAI">dummy-text</epoch>
+                        <epoch type="UTC">2004-07-03T00:00:00.906000Z</epoch>
+                        <epoch type="UT1">dummy-text</epoch>
+                        <position>
+                           <x>dummy-text</x>
+                           <y>dummy-text</y>
+                           <z>dummy-text</z>
+                        </position>
+                        <velocity>
+                           <x>dummy-text</x>
+                           <y>dummy-text</y>
+                           <z>dummy-text</z>
+                        </velocity>
+                     </ephemeris>
+                     <ephemeris>
+                        <epoch type="TAI">dummy-text</epoch>
+                        <epoch type="UTC">2004-07-03T01:41:00.906000Z</epoch>
+                        <epoch type="UT1">dummy-text</epoch>
+                        <position>
+                           <x>dummy-text</x>
+                           <y>dummy-text</y>
+                           <z>dummy-text</z>
+                        </position>
+                        <velocity>
+                           <x>dummy-text</x>
+                           <y>dummy-text</y>
+                           <z>dummy-text</z>
+                        </velocity>
+                     </ephemeris>
+                  </elementSet>
+               </orbitReference>
+            </xmlData>
+         </metadataWrap>
+      </metadataObject>
+      <metadataObject ID="processing">
+         <metadataWrap mimeType="text/xml" vocabularyName="DC" textInfo="processing">
+            <xmlData>
+               <processing name="dummy-text" outputLevel="dummy-text" start="2016-02-04T07:09:49.000845Z" stop="dummy-text" xmlns="http://www.esa.int/safe/sentinel/1.1">
+                  <facility name="dummy-text" organisation="dummy-text" site="dummy-text" country="dummy-text">
+                     <hardware name="dummy-text"/>
+                     <software name="ACQ-WERUM" version="1.0"/>
+                  </facility>
+                  <resource name="dummy-text" role="dummy-text" version="dummy-text" href="dummy-text">
+                     <processing>dummy-text</processing>
+                  </resource>
+               </processing>
+            </xmlData>
+         </metadataWrap>
+      </metadataObject>
+      <metadataObject ID="measurementFrameSet">
+         <metadataWrap mimeType="text/xml" vocabularyName="DC" textInfo="Frame Set">
+            <xmlData>
+               <frameSet xmlns="http://www.esa.int/safe/sentinel/1.1">
+                  <footPrint srsName="http://www.opengis.net/def/crs/EPSG/0/4326">
+                     <posList xmlns="http://www.opengis.net/gml/3.2">-14.937040 -75.312935 -11.387472 -75.312935 -11.387472 -14.312935 -14.387472 -14.312935 -14.937040 -75.312935</posList>
+                  </footPrint>
+               </frameSet>
+            </xmlData>
+         </metadataWrap>
+      </metadataObject>
+      <metadataObject ID="measurementQualityInformation">
+         <metadataWrap mimeType="text/xml" vocabularyName="DC" textInfo="Quality Information">
+            <xmlData>
+               <qualityInformation xmlns="http://www.esa.int/safe/sentinel/1.1">
+                  <extension>
+                     <productQuality xmlns="http://www.esa.int/safe/sentinel/1.1/sentinel-3">
+                        <onlineQualityCheck>dummy-text</onlineQualityCheck>
+                        <satelliteManoeuvre>
+                           <startTime>dummy-text</startTime>
+                           <stopTime>dummy-text</stopTime>
+                           <type>dummy-text</type>
+                           <thrust>
+                              <startTime>dummy-text</startTime>
+                              <stopTime>dummy-text</stopTime>
+                           </thrust>
+                        </satelliteManoeuvre>
+                        <degradationFlags>dummy-text</degradationFlags>
+                     </productQuality>
+                  </extension>
+               </qualityInformation>
+            </xmlData>
+         </metadataWrap>
+      </metadataObject>
+      <metadataObject ID="measurementSchema1">
+         <metadataReference mimeType="text/xml" locatorType="URL" textInfo="dummy-textInfo" href="./"/>
+      </metadataObject>
+   </metadataSection>
+   <dataObjectSection>
+      <dataObject ID="measurementData1" repID="dummy-repID1">
+         <byteStream mimeType="application/octetstream">
+            <fileLocation locatorType="URL" textInfo="dummy-textInfo" href="./Oa01_radiance.nc"/>
+            <checksum checksumName="MD5">dummy-checksum-value</checksum>
+         </byteStream>
+      </dataObject>
+      <dataObject ID="measurementData2" repID="dummy-repID2">
+         <byteStream mimeType="application/octetstream">
+            <fileLocation locatorType="URL" textInfo="dummy-textInfo" href="./Oa02_radiance.nc"/>
+            <checksum checksumName="MD5">dummy-checksum-value</checksum>
+         </byteStream>
+      </dataObject>
+      <dataObject ID="measurementData3" repID="dummy-repID3">
+         <byteStream mimeType="application/octetstream">
+            <fileLocation locatorType="URL" textInfo="dummy-textInfo" href="./Oa03_radiance.nc"/>
+            <checksum checksumName="MD5">dummy-checksum-value</checksum>
+         </byteStream>
+      </dataObject>
+      <dataObject ID="measurementData4" repID="dummy-repID4">
+         <byteStream mimeType="application/octetstream">
+            <fileLocation locatorType="URL" textInfo="dummy-textInfo" href="./Oa04_radiance.nc"/>
+            <checksum checksumName="MD5">dummy-checksum-value</checksum>
+         </byteStream>
+      </dataObject>
+      <dataObject ID="measurementData5" repID="dummy-repID5">
+         <byteStream mimeType="application/octetstream">
+            <fileLocation locatorType="URL" textInfo="dummy-textInfo" href="./Oa05_radiance.nc"/>
+            <checksum checksumName="MD5">dummy-checksum-value</checksum>
+         </byteStream>
+      </dataObject>
+      <dataObject ID="measurementData6" repID="dummy-repID6">
+         <byteStream mimeType="application/octetstream">
+            <fileLocation locatorType="URL" textInfo="dummy-textInfo" href="./Oa06_radiance.nc"/>
+            <checksum checksumName="MD5">dummy-checksum-value</checksum>
+         </byteStream>
+      </dataObject>
+      <dataObject ID="measurementData7" repID="dummy-repID7">
+         <byteStream mimeType="application/octetstream">
+            <fileLocation locatorType="URL" textInfo="dummy-textInfo" href="./Oa07_radiance.nc"/>
+            <checksum checksumName="MD5">dummy-checksum-value</checksum>
+         </byteStream>
+      </dataObject>
+      <dataObject ID="measurementData8" repID="dummy-repID8">
+         <byteStream mimeType="application/octetstream">
+            <fileLocation locatorType="URL" textInfo="dummy-textInfo" href="./Oa08_radiance.nc"/>
+            <checksum checksumName="MD5">dummy-checksum-value</checksum>
+         </byteStream>
+      </dataObject>
+      <dataObject ID="measurementData9" repID="dummy-repID9">
+         <byteStream mimeType="application/octetstream">
+            <fileLocation locatorType="URL" textInfo="dummy-textInfo" href="./Oa09_radiance.nc"/>
+            <checksum checksumName="MD5">dummy-checksum-value</checksum>
+         </byteStream>
+      </dataObject>
+      <dataObject ID="measurementData10" repID="dummy-repID10">
+         <byteStream mimeType="application/octetstream">
+            <fileLocation locatorType="URL" textInfo="dummy-textInfo" href="./Oa10_radiance.nc"/>
+            <checksum checksumName="MD5">dummy-checksum-value</checksum>
+         </byteStream>
+      </dataObject>
+      <dataObject ID="measurementData11" repID="dummy-repID11">
+         <byteStream mimeType="application/octetstream">
+            <fileLocation locatorType="URL" textInfo="dummy-textInfo" href="./Oa11_radiance.nc"/>
+            <checksum checksumName="MD5">dummy-checksum-value</checksum>
+         </byteStream>
+      </dataObject>
+      <dataObject ID="measurementData12" repID="dummy-repID12">
+         <byteStream mimeType="application/octetstream">
+            <fileLocation locatorType="URL" textInfo="dummy-textInfo" href="./Oa12_radiance.nc"/>
+            <checksum checksumName="MD5">dummy-checksum-value</checksum>
+         </byteStream>
+      </dataObject>
+      <dataObject ID="measurementData13" repID="dummy-repID13">
+         <byteStream mimeType="application/octetstream">
+            <fileLocation locatorType="URL" textInfo="dummy-textInfo" href="./Oa13_radiance.nc"/>
+            <checksum checksumName="MD5">dummy-checksum-value</checksum>
+         </byteStream>
+      </dataObject>
+      <dataObject ID="measurementData14" repID="dummy-repID14">
+         <byteStream mimeType="application/octetstream">
+            <fileLocation locatorType="URL" textInfo="dummy-textInfo" href="./Oa14_radiance.nc"/>
+            <checksum checksumName="MD5">dummy-checksum-value</checksum>
+         </byteStream>
+      </dataObject>
+      <dataObject ID="measurementData15" repID="dummy-repID15">
+         <byteStream mimeType="application/octetstream">
+            <fileLocation locatorType="URL" textInfo="dummy-textInfo" href="./Oa15_radiance.nc"/>
+            <checksum checksumName="MD5">dummy-checksum-value</checksum>
+         </byteStream>
+      </dataObject>
+      <dataObject ID="measurementData16" repID="dummy-repID16">
+         <byteStream mimeType="application/octetstream">
+            <fileLocation locatorType="URL" textInfo="dummy-textInfo" href="./Oa16_radiance.nc"/>
+            <checksum checksumName="MD5">dummy-checksum-value</checksum>
+         </byteStream>
+      </dataObject>
+      <dataObject ID="measurementData17" repID="dummy-repID17">
+         <byteStream mimeType="application/octetstream">
+            <fileLocation locatorType="URL" textInfo="dummy-textInfo" href="./Oa17_radiance.nc"/>
+            <checksum checksumName="MD5">dummy-checksum-value</checksum>
+         </byteStream>
+      </dataObject>
+      <dataObject ID="measurementData18" repID="dummy-repID18">
+         <byteStream mimeType="application/octetstream">
+            <fileLocation locatorType="URL" textInfo="dummy-textInfo" href="./Oa18_radiance.nc"/>
+            <checksum checksumName="MD5">dummy-checksum-value</checksum>
+         </byteStream>
+      </dataObject>
+      <dataObject ID="measurementData19" repID="dummy-repID19">
+         <byteStream mimeType="application/octetstream">
+            <fileLocation locatorType="URL" textInfo="dummy-textInfo" href="./Oa19_radiance.nc"/>
+            <checksum checksumName="MD5">dummy-checksum-value</checksum>
+         </byteStream>
+      </dataObject>
+      <dataObject ID="measurementData20" repID="dummy-repID20">
+         <byteStream mimeType="application/octetstream">
+            <fileLocation locatorType="URL" textInfo="dummy-textInfo" href="./Oa20_radiance.nc"/>
+            <checksum checksumName="MD5">dummy-checksum-value</checksum>
+         </byteStream>
+      </dataObject>
+      <dataObject ID="measurementData21" repID="dummy-repID21">
+         <byteStream mimeType="application/octetstream">
+            <fileLocation locatorType="URL" textInfo="dummy-textInfo" href="./Oa21_radiance.nc"/>
+            <checksum checksumName="MD5">dummy-checksum-value</checksum>
+         </byteStream>
+      </dataObject>
+      <dataObject ID="measurementData22" repID="dummy-repID22">
+         <byteStream mimeType="application/octetstream">
+            <fileLocation locatorType="URL" textInfo="dummy-textInfo" href="./removedPixels.nc"/>
+            <checksum checksumName="MD5">dummy-checksum-value</checksum>
+         </byteStream>
+      </dataObject>
+      <dataObject ID="annotationData1" repID="dummy-repID1">
+         <byteStream mimeType="application/octetstream">
+            <fileLocation locatorType="URL" textInfo="dummy-textInfo" href="./timeCoordinates"/>
+            <checksum checksumName="MD5">dummy-checksum-value</checksum>
+         </byteStream>
+      </dataObject>
+      <dataObject ID="annotationData2" repID="dummy-repID2">
+         <byteStream mimeType="application/octetstream">
+            <fileLocation locatorType="URL" textInfo="dummy-textInfo" href="./geoCoordinates"/>
+            <checksum checksumName="MD5">dummy-checksum-value</checksum>
+         </byteStream>
+      </dataObject>
+      <dataObject ID="annotationData3" repID="dummy-repID3">
+         <byteStream mimeType="application/octetstream">
+            <fileLocation locatorType="URL" textInfo="dummy-textInfo" href="./qualityFlags"/>
+            <checksum checksumName="MD5">dummy-checksum-value</checksum>
+         </byteStream>
+      </dataObject>
+      <dataObject ID="annotationData4" repID="dummy-repID4">
+         <byteStream mimeType="application/octetstream">
+            <fileLocation locatorType="URL" textInfo="dummy-textInfo" href="./tie_geoCoordinates.nc"/>
+            <checksum checksumName="MD5">dummy-checksum-value</checksum>
+         </byteStream>
+      </dataObject>
+      <dataObject ID="annotationData5" repID="dummy-repID5">
+         <byteStream mimeType="application/octetstream">
+            <fileLocation locatorType="URL" textInfo="dummy-textInfo" href="./tie_geometries.nc"/>
+            <checksum checksumName="MD5">dummy-checksum-value</checksum>
+         </byteStream>
+      </dataObject>
+      <dataObject ID="annotationData6" repID="dummy-repID6">
+         <byteStream mimeType="application/octetstream">
+            <fileLocation locatorType="URL" textInfo="dummy-textInfo" href="./tie_meteo.nc"/>
+            <checksum checksumName="MD5">dummy-checksum-value</checksum>
+         </byteStream>
+      </dataObject>
+      <dataObject ID="annotationData7" repID="dummy-repID7">
+         <byteStream mimeType="application/octetstream">
+            <fileLocation locatorType="URL" textInfo="dummy-textInfo" href="./instrumentData.nc"/>
+            <checksum checksumName="MD5">dummy-checksum-value</checksum>
+         </byteStream>
+      </dataObject>
+   </dataObjectSection>
+</xfdu:XFDU>

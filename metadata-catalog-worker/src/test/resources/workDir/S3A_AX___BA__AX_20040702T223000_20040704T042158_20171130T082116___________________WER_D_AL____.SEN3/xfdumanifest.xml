@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<xfdu:XFDU xmlns:xfdu="urn:ccsds:schema:xfdu:1">
+   <informationPackageMap>
+      <xfdu:contentUnit unitType="SAFE Archive Information Package" textInfo="S3AAX___BA__AX" dmdID="_dmdID">
+         <xfdu:contentUnit unitType="Measurement Data Unit" repID="_repId" dmdID="_dmdID">
+            <dataObjectPointer ID="measurementData1"/>
+         </xfdu:contentUnit>
+      </xfdu:contentUnit>
+   </informationPackageMap>
+   <metadataSection>
+      <metadataObject ID="generalProductInformation">
+         <metadataWrap mimeType="text/xml" vocabularyName="DC" textInfo="General Product Information">
+            <xmlData>
+               <generalProductInformation xmlns="http://www.esa.int/safe/sentinel/1.1/sentinel-3/adf">
+                  <timeliness>AL</timeliness>
+                  <baselineCollection>___</baselineCollection>
+                  <creationTime>20171130T082116</creationTime>
+                  <productSize>1</productSize>
+                  <familyName>Sentinel-3</familyName>
+                  <number>A</number>
+                  <validityStartTime>2004-07-02T22:30:00.000000Z</validityStartTime>
+                  <validityStopTime>2004-07-04T04:21:58.000000Z</validityStopTime>
+               </generalProductInformation>
+            </xmlData>
+         </metadataWrap>
+      </metadataObject>
+      <metadataObject ID="processing">
+         <metadataWrap mimeType="text/xml" vocabularyName="DC" textInfo="processing">
+            <xmlData>
+               <processing xmlns="http://www.esa.int/safe/sentinel/1.1">
+                  <facility name="dummy-text" organisation="dummy-text" site="dummy-text" country="dummy-text">
+                     <hardware name="dummy-text"/>
+                     <software name="dummy-text" version="1.0"/>
+                  </facility>
+                  <resource name="dummy-text" role="dummy-text" version="42.0"/>
+               </processing>
+            </xmlData>
+         </metadataWrap>
+      </metadataObject>
+      <metadataObject ID="measurementQualityInformation">
+         <metadataWrap mimeType="text/xml" vocabularyName="DC" textInfo="Quality Information">
+            <xmlData>
+               <qualityInformation xmlns="http://www.esa.int/safe/sentinel/1.1">
+                  <extension>
+                     <adfQuality xmlns="http://www.esa.int/safe/sentinel/1.1/sentinel-3/adf">
+                        <adfQualityCheck>OPASSED</adfQualityCheck>
+                     </adfQuality>
+                  </extension>
+               </qualityInformation>
+            </xmlData>
+         </metadataWrap>
+      </metadataObject>
+      <metadataObject ID="measurementSchema1">
+         <metadataReference mimeType="text/xml" locatorType="URL" textInfo="dummy-textInfo" href="./ISPData.xsd"/>
+      </metadataObject>
+   </metadataSection>
+   <dataObjectSection>
+      <dataObject ID="measurementData1" repID="dummy-repID1">
+         <byteStream mimeType="application/octetstream">
+            <fileLocation locatorType="URL" textInfo="dummy-textInfo" href="./ISPData.dat"/>
+            <checksum checksumName="MD5">dummy-checksum-value</checksum>
+         </byteStream>
+      </dataObject>
+   </dataObjectSection>
+</xfdu:XFDU>
