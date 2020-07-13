@@ -100,7 +100,7 @@ public class GenericConsumer implements MqiListener<CatalogEvent> {
             		ReportingUtils.newFilenameReportingInputFor(event.getProductFamily(), productName),
             		new ReportingMessage("Received CatalogEvent for %s", productName)
             );  
-            if (!shallBeSkipped(event, reporting)) {                      
+            if (!isOverLand(event, reporting)) {                      
                 final AppDataJob job = new AppDataJob();
                 job.setLevel(processSettings.getLevel());
                 job.setPod(processSettings.getHostname());
@@ -111,8 +111,8 @@ public class GenericConsumer implements MqiListener<CatalogEvent> {
                 reporting.end(new ReportingMessage("IpfPreparationJob for product %s created", productName));  
             }
             else {
-            	LOGGER.debug("CatalogEvent for {} is ignored", productName);
-                reporting.end(new ReportingMessage("No action for CatalogEvent for product %s", productName)); 
+            	LOGGER.debug("CatalogEvent for {} is ignored", productName);        
+                reporting.end(new ReportingMessage("Product %s is not over sea, skipping", productName)); 
             }
         } catch (final Exception e) {        	
         	reporting.error(new ReportingMessage("Error on handling CatalogEvent: %s", LogUtils.toString(e)));
@@ -173,7 +173,7 @@ public class GenericConsumer implements MqiListener<CatalogEvent> {
 		}
 	}	
 
-	private final boolean shallBeSkipped(final CatalogEvent event, final Reporting reporting) throws Exception {
+	private final boolean isOverLand(final CatalogEvent event, final ReportingFactory reporting) throws Exception {
         final String productName = event.getProductName();
         final ProductFamily family = event.getProductFamily();
 		
@@ -191,8 +191,6 @@ public class GenericConsumer implements MqiListener<CatalogEvent> {
 							new SeaCoverageCheckReportingOutput(false), 
 							new ReportingMessage("Product %s is not over sea", productName)
 					);
-					
-					reporting.end(new ReportingMessage("Product %s is not over sea, skipping", productName));
 					LOGGER.warn("Skipping job generation for product {} because it is not over sea", productName);
 			        return true;
 			    }
