@@ -14,6 +14,8 @@ public class IngestionEvent extends AbstractMessage {
 	private String relativePath = NOT_DEFINED;
 	private long productSizeByte = 0L;
 	private String stationName;
+	private String mode = "NOMINAL";
+	private String timeliness = "";
 	
 	public IngestionEvent() {
 		super();
@@ -65,6 +67,22 @@ public class IngestionEvent extends AbstractMessage {
 		this.stationName = stationName;
 	}
 
+	public String getMode() {
+		return mode;
+	}
+
+	public void setMode(String mode) {
+		this.mode = mode;
+	}
+
+	public String getTimeliness() {
+		return timeliness;
+	}
+
+	public void setTimeliness(String timeliness) {
+		this.timeliness = timeliness;
+	}
+
 	@Override
 	public int hashCode() {
 		return Objects.hash(
@@ -72,7 +90,9 @@ public class IngestionEvent extends AbstractMessage {
 				hostname, 
 				keyObjectStorage, 
 				productFamily, 
-				productName, 
+				productName,
+				mode,
+				timeliness,
 				relativePath, 
 				uid,
 				productSizeByte,
@@ -98,15 +118,20 @@ public class IngestionEvent extends AbstractMessage {
 				&& productFamily == other.productFamily
 				&& Objects.equals(productName, other.productName)
 				&& Objects.equals(stationName, other.stationName)
+				&& Objects.equals(mode, other.mode)
+				&& Objects.equals(timeliness, other.timeliness)
 				&& Objects.equals(uid, other.uid)
 				&& productSizeByte == other.productSizeByte
 				&& Objects.equals(relativePath, other.relativePath);
 	}
+	
+	
 
 	@Override
 	public String toString() {
 		return "IngestionEvent [productName=" + productName + ", productFamily=" + productFamily + ", keyObjectStorage=" 
 				+ keyObjectStorage + ", creationDate=" + creationDate + ", hostname=" + hostname + ", relativePath=" + 
-				relativePath + ", uid=" + uid +", productSizeByte=" + productSizeByte + ", stationName=" + stationName + "]";
+				relativePath + ", mode=" + mode +", uid=" + uid +", productSizeByte=" + productSizeByte + ", stationName=" + stationName +", timeliness=" + timeliness + "]";
 	}
 }
+
