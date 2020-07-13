@@ -21,13 +21,15 @@ import esa.s1pdgs.cpoc.mdc.worker.Utils;
 import esa.s1pdgs.cpoc.mdc.worker.extraction.model.AuxDescriptor;
 import esa.s1pdgs.cpoc.mdc.worker.extraction.model.EdrsSessionFileDescriptor;
 import esa.s1pdgs.cpoc.mdc.worker.extraction.model.OutputFileDescriptor;
+import esa.s1pdgs.cpoc.mdc.worker.extraction.model.S3FileDescriptor;
 import esa.s1pdgs.cpoc.mqi.model.queue.CatalogJob;
 
 public class TestFileDescriptorBuilder {
 	private static final String PATTERN_EDRS = "^(\\w+)(/|\\\\)(ch)(0[1-2])(/|\\\\)((\\w*)\\4(\\w*)\\.(XML|RAW))$";
 	private static final String PATTERN_AUX = "^([0-9a-z][0-9a-z]){1}([0-9a-z]){1}(_(OPER|TEST))?_(AUX_OBMEMC|AUX_PP1|AUX_CAL|AUX_INS|AUX_RESORB|MPL_ORBPRE|MPL_ORBSCT)_\\w{1,}\\.(XML|EOF|SAFE)(/.*)?$";
 	private static final String PATTERN_PROD = "^(S1|AS)(A|B)_(S[1-6]|IW|EW|WV|GP|HK|N[1-6]|EN|IM)_(SLC|GRD|OCN|RAW)(F|H|M|_)_(0|1|2)(A|C|N|S|_)(SH|SV|HH|HV|VV|VH|DH|DV)_([0-9a-z]{15})_([0-9a-z]{15})_([0-9]{6})_([0-9a-z_]{6})\\w{1,}\\.(SAFE)(/.*)?$";
-
+	
+	private static final String PATTERN_S3 = "^([a-zA-Z0-9][a-zA-Z0-9])(\\w{1})_((OL|SL|SR|DO|MW|GN|SY|TM|AX)_(0|1|2|_)_\\w{6})_(\\d{8}T\\d{6})_(\\d{8}T\\d{6})_(\\d{8}T\\d{6})_(\\w{17})_(\\w{3})_(\\w{8})\\.(\\w{1,4})\\/?(.+)?$";
     private final File inputDir = new File("src/test/resources/workDir/");
 	private final File testDir = FileUtils.createTmpDir();
 	
@@ -259,6 +261,38 @@ public class TestFileDescriptorBuilder {
         final FileDescriptorBuilder uut = newDescriptorForPattern(PATTERN_PROD); 
       
         final OutputFileDescriptor result = uut.buildOutputFileDescriptor(file, dto, ProductFamily.L1_SLICE);
+        assertNotNull("File descriptor should not be null", result);
+        assertEquals("File descriptor are not equals", expected, result);
+    }
+    
+    @Test
+    public void testBuildS3FileDescriptor() throws Exception {
+    	final CatalogJob dto = Utils.newCatalogJob(
+                "S3A_AX___BA__AX_20040702T223000_20040704T042158_20171130T082116___________________WER_D_AL____.SEN3",
+                "S3A_AX___BA__AX_20040702T223000_20040704T042158_20171130T082116___________________WER_D_AL____.SEN3",
+                ProductFamily.S3_AUXILIARY_FILE, 
+                "NRT"
+        );  
+    	
+        final S3FileDescriptor expected = new S3FileDescriptor();
+        expected.setProductType("AX___BA__AX");
+		expected.setProductClass("AX");
+		expected.setRelativePath("S3A_AX___BA__AX_20040702T223000_20040704T042158_20171130T082116___________________WER_D_AL____.SEN3/xfdumanifest.xml");
+		expected.setFilename("xfdumanifest.xml");
+		expected.setExtension(FileExtension.SEN3);
+		expected.setProductName("S3A_AX___BA__AX_20040702T223000_20040704T042158_20171130T082116___________________WER_D_AL____.SEN3");
+		expected.setMissionId("S3");
+		expected.setSatelliteId("A");
+		expected.setKeyObjectStorage("S3A_AX___BA__AX_20040702T223000_20040704T042158_20171130T082116___________________WER_D_AL____.SEN3");
+		expected.setProductFamily(ProductFamily.S3_AUXILIARY_FILE);
+		expected.setInstanceId("_________________");
+		expected.setGeneratingCentre("WER");
+		expected.setClassId("D_AL____");
+		expected.setMode("NRT");
+
+        final File file = new File(testDir, "S3A_AX___BA__AX_20040702T223000_20040704T042158_20171130T082116___________________WER_D_AL____.SEN3/xfdumanifest.xml");
+        final FileDescriptorBuilder uut = newDescriptorForPattern(PATTERN_S3);
+        final S3FileDescriptor result = uut.buildS3FileDescriptor(file, dto, ProductFamily.S3_AUXILIARY_FILE);
         assertNotNull("File descriptor should not be null", result);
         assertEquals("File descriptor are not equals", expected, result);
     }

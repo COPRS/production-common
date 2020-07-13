@@ -22,22 +22,17 @@ import esa.s1pdgs.cpoc.mdc.worker.service.EsServices;
 import esa.s1pdgs.cpoc.obs_sdk.ObsClient;
 
 @Component
-public class MetadataExtractorFactory {	
-    private final EsServices esServices;
-    private final MetadataExtractorConfig extractorConfig;
-    private final XmlConverter xmlConverter;
-    private final ObsClient obsClient;
-    private final ProcessConfiguration processConfiguration;
-    
-    @Autowired
-	public MetadataExtractorFactory(
-			final EsServices esServices, 
-			final MetadataExtractorConfig extractorConfig,
-			final XmlConverter xmlConverter, 
-			final ObsClient obsClient, 
-			final ProcessConfiguration processConfiguration,
-			final MdcWorkerConfigurationProperties properties
-	) {
+public class MetadataExtractorFactory {
+	private final EsServices esServices;
+	private final MetadataExtractorConfig extractorConfig;
+	private final XmlConverter xmlConverter;
+	private final ObsClient obsClient;
+	private final ProcessConfiguration processConfiguration;
+
+	@Autowired
+	public MetadataExtractorFactory(final EsServices esServices, final MetadataExtractorConfig extractorConfig,
+			final XmlConverter xmlConverter, final ObsClient obsClient, final ProcessConfiguration processConfiguration,
+			final MdcWorkerConfigurationProperties properties) {
 		this.esServices = esServices;
 		this.extractorConfig = extractorConfig;
 		this.xmlConverter = xmlConverter;
@@ -45,7 +40,7 @@ public class MetadataExtractorFactory {
 		this.processConfiguration = processConfiguration;
 	}
 
-	public MetadataExtractor newMetadataExtractorFor(final ProductCategory category, final CategoryConfig config) {
+	public MetadataExtractor newMetadataExtractorFor(final ProductCategory category, final CategoryConfig config) {		
 		final FileDescriptorBuilder fileDescriptorBuilder = new FileDescriptorBuilder(
 				new File(config.getLocalDirectory()), 
 				Pattern.compile(config.getPatternConfig(), Pattern.CASE_INSENSITIVE)
@@ -109,6 +104,15 @@ public class MetadataExtractorFactory {
 		    			processConfiguration, 
 		    			obsClient
 		    	);
+		    case S3_AUXILIARY_FILES:
+				return new S3AuxMetadataExtractor(
+						esServices, 
+						mdBuilder, 
+						fileDescriptorBuilder,
+						config.getLocalDirectory(), 
+						processConfiguration, 
+						obsClient
+				);
 			default:
 				// fall through
 		}
@@ -118,21 +122,21 @@ public class MetadataExtractorFactory {
 						category,
 						Arrays.asList(
 								ProductCategory.AUXILIARY_FILES, 
-								ProductCategory.EDRS_SESSIONS, 
+								ProductCategory.EDRS_SESSIONS,
+								ProductCategory.PLANS_AND_REPORTS,
 								ProductCategory.LEVEL_SEGMENTS, 
-								ProductCategory.LEVEL_PRODUCTS
+								ProductCategory.LEVEL_PRODUCTS,
+								ProductCategory.S3_AUXILIARY_FILES
 						)
 				)
 		);
 	}
-	
+
 	private final PathMetadataExtractor newPathMetadataExtractor(final CategoryConfig config) {
 		if (config.getPathPattern() == null) {
 			return PathMetadataExtractor.NULL;
 		}
-		return new PathMetadataExtractorImpl(
-					Pattern.compile(config.getPathPattern(), Pattern.CASE_INSENSITIVE), 
-					config.getPathMetadataElements()
-		);
+		return new PathMetadataExtractorImpl(Pattern.compile(config.getPathPattern(), Pattern.CASE_INSENSITIVE),
+				config.getPathMetadataElements());
 	}
 }

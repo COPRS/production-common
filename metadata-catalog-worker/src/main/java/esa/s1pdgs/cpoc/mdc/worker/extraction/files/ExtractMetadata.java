@@ -38,6 +38,7 @@ import esa.s1pdgs.cpoc.mdc.worker.extraction.model.AuxDescriptor;
 import esa.s1pdgs.cpoc.mdc.worker.extraction.model.EdrsSessionFile;
 import esa.s1pdgs.cpoc.mdc.worker.extraction.model.EdrsSessionFileDescriptor;
 import esa.s1pdgs.cpoc.mdc.worker.extraction.model.OutputFileDescriptor;
+import esa.s1pdgs.cpoc.mdc.worker.extraction.model.S3FileDescriptor;
 import esa.s1pdgs.cpoc.mdc.worker.extraction.report.TimelinessReportingInput;
 import esa.s1pdgs.cpoc.mdc.worker.extraction.report.TimelinessReportingOutput;
 import esa.s1pdgs.cpoc.mdc.worker.extraction.xml.XmlConverter;
@@ -59,6 +60,9 @@ public class ExtractMetadata {
 	private static final String XSLT_L0_SEGMENT_MANIFEST = "XSLT_L0_SEGMENT.xslt";
 	private static final String XSLT_L1_MANIFEST = "XSLT_L1_MANIFEST.xslt";
 	private static final String XSLT_L2_MANIFEST = "XSLT_L2_MANIFEST.xslt";
+	private static final String XSLT_S3_AUX_XFDU_XML = "XSLT_S3_AUX_XFDU_XML.xslt";
+	private static final String XSLT_S3_XFDU_XML = "XSLT_S3_XFDU_XML.xslt";
+	private static final String XSLT_S3_IIF_XML = "XSLT_S3_IIF_XML.xslt";
 
 	/**
 	 * Mapping of family to XSLT file name
@@ -373,6 +377,69 @@ public class ExtractMetadata {
 		}
 	}
 	
+	/**
+	 * Extracts metadata from S3 level product files (L0 - ISIP-format)
+	 * 
+	 * @param descriptor The file descriptor of the file
+	 * @param file       The input manifest File
+	 * @return json object with extracted metadata
+	 * @throws MetadataExtractionException
+	 * @throws MetadataMalformedException
+	 */
+	public JSONObject processIIFFile(S3FileDescriptor descriptor, File file)
+			throws MetadataExtractionException, MetadataMalformedException {
+		JSONObject metadataJSONObject = transformXMLWithXSLTToJSON(file,
+				new File(this.xsltDirectory + XSLT_S3_IIF_XML));
+
+		// Add metadata from file descriptor
+		metadataJSONObject = putS3FileMetadataToJSON(metadataJSONObject, descriptor);
+
+		LOGGER.debug("composed Json: {} ", metadataJSONObject);
+		return metadataJSONObject;
+	}
+
+	/**
+	 * Extracts metadata from S3 auxiliary files (xfdumanifest.xml)
+	 * 
+	 * @param descriptor The file descriptor of the file
+	 * @param file       The input manifest File
+	 * @return json object with extracted metadata
+	 * @throws MetadataExtractionException
+	 * @throws MetadataMalformedException
+	 */
+	public JSONObject processAuxXFDUFile(final S3FileDescriptor descriptor, final File file)
+			throws MetadataExtractionException, MetadataMalformedException {
+		JSONObject metadataJSONObject = transformXMLWithXSLTToJSON(file,
+				new File(this.xsltDirectory + XSLT_S3_AUX_XFDU_XML));
+
+		// Add metadata from file descriptor
+		metadataJSONObject = putS3FileMetadataToJSON(metadataJSONObject, descriptor);
+
+		LOGGER.debug("composed Json: {} ", metadataJSONObject);
+		return metadataJSONObject;
+	}
+
+	/**
+	 * Extracts metadata from S3 level product files (Intermediates - XFDU-Format)
+	 * 
+	 * @param descriptor The file descriptor of the file
+	 * @param file       The input manifest File
+	 * @return json object with extracted metadata
+	 * @throws MetadataExtractionException
+	 * @throws MetadataMalformedException
+	 */
+	public JSONObject processProductXFDUFile(S3FileDescriptor descriptor, File file)
+			throws MetadataExtractionException, MetadataMalformedException {
+		JSONObject metadataJSONObject = transformXMLWithXSLTToJSON(file,
+				new File(this.xsltDirectory + XSLT_S3_XFDU_XML));
+
+		// Add metadata from file descriptor
+		metadataJSONObject = putS3FileMetadataToJSON(metadataJSONObject, descriptor);
+
+		LOGGER.debug("composed Json: {} ", metadataJSONObject);
+		return metadataJSONObject;
+	}
+	
 	public String maxTimeliness(final List<String> timelinesses) {
 		for (final String currentPriorityTimeliness : timelinessPriorityFromHighToLow) {
 			if (timelinesses.contains(currentPriorityTimeliness)) {
@@ -566,6 +633,66 @@ public class ExtractMetadata {
 			throw new MetadataExtractionException(e);
 		}
 
+	}
+	
+	private JSONObject putS3FileMetadataToJSON(final JSONObject metadataJSONObject, final S3FileDescriptor descriptor)
+			throws MetadataExtractionException, MetadataMalformedException {
+		try {
+
+			if (metadataJSONObject.has("validityStartTime")) {
+				try {
+					metadataJSONObject.put("validityStartTime", DateUtils
+							.convertToMetadataDateTimeFormat((String) metadataJSONObject.get("validityStartTime")));
+				} catch (final DateTimeParseException e) {
+					throw new MetadataMalformedException("validityStartTime");
+				}
+			}
+
+			if (metadataJSONObject.has("validityStopTime")) {
+
+				final String validStopTime = (String) metadataJSONObject.get("validityStopTime");
+
+				if (validStopTime.contains("9999-")) {
+					metadataJSONObject.put("validityStopTime", "9999-12-31T23:59:59.999999Z");
+				} else {
+					try {
+						metadataJSONObject.put("validityStopTime",
+								DateUtils.convertToMetadataDateTimeFormat(validStopTime));
+					} catch (final DateTimeParseException e) {
+						throw new MetadataMalformedException("validityStopTime");
+					}
+				}
+
+			} else {
+				metadataJSONObject.put("validityStopTime", "9999-12-31T23:59:59.999999Z");
+			}
+
+			if (metadataJSONObject.has("creationTime")) {
+				try {
+					metadataJSONObject.put("creationTime",
+							DateUtils.convertToMetadataDateTimeFormat(metadataJSONObject.getString("creationTime")));
+				} catch (final DateTimeParseException e) {
+					throw new MetadataMalformedException("creationTime");
+				}
+			}
+
+			metadataJSONObject.put("productName", descriptor.getProductName());
+			metadataJSONObject.put("productClass", descriptor.getProductClass());
+			metadataJSONObject.put("productType", descriptor.getProductType());
+			metadataJSONObject.put("missionId", descriptor.getMissionId());
+			metadataJSONObject.put("satelliteId", descriptor.getSatelliteId());
+			metadataJSONObject.put("url", descriptor.getKeyObjectStorage());
+			metadataJSONObject.put("productFamily", descriptor.getProductFamily().name());
+			metadataJSONObject.put("instanceId", descriptor.getInstanceId());
+			metadataJSONObject.put("generatingCentre", descriptor.getGeneratingCentre());
+			metadataJSONObject.put("classId", descriptor.getClassId());
+			
+			return metadataJSONObject;
+
+		} catch (final JSONException e) {
+			LOGGER.error("Error while extraction of config file metadata ", e);
+			throw new MetadataExtractionException(e);
+		}
 	}
 
 	private JSONObject transformXMLWithXSLTToJSON(final File inputXMLFile, final File xsltFile) throws MetadataExtractionException {
