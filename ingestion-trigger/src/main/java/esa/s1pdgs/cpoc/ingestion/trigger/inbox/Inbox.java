@@ -33,6 +33,8 @@ public final class Inbox {
 	private final SubmissionClient client;
 	private final ProductFamily family;
 	private final String stationName;
+	private final String mode;
+	private final String timeliness;
 	private final ProductNameEvaluator nameEvaluator;
 
 	Inbox(
@@ -42,6 +44,8 @@ public final class Inbox {
 			final SubmissionClient client,
 			final ProductFamily family,
 			final String stationName,
+			final String mode,
+			final String timeliness,
 			final ProductNameEvaluator nameEvaluator
 	) {
 		this.inboxAdapter = inboxAdapter;
@@ -50,6 +54,8 @@ public final class Inbox {
 		this.client = client;
 		this.family = family;
 		this.stationName = stationName;
+		this.mode = mode;
+		this.timeliness = timeliness;
 		this.nameEvaluator = nameEvaluator;
 		this.log = LoggerFactory.getLogger(String.format("%s (%s) for %s", getClass().getName(), stationName, family));
 	}
@@ -136,7 +142,9 @@ public final class Inbox {
 						entry.getRelativePath(), 
 						entry.getSize(),
 						reporting.getUid(),
-						stationName
+						stationName,
+						mode,
+						timeliness
 					)
 			);
 			reporting.end(

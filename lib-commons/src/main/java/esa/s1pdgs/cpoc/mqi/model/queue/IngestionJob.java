@@ -25,6 +25,10 @@ public class IngestionJob extends AbstractMessage {
 	private long productSizeByte = 0L;
 	
 	private String stationName;
+	
+	private String mode;
+	
+	private String timeliness;
 		
 	public IngestionJob() {
 		super();
@@ -37,7 +41,9 @@ public class IngestionJob extends AbstractMessage {
 			final String relativePath, 	
 			final long productSizeByte,
 			final UUID uuid,
-			final String stationName
+			final String stationName,
+			final String mode,
+			final String timeliness
 	) {
 		super(family, productName);
 		this.pickupBaseURL 		= pickupBaseURL;
@@ -46,6 +52,8 @@ public class IngestionJob extends AbstractMessage {
 		this.productSizeByte 	= productSizeByte;
 		this.uid				= uuid;
 		this.stationName		= stationName;
+		this.mode               = mode;
+		this.timeliness        = timeliness;
 	}
 
 	public String getPickupBaseURL() {
@@ -87,11 +95,27 @@ public class IngestionJob extends AbstractMessage {
 	public void setStationName(final String stationName) {
 		this.stationName = stationName;
 	}
+	
+	public String getMode() {
+		return mode;
+	}
+
+	public void setMode(String mode) {
+		this.mode = mode;
+	}
+
+	public String getTimeliness() {
+		return timeliness;
+	}
+
+	public void setTimeliness(String timeliness) {
+		this.timeliness = timeliness;
+	}
 
 	@Override
 	public int hashCode() {
 		return Objects.hash(creationDate, hostname, keyObjectStorage, pickupBaseURL, productFamily,
-				relativePath, productName, uid, productSizeByte, stationName);
+				relativePath, productName, uid, productSizeByte, stationName, mode, timeliness);
 	}
 
 	@Override
@@ -114,6 +138,8 @@ public class IngestionJob extends AbstractMessage {
 				&& Objects.equals(uid, other.uid)
 				&& Objects.equals(relativePath, other.relativePath)
 				&& Objects.equals(stationName, other.stationName)
+				&& Objects.equals(mode, other.mode)
+				&& Objects.equals(timeliness, other.timeliness)
 				&& productSizeByte == other.productSizeByte 
 				&& Objects.equals(productName, other.productName);
 	}
@@ -123,6 +149,6 @@ public class IngestionJob extends AbstractMessage {
 		return "IngestionJob [productFamily=" + productFamily + ", keyObjectStorage=" + keyObjectStorage
 				+ ", creationDate=" + creationDate + ", hostname=" + hostname + ", relativePath=" + relativePath
 				+ ", pickupBaseURL=" + pickupBaseURL + ", productName=" + productName + ", uid=" + uid +
-				", productSizeByte="+productSizeByte+", stationName=" + stationName + "]";
+				", productSizeByte="+productSizeByte+", stationName=" + stationName + ", mode=" + mode + ", timeliness=" + timeliness +"]";
 	}	
 }

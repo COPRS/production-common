@@ -8,6 +8,8 @@ public class InboxConfiguration {
 	private String ignoreRegex;
 	private String topic;
 	private String stationName;
+	private String mode;
+	private String timeliness;
 	private String sessionNamePattern = "^([a-z_]{4}/)?"
 			+ "([0-9a-z_]{2})([0-9a-z_]{1})/(([0-9a-z_]+)/(ch[0|_]?[1-2]/)?"
 			+ "(DCS_[0-9]{2}_([a-zA-Z0-9_]*)_ch([12])_(DSDB|DSIB).*\\.(raw|aisp|xml)))$";
@@ -62,6 +64,22 @@ public class InboxConfiguration {
 	public void setStationName(final String stationName) {
 		this.stationName = stationName;
 	}
+	
+	public String getMode() {
+		return mode;
+	}
+
+	public void setMode(String mode) {
+		this.mode = mode;
+	}
+
+	public String getTimeliness() {
+		return timeliness;
+	}
+
+	public void setTimeliness(String timeliness) {
+		this.timeliness = timeliness;
+	}
 
 	public String getSessionNamePattern() {
 		return sessionNamePattern;
@@ -82,7 +100,7 @@ public class InboxConfiguration {
 	@Override
 	public String toString() {
 		return "InboxConfiguration [directory=" + directory + ", matchRegex=" + matchRegex + ", ignoreRegex="
-				+ ignoreRegex + ", topic=" + topic + ", stationName=" + stationName + ", sessionNamePattern="
+				+ ignoreRegex + ", topic=" + topic + ", stationName=" + stationName + ", mode=" + mode + ", timeliness=" + timeliness + ", sessionNamePattern="
 				+ sessionNamePattern + ", sessionNameGroupIndex=" + sessionNameGroupIndex + ", family=" + family + "]";
 	}	
 }

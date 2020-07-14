@@ -14,8 +14,8 @@ public class IngestionEvent extends AbstractMessage {
 	private String relativePath = NOT_DEFINED;
 	private long productSizeByte = 0L;
 	private String stationName;
-	private String mode = "NOMINAL";
-	private String timeliness = "";
+	private String mode;
+	private String timeliness;
 	
 	public IngestionEvent() {
 		super();
@@ -26,13 +26,17 @@ public class IngestionEvent extends AbstractMessage {
 			final String productName, 
 			final String relativePath, 
 			final long productSizeByte,
-			final String stationName
+			final String stationName,
+			final String mode,
+			final String timeliness
 	) {
 		super(productFamily, productName);
 		this.productName = productName;
 		this.relativePath = relativePath;
 		this.productSizeByte = productSizeByte;
 		this.stationName = stationName;
+		this.mode = mode;
+		this.timeliness = timeliness;
 	}
 
 	public String getProductName() {

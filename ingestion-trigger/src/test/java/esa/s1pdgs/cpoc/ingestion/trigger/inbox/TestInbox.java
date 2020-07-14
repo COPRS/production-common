@@ -56,6 +56,8 @@ public class TestInbox {
                 fakeKafkaClient,
                 ProductFamily.EDRS_SESSION,
                 "WILE",
+                "NOMINAL",
+                "FAST24",
                 new FlatProductNameEvaluator());
         uut.poll();
 
@@ -86,6 +88,8 @@ public class TestInbox {
                 fakeKafkaClient,
                 ProductFamily.EDRS_SESSION,
 				"WILE",
+				"NOMINAL",
+                "FAST24",
         new FlatProductNameEvaluator());
         uut.poll();
 
