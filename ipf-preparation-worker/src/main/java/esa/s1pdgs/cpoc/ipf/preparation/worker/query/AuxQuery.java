@@ -1,5 +1,6 @@
 package esa.s1pdgs.cpoc.ipf.preparation.worker.query;
 
+import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toMap;
 
 import java.util.ArrayList;
@@ -13,7 +14,10 @@ import org.apache.logging.log4j.Logger;
 import org.springframework.util.StringUtils;
 
 import esa.s1pdgs.cpoc.appcatalog.AppDataJob;
+import esa.s1pdgs.cpoc.appcatalog.AppDataJobFile;
+import esa.s1pdgs.cpoc.appcatalog.AppDataJobInput;
 import esa.s1pdgs.cpoc.appcatalog.AppDataJobProduct;
+import esa.s1pdgs.cpoc.appcatalog.AppDataJobTaskInputs;
 import esa.s1pdgs.cpoc.common.ProductFamily;
 import esa.s1pdgs.cpoc.common.errors.processing.IpfPrepWorkerInputsMissingException;
 import esa.s1pdgs.cpoc.common.errors.processing.MetadataQueryException;
@@ -21,6 +25,8 @@ import esa.s1pdgs.cpoc.common.utils.DateUtils;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.model.JobGen;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.model.ProductMode;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.model.joborder.JobOrderInput;
+import esa.s1pdgs.cpoc.ipf.preparation.worker.model.joborder.JobOrderInputFile;
+import esa.s1pdgs.cpoc.ipf.preparation.worker.model.joborder.JobOrderTimeInterval;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.model.metadata.SearchMetadataResult;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.model.tasktable.ElementMapper;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.model.tasktable.TaskTableAdapter;
@@ -43,7 +49,6 @@ public class AuxQuery implements Callable<JobGen> {
 	private final ProductMode mode;
 	private final InputTimeoutChecker timeoutChecker;
 	private final TaskTableAdapter taskTableAdapter;
-	//TODO clarify if elementMapper or parts of it are mission specific
 	private final ElementMapper elementMapper;
 	private final Map<TaskTableInputAlternative.TaskTableInputAltKey, SearchMetadataQuery> queryTemplates;
 
@@ -51,14 +56,16 @@ public class AuxQuery implements Callable<JobGen> {
 			final MetadataClient metadataClient,
 			final JobGen jobGen,
 			final ProductMode mode,
-			final InputTimeoutChecker timeoutChecker, ElementMapper elementMapper) {
+			final InputTimeoutChecker timeoutChecker,
+			final ElementMapper elementMapper,
+			final Map<TaskTableInputAlternative.TaskTableInputAltKey, SearchMetadataQuery> queryTemplates) {
 		this.metadataClient = metadataClient;
 		this.jobGen = jobGen;
 		this.mode = mode;
 		this.timeoutChecker = timeoutChecker;
 		this.taskTableAdapter = jobGen.taskTableAdapter();
 		this.elementMapper = elementMapper;
-		queryTemplates = buildMetadataSearchQuery();
+		this.queryTemplates = queryTemplates;
 	}
 
 	@Override
@@ -66,29 +73,8 @@ public class AuxQuery implements Callable<JobGen> {
 		LOGGER.debug("Searching required AUX for job {} (product: {})", jobGen.id(), jobGen.productName());
 		final Map<TaskTableInputAlternative.TaskTableInputAltKey, SearchMetadataResult> results = performAuxQueries();
 		LOGGER.info("Distributing required AUX for job {} (product: {})", jobGen.id(), jobGen.productName());
-		distributeResults(results);
+		jobGen.job().setAdditionalInputs(distributeResults(results));
 		return jobGen;
-	}
-
-	//TODO check if some stuff from here can be put back again to TaskTableAdapter
-	private Map<TaskTableInputAlternative.TaskTableInputAltKey, SearchMetadataQuery> buildMetadataSearchQuery() {
-		final Map<TaskTableInputAlternative.TaskTableInputAltKey, SearchMetadataQuery> metadataQueryTemplate =  new HashMap<>();
-
-		taskTableAdapter.allTaskTableInputs()
-				.forEach((inputAltKey, alternatives) -> {
-					final String fileType = elementMapper.mappedFileType(inputAltKey.getFileType());
-					final ProductFamily family = elementMapper.inputFamilyOf(fileType);
-					final SearchMetadataQuery query = new SearchMetadataQuery(
-							0,
-							inputAltKey.getRetrievalMode(),
-							inputAltKey.getDeltaTime0(),
-							inputAltKey.getDeltaTime1(),
-							fileType,
-							family
-					);
-					metadataQueryTemplate.put(inputAltKey, query);
-				});
-		return metadataQueryTemplate;
 	}
 
 	private Map<TaskTableInputAlternative.TaskTableInputAltKey, SearchMetadataResult> toQueries(Map<TaskTableInputAlternative.TaskTableInputAltKey, SearchMetadataQuery> metadataQueriesTemplate) {
@@ -134,15 +120,15 @@ public class AuxQuery implements Callable<JobGen> {
 		return queries;
 	}
 	
-	private void distributeResults(Map<TaskTableInputAlternative.TaskTableInputAltKey, SearchMetadataResult> metadataQueries) throws IpfPrepWorkerInputsMissingException {
-		int counterProc = 0;
-		final Map<String, JobOrderInput> referenceInputs = new HashMap<>();
+	private List<AppDataJobTaskInputs> distributeResults(Map<TaskTableInputAlternative.TaskTableInputAltKey, SearchMetadataResult> metadataQueries) throws IpfPrepWorkerInputsMissingException {
+		final Map<String, AppDataJobInput> referenceInputs = new HashMap<>();
+		final List<AppDataJobTaskInputs> result = new ArrayList<>();
 		//for each pool
 		for (final TaskTablePool pool : jobGen.taskTableAdapter().pools()) {
 			// and each task in this pool
 			for (final TaskTableTask task : pool.getTasks()) {
 				final Map<String, String> missingMetadata = new HashMap<>();
-				final List<JobOrderInput> futureInputs = new ArrayList<>();
+				final List<AppDataJobInput> futureInputs = new ArrayList<>();
 				//take each input
 				for (final TaskTableInput input : task.getInputs()) {					
 					// If it is NOT a reference
@@ -150,7 +136,7 @@ public class AuxQuery implements Callable<JobGen> {
 						//check if input mode matches the product mode
 						if (mode.isCompatibleWithTaskTableMode(input.getMode())) {
 							// returns null, if not found
-							final JobOrderInput foundInput = taskTableAdapter.findInput(jobGen, input, metadataQueries);
+							final AppDataJobInput foundInput = convert(taskTableAdapter.findInput(jobGen, input, metadataQueries));
 														
 							if (foundInput != null) {
 								futureInputs.add(foundInput);
@@ -182,20 +168,40 @@ public class AuxQuery implements Callable<JobGen> {
 					} else {
 						// We shall add inputs of the reference
 						if (referenceInputs.containsKey(input.getReference())) {
-							futureInputs.add(new JobOrderInput(referenceInputs.get(input.getReference())));
+							futureInputs.add(new AppDataJobInput(referenceInputs.get(input.getReference())));
 						}
 					}
 				}
 				if (missingMetadata.isEmpty()) {
-					jobGen.jobOrder().getProcs().get(counterProc).setInputs(futureInputs);
-					counterProc++;
+					result.add(new AppDataJobTaskInputs(task.getName(), task.getVersion(), futureInputs));
 				} else {
 					throw new IpfPrepWorkerInputsMissingException(missingMetadata);
 				}
 			}
 		}
+		return result;
 	}
-	
+
+	// TODO TaskTableAdapter by itself should not return a JobOrderInput but a more generic
+	// structure which solely holds the reference between task table input and search meta data result
+	// as long as this is not changed the JobOrderInput has to be converted to AppDataJobInput here
+	private AppDataJobInput convert(JobOrderInput input) {
+		if(input == null) {
+			return null;
+		}
+
+		//TODO there is not check if fileNames and intervals are consistent
+		final Map<String, JobOrderInputFile> fileNames = input.getFilenames().stream().collect(toMap(JobOrderInputFile::getFilename, fn -> fn));
+		return new AppDataJobInput(input.getFileType(), input.getFileNameType().toString(),
+				input.getTimeIntervals().stream().map(ti -> merge(fileNames.get(ti.getFileName()), ti)).collect(toList()));
+	}
+
+	private AppDataJobFile merge(JobOrderInputFile file, JobOrderTimeInterval interval) {
+		return new AppDataJobFile(
+				file.getFilename(), file.getKeyObjectStorage(),
+				interval.getStart(), interval.getStop());
+	}
+
 	private List<SearchMetadata> queryAux(final SearchMetadataQuery query) throws MetadataQueryException {
 		final AppDataJob job = jobGen.job();
 		return metadataClient.search(

@@ -267,7 +267,8 @@ public class IpfPreparationWorkerConfiguration {
 				timeoutCheckerFactory.apply(tasktableAdapter.taskTable()),
 				elementMapper);
 		return new JobGeneratorImpl(
-				tasktableAdapter, 
+				tasktableAdapter,
+				elementMapper,
 				typeAdapter, 
 				appCat, 
 				processSettings, 

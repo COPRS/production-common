@@ -83,11 +83,6 @@ public class JobOrderInput {
 	}
 
 	/**
-	 * @param fileType
-	 * @param fileNameType
-	 * @param filenames
-	 * @param timeIntervals
-	 * @param family
 	 */
 	public JobOrderInput(final String fileType, final JobOrderFileNameType fileNameType,
 			final List<JobOrderInputFile> filenames, final List<JobOrderTimeInterval> timeIntervals,
@@ -97,15 +92,11 @@ public class JobOrderInput {
 		this.fileNameType = fileNameType;
 		this.family = family;
 		if (filenames != null) {
-			filenames.forEach(filename -> {
-				this.filenames.add(new JobOrderInputFile(filename));
-			});
+			filenames.forEach(filename -> this.filenames.add(new JobOrderInputFile(filename)));
 			this.nbFilenames = this.filenames.size();
 		}
 		if (timeIntervals != null) {
-			timeIntervals.forEach(timeInterval -> {
-				this.timeIntervals.add(new JobOrderTimeInterval(timeInterval));
-			});
+			timeIntervals.forEach(timeInterval -> this.timeIntervals.add(new JobOrderTimeInterval(timeInterval)));
 			this.nbTimeIntervals = this.timeIntervals.size();
 		}
 	}
@@ -113,7 +104,6 @@ public class JobOrderInput {
 	/**
 	 * Clone
 	 * 
-	 * @param obj
 	 */
 	public JobOrderInput(final JobOrderInput obj) {
 		this();
@@ -121,13 +111,13 @@ public class JobOrderInput {
 		this.fileType = obj.getFileType();
 		this.fileNameType = obj.getFileNameType();
 		if (!CollectionUtils.isEmpty(obj.getFilenames())) {
-			this.filenames.addAll(obj.getFilenames().stream().filter(item -> item != null)
-					.map(item -> new JobOrderInputFile(item)).collect(Collectors.toList()));
+			this.filenames.addAll(obj.getFilenames().stream().filter(Objects::nonNull)
+					.map(JobOrderInputFile::new).collect(Collectors.toList()));
 			this.nbFilenames = this.filenames.size();
 		}
 		if (!CollectionUtils.isEmpty(obj.getTimeIntervals())) {
-			this.timeIntervals.addAll(obj.getTimeIntervals().stream().filter(item -> item != null)
-					.map(item -> new JobOrderTimeInterval(item)).collect(Collectors.toList()));
+			this.timeIntervals.addAll(obj.getTimeIntervals().stream().filter(Objects::nonNull)
+					.map(JobOrderTimeInterval::new).collect(Collectors.toList()));
 			this.nbTimeIntervals = this.timeIntervals.size();
 		}
 	}
@@ -170,7 +160,7 @@ public class JobOrderInput {
 	}
 
 	/**
-	 * @param filenames
+	 * @param filename
 	 *            the filenames to set
 	 */
 	public void addFilename(final String filename, final String objectStorageKey) {
@@ -186,8 +176,8 @@ public class JobOrderInput {
 	}
 
 	/**
-	 * @param timeIntervals
-	 *            the timeIntervals to set
+	 * @param timeInterval
+	 *            the timeInterval to set
 	 */
 	public void addTimeInterval(final JobOrderTimeInterval timeInterval) {
 		this.timeIntervals.add(timeInterval);

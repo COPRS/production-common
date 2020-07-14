@@ -1,21 +1,34 @@
 package esa.s1pdgs.cpoc.ipf.preparation.worker.model;
 
+import static java.util.stream.Collectors.toList;
+import static java.util.stream.Collectors.toMap;
+
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.Callable;
 
 import org.springframework.util.CollectionUtils;
 
 import esa.s1pdgs.cpoc.appcatalog.AppDataJob;
+import esa.s1pdgs.cpoc.appcatalog.AppDataJobFile;
 import esa.s1pdgs.cpoc.appcatalog.AppDataJobGeneration;
 import esa.s1pdgs.cpoc.appcatalog.AppDataJobGenerationState;
+import esa.s1pdgs.cpoc.appcatalog.AppDataJobInput;
 import esa.s1pdgs.cpoc.appcatalog.AppDataJobProduct;
+import esa.s1pdgs.cpoc.appcatalog.AppDataJobTaskInputs;
 import esa.s1pdgs.cpoc.common.errors.processing.IpfPrepWorkerInputsMissingException;
 import esa.s1pdgs.cpoc.common.utils.DateUtils;
 import esa.s1pdgs.cpoc.common.utils.Exceptions;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.generator.state.JobStateTransistionFailed;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.model.joborder.JobOrder;
+import esa.s1pdgs.cpoc.ipf.preparation.worker.model.joborder.JobOrderInput;
+import esa.s1pdgs.cpoc.ipf.preparation.worker.model.joborder.JobOrderInputFile;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.model.joborder.JobOrderSensingTime;
+import esa.s1pdgs.cpoc.ipf.preparation.worker.model.joborder.JobOrderTimeInterval;
+import esa.s1pdgs.cpoc.ipf.preparation.worker.model.joborder.enums.JobOrderFileNameType;
+import esa.s1pdgs.cpoc.ipf.preparation.worker.model.tasktable.ElementMapper;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.model.tasktable.TaskTableAdapter;
+import esa.s1pdgs.cpoc.ipf.preparation.worker.model.tasktable.enums.TaskTableFileNameType;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.publish.Publisher;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.query.AuxQueryHandler;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.type.ProductTypeAdapter;
@@ -26,6 +39,7 @@ public class JobGen {
 	private final ProductTypeAdapter typeAdapter;
 	private final List<List<String>> tasks;
 	private final TaskTableAdapter taskTableAdapter;
+	private final ElementMapper elementMapper;
     private final AuxQueryHandler auxQueryHandler;
     private final JobOrder jobOrder;
     private final Publisher publisher;
@@ -35,6 +49,7 @@ public class JobGen {
 			final ProductTypeAdapter typeAdapter, 
 			final List<List<String>> tasks,
 			final TaskTableAdapter taskTableAdapter,
+			final ElementMapper elementMapper,
 			final AuxQueryHandler auxQueryHandler,
 			final JobOrder jobOrder,
 			final Publisher publisher
@@ -44,6 +59,7 @@ public class JobGen {
 		this.typeAdapter = typeAdapter;
 		this.tasks = tasks;
 		this.taskTableAdapter = taskTableAdapter;
+		this.elementMapper = elementMapper;
 		this.auxQueryHandler = auxQueryHandler;
 		this.jobOrder = jobOrder;
 		this.publisher = publisher;
@@ -115,6 +131,16 @@ public class JobGen {
 								AppDataJobProduct.TIME_FORMATTER, JobOrderSensingTime.DATETIME_FORMATTER),
 						DateUtils.convertToAnotherFormat(job.getProduct().getStopTime(),
 								AppDataJobProduct.TIME_FORMATTER, JobOrderSensingTime.DATETIME_FORMATTER)));
+
+		// collect all additional inputs
+		final Map<String, AppDataJobTaskInputs> inputs
+				= job.getAdditionalInputs().stream().collect(toMap(i -> i.getTaskName() + ":" + i.getTaskVersion(), i -> i));
+
+		//set these inputs in corresponding job order processors
+		jobOrder().getProcs().forEach(
+				p -> p.setInputs(toJobOrderInputs(inputs.get(p.getTaskName() + ":" + p.getTaskVersion()))));
+
+
 		typeAdapter.customJobOrder(this);
 	}
 	
@@ -132,8 +158,7 @@ public class JobGen {
 	}
 	
 	public final JobGen send() throws JobStateTransistionFailed {
-		// FIXME applied same dirty workaround viveris did, auxSearch needs to be cleaned up
-		return perform(publisher.send(auxSearch()), "publishing Job");
+		return perform(publisher.send(this), "publishing Job");
 	}
 	
 	private JobGen perform(final Callable<JobGen> command, final String name) throws JobStateTransistionFailed {

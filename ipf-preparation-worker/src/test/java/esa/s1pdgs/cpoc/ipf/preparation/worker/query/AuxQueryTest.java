@@ -85,7 +85,7 @@ public class AuxQueryTest {
 
         JobOrder jobOrder = new TaskTableToJobOrderConverter().apply(taskTable);
 
-        JobGen jobGen = new JobGen(job, null, null, taskTableAdapter, null, jobOrder, null);
+        JobGen jobGen = new JobGen(job, null, null, taskTableAdapter, null, null, jobOrder, null);
 
         when(metadataClient
                 .search(argThat(isQueryWithType("MPL_ORBPRE")), any(), any(), any(), anyInt(), any(), any()))
@@ -137,7 +137,7 @@ public class AuxQueryTest {
 
 
         //actual test
-        new AuxQuery(metadataClient, jobGen, ProductMode.SLICING, inputTimeoutChecker, elementMapper).call();
+        new AuxQueryHandler(metadataClient, ProductMode.SLICING, inputTimeoutChecker, elementMapper).queryFor(jobGen).call();
 
         //we have three distinct alternatives in the task table -> three different queries
         verify(metadataClient, times(3)).search(any(), any(), any(), any(), anyInt(), any(), any());
@@ -203,7 +203,7 @@ public class AuxQueryTest {
 
         JobOrder jobOrder = new TaskTableToJobOrderConverter().apply(taskTable);
 
-        JobGen jobGen = new JobGen(job, null, null, taskTableAdapter, null, jobOrder, null);
+        JobGen jobGen = new JobGen(job, null, null, taskTableAdapter, elementMapper, null, jobOrder, null);
 
         //currently for multiple alternatives all are queried no matter a result has already been found or not
         //but later the first result is taken in the final job order
@@ -221,7 +221,7 @@ public class AuxQueryTest {
         expectAndReturnMetadataQuery("IW_RAW__0S", "IW_RAW__0S_RESULT", metadataClient);
 
         //actual test
-        new AuxQuery(metadataClient, jobGen, ProductMode.SLICING, inputTimeoutChecker, elementMapper).call();
+        new AuxQueryHandler(metadataClient, ProductMode.SLICING, inputTimeoutChecker, elementMapper).queryFor(jobGen).call();
 
         verify(metadataClient, times(11)).search(any(), any(), any(), any(), anyInt(), any(), any());
 

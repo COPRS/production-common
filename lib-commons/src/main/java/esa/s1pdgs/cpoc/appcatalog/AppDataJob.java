@@ -57,6 +57,11 @@ public class AppDataJob {
     private AppDataJobProduct product;
 
     /**
+     * Additional inputs for the job, e.g. aux files
+     */
+    private List<AppDataJobTaskInputs> additionalInputs;
+
+    /**
      * Generations of the job
      */
     private AppDataJobGeneration generation;
@@ -197,6 +202,22 @@ public class AppDataJob {
     }
 
     /**
+     *
+     * @return additional job inputs
+     */
+    public List<AppDataJobTaskInputs> getAdditionalInputs() {
+        return additionalInputs;
+    }
+
+    /**
+     *
+     * @param additionalInputs additional job inputs
+     */
+    public void setAdditionalInputs(List<AppDataJobTaskInputs> additionalInputs) {
+        this.additionalInputs = additionalInputs;
+    }
+
+    /**
      * @return the generations
      */
     public AppDataJobGeneration getGeneration() {
@@ -204,8 +225,8 @@ public class AppDataJob {
     }
 
     /**
-     * @param generations
-     *            the generations to set
+     * @param generation
+     *            the generation to set
      */
     public void setGeneration(final AppDataJobGeneration generation) {
         this.generation = generation;
@@ -242,15 +263,16 @@ public class AppDataJob {
     @Override
     public int hashCode() {
         return Objects.hash(id, level, pod, state,
-                creationDate, lastUpdateDate, messages, product, generation, reportingId, prepJobInputQueue, prepJobMessageId);
+                creationDate, lastUpdateDate, messages, product, additionalInputs, generation, reportingId, prepJobInputQueue, prepJobMessageId);
     }
     
     @Override
 	public String toString() {
-		return "AppDataJob [id=" + id + ", level=" + level + ", pod=" + pod + ", state="
-				+ state + ", creationDate=" + creationDate + ", lastUpdateDate=" + lastUpdateDate + ", messages="
-				+ messages + ", product=" + product + ", generation=" + generation + ", reportingId=" + reportingId
-				+ ", prepJobMessageId=" + prepJobMessageId + ", prepJobInputQueue=" + prepJobInputQueue + "]";
+		return "AppDataJob [id=" + id + ", level=" + level + ", pod=" + pod + ", state=" + state
+                + ", creationDate=" + creationDate + ", lastUpdateDate=" + lastUpdateDate + ", messages=" + messages
+                + ", product=" + product + ", additionalInputs=" + additionalInputs + ", generation=" + generation
+                + ", reportingId=" + reportingId + ", prepJobMessageId=" + prepJobMessageId
+                + ", prepJobInputQueue=" + prepJobInputQueue + "]";
 	}
 
 	/**
@@ -273,6 +295,7 @@ public class AppDataJob {
                     && Objects.equals(lastUpdateDate, other.lastUpdateDate)
                     && Objects.equals(messages, other.messages)
                     && Objects.equals(product, other.product)
+                    && Objects.equals(additionalInputs, other.additionalInputs)
                     && Objects.equals(generation, other.generation)
                     && Objects.equals(prepJobInputQueue, other.prepJobInputQueue)
                     && Objects.equals(prepJobMessageId, other.prepJobMessageId)

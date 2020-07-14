@@ -16,6 +16,7 @@ import esa.s1pdgs.cpoc.ipf.preparation.worker.appcat.AppCatAdapter;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.config.ProcessSettings;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.generator.state.JobGenerationStateTransitions;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.model.JobGen;
+import esa.s1pdgs.cpoc.ipf.preparation.worker.model.tasktable.ElementMapper;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.model.tasktable.TaskTableAdapter;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.publish.Publisher;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.query.AuxQueryHandler;
@@ -24,6 +25,7 @@ import esa.s1pdgs.cpoc.mqi.model.rest.GenericMessageDto;
 
 public final class JobGeneratorImpl implements JobGenerator {
 	private final TaskTableAdapter tasktableAdapter;
+	private final ElementMapper elementMapper;
 	private final ProductTypeAdapter typeAdapter;	
     private final AppCatAdapter appCat;
     private final ProcessSettings settings;
@@ -34,6 +36,7 @@ public final class JobGeneratorImpl implements JobGenerator {
         
 	public JobGeneratorImpl(
 			final TaskTableAdapter tasktableAdapter,
+			final ElementMapper elementMapper,
 			final ProductTypeAdapter typeAdapter, 
 			final AppCatAdapter appCat,
 			final ProcessSettings settings,
@@ -43,6 +46,7 @@ public final class JobGeneratorImpl implements JobGenerator {
 			final AuxQueryHandler auxQueryHandler
 	) {
 		this.tasktableAdapter = tasktableAdapter;
+		this.elementMapper = elementMapper;
 		this.typeAdapter = typeAdapter;
 		this.appCat = appCat;
 		this.settings = settings;
@@ -111,7 +115,8 @@ public final class JobGeneratorImpl implements JobGenerator {
 				job, 
 				typeAdapter, 
 				tasks,
-				tasktableAdapter, 
+				tasktableAdapter,
+				elementMapper,
 				auxQueryHandler, 
 				tasktableAdapter.newJobOrder(settings), 
 				publisher
