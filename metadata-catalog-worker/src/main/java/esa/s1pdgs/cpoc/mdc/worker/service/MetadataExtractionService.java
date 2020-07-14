@@ -190,7 +190,7 @@ public class MetadataExtractionService implements MqiListener<CatalogJob> {
 		String outputKey = "";
 
 		final Object timeliness = event.getMetadata().get("timeliness");
-		if (timeliness != null) {
+		if (timeliness != null && !timeliness.toString().isEmpty()) {
 			outputKey = event.getProductFamily().name() + "@" + timeliness;
 		} else {
 			outputKey = event.getProductFamily().name();
