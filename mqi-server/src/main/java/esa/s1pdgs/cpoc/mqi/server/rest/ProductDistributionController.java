@@ -110,7 +110,7 @@ public class ProductDistributionController {
                     category);
         }
         final GenericMessageDto<? extends AbstractMessage> message = nextMessage(category);
-        LOGGER.info("[MONITOR] [category {}] [api next] [messageId {}] Starting", category, message.getId());
+        LOGGER.info("[MONITOR] [category {}] [api next] [messageId {}] Starting", category, (message != null ? message.getId(): "n/a"));
         return message;
     }
 
