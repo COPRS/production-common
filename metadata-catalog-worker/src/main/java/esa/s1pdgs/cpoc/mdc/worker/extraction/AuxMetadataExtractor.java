@@ -9,6 +9,7 @@ import org.json.JSONObject;
 import esa.s1pdgs.cpoc.common.ProductFamily;
 import esa.s1pdgs.cpoc.common.errors.AbstractCodedException;
 import esa.s1pdgs.cpoc.common.errors.InternalErrorException;
+import esa.s1pdgs.cpoc.common.utils.Exceptions;
 import esa.s1pdgs.cpoc.common.utils.FileUtils;
 import esa.s1pdgs.cpoc.common.utils.LogUtils;
 import esa.s1pdgs.cpoc.mdc.worker.config.ProcessConfiguration;
@@ -67,8 +68,8 @@ public final class AuxMetadataExtractor extends AbstractMetadataExtractor {
 						c++;
 					}
 				} catch (final Exception ex) {
-					logger.error("An error occured while ingesting land mark documents: {}", LogUtils.toString(ex));
-					throw new InternalErrorException(LogUtils.toString(ex));
+					logger.error("An error occurred while ingesting land mask documents: {}", LogUtils.toString(ex));
+					throw new InternalErrorException(Exceptions.messageOf(ex), ex);
 				}
 			}
 			return obj;
