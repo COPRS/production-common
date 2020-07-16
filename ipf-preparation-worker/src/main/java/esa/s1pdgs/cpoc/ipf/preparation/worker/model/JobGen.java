@@ -1,7 +1,5 @@
 package esa.s1pdgs.cpoc.ipf.preparation.worker.model;
 
-import static java.util.stream.Collectors.toMap;
-
 import java.util.List;
 import java.util.concurrent.Callable;
 
@@ -17,7 +15,6 @@ import esa.s1pdgs.cpoc.ipf.preparation.worker.model.tasktable.TaskTableAdapter;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.publish.Publisher;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.query.AuxQueryHandler;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.type.ProductTypeAdapter;
-import esa.s1pdgs.cpoc.mqi.model.queue.IpfExecutionJob;
 
 public class JobGen {	
 	private final AppDataJob job;
@@ -28,17 +25,17 @@ public class JobGen {
     private final AuxQueryHandler auxQueryHandler;
     private final JobOrder jobOrder;
     private final Publisher publisher;
-			
+
 	public JobGen(
-			final AppDataJob job, 
-			final ProductTypeAdapter typeAdapter, 
+			final AppDataJob job,
+			final ProductTypeAdapter typeAdapter,
 			final List<List<String>> tasks,
 			final TaskTableAdapter taskTableAdapter,
 			final ElementMapper elementMapper,
 			final AuxQueryHandler auxQueryHandler,
 			final JobOrder jobOrder,
 			final Publisher publisher
-			
+
 	) {
 		this.job = job;
 		this.typeAdapter = typeAdapter;
@@ -53,23 +50,27 @@ public class JobGen {
 	public String id() {
 		return String.valueOf(job.getId());
 	}
-	
+
 	public final AppDataJob job() {
 		return job;
 	}
-	
+
 	public final JobOrder jobOrder() {
 		return jobOrder;
 	}
-	
+
 	public final List<List<String>> tasks() {
 		return tasks;
 	}
-	
+
 	public final TaskTableAdapter taskTableAdapter() {
 		return taskTableAdapter;
 	}
-	
+
+	public final ProductTypeAdapter typeAdapter() {
+		return typeAdapter;
+	}
+
 	public final String productName() {
 		return job.getProduct().getProductName();
 	}
@@ -90,15 +91,6 @@ public class JobGen {
 		return job.getGeneration();
 	}
 	
-	public final String timeliness() {
-		try {
-			return String.valueOf(job.getMessages().get(0).getBody().getMetadata().getOrDefault("timeliness", ""));
-		} catch (final Exception e) {
-			// fall through: just don't care if the mess above fails and return an empty value
-		}
-		return "";
-	}
-
 	public final JobGen mainInputSearch() throws JobStateTransistionFailed {
 		return perform(typeAdapter.mainInputSearch(this), "querying input " + productName());
 	}
@@ -111,10 +103,6 @@ public class JobGen {
 		return perform(publisher.send(this), "publishing Job");
 	}
 
-	public final ProductTypeAdapter typeAdapter() {
-		return  typeAdapter;
-	}
-	
 	private JobGen perform(final Callable<JobGen> command, final String name) throws JobStateTransistionFailed {
 		try {
 			return command.call();

@@ -10,7 +10,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.Callable;
-import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import javax.xml.bind.JAXBException;
 
@@ -106,110 +106,142 @@ public class Publisher {
 		
 		try {
 			// Second, build the DTO
+			//TODO check if it's possible to create the JobOrder here instead of changing contents inside
 			buildJobOrder(job, workingDir);
-			
-			final IpfExecutionJob execJob = new IpfExecutionJob(
-					settings.getLevel().toFamily(),
-					job.productName(),
-					job.processMode(), 
-					workingDir, 
-					jobOrder, 
-					job.timeliness(),
-					reporting.getUid()
-			);
-			execJob.setCreationDate(new Date());
-			execJob.setHostname(settings.getHostname());
 
-			try {
-				// Add jobOrder inputs to the DTO
-				final List<JobOrderInput> distinctInputJobOrder = job.jobOrder().getProcs().stream()
-						.filter(proc -> proc != null && !CollectionUtils.isEmpty(proc.getInputs()))
-						.flatMap(proc -> proc.getInputs().stream()).distinct().collect(Collectors.toList());
-
-				distinctInputJobOrder.forEach(input -> {
-					for (final JobOrderInputFile file : input.getFilenames()) {
-						execJob.addInput(new LevelJobInputDto(input.getFamily().name(), file.getFilename(),
-								file.getKeyObjectStorage()));
-					}
-				});
-
-				final String jobOrderXml = xmlConverter.convertFromObjectToXMLString(job.jobOrder());
-				LOGGER.trace("Adding input JobOrderXml '{}' for product '{}'", jobOrderXml, job.productName());
-
-				// Add the jobOrder itself in inputs
-				execJob.addInput(new LevelJobInputDto(ProductFamily.JOB_ORDER.name(), jobOrder, jobOrderXml));
-
-				// Add jobOrder output to the DTO
-				final List<JobOrderOutput> distinctOutputJobOrder = job.jobOrder().getProcs().stream()
-						.filter(proc -> proc != null && !CollectionUtils.isEmpty(proc.getOutputs()))
-						.flatMap(proc -> proc.getOutputs().stream())
-						.filter(output -> output.getFileNameType() == JobOrderFileNameType.REGEXP
-								&& output.getDestination() == JobOrderDestination.DB)
-						.distinct().collect(Collectors.toList());
-
-				execJob.addOutputs(distinctOutputJobOrder.stream()
-						.map(output -> new LevelJobOutputDto(output.getFamily().name(), output.getFileName()))
-						.collect(Collectors.toList()));
-
-				final List<JobOrderOutput> distinctOutputJobOrderNotRegexp = job.jobOrder().getProcs().stream()
-						.filter(proc -> proc != null && !CollectionUtils.isEmpty(proc.getOutputs()))
-						.flatMap(proc -> proc.getOutputs().stream())
-						.filter(output -> output.getFileNameType() == JobOrderFileNameType.DIRECTORY
-								&& output.getDestination() == JobOrderDestination.DB)
-						.distinct().collect(Collectors.toList());
-
-				execJob.addOutputs(distinctOutputJobOrderNotRegexp.stream()
-						.map(output -> new LevelJobOutputDto(output.getFamily().name(),
-								output.getFileName() + "^.*" + output.getFileType() + ".*$"))
-						.collect(Collectors.toList()));
-
-				for (final LevelJobOutputDto output : execJob.getOutputs()) {
-					// Iterate over the outputs and identify if an OQC check is required
-					final ProductFamily outputFamily = ProductFamily.valueOf(output.getFamily());
-					if (prepperSettings.getOqcCheck().contains(outputFamily)) {
-						// Hit, we found a product family that had been configured as oqc check. Flag
-						// it.
-						LOGGER.info("Found output of family {}, flagging it as oqcCheck", outputFamily);
-						output.setOqcCheck(true);
-					} else {
-						// No hit
-						LOGGER.debug("Found output of family {}, no oqcCheck required", outputFamily);
-					}
-				}
-
-				// Add the tasks
-				for (final List<String> pool : job.tasks()) {
-					final LevelJobPoolDto poolDto = new LevelJobPoolDto();
-					for (final String task : pool) {
-						poolDto.addTask(new LevelJobTaskDto(task));
-					}
-					execJob.addPool(poolDto);
-				}
-
-				job.typeAdapter().customJobDto(job, execJob);
-			}
-			catch (IOException | JAXBException e) {
-				throw new InternalErrorException("Cannot send the job", e);
-			}
-
-			LOGGER.info("Publishing job {} (product {})", job.id(), job.productName());
-			final AppDataJob dto = job.job();
-
-			final GenericPublicationMessageDto<IpfExecutionJob> messageToPublish =
-					new GenericPublicationMessageDto<>(
-							dto.getPrepJobMessageId(),
-							execJob.getProductFamily(),
-							execJob
-					);
-			messageToPublish.setInputKey(dto.getPrepJobInputQueue());
-			messageToPublish.setOutputKey(execJob.getProductFamily().name());
-			mqiClient.publish(messageToPublish, ProductCategory.LEVEL_JOBS);
+			publishJob(job, createIpfExecutionJob(job, workingDir, jobOrder, reporting));
 
 			reporting.end(new JobOrderReportingOutput(jobOrderName, toProcParamMap(job)),
 					new ReportingMessage("End job generation"));
 		} catch (final AbstractCodedException e) {
+			// TODO cause is not contained in reporting message
 			reporting.error(new ReportingMessage("Error on job generation"));
 		}
+	}
+
+	private IpfExecutionJob createIpfExecutionJob(JobGen job, String workingDir, String jobOrder, Reporting reporting) throws InternalErrorException {
+		final IpfExecutionJob execJob = new IpfExecutionJob(
+				settings.getLevel().toFamily(),
+				job.productName(),
+				job.processMode(),
+				workingDir,
+				jobOrder,
+				timeliness(job.job()),
+				reporting.getUid()
+		);
+		execJob.setCreationDate(new Date());
+		execJob.setHostname(settings.getHostname());
+
+		try {
+			// Add jobOrder inputs to the DTO
+			final List<JobOrderInput> distinctInputJobOrder = jobOrderInputs(job.jobOrder()).distinct().collect(toList());
+
+			distinctInputJobOrder.forEach(input -> {
+				for (final JobOrderInputFile file : input.getFilenames()) {
+					execJob.addInput(new LevelJobInputDto(input.getFamily().name(), file.getFilename(),
+							file.getKeyObjectStorage()));
+				}
+			});
+
+			final String jobOrderXml = xmlConverter.convertFromObjectToXMLString(job.jobOrder());
+			LOGGER.trace("Adding input JobOrderXml '{}' for product '{}'", jobOrderXml, job.productName());
+
+			// Add the jobOrder itself in inputs
+			execJob.addInput(new LevelJobInputDto(ProductFamily.JOB_ORDER.name(), jobOrder, jobOrderXml));
+
+			// Add jobOrder outputs to the DTO
+			execJob.addOutputs(regexpOutputs(job));
+			execJob.addOutputs(directoryOutputs(job));
+
+			addOqcFlags(execJob);
+
+			// Add the tasks
+			for (final List<String> pool : job.tasks()) {
+				final LevelJobPoolDto poolDto = new LevelJobPoolDto();
+				for (final String task : pool) {
+					poolDto.addTask(new LevelJobTaskDto(task));
+				}
+				execJob.addPool(poolDto);
+			}
+
+			job.typeAdapter().customJobDto(job, execJob);
+			return execJob;
+		}
+		catch (IOException | JAXBException e) {
+			throw new InternalErrorException("Cannot send the job", e);
+		}
+	}
+
+	private List<LevelJobOutputDto> directoryOutputs(JobGen job) {
+		return jobOrderOutputs(job.jobOrder())
+				.filter(output -> output.getFileNameType() == JobOrderFileNameType.DIRECTORY
+						&& output.getDestination() == JobOrderDestination.DB)
+				.distinct()
+				.map(output -> new LevelJobOutputDto(output.getFamily().name(),
+						output.getFileName() + "^.*" + output.getFileType() + ".*$"))
+				.collect(toList());
+	}
+
+	private List<LevelJobOutputDto> regexpOutputs(JobGen job) {
+		return jobOrderOutputs(job.jobOrder())
+				.filter(output -> output.getFileNameType() == JobOrderFileNameType.REGEXP
+						&& output.getDestination() == JobOrderDestination.DB)
+				.distinct()
+				.map(output -> new LevelJobOutputDto(output.getFamily().name(), output.getFileName()))
+				.collect(toList());
+	}
+
+	private Stream<JobOrderInput> jobOrderInputs(JobOrder jobOrder) {
+		return jobOrder.getProcs().stream()
+				.filter(proc -> proc != null && !CollectionUtils.isEmpty(proc.getInputs()))
+				.flatMap(proc -> proc.getInputs().stream());
+	}
+
+	private Stream<JobOrderOutput> jobOrderOutputs(JobOrder jobOrder) {
+		return jobOrder.getProcs().stream()
+				.filter(proc -> proc != null && !CollectionUtils.isEmpty(proc.getOutputs()))
+				.flatMap(proc -> proc.getOutputs().stream());
+	}
+
+	private IpfExecutionJob addOqcFlags(IpfExecutionJob execJob) {
+		for (final LevelJobOutputDto output : execJob.getOutputs()) {
+			// Iterate over the outputs and identify if an OQC check is required
+			final ProductFamily outputFamily = ProductFamily.valueOf(output.getFamily());
+			if (prepperSettings.getOqcCheck().contains(outputFamily)) {
+				// Hit, we found a product family that had been configured as oqc check. Flag
+				// it.
+				LOGGER.info("Found output of family {}, flagging it as oqcCheck", outputFamily);
+				output.setOqcCheck(true);
+			} else {
+				// No hit
+				LOGGER.debug("Found output of family {}, no oqcCheck required", outputFamily);
+			}
+		}
+		return execJob;
+	}
+
+	private void publishJob(JobGen job, IpfExecutionJob execJob) throws AbstractCodedException {
+		LOGGER.info("Publishing job {} (product {})", job.id(), job.productName());
+		final AppDataJob dto = job.job();
+
+		final GenericPublicationMessageDto<IpfExecutionJob> messageToPublish =
+				new GenericPublicationMessageDto<>(
+						dto.getPrepJobMessageId(),
+						execJob.getProductFamily(),
+						execJob
+				);
+		messageToPublish.setInputKey(dto.getPrepJobInputQueue());
+		messageToPublish.setOutputKey(execJob.getProductFamily().name());
+		mqiClient.publish(messageToPublish, ProductCategory.LEVEL_JOBS);
+	}
+
+	public final String timeliness(AppDataJob job) {
+		try {
+			return String.valueOf(job.getMessages().get(0).getBody().getMetadata().getOrDefault("timeliness", ""));
+		} catch (final Exception e) {
+			// fall through: just don't care if the mess above fails and return an empty value
+		}
+		return "";
 	}
 
 	// it is not a good idea to change the job order; instead it should be generated in the last step
@@ -220,15 +252,12 @@ public class Publisher {
 		final AppDataJob job = jobGen.job();
 		final ProductTypeAdapter typeAdapter = jobGen.typeAdapter();
 
-		jobOrder.getProcs().stream()
-				.filter(proc -> proc != null && !CollectionUtils.isEmpty(proc.getInputs()))
-				.flatMap(proc -> proc.getInputs().stream()).forEach(input -> {
+		jobOrderInputs(jobOrder).forEach(input -> {
 			input.getFilenames().forEach(filename -> filename.setFilename(workingDir + filename.getFilename()));
 			input.getTimeIntervals().forEach(interval -> interval.setFileName(workingDir + interval.getFileName()));
 		});
-		jobOrder.getProcs().stream()
-				.filter(proc -> proc != null && !CollectionUtils.isEmpty(proc.getOutputs()))
-				.flatMap(proc -> proc.getOutputs().stream()).forEach(output -> output.setFileName(workingDir + output.getFileName()));
+
+		jobOrderOutputs(jobOrder).forEach(output -> output.setFileName(workingDir + output.getFileName()));
 
 		// Apply implementation build job
 		jobOrder.getConf().setSensingTime(new JobOrderSensingTime(
@@ -244,7 +273,6 @@ public class Publisher {
 		//set these inputs in corresponding job order processors
 		jobOrder.getProcs().forEach(
 				p -> p.setInputs(toJobOrderInputs(inputs.get(p.getTaskName() + ":" + p.getTaskVersion()))));
-
 
 		typeAdapter.customJobOrder(jobGen);
 	}

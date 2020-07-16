@@ -15,7 +15,7 @@ import esa.s1pdgs.cpoc.ipf.preparation.worker.model.tasktable.mapper.TasktableMa
 import esa.s1pdgs.cpoc.mqi.model.queue.IpfExecutionJob;
 
 public interface ProductTypeAdapter {	
-	static final Logger LOGGER = LogManager.getLogger(ProductTypeAdapter.class); 
+	Logger LOGGER = LogManager.getLogger(ProductTypeAdapter.class);
 	
 	TasktableMapper taskTableMapper();
 	
