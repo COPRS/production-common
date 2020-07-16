@@ -1,8 +1,6 @@
 package esa.s1pdgs.cpoc.errorrepo.model.rest;
 
-import java.util.Collections;
 import java.util.Date;
-import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 
@@ -16,18 +14,13 @@ public class FailedProcessingDto {
 	private String failedPod;
 	private Date failedDate;
 	private String failureMessage;
-	private List<GenericMessageDto<?>> processingDetails;
+	private GenericMessageDto<?> processingDetails;
 	
 	public FailedProcessingDto() {
 	}
 
-	public FailedProcessingDto(final String failedPod, final Date failedDate, final String failureMessage,
-			final GenericMessageDto<?> processingDetails) {		
-		this(failedPod, failedDate, failureMessage, Collections.singletonList(processingDetails));
-	}
-	
-	public FailedProcessingDto(final String failedPod, final Date failedDate, final String failureMessage,
-			final List<GenericMessageDto<?>> processingDetails) {
+	public FailedProcessingDto(String failedPod, Date failedDate, String failureMessage,
+			GenericMessageDto<?> processingDetails) {
 		super();
 		this.failedPod = failedPod;
 		this.failedDate = failedDate;
@@ -39,7 +32,7 @@ public class FailedProcessingDto {
 		return failedPod;
 	}
 
-	public void setFailedPod(final String failedPod) {
+	public void setFailedPod(String failedPod) {
 		this.failedPod = failedPod;
 	}
 
@@ -48,7 +41,7 @@ public class FailedProcessingDto {
 		return failedDate;
 	}
 
-	public void setFailedDate(final Date failedDate) {
+	public void setFailedDate(Date failedDate) {
 		this.failedDate = failedDate;
 	}
 
@@ -56,15 +49,15 @@ public class FailedProcessingDto {
 		return failureMessage;
 	}
 
-	public void setFailureMessage(final String failureMessage) {
+	public void setFailureMessage(String failureMessage) {
 		this.failureMessage = failureMessage;
 	}
 
-	public List<GenericMessageDto<?>> getProcessingDetails() {
+	public GenericMessageDto<?> getProcessingDetails() {
 		return processingDetails;
 	}
 
-	public void setProcessingDetails(final  List<GenericMessageDto<?>> processingDetails) {
+	public void setProcessingDetails(GenericMessageDto<?> processingDetails) {
 		this.processingDetails = processingDetails;
 	}
 

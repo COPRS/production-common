@@ -83,15 +83,16 @@ public final class JobGeneratorImpl implements JobGenerator {
 						.map(m -> String.valueOf(m.getId()))
 						.collect(Collectors.joining(", "));	
 	
-				// 751: Error handling of job comprises of sending all messages of this job to the failedRequest repo
-				LOGGER.error("Error on handling job {} and creating failed request for it's messages {}: {}",
+				// 751: Adding just one of the messages should be sufficient to re-create the job on restart
+				// scenario
+				LOGGER.error("Error on handling job {} and creating failed request for one of its messages {}: {}",
 						job.getId(), ids, LogUtils.toString(error));
 
 				errorAppender.send(new FailedProcessingDto(
 						settings.getHostname(), 
 						new Date(), 
 						LogUtils.toString(error), 
-						messages
+						messages.get(0)
 				));
 				appCat.terminate(job);	
 			}		

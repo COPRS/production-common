@@ -60,9 +60,9 @@ abstract class AbstractRequest {
 	protected AbstractRequest() {
 	}
 	
-	protected AbstractRequest(final ProductCategory category, final String topic, final int partition, final long offset,
-			final String group, final MessageState state, final String sendingPod, final Date lastSendDate, final Date lastAckDate, final int nbRetries,
-			final Object dto, final Date creationDate) {
+	protected AbstractRequest(ProductCategory category, String topic, int partition, long offset,
+			String group, MessageState state, String sendingPod, Date lastSendDate, Date lastAckDate, int nbRetries,
+			Object dto, Date creationDate) {
 		this.category = category;
 		this.topic = topic;
 		this.partition = partition;
@@ -87,7 +87,7 @@ abstract class AbstractRequest {
 	/**
 	 * @param category the category to set
 	 */
-	public void setCategory(final ProductCategory category) {
+	public void setCategory(ProductCategory category) {
 	    this.category = category;
 	}
 
@@ -101,7 +101,7 @@ abstract class AbstractRequest {
 	/**
 	 * @param topic the topic to set
 	 */
-	public void setTopic(final String topic) {
+	public void setTopic(String topic) {
 	    this.topic = topic;
 	}
 
@@ -115,7 +115,7 @@ abstract class AbstractRequest {
 	/**
 	 * @param partition the partition to set
 	 */
-	public void setPartition(final int partition) {
+	public void setPartition(int partition) {
 	    this.partition = partition;
 	}
 
@@ -129,7 +129,7 @@ abstract class AbstractRequest {
 	/**
 	 * @param offset the offset to set
 	 */
-	public void setOffset(final long offset) {
+	public void setOffset(long offset) {
 	    this.offset = offset;
 	}
 
@@ -143,7 +143,7 @@ abstract class AbstractRequest {
 	/**
 	 * @param group the group to set
 	 */
-	public void setGroup(final String group) {
+	public void setGroup(String group) {
 	    this.group = group;
 	}
 
@@ -157,7 +157,7 @@ abstract class AbstractRequest {
 	/**
 	 * @param state the state to set
 	 */
-	public void setState(final MessageState state) {
+	public void setState(MessageState state) {
 	    this.state = state;
 	}
 
@@ -171,7 +171,7 @@ abstract class AbstractRequest {
 	/**
 	 * @param sendingPod the sendingPod to set
 	 */
-	public void setSendingPod(final String sendingPod) {
+	public void setSendingPod(String sendingPod) {
 	    this.sendingPod = sendingPod;
 	}
 
@@ -185,7 +185,7 @@ abstract class AbstractRequest {
 	/**
 	 * @param lastSendDate the lastSendDate to set
 	 */
-	public void setLastSendDate(final Date lastSendDate) {
+	public void setLastSendDate(Date lastSendDate) {
 	    this.lastSendDate = lastSendDate;
 	}
 
@@ -199,7 +199,7 @@ abstract class AbstractRequest {
 	/**
 	 * @param lastAckDate the lastAckDate to set
 	 */
-	public void setLastAckDate(final Date lastAckDate) {
+	public void setLastAckDate(Date lastAckDate) {
 	    this.lastAckDate = lastAckDate;
 	}
 
@@ -213,8 +213,22 @@ abstract class AbstractRequest {
 	/**
 	 * @param nbRetries the nbRetries to set
 	 */
-	public void setNbRetries(final int nbRetries) {
+	public void setNbRetries(int nbRetries) {
 	    this.nbRetries = nbRetries;
+	}
+
+	/**
+	 * @return the dto
+	 */
+	public Object getDto() {
+	    return dto;
+	}
+
+	/**
+	 * @param dto the dto to set
+	 */
+	public void setDto(Object dto) {
+	    this.dto = dto;
 	}
 
 	/**
@@ -227,7 +241,7 @@ abstract class AbstractRequest {
 	/**
 	 * @param creationDate the creationDate to set
 	 */
-	public void setCreationDate(final Date creationDate) {
+	public void setCreationDate(Date creationDate) {
 	    this.creationDate = creationDate;
 	}
 
