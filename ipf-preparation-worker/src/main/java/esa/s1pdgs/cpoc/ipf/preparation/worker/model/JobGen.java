@@ -143,7 +143,47 @@ public class JobGen {
 
 		typeAdapter.customJobOrder(this);
 	}
-	
+
+	private List<JobOrderInput> toJobOrderInputs(AppDataJobTaskInputs appDataJobTaskInputs) {
+		return appDataJobTaskInputs.getInputs().stream().map(this::toJobOrderInputs).collect(toList());
+	}
+
+	private JobOrderInput toJobOrderInputs(AppDataJobInput input) {
+		return new JobOrderInput(
+				input.getFileType(),
+				getFileNameTypeFor(input.getFileNameType()),
+				toFileNames(input.getFiles()),
+				toIntervals(input.getFiles()),
+				elementMapper.inputFamilyOf(input.getFileType()));
+	}
+
+	//this is a copy from TaskTableAdapter but there it should be removed soon
+	private JobOrderFileNameType getFileNameTypeFor(final String fileNameType) {
+		TaskTableFileNameType type = TaskTableFileNameType.valueOf(fileNameType);
+		switch (type) {
+			case PHYSICAL:
+				return JobOrderFileNameType.PHYSICAL;
+			case DIRECTORY:
+				return JobOrderFileNameType.DIRECTORY;
+			case REGEXP:
+				return JobOrderFileNameType.REGEXP;
+			default:
+				// fall through
+		}
+		return JobOrderFileNameType.BLANK;
+	}
+
+	private List<JobOrderTimeInterval> toIntervals(List<AppDataJobFile> files) {
+		return files.stream().map(
+				f -> new JobOrderTimeInterval(f.getStartDate(), f.getEndDate(), f.getFilename())).collect(toList());
+	}
+
+	private List<JobOrderInputFile> toFileNames(List<AppDataJobFile> files) {
+		return files.stream().map(
+				f -> new JobOrderInputFile(f.getFilename(), f.getKeyObs())).collect(toList());
+	}
+
+	//TODO move to Publisher
 	public final void customJobDto(final IpfExecutionJob execJob) {
 		typeAdapter.customJobDto(this, execJob);
 	}
