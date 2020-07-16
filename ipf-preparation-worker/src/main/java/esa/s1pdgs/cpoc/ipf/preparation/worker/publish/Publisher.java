@@ -1,5 +1,8 @@
 package esa.s1pdgs.cpoc.ipf.preparation.worker.publish;
 
+import static java.util.stream.Collectors.toList;
+import static java.util.stream.Collectors.toMap;
+
 import java.io.IOException;
 import java.util.Collections;
 import java.util.Date;
@@ -18,21 +21,32 @@ import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
 
 import esa.s1pdgs.cpoc.appcatalog.AppDataJob;
+import esa.s1pdgs.cpoc.appcatalog.AppDataJobFile;
+import esa.s1pdgs.cpoc.appcatalog.AppDataJobInput;
+import esa.s1pdgs.cpoc.appcatalog.AppDataJobProduct;
+import esa.s1pdgs.cpoc.appcatalog.AppDataJobTaskInputs;
 import esa.s1pdgs.cpoc.common.ProductCategory;
 import esa.s1pdgs.cpoc.common.ProductFamily;
 import esa.s1pdgs.cpoc.common.errors.AbstractCodedException;
 import esa.s1pdgs.cpoc.common.errors.InternalErrorException;
+import esa.s1pdgs.cpoc.common.utils.DateUtils;
 import esa.s1pdgs.cpoc.common.utils.LogUtils;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.config.IpfPreparationWorkerSettings;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.config.ProcessSettings;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.model.JobGen;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.model.converter.XmlConverter;
+import esa.s1pdgs.cpoc.ipf.preparation.worker.model.joborder.JobOrder;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.model.joborder.JobOrderInput;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.model.joborder.JobOrderInputFile;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.model.joborder.JobOrderOutput;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.model.joborder.JobOrderProcParam;
+import esa.s1pdgs.cpoc.ipf.preparation.worker.model.joborder.JobOrderSensingTime;
+import esa.s1pdgs.cpoc.ipf.preparation.worker.model.joborder.JobOrderTimeInterval;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.model.joborder.enums.JobOrderDestination;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.model.joborder.enums.JobOrderFileNameType;
+import esa.s1pdgs.cpoc.ipf.preparation.worker.model.tasktable.ElementMapper;
+import esa.s1pdgs.cpoc.ipf.preparation.worker.model.tasktable.enums.TaskTableFileNameType;
+import esa.s1pdgs.cpoc.ipf.preparation.worker.type.ProductTypeAdapter;
 import esa.s1pdgs.cpoc.mqi.client.MqiClient;
 import esa.s1pdgs.cpoc.mqi.model.queue.IpfExecutionJob;
 import esa.s1pdgs.cpoc.mqi.model.queue.LevelJobInputDto;
@@ -51,38 +65,38 @@ public class Publisher {
 	
     private final IpfPreparationWorkerSettings prepperSettings;
 	private final ProcessSettings settings;
+	private final ElementMapper elementMapper;
 	private final XmlConverter xmlConverter;
 	private final MqiClient mqiClient;
 	
 	@Autowired
 	public Publisher(
-			final IpfPreparationWorkerSettings prepperSettings, 
+			final IpfPreparationWorkerSettings prepperSettings,
 			final ProcessSettings settings,
+			final ElementMapper elementMapper,
 			final XmlConverter xmlConverter,
 			final MqiClient mqiClient
 	) {
 		this.prepperSettings = prepperSettings;
 		this.settings = settings;
+		this.elementMapper = elementMapper;
 		this.xmlConverter = xmlConverter;
 		this.mqiClient = mqiClient;
 	}
 
 	public Callable<JobGen> send(final JobGen job)  {
-		return new Callable<JobGen>() {
-			@Override
-			public JobGen call() throws Exception {
-				doSend(job);
-				return job;
-			}
-		};		
+		return () -> {
+			doSend(job);
+			return job;
+		};
 	}
 	
 	// TODO this needs further cleanup but I'm running out of time
-	private final void doSend(final JobGen job) {
+	private void doSend(final JobGen job) {
 		final long inc = job.job().getId();
 		final String workingDir = "/data/localWD/" + inc + "/";
-		final String joborderName = "JobOrder." + inc + ".xml";
-		final String jobOrder = workingDir + joborderName;
+		final String jobOrderName = "JobOrder." + inc + ".xml";
+		final String jobOrder = workingDir + jobOrderName;
 
 		final Reporting reporting = ReportingUtils.newReportingBuilder()
 				.predecessor(job.job().getReportingId())
@@ -92,7 +106,7 @@ public class Publisher {
 		
 		try {
 			// Second, build the DTO
-			job.buildJobOrder(workingDir);
+			buildJobOrder(job, workingDir);
 			
 			final IpfExecutionJob execJob = new IpfExecutionJob(
 					settings.getLevel().toFamily(),
@@ -125,7 +139,7 @@ public class Publisher {
 				// Add the jobOrder itself in inputs
 				execJob.addInput(new LevelJobInputDto(ProductFamily.JOB_ORDER.name(), jobOrder, jobOrderXml));
 
-				// Add joborder output to the DTO
+				// Add jobOrder output to the DTO
 				final List<JobOrderOutput> distinctOutputJobOrder = job.jobOrder().getProcs().stream()
 						.filter(proc -> proc != null && !CollectionUtils.isEmpty(proc.getOutputs()))
 						.flatMap(proc -> proc.getOutputs().stream())
@@ -171,8 +185,9 @@ public class Publisher {
 					}
 					execJob.addPool(poolDto);
 				}
-				job.customJobDto(execJob);
-			} 
+
+				job.typeAdapter().customJobDto(job, execJob);
+			}
 			catch (IOException | JAXBException e) {
 				throw new InternalErrorException("Cannot send the job", e);
 			}
@@ -180,32 +195,107 @@ public class Publisher {
 			LOGGER.info("Publishing job {} (product {})", job.id(), job.productName());
 			final AppDataJob dto = job.job();
 
-			final GenericPublicationMessageDto<IpfExecutionJob> messageToPublish = 
-					new GenericPublicationMessageDto<IpfExecutionJob>(
-					dto.getPrepJobMessageId(), 
-					execJob.getProductFamily(), 
-					execJob
-			);
+			final GenericPublicationMessageDto<IpfExecutionJob> messageToPublish =
+					new GenericPublicationMessageDto<>(
+							dto.getPrepJobMessageId(),
+							execJob.getProductFamily(),
+							execJob
+					);
 			messageToPublish.setInputKey(dto.getPrepJobInputQueue());
 			messageToPublish.setOutputKey(execJob.getProductFamily().name());
 			mqiClient.publish(messageToPublish, ProductCategory.LEVEL_JOBS);
 
-			reporting.end(new JobOrderReportingOutput(joborderName, toProcParamMap(job)),
+			reporting.end(new JobOrderReportingOutput(jobOrderName, toProcParamMap(job)),
 					new ReportingMessage("End job generation"));
 		} catch (final AbstractCodedException e) {
 			reporting.error(new ReportingMessage("Error on job generation"));
 		}
 	}
-	
 
-	private final Map<String, String> toProcParamMap(final JobGen jobGen) {
+	// it is not a good idea to change the job order; instead it should be generated in the last step
+	public final void buildJobOrder(final JobGen jobGen, final String workingDir) {
+		//FIXME find better way to create proper paths than just modifying fileNames, intervals and outputs
+
+		final JobOrder jobOrder = jobGen.jobOrder();
+		final AppDataJob job = jobGen.job();
+		final ProductTypeAdapter typeAdapter = jobGen.typeAdapter();
+
+		jobOrder.getProcs().stream()
+				.filter(proc -> proc != null && !CollectionUtils.isEmpty(proc.getInputs()))
+				.flatMap(proc -> proc.getInputs().stream()).forEach(input -> {
+			input.getFilenames().forEach(filename -> filename.setFilename(workingDir + filename.getFilename()));
+			input.getTimeIntervals().forEach(interval -> interval.setFileName(workingDir + interval.getFileName()));
+		});
+		jobOrder.getProcs().stream()
+				.filter(proc -> proc != null && !CollectionUtils.isEmpty(proc.getOutputs()))
+				.flatMap(proc -> proc.getOutputs().stream()).forEach(output -> output.setFileName(workingDir + output.getFileName()));
+
+		// Apply implementation build job
+		jobOrder.getConf().setSensingTime(new JobOrderSensingTime(
+				DateUtils.convertToAnotherFormat(job.getProduct().getStartTime(),
+						AppDataJobProduct.TIME_FORMATTER, JobOrderSensingTime.DATETIME_FORMATTER),
+				DateUtils.convertToAnotherFormat(job.getProduct().getStopTime(),
+						AppDataJobProduct.TIME_FORMATTER, JobOrderSensingTime.DATETIME_FORMATTER)));
+
+		// collect all additional inputs
+		final Map<String, AppDataJobTaskInputs> inputs
+				= job.getAdditionalInputs().stream().collect(toMap(i -> i.getTaskName() + ":" + i.getTaskVersion(), i -> i));
+
+		//set these inputs in corresponding job order processors
+		jobOrder.getProcs().forEach(
+				p -> p.setInputs(toJobOrderInputs(inputs.get(p.getTaskName() + ":" + p.getTaskVersion()))));
+
+
+		typeAdapter.customJobOrder(jobGen);
+	}
+
+	private List<JobOrderInput> toJobOrderInputs(AppDataJobTaskInputs appDataJobTaskInputs) {
+		return appDataJobTaskInputs.getInputs().stream().map(this::toJobOrderInputs).collect(toList());
+	}
+
+	private JobOrderInput toJobOrderInputs(AppDataJobInput input) {
+		return new JobOrderInput(
+				input.getFileType(),
+				getFileNameTypeFor(input.getFileNameType()),
+				toFileNames(input.getFiles()),
+				toIntervals(input.getFiles()),
+				elementMapper.inputFamilyOf(input.getFileType()));
+	}
+
+	//this is a copy from TaskTableAdapter but there it should be removed soon
+	private JobOrderFileNameType getFileNameTypeFor(final String fileNameType) {
+		TaskTableFileNameType type = TaskTableFileNameType.valueOf(fileNameType);
+		switch (type) {
+			case PHYSICAL:
+				return JobOrderFileNameType.PHYSICAL;
+			case DIRECTORY:
+				return JobOrderFileNameType.DIRECTORY;
+			case REGEXP:
+				return JobOrderFileNameType.REGEXP;
+			default:
+				// fall through
+		}
+		return JobOrderFileNameType.BLANK;
+	}
+
+	private List<JobOrderTimeInterval> toIntervals(List<AppDataJobFile> files) {
+		return files.stream().map(
+				f -> new JobOrderTimeInterval(f.getStartDate(), f.getEndDate(), f.getFilename())).collect(toList());
+	}
+
+	private List<JobOrderInputFile> toFileNames(List<AppDataJobFile> files) {
+		return files.stream().map(
+				f -> new JobOrderInputFile(f.getFilename(), f.getKeyObs())).collect(toList());
+	}
+
+	private Map<String, String> toProcParamMap(final JobGen jobGen) {
 		try {
 			final Map<String, String> result = new HashMap<>();
 
 			for (final JobOrderProcParam param : jobGen.jobOrder().getConf().getProcParams()) {
 				// S1PRO-699: Determine type of parameter to use the appropriate suffix in
 				// reporting
-				final String reportingType = mapTasktableTypeToReportingType(
+				final String reportingType = mapTaskTableTypeToReportingType(
 						jobGen.taskTableAdapter().getTypeForParameterName(param.getName())
 				);
 				result.put(param.getName() + reportingType, param.getValue());
@@ -218,7 +308,7 @@ public class Publisher {
 		}
 	}
 	
-	private final String mapTasktableTypeToReportingType(final String type) {
+	private String mapTaskTableTypeToReportingType(final String type) {
 		if ("number".equalsIgnoreCase(type)) {
 			return "_double";
 		} else if ("datenumber".equalsIgnoreCase(type)) {

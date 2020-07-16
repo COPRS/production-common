@@ -94,7 +94,11 @@ public class TaskTableAdapter {
 		
 		return new JobOrder(jobOrderTemplate, settings.getLevel());
 	}
-	
+
+	// FIXME this method does two things: 1. find input 2. convert to JobOrderInput -> job order conversion should be done
+	// as last step when all inputs are present (in AppDataJob)
+	// this would also remove the mutable behaviour of the jobOrder
+	// TODO at least return AppDataJobInput here
 	public final JobOrderInput findInput(final JobGen job, final TaskTableInput input, Map<TaskTableInputAlternative.TaskTableInputAltKey, SearchMetadataResult> results) {
 		JobOrderInput result = null;
 
