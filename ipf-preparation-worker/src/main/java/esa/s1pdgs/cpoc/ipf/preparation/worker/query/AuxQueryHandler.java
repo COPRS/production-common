@@ -8,10 +8,10 @@ import esa.s1pdgs.cpoc.ipf.preparation.worker.model.JobGen;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.model.ProductMode;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.model.tasktable.ElementMapper;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.model.tasktable.TaskTableAdapter;
-import esa.s1pdgs.cpoc.ipf.preparation.worker.model.tasktable.TaskTableInputAlternative;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.timeout.InputTimeoutChecker;
 import esa.s1pdgs.cpoc.metadata.client.MetadataClient;
 import esa.s1pdgs.cpoc.metadata.client.SearchMetadataQuery;
+import esa.s1pdgs.cpoc.xml.model.tasktable.TaskTableInputAlternative;
 
 public class AuxQueryHandler {	
     private final MetadataClient metadataClient;
@@ -23,7 +23,7 @@ public class AuxQueryHandler {
 			final MetadataClient metadataClient,
 			final ProductMode mode,
 			final InputTimeoutChecker timeoutChecker,
-			ElementMapper elementMapper) {
+			final ElementMapper elementMapper) {
 		this.metadataClient = metadataClient;
 		this.mode = mode;
 		this.timeoutChecker = timeoutChecker;
@@ -40,7 +40,7 @@ public class AuxQueryHandler {
 				buildMetadataSearchQuery(jobGen.taskTableAdapter()));
 	}
 
-	private Map<TaskTableInputAlternative.TaskTableInputAltKey, SearchMetadataQuery> buildMetadataSearchQuery(TaskTableAdapter taskTableAdapter) {
+	private Map<TaskTableInputAlternative.TaskTableInputAltKey, SearchMetadataQuery> buildMetadataSearchQuery(final TaskTableAdapter taskTableAdapter) {
 		final Map<TaskTableInputAlternative.TaskTableInputAltKey, SearchMetadataQuery> metadataQueryTemplate =  new HashMap<>();
 
 		taskTableAdapter.allTaskTableInputs()

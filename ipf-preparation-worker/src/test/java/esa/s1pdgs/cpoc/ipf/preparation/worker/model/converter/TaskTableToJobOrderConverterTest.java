@@ -8,13 +8,13 @@ import static org.junit.Assert.assertTrue;
 import org.junit.Test;
 
 import esa.s1pdgs.cpoc.ipf.preparation.worker.model.converter.TaskTableToJobOrderConverter;
-import esa.s1pdgs.cpoc.ipf.preparation.worker.model.joborder.JobOrder;
-import esa.s1pdgs.cpoc.ipf.preparation.worker.model.joborder.JobOrderOutput;
-import esa.s1pdgs.cpoc.ipf.preparation.worker.model.joborder.enums.JobOrderFileNameType;
-import esa.s1pdgs.cpoc.ipf.preparation.worker.model.tasktable.TaskTable;
-import esa.s1pdgs.cpoc.ipf.preparation.worker.model.tasktable.TaskTableOuput;
-import esa.s1pdgs.cpoc.ipf.preparation.worker.model.tasktable.TaskTableTask;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.service.TestL0Utils;
+import esa.s1pdgs.cpoc.xml.model.joborder.JobOrder;
+import esa.s1pdgs.cpoc.xml.model.joborder.JobOrderOutput;
+import esa.s1pdgs.cpoc.xml.model.joborder.enums.JobOrderFileNameType;
+import esa.s1pdgs.cpoc.xml.model.tasktable.TaskTable;
+import esa.s1pdgs.cpoc.xml.model.tasktable.TaskTableOuput;
+import esa.s1pdgs.cpoc.xml.model.tasktable.TaskTableTask;
 
 /**
  * Test the converter TaskTable to JobOrder

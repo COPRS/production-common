@@ -8,10 +8,10 @@ import java.util.List;
 
 import org.junit.Test;
 
-import esa.s1pdgs.cpoc.ipf.preparation.worker.model.routing.LevelProductsRoute;
-import esa.s1pdgs.cpoc.ipf.preparation.worker.model.routing.LevelProductsRouteFrom;
-import esa.s1pdgs.cpoc.ipf.preparation.worker.model.routing.LevelProductsRouteTo;
-import esa.s1pdgs.cpoc.ipf.preparation.worker.model.routing.LevelProductsRouting;
+import esa.s1pdgs.cpoc.xml.model.tasktable.routing.LevelProductsRoute;
+import esa.s1pdgs.cpoc.xml.model.tasktable.routing.LevelProductsRouteFrom;
+import esa.s1pdgs.cpoc.xml.model.tasktable.routing.LevelProductsRouteTo;
+import esa.s1pdgs.cpoc.xml.model.tasktable.routing.LevelProductsRouting;
 import nl.jqno.equalsverifier.EqualsVerifier;
 import nl.jqno.equalsverifier.Warning;
 

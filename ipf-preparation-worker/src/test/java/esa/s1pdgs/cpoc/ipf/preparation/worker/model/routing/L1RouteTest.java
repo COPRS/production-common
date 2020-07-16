@@ -7,9 +7,9 @@ import java.util.Arrays;
 
 import org.junit.Test;
 
-import esa.s1pdgs.cpoc.ipf.preparation.worker.model.routing.LevelProductsRoute;
-import esa.s1pdgs.cpoc.ipf.preparation.worker.model.routing.LevelProductsRouteFrom;
-import esa.s1pdgs.cpoc.ipf.preparation.worker.model.routing.LevelProductsRouteTo;
+import esa.s1pdgs.cpoc.xml.model.tasktable.routing.LevelProductsRoute;
+import esa.s1pdgs.cpoc.xml.model.tasktable.routing.LevelProductsRouteFrom;
+import esa.s1pdgs.cpoc.xml.model.tasktable.routing.LevelProductsRouteTo;
 import nl.jqno.equalsverifier.EqualsVerifier;
 import nl.jqno.equalsverifier.Warning;
 

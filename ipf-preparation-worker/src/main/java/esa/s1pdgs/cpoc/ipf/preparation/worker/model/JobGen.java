@@ -20,19 +20,19 @@ import esa.s1pdgs.cpoc.common.errors.processing.IpfPrepWorkerInputsMissingExcept
 import esa.s1pdgs.cpoc.common.utils.DateUtils;
 import esa.s1pdgs.cpoc.common.utils.Exceptions;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.generator.state.JobStateTransistionFailed;
-import esa.s1pdgs.cpoc.ipf.preparation.worker.model.joborder.JobOrder;
-import esa.s1pdgs.cpoc.ipf.preparation.worker.model.joborder.JobOrderInput;
-import esa.s1pdgs.cpoc.ipf.preparation.worker.model.joborder.JobOrderInputFile;
-import esa.s1pdgs.cpoc.ipf.preparation.worker.model.joborder.JobOrderSensingTime;
-import esa.s1pdgs.cpoc.ipf.preparation.worker.model.joborder.JobOrderTimeInterval;
-import esa.s1pdgs.cpoc.ipf.preparation.worker.model.joborder.enums.JobOrderFileNameType;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.model.tasktable.ElementMapper;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.model.tasktable.TaskTableAdapter;
-import esa.s1pdgs.cpoc.ipf.preparation.worker.model.tasktable.enums.TaskTableFileNameType;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.publish.Publisher;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.query.AuxQueryHandler;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.type.ProductTypeAdapter;
 import esa.s1pdgs.cpoc.mqi.model.queue.IpfExecutionJob;
+import esa.s1pdgs.cpoc.xml.model.joborder.JobOrder;
+import esa.s1pdgs.cpoc.xml.model.joborder.JobOrderInput;
+import esa.s1pdgs.cpoc.xml.model.joborder.JobOrderInputFile;
+import esa.s1pdgs.cpoc.xml.model.joborder.JobOrderSensingTime;
+import esa.s1pdgs.cpoc.xml.model.joborder.JobOrderTimeInterval;
+import esa.s1pdgs.cpoc.xml.model.joborder.enums.JobOrderFileNameType;
+import esa.s1pdgs.cpoc.xml.model.tasktable.enums.TaskTableFileNameType;
 
 public class JobGen {	
 	private final AppDataJob job;
@@ -144,11 +144,11 @@ public class JobGen {
 		typeAdapter.customJobOrder(this);
 	}
 
-	private List<JobOrderInput> toJobOrderInputs(AppDataJobTaskInputs appDataJobTaskInputs) {
+	private List<JobOrderInput> toJobOrderInputs(final AppDataJobTaskInputs appDataJobTaskInputs) {
 		return appDataJobTaskInputs.getInputs().stream().map(this::toJobOrderInputs).collect(toList());
 	}
 
-	private JobOrderInput toJobOrderInputs(AppDataJobInput input) {
+	private JobOrderInput toJobOrderInputs(final AppDataJobInput input) {
 		return new JobOrderInput(
 				input.getFileType(),
 				getFileNameTypeFor(input.getFileNameType()),
@@ -159,7 +159,7 @@ public class JobGen {
 
 	//this is a copy from TaskTableAdapter but there it should be removed soon
 	private JobOrderFileNameType getFileNameTypeFor(final String fileNameType) {
-		TaskTableFileNameType type = TaskTableFileNameType.valueOf(fileNameType);
+		final TaskTableFileNameType type = TaskTableFileNameType.valueOf(fileNameType);
 		switch (type) {
 			case PHYSICAL:
 				return JobOrderFileNameType.PHYSICAL;
@@ -173,12 +173,12 @@ public class JobGen {
 		return JobOrderFileNameType.BLANK;
 	}
 
-	private List<JobOrderTimeInterval> toIntervals(List<AppDataJobFile> files) {
+	private List<JobOrderTimeInterval> toIntervals(final List<AppDataJobFile> files) {
 		return files.stream().map(
 				f -> new JobOrderTimeInterval(f.getStartDate(), f.getEndDate(), f.getFilename())).collect(toList());
 	}
 
-	private List<JobOrderInputFile> toFileNames(List<AppDataJobFile> files) {
+	private List<JobOrderInputFile> toFileNames(final List<AppDataJobFile> files) {
 		return files.stream().map(
 				f -> new JobOrderInputFile(f.getFilename(), f.getKeyObs())).collect(toList());
 	}

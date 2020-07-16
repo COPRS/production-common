@@ -12,22 +12,19 @@ import esa.s1pdgs.cpoc.common.errors.AbstractCodedException;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.appcat.AppCatAdapter;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.appcat.CatalogEventAdapter;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.model.JobGen;
-import esa.s1pdgs.cpoc.ipf.preparation.worker.model.joborder.AbstractJobOrderConf;
-import esa.s1pdgs.cpoc.ipf.preparation.worker.model.tasktable.mapper.TasktableMapper;
 import esa.s1pdgs.cpoc.metadata.client.MetadataClient;
 import esa.s1pdgs.cpoc.mqi.model.queue.IpfExecutionJob;
 import esa.s1pdgs.cpoc.mqi.model.queue.LevelJobInputDto;
+import esa.s1pdgs.cpoc.xml.model.joborder.AbstractJobOrderConf;
 
 public final class EdrsSession extends AbstractProductTypeAdapter implements ProductTypeAdapter {		
 	private final MetadataClient metadataClient;
     private final AiopPropertiesAdapter aiopAdapter;
       
 	public EdrsSession(
-			final TasktableMapper taskTableMapper, 
 			final MetadataClient metadataClient, 
 			final AiopPropertiesAdapter aiopAdapter
 	) {
-		super(taskTableMapper);
 		this.metadataClient = metadataClient;
 		this.aiopAdapter = aiopAdapter;
 	}

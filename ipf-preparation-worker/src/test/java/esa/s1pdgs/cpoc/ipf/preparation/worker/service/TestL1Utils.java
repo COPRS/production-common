@@ -12,12 +12,12 @@ import esa.s1pdgs.cpoc.appcatalog.AppDataJobState;
 import esa.s1pdgs.cpoc.common.ApplicationLevel;
 import esa.s1pdgs.cpoc.common.ProductFamily;
 import esa.s1pdgs.cpoc.common.errors.InternalErrorException;
-import esa.s1pdgs.cpoc.ipf.preparation.worker.model.routing.LevelProductsRoute;
-import esa.s1pdgs.cpoc.ipf.preparation.worker.model.routing.LevelProductsRouteFrom;
-import esa.s1pdgs.cpoc.ipf.preparation.worker.model.routing.LevelProductsRouteTo;
-import esa.s1pdgs.cpoc.ipf.preparation.worker.model.routing.LevelProductsRouting;
 import esa.s1pdgs.cpoc.mqi.model.queue.CatalogEvent;
 import esa.s1pdgs.cpoc.mqi.model.rest.GenericMessageDto;
+import esa.s1pdgs.cpoc.xml.model.tasktable.routing.LevelProductsRoute;
+import esa.s1pdgs.cpoc.xml.model.tasktable.routing.LevelProductsRouteFrom;
+import esa.s1pdgs.cpoc.xml.model.tasktable.routing.LevelProductsRouteTo;
+import esa.s1pdgs.cpoc.xml.model.tasktable.routing.LevelProductsRouting;
 
 public class TestL1Utils {
 

@@ -6,10 +6,10 @@ import static org.junit.Assert.assertTrue;
 import org.junit.Test;
 
 import esa.s1pdgs.cpoc.common.ProductFamily;
-import esa.s1pdgs.cpoc.ipf.preparation.worker.model.joborder.JobOrderInput;
-import esa.s1pdgs.cpoc.ipf.preparation.worker.model.joborder.JobOrderInputFile;
-import esa.s1pdgs.cpoc.ipf.preparation.worker.model.joborder.JobOrderTimeInterval;
-import esa.s1pdgs.cpoc.ipf.preparation.worker.model.joborder.enums.JobOrderFileNameType;
+import esa.s1pdgs.cpoc.xml.model.joborder.JobOrderInput;
+import esa.s1pdgs.cpoc.xml.model.joborder.JobOrderInputFile;
+import esa.s1pdgs.cpoc.xml.model.joborder.JobOrderTimeInterval;
+import esa.s1pdgs.cpoc.xml.model.joborder.enums.JobOrderFileNameType;
 import nl.jqno.equalsverifier.EqualsVerifier;
 import nl.jqno.equalsverifier.Warning;
 

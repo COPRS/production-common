@@ -5,10 +5,10 @@ import static org.junit.Assert.assertNull;
 
 import org.junit.Test;
 
-import esa.s1pdgs.cpoc.ipf.preparation.worker.model.tasktable.TaskTableInput;
-import esa.s1pdgs.cpoc.ipf.preparation.worker.model.tasktable.TaskTableInputAlternative;
-import esa.s1pdgs.cpoc.ipf.preparation.worker.model.tasktable.enums.TaskTableInputMode;
-import esa.s1pdgs.cpoc.ipf.preparation.worker.model.tasktable.enums.TaskTableMandatoryEnum;
+import esa.s1pdgs.cpoc.xml.model.tasktable.TaskTableInput;
+import esa.s1pdgs.cpoc.xml.model.tasktable.TaskTableInputAlternative;
+import esa.s1pdgs.cpoc.xml.model.tasktable.enums.TaskTableInputMode;
+import esa.s1pdgs.cpoc.xml.model.tasktable.enums.TaskTableMandatoryEnum;
 import nl.jqno.equalsverifier.EqualsVerifier;
 import nl.jqno.equalsverifier.Warning;
 

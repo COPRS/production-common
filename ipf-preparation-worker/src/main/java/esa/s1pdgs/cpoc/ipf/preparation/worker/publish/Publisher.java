@@ -26,13 +26,6 @@ import esa.s1pdgs.cpoc.common.utils.LogUtils;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.config.IpfPreparationWorkerSettings;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.config.ProcessSettings;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.model.JobGen;
-import esa.s1pdgs.cpoc.ipf.preparation.worker.model.converter.XmlConverter;
-import esa.s1pdgs.cpoc.ipf.preparation.worker.model.joborder.JobOrderInput;
-import esa.s1pdgs.cpoc.ipf.preparation.worker.model.joborder.JobOrderInputFile;
-import esa.s1pdgs.cpoc.ipf.preparation.worker.model.joborder.JobOrderOutput;
-import esa.s1pdgs.cpoc.ipf.preparation.worker.model.joborder.JobOrderProcParam;
-import esa.s1pdgs.cpoc.ipf.preparation.worker.model.joborder.enums.JobOrderDestination;
-import esa.s1pdgs.cpoc.ipf.preparation.worker.model.joborder.enums.JobOrderFileNameType;
 import esa.s1pdgs.cpoc.mqi.client.MqiClient;
 import esa.s1pdgs.cpoc.mqi.model.queue.IpfExecutionJob;
 import esa.s1pdgs.cpoc.mqi.model.queue.LevelJobInputDto;
@@ -44,6 +37,13 @@ import esa.s1pdgs.cpoc.report.Reporting;
 import esa.s1pdgs.cpoc.report.ReportingMessage;
 import esa.s1pdgs.cpoc.report.ReportingUtils;
 import esa.s1pdgs.cpoc.report.message.output.JobOrderReportingOutput;
+import esa.s1pdgs.cpoc.xml.XmlConverter;
+import esa.s1pdgs.cpoc.xml.model.joborder.JobOrderInput;
+import esa.s1pdgs.cpoc.xml.model.joborder.JobOrderInputFile;
+import esa.s1pdgs.cpoc.xml.model.joborder.JobOrderOutput;
+import esa.s1pdgs.cpoc.xml.model.joborder.JobOrderProcParam;
+import esa.s1pdgs.cpoc.xml.model.joborder.enums.JobOrderDestination;
+import esa.s1pdgs.cpoc.xml.model.joborder.enums.JobOrderFileNameType;
 
 @Component
 public class Publisher {	

@@ -1,26 +1,27 @@
 package esa.s1pdgs.cpoc.ipf.preparation.worker.model.converter;
 
 import esa.s1pdgs.cpoc.common.ApplicationLevel;
-import esa.s1pdgs.cpoc.ipf.preparation.worker.model.joborder.AbstractJobOrderConf;
-import esa.s1pdgs.cpoc.ipf.preparation.worker.model.joborder.JobOrder;
-import esa.s1pdgs.cpoc.ipf.preparation.worker.model.joborder.JobOrderBreakpoint;
-import esa.s1pdgs.cpoc.ipf.preparation.worker.model.joborder.JobOrderOutput;
-import esa.s1pdgs.cpoc.ipf.preparation.worker.model.joborder.JobOrderProc;
-import esa.s1pdgs.cpoc.ipf.preparation.worker.model.joborder.JobOrderProcParam;
-import esa.s1pdgs.cpoc.ipf.preparation.worker.model.joborder.L0JobOrderConf;
-import esa.s1pdgs.cpoc.ipf.preparation.worker.model.joborder.L1JobOrderConf;
-import esa.s1pdgs.cpoc.ipf.preparation.worker.model.joborder.L2JobOrderConf;
-import esa.s1pdgs.cpoc.ipf.preparation.worker.model.joborder.enums.JobOrderDestination;
-import esa.s1pdgs.cpoc.ipf.preparation.worker.model.joborder.enums.JobOrderFileNameType;
-import esa.s1pdgs.cpoc.ipf.preparation.worker.model.tasktable.TaskTable;
-import esa.s1pdgs.cpoc.ipf.preparation.worker.model.tasktable.TaskTableCfgFile;
-import esa.s1pdgs.cpoc.ipf.preparation.worker.model.tasktable.TaskTableDynProcParam;
-import esa.s1pdgs.cpoc.ipf.preparation.worker.model.tasktable.TaskTableOuput;
-import esa.s1pdgs.cpoc.ipf.preparation.worker.model.tasktable.TaskTableTask;
-import esa.s1pdgs.cpoc.ipf.preparation.worker.model.tasktable.enums.TaskTableFileNameType;
-import esa.s1pdgs.cpoc.ipf.preparation.worker.model.tasktable.enums.TaskTableMandatoryEnum;
-import esa.s1pdgs.cpoc.ipf.preparation.worker.model.tasktable.enums.TaskTableOutputDestination;
-import esa.s1pdgs.cpoc.ipf.preparation.worker.model.tasktable.enums.TaskTableTestEnum;
+import esa.s1pdgs.cpoc.xml.SuperConverter;
+import esa.s1pdgs.cpoc.xml.model.joborder.AbstractJobOrderConf;
+import esa.s1pdgs.cpoc.xml.model.joborder.JobOrder;
+import esa.s1pdgs.cpoc.xml.model.joborder.JobOrderBreakpoint;
+import esa.s1pdgs.cpoc.xml.model.joborder.JobOrderOutput;
+import esa.s1pdgs.cpoc.xml.model.joborder.JobOrderProc;
+import esa.s1pdgs.cpoc.xml.model.joborder.JobOrderProcParam;
+import esa.s1pdgs.cpoc.xml.model.joborder.L0JobOrderConf;
+import esa.s1pdgs.cpoc.xml.model.joborder.L1JobOrderConf;
+import esa.s1pdgs.cpoc.xml.model.joborder.L2JobOrderConf;
+import esa.s1pdgs.cpoc.xml.model.joborder.enums.JobOrderDestination;
+import esa.s1pdgs.cpoc.xml.model.joborder.enums.JobOrderFileNameType;
+import esa.s1pdgs.cpoc.xml.model.tasktable.TaskTable;
+import esa.s1pdgs.cpoc.xml.model.tasktable.TaskTableCfgFile;
+import esa.s1pdgs.cpoc.xml.model.tasktable.TaskTableDynProcParam;
+import esa.s1pdgs.cpoc.xml.model.tasktable.TaskTableOuput;
+import esa.s1pdgs.cpoc.xml.model.tasktable.TaskTableTask;
+import esa.s1pdgs.cpoc.xml.model.tasktable.enums.TaskTableFileNameType;
+import esa.s1pdgs.cpoc.xml.model.tasktable.enums.TaskTableMandatoryEnum;
+import esa.s1pdgs.cpoc.xml.model.tasktable.enums.TaskTableOutputDestination;
+import esa.s1pdgs.cpoc.xml.model.tasktable.enums.TaskTableTestEnum;
 
 /**
  * Convert TaskTable objects into JobOrder objects
@@ -79,7 +80,7 @@ class TaskTableDynProcParamToJobOrderProcParamConverter
 	 */
 	@Override
 	public JobOrderProcParam apply(final TaskTableDynProcParam tObj) {
-		JobOrderProcParam rObj = new JobOrderProcParam();
+		final JobOrderProcParam rObj = new JobOrderProcParam();
 		rObj.setName(tObj.getName());
 		rObj.setValue(tObj.getDefaultValue());
 		return rObj;
@@ -123,7 +124,7 @@ class TaskTableTaskToJobOrderProc implements SuperConverter<TaskTableTask, JobOr
 	@Override
 	public JobOrderProc apply(final TaskTableTask tObj) {
 		final TaskTableOuputToJobOrderOutput outputConverter = new TaskTableOuputToJobOrderOutput();
-		JobOrderProc rObj = new JobOrderProc();
+		final JobOrderProc rObj = new JobOrderProc();
 		rObj.setTaskName(tObj.getName());
 		rObj.setTaskVersion(tObj.getVersion());
 		rObj.setBreakpoint(new JobOrderBreakpoint());
@@ -147,7 +148,7 @@ class TaskTableOuputToJobOrderOutput implements SuperConverter<TaskTableOuput, J
 	public JobOrderOutput apply(final TaskTableOuput tObj) {
 		final TaskTableFileNameTypeToJobOrderFileNameType fileNameTypeConverter = new TaskTableFileNameTypeToJobOrderFileNameType();
 
-		JobOrderOutput rObj = new JobOrderOutput();
+		final JobOrderOutput rObj = new JobOrderOutput();
 		if (tObj.getMandatory() == TaskTableMandatoryEnum.YES) {
 			rObj.setMandatory(true);
 		}

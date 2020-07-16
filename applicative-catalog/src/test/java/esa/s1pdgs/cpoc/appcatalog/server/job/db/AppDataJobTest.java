@@ -30,7 +30,7 @@ public class AppDataJobTest {
         final AppDataJob obj = new AppDataJob();
         
         final AppDataJobProduct product = new AppDataJobProduct();
-        product.setSessionId("session-id");
+        product.getMetadata().put("sessionId", "session-id");
         final AppDataJobGeneration gen1 = new AppDataJobGeneration();
         gen1.setTaskTable("tast-table-1");
         final AppDataJobGeneration gen2 = new AppDataJobGeneration();

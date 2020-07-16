@@ -11,10 +11,9 @@ import esa.s1pdgs.cpoc.common.utils.DateUtils;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.appcat.AppCatAdapter;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.appcat.CatalogEventAdapter;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.model.JobGen;
-import esa.s1pdgs.cpoc.ipf.preparation.worker.model.joborder.JobOrderSensingTime;
-import esa.s1pdgs.cpoc.ipf.preparation.worker.model.tasktable.mapper.TasktableMapper;
 import esa.s1pdgs.cpoc.metadata.client.MetadataClient;
 import esa.s1pdgs.cpoc.mqi.model.queue.IpfExecutionJob;
+import esa.s1pdgs.cpoc.xml.model.joborder.JobOrderSensingTime;
 
 public final class LevelProduct extends AbstractProductTypeAdapter implements ProductTypeAdapter {
 	private final MetadataClient metadataClient;
@@ -22,12 +21,10 @@ public final class LevelProduct extends AbstractProductTypeAdapter implements Pr
 	private final Map<String, Float> sliceLength;
 
 	public LevelProduct(
-			final TasktableMapper taskTableMapper, 
 			final MetadataClient metadataClient,
 			final Map<String, Float> sliceOverlap,
 			final Map<String, Float> sliceLength
 	) {
-		super(taskTableMapper);
 		this.metadataClient = metadataClient;
 		this.sliceOverlap = sliceOverlap;
 		this.sliceLength = sliceLength;

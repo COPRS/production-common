@@ -18,28 +18,27 @@ import esa.s1pdgs.cpoc.appcatalog.AppDataJobFile;
 import esa.s1pdgs.cpoc.appcatalog.AppDataJobInput;
 import esa.s1pdgs.cpoc.appcatalog.AppDataJobProduct;
 import esa.s1pdgs.cpoc.appcatalog.AppDataJobTaskInputs;
-import esa.s1pdgs.cpoc.common.ProductFamily;
 import esa.s1pdgs.cpoc.common.errors.processing.IpfPrepWorkerInputsMissingException;
 import esa.s1pdgs.cpoc.common.errors.processing.MetadataQueryException;
 import esa.s1pdgs.cpoc.common.utils.DateUtils;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.model.JobGen;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.model.ProductMode;
-import esa.s1pdgs.cpoc.ipf.preparation.worker.model.joborder.JobOrderInput;
-import esa.s1pdgs.cpoc.ipf.preparation.worker.model.joborder.JobOrderInputFile;
-import esa.s1pdgs.cpoc.ipf.preparation.worker.model.joborder.JobOrderTimeInterval;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.model.metadata.SearchMetadataResult;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.model.tasktable.ElementMapper;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.model.tasktable.TaskTableAdapter;
-import esa.s1pdgs.cpoc.ipf.preparation.worker.model.tasktable.TaskTableInput;
-import esa.s1pdgs.cpoc.ipf.preparation.worker.model.tasktable.TaskTableInputAlternative;
-import esa.s1pdgs.cpoc.ipf.preparation.worker.model.tasktable.TaskTablePool;
-import esa.s1pdgs.cpoc.ipf.preparation.worker.model.tasktable.TaskTableTask;
-import esa.s1pdgs.cpoc.ipf.preparation.worker.model.tasktable.enums.TaskTableMandatoryEnum;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.timeout.InputTimeoutChecker;
 import esa.s1pdgs.cpoc.metadata.client.MetadataClient;
 import esa.s1pdgs.cpoc.metadata.client.SearchMetadataQuery;
 import esa.s1pdgs.cpoc.metadata.model.AbstractMetadata;
 import esa.s1pdgs.cpoc.metadata.model.SearchMetadata;
+import esa.s1pdgs.cpoc.xml.model.joborder.JobOrderInput;
+import esa.s1pdgs.cpoc.xml.model.joborder.JobOrderInputFile;
+import esa.s1pdgs.cpoc.xml.model.joborder.JobOrderTimeInterval;
+import esa.s1pdgs.cpoc.xml.model.tasktable.TaskTableInput;
+import esa.s1pdgs.cpoc.xml.model.tasktable.TaskTableInputAlternative;
+import esa.s1pdgs.cpoc.xml.model.tasktable.TaskTablePool;
+import esa.s1pdgs.cpoc.xml.model.tasktable.TaskTableTask;
+import esa.s1pdgs.cpoc.xml.model.tasktable.enums.TaskTableMandatoryEnum;
 
 public class AuxQuery implements Callable<JobGen> {
 	private static final Logger LOGGER = LogManager.getLogger(AuxQuery.class);
@@ -77,7 +76,7 @@ public class AuxQuery implements Callable<JobGen> {
 		return jobGen;
 	}
 
-	private Map<TaskTableInputAlternative.TaskTableInputAltKey, SearchMetadataResult> toQueries(Map<TaskTableInputAlternative.TaskTableInputAltKey, SearchMetadataQuery> metadataQueriesTemplate) {
+	private Map<TaskTableInputAlternative.TaskTableInputAltKey, SearchMetadataResult> toQueries(final Map<TaskTableInputAlternative.TaskTableInputAltKey, SearchMetadataQuery> metadataQueriesTemplate) {
 		return metadataQueriesTemplate.entrySet().stream().collect(
 				toMap(
 						Map.Entry::getKey,
@@ -120,7 +119,7 @@ public class AuxQuery implements Callable<JobGen> {
 		return queries;
 	}
 	
-	private List<AppDataJobTaskInputs> distributeResults(Map<TaskTableInputAlternative.TaskTableInputAltKey, SearchMetadataResult> metadataQueries) throws IpfPrepWorkerInputsMissingException {
+	private List<AppDataJobTaskInputs> distributeResults(final Map<TaskTableInputAlternative.TaskTableInputAltKey, SearchMetadataResult> metadataQueries) throws IpfPrepWorkerInputsMissingException {
 		final Map<String, AppDataJobInput> referenceInputs = new HashMap<>();
 		final List<AppDataJobTaskInputs> result = new ArrayList<>();
 		//for each pool
@@ -185,7 +184,7 @@ public class AuxQuery implements Callable<JobGen> {
 	// TODO TaskTableAdapter by itself should not return a JobOrderInput but a more generic
 	// structure which solely holds the reference between task table input and search meta data result
 	// as long as this is not changed the JobOrderInput has to be converted to AppDataJobInput here
-	private AppDataJobInput convert(JobOrderInput input) {
+	private AppDataJobInput convert(final JobOrderInput input) {
 		if(input == null) {
 			return null;
 		}
@@ -196,7 +195,7 @@ public class AuxQuery implements Callable<JobGen> {
 				input.getTimeIntervals().stream().map(ti -> merge(fileNames.get(ti.getFileName()), ti)).collect(toList()));
 	}
 
-	private AppDataJobFile merge(JobOrderInputFile file, JobOrderTimeInterval interval) {
+	private AppDataJobFile merge(final JobOrderInputFile file, final JobOrderTimeInterval interval) {
 		return new AppDataJobFile(
 				file.getFilename(), file.getKeyObjectStorage(),
 				interval.getStart(), interval.getStop());

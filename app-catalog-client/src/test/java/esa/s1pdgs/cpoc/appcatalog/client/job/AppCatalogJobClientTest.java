@@ -197,7 +197,7 @@ public class AppCatalogJobClientTest {
         job.setState(AppDataJobState.DISPATCHING);
         
         final AppDataJobProduct product = new AppDataJobProduct();
-        product.setProductName("toto");
+        product.getMetadata().put("productName", "toto");
         job.setProduct(product);
         
         final GenericMessageDto<CatalogEvent> message1 = new GenericMessageDto<CatalogEvent>(1, "key1", DUMMY);

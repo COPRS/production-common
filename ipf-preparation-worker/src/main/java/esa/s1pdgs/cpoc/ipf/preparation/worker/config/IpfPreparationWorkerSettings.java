@@ -116,10 +116,11 @@ public class IpfPreparationWorkerSettings {
 					+ ", waitingFromDownlinkInSeconds=" + waitingFromDownlinkInSeconds + ", waitingFromIngestionInSeconds=" + waitingFromIngestionInSeconds + "]";
 		}
 	}
+		
+	private List<InputWaitingConfig> inputWaiting = new ArrayList<>();
 
 	private Map<ProductCategory, CategoryConfig> productCategories = new LinkedHashMap<>();
-	
-	private List<InputWaitingConfig> inputWaiting = new ArrayList<>();
+
 	
 	public Map<ProductCategory, CategoryConfig> getProductCategories() {
 		return productCategories;

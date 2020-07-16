@@ -8,6 +8,7 @@ import java.util.List;
 
 import org.junit.Test;
 
+import esa.s1pdgs.cpoc.xml.model.tasktable.TaskTableInputAlternative;
 import nl.jqno.equalsverifier.EqualsVerifier;
 import nl.jqno.equalsverifier.Warning;
 

@@ -4,8 +4,8 @@ import static org.junit.Assert.assertEquals;
 
 import org.junit.Test;
 
-import esa.s1pdgs.cpoc.ipf.preparation.worker.model.joborder.enums.JobOrderDestination;
-import esa.s1pdgs.cpoc.ipf.preparation.worker.model.joborder.enums.JobOrderFileNameType;
+import esa.s1pdgs.cpoc.xml.model.joborder.enums.JobOrderDestination;
+import esa.s1pdgs.cpoc.xml.model.joborder.enums.JobOrderFileNameType;
 
 public class JobOrderEnumsTest {
 

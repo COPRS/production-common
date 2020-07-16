@@ -12,7 +12,7 @@ import org.apache.logging.log4j.Logger;
 import esa.s1pdgs.cpoc.appcatalog.AppDataJob;
 import esa.s1pdgs.cpoc.common.utils.DateUtils;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.config.IpfPreparationWorkerSettings.InputWaitingConfig;
-import esa.s1pdgs.cpoc.ipf.preparation.worker.model.tasktable.TaskTableInput;
+import esa.s1pdgs.cpoc.xml.model.tasktable.TaskTableInput;
 
 public final class InputTimeoutCheckerImpl implements InputTimeoutChecker {	
 	private static final Logger LOG = LogManager.getLogger(InputTimeoutChecker.class);

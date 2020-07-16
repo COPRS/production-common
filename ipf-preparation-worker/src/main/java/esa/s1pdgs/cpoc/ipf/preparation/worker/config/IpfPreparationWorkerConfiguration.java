@@ -32,14 +32,10 @@ import esa.s1pdgs.cpoc.ipf.preparation.worker.generator.GracePeriodHandler;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.generator.JobGenerator;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.generator.JobGeneratorImpl;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.model.ProductMode;
-import esa.s1pdgs.cpoc.ipf.preparation.worker.model.converter.XmlConverter;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.model.tasktable.ElementMapper;
-import esa.s1pdgs.cpoc.ipf.preparation.worker.model.tasktable.TaskTable;
-import esa.s1pdgs.cpoc.ipf.preparation.worker.model.tasktable.TaskTableFactory;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.model.tasktable.TaskTableAdapter;
+import esa.s1pdgs.cpoc.ipf.preparation.worker.model.tasktable.TaskTableFactory;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.model.tasktable.TasktableManager;
-import esa.s1pdgs.cpoc.ipf.preparation.worker.model.tasktable.mapper.RoutingBasedTasktableMapper;
-import esa.s1pdgs.cpoc.ipf.preparation.worker.model.tasktable.mapper.SingleTasktableMapper;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.publish.Publisher;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.query.AuxQueryHandler;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.service.IpfPreparationService;
@@ -57,6 +53,8 @@ import esa.s1pdgs.cpoc.mqi.client.MqiClient;
 import esa.s1pdgs.cpoc.mqi.client.MqiConsumer;
 import esa.s1pdgs.cpoc.mqi.client.MqiListener;
 import esa.s1pdgs.cpoc.mqi.model.queue.IpfPreparationJob;
+import esa.s1pdgs.cpoc.xml.XmlConverter;
+import esa.s1pdgs.cpoc.xml.model.tasktable.TaskTable;
 
 @Configuration
 public class IpfPreparationWorkerConfiguration {

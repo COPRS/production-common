@@ -8,7 +8,13 @@ import static java.util.stream.Collectors.toList;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertThat;
-import static org.mockito.Mockito.*;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.argThat;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 import java.io.File;
 import java.util.List;
@@ -32,21 +38,20 @@ import esa.s1pdgs.cpoc.appcatalog.AppDataJob;
 import esa.s1pdgs.cpoc.appcatalog.AppDataJobProduct;
 import esa.s1pdgs.cpoc.common.ProductFamily;
 import esa.s1pdgs.cpoc.common.errors.processing.MetadataQueryException;
-import esa.s1pdgs.cpoc.ipf.preparation.worker.config.XmlConfig;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.model.JobGen;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.model.ProductMode;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.model.converter.TaskTableToJobOrderConverter;
-import esa.s1pdgs.cpoc.ipf.preparation.worker.model.converter.XmlConverter;
-import esa.s1pdgs.cpoc.ipf.preparation.worker.model.joborder.JobOrder;
-import esa.s1pdgs.cpoc.ipf.preparation.worker.model.joborder.JobOrderInputFile;
-import esa.s1pdgs.cpoc.ipf.preparation.worker.model.joborder.JobOrderProc;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.model.tasktable.ElementMapper;
-import esa.s1pdgs.cpoc.ipf.preparation.worker.model.tasktable.TaskTable;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.model.tasktable.TaskTableAdapter;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.timeout.InputTimeoutChecker;
 import esa.s1pdgs.cpoc.metadata.client.MetadataClient;
 import esa.s1pdgs.cpoc.metadata.client.SearchMetadataQuery;
 import esa.s1pdgs.cpoc.metadata.model.SearchMetadata;
+import esa.s1pdgs.cpoc.xml.config.XmlConfig;
+import esa.s1pdgs.cpoc.xml.model.joborder.JobOrder;
+import esa.s1pdgs.cpoc.xml.model.joborder.JobOrderInputFile;
+import esa.s1pdgs.cpoc.xml.model.joborder.JobOrderProc;
+import esa.s1pdgs.cpoc.xml.model.tasktable.TaskTable;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest
@@ -71,21 +76,21 @@ public class AuxQueryTest {
     public void call() throws Exception {
 
         final String xmlFile = "./test/data/generic_config/task_tables/TaskTable.AIOP.xml";
-        XmlConverter converter = new XmlConfig().xmlConverter();
+        final XmlConverter converter = new XmlConfig().xmlConverter();
         final TaskTable taskTable = (TaskTable) converter.convertFromXMLToObject(xmlFile);
         final TaskTableAdapter taskTableAdapter = new TaskTableAdapter(new File(xmlFile), taskTable, elementMapper);
 
         taskTableAdapter.allTaskTableInputs().forEach((key, value) -> System.out.println("input: " + key));
 
-        AppDataJob job = new AppDataJob(133L);
+        final AppDataJob job = new AppDataJob(133L);
         final AppDataJobProduct product = new AppDataJobProduct();
         product.setStartTime("2020-07-13T12:20:00.000000Z");
         product.setStopTime("2020-07-13T12:25:00.000000Z");
         job.setProduct(product);
 
-        JobOrder jobOrder = new TaskTableToJobOrderConverter().apply(taskTable);
+        final JobOrder jobOrder = new TaskTableToJobOrderConverter().apply(taskTable);
 
-        JobGen jobGen = new JobGen(job, null, null, taskTableAdapter, null, null, jobOrder, null);
+        final JobGen jobGen = new JobGen(job, null, null, taskTableAdapter, null, null, jobOrder, null);
 
         when(metadataClient
                 .search(argThat(isQueryWithType("MPL_ORBPRE")), any(), any(), any(), anyInt(), any(), any()))
@@ -189,21 +194,21 @@ public class AuxQueryTest {
     public void callWithMultipleAlternativesAndRefInputs() throws Exception {
 
         final String xmlFile = "./test/data/generic_config/task_tables/IW_RAW__0_GRDH_1.xml";
-        XmlConverter converter = new XmlConfig().xmlConverter();
+        final XmlConverter converter = new XmlConfig().xmlConverter();
         final TaskTable taskTable = (TaskTable) converter.convertFromXMLToObject(xmlFile);
         final TaskTableAdapter taskTableAdapter = new TaskTableAdapter(new File(xmlFile), taskTable, elementMapper);
 
         taskTableAdapter.allTaskTableInputs().forEach((key, value) -> System.out.println("input: " + key));
 
-        AppDataJob job = new AppDataJob(133L);
+        final AppDataJob job = new AppDataJob(133L);
         final AppDataJobProduct product = new AppDataJobProduct();
         product.setStartTime("2020-07-13T12:20:00.000000Z");
         product.setStopTime("2020-07-13T12:25:00.000000Z");
         job.setProduct(product);
 
-        JobOrder jobOrder = new TaskTableToJobOrderConverter().apply(taskTable);
+        final JobOrder jobOrder = new TaskTableToJobOrderConverter().apply(taskTable);
 
-        JobGen jobGen = new JobGen(job, null, null, taskTableAdapter, elementMapper, null, jobOrder, null);
+        final JobGen jobGen = new JobGen(job, null, null, taskTableAdapter, elementMapper, null, jobOrder, null);
 
         //currently for multiple alternatives all are queried no matter a result has already been found or not
         //but later the first result is taken in the final job order
@@ -279,7 +284,7 @@ public class AuxQueryTest {
                 "AUX_ATT_RESULT"));
     }
 
-    private void expectAndReturnMetadataQuery(String fileType, String result, MetadataClient metadataClient) throws MetadataQueryException {
+    private void expectAndReturnMetadataQuery(final String fileType, final String result, final MetadataClient metadataClient) throws MetadataQueryException {
         when(metadataClient
                 .search(argThat(isQueryWithType(fileType)), any(), any(), any(), anyInt(), any(), any()))
                 .thenReturn(singletonList(
@@ -294,7 +299,7 @@ public class AuxQueryTest {
                                 "")));
     }
 
-    private void expectAndReturnMetadataQueryNoResult(String fileType, MetadataClient metadataClient) throws MetadataQueryException {
+    private void expectAndReturnMetadataQueryNoResult(final String fileType, final MetadataClient metadataClient) throws MetadataQueryException {
         when(metadataClient
                 .search(argThat(isQueryWithType(fileType)), any(), any(), any(), anyInt(), any(), any()))
                 .thenReturn(emptyList());
@@ -302,15 +307,15 @@ public class AuxQueryTest {
 
 
     //check if proc has expectedInputs where in input is defined by "resultFileName"
-    private Matcher<JobOrderProc> hasInputs(String... expectedInputs) {
+    private Matcher<JobOrderProc> hasInputs(final String... expectedInputs) {
         return new CustomMatcher<JobOrderProc>(format("proc with inputs %s", asList(expectedInputs))) {
             @Override
-            public boolean matches(Object item) {
+            public boolean matches(final Object item) {
                 if (!(item instanceof JobOrderProc)) {
                     return false;
                 }
 
-                JobOrderProc actual = (JobOrderProc) item;
+                final JobOrderProc actual = (JobOrderProc) item;
 
                 final List<String> actualInputs = actual.getInputs().stream()
                         .flatMap(i -> i.getFilenames().stream().map(JobOrderInputFile::getFilename))
@@ -324,7 +329,7 @@ public class AuxQueryTest {
         };
     }
 
-    private JobOrderProc procOfType(String type, JobOrder jobOrder) {
+    private JobOrderProc procOfType(final String type, final JobOrder jobOrder) {
         final Optional<JobOrderProc> proc = jobOrder.getProcs().stream().filter(p -> p.getTaskName().equals(type)).findFirst();
 
         if (!proc.isPresent()) {
@@ -334,10 +339,10 @@ public class AuxQueryTest {
         return proc.get();
     }
 
-    private ArgumentMatcher<SearchMetadataQuery> isQueryWithType(String productType) {
+    private ArgumentMatcher<SearchMetadataQuery> isQueryWithType(final String productType) {
         return new ArgumentMatcher<SearchMetadataQuery>() {
             @Override
-            public boolean matches(SearchMetadataQuery query) {
+            public boolean matches(final SearchMetadataQuery query) {
                 return query != null && query.getProductType().equals(productType);
             }
 
@@ -348,11 +353,11 @@ public class AuxQueryTest {
         };
     }
 
-    private ArgumentMatcher<SearchMetadataQuery> isQueryMatching(String productType, ProductFamily productFamily, double dT0, double dT1, String retrievalMode) {
+    private ArgumentMatcher<SearchMetadataQuery> isQueryMatching(final String productType, final ProductFamily productFamily, final double dT0, final double dT1, final String retrievalMode) {
 
         return new ArgumentMatcher<SearchMetadataQuery>() {
             @Override
-            public boolean matches(SearchMetadataQuery searchMetadataQuery) {
+            public boolean matches(final SearchMetadataQuery searchMetadataQuery) {
                 return searchMetadataQuery.getProductType().equals(productType)
                         && searchMetadataQuery.getProductFamily().equals(productFamily)
                         && searchMetadataQuery.getDeltaTime0() == dT0

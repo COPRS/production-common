@@ -9,7 +9,7 @@ import java.util.List;
 
 import org.junit.Test;
 
-import esa.s1pdgs.cpoc.ipf.preparation.worker.model.joborder.JobOrderBreakpoint;
+import esa.s1pdgs.cpoc.xml.model.joborder.JobOrderBreakpoint;
 import nl.jqno.equalsverifier.EqualsVerifier;
 import nl.jqno.equalsverifier.Warning;
 

@@ -8,6 +8,7 @@ import java.util.Optional;
 import esa.s1pdgs.cpoc.appcatalog.AppDataJob;
 import esa.s1pdgs.cpoc.appcatalog.AppDataJobGeneration;
 import esa.s1pdgs.cpoc.appcatalog.AppDataJobGenerationState;
+import esa.s1pdgs.cpoc.appcatalog.AppDataJobProductAdapter;
 import esa.s1pdgs.cpoc.appcatalog.AppDataJobState;
 import esa.s1pdgs.cpoc.common.utils.LogUtils;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.appcat.AppCatAdapter;
@@ -60,12 +61,19 @@ public class JobDispatcherImpl implements JobDispatcher {
         		.predecessor(prepJob.getUid())
         		.newReporting("TaskTableLookup");
         
+        typeAdapter.customAppDataJobProduct(jobFromMessage.getProduct());        
+        final AppDataJobProductAdapter productAdapter = new AppDataJobProductAdapter(jobFromMessage.getProduct());
+        
+        
     	reporting.begin(
     			ReportingUtils.newFilenameReportingInputFor(prepJob.getProductFamily(), jobFromMessage.getProduct().getProductName()),
     			new ReportingMessage("Start associating TaskTables to AppDataJob", jobFromMessage.getId())
     	);    	
         try {        	
-            final String tasktableFilename = typeAdapter.taskTableMapper().tasktableFor(jobFromMessage);
+            final String tasktableFilename = 
+            		
+            		
+            		typeAdapter.taskTableMapper().tasktableFor(jobFromMessage);
             LOGGER.trace("Got TaskTable {}", tasktableFilename);
             
             // assert that there is a job generator for the assigned tasktable

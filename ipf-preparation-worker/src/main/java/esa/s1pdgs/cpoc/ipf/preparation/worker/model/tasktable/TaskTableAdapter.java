@@ -16,15 +16,22 @@ import esa.s1pdgs.cpoc.common.utils.DateUtils;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.config.ProcessSettings;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.model.JobGen;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.model.converter.TaskTableToJobOrderConverter;
-import esa.s1pdgs.cpoc.ipf.preparation.worker.model.joborder.JobOrder;
-import esa.s1pdgs.cpoc.ipf.preparation.worker.model.joborder.JobOrderInput;
-import esa.s1pdgs.cpoc.ipf.preparation.worker.model.joborder.JobOrderInputFile;
-import esa.s1pdgs.cpoc.ipf.preparation.worker.model.joborder.JobOrderTimeInterval;
-import esa.s1pdgs.cpoc.ipf.preparation.worker.model.joborder.enums.JobOrderFileNameType;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.model.metadata.SearchMetadataResult;
-import esa.s1pdgs.cpoc.ipf.preparation.worker.model.tasktable.enums.TaskTableInputOrigin;
 import esa.s1pdgs.cpoc.metadata.model.AbstractMetadata;
 import esa.s1pdgs.cpoc.metadata.model.SearchMetadata;
+import esa.s1pdgs.cpoc.xml.model.joborder.JobOrder;
+import esa.s1pdgs.cpoc.xml.model.joborder.JobOrderInput;
+import esa.s1pdgs.cpoc.xml.model.joborder.JobOrderInputFile;
+import esa.s1pdgs.cpoc.xml.model.joborder.JobOrderTimeInterval;
+import esa.s1pdgs.cpoc.xml.model.joborder.enums.JobOrderFileNameType;
+import esa.s1pdgs.cpoc.xml.model.tasktable.TaskTable;
+import esa.s1pdgs.cpoc.xml.model.tasktable.TaskTableDynProcParam;
+import esa.s1pdgs.cpoc.xml.model.tasktable.TaskTableInput;
+import esa.s1pdgs.cpoc.xml.model.tasktable.TaskTableInputAlternative;
+import esa.s1pdgs.cpoc.xml.model.tasktable.TaskTablePool;
+import esa.s1pdgs.cpoc.xml.model.tasktable.TaskTableTask;
+import esa.s1pdgs.cpoc.xml.model.tasktable.TaskTableInputAlternative.TaskTableInputAltKey;
+import esa.s1pdgs.cpoc.xml.model.tasktable.enums.TaskTableInputOrigin;
 
 public class TaskTableAdapter {
 	private final File file;

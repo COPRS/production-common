@@ -2,7 +2,7 @@ package esa.s1pdgs.cpoc.ipf.preparation.worker.model;
 
 import java.util.Objects;
 
-import esa.s1pdgs.cpoc.ipf.preparation.worker.model.tasktable.enums.TaskTableInputMode;
+import esa.s1pdgs.cpoc.xml.model.tasktable.enums.TaskTableInputMode;
 
 /**
  * Product mode (available in task table)

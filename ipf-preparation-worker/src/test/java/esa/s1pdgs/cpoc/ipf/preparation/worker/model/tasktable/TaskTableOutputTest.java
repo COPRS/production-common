@@ -4,10 +4,10 @@ import static org.junit.Assert.assertEquals;
 
 import org.junit.Test;
 
-import esa.s1pdgs.cpoc.ipf.preparation.worker.model.tasktable.TaskTableOuput;
-import esa.s1pdgs.cpoc.ipf.preparation.worker.model.tasktable.enums.TaskTableFileNameType;
-import esa.s1pdgs.cpoc.ipf.preparation.worker.model.tasktable.enums.TaskTableMandatoryEnum;
-import esa.s1pdgs.cpoc.ipf.preparation.worker.model.tasktable.enums.TaskTableOutputDestination;
+import esa.s1pdgs.cpoc.xml.model.tasktable.TaskTableOuput;
+import esa.s1pdgs.cpoc.xml.model.tasktable.enums.TaskTableFileNameType;
+import esa.s1pdgs.cpoc.xml.model.tasktable.enums.TaskTableMandatoryEnum;
+import esa.s1pdgs.cpoc.xml.model.tasktable.enums.TaskTableOutputDestination;
 import nl.jqno.equalsverifier.EqualsVerifier;
 import nl.jqno.equalsverifier.Warning;
 

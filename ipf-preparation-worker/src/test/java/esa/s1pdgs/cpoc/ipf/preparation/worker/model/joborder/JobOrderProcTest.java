@@ -10,10 +10,10 @@ import java.util.List;
 
 import org.junit.Test;
 
-import esa.s1pdgs.cpoc.ipf.preparation.worker.model.joborder.JobOrderBreakpoint;
-import esa.s1pdgs.cpoc.ipf.preparation.worker.model.joborder.JobOrderInput;
-import esa.s1pdgs.cpoc.ipf.preparation.worker.model.joborder.JobOrderOutput;
-import esa.s1pdgs.cpoc.ipf.preparation.worker.model.joborder.JobOrderProc;
+import esa.s1pdgs.cpoc.xml.model.joborder.JobOrderBreakpoint;
+import esa.s1pdgs.cpoc.xml.model.joborder.JobOrderInput;
+import esa.s1pdgs.cpoc.xml.model.joborder.JobOrderOutput;
+import esa.s1pdgs.cpoc.xml.model.joborder.JobOrderProc;
 import nl.jqno.equalsverifier.EqualsVerifier;
 import nl.jqno.equalsverifier.Warning;
 

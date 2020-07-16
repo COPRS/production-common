@@ -2,10 +2,10 @@ package esa.s1pdgs.cpoc.ipf.preparation.worker.model.tasktable;
 
 import org.junit.Test;
 
-import esa.s1pdgs.cpoc.ipf.preparation.worker.model.tasktable.TaskTable;
-import esa.s1pdgs.cpoc.ipf.preparation.worker.model.tasktable.TaskTablePool;
-import esa.s1pdgs.cpoc.ipf.preparation.worker.model.tasktable.TaskTableTask;
-import esa.s1pdgs.cpoc.ipf.preparation.worker.model.tasktable.TaskTableInputAlternative.TaskTableInputAltKey;
+import esa.s1pdgs.cpoc.xml.model.tasktable.TaskTable;
+import esa.s1pdgs.cpoc.xml.model.tasktable.TaskTablePool;
+import esa.s1pdgs.cpoc.xml.model.tasktable.TaskTableTask;
+import esa.s1pdgs.cpoc.xml.model.tasktable.TaskTableInputAlternative.TaskTableInputAltKey;
 import nl.jqno.equalsverifier.EqualsVerifier;
 import nl.jqno.equalsverifier.Warning;
 

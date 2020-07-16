@@ -4,11 +4,11 @@ import java.util.Optional;
 import java.util.concurrent.Callable;
 
 import esa.s1pdgs.cpoc.appcatalog.AppDataJob;
+import esa.s1pdgs.cpoc.appcatalog.AppDataJobProductAdapter;
 import esa.s1pdgs.cpoc.common.errors.AbstractCodedException;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.appcat.AppCatAdapter;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.appcat.CatalogEventAdapter;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.model.JobGen;
-import esa.s1pdgs.cpoc.ipf.preparation.worker.model.tasktable.mapper.TasktableMapper;
 import esa.s1pdgs.cpoc.metadata.client.MetadataClient;
 import esa.s1pdgs.cpoc.mqi.model.queue.IpfExecutionJob;
 
@@ -17,11 +17,9 @@ public final class L0Segment extends AbstractProductTypeAdapter implements Produ
 	private final long timeoutInputSearchMs;
 
 	public L0Segment(
-			final TasktableMapper taskTableMapper, 
 			final MetadataClient metadataClient,
 			final long timeoutInputSearchMs
 	) {
-		super(taskTableMapper);
 		this.metadataClient = metadataClient;
 		this.timeoutInputSearchMs = timeoutInputSearchMs;
 	}
@@ -39,10 +37,11 @@ public final class L0Segment extends AbstractProductTypeAdapter implements Produ
 
 	@Override
 	public final void customJobOrder(final JobGen job) {
+		final AppDataJobProductAdapter product = new AppDataJobProductAdapter(job.job().getProduct());		
         updateProcParam(
         		job.jobOrder(), 
         		"Mission_Id",
-                job.job().getProduct().getMissionId() + job.job().getProduct().getSatelliteId()
+        		product.getMissionId()+ product.getStringValue("satelliteId")
         );		
 	}
 

@@ -161,21 +161,21 @@ public class TestL0Utils {
         ret.setMessages(messages.stream().collect(Collectors.toList()));
 
         final AppDataJobProduct product = new AppDataJobProduct();
-        product.setMissionId(missionId);
-        product.setProductName("L20171109175634707000125");
-        if (raw1) {
-            product.setRaws1(getRawsChannel1(xmlOnlyForRaws));
-        }
-        if (raw2) {
-            product.setRaws2(getRawsChannel2(xmlOnlyForRaws));
-        }
-        product.setSessionId("L20171109175634707000125");
-        product.setSatelliteId("A");
-        product.setStationCode("WILE");
-        product.setStartTime("2017-12-13T14:59:48.123456Z");
-        product.setStopTime("2017-12-13T15:17:25.142536Z");
-        product.setInsConfId(-1);
-        product.setProcessMode("");
+        product.getMetadata().put("missionId", missionId);
+        product.getMetadata().put("productName", "L20171109175634707000125");
+        product.getMetadata().put("sessionId", "L20171109175634707000125");
+        product.getMetadata().put("satelliteId", "A");
+        product.getMetadata().put("stationCode", "WILE");
+        product.getMetadata().put("startTime","2017-12-13T14:59:48.123456Z");
+        product.getMetadata().put("stopTime","2017-12-13T15:17:25.142536Z");
+        product.getMetadata().put("insConfId",-1);
+        
+//        if (raw1) {
+//            product.setRaws1(getRawsChannel1(xmlOnlyForRaws));
+//        }
+//        if (raw2) {
+//            product.setRaws2(getRawsChannel2(xmlOnlyForRaws));
+//        }
         ret.setProduct(product);
 
         final AppDataJobGeneration gen1 = new AppDataJobGeneration();

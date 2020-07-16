@@ -35,6 +35,12 @@ public class AppDataJob {
      * generations)
      */
     private AppDataJobState state;
+    
+    private String taskTableName;
+    
+    private String startTime;
+    
+    private String stopTime;
 
     /**
      * Date when the job is created
@@ -213,7 +219,7 @@ public class AppDataJob {
      *
      * @param additionalInputs additional job inputs
      */
-    public void setAdditionalInputs(List<AppDataJobTaskInputs> additionalInputs) {
+    public void setAdditionalInputs(final List<AppDataJobTaskInputs> additionalInputs) {
         this.additionalInputs = additionalInputs;
     }
 
@@ -255,20 +261,44 @@ public class AppDataJob {
 	public void setPrepJobInputQueue(final String prepJobInputQueue) {
 		this.prepJobInputQueue = prepJobInputQueue;
 	}
+	
+	public String getTaskTableName() {
+		return taskTableName;
+	}
 
+	public void setTaskTableName(final String taskTableName) {
+		this.taskTableName = taskTableName;
+	}
+
+	public String getStartTime() {
+		return startTime;
+	}
+
+	public void setStartTime(final String startTime) {
+		this.startTime = startTime;
+	}
+
+	public String getStopTime() {
+		return stopTime;
+	}
+
+	public void setStopTime(final String stoptime) {
+		this.stopTime = stoptime;
+	}
 
 	/**
      * @see java.lang.Object#hashCode()
      */
     @Override
     public int hashCode() {
-        return Objects.hash(id, level, pod, state,
+        return Objects.hash(id, level, pod, state, taskTableName, startTime, stopTime,
                 creationDate, lastUpdateDate, messages, product, additionalInputs, generation, reportingId, prepJobInputQueue, prepJobMessageId);
     }
     
     @Override
 	public String toString() {
 		return "AppDataJob [id=" + id + ", level=" + level + ", pod=" + pod + ", state=" + state
+			    + ", taskTableName=" + taskTableName + ", startTime=" + startTime + ", stopTime=" + stopTime
                 + ", creationDate=" + creationDate + ", lastUpdateDate=" + lastUpdateDate + ", messages=" + messages
                 + ", product=" + product + ", additionalInputs=" + additionalInputs + ", generation=" + generation
                 + ", reportingId=" + reportingId + ", prepJobMessageId=" + prepJobMessageId
@@ -290,7 +320,10 @@ public class AppDataJob {
             ret =  id == other.id
                     && Objects.equals(level, other.level)
                     && Objects.equals(pod, other.pod)
-                    && Objects.equals(state, other.state)
+                    && Objects.equals(state, other.state)                    
+                    && Objects.equals(taskTableName, other.taskTableName)
+                    && Objects.equals(startTime, other.startTime)
+                    && Objects.equals(stopTime, other.stopTime)
                     && Objects.equals(creationDate, other.creationDate)
                     && Objects.equals(lastUpdateDate, other.lastUpdateDate)
                     && Objects.equals(messages, other.messages)

@@ -38,6 +38,9 @@ public class ProcessSettings {
      */
     private String hostname;
     
+    // only for logging/reporting purposes at the moment
+    private String productType = "Product";
+    
     // 0 --> means that it least needs to be covered
     private int minSeaCoveragePercentage = 0;
     
@@ -113,5 +116,13 @@ public class ProcessSettings {
 
 	public void setCategory(final ProductCategory category) {
 		this.category = category;
+	}
+
+	public String getProductType() {
+		return productType;
+	}
+
+	public void setProductType(final String productType) {
+		this.productType = productType;
 	}
 }

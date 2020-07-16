@@ -11,10 +11,10 @@ import java.util.List;
 
 import org.junit.Test;
 
-import esa.s1pdgs.cpoc.ipf.preparation.worker.model.joborder.JobOrderProcParam;
-import esa.s1pdgs.cpoc.ipf.preparation.worker.model.joborder.JobOrderSensingTime;
-import esa.s1pdgs.cpoc.ipf.preparation.worker.model.joborder.L0JobOrderConf;
-import esa.s1pdgs.cpoc.ipf.preparation.worker.model.joborder.L1JobOrderConf;
+import esa.s1pdgs.cpoc.xml.model.joborder.JobOrderProcParam;
+import esa.s1pdgs.cpoc.xml.model.joborder.JobOrderSensingTime;
+import esa.s1pdgs.cpoc.xml.model.joborder.L0JobOrderConf;
+import esa.s1pdgs.cpoc.xml.model.joborder.L1JobOrderConf;
 import nl.jqno.equalsverifier.EqualsVerifier;
 import nl.jqno.equalsverifier.Warning;
 

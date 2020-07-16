@@ -334,6 +334,7 @@
 		<module>validation</module>
 		<module>compression-trigger</module>
 		<module>compression-worker</module>
-		<!-- module>scaler</module-->		
+		<!-- module>scaler</module-->
+		<module>xml-tools</module>
 	</modules>
 </project>

@@ -136,14 +136,16 @@ public class CleaningOldestJob {
         		dateCompareS
         );
         for (final AppDataJob jobS : jobsS) {
+        	final String logMessage = String.format(
+        			"Remove %s job %s (%s) for enough time", 
+        			jobS.getLevel(),
+        			jobS.getId(),
+        			state
+        	);       	
             if (isError) {
-                LOGGER.error(
-                        "[productName {}] [level {}] Remove {} job for enough time",
-                        jobS.getProduct().getProductName(),  jobS.getLevel(), state);
+                LOGGER.error(logMessage);
             } else {
-                LOGGER.info(
-                        "[productName {}] [level {}] Remove {} job for enough time",
-                        jobS.getProduct().getProductName(), jobS.getLevel(), state);
+                LOGGER.info(logMessage);
             }
             appDataJobService.deleteJob(jobS.getId());
         }
