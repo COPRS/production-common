@@ -54,6 +54,8 @@ public class InboxFactory {
 				new KafkaSubmissionClient(kafkaTemplate, config.getTopic()),
 				config.getFamily(),
 				config.getStationName(),
+				config.getMode(),
+				config.getTimeliness(),
 				newProductNameEvaluatorFor(config)
 		);
 	}

@@ -4,21 +4,16 @@ import java.io.IOException;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
-import java.util.Map;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.springframework.data.domain.Sort;
-import org.springframework.data.domain.Sort.Direction;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.fasterxml.jackson.core.JsonParseException;
@@ -30,8 +25,6 @@ import esa.s1pdgs.cpoc.appcatalog.server.job.exception.AppCatalogJobInvalidState
 import esa.s1pdgs.cpoc.appcatalog.server.job.exception.AppCatalogJobNotFoundException;
 import esa.s1pdgs.cpoc.appcatalog.server.service.AppDataJobService;
 import esa.s1pdgs.cpoc.common.errors.InternalErrorException;
-import esa.s1pdgs.cpoc.common.filter.FilterCriterion;
-import esa.s1pdgs.cpoc.common.filter.FilterUtils;
 import esa.s1pdgs.cpoc.common.utils.LogUtils;
 
 /**
@@ -43,59 +36,28 @@ public class JobController {
 
     private final AppDataJobService appDataJobService;
 
-    private final static String PK_ORDER_BY_ASC = "[orderByAsc]";
-    private final static String PK_ORDER_BY_DESC = "[orderByDesc]";
-
-    private final static String PK_ID = "_id";
-    private final static String PK_CREATION = "creationDate";
-    private final static String PK_UPDATE = "lastUpdateDate";
-    private final static String PK_MESSAGES_ID = "messages.id";
-    private final static String PK_PRODUCT_START = "product.startTime";
-    private final static String PK_PRODUCT_STOP = "product.stopTime";
-
     public JobController(final AppDataJobService appDataJobService) {
         this.appDataJobService = appDataJobService;
     }
+    
+    @RequestMapping(method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_UTF8_VALUE, path = "/jobs/findByMessagesId/{messageId}")
+    public List<AppDataJob> findByMessagesId(@PathVariable(name = "messageId") final Long messageId) {
+    	return appDataJobService.findByMessagesId(messageId);
+    }
 
-    @RequestMapping(method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_UTF8_VALUE, path = "/jobs/search")
-    public List<AppDataJob> search(@RequestParam final Map<String, String> params) throws  InternalErrorException {
-        // Extract criterion
-        final List<FilterCriterion> filters = new ArrayList<>();
-        Sort sort = null;
-        for (final String keyFilter : params.keySet()) {
-            final String valueFilter = params.get(keyFilter);
-            switch (keyFilter) {
-                case PK_ORDER_BY_ASC:
-                    sort = new Sort(Direction.ASC, valueFilter);
-                    break;
-                case PK_ORDER_BY_DESC:
-                    sort = new Sort(Direction.DESC, valueFilter);
-                    break;
-                default:
-                    final FilterCriterion criterion = FilterUtils
-                            .extractCriterion(keyFilter, valueFilter);
-                    switch (criterion.getKey()) {
-                        case PK_ID:
-                        case PK_MESSAGES_ID:
-                            criterion.setValue(Long.decode(valueFilter));
-                            break;
-                        case PK_CREATION:
-                        case PK_UPDATE:
-                            criterion.setValue(convertDateIso(valueFilter));
-                            break;
-                        case PK_PRODUCT_START:
-                        case PK_PRODUCT_STOP:
-                            criterion.setValue(convertDateIso(valueFilter));
-                            break;
-                    }
-                    filters.add(criterion);
-                    break;
-            }
-        }
-        LOGGER.trace("performing search for input: {} {} {}", filters, sort);
-        final List<AppDataJob> result = appDataJobService.search(filters, sort);
-        LOGGER.trace("search result: {}", result);
-        return result;
+    @RequestMapping(method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_UTF8_VALUE, path = "/jobs/findByProductSessionId/{sessionId}")
+    public List<AppDataJob> findByProductSessionId(@PathVariable(name = "sessionId") final String sessionId) {
+    	return appDataJobService.findByProductSessionId(sessionId);
+    }
+    
+    @RequestMapping(method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_UTF8_VALUE, path = "/jobs/findByProductDataTakeId/{dataTakeId}")
+    public List<AppDataJob> findByProductDataTakeId(@PathVariable(name = "dataTakeId") final String dataTakeId) {
+    	return appDataJobService.findByProductDataTakeId(dataTakeId);
+    }
+    
+    @RequestMapping(method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_UTF8_VALUE, path = "/jobs/findJobInStateGenerating/{taskTable}")
+    public List<AppDataJob> findJobInStateGenerating(@PathVariable(name = "taskTable") final String taskTable) {
+    	return appDataJobService.findJobInStateGenerating(taskTable);
     }
 
     @RequestMapping(method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_UTF8_VALUE, path = "/jobs/{jobId}")
@@ -110,7 +72,7 @@ public class JobController {
     }
 
     @RequestMapping(method = RequestMethod.DELETE, produces = MediaType.APPLICATION_JSON_UTF8_VALUE, path = "/jobs/{jobId}")
-    public void deleteJob(@PathVariable final Long jobId) {
+    public void deleteJob(@PathVariable(name = "jobId") final Long jobId) {
         appDataJobService.deleteJob(jobId);
     }
 

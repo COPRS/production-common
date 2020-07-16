@@ -98,7 +98,8 @@ public class MemoryConsumerAwareRebalanceListener
         // We seek the consumer on the right offset
         for (TopicPartition topicPartition : partitions) {
             LOGGER.debug(
-                    "[MONITOR] [rebalance] Current offset is {} committed offset is -> {}",
+                    "[MONITOR] [rebalance] Current offset for topic {} in partition {} is {} committed offset is -> {}",
+                    topicPartition.topic(), topicPartition.partition(),
                     consumer.position(topicPartition),
                     consumer.committed(topicPartition));
             long startingOffset = defaultMode;

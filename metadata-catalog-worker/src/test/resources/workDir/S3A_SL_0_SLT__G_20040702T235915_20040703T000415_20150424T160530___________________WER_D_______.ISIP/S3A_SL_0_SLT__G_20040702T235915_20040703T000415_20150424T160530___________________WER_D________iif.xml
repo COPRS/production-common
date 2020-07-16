@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<IIF xmlns:sentinel-safe="http://www.esa.int/safe/sentinel/1.1" xmlns:java="http://xml.apache.org/xalan/java" xmlns:gml="http://www.opengis.net/gml/3.2" xmlns:xfdu="urn:ccsds:schema:xfdu:1" xmlns:safe="http://www.esa.int/safe/1.2" xmlns:sentinel-3="http://www.esa.int/safe/sentinel/1.1/sentinel-3">
+<item>
+<administration>
+<id>(rid://ingest)</id>
+<type>SL_0_SLT__G</type>
+<keys>
+<feature key="originalName">S3A_SL_0_SLT__G_20040702T235915_20040703T000415_20150424T160530___________________WER_D_______</feature>
+<feature key="productType">SL_0_SLT__G</feature>
+<feature key="code">SL_0_SLT__G</feature>
+</keys>
+</administration>
+<fileInformation>
+<file>
+<location>
+<name>S3A_SL_0_SLT__G_20040702T235915_20040703T000415_20150424T160530___________________WER_D_______</name>
+</location>
+</file>
+</fileInformation>
+<parameters>
+<temporalCoverage>
+<startTime>2004-07-02T23:59:15.906000</startTime>
+<stopTime>2004-07-03T00:04:15.906000</stopTime>
+</temporalCoverage>
+<quality>APPROVED</quality>
+</parameters>
+<specificParameters>
+<feature key="receivingGroundStation">dummy-text</feature>
+<feature key="receivingStartTime">2012-05-11T18:25:35.000499Z</feature>
+<feature key="receivingStopTime">2012-05-11T18:27:35.000499Z</feature>
+<feature key="granuleNumber">16</feature>
+<feature key="granulePosition">NONE</feature>
+<feature key="dumpStart">2004-07-02T22:44:15.906000</feature>
+<feature key="ISIPProvider">L0PP</feature>
+</specificParameters>
+</item>
+</IIF>

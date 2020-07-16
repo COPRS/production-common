@@ -10,9 +10,7 @@ import static org.mockito.Mockito.verifyNoMoreInteractions;
 import java.net.URI;
 import java.util.Arrays;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.concurrent.Callable;
 
 import org.junit.Before;
@@ -75,7 +73,7 @@ public class AppCatalogJobClientTest {
 
     @SuppressWarnings("unchecked")
 	@Test(expected = AppCatalogJobSearchApiError.class)
-    public void testSearchWhenError() throws AbstractCodedException {
+    public void testFindByMessagesIdWhenError() throws AbstractCodedException {
         doThrow(new RestClientException("rest client exception"))
 	        .when(restTemplate).exchange(
 	        		Mockito.any(URI.class),
@@ -83,15 +81,51 @@ public class AppCatalogJobClientTest {
 	                Mockito.any(),
 	                Mockito.any(ParameterizedTypeReference.class)
 	    );        
-        final Map<String, String> filters = new HashMap<>();
-        filters.put("filter1", "value1");
-        filters.put("filter2", "value2");
-        client.search(filters);
+        client.findByMessagesId(1L);
     }
     
     @SuppressWarnings("unchecked")
-	private final void runSearchTest(final Callable<Void> callable, final String uriArgs) throws Exception {   
-    	final URI expectedUri = new URI("http://localhost:8080/jobs/search?" + uriArgs);
+	@Test(expected = AppCatalogJobSearchApiError.class)
+    public void testFindByProductSessionIdWhenError() throws AbstractCodedException {
+        doThrow(new RestClientException("rest client exception"))
+	        .when(restTemplate).exchange(
+	        		Mockito.any(URI.class),
+	                Mockito.any(HttpMethod.class),
+	                Mockito.any(),
+	                Mockito.any(ParameterizedTypeReference.class)
+	    );        
+        client.findByProductSessionId("sessionId");
+    }
+
+    @SuppressWarnings("unchecked")
+	@Test(expected = AppCatalogJobSearchApiError.class)
+    public void testFindByProductDataTakeIdWhenError() throws AbstractCodedException {
+        doThrow(new RestClientException("rest client exception"))
+	        .when(restTemplate).exchange(
+	        		Mockito.any(URI.class),
+	                Mockito.any(HttpMethod.class),
+	                Mockito.any(),
+	                Mockito.any(ParameterizedTypeReference.class)
+	    );        
+        client.findByProductDataTakeId("dataTakeId");
+    }
+
+    @SuppressWarnings("unchecked")
+	@Test(expected = AppCatalogJobSearchApiError.class)
+    public void testFindJobInStateGeneratingWhenError() throws AbstractCodedException {
+        doThrow(new RestClientException("rest client exception"))
+	        .when(restTemplate).exchange(
+	        		Mockito.any(URI.class),
+	                Mockito.any(HttpMethod.class),
+	                Mockito.any(),
+	                Mockito.any(ParameterizedTypeReference.class)
+	    );        
+        client.findJobInStateGenerating("taskTable");
+    }
+
+    @SuppressWarnings("unchecked")
+	private final void runSearchTest(final Callable<Void> callable, final String apiMethod, final String apiParameterValue) throws Exception {   
+    	final URI expectedUri = new URI("http://localhost:8080/jobs/" + apiMethod + "/" + apiParameterValue);
     	doReturn(new ResponseEntity<AppDataJob>(HttpStatus.OK))
 	    	.when(restTemplate).exchange(
 		        		Mockito.any(URI.class),
@@ -111,44 +145,52 @@ public class AppCatalogJobClientTest {
     }
 
     @Test
-    public void testSearch() throws Exception {
+    public void testtestFindByMessagesId() throws Exception {
     	runSearchTest(
     			() -> {
-    		        final Map<String, String> filters = new HashMap<>();
-    		        filters.put("filter1", "value1");
-    		        filters.put("filter2", "value2");
-    		        client.search(filters);
-    				return null;
-    			}, 
-    			"filter1=value1&filter2=value2"
+    			    client.findByMessagesId(1L);
+    		        return null;
+    			},
+    			"findByMessagesId",
+    			"1"
     	);
     }
 
     @Test
-    public void testfindByMessagesIdentifier() throws Exception {  
+    public void testFindByProductSessionId() throws Exception {
     	runSearchTest(
     			() -> {
-    		        client.findByMessagesId(12L);
+    			    client.findByProductSessionId("sessionId");
     		        return null;
-    			}, 
-    			"messages.id=12&state[neq]=TERMINATED"
-    	);
-    } 
-
-    @Test
-    public void testFindJobInStateGeneratingFor() throws Exception {
-    	runSearchTest(
-    			() -> {
-    			    client.findJobInStateGenerating("task-table");
-    		        return null;
-    			}, 
-    			"state=GENERATING"
-    			+ "&generation.state[neq]=SENT"
-    			+ "&generation.taskTable=task-table"
-    			+ "&[orderByAsc]=generation.lastUpdateDate"
+    			},
+    			"findByProductSessionId",
+    			"sessionId"
     	);
     }
 
+    @Test
+    public void testFindByProductDataTakeId() throws Exception {
+    	runSearchTest(
+    			() -> {
+    			    client.findByProductDataTakeId("dataTakeId");
+    		        return null;
+    			},
+    			"findByProductDataTakeId",
+    			"dataTakeId"
+    	);
+    }
+    
+    @Test
+    public void testFindJobInStateGenerating() throws Exception {
+    	runSearchTest(
+    			() -> {
+    			    client.findJobInStateGenerating("taskTable");
+    		        return null;
+    			},
+    			"findJobInStateGenerating",
+    			"taskTable"
+    	);
+    }
     private AppDataJob buildJob() {
         final AppDataJob job = new AppDataJob();
         job.setId(142);

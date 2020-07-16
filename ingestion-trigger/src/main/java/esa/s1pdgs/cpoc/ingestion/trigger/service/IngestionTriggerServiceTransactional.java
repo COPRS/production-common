@@ -4,8 +4,6 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-import java.util.stream.Collectors;
-import java.util.stream.StreamSupport;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -27,10 +25,10 @@ public class IngestionTriggerServiceTransactional {
 	}
 	
 	public Set<InboxEntry> getAllForPath(final String pickupURL, final String stationName) {
-		final List<InboxEntry> result = repository.findByPickupURLAndStationNameAndProcessingPod(
-				pickupURL,
-				stationName,
-				processConfiguration.getHostname());
+		final List<InboxEntry> result = repository.findByProcessingPodAndPickupURLAndStationName(
+                processConfiguration.getHostname(), pickupURL,
+				stationName
+        );
 		return new HashSet<>(result);
 	}
 	

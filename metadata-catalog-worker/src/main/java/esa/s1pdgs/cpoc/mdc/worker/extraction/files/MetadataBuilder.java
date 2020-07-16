@@ -11,6 +11,7 @@ import esa.s1pdgs.cpoc.common.errors.processing.MetadataMalformedException;
 import esa.s1pdgs.cpoc.mdc.worker.extraction.model.AuxDescriptor;
 import esa.s1pdgs.cpoc.mdc.worker.extraction.model.EdrsSessionFileDescriptor;
 import esa.s1pdgs.cpoc.mdc.worker.extraction.model.OutputFileDescriptor;
+import esa.s1pdgs.cpoc.mdc.worker.extraction.model.S3FileDescriptor;
 import esa.s1pdgs.cpoc.mqi.model.queue.CatalogJob;
 import esa.s1pdgs.cpoc.report.ReportingFactory;
 
@@ -136,6 +137,54 @@ public class MetadataBuilder {
         LOGGER.debug("JSON OBJECT:{}",metadataToIndex.toString());
         return metadataToIndex;
     }
+    
+	/**
+	 * Build the metadata for an S3 auxiliary product
+	 * 
+	 * @param descriptor file descriptor of the product
+	 * @param file       file to extract metadata from
+	 * 
+	 * @return the JSONObject containing the metadata to index
+	 * 
+	 * @throws MetadataExtractionException
+	 * @throws MetadataMalformedException
+	 */
+	public JSONObject buildS3AuxFileMetadata(final S3FileDescriptor descriptor, final File file, final CatalogJob job)
+			throws MetadataExtractionException, MetadataMalformedException {
+		final JSONObject metadataToIndex = extractor.processAuxXFDUFile(descriptor, file);
+
+		LOGGER.debug("JSON OBJECT:{}", metadataToIndex.toString());
+		return metadataToIndex;
+	}
+	
+	/**
+	 * Build the metadata for an S3 level product
+	 * 
+	 * @param descriptor file descriptor of the product
+	 * @param file       file to extract metadata from
+	 * 
+	 * @return the JSONObject containing the metadata to index
+	 * 
+	 * @throws MetadataExtractionException
+	 * @throws MetadataMalformedException
+	 */
+	public JSONObject buildS3LevelProductFileMetadata(final S3FileDescriptor descriptor, final File file, final CatalogJob job)
+			throws MetadataExtractionException, MetadataMalformedException {
+		JSONObject metadataToIndex;
+		
+		switch (descriptor.getExtension()) {
+			case ISIP:
+				metadataToIndex = extractor.processIIFFile(descriptor, file);
+				break;
+			case SEN3:
+				metadataToIndex = extractor.processProductXFDUFile(descriptor, file);
+				break;
+			default:
+				throw new MetadataExtractionException(new Exception("Invalid extension for S3 level products"));
+		}
+		LOGGER.debug("JSON OBJECT:{}", metadataToIndex.toString());
+		return metadataToIndex;
+	}
 
 
 	

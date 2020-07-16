@@ -7,7 +7,7 @@ import java.util.Locale;
  *
  */
 public enum FileExtension {
-	XML, SAFE, EOF, RAW, XSD, DAT, AISP, UNKNOWN;
+	XML, SAFE, EOF, RAW, XSD, DAT, AISP, ISIP, SEN3, UNKNOWN;
 
 	/**
 	 * Determinate value from an extension

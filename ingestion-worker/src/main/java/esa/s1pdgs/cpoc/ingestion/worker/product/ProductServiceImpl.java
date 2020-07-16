@@ -45,7 +45,9 @@ public class ProductServiceImpl implements ProductService {
 				ingestion.getProductName(), 
 				ingestion.getRelativePath(), 
 				ingestion.getProductSizeByte(),
-				ingestion.getStationName()
+				ingestion.getStationName(),
+				ingestion.getMode(),
+				ingestion.getTimeliness()
 		);
 		final Product<IngestionEvent> prod = new Product<IngestionEvent>(family, uri, dto);
 		obsAdapter.upload(

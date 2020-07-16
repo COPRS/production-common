@@ -1,12 +1,6 @@
 package esa.s1pdgs.cpoc.appcatalog.client.job;
 
-import java.net.URI;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.Iterator;
-import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.Map;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -18,11 +12,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.client.HttpStatusCodeException;
 import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
-import org.springframework.web.util.UriComponentsBuilder;
 
 import esa.s1pdgs.cpoc.appcatalog.AppDataJob;
-import esa.s1pdgs.cpoc.appcatalog.AppDataJobGenerationState;
-import esa.s1pdgs.cpoc.appcatalog.AppDataJobState;
 import esa.s1pdgs.cpoc.common.errors.AbstractCodedException;
 import esa.s1pdgs.cpoc.common.errors.appcatalog.AppCatalogJobNewApiError;
 import esa.s1pdgs.cpoc.common.errors.appcatalog.AppCatalogJobPatchApiError;
@@ -128,25 +119,11 @@ public class AppCatalogJobClient {
         }
     }
     
-
-
-    /**
-     * Search for jobs
-     * 
-     * @param filters
-     * @return
-     * @throws AbstractCodedException
-     */
-    public List<AppDataJob> search(final Map<String, String> filters) throws AbstractCodedException {
+    private List<AppDataJob> findAppDataJobs(final String apiMethod, final String apiParameterValue) throws AbstractCodedException {
         int retries = 0;
         while (true) {
             retries++;
-            final UriComponentsBuilder builder = UriComponentsBuilder.fromUriString(hostUri + "/jobs/search");
-            
-            for (final Map.Entry<String, String> entry : filters.entrySet()) {
-            	builder.queryParam(entry.getKey(), entry.getValue());
-            }
-            final URI uri = builder.build().toUri();
+            final String uri = hostUri + "/jobs/" + apiMethod + "/" + apiParameterValue;
             LogUtils.traceLog(LOGGER, String.format("[uri %s]", uri));
             try {
                 final ResponseEntity<List<AppDataJob>> response = restTemplate.exchange(
@@ -160,27 +137,27 @@ public class AppCatalogJobClient {
                     return response.getBody();
                 } else {
                     waitOrThrow(retries,
-                            new AppCatalogJobSearchApiError(uri.toString(),
+                            new AppCatalogJobSearchApiError(uri,
                                     "HTTP status code "
                                             + response.getStatusCode()),
-                            "search");
+                            apiMethod);
                 }
             } catch (final HttpStatusCodeException hsce) {
                 waitOrThrow(retries, new AppCatalogJobSearchApiError(
-                        uri.toString(),
+                        uri,
                         String.format(
                                 "HttpStatusCodeException occured: %s - %s",
                                 hsce.getStatusCode(),
                                 hsce.getResponseBodyAsString())),
-                        "search");
+                		apiMethod);
             } catch (final RestClientException rce) {
                 waitOrThrow(retries,
-                        new AppCatalogJobSearchApiError(uri.toString(),
+                        new AppCatalogJobSearchApiError(uri,
                                 String.format(
                                         "RestClientException occured: %s",
                                         rce.getMessage()),
                                 rce),
-                        "search");
+                        apiMethod);
             }
         }
     }
@@ -193,11 +170,8 @@ public class AppCatalogJobClient {
      * @throws AbstractCodedException
      */
     public List<AppDataJob> findByMessagesId(final long messageId)
-            throws AbstractCodedException {   	
-        return search(mapOf(
-        		"messages.id", Long.toString(messageId),
-                "state[neq]", AppDataJobState.TERMINATED.name()
-        ));        
+            throws AbstractCodedException {
+    	return findAppDataJobs("findByMessagesId", Long.toString(messageId));
     }
 
     /**
@@ -209,10 +183,7 @@ public class AppCatalogJobClient {
      */
     public List<AppDataJob> findByProductSessionId(final String sessionId)
             throws AbstractCodedException {
-        return search(mapOf(
-        		"product.sessionId", sessionId,
-        		"state[neq]", AppDataJobState.TERMINATED.name()
-        ));
+    	return findAppDataJobs("findByProductSessionId", sessionId);
     }
 
     /**
@@ -224,10 +195,7 @@ public class AppCatalogJobClient {
      */
     public List<AppDataJob> findByProductDataTakeId(final String dataTakeId)
             throws AbstractCodedException {
-        return search(mapOf(
-        		"product.dataTakeId", dataTakeId,
-        		"state[neq]", AppDataJobState.TERMINATED.name()
-        ));
+    	return findAppDataJobs("findByProductDataTakeId", dataTakeId);
     }
 
     /**
@@ -239,13 +207,8 @@ public class AppCatalogJobClient {
      * @throws AbstractCodedException
      */
     public List<AppDataJob> findJobInStateGenerating(final String taskTable) 
-    		throws AbstractCodedException {       
-        return search(mapOf(
-                "state", AppDataJobState.GENERATING.name(),
-                "generation.state[neq]", AppDataJobGenerationState.SENT.name(),
-                "generation.taskTable", taskTable,
-                "[orderByAsc]", "generation.lastUpdateDate"
-        ));     
+    		throws AbstractCodedException {
+    	return findAppDataJobs("findJobInStateGenerating", taskTable);
     }
 
     public AppDataJob newJob(final AppDataJob job) throws AbstractCodedException {
@@ -359,24 +322,4 @@ public class AppCatalogJobClient {
             }
         }
 	}
-	
-    private final static Map<String, String> mapOf(final String ... args) {
-    	// usually, this is a bit dangerous but since the method is only used internally, the risk
-    	// is greatly reduced because any errors in using it should become apparent in unit tests
-    	if (args == null || args.length % 2 != 0) {
-    		throw new IllegalArgumentException(
-    				String.format("Expected even number of entries but was %s", Arrays.toString(args))
-    		);
-    	}
-    	final Map<String, String> result = new LinkedHashMap<>(args.length /2);
-    	
-    	//final Iterator<String> it = Arrays.asList(args).iterator();
-    	
-    	for (final Iterator<String> it = Arrays.asList(args).iterator(); it.hasNext();) {
-    		final String key = it.next();
-    		final String val = it.next();
-    		result.put(key, val);
-    	}    	
-    	return Collections.unmodifiableMap(result);    	
-    }
 }

@@ -103,7 +103,9 @@ public class TestFilesystemInboxAdapter {
 				"MPS_/S1B/S1B__MPS__________017080/ch01/DCS_95_S1B__MPS__________017080_ch1_DSIB.xml", 
 				42L, 
 				UUID.randomUUID(), 
-				"MPS_"
+				"MPS_",
+				"NOMINAL",
+                "FAST24"
 		);		
 		final URI uri = IngestionJobs.toUri(job);
 		
@@ -135,7 +137,9 @@ public class TestFilesystemInboxAdapter {
 				"S1__AUX_ICE_V20180930T120000_G20181001T042911.SAFE", 
 				42L, 
 				UUID.randomUUID(), 
-				"MPS_"
+				"MPS_",
+				"NOMINAL",
+                "FAST24"
 		);		
 		final URI uri = IngestionJobs.toUri(job);
 		

@@ -7,7 +7,6 @@ import org.springframework.stereotype.Component;
 
 @Component
 public interface InboxEntryRepository  extends MongoRepository<InboxEntry, Long> {
-	List<InboxEntry> findByPickupURLAndStationNameAndProcessingPod(final String pickupURL,
-																   final String stationName,
-																   final String processingPod);
+	List<InboxEntry> findByProcessingPodAndPickupURLAndStationName(final String processingPod, final String pickupURL,
+																   final String stationName);
 }

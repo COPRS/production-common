@@ -29,6 +29,7 @@ import esa.s1pdgs.cpoc.common.errors.processing.MetadataMalformedException;
 import esa.s1pdgs.cpoc.mdc.worker.extraction.model.AuxDescriptor;
 import esa.s1pdgs.cpoc.mdc.worker.extraction.model.EdrsSessionFileDescriptor;
 import esa.s1pdgs.cpoc.mdc.worker.extraction.model.OutputFileDescriptor;
+import esa.s1pdgs.cpoc.mdc.worker.extraction.model.S3FileDescriptor;
 import esa.s1pdgs.cpoc.mdc.worker.extraction.xml.XmlConverter;
 import esa.s1pdgs.cpoc.report.ReportingFactory;
 
@@ -1171,6 +1172,163 @@ public class ExtractMetadataTest {
 
         extractor.processProduct(descriptor, ProductFamily.L1_ACN, file);
     }
+    
+    @Test
+	public void testProcessIIFFile() {
+		final JSONObject expectedResult = new JSONObject(
+				"{\"validityStartTime\":\"2004-07-02T23:59:15.906000Z\", \"validityStopTime\":\"2004-07-03T00:04:15.906000Z\", \"creationTime\":\"2015-04-24T16:05:30.000000Z\", \"ISIPProvider\":\"L0PP\", \"dumpStart\":\"2004-07-02T22:44:15.906000\", \"receivingStartTime\":\"2012-05-11T18:25:35.000499Z\", \"receivingStopTime\":\"2012-05-11T18:27:35.000499Z\", \"receivingGroundStation\":\"dummy-text\", \"granuleNumber\":16, \"granulePosition\":\"NONE\", \"qualityIndicator\":\"APPROVED\", \"timeliness\":{\"NRT\":true,\"STC\":false,\"NTC\":false}, \"productName\":\"S3A_SL_0_SLT__G_20040702T235915_20040703T000415_20150424T160530___________________WER_D_______.ISIP\", \"productClass\":\"SL\", \"productType\":\"SL_0_SLT__G\", \"missionId\":\"S3\", \"satelliteId\":\"A\", \"url\":\"S3A_SL_0_SLT__G_20040702T235915_20040703T000415_20150424T160530___________________WER_D_______.ISIP\", \"productFamily\":\"S3_GRANULES\", \"instanceId\":\"_________________\", \"generatingCentre\":\"WER\", \"classId\":\"D_______\"}");
+
+		final S3FileDescriptor descriptor = new S3FileDescriptor();
+		descriptor.setProductType("SL_0_SLT__G");
+		descriptor.setProductClass("SL");
+		descriptor.setRelativePath(
+				"S3A_SL_0_SLT__G_20040702T235915_20040703T000415_20150424T160530___________________WER_D_______.ISIP/S3A_SL_0_SLT__G_20040702T235915_20040703T000415_20150424T160530___________________WER_D________iif.xml");
+		descriptor.setFilename("S3A_SL_0_SLT__G_20040702T235915_20040703T000415_20150424T160530___________________WER_D________iif.xml");
+		descriptor.setExtension(FileExtension.ISIP);
+		descriptor.setProductName(
+				"S3A_SL_0_SLT__G_20040702T235915_20040703T000415_20150424T160530___________________WER_D_______.ISIP");
+		descriptor.setMissionId("S3");
+		descriptor.setSatelliteId("A");
+		descriptor.setKeyObjectStorage(
+				"S3A_SL_0_SLT__G_20040702T235915_20040703T000415_20150424T160530___________________WER_D_______.ISIP");
+		descriptor.setProductFamily(ProductFamily.S3_GRANULES);
+		descriptor.setInstanceId("_________________");
+		descriptor.setGeneratingCentre("WER");
+		descriptor.setClassId("D_______");
+		descriptor.setMode("NRT");
+
+		final File file = new File(testDir,
+				"S3A_SL_0_SLT__G_20040702T235915_20040703T000415_20150424T160530___________________WER_D_______.ISIP/S3A_SL_0_SLT__G_20040702T235915_20040703T000415_20150424T160530___________________WER_D________iif.xml");
+
+		try {
+			final JSONObject result = extractor.processIIFFile(descriptor, file);
+
+			assertNotNull("JSON object should not be null", result);
+			assertEquals("JSON object are not equals", expectedResult.length(), result.length());
+			for (final String key : expectedResult.keySet()) {
+				// timeliness is an JSONobject again, so we test it seperately
+				if (!key.equals("timeliness"))
+					assertEquals("JSON object value " + key + " are not equals", expectedResult.get(key),
+							result.get(key));
+			}
+
+			// test timeliness
+			for (final String key : expectedResult.getJSONObject("timeliness").keySet()) {
+				assertEquals("JSON object value timeliness/" + key + " are not equals",
+						expectedResult.getJSONObject("timeliness").get(key),
+						result.getJSONObject("timeliness").get(key));
+			}
+		} catch (final AbstractCodedException fe) {
+			fail("Exception occurred: " + fe.getMessage());
+		}
+	}
+    
+	@Test
+	public void testProcessAuxXFDUFile() {
+		final JSONObject expectedResult = new JSONObject(
+				"{\"validityStartTime\":\"2004-07-02T22:30:00.000000Z\", \"validityStopTime\":\"2004-07-04T04:21:58.000000Z\", \"creationTime\":\"2017-11-30T08:21:16.000000Z\", \"adfQualityCheck\":\"OPASSED\", \"baselineCollection\":\"___\", \"site\":\"dummy-text\", \"timeliness\": {  \"NRT\":true,  \"STC\":true,  \"NTC\":true }, \"productName\":\"S3A_AX___BA__AX_20040702T223000_20040704T042158_20171130T082116___________________WER_D_AL____.SEN3\", \"productClass\":\"AX\", \"productType\":\"AX___BA__AX\", \"missionId\":\"S3\", \"satelliteId\":\"A\", \"url\":\"S3A_AX___BA__AX_20040702T223000_20040704T042158_20171130T082116___________________WER_D_AL____.SEN3\", \"productFamily\":\"S3_AUXILIARY_FILE\", \"instanceId\":\"_________________\", \"generatingCentre\":\"WER\", \"classId\":\"D_AL____\"}");
+
+		final S3FileDescriptor descriptor = new S3FileDescriptor();
+		descriptor.setProductType("AX___BA__AX");
+		descriptor.setProductClass("AX");
+		descriptor.setRelativePath(
+				"S3A_AX___BA__AX_20040702T223000_20040704T042158_20171130T082116___________________WER_D_AL____.SEN3/xfdumanifest.xml");
+		descriptor.setFilename("xfdumanifest.xml");
+		descriptor.setExtension(FileExtension.SEN3);
+		descriptor.setProductName(
+				"S3A_AX___BA__AX_20040702T223000_20040704T042158_20171130T082116___________________WER_D_AL____.SEN3");
+		descriptor.setMissionId("S3");
+		descriptor.setSatelliteId("A");
+		descriptor.setKeyObjectStorage(
+				"S3A_AX___BA__AX_20040702T223000_20040704T042158_20171130T082116___________________WER_D_AL____.SEN3");
+		descriptor.setProductFamily(ProductFamily.S3_AUXILIARY_FILE);
+		descriptor.setInstanceId("_________________");
+		descriptor.setGeneratingCentre("WER");
+		descriptor.setClassId("D_AL____");
+		descriptor.setMode("NRT");
+
+		final File file = new File(testDir,
+				"S3A_AX___BA__AX_20040702T223000_20040704T042158_20171130T082116___________________WER_D_AL____.SEN3/xfdumanifest.xml");
+
+		try {
+			final JSONObject result = extractor.processAuxXFDUFile(descriptor, file);
+
+			assertNotNull("JSON object should not be null", result);
+			assertEquals("JSON object are not equals", expectedResult.length(), result.length());
+			for (final String key : expectedResult.keySet()) {
+				// timeliness is an JSONobject again, so we test it seperately
+				if (!key.equals("timeliness"))
+					assertEquals("JSON object value " + key + " are not equals", expectedResult.get(key),
+							result.get(key));
+			}
+
+			// test timeliness
+			for (final String key : expectedResult.getJSONObject("timeliness").keySet()) {
+				assertEquals("JSON object value timeliness/" + key + " are not equals",
+						expectedResult.getJSONObject("timeliness").get(key),
+						result.getJSONObject("timeliness").get(key));
+			}
+		} catch (final AbstractCodedException fe) {
+			fail("Exception occurred: " + fe.getMessage());
+		}
+	}
+	
+	@Test
+	public void testProcessProductXFDUFile() {
+		final JSONObject expectedResult = new JSONObject(
+				"{\"validityStartTime\":\"2004-07-03T00:30:00.906000Z\", \"validityStopTime\":\"2004-07-03T00:32:00.906000Z\", \"creationTime\":\"2016-02-04T07:09:33.000000Z\", \"baselineCollection\":\"NNN\", \"boundingPolygon\":{\"points\":[\"-14.937040 -75.312935\",\"-11.387472 -75.312935\",\"-11.387472 -14.312935\",\"-14.387472 -14.312935\"]}, \"site\":\"dummy-text\", \"absoluteStartOrbit\":9895, \"absoluteStopOrbit\":9895, \"relativeStartOrbit\":2, \"relativeStopOrbit\":2, \"receivingGroundStation\":\"dummy-text\", \"instrumentName\":\"OLCI\", \"procTime\":\"2016-02-04T07:09:49.000845Z\", \"granuleNumber\":1, \"granulePosition\":\"FIRST\", \"dumpStart\":\"2004-07-03T00:28:17.706000Z\", \"utcTime\":\"2004-07-03T00:00:00.906000Z\", \"utc1Time\":\"2004-07-03T01:41:00.906000Z\", \"processingLevel\":1, \"procVersion\":1.0, \"procName\":\"ACQ-WERUM\", \"qualityIndicator\":\"dummy-text\", \"timeliness\":{\"NRT\":true,\"STC\":false,\"NTC\":false}, \"productName\":\"S3B_OL_1_EFR____20040703T003000_20040703T003200_20160204T070933_DDDD_001_002_FFFF_WER_D_NR_NNN.SEN3\", \"productClass\":\"OL\", \"productType\":\"OL_1_EFR___\", \"missionId\":\"S3\", \"satelliteId\":\"B\", \"url\":\"S3B_OL_1_EFR____20040703T003000_20040703T003200_20160204T070933_DDDD_001_002_FFFF_WER_D_NR_NNN.SEN3\", \"productFamily\":\"S3_SAFE\", \"instanceId\":\"DDDD_001_002_FFFF\", \"generatingCentre\":\"WER\", \"classId\":\"D_NR_NNN\"}");
+
+		final S3FileDescriptor descriptor = new S3FileDescriptor();
+		descriptor.setProductType("OL_1_EFR___");
+		descriptor.setProductClass("OL");
+		descriptor.setRelativePath(
+				"S3B_OL_1_EFR____20040703T003000_20040703T003200_20160204T070933_DDDD_001_002_FFFF_WER_D_NR_NNN.SEN3/xfdumanifest.xml");
+		descriptor.setFilename("xfdumanifest.xml");
+		descriptor.setExtension(FileExtension.SEN3);
+		descriptor.setProductName(
+				"S3B_OL_1_EFR____20040703T003000_20040703T003200_20160204T070933_DDDD_001_002_FFFF_WER_D_NR_NNN.SEN3");
+		descriptor.setMissionId("S3");
+		descriptor.setSatelliteId("B");
+		descriptor.setKeyObjectStorage(
+				"S3B_OL_1_EFR____20040703T003000_20040703T003200_20160204T070933_DDDD_001_002_FFFF_WER_D_NR_NNN.SEN3");
+		descriptor.setProductFamily(ProductFamily.S3_SAFE);
+		descriptor.setInstanceId("DDDD_001_002_FFFF");
+		descriptor.setGeneratingCentre("WER");
+		descriptor.setClassId("D_NR_NNN");
+		descriptor.setMode("NRT");
+
+		final File file = new File(testDir,
+				"S3B_OL_1_EFR____20040703T003000_20040703T003200_20160204T070933_DDDD_001_002_FFFF_WER_D_NR_NNN.SEN3/xfdumanifest.xml");
+
+		try {
+			final JSONObject result = extractor.processProductXFDUFile(descriptor, file);
+
+			assertNotNull("JSON object should not be null", result);
+			assertEquals("JSON object are not equals", expectedResult.length(), result.length());
+			for (final String key : expectedResult.keySet()) {
+				// timeliness and boundPolygon are JSONobjects again, so we test them seperately
+				if (!key.equals("timeliness") && !key.equals("boundingPolygon"))
+					assertEquals("JSON object value " + key + " are not equals", expectedResult.get(key),
+							result.get(key));
+			}
+
+			// test timeliness
+			for (final String key : expectedResult.getJSONObject("timeliness").keySet()) {
+				assertEquals("JSON object value timeliness/" + key + " are not equals",
+						expectedResult.getJSONObject("timeliness").get(key),
+						result.getJSONObject("timeliness").get(key));
+			}
+
+			// test boundPolygon
+			for (int i = 0; i < expectedResult.getJSONObject("boundingPolygon").getJSONArray("points").length(); i++) {
+				assertEquals("JSON object value boundingPolygon/points/" + i + " are not equals",
+						expectedResult.getJSONObject("boundingPolygon").getJSONArray("points").get(i),
+						result.getJSONObject("boundingPolygon").getJSONArray("points").get(i));
+			}
+		} catch (final AbstractCodedException fe) {
+			fail("Exception occurred: " + fe.getMessage());
+		}
+	}
     
     @Test
     public void testTotalNumberOfSliceEW() {

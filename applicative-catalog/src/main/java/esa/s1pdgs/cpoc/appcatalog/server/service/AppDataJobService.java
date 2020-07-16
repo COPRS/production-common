@@ -6,7 +6,6 @@ import java.util.List;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import esa.s1pdgs.cpoc.appcatalog.AppDataJob;
@@ -15,7 +14,6 @@ import esa.s1pdgs.cpoc.appcatalog.server.job.db.AppDataJobRepository;
 import esa.s1pdgs.cpoc.appcatalog.server.job.exception.AppCatalogJobNotFoundException;
 import esa.s1pdgs.cpoc.appcatalog.server.sequence.db.SequenceDao;
 import esa.s1pdgs.cpoc.common.ApplicationLevel;
-import esa.s1pdgs.cpoc.common.filter.FilterCriterion;
 
 /**
  * @author Viveris Technologies
@@ -26,7 +24,7 @@ public class AppDataJobService {
 	
     public static final String JOB_SEQ_KEY = "appDataJob";
     
-    private final AppDataJobRepository appDataJobDao;
+    private final AppDataJobRepository appDataJobRepository;
     private final SequenceDao sequenceDao;
 
     @Autowired
@@ -34,7 +32,7 @@ public class AppDataJobService {
     		final AppDataJobRepository appDataJobDao,
             final SequenceDao sequenceDao
     ) {
-        this.appDataJobDao = appDataJobDao;
+        this.appDataJobRepository = appDataJobDao;
         this.sequenceDao = sequenceDao;
     }
     
@@ -44,16 +42,12 @@ public class AppDataJobService {
         newJob.setId(sequence);
         newJob.setCreationDate(new Date());
         newJob.setLastUpdateDate(new Date());
-        return appDataJobDao.save(newJob);
+        return appDataJobRepository.save(newJob);
     }
 
     public AppDataJob getJob(final Long identifier) throws AppCatalogJobNotFoundException {
-        return appDataJobDao.findById(identifier).orElseThrow(
+        return appDataJobRepository.findById(identifier).orElseThrow(
                 () -> new AppCatalogJobNotFoundException(identifier));
-    }
-
-    public List<AppDataJob> search(final List<FilterCriterion> filters, final Sort sort) {
-        return appDataJobDao.search(filters, sort);
     }
 
     public List<AppDataJob> findByStateAndLastUpdateDateLessThan(
@@ -61,16 +55,32 @@ public class AppDataJobService {
     		final ApplicationLevel level,
             final Date lastUpdateDate
     ) {
-        return appDataJobDao.findByStateAndLevelAndLastUpdateDateLessThan(
+        return appDataJobRepository.findByStateAndLevelAndLastUpdateDateLessThan(
         		state, 
         		level, 
         		lastUpdateDate
         );
     }
+    
+    public List<AppDataJob> findByMessagesId(final long messageId) {
+    	return appDataJobRepository.findByMessagesId(messageId);
+    }
+
+    public List<AppDataJob> findByProductSessionId(final String sessionId) {
+    	return appDataJobRepository.findByProductSessionId(sessionId);
+    }
+    
+    public List<AppDataJob> findByProductDataTakeId(final String dataTakeId) {
+    	return appDataJobRepository.findByProductDataTakeId(dataTakeId);
+    }
+    
+    public List<AppDataJob> findJobInStateGenerating(final String taskTable) {
+    	return appDataJobRepository.findJobInStateGenerating(taskTable);
+    }
 
     public void deleteJob(final Long jobId) {
         LOGGER.debug("Deleting appDataJob {}", jobId);
-        appDataJobDao.deleteById(jobId);
+        appDataJobRepository.deleteById(jobId);
     }
 
     public AppDataJob updateJob(final AppDataJob patchJob) throws AppCatalogJobNotFoundException {
@@ -84,6 +94,6 @@ public class AppDataJobService {
         patchJob.setLastUpdateDate(new Date());
         
         LOGGER.debug("Updating appDataJob {}", patchJob.getId());
-        return appDataJobDao.save(patchJob);
+        return appDataJobRepository.save(patchJob);
     }
 }
