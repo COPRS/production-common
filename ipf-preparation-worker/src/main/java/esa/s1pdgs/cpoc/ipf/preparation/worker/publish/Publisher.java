@@ -1,5 +1,6 @@
 package esa.s1pdgs.cpoc.ipf.preparation.worker.publish;
 
+import static java.util.Collections.emptyList;
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toMap;
 
@@ -245,12 +246,20 @@ public class Publisher {
 	}
 
 	// it is not a good idea to change the job order; instead it should be generated in the last step
-	public final void buildJobOrder(final JobGen jobGen, final String workingDir) {
+	final void buildJobOrder(final JobGen jobGen, final String workingDir) {
 		//FIXME find better way to create proper paths than just modifying fileNames, intervals and outputs
 
 		final JobOrder jobOrder = jobGen.jobOrder();
 		final AppDataJob job = jobGen.job();
 		final ProductTypeAdapter typeAdapter = jobGen.typeAdapter();
+
+		// collect all additional inputs
+		final Map<String, AppDataJobTaskInputs> inputs
+				= job.getAdditionalInputs().stream().collect(toMap(i -> i.getTaskName() + ":" + i.getTaskVersion(), i -> i));
+
+		//set these inputs in corresponding job order processors
+		jobOrder.getProcs().forEach(
+				p -> p.setInputs(toJobOrderInputs(inputs.get(p.getTaskName() + ":" + p.getTaskVersion()))));
 
 		jobOrderInputs(jobOrder).forEach(input -> {
 			input.getFilenames().forEach(filename -> filename.setFilename(workingDir + filename.getFilename()));
@@ -266,18 +275,14 @@ public class Publisher {
 				DateUtils.convertToAnotherFormat(job.getStopTime(),
 						AppDataJobProduct.TIME_FORMATTER, JobOrderSensingTime.DATETIME_FORMATTER)));
 
-		// collect all additional inputs
-		final Map<String, AppDataJobTaskInputs> inputs
-				= job.getAdditionalInputs().stream().collect(toMap(i -> i.getTaskName() + ":" + i.getTaskVersion(), i -> i));
-
-		//set these inputs in corresponding job order processors
-		jobOrder.getProcs().forEach(
-				p -> p.setInputs(toJobOrderInputs(inputs.get(p.getTaskName() + ":" + p.getTaskVersion()))));
-
 		typeAdapter.customJobOrder(jobGen);
 	}
 
 	private List<JobOrderInput> toJobOrderInputs(final AppDataJobTaskInputs appDataJobTaskInputs) {
+		if(appDataJobTaskInputs == null) {
+			return emptyList();
+		}
+
 		return appDataJobTaskInputs.getInputs().stream().map(this::toJobOrderInputs).collect(toList());
 	}
 

@@ -8,13 +8,8 @@ import static java.util.stream.Collectors.toList;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertThat;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyInt;
-import static org.mockito.ArgumentMatchers.argThat;
-import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.mockito.ArgumentMatchers.*;
+import static org.mockito.Mockito.*;
 
 import java.io.File;
 import java.util.List;
@@ -23,6 +18,7 @@ import java.util.stream.Stream;
 
 import org.hamcrest.CustomMatcher;
 import org.hamcrest.Matcher;
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -35,7 +31,9 @@ import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.junit4.SpringRunner;
 
 import esa.s1pdgs.cpoc.appcatalog.AppDataJob;
+import esa.s1pdgs.cpoc.appcatalog.AppDataJobFile;
 import esa.s1pdgs.cpoc.appcatalog.AppDataJobProduct;
+import esa.s1pdgs.cpoc.appcatalog.AppDataJobTaskInputs;
 import esa.s1pdgs.cpoc.common.ProductFamily;
 import esa.s1pdgs.cpoc.common.errors.processing.MetadataQueryException;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.model.JobGen;
@@ -47,10 +45,9 @@ import esa.s1pdgs.cpoc.ipf.preparation.worker.timeout.InputTimeoutChecker;
 import esa.s1pdgs.cpoc.metadata.client.MetadataClient;
 import esa.s1pdgs.cpoc.metadata.client.SearchMetadataQuery;
 import esa.s1pdgs.cpoc.metadata.model.SearchMetadata;
+import esa.s1pdgs.cpoc.xml.XmlConverter;
 import esa.s1pdgs.cpoc.xml.config.XmlConfig;
 import esa.s1pdgs.cpoc.xml.model.joborder.JobOrder;
-import esa.s1pdgs.cpoc.xml.model.joborder.JobOrderInputFile;
-import esa.s1pdgs.cpoc.xml.model.joborder.JobOrderProc;
 import esa.s1pdgs.cpoc.xml.model.tasktable.TaskTable;
 
 @RunWith(SpringRunner.class)
@@ -59,13 +56,13 @@ import esa.s1pdgs.cpoc.xml.model.tasktable.TaskTable;
 public class AuxQueryTest {
 
     @Mock
-    MetadataClient metadataClient;
+    private MetadataClient metadataClient;
 
     @Mock
-    InputTimeoutChecker inputTimeoutChecker;
+    private InputTimeoutChecker inputTimeoutChecker;
 
     @Autowired
-    ElementMapper elementMapper;
+    private ElementMapper elementMapper;
 
     @Before
     public void initMocks() {
@@ -84,13 +81,15 @@ public class AuxQueryTest {
 
         final AppDataJob job = new AppDataJob(133L);
         final AppDataJobProduct product = new AppDataJobProduct();
-        product.setStartTime("2020-07-13T12:20:00.000000Z");
-        product.setStopTime("2020-07-13T12:25:00.000000Z");
+
+        //TODO where to set statTime, stopTime?
+        //product.setStartTime("2020-07-13T12:20:00.000000Z");
+        //product.setStopTime("2020-07-13T12:25:00.000000Z");
         job.setProduct(product);
 
         final JobOrder jobOrder = new TaskTableToJobOrderConverter().apply(taskTable);
 
-        final JobGen jobGen = new JobGen(job, null, null, taskTableAdapter, null, null, jobOrder, null);
+        final JobGen jobGen = new JobGen(job, null, null, taskTableAdapter, null, jobOrder, null);
 
         when(metadataClient
                 .search(argThat(isQueryWithType("MPL_ORBPRE")), any(), any(), any(), anyInt(), any(), any()))
@@ -177,17 +176,17 @@ public class AuxQueryTest {
                         eq("2020-07-13T12:20:00.000000Z"), eq("2020-07-13T12:25:00.000000Z"), any(), anyInt(), any(), any());
 
 
-        assertThat(procOfType(
-                "AIOP_PROC_APP", jobGen.jobOrder()),
-                hasInputs("AUX_OBMEMC:AUX_OBMEMC_RESULT", "MPL_ORBPRE:MPL_ORBPRE_RESULT", "MPL_ORBSCT:MPL_ORBSCT_RESULT_1", "MPL_ORBSCT:MPL_ORBSCT_RESULT_2"));
+        assertThat(inputsForTask(
+                "AIOP_PROC_APP:01.00", jobGen.job()),
+                hasInputs("AUX_OBMEMC_RESULT", "MPL_ORBPRE_RESULT", "MPL_ORBSCT_RESULT_1", "MPL_ORBSCT_RESULT_2"));
 
-        assertThat(procOfType(
-                "AIOP_DPASSEMBLER_APP", jobGen.jobOrder()),
-                hasInputs("AUX_OBMEMC:AUX_OBMEMC_RESULT", "MPL_ORBPRE:MPL_ORBPRE_RESULT", "MPL_ORBSCT:MPL_ORBSCT_RESULT_1", "MPL_ORBSCT:MPL_ORBSCT_RESULT_2"));
+        assertThat(inputsForTask(
+                "AIOP_DPASSEMBLER_APP:01.00", jobGen.job()),
+                hasInputs("AUX_OBMEMC_RESULT", "MPL_ORBPRE_RESULT", "MPL_ORBSCT_RESULT_1", "MPL_ORBSCT_RESULT_2"));
 
-        assertThat(procOfType(
-                "AIOP_LIST_APP", jobGen.jobOrder()),
-                hasInputs("AUX_OBMEMC:AUX_OBMEMC_RESULT"));
+        assertThat(inputsForTask(
+                "AIOP_LIST_APP:01.00", jobGen.job()),
+                hasInputs("AUX_OBMEMC_RESULT"));
     }
 
     @Test
@@ -202,13 +201,14 @@ public class AuxQueryTest {
 
         final AppDataJob job = new AppDataJob(133L);
         final AppDataJobProduct product = new AppDataJobProduct();
-        product.setStartTime("2020-07-13T12:20:00.000000Z");
-        product.setStopTime("2020-07-13T12:25:00.000000Z");
+        //TODO where to set start time stop time?
+        //product.setStartTime("2020-07-13T12:20:00.000000Z");
+        //product.setStopTime("2020-07-13T12:25:00.000000Z");
         job.setProduct(product);
 
         final JobOrder jobOrder = new TaskTableToJobOrderConverter().apply(taskTable);
 
-        final JobGen jobGen = new JobGen(job, null, null, taskTableAdapter, elementMapper, null, jobOrder, null);
+        final JobGen jobGen = new JobGen(job, null, null, taskTableAdapter, null, jobOrder, null);
 
         //currently for multiple alternatives all are queried no matter a result has already been found or not
         //but later the first result is taken in the final job order
@@ -243,7 +243,7 @@ public class AuxQueryTest {
         verify(metadataClient, times(1)).search(argThat(isQueryWithType("IW_RAW__0N")), any(), any(), any(), anyInt(), any(), any());
         verify(metadataClient, times(1)).search(argThat(isQueryWithType("IW_RAW__0S")), any(), any(), any(), anyInt(), any(), any());
 
-        assertThat(procOfType("PSC", jobOrder), hasInputs(
+        assertThat(inputsForTask("PSC:3.20", job), hasInputs(
                 "IW_RAW__0S_RESULT",
                 "IW_RAW__0C_RESULT",
                 "IW_RAW__0N_RESULT",
@@ -254,21 +254,21 @@ public class AuxQueryTest {
                 "AUX_RESORB_RESULT",
                 "AUX_ATT_RESULT"));
 
-        assertThat(procOfType("MDC", jobOrder), hasInputs(
+        assertThat(inputsForTask("MDC:3.20", job), hasInputs(
                 "AUX_PP1_RESULT",
                 "AUX_CAL_RESULT",
                 "AUX_INS_RESULT",
                 "AUX_RESORB_RESULT",
                 "AUX_ATT_RESULT"));
 
-        assertThat(procOfType("WPC", jobOrder), hasInputs(
+        assertThat(inputsForTask("WPC:3.20", job), hasInputs(
                 "AUX_PP1_RESULT",
                 "AUX_CAL_RESULT",
                 "AUX_INS_RESULT",
                 "AUX_RESORB_RESULT",
                 "AUX_ATT_RESULT"));
 
-        assertThat(procOfType("LPC1", jobOrder), hasInputs(
+        assertThat(inputsForTask("LPC1:3.20", job), hasInputs(
                 "IW_SL1__1_", //this is an output
                 "AUX_PP1_RESULT",
                 "AUX_CAL_RESULT",
@@ -276,7 +276,7 @@ public class AuxQueryTest {
                 "AUX_RESORB_RESULT",
                 "AUX_ATT_RESULT"));
 
-        assertThat(procOfType("stats", jobOrder), hasInputs(
+        assertThat(inputsForTask("stats:3.20", job), hasInputs(
                 "AUX_PP1_RESULT",
                 "AUX_CAL_RESULT",
                 "AUX_INS_RESULT",
@@ -305,20 +305,29 @@ public class AuxQueryTest {
                 .thenReturn(emptyList());
     }
 
+    private AppDataJobTaskInputs inputsForTask(String taskVersion, AppDataJob job) {
+        final Optional<AppDataJobTaskInputs> candidate =
+                job.getAdditionalInputs().stream()
+                        .filter(i -> taskVersion.equals(i.getTaskName() + ":" + i.getTaskVersion())).findFirst();
+
+        Assert.assertTrue("input is present: " + taskVersion, candidate.isPresent());
+
+        return candidate.get();
+    }
 
     //check if proc has expectedInputs where in input is defined by "resultFileName"
-    private Matcher<JobOrderProc> hasInputs(final String... expectedInputs) {
-        return new CustomMatcher<JobOrderProc>(format("proc with inputs %s", asList(expectedInputs))) {
+    private Matcher<AppDataJobTaskInputs> hasInputs(final String... expectedInputs) {
+        return new CustomMatcher<AppDataJobTaskInputs>(format("proc with inputs %s", asList(expectedInputs))) {
             @Override
             public boolean matches(final Object item) {
-                if (!(item instanceof JobOrderProc)) {
+                if (!(item instanceof AppDataJobTaskInputs)) {
                     return false;
                 }
 
-                final JobOrderProc actual = (JobOrderProc) item;
+                final AppDataJobTaskInputs actual = (AppDataJobTaskInputs) item;
 
                 final List<String> actualInputs = actual.getInputs().stream()
-                        .flatMap(i -> i.getFilenames().stream().map(JobOrderInputFile::getFilename))
+                        .flatMap(i -> i.getFiles().stream().map(AppDataJobFile::getFilename))
                         .sorted()
                         .collect(toList());
 
@@ -329,15 +338,6 @@ public class AuxQueryTest {
         };
     }
 
-    private JobOrderProc procOfType(final String type, final JobOrder jobOrder) {
-        final Optional<JobOrderProc> proc = jobOrder.getProcs().stream().filter(p -> p.getTaskName().equals(type)).findFirst();
-
-        if (!proc.isPresent()) {
-            throw new IllegalArgumentException(format("job order does not have proc %s", type));
-        }
-
-        return proc.get();
-    }
 
     private ArgumentMatcher<SearchMetadataQuery> isQueryWithType(final String productType) {
         return new ArgumentMatcher<SearchMetadataQuery>() {
