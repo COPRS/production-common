@@ -36,7 +36,6 @@ public class AuxQueryHandler {
 				jobGen,
 				mode,
 				timeoutChecker,
-				elementMapper,
 				buildMetadataSearchQuery(jobGen.taskTableAdapter()));
 	}
 

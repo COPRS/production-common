@@ -1,10 +1,21 @@
 package esa.s1pdgs.cpoc.appcatalog;
 
+import java.util.Collections;
+import java.util.List;
+
 public final class AppDataJobProductAdapter {
 	private final AppDataJobProduct product;
 
 	public AppDataJobProductAdapter(final AppDataJobProduct product) {
 		this.product = product;
+	}
+	
+	public final void setProductsFor(final String key, final List<AppDataJobFile> products) {
+		product.getInputs().put(key, products);
+	}
+	
+	public final List<AppDataJobFile> getProductsFor(final String key) {
+		return product.getInputs().getOrDefault(key, Collections.emptyList());
 	}
 	
 	public final String getStartTime() {
@@ -19,6 +30,10 @@ public final class AppDataJobProductAdapter {
 		return getStringValue("productName");
 	}
 	
+	public final String getSatelliteId() {
+		return getStringValue("satelliteId");
+	}
+		
 	public final String getMissionId() {
 		return getStringValue("missionId");
 	}
@@ -54,5 +69,4 @@ public final class AppDataJobProductAdapter {
     	}
     	return text;
     }
-	
 }

@@ -1,4 +1,4 @@
-package esa.s1pdgs.cpoc.ipf.preparation.worker.type;
+package esa.s1pdgs.cpoc.ipf.preparation.worker.type.edrs;
 
 import java.time.Instant;
 import java.time.ZoneOffset;
@@ -71,9 +71,12 @@ public final class AiopPropertiesAdapter {
 	}
 	
 	public final Map<String,String> aiopPropsFor(final AppDataJob job) {		
-    	final AppDataJobProduct product = job.getProduct();
     	final boolean reprocessing = false; // currently no reprocessing supported
-    	LOGGER.info("Configuring AIOP with station parameters for stationCode {} for product {}", product.getStationCode(), product.getProductName());
+    	
+    	final EdrsSessionProduct product = EdrsSessionProduct.of(job);
+    	
+    	LOGGER.info("Configuring AIOP with station parameters for stationCode {} for product {}", 
+    			product.getStationCode(), product.getProductName());
 
     	final Map<String,String> aiopParams = new HashMap<>();
     	aiopParams.put("Mission_Id", product.getMissionId() + product.getSatelliteId());
@@ -116,8 +119,9 @@ public final class AiopPropertiesAdapter {
 	
     
 	private boolean checkTimeoutReached(final AppDataJob job) {
+    	final EdrsSessionProduct product = EdrsSessionProduct.of(job);
 
-		final String stationCode = job.getProduct().getStationCode();
+		final String stationCode = product.getStationCode();
 		final Map<String, String> propForStationCode = aiopProperties.get(stationCode);
 		if (propForStationCode == null) {
 			LOGGER.warn("no configuration found for station code -> not timeout check");
@@ -130,12 +134,11 @@ public final class AiopPropertiesAdapter {
 		final long startToWaitMs = job.getGeneration().getCreationDate().toInstant().toEpochMilli();
 
 		// the "stop time" of the product (DSIB) is the downlink-end time
-		final String downlinkEndTimeUTC = job.getProduct().getStopTime();
+		final String downlinkEndTimeUTC = product.getStopTime();
 		final long currentTimeMs = System.currentTimeMillis();
 
 		if (timeoutReachedForPrimarySearch(downlinkEndTimeUTC, currentTimeMs, startToWaitMs, minimalWaitingTimeMs,
 				timeoutForDownlinkStationMs)) {
-			final AppDataJobProduct product = job.getProduct();
 			LOGGER.warn("Timeout reached for stationCode {} and product {}", product.getStationCode(),
 					product.getProductName());
 			return true;

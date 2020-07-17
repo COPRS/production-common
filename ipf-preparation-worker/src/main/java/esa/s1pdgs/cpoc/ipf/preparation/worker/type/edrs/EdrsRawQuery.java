@@ -1,4 +1,4 @@
-package esa.s1pdgs.cpoc.ipf.preparation.worker.type;
+package esa.s1pdgs.cpoc.ipf.preparation.worker.type.edrs;
 
 import java.util.Collections;
 import java.util.Map;
@@ -29,30 +29,34 @@ final class EdrsRawQuery implements Callable<JobGen> {
     	}
         
         if (job.job() != null && job.job().getProduct() != null) {
+        	final EdrsSessionProduct product = EdrsSessionProduct.of(job.job());
+        	
             try {
-            	// in case of EDRS session, the product name is the sessionId
             	final EdrsSessionMetadataAdapter edrsMetadata = EdrsSessionMetadataAdapter.parse(        			
-            			metadataClient.getEdrsSessionFor(job.productName())
+            			metadataClient.getEdrsSessionFor(product.getSessionId())
             	);
-              	job.job().getProduct().setRaws1(edrsMetadata.availableRaws1());
-          	  	job.job().getProduct().setRaws2(edrsMetadata.availableRaws2());
-          	  	
-            	if (edrsMetadata.getChannel1() == null) {            	
+            	
+            	if (edrsMetadata.getChannel1() == null) {    
+            		product.setRawsForChannel(1, edrsMetadata.availableRaws1());
             	  	throw new IpfPrepWorkerInputsMissingException(
 						  Collections.singletonMap(
-								  job.job().getProduct().getProductName(), 
+								  product.getProductName(), 
 								  "No DSIB for channel 1"
 						  )
             	  	);
-            	}        	
+            	}        
+            	product.setRawsForChannel(1, edrsMetadata.raws1());
+            	
             	if (edrsMetadata.getChannel2() == null) { 
+            		product.setRawsForChannel(2, edrsMetadata.availableRaws2());
             		throw new IpfPrepWorkerInputsMissingException(
       					  Collections.singletonMap(
-      							  job.job().getProduct().getProductName(), 
+      							  product.getProductName(), 
       							  "No DSIB for channel 2"
       					  )
                   	);
             	} 
+            	product.setRawsForChannel(2, edrsMetadata.raws2());
             	
             	final Map<String,String> missingRaws = edrsMetadata.missingRaws(); 
         	    if (!missingRaws.isEmpty()) {
@@ -62,7 +66,7 @@ final class EdrsRawQuery implements Callable<JobGen> {
             catch (final MetadataQueryException me) {
             	 throw new IpfPrepWorkerInputsMissingException(
    	    			  Collections.singletonMap(
-   	    					  job.job().getProduct().getProductName(), 
+   	    					product.getProductName(), 
    	    					  String.format("Query error: %s", Exceptions.messageOf(me))
    	    			  )
      	    	  );

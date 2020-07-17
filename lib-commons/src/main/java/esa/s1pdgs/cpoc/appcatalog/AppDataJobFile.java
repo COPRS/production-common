@@ -7,7 +7,7 @@ import java.util.Objects;
  * 
  * @author Viveris Technologies
  */
-public class AppDataJobFile {
+public class AppDataJobFile implements Comparable<AppDataJobFile> {
 
     /**
      * Name of the file
@@ -51,7 +51,7 @@ public class AppDataJobFile {
         this.keyObs = keyObs;
     }
 
-    public AppDataJobFile(AppDataJobFile other) {
+    public AppDataJobFile(final AppDataJobFile other) {
         fileName = other.fileName;
         keyObs = other.keyObs;
         startDate = other.startDate;
@@ -68,7 +68,7 @@ public class AppDataJobFile {
     /**
      * @param filename the filename to set
      */
-    public void setFilename(String filename) {
+    public void setFilename(final String filename) {
         this.fileName = filename;
     }
 
@@ -91,7 +91,7 @@ public class AppDataJobFile {
         return startDate;
     }
 
-    public void setStartDate(String startDate) {
+    public void setStartDate(final String startDate) {
         this.startDate = startDate;
     }
 
@@ -99,7 +99,7 @@ public class AppDataJobFile {
         return endDate;
     }
 
-    public void setEndDate(String endDate) {
+    public void setEndDate(final String endDate) {
         this.endDate = endDate;
     }
 
@@ -130,7 +130,7 @@ public class AppDataJobFile {
         } else if (obj == null || getClass() != obj.getClass()) {
             ret = false;
         } else {
-            AppDataJobFile other = (AppDataJobFile) obj;
+            final AppDataJobFile other = (AppDataJobFile) obj;
             ret = Objects.equals(fileName, other.fileName)
                     && Objects.equals(keyObs, other.keyObs)
                     && Objects.equals(startDate, other.startDate)
@@ -138,5 +138,10 @@ public class AppDataJobFile {
         }
         return ret;
     }
+
+	@Override
+	public int compareTo(final AppDataJobFile o) {
+		return fileName.compareTo(o.fileName);
+	}
 
 }

@@ -1,4 +1,4 @@
-package esa.s1pdgs.cpoc.ipf.preparation.worker.type;
+package esa.s1pdgs.cpoc.ipf.preparation.worker.type.edrs;
 
 import java.util.Collection;
 import java.util.HashMap;
@@ -72,18 +72,15 @@ public class EdrsSessionMetadataAdapter {
 		return channel2;
 	}
 		
-	public final Map<String,String> missingRaws() {
-		final List<AppDataJobFile> expected1 = raws(channel1.getRawNames(), raws1);
-		final List<AppDataJobFile> expected2 = raws(channel2.getRawNames(), raws2);
-		
+	public final Map<String,String> missingRaws() {		
     	final Map<String,String> missingRaws = new HashMap<>();
-    	for (final AppDataJobFile raw : availableRaws1()) {
-    		if (!expected1.contains(raw)) {
+    	for (final AppDataJobFile raw : raws1()) {
+    		if (raw.getKeyObs() == null) {
     			missingRaws.put(raw.getFilename(), "Missing RAW1 " + raw.getFilename());
     		}
     	}
-    	for (final AppDataJobFile raw : availableRaws2()) {
-    		if (!expected2.contains(raw)) {
+    	for (final AppDataJobFile raw : raws2()) {
+    		if (raw.getKeyObs() == null) {
     			missingRaws.put(raw.getFilename(), "Missing RAW2 " + raw.getFilename());
     		}
     	}
@@ -96,6 +93,14 @@ public class EdrsSessionMetadataAdapter {
 	
 	public final List<AppDataJobFile> availableRaws2() {
 		return raws(raws2.keySet(), raws2);
+	}	
+	
+	public final List<AppDataJobFile> raws1() {
+		return raws(channel1.getRawNames(), raws1);
+	}
+	
+	public final List<AppDataJobFile> raws2() {
+		return raws(channel2.getRawNames(), raws2);
 	}	
 	
 	private final List<AppDataJobFile> raws(final Collection<String> names, final Map<String,EdrsSessionMetadata> raws) {

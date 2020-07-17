@@ -1,4 +1,4 @@
-package esa.s1pdgs.cpoc.ipf.preparation.worker.type;
+package esa.s1pdgs.cpoc.ipf.preparation.worker.type.segment;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -154,15 +154,15 @@ final class L0SegmentPolarisationQuery implements Callable<JobGen> {
 			if (job.generation().getCreationDate().getTime() < currentDate.getTime() - timeoutInputSearchMs) {
 				LOGGER.warn("Continue generation of {} {} even if sensing gaps", job.productName(),
 						job.generation());
-				appDataJob.getProduct().setStartTime(sensingStart);
-				appDataJob.getProduct().setStopTime(sensingStop);
+				appDataJob.setStartTime(sensingStart);
+				appDataJob.setStopTime(sensingStop);
 			} else {
 				throw new IpfPrepWorkerInputsMissingException(missingMetadata);
 			}
 		} 
 		else {
-			appDataJob.getProduct().setStartTime(sensingStart);
-			appDataJob.getProduct().setStopTime(sensingStop);
+			appDataJob.setStartTime(sensingStart);
+			appDataJob.setStopTime(sensingStop);
 		}
 		LOGGER.debug("== preSearch: performed lastName: {},fullCoverage= {} ", lastName, fullCoverage);
 				

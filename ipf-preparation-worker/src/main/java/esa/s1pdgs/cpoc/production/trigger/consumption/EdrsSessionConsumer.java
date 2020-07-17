@@ -8,6 +8,7 @@ import org.apache.logging.log4j.Logger;
 
 import esa.s1pdgs.cpoc.appcatalog.AppDataJobFile;
 import esa.s1pdgs.cpoc.appcatalog.AppDataJobProduct;
+import esa.s1pdgs.cpoc.ipf.preparation.worker.type.CatalogEventAdapter;
 import esa.s1pdgs.cpoc.mqi.model.queue.CatalogEvent;
 import esa.s1pdgs.cpoc.mqi.model.rest.GenericMessageDto;
 
@@ -35,8 +36,7 @@ public final class EdrsSessionConsumer implements ProductTypeConsumptionHandler 
         productDto.setMissionId(eventAdapter.missionId());
         productDto.setStationCode(eventAdapter.stationCode());
         
-        productDto.setProductName(eventAdapter.sessionId()); // IMPORTANT workaround!!! Allows to get the
-        // session identifier in exec-worker
+        productDto.setProductName(eventAdapter.sessionId()); 
         
         productDto.setSatelliteId(eventAdapter.satelliteId());
         productDto.setStartTime(eventAdapter.startTime());

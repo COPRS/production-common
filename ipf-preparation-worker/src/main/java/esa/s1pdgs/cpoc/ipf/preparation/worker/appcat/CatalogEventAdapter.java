@@ -2,6 +2,9 @@ package esa.s1pdgs.cpoc.ipf.preparation.worker.appcat;
 
 import java.util.List;
 
+import org.apache.http.util.Asserts;
+
+import esa.s1pdgs.cpoc.appcatalog.AppDataJob;
 import esa.s1pdgs.cpoc.mqi.model.queue.CatalogEvent;
 import esa.s1pdgs.cpoc.mqi.model.rest.GenericMessageDto;
 
@@ -11,6 +14,13 @@ public final class CatalogEventAdapter {
 
 	public CatalogEventAdapter(final CatalogEvent event) {
 		this.event = event;
+	}
+	
+	public static final CatalogEventAdapter of(final AppDataJob job) {
+		Asserts.check(!job.getMessages().isEmpty(), "Missing message in job " + job.getId());
+		
+		final GenericMessageDto<CatalogEvent> mqiMessage = job.getMessages().get(0);				
+		return new CatalogEventAdapter(mqiMessage.getBody());
 	}
 	
 	public static final CatalogEventAdapter of(final GenericMessageDto<CatalogEvent> mqiMessage) {

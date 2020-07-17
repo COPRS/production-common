@@ -1,5 +1,6 @@
-package esa.s1pdgs.cpoc.ipf.preparation.worker.type;
+package esa.s1pdgs.cpoc.ipf.preparation.worker.type.edrs;
 
+import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Optional;
@@ -12,6 +13,8 @@ import esa.s1pdgs.cpoc.common.errors.AbstractCodedException;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.appcat.AppCatJobService;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.appcat.CatalogEventAdapter;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.model.JobGen;
+import esa.s1pdgs.cpoc.ipf.preparation.worker.type.AbstractProductTypeAdapter;
+import esa.s1pdgs.cpoc.ipf.preparation.worker.type.ProductTypeAdapter;
 import esa.s1pdgs.cpoc.metadata.client.MetadataClient;
 import esa.s1pdgs.cpoc.mqi.model.queue.IpfExecutionJob;
 import esa.s1pdgs.cpoc.mqi.model.queue.LevelJobInputDto;
@@ -39,7 +42,14 @@ public final class EdrsSession extends AbstractProductTypeAdapter implements Pro
 	public final Callable<JobGen> mainInputSearch(final JobGen job) {
 		return new EdrsRawQuery(job, metadataClient, aiopAdapter);
 	}
-
+	
+	@Override
+	public final void customAppDataJob(final AppDataJob job) {			
+		final CatalogEventAdapter eventAdapter = CatalogEventAdapter.of(job);		
+		// IMPORTANT workaround!!! Allows to get the session identifier in exec-worker
+		job.getProduct().getMetadata().put("productName", eventAdapter.sessionId());	
+	}
+	
 	@Override
 	public final void customJobOrder(final JobGen job) {
     	final AbstractJobOrderConf conf = job.jobOrder().getConf();    	
@@ -59,21 +69,23 @@ public final class EdrsSession extends AbstractProductTypeAdapter implements Pro
 	public final void customJobDto(final JobGen job, final IpfExecutionJob dto) {
         // Add input relative to the channels
         if (job.job().getProduct() != null) {
-            final int nb1 = job.job().getProduct().getRaws1().size();
-            final int nb2 = job.job().getProduct().getRaws2().size();
+        	final EdrsSessionProduct product = EdrsSessionProduct.of(job.job());
+        	
+        	final List<AppDataJobFile> raws1 = product.getRawsForChannel(1);
+        	final List<AppDataJobFile> raws2 = product.getRawsForChannel(2);
 
             // Add raw to the job order, one file per channel, alterating and in alphabetic order
-            for (int i = 0; i < Math.max(nb1, nb2); i++) {
-                if (i < nb1) {
-                    final AppDataJobFile raw = job.job().getProduct().getRaws1().get(i);
+            for (int i = 0; i < Math.max(raws1.size(), raws2.size()); i++) {
+                if (i < raws1.size()) {
+                    final AppDataJobFile raw = raws1.get(i);
                     dto.addInput(
                             new LevelJobInputDto(
                                     ProductFamily.EDRS_SESSION.name(),
                                     dto.getWorkDirectory() + "ch01/" + raw.getFilename(),
                                     raw.getKeyObs()));
                 }
-                if (i < nb2) {
-                    final AppDataJobFile raw = job.job().getProduct().getRaws2().get(i);
+                if (i < raws2.size()) {
+                    final AppDataJobFile raw = raws2.get(i);
                     dto.addInput(
                             new LevelJobInputDto(
                                     ProductFamily.EDRS_SESSION.name(),

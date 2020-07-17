@@ -58,7 +58,7 @@ public class JobDispatcherImpl implements JobDispatcher {
         		.predecessor(prepJob.getUid())
         		.newReporting("TaskTableLookup");
         
-        typeAdapter.customAppDataJobProduct(jobFromMessage.getProduct());
+        typeAdapter.customAppDataJob(jobFromMessage);
     	LOGGER.trace("== dispatch job {}", jobFromMessage.toString());
     	
     	reporting.begin(

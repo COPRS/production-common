@@ -1,7 +1,6 @@
 package esa.s1pdgs.cpoc.appcatalog;
 
 import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -24,13 +23,13 @@ public class AppDataJobProduct {
     public static final String DEFAULT_POLARISTATION = "NONE";
 
 	private Map<String,Object> metadata = new LinkedHashMap<>();    
-	private List<AppDataJobInput> inputs = new ArrayList<>();
+	private Map<String, List<AppDataJobFile>> inputs = new LinkedHashMap<>();  
 	
-	public List<AppDataJobInput> getInputs() {
+	public Map<String, List<AppDataJobFile>> getInputs() {
 		return inputs;
 	}
 	
-	public void setInputs(final List<AppDataJobInput> inputProducts) {
+	public void setInputs(final Map<String, List<AppDataJobFile>> inputProducts) {
 		this.inputs = inputProducts;
 	}
 	

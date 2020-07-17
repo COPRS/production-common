@@ -17,6 +17,7 @@ import esa.s1pdgs.cpoc.appcatalog.AppDataJob;
 import esa.s1pdgs.cpoc.appcatalog.AppDataJobFile;
 import esa.s1pdgs.cpoc.appcatalog.AppDataJobInput;
 import esa.s1pdgs.cpoc.appcatalog.AppDataJobProduct;
+import esa.s1pdgs.cpoc.appcatalog.AppDataJobProductAdapter;
 import esa.s1pdgs.cpoc.appcatalog.AppDataJobTaskInputs;
 import esa.s1pdgs.cpoc.common.errors.processing.IpfPrepWorkerInputsMissingException;
 import esa.s1pdgs.cpoc.common.errors.processing.MetadataQueryException;
@@ -24,7 +25,6 @@ import esa.s1pdgs.cpoc.common.utils.DateUtils;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.model.JobGen;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.model.ProductMode;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.model.metadata.SearchMetadataResult;
-import esa.s1pdgs.cpoc.ipf.preparation.worker.model.tasktable.ElementMapper;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.model.tasktable.TaskTableAdapter;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.timeout.InputTimeoutChecker;
 import esa.s1pdgs.cpoc.metadata.client.MetadataClient;
@@ -48,7 +48,6 @@ public class AuxQuery implements Callable<JobGen> {
 	private final ProductMode mode;
 	private final InputTimeoutChecker timeoutChecker;
 	private final TaskTableAdapter taskTableAdapter;
-	private final ElementMapper elementMapper;
 	private final Map<TaskTableInputAlternative.TaskTableInputAltKey, SearchMetadataQuery> queryTemplates;
 
 	public AuxQuery(
@@ -56,14 +55,12 @@ public class AuxQuery implements Callable<JobGen> {
 			final JobGen jobGen,
 			final ProductMode mode,
 			final InputTimeoutChecker timeoutChecker,
-			final ElementMapper elementMapper,
 			final Map<TaskTableInputAlternative.TaskTableInputAltKey, SearchMetadataQuery> queryTemplates) {
 		this.metadataClient = metadataClient;
 		this.jobGen = jobGen;
 		this.mode = mode;
 		this.timeoutChecker = timeoutChecker;
 		this.taskTableAdapter = jobGen.taskTableAdapter();
-		this.elementMapper = elementMapper;
 		this.queryTemplates = queryTemplates;
 	}
 
@@ -203,13 +200,15 @@ public class AuxQuery implements Callable<JobGen> {
 
 	private List<SearchMetadata> queryAux(final SearchMetadataQuery query) throws MetadataQueryException {
 		final AppDataJob job = jobGen.job();
+		final AppDataJobProductAdapter productAdapter = new AppDataJobProductAdapter(job.getProduct());
+		
 		return metadataClient.search(
 				query,
-				sanitizeDateString(job.getProduct().getStartTime()),
-				sanitizeDateString(job.getProduct().getStopTime()),
-				job.getProduct().getSatelliteId(),
-				job.getProduct().getInsConfId(),
-				job.getProduct().getProcessMode(), 
+				sanitizeDateString(job.getStartTime()),
+				sanitizeDateString(job.getStopTime()),
+				productAdapter.getSatelliteId(),
+				productAdapter.getInsConfId(),
+				productAdapter.getProcessMode(), 
 				polarisationFor(query.getProductType())
 		);
 	}
@@ -218,7 +217,9 @@ public class AuxQuery implements Callable<JobGen> {
 	// S1PRO-707: only "AUX_ECE" requires to query polarisation
 	private String polarisationFor(final String productType) {
 		if ("AUX_ECE".equals(productType.toUpperCase())) {
-			final String polarisation = jobGen.job().getProduct().getPolarisation().toUpperCase();
+			final AppDataJobProductAdapter productAdapter = new AppDataJobProductAdapter(jobGen.job().getProduct());		
+			
+			final String polarisation = productAdapter.getStringValue("polarisation", "NONE").toUpperCase();
 			if (polarisation.equals("SV") || polarisation.equals("DV")) {
 				return "V";
 			} else if (polarisation.equals("SH") || polarisation.equals("DH")) {

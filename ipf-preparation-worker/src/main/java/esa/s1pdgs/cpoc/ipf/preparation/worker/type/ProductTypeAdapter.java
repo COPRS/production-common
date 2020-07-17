@@ -7,7 +7,6 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import esa.s1pdgs.cpoc.appcatalog.AppDataJob;
-import esa.s1pdgs.cpoc.appcatalog.AppDataJobProduct;
 import esa.s1pdgs.cpoc.common.errors.AbstractCodedException;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.appcat.AppCatJobService;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.appcat.CatalogEventAdapter;
@@ -19,7 +18,7 @@ public interface ProductTypeAdapter {
 	
 	Callable<JobGen> mainInputSearch(JobGen job);
 	
-	void customAppDataJobProduct(final AppDataJobProduct product);
+	void customAppDataJob(final AppDataJob job);
 	
     void customJobOrder(JobGen job);
 	

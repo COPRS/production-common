@@ -5,6 +5,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import esa.s1pdgs.cpoc.appcatalog.AppDataJobProduct;
+import esa.s1pdgs.cpoc.ipf.preparation.worker.type.CatalogEventAdapter;
 import esa.s1pdgs.cpoc.mqi.model.queue.CatalogEvent;
 import esa.s1pdgs.cpoc.mqi.model.rest.GenericMessageDto;
 

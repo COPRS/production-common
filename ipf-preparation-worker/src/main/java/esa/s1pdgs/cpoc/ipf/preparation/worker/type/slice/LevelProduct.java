@@ -1,11 +1,15 @@
-package esa.s1pdgs.cpoc.ipf.preparation.worker.type;
+package esa.s1pdgs.cpoc.ipf.preparation.worker.type.slice;
 
 import java.util.Map;
 import java.util.concurrent.Callable;
 
+import esa.s1pdgs.cpoc.appcatalog.AppDataJob;
 import esa.s1pdgs.cpoc.appcatalog.AppDataJobProduct;
+import esa.s1pdgs.cpoc.appcatalog.AppDataJobProductAdapter;
 import esa.s1pdgs.cpoc.common.utils.DateUtils;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.model.JobGen;
+import esa.s1pdgs.cpoc.ipf.preparation.worker.type.AbstractProductTypeAdapter;
+import esa.s1pdgs.cpoc.ipf.preparation.worker.type.ProductTypeAdapter;
 import esa.s1pdgs.cpoc.metadata.client.MetadataClient;
 import esa.s1pdgs.cpoc.mqi.model.queue.IpfExecutionJob;
 import esa.s1pdgs.cpoc.xml.model.joborder.JobOrderSensingTime;
@@ -31,7 +35,16 @@ public final class LevelProduct extends AbstractProductTypeAdapter implements Pr
 	}
 
 	@Override
+	public void customAppDataJob(final AppDataJob job) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
 	public final void customJobOrder(final JobGen job) {
+		final AppDataJobProductAdapter product = new AppDataJobProductAdapter(job.job().getProduct());
+		
+		
 		// Rewrite job order sensing time
 		final String jobOrderStart = DateUtils.convertToAnotherFormat(job.job().getProduct().getSegmentStartDate(),
 				AppDataJobProduct.TIME_FORMATTER, JobOrderSensingTime.DATETIME_FORMATTER);
