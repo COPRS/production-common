@@ -18,6 +18,7 @@ import org.elasticsearch.action.support.replication.ReplicationResponse;
 import org.elasticsearch.client.RequestOptions;
 import org.elasticsearch.client.RestHighLevelClient;
 import org.elasticsearch.client.core.CountRequest;
+import org.elasticsearch.common.geo.GeoShapeType;
 import org.elasticsearch.common.unit.Fuzziness;
 import org.elasticsearch.common.xcontent.XContentType;
 import org.elasticsearch.index.query.BoolQueryBuilder;
@@ -34,7 +35,9 @@ import org.springframework.stereotype.Service;
 import esa.s1pdgs.cpoc.common.ProductFamily;
 import esa.s1pdgs.cpoc.common.utils.DateUtils;
 import esa.s1pdgs.cpoc.prip.model.Checksum;
+import esa.s1pdgs.cpoc.prip.model.GeoShapePolygon;
 import esa.s1pdgs.cpoc.prip.model.PripDateTimeFilter;
+import esa.s1pdgs.cpoc.prip.model.PripGeoShape;
 import esa.s1pdgs.cpoc.prip.model.PripMetadata;
 import esa.s1pdgs.cpoc.prip.model.PripTextFilter;
 
@@ -146,20 +149,20 @@ public class PripElasticSearchMetadataRepo implements PripMetadataRepository {
 //		buildQueryWithTextFilters(nameFilters, queryBuilder, PripMetadata.FIELD_NAMES.NAME);
 //		return query(queryBuilder, top, skip);
 //	}
-	
+
 	@Override
 	public List<PripMetadata> findWithFilters(List<PripTextFilter> textFilters,
 			List<PripDateTimeFilter> dateTimeFilters, Optional<Integer> top, Optional<Integer> skip) {
-		
-		LOGGER.info("finding PRIP metadata with date filters {} and text filters {}", dateTimeFilters,
-				textFilters);
+
+		LOGGER.info("finding PRIP metadata with date filters {} and text filters {}", dateTimeFilters, textFilters);
 		BoolQueryBuilder queryBuilder = QueryBuilders.boolQuery();
 		buildQueryWithDateTimeFilters(dateTimeFilters, queryBuilder);
 		buildQueryWithTextFilters(textFilters, queryBuilder);
 		return query(queryBuilder, top, skip);
 	}
 
-	private void buildQueryWithDateTimeFilters(List<PripDateTimeFilter> dateTimeFilters, BoolQueryBuilder queryBuilder) {
+	private void buildQueryWithDateTimeFilters(List<PripDateTimeFilter> dateTimeFilters,
+			BoolQueryBuilder queryBuilder) {
 
 		for (PripDateTimeFilter filter : dateTimeFilters) {
 
@@ -200,7 +203,8 @@ public class PripElasticSearchMetadataRepo implements PripMetadataRepository {
 						String.format("*%s*", filter.getText())));
 				break;
 			case EQUALS:
-				queryBuilder.must(QueryBuilders.matchQuery(filter.getFieldName().fieldName(), filter.getText()).fuzziness(Fuzziness.ZERO).operator(Operator.AND));
+				queryBuilder.must(QueryBuilders.matchQuery(filter.getFieldName().fieldName(), filter.getText())
+						.fuzziness(Fuzziness.ZERO).operator(Operator.AND));
 				break;
 			default:
 				throw new IllegalArgumentException(
@@ -257,15 +261,19 @@ public class PripElasticSearchMetadataRepo implements PripMetadataRepository {
 		pm.setProductFamily(
 				ProductFamily.valueOf((String) sourceAsMap.get(PripMetadata.FIELD_NAMES.PRODUCT_FAMILY.fieldName())));
 		pm.setContentType((String) sourceAsMap.get(PripMetadata.FIELD_NAMES.CONTENT_TYPE.fieldName()));
-		pm.setContentLength(Long.parseLong(sourceAsMap.get(PripMetadata.FIELD_NAMES.CONTENT_LENGTH.fieldName()).toString()));
+		pm.setContentLength(
+				Long.parseLong(sourceAsMap.get(PripMetadata.FIELD_NAMES.CONTENT_LENGTH.fieldName()).toString()));
 		pm.setCreationDate(
 				DateUtils.parse((String) sourceAsMap.get(PripMetadata.FIELD_NAMES.CREATION_DATE.fieldName())));
 		pm.setEvictionDate(
 				DateUtils.parse((String) sourceAsMap.get(PripMetadata.FIELD_NAMES.EVICTION_DATE.fieldName())));
 
-		pm.setContentDateStart(DateUtils.parse((String) sourceAsMap.get(PripMetadata.FIELD_NAMES.CONTENT_DATE_START.fieldName())));
-		pm.setContentDateEnd(DateUtils.parse((String) sourceAsMap.get(PripMetadata.FIELD_NAMES.CONTENT_DATE_END.fieldName())));
-		List<Checksum> checksumList = new ArrayList<>();
+		pm.setContentDateStart(
+				DateUtils.parse((String) sourceAsMap.get(PripMetadata.FIELD_NAMES.CONTENT_DATE_START.fieldName())));
+		pm.setContentDateEnd(
+				DateUtils.parse((String) sourceAsMap.get(PripMetadata.FIELD_NAMES.CONTENT_DATE_END.fieldName())));
+
+		final List<Checksum> checksumList = new ArrayList<>();
 		for (Map<String, Object> c : (List<Map<String, Object>>) sourceAsMap
 				.get(PripMetadata.FIELD_NAMES.CHECKSUM.fieldName())) {
 			Checksum checksum = new Checksum();
@@ -274,9 +282,34 @@ public class PripElasticSearchMetadataRepo implements PripMetadataRepository {
 			checksumList.add(checksum);
 		}
 		pm.setChecksums(checksumList);
+		
+		pm.setFootprint(this.mapToGeoShapePolygon(sourceAsMap));
 
 		LOGGER.debug("hit {}", pm);
 		return pm;
+	}
+
+	private GeoShapePolygon mapToGeoShapePolygon(Map<String, Object> sourceAsMap) {
+		final Map<String, Object> footprintJson = (Map<String, Object>) sourceAsMap
+				.get(PripMetadata.FIELD_NAMES.FOOTPRINT.fieldName());
+
+		if (null != footprintJson && !footprintJson.isEmpty()) {
+			final String footprintGeoshapeType = (String) footprintJson.get(PripGeoShape.FIELD_NAMES.TYPE.fieldName());
+			if (!GeoShapeType.POLYGON.name().equals(footprintGeoshapeType)) {
+				throw new IllegalArgumentException(
+						"PRIP metadata attribute value of " + PripMetadata.FIELD_NAMES.FOOTPRINT.fieldName() + "."
+								+ PripGeoShape.FIELD_NAMES.TYPE.fieldName() + " must be '" + GeoShapeType.POLYGON.name()
+								+ "' but is '" + footprintGeoshapeType + "'!");
+			}
+
+			final List<Object> footprintCoordinatesOuterArray = (List<Object>) footprintJson
+					.get(PripGeoShape.FIELD_NAMES.COORDINATES.fieldName());
+			final List<Object> footprintCoordinatesInnerArray = (List<Object>) footprintCoordinatesOuterArray.get(0);
+
+			return new GeoShapePolygon(footprintCoordinatesInnerArray);
+		}
+
+		return null;
 	}
 
 	@Override
@@ -286,8 +319,7 @@ public class PripElasticSearchMetadataRepo implements PripMetadataRepository {
 	}
 
 	@Override
-	public int countWithFilters(List<PripDateTimeFilter> creationDateFilters,
-			List<PripTextFilter> nameFilters) {
+	public int countWithFilters(List<PripDateTimeFilter> creationDateFilters, List<PripTextFilter> nameFilters) {
 		LOGGER.info("counting PRIP metadata with creationDate filters {} and name filters {}", creationDateFilters,
 				nameFilters);
 		BoolQueryBuilder queryBuilder = QueryBuilders.boolQuery();
@@ -295,7 +327,7 @@ public class PripElasticSearchMetadataRepo implements PripMetadataRepository {
 		buildQueryWithTextFilters(nameFilters, queryBuilder);
 		return count(queryBuilder);
 	}
-	
+
 	private int count(BoolQueryBuilder queryBuilder) {
 		int count = 0;
 		SearchSourceBuilder searchSourceBuilder = new SearchSourceBuilder();
@@ -304,9 +336,9 @@ public class PripElasticSearchMetadataRepo implements PripMetadataRepository {
 		}
 
 		CountRequest countRequest = new CountRequest(ES_INDEX);
-		countRequest.source(searchSourceBuilder); 
+		countRequest.source(searchSourceBuilder);
 		countRequest.types(ES_PRIP_TYPE);
-		
+
 		try {
 			count = new Long(restHighLevelClient.count(countRequest, RequestOptions.DEFAULT).getCount()).intValue();
 			LOGGER.info("counting PRIP metadata successful, number of hits {}", count);
@@ -314,6 +346,6 @@ public class PripElasticSearchMetadataRepo implements PripMetadataRepository {
 			LOGGER.error("error while counting PRIP metadata", e);
 		}
 		return count;
-	}	
+	}
 
 }
