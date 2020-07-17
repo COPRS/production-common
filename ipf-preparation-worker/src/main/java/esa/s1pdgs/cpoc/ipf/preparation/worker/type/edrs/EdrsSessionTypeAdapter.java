@@ -11,20 +11,20 @@ import esa.s1pdgs.cpoc.appcatalog.AppDataJobFile;
 import esa.s1pdgs.cpoc.common.ProductFamily;
 import esa.s1pdgs.cpoc.common.errors.AbstractCodedException;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.appcat.AppCatJobService;
-import esa.s1pdgs.cpoc.ipf.preparation.worker.appcat.CatalogEventAdapter;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.model.JobGen;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.type.AbstractProductTypeAdapter;
+import esa.s1pdgs.cpoc.ipf.preparation.worker.type.CatalogEventAdapter;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.type.ProductTypeAdapter;
 import esa.s1pdgs.cpoc.metadata.client.MetadataClient;
 import esa.s1pdgs.cpoc.mqi.model.queue.IpfExecutionJob;
 import esa.s1pdgs.cpoc.mqi.model.queue.LevelJobInputDto;
 import esa.s1pdgs.cpoc.xml.model.joborder.AbstractJobOrderConf;
 
-public final class EdrsSession extends AbstractProductTypeAdapter implements ProductTypeAdapter {		
+public final class EdrsSessionTypeAdapter extends AbstractProductTypeAdapter implements ProductTypeAdapter {		
 	private final MetadataClient metadataClient;
     private final AiopPropertiesAdapter aiopAdapter;
       
-	public EdrsSession(
+	public EdrsSessionTypeAdapter(
 			final MetadataClient metadataClient, 
 			final AiopPropertiesAdapter aiopAdapter
 	) {
@@ -39,15 +39,16 @@ public final class EdrsSession extends AbstractProductTypeAdapter implements Pro
 	}
 
 	@Override
-	public final Callable<JobGen> mainInputSearch(final JobGen job) {
+	public final Callable<Void> mainInputSearch(final AppDataJob job) {
 		return new EdrsRawQuery(job, metadataClient, aiopAdapter);
 	}
 	
 	@Override
 	public final void customAppDataJob(final AppDataJob job) {			
-		final CatalogEventAdapter eventAdapter = CatalogEventAdapter.of(job);		
+		final CatalogEventAdapter eventAdapter = CatalogEventAdapter.of(job);				
+		final EdrsSessionProduct product = EdrsSessionProduct.of(job);		
 		// IMPORTANT workaround!!! Allows to get the session identifier in exec-worker
-		job.getProduct().getMetadata().put("productName", eventAdapter.sessionId());	
+		product.setProductName(eventAdapter.sessionId());	
 	}
 	
 	@Override

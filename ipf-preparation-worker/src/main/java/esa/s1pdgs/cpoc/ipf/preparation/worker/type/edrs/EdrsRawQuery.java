@@ -4,32 +4,32 @@ import java.util.Collections;
 import java.util.Map;
 import java.util.concurrent.Callable;
 
+import esa.s1pdgs.cpoc.appcatalog.AppDataJob;
 import esa.s1pdgs.cpoc.common.errors.processing.IpfPrepWorkerInputsMissingException;
 import esa.s1pdgs.cpoc.common.errors.processing.MetadataQueryException;
 import esa.s1pdgs.cpoc.common.utils.Exceptions;
-import esa.s1pdgs.cpoc.ipf.preparation.worker.model.JobGen;
 import esa.s1pdgs.cpoc.metadata.client.MetadataClient;
 
-final class EdrsRawQuery implements Callable<JobGen> {
-	private final JobGen job;
+final class EdrsRawQuery implements Callable<Void> {
+	private final AppDataJob job;
 	private final MetadataClient metadataClient;
 	private final AiopPropertiesAdapter aiopAdapter;
 	
-	public EdrsRawQuery(final JobGen job, final MetadataClient metadataClient, final AiopPropertiesAdapter aiopAdapter) {
+	public EdrsRawQuery(final AppDataJob job, final MetadataClient metadataClient, final AiopPropertiesAdapter aiopAdapter) {
 		this.job = job;
 		this.metadataClient = metadataClient;
 		this.aiopAdapter = aiopAdapter;
 	}
 	
 	@Override
-	public final JobGen call() throws Exception {		
+	public final Void call() throws Exception {		
         // S1PRO-1101: if timeout for primary search is reached -> just start the job 
-    	if (aiopAdapter.isTimedOut(job.job())) {	        		
-    		return job;
+    	if (aiopAdapter.isTimedOut(job)) {	        		
+    		return null;
     	}
         
-        if (job.job() != null && job.job().getProduct() != null) {
-        	final EdrsSessionProduct product = EdrsSessionProduct.of(job.job());
+        if (job != null && job.getProduct() != null) {
+        	final EdrsSessionProduct product = EdrsSessionProduct.of(job);
         	
             try {
             	final EdrsSessionMetadataAdapter edrsMetadata = EdrsSessionMetadataAdapter.parse(        			
@@ -72,6 +72,6 @@ final class EdrsRawQuery implements Callable<JobGen> {
      	    	  );
             }
         }
-		return job;
+		return null;
 	}
 }

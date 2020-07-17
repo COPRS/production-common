@@ -88,7 +88,8 @@ public class JobGen {
 	}
 	
 	public final JobGen mainInputSearch() throws JobStateTransistionFailed {
-		return perform(typeAdapter.mainInputSearch(this), "querying input " + productName());
+		perform(typeAdapter.mainInputSearch(job), "querying input " + productName());
+		return this;
 	}
 	
 	public final JobGen auxSearch() throws JobStateTransistionFailed {	
@@ -99,7 +100,7 @@ public class JobGen {
 		return perform(publisher.send(this), "publishing Job");
 	}
 
-	private JobGen perform(final Callable<JobGen> command, final String name) throws JobStateTransistionFailed {
+	private <E> E perform(final Callable<E> command, final String name) throws JobStateTransistionFailed {
 		try {
 			return command.call();
 		} 

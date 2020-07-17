@@ -18,22 +18,19 @@ import esa.s1pdgs.cpoc.appcatalog.AppDataJobProduct;
 import esa.s1pdgs.cpoc.common.errors.processing.IpfPrepWorkerInputsMissingException;
 import esa.s1pdgs.cpoc.common.errors.processing.MetadataQueryException;
 import esa.s1pdgs.cpoc.common.utils.DateUtils;
-import esa.s1pdgs.cpoc.ipf.preparation.worker.model.JobGen;
 import esa.s1pdgs.cpoc.metadata.client.MetadataClient;
 import esa.s1pdgs.cpoc.metadata.model.AbstractMetadata;
 import esa.s1pdgs.cpoc.metadata.model.LevelSegmentMetadata;
-import esa.s1pdgs.cpoc.mqi.model.queue.CatalogEvent;
-import esa.s1pdgs.cpoc.mqi.model.rest.GenericMessageDto;
 
-final class L0SegmentPolarisationQuery implements Callable<JobGen> {
+final class L0SegmentPolarisationQuery implements Callable<Void> {
 	static final Logger LOGGER = LogManager.getLogger(L0SegmentPolarisationQuery.class); 
 	
-	private final JobGen job;
+	private final AppDataJob job;
 	private final MetadataClient metadataClient;
 	private final long timeoutInputSearchMs;
 
 	public L0SegmentPolarisationQuery(
-			final JobGen job, 
+			final AppDataJob job, 
 			final MetadataClient metadataClient,
 			final long timeoutInputSearchMs
 	) {
@@ -43,25 +40,20 @@ final class L0SegmentPolarisationQuery implements Callable<JobGen> {
 	}
 
 	@Override
-	public JobGen call() throws Exception {
+	public Void call() throws Exception {
 		boolean fullCoverage = false;
 
 		// Retrieve the segments
 		final Map<String, String> missingMetadata = new HashMap<>();
 		final List<String> pols = new ArrayList<>();
 		final Map<String, List<LevelSegmentMetadata>> segmentsGroupByPol = new HashMap<>();
-		String lastName = "";
-		String dataTakeId = "null";
-		final AppDataJob appDataJob = job.job();
+
+		final L0SegmentProduct product = L0SegmentProduct.of(job);
+		final String lastName = product.getProductName();
+		final String dataTakeId = product.getDataTakeId();
 		
-		try {
-			for (final GenericMessageDto<CatalogEvent> message : appDataJob.getMessages()) {
-				final CatalogEvent dto = message.getBody();
-				lastName = dto.getKeyObjectStorage();
-				dataTakeId = dto.getMetadata().get("dataTakeId").toString();
-				break;
-			}
-			
+		
+		try {			
 			for (final LevelSegmentMetadata metadata : metadataClient.getLevelSegments(dataTakeId)) {
 				if (!segmentsGroupByPol.containsKey(metadata.getPolarisation())) {
 					pols.add(metadata.getPolarisation());
@@ -86,7 +78,7 @@ final class L0SegmentPolarisationQuery implements Callable<JobGen> {
 		String sensingStart = null;
 		String sensingStop = null;
 		if (pols.size() <= 0 || pols.size() > 2) {
-			missingMetadata.put(job.productName(), "Invalid number of polarisation " + pols.size());
+			missingMetadata.put(product.getProductName(), "Invalid number of polarisation " + pols.size());
 		} else if (pols.size() == 1) {
 			// Sort segments
 			final String polA = pols.get(0);
@@ -98,12 +90,12 @@ final class L0SegmentPolarisationQuery implements Callable<JobGen> {
 					fullCoverage = true;
 				} else {
 					fullCoverage = false;
-					missingMetadata.put(job.productName(), "Missing segments for the coverage of polarisation " + polA
+					missingMetadata.put(product.getProductName(), "Missing segments for the coverage of polarisation " + polA
 							+ ": " + extractProductSensingConsolidation(segmentsA));
 				}
 			} else {
 				fullCoverage = false;
-				missingMetadata.put(job.productName(), "Missing the other polarisation of " + polA);
+				missingMetadata.put(product.getProductName(), "Missing the other polarisation of " + polA);
 			}
 			// Get sensing start and stop
 			sensingStart = getStartSensingDate(segmentsA, AppDataJobProduct.TIME_FORMATTER);
@@ -123,7 +115,7 @@ final class L0SegmentPolarisationQuery implements Callable<JobGen> {
 					fullCoverageA = true;
 				} else {
 					fullCoverageA = false;
-					missingMetadata.put(job.productName(), "Missing segments for the coverage of polarisation " + polA
+					missingMetadata.put(product.getProductName(), "Missing segments for the coverage of polarisation " + polA
 							+ ": " + extractProductSensingConsolidation(segmentsA));
 				}
 				final boolean fullCoverageB;
@@ -132,13 +124,13 @@ final class L0SegmentPolarisationQuery implements Callable<JobGen> {
 					fullCoverageB = true;
 				} else {
 					fullCoverageB = false;
-					missingMetadata.put(job.productName(), "Missing segments for the coverage of polarisation " + polB
+					missingMetadata.put(product.getProductName(), "Missing segments for the coverage of polarisation " + polB
 							+ ": " + extractProductSensingConsolidation(segmentsB));
 				}
 				fullCoverage = fullCoverageA && fullCoverageB;
 			} else {
 				fullCoverage = false;
-				missingMetadata.put(job.productName(), "Invalid double polarisation " + polA + " - " + polB);
+				missingMetadata.put(product.getProductName(), "Invalid double polarisation " + polA + " - " + polB);
 			}
 			// Get sensing start and stop
 			final DateTimeFormatter formatter = AppDataJobProduct.TIME_FORMATTER;
@@ -151,22 +143,22 @@ final class L0SegmentPolarisationQuery implements Callable<JobGen> {
 		// Check if we add the coverage
 		if (!fullCoverage) {
 			final Date currentDate = new Date();
-			if (job.generation().getCreationDate().getTime() < currentDate.getTime() - timeoutInputSearchMs) {
-				LOGGER.warn("Continue generation of {} {} even if sensing gaps", job.productName(),
-						job.generation());
-				appDataJob.setStartTime(sensingStart);
-				appDataJob.setStopTime(sensingStop);
+			if (job.getGeneration().getCreationDate().getTime() < currentDate.getTime() - timeoutInputSearchMs) {
+				LOGGER.warn("Continue generation of {} {} even if sensing gaps", product.getProductName(),
+						job.getGeneration());
+				job.setStartTime(sensingStart);
+				job.setStopTime(sensingStop);
 			} else {
 				throw new IpfPrepWorkerInputsMissingException(missingMetadata);
 			}
 		} 
 		else {
-			appDataJob.setStartTime(sensingStart);
-			appDataJob.setStopTime(sensingStop);
+			job.setStartTime(sensingStart);
+			job.setStopTime(sensingStop);
 		}
 		LOGGER.debug("== preSearch: performed lastName: {},fullCoverage= {} ", lastName, fullCoverage);
 				
-		return job;
+		return null;
 	}
 
 	private final void sortSegmentsPerStartDate(final List<LevelSegmentMetadata> list) {

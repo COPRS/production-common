@@ -5,21 +5,21 @@ import java.util.concurrent.Callable;
 
 import esa.s1pdgs.cpoc.appcatalog.AppDataJob;
 import esa.s1pdgs.cpoc.appcatalog.AppDataJobProduct;
-import esa.s1pdgs.cpoc.appcatalog.AppDataJobProductAdapter;
 import esa.s1pdgs.cpoc.common.utils.DateUtils;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.model.JobGen;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.type.AbstractProductTypeAdapter;
+import esa.s1pdgs.cpoc.ipf.preparation.worker.type.CatalogEventAdapter;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.type.ProductTypeAdapter;
 import esa.s1pdgs.cpoc.metadata.client.MetadataClient;
 import esa.s1pdgs.cpoc.mqi.model.queue.IpfExecutionJob;
 import esa.s1pdgs.cpoc.xml.model.joborder.JobOrderSensingTime;
 
-public final class LevelProduct extends AbstractProductTypeAdapter implements ProductTypeAdapter {
+public final class LevelSliceTypeAdapter extends AbstractProductTypeAdapter implements ProductTypeAdapter {
 	private final MetadataClient metadataClient;
 	private final Map<String, Float> sliceOverlap;
 	private final Map<String, Float> sliceLength;
 
-	public LevelProduct(
+	public LevelSliceTypeAdapter(
 			final MetadataClient metadataClient,
 			final Map<String, Float> sliceOverlap,
 			final Map<String, Float> sliceLength
@@ -30,25 +30,27 @@ public final class LevelProduct extends AbstractProductTypeAdapter implements Pr
 	}
 
 	@Override
-	public final Callable<JobGen> mainInputSearch(final JobGen job) {
-		return new LevelProductInputQuery(job, metadataClient);
+	public final Callable<Void> mainInputSearch(final AppDataJob job) {
+		return new LevelSliceInputQuery(job, metadataClient);
 	}
 
 	@Override
 	public void customAppDataJob(final AppDataJob job) {
-		// TODO Auto-generated method stub
+		final CatalogEventAdapter eventAdapter = CatalogEventAdapter.of(job);
+		final LevelSliceProduct product = LevelSliceProduct.of(job);
 		
+		product.setAcquisition(eventAdapter.swathType()); 
+        product.setPolarisation(eventAdapter.polarisation());
 	}
 
 	@Override
 	public final void customJobOrder(final JobGen job) {
-		final AppDataJobProductAdapter product = new AppDataJobProductAdapter(job.job().getProduct());
-		
+		final LevelSliceProduct product = LevelSliceProduct.of(job.job());
 		
 		// Rewrite job order sensing time
-		final String jobOrderStart = DateUtils.convertToAnotherFormat(job.job().getProduct().getSegmentStartDate(),
+		final String jobOrderStart = DateUtils.convertToAnotherFormat(product.getSegmentStartDate(),
 				AppDataJobProduct.TIME_FORMATTER, JobOrderSensingTime.DATETIME_FORMATTER);
-		final String jobOrderStop = DateUtils.convertToAnotherFormat(job.job().getProduct().getSegmentStopDate(),
+		final String jobOrderStop = DateUtils.convertToAnotherFormat(product.getSegmentStopDate(),
 				AppDataJobProduct.TIME_FORMATTER, JobOrderSensingTime.DATETIME_FORMATTER);
 		
 		job.jobOrder().getConf().setSensingTime(new JobOrderSensingTime(jobOrderStart, jobOrderStop));
@@ -56,23 +58,23 @@ public final class LevelProduct extends AbstractProductTypeAdapter implements Pr
 		updateProcParam(
 				job.jobOrder(), 
 				"Mission_Id",
-				job.job().getProduct().getMissionId() + job.job().getProduct().getSatelliteId());
+				product.getMissionId() + product.getSatelliteId());
 		updateProcParam(
 				job.jobOrder(), 
 				"Slice_Number", 
-				String.valueOf(job.job().getProduct().getNumberSlice()));
+				String.valueOf(product.getNumberSlice()));
 		updateProcParam(
 				job.jobOrder(), 
 				"Total_Number_Of_Slices",
-				String.valueOf(job.job().getProduct().getTotalNbOfSlice()));
+				String.valueOf(product.getTotalNbOfSlice()));
 		updateProcParam(
 				job.jobOrder(), 
 				"Slice_Overlap",
-				String.valueOf(sliceOverlap.get(job.job().getProduct().getAcquisition())));
+				String.valueOf(sliceOverlap.get(product.getAcquisition())));
 		updateProcParam(
 				job.jobOrder(), 
 				"Slice_Length",
-				String.valueOf(sliceLength.get(job.job().getProduct().getAcquisition())));
+				String.valueOf(sliceLength.get(product.getAcquisition())));
 		updateProcParam(
 				job.jobOrder(), 
 				"Slicing_Flag", 

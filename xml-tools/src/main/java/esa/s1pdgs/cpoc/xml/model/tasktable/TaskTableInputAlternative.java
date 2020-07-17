@@ -91,7 +91,7 @@ public class TaskTableInputAlternative {
 	
 	
 	// for comparator test
-	TaskTableInputAlternative(final int order) {
+	public TaskTableInputAlternative(final int order) {
 		this.order = order;
 	}
 

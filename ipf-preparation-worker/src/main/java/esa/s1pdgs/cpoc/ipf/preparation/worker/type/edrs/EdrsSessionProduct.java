@@ -8,8 +8,7 @@ import esa.s1pdgs.cpoc.appcatalog.AppDataJobFile;
 import esa.s1pdgs.cpoc.appcatalog.AppDataJobProduct;
 import esa.s1pdgs.cpoc.appcatalog.AppDataJobProductAdapter;
 
-final class EdrsSessionProduct
-{
+final class EdrsSessionProduct {
 	private static final String RAWS1_ID = "raws1";
 	private static final String RAWS2_ID = "raws2";
 	
@@ -29,8 +28,7 @@ final class EdrsSessionProduct
 		);
 	}
 	
-	public final void setRawsForChannel(final int channel, final List<AppDataJobFile> raws) 
-	{
+	public final void setRawsForChannel(final int channel, final List<AppDataJobFile> raws) {
 		Collections.sort(raws);
 		final String channelKey = getIdForChannels(channel);	
 		product.setProductsFor(channelKey, raws);
@@ -39,6 +37,10 @@ final class EdrsSessionProduct
 	public final List<AppDataJobFile> getRawsForChannel(final int channel) {
 		final String channelKey = getIdForChannels(channel);	
 		return product.getProductsFor(channelKey);
+	}
+	
+	public final void setProductName(final String productName) {
+		product.setProductName(productName);		
 	}
 
 	public final String getStationCode() {

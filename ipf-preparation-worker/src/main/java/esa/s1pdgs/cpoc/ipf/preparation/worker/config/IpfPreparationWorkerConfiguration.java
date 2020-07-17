@@ -42,9 +42,9 @@ import esa.s1pdgs.cpoc.ipf.preparation.worker.timeout.InputTimeoutChecker;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.timeout.InputTimeoutCheckerImpl;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.type.ProductTypeAdapter;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.type.edrs.AiopPropertiesAdapter;
-import esa.s1pdgs.cpoc.ipf.preparation.worker.type.edrs.EdrsSession;
-import esa.s1pdgs.cpoc.ipf.preparation.worker.type.segment.L0Segment;
-import esa.s1pdgs.cpoc.ipf.preparation.worker.type.slice.LevelProduct;
+import esa.s1pdgs.cpoc.ipf.preparation.worker.type.edrs.EdrsSessionTypeAdapter;
+import esa.s1pdgs.cpoc.ipf.preparation.worker.type.segment.L0SegmentTypeAdapter;
+import esa.s1pdgs.cpoc.ipf.preparation.worker.type.slice.LevelSliceTypeAdapter;
 import esa.s1pdgs.cpoc.metadata.client.MetadataClient;
 import esa.s1pdgs.cpoc.mqi.client.MessageFilter;
 import esa.s1pdgs.cpoc.mqi.client.MqiClient;
@@ -160,7 +160,7 @@ public class IpfPreparationWorkerConfiguration {
 			@Value("${level-products.pathroutingxmlfile}") final String pathRoutingXmlFile
 	) {
 		if (processSettings.getLevel() == ApplicationLevel.L0) {
-			return new EdrsSession(
+			return new EdrsSessionTypeAdapter(
 					metadataClient, 
 					AiopPropertiesAdapter.of(aiopProperties)
 			);
@@ -168,7 +168,7 @@ public class IpfPreparationWorkerConfiguration {
 		else if (processSettings.getLevel() == ApplicationLevel.L0_SEGMENT) {
 			final long timeoutInputSearchMs = settings.getWaitprimarycheck().getMaxTimelifeS() * 1000L;
 			
-			return new L0Segment(
+			return new L0SegmentTypeAdapter(
 					metadataClient, 
 					timeoutInputSearchMs
 			);			
@@ -177,7 +177,7 @@ public class IpfPreparationWorkerConfiguration {
 			final Map<String, Float> sliceOverlap = settings.getTypeOverlap();
 			final Map<String, Float> sliceLength = settings.getTypeSliceLength();
 	
-			return new LevelProduct(
+			return new LevelSliceTypeAdapter(
 					metadataClient, 
 					sliceOverlap, 
 					sliceLength

@@ -3,37 +3,39 @@ package esa.s1pdgs.cpoc.ipf.preparation.worker.type.slice;
 import java.util.Collections;
 import java.util.concurrent.Callable;
 
+import esa.s1pdgs.cpoc.appcatalog.AppDataJob;
 import esa.s1pdgs.cpoc.common.errors.processing.IpfPrepWorkerInputsMissingException;
 import esa.s1pdgs.cpoc.common.errors.processing.MetadataQueryException;
-import esa.s1pdgs.cpoc.ipf.preparation.worker.model.JobGen;
 import esa.s1pdgs.cpoc.metadata.client.MetadataClient;
 import esa.s1pdgs.cpoc.metadata.model.L0AcnMetadata;
 import esa.s1pdgs.cpoc.metadata.model.L0SliceMetadata;
 
-class LevelProductInputQuery implements Callable<JobGen>  {
-	private final JobGen job;
+class LevelSliceInputQuery implements Callable<Void>  {
+	private final AppDataJob job;
 	private final MetadataClient metadataClient;
 	
-	public LevelProductInputQuery(final JobGen job, final MetadataClient metadataClient) {
+	public LevelSliceInputQuery(final AppDataJob job, final MetadataClient metadataClient) {
 		this.job = job;
 		this.metadataClient = metadataClient;
 	}
 	
 	@Override
-	public final JobGen call() throws Exception {
+	public final Void call() throws Exception {		
+		final LevelSliceProduct product = LevelSliceProduct.of(job);
+		
 		// Retrieve instrument configuration id and slice number
 		try {
-			final L0SliceMetadata file = this.metadataClient.getL0Slice(job.productName());
+			final L0SliceMetadata file = this.metadataClient.getL0Slice(product.getProductName());
 			
-			job.job().getProduct().setProductType(file.getProductType());
-			job.job().getProduct().setInsConfId(file.getInstrumentConfigurationId());
-			job.job().getProduct().setNumberSlice(file.getNumberSlice());
-			job.job().getProduct().setDataTakeId(file.getDatatakeId());
+			product.setProductType(file.getProductType());
+			product.setInsConfId(file.getInstrumentConfigurationId());
+			product.setNumberSlice(file.getNumberSlice());
+			product.setDataTakeId(file.getDatatakeId());
 			
 		} catch (final MetadataQueryException e) {
 			throw new IpfPrepWorkerInputsMissingException(
 					Collections.singletonMap(
-							job.productName(), 
+							product.getProductName(), 
 							"No Slice: " + e.getMessage()
 					)
 			);
@@ -41,20 +43,20 @@ class LevelProductInputQuery implements Callable<JobGen>  {
 		// Retrieve Total_Number_Of_Slices
 		try {
 			final L0AcnMetadata acn = this.metadataClient.getFirstACN(
-					job.job().getProduct().getProductName(),
-					job.job().getProduct().getProcessMode()
+					product.getProductName(),
+					product.getProcessMode()
 			);
-			job.job().getProduct().setTotalNbOfSlice(acn.getNumberOfSlices());
-			job.job().getProduct().setSegmentStartDate(acn.getValidityStart());
-			job.job().getProduct().setSegmentStopDate(acn.getValidityStop());
+			product.setTotalNbOfSlice(acn.getNumberOfSlices());
+			product.setSegmentStartDate(acn.getValidityStart());
+			product.setSegmentStopDate(acn.getValidityStop());
 		} catch (final MetadataQueryException e) {
 			throw new IpfPrepWorkerInputsMissingException(	
 					Collections.singletonMap(
-							job.productName(), 
+							product.getProductName(), 
 							"No ACNs: " + e.getMessage()
 					)
 			);
 		}
-		return job;
+		return null;
 	}		
 }

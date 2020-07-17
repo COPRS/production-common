@@ -26,6 +26,10 @@ public final class AppDataJobProductAdapter {
 		return getStringValue("stopTime");		
 	}
 	
+	public final void setProductName(final String name) {
+		setStringValue("productName", name);
+	}
+	
 	public final String getProductName() {
 		return getStringValue("productName");
 	}
@@ -36,6 +40,10 @@ public final class AppDataJobProductAdapter {
 		
 	public final String getMissionId() {
 		return getStringValue("missionId");
+	}
+	
+	public final void setInsConfId(final int id) {
+		setIntegerValue("insConfId", id);
 	}
 	
 	public final int getInsConfId() {
@@ -50,6 +58,20 @@ public final class AppDataJobProductAdapter {
 		return getStringValue("processMode", "NOMINAL");
 	}
 
+	public final void setStringValue(final String key, final String value) {
+		product.getMetadata().put(key, value);
+	}
+	
+	public final void setIntegerValue(final String key, final Integer value) {
+		product.getMetadata().put(key, value);
+	}
+	
+    
+    public final Integer getIntegerValue(final String key) {
+    	final Integer value = (int) product.getMetadata().get(key);
+    	return value;
+    }
+	
     public final String getStringValue(final String key)
     {
 		final String value = getStringValue(key, null);

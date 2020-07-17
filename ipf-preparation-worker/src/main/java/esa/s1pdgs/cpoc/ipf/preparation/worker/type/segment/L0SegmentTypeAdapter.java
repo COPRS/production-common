@@ -7,18 +7,18 @@ import esa.s1pdgs.cpoc.appcatalog.AppDataJob;
 import esa.s1pdgs.cpoc.appcatalog.AppDataJobProductAdapter;
 import esa.s1pdgs.cpoc.common.errors.AbstractCodedException;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.appcat.AppCatJobService;
-import esa.s1pdgs.cpoc.ipf.preparation.worker.appcat.CatalogEventAdapter;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.model.JobGen;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.type.AbstractProductTypeAdapter;
+import esa.s1pdgs.cpoc.ipf.preparation.worker.type.CatalogEventAdapter;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.type.ProductTypeAdapter;
 import esa.s1pdgs.cpoc.metadata.client.MetadataClient;
 import esa.s1pdgs.cpoc.mqi.model.queue.IpfExecutionJob;
 
-public final class L0Segment extends AbstractProductTypeAdapter implements ProductTypeAdapter {
+public final class L0SegmentTypeAdapter extends AbstractProductTypeAdapter implements ProductTypeAdapter {
 	private final MetadataClient metadataClient;
 	private final long timeoutInputSearchMs;
 
-	public L0Segment(
+	public L0SegmentTypeAdapter(
 			final MetadataClient metadataClient,
 			final long timeoutInputSearchMs
 	) {
@@ -33,17 +33,17 @@ public final class L0Segment extends AbstractProductTypeAdapter implements Produ
 	}
 
 	@Override
-	public final Callable<JobGen> mainInputSearch(final JobGen job) {
+	public final Callable<Void> mainInputSearch(final AppDataJob job) {
 		return new L0SegmentPolarisationQuery(job, metadataClient, timeoutInputSearchMs);
 	}
 	
 	@Override
 	public final void customAppDataJob(final AppDataJob job) {
 		final CatalogEventAdapter eventAdapter = CatalogEventAdapter.of(job);
-
-		job.getProduct().getMetadata().put("acquisition", eventAdapter.swathType());
-		job.getProduct().getMetadata().put("dataTakeId", eventAdapter.datatakeId());
-		job.getProduct().getMetadata().put("productName","l0_segments_for_" + eventAdapter.datatakeId());
+		final L0SegmentProduct product = L0SegmentProduct.of(job);
+		product.setAcquistion(eventAdapter.swathType());
+		product.setDataTakeId(eventAdapter.datatakeId());
+		product.setProductName("l0_segments_for_" + eventAdapter.datatakeId());
 	}
 
 	@Override
@@ -52,7 +52,7 @@ public final class L0Segment extends AbstractProductTypeAdapter implements Produ
         updateProcParam(
         		job.jobOrder(), 
         		"Mission_Id",
-        		product.getMissionId()+ product.getStringValue("satelliteId")
+        		product.getMissionId()+ product.getSatelliteId()
         );		
 	}
 

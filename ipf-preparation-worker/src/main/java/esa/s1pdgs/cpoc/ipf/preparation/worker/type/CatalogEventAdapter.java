@@ -1,4 +1,4 @@
-package esa.s1pdgs.cpoc.ipf.preparation.worker.appcat;
+package esa.s1pdgs.cpoc.ipf.preparation.worker.type;
 
 import java.util.List;
 

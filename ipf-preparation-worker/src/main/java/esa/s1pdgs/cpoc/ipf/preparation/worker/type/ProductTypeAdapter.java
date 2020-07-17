@@ -9,14 +9,13 @@ import org.apache.logging.log4j.Logger;
 import esa.s1pdgs.cpoc.appcatalog.AppDataJob;
 import esa.s1pdgs.cpoc.common.errors.AbstractCodedException;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.appcat.AppCatJobService;
-import esa.s1pdgs.cpoc.ipf.preparation.worker.appcat.CatalogEventAdapter;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.model.JobGen;
 import esa.s1pdgs.cpoc.mqi.model.queue.IpfExecutionJob;
 
 public interface ProductTypeAdapter {	
 	Logger LOGGER = LogManager.getLogger(ProductTypeAdapter.class);
 	
-	Callable<JobGen> mainInputSearch(JobGen job);
+	Callable<Void> mainInputSearch(final AppDataJob job);
 	
 	void customAppDataJob(final AppDataJob job);
 	
