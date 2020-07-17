@@ -41,6 +41,8 @@ public class AppDataJob {
     private String startTime;
     
     private String stopTime;
+    
+    private String productName;
 
     /**
      * Date when the job is created
@@ -285,13 +287,21 @@ public class AppDataJob {
 	public void setStopTime(final String stoptime) {
 		this.stopTime = stoptime;
 	}
+	
+	public String getProductName() {
+		return productName;
+	}
+
+	public void setProductName(final String productName) {
+		this.productName = productName;
+	}
 
 	/**
      * @see java.lang.Object#hashCode()
      */
     @Override
     public int hashCode() {
-        return Objects.hash(id, level, pod, state, taskTableName, startTime, stopTime,
+        return Objects.hash(id, level, pod, state, taskTableName, startTime, stopTime, productName,
                 creationDate, lastUpdateDate, messages, product, additionalInputs, generation, reportingId, prepJobInputQueue, prepJobMessageId);
     }
     
@@ -301,7 +311,7 @@ public class AppDataJob {
 			    + ", taskTableName=" + taskTableName + ", startTime=" + startTime + ", stopTime=" + stopTime
                 + ", creationDate=" + creationDate + ", lastUpdateDate=" + lastUpdateDate + ", messages=" + messages
                 + ", product=" + product + ", additionalInputs=" + additionalInputs + ", generation=" + generation
-                + ", reportingId=" + reportingId + ", prepJobMessageId=" + prepJobMessageId
+                + ", reportingId=" + reportingId + ", prepJobMessageId=" + prepJobMessageId + ", productName=" + productName
                 + ", prepJobInputQueue=" + prepJobInputQueue + "]";
 	}
 
@@ -330,6 +340,7 @@ public class AppDataJob {
                     && Objects.equals(product, other.product)
                     && Objects.equals(additionalInputs, other.additionalInputs)
                     && Objects.equals(generation, other.generation)
+                    && Objects.equals(productName, other.productName)
                     && Objects.equals(prepJobInputQueue, other.prepJobInputQueue)
                     && Objects.equals(prepJobMessageId, other.prepJobMessageId)
                     && Objects.equals(reportingId, other.reportingId);

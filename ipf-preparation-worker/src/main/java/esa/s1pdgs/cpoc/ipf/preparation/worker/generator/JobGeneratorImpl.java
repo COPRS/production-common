@@ -12,22 +12,20 @@ import esa.s1pdgs.cpoc.common.utils.Exceptions;
 import esa.s1pdgs.cpoc.common.utils.LogUtils;
 import esa.s1pdgs.cpoc.errorrepo.ErrorRepoAppender;
 import esa.s1pdgs.cpoc.errorrepo.model.rest.FailedProcessingDto;
-import esa.s1pdgs.cpoc.ipf.preparation.worker.appcat.AppCatAdapter;
+import esa.s1pdgs.cpoc.ipf.preparation.worker.appcat.AppCatJobService;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.config.ProcessSettings;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.generator.state.JobGenerationStateTransitions;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.model.JobGen;
-import esa.s1pdgs.cpoc.ipf.preparation.worker.model.tasktable.ElementMapper;
+import esa.s1pdgs.cpoc.ipf.preparation.worker.model.tasktable.TaskTableAdapter;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.publish.Publisher;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.query.AuxQueryHandler;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.type.ProductTypeAdapter;
 import esa.s1pdgs.cpoc.mqi.model.rest.GenericMessageDto;
-import esa.s1pdgs.cpoc.xml.model.tasktable.TaskTableAdapter;
 
 public final class JobGeneratorImpl implements JobGenerator {
 	private final TaskTableAdapter tasktableAdapter;
-	private final ElementMapper elementMapper;
 	private final ProductTypeAdapter typeAdapter;	
-    private final AppCatAdapter appCat;
+	private final AppCatJobService appCatService;
     private final ProcessSettings settings;
     private final ErrorRepoAppender errorAppender;
     private final Publisher publisher;
@@ -36,9 +34,8 @@ public final class JobGeneratorImpl implements JobGenerator {
         
 	public JobGeneratorImpl(
 			final TaskTableAdapter tasktableAdapter,
-			final ElementMapper elementMapper,
 			final ProductTypeAdapter typeAdapter, 
-			final AppCatAdapter appCat,
+			final AppCatJobService appCatService,
 			final ProcessSettings settings,
 			final ErrorRepoAppender errorAppender,
 			final Publisher publisher,
@@ -46,9 +43,8 @@ public final class JobGeneratorImpl implements JobGenerator {
 			final AuxQueryHandler auxQueryHandler
 	) {
 		this.tasktableAdapter = tasktableAdapter;
-		this.elementMapper = elementMapper;
 		this.typeAdapter = typeAdapter;
-		this.appCat = appCat;
+		this.appCatService = appCatService;
 		this.settings = settings;
 		this.errorAppender = errorAppender;
 		this.publisher = publisher;
@@ -59,9 +55,11 @@ public final class JobGeneratorImpl implements JobGenerator {
 	@Override
 	public final void run() {
 		try {
-			final AppDataJob job = appCat.next(tasktableAdapter.file().getName());
+			final String tasktableName = tasktableAdapter.file().getName();
+			
+			final AppDataJob job = appCatService.next(tasktableName);
 			if (job == null) {
-				LOGGER.trace("Found no applicable job to handle");
+				LOGGER.trace("Found no applicable job to handle for tasktable {}", tasktableName);
 				return;
 			}
 			try {			
@@ -91,7 +89,7 @@ public final class JobGeneratorImpl implements JobGenerator {
 						LogUtils.toString(error), 
 						messages.get(0)
 				));
-				appCat.terminate(job);	
+				appCatService.terminate(job);	
 			}		
 			// TODO check if it makes sense to evaluate the error counter here to limit the amount of
 			// failed transition attempts	
@@ -117,7 +115,6 @@ public final class JobGeneratorImpl implements JobGenerator {
 				typeAdapter, 
 				tasks,
 				tasktableAdapter,
-				elementMapper,
 				auxQueryHandler, 
 				tasktableAdapter.newJobOrder(settings), 
 				publisher

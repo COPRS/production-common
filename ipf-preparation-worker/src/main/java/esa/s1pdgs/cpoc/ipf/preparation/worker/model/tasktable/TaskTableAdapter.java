@@ -30,7 +30,6 @@ import esa.s1pdgs.cpoc.xml.model.tasktable.TaskTableInput;
 import esa.s1pdgs.cpoc.xml.model.tasktable.TaskTableInputAlternative;
 import esa.s1pdgs.cpoc.xml.model.tasktable.TaskTablePool;
 import esa.s1pdgs.cpoc.xml.model.tasktable.TaskTableTask;
-import esa.s1pdgs.cpoc.xml.model.tasktable.TaskTableInputAlternative.TaskTableInputAltKey;
 import esa.s1pdgs.cpoc.xml.model.tasktable.enums.TaskTableInputOrigin;
 
 public class TaskTableAdapter {
@@ -106,7 +105,7 @@ public class TaskTableAdapter {
 	// as last step when all inputs are present (in AppDataJob)
 	// this would also remove the mutable behaviour of the jobOrder
 	// TODO at least return AppDataJobInput here
-	public final JobOrderInput findInput(final JobGen job, final TaskTableInput input, Map<TaskTableInputAlternative.TaskTableInputAltKey, SearchMetadataResult> results) {
+	public final JobOrderInput findInput(final JobGen job, final TaskTableInput input, final Map<TaskTableInputAlternative.TaskTableInputAltKey, SearchMetadataResult> results) {
 		JobOrderInput result = null;
 
 		for (final TaskTableInputAlternative alt : input.alternativesOrdered().collect(toList())) {
@@ -139,10 +138,10 @@ public class TaskTableAdapter {
 			// is PROC input?
 			} else {
 				final String startDate = convertDateToJobOrderFormat(
-						job.job().getProduct().getStartTime()
+						job.job().getStartTime()
 				);
 				final String stopDate = convertDateToJobOrderFormat(
-						job.job().getProduct().getStopTime()
+						job.job().getStopTime()
 				);											
 				final String fileType = elementMapper.mappedFileType(alt.getFileType());
 				result = new JobOrderInput(

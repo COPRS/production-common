@@ -15,8 +15,6 @@ import org.springframework.web.client.RestTemplate;
 
 import esa.s1pdgs.cpoc.appcatalog.AppDataJob;
 import esa.s1pdgs.cpoc.common.errors.AbstractCodedException;
-import esa.s1pdgs.cpoc.common.errors.appcatalog.AppCatalogJobNewApiError;
-import esa.s1pdgs.cpoc.common.errors.appcatalog.AppCatalogJobPatchApiError;
 import esa.s1pdgs.cpoc.common.errors.appcatalog.AppCatalogJobSearchApiError;
 import esa.s1pdgs.cpoc.common.utils.LogUtils;
 
@@ -28,6 +26,11 @@ import esa.s1pdgs.cpoc.common.utils.LogUtils;
  *            the type of the DTO objects used for a product category
  */
 public class AppCatalogJobClient {
+	@FunctionalInterface
+	static interface RestCommand<E> {
+		E execute() throws HttpStatusCodeException, RestClientException, AbstractCodedException;
+	}
+	
 
     /**
      * Logger
@@ -95,6 +98,145 @@ public class AppCatalogJobClient {
     int getTempoRetryMs() {
         return tempoRetryMs;
     }
+        
+    public final AppDataJob findById(final long jobId) throws AbstractCodedException {
+        final String uri = hostUri + "/jobs/" + Long.toString(jobId);
+        
+        return performWithRetries(
+        		"get", 
+        		uri, 
+        		() -> restTemplate.exchange(
+                    		uri, 
+                    		HttpMethod.GET, 
+                    		null,
+                    		new ParameterizedTypeReference<AppDataJob>() {}
+                )        		
+        );
+    }
+
+    public final List<AppDataJob> findByMessagesId(final long messageId)
+            throws AbstractCodedException {
+    	return findAppDataJobsBy("findByMessagesId", Long.toString(messageId));
+    }
+
+    public final List<AppDataJob> findByProductSessionId(final String sessionId)
+            throws AbstractCodedException {
+    	return findAppDataJobsBy("findByProductSessionId", sessionId);
+    }
+
+    public final List<AppDataJob> findByProductDataTakeId(final String dataTakeId)
+            throws AbstractCodedException {
+    	return findAppDataJobsBy("findByProductDataTakeId", dataTakeId);
+    }
+
+    public final List<AppDataJob> findJobInStateGenerating(final String taskTable) 
+    		throws AbstractCodedException {
+    	return findAppDataJobsBy("findJobInStateGenerating", taskTable);
+    }
+
+    public final AppDataJob newJob(final AppDataJob job) throws AbstractCodedException {
+        final String uri = hostUri + "/jobs";
+        LogUtils.traceLog(LOGGER, String.format("[uri %s]", uri));
+        
+        return performWithRetries(
+        		"new", 
+        		uri, 
+        		() -> restTemplate.exchange(
+                		uri, 
+                		HttpMethod.POST,
+                		new HttpEntity<AppDataJob>(job),
+                		new ParameterizedTypeReference<AppDataJob>() {}
+                )        		
+        );
+    }
+
+	public AppDataJob updateJob(final AppDataJob job) throws AbstractCodedException {  		
+        final String uri = hostUri + "/jobs/" + job.getId();
+        LogUtils.traceLog(LOGGER, String.format("[uri %s]", uri));
+        
+        return performWithRetries(
+        		"patch", 
+        		uri, 
+        		() -> restTemplate.exchange(
+                		uri, 
+                		HttpMethod.PATCH,
+                		new HttpEntity<AppDataJob>(job),
+                		new ParameterizedTypeReference<AppDataJob>() {}
+                )        		
+        );
+    }
+	
+	public void deleteJob(final AppDataJob job) throws AbstractCodedException {  
+		final String uri = hostUri + "/jobs/" + job.getId();
+		performWithRetries(
+				"delete", 
+				uri, 
+				() -> {
+					restTemplate.delete(uri);
+					return null;
+				}
+		);  
+	}
+	
+    private final List<AppDataJob> findAppDataJobsBy(final String apiMethod, final String apiParameterValue) throws AbstractCodedException {        
+        final String uri = hostUri + "/jobs/" + apiMethod + "/" + apiParameterValue;
+        LogUtils.traceLog(LOGGER, String.format("[uri %s]", uri));
+        
+        return performWithRetries(
+        		apiMethod, 
+        		uri, 
+        		() -> restTemplate.exchange(
+                    		uri, 
+                    		HttpMethod.GET, 
+                    		null,
+                    		new ParameterizedTypeReference<List<AppDataJob>>() {}
+                )        		
+        );
+    }
+	
+    private final <E> E performWithRetries(
+    		final String name,
+    		final String uri,
+    		final RestCommand<ResponseEntity<E>> command
+    		
+    ) throws AbstractCodedException {
+        int retries = 0;
+        
+        while (true) {
+            retries++;
+            try {
+                final ResponseEntity<E> response = command.execute();
+            
+                if (response.getStatusCode() == HttpStatus.OK) {
+                    LogUtils.traceLog(LOGGER, String.format("[uri %s] [ret %s]", uri, response.getBody()));
+                    return response.getBody();
+                } else {
+                    waitOrThrow(retries,
+                            new AppCatalogJobSearchApiError(uri,
+                                    "HTTP status code "
+                                            + response.getStatusCode()),
+                            name);
+                }
+            } catch (final HttpStatusCodeException hsce) {
+                waitOrThrow(retries, new AppCatalogJobSearchApiError(
+                        uri,
+                        String.format(
+                                "HttpStatusCodeException occured: %s - %s",
+                                hsce.getStatusCode(),
+                                hsce.getResponseBodyAsString())),
+                		name);
+            } catch (final RestClientException rce) {
+                waitOrThrow(retries,
+                        new AppCatalogJobSearchApiError(uri,
+                                String.format(
+                                        "RestClientException occured: %s",
+                                        rce.getMessage()),
+                                rce),
+                        name);
+            }
+        }
+    }
+    
 
     /**
      * Wait or throw an error according the number of retries
@@ -119,207 +261,4 @@ public class AppCatalogJobClient {
         }
     }
     
-    private List<AppDataJob> findAppDataJobs(final String apiMethod, final String apiParameterValue) throws AbstractCodedException {
-        int retries = 0;
-        while (true) {
-            retries++;
-            final String uri = hostUri + "/jobs/" + apiMethod + "/" + apiParameterValue;
-            LogUtils.traceLog(LOGGER, String.format("[uri %s]", uri));
-            try {
-                final ResponseEntity<List<AppDataJob>> response = restTemplate.exchange(
-                		uri, 
-                		HttpMethod.GET, 
-                		null,
-                		new ParameterizedTypeReference<List<AppDataJob>>() {}
-                );             
-                if (response.getStatusCode() == HttpStatus.OK) {
-                    LogUtils.traceLog(LOGGER, String.format("[uri %s] [ret %s]", uri, response.getBody()));
-                    return response.getBody();
-                } else {
-                    waitOrThrow(retries,
-                            new AppCatalogJobSearchApiError(uri,
-                                    "HTTP status code "
-                                            + response.getStatusCode()),
-                            apiMethod);
-                }
-            } catch (final HttpStatusCodeException hsce) {
-                waitOrThrow(retries, new AppCatalogJobSearchApiError(
-                        uri,
-                        String.format(
-                                "HttpStatusCodeException occured: %s - %s",
-                                hsce.getStatusCode(),
-                                hsce.getResponseBodyAsString())),
-                		apiMethod);
-            } catch (final RestClientException rce) {
-                waitOrThrow(retries,
-                        new AppCatalogJobSearchApiError(uri,
-                                String.format(
-                                        "RestClientException occured: %s",
-                                        rce.getMessage()),
-                                rce),
-                        apiMethod);
-            }
-        }
-    }
-
-    /**
-     * Search by message identifier
-     * 
-     * @param messageId
-     * @return
-     * @throws AbstractCodedException
-     */
-    public List<AppDataJob> findByMessagesId(final long messageId)
-            throws AbstractCodedException {
-    	return findAppDataJobs("findByMessagesId", Long.toString(messageId));
-    }
-
-    /**
-     * Search by message identifier
-     * 
-     * @param messageId
-     * @return
-     * @throws AbstractCodedException
-     */
-    public List<AppDataJob> findByProductSessionId(final String sessionId)
-            throws AbstractCodedException {
-    	return findAppDataJobs("findByProductSessionId", sessionId);
-    }
-
-    /**
-     * Search by product datatake identifier
-     * 
-     * @param messageId
-     * @return
-     * @throws AbstractCodedException
-     */
-    public List<AppDataJob> findByProductDataTakeId(final String dataTakeId)
-            throws AbstractCodedException {
-    	return findAppDataJobs("findByProductDataTakeId", dataTakeId);
-    }
-
-    /**
-     * Search for job with generating tastables per pod and task table
-     * 
-     * @param pod
-     * @param taskTable
-     * @return
-     * @throws AbstractCodedException
-     */
-    public List<AppDataJob> findJobInStateGenerating(final String taskTable) 
-    		throws AbstractCodedException {
-    	return findAppDataJobs("findJobInStateGenerating", taskTable);
-    }
-
-    public AppDataJob newJob(final AppDataJob job) throws AbstractCodedException {
-        int retries = 0;
-        while (true) {
-            retries++;
-            final String uri = hostUri + "/jobs";
-            LogUtils.traceLog(LOGGER, String.format("[uri %s]", uri));
-            try {           	
-                final ResponseEntity<AppDataJob> response = restTemplate.exchange(
-                		uri, 
-                		HttpMethod.POST,
-                		new HttpEntity<AppDataJob>(job),
-                		new ParameterizedTypeReference<AppDataJob>() {}
-                );
-                
-                if (response.getStatusCode() == HttpStatus.OK) {
-                    LogUtils.traceLog(LOGGER, String.format("[uri %s] [ret %s]",
-                            uri, response.getBody()));
-                    return response.getBody();
-                } else {
-                    waitOrThrow(retries, new AppCatalogJobNewApiError(uri, job,
-                            "HTTP status code " + response.getStatusCode()),
-                            "new");
-                }
-            } catch (final HttpStatusCodeException hsce) {
-                waitOrThrow(retries,
-                        new AppCatalogJobNewApiError(uri, job, String.format(
-                                "HttpStatusCodeException occured: %s - %s",
-                                hsce.getStatusCode(),
-                                hsce.getResponseBodyAsString())),
-                        "new");
-            } catch (final RestClientException rce) {
-                waitOrThrow(retries,
-                        new AppCatalogJobNewApiError(uri, job,
-                                String.format(
-                                        "RestClientException occured: %s",
-                                        rce.getMessage()),
-                                rce),
-                        "new");
-            }
-        }
-    }
-
-	public AppDataJob updateJob(final AppDataJob job) throws AbstractCodedException {  
-        int retries = 0;
-        while (true) {
-            retries++;
-            final String uri = hostUri + "/jobs/" + job.getId();
-            LogUtils.traceLog(LOGGER, String.format("[uri %s]", uri));
-            try {
-                final ResponseEntity<AppDataJob> response = restTemplate.exchange(
-                		uri, 
-                		HttpMethod.PATCH,
-                		new HttpEntity<AppDataJob>(job),
-                		new ParameterizedTypeReference<AppDataJob>() {}
-                );
-                if (response.getStatusCode() == HttpStatus.OK) {
-                    LogUtils.traceLog(LOGGER, String.format("[uri %s] [ret %s]",
-                            uri, response.getBody()));
-                    return response.getBody();
-                } else {
-                    waitOrThrow(retries,
-                            new AppCatalogJobPatchApiError(uri, job,
-                                    "HTTP status code "
-                                            + response.getStatusCode()),
-                            "patch");
-                }
-            } catch (final HttpStatusCodeException hsce) {
-                waitOrThrow(retries,
-                        new AppCatalogJobPatchApiError(uri, job, String.format(
-                                "HttpStatusCodeException occured: %s - %s",
-                                hsce.getStatusCode(),
-                                hsce.getResponseBodyAsString())),
-                        "patch");
-            } catch (final RestClientException rce) {
-                waitOrThrow(retries,
-                        new AppCatalogJobPatchApiError(uri, job,
-                                String.format(
-                                        "HttpStatusCodeException occured: %s",
-                                        rce.getMessage()),
-                                rce),
-                        "patch");
-            }
-        }
-    }
-	
-	public void deleteJob(final AppDataJob job) throws AbstractCodedException {  
-        int retries = 0;
-        while (true) {
-            retries++;
-            final String uri = hostUri + "/jobs/" + job.getId();
-            LogUtils.traceLog(LOGGER, String.format("[uri %s]", uri));
-            try {
-                restTemplate.delete(uri);
-            } catch (final HttpStatusCodeException hsce) {
-                waitOrThrow(retries,
-                        new AppCatalogJobPatchApiError(uri, job, String.format(
-                                "HttpStatusCodeException occured: %s - %s",
-                                hsce.getStatusCode(),
-                                hsce.getResponseBodyAsString())),
-                        "delete");
-            } catch (final RestClientException rce) {
-                waitOrThrow(retries,
-                        new AppCatalogJobPatchApiError(uri, job,
-                                String.format(
-                                        "HttpStatusCodeException occured: %s",
-                                        rce.getMessage()),
-                                rce),
-                        "delete");
-            }
-        }
-	}
 }

@@ -1,15 +1,10 @@
 package esa.s1pdgs.cpoc.ipf.preparation.worker.type;
 
 import java.util.Map;
-import java.util.Optional;
 import java.util.concurrent.Callable;
 
-import esa.s1pdgs.cpoc.appcatalog.AppDataJob;
 import esa.s1pdgs.cpoc.appcatalog.AppDataJobProduct;
-import esa.s1pdgs.cpoc.common.errors.AbstractCodedException;
 import esa.s1pdgs.cpoc.common.utils.DateUtils;
-import esa.s1pdgs.cpoc.ipf.preparation.worker.appcat.AppCatAdapter;
-import esa.s1pdgs.cpoc.ipf.preparation.worker.appcat.CatalogEventAdapter;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.model.JobGen;
 import esa.s1pdgs.cpoc.metadata.client.MetadataClient;
 import esa.s1pdgs.cpoc.mqi.model.queue.IpfExecutionJob;
@@ -28,12 +23,6 @@ public final class LevelProduct extends AbstractProductTypeAdapter implements Pr
 		this.metadataClient = metadataClient;
 		this.sliceOverlap = sliceOverlap;
 		this.sliceLength = sliceLength;
-	}
-	
-	@Override
-	public Optional<AppDataJob> findAssociatedJobFor(final AppCatAdapter appCat, final CatalogEventAdapter catEvent)
-			throws AbstractCodedException {
-		return Optional.empty();
 	}
 
 	@Override

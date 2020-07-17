@@ -9,7 +9,6 @@ import esa.s1pdgs.cpoc.appcatalog.AppDataJobGenerationState;
 import esa.s1pdgs.cpoc.common.errors.processing.IpfPrepWorkerInputsMissingException;
 import esa.s1pdgs.cpoc.common.utils.Exceptions;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.generator.state.JobStateTransistionFailed;
-import esa.s1pdgs.cpoc.ipf.preparation.worker.model.tasktable.ElementMapper;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.model.tasktable.TaskTableAdapter;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.publish.Publisher;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.query.AuxQueryHandler;
@@ -21,7 +20,6 @@ public class JobGen {
 	private final ProductTypeAdapter typeAdapter;
 	private final List<List<String>> tasks;
 	private final TaskTableAdapter taskTableAdapter;
-	private final ElementMapper elementMapper;
     private final AuxQueryHandler auxQueryHandler;
     private final JobOrder jobOrder;
     private final Publisher publisher;
@@ -31,7 +29,6 @@ public class JobGen {
 			final ProductTypeAdapter typeAdapter,
 			final List<List<String>> tasks,
 			final TaskTableAdapter taskTableAdapter,
-			final ElementMapper elementMapper,
 			final AuxQueryHandler auxQueryHandler,
 			final JobOrder jobOrder,
 			final Publisher publisher
@@ -41,7 +38,6 @@ public class JobGen {
 		this.typeAdapter = typeAdapter;
 		this.tasks = tasks;
 		this.taskTableAdapter = taskTableAdapter;
-		this.elementMapper = elementMapper;
 		this.auxQueryHandler = auxQueryHandler;
 		this.jobOrder = jobOrder;
 		this.publisher = publisher;
@@ -72,11 +68,11 @@ public class JobGen {
 	}
 
 	public final String productName() {
-		return job.getProduct().getProductName();
+		return job.getProductName();
 	}
 	
 	public final String processMode() {
-		return job.getProduct().getProcessMode();
+		return job.getProduct().getMetadata().getOrDefault("processMode", "NOMINAL").toString();
 	}
 	
 	public AppDataJobGenerationState state() {

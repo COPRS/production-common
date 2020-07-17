@@ -261,9 +261,9 @@ public class Publisher {
 
 		// Apply implementation build job
 		jobOrder.getConf().setSensingTime(new JobOrderSensingTime(
-				DateUtils.convertToAnotherFormat(job.getProduct().getStartTime(),
+				DateUtils.convertToAnotherFormat(job.getStartTime(),
 						AppDataJobProduct.TIME_FORMATTER, JobOrderSensingTime.DATETIME_FORMATTER),
-				DateUtils.convertToAnotherFormat(job.getProduct().getStopTime(),
+				DateUtils.convertToAnotherFormat(job.getStopTime(),
 						AppDataJobProduct.TIME_FORMATTER, JobOrderSensingTime.DATETIME_FORMATTER)));
 
 		// collect all additional inputs

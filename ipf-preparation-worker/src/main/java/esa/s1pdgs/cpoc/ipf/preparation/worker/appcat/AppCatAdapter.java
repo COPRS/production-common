@@ -18,7 +18,7 @@ import esa.s1pdgs.cpoc.ipf.preparation.worker.generator.GracePeriodHandler;
 import esa.s1pdgs.cpoc.mqi.model.queue.CatalogEvent;
 import esa.s1pdgs.cpoc.mqi.model.rest.GenericMessageDto;
 
-public class AppCatAdapter {
+final class AppCatAdapter {
 	private static final Logger LOG = LogManager.getLogger(AppCatAdapter.class);
 	
     private final AppCatalogJobClient appCatClient;

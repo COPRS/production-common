@@ -9,7 +9,7 @@ import org.apache.logging.log4j.Logger;
 import esa.s1pdgs.cpoc.appcatalog.AppDataJob;
 import esa.s1pdgs.cpoc.appcatalog.AppDataJobProduct;
 import esa.s1pdgs.cpoc.common.errors.AbstractCodedException;
-import esa.s1pdgs.cpoc.ipf.preparation.worker.appcat.AppCatAdapter;
+import esa.s1pdgs.cpoc.ipf.preparation.worker.appcat.AppCatJobService;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.appcat.CatalogEventAdapter;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.model.JobGen;
 import esa.s1pdgs.cpoc.mqi.model.queue.IpfExecutionJob;
@@ -23,10 +23,13 @@ public interface ProductTypeAdapter {
 	
     void customJobOrder(JobGen job);
 	
-    void customJobDto(final JobGen job, final IpfExecutionJob dto);	  
+    void customJobDto(final JobGen job, final IpfExecutionJob dto);	
     
-	Optional<AppDataJob> findAssociatedJobFor(
-			final AppCatAdapter appCat, 
+	// default implementation. Only required for S1 special scenarios (session, segments)
+	default Optional<AppDataJob> findAssociatedJobFor(
+			final AppCatJobService appCat, 
 			final CatalogEventAdapter catEvent
-    ) throws AbstractCodedException;
+    ) throws AbstractCodedException {
+		return Optional.empty();
+	}
 }

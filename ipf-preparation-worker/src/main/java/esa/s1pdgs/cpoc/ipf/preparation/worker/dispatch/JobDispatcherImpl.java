@@ -8,10 +8,9 @@ import java.util.Optional;
 import esa.s1pdgs.cpoc.appcatalog.AppDataJob;
 import esa.s1pdgs.cpoc.appcatalog.AppDataJobGeneration;
 import esa.s1pdgs.cpoc.appcatalog.AppDataJobGenerationState;
-import esa.s1pdgs.cpoc.appcatalog.AppDataJobProductAdapter;
 import esa.s1pdgs.cpoc.appcatalog.AppDataJobState;
 import esa.s1pdgs.cpoc.common.utils.LogUtils;
-import esa.s1pdgs.cpoc.ipf.preparation.worker.appcat.AppCatAdapter;
+import esa.s1pdgs.cpoc.ipf.preparation.worker.appcat.AppCatJobService;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.appcat.CatalogEventAdapter;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.config.ProcessSettings;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.report.TaskTableLookupReportingOutput;
@@ -32,7 +31,7 @@ import esa.s1pdgs.cpoc.report.ReportingUtils;
  * @param <T>
  */
 public class JobDispatcherImpl implements JobDispatcher {
-    private final AppCatAdapter appCat;    
+    private final AppCatJobService appCat;    
     private final ProcessSettings settings;
     private final ProductTypeAdapter typeAdapter;
     private final Collection<String> generatorAvailableForTasktableNames;
@@ -40,7 +39,7 @@ public class JobDispatcherImpl implements JobDispatcher {
     public JobDispatcherImpl(
     		final ProductTypeAdapter typeAdapter,
     		final ProcessSettings settings,
-            final AppCatAdapter appCat,         
+            final AppCatJobService appCat,         
             final Collection<String> generatorAvailableForTasktableNames
     ) {
         this.appCat = appCat;
@@ -54,26 +53,20 @@ public class JobDispatcherImpl implements JobDispatcher {
     	final IpfPreparationJob prepJob = message.getBody();
     	final AppDataJob jobFromMessage = prepJob.getAppDataJob();    	
     	final GenericMessageDto<CatalogEvent> firstMessage = jobFromMessage.getMessages().get(0);
-    	
-    	LOGGER.trace("== dispatch job {}", jobFromMessage.toString());
         
         final Reporting reporting = ReportingUtils.newReportingBuilder()
         		.predecessor(prepJob.getUid())
         		.newReporting("TaskTableLookup");
         
-        typeAdapter.customAppDataJobProduct(jobFromMessage.getProduct());        
-        final AppDataJobProductAdapter productAdapter = new AppDataJobProductAdapter(jobFromMessage.getProduct());
-        
-        
+        typeAdapter.customAppDataJobProduct(jobFromMessage.getProduct());
+    	LOGGER.trace("== dispatch job {}", jobFromMessage.toString());
+    	
     	reporting.begin(
-    			ReportingUtils.newFilenameReportingInputFor(prepJob.getProductFamily(), jobFromMessage.getProduct().getProductName()),
+    			ReportingUtils.newFilenameReportingInputFor(prepJob.getProductFamily(), jobFromMessage.getProductName()),
     			new ReportingMessage("Start associating TaskTables to AppDataJob", jobFromMessage.getId())
     	);    	
         try {        	
-            final String tasktableFilename = 
-            		
-            		
-            		typeAdapter.taskTableMapper().tasktableFor(jobFromMessage);
+            final String tasktableFilename = jobFromMessage.getTaskTableName();
             LOGGER.trace("Got TaskTable {}", tasktableFilename);
             
             // assert that there is a job generator for the assigned tasktable

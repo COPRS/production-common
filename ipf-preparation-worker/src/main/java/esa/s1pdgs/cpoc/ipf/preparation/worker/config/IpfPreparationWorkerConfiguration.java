@@ -20,15 +20,13 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
 
-import esa.s1pdgs.cpoc.appcatalog.client.job.AppCatalogJobClient;
 import esa.s1pdgs.cpoc.common.ApplicationLevel;
 import esa.s1pdgs.cpoc.common.ProductCategory;
 import esa.s1pdgs.cpoc.errorrepo.ErrorRepoAppender;
-import esa.s1pdgs.cpoc.ipf.preparation.worker.appcat.AppCatAdapter;
+import esa.s1pdgs.cpoc.ipf.preparation.worker.appcat.AppCatJobService;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.config.IpfPreparationWorkerSettings.CategoryConfig;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.config.IpfPreparationWorkerSettings.InputWaitingConfig;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.dispatch.JobDispatcherImpl;
-import esa.s1pdgs.cpoc.ipf.preparation.worker.generator.GracePeriodHandler;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.generator.JobGenerator;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.generator.JobGeneratorImpl;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.model.ProductMode;
@@ -60,7 +58,7 @@ import esa.s1pdgs.cpoc.xml.model.tasktable.TaskTable;
 public class IpfPreparationWorkerConfiguration {
 	private static final Logger LOG = LogManager.getLogger(IpfPreparationWorkerConfiguration.class);
 	
-	private final AppCatalogJobClient appCatClient;
+
     private final AppStatusImpl appStatus;
     private final MqiClient mqiClient;
     private final List<MessageFilter> messageFilter;
@@ -70,12 +68,11 @@ public class IpfPreparationWorkerConfiguration {
 	private final ProcessSettings processSettings;
     private final MetadataClient metadataClient;
     private final AiopProperties aiopProperties;
-    private final XmlConverter xmlConverter;
 	private final TaskTableFactory taskTableFactory;
 	private final ElementMapper elementMapper;
-    private final GracePeriodHandler gracePeriodHandler;
     private final Publisher publisher;
-        
+    private final AppCatJobService appCatService;
+    
 	@Autowired
 	public IpfPreparationWorkerConfiguration(
 			final AppStatusImpl appStatus, 
@@ -85,14 +82,13 @@ public class IpfPreparationWorkerConfiguration {
 			final ErrorRepoAppender errorAppender,
 			final ProcessConfiguration processConfiguration,
 			final ProcessSettings processSettings,
-			final AppCatalogJobClient appCatClient,
 		    final MetadataClient metadataClient,
 		    final AiopProperties aiopProperties,
 		    final XmlConverter xmlConverter,
 			final TaskTableFactory taskTableFactory,
 			final ElementMapper elementMapper,
-		    final GracePeriodHandler gracePeriodHandler,
-		    final Publisher publisher
+		    final Publisher publisher,
+		    final AppCatJobService appCatService
 	) {
 		this.appStatus = appStatus;
 		this.mqiClient = mqiClient;
@@ -101,14 +97,12 @@ public class IpfPreparationWorkerConfiguration {
 		this.errorAppender = errorAppender;
 		this.processConfiguration = processConfiguration;
 		this.processSettings = processSettings;
-		this.appCatClient = appCatClient;
 		this.metadataClient = metadataClient;
 		this.aiopProperties = aiopProperties;
-		this.xmlConverter = xmlConverter;
 		this.taskTableFactory = taskTableFactory;
 		this.elementMapper = elementMapper;
-		this.gracePeriodHandler = gracePeriodHandler;
 		this.publisher = publisher;
+		this.appCatService = appCatService;
 	}
 
 	@Bean
@@ -167,7 +161,6 @@ public class IpfPreparationWorkerConfiguration {
 	) {
 		if (processSettings.getLevel() == ApplicationLevel.L0) {
 			return new EdrsSession(
-					new SingleTasktableMapper("TaskTable.AIOP.xml"),
 					metadataClient, 
 					AiopPropertiesAdapter.of(aiopProperties)
 			);
@@ -176,7 +169,6 @@ public class IpfPreparationWorkerConfiguration {
 			final long timeoutInputSearchMs = settings.getWaitprimarycheck().getMaxTimelifeS() * 1000L;
 			
 			return new L0Segment(
-					new SingleTasktableMapper("TaskTable.L0ASP.xml"), 
 					metadataClient, 
 					timeoutInputSearchMs
 			);			
@@ -186,7 +178,6 @@ public class IpfPreparationWorkerConfiguration {
 			final Map<String, Float> sliceLength = settings.getTypeSliceLength();
 	
 			return new LevelProduct(
-					new RoutingBasedTasktableMapper.Factory(xmlConverter, pathRoutingXmlFile).newMapper(), 
 					metadataClient, 
 					sliceOverlap, 
 					sliceLength
@@ -216,10 +207,10 @@ public class IpfPreparationWorkerConfiguration {
 			final Function<TaskTable, InputTimeoutChecker> timeoutCheckerFactory
 	) {		
 		final Map<String, JobGenerator> generators = new HashMap<>(ttManager.size());	
-		final AppCatAdapter appCat = new AppCatAdapter(appCatClient, gracePeriodHandler);
+		//final AppCatAdapter appCat = new AppCatAdapter(appCatClient, gracePeriodHandler);
 	
 		for (final File taskTableFile : ttManager.tasktables()) {				
-			final JobGenerator jobGenerator = newJobGenerator(taskTableFile, typeAdapter, appCat, timeoutCheckerFactory);
+			final JobGenerator jobGenerator = newJobGenerator(taskTableFile, typeAdapter, timeoutCheckerFactory);
 			generators.put(taskTableFile.getName(), jobGenerator);
 		    // --> Launch generators
 			taskScheduler.scheduleWithFixedDelay(jobGenerator, settings.getJobgenfixedrate());
@@ -229,7 +220,7 @@ public class IpfPreparationWorkerConfiguration {
 				new JobDispatcherImpl(
 						typeAdapter, 
 						processSettings, 
-						appCat, 
+						appCatService, 
 						generators.keySet()
 				), 
 				errorAppender, 
@@ -250,7 +241,6 @@ public class IpfPreparationWorkerConfiguration {
 	private JobGenerator newJobGenerator(
 			final File taskTableFile, 
 			final ProductTypeAdapter typeAdapter,
-			final AppCatAdapter appCat,
 			final Function<TaskTable, InputTimeoutChecker> timeoutCheckerFactory
 	) {		
 		final TaskTableAdapter tasktableAdapter = new TaskTableAdapter(
@@ -266,9 +256,8 @@ public class IpfPreparationWorkerConfiguration {
 				elementMapper);
 		return new JobGeneratorImpl(
 				tasktableAdapter,
-				elementMapper,
 				typeAdapter, 
-				appCat, 
+				appCatService, 
 				processSettings, 
 				errorAppender, 
 				publisher, 

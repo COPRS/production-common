@@ -9,7 +9,7 @@ import esa.s1pdgs.cpoc.appcatalog.AppDataJob;
 import esa.s1pdgs.cpoc.appcatalog.AppDataJobFile;
 import esa.s1pdgs.cpoc.common.ProductFamily;
 import esa.s1pdgs.cpoc.common.errors.AbstractCodedException;
-import esa.s1pdgs.cpoc.ipf.preparation.worker.appcat.AppCatAdapter;
+import esa.s1pdgs.cpoc.ipf.preparation.worker.appcat.AppCatJobService;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.appcat.CatalogEventAdapter;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.model.JobGen;
 import esa.s1pdgs.cpoc.metadata.client.MetadataClient;
@@ -30,7 +30,7 @@ public final class EdrsSession extends AbstractProductTypeAdapter implements Pro
 	}
 	
 	@Override
-	public final Optional<AppDataJob> findAssociatedJobFor(final AppCatAdapter appCat,final CatalogEventAdapter catEvent) 
+	public final Optional<AppDataJob> findAssociatedJobFor(final AppCatJobService appCat, final CatalogEventAdapter catEvent) 
 			throws AbstractCodedException {
 		return appCat.findJobForSession(catEvent.sessionId());
 	}
