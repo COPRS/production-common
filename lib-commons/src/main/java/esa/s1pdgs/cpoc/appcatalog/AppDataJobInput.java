@@ -7,26 +7,44 @@ import java.util.Objects;
 
 public class AppDataJobInput {
 
+    private String taskTableInputReference;
+    private String taskTableInputAlternativeReference;
     private String fileType;
     private String fileNameType;
+    private boolean mandatory;
+    private boolean hasResults;
 
     private List<AppDataJobFile> files;
 
     public AppDataJobInput() {
     }
 
-    public AppDataJobInput(String fileType, String fileNameType, List<AppDataJobFile> files) {
+    public AppDataJobInput(final String taskTableInputReference, final String fileType, final String fileNameType, final boolean mandatory, final List<AppDataJobFile> files) {
+        this.taskTableInputReference = taskTableInputReference;
         this.fileType = fileType;
         this.fileNameType = fileNameType;
+        this.mandatory = mandatory;
         this.files = files;
+        this.hasResults = !files.isEmpty();
     }
 
-    public AppDataJobInput(AppDataJobInput other) {
+    public AppDataJobInput(final AppDataJobInput other) {
         if(other.files != null) {
             files = other.files.stream().map(AppDataJobFile::new).collect(toList());
         }
+        taskTableInputReference = other.taskTableInputReference;
         fileType = other.fileType;
         fileNameType = other.fileNameType;
+        mandatory = other.mandatory;
+        hasResults = other.hasResults;
+    }
+
+    public String getTaskTableInputReference() {
+        return taskTableInputReference;
+    }
+
+    public void setTaskTableInputReference(String taskTableInputReference) {
+        this.taskTableInputReference = taskTableInputReference;
     }
 
     public List<AppDataJobFile> getFiles() {
@@ -53,9 +71,26 @@ public class AppDataJobInput {
         this.fileNameType = fileNameType;
     }
 
+    public boolean isMandatory() {
+        return mandatory;
+    }
+
+    public void setMandatory(boolean mandatory) {
+        this.mandatory = mandatory;
+    }
+
+    public boolean hasResults() {
+        return hasResults;
+    }
+
+    public void setHasResults(boolean hasResults) {
+        this.hasResults = hasResults;
+    }
+
     @Override
     public String toString() {
-        return String.format("{fileType: %s, fileNameType: %s, files: %s}", fileType, fileNameType, files);
+        return String.format("{inputReference: %s, fileType: %s, fileNameType: %s, mandatory: %s, files: %s}",
+                taskTableInputReference, fileType, fileNameType, mandatory, files);
     }
 
     @Override
@@ -63,13 +98,16 @@ public class AppDataJobInput {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         AppDataJobInput that = (AppDataJobInput) o;
-        return Objects.equals(fileType, that.fileType) &&
+        return Objects.equals(taskTableInputReference, that.taskTableInputReference) &&
+                Objects.equals(fileType, that.fileType) &&
                 Objects.equals(fileNameType, that.fileNameType) &&
+                Objects.equals(mandatory, that.mandatory) &&
+                Objects.equals(hasResults, that.hasResults) &&
                 Objects.equals(files, that.files);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(fileType, fileNameType, files);
+        return Objects.hash(taskTableInputReference, fileType, fileNameType, mandatory, hasResults, files);
     }
 }

@@ -1,7 +1,7 @@
 package esa.s1pdgs.cpoc.ipf.preparation.worker.query;
 
-import static java.util.stream.Collectors.toList;
-import static java.util.stream.Collectors.toMap;
+import static java.util.Collections.emptyList;
+import static java.util.stream.Collectors.*;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -11,6 +11,7 @@ import java.util.concurrent.Callable;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 
 import esa.s1pdgs.cpoc.appcatalog.AppDataJob;
@@ -38,6 +39,7 @@ import esa.s1pdgs.cpoc.xml.model.tasktable.TaskTableInput;
 import esa.s1pdgs.cpoc.xml.model.tasktable.TaskTableInputAlternative;
 import esa.s1pdgs.cpoc.xml.model.tasktable.TaskTablePool;
 import esa.s1pdgs.cpoc.xml.model.tasktable.TaskTableTask;
+import esa.s1pdgs.cpoc.xml.model.tasktable.enums.TaskTableInputOrigin;
 import esa.s1pdgs.cpoc.xml.model.tasktable.enums.TaskTableMandatoryEnum;
 
 public class AuxQuery implements Callable<JobGen> {
@@ -71,6 +73,74 @@ public class AuxQuery implements Callable<JobGen> {
 		LOGGER.info("Distributing required AUX for job {} (product: {})", jobGen.id(), jobGen.productName());
 		jobGen.job().setAdditionalInputs(distributeResults(results));
 		return jobGen;
+	}
+
+	private List<AppDataJobInput> inputsWithoutResults() {
+		return inputsOf(jobGen.job()).stream()
+				.flatMap(taskInputs -> taskInputs.getInputs().stream()).filter(input -> !input.hasResults()).collect(toList());
+	}
+
+	private void existingResults() {
+		inputsOf(jobGen.job()).stream()
+				.flatMap(taskInputs -> taskInputs.getInputs().stream()).filter(AppDataJobInput::hasResults);
+	}
+
+	private void alternativesConsidering(List<AppDataJobInput> existingResults) {
+
+		//taskTable.getPools().stream()
+		//		.flatMap(TaskTablePool::tasks)
+		//		.flatMap(TaskTableTask::inputs)
+		//		.flatMap(TaskTableInput::alternativesOrdered)
+		//		.filter(alt -> alt.getOrigin() == TaskTableInputOrigin.DB)
+		//		.collect(groupingBy(TaskTableInputAlternative::getTaskTableInputAltKey))
+
+
+	}
+
+	private List<AppDataJobTaskInputs> inputsOf(AppDataJob job) {
+		if(CollectionUtils.isEmpty(job.getAdditionalInputs())) {
+			return buildInitialInputs();
+		}
+
+		return job.getAdditionalInputs();
+	}
+
+	private Map<String, TaskTableTask> taskTableTasks() {
+		Map<String, TaskTableTask> tasks = new HashMap<>();
+		int poolNumber = 0; // I wish Java had list.stream((index, entry) -> ...)
+		for (TaskTablePool pool : taskTableAdapter.pools()) {
+			int taskNumber = 0;
+			for (TaskTableTask task : pool.getTasks()) {
+				final String reference = String.format("P%sT%s:%s-%s",
+						poolNumber, taskNumber, task.getName(), task.getVersion());
+				tasks.put(reference, task);
+
+				taskNumber++;
+			}
+			poolNumber++;
+		}
+		return tasks;
+	}
+
+	private List<AppDataJobTaskInputs> buildInitialInputs() {
+		final List<AppDataJobTaskInputs> taskInputs = new ArrayList<>();
+
+		for (Map.Entry<String, TaskTableTask> taskEntry : taskTableTasks().entrySet()) {
+			final List<AppDataJobInput> inputs = new ArrayList<>();
+			int inputNumber = 0;
+			for (TaskTableInput input : taskEntry.getValue().getInputs()) {
+				final String reference = String.format("%sI%s", taskEntry.getKey(), inputNumber++);
+				inputs.add(new AppDataJobInput(
+						reference,
+						"",
+						"",
+						TaskTableMandatoryEnum.YES.equals(input.getMandatory()),
+						emptyList()));
+			}
+			taskInputs.add(new AppDataJobTaskInputs(taskEntry.getValue().getName(), taskEntry.getValue().getVersion(), inputs));
+		}
+
+		return taskInputs;
 	}
 
 	private Map<TaskTableInputAlternative.TaskTableInputAltKey, SearchMetadataResult> toQueries(final Map<TaskTableInputAlternative.TaskTableInputAltKey, SearchMetadataQuery> metadataQueriesTemplate) {
@@ -115,7 +185,7 @@ public class AuxQuery implements Callable<JobGen> {
 
 		return queries;
 	}
-	
+
 	private List<AppDataJobTaskInputs> distributeResults(final Map<TaskTableInputAlternative.TaskTableInputAltKey, SearchMetadataResult> metadataQueries) throws IpfPrepWorkerInputsMissingException {
 		final Map<String, AppDataJobInput> referenceInputs = new HashMap<>();
 		final List<AppDataJobTaskInputs> result = new ArrayList<>();
@@ -126,13 +196,17 @@ public class AuxQuery implements Callable<JobGen> {
 				final Map<String, String> missingMetadata = new HashMap<>();
 				final List<AppDataJobInput> futureInputs = new ArrayList<>();
 				//take each input
-				for (final TaskTableInput input : task.getInputs()) {					
+				int inputNumber = 0;
+				for (final TaskTableInput input : task.getInputs()) {
+					//descriptive reference for this input, used in AppDataJobInput
+					final String inputReference = task.getName() + '-' + task.getVersion() + '#' + inputNumber++;
 					// If it is NOT a reference
 					if (StringUtils.isEmpty(input.getReference())) {
 						//check if input mode matches the product mode
 						if (mode.isCompatibleWithTaskTableMode(input.getMode())) {
 							// returns null, if not found
-							final AppDataJobInput foundInput = convert(taskTableAdapter.findInput(jobGen, input, metadataQueries));
+							final AppDataJobInput foundInput = convert(
+									taskTableAdapter.findInput(jobGen, input, metadataQueries), inputReference, input.getMandatory());
 														
 							if (foundInput != null) {
 								futureInputs.add(foundInput);
@@ -181,14 +255,14 @@ public class AuxQuery implements Callable<JobGen> {
 	// TODO TaskTableAdapter by itself should not return a JobOrderInput but a more generic
 	// structure which solely holds the reference between task table input and search meta data result
 	// as long as this is not changed the JobOrderInput has to be converted to AppDataJobInput here
-	private AppDataJobInput convert(final JobOrderInput input) {
+	private AppDataJobInput convert(final JobOrderInput input, String inputReference, TaskTableMandatoryEnum mandatory) {
 		if(input == null) {
 			return null;
 		}
 
 		//TODO there is not check if fileNames and intervals are consistent
 		final Map<String, JobOrderInputFile> fileNames = input.getFilenames().stream().collect(toMap(JobOrderInputFile::getFilename, fn -> fn));
-		return new AppDataJobInput(input.getFileType(), input.getFileNameType().toString(),
+		return new AppDataJobInput(inputReference, input.getFileType(), input.getFileNameType().toString(), TaskTableMandatoryEnum.YES.equals(mandatory),
 				input.getTimeIntervals().stream().map(ti -> merge(fileNames.get(ti.getFileName()), ti)).collect(toList()));
 	}
 

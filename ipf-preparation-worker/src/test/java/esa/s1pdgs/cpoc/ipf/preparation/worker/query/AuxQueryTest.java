@@ -77,7 +77,7 @@ public class AuxQueryTest {
         final TaskTable taskTable = (TaskTable) converter.convertFromXMLToObject(xmlFile);
         final TaskTableAdapter taskTableAdapter = new TaskTableAdapter(new File(xmlFile), taskTable, elementMapper);
 
-        taskTableAdapter.allTaskTableInputs().forEach((key, value) -> System.out.println("input: " + key));
+        taskTableAdapter.allTaskTableInputAlternatives().forEach((key, value) -> System.out.println("input: " + key));
 
         final AppDataJob job = new AppDataJob(133L);
         final AppDataJobProduct product = new AppDataJobProduct();
@@ -197,7 +197,7 @@ public class AuxQueryTest {
         final TaskTable taskTable = (TaskTable) converter.convertFromXMLToObject(xmlFile);
         final TaskTableAdapter taskTableAdapter = new TaskTableAdapter(new File(xmlFile), taskTable, elementMapper);
 
-        taskTableAdapter.allTaskTableInputs().forEach((key, value) -> System.out.println("input: " + key));
+        taskTableAdapter.allTaskTableInputAlternatives().forEach((key, value) -> System.out.println("input: " + key));
 
         final AppDataJob job = new AppDataJob(133L);
         final AppDataJobProduct product = new AppDataJobProduct();

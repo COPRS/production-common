@@ -42,7 +42,7 @@ public class AuxQueryHandler {
 	private Map<TaskTableInputAlternative.TaskTableInputAltKey, SearchMetadataQuery> buildMetadataSearchQuery(final TaskTableAdapter taskTableAdapter) {
 		final Map<TaskTableInputAlternative.TaskTableInputAltKey, SearchMetadataQuery> metadataQueryTemplate =  new HashMap<>();
 
-		taskTableAdapter.allTaskTableInputs()
+		taskTableAdapter.allTaskTableInputAlternatives()
 				.forEach((inputAltKey, alternatives) -> {
 					final String fileType = elementMapper.mappedFileType(inputAltKey.getFileType());
 					final ProductFamily family = elementMapper.inputFamilyOf(fileType);

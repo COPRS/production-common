@@ -105,6 +105,7 @@ public class TaskTableAdapter {
 	// as last step when all inputs are present (in AppDataJob)
 	// this would also remove the mutable behaviour of the jobOrder
 	// TODO at least return AppDataJobInput here
+	// TODO consider moving this method to AuxQuery
 	public final JobOrderInput findInput(final JobGen job, final TaskTableInput input, final Map<TaskTableInputAlternative.TaskTableInputAltKey, SearchMetadataResult> results) {
 		JobOrderInput result = null;
 
@@ -163,7 +164,7 @@ public class TaskTableAdapter {
 		return result;
 	}
 
-	public Map<TaskTableInputAlternative.TaskTableInputAltKey, List<TaskTableInputAlternative>> allTaskTableInputs() {
+	public Map<TaskTableInputAlternative.TaskTableInputAltKey, List<TaskTableInputAlternative>> allTaskTableInputAlternatives() {
 		return taskTable.getPools().stream()
 				.flatMap(TaskTablePool::tasks)
 				.flatMap(TaskTableTask::inputs)
