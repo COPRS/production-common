@@ -2,15 +2,14 @@ package esa.s1pdgs.cpoc.ipf.preparation.worker.type.slice;
 
 import esa.s1pdgs.cpoc.appcatalog.AppDataJob;
 import esa.s1pdgs.cpoc.appcatalog.AppDataJobProduct;
-import esa.s1pdgs.cpoc.appcatalog.AppDataJobProductAdapter;
+import esa.s1pdgs.cpoc.appcatalog.util.AppDataJobProductAdapter;
+import esa.s1pdgs.cpoc.ipf.preparation.worker.type.AbstractProduct;
 
-public class LevelSliceProduct {
-	private final AppDataJobProductAdapter product;
-
+public class LevelSliceProduct extends AbstractProduct {
 	public LevelSliceProduct(final AppDataJobProductAdapter product) {
-		this.product = product;
+		super(product);
 	}
-	
+
 	public static final LevelSliceProduct of(final AppDataJob job) {
 		return of(job.getProduct());
 	}
@@ -21,9 +20,6 @@ public class LevelSliceProduct {
 		);
 	}
 
-	public final void setProductType(final String productType) {
-		product.setStringValue("productType", productType);
-	}
 
 	public final void setInsConfId(final int instrumentConfigurationId) {
 		product.setInsConfId(instrumentConfigurationId);		
@@ -32,29 +28,21 @@ public class LevelSliceProduct {
 	public final void setNumberSlice(final int numberSlice) {
 		product.setIntegerValue("numberSlice", numberSlice);
 	}
-
-	public final void setDataTakeId(final String datatakeId) {
-		product.setStringValue("dataTakeId", datatakeId);			
-	}
-
-	public final String getProductName() {
-		return product.getProductName();
-	}
-
-	public final String getProcessMode() {
-		return product.getProcessMode();
-	}
 	
 	public final int getNumberSlice() {
 		return product.getIntegerValue("numberSlice");
 	}
 
-	public final int getTotalNbOfSlice() {
-		return product.getIntegerValue("totalNbOfSlice");
+	public final void setDataTakeId(final String datatakeId) {
+		product.setStringValue("dataTakeId", datatakeId);			
 	}
 
 	public final void setTotalNbOfSlice(final int numberOfSlices) {
 		product.setIntegerValue("totalNbOfSlice", numberOfSlices);		
+	}
+	
+	public final int getTotalNbOfSlice() {
+		return product.getIntegerValue("totalNbOfSlice");
 	}
 
 	public final void setSegmentStartDate(final String validityStart) {
@@ -76,6 +64,10 @@ public class LevelSliceProduct {
 	public final void setPolarisation(final String polarisation) {
 		product.setStringValue("polarisation", polarisation);
 	}
+	
+	public final String getPolarisation() {
+		return product.getStringValue("polarisation");
+	}
 
 	public final String getSegmentStartDate() {
 		return product.getStringValue("segmentStartDate");
@@ -83,13 +75,5 @@ public class LevelSliceProduct {
 
 	public final String getSegmentStopDate() {
 		return product.getStringValue("segmentStopDate");
-	}
-
-	public final String getMissionId() {
-		return product.getMissionId();
-	}
-
-	public final String getSatelliteId() {
-		return product.getSatelliteId();
 	}
 }

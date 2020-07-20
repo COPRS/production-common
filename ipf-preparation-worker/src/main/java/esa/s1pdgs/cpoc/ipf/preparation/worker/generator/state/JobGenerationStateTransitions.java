@@ -4,7 +4,6 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import esa.s1pdgs.cpoc.appcatalog.AppDataJobGenerationState;
-import esa.s1pdgs.cpoc.ipf.preparation.worker.model.JobGen;
 
 public enum JobGenerationStateTransitions implements JobGenerationStateTransitionFunction {
 	INITIAL_2_PRIMARYCHECK(AppDataJobGenerationState.INITIAL, AppDataJobGenerationState.PRIMARY_CHECK, j -> j.mainInputSearch()),
@@ -41,18 +40,14 @@ public enum JobGenerationStateTransitions implements JobGenerationStateTransitio
 	}
 
 	@Override
-	public final JobGen performTransitionOn(final JobGen job) {
-		LOGGER.debug("Performing {} on job {}", toDescription(), job.id());
+	public final void performTransitionOn(final JobGenerationTransition job) throws JobStateTransistionFailed {
+		LOGGER.debug("Performing {} on {}", toDescription(), job);
 		try {
-			final JobGen newStateJobGen = function.performTransitionOn(job);
-			newStateJobGen.state(outputState);
-			LOGGER.info("Job {} {} succeeded", job.id(), toDescription());
-			return newStateJobGen;
+			function.performTransitionOn(job);
+			LOGGER.info("{} {} succeeded", job, toDescription());
 		} catch (final JobStateTransistionFailed e) {
-			LOGGER.info("Prerequisites for {} not met for job {}: {}",  toDescription(), job.id(), e.getMessage());
-			// fall through
+			LOGGER.info("Prerequisites for {} not met for {}: {}",  toDescription(), job, e.getMessage());
+			throw e;
 		}
-		// return unaltered job
-		return job;
 	}
 }

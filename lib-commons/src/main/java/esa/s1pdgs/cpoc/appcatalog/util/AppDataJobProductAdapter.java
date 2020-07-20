@@ -1,7 +1,10 @@
-package esa.s1pdgs.cpoc.appcatalog;
+package esa.s1pdgs.cpoc.appcatalog.util;
 
 import java.util.Collections;
 import java.util.List;
+
+import esa.s1pdgs.cpoc.appcatalog.AppDataJobFile;
+import esa.s1pdgs.cpoc.appcatalog.AppDataJobProduct;
 
 public final class AppDataJobProductAdapter {
 	private final AppDataJobProduct product;
@@ -90,5 +93,9 @@ public final class AppDataJobProductAdapter {
     		return defaultValue;
     	}
     	return text;
+    }
+    
+    public final AppDataJobProduct toProduct() {
+    	return product;
     }
 }

@@ -13,7 +13,7 @@ import org.apache.logging.log4j.Logger;
 
 import esa.s1pdgs.cpoc.appcatalog.AppDataJob;
 import esa.s1pdgs.cpoc.appcatalog.AppDataJobProduct;
-import esa.s1pdgs.cpoc.appcatalog.AppDataJobProductAdapter;
+import esa.s1pdgs.cpoc.appcatalog.util.AppDataJobProductAdapter;
 import esa.s1pdgs.cpoc.appstatus.AppStatus;
 import esa.s1pdgs.cpoc.common.ProductCategory;
 import esa.s1pdgs.cpoc.common.ProductFamily;
@@ -28,6 +28,7 @@ import esa.s1pdgs.cpoc.mqi.client.MqiConsumer;
 import esa.s1pdgs.cpoc.mqi.client.MqiListener;
 import esa.s1pdgs.cpoc.mqi.model.queue.CatalogEvent;
 import esa.s1pdgs.cpoc.mqi.model.queue.IpfPreparationJob;
+import esa.s1pdgs.cpoc.mqi.model.queue.util.CatalogEventAdapter;
 import esa.s1pdgs.cpoc.mqi.model.rest.GenericMessageDto;
 import esa.s1pdgs.cpoc.mqi.model.rest.GenericPublicationMessageDto;
 import esa.s1pdgs.cpoc.production.trigger.config.ProcessSettings;
@@ -233,7 +234,15 @@ public class GenericConsumer implements MqiListener<CatalogEvent> {
 	private final AppDataJobProduct newProductFor(final GenericMessageDto<CatalogEvent> mqiMessage) {
 		final CatalogEvent event = mqiMessage.getBody();
         final AppDataJobProduct productDto = new AppDataJobProduct();
-        productDto.getMetadata().putAll(event.getMetadata());         
+        
+		final CatalogEventAdapter eventAdapter = CatalogEventAdapter.of(mqiMessage);		
+		productDto.getMetadata().put("productName", event.getProductName());
+		productDto.getMetadata().put("productType", event.getProductType());
+		productDto.getMetadata().put("satelliteId", eventAdapter.satelliteId());
+		productDto.getMetadata().put("missionId", eventAdapter.missionId());
+		productDto.getMetadata().put("processMode", eventAdapter.processMode());
+		productDto.getMetadata().put("startTime", eventAdapter.startTime());
+		productDto.getMetadata().put("stopTime", eventAdapter.stopTime());     
         return productDto;
 	}
 }

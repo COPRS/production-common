@@ -1,14 +1,10 @@
 package esa.s1pdgs.cpoc.ipf.preparation.worker.model;
 
 import java.util.List;
-import java.util.concurrent.Callable;
 
 import esa.s1pdgs.cpoc.appcatalog.AppDataJob;
 import esa.s1pdgs.cpoc.appcatalog.AppDataJobGeneration;
 import esa.s1pdgs.cpoc.appcatalog.AppDataJobGenerationState;
-import esa.s1pdgs.cpoc.common.errors.processing.IpfPrepWorkerInputsMissingException;
-import esa.s1pdgs.cpoc.common.utils.Exceptions;
-import esa.s1pdgs.cpoc.ipf.preparation.worker.generator.state.JobStateTransistionFailed;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.model.tasktable.TaskTableAdapter;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.publish.Publisher;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.query.AuxQueryHandler;
@@ -85,36 +81,5 @@ public class JobGen {
 	
 	public AppDataJobGeneration generation() {
 		return job.getGeneration();
-	}
-	
-	public final JobGen mainInputSearch() throws JobStateTransistionFailed {
-		perform(typeAdapter.mainInputSearch(job), "querying input " + productName());
-		return this;
-	}
-	
-	public final JobGen auxSearch() throws JobStateTransistionFailed {	
-		return perform(auxQueryHandler.queryFor(this), "querying required AUX");
-	}
-	
-	public final JobGen send() throws JobStateTransistionFailed {
-		return perform(publisher.send(this), "publishing Job");
-	}
-
-	private <E> E perform(final Callable<E> command, final String name) throws JobStateTransistionFailed {
-		try {
-			return command.call();
-		} 
-		// expected
-		catch (final IpfPrepWorkerInputsMissingException e) {
-			// TODO once there is some time for refactoring, cleanup the created error message of 
-			// IpfPrepWorkerInputsMissingException to be more descriptive
-			throw new JobStateTransistionFailed(e.getLogMessage());
-		}
-		catch (final Exception e) {
-			throw new RuntimeException(
-					String.format("Fatal error on %s: %s", name, Exceptions.messageOf(e)),
-					e
-			);
-		}
 	}
 }

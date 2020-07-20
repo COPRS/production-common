@@ -1,8 +1,8 @@
-package esa.s1pdgs.cpoc.ipf.preparation.worker.type;
+package esa.s1pdgs.cpoc.mqi.model.queue.util;
 
 import java.util.List;
 
-import org.apache.http.util.Asserts;
+import org.springframework.util.Assert;
 
 import esa.s1pdgs.cpoc.appcatalog.AppDataJob;
 import esa.s1pdgs.cpoc.mqi.model.queue.CatalogEvent;
@@ -17,8 +17,7 @@ public final class CatalogEventAdapter {
 	}
 	
 	public static final CatalogEventAdapter of(final AppDataJob job) {
-		Asserts.check(!job.getMessages().isEmpty(), "Missing message in job " + job.getId());
-		
+		Assert.isTrue(!job.getMessages().isEmpty(), "Missing message in job " + job.getId());		
 		final GenericMessageDto<CatalogEvent> mqiMessage = job.getMessages().get(0);				
 		return new CatalogEventAdapter(mqiMessage.getBody());
 	}

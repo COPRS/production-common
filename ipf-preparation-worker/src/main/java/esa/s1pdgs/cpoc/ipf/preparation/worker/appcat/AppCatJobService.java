@@ -12,9 +12,11 @@ import org.springframework.stereotype.Component;
 import esa.s1pdgs.cpoc.appcatalog.AppDataJob;
 import esa.s1pdgs.cpoc.appcatalog.AppDataJobGeneration;
 import esa.s1pdgs.cpoc.appcatalog.AppDataJobState;
+import esa.s1pdgs.cpoc.appcatalog.AppDataJobTaskInputs;
 import esa.s1pdgs.cpoc.appcatalog.client.job.AppCatalogJobClient;
 import esa.s1pdgs.cpoc.common.errors.AbstractCodedException;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.generator.GracePeriodHandler;
+import esa.s1pdgs.cpoc.ipf.preparation.worker.type.Product;
 import esa.s1pdgs.cpoc.mqi.model.queue.CatalogEvent;
 import esa.s1pdgs.cpoc.mqi.model.rest.GenericMessageDto;
 
@@ -24,7 +26,6 @@ public class AppCatJobService {
 	
 	private final AppCatalogJobClient appCatClient;
     private final GracePeriodHandler gracePeriodHandler;
-
 
 	@Autowired
 	public AppCatJobService(final AppCatalogJobClient appCatClient, final GracePeriodHandler gracePeriodHandler) {
@@ -103,17 +104,27 @@ public class AppCatJobService {
 		return Optional.of(result.get(0));	
 	}
 
-
-	public void appendMessage(final AppDataJob existingJob, final GenericMessageDto<CatalogEvent> firstMessage) {
-		// TODO Auto-generated method stub
-		
-	}
-
-
 	public final AppDataJob terminate(final AppDataJob job) throws AbstractCodedException {
     	LOG.info("Terminating appDataJob {} for product {}", job.getId(), job.getProductName());
     	job.setState(AppDataJobState.TERMINATED);  
     	return appCatClient.updateJob(job);
+	}
+	
+
+	public final synchronized void appendMessage(final long id, final GenericMessageDto<CatalogEvent> firstMessage) 
+			throws AppCatJobUpdateFailed {
+
+	}
+
+
+	public final synchronized void updateProduct(final long id, final Product queried) 
+			throws AppCatJobUpdateFailed {
+		
+	}
+
+	public final synchronized void updateAux(final long id, final List<AppDataJobTaskInputs> queried) 
+			throws AppCatJobUpdateFailed {
+		
 	}
 }
 

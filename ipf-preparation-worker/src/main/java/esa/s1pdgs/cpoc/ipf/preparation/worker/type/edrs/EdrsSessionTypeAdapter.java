@@ -1,23 +1,29 @@
 package esa.s1pdgs.cpoc.ipf.preparation.worker.type.edrs;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Optional;
-import java.util.concurrent.Callable;
+
+import org.springframework.util.Assert;
 
 import esa.s1pdgs.cpoc.appcatalog.AppDataJob;
 import esa.s1pdgs.cpoc.appcatalog.AppDataJobFile;
 import esa.s1pdgs.cpoc.common.ProductFamily;
 import esa.s1pdgs.cpoc.common.errors.AbstractCodedException;
+import esa.s1pdgs.cpoc.common.errors.processing.IpfPrepWorkerInputsMissingException;
+import esa.s1pdgs.cpoc.common.errors.processing.MetadataQueryException;
+import esa.s1pdgs.cpoc.common.utils.Exceptions;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.appcat.AppCatJobService;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.model.JobGen;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.type.AbstractProductTypeAdapter;
-import esa.s1pdgs.cpoc.ipf.preparation.worker.type.CatalogEventAdapter;
+import esa.s1pdgs.cpoc.ipf.preparation.worker.type.Product;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.type.ProductTypeAdapter;
 import esa.s1pdgs.cpoc.metadata.client.MetadataClient;
 import esa.s1pdgs.cpoc.mqi.model.queue.IpfExecutionJob;
 import esa.s1pdgs.cpoc.mqi.model.queue.LevelJobInputDto;
+import esa.s1pdgs.cpoc.mqi.model.queue.util.CatalogEventAdapter;
 import esa.s1pdgs.cpoc.xml.model.joborder.AbstractJobOrderConf;
 
 public final class EdrsSessionTypeAdapter extends AbstractProductTypeAdapter implements ProductTypeAdapter {		
@@ -39,8 +45,58 @@ public final class EdrsSessionTypeAdapter extends AbstractProductTypeAdapter imp
 	}
 
 	@Override
-	public final Callable<Void> mainInputSearch(final AppDataJob job) {
-		return new EdrsRawQuery(job, metadataClient, aiopAdapter);
+	public final Product mainInputSearch(final AppDataJob job) throws IpfPrepWorkerInputsMissingException {	
+    	Assert.notNull(job, "Provided AppDataJob is null");
+       	Assert.notNull(job.getProduct(), "Provided AppDataJobProduct is null");
+
+       	final EdrsSessionProduct product = EdrsSessionProduct.of(job);
+       	
+        // S1PRO-1101: if timeout for primary search is reached -> just start the job 
+    	if (aiopAdapter.isTimedOut(job)) {	        		
+    		return product;
+    	}
+    	
+        try {
+        	final EdrsSessionMetadataAdapter edrsMetadata = EdrsSessionMetadataAdapter.parse(        			
+        			metadataClient.getEdrsSessionFor(product.getSessionId())
+        	);
+        	
+        	if (edrsMetadata.getChannel1() == null) {    
+        		product.setRawsForChannel(1, edrsMetadata.availableRaws1());
+        	  	throw new IpfPrepWorkerInputsMissingException(
+					  Collections.singletonMap(
+							  product.getProductName(), 
+							  "No DSIB for channel 1"
+					  )
+        	  	);
+        	}        
+        	product.setRawsForChannel(1, edrsMetadata.raws1());
+        	
+        	if (edrsMetadata.getChannel2() == null) { 
+        		product.setRawsForChannel(2, edrsMetadata.availableRaws2());
+        		throw new IpfPrepWorkerInputsMissingException(
+  					  Collections.singletonMap(
+  							  product.getProductName(), 
+  							  "No DSIB for channel 2"
+  					  )
+              	);
+        	} 
+        	product.setRawsForChannel(2, edrsMetadata.raws2());
+        	
+        	final Map<String,String> missingRaws = edrsMetadata.missingRaws(); 
+    	    if (!missingRaws.isEmpty()) {
+                throw new IpfPrepWorkerInputsMissingException(missingRaws);
+            }
+    	    return product;
+        } 
+        catch (final MetadataQueryException me) {
+        	 throw new IpfPrepWorkerInputsMissingException(
+    			  Collections.singletonMap(
+    					product.getProductName(), 
+    					  String.format("Query error: %s", Exceptions.messageOf(me))
+    			  )
+ 	    	  );
+        }
 	}
 	
 	@Override
@@ -48,7 +104,9 @@ public final class EdrsSessionTypeAdapter extends AbstractProductTypeAdapter imp
 		final CatalogEventAdapter eventAdapter = CatalogEventAdapter.of(job);				
 		final EdrsSessionProduct product = EdrsSessionProduct.of(job);		
 		// IMPORTANT workaround!!! Allows to get the session identifier in exec-worker
-		product.setProductName(eventAdapter.sessionId());	
+		product.setProductName(eventAdapter.sessionId());
+		product.setSessionId(eventAdapter.sessionId());
+		product.setStationCode(eventAdapter.stationCode());
 	}
 	
 	@Override

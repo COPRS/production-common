@@ -6,18 +6,17 @@ import java.util.List;
 import esa.s1pdgs.cpoc.appcatalog.AppDataJob;
 import esa.s1pdgs.cpoc.appcatalog.AppDataJobFile;
 import esa.s1pdgs.cpoc.appcatalog.AppDataJobProduct;
-import esa.s1pdgs.cpoc.appcatalog.AppDataJobProductAdapter;
+import esa.s1pdgs.cpoc.appcatalog.util.AppDataJobProductAdapter;
+import esa.s1pdgs.cpoc.ipf.preparation.worker.type.AbstractProduct;
 
-final class EdrsSessionProduct {
+final class EdrsSessionProduct extends AbstractProduct {
 	private static final String RAWS1_ID = "raws1";
 	private static final String RAWS2_ID = "raws2";
-	
-	private final AppDataJobProductAdapter product;
 
 	public EdrsSessionProduct(final AppDataJobProductAdapter product) {
-		this.product = product;
+		super(product);
 	}
-	
+
 	public static final EdrsSessionProduct of(final AppDataJob job) {
 		return of(job.getProduct());
 	}
@@ -39,33 +38,17 @@ final class EdrsSessionProduct {
 		return product.getProductsFor(channelKey);
 	}
 	
-	public final void setProductName(final String productName) {
-		product.setProductName(productName);		
+	public final void setStationCode(final String stationCode) {
+		product.setStringValue("stationCode", stationCode);
 	}
 
 	public final String getStationCode() {
 		return product.getStringValue("stationCode");
 	}
-
-	public final String getProductName() {
-		return product.getProductName();
+	
+	public final void setSessionId(final String sessionId) {
+		product.setStringValue("sessionId", sessionId);
 	}
-
-	public final String getMissionId() {
-		return product.getMissionId();
-	}
-
-	public final String getSatelliteId() {
-		return product.getSatelliteId();
-	}
-
-	public final String getStartTime() {
-		return product.getStartTime();
-	}
-
-	public String getStopTime() {
-		return product.getStopTime();
-	}	
 	
 	public String getSessionId() {
 		return product.getStringValue("sessionId");

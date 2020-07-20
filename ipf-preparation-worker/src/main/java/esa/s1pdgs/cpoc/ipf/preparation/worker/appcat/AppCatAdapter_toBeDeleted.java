@@ -18,7 +18,7 @@ import esa.s1pdgs.cpoc.ipf.preparation.worker.generator.GracePeriodHandler;
 import esa.s1pdgs.cpoc.mqi.model.queue.CatalogEvent;
 import esa.s1pdgs.cpoc.mqi.model.rest.GenericMessageDto;
 
-final class AppCatAdapter {
+final class AppCatAdapter_toBeDeleted {
 	private static final Logger LOG = LogManager.getLogger(AppCatAdapter.class);
 	
     private final AppCatalogJobClient appCatClient;
@@ -26,7 +26,7 @@ final class AppCatAdapter {
 
     
 	
-	public AppCatAdapter(final AppCatalogJobClient appCatClient, final GracePeriodHandler gracePeriodHandler) {
+	public AppCatAdapter_toBeDeleted(final AppCatalogJobClient appCatClient, final GracePeriodHandler gracePeriodHandler) {
 		this.appCatClient = appCatClient;
 		this.gracePeriodHandler = gracePeriodHandler;
 	}
@@ -133,7 +133,7 @@ final class AppCatAdapter {
     	return appCatClient.updateJob(job);
 	}
 
-	public void appendMessage(final AppDataJob existingJob, final GenericMessageDto<CatalogEvent> mqiMessage) {
+	public final void appendMessage(final AppDataJob existingJob, final GenericMessageDto<CatalogEvent> mqiMessage) {
 		// FIXME needs to be implemented
 		
 	}   

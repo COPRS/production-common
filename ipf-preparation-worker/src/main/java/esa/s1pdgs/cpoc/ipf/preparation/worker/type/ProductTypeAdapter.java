@@ -1,21 +1,22 @@
 package esa.s1pdgs.cpoc.ipf.preparation.worker.type;
 
 import java.util.Optional;
-import java.util.concurrent.Callable;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import esa.s1pdgs.cpoc.appcatalog.AppDataJob;
 import esa.s1pdgs.cpoc.common.errors.AbstractCodedException;
+import esa.s1pdgs.cpoc.common.errors.processing.IpfPrepWorkerInputsMissingException;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.appcat.AppCatJobService;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.model.JobGen;
 import esa.s1pdgs.cpoc.mqi.model.queue.IpfExecutionJob;
+import esa.s1pdgs.cpoc.mqi.model.queue.util.CatalogEventAdapter;
 
 public interface ProductTypeAdapter {	
 	Logger LOGGER = LogManager.getLogger(ProductTypeAdapter.class);
 	
-	Callable<Void> mainInputSearch(final AppDataJob job);
+	Product mainInputSearch(final AppDataJob job) throws IpfPrepWorkerInputsMissingException;
 	
 	void customAppDataJob(final AppDataJob job);
 	

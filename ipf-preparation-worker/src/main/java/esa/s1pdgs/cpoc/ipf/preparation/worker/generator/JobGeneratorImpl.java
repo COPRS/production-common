@@ -3,26 +3,78 @@ package esa.s1pdgs.cpoc.ipf.preparation.worker.generator;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.concurrent.Callable;
 import java.util.stream.Collectors;
 
 import esa.s1pdgs.cpoc.appcatalog.AppDataJob;
-import esa.s1pdgs.cpoc.appcatalog.AppDataJobGeneration;
+import esa.s1pdgs.cpoc.appcatalog.AppDataJobTaskInputs;
 import esa.s1pdgs.cpoc.common.errors.AbstractCodedException;
+import esa.s1pdgs.cpoc.common.errors.processing.IpfPrepWorkerInputsMissingException;
 import esa.s1pdgs.cpoc.common.utils.Exceptions;
 import esa.s1pdgs.cpoc.common.utils.LogUtils;
 import esa.s1pdgs.cpoc.errorrepo.ErrorRepoAppender;
 import esa.s1pdgs.cpoc.errorrepo.model.rest.FailedProcessingDto;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.appcat.AppCatJobService;
+import esa.s1pdgs.cpoc.ipf.preparation.worker.appcat.AppCatJobUpdateFailed;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.config.ProcessSettings;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.generator.state.JobGenerationStateTransitions;
-import esa.s1pdgs.cpoc.ipf.preparation.worker.model.JobGen;
+import esa.s1pdgs.cpoc.ipf.preparation.worker.generator.state.JobGenerationTransition;
+import esa.s1pdgs.cpoc.ipf.preparation.worker.generator.state.JobStateTransistionFailed;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.model.tasktable.TaskTableAdapter;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.publish.Publisher;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.query.AuxQueryHandler;
+import esa.s1pdgs.cpoc.ipf.preparation.worker.type.Product;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.type.ProductTypeAdapter;
 import esa.s1pdgs.cpoc.mqi.model.rest.GenericMessageDto;
 
-public final class JobGeneratorImpl implements JobGenerator {
+public final class JobGeneratorImpl implements JobGenerator {	
+	final class JobGeneration implements JobGenerationTransition {
+		private final AppDataJob job;
+	    
+		JobGeneration(final AppDataJob job) {
+			this.job = job;
+		}
+
+		@Override
+		public final void mainInputSearch() throws JobStateTransistionFailed {
+			perform(() -> {
+						final Product queried = typeAdapter.mainInputSearch(job);
+						appCatService.updateProduct(job.getId(), queried);
+						return null;
+					},
+					"querying input " + job.getProductName()
+			);
+		}
+		
+		@Override
+		public final void auxSearch() throws JobStateTransistionFailed {
+			perform(() -> {
+						final List<AppDataJobTaskInputs> queried = auxQueryHandler.queryFor(job);
+						appCatService.updateAux(job.getId(), queried);
+						return null;
+					},	
+					"querying required AUX"
+			);
+		}
+		
+		@Override
+		public final void send() throws JobStateTransistionFailed {
+			perform(() -> {
+						publisher.send(job);
+						return null;
+					}, 
+					"publishing Job"
+			);
+		}
+		
+		@Override
+		public final String toString() {
+			return "AppDataJob " + job.getId();
+		}
+		
+
+	}
+	
 	private final TaskTableAdapter tasktableAdapter;
 	private final ProductTypeAdapter typeAdapter;	
 	private final AppCatJobService appCatService;
@@ -64,12 +116,8 @@ public final class JobGeneratorImpl implements JobGenerator {
 			}
 			try {			
 				LOGGER.debug("Trying job generation for appDataJob {}", job.getId());
-				final AppDataJobGeneration oldGen = new AppDataJobGeneration(job.getGeneration());
-				final JobGen jobGenNew = JobGenerationStateTransitions.ofInputState(oldGen.getState())
-						.performTransitionOn(newJobGenFor(job));		
-				
-				// TODO
-				appCat.update(oldGen, jobGenNew.job());
+				JobGenerationStateTransitions.ofInputState(job.getGeneration().getState())
+						.performTransitionOn(new JobGeneration(job));
 			}
 			catch (final Exception e) {
 				final Throwable error = Exceptions.unwrap(e);
@@ -110,16 +158,29 @@ public final class JobGeneratorImpl implements JobGenerator {
 			LOGGER.error("Omitting job generation attempt due to unexpected error: {}", errorMessage);
 		}
 	}
-
-	private JobGen newJobGenFor(final AppDataJob job) {
-		return new JobGen(
-				job, 
-				typeAdapter, 
-				tasks,
-				tasktableAdapter,
-				auxQueryHandler, 
-				tasktableAdapter.newJobOrder(settings), 
-				publisher
-		);
+	
+	private static final <E> E perform(final Callable<E> command, final String name) throws JobStateTransistionFailed {
+		try {
+			return command.call();
+		} 
+		// expected on failed transition
+		catch (final IpfPrepWorkerInputsMissingException e) {
+			// TODO once there is some time for refactoring, cleanup the created error message of 
+			// IpfPrepWorkerInputsMissingException to be more descriptive
+			throw new JobStateTransistionFailed(e.getLogMessage());
+		}
+		// expected on updating AppDataJob in persistence -> simply retry next time
+		catch (final AppCatJobUpdateFailed e) {
+			throw new JobStateTransistionFailed(
+					String.format("Error on persisting change of '%s': %s", name, Exceptions.messageOf(e)), 
+					e
+			);
+		}
+		catch (final Exception e) {
+			throw new RuntimeException(
+					String.format("Fatal error on %s: %s", name, Exceptions.messageOf(e)),
+					e
+			);
+		}
 	}
 }
