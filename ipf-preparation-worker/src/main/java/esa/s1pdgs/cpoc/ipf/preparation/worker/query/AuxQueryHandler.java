@@ -1,9 +1,12 @@
 package esa.s1pdgs.cpoc.ipf.preparation.worker.query;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
+import esa.s1pdgs.cpoc.appcatalog.AppDataJobTaskInputs;
 import esa.s1pdgs.cpoc.common.ProductFamily;
+import esa.s1pdgs.cpoc.common.errors.processing.IpfPrepWorkerInputsMissingException;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.model.JobGen;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.model.ProductMode;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.model.tasktable.ElementMapper;
@@ -30,14 +33,16 @@ public class AuxQueryHandler {
 		this.elementMapper = elementMapper;
 	}
 	
-	public AuxQuery queryFor(final JobGen jobGen) {
-		return new AuxQuery(
+	public List<AppDataJobTaskInputs> queryFor(final JobGen jobGen) throws IpfPrepWorkerInputsMissingException {
+		final AuxQuery query = new AuxQuery(
 				metadataClient,
 				jobGen.job(),
 				mode,
 				timeoutChecker,
 				jobGen.taskTableAdapter(),
 				buildMetadataSearchQuery(jobGen.taskTableAdapter()));
+		
+		return query.queryAux();
 	}
 
 	private Map<TaskTableInputAlternative.TaskTableInputAltKey, SearchMetadataQuery> buildMetadataSearchQuery(final TaskTableAdapter taskTableAdapter) {

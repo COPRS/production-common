@@ -65,7 +65,7 @@ public class AuxQuery {
 		this.queryTemplates = queryTemplates;
 	}
 
-	public final List<AppDataJobTaskInputs>  queryAux() throws Exception {	
+	public final List<AppDataJobTaskInputs>  queryAux() throws IpfPrepWorkerInputsMissingException {	
 		LOGGER.debug("Searching required AUX for job {} (product: {})", job.getId(), job.getProductName());
 		final Map<TaskTableInputAlternative.TaskTableInputAltKey, SearchMetadataResult> results = performAuxQueries();
 		LOGGER.info("Distributing required AUX for job {} (product: {})", job.getId(), job.getProductName());
