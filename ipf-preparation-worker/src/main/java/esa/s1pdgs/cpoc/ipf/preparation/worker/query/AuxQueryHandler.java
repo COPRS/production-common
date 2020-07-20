@@ -33,9 +33,10 @@ public class AuxQueryHandler {
 	public AuxQuery queryFor(final JobGen jobGen) {
 		return new AuxQuery(
 				metadataClient,
-				jobGen,
+				jobGen.job(),
 				mode,
 				timeoutChecker,
+				jobGen.taskTableAdapter(),
 				buildMetadataSearchQuery(jobGen.taskTableAdapter()));
 	}
 

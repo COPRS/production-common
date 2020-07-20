@@ -1,13 +1,13 @@
 package esa.s1pdgs.cpoc.ipf.preparation.worker.query;
 
 import static java.util.Collections.emptyList;
-import static java.util.stream.Collectors.*;
+import static java.util.stream.Collectors.toList;
+import static java.util.stream.Collectors.toMap;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.Callable;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -23,7 +23,6 @@ import esa.s1pdgs.cpoc.appcatalog.util.AppDataJobProductAdapter;
 import esa.s1pdgs.cpoc.common.errors.processing.IpfPrepWorkerInputsMissingException;
 import esa.s1pdgs.cpoc.common.errors.processing.MetadataQueryException;
 import esa.s1pdgs.cpoc.common.utils.DateUtils;
-import esa.s1pdgs.cpoc.ipf.preparation.worker.model.JobGen;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.model.ProductMode;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.model.metadata.SearchMetadataResult;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.model.tasktable.TaskTableAdapter;
@@ -39,14 +38,13 @@ import esa.s1pdgs.cpoc.xml.model.tasktable.TaskTableInput;
 import esa.s1pdgs.cpoc.xml.model.tasktable.TaskTableInputAlternative;
 import esa.s1pdgs.cpoc.xml.model.tasktable.TaskTablePool;
 import esa.s1pdgs.cpoc.xml.model.tasktable.TaskTableTask;
-import esa.s1pdgs.cpoc.xml.model.tasktable.enums.TaskTableInputOrigin;
 import esa.s1pdgs.cpoc.xml.model.tasktable.enums.TaskTableMandatoryEnum;
 
-public class AuxQuery implements Callable<JobGen> {
+public class AuxQuery {
 	private static final Logger LOGGER = LogManager.getLogger(AuxQuery.class);
 	
 	private final MetadataClient metadataClient;
-	private final JobGen jobGen;
+	private final AppDataJob job;
 	private final ProductMode mode;
 	private final InputTimeoutChecker timeoutChecker;
 	private final TaskTableAdapter taskTableAdapter;
@@ -54,38 +52,37 @@ public class AuxQuery implements Callable<JobGen> {
 
 	public AuxQuery(
 			final MetadataClient metadataClient,
-			final JobGen jobGen,
+			final AppDataJob job,
 			final ProductMode mode,
 			final InputTimeoutChecker timeoutChecker,
+			final TaskTableAdapter ttAdapter,
 			final Map<TaskTableInputAlternative.TaskTableInputAltKey, SearchMetadataQuery> queryTemplates) {
 		this.metadataClient = metadataClient;
-		this.jobGen = jobGen;
-		this.mode = mode;
+		this.job = job;
+		this.mode = mode; 
 		this.timeoutChecker = timeoutChecker;
-		this.taskTableAdapter = jobGen.taskTableAdapter();
+		this.taskTableAdapter = ttAdapter;
 		this.queryTemplates = queryTemplates;
 	}
 
-	@Override
-	public final JobGen call() throws Exception {	
-		LOGGER.debug("Searching required AUX for job {} (product: {})", jobGen.id(), jobGen.productName());
+	public final List<AppDataJobTaskInputs>  queryAux() throws Exception {	
+		LOGGER.debug("Searching required AUX for job {} (product: {})", job.getId(), job.getProductName());
 		final Map<TaskTableInputAlternative.TaskTableInputAltKey, SearchMetadataResult> results = performAuxQueries();
-		LOGGER.info("Distributing required AUX for job {} (product: {})", jobGen.id(), jobGen.productName());
-		jobGen.job().setAdditionalInputs(distributeResults(results));
-		return jobGen;
+		LOGGER.info("Distributing required AUX for job {} (product: {})", job.getId(), job.getProductName());
+		return distributeResults(results);
 	}
 
 	private List<AppDataJobInput> inputsWithoutResults() {
-		return inputsOf(jobGen.job()).stream()
+		return inputsOf(job).stream()
 				.flatMap(taskInputs -> taskInputs.getInputs().stream()).filter(input -> !input.hasResults()).collect(toList());
 	}
 
 	private void existingResults() {
-		inputsOf(jobGen.job()).stream()
+		inputsOf(job).stream()
 				.flatMap(taskInputs -> taskInputs.getInputs().stream()).filter(AppDataJobInput::hasResults);
 	}
 
-	private void alternativesConsidering(List<AppDataJobInput> existingResults) {
+	private void alternativesConsidering(final List<AppDataJobInput> existingResults) {
 
 		//taskTable.getPools().stream()
 		//		.flatMap(TaskTablePool::tasks)
@@ -97,7 +94,7 @@ public class AuxQuery implements Callable<JobGen> {
 
 	}
 
-	private List<AppDataJobTaskInputs> inputsOf(AppDataJob job) {
+	private List<AppDataJobTaskInputs> inputsOf(final AppDataJob job) {
 		if(CollectionUtils.isEmpty(job.getAdditionalInputs())) {
 			return buildInitialInputs();
 		}
@@ -106,11 +103,11 @@ public class AuxQuery implements Callable<JobGen> {
 	}
 
 	private Map<String, TaskTableTask> taskTableTasks() {
-		Map<String, TaskTableTask> tasks = new HashMap<>();
+		final Map<String, TaskTableTask> tasks = new HashMap<>();
 		int poolNumber = 0; // I wish Java had list.stream((index, entry) -> ...)
-		for (TaskTablePool pool : taskTableAdapter.pools()) {
+		for (final TaskTablePool pool : taskTableAdapter.pools()) {
 			int taskNumber = 0;
-			for (TaskTableTask task : pool.getTasks()) {
+			for (final TaskTableTask task : pool.getTasks()) {
 				final String reference = String.format("P%sT%s:%s-%s",
 						poolNumber, taskNumber, task.getName(), task.getVersion());
 				tasks.put(reference, task);
@@ -125,10 +122,10 @@ public class AuxQuery implements Callable<JobGen> {
 	private List<AppDataJobTaskInputs> buildInitialInputs() {
 		final List<AppDataJobTaskInputs> taskInputs = new ArrayList<>();
 
-		for (Map.Entry<String, TaskTableTask> taskEntry : taskTableTasks().entrySet()) {
+		for (final Map.Entry<String, TaskTableTask> taskEntry : taskTableTasks().entrySet()) {
 			final List<AppDataJobInput> inputs = new ArrayList<>();
 			int inputNumber = 0;
-			for (TaskTableInput input : taskEntry.getValue().getInputs()) {
+			for (final TaskTableInput input : taskEntry.getValue().getInputs()) {
 				final String reference = String.format("%sI%s", taskEntry.getKey(), inputNumber++);
 				inputs.add(new AppDataJobInput(
 						reference,
@@ -162,7 +159,7 @@ public class AuxQuery implements Callable<JobGen> {
 			final SearchMetadataQuery query = result.getQuery();
 			try {				
 				LOGGER.debug("Querying input product of type {}, AppJobId {}: {}", 
-						query.getProductType(), jobGen.id(), query);
+						query.getProductType(), job.getId(), query);
 
 				final List<SearchMetadata> results = queryAux(query);
 				// save query results
@@ -176,8 +173,8 @@ public class AuxQuery implements Callable<JobGen> {
 			} catch (final MetadataQueryException me) {
 				LOGGER.warn("Exception occurred when searching alternative {} for job {} with product {}: {}",
 						query.toLogMessage(),
-						jobGen.id(), 
-						jobGen.productName(), 
+						job.getId(), 
+						job.getProductName(), 
 						me.getMessage()
 				);
 			}
@@ -190,7 +187,7 @@ public class AuxQuery implements Callable<JobGen> {
 		final Map<String, AppDataJobInput> referenceInputs = new HashMap<>();
 		final List<AppDataJobTaskInputs> result = new ArrayList<>();
 		//for each pool
-		for (final TaskTablePool pool : jobGen.taskTableAdapter().pools()) {
+		for (final TaskTablePool pool : taskTableAdapter.pools()) {
 			// and each task in this pool
 			for (final TaskTableTask task : pool.getTasks()) {
 				final Map<String, String> missingMetadata = new HashMap<>();
@@ -206,7 +203,7 @@ public class AuxQuery implements Callable<JobGen> {
 						if (mode.isCompatibleWithTaskTableMode(input.getMode())) {
 							// returns null, if not found
 							final AppDataJobInput foundInput = convert(
-									taskTableAdapter.findInput(jobGen, input, metadataQueries), inputReference, input.getMandatory());
+									taskTableAdapter.findInput(job, input, metadataQueries), inputReference, input.getMandatory());
 														
 							if (foundInput != null) {
 								futureInputs.add(foundInput);
@@ -224,7 +221,7 @@ public class AuxQuery implements Callable<JobGen> {
 									// a IpfPrepWorkerInputsMissingException needs to be thrown. Otherwise,
 									// we log that timeout is expired and we continue anyway behaving as if 
 									// the input was there
-									if (timeoutChecker.isTimeoutExpiredFor(jobGen.job(), input)) {
+									if (timeoutChecker.isTimeoutExpiredFor(job, input)) {
 										LOGGER.info("Non-Mandatory Input {} is not available. Continue without it...", 
 												input.toLogMessage());
 									}
@@ -255,7 +252,7 @@ public class AuxQuery implements Callable<JobGen> {
 	// TODO TaskTableAdapter by itself should not return a JobOrderInput but a more generic
 	// structure which solely holds the reference between task table input and search meta data result
 	// as long as this is not changed the JobOrderInput has to be converted to AppDataJobInput here
-	private AppDataJobInput convert(final JobOrderInput input, String inputReference, TaskTableMandatoryEnum mandatory) {
+	private AppDataJobInput convert(final JobOrderInput input, final String inputReference, final TaskTableMandatoryEnum mandatory) {
 		if(input == null) {
 			return null;
 		}
@@ -273,7 +270,6 @@ public class AuxQuery implements Callable<JobGen> {
 	}
 
 	private List<SearchMetadata> queryAux(final SearchMetadataQuery query) throws MetadataQueryException {
-		final AppDataJob job = jobGen.job();
 		final AppDataJobProductAdapter productAdapter = new AppDataJobProductAdapter(job.getProduct());
 		
 		return metadataClient.search(
@@ -291,7 +287,7 @@ public class AuxQuery implements Callable<JobGen> {
 	// S1PRO-707: only "AUX_ECE" requires to query polarisation
 	private String polarisationFor(final String productType) {
 		if ("AUX_ECE".equals(productType.toUpperCase())) {
-			final AppDataJobProductAdapter productAdapter = new AppDataJobProductAdapter(jobGen.job().getProduct());		
+			final AppDataJobProductAdapter productAdapter = new AppDataJobProductAdapter(job.getProduct());		
 			
 			final String polarisation = productAdapter.getStringValue("polarisation", "NONE").toUpperCase();
 			if (polarisation.equals("SV") || polarisation.equals("DV")) {

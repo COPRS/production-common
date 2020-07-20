@@ -11,10 +11,10 @@ import java.util.Map;
 
 import org.springframework.util.CollectionUtils;
 
+import esa.s1pdgs.cpoc.appcatalog.AppDataJob;
 import esa.s1pdgs.cpoc.common.ProductFamily;
 import esa.s1pdgs.cpoc.common.utils.DateUtils;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.config.ProcessSettings;
-import esa.s1pdgs.cpoc.ipf.preparation.worker.model.JobGen;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.model.converter.TaskTableToJobOrderConverter;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.model.metadata.SearchMetadataResult;
 import esa.s1pdgs.cpoc.metadata.model.AbstractMetadata;
@@ -106,7 +106,7 @@ public class TaskTableAdapter {
 	// this would also remove the mutable behaviour of the jobOrder
 	// TODO at least return AppDataJobInput here
 	// TODO consider moving this method to AuxQuery
-	public final JobOrderInput findInput(final JobGen job, final TaskTableInput input, final Map<TaskTableInputAlternative.TaskTableInputAltKey, SearchMetadataResult> results) {
+	public final JobOrderInput findInput(final AppDataJob job, final TaskTableInput input, final Map<TaskTableInputAlternative.TaskTableInputAltKey, SearchMetadataResult> results) {
 		JobOrderInput result = null;
 
 		for (final TaskTableInputAlternative alt : input.alternativesOrdered().collect(toList())) {
@@ -139,10 +139,10 @@ public class TaskTableAdapter {
 			// is PROC input?
 			} else {
 				final String startDate = convertDateToJobOrderFormat(
-						job.job().getStartTime()
+						job.getStartTime()
 				);
 				final String stopDate = convertDateToJobOrderFormat(
-						job.job().getStopTime()
+						job.getStopTime()
 				);											
 				final String fileType = elementMapper.mappedFileType(alt.getFileType());
 				result = new JobOrderInput(
