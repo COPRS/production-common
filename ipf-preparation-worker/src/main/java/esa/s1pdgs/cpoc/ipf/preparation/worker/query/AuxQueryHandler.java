@@ -15,7 +15,6 @@ public class AuxQueryHandler {
     private final MetadataClient metadataClient;
 	private final ProductMode mode;
 	private final InputTimeoutChecker timeoutChecker;
-	private final ElementMapper elementMapper;
 	private final TaskTableAdapter taskTableAdapter;
 
 	public AuxQueryHandler(
@@ -28,7 +27,6 @@ public class AuxQueryHandler {
 		this.metadataClient = metadataClient;
 		this.mode = mode;
 		this.timeoutChecker = timeoutChecker;
-		this.elementMapper = elementMapper;
 		this.taskTableAdapter = taskTableAdapter;
 	}
 	
@@ -38,9 +36,8 @@ public class AuxQueryHandler {
 				job,
 				mode,
 				timeoutChecker,
-				taskTableAdapter,
-				taskTableAdapter.buildMetadataSearchQuery());
-		
+				taskTableAdapter);
+
 		return query.queryAux();
 	}
 }
