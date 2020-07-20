@@ -122,38 +122,7 @@ public class IpfPreparationWorkerConfiguration {
         threadPoolTaskScheduler.setThreadNamePrefix("JobGenerationTaskScheduler");
         return threadPoolTaskScheduler;
     }
-	
-//	@Bean
-//	@Autowired
-//	public AbstractJobsDispatcher jobsDispatcher(
-//			final ProcessSettings processSettings,
-//			final JobsGeneratorFactory factory, 
-//			final ThreadPoolTaskScheduler taskScheduler,
-//			final XmlConverter xmlConverter,
-//			@Value("${level-products.pathroutingxmlfile}") final String pathRoutingXmlFile,
-//		
-//	) {
-//		switch (processSettings.getLevel()) {
-//			case L0:
-//				return new L0AppJobDispatcher(settings, processSettings, factory, taskScheduler, appCatClient);
-//			case L0_SEGMENT:
-//				return new L0SegmentAppJobDispatcher(settings, processSettings, factory, taskScheduler, appCatClient);
-//			case L1:
-//			case L2:
-//				return new LevelProductsJobDispatcher(settings, processSettings, factory, taskScheduler, xmlConverter, 
-//						pathRoutingXmlFile, appCatClient);
-//			default:
-//				// fall through to throw exception
-//		}
-//		throw new IllegalArgumentException(
-//				String.format(
-//						"Unsupported Application Level '%s'. Available are: %s", 
-//						processSettings.getLevel(),
-//						Arrays.asList(ApplicationLevel.values())
-//				)
-//		);
-//	}
-	
+
 	@Bean
 	@Autowired
 	public ProductTypeAdapter typeAdapter(
@@ -207,8 +176,7 @@ public class IpfPreparationWorkerConfiguration {
 			final Function<TaskTable, InputTimeoutChecker> timeoutCheckerFactory
 	) {		
 		final Map<String, JobGenerator> generators = new HashMap<>(ttManager.size());	
-		//final AppCatAdapter appCat = new AppCatAdapter(appCatClient, gracePeriodHandler);
-	
+
 		for (final File taskTableFile : ttManager.tasktables()) {				
 			final JobGenerator jobGenerator = newJobGenerator(taskTableFile, typeAdapter, timeoutCheckerFactory);
 			generators.put(taskTableFile.getName(), jobGenerator);
@@ -253,7 +221,9 @@ public class IpfPreparationWorkerConfiguration {
 				metadataClient, 
 				ProductMode.SLICING, //TODO clarify why mode is always slicing
 				timeoutCheckerFactory.apply(tasktableAdapter.taskTable()),
-				elementMapper);
+				elementMapper,
+				tasktableAdapter
+		);
 		return new JobGeneratorImpl(
 				tasktableAdapter,
 				typeAdapter, 

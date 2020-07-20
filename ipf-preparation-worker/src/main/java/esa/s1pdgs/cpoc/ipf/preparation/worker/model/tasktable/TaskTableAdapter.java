@@ -6,6 +6,7 @@ import static java.util.stream.Collectors.toList;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -17,6 +18,7 @@ import esa.s1pdgs.cpoc.common.utils.DateUtils;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.config.ProcessSettings;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.model.converter.TaskTableToJobOrderConverter;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.model.metadata.SearchMetadataResult;
+import esa.s1pdgs.cpoc.metadata.client.SearchMetadataQuery;
 import esa.s1pdgs.cpoc.metadata.model.AbstractMetadata;
 import esa.s1pdgs.cpoc.metadata.model.SearchMetadata;
 import esa.s1pdgs.cpoc.xml.model.joborder.JobOrder;
@@ -185,6 +187,25 @@ public class TaskTableAdapter {
 				// fall through
 		}
 		return JobOrderFileNameType.BLANK;
+	}
+	
+	public final Map<TaskTableInputAlternative.TaskTableInputAltKey, SearchMetadataQuery> buildMetadataSearchQuery() {
+		final Map<TaskTableInputAlternative.TaskTableInputAltKey, SearchMetadataQuery> metadataQueryTemplate =  new HashMap<>();
+
+		allTaskTableInputAlternatives().forEach((inputAltKey, alternatives) -> {
+					final String fileType = elementMapper.mappedFileType(inputAltKey.getFileType());
+					final ProductFamily family = elementMapper.inputFamilyOf(fileType);
+					final SearchMetadataQuery query = new SearchMetadataQuery(
+							0,
+							inputAltKey.getRetrievalMode(),
+							inputAltKey.getDeltaTime0(),
+							inputAltKey.getDeltaTime1(),
+							fileType,
+							family
+					);
+					metadataQueryTemplate.put(inputAltKey, query);
+				});
+		return metadataQueryTemplate;
 	}
 	
 	private JobOrderTimeInterval newJobOrderTimeIntervalFor(final SearchMetadata searchMetadata) {

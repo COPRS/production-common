@@ -71,8 +71,6 @@ public final class JobGeneratorImpl implements JobGenerator {
 		public final String toString() {
 			return "AppDataJob " + job.getId();
 		}
-		
-
 	}
 	
 	private final TaskTableAdapter tasktableAdapter;
