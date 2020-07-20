@@ -4,10 +4,10 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import esa.s1pdgs.cpoc.appcatalog.AppDataJob;
 import esa.s1pdgs.cpoc.appcatalog.AppDataJobTaskInputs;
 import esa.s1pdgs.cpoc.common.ProductFamily;
 import esa.s1pdgs.cpoc.common.errors.processing.IpfPrepWorkerInputsMissingException;
-import esa.s1pdgs.cpoc.ipf.preparation.worker.model.JobGen;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.model.ProductMode;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.model.tasktable.ElementMapper;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.model.tasktable.TaskTableAdapter;
@@ -21,26 +21,30 @@ public class AuxQueryHandler {
 	private final ProductMode mode;
 	private final InputTimeoutChecker timeoutChecker;
 	private final ElementMapper elementMapper;
+	private final TaskTableAdapter taskTableAdapter;
 
 	public AuxQueryHandler(
 			final MetadataClient metadataClient,
 			final ProductMode mode,
 			final InputTimeoutChecker timeoutChecker,
-			final ElementMapper elementMapper) {
+			final ElementMapper elementMapper,
+			final TaskTableAdapter taskTableAdapter
+	) {
 		this.metadataClient = metadataClient;
 		this.mode = mode;
 		this.timeoutChecker = timeoutChecker;
 		this.elementMapper = elementMapper;
+		this.taskTableAdapter = taskTableAdapter;
 	}
 	
-	public List<AppDataJobTaskInputs> queryFor(final JobGen jobGen) throws IpfPrepWorkerInputsMissingException {
+	public List<AppDataJobTaskInputs> queryFor(final AppDataJob job) throws IpfPrepWorkerInputsMissingException {
 		final AuxQuery query = new AuxQuery(
 				metadataClient,
-				jobGen.job(),
+				job,
 				mode,
 				timeoutChecker,
-				jobGen.taskTableAdapter(),
-				buildMetadataSearchQuery(jobGen.taskTableAdapter()));
+				taskTableAdapter,
+				buildMetadataSearchQuery(taskTableAdapter));
 		
 		return query.queryAux();
 	}
