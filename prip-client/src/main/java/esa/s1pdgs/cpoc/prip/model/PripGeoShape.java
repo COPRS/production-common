@@ -126,5 +126,9 @@ public class PripGeoShape {
 	public void setCoordinates(List<Coordinate> coordinates) {
 		this.coordinates = coordinates;
 	}
+	
+	public int getSRID() {
+		return 4326; // EPSG-Code for WGS84
+	}
 
 }
