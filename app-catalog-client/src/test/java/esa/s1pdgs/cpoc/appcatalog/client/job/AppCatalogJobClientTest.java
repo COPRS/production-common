@@ -7,7 +7,6 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 
-import java.net.URI;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
