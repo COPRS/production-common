@@ -314,7 +314,7 @@
 		<module>ingestion-trigger</module>
 		<module>ingestion-worker</module>
 		<module>production-trigger</module>
-		<module>ipf-preparation-worker</module>
+ 		<module>ipf-preparation-worker</module> 
 		<module>lib-commons</module>
 		<module>ipf-execution-worker</module>
 		<module>request-repository</module>
@@ -327,14 +327,13 @@
 		<module>obs-sdk</module>
 		<module>prip-trigger</module>
 		<module>prip-worker</module>
-		<module>prip-frontend</module>
+ 		<module>prip-frontend</module>
 		<module>prip-client</module>
 		<module>data-lifecycle-trigger</module>
 		<module>data-lifecycle-worker</module>
 		<module>validation</module>
 		<module>compression-trigger</module>
 		<module>compression-worker</module>
-		<!-- module>scaler</module-->
 		<module>xml-tools</module>
 	</modules>
 </project>
