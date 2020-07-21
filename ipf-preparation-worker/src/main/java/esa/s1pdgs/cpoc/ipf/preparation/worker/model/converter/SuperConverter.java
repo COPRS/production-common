@@ -1,4 +1,4 @@
-package esa.s1pdgs.cpoc.xml;
+package esa.s1pdgs.cpoc.ipf.preparation.worker.model.converter;
 
 import java.util.List;
 import java.util.function.Function;

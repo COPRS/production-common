@@ -1,4 +1,4 @@
-package esa.s1pdgs.cpoc.ipf.preparation.worker.model.joborder;
+package esa.s1pdgs.cpoc.xml.model.tasktable.joborder;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;

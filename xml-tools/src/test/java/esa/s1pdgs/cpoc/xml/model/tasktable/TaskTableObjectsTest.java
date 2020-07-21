@@ -1,4 +1,4 @@
-package esa.s1pdgs.cpoc.ipf.preparation.worker.model.tasktable;
+package esa.s1pdgs.cpoc.xml.model.tasktable;
 
 import org.junit.Test;
 

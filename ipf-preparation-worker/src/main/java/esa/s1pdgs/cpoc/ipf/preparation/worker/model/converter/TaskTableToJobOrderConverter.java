@@ -1,7 +1,6 @@
 package esa.s1pdgs.cpoc.ipf.preparation.worker.model.converter;
 
 import esa.s1pdgs.cpoc.common.ApplicationLevel;
-import esa.s1pdgs.cpoc.xml.SuperConverter;
 import esa.s1pdgs.cpoc.xml.model.joborder.AbstractJobOrderConf;
 import esa.s1pdgs.cpoc.xml.model.joborder.JobOrder;
 import esa.s1pdgs.cpoc.xml.model.joborder.JobOrderBreakpoint;

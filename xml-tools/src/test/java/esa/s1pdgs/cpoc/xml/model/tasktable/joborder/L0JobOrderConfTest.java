@@ -1,6 +1,7 @@
-package esa.s1pdgs.cpoc.ipf.preparation.worker.model.joborder;
+package esa.s1pdgs.cpoc.xml.model.tasktable.joborder;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
@@ -12,6 +13,7 @@ import org.junit.Test;
 
 import esa.s1pdgs.cpoc.xml.model.joborder.JobOrderProcParam;
 import esa.s1pdgs.cpoc.xml.model.joborder.JobOrderSensingTime;
+import esa.s1pdgs.cpoc.xml.model.joborder.L0JobOrderConf;
 import esa.s1pdgs.cpoc.xml.model.joborder.L1JobOrderConf;
 import nl.jqno.equalsverifier.EqualsVerifier;
 import nl.jqno.equalsverifier.Warning;
@@ -21,13 +23,13 @@ import nl.jqno.equalsverifier.Warning;
  * @author Cyrielle
  *
  */
-public class L1JobOrderConfTest {
+public class L0JobOrderConfTest {
 	/**
 	 * Test clone function
 	 */
 	@Test
 	public void testConstructors() {
-		L1JobOrderConf obj = new L1JobOrderConf();
+		L0JobOrderConf obj = new L0JobOrderConf();
 		obj.setProcessorName("processor-name");
 		obj.setBreakPointEnable(false);
 		obj.setProcessingStation("processing-station");
@@ -45,7 +47,7 @@ public class L1JobOrderConfTest {
 		obj.addProcParam(proc1);
 		obj.addProcParam(proc2);
 		
-		L1JobOrderConf clone = new L1JobOrderConf(obj);
+		L0JobOrderConf clone = new L0JobOrderConf(obj);
 		assertEquals(obj.getProcessingStation(), clone.getProcessingStation());
 		assertEquals(obj.getProcessorName(), clone.getProcessorName());
 		assertEquals(obj.getNbProcParams(), clone.getNbProcParams());
@@ -58,6 +60,7 @@ public class L1JobOrderConfTest {
 		assertEquals(obj.getProcParams().get(1), clone.getProcParams().get(1));
 		assertTrue(clone.getConfigFiles().size() == 3);
 		assertEquals(obj.getConfigFiles().get(1), clone.getConfigFiles().get(1));
+		assertFalse(obj.isBreakPointEnable());
 		
 		obj.setSensingTime(null);
 		obj.setProcParams(new ArrayList<>());
@@ -66,21 +69,21 @@ public class L1JobOrderConfTest {
 		assertTrue(clone2.getNbProcParams() == 0);
 		assertTrue(clone2.getProcParams().size() == 0);
 		
+		obj.setSensingTime(null);
 		obj.addProcParam(null);
-		L1JobOrderConf clone3 = new L1JobOrderConf(obj);
+		L0JobOrderConf clone3 = new L0JobOrderConf(obj);
 		assertNull(clone3.getSensingTime());
 		assertTrue(obj.getNbProcParams() == 1);
 		assertTrue(clone3.getNbProcParams() == 0);
 		assertTrue(clone3.getProcParams().size() == 0);
 	}
-	
 	/**
 	 * Test to string
 	 */
 	@Test
-	public void testToStringL1JobOrderConf() {
+	public void testToStringL0JobOrderConf() {
 		
-		L1JobOrderConf obj = new L1JobOrderConf();
+		L0JobOrderConf obj = new L0JobOrderConf();
 		obj.setProcessorName("processor-name");
 		obj.setBreakPointEnable(false);
 		obj.setProcessingStation("processing-station");
@@ -97,6 +100,9 @@ public class L1JobOrderConfTest {
 		JobOrderProcParam proc2 = new JobOrderProcParam("proc2", "val2");
 		obj.addProcParam(proc1);
 		obj.addProcParam(proc2);
+		
+		assertTrue(obj.getNbProcParams() == 2);
+		assertTrue(obj.getConfigFiles().size() == 3);
 		
 		String str = obj.toString();
 		assertTrue(str.contains("processorName: processor-name"));
@@ -117,7 +123,7 @@ public class L1JobOrderConfTest {
 	 * Check equals and hascode methods
 	 */
 	@Test
-	public void equalsDtoL1JobOrderConf() {
-		EqualsVerifier.forClass(L1JobOrderConf.class).usingGetClass().suppress(Warning.NONFINAL_FIELDS).verify();
+	public void equalsDtoL0JobOrderConf() {
+		EqualsVerifier.forClass(L0JobOrderConf.class).usingGetClass().suppress(Warning.NONFINAL_FIELDS).verify();
 	}
 }

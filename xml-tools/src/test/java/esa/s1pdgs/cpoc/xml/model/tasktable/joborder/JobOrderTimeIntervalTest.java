@@ -1,11 +1,11 @@
-package esa.s1pdgs.cpoc.ipf.preparation.worker.model.joborder;
+package esa.s1pdgs.cpoc.xml.model.tasktable.joborder;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
 import org.junit.Test;
 
-import esa.s1pdgs.cpoc.xml.model.joborder.JobOrderSensingTime;
+import esa.s1pdgs.cpoc.xml.model.joborder.JobOrderTimeInterval;
 import nl.jqno.equalsverifier.EqualsVerifier;
 import nl.jqno.equalsverifier.Warning;
 
@@ -13,7 +13,7 @@ import nl.jqno.equalsverifier.Warning;
  * 
  *
  */
-public class JobOrderSensingTimeTest {
+public class JobOrderTimeIntervalTest {
 
 	/**
 	 * Test constructors
@@ -21,13 +21,15 @@ public class JobOrderSensingTimeTest {
 	@Test
 	public void testConstructorClone() {
 
-		JobOrderSensingTime obj = new JobOrderSensingTime();
+		JobOrderTimeInterval obj = new JobOrderTimeInterval();
 		obj.setStart("starttime");
 		obj.setStop("stoptime");
+		obj.setFileName("file");
 
-		JobOrderSensingTime clone = new JobOrderSensingTime(obj);
+		JobOrderTimeInterval clone = new JobOrderTimeInterval(obj);
 		assertEquals(obj.getStart(), clone.getStart());
 		assertEquals(obj.getStop(), clone.getStop());
+		assertEquals(obj.getFileName(), clone.getFileName());
 	}
 
 	/**
@@ -36,13 +38,15 @@ public class JobOrderSensingTimeTest {
 	@Test
 	public void testToString() {
 
-		JobOrderSensingTime obj = new JobOrderSensingTime();
+		JobOrderTimeInterval obj = new JobOrderTimeInterval();
 		obj.setStart("starttime");
 		obj.setStop("stoptime");
+		obj.setFileName("file");
 
 		String str = obj.toString();
 		assertTrue(str.contains("start: starttime"));
 		assertTrue(str.contains("stop: stoptime"));
+		assertTrue(str.contains("fileName: file"));
 	}
 
 	/**
@@ -50,7 +54,7 @@ public class JobOrderSensingTimeTest {
 	 */
 	@Test
 	public void testEquals() {
-		EqualsVerifier.forClass(JobOrderSensingTime.class).usingGetClass().suppress(Warning.NONFINAL_FIELDS).verify();
+		EqualsVerifier.forClass(JobOrderTimeInterval.class).usingGetClass().suppress(Warning.NONFINAL_FIELDS).verify();
 	}
 
 }
