@@ -295,10 +295,10 @@ public class PripElasticSearchMetadataRepo implements PripMetadataRepository {
 
 		if (null != footprintJson && !footprintJson.isEmpty()) {
 			final String footprintGeoshapeType = (String) footprintJson.get(PripGeoShape.FIELD_NAMES.TYPE.fieldName());
-			if (!GeoShapeType.POLYGON.name().equals(footprintGeoshapeType)) {
+			if (!GeoShapeType.POLYGON.wktName().equals(footprintGeoshapeType)) {
 				throw new IllegalArgumentException(
 						"PRIP metadata attribute value of " + PripMetadata.FIELD_NAMES.FOOTPRINT.fieldName() + "."
-								+ PripGeoShape.FIELD_NAMES.TYPE.fieldName() + " must be '" + GeoShapeType.POLYGON.name()
+								+ PripGeoShape.FIELD_NAMES.TYPE.fieldName() + " must be '" + GeoShapeType.POLYGON.wktName()
 								+ "' but is '" + footprintGeoshapeType + "'!");
 			}
 
