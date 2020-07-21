@@ -62,7 +62,7 @@ public class AppDataJob {
     /**
      * Product of this job
      */
-    private AppDataJobProduct product;
+    private AppDataJobProduct product = new AppDataJobProduct();
 
     /**
      * Additional inputs for the job, e.g. aux files

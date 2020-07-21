@@ -1,5 +1,6 @@
 package esa.s1pdgs.cpoc.ipf.preparation.worker.appcat;
 
+import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -16,6 +17,8 @@ import esa.s1pdgs.cpoc.appcatalog.AppDataJobState;
 import esa.s1pdgs.cpoc.appcatalog.AppDataJobTaskInputs;
 import esa.s1pdgs.cpoc.appcatalog.client.job.AppCatalogJobClient;
 import esa.s1pdgs.cpoc.common.errors.AbstractCodedException;
+import esa.s1pdgs.cpoc.common.errors.InternalErrorException;
+import esa.s1pdgs.cpoc.common.utils.Exceptions;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.generator.GracePeriodHandler;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.type.Product;
 import esa.s1pdgs.cpoc.mqi.model.queue.CatalogEvent;
@@ -62,10 +65,6 @@ public class AppCatJobService {
 		return null;
 	}
 	
-	public void performUpdateOnJob() {
-		
-	}	
-	
 	public Optional<AppDataJob> findJobFor(final GenericMessageDto<CatalogEvent> mqiMessage) 
 			throws AbstractCodedException {
 		return first(
@@ -86,6 +85,14 @@ public class AppCatJobService {
 				appCatClient.findByProductDataTakeId(dataTakeId), 
 				String.format("dataTakeId %s", dataTakeId)
 		);	
+	}
+	
+	private final AppDataJob find(final long jobId) throws AbstractCodedException {
+		final AppDataJob result = appCatClient.findById(jobId);
+		if (result == null) {
+			throw new InternalErrorException(String.format("Job %s is null", String.valueOf(jobId)));
+		}
+		return result;
 	}
 	
 	private final Optional<AppDataJob> first(final List<AppDataJob> result, final String desc) {
@@ -111,26 +118,98 @@ public class AppCatJobService {
     	return appCatClient.updateJob(job);
 	}
 	
-
-	public final synchronized void appendMessage(final long id, final GenericMessageDto<CatalogEvent> mess) 
+	private final synchronized void performUpdate(final UpdateFunction command, final long id, final String name) 
 			throws AppCatJobUpdateFailed {
+		try {
+			final AppDataJob job = find(id);
+			command.applyUpdateOn(job);
+			appCatClient.updateJob(job);			
+		} catch (final AbstractCodedException e) {
+			final String message = String.format(
+					"Error on appDataJob %s %s update: %s. Trying next time...", 
+					id, 
+					name, 
+					Exceptions.messageOf(e)
+			);
+			throw new AppCatJobUpdateFailed(message, e);
+		}
+	}
 
+	public final void appendMessage(final long id, final GenericMessageDto<CatalogEvent> mess) 
+			throws AppCatJobUpdateFailed {		
+		performUpdate(
+				job -> {
+					job.getMessages().add(mess);
+					job.setLastUpdateDate(new Date());
+				}, 
+				id, 
+				"message"
+		);
 	}
 
 
-	public final synchronized void updateProduct(final long id, final Product queried, final AppDataJobGenerationState outputState) 
+	public final void updateProduct(final long id, final Product queried, final AppDataJobGenerationState outputState) 
 			throws AppCatJobUpdateFailed {
-		
+		performUpdate(
+				job -> {
+					job.setProduct(queried.toProduct());
+					
+					// no transition?
+					if (job.getGeneration().getState() == outputState) {
+						// don't update jobs last modified date here to enable timeout, just update the generation time
+						job.getGeneration().setLastUpdateDate(new Date());		
+						job.getGeneration().setNbErrors(job.getGeneration().getNbErrors()+1);
+					}
+					else {
+						job.getGeneration().setState(outputState);
+						job.setLastUpdateDate(new Date());
+					}
+				}, 
+				id, 
+				"inputProduct"
+		);
 	}
 
-	public final synchronized void updateAux(final long id, final List<AppDataJobTaskInputs> queried, final AppDataJobGenerationState outputState) 
+	public final void updateAux(final long id, final List<AppDataJobTaskInputs> queried, final AppDataJobGenerationState outputState) 
 			throws AppCatJobUpdateFailed {
-		
+		performUpdate(
+				job -> {
+					job.setAdditionalInputs(queried);					
+						
+					// no transition?
+					if (job.getGeneration().getState() == outputState) {
+						// don't update jobs last modified date here to enable timeout, just update the generation time
+						job.getGeneration().setLastUpdateDate(new Date());
+						job.getGeneration().setNbErrors(job.getGeneration().getNbErrors()+1);
+					}
+					else {
+						job.getGeneration().setState(outputState);
+						job.setLastUpdateDate(new Date());
+					}
+				}, 
+				id, 
+				"auxProduct"
+		);
 	}
 	
-	public final synchronized void updateSend(final long id, final AppDataJobGenerationState outputState) 
+	public final void updateSend(final long id, final AppDataJobGenerationState outputState) 
 			throws AppCatJobUpdateFailed {
-		
+		performUpdate(
+				job -> {
+					// no transition?
+					if (job.getGeneration().getState() == outputState) {
+						// don't update jobs last modified date here to enable timeout, just update the generation time
+						job.getGeneration().setLastUpdateDate(new Date());
+						job.getGeneration().setNbErrors(job.getGeneration().getNbErrors()+1);
+					}
+					else {
+						// it's done
+				    	job.setState(AppDataJobState.TERMINATED);  
+					}
+				}, 
+				id, 
+				"send"
+		);
 	}
 	
 }

@@ -85,14 +85,7 @@ public class AppDataJobService {
 
     public AppDataJob updateJob(final AppDataJob patchJob) throws AppCatalogJobNotFoundException {
     	// assert job exists
-        final AppDataJob existingJob = getJob(patchJob.getId());
-        // has been modified concurrently?
-        // FIXME needs to be implemented in 940
-//        if (existingJob.getLastUpdateDate().after(patchJob.getLastUpdateDate())) {
-//        	throw new AppCatalogJobGenerationInvalidStateException();
-//        }
-        patchJob.setLastUpdateDate(new Date());
-        
+        getJob(patchJob.getId());        
         LOGGER.debug("Updating appDataJob {}", patchJob.getId());
         return appDataJobRepository.save(patchJob);
     }

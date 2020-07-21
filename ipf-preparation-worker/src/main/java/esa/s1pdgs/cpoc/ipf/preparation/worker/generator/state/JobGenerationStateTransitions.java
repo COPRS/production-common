@@ -59,7 +59,7 @@ public enum JobGenerationStateTransitions implements JobGenerationStateTransitio
 			LOGGER.info("{} {} succeeded", job, toDescription());
 		} catch (final JobStateTransistionFailed e) {
 			LOGGER.info("Prerequisites for {} not met for {}: {}",  toDescription(), job, e.getMessage());
-			throw e;
+			LOGGER.trace(e);
 		}
 	}
 }

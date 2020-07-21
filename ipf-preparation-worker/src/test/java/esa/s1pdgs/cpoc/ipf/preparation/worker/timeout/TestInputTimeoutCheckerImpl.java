@@ -10,7 +10,6 @@ import java.util.Map;
 import org.junit.Test;
 
 import esa.s1pdgs.cpoc.appcatalog.AppDataJob;
-import esa.s1pdgs.cpoc.appcatalog.AppDataJobProduct;
 import esa.s1pdgs.cpoc.common.utils.DateUtils;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.config.IpfPreparationWorkerSettings.InputWaitingConfig;
 import esa.s1pdgs.cpoc.mqi.model.queue.CatalogEvent;
@@ -258,10 +257,7 @@ public class TestInputTimeoutCheckerImpl {
 		
 		final GenericMessageDto<CatalogEvent> mess = new GenericMessageDto<CatalogEvent>(1, "topic", event);		
 		job.getMessages().add(mess);
-		
-		final AppDataJobProduct appDataJob = new AppDataJobProduct();
-		appDataJob.setStartTime(sensingStartTime);		
-		job.setProduct(appDataJob);
+		job.setStartTime(sensingStartTime);	
 		job.setCreationDate(new SimpleDateFormat(METADATA_DATE_FORMAT).parse(jobCreationDate));
 		return job;
 	}
