@@ -13,6 +13,7 @@ import static esa.s1pdgs.cpoc.prip.frontend.service.edm.EntityTypeProperties.Pro
 import static esa.s1pdgs.cpoc.prip.frontend.service.edm.EntityTypeProperties.PublicationDate;
 import static esa.s1pdgs.cpoc.prip.frontend.service.edm.EntityTypeProperties.Start;
 import static esa.s1pdgs.cpoc.prip.frontend.service.edm.EntityTypeProperties.Value;
+import static esa.s1pdgs.cpoc.prip.frontend.service.edm.EntityTypeProperties.Footprint;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -45,10 +46,10 @@ public class EdmProvider extends org.apache.olingo.commons.api.edm.provider.Csdl
 	public static final FullQualifiedName GUID_TYPE_FQN = EdmPrimitiveTypeKind.Guid.getFullQualifiedName();
 	public static final FullQualifiedName DATE_TIME_OFFSET_TYPE_FQN = EdmPrimitiveTypeKind.DateTimeOffset
 			.getFullQualifiedName();
+	public static final FullQualifiedName GEOSHAPE_POLYGON_TYPE_FQN = EdmPrimitiveTypeKind.GeographyPolygon.getFullQualifiedName();
+	
 	public static final FullQualifiedName CHECKSUM_TYPE_FQN = new FullQualifiedName(SERVICE_NAMESPACE, "Checksums");
-	
 	public static final FullQualifiedName TIMERANGE_TYPE_FQN = new FullQualifiedName(SERVICE_NAMESPACE,"TimeRange");
-	
 	public static final FullQualifiedName PRODUCTION_TYPE_TYPE_FQN = new FullQualifiedName(SERVICE_NAMESPACE, "ProductionType");
 
 	// EDM Container
@@ -84,6 +85,7 @@ public class EdmProvider extends org.apache.olingo.commons.api.edm.provider.Csdl
 			properties.add(new CsdlProperty().setName(Checksums.name()).setType(CHECKSUM_TYPE_FQN).setCollection(true));
 			properties.add(new CsdlProperty().setName(ProductionType.name()).setType(PRODUCTION_TYPE_TYPE_FQN));
 			properties.add(new CsdlProperty().setName(ContentDate.name()).setType(TIMERANGE_TYPE_FQN));
+			properties.add(new CsdlProperty().setName(Footprint.name()).setType(GEOSHAPE_POLYGON_TYPE_FQN));
 
 			entityType.setProperties(properties);
 

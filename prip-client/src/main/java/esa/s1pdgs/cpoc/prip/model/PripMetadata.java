@@ -31,7 +31,8 @@ public class PripMetadata {
 		EVICTION_DATE("evictionDate",
 				m -> (m.getEvictionDate() == null) ? null : DateUtils.formatToOdataDateTimeFormat(m.getEvictionDate())),
 		CHECKSUM("checksum", PripMetadata::getChecksums),
-		PRODUCTION_TYPE("productionType", PripMetadata::getProductionType);
+		PRODUCTION_TYPE("productionType", PripMetadata::getProductionType),
+		FOOTPRINT("footprint", PripMetadata::getFootprint);
 
 		private final String fieldName;
 		private final Function<PripMetadata, Object> toJsonAccessor;
@@ -73,6 +74,8 @@ public class PripMetadata {
 	private List<Checksum> checksums;
 	
 	private ProductionType productionType;
+	
+	private GeoShapePolygon footprint;
 
 	public PripMetadata() {
 	}
@@ -168,9 +171,17 @@ public class PripMetadata {
 	public void setProductionType(ProductionType productionType) {
 		this.productionType = productionType;
 	}
+	
+	public GeoShapePolygon getFootprint() {
+		return footprint;
+	}
+
+	public void setFootprint(GeoShapePolygon footprint) {
+		this.footprint = footprint;
+	}
 
 	public JSONObject toJson() {
-		JSONObject json = new JSONObject();
+		final JSONObject json = new JSONObject();
 
 		Arrays.stream(FIELD_NAMES.values()).forEach(field -> json.put(field.fieldName(), field.toJsonAccessor().apply(this)));
 
@@ -185,7 +196,7 @@ public class PripMetadata {
 	@Override
 	public int hashCode() {
 		return Objects.hash(checksums, contentDateEnd, contentDateStart, contentLength, contentType, creationDate,
-				evictionDate, id, name, obsKey, productFamily, productionType);
+				evictionDate, id, name, obsKey, productFamily, productionType, footprint);
 	}
 
 	@Override
@@ -194,13 +205,15 @@ public class PripMetadata {
 			return true;
 		if (!(obj instanceof PripMetadata))
 			return false;
-		PripMetadata other = (PripMetadata) obj;
+		
+		final PripMetadata other = (PripMetadata) obj;
 		return Objects.equals(checksums, other.checksums) && Objects.equals(contentDateEnd, other.contentDateEnd)
 				&& Objects.equals(contentDateStart, other.contentDateStart) && contentLength == other.contentLength
 				&& Objects.equals(contentType, other.contentType) && Objects.equals(creationDate, other.creationDate)
 				&& Objects.equals(evictionDate, other.evictionDate) && Objects.equals(id, other.id)
 				&& Objects.equals(name, other.name) && Objects.equals(obsKey, other.obsKey)
-				&& productFamily == other.productFamily && productionType == other.productionType;
+				&& productFamily == other.productFamily && productionType == other.productionType
+				&& Objects.equals(footprint, other.footprint);
 	}
 
 }
