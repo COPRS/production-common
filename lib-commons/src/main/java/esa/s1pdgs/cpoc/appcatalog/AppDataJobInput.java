@@ -28,11 +28,11 @@ public class AppDataJobInput {
         this.hasResults = !files.isEmpty();
     }
 
-    public AppDataJobInput(final AppDataJobInput other) {
+    public AppDataJobInput(final String newTaskTableInputReference, final AppDataJobInput other) {
         if(other.files != null) {
             files = other.files.stream().map(AppDataJobFile::new).collect(toList());
         }
-        taskTableInputReference = other.taskTableInputReference;
+        taskTableInputReference = newTaskTableInputReference;
         fileType = other.fileType;
         fileNameType = other.fileNameType;
         mandatory = other.mandatory;

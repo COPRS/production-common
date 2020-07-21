@@ -141,8 +141,8 @@ public class AuxQuery {
 		return job.getAdditionalInputs();
 	}
 
-	private <T, U> List<U> taskTablesAndInputsMappedTo(final BiFunction<String, TaskTableInput, T> inputMapFunction,
-													   final BiFunction<List<T>, TaskTableTask, U> taskMapFunction) {
+	private <T, U> List<U> taskTableTasksAndInputsMappedTo(final BiFunction<String, TaskTableInput, T> inputMapFunction,
+														   final BiFunction<List<T>, TaskTableTask, U> taskMapFunction) {
 		final List<U> mappedTasks = new ArrayList<>();
 
 		for (final Map.Entry<String, TaskTableTask> taskEntry : taskTableTasks().entrySet()) {
@@ -159,7 +159,7 @@ public class AuxQuery {
 	}
 
 	private <T> List<T> inputsMappedTo(final BiFunction<String, TaskTableInput, T> inputMapFunction) {
-		return taskTablesAndInputsMappedTo(inputMapFunction, (list, task) -> list)
+		return taskTableTasksAndInputsMappedTo(inputMapFunction, (list, task) -> list)
 				.stream().flatMap(Collection::stream).collect(toList());
 	}
 
@@ -187,7 +187,7 @@ public class AuxQuery {
 
 
 	private List<AppDataJobTaskInputs> buildInitialInputs() {
-		return taskTablesAndInputsMappedTo(
+		return taskTableTasksAndInputsMappedTo(
 				(reference, input) -> new AppDataJobInput(
 						reference,
 						"",
@@ -250,6 +250,7 @@ public class AuxQuery {
 	private List<AppDataJobTaskInputs> distributeResults(final Map<TaskTableInputAlternative.TaskTableInputAltKey, SearchMetadataResult> metadataQueries) {
 		final Map<String, AppDataJobInput> referenceInputs = new HashMap<>();
 		final Map<String, TaskTableInput> taskTableInputs = taskTableInputs();
+		final Map<String, String> unsatisfiedReferences = new HashMap<>();
 
 		final List<AppDataJobInput> futureInputs = new ArrayList<>();
 		taskTableInputs.forEach((reference, taskTableInput) -> {
@@ -261,6 +262,7 @@ public class AuxQuery {
 							taskTableAdapter.findInput(job, taskTableInput, metadataQueries), reference, taskTableInput.getMandatory());
 
 					if (foundInput != null) {
+						LOGGER.info("found input {} for job {}", foundInput, job.getId());
 						futureInputs.add(foundInput);
 						if (!StringUtils.isEmpty(taskTableInput.getId())) {
 							referenceInputs.put(taskTableInput.getId(), foundInput);
@@ -269,13 +271,28 @@ public class AuxQuery {
 				}
 			} else {
 				// We shall add inputs of the reference
-				if (referenceInputs.containsKey(taskTableInput.getReference())) {
-					futureInputs.add(new AppDataJobInput(referenceInputs.get(taskTableInput.getReference())));
+				if(!addReferredInputFor(reference, taskTableInput.getReference(), referenceInputs, futureInputs)) {
+					unsatisfiedReferences.put(reference, taskTableInput.getReference());
 				}
 			}
 		});
 
+		//handle unsatisfied references because of ref input handled before origin input
+		unsatisfiedReferences.forEach((newInputReference, referredInputReference)
+				-> addReferredInputFor(newInputReference, referredInputReference, referenceInputs, futureInputs));
+
 		return mergeInto(futureInputs, inputsOf(job));
+	}
+
+	private boolean addReferredInputFor(String reference, String referredInputReference, Map<String, AppDataJobInput> references, List<AppDataJobInput> futureInputs) {
+		if (references.containsKey(referredInputReference)) {
+			final AppDataJobInput referredInput = references.get(referredInputReference);
+			final AppDataJobInput inputForReference = new AppDataJobInput(reference, referredInput);
+			LOGGER.info("adding {} referencing {}:{} for job {}", reference, referredInputReference,  referredInput.getTaskTableInputReference(), job.getId());
+			futureInputs.add(inputForReference);
+			return true;
+		}
+		return false;
 	}
 
 	private List<AppDataJobTaskInputs> mergeInto(List<AppDataJobInput> inputsWithResults, List<AppDataJobTaskInputs> jobTaskInputs) {

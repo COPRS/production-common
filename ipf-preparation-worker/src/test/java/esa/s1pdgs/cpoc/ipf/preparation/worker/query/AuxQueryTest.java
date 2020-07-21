@@ -12,6 +12,7 @@ import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
 
 import java.io.File;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Stream;
@@ -27,8 +28,11 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.junit4.SpringRunner;
+
+import com.sun.xml.internal.ws.policy.privateutil.PolicyUtils;
 
 import esa.s1pdgs.cpoc.appcatalog.AppDataJob;
 import esa.s1pdgs.cpoc.appcatalog.AppDataJobFile;
@@ -36,24 +40,30 @@ import esa.s1pdgs.cpoc.appcatalog.AppDataJobProduct;
 import esa.s1pdgs.cpoc.appcatalog.AppDataJobTaskInputs;
 import esa.s1pdgs.cpoc.common.ProductFamily;
 import esa.s1pdgs.cpoc.common.errors.processing.MetadataQueryException;
-import esa.s1pdgs.cpoc.ipf.preparation.worker.model.JobGen;
+import esa.s1pdgs.cpoc.ipf.preparation.worker.config.ProcessSettings;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.model.ProductMode;
-import esa.s1pdgs.cpoc.ipf.preparation.worker.model.converter.TaskTableToJobOrderConverter;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.model.tasktable.ElementMapper;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.model.tasktable.TaskTableAdapter;
+import esa.s1pdgs.cpoc.ipf.preparation.worker.model.tasktable.TaskTableFactory;
+import esa.s1pdgs.cpoc.ipf.preparation.worker.publish.Publisher;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.timeout.InputTimeoutChecker;
 import esa.s1pdgs.cpoc.metadata.client.MetadataClient;
 import esa.s1pdgs.cpoc.metadata.client.SearchMetadataQuery;
 import esa.s1pdgs.cpoc.metadata.model.SearchMetadata;
-import esa.s1pdgs.cpoc.xml.XmlConverter;
-import esa.s1pdgs.cpoc.xml.config.XmlConfig;
-import esa.s1pdgs.cpoc.xml.model.joborder.JobOrder;
-import esa.s1pdgs.cpoc.xml.model.tasktable.TaskTable;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest
 @DirtiesContext
 public class AuxQueryTest {
+
+    @Autowired
+    private ElementMapper elementMapper;
+
+    @Autowired
+    private TaskTableFactory taskTableFactory;
+
+    @Autowired
+    private ProcessSettings processSettings;
 
     @Mock
     private MetadataClient metadataClient;
@@ -61,8 +71,8 @@ public class AuxQueryTest {
     @Mock
     private InputTimeoutChecker inputTimeoutChecker;
 
-    @Autowired
-    private ElementMapper elementMapper;
+    @MockBean
+    private Publisher publisher;
 
     @Before
     public void initMocks() {
@@ -72,24 +82,21 @@ public class AuxQueryTest {
     @Test
     public void call() throws Exception {
 
-        final String xmlFile = "./test/data/generic_config/task_tables/TaskTable.AIOP.xml";
-        final XmlConverter converter = new XmlConfig().xmlConverter();
-        final TaskTable taskTable = (TaskTable) converter.convertFromXMLToObject(xmlFile);
-        final TaskTableAdapter taskTableAdapter = new TaskTableAdapter(new File(xmlFile), taskTable, elementMapper);
+        final File xmlFile = new File("./test/data/generic_config/task_tables/TaskTable.AIOP.xml");
 
-        taskTableAdapter.allTaskTableInputAlternatives().forEach((key, value) -> System.out.println("input: " + key));
+        final TaskTableAdapter taskTableAdapter = new TaskTableAdapter(
+                xmlFile,
+                taskTableFactory.buildTaskTable(xmlFile, processSettings.getLevel()),
+                elementMapper
+        );
 
         final AppDataJob job = new AppDataJob(133L);
+        job.setStartTime("2020-07-13T12:20:00.000000Z");
+        job.setStopTime("2020-07-13T12:25:00.000000Z");
         final AppDataJobProduct product = new AppDataJobProduct();
+        product.getMetadata().put("satelliteId", "S1A");
 
-        //TODO where to set statTime, stopTime?
-        //product.setStartTime("2020-07-13T12:20:00.000000Z");
-        //product.setStopTime("2020-07-13T12:25:00.000000Z");
         job.setProduct(product);
-
-        final JobOrder jobOrder = new TaskTableToJobOrderConverter().apply(taskTable);
-
-        final JobGen jobGen = new JobGen(job, null, null, taskTableAdapter, null, jobOrder, null);
 
         when(metadataClient
                 .search(argThat(isQueryWithType("MPL_ORBPRE")), any(), any(), any(), anyInt(), any(), any()))
@@ -141,7 +148,8 @@ public class AuxQueryTest {
 
 
         //actual test
-        new AuxQueryHandler(metadataClient, ProductMode.SLICING, inputTimeoutChecker, elementMapper).queryFor(jobGen).call();
+        final List<AppDataJobTaskInputs> appDataJobTaskInputs =
+                new AuxQueryHandler(metadataClient, ProductMode.SLICING, inputTimeoutChecker, taskTableAdapter).queryFor(job).queryAux();
 
         //we have three distinct alternatives in the task table -> three different queries
         verify(metadataClient, times(3)).search(any(), any(), any(), any(), anyInt(), any(), any());
@@ -177,38 +185,37 @@ public class AuxQueryTest {
 
 
         assertThat(inputsForTask(
-                "AIOP_PROC_APP:01.00", jobGen.job()),
+                "AIOP_PROC_APP:01.00", appDataJobTaskInputs),
                 hasInputs("AUX_OBMEMC_RESULT", "MPL_ORBPRE_RESULT", "MPL_ORBSCT_RESULT_1", "MPL_ORBSCT_RESULT_2"));
 
         assertThat(inputsForTask(
-                "AIOP_DPASSEMBLER_APP:01.00", jobGen.job()),
+                "AIOP_DPASSEMBLER_APP:01.00", appDataJobTaskInputs),
                 hasInputs("AUX_OBMEMC_RESULT", "MPL_ORBPRE_RESULT", "MPL_ORBSCT_RESULT_1", "MPL_ORBSCT_RESULT_2"));
 
         assertThat(inputsForTask(
-                "AIOP_LIST_APP:01.00", jobGen.job()),
+                "AIOP_LIST_APP:01.00", appDataJobTaskInputs),
                 hasInputs("AUX_OBMEMC_RESULT"));
     }
 
     @Test
     public void callWithMultipleAlternativesAndRefInputs() throws Exception {
 
-        final String xmlFile = "./test/data/generic_config/task_tables/IW_RAW__0_GRDH_1.xml";
-        final XmlConverter converter = new XmlConfig().xmlConverter();
-        final TaskTable taskTable = (TaskTable) converter.convertFromXMLToObject(xmlFile);
-        final TaskTableAdapter taskTableAdapter = new TaskTableAdapter(new File(xmlFile), taskTable, elementMapper);
+        final File xmlFile = new File("./test/data/generic_config/task_tables/IW_RAW__0_GRDH_1.xml");
 
-        taskTableAdapter.allTaskTableInputAlternatives().forEach((key, value) -> System.out.println("input: " + key));
+        final TaskTableAdapter taskTableAdapter = new TaskTableAdapter(
+                xmlFile,
+                taskTableFactory.buildTaskTable(xmlFile, processSettings.getLevel()),
+                elementMapper
+        );
 
         final AppDataJob job = new AppDataJob(133L);
+
+        job.setStartTime("2020-07-13T12:20:00.000000Z");
+        job.setStopTime("2020-07-13T12:25:00.000000Z");
         final AppDataJobProduct product = new AppDataJobProduct();
-        //TODO where to set start time stop time?
-        //product.setStartTime("2020-07-13T12:20:00.000000Z");
-        //product.setStopTime("2020-07-13T12:25:00.000000Z");
+        product.getMetadata().put("satelliteId", "S1A");
+
         job.setProduct(product);
-
-        final JobOrder jobOrder = new TaskTableToJobOrderConverter().apply(taskTable);
-
-        final JobGen jobGen = new JobGen(job, null, null, taskTableAdapter, null, jobOrder, null);
 
         //currently for multiple alternatives all are queried no matter a result has already been found or not
         //but later the first result is taken in the final job order
@@ -226,7 +233,7 @@ public class AuxQueryTest {
         expectAndReturnMetadataQuery("IW_RAW__0S", "IW_RAW__0S_RESULT", metadataClient);
 
         //actual test
-        new AuxQueryHandler(metadataClient, ProductMode.SLICING, inputTimeoutChecker, elementMapper).queryFor(jobGen).call();
+        final List<AppDataJobTaskInputs> appDataJobTaskInputs = new AuxQueryHandler(metadataClient, ProductMode.SLICING, inputTimeoutChecker, taskTableAdapter).queryFor(job).queryAux();
 
         verify(metadataClient, times(11)).search(any(), any(), any(), any(), anyInt(), any(), any());
 
@@ -243,7 +250,7 @@ public class AuxQueryTest {
         verify(metadataClient, times(1)).search(argThat(isQueryWithType("IW_RAW__0N")), any(), any(), any(), anyInt(), any(), any());
         verify(metadataClient, times(1)).search(argThat(isQueryWithType("IW_RAW__0S")), any(), any(), any(), anyInt(), any(), any());
 
-        assertThat(inputsForTask("PSC:3.20", job), hasInputs(
+        assertThat(inputsForTask("PSC:3.20", appDataJobTaskInputs), hasInputs(
                 "IW_RAW__0S_RESULT",
                 "IW_RAW__0C_RESULT",
                 "IW_RAW__0N_RESULT",
@@ -254,21 +261,21 @@ public class AuxQueryTest {
                 "AUX_RESORB_RESULT",
                 "AUX_ATT_RESULT"));
 
-        assertThat(inputsForTask("MDC:3.20", job), hasInputs(
+        assertThat(inputsForTask("MDC:3.20", appDataJobTaskInputs), hasInputs(
                 "AUX_PP1_RESULT",
                 "AUX_CAL_RESULT",
                 "AUX_INS_RESULT",
                 "AUX_RESORB_RESULT",
                 "AUX_ATT_RESULT"));
 
-        assertThat(inputsForTask("WPC:3.20", job), hasInputs(
+        assertThat(inputsForTask("WPC:3.20", appDataJobTaskInputs), hasInputs(
                 "AUX_PP1_RESULT",
                 "AUX_CAL_RESULT",
                 "AUX_INS_RESULT",
                 "AUX_RESORB_RESULT",
                 "AUX_ATT_RESULT"));
 
-        assertThat(inputsForTask("LPC1:3.20", job), hasInputs(
+        assertThat(inputsForTask("LPC1:3.20", appDataJobTaskInputs), hasInputs(
                 "IW_SL1__1_", //this is an output
                 "AUX_PP1_RESULT",
                 "AUX_CAL_RESULT",
@@ -276,7 +283,7 @@ public class AuxQueryTest {
                 "AUX_RESORB_RESULT",
                 "AUX_ATT_RESULT"));
 
-        assertThat(inputsForTask("stats:3.20", job), hasInputs(
+        assertThat(inputsForTask("stats:3.20", appDataJobTaskInputs), hasInputs(
                 "AUX_PP1_RESULT",
                 "AUX_CAL_RESULT",
                 "AUX_INS_RESULT",
@@ -305,9 +312,9 @@ public class AuxQueryTest {
                 .thenReturn(emptyList());
     }
 
-    private AppDataJobTaskInputs inputsForTask(String taskVersion, AppDataJob job) {
+    private AppDataJobTaskInputs inputsForTask(String taskVersion, List<AppDataJobTaskInputs> inputs) {
         final Optional<AppDataJobTaskInputs> candidate =
-                job.getAdditionalInputs().stream()
+                inputs.stream()
                         .filter(i -> taskVersion.equals(i.getTaskName() + ":" + i.getTaskVersion())).findFirst();
 
         Assert.assertTrue("input is present: " + taskVersion, candidate.isPresent());
@@ -374,5 +381,4 @@ public class AuxQueryTest {
         };
 
     }
-
 }
