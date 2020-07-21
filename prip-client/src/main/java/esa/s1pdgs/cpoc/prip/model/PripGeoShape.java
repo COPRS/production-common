@@ -128,7 +128,7 @@ public class PripGeoShape {
 	}
 	
 	public int getSRID() {
-		return 4326; // EPSG-Code for WGS84
+		return 4326; // EPSG-Code for WGS84 (Elasticsearch uses WGS-84 coordinates only)
 	}
 
 }
