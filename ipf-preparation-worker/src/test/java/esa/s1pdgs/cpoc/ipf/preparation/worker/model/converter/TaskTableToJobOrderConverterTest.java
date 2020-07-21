@@ -8,7 +8,6 @@ import static org.junit.Assert.assertTrue;
 import org.junit.Test;
 
 import esa.s1pdgs.cpoc.ipf.preparation.worker.model.converter.TaskTableToJobOrderConverter;
-import esa.s1pdgs.cpoc.ipf.preparation.worker.service.TestL0Utils;
 import esa.s1pdgs.cpoc.xml.model.joborder.JobOrder;
 import esa.s1pdgs.cpoc.xml.model.joborder.JobOrderOutput;
 import esa.s1pdgs.cpoc.xml.model.joborder.enums.JobOrderFileNameType;

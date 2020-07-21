@@ -1,4 +1,4 @@
-package esa.s1pdgs.cpoc.ipf.preparation.worker.service;
+package esa.s1pdgs.cpoc.ipf.preparation.worker.model.converter;
 
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
@@ -17,13 +17,14 @@ import esa.s1pdgs.cpoc.appcatalog.AppDataJobGeneration;
 import esa.s1pdgs.cpoc.appcatalog.AppDataJobGenerationState;
 import esa.s1pdgs.cpoc.appcatalog.AppDataJobProduct;
 import esa.s1pdgs.cpoc.appcatalog.AppDataJobState;
+import esa.s1pdgs.cpoc.appcatalog.util.AppDataJobProductAdapter;
 import esa.s1pdgs.cpoc.common.ApplicationLevel;
 import esa.s1pdgs.cpoc.common.EdrsSessionFileType;
 import esa.s1pdgs.cpoc.common.ProductFamily;
 import esa.s1pdgs.cpoc.common.utils.DateUtils;
+import esa.s1pdgs.cpoc.ipf.preparation.worker.type.edrs.EdrsSessionProduct;
 import esa.s1pdgs.cpoc.mqi.model.queue.CatalogEvent;
 import esa.s1pdgs.cpoc.mqi.model.rest.GenericMessageDto;
-import esa.s1pdgs.cpoc.xml.TestGenericUtils;
 import esa.s1pdgs.cpoc.xml.model.tasktable.TaskTable;
 
 public class TestL0Utils {
@@ -165,23 +166,24 @@ public class TestL0Utils {
         
         ret.setMessages(messages.stream().collect(Collectors.toList()));
 
-        final AppDataJobProduct product = new AppDataJobProduct();
+        final AppDataJobProductAdapter product = new AppDataJobProductAdapter(ret.getProduct());
+        final EdrsSessionProduct edrsProd = EdrsSessionProduct.of(ret);
         product.setMissionId(missionId);
         product.setProductName("L20171109175634707000125");
         if (raw1) {
-            product.setRaws1(getRawsChannel1(xmlOnlyForRaws));
+        	edrsProd.setRawsForChannel(1, getRawsChannel1(xmlOnlyForRaws));
         }
         if (raw2) {
-            product.setRaws2(getRawsChannel2(xmlOnlyForRaws));
+        	edrsProd.setRawsForChannel(2, getRawsChannel2(xmlOnlyForRaws));
         }
-        product.setSessionId("L20171109175634707000125");
+        edrsProd.setSessionId("L20171109175634707000125");
         product.setSatelliteId("A");
-        product.setStationCode("WILE");
+        edrsProd.setStationCode("WILE");
         product.setStartTime("2017-12-13T14:59:48.123456Z");
         product.setStopTime("2017-12-13T15:17:25.142536Z");
         product.setInsConfId(-1);
         product.setProcessMode("");
-        ret.setProduct(product);
+
 
         final AppDataJobGeneration gen1 = new AppDataJobGeneration();
         gen1.setTaskTable("TaskTable.AIOP.xml");

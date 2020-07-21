@@ -21,8 +21,16 @@ public final class AppDataJobProductAdapter {
 		return product.getInputs().getOrDefault(key, Collections.emptyList());
 	}
 	
+	public final void setStartTime(final String value) {
+		setStringValue("startTime", value);		
+	}
+	
 	public final String getStartTime() {
 		return getStringValue("startTime");		
+	}
+	
+	public final void setStopTime(final String value) {
+		setStringValue("stopTime", value);		
 	}
 	
 	public final String getStopTime() {
@@ -37,8 +45,16 @@ public final class AppDataJobProductAdapter {
 		return getStringValue("productName");
 	}
 	
+	public final void setSatelliteId(final String value) {
+		setStringValue("satelliteId", value);		
+	}
+	
 	public final String getSatelliteId() {
 		return getStringValue("satelliteId");
+	}
+	
+	public final void setMissionId(final String value) {
+		setStringValue("missionId", value);		
 	}
 		
 	public final String getMissionId() {
@@ -53,8 +69,16 @@ public final class AppDataJobProductAdapter {
 		return Integer.parseInt(getStringValue("insConfId", "-1"));
 	}
 	
+	public final void setProductType(final String value) {
+		setStringValue("productType", value);		
+	}
+	
 	public final String getProductType() {
 		return getStringValue("productType");
+	}
+	
+	public final void setProcessMode(final String value) {
+		setStringValue("processMode", value);		
 	}
 
 	public final String getProcessMode() {

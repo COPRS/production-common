@@ -35,5 +35,5 @@ public class L0SegmentProduct extends AbstractProduct {
 
 	public final String getDataTakeId() {
 		return product.getStringValue("dataTakeId");
-	}		
+	}	
 }

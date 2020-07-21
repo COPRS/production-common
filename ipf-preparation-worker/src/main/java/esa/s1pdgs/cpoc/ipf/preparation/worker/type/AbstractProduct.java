@@ -38,6 +38,7 @@ public abstract class AbstractProduct implements Product {
 		return product.getProcessMode();
 	}
 	
+	@Override
 	public final AppDataJobProduct toProduct() {
 		return product.toProduct();
 	}	
