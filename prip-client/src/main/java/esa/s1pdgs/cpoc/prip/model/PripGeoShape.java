@@ -39,7 +39,7 @@ public class PripGeoShape {
 		this(GeoShapeType.valueOf(type), coordinates);
 	}
 
-	public PripGeoShape(GeoShapeType type, List<Object> coordinates) {
+	protected PripGeoShape(GeoShapeType type, List<Object> coordinates) {
 		this.type = Objects.requireNonNull(type);
 
 		final CoordinatesBuilder coordBuilder = new CoordinatesBuilder();
@@ -111,11 +111,11 @@ public class PripGeoShape {
 
 	// --------------------------------------------------------------------------
 
-	public GeoShapeType getType() {
+	protected GeoShapeType getType() {
 		return type;
 	}
 
-	public void setType(GeoShapeType type) {
+	protected void setType(GeoShapeType type) {
 		this.type = type;
 	}
 
