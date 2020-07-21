@@ -1,4 +1,4 @@
-package esa.s1pdgs.cpoc.ipf.preparation.worker.generator;
+package esa.s1pdgs.cpoc.ipf.preparation.worker.appcat;
 
 import java.util.Date;
 
@@ -19,9 +19,9 @@ public class GracePeriodHandler {
 		this.settings = settings;
 	}
 	
-	public final boolean isWithinGracePeriod(final AppDataJobGeneration jobGen) {
+	public final boolean isWithinGracePeriod(final Date now, final AppDataJobGeneration jobGen) {
 		final Date gracePeriodOverAt = new Date(jobGen.getLastUpdateDate().getTime() + getGracePeriodMillis(jobGen));
-		return new Date().before(gracePeriodOverAt);
+		return now.before(gracePeriodOverAt);
 	}
 	
 	private final long getGracePeriodMillis(final AppDataJobGeneration jobGen) {

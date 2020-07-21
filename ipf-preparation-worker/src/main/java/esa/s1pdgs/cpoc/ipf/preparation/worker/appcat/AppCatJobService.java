@@ -19,7 +19,6 @@ import esa.s1pdgs.cpoc.appcatalog.client.job.AppCatalogJobClient;
 import esa.s1pdgs.cpoc.common.errors.AbstractCodedException;
 import esa.s1pdgs.cpoc.common.errors.InternalErrorException;
 import esa.s1pdgs.cpoc.common.utils.Exceptions;
-import esa.s1pdgs.cpoc.ipf.preparation.worker.generator.GracePeriodHandler;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.type.Product;
 import esa.s1pdgs.cpoc.mqi.model.queue.CatalogEvent;
 import esa.s1pdgs.cpoc.mqi.model.rest.GenericMessageDto;
@@ -54,7 +53,7 @@ public class AppCatJobService {
 			final AppDataJobGeneration jobGen = appDataJob.getGeneration();
 			
 			// check if grace period for state INITIAL and PRIMARY_CHECK is exceeded	
-			if (gracePeriodHandler.isWithinGracePeriod(jobGen)) {
+			if (gracePeriodHandler.isWithinGracePeriod(new Date(),jobGen)) {
 				LOG.debug("Job {} is still in grace period...", appDataJob.getId());
 				continue;
 			}

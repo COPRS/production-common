@@ -99,7 +99,7 @@ public class AppCatalogJobClient {
         return tempoRetryMs;
     }
         
-    public final AppDataJob findById(final long jobId) throws AbstractCodedException {
+    public AppDataJob findById(final long jobId) throws AbstractCodedException {
         final String uri = hostUri + "/jobs/" + Long.toString(jobId);
         
         return performWithRetries(
@@ -114,27 +114,27 @@ public class AppCatalogJobClient {
         );
     }
 
-    public final List<AppDataJob> findByMessagesId(final long messageId)
+    public List<AppDataJob> findByMessagesId(final long messageId)
             throws AbstractCodedException {
     	return findAppDataJobsBy("findByMessagesId", Long.toString(messageId));
     }
 
-    public final List<AppDataJob> findByProductSessionId(final String sessionId)
+    public List<AppDataJob> findByProductSessionId(final String sessionId)
             throws AbstractCodedException {
     	return findAppDataJobsBy("findByProductSessionId", sessionId);
     }
 
-    public final List<AppDataJob> findByProductDataTakeId(final String dataTakeId)
+    public List<AppDataJob> findByProductDataTakeId(final String dataTakeId)
             throws AbstractCodedException {
     	return findAppDataJobsBy("findByProductDataTakeId", dataTakeId);
     }
 
-    public final List<AppDataJob> findJobInStateGenerating(final String taskTable) 
+    public List<AppDataJob> findJobInStateGenerating(final String taskTable) 
     		throws AbstractCodedException {
     	return findAppDataJobsBy("findJobInStateGenerating", taskTable);
     }
 
-    public final AppDataJob newJob(final AppDataJob job) throws AbstractCodedException {
+    public AppDataJob newJob(final AppDataJob job) throws AbstractCodedException {
         final String uri = hostUri + "/jobs";
         LogUtils.traceLog(LOGGER, String.format("[uri %s]", uri));
         

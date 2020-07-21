@@ -157,12 +157,12 @@ public class IpfPreparationWorkerSettings {
 	/**
 	 * Delay configuration between 2 check of raw metadata presence for a session
 	 */
-	private WaitTempo waitprimarycheck;
+	private WaitTempo waitprimarycheck = new WaitTempo();
 
 	/**
 	 * Delay configuration between 2 check of inputs metadata search for a job
 	 */
-	private WaitTempo waitmetadatainput;
+	private WaitTempo waitmetadatainput = new WaitTempo();
 
 	/**
 	 * Location of task table XML files

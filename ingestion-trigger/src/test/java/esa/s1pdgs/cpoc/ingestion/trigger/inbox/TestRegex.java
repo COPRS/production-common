@@ -54,10 +54,28 @@ public class TestRegex {
 			Pattern.CASE_INSENSITIVE
 	);	
 	
+	private static final Pattern SESSION_PATTERN_CASE_SENS = Pattern.compile("^([A-Za-z_]{4}/)?([0-9A-Za-z_]{2})([0-9A-Za-z_]{1})/"
+			+ "([0-9A-Za-z_]+)/(ch[0|_]?[1-2]/)?(DCS_[0-9]{2}_([a-zA-Z0-9_]*)_ch([12])_(DSDB|DSIB).*\\.(raw|aisp|xml|RAW|AISP|XML))$");
+	
+	@Test
+	public final void tesPAtternCaseSens() {
+		final String otherName = 
+							"S1B/L20191204153633245000201/DCS_02_L20191204153633245000201_ch1_DSDB_00003.raw";
+		final Matcher matcher = SESSION_PATTERN_CASE_SENS.matcher(otherName);
+		
+		System.out.println(SESSION_PATTERN_CASE_SENS);
+		if (!matcher.matches()) {
+			throw new RuntimeException();
+		}
+		System.out.println(matcher.group(7));
+	}
+			
 	@Test
 	public final void tesPAtternt() {
-		final String name = "S1B/L20180724144436762001030/ch02/DCS_02_L20180724144436762001030_ch2_DSDB_00025.raw";
+		final String name = "S1B/L20180724144436762001030/DCS_02_L20180724144436762001030_ch2_DSDB_00025.raw";
 		final Matcher matcher = SESSION_PATTERN.matcher(name);
+		
+		System.out.println(SESSION_PATTERN);
 		if (!matcher.matches()) {
 			throw new RuntimeException();
 		}
