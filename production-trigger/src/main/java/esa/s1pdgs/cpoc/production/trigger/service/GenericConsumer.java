@@ -12,6 +12,8 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import esa.s1pdgs.cpoc.appcatalog.AppDataJob;
+import esa.s1pdgs.cpoc.appcatalog.AppDataJobProduct;
+import esa.s1pdgs.cpoc.appcatalog.util.AppDataJobProductAdapter;
 import esa.s1pdgs.cpoc.appstatus.AppStatus;
 import esa.s1pdgs.cpoc.common.ProductCategory;
 import esa.s1pdgs.cpoc.common.ProductFamily;
@@ -26,12 +28,13 @@ import esa.s1pdgs.cpoc.mqi.client.MqiConsumer;
 import esa.s1pdgs.cpoc.mqi.client.MqiListener;
 import esa.s1pdgs.cpoc.mqi.model.queue.CatalogEvent;
 import esa.s1pdgs.cpoc.mqi.model.queue.IpfPreparationJob;
+import esa.s1pdgs.cpoc.mqi.model.queue.util.CatalogEventAdapter;
 import esa.s1pdgs.cpoc.mqi.model.rest.GenericMessageDto;
 import esa.s1pdgs.cpoc.mqi.model.rest.GenericPublicationMessageDto;
 import esa.s1pdgs.cpoc.production.trigger.config.ProcessSettings;
-import esa.s1pdgs.cpoc.production.trigger.consumption.ProductTypeConsumptionHandler;
 import esa.s1pdgs.cpoc.production.trigger.report.DispatchReportInput;
 import esa.s1pdgs.cpoc.production.trigger.report.SeaCoverageCheckReportingOutput;
+import esa.s1pdgs.cpoc.production.trigger.taskTableMapping.TasktableMapper;
 import esa.s1pdgs.cpoc.report.Reporting;
 import esa.s1pdgs.cpoc.report.ReportingFactory;
 import esa.s1pdgs.cpoc.report.ReportingMessage;
@@ -47,7 +50,7 @@ public class GenericConsumer implements MqiListener<CatalogEvent> {
     private final ErrorRepoAppender errorRepoAppender;    
     private final Pattern seaCoverageCheckPattern;    
     private final MetadataClient metadataClient;
-    private final ProductTypeConsumptionHandler consumptionHandler;
+    private final TasktableMapper taskTableMapper;
     
     public GenericConsumer(
             final ProcessSettings processSettings,
@@ -56,7 +59,7 @@ public class GenericConsumer implements MqiListener<CatalogEvent> {
             final AppStatus appStatus,
             final ErrorRepoAppender errorRepoAppender,
             final MetadataClient metadataClient,
-            final ProductTypeConsumptionHandler consumptionHandler
+            final TasktableMapper taskTableMapper
     ) {
         this.processSettings = processSettings;
         this.mqiClient = mqiService;
@@ -65,7 +68,7 @@ public class GenericConsumer implements MqiListener<CatalogEvent> {
         this.errorRepoAppender = errorRepoAppender;
 		this.seaCoverageCheckPattern = Pattern.compile(processSettings.getSeaCoverageCheckPattern());
 		this.metadataClient = metadataClient;
-		this.consumptionHandler = consumptionHandler;
+		this.taskTableMapper = taskTableMapper;
     }
 
 	@PostConstruct
@@ -105,9 +108,19 @@ public class GenericConsumer implements MqiListener<CatalogEvent> {
                 job.setLevel(processSettings.getLevel());
                 job.setPod(processSettings.getHostname());
                 job.getMessages().add(mqiMessage);
-                job.setProduct(consumptionHandler.newProductFor(mqiMessage));
-                LOGGER.info("Dispatching {} product {}", consumptionHandler.type(), productName);
-                dispatch(mqiMessage, job, productName, consumptionHandler.type(), reporting);
+                
+                final AppDataJobProduct product = newProductFor(mqiMessage);
+                job.setProduct(product);                
+                final AppDataJobProductAdapter productAdapter = new AppDataJobProductAdapter(product);
+                
+                final String taskTableName = taskTableMapper.tasktableFor(product);
+                LOGGER.debug("Tasktable for %s is %s", productAdapter.getProductName(), taskTableName);
+                job.setTaskTableName(taskTableName);     
+                job.setStartTime(productAdapter.getStartTime());
+                job.setStopTime(productAdapter.getStopTime());
+                                
+                LOGGER.info("Dispatching product {}", productName);
+                dispatch(mqiMessage, job, productName, reporting);
                 reporting.end(new ReportingMessage("IpfPreparationJob for product %s created", productName));  
             }
             else {
@@ -133,16 +146,20 @@ public class GenericConsumer implements MqiListener<CatalogEvent> {
 			final GenericMessageDto<CatalogEvent> mqiMessage,
 			final AppDataJob appDataJob,
 			final String productName,
-			final String type,
 			final ReportingFactory reportingFactory
 	) throws AbstractCodedException {
         final CatalogEvent event = mqiMessage.getBody();
 		
         final Reporting reporting = reportingFactory.newReporting("Dispatch");
-        
+            
         reporting.begin(
-        		DispatchReportInput.newInstance(appDataJob.getId(), productName, type),
-        		new ReportingMessage("Dispatching AppDataJob %s for %s %s", appDataJob.getId(), type, productName)
+        		DispatchReportInput.newInstance(appDataJob.getId(), productName, processSettings.getProductType()),
+        		new ReportingMessage(
+        				"Dispatching AppDataJob %s for %s %s", 
+        				appDataJob.getId(), 
+        				processSettings.getProductType(), 
+        				productName
+        		)
         );     
         try {           
         	final IpfPreparationJob job = new IpfPreparationJob();
@@ -159,13 +176,18 @@ public class GenericConsumer implements MqiListener<CatalogEvent> {
         	messageDto.setOutputKey(event.getProductFamily().name());
         	mqiClient.publish(messageDto, ProductCategory.PREPARATION_JOBS);  
 			reporting.end(
-					new ReportingMessage("AppDataJob %s for %s %s dispatched", appDataJob.getId(), type, productName)
+					new ReportingMessage(
+							"AppDataJob %s for %s %s dispatched", 
+							appDataJob.getId(), 
+							processSettings.getProductType(), 
+							productName
+	        		)
 			);
 		} catch (final AbstractCodedException e) {
 			reporting.error(new ReportingMessage(
 					"Error on dispatching AppDataJob %s for %s %s: %s", 
 					appDataJob.getId(), 
-					type, 
+					processSettings.getProductType(), 
 					productName,
 					LogUtils.toString(e)
 			));
@@ -207,4 +229,20 @@ public class GenericConsumer implements MqiListener<CatalogEvent> {
 		}        
         return false;
 	}    
+	
+
+	private final AppDataJobProduct newProductFor(final GenericMessageDto<CatalogEvent> mqiMessage) {
+		final CatalogEvent event = mqiMessage.getBody();
+        final AppDataJobProduct productDto = new AppDataJobProduct();
+        
+		final CatalogEventAdapter eventAdapter = CatalogEventAdapter.of(mqiMessage);		
+		productDto.getMetadata().put("productName", event.getProductName());
+		productDto.getMetadata().put("productType", event.getProductType());
+		productDto.getMetadata().put("satelliteId", eventAdapter.satelliteId());
+		productDto.getMetadata().put("missionId", eventAdapter.missionId());
+		productDto.getMetadata().put("processMode", eventAdapter.processMode());
+		productDto.getMetadata().put("startTime", eventAdapter.startTime());
+		productDto.getMetadata().put("stopTime", eventAdapter.stopTime());     
+        return productDto;
+	}
 }

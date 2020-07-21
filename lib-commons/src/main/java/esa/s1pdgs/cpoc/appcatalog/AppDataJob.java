@@ -35,6 +35,14 @@ public class AppDataJob {
      * generations)
      */
     private AppDataJobState state;
+    
+    private String taskTableName;
+    
+    private String startTime;
+    
+    private String stopTime;
+    
+    private String productName;
 
     /**
      * Date when the job is created
@@ -54,7 +62,12 @@ public class AppDataJob {
     /**
      * Product of this job
      */
-    private AppDataJobProduct product;
+    private AppDataJobProduct product = new AppDataJobProduct();
+
+    /**
+     * Additional inputs for the job, e.g. aux files
+     */
+    private List<AppDataJobTaskInputs> additionalInputs;
 
     /**
      * Generations of the job
@@ -197,6 +210,22 @@ public class AppDataJob {
     }
 
     /**
+     *
+     * @return additional job inputs
+     */
+    public List<AppDataJobTaskInputs> getAdditionalInputs() {
+        return additionalInputs;
+    }
+
+    /**
+     *
+     * @param additionalInputs additional job inputs
+     */
+    public void setAdditionalInputs(final List<AppDataJobTaskInputs> additionalInputs) {
+        this.additionalInputs = additionalInputs;
+    }
+
+    /**
      * @return the generations
      */
     public AppDataJobGeneration getGeneration() {
@@ -204,8 +233,8 @@ public class AppDataJob {
     }
 
     /**
-     * @param generations
-     *            the generations to set
+     * @param generation
+     *            the generation to set
      */
     public void setGeneration(final AppDataJobGeneration generation) {
         this.generation = generation;
@@ -234,23 +263,56 @@ public class AppDataJob {
 	public void setPrepJobInputQueue(final String prepJobInputQueue) {
 		this.prepJobInputQueue = prepJobInputQueue;
 	}
+	
+	public String getTaskTableName() {
+		return taskTableName;
+	}
 
+	public void setTaskTableName(final String taskTableName) {
+		this.taskTableName = taskTableName;
+	}
+
+	public String getStartTime() {
+		return startTime;
+	}
+
+	public void setStartTime(final String startTime) {
+		this.startTime = startTime;
+	}
+
+	public String getStopTime() {
+		return stopTime;
+	}
+
+	public void setStopTime(final String stoptime) {
+		this.stopTime = stoptime;
+	}
+	
+	public String getProductName() {
+		return productName;
+	}
+
+	public void setProductName(final String productName) {
+		this.productName = productName;
+	}
 
 	/**
      * @see java.lang.Object#hashCode()
      */
     @Override
     public int hashCode() {
-        return Objects.hash(id, level, pod, state,
-                creationDate, lastUpdateDate, messages, product, generation, reportingId, prepJobInputQueue, prepJobMessageId);
+        return Objects.hash(id, level, pod, state, taskTableName, startTime, stopTime, productName,
+                creationDate, lastUpdateDate, messages, product, additionalInputs, generation, reportingId, prepJobInputQueue, prepJobMessageId);
     }
     
     @Override
 	public String toString() {
-		return "AppDataJob [id=" + id + ", level=" + level + ", pod=" + pod + ", state="
-				+ state + ", creationDate=" + creationDate + ", lastUpdateDate=" + lastUpdateDate + ", messages="
-				+ messages + ", product=" + product + ", generation=" + generation + ", reportingId=" + reportingId
-				+ ", prepJobMessageId=" + prepJobMessageId + ", prepJobInputQueue=" + prepJobInputQueue + "]";
+		return "AppDataJob [id=" + id + ", level=" + level + ", pod=" + pod + ", state=" + state
+			    + ", taskTableName=" + taskTableName + ", startTime=" + startTime + ", stopTime=" + stopTime
+                + ", creationDate=" + creationDate + ", lastUpdateDate=" + lastUpdateDate + ", messages=" + messages
+                + ", product=" + product + ", additionalInputs=" + additionalInputs + ", generation=" + generation
+                + ", reportingId=" + reportingId + ", prepJobMessageId=" + prepJobMessageId + ", productName=" + productName
+                + ", prepJobInputQueue=" + prepJobInputQueue + "]";
 	}
 
 	/**
@@ -268,12 +330,17 @@ public class AppDataJob {
             ret =  id == other.id
                     && Objects.equals(level, other.level)
                     && Objects.equals(pod, other.pod)
-                    && Objects.equals(state, other.state)
+                    && Objects.equals(state, other.state)                    
+                    && Objects.equals(taskTableName, other.taskTableName)
+                    && Objects.equals(startTime, other.startTime)
+                    && Objects.equals(stopTime, other.stopTime)
                     && Objects.equals(creationDate, other.creationDate)
                     && Objects.equals(lastUpdateDate, other.lastUpdateDate)
                     && Objects.equals(messages, other.messages)
                     && Objects.equals(product, other.product)
+                    && Objects.equals(additionalInputs, other.additionalInputs)
                     && Objects.equals(generation, other.generation)
+                    && Objects.equals(productName, other.productName)
                     && Objects.equals(prepJobInputQueue, other.prepJobInputQueue)
                     && Objects.equals(prepJobMessageId, other.prepJobMessageId)
                     && Objects.equals(reportingId, other.reportingId);

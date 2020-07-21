@@ -27,15 +27,9 @@ public class SearchMetadataResult {
 	/**
 	 * Constructor using fields
 	 * 
-	 * @param query
-	 * @param res
 	 */
 	public SearchMetadataResult(final SearchMetadataQuery query) {
 		this.query = query;
-	}
-	
-	public SearchMetadataResult() {
-		
 	}
 
 	/**
@@ -58,6 +52,10 @@ public class SearchMetadataResult {
 	 */
 	public List<SearchMetadata> getResult() {
 		return result;
+	}
+
+	public boolean hasResult() {
+		return result != null;
 	}
 
 	/**

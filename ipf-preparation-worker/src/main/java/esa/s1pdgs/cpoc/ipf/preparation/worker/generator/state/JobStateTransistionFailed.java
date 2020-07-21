@@ -6,4 +6,8 @@ public final class JobStateTransistionFailed extends RuntimeException {
 	public JobStateTransistionFailed(final String message) {
 		super(message);
 	}
+
+	public JobStateTransistionFailed(final String message, final Throwable cause) {
+		super(message, cause);
+	}
 }

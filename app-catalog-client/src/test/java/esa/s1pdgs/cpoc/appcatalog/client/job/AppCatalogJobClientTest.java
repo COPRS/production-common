@@ -31,8 +31,6 @@ import esa.s1pdgs.cpoc.appcatalog.AppDataJobGenerationState;
 import esa.s1pdgs.cpoc.appcatalog.AppDataJobProduct;
 import esa.s1pdgs.cpoc.appcatalog.AppDataJobState;
 import esa.s1pdgs.cpoc.common.errors.AbstractCodedException;
-import esa.s1pdgs.cpoc.common.errors.appcatalog.AppCatalogJobNewApiError;
-import esa.s1pdgs.cpoc.common.errors.appcatalog.AppCatalogJobPatchApiError;
 import esa.s1pdgs.cpoc.common.errors.appcatalog.AppCatalogJobSearchApiError;
 import esa.s1pdgs.cpoc.mqi.model.queue.CatalogEvent;
 import esa.s1pdgs.cpoc.mqi.model.rest.GenericMessageDto;
@@ -196,7 +194,7 @@ public class AppCatalogJobClientTest {
         job.setState(AppDataJobState.DISPATCHING);
         
         final AppDataJobProduct product = new AppDataJobProduct();
-        product.setProductName("toto");
+        product.getMetadata().put("productName", "toto");
         job.setProduct(product);
         
         final GenericMessageDto<CatalogEvent> message1 = new GenericMessageDto<CatalogEvent>(1, "key1", DUMMY);
@@ -212,7 +210,7 @@ public class AppCatalogJobClientTest {
     }
 
     @SuppressWarnings("unchecked")
-	@Test(expected = AppCatalogJobNewApiError.class)
+	@Test(expected = AbstractCodedException.class)
     public void testNewWhenError() throws AbstractCodedException {
         doThrow(new RestClientException("rest client exception"))
 	        .when(restTemplate).exchange(
@@ -247,7 +245,7 @@ public class AppCatalogJobClientTest {
     }
 
     @SuppressWarnings("unchecked")
-	@Test(expected = AppCatalogJobPatchApiError.class)
+	@Test(expected = AbstractCodedException.class)
     public void testPatchWhenError() throws AbstractCodedException {
         doThrow(new RestClientException("rest client exception"))
 	        .when(restTemplate).exchange(

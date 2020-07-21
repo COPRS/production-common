@@ -116,10 +116,11 @@ public class IpfPreparationWorkerSettings {
 					+ ", waitingFromDownlinkInSeconds=" + waitingFromDownlinkInSeconds + ", waitingFromIngestionInSeconds=" + waitingFromIngestionInSeconds + "]";
 		}
 	}
+		
+	private List<InputWaitingConfig> inputWaiting = new ArrayList<>();
 
 	private Map<ProductCategory, CategoryConfig> productCategories = new LinkedHashMap<>();
-	
-	private List<InputWaitingConfig> inputWaiting = new ArrayList<>();
+
 	
 	public Map<ProductCategory, CategoryConfig> getProductCategories() {
 		return productCategories;
@@ -156,12 +157,12 @@ public class IpfPreparationWorkerSettings {
 	/**
 	 * Delay configuration between 2 check of raw metadata presence for a session
 	 */
-	private WaitTempo waitprimarycheck;
+	private WaitTempo waitprimarycheck = new WaitTempo();
 
 	/**
 	 * Delay configuration between 2 check of inputs metadata search for a job
 	 */
-	private WaitTempo waitmetadatainput;
+	private WaitTempo waitmetadatainput = new WaitTempo();
 
 	/**
 	 * Location of task table XML files

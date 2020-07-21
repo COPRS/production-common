@@ -4,7 +4,6 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 import esa.s1pdgs.cpoc.common.ProductFamily;
-import esa.s1pdgs.cpoc.production.trigger.consumption.L0SegmentConsumer;
 import esa.s1pdgs.cpoc.report.ReportingFilenameEntries;
 import esa.s1pdgs.cpoc.report.ReportingFilenameEntry;
 import esa.s1pdgs.cpoc.report.ReportingInput;
@@ -25,7 +24,7 @@ public final class DispatchReportInput extends AbstractFilenameReportingProduct 
 	
 	@JsonIgnore
 	public static final DispatchReportInput newInstance(final long jobId, final String filename, final String inputType) {        
-		final ProductFamily family = inputType.equals(L0SegmentConsumer.TYPE) ?
+		final ProductFamily family = inputType.equals("L0Segment") ?
 				ProductFamily.L0_SEGMENT :
 			    ProductFamily.BLANK; // we only care about segments here, everything else will be reported as 'filename'
 		

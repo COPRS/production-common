@@ -20,50 +20,46 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
 
-import esa.s1pdgs.cpoc.appcatalog.client.job.AppCatalogJobClient;
 import esa.s1pdgs.cpoc.common.ApplicationLevel;
 import esa.s1pdgs.cpoc.common.ProductCategory;
 import esa.s1pdgs.cpoc.errorrepo.ErrorRepoAppender;
-import esa.s1pdgs.cpoc.ipf.preparation.worker.appcat.AppCatAdapter;
+import esa.s1pdgs.cpoc.ipf.preparation.worker.appcat.AppCatJobService;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.config.IpfPreparationWorkerSettings.CategoryConfig;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.config.IpfPreparationWorkerSettings.InputWaitingConfig;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.dispatch.JobDispatcherImpl;
-import esa.s1pdgs.cpoc.ipf.preparation.worker.generator.GracePeriodHandler;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.generator.JobGenerator;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.generator.JobGeneratorImpl;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.model.ProductMode;
-import esa.s1pdgs.cpoc.ipf.preparation.worker.model.converter.XmlConverter;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.model.tasktable.ElementMapper;
-import esa.s1pdgs.cpoc.ipf.preparation.worker.model.tasktable.TaskTable;
+import esa.s1pdgs.cpoc.ipf.preparation.worker.model.tasktable.TaskTableAdapter;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.model.tasktable.TaskTableFactory;
-import esa.s1pdgs.cpoc.ipf.preparation.worker.model.tasktable.TasktableAdapter;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.model.tasktable.TasktableManager;
-import esa.s1pdgs.cpoc.ipf.preparation.worker.model.tasktable.mapper.RoutingBasedTasktableMapper;
-import esa.s1pdgs.cpoc.ipf.preparation.worker.model.tasktable.mapper.SingleTasktableMapper;
+import esa.s1pdgs.cpoc.ipf.preparation.worker.publish.JobOrderAdapter;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.publish.Publisher;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.query.AuxQueryHandler;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.service.IpfPreparationService;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.status.AppStatusImpl;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.timeout.InputTimeoutChecker;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.timeout.InputTimeoutCheckerImpl;
-import esa.s1pdgs.cpoc.ipf.preparation.worker.type.AiopPropertiesAdapter;
-import esa.s1pdgs.cpoc.ipf.preparation.worker.type.EdrsSession;
-import esa.s1pdgs.cpoc.ipf.preparation.worker.type.L0Segment;
-import esa.s1pdgs.cpoc.ipf.preparation.worker.type.LevelProduct;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.type.ProductTypeAdapter;
+import esa.s1pdgs.cpoc.ipf.preparation.worker.type.edrs.AiopPropertiesAdapter;
+import esa.s1pdgs.cpoc.ipf.preparation.worker.type.edrs.EdrsSessionTypeAdapter;
+import esa.s1pdgs.cpoc.ipf.preparation.worker.type.segment.L0SegmentTypeAdapter;
+import esa.s1pdgs.cpoc.ipf.preparation.worker.type.slice.LevelSliceTypeAdapter;
 import esa.s1pdgs.cpoc.metadata.client.MetadataClient;
-import esa.s1pdgs.cpoc.metadata.client.SearchMetadataQuery;
 import esa.s1pdgs.cpoc.mqi.client.MessageFilter;
 import esa.s1pdgs.cpoc.mqi.client.MqiClient;
 import esa.s1pdgs.cpoc.mqi.client.MqiConsumer;
 import esa.s1pdgs.cpoc.mqi.client.MqiListener;
 import esa.s1pdgs.cpoc.mqi.model.queue.IpfPreparationJob;
+import esa.s1pdgs.cpoc.xml.XmlConverter;
+import esa.s1pdgs.cpoc.xml.model.tasktable.TaskTable;
 
 @Configuration
 public class IpfPreparationWorkerConfiguration {
 	private static final Logger LOG = LogManager.getLogger(IpfPreparationWorkerConfiguration.class);
 	
-	private final AppCatalogJobClient appCatClient;
+
     private final AppStatusImpl appStatus;
     private final MqiClient mqiClient;
     private final List<MessageFilter> messageFilter;
@@ -73,12 +69,11 @@ public class IpfPreparationWorkerConfiguration {
 	private final ProcessSettings processSettings;
     private final MetadataClient metadataClient;
     private final AiopProperties aiopProperties;
-    private final XmlConverter xmlConverter;
 	private final TaskTableFactory taskTableFactory;
 	private final ElementMapper elementMapper;
-    private final GracePeriodHandler gracePeriodHandler;
-    private final Publisher publisher;
-        
+    private final AppCatJobService appCatService;
+    private final XmlConverter xmlConverter;
+    
 	@Autowired
 	public IpfPreparationWorkerConfiguration(
 			final AppStatusImpl appStatus, 
@@ -88,14 +83,12 @@ public class IpfPreparationWorkerConfiguration {
 			final ErrorRepoAppender errorAppender,
 			final ProcessConfiguration processConfiguration,
 			final ProcessSettings processSettings,
-			final AppCatalogJobClient appCatClient,
 		    final MetadataClient metadataClient,
 		    final AiopProperties aiopProperties,
 		    final XmlConverter xmlConverter,
 			final TaskTableFactory taskTableFactory,
 			final ElementMapper elementMapper,
-		    final GracePeriodHandler gracePeriodHandler,
-		    final Publisher publisher
+		    final AppCatJobService appCatService
 	) {
 		this.appStatus = appStatus;
 		this.mqiClient = mqiClient;
@@ -104,19 +97,17 @@ public class IpfPreparationWorkerConfiguration {
 		this.errorAppender = errorAppender;
 		this.processConfiguration = processConfiguration;
 		this.processSettings = processSettings;
-		this.appCatClient = appCatClient;
 		this.metadataClient = metadataClient;
 		this.aiopProperties = aiopProperties;
-		this.xmlConverter = xmlConverter;
 		this.taskTableFactory = taskTableFactory;
 		this.elementMapper = elementMapper;
-		this.gracePeriodHandler = gracePeriodHandler;
-		this.publisher = publisher;
+		this.appCatService = appCatService;
+		this.xmlConverter = xmlConverter;
 	}
 
 	@Bean
 	public Function<TaskTable, InputTimeoutChecker> timeoutCheckerFor() {
-		return t -> inputWaitTimeoutFor(t);		
+		return this::inputWaitTimeoutFor;
 	}
 	
 	@Bean
@@ -131,46 +122,14 @@ public class IpfPreparationWorkerConfiguration {
         threadPoolTaskScheduler.setThreadNamePrefix("JobGenerationTaskScheduler");
         return threadPoolTaskScheduler;
     }
-	
-//	@Bean
-//	@Autowired
-//	public AbstractJobsDispatcher jobsDispatcher(
-//			final ProcessSettings processSettings,
-//			final JobsGeneratorFactory factory, 
-//			final ThreadPoolTaskScheduler taskScheduler,
-//			final XmlConverter xmlConverter,
-//			@Value("${level-products.pathroutingxmlfile}") final String pathRoutingXmlFile,
-//		
-//	) {
-//		switch (processSettings.getLevel()) {
-//			case L0:
-//				return new L0AppJobDispatcher(settings, processSettings, factory, taskScheduler, appCatClient);
-//			case L0_SEGMENT:
-//				return new L0SegmentAppJobDispatcher(settings, processSettings, factory, taskScheduler, appCatClient);
-//			case L1:
-//			case L2:
-//				return new LevelProductsJobDispatcher(settings, processSettings, factory, taskScheduler, xmlConverter, 
-//						pathRoutingXmlFile, appCatClient);
-//			default:
-//				// fall through to throw exception
-//		}
-//		throw new IllegalArgumentException(
-//				String.format(
-//						"Unsupported Application Level '%s'. Available are: %s", 
-//						processSettings.getLevel(),
-//						Arrays.asList(ApplicationLevel.values())
-//				)
-//		);
-//	}
-	
+
 	@Bean
 	@Autowired
 	public ProductTypeAdapter typeAdapter(
 			@Value("${level-products.pathroutingxmlfile}") final String pathRoutingXmlFile
 	) {
 		if (processSettings.getLevel() == ApplicationLevel.L0) {
-			return new EdrsSession(
-					new SingleTasktableMapper("TaskTable.AIOP.xml"),
+			return new EdrsSessionTypeAdapter(
 					metadataClient, 
 					AiopPropertiesAdapter.of(aiopProperties)
 			);
@@ -178,8 +137,7 @@ public class IpfPreparationWorkerConfiguration {
 		else if (processSettings.getLevel() == ApplicationLevel.L0_SEGMENT) {
 			final long timeoutInputSearchMs = settings.getWaitprimarycheck().getMaxTimelifeS() * 1000L;
 			
-			return new L0Segment(
-					new SingleTasktableMapper("TaskTable.L0ASP.xml"), 
+			return new L0SegmentTypeAdapter(
 					metadataClient, 
 					timeoutInputSearchMs
 			);			
@@ -188,8 +146,7 @@ public class IpfPreparationWorkerConfiguration {
 			final Map<String, Float> sliceOverlap = settings.getTypeOverlap();
 			final Map<String, Float> sliceLength = settings.getTypeSliceLength();
 	
-			return new LevelProduct(
-					new RoutingBasedTasktableMapper.Factory(xmlConverter, pathRoutingXmlFile).newMapper(), 
+			return new LevelSliceTypeAdapter(
 					metadataClient, 
 					sliceOverlap, 
 					sliceLength
@@ -219,10 +176,9 @@ public class IpfPreparationWorkerConfiguration {
 			final Function<TaskTable, InputTimeoutChecker> timeoutCheckerFactory
 	) {		
 		final Map<String, JobGenerator> generators = new HashMap<>(ttManager.size());	
-		final AppCatAdapter appCat = new AppCatAdapter(appCatClient, gracePeriodHandler);
-	
+
 		for (final File taskTableFile : ttManager.tasktables()) {				
-			final JobGenerator jobGenerator = newJobGenerator(taskTableFile, typeAdapter, appCat, timeoutCheckerFactory);
+			final JobGenerator jobGenerator = newJobGenerator(taskTableFile, typeAdapter, timeoutCheckerFactory);
 			generators.put(taskTableFile.getName(), jobGenerator);
 		    // --> Launch generators
 			taskScheduler.scheduleWithFixedDelay(jobGenerator, settings.getJobgenfixedrate());
@@ -232,7 +188,7 @@ public class IpfPreparationWorkerConfiguration {
 				new JobDispatcherImpl(
 						typeAdapter, 
 						processSettings, 
-						appCat, 
+						appCatService, 
 						generators.keySet()
 				), 
 				errorAppender, 
@@ -250,47 +206,61 @@ public class IpfPreparationWorkerConfiguration {
 		return service;
 	}
 	
-	private final JobGenerator newJobGenerator(
+	private JobGenerator newJobGenerator(
 			final File taskTableFile, 
 			final ProductTypeAdapter typeAdapter,
-			final AppCatAdapter appCat,
 			final Function<TaskTable, InputTimeoutChecker> timeoutCheckerFactory
 	) {		
-		final TasktableAdapter tasktableAdapter = new TasktableAdapter(
+		final TaskTableAdapter tasktableAdapter = new TaskTableAdapter(
 				taskTableFile, 
 				taskTableFactory.buildTaskTable(taskTableFile, processSettings.getLevel()), 
 				elementMapper
 		);			    
-	    final Map<Integer, SearchMetadataQuery> metadataQueryTemplate = tasktableAdapter.buildMetadataSearchQuery();	    		
-	    final List<List<String>> tasks = tasktableAdapter.buildTasks();	    
+	    //final List<List<String>> tasks = tasktableAdapter.buildTasks();
 		final AuxQueryHandler auxQueryHandler = new AuxQueryHandler(
 				metadataClient, 
-				ProductMode.SLICING, 
-				timeoutCheckerFactory.apply(tasktableAdapter.taskTable())
+				ProductMode.SLICING, //TODO clarify why mode is always slicing
+				timeoutCheckerFactory.apply(tasktableAdapter.taskTable()),
+				tasktableAdapter
 		);
-		return new JobGeneratorImpl(
+		
+		final JobOrderAdapter.Factory jobOrderFactory = new JobOrderAdapter.Factory(
+				() -> tasktableAdapter.newJobOrder(processSettings),
+				typeAdapter,
+				elementMapper,
+				xmlConverter
+		);		
+		
+		final Publisher publisher = new Publisher(
+				settings, 
+				processSettings, 
+				mqiClient, 
 				tasktableAdapter, 
+				jobOrderFactory,
+				typeAdapter
+		);
+		
+		return new JobGeneratorImpl(
+				tasktableAdapter,
 				typeAdapter, 
-				appCat, 
+				appCatService, 
 				processSettings, 
 				errorAppender, 
 				publisher, 
-				metadataQueryTemplate, 
-				tasks, 
 				auxQueryHandler
 		);
 	}
 		
-	private final MqiConsumer<IpfPreparationJob> newConsumerFor(
+	private MqiConsumer<IpfPreparationJob> newConsumerFor(
 			final ProductCategory category, 
 			final CategoryConfig config,
 			final MqiListener<IpfPreparationJob> listener
 			
 	) {
 		LOG.debug("Creating MQI consumer for category {} using {}", category, config);
-		return new MqiConsumer<IpfPreparationJob>(
-				mqiClient, 
-				category, 
+		return new MqiConsumer<>(
+				mqiClient,
+				category,
 				listener,
 				messageFilter,
 				config.getFixedDelayMs(),
@@ -299,16 +269,16 @@ public class IpfPreparationWorkerConfiguration {
 		);
 	}	
 
-	private final InputTimeoutChecker inputWaitTimeoutFor(final TaskTable taskTable) {
-		final List<InputWaitingConfig> configsForTasktable = new ArrayList<>();
+	private InputTimeoutChecker inputWaitTimeoutFor(final TaskTable taskTable) {
+		final List<InputWaitingConfig> configsForTaskTable = new ArrayList<>();
 		for (final InputWaitingConfig config : settings.getInputWaiting()) {
 			if (taskTable.getProcessorName().equals(config.getProcessorNameRegexp()) &&
 				taskTable.getVersion().matches(config.getProcessorVersionRegexp())) 
 			{			
-				configsForTasktable.add(config);
+				configsForTaskTable.add(config);
 			}					
 		}
 		// default: always time out
-		return new InputTimeoutCheckerImpl(configsForTasktable, () -> LocalDateTime.now());	
+		return new InputTimeoutCheckerImpl(configsForTaskTable, LocalDateTime::now);
 	}
 }

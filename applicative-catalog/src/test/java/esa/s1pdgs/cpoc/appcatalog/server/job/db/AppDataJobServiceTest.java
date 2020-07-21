@@ -121,7 +121,7 @@ public class AppDataJobServiceTest {
     public void patchJobTest() throws AppCatalogJobNotFoundException {
         final AppDataJob obj = new AppDataJob();
         final AppDataJobProduct product = new AppDataJobProduct();
-        product.setSessionId("session-id");
+        product.getMetadata().put("sessionId", "session-id");
         final AppDataJobGeneration gen1 = new AppDataJobGeneration();
         gen1.setTaskTable("tast-table-1");
         final GenericMessageDto<CatalogEvent> message1 = new GenericMessageDto<CatalogEvent>(1, "topic1", null);

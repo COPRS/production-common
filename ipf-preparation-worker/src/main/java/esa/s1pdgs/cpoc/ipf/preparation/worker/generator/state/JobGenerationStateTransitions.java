@@ -4,12 +4,23 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import esa.s1pdgs.cpoc.appcatalog.AppDataJobGenerationState;
-import esa.s1pdgs.cpoc.ipf.preparation.worker.model.JobGen;
 
 public enum JobGenerationStateTransitions implements JobGenerationStateTransitionFunction {
-	INITIAL_2_PRIMARYCHECK(AppDataJobGenerationState.INITIAL, AppDataJobGenerationState.PRIMARY_CHECK, j -> j.mainInputSearch()),
-	PRIMARYCHECK_2_READY(AppDataJobGenerationState.PRIMARY_CHECK, AppDataJobGenerationState.READY, j -> j.auxSearch()),
-	READY_2_SENT(AppDataJobGenerationState.READY, AppDataJobGenerationState.SENT,  j -> j.send());
+	INITIAL_2_PRIMARYCHECK(
+			AppDataJobGenerationState.INITIAL, 
+			AppDataJobGenerationState.PRIMARY_CHECK, 
+			j -> j.mainInputSearch(AppDataJobGenerationState.PRIMARY_CHECK)
+	),
+	PRIMARYCHECK_2_READY(
+			AppDataJobGenerationState.PRIMARY_CHECK, 
+			AppDataJobGenerationState.READY, 
+			j -> j.auxSearch(AppDataJobGenerationState.READY)
+	),
+	READY_2_SENT(
+			AppDataJobGenerationState.READY, 
+			AppDataJobGenerationState.SENT,  
+			j -> j.send(AppDataJobGenerationState.SENT)
+	);
 	
 	private static final Logger LOGGER = LogManager.getLogger(JobGenerationStateTransitions.class);
 	
@@ -41,18 +52,14 @@ public enum JobGenerationStateTransitions implements JobGenerationStateTransitio
 	}
 
 	@Override
-	public final JobGen performTransitionOn(final JobGen job) {
-		LOGGER.debug("Performing {} on job {}", toDescription(), job.id());
+	public final void performTransitionOn(final JobGenerationTransition job) throws JobStateTransistionFailed {
+		LOGGER.debug("Performing {} on {}", toDescription(), job);
 		try {
-			final JobGen newStateJobGen = function.performTransitionOn(job);
-			newStateJobGen.state(outputState);
-			LOGGER.info("Job {} {} succeeded", job.id(), toDescription());
-			return newStateJobGen;
+			function.performTransitionOn(job);
+			LOGGER.info("{} {} succeeded", job, toDescription());
 		} catch (final JobStateTransistionFailed e) {
-			LOGGER.info("Prerequisites for {} not met for job {}: {}",  toDescription(), job.id(), e.getMessage());
-			// fall through
+			LOGGER.info("Prerequisites for {} not met for {}: {}",  toDescription(), job, e.getMessage());
+			LOGGER.trace(e);
 		}
-		// return unaltered job
-		return job;
 	}
 }

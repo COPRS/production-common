@@ -1,7 +1,7 @@
 package esa.s1pdgs.cpoc.ipf.preparation.worker.timeout;
 
 import esa.s1pdgs.cpoc.appcatalog.AppDataJob;
-import esa.s1pdgs.cpoc.ipf.preparation.worker.model.tasktable.TaskTableInput;
+import esa.s1pdgs.cpoc.xml.model.tasktable.TaskTableInput;
 
 /**
  * Checks for a specific tasktable/joborder input if the timeout has been expired

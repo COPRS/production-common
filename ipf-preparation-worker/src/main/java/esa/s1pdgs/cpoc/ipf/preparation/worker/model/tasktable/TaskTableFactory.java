@@ -9,7 +9,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import esa.s1pdgs.cpoc.common.ApplicationLevel;
-import esa.s1pdgs.cpoc.ipf.preparation.worker.model.converter.XmlConverter;
+import esa.s1pdgs.cpoc.xml.XmlConverter;
+import esa.s1pdgs.cpoc.xml.model.tasktable.TaskTable;
 
 @Component
 public class TaskTableFactory {	
@@ -29,7 +30,7 @@ public class TaskTableFactory {
 			
 		} catch (IOException | JAXBException e) {
 			throw new RuntimeException(
-					String.format("Error reading tasktable %s: %s", xmlFile.getPath(), e.getMessage()),
+					String.format("Error reading taskTable %s: %s", xmlFile.getPath(), e.getMessage()),
 					e
 			);
 		}
