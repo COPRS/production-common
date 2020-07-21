@@ -108,7 +108,7 @@ public class GenericConsumer implements MqiListener<CatalogEvent> {
                 job.setLevel(processSettings.getLevel());
                 job.setPod(processSettings.getHostname());
                 job.getMessages().add(mqiMessage);
-                
+                      
                 final AppDataJobProduct product = newProductFor(mqiMessage);
                 job.setProduct(product);                
                 final AppDataJobProductAdapter productAdapter = new AppDataJobProductAdapter(product);
@@ -118,6 +118,7 @@ public class GenericConsumer implements MqiListener<CatalogEvent> {
                 job.setTaskTableName(taskTableName);     
                 job.setStartTime(productAdapter.getStartTime());
                 job.setStopTime(productAdapter.getStopTime());
+                job.setProductName(productName);
                                 
                 LOGGER.info("Dispatching product {}", productName);
                 dispatch(mqiMessage, job, productName, reporting);
@@ -164,6 +165,7 @@ public class GenericConsumer implements MqiListener<CatalogEvent> {
         try {           
         	final IpfPreparationJob job = new IpfPreparationJob();
         	job.setProductFamily(event.getProductFamily());
+        	job.setKeyObjectStorage(event.getProductName());
         	job.setAppDataJob(appDataJob);
         	job.setUid(reporting.getUid());
         	
