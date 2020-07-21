@@ -34,9 +34,8 @@ public class AuxQueryHandler {
 				job,
 				mode,
 				timeoutChecker,
-				taskTableAdapter,
-				taskTableAdapter.buildMetadataSearchQuery());
-		
+				taskTableAdapter);
+
 		return query.queryAux();
 	}
 }

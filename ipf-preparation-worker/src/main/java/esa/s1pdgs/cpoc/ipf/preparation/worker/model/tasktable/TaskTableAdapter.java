@@ -188,26 +188,30 @@ public class TaskTableAdapter {
 		}
 		return JobOrderFileNameType.BLANK;
 	}
-	
+
 	public final Map<TaskTableInputAlternative.TaskTableInputAltKey, SearchMetadataQuery> buildMetadataSearchQuery() {
-		final Map<TaskTableInputAlternative.TaskTableInputAltKey, SearchMetadataQuery> metadataQueryTemplate =  new HashMap<>();
+		final Map<TaskTableInputAlternative.TaskTableInputAltKey, SearchMetadataQuery> metadataQueryTemplate = new HashMap<>();
 
 		allTaskTableInputAlternatives().forEach((inputAltKey, alternatives) -> {
-					final String fileType = elementMapper.mappedFileType(inputAltKey.getFileType());
-					final ProductFamily family = elementMapper.inputFamilyOf(fileType);
-					final SearchMetadataQuery query = new SearchMetadataQuery(
-							0,
-							inputAltKey.getRetrievalMode(),
-							inputAltKey.getDeltaTime0(),
-							inputAltKey.getDeltaTime1(),
-							fileType,
-							family
-					);
-					metadataQueryTemplate.put(inputAltKey, query);
-				});
+			metadataQueryTemplate.put(inputAltKey, metadataSearchQueryFor(alternatives.get(0))); //TODO
+		});
 		return metadataQueryTemplate;
 	}
-	
+
+	public SearchMetadataQuery metadataSearchQueryFor(TaskTableInputAlternative alternative) {
+		final TaskTableInputAlternative.TaskTableInputAltKey inputAltKey = alternative.getTaskTableInputAltKey();
+		final String fileType = elementMapper.mappedFileType(inputAltKey.getFileType());
+		final ProductFamily family = elementMapper.inputFamilyOf(fileType);
+		return new SearchMetadataQuery(
+				0,
+				inputAltKey.getRetrievalMode(),
+				inputAltKey.getDeltaTime0(),
+				inputAltKey.getDeltaTime1(),
+				fileType,
+				family
+		);
+	}
+
 	private JobOrderTimeInterval newJobOrderTimeIntervalFor(final SearchMetadata searchMetadata) {
 		return new JobOrderTimeInterval(
 				convertDateToJobOrderFormat(searchMetadata.getValidityStart()),

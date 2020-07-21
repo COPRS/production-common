@@ -1,17 +1,21 @@
 package esa.s1pdgs.cpoc.ipf.preparation.worker.query;
 
 import static java.util.Collections.emptyList;
+import static java.util.Collections.singletonMap;
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toMap;
+import static org.springframework.util.CollectionUtils.isEmpty;
 
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.function.BiFunction;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 
 import esa.s1pdgs.cpoc.appcatalog.AppDataJob;
@@ -38,6 +42,7 @@ import esa.s1pdgs.cpoc.xml.model.tasktable.TaskTableInput;
 import esa.s1pdgs.cpoc.xml.model.tasktable.TaskTableInputAlternative;
 import esa.s1pdgs.cpoc.xml.model.tasktable.TaskTablePool;
 import esa.s1pdgs.cpoc.xml.model.tasktable.TaskTableTask;
+import esa.s1pdgs.cpoc.xml.model.tasktable.enums.TaskTableInputOrigin;
 import esa.s1pdgs.cpoc.xml.model.tasktable.enums.TaskTableMandatoryEnum;
 
 public class AuxQuery {
@@ -48,58 +53,119 @@ public class AuxQuery {
 	private final ProductMode mode;
 	private final InputTimeoutChecker timeoutChecker;
 	private final TaskTableAdapter taskTableAdapter;
-	private final Map<TaskTableInputAlternative.TaskTableInputAltKey, SearchMetadataQuery> queryTemplates;
 
 	public AuxQuery(
 			final MetadataClient metadataClient,
 			final AppDataJob job,
 			final ProductMode mode,
 			final InputTimeoutChecker timeoutChecker,
-			final TaskTableAdapter ttAdapter,
-			final Map<TaskTableInputAlternative.TaskTableInputAltKey, SearchMetadataQuery> queryTemplates) {
+			final TaskTableAdapter ttAdapter) {
 		this.metadataClient = metadataClient;
 		this.job = job;
 		this.mode = mode; 
 		this.timeoutChecker = timeoutChecker;
 		this.taskTableAdapter = ttAdapter;
-		this.queryTemplates = queryTemplates;
 	}
 
-	public final List<AppDataJobTaskInputs>  queryAux() throws IpfPrepWorkerInputsMissingException {	
+	public final List<AppDataJobTaskInputs>  queryAux() {
 		LOGGER.debug("Searching required AUX for job {} (product: {})", job.getId(), job.getProductName());
-		final Map<TaskTableInputAlternative.TaskTableInputAltKey, SearchMetadataResult> results = performAuxQueries();
+		final Map<TaskTableInputAlternative.TaskTableInputAltKey, SearchMetadataResult> results =
+				performAuxQueriesFor(alternativesOf(inputsWithoutResultsOf(job)));
 		LOGGER.info("Distributing required AUX for job {} (product: {})", job.getId(), job.getProductName());
 		return distributeResults(results);
 	}
 
-	private List<AppDataJobInput> inputsWithoutResults() {
+	public final void validate(AppDataJob job) throws IpfPrepWorkerInputsMissingException {
+		final List<AppDataJobInput> missingInputs = inputsWithoutResultsOf(job);
+		final Map<String, TaskTableInput> taskTableInputs = taskTableInputs();
+
+		final Map<String, String> missingMetadata = new HashMap<>();
+
+		for (AppDataJobInput missingInput : missingInputs) {
+			TaskTableInput taskTableInput = taskTableInputs.get(missingInput.getTaskTableInputReference());
+			if (missingInput.isMandatory()) {
+				missingMetadata.put(taskTableInput.toLogMessage(), "");
+			} else {
+				// optional input
+
+				// if the timeout is not expired, we want to continue waiting. To do that,
+				// a IpfPrepWorkerInputsMissingException needs to be thrown. Otherwise,
+				// we log that timeout is expired and we continue anyway behaving as if
+				// the input was there
+				if (timeoutChecker.isTimeoutExpiredFor(job, taskTableInput)) {
+					LOGGER.info("Non-Mandatory Input {} is not available. Continue without it...",
+							taskTableInput.toLogMessage());
+				}
+				else {
+					missingMetadata.put(missingInput.getTaskTableInputReference(), "");
+				}
+			}
+		}
+
+		if(!missingInputs.isEmpty()) {
+			throw new IpfPrepWorkerInputsMissingException(missingMetadata);
+		}
+	}
+
+	private List<AppDataJobInput> inputsWithoutResultsOf(AppDataJob job) {
 		return inputsOf(job).stream()
-				.flatMap(taskInputs -> taskInputs.getInputs().stream()).filter(input -> !input.hasResults()).collect(toList());
+				.flatMap(taskInputs -> taskInputs.getInputs().stream().filter(input -> !input.hasResults()))
+				.collect(toList());
 	}
 
-	private void existingResults() {
-		inputsOf(job).stream()
-				.flatMap(taskInputs -> taskInputs.getInputs().stream()).filter(AppDataJobInput::hasResults);
-	}
+	private List<TaskTableInputAlternative> alternativesOf(
+			final List<AppDataJobInput> inputsWithoutResults) {
 
-	private void alternativesConsidering(final List<AppDataJobInput> existingResults) {
+		final List<String> inputWithoutResultReferences =
+				inputsWithoutResults.stream().map(AppDataJobInput::getTaskTableInputReference).collect(toList());
 
-		//taskTable.getPools().stream()
-		//		.flatMap(TaskTablePool::tasks)
-		//		.flatMap(TaskTableTask::inputs)
-		//		.flatMap(TaskTableInput::alternativesOrdered)
-		//		.filter(alt -> alt.getOrigin() == TaskTableInputOrigin.DB)
-		//		.collect(groupingBy(TaskTableInputAlternative::getTaskTableInputAltKey))
+		final Map<String, List<TaskTableInputAlternative>> taskTableAlternativesMappedToReferences =
+				inputsMappedTo((reference, input) -> singletonMap(reference, input.getAlternatives()))
+						.stream()
+						.flatMap(map -> map.entrySet().stream())
+						.collect(toMap(Map.Entry::getKey, Map.Entry::getValue));
 
-
+		return taskTableAlternativesMappedToReferences.entrySet().stream()
+				.filter(entry -> inputWithoutResultReferences.contains(entry.getKey()))
+				.flatMap(entry -> entry.getValue().stream())
+				.filter(alt -> alt.getOrigin() == TaskTableInputOrigin.DB)
+				.distinct()
+				.collect(toList());
 	}
 
 	private List<AppDataJobTaskInputs> inputsOf(final AppDataJob job) {
-		if(CollectionUtils.isEmpty(job.getAdditionalInputs())) {
+		if(isEmpty(job.getAdditionalInputs())) {
 			return buildInitialInputs();
 		}
 
 		return job.getAdditionalInputs();
+	}
+
+	private <T, U> List<U> taskTablesAndInputsMappedTo(final BiFunction<String, TaskTableInput, T> inputMapFunction,
+													   final BiFunction<List<T>, TaskTableTask, U> taskMapFunction) {
+		final List<U> mappedTasks = new ArrayList<>();
+
+		for (final Map.Entry<String, TaskTableTask> taskEntry : taskTableTasks().entrySet()) {
+			final List<T> mappedInputs = new ArrayList<>();
+			int inputNumber = 0;
+			for (final TaskTableInput input : taskEntry.getValue().getInputs()) {
+				final String reference = String.format("%sI%s", taskEntry.getKey(), inputNumber++);
+				mappedInputs.add(inputMapFunction.apply(reference, input));
+			}
+			mappedTasks.add(taskMapFunction.apply(mappedInputs, taskEntry.getValue()));
+		}
+
+		return mappedTasks;
+	}
+
+	private <T> List<T> inputsMappedTo(final BiFunction<String, TaskTableInput, T> inputMapFunction) {
+		return taskTablesAndInputsMappedTo(inputMapFunction, (list, task) -> list)
+				.stream().flatMap(Collection::stream).collect(toList());
+	}
+
+	private Map<String, TaskTableInput> taskTableInputs() {
+		return inputsMappedTo(Collections::singletonMap).stream().flatMap(map -> map.entrySet().stream())
+				.collect(toMap(Map.Entry::getKey, Map.Entry::getValue));
 	}
 
 	private Map<String, TaskTableTask> taskTableTasks() {
@@ -119,25 +185,16 @@ public class AuxQuery {
 		return tasks;
 	}
 
-	private List<AppDataJobTaskInputs> buildInitialInputs() {
-		final List<AppDataJobTaskInputs> taskInputs = new ArrayList<>();
 
-		for (final Map.Entry<String, TaskTableTask> taskEntry : taskTableTasks().entrySet()) {
-			final List<AppDataJobInput> inputs = new ArrayList<>();
-			int inputNumber = 0;
-			for (final TaskTableInput input : taskEntry.getValue().getInputs()) {
-				final String reference = String.format("%sI%s", taskEntry.getKey(), inputNumber++);
-				inputs.add(new AppDataJobInput(
+	private List<AppDataJobTaskInputs> buildInitialInputs() {
+		return taskTablesAndInputsMappedTo(
+				(reference, input) -> new AppDataJobInput(
 						reference,
 						"",
 						"",
 						TaskTableMandatoryEnum.YES.equals(input.getMandatory()),
-						emptyList()));
-			}
-			taskInputs.add(new AppDataJobTaskInputs(taskEntry.getValue().getName(), taskEntry.getValue().getVersion(), inputs));
-		}
-
-		return taskInputs;
+						emptyList()),
+				(jobInputList, task) -> new AppDataJobTaskInputs(task.getName(), task.getVersion(), jobInputList));
 	}
 
 	private Map<TaskTableInputAlternative.TaskTableInputAltKey, SearchMetadataResult> toQueries(final Map<TaskTableInputAlternative.TaskTableInputAltKey, SearchMetadataQuery> metadataQueriesTemplate) {
@@ -148,8 +205,8 @@ public class AuxQuery {
 		);
 	}
 
-	private Map<TaskTableInputAlternative.TaskTableInputAltKey, SearchMetadataResult> performAuxQueries() {
-		final Map<TaskTableInputAlternative.TaskTableInputAltKey, SearchMetadataResult> queries = toQueries(queryTemplates);
+	private Map<TaskTableInputAlternative.TaskTableInputAltKey, SearchMetadataResult> performAuxQueriesFor(List<TaskTableInputAlternative> alternatives) {
+		final Map<TaskTableInputAlternative.TaskTableInputAltKey, SearchMetadataResult> queries = toQueries(queryTemplatesFor(alternatives));
 
 		for (final SearchMetadataResult result : queries.values()) {
 			if (result.hasResult()) {
@@ -183,70 +240,56 @@ public class AuxQuery {
 		return queries;
 	}
 
-	private List<AppDataJobTaskInputs> distributeResults(final Map<TaskTableInputAlternative.TaskTableInputAltKey, SearchMetadataResult> metadataQueries) throws IpfPrepWorkerInputsMissingException {
+	private Map<TaskTableInputAlternative.TaskTableInputAltKey, SearchMetadataQuery> queryTemplatesFor(List<TaskTableInputAlternative> alternatives) {
+		return alternatives.stream()
+				.collect(toMap(
+						TaskTableInputAlternative::getTaskTableInputAltKey,
+						taskTableAdapter::metadataSearchQueryFor));
+	}
+
+	private List<AppDataJobTaskInputs> distributeResults(final Map<TaskTableInputAlternative.TaskTableInputAltKey, SearchMetadataResult> metadataQueries) {
 		final Map<String, AppDataJobInput> referenceInputs = new HashMap<>();
-		final List<AppDataJobTaskInputs> result = new ArrayList<>();
-		//for each pool
-		for (final TaskTablePool pool : taskTableAdapter.pools()) {
-			// and each task in this pool
-			for (final TaskTableTask task : pool.getTasks()) {
-				final Map<String, String> missingMetadata = new HashMap<>();
-				final List<AppDataJobInput> futureInputs = new ArrayList<>();
-				//take each input
-				int inputNumber = 0;
-				for (final TaskTableInput input : task.getInputs()) {
-					//descriptive reference for this input, used in AppDataJobInput
-					final String inputReference = task.getName() + '-' + task.getVersion() + '#' + inputNumber++;
-					// If it is NOT a reference
-					if (StringUtils.isEmpty(input.getReference())) {
-						//check if input mode matches the product mode
-						if (mode.isCompatibleWithTaskTableMode(input.getMode())) {
-							// returns null, if not found
-							final AppDataJobInput foundInput = convert(
-									taskTableAdapter.findInput(job, input, metadataQueries), inputReference, input.getMandatory());
-														
-							if (foundInput != null) {
-								futureInputs.add(foundInput);
-								if (!StringUtils.isEmpty(input.getId())) {
-									referenceInputs.put(input.getId(), foundInput);
-								}
-							} else {
-								// nothing found in none of the alternatives
-								if (input.getMandatory() == TaskTableMandatoryEnum.YES) {
-									missingMetadata.put(input.toLogMessage(), "");
-								} else {			
-									// optional input
-									
-									// if the timeout is not expired, we want to continue waiting. To do that, 
-									// a IpfPrepWorkerInputsMissingException needs to be thrown. Otherwise,
-									// we log that timeout is expired and we continue anyway behaving as if 
-									// the input was there
-									if (timeoutChecker.isTimeoutExpiredFor(job, input)) {
-										LOGGER.info("Non-Mandatory Input {} is not available. Continue without it...", 
-												input.toLogMessage());
-									}
-									else {
-										throw new IpfPrepWorkerInputsMissingException(missingMetadata); 
-									}
-								}
-							}
-						}
-					// handle Input 'references'
-					} else {
-						// We shall add inputs of the reference
-						if (referenceInputs.containsKey(input.getReference())) {
-							futureInputs.add(new AppDataJobInput(referenceInputs.get(input.getReference())));
+		final Map<String, TaskTableInput> taskTableInputs = taskTableInputs();
+
+		final List<AppDataJobInput> futureInputs = new ArrayList<>();
+		taskTableInputs.forEach((reference, taskTableInput) -> {
+			if (StringUtils.isEmpty(taskTableInput.getReference())) {
+				//check if input mode matches the product mode
+				if (mode.isCompatibleWithTaskTableMode(taskTableInput.getMode())) {
+					// returns null, if not found
+					final AppDataJobInput foundInput = convert(
+							taskTableAdapter.findInput(job, taskTableInput, metadataQueries), reference, taskTableInput.getMandatory());
+
+					if (foundInput != null) {
+						futureInputs.add(foundInput);
+						if (!StringUtils.isEmpty(taskTableInput.getId())) {
+							referenceInputs.put(taskTableInput.getId(), foundInput);
 						}
 					}
 				}
-				if (missingMetadata.isEmpty()) {
-					result.add(new AppDataJobTaskInputs(task.getName(), task.getVersion(), futureInputs));
-				} else {
-					throw new IpfPrepWorkerInputsMissingException(missingMetadata);
+			} else {
+				// We shall add inputs of the reference
+				if (referenceInputs.containsKey(taskTableInput.getReference())) {
+					futureInputs.add(new AppDataJobInput(referenceInputs.get(taskTableInput.getReference())));
 				}
 			}
-		}
-		return result;
+		});
+
+		return mergeInto(futureInputs, inputsOf(job));
+	}
+
+	private List<AppDataJobTaskInputs> mergeInto(List<AppDataJobInput> inputsWithResults, List<AppDataJobTaskInputs> jobTaskInputs) {
+		final Map<String, AppDataJobInput> newInputs
+				= inputsWithResults.stream().collect(toMap(AppDataJobInput::getTaskTableInputReference, input -> input));
+
+		List<AppDataJobTaskInputs> mergedJobTaskInputs = new ArrayList<>();
+		jobTaskInputs.forEach(jobTaskInput -> {
+			List<AppDataJobInput> mergedInputs = new ArrayList<>();
+			jobTaskInput.getInputs().forEach(jobInput -> mergedInputs.add(newInputs.getOrDefault(jobInput.getTaskTableInputReference(), jobInput)));
+			mergedJobTaskInputs.add
+					(new AppDataJobTaskInputs(jobTaskInput.getTaskName(), jobTaskInput.getTaskVersion(), mergedInputs));
+		});
+		return mergedJobTaskInputs;
 	}
 
 	// TODO TaskTableAdapter by itself should not return a JobOrderInput but a more generic
