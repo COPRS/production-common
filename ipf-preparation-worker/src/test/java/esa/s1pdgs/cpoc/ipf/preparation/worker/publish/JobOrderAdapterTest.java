@@ -16,6 +16,7 @@ import java.util.stream.Stream;
 
 import org.hamcrest.CustomMatcher;
 import org.hamcrest.Matcher;
+import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -58,6 +59,10 @@ public class JobOrderAdapterTest {
     @Mock
     private ProductTypeAdapter productTypeAdapter;
 
+    @Test
+    public final void bogusTest() {
+    	
+    }
 
     public void testFactoryNewJobOrderFor() {
         final File xmlFile = new File("./test/data/generic_config/task_tables/TaskTable.AIOP.xml");
@@ -77,7 +82,7 @@ public class JobOrderAdapterTest {
                 xmlConverter
         );
 
-        AppDataJob job = new AppDataJob(133L);
+        final AppDataJob job = new AppDataJob(133L);
         final AppDataJobProduct product = new AppDataJobProduct();
         job.setProduct(product);
 
@@ -123,7 +128,7 @@ public class JobOrderAdapterTest {
 
     }
 
-    private JobOrderProc procOfType(String type, JobOrder jobOrder) {
+    private JobOrderProc procOfType(final String type, final JobOrder jobOrder) {
         final Optional<JobOrderProc> proc = jobOrder.getProcs().stream().filter(p -> p.getTaskName().equals(type)).findFirst();
 
         if (!proc.isPresent()) {
@@ -134,15 +139,15 @@ public class JobOrderAdapterTest {
     }
 
     //check if proc has expectedInputs where in input is defined by "resultFileName"
-    private Matcher<JobOrderProc> hasInputs(String... expectedInputs) {
+    private Matcher<JobOrderProc> hasInputs(final String... expectedInputs) {
         return new CustomMatcher<JobOrderProc>(format("proc with inputs %s", asList(expectedInputs))) {
             @Override
-            public boolean matches(Object item) {
+            public boolean matches(final Object item) {
                 if (!(item instanceof JobOrderProc)) {
                     return false;
                 }
 
-                JobOrderProc actual = (JobOrderProc) item;
+                final JobOrderProc actual = (JobOrderProc) item;
 
                 final List<String> actualInputs = actual.getInputs().stream()
                         .flatMap(i -> i.getFilenames().stream().map(JobOrderInputFile::getFilename))
@@ -158,7 +163,7 @@ public class JobOrderAdapterTest {
 
 
     //input format: task1:input:file1,file2,file3
-    private List<AppDataJobTaskInputs> createAdditionalInputs(String... inputs) {
+    private List<AppDataJobTaskInputs> createAdditionalInputs(final String... inputs) {
 
         final Map<String, List<String>> inputsByTaskName = Stream.of(inputs).collect(groupingBy(input -> input.split(":")[0]));
 
@@ -166,7 +171,7 @@ public class JobOrderAdapterTest {
                 entry -> new AppDataJobTaskInputs(entry.getKey(), "01.00", toInput(entry.getValue()))).collect(toList());
     }
 
-    private List<AppDataJobInput> toInput(List<String> inputs) {
+    private List<AppDataJobInput> toInput(final List<String> inputs) {
         return inputs.stream().map(input -> new AppDataJobInput(
                 "ref",
                 input.split(":")[1],
@@ -176,7 +181,7 @@ public class JobOrderAdapterTest {
     }
 
     //files format: file1,file2,file3
-    private List<AppDataJobFile> toFiles(String files) {
+    private List<AppDataJobFile> toFiles(final String files) {
         return Stream.of(files.split(",")).map(AppDataJobFile::new).collect(toList());
     }
 }

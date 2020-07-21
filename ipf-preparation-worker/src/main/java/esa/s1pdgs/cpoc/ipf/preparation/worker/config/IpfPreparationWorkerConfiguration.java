@@ -88,7 +88,6 @@ public class IpfPreparationWorkerConfiguration {
 		    final XmlConverter xmlConverter,
 			final TaskTableFactory taskTableFactory,
 			final ElementMapper elementMapper,
-		    final Publisher publisher,
 		    final AppCatJobService appCatService
 	) {
 		this.appStatus = appStatus;
