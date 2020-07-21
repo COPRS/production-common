@@ -18,7 +18,7 @@ public class ConfigurableKeyEvaluator implements Function<AppDataJobProduct, Str
 		String result = template;
 		for (final Map.Entry<String,Object> metadata : t.getMetadata().entrySet()) {
 			result = result.replaceAll(		
-					Pattern.quote("${product." + metadata.getKey() + "}"),
+					Pattern.quote("$(product." + metadata.getKey() + ")"),
 					String.valueOf(metadata.getValue())
 			);
 		}
