@@ -79,7 +79,6 @@ public final class JobGeneratorImpl implements JobGenerator {
     private final ProcessSettings settings;
     private final ErrorRepoAppender errorAppender;
     private final Publisher publisher;
-    private final List<List<String>> tasks;
     private final AuxQueryHandler auxQueryHandler;
         
 	public JobGeneratorImpl(
@@ -89,7 +88,6 @@ public final class JobGeneratorImpl implements JobGenerator {
 			final ProcessSettings settings,
 			final ErrorRepoAppender errorAppender,
 			final Publisher publisher,
-			final List<List<String>> tasks,
 			final AuxQueryHandler auxQueryHandler
 	) {
 		this.tasktableAdapter = tasktableAdapter;
@@ -98,7 +96,6 @@ public final class JobGeneratorImpl implements JobGenerator {
 		this.settings = settings;
 		this.errorAppender = errorAppender;
 		this.publisher = publisher;
-		this.tasks = tasks;
 		this.auxQueryHandler = auxQueryHandler;				
 	}
 

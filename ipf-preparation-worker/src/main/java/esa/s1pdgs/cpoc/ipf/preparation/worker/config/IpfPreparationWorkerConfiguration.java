@@ -34,6 +34,7 @@ import esa.s1pdgs.cpoc.ipf.preparation.worker.model.tasktable.ElementMapper;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.model.tasktable.TaskTableAdapter;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.model.tasktable.TaskTableFactory;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.model.tasktable.TasktableManager;
+import esa.s1pdgs.cpoc.ipf.preparation.worker.publish.JobOrderAdapter;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.publish.Publisher;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.query.AuxQueryHandler;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.service.IpfPreparationService;
@@ -70,8 +71,8 @@ public class IpfPreparationWorkerConfiguration {
     private final AiopProperties aiopProperties;
 	private final TaskTableFactory taskTableFactory;
 	private final ElementMapper elementMapper;
-    private final Publisher publisher;
     private final AppCatJobService appCatService;
+    private final XmlConverter xmlConverter;
     
 	@Autowired
 	public IpfPreparationWorkerConfiguration(
@@ -101,8 +102,8 @@ public class IpfPreparationWorkerConfiguration {
 		this.aiopProperties = aiopProperties;
 		this.taskTableFactory = taskTableFactory;
 		this.elementMapper = elementMapper;
-		this.publisher = publisher;
 		this.appCatService = appCatService;
+		this.xmlConverter = xmlConverter;
 	}
 
 	@Bean
@@ -216,14 +217,30 @@ public class IpfPreparationWorkerConfiguration {
 				taskTableFactory.buildTaskTable(taskTableFile, processSettings.getLevel()), 
 				elementMapper
 		);			    
-	    final List<List<String>> tasks = tasktableAdapter.buildTasks();
+	    //final List<List<String>> tasks = tasktableAdapter.buildTasks();
 		final AuxQueryHandler auxQueryHandler = new AuxQueryHandler(
 				metadataClient, 
 				ProductMode.SLICING, //TODO clarify why mode is always slicing
 				timeoutCheckerFactory.apply(tasktableAdapter.taskTable()),
-				elementMapper,
 				tasktableAdapter
 		);
+		
+		final JobOrderAdapter.Factory jobOrderFactory = new JobOrderAdapter.Factory(
+				() -> tasktableAdapter.newJobOrder(processSettings),
+				typeAdapter,
+				elementMapper,
+				xmlConverter
+		);		
+		
+		final Publisher publisher = new Publisher(
+				settings, 
+				processSettings, 
+				mqiClient, 
+				tasktableAdapter, 
+				jobOrderFactory,
+				typeAdapter
+		);
+		
 		return new JobGeneratorImpl(
 				tasktableAdapter,
 				typeAdapter, 
@@ -231,7 +248,6 @@ public class IpfPreparationWorkerConfiguration {
 				processSettings, 
 				errorAppender, 
 				publisher, 
-				tasks,
 				auxQueryHandler
 		);
 	}

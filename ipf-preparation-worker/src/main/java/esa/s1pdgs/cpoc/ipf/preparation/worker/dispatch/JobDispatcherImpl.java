@@ -94,7 +94,7 @@ public class JobDispatcherImpl implements JobDispatcher {
         		final AppDataJob existingJob = specificJob.get(); 
         		LOGGER.info("Found job {} already being handled. Appending new message ...",
         				existingJob.getId(), firstMessage.getId());
-        		appCat.appendMessage(existingJob, firstMessage);
+        		appCat.appendMessage(existingJob.getId(), firstMessage);
     		}
     		else {
         		LOGGER.info("Persisting new job for message {} (catalog event message {}) ...",

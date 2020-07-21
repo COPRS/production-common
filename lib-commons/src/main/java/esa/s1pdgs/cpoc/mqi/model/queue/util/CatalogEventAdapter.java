@@ -70,6 +70,10 @@ public final class CatalogEventAdapter {
 		return getStringValue("polarisation");
 	}
 	
+	public final String timeliness() {
+		return getStringValue("timeliness");
+	}
+	
 	public final List<String> listValues(final String name) {
 		return (List<String>) event.getMetadata().get(name);
 	}

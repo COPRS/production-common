@@ -16,7 +16,6 @@ import esa.s1pdgs.cpoc.common.errors.processing.IpfPrepWorkerInputsMissingExcept
 import esa.s1pdgs.cpoc.common.errors.processing.MetadataQueryException;
 import esa.s1pdgs.cpoc.common.utils.Exceptions;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.appcat.AppCatJobService;
-import esa.s1pdgs.cpoc.ipf.preparation.worker.model.JobGen;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.type.AbstractProductTypeAdapter;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.type.Product;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.type.ProductTypeAdapter;
@@ -25,6 +24,7 @@ import esa.s1pdgs.cpoc.mqi.model.queue.IpfExecutionJob;
 import esa.s1pdgs.cpoc.mqi.model.queue.LevelJobInputDto;
 import esa.s1pdgs.cpoc.mqi.model.queue.util.CatalogEventAdapter;
 import esa.s1pdgs.cpoc.xml.model.joborder.AbstractJobOrderConf;
+import esa.s1pdgs.cpoc.xml.model.joborder.JobOrder;
 
 public final class EdrsSessionTypeAdapter extends AbstractProductTypeAdapter implements ProductTypeAdapter {		
 	private final MetadataClient metadataClient;
@@ -110,25 +110,25 @@ public final class EdrsSessionTypeAdapter extends AbstractProductTypeAdapter imp
 	}
 	
 	@Override
-	public final void customJobOrder(final JobGen job) {
-    	final AbstractJobOrderConf conf = job.jobOrder().getConf();    	
+	public final void customJobOrder(final AppDataJob job, final JobOrder jobOrder) {
+    	final AbstractJobOrderConf conf = jobOrder.getConf();    	
     	
-    	final Map<String,String> aiopParams = aiopAdapter.aiopPropsFor(job.job());    	
+    	final Map<String,String> aiopParams = aiopAdapter.aiopPropsFor(job);    	
     	LOGGER.trace("Existing parameters: {}", conf.getProcParams());
     	LOGGER.trace("New AIOP parameters: {}", aiopParams);
     	
     	for (final Entry<String, String> newParam : aiopParams.entrySet()) {
-    		updateProcParam(job.jobOrder(), newParam.getKey(), newParam.getValue());
+    		updateProcParam(jobOrder, newParam.getKey(), newParam.getValue());
 		}    	
     	LOGGER.debug("Configured AIOP for product {} of job {} with configuration {}", 
-    			job.productName(), job.id(), conf);		
+    			job.getProductName(), job.getId(), conf);		
 	}
 
 	@Override
-	public final void customJobDto(final JobGen job, final IpfExecutionJob dto) {
+	public final void customJobDto(final AppDataJob job, final IpfExecutionJob dto) {
         // Add input relative to the channels
-        if (job.job().getProduct() != null) {
-        	final EdrsSessionProduct product = EdrsSessionProduct.of(job.job());
+        if (job.getProduct() != null) {
+        	final EdrsSessionProduct product = EdrsSessionProduct.of(job);
         	
         	final List<AppDataJobFile> raws1 = product.getRawsForChannel(1);
         	final List<AppDataJobFile> raws2 = product.getRawsForChannel(2);

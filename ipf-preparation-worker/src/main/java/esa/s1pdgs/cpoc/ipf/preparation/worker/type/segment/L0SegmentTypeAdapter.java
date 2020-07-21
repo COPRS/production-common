@@ -19,7 +19,6 @@ import esa.s1pdgs.cpoc.common.errors.processing.IpfPrepWorkerInputsMissingExcept
 import esa.s1pdgs.cpoc.common.errors.processing.MetadataQueryException;
 import esa.s1pdgs.cpoc.common.utils.DateUtils;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.appcat.AppCatJobService;
-import esa.s1pdgs.cpoc.ipf.preparation.worker.model.JobGen;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.type.AbstractProductTypeAdapter;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.type.Product;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.type.ProductTypeAdapter;
@@ -28,6 +27,7 @@ import esa.s1pdgs.cpoc.metadata.model.AbstractMetadata;
 import esa.s1pdgs.cpoc.metadata.model.LevelSegmentMetadata;
 import esa.s1pdgs.cpoc.mqi.model.queue.IpfExecutionJob;
 import esa.s1pdgs.cpoc.mqi.model.queue.util.CatalogEventAdapter;
+import esa.s1pdgs.cpoc.xml.model.joborder.JobOrder;
 
 public final class L0SegmentTypeAdapter extends AbstractProductTypeAdapter implements ProductTypeAdapter {
 	private final MetadataClient metadataClient;
@@ -175,17 +175,17 @@ public final class L0SegmentTypeAdapter extends AbstractProductTypeAdapter imple
 	}
 
 	@Override
-	public final void customJobOrder(final JobGen job) {
-		final AppDataJobProductAdapter product = new AppDataJobProductAdapter(job.job().getProduct());		
+	public final void customJobOrder(final AppDataJob job, final JobOrder jobOrder) {
+		final AppDataJobProductAdapter product = new AppDataJobProductAdapter(job.getProduct());		
         updateProcParam(
-        		job.jobOrder(), 
+        		jobOrder, 
         		"Mission_Id",
         		product.getMissionId()+ product.getSatelliteId()
         );		
 	}
 
 	@Override
-	public final void customJobDto(final JobGen job, final IpfExecutionJob dto) {
+	public final void customJobDto(final AppDataJob job, final IpfExecutionJob dto) {
         // NOTHING TO DO		
 	}
 

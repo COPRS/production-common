@@ -8,7 +8,6 @@ import esa.s1pdgs.cpoc.appcatalog.AppDataJobProduct;
 import esa.s1pdgs.cpoc.common.errors.processing.IpfPrepWorkerInputsMissingException;
 import esa.s1pdgs.cpoc.common.errors.processing.MetadataQueryException;
 import esa.s1pdgs.cpoc.common.utils.DateUtils;
-import esa.s1pdgs.cpoc.ipf.preparation.worker.model.JobGen;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.type.AbstractProductTypeAdapter;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.type.Product;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.type.ProductTypeAdapter;
@@ -17,6 +16,7 @@ import esa.s1pdgs.cpoc.metadata.model.L0AcnMetadata;
 import esa.s1pdgs.cpoc.metadata.model.L0SliceMetadata;
 import esa.s1pdgs.cpoc.mqi.model.queue.IpfExecutionJob;
 import esa.s1pdgs.cpoc.mqi.model.queue.util.CatalogEventAdapter;
+import esa.s1pdgs.cpoc.xml.model.joborder.JobOrder;
 import esa.s1pdgs.cpoc.xml.model.joborder.JobOrderSensingTime;
 
 public final class LevelSliceTypeAdapter extends AbstractProductTypeAdapter implements ProductTypeAdapter {
@@ -82,8 +82,8 @@ public final class LevelSliceTypeAdapter extends AbstractProductTypeAdapter impl
 	}
 
 	@Override
-	public final void customJobOrder(final JobGen job) {
-		final LevelSliceProduct product = LevelSliceProduct.of(job.job());
+	public final void customJobOrder(final AppDataJob job, final JobOrder jobOrder) {
+		final LevelSliceProduct product = LevelSliceProduct.of(job);
 		
 		// Rewrite job order sensing time
 		final String jobOrderStart = DateUtils.convertToAnotherFormat(product.getSegmentStartDate(),
@@ -91,37 +91,37 @@ public final class LevelSliceTypeAdapter extends AbstractProductTypeAdapter impl
 		final String jobOrderStop = DateUtils.convertToAnotherFormat(product.getSegmentStopDate(),
 				AppDataJobProduct.TIME_FORMATTER, JobOrderSensingTime.DATETIME_FORMATTER);
 		
-		job.jobOrder().getConf().setSensingTime(new JobOrderSensingTime(jobOrderStart, jobOrderStop));
+		jobOrder.getConf().setSensingTime(new JobOrderSensingTime(jobOrderStart, jobOrderStop));
 
 		updateProcParam(
-				job.jobOrder(), 
+				jobOrder, 
 				"Mission_Id",
 				product.getMissionId() + product.getSatelliteId());
 		updateProcParam(
-				job.jobOrder(), 
+				jobOrder, 
 				"Slice_Number", 
 				String.valueOf(product.getNumberSlice()));
 		updateProcParam(
-				job.jobOrder(), 
+				jobOrder, 
 				"Total_Number_Of_Slices",
 				String.valueOf(product.getTotalNbOfSlice()));
 		updateProcParam(
-				job.jobOrder(), 
+				jobOrder, 
 				"Slice_Overlap",
 				String.valueOf(sliceOverlap.get(product.getAcquisition())));
 		updateProcParam(
-				job.jobOrder(), 
+				jobOrder, 
 				"Slice_Length",
 				String.valueOf(sliceLength.get(product.getAcquisition())));
 		updateProcParam(
-				job.jobOrder(), 
+				jobOrder, 
 				"Slicing_Flag", 
 				"TRUE"
 		);
 	}
 
 	@Override
-	public final void customJobDto(final JobGen job, final IpfExecutionJob dto) {
+	public final void customJobDto(final AppDataJob job, final IpfExecutionJob dto) {
 		// NOTHING TO DO
 		
 	}	

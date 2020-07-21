@@ -111,7 +111,7 @@ public class AppCatJobService {
 	}
 	
 
-	public final synchronized void appendMessage(final long id, final GenericMessageDto<CatalogEvent> firstMessage) 
+	public final synchronized void appendMessage(final long id, final GenericMessageDto<CatalogEvent> mess) 
 			throws AppCatJobUpdateFailed {
 
 	}
