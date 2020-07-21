@@ -8,11 +8,15 @@ import static java.util.stream.Collectors.toList;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertThat;
-import static org.mockito.ArgumentMatchers.*;
-import static org.mockito.Mockito.*;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.argThat;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 import java.io.File;
-import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Stream;
@@ -31,8 +35,6 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.junit4.SpringRunner;
-
-import com.sun.xml.internal.ws.policy.privateutil.PolicyUtils;
 
 import esa.s1pdgs.cpoc.appcatalog.AppDataJob;
 import esa.s1pdgs.cpoc.appcatalog.AppDataJobFile;
@@ -312,7 +314,7 @@ public class AuxQueryTest {
                 .thenReturn(emptyList());
     }
 
-    private AppDataJobTaskInputs inputsForTask(String taskVersion, List<AppDataJobTaskInputs> inputs) {
+    private AppDataJobTaskInputs inputsForTask(final String taskVersion, final List<AppDataJobTaskInputs> inputs) {
         final Optional<AppDataJobTaskInputs> candidate =
                 inputs.stream()
                         .filter(i -> taskVersion.equals(i.getTaskName() + ":" + i.getTaskVersion())).findFirst();
