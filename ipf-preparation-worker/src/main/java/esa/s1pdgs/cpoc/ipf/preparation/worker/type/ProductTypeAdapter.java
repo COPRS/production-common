@@ -18,6 +18,10 @@ public interface ProductTypeAdapter {
 	
 	Product mainInputSearch(final AppDataJob job) throws IpfPrepWorkerInputsMissingException;
 	
+	default void validateInputSearch(final AppDataJob job) throws IpfPrepWorkerInputsMissingException {
+		// default implementation: don't validate
+	}
+	
 	void customAppDataJob(final AppDataJob job);
 	
     void customJobOrder(final AppDataJob job, final JobOrder jobOrder);

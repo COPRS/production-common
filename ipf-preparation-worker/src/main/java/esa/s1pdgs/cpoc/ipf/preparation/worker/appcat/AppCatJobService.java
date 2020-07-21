@@ -11,6 +11,7 @@ import org.springframework.stereotype.Component;
 
 import esa.s1pdgs.cpoc.appcatalog.AppDataJob;
 import esa.s1pdgs.cpoc.appcatalog.AppDataJobGeneration;
+import esa.s1pdgs.cpoc.appcatalog.AppDataJobGenerationState;
 import esa.s1pdgs.cpoc.appcatalog.AppDataJobState;
 import esa.s1pdgs.cpoc.appcatalog.AppDataJobTaskInputs;
 import esa.s1pdgs.cpoc.appcatalog.client.job.AppCatalogJobClient;
@@ -117,15 +118,21 @@ public class AppCatJobService {
 	}
 
 
-	public final synchronized void updateProduct(final long id, final Product queried) 
+	public final synchronized void updateProduct(final long id, final Product queried, final AppDataJobGenerationState outputState) 
 			throws AppCatJobUpdateFailed {
 		
 	}
 
-	public final synchronized void updateAux(final long id, final List<AppDataJobTaskInputs> queried) 
+	public final synchronized void updateAux(final long id, final List<AppDataJobTaskInputs> queried, final AppDataJobGenerationState outputState) 
 			throws AppCatJobUpdateFailed {
 		
 	}
+	
+	public final synchronized void updateSend(final long id, final AppDataJobGenerationState outputState) 
+			throws AppCatJobUpdateFailed {
+		
+	}
+	
 }
 
 

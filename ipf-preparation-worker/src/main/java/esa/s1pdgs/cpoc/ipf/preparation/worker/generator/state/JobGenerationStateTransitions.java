@@ -6,9 +6,21 @@ import org.apache.logging.log4j.Logger;
 import esa.s1pdgs.cpoc.appcatalog.AppDataJobGenerationState;
 
 public enum JobGenerationStateTransitions implements JobGenerationStateTransitionFunction {
-	INITIAL_2_PRIMARYCHECK(AppDataJobGenerationState.INITIAL, AppDataJobGenerationState.PRIMARY_CHECK, j -> j.mainInputSearch()),
-	PRIMARYCHECK_2_READY(AppDataJobGenerationState.PRIMARY_CHECK, AppDataJobGenerationState.READY, j -> j.auxSearch()),
-	READY_2_SENT(AppDataJobGenerationState.READY, AppDataJobGenerationState.SENT,  j -> j.send());
+	INITIAL_2_PRIMARYCHECK(
+			AppDataJobGenerationState.INITIAL, 
+			AppDataJobGenerationState.PRIMARY_CHECK, 
+			j -> j.mainInputSearch(AppDataJobGenerationState.PRIMARY_CHECK)
+	),
+	PRIMARYCHECK_2_READY(
+			AppDataJobGenerationState.PRIMARY_CHECK, 
+			AppDataJobGenerationState.READY, 
+			j -> j.auxSearch(AppDataJobGenerationState.READY)
+	),
+	READY_2_SENT(
+			AppDataJobGenerationState.READY, 
+			AppDataJobGenerationState.SENT,  
+			j -> j.send(AppDataJobGenerationState.SENT)
+	);
 	
 	private static final Logger LOGGER = LogManager.getLogger(JobGenerationStateTransitions.class);
 	

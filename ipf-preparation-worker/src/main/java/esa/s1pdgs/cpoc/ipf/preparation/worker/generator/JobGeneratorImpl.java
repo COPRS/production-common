@@ -7,6 +7,7 @@ import java.util.concurrent.Callable;
 import java.util.stream.Collectors;
 
 import esa.s1pdgs.cpoc.appcatalog.AppDataJob;
+import esa.s1pdgs.cpoc.appcatalog.AppDataJobGenerationState;
 import esa.s1pdgs.cpoc.appcatalog.AppDataJobTaskInputs;
 import esa.s1pdgs.cpoc.common.errors.AbstractCodedException;
 import esa.s1pdgs.cpoc.common.errors.processing.IpfPrepWorkerInputsMissingException;
@@ -22,6 +23,7 @@ import esa.s1pdgs.cpoc.ipf.preparation.worker.generator.state.JobGenerationTrans
 import esa.s1pdgs.cpoc.ipf.preparation.worker.generator.state.JobStateTransistionFailed;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.model.tasktable.TaskTableAdapter;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.publish.Publisher;
+import esa.s1pdgs.cpoc.ipf.preparation.worker.query.AuxQuery;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.query.AuxQueryHandler;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.type.Product;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.type.ProductTypeAdapter;
@@ -36,35 +38,60 @@ public final class JobGeneratorImpl implements JobGenerator {
 		}
 
 		@Override
-		public final void mainInputSearch() throws JobStateTransistionFailed {
-			perform(() -> {
-						final Product queried = typeAdapter.mainInputSearch(job);
-						appCatService.updateProduct(job.getId(), queried);
-						return null;
-					},
+		public final void mainInputSearch(final AppDataJobGenerationState outputState) throws JobStateTransistionFailed {			
+			AppDataJobGenerationState newState = job.getGeneration().getState();
+			
+			final Product queried = perform(
+					() -> typeAdapter.mainInputSearch(job),
 					"querying input " + job.getProductName()
 			);
+			try {
+				performVoid(
+					() -> typeAdapter.validateInputSearch(job), 
+					"validating availability of input products for " + job.getProductName()
+				);
+				newState = outputState;
+			}
+			finally
+			{
+				appCatService.updateProduct(job.getId(), queried, newState);
+			}			
 		}
 		
 		@Override
-		public final void auxSearch() throws JobStateTransistionFailed {
-			perform(() -> {
-						final List<AppDataJobTaskInputs> queried = auxQueryHandler.queryFor(job);
-						appCatService.updateAux(job.getId(), queried);
-						return null;
-					},	
-					"querying required AUX"
-			);
+		public final void auxSearch(final AppDataJobGenerationState outputState) throws JobStateTransistionFailed {
+			AppDataJobGenerationState newState = job.getGeneration().getState();			
+			final AuxQuery auxQuery = auxQueryHandler.queryFor(job);
+			
+			final List<AppDataJobTaskInputs> queried = perform(() -> auxQuery.queryAux(), "querying required AUX");
+			
+			try {
+				performVoid(
+					() -> auxQuery.validate(job), 
+					"validating availability of AUX for " + job.getProductName()
+				);
+				newState = outputState;
+			}
+			finally
+			{
+				appCatService.updateAux(job.getId(), queried, newState);
+			}				
 		}
 		
 		@Override
-		public final void send() throws JobStateTransistionFailed {
-			perform(() -> {
-						publisher.send(job);
-						return null;
-					}, 
-					"publishing Job"
-			);
+		public final void send(final AppDataJobGenerationState outputState) throws JobStateTransistionFailed {
+			AppDataJobGenerationState newState = job.getGeneration().getState();						
+			try {
+				performVoid(
+					() -> publisher.send(job), 
+					"publishing Job for " + job.getProductName()
+				);
+				newState = outputState;
+			}
+			finally
+			{
+				appCatService.updateSend(job.getId(), newState);
+			}
 		}
 		
 		@Override
@@ -152,6 +179,14 @@ public final class JobGeneratorImpl implements JobGenerator {
 			final String errorMessage = Exceptions.messageOf(e);
 			LOGGER.error("Omitting job generation attempt due to unexpected error: {}", errorMessage);
 		}
+	}
+	
+	
+	private static final void performVoid(final ThrowingRunnable command, final String name) throws JobStateTransistionFailed {
+		perform(
+				() -> {command.run(); return null;}, 
+				name
+		);
 	}
 	
 	private static final <E> E perform(final Callable<E> command, final String name) throws JobStateTransistionFailed {

@@ -1,10 +1,6 @@
 package esa.s1pdgs.cpoc.ipf.preparation.worker.query;
 
-import java.util.List;
-
 import esa.s1pdgs.cpoc.appcatalog.AppDataJob;
-import esa.s1pdgs.cpoc.appcatalog.AppDataJobTaskInputs;
-import esa.s1pdgs.cpoc.common.errors.processing.IpfPrepWorkerInputsMissingException;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.model.ProductMode;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.model.tasktable.TaskTableAdapter;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.timeout.InputTimeoutChecker;
@@ -28,14 +24,13 @@ public class AuxQueryHandler {
 		this.taskTableAdapter = taskTableAdapter;
 	}
 	
-	public List<AppDataJobTaskInputs> queryFor(final AppDataJob job) throws IpfPrepWorkerInputsMissingException {
-		final AuxQuery query = new AuxQuery(
+	public AuxQuery queryFor(final AppDataJob job) {
+		return new AuxQuery(
 				metadataClient,
 				job,
 				mode,
 				timeoutChecker,
-				taskTableAdapter);
-
-		return query.queryAux();
-	}
+				taskTableAdapter
+		);
+	}	
 }

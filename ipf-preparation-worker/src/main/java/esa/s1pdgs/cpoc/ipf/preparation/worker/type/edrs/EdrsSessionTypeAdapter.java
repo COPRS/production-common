@@ -1,6 +1,7 @@
 package esa.s1pdgs.cpoc.ipf.preparation.worker.type.edrs;
 
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -14,7 +15,6 @@ import esa.s1pdgs.cpoc.common.ProductFamily;
 import esa.s1pdgs.cpoc.common.errors.AbstractCodedException;
 import esa.s1pdgs.cpoc.common.errors.processing.IpfPrepWorkerInputsMissingException;
 import esa.s1pdgs.cpoc.common.errors.processing.MetadataQueryException;
-import esa.s1pdgs.cpoc.common.utils.Exceptions;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.appcat.AppCatJobService;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.type.AbstractProductTypeAdapter;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.type.Product;
@@ -45,16 +45,11 @@ public final class EdrsSessionTypeAdapter extends AbstractProductTypeAdapter imp
 	}
 
 	@Override
-	public final Product mainInputSearch(final AppDataJob job) throws IpfPrepWorkerInputsMissingException {	
+	public final Product mainInputSearch(final AppDataJob job) {	
     	Assert.notNull(job, "Provided AppDataJob is null");
        	Assert.notNull(job.getProduct(), "Provided AppDataJobProduct is null");
 
        	final EdrsSessionProduct product = EdrsSessionProduct.of(job);
-       	
-        // S1PRO-1101: if timeout for primary search is reached -> just start the job 
-    	if (aiopAdapter.isTimedOut(job)) {	        		
-    		return product;
-    	}
     	
         try {
         	final EdrsSessionMetadataAdapter edrsMetadata = EdrsSessionMetadataAdapter.parse(        			
@@ -63,42 +58,79 @@ public final class EdrsSessionTypeAdapter extends AbstractProductTypeAdapter imp
         	
         	if (edrsMetadata.getChannel1() == null) {    
         		product.setRawsForChannel(1, edrsMetadata.availableRaws1());
-        	  	throw new IpfPrepWorkerInputsMissingException(
-					  Collections.singletonMap(
-							  product.getProductName(), 
-							  "No DSIB for channel 1"
-					  )
-        	  	);
-        	}        
-        	product.setRawsForChannel(1, edrsMetadata.raws1());
+        	}   
+        	else {
+            	product.setDsibForChannel(1, edrsMetadata.getChannel1().getKeyObjectStorage());
+            	product.setRawsForChannel(1, edrsMetadata.raws1());
+        	}
         	
         	if (edrsMetadata.getChannel2() == null) { 
         		product.setRawsForChannel(2, edrsMetadata.availableRaws2());
-        		throw new IpfPrepWorkerInputsMissingException(
-  					  Collections.singletonMap(
-  							  product.getProductName(), 
-  							  "No DSIB for channel 2"
-  					  )
-              	);
         	} 
-        	product.setRawsForChannel(2, edrsMetadata.raws2());
-        	
-        	final Map<String,String> missingRaws = edrsMetadata.missingRaws(); 
-    	    if (!missingRaws.isEmpty()) {
-                throw new IpfPrepWorkerInputsMissingException(missingRaws);
-            }
-    	    return product;
+        	else {
+        		product.setDsibForChannel(2, edrsMetadata.getChannel2().getKeyObjectStorage());
+               	product.setRawsForChannel(2, edrsMetadata.raws2());
+        	}
         } 
         catch (final MetadataQueryException me) {
-        	 throw new IpfPrepWorkerInputsMissingException(
-    			  Collections.singletonMap(
-    					product.getProductName(), 
-    					  String.format("Query error: %s", Exceptions.messageOf(me))
-    			  )
- 	    	  );
+        	LOGGER.error("Error on query execution, retrying next time", me);
+//        	 throw new IpfPrepWorkerInputsMissingException(
+//    			  Collections.singletonMap(
+//    					product.getProductName(), 
+//    					  String.format("Query error: %s", Exceptions.messageOf(me))
+//    			  )
+// 	    	  );
+        }
+	    return product;
+	}
+	
+
+	@Override
+	public final void validateInputSearch(final AppDataJob job) throws IpfPrepWorkerInputsMissingException {       	
+        // S1PRO-1101: if timeout for primary search is reached -> just start the job 
+    	if (aiopAdapter.isTimedOut(job)) {	        		
+    		return;
+    	}
+       	final EdrsSessionProduct product = EdrsSessionProduct.of(job);       	    	
+
+    	if (product.getDsibForChannel(1) == null) {    
+    	  	throw new IpfPrepWorkerInputsMissingException(
+				  Collections.singletonMap(
+						  product.getProductName(), 
+						  "No DSIB for channel 1"
+				  )
+    	  	);
+    	}     
+    	if (product.getDsibForChannel(2) == null) { 
+    		throw new IpfPrepWorkerInputsMissingException(
+				  Collections.singletonMap(
+						  product.getProductName(), 
+						  "No DSIB for channel 2"
+				  )
+          	);
+    	} 
+    	final Map<String,String> missingRaws = missingRawsOf(product); 
+	    if (!missingRaws.isEmpty()) {
+            throw new IpfPrepWorkerInputsMissingException(missingRaws);
         }
 	}
 	
+	private final Map<String,String> missingRawsOf(final EdrsSessionProduct product) {		
+    	final Map<String,String> missingRaws = new HashMap<>();
+    	
+    	for (final AppDataJobFile raw : product.getRawsForChannel(1)) {
+    		if (raw.getKeyObs() == null) {
+    			missingRaws.put(raw.getFilename(), "Missing RAW1 " + raw.getFilename());
+    		}
+    	}
+    	for (final AppDataJobFile raw : product.getRawsForChannel(2)) {
+    		if (raw.getKeyObs() == null) {
+    			missingRaws.put(raw.getFilename(), "Missing RAW2 " + raw.getFilename());
+    		}
+    	}
+    	return missingRaws;
+	}
+
 	@Override
 	public final void customAppDataJob(final AppDataJob job) {			
 		final CatalogEventAdapter eventAdapter = CatalogEventAdapter.of(job);				

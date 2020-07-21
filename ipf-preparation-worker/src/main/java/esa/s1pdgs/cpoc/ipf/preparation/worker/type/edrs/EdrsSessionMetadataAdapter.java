@@ -1,7 +1,6 @@
 package esa.s1pdgs.cpoc.ipf.preparation.worker.type.edrs;
 
 import java.util.Collection;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
@@ -35,7 +34,6 @@ public class EdrsSessionMetadataAdapter {
 		this.raws1 = raws1;
 		this.raws2 = raws2;
 	}
-
 
 	public static final EdrsSessionMetadataAdapter parse(final List<EdrsSessionMetadata> metadata) {
 		EdrsSessionMetadata channel1 = null;
@@ -72,21 +70,6 @@ public class EdrsSessionMetadataAdapter {
 		return channel2;
 	}
 		
-	public final Map<String,String> missingRaws() {		
-    	final Map<String,String> missingRaws = new HashMap<>();
-    	for (final AppDataJobFile raw : raws1()) {
-    		if (raw.getKeyObs() == null) {
-    			missingRaws.put(raw.getFilename(), "Missing RAW1 " + raw.getFilename());
-    		}
-    	}
-    	for (final AppDataJobFile raw : raws2()) {
-    		if (raw.getKeyObs() == null) {
-    			missingRaws.put(raw.getFilename(), "Missing RAW2 " + raw.getFilename());
-    		}
-    	}
-    	return missingRaws;
-	}
-	
 	public final List<AppDataJobFile> availableRaws1() {
 		return raws(raws1.keySet(), raws1);
 	}
