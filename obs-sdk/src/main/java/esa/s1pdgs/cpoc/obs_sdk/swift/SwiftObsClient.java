@@ -70,8 +70,7 @@ public class SwiftObsClient extends AbstractObsClient {
 						.replaceAll(Pattern.quote("/"), ""); // remove trailing slash
 
 				final String host = removedProtocol.substring(0, removedProtocol.indexOf(':'));
-				final int port = Integer.parseInt(removedProtocol.substring(removedProtocol.indexOf(':') + 1, 
-						removedProtocol.length()));
+				final int port = Integer.parseInt(removedProtocol.substring(removedProtocol.indexOf(':') + 1));
 				accConf.setProxyHost(host);
 		        accConf.setProxyPort(port);
 		        accConf.setUseProxy(true);
@@ -144,7 +143,7 @@ public class SwiftObsClient extends AbstractObsClient {
 
 	@Override
 	public void uploadObject(final FileObsUploadObject object) throws SdkClientException, ObsServiceException, ObsException {
-		final List<String> fileList = new ArrayList<>();
+		final List<Md5.Entry> fileList = new ArrayList<>();
         if (object.getFile().isDirectory()) {
         	fileList.addAll(swiftObsServices.uploadDirectory(
                     getBucketFor(object.getFamily()),
@@ -164,17 +163,17 @@ public class SwiftObsClient extends AbstractObsClient {
 	 *
 	 */
 	@Override
-	protected String uploadObject(final StreamObsUploadObject object) throws ObsServiceException, SwiftSdkClientException {
+	protected Md5.Entry uploadObject(final StreamObsUploadObject object) throws ObsServiceException, SwiftSdkClientException {
 		return swiftObsServices.uploadStream(getBucketFor(object.getFamily()), object.getKey(), object.getInput(), object.getContentLength());
 	}
 
 	@Override
-	public final void uploadMd5Sum(final ObsObject object, final List<String> fileList) throws ObsServiceException {
+	public final void uploadMd5Sum(final ObsObject object, final List<Md5.Entry> fileList) throws ObsServiceException {
 		File file;
 		try {
 			file = File.createTempFile(object.getKey(), Md5.MD5SUM_SUFFIX);
 			try(PrintWriter writer = new PrintWriter(file)) {
-				for (final String fileInfo : fileList) {
+				for (final Md5.Entry fileInfo : fileList) {
 					writer.println(fileInfo);
 				}
 			}
@@ -223,7 +222,7 @@ public class SwiftObsClient extends AbstractObsClient {
 		final List<ObsObject> objectsOfTimeFrame = new ArrayList<>();
 		final String container = getBucketFor(family);
 		Collection<StoredObject> objListing = swiftObsServices.listObjectsFromContainer(container);
-		boolean possiblyTruncated = false;
+		boolean possiblyTruncated;
 		String marker = "";
 		do {
 			if (objListing == null || objListing.size() == 0) {
@@ -266,9 +265,9 @@ public class SwiftObsClient extends AbstractObsClient {
 	}
 
 	@Override
-	protected Map<String,String> collectMd5Sums(final ObsObject object) throws ObsException {
+	protected Map<String,String> collectETags(final ObsObject object) throws ObsException {
 		try {
-			return swiftObsServices.collectMd5Sums(getBucketFor(object.getFamily()), object.getKey());
+			return swiftObsServices.collectETags(getBucketFor(object.getFamily()), object.getKey());
 		} catch (SwiftSdkClientException | ObsServiceException e) {
 			throw new ObsException(object.getFamily(), object.getKey(), e);
 		}
@@ -292,29 +291,6 @@ public class SwiftObsClient extends AbstractObsClient {
 			
 			// return the size of the object
 			return swiftObsServices.size(bucketName, object.getKey());						
-		} catch (final SdkClientException ex) {
-			throw new ObsException(object.getFamily(), object.getKey(), ex);
-		}
-	}
-
-	@Override
-	public String getChecksum(final ObsObject object) throws ObsException {
-		ValidArgumentAssertion.assertValidArgument(object);
-		try {
-			final String bucketName = getBucketFor(object.getFamily());
-			/*
-			 * This method is supposed to return the size of exactly one object. If more than
-			 * one is returned the object is not unique and very likely not the full name of it or
-			 * a directory. We are not supporting this and thus operations fails
-			 */
-			if (swiftObsServices.getNbObjects(bucketName, object.getKey()) != 1) {
-				throw new IllegalArgumentException(String.format(
-						"Unable to determinate checksum of object '%s' (family:%s) (is a directory or not exist?)",
-						object.getKey(), object.getFamily()));
-			}
-			
-			// return the checksum of the object
-			return swiftObsServices.getChecksum(bucketName, object.getKey());
 		} catch (final SdkClientException ex) {
 			throw new ObsException(object.getFamily(), object.getKey(), ex);
 		}

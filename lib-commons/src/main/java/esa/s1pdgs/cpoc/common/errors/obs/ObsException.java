@@ -26,9 +26,6 @@ public class ObsException extends AbstractCodedException {
     private final ProductFamily family;
 
     /**
-     * @param key
-     * @param bucket
-     * @param e
      */
     public ObsException(final ProductFamily family, final String key,
             final Throwable cause) {
@@ -36,9 +33,6 @@ public class ObsException extends AbstractCodedException {
     }
 
     /**
-     * @param key
-     * @param bucket
-     * @param e
      */
     protected ObsException(final ErrorCode error, final ProductFamily family,
             final String key, final String message, final Throwable cause) {
@@ -48,11 +42,8 @@ public class ObsException extends AbstractCodedException {
     }
 
     /**
-     * @param key
-     * @param bucket
-     * @param e
      */
-    protected ObsException(final ErrorCode error, final ProductFamily family,
+    public ObsException(final ErrorCode error, final ProductFamily family,
             final String key, final String message) {
         super(error, message);
         this.key = key;

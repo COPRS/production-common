@@ -12,6 +12,7 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.concurrent.Callable;
 import java.util.concurrent.CompletionService;
 import java.util.concurrent.ExecutionException;
@@ -63,7 +64,7 @@ public abstract class AbstractObsClient implements ObsClient {
     
     protected abstract void uploadObject(FileObsUploadObject object) throws SdkClientException, ObsServiceException, ObsException;
 
-	protected abstract String uploadObject(final StreamObsUploadObject object) throws ObsServiceException, S3SdkClientException, SwiftSdkClientException;
+	protected abstract Md5.Entry uploadObject(final StreamObsUploadObject object) throws ObsServiceException, S3SdkClientException, SwiftSdkClientException;
 
     private List<File> downloadObjects(final List<ObsDownloadObject> objects,
 									   final boolean parallel, final ReportingFactory reportingFactory)
@@ -196,11 +197,6 @@ public abstract class AbstractObsClient implements ObsClient {
     /**
      * Wait for completion ending of all tasks
      * 
-     * @param workerThread
-     * @param service
-     * @param nbTasks
-     * @param timeout
-     * @throws ObsServiceException
      */
     private <E> List<E> waitForCompletion(final ExecutorService workerThread,
             final CompletionService<List<E>> service, final int nbTasks,
@@ -235,9 +231,6 @@ public abstract class AbstractObsClient implements ObsClient {
 	/**
      * Download files per batch
      * 
-     * @param objects
-     * @throws AbstractCodedException
-     * @throws IllegalArgumentException
      */
     @Override
 	public List<File> download(final List<ObsDownloadObject> objects, final ReportingFactory reportingFactory) throws AbstractCodedException {
@@ -252,9 +245,6 @@ public abstract class AbstractObsClient implements ObsClient {
 	/**
 	 * Upload files per batch
 	 * 
-	 * @param objects
-	 * @throws AbstractCodedException
-	 * @throws ObsEmptyFileException
 	 */
 	@Override
 	public void upload(final List<FileObsUploadObject> objects, final ReportingFactory reportingFactory) throws AbstractCodedException, ObsEmptyFileException {
@@ -285,14 +275,14 @@ public abstract class AbstractObsClient implements ObsClient {
 		}
 
 		try {
-			final List<String> md5s = uploadStreams(objects, true, reportingFactory);
+			final List<Md5.Entry> md5s = uploadStreams(objects, true, reportingFactory);
 			uploadMd5Sum(baseKeyOf(objects), md5s);
 		} catch (final SdkClientException exc) {
 			throw new ObsParallelAccessException(exc);
 		}
 	}
 
-	private final ObsObject baseKeyOf(final List<StreamObsUploadObject> objects) {
+	private ObsObject baseKeyOf(final List<StreamObsUploadObject> objects) {
 		// TODO this needs a safety net against misusage
 		// currently, the assumpion is that all provided StreamObsUploadObject belong to the same directory
 		
@@ -317,21 +307,21 @@ public abstract class AbstractObsClient implements ObsClient {
 		return null;
 	}
 
-	private List<String> uploadStreams(final List<StreamObsUploadObject> objects, final boolean parallel, final ReportingFactory reportingFactory) throws ObsServiceException, S3SdkClientException, SwiftSdkClientException {
+	private List<Md5.Entry> uploadStreams(final List<StreamObsUploadObject> objects, final boolean parallel, final ReportingFactory reportingFactory) throws ObsServiceException, S3SdkClientException, SwiftSdkClientException {
 		if (objects.size() > 1 && parallel) {
 			// Upload objects in parallel
 			final ExecutorService workerThread = Executors.newFixedThreadPool(objects.size());
-			final CompletionService<List<String>> service = new ExecutorCompletionService<>(workerThread);
+			final CompletionService<List<Md5.Entry>> service = new ExecutorCompletionService<>(workerThread);
 			// Launch all downloads
 			for (final StreamObsUploadObject object : objects) {
-				service.submit(wrapStringList(() -> uploadStreams(Collections.singletonList(object), parallel, reportingFactory)));
+				service.submit(() -> uploadStreams(Collections.singletonList(object), parallel, reportingFactory));
 			}
 			return waitForCompletion(workerThread, service, objects.size(), configuration.getTimeoutUpExec());
 
 		} else {
 			final Reporting reporting = reportingFactory.newReporting("ObsWrite");
 
-			final List<String> md5 = new ArrayList<>();
+			final List<Md5.Entry> md5 = new ArrayList<>();
 			
 			// Upload object in sequential
 			for (final StreamObsUploadObject object : objects) {
@@ -364,7 +354,7 @@ public abstract class AbstractObsClient implements ObsClient {
     	return results.stream()
     		      .collect(Collectors.toMap(ObsObject::getKey, obsObject -> obsObject));
     }
-	
+
 	@Override
     public void validate(final ObsObject object) throws ObsServiceException, ObsValidationException {
 		ValidArgumentAssertion.assertValidArgument(object);			
@@ -378,23 +368,26 @@ public abstract class AbstractObsClient implements ObsClient {
 				throw new ObsValidationException("Checksum file not found for: {} of family {}", object.getKey(), object.getFamily());
 			} 
 			try(final InputStream is = isMap.get(Md5.md5KeyFor(object))) {
-				final Map<String,String> md5sums = collectMd5Sums(object);
+				final Map<String,String> md5sums = collectETags(object);
 				try(BufferedReader reader = new BufferedReader(new InputStreamReader(is))) {
 					String line;
-	                while ((line = reader.readLine()) != null) {    
-	                	final int idx = line.indexOf("  ");
-	                	if (idx >= 0 && line.length() > (idx + 2)) {
-	                		final String md5 = line.substring(0, idx);
-	                		final String key = line.substring(idx + 2);
-	                		final String currentMd5 = md5sums.get(key);
-	                		if (null == currentMd5) {
-	                			throw new ObsValidationException("Object not found: {} of family {}", key, object.getFamily());
-	                		}
-	                		if (!md5.equals(currentMd5)) {
-	                			throw new ObsValidationException("Checksum is wrong for object: {} of family {}", key, object.getFamily());
-	                		}
-	                		md5sums.remove(key);
-	                	}
+	                while ((line = reader.readLine()) != null) {
+						final Optional<Md5.Entry> md5Entry = Md5.parseIfPossible(line);
+
+						if(!md5Entry.isPresent()) {
+							continue; //skip non parseable line
+						}
+
+						final String md5 = md5Entry.get().getETag();
+						final String key = md5Entry.get().getFileName();
+						final String currentMd5 = md5sums.get(key);
+						if (null == currentMd5) {
+							throw new ObsValidationException("Object not found: {} of family {}", key, object.getFamily());
+						}
+						if (!md5.equals(currentMd5)) {
+							throw new ObsValidationException("Checksum is wrong for object: {} of family {}, expected {} but is {}", key, object.getFamily(), currentMd5, md5);
+						}
+						md5sums.remove(key);
 		            }
                 }
 				for (final String key : md5sums.keySet()) {
@@ -410,8 +403,32 @@ public abstract class AbstractObsClient implements ObsClient {
 
     }
 	
-	protected abstract Map<String,String> collectMd5Sums(ObsObject object) throws ObsServiceException, ObsException;
-//
+	protected abstract Map<String,String> collectETags(ObsObject object) throws ObsServiceException, ObsException;
+
+	@Override
+	public String getChecksum(ObsObject object) throws ObsException {
+		try {
+			final Map<String, InputStream> streams = getAllAsInputStream(object.getFamily(), Md5.md5KeyFor(object));
+			try {
+				final Optional<Md5.Entry> result = Md5.readFrom(streams.get(Md5.md5KeyFor(object)))
+						.stream().filter(md5 -> md5.getFileName().equals(object.getKey())).findFirst();
+
+				if(!result.isPresent()) {
+					throw new ObsException(AbstractCodedException.ErrorCode.INTERNAL_ERROR,
+							object.getFamily(),
+							object.getKey(),
+							"md5sum cold not determined (not contained in md5sum file)");
+				}
+
+				return result.get().getMd5Hash();
+			} finally {
+				Utils.closeQuietly(streams.values());
+			}
+		} catch (SdkClientException | IOException e) {
+			throw new ObsException(object.getFamily(), object.getKey(), e);
+		}
+	}
+
 	@FunctionalInterface
 	interface VoidCallable {
 
@@ -426,9 +443,7 @@ public abstract class AbstractObsClient implements ObsClient {
 	}
 	
 	static Callable<List<String>> wrapStringList(final StringListCallable callable) {
-		return () -> {
-			return callable.call();
-		};
+		return callable::call;
 	}
 	
 	@FunctionalInterface
@@ -436,7 +451,7 @@ public abstract class AbstractObsClient implements ObsClient {
 		List<String> call() throws Exception;
 	}
 
-	public void uploadMd5Sum(final ObsObject object, final List<String> fileList) throws ObsServiceException, S3SdkClientException {
+	public void uploadMd5Sum(final ObsObject object, final List<Md5.Entry> md5Sums) throws ObsServiceException, S3SdkClientException {
 	}
 
 	protected ObsConfigurationProperties getConfiguration() {

@@ -12,7 +12,6 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
-import esa.s1pdgs.cpoc.obs_sdk.Md5;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.javaswift.joss.instructions.UploadInstructions;
@@ -20,7 +19,7 @@ import org.javaswift.joss.model.Account;
 import org.javaswift.joss.model.Container;
 import org.javaswift.joss.model.StoredObject;
 
-import esa.s1pdgs.cpoc.obs_sdk.AbstractObsClient;
+import esa.s1pdgs.cpoc.obs_sdk.Md5;
 import esa.s1pdgs.cpoc.obs_sdk.s3.S3ObsServices;
 
 public class SwiftObsServices {
@@ -59,7 +58,6 @@ public class SwiftObsServices {
     /**
      * Internal function to log messages
      * 
-     * @param message
      */
     private void log(final String message) {
         if (LOGGER.isDebugEnabled()) {
@@ -70,10 +68,6 @@ public class SwiftObsServices {
 	/**
      * Check if object with such key in container exists
      * 
-     * @param containerName
-     * @param keyName
-     * @return
-	 * @throws SwiftSdkClientException
      */
 	public boolean exist(final String containerName, final String keyName) {
 		Container container = client.getContainer(containerName);
@@ -83,9 +77,6 @@ public class SwiftObsServices {
 	/**
      * Check if container exists
      * 
-     * @param containerName
-     * @return
-	 * @throws SwiftSdkClientException
      */
 	public boolean containerExist(final String containerName) {
 		Container container = client.getContainer(containerName);
@@ -95,10 +86,6 @@ public class SwiftObsServices {
 	/**
      * Get the number of objects in the container whose key matches with prefix
      * 
-     * @param containerName
-     * @param prefixKey
-     * @return
-	 * @throws SwiftSdkClientException
      */
 	public int getNbObjects(String containerName, String prefixKey) throws SwiftSdkClientException {
         for (int retryCount = 1;; retryCount++) {
@@ -152,13 +139,7 @@ public class SwiftObsServices {
 	/**
      * Download objects of the given container with a key matching the prefix
      * 
-     * @param containerName
-     * @param prefixKey
-     * @param directoryPath
-     * @param ignoreFolders
      * @return the downloaded files
-	 * @throws SwiftObsServiceException
-	 * @throws SwiftSdkClientException
      */
 	public List<File> downloadObjectsWithPrefix(final String containerName,
             final String prefixKey, final String directoryPath,
@@ -254,8 +235,7 @@ public class SwiftObsServices {
                                 String.format("Download in %s fails: %s",
                                         directoryPath, e.getMessage()), e);
                     }
-                    continue;
-                } else {
+				} else {
                     throw new SwiftSdkClientException(containerName, prefixKey,
                             String.format("Download in %s fails: %s",
                                     directoryPath, e.getMessage()), e);
@@ -265,16 +245,11 @@ public class SwiftObsServices {
     }
 
 	/**
-	 * @param containerName
-	 * @param keyName
-	 * @param uploadFile
 	 * @return file information (md5 sum with filename)
-	 * @throws SwiftObsServiceException
-	 * @throws SwiftSdkClientException
 	 */
-	public String uploadFile(String containerName, String keyName, final File uploadFile)
+	public Md5.Entry uploadFile(String containerName, String keyName, final File uploadFile)
 			throws SwiftObsServiceException, SwiftSdkClientException {
-		String md5 = null;
+		String md5;
 	    for (int retryCount = 1;; retryCount++) {
             try {
                 log(String.format("Uploading object %s in container %s", keyName,
@@ -306,18 +281,17 @@ public class SwiftObsServices {
                         throw new SwiftSdkClientException(containerName, keyName,
                                 String.format("Upload fails: %s", e.getMessage()), e);
                     }
-                    continue;
-                } else {
+				} else {
                     throw new SwiftSdkClientException(containerName, keyName,
                             String.format("Upload fails: %s", e.getMessage()), e);
                 }
             }
         }
-	    return md5 + "  " + keyName;
+	    return new Md5.Entry(md5, md5, keyName);
 	}
 
-	public String uploadStream(String containerName, String keyName, final InputStream in, long contentLength) throws SwiftSdkClientException {
-		String md5 = null;
+	public Md5.Entry uploadStream(String containerName, String keyName, final InputStream in, long contentLength) throws SwiftSdkClientException {
+		String md5;
 		for (int retryCount = 1;; retryCount++) {
 			try {
 				log(String.format("Uploading object %s in container %s", keyName,
@@ -349,28 +323,22 @@ public class SwiftObsServices {
 						throw new SwiftSdkClientException(containerName, keyName,
 								String.format("Upload fails: %s", e.getMessage()), e);
 					}
-					continue;
 				} else {
 					throw new SwiftSdkClientException(containerName, keyName,
 							String.format("Upload fails: %s", e.getMessage()), e);
 				}
 			}
 		}
-		return md5 + "  " + keyName;
+		return new Md5.Entry(md5, md5, keyName);
 	}
 
 	/**
-     * @param containerName
-     * @param keyName
-     * @param uploadDirectory
      * @return file informations (list of md5 sums with filenames)
-	 * @throws SwiftSdkClientException 
-	 * @throws SwiftObsServiceException 
      */
-	public List<String> uploadDirectory(final String containerName, final String keyName,
+	public List<Md5.Entry> uploadDirectory(final String containerName, final String keyName,
             final File uploadDirectory)
             throws SwiftObsServiceException, SwiftSdkClientException {
-		List<String> fileList = new ArrayList<>(); 
+		List<Md5.Entry> fileList = new ArrayList<>();
         if (uploadDirectory.isDirectory()) {
             File[] childs = uploadDirectory.listFiles();
             if (childs != null) {
@@ -410,8 +378,7 @@ public class SwiftObsServices {
                     	throw new SwiftSdkClientException(containerName,
                                 String.format("Create container fails: %s", e.getMessage()), e);
                     }
-                    continue;
-                } else {
+				} else {
                     throw new SwiftSdkClientException(containerName,
                             String.format("Create container fails: %s", e.getMessage()), e);
                 }
@@ -458,8 +425,7 @@ public class SwiftObsServices {
                         throw new SwiftSdkClientException(containerName, keyName,
                                 String.format("Delete fails: %s", e.getMessage()), e);
                     }
-                    continue;
-                } else {
+				} else {
                     throw new SwiftSdkClientException(containerName, keyName,
                             String.format("Delete fails: %s", e.getMessage()), e);
                 }
@@ -469,19 +435,12 @@ public class SwiftObsServices {
 	}
 
 	/**
-	 * @param containerName
-	 * @return
-	 * @throws SwiftSdkClientException 
 	 */
 	public Collection<StoredObject> listObjectsFromContainer(String containerName) throws SwiftSdkClientException {
 		return listNextBatchOfObjectsFromContainer(containerName, "");
 	}
 
 	/**
-	 * @param containerName
-	 * @param leMarker
-	 * @return
-	 * @throws SwiftSdkClientException 
 	 */
 	public Collection<StoredObject> listNextBatchOfObjectsFromContainer(String containerName, String leMarker) throws SwiftSdkClientException {
 		String marker = leMarker;		
@@ -511,7 +470,6 @@ public class SwiftObsServices {
 						throw new SwiftSdkClientException(containerName, "",
 								String.format("Listing objects fails: %s", e.getMessage()), e);
 					}
-					continue;
 				} else {
 					throw new SwiftSdkClientException(containerName, "",
 							String.format("Listing objects fails: %s", e.getMessage()), e);
@@ -520,7 +478,7 @@ public class SwiftObsServices {
 		}
 	}
 	
-	private final Iterable<StoredObject> getAll(final String containerName, final String prefix) {				
+	private Iterable<StoredObject> getAll(final String containerName, final String prefix) {
 		final List<StoredObject> result = new ArrayList<>(); 
 		String marker = "";
 		String lastNonSegmentName = "";
@@ -562,7 +520,7 @@ public class SwiftObsServices {
     	return result; 
     }
 
-	public final Map<String,String> collectMd5Sums(final String bucketName, final String prefix) throws SwiftObsServiceException, SwiftSdkClientException {
+	public final Map<String,String> collectETags(final String bucketName, final String prefix) throws SwiftObsServiceException, SwiftSdkClientException {
     	Map<String,String> result;
     	for (int retryCount = 1;; retryCount++) {
     		result = new HashMap<>();
@@ -583,8 +541,7 @@ public class SwiftObsServices {
                     } catch (InterruptedException ie) {
                         throw new SwiftSdkClientException(bucketName, prefix,String.format("Listing fails: %s", e.getMessage()), e);
                     }
-                    continue;
-                } else {
+				} else {
                     throw new SwiftSdkClientException(bucketName, prefix, String.format("Upload fails: %s", e.getMessage()), e);
                 }
             }
@@ -601,17 +558,6 @@ public class SwiftObsServices {
 					"Size query for object %s from bucket %s returned %s results", key, bucketName, results.size()));
 		}
 		return results.get(0).getContentLength();
-	}
-
-	public String getChecksum(String bucketName, String key) throws SwiftSdkClientException {
-		log(String.format("Get checksum of object %s from bucket %s", key, bucketName));
-		List<StoredObject> results = new ArrayList<>();
-		getAll(bucketName, key).forEach(results::add);
-		if (results.size() != 1) {
-			throw new SwiftSdkClientException(bucketName, key, String.format(
-					"Checksum query for object %s from bucket %s returned %s results", key, bucketName, results.size()));
-		}
-		return results.get(0).getEtag();
 	}
 
 	public URL createTemporaryDownloadUrl(String bucketName, String key, long expirationTimeInSeconds) throws SwiftSdkClientException {

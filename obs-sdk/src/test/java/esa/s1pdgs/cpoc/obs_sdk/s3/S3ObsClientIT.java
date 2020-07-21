@@ -1,6 +1,10 @@
 package esa.s1pdgs.cpoc.obs_sdk.s3;
 
 import static java.util.Collections.singletonList;
+import static org.hamcrest.CoreMatchers.equalTo;
+import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.Matchers.lessThan;
+import static org.hamcrest.number.OrderingComparison.greaterThan;
 import static org.junit.Assert.*;
 
 import java.io.BufferedInputStream;
@@ -16,14 +20,9 @@ import java.nio.file.Paths;
 import java.time.Duration;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
-import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
 import java.util.Map;
-import java.util.UUID;
-import java.util.function.IntFunction;
 import java.util.stream.Collectors;
-import java.util.stream.IntStream;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.logging.log4j.LogManager;
@@ -422,10 +421,10 @@ public class S3ObsClientIT {
     }
 
     @Test
-    public void testSetExpirationDate() throws SdkClientException, AbstractCodedException, ObsEmptyFileException {
+    public void testSetExpirationDate() throws SdkClientException {
         removeAllLifecycleRules();
 
-        uut.setExpirationTime(new ObsObject(ProductFamily.AUXILIARY_FILE, "AUX-FILE.DAT"),Instant.now());
+        uut.setExpirationTime(new ObsObject(ProductFamily.AUXILIARY_FILE, "AUX-FILE.DAT"), Instant.now());
 
         final BucketLifecycleConfiguration lifecycleConfiguration = uut.s3Services.s3client.getBucketLifecycleConfiguration(auxiliaryFilesBucketName);
 
@@ -457,7 +456,7 @@ public class S3ObsClientIT {
 
     @Test
     public void testGetMetadata() throws SdkClientException, AbstractCodedException, ObsEmptyFileException {
-        Instant justBeforeCreation = Instant.now().minus(Duration.ofSeconds(1));
+        Instant justBeforeCreation = Instant.now().minus(Duration.ofMinutes(1));
 
         final String obsKey = testFilePrefix1 + testFileName1;
         assertFalse(uut.exists(new ObsObject(auxiliaryFiles, obsKey)));
@@ -469,7 +468,18 @@ public class S3ObsClientIT {
         final ObsObjectMetadata metadata = uut.getMetadata(new ObsObject(ProductFamily.AUXILIARY_FILE, obsKey));
 
         assertEquals(obsKey, metadata.getKey());
-        assertTrue(metadata.getLastModified().isAfter(justBeforeCreation));
-        assertTrue(metadata.getLastModified().isBefore(justAfterCreation));
+        assertThat(metadata.getLastModified(), is(greaterThan(justBeforeCreation)));
+        assertThat(metadata.getLastModified(), is(lessThan(justAfterCreation)));
+    }
+
+    @Test
+    public void testGetChecksum() throws SdkClientException, AbstractCodedException, ObsEmptyFileException {
+        // upload
+        assertFalse(uut.exists(new ObsObject(auxiliaryFiles, testFileName1)));
+        uut.upload(singletonList(new FileObsUploadObject(auxiliaryFiles, testFileName1, testFile1)), ReportingFactory.NULL);
+        assertTrue(uut.exists(new ObsObject(auxiliaryFiles, testFileName1)));
+
+        final String md5 = uut.getChecksum(new ObsObject(auxiliaryFiles, testFileName1));
+        assertThat(md5, is(equalTo("98f6bcd4621d373cade4e832627b4f6")));
     }
 }

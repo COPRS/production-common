@@ -32,6 +32,7 @@ import esa.s1pdgs.cpoc.common.ProductFamily;
 import esa.s1pdgs.cpoc.common.errors.AbstractCodedException;
 import esa.s1pdgs.cpoc.common.errors.obs.ObsException;
 import esa.s1pdgs.cpoc.obs_sdk.FileObsUploadObject;
+import esa.s1pdgs.cpoc.obs_sdk.Md5;
 import esa.s1pdgs.cpoc.obs_sdk.ObsConfigurationProperties;
 import esa.s1pdgs.cpoc.obs_sdk.ObsDownloadObject;
 import esa.s1pdgs.cpoc.obs_sdk.ObsEmptyFileException;
@@ -104,9 +105,10 @@ public class S3ObsClientTest {
                 eq("key-exist"));
         doReturn(0).when(service).getNbObjects(Mockito.anyString(),
                 eq("key-not-exist"));
-        doReturn("dummy").when(service).uploadFile(Mockito.anyString(),
+        doReturn(new Md5.Entry("dummy", "dummy", "dummy"))
+                .when(service).uploadFile(Mockito.anyString(),
                 Mockito.anyString(), any());
-        doReturn("dummy").when(service).uploadStream(Mockito.anyString(),
+        doReturn(new Md5.Entry("dummy", "dummy", "dummy")).when(service).uploadStream(Mockito.anyString(),
                 Mockito.anyString(), any(InputStream.class), anyLong());
 
         final ObjectMetadata objectMetadata = new ObjectMetadata();
