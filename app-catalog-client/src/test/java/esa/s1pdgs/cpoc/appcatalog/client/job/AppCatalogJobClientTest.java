@@ -76,7 +76,7 @@ public class AppCatalogJobClientTest {
     public void testFindByMessagesIdWhenError() throws AbstractCodedException {
         doThrow(new RestClientException("rest client exception"))
 	        .when(restTemplate).exchange(
-	        		Mockito.any(URI.class),
+	        		Mockito.anyString(),
 	                Mockito.any(HttpMethod.class),
 	                Mockito.any(),
 	                Mockito.any(ParameterizedTypeReference.class)
@@ -89,7 +89,7 @@ public class AppCatalogJobClientTest {
     public void testFindByProductSessionIdWhenError() throws AbstractCodedException {
         doThrow(new RestClientException("rest client exception"))
 	        .when(restTemplate).exchange(
-	        		Mockito.any(URI.class),
+	        		Mockito.anyString(),
 	                Mockito.any(HttpMethod.class),
 	                Mockito.any(),
 	                Mockito.any(ParameterizedTypeReference.class)
@@ -102,7 +102,7 @@ public class AppCatalogJobClientTest {
     public void testFindByProductDataTakeIdWhenError() throws AbstractCodedException {
         doThrow(new RestClientException("rest client exception"))
 	        .when(restTemplate).exchange(
-	        		Mockito.any(URI.class),
+	        		Mockito.anyString(),
 	                Mockito.any(HttpMethod.class),
 	                Mockito.any(),
 	                Mockito.any(ParameterizedTypeReference.class)
@@ -115,7 +115,7 @@ public class AppCatalogJobClientTest {
     public void testFindJobInStateGeneratingWhenError() throws AbstractCodedException {
         doThrow(new RestClientException("rest client exception"))
 	        .when(restTemplate).exchange(
-	        		Mockito.any(URI.class),
+	        		Mockito.anyString(),
 	                Mockito.any(HttpMethod.class),
 	                Mockito.any(),
 	                Mockito.any(ParameterizedTypeReference.class)
@@ -125,24 +125,24 @@ public class AppCatalogJobClientTest {
 
     @SuppressWarnings("unchecked")
 	private final void runSearchTest(final Callable<Void> callable, final String apiMethod, final String apiParameterValue) throws Exception {   
-    	final URI expectedUri = new URI("http://localhost:8080/jobs/" + apiMethod + "/" + apiParameterValue);
-    	doReturn(new ResponseEntity<AppDataJob>(HttpStatus.OK))
-	    	.when(restTemplate).exchange(
-		        		Mockito.any(URI.class),
-		                Mockito.any(HttpMethod.class),
-		                Mockito.any(),
-		                Mockito.any(ParameterizedTypeReference.class)
-	    );
-        callable.call();
-        
-        verify(restTemplate, times(1)).exchange(
-                Mockito.eq(expectedUri),
-                Mockito.eq(HttpMethod.GET),
-                Mockito.isNull(),
-                Mockito.eq(new ParameterizedTypeReference<List<AppDataJob>>() {})
-        );
-        verifyNoMoreInteractions(restTemplate);
-    }
+       	final String expectedUri = "http://localhost:8080/jobs/" + apiMethod + "/" + apiParameterValue;
+       	doReturn(new ResponseEntity<AppDataJob>(HttpStatus.OK))
+   	    	.when(restTemplate).exchange(
+   		        		Mockito.anyString(),
+   		                Mockito.any(HttpMethod.class),
+   		                Mockito.any(),
+   		                Mockito.any(ParameterizedTypeReference.class)
+   	    );
+           callable.call();
+           
+           verify(restTemplate, times(1)).exchange(
+                   Mockito.eq(expectedUri),
+                   Mockito.eq(HttpMethod.GET),
+                   Mockito.isNull(),
+                   Mockito.eq(new ParameterizedTypeReference<List<AppDataJob>>() {})
+           );
+           verifyNoMoreInteractions(restTemplate);
+       }
 
     @Test
     public void testtestFindByMessagesId() throws Exception {
