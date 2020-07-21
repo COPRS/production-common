@@ -15,7 +15,6 @@ import java.util.function.Function;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
@@ -124,10 +123,7 @@ public class IpfPreparationWorkerConfiguration {
     }
 
 	@Bean
-	@Autowired
-	public ProductTypeAdapter typeAdapter(
-			@Value("${level-products.pathroutingxmlfile}") final String pathRoutingXmlFile
-	) {
+	public ProductTypeAdapter typeAdapter() {
 		if (processSettings.getLevel() == ApplicationLevel.L0) {
 			return new EdrsSessionTypeAdapter(
 					metadataClient, 
