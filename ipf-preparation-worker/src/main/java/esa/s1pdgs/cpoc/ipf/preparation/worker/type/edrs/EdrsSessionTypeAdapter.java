@@ -1,5 +1,6 @@
 package esa.s1pdgs.cpoc.ipf.preparation.worker.type.edrs;
 
+import java.io.File;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -165,25 +166,28 @@ public final class EdrsSessionTypeAdapter extends AbstractProductTypeAdapter imp
         	final List<AppDataJobFile> raws1 = product.getRawsForChannel(1);
         	final List<AppDataJobFile> raws2 = product.getRawsForChannel(2);
 
-            // Add raw to the job order, one file per channel, alterating and in alphabetic order
-            for (int i = 0; i < Math.max(raws1.size(), raws2.size()); i++) {
-                if (i < raws1.size()) {
-                    final AppDataJobFile raw = raws1.get(i);
-                    dto.addInput(
-                            new LevelJobInputDto(
-                                    ProductFamily.EDRS_SESSION.name(),
-                                    dto.getWorkDirectory() + "ch01/" + raw.getFilename(),
-                                    raw.getKeyObs()));
+            // Add raw to the job order, one file per channel, alternating and in alphabetic order
+            for (int i = 0; i < Math.max(raws1.size(), raws2.size()); i++) {            	            	
+                if (i < raws1.size()) { 
+                    dto.addInput(newInputFor(raws1.get(i), dto.getWorkDirectory(), "ch01"));
                 }
                 if (i < raws2.size()) {
-                    final AppDataJobFile raw = raws2.get(i);
-                    dto.addInput(
-                            new LevelJobInputDto(
-                                    ProductFamily.EDRS_SESSION.name(),
-                                    dto.getWorkDirectory() + "ch02/" + raw.getFilename(),
-                                    raw.getKeyObs()));
+                    dto.addInput(newInputFor(raws2.get(i), dto.getWorkDirectory(), "ch02"));
                 }
             }
         }		
+	}
+
+	private final LevelJobInputDto newInputFor(
+			final AppDataJobFile file, 
+			final String directory,
+			final String channelSubdir
+	) {
+		final File channelFolder = new File(directory, channelSubdir);
+		return new LevelJobInputDto(
+				ProductFamily.EDRS_SESSION.name(),
+				new File(channelFolder, file.getFilename()).getPath(), 
+				file.getKeyObs()
+		);
 	}
 }
