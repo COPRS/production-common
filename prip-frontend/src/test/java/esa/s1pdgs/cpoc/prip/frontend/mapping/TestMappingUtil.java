@@ -140,7 +140,6 @@ public class TestMappingUtil {
 		checksum2.setAlgorithm("SHA256");
 		checksum2.setValue("e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855");
 		inputPripMetadata.setChecksums(Arrays.asList(checksum1, checksum2));
-		System.out.println("actual:");
 		Entity actualEntity = MappingUtil.pripMetadataToEntity(inputPripMetadata, "http://example.org");
 		
 		Assert.assertEquals(expectedEntity, actualEntity);
