@@ -1,5 +1,6 @@
 package esa.s1pdgs.cpoc.ipf.preparation.worker.appcat;
 
+import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
@@ -41,15 +42,8 @@ public class AppCatJobService {
 		return appCatClient.newJob(job);
 	}   
 
-	public AppDataJob next(final String tasktableName) throws AbstractCodedException {
-		final List<AppDataJob> jobs = appCatClient.findJobInStateGenerating(tasktableName);
-		
-		if (jobs == null || jobs.isEmpty()) {
-			LOG.trace("==  no job found in AppCatalog for taskTableXmlName {}", tasktableName);
-			return null;
-		}		
-		
-		for (final AppDataJob appDataJob : jobs) {			
+	public AppDataJob next(final String tasktableName) throws AbstractCodedException {		
+		for (final AppDataJob appDataJob : nextForTasktable(tasktableName)) {			
 			final AppDataJobGeneration jobGen = appDataJob.getGeneration();
 			
 			// check if grace period for state INITIAL and PRIMARY_CHECK is exceeded	
@@ -86,31 +80,6 @@ public class AppCatJobService {
 		);	
 	}
 	
-	private final AppDataJob find(final long jobId) throws AbstractCodedException {
-		final AppDataJob result = appCatClient.findById(jobId);
-		if (result == null) {
-			throw new InternalErrorException(String.format("Job %s is null", String.valueOf(jobId)));
-		}
-		return result;
-	}
-	
-	private final Optional<AppDataJob> first(final List<AppDataJob> result, final String desc) {
-		if (result == null || result.isEmpty()) {
-			LOG.debug("No AppDataJob found for {}", desc);
-			return Optional.empty();
-		}
-		// just an assertion to identify possible problems -> should not happen
-		if (result.size() != 1) {
-			final String jobIds = result.stream()
-					.map(j -> String.valueOf(j.getId()))
-					.collect(Collectors.joining(", "));
-			LOG.warn("More than one AppDataJob found for {}: {}", desc, jobIds);
-			// TODO: check how to deal with this problem
-			// for the time being: fall through
-		}	
-		return Optional.of(result.get(0));	
-	}
-
 	public final AppDataJob terminate(final AppDataJob job) throws AbstractCodedException {
     	LOG.info("Terminating appDataJob {} for product {}", job.getId(), job.getProductName());
     	job.setState(AppDataJobState.TERMINATED);  
@@ -209,6 +178,42 @@ public class AppCatJobService {
 				id, 
 				"send"
 		);
+	}
+	
+	
+	private final AppDataJob find(final long jobId) throws AbstractCodedException {
+		final AppDataJob result = appCatClient.findById(jobId);
+		if (result == null) {
+			throw new InternalErrorException(String.format("Job %s is null", String.valueOf(jobId)));
+		}
+		return result;
+	}
+	
+	private final Optional<AppDataJob> first(final List<AppDataJob> result, final String desc) {
+		if (result == null || result.isEmpty()) {
+			LOG.debug("No AppDataJob found for {}", desc);
+			return Optional.empty();
+		}
+		// just an assertion to identify possible problems -> should not happen
+		if (result.size() != 1) {
+			final String jobIds = result.stream()
+					.map(j -> String.valueOf(j.getId()))
+					.collect(Collectors.joining(", "));
+			LOG.warn("More than one AppDataJob found for {}: {}", desc, jobIds);
+			// TODO: check how to deal with this problem
+			// for the time being: fall through
+		}	
+		return Optional.of(result.get(0));	
+	}
+	
+	private final List<AppDataJob> nextForTasktable(final String tasktableName)  throws AbstractCodedException {
+		final List<AppDataJob> jobs = appCatClient.findJobInStateGenerating(tasktableName);
+		
+		if (jobs == null || jobs.isEmpty()) {
+			LOG.trace("==  no job found in AppCatalog for taskTableXmlName {}", tasktableName);
+			return Collections.emptyList();
+		}	
+		return jobs;		
 	}
 	
 }
