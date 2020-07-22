@@ -111,7 +111,7 @@ public class JobDispatcherImpl implements JobDispatcher {
 		// there is already a job for this message --> possible restart scenario --> just update the pod name 
 		if (jobForMess.isPresent()) {		
 			final AppDataJob job = jobForMess.get();
-			LOGGER.info("Found job {} already associated to mqiMessage {}. Ignoring new message ...",
+			LOGGER.warn("Found job {} already associated to mqiMessage {}. Ignoring new message ...",
 					job.getId(), firstMessage.getId());		
 		}
 		else if (specificJob.isPresent()) {
@@ -121,7 +121,7 @@ public class JobDispatcherImpl implements JobDispatcher {
 			appCat.appendMessage(existingJob.getId(), firstMessage);
 		}
 		else {
-			LOGGER.info("Persisting new job for message {} (catalog event message {}) ...",
+			LOGGER.debug("Persisting new job for message {} (catalog event message {}) ...",
 					message.getId(), firstMessage.getId());
 			
 			// no job yet associated to this message --> create job and persist
