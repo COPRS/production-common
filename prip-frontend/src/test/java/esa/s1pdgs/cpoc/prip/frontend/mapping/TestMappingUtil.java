@@ -8,6 +8,7 @@ import java.sql.Timestamp;
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.TimeZone;
@@ -17,11 +18,21 @@ import org.apache.olingo.commons.api.data.ComplexValue;
 import org.apache.olingo.commons.api.data.Entity;
 import org.apache.olingo.commons.api.data.Property;
 import org.apache.olingo.commons.api.data.ValueType;
+import org.apache.olingo.commons.api.edm.geo.ComposedGeospatial;
+import org.apache.olingo.commons.api.edm.geo.Geospatial;
+import org.apache.olingo.commons.api.edm.geo.LineString;
+import org.apache.olingo.commons.api.edm.geo.Point;
+import org.apache.olingo.commons.api.edm.geo.Polygon;
+import org.apache.olingo.commons.api.edm.geo.SRID;
+import org.apache.olingo.commons.api.edm.geo.Geospatial.Dimension;
 import org.junit.Assert;
 import org.junit.Test;
+import org.locationtech.jts.geom.Coordinate;
 
 import esa.s1pdgs.cpoc.prip.frontend.service.mapping.MappingUtil;
 import esa.s1pdgs.cpoc.prip.model.Checksum;
+import esa.s1pdgs.cpoc.prip.model.GeoShapePolygon;
+import esa.s1pdgs.cpoc.prip.model.PripGeoCoordinate;
 import esa.s1pdgs.cpoc.prip.model.PripMetadata;
 
 public class TestMappingUtil {
@@ -73,6 +84,21 @@ public class TestMappingUtil {
 		ComplexValue contentDate = new ComplexValue();
 		contentDate.getValue().add(new Property(null, "Start", ValueType.PRIMITIVE, new Timestamp(111111111111L)));
 		contentDate.getValue().add(new Property(null, "End", ValueType.PRIMITIVE,new Timestamp(222222222222L)));
+		SRID srid = SRID.valueOf("4326");
+		Point p1 = new Point(Dimension.GEOGRAPHY, srid);
+		p1.setX(0.0);
+		p1.setY(1.0);
+		Point p2 = new Point(Dimension.GEOGRAPHY, srid);
+		p2.setX(2.0);
+		p2.setY(3.0);
+		Point p3 = new Point(Dimension.GEOGRAPHY, srid);
+		p3.setX(4.0);
+		p3.setY(5.0);
+		Point p4 = new Point(Dimension.GEOGRAPHY, srid);
+		p4.setX(0.0);
+		p4.setY(1.0);
+		LineString lineString = new LineString(Dimension.GEOGRAPHY, srid, Arrays.asList(p1, p2, p3, p4));
+		Geospatial footprint = new Polygon(Dimension.GEOGRAPHY, srid, null, lineString);
 		ComplexValue cv1 = new ComplexValue();
 		cv1.getValue().add(new Property(null, "Algorithm", ValueType.PRIMITIVE, "MD5"));
 		cv1.getValue().add(new Property(null, "Value", ValueType.PRIMITIVE, "d41d8cd98f00b204e9800998ecf8427e"));
@@ -88,7 +114,8 @@ public class TestMappingUtil {
 				.addProperty(new Property(null, "PublicationDate", ValueType.PRIMITIVE, new Timestamp(100000000000L)))
 				.addProperty(new Property(null, "EvictionDate", ValueType.PRIMITIVE, new Timestamp(200000000000L)))
 				.addProperty(new Property(null, "ProductionType", ValueType.ENUM, 0))
-				.addProperty(new Property(null, "Checksums", ValueType.COLLECTION_COMPLEX, Arrays.asList(cv1, cv2)));
+				.addProperty(new Property(null, "Checksums", ValueType.COLLECTION_COMPLEX, Arrays.asList(cv1, cv2)))
+				.addProperty(new Property(null, "Footprint", ValueType.GEOSPATIAL, footprint));
 		expectedEntity.setMediaContentType("application/octet-stream");
 		expectedEntity.setId(uri);
 		
@@ -101,13 +128,19 @@ public class TestMappingUtil {
 		inputPripMetadata.setContentDateEnd(LocalDateTime.ofInstant(Instant.ofEpochMilli(222222222222L), TimeZone.getTimeZone("UTC").toZoneId()));
 		inputPripMetadata.setCreationDate(LocalDateTime.ofInstant(Instant.ofEpochMilli(100000000000L), TimeZone.getTimeZone("UTC").toZoneId()));
 		inputPripMetadata.setEvictionDate(LocalDateTime.ofInstant(Instant.ofEpochMilli(200000000000L), TimeZone.getTimeZone("UTC").toZoneId()));
-		Checksum c1 = new Checksum();
-		c1.setAlgorithm("MD5");
-		c1.setValue("d41d8cd98f00b204e9800998ecf8427e");
-		Checksum c2 = new Checksum();
-		c2.setAlgorithm("SHA256");
-		c2.setValue("e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855");
-		inputPripMetadata.setChecksums(Arrays.asList(c1, c2));
+		
+		GeoShapePolygon inputPolygon = new GeoShapePolygon(Arrays.asList(
+				new PripGeoCoordinate(0.0, 1.0), new PripGeoCoordinate(2.0, 3.0),
+				new PripGeoCoordinate(4.0, 5.0), new PripGeoCoordinate(0.0, 1.0)));
+		inputPripMetadata.setFootprint(inputPolygon);
+		Checksum checksum1 = new Checksum();
+		checksum1.setAlgorithm("MD5");
+		checksum1.setValue("d41d8cd98f00b204e9800998ecf8427e");
+		Checksum checksum2 = new Checksum();
+		checksum2.setAlgorithm("SHA256");
+		checksum2.setValue("e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855");
+		inputPripMetadata.setChecksums(Arrays.asList(checksum1, checksum2));
+		System.out.println("actual:");
 		Entity actualEntity = MappingUtil.pripMetadataToEntity(inputPripMetadata, "http://example.org");
 		
 		Assert.assertEquals(expectedEntity, actualEntity);

@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -37,6 +38,7 @@ import esa.s1pdgs.cpoc.common.utils.DateUtils;
 import esa.s1pdgs.cpoc.prip.model.Checksum;
 import esa.s1pdgs.cpoc.prip.model.GeoShapePolygon;
 import esa.s1pdgs.cpoc.prip.model.PripDateTimeFilter;
+import esa.s1pdgs.cpoc.prip.model.PripGeoCoordinate;
 import esa.s1pdgs.cpoc.prip.model.PripGeoShape;
 import esa.s1pdgs.cpoc.prip.model.PripMetadata;
 import esa.s1pdgs.cpoc.prip.model.PripTextFilter;
@@ -305,8 +307,17 @@ public class PripElasticSearchMetadataRepo implements PripMetadataRepository {
 			final List<Object> footprintCoordinatesOuterArray = (List<Object>) footprintJson
 					.get(PripGeoShape.FIELD_NAMES.COORDINATES.fieldName());
 			final List<Object> footprintCoordinatesInnerArray = (List<Object>) footprintCoordinatesOuterArray.get(0);
-
-			return new GeoShapePolygon(footprintCoordinatesInnerArray);
+			
+			
+			List<PripGeoCoordinate> pripGeoCoordinates = new ArrayList<>(); 
+			for (final Object coordPair : Objects.requireNonNull(footprintCoordinatesInnerArray)) {
+				final List<Number> coords = (List<Number>) coordPair;
+				final double lon = coords.get(0).doubleValue();
+				final double lat = coords.get(1).doubleValue();
+				pripGeoCoordinates.add(new PripGeoCoordinate(lon, lat));
+			}
+			
+			return new GeoShapePolygon(pripGeoCoordinates);
 		}
 
 		return null;

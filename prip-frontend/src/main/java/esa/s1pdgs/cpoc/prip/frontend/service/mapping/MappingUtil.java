@@ -2,11 +2,12 @@ package esa.s1pdgs.cpoc.prip.frontend.service.mapping;
 
 import static esa.s1pdgs.cpoc.prip.frontend.service.edm.EntityTypeProperties.Algorithm;
 import static esa.s1pdgs.cpoc.prip.frontend.service.edm.EntityTypeProperties.Checksums;
-import static esa.s1pdgs.cpoc.prip.frontend.service.edm.EntityTypeProperties.ContentLength;
 import static esa.s1pdgs.cpoc.prip.frontend.service.edm.EntityTypeProperties.ContentDate;
+import static esa.s1pdgs.cpoc.prip.frontend.service.edm.EntityTypeProperties.ContentLength;
 import static esa.s1pdgs.cpoc.prip.frontend.service.edm.EntityTypeProperties.ContentType;
 import static esa.s1pdgs.cpoc.prip.frontend.service.edm.EntityTypeProperties.End;
 import static esa.s1pdgs.cpoc.prip.frontend.service.edm.EntityTypeProperties.EvictionDate;
+import static esa.s1pdgs.cpoc.prip.frontend.service.edm.EntityTypeProperties.Footprint;
 import static esa.s1pdgs.cpoc.prip.frontend.service.edm.EntityTypeProperties.Id;
 import static esa.s1pdgs.cpoc.prip.frontend.service.edm.EntityTypeProperties.Name;
 import static esa.s1pdgs.cpoc.prip.frontend.service.edm.EntityTypeProperties.ProductionType;
@@ -28,10 +29,19 @@ import org.apache.olingo.commons.api.data.ComplexValue;
 import org.apache.olingo.commons.api.data.Entity;
 import org.apache.olingo.commons.api.data.Property;
 import org.apache.olingo.commons.api.data.ValueType;
+import org.apache.olingo.commons.api.edm.geo.Geospatial;
+import org.apache.olingo.commons.api.edm.geo.Geospatial.Dimension;
+import org.apache.olingo.commons.api.edm.geo.LineString;
+import org.apache.olingo.commons.api.edm.geo.Point;
+import org.apache.olingo.commons.api.edm.geo.Polygon;
+import org.apache.olingo.commons.api.edm.geo.SRID;
 import org.apache.olingo.commons.api.ex.ODataRuntimeException;
 
 import esa.s1pdgs.cpoc.prip.frontend.service.edm.EdmProvider;
 import esa.s1pdgs.cpoc.prip.model.Checksum;
+import esa.s1pdgs.cpoc.prip.model.GeoShapePolygon;
+import esa.s1pdgs.cpoc.prip.model.PripGeoCoordinate;
+import esa.s1pdgs.cpoc.prip.model.PripGeoShape;
 import esa.s1pdgs.cpoc.prip.model.PripMetadata;
 
 public class MappingUtil {
@@ -49,7 +59,8 @@ public class MappingUtil {
 				.addProperty(new Property(null, PublicationDate.name(), ValueType.PRIMITIVE, convertLocalDateTimeToTimestamp(pripMetadata.getCreationDate())))
 				.addProperty(new Property(null, EvictionDate.name(), ValueType.PRIMITIVE, convertLocalDateTimeToTimestamp(pripMetadata.getEvictionDate())))
 				.addProperty(new Property(null, ProductionType.name(), ValueType.ENUM, mapToProductionType(esa.s1pdgs.cpoc.prip.model.ProductionType.SYSTEMATIC_PRODUCTION)))
-				.addProperty(new Property(null, Checksums.name(), ValueType.COLLECTION_COMPLEX, mapToChecksumList(pripMetadata.getChecksums())));
+				.addProperty(new Property(null, Checksums.name(), ValueType.COLLECTION_COMPLEX, mapToChecksumList(pripMetadata.getChecksums())))
+				.addProperty(new Property(null, Footprint.name(), ValueType.GEOSPATIAL, mapToGeospatial(pripMetadata.getFootprint())));
 		entity.setMediaContentType(pripMetadata.getContentType());
 		entity.setId(uri);
 		return entity;
@@ -98,6 +109,23 @@ public class MappingUtil {
 		return listOfComplexValues;
 	}
 	
+	public static Geospatial mapToGeospatial(PripGeoShape footprint) {
+		Geospatial result = null;
+		if(null != footprint && footprint instanceof GeoShapePolygon) {
+			SRID srid = SRID.valueOf(String.valueOf(footprint.getSRID()));
+			List<Point> points = new ArrayList<>();
+			for (PripGeoCoordinate coordinates : footprint.getCoordinates()) {
+				Point p = new Point(Dimension.GEOGRAPHY, srid);
+				p.setX(coordinates.getLongitude());
+				p.setY(coordinates.getLatitude());
+				points.add(p);
+			}			
+			LineString lineString = new LineString(Dimension.GEOGRAPHY, srid, points);
+			result = new Polygon(Dimension.GEOGRAPHY, srid, null, lineString);
+		}
+		return result;
+	}
+
 	public static Integer mapToProductionType(esa.s1pdgs.cpoc.prip.model.ProductionType productionType) {
 		return productionType.getValue();
 	}

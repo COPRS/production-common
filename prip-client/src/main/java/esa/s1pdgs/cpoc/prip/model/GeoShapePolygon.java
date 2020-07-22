@@ -9,7 +9,7 @@ import org.elasticsearch.common.geo.GeoShapeType;
  */
 public class GeoShapePolygon extends PripGeoShape {
 	
-	public GeoShapePolygon(List<Object> coordinates) {
+	public GeoShapePolygon(List<PripGeoCoordinate> coordinates) {
 		super(GeoShapeType.POLYGON,coordinates);
 	}
 

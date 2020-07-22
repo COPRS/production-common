@@ -1,12 +1,9 @@
 package esa.s1pdgs.cpoc.prip.model;
 
 import java.util.List;
-import java.util.Objects;
 
 import org.elasticsearch.common.geo.GeoShapeType;
-import org.elasticsearch.common.geo.builders.CoordinatesBuilder;
 import org.json.JSONObject;
-import org.locationtech.jts.geom.Coordinate;
 
 /**
  * Java representation of the elasticsearch geo_shape type.
@@ -31,26 +28,16 @@ public class PripGeoShape {
 	// --------------------------------------------------------------------------
 
 	protected GeoShapeType type;
-	protected List<Coordinate> coordinates;
+	protected List<PripGeoCoordinate> coordinates;
 
 	// --------------------------------------------------------------------------
 
-	public PripGeoShape(String type, List<Object> coordinates) {
+	public PripGeoShape(String type, List<PripGeoCoordinate> coordinates) {
 		this(GeoShapeType.valueOf(type), coordinates);
 	}
 
-	protected PripGeoShape(GeoShapeType type, List<Object> coordinates) {
-		this.type = Objects.requireNonNull(type);
-
-		final CoordinatesBuilder coordBuilder = new CoordinatesBuilder();
-		for (final Object coordPair : Objects.requireNonNull(coordinates)) {
-			final List<Number> coords = (List<Number>) coordPair;
-			final double lon = coords.get(0).doubleValue();
-			final double lat = coords.get(1).doubleValue();
-			coordBuilder.coordinate(lon, lat);
-		}
-		// coordBuilder.close();
-		this.coordinates = coordBuilder.build();
+	protected PripGeoShape(GeoShapeType type, List<PripGeoCoordinate> coordinates) {
+		this.coordinates = coordinates;
 	}
 
 	// --------------------------------------------------------------------------
@@ -119,11 +106,11 @@ public class PripGeoShape {
 		this.type = type;
 	}
 
-	public List<Coordinate> getCoordinates() {
+	public List<PripGeoCoordinate> getCoordinates() {
 		return coordinates;
 	}
 
-	public void setCoordinates(List<Coordinate> coordinates) {
+	public void setCoordinates(List<PripGeoCoordinate> coordinates) {
 		this.coordinates = coordinates;
 	}
 	
