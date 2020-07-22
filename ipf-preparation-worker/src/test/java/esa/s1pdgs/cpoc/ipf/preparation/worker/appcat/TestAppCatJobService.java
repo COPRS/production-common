@@ -16,8 +16,6 @@ import org.mockito.MockitoAnnotations;
 
 import esa.s1pdgs.cpoc.appcatalog.AppDataJob;
 import esa.s1pdgs.cpoc.appcatalog.client.job.AppCatalogJobClient;
-import esa.s1pdgs.cpoc.mqi.model.queue.CatalogEvent;
-import esa.s1pdgs.cpoc.mqi.model.rest.GenericMessageDto;
 
 public class TestAppCatJobService {
 	@Mock
@@ -75,16 +73,16 @@ public class TestAppCatJobService {
     	assertEquals(job, uut.next(tasktableName));
 		verify(gracePeriodHandler, times(1)).isWithinGracePeriod(Mockito.any(), Mockito.eq(job.getGeneration()));	
 	}
-	
-	@Test
-	public final void testFindJobFor_AppCatReturnsJobForMessage() {
-		final GenericMessageDto<CatalogEvent> mess = new GenericMessageDto<>();
-		mess.setId(1234);
-		final AppDataJob job = new AppDataJob();
-		job.getMessages()
-		
-	  	doReturn(Collections.singletonList(job)).when(appCatClient).findJobInStateGenerating(Mockito.eq(tasktableName));
-	
-		uut.findJobFor(mqiMessage)
-	}
+//	
+//	@Test
+//	public final void testFindJobFor_AppCatReturnsJobForMessage() {
+//		final GenericMessageDto<CatalogEvent> mess = new GenericMessageDto<>();
+//		mess.setId(1234);
+//		final AppDataJob job = new AppDataJob();
+//		job.getMessages()
+//		
+//	  	doReturn(Collections.singletonList(job)).when(appCatClient).findJobInStateGenerating(Mockito.eq(tasktableName));
+//	
+//		uut.findJobFor(mqiMessage)
+//	}
 }
