@@ -75,16 +75,19 @@ public class AuxQuery {
 		return distributeResults(results);
 	}
 
-	public final void validate(AppDataJob job) throws IpfPrepWorkerInputsMissingException {
+	public final void validate(final AppDataJob job) throws IpfPrepWorkerInputsMissingException {
 		final List<AppDataJobInput> missingInputs = inputsWithoutResultsOf(job);
 		final Map<String, TaskTableInput> taskTableInputs = taskTableInputs();
 
 		final Map<String, String> missingMetadata = new HashMap<>();
 
-		for (AppDataJobInput missingInput : missingInputs) {
-			TaskTableInput taskTableInput = taskTableInputs.get(missingInput.getTaskTableInputReference());
+		for (final AppDataJobInput missingInput : missingInputs) {
+			final TaskTableInput taskTableInput = taskTableInputs.get(missingInput.getTaskTableInputReference());
 			if (missingInput.isMandatory()) {
-				missingMetadata.put(taskTableInput.toLogMessage(), "");
+				missingMetadata.put(						
+						missingInput.getTaskTableInputReference() + " is missing",
+						taskTableInput.toLogMessage()
+				);
 			} else {
 				// optional input
 
@@ -97,7 +100,10 @@ public class AuxQuery {
 							taskTableInput.toLogMessage());
 				}
 				else {
-					missingMetadata.put(missingInput.getTaskTableInputReference(), "");
+					missingMetadata.put(
+							missingInput.getTaskTableInputReference() + " is missing",
+							taskTableInput.toLogMessage()						
+					);
 				}
 			}
 		}
@@ -107,7 +113,7 @@ public class AuxQuery {
 		}
 	}
 
-	private List<AppDataJobInput> inputsWithoutResultsOf(AppDataJob job) {
+	private List<AppDataJobInput> inputsWithoutResultsOf(final AppDataJob job) {
 		return inputsOf(job).stream()
 				.flatMap(taskInputs -> taskInputs.getInputs().stream().filter(input -> !input.hasResults()))
 				.collect(toList());
@@ -205,7 +211,7 @@ public class AuxQuery {
 		);
 	}
 
-	private Map<TaskTableInputAlternative.TaskTableInputAltKey, SearchMetadataResult> performAuxQueriesFor(List<TaskTableInputAlternative> alternatives) {
+	private Map<TaskTableInputAlternative.TaskTableInputAltKey, SearchMetadataResult> performAuxQueriesFor(final List<TaskTableInputAlternative> alternatives) {
 		final Map<TaskTableInputAlternative.TaskTableInputAltKey, SearchMetadataResult> queries = toQueries(queryTemplatesFor(alternatives));
 
 		for (final SearchMetadataResult result : queries.values()) {
@@ -240,7 +246,7 @@ public class AuxQuery {
 		return queries;
 	}
 
-	private Map<TaskTableInputAlternative.TaskTableInputAltKey, SearchMetadataQuery> queryTemplatesFor(List<TaskTableInputAlternative> alternatives) {
+	private Map<TaskTableInputAlternative.TaskTableInputAltKey, SearchMetadataQuery> queryTemplatesFor(final List<TaskTableInputAlternative> alternatives) {
 		return alternatives.stream()
 				.collect(toMap(
 						TaskTableInputAlternative::getTaskTableInputAltKey,
@@ -284,7 +290,7 @@ public class AuxQuery {
 		return mergeInto(futureInputs, inputsOf(job));
 	}
 
-	private boolean addReferredInputFor(String reference, String referredInputReference, Map<String, AppDataJobInput> references, List<AppDataJobInput> futureInputs) {
+	private boolean addReferredInputFor(final String reference, final String referredInputReference, final Map<String, AppDataJobInput> references, final List<AppDataJobInput> futureInputs) {
 		if (references.containsKey(referredInputReference)) {
 			final AppDataJobInput referredInput = references.get(referredInputReference);
 			final AppDataJobInput inputForReference = new AppDataJobInput(reference, referredInput);
@@ -295,13 +301,13 @@ public class AuxQuery {
 		return false;
 	}
 
-	private List<AppDataJobTaskInputs> mergeInto(List<AppDataJobInput> inputsWithResults, List<AppDataJobTaskInputs> jobTaskInputs) {
+	private List<AppDataJobTaskInputs> mergeInto(final List<AppDataJobInput> inputsWithResults, final List<AppDataJobTaskInputs> jobTaskInputs) {
 		final Map<String, AppDataJobInput> newInputs
 				= inputsWithResults.stream().collect(toMap(AppDataJobInput::getTaskTableInputReference, input -> input));
 
-		List<AppDataJobTaskInputs> mergedJobTaskInputs = new ArrayList<>();
+		final List<AppDataJobTaskInputs> mergedJobTaskInputs = new ArrayList<>();
 		jobTaskInputs.forEach(jobTaskInput -> {
-			List<AppDataJobInput> mergedInputs = new ArrayList<>();
+			final List<AppDataJobInput> mergedInputs = new ArrayList<>();
 			jobTaskInput.getInputs().forEach(jobInput -> mergedInputs.add(newInputs.getOrDefault(jobInput.getTaskTableInputReference(), jobInput)));
 			mergedJobTaskInputs.add
 					(new AppDataJobTaskInputs(jobTaskInput.getTaskName(), jobTaskInput.getTaskVersion(), mergedInputs));
