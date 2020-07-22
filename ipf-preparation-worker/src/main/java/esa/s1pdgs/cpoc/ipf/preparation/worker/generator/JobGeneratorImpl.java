@@ -45,6 +45,7 @@ public final class JobGeneratorImpl implements JobGenerator {
 					() -> typeAdapter.mainInputSearch(job),
 					"querying input " + job.getProductName()
 			);
+			job.setProduct(queried.toProduct());
 			try {
 				performVoid(
 					() -> typeAdapter.validateInputSearch(job), 
@@ -64,7 +65,7 @@ public final class JobGeneratorImpl implements JobGenerator {
 			final AuxQuery auxQuery = auxQueryHandler.queryFor(job);
 			
 			final List<AppDataJobTaskInputs> queried = perform(() -> auxQuery.queryAux(), "querying required AUX");
-			
+			job.setAdditionalInputs(queried);
 			try {
 				performVoid(
 					() -> auxQuery.validate(job), 
