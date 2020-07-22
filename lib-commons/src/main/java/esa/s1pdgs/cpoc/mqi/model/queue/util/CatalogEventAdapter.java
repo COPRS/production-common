@@ -71,7 +71,7 @@ public final class CatalogEventAdapter {
 	}
 	
 	public final String timeliness() {
-		return getStringValue("timeliness");
+		return getStringValue("timeliness", null);
 	}
 	
 	public final List<String> listValues(final String name) {
