@@ -52,7 +52,7 @@ public class TaskTableToJobOrderConverterTest {
 		assertNotNull("[Procs] Invalid breakpoint", o.getProcs().get(2).getBreakpoint());
 		assertEquals("[Procs] Invalid breakpoint enable", "OFF", o.getProcs().get(2).getBreakpoint().getEnable());
 
-		assertTrue("[Inputs] Invalid number", 0 == o.getProcs().get(0).getInputs().size());
+		assertTrue("[Inputs] Invalid number", 3 == o.getProcs().get(0).getInputs().size());
 
 		assertTrue("[Outputs] Invalid number", task11.getOutputs().size() == o.getProcs().get(0).getOutputs().size());
 		JobOrderOutput oOutput = o.getProcs().get(0).getOutputs().get(0);
@@ -60,6 +60,10 @@ public class TaskTableToJobOrderConverterTest {
 		assertFalse("[Outputs] Invalid mandatory", oOutput.isMandatory());
 		assertTrue("[Outputs] Invalid filenametype", oOutput.getFileNameType() == JobOrderFileNameType.REGEXP);
 		assertEquals("[Outputs] Invalid filenametype", tOutput.getType(), oOutput.getFileType());
+
+		o.getProcs().stream().flatMap(p -> p.getInputs().stream()).forEach(input -> {
+			System.out.println(input.getFileType());
+		});
 	}
 
 }
