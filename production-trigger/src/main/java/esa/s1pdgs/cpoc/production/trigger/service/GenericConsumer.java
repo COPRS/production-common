@@ -114,7 +114,7 @@ public class GenericConsumer implements MqiListener<CatalogEvent> {
                 final AppDataJobProductAdapter productAdapter = new AppDataJobProductAdapter(product);
                 
                 final String taskTableName = taskTableMapper.tasktableFor(product);
-                LOGGER.debug("Tasktable for %s is %s", productAdapter.getProductName(), taskTableName);
+                LOGGER.debug("Tasktable for {} is {}", productAdapter.getProductName(), taskTableName);
                 job.setTaskTableName(taskTableName);     
                 job.setStartTime(productAdapter.getStartTime());
                 job.setStopTime(productAdapter.getStopTime());
