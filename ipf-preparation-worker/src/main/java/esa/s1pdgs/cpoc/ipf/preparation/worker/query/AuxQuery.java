@@ -307,13 +307,22 @@ public class AuxQuery {
 				= inputsWithResults.stream().collect(toMap(AppDataJobInput::getTaskTableInputReference, input -> input));
 
 		final List<AppDataJobTaskInputs> mergedJobTaskInputs = new ArrayList<>();
-		jobTaskInputs.forEach(jobTaskInput -> {
-			final List<AppDataJobInput> mergedInputs = new ArrayList<>();
-			jobTaskInput.getInputs().forEach(jobInput -> mergedInputs.add(newInputs.getOrDefault(jobInput.getTaskTableInputReference(), jobInput)));
+
+		for (AppDataJobTaskInputs jobTaskInput : jobTaskInputs) {
+
 			mergedJobTaskInputs.add
-					(new AppDataJobTaskInputs(jobTaskInput.getTaskName(), jobTaskInput.getTaskVersion(), mergedInputs));
-		});
+					(new AppDataJobTaskInputs(jobTaskInput.getTaskName(), jobTaskInput.getTaskVersion(), mergeInputs(newInputs, jobTaskInput)));
+		}
 		return mergedJobTaskInputs;
+	}
+
+	private List<AppDataJobInput> mergeInputs(Map<String, AppDataJobInput> newInputs, AppDataJobTaskInputs jobTaskInput) {
+		final List<AppDataJobInput> mergedInputs = new ArrayList<>();
+
+		for (AppDataJobInput jobInput : jobTaskInput.getInputs()) {
+			mergedInputs.add(newInputs.getOrDefault(jobInput.getTaskTableInputReference(), jobInput));
+		}
+		return mergedInputs;
 	}
 
 	// TODO TaskTableAdapter by itself should not return a JobOrderInput but a more generic
