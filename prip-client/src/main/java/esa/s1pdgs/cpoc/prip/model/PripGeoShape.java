@@ -1,5 +1,6 @@
 package esa.s1pdgs.cpoc.prip.model;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
@@ -47,9 +48,19 @@ public class PripGeoShape {
 	@Override
 	public String toString() {
 		final JSONObject json = new JSONObject();
-
+		
+		List<List<List<Double>>> coordExportOuterList = new ArrayList<>();
+		List<List<Double>> coordExportInnerList = new ArrayList<>();
+		coordExportOuterList.add(coordExportInnerList);
+		for (PripGeoCoordinate coords : coordinates) {
+			ArrayList<Double> p = new ArrayList<>();
+			p.add(coords.getLongitude());
+			p.add(coords.getLatitude());
+			coordExportInnerList.add(p);
+		}
+		
 		json.put(FIELD_NAMES.TYPE.fieldName, this.type.shapeName());
-		json.put(FIELD_NAMES.COORDINATES.fieldName, this.coordinates);
+		json.put(FIELD_NAMES.COORDINATES.fieldName, coordExportOuterList);
 
 		return json.toString();
 	}
