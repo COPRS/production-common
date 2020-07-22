@@ -269,6 +269,7 @@ public class AuxQuery {
 
 					if (foundInput != null) {
 						LOGGER.info("found input {} for job {}", foundInput, job.getId());
+						foundInput.setHasResults(true);
 						futureInputs.add(foundInput);
 						if (!StringUtils.isEmpty(taskTableInput.getId())) {
 							referenceInputs.put(taskTableInput.getId(), foundInput);
