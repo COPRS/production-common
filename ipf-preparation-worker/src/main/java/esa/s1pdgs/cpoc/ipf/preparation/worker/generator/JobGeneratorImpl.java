@@ -153,7 +153,7 @@ public final class JobGeneratorImpl implements JobGenerator {
 	
 				// 751: Adding just one of the messages should be sufficient to re-create the job on restart
 				// scenario
-				LOGGER.error("Error on handling job {} and creating failed request for one of its messages {}: {}",
+				LOGGER.error("Error on handling job {}. Failed request will be created for one of its messages {}. Error was: {}",
 						job.getId(), ids, LogUtils.toString(error));
 
 				errorAppender.send(new FailedProcessingDto(
