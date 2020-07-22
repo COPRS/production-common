@@ -1,9 +1,15 @@
 package esa.s1pdgs.cpoc.ipf.preparation.worker.model.converter;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+
 import esa.s1pdgs.cpoc.common.ApplicationLevel;
+import esa.s1pdgs.cpoc.common.ProductFamily;
 import esa.s1pdgs.cpoc.xml.model.joborder.AbstractJobOrderConf;
 import esa.s1pdgs.cpoc.xml.model.joborder.JobOrder;
 import esa.s1pdgs.cpoc.xml.model.joborder.JobOrderBreakpoint;
+import esa.s1pdgs.cpoc.xml.model.joborder.JobOrderInput;
 import esa.s1pdgs.cpoc.xml.model.joborder.JobOrderOutput;
 import esa.s1pdgs.cpoc.xml.model.joborder.JobOrderProc;
 import esa.s1pdgs.cpoc.xml.model.joborder.JobOrderProcParam;
@@ -15,7 +21,9 @@ import esa.s1pdgs.cpoc.xml.model.joborder.enums.JobOrderFileNameType;
 import esa.s1pdgs.cpoc.xml.model.tasktable.TaskTable;
 import esa.s1pdgs.cpoc.xml.model.tasktable.TaskTableCfgFile;
 import esa.s1pdgs.cpoc.xml.model.tasktable.TaskTableDynProcParam;
+import esa.s1pdgs.cpoc.xml.model.tasktable.TaskTableInput;
 import esa.s1pdgs.cpoc.xml.model.tasktable.TaskTableOuput;
+import esa.s1pdgs.cpoc.xml.model.tasktable.TaskTablePool;
 import esa.s1pdgs.cpoc.xml.model.tasktable.TaskTableTask;
 import esa.s1pdgs.cpoc.xml.model.tasktable.enums.TaskTableFileNameType;
 import esa.s1pdgs.cpoc.xml.model.tasktable.enums.TaskTableMandatoryEnum;
@@ -41,7 +49,7 @@ public class TaskTableToJobOrderConverter implements SuperConverter<TaskTable, J
 
 		final JobOrder order = new JobOrder();
 	//	AbstractJobOrderConf conf = tObj.getLevel() == ApplicationLevel.L0 ? new L0JobOrderConf() : new L1JobOrderConf();
-		AbstractJobOrderConf conf = null;
+		AbstractJobOrderConf conf;
 		if (tObj.getLevel() == ApplicationLevel.L0) {
 			conf = new L0JobOrderConf();
 		} else if (tObj.getLevel() == ApplicationLevel.L2) {
@@ -57,11 +65,22 @@ public class TaskTableToJobOrderConverter implements SuperConverter<TaskTable, J
 		conf.addConfigFiles(confFilesConv.convertToList(tObj.getCfgFiles()));
 		conf.setProcParams(procParamConv.convertToList(tObj.getDynProcParams()));
 		order.setConf(conf);
-		tObj.getPools().forEach(pool -> {
-			order.addProcs(procConv.convertToList(pool.getTasks()));
-		});
+
+		int poolNumber = 0;
+		for (TaskTablePool pool : tObj.getPools()) {
+			order.addProcs(procConv.convertToList(toIndexedTasks(poolNumber++, pool.getTasks())));
+		}
 
 		return order;
+	}
+
+	private List<NamedEntry<TaskTableTask>> toIndexedTasks(int poolNumber, List<TaskTableTask> tasks) {
+		int taskNumber = 0;
+		List<NamedEntry<TaskTableTask>> result = new ArrayList<>();
+		for (TaskTableTask task : tasks) {
+			result.add(new NamedEntry<>(String.format("P%sT%s:%s-%s", poolNumber, taskNumber++, task.getName(), task.getVersion()), task));
+		}
+		return result;
 	}
 }
 
@@ -110,30 +129,50 @@ class TaskTableCfgFilesToString implements SuperConverter<TaskTableCfgFile, Stri
 }
 
 /**
- * Class to covnert TaskTableTask into JobOrderProc
+ * Class to convert TaskTableTask into JobOrderProc
  * 
  * @author Cyrielle Gailliard
  *
  */
-class TaskTableTaskToJobOrderProc implements SuperConverter<TaskTableTask, JobOrderProc> {
+class TaskTableTaskToJobOrderProc implements SuperConverter<NamedEntry<TaskTableTask>, JobOrderProc> {
+	final TaskTableInputToJobOrderInputPlaceholderProc inputProc = new TaskTableInputToJobOrderInputPlaceholderProc();
 	
 	/**
 	 * Conversion function
 	 */
 	@Override
-	public JobOrderProc apply(final TaskTableTask tObj) {
+	public JobOrderProc apply(final NamedEntry<TaskTableTask> tObj) {
 		final TaskTableOuputToJobOrderOutput outputConverter = new TaskTableOuputToJobOrderOutput();
 		final JobOrderProc rObj = new JobOrderProc();
-		rObj.setTaskName(tObj.getName());
-		rObj.setTaskVersion(tObj.getVersion());
+		rObj.setTaskName(tObj.getEntry().getName());
+		rObj.setTaskVersion(tObj.getEntry().getVersion());
 		rObj.setBreakpoint(new JobOrderBreakpoint());
-		rObj.addOutputs(outputConverter.convertToList(tObj.getOutputs()));
+		rObj.addOutputs(outputConverter.convertToList(tObj.getEntry().getOutputs()));
+
+		rObj.setInputs(inputProc.convertToList(toIndexedInputs(tObj.getName(), tObj.getEntry().getInputs())));
+
 		return rObj;
+	}
+
+	private List<NamedEntry<TaskTableInput>> toIndexedInputs(String taskIndex, List<TaskTableInput> inputs) {
+		int inputNumber = 0;
+		List<NamedEntry<TaskTableInput>> result = new ArrayList<>();
+		for (TaskTableInput input : inputs) {
+			result.add(new NamedEntry<>(String.format("%sI%s", taskIndex, inputNumber++), input));
+		}
+		return result;
+	}
+}
+
+class TaskTableInputToJobOrderInputPlaceholderProc implements SuperConverter<NamedEntry<TaskTableInput>, JobOrderInput> {
+	@Override
+	public JobOrderInput apply(NamedEntry<TaskTableInput> tIObj) {
+		return  new JobOrderInput(tIObj.getName(), JobOrderFileNameType.BLANK, Collections.emptyList(), Collections.emptyList(), ProductFamily.BLANK);
 	}
 }
 
 /**
- * Class to convert TaskTableOuput into JobOrderOutput
+ * Class to convert TaskTableOutput into JobOrderOutput
  * 
  * @author Cyrielle Gailliard
  *
@@ -193,5 +232,23 @@ class TaskTableFileNameTypeToJobOrderFileNameType
 			break;
 		}
 		return rObj;
+	}
+}
+
+class NamedEntry<U> {
+	private final String name;
+	private final U entry;
+
+	NamedEntry(String name, U entry) {
+		this.name = name;
+		this.entry = entry;
+	}
+
+	public String getName() {
+		return name;
+	}
+
+	public U getEntry() {
+		return entry;
 	}
 }

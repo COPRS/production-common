@@ -1,6 +1,6 @@
 package esa.s1pdgs.cpoc.ipf.preparation.worker.publish;
 
-import static java.util.Collections.emptyList;
+import static java.lang.String.format;
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toMap;
 
@@ -23,7 +23,6 @@ import esa.s1pdgs.cpoc.appcatalog.AppDataJob;
 import esa.s1pdgs.cpoc.appcatalog.AppDataJobFile;
 import esa.s1pdgs.cpoc.appcatalog.AppDataJobInput;
 import esa.s1pdgs.cpoc.appcatalog.AppDataJobProduct;
-import esa.s1pdgs.cpoc.appcatalog.AppDataJobTaskInputs;
 import esa.s1pdgs.cpoc.common.utils.DateUtils;
 import esa.s1pdgs.cpoc.common.utils.LogUtils;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.model.tasktable.ElementMapper;
@@ -35,6 +34,7 @@ import esa.s1pdgs.cpoc.xml.model.joborder.JobOrder;
 import esa.s1pdgs.cpoc.xml.model.joborder.JobOrderInput;
 import esa.s1pdgs.cpoc.xml.model.joborder.JobOrderInputFile;
 import esa.s1pdgs.cpoc.xml.model.joborder.JobOrderOutput;
+import esa.s1pdgs.cpoc.xml.model.joborder.JobOrderProc;
 import esa.s1pdgs.cpoc.xml.model.joborder.JobOrderProcParam;
 import esa.s1pdgs.cpoc.xml.model.joborder.JobOrderSensingTime;
 import esa.s1pdgs.cpoc.xml.model.joborder.JobOrderTimeInterval;
@@ -73,12 +73,13 @@ public final class JobOrderAdapter
 			final JobOrder jobOrder = jobOrderSupplier.get();
 			
 			// collect all additional inputs
-			final Map<String, AppDataJobTaskInputs> inputs
-					= job.getAdditionalInputs().stream().collect(toMap(i -> i.getTaskName() + ":" + i.getTaskVersion(), i -> i));
+			final Map<String, AppDataJobInput> inputsByReference =
+					job.getAdditionalInputs().stream().flatMap(taskInputs -> taskInputs.getInputs().stream())
+							.collect(toMap(AppDataJobInput::getTaskTableInputReference, i -> i));
 
 			//set these inputs in corresponding job order processors
 			jobOrder.getProcs().forEach(
-					p -> p.setInputs(toJobOrderInputs(inputs.get(p.getTaskName() + ":" + p.getTaskVersion()))));
+					p -> replaceInputsFor(p, inputsByReference));
 
 			inputsOf(jobOrder).forEach(input -> {
 				input.getFilenames().forEach(filename -> filename.setFilename(workingDir + filename.getFilename()));
@@ -98,16 +99,23 @@ public final class JobOrderAdapter
 			
 			return new JobOrderAdapter(xmlConverter, jobOrderFile, jobOrder);
 		}
-		
-		private List<JobOrderInput> toJobOrderInputs(final AppDataJobTaskInputs appDataJobTaskInputs) {
-			if(appDataJobTaskInputs == null) {
-				return emptyList();
-			}
-			return appDataJobTaskInputs.getInputs().stream()
-					.map(this::toJobOrderInput)
-					.collect(toList());
+
+		private void replaceInputsFor(JobOrderProc p, Map<String, AppDataJobInput> inputsByReference) {
+			p.setInputs(p.getInputs().stream()
+					.map(placeHolder -> {
+						final AppDataJobInput appDataJobInput = inputsByReference.get(placeHolder.getFileType());
+
+						if(appDataJobInput == null) {
+							// this should not happen
+							throw new RuntimeException(format("jobOrder expects input %s but there is none in the result list",
+									placeHolder.getFileType()));
+						}
+
+						return appDataJobInput;
+					})
+					.map(this::toJobOrderInput).collect(toList()));
 		}
-		
+
 		private JobOrderInput toJobOrderInput(final AppDataJobInput input) {
 			return new JobOrderInput(
 					input.getFileType(),
