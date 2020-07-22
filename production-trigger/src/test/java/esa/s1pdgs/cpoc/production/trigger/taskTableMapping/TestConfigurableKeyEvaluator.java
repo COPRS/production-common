@@ -10,7 +10,7 @@ public class TestConfigurableKeyEvaluator {
 
 	@Test
 	public final void testSentinel1DefaultPattern() {
-		final ConfigurableKeyEvaluator uut = new ConfigurableKeyEvaluator("${product.swathtype}_${product.satelliteId}");
+		final ConfigurableKeyEvaluator uut = new ConfigurableKeyEvaluator("$(product.swathtype)_$(product.satelliteId)");
 		final AppDataJobProduct prod = new AppDataJobProduct();
 		prod.getMetadata().put("foo", "baaaaar");
 		prod.getMetadata().put("swathtype", "WV");
