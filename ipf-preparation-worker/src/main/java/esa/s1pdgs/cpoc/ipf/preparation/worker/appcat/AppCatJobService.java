@@ -171,6 +171,7 @@ public class AppCatJobService {
 					}
 					else {
 						// it's done
+						job.getGeneration().setState(outputState);
 				    	job.setState(AppDataJobState.TERMINATED);  
 					}
 				}, 
