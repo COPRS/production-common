@@ -1,6 +1,7 @@
 package esa.s1pdgs.cpoc.prip.model;
 
 import java.util.List;
+import java.util.Objects;
 
 import org.elasticsearch.common.geo.GeoShapeType;
 import org.json.JSONObject;
@@ -37,6 +38,7 @@ public class PripGeoShape {
 	}
 
 	protected PripGeoShape(GeoShapeType type, List<PripGeoCoordinate> coordinates) {
+		this.type = Objects.requireNonNull(type);
 		this.coordinates = coordinates;
 	}
 
