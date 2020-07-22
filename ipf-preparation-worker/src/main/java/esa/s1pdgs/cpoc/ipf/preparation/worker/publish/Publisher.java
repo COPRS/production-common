@@ -94,7 +94,7 @@ public class Publisher {
 				settings.getLevel().toFamily(),
 				product.getProductName(),
 				product.getProcessMode(),
-				jobOrderAdapter.getWorkdir().getPath(),
+				jobOrderAdapter.getWorkdir().getPath() + "/",
 				jobOrderAdapter.getJobOrderName(),
 				product.getStringValue("timeliness", ""),
 				reporting.getUid()

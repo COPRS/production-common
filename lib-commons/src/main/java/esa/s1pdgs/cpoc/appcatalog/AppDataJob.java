@@ -57,7 +57,7 @@ public class AppDataJob {
     /**
      * MQI messages linked to this job
      */
-    private List<GenericMessageDto<CatalogEvent>> messages;
+    private List<GenericMessageDto<CatalogEvent>> messages = new ArrayList<>();
 
     /**
      * Product of this job

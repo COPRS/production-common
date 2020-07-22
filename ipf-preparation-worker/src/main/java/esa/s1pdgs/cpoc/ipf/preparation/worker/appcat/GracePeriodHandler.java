@@ -19,7 +19,7 @@ public class GracePeriodHandler {
 		this.settings = settings;
 	}
 	
-	public final boolean isWithinGracePeriod(final Date now, final AppDataJobGeneration jobGen) {
+	public boolean isWithinGracePeriod(final Date now, final AppDataJobGeneration jobGen) {
 		final Date gracePeriodOverAt = new Date(jobGen.getLastUpdateDate().getTime() + getGracePeriodMillis(jobGen));
 		return now.before(gracePeriodOverAt);
 	}
