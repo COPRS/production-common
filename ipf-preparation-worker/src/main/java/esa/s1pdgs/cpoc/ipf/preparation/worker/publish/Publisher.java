@@ -1,5 +1,6 @@
 package esa.s1pdgs.cpoc.ipf.preparation.worker.publish;
 
+import java.io.File;
 import java.io.IOException;
 import java.util.Date;
 import java.util.List;
@@ -115,7 +116,11 @@ public class Publisher {
 			LOGGER.trace("Adding input JobOrderXml '{}' for product '{}'", jobOrderXml, product.getProductName());
 
 			// Add the jobOrder itself in inputs
-			execJob.addInput(new LevelJobInputDto(ProductFamily.JOB_ORDER.name(), jobOrderAdapter.getJobOrderName(), jobOrderXml));
+			execJob.addInput(new LevelJobInputDto(
+					ProductFamily.JOB_ORDER.name(), 
+					new File(jobOrderAdapter.getWorkdir(), jobOrderAdapter.getJobOrderName()).getPath(), 
+					jobOrderXml
+			));
 
 			// Add jobOrder outputs to the DTO
 			execJob.addOutputs(jobOrderAdapter.regexpOutputs());

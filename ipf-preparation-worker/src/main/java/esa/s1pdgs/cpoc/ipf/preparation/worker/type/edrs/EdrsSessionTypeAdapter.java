@@ -178,7 +178,6 @@ public final class EdrsSessionTypeAdapter extends AbstractProductTypeAdapter imp
         }		
 	}
 
-
 	private final LevelJobInputDto newInputFor(
 			final AppDataJobFile file, 
 			final String directory,
