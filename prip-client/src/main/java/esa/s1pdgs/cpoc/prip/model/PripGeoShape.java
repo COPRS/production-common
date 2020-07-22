@@ -47,6 +47,10 @@ public class PripGeoShape {
 
 	@Override
 	public String toString() {
+		return toJson().toString();
+	}
+	
+	public JSONObject toJson() {
 		final JSONObject json = new JSONObject();
 		
 		List<List<List<Double>>> coordExportOuterList = new ArrayList<>();
@@ -61,8 +65,8 @@ public class PripGeoShape {
 		
 		json.put(FIELD_NAMES.TYPE.fieldName, this.type.shapeName());
 		json.put(FIELD_NAMES.COORDINATES.fieldName, coordExportOuterList);
-
-		return json.toString();
+		
+		return json;
 	}
 
 	@Override
