@@ -695,16 +695,19 @@ public class EsServices {
 		}
 
 		List<List<Double>> footprint = new ArrayList<>();
-		if (null != coordinates) {
-			final List<Object> secondArray = (List<Object>) coordinates.get(0);			
-			for (final Object arr : secondArray) {
-				List<Double> p = new ArrayList<>();
-				final List<Number> coords = (List<Number>) arr;
-				final double lon = coords.get(0).doubleValue();
-				final double lat = coords.get(1).doubleValue();
-				p.add(lon);
-				p.add(lat);
-				footprint.add(p);
+		if (null != coordinates && coordinates.containsKey("coordinates")) {
+			final List<Object> firstArray = (List<Object>)coordinates.get("coordinates");
+			if (null != firstArray) {
+				final List<Object> secondArray = (List<Object>)firstArray.get(0);			
+				for (final Object arr : secondArray) {
+					List<Double> p = new ArrayList<>();
+					final List<Number> coords = (List<Number>) arr;
+					final double lon = coords.get(0).doubleValue();
+					final double lat = coords.get(1).doubleValue();
+					p.add(lon);
+					p.add(lat);
+					footprint.add(p);
+				}
 			}
 		}
 		searchMetadata.setFootprint(footprint);
