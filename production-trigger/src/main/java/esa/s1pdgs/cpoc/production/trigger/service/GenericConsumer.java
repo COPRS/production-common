@@ -247,7 +247,8 @@ public class GenericConsumer implements MqiListener<CatalogEvent> {
 		productDto.getMetadata().put("processMode", eventAdapter.processMode());
 		productDto.getMetadata().put("startTime", eventAdapter.startTime());
 		productDto.getMetadata().put("stopTime", eventAdapter.stopTime());     
-		productDto.getMetadata().put("timeliness", eventAdapter.timeliness());    
+		productDto.getMetadata().put("timeliness", eventAdapter.timeliness());
+		productDto.getMetadata().put("acquistion", eventAdapter.swathType());
         return productDto;
 	}
 }
