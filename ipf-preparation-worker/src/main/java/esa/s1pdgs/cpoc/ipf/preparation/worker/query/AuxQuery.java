@@ -75,6 +75,13 @@ public class AuxQuery {
 		return distributeResults(results);
 	}
 
+	private final String inputDescription(final String reference, final TaskTableInput input) {
+		if (input.toLogMessage() == null) {
+			return reference;
+		}
+		return reference + " (id: " + input.toLogMessage() + ")";
+	}
+	
 	public final void validate(final AppDataJob job) throws IpfPrepWorkerInputsMissingException {
 		final List<AppDataJobInput> missingInputs = inputsWithoutResultsOf(job);
 		final Map<String, TaskTableInput> taskTableInputs = taskTableInputs();
@@ -82,26 +89,27 @@ public class AuxQuery {
 		final Map<String, String> missingMetadata = new HashMap<>();
 
 		for (final AppDataJobInput missingInput : missingInputs) {
-			final TaskTableInput taskTableInput = taskTableInputs.get(missingInput.getTaskTableInputReference());
+			final String ref = missingInput.getTaskTableInputReference();
+			
+			final TaskTableInput taskTableInput = taskTableInputs.get(ref);
 			if (missingInput.isMandatory()) {
-				missingMetadata.put(						
-						missingInput.getTaskTableInputReference() + " is missing",
-						taskTableInput.toLogMessage()
-				);
+				missingMetadata.put(ref + " is missing", taskTableInput.toLogMessage());
 			} else {
+				final String inputDescription = inputDescription(ref, taskTableInput);
+				
 				// optional input
 
 				// if the timeout is not expired, we want to continue waiting. To do that,
 				// a IpfPrepWorkerInputsMissingException needs to be thrown. Otherwise,
 				// we log that timeout is expired and we continue anyway behaving as if
 				// the input was there
-				if (timeoutChecker.isTimeoutExpiredFor(job, taskTableInput)) {
+				if (timeoutChecker.isTimeoutExpiredFor(job, taskTableInput)) {					
 					LOGGER.info("Non-Mandatory Input {} is not available. Continue without it...",
-							taskTableInput.toLogMessage());
+							inputDescription);
 				}
 				else {
 					missingMetadata.put(
-							missingInput.getTaskTableInputReference() + " is missing",
+							inputDescription + " is missing",
 							taskTableInput.toLogMessage()						
 					);
 				}
@@ -308,7 +316,7 @@ public class AuxQuery {
 
 		final List<AppDataJobTaskInputs> mergedJobTaskInputs = new ArrayList<>();
 
-		for (AppDataJobTaskInputs jobTaskInput : jobTaskInputs) {
+		for (final AppDataJobTaskInputs jobTaskInput : jobTaskInputs) {
 
 			mergedJobTaskInputs.add
 					(new AppDataJobTaskInputs(jobTaskInput.getTaskName(), jobTaskInput.getTaskVersion(), mergeInputs(newInputs, jobTaskInput)));
@@ -319,10 +327,10 @@ public class AuxQuery {
 		return mergedJobTaskInputs;
 	}
 
-	private List<AppDataJobInput> mergeInputs(Map<String, AppDataJobInput> newInputs, AppDataJobTaskInputs jobTaskInput) {
+	private List<AppDataJobInput> mergeInputs(final Map<String, AppDataJobInput> newInputs, final AppDataJobTaskInputs jobTaskInput) {
 		final List<AppDataJobInput> mergedInputs = new ArrayList<>();
 
-		for (AppDataJobInput jobInput : jobTaskInput.getInputs()) {
+		for (final AppDataJobInput jobInput : jobTaskInput.getInputs()) {
 			mergedInputs.add(newInputs.getOrDefault(jobInput.getTaskTableInputReference(), jobInput));
 		}
 		return mergedInputs;
