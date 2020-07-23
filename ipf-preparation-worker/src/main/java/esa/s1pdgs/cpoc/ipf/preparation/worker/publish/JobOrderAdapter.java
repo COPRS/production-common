@@ -1,16 +1,15 @@
 package esa.s1pdgs.cpoc.ipf.preparation.worker.publish;
 
-import static java.lang.String.format;
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toMap;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.function.Predicate;
 import java.util.function.Supplier;
 import java.util.stream.Stream;
 
@@ -79,10 +78,7 @@ public final class JobOrderAdapter
 
 			//set these inputs in corresponding job order processors
 			jobOrder.getProcs().forEach(
-					p -> replaceInputsFor(p, inputsByReference));
-
-			//remove empty inputs (these might be timed out inputs not available in inputsByReference)
-			jobOrder.getProcs().forEach(this::removeEmptyInputsFor);
+					p -> replacePlaceHolderWithResults(p, inputsByReference));
 
 			inputsOf(jobOrder).forEach(input -> {
 				input.getFilenames().forEach(filename -> filename.setFilename(workingDir + filename.getFilename()));
@@ -103,35 +99,20 @@ public final class JobOrderAdapter
 			return new JobOrderAdapter(xmlConverter, jobOrderFile, jobOrder);
 		}
 
-		private void removeEmptyInputsFor(JobOrderProc p) {
-			final Predicate<JobOrderInput> notHavingFileNames = i -> i.getFilenames().isEmpty();
+		private void replacePlaceHolderWithResults(final JobOrderProc p, final Map<String, AppDataJobInput> inputsByReference) {
+			List<JobOrderInput> jobOrderInputs = new ArrayList<>();
 
-			final List<JobOrderInput> inputsWithoutFileNames = p.getInputs().stream()
-					.filter(notHavingFileNames).collect(toList());
+			p.getInputs().forEach(placeHolder -> {
+				final AppDataJobInput appDataJobInput = inputsByReference.get(placeHolder.getFileType());
 
-			LOGGER.info("removing empty inputs from JobOrder proc {}-{}: {}",
-					p.getTaskName(), p.getTaskVersion(), inputsWithoutFileNames);
+				if(appDataJobInput == null) {
+					LOGGER.info("removing JobOrder placeholder without result (probably timeout): {}", placeHolder.getFileType());
+				} else {
+					jobOrderInputs.add(toJobOrderInput(appDataJobInput));
+				}
+			});
 
-			final List<JobOrderInput> inputsWithFileNames = p.getInputs().stream()
-					.filter(notHavingFileNames.negate()).collect(toList());
-
-			p.setInputs(inputsWithFileNames);
-		}
-
-		private void replaceInputsFor(final JobOrderProc p, final Map<String, AppDataJobInput> inputsByReference) {
-			p.setInputs(p.getInputs().stream()
-					.map(placeHolder -> {
-						final AppDataJobInput appDataJobInput = inputsByReference.get(placeHolder.getFileType());
-
-						if(appDataJobInput == null) {
-							// this should not happen
-							throw new RuntimeException(format("jobOrder expects input %s but there is none in the result list",
-									placeHolder.getFileType()));
-						}
-
-						return appDataJobInput;
-					})
-					.map(this::toJobOrderInput).collect(toList()));
+			p.setInputs(jobOrderInputs);
 		}
 
 		private JobOrderInput toJobOrderInput(final AppDataJobInput input) {
