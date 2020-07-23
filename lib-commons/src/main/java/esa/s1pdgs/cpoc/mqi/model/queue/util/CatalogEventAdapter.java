@@ -51,7 +51,7 @@ public final class CatalogEventAdapter {
 	}
 	
 	public final String swathType() {
-		return getStringValue("swathtype");
+		return getStringValue("swathtype","UNDEFINED");
 	}
 	
 	public final String processMode() {
