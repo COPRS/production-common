@@ -1,6 +1,8 @@
 package esa.s1pdgs.cpoc.prip.model;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 import org.elasticsearch.common.geo.GeoShapeType;
 import org.json.JSONObject;
@@ -37,6 +39,7 @@ public class PripGeoShape {
 	}
 
 	protected PripGeoShape(GeoShapeType type, List<PripGeoCoordinate> coordinates) {
+		this.type = Objects.requireNonNull(type);
 		this.coordinates = coordinates;
 	}
 
@@ -44,12 +47,26 @@ public class PripGeoShape {
 
 	@Override
 	public String toString() {
+		return toJson().toString();
+	}
+	
+	public JSONObject toJson() {
 		final JSONObject json = new JSONObject();
-
+		
+		List<List<List<Double>>> coordExportOuterList = new ArrayList<>();
+		List<List<Double>> coordExportInnerList = new ArrayList<>();
+		coordExportOuterList.add(coordExportInnerList);
+		for (PripGeoCoordinate coords : coordinates) {
+			ArrayList<Double> p = new ArrayList<>();
+			p.add(coords.getLongitude());
+			p.add(coords.getLatitude());
+			coordExportInnerList.add(p);
+		}
+		
 		json.put(FIELD_NAMES.TYPE.fieldName, this.type.shapeName());
-		json.put(FIELD_NAMES.COORDINATES.fieldName, this.coordinates);
-
-		return json.toString();
+		json.put(FIELD_NAMES.COORDINATES.fieldName, coordExportOuterList);
+		
+		return json;
 	}
 
 	@Override

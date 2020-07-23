@@ -183,7 +183,15 @@ public class PripMetadata {
 	public JSONObject toJson() {
 		final JSONObject json = new JSONObject();
 
-		Arrays.stream(FIELD_NAMES.values()).forEach(field -> json.put(field.fieldName(), field.toJsonAccessor().apply(this)));
+		Arrays.stream(FIELD_NAMES.values()).forEach(field -> {
+			// FIXME: Find a generic solution to support both String and JSON sub elements
+			if (field.fieldName.equals(FIELD_NAMES.FOOTPRINT.fieldName)) {
+				GeoShapePolygon footprint = (GeoShapePolygon)field.toJsonAccessor().apply(this);
+				json.put(field.fieldName(), footprint.toJson());
+			} else {
+				json.put(field.fieldName(), field.toJsonAccessor().apply(this));
+			}
+		});
 
 		return json;
 	}
