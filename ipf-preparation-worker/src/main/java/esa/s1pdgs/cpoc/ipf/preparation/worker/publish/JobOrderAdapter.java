@@ -40,7 +40,6 @@ import esa.s1pdgs.cpoc.xml.model.joborder.JobOrderSensingTime;
 import esa.s1pdgs.cpoc.xml.model.joborder.JobOrderTimeInterval;
 import esa.s1pdgs.cpoc.xml.model.joborder.enums.JobOrderDestination;
 import esa.s1pdgs.cpoc.xml.model.joborder.enums.JobOrderFileNameType;
-import esa.s1pdgs.cpoc.xml.model.tasktable.enums.TaskTableFileNameType;
 
 public final class JobOrderAdapter
 {
@@ -100,7 +99,7 @@ public final class JobOrderAdapter
 			return new JobOrderAdapter(xmlConverter, jobOrderFile, jobOrder);
 		}
 
-		private void replaceInputsFor(JobOrderProc p, Map<String, AppDataJobInput> inputsByReference) {
+		private void replaceInputsFor(final JobOrderProc p, final Map<String, AppDataJobInput> inputsByReference) {
 			p.setInputs(p.getInputs().stream()
 					.map(placeHolder -> {
 						final AppDataJobInput appDataJobInput = inputsByReference.get(placeHolder.getFileType());
@@ -119,28 +118,19 @@ public final class JobOrderAdapter
 		private JobOrderInput toJobOrderInput(final AppDataJobInput input) {
 			return new JobOrderInput(
 					input.getFileType(),
-					getFileNameTypeFor(input.getFileNameType()),
+					filenameTypeOf(input.getFileNameType()),
 					toFileNames(input.getFiles()),
 					toIntervals(input.getFiles()),
 					elementMapper.inputFamilyOf(input.getFileType()));
 		}
 		
 		//this is a copy from TaskTableAdapter but there it should be removed soon
-		private JobOrderFileNameType getFileNameTypeFor(final String fileNameType) {
-			final TaskTableFileNameType type = TaskTableFileNameType.valueOf(fileNameType);
-			switch (type) {
-				case PHYSICAL:
-					return JobOrderFileNameType.PHYSICAL;
-				case DIRECTORY:
-					return JobOrderFileNameType.DIRECTORY;
-				case REGEXP:
-					return JobOrderFileNameType.REGEXP;
-				default:
-					// fall through
+		private JobOrderFileNameType filenameTypeOf(final String fileNameType) {
+			if ("".equals(fileNameType)) {
+				return JobOrderFileNameType.BLANK;
 			}
-			return JobOrderFileNameType.BLANK;
-		}
-		
+			return JobOrderFileNameType.valueOf(fileNameType);	
+		}		
 
 		private List<JobOrderTimeInterval> toIntervals(final List<AppDataJobFile> files) {
 			return files.stream().map(
