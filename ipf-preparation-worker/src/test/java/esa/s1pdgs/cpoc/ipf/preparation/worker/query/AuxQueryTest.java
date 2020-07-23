@@ -340,8 +340,8 @@ public class AuxQueryTest {
 
                 actual.getInputs().forEach(
                         input -> {
-                            System.out.println(format("input %s hasResults: %s", input, input.isHasResults()));
-                            assertThat(format("input %s should have hasResults = true", input), input.isHasResults(), is(true));
+                            System.out.println(format("input %s hasResults: %s", input, input.getHasResults()));
+                            assertThat(format("input %s should have hasResults = true", input), input.getHasResults(), is(true));
                         });
 
                 return Stream.of(expectedInputs).sorted().collect(toList()).equals(actualInputs);

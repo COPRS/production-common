@@ -137,7 +137,7 @@ public class AuxQuery {
 
 	private List<AppDataJobInput> inputsWithoutResultsOf(final AppDataJob job) {
 		return inputsOf(job).stream()
-				.flatMap(taskInputs -> taskInputs.getInputs().stream().filter(input -> !input.isHasResults()))
+				.flatMap(taskInputs -> taskInputs.getInputs().stream().filter(input -> !input.getHasResults()))
 				.collect(toList());
 	}
 
