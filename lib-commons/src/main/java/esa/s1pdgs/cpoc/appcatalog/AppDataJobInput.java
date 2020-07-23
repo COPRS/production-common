@@ -79,7 +79,7 @@ public class AppDataJobInput {
         this.mandatory = mandatory;
     }
 
-    public boolean hasResults() {
+    public boolean isHasResults() {
         return hasResults;
     }
 
