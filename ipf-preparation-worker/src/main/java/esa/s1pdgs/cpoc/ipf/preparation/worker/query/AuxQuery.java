@@ -313,6 +313,9 @@ public class AuxQuery {
 			mergedJobTaskInputs.add
 					(new AppDataJobTaskInputs(jobTaskInput.getTaskName(), jobTaskInput.getTaskVersion(), mergeInputs(newInputs, jobTaskInput)));
 		}
+
+		LOGGER.debug("merging inputs {} into job inputs {} result {}", inputsWithResults, job.getAdditionalInputs(), mergedJobTaskInputs);
+
 		return mergedJobTaskInputs;
 	}
 
