@@ -120,7 +120,7 @@ public class AuxQuery {
 			}
 		}
 
-		if(!missingInputs.isEmpty()) {
+		if(!missingMetadata.isEmpty()) {
 			throw new IpfPrepWorkerInputsMissingException(missingMetadata);
 		}
 	}
