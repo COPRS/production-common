@@ -127,7 +127,7 @@ public class AuxQuery {
 
 	private List<AppDataJobInput> inputsWithoutResultsOf(final AppDataJob job) {
 		return inputsOf(job).stream()
-				.flatMap(taskInputs -> taskInputs.getInputs().stream().filter(input -> !input.hasResults()))
+				.flatMap(taskInputs -> taskInputs.getInputs().stream().filter(input -> !input.isHasResults()))
 				.collect(toList());
 	}
 
@@ -326,6 +326,9 @@ public class AuxQuery {
 			mergedJobTaskInputs.add
 					(new AppDataJobTaskInputs(jobTaskInput.getTaskName(), jobTaskInput.getTaskVersion(), mergeInputs(newInputs, jobTaskInput)));
 		}
+
+		LOGGER.debug("merging inputs {} into job inputs {} result {}", inputsWithResults, job.getAdditionalInputs(), mergedJobTaskInputs);
+
 		return mergedJobTaskInputs;
 	}
 

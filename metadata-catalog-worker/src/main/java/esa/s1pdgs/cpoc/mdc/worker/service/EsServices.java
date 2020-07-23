@@ -686,7 +686,32 @@ public class EsServices {
 		} else {
 			throw new MetadataMalformedException("stopTime");
 		}
+		
+		Map<String, Object> coordinates = null;
+		if (source.containsKey("sliceCoordinates")) {
+			coordinates = (Map<String, Object>)source.get("sliceCoordinates");
+		} else if (source.containsKey("segmentCoordinates")) {
+			coordinates = (Map<String, Object>)source.get("segmentCoordinates"); 
+		}
 
+		List<List<Double>> footprint = new ArrayList<>();
+		if (null != coordinates && coordinates.containsKey("coordinates")) {
+			final List<Object> firstArray = (List<Object>)coordinates.get("coordinates");
+			if (null != firstArray) {
+				final List<Object> secondArray = (List<Object>)firstArray.get(0);			
+				for (final Object arr : secondArray) {
+					List<Double> p = new ArrayList<>();
+					final List<Number> coords = (List<Number>) arr;
+					final double lon = coords.get(0).doubleValue();
+					final double lat = coords.get(1).doubleValue();
+					p.add(lon);
+					p.add(lat);
+					footprint.add(p);
+				}
+			}
+		}
+		searchMetadata.setFootprint(footprint);
+		
 		return searchMetadata;
 	}
 	

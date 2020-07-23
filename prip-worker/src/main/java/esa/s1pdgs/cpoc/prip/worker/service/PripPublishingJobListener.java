@@ -2,6 +2,7 @@ package esa.s1pdgs.cpoc.prip.worker.service;
 
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
@@ -36,6 +37,8 @@ import esa.s1pdgs.cpoc.obs_sdk.ObsClient;
 import esa.s1pdgs.cpoc.obs_sdk.ObsObject;
 import esa.s1pdgs.cpoc.prip.metadata.PripMetadataRepository;
 import esa.s1pdgs.cpoc.prip.model.Checksum;
+import esa.s1pdgs.cpoc.prip.model.GeoShapePolygon;
+import esa.s1pdgs.cpoc.prip.model.PripGeoCoordinate;
 import esa.s1pdgs.cpoc.prip.model.PripMetadata;
 import esa.s1pdgs.cpoc.prip.worker.report.PripReportingInput;
 import esa.s1pdgs.cpoc.prip.worker.report.PripReportingOutput;
@@ -95,8 +98,6 @@ public class PripPublishingJobListener implements MqiListener<PripPublishingJob>
 			));
 		}
 	}
-	
-
 
 	@Override
 	public void onMessage(final GenericMessageDto<PripPublishingJob> message) {
@@ -133,6 +134,17 @@ public class PripPublishingJobListener implements MqiListener<PripPublishingJob>
 					.setChecksums(getChecksums(publishingJob.getProductFamily(), publishingJob.getKeyObjectStorage()));
 			pripMetadata.setContentDateStart(DateUtils.parse(searchMetadata.getValidityStart()).truncatedTo(ChronoUnit.MILLIS));
 			pripMetadata.setContentDateEnd(DateUtils.parse(searchMetadata.getValidityStop()).truncatedTo(ChronoUnit.MILLIS));
+			
+			List<PripGeoCoordinate> coordinates = new ArrayList<>();
+			if (null != searchMetadata.getFootprint()) {
+				for (List<Double> p : searchMetadata.getFootprint()) {
+					coordinates.add(new PripGeoCoordinate(p.get(0), p.get(1)));
+				}
+			}
+			if (!coordinates.isEmpty()) {
+				pripMetadata.setFootprint(new GeoShapePolygon(coordinates));
+			}
+			
 			pripMetadataRepo.save(pripMetadata);
 
 			LOGGER.debug("end of saving PRIP metadata: {}", pripMetadata);
