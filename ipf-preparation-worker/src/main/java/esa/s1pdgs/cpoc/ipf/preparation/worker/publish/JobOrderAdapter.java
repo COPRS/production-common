@@ -10,6 +10,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Predicate;
 import java.util.function.Supplier;
 import java.util.stream.Stream;
 
@@ -80,6 +81,9 @@ public final class JobOrderAdapter
 			jobOrder.getProcs().forEach(
 					p -> replaceInputsFor(p, inputsByReference));
 
+			//remove empty inputs (these might be timed out inputs not available in inputsByReference)
+			jobOrder.getProcs().forEach(this::removeEmptyInputsFor);
+
 			inputsOf(jobOrder).forEach(input -> {
 				input.getFilenames().forEach(filename -> filename.setFilename(workingDir + filename.getFilename()));
 				input.getTimeIntervals().forEach(interval -> interval.setFileName(workingDir + interval.getFileName()));
@@ -97,6 +101,21 @@ public final class JobOrderAdapter
 			typeAdapter.customJobOrder(job, jobOrder);	
 			
 			return new JobOrderAdapter(xmlConverter, jobOrderFile, jobOrder);
+		}
+
+		private void removeEmptyInputsFor(JobOrderProc p) {
+			final Predicate<JobOrderInput> notHavingFileNames = i -> i.getFilenames().isEmpty();
+
+			final List<JobOrderInput> inputsWithoutFileNames = p.getInputs().stream()
+					.filter(notHavingFileNames).collect(toList());
+
+			LOGGER.info("removing empty inputs from JobOrder proc {}-{}: {}",
+					p.getTaskName(), p.getTaskVersion(), inputsWithoutFileNames);
+
+			final List<JobOrderInput> inputsWithFileNames = p.getInputs().stream()
+					.filter(notHavingFileNames.negate()).collect(toList());
+
+			p.setInputs(inputsWithFileNames);
 		}
 
 		private void replaceInputsFor(final JobOrderProc p, final Map<String, AppDataJobInput> inputsByReference) {

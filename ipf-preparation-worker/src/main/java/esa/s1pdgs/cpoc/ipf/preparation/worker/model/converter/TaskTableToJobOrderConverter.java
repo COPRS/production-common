@@ -176,7 +176,9 @@ class TaskTableTaskToJobOrderProc implements SuperConverter<NamedEntry<TaskTable
 		rObj.setBreakpoint(new JobOrderBreakpoint());
 		rObj.addOutputs(outputConverter.convertToList(tObj.getEntry().getOutputs()));
 
-		rObj.setInputs(inputProc.convertToList(toIndexedInputs(tObj.getName(), tObj.getEntry().getInputs()).stream().filter(this::withMatchingMode).collect(toList())));
+		rObj.setInputs(inputProc.convertToList(
+				toIndexedInputs(tObj.getName(), tObj.getEntry().getInputs())
+						.stream().filter(this::withMatchingMode).collect(toList())));
 
 		return rObj;
 	}
