@@ -86,6 +86,7 @@ public class AuxQuery {
 	public final void validate(final AppDataJob job) throws IpfPrepWorkerInputsMissingException {
 		final List<AppDataJobInput> missingInputs = inputsWithoutResultsOf(job);
 		final Map<String, TaskTableInput> taskTableInputs = taskTableInputs();
+		final List<AppDataJobInput> timedOutInputs = new ArrayList<>();
 
 		final Map<String, String> missingMetadata = new HashMap<>();
 
@@ -109,6 +110,7 @@ public class AuxQuery {
 				if (timeoutChecker.isTimeoutExpiredFor(job, taskTableInput)) {					
 					LOGGER.info("Non-Mandatory Input {} is not available. Continue without it...",
 							inputDescription);
+					timedOutInputs.add(missingInput);
 				}
 				else {
 					LOGGER.info("Waiting for Non-Mandatory Input {} ...", inputDescription);
@@ -124,6 +126,13 @@ public class AuxQuery {
 		if(!missingMetadata.isEmpty()) {
 			throw new IpfPrepWorkerInputsMissingException(missingMetadata);
 		}
+
+		//remove timed out inputs
+		job.getAdditionalInputs().forEach(taskInputs -> {
+			taskInputs.setInputs(
+					taskInputs.getInputs().stream().filter(input -> !timedOutInputs.contains(input)).collect(toList()));
+		});
+
 	}
 
 	private List<AppDataJobInput> inputsWithoutResultsOf(final AppDataJob job) {
