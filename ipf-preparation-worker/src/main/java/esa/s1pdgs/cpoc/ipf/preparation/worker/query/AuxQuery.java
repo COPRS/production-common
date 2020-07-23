@@ -92,10 +92,12 @@ public class AuxQuery {
 			final String ref = missingInput.getTaskTableInputReference();
 			
 			final TaskTableInput taskTableInput = taskTableInputs.get(ref);
+			final String inputDescription = inputDescription(ref, taskTableInput);
+			
 			if (missingInput.isMandatory()) {
+				LOGGER.warn("Mandatory Input {} is not available", inputDescription);
 				missingMetadata.put(ref + " is missing", taskTableInput.toLogMessage());
-			} else {
-				final String inputDescription = inputDescription(ref, taskTableInput);
+			} else {		
 				
 				// optional input
 
@@ -108,6 +110,8 @@ public class AuxQuery {
 							inputDescription);
 				}
 				else {
+					LOGGER.info("Waiting for Non-Mandatory Input {} ...", inputDescription);
+					
 					missingMetadata.put(
 							inputDescription + " is missing",
 							taskTableInput.toLogMessage()						
@@ -312,7 +316,8 @@ public class AuxQuery {
 
 	private List<AppDataJobTaskInputs> mergeInto(final List<AppDataJobInput> inputsWithResults, final List<AppDataJobTaskInputs> jobTaskInputs) {
 		final Map<String, AppDataJobInput> newInputs
-				= inputsWithResults.stream().collect(toMap(AppDataJobInput::getTaskTableInputReference, input -> input));
+				= inputsWithResults.stream()
+				.collect(toMap(AppDataJobInput::getTaskTableInputReference, input -> input));
 
 		final List<AppDataJobTaskInputs> mergedJobTaskInputs = new ArrayList<>();
 
