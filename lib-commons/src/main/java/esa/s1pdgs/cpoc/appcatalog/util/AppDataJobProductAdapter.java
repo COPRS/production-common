@@ -66,7 +66,7 @@ public final class AppDataJobProductAdapter {
 	}
 	
 	public final int getInsConfId() {
-		return Integer.parseInt(getStringValue("insConfId", "-1"));
+		return getIntegerValue("insConfId", -1);
 	}
 	
 	public final void setProductType(final String value) {
@@ -93,9 +93,15 @@ public final class AppDataJobProductAdapter {
 		product.getMetadata().put(key, value);
 	}
 	
-    
     public final Integer getIntegerValue(final String key) {
-    	final Integer value = (int) product.getMetadata().get(key);
+    	return (Integer) product.getMetadata().get(key);
+    }
+    
+    public final Integer getIntegerValue(final String key, final int defaultValue) {
+    	final Integer value = getIntegerValue(key);
+    	if (value == null) {
+    		return defaultValue;
+    	}
     	return value;
     }
 	
