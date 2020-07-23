@@ -87,7 +87,8 @@ public class SwiftObsClientTest {
                 Mockito.eq("key-exist"));
         doReturn(0).when(service).getNbObjects(Mockito.anyString(),
                 Mockito.eq("key-not-exist"));
-        doReturn("(md5)  (file)").when(service).uploadFile(Mockito.anyString(),
+        doReturn(new Md5.Entry("md5", "md5", "file"))
+				.when(service).uploadFile(Mockito.anyString(),
                 Mockito.anyString(), Mockito.any());
 
         // Mock configuration

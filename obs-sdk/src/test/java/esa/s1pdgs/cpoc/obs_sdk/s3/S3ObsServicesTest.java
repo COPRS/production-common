@@ -1,5 +1,31 @@
 package esa.s1pdgs.cpoc.obs_sdk.s3;
 
+import static org.hamcrest.CoreMatchers.instanceOf;
+import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.Matchers.hasProperty;
+import static org.junit.Assert.*;
+import static org.mockito.ArgumentMatchers.*;
+import static org.mockito.Mockito.*;
+
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.security.DigestInputStream;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Rule;
+import org.junit.Test;
+import org.junit.rules.ExpectedException;
+import org.mockito.ArgumentMatcher;
+import org.mockito.Mock;
+import org.mockito.Mockito;
+import org.mockito.MockitoAnnotations;
+
 import com.amazonaws.AmazonClientException;
 import com.amazonaws.AmazonServiceException;
 import com.amazonaws.SdkClientException;
@@ -11,34 +37,10 @@ import com.amazonaws.services.s3.model.S3ObjectSummary;
 import com.amazonaws.services.s3.transfer.TransferManager;
 import com.amazonaws.services.s3.transfer.Upload;
 import com.amazonaws.services.s3.transfer.model.UploadResult;
+
 import esa.s1pdgs.cpoc.common.errors.InternalErrorException;
 import esa.s1pdgs.cpoc.common.utils.FileUtils;
 import esa.s1pdgs.cpoc.obs_sdk.Md5;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.ExpectedException;
-import org.mockito.ArgumentMatcher;
-import org.mockito.Mock;
-import org.mockito.Mockito;
-import org.mockito.MockitoAnnotations;
-
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
-
-import static org.hamcrest.CoreMatchers.is;
-import static org.hamcrest.CoreMatchers.isA;
-import static org.hamcrest.Matchers.hasProperty;
-import static org.junit.Assert.*;
-import static org.mockito.ArgumentMatchers.*;
-import static org.mockito.Mockito.*;
 
 /**
  * Test the services to access to the OBS via the amazon S3 API
@@ -154,7 +156,9 @@ public class S3ObsServicesTest {
                 "amazon SDK exception")).when(s3tm).upload(
                         eq(BCK_EXC_AWS), anyString(),
                         any());
-        doReturn(new UploadResult()).when(upload).waitForUploadResult();
+        final UploadResult uploadResult = new UploadResult();
+        uploadResult.setETag("dummy");
+        doReturn(uploadResult).when(upload).waitForUploadResult();
     }
 
     /**
@@ -261,7 +265,7 @@ public class S3ObsServicesTest {
         thrown.expect(S3SdkClientException.class);
         thrown.expect(hasProperty("bucket", is(BCK_EXC_SDK)));
         thrown.expect(hasProperty("key", is("test-key")));
-        thrown.expectCause(isA(SdkClientException.class));
+        thrown.expectCause(instanceOf(SdkClientException.class));
 
         service.exist(BCK_EXC_SDK, "test-key");
     }
@@ -313,7 +317,7 @@ public class S3ObsServicesTest {
         thrown.expect(S3SdkClientException.class);
         thrown.expect(hasProperty("bucket", is(BCK_EXC_SDK)));
         thrown.expect(hasProperty("key", is("prefix")));
-        thrown.expectCause(isA(SdkClientException.class));
+        thrown.expectCause(instanceOf(SdkClientException.class));
 
         service.getNbObjects(BCK_EXC_SDK, "prefix");
     }
@@ -429,7 +433,7 @@ public class S3ObsServicesTest {
         thrown.expect(S3SdkClientException.class);
         thrown.expect(hasProperty("bucket", is(BCK_EXC_SDK)));
         thrown.expect(hasProperty("key", is("prefix")));
-        thrown.expectCause(isA(SdkClientException.class));
+        thrown.expectCause(instanceOf(SdkClientException.class));
 
         service.downloadObjectsWithPrefix(BCK_EXC_SDK, "prefix", "directory",
                 true);
@@ -465,7 +469,7 @@ public class S3ObsServicesTest {
         thrown.expect(S3SdkClientException.class);
         thrown.expect(hasProperty("bucket", is(BCK_EXC_SDK)));
         thrown.expect(hasProperty("key", is("key-test")));
-        thrown.expectCause(isA(SdkClientException.class));
+        thrown.expectCause(instanceOf(SdkClientException.class));
 
         service.uploadFile(BCK_EXC_SDK, "key-test", tmpDir);
     }
@@ -499,9 +503,13 @@ public class S3ObsServicesTest {
     	final File testFile = new File(tmpDir,"foo");
     	FileUtils.writeFile(testFile, "123");
     	
-        List<String> ret = service.uploadDirectory(BCK_OBJ_EXIST, "key-test", testFile);
+        List<Md5.Entry> ret = service.uploadDirectory(BCK_OBJ_EXIST, "key-test", testFile);
         assertEquals(1, ret.size());
-        verify(s3tm, times(1)).upload(eq(BCK_OBJ_EXIST), eq("key-test"), eq(testFile));
+        verify(s3tm, times(1)).upload(
+                eq(BCK_OBJ_EXIST),
+                eq("key-test"),
+                isA(DigestInputStream.class),
+                isA(ObjectMetadata.class));
     }
 
     /**
@@ -528,17 +536,17 @@ public class S3ObsServicesTest {
         
         service.uploadDirectory(BCK_OBJ_EXIST, "key-test", tmpDir);
         verify(s3tm, times(3)).upload(eq(BCK_OBJ_EXIST),
-                anyString(), any(File.class));
+                anyString(), any(DigestInputStream.class), any(ObjectMetadata.class));
         verify(s3tm, times(1)).upload(eq(BCK_OBJ_EXIST),
                 eq("key-test" + "/" + "key1"),
-                eq(new File(tmpDir,"key1")));
+                any(DigestInputStream.class), any(ObjectMetadata.class));
         verify(s3tm, times(1)).upload(eq(BCK_OBJ_EXIST),
                 eq("key-test" + "/" + "key2"),
-                eq(new File(tmpDir,"key2")));
+                any(DigestInputStream.class), any(ObjectMetadata.class));
         verify(s3tm, times(1)).upload(
                 eq(BCK_OBJ_EXIST), eq("key-test"
                         + "/" + "key" + "/" + "key3"),
-                eq(new File(tmpDir,"key/key3")));
+                any(DigestInputStream.class), any(ObjectMetadata.class));
 
         file1.delete();
         file2.delete();
@@ -560,7 +568,7 @@ public class S3ObsServicesTest {
         File file3 = new File(tmpDir,"key");
         file3.mkdirs();
 
-        List<String> ret = service.uploadDirectory(BCK_OBJ_EXIST, "key-test", file3);
+        List<Md5.Entry> ret = service.uploadDirectory(BCK_OBJ_EXIST, "key-test", file3);
         assertEquals(0, ret.size());
         verify(s3tm, never()).upload(anyString(), anyString(),
                 any(File.class));
@@ -583,7 +591,7 @@ public class S3ObsServicesTest {
             thrown.expect(S3SdkClientException.class);
             thrown.expect(hasProperty("bucket", is(BCK_EXC_SDK)));
             thrown.expect(hasProperty("key", is("key-test")));
-            thrown.expectCause(isA(SdkClientException.class));
+            thrown.expectCause(instanceOf(SdkClientException.class));
             service.uploadStream(BCK_EXC_SDK, "key-test", in, 100);
         }
     }

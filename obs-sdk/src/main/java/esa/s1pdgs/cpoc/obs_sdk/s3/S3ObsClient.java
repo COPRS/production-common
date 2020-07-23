@@ -82,7 +82,7 @@ public class S3ObsClient extends AbstractObsClient {
 
 				final String host = removedProtocol.substring(0, removedProtocol.indexOf(':'));
 				final int port = Integer.parseInt(
-						removedProtocol.substring(removedProtocol.indexOf(':') + 1, removedProtocol.length()));
+						removedProtocol.substring(removedProtocol.indexOf(':') + 1));
 				clientConfig.setProxyHost(host);
 				clientConfig.setProxyPort(port);
 			}
@@ -156,7 +156,7 @@ public class S3ObsClient extends AbstractObsClient {
 	@Override
 	public void uploadObject(final FileObsUploadObject object)
 			throws SdkClientException, ObsServiceException, ObsException {
-		final List<String> fileList = new ArrayList<>();
+		final List<Md5.Entry> fileList = new ArrayList<>();
 		if (object.getFile().isDirectory()) {
 			fileList.addAll(
 					s3Services.uploadDirectory(getBucketFor(object.getFamily()), object.getKey(), object.getFile()));
@@ -167,17 +167,13 @@ public class S3ObsClient extends AbstractObsClient {
 	}
 
 	/**
-	 * @param object
-	 * @throws ObsServiceException
-	 * @throws S3SdkClientException
 	 *
 	 * Note: The stream is not closed here. It should be closed after upload.
 	 *
 	 */
 	@Override
-	public String uploadObject(final StreamObsUploadObject object) throws ObsServiceException, S3SdkClientException {
+	public Md5.Entry uploadObject(final StreamObsUploadObject object) throws ObsServiceException, S3SdkClientException {
 		return s3Services.uploadStream(getBucketFor(object.getFamily()), object.getKey(), maybeWithBuffer(object), object.getContentLength());
-		//uploadMd5Sum(object, Arrays.asList(md5));
 	}
 
 	/**
@@ -203,13 +199,13 @@ public class S3ObsClient extends AbstractObsClient {
 	}
 
 	@Override
-	public final void uploadMd5Sum(final ObsObject object, final List<String> fileList)
+	public final void uploadMd5Sum(final ObsObject object, final List<Md5.Entry> fileList)
 			throws ObsServiceException, S3SdkClientException {
 		File file;
 		try {
 			file = File.createTempFile(object.getKey(), Md5.MD5SUM_SUFFIX);
 			try (PrintWriter writer = new PrintWriter(file)) {
-				for (final String fileInfo : fileList) {
+				for (final Md5.Entry fileInfo : fileList) {
 					writer.println(fileInfo);
 				}
 			}
@@ -255,7 +251,7 @@ public class S3ObsClient extends AbstractObsClient {
 		LOGGER.debug(format("listing objects in OBS from bucket %s within last modification time %s to %s",
 				bucket, timeFrameBegin, timeFrameEnd));
 		ObjectListing objListing = s3Services.listObjectsFromBucket(bucket);
-		boolean truncated = false;
+		boolean truncated;
 
 		do {
 			if (objListing == null) {
@@ -308,9 +304,9 @@ public class S3ObsClient extends AbstractObsClient {
 	}
 
 	@Override
-	protected Map<String, String> collectMd5Sums(final ObsObject object) throws ObsException {
+	protected Map<String, String> collectETags(final ObsObject object) throws ObsException {
 		try {
-			return s3Services.collectMd5Sums(getBucketFor(object.getFamily()), object.getKey());
+			return s3Services.collectETags(getBucketFor(object.getFamily()), object.getKey());
 		} catch (S3SdkClientException | ObsServiceException e) {
 			throw new ObsException(object.getFamily(), object.getKey(), e);
 		}
@@ -339,29 +335,6 @@ public class S3ObsClient extends AbstractObsClient {
 		}
 	}
 	
-	@Override
-	public String getChecksum(final ObsObject object) throws ObsException {
-		ValidArgumentAssertion.assertValidArgument(object);
-		try {
-			final String bucketName = getBucketFor(object.getFamily());
-			/*
-			 * This method is supposed to return the size of exactly one object. If more than
-			 * one is returned the object is not unique and very likely not the full name of it or
-			 * a directory. We are not supporting this and thus operations fails
-			 */
-			if (s3Services.getNbObjects(bucketName, object.getKey()) != 1) {
-				throw new IllegalArgumentException(format(
-						"Unable to determinate checksum of object '%s' (family:%s) (is a directory?)",
-						object.getKey(), object.getFamily()));
-			}
-			
-			// return the checksum of the object
-			return s3Services.getChecksum(bucketName, object.getKey());
-		} catch (final SdkClientException ex) {
-			throw new ObsException(object.getFamily(), object.getKey(), ex);
-		}
-	}
-
 	@Override
 	public void setExpirationTime(ObsObject object, Instant expirationTime) throws ObsServiceException {
 		s3Services.setExpirationTime(getBucketFor(object.getFamily()), object.getKey(), expirationTime);

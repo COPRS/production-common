@@ -1,11 +1,19 @@
 package esa.s1pdgs.cpoc.obs_sdk.s3;
 
+import static java.lang.String.format;
+
 import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.math.BigInteger;
 import java.net.URL;
+import java.security.DigestInputStream;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
@@ -41,7 +49,6 @@ import com.amazonaws.util.IOUtils;
 
 import esa.s1pdgs.cpoc.obs_sdk.Md5;
 import esa.s1pdgs.cpoc.obs_sdk.ObsServiceException;
-import esa.s1pdgs.cpoc.obs_sdk.SdkClientException;
 
 /**
  * Provides services to manage objects in the object storage wia the AmazonS3
@@ -98,7 +105,6 @@ public class S3ObsServices {
 	private final int retryDelay;
 
 	/**
-	 * @param s3client
 	 */
 	public S3ObsServices(final AmazonS3 s3client, final TransferManager s3tm, final int numRetries,
 			final int retryDelay) {
@@ -111,7 +117,6 @@ public class S3ObsServices {
 	/**
 	 * Internal function to log messages
 	 * 
-	 * @param message
 	 */
 	private void log(final String message) {
 		if (LOGGER.isDebugEnabled()) {
@@ -122,10 +127,6 @@ public class S3ObsServices {
 	/**
 	 * Check if object with such key in bucket exists
 	 * 
-	 * @param bucketName
-	 * @param keyName
-	 * @return
-	 * @throws SdkClientException
 	 */
 	public boolean exist(final String bucketName, final String keyName)
 			throws S3ObsServiceException, S3SdkClientException {
@@ -134,18 +135,17 @@ public class S3ObsServices {
 				return s3client.doesObjectExist(bucketName, keyName);		
 			} catch (final com.amazonaws.SdkClientException sce) {
 				if (retryCount <= numRetries) {
-					LOGGER.warn(String.format("Checking object existance %s failed: Attempt : %d / %d", keyName,
+					LOGGER.warn(format("Checking object existance %s failed: Attempt : %d / %d", keyName,
 							retryCount, numRetries));
 					try {
 						Thread.sleep(retryDelay);
 					} catch (final InterruptedException e) {
 						throw new S3SdkClientException(bucketName, keyName,
-								String.format("Checking object existance fails: %s", sce.getMessage()), sce);
+								format("Checking object existance fails: %s", sce.getMessage()), sce);
 					}
-					continue;
 				} else {
 					throw new S3SdkClientException(bucketName, keyName,
-							String.format("Checking object existance fails: %s", sce.getMessage()), sce);
+							format("Checking object existance fails: %s", sce.getMessage()), sce);
 				}
 			}
 		}
@@ -154,10 +154,6 @@ public class S3ObsServices {
 	/**
 	 * Check if bucket exists
 	 * 
-	 * @param bucketName
-	 * @return
-	 * @throws S3SdkClientException
-	 * @throws S3ObsServiceException
 	 */
 	public boolean bucketExist(final String bucketName) throws S3SdkClientException, S3ObsServiceException {
 		for (int retryCount = 1;; retryCount++) {
@@ -165,18 +161,17 @@ public class S3ObsServices {
 				return s3client.doesBucketExistV2(bucketName);
 			} catch (final com.amazonaws.SdkClientException sce) {
 				if (retryCount <= numRetries) {
-					LOGGER.warn(String.format("Checking bucket existance %s failed: Attempt : %d / %d", bucketName,
+					LOGGER.warn(format("Checking bucket existance %s failed: Attempt : %d / %d", bucketName,
 							retryCount, numRetries));
 					try {
 						Thread.sleep(retryDelay);
 					} catch (final InterruptedException e) {
 						throw new S3SdkClientException(bucketName, "",
-								String.format("Checking bucket existance fails: %s", sce.getMessage()), sce);
+								format("Checking bucket existance fails: %s", sce.getMessage()), sce);
 					}
-					continue;
 				} else {
 					throw new S3SdkClientException(bucketName, "",
-							String.format("Checking bucket existance fails: %s", sce.getMessage()), sce);
+							format("Checking bucket existance fails: %s", sce.getMessage()), sce);
 				}
 			}
 		}
@@ -185,10 +180,6 @@ public class S3ObsServices {
 	/**
 	 * Get the number of objects in the bucket whose key matches with prefix
 	 * 
-	 * @param bucketName
-	 * @param prefixKey
-	 * @return
-	 * @throws SdkClientException
 	 */
 	public int getNbObjects(final String bucketName, final String prefixKey)
 			throws S3ObsServiceException, S3SdkClientException {
@@ -206,18 +197,17 @@ public class S3ObsServices {
 				return nbObj;
 			} catch (final com.amazonaws.SdkClientException sce) {
 				if (retryCount <= numRetries) {
-					LOGGER.warn(String.format("Getting number of objects %s failed: Attempt : %d / %d", prefixKey,
+					LOGGER.warn(format("Getting number of objects %s failed: Attempt : %d / %d", prefixKey,
 							retryCount, numRetries));
 					try {
 						Thread.sleep(retryDelay);
 					} catch (final InterruptedException e) {
 						throw new S3SdkClientException(bucketName, prefixKey,
-								String.format("Getting number of objects fails: %s", sce.getMessage()), sce);
+								format("Getting number of objects fails: %s", sce.getMessage()), sce);
 					}
-					continue;
 				} else {
 					throw new S3SdkClientException(bucketName, prefixKey,
-							String.format("Getting number of objects fails: %s", sce.getMessage()), sce);
+							format("Getting number of objects fails: %s", sce.getMessage()), sce);
 				}
 			}
 		}
@@ -226,18 +216,11 @@ public class S3ObsServices {
 	/**
 	 * Download objects of the given bucket with a key matching the prefix
 	 * 
-	 * @param bucketName
-	 * @param prefixKey
-	 * @param directoryPath
-	 * @param ignoreFolders
-	 * @return the download files
-	 * @throws SdkClientException
-	 * @throws ObsServiceException
 	 */
 	public List<File> downloadObjectsWithPrefix(final String bucketName, final String prefixKey,
 			final String directoryPath, final boolean ignoreFolders)
 			throws S3ObsServiceException, S3SdkClientException {
-		log(String.format("Downloading objects with prefix %s from bucket %s in %s", prefixKey, bucketName,
+		log(format("Downloading objects with prefix %s from bucket %s in %s", prefixKey, bucketName,
 				directoryPath));
 		final List<File> files = new ArrayList<>();
 		int nbObj;
@@ -246,7 +229,7 @@ public class S3ObsServices {
 			// List all objects with given prefix
 			try {
 				final List<String> expectedFiles = getExpectedFiles(bucketName, prefixKey);
-				log(String.format("Expected files for prefix %s is %s", prefixKey, String.join(", ", expectedFiles)));
+				log(format("Expected files for prefix %s is %s", prefixKey, String.join(", ", expectedFiles)));
 				// TODO: How to handle MD5 SUM files???
 
 				for (final String key : expectedFiles) {
@@ -264,7 +247,7 @@ public class S3ObsServices {
 
 					final String localFilePath = targetDir + key;
 					// Download object
-					log(String.format("Downloading object %s from bucket %s in %s", key, bucketName, localFilePath));
+					log(format("Downloading object %s from bucket %s in %s", key, bucketName, localFilePath));
 					File localFile = new File(localFilePath);
 					if (localFile.getParentFile() != null) {
 						localFile.getParentFile().mkdirs();
@@ -284,7 +267,7 @@ public class S3ObsServices {
 							filename = key.substring(lastIndex + 1);
 						}
 						if (!key.equals(filename)) {
-							log(String.format("==debug filename=%s, key=%s", filename, key));
+							log(format("==debug filename=%s, key=%s", filename, key));
 							final File fTo = new File(targetDir + filename);
 							localFile.renameTo(fTo);
 							localFile = fTo;
@@ -294,24 +277,23 @@ public class S3ObsServices {
 					nbObj++;
 				}
 
-				log(String.format("Download %d objects with prefix %s from bucket %s in %s succeeded", nbObj, prefixKey,
+				log(format("Download %d objects with prefix %s from bucket %s in %s succeeded", nbObj, prefixKey,
 						bucketName, directoryPath));
 				return files;
 			} catch (final com.amazonaws.SdkClientException ase) {
 				if (retryCount <= numRetries) {
 					LOGGER.warn(
-							String.format("Download objects with prefix %s from bucket %s failed: Attempt : %d / %d",
+							format("Download objects with prefix %s from bucket %s failed: Attempt : %d / %d",
 									prefixKey, bucketName, retryCount, numRetries));
 					try {
 						Thread.sleep(retryDelay);						
 					} catch (final InterruptedException e) {
 						throw new S3SdkClientException(bucketName, prefixKey,
-								String.format("Download in %s fails: %s", directoryPath, ase.getMessage()), ase);
+								format("Download in %s fails: %s", directoryPath, ase.getMessage()), ase);
 					}
-					continue;
 				} else {
 					throw new S3SdkClientException(bucketName, prefixKey,
-							String.format("Download in %s fails: %s", directoryPath, ase.getMessage()), ase);
+							format("Download in %s fails: %s", directoryPath, ase.getMessage()), ase);
 				}
 			}
 		}
@@ -320,49 +302,46 @@ public class S3ObsServices {
 	List<String> getExpectedFiles(final String bucketName, final String prefixKey) throws S3ObsServiceException {
 
 		final String md5FileName = Md5.md5KeyFor(prefixKey);
-		log(String.format("Try to list expected files from file %s", md5FileName));
+		log(format("Try to list expected files from file %s", md5FileName));
 
 		final S3Object md5file = s3client.getObject(bucketName, md5FileName);
 		if (md5file == null) {
 			throw new com.amazonaws.SdkClientException(
-					String.format("Tried to access md5sum file %s, but it odes not exist", md5FileName));
+					format("Tried to access md5sum file %s, but it odes not exist", md5FileName));
 		}
 		final S3ObsInputStream md5stream = new S3ObsInputStream(md5file, md5file.getObjectContent());
-		List<String> result = new ArrayList<>();
 		try {
-			result = readMd5StreamAndGetFiles(prefixKey, md5stream);
+			return readMd5StreamAndGetFiles(prefixKey, md5stream);
 
 		} catch (final IOException e) {
 			throw new S3ObsServiceException(bucketName, prefixKey,
-					String.format("Error getting expected files from file %s", md5FileName), e);
+					format("Error getting expected files from file %s", md5FileName), e);
 		}
-		return result;
 	}
 	
 	List<String> readMd5StreamAndGetFiles(final String prefixKey, final InputStream md5stream) throws IOException {
-
-		final List<String> result = new ArrayList<>();
 		try (BufferedReader reader = new BufferedReader(new InputStreamReader(md5stream))) {
+			final List<String> result = new ArrayList<>();
 			String line;
 			while ((line = reader.readLine()) != null) {
-				final int idx = line.indexOf("  ");
-				if (idx >= 0 && line.length() > (idx + 2)) {
-					final String key = line.substring(idx + 2);
-					/*
-					 * If the prefix is found in the key it is valid. This should work for single
-					 * files as well as directories
-					 */
-					if (key.contains(prefixKey)) {
-						result.add(key);
-					}
+				final Optional<Md5.Entry> entry = Md5.parseIfPossible(line);
+
+				if(!entry.isPresent()) {
+					continue; //silently
+				}
+				/*
+				 * If the prefix is found in the key it is valid. This should work for single
+				 * files as well as directories
+				 */
+				if(entry.get().getFileName().contains(prefixKey)) {
+					result.add(entry.get().getFileName());
 				}
 			}
+			return result;
 		}
-
-		return result;
 	}
 
-	private final List<S3ObjectSummary> getAll(final String bucketName, final String prefix) {
+	private List<S3ObjectSummary> getAll(final String bucketName, final String prefix) {
 		final List<S3ObjectSummary> result = new ArrayList<>();
 		ObjectListing listing = null;
 		do {
@@ -393,12 +372,12 @@ public class S3ObsServices {
 			}
 			return result;
 		} catch (final com.amazonaws.SdkClientException e) {
-			throw new S3ObsServiceException(bucketName, prefix, String.format("Listing fails: %s", e.getMessage()), e);
+			throw new S3ObsServiceException(bucketName, prefix, format("Listing fails: %s", e.getMessage()), e);
 		}
 
 	}
 
-	public final Map<String, String> collectMd5Sums(final String bucketName, final String prefix)
+	public final Map<String, String> collectETags(final String bucketName, final String prefix)
 			throws S3ObsServiceException, S3SdkClientException {
 		Map<String, String> result;
 		for (int retryCount = 1;; retryCount++) {
@@ -414,83 +393,42 @@ public class S3ObsServices {
 				return result;
 			} catch (final com.amazonaws.SdkClientException sce) {
 				if (retryCount <= numRetries) {
-					LOGGER.warn(String.format("Listing prefixed objects %s from bucket %s failed: Attempt : %d / %d",
+					LOGGER.warn(format("Listing prefixed objects %s from bucket %s failed: Attempt : %d / %d",
 							prefix, bucketName, retryCount, numRetries));
 					try {
 						Thread.sleep(retryDelay);
 					} catch (final InterruptedException e) {
 						throw new S3SdkClientException(bucketName, prefix,
-								String.format("Listing fails: %s", sce.getMessage()), sce);
+								format("Listing fails: %s", sce.getMessage()), sce);
 					}
-					continue;
 				} else {
 					throw new S3SdkClientException(bucketName, prefix,
-							String.format("Upload fails: %s", sce.getMessage()), sce);
+							format("Upload fails: %s", sce.getMessage()), sce);
 				}
 			}
 		}
 	}
 
 	/**
-	 * @param bucketName
-	 * @param keyName
-	 * @param uploadFile
-	 * @throws S3SdkClientException
 	 */
-	public String uploadFile(final String bucketName, final String keyName, final File uploadFile)
+	public Md5.Entry uploadFile(final String bucketName, final String keyName, final File uploadFile)
 			throws S3ObsServiceException, S3SdkClientException {
-		String md5 = null;
-		for (int retryCount = 1;; retryCount++) {
-			try {
-				log(String.format("Uploading object %s in bucket %s", keyName, bucketName));
-
-				final Upload upload = s3tm.upload(bucketName, keyName, uploadFile);
-				upload.addProgressListener((final ProgressEvent progressEvent) -> {
-					LOGGER.trace(String.format("Uploading object %s in bucket %s: progress %s", keyName, bucketName,
-							progressEvent.toString()));
-				});
-
-				try {
-					final UploadResult uploadResult = upload.waitForUploadResult();
-					md5 = uploadResult.getETag();
-				} catch (final InterruptedException e) {
-					throw new S3ObsServiceException(bucketName, keyName,
-							"Upload fails: interrupted during waiting multipart upload completion", e);
-				}
-
-				log(String.format("Upload object %s in bucket %s succeeded", keyName, bucketName));
-				break;
-			} catch (final com.amazonaws.SdkClientException sce) {
-				if (retryCount <= numRetries) {
-					LOGGER.warn(String.format("Upload object %s from bucket %s failed: Attempt : %d / %d", keyName,
-							bucketName, retryCount, numRetries));
-					try {
-						Thread.sleep(retryDelay);
-					} catch (final InterruptedException e) {
-						throw new S3SdkClientException(bucketName, keyName,
-								String.format("Upload fails: %s", sce.getMessage()), sce);
-					}
-					continue;
-				} else {
-					throw new S3SdkClientException(bucketName, keyName,
-							String.format("Upload fails: %s", sce.getMessage()), sce);
-				}
-			}
+		InputStream in  = null;
+		try {
+			in = new FileInputStream(uploadFile);
+			return uploadStream(bucketName, keyName, in, uploadFile.length());
+		} catch (FileNotFoundException e) {
+			throw new S3SdkClientException(bucketName, keyName, "could not create input stream for file "+ uploadFile, e);
+		} finally {
+			IOUtils.closeQuietly(in, null);
 		}
-		return md5 + "  " + keyName;
 	}
 
 	/**
-	 * @param bucketName
-	 * @param keyName
-	 * @param uploadDirectory
-	 * @return
-	 * @throws S3ObsServiceException
-	 * @throws S3SdkClientException
 	 */
-	public List<String> uploadDirectory(final String bucketName, final String keyName, final File uploadDirectory)
+	public List<Md5.Entry> uploadDirectory(final String bucketName, final String keyName, final File uploadDirectory)
 			throws S3ObsServiceException, S3SdkClientException {
-		final List<String> fileList = new ArrayList<>();
+		final List<Md5.Entry> fileList = new ArrayList<>();
 		if (uploadDirectory.isDirectory()) {
 			final File[] childs = uploadDirectory.listFiles();
 			if (childs != null) {
@@ -508,37 +446,40 @@ public class S3ObsServices {
 		return fileList;
 	}
 
-	public String uploadStream(final String bucketName, final String keyName, final InputStream in, final long contentLength) throws S3ObsServiceException, S3SdkClientException {
+	public Md5.Entry uploadStream(final String bucketName, final String keyName, final InputStream in, final long contentLength) throws S3ObsServiceException, S3SdkClientException {
 		{
-			String md5 = null;
 			for (int retryCount = 1;; retryCount++) {
 				try {
-					log(String.format("Uploading object %s in bucket %s", keyName, bucketName));
+					log(format("Uploading object %s in bucket %s", keyName, bucketName));
+
+					final DigestInputStream digestInputStream = new DigestInputStream(in, MessageDigest.getInstance("MD5"));
 
 					final ObjectMetadata metadata = new ObjectMetadata();
 					metadata.setContentLength(contentLength);
-					final Upload upload = s3tm.upload(bucketName, keyName, in, metadata);
-					upload.addProgressListener((final ProgressEvent progressEvent) -> {
-						LOGGER.trace(String.format("Uploading object %s in bucket %s: progress %s", keyName, bucketName,
-								progressEvent.toString()));
-					});
+					final Upload upload = s3tm.upload(bucketName, keyName, digestInputStream, metadata);
+					upload.addProgressListener(
+							(final ProgressEvent progressEvent)
+									-> LOGGER.trace(format("Uploading object %s in bucket %s: progress %s",
+									keyName,
+									bucketName,
+									progressEvent.toString())));
 
 					try {
-						final UploadResult uploadResult = upload.waitForUploadResult();
-						md5 = uploadResult.getETag();
+						final UploadResult result = upload.waitForUploadResult();
+						log(format("Upload object %s in bucket %s succeeded", keyName, bucketName));
+
+						return new Md5.Entry(md5Of(digestInputStream), result.getETag(), keyName);
 					} catch (final InterruptedException e) {
 						throw new S3ObsServiceException(bucketName, keyName,
 								"Upload fails: interrupted during waiting multipart upload completion", e);
 					}
 
-					log(String.format("Upload object %s in bucket %s succeeded", keyName, bucketName));
-					break;
 				} catch (final com.amazonaws.SdkClientException sce) {
 					if (retryCount <= numRetries) {						
 						if (retryCount == 1) {
 							LOGGER.warn("Upload object {} to bucket {} failed: Attempt : {}/{}", keyName,
 									bucketName, retryCount, numRetries);																					
-							LOGGER.debug("Exception is: {}", sce);							
+							LOGGER.debug("Exception is", sce);
 						}
 						else {
 							LOGGER.warn("Upload object {} to bucket {} failed: Attempt : {}/{}", keyName,
@@ -548,17 +489,26 @@ public class S3ObsServices {
 							Thread.sleep(retryDelay);
 						} catch (final InterruptedException e) {
 							throw new S3SdkClientException(bucketName, keyName,
-									String.format("Upload fails: %s", sce.getMessage()), sce);
+									format("Upload fails: %s", sce.getMessage()), sce);
 						}
-						continue;
 					} else {
 						throw new S3SdkClientException(bucketName, keyName,
-								String.format("Upload fails: %s", sce.getMessage()), sce);
+								format("Upload fails: %s", sce.getMessage()), sce);
 					}
+				} catch (NoSuchAlgorithmException e) {
+					//thrown by MessageDigest.getInstance("MD5"), which should not happen
+					throw new S3SdkClientException(bucketName, keyName,
+							format("Upload fails: %s", e.getMessage()), e);
 				}
 			}
-			return md5 + "  " + keyName;
 		}
+	}
+
+	private String md5Of(DigestInputStream digestInputStream) {
+		final MessageDigest messageDigest = digestInputStream.getMessageDigest();
+		final byte[] hash = messageDigest.digest();
+
+		return new BigInteger(1, hash).toString(16);
 	}
 
 	public void setExpirationTime(final String bucketName, final String prefix, final Instant expirationDate) {
@@ -602,83 +552,71 @@ public class S3ObsServices {
 				break;
 			} catch (final com.amazonaws.SdkClientException sce) {
 				if (retryCount <= numRetries) {
-					LOGGER.warn(String.format("Checking bucket existance %s failed: Attempt : %d / %d", bucketName,
+					LOGGER.warn(format("Checking bucket existance %s failed: Attempt : %d / %d", bucketName,
 							retryCount, numRetries));
 					try {
 						Thread.sleep(retryDelay);
 					} catch (final InterruptedException e) {
 						throw new S3SdkClientException(bucketName, "",
-								String.format("Bucket creation fails: %s", sce.getMessage()), sce);
+								format("Bucket creation fails: %s", sce.getMessage()), sce);
 					}
-					continue;
 				} else {
 					throw new S3SdkClientException(bucketName, "",
-							String.format("Bucket creation fails: %s", sce.getMessage()), sce);
+							format("Bucket creation fails: %s", sce.getMessage()), sce);
 				}
 			}
 		}
 	}
 
 	/**
-	 * @param bucketName
-	 * @return
-	 * @throws S3ObsServiceException
-	 * @throws S3SdkClientException
 	 */
 	public ObjectListing listObjectsFromBucket(final String bucketName)
 			throws S3ObsServiceException, S3SdkClientException {
 
 		for (int retryCount = 1;; retryCount++) {
 			try {
-				log(String.format("Listing objects from bucket %s", bucketName));
+				log(format("Listing objects from bucket %s", bucketName));
 				return s3client.listObjects(bucketName);
 			} catch (final com.amazonaws.SdkClientException sce) {
 				if (retryCount <= numRetries) {
-					LOGGER.warn(String.format("Listing objects from bucket %s failed: Attempt : %d / %d", bucketName,
+					LOGGER.warn(format("Listing objects from bucket %s failed: Attempt : %d / %d", bucketName,
 							retryCount, numRetries));
 					try {
 						Thread.sleep(retryDelay);
 					} catch (final InterruptedException e) {
 						throw new S3SdkClientException(bucketName, "",
-								String.format("Listing objects fails: %s", sce.getMessage()), sce);
+								format("Listing objects fails: %s", sce.getMessage()), sce);
 					}
-					continue;
 				} else {
 					throw new S3SdkClientException(bucketName, "",
-							String.format("Listing objects fails: %s", sce.getMessage()), sce);
+							format("Listing objects fails: %s", sce.getMessage()), sce);
 				}
 			}
 		}
 	}
 
 	/**
-	 * @param bucketName
-	 * @param previousObjectListing
-	 * @return
-	 * @throws S3ObsServiceException
-	 * @throws S3SdkClientException
 	 */
 	public ObjectListing listNextBatchOfObjectsFromBucket(final String bucketName,
 			final ObjectListing previousObjectListing) throws S3ObsServiceException, S3SdkClientException {
 
 		for (int retryCount = 1;; retryCount++) {
 			try {
-				log(String.format("Listing next batch of objects from bucket %s", bucketName));
+				log(format("Listing next batch of objects from bucket %s", bucketName));
 				return s3client.listNextBatchOfObjects(previousObjectListing);
 			} catch (final com.amazonaws.SdkClientException sce) {
 				if (retryCount <= numRetries) {
-					LOGGER.warn(String.format("Listing next batch of objects from bucket %s failed: Attempt : %d / %d",
+					LOGGER.warn(format("Listing next batch of objects from bucket %s failed: Attempt : %d / %d",
 							bucketName, retryCount, numRetries));
 					try {
 						Thread.sleep(retryDelay);
 					} catch (final InterruptedException e) {
 						throw new S3SdkClientException(bucketName, "",
-								String.format("Listing next batch of objects fails: %s", sce.getMessage()), sce);
+								format("Listing next batch of objects fails: %s", sce.getMessage()), sce);
 					}
-					continue;
 				} else {
 					throw new S3SdkClientException(bucketName, "",
-							String.format("Listing next batch of objects fails: %s", sce.getMessage()), sce);
+							format("Listing next batch of objects fails: %s", sce.getMessage()), sce);
 				}
 			}
 		}
@@ -688,44 +626,43 @@ public class S3ObsServices {
 
 		for (int retryCount = 1;; retryCount++) {
 			try {
-				log(String.format("Performing %s", request));
+				log(format("Performing %s", request));
 				s3client.copyObject(request);
 				break;
 			} catch (final com.amazonaws.SdkClientException sce) {
 				if (retryCount <= numRetries) {
-					LOGGER.warn(String.format("Move of objects from bucket %s failed: Attempt : %d / %d",
+					LOGGER.warn(format("Move of objects from bucket %s failed: Attempt : %d / %d",
 							request.getSourceBucketName(), retryCount, numRetries));
 					try {
 						Thread.sleep(retryDelay);
 					} catch (final InterruptedException e) {
 						throw new S3SdkClientException(request.getSourceBucketName(), request.getSourceKey(),
-								String.format("Move of objects fails: %s", sce.getMessage()), sce);
+								format("Move of objects fails: %s", sce.getMessage()), sce);
 					}
-					continue;
 				} else {
 					throw new S3SdkClientException(request.getSourceBucketName(), request.getSourceKey(),
-							String.format("Move of objects fails: %s", sce.getMessage()), sce);
+							format("Move of objects fails: %s", sce.getMessage()), sce);
 				}
 			}
 		}
 	}
 
 	public long size(final String bucketName, final String prefix) throws S3SdkClientException {
-		log(String.format("Get size of object %s from bucket %s", prefix, bucketName));
+		log(format("Get size of object %s from bucket %s", prefix, bucketName));
 		final List<S3ObjectSummary> results = getAll(bucketName, prefix);
 		if (results.size() != 1) {
-			throw new S3SdkClientException(bucketName, prefix, String.format(
+			throw new S3SdkClientException(bucketName, prefix, format(
 					"Size query for object %s from bucket %s returned %s results", prefix, bucketName, results.size()));
 		}
 		return results.get(0).getSize();
 	}
 
 	public String getChecksum(final String bucketName, final String prefix) throws S3SdkClientException {
-		log(String.format("Get checksum of object %s from bucket %s", prefix, bucketName));
+		log(format("Get checksum of object %s from bucket %s", prefix, bucketName));
 		final List<S3ObjectSummary> results = getAll(bucketName, prefix);
 		if (results.size() != 1) {
 			throw new S3SdkClientException(bucketName, prefix,
-					String.format("Checksum query for object %s from bucket %s returned %s results", prefix, bucketName,
+					format("Checksum query for object %s from bucket %s returned %s results", prefix, bucketName,
 							results.size()));
 		}
 		return results.get(0).getETag();
