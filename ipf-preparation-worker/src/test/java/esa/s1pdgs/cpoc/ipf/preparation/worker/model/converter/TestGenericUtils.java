@@ -213,7 +213,7 @@ public class TestGenericUtils {
 		task11.addInput(new TaskTableInput(TaskTableInputMode.ALWAYS, TaskTableMandatoryEnum.YES));
 		task11.getInputs().get(0).addAlternative(new TaskTableInputAlternative(1, TaskTableInputOrigin.DB,
 				"LatestValCover", 345600, 0, "MPL_ORBPRE", TaskTableFileNameType.PHYSICAL));
-		task11.addInput(new TaskTableInput(TaskTableInputMode.ALWAYS, TaskTableMandatoryEnum.YES));
+		task11.addInput(new TaskTableInput(TaskTableInputMode.NON_SLICING, TaskTableMandatoryEnum.YES));
 		task11.getInputs().get(1).addAlternative(new TaskTableInputAlternative(1, TaskTableInputOrigin.DB,
 				"LatestValCover", 0, 0, "MPL_ORBSCT", TaskTableFileNameType.PHYSICAL));
 		task11.addInput(new TaskTableInput(TaskTableInputMode.ALWAYS, TaskTableMandatoryEnum.YES));

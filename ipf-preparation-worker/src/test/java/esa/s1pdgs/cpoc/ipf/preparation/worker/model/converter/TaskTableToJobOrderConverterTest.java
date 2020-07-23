@@ -7,7 +7,8 @@ import static org.junit.Assert.assertTrue;
 
 import org.junit.Test;
 
-import esa.s1pdgs.cpoc.ipf.preparation.worker.model.converter.TaskTableToJobOrderConverter;
+import esa.s1pdgs.cpoc.ipf.preparation.worker.model.ProductMode;
+import esa.s1pdgs.cpoc.ipf.preparation.worker.type.Product;
 import esa.s1pdgs.cpoc.xml.model.joborder.JobOrder;
 import esa.s1pdgs.cpoc.xml.model.joborder.JobOrderOutput;
 import esa.s1pdgs.cpoc.xml.model.joborder.enums.JobOrderFileNameType;
@@ -28,7 +29,7 @@ public class TaskTableToJobOrderConverterTest {
 	@Test
 	public void testConverter() {
 		TaskTable t = TestL0Utils.buildTaskTableAIOP();
-		TaskTableToJobOrderConverter converter = new TaskTableToJobOrderConverter();
+		TaskTableToJobOrderConverter converter = new TaskTableToJobOrderConverter(ProductMode.SLICING);
 		JobOrder o = converter.apply(t);
 
 		TaskTableTask task11 = t.getPools().get(0).getTasks().get(0);
@@ -52,7 +53,7 @@ public class TaskTableToJobOrderConverterTest {
 		assertNotNull("[Procs] Invalid breakpoint", o.getProcs().get(2).getBreakpoint());
 		assertEquals("[Procs] Invalid breakpoint enable", "OFF", o.getProcs().get(2).getBreakpoint().getEnable());
 
-		assertTrue("[Inputs] Invalid number", 3 == o.getProcs().get(0).getInputs().size());
+		assertTrue("[Inputs] Invalid number", 2 == o.getProcs().get(0).getInputs().size());
 
 		assertTrue("[Outputs] Invalid number", task11.getOutputs().size() == o.getProcs().get(0).getOutputs().size());
 		JobOrderOutput oOutput = o.getProcs().get(0).getOutputs().get(0);

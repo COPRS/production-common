@@ -16,6 +16,7 @@ import esa.s1pdgs.cpoc.appcatalog.AppDataJob;
 import esa.s1pdgs.cpoc.common.ProductFamily;
 import esa.s1pdgs.cpoc.common.utils.DateUtils;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.config.ProcessSettings;
+import esa.s1pdgs.cpoc.ipf.preparation.worker.model.ProductMode;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.model.converter.TaskTableToJobOrderConverter;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.model.metadata.SearchMetadataResult;
 import esa.s1pdgs.cpoc.metadata.client.SearchMetadataQuery;
@@ -77,7 +78,7 @@ public class TaskTableAdapter {
 	
 	public final JobOrder newJobOrder(final ProcessSettings settings) {
 		// Build from task table
-		final TaskTableToJobOrderConverter converter = new TaskTableToJobOrderConverter();
+		final TaskTableToJobOrderConverter converter = new TaskTableToJobOrderConverter(ProductMode.SLICING); //FIXME configure me!!!
 		final JobOrder jobOrderTemplate = converter.apply(taskTable);
 
 		// Update values from configuration file

@@ -141,9 +141,6 @@ public final class JobOrderAdapter
 			return files.stream().map(
 					f -> new JobOrderInputFile(f.getFilename(), f.getKeyObs())).collect(toList());
 		}
-		
-
-		
 	}
 	
 	private static final Logger LOGGER = LogManager.getLogger(Publisher.class);

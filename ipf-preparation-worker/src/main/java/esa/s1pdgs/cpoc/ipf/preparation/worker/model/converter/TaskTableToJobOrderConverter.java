@@ -1,11 +1,18 @@
 package esa.s1pdgs.cpoc.ipf.preparation.worker.model.converter;
 
+import static java.util.stream.Collectors.toList;
+import static java.util.stream.Collectors.toMap;
+
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
+
+import org.springframework.util.StringUtils;
 
 import esa.s1pdgs.cpoc.common.ApplicationLevel;
 import esa.s1pdgs.cpoc.common.ProductFamily;
+import esa.s1pdgs.cpoc.ipf.preparation.worker.model.ProductMode;
 import esa.s1pdgs.cpoc.xml.model.joborder.AbstractJobOrderConf;
 import esa.s1pdgs.cpoc.xml.model.joborder.JobOrder;
 import esa.s1pdgs.cpoc.xml.model.joborder.JobOrderBreakpoint;
@@ -26,6 +33,7 @@ import esa.s1pdgs.cpoc.xml.model.tasktable.TaskTableOuput;
 import esa.s1pdgs.cpoc.xml.model.tasktable.TaskTablePool;
 import esa.s1pdgs.cpoc.xml.model.tasktable.TaskTableTask;
 import esa.s1pdgs.cpoc.xml.model.tasktable.enums.TaskTableFileNameType;
+import esa.s1pdgs.cpoc.xml.model.tasktable.enums.TaskTableInputMode;
 import esa.s1pdgs.cpoc.xml.model.tasktable.enums.TaskTableMandatoryEnum;
 import esa.s1pdgs.cpoc.xml.model.tasktable.enums.TaskTableOutputDestination;
 import esa.s1pdgs.cpoc.xml.model.tasktable.enums.TaskTableTestEnum;
@@ -38,6 +46,12 @@ import esa.s1pdgs.cpoc.xml.model.tasktable.enums.TaskTableTestEnum;
  */
 public class TaskTableToJobOrderConverter implements SuperConverter<TaskTable, JobOrder> {
 
+	private final ProductMode productMode;
+
+	public TaskTableToJobOrderConverter(ProductMode productMode) {
+		this.productMode = productMode;
+	}
+
 	/**
 	 * Conversion function
 	 */
@@ -45,7 +59,7 @@ public class TaskTableToJobOrderConverter implements SuperConverter<TaskTable, J
 	public JobOrder apply(final TaskTable tObj) {
 		final TaskTableDynProcParamToJobOrderProcParamConverter procParamConv = new TaskTableDynProcParamToJobOrderProcParamConverter();
 		final TaskTableCfgFilesToString confFilesConv = new TaskTableCfgFilesToString();
-		final TaskTableTaskToJobOrderProc procConv = new TaskTableTaskToJobOrderProc();
+		final TaskTableTaskToJobOrderProc procConv = new TaskTableTaskToJobOrderProc(allInputsWithIdOf(tObj), productMode);
 
 		final JobOrder order = new JobOrder();
 	//	AbstractJobOrderConf conf = tObj.getLevel() == ApplicationLevel.L0 ? new L0JobOrderConf() : new L1JobOrderConf();
@@ -72,6 +86,11 @@ public class TaskTableToJobOrderConverter implements SuperConverter<TaskTable, J
 		}
 
 		return order;
+	}
+
+	private Map<String, TaskTableInput> allInputsWithIdOf(TaskTable tObj) {
+		return tObj.getPools().stream().flatMap(pool -> pool.getTasks().stream()).flatMap(task -> task.getInputs().stream())
+				.filter(input -> !StringUtils.isEmpty(input.getId())).collect(toMap(TaskTableInput::getId, i -> i));
 	}
 
 	private List<NamedEntry<TaskTableTask>> toIndexedTasks(int poolNumber, List<TaskTableTask> tasks) {
@@ -136,7 +155,15 @@ class TaskTableCfgFilesToString implements SuperConverter<TaskTableCfgFile, Stri
  */
 class TaskTableTaskToJobOrderProc implements SuperConverter<NamedEntry<TaskTableTask>, JobOrderProc> {
 	final TaskTableInputToJobOrderInputPlaceholderProc inputProc = new TaskTableInputToJobOrderInputPlaceholderProc();
-	
+
+	private final Map<String, TaskTableInput> inputsWithId;
+	private final ProductMode productMode;
+
+	TaskTableTaskToJobOrderProc(Map<String, TaskTableInput> inputsWithId, ProductMode productMode) {
+		this.inputsWithId = inputsWithId;
+		this.productMode = productMode;
+	}
+
 	/**
 	 * Conversion function
 	 */
@@ -149,9 +176,27 @@ class TaskTableTaskToJobOrderProc implements SuperConverter<NamedEntry<TaskTable
 		rObj.setBreakpoint(new JobOrderBreakpoint());
 		rObj.addOutputs(outputConverter.convertToList(tObj.getEntry().getOutputs()));
 
-		rObj.setInputs(inputProc.convertToList(toIndexedInputs(tObj.getName(), tObj.getEntry().getInputs())));
+		rObj.setInputs(inputProc.convertToList(toIndexedInputs(tObj.getName(), tObj.getEntry().getInputs()).stream().filter(this::withMatchingMode).collect(toList())));
 
 		return rObj;
+	}
+
+	private boolean withMatchingMode(NamedEntry<TaskTableInput> input) {
+		return productMode.isCompatibleWithTaskTableMode(modeOfInputOrReference(input.getEntry(), inputsWithId));
+	}
+
+	private TaskTableInputMode modeOfInputOrReference(TaskTableInput input, Map<String, TaskTableInput> inputsWithId) {
+		if(StringUtils.isEmpty(input.getReference())) {
+			return input.getMode();
+		}
+
+		final TaskTableInput reference = inputsWithId.get(input.getReference());
+
+		if(reference == null) {
+			throw new RuntimeException("no input in taskTable with id " + input.getReference());
+		}
+
+		return reference.getMode();
 	}
 
 	private List<NamedEntry<TaskTableInput>> toIndexedInputs(String taskIndex, List<TaskTableInput> inputs) {
