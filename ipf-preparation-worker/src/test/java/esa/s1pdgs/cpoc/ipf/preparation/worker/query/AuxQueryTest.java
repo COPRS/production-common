@@ -8,13 +8,8 @@ import static java.util.stream.Collectors.toList;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertThat;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyInt;
-import static org.mockito.ArgumentMatchers.argThat;
-import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.mockito.ArgumentMatchers.*;
+import static org.mockito.Mockito.*;
 
 import java.io.File;
 import java.util.List;
@@ -52,6 +47,7 @@ import esa.s1pdgs.cpoc.ipf.preparation.worker.timeout.InputTimeoutChecker;
 import esa.s1pdgs.cpoc.metadata.client.MetadataClient;
 import esa.s1pdgs.cpoc.metadata.client.SearchMetadataQuery;
 import esa.s1pdgs.cpoc.metadata.model.SearchMetadata;
+import esa.s1pdgs.cpoc.xml.model.tasktable.enums.TaskTableFileNameType;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest
@@ -341,6 +337,12 @@ public class AuxQueryTest {
                         .collect(toList());
 
                 assertThat(actualInputs, is(equalTo(Stream.of(expectedInputs).sorted().collect(toList()))));
+
+                actual.getInputs().forEach(
+                        input -> {
+                            System.out.println(format("input %s hasResults: %s", input, input.isHasResults()));
+                            assertThat(format("input %s should have hasResults = true", input), input.isHasResults(), is(true));
+                        });
 
                 return Stream.of(expectedInputs).sorted().collect(toList()).equals(actualInputs);
             }

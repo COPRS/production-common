@@ -42,6 +42,7 @@ import esa.s1pdgs.cpoc.xml.model.tasktable.TaskTableInput;
 import esa.s1pdgs.cpoc.xml.model.tasktable.TaskTableInputAlternative;
 import esa.s1pdgs.cpoc.xml.model.tasktable.TaskTablePool;
 import esa.s1pdgs.cpoc.xml.model.tasktable.TaskTableTask;
+import esa.s1pdgs.cpoc.xml.model.tasktable.enums.TaskTableInputMode;
 import esa.s1pdgs.cpoc.xml.model.tasktable.enums.TaskTableInputOrigin;
 import esa.s1pdgs.cpoc.xml.model.tasktable.enums.TaskTableMandatoryEnum;
 
@@ -75,7 +76,7 @@ public class AuxQuery {
 		return distributeResults(results);
 	}
 
-	private final String inputDescription(final String reference, final TaskTableInput input) {
+	private String inputDescription(final String reference, final TaskTableInput input) {
 		if (input.toLogMessage() == null) {
 			return reference;
 		}
@@ -163,17 +164,37 @@ public class AuxQuery {
 														   final BiFunction<List<T>, TaskTableTask, U> taskMapFunction) {
 		final List<U> mappedTasks = new ArrayList<>();
 
+		final Map<String, TaskTableInput> inputsWithId = taskTableTasks().values().stream().flatMap(task -> task.getInputs().stream())
+				.filter(input -> !StringUtils.isEmpty(input.getId())).collect(toMap(TaskTableInput::getId, i -> i));
+
 		for (final Map.Entry<String, TaskTableTask> taskEntry : taskTableTasks().entrySet()) {
 			final List<T> mappedInputs = new ArrayList<>();
 			int inputNumber = 0;
 			for (final TaskTableInput input : taskEntry.getValue().getInputs()) {
-				final String reference = String.format("%sI%s", taskEntry.getKey(), inputNumber++);
-				mappedInputs.add(inputMapFunction.apply(reference, input));
+				if(mode.isCompatibleWithTaskTableMode(modeOfInputOrReference(input, inputsWithId))) {
+					final String reference = String.format("%sI%s", taskEntry.getKey(), inputNumber);
+					mappedInputs.add(inputMapFunction.apply(reference, input));
+				}
+				inputNumber++;
 			}
 			mappedTasks.add(taskMapFunction.apply(mappedInputs, taskEntry.getValue()));
 		}
 
 		return mappedTasks;
+	}
+
+	private TaskTableInputMode modeOfInputOrReference(TaskTableInput input, Map<String, TaskTableInput> inputsWithId) {
+		if(StringUtils.isEmpty(input.getReference())) {
+			return input.getMode();
+		}
+
+		final TaskTableInput reference = inputsWithId.get(input.getReference());
+
+		if(reference == null) {
+			throw new RuntimeException("no input in taskTable with id " + input.getReference());
+		}
+
+		return reference.getMode();
 	}
 
 	private <T> List<T> inputsMappedTo(final BiFunction<String, TaskTableInput, T> inputMapFunction) {
@@ -202,7 +223,6 @@ public class AuxQuery {
 		}
 		return tasks;
 	}
-
 
 	private List<AppDataJobTaskInputs> buildInitialInputs() {
 		return taskTableTasksAndInputsMappedTo(
@@ -327,7 +347,7 @@ public class AuxQuery {
 					(new AppDataJobTaskInputs(jobTaskInput.getTaskName(), jobTaskInput.getTaskVersion(), mergeInputs(newInputs, jobTaskInput)));
 		}
 
-		LOGGER.debug("merging inputs {} into job inputs {} result {}", inputsWithResults, job.getAdditionalInputs(), mergedJobTaskInputs);
+		LOGGER.trace("merging inputs {} into job inputs {} result {}", inputsWithResults, job.getAdditionalInputs(), mergedJobTaskInputs);
 
 		return mergedJobTaskInputs;
 	}
