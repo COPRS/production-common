@@ -55,6 +55,7 @@ public class MetadataTriggerService {
 			job.setProductFamily(event.getProductFamily());
 			job.setKeyObjectStorage(event.getKeyObjectStorage());
 			job.setMode(event.getMode());
+			job.setOqcFlag(event.getOqcFlag());
 			job.setUid(reportingId);
 			job.setTimeliness(event.getTimeliness());
 			return job;
