@@ -3,9 +3,19 @@ package esa.s1pdgs.cpoc.obs_sdk.s3;
 import static org.hamcrest.CoreMatchers.instanceOf;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.Matchers.hasProperty;
-import static org.junit.Assert.*;
-import static org.mockito.ArgumentMatchers.*;
-import static org.mockito.Mockito.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.argThat;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.ArgumentMatchers.isA;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -16,18 +26,17 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-import org.junit.After;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
+import org.junit.rules.TemporaryFolder;
 import org.mockito.ArgumentMatcher;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 
 import com.amazonaws.AmazonClientException;
-import com.amazonaws.AmazonServiceException;
 import com.amazonaws.SdkClientException;
 import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.model.GetObjectRequest;
@@ -38,7 +47,6 @@ import com.amazonaws.services.s3.transfer.TransferManager;
 import com.amazonaws.services.s3.transfer.Upload;
 import com.amazonaws.services.s3.transfer.model.UploadResult;
 
-import esa.s1pdgs.cpoc.common.errors.InternalErrorException;
 import esa.s1pdgs.cpoc.common.utils.FileUtils;
 import esa.s1pdgs.cpoc.obs_sdk.Md5;
 
@@ -57,7 +65,11 @@ public class S3ObsServicesTest {
     private final static String BCK_EXC_SDK = "bck-ex-sdk";
     private final static String BCK_EXC_AWS = "bck-ex-aws";
     
-    private final File tmpDir = FileUtils.createTmpDir();
+    @Rule
+    public TemporaryFolder tmp = new TemporaryFolder();
+
+    private File tmpDir;
+    private File tmpFile;
 
     /**
      * Mock S3 client
@@ -96,14 +108,13 @@ public class S3ObsServicesTest {
     /**
      * Initialization
      * 
-     * @throws InterruptedException
-     * @throws AmazonClientException
-     * @throws AmazonServiceException
-     * @throws S3ObsServiceException 
      */
     @Before
-    public void init() throws AmazonServiceException, AmazonClientException,
-            InterruptedException, S3ObsServiceException {
+    public void init() throws AmazonClientException,
+            InterruptedException, S3ObsServiceException, IOException {
+        tmpDir = tmp.newFolder();
+        tmpFile = tmp.newFile();
+
         // Init mocks
         MockitoAnnotations.initMocks(this);
 
@@ -119,7 +130,7 @@ public class S3ObsServicesTest {
         listObjects1.getObjectSummaries().add(obj2);
         listObjects1.getObjectSummaries().add(obj3);
         
-        listObjects2 = new ArrayList<String>();
+        listObjects2 = new ArrayList<>();
         listObjects2.add("key1");
         listObjects2.add("key2");
         listObjects2.add("root/key3");
@@ -131,15 +142,7 @@ public class S3ObsServicesTest {
         mockAmazonS3TransferManager();
     }
 
-    /**
-     * Clean
-     */
-    @After
-    public void clean() {
-    	FileUtils.delete(tmpDir.getPath());
-    }
-
-    private void mockAmazonS3TransferManager() throws AmazonServiceException,
+    private void mockAmazonS3TransferManager() throws
             AmazonClientException, InterruptedException {
 
         doReturn(upload).when(s3tm).upload(anyString(),
@@ -163,7 +166,6 @@ public class S3ObsServicesTest {
 
     /**
      * Mock the amazon S3 client
-     * @throws S3ObsServiceException 
      */
     private void mockAmazonS3Client() throws S3ObsServiceException {
         // doesObjectExist
@@ -218,8 +220,6 @@ public class S3ObsServicesTest {
     /**
      * Test the nominal case of the exists function
      * 
-     * @throws S3ObsServiceException
-     * @throws S3SdkClientException
      */
     @Test
     public void testNominalExist()
@@ -239,8 +239,6 @@ public class S3ObsServicesTest {
     /**
      * Then when Amazon S3 API raises AmazonServiceException
      * 
-     * @throws S3ObsServiceException
-     * @throws S3SdkClientException
      */
     @Test
     public void testExistsWhenAwsException()
@@ -256,8 +254,6 @@ public class S3ObsServicesTest {
     /**
      * Then when Amazon S3 API raises SdkClientException
      * 
-     * @throws S3ObsServiceException
-     * @throws S3SdkClientException
      */
     @Test
     public void testExistsWhenSDKException()
@@ -277,8 +273,6 @@ public class S3ObsServicesTest {
     /**
      * Nominal case of GetNbObjects
      * 
-     * @throws S3ObsServiceException
-     * @throws S3SdkClientException
      */
     @Test
     public void testNominalGetNbObject()
@@ -291,8 +285,6 @@ public class S3ObsServicesTest {
     /**
      * Test GetNbObjects when Amazon S3 API raises AmazonServiceException
      * 
-     * @throws S3ObsServiceException
-     * @throws S3SdkClientException
      */
     @Test
     public void testGetNbObjectsWhenAwsException()
@@ -308,8 +300,6 @@ public class S3ObsServicesTest {
     /**
      * Test GetNbObjects when Amazon S3 API raises SdkClientException
      * 
-     * @throws S3ObsServiceException
-     * @throws S3SdkClientException
      */
     @Test
     public void testGetNbObjectsWhenSDKException()
@@ -329,8 +319,6 @@ public class S3ObsServicesTest {
     /**
      * downloadObjectsWithPrefix nominal case
      * 
-     * @throws S3ObsServiceException
-     * @throws S3SdkClientException
      */
     @Test
     public void testNominaldownloadObjectsWithPrefixNoObjects()
@@ -351,8 +339,6 @@ public class S3ObsServicesTest {
     /**
      * downloadObjectsWithPrefix nominal case when ignore folders
      * 
-     * @throws S3ObsServiceException
-     * @throws S3SdkClientException
      */
     @Test
     public void testNominaldownloadObjectsWithPrefixIgnoreFolder()
@@ -377,8 +363,6 @@ public class S3ObsServicesTest {
     /**
      * downloadObjectsWithPrefix nominal case when ignore folders
      * 
-     * @throws S3ObsServiceException
-     * @throws S3SdkClientException
      */
     @Test
     public void testNominaldownloadObjectsWithPrefixNotIgnoreFolder()
@@ -405,8 +389,6 @@ public class S3ObsServicesTest {
      * Test downloadObjectsWithPrefix when Amazon S3 API raises
      * AmazonServiceException
      * 
-     * @throws S3ObsServiceException
-     * @throws S3SdkClientException
      */
     @Test
     public void testdownloadObjectsWithPrefixWhenAwsException()
@@ -424,8 +406,6 @@ public class S3ObsServicesTest {
      * Test downloadObjectsWithPrefix when Amazon S3 API raises
      * SdkClientException
      * 
-     * @throws S3ObsServiceException
-     * @throws S3SdkClientException
      */
     @Test
     public void testdownloadObjectsWithPrefixsWhenSDKException()
@@ -446,22 +426,18 @@ public class S3ObsServicesTest {
     /**
      * Nominal test case of uploadFile
      * 
-     * @throws S3ObsServiceException
-     * @throws S3SdkClientException
      */
     @Test
     public void testUploadFileNominal()
             throws S3ObsServiceException, S3SdkClientException {
-        service.uploadFile(BCK_OBJ_EXIST, "key-test", tmpDir);
+        service.uploadFile(BCK_OBJ_EXIST, "key-test", tmpFile);
         verify(s3tm, times(1)).upload(eq(BCK_OBJ_EXIST),
-                eq("key-test"), eq(tmpDir));
+                eq("key-test"), any(DigestInputStream.class), any(ObjectMetadata.class));
     }
 
     /**
      * Test upload file when SDKClientException raised by Amazon services
      * 
-     * @throws S3ObsServiceException
-     * @throws S3SdkClientException
      */
     @Test
     public void testUploadFileSDKException()
@@ -471,14 +447,12 @@ public class S3ObsServicesTest {
         thrown.expect(hasProperty("key", is("key-test")));
         thrown.expectCause(instanceOf(SdkClientException.class));
 
-        service.uploadFile(BCK_EXC_SDK, "key-test", tmpDir);
+        service.uploadFile(BCK_EXC_SDK, "key-test", tmpFile);
     }
 
     /**
      * Test upload file when AmazonServiceException raised by Amazon services
      * 
-     * @throws S3ObsServiceException
-     * @throws S3SdkClientException
      */
     @Test
     public void testUploadFileServiceException()
@@ -494,9 +468,6 @@ public class S3ObsServicesTest {
     /**
      * Nominal test case of uploadFile
      * 
-     * @throws S3ObsServiceException
-     * @throws S3SdkClientException
-     * @throws InternalErrorException 
      */
     @Test
     public void testUploadDirectoryNominalWhenFile() throws Exception {
@@ -515,9 +486,6 @@ public class S3ObsServicesTest {
     /**
      * Nominal test case of uploadFile
      * 
-     * @throws S3ObsServiceException
-     * @throws S3SdkClientException
-     * @throws IOException
      */
     @Test
     public void testUploadDirectoryNominal()
@@ -558,13 +526,10 @@ public class S3ObsServicesTest {
     /**
      * Nominal test case of uploadFile
      * 
-     * @throws S3ObsServiceException
-     * @throws S3SdkClientException
-     * @throws IOException
      */
     @Test
     public void testUploadDirectoryNominalNoChild()
-            throws S3ObsServiceException, S3SdkClientException, IOException {
+            throws S3ObsServiceException, S3SdkClientException {
         File file3 = new File(tmpDir,"key");
         file3.mkdirs();
 
