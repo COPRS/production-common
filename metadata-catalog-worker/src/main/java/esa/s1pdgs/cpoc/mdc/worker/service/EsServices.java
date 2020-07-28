@@ -655,36 +655,35 @@ public class EsServices {
 	 * @throws MetadataNotPresentException
 	 * @throws IOException
 	 */
-	public SearchMetadata productNameQuery(final String productFamily, final String productName)
-			throws MetadataMalformedException, MetadataNotPresentException, IOException {
+	public SearchMetadata productNameQuery(final String productFamily, final String productName) throws IOException {
 
 		final Map<String, Object> source = getRequest(productFamily, productName);
-
-		if (source.isEmpty()) {
-			throw new MetadataNotPresentException(productName);
-		}
-
+		
 		final SearchMetadata searchMetadata = new SearchMetadata();
+		
+		if (source.isEmpty()) {
+			return searchMetadata;
+		}
 
 		if (source.containsKey("startTime")) {
 			try {
 				searchMetadata.setValidityStart(
 						DateUtils.convertToMetadataDateTimeFormat(source.get("startTime").toString()));
 			} catch (final DateTimeParseException e) {
-				throw new MetadataMalformedException("startTime");
+				LOGGER.error("Error parsing validity start time of product {}", productName);
 			}
 		} else {
-			throw new MetadataMalformedException("startTime");
+			LOGGER.error("Metadata of product {} has no startTime", productName);
 		}
 		if (source.containsKey("stopTime")) {
 			try {
 				searchMetadata
 						.setValidityStop(DateUtils.convertToMetadataDateTimeFormat(source.get("stopTime").toString()));
 			} catch (final DateTimeParseException e) {
-				throw new MetadataMalformedException("stopTime");
+				LOGGER.error("Error parsing validity stop time of product {}", productName);
 			}
 		} else {
-			throw new MetadataMalformedException("stopTime");
+			LOGGER.error("Metadata of product {} has no stopTime", productName);
 		}
 		
 		Map<String, Object> coordinates = null;

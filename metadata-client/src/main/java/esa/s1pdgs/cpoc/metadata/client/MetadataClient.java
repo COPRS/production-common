@@ -257,8 +257,8 @@ public class MetadataClient {
 				});
 
 		if (response == null) {
-			LOGGER.debug("Metadata query for family '{}' and product name {} returned no result", family, productName);
-			return null;
+			LOGGER.warn("Metadata query for family '{}' and product name {} returned no result", family, productName);
+			return new SearchMetadata();
 		} else {
 			LOGGER.info("Metadata query for family '{}' and product name {} returned 1 result", family, productName);
 			return response.getBody();
