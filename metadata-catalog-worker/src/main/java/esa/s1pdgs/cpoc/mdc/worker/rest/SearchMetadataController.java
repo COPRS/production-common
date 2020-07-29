@@ -19,6 +19,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import esa.s1pdgs.cpoc.common.ProductFamily;
 import esa.s1pdgs.cpoc.common.errors.AbstractCodedException;
+import esa.s1pdgs.cpoc.common.errors.processing.MetadataNotPresentException;
 import esa.s1pdgs.cpoc.common.utils.LogUtils;
 import esa.s1pdgs.cpoc.mdc.worker.service.EsServices;
 import esa.s1pdgs.cpoc.metadata.model.SearchMetadata;
@@ -114,7 +115,10 @@ public class SearchMetadataController {
 		try {
 			final SearchMetadata result = esServices.productNameQuery(productFamily, productName);
 			return new ResponseEntity<>(result, HttpStatus.OK);
-
+		} catch (MetadataNotPresentException e) {
+        	LOGGER.warn("{} '{}' of family {} not available [code {}] {}",  
+        			this.getClass().getSimpleName(), productName, productFamily, e.getCode().getCode(), e.getLogMessage());            
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
 		} catch (final Exception ex) {
 			LOGGER.error("Query error while doing product name search: {}", LogUtils.toString(ex));
 			return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);

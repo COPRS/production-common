@@ -256,9 +256,9 @@ public class MetadataClient {
 				new ParameterizedTypeReference<SearchMetadata>() {
 				});
 
-		if (response == null) {
-			LOGGER.debug("Metadata query for family '{}' and product name {} returned no result", family, productName);
-			return null;
+		if (response.getBody() == null) {
+			LOGGER.error("Metadata query for family '{}' and product name {} returned no result", family, productName);
+			throw new MetadataQueryException(String.format("Metadata query for family '%s' and product name %s returned no result", family, productName));
 		} else {
 			LOGGER.info("Metadata query for family '{}' and product name {} returned 1 result", family, productName);
 			return response.getBody();
@@ -325,6 +325,9 @@ public class MetadataClient {
 	private <T> void handleReturnValueErrors(final String uri, final ResponseEntity<T> response) throws MetadataQueryException {
 		if (response == null) {
 			throw new MetadataQueryException(String.format("Rest metadata call %s returned null", uri));
+		}
+		if (response.getStatusCode() == HttpStatus.NOT_FOUND) {
+			return;
 		}
 		if (response.getStatusCode() != HttpStatus.OK) {
 			throw new MetadataQueryException(

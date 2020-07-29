@@ -100,7 +100,7 @@ public class PripPublishingJobListener implements MqiListener<PripPublishingJob>
 	}
 
 	@Override
-	public void onMessage(final GenericMessageDto<PripPublishingJob> message) {
+	public void onMessage(final GenericMessageDto<PripPublishingJob> message) throws Exception {
 
 		LOGGER.debug("starting saving PRIP metadata, got message: {}", message);
 
@@ -153,22 +153,17 @@ public class PripPublishingJobListener implements MqiListener<PripPublishingJob>
 		} catch (final Exception e) {
 			final ReportingOutput out = PripReportingOutput.newInstance(new Date());
 			reporting.end(out, new ReportingMessage("Error on publishing file %s in PRIP: %s", name, LogUtils.toString(e)));
-			throw e;
+			throw new Exception(e);
 		}
 	}
 
-	private SearchMetadata queryMetadata(ProductFamily productFamily, String keyObjectStorage) {
+	private SearchMetadata queryMetadata(ProductFamily productFamily, String keyObjectStorage) throws MetadataQueryException {
 
-		SearchMetadata searchMetadata = new SearchMetadata();
-		try {
-			searchMetadata = metadataClient.queryByFamilyAndProductName(removeZipSuffix(productFamily.name()),
+			return  metadataClient.queryByFamilyAndProductName(removeZipSuffix(productFamily.name()),
 					removeZipSuffix(keyObjectStorage));
-		} catch (MetadataQueryException e) {
-			LOGGER.warn(String.format("could not determine validity start and stop times of %s", keyObjectStorage), e);
-		}
-		return searchMetadata;
+	
 	}
-
+	
 	private long getContentLength(final ProductFamily family, final String key) {
 		long contentLength = 0;
 		try {
