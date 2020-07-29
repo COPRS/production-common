@@ -1,20 +1,19 @@
 package esa.s1pdgs.cpoc.common;
 
-import esa.s1pdgs.cpoc.common.errors.InternalErrorException;
 import esa.s1pdgs.cpoc.mqi.model.queue.AbstractMessage;
 import esa.s1pdgs.cpoc.mqi.model.queue.CatalogEvent;
 import esa.s1pdgs.cpoc.mqi.model.queue.CatalogJob;
 import esa.s1pdgs.cpoc.mqi.model.queue.CompressionEvent;
 import esa.s1pdgs.cpoc.mqi.model.queue.CompressionJob;
+import esa.s1pdgs.cpoc.mqi.model.queue.EvictionManagementJob;
 import esa.s1pdgs.cpoc.mqi.model.queue.IngestionEvent;
 import esa.s1pdgs.cpoc.mqi.model.queue.IngestionJob;
 import esa.s1pdgs.cpoc.mqi.model.queue.IpfExecutionJob;
 import esa.s1pdgs.cpoc.mqi.model.queue.IpfPreparationJob;
 import esa.s1pdgs.cpoc.mqi.model.queue.LevelReportDto;
+import esa.s1pdgs.cpoc.mqi.model.queue.LtaDownloadEvent;
 import esa.s1pdgs.cpoc.mqi.model.queue.PripPublishingJob;
 import esa.s1pdgs.cpoc.mqi.model.queue.ProductionEvent;
-import esa.s1pdgs.cpoc.mqi.model.queue.EvictionManagementJob;
-import esa.s1pdgs.cpoc.mqi.model.queue.LtaDownloadEvent;
 
 /**
  * Group products per category
@@ -114,68 +113,20 @@ public enum ProductCategory {
         }
 	}
 
-    /**
-     * Get the category for a given product family
-     * 
-     * @param family
-     * @return
-     * @throws InternalErrorException
-     * @see {@link #of(ProductFamily)}
-     */
-	@Deprecated
-    public static ProductCategory fromProductFamily(final ProductFamily family)
-            throws InternalErrorException {
-        if (family == null) {
-            throw new InternalErrorException(
-                    "Cannot determinate product category for a null family");
-        }
-        ProductCategory ret = null;
-        switch (family) {
-            case AUXILIARY_FILE:
-                ret = ProductCategory.AUXILIARY_FILES;
-                break;
-            case EDRS_SESSION:
-                ret = ProductCategory.EDRS_SESSIONS;
-                break;
-            case PLAN_AND_REPORT:
-            	ret = ProductCategory.PLANS_AND_REPORTS;
-            	break;
-            case INVALID: // --> failed ingestion    
-            case BLANK: // --> nominal polling ingestion
-            	ret = ProductCategory.INGESTION;
-            	break;
-            case L0_JOB:
-            case L1_JOB:
-            case L2_JOB:
-            case L0_SEGMENT_JOB:
-                ret = ProductCategory.LEVEL_JOBS;
-                break;
-            case L0_REPORT:
-            case L1_REPORT:
-            case L2_REPORT:            	
-            case L0_SEGMENT_REPORT:
-                ret = ProductCategory.LEVEL_REPORTS;
-                break;
-            case L0_ACN:
-            case L0_SLICE:
-            case L1_ACN:
-            case L1_SLICE:
-            case L0_BLANK:
-            case L2_SLICE:
-            case L2_ACN:
-                ret = ProductCategory.LEVEL_PRODUCTS;
-                break;
-            case L0_SEGMENT:
-                ret = ProductCategory.LEVEL_SEGMENTS;
-                break;
-            default:
-                throw new InternalErrorException(
-                        "Cannot determinate product category for family "
-                                + family);
-        }
-        return ret;
-    }
-    
+	public static ProductCategory ofMessage(final AbstractMessage message) {
+		final Class<? extends AbstractMessage> thisDtoClass = message.getClass();
+		
+		for (final ProductCategory cat : ProductCategory.values()) {
+			if (cat.dtoClass.equals(thisDtoClass)) {
+				return cat;
+			}
+		}
+		throw new IllegalArgumentException(
+    			String.format("Cannot determine product category for class %s", thisDtoClass)
+    	);		
+	}
+	
+	
     private final Class<? extends AbstractMessage> dtoClass;
 
 	private ProductCategory(final Class<? extends AbstractMessage> dtoClass) {
