@@ -125,7 +125,7 @@ public class CompressProcessor implements MqiListener<CompressionJob> {
 				ReportingUtils.newFilenameReportingInputFor(job.getProductFamily(), message.getBody().getKeyObjectStorage()),
 				new ReportingMessage("Start compression processing")
 		);		
-		return new MqiMessageEventHandler.Builder<CompressionEvent>()
+		return new MqiMessageEventHandler.Builder<CompressionEvent>(ProductCategory.COMPRESSED_PRODUCTS)
 				.onSuccess(res -> report.end(
 						ReportingUtils.newFilenameReportingOutputFor(job.getProductFamily(),job.getOutputKeyObjectStorage()), 
 						new ReportingMessage("End compression processing")

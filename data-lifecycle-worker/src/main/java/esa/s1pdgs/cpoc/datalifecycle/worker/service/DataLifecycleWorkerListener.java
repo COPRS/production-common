@@ -13,6 +13,7 @@ import org.elasticsearch.action.index.IndexRequest;
 import org.elasticsearch.common.xcontent.XContentType;
 import org.json.JSONObject;
 
+import esa.s1pdgs.cpoc.common.ProductCategory;
 import esa.s1pdgs.cpoc.common.utils.DateUtils;
 import esa.s1pdgs.cpoc.common.utils.LogUtils;
 import esa.s1pdgs.cpoc.datalifecycle.worker.config.ProcessConfiguration;
@@ -67,7 +68,7 @@ public class DataLifecycleWorkerListener implements MqiListener<EvictionManageme
 				new ReportingMessage("Updating eviction time for %s", job.getKeyObjectStorage())
 		);  
 		
-		return new MqiMessageEventHandler.Builder<NullMessage>()
+		return new MqiMessageEventHandler.Builder<NullMessage>(ProductCategory.UNDEFINED)
 				.onError(e -> 	reporting.error(
 						new ReportingMessage(
 								"Error updating eviction time for %s: %s", 

@@ -98,7 +98,7 @@ public class GenericConsumer implements MqiListener<CatalogEvent> {
         		.predecessor(event.getUid())
         		.newReporting("ProductionTrigger");
                 
-		return new MqiMessageEventHandler.Builder<IpfPreparationJob>()
+		return new MqiMessageEventHandler.Builder<IpfPreparationJob>(ProductCategory.PREPARATION_JOBS)
 				.onSuccess(res -> {
 					if (res.size() == 0) {	      
 		                reporting.end(new ReportingMessage("Product %s is not over sea, skipping", productName)); 

@@ -35,7 +35,9 @@ import esa.s1pdgs.cpoc.ipf.execution.worker.service.report.GhostHandlingSegmentR
 import esa.s1pdgs.cpoc.mqi.model.queue.IpfExecutionJob;
 import esa.s1pdgs.cpoc.mqi.model.queue.LevelJobOutputDto;
 import esa.s1pdgs.cpoc.mqi.model.queue.OQCFlag;
+import esa.s1pdgs.cpoc.mqi.model.queue.ProductionEvent;
 import esa.s1pdgs.cpoc.mqi.model.rest.GenericMessageDto;
+import esa.s1pdgs.cpoc.mqi.model.rest.GenericPublicationMessageDto;
 import esa.s1pdgs.cpoc.obs_sdk.FileObsUploadObject;
 import esa.s1pdgs.cpoc.obs_sdk.ObsClient;
 import esa.s1pdgs.cpoc.obs_sdk.ObsEmptyFileException;
@@ -488,7 +490,7 @@ public class OutputProcessor {
 	 * @throws AbstractCodedException
 	 * @throws ObsEmptyFileException 
 	 */
-	final void processProducts(
+	final List<GenericPublicationMessageDto<ProductionEvent>> processProducts(
 			final ReportingFactory reportingFactory, 
 			final List<FileObsUploadObject> uploadBatch,
 			final List<ObsQueueMessage> outputToPublish,
@@ -505,17 +507,12 @@ public class OutputProcessor {
 			if (i > 0) {
 				this.publishAccordingUploadFiles(i - 1, sublist.get(0).getKey(), outputToPublish, uuid);
 			}
-			try {
-
-				if (Thread.currentThread().isInterrupted()) {
-					throw new InternalErrorException("The current thread as been interrupted");
-				}
-				this.obsClient.upload(sublist, reportingFactory);
-			} catch (final AbstractCodedException | ObsEmptyFileException e) {
-				throw e;
+			if (Thread.currentThread().isInterrupted()) {
+				throw new InternalErrorException("The current thread as been interrupted");
 			}
+			this.obsClient.upload(sublist, reportingFactory);
 		}
-		publishAccordingUploadFiles(nbPool - 1, NOT_KEY_OBS, outputToPublish, uuid);
+		return publishAccordingUploadFiles(nbPool - 1, NOT_KEY_OBS, outputToPublish, uuid);
 	}
 
 	/**
@@ -527,7 +524,7 @@ public class OutputProcessor {
 	 * @param outputToPublish
 	 * @throws AbstractCodedException
 	 */
-	private void publishAccordingUploadFiles(
+	private final List<GenericPublicationMessageDto<ProductionEvent>> publishAccordingUploadFiles(
 			final double nbBatch,
 			final String nextKeyUpload, 
 			final List<ObsQueueMessage> outputToPublish,

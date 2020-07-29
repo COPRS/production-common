@@ -93,7 +93,7 @@ public class CompressionTriggerService implements MqiListener<ProductionEvent> {
 				ReportingUtils.newFilenameReportingInputFor(event.getProductFamily(), event.getProductName()),
 				new ReportingMessage("Start handling of event for %s", event.getProductName())
 		);
-		return new MqiMessageEventHandler.Builder<CompressionJob>()
+		return new MqiMessageEventHandler.Builder<CompressionJob>(ProductCategory.COMPRESSION_JOBS)
 				.onSuccess(res -> reporting.end(new ReportingMessage("Finished handling of event for %s", event.getProductName())))
 				.onError(e -> reporting.error(new ReportingMessage(
 						"Error on handling event for %s: %s", 

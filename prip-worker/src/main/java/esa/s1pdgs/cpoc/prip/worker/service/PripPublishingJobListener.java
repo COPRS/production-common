@@ -116,7 +116,7 @@ public class PripPublishingJobListener implements MqiListener<PripPublishingJob>
 		final ReportingInput in = PripReportingInput.newInstance(name, publishingJob.getProductFamily());
 		reporting.begin(in, new ReportingMessage("Publishing file %s in PRIP", name));
 		
-		return new MqiMessageEventHandler.Builder<NullMessage>()
+		return new MqiMessageEventHandler.Builder<NullMessage>(ProductCategory.UNDEFINED)
 				.onSuccess(res -> reporting.end(
 						PripReportingOutput.newInstance(new Date()), 
 						new ReportingMessage("Finished publishing file %s in PRIP", name)

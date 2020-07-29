@@ -84,7 +84,7 @@ public class CompressionEventListener implements MqiListener<CompressionEvent> {
 				new ReportingMessage("Handling event for %s", compressionEvent.getKeyObjectStorage())
 		);
 		
-		return new MqiMessageEventHandler.Builder<PripPublishingJob>()
+		return new MqiMessageEventHandler.Builder<PripPublishingJob>(ProductCategory.PRIP_JOBS)
 				.onSuccess(res -> reporting.end(new ReportingMessage("End Handling event for %s", compressionEvent.getKeyObjectStorage())))
 				.onError(e -> reporting.error(new ReportingMessage(
 						"Error on handling event for %s: %s", 

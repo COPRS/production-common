@@ -41,6 +41,7 @@ import esa.s1pdgs.cpoc.ipf.execution.worker.config.DevProperties;
 import esa.s1pdgs.cpoc.ipf.execution.worker.job.MonitorLogUtils;
 import esa.s1pdgs.cpoc.ipf.execution.worker.job.file.InputDownloader;
 import esa.s1pdgs.cpoc.ipf.execution.worker.job.file.OutputProcessor;
+import esa.s1pdgs.cpoc.ipf.execution.worker.job.model.mqi.ObsQueueMessage;
 import esa.s1pdgs.cpoc.ipf.execution.worker.job.mqi.OutputProcuderFactory;
 import esa.s1pdgs.cpoc.ipf.execution.worker.job.process.PoolExecutorCallable;
 import esa.s1pdgs.cpoc.ipf.execution.worker.service.report.JobReportingInput;
@@ -50,17 +51,21 @@ import esa.s1pdgs.cpoc.mqi.client.MessageFilter;
 import esa.s1pdgs.cpoc.mqi.client.MqiClient;
 import esa.s1pdgs.cpoc.mqi.client.MqiConsumer;
 import esa.s1pdgs.cpoc.mqi.client.MqiListener;
+import esa.s1pdgs.cpoc.mqi.client.MqiMessageEventHandler;
 import esa.s1pdgs.cpoc.mqi.client.StatusService;
 import esa.s1pdgs.cpoc.mqi.model.queue.IpfExecutionJob;
 import esa.s1pdgs.cpoc.mqi.model.queue.LevelJobInputDto;
+import esa.s1pdgs.cpoc.mqi.model.queue.PripPublishingJob;
 import esa.s1pdgs.cpoc.mqi.model.rest.GenericMessageDto;
 import esa.s1pdgs.cpoc.obs_sdk.ObsClient;
 import esa.s1pdgs.cpoc.obs_sdk.ObsDownloadObject;
 import esa.s1pdgs.cpoc.report.Reporting;
+import esa.s1pdgs.cpoc.report.ReportingFilenameEntries;
 import esa.s1pdgs.cpoc.report.ReportingFilenameEntry;
 import esa.s1pdgs.cpoc.report.ReportingMessage;
 import esa.s1pdgs.cpoc.report.ReportingOutput;
 import esa.s1pdgs.cpoc.report.ReportingUtils;
+import esa.s1pdgs.cpoc.report.message.output.FilenameReportingOutput;
 
 /**
  * Process a jobs
@@ -185,7 +190,7 @@ public class JobProcessor implements MqiListener<IpfExecutionJob> {
 
 
 	@Override
-	public final void onMessage(final GenericMessageDto<IpfExecutionJob> message) throws Exception {
+	public final MqiMessageEventHandler onMessage(final GenericMessageDto<IpfExecutionJob> message) throws Exception {
 		LOGGER.info("Initializing job processing {}", message);
 
 		// ----------------------------------------------------------
@@ -224,11 +229,7 @@ public class JobProcessor implements MqiListener<IpfExecutionJob> {
 			outputListFile = job.getWorkDirectory() + "AIOProc.LIST";
 		} else if (properties.getLevel() == ApplicationLevel.L0_SEGMENT) {
 			outputListFile = job.getWorkDirectory() + "L0ASProcList.LIST";
-		}			
-		reporting.begin(
-				JobReportingInput.newInstance(toReportFilenames(job), jobOrderName),	
-				new ReportingMessage("Start job processing")
-		);
+		}
 		
 		// Clean up the working directory with all of its content
 		eraseWorkingDirectory(properties.getWorkingDir());
@@ -255,6 +256,84 @@ public class JobProcessor implements MqiListener<IpfExecutionJob> {
 		final OutputProcessor outputProcessor = new OutputProcessor(obsClient, procuderFactory, message, outputListFile,
 				this.properties.getSizeBatchUpload(), getPrefixMonitorLog(MonitorLogUtils.LOG_OUTPUT, job),
 				this.properties.getLevel(), properties);
+		
+		
+		reporting.begin(
+				JobReportingInput.newInstance(toReportFilenames(job), jobOrderName),	
+				new ReportingMessage("Start job processing")
+		);		
+	    ReportingOutput reportingOutput = ReportingOutput.NULL;
+		
+		return new MqiMessageEventHandler.Builder<PripPublishingJob>()
+				.onSuccess(res -> reporting.end(reportingOutput, new ReportingMessage("End job processing")))
+				.onError(e -> reporting.error(errorReportMessage(e)))
+				.messageHandling(() -> {
+			        boolean poolProcessing = false;
+						        
+					try { 
+			            LOGGER.info("{} Starting process executor",
+			                    getPrefixMonitorLog(MonitorLogUtils.LOG_PROCESS, message.getBody()));
+			            
+			            procCompletionSrv.submit(procExecutor);
+			            poolProcessing = true;
+			            
+			            final List<ObsDownloadObject> downloadToBatch;
+			            if (devProperties.getStepsActivation().get("download")) {
+			                checkThreadInterrupted();
+			                LOGGER.info("{} Preparing local working directory",
+			                        getPrefixMonitorLog(MonitorLogUtils.LOG_INPUT, message.getBody()));
+			                downloadToBatch = inputDownloader.processInputs(reporting);
+			            } else {
+			                LOGGER.info("{} Preparing local working directory bypassed",
+			                        getPrefixMonitorLog(MonitorLogUtils.LOG_INPUT, message.getBody()));
+			                downloadToBatch = Collections.emptyList();
+			            }
+			            this.waitForPoolProcessesEnding(procCompletionSrv);
+			            poolProcessing = false;
+			            
+			            if (devProperties.getStepsActivation().get("upload")) {
+			                checkThreadInterrupted();
+			                LOGGER.info("{} Processing l0 outputs",
+			                        getPrefixMonitorLog(MonitorLogUtils.LOG_OUTPUT, message.getBody()));
+			                reportingOutput = outputProcessor.processOutput(reporting, reporting.getUid());
+			            } else {
+			                LOGGER.info("{} Processing l0 outputs bypasssed",
+			                        getPrefixMonitorLog(MonitorLogUtils.LOG_OUTPUT, message.getBody()));
+			            }		
+			            
+			            // S1PRO-1496: If there was a missing chunk, we simply let this request succeed but in addition
+			            // we create an additional failed request in order to deal with the missing chunk and operator
+			            // needs to decide, whether to restart it or delete it.
+			            
+			            final List<String> missingChunks = downloadToBatch.stream()
+			            	.filter(o -> o.getFamily() == ProductFamily.INVALID)
+			            	.map(o -> o.getKey())
+			            	.collect(Collectors.toList());
+			            
+			            if (!missingChunks.isEmpty()) {
+			                errorAppender.send(new FailedProcessingDto(
+			                		properties.getHostname(),
+			                		new Date(), 
+			                		String.format(
+			                				"Missing RAWs detected for successful production %s: %s. "
+			                				+ "Restart if chunks become available or delete this request if they are lost", 
+			                				message.getId(), 
+			                				missingChunks
+			                		), 
+			                		message
+			                ));
+			            }
+			            
+					}
+					finally {
+			            cleanJobProcessing(job, poolProcessing, procExecutorSrv);
+					}
+				})
+				.newResult();
+		
+		
+		
+
 
 		processJob(message, inputDownloader, outputProcessor, procExecutorSrv, procCompletionSrv, procExecutor, reporting);
 	}
@@ -473,5 +552,14 @@ public class JobProcessor implements MqiListener<IpfExecutionJob> {
 		// any other Exception
 		return new ReportingMessage("[code {}] {}", ErrorCode.INTERNAL_ERROR, LogUtils.toString(e));
 	}
+	
+	private final ReportingOutput toReportingOutput(final List<ObsQueueMessage> outputToPublish) {		
+		final List<ReportingFilenameEntry> reportingEntries = outputToPublish.stream()
+				.map(m -> new ReportingFilenameEntry(m.getFamily(), m.getProductName()))
+				.collect(Collectors.toList());
+		
+		return new FilenameReportingOutput(new ReportingFilenameEntries(reportingEntries));
+	}
+	
 	
 }

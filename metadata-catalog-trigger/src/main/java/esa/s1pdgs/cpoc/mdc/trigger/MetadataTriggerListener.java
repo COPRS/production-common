@@ -7,6 +7,7 @@ import java.util.List;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import esa.s1pdgs.cpoc.common.ProductCategory;
 import esa.s1pdgs.cpoc.common.utils.LogUtils;
 import esa.s1pdgs.cpoc.errorrepo.ErrorRepoAppender;
 import esa.s1pdgs.cpoc.errorrepo.model.rest.FailedProcessingDto;
@@ -52,7 +53,7 @@ public final class MetadataTriggerListener<E extends AbstractMessage> implements
 				new ReportingMessage("Received %s", eventType)
 		);	
 		
-		return new MqiMessageEventHandler.Builder<CatalogJob>()
+		return new MqiMessageEventHandler.Builder<CatalogJob>(ProductCategory.CATALOG_JOBS)
 				.onSuccess(res -> reporting.end(new ReportingMessage("Created CatalogJob for %s", eventType)))
 				.onError(e -> reportError(eventType, reporting, e))
 				.messageHandling(() -> newPublicationMessage(reporting, message))

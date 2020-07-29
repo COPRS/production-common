@@ -43,7 +43,8 @@ public enum ProductCategory {
     LEVEL_INPUT(IngestionEvent.class), // represent level product that has been ingested
 	// S3 based categories
 	S3_AUXILIARY_FILES(ProductionEvent.class),
-	S3_LEVEL_PRODUCTS(ProductionEvent.class);
+	S3_LEVEL_PRODUCTS(ProductionEvent.class),
+	UNDEFINED(null);
 	
     /**
      * Get the category for a given product family.
@@ -112,20 +113,6 @@ public enum ProductCategory {
 	        	);
         }
 	}
-
-	public static ProductCategory ofMessage(final AbstractMessage message) {
-		final Class<? extends AbstractMessage> thisDtoClass = message.getClass();
-		
-		for (final ProductCategory cat : ProductCategory.values()) {
-			if (cat.dtoClass.equals(thisDtoClass)) {
-				return cat;
-			}
-		}
-		throw new IllegalArgumentException(
-    			String.format("Cannot determine product category for class %s", thisDtoClass)
-    	);		
-	}
-	
 	
     private final Class<? extends AbstractMessage> dtoClass;
 

@@ -10,6 +10,7 @@ import esa.s1pdgs.cpoc.appcatalog.AppDataJob;
 import esa.s1pdgs.cpoc.appcatalog.AppDataJobGeneration;
 import esa.s1pdgs.cpoc.appcatalog.AppDataJobGenerationState;
 import esa.s1pdgs.cpoc.appcatalog.AppDataJobState;
+import esa.s1pdgs.cpoc.common.ProductCategory;
 import esa.s1pdgs.cpoc.common.errors.AbstractCodedException;
 import esa.s1pdgs.cpoc.common.utils.LogUtils;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.appcat.AppCatJobService;
@@ -71,7 +72,7 @@ public class JobDispatcherImpl implements JobDispatcher {
     			new ReportingMessage("Start associating TaskTables to AppDataJob", jobFromMessage.getId())
     	); 
     	
-		return new MqiMessageEventHandler.Builder<NullMessage>()
+		return new MqiMessageEventHandler.Builder<NullMessage>(ProductCategory.UNDEFINED)
 				.onSuccess(res -> reporting.end(
 	            		new TaskTableLookupReportingOutput(Collections.singletonList(tasktableFilename)),
 	            		new ReportingMessage("End associating TaskTables to AppDataJob")

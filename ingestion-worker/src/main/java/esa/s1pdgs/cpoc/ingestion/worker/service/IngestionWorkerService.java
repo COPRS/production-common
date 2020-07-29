@@ -102,7 +102,7 @@ public class IngestionWorkerService implements MqiListener<IngestionJob> {
 		final URI productUri = IngestionJobs.toUri(ingestion);		
 		final InboxAdapter inboxAdapter = inboxAdapterManager.getInboxAdapterFor(productUri);
 	
-		return new MqiMessageEventHandler.Builder<IngestionEvent>()
+		return new MqiMessageEventHandler.Builder<IngestionEvent>(ProductCategory.INGESTION_EVENT)
 				.onSuccess(res -> {
 					inboxAdapter.delete(productUri);
 					reporting.end(

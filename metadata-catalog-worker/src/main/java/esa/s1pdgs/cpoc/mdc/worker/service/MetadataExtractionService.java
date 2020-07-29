@@ -103,7 +103,7 @@ public class MetadataExtractionService implements MqiListener<CatalogJob> {
 				ReportingUtils.newFilenameReportingInputFor(catJob.getProductFamily(), catJob.getProductName()),
 				new ReportingMessage("Starting metadata extraction")
 		);   
-		return new MqiMessageEventHandler.Builder<CatalogEvent>()
+		return new MqiMessageEventHandler.Builder<CatalogEvent>(ProductCategory.CATALOG_EVENT)
 				.onSuccess(res -> reporting.end(reportingOutput(res), new ReportingMessage("End metadata extraction")))
 				.onError(e -> reporting.error(new ReportingMessage("Metadata extraction failed: %s", LogUtils.toString(e))))				
 				.messageHandling(() -> handleMessage(message, reporting))
