@@ -132,13 +132,9 @@ public class PripPublishingJobListener implements MqiListener<PripPublishingJob>
 			pripMetadata.setEvictionDate(creationDate.plusDays(PripMetadata.DEFAULT_EVICTION_DAYS));
 			pripMetadata
 					.setChecksums(getChecksums(publishingJob.getProductFamily(), publishingJob.getKeyObjectStorage()));
+			pripMetadata.setContentDateStart(DateUtils.parse(searchMetadata.getValidityStart()).truncatedTo(ChronoUnit.MILLIS));
+			pripMetadata.setContentDateEnd(DateUtils.parse(searchMetadata.getValidityStop()).truncatedTo(ChronoUnit.MILLIS));
 			
-			if (searchMetadata.getValidityStart() != null && !searchMetadata.getValidityStart().isEmpty()) {
-				pripMetadata.setContentDateStart(DateUtils.parse(searchMetadata.getValidityStart()).truncatedTo(ChronoUnit.MILLIS));
-			}
-			if (searchMetadata.getValidityStop() != null && !searchMetadata.getValidityStop().isEmpty()) {
-				pripMetadata.setContentDateEnd(DateUtils.parse(searchMetadata.getValidityStop()).truncatedTo(ChronoUnit.MILLIS));
-			}
 			List<PripGeoCoordinate> coordinates = new ArrayList<>();
 			if (null != searchMetadata.getFootprint()) {
 				for (List<Double> p : searchMetadata.getFootprint()) {
