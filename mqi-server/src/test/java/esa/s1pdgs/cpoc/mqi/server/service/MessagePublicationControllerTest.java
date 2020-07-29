@@ -11,8 +11,6 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 
-import javax.xml.bind.JAXBException;
-
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.junit.Before;
 import org.junit.ClassRule;
@@ -24,7 +22,7 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.kafka.test.rule.KafkaEmbedded;
+import org.springframework.kafka.test.rule.EmbeddedKafkaRule;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.junit4.SpringRunner;
 
@@ -38,14 +36,13 @@ import esa.s1pdgs.cpoc.mqi.model.queue.IngestionEvent;
 import esa.s1pdgs.cpoc.mqi.model.queue.IpfExecutionJob;
 import esa.s1pdgs.cpoc.mqi.model.queue.LevelReportDto;
 import esa.s1pdgs.cpoc.mqi.model.queue.ProductionEvent;
+import esa.s1pdgs.cpoc.mqi.server.GenericKafkaUtils;
 import esa.s1pdgs.cpoc.mqi.server.config.ApplicationProperties;
-import esa.s1pdgs.cpoc.mqi.server.config.KafkaProperties;
 import esa.s1pdgs.cpoc.mqi.server.config.ApplicationProperties.ProductCategoryProperties;
 import esa.s1pdgs.cpoc.mqi.server.config.ApplicationProperties.ProductCategoryPublicationProperties;
-import esa.s1pdgs.cpoc.mqi.server.GenericKafkaUtils;
+import esa.s1pdgs.cpoc.mqi.server.config.KafkaProperties;
 import esa.s1pdgs.cpoc.mqi.server.converter.XmlConverter;
 import esa.s1pdgs.cpoc.mqi.server.publication.kafka.producer.GenericProducer;
-import esa.s1pdgs.cpoc.mqi.server.service.MessagePublicationController;
 
 /**
  * @author Viveris Technologies
@@ -56,7 +53,7 @@ import esa.s1pdgs.cpoc.mqi.server.service.MessagePublicationController;
 public class MessagePublicationControllerTest {
 
     @ClassRule
-    public static KafkaEmbedded embeddedKafka = new KafkaEmbedded(1, true,
+    public static EmbeddedKafkaRule embeddedKafka = new EmbeddedKafkaRule(1, true,
             GenericKafkaUtils.TOPIC_ERROR, 
             GenericKafkaUtils.TOPIC_L0_PRODUCTS,
             GenericKafkaUtils.TOPIC_L0_ACNS, 
