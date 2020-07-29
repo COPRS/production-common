@@ -1,6 +1,7 @@
 package esa.s1pdgs.cpoc.datalifecycle.trigger.service;
 
 import java.time.Period;
+import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.UUID;
@@ -9,7 +10,6 @@ import java.util.regex.Pattern;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import esa.s1pdgs.cpoc.common.ProductCategory;
 import esa.s1pdgs.cpoc.common.ProductFamily;
 import esa.s1pdgs.cpoc.common.utils.LogUtils;
 import esa.s1pdgs.cpoc.datalifecycle.trigger.config.DataLifecycleTriggerConfigurationProperties.RetentionPolicy;
@@ -18,6 +18,7 @@ import esa.s1pdgs.cpoc.errorrepo.ErrorRepoAppender;
 import esa.s1pdgs.cpoc.errorrepo.model.rest.FailedProcessingDto;
 import esa.s1pdgs.cpoc.mqi.client.MqiClient;
 import esa.s1pdgs.cpoc.mqi.client.MqiListener;
+import esa.s1pdgs.cpoc.mqi.client.MqiMessageEventHandler;
 import esa.s1pdgs.cpoc.mqi.model.queue.AbstractMessage;
 import esa.s1pdgs.cpoc.mqi.model.queue.EvictionManagementJob;
 import esa.s1pdgs.cpoc.mqi.model.rest.GenericMessageDto;
@@ -48,7 +49,7 @@ public class DataLifecycleTriggerListener<E extends AbstractMessage> implements 
 	}
 
 	@Override
-	public void onMessage(final GenericMessageDto<E> inputMessage) throws Exception {
+	public MqiMessageEventHandler onMessage(final GenericMessageDto<E> inputMessage) throws Exception {
 		final E inputEvent = inputMessage.getBody();
 
 		final Reporting reporting = ReportingUtils.newReportingBuilder()
@@ -58,29 +59,29 @@ public class DataLifecycleTriggerListener<E extends AbstractMessage> implements 
 		reporting.begin(
 				ReportingUtils.newFilenameReportingInputFor(inputEvent.getProductFamily(), inputEvent.getKeyObjectStorage()),
 				new ReportingMessage("Handling event for %s", inputEvent.getKeyObjectStorage()));
+		
+		return new MqiMessageEventHandler.Builder<EvictionManagementJob>()
+				.onSuccess(res -> reporting.end(new ReportingMessage("End handling event for %s", inputEvent.getKeyObjectStorage())))
+				.onError(e -> reporting.error(new ReportingMessage(
+						"Error on handling event for %s: %s", 
+						inputEvent.getKeyObjectStorage(),
+						LogUtils.toString(e)
+				)))
+				.messageHandling(() ->{
+					final EvictionManagementJob evictionManagementJob = toEvictionManagementJob(
+							inputEvent, 
+							retentionPolicies,
+							reporting.getUid()
+					);
 
-		try {
-			final EvictionManagementJob evictionManagementJob = toEvictionManagementJob(
-					inputEvent, 
-					retentionPolicies,
-					reporting.getUid()
-			);
-
-			final GenericPublicationMessageDto<EvictionManagementJob> outputMessage = new GenericPublicationMessageDto<EvictionManagementJob>(
-					inputMessage.getId(), 
-					inputEvent.getProductFamily(), 
-					evictionManagementJob
-			);
-			mqiClient.publish(outputMessage, ProductCategory.EVICTION_MANAGEMENT_JOBS);
-			reporting.end(new ReportingMessage("End handling event for %s", inputEvent.getKeyObjectStorage()));
-		} catch (final Exception e) {
-			reporting.error(new ReportingMessage(
-					"Error on handling event for %s: %s", 
-					inputEvent.getKeyObjectStorage(),
-					LogUtils.toString(e)
-			));
-			throw e;
-		}
+					final GenericPublicationMessageDto<EvictionManagementJob> outputMessage = new GenericPublicationMessageDto<EvictionManagementJob>(
+							inputMessage.getId(), 
+							inputEvent.getProductFamily(), 
+							evictionManagementJob
+					);
+					return Collections.singletonList(outputMessage);
+				})
+				.newResult();
 	}
 	
 	@Override

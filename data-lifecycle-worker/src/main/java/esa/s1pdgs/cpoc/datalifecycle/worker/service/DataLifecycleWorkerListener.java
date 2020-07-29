@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
+import java.util.Collections;
 import java.util.Date;
 
 import org.apache.logging.log4j.LogManager;
@@ -20,7 +21,9 @@ import esa.s1pdgs.cpoc.datalifecycle.worker.report.EvictionReportingOutput;
 import esa.s1pdgs.cpoc.errorrepo.ErrorRepoAppender;
 import esa.s1pdgs.cpoc.errorrepo.model.rest.FailedProcessingDto;
 import esa.s1pdgs.cpoc.mqi.client.MqiListener;
+import esa.s1pdgs.cpoc.mqi.client.MqiMessageEventHandler;
 import esa.s1pdgs.cpoc.mqi.model.queue.EvictionManagementJob;
+import esa.s1pdgs.cpoc.mqi.model.queue.NullMessage;
 import esa.s1pdgs.cpoc.mqi.model.rest.GenericMessageDto;
 import esa.s1pdgs.cpoc.obs_sdk.ObsClient;
 import esa.s1pdgs.cpoc.obs_sdk.ObsObject;
@@ -51,7 +54,7 @@ public class DataLifecycleWorkerListener implements MqiListener<EvictionManageme
     }
 
     @Override
-    public final void onMessage(final GenericMessageDto<EvictionManagementJob> message) throws Exception {
+    public final MqiMessageEventHandler onMessage(final GenericMessageDto<EvictionManagementJob> message) throws Exception {
         final EvictionManagementJob job = message.getBody();
         LOG.info("set/update eviction time {} for family {} key {}", job.getEvictionDate(), job.getProductFamily(), job.getKeyObjectStorage());
         
@@ -63,19 +66,25 @@ public class DataLifecycleWorkerListener implements MqiListener<EvictionManageme
 				ReportingUtils.newFilenameReportingInputFor(job.getProductFamily(), job.getKeyObjectStorage()),
 				new ReportingMessage("Updating eviction time for %s", job.getKeyObjectStorage())
 		);  
-        try {
-			updateRetentionInObs(job);
-			final ReportingOutput out = updateRetentionInEs(job);
-			reporting.end(
-					out,
-					new ReportingMessage("Updated eviction time for %s", job.getKeyObjectStorage())
-			);			
-		} catch (final Exception e) {
-			reporting.error(
-					new ReportingMessage("Error updating eviction time for %s: %s", job.getKeyObjectStorage(), LogUtils.toString(e))
-			);	
-			throw e;
-		}
+		
+		return new MqiMessageEventHandler.Builder<NullMessage>()
+				.onError(e -> 	reporting.error(
+						new ReportingMessage(
+								"Error updating eviction time for %s: %s", 
+								job.getKeyObjectStorage(), 
+								LogUtils.toString(e)
+						)
+				))
+				.messageHandling(() -> {
+					updateRetentionInObs(job);
+					final ReportingOutput out = updateRetentionInEs(job);
+					reporting.end(
+							out,
+							new ReportingMessage("Updated eviction time for %s", job.getKeyObjectStorage())
+					);
+					return Collections.emptyList();
+				})
+				.newResult();
     }
     
     @Override

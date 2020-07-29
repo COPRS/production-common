@@ -1,10 +1,10 @@
 package esa.s1pdgs.cpoc.mdc.worker.service;
 
 import java.time.LocalDateTime;
+import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
-import java.util.UUID;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -22,7 +22,6 @@ import esa.s1pdgs.cpoc.common.utils.DateUtils;
 import esa.s1pdgs.cpoc.common.utils.LogUtils;
 import esa.s1pdgs.cpoc.errorrepo.ErrorRepoAppender;
 import esa.s1pdgs.cpoc.errorrepo.model.rest.FailedProcessingDto;
-import esa.s1pdgs.cpoc.mdc.worker.MetadataExtractException;
 import esa.s1pdgs.cpoc.mdc.worker.config.MdcWorkerConfigurationProperties;
 import esa.s1pdgs.cpoc.mdc.worker.config.ProcessConfiguration;
 import esa.s1pdgs.cpoc.mdc.worker.config.TriggerConfigurationProperties;
@@ -35,8 +34,10 @@ import esa.s1pdgs.cpoc.mqi.client.MessageFilter;
 import esa.s1pdgs.cpoc.mqi.client.MqiClient;
 import esa.s1pdgs.cpoc.mqi.client.MqiConsumer;
 import esa.s1pdgs.cpoc.mqi.client.MqiListener;
+import esa.s1pdgs.cpoc.mqi.client.MqiMessageEventHandler;
 import esa.s1pdgs.cpoc.mqi.model.queue.CatalogEvent;
 import esa.s1pdgs.cpoc.mqi.model.queue.CatalogJob;
+import esa.s1pdgs.cpoc.mqi.model.queue.util.CatalogEventAdapter;
 import esa.s1pdgs.cpoc.mqi.model.rest.GenericMessageDto;
 import esa.s1pdgs.cpoc.mqi.model.rest.GenericPublicationMessageDto;
 import esa.s1pdgs.cpoc.report.Reporting;
@@ -92,69 +93,21 @@ public class MetadataExtractionService implements MqiListener<CatalogJob> {
     }
 	
 	@Override
-	public final void onMessage(final GenericMessageDto<CatalogJob> message) throws Exception {	
+	public final MqiMessageEventHandler onMessage(final GenericMessageDto<CatalogJob> message) throws Exception {	
 		final CatalogJob catJob = message.getBody();	
-		final String productName = catJob.getProductName();
-		final ProductFamily family = catJob.getProductFamily();		
-		final ProductCategory category = ProductCategory.of(family);
 		final Reporting reporting = ReportingUtils.newReportingBuilder()
 				.predecessor(catJob.getUid())				
 				.newReporting("MetadataExtraction");
     
 		reporting.begin(
-				ReportingUtils.newFilenameReportingInputFor(family, productName),
+				ReportingUtils.newFilenameReportingInputFor(catJob.getProductFamily(), catJob.getProductName()),
 				new ReportingMessage("Starting metadata extraction")
 		);   
-				
-		try {
-			final MetadataExtractor extractor = extractorFactory.newMetadataExtractorFor(
-					category,
-					properties.getProductCategories().get(category)
-			);			
-			final JSONObject metadata = extractor.extract(reporting, message);
-			
-			// TODO move to extractor
-			if (null != catJob.getTimeliness() && !metadata.has("timeliness")) {
-				metadata.put("timeliness", catJob.getTimeliness()); 
-			}
-			
-			// TODO move to extractor
-			if (!metadata.has("insertionTime")) {
-				metadata.put("insertionTime", DateUtils.formatToMetadataDateTimeFormat(LocalDateTime.now()));
-			}
-			
-			final ReportingOutput reportingOutput;
-			
-			// S1PRO-1247: deal with segment scenario
-			if (family == ProductFamily.L0_SEGMENT) {				
-				reportingOutput = new SegmentReportingOutput(
-						metadata.getString("productConsolidation"),
-						metadata.getString("productSensingConsolidation")
-				);			
-			}
-			else {
-				reportingOutput = ReportingOutput.NULL;
-			}
-			
-	    	LOG.debug("Metadata extracted: {} for product: {}", metadata, productName);
-	    	
-	    	esServices.createMetadataWithRetries(metadata, productName, properties.getProductInsertion().getMaxRetries(),
-	    			properties.getProductInsertion().getTempoRetryMs());
-
-	    	publish(message, reporting.getUid(), metadata);
-	        reporting.end(reportingOutput, new ReportingMessage("End metadata extraction"));
-            
-		}
-		catch (final Exception e) {			
-			final String errMess = String.format(
-					"Failed to extract metadata from product %s of family %s: %s",
-					productName,
-					family,
-					LogUtils.toString(e)
-			);
-	        reporting.error(new ReportingMessage("Metadata extraction failed: %s", 	LogUtils.toString(e)));	        
-	        throw new MetadataExtractException(errMess, e);
-		}    
+		return new MqiMessageEventHandler.Builder<CatalogEvent>()
+				.onSuccess(res -> reporting.end(reportingOutput(res), new ReportingMessage("End metadata extraction")))
+				.onError(e -> reporting.error(new ReportingMessage("Metadata extraction failed: %s", LogUtils.toString(e))))				
+				.messageHandling(() -> handleMessage(message, reporting))
+				.newResult();
 	}
 	
 	@Override
@@ -166,23 +119,6 @@ public class MetadataExtractionService implements MqiListener<CatalogJob> {
         		error.getMessage(),
         		message
         )); 
-	}
-	
-	private final void publish(
-			final GenericMessageDto<CatalogJob> message, 
-			final UUID reportingId,
-			final JSONObject metadata
-	) throws Exception {
-		final CatalogEvent event = toCatalogEvent(message.getBody(), metadata);
-		event.setUid(reportingId);
-		final GenericPublicationMessageDto<CatalogEvent> messageDto = new GenericPublicationMessageDto<CatalogEvent>(
-				message.getId(), 
-				event.getProductFamily(), 
-				event
-		);
-		messageDto.setInputKey(message.getInputKey());
-		messageDto.setOutputKey(determineOutputKeyDependentOnProductFamilyAndTimeliness(event));		    	
-		mqiClient.publish(messageDto, ProductCategory.CATALOG_EVENT);
 	}
 	
 	private String determineOutputKeyDependentOnProductFamilyAndTimeliness(final CatalogEvent event) {
@@ -220,5 +156,66 @@ public class MetadataExtractionService implements MqiListener<CatalogJob> {
 		catEvent.setProductType(metadata.getString("productType"));
 		catEvent.setMetadata(metadata.toMap());		
 		return catEvent;
+	}
+	
+	private final List<GenericPublicationMessageDto<CatalogEvent>> handleMessage(
+			final GenericMessageDto<CatalogJob> message, 
+			final Reporting reporting
+	) throws Exception {
+		final CatalogJob catJob = message.getBody();
+		final String productName = catJob.getProductName();
+		final ProductFamily family = catJob.getProductFamily();
+		final ProductCategory category = ProductCategory.of(family);
+
+		final MetadataExtractor extractor = extractorFactory.newMetadataExtractorFor(
+				category,
+				properties.getProductCategories().get(category)
+		);
+		final JSONObject metadata = extractor.extract(reporting, message);
+
+		// TODO move to extractor
+		if (null != catJob.getTimeliness() && !metadata.has("timeliness")) {
+			metadata.put("timeliness", catJob.getTimeliness());
+		}
+
+		// TODO move to extractor
+		if (!metadata.has("insertionTime")) {
+			metadata.put("insertionTime", DateUtils.formatToMetadataDateTimeFormat(LocalDateTime.now()));
+		}
+		LOG.debug("Metadata extracted: {} for product: {}", metadata, productName);
+
+		esServices.createMetadataWithRetries(
+				metadata, 
+				productName, 
+				properties.getProductInsertion().getMaxRetries(),
+				properties.getProductInsertion().getTempoRetryMs()
+		);
+		
+		final CatalogEvent event = toCatalogEvent(message.getBody(), metadata);
+		event.setUid(reporting.getUid());
+		final GenericPublicationMessageDto<CatalogEvent> messageDto = new GenericPublicationMessageDto<CatalogEvent>(
+				message.getId(), 
+				event.getProductFamily(), 
+				event
+		);
+		messageDto.setInputKey(message.getInputKey());
+		messageDto.setOutputKey(determineOutputKeyDependentOnProductFamilyAndTimeliness(event));		    	
+		return Collections.singletonList(messageDto);
+	}
+	
+	private final ReportingOutput reportingOutput(
+			final List<GenericPublicationMessageDto<CatalogEvent>> pubs
+	) {
+		final GenericPublicationMessageDto<CatalogEvent> pub = pubs.get(0);	
+		final CatalogEventAdapter eventAdapter = CatalogEventAdapter.of(pub);
+				
+		// S1PRO-1247: deal with segment scenario
+		if (pub.getFamily() == ProductFamily.L0_SEGMENT) {				
+			return new SegmentReportingOutput(
+					eventAdapter.productConsolidation(),
+					eventAdapter.productSensingConsolidation()
+			);			
+		}
+		return ReportingOutput.NULL;
 	}
 }

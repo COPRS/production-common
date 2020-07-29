@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.time.LocalDateTime;
+import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -26,8 +27,11 @@ import esa.s1pdgs.cpoc.mqi.client.GenericMqiClient;
 import esa.s1pdgs.cpoc.mqi.client.MessageFilter;
 import esa.s1pdgs.cpoc.mqi.client.MqiConsumer;
 import esa.s1pdgs.cpoc.mqi.client.MqiListener;
+import esa.s1pdgs.cpoc.mqi.client.MqiMessageEventHandler;
+import esa.s1pdgs.cpoc.mqi.model.queue.NullMessage;
 import esa.s1pdgs.cpoc.mqi.model.queue.ProductionEvent;
 import esa.s1pdgs.cpoc.mqi.model.rest.GenericMessageDto;
+import esa.s1pdgs.cpoc.mqi.model.rest.GenericPublicationMessageDto;
 import esa.s1pdgs.cpoc.queuewatcher.config.ApplicationProperties;
 
 @Service
@@ -132,18 +136,27 @@ public class QueueWatcherService implements MqiListener<ProductionEvent> {
 	}
 
 	@Override
-	public void onMessage(final GenericMessageDto<ProductionEvent> message) {
+	public MqiMessageEventHandler onMessage(final GenericMessageDto<ProductionEvent> message) {
 		final ProductionEvent product = message.getBody();
 		final String productName = product.getKeyObjectStorage();
 		final ProductCategory category = ProductCategory.of(product.getProductFamily());
+		
+		return new MqiMessageEventHandler.Builder<NullMessage>()
+				.messageHandling(() -> handleMessage(productName, category))
+				.newResult();
+	}
 
+	private List<GenericPublicationMessageDto<NullMessage>> handleMessage(
+			final String productName, 
+			final ProductCategory category
+	) {
 		LOGGER.info("received {}: {}", category, productName);
-
 		try {
 			writeCSV(DateUtils.formatToMetadataDateTimeFormat(LocalDateTime.now()), productName);
 		} catch (final IOException e) {
 			LOGGER.error("Error occured while writing to CSV {}", LogUtils.toString(e));
 		}
+		return Collections.emptyList();
 	}
 	
 	private final MqiConsumer<ProductionEvent> newConsumerFor(final ProductCategory category, final long interval, final long delay) {

@@ -32,7 +32,7 @@ public final class XbipInboxAdapter implements InboxAdapter {
 	}
 
 	@Override
-	public final void delete(final URI uri) throws Exception {
+	public final void delete(final URI uri) {
 		// no deletiong for Xbip --> do nothing
 	}
 

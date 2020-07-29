@@ -6,8 +6,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import javax.annotation.PostConstruct;
-
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -30,7 +28,9 @@ import esa.s1pdgs.cpoc.disseminator.service.DisseminationService;
 import esa.s1pdgs.cpoc.errorrepo.ErrorRepoAppender;
 import esa.s1pdgs.cpoc.errorrepo.model.rest.FailedProcessingDto;
 import esa.s1pdgs.cpoc.mqi.client.MqiListener;
+import esa.s1pdgs.cpoc.mqi.client.MqiMessageEventHandler;
 import esa.s1pdgs.cpoc.mqi.model.queue.AbstractMessage;
+import esa.s1pdgs.cpoc.mqi.model.queue.NullMessage;
 import esa.s1pdgs.cpoc.mqi.model.rest.GenericMessageDto;
 import esa.s1pdgs.cpoc.obs_sdk.ObsClient;
 import esa.s1pdgs.cpoc.obs_sdk.ObsObject;
@@ -92,17 +92,22 @@ public class DisseminationTriggerListener<E extends AbstractMessage> implements 
 	}
     
 	@Override
-	public void onMessage(final GenericMessageDto<E> message) {
-		final AbstractMessage body = message.getBody();
-		LOG.debug("Handling {}", message);
-		
-		for (final DisseminationTypeConfiguration config : configsFor(body.getProductFamily())) {	
-			LOG.trace("Checking if product {} matches {}", body.getKeyObjectStorage(), config.getRegex());
-			if (body.getKeyObjectStorage().matches(config.getRegex())) {
-				LOG.debug("Found config {} for product {}", config, body.getKeyObjectStorage());
-				handleTransferTo(message, config.getTarget());
-			}			
-		}			
+	public MqiMessageEventHandler onMessage(final GenericMessageDto<E> message) {		
+		return new MqiMessageEventHandler.Builder<NullMessage>()
+				.messageHandling(() -> {
+					final AbstractMessage body = message.getBody();
+					LOG.debug("Handling {}", message);
+					
+					for (final DisseminationTypeConfiguration config : configsFor(body.getProductFamily())) {	
+						LOG.trace("Checking if product {} matches {}", body.getKeyObjectStorage(), config.getRegex());
+						if (body.getKeyObjectStorage().matches(config.getRegex())) {
+							LOG.debug("Found config {} for product {}", config, body.getKeyObjectStorage());
+							handleTransferTo(message, config.getTarget());
+						}			
+					}	
+					return Collections.emptyList();
+				})
+				.newResult();
 	}
 	
     @Override
@@ -134,13 +139,13 @@ public class DisseminationTriggerListener<E extends AbstractMessage> implements 
 			pc = ProductCategory.of(family);	
 		}		
 		
-		List<DisseminationTypeConfiguration> hits = properties.getCategories().getOrDefault(pc, Collections.emptyList());
+		final List<DisseminationTypeConfiguration> hits = properties.getCategories().getOrDefault(pc, Collections.emptyList());
 		LOG.debug("Family '{}' was resolved to category '{}' finding {} configurations",family, pc, hits.size());
     	return 	hits;
     }
 
 	final void handleTransferTo(final GenericMessageDto<E> message, final String target) {		
-		AbstractMessage body = message.getBody();
+		final AbstractMessage body = message.getBody();
 		
 		final Reporting reporting = ReportingUtils.newReportingBuilder()
 				.predecessor(body.getUid())				
