@@ -15,11 +15,13 @@ import esa.s1pdgs.cpoc.common.errors.AbstractCodedException;
 import esa.s1pdgs.cpoc.common.errors.InternalErrorException;
 import esa.s1pdgs.cpoc.compression.worker.model.mqi.CompressedProductQueueMessage;
 import esa.s1pdgs.cpoc.compression.worker.mqi.OutputProducerFactory;
+import esa.s1pdgs.cpoc.mqi.model.queue.CompressionEvent;
 import esa.s1pdgs.cpoc.mqi.model.queue.CompressionJob;
 import esa.s1pdgs.cpoc.mqi.model.rest.GenericMessageDto;
+import esa.s1pdgs.cpoc.mqi.model.rest.GenericPublicationMessageDto;
+import esa.s1pdgs.cpoc.obs_sdk.FileObsUploadObject;
 import esa.s1pdgs.cpoc.obs_sdk.ObsClient;
 import esa.s1pdgs.cpoc.obs_sdk.ObsEmptyFileException;
-import esa.s1pdgs.cpoc.obs_sdk.FileObsUploadObject;
 import esa.s1pdgs.cpoc.report.ReportingFactory;
 
 public class FileUploader {
@@ -65,9 +67,8 @@ public class FileUploader {
 		this.job = job;
 		this.reportingUuid = reportingUuid;
 	}
-
-	public String processOutput(final ReportingFactory reportingFactory) throws AbstractCodedException, ObsEmptyFileException {
-
+	
+	public List<GenericPublicationMessageDto<CompressionEvent>> processOutput(final ReportingFactory reportingFactory) throws AbstractCodedException, ObsEmptyFileException {
 		final List<CompressedProductQueueMessage> outputToPublish = new ArrayList<>();
 
 		final String zipFileName = job.getOutputKeyObjectStorage();
@@ -89,10 +90,8 @@ public class FileUploader {
 			throw new InternalErrorException("The current thread as been interrupted");
 		}
 		obsClient.upload(Arrays.asList(new FileObsUploadObject(uploadObject.getFamily(), uploadObject.getKey(), uploadObject.getFile())), reportingFactory);
-		
-		publishAccordingUploadFiles(NOT_KEY_OBS, outputToPublish);
-        
-        return zipFileName;
+
+        return publishAccordingUploadFiles(NOT_KEY_OBS, outputToPublish);
 	}
 
 	/**
@@ -103,9 +102,9 @@ public class FileUploader {
 	 * @param outputToPublish
 	 * @throws AbstractCodedException
 	 */
-	private void publishAccordingUploadFiles(final String nextKeyUpload,
+	private List<GenericPublicationMessageDto<CompressionEvent>> publishAccordingUploadFiles(final String nextKeyUpload,
 			final List<CompressedProductQueueMessage> outputToPublish) throws AbstractCodedException {
-
+		final List<GenericPublicationMessageDto<CompressionEvent>> result = new ArrayList<>();
         LOGGER.info("{} 3 - Publishing KAFKA messages for batch ");
 		final Iterator<CompressedProductQueueMessage> iter = outputToPublish.iterator();
 		boolean stop = false;
@@ -117,11 +116,12 @@ public class FileUploader {
 			if (nextKeyUpload.startsWith(msg.getObjectStorageKey())) {
 				stop = true;
 			} else {
-				producerFactory.sendOutput(msg, inputMessage, reportingUuid);
+				result.add(producerFactory.sendOutput(msg, inputMessage, reportingUuid));
 				iter.remove();
 			}
 
 		}
+		return result;
 	}
 
 }

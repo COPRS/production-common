@@ -41,7 +41,9 @@ import esa.s1pdgs.cpoc.mqi.client.GenericMqiClient;
 import esa.s1pdgs.cpoc.mqi.client.MessageFilter;
 import esa.s1pdgs.cpoc.mqi.client.MqiConsumer;
 import esa.s1pdgs.cpoc.mqi.client.MqiListener;
+import esa.s1pdgs.cpoc.mqi.client.MqiMessageEventHandler;
 import esa.s1pdgs.cpoc.mqi.client.StatusService;
+import esa.s1pdgs.cpoc.mqi.model.queue.CompressionEvent;
 import esa.s1pdgs.cpoc.mqi.model.queue.CompressionJob;
 import esa.s1pdgs.cpoc.mqi.model.rest.GenericMessageDto;
 import esa.s1pdgs.cpoc.obs_sdk.ObsClient;
@@ -98,7 +100,7 @@ public class CompressProcessor implements MqiListener<CompressionJob> {
 	}
 
 	@Override
-	public final void onMessage(final GenericMessageDto<CompressionJob> message) throws Exception {
+	public final MqiMessageEventHandler onMessage(final GenericMessageDto<CompressionJob> message) throws Exception {
 		final String workDir = properties.getWorkingDirectory();
 		final CompressionJob job = message.getBody();
 		
@@ -122,33 +124,35 @@ public class CompressProcessor implements MqiListener<CompressionJob> {
 		report.begin(
 				ReportingUtils.newFilenameReportingInputFor(job.getProductFamily(), message.getBody().getKeyObjectStorage()),
 				new ReportingMessage("Start compression processing")
-		);
-		try {			
-			checkThreadInterrupted();
-			LOGGER.info("Downloading inputs for {}", job);
-			fileDownloader.processInputs(report);
+		);		
+		return new MqiMessageEventHandler.Builder<CompressionEvent>()
+				.onSuccess(res -> report.end(
+						ReportingUtils.newFilenameReportingOutputFor(job.getProductFamily(),job.getOutputKeyObjectStorage()), 
+						new ReportingMessage("End compression processing")
+				))
+				.onError(e -> report.error(errorReportMessage(e)))
+				.messageHandling(() -> {
+					try {
+						checkThreadInterrupted();
+						LOGGER.info("Downloading inputs for {}", job);
+						fileDownloader.processInputs(report);
 
-			checkThreadInterrupted();
-			LOGGER.info("Compressing inputs for {}", job);
-			procCompletionSrv.submit(procExecutor);
-			waitForPoolProcessesEnding(procCompletionSrv);
+						checkThreadInterrupted();
+						LOGGER.info("Compressing inputs for {}", job);
+						procCompletionSrv.submit(procExecutor);
+						waitForPoolProcessesEnding(procCompletionSrv);
 
-			checkThreadInterrupted();
-			LOGGER.info("Uploading compressed outputs for {}", job);
-			final String filename = fileUploader.processOutput(report);
-			report.end(
-					ReportingUtils.newFilenameReportingOutputFor(job.getProductFamily(), filename), 
-					new ReportingMessage("End compression processing")
-			);
-		} catch (final Exception e) {
-			report.error(errorReportMessage(e));
-			throw e;
-		}
-		finally {
-			// initially, this has only been performed on InterruptedException but we discussed that it makes sense to
-			// always perform the cleanup, also see S1PRO-988 
-			cleanCompressionProcessing(job, procExecutorSrv);
-		}
+						checkThreadInterrupted();
+						LOGGER.info("Uploading compressed outputs for {}", job);
+						return fileUploader.processOutput(report);
+					}
+					finally {
+						// initially, this has only been performed on InterruptedException but we discussed that it makes sense to
+						// always perform the cleanup, also see S1PRO-988 
+						cleanCompressionProcessing(job, procExecutorSrv);
+					}
+				})
+				.newResult();
 	}
 		
 	@Override
