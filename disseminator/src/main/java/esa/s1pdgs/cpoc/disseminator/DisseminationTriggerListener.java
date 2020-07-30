@@ -94,7 +94,7 @@ public class DisseminationTriggerListener<E extends AbstractMessage> implements 
 	@Override
 	public MqiMessageEventHandler onMessage(final GenericMessageDto<E> message) {		
 		return new MqiMessageEventHandler.Builder<NullMessage>(ProductCategory.UNDEFINED)
-				.messageHandling(() -> {
+				.onMessage(() -> {
 					final AbstractMessage body = message.getBody();
 					LOG.debug("Handling {}", message);
 					

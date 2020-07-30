@@ -142,7 +142,7 @@ public class QueueWatcherService implements MqiListener<ProductionEvent> {
 		final ProductCategory category = ProductCategory.of(product.getProductFamily());
 		
 		return new MqiMessageEventHandler.Builder<NullMessage>(ProductCategory.UNDEFINED)
-				.messageHandling(() -> handleMessage(productName, category))
+				.onMessage(() -> handleMessage(productName, category))
 				.newResult();
 	}
 

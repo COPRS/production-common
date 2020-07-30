@@ -81,7 +81,7 @@ public class JobDispatcherImpl implements JobDispatcher {
 	        			"Error associating TaskTables to AppDataJob: %s", 
 	        			LogUtils.toString(e)
 	        	)))
-				.messageHandling(() -> {
+				.onMessage(() -> {
 					LOGGER.trace("Got TaskTable {}", tasktableFilename);
 		            
 		            // assert that there is a job generator for the assigned tasktable

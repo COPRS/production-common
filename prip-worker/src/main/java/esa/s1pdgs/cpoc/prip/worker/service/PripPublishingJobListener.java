@@ -125,7 +125,7 @@ public class PripPublishingJobListener implements MqiListener<PripPublishingJob>
 						PripReportingOutput.newInstance(new Date()), 
 						new ReportingMessage("Error on publishing file %s in PRIP: %s", name, LogUtils.toString(e))
 				))
-				.messageHandling(() -> {
+				.onMessage(() -> {
 					createAndSave(publishingJob);
 		    		return Collections.emptyList();
 				})

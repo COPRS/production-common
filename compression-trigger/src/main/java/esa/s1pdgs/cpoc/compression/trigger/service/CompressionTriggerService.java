@@ -100,7 +100,7 @@ public class CompressionTriggerService implements MqiListener<ProductionEvent> {
 						event.getProductName(), 
 						LogUtils.toString(e))
 				))
-				.messageHandling(() -> {
+				.onMessage(() -> {
 					final CompressionJob job = toCompressionJob(event);
 					job.setUid(reporting.getUid());
 					return Collections.singletonList(publish(message, job));

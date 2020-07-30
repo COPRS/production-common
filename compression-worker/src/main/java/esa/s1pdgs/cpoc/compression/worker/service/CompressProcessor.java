@@ -131,7 +131,7 @@ public class CompressProcessor implements MqiListener<CompressionJob> {
 						new ReportingMessage("End compression processing")
 				))
 				.onError(e -> report.error(errorReportMessage(e)))
-				.messageHandling(() -> {
+				.onMessage(() -> {
 					try {
 						checkThreadInterrupted();
 						LOGGER.info("Downloading inputs for {}", job);

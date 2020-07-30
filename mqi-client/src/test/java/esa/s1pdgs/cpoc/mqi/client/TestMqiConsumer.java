@@ -22,10 +22,12 @@ import esa.s1pdgs.cpoc.appstatus.AppStatus;
 import esa.s1pdgs.cpoc.common.ProductCategory;
 import esa.s1pdgs.cpoc.common.ProductFamily;
 import esa.s1pdgs.cpoc.common.errors.mqi.MqiAckApiError;
+import esa.s1pdgs.cpoc.mqi.model.queue.CatalogJob;
 import esa.s1pdgs.cpoc.mqi.model.queue.ProductionEvent;
 import esa.s1pdgs.cpoc.mqi.model.rest.Ack;
 import esa.s1pdgs.cpoc.mqi.model.rest.AckMessageDto;
 import esa.s1pdgs.cpoc.mqi.model.rest.GenericMessageDto;
+import esa.s1pdgs.cpoc.mqi.model.rest.GenericPublicationMessageDto;
 
 public class TestMqiConsumer {	
 	@Mock
@@ -47,9 +49,15 @@ public class TestMqiConsumer {
 	
 	@Test
 	public final void testOnNominalHandling_ShallAcknowledgePostively() throws Exception {
+		final MqiMessageEventHandler handler = new MqiMessageEventHandler.Builder<CatalogJob>(ProductCategory.AUXILIARY_FILES)
+				.onMessage(() -> Collections.singletonList(new GenericPublicationMessageDto<CatalogJob>()))
+				.newResult();
+		
+		
 		// let it only poll once
 		doReturn(true).when(fakeappStatus).isInterrupted();
 		doReturn(mess).when(fakeClient).next(Mockito.eq(ProductCategory.AUXILIARY_FILES));
+		doReturn(handler).when(fakeListener).onMessage(Mockito.any());
 		
 		final MqiConsumer<?> uut = new MqiConsumer<>(
 				fakeClient, 
@@ -61,7 +69,10 @@ public class TestMqiConsumer {
 				fakeappStatus
 		);		
 		uut.run();		
-		verify(fakeClient).ack(Mockito.eq(new AckMessageDto(1, Ack.OK, null, false)), Mockito.eq(ProductCategory.AUXILIARY_FILES));
+		verify(fakeClient).ack(
+				Mockito.eq(new AckMessageDto(1, Ack.OK, null, false)),
+				Mockito.eq(ProductCategory.AUXILIARY_FILES)
+		);
 	}
 	
 	@Test

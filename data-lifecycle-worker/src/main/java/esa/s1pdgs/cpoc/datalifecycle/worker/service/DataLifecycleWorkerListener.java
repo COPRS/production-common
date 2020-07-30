@@ -76,7 +76,7 @@ public class DataLifecycleWorkerListener implements MqiListener<EvictionManageme
 								LogUtils.toString(e)
 						)
 				))
-				.messageHandling(() -> {
+				.onMessage(() -> {
 					updateRetentionInObs(job);
 					final ReportingOutput out = updateRetentionInEs(job);
 					reporting.end(

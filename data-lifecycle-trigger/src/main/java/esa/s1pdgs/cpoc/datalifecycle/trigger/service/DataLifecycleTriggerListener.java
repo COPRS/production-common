@@ -63,7 +63,7 @@ public class DataLifecycleTriggerListener<E extends AbstractMessage> implements 
 						inputEvent.getKeyObjectStorage(),
 						LogUtils.toString(e)
 				)))
-				.messageHandling(() ->{
+				.onMessage(() ->{
 					final EvictionManagementJob evictionManagementJob = toEvictionManagementJob(
 							inputEvent, 
 							retentionPolicies,

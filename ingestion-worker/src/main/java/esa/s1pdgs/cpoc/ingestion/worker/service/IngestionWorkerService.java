@@ -118,7 +118,7 @@ public class IngestionWorkerService implements MqiListener<IngestionJob> {
 						ingestion.getKeyObjectStorage(),  
 						LogUtils.toString(e)
 				)))
-				.messageHandling(() -> {					
+				.onMessage(() -> {					
 					reporting.begin(
 							new InboxReportingInput(ingestion.getProductName(), ingestion.getRelativePath(), ingestion.getPickupBaseURL()), 
 							new ReportingMessage("Start processing of %s", ingestion.getProductName())

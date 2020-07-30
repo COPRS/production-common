@@ -108,7 +108,7 @@ public class GenericConsumer implements MqiListener<CatalogEvent> {
 					}
 				})
 				.onError(e -> reporting.error(new ReportingMessage("Error on handling CatalogEvent: %s", LogUtils.toString(e))))
-				.messageHandling(() -> handle(reporting, mqiMessage))
+				.onMessage(() -> handle(reporting, mqiMessage))
 				.newResult();
     }
 

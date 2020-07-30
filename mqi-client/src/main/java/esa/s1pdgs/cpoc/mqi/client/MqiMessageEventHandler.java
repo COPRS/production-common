@@ -21,7 +21,7 @@ public class MqiMessageEventHandler {
 			this.cat = cat;
 		}
 
-		public final Builder<E> messageHandling(final Callable<List<GenericPublicationMessageDto<E>>> messageProcessor) {
+		public final Builder<E> onMessage(final Callable<List<GenericPublicationMessageDto<E>>> messageProcessor) {
 			if (messageProcessor != null) {
 				processor = messageProcessor;
 			}
