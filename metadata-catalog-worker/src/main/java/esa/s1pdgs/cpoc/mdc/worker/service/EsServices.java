@@ -13,6 +13,7 @@ import java.util.Map;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.apache.lucene.search.TotalHits;
 import org.apache.lucene.search.TotalHits.Relation;
 import org.elasticsearch.ElasticsearchStatusException;
 import org.elasticsearch.action.get.GetRequest;
@@ -38,7 +39,6 @@ import org.elasticsearch.search.sort.SortOrder;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import esa.s1pdgs.cpoc.common.EdrsSessionFileType;
@@ -680,13 +680,13 @@ public class EsServices {
 			coordinates = (Map<String, Object>)source.get("segmentCoordinates"); 
 		}
 
-		List<List<Double>> footprint = new ArrayList<>();
+		final List<List<Double>> footprint = new ArrayList<>();
 		if (null != coordinates && coordinates.containsKey("coordinates")) {
 			final List<Object> firstArray = (List<Object>)coordinates.get("coordinates");
 			if (null != firstArray) {
 				final List<Object> secondArray = (List<Object>)firstArray.get(0);			
 				for (final Object arr : secondArray) {
-					List<Double> p = new ArrayList<>();
+					final List<Double> p = new ArrayList<>();
 					final List<Number> coords = (List<Number>) arr;
 					final double lon = coords.get(0).doubleValue();
 					final double lat = coords.get(1).doubleValue();
@@ -1108,11 +1108,11 @@ public class EsServices {
 
 	}
 	
-	private boolean isEmpty(SearchResponse searchResponse) {
+	private boolean isEmpty(final SearchResponse searchResponse) {
 		return !this.isNotEmpty(searchResponse);
 	}
 	
-	private boolean isNotEmpty(SearchResponse searchResponse) {
+	private boolean isNotEmpty(final SearchResponse searchResponse) {
 		if (null != searchResponse) {
 			return this.isNotEmpty(searchResponse.getHits());
 		}
@@ -1120,24 +1120,31 @@ public class EsServices {
 		return false;
 	}
 	
-	private boolean isEmpty(SearchHits searchHits) {
+	private boolean isEmpty(final SearchHits searchHits) {
 		return !this.isNotEmpty(searchHits);
 	}
 
-	private boolean isNotEmpty(SearchHits searchHits) {
-		return null != searchHits && null != searchHits.getTotalHits() && searchHits.getTotalHits().value > 0;
-	}
-
-	private String getTotalSearchHitsStr(SearchHits searchHits) {
-		if (null != searchHits && null != searchHits.getTotalHits()) {
-			if (Relation.GREATER_THAN_OR_EQUAL_TO == searchHits.getTotalHits().relation) {
-				return String.valueOf(searchHits.getTotalHits().value) + " (or more)";
-			} else {
-				return String.valueOf(searchHits.getTotalHits().value);
+	private boolean isNotEmpty(final SearchHits searchHits) {
+		if (null != searchHits) {
+			final TotalHits hits = searchHits.getTotalHits();
+			if (null != hits) {
+				return hits.value > 0; 
 			}
 		}
-
-		return "0";
+		return false;
 	}
-	
+
+	private String getTotalSearchHitsStr(final SearchHits searchHits) {
+		if (null != searchHits) {
+			final TotalHits hits = searchHits.getTotalHits();
+			if (null != hits) {
+				if (Relation.GREATER_THAN_OR_EQUAL_TO == hits.relation) {
+					return String.valueOf(hits.value) + " (or more)";
+				} else {
+					return String.valueOf(hits.value);
+				}
+			}			
+		}
+		return "0";
+	}	
 }
