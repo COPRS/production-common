@@ -28,7 +28,7 @@
 		<equalsverifier.version>2.4.6</equalsverifier.version>
 		<aws.version>1.11.271</aws.version>		
 		<jsch.version>0.1.53</jsch.version>
-		<elasticsearch.version>6.7.0</elasticsearch.version>
+		<elasticsearch.version>7.7.0</elasticsearch.version>
 		<spatial4j.version>0.7</spatial4j.version>
 		<jts.version>1.15.0</jts.version>
 		<pmd.failOnViolation>false</pmd.failOnViolation>
