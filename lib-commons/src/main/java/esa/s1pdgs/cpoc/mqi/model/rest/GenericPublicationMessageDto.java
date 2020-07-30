@@ -2,6 +2,8 @@ package esa.s1pdgs.cpoc.mqi.model.rest;
 
 import java.util.Objects;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 import esa.s1pdgs.cpoc.common.ProductFamily;
 
 /**
@@ -65,6 +67,7 @@ public class GenericPublicationMessageDto<T> implements MessageDto<T> {
     }
     
     @Override
+    @JsonIgnore
 	public T getDto() {
 		return messageToPublish;
 	}

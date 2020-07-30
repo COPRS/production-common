@@ -2,6 +2,8 @@ package esa.s1pdgs.cpoc.mqi.model.rest;
 
 import java.util.Objects;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 /**
  * Exchanged message for consumption
  * 
@@ -93,6 +95,7 @@ public class GenericMessageDto<T> implements MessageDto<T> {
     }
     
     @Override
+    @JsonIgnore
 	public T getDto() {
 		return body;
 	}
