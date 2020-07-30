@@ -495,8 +495,20 @@ public class OutputProcessor {
 			final List<FileObsUploadObject> uploadBatch,
 			final List<ObsQueueMessage> outputToPublish,
 			final UUID uuid
-	) throws AbstractCodedException, ObsEmptyFileException {
-
+	) throws Exception {
+		// I can't believe this stuff is actually working in any reliable form. It seems to be operating on
+		// 2 indepenent lists associated via the obsKey. This REALLY needs some refactoring since there are
+		// some dangerous assumptions here, like:
+		// - the two lists need to be in any coherence to each other that seems to be the case at the moment
+		// but I'm quite surprised it's even working. If the lists content are changed any time in the future
+		// this might break horribly.
+		// - publishing of the outputs is done before the upload, i.e. all subsequent steps must have a 
+		// reliable retry mechanism. If OBS upload fails, there may be Zombie messages in the system referring
+		// to products that have not been uploaded.
+		// As time is scarce, all this crap needs to be cleaned up in the IPF refactoring story in the future
+		// and this piece of code should never become operational.
+		final List<GenericPublicationMessageDto<ProductionEvent>> res = new ArrayList<>();
+		
 		final double size = Double.valueOf(uploadBatch.size());
 		final double nbPool = Math.ceil(size / sizeUploadBatch);
 
@@ -505,16 +517,20 @@ public class OutputProcessor {
 			final List<FileObsUploadObject> sublist = uploadBatch.subList(i * sizeUploadBatch, lastIndex);
 
 			if (i > 0) {
-				this.publishAccordingUploadFiles(i - 1, sublist.get(0).getKey(), outputToPublish, uuid);
+				res.addAll(publishAccordingUploadFiles(i - 1, sublist.get(0).getKey(), outputToPublish, uuid));
 			}
 			if (Thread.currentThread().isInterrupted()) {
 				throw new InternalErrorException("The current thread as been interrupted");
 			}
 			this.obsClient.upload(sublist, reportingFactory);
 		}
-		return publishAccordingUploadFiles(nbPool - 1, NOT_KEY_OBS, outputToPublish, uuid);
+		// ok, this seems to be some kind of 'poison pill' pattern here to indicate that upload is done.
+		// as nothing else is done. If there is a remainder in 'outputToPublish', I guess it will be published
+		// but it will not be uploaded. But to be safe, we add it also here...
+		res.addAll(publishAccordingUploadFiles(nbPool - 1, NOT_KEY_OBS, outputToPublish, uuid));
+		return res;
 	}
-
+	
 	/**
 	 * Public uploaded files, i.e. unitl the output to publish is the next key to
 	 * upload
@@ -522,15 +538,15 @@ public class OutputProcessor {
 	 * @param nbBatch
 	 * @param nextKeyUpload
 	 * @param outputToPublish
-	 * @throws AbstractCodedException
+	 * @throws Exception 
 	 */
 	private final List<GenericPublicationMessageDto<ProductionEvent>> publishAccordingUploadFiles(
 			final double nbBatch,
 			final String nextKeyUpload, 
 			final List<ObsQueueMessage> outputToPublish,
 			final UUID uuid
-	) throws AbstractCodedException {
-
+	) throws Exception {
+		final List<GenericPublicationMessageDto<ProductionEvent>> result = new ArrayList<>();
 		LOGGER.info("{} 3 - Publishing KAFKA messages for batch {}", prefixMonitorLogs, nbBatch);
 		final Iterator<ObsQueueMessage> iter = outputToPublish.iterator();
 		boolean stop = false;
@@ -542,20 +558,29 @@ public class OutputProcessor {
 			if (nextKeyUpload.startsWith(msg.getKeyObs())) {
 				stop = true;
 			} else {
-				try {
-					LOGGER.info("{} 3 - Publishing KAFKA message for output {}", prefixMonitorLogs,
-							msg.getProductName());
-					procuderFactory.sendOutput(msg, inputMessage, uuid);
-					LOGGER.info("{} 3 - Successful published KAFKA message for output {}", prefixMonitorLogs,
-							msg.getProductName());
-				} catch (final Exception e) {
-					LOGGER.error("{} 3 - Failed publishing KAFKA message for output {}", prefixMonitorLogs,
-							msg.getProductName());
-					throw e;
-				}
+				result.add(publish(uuid, msg));
 				iter.remove();
 			}
 
+		}
+		return result;
+	}
+
+	private final GenericPublicationMessageDto<ProductionEvent> publish(
+			final UUID uuid, 
+			final ObsQueueMessage msg
+	) throws Exception {
+		try {
+			LOGGER.info("{} 3 - Publishing KAFKA message for output {}", prefixMonitorLogs,
+					msg.getProductName());
+			final GenericPublicationMessageDto<ProductionEvent> res = procuderFactory.sendOutput(msg, inputMessage, uuid);
+			LOGGER.info("{} 3 - Successful published KAFKA message for output {}", prefixMonitorLogs,
+					msg.getProductName());
+			return res;
+		} catch (final Exception e) {
+			LOGGER.error("{} 3 - Failed publishing KAFKA message for output {}", prefixMonitorLogs,
+					msg.getProductName());
+			throw e;
 		}
 	}
 
@@ -597,7 +622,7 @@ public class OutputProcessor {
 	 * @throws IOException
 	 * @throws ObsEmptyFileException 
 	 */
-	public ReportingOutput processOutput(final ReportingFactory reportingFactory, final UUID uuid) throws AbstractCodedException, ObsEmptyFileException {
+	public List<GenericPublicationMessageDto<ProductionEvent>> processOutput(final ReportingFactory reportingFactory, final UUID uuid) throws Exception {
 		// Extract files
 		final List<String> lines = extractFiles();
 
@@ -610,12 +635,17 @@ public class OutputProcessor {
 		try {
 			// Upload per batch the output
 			// S1PRO-1494: WARNING--- list will be emptied by this method. For reporting, make a copy beforehand
-			final List<ObsQueueMessage> outs = new ArrayList<>(outputToPublish);			
-			processProducts(reportingFactory, uploadBatch, outputToPublish, uuid);
+			//final List<ObsQueueMessage> outs = new ArrayList<>(outputToPublish);			
+			final List<GenericPublicationMessageDto<ProductionEvent>> res = processProducts(
+					reportingFactory, 
+					uploadBatch, 
+					outputToPublish, 
+					uuid
+			);
 			// Publish reports
 			processReports(reportToPublish, uuid);
-			return toReportingOutput(outs);
-		} catch (final AbstractCodedException | ObsEmptyFileException e) {
+			return res;
+		} catch (final Exception e) {
 			throw e;
 		}
 	}
