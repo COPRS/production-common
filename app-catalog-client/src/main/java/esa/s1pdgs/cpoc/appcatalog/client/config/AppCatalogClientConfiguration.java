@@ -1,5 +1,7 @@
 package esa.s1pdgs.cpoc.appcatalog.client.config;
 
+import java.time.Duration;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.web.client.RestTemplateBuilder;
 import org.springframework.context.annotation.Bean;
@@ -26,7 +28,7 @@ public class AppCatalogClientConfiguration {
 	) {
 		this.properties = properties;
 		this.restTemplate = restTemplateBuilder
-				.setConnectTimeout(properties.getTmConnectMs())
+				.setConnectTimeout(Duration.ofMillis(properties.getTmConnectMs()))
 				.build();
 	}
 	

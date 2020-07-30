@@ -12,13 +12,12 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.kafka.test.rule.KafkaEmbedded;
+import org.springframework.kafka.test.rule.EmbeddedKafkaRule;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit4.SpringRunner;
 
 import esa.s1pdgs.cpoc.common.ProductCategory;
-import esa.s1pdgs.cpoc.mqi.server.config.ApplicationProperties;
 import esa.s1pdgs.cpoc.mqi.server.config.ApplicationProperties.ProductCategoryConsumptionProperties;
 import esa.s1pdgs.cpoc.mqi.server.config.ApplicationProperties.ProductCategoryProperties;
 import esa.s1pdgs.cpoc.mqi.server.config.ApplicationProperties.ProductCategoryPublicationProperties;
@@ -38,8 +37,8 @@ public class ApplicationPropertiesTest {
      * Embedded Kafka
      */
     @ClassRule
-    public static KafkaEmbedded embeddedKafka =
-            new KafkaEmbedded(1, true, "t-pdgs-aio-execution-jobs");
+    public static EmbeddedKafkaRule embeddedKafka =
+            new EmbeddedKafkaRule(1, true, "t-pdgs-aio-execution-jobs");
 
     /**
      * Properties to test

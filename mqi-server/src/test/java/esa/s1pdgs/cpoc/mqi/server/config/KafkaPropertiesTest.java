@@ -7,11 +7,10 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.kafka.test.rule.KafkaEmbedded;
+import org.springframework.kafka.test.rule.EmbeddedKafkaRule;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.junit4.SpringRunner;
 
-import esa.s1pdgs.cpoc.mqi.server.config.KafkaProperties;
 import esa.s1pdgs.cpoc.mqi.server.config.KafkaProperties.KafkaConsumerProperties;
 import esa.s1pdgs.cpoc.mqi.server.config.KafkaProperties.KafkaListenerProperties;
 import esa.s1pdgs.cpoc.mqi.server.config.KafkaProperties.KafkaProducerProperties;
@@ -30,8 +29,8 @@ public class KafkaPropertiesTest {
      * Embedded Kafka
      */
     @ClassRule
-    public static KafkaEmbedded embeddedKafka =
-            new KafkaEmbedded(1, true, "t-pdgs-aio-execution-jobs");
+    public static EmbeddedKafkaRule embeddedKafka =
+            new EmbeddedKafkaRule(1, true, "t-pdgs-aio-execution-jobs");
 
     /**
      * Properties to test

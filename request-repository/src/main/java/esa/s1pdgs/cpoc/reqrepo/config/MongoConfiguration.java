@@ -1,11 +1,7 @@
-/**
- * 
- */
 package esa.s1pdgs.cpoc.reqrepo.config;
 
-
-import java.util.ArrayList;
 import java.util.List;
+import java.util.StringJoiner;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -14,8 +10,8 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.data.mongodb.core.MongoTemplate;
 
-import com.mongodb.MongoClient;
-import com.mongodb.ServerAddress;
+import com.mongodb.client.MongoClient;
+import com.mongodb.client.MongoClients;
 
 /**
  * Configuration for the MongoDB client
@@ -42,12 +38,12 @@ public class MongoConfiguration {
 
     @Bean
     public MongoClient mongoClient() {
-        LOGGER.info("New constructor");
-        List<ServerAddress> servers = new ArrayList<>();
+    	LOGGER.info("New constructor");
+        StringJoiner stringJoinerHosts = new StringJoiner(",");       
         mongoDBHost.forEach(host -> {
-            servers.add(new ServerAddress(host, mongoDBPort));
+        	stringJoinerHosts.add(host + ":" + mongoDBPort);
         });
-        return new MongoClient(servers);
+        return MongoClients.create("mongodb://" + stringJoinerHosts.toString());
     }
 
     @Bean
