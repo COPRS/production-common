@@ -48,7 +48,6 @@ public class PripElasticSearchMetadataRepo implements PripMetadataRepository {
 
 	private static final Logger LOGGER = LogManager.getLogger(PripElasticSearchMetadataRepo.class);
 	private static final String ES_INDEX = "prip";
-	private static final String ES_PRIP_TYPE = "metadata";
 	private final int maxSearchHits;
 
 	private final RestHighLevelClient restHighLevelClient;
@@ -65,10 +64,10 @@ public class PripElasticSearchMetadataRepo implements PripMetadataRepository {
 
 		LOGGER.info("saving PRIP metadata {}", pripMetadata);
 
-		IndexRequest request = new IndexRequest(ES_INDEX, ES_PRIP_TYPE, pripMetadata.getName())
+		IndexRequest request = new IndexRequest(ES_INDEX).id(pripMetadata.getName())
 				.source(pripMetadata.toString(), XContentType.JSON);
 		try {
-			IndexResponse indexResponse = restHighLevelClient.index(request);
+			IndexResponse indexResponse = restHighLevelClient.index(request, RequestOptions.DEFAULT);
 
 			if (indexResponse.getResult() == DocWriteResponse.Result.CREATED
 					|| indexResponse.getResult() == DocWriteResponse.Result.UPDATED) {
@@ -97,13 +96,12 @@ public class PripElasticSearchMetadataRepo implements PripMetadataRepository {
 		sourceBuilder.query(QueryBuilders.matchQuery(PripMetadata.FIELD_NAMES.ID.fieldName(), id));
 
 		SearchRequest searchRequest = new SearchRequest(ES_INDEX);
-		searchRequest.types(ES_PRIP_TYPE);
 		searchRequest.source(sourceBuilder);
 
 		PripMetadata pripMetadata = null;
 
 		try {
-			SearchResponse searchResponse = restHighLevelClient.search(searchRequest);
+			SearchResponse searchResponse = restHighLevelClient.search(searchRequest, RequestOptions.DEFAULT);
 			LOGGER.trace("response {}", searchResponse);
 
 			if (searchResponse.getHits().getHits().length > 0) {
@@ -231,7 +229,6 @@ public class PripElasticSearchMetadataRepo implements PripMetadataRepository {
 		sourceBuilder.sort(PripMetadata.FIELD_NAMES.CREATION_DATE.fieldName(), SortOrder.ASC);
 
 		SearchRequest searchRequest = new SearchRequest(ES_INDEX);
-		searchRequest.types(ES_PRIP_TYPE);
 		searchRequest.source(sourceBuilder);
 
 		List<PripMetadata> metadata = new ArrayList<>();
@@ -239,7 +236,7 @@ public class PripElasticSearchMetadataRepo implements PripMetadataRepository {
 		LOGGER.debug("search request: {}", searchRequest);
 
 		try {
-			SearchResponse searchResponse = restHighLevelClient.search(searchRequest);
+			SearchResponse searchResponse = restHighLevelClient.search(searchRequest, RequestOptions.DEFAULT);
 			LOGGER.debug("response: {}", searchResponse);
 
 			for (SearchHit hit : searchResponse.getHits().getHits()) {
@@ -348,7 +345,6 @@ public class PripElasticSearchMetadataRepo implements PripMetadataRepository {
 
 		CountRequest countRequest = new CountRequest(ES_INDEX);
 		countRequest.source(searchSourceBuilder);
-		countRequest.types(ES_PRIP_TYPE);
 
 		try {
 			count = new Long(restHighLevelClient.count(countRequest, RequestOptions.DEFAULT).getCount()).intValue();

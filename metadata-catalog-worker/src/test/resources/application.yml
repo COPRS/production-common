@@ -11,10 +11,8 @@ logging:
 elasticsearch:
   host: es-svc
   port: 25000
-  index-type: metadata  
   connect-timeout-ms: 2000
   socket-timeout-ms: 10000
-  max-retry-timeout-ms: 30000
   
 process:
   hostname: "hostname"

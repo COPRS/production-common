@@ -55,10 +55,8 @@ Parameter                                        | Description
 ------------------------------------------------ | ------------- 
 elasticsearch.host                               | Host of Elasticsearch cluster
 elasticsearch.port                               | Port of Elasticsearch cluster
-elasticsearch.index-type                         | Elasticsearch index type used for metadata
 elasticsearch.connect-timeout-ms                 | Timeout in milliseconds of connection to the cluster
 elasticsearch.socket-timeout-ms                  | Timeout in milliseconds of the socket to the cluster
-elasticsearch.max-retry-timeout-ms               | Timeout in milliseconds of connection to the cluster
 file.file-with-manifest-ext                      | Extension of the SAFE files
 file.manifest-filename                           | Name of the manifest (with extension)
 file.mqi.host-uri                                | the host and port for querying MQI server

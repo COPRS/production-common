@@ -13,6 +13,7 @@ import java.util.Map;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.apache.lucene.search.TotalHits.Relation;
 import org.elasticsearch.ElasticsearchStatusException;
 import org.elasticsearch.action.get.GetRequest;
 import org.elasticsearch.action.get.GetResponse;
@@ -81,20 +82,9 @@ public class EsServices {
 	 */
 	private final ElasticsearchDAO elasticsearchDAO;
 
-	/**
-	 * Index type for elastic search
-	 */
-	private final String indexType;
-
-	private final String landmaskIndexType;
-
 	@Autowired
-	public EsServices(final ElasticsearchDAO elasticsearchDAO,
-			@Value("${elasticsearch.index-type}") final String indexType,
-			@Value("${elasticsearch.landmask-index-type:metadata}") final String landmaskIndexType) {
+	public EsServices(final ElasticsearchDAO elasticsearchDAO) {
 		this.elasticsearchDAO = elasticsearchDAO;
-		this.indexType = indexType;
-		this.landmaskIndexType = landmaskIndexType;
 	}
 
 	/**
@@ -115,7 +105,7 @@ public class EsServices {
 			}
 			final String productName = product.getString("productName");
 
-			final GetRequest getRequest = new GetRequest(productType, indexType, productName);
+			final GetRequest getRequest = new GetRequest(productType, productName);
 
 			final GetResponse response = elasticsearchDAO.get(getRequest);
 			
@@ -164,8 +154,7 @@ public class EsServices {
 			}
 			final String productName = product.getString("productName");
 
-			IndexRequest request = new IndexRequest(productType, indexType, productName)
-					.source(product.toString(),
+			IndexRequest request = new IndexRequest(productType).id(productName).source(product.toString(),
 					XContentType.JSON);
 
 			IndexResponse response;
@@ -205,8 +194,7 @@ public class EsServices {
 				
 				LOGGER.debug("Content of JSON second attempt: {}", product.toString());
 
-				request = new IndexRequest(productType, indexType, productName).source(product.toString(),
-						XContentType.JSON);
+				request = new IndexRequest(productType).id(productName).source(product.toString(), XContentType.JSON);
 				response = elasticsearchDAO.index(request);
 				// END OF WORKAROUND S1PRO-783
 			}
@@ -228,8 +216,7 @@ public class EsServices {
 		try {
 //			String landName = product.getString("name");
 
-			// indexType is usually "metadata"
-			final IndexRequest request = new IndexRequest("landmask", indexType, landName).source(product.toString(),
+			final IndexRequest request = new IndexRequest("landmask").id(landName).source(product.toString(),
 					XContentType.JSON);
 
 			final IndexResponse response = elasticsearchDAO.index(request);
@@ -293,11 +280,10 @@ public class EsServices {
 		sourceBuilder.sort(new FieldSortBuilder("creationTime").order(SortOrder.DESC));
 
 		final SearchRequest searchRequest = new SearchRequest(index);
-		searchRequest.types(indexType);
 		searchRequest.source(sourceBuilder);
 		try {
 			final SearchResponse searchResponse = elasticsearchDAO.search(searchRequest);
-			if (searchResponse.getHits().totalHits >= 1) {
+			if (this.isNotEmpty(searchResponse)) {
 				final Map<String, Object> source = searchResponse.getHits().getAt(0).getSourceAsMap();
 				final SearchMetadata r = new SearchMetadata();
 				r.setProductName(source.get("productName").toString());
@@ -326,7 +312,7 @@ public class EsServices {
 		}
 		return null;
 	}
-
+	
 	/*
 	 * ClosestStartValidity This policy uses a centre time, calculated as (t0-t1) /
 	 * 2 to determinate auxiliary data, which is located nearest to the centre time.
@@ -361,17 +347,18 @@ public class EsServices {
 			final SearchHits before = beforeResponse.getHits();
 			final SearchHits after = afterResponse.getHits();
 
-			LOGGER.debug("Total Hits Found before {} and after {}", before.totalHits, after.totalHits);
+			LOGGER.debug("Total Hits Found before {} and after {}", this.getTotalSearchHitsStr(before),
+					this.getTotalSearchHitsStr(after));
 
-			if (before.totalHits == 0 && after.totalHits > 0) {
+			if (this.isEmpty(before) && this.isNotEmpty(after)) {
 				final SearchMetadata metaAfter = toSearchMetadata(after.getAt(0));
 				LOGGER.debug("Candidate after was the best result, {}", metaAfter.getProductName());
 				return metaAfter;
-			} else if (before.totalHits > 0 && after.totalHits == 0) {
+			} else if (this.isNotEmpty(before) && this.isEmpty(after)) {
 				final SearchMetadata metaBefore = toSearchMetadata(before.getAt(0));
 				LOGGER.debug("Candidate before was the best result, {}", metaBefore.getProductName());
 				return metaBefore;
-			} else if (before.totalHits == 0 && after.totalHits == 0) {
+			} else if (this.isEmpty(before) && this.isEmpty(after)) {
 				return null;
 			}
 
@@ -451,7 +438,6 @@ public class EsServices {
 		sourceBuilder.sort(sortOrder);
 
 		final SearchRequest searchRequest = new SearchRequest(index);
-		searchRequest.types(indexType);
 		searchRequest.source(sourceBuilder);
 		return searchRequest;
 	}
@@ -485,13 +471,14 @@ public class EsServices {
 			final SearchHits before = beforeResponse.getHits();
 			final SearchHits after = afterResponse.getHits();
 
-			LOGGER.debug("Total Hits Found before {} and after {}", before.totalHits, after.totalHits);
+			LOGGER.debug("Total Hits Found before {} and after {}", this.getTotalSearchHitsStr(before),
+					this.getTotalSearchHitsStr(after));
 
-			if (before.totalHits == 0 && after.totalHits > 0) {
+			if (this.isEmpty(before) && this.isNotEmpty(after)) {
 				return toSearchMetadata(after.getAt(0));
-			} else if (before.totalHits > 0 && after.totalHits == 0) {
+			} else if (this.isNotEmpty(before) && this.isEmpty(after)) {
 				return toSearchMetadata(before.getAt(0));
-			} else if (before.totalHits == 0 && after.totalHits == 0) {
+			} else if (this.isEmpty(before) && this.isEmpty(after)) {
 				return null;
 			}
 
@@ -540,12 +527,12 @@ public class EsServices {
 		LOGGER.debug("valIntersect: query composed is {}", queryBuilder);
 		sourceBuilder.size(SIZE_LIMIT);
 		final SearchRequest searchRequest = new SearchRequest(ProductFamily.L0_SEGMENT.name().toLowerCase());
-		searchRequest.types(indexType);
 		searchRequest.source(sourceBuilder);
 		try {
 			final SearchResponse searchResponse = elasticsearchDAO.search(searchRequest);
-			LOGGER.debug("valIntersect: Total Hits Found  {}", searchResponse.getHits().totalHits);
-			if (searchResponse.getHits().totalHits >= 1) {
+			LOGGER.debug("valIntersect: Total Hits Found  {}", this.getTotalSearchHitsStr(searchResponse.getHits()));
+			
+			if (this.isNotEmpty(searchResponse)) {
 				final List<SearchMetadata> r = new ArrayList<>();
 				for (final SearchHit hit : searchResponse.getHits().getHits()) {
 					final Map<String, Object> source = hit.getSourceAsMap();
@@ -603,12 +590,11 @@ public class EsServices {
 			index = productFamily.name().toLowerCase();
 		}
 		final SearchRequest searchRequest = new SearchRequest(index);
-		searchRequest.types(indexType);
 		searchRequest.source(sourceBuilder);
 
 		try {
 			final SearchResponse searchResponse = elasticsearchDAO.search(searchRequest);
-			if (searchResponse.getHits().totalHits >= 1) {
+			if (this.isNotEmpty(searchResponse)) {
 				final List<SearchMetadata> r = new ArrayList<>();
 				for (final SearchHit hit : searchResponse.getHits().getHits()) {
 					final Map<String, Object> source = hit.getSourceAsMap();
@@ -724,15 +710,15 @@ public class EsServices {
 		LOGGER.debug("LevelSegmentQuery: query composed is {}", queryBuilder);
 		sourceBuilder.size(SIZE_LIMIT);
 		final SearchRequest searchRequest = new SearchRequest(ProductFamily.L0_SEGMENT.name().toLowerCase());
-		searchRequest.types(indexType);
 		searchRequest.source(sourceBuilder);
 		
 		try {
 			final SearchResponse searchResponse = elasticsearchDAO.search(searchRequest);
-			LOGGER.debug("LevelSegmentQuery: Total Hits Found  {}", searchResponse.getHits().totalHits);
+			LOGGER.debug("LevelSegmentQuery: Total Hits Found  {}",
+					this.getTotalSearchHitsStr(searchResponse.getHits()));
 			final List<LevelSegmentMetadata> results = new ArrayList<>();
 						
-			if (searchResponse.getHits().totalHits >= 1) {
+			if (this.isNotEmpty(searchResponse)) {
 				for (final SearchHit hit : searchResponse.getHits().getHits()) {
 					final Map<String, Object> source = hit.getSourceAsMap();
 					if (!source.isEmpty()) {
@@ -758,15 +744,14 @@ public class EsServices {
 		
 		for (final EdrsSessionFileType sessionType : EdrsSessionFileType.values()) {
 			final SearchRequest searchRequest = new SearchRequest(sessionType.name().toLowerCase());
-			searchRequest.types(indexType);
 			searchRequest.source(sourceBuilder);
 			
 			try {
 				final SearchResponse searchResponse = elasticsearchDAO.search(searchRequest);
-				LOGGER.debug("EdrsSessionQuery {}: Total Hits Found  {}", sessionType.name().toLowerCase(), 
-						searchResponse.getHits().totalHits);
+				LOGGER.debug("EdrsSessionQuery {}: Total Hits Found  {}", sessionType.name().toLowerCase(),
+						this.getTotalSearchHitsStr(searchResponse.getHits()));
 							
-				if (searchResponse.getHits().totalHits >= 1) {
+				if (this.isNotEmpty(searchResponse)) {
 					for (final SearchHit hit : searchResponse.getHits().getHits()) {
 						final Map<String, Object> source = hit.getSourceAsMap();
 						if (!source.isEmpty()) {
@@ -851,13 +836,12 @@ public class EsServices {
 		sourceBuilder.sort(new FieldSortBuilder("creationTime").order(SortOrder.DESC));
 
 		final SearchRequest searchRequest = new SearchRequest(ProductFamily.L0_ACN.name().toLowerCase());
-		searchRequest.types(indexType);
 		searchRequest.source(sourceBuilder);
 		try {
 			LOGGER.debug("Sending search request to ES for L0 ACN: {}", searchRequest);
 			final SearchResponse searchResponse = elasticsearchDAO.search(searchRequest);
-			LOGGER.debug("Hits found: {}", searchResponse.getHits().totalHits);
-			if (searchResponse.getHits().totalHits >= 1) {
+			LOGGER.debug("Hits found: {}", this.getTotalSearchHitsStr(searchResponse.getHits()));
+			if (this.isNotEmpty(searchResponse)) {
 				return this.extractInfoForL0ACN(searchResponse.getHits().getAt(0).getSourceAsMap());
 			}
 		} catch (final Exception e) {
@@ -876,7 +860,7 @@ public class EsServices {
 	}
 
 	private Map<String, Object> getRequest(final String index, final String productName) throws IOException {
-		final GetRequest getRequest = new GetRequest(index.toLowerCase(), indexType, productName);
+		final GetRequest getRequest = new GetRequest(index.toLowerCase(), productName);
 
 		final GetResponse response = elasticsearchDAO.get(getRequest);
 
@@ -996,8 +980,7 @@ public class EsServices {
 	@SuppressWarnings("unchecked")
 	public int getSeaCoverage(final ProductFamily family, final String productName) throws MetadataNotPresentException {
 		try {
-			final GetResponse response = elasticsearchDAO
-					.get(new GetRequest(family.name().toLowerCase(), indexType, productName));
+			final GetResponse response = elasticsearchDAO.get(new GetRequest(family.name().toLowerCase(), productName));
 			if (!response.isExists()) {
 				throw new MetadataNotPresentException(productName);
 			}
@@ -1028,11 +1011,10 @@ public class EsServices {
 			sourceBuilder.size(SIZE_LIMIT);
 
 			final SearchRequest request = new SearchRequest("landmask");
-			request.types(landmaskIndexType);
 			request.source(sourceBuilder);
 
 			final SearchResponse searchResponse = elasticsearchDAO.search(request);
-			if (searchResponse.getHits().totalHits > 0) {
+			if (this.isNotEmpty(searchResponse)) {
 				// TODO FIXME implement coverage calculation
 				return 0;
 			}
@@ -1044,7 +1026,7 @@ public class EsServices {
 
 	public LevelSegmentMetadata delme_getLevelSegment(final ProductFamily family, final String productName) throws Exception {
 		try {
-			final GetRequest getRequest = new GetRequest(family.name().toLowerCase(), indexType, productName);
+			final GetRequest getRequest = new GetRequest(family.name().toLowerCase(), productName);
 			final GetResponse response = elasticsearchDAO.get(getRequest);
 
 			if (response.isExists()) {
@@ -1125,4 +1107,37 @@ public class EsServices {
 				.should(QueryBuilders.termQuery("satelliteId.keyword", "_"));
 
 	}
+	
+	private boolean isEmpty(SearchResponse searchResponse) {
+		return !this.isNotEmpty(searchResponse);
+	}
+	
+	private boolean isNotEmpty(SearchResponse searchResponse) {
+		if (null != searchResponse) {
+			return this.isNotEmpty(searchResponse.getHits());
+		}
+
+		return false;
+	}
+	
+	private boolean isEmpty(SearchHits searchHits) {
+		return !this.isNotEmpty(searchHits);
+	}
+
+	private boolean isNotEmpty(SearchHits searchHits) {
+		return null != searchHits && null != searchHits.getTotalHits() && searchHits.getTotalHits().value > 0;
+	}
+
+	private String getTotalSearchHitsStr(SearchHits searchHits) {
+		if (null != searchHits && null != searchHits.getTotalHits()) {
+			if (Relation.GREATER_THAN_OR_EQUAL_TO == searchHits.getTotalHits().relation) {
+				return String.valueOf(searchHits.getTotalHits().value) + " (or more)";
+			} else {
+				return String.valueOf(searchHits.getTotalHits().value);
+			}
+		}
+
+		return "0";
+	}
+	
 }
