@@ -56,7 +56,7 @@ public final class MetadataTriggerListener<E extends AbstractMessage> implements
 		return new MqiMessageEventHandler.Builder<CatalogJob>(ProductCategory.CATALOG_JOBS)
 				.onSuccess(res -> reporting.end(new ReportingMessage("Created CatalogJob for %s", eventType)))
 				.onError(e -> reportError(eventType, reporting, e))
-				.onMessage(() -> newPublicationMessage(reporting, message))
+				.publishMessageProducer(() -> newPublicationMessage(reporting, message))
 				.newResult();
 	}
 	

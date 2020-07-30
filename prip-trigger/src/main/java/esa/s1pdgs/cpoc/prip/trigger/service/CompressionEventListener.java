@@ -91,7 +91,7 @@ public class CompressionEventListener implements MqiListener<CompressionEvent> {
 						compressionEvent.getKeyObjectStorage(), 
 						LogUtils.toString(e)
 				)))
-				.onMessage(() -> {
+				.publishMessageProducer(() -> {
 					final PripPublishingJob publishingJob = new PripPublishingJob();
 					publishingJob.setKeyObjectStorage(compressionEvent.getKeyObjectStorage());
 					publishingJob.setProductFamily(compressionEvent.getProductFamily());

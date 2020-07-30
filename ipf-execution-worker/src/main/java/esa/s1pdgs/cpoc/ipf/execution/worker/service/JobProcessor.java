@@ -274,7 +274,7 @@ public class JobProcessor implements MqiListener<IpfExecutionJob> {
 		return new MqiMessageEventHandler.Builder<ProductionEvent>(category)
 				.onSuccess(res -> reporting.end(toReportingOutput(res), new ReportingMessage("End job processing")))
 				.onError(e -> reporting.error(errorReportMessage(e)))
-				.onMessage(() -> processJob(message, inputDownloader, outputProcessor, procExecutorSrv, procCompletionSrv, procExecutor, reporting))
+				.publishMessageProducer(() -> processJob(message, inputDownloader, outputProcessor, procExecutorSrv, procCompletionSrv, procExecutor, reporting))
 				.newResult();
 	}
 
