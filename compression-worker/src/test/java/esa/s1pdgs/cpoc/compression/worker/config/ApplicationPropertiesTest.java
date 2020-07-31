@@ -33,7 +33,7 @@ public class ApplicationPropertiesTest {
      */
     @Test
     public void testLoadProperties() {
-        assertEquals("/usr/bin/sh", properties.getCommand());
+        assertEquals("/usr/bin/sh", properties.getCompressionCommand());
     } 
     
     @Test
