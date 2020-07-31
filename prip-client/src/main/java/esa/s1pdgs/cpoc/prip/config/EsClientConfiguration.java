@@ -26,9 +26,6 @@ public class EsClientConfiguration {
 	@Value("${elasticsearch.socket-timeout-ms}")
     private int socketTimeoutMs;
 	
-	@Value("${elasticsearch.max-retry-timeout-ms}")
-    private int maxRetryTimeoutMs;
-
 	@Bean(destroyMethod = "close")
 	RestHighLevelClient restHighLevelClient() throws UnknownHostException {
 		HttpHost host1 = new HttpHost(esHost, esPort, "http");
@@ -40,8 +37,7 @@ public class EsClientConfiguration {
                 return requestConfigBuilder.setConnectTimeout(connectTimeoutMs)
                         .setSocketTimeout(socketTimeoutMs);
             }
-        })
-        .setMaxRetryTimeoutMillis(maxRetryTimeoutMs);
+        });
 		RestHighLevelClient client = new RestHighLevelClient(builder);
 		return client;
 	}

@@ -15,7 +15,7 @@ import org.springframework.kafka.listener.ConcurrentMessageListenerContainer;
 import org.springframework.kafka.listener.ContainerProperties;
 import org.springframework.kafka.listener.ContainerProperties.AckMode;
 import org.springframework.kafka.listener.MessageListener;
-import org.springframework.kafka.support.serializer.ErrorHandlingDeserializer2;
+import org.springframework.kafka.support.serializer.ErrorHandlingDeserializer;
 import org.springframework.kafka.support.serializer.JsonDeserializer;
 
 import esa.s1pdgs.cpoc.appstatus.AppStatus;
@@ -85,14 +85,14 @@ public class GenericConsumer<T extends AbstractMessage> {
 	    private ConsumerFactory<String, T> consumerFactory(final String topic, final Class<T> dtoClass) {
 	    	final JsonDeserializer<T> deser = new JsonDeserializer<>(dtoClass);
 	    	deser.addTrustedPackages("*");	    	
-	    	final ErrorHandlingDeserializer2<T> deserializer = new ErrorHandlingDeserializer2<>(deser);
+	    	final ErrorHandlingDeserializer<T> deserializer = new ErrorHandlingDeserializer<>(deser);
 
-	    	deserializer.setFailedDeserializationFunction( (b,h) -> {
+	    	deserializer.setFailedDeserializationFunction( (failedDeserializationInfo) -> {
 	    		LOGGER.error(
 	    				"Error on deserializing element from queue '{}'. Expected json of class {} but was: {}", 
 	    				topic,
 	    				dtoClass.getName(),
-	    				new String(b)
+	    				new String(failedDeserializationInfo.getData())
 	    		);	    		
 	    		return null;
 	    	});	    		    	

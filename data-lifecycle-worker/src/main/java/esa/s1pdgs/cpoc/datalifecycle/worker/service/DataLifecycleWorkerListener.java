@@ -101,9 +101,8 @@ public class DataLifecycleWorkerListener implements MqiListener<EvictionManageme
 		expirationMetadata.put("evictionDate", evictionDate);
 		expirationMetadata.put("isUnlimited", job.isUnlimited());
 		
-		elasticSearchDAO.index(
-		        new IndexRequest("data-lifecycle", "metadata", job.getKeyObjectStorage()).source(expirationMetadata.toString(), XContentType.JSON)
-		);
+		elasticSearchDAO.index(new IndexRequest("data-lifecycle").id(job.getKeyObjectStorage())
+				.source(expirationMetadata.toString(), XContentType.JSON));
 		return new EvictionReportingOutput(Date.from(evictionTimeOfJob.toInstant(ZoneOffset.UTC)));
     }
     

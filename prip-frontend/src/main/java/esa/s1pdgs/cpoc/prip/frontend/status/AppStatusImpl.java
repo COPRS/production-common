@@ -2,6 +2,7 @@ package esa.s1pdgs.cpoc.prip.frontend.status;
 
 import java.io.IOException;
 
+import org.elasticsearch.client.RequestOptions;
 import org.elasticsearch.client.RestHighLevelClient;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -38,7 +39,7 @@ public class AppStatusImpl extends AbstractAppStatus {
 	public boolean getKubernetesReadiness() {		
 		boolean elasticSearchReadiness;
 		try {
-			elasticSearchReadiness = restHighLevelClient.ping();
+			elasticSearchReadiness = restHighLevelClient.ping(RequestOptions.DEFAULT);
 		} catch (final IOException e) {
 			elasticSearchReadiness = false;
 		}

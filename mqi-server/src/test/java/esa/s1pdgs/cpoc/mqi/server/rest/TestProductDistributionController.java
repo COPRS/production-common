@@ -2,7 +2,10 @@ package esa.s1pdgs.cpoc.mqi.server.rest;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -68,7 +71,7 @@ public class TestProductDistributionController {
     public void init() throws AbstractCodedException {
         MockitoAnnotations.initMocks(this);
 
-        GenericMessageDto<StringDto> consumedMessage = new GenericMessageDto<>(123, "input-key", new StringDto());
+        final GenericMessageDto<StringDto> consumedMessage = new GenericMessageDto<>(123, "input-key", new StringDto());
 
         doReturn(consumedMessage).when(messages).nextMessage(Mockito.any());
 
@@ -162,8 +165,7 @@ public class TestProductDistributionController {
         final ProductionEvent dto = new ProductionEvent("test321", "bar", ProductFamily.AUXILIARY_FILE);
         
         try {
-        	final ProductionEvent event = new ProductionEvent("test321", "bar", ProductFamily.AUXILIARY_FILE);
-        	event.setUid(dto.getUid());
+        	final ProductionEvent event = clone(dto);
 		    final GenericPublicationMessageDto<? extends AbstractMessage> mess = new GenericPublicationMessageDto<>(
                     ProductFamily.AUXILIARY_FILE,
                     event
@@ -183,4 +185,17 @@ public class TestProductDistributionController {
                 Mockito.eq(null), 
                 Mockito.eq(null));
     }
+    
+    private final ProductionEvent clone(final ProductionEvent event)
+	{
+    	final ProductionEvent clone = new ProductionEvent(
+    			event.getProductName(), 
+    			event.getKeyObjectStorage(), 
+    			event.getProductFamily()
+    	);
+    	clone.setUid(event.getUid());
+    	clone.setCreationDate(event.getCreationDate());
+    	return clone;
+	}
+	
 }

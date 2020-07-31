@@ -7,6 +7,7 @@ import java.util.Map;
 import org.apache.http.HttpHost;
 import org.elasticsearch.action.get.GetRequest;
 import org.elasticsearch.action.get.GetResponse;
+import org.elasticsearch.client.RequestOptions;
 import org.elasticsearch.client.RestClient;
 import org.elasticsearch.client.RestHighLevelClient;
 import org.elasticsearch.common.geo.builders.CoordinatesBuilder;
@@ -63,7 +64,7 @@ public class ElasticsearchDAOTest {
 	
 	private void extractCoordinates(String id) throws IOException {
 		
-		GetResponse getResponse = restHighLevelClient.get(new GetRequest("l0_slice", "metadata", id));
+		GetResponse getResponse = restHighLevelClient.get(new GetRequest("l0_slice", id), RequestOptions.DEFAULT);
 		
 		final Map<String, Object> sliceCoordinates = (Map<String, Object>) getResponse.getSourceAsMap()
 				.get("sliceCoordinates");

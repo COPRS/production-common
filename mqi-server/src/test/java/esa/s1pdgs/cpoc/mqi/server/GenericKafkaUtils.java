@@ -15,7 +15,7 @@ import org.springframework.kafka.core.DefaultKafkaConsumerFactory;
 import org.springframework.kafka.core.DefaultKafkaProducerFactory;
 import org.springframework.kafka.support.serializer.JsonDeserializer;
 import org.springframework.kafka.support.serializer.JsonSerializer;
-import org.springframework.kafka.test.rule.KafkaEmbedded;
+import org.springframework.kafka.test.rule.EmbeddedKafkaRule;
 import org.springframework.kafka.test.utils.KafkaTestUtils;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
@@ -47,9 +47,9 @@ public class GenericKafkaUtils<T> {
     public final static String TOPIC_L2_ACNS = "t-pdgs-l2-acn-production-events-fast";
     public final static String TOPIC_L2_REPORTS = "t-pdgs-l2-production-report-events";      
     
-    private final KafkaEmbedded embeddedKafka;
+    private final EmbeddedKafkaRule embeddedKafka;
 
-    public GenericKafkaUtils(final KafkaEmbedded embeddedKafka) {
+    public GenericKafkaUtils(final EmbeddedKafkaRule embeddedKafka) {
         this.embeddedKafka = embeddedKafka;
     }
 
@@ -57,7 +57,7 @@ public class GenericKafkaUtils<T> {
         Consumer<String, T> consumer =
                 new DefaultKafkaConsumerFactory<String, T>(consumerProps())
                         .createConsumer();
-        embeddedKafka.consumeFromAnEmbeddedTopic(consumer, topic);
+        embeddedKafka.getEmbeddedKafka().consumeFromAnEmbeddedTopic(consumer, topic);
         return KafkaTestUtils.getSingleRecord(consumer, topic);
     }
 
@@ -67,7 +67,7 @@ public class GenericKafkaUtils<T> {
                 new DefaultKafkaConsumerFactory<>(
                         consumerProps(), new StringDeserializer(),
                         new JsonDeserializer<>(IngestionEvent.class)).createConsumer();
-        embeddedKafka.consumeFromAnEmbeddedTopic(consumer, topic);
+        embeddedKafka.getEmbeddedKafka().consumeFromAnEmbeddedTopic(consumer, topic);
         return KafkaTestUtils.getSingleRecord(consumer, topic);
     }
 
@@ -77,7 +77,7 @@ public class GenericKafkaUtils<T> {
                 new DefaultKafkaConsumerFactory<>(
                         consumerProps(), new StringDeserializer(),
                         new JsonDeserializer<>(ProductionEvent.class)).createConsumer();
-        embeddedKafka.consumeFromAnEmbeddedTopic(consumer, topic);
+        embeddedKafka.getEmbeddedKafka().consumeFromAnEmbeddedTopic(consumer, topic);
         return KafkaTestUtils.getSingleRecord(consumer, topic);
     }
 
@@ -87,7 +87,7 @@ public class GenericKafkaUtils<T> {
                 new DefaultKafkaConsumerFactory<>(
                         consumerProps(), new StringDeserializer(),
                         new JsonDeserializer<>(IpfExecutionJob.class)).createConsumer();
-        embeddedKafka.consumeFromAnEmbeddedTopic(consumer, topic);
+        embeddedKafka.getEmbeddedKafka().consumeFromAnEmbeddedTopic(consumer, topic);
         return KafkaTestUtils.getSingleRecord(consumer, topic);
     }
 
@@ -97,7 +97,7 @@ public class GenericKafkaUtils<T> {
                 new DefaultKafkaConsumerFactory<>(
                         consumerProps(), new StringDeserializer(),
                         new JsonDeserializer<>(ProductionEvent.class)).createConsumer();
-        embeddedKafka.consumeFromAnEmbeddedTopic(consumer, topic);
+        embeddedKafka.getEmbeddedKafka().consumeFromAnEmbeddedTopic(consumer, topic);
         return KafkaTestUtils.getSingleRecord(consumer, topic);
     }
 
@@ -107,7 +107,7 @@ public class GenericKafkaUtils<T> {
                 new DefaultKafkaConsumerFactory<>(
                         consumerProps(), new StringDeserializer(),
                         new JsonDeserializer<>(ProductionEvent.class)).createConsumer();
-        embeddedKafka.consumeFromAnEmbeddedTopic(consumer, topic);
+        embeddedKafka.getEmbeddedKafka().consumeFromAnEmbeddedTopic(consumer, topic);
         return KafkaTestUtils.getSingleRecord(consumer, topic);
     }
 
@@ -117,7 +117,7 @@ public class GenericKafkaUtils<T> {
                 new DefaultKafkaConsumerFactory<>(
                         consumerProps(), new StringDeserializer(),
                         new JsonDeserializer<>(LevelReportDto.class)).createConsumer();
-        embeddedKafka.consumeFromAnEmbeddedTopic(consumer, topic);
+        embeddedKafka.getEmbeddedKafka().consumeFromAnEmbeddedTopic(consumer, topic);
         return KafkaTestUtils.getSingleRecord(consumer, topic);
     }
 
@@ -132,7 +132,7 @@ public class GenericKafkaUtils<T> {
 
     private Map<String, Object> consumerProps() {
         Map<String, Object> props = KafkaTestUtils.consumerProps(
-                UUID.randomUUID().toString(), "true", embeddedKafka);
+                UUID.randomUUID().toString(), "true", embeddedKafka.getEmbeddedKafka());
         props.put(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "earliest");
         props.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG,
                 StringDeserializer.class);
@@ -142,7 +142,7 @@ public class GenericKafkaUtils<T> {
     }
 
     private Map<String, Object> producerProps() {
-        Map<String, Object> props = KafkaTestUtils.producerProps(embeddedKafka);
+        Map<String, Object> props = KafkaTestUtils.producerProps(embeddedKafka.getEmbeddedKafka());
         props.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG,
                 StringSerializer.class);
         props.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG,

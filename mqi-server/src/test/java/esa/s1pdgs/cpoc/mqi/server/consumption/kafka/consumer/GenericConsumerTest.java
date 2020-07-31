@@ -18,7 +18,7 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.kafka.test.rule.KafkaEmbedded;
+import org.springframework.kafka.test.rule.EmbeddedKafkaRule;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit4.SpringRunner;
@@ -55,7 +55,7 @@ public class GenericConsumerTest {
     private MessagePersistence<ProductionEvent> messagePersistence;
 
     @ClassRule
-    public static KafkaEmbedded embeddedKafka = new KafkaEmbedded(1, false, CONSUMER_TOPIC, GenericKafkaUtils.TOPIC_AUXILIARY_FILES);
+    public static EmbeddedKafkaRule embeddedKafka = new EmbeddedKafkaRule(1, false, CONSUMER_TOPIC, GenericKafkaUtils.TOPIC_AUXILIARY_FILES);
 
     private GenericConsumer<ProductionEvent> uut; 
     

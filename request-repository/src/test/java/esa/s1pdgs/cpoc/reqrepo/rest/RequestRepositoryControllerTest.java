@@ -115,7 +115,7 @@ public class RequestRepositoryControllerTest {
 			      .contentType(MediaType.APPLICATION_JSON)
 			      .header("ApiKey", API_KEY)
         ).andExpect(status().isOk())
-		.andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8_VALUE))
+		.andExpect(content().contentType(MediaType.APPLICATION_JSON_VALUE))
 		.andExpect(content().json(jsonContent));
 	}
 	
@@ -161,7 +161,7 @@ public class RequestRepositoryControllerTest {
 		uut.perform(get("/api/v1/failedProcessings/1")
 			      .contentType(MediaType.APPLICATION_JSON)
 			      .header("ApiKey", API_KEY)
-        ).andExpect(status().isOk()).andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8_VALUE))
+        ).andExpect(status().isOk()).andExpect(content().contentType(MediaType.APPLICATION_JSON_VALUE))
 		.andExpect(content().json(jsonContent));
 	}
 

@@ -12,6 +12,8 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+import org.apache.lucene.search.TotalHits;
+import org.apache.lucene.search.TotalHits.Relation;
 import org.elasticsearch.action.get.GetRequest;
 import org.elasticsearch.action.get.GetResponse;
 import org.elasticsearch.action.index.IndexRequest;
@@ -52,14 +54,10 @@ public class EsServicesTest{
 	@Mock
 	private ElasticsearchDAO elasticsearchDAO;
 	
-	private final static String INDEX_TYPE = "metadata";
-	
-	private final static String LANDMASK_INDEX_TYPE = "metadata";
-	
 	@Before
 	public void init() throws IOException {
 		MockitoAnnotations.initMocks(this);
-		esServices = new EsServices(elasticsearchDAO, INDEX_TYPE, LANDMASK_INDEX_TYPE);
+		esServices = new EsServices(elasticsearchDAO);
 		
 	}
 	
@@ -96,7 +94,7 @@ public class EsServicesTest{
 		product.put("productFamily", "AUXILIARY_FILE");
 		
 		//Result with boolean at true for isExist
-		final GetResult getResult = new GetResult("index", "type", "id", SequenceNumbers.UNASSIGNED_SEQ_NO, SequenceNumbers.UNASSIGNED_PRIMARY_TERM, 0L, true, null, null);
+		final GetResult getResult = new GetResult("index", "type", "id", SequenceNumbers.UNASSIGNED_SEQ_NO, SequenceNumbers.UNASSIGNED_PRIMARY_TERM, 0L, true, null, null, null);
 		final GetResponse getResponse = new GetResponse(getResult);
 		
 		//Mocking the get Request
@@ -119,7 +117,7 @@ public class EsServicesTest{
         product.put("productFamily", "L0_SLICE");
 		
 		//Result with boolean at false for isExist
-		final GetResult getResult = new GetResult("index", "type", "id", SequenceNumbers.UNASSIGNED_SEQ_NO, SequenceNumbers.UNASSIGNED_PRIMARY_TERM, 0L, false, null, null);
+		final GetResult getResult = new GetResult("index", "type", "id", SequenceNumbers.UNASSIGNED_SEQ_NO, SequenceNumbers.UNASSIGNED_PRIMARY_TERM, 0L, false, null, null, null);
 		final GetResponse getResponse = new GetResponse(getResult);
 		
 		//Mocking the get Request
@@ -141,7 +139,7 @@ public class EsServicesTest{
 		product.put("productType", "type");
 		
 		//Result with boolean at false for isExist
-		final GetResult getResult = new GetResult("index", "type", "id", SequenceNumbers.UNASSIGNED_SEQ_NO, SequenceNumbers.UNASSIGNED_PRIMARY_TERM, 0L, false, null, null);
+		final GetResult getResult = new GetResult("index", "type", "id", SequenceNumbers.UNASSIGNED_SEQ_NO, SequenceNumbers.UNASSIGNED_PRIMARY_TERM, 0L, false, null, null, null);
 		final GetResponse getResponse = new GetResponse(getResult);
 		
 		//Mocking the get Request
@@ -231,7 +229,8 @@ public class EsServicesTest{
 		final SearchHit hit = new SearchHit(1);
 		hit.sourceRef(source);
 		final SearchHit[] hits = {hit};
-		final SearchHits searchHits = new SearchHits(hits, 1, 1.0F);
+		final TotalHits totalHits = new TotalHits(1, Relation.EQUAL_TO);
+		final SearchHits searchHits = new SearchHits(hits, totalHits, 1.0F);
 		final SearchResponseSections searchResponsSections = new SearchResponseSections(searchHits, null, null, false, Boolean.FALSE, null, 0);
 		final SearchResponse response = new SearchResponse(searchResponsSections, "1", 1,1,0,25,null,null);
 		
@@ -264,7 +263,8 @@ public class EsServicesTest{
 		final SearchHit hit = new SearchHit(1);
 		hit.sourceRef(source);
 		final SearchHit[] hits = {hit};
-		final SearchHits searchHits = new SearchHits(hits, 1, 1.0F);
+		final TotalHits totalHits = new TotalHits(1, Relation.EQUAL_TO);
+		final SearchHits searchHits = new SearchHits(hits, totalHits, 1.0F);
 		final SearchResponseSections searchResponsSections = new SearchResponseSections(searchHits, null, null, false, Boolean.FALSE, null, 0);
 		final SearchResponse response = new SearchResponse(searchResponsSections, "1", 1,1,0,25,null,null);
 		
@@ -295,7 +295,8 @@ public class EsServicesTest{
 		final SearchHit hit = new SearchHit(1);
 		hit.sourceRef(source);
 		final SearchHit[] hits = {hit};
-		final SearchHits searchHits = new SearchHits(hits, 1, 1.0F);
+		final TotalHits totalHits = new TotalHits(1, Relation.EQUAL_TO);
+		final SearchHits searchHits = new SearchHits(hits, totalHits, 1.0F);
 		final SearchResponseSections searchResponsSections = new SearchResponseSections(searchHits, null, null, false, Boolean.FALSE, null, 0);
 		final SearchResponse response = new SearchResponse(searchResponsSections, "1", 1,1,0,25,null,null);
 		
@@ -329,7 +330,8 @@ public class EsServicesTest{
 		final SearchHit hit = new SearchHit(1);
 		hit.sourceRef(source);
 		final SearchHit[] hits = {hit};
-		final SearchHits searchHits = new SearchHits(hits, 1, 1.0F);
+		final TotalHits totalHits = new TotalHits(1, Relation.EQUAL_TO);
+		final SearchHits searchHits = new SearchHits(hits, totalHits, 1.0F);
 		final SearchResponseSections searchResponsSections = new SearchResponseSections(searchHits, null, null, false, Boolean.FALSE, null, 0);
 		final SearchResponse response = new SearchResponse(searchResponsSections, "1", 1,1,0,25,null,null);
 		
@@ -360,7 +362,8 @@ public class EsServicesTest{
 		final SearchHit hit = new SearchHit(1);
 		hit.sourceRef(source);
 		final SearchHit[] hits = {hit};
-		final SearchHits searchHits = new SearchHits(hits, 0, 1.0F);
+		final TotalHits totalHits = new TotalHits(0, Relation.EQUAL_TO);
+		final SearchHits searchHits = new SearchHits(hits, totalHits, 1.0F);
 		final SearchResponseSections searchResponsSections = new SearchResponseSections(searchHits, null, null, false, Boolean.FALSE, null, 0);
 		final SearchResponse response = new SearchResponse(searchResponsSections, "1", 1,1,0,25,null,null);
 		
@@ -395,7 +398,8 @@ public class EsServicesTest{
         final SearchHit hit = new SearchHit(1);
         hit.sourceRef(source);
         final SearchHit[] hits = {hit};
-        final SearchHits searchHits = new SearchHits(hits, 1, 1.0F);
+        final TotalHits totalHits = new TotalHits(1, Relation.EQUAL_TO);
+        final SearchHits searchHits = new SearchHits(hits, totalHits, 1.0F);
         final SearchResponseSections searchResponsSections = new SearchResponseSections(searchHits, null, null, false, Boolean.FALSE, null, 0);
         final SearchResponse response = new SearchResponse(searchResponsSections, "1", 1,1,0,25,null,null);
         
@@ -425,7 +429,8 @@ public class EsServicesTest{
         final SearchHit hit = new SearchHit(1);
         hit.sourceRef(source);
         final SearchHit[] hits = {hit};
-        final SearchHits searchHits = new SearchHits(hits, 0, 1.0F);
+        final TotalHits totalHits = new TotalHits(0, Relation.EQUAL_TO);
+        final SearchHits searchHits = new SearchHits(hits, totalHits, 1.0F);
         final SearchResponseSections searchResponsSections = new SearchResponseSections(searchHits, null, null, false, Boolean.FALSE, null, 0);
         final SearchResponse response = new SearchResponse(searchResponsSections, "1", 1,1,0,25,null,null);
         
@@ -461,7 +466,7 @@ public class EsServicesTest{
 		final BytesReference source = new BytesArray("{\"productName\":\"name\",\"url\""
 		        + ":\"url\",\"sessionId\":\"session\",\"startTime\":\"2000-01-01T00:00:00.000000Z\",\"stopTime\":\"2001-01-01T00:00:00.000000Z\",\"validityStartTime\":\"2000-01-01T00:00:00.000000Z\",\"validityStopTime\":"
 		        + "\"2001-01-01T00:00:00.000000Z\", \"productType\": \"product_type\", \"missionId\":\"mission\",\"satelliteId\":\"satellite\",\"stationCode\":\"station\"}");
-		final GetResult getResult = new GetResult("index", "type", "id", SequenceNumbers.UNASSIGNED_SEQ_NO, SequenceNumbers.UNASSIGNED_PRIMARY_TERM, 0L, true, source, null);
+		final GetResult getResult = new GetResult("index", "type", "id", SequenceNumbers.UNASSIGNED_SEQ_NO, SequenceNumbers.UNASSIGNED_PRIMARY_TERM, 0L, true, source, null, null);
 		final GetResponse getResponse = new GetResponse(getResult);
 		
 		//Mocking the get Request
@@ -495,7 +500,7 @@ public class EsServicesTest{
 		        + "\"2001-01-01T00:00:00.000000Z\", \"instrumentConfigurationId\":0, \"sliceNumber\":2, "
 		        + "\"dataTakeId\":\"datatakeId\","
 		        + "\"productType\": \"product_type\"}");
-		final GetResult getResult = new GetResult("index", "type", "id", SequenceNumbers.UNASSIGNED_SEQ_NO, SequenceNumbers.UNASSIGNED_PRIMARY_TERM, 0L, true, source, null);
+		final GetResult getResult = new GetResult("index", "type", "id", SequenceNumbers.UNASSIGNED_SEQ_NO, SequenceNumbers.UNASSIGNED_PRIMARY_TERM, 0L, true, source, null, null);
 		final GetResponse getResponse = new GetResponse(getResult);
 		
 		//Mocking the get Request
@@ -515,7 +520,7 @@ public class EsServicesTest{
 		        + ":\"url\",\"startTime\":\"validityStartTime\",\"stopTime\":"
 		        + "\"validityStopTime\", \"instrumentConfigurationId\":0, \"sliceNumber\":2, \"dataTakeId\":\"datatakeId\","
                 + "\"productType\": \"product_type\"}");
-		final GetResult getResult = new GetResult("index", "type", "id", SequenceNumbers.UNASSIGNED_SEQ_NO, SequenceNumbers.UNASSIGNED_PRIMARY_TERM, 0L, false, source, null);
+		final GetResult getResult = new GetResult("index", "type", "id", SequenceNumbers.UNASSIGNED_SEQ_NO, SequenceNumbers.UNASSIGNED_PRIMARY_TERM, 0L, false, source, null, null);
 		final GetResponse getResponse = new GetResponse(getResult);
 		
 		//Mocking the get Request
@@ -530,7 +535,7 @@ public class EsServicesTest{
 		BytesReference source = new BytesArray("{\"startTime\":\"validityStartTime\",\"stopTime\":"
 		        + "\"validityStopTime\", \"instrumentConfigurationId\":0, \"sliceNumber\":2, \"dataTakeId\":\"datatakeId\","
                 + "\"productType\": \"product_type\"}");
-		GetResult getResult = new GetResult("index", "type", "id", SequenceNumbers.UNASSIGNED_SEQ_NO, SequenceNumbers.UNASSIGNED_PRIMARY_TERM, 0L, true, source, null);
+		GetResult getResult = new GetResult("index", "type", "id", SequenceNumbers.UNASSIGNED_SEQ_NO, SequenceNumbers.UNASSIGNED_PRIMARY_TERM, 0L, true, source, null, null);
 		GetResponse getResponse = new GetResponse(getResult);
 		this.mockGetRequest(getResponse);
 		try {
@@ -545,7 +550,7 @@ public class EsServicesTest{
 		        + ":\"url\",\"stopTime\":\"2001-01-01T00:00:00.000000Z\", "
 		        + "\"instrumentConfigurationId\":0, \"sliceNumber\":2, \"dataTakeId\":\"datatakeId\","
                 + "\"productType\": \"product_type\"}");
-		getResult = new GetResult("index", "type", "id", SequenceNumbers.UNASSIGNED_SEQ_NO, SequenceNumbers.UNASSIGNED_PRIMARY_TERM, 0L, true, source, null);
+		getResult = new GetResult("index", "type", "id", SequenceNumbers.UNASSIGNED_SEQ_NO, SequenceNumbers.UNASSIGNED_PRIMARY_TERM, 0L, true, source, null, null);
 		getResponse = new GetResponse(getResult);
 		this.mockGetRequest(getResponse);
 		try {
@@ -560,7 +565,7 @@ public class EsServicesTest{
 		        + ":\"url\",\"startTime\":\"2001-01-01T00:00:00.000000Z\","
 		        + " \"instrumentConfigurationId\":0, \"sliceNumber\":2, \"dataTakeId\":\"datatakeId\","
                 + "\"productType\": \"product_type\"}");
-		getResult = new GetResult("index", "type", "id", SequenceNumbers.UNASSIGNED_SEQ_NO, SequenceNumbers.UNASSIGNED_PRIMARY_TERM, 0L, true, source, null);
+		getResult = new GetResult("index", "type", "id", SequenceNumbers.UNASSIGNED_SEQ_NO, SequenceNumbers.UNASSIGNED_PRIMARY_TERM, 0L, true, source, null, null);
 		getResponse = new GetResponse(getResult);
 		this.mockGetRequest(getResponse);
 		try {
@@ -575,7 +580,7 @@ public class EsServicesTest{
 		        + ":\"url\",\"startTime\":\"2000-01-01T00:00:00.000000Z\",\"stopTime\":"
 		        + "\"2001-01-01T00:00:00.000000Z\", \"sliceNumber\":2, \"dataTakeId\":\"datatakeId\","
                 + "\"productType\": \"product_type\"}");
-		getResult = new GetResult("index", "type", "id", SequenceNumbers.UNASSIGNED_SEQ_NO, SequenceNumbers.UNASSIGNED_PRIMARY_TERM, 0L, true, source, null);
+		getResult = new GetResult("index", "type", "id", SequenceNumbers.UNASSIGNED_SEQ_NO, SequenceNumbers.UNASSIGNED_PRIMARY_TERM, 0L, true, source, null, null);
 		getResponse = new GetResponse(getResult);
 		this.mockGetRequest(getResponse);
 		try {
@@ -590,7 +595,7 @@ public class EsServicesTest{
 		        + ":\"url\",\"startTime\":\"2000-01-01T00:00:00.000000Z\",\"stopTime\":"
 		        + "\"2001-01-01T00:00:00.000000Z\", \"instrumentConfigurationId\":0, \"dataTakeId\":\"datatakeId\","
                 + "\"productType\": \"product_type\"}");
-		getResult = new GetResult("index", "type", "id", SequenceNumbers.UNASSIGNED_SEQ_NO, SequenceNumbers.UNASSIGNED_PRIMARY_TERM, 0L, true, source, null);
+		getResult = new GetResult("index", "type", "id", SequenceNumbers.UNASSIGNED_SEQ_NO, SequenceNumbers.UNASSIGNED_PRIMARY_TERM, 0L, true, source, null, null);
 		getResponse = new GetResponse(getResult);
 		this.mockGetRequest(getResponse);
 		try {
@@ -605,7 +610,7 @@ public class EsServicesTest{
 		        + ":\"url\",\"startTime\":\"2000-01-01T00:00:00.000000Z\",\"stopTime\":"
 		        + "\"2001-01-01T00:00:00.000000Z\", \"instrumentConfigurationId\":0, \"sliceNumber\":2,"
                 + "\"productType\": \"product_type\"}");
-		getResult = new GetResult("index", "type", "id", SequenceNumbers.UNASSIGNED_SEQ_NO, SequenceNumbers.UNASSIGNED_PRIMARY_TERM, 0L, true, source, null);
+		getResult = new GetResult("index", "type", "id", SequenceNumbers.UNASSIGNED_SEQ_NO, SequenceNumbers.UNASSIGNED_PRIMARY_TERM, 0L, true, source, null, null);
 		getResponse = new GetResponse(getResult);
 		this.mockGetRequest(getResponse);
 		try {
@@ -619,7 +624,7 @@ public class EsServicesTest{
         source = new BytesArray("{\"url\""
                 + ":\"url\",\"startTime\":\"2000-01-01T00:00:00.000000Z\",\"stopTime\":"
                 + "\"2001-01-01T00:00:00.000000Z\", \"instrumentConfigurationId\":0, \"sliceNumber\":2}");
-        getResult = new GetResult("index", "type", "id", SequenceNumbers.UNASSIGNED_SEQ_NO, SequenceNumbers.UNASSIGNED_PRIMARY_TERM, 0L, true, source, null);
+        getResult = new GetResult("index", "type", "id", SequenceNumbers.UNASSIGNED_SEQ_NO, SequenceNumbers.UNASSIGNED_PRIMARY_TERM, 0L, true, source, null, null);
         getResponse = new GetResponse(getResult);
         this.mockGetRequest(getResponse);
         try {
@@ -654,7 +659,8 @@ public class EsServicesTest{
 		final SearchHit hit = new SearchHit(1);
 		hit.sourceRef(source);
 		final SearchHit[] hits = {hit};
-		final SearchHits searchHits = new SearchHits(hits, 1, 1.0F);
+		final TotalHits totalHits = new TotalHits(1, Relation.EQUAL_TO);
+		final SearchHits searchHits = new SearchHits(hits, totalHits, 1.0F);
 		final SearchResponseSections searchResponsSections = new SearchResponseSections(searchHits, null, null, false, Boolean.FALSE, null, 0);
 		final SearchResponse response = new SearchResponse(searchResponsSections, "1", 1,1,0,25,null,null);
 		//Mocking the search request
@@ -677,7 +683,8 @@ public class EsServicesTest{
 		final SearchHit hit = new SearchHit(1);
 		hit.sourceRef(source);
 		final SearchHit[] hits = {hit};
-		final SearchHits searchHits = new SearchHits(hits, 0, 0.0F);
+		final TotalHits totalHits = new TotalHits(0, Relation.EQUAL_TO);
+		final SearchHits searchHits = new SearchHits(hits, totalHits, 0.0F);
 		final SearchResponseSections searchResponsSections = new SearchResponseSections(searchHits, null, null, false, Boolean.FALSE, null, 0);
 		final SearchResponse response = new SearchResponse(searchResponsSections, "1", 1,1,0,25,null,null);
 		
@@ -715,7 +722,8 @@ public class EsServicesTest{
 		SearchHit hit = new SearchHit(1);
 		hit.sourceRef(source);
 		final SearchHit[] hits = {hit};
-		SearchHits searchHits = new SearchHits(hits, 1, 1.0F);
+		final TotalHits totalHitsOne = new TotalHits(1, Relation.EQUAL_TO);
+		SearchHits searchHits = new SearchHits(hits, totalHitsOne, 1.0F);
 		SearchResponseSections searchResponsSections = new SearchResponseSections(searchHits, null, null, false, Boolean.FALSE, null, 0);
 		SearchResponse response = new SearchResponse(searchResponsSections, "1", 1,1,0,25,null,null);
 		this.mockSearchRequest(response);
@@ -732,7 +740,7 @@ public class EsServicesTest{
 		hit = new SearchHit(1);
 		hit.sourceRef(source);
 		hits[0] = hit;
-		searchHits = new SearchHits(hits, 1, 1.0F);
+		searchHits = new SearchHits(hits, totalHitsOne, 1.0F);
 		searchResponsSections = new SearchResponseSections(searchHits, null, null, false, Boolean.FALSE, null, 0);
 		response = new SearchResponse(searchResponsSections, "1", 1,1,0,25,null,null);
 		this.mockSearchRequest(response);
@@ -750,7 +758,7 @@ public class EsServicesTest{
 		hit = new SearchHit(1);
 		hit.sourceRef(source);
 		hits[0] = hit;
-		searchHits = new SearchHits(hits, 1, 1.0F);
+		searchHits = new SearchHits(hits, totalHitsOne, 1.0F);
 		searchResponsSections = new SearchResponseSections(searchHits, null, null, false, Boolean.FALSE, null, 0);
 		response = new SearchResponse(searchResponsSections, "1", 1,1,0,25,null,null);
 		this.mockSearchRequest(response);
@@ -768,7 +776,7 @@ public class EsServicesTest{
 		hit = new SearchHit(1);
 		hit.sourceRef(source);
 		hits[0] = hit;
-		searchHits = new SearchHits(hits, 1, 1.0F);
+		searchHits = new SearchHits(hits, totalHitsOne, 1.0F);
 		searchResponsSections = new SearchResponseSections(searchHits, null, null, false, Boolean.FALSE, null, 0);
 		response = new SearchResponse(searchResponsSections, "1", 1,1,0,25,null,null);
 		this.mockSearchRequest(response);
@@ -786,7 +794,7 @@ public class EsServicesTest{
 		hit = new SearchHit(1);
 		hit.sourceRef(source);
 		hits[0] = hit;
-		searchHits = new SearchHits(hits, 1, 1.0F);
+		searchHits = new SearchHits(hits, totalHitsOne, 1.0F);
 		searchResponsSections = new SearchResponseSections(searchHits, null, null, false, Boolean.FALSE, null, 0);
 		response = new SearchResponse(searchResponsSections, "1", 1,1,0,25,null,null);
 		this.mockSearchRequest(response);
@@ -804,7 +812,7 @@ public class EsServicesTest{
 		hit = new SearchHit(1);
 		hit.sourceRef(source);
 		hits[0] = hit;
-		searchHits = new SearchHits(hits, 1, 1.0F);
+		searchHits = new SearchHits(hits, totalHitsOne, 1.0F);
 		searchResponsSections = new SearchResponseSections(searchHits, null, null, false, Boolean.FALSE, null, 0);
 		response = new SearchResponse(searchResponsSections, "1", 1,1,0,25,null,null);
 		this.mockSearchRequest(response);
@@ -822,7 +830,7 @@ public class EsServicesTest{
 		hit = new SearchHit(1);
 		hit.sourceRef(source);
 		hits[0] = hit;
-		searchHits = new SearchHits(hits, 1, 1.0F);
+		searchHits = new SearchHits(hits, totalHitsOne, 1.0F);
 		searchResponsSections = new SearchResponseSections(searchHits, null, null, false, Boolean.FALSE, null, 0);
 		response = new SearchResponse(searchResponsSections, "1", 1,1,0,25,null,null);
 		this.mockSearchRequest(response);
@@ -839,7 +847,7 @@ public class EsServicesTest{
         hit = new SearchHit(1);
         hit.sourceRef(source);
         hits[0] = hit;
-        searchHits = new SearchHits(hits, 1, 1.0F);
+        searchHits = new SearchHits(hits, totalHitsOne, 1.0F);
         searchResponsSections = new SearchResponseSections(searchHits, null, null, false, Boolean.FALSE, null, 0);
         response = new SearchResponse(searchResponsSections, "1", 1,1,0,25,null,null);
         this.mockSearchRequest(response);
@@ -903,7 +911,7 @@ public class EsServicesTest{
                 + "[ 31.191409132621285, -22.2515096981724 ] ]]}}";        
         final BytesReference source = new BytesArray(content);
         
-        final GetResult getResult = new GetResult("index", "type", "id", SequenceNumbers.UNASSIGNED_SEQ_NO, SequenceNumbers.UNASSIGNED_PRIMARY_TERM, 0L, true, source, null);
+        final GetResult getResult = new GetResult("index", "type", "id", SequenceNumbers.UNASSIGNED_SEQ_NO, SequenceNumbers.UNASSIGNED_PRIMARY_TERM, 0L, true, source, null, null);
         final GetResponse getResponse = new GetResponse(getResult);
         this.mockGetRequest(getResponse);
 
@@ -913,7 +921,8 @@ public class EsServicesTest{
 		final SearchHit hit = new SearchHit(1);
 		hit.sourceRef(hm);
 		final SearchHit[] hits = {hit};
-		final SearchHits searchHits = new SearchHits(hits, 1, 1.0F);
+		final TotalHits totalHits = new TotalHits(1, Relation.EQUAL_TO);
+		final SearchHits searchHits = new SearchHits(hits, totalHits, 1.0F);
 		final SearchResponseSections searchResponsSections = new SearchResponseSections(searchHits, null, null, false, Boolean.FALSE, null, 0);
 		final SearchResponse response = new SearchResponse(searchResponsSections, "1", 1,1,0,25,null,null);
         this.mockSearchRequest(response);
@@ -968,14 +977,15 @@ public class EsServicesTest{
                 + "[ 31.191409132621285, -22.2515096981724 ] ]]}}";        
         final BytesReference source = new BytesArray(content);
         
-        final GetResult getResult = new GetResult("index", "type", "id", SequenceNumbers.UNASSIGNED_SEQ_NO, SequenceNumbers.UNASSIGNED_PRIMARY_TERM, 0L, true, source, null);
+        final GetResult getResult = new GetResult("index", "type", "id", SequenceNumbers.UNASSIGNED_SEQ_NO, SequenceNumbers.UNASSIGNED_PRIMARY_TERM, 0L, true, source, null, null);
         final GetResponse getResponse = new GetResponse(getResult);
         this.mockGetRequest(getResponse);
 
 
 		final SearchHit hit = new SearchHit(0);
 		final SearchHit[] hits = {hit};
-		final SearchHits searchHits = new SearchHits(hits, 0, 1.0F);
+		final TotalHits totalHits = new TotalHits(0, Relation.EQUAL_TO);
+		final SearchHits searchHits = new SearchHits(hits, totalHits, 1.0F);
 		final SearchResponseSections searchResponsSections = new SearchResponseSections(searchHits, null, null, false, Boolean.FALSE, null, 0);
 		final SearchResponse response = new SearchResponse(searchResponsSections, "1", 1,1,0,25,null,null);
         this.mockSearchRequest(response);
@@ -997,14 +1007,15 @@ public class EsServicesTest{
                 + "]]}}";        
         final BytesReference source = new BytesArray(content);
         
-        final GetResult getResult = new GetResult("index", "type", "id", SequenceNumbers.UNASSIGNED_SEQ_NO, SequenceNumbers.UNASSIGNED_PRIMARY_TERM, 0L, true, source, null);
+        final GetResult getResult = new GetResult("index", "type", "id", SequenceNumbers.UNASSIGNED_SEQ_NO, SequenceNumbers.UNASSIGNED_PRIMARY_TERM, 0L, true, source, null, null);
         final GetResponse getResponse = new GetResponse(getResult);
         this.mockGetRequest(getResponse);
 
 
 		final SearchHit hit = new SearchHit(0);
 		final SearchHit[] hits = {hit};
-		final SearchHits searchHits = new SearchHits(hits, 0, 1.0F);
+		final TotalHits totalHits = new TotalHits(0, Relation.EQUAL_TO);
+		final SearchHits searchHits = new SearchHits(hits, totalHits, 1.0F);
 		final SearchResponseSections searchResponsSections = new SearchResponseSections(searchHits, null, null, false, Boolean.FALSE, null, 0);
 		final SearchResponse response = new SearchResponse(searchResponsSections, "1", 1,1,0,25,null,null);
         this.mockSearchRequest(response);
