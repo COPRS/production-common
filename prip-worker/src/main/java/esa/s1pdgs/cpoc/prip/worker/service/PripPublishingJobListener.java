@@ -121,9 +121,7 @@ public class PripPublishingJobListener implements MqiListener<PripPublishingJob>
 						PripReportingOutput.newInstance(new Date()), 
 						new ReportingMessage("Finished publishing file %s in PRIP", name)
 				))
-				// FIXME Not clear, why this is not reported as an error - but then, no output can be provided
-				.onError(e -> reporting.end(
-						PripReportingOutput.newInstance(new Date()), 
+				.onError(e -> reporting.error(
 						new ReportingMessage("Error on publishing file %s in PRIP: %s", name, LogUtils.toString(e))
 				))
 				.publishMessageProducer(() -> {
