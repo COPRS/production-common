@@ -1,7 +1,6 @@
 package esa.s1pdgs.cpoc.mdc.worker.service;
 
 import java.io.IOException;
-import java.text.ParseException;
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeParseException;
@@ -44,7 +43,6 @@ import org.springframework.stereotype.Service;
 import esa.s1pdgs.cpoc.common.EdrsSessionFileType;
 import esa.s1pdgs.cpoc.common.ProductCategory;
 import esa.s1pdgs.cpoc.common.ProductFamily;
-import esa.s1pdgs.cpoc.common.errors.InternalErrorException;
 import esa.s1pdgs.cpoc.common.errors.processing.MetadataCreationException;
 import esa.s1pdgs.cpoc.common.errors.processing.MetadataMalformedException;
 import esa.s1pdgs.cpoc.common.errors.processing.MetadataNotPresentException;
@@ -90,9 +88,6 @@ public class EsServices {
 	/**
 	 * Check if a given metadata already exist
 	 * 
-	 * @param product
-	 * @return
-	 * @throws Exception
 	 */
 	public boolean isMetadataExist(final JSONObject product) throws Exception {
 		try {
@@ -139,8 +134,6 @@ public class EsServices {
 	 * Save the metadata in elastic search. The metadata data is created in the
 	 * index named [productType] with id [productName]
 	 * 
-	 * @param product
-	 * @throws Exception
 	 */
 	public void createMetadata(final JSONObject product) throws Exception {
 		try {
@@ -234,13 +227,7 @@ public class EsServices {
 	 * Function which return the product that correspond to the lastValCover
 	 * specification If there is no corresponding product return null
 	 * 
-	 * @param productType
-	 * @param beginDate
-	 * @param endDate
-	 * @param satelliteId
-	 * 
 	 * @return the key object storage of the chosen product
-	 * @throws Exception
 	 */
 	public SearchMetadata lastValCover(final String productType, final ProductFamily productFamily, final String beginDate,
 			final String endDate, final String satelliteId, final int instrumentConfId, final String processMode) throws Exception {
@@ -398,8 +385,7 @@ public class EsServices {
 	}
 
 	private SearchRequest newQueryFor(final String productType, final ProductFamily productFamily, final String satelliteId, final int instrumentConfId,
-			final String processMode, final RangeQueryBuilder rangeQueryBuilder, final FieldSortBuilder sortOrder, final String polarisation)
-			throws InternalErrorException {
+			final String processMode, final RangeQueryBuilder rangeQueryBuilder, final FieldSortBuilder sortOrder, final String polarisation) {
 		final ProductCategory category = ProductCategory.of(productFamily);
 		final SearchSourceBuilder sourceBuilder = new SearchSourceBuilder();
 		BoolQueryBuilder queryBuilder = QueryBuilders.boolQuery().must(rangeQueryBuilder);
@@ -505,12 +491,8 @@ public class EsServices {
 	/**
 	 * Function which returns the list of all the Segments for a specific datatakeid
 	 * and start/stop time
-	 * 
-	 * @param beginDate
-	 * @param endDate
 	 *
 	 * @return the list of the corresponding Segment
-	 * @throws Exception
 	 */
 	public List<SearchMetadata> valIntersect(final String beginDate, final String endDate, final String productType, final String processMode,
 			final String satelliteId) throws Exception {
@@ -634,13 +616,8 @@ public class EsServices {
 	 * Searches for the product with given productName and in the index =
 	 * productFamily. Returns only validity start and stop time.
 	 * 
-	 * @param productFamily
-	 * @param productName
-	 * @return
-	 * @throws MetadataMalformedException
-	 * @throws MetadataNotPresentException
-	 * @throws IOException
 	 */
+	@SuppressWarnings("unchecked")
 	public SearchMetadata productNameQuery(final String productFamily, final String productName)
 			throws MetadataMalformedException, MetadataNotPresentException, IOException {
 
@@ -767,24 +744,6 @@ public class EsServices {
 		return results;
 	}
 	
-	/**
-	 * Function which return the product that correspond to the lastValCover
-	 * specification If there is no corresponding product return null
-	 * 
-	 * @param productType
-	 *
-	 * @return the key object storage of the chosen product
-	 * @throws Exception
-	 */
-	public EdrsSessionMetadata delme_getEdrsSession(final String productType, final String productName) throws Exception {
-		final Map<String, Object> source = this.getRequest(productType.toLowerCase(), productName);
-
-		if (!source.isEmpty()) {
-			return toSessionMetadata(source);
-		}
-		return new EdrsSessionMetadata();
-	}
-
 	private EdrsSessionMetadata toSessionMetadata(
 			final Map<String, Object> source
 	) throws MetadataMalformedException {
@@ -826,7 +785,7 @@ public class EsServices {
 		return this.extractInfoForL0Slice(source, productName);
 	}
 
-	public L0AcnMetadata getL0Acn(final String productType, final String datatakeId, final String processMode) throws Exception {
+	public L0AcnMetadata getL0Acn(final String productType, final String datatakeId, final String processMode) {
 		final SearchSourceBuilder sourceBuilder = new SearchSourceBuilder();
 		sourceBuilder.query(QueryBuilders.boolQuery().must(QueryBuilders.termQuery("dataTakeId.keyword", datatakeId))
 				.must(QueryBuilders.termQuery("productType.keyword", productType))
@@ -852,7 +811,7 @@ public class EsServices {
 		return null;
 	}
 
-	private LocalDateTime calculateCentreTime(final String startDate, final String stopDate) throws ParseException {
+	private LocalDateTime calculateCentreTime(final String startDate, final String stopDate) {
 		final LocalDateTime start = DateUtils.parse(startDate);
 		final LocalDateTime stop = DateUtils.parse(stopDate);
 		// centre time calculation similar to legacy
@@ -978,7 +937,7 @@ public class EsServices {
 	}
 
 	@SuppressWarnings("unchecked")
-	public int getSeaCoverage(final ProductFamily family, final String productName) throws MetadataNotPresentException {
+	public int getSeaCoverage(final ProductFamily family, final String productName) {
 		try {
 			final GetResponse response = elasticsearchDAO.get(new GetRequest(family.name().toLowerCase(), productName));
 			if (!response.isExists()) {
@@ -1018,36 +977,13 @@ public class EsServices {
 				// TODO FIXME implement coverage calculation
 				return 0;
 			}
+			return 100;
 		} catch (final Exception e) {
 			throw new RuntimeException("Failed to check for sea coverage", e);
 		}
-		return 100;
 	}
 
-	public LevelSegmentMetadata delme_getLevelSegment(final ProductFamily family, final String productName) throws Exception {
-		try {
-			final GetRequest getRequest = new GetRequest(family.name().toLowerCase(), productName);
-			final GetResponse response = elasticsearchDAO.get(getRequest);
-
-			if (response.isExists()) {
-				return this.extractInfoForLevelSegment(response.getSourceAsMap(), productName);
-			} else {
-				throw new MetadataNotPresentException(productName);
-			}
-		} catch (final IOException e) {
-			throw new Exception(e.getMessage());
-		}
-	}
-
-	private LevelSegmentMetadata extractInfoForLevelSegment(final Map<String, Object> source, final String productName)
-			throws MetadataMalformedException, MetadataNotPresentException {
-		if (source.isEmpty()) {
-			throw new MetadataNotPresentException(productName);
-		}
-		return toLevelSegmentMetadata(source);
-	}
-
-	private final LevelSegmentMetadata toLevelSegmentMetadata(final Map<String, Object> source)
+	private LevelSegmentMetadata toLevelSegmentMetadata(final Map<String, Object> source)
 			throws MetadataMalformedException {
 		final LevelSegmentMetadata r = new LevelSegmentMetadata();
 		r.setProductName(source.get("productName").toString());
@@ -1108,10 +1044,6 @@ public class EsServices {
 
 	}
 	
-	private boolean isEmpty(final SearchResponse searchResponse) {
-		return !this.isNotEmpty(searchResponse);
-	}
-	
 	private boolean isNotEmpty(final SearchResponse searchResponse) {
 		if (null != searchResponse) {
 			return this.isNotEmpty(searchResponse.getHits());
@@ -1139,7 +1071,7 @@ public class EsServices {
 			final TotalHits hits = searchHits.getTotalHits();
 			if (null != hits) {
 				if (Relation.GREATER_THAN_OR_EQUAL_TO == hits.relation) {
-					return String.valueOf(hits.value) + " (or more)";
+					return hits.value + " (or more)";
 				} else {
 					return String.valueOf(hits.value);
 				}

@@ -47,20 +47,17 @@ public class L0SliceMetadataController extends AbstractMetadataController<L0Slic
 			@RequestParam(name = "processMode", defaultValue = "NOMINAL") String processMode,
 			@RequestParam(value = "mode", defaultValue = "ALL") String mode) {
 		
-		final Callable<List<L0AcnMetadata>> acnsSupplier = new Callable<List<L0AcnMetadata>>() {
-			@Override
-			public final List<L0AcnMetadata> call() throws Exception {
-				final L0SliceMetadata slice = esServices.getL0Slice(productName);
-				if (slice == null) {
-					throw new MetadataNotPresentException(productName);
-				}
-				return getL0AcnFor(slice, processMode, mode);
-			}			
+		final Callable<List<L0AcnMetadata>> acnsSupplier = () -> {
+			final L0SliceMetadata slice = esServices.getL0Slice(productName);
+			if (slice == null) {
+				throw new MetadataNotPresentException(productName);
+			}
+			return getL0AcnFor(slice, processMode, mode);
 		};
 		return getResponse(productName, ProductFamily.L0_ACN, acnsSupplier);
 	}
 		
-	private final List<L0AcnMetadata> getL0AcnFor(final L0SliceMetadata slice, final String processingMode, final String mode) throws Exception {		
+	private List<L0AcnMetadata> getL0AcnFor(final L0SliceMetadata slice, final String processingMode, final String mode) throws MetadataNotPresentException {
 		final List<L0AcnMetadata> result = new ArrayList<>();
 			
 		final String productType = slice.getProductType();
