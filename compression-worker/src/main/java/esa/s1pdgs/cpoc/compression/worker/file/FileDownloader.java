@@ -80,7 +80,7 @@ public class FileDownloader {
 
 		final String targetFile = this.localWorkingDir+"/"+job.getOutputKeyObjectStorage();
 		LOGGER.info("Input {} will be stored in {}", job.getKeyObjectStorage(), targetFile);
-		return new ObsDownloadObject(job.getProductFamily(), job.getKeyObjectStorage(),targetFile);
+		return new ObsDownloadObject(job.getProductFamily(), job.getKeyObjectStorage(), targetFile);
 
 	}
 }

@@ -11,7 +11,9 @@ public class ApplicationProperties {
 	/**
 	 * The command that is performed to invoke the compression process
 	 */
-	private String command;
+	private String compressionCommand;
+	
+	private String uncompressionCommand;
 	
 	private String workingDirectory;
 	
@@ -57,12 +59,20 @@ public class ApplicationProperties {
     
     private String hostname;
 
-	public String getCommand() {
-		return command;
+	public String getCompressionCommand() {
+		return compressionCommand;
 	}
 
-	public void setCommand(String command) {
-		this.command = command;
+	public void setCompressionCommand(String compressionCommand) {
+		this.compressionCommand = compressionCommand;
+	}
+
+	public String getUncompressionCommand() {
+		return uncompressionCommand;
+	}
+
+	public void setUncompressionCommand(String uncompressionCommand) {
+		this.uncompressionCommand = uncompressionCommand;
 	}
 
 	public String getWorkingDirectory() {

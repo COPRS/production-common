@@ -15,6 +15,7 @@ import esa.s1pdgs.cpoc.common.errors.AbstractCodedException;
 import esa.s1pdgs.cpoc.common.errors.InternalErrorException;
 import esa.s1pdgs.cpoc.compression.worker.model.mqi.CompressedProductQueueMessage;
 import esa.s1pdgs.cpoc.compression.worker.mqi.OutputProducerFactory;
+import esa.s1pdgs.cpoc.mqi.model.queue.CompressionDirection;
 import esa.s1pdgs.cpoc.mqi.model.queue.CompressionJob;
 import esa.s1pdgs.cpoc.mqi.model.rest.GenericMessageDto;
 import esa.s1pdgs.cpoc.obs_sdk.ObsClient;
@@ -70,19 +71,21 @@ public class FileUploader {
 
 		final List<CompressedProductQueueMessage> outputToPublish = new ArrayList<>();
 
-		final String zipFileName = job.getOutputKeyObjectStorage();
-		final File productPath = new File(workingDir + "/" + zipFileName + "/" + zipFileName);
+		final String outputFileName = job.getOutputKeyObjectStorage();
+		final File productPath = new File(workingDir + "/" + outputFileName + "/" + outputFileName);
 		if (!productPath.exists()) {
 			throw new InternalErrorException(
 					"Operation aborted: The compressed product " + productPath + " does not exist");
 		}
 					
-		LOGGER.info("Uploading compressed product {} [{}]",productPath, job.getProductFamily());
-		final ProductFamily zipProductFamily = job.getOutputProductFamily();
-		final FileObsUploadObject uploadObject = new FileObsUploadObject(zipProductFamily, zipFileName, productPath);
+		LOGGER.info("Uploading compressed/uncompressed product {} [{}]", productPath, job.getProductFamily());
+		final ProductFamily outputProductFamily = job.getOutputProductFamily();
+		final FileObsUploadObject uploadObject = new FileObsUploadObject(outputProductFamily, outputFileName, productPath);
 		
-		final CompressedProductQueueMessage cpqm = new CompressedProductQueueMessage(zipProductFamily, zipFileName, zipFileName);
-		outputToPublish.add(cpqm);
+		if(job.getCompressionDirection() == CompressionDirection.COMPRESS) {
+			final CompressedProductQueueMessage cpqm = new CompressedProductQueueMessage(outputProductFamily, outputFileName, outputFileName);
+			outputToPublish.add(cpqm);
+		}
 
 		// upload
 		if (Thread.currentThread().isInterrupted()) {
@@ -92,7 +95,7 @@ public class FileUploader {
 		
 		publishAccordingUploadFiles(NOT_KEY_OBS, outputToPublish);
         
-        return zipFileName;
+        return outputFileName;
 	}
 
 	/**
