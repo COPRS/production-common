@@ -121,7 +121,7 @@ public class CompressProcessor implements MqiListener<CompressionJob> {
 		final FileUploader fileUploader = new FileUploader(obsClient, producerFactory, workDir, message, job, report.getUid());	
 		report.begin(
 				ReportingUtils.newFilenameReportingInputFor(job.getProductFamily(), message.getBody().getKeyObjectStorage()),
-				new ReportingMessage("Start compression processing")
+				new ReportingMessage("Start compression/uncompression processing")
 		);
 		try {			
 			checkThreadInterrupted();
@@ -129,16 +129,16 @@ public class CompressProcessor implements MqiListener<CompressionJob> {
 			fileDownloader.processInputs(report);
 
 			checkThreadInterrupted();
-			LOGGER.info("Compressing inputs for {}", job);
+			LOGGER.info("Compressing/Uncompressing inputs for {}", job);
 			procCompletionSrv.submit(procExecutor);
 			waitForPoolProcessesEnding(procCompletionSrv);
 
 			checkThreadInterrupted();
-			LOGGER.info("Uploading compressed outputs for {}", job);
+			LOGGER.info("Uploading compressed/uncompressed outputs for {}", job);
 			final String filename = fileUploader.processOutput(report);
 			report.end(
 					ReportingUtils.newFilenameReportingOutputFor(job.getProductFamily(), filename), 
-					new ReportingMessage("End compression processing")
+					new ReportingMessage("End compression/uncompression processing")
 			);
 		} catch (final Exception e) {
 			report.error(errorReportMessage(e));
@@ -157,7 +157,7 @@ public class CompressProcessor implements MqiListener<CompressionJob> {
 		errorAppender.send(new FailedProcessingDto(
 				properties.getHostname(), 
 				new Date(), 
-				String.format("Error on handling compression for message %s: %s", message.getId(), LogUtils.toString(error)), 
+				String.format("Error on handling compression/uncompression for message %s: %s", message.getId(), LogUtils.toString(error)), 
 				message
 		));
 		exitOnAppStatusStopOrWait();

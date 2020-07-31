@@ -18,5 +18,6 @@ RUN apk update && apk add p7zip
 COPY --from=build /app/compression-worker/target/s1pro-core-compression-worker-*.jar s1pdgs-compression-worker.jar
 COPY /config/start.sh start.sh
 COPY /config/compression.sh compression.sh
+COPY /config/uncompression.sh uncompression.sh
 
 ENTRYPOINT "/app/start.sh"

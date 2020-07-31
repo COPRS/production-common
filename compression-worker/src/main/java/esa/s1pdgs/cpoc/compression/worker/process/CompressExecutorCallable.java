@@ -53,10 +53,12 @@ public class CompressExecutorCallable implements Callable<Void> {
 	@Override
 	public Void call() throws AbstractCodedException {
 		
-		LOGGER.debug("command={}, productName={}, workingDirectory={}",properties.getCommand(), job.getKeyObjectStorage(), properties.getWorkingDirectory());
+		String command = determineCommand();
+		
+		LOGGER.debug("command={}, productName={}, workingDirectory={}", command, job.getKeyObjectStorage(), properties.getWorkingDirectory());
 		/*completionSrv.submit(new TaskCallable(properties.getCommand(), job.getProductName(),
 				properties.getWorkingDirectory(), reporting));*/
-		execute(properties.getCommand(), job.getKeyObjectStorage(), job.getOutputKeyObjectStorage(), properties.getWorkingDirectory()+"/"+job.getOutputKeyObjectStorage());
+		execute(command, job.getKeyObjectStorage(), job.getOutputKeyObjectStorage(), properties.getWorkingDirectory()+"/"+job.getOutputKeyObjectStorage());
 
 		return null;
 	}
@@ -64,7 +66,7 @@ public class CompressExecutorCallable implements Callable<Void> {
 	public TaskResult execute(final String binaryPath, final String inputPath, final String outputPath,
             final String workDirectory) throws InternalErrorException {
 				
-		LOGGER.info("Starting compression task using '{}' with input {} and output {} in {}", binaryPath, inputPath, outputPath, workDirectory);
+		LOGGER.info("Starting compression/uncompression task using '{}' with input {} and output {} in {}", binaryPath, inputPath, outputPath, workDirectory);
         
         final Consumer<String> stdOutConsumer = DEFAULT_OUTPUT_CONSUMER;
         final Consumer<String> stdErrConsumer = DEFAULT_OUTPUT_CONSUMER;
@@ -105,4 +107,15 @@ public class CompressExecutorCallable implements Callable<Void> {
 
         return new TaskResult(binaryPath, r);
     }
+	
+	private String determineCommand() throws InternalErrorException {
+		switch (job.getCompressionDirection()) {
+		case COMPRESS:
+			return properties.getCompressionCommand();
+		case UNCOMPRESS:
+			return properties.getUncompressionCommand();
+		default:
+			throw new InternalErrorException("CompressionDirecton not allowed: " + properties.getCompressionCommand());
+		}
+	}
 }

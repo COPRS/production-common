@@ -25,7 +25,8 @@ mqi:
   
 # Compression
 compression-worker:
-  command: /usr/bin/sh
+  compressionCommand: /usr/bin/sh
+  uncompressionCommand: /usr/bin/sh
   hostname: "hostname"
   fixed-delay-ms: 10
   init-delay-poll-ms: 1000
