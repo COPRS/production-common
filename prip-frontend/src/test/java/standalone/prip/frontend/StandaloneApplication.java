@@ -14,7 +14,8 @@ public class StandaloneApplication {
     	 * 
     	 * How to get it running:
     	 * 
-    	 * 1. Download and unpack https://www.elastic.co/de/downloads/past-releases/elasticsearch-6-7-0
+    	 * 1. Download and unpack https://www.elastic.co/de/downloads/past-releases/elasticsearch-7-7-0
+    	 * 		--> better use open source version: https://www.elastic.co/de/downloads/past-releases/elasticsearch-oss-7-7-0
     	 * 
     	 * 2. Execute bin/elasticsearch
     	 * 
