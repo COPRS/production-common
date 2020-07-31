@@ -29,19 +29,19 @@ public class L0SliceMetadataController extends AbstractMetadataController<L0Slic
 		super(L0SliceMetadata.class, esServices);
 	}
 	
-	@RequestMapping(method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_UTF8_VALUE, path = "/{family}/{productName:.+}/seaCoverage")
+	@RequestMapping(method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE, path = "/{family}/{productName:.+}/seaCoverage")
     public ResponseEntity<Integer> getSeaCoverage(
             @PathVariable(name = "family") ProductFamily family,
             @PathVariable(name = "productName") String productName) {		
 		return getResponse(productName, family, () -> esServices.getSeaCoverage(family, productName));
     }
 
-	@RequestMapping(method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_UTF8_VALUE, path = "/{productName:.+}")
+	@RequestMapping(method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE, path = "/{productName:.+}")
 	public ResponseEntity<L0SliceMetadata> get(@PathVariable(name = "productName") String productName) {
 		return getResponse(productName, ProductFamily.L0_SLICE, () -> esServices.getL0Slice(productName));	
 	}
 	
-	@RequestMapping(method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_UTF8_VALUE, path = "/{productName:.+}/acns")
+	@RequestMapping(method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE, path = "/{productName:.+}/acns")
 	public ResponseEntity<List<L0AcnMetadata>> getAcns(
 			@PathVariable(name = "productName") String productName,
 			@RequestParam(name = "processMode", defaultValue = "NOMINAL") String processMode,

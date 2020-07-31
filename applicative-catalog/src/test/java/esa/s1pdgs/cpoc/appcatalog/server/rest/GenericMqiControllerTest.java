@@ -127,7 +127,7 @@ public class GenericMqiControllerTest extends RestControllerTest {
                 .content(convertObjectToJsonString(body)))
                         .andExpect(MockMvcResultMatchers.status().isOk())
                         .andExpect(content().contentType(
-                                MediaType.APPLICATION_JSON_UTF8_VALUE));
+                                MediaType.APPLICATION_JSON_VALUE));
         verify(mongoDBServices, times(1)).searchByTopicPartitionOffsetGroup(
                 Mockito.anyString(), Mockito.anyInt(), Mockito.anyLong(),
                 Mockito.anyString());
@@ -151,7 +151,7 @@ public class GenericMqiControllerTest extends RestControllerTest {
                 .content(convertObjectToJsonString(body)))
                         .andExpect(MockMvcResultMatchers.status().isOk())
                         .andExpect(content().contentType(
-                                MediaType.APPLICATION_JSON_UTF8_VALUE));
+                                MediaType.APPLICATION_JSON_VALUE));
         verify(mongoDBServices, times(1)).searchByTopicPartitionOffsetGroup(
                 Mockito.anyString(), Mockito.anyInt(), Mockito.anyLong(),
                 Mockito.anyString());
@@ -179,7 +179,7 @@ public class GenericMqiControllerTest extends RestControllerTest {
                 .content(convertObjectToJsonString(body)))
                         .andExpect(MockMvcResultMatchers.status().isOk())
                         .andExpect(content().contentType(
-                                MediaType.APPLICATION_JSON_UTF8_VALUE))
+                                MediaType.APPLICATION_JSON_VALUE))
                         .andExpect(jsonPath("$.state", is("SEND")))
                         .andExpect(jsonPath("$.readingPod", is("readingPod2")))
                         .andExpect(jsonPath("$.sendingPod", is("sendingPod")));
@@ -210,7 +210,7 @@ public class GenericMqiControllerTest extends RestControllerTest {
                 .content(convertObjectToJsonString(body)))
                         .andExpect(MockMvcResultMatchers.status().isOk())
                         .andExpect(content().contentType(
-                                MediaType.APPLICATION_JSON_UTF8_VALUE))
+                                MediaType.APPLICATION_JSON_VALUE))
                         .andExpect(jsonPath("$.state", is("READ")))
                         .andExpect(jsonPath("$.readingPod", is("readingPod2")));
         verify(mongoDBServices, times(1)).searchByTopicPartitionOffsetGroup(
@@ -240,7 +240,7 @@ public class GenericMqiControllerTest extends RestControllerTest {
                 .content(convertObjectToJsonString(body)))
                         .andExpect(MockMvcResultMatchers.status().isOk())
                         .andExpect(content().contentType(
-                                MediaType.APPLICATION_JSON_UTF8_VALUE))
+                                MediaType.APPLICATION_JSON_VALUE))
                         .andExpect(jsonPath("$.state", is("ACK_KO")));
         verify(mongoDBServices, times(1)).searchByTopicPartitionOffsetGroup(
                 Mockito.anyString(), Mockito.anyInt(), Mockito.anyLong(),
@@ -269,7 +269,7 @@ public class GenericMqiControllerTest extends RestControllerTest {
                 .content(convertObjectToJsonString(body)))
                         .andExpect(MockMvcResultMatchers.status().isOk())
                         .andExpect(content().contentType(
-                                MediaType.APPLICATION_JSON_UTF8_VALUE));
+                                MediaType.APPLICATION_JSON_VALUE));
         verify(mongoDBServices, times(1)).searchByTopicPartitionOffsetGroup(
                 Mockito.anyString(), Mockito.anyInt(), Mockito.anyLong(),
                 Mockito.anyString());
@@ -297,7 +297,7 @@ public class GenericMqiControllerTest extends RestControllerTest {
                 .content(convertObjectToJsonString(body)))
                         .andExpect(MockMvcResultMatchers.status().isOk())
                         .andExpect(content().contentType(
-                                MediaType.APPLICATION_JSON_UTF8_VALUE));
+                                MediaType.APPLICATION_JSON_VALUE));
         verify(mongoDBServices, times(1)).searchByTopicPartitionOffsetGroup(
                 Mockito.anyString(), Mockito.anyInt(), Mockito.anyLong(),
                 Mockito.anyString());
@@ -328,7 +328,7 @@ public class GenericMqiControllerTest extends RestControllerTest {
         request(get("/mqi/auxiliary_files/next").param("pod", "readingPod"))
                 .andExpect(MockMvcResultMatchers.status().isOk())
                 .andExpect(content()
-                        .contentType(MediaType.APPLICATION_JSON_UTF8_VALUE));
+                        .contentType(MediaType.APPLICATION_JSON_VALUE));
         verify(mongoDBServices, times(1)).searchByPodStateCategory(
                 Mockito.anyString(), Mockito.any(ProductCategory.class),
                 Mockito.any());
@@ -350,7 +350,7 @@ public class GenericMqiControllerTest extends RestControllerTest {
         request(get("/mqi/auxiliary_files/next").param("pod", "readingPod"))
                 .andExpect(MockMvcResultMatchers.status().isOk())
                 .andExpect(content()
-                        .contentType(MediaType.APPLICATION_JSON_UTF8_VALUE));
+                        .contentType(MediaType.APPLICATION_JSON_VALUE));
         verify(mongoDBServices, times(1)).searchByPodStateCategory(
                 Mockito.anyString(), Mockito.any(ProductCategory.class),
                 Mockito.any());
@@ -390,7 +390,7 @@ public class GenericMqiControllerTest extends RestControllerTest {
                 .content(convertObjectToJsonString(body)))
                         .andExpect(MockMvcResultMatchers.status().isOk())
                         .andExpect(content().contentType(
-                                MediaType.APPLICATION_JSON_UTF8_VALUE));
+                                MediaType.APPLICATION_JSON_VALUE));
         verify(mongoDBServices, times(1)).searchByID(Mockito.anyLong());
     }
 
@@ -407,7 +407,7 @@ public class GenericMqiControllerTest extends RestControllerTest {
                 .content(convertObjectToJsonString(body)))
                         .andExpect(MockMvcResultMatchers.status().isOk())
                         .andExpect(content().contentType(
-                                MediaType.APPLICATION_JSON_UTF8_VALUE));
+                                MediaType.APPLICATION_JSON_VALUE));
         verify(mongoDBServices, times(1)).searchByID(Mockito.anyLong());
         verify(mongoDBServices, times(1)).updateByID(Mockito.anyLong(),
                 Mockito.any());
@@ -426,7 +426,7 @@ public class GenericMqiControllerTest extends RestControllerTest {
                 .content(convertObjectToJsonString(body)))
                         .andExpect(MockMvcResultMatchers.status().isOk())
                         .andExpect(content().contentType(
-                                MediaType.APPLICATION_JSON_UTF8_VALUE));
+                                MediaType.APPLICATION_JSON_VALUE));
         verify(mongoDBServices, times(1)).searchByID(Mockito.anyLong());
         verify(mongoDBServices, times(1)).updateByID(Mockito.anyLong(),
                 Mockito.any());
@@ -445,7 +445,7 @@ public class GenericMqiControllerTest extends RestControllerTest {
                 .content(convertObjectToJsonString(body)))
                         .andExpect(MockMvcResultMatchers.status().isOk())
                         .andExpect(content().contentType(
-                                MediaType.APPLICATION_JSON_UTF8_VALUE));
+                                MediaType.APPLICATION_JSON_VALUE));
         verify(mongoDBServices, times(1)).searchByID(Mockito.anyLong());
         verify(mongoDBServices, times(1)).updateByID(Mockito.anyLong(),
                 Mockito.any());
@@ -477,7 +477,7 @@ public class GenericMqiControllerTest extends RestControllerTest {
                 .content(convertObjectToJsonString(Ack.OK)))
                         .andExpect(MockMvcResultMatchers.status().isOk())
                         .andExpect(content().contentType(
-                                MediaType.APPLICATION_JSON_UTF8_VALUE));
+                                MediaType.APPLICATION_JSON_VALUE));
         verify(mongoDBServices, times(1)).searchByID(Mockito.anyLong());
         verify(mongoDBServices, never())
                 .insertMqiMessage(Mockito.any(MqiMessage.class));
@@ -500,7 +500,7 @@ public class GenericMqiControllerTest extends RestControllerTest {
                 .content(convertObjectToJsonString(Ack.ERROR)))
                         .andExpect(MockMvcResultMatchers.status().isOk())
                         .andExpect(content().contentType(
-                                MediaType.APPLICATION_JSON_UTF8_VALUE));
+                                MediaType.APPLICATION_JSON_VALUE));
         verify(mongoDBServices, times(1)).searchByID(Mockito.anyLong());
         verify(mongoDBServices, never())
                 .insertMqiMessage(Mockito.any(MqiMessage.class));
@@ -523,7 +523,7 @@ public class GenericMqiControllerTest extends RestControllerTest {
                 .content(convertObjectToJsonString(Ack.WARN)))
                         .andExpect(MockMvcResultMatchers.status().isOk())
                         .andExpect(content().contentType(
-                                MediaType.APPLICATION_JSON_UTF8_VALUE));
+                                MediaType.APPLICATION_JSON_VALUE));
         verify(mongoDBServices, times(1)).searchByID(Mockito.anyLong());
         verify(mongoDBServices, never())
                 .insertMqiMessage(Mockito.any(MqiMessage.class));
@@ -549,7 +549,7 @@ public class GenericMqiControllerTest extends RestControllerTest {
                 .param("group", "group"))
                         .andExpect(MockMvcResultMatchers.status().isOk())
                         .andExpect(content().contentType(
-                                MediaType.APPLICATION_JSON_UTF8_VALUE));
+                                MediaType.APPLICATION_JSON_VALUE));
         verify(mongoDBServices, times(1)).searchByTopicPartitionGroup(
                 Mockito.anyString(), Mockito.anyInt(), Mockito.anyString(),
                 Mockito.any());
@@ -566,7 +566,7 @@ public class GenericMqiControllerTest extends RestControllerTest {
                 .param("group", "group"))
                         .andExpect(MockMvcResultMatchers.status().isOk())
                         .andExpect(content().contentType(
-                                MediaType.APPLICATION_JSON_UTF8_VALUE));
+                                MediaType.APPLICATION_JSON_VALUE));
         verify(mongoDBServices, times(1)).searchByTopicPartitionGroup(
                 Mockito.anyString(), Mockito.anyInt(), Mockito.anyString(),
                 Mockito.any());

@@ -51,7 +51,7 @@ public class GenericMessageController<T> {
 	    this.appStatus.setWaiting();
 	}
 
-    @RequestMapping(method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE, path = "/{category}/{topic}/{partition}/{offset}/read")
+    @RequestMapping(method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE, path = "/{category}/{topic}/{partition}/{offset}/read")
     public ResponseEntity<AppCatMessageDto<T>> readMessage(
     		@PathVariable(name = "category") final String categoryName,
             @PathVariable(name = "topic") final String topic,
@@ -83,7 +83,7 @@ public class GenericMessageController<T> {
         return new ResponseEntity<AppCatMessageDto<T>>(HttpStatus.INTERNAL_SERVER_ERROR);
     }
 
-	@RequestMapping(method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_UTF8_VALUE, path = "/{category}/next")
+	@RequestMapping(method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE, path = "/{category}/next")
     public ResponseEntity<List<AppCatMessageDto<T>>> next(
     		@PathVariable(name = "category") final String categoryName,
             @RequestParam("pod") final String pod) {
@@ -109,7 +109,7 @@ public class GenericMessageController<T> {
         return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
     }
 
-    @RequestMapping(method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE, path = "/{category}/{messageID}/send")
+    @RequestMapping(method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE, path = "/{category}/{messageID}/send")
     public ResponseEntity<Boolean> sendMessage(
     		@PathVariable(name = "category") final String categoryName,
             @PathVariable(name = "messageID") final long messageID,
@@ -130,7 +130,7 @@ public class GenericMessageController<T> {
         }
     }
 
-    @RequestMapping(method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE, path = "/{category}/{messageID}/ack")
+    @RequestMapping(method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE, path = "/{category}/{messageID}/ack")
     public ResponseEntity<Boolean> ackMessage(
     		@PathVariable(name = "category") final String categoryName,
             @PathVariable(name = "messageID") final long messageID,
@@ -151,7 +151,7 @@ public class GenericMessageController<T> {
     }
 
     @SuppressWarnings("unchecked")
-	@RequestMapping(method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_UTF8_VALUE, path = "/{category}/{messageID}")
+	@RequestMapping(method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE, path = "/{category}/{messageID}")
     public ResponseEntity<AppCatMessageDto<T>> getMessage(
     		@PathVariable(name = "category") final String categoryName,
             @PathVariable(name = "messageID") final long messageID) {
@@ -173,7 +173,7 @@ public class GenericMessageController<T> {
         }
     }
 
-    @RequestMapping(method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_UTF8_VALUE, path = "/{topic}/{partition}/earliestOffset")
+    @RequestMapping(method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE, path = "/{topic}/{partition}/earliestOffset")
     public ResponseEntity<Long> earliestOffset(
             @PathVariable(name = "topic") final String topic,
             @PathVariable(name = "partition") final int partition,
@@ -195,7 +195,7 @@ public class GenericMessageController<T> {
      * @param pod
      * @return
      */
-    @RequestMapping(method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_UTF8_VALUE, path = "/{topic}/nbReading")
+    @RequestMapping(method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE, path = "/{topic}/nbReading")
     public ResponseEntity<Integer> nbMessages(
             @PathVariable(name = "topic") final String topic,
             @RequestParam("pod") final String pod) {
