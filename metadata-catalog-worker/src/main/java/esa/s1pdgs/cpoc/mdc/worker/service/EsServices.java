@@ -21,9 +21,11 @@ import org.elasticsearch.action.index.IndexRequest;
 import org.elasticsearch.action.index.IndexResponse;
 import org.elasticsearch.action.search.SearchRequest;
 import org.elasticsearch.action.search.SearchResponse;
+import org.elasticsearch.common.geo.ShapeRelation;
 import org.elasticsearch.common.geo.builders.CoordinatesBuilder;
 import org.elasticsearch.common.geo.builders.PolygonBuilder;
 import org.elasticsearch.common.xcontent.XContentType;
+import org.elasticsearch.geometry.Geometry;
 import org.elasticsearch.index.query.BoolQueryBuilder;
 import org.elasticsearch.index.query.GeoShapeQueryBuilder;
 import org.elasticsearch.index.query.QueryBuilder;
@@ -164,19 +166,19 @@ public class EsServices {
 				 * pattern, we have to parse the exception to identify possible footprint
 				 * issues.
 				 */
-				LOGGER.warn("An exception occured while accessing the elastic search index: {}", LogUtils.toString(e));
+				LOGGER.warn("An exception occurred while accessing the elastic search index: {}", LogUtils.toString(e));
 				final String result = e.getMessage();
 				boolean fixed = false;
 				if (result.contains("failed to parse field [sliceCoordinates] of type [geo_shape]")) {
 					LOGGER.warn(
-							"Parsing error occured for sliceCoordinates, dropping them as workaround for #S1PRO-783");
+							"Parsing error occurred for sliceCoordinates, dropping them as workaround for #S1PRO-783");
 					product.remove("sliceCoordinates");
 					fixed = true;
 				}
 				
 				if (result.contains("failed to parse field [segmentCoordinates] of type [geo_shape]")) {
 					LOGGER.warn(
-							"Parsing error occured for segmentCoordinates, dropping them as workaround for #S1PRO-783");
+							"Parsing error occurred for segmentCoordinates, dropping them as workaround for #S1PRO-783");
 					product.remove("segmentCoordinates");
 					fixed = true;
 				}
@@ -936,7 +938,6 @@ public class EsServices {
 		return r;
 	}
 
-	@SuppressWarnings("unchecked")
 	public int getSeaCoverage(final ProductFamily family, final String productName) {
 		try {
 			final GetResponse response = elasticsearchDAO.get(new GetRequest(family.name().toLowerCase(), productName));
@@ -944,26 +945,9 @@ public class EsServices {
 				throw new MetadataNotPresentException(productName);
 			}
 
-			// TODO FIXME this needs to be fixed to use a proper abstraction
-			final Map<String, Object> sliceCoordinates = (Map<String, Object>) response.getSourceAsMap()
-					.get("sliceCoordinates");
-
-			final String type = (String) sliceCoordinates.get("type");
-			LOGGER.debug("Found sliceCoordinates of type {}", type);
-
-			final List<Object> firstArray = (List<Object>) sliceCoordinates.get("coordinates");
-			final List<Object> secondArray = (List<Object>) firstArray.get(0);
-
-			final CoordinatesBuilder coordBuilder = new CoordinatesBuilder();
-
-			for (final Object arr : secondArray) {
-				final List<Number> coords = (List<Number>) arr;
-				final double lon = coords.get(0).doubleValue();
-				final double lat = coords.get(1).doubleValue();
-				coordBuilder.coordinate(lon, lat);
-			}
-			final GeoShapeQueryBuilder queryBuilder = QueryBuilders.geoIntersectionQuery("geometry",
-					new PolygonBuilder(coordBuilder));
+			final GeoShapeQueryBuilder queryBuilder = QueryBuilders.geoShapeQuery("geometry",
+					extractPolygonFrom(response));
+			queryBuilder.relation(ShapeRelation.CONTAINS);
 			LOGGER.debug("Using {}", queryBuilder);
 			final SearchSourceBuilder sourceBuilder = new SearchSourceBuilder();
 			sourceBuilder.query(queryBuilder);
@@ -974,13 +958,36 @@ public class EsServices {
 
 			final SearchResponse searchResponse = elasticsearchDAO.search(request);
 			if (this.isNotEmpty(searchResponse)) {
-				// TODO FIXME implement coverage calculation
 				return 0;
 			}
+			// TODO FIXME implement coverage calculation
 			return 100;
 		} catch (final Exception e) {
 			throw new RuntimeException("Failed to check for sea coverage", e);
 		}
+	}
+
+	@SuppressWarnings("unchecked")
+	private Geometry extractPolygonFrom(GetResponse response) {
+		// TODO FIXME this needs to be fixed to use a proper abstraction
+		final Map<String, Object> sliceCoordinates = (Map<String, Object>) response.getSourceAsMap()
+				.get("sliceCoordinates");
+
+		final String type = (String) sliceCoordinates.get("type");
+		LOGGER.debug("Found sliceCoordinates of type {}", type);
+
+		final List<Object> firstArray = (List<Object>) sliceCoordinates.get("coordinates");
+		final List<Object> secondArray = (List<Object>) firstArray.get(0);
+
+		final CoordinatesBuilder coordBuilder = new CoordinatesBuilder();
+
+		for (final Object arr : secondArray) {
+			final List<Number> coords = (List<Number>) arr;
+			final double lon = coords.get(0).doubleValue();
+			final double lat = coords.get(1).doubleValue();
+			coordBuilder.coordinate(lon, lat);
+		}
+		return new PolygonBuilder(coordBuilder).buildGeometry();
 	}
 
 	private LevelSegmentMetadata toLevelSegmentMetadata(final Map<String, Object> source)
