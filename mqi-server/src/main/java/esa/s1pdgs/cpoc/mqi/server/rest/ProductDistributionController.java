@@ -96,7 +96,7 @@ public class ProductDistributionController {
      * Get the next message to proceed for auxiliary files
      * 
      */
-    @RequestMapping(method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_UTF8_VALUE, path = "/{category}/next")
+    @RequestMapping(method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE, path = "/{category}/next")
     public GenericMessageDto<? extends AbstractMessage> next(@PathVariable("category") String categoryName) throws ProductDistributionException {
     	final ProductCategory category = ProductCategory.valueOf(categoryName.toUpperCase());    	
         LOGGER.debug("[MONITOR] [category {}] [api next] Starting", category);
@@ -118,7 +118,7 @@ public class ProductDistributionController {
      * Get the next message to proceed for auxiliary files
      * 
      */
-    @RequestMapping(method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE, path = "/{category}/ack")
+    @RequestMapping(method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE, path = "/{category}/ack")
     public void ack(@RequestBody final AckMessageDto ackDto, @PathVariable("category") String categoryName) 
     		throws ProductDistributionException {    	    	
     	final ProductCategory category = ProductCategory.valueOf(categoryName.toUpperCase());    	
@@ -152,7 +152,7 @@ public class ProductDistributionController {
      * Publish a message
      * 
      */
-    @RequestMapping(method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE, path = "/{category}/publish")
+    @RequestMapping(method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE, path = "/{category}/publish")
     public void publish(
     		@RequestBody final JsonNode message, 
     		@PathVariable("category") String categoryName

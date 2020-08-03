@@ -23,7 +23,7 @@ public class LevelSegmentController extends AbstractMetadataController<LevelSegm
     	super(LevelSegmentMetadata.class, esServices);
     }
  
-//    @RequestMapping(method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_UTF8_VALUE, path = "/{family}/{productName:.+}")
+//    @RequestMapping(method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE, path = "/{family}/{productName:.+}")
 //    public ResponseEntity<LevelSegmentMetadata> get(
 //            @PathVariable(name = "family") final ProductFamily family,
 //            @PathVariable(name = "productName") final String productName
@@ -31,7 +31,7 @@ public class LevelSegmentController extends AbstractMetadataController<LevelSegm
 //    	return getResponse(productName, family, () -> esServices.getLevelSegment(family, productName));
 //    }
     
-    @RequestMapping(method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_UTF8_VALUE, path = "/{dataTakeId}")
+    @RequestMapping(method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE, path = "/{dataTakeId}")
     public ResponseEntity<List<LevelSegmentMetadata>> get(
             @PathVariable(name = "dataTakeId") final String dataTakeId
     ) {

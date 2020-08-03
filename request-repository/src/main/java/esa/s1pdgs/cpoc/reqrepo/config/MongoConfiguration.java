@@ -43,7 +43,7 @@ public class MongoConfiguration {
         mongoDBHost.forEach(host -> {
         	stringJoinerHosts.add(host + ":" + mongoDBPort);
         });
-        return MongoClients.create("mongodb://" + stringJoinerHosts.toString());
+        return MongoClients.create("mongodb://" + stringJoinerHosts.toString() + "/?uuidRepresentation=STANDARD");
     }
 
     @Bean

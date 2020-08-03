@@ -40,43 +40,43 @@ public class JobController {
         this.appDataJobService = appDataJobService;
     }
     
-    @RequestMapping(method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_UTF8_VALUE, path = "/jobs/findByMessagesId/{messageId}")
+    @RequestMapping(method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE, path = "/jobs/findByMessagesId/{messageId}")
     public List<AppDataJob> findByMessagesId(@PathVariable(name = "messageId") final Long messageId) {
     	return appDataJobService.findByMessagesId(messageId);
     }
 
-    @RequestMapping(method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_UTF8_VALUE, path = "/jobs/findByProductSessionId/{sessionId}")
+    @RequestMapping(method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE, path = "/jobs/findByProductSessionId/{sessionId}")
     public List<AppDataJob> findByProductSessionId(@PathVariable(name = "sessionId") final String sessionId) {
     	return appDataJobService.findByProductSessionId(sessionId);
     }
     
-    @RequestMapping(method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_UTF8_VALUE, path = "/jobs/findByProductDataTakeId/{dataTakeId}")
+    @RequestMapping(method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE, path = "/jobs/findByProductDataTakeId/{dataTakeId}")
     public List<AppDataJob> findByProductDataTakeId(@PathVariable(name = "dataTakeId") final String dataTakeId) {
     	return appDataJobService.findByProductDataTakeId(dataTakeId);
     }
     
-    @RequestMapping(method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_UTF8_VALUE, path = "/jobs/findJobInStateGenerating/{taskTable}")
+    @RequestMapping(method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE, path = "/jobs/findJobInStateGenerating/{taskTable}")
     public List<AppDataJob> findJobInStateGenerating(@PathVariable(name = "taskTable") final String taskTable) {
     	return appDataJobService.findJobInStateGenerating(taskTable);
     }
 
-    @RequestMapping(method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_UTF8_VALUE, path = "/jobs/{jobId}")
+    @RequestMapping(method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE, path = "/jobs/{jobId}")
     public AppDataJob get(@PathVariable(name = "jobId") final Long jobId)
             throws AppCatalogJobNotFoundException {
     	return appDataJobService.getJob(jobId);
     }
 
-    @RequestMapping(method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE, path = "/jobs")
+    @RequestMapping(method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE, path = "/jobs")
     public AppDataJob newJob(@RequestBody final AppDataJob newJob) {  	
     	return appDataJobService.newJob(newJob);
     }
 
-    @RequestMapping(method = RequestMethod.DELETE, produces = MediaType.APPLICATION_JSON_UTF8_VALUE, path = "/jobs/{jobId}")
+    @RequestMapping(method = RequestMethod.DELETE, produces = MediaType.APPLICATION_JSON_VALUE, path = "/jobs/{jobId}")
     public void deleteJob(@PathVariable(name = "jobId") final Long jobId) {
         appDataJobService.deleteJob(jobId);
     }
 
-    @RequestMapping(method = RequestMethod.PATCH, produces = MediaType.APPLICATION_JSON_UTF8_VALUE, path = "/jobs/{jobId}")
+    @RequestMapping(method = RequestMethod.PATCH, produces = MediaType.APPLICATION_JSON_VALUE, path = "/jobs/{jobId}")
     public AppDataJob update(
             @PathVariable(name = "jobId") final Long jobId,
             @RequestBody final AppDataJob patchJob

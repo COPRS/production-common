@@ -36,7 +36,7 @@ public class SearchMetadataController {
 		this.esServices = esServices;
 	}
 
-	@RequestMapping(method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_UTF8_VALUE, path = "/{productFamily}/searchInterval")
+	@RequestMapping(method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE, path = "/{productFamily}/searchInterval")
 	public ResponseEntity<List<SearchMetadata>> searchTimeInterval(
 			@PathVariable(name = "productFamily") final String productFamily,
 			@RequestParam(name = "intervalStart") final String intervalStart,
@@ -105,7 +105,7 @@ public class SearchMetadataController {
 	 * @param productName
 	 * @return
 	 */
-	@RequestMapping(method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_UTF8_VALUE, path = "/{productFamily}/searchProductName")
+	@RequestMapping(method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE, path = "/{productFamily}/searchProductName")
 	public ResponseEntity<SearchMetadata> searchProductName(
 			@PathVariable(name = "productFamily") final String productFamily,
 			@RequestParam(name = "productName") final String productName) {
@@ -121,7 +121,7 @@ public class SearchMetadataController {
 		}
 	}
 
-	@RequestMapping(method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_UTF8_VALUE, path = "/{productFamily}/search")
+	@RequestMapping(method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE, path = "/{productFamily}/search")
 	public ResponseEntity<List<SearchMetadata>> search(@PathVariable(name = "productFamily") final String productFamily,
 			@RequestParam(name = "productType", defaultValue = "NONE") final String productType,
 			@RequestParam(name = "mode", defaultValue = "NONE") final String mode,

@@ -23,7 +23,7 @@ public class EdrsSessionMetadataController extends AbstractMetadataController<Ed
 		super(EdrsSessionMetadata.class, esServices);
 	}
 
-//	@RequestMapping(method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_UTF8_VALUE, path = "/{productType}/{productName:.+}")
+//	@RequestMapping(method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE, path = "/{productType}/{productName:.+}")
 //	public ResponseEntity<EdrsSessionMetadata> get(
 //			@PathVariable(name = "productType") String productType,
 //			@PathVariable(name = "productName") String productName
@@ -31,7 +31,7 @@ public class EdrsSessionMetadataController extends AbstractMetadataController<Ed
 //		return getResponse(productName, ProductFamily.EDRS_SESSION, () -> esServices.getEdrsSession(productType, productName));
 //	}
 	
-	@RequestMapping(method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_UTF8_VALUE, path = "/sessionId/{sessionId}")
+	@RequestMapping(method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE, path = "/sessionId/{sessionId}")
 	public ResponseEntity<List<EdrsSessionMetadata>> get(@PathVariable(name = "sessionId") final String sessionId) {
 		return getResponse(
 				"files for session " + sessionId, 
