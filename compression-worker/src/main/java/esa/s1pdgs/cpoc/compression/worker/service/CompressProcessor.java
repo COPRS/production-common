@@ -42,9 +42,13 @@ import esa.s1pdgs.cpoc.mqi.client.MessageFilter;
 import esa.s1pdgs.cpoc.mqi.client.MqiConsumer;
 import esa.s1pdgs.cpoc.mqi.client.MqiListener;
 import esa.s1pdgs.cpoc.mqi.client.StatusService;
+import esa.s1pdgs.cpoc.mqi.model.queue.CompressionDirection;
 import esa.s1pdgs.cpoc.mqi.model.queue.CompressionJob;
 import esa.s1pdgs.cpoc.mqi.model.rest.GenericMessageDto;
 import esa.s1pdgs.cpoc.obs_sdk.ObsClient;
+import esa.s1pdgs.cpoc.obs_sdk.ObsObject;
+import esa.s1pdgs.cpoc.obs_sdk.ObsServiceException;
+import esa.s1pdgs.cpoc.obs_sdk.SdkClientException;
 import esa.s1pdgs.cpoc.report.Reporting;
 import esa.s1pdgs.cpoc.report.ReportingMessage;
 import esa.s1pdgs.cpoc.report.ReportingUtils;
@@ -120,24 +124,30 @@ public class CompressProcessor implements MqiListener<CompressionJob> {
 		);
 		final FileUploader fileUploader = new FileUploader(obsClient, producerFactory, workDir, message, job, report.getUid());	
 		report.begin(
-				ReportingUtils.newFilenameReportingInputFor(job.getProductFamily(), message.getBody().getKeyObjectStorage()),
+				ReportingUtils.newFilenameReportingInputFor(job.getProductFamily(), job.getKeyObjectStorage()),
 				new ReportingMessage("Start compression/uncompression processing")
 		);
-		try {			
-			checkThreadInterrupted();
-			LOGGER.info("Downloading inputs for {}", job);
-			fileDownloader.processInputs(report);
-
-			checkThreadInterrupted();
-			LOGGER.info("Compressing/Uncompressing inputs for {}", job);
-			procCompletionSrv.submit(procExecutor);
-			waitForPoolProcessesEnding(procCompletionSrv);
-
-			checkThreadInterrupted();
-			LOGGER.info("Uploading compressed/uncompressed outputs for {}", job);
-			final String filename = fileUploader.processOutput(report);
+		try {
+			if(skip(job)) {
+				
+				LOGGER.warn("Skipping uncompression for {}", job);
+				
+			} else {
+				checkThreadInterrupted();
+				LOGGER.info("Downloading inputs for {}", job);
+				fileDownloader.processInputs(report);
+	
+				checkThreadInterrupted();
+				LOGGER.info("Compressing/Uncompressing inputs for {}", job);
+				procCompletionSrv.submit(procExecutor);
+				waitForPoolProcessesEnding(procCompletionSrv);
+	
+				checkThreadInterrupted();
+				LOGGER.info("Uploading compressed/uncompressed outputs for {}", job);
+				fileUploader.processOutput(report);
+			}
 			report.end(
-					ReportingUtils.newFilenameReportingOutputFor(job.getProductFamily(), filename), 
+					ReportingUtils.newFilenameReportingOutputFor(job.getOutputProductFamily(), job.getKeyObjectStorage()), 
 					new ReportingMessage("End compression/uncompression processing")
 			);
 		} catch (final Exception e) {
@@ -151,6 +161,18 @@ public class CompressProcessor implements MqiListener<CompressionJob> {
 		}
 	}
 		
+	private boolean skip(CompressionJob job) throws ObsServiceException, SdkClientException {
+		
+		if (job.getCompressionDirection() == CompressionDirection.UNCOMPRESS) {
+			
+			ObsObject obsObject = new ObsObject(job.getOutputProductFamily(), job.getOutputKeyObjectStorage());
+			if(obsClient.exists(obsObject)) {
+				return true;
+			}
+		}
+		return false;
+	}
+
 	@Override
 	public final void onTerminalError(final GenericMessageDto<CompressionJob> message, final Exception error) {		
 		LOGGER.error(error);

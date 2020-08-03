@@ -67,7 +67,7 @@ public class FileUploader {
 		this.reportingUuid = reportingUuid;
 	}
 
-	public String processOutput(final ReportingFactory reportingFactory) throws AbstractCodedException, ObsEmptyFileException {
+	public void processOutput(final ReportingFactory reportingFactory) throws AbstractCodedException, ObsEmptyFileException {
 
 		final List<CompressedProductQueueMessage> outputToPublish = new ArrayList<>();
 
@@ -94,8 +94,6 @@ public class FileUploader {
 		obsClient.upload(Arrays.asList(new FileObsUploadObject(uploadObject.getFamily(), uploadObject.getKey(), uploadObject.getFile())), reportingFactory);
 		
 		publishAccordingUploadFiles(NOT_KEY_OBS, outputToPublish);
-        
-        return outputFileName;
 	}
 
 	/**
