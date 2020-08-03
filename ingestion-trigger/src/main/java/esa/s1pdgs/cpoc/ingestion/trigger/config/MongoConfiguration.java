@@ -36,6 +36,12 @@ public class MongoConfiguration {
     @Value("${mongodb.database}")
     private String mongoDBDatabase;
 
+    @Value("${mongodb.username:}")
+    private String mongoUsername;
+
+    @Value("${mongodb.password:}")
+    private String mongoPassword;
+
     @Bean
     public MongoClient mongoClient() {
     	LOGGER.info("New constructor");
@@ -43,7 +49,8 @@ public class MongoConfiguration {
         mongoDBHost.forEach(host -> {
         	stringJoinerHosts.add(host + ":" + mongoDBPort);
         });
-        return MongoClients.create("mongodb://" + stringJoinerHosts.toString() + "/?uuidRepresentation=STANDARD");
+        String credentials = "".equals(mongoUsername) ? "" : mongoUsername + ":" + mongoPassword + "@";
+        return MongoClients.create("mongodb://" + credentials + stringJoinerHosts.toString() + "/?uuidRepresentation=STANDARD");
     }
 
     @Bean
