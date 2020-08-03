@@ -83,6 +83,9 @@ public class FileUploader {
 		final FileObsUploadObject uploadObject = new FileObsUploadObject(outputProductFamily, outputFileName, productPath);
 		
 		if(job.getCompressionDirection() == CompressionDirection.COMPRESS) {
+			// skipping publishing of Un-compression event,
+			// The better way would be to add the CompressionDirection to the CompressionEvent
+			// (similar to CompressionJob) or to generate a "UncompressionEvent"
 			final CompressedProductQueueMessage cpqm = new CompressedProductQueueMessage(outputProductFamily, outputFileName, outputFileName);
 			outputToPublish.add(cpqm);
 		}
