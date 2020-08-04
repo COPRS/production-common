@@ -29,7 +29,9 @@ public class TestFileDescriptorBuilder {
 	private static final String PATTERN_AUX = "^([0-9a-z][0-9a-z]){1}([0-9a-z]){1}(_(OPER|TEST))?_(AUX_OBMEMC|AUX_PP1|AUX_CAL|AUX_INS|AUX_RESORB|MPL_ORBPRE|MPL_ORBSCT)_\\w{1,}\\.(XML|EOF|SAFE)(/.*)?$";
 	private static final String PATTERN_PROD = "^(S1|AS)(A|B)_(S[1-6]|IW|EW|WV|GP|HK|N[1-6]|EN|IM)_(SLC|GRD|OCN|RAW)(F|H|M|_)_(0|1|2)(A|C|N|S|_)(SH|SV|HH|HV|VV|VH|DH|DV)_([0-9a-z]{15})_([0-9a-z]{15})_([0-9]{6})_([0-9a-z_]{6})\\w{1,}\\.(SAFE)(/.*)?$";
 	
-	private static final String PATTERN_S3 = "^([a-zA-Z0-9][a-zA-Z0-9])(\\w{1})_((OL|SL|SR|DO|MW|GN|SY|TM|AX)_(0|1|2|_)_\\w{6})_(\\d{8}T\\d{6})_(\\d{8}T\\d{6})_(\\d{8}T\\d{6})_(\\w{17})_(\\w{3})_(\\w{8})\\.(\\w{1,4})\\/?(.+)?$";
+	private static final String PATTERN_S3 = "^([a-zA-Z0-9][a-zA-Z0-9])(\\w{1})_((OL|SL|SR|DO|MW|GN|SY|TM|AX)_(0|1|2|_)_\\w{4}(?!AX)\\w{2})_(\\d{8}T\\d{6})_(\\d{8}T\\d{6})_(\\d{8}T\\d{6})_(\\w{17})_(\\w{3})_(\\w{8})\\.(SEN3|ISIP)\\/?(.+)?$";
+	private static final String PATTERN_S3_AUX = "^([a-zA-Z0-9][a-zA-Z0-9])(\\w{1})_((OL|SL|SR|DO|MW|GN|SY|TM|AX)_(0|1|2|_)_\\w{4}AX)_(\\d{8}T\\d{6})_(\\d{8}T\\d{6})_(\\d{8}T\\d{6})_(_{17})_(\\w{3})_(\\w{8})\\.(SEN3)\\/?(.+)?$";
+	
     private final File inputDir = new File("src/test/resources/workDir/");
 	private final File testDir = FileUtils.createTmpDir();
 	
@@ -291,8 +293,40 @@ public class TestFileDescriptorBuilder {
 		expected.setMode("NRT");
 
         final File file = new File(testDir, "S3A_AX___BA__AX_20040702T223000_20040704T042158_20171130T082116___________________WER_D_AL____.SEN3/xfdumanifest.xml");
-        final FileDescriptorBuilder uut = newDescriptorForPattern(PATTERN_S3);
+        final FileDescriptorBuilder uut = newDescriptorForPattern(PATTERN_S3_AUX);
         final S3FileDescriptor result = uut.buildS3FileDescriptor(file, dto, ProductFamily.S3_AUXILIARY_FILE);
+        assertNotNull("File descriptor should not be null", result);
+        assertEquals("File descriptor are not equals", expected, result);
+    }
+    
+    @Test
+    public void testBuildS3FileDescriptorProduct() throws Exception {
+    	final CatalogJob dto = Utils.newCatalogJob(
+                "S3A_SL_0_SLT__G_20040702T235915_20040703T000415_20150424T160530___________________WER_D_______.ISIP",
+                "S3A_SL_0_SLT__G_20040702T235915_20040703T000415_20150424T160530___________________WER_D_______.ISIP",
+                ProductFamily.S3_GRANULES, 
+                "NRT"
+        );  
+    	
+        final S3FileDescriptor expected = new S3FileDescriptor();
+        expected.setProductType("SL_0_SLT__G");
+		expected.setProductClass("SL");
+		expected.setRelativePath("S3A_SL_0_SLT__G_20040702T235915_20040703T000415_20150424T160530___________________WER_D_______.ISIP/S3A_SL_0_SLT__G_20040702T235915_20040703T000415_20150424T160530___________________WER_D________iif.xml");
+		expected.setFilename("S3A_SL_0_SLT__G_20040702T235915_20040703T000415_20150424T160530___________________WER_D________iif.xml");
+		expected.setExtension(FileExtension.ISIP);
+		expected.setProductName("S3A_SL_0_SLT__G_20040702T235915_20040703T000415_20150424T160530___________________WER_D_______.ISIP");
+		expected.setMissionId("S3");
+		expected.setSatelliteId("A");
+		expected.setKeyObjectStorage("S3A_SL_0_SLT__G_20040702T235915_20040703T000415_20150424T160530___________________WER_D_______.ISIP");
+		expected.setProductFamily(ProductFamily.S3_GRANULES);
+		expected.setInstanceId("_________________");
+		expected.setGeneratingCentre("WER");
+		expected.setClassId("D_______");
+		expected.setMode("NRT");
+
+        final File file = new File(testDir, "S3A_SL_0_SLT__G_20040702T235915_20040703T000415_20150424T160530___________________WER_D_______.ISIP/S3A_SL_0_SLT__G_20040702T235915_20040703T000415_20150424T160530___________________WER_D________iif.xml");
+        final FileDescriptorBuilder uut = newDescriptorForPattern(PATTERN_S3);
+        final S3FileDescriptor result = uut.buildS3FileDescriptor(file, dto, ProductFamily.S3_GRANULES);
         assertNotNull("File descriptor should not be null", result);
         assertEquals("File descriptor are not equals", expected, result);
     }
