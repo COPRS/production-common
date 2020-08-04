@@ -10,7 +10,8 @@ public class IpfPreparationJob extends AbstractMessage {
 	private String ipfVersion;
 	private List<String> preselectednputs;
 	
-	// workaround until S1PRO-940 is implemented
+	// Used to provide the information required for job generation from production-trigger to preparation-worker, e.g.
+	// start/stop time, tasktable name, ...
 	private AppDataJob appDataJob;
 
 	public String getIpfName() {
