@@ -39,6 +39,7 @@ public enum ProductFamily {
     L1_SLICE_ZIP, //
     L2_ACN_ZIP, //
     L2_SLICE_ZIP,
+    PLAN_AND_REPORT_ZIP,
     
     // S2QT types
     L1C,
