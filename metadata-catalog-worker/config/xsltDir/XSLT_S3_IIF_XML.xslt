@@ -43,7 +43,7 @@
 					select="//*[local-name()='specificParameters']/feature[@key='dumpStart']" />
 			</xsl:call-template>
 		</dumpStart>
-		
+
 		<receivingStartTime>
 			<xsl:call-template name="formatDateTime">
 				<xsl:with-param name="receivedDateTime"
@@ -62,7 +62,7 @@
 			<xsl:value-of
 				select="//*[local-name()='specificParameters']/feature[@key='receivingGroundStation']" />
 		</receivingGroundStation>
-		
+
 		<granuleNumber>
 			<xsl:value-of
 				select="//*[local-name()='specificParameters']/feature[@key='granuleNumber']" />
@@ -74,8 +74,7 @@
 		</granulePosition>
 
 		<qualityIndicator>
-			<xsl:value-of
-				select="//*[local-name()='quality']" />
+			<xsl:value-of select="//*[local-name()='quality']" />
 		</qualityIndicator>
 
 		<xsl:call-template name="setTimeliness" />
@@ -84,17 +83,15 @@
 	<!--=================== Getting Timeliness Fields Template =================== -->
 	<!-- L0 products should always use NRT -->
 	<xsl:template name="setTimeliness">
-		<timeliness>
-			<NRT>
-				<xsl:value-of select="'true'" />
-			</NRT>
-			<STC>
-				<xsl:value-of select="'false'" />
-			</STC>
-			<NTC>
-				<xsl:value-of select="'false'" />
-			</NTC>
-		</timeliness>
+		<NRT>
+			<xsl:value-of select="'true'" />
+		</NRT>
+		<STC>
+			<xsl:value-of select="'false'" />
+		</STC>
+		<NTC>
+			<xsl:value-of select="'false'" />
+		</NTC>
 	</xsl:template>
 
 	<!--==================== Format Date Time Template ========================= -->

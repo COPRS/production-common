@@ -153,7 +153,7 @@
 			<xsl:value-of
 				select="//*[local-name()='onlineQualityCheck']" />
 		</qualityIndicator>
-		
+
 		<xsl:call-template name="setTimeliness">
 			<xsl:with-param name="timeliness">
 				<xsl:value-of
@@ -198,17 +198,15 @@
 				</xsl:otherwise>
 			</xsl:choose>
 		</xsl:variable>
-		<timeliness>
-			<NRT>
-				<xsl:value-of select="$NRT" />
-			</NRT>
-			<STC>
-				<xsl:value-of select="$STC" />
-			</STC>
-			<NTC>
-				<xsl:value-of select="$NTC" />
-			</NTC>
-		</timeliness>
+		<NRT>
+			<xsl:value-of select="$NRT" />
+		</NRT>
+		<STC>
+			<xsl:value-of select="$STC" />
+		</STC>
+		<NTC>
+			<xsl:value-of select="$NTC" />
+		</NTC>
 	</xsl:template>
 
 	<!--==================== Format Date Time Template ========================= -->
