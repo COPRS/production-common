@@ -118,7 +118,7 @@ public class SearchMetadataController {
 		} catch (MetadataNotPresentException e) {
         	LOGGER.warn("{} '{}' of family {} not available [code {}] {}",  
         			this.getClass().getSimpleName(), productName, productFamily, e.getCode().getCode(), e.getLogMessage());            
-            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+            return new ResponseEntity<>(new SearchMetadata(), HttpStatus.NOT_FOUND);
 		} catch (final Exception ex) {
 			LOGGER.error("Query error while doing product name search: {}", LogUtils.toString(ex));
 			return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
