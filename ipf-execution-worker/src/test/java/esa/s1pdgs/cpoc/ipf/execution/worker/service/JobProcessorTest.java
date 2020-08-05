@@ -40,7 +40,6 @@ import esa.s1pdgs.cpoc.mqi.model.queue.IpfExecutionJob;
 import esa.s1pdgs.cpoc.mqi.model.rest.GenericMessageDto;
 import esa.s1pdgs.cpoc.obs_sdk.ObsClient;
 import esa.s1pdgs.cpoc.report.Reporting;
-import esa.s1pdgs.cpoc.report.ReportingOutput;
 import esa.s1pdgs.cpoc.report.ReportingUtils;
 
 /**
@@ -222,7 +221,7 @@ public class JobProcessorTest extends MockPropertiesTest {
         // Step 2
         doReturn(Collections.emptyList()).when(inputDownloader).processInputs(reporting);
         // Step 4
-        doReturn(ReportingOutput.NULL).when(outputProcessor).processOutput(reporting, UUID.randomUUID());
+        doReturn(Collections.emptyList()).when(outputProcessor).processOutput(reporting, UUID.randomUUID());
         // Step 5
         final File folder1 =
                 new File(inputMessage.getBody().getWorkDirectory() + "folder1");

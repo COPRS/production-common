@@ -47,58 +47,58 @@ public class ProductCategoryTest {
     @Test
     public void testValueFromFamily() throws InternalErrorException {
         assertEquals(ProductCategory.AUXILIARY_FILES, ProductCategory
-                .fromProductFamily(ProductFamily.AUXILIARY_FILE));
+                .of(ProductFamily.AUXILIARY_FILE));
         assertEquals(ProductCategory.EDRS_SESSIONS,
-                ProductCategory.fromProductFamily(ProductFamily.EDRS_SESSION));
+                ProductCategory.of(ProductFamily.EDRS_SESSION));
         assertEquals(ProductCategory.LEVEL_REPORTS,
-                ProductCategory.fromProductFamily(ProductFamily.L0_REPORT));
+                ProductCategory.of(ProductFamily.L0_REPORT));
         assertEquals(ProductCategory.LEVEL_REPORTS,
-                ProductCategory.fromProductFamily(ProductFamily.L1_REPORT));
+                ProductCategory.of(ProductFamily.L1_REPORT));
         assertEquals(ProductCategory.LEVEL_REPORTS,
-                ProductCategory.fromProductFamily(ProductFamily.L0_SEGMENT_REPORT));
+                ProductCategory.of(ProductFamily.L0_SEGMENT_REPORT));
         assertEquals(ProductCategory.LEVEL_PRODUCTS,
-                ProductCategory.fromProductFamily(ProductFamily.L0_ACN));
+                ProductCategory.of(ProductFamily.L0_ACN));
         assertEquals(ProductCategory.LEVEL_PRODUCTS,
-                ProductCategory.fromProductFamily(ProductFamily.L0_SLICE));
+                ProductCategory.of(ProductFamily.L0_SLICE));
         assertEquals(ProductCategory.LEVEL_PRODUCTS,
-                ProductCategory.fromProductFamily(ProductFamily.L1_ACN));
+                ProductCategory.of(ProductFamily.L1_ACN));
         assertEquals(ProductCategory.LEVEL_PRODUCTS,
-                ProductCategory.fromProductFamily(ProductFamily.L1_SLICE));
+                ProductCategory.of(ProductFamily.L1_SLICE));
         assertEquals(ProductCategory.LEVEL_PRODUCTS,
-                ProductCategory.fromProductFamily(ProductFamily.L0_BLANK));
+                ProductCategory.of(ProductFamily.L0_BLANK));
         assertEquals(ProductCategory.LEVEL_JOBS,
-                ProductCategory.fromProductFamily(ProductFamily.L0_JOB));
+                ProductCategory.of(ProductFamily.L0_JOB));
         assertEquals(ProductCategory.LEVEL_JOBS,
-                ProductCategory.fromProductFamily(ProductFamily.L1_JOB));
+                ProductCategory.of(ProductFamily.L1_JOB));
         assertEquals(ProductCategory.LEVEL_JOBS,
-                ProductCategory.fromProductFamily(ProductFamily.L0_SEGMENT_JOB));
+                ProductCategory.of(ProductFamily.L0_SEGMENT_JOB));
         assertEquals(ProductCategory.LEVEL_SEGMENTS,
-                ProductCategory.fromProductFamily(ProductFamily.L0_SEGMENT));
+                ProductCategory.of(ProductFamily.L0_SEGMENT));
 
 
         assertEquals(ProductCategory.LEVEL_REPORTS,
-                ProductCategory.fromProductFamily(ProductFamily.L2_REPORT));
+                ProductCategory.of(ProductFamily.L2_REPORT));
         assertEquals(ProductCategory.LEVEL_JOBS,
-                ProductCategory.fromProductFamily(ProductFamily.L2_JOB));
+                ProductCategory.of(ProductFamily.L2_JOB));
         assertEquals(ProductCategory.LEVEL_PRODUCTS,
-                ProductCategory.fromProductFamily(ProductFamily.L2_ACN));
+                ProductCategory.of(ProductFamily.L2_ACN));
         assertEquals(ProductCategory.LEVEL_PRODUCTS,
-                ProductCategory.fromProductFamily(ProductFamily.L2_SLICE));
+                ProductCategory.of(ProductFamily.L2_SLICE));
         
-        assertEquals(ProductCategory.INGESTION,ProductCategory.fromProductFamily(ProductFamily.BLANK));
-        assertEquals(ProductCategory.INGESTION,ProductCategory.fromProductFamily(ProductFamily.INVALID));
+        assertEquals(ProductCategory.INGESTION,ProductCategory.of(ProductFamily.BLANK));
+        assertEquals(ProductCategory.INGESTION,ProductCategory.of(ProductFamily.INVALID));
         
         try {
-            ProductCategory.fromProductFamily(null);
+            ProductCategory.of(null);
             fail("an InternalErrorException shall be raised");
-        } catch (InternalErrorException iee) {
+        } catch (final IllegalArgumentException iee) {
             assertTrue(iee.getMessage().contains("null"));
         }
 
         try {
-            ProductCategory.fromProductFamily(ProductFamily.JOB_ORDER);
+            ProductCategory.of(ProductFamily.JOB_ORDER);
             fail("an InternalErrorException shall be raised");
-        } catch (InternalErrorException iee) {
+        } catch (final IllegalArgumentException iee) {
             assertTrue(iee.getMessage().contains("JOB"));
         }
     }

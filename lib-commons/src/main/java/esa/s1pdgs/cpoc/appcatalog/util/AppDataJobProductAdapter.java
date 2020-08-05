@@ -1,6 +1,6 @@
 package esa.s1pdgs.cpoc.appcatalog.util;
 
-import java.util.Collections;
+import java.util.ArrayList;
 import java.util.List;
 
 import esa.s1pdgs.cpoc.appcatalog.AppDataJobFile;
@@ -18,7 +18,7 @@ public final class AppDataJobProductAdapter {
 	}
 	
 	public final List<AppDataJobFile> getProductsFor(final String key) {
-		return product.getInputs().getOrDefault(key, Collections.emptyList());
+		return product.getInputs().getOrDefault(key, new ArrayList<>());
 	}
 	
 	public final void setStartTime(final String value) {

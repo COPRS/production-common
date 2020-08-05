@@ -10,6 +10,7 @@ import esa.s1pdgs.cpoc.ipf.preparation.worker.config.ProcessConfiguration;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.dispatch.JobDispatcher;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.generator.JobGenerator;
 import esa.s1pdgs.cpoc.mqi.client.MqiListener;
+import esa.s1pdgs.cpoc.mqi.client.MqiMessageEventHandler;
 import esa.s1pdgs.cpoc.mqi.model.queue.IpfPreparationJob;
 import esa.s1pdgs.cpoc.mqi.model.rest.GenericMessageDto;
 
@@ -34,8 +35,8 @@ public class IpfPreparationService implements MqiListener<IpfPreparationJob> {
 	}
 		
 	@Override
-	public void onMessage(final GenericMessageDto<IpfPreparationJob> message) throws Exception {
-		jobDispatcher.dispatch(message);
+	public MqiMessageEventHandler onMessage(final GenericMessageDto<IpfPreparationJob> message) throws Exception {
+		return jobDispatcher.dispatch(message);
 	}
 
 	@Override

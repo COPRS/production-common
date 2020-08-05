@@ -6,6 +6,7 @@ import java.nio.file.FileVisitOption;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
@@ -41,8 +42,10 @@ import esa.s1pdgs.cpoc.mqi.client.GenericMqiClient;
 import esa.s1pdgs.cpoc.mqi.client.MessageFilter;
 import esa.s1pdgs.cpoc.mqi.client.MqiConsumer;
 import esa.s1pdgs.cpoc.mqi.client.MqiListener;
+import esa.s1pdgs.cpoc.mqi.client.MqiMessageEventHandler;
 import esa.s1pdgs.cpoc.mqi.client.StatusService;
 import esa.s1pdgs.cpoc.mqi.model.queue.CompressionDirection;
+import esa.s1pdgs.cpoc.mqi.model.queue.CompressionEvent;
 import esa.s1pdgs.cpoc.mqi.model.queue.CompressionJob;
 import esa.s1pdgs.cpoc.mqi.model.rest.GenericMessageDto;
 import esa.s1pdgs.cpoc.obs_sdk.ObsClient;
@@ -102,7 +105,7 @@ public class CompressProcessor implements MqiListener<CompressionJob> {
 	}
 
 	@Override
-	public final void onMessage(final GenericMessageDto<CompressionJob> message) throws Exception {
+	public final MqiMessageEventHandler onMessage(final GenericMessageDto<CompressionJob> message) throws Exception {
 		final String workDir = properties.getWorkingDirectory();
 		final CompressionJob job = message.getBody();
 		
@@ -124,49 +127,49 @@ public class CompressProcessor implements MqiListener<CompressionJob> {
 		);
 		final FileUploader fileUploader = new FileUploader(obsClient, producerFactory, workDir, message, job, report.getUid());	
 		report.begin(
-				ReportingUtils.newFilenameReportingInputFor(job.getProductFamily(), job.getKeyObjectStorage()),
-				new ReportingMessage("Start compression/uncompression processing")
-		);
-		try {
-			if(skip(job)) {
-				
-				LOGGER.warn("Skipping uncompression for {}", job);
-				
-			} else {
-				checkThreadInterrupted();
-				LOGGER.info("Downloading inputs for {}", job);
-				fileDownloader.processInputs(report);
-	
-				checkThreadInterrupted();
-				LOGGER.info("Compressing/Uncompressing inputs for {}", job);
-				procCompletionSrv.submit(procExecutor);
-				waitForPoolProcessesEnding(procCompletionSrv);
-	
-				checkThreadInterrupted();
-				LOGGER.info("Uploading compressed/uncompressed outputs for {}", job);
-				fileUploader.processOutput(report);
-			}
-			report.end(
-					ReportingUtils.newFilenameReportingOutputFor(job.getOutputProductFamily(), job.getKeyObjectStorage()), 
-					new ReportingMessage("End compression/uncompression processing")
-			);
-		} catch (final Exception e) {
-			report.error(errorReportMessage(e));
-			throw e;
-		}
-		finally {
-			// initially, this has only been performed on InterruptedException but we discussed that it makes sense to
-			// always perform the cleanup, also see S1PRO-988 
-			cleanCompressionProcessing(job, procExecutorSrv);
-		}
+				ReportingUtils.newFilenameReportingInputFor(job.getProductFamily(), message.getBody().getKeyObjectStorage()),
+				new ReportingMessage("Start compression processing")
+		);		
+		return new MqiMessageEventHandler.Builder<CompressionEvent>(ProductCategory.COMPRESSED_PRODUCTS)
+				.onSuccess(res -> report.end(
+						ReportingUtils.newFilenameReportingOutputFor(job.getProductFamily(),job.getOutputKeyObjectStorage()), 
+						new ReportingMessage("End compression processing")
+				))
+				.onError(e -> report.error(errorReportMessage(e)))
+				.publishMessageProducer(() -> {
+					try {
+						if(skip(job)) {							
+							LOGGER.warn("Skipping uncompression for {}", job);
+							return Collections.emptyList();							
+						} 
+						checkThreadInterrupted();
+						LOGGER.info("Downloading inputs for {}", job);
+						fileDownloader.processInputs(report);
+			
+						checkThreadInterrupted();
+						LOGGER.info("Compressing/Uncompressing inputs for {}", job);
+						procCompletionSrv.submit(procExecutor);
+						waitForPoolProcessesEnding(procCompletionSrv);
+			
+						checkThreadInterrupted();
+						LOGGER.info("Uploading compressed/uncompressed outputs for {}", job);
+						return fileUploader.processOutput(report);
+					}
+					finally {
+						// initially, this has only been performed on InterruptedException but we discussed that it makes sense to
+						// always perform the cleanup, also see S1PRO-988 
+						cleanCompressionProcessing(job, procExecutorSrv);
+					}
+				})
+				.newResult();
 	}
 		
-	private boolean skip(CompressionJob job) throws ObsServiceException, SdkClientException {
+	private boolean skip(final CompressionJob job) throws ObsServiceException, SdkClientException {
 		
 		if (job.getCompressionDirection() == CompressionDirection.UNCOMPRESS) {
 			LOGGER.debug("compression direction is: uncompress");
 			
-			ObsObject obsObject = new ObsObject(job.getOutputProductFamily(), job.getOutputKeyObjectStorage());
+			final ObsObject obsObject = new ObsObject(job.getOutputProductFamily(), job.getOutputKeyObjectStorage());
 			if(obsClient.prefixExists(obsObject)) {
 				LOGGER.info(
 				String.format(

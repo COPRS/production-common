@@ -7,6 +7,7 @@ import org.springframework.util.Assert;
 import esa.s1pdgs.cpoc.appcatalog.AppDataJob;
 import esa.s1pdgs.cpoc.mqi.model.queue.CatalogEvent;
 import esa.s1pdgs.cpoc.mqi.model.rest.GenericMessageDto;
+import esa.s1pdgs.cpoc.mqi.model.rest.MessageDto;
 
 public final class CatalogEventAdapter {
 
@@ -22,8 +23,8 @@ public final class CatalogEventAdapter {
 		return new CatalogEventAdapter(mqiMessage.getBody());
 	}
 	
-	public static final CatalogEventAdapter of(final GenericMessageDto<CatalogEvent> mqiMessage) {
-		return new CatalogEventAdapter(mqiMessage.getBody());
+	public static final CatalogEventAdapter of(final MessageDto<CatalogEvent> mqiMessage) {
+		return new CatalogEventAdapter(mqiMessage.getDto());
 	}
 	
 	public final String sessionId() {
@@ -72,6 +73,14 @@ public final class CatalogEventAdapter {
 	
 	public final String timeliness() {
 		return getStringValue("timeliness", null);
+	}
+	
+	public final String productConsolidation() {
+		return getStringValue("productConsolidation", "NOT_DEFINED");
+	}
+	
+	public final String productSensingConsolidation() {
+		return getStringValue("productSensingConsolidation", "NOT_DEFINED");
 	}
 	
 	public final List<String> listValues(final String name) {

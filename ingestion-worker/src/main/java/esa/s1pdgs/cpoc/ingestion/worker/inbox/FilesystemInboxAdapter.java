@@ -15,6 +15,7 @@ import java.util.stream.Collectors;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import esa.s1pdgs.cpoc.common.utils.Exceptions;
 import esa.s1pdgs.cpoc.common.utils.FileUtils;
 import esa.s1pdgs.cpoc.ingestion.worker.config.IngestionWorkerServiceConfigurationProperties;
 import esa.s1pdgs.cpoc.ingestion.worker.product.IngestionJobs;
@@ -40,16 +41,27 @@ public final class FilesystemInboxAdapter implements InboxAdapter {
 	}
 	
 	@Override
-	public final void delete(final URI uri) throws Exception {
+	public final void delete(final URI uri) {
 		final File file = Paths.get(uri)
 				.toFile();
 		
 		if (file.exists()) {
 			LOG.debug("Deleting file {}", file);
+			delete(file);
+		}
+	}
+
+	private void delete(final File file) {
+		try {
 			FileUtils.deleteWithRetries(
 					file, 
 					properties.getMaxRetries(), 
 					properties.getTempoRetryMs()
+			);
+		} catch (final InterruptedException e) {
+			throw new RuntimeException(
+					String.format("Interrupted on deleting file %s: %s", file, Exceptions.messageOf(e)),
+					e
 			);
 		}
 	}
