@@ -326,16 +326,10 @@ public class MetadataClient {
 		if (response == null) {
 			throw new MetadataQueryException(String.format("Rest metadata call %s returned null", uri));
 		}
-		if (response.getStatusCode() == HttpStatus.NOT_FOUND) {
-			return;
-		}
 		if (response.getStatusCode() != HttpStatus.OK) {
 			throw new MetadataQueryException(
 					String.format("Rest metadata call %s returned status code %s", uri, response.getStatusCode())
 			);
-		}
-		if (response.getBody() == null) {
-			throw new MetadataQueryException(String.format("Rest metadata call %s returned null body", uri));
 		}
 	}
 	
