@@ -164,9 +164,16 @@ public class CompressProcessor implements MqiListener<CompressionJob> {
 	private boolean skip(CompressionJob job) throws ObsServiceException, SdkClientException {
 		
 		if (job.getCompressionDirection() == CompressionDirection.UNCOMPRESS) {
+			LOGGER.debug("compression direction is: uncompress");
 			
 			ObsObject obsObject = new ObsObject(job.getOutputProductFamily(), job.getOutputKeyObjectStorage());
-			if(obsClient.exists(obsObject)) {
+			if(obsClient.prefixExists(obsObject)) {
+				LOGGER.info(
+				String.format(
+						"OBS file '%s' (%s) already exist", 
+						job.getOutputKeyObjectStorage(), 
+						job.getOutputProductFamily()
+				));
 				return true;
 			}
 		}
