@@ -1,5 +1,8 @@
 package esa.s1pdgs.cpoc.mdc.worker.config;
 
+import java.util.Collections;
+import java.util.Map;
+
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Configuration;
@@ -10,10 +13,17 @@ import org.springframework.context.annotation.Configuration;
 public class ProcessConfiguration {
 	private String hostname = "";
 	private int numObsDownloadRetries = 99;
-	private long sleepBetweenObsRetriesMillis = 3000L; 	
-	private String fileWithManifestExt = ".safe";
-	private String manifestFilename = "manifest.safe";  
-	
+	private long sleepBetweenObsRetriesMillis = 3000L;
+
+	/*
+	 * Determine manifest filename by filename extension. The placeholder
+	 * "<PRODUCTNAME>" will be replaced by the actual product key 
+	 * 
+	 * ex.
+	 *   <PRODUCTNAME>_iif.xml for product S3A_SL_0_SR___G will be converted to
+	 *   S3A_SL_0_SR___G_iif.xml
+	 */
+	private Map<String, String> manifestFilenames = Collections.singletonMap("safe", "manifest.safe");
 
 	public String getHostname() {
 		return hostname;
@@ -38,20 +48,12 @@ public class ProcessConfiguration {
 	public void setSleepBetweenObsRetriesMillis(final long sleepBetweenObsRetriesMillis) {
 		this.sleepBetweenObsRetriesMillis = sleepBetweenObsRetriesMillis;
 	}
-	
-	public String getFileWithManifestExt() {
-		return fileWithManifestExt;
+
+	public Map<String, String> getManifestFilenames() {
+		return manifestFilenames;
 	}
 
-	public void setFileWithManifestExt(final String fileWithManifestExt) {
-		this.fileWithManifestExt = fileWithManifestExt;
-	}
-
-	public String getManifestFilename() {
-		return manifestFilename;
-	}
-
-	public void setManifestFilename(final String manifestFilename) {
-		this.manifestFilename = manifestFilename;
+	public void setManifestFilenames(Map<String, String> manifestFilenames) {
+		this.manifestFilenames = manifestFilenames;
 	}
 }

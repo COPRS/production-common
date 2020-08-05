@@ -75,9 +75,16 @@ public abstract class AbstractMetadataExtractor implements MetadataExtractor {
     }
     
 	private final String getMetadataKeyObs(final String productKeyObs) {
-		if (productKeyObs.toLowerCase().endsWith(processConfiguration.getFileWithManifestExt())) {
-			return productKeyObs + "/" + processConfiguration.getManifestFilename();
-		} 
+		for (String manifestExt : processConfiguration.getManifestFilenames().keySet()) {
+			if (productKeyObs.toLowerCase().endsWith(manifestExt)) {
+				// Replace string "<PRODUCTNAME>" with productkey
+				String manifestFilename = processConfiguration.getManifestFilenames().get(manifestExt)
+						.replace("<PRODUCTNAME>", productKeyObs);
+
+				return productKeyObs + "/" + manifestFilename;
+			}
+		}
+
 		return productKeyObs;
 	}
 }
