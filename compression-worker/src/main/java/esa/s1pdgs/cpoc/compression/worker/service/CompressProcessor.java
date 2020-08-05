@@ -236,9 +236,12 @@ public class CompressProcessor implements MqiListener<CompressionJob> {
 		}
 		try {
 			LOGGER.info("Erasing local working directory for job {}", job);
+			
 			final Path p = Paths.get(properties.getWorkingDirectory());
-			Files.walk(p, FileVisitOption.FOLLOW_LINKS).sorted(Comparator.reverseOrder()).map(Path::toFile)
+			if (p.toFile().exists()) {
+				Files.walk(p, FileVisitOption.FOLLOW_LINKS).sorted(Comparator.reverseOrder()).map(Path::toFile)
 					.forEach(File::delete);
+			}
 		} catch (final IOException e) {
 			LOGGER.error("{} [code {}] Failed to erase local working directory", job,
 					ErrorCode.INTERNAL_ERROR.getCode());
