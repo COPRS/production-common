@@ -8,6 +8,7 @@ import java.util.Objects;
  * @author Viveris Technologies
  */
 public class LevelSegmentMetadata extends AbstractMetadata {
+	public static final LevelSegmentMetadata NULL = new LevelSegmentMetadata();
 
     private String polarisation;
 
@@ -55,7 +56,7 @@ public class LevelSegmentMetadata extends AbstractMetadata {
      * @param polarisation
      *            the polarisation to set
      */
-    public void setPolarisation(String polarisation) {
+    public void setPolarisation(final String polarisation) {
         this.polarisation = polarisation;
     }
 
@@ -77,7 +78,7 @@ public class LevelSegmentMetadata extends AbstractMetadata {
      * @param consolidation
      *            the consolidation to set
      */
-    public void setConsolidation(String consolidation) {
+    public void setConsolidation(final String consolidation) {
         this.consolidation = consolidation;
     }
 
@@ -85,7 +86,7 @@ public class LevelSegmentMetadata extends AbstractMetadata {
      * @param datatakeId
      *            the datatakeId to set
      */
-    public void setDatatakeId(String datatakeId) {
+    public void setDatatakeId(final String datatakeId) {
         this.datatakeId = datatakeId;
     }
     
@@ -93,13 +94,13 @@ public class LevelSegmentMetadata extends AbstractMetadata {
 		return productSensingConsolidation;
 	}
 
-	public void setProductSensingConsolidation(String productSensingConsolidation) {
+	public void setProductSensingConsolidation(final String productSensingConsolidation) {
 		this.productSensingConsolidation = productSensingConsolidation;
 	}
 	
 
 	public String toJsonString() {
-		String superToString = super.toAbstractString();
+		final String superToString = super.toAbstractString();
 		return String.format("{%s,\"datatakeId\":\"%s\",\"polarisation\":\"%s\",\"consolidation\":\"%s\",\"productSensingConsolidation\":\"%s\"}",
 				superToString, datatakeId, polarisation, consolidation, productSensingConsolidation);
 	}
@@ -124,7 +125,7 @@ public class LevelSegmentMetadata extends AbstractMetadata {
         } else if (obj == null || getClass() != obj.getClass()) {
             ret = false;
         } else {
-            LevelSegmentMetadata other = (LevelSegmentMetadata) obj;
+            final LevelSegmentMetadata other = (LevelSegmentMetadata) obj;
             ret = super.equals(obj)
                     && Objects.equals(datatakeId, other.datatakeId)
                     && Objects.equals(polarisation, other.polarisation)
