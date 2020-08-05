@@ -82,9 +82,9 @@ public class L0SegmentProduct extends AbstractProduct {
 	
 	private final Map<String,String> toMetadataMap(final LevelSegmentMetadata metadata) {
 		final Map<String,String> result = new LinkedHashMap<>();
-		result.put(DATATAKE_ID, metadata.getDatatakeId());
-		result.put(CONSOLIDATION, metadata.getConsolidation());
-		result.put(PRODUCT_SENSING_CONSOLIDATION, metadata.getProductSensingConsolidation());
+		result.put(DATATAKE_ID, String.valueOf(metadata.getDatatakeId()));
+		result.put(CONSOLIDATION, String.valueOf(metadata.getConsolidation()));
+		result.put(PRODUCT_SENSING_CONSOLIDATION, String.valueOf(metadata.getProductSensingConsolidation()));
 		return result;
 	}
 	
