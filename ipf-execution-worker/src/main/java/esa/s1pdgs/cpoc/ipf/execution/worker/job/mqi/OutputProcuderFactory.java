@@ -9,7 +9,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import esa.s1pdgs.cpoc.common.ProductCategory;
-import esa.s1pdgs.cpoc.common.ProductFamily;
 import esa.s1pdgs.cpoc.common.errors.AbstractCodedException;
 import esa.s1pdgs.cpoc.common.utils.FileUtils;
 import esa.s1pdgs.cpoc.ipf.execution.worker.config.ProcessConfiguration;
@@ -106,15 +105,9 @@ public class OutputProcuderFactory {
                 msg.getFamily(),
                 toProductionEvent(msg, inputMessage.getBody().getTimeliness(), reportUid)
 		);
-    	    	
-        if (msg.getFamily() == ProductFamily.L0_SEGMENT) {
-            sender.publish(messageToPublish, ProductCategory.LEVEL_SEGMENTS);
-        } else {
-    		messageToPublish.setInputKey(inputMessage.getInputKey());
-    		messageToPublish.setOutputKey(msg.getFamily().name());    		
-            sender.publish(messageToPublish, ProductCategory.LEVEL_PRODUCTS);
-        }
-        return messageToPublish;
+ 		messageToPublish.setInputKey(inputMessage.getInputKey());
+		messageToPublish.setOutputKey(msg.getFamily().name());
+		return messageToPublish;
     }
     
     private final ProductionEvent toProductionEvent(final ObsQueueMessage msg, final String timeliness, final UUID uid)

@@ -1,5 +1,6 @@
 package esa.s1pdgs.cpoc.production.trigger.service;
 
+import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
@@ -17,7 +18,6 @@ import esa.s1pdgs.cpoc.appcatalog.util.AppDataJobProductAdapter;
 import esa.s1pdgs.cpoc.appstatus.AppStatus;
 import esa.s1pdgs.cpoc.common.ProductCategory;
 import esa.s1pdgs.cpoc.common.ProductFamily;
-import esa.s1pdgs.cpoc.common.errors.AbstractCodedException;
 import esa.s1pdgs.cpoc.common.utils.LogUtils;
 import esa.s1pdgs.cpoc.errorrepo.ErrorRepoAppender;
 import esa.s1pdgs.cpoc.errorrepo.model.rest.FailedProcessingDto;
@@ -26,6 +26,7 @@ import esa.s1pdgs.cpoc.mqi.client.GenericMqiClient;
 import esa.s1pdgs.cpoc.mqi.client.MessageFilter;
 import esa.s1pdgs.cpoc.mqi.client.MqiConsumer;
 import esa.s1pdgs.cpoc.mqi.client.MqiListener;
+import esa.s1pdgs.cpoc.mqi.client.MqiMessageEventHandler;
 import esa.s1pdgs.cpoc.mqi.model.queue.CatalogEvent;
 import esa.s1pdgs.cpoc.mqi.model.queue.IpfPreparationJob;
 import esa.s1pdgs.cpoc.mqi.model.queue.util.CatalogEventAdapter;
@@ -89,68 +90,84 @@ public class GenericConsumer implements MqiListener<CatalogEvent> {
 	} 
 
     @Override
-    public final void onMessage(final GenericMessageDto<CatalogEvent> mqiMessage) throws Exception {
+    public final MqiMessageEventHandler onMessage(final GenericMessageDto<CatalogEvent> mqiMessage) throws Exception {
         final CatalogEvent event = mqiMessage.getBody();
         final String productName = event.getProductName();
         
         final Reporting reporting = ReportingUtils.newReportingBuilder()
         		.predecessor(event.getUid())
         		.newReporting("ProductionTrigger");
-        
-        LOGGER.debug("Handling consumption of product {}", productName);
-        try {
-            reporting.begin(
-            		ReportingUtils.newFilenameReportingInputFor(event.getProductFamily(), productName),
-            		new ReportingMessage("Received CatalogEvent for %s", productName)
-            );  
-            if (!isOverLand(event, reporting)) {                      
-                final AppDataJob job = new AppDataJob();
-                job.setLevel(processSettings.getLevel());
-                job.setPod(processSettings.getHostname());
-                job.getMessages().add(mqiMessage);
-                      
-                final AppDataJobProduct product = newProductFor(mqiMessage);
-                job.setProduct(product);                
-                final AppDataJobProductAdapter productAdapter = new AppDataJobProductAdapter(product);
                 
-                final String taskTableName = taskTableMapper.tasktableFor(product);
-                
-                LOGGER.debug("Tasktable for {} is {}", productAdapter.getProductName(), taskTableName);
-                
-                job.setTaskTableName(taskTableName);     
-                job.setStartTime(productAdapter.getStartTime());
-                job.setStopTime(productAdapter.getStopTime());
-                job.setProductName(productName);
-                                
-                LOGGER.info("Dispatching product {}", productName);
-                dispatch(mqiMessage, job, productName, reporting);
-                reporting.end(new ReportingMessage("IpfPreparationJob for product %s created", productName));  
-            }
-            else {
-            	LOGGER.debug("CatalogEvent for {} is ignored", productName);        
-                reporting.end(new ReportingMessage("Product %s is not over sea, skipping", productName)); 
-            }
-        } catch (final Exception e) {        	
-        	reporting.error(new ReportingMessage("Error on handling CatalogEvent: %s", LogUtils.toString(e)));
-        	throw e;
-        }
-        LOGGER.debug("Done handling consumption of product {}", productName);
-    }       
+		return new MqiMessageEventHandler.Builder<IpfPreparationJob>(ProductCategory.PREPARATION_JOBS)
+				.onSuccess(res -> {
+					if (res.size() == 0) {	      
+		                reporting.end(new ReportingMessage("Product %s is not over sea, skipping", productName)); 
+					}
+					else {
+						reporting.end(new ReportingMessage("IpfPreparationJob for product %s created", productName));
+					}
+				})
+				.onError(e -> reporting.error(new ReportingMessage("Error on handling CatalogEvent: %s", LogUtils.toString(e))))
+				.publishMessageProducer(() -> handle(reporting, mqiMessage))
+				.newResult();
+    }
 
-	@Override
+    @Override
 	public final void onTerminalError(final GenericMessageDto<CatalogEvent> message, final Exception error) {
         LOGGER.error(error);
         errorRepoAppender.send(
         	new FailedProcessingDto(processSettings.getHostname(), new Date(), error.getMessage(), message)
         );
 	}
+        
+    private final List<GenericPublicationMessageDto<IpfPreparationJob>> handle(
+    		final Reporting reporting, 
+    		final GenericMessageDto<CatalogEvent> mqiMessage
+    ) throws Exception {
+        final CatalogEvent event = mqiMessage.getBody();
+        final String productName = event.getProductName();
+        
+		LOGGER.debug("Handling consumption of product {}", productName);
+
+        reporting.begin(
+        		ReportingUtils.newFilenameReportingInputFor(event.getProductFamily(), productName),
+        		new ReportingMessage("Received CatalogEvent for %s", productName)
+        );  
+        if (!isOverLand(event, reporting)) {                      
+            final AppDataJob job = new AppDataJob();
+            job.setLevel(processSettings.getLevel());
+            job.setPod(processSettings.getHostname());
+            job.getMessages().add(mqiMessage);
+                  
+            final AppDataJobProduct product = newProductFor(mqiMessage);
+            job.setProduct(product);                
+            final AppDataJobProductAdapter productAdapter = new AppDataJobProductAdapter(product);
+            
+            final String taskTableName = taskTableMapper.tasktableFor(product);
+            
+            LOGGER.debug("Tasktable for {} is {}", productAdapter.getProductName(), taskTableName);
+            
+            job.setTaskTableName(taskTableName);     
+            job.setStartTime(productAdapter.getStartTime());
+            job.setStopTime(productAdapter.getStopTime());
+            job.setProductName(productName);
+                            
+            LOGGER.info("Dispatching product {}", productName);
+            return Collections.singletonList(dispatch(mqiMessage, job, productName, reporting));          
+        }
+        else {
+           	LOGGER.debug("CatalogEvent for {} is ignored", productName); 
+        }
+        LOGGER.debug("Done handling consumption of product {}", productName);
+        return Collections.emptyList();
+    }
 	
-	private final void dispatch(
+	private final GenericPublicationMessageDto<IpfPreparationJob> dispatch(
 			final GenericMessageDto<CatalogEvent> mqiMessage,
 			final AppDataJob appDataJob,
 			final String productName,
 			final ReportingFactory reportingFactory
-	) throws AbstractCodedException {
+	) {
         final CatalogEvent event = mqiMessage.getBody();
 		
         final Reporting reporting = reportingFactory.newReporting("Dispatch");
@@ -164,39 +181,28 @@ public class GenericConsumer implements MqiListener<CatalogEvent> {
         				productName
         		)
         );     
-        try {           
-        	final IpfPreparationJob job = new IpfPreparationJob();
-        	job.setProductFamily(event.getProductFamily());
-        	job.setKeyObjectStorage(event.getProductName());
-        	job.setAppDataJob(appDataJob);
-        	job.setUid(reporting.getUid());
-        	
-        	final GenericPublicationMessageDto<IpfPreparationJob> messageDto = new GenericPublicationMessageDto<IpfPreparationJob>(
-        			mqiMessage.getId(), 
-        			event.getProductFamily(), 
-        			job
-        	);
-        	messageDto.setInputKey(mqiMessage.getInputKey());
-        	messageDto.setOutputKey(event.getProductFamily().name());
-        	mqiClient.publish(messageDto, ProductCategory.PREPARATION_JOBS);  
-			reporting.end(
-					new ReportingMessage(
-							"AppDataJob %s for %s %s dispatched", 
-							appDataJob.getId(), 
-							processSettings.getProductType(), 
-							productName
-	        		)
-			);
-		} catch (final AbstractCodedException e) {
-			reporting.error(new ReportingMessage(
-					"Error on dispatching AppDataJob %s for %s %s: %s", 
-					appDataJob.getId(), 
-					processSettings.getProductType(), 
-					productName,
-					LogUtils.toString(e)
-			));
-			throw e;
-		}
+    	final IpfPreparationJob job = new IpfPreparationJob();
+    	job.setProductFamily(event.getProductFamily());
+    	job.setKeyObjectStorage(event.getProductName());
+    	job.setAppDataJob(appDataJob);
+    	job.setUid(reporting.getUid());
+    	
+    	final GenericPublicationMessageDto<IpfPreparationJob> messageDto = new GenericPublicationMessageDto<IpfPreparationJob>(
+    			mqiMessage.getId(), 
+    			event.getProductFamily(), 
+    			job
+    	);
+    	messageDto.setInputKey(mqiMessage.getInputKey());
+    	messageDto.setOutputKey(event.getProductFamily().name());
+		reporting.end(
+				new ReportingMessage(
+						"AppDataJob %s for %s %s dispatched", 
+						appDataJob.getId(), 
+						processSettings.getProductType(), 
+						productName
+        		)
+		);
+		return messageDto;
 	}	
 
 	private final boolean isOverLand(final CatalogEvent event, final ReportingFactory reporting) throws Exception {

@@ -1,5 +1,6 @@
 package esa.s1pdgs.cpoc.prip.trigger.service;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -20,6 +21,7 @@ import esa.s1pdgs.cpoc.mqi.client.GenericMqiClient;
 import esa.s1pdgs.cpoc.mqi.client.MessageFilter;
 import esa.s1pdgs.cpoc.mqi.client.MqiConsumer;
 import esa.s1pdgs.cpoc.mqi.client.MqiListener;
+import esa.s1pdgs.cpoc.mqi.client.MqiMessageEventHandler;
 import esa.s1pdgs.cpoc.mqi.model.queue.CompressionEvent;
 import esa.s1pdgs.cpoc.mqi.model.queue.PripPublishingJob;
 import esa.s1pdgs.cpoc.mqi.model.rest.GenericMessageDto;
@@ -69,7 +71,7 @@ public class CompressionEventListener implements MqiListener<CompressionEvent> {
 	}
 
 	@Override
-	public void onMessage(final GenericMessageDto<CompressionEvent> inputMessage) throws AbstractCodedException {
+	public MqiMessageEventHandler onMessage(final GenericMessageDto<CompressionEvent> inputMessage) throws AbstractCodedException {
 		LOGGER.debug("starting conversion of CompressionEvent to PublishingJob, got message: {}", inputMessage);		
 		final CompressionEvent compressionEvent = inputMessage.getBody();
 		
@@ -82,30 +84,30 @@ public class CompressionEventListener implements MqiListener<CompressionEvent> {
 				new ReportingMessage("Handling event for %s", compressionEvent.getKeyObjectStorage())
 		);
 		
-		try {
-			final PripPublishingJob publishingJob = new PripPublishingJob();
-			publishingJob.setKeyObjectStorage(compressionEvent.getKeyObjectStorage());
-			publishingJob.setProductFamily(compressionEvent.getProductFamily());
-			publishingJob.setUid(reporting.getUid());
-			
-			final GenericPublicationMessageDto<PripPublishingJob> outputMessage =
-					new GenericPublicationMessageDto<PripPublishingJob>(
-							inputMessage.getId(),
-							compressionEvent.getProductFamily(), 
-							publishingJob
-					);
-			
-			mqiClient.publish(outputMessage, ProductCategory.PRIP_JOBS);
-			reporting.end(new ReportingMessage("End Handling event for %s", compressionEvent.getKeyObjectStorage()));
-			LOGGER.debug("end conversion of CompressionEvent to PublishingJob, sent message: {}", outputMessage);
-		} catch (final Exception e) {
-			reporting.error(new ReportingMessage(
-					"Error on handling event for %s: %s", 
-					compressionEvent.getKeyObjectStorage(), 
-					LogUtils.toString(e)
-			));
-			throw e;
-		}
+		return new MqiMessageEventHandler.Builder<PripPublishingJob>(ProductCategory.PRIP_JOBS)
+				.onSuccess(res -> reporting.end(new ReportingMessage("End Handling event for %s", compressionEvent.getKeyObjectStorage())))
+				.onError(e -> reporting.error(new ReportingMessage(
+						"Error on handling event for %s: %s", 
+						compressionEvent.getKeyObjectStorage(), 
+						LogUtils.toString(e)
+				)))
+				.publishMessageProducer(() -> {
+					final PripPublishingJob publishingJob = new PripPublishingJob();
+					publishingJob.setKeyObjectStorage(compressionEvent.getKeyObjectStorage());
+					publishingJob.setProductFamily(compressionEvent.getProductFamily());
+					publishingJob.setUid(reporting.getUid());
+					
+					final GenericPublicationMessageDto<PripPublishingJob> outputMessage =
+							new GenericPublicationMessageDto<PripPublishingJob>(
+									inputMessage.getId(),
+									compressionEvent.getProductFamily(), 
+									publishingJob
+							);
+
+					LOGGER.debug("end conversion of CompressionEvent to PublishingJob, sent message: {}", outputMessage);
+		    		return Collections.singletonList(outputMessage);
+				})
+				.newResult();
 	}
 
 }

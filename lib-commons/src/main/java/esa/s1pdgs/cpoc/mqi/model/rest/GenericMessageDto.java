@@ -2,6 +2,8 @@ package esa.s1pdgs.cpoc.mqi.model.rest;
 
 import java.util.Objects;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 /**
  * Exchanged message for consumption
  * 
@@ -9,7 +11,7 @@ import java.util.Objects;
  * @param <T>
  *            the message
  */
-public class GenericMessageDto<T> {
+public class GenericMessageDto<T> implements MessageDto<T> {
 
     /**
      * Message identifier
@@ -91,8 +93,14 @@ public class GenericMessageDto<T> {
     public void setBody(final T body) {
         this.body = body;
     }
+    
+    @Override
+    @JsonIgnore
+	public T getDto() {
+		return body;
+	}
 
-    /**
+	/**
      * @see java.lang.Object#toString()
      */
     @Override
@@ -120,7 +128,7 @@ public class GenericMessageDto<T> {
         } else if (obj == null || getClass() != obj.getClass()) {
             ret = false;
         } else {
-            GenericMessageDto<?> other = (GenericMessageDto<?>) obj;
+            final GenericMessageDto<?> other = (GenericMessageDto<?>) obj;
             ret = id == other.id
                     && Objects.equals(inputKey, other.inputKey)
                     && Objects.equals(body, other.body);

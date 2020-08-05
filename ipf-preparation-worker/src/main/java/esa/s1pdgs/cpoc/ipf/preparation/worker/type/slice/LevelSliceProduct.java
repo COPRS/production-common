@@ -1,11 +1,19 @@
 package esa.s1pdgs.cpoc.ipf.preparation.worker.type.slice;
 
+import java.util.List;
+
 import esa.s1pdgs.cpoc.appcatalog.AppDataJob;
+import esa.s1pdgs.cpoc.appcatalog.AppDataJobFile;
 import esa.s1pdgs.cpoc.appcatalog.AppDataJobProduct;
 import esa.s1pdgs.cpoc.appcatalog.util.AppDataJobProductAdapter;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.type.AbstractProduct;
+import esa.s1pdgs.cpoc.metadata.model.L0AcnMetadata;
+import esa.s1pdgs.cpoc.metadata.model.L0SliceMetadata;
 
 public class LevelSliceProduct extends AbstractProduct {
+	private static final String SLICE = "slice";
+	private static final String ACN = "acn";
+	
 	public LevelSliceProduct(final AppDataJobProductAdapter product) {
 		super(product);
 	}
@@ -75,5 +83,41 @@ public class LevelSliceProduct extends AbstractProduct {
 
 	public final String getSegmentStopDate() {
 		return product.getStringValue("segmentStopDate");
+	}
+
+	public final void addSlice(final L0SliceMetadata file) {
+		final List<AppDataJobFile> slices = product.getProductsFor(SLICE);
+		final AppDataJobFile slice = new AppDataJobFile(
+				file.getProductName(), 
+				file.getKeyObjectStorage(), 
+				file.getValidityStart(), 
+				file.getValidityStop()
+		);
+		if (!slices.contains(slice)) {
+			slices.add(slice);
+			product.setProductsFor(SLICE, slices);
+		}	
+	}
+
+	public final void addAcn(final L0AcnMetadata file) {
+		final List<AppDataJobFile> acns = product.getProductsFor(ACN);
+		final AppDataJobFile acn = new AppDataJobFile(
+				file.getProductName(), 
+				file.getKeyObjectStorage(), 
+				file.getValidityStart(), 
+				file.getValidityStop()
+		);
+		if (!acns.contains(acn)) {
+			acns.add(acn);
+			product.setProductsFor(ACN, acns);
+		}
+	}
+	
+	public final List<AppDataJobFile> getSlices() {
+		return product.getProductsFor(SLICE);
+	}
+	
+	public final List<AppDataJobFile> getAcns() {
+		return product.getProductsFor(ACN);
 	}
 }

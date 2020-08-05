@@ -66,7 +66,6 @@ public class DataLifecycleTriggerService {
 	private final <E extends AbstractMessage> MqiConsumer<E> newConsumerFor(final ProductCategory cat) {
 		final CategoryConfig conf = configurationProperties.getProductCategories().get(cat);
 		final DataLifecycleTriggerListener<E> listener = new DataLifecycleTriggerListener<>(
-				mqiClient, 
 				errorRepoAppender, 
 				processConfig,
 				configurationProperties.getRetentionPolicies()

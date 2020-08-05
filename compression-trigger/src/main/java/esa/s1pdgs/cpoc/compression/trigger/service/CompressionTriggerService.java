@@ -1,5 +1,6 @@
 package esa.s1pdgs.cpoc.compression.trigger.service;
 
+import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
@@ -16,7 +17,6 @@ import org.springframework.stereotype.Service;
 import esa.s1pdgs.cpoc.appstatus.AppStatus;
 import esa.s1pdgs.cpoc.common.ProductCategory;
 import esa.s1pdgs.cpoc.common.ProductFamily;
-import esa.s1pdgs.cpoc.common.errors.AbstractCodedException;
 import esa.s1pdgs.cpoc.common.utils.LogUtils;
 import esa.s1pdgs.cpoc.compression.trigger.config.ProcessConfiguration;
 import esa.s1pdgs.cpoc.compression.trigger.config.TriggerConfigurationProperties;
@@ -27,6 +27,7 @@ import esa.s1pdgs.cpoc.mqi.client.GenericMqiClient;
 import esa.s1pdgs.cpoc.mqi.client.MessageFilter;
 import esa.s1pdgs.cpoc.mqi.client.MqiConsumer;
 import esa.s1pdgs.cpoc.mqi.client.MqiListener;
+import esa.s1pdgs.cpoc.mqi.client.MqiMessageEventHandler;
 import esa.s1pdgs.cpoc.mqi.model.queue.CompressionDirection;
 import esa.s1pdgs.cpoc.mqi.model.queue.CompressionJob;
 import esa.s1pdgs.cpoc.mqi.model.queue.ProductionEvent;
@@ -81,7 +82,7 @@ public class CompressionTriggerService implements MqiListener<ProductionEvent> {
 	}	
 
 	@Override
-	public final void onMessage(final GenericMessageDto<ProductionEvent> message) throws Exception {
+	public final MqiMessageEventHandler onMessage(final GenericMessageDto<ProductionEvent> message) throws Exception {
 		final ProductionEvent event = message.getBody();
 		
 		final Reporting reporting = ReportingUtils.newReportingBuilder()
@@ -92,16 +93,19 @@ public class CompressionTriggerService implements MqiListener<ProductionEvent> {
 				ReportingUtils.newFilenameReportingInputFor(event.getProductFamily(), event.getProductName()),
 				new ReportingMessage("Start handling of event for %s", event.getProductName())
 		);
-		try {
-			final CompressionJob job = toCompressionJob(event);
-			job.setUid(reporting.getUid());
-			publish(ProductCategory.COMPRESSION_JOBS, message, job);
-			reporting.end(new ReportingMessage("Finished handling of event for %s", event.getProductName()));
-		} catch (final Exception e) {
-			reporting.error(new ReportingMessage("Error on handling event for %s: %s", 
-					event.getProductName(), LogUtils.toString(e)));
-			throw e;
-		}
+		return new MqiMessageEventHandler.Builder<CompressionJob>(ProductCategory.COMPRESSION_JOBS)
+				.onSuccess(res -> reporting.end(new ReportingMessage("Finished handling of event for %s", event.getProductName())))
+				.onError(e -> reporting.error(new ReportingMessage(
+						"Error on handling event for %s: %s", 
+						event.getProductName(), 
+						LogUtils.toString(e))
+				))
+				.publishMessageProducer(() -> {
+					final CompressionJob job = toCompressionJob(event);
+					job.setUid(reporting.getUid());
+					return Collections.singletonList(publish(message, job));
+				})
+				.newResult();
 	}
 			
 	@Override
@@ -120,8 +124,7 @@ public class CompressionTriggerService implements MqiListener<ProductionEvent> {
 	}
 
 	private final MqiConsumer<?> newMqiConsumerFor(final ProductCategory cat, final CategoryConfig config) {
-		LOGGER.debug("Creating MQI consumer for category {} using {}", cat, config);
-	
+		LOGGER.debug("Creating MQI consumer for category {} using {}", cat, config);	
 		return new MqiConsumer<ProductionEvent>(
 				mqiClient, 
 				cat, 
@@ -133,7 +136,10 @@ public class CompressionTriggerService implements MqiListener<ProductionEvent> {
 		);
 	}
 	
-	final void publish(final ProductCategory cat, final GenericMessageDto<ProductionEvent> mess, final CompressionJob job) {
+	final GenericPublicationMessageDto<CompressionJob> publish(
+			final GenericMessageDto<ProductionEvent> mess, 
+			final CompressionJob job
+	) {
     	final GenericPublicationMessageDto<CompressionJob> messageDto = new GenericPublicationMessageDto<CompressionJob>(
     			mess.getId(), 
     			job.getProductFamily(), 
@@ -141,14 +147,7 @@ public class CompressionTriggerService implements MqiListener<ProductionEvent> {
     	);
     	messageDto.setInputKey(mess.getInputKey());
     	messageDto.setOutputKey(job.getOutputProductFamily().name());
-		try {
-			mqiClient.publish(messageDto, cat);
-		} catch (final AbstractCodedException e) {
-			throw new RuntimeException(
-					String.format("Error publishing %s message %s: %s", cat, messageDto, e.getLogMessage()),
-					e
-			);
-		}
+    	return messageDto;
 	}
 	
 	private final CompressionJob toCompressionJob(final ProductionEvent event) {

@@ -8,6 +8,7 @@ import esa.s1pdgs.cpoc.appcatalog.AppDataJobProduct;
 import esa.s1pdgs.cpoc.common.errors.processing.IpfPrepWorkerInputsMissingException;
 import esa.s1pdgs.cpoc.common.errors.processing.MetadataQueryException;
 import esa.s1pdgs.cpoc.common.utils.DateUtils;
+import esa.s1pdgs.cpoc.common.utils.Exceptions;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.type.AbstractProductTypeAdapter;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.type.Product;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.type.ProductTypeAdapter;
@@ -40,37 +41,58 @@ public final class LevelSliceTypeAdapter extends AbstractProductTypeAdapter impl
 		
 		// Retrieve instrument configuration id and slice number
 		try {
-			final L0SliceMetadata file = this.metadataClient.getL0Slice(product.getProductName());
+			final L0SliceMetadata file = metadataClient.getL0Slice(product.getProductName());
 			product.setInsConfId(file.getInstrumentConfigurationId());
 			product.setNumberSlice(file.getNumberSlice());
 			product.setDataTakeId(file.getDatatakeId());
+			product.addSlice(file);
 			
 		} catch (final MetadataQueryException e) {
-			throw new IpfPrepWorkerInputsMissingException(
-					Collections.singletonMap(
-							product.getProductName(), 
-							"No Slice: " + e.getMessage()
-					)
-			);
+			LOGGER.debug("L0 slice for {} not found in MDC (error was {}). Trying next time...", product.getProductName(), 
+					Exceptions.messageOf(e));
 		}
 		// Retrieve Total_Number_Of_Slices
 		try {
-			final L0AcnMetadata acn = this.metadataClient.getFirstACN(
+			final L0AcnMetadata acn = metadataClient.getFirstACN(
 					product.getProductName(),
 					product.getProcessMode()
 			);
 			product.setTotalNbOfSlice(acn.getNumberOfSlices());
 			product.setSegmentStartDate(acn.getValidityStart());
 			product.setSegmentStopDate(acn.getValidityStop());
+			product.addAcn(acn);
 		} catch (final MetadataQueryException e) {
-			throw new IpfPrepWorkerInputsMissingException(	
+			LOGGER.debug("L0 acn for {} not found in MDC (error was {}). Trying next time...", product.getProductName(), 
+					Exceptions.messageOf(e));
+		}
+		return product;
+	}
+	
+	@Override
+	public void validateInputSearch(final AppDataJob job) throws IpfPrepWorkerInputsMissingException {
+		final LevelSliceProduct product = LevelSliceProduct.of(job);
+		
+		// there needs to be a slice
+		if (product.getSlices().isEmpty()) {
+			throw new IpfPrepWorkerInputsMissingException(
 					Collections.singletonMap(
 							product.getProductName(), 
-							"No ACNs: " + e.getMessage()
+							"No Slice: " + 	product.getProductName()
 					)
 			);
 		}
-		return product;
+		
+		// and there needs to be an ACN
+		if (product.getAcns().isEmpty()) {
+			throw new IpfPrepWorkerInputsMissingException(	
+					Collections.singletonMap(
+							product.getProductName(), 
+							"No ACNs: " + product.getProductName()
+					)
+			);
+		}
+		// if both are there, job creation can proceed
+		LOGGER.info("Found slice {} and ACN {}", product.getSlices(), product.getAcns());
 	}
 
 	@Override

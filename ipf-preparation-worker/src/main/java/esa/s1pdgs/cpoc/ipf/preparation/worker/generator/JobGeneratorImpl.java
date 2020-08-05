@@ -1,6 +1,7 @@
 package esa.s1pdgs.cpoc.ipf.preparation.worker.generator;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.concurrent.Callable;
@@ -41,12 +42,14 @@ public final class JobGeneratorImpl implements JobGenerator {
 		public final void mainInputSearch(final AppDataJobGenerationState outputState) throws JobStateTransistionFailed {			
 			AppDataJobGenerationState newState = job.getGeneration().getState();
 			
-			final Product queried = perform(
-					() -> typeAdapter.mainInputSearch(job),
-					"querying input " + job.getProductName()
-			);
-			job.setProduct(queried.toProduct());
+			Product queried = null;
 			try {
+				queried = perform(
+						() -> typeAdapter.mainInputSearch(job),
+						"querying input " + job.getProductName()
+				);
+				job.setProduct(queried.toProduct());	
+				
 				performVoid(
 					() -> typeAdapter.validateInputSearch(job), 
 					"validating availability of input products for " + job.getProductName()
@@ -64,9 +67,12 @@ public final class JobGeneratorImpl implements JobGenerator {
 			AppDataJobGenerationState newState = job.getGeneration().getState();			
 			final AuxQuery auxQuery = auxQueryHandler.queryFor(job);
 			
-			final List<AppDataJobTaskInputs> queried = perform(() -> auxQuery.queryAux(), "querying required AUX");
-			job.setAdditionalInputs(queried);
+			List<AppDataJobTaskInputs> queried = Collections.emptyList();
+		
 			try {
+				queried = perform(() -> auxQuery.queryAux(), "querying required AUX");
+				job.setAdditionalInputs(queried);
+				
 				performVoid(
 					() -> auxQuery.validate(job), 
 					"validating availability of AUX for " + job.getProductName()

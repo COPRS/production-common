@@ -12,16 +12,16 @@ public class AppDataJobFile implements Comparable<AppDataJobFile> {
     /**
      * Name of the file
      */
-    private String fileName;
+    protected String fileName;
 
     /**
      * Key in the OBS
      */
-    private String keyObs;
+    protected String keyObs;
 
-    private String startDate;
+    protected String startDate;
 
-    private String endDate;
+    protected String endDate;
 
     /**
      */

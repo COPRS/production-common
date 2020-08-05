@@ -105,7 +105,7 @@ public class MetadataTriggerService {
 			return new MqiConsumer<IngestionEvent>(
 					mqiClient, 
 					cat, 
-					new MetadataTriggerListener<>(INGESTION_MAPPER, mqiClient, errorAppender, processConfig),
+					new MetadataTriggerListener<>(INGESTION_MAPPER, errorAppender, processConfig),
 					messageFilter,
 					config.getFixedDelayMs(),
 					config.getInitDelayPolMs(),
@@ -115,7 +115,7 @@ public class MetadataTriggerService {
 			return new MqiConsumer<ProductionEvent>(
 					mqiClient, 
 					cat, 
-					new MetadataTriggerListener<>(PROD_MAPPER, mqiClient, errorAppender, processConfig),
+					new MetadataTriggerListener<>(PROD_MAPPER, errorAppender, processConfig),
 					messageFilter,
 					config.getFixedDelayMs(),
 					config.getInitDelayPolMs(),

@@ -1,6 +1,5 @@
 package esa.s1pdgs.cpoc.mqi.client;
 
-import java.util.Collections;
 import java.util.List;
 
 import org.apache.logging.log4j.LogManager;
@@ -19,7 +18,7 @@ import esa.s1pdgs.cpoc.mqi.model.rest.AckMessageDto;
 import esa.s1pdgs.cpoc.mqi.model.rest.GenericMessageDto;
 
 public final class MqiConsumer<E extends AbstractMessage> implements Runnable {
-	private static final Logger LOG = LogManager.getLogger(MqiConsumer.class);
+	static final Logger LOG = LogManager.getLogger(MqiConsumer.class);
 	
 	private final MqiClient client;
 	private final ProductCategory category;
@@ -97,7 +96,13 @@ public final class MqiConsumer<E extends AbstractMessage> implements Runnable {
 				appStatus.setProcessing(message.getId());
 				LOG.debug("{} received {} from MQI", this, message);
 				try {
-					mqiListener.onMessage(message);
+					final MqiMessageEventHandler handler = mqiListener.onMessage(message);
+					if (handler == null) {
+						throw new RuntimeException(
+								String.format("MqiListener implementation %s returned null", mqiListener.getClass())
+						);
+					}	
+					handler.processMessages(client);				
 					client.ack(new AckMessageDto(message.getId(), Ack.OK, null, false), category);
 				// any other error --> dump prominently into log file but continue	
 				} catch (final Exception e) {

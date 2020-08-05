@@ -2,6 +2,8 @@ package esa.s1pdgs.cpoc.mqi.model.rest;
 
 import java.util.Objects;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 import esa.s1pdgs.cpoc.common.ProductFamily;
 
 /**
@@ -10,7 +12,7 @@ import esa.s1pdgs.cpoc.common.ProductFamily;
  * @author Viveris Technologies
  * @param <T>
  */
-public class GenericPublicationMessageDto<T> {
+public class GenericPublicationMessageDto<T> implements MessageDto<T> {
 
     /**
      * Identifier of the input message if exists
@@ -63,8 +65,14 @@ public class GenericPublicationMessageDto<T> {
         this.messageToPublish = messageToPublish;
         this.inputMessageId = inputMessageId;
     }
+    
+    @Override
+    @JsonIgnore
+	public T getDto() {
+		return messageToPublish;
+	}
 
-    /**
+	/**
      * @return the inputMessageId
      */
     public long getInputMessageId() {
@@ -169,7 +177,7 @@ public class GenericPublicationMessageDto<T> {
         } else if (obj == null || getClass() != obj.getClass()) {
             ret = false;
         } else {
-            GenericPublicationMessageDto<?> other =
+            final GenericPublicationMessageDto<?> other =
                     (GenericPublicationMessageDto<?>) obj;
             ret = inputMessageId == other.inputMessageId
                     && Objects.equals(inputKey, other.inputKey)
