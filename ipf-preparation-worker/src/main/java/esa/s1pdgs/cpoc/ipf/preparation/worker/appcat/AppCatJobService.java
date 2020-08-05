@@ -119,11 +119,13 @@ public class AppCatJobService {
 			throws AppCatJobUpdateFailed {
 		performUpdate(
 				job -> {
-					job.setProduct(queried.toProduct());
-					
+					if (queried != null) {
+						job.setProduct(queried.toProduct());
+					}
 					// no transition?
 					if (job.getGeneration().getState() == outputState) {
-						// don't update jobs last modified date here to enable timeout, just update the generation time
+						// don't update jobs last modified date here to enable timeout, just update the generations 
+						// last update time
 						job.getGeneration().setLastUpdateDate(new Date());		
 						job.getGeneration().setNbErrors(job.getGeneration().getNbErrors()+1);
 					}
@@ -141,8 +143,9 @@ public class AppCatJobService {
 			throws AppCatJobUpdateFailed {
 		performUpdate(
 				job -> {
-					job.setAdditionalInputs(queried);					
-						
+					if (!queried.isEmpty()) {
+						job.setAdditionalInputs(queried);	
+					}
 					// no transition?
 					if (job.getGeneration().getState() == outputState) {
 						// don't update jobs last modified date here to enable timeout, just update the generation time
