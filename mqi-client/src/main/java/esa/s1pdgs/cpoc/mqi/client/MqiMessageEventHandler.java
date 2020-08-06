@@ -7,6 +7,7 @@ import java.util.function.Consumer;
 
 import esa.s1pdgs.cpoc.common.ProductCategory;
 import esa.s1pdgs.cpoc.mqi.model.queue.AbstractMessage;
+import esa.s1pdgs.cpoc.mqi.model.queue.NullMessage;
 import esa.s1pdgs.cpoc.mqi.model.rest.GenericPublicationMessageDto;
 
 public class MqiMessageEventHandler {		
@@ -45,6 +46,11 @@ public class MqiMessageEventHandler {
 		public final MqiMessageEventHandler newResult() {
 			return new MqiMessageEventHandler(this);
 		}
+	}
+	
+	public static final MqiMessageEventHandler nullHandler() {
+		return new MqiMessageEventHandler.Builder<NullMessage>(ProductCategory.UNDEFINED)
+				.newResult();
 	}
 	
 	private final Callable<List<GenericPublicationMessageDto<? extends AbstractMessage>>> processor;
