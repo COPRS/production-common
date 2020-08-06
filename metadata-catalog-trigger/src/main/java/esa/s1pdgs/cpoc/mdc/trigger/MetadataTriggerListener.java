@@ -1,5 +1,8 @@
 package esa.s1pdgs.cpoc.mdc.trigger;
 
+import static esa.s1pdgs.cpoc.common.ProductFamily.AUXILIARY_FILE_ZIP;
+import static esa.s1pdgs.cpoc.common.ProductFamily.PLAN_AND_REPORT_ZIP;
+
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
@@ -16,6 +19,7 @@ import esa.s1pdgs.cpoc.mqi.client.MqiListener;
 import esa.s1pdgs.cpoc.mqi.client.MqiMessageEventHandler;
 import esa.s1pdgs.cpoc.mqi.model.queue.AbstractMessage;
 import esa.s1pdgs.cpoc.mqi.model.queue.CatalogJob;
+import esa.s1pdgs.cpoc.mqi.model.queue.IngestionEvent;
 import esa.s1pdgs.cpoc.mqi.model.rest.GenericMessageDto;
 import esa.s1pdgs.cpoc.mqi.model.rest.GenericPublicationMessageDto;
 import esa.s1pdgs.cpoc.report.Reporting;
@@ -44,6 +48,10 @@ public final class MetadataTriggerListener<E extends AbstractMessage> implements
 		final E dto = message.getBody();
 		final String eventType = dto.getClass().getSimpleName();
 		
+		if (this.omitMessage(dto)) {
+			return MqiMessageEventHandler.nullHandler();
+		}
+		
 		final Reporting reporting = ReportingUtils.newReportingBuilder()
 				.predecessor(dto.getUid())
 				.newReporting("MetadataTrigger");
@@ -69,6 +77,19 @@ public final class MetadataTriggerListener<E extends AbstractMessage> implements
 				error.getMessage(), 
 				message
 		));
+	}
+	
+	// --------------------------------------------------------------------------
+	
+	private boolean omitMessage(E message) {
+		if (message instanceof IngestionEvent && //
+				(AUXILIARY_FILE_ZIP == message.getProductFamily()
+						|| PLAN_AND_REPORT_ZIP == message.getProductFamily())) {
+			// omit ingestion events from zipped backdoor products, they become relevant for metadata catalog after they have been uncompressed
+			return true;
+		}
+
+		return false;
 	}
 	
 	private final List<GenericPublicationMessageDto<CatalogJob>> newPublicationMessage(
