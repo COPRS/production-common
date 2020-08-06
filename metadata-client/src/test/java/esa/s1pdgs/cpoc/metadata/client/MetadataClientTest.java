@@ -565,7 +565,7 @@ public class MetadataClientTest {
 	@Test
 	public void testGetSeaCoverageNotFound() throws MetadataQueryException {
 
-		final ResponseEntity<Integer> responseEntity = new ResponseEntity<Integer>(HttpStatus.NOT_FOUND);
+		final ResponseEntity<Integer> responseEntity = new ResponseEntity<Integer>(HttpStatus.NO_CONTENT);
 
 		when(restTemplate.exchange(Mockito.anyString(), eq(HttpMethod.GET), eq(null), eq(Integer.class)))
 				.thenReturn(responseEntity);

@@ -284,7 +284,7 @@ public class MetadataClient {
 					int notAvailableRetries = 10;					
 					LOGGER.debug(commandDescription);
 					ResponseEntity<Integer> response = this.restTemplate.exchange(uri, HttpMethod.GET, null, Integer.class);
-					while (response.getStatusCode() == HttpStatus.NOT_FOUND) {
+					while (response.getStatusCode() == HttpStatus.NO_CONTENT) {
 						LOGGER.debug("Product not available yet. Waiting...");
 						try {
 							Thread.sleep(this.retryInMillis);
@@ -325,6 +325,9 @@ public class MetadataClient {
 	private <T> void handleReturnValueErrors(final String uri, final ResponseEntity<T> response) throws MetadataQueryException {
 		if (response == null) {
 			throw new MetadataQueryException(String.format("Rest metadata call %s returned null", uri));
+		}
+		if (response.getStatusCode() == HttpStatus.NO_CONTENT) {
+			return;
 		}
 		if (response.getStatusCode() != HttpStatus.OK) {
 			throw new MetadataQueryException(
