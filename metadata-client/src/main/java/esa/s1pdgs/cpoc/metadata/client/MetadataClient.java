@@ -63,9 +63,8 @@ public class MetadataClient {
 				new ParameterizedTypeReference<List<EdrsSessionMetadata>>() {}
 		);
 
-		if (response == null) {
-			LOGGER.debug("Edrs session not found for sessionId {}", sessionId);
-			return null;
+		if (response == null || response.getBody() == null) {
+			throw new MetadataQueryException("Edrs session not found for sessionId "+ sessionId);
 		} else {
 			LOGGER.debug("Returning Edrs session: {}", response.getBody());
 			return response.getBody();
@@ -86,9 +85,8 @@ public class MetadataClient {
 				new ParameterizedTypeReference<L0SliceMetadata>() {
 				});
 
-		if (response == null) {
-			LOGGER.debug("L0 slice not found for product name {}", productName);
-			return null;
+		if (response == null || response.getBody() == null) {
+			throw new MetadataQueryException("L0 slice not found for product name {}" + productName);
 		} else {
 			LOGGER.debug("Returning L0 slice: {}", response.getBody());
 			return response.getBody();
@@ -111,9 +109,8 @@ public class MetadataClient {
 				new ParameterizedTypeReference<List<LevelSegmentMetadata>>() {}
 		);
 
-		if (response == null) {
-			LOGGER.debug("Level segment not found for dataTakeId {}",  dataTakeId);
-			return null;
+		if (response == null || response.getBody() == null) {
+			throw new MetadataQueryException("Level segment not found for dataTakeId {}"+  dataTakeId);
 		} else {
 			LOGGER.debug("Returning level segment: {}", response.getBody());
 			return response.getBody();
@@ -138,16 +135,14 @@ public class MetadataClient {
 				});
 
 		if (response == null) {
-			LOGGER.debug("First ACN not found for product name {} and process mode {}", productName, processMode);
-			return null;
+			throw new MetadataQueryException(String.format("First ACN not found for product name %s and process mode %s", productName, processMode));
 		} else {
 			final L0AcnMetadata[] objects = response.getBody();
 			if (objects != null && objects.length > 0) {
 				LOGGER.debug("Returning first ACN: {}", objects[0]);
 				return objects[0];
 			} else {
-				LOGGER.debug("First ACN not found for product name {} and process mode {}", productName, processMode);
-				return null;
+				throw new MetadataQueryException(String.format("First ACN not found for product name %s and process mode %s", productName, processMode));
 			}
 		}
 	}
@@ -191,7 +186,7 @@ public class MetadataClient {
 				new ParameterizedTypeReference<List<SearchMetadata>>() {
 				});
 
-		if (response == null) {
+		if (response == null || response.getBody() == null) {
 			LOGGER.debug("Metadata query for family '{}' and product type '{}' returned no results",
 					query.getProductFamily(), query.getProductType());
 			return new ArrayList<>();
@@ -225,7 +220,7 @@ public class MetadataClient {
 				new ParameterizedTypeReference<List<SearchMetadata>>() {
 				});
 
-		if (response == null) {
+		if (response == null || response.getBody() == null) {
 			LOGGER.debug("Metadata query for family '{}' returned no results", family);
 			return new ArrayList<>();
 		} else {
@@ -256,7 +251,7 @@ public class MetadataClient {
 				new ParameterizedTypeReference<SearchMetadata>() {
 				});
 
-		if (response.getBody() == null) {
+		if (response == null || response.getBody() == null) {
 			LOGGER.error("Metadata query for family '{}' and product name {} returned no result", family, productName);
 			throw new MetadataQueryException(String.format("Metadata query for family '%s' and product name %s returned no result", family, productName));
 		} else {
@@ -278,7 +273,7 @@ public class MetadataClient {
 		
 		final String commandDescription = String.format("call rest metadata for sea coverage check on %s", uri);
 		
-		return performWithRetries(
+		ResponseEntity<Integer> result = performWithRetries(
 				commandDescription,
 				() -> {
 					int notAvailableRetries = 10;					
@@ -300,11 +295,19 @@ public class MetadataClient {
 						}
 					}
 					handleReturnValueErrors(uri, response);
-					final Integer res = response.getBody();
-					LOGGER.debug("Got coverage {}", res);
-					return res;					
+					return response;				
 				}
 		);
+		 
+		 
+		 
+		 if (result == null || result.getBody() == null) {
+			 throw new MetadataQueryException("Query for seacoverage returns no result for "+ productName);
+		 } else {
+			final Integer coverage = result.getBody();
+			LOGGER.debug("Got coverage {}", coverage);
+			return coverage;
+		 }
 	}
 
 	private <T> ResponseEntity<T> query(final URI uri, final ParameterizedTypeReference<T> responseType) throws MetadataQueryException {

@@ -17,6 +17,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -369,7 +370,21 @@ public class MetadataClientTest {
 		thrown.expect(MetadataQueryException.class);
 		this.metadataClient.getFirstACN(file, "FAST");
 	}
-
+	
+	@Test
+	public void testGetFirstAcnNoContent() throws MetadataQueryException {
+		final String file = "S1A_IW_RAW__0SDV_20171213T121623_20171213T121656_019684_021735_C6DB.SAFE";
+		final ResponseEntity<L0AcnMetadata[]> r = new ResponseEntity<L0AcnMetadata[]>(HttpStatus.NO_CONTENT);
+		final String uri = "http://" + METADATA_HOST + "/l0Slice/" + file + "/acns";
+		final UriComponentsBuilder builder = UriComponentsBuilder.fromUriString(uri).queryParam("mode", "ONE")
+				.queryParam("processMode", "FAST");
+		when(restTemplate.exchange(eq(builder.build().toUri()), eq(HttpMethod.GET), eq(null),
+				any((Class<ParameterizedTypeReference<L0AcnMetadata[]>>) (Object) ParameterizedTypeReference.class)))
+						.thenReturn(r);
+		thrown.expect(MetadataQueryException.class);
+		this.metadataClient.getFirstACN(file, "FAST");
+	}
+	
 	@Test
 	public void testGetFirstAcnRestKo() throws MetadataQueryException {
 		doThrow(new RestClientException("rest exception")).when(restTemplate).exchange(Mockito.any(),
@@ -563,7 +578,7 @@ public class MetadataClientTest {
 	}
 
 	@Test
-	public void testGetSeaCoverageNotFound() throws MetadataQueryException {
+	public void testGetSeaCoverageNoContent() throws MetadataQueryException {
 
 		final ResponseEntity<Integer> responseEntity = new ResponseEntity<Integer>(HttpStatus.NO_CONTENT);
 
