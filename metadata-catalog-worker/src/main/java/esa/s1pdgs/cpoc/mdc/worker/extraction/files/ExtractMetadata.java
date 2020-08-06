@@ -87,18 +87,18 @@ public class ExtractMetadata {
 	/**
 	 * Map packet stores to packet store type
 	 */
-	private Map<String,String> packetStoreTypes;
+	private Map<String, String> packetStoreTypes;
 
 	/**
 	 * Map packet store type to timeliness
 	 */
-	private Map<String,String> packetStoreTypeTimelinesses;
-	
+	private Map<String, String> packetStoreTypeTimelinesses;
+
 	/**
 	 * Timeliness prioritization
 	 */
 	private List<String> timelinessPriorityFromHighToLow;
-	
+
 	/**
 	 * Directory containing the XSLT files
 	 */
@@ -118,7 +118,7 @@ public class ExtractMetadata {
 	 * Constructor
 	 */
 	public ExtractMetadata(final Map<String, Float> typeOverlap, final Map<String, Float> typeSliceLength,
-			final Map<String,String> packetStoreTypes, final Map<String,String> packetStoreTypeTimelinesses,
+			final Map<String, String> packetStoreTypes, final Map<String, String> packetStoreTypeTimelinesses,
 			final List<String> timelinessPriorityFromHighToLow, final String xsltDirectory,
 			final XmlConverter xmlConverter) {
 		this.transFactory = TransformerFactory.newInstance();
@@ -152,7 +152,7 @@ public class ExtractMetadata {
 
 		JSONObject metadataJSONObject = transformXMLWithXSLTToJSON(inputMetadataFile,
 				new File(this.xsltDirectory + XSLT_MPL_EOF));
-		
+
 		metadataJSONObject = putConfigFileMetadataToJSON(metadataJSONObject, descriptor);
 		LOGGER.debug("composed Json: {} ", metadataJSONObject);
 		return metadataJSONObject;
@@ -172,7 +172,7 @@ public class ExtractMetadata {
 
 		JSONObject metadataJSONObject = transformXMLWithXSLTToJSON(inputMetadataFile,
 				new File(this.xsltDirectory + XSLT_MPL_EOF));
-		
+
 		metadataJSONObject = putConfigFileMetadataToJSON(metadataJSONObject, descriptor);
 		LOGGER.debug("composed Json: {} ", metadataJSONObject);
 		return metadataJSONObject;
@@ -192,7 +192,7 @@ public class ExtractMetadata {
 
 		JSONObject metadataJSONObject = transformXMLWithXSLTToJSON(inputMetadataFile,
 				new File(this.xsltDirectory + XSLT_AUX_XML));
-		
+
 		metadataJSONObject = putConfigFileMetadataToJSON(metadataJSONObject, descriptor);
 		LOGGER.debug("composed Json: {} ", metadataJSONObject);
 		return metadataJSONObject;
@@ -213,7 +213,7 @@ public class ExtractMetadata {
 
 		JSONObject metadataJSONObject = transformXMLWithXSLTToJSON(inputMetadataFile,
 				new File(this.xsltDirectory + XSLT_AUX_MANIFEST));
-		
+
 		metadataJSONObject = putConfigFileMetadataToJSON(metadataJSONObject, descriptor);
 		LOGGER.debug("composed Json: {} ", metadataJSONObject);
 		return metadataJSONObject;
@@ -239,17 +239,16 @@ public class ExtractMetadata {
 	 * @return the json object with extracted metadata
 	 * @throws MetadataExtractionException
 	 */
-	public JSONObject processSESSIONFile(
-			final EdrsSessionFileDescriptor descriptor,
-			final File file
-	) throws MetadataExtractionException {
+	public JSONObject processSESSIONFile(final EdrsSessionFileDescriptor descriptor, final File file)
+			throws MetadataExtractionException {
 		try {
 			final JSONObject metadataJSONObject = putEdrsSessionMetadataToJSON(new JSONObject(), descriptor);
 
 //			final String name = new File(descriptor.getRelativePath()).getName();
 //			final File file = new File(localDirectory, name);
 
-			final EdrsSessionFile edrsSessionFile = (EdrsSessionFile) xmlConverter.convertFromXMLToObject(file.getPath());
+			final EdrsSessionFile edrsSessionFile = (EdrsSessionFile) xmlConverter
+					.convertFromXMLToObject(file.getPath());
 
 			metadataJSONObject.put("startTime", DateUtils.convertToAnotherFormat(edrsSessionFile.getStartTime(),
 					EdrsSessionFile.TIME_FORMATTER, DateUtils.METADATA_DATE_FORMATTER));
@@ -270,20 +269,17 @@ public class ExtractMetadata {
 	}
 
 	/**
-	 * Extracts metadata for L0 segment files 
+	 * Extracts metadata for L0 segment files
 	 * 
-	 * @param descriptor The file descriptor of the file
+	 * @param descriptor   The file descriptor of the file
 	 * @param manifestFile The input manifest File
 	 * @return json object with extracted metadata
 	 * @throws MetadataExtractionException
 	 * @throws MetadataMalformedException
 	 */
-	public JSONObject processL0Segment(
-			final OutputFileDescriptor descriptor, 
-			final File manifestFile,
-			final ReportingFactory reportingFactory
-	) throws MetadataExtractionException, MetadataMalformedException {
-		
+	public JSONObject processL0Segment(final OutputFileDescriptor descriptor, final File manifestFile,
+			final ReportingFactory reportingFactory) throws MetadataExtractionException, MetadataMalformedException {
+
 		final File xsltFile = new File(this.xsltDirectory + XSLT_L0_SEGMENT_MANIFEST);
 		LOGGER.debug("extracting metadata for descriptor: {} ", descriptor);
 		JSONObject metadataJSONObject = transformXMLWithXSLTToJSON(manifestFile, xsltFile);
@@ -307,76 +303,68 @@ public class ExtractMetadata {
 					}
 				}
 			}
-			
+
 			if (metadataJSONObject.has("packetStoreID")) {
-				
-				final Reporting reporting = reportingFactory
-						.newReporting("SegmentTimeliness");
-				
+
+				final Reporting reporting = reportingFactory.newReporting("SegmentTimeliness");
+
 				final List<String> packetStoreIDs = new ArrayList<>();
 				if (metadataJSONObject.get("packetStoreID") instanceof JSONArray) {
-					final JSONArray jsonArray = ((JSONArray)metadataJSONObject.get("packetStoreID"));
+					final JSONArray jsonArray = ((JSONArray) metadataJSONObject.get("packetStoreID"));
 					for (int i = 0; i < jsonArray.length(); i++) {
 						packetStoreIDs.add(Integer.toString(jsonArray.getInt(i)));
 					}
 				} else {
 					packetStoreIDs.add(Integer.toString(metadataJSONObject.getInt("packetStoreID")));
 				}
-				
-				final String satellite = descriptor.getMissionId() + descriptor.getSatelliteId(); 
+
+				final String satellite = descriptor.getMissionId() + descriptor.getSatelliteId();
 				// e. g. S1A or S1B (used in configuration file as prefix before PacketStore ID)
-				
-				reporting.begin(
-						new TimelinessReportingInput(descriptor.getDataTakeId(), packetStoreIDs, satellite), 
-						new ReportingMessage("Start timeliness lookup for %s", descriptor.getProductName())
-				);
-					
+
+				reporting.begin(new TimelinessReportingInput(descriptor.getDataTakeId(), packetStoreIDs, satellite),
+						new ReportingMessage("Start timeliness lookup for %s", descriptor.getProductName()));
+
 				final List<String> timelinesses = new ArrayList<>();
-				
+
 				for (final String packetStoreID : packetStoreIDs) {
-					
+
 					final String packetStoreType = packetStoreTypes.get(satellite + "-" + packetStoreID);
 					final String timeliness = packetStoreTypeTimelinesses.get(packetStoreType);
-					
+
 					if (timeliness == null) {
 						final String errMess = String.format(
-								"No timeliness configured for packetStoreID %s with packetStoreType %s", 
-								packetStoreID,
-								packetStoreType
-						);
+								"No timeliness configured for packetStoreID %s with packetStoreType %s", packetStoreID,
+								packetStoreType);
 						reporting.error(new ReportingMessage(errMess));
 						throw new MetadataExtractionException(new RuntimeException(errMess));
 					}
 					timelinesses.add(timeliness);
-				}				
+				}
 				final String timeliness = maxTimeliness(timelinesses);
-				reporting.end(
-						new TimelinessReportingOutput(timeliness), 
-						new ReportingMessage("Timeliness for %s is: %s", descriptor.getProductName(), timeliness)
-				);
+				reporting.end(new TimelinessReportingOutput(timeliness),
+						new ReportingMessage("Timeliness for %s is: %s", descriptor.getProductName(), timeliness));
 				metadataJSONObject.put("timeliness", timeliness);
 				metadataJSONObject.remove("packetStoreID"); // the packetStoreID was only needed to compute timeliness
 			}
-			//S1PRO-1030 GP and HKTM products
+			// S1PRO-1030 GP and HKTM products
 			else if (productType.contains("GP_RAW_") || productType.contains("HK_RAW_")) {
 				LOGGER.debug("Setting timeliness to NRT for {} product {}", productType, descriptor.getFilename());
-				//FIXME S1PRO-1030 should be taken from the application.yaml ??
+				// FIXME S1PRO-1030 should be taken from the application.yaml ??
 				metadataJSONObject.put("timeliness", "NRT");
-			}
-			else {
-				//FIXME S1PRO-1030 what should be exactly done if it is missing
+			} else {
+				// FIXME S1PRO-1030 what should be exactly done if it is missing
 				LOGGER.error("No packetStoreID found for product in manifest: {} ", manifestFile);
 			}
- 
+
 			LOGGER.debug("composed Json: {} ", metadataJSONObject);
 			return metadataJSONObject;
 
 		} catch (final JSONException e) {
-			LOGGER.error("Extraction of L0 segment file metadata failed", e);		
+			LOGGER.error("Extraction of L0 segment file metadata failed", e);
 			throw new MetadataExtractionException(e);
 		}
 	}
-	
+
 	/**
 	 * Extracts metadata from S3 level product files (L0 - ISIP-format)
 	 * 
@@ -392,6 +380,7 @@ public class ExtractMetadata {
 				new File(this.xsltDirectory + XSLT_S3_IIF_XML));
 
 		// Add metadata from file descriptor
+		metadataJSONObject = checkS3MetadataForLevelProducts(metadataJSONObject);
 		metadataJSONObject = putS3FileMetadataToJSON(metadataJSONObject, descriptor);
 
 		LOGGER.debug("composed Json: {} ", metadataJSONObject);
@@ -413,6 +402,7 @@ public class ExtractMetadata {
 				new File(this.xsltDirectory + XSLT_S3_AUX_XFDU_XML));
 
 		// Add metadata from file descriptor
+		metadataJSONObject = checkS3MetadataForAux(metadataJSONObject);
 		metadataJSONObject = putS3FileMetadataToJSON(metadataJSONObject, descriptor);
 
 		LOGGER.debug("composed Json: {} ", metadataJSONObject);
@@ -434,33 +424,34 @@ public class ExtractMetadata {
 				new File(this.xsltDirectory + XSLT_S3_XFDU_XML));
 
 		// Add metadata from file descriptor
+		metadataJSONObject = checkS3MetadataForLevelProducts(metadataJSONObject);
 		metadataJSONObject = putS3FileMetadataToJSON(metadataJSONObject, descriptor);
 
 		LOGGER.debug("composed Json: {} ", metadataJSONObject);
 		return metadataJSONObject;
 	}
-	
+
 	public String maxTimeliness(final List<String> timelinesses) {
 		for (final String currentPriorityTimeliness : timelinessPriorityFromHighToLow) {
 			if (timelinesses.contains(currentPriorityTimeliness)) {
 				return currentPriorityTimeliness;
 			}
-		}	
+		}
 		throw new RuntimeException("Invalid timeliness values: " + timelinesses);
 	}
 
 	/**
 	 * Function which extracts metadata from product
 	 * 
-	 * @param descriptor The file descriptor of the file
+	 * @param descriptor    The file descriptor of the file
 	 * @param productFamily product family
-	 * @param manifestFile The input manifest file
+	 * @param manifestFile  The input manifest file
 	 * @return json object with extracted metadata
 	 * @throws MetadataExtractionException
 	 * @throws MetadataMalformedException
 	 */
-	public JSONObject processProduct(final OutputFileDescriptor descriptor, final ProductFamily productFamily, final File manifestFile)
-			throws MetadataExtractionException, MetadataMalformedException {
+	public JSONObject processProduct(final OutputFileDescriptor descriptor, final ProductFamily productFamily,
+			final File manifestFile) throws MetadataExtractionException, MetadataMalformedException {
 
 		final File xsltFile = new File(this.xsltDirectory + xsltMap.get(productFamily));
 		LOGGER.debug("extracting metadata for descriptor: {} ", descriptor);
@@ -497,6 +488,101 @@ public class ExtractMetadata {
 
 		} catch (final JSONException e) {
 			LOGGER.error("Extraction of metadata failed", e);
+			throw new MetadataExtractionException(e);
+		}
+	}
+
+	/**
+	 * Check validityStartTime, validityStopTime and creationTime on
+	 * S3-Aux-Metadata-Objects
+	 */
+	private JSONObject checkS3MetadataForAux(final JSONObject metadataJSONObject)
+			throws MetadataExtractionException, MetadataMalformedException {
+		try {
+			if (metadataJSONObject.has("validityStartTime")) {
+				try {
+					metadataJSONObject.put("validityStartTime", DateUtils
+							.convertToMetadataDateTimeFormat((String) metadataJSONObject.get("validityStartTime")));
+				} catch (final DateTimeParseException e) {
+					throw new MetadataMalformedException("validityStartTime");
+				}
+			}
+
+			if (metadataJSONObject.has("validityStopTime")) {
+
+				final String validStopTime = (String) metadataJSONObject.get("validityStopTime");
+
+				if (validStopTime.contains("9999-")) {
+					metadataJSONObject.put("validityStopTime", "9999-12-31T23:59:59.999999Z");
+				} else {
+					try {
+						metadataJSONObject.put("validityStopTime",
+								DateUtils.convertToMetadataDateTimeFormat(validStopTime));
+					} catch (final DateTimeParseException e) {
+						throw new MetadataMalformedException("validityStopTime");
+					}
+				}
+
+			} else {
+				metadataJSONObject.put("validityStopTime", "9999-12-31T23:59:59.999999Z");
+			}
+
+			if (metadataJSONObject.has("creationTime")) {
+				try {
+					metadataJSONObject.put("creationTime",
+							DateUtils.convertToMetadataDateTimeFormat(metadataJSONObject.getString("creationTime")));
+				} catch (final DateTimeParseException e) {
+					throw new MetadataMalformedException("creationTime");
+				}
+			}
+
+			return metadataJSONObject;
+
+		} catch (final JSONException e) {
+			LOGGER.error("Error while extraction of config file metadata ", e);
+			throw new MetadataExtractionException(e);
+		}
+	}
+
+	/**
+	 * Check startTime, stopTime and creationTime on
+	 * S3-LevelProduct-Metadata-Objects
+	 */
+	private JSONObject checkS3MetadataForLevelProducts(final JSONObject metadataJSONObject)
+			throws MetadataExtractionException, MetadataMalformedException {
+		try {
+
+			if (metadataJSONObject.has("startTime")) {
+				try {
+					metadataJSONObject.put("startTime",
+							DateUtils.convertToMetadataDateTimeFormat((String) metadataJSONObject.get("startTime")));
+				} catch (final DateTimeParseException e) {
+					throw new MetadataMalformedException("startTime");
+				}
+			}
+
+			if (metadataJSONObject.has("stopTime")) {
+				try {
+					metadataJSONObject.put("stopTime",
+							DateUtils.convertToMetadataDateTimeFormat((String) metadataJSONObject.get("stopTime")));
+				} catch (final DateTimeParseException e) {
+					throw new MetadataMalformedException("stopTime");
+				}
+			}
+
+			if (metadataJSONObject.has("creationTime")) {
+				try {
+					metadataJSONObject.put("creationTime",
+							DateUtils.convertToMetadataDateTimeFormat(metadataJSONObject.getString("creationTime")));
+				} catch (final DateTimeParseException e) {
+					throw new MetadataMalformedException("creationTime");
+				}
+			}
+
+			return metadataJSONObject;
+
+		} catch (final JSONException e) {
+			LOGGER.error("Error while extraction of config file metadata ", e);
 			throw new MetadataExtractionException(e);
 		}
 	}
@@ -560,8 +646,8 @@ public class ExtractMetadata {
 		}
 	}
 
-	private JSONObject putEdrsSessionMetadataToJSON(final JSONObject metadataJSONObject, final EdrsSessionFileDescriptor descriptor)
-			throws MetadataExtractionException {
+	private JSONObject putEdrsSessionMetadataToJSON(final JSONObject metadataJSONObject,
+			final EdrsSessionFileDescriptor descriptor) throws MetadataExtractionException {
 		try {
 			metadataJSONObject.put("channelId", descriptor.getChannel());
 			metadataJSONObject.put("productName", descriptor.getProductName());
@@ -582,8 +668,8 @@ public class ExtractMetadata {
 		}
 	}
 
-	private JSONObject putCommonMetadataToJSON(final JSONObject metadataJSONObject, final OutputFileDescriptor descriptor)
-			throws MetadataExtractionException, MetadataMalformedException {
+	private JSONObject putCommonMetadataToJSON(final JSONObject metadataJSONObject,
+			final OutputFileDescriptor descriptor) throws MetadataExtractionException, MetadataMalformedException {
 
 		try {
 			if (metadataJSONObject.has("startTime")) {
@@ -623,7 +709,7 @@ public class ExtractMetadata {
 			metadataJSONObject.put("insertionTime", dt);
 			metadataJSONObject.put("creationTime", dt);
 			metadataJSONObject.put("productFamily", descriptor.getProductFamily().name());
-			//TODO S1PRO-1030 in future it can be DEBUG or REPROCESSING as well
+			// TODO S1PRO-1030 in future it can be DEBUG or REPROCESSING as well
 			metadataJSONObject.put("processMode", "NOMINAL");
 
 			return metadataJSONObject;
@@ -634,48 +720,13 @@ public class ExtractMetadata {
 		}
 
 	}
-	
+
+	/**
+	 * Common metadata from FileDescriptor to insert into S3-Metadata-Objects
+	 */
 	private JSONObject putS3FileMetadataToJSON(final JSONObject metadataJSONObject, final S3FileDescriptor descriptor)
-			throws MetadataExtractionException, MetadataMalformedException {
+			throws MetadataExtractionException {
 		try {
-
-			if (metadataJSONObject.has("validityStartTime")) {
-				try {
-					metadataJSONObject.put("validityStartTime", DateUtils
-							.convertToMetadataDateTimeFormat((String) metadataJSONObject.get("validityStartTime")));
-				} catch (final DateTimeParseException e) {
-					throw new MetadataMalformedException("validityStartTime");
-				}
-			}
-
-			if (metadataJSONObject.has("validityStopTime")) {
-
-				final String validStopTime = (String) metadataJSONObject.get("validityStopTime");
-
-				if (validStopTime.contains("9999-")) {
-					metadataJSONObject.put("validityStopTime", "9999-12-31T23:59:59.999999Z");
-				} else {
-					try {
-						metadataJSONObject.put("validityStopTime",
-								DateUtils.convertToMetadataDateTimeFormat(validStopTime));
-					} catch (final DateTimeParseException e) {
-						throw new MetadataMalformedException("validityStopTime");
-					}
-				}
-
-			} else {
-				metadataJSONObject.put("validityStopTime", "9999-12-31T23:59:59.999999Z");
-			}
-
-			if (metadataJSONObject.has("creationTime")) {
-				try {
-					metadataJSONObject.put("creationTime",
-							DateUtils.convertToMetadataDateTimeFormat(metadataJSONObject.getString("creationTime")));
-				} catch (final DateTimeParseException e) {
-					throw new MetadataMalformedException("creationTime");
-				}
-			}
-
 			metadataJSONObject.put("productName", descriptor.getProductName());
 			metadataJSONObject.put("productClass", descriptor.getProductClass());
 			metadataJSONObject.put("productType", descriptor.getProductType());
@@ -686,16 +737,15 @@ public class ExtractMetadata {
 			metadataJSONObject.put("instanceId", descriptor.getInstanceId());
 			metadataJSONObject.put("generatingCentre", descriptor.getGeneratingCentre());
 			metadataJSONObject.put("classId", descriptor.getClassId());
-			
 			return metadataJSONObject;
-
 		} catch (final JSONException e) {
 			LOGGER.error("Error while extraction of config file metadata ", e);
 			throw new MetadataExtractionException(e);
 		}
 	}
 
-	private JSONObject transformXMLWithXSLTToJSON(final File inputXMLFile, final File xsltFile) throws MetadataExtractionException {
+	private JSONObject transformXMLWithXSLTToJSON(final File inputXMLFile, final File xsltFile)
+			throws MetadataExtractionException {
 
 		try {
 			final Transformer transformer = transFactory.newTransformer(new StreamSource(xsltFile));
@@ -719,8 +769,8 @@ public class ExtractMetadata {
 	 * @return the coordinates in good format
 	 * @throws MetadataExtractionException
 	 */
-	private JSONObject processCoordinates(final File manifest, final OutputFileDescriptor descriptor, final String rawCoordinates)
-			throws MetadataExtractionException {
+	private JSONObject processCoordinates(final File manifest, final OutputFileDescriptor descriptor,
+			final String rawCoordinates) throws MetadataExtractionException {
 		try {
 			final String productType = descriptor.getProductType();
 			// ------------ LEVEL 0 --------------------//
@@ -908,9 +958,9 @@ public class ExtractMetadata {
 	 */
 	int totalNumberOfSlice(final String startTime, final String stopTime, final String type) {
 		LOGGER.trace("start time: {}, stop time: {}", startTime, stopTime);
-		
+
 		int totalNumberOfSlices = 1;
-		
+
 		final float sliceLength = this.typeSliceLength.get(type);
 		LOGGER.trace("slice length for type {}: {}s", type, sliceLength);
 
@@ -922,21 +972,24 @@ public class ExtractMetadata {
 		final float overlap = this.typeOverlap.get(type);
 		LOGGER.trace("slice overlap for type {}: {}s", type, overlap);
 
-		final float durationSeconds = ChronoUnit.MICROS.between(DateUtils.parse(startTime), DateUtils.parse(stopTime))/1000000f;
+		final float durationSeconds = ChronoUnit.MICROS.between(DateUtils.parse(startTime), DateUtils.parse(stopTime))
+				/ 1000000f;
 		LOGGER.trace("duration: {}s", durationSeconds);
-		
+
 		final float numberOfSlices = (durationSeconds - overlap) / sliceLength;
 		LOGGER.trace("number of slices: {}", numberOfSlices);
-		
-		final double fracNumberOfSlicesMultipliedBySliceLength = (numberOfSlices - Math.floor(numberOfSlices)) * sliceLength;
+
+		final double fracNumberOfSlicesMultipliedBySliceLength = (numberOfSlices - Math.floor(numberOfSlices))
+				* sliceLength;
 		LOGGER.trace("FRAC(number of slices) * slice length = {}", fracNumberOfSlicesMultipliedBySliceLength);
-		
-		
+
 		if (fracNumberOfSlicesMultipliedBySliceLength < overlap) {
-			LOGGER.trace("{} < {} (slice overlap) ==> total number of slices = FLOOR({})", fracNumberOfSlicesMultipliedBySliceLength, overlap, numberOfSlices);
+			LOGGER.trace("{} < {} (slice overlap) ==> total number of slices = FLOOR({})",
+					fracNumberOfSlicesMultipliedBySliceLength, overlap, numberOfSlices);
 			totalNumberOfSlices = (int) Math.floor(numberOfSlices);
 		} else {
-			LOGGER.trace("{} >= {} (slice overlap) ==> total number of slices = CEIL({})", fracNumberOfSlicesMultipliedBySliceLength, overlap, numberOfSlices);
+			LOGGER.trace("{} >= {} (slice overlap) ==> total number of slices = CEIL({})",
+					fracNumberOfSlicesMultipliedBySliceLength, overlap, numberOfSlices);
 			totalNumberOfSlices = (int) Math.ceil(numberOfSlices);
 		}
 		totalNumberOfSlices = Math.max(totalNumberOfSlices, 1);

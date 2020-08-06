@@ -11,19 +11,19 @@
 
 	<!--======= Create a flat XML structure with the necessary information ======= -->
 	<xsl:template match="/">
-		<validityStartTime>
+		<startTime>
 			<xsl:call-template name="formatDateTime">
 				<xsl:with-param name="receivedDateTime"
 					select="//*[local-name()='acquisitionPeriod']/*[local-name()='startTime']" />
 			</xsl:call-template>
-		</validityStartTime>
+		</startTime>
 
-		<validityStopTime>
+		<stopTime>
 			<xsl:call-template name="formatDateTime">
 				<xsl:with-param name="receivedDateTime"
 					select="//*[local-name()='acquisitionPeriod']/*[local-name()='stopTime']" />
 			</xsl:call-template>
-		</validityStopTime>
+		</stopTime>
 
 		<creationTime>
 			<xsl:call-template name="formatDateTime">
