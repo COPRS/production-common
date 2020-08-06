@@ -285,6 +285,19 @@ public class MetadataClientTest {
 		thrown.expect(MetadataQueryException.class);
 		this.metadataClient.getL0Slice(file);
 	}
+	
+	@Test
+	public void testGetSliceNoContent() throws MetadataQueryException {
+		final ResponseEntity<L0SliceMetadata> r = new ResponseEntity<L0SliceMetadata>(HttpStatus.NO_CONTENT);
+		when(restTemplate.exchange(any(URI.class), eq(HttpMethod.GET), eq(null),
+				any((Class<ParameterizedTypeReference<L0SliceMetadata>>) (Object) ParameterizedTypeReference.class)))
+						.thenReturn(r);
+
+		final String file = "S1A_IW_RAW__0SDV_20171213T121623_20171213T121656_019684_021735_C6DB.SAFE";
+
+		thrown.expect(MetadataQueryException.class);
+		this.metadataClient.getL0Slice(file);
+	}
 
 	@Test
 	public void testGetSliceRestKo() throws MetadataQueryException {
@@ -587,6 +600,49 @@ public class MetadataClientTest {
 		thrown.expect(MetadataQueryException.class);
 		this.metadataClient.getSeaCoverage(ProductFamily.AUXILIARY_FILE,
 				"S1A_OPER_MPL_ORBPRE_20171208T200309_20171215T200309_0001.EOF");
+	}
+	
+	@Test
+	public void testQueryByFamilyAndProductNameOk() throws MetadataQueryException {
+		final String file = "S1A_IW_RAW__0SDV_20171213T121623_20171213T121656_019684_021735_C6DB.SAFE";
+		final SearchMetadata expectedResult = new SearchMetadata();
+		expectedResult.setProductType("IW_RAW__0S");
+		expectedResult.setProductName(file);
+		expectedResult.setKeyObjectStorage(file);
+		expectedResult.setValidityStart("2017-12-13T12:16:23");
+		expectedResult.setValidityStop("2017-12-13T12:16:56");
+		
+		
+		final ResponseEntity<SearchMetadata> r = new ResponseEntity<SearchMetadata>(expectedResult, HttpStatus.OK);
+		when(restTemplate.exchange(any(URI.class), eq(HttpMethod.GET), eq(null),
+				any((Class<ParameterizedTypeReference<SearchMetadata>>) (Object) ParameterizedTypeReference.class)))
+						.thenReturn(r);
+
+		final SearchMetadata f = this.metadataClient.queryByFamilyAndProductName("L0_SLICE", file);
+
+		assertEquals("IW_RAW__0S", f.getProductType());
+		assertEquals(file, f.getProductName());
+		assertEquals(file, f.getKeyObjectStorage());
+		assertEquals("2017-12-13T12:16:23", f.getValidityStart());
+		assertEquals("2017-12-13T12:16:56", f.getValidityStop());
+	}
+	
+	@Test
+	public void testQueryByFamilyAndProductNameNoContent() {
+		final ResponseEntity<L0SliceMetadata> r = new ResponseEntity<L0SliceMetadata>(HttpStatus.NO_CONTENT);
+		when(restTemplate.exchange(any(URI.class), eq(HttpMethod.GET), eq(null),
+				any((Class<ParameterizedTypeReference<L0SliceMetadata>>) (Object) ParameterizedTypeReference.class)))
+						.thenReturn(r);
+
+		final String file = "S1A_IW_RAW__0SDV_20171213T121623_20171213T121656_019684_021735_C6DB.SAFE";
+
+		try {
+			this.metadataClient.queryByFamilyAndProductName("L0_SLICE", file);
+			Assert.fail("MetadataQueryException expected");
+		} catch(MetadataQueryException e) {
+			//OK
+		}
+		
 	}
 
 }
