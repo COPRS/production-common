@@ -51,7 +51,7 @@ public class MongoConfiguration {
         	stringJoinerHosts.add(host + ":" + mongoDBPort);
         });
         String credentials = "".equals(mongoUsername) ? "" : mongoUsername + ":" + mongoPassword + "@";
-        return MongoClients.create("mongodb://" + credentials + stringJoinerHosts.toString() + "/?uuidRepresentation=STANDARD");
+        return MongoClients.create("mongodb://" + credentials + stringJoinerHosts.toString() + "/" + mongoDBDatabase + "?uuidRepresentation=STANDARD");
     }
 
     public @Bean MongoTemplate mongoTemplate() {
