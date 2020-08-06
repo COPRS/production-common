@@ -113,6 +113,15 @@ public class MetadataExtractorFactory {
 						processConfiguration, 
 						obsClient
 				);
+		    case S3_LEVEL_PRODUCTS:
+		    	return new S3LevelProductMetadataExtractor(
+		    			esServices, 
+		    			mdBuilder, 
+		    			fileDescriptorBuilder, 
+		    			config.getLocalDirectory(), 
+		    			processConfiguration, 
+		    			obsClient
+		    	);
 			default:
 				// fall through
 		}
@@ -126,7 +135,8 @@ public class MetadataExtractorFactory {
 								ProductCategory.PLANS_AND_REPORTS,
 								ProductCategory.LEVEL_SEGMENTS, 
 								ProductCategory.LEVEL_PRODUCTS,
-								ProductCategory.S3_AUXILIARY_FILES
+								ProductCategory.S3_AUXILIARY_FILES,
+								ProductCategory.S3_LEVEL_PRODUCTS
 						)
 				)
 		);
