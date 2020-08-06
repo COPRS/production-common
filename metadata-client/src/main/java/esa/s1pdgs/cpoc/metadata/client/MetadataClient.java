@@ -273,7 +273,7 @@ public class MetadataClient {
 		
 		final String commandDescription = String.format("call rest metadata for sea coverage check on %s", uri);
 		
-		ResponseEntity<Integer> result = performWithRetries(
+		final ResponseEntity<Integer> result = performWithRetries(
 				commandDescription,
 				() -> {
 					int notAvailableRetries = 10;					
@@ -299,15 +299,16 @@ public class MetadataClient {
 				}
 		);
 		 
-		 
-		 
-		 if (result == null || result.getBody() == null) {
+		if (result == null) {
 			 throw new MetadataQueryException("Query for seacoverage returns no result for "+ productName);
-		 } else {
-			final Integer coverage = result.getBody();
-			LOGGER.debug("Got coverage {}", coverage);
-			return coverage;
-		 }
+		} 
+		final Integer coverage = result.getBody();
+		if (coverage == null) {
+			 throw new MetadataQueryException("Query for seacoverage returns no result body for "+ productName);
+		}
+		LOGGER.debug("Got coverage {}", coverage);
+		return coverage;
+
 	}
 
 	private <T> ResponseEntity<T> query(final URI uri, final ParameterizedTypeReference<T> responseType) throws MetadataQueryException {
