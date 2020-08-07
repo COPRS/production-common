@@ -104,7 +104,7 @@ public final class MqiConsumer<E extends AbstractMessage> implements Runnable {
 					}	
 					handler.processMessages(client);				
 					client.ack(new AckMessageDto(message.getId(), Ack.OK, null, false), category);
-					LOG.info("{} handled {} successfully, done!", this, message);
+					LOG.info("{} handled {} successfully, done!", this, message.getId());
 				// should be thrown if publish() or ack() is failing	
 				} catch (final MqiAckApiError | MqiPublishApiError ace) {
 					// S1PRO-1406: simply propagate exception to initiate shutdown in case publish or ack fails
