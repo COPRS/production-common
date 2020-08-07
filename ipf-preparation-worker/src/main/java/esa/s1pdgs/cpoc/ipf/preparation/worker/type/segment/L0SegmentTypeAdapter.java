@@ -2,13 +2,13 @@ package esa.s1pdgs.cpoc.ipf.preparation.worker.type.segment;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import org.springframework.util.CollectionUtils;
 
@@ -73,7 +73,10 @@ public final class L0SegmentTypeAdapter extends AbstractProductTypeAdapter imple
 		// Retrieve the segments
 		final Map<String, String> missingMetadata = new HashMap<>();
 		final Map<String, List<LevelSegmentMetadata>> segmentsGroupByPol = product.segmentsForPolaristions();
-		final List<String> pols = new ArrayList<>(segmentsGroupByPol.keySet());
+		final List<String> pols = segmentsGroupByPol.entrySet().stream()
+				.filter(e -> !e.getValue().isEmpty())
+				.map(e -> e.getKey())
+				.collect(Collectors.toList());
 		
 		// If missing input segment
 		if (segmentsGroupByPol.isEmpty()) {
