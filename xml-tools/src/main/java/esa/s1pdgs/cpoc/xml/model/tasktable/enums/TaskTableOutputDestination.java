@@ -13,6 +13,9 @@ public enum TaskTableOutputDestination {
 
 	@XmlEnumValue("DB")
 	DB,
+	
+	@XmlEnumValue("DBPROC")
+	DBPROC,
 
 	@XmlEnumValue("PROC")
 	PROC,

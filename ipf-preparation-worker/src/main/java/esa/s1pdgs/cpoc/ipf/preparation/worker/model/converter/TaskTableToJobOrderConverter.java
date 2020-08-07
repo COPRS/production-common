@@ -5,6 +5,7 @@ import static java.util.stream.Collectors.toMap;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.EnumSet;
 import java.util.List;
 import java.util.Map;
 
@@ -239,7 +240,7 @@ class TaskTableOuputToJobOrderOutput implements SuperConverter<TaskTableOuput, J
 		}
 		rObj.setFileType(tObj.getType());
 		rObj.setFileNameType(fileNameTypeConverter.apply(tObj.getFileNameType()));
-		if (tObj.getDestination() == TaskTableOutputDestination.DB) {
+		if (EnumSet.of(TaskTableOutputDestination.DB, TaskTableOutputDestination.DBPROC).contains(tObj.getDestination())) {
 			rObj.setDestination(JobOrderDestination.DB);
 		} else {
 			rObj.setDestination(JobOrderDestination.PROC);
