@@ -39,6 +39,14 @@ public class L0SegmentProduct extends AbstractProduct {
 		product.setStringValue("acquistion", swathType);		
 	}
 	
+	public final void setStartTime(final String start) {
+		product.setStartTime(start);
+	}
+	
+	public final void setStopTime(final String stop) {
+		product.setStopTime(stop);
+	}
+	
 	public final String getAcquistion() {
 		return product.getStringValue("acquistion");
 	}

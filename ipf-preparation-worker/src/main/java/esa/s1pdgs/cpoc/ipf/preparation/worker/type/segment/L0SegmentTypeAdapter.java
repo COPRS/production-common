@@ -158,16 +158,16 @@ public final class L0SegmentTypeAdapter extends AbstractProductTypeAdapter imple
 			final Date currentDate = new Date();
 			if (job.getGeneration().getCreationDate().getTime() < currentDate.getTime() - timeoutInputSearchMs) {
 				LOGGER.warn("Continue generation of {} {} even if sensing gaps", product.getProductName(),
-						job.getGeneration());
-				job.setStartTime(sensingStart);
-				job.setStopTime(sensingStop);
+						job.getGeneration());				
+				product.setStartTime(sensingStart);
+				product.setStopTime(sensingStop);
 			} else {
 				throw new IpfPrepWorkerInputsMissingException(missingMetadata);
 			}
 		} 
 		else {
-			job.setStartTime(sensingStart);
-			job.setStopTime(sensingStop);
+			product.setStartTime(sensingStart);
+			product.setStopTime(sensingStop);
 		}
 		LOGGER.debug("== preSearch: performed lastName: {},fullCoverage= {} ", product.getProductName(), fullCoverage);
 	}

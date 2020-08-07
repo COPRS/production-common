@@ -13,9 +13,11 @@ import org.springframework.stereotype.Component;
 import esa.s1pdgs.cpoc.appcatalog.AppDataJob;
 import esa.s1pdgs.cpoc.appcatalog.AppDataJobGeneration;
 import esa.s1pdgs.cpoc.appcatalog.AppDataJobGenerationState;
+import esa.s1pdgs.cpoc.appcatalog.AppDataJobProduct;
 import esa.s1pdgs.cpoc.appcatalog.AppDataJobState;
 import esa.s1pdgs.cpoc.appcatalog.AppDataJobTaskInputs;
 import esa.s1pdgs.cpoc.appcatalog.client.job.AppCatalogJobClient;
+import esa.s1pdgs.cpoc.appcatalog.util.AppDataJobProductAdapter;
 import esa.s1pdgs.cpoc.common.errors.AbstractCodedException;
 import esa.s1pdgs.cpoc.common.errors.InternalErrorException;
 import esa.s1pdgs.cpoc.common.utils.Exceptions;
@@ -120,7 +122,12 @@ public class AppCatJobService {
 		performUpdate(
 				job -> {
 					if (queried != null) {
-						job.setProduct(queried.toProduct());
+						final AppDataJobProduct prod = queried.toProduct();
+						job.setProduct(prod);
+						// dirty workaround for segment scenario
+						final AppDataJobProductAdapter productAdapter = new AppDataJobProductAdapter(prod);
+						job.setStartTime(productAdapter.getStartTime());
+						job.setStopTime(productAdapter.getStopTime());
 					}
 					// no transition?
 					if (job.getGeneration().getState() == outputState) {

@@ -48,8 +48,9 @@ public final class JobGeneratorImpl implements JobGenerator {
 						() -> typeAdapter.mainInputSearch(job),
 						"querying input " + job.getProductName()
 				);
-				job.setProduct(queried.toProduct());	
-				
+				job.setProduct(queried.toProduct());
+				// FIXME dirty workaroung warning, the product above is still altered in validate by modifying 
+				// the start stop time for segments
 				performVoid(
 					() -> typeAdapter.validateInputSearch(job), 
 					"validating availability of input products for " + job.getProductName()
@@ -71,8 +72,7 @@ public final class JobGeneratorImpl implements JobGenerator {
 		
 			try {
 				queried = perform(() -> auxQuery.queryAux(), "querying required AUX");
-				job.setAdditionalInputs(queried);
-				
+				job.setAdditionalInputs(queried);				
 				performVoid(
 					() -> auxQuery.validate(job), 
 					"validating availability of AUX for " + job.getProductName()
