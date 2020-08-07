@@ -1,5 +1,6 @@
 package esa.s1pdgs.cpoc.ipf.execution.worker.job.process;
 
+import java.util.List;
 import java.util.concurrent.CompletionService;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorCompletionService;
@@ -7,6 +8,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
+import java.util.function.Consumer;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -14,6 +16,7 @@ import org.apache.logging.log4j.Logger;
 import esa.s1pdgs.cpoc.common.errors.AbstractCodedException;
 import esa.s1pdgs.cpoc.common.errors.InternalErrorException;
 import esa.s1pdgs.cpoc.common.errors.processing.IpfExecutionWorkerProcessExecutionException;
+import esa.s1pdgs.cpoc.common.utils.LogUtils;
 import esa.s1pdgs.cpoc.mqi.model.queue.LevelJobPoolDto;
 import esa.s1pdgs.cpoc.mqi.model.queue.LevelJobTaskDto;
 import esa.s1pdgs.cpoc.report.ReportingFactory;
@@ -69,6 +72,8 @@ public class PoolProcessor {
      * as failed and all tasks are shutdown
      */
     private final long tmProcessOneTaskS;
+    
+    private final List<String> plainTextLoggingTasks;
 
     /**
      * @param pool
@@ -79,7 +84,7 @@ public class PoolProcessor {
      */
     public PoolProcessor(final LevelJobPoolDto pool, final String jobOrderPath,
             final String workDirectory, final String prefixLogs,
-            final long tmProcessOneTaskS) {
+            final long tmProcessOneTaskS, final List<String> plainTextLoggingTasks) {
         this.pool = pool;
         this.nbTasks = pool.getTasks().size();
         this.execSrv = Executors.newFixedThreadPool(this.nbTasks);
@@ -88,6 +93,19 @@ public class PoolProcessor {
         this.workDirectory = workDirectory;
         this.prefixLogs = prefixLogs;
         this.tmProcessOneTaskS = tmProcessOneTaskS;
+        this.plainTextLoggingTasks = plainTextLoggingTasks;
+    }
+    
+    // S1PRO-1561: Since some IPF already log in JSON format, it needs to be dumped directly into the log
+    // without further JSON wrapping. For such tasks, LogUtils.PLAINTEXT logger is used.
+    // All other tasks need to be configured, i.e. their output is wrapped in JSON by using the local logger
+    private final Consumer<String> getLogConsumerForTask(final String binaryPath) {
+    	for (final String plainTextLoggingTaskPattern : plainTextLoggingTasks) {
+    		if (binaryPath.matches(plainTextLoggingTaskPattern)) {
+    	    	return TaskCallable.LOGGER::info;      			
+    		}
+    	}
+    	return LogUtils.PLAINTEXT::info;  	
     }
 
     /**
@@ -103,9 +121,16 @@ public class PoolProcessor {
             try {
                 LOGGER.info("{} 1 - Submitting tasks {}", prefixLogs,
                         pool.getTasks());
-                for (final LevelJobTaskDto task : pool.getTasks()) {               	
-                    completionSrv.submit(new TaskCallable(task.getBinaryPath(),
-                            jobOrderPath, workDirectory, reportingFactory));
+                for (final LevelJobTaskDto task : pool.getTasks()) {                   	
+                	final Consumer<String> logConsumer = getLogConsumerForTask(task.getBinaryPath());                	
+                    completionSrv.submit(new TaskCallable(
+                    		task.getBinaryPath(),
+                            jobOrderPath, 
+                            workDirectory, 
+                            logConsumer,
+                            logConsumer,
+                            reportingFactory           
+                    ));
                 }
                 LOGGER.info("{} 2 - Waiting for tasks execution", prefixLogs);
                 for (int i = 0; i < nbTasks; i++) {

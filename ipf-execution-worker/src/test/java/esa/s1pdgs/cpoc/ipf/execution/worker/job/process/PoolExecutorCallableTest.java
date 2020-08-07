@@ -4,6 +4,7 @@ import static org.hamcrest.CoreMatchers.isA;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 
+import java.util.Collections;
 import java.util.UUID;
 import java.util.concurrent.CompletionService;
 import java.util.concurrent.ExecutionException;
@@ -61,7 +62,14 @@ public class PoolExecutorCallableTest extends MockPropertiesTest {
         job.getPools().get(2)
                 .addTask(new LevelJobTaskDto(SystemUtils.getCmdRmdir()));
 
-        callable = new PoolExecutorCallable(properties, job, "log", ApplicationLevel.L0, ReportingFactory.NULL);
+        callable = new PoolExecutorCallable(
+        		properties, 
+        		job, 
+        		"log", 
+        		ApplicationLevel.L0, 
+        		ReportingFactory.NULL,
+        		Collections.emptyList()
+        );
     }
 
     @Test
