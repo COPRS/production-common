@@ -43,6 +43,7 @@ import esa.s1pdgs.cpoc.ipf.preparation.worker.timeout.InputTimeoutCheckerImpl;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.type.ProductTypeAdapter;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.type.edrs.AiopPropertiesAdapter;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.type.edrs.EdrsSessionTypeAdapter;
+import esa.s1pdgs.cpoc.ipf.preparation.worker.type.s3.S3TypeAdapter;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.type.segment.L0SegmentTypeAdapter;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.type.slice.LevelSliceTypeAdapter;
 import esa.s1pdgs.cpoc.metadata.client.MetadataClient;
@@ -147,6 +148,8 @@ public class IpfPreparationWorkerConfiguration {
 					sliceOverlap, 
 					sliceLength
 			);			
+		} else if (processSettings.getLevel() == ApplicationLevel.S3_L0) {
+			return new S3TypeAdapter();
 		}
 		throw new IllegalArgumentException(
 				String.format(
@@ -156,7 +159,8 @@ public class IpfPreparationWorkerConfiguration {
 								ApplicationLevel.L0, 
 								ApplicationLevel.L0_SEGMENT, 
 								ApplicationLevel.L1, 
-								ApplicationLevel.L2
+								ApplicationLevel.L2,
+								ApplicationLevel.S3_L0
 						)
 				)
 		);
