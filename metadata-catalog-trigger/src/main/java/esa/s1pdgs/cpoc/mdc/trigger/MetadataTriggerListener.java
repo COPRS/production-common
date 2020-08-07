@@ -48,10 +48,6 @@ public final class MetadataTriggerListener<E extends AbstractMessage> implements
 		final E dto = message.getBody();
 		final String eventType = dto.getClass().getSimpleName();
 		
-		if (this.omitMessage(dto)) {
-			return MqiMessageEventHandler.nullHandler();
-		}
-		
 		final Reporting reporting = ReportingUtils.newReportingBuilder()
 				.predecessor(dto.getUid())
 				.newReporting("MetadataTrigger");
@@ -80,17 +76,6 @@ public final class MetadataTriggerListener<E extends AbstractMessage> implements
 	}
 	
 	// --------------------------------------------------------------------------
-	
-	private boolean omitMessage(E message) {
-		if (message instanceof IngestionEvent && //
-				(AUXILIARY_FILE_ZIP == message.getProductFamily()
-						|| PLAN_AND_REPORT_ZIP == message.getProductFamily())) {
-			// omit ingestion events from zipped backdoor products, they become relevant for metadata catalog after they have been uncompressed
-			return true;
-		}
-
-		return false;
-	}
 	
 	private final List<GenericPublicationMessageDto<CatalogJob>> newPublicationMessage(
 			final Reporting reporting, 
