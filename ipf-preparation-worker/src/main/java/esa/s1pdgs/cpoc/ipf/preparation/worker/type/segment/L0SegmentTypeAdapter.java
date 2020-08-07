@@ -72,8 +72,8 @@ public final class L0SegmentTypeAdapter extends AbstractProductTypeAdapter imple
 
 		// Retrieve the segments
 		final Map<String, String> missingMetadata = new HashMap<>();
-		final List<String> pols = new ArrayList<>();
 		final Map<String, List<LevelSegmentMetadata>> segmentsGroupByPol = product.segmentsForPolaristions();
+		final List<String> pols = new ArrayList<>(segmentsGroupByPol.keySet());
 		
 		// If missing input segment
 		if (segmentsGroupByPol.isEmpty()) {
