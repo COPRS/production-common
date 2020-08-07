@@ -44,7 +44,7 @@ import esa.s1pdgs.cpoc.mqi.model.queue.OQCFlag;
 public class OQCTask implements Callable<OQCFlag> {
 	private static final Logger LOGGER = LogManager.getLogger(OQCTask.class);
 
-	private static final Consumer<String> DEFAULT_OUTPUT_CONSUMER = LOGGER::info;
+	private static final Consumer<String> DEFAULT_OUTPUT_CONSUMER = LogUtils.PLAINTEXT::info;
 
 	private File originalProduct;
 
@@ -57,7 +57,6 @@ public class OQCTask implements Callable<OQCFlag> {
 
 	public OQCTask(final ApplicationProperties properties, final File originalProduct) {
 		this.originalProduct = originalProduct;
-
 		this.binaryPath = Paths.get(properties.getOqcBinaryPath());
 		this.oqcBaseWorkingDirectory = Paths.get(properties.getOqcWorkingDir());
 		this.timeOutInSeconds = properties.getOqcTimeoutInSeconds();
