@@ -245,8 +245,15 @@ public class JobProcessor implements MqiListener<IpfExecutionJob> {
 
 		LOGGER.debug("Output list build {}", outputListFile);
 
-		final PoolExecutorCallable procExecutor = new PoolExecutorCallable(properties, job,
-				getPrefixMonitorLog(MonitorLogUtils.LOG_PROCESS, job), this.properties.getLevel(), reporting);
+		final PoolExecutorCallable procExecutor = new PoolExecutorCallable(
+				properties, 
+				job,
+				getPrefixMonitorLog(MonitorLogUtils.LOG_PROCESS, job), 
+				properties.getLevel(), 
+				reporting,
+				properties.getPlaintextTaskPatterns()
+		);
+		
 		
 		final ExecutorService procExecutorSrv = Executors.newSingleThreadExecutor();
 		final ExecutorCompletionService<Void> procCompletionSrv = new ExecutorCompletionService<>(procExecutorSrv);

@@ -58,6 +58,8 @@ public class PoolExecutorCallable implements Callable<Void> {
      * Application level
      */
     private final ApplicationLevel appLevel;
+    
+    private final List<String> plainTextLoggingTasks;
 
     /**
      * Will create one PoolProcessor per pool
@@ -68,18 +70,25 @@ public class PoolExecutorCallable implements Callable<Void> {
      */
     public PoolExecutorCallable(final ApplicationProperties properties,
             final IpfExecutionJob job, final String prefixLogs, final ApplicationLevel appLevel,
-            final ReportingFactory reportingFactory) {
+            final ReportingFactory reportingFactory, final List<String> plainTextLoggingTasks) {
         this.active = false;
         this.properties = properties;
         this.prefixMonitorLogs = prefixLogs;
         int counter = 0;
         this.processors = new ArrayList<>(job.getPools().size());
+        this.plainTextLoggingTasks = plainTextLoggingTasks;
+        
+        // FIXME move this out of the constructor
         for (final LevelJobPoolDto pool : job.getPools()) {
             counter++;
-            this.processors.add(new PoolProcessor(pool, job.getJobOrder(),
+            this.processors.add(new PoolProcessor(
+            		pool, 
+            		job.getJobOrder(),
                     job.getWorkDirectory(),
                     String.format("%s [poolCounter %d] [s1pdgsTask %sProcessing] ", prefixMonitorLogs, counter, appLevel),
-                    properties.getTmProcOneTaskS()));
+                    properties.getTmProcOneTaskS(),
+                    plainTextLoggingTasks
+            ));
         }
         this.appLevel = appLevel;
         this.reportingFactory = reportingFactory;
