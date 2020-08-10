@@ -100,7 +100,7 @@ public final class JobOrderAdapter
 		}
 
 		private void replacePlaceHolderWithResults(final JobOrderProc p, final Map<String, AppDataJobInput> inputsByReference) {
-			List<JobOrderInput> jobOrderInputs = new ArrayList<>();
+			final List<JobOrderInput> jobOrderInputs = new ArrayList<>();
 
 			p.getInputs().forEach(placeHolder -> {
 				final AppDataJobInput appDataJobInput = inputsByReference.get(placeHolder.getFileType());
@@ -169,6 +169,15 @@ public final class JobOrderAdapter
 			.collect(toList());
 	}
 	
+	public final List<LevelJobOutputDto> physicalOutputs() {
+		return outputsOf(jobOrder)
+				.filter(output -> output.getFileNameType() == JobOrderFileNameType.PHYSICAL
+						&& output.getDestination() == JobOrderDestination.DB)
+				.distinct()
+				.map(output -> new LevelJobOutputDto(output.getFamily().name(),
+						output.getFileName() + "^.*" + output.getFileType() + ".*$"))
+				.collect(toList());
+	}
 	
 	public final List<LevelJobOutputDto> directoryOutputs() {
 		return outputsOf(jobOrder)

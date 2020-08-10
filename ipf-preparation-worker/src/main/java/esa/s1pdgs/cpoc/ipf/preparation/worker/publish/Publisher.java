@@ -123,6 +123,7 @@ public class Publisher {
 			));
 
 			// Add jobOrder outputs to the DTO
+			execJob.addOutputs(jobOrderAdapter.physicalOutputs());
 			execJob.addOutputs(jobOrderAdapter.regexpOutputs());
 			execJob.addOutputs(jobOrderAdapter.directoryOutputs());
 			addOqcFlags(execJob);
