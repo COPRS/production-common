@@ -150,7 +150,7 @@ public class MetadataTriggerService {
 				String.format(
 						"Invalid product category %s. Available are %s", 
 						cat, 
-						Arrays.asList(ProductCategory.INGESTION_EVENT, ProductCategory.PRODUCTION_EVENT)
+						Arrays.asList(ProductCategory.INGESTION_EVENT, ProductCategory.PRODUCTION_EVENT, ProductCategory.COMPRESSED_PRODUCTS)
 				)
 		);
 	}

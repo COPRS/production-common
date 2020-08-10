@@ -1,8 +1,5 @@
 package esa.s1pdgs.cpoc.mdc.trigger;
 
-import static esa.s1pdgs.cpoc.common.ProductFamily.AUXILIARY_FILE_ZIP;
-import static esa.s1pdgs.cpoc.common.ProductFamily.PLAN_AND_REPORT_ZIP;
-
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
@@ -19,7 +16,6 @@ import esa.s1pdgs.cpoc.mqi.client.MqiListener;
 import esa.s1pdgs.cpoc.mqi.client.MqiMessageEventHandler;
 import esa.s1pdgs.cpoc.mqi.model.queue.AbstractMessage;
 import esa.s1pdgs.cpoc.mqi.model.queue.CatalogJob;
-import esa.s1pdgs.cpoc.mqi.model.queue.IngestionEvent;
 import esa.s1pdgs.cpoc.mqi.model.rest.GenericMessageDto;
 import esa.s1pdgs.cpoc.mqi.model.rest.GenericPublicationMessageDto;
 import esa.s1pdgs.cpoc.report.Reporting;
