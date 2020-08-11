@@ -186,8 +186,12 @@ public class PripMetadata {
 		Arrays.stream(FIELD_NAMES.values()).forEach(field -> {
 			// FIXME: Find a generic solution to support both String and JSON sub elements
 			if (field.fieldName.equals(FIELD_NAMES.FOOTPRINT.fieldName)) {
-				GeoShapePolygon footprint = (GeoShapePolygon)field.toJsonAccessor().apply(this);
-				json.put(field.fieldName(), footprint.toJson());
+				if (null != getFootprint()) {
+					GeoShapePolygon footprint = (GeoShapePolygon)field.toJsonAccessor().apply(this);
+					json.put(field.fieldName(), footprint.toJson());
+				} else {
+					json.put(field.fieldName(), new JSONObject());
+				}
 			} else {
 				json.put(field.fieldName(), field.toJsonAccessor().apply(this));
 			}

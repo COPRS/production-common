@@ -13,9 +13,11 @@ import org.springframework.stereotype.Component;
 import esa.s1pdgs.cpoc.appcatalog.AppDataJob;
 import esa.s1pdgs.cpoc.appcatalog.AppDataJobGeneration;
 import esa.s1pdgs.cpoc.appcatalog.AppDataJobGenerationState;
+import esa.s1pdgs.cpoc.appcatalog.AppDataJobProduct;
 import esa.s1pdgs.cpoc.appcatalog.AppDataJobState;
 import esa.s1pdgs.cpoc.appcatalog.AppDataJobTaskInputs;
 import esa.s1pdgs.cpoc.appcatalog.client.job.AppCatalogJobClient;
+import esa.s1pdgs.cpoc.appcatalog.util.AppDataJobProductAdapter;
 import esa.s1pdgs.cpoc.common.errors.AbstractCodedException;
 import esa.s1pdgs.cpoc.common.errors.InternalErrorException;
 import esa.s1pdgs.cpoc.common.utils.Exceptions;
@@ -119,11 +121,18 @@ public class AppCatJobService {
 			throws AppCatJobUpdateFailed {
 		performUpdate(
 				job -> {
-					job.setProduct(queried.toProduct());
-					
+					if (queried != null) {
+						final AppDataJobProduct prod = queried.toProduct();
+						job.setProduct(prod);
+						// dirty workaround for segment scenario
+						final AppDataJobProductAdapter productAdapter = new AppDataJobProductAdapter(prod);
+						job.setStartTime(productAdapter.getStartTime());
+						job.setStopTime(productAdapter.getStopTime());
+					}
 					// no transition?
 					if (job.getGeneration().getState() == outputState) {
-						// don't update jobs last modified date here to enable timeout, just update the generation time
+						// don't update jobs last modified date here to enable timeout, just update the generations 
+						// last update time
 						job.getGeneration().setLastUpdateDate(new Date());		
 						job.getGeneration().setNbErrors(job.getGeneration().getNbErrors()+1);
 					}
@@ -141,8 +150,9 @@ public class AppCatJobService {
 			throws AppCatJobUpdateFailed {
 		performUpdate(
 				job -> {
-					job.setAdditionalInputs(queried);					
-						
+					if (!queried.isEmpty()) {
+						job.setAdditionalInputs(queried);	
+					}
 					// no transition?
 					if (job.getGeneration().getState() == outputState) {
 						// don't update jobs last modified date here to enable timeout, just update the generation time

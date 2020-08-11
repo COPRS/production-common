@@ -4,6 +4,7 @@ import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.UUID;
@@ -31,6 +32,8 @@ import esa.s1pdgs.cpoc.mqi.client.GenericMqiClient;
 import esa.s1pdgs.cpoc.mqi.client.MessageFilter;
 import esa.s1pdgs.cpoc.mqi.client.MqiConsumer;
 import esa.s1pdgs.cpoc.mqi.client.MqiListener;
+import esa.s1pdgs.cpoc.mqi.client.MqiMessageEventHandler;
+import esa.s1pdgs.cpoc.mqi.model.queue.NullMessage;
 import esa.s1pdgs.cpoc.mqi.model.queue.PripPublishingJob;
 import esa.s1pdgs.cpoc.mqi.model.rest.GenericMessageDto;
 import esa.s1pdgs.cpoc.obs_sdk.ObsClient;
@@ -45,7 +48,6 @@ import esa.s1pdgs.cpoc.prip.worker.report.PripReportingOutput;
 import esa.s1pdgs.cpoc.report.Reporting;
 import esa.s1pdgs.cpoc.report.ReportingInput;
 import esa.s1pdgs.cpoc.report.ReportingMessage;
-import esa.s1pdgs.cpoc.report.ReportingOutput;
 import esa.s1pdgs.cpoc.report.ReportingUtils;
 
 @Service
@@ -100,69 +102,78 @@ public class PripPublishingJobListener implements MqiListener<PripPublishingJob>
 	}
 
 	@Override
-	public void onMessage(final GenericMessageDto<PripPublishingJob> message) throws Exception {
-
+	public MqiMessageEventHandler onMessage(final GenericMessageDto<PripPublishingJob> message) {
 		LOGGER.debug("starting saving PRIP metadata, got message: {}", message);
 
 		final PripPublishingJob publishingJob = message.getBody();
 
-		final Reporting reporting = ReportingUtils.newReportingBuilder().predecessor(publishingJob.getUid())
+		final Reporting reporting = ReportingUtils.newReportingBuilder()
+				.predecessor(publishingJob.getUid())
 				.newReporting("PripWorker");
 
 		final String name = removeZipSuffix(publishingJob.getKeyObjectStorage());
 
 		final ReportingInput in = PripReportingInput.newInstance(name, publishingJob.getProductFamily());
 		reporting.begin(in, new ReportingMessage("Publishing file %s in PRIP", name));
+		
+		return new MqiMessageEventHandler.Builder<NullMessage>(ProductCategory.UNDEFINED)
+				.onSuccess(res -> reporting.end(
+						PripReportingOutput.newInstance(new Date()), 
+						new ReportingMessage("Finished publishing file %s in PRIP", name)
+				))
+				.onError(e -> reporting.error(
+						new ReportingMessage("Error on publishing file %s in PRIP: %s", name, LogUtils.toString(e))
+				))
+				.publishMessageProducer(() -> {
+					createAndSave(publishingJob);
+		    		return Collections.emptyList();
+				})
+				.newResult();
+	}
 
-		try {
-			final LocalDateTime creationDate = LocalDateTime.now().truncatedTo(ChronoUnit.MILLIS);
+	private final void createAndSave(final PripPublishingJob publishingJob) throws MetadataQueryException {
+		final LocalDateTime creationDate = LocalDateTime.now().truncatedTo(ChronoUnit.MILLIS);
 
-			final SearchMetadata searchMetadata = queryMetadata(publishingJob.getProductFamily(),
-					publishingJob.getKeyObjectStorage());
+		final SearchMetadata searchMetadata = queryMetadata(
+				publishingJob.getProductFamily(),
+				publishingJob.getKeyObjectStorage()
+		);
 
-			final PripMetadata pripMetadata = new PripMetadata();
-			pripMetadata.setId(UUID.randomUUID());
-			pripMetadata.setObsKey(publishingJob.getKeyObjectStorage());
-			pripMetadata.setName(publishingJob.getKeyObjectStorage());
-			pripMetadata.setProductFamily(publishingJob.getProductFamily());
-			pripMetadata.setContentType(PripMetadata.DEFAULT_CONTENTTYPE);
-			pripMetadata.setContentLength(
-					getContentLength(publishingJob.getProductFamily(), publishingJob.getKeyObjectStorage()));
-			pripMetadata.setCreationDate(creationDate);
-			pripMetadata.setEvictionDate(creationDate.plusDays(PripMetadata.DEFAULT_EVICTION_DAYS));
-			pripMetadata
-					.setChecksums(getChecksums(publishingJob.getProductFamily(), publishingJob.getKeyObjectStorage()));
-			pripMetadata.setContentDateStart(DateUtils.parse(searchMetadata.getValidityStart()).truncatedTo(ChronoUnit.MILLIS));
-			pripMetadata.setContentDateEnd(DateUtils.parse(searchMetadata.getValidityStop()).truncatedTo(ChronoUnit.MILLIS));
-			
-			List<PripGeoCoordinate> coordinates = new ArrayList<>();
-			if (null != searchMetadata.getFootprint()) {
-				for (List<Double> p : searchMetadata.getFootprint()) {
-					coordinates.add(new PripGeoCoordinate(p.get(0), p.get(1)));
-				}
+		final PripMetadata pripMetadata = new PripMetadata();
+		pripMetadata.setId(UUID.randomUUID());
+		pripMetadata.setObsKey(publishingJob.getKeyObjectStorage());
+		pripMetadata.setName(publishingJob.getKeyObjectStorage());
+		pripMetadata.setProductFamily(publishingJob.getProductFamily());
+		pripMetadata.setContentType(PripMetadata.DEFAULT_CONTENTTYPE);
+		pripMetadata.setContentLength(
+				getContentLength(publishingJob.getProductFamily(), publishingJob.getKeyObjectStorage()));
+		pripMetadata.setCreationDate(creationDate);
+		pripMetadata.setEvictionDate(creationDate.plusDays(PripMetadata.DEFAULT_EVICTION_DAYS));
+		pripMetadata
+				.setChecksums(getChecksums(publishingJob.getProductFamily(), publishingJob.getKeyObjectStorage()));
+		pripMetadata.setContentDateStart(DateUtils.parse(searchMetadata.getValidityStart()).truncatedTo(ChronoUnit.MILLIS));
+		pripMetadata.setContentDateEnd(DateUtils.parse(searchMetadata.getValidityStop()).truncatedTo(ChronoUnit.MILLIS));
+		
+		final List<PripGeoCoordinate> coordinates = new ArrayList<>();
+		if (null != searchMetadata.getFootprint()) {
+			for (final List<Double> p : searchMetadata.getFootprint()) {
+				coordinates.add(new PripGeoCoordinate(p.get(0), p.get(1)));
 			}
-			if (!coordinates.isEmpty()) {
-				pripMetadata.setFootprint(new GeoShapePolygon(coordinates));
-			}
-			
-			pripMetadataRepo.save(pripMetadata);
-
-			LOGGER.debug("end of saving PRIP metadata: {}", pripMetadata);
-			final ReportingOutput out = PripReportingOutput.newInstance(new Date());
-			reporting.end(out, new ReportingMessage("Finished publishing file %s in PRIP", name));
-		} catch (final Exception e) {
-			final ReportingOutput out = PripReportingOutput.newInstance(new Date());
-			reporting.end(out, new ReportingMessage("Error on publishing file %s in PRIP: %s", name, LogUtils.toString(e)));
-			throw new Exception(e);
 		}
+		if (!coordinates.isEmpty()) {
+			pripMetadata.setFootprint(new GeoShapePolygon(coordinates));
+		}	
+		pripMetadataRepo.save(pripMetadata);
+
+		LOGGER.debug("end of saving PRIP metadata: {}", pripMetadata);
 	}
-
-	private SearchMetadata queryMetadata(ProductFamily productFamily, String keyObjectStorage) throws MetadataQueryException {
-
-			return  metadataClient.queryByFamilyAndProductName(removeZipSuffix(productFamily.name()),
-					removeZipSuffix(keyObjectStorage));
 	
-	}
+	private SearchMetadata queryMetadata(final ProductFamily productFamily, final String keyObjectStorage) throws MetadataQueryException {
+
+		return  metadataClient.queryByFamilyAndProductName(removeZipSuffix(productFamily.name()),
+				removeZipSuffix(keyObjectStorage));
+
+}
 	
 	private long getContentLength(final ProductFamily family, final String key) {
 		long contentLength = 0;

@@ -1,6 +1,5 @@
 package esa.s1pdgs.cpoc.mqi.client;
 
-import java.util.Collections;
 import java.util.List;
 
 import org.apache.logging.log4j.LogManager;
@@ -19,7 +18,7 @@ import esa.s1pdgs.cpoc.mqi.model.rest.AckMessageDto;
 import esa.s1pdgs.cpoc.mqi.model.rest.GenericMessageDto;
 
 public final class MqiConsumer<E extends AbstractMessage> implements Runnable {
-	private static final Logger LOG = LogManager.getLogger(MqiConsumer.class);
+	static final Logger LOG = LogManager.getLogger(MqiConsumer.class);
 	
 	private final MqiClient client;
 	private final ProductCategory category;
@@ -97,8 +96,20 @@ public final class MqiConsumer<E extends AbstractMessage> implements Runnable {
 				appStatus.setProcessing(message.getId());
 				LOG.debug("{} received {} from MQI", this, message);
 				try {
-					mqiListener.onMessage(message);
+					final MqiMessageEventHandler handler = mqiListener.onMessage(message);
+					if (handler == null) {
+						throw new RuntimeException(
+								String.format("MqiListener implementation %s returned null", mqiListener.getClass())
+						);
+					}	
+					handler.processMessages(client);				
 					client.ack(new AckMessageDto(message.getId(), Ack.OK, null, false), category);
+					LOG.info("{} handled {} successfully, done!", this, message.getId());
+				// should be thrown if publish() or ack() is failing	
+				} catch (final MqiAckApiError | MqiPublishApiError ace) {
+					// S1PRO-1406: simply propagate exception to initiate shutdown in case publish or ack fails
+					// since input message is considered as not handled, no error request shall be created
+					throw ace;								
 				// any other error --> dump prominently into log file but continue	
 				} catch (final Exception e) {
 					LOG.error(String.format("Error handling message %s", message), e);
@@ -107,7 +118,7 @@ public final class MqiConsumer<E extends AbstractMessage> implements Runnable {
 					// S1PRO-1045: as this implementation is used for e.g. appending something to the ErrorQueue, 
 					// it must only be called on errors if ack call was successful (otherwise, the message may be 
 					// distributed to another pod)
-					mqiListener.onTerminalError(message, e);					
+					mqiListener.onTerminalError(message, e);
 				}
 			// on communication errors with Mqi --> just dump warning and retry on next polling attempt
 			} catch (final MqiAckApiError | MqiNextApiError | MqiPublishApiError ace) {
@@ -118,6 +129,7 @@ public final class MqiConsumer<E extends AbstractMessage> implements Runnable {
 				 */
 				LOG.error("Unable to reach the MQI Server for the maximum of retries. Terminating this service now. Error Code: {}, Message: {}", ace.getCode().getCode(), ace.getLogMessage());
 				appStatus.setShallBeStopped(true);
+				appStatus.forceStopping();
 			} catch (final AbstractCodedException ace) {
 				LOG.warn("Error Code: {}, Message: {}", ace.getCode().getCode(), ace.getLogMessage());
 				appStatus.setError("NEXT_MESSAGE");

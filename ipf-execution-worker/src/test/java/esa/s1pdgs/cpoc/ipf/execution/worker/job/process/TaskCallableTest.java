@@ -54,7 +54,7 @@ public class TaskCallableTest {
 	@Test
 	public void testRun_Nominal() throws Exception {		
 		final Future<TaskResult> future = completionService.submit(
-				new TaskCallable(ipf.getPath(), "0", testDir.getPath(), reporting)
+				new TaskCallable(ipf.getPath(), "0", testDir.getPath(),System.out::println, System.out::println, reporting)
 		);
 		final TaskResult result = future.get();
 		assertEquals(ipf.getPath(), result.getBinary());

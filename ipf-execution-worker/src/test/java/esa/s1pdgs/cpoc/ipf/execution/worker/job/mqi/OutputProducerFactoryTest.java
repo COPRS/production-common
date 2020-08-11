@@ -140,10 +140,6 @@ public class OutputProducerFactoryTest {
         		expectedEvent
         );
         expectedMessage.setOutputKey("L0_SLICE");
-
-        verify(this.sender, times(1)).publish(Mockito.eq(expectedMessage), Mockito.eq(ProductCategory.LEVEL_PRODUCTS));
-        verify(this.sender, never()).publish(Mockito.any(), Mockito.eq(ProductCategory.LEVEL_REPORTS));
-        verify(this.sender, never()).publish(Mockito.any(), Mockito.eq(ProductCategory.LEVEL_SEGMENTS));
     }
 
     /**
@@ -171,8 +167,6 @@ public class OutputProducerFactoryTest {
         		ProductFamily.L0_SEGMENT, 
         		expectedEvent
         );        
-        verify(this.sender, times(1)).publish(Mockito.eq(expectedMessage), Mockito.eq(ProductCategory.LEVEL_SEGMENTS));
-        verify(this.sender, never()).publish(Mockito.any(), Mockito.eq(ProductCategory.LEVEL_REPORTS));
     }
 
     /**
@@ -201,9 +195,6 @@ public class OutputProducerFactoryTest {
         		expectedEvent
         );
         expectedMessage.setOutputKey("L0_ACN");
-        
-        verify(this.sender, times(1)).publish(Mockito.eq(expectedMessage), Mockito.eq(ProductCategory.LEVEL_PRODUCTS));
-        verify(this.sender, never()).publish(Mockito.any(), Mockito.eq(ProductCategory.LEVEL_REPORTS));
     }
 
     /**
@@ -258,10 +249,6 @@ public class OutputProducerFactoryTest {
         		expectedEvent
         );
         expectedMessage.setOutputKey("L1_SLICE");
-
-        
-        verify(this.sender, times(1)).publish(Mockito.eq(expectedMessage), Mockito.eq(ProductCategory.LEVEL_PRODUCTS));
-        verify(this.sender, never()).publish(Mockito.any(), Mockito.eq(ProductCategory.LEVEL_REPORTS));        
     }
 
     /**
@@ -290,8 +277,5 @@ public class OutputProducerFactoryTest {
         		expectedEvent
         );
         expectedMessage.setOutputKey("L1_ACN");
-        
-        verify(this.sender, times(1)).publish(Mockito.eq(expectedMessage), Mockito.eq(ProductCategory.LEVEL_PRODUCTS));
-        verify(this.sender, never()).publish(Mockito.any(), Mockito.eq(ProductCategory.LEVEL_REPORTS));  
     }
 }

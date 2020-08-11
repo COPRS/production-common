@@ -39,7 +39,7 @@ public class AbstractMetadataController<E extends AbstractMetadata> {
         } catch (MetadataNotPresentException e) {
         	logger.warn("{} '{}' of family {} not available [code {}] {}",  
         			className.getSimpleName(), productName, family, e.getCode().getCode(), e.getLogMessage());            
-            return new ResponseEntity<F>(HttpStatus.NOT_FOUND);            
+            return new ResponseEntity<F>(HttpStatus.NO_CONTENT);            
         } catch (AbstractCodedException e) {
         	logger.error("Error on getting {} '{}' of family {} [code {}] {}", 
         			className.getSimpleName(), productName, family, e.getCode().getCode(), e.getLogMessage());

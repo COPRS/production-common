@@ -115,10 +115,10 @@ public class SearchMetadataController {
 		try {
 			final SearchMetadata result = esServices.productNameQuery(productFamily, productName);
 			return new ResponseEntity<>(result, HttpStatus.OK);
-		} catch (MetadataNotPresentException e) {
+		} catch (final MetadataNotPresentException e) {
         	LOGGER.warn("{} '{}' of family {} not available [code {}] {}",  
         			this.getClass().getSimpleName(), productName, productFamily, e.getCode().getCode(), e.getLogMessage());            
-            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
 		} catch (final Exception ex) {
 			LOGGER.error("Query error while doing product name search: {}", LogUtils.toString(ex));
 			return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);

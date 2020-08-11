@@ -26,10 +26,8 @@ public class TaskCallable implements Callable<TaskResult> {
     /**
      * Logger
      */
-    private static final Logger LOGGER =
+    public static final Logger LOGGER =
             LogManager.getLogger(TaskCallable.class);
-    
-    private static final Consumer<String> DEFAULT_OUTPUT_CONSUMER = LOGGER::info;
 
     /**
      * Absolute path of the binary
@@ -51,17 +49,7 @@ public class TaskCallable implements Callable<TaskResult> {
     
     private final ReportingFactory reportingFactory;
 
-    /**
-     * @param binaryPath
-     * @param jobOrderPath
-     * @param workDirectory
-     */
-    public TaskCallable(final String binaryPath, final String jobOrderPath,
-            final String workDirectory, final ReportingFactory reportingFactory) {
-    	this(binaryPath, jobOrderPath, workDirectory, DEFAULT_OUTPUT_CONSUMER, DEFAULT_OUTPUT_CONSUMER, reportingFactory);
-    }
-    
-    TaskCallable(
+    public TaskCallable(
     		final String binaryPath, 
     		final String jobOrderPath, 
     		final String workDirectory, 

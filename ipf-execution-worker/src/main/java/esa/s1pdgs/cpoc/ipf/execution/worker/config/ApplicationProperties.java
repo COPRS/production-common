@@ -1,5 +1,8 @@
 package esa.s1pdgs.cpoc.ipf.execution.worker.config;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Configuration;
@@ -79,6 +82,8 @@ public class ApplicationProperties {
     private String oqcBinaryPath;
     private String oqcWorkingDir;
     private long oqcTimeoutInSeconds = 60;
+    
+	private List<String> plaintextTaskPatterns = new ArrayList<>();
 
 
     /**
@@ -301,5 +306,13 @@ public class ApplicationProperties {
 
 	public void setOqcEnabled(final boolean oqcEnabled) {
 		this.oqcEnabled = oqcEnabled;
+	}
+
+	public List<String> getPlaintextTaskPatterns() {
+		return plaintextTaskPatterns;
+	}
+
+	public void setPlaintextTaskPatterns(final List<String> plaintextTaskPatterns) {
+		this.plaintextTaskPatterns = plaintextTaskPatterns;
 	}
 }

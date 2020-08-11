@@ -22,7 +22,6 @@ import org.elasticsearch.action.DocWriteResponse.Result;
 import org.elasticsearch.action.index.IndexResponse;
 import org.elasticsearch.action.search.SearchResponse;
 import org.elasticsearch.action.support.replication.ReplicationResponse.ShardInfo;
-import org.elasticsearch.client.RequestOptions;
 import org.elasticsearch.client.RestHighLevelClient;
 import org.elasticsearch.common.bytes.BytesArray;
 import org.elasticsearch.common.bytes.BytesReference;
@@ -40,8 +39,8 @@ import esa.s1pdgs.cpoc.common.ProductFamily;
 import esa.s1pdgs.cpoc.prip.model.Checksum;
 import esa.s1pdgs.cpoc.prip.model.PripDateTimeFilter;
 import esa.s1pdgs.cpoc.prip.model.PripDateTimeFilter.Operator;
-import esa.s1pdgs.cpoc.prip.model.PripMetadata.FIELD_NAMES;
 import esa.s1pdgs.cpoc.prip.model.PripMetadata;
+import esa.s1pdgs.cpoc.prip.model.PripMetadata.FIELD_NAMES;
 import esa.s1pdgs.cpoc.prip.model.PripTextFilter;
 
 public class TestPripElasticSearchMetadataRepo {
@@ -72,17 +71,17 @@ public class TestPripElasticSearchMetadataRepo {
 		final Result result = DocWriteResponse.Result.CREATED;
 
 		doReturn(result).when(indexResponse).getResult();
-		doReturn(indexResponse).when(restHighLevelClient).index(Mockito.any(), RequestOptions.DEFAULT);
+		doReturn(indexResponse).when(restHighLevelClient).index(Mockito.any(), Mockito.any());
 
 		repo.save(createPripMetadata());
 
-		verify(restHighLevelClient, times(1)).index(Mockito.any(), RequestOptions.DEFAULT);
+		verify(restHighLevelClient, times(1)).index(Mockito.any(), Mockito.any());
 
 	}
 
 	@Test
 	public void testSaveWithFailure() throws IOException {
-		ShardId shardId = new ShardId("", "", 0);
+		final ShardId shardId = new ShardId("", "", 0);
 		final ShardInfo.Failure failure = new ShardInfo.Failure(shardId, "", new IOException("testexception"),
 				RestStatus.CONFLICT, false);
 		final ShardInfo shardInfo = new ShardInfo(1, 0, failure);
@@ -91,10 +90,10 @@ public class TestPripElasticSearchMetadataRepo {
 
 		doReturn(result).when(indexResponse).getResult();
 		doReturn(shardInfo).when(indexResponse).getShardInfo();
-		doReturn(indexResponse).when(restHighLevelClient).index(Mockito.any(), RequestOptions.DEFAULT);
+		doReturn(indexResponse).when(restHighLevelClient).index(Mockito.any(), Mockito.any());
 
 		repo.save(createPripMetadata());
-		verify(restHighLevelClient, times(1)).index(Mockito.any(), RequestOptions.DEFAULT);
+		verify(restHighLevelClient, times(1)).index(Mockito.any(), Mockito.any());
 
 	}
 
@@ -120,7 +119,7 @@ public class TestPripElasticSearchMetadataRepo {
 
 		doReturn(searchHits).when(searchResponse).getHits();
 
-		doReturn(searchResponse).when(restHighLevelClient).search(Mockito.any(), RequestOptions.DEFAULT);
+		doReturn(searchResponse).when(restHighLevelClient).search(Mockito.any(), Mockito.any());
 
 		final List<PripMetadata> result = repo.findAll(Optional.empty(), Optional.empty());
 
@@ -138,7 +137,7 @@ public class TestPripElasticSearchMetadataRepo {
 
 		doReturn(searchHits).when(searchResponse).getHits();
 
-		doReturn(searchResponse).when(restHighLevelClient).search(Mockito.any(), RequestOptions.DEFAULT);
+		doReturn(searchResponse).when(restHighLevelClient).search(Mockito.any(), Mockito.any());
 
 		final List<PripMetadata> result = repo.findAll(Optional.empty(), Optional.empty());
 
@@ -148,7 +147,7 @@ public class TestPripElasticSearchMetadataRepo {
 	@Test
 	public void testFindAllWithFailure() throws IOException {
 
-		doThrow(new IOException("testexecption")).when(restHighLevelClient).search(Mockito.any(), RequestOptions.DEFAULT);
+		doThrow(new IOException("testexecption")).when(restHighLevelClient).search(Mockito.any(), Mockito.any());
 		final List<PripMetadata> result = repo.findAll(Optional.empty(), Optional.empty());
 		assertEquals(0, result.size());
 	}
@@ -174,7 +173,7 @@ public class TestPripElasticSearchMetadataRepo {
 		final SearchHits searchHits = new SearchHits(hits, totalHits, 0);
 
 		doReturn(searchHits).when(searchResponse).getHits();
-		doReturn(searchResponse).when(restHighLevelClient).search(Mockito.any(), RequestOptions.DEFAULT);
+		doReturn(searchResponse).when(restHighLevelClient).search(Mockito.any(), Mockito.any());
 
 		final List<PripDateTimeFilter> creationDateIntervals = new ArrayList<>();
 
@@ -218,7 +217,7 @@ public class TestPripElasticSearchMetadataRepo {
 		final SearchHits searchHits = new SearchHits(hits, totalHits, 0);
 
 		doReturn(searchHits).when(searchResponse).getHits();
-		doReturn(searchResponse).when(restHighLevelClient).search(Mockito.any(), RequestOptions.DEFAULT);
+		doReturn(searchResponse).when(restHighLevelClient).search(Mockito.any(), Mockito.any());
 
 		final List<PripTextFilter> nameFilters = new ArrayList<>();
 
@@ -268,7 +267,7 @@ public class TestPripElasticSearchMetadataRepo {
 		final SearchHits searchHits = new SearchHits(hits, totalHits, 0);
 
 		doReturn(searchHits).when(searchResponse).getHits();
-		doReturn(searchResponse).when(restHighLevelClient).search(Mockito.any(), RequestOptions.DEFAULT);
+		doReturn(searchResponse).when(restHighLevelClient).search(Mockito.any(), Mockito.any());
 
 		final List<PripDateTimeFilter> creationDateFilters = new ArrayList<>();
 

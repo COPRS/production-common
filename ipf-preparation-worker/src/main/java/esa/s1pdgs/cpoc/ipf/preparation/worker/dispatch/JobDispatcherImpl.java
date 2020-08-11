@@ -10,14 +10,17 @@ import esa.s1pdgs.cpoc.appcatalog.AppDataJob;
 import esa.s1pdgs.cpoc.appcatalog.AppDataJobGeneration;
 import esa.s1pdgs.cpoc.appcatalog.AppDataJobGenerationState;
 import esa.s1pdgs.cpoc.appcatalog.AppDataJobState;
+import esa.s1pdgs.cpoc.common.ProductCategory;
 import esa.s1pdgs.cpoc.common.errors.AbstractCodedException;
 import esa.s1pdgs.cpoc.common.utils.LogUtils;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.appcat.AppCatJobService;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.config.ProcessSettings;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.report.TaskTableLookupReportingOutput;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.type.ProductTypeAdapter;
+import esa.s1pdgs.cpoc.mqi.client.MqiMessageEventHandler;
 import esa.s1pdgs.cpoc.mqi.model.queue.CatalogEvent;
 import esa.s1pdgs.cpoc.mqi.model.queue.IpfPreparationJob;
+import esa.s1pdgs.cpoc.mqi.model.queue.NullMessage;
 import esa.s1pdgs.cpoc.mqi.model.queue.util.CatalogEventAdapter;
 import esa.s1pdgs.cpoc.mqi.model.rest.GenericMessageDto;
 import esa.s1pdgs.cpoc.report.Reporting;
@@ -51,7 +54,7 @@ public class JobDispatcherImpl implements JobDispatcher {
     }
 
 	@Override
-	public final void dispatch(final GenericMessageDto<IpfPreparationJob> message) throws Exception {
+	public final MqiMessageEventHandler dispatch(final GenericMessageDto<IpfPreparationJob> message) throws Exception {
     	final IpfPreparationJob prepJob = message.getBody();
     	final AppDataJob jobFromMessage = prepJob.getAppDataJob();    	
         
@@ -62,37 +65,39 @@ public class JobDispatcherImpl implements JobDispatcher {
         typeAdapter.customAppDataJob(jobFromMessage);
     	LOGGER.trace("== dispatch job {}", jobFromMessage.toString());
     	
+        final String tasktableFilename = jobFromMessage.getTaskTableName();
+        
     	reporting.begin(
     			ReportingUtils.newFilenameReportingInputFor(prepJob.getProductFamily(), jobFromMessage.getProductName()),
     			new ReportingMessage("Start associating TaskTables to AppDataJob", jobFromMessage.getId())
-    	);    	
-        try {        	
-            final String tasktableFilename = jobFromMessage.getTaskTableName();
-            LOGGER.trace("Got TaskTable {}", tasktableFilename);
-            
-            // assert that there is a job generator for the assigned tasktable
-            if (!generatorAvailableForTasktableNames.contains(tasktableFilename))  {
-            	throw new IllegalStateException(
-            			String.format(
-            					"No job generator found for tasktable %s. Available are: %s", 
-            					tasktableFilename,
-            					generatorAvailableForTasktableNames
-            			)
-            	);
-            } 
-    		handleJob(message, jobFromMessage, reporting.getUid(), tasktableFilename);
-    		
-    		reporting.end(
-            		new TaskTableLookupReportingOutput(Collections.singletonList(tasktableFilename)),
-            		new ReportingMessage("End associating TaskTables to AppDataJob")
-            );
-        } catch (final Exception e) {        	
-        	reporting.error(new ReportingMessage(
-        			"Error associating TaskTables to AppDataJob: %s", 
-        			LogUtils.toString(e)
-        	));
-            throw e;
-        }
+    	); 
+    	
+		return new MqiMessageEventHandler.Builder<NullMessage>(ProductCategory.UNDEFINED)
+				.onSuccess(res -> reporting.end(
+	            		new TaskTableLookupReportingOutput(Collections.singletonList(tasktableFilename)),
+	            		new ReportingMessage("End associating TaskTables to AppDataJob")
+	            ))
+				.onError(e -> reporting.error(new ReportingMessage(
+	        			"Error associating TaskTables to AppDataJob: %s", 
+	        			LogUtils.toString(e)
+	        	)))
+				.publishMessageProducer(() -> {
+					LOGGER.trace("Got TaskTable {}", tasktableFilename);
+		            
+		            // assert that there is a job generator for the assigned tasktable
+		            if (!generatorAvailableForTasktableNames.contains(tasktableFilename))  {
+		            	throw new IllegalStateException(
+		            			String.format(
+		            					"No job generator found for tasktable %s. Available are: %s", 
+		            					tasktableFilename,
+		            					generatorAvailableForTasktableNames
+		            			)
+		            	);
+		            } 
+		    		handleJob(message, jobFromMessage, reporting.getUid(), tasktableFilename);
+		    		return Collections.emptyList();
+				})
+				.newResult();
     }
 
 	// This needs to be synchronized to avoid duplicate jobs

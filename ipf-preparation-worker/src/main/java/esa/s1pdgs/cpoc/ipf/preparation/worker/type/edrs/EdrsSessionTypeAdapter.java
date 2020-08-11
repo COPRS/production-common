@@ -75,12 +75,6 @@ public final class EdrsSessionTypeAdapter extends AbstractProductTypeAdapter imp
         } 
         catch (final MetadataQueryException me) {
         	LOGGER.error("Error on query execution, retrying next time", me);
-//        	 throw new IpfPrepWorkerInputsMissingException(
-//    			  Collections.singletonMap(
-//    					product.getProductName(), 
-//    					  String.format("Query error: %s", Exceptions.messageOf(me))
-//    			  )
-// 	    	  );
         }
 	    return product;
 	}

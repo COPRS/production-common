@@ -1,5 +1,7 @@
 package esa.s1pdgs.cpoc.appcatalog;
 
+import java.util.LinkedHashMap;
+import java.util.Map;
 import java.util.Objects;
 
 /**
@@ -22,40 +24,46 @@ public class AppDataJobFile implements Comparable<AppDataJobFile> {
     private String startDate;
 
     private String endDate;
+    
+    private Map<String,String> metadata;
 
-    /**
-     */
-    public AppDataJobFile() {
-        super();
-    }
-
-    /**
-     */
-    public AppDataJobFile(final String fileName) {
-        super();
-        this.fileName = fileName;
-    }
-
-    public AppDataJobFile(final String fileName, final String keyObs, final String startDate, final String endDate) {
+    public AppDataJobFile(
+    		final String fileName, 
+    		final String keyObs, 
+    		final String startDate, 
+    		final String endDate, 
+    		final Map<String,String> metadata
+    ) {
         this.fileName = fileName;
         this.keyObs = keyObs;
         this.startDate = startDate;
         this.endDate = endDate;
+        this.metadata = metadata;
+    }
+    
+    public AppDataJobFile() {
+    	this(null,null,null,null,new LinkedHashMap<>());
     }
 
-    /**
-     */
-    public AppDataJobFile(final String fileName, final String keyObs) {
-        super();
-        this.fileName = fileName;
-        this.keyObs = keyObs;
+    public AppDataJobFile(final String fileName) {
+        this(fileName, null,null,null, new LinkedHashMap<>());
     }
+    
+    public AppDataJobFile(final String fileName, final String keyObs) {
+    	this(fileName, keyObs, null, null,  new LinkedHashMap<>());
+    }
+    
+    public AppDataJobFile(
+    		final String fileName, 
+    		final String keyObs, 
+    		final String startDate, 
+    		final String endDate
+    ) {
+    	this(fileName, keyObs, startDate, endDate, new LinkedHashMap<>());
+    }    
 
     public AppDataJobFile(final AppDataJobFile other) {
-        fileName = other.fileName;
-        keyObs = other.keyObs;
-        startDate = other.startDate;
-        endDate = other.endDate;
+    	this(other.fileName, other.keyObs, other.startDate, other.endDate, other.metadata);
     }
 
     /**
@@ -102,13 +110,21 @@ public class AppDataJobFile implements Comparable<AppDataJobFile> {
     public void setEndDate(final String endDate) {
         this.endDate = endDate;
     }
+    
+    public Map<String, String> getMetadata() {
+		return metadata;
+	}
 
-    /**
+	public void setMetadata(final Map<String, String> metadata) {
+		this.metadata = metadata;
+	}
+
+	/**
      * @see java.lang.Object#toString()
      */
     @Override
     public String toString() {
-        return String.format("{fileName: %s, keyObs: %s, startDate: %s, endDate, %s}", fileName, keyObs, startDate, endDate);
+        return String.format("{fileName: %s, keyObs: %s, startDate: %s, endDate: %s, metadata:%s}", fileName, keyObs, startDate, endDate, metadata);
     }
 
     /**
@@ -116,7 +132,7 @@ public class AppDataJobFile implements Comparable<AppDataJobFile> {
      */
     @Override
     public int hashCode() {
-        return Objects.hash(fileName, keyObs, startDate, endDate);
+        return Objects.hash(fileName, keyObs, startDate, endDate, metadata);
     }
 
     /**
@@ -134,7 +150,8 @@ public class AppDataJobFile implements Comparable<AppDataJobFile> {
             ret = Objects.equals(fileName, other.fileName)
                     && Objects.equals(keyObs, other.keyObs)
                     && Objects.equals(startDate, other.startDate)
-                    && Objects.equals(endDate, other.endDate);
+                    && Objects.equals(endDate, other.endDate)
+                    && Objects.equals(metadata, other.metadata);
         }
         return ret;
     }

@@ -2,12 +2,13 @@ package esa.s1pdgs.cpoc.ipf.preparation.worker.type.segment;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import org.springframework.util.CollectionUtils;
 
@@ -49,33 +50,41 @@ public final class L0SegmentTypeAdapter extends AbstractProductTypeAdapter imple
 
 	@Override
 	public final Product mainInputSearch(final AppDataJob job) throws IpfPrepWorkerInputsMissingException {	
+		final L0SegmentProduct product = L0SegmentProduct.of(job);
+		
+		try {			
+			for (final LevelSegmentMetadata metadata : metadataClient.getLevelSegments(product.getDataTakeId())) {				
+				LOGGER.debug("Found {} in MDC for {}", metadata.getProductName(),  product.getProductName());
+				product.addSegmentMetadata(metadata);
+			}			
+		}
+		catch (final MetadataQueryException e) {
+			LOGGER.debug("== preSearch: Exception- Missing segment for lastname {}. Trying next time...", product.getProductName());
+		}				
+		return product;
+	}	
+	
+	@Override
+	public void validateInputSearch(final AppDataJob job) throws IpfPrepWorkerInputsMissingException {
+		final L0SegmentProduct product = L0SegmentProduct.of(job);
+		
 		boolean fullCoverage = false;
 
 		// Retrieve the segments
 		final Map<String, String> missingMetadata = new HashMap<>();
-		final List<String> pols = new ArrayList<>();
-		final Map<String, List<LevelSegmentMetadata>> segmentsGroupByPol = new HashMap<>();
+		final Map<String, List<LevelSegmentMetadata>> segmentsGroupByPol = product.segmentsForPolaristions();
 
-		final L0SegmentProduct product = L0SegmentProduct.of(job);
+		final List<String> pols = segmentsGroupByPol.entrySet().stream()
+				.filter(e -> !e.getValue().isEmpty())
+				.map(e -> e.getKey())
+				.collect(Collectors.toList());
 		
-		try {			
-			for (final LevelSegmentMetadata metadata : metadataClient.getLevelSegments(product.getDataTakeId())) {
-				if (!segmentsGroupByPol.containsKey(metadata.getPolarisation())) {
-					pols.add(metadata.getPolarisation());
-					segmentsGroupByPol.put(metadata.getPolarisation(), new ArrayList<>());
-				}
-				segmentsGroupByPol.get(metadata.getPolarisation()).add(metadata);
-			}			
-		}
-		catch (final MetadataQueryException e) {
-			LOGGER.debug("== preSearch: Exception- Missing segment for lastname {}", product.getProductName());
-			missingMetadata.put(product.getProductName(), "Missing segment: " + e.getMessage());
-		}
-
-		// If missing one segment
-		if (!missingMetadata.isEmpty()) {
+		// If missing input segment
+		if (segmentsGroupByPol.isEmpty()) {
 			LOGGER.debug("== preSearch: Missing other segment for lastname {}", product.getProductName());
-			throw new IpfPrepWorkerInputsMissingException(missingMetadata);
+			throw new IpfPrepWorkerInputsMissingException(
+					Collections.singletonMap(product.getProductName(), "Missing product in MDC ")
+			);
 		}
 
 		LOGGER.debug("== preSearch00 -segment  {}", segmentsGroupByPol);
@@ -150,21 +159,20 @@ public final class L0SegmentTypeAdapter extends AbstractProductTypeAdapter imple
 			final Date currentDate = new Date();
 			if (job.getGeneration().getCreationDate().getTime() < currentDate.getTime() - timeoutInputSearchMs) {
 				LOGGER.warn("Continue generation of {} {} even if sensing gaps", product.getProductName(),
-						job.getGeneration());
-				job.setStartTime(sensingStart);
-				job.setStopTime(sensingStop);
+						job.getGeneration());				
+				product.setStartTime(sensingStart);
+				product.setStopTime(sensingStop);
 			} else {
 				throw new IpfPrepWorkerInputsMissingException(missingMetadata);
 			}
 		} 
 		else {
-			job.setStartTime(sensingStart);
-			job.setStopTime(sensingStop);
+			product.setStartTime(sensingStart);
+			product.setStopTime(sensingStop);
 		}
-		LOGGER.debug("== preSearch: performed lastName: {},fullCoverage= {} ", product.getProductName(), fullCoverage);				
-		return product;
+		LOGGER.debug("== preSearch: performed lastName: {},fullCoverage= {} ", product.getProductName(), fullCoverage);
 	}
-	
+
 	@Override
 	public final void customAppDataJob(final AppDataJob job) {
 		final CatalogEventAdapter eventAdapter = CatalogEventAdapter.of(job);
@@ -209,6 +217,8 @@ public final class L0SegmentTypeAdapter extends AbstractProductTypeAdapter imple
 		} 
 		return ("HH".equals(polA) && "HV".equals(polB)) || ("HV".equals(polA) && "HH".equals(polB));
 	}
+	
+
 
 	private final boolean isCovered(final List<LevelSegmentMetadata> sortedSegments) {
 		if (CollectionUtils.isEmpty(sortedSegments)) {

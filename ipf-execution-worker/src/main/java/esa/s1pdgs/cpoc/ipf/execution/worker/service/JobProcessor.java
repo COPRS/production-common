@@ -6,6 +6,7 @@ import java.nio.file.FileVisitOption;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
@@ -50,17 +51,22 @@ import esa.s1pdgs.cpoc.mqi.client.MessageFilter;
 import esa.s1pdgs.cpoc.mqi.client.MqiClient;
 import esa.s1pdgs.cpoc.mqi.client.MqiConsumer;
 import esa.s1pdgs.cpoc.mqi.client.MqiListener;
+import esa.s1pdgs.cpoc.mqi.client.MqiMessageEventHandler;
 import esa.s1pdgs.cpoc.mqi.client.StatusService;
 import esa.s1pdgs.cpoc.mqi.model.queue.IpfExecutionJob;
 import esa.s1pdgs.cpoc.mqi.model.queue.LevelJobInputDto;
+import esa.s1pdgs.cpoc.mqi.model.queue.ProductionEvent;
 import esa.s1pdgs.cpoc.mqi.model.rest.GenericMessageDto;
+import esa.s1pdgs.cpoc.mqi.model.rest.GenericPublicationMessageDto;
 import esa.s1pdgs.cpoc.obs_sdk.ObsClient;
 import esa.s1pdgs.cpoc.obs_sdk.ObsDownloadObject;
 import esa.s1pdgs.cpoc.report.Reporting;
+import esa.s1pdgs.cpoc.report.ReportingFilenameEntries;
 import esa.s1pdgs.cpoc.report.ReportingFilenameEntry;
 import esa.s1pdgs.cpoc.report.ReportingMessage;
 import esa.s1pdgs.cpoc.report.ReportingOutput;
 import esa.s1pdgs.cpoc.report.ReportingUtils;
+import esa.s1pdgs.cpoc.report.message.output.FilenameReportingOutput;
 
 /**
  * Process a jobs
@@ -185,7 +191,7 @@ public class JobProcessor implements MqiListener<IpfExecutionJob> {
 
 
 	@Override
-	public final void onMessage(final GenericMessageDto<IpfExecutionJob> message) throws Exception {
+	public final MqiMessageEventHandler onMessage(final GenericMessageDto<IpfExecutionJob> message) throws Exception {
 		LOGGER.info("Initializing job processing {}", message);
 
 		// ----------------------------------------------------------
@@ -217,26 +223,37 @@ public class JobProcessor implements MqiListener<IpfExecutionJob> {
 		
 		final File workdir = new File(job.getWorkDirectory());
 		final String jobOrderName = new File(job.getJobOrder()).getName();
+		
+		final ProductCategory category;
 
 		// Build output list filename
-		String outputListFile = job.getWorkDirectory() + workdir.getName() + ".LIST";
+		final String outputListFile;
 		if (properties.getLevel() == ApplicationLevel.L0) {
 			outputListFile = job.getWorkDirectory() + "AIOProc.LIST";
+			category = ProductCategory.LEVEL_SEGMENTS;
 		} else if (properties.getLevel() == ApplicationLevel.L0_SEGMENT) {
 			outputListFile = job.getWorkDirectory() + "L0ASProcList.LIST";
-		}			
-		reporting.begin(
-				JobReportingInput.newInstance(toReportFilenames(job), jobOrderName),	
-				new ReportingMessage("Start job processing")
-		);
+			category = ProductCategory.LEVEL_PRODUCTS;
+		}
+		else {
+			outputListFile = job.getWorkDirectory() + workdir.getName() + ".LIST";
+			category = ProductCategory.LEVEL_PRODUCTS;
+		}
 		
 		// Clean up the working directory with all of its content
 		eraseWorkingDirectory(properties.getWorkingDir());
 
 		LOGGER.debug("Output list build {}", outputListFile);
 
-		final PoolExecutorCallable procExecutor = new PoolExecutorCallable(properties, job,
-				getPrefixMonitorLog(MonitorLogUtils.LOG_PROCESS, job), this.properties.getLevel(), reporting);
+		final PoolExecutorCallable procExecutor = new PoolExecutorCallable(
+				properties, 
+				job,
+				getPrefixMonitorLog(MonitorLogUtils.LOG_PROCESS, job), 
+				properties.getLevel(), 
+				reporting,
+				properties.getPlaintextTaskPatterns()
+		);
+		
 		
 		final ExecutorService procExecutorSrv = Executors.newSingleThreadExecutor();
 		final ExecutorCompletionService<Void> procCompletionSrv = new ExecutorCompletionService<>(procExecutorSrv);
@@ -255,8 +272,17 @@ public class JobProcessor implements MqiListener<IpfExecutionJob> {
 		final OutputProcessor outputProcessor = new OutputProcessor(obsClient, procuderFactory, message, outputListFile,
 				this.properties.getSizeBatchUpload(), getPrefixMonitorLog(MonitorLogUtils.LOG_OUTPUT, job),
 				this.properties.getLevel(), properties);
-
-		processJob(message, inputDownloader, outputProcessor, procExecutorSrv, procCompletionSrv, procExecutor, reporting);
+		
+		
+		reporting.begin(
+				JobReportingInput.newInstance(toReportFilenames(job), jobOrderName),	
+				new ReportingMessage("Start job processing")
+		);
+		return new MqiMessageEventHandler.Builder<ProductionEvent>(category)
+				.onSuccess(res -> reporting.end(toReportingOutput(res), new ReportingMessage("End job processing")))
+				.onError(e -> reporting.error(errorReportMessage(e)))
+				.publishMessageProducer(() -> processJob(message, inputDownloader, outputProcessor, procExecutorSrv, procCompletionSrv, procExecutor, reporting))
+				.newResult();
 	}
 
 	@Override
@@ -271,7 +297,8 @@ public class JobProcessor implements MqiListener<IpfExecutionJob> {
 		exitOnAppStatusStopOrWait();
 	}
 	
-    protected void processJob(final GenericMessageDto<IpfExecutionJob> message,
+    protected List<GenericPublicationMessageDto<ProductionEvent>> processJob(
+    		final GenericMessageDto<IpfExecutionJob> message,
             final InputDownloader inputDownloader,
             final OutputProcessor outputProcessor,
             final ExecutorService procExecutorSrv,
@@ -280,8 +307,7 @@ public class JobProcessor implements MqiListener<IpfExecutionJob> {
             final Reporting reporting /* TODO: Refactor to not expect an already begun reporting... */) throws Exception {
         boolean poolProcessing = false;
         final IpfExecutionJob job = message.getBody();
-        
-        ReportingOutput reportingOutput = ReportingOutput.NULL;
+        final List<GenericPublicationMessageDto<ProductionEvent>> result = new ArrayList<>();
         
         try {
             LOGGER.info("{} Starting process executor",
@@ -307,13 +333,11 @@ public class JobProcessor implements MqiListener<IpfExecutionJob> {
                 checkThreadInterrupted();
                 LOGGER.info("{} Processing l0 outputs",
                         getPrefixMonitorLog(MonitorLogUtils.LOG_OUTPUT, job));
-                reportingOutput = outputProcessor.processOutput(reporting, reporting.getUid());
+                result.addAll(outputProcessor.processOutput(reporting, reporting.getUid()));
             } else {
                 LOGGER.info("{} Processing l0 outputs bypasssed",
                         getPrefixMonitorLog(MonitorLogUtils.LOG_OUTPUT, job));
-            }
-            reporting.end(reportingOutput, new ReportingMessage("End job processing"));
-            
+            }            
             // S1PRO-1496: If there was a missing chunk, we simply let this request succeed but in addition
             // we create an additional failed request in order to deal with the missing chunk and operator
             // needs to decide, whether to restart it or delete it.
@@ -336,13 +360,19 @@ public class JobProcessor implements MqiListener<IpfExecutionJob> {
                 		message
                 ));
             }
-        } catch (final Exception e) {
-            reporting.error(errorReportMessage(e)); 
-            throw e;
+            return result;
 		} finally {
             cleanJobProcessing(job, poolProcessing, procExecutorSrv);
         }
     }
+    
+	private final ReportingOutput toReportingOutput(final List<GenericPublicationMessageDto<ProductionEvent>> out) {		
+		final List<ReportingFilenameEntry> reportingEntries = out.stream()
+				.map(m -> new ReportingFilenameEntry(m.getFamily(), new File(m.getDto().getProductName()).getName()))
+				.collect(Collectors.toList());
+		
+		return new FilenameReportingOutput(new ReportingFilenameEntries(reportingEntries));
+	}
     
     
 
@@ -473,5 +503,6 @@ public class JobProcessor implements MqiListener<IpfExecutionJob> {
 		// any other Exception
 		return new ReportingMessage("[code {}] {}", ErrorCode.INTERNAL_ERROR, LogUtils.toString(e));
 	}
+	
 	
 }

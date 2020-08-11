@@ -31,24 +31,20 @@ public final class EdrsSessionProduct extends AbstractProduct {
 	}
 	
 	public final void setDsibForChannel(final int channel, final String dsibName) {
-		final String channelKey = getDsibIdForChannels(channel);	
-		product.setStringValue(channelKey, dsibName);
+		product.setStringValue(getDsibIdForChannels(channel), dsibName);
 	}
 	
 	public final String getDsibForChannel(final int channel) {
-		final String channelKey = getDsibIdForChannels(channel);	
-		return product.getStringValue(channelKey, null);
+		return product.getStringValue(getDsibIdForChannels(channel), null);
 	}
 	
 	public final void setRawsForChannel(final int channel, final List<AppDataJobFile> raws) {
 		Collections.sort(raws);
-		final String channelKey = getRawIdForChannels(channel);	
-		product.setProductsFor(channelKey, raws);
+		product.setProductsFor(getRawIdForChannels(channel), raws);
 	}	
 	
 	public final List<AppDataJobFile> getRawsForChannel(final int channel) {
-		final String channelKey = getRawIdForChannels(channel);	
-		return product.getProductsFor(channelKey);
+		return product.getProductsFor(getRawIdForChannels(channel));
 	}
 	
 	public final void setStationCode(final String stationCode) {
