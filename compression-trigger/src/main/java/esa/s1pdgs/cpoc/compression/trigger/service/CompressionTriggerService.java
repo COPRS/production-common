@@ -66,8 +66,8 @@ public class CompressionTriggerService {
 			}
 
 			return new CompressionJob(event.getKeyObjectStorage(), event.getProductFamily(),
-					getCompressedKeyObjectStorage(event.getKeyObjectStorage()),
-					getCompressedProductFamily(event.getProductFamily()), compressionDirection);
+					removeZipSuffix(event.getKeyObjectStorage()),
+					ProductFamily.fromValue(removeZipSuffix(event.getProductFamily().toString())), compressionDirection);
 		}		
 	};
 
@@ -146,5 +146,14 @@ public class CompressionTriggerService {
 
 	static ProductFamily getCompressedProductFamily(final ProductFamily inputFamily) {
 		return ProductFamily.fromValue(inputFamily.toString() + SUFFIX_ZIPPRODUCTFAMILY);
+	}
+	
+	static String removeZipSuffix(final String name) {
+		if (name.toLowerCase().endsWith(".zip")) {
+			return name.substring(0, name.length() - ".zip".length());
+		} else if (name.toLowerCase().endsWith("_zip")) {
+			return name.substring(0, name.length() - "_zip".length());
+		}
+		return name;
 	}
 }
