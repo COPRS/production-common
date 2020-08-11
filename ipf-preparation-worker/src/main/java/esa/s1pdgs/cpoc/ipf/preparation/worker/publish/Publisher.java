@@ -91,12 +91,14 @@ public class Publisher {
 	) throws InternalErrorException {
 		final AppDataJobProductAdapter product = new AppDataJobProductAdapter(job.getProduct());
 		
+		final File joborder = new File(jobOrderAdapter.getWorkdir(), jobOrderAdapter.getJobOrderName());
+		
 		final IpfExecutionJob execJob = new IpfExecutionJob(
 				settings.getLevel().toFamily(),
 				product.getProductName(),
 				product.getProcessMode(),
 				jobOrderAdapter.getWorkdir().getPath() + "/",
-				jobOrderAdapter.getJobOrderName(),
+				joborder.getPath(),
 				product.getStringValue("timeliness", ""),
 				reporting.getUid()
 		);
@@ -118,7 +120,7 @@ public class Publisher {
 			// Add the jobOrder itself in inputs
 			execJob.addInput(new LevelJobInputDto(
 					ProductFamily.JOB_ORDER.name(), 
-					new File(jobOrderAdapter.getWorkdir(), jobOrderAdapter.getJobOrderName()).getPath(), 
+					joborder.getPath(), 
 					jobOrderXml
 			));
 
