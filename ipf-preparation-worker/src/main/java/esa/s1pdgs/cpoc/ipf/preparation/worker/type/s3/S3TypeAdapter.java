@@ -27,7 +27,8 @@ public class S3TypeAdapter extends AbstractProductTypeAdapter implements Product
 
 	@Override
 	public void customJobDto(AppDataJob job, IpfExecutionJob dto) {
-		// Nothing to do currently
+		// S3 IPFs need absolut path for JobOrder 
+		dto.setJobOrder(dto.getWorkDirectory() + dto.getJobOrder());
 	}
 
 }
