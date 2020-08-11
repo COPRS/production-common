@@ -227,6 +227,9 @@ public class InputDownloader {
                 case "L1_ACN":
                 case "L2_ACN":
                 case "L2_SLICE":
+                case "S3_GRANULES":
+                case "S3_AUXILIARY_FILE":
+                case "S3_SAFE":
                     LOGGER.info("Input {}-{} will be stored in {}",
                             input.getFamily(), input.getContentRef(),
                             input.getLocalPath());
