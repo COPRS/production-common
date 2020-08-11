@@ -72,7 +72,8 @@ public class OutputProducerFactory {
     {
     	return new CompressionEvent(        		
         		msg.getFamily(),
-        		msg.getObjectStorageKey()
+        		msg.getObjectStorageKey(),
+        		msg.getCompressionDirection()
         );
     }
 
