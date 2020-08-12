@@ -49,7 +49,10 @@ public enum ProductFamily {
     // S3 Types
     S3_AUXILIARY_FILE,
     S3_GRANULES,
-    S3_SAFE;
+    S3_SAFE,
+    
+    S3_AUXILIARY_FILE_ZIP,
+    S3_SAFE_ZIP;
 
     /**
      * Get product family from value in string format
