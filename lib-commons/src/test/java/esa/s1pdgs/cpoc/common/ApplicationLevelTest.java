@@ -16,11 +16,12 @@ public class ApplicationLevelTest {
      */
     @Test
     public void testValueOf() {
-        assertEquals(5, ApplicationLevel.values().length);
+        assertEquals(6, ApplicationLevel.values().length);
         assertEquals(ApplicationLevel.L0, ApplicationLevel.valueOf("L0"));
         assertEquals(ApplicationLevel.L1, ApplicationLevel.valueOf("L1"));
         assertEquals(ApplicationLevel.L2, ApplicationLevel.valueOf("L2"));
         assertEquals(ApplicationLevel.L0_SEGMENT, ApplicationLevel.valueOf("L0_SEGMENT"));
         assertEquals(ApplicationLevel.S3_L0, ApplicationLevel.valueOf("S3_L0"));
+        assertEquals(ApplicationLevel.S3_L1, ApplicationLevel.valueOf("S3_L1"));
     }
 }
