@@ -148,7 +148,7 @@ public class IpfPreparationWorkerConfiguration {
 					sliceOverlap, 
 					sliceLength
 			);			
-		} else if (processSettings.getLevel() == ApplicationLevel.S3_L0) {
+		} else if (EnumSet.of(ApplicationLevel.S3_L0, ApplicationLevel.S3_L1).contains(processSettings.getLevel())) {
 			return new S3TypeAdapter();
 		}
 		throw new IllegalArgumentException(

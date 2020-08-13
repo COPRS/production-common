@@ -10,6 +10,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
+import java.util.EnumSet;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorCompletionService;
@@ -234,7 +235,7 @@ public class JobProcessor implements MqiListener<IpfExecutionJob> {
 		} else if (properties.getLevel() == ApplicationLevel.L0_SEGMENT) {
 			outputListFile = job.getWorkDirectory() + "L0ASProcList.LIST";
 			category = ProductCategory.LEVEL_PRODUCTS;
-		} else if (properties.getLevel() == ApplicationLevel.S3_L0){
+		} else if (EnumSet.of(ApplicationLevel.S3_L0, ApplicationLevel.S3_L1).contains(properties.getLevel())){
 			outputListFile = job.getWorkDirectory() + "product.LIST";
 			category = ProductCategory.S3_LEVEL_PRODUCTS;
 		}
