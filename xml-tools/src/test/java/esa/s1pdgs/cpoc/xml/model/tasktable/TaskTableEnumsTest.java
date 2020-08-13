@@ -36,11 +36,13 @@ public class TaskTableEnumsTest {
 
     @Test
     public void testEnumTaskTableOutputDestination() {
-        assertEquals(3, TaskTableOutputDestination.values().length);
+        assertEquals(4, TaskTableOutputDestination.values().length);
         assertEquals(TaskTableOutputDestination.DB,
                 TaskTableOutputDestination.valueOf("DB"));
         assertEquals(TaskTableOutputDestination.PROC,
                 TaskTableOutputDestination.valueOf("PROC"));
+        assertEquals(TaskTableOutputDestination.DBPROC,
+                TaskTableOutputDestination.valueOf("DBPROC"));
         assertEquals(TaskTableOutputDestination.BLANK,
                 TaskTableOutputDestination.valueOf("BLANK"));
     }
@@ -58,13 +60,19 @@ public class TaskTableEnumsTest {
 
     @Test
     public void testEnumTaskTableInputMode() {
-        assertEquals(4, TaskTableInputMode.values().length);
+        assertEquals(7, TaskTableInputMode.values().length);
         assertEquals(TaskTableInputMode.ALWAYS,
                 TaskTableInputMode.valueOf("ALWAYS"));
         assertEquals(TaskTableInputMode.SLICING,
                 TaskTableInputMode.valueOf("SLICING"));
         assertEquals(TaskTableInputMode.NON_SLICING,
                 TaskTableInputMode.valueOf("NON_SLICING"));
+        assertEquals(TaskTableInputMode.NRT,
+                TaskTableInputMode.valueOf("NRT"));
+        assertEquals(TaskTableInputMode.NTC,
+                TaskTableInputMode.valueOf("NTC"));
+        assertEquals(TaskTableInputMode.STC,
+                TaskTableInputMode.valueOf("STC"));
         assertEquals(TaskTableInputMode.BLANK,
                 TaskTableInputMode.valueOf("BLANK"));
     }
