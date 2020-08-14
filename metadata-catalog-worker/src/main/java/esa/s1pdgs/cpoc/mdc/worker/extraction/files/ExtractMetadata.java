@@ -737,6 +737,9 @@ public class ExtractMetadata {
 			metadataJSONObject.put("instanceId", descriptor.getInstanceId());
 			metadataJSONObject.put("generatingCentre", descriptor.getGeneratingCentre());
 			metadataJSONObject.put("classId", descriptor.getClassId());
+			// TODO S1PRO-1030 in future it can be DEBUG or REPROCESSING as well
+			metadataJSONObject.put("processMode", "NOMINAL");
+			
 			return metadataJSONObject;
 		} catch (final JSONException e) {
 			LOGGER.error("Error while extraction of config file metadata ", e);
