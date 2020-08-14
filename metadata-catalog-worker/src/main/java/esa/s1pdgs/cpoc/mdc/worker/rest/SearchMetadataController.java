@@ -172,7 +172,8 @@ public class SearchMetadataController {
 				final List<SearchMetadata> f = esServices.valIntersect(
 						convertDateForSearch(startDate, -dt0, DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSSSSS'Z'")),
 						convertDateForSearch(stopDate, dt1, DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSSSSS'Z'")),
-						productType, 
+						productType,
+						ProductFamily.fromValue(productFamily),
 						processMode, 
 						satellite
 				);

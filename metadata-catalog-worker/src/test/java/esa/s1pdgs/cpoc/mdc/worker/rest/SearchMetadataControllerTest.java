@@ -17,11 +17,10 @@ import org.mockito.MockitoAnnotations;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 
-import esa.s1pdgs.cpoc.metadata.model.SearchMetadata;
 import esa.s1pdgs.cpoc.common.ProductFamily;
 import esa.s1pdgs.cpoc.common.errors.processing.MetadataNotPresentException;
-import esa.s1pdgs.cpoc.mdc.worker.rest.SearchMetadataController;
 import esa.s1pdgs.cpoc.mdc.worker.service.EsServices;
+import esa.s1pdgs.cpoc.metadata.model.SearchMetadata;
 
 public class SearchMetadataControllerTest extends RestControllerTest {
 
@@ -43,7 +42,7 @@ public class SearchMetadataControllerTest extends RestControllerTest {
 	}
 	
 	private void mockSearchMetadataValIntersect(List<SearchMetadata> response) throws Exception {
-        doReturn(response).when(esServices).valIntersect(Mockito.any(String.class),Mockito.any(String.class),Mockito.any(String.class),Mockito.any(String.class),Mockito.any(String.class));
+        doReturn(response).when(esServices).valIntersect(Mockito.any(String.class),Mockito.any(String.class),Mockito.any(String.class),Mockito.any(ProductFamily.class),Mockito.any(String.class),Mockito.any(String.class));
     }
 
 	private void mockSearchMetadataNotPresentException() throws Exception {
