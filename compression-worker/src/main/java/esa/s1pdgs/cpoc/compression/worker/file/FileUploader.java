@@ -82,15 +82,9 @@ public class FileUploader {
 		LOGGER.info("Uploading compressed/uncompressed product {} [{}]", productPath, job.getProductFamily());
 		final ProductFamily outputProductFamily = job.getOutputProductFamily();
 		final FileObsUploadObject uploadObject = new FileObsUploadObject(outputProductFamily, outputFileName, productPath);
+		final CompressedProductQueueMessage cpqm = new CompressedProductQueueMessage(outputProductFamily, outputFileName, outputFileName, job.getCompressionDirection());
+		outputToPublish.add(cpqm);
 		
-		if(job.getCompressionDirection() == CompressionDirection.COMPRESS) {
-			// skipping publishing of Un-compression event,
-			// The better way would be to add the CompressionDirection to the CompressionEvent
-			// (similar to CompressionJob) or to generate a "UncompressionEvent"
-			final CompressedProductQueueMessage cpqm = new CompressedProductQueueMessage(outputProductFamily, outputFileName, outputFileName);
-			outputToPublish.add(cpqm);
-		}
-
 		// upload
 		if (Thread.currentThread().isInterrupted()) {
 			throw new InternalErrorException("The current thread as been interrupted");

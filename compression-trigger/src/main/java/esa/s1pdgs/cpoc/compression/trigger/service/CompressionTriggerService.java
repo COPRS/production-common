@@ -1,9 +1,9 @@
 package esa.s1pdgs.cpoc.compression.trigger.service;
 
-import java.util.Collections;
-import java.util.Date;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -17,154 +17,143 @@ import org.springframework.stereotype.Service;
 import esa.s1pdgs.cpoc.appstatus.AppStatus;
 import esa.s1pdgs.cpoc.common.ProductCategory;
 import esa.s1pdgs.cpoc.common.ProductFamily;
-import esa.s1pdgs.cpoc.common.utils.LogUtils;
 import esa.s1pdgs.cpoc.compression.trigger.config.ProcessConfiguration;
 import esa.s1pdgs.cpoc.compression.trigger.config.TriggerConfigurationProperties;
 import esa.s1pdgs.cpoc.compression.trigger.config.TriggerConfigurationProperties.CategoryConfig;
 import esa.s1pdgs.cpoc.errorrepo.ErrorRepoAppender;
-import esa.s1pdgs.cpoc.errorrepo.model.rest.FailedProcessingDto;
-import esa.s1pdgs.cpoc.mqi.client.GenericMqiClient;
 import esa.s1pdgs.cpoc.mqi.client.MessageFilter;
+import esa.s1pdgs.cpoc.mqi.client.MqiClient;
 import esa.s1pdgs.cpoc.mqi.client.MqiConsumer;
-import esa.s1pdgs.cpoc.mqi.client.MqiListener;
-import esa.s1pdgs.cpoc.mqi.client.MqiMessageEventHandler;
 import esa.s1pdgs.cpoc.mqi.model.queue.CompressionDirection;
 import esa.s1pdgs.cpoc.mqi.model.queue.CompressionJob;
+import esa.s1pdgs.cpoc.mqi.model.queue.IngestionEvent;
 import esa.s1pdgs.cpoc.mqi.model.queue.ProductionEvent;
-import esa.s1pdgs.cpoc.mqi.model.rest.GenericMessageDto;
-import esa.s1pdgs.cpoc.mqi.model.rest.GenericPublicationMessageDto;
-import esa.s1pdgs.cpoc.report.Reporting;
-import esa.s1pdgs.cpoc.report.ReportingMessage;
-import esa.s1pdgs.cpoc.report.ReportingUtils;
 
 @Service
-public class CompressionTriggerService implements MqiListener<ProductionEvent> {
+public class CompressionTriggerService {
 
 	private static final Logger LOGGER = LogManager.getLogger(CompressionTriggerService.class);
-	
 	private static final String SUFFIX_ZIPPRODUCTFAMILY = "_ZIP";
 	private static final String SUFFIX_ZIPPPRODUCTFILE = ".zip";
+	
+	private static final CompressionJobMapper<ProductionEvent> PROD_MAPPER = new CompressionJobMapper<ProductionEvent>() {
+		@Override
+		public final CompressionJob toCompressionJob(final ProductionEvent event, final UUID reportingId) {
+			CompressionDirection compressionDirection;
 
-	private final GenericMqiClient mqiClient;
+			if (event.getProductFamily().toString().endsWith(SUFFIX_ZIPPRODUCTFAMILY)) {
+				compressionDirection = CompressionDirection.UNDEFINED;
+			} else {
+				compressionDirection = CompressionDirection.COMPRESS;
+			}
+
+			return new CompressionJob(event.getKeyObjectStorage(), event.getProductFamily(),
+					getCompressedKeyObjectStorage(event.getKeyObjectStorage()),
+					getCompressedProductFamily(event.getProductFamily()), compressionDirection);
+			
+		}		
+	};
+	
+	private static final CompressionJobMapper<IngestionEvent> INGESTION_MAPPER = new CompressionJobMapper<IngestionEvent>() {
+		@Override
+		public final CompressionJob toCompressionJob(final IngestionEvent event, final UUID reportingId) {
+			CompressionDirection compressionDirection;
+
+			if (event.getProductFamily().toString().endsWith(SUFFIX_ZIPPRODUCTFAMILY)) {
+				compressionDirection = CompressionDirection.UNCOMPRESS;
+			} else {
+				compressionDirection = CompressionDirection.UNDEFINED;
+			}
+
+			return new CompressionJob(event.getKeyObjectStorage(), event.getProductFamily(),
+					removeZipSuffix(event.getKeyObjectStorage()),
+					ProductFamily.fromValue(removeZipSuffix(event.getProductFamily().toString())), compressionDirection);
+		}		
+	};
+
+	private final MqiClient mqiClient;
 	private final TriggerConfigurationProperties properties;
 	private final List<MessageFilter> messageFilter;
 	private final ErrorRepoAppender errorAppender;
-	private final ProcessConfiguration settings;
-	
+	private final ProcessConfiguration processConfig;
 	private final AppStatus appStatus;
+	
 
 	@Autowired
 	public CompressionTriggerService(
-			final GenericMqiClient mqiClient,
+			final MqiClient mqiClient,
 			final List<MessageFilter> messageFilter,
 			final AppStatus appStatus,
 			final TriggerConfigurationProperties properties,
 			final ErrorRepoAppender errorAppender,
-			final ProcessConfiguration settings
+			final ProcessConfiguration processConfig
 	) {
 		this.mqiClient = mqiClient;
 		this.messageFilter = messageFilter;
 		this.appStatus = appStatus;
 		this.properties = properties;
 		this.errorAppender = errorAppender;
-		this.settings = settings;
+		this.processConfig = processConfig;
 	}
 	
 	@PostConstruct
 	public void initService() {
-		LOGGER.info("Setting up product event listeners");
 		final Map<ProductCategory, CategoryConfig> entries = properties.getProductCategories();
 		final ExecutorService service = Executors.newFixedThreadPool(entries.size());
 		
 		for (final Map.Entry<ProductCategory, CategoryConfig> entry : entries.entrySet()) {			
 			service.execute(newMqiConsumerFor(entry.getKey(), entry.getValue()));
 		}
-	}	
-
-	@Override
-	public final MqiMessageEventHandler onMessage(final GenericMessageDto<ProductionEvent> message) throws Exception {
-		final ProductionEvent event = message.getBody();
-		
-		final Reporting reporting = ReportingUtils.newReportingBuilder()
-				.predecessor(event.getUid())
-				.newReporting("CompressionTrigger");
-		
-		reporting.begin(
-				ReportingUtils.newFilenameReportingInputFor(event.getProductFamily(), event.getProductName()),
-				new ReportingMessage("Start handling of event for %s", event.getProductName())
-		);
-		return new MqiMessageEventHandler.Builder<CompressionJob>(ProductCategory.COMPRESSION_JOBS)
-				.onSuccess(res -> reporting.end(new ReportingMessage("Finished handling of event for %s", event.getProductName())))
-				.onError(e -> reporting.error(new ReportingMessage(
-						"Error on handling event for %s: %s", 
-						event.getProductName(), 
-						LogUtils.toString(e))
-				))
-				.publishMessageProducer(() -> {
-					final CompressionJob job = toCompressionJob(event);
-					job.setUid(reporting.getUid());
-					return Collections.singletonList(publish(message, job));
-				})
-				.newResult();
 	}
-			
-	@Override
-	public final void onTerminalError(final GenericMessageDto<ProductionEvent> message, final Exception error) {
-		LOGGER.error(error);
-		errorAppender.send(new FailedProcessingDto(
-				settings.getHostname(), 
-				new Date(),
-				String.format(
-						"Error on handling ProductionEvent for %s: %s", 
-						message.getBody().getProductName(), 
-						LogUtils.toString(error)
-				), 
-				message
-		));
-	}
-
+	
 	private final MqiConsumer<?> newMqiConsumerFor(final ProductCategory cat, final CategoryConfig config) {
-		LOGGER.debug("Creating MQI consumer for category {} using {}", cat, config);	
-		return new MqiConsumer<ProductionEvent>(
-				mqiClient, 
-				cat, 
-				this,
-				messageFilter,
-				config.getFixedDelayMs(),
-				config.getInitDelayPolMs(),
-				appStatus
+		LOGGER.debug("Creating MQI consumer for category {} using {}", cat, config);
+		
+		if (cat == ProductCategory.LEVEL_SEGMENTS || cat == ProductCategory.LEVEL_PRODUCTS) {
+			return new MqiConsumer<ProductionEvent>(
+					mqiClient, 
+					cat, 
+					new CompressionTriggerListener(PROD_MAPPER, errorAppender, processConfig),
+					messageFilter,
+					config.getFixedDelayMs(),
+					config.getInitDelayPolMs(),
+					appStatus
+			);
+		} else if (cat == ProductCategory.INGESTION_EVENT) {
+			return new MqiConsumer<IngestionEvent>(
+					mqiClient, 
+					cat, 
+					new CompressionTriggerListener(INGESTION_MAPPER, errorAppender, processConfig),
+					messageFilter,
+					config.getFixedDelayMs(),
+					config.getInitDelayPolMs(),
+					appStatus
+			);
+			
+		}
+		throw new IllegalArgumentException(
+				String.format(
+						"Invalid product category %s. Available are %s", 
+						cat, 
+						Arrays.asList(ProductCategory.LEVEL_PRODUCTS, ProductCategory.LEVEL_SEGMENTS, ProductCategory.INGESTION_EVENT)
+				)
 		);
 	}
-	
-	final GenericPublicationMessageDto<CompressionJob> publish(
-			final GenericMessageDto<ProductionEvent> mess, 
-			final CompressionJob job
-	) {
-    	final GenericPublicationMessageDto<CompressionJob> messageDto = new GenericPublicationMessageDto<CompressionJob>(
-    			mess.getId(), 
-    			job.getProductFamily(), 
-    			job
-    	);
-    	messageDto.setInputKey(mess.getInputKey());
-    	messageDto.setOutputKey(job.getOutputProductFamily().name());
-    	return messageDto;
-	}
-	
-	private final CompressionJob toCompressionJob(final ProductionEvent event) {
-		return new CompressionJob(
-				event.getKeyObjectStorage(), 
-				event.getProductFamily(),
-				getCompressedKeyObjectStorage(event.getKeyObjectStorage()),
-				getCompressedProductFamily(event.getProductFamily()),
-				CompressionDirection.COMPRESS
-		);
-	}
-	
-	String getCompressedKeyObjectStorage(final String inputKeyObjectStorage) {
+
+	static String getCompressedKeyObjectStorage(final String inputKeyObjectStorage) {
 		return inputKeyObjectStorage + SUFFIX_ZIPPPRODUCTFILE;
 	}
 
-	ProductFamily getCompressedProductFamily(final ProductFamily inputFamily) {
+	static ProductFamily getCompressedProductFamily(final ProductFamily inputFamily) {
 		return ProductFamily.fromValue(inputFamily.toString() + SUFFIX_ZIPPRODUCTFAMILY);
+	}
+	
+	static String removeZipSuffix(final String name) {
+		if (name.toLowerCase().endsWith(".zip")) {
+			return name.substring(0, name.length() - ".zip".length());
+		} else if (name.toLowerCase().endsWith("_zip")) {
+			return name.substring(0, name.length() - "_zip".length());
+		}
+		return name;
 	}
 }

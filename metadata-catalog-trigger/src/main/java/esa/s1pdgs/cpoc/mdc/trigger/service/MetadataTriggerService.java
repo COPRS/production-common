@@ -26,6 +26,7 @@ import esa.s1pdgs.cpoc.mqi.client.MessageFilter;
 import esa.s1pdgs.cpoc.mqi.client.MqiClient;
 import esa.s1pdgs.cpoc.mqi.client.MqiConsumer;
 import esa.s1pdgs.cpoc.mqi.model.queue.CatalogJob;
+import esa.s1pdgs.cpoc.mqi.model.queue.CompressionEvent;
 import esa.s1pdgs.cpoc.mqi.model.queue.IngestionEvent;
 import esa.s1pdgs.cpoc.mqi.model.queue.ProductionEvent;
 
@@ -60,6 +61,19 @@ public class MetadataTriggerService {
 			job.setTimeliness(event.getTimeliness());
 			return job;
 		}		
+	};
+	
+	private static final CatalogJobMapper<CompressionEvent> COMPRESSION_MAPPER = new CatalogJobMapper<CompressionEvent>() {
+		@Override
+		public final CatalogJob toCatJob(final CompressionEvent event, final UUID reportingId) {
+			final CatalogJob job = new CatalogJob();
+			job.setProductName(event.getKeyObjectStorage());
+			job.setRelativePath(event.getKeyObjectStorage());
+			job.setProductFamily(event.getProductFamily());
+			job.setKeyObjectStorage(event.getKeyObjectStorage());
+			job.setUid(reportingId);
+			return job;
+		}
 	};
 	
 	private static final Logger LOG = LogManager.getLogger(MetadataTriggerService.class);
@@ -121,12 +135,22 @@ public class MetadataTriggerService {
 					config.getInitDelayPolMs(),
 					appStatus
 			);
-		} 
+		} else if (cat == ProductCategory.COMPRESSED_PRODUCTS) {
+			return new MqiConsumer<CompressionEvent>(
+					mqiClient, 
+					cat, 
+					new MetadataTriggerListener<>(COMPRESSION_MAPPER, errorAppender, processConfig),
+					messageFilter,
+					config.getFixedDelayMs(),
+					config.getInitDelayPolMs(),
+					appStatus
+			);
+		}
 		throw new IllegalArgumentException(
 				String.format(
 						"Invalid product category %s. Available are %s", 
 						cat, 
-						Arrays.asList(ProductCategory.INGESTION_EVENT, ProductCategory.PRODUCTION_EVENT)
+						Arrays.asList(ProductCategory.INGESTION_EVENT, ProductCategory.PRODUCTION_EVENT, ProductCategory.COMPRESSED_PRODUCTS)
 				)
 		);
 	}

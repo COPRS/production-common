@@ -190,7 +190,7 @@ public class PripMetadata {
 					GeoShapePolygon footprint = (GeoShapePolygon)field.toJsonAccessor().apply(this);
 					json.put(field.fieldName(), footprint.toJson());
 				} else {
-					json.put(field.fieldName(), new JSONObject());
+					json.put(field.fieldName(), (JSONObject)null);
 				}
 			} else {
 				json.put(field.fieldName(), field.toJsonAccessor().apply(this));
