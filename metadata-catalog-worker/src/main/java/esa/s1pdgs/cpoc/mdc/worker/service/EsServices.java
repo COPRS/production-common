@@ -219,6 +219,80 @@ public class EsServices {
 			throw new Exception(e);
 		}
 	}
+	
+	/**
+	 * Function which return the products that correspond to the valCover
+	 * specification If there is no corresponding product return null
+	 * 
+	 * @return a list of object storage keys of the chosen product
+	 */
+	public List<SearchMetadata> valCover(final String productType, final ProductFamily productFamily,
+			final String beginDate, final String endDate, final String satelliteId, final int instrumentConfId,
+			final String processMode) throws Exception {
+
+		final ProductCategory category = ProductCategory.of(productFamily);
+
+		final SearchSourceBuilder sourceBuilder = new SearchSourceBuilder();
+		// Generic fields
+		BoolQueryBuilder queryBuilder = QueryBuilders.boolQuery()
+				.must(QueryBuilders.rangeQuery("validityStartTime").lt(beginDate))
+				.must(QueryBuilders.rangeQuery("validityStopTime").gt(endDate)).must(satelliteId(satelliteId));
+		// Product type
+		if (category == ProductCategory.LEVEL_PRODUCTS || category == ProductCategory.LEVEL_SEGMENTS) {
+			queryBuilder = queryBuilder.must(QueryBuilders.regexpQuery("productType.keyword", productType));
+		} else {
+			queryBuilder = queryBuilder.must(QueryBuilders.termQuery("productType.keyword", productType));
+		}
+		// Instrument configuration id
+		if (instrumentConfId != -1 && productType.toLowerCase().matches(REQUIRED_INSTRUMENT_ID_PATTERN)) {
+			queryBuilder = queryBuilder.must(QueryBuilders.termQuery("instrumentConfigurationId", instrumentConfId));
+		}
+		// Process mode
+		if (category == ProductCategory.LEVEL_PRODUCTS || category == ProductCategory.LEVEL_SEGMENTS) {
+			queryBuilder = queryBuilder.must(QueryBuilders.termQuery("processMode.keyword", processMode));
+		}
+		LOGGER.debug("query composed is {}", queryBuilder);
+
+		sourceBuilder.query(queryBuilder);
+		sourceBuilder.size(SIZE_LIMIT);
+
+		final SearchRequest searchRequest = new SearchRequest(getIndexForProductFamily(productFamily, productType));
+		searchRequest.source(sourceBuilder);
+		try {
+			final SearchResponse searchResponse = elasticsearchDAO.search(searchRequest);
+			final List<SearchMetadata> r = new ArrayList<>();
+			if (this.isNotEmpty(searchResponse)) {
+				for (final SearchHit hit : searchResponse.getHits().getHits()) {
+					final Map<String, Object> source = hit.getSourceAsMap();
+					final SearchMetadata local = new SearchMetadata();
+					local.setProductName(source.get("productName").toString());
+					local.setProductType(source.get("productType").toString());
+					local.setKeyObjectStorage(source.get("url").toString());
+					if (source.containsKey("validityStartTime")) {
+						try {
+							local.setValidityStart(
+									DateUtils.convertToMetadataDateTimeFormat(source.get("validityStartTime").toString()));
+						} catch (final DateTimeParseException e) {
+							throw new MetadataMalformedException("validityStartTime");
+						}
+					}
+					if (source.containsKey("validityStopTime")) {
+						try {
+							local.setValidityStop(
+									DateUtils.convertToMetadataDateTimeFormat(source.get("validityStopTime").toString()));
+						} catch (final DateTimeParseException e) {
+							throw new MetadataMalformedException("validityStopTime");
+						}
+					}
+					r.add(local);
+				}
+				return r;
+			}
+		} catch (final IOException e) {
+			throw new Exception(e.getMessage());
+		}
+		return null;
+	}
 
 	/**
 	 * Function which return the product that correspond to the lastValCover

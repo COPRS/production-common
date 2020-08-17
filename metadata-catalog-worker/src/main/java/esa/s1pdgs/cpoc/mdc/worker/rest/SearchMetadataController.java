@@ -142,7 +142,35 @@ public class SearchMetadataController {
 		try {
 			final List<SearchMetadata> response = new ArrayList<>();
 			
-			if ("LatestValCover".equals(mode)) {
+			if ("ValCover".equals(mode)) {
+				final List<SearchMetadata> f = esServices.valCover(
+						productType, 
+						ProductFamily.fromValue(productFamily),
+						convertDateForSearch(startDate, -dt0, DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.999999'Z'")),
+						convertDateForSearch(stopDate, dt1, DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.000000'Z'")),
+						satellite, 
+						insConfId, 
+						processMode
+				);
+
+				if (f != null) {
+					LOGGER.debug("Query returned {} results", f.size());				
+
+					for (final SearchMetadata m : f) {
+						response.add(new SearchMetadata(
+								m.getProductName(), 
+								m.getProductType(), 
+								m.getKeyObjectStorage(),
+								m.getValidityStart(), 
+								m.getValidityStop(), 
+								m.getMissionId(), 
+								m.getSatelliteId(),
+								m.getStationCode()
+						));
+					}
+				}
+				return new ResponseEntity<>(response, HttpStatus.OK);
+			} else if ("LatestValCover".equals(mode)) {
 				final SearchMetadata f = esServices.lastValCover(
 						productType, 
 						ProductFamily.fromValue(productFamily),
