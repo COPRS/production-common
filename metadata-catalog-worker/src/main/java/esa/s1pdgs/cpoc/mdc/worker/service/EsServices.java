@@ -568,10 +568,8 @@ public class EsServices {
 		final SearchSourceBuilder sourceBuilder = new SearchSourceBuilder();
 		// Generic fields
 		final BoolQueryBuilder queryBuilder = QueryBuilders.boolQuery()
-				.must(QueryBuilders.boolQuery().should(QueryBuilders.rangeQuery("startTime").lt(endDate))
-						.should(QueryBuilders.rangeQuery("validityStartTime").lt(endDate)))
-				.must(QueryBuilders.boolQuery().should(QueryBuilders.rangeQuery("stopTime").gt(beginDate))
-						.should(QueryBuilders.rangeQuery("validityStopTime").gt(beginDate)))
+				.must(QueryBuilders.rangeQuery("startTime").lt(endDate))
+				.must(QueryBuilders.rangeQuery("stopTime").gt(beginDate))
 				.must(satelliteId(satelliteId)).must(QueryBuilders.regexpQuery("productType.keyword", productType))
 				.must(QueryBuilders.termQuery("processMode.keyword", processMode));
 		sourceBuilder.query(queryBuilder);
@@ -592,6 +590,7 @@ public class EsServices {
 					local.setProductName(source.get("productName").toString());
 					local.setProductType(source.get("productType").toString());
 					local.setKeyObjectStorage(source.get("url").toString());
+					
 					if (source.containsKey("startTime")) {
 						try {
 							local.setValidityStart(
@@ -649,20 +648,20 @@ public class EsServices {
 				r.setProductName(source.get("productName").toString());
 				r.setProductType(source.get("productType").toString());
 				r.setKeyObjectStorage(source.get("url").toString());
-				if (source.containsKey("startTime")) {
+				if (source.containsKey("validityStartTime")) {
 					try {
 						r.setValidityStart(
-								DateUtils.convertToMetadataDateTimeFormat(source.get("startTime").toString()));
+								DateUtils.convertToMetadataDateTimeFormat(source.get("validityStartTime").toString()));
 					} catch (final DateTimeParseException e) {
-						throw new MetadataMalformedException("startTime");
+						throw new MetadataMalformedException("validityStartTime");
 					}
 				}
-				if (source.containsKey("stopTime")) {
+				if (source.containsKey("validityStopTime")) {
 					try {
 						r.setValidityStop(
-								DateUtils.convertToMetadataDateTimeFormat(source.get("stopTime").toString()));
+								DateUtils.convertToMetadataDateTimeFormat(source.get("validityStopTime").toString()));
 					} catch (final DateTimeParseException e) {
-						throw new MetadataMalformedException("stopTime");
+						throw new MetadataMalformedException("validityStopTime");
 					}
 				}
 				return r;
