@@ -541,6 +541,61 @@ public class EsServices {
 		}
 		return null;
 	}
+	
+	/**
+	 * Retrieveal Mode LatestValIntersect to retrieve latest intersecting product
+	 * (latest creation time) for product search criteria
+	 *
+	 * @return latest product with intersecting validity time
+	 */
+	public SearchMetadata lastValIntersect(final String beginDate, final String endDate, final String productType,
+			final ProductFamily productFamily, final String processMode, final String satelliteId) throws Exception {
+
+		final SearchSourceBuilder sourceBuilder = new SearchSourceBuilder();
+		// Generic fields
+		final BoolQueryBuilder queryBuilder = QueryBuilders.boolQuery()
+				.must(QueryBuilders.rangeQuery("startTime").lt(endDate))
+				.must(QueryBuilders.rangeQuery("stopTime").gt(beginDate)).must(satelliteId(satelliteId))
+				.must(QueryBuilders.regexpQuery("productType.keyword", productType));
+		sourceBuilder.query(queryBuilder);
+		LOGGER.debug("latestValIntersect: query composed is {}", queryBuilder);
+
+		sourceBuilder.size(1);
+		sourceBuilder.sort(new FieldSortBuilder("creationTime").order(SortOrder.DESC));
+
+		final SearchRequest searchRequest = new SearchRequest(getIndexForProductFamily(productFamily, productType));
+		searchRequest.source(sourceBuilder);
+		try {
+			final SearchResponse searchResponse = elasticsearchDAO.search(searchRequest);
+			if (this.isNotEmpty(searchResponse)) {
+				final Map<String, Object> source = searchResponse.getHits().getAt(0).getSourceAsMap();
+				final SearchMetadata r = new SearchMetadata();
+				r.setProductName(source.get("productName").toString());
+				r.setProductType(source.get("productType").toString());
+				r.setKeyObjectStorage(source.get("url").toString());
+				if (source.containsKey("startTime")) {
+					try {
+						r.setValidityStart(
+								DateUtils.convertToMetadataDateTimeFormat(source.get("startTime").toString()));
+					} catch (final DateTimeParseException e) {
+						throw new MetadataMalformedException("startTime");
+					}
+				}
+				if (source.containsKey("stopTime")) {
+					try {
+						r.setValidityStop(
+								DateUtils.convertToMetadataDateTimeFormat(source.get("stopTime").toString()));
+					} catch (final DateTimeParseException e) {
+						throw new MetadataMalformedException("stopTime");
+					}
+				}
+				return r;
+			}
+		} catch (final IOException e) {
+			throw new Exception(e.getMessage());
+		}
+		return null;
+	}
 
 	public List<SearchMetadata> intervalQuery(final String startTime, final String stopTime,
 			final ProductFamily productFamily, final String productType) throws Exception {
