@@ -10,8 +10,9 @@ public enum ProductFamily {
     AUXILIARY_FILE, //
     PLAN_AND_REPORT, //
     BLANK, //
-    INVALID,
-    GHOST,
+    INVALID, //
+    GHOST, //
+    SESSION_RETRANSFER, //
     JOB_ORDER, //
     L0_ACN, //
     L0_BLANK, //
