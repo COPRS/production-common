@@ -1,5 +1,6 @@
 package esa.s1pdgs.cpoc.production.trigger.service;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
@@ -143,17 +144,23 @@ public class GenericConsumer implements MqiListener<CatalogEvent> {
             job.setProduct(product);                
             final AppDataJobProductAdapter productAdapter = new AppDataJobProductAdapter(product);
             
-            final String taskTableName = taskTableMapper.tasktableFor(product);
+            final List<String> taskTableNames = taskTableMapper.tasktableFor(product);
+            List<GenericPublicationMessageDto<IpfPreparationJob>> messageDtos = new ArrayList<>();
             
-            LOGGER.debug("Tasktable for {} is {}", productAdapter.getProductName(), taskTableName);
+            for (final String taskTableName: taskTableNames)
+            {
+            	LOGGER.debug("Tasktable for {} is {}", productAdapter.getProductName(), taskTableName);
             
-            job.setTaskTableName(taskTableName);     
-            job.setStartTime(productAdapter.getStartTime());
-            job.setStopTime(productAdapter.getStopTime());
-            job.setProductName(productName);
+            	job.setTaskTableName(taskTableName);     
+            	job.setStartTime(productAdapter.getStartTime());
+            	job.setStopTime(productAdapter.getStopTime());
+            	job.setProductName(productName);
+            	
+            	messageDtos.add(dispatch(mqiMessage, job, productName, reporting));
+            }            
                             
             LOGGER.info("Dispatching product {}", productName);
-            return Collections.singletonList(dispatch(mqiMessage, job, productName, reporting));          
+            return Collections.singletonList(messageDtos);          
         }
         else {
            	LOGGER.debug("CatalogEvent for {} is ignored", productName); 

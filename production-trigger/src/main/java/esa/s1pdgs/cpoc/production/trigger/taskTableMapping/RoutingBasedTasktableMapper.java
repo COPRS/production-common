@@ -1,6 +1,7 @@
 package esa.s1pdgs.cpoc.production.trigger.taskTableMapping;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -92,23 +93,31 @@ public class RoutingBasedTasktableMapper implements TasktableMapper {
 	}
 
 	@Override
-	public final String tasktableFor(final AppDataJobProduct product) {
+	public final List<String> tasktableFor(final AppDataJobProduct product) {
         final String key = keyFunction.apply(product);
 
-        LOGGER.debug("Searching tasktable for {}", key);        
+        LOGGER.debug("Searching tasktable for {}", key);
+        List<String> taskTableHolder = new ArrayList<>();
+        
         for (final Map.Entry<Pattern, String> entry : routingMap.entrySet()) {
 			if (entry.getKey().matcher(key).matches()) {	
 				LOGGER.info("Got tasktable {} for {}", entry.getValue(), key);   
-				return entry.getValue();
+				taskTableHolder.add(entry.getValue());
 			}
-		}
-        throw new IllegalArgumentException(
-        		String.format(
-        				"No tasktable found for AppDataJobProduct %s, key: %s in: %s", 
-        				product.getMetadata().get("productName"),
-        				key,
-        				routingMap
-        		)
-        );
+		}        
+        
+        if (taskTableHolder.isEmpty())
+        {
+            throw new IllegalArgumentException(
+            		String.format(
+            				"No tasktable found for AppDataJobProduct %s, key: %s in: %s", 
+            				product.getMetadata().get("productName"),
+            				key,
+            				routingMap
+            		)
+            );
+        }
+        
+        return taskTableHolder;
 	}
 }
