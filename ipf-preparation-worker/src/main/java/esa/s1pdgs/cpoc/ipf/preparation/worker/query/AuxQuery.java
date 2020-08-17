@@ -294,7 +294,8 @@ public class AuxQuery {
 		return alternatives.stream()
 				.collect(toMap(
 						TaskTableInputAlternative::getTaskTableInputAltKey,
-						taskTableAdapter::metadataSearchQueryFor));
+						taskTableAdapter::metadataSearchQueryFor,
+						(existing, replacement) -> existing));
 	}
 
 	private List<AppDataJobTaskInputs> distributeResults(final Map<TaskTableInputAlternative.TaskTableInputAltKey, SearchMetadataResult> metadataQueries) {
