@@ -160,7 +160,7 @@ public class GenericConsumer implements MqiListener<CatalogEvent> {
             }            
                             
             LOGGER.info("Dispatching product {}", productName);
-            return Collections.singletonList(messageDtos);          
+            return messageDtos;          
         }
         else {
            	LOGGER.debug("CatalogEvent for {} is ignored", productName); 
