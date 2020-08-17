@@ -1,5 +1,8 @@
 package esa.s1pdgs.cpoc.production.trigger.taskTableMapping;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import esa.s1pdgs.cpoc.appcatalog.AppDataJobProduct;
 
 public final class SingleTasktableMapper implements TasktableMapper {	
@@ -10,8 +13,10 @@ public final class SingleTasktableMapper implements TasktableMapper {
 	}
 
 	@Override
-	public String tasktableFor(final AppDataJobProduct job) {
-		return tasktableFilename;
+	public List<String> tasktableFor(final AppDataJobProduct job) {
+		List<String> taskTableNames = new ArrayList<String>();
+		taskTableNames.add(tasktableFilename);
+		return taskTableNames;
 	}
 
 }
