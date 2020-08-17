@@ -17,7 +17,7 @@ stages:
 
 before_script:
     - DEFAULT_MAVEN_ARGS="-DskipTests=true -Dpmd.skip=true -Dfindbugs.skip=true -B"
-    - alias dockerbuild="docker build --network host --pull --build-arg MAVEN_ARGS=${MAVEN_ARGS:-${DEFAULT_MAVEN_ARGS}} --build-arg BRANCH=$BRANCH --build-arg BRANCH_TEXT=$BRANCH --build-arg COMMIT_ID=$CI_COMMIT_SHA --build-arg VERSION=$VERSION"
+    - alias dockerbuild="docker build --network host --pull --build-arg MAVEN_ARGS=\"${MAVEN_ARGS:-${DEFAULT_MAVEN_ARGS}}\" --build-arg BRANCH=$BRANCH --build-arg BRANCH_TEXT=$BRANCH --build-arg COMMIT_ID=$CI_COMMIT_SHA --build-arg VERSION=$VERSION"
     - alias # just for debugging purpose
     - docker login -u "$CI_REGISTRY_USERNAME" -p "$CI_REGISTRY_PASSWORD" $CI_REGISTRY
 
