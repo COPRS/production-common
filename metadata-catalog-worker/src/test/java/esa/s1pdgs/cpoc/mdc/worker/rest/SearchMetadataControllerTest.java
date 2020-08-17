@@ -44,6 +44,10 @@ public class SearchMetadataControllerTest extends RestControllerTest {
 	private void mockSearchMetadataValIntersect(List<SearchMetadata> response) throws Exception {
         doReturn(response).when(esServices).valIntersect(Mockito.any(String.class),Mockito.any(String.class),Mockito.any(String.class),Mockito.any(ProductFamily.class),Mockito.any(String.class),Mockito.any(String.class));
     }
+	
+	private void mockSearchMetadataLastValIntersect(SearchMetadata response) throws Exception {
+        doReturn(response).when(esServices).lastValIntersect(Mockito.any(String.class),Mockito.any(String.class),Mockito.any(String.class),Mockito.any(ProductFamily.class),Mockito.any(String.class),Mockito.any(String.class));
+    }
 
 	private void mockSearchMetadataNotPresentException() throws Exception {
 		doThrow(new MetadataNotPresentException("name")).when(esServices).lastValCover(Mockito.any(String.class), Mockito.any(ProductFamily.class), Mockito.any(String.class), Mockito.any(String.class), Mockito.any(String.class), Mockito.anyInt(), Mockito.anyString());
@@ -86,6 +90,23 @@ public class SearchMetadataControllerTest extends RestControllerTest {
         response.add(r);
         this.mockSearchMetadataValIntersect(response);
         MvcResult result = request(get("/metadata/L0_SEGMENT/search?mode=ValIntersect&t0=2017-12-08T12:45:23.132456Z&t1=2017-12-08T13:02:19.123456Z&productType=type&processMode=pMode&satellite=B")).andExpect(MockMvcResultMatchers.status().isOk())
+                .andReturn();
+        assertEquals("Result is not returning the HTTP OK Status code", 200, result.getResponse().getStatus());
+    }
+	
+	@Test
+    public void testSearchMetadataLastValIntersect() throws Exception {
+        List<SearchMetadata> expectedResult = new ArrayList<>();
+        expectedResult.add(new SearchMetadata("name", "type", "kobs", "startDate", "stopDate",
+                "mission", "satellite", "station"));
+        SearchMetadata response = new SearchMetadata();
+        response.setProductName("name");
+        response.setProductType("type");
+        response.setKeyObjectStorage("kobs");
+        response.setValidityStart("startDate");
+        response.setValidityStop("stopDate");
+        this.mockSearchMetadataLastValIntersect(response);
+        MvcResult result = request(get("/metadata/L0_SEGMENT/search?mode=LatestValIntersect&t0=2017-12-08T12:45:23.132456Z&t1=2017-12-08T13:02:19.123456Z&productType=type&processMode=pMode&satellite=B")).andExpect(MockMvcResultMatchers.status().isOk())
                 .andReturn();
         assertEquals("Result is not returning the HTTP OK Status code", 200, result.getResponse().getStatus());
     }
