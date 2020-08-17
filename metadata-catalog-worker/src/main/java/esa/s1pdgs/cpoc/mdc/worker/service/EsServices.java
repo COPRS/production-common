@@ -568,9 +568,11 @@ public class EsServices {
 		final SearchSourceBuilder sourceBuilder = new SearchSourceBuilder();
 		// Generic fields
 		final BoolQueryBuilder queryBuilder = QueryBuilders.boolQuery()
-				.must(QueryBuilders.rangeQuery("startTime").lt(endDate))
-				.must(QueryBuilders.rangeQuery("stopTime").gt(beginDate)).must(satelliteId(satelliteId))
-				.must(QueryBuilders.regexpQuery("productType.keyword", productType))
+				.must(QueryBuilders.boolQuery().should(QueryBuilders.rangeQuery("startTime").lt(endDate))
+						.should(QueryBuilders.rangeQuery("validityStartTime").lt(endDate)))
+				.must(QueryBuilders.boolQuery().should(QueryBuilders.rangeQuery("stopTime").gt(beginDate))
+						.should(QueryBuilders.rangeQuery("validityStopTime").gt(beginDate)))
+				.must(satelliteId(satelliteId)).must(QueryBuilders.regexpQuery("productType.keyword", productType))
 				.must(QueryBuilders.termQuery("processMode.keyword", processMode));
 		sourceBuilder.query(queryBuilder);
 		LOGGER.debug("valIntersect: query composed is {}", queryBuilder);
@@ -628,8 +630,8 @@ public class EsServices {
 		final SearchSourceBuilder sourceBuilder = new SearchSourceBuilder();
 		// Generic fields
 		final BoolQueryBuilder queryBuilder = QueryBuilders.boolQuery()
-				.must(QueryBuilders.rangeQuery("startTime").lt(endDate))
-				.must(QueryBuilders.rangeQuery("stopTime").gt(beginDate)).must(satelliteId(satelliteId))
+				.must(QueryBuilders.rangeQuery("validityStartTime").lt(endDate))
+				.must(QueryBuilders.rangeQuery("validityStopTime").gt(beginDate)).must(satelliteId(satelliteId))
 				.must(QueryBuilders.regexpQuery("productType.keyword", productType));
 		sourceBuilder.query(queryBuilder);
 		LOGGER.debug("latestValIntersect: query composed is {}", queryBuilder);
