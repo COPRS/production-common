@@ -12,6 +12,7 @@ public enum ApplicationLevel {
 	L2(ProductFamily.L2_JOB),
 	S3_L0(ProductFamily.S3_GRANULES),
 	S3_L1(ProductFamily.S3_SAFE);
+	S3_L2(productFamily.S3_SAFE);
 	
 	private final ProductFamily jobFamily;
 	
