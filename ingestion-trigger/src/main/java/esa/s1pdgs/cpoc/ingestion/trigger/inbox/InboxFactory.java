@@ -96,7 +96,8 @@ public class InboxFactory {
 	}
 	
 	final ProductNameEvaluator newProductNameEvaluatorFor(final InboxConfiguration config) {
-		if (config.getFamily() == ProductFamily.EDRS_SESSION) {
+		if (config.getFamily() == ProductFamily.EDRS_SESSION 
+				|| config.getFamily() == ProductFamily.SESSION_RETRANSFER) {
 			return new SessionProductNameEvaluator(
 					Pattern.compile(config.getSessionNamePattern(), Pattern.CASE_INSENSITIVE), 
 					config.getSessionNameGroupIndex()

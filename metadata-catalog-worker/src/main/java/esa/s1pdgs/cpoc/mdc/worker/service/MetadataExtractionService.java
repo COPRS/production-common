@@ -28,7 +28,7 @@ import esa.s1pdgs.cpoc.mdc.worker.config.TriggerConfigurationProperties;
 import esa.s1pdgs.cpoc.mdc.worker.config.TriggerConfigurationProperties.CategoryConfig;
 import esa.s1pdgs.cpoc.mdc.worker.extraction.MetadataExtractor;
 import esa.s1pdgs.cpoc.mdc.worker.extraction.MetadataExtractorFactory;
-import esa.s1pdgs.cpoc.mdc.worker.extraction.report.SegmentReportingOutput;
+import esa.s1pdgs.cpoc.mdc.worker.extraction.report.MetadataExtractionReportingOutput;
 import esa.s1pdgs.cpoc.mdc.worker.status.AppStatusImpl;
 import esa.s1pdgs.cpoc.mqi.client.MessageFilter;
 import esa.s1pdgs.cpoc.mqi.client.MqiClient;
@@ -48,6 +48,9 @@ import esa.s1pdgs.cpoc.report.ReportingUtils;
 @Service
 public class MetadataExtractionService implements MqiListener<CatalogJob> {
 	private static final Logger LOG = LogManager.getLogger(MetadataExtractionService.class);
+	
+	public static final String KEY_PRODUCT_SENSING_START = "product_sensing_start_date";
+	public static final String KEY_PRODUCT_SENSING_STOP = "product_sensing_stop_date";
 
     private final AppStatusImpl appStatus;
     private final ErrorRepoAppender errorAppender;
@@ -203,19 +206,27 @@ public class MetadataExtractionService implements MqiListener<CatalogJob> {
 		return Collections.singletonList(messageDto);
 	}
 	
-	private final ReportingOutput reportingOutput(
-			final List<GenericPublicationMessageDto<CatalogEvent>> pubs
-	) {
-		final GenericPublicationMessageDto<CatalogEvent> pub = pubs.get(0);	
+	private final ReportingOutput reportingOutput(final List<GenericPublicationMessageDto<CatalogEvent>> pubs) {
+		final GenericPublicationMessageDto<CatalogEvent> pub = pubs.get(0);
 		final CatalogEventAdapter eventAdapter = CatalogEventAdapter.of(pub);
-				
-		// S1PRO-1247: deal with segment scenario
-		if (pub.getFamily() == ProductFamily.L0_SEGMENT) {				
-			return new SegmentReportingOutput(
-					eventAdapter.productConsolidation(),
-					eventAdapter.productSensingConsolidation()
-			);			
+		final Map<String, Object> metadata = pub.getDto().getMetadata();
+		final MetadataExtractionReportingOutput output = new MetadataExtractionReportingOutput();
+		
+		// S1PRO-1678: trace sensing start/stop
+		if (metadata.containsKey(KEY_PRODUCT_SENSING_START)) {
+			output.withSensingStart((String) metadata.get(KEY_PRODUCT_SENSING_START));
 		}
-		return ReportingOutput.NULL;
+		if (metadata.containsKey(KEY_PRODUCT_SENSING_STOP)) {
+			output.withSensingStop((String) metadata.get(KEY_PRODUCT_SENSING_STOP));
+		}
+
+		// S1PRO-1247: deal with segment scenario
+		if (pub.getFamily() == ProductFamily.L0_SEGMENT) {
+			output.withConsolidation(eventAdapter.productConsolidation())
+					.withSensingConsolidation(eventAdapter.productSensingConsolidation());
+		}
+		
+		return output.build();
 	}
+	
 }

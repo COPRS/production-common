@@ -2,7 +2,7 @@ Configuration:
   status: debug
   name: YAMLConfigTest
   thresholdFilter:
-    level: trace
+    level: ERROR
   appenders:
     Console:
       name: STDOUT
