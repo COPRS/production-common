@@ -73,6 +73,7 @@ public class IpfPreparationWorkerConfiguration {
 	private final ElementMapper elementMapper;
     private final AppCatJobService appCatService;
     private final XmlConverter xmlConverter;
+    private final S3TypeAdapterSettings s3TypeAdapterSettings;
     
 	@Autowired
 	public IpfPreparationWorkerConfiguration(
@@ -88,7 +89,8 @@ public class IpfPreparationWorkerConfiguration {
 		    final XmlConverter xmlConverter,
 			final TaskTableFactory taskTableFactory,
 			final ElementMapper elementMapper,
-		    final AppCatJobService appCatService
+		    final AppCatJobService appCatService,
+		    final S3TypeAdapterSettings s3TypeAdapterSettings
 	) {
 		this.appStatus = appStatus;
 		this.mqiClient = mqiClient;
@@ -103,6 +105,7 @@ public class IpfPreparationWorkerConfiguration {
 		this.elementMapper = elementMapper;
 		this.appCatService = appCatService;
 		this.xmlConverter = xmlConverter;
+		this.s3TypeAdapterSettings = s3TypeAdapterSettings;
 	}
 
 	@Bean
@@ -149,7 +152,10 @@ public class IpfPreparationWorkerConfiguration {
 					sliceLength
 			);			
 		} else if (EnumSet.of(ApplicationLevel.S3_L0, ApplicationLevel.S3_L1).contains(processSettings.getLevel())) {
-			return new S3TypeAdapter();
+			return new S3TypeAdapter(
+					metadataClient, 
+					s3TypeAdapterSettings
+			);
 		}
 		throw new IllegalArgumentException(
 				String.format(

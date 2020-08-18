@@ -6,7 +6,8 @@ FROM maven:3.5.3-jdk-8 as buildenv
 WORKDIR /app
 COPY . /app/
 
-RUN mvn -DskipTests=true -Dpmd.skip=true -Dfindbugs.skip=true -B -f /app/pom.xml -s /usr/share/maven/ref/settings-docker.xml install 
+ARG MAVEN_ARGS
+RUN mvn ${MAVEN_ARGS} -f /app/pom.xml -s /usr/share/maven/ref/settings-docker.xml install 
 
 ####
 # An empty image that will be just used to gather all build artifacts into a small image
