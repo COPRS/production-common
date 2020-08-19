@@ -118,6 +118,9 @@ public class IpfPreparationWorkerConfiguration {
 	@Bean(name="jobGenerationTaskScheduler", destroyMethod = "shutdown")
     public ThreadPoolTaskScheduler threadPoolTaskScheduler(final TasktableManager ttManager) {
         final ThreadPoolTaskScheduler threadPoolTaskScheduler = new ThreadPoolTaskScheduler();
+        if (ttManager.size() == 0) {
+        	throw new IllegalStateException("No tasktable defined");
+        }       
         threadPoolTaskScheduler.setPoolSize(ttManager.size());
         threadPoolTaskScheduler.setThreadNamePrefix("JobGenerationTaskScheduler");
         return threadPoolTaskScheduler;
