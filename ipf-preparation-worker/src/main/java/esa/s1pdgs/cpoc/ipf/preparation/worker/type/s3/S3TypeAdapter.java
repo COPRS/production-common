@@ -54,7 +54,6 @@ public class S3TypeAdapter extends AbstractProductTypeAdapter implements Product
 		// Get Inputs for WFX
 		List<AppDataJobTaskInputs> inputs = QueryUtils.buildInitialInputs(settings.getMode(), tasktableAdapter);
 
-		returnValue.setAdditionalInputs(inputs);
 		return returnValue;
 	}
 
