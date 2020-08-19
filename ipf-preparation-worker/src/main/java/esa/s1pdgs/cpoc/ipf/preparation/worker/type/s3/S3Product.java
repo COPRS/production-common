@@ -16,7 +16,11 @@ public class S3Product extends AbstractProduct {
 	private List<AppDataJobTaskInputs> additionalInputs;
 	
 	public static final S3Product of(final AppDataJob job) {
-		return of(job.getProduct());
+		S3Product returnValue = of(job.getProduct());
+		
+		returnValue.setAdditionalInputs(job.getAdditionalInputs());
+		
+		return returnValue;
 	}
 
 	public static final S3Product of(final AppDataJobProduct product) {

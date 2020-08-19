@@ -76,6 +76,27 @@ public class TaskTableAdapter {
 		return tasks;
 	}
 	
+	/**
+	 * Creates a map of all tasks inside of the tasktable
+	 * @return
+	 */
+	public Map<String, TaskTableTask> getTasks() {
+		final Map<String, TaskTableTask> tasks = new HashMap<>();
+		int poolNumber = 0;
+		for (final TaskTablePool pool : pools()) {
+			int taskNumber = 0;
+			for (final TaskTableTask task : pool.getTasks()) {
+				final String reference = String.format("P%sT%s:%s-%s",
+						poolNumber, taskNumber, task.getName(), task.getVersion());
+				tasks.put(reference, task);
+
+				taskNumber++;
+			}
+			poolNumber++;
+		}
+		return tasks;
+	}
+	
 	public final JobOrder newJobOrder(final ProcessSettings settings) {
 		// Build from task table
 		final TaskTableToJobOrderConverter converter = new TaskTableToJobOrderConverter(ProductMode.SLICING); //FIXME configure me!!!

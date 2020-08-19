@@ -153,7 +153,10 @@ public class IpfPreparationWorkerConfiguration {
 			);			
 		} else if (EnumSet.of(ApplicationLevel.S3_L0, ApplicationLevel.S3_L1, ApplicationLevel.S3_L2).contains(processSettings.getLevel())) {
 			return new S3TypeAdapter(
-					metadataClient, 
+					metadataClient,
+					taskTableFactory,
+					elementMapper,
+					processSettings,
 					s3TypeAdapterSettings
 			);
 		}

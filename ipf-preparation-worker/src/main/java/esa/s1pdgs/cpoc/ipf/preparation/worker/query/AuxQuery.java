@@ -1,6 +1,5 @@
 package esa.s1pdgs.cpoc.ipf.preparation.worker.query;
 
-import static java.util.Collections.emptyList;
 import static java.util.Collections.singletonMap;
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toMap;
@@ -40,9 +39,6 @@ import esa.s1pdgs.cpoc.xml.model.joborder.JobOrderInputFile;
 import esa.s1pdgs.cpoc.xml.model.joborder.JobOrderTimeInterval;
 import esa.s1pdgs.cpoc.xml.model.tasktable.TaskTableInput;
 import esa.s1pdgs.cpoc.xml.model.tasktable.TaskTableInputAlternative;
-import esa.s1pdgs.cpoc.xml.model.tasktable.TaskTablePool;
-import esa.s1pdgs.cpoc.xml.model.tasktable.TaskTableTask;
-import esa.s1pdgs.cpoc.xml.model.tasktable.enums.TaskTableInputMode;
 import esa.s1pdgs.cpoc.xml.model.tasktable.enums.TaskTableInputOrigin;
 import esa.s1pdgs.cpoc.xml.model.tasktable.enums.TaskTableMandatoryEnum;
 
@@ -165,86 +161,22 @@ public class AuxQuery {
 	}
 
 	private List<AppDataJobTaskInputs> inputsOf(final AppDataJob job) {
-		if(isEmpty(job.getAdditionalInputs())) {
-			return buildInitialInputs();
+		if (isEmpty(job.getAdditionalInputs())) {
+			return QueryUtils.buildInitialInputs(mode, taskTableAdapter);
 		}
 
 		return job.getAdditionalInputs();
 	}
 
-	private <T, U> List<U> taskTableTasksAndInputsMappedTo(final BiFunction<String, TaskTableInput, T> inputMapFunction,
-														   final BiFunction<List<T>, TaskTableTask, U> taskMapFunction) {
-		final List<U> mappedTasks = new ArrayList<>();
-
-		final Map<String, TaskTableInput> inputsWithId = taskTableTasks().values().stream().flatMap(task -> task.getInputs().stream())
-				.filter(input -> !StringUtils.isEmpty(input.getId())).collect(toMap(TaskTableInput::getId, i -> i));
-
-		for (final Map.Entry<String, TaskTableTask> taskEntry : taskTableTasks().entrySet()) {
-			final List<T> mappedInputs = new ArrayList<>();
-			int inputNumber = 0;
-			for (final TaskTableInput input : taskEntry.getValue().getInputs()) {
-				if(mode.isCompatibleWithTaskTableMode(modeOfInputOrReference(input, inputsWithId))) {
-					final String reference = String.format("%sI%s", taskEntry.getKey(), inputNumber);
-					mappedInputs.add(inputMapFunction.apply(reference, input));
-				}
-				inputNumber++;
-			}
-			mappedTasks.add(taskMapFunction.apply(mappedInputs, taskEntry.getValue()));
-		}
-
-		return mappedTasks;
-	}
-
-	private TaskTableInputMode modeOfInputOrReference(TaskTableInput input, Map<String, TaskTableInput> inputsWithId) {
-		if(StringUtils.isEmpty(input.getReference())) {
-			return input.getMode();
-		}
-
-		final TaskTableInput reference = inputsWithId.get(input.getReference());
-
-		if(reference == null) {
-			throw new RuntimeException("no input in taskTable with id " + input.getReference());
-		}
-
-		return reference.getMode();
-	}
-
 	private <T> List<T> inputsMappedTo(final BiFunction<String, TaskTableInput, T> inputMapFunction) {
-		return taskTableTasksAndInputsMappedTo(inputMapFunction, (list, task) -> list)
+		return QueryUtils
+				.taskTableTasksAndInputsMappedTo(inputMapFunction, (list, task) -> list, mode, taskTableAdapter)
 				.stream().flatMap(Collection::stream).collect(toList());
 	}
 
 	private Map<String, TaskTableInput> taskTableInputs() {
 		return inputsMappedTo(Collections::singletonMap).stream().flatMap(map -> map.entrySet().stream())
 				.collect(toMap(Map.Entry::getKey, Map.Entry::getValue));
-	}
-
-	private Map<String, TaskTableTask> taskTableTasks() {
-		final Map<String, TaskTableTask> tasks = new HashMap<>();
-		int poolNumber = 0; // I wish Java had list.stream((index, entry) -> ...)
-		for (final TaskTablePool pool : taskTableAdapter.pools()) {
-			int taskNumber = 0;
-			for (final TaskTableTask task : pool.getTasks()) {
-				final String reference = String.format("P%sT%s:%s-%s",
-						poolNumber, taskNumber, task.getName(), task.getVersion());
-				tasks.put(reference, task);
-
-				taskNumber++;
-			}
-			poolNumber++;
-		}
-		return tasks;
-	}
-
-	private List<AppDataJobTaskInputs> buildInitialInputs() {
-		return taskTableTasksAndInputsMappedTo(
-				(reference, input) -> new AppDataJobInput(
-						reference,
-						"",
-						"",
-						TaskTableMandatoryEnum.YES.equals(input.getMandatory()),
-						emptyList()),
-				(jobInputList, task) -> new AppDataJobTaskInputs(task.getName(), task.getVersion(), jobInputList));
 	}
 
 	private Map<TaskTableInputAlternative.TaskTableInputAltKey, SearchMetadataResult> toQueries(final Map<TaskTableInputAlternative.TaskTableInputAltKey, SearchMetadataQuery> metadataQueriesTemplate) {
