@@ -151,7 +151,7 @@ public class IpfPreparationWorkerConfiguration {
 					sliceOverlap, 
 					sliceLength
 			);			
-		} else if (EnumSet.of(ApplicationLevel.S3_L0, ApplicationLevel.S3_L1).contains(processSettings.getLevel())) {
+		} else if (EnumSet.of(ApplicationLevel.S3_L0, ApplicationLevel.S3_L1, ApplicationLevel.S3_L2).contains(processSettings.getLevel())) {
 			return new S3TypeAdapter(
 					metadataClient, 
 					s3TypeAdapterSettings
@@ -166,7 +166,9 @@ public class IpfPreparationWorkerConfiguration {
 								ApplicationLevel.L0_SEGMENT, 
 								ApplicationLevel.L1, 
 								ApplicationLevel.L2,
-								ApplicationLevel.S3_L0
+								ApplicationLevel.S3_L0,
+								ApplicationLevel.S3_L1,
+								ApplicationLevel.S3_L2
 						)
 				)
 		);
