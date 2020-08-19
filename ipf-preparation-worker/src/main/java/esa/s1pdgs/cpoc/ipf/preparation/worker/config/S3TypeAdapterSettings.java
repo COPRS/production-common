@@ -1,5 +1,6 @@
 package esa.s1pdgs.cpoc.ipf.preparation.worker.config;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import org.springframework.boot.context.properties.ConfigurationProperties;
@@ -19,9 +20,8 @@ import esa.s1pdgs.cpoc.ipf.preparation.worker.model.ProductMode;
 @ConfigurationProperties(prefix = "s3-type-adapter")
 public class S3TypeAdapterSettings {
 	
-	private List<String> marginProductTypes;
-	
-	private ProductMode mode;
+	private List<String> marginProductTypes = new ArrayList<>();
+	private ProductMode mode = ProductMode.ALWAYS;
 
 	public List<String> getMarginProductTypes() {
 		return marginProductTypes;
