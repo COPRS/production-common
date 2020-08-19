@@ -6,6 +6,7 @@ import java.util.List;
 import esa.s1pdgs.cpoc.appcatalog.AppDataJob;
 import esa.s1pdgs.cpoc.appcatalog.AppDataJobTaskInputs;
 import esa.s1pdgs.cpoc.common.errors.processing.IpfPrepWorkerInputsMissingException;
+import esa.s1pdgs.cpoc.ipf.preparation.worker.config.IpfPreparationWorkerSettings;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.config.ProcessSettings;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.config.S3TypeAdapterSettings;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.model.tasktable.ElementMapper;
@@ -25,15 +26,17 @@ public class S3TypeAdapter extends AbstractProductTypeAdapter implements Product
 	private TaskTableFactory ttFactory;
 	private ElementMapper elementMapper;
 	private ProcessSettings processSettings;
+	private IpfPreparationWorkerSettings workerSettings;
 	private S3TypeAdapterSettings settings;
 
 	public S3TypeAdapter(final MetadataClient metadataClient, final TaskTableFactory ttFactory,
 			final ElementMapper elementMapper, final ProcessSettings processSettings,
-			final S3TypeAdapterSettings settings) {
+			final IpfPreparationWorkerSettings workerSettings, final S3TypeAdapterSettings settings) {
 		this.metadataClient = metadataClient;
 		this.ttFactory = ttFactory;
 		this.elementMapper = elementMapper;
 		this.processSettings = processSettings;
+		this.workerSettings = workerSettings;
 		this.settings = settings;
 	}
 
@@ -44,7 +47,7 @@ public class S3TypeAdapter extends AbstractProductTypeAdapter implements Product
 		// Workaround to implement MarginTTWFX
 
 		// Create tasktable Adapter
-		final File ttFile = new File(job.getTaskTableName());
+		final File ttFile = new File(workerSettings.getDiroftasktables(), job.getTaskTableName());
 		final TaskTableAdapter tasktableAdapter = new TaskTableAdapter(ttFile,
 				ttFactory.buildTaskTable(ttFile, processSettings.getLevel()), elementMapper);
 

@@ -157,6 +157,7 @@ public class IpfPreparationWorkerConfiguration {
 					taskTableFactory,
 					elementMapper,
 					processSettings,
+					settings,
 					s3TypeAdapterSettings
 			);
 		}
