@@ -56,7 +56,8 @@ public class InboxFactory {
 				config.getStationName(),
 				config.getMode(),
 				config.getTimeliness(),
-				newProductNameEvaluatorFor(config)
+				newProductNameEvaluatorFor(config),
+				config.getIgnoreFilesBeforeDate()
 		);
 	}
 	

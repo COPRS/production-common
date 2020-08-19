@@ -19,6 +19,7 @@ ingestion-trigger:
       ignoreRegex: (^\..*|.*\.tmp$|db.*|^lost\+found$)
       topic: t-pdgs-ingestion-${HOSTNAME}
       family: EDRS_SESSION
+      ignore-files-before-date: 2001-09-11T08:46:00.000Z
   
 # KAFKA
 kafka:

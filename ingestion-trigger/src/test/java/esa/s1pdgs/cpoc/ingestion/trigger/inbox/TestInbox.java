@@ -1,7 +1,10 @@
 package esa.s1pdgs.cpoc.ingestion.trigger.inbox;
 
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.*;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 import java.io.IOException;
 import java.util.Arrays;
@@ -58,7 +61,9 @@ public class TestInbox {
                 "WILE",
                 "NOMINAL",
                 "FAST24",
-                new FlatProductNameEvaluator());
+                new FlatProductNameEvaluator(),
+                new Date(0)
+        );
         uut.poll();
 
         verify(fakeRepo, times(2)).save(any());
@@ -90,7 +95,9 @@ public class TestInbox {
 				"WILE",
 				"NOMINAL",
                 "FAST24",
-        new FlatProductNameEvaluator());
+                new FlatProductNameEvaluator(),
+                new Date(0)
+        );
         uut.poll();
 
         verify(fakeRepo, times(0)).save(any());

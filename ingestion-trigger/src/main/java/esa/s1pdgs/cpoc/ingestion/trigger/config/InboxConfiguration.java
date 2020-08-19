@@ -1,8 +1,10 @@
 package esa.s1pdgs.cpoc.ingestion.trigger.config;
 
+import java.util.Date;
+
 import esa.s1pdgs.cpoc.common.ProductFamily;
 
-public class InboxConfiguration {
+public class InboxConfiguration {	
 	private String directory;
 	private String matchRegex;
 	private String ignoreRegex;
@@ -14,6 +16,8 @@ public class InboxConfiguration {
 			+ "([0-9a-z_]{2})([0-9a-z_]{1})/(([0-9a-z_]+)/(ch[0|_]?[1-2]/)?"
 			+ "(DCS_[0-9]{2}_([a-zA-Z0-9_]*)_ch([12])_(DSDB|DSIB).*\\.(raw|aisp|xml)))$";
 	private int sessionNameGroupIndex = 4;
+	
+	private Date ignoreFilesBeforeDate = ConfigDateConverter.DEFAULT_START_DATE;
 	
 	private ProductFamily family = ProductFamily.BLANK;
 
@@ -69,7 +73,7 @@ public class InboxConfiguration {
 		return mode;
 	}
 
-	public void setMode(String mode) {
+	public void setMode(final String mode) {
 		this.mode = mode;
 	}
 
@@ -77,7 +81,7 @@ public class InboxConfiguration {
 		return timeliness;
 	}
 
-	public void setTimeliness(String timeliness) {
+	public void setTimeliness(final String timeliness) {
 		this.timeliness = timeliness;
 	}
 
@@ -97,10 +101,20 @@ public class InboxConfiguration {
 		this.sessionNameGroupIndex = sessionNameGroupIndex;
 	}
 
+	public Date getIgnoreFilesBeforeDate() {
+		return ignoreFilesBeforeDate;
+	}
+
+	public void setIgnoreFilesBeforeDate(final Date ignoreFilesBeforeDate) {
+		this.ignoreFilesBeforeDate = ignoreFilesBeforeDate;
+	}
+
 	@Override
 	public String toString() {
 		return "InboxConfiguration [directory=" + directory + ", matchRegex=" + matchRegex + ", ignoreRegex="
-				+ ignoreRegex + ", topic=" + topic + ", stationName=" + stationName + ", mode=" + mode + ", timeliness=" + timeliness + ", sessionNamePattern="
-				+ sessionNamePattern + ", sessionNameGroupIndex=" + sessionNameGroupIndex + ", family=" + family + "]";
-	}	
+				+ ignoreRegex + ", topic=" + topic + ", stationName=" + stationName + ", mode=" + mode + ", timeliness="
+				+ timeliness + ", sessionNamePattern=" + sessionNamePattern + ", sessionNameGroupIndex="
+				+ sessionNameGroupIndex + ", ignoreFilesBeforeDate=" + ignoreFilesBeforeDate + ", family=" + family
+				+ "]";
+	}
 }
