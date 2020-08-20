@@ -7,6 +7,8 @@ import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import esa.s1pdgs.cpoc.common.ProductFamily;
+import esa.s1pdgs.cpoc.mqi.model.control.ControlAction;
+import esa.s1pdgs.cpoc.mqi.model.control.ControlDemandType;
 
 /**
  * This is supposed to be the basic element that is used in all other
@@ -45,6 +47,14 @@ public abstract class AbstractMessage {
 	@JsonFormat(pattern="yyyy-MM-dd'T'HH:mm:ss.SSS'Z'", timezone="UTC")
 	protected Date creationDate = new Date();
 	protected String hostname = DEFAULT_HOSTNAME;
+	
+	protected ControlAction controlAction = ControlAction.NO_ACTION;
+	
+	protected ControlDemandType controlDemandType = ControlDemandType.NOMINAL;
+	
+	protected int controlRetryCounter = 0;
+	
+	protected boolean controlDebug = false;
 	
 	public AbstractMessage() {
 	}
@@ -94,10 +104,44 @@ public abstract class AbstractMessage {
 		this.uid = uid;
 	}
 
+	public ControlAction getControlAction() {
+		return controlAction;
+	}
+
+	public void setControlAction(ControlAction controlAction) {
+		this.controlAction = controlAction;
+	}
+
+	public ControlDemandType getControlDemandType() {
+		return controlDemandType;
+	}
+
+	public void setControlDemandType(ControlDemandType controlDemandType) {
+		this.controlDemandType = controlDemandType;
+	}
+
+	public int getControlRetryCounter() {
+		return controlRetryCounter;
+	}
+
+	public void increaseControlRetryCounter() {
+		++this.controlRetryCounter;
+	}
+
+	public boolean isControlDebug() {
+		return controlDebug;
+	}
+
+	public void setControlDebug(boolean controlDebug) {
+		this.controlDebug = controlDebug;
+	}
+
 	@Override
 	public String toString() {
 		return "AbstractMessage [productFamily=" + productFamily + ", keyObjectStorage=" + keyObjectStorage + ", uid="
-				+ uid + ", creationDate=" + creationDate + ", hostname=" + hostname + "]";
+				+ uid + ", creationDate=" + creationDate + ", hostname=" + hostname + ", controlAction=" + controlAction 
+				+ ", controlDemandType=" + controlDemandType + ", controlRetryCounter=" + controlRetryCounter 
+				+ ", controlDebug=" + controlDebug + "]";
 	}	
 	
 	
