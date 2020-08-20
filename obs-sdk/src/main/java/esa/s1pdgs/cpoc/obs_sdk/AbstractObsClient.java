@@ -31,6 +31,7 @@ import esa.s1pdgs.cpoc.common.errors.obs.ObsParallelAccessException;
 import esa.s1pdgs.cpoc.common.errors.obs.ObsUnknownObject;
 import esa.s1pdgs.cpoc.common.utils.FileUtils;
 import esa.s1pdgs.cpoc.common.utils.LogUtils;
+import esa.s1pdgs.cpoc.common.utils.Streams;
 import esa.s1pdgs.cpoc.obs_sdk.report.ReportingProductFactory;
 import esa.s1pdgs.cpoc.obs_sdk.s3.S3SdkClientException;
 import esa.s1pdgs.cpoc.obs_sdk.swift.SwiftSdkClientException;
@@ -267,18 +268,31 @@ public abstract class AbstractObsClient implements ObsClient {
 	public void uploadStreams(final List<StreamObsUploadObject> objects, final ReportingFactory reportingFactory)
 			throws AbstractCodedException, ObsEmptyFileException {
 		ValidArgumentAssertion.assertValidArgument(objects);
-
-		for (final StreamObsUploadObject o : objects) {
-			if (o.getContentLength() == 0) {
-				throw new ObsEmptyFileException("Empty stream detected: " + o.getKey());
-			}
-		}
-
+		assertIsNotEmpty(objects);
 		try {
 			final List<Md5.Entry> md5s = uploadStreams(objects, true, reportingFactory);
 			uploadMd5Sum(baseKeyOf(objects), md5s);
 		} catch (final SdkClientException exc) {
 			throw new ObsParallelAccessException(exc);
+		}
+	}
+
+	private final void assertIsNotEmpty(final List<StreamObsUploadObject> objects) throws ObsEmptyFileException {
+		String emptyElementKey = "";
+		
+		for (final StreamObsUploadObject o : objects) {
+			if (o.getContentLength() == 0) {
+				emptyElementKey =  o.getKey();
+				break;
+			}
+		}
+
+		if (!"".equals(emptyElementKey)) {
+			// Make sure that all input streams are closed properly, seems to be a problem with FileInputStream
+			// even if it has not been read.
+			Streams.close(objects);
+
+			throw new ObsEmptyFileException("Empty stream detected: " + emptyElementKey);
 		}
 	}
 
@@ -406,7 +420,7 @@ public abstract class AbstractObsClient implements ObsClient {
 	protected abstract Map<String,String> collectETags(ObsObject object) throws ObsServiceException, ObsException;
 
 	@Override
-	public String getChecksum(ObsObject object) throws ObsException {
+	public String getChecksum(final ObsObject object) throws ObsException {
 		try {
 			final Map<String, InputStream> streams = getAllAsInputStream(object.getFamily(), Md5.md5KeyFor(object));
 			try {
