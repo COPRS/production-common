@@ -17,7 +17,7 @@
       <Processing_Parameter>
          <Name>addon</Name>
          <Value>
-            /app/amalfi/addons/amalfi-config-sentinel-1-2.2.1.jar
+            /app/amalfi/addons/amalfi-config-sentinel-1-2.4.jar
          </Value>
       </Processing_Parameter>
       <Processing_Parameter>
@@ -29,13 +29,13 @@
       <Processing_Parameter>
          <Name>addon</Name>
          <Value>
-            /app/amalfi/addons/drbx-cortex-topic-safe-1-0-beta-1.jar
+            /app/amalfi/addons/drbx-cortex-topic-safe-1.0.5.jar
          </Value>
       </Processing_Parameter>
       <Processing_Parameter>
          <Name>addon</Name>
          <Value>
-            /app/amalfi/addons/drbx-cortex-topic-sentinel-1-1-0-beta-1.jar
+            /app/amalfi/addons/drbx-cortex-topic-sentinel-1-1.0.11.jar
          </Value>
       </Processing_Parameter>
       <Processing_Parameter>
