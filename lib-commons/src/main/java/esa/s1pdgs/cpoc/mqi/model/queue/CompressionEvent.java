@@ -1,8 +1,10 @@
 package esa.s1pdgs.cpoc.mqi.model.queue;
 
+import java.util.Arrays;
 import java.util.Objects;
 
 import esa.s1pdgs.cpoc.common.ProductFamily;
+import esa.s1pdgs.cpoc.mqi.model.control.ControlAction;
 
 public class CompressionEvent extends AbstractMessage {	
 	
@@ -10,11 +12,13 @@ public class CompressionEvent extends AbstractMessage {
 	
 	public CompressionEvent() {
 		super();
+		setAllowedControlActions(Arrays.asList(ControlAction.RESUBMIT));
 	}
 	
 	public CompressionEvent(final ProductFamily productFamily, final String keyObjectStorage, final CompressionDirection compressionDirection) {
 		super(productFamily, keyObjectStorage);
 		this.compressionDirection = compressionDirection;
+		setAllowedControlActions(Arrays.asList(ControlAction.RESUBMIT));
 	}
 
 	@Override

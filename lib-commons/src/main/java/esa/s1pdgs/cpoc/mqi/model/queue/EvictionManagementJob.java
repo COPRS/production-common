@@ -1,9 +1,12 @@
 package esa.s1pdgs.cpoc.mqi.model.queue;
 
+import java.util.Arrays;
 import java.util.Date;
 import java.util.Objects;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
+
+import esa.s1pdgs.cpoc.mqi.model.control.ControlAction;
 
 public class EvictionManagementJob extends AbstractMessage {
 
@@ -11,6 +14,11 @@ public class EvictionManagementJob extends AbstractMessage {
 	private Date evictionDate;
 
 	private boolean unlimited;
+	
+	public EvictionManagementJob() {
+		super();
+		setAllowedControlActions(Arrays.asList(ControlAction.RESTART));
+	}
 
 	public Date getEvictionDate() {
 		return evictionDate;

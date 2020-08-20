@@ -1,9 +1,11 @@
 package esa.s1pdgs.cpoc.mqi.model.queue;
 
+import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 
 import esa.s1pdgs.cpoc.appcatalog.AppDataJob;
+import esa.s1pdgs.cpoc.mqi.model.control.ControlAction;
 
 public class IpfPreparationJob extends AbstractMessage {
 	private String ipfName;
@@ -13,6 +15,11 @@ public class IpfPreparationJob extends AbstractMessage {
 	// Used to provide the information required for job generation from production-trigger to preparation-worker, e.g.
 	// start/stop time, tasktable name, ...
 	private AppDataJob appDataJob;
+	
+	public IpfPreparationJob() {
+		super();
+		setAllowedControlActions(Arrays.asList(ControlAction.RESTART));
+	}
 
 	public String getIpfName() {
 		return ipfName;

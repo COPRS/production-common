@@ -1,8 +1,10 @@
 package esa.s1pdgs.cpoc.mqi.model.queue;
 
+import java.util.Arrays;
 import java.util.Objects;
 
 import esa.s1pdgs.cpoc.common.ProductFamily;
+import esa.s1pdgs.cpoc.mqi.model.control.ControlAction;
 
 public class CompressionJob extends AbstractMessage {	
 	// use some sane defaults
@@ -12,6 +14,7 @@ public class CompressionJob extends AbstractMessage {
 
 	public CompressionJob() {
 		super();
+		setAllowedControlActions(Arrays.asList(ControlAction.RESTART));
 	}	
 
 	public CompressionJob(
@@ -25,6 +28,7 @@ public class CompressionJob extends AbstractMessage {
 		this.outputKeyObjectStorage = outputKeyObjectStorage;
 		this.outputProductFamily = outputProductFamily;
 		this.compressionDirection = compressionDirection;
+		setAllowedControlActions(Arrays.asList(ControlAction.RESTART));
 	}
 
 	public ProductFamily getOutputProductFamily() {

@@ -1,6 +1,8 @@
 package esa.s1pdgs.cpoc.mqi.model.queue;
 
+import java.util.Collections;
 import java.util.Date;
+import java.util.List;
 import java.util.UUID;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
@@ -48,7 +50,7 @@ public abstract class AbstractMessage {
 	protected Date creationDate = new Date();
 	protected String hostname = DEFAULT_HOSTNAME;
 	
-	protected ControlAction controlAction = ControlAction.NO_ACTION;
+	protected List<ControlAction> allowedControlActions = Collections.emptyList();
 	
 	protected ControlDemandType controlDemandType = ControlDemandType.NOMINAL;
 	
@@ -103,13 +105,13 @@ public abstract class AbstractMessage {
 	public void setUid(final UUID uid) {
 		this.uid = uid;
 	}
-
-	public ControlAction getControlAction() {
-		return controlAction;
+	
+	public List<ControlAction> getAllowedControlActions() {
+		return allowedControlActions;
 	}
 
-	public void setControlAction(ControlAction controlAction) {
-		this.controlAction = controlAction;
+	public void setAllowedControlActions(List<ControlAction> allowedControlActions) {
+		this.allowedControlActions = allowedControlActions;
 	}
 
 	public ControlDemandType getControlDemandType() {
@@ -139,7 +141,7 @@ public abstract class AbstractMessage {
 	@Override
 	public String toString() {
 		return "AbstractMessage [productFamily=" + productFamily + ", keyObjectStorage=" + keyObjectStorage + ", uid="
-				+ uid + ", creationDate=" + creationDate + ", hostname=" + hostname + ", controlAction=" + controlAction 
+				+ uid + ", creationDate=" + creationDate + ", hostname=" + hostname + ", allowedControlActions=" + allowedControlActions 
 				+ ", controlDemandType=" + controlDemandType + ", controlRetryCounter=" + controlRetryCounter 
 				+ ", controlDebug=" + controlDebug + "]";
 	}	

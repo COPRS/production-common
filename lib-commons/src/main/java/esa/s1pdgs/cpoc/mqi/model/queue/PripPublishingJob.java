@@ -1,13 +1,21 @@
 package esa.s1pdgs.cpoc.mqi.model.queue;
 
+import java.util.Arrays;
 import java.util.Date;
 import java.util.Objects;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 
+import esa.s1pdgs.cpoc.mqi.model.control.ControlAction;
+
 public class PripPublishingJob extends AbstractMessage {	
 	@JsonFormat(pattern="yyyy-MM-dd'T'HH:mm:ss.SSS'Z'", timezone="UTC")
 	private Date evictionDate;
+	
+	public PripPublishingJob() {
+		super();
+		setAllowedControlActions(Arrays.asList(ControlAction.RESTART));
+	}
 
 	public Date getEvictionDate() {
 		return evictionDate;

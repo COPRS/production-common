@@ -1,12 +1,20 @@
 package esa.s1pdgs.cpoc.mqi.model.queue;
 
+import java.util.Arrays;
 import java.util.Map;
 import java.util.Objects;
+
+import esa.s1pdgs.cpoc.mqi.model.control.ControlAction;
 
 public class CatalogEvent extends AbstractMessage {	
 	private String productName;
 	private String productType;
 	private Map<String,Object> metadata;
+	
+	public CatalogEvent() {
+		super();
+		setAllowedControlActions(Arrays.asList(ControlAction.RESUBMIT));
+	}
 	
 	public String getProductName() {
 		return productName;

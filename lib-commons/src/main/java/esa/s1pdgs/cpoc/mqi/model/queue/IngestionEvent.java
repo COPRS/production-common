@@ -1,8 +1,10 @@
 package esa.s1pdgs.cpoc.mqi.model.queue;
 
+import java.util.Arrays;
 import java.util.Objects;
 
 import esa.s1pdgs.cpoc.common.ProductFamily;
+import esa.s1pdgs.cpoc.mqi.model.control.ControlAction;
 
 /**
  * DTO object used to transfer EDRS session files between MQI and application
@@ -19,6 +21,7 @@ public class IngestionEvent extends AbstractMessage {
 	
 	public IngestionEvent() {
 		super();
+		setAllowedControlActions(Arrays.asList(ControlAction.RESUBMIT));
 	}
 
 	public IngestionEvent(
@@ -37,6 +40,7 @@ public class IngestionEvent extends AbstractMessage {
 		this.stationName = stationName;
 		this.mode = mode;
 		this.timeliness = timeliness;
+		setAllowedControlActions(Arrays.asList(ControlAction.RESUBMIT));
 	}
 
 	public String getProductName() {

@@ -1,9 +1,11 @@
 package esa.s1pdgs.cpoc.mqi.model.queue;
 
+import java.util.Arrays;
 import java.util.Objects;
 import java.util.UUID;
 
 import esa.s1pdgs.cpoc.common.ProductFamily;
+import esa.s1pdgs.cpoc.mqi.model.control.ControlAction;
 
 public class IngestionJob extends AbstractMessage {	
 	
@@ -32,6 +34,7 @@ public class IngestionJob extends AbstractMessage {
 		
 	public IngestionJob() {
 		super();
+		setAllowedControlActions(Arrays.asList(ControlAction.RESTART));
 	}
 
 	public IngestionJob(
@@ -54,6 +57,7 @@ public class IngestionJob extends AbstractMessage {
 		this.stationName		= stationName;
 		this.mode               = mode;
 		this.timeliness        = timeliness;
+		setAllowedControlActions(Arrays.asList(ControlAction.RESTART));
 	}
 
 	public String getPickupBaseURL() {
