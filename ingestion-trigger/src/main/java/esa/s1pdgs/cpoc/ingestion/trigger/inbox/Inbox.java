@@ -2,7 +2,6 @@ package esa.s1pdgs.cpoc.ingestion.trigger.inbox;
 
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.Date;
 import java.util.HashSet;
 import java.util.Optional;
 import java.util.Set;
@@ -37,7 +36,6 @@ public final class Inbox {
 	private final String mode;
 	private final String timeliness;
 	private final ProductNameEvaluator nameEvaluator;
-	private final Date ignoreFilesBefore;
 
 	Inbox(
 			final InboxAdapter inboxAdapter, 
@@ -48,8 +46,7 @@ public final class Inbox {
 			final String stationName,
 			final String mode,
 			final String timeliness,
-			final ProductNameEvaluator nameEvaluator,
-			final Date ignoreFilesBefore
+			final ProductNameEvaluator nameEvaluator
 	) {
 		this.inboxAdapter = inboxAdapter;
 		this.filter = filter;
@@ -60,29 +57,15 @@ public final class Inbox {
 		this.mode = mode;
 		this.timeliness = timeliness;
 		this.nameEvaluator = nameEvaluator;
-		this.ignoreFilesBefore = ignoreFilesBefore;
 		this.log = LoggerFactory.getLogger(String.format("%s (%s) for %s", getClass().getName(), stationName, family));
 	}
 	
 	public final void poll() {
-		try {
-			final InboxFilter minimumDateFilter = new InboxFilter() {				
-				@Override public final boolean accept(final InboxEntry entry) {
-					final Date lastModified = entry.getLastModified();					
-					// in doubt (i.e. if last modification date could not be determined) 
-					// accept the entry
-					if (lastModified == null) {
-						return true;
-					}
-					return lastModified.after(ignoreFilesBefore);
-				}
-			};
-			
+		try {			
 			final PollingRun pollingRun = PollingRun.newInstance(
 					ingestionTriggerServiceTransactional.getAllForPath(inboxAdapter.inboxURL(), stationName),
-					inboxAdapter.read(minimumDateFilter)
-			);
-						
+					inboxAdapter.read(InboxFilter.ALLOW_ALL)
+			);						
 			// when a product has been removed from the inbox directory, it shall be removed
 			// from the persistence so it will not be ignored if it occurs again on the inbox
 			ingestionTriggerServiceTransactional.removeFinished(pollingRun.finishedElements());
@@ -125,7 +108,7 @@ public final class Inbox {
 		return false;
 	}
 
-	private Optional<InboxEntry> handleEntry(final InboxEntry entry) {
+	final Optional<InboxEntry> handleEntry(final InboxEntry entry) {
 		final Reporting reporting = ReportingUtils.newReportingBuilder()
 				.newReporting("IngestionTrigger");
 
