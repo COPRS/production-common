@@ -135,9 +135,16 @@ public class TaskTableAdapter {
 
 		for (final TaskTableInputAlternative alt : input.alternativesOrdered().collect(toList())) {
 			// We ignore input not DB
-			if (alt.getOrigin() == TaskTableInputOrigin.DB) {							
-				final List<SearchMetadata> queryResults = results.get(alt.getTaskTableInputAltKey()).getResult();
-				
+			if (alt.getOrigin() == TaskTableInputOrigin.DB) {				
+				// dirty workaround to prevent NPE here if there had been problems with the query				
+				final SearchMetadataResult queryRes = results.get(alt.getTaskTableInputAltKey());				
+				final List<SearchMetadata> queryResults;
+				if (queryRes == null) {
+					queryResults = Collections.emptyList();
+				} 
+				else {
+					queryResults = queryRes.getResult();
+				}
 				// has queries defined?
 				if (!CollectionUtils.isEmpty(queryResults)) {
 					final JobOrderFileNameType type = getFileNameTypeFor(alt);
@@ -220,7 +227,7 @@ public class TaskTableAdapter {
 		return metadataQueryTemplate;
 	}
 
-	public SearchMetadataQuery metadataSearchQueryFor(TaskTableInputAlternative alternative) {
+	public SearchMetadataQuery metadataSearchQueryFor(final TaskTableInputAlternative alternative) {
 		final TaskTableInputAlternative.TaskTableInputAltKey inputAltKey = alternative.getTaskTableInputAltKey();
 		final String fileType = elementMapper.mappedFileType(inputAltKey.getFileType());
 		final ProductFamily family = elementMapper.inputFamilyOf(fileType);
