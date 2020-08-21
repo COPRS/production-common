@@ -7,6 +7,10 @@ spring:
 logging:
   config: classpath:log4j2-test.yml
 
+# Disable System Exit in Unit Tests
+status:
+  block-system-exit: false
+
 dissemination:
   hostname: localhost
   polling-interval-ms: 10000
