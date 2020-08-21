@@ -1,5 +1,6 @@
 package esa.s1pdgs.cpoc.ipf.preparation.worker.model.metadata;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 
@@ -22,7 +23,7 @@ public class SearchMetadataResult {
 	/**
 	 * Result. Null if not found
 	 */
-	private List<SearchMetadata> result;
+	private List<SearchMetadata> result = Collections.emptyList();
 
 	/**
 	 * Constructor using fields
@@ -89,7 +90,7 @@ public class SearchMetadataResult {
 		} else if (obj == null || getClass() != obj.getClass()) {
 			ret = false;
 		} else {
-			SearchMetadataResult other = (SearchMetadataResult) obj;
+			final SearchMetadataResult other = (SearchMetadataResult) obj;
 			ret = Objects.equals(query, other.query) && Objects.equals(result, other.result);
 		}
 		return ret;
