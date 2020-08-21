@@ -7,10 +7,6 @@ spring:
 logging:
   config: classpath:log4j2-test.yml
 
-# Disable System Exit in Unit Tests
-status:
-  block-system-exit: false
-
 dissemination:
   hostname: localhost
   polling-interval-ms: 10000
@@ -35,4 +31,7 @@ kafka:
 mqi:
   host-uri: http://localhost:8081                               # the host and port for querying MQI server
   max-retries: 3                                                # the maximal number of consecutive retries following a MQI request error 
-  tempo-retry-ms: 1000  
+  tempo-retry-ms: 1000
+
+status:
+  block-system-exit: true

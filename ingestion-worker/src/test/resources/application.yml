@@ -29,4 +29,8 @@ mqi:
 
 scheduling:
   enable: false
+
+status:
+  block-system-exit: true
+
      
