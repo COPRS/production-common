@@ -87,3 +87,6 @@ persistence:
   other-app:
     suffix-uri: .processing.default.svc.cluster.local
     begin-uri-processing: /status/
+
+status:
+  block-system-exit: true
