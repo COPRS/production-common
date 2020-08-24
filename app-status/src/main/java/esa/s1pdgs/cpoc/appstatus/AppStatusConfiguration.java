@@ -30,6 +30,7 @@ public class AppStatusConfiguration {
 		if (blockSystemExit) {
 			return ()->{};
 		}
-		return () -> System.exit(0);
+		//return () -> System.exit(0);
+		return ()->{}; // FIXME
 	}
 }
