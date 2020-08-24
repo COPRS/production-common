@@ -89,9 +89,6 @@ public class AuxQuery {
 		for (final AppDataJobInput missingInput : missingInputs) {
 			final String ref = missingInput.getTaskTableInputReference();
 			
-			LOGGER.debug("Get tasktable input for reference {}", ref);
-			LOGGER.debug("List of task table inputs: {}", taskTableInputs.keySet().toString());
-			
 			final TaskTableInput taskTableInput = taskTableInputs.get(ref);
 			final String inputDescription = inputDescription(ref, taskTableInput);
 			

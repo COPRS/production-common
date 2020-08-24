@@ -13,7 +13,7 @@ import esa.s1pdgs.cpoc.xml.model.tasktable.enums.TaskTableInputMode;
 // there are several mode a processor can run NRT, SYSTEMATIC etc.
 // when input selection is done, only inputs matching this mode are selected
 public enum ProductMode {
-	ALWAYS, SLICING, NON_SLICING, BLANK;
+	ALWAYS, SLICING, NON_SLICING, BLANK, NRT, NTC, STC;
 
 	public boolean isCompatibleWithTaskTableMode(final TaskTableInputMode tMode) {
 		return isCompatibleWithTaskTableMode(this, tMode);

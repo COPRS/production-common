@@ -15,6 +15,7 @@ import org.springframework.util.StringUtils;
 
 import esa.s1pdgs.cpoc.common.ProductCategory;
 import esa.s1pdgs.cpoc.common.ProductFamily;
+import esa.s1pdgs.cpoc.ipf.preparation.worker.model.ProductMode;
 
 /**
  * Extraction class of "tasktables" configuration properties
@@ -25,8 +26,7 @@ import esa.s1pdgs.cpoc.common.ProductFamily;
 @EnableConfigurationProperties
 @ConfigurationProperties(prefix = "ipf-preparation-worker")
 public class IpfPreparationWorkerSettings {
-	public static class CategoryConfig
-	{
+	public static class CategoryConfig {
 		private long fixedDelayMs = 500L;
 		private long initDelayPollMs = 2000L;
 
@@ -45,58 +45,57 @@ public class IpfPreparationWorkerSettings {
 		public void setInitDelayPollMs(final long initDelayPolMs) {
 			this.initDelayPollMs = initDelayPolMs;
 		}
-		
+
 		@Override
 		public String toString() {
 			return "CategoryConfig [fixedDelayMs=" + fixedDelayMs + ", initDelayPollMs=" + initDelayPollMs + "]";
 		}
 	}
-	
-	public static class InputWaitingConfig
-	{
-		private String processorNameRegexp 		= ".*";
-		private String processorVersionRegexp	= ".*";
+
+	public static class InputWaitingConfig {
+		private String processorNameRegexp = ".*";
+		private String processorVersionRegexp = ".*";
 		private String inputIdRegexp;
 		private String timelinessRegexp;
 		private long waitingFromDownlinkInSeconds;
-		private long waitingFromIngestionInSeconds = 0;		
+		private long waitingFromIngestionInSeconds = 0;
 
 		public String getProcessorNameRegexp() {
 			return processorNameRegexp;
 		}
-		
+
 		public void setProcessorNameRegexp(final String processorNameRegexp) {
 			this.processorNameRegexp = processorNameRegexp;
 		}
-		
+
 		public String getProcessorVersionRegexp() {
 			return processorVersionRegexp;
 		}
-		
+
 		public void setProcessorVersionRegexp(final String processorVersionRegexp) {
 			this.processorVersionRegexp = processorVersionRegexp;
 		}
-		
+
 		public String getInputIdRegexp() {
 			return inputIdRegexp;
 		}
-		
+
 		public void setInputIdRegexp(final String inputIdRegexp) {
 			this.inputIdRegexp = inputIdRegexp;
 		}
-		
+
 		public String getTimelinessRegexp() {
 			return timelinessRegexp;
 		}
-		
+
 		public void setTimelinessRegexp(final String timelinessRegexp) {
 			this.timelinessRegexp = timelinessRegexp;
 		}
-		
+
 		public long getWaitingFromDownlinkInSeconds() {
 			return waitingFromDownlinkInSeconds;
 		}
-		
+
 		public void setWaitingFromDownlinkInSeconds(final long waitingFromDownlinkInSeconds) {
 			this.waitingFromDownlinkInSeconds = waitingFromDownlinkInSeconds;
 		}
@@ -112,16 +111,16 @@ public class IpfPreparationWorkerSettings {
 		@Override
 		public String toString() {
 			return "InputWaitingConfig [processorNameRegexp=" + processorNameRegexp + ", processorVersionRegexp="
-					+ processorVersionRegexp + ", inputIdRegexp=" + inputIdRegexp + ", timelinessRegexp=" + timelinessRegexp 
-					+ ", waitingFromDownlinkInSeconds=" + waitingFromDownlinkInSeconds + ", waitingFromIngestionInSeconds=" + waitingFromIngestionInSeconds + "]";
+					+ processorVersionRegexp + ", inputIdRegexp=" + inputIdRegexp + ", timelinessRegexp="
+					+ timelinessRegexp + ", waitingFromDownlinkInSeconds=" + waitingFromDownlinkInSeconds
+					+ ", waitingFromIngestionInSeconds=" + waitingFromIngestionInSeconds + "]";
 		}
 	}
-		
+
 	private List<InputWaitingConfig> inputWaiting = new ArrayList<>();
 
 	private Map<ProductCategory, CategoryConfig> productCategories = new LinkedHashMap<>();
 
-	
 	public Map<ProductCategory, CategoryConfig> getProductCategories() {
 		return productCategories;
 	}
@@ -137,7 +136,7 @@ public class IpfPreparationWorkerSettings {
 	public void setInputWaiting(final List<InputWaitingConfig> inputWaiting) {
 		this.inputWaiting = inputWaiting;
 	}
-	
+
 	/**
 	 * Separator use to seperate the elements of a map in a string format
 	 */
@@ -217,8 +216,13 @@ public class IpfPreparationWorkerSettings {
 	 * in lowercase in not the metadata index (example: aux_resorb use aux_res)<br/>
 	 */
 	private Map<String, String> mapTypeMeta = new HashMap<>();
-	
+
 	private List<ProductFamily> oqcCheck = new ArrayList<>();
+
+	/**
+	 * Mode of the process
+	 */
+	private ProductMode productMode = ProductMode.SLICING;
 
 	/**
 	 * Initialization function:
@@ -332,7 +336,6 @@ public class IpfPreparationWorkerSettings {
 		}
 
 	}
-
 
 	/**
 	 * @return the waitprimarycheck
@@ -513,18 +516,26 @@ public class IpfPreparationWorkerSettings {
 		this.oqcCheck = oqcCheck;
 	}
 
+	public ProductMode getProductMode() {
+		return productMode;
+	}
+
+	public void setProductMode(ProductMode productMode) {
+		this.productMode = productMode;
+	}
+
 	/**
 	 * Display object in JSON format
 	 */
 	@Override
 	public String toString() {
-		return "{maxnumberofjobs: " + maxnumberofjobs
-				+ ", waitprimarycheck: \"" + waitprimarycheck + "\", waitmetadatainput: \"" + waitmetadatainput
-				+ "\", diroftasktables: \"" + diroftasktables + "\", jobgenfixedrate: " + jobgenfixedrate
-				+ ", defaultfamily: \"" + defaultfamily + "\", outputfamiliesstr: \"" + outputfamiliesstr
-				+ "\", outputfamilies: \"" + outputfamilies + "\", typeOverlap: \"" + typeOverlap + "\", typeSliceLength: \""
-				+ typeSliceLength + "\", mapTypeMeta: \"" + mapTypeMeta + "\", oqcCheck: \"" + oqcCheck
-				+ "\", productCategories: \"" + productCategories + "\", inputWaiting: \"" + inputWaiting
+		return "{maxnumberofjobs: " + maxnumberofjobs + ", waitprimarycheck: \"" + waitprimarycheck
+				+ "\", waitmetadatainput: \"" + waitmetadatainput + "\", diroftasktables: \"" + diroftasktables
+				+ "\", jobgenfixedrate: " + jobgenfixedrate + ", defaultfamily: \"" + defaultfamily
+				+ "\", outputfamiliesstr: \"" + outputfamiliesstr + "\", outputfamilies: \"" + outputfamilies
+				+ "\", typeOverlap: \"" + typeOverlap + "\", typeSliceLength: \"" + typeSliceLength
+				+ "\", mapTypeMeta: \"" + mapTypeMeta + "\", oqcCheck: \"" + oqcCheck + "\", productMode: \""
+				+ productMode + "\", productCategories: \"" + productCategories + "\", inputWaiting: \"" + inputWaiting
 				+ "\"}";
 	}
 
