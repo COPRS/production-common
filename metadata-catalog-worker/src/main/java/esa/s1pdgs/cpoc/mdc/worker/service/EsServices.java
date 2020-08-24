@@ -56,6 +56,7 @@ import esa.s1pdgs.cpoc.metadata.model.EdrsSessionMetadata;
 import esa.s1pdgs.cpoc.metadata.model.L0AcnMetadata;
 import esa.s1pdgs.cpoc.metadata.model.L0SliceMetadata;
 import esa.s1pdgs.cpoc.metadata.model.LevelSegmentMetadata;
+import esa.s1pdgs.cpoc.metadata.model.S3Metadata;
 import esa.s1pdgs.cpoc.metadata.model.SearchMetadata;
 
 /**
@@ -219,7 +220,7 @@ public class EsServices {
 			throw new Exception(e);
 		}
 	}
-	
+
 	/**
 	 * Function which return the products that correspond to the valCover
 	 * specification If there is no corresponding product return null
@@ -270,16 +271,16 @@ public class EsServices {
 					local.setKeyObjectStorage(source.get("url").toString());
 					if (source.containsKey("validityStartTime")) {
 						try {
-							local.setValidityStart(
-									DateUtils.convertToMetadataDateTimeFormat(source.get("validityStartTime").toString()));
+							local.setValidityStart(DateUtils
+									.convertToMetadataDateTimeFormat(source.get("validityStartTime").toString()));
 						} catch (final DateTimeParseException e) {
 							throw new MetadataMalformedException("validityStartTime");
 						}
 					}
 					if (source.containsKey("validityStopTime")) {
 						try {
-							local.setValidityStop(
-									DateUtils.convertToMetadataDateTimeFormat(source.get("validityStopTime").toString()));
+							local.setValidityStop(DateUtils
+									.convertToMetadataDateTimeFormat(source.get("validityStopTime").toString()));
 						} catch (final DateTimeParseException e) {
 							throw new MetadataMalformedException("validityStopTime");
 						}
@@ -569,8 +570,8 @@ public class EsServices {
 		// Generic fields
 		final BoolQueryBuilder queryBuilder = QueryBuilders.boolQuery()
 				.must(QueryBuilders.rangeQuery("startTime").lt(endDate))
-				.must(QueryBuilders.rangeQuery("stopTime").gt(beginDate))
-				.must(satelliteId(satelliteId)).must(QueryBuilders.regexpQuery("productType.keyword", productType))
+				.must(QueryBuilders.rangeQuery("stopTime").gt(beginDate)).must(satelliteId(satelliteId))
+				.must(QueryBuilders.regexpQuery("productType.keyword", productType))
 				.must(QueryBuilders.termQuery("processMode.keyword", processMode));
 		sourceBuilder.query(queryBuilder);
 		LOGGER.debug("valIntersect: query composed is {}", queryBuilder);
@@ -590,7 +591,7 @@ public class EsServices {
 					local.setProductName(source.get("productName").toString());
 					local.setProductType(source.get("productType").toString());
 					local.setKeyObjectStorage(source.get("url").toString());
-					
+
 					if (source.containsKey("startTime")) {
 						try {
 							local.setValidityStart(
@@ -616,7 +617,7 @@ public class EsServices {
 		}
 		return null;
 	}
-	
+
 	/**
 	 * Retrieveal Mode LatestValIntersect to retrieve latest intersecting product
 	 * (latest creation time) for product search criteria
@@ -669,6 +670,71 @@ public class EsServices {
 		} catch (final IOException e) {
 			throw new Exception(e.getMessage());
 		}
+		return null;
+	}
+
+	/**
+	 * Queries the elastic search for products matching the given parameters. Query
+	 * build is based on the marginTT workflow extension.
+	 * 
+	 * @return list of matching products
+	 * @throws Exception if start or stop time is in an invalid format, or the searh
+	 *                   itself throws an error
+	 */
+	public List<S3Metadata> marginTTQuery(final String startTime, final String stopTime, final String productType,
+			final String satelliteId, final String timeliness, final ProductFamily productFamily) throws Exception {
+		final SearchSourceBuilder sourceBuilder = new SearchSourceBuilder();
+		final BoolQueryBuilder queryBuilder = QueryBuilders.boolQuery()
+				.must(QueryBuilders.rangeQuery("startTime").lt(stopTime))
+				.must(QueryBuilders.rangeQuery("stopTime").gt(startTime)).must(satelliteId(satelliteId))
+				.must(QueryBuilders.termQuery(timeliness + ".keyword", true));
+
+		LOGGER.debug("query composed is {}", queryBuilder);
+
+		sourceBuilder.query(queryBuilder);
+		sourceBuilder.sort("startTime", SortOrder.ASC);
+		sourceBuilder.size(SIZE_LIMIT);
+
+		final String index = productFamily.name().toLowerCase();
+		final SearchRequest searchRequest = new SearchRequest(index);
+		searchRequest.source(sourceBuilder);
+
+		try {
+			final SearchResponse searchResponse = elasticsearchDAO.search(searchRequest);
+			if (this.isNotEmpty(searchResponse)) {
+				final List<S3Metadata> r = new ArrayList<>();
+				for (final SearchHit hit : searchResponse.getHits().getHits()) {
+					final Map<String, Object> source = hit.getSourceAsMap();
+					final S3Metadata local = new S3Metadata();
+					local.setProductName(source.get("productName").toString());
+					local.setProductType(source.get("productType").toString());
+					local.setKeyObjectStorage(source.get("url").toString());
+					local.setGranuleNumber(Integer.parseInt(source.get("granuleNumber").toString()));
+					local.setGranulePosition(source.get("granulePosition").toString());
+					if (source.containsKey("startTime")) {
+						try {
+							local.setValidityStart(
+									DateUtils.convertToMetadataDateTimeFormat(source.get("startTime").toString()));
+						} catch (final DateTimeParseException e) {
+							throw new MetadataMalformedException("startTime");
+						}
+					}
+					if (source.containsKey("stopTime")) {
+						try {
+							local.setValidityStop(
+									DateUtils.convertToMetadataDateTimeFormat(source.get("stopTime").toString()));
+						} catch (final DateTimeParseException e) {
+							throw new MetadataMalformedException("stopTime");
+						}
+					}
+					r.add(local);
+				}
+				return r;
+			}
+		} catch (final IOException e) {
+			throw new Exception(e.getMessage());
+		}
+
 		return null;
 	}
 
@@ -1189,7 +1255,7 @@ public class EsServices {
 		}
 		return false;
 	}
-	
+
 	/**
 	 * Determines the ES Index for a given Product Family
 	 */
