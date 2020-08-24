@@ -1,0 +1,11 @@
+#TODO: figure out why I need this here and in bootstrap.yml
+spring:
+  application:
+    name: s1pdgs-data-lifecycle-worker
+    
+# Logging     
+logging:
+  config: classpath:log4j2-test.yml
+
+status:
+  block-system-exit: true

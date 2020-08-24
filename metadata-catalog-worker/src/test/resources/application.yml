@@ -204,5 +204,4 @@ mdextractor:
 status:
   max-error-counter-processing: 3
   max-error-counter-mqi: 30
-  
-  
+  block-system-exit: true

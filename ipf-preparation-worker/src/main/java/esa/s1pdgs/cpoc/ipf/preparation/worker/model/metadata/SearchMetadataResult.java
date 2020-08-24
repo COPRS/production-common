@@ -1,5 +1,6 @@
 package esa.s1pdgs.cpoc.ipf.preparation.worker.model.metadata;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 
@@ -14,68 +15,47 @@ import esa.s1pdgs.cpoc.metadata.model.SearchMetadata;
  */
 public class SearchMetadataResult {
 
-	/**
-	 * Query
-	 */
 	private SearchMetadataQuery query;
+	
+	// WARNING: Previously, there were some "unhealthy" semantics coupled to this field. It had been 'null'
+	// if the query has not been performed, empty if no results were returned from query and contained 
+	// the results, if there were any. To get it at least a little but cleaned up and avoid those nasty NPE
+	// we'll make it explicit with an additonal boolean field to avoid these null scenarios.
+	private List<SearchMetadata> result = Collections.emptyList();
+	private boolean hasResults = false;
 
-	/**
-	 * Result. Null if not found
-	 */
-	private List<SearchMetadata> result;
-
-	/**
-	 * Constructor using fields
-	 * 
-	 */
 	public SearchMetadataResult(final SearchMetadataQuery query) {
 		this.query = query;
 	}
 
-	/**
-	 * @return the query
-	 */
 	public SearchMetadataQuery getQuery() {
 		return query;
 	}
 
-	/**
-	 * @param query
-	 *            the query to set
-	 */
 	public void setQuery(final SearchMetadataQuery query) {
 		this.query = query;
 	}
 
-	/**
-	 * @return the result
-	 */
 	public List<SearchMetadata> getResult() {
 		return result;
 	}
 
 	public boolean hasResult() {
-		return result != null;
+		return hasResults;
 	}
 
-	/**
-	 * @param result
-	 *            the result to set
-	 */
 	public void setResult(final List<SearchMetadata> result) {
 		this.result = result;
+		this.hasResults = !result.isEmpty();
 	}
 
 	public String toJsonString() {
 		return String.format("{query: %s, result: %s}", query, result);
 	}
-	
-	/**
-	 * @see java.lang.Object#hashCode()
-	 */
+
 	@Override
 	public int hashCode() {
-		return Objects.hash(query, result);
+		return Objects.hash(query, result, hasResults);
 	}
 
 	/**
@@ -89,8 +69,10 @@ public class SearchMetadataResult {
 		} else if (obj == null || getClass() != obj.getClass()) {
 			ret = false;
 		} else {
-			SearchMetadataResult other = (SearchMetadataResult) obj;
-			ret = Objects.equals(query, other.query) && Objects.equals(result, other.result);
+			final SearchMetadataResult other = (SearchMetadataResult) obj;
+			ret = Objects.equals(query, other.query) && 
+					Objects.equals(result, other.result) &&
+					hasResults == other.hasResults;
 		}
 		return ret;
 	}
@@ -99,6 +81,4 @@ public class SearchMetadataResult {
 	public String toString() {
 		return "SearchMetadataResult [query=" + query + ", result=" + result + "]";
 	}
-
-	
 }

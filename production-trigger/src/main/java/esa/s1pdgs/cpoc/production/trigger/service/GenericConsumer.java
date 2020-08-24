@@ -134,31 +134,30 @@ public class GenericConsumer implements MqiListener<CatalogEvent> {
         		ReportingUtils.newFilenameReportingInputFor(event.getProductFamily(), productName),
         		new ReportingMessage("Received CatalogEvent for %s", productName)
         );  
-        if (!isOverLand(event, reporting)) {                      
-            final AppDataJob job = new AppDataJob();
-            job.setLevel(processSettings.getLevel());
-            job.setPod(processSettings.getHostname());
-            job.getMessages().add(mqiMessage);
-                  
-            final AppDataJobProduct product = newProductFor(mqiMessage);
-            job.setProduct(product);                
+        if (!isOverLand(event, reporting)) {                   
+            final AppDataJobProduct product = newProductFor(mqiMessage);           
             final AppDataJobProductAdapter productAdapter = new AppDataJobProductAdapter(product);
             
             final List<String> taskTableNames = taskTableMapper.tasktableFor(product);
-            List<GenericPublicationMessageDto<IpfPreparationJob>> messageDtos = new ArrayList<>();
+            final List<GenericPublicationMessageDto<IpfPreparationJob>> messageDtos = new ArrayList<>(taskTableNames.size());
             
             for (final String taskTableName: taskTableNames)
             {
-            	LOGGER.debug("Tasktable for {} is {}", productAdapter.getProductName(), taskTableName);
-            
+                final AppDataJob job = new AppDataJob();
+                job.setLevel(processSettings.getLevel());
+                job.setPod(processSettings.getHostname());
+                job.getMessages().add(mqiMessage);
+                job.setProduct(product);       
+                
+            	LOGGER.debug("Tasktable for {} is {}", productAdapter.getProductName(), taskTableName); 
+          
             	job.setTaskTableName(taskTableName);     
             	job.setStartTime(productAdapter.getStartTime());
             	job.setStopTime(productAdapter.getStopTime());
-            	job.setProductName(productName);
+            	job.setProductName(productName);         
             	
             	messageDtos.add(dispatch(mqiMessage, job, productName, reporting));
-            }            
-                            
+            }               
             LOGGER.info("Dispatching product {}", productName);
             return messageDtos;          
         }

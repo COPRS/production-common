@@ -34,4 +34,7 @@ mongodb:
 
 # REST controller
 server:
-  port: 8081      
+  port: 8081
+
+status:
+  block-system-exit: true
