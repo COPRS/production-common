@@ -87,7 +87,7 @@ public class AppStatusImpl extends AbstractAppStatus {
 	@Scheduled(fixedDelayString = "${status.delete-fixed-delay-ms:3000}")
     public void forceStopping() {
         if (isShallBeStopped()) {
-            System.exit(0);
+            systemExit();
         }
     }
 
