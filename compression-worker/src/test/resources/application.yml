@@ -17,6 +17,7 @@ status:
   max-error-counter-processing: 2
   max-error-counter-mqi: 2
   delete-fixed-delay-ms: 1000
+  block-system-exit: true
   
 mqi:
   host-uri: http://localhost:8081       # the host and port for querying MQI server

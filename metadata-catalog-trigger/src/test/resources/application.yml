@@ -58,4 +58,5 @@ mdextractor:
 status:
   max-error-counter-processing: 3                                 # the number of consecutive processing errors leading to the state FATALERROR
   max-error-counter-mqi: 30                                       # the number of consecutive MQI errors leading to the state FATALERROR
-  
+  block-system-exit: true
+
