@@ -15,7 +15,7 @@ public class FailedProcessingDto {
 	private Date failedDate;
 	private String failureMessage;
 	private GenericMessageDto<?> processingDetails;
-	private GenericMessageDto<?> predecessor;
+	private GenericMessageDto<?> predecessor = new GenericMessageDto<>();
 	
 	public FailedProcessingDto() {
 	}
