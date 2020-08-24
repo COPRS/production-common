@@ -8,6 +8,8 @@ variables:
   MODULE: s1pro-core
   BRANCH: $CI_COMMIT_REF_SLUG
   VERSION: 0.14.0
+  KUBERNETES_MEMORY_REQUEST: 1Gi
+  KUBERNETES_MEMORY_LIMIT: 1Gi
 
 stages:
   - build
@@ -16,6 +18,7 @@ stages:
   - deploy
 
 before_script:
+    - MAVEN_OPTS="-Xmx512m"
     - DEFAULT_MAVEN_ARGS="-DskipTests=true -Dpmd.skip=true -Dfindbugs.skip=true -B"
     - alias dockerbuild="docker build --network host --pull --build-arg MAVEN_ARGS=\"${MAVEN_ARGS:-${DEFAULT_MAVEN_ARGS}}\" --build-arg BRANCH=$BRANCH --build-arg BRANCH_TEXT=$BRANCH --build-arg COMMIT_ID=$CI_COMMIT_SHA --build-arg VERSION=$VERSION"
     - alias # just for debugging purpose
