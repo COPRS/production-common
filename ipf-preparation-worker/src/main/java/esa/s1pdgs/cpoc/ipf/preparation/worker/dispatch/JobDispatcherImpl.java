@@ -139,8 +139,7 @@ public class JobDispatcherImpl implements JobDispatcher {
 		    gen.setLastUpdateDate(now);
 		    
 		    jobFromMessage.setGeneration(gen);
-		    jobFromMessage.setPrepJobMessageId(message.getId());
-		    jobFromMessage.setPrepJobInputQueue(message.getInputKey());
+		    jobFromMessage.setPrepJobMessage(message);
 		    jobFromMessage.setReportingId(reportingUid);
 		    jobFromMessage.setState(AppDataJobState.GENERATING); // will activate that this request can be polled
 		    jobFromMessage.setPod(settings.getHostname()); 
