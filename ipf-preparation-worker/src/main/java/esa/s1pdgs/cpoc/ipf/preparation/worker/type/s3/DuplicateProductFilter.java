@@ -19,7 +19,7 @@ import esa.s1pdgs.cpoc.xml.model.joborder.JobOrderTimeInterval;
  * @author Julian Kaping
  *
  */
-public class DuplicateProductFilter {
+public class DuplicateProductFilter {	
 	private static int CREATION_TIME_BEGIN_INDEX = 48;
 	private static int CREATION_TIME_END_INDEX = 63;
 

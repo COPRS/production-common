@@ -110,7 +110,10 @@ public class S3TypeAdapter extends AbstractProductTypeAdapter implements Product
 			for (int i = 0; i < proc.getInputs().size(); i++) {
 				JobOrderInput input = proc.getInputs().get(i);
 				if (settings.getMarginProductTypes().contains(input.getFileType())) {
-					proc.updateInput(i, DuplicateProductFilter.filter(input));
+					JobOrderInput newInput = DuplicateProductFilter.filter(input);
+					LOGGER.debug("Update JobOrderInput {}. New Input: {}", input.getFileType(), newInput.toString());
+					
+					proc.updateInput(i, newInput);
 				}
 			}
 		}
