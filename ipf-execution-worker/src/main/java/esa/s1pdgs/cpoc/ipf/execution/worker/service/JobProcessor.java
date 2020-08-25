@@ -491,9 +491,11 @@ public class JobProcessor implements MqiListener<IpfExecutionJob> {
 			} catch (final AbstractCodedException ace) {
 				LOGGER.error("MQI service couldn't be stopped {}", ace);
 			}
-			System.exit(0);
+			appStatus.setShallBeStopped(true);
+			appStatus.forceStopping(); // only stops when isShallBeStopped() == true
 		} else if (appStatus.getStatus().isFatalError()) {
-			System.exit(-1);
+			appStatus.setShallBeStopped(true);
+			appStatus.forceStopping(); // only stops when isShallBeStopped() == true
 		} else {
 			appStatus.setWaiting();
 		}
