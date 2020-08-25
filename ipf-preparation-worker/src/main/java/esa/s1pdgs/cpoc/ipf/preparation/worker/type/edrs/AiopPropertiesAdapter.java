@@ -109,6 +109,12 @@ public final class AiopPropertiesAdapter {
     	    			aiopParams.put("Processing_Mode", entrySet.getValue());    					
     				}
     				break;
+    			case "NRTOutputPath":
+    				aiopParams.put(entrySet.getKey(), entrySet.getValue().replace("<WORKING_DIR_NUMBER>", Long.toString(job.getId())));
+    				break;
+    			case "PTOutputPath":
+    				aiopParams.put(entrySet.getKey(), entrySet.getValue().replace("<WORKING_DIR_NUMBER>", Long.toString(job.getId())));
+    				break;
     			default:
     				aiopParams.put(entrySet.getKey(), entrySet.getValue());
     		} 
