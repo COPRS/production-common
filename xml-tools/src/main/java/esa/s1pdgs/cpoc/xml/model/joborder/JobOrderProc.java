@@ -154,6 +154,12 @@ public class JobOrderProc {
 		this.inputs.add(input);
 		this.nbInputs++;
 	}
+	
+	public void updateInput(final int index, final JobOrderInput input) {
+		if (index >= 0 && index < this.inputs.size()) {
+			this.inputs.set(index, input);
+		}
+	}
 
 	/**
 	 * @param inputs
