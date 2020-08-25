@@ -291,13 +291,16 @@ public class JobProcessor implements MqiListener<IpfExecutionJob> {
 
 	@Override
 	public void onTerminalError(final GenericMessageDto<IpfExecutionJob> message, final Exception error) {
-        LOGGER.error(error);  
-        errorAppender.send(new FailedProcessingDto(
+        LOGGER.error(error);
+        
+        FailedProcessingDto failedProcessing = new FailedProcessingDto(
         		properties.getHostname(),
         		new Date(), 
         		String.format("Error on handling IpfExecutionJob message %s: %s", message.getId(), LogUtils.toString(error)), 
         		message
-        ));
+        );
+        failedProcessing.setPredecessor(message.getBody().getIpfPreparationJobMessage());
+        errorAppender.send(failedProcessing);
 		exitOnAppStatusStopOrWait();
 	}
 	
