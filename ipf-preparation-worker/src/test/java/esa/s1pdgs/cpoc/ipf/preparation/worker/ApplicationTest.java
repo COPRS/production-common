@@ -37,7 +37,7 @@ public class ApplicationTest {
 
 	private IpfPreparationJob newPrepJob() {
 		final IpfPreparationJob job = new IpfPreparationJob();
-		job.setProductName("fooBar");
+		job.setKeyObjectStorage("fooBar");
 		job.setEventMessage(new GenericMessageDto<CatalogEvent>(1, "foo", newCatEvent()));
 		return job;
 	}
