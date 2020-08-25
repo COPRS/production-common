@@ -17,6 +17,7 @@ import esa.s1pdgs.cpoc.appcatalog.common.Processing;
 import esa.s1pdgs.cpoc.appstatus.AppStatus;
 import esa.s1pdgs.cpoc.common.MessageState;
 import esa.s1pdgs.cpoc.errorrepo.model.rest.FailedProcessingDto;
+import esa.s1pdgs.cpoc.mqi.model.queue.AbstractMessage;
 import esa.s1pdgs.cpoc.mqi.model.rest.GenericMessageDto;
 import esa.s1pdgs.cpoc.reqrepo.kafka.producer.SubmissionClient;
 import esa.s1pdgs.cpoc.reqrepo.repo.FailedProcessingRepo;
@@ -78,7 +79,9 @@ public class RequestRepositoryImpl implements RequestRepository {
 	public synchronized void restartAndDeleteFailedProcessing(final long id) {
 		final FailedProcessing failedProcessing = failedProcessingRepo.findById(id);
 		assertNotNull("failed request", failedProcessing, id);
-		assertTopicDefined(id, failedProcessing);	
+		assertDtoDefined(id, failedProcessing);
+		assertTopicDefined(id, failedProcessing);
+		((AbstractMessage) failedProcessing.getDto()).increaseControlRetryCounter();
 		kafkaSubmissionClient.resubmit(id, failedProcessing.getTopic(), failedProcessing.getDto(), status);
 		failedProcessingRepo.deleteById(id);
 	}
@@ -88,7 +91,8 @@ public class RequestRepositoryImpl implements RequestRepository {
 		final FailedProcessing failedProcessing = failedProcessingRepo.findById(id);
 		assertNotNull("failed request", failedProcessing, id);
 		assertPredecessorDefined(id, failedProcessing);
-		assertPredecessorTopicDefined(id, failedProcessing);	
+		assertPredecessorTopicDefined(id, failedProcessing);
+		((AbstractMessage) failedProcessing.getPredecessorDto()).increaseControlRetryCounter();
 		kafkaSubmissionClient.resubmit(id, failedProcessing.getPredecessorTopic(), failedProcessing.getPredecessorDto(), status);
 		failedProcessingRepo.deleteById(id);
 	}
@@ -150,6 +154,18 @@ public class RequestRepositoryImpl implements RequestRepository {
 		if (object == null) {
 			throw new IllegalArgumentException(
 					String.format("Could not find %s by id %s", name, id)
+			);
+		}
+	}
+	
+	private static final void assertDtoDefined(final long id, final FailedProcessing failedProcessing) {
+		if (failedProcessing.getDto() == null)
+		{
+			throw new RuntimeException(
+					String.format(
+							"Failed to restart request id %s as it has no message specified (not restartable)", 
+							id
+					)
 			);
 		}
 	}
