@@ -131,7 +131,7 @@ public class GenericConsumer implements MqiListener<CatalogEvent> {
         		ReportingUtils.newFilenameReportingInputFor(event.getProductFamily(), productName),
         		new ReportingMessage("Received CatalogEvent for %s", productName)
         );  
-        if (!isOverLand(event, reporting)) {                   
+        if (isAllowed(event, reporting)) {                   
             final List<String> taskTableNames = taskTableMapper.tasktableFor(event);
             final List<GenericPublicationMessageDto<IpfPreparationJob>> messageDtos = new ArrayList<>(taskTableNames.size());
             
@@ -157,14 +157,17 @@ public class GenericConsumer implements MqiListener<CatalogEvent> {
 	) {
         final CatalogEvent event = mqiMessage.getBody();
         final CatalogEventAdapter eventAdapter = CatalogEventAdapter.of(mqiMessage);	
+        
+        // FIXME reporting of AppDataJob doesn't make sense here any more, needs to be replaced by something
+        // meaningful
+        final int appDataJobId = 0;
 		
-        // FIXME reporting of AppDataJob doesn't make sense here any more
         final Reporting reporting = reportingFactory.newReporting("Dispatch");            
         reporting.begin(
-        		DispatchReportInput.newInstance(0, event.getProductName(), processSettings.getProductType()),
+        		DispatchReportInput.newInstance(appDataJobId, event.getProductName(), processSettings.getProductType()),
         		new ReportingMessage(
         				"Dispatching AppDataJob %s for %s %s", 
-        				0, 
+        				appDataJobId, 
         				processSettings.getProductType(), 
         				event.getProductName()
         		)
@@ -191,7 +194,7 @@ public class GenericConsumer implements MqiListener<CatalogEvent> {
 		reporting.end(
 				new ReportingMessage(
 						"AppDataJob %s for %s %s dispatched", 
-						0, 
+						appDataJobId, 
 						processSettings.getProductType(), 
 						event.getProductName()
         		)
@@ -199,7 +202,7 @@ public class GenericConsumer implements MqiListener<CatalogEvent> {
 		return messageDto;
 	}	
 
-	private final boolean isOverLand(final CatalogEvent event, final ReportingFactory reporting) throws Exception {
+	private final boolean isAllowed(final CatalogEvent event, final ReportingFactory reporting) throws Exception {
         final String productName = event.getProductName();
         final ProductFamily family = event.getProductFamily();
 		
@@ -218,7 +221,7 @@ public class GenericConsumer implements MqiListener<CatalogEvent> {
 							new ReportingMessage("Product %s is not over sea", productName)
 					);
 					LOGGER.warn("Skipping job generation for product {} because it is not over sea", productName);
-			        return true;
+			        return false;
 			    }
 				else {
 					seaReport.end(
@@ -231,24 +234,6 @@ public class GenericConsumer implements MqiListener<CatalogEvent> {
 			seaReport.error(new ReportingMessage("SeaCoverage check failed: %s", LogUtils.toString(e)));
 			throw e;			
 		}        
-        return false;
+        return true;
 	}    
-	
-
-//	private final AppDataJobProduct newProductFor(final GenericMessageDto<CatalogEvent> mqiMessage) {
-//		final CatalogEvent event = mqiMessage.getBody();
-//        final AppDataJobProduct productDto = new AppDataJobProduct();
-//        
-//		final CatalogEventAdapter eventAdapter = CatalogEventAdapter.of(mqiMessage);		
-//		productDto.getMetadata().put("productName", event.getProductName());
-//		productDto.getMetadata().put("productType", event.getProductType());
-//		productDto.getMetadata().put("satelliteId", eventAdapter.satelliteId());
-//		productDto.getMetadata().put("missionId", eventAdapter.missionId());
-//		productDto.getMetadata().put("processMode", eventAdapter.processMode());
-//		productDto.getMetadata().put("startTime", eventAdapter.startTime());
-//		productDto.getMetadata().put("stopTime", eventAdapter.stopTime());     
-//		productDto.getMetadata().put("timeliness", eventAdapter.timeliness());
-//		productDto.getMetadata().put("acquistion", eventAdapter.swathType());
-//        return productDto;
-//	}
 }
