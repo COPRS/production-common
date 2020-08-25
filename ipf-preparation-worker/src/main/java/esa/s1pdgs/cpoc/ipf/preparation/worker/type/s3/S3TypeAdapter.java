@@ -86,6 +86,7 @@ public class S3TypeAdapter extends AbstractProductTypeAdapter implements Product
 		for (TaskTableInputAlternative alternative : alternatives) {
 			try {
 				if (settings.getMarginProductTypes().contains(alternative.getFileType())) {
+					LOGGER.debug("Use additional logic 'MultipleProductCoverSearch' for product type {}", alternative.getFileType());
 					MultipleProductCoverSearch mpcSearch = new MultipleProductCoverSearch(tasktableAdapter,
 							elementMapper, metadataClient, workerSettings);
 					tasks = mpcSearch.updateTaskInputsByAlternative(tasks, alternative, returnValue);
@@ -109,10 +110,8 @@ public class S3TypeAdapter extends AbstractProductTypeAdapter implements Product
 		LOGGER.debug("Customize Job order for S3...");
 		
 		for (JobOrderProc proc : jobOrder.getProcs()) {
-			LOGGER.debug("Loop over inputs of proc {}", proc.getTaskName());
 			for (int i = 0; i < proc.getInputs().size(); i++) {
 				JobOrderInput input = proc.getInputs().get(i);
-				LOGGER.debug("Check if input {} needs to be checked for duplicates", input.getFileType());
 				if (settings.getMarginProductTypes().contains(input.getFileType())) {
 					JobOrderInput newInput = DuplicateProductFilter.filter(input);
 					LOGGER.debug("Update JobOrderInput {}. New Input: {}", input.getFileType(), newInput.toString());
