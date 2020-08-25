@@ -106,6 +106,8 @@ public class S3TypeAdapter extends AbstractProductTypeAdapter implements Product
 
 	@Override
 	public void customJobOrder(AppDataJob job, JobOrder jobOrder) {
+		LOGGER.debug("Customize Job order for S3...");
+		
 		for (JobOrderProc proc : jobOrder.getProcs()) {
 			for (int i = 0; i < proc.getInputs().size(); i++) {
 				JobOrderInput input = proc.getInputs().get(i);
