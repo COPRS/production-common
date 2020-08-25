@@ -23,7 +23,8 @@ public class CompressionEvent extends AbstractMessage {
 
 	@Override
 	public int hashCode() {
-		return Objects.hash(creationDate, hostname, keyObjectStorage, productFamily, uid, compressionDirection);
+		return Objects.hash(creationDate, hostname, keyObjectStorage, productFamily, uid, compressionDirection,
+				allowedControlActions, controlDemandType, controlDebug, controlRetryCounter);
 	}
 
 	@Override
@@ -43,7 +44,11 @@ public class CompressionEvent extends AbstractMessage {
 				&& Objects.equals(keyObjectStorage, other.keyObjectStorage) 
 				&& Objects.equals(uid, other.uid)
 				&& productFamily == other.productFamily
-		        && compressionDirection == other.compressionDirection;
+		        && compressionDirection == other.compressionDirection
+		        && Objects.equals(allowedControlActions, other.getAllowedControlActions())
+		        && controlDemandType == other.controlDemandType
+		        && controlDebug == other.controlDebug
+		        && controlRetryCounter == other.controlRetryCounter;
 	}
 
 	@Override

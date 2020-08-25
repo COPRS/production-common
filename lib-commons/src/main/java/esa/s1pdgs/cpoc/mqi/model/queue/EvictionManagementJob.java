@@ -38,7 +38,8 @@ public class EvictionManagementJob extends AbstractMessage {
 
 	@Override
 	public int hashCode() {
-		return Objects.hash(evictionDate, unlimited, creationDate, hostname, keyObjectStorage, productFamily, uid);
+		return Objects.hash(evictionDate, unlimited, creationDate, hostname, keyObjectStorage, productFamily, uid,
+				allowedControlActions, controlDemandType, controlDebug, controlRetryCounter);
 	}
 
 	@Override
@@ -51,7 +52,11 @@ public class EvictionManagementJob extends AbstractMessage {
 		return Objects.equals(evictionDate, other.evictionDate) && Objects.equals(creationDate, other.creationDate)
 				&& Objects.equals(hostname, other.hostname) && Objects.equals(keyObjectStorage, other.keyObjectStorage)
 				&& Objects.equals(uid, other.uid) && productFamily == other.productFamily
-				&& unlimited == other.unlimited;
+				&& unlimited == other.unlimited
+				&& Objects.equals(allowedControlActions, other.getAllowedControlActions())
+		        && controlDemandType == other.controlDemandType
+		        && controlDebug == other.controlDebug
+		        && controlRetryCounter == other.controlRetryCounter;
 	}
 
 	@Override

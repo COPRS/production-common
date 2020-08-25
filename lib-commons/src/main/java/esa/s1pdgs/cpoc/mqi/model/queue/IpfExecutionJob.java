@@ -237,7 +237,8 @@ public class IpfExecutionJob extends AbstractMessage {
 	@Override
 	public int hashCode() {
 		return Objects.hash(creationDate, hostname, inputs, jobOrder, timeliness, keyObjectStorage, outputs, pools,
-				productFamily, productProcessMode, workDirectory,  uid, ipfPreparationJobMessage);
+				productFamily, productProcessMode, workDirectory,  uid, ipfPreparationJobMessage,
+				allowedControlActions, controlDemandType, controlDebug, controlRetryCounter);
 	}
 
 	@Override
@@ -264,7 +265,11 @@ public class IpfExecutionJob extends AbstractMessage {
 				&& Objects.equals(productProcessMode, other.productProcessMode)
 				&& Objects.equals(workDirectory, other.workDirectory)
 				&& Objects.equals(uid, other.uid)
-				&& Objects.equals(ipfPreparationJobMessage, other.ipfPreparationJobMessage);
+				&& Objects.equals(ipfPreparationJobMessage, other.ipfPreparationJobMessage)
+				&& Objects.equals(allowedControlActions, other.getAllowedControlActions())
+		        && controlDemandType == other.controlDemandType
+		        && controlDebug == other.controlDebug
+		        && controlRetryCounter == other.controlRetryCounter;
 	}
 
 	@Override
