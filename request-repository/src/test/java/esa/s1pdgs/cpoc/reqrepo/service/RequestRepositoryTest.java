@@ -272,7 +272,7 @@ public class RequestRepositoryTest {
 	private final FailedProcessing newFailedProcessing(final long id, final AbstractMessage mess) {
 		final FailedProcessing fpDto = new FailedProcessing();
 		fpDto.setId(123);
-		fpDto.setDto(Collections.singletonList(mess));
+		fpDto.setDto(mess);
 		fpDto.setTopic("myTopic");
 		return fpDto;
 	}
