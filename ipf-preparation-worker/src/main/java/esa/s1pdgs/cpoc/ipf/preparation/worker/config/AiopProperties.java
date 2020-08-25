@@ -17,6 +17,8 @@ public class AiopProperties {
 	private Map<String,String> timeoutSec;
 	private Map<String,String> descramble;
 	private Map<String,String> rsEncode;
+	private Map<String,String> nrtOutputPath;
+	private Map<String,String> ptOutputPath;
 	private long minimalWaitingTimeSec;
 	private boolean disableTimeout;
 	
@@ -117,7 +119,35 @@ public class AiopProperties {
 	public void setRsEncode(Map<String, String> rsEncode) {
 		this.rsEncode = rsEncode;
 	}
+	
+	/**
+	 * @return the nrtOutputPath
+	 */
+	public Map<String, String> getNrtOutputPath() {
+		return nrtOutputPath;
+	}
 
+	/**
+	 * @param nrtOutputPath the nrtOutputPath to set
+	 */
+	public void setNrtOutputPath(Map<String, String> nrtOutputPath) {
+		this.nrtOutputPath = nrtOutputPath;
+	}
+	
+	/**
+	 * @return the ptOutputPath
+	 */
+	public Map<String, String> getPtOutputPath() {
+		return ptOutputPath;
+	}
+
+	/**
+	 * @param ptOutputPath the ptOutputPath to set
+	 */
+	public void setPtOutputPath(Map<String, String> ptOutputPath) {
+		this.ptOutputPath = ptOutputPath;
+	}
+	
 	public long getMinimalWaitingTimeSec() {
 		return minimalWaitingTimeSec;
 	}
