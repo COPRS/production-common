@@ -56,7 +56,7 @@ public class IpfPreparationJob extends AbstractMessage {
 	@Override
 	public int hashCode() {
 		return Objects.hash(appDataJob, creationDate, hostname, ipfName, ipfVersion, keyObjectStorage, preselectednputs,
-				productFamily, uid);
+				productFamily, uid, allowedControlActions, controlDemandType, controlDebug, controlRetryCounter);
 	}
 
 	@Override
@@ -79,7 +79,11 @@ public class IpfPreparationJob extends AbstractMessage {
 				&& Objects.equals(keyObjectStorage, other.keyObjectStorage)
 				&& Objects.equals(preselectednputs, other.preselectednputs) 
 				&& Objects.equals(uid, other.uid)
-				&& productFamily == other.productFamily;
+				&& productFamily == other.productFamily
+				&& Objects.equals(allowedControlActions, other.getAllowedControlActions())
+		        && controlDemandType == other.controlDemandType
+		        && controlDebug == other.controlDebug
+		        && controlRetryCounter == other.controlRetryCounter;
 	}
 
 	@Override

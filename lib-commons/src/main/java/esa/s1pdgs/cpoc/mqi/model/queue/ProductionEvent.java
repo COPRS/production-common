@@ -80,7 +80,8 @@ public class ProductionEvent extends AbstractMessage {
 
 	@Override
 	public int hashCode() {
-		return Objects.hash(creationDate, hostname, keyObjectStorage, mode, timeliness, oqcFlag, productFamily, productName, uid);
+		return Objects.hash(creationDate, hostname, keyObjectStorage, mode, timeliness, oqcFlag, productFamily, productName, uid,
+				allowedControlActions, controlDemandType, controlDebug, controlRetryCounter);
 	}
 
 	@Override
@@ -103,7 +104,11 @@ public class ProductionEvent extends AbstractMessage {
 				&& productFamily == other.productFamily
 				&& Objects.equals(timeliness, other.timeliness)
 				&& Objects.equals(uid, other.uid)
-				&& Objects.equals(productName, other.productName);
+				&& Objects.equals(productName, other.productName)
+				&& Objects.equals(allowedControlActions, other.getAllowedControlActions())
+		        && controlDemandType == other.controlDemandType
+		        && controlDebug == other.controlDebug
+		        && controlRetryCounter == other.controlRetryCounter;
 	}
 
 	@Override

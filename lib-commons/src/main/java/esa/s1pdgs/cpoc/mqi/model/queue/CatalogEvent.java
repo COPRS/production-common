@@ -43,7 +43,8 @@ public class CatalogEvent extends AbstractMessage {
 	@Override
 	public int hashCode() {
 		return Objects.hash(creationDate, hostname, productName, productType,
-				keyObjectStorage, metadata, productFamily, uid);
+				keyObjectStorage, metadata, productFamily, uid,
+				allowedControlActions, controlDemandType, controlDebug, controlRetryCounter);
 	}
 
 	@Override
@@ -65,7 +66,11 @@ public class CatalogEvent extends AbstractMessage {
 				&& Objects.equals(metadata, other.metadata)
 				&& Objects.equals(keyObjectStorage, other.keyObjectStorage)
 				&& Objects.equals(uid, other.uid)
-				&& productFamily == other.productFamily;
+				&& productFamily == other.productFamily
+				&& Objects.equals(allowedControlActions, other.getAllowedControlActions())
+		        && controlDemandType == other.controlDemandType
+		        && controlDebug == other.controlDebug
+		        && controlRetryCounter == other.controlRetryCounter;
 	}
 
 	@Override

@@ -104,8 +104,8 @@ public class IngestionEvent extends AbstractMessage {
 				relativePath, 
 				uid,
 				productSizeByte,
-				stationName
-		);
+				stationName,
+				allowedControlActions, controlDemandType, controlDebug, controlRetryCounter);
 	}
 
 	@Override
@@ -130,7 +130,11 @@ public class IngestionEvent extends AbstractMessage {
 				&& Objects.equals(timeliness, other.timeliness)
 				&& Objects.equals(uid, other.uid)
 				&& productSizeByte == other.productSizeByte
-				&& Objects.equals(relativePath, other.relativePath);
+				&& Objects.equals(relativePath, other.relativePath)
+				&& Objects.equals(allowedControlActions, other.getAllowedControlActions())
+		        && controlDemandType == other.controlDemandType
+		        && controlDebug == other.controlDebug
+		        && controlRetryCounter == other.controlRetryCounter;
 	}
 	
 	

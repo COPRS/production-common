@@ -119,7 +119,8 @@ public class IngestionJob extends AbstractMessage {
 	@Override
 	public int hashCode() {
 		return Objects.hash(creationDate, hostname, keyObjectStorage, pickupBaseURL, productFamily,
-				relativePath, productName, uid, productSizeByte, stationName, mode, timeliness);
+				relativePath, productName, uid, productSizeByte, stationName, mode, timeliness,
+				allowedControlActions, controlDemandType, controlDebug, controlRetryCounter);
 	}
 
 	@Override
@@ -145,7 +146,11 @@ public class IngestionJob extends AbstractMessage {
 				&& Objects.equals(mode, other.mode)
 				&& Objects.equals(timeliness, other.timeliness)
 				&& productSizeByte == other.productSizeByte 
-				&& Objects.equals(productName, other.productName);
+				&& Objects.equals(productName, other.productName)
+				&& Objects.equals(allowedControlActions, other.getAllowedControlActions())
+		        && controlDemandType == other.controlDemandType
+		        && controlDebug == other.controlDebug
+		        && controlRetryCounter == other.controlRetryCounter;
 	}
 
 	@Override

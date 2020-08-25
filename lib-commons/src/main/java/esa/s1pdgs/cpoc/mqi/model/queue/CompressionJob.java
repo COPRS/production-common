@@ -58,7 +58,8 @@ public class CompressionJob extends AbstractMessage {
 	@Override
 	public int hashCode() {
 		return Objects.hash(compressionDirection, creationDate, hostname, keyObjectStorage, outputKeyObjectStorage,
-				outputProductFamily, productFamily, uid);
+				outputProductFamily, productFamily, uid,
+				allowedControlActions, controlDemandType, controlDebug, controlRetryCounter);
 	}
 
 	@Override
@@ -80,7 +81,11 @@ public class CompressionJob extends AbstractMessage {
 				&& Objects.equals(outputKeyObjectStorage, other.outputKeyObjectStorage)
 				&& Objects.equals(uid, other.uid)
 				&& outputProductFamily == other.outputProductFamily 
-				&& productFamily == other.productFamily;
+				&& productFamily == other.productFamily
+				&& Objects.equals(allowedControlActions, other.getAllowedControlActions())
+		        && controlDemandType == other.controlDemandType
+		        && controlDebug == other.controlDebug
+		        && controlRetryCounter == other.controlRetryCounter;
 	}
 
 	@Override
