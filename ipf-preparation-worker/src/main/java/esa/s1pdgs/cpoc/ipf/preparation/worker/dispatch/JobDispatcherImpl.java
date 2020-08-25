@@ -105,13 +105,13 @@ public class JobDispatcherImpl implements JobDispatcher {
 	private final AppDataJob toAppDataJob(final IpfPreparationJob prepJob) {
         final AppDataJob job = new AppDataJob();
         job.setLevel(prepJob.getLevel());
-        job.setPod(prepJob.getPod());
+        job.setPod(prepJob.getHostname());
         job.getMessages().add(prepJob.getEventMessage());
         job.setProduct(newProductFor(prepJob.getEventMessage())); 
     	job.setTaskTableName(prepJob.getTaskTableName());     
     	job.setStartTime(prepJob.getStartTime());
     	job.setStopTime(prepJob.getStopTime());
-    	job.setProductName(prepJob.getProductName());     
+    	job.setProductName(prepJob.getKeyObjectStorage());     
     	return job;    	
 	}
 	

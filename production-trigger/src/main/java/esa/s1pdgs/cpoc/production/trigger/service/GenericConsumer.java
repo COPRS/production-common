@@ -174,12 +174,11 @@ public class GenericConsumer implements MqiListener<CatalogEvent> {
         );     
     	final IpfPreparationJob job = new IpfPreparationJob();    	    	
         job.setLevel(processSettings.getLevel());
-        job.setPod(processSettings.getHostname());
+        job.setHostname(processSettings.getHostname());
         job.setEventMessage(mqiMessage);     
     	job.setTaskTableName(taskTableName);    	
     	job.setStartTime(eventAdapter.startTime());
     	job.setStopTime(eventAdapter.stopTime());
-    	job.setProductName(event.getProductName()); 
     	job.setProductFamily(event.getProductFamily());
     	job.setKeyObjectStorage(event.getProductName());
     	job.setUid(reporting.getUid());

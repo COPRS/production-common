@@ -9,12 +9,10 @@ import esa.s1pdgs.cpoc.mqi.model.rest.GenericMessageDto;
 
 public class IpfPreparationJob extends AbstractMessage {	
     private ApplicationLevel level;
-    private String pod;
     private GenericMessageDto<CatalogEvent> eventMessage;
     private String taskTableName;
     private String startTime;    
     private String stopTime;    
-    private String productName;
 
     public IpfPreparationJob() {
 		allowedControlActions = Collections.singletonList(ControlAction.RESTART);
@@ -26,14 +24,6 @@ public class IpfPreparationJob extends AbstractMessage {
 
 	public void setLevel(final ApplicationLevel level) {
 		this.level = level;
-	}
-
-	public String getPod() {
-		return pod;
-	}
-
-	public void setPod(final String pod) {
-		this.pod = pod;
 	}
 
 	public GenericMessageDto<CatalogEvent> getEventMessage() {
@@ -68,13 +58,6 @@ public class IpfPreparationJob extends AbstractMessage {
 		this.stopTime = stopTime;
 	}
 
-	public String getProductName() {
-		return productName;
-	}
-
-	public void setProductName(final String productName) {
-		this.productName = productName;
-	}
 
 	@Override
 	public int hashCode() {
@@ -85,12 +68,10 @@ public class IpfPreparationJob extends AbstractMessage {
 				productFamily, 
 				uid,
 			    level,
-			    pod,
 			    eventMessage,
 			    taskTableName,
 			    startTime,  
 			    stopTime,   
-			    productName,
 			    allowedControlActions,
 			    controlDemandType,
 			    controlRetryCounter,
@@ -114,8 +95,7 @@ public class IpfPreparationJob extends AbstractMessage {
 				&& Objects.equals(hostname, other.hostname)
 				&& Objects.equals(keyObjectStorage, other.keyObjectStorage)
 				&& Objects.equals(uid, other.uid)
-			    && Objects.equals(level,other.level)
-			    && Objects.equals(pod, other.pod)			    
+			    && Objects.equals(level,other.level)	    
 			    && Objects.equals(allowedControlActions, other.allowedControlActions)
 			    && Objects.equals(controlDemandType, other.controlDemandType)
 			    && Objects.equals(controlRetryCounter, other.controlRetryCounter)
@@ -123,15 +103,14 @@ public class IpfPreparationJob extends AbstractMessage {
 			    && Objects.equals(eventMessage, other.eventMessage)
 			    && Objects.equals(taskTableName,other.taskTableName)
 			    && Objects.equals(startTime, other.startTime)
-			    && Objects.equals(stopTime, other.stopTime) 
-			    && Objects.equals(productName, other.productName)								
+			    && Objects.equals(stopTime, other.stopTime) 							
 				&& productFamily == other.productFamily;
 	}
 
 	@Override
 	public String toString() {
-		return "IpfPreparationJob [level=" + level + ", pod=" + pod + ", eventMessage=" + eventMessage + ", taskTableName="
-				+ taskTableName + ", startTime=" + startTime + ", stopTime=" + stopTime + ", productName=" + productName
+		return "IpfPreparationJob [level=" + level + ", eventMessage=" + eventMessage + ", taskTableName="
+				+ taskTableName + ", startTime=" + startTime + ", stopTime=" + stopTime 
 				+ ", productFamily=" + productFamily + ", keyObjectStorage=" + keyObjectStorage + ", uid=" + uid
 				+ ", creationDate=" + creationDate + ", hostname=" + hostname + ", allowedControlActions="
 				+ allowedControlActions + ", controlDemandType=" + controlDemandType + ", controlRetryCounter="
