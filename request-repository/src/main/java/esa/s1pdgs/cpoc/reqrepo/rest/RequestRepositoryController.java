@@ -128,6 +128,29 @@ public class RequestRepositoryController {
 	}
 	
 	/**
+	 * Reevaluates the failed processing with Id
+	 * 
+	 * @param apiKey token agreed by server and client for authentication
+	 * @param id     failed processing Id
+	 * @return
+	 */
+	@RequestMapping(method = RequestMethod.POST, path = "failedProcessings/{id}/reevaluate")
+	public ApiResponse reevaluateFailedProcessing(
+			@RequestHeader("ApiKey") final String apiKey,
+			@PathVariable("id") final String id
+	) {
+		LOGGER.info("reevaluate the failed processing with id {}", id);
+		assertValidApiKey(apiKey);				
+		final long idInt = parseId(id);
+		try {
+			requestRepository.reevaluateAndDeleteFailedProcessing(idInt);
+		} catch (IllegalArgumentException e) {
+			assertElementFound("failed processing", null, String.format("%s: %s", id, e));
+		}
+		return new ApiResponse("FailedProcessing", "reevaluate", Collections.singletonList(idInt), Collections.emptyList());
+	}
+	
+	/**
 	 * Deletes the failed processing with Id
 	 * 
 	 * @param apiKey token agreed by server and client for authentication
@@ -217,6 +240,29 @@ public class RequestRepositoryController {
 			}
 		}
 		return new ApiResponse("FailedProcessing", "resubmit", success, failed);
+	}
+	
+	@RequestMapping(method = RequestMethod.POST,  path = "failedProcessings/reevaluate")
+	public ApiResponse reevaluateFailedProcessings(
+			@RequestHeader("ApiKey") final String apiKey,
+			@RequestBody final List<String> ids
+	) {
+		LOGGER.info("reevaluate the failed processings with id {}", ids);
+		assertValidApiKey(apiKey);
+		
+		final List<Long> success = new ArrayList<>();
+		final List<Long> failed = new ArrayList<>();
+		
+		for (final String id : ids) {
+			final long idInt = parseId(id);
+			try {
+				requestRepository.reevaluateAndDeleteFailedProcessing(idInt);
+				success.add(idInt);
+			} catch (IllegalArgumentException e) {
+				failed.add(idInt);
+			}
+		}
+		return new ApiResponse("FailedProcessing", "reevaluate", success, failed);
 	}
 	
 	@RequestMapping(method = RequestMethod.GET, path = "processingTypes")
