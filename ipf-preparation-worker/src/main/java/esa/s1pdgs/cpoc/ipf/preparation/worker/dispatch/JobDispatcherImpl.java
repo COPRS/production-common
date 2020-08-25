@@ -9,6 +9,7 @@ import java.util.UUID;
 import esa.s1pdgs.cpoc.appcatalog.AppDataJob;
 import esa.s1pdgs.cpoc.appcatalog.AppDataJobGeneration;
 import esa.s1pdgs.cpoc.appcatalog.AppDataJobGenerationState;
+import esa.s1pdgs.cpoc.appcatalog.AppDataJobProduct;
 import esa.s1pdgs.cpoc.appcatalog.AppDataJobState;
 import esa.s1pdgs.cpoc.common.ProductCategory;
 import esa.s1pdgs.cpoc.common.errors.AbstractCodedException;
@@ -56,7 +57,8 @@ public class JobDispatcherImpl implements JobDispatcher {
 	@Override
 	public final MqiMessageEventHandler dispatch(final GenericMessageDto<IpfPreparationJob> message) throws Exception {
     	final IpfPreparationJob prepJob = message.getBody();
-    	final AppDataJob jobFromMessage = prepJob.getAppDataJob();    	
+    	
+    	final AppDataJob jobFromMessage = toAppDataJob(prepJob);
         
         final Reporting reporting = ReportingUtils.newReportingBuilder()
         		.predecessor(prepJob.getUid())
@@ -99,6 +101,36 @@ public class JobDispatcherImpl implements JobDispatcher {
 				})
 				.newResult();
     }
+
+	private final AppDataJob toAppDataJob(final IpfPreparationJob prepJob) {
+        final AppDataJob job = new AppDataJob();
+        job.setLevel(prepJob.getLevel());
+        job.setPod(prepJob.getPod());
+        job.getMessages().add(prepJob.getEventMessage());
+        job.setProduct(newProductFor(prepJob.getEventMessage())); 
+    	job.setTaskTableName(prepJob.getTaskTableName());     
+    	job.setStartTime(prepJob.getStartTime());
+    	job.setStopTime(prepJob.getStopTime());
+    	job.setProductName(prepJob.getProductName());     
+    	return job;    	
+	}
+	
+	private final AppDataJobProduct newProductFor(final GenericMessageDto<CatalogEvent> mqiMessage) {
+		final CatalogEvent event = mqiMessage.getBody();
+	    final AppDataJobProduct productDto = new AppDataJobProduct();
+	    
+		final CatalogEventAdapter eventAdapter = CatalogEventAdapter.of(mqiMessage);		
+		productDto.getMetadata().put("productName", event.getProductName());
+		productDto.getMetadata().put("productType", event.getProductType());
+		productDto.getMetadata().put("satelliteId", eventAdapter.satelliteId());
+		productDto.getMetadata().put("missionId", eventAdapter.missionId());
+		productDto.getMetadata().put("processMode", eventAdapter.processMode());
+		productDto.getMetadata().put("startTime", eventAdapter.startTime());
+		productDto.getMetadata().put("stopTime", eventAdapter.stopTime());     
+		productDto.getMetadata().put("timeliness", eventAdapter.timeliness());
+		productDto.getMetadata().put("acquistion", eventAdapter.swathType());
+	    return productDto;
+	}
 
 	// This needs to be synchronized to avoid duplicate jobs
 	private final synchronized void handleJob(
