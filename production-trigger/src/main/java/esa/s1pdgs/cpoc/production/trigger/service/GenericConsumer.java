@@ -13,9 +13,6 @@ import javax.annotation.PostConstruct;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import esa.s1pdgs.cpoc.appcatalog.AppDataJob;
-import esa.s1pdgs.cpoc.appcatalog.AppDataJobProduct;
-import esa.s1pdgs.cpoc.appcatalog.util.AppDataJobProductAdapter;
 import esa.s1pdgs.cpoc.appstatus.AppStatus;
 import esa.s1pdgs.cpoc.common.ProductCategory;
 import esa.s1pdgs.cpoc.common.ProductFamily;
@@ -135,28 +132,13 @@ public class GenericConsumer implements MqiListener<CatalogEvent> {
         		new ReportingMessage("Received CatalogEvent for %s", productName)
         );  
         if (!isOverLand(event, reporting)) {                   
-            final AppDataJobProduct product = newProductFor(mqiMessage);           
-            final AppDataJobProductAdapter productAdapter = new AppDataJobProductAdapter(product);
-            
-            final List<String> taskTableNames = taskTableMapper.tasktableFor(product);
+            final List<String> taskTableNames = taskTableMapper.tasktableFor(event);
             final List<GenericPublicationMessageDto<IpfPreparationJob>> messageDtos = new ArrayList<>(taskTableNames.size());
             
             for (final String taskTableName: taskTableNames)
             {
-                final AppDataJob job = new AppDataJob();
-                job.setLevel(processSettings.getLevel());
-                job.setPod(processSettings.getHostname());
-                job.getMessages().add(mqiMessage);
-                job.setProduct(product);       
-                
-            	LOGGER.debug("Tasktable for {} is {}", productAdapter.getProductName(), taskTableName); 
-          
-            	job.setTaskTableName(taskTableName);     
-            	job.setStartTime(productAdapter.getStartTime());
-            	job.setStopTime(productAdapter.getStopTime());
-            	job.setProductName(productName);         
-            	
-            	messageDtos.add(dispatch(mqiMessage, job, productName, reporting));
+            	LOGGER.debug("Tasktable for {} is {}", productName, taskTableName);
+            	messageDtos.add(dispatch(mqiMessage,reporting, taskTableName));
             }               
             LOGGER.info("Dispatching product {}", productName);
             return messageDtos;          
@@ -170,27 +152,33 @@ public class GenericConsumer implements MqiListener<CatalogEvent> {
 	
 	private final GenericPublicationMessageDto<IpfPreparationJob> dispatch(
 			final GenericMessageDto<CatalogEvent> mqiMessage,
-			final AppDataJob appDataJob,
-			final String productName,
-			final ReportingFactory reportingFactory
+			final ReportingFactory reportingFactory,
+    		final String taskTableName
 	) {
         final CatalogEvent event = mqiMessage.getBody();
+        final CatalogEventAdapter eventAdapter = CatalogEventAdapter.of(mqiMessage);	
 		
-        final Reporting reporting = reportingFactory.newReporting("Dispatch");
-            
+        // FIXME reporting of AppDataJob doesn't make sense here any more
+        final Reporting reporting = reportingFactory.newReporting("Dispatch");            
         reporting.begin(
-        		DispatchReportInput.newInstance(appDataJob.getId(), productName, processSettings.getProductType()),
+        		DispatchReportInput.newInstance(0, event.getProductName(), processSettings.getProductType()),
         		new ReportingMessage(
         				"Dispatching AppDataJob %s for %s %s", 
-        				appDataJob.getId(), 
+        				0, 
         				processSettings.getProductType(), 
-        				productName
+        				event.getProductName()
         		)
         );     
-    	final IpfPreparationJob job = new IpfPreparationJob();
+    	final IpfPreparationJob job = new IpfPreparationJob();    	    	
+        job.setLevel(processSettings.getLevel());
+        job.setPod(processSettings.getHostname());
+        job.setEventMessage(mqiMessage);     
+    	job.setTaskTableName(taskTableName);    	
+    	job.setStartTime(eventAdapter.startTime());
+    	job.setStopTime(eventAdapter.stopTime());
+    	job.setProductName(event.getProductName()); 
     	job.setProductFamily(event.getProductFamily());
     	job.setKeyObjectStorage(event.getProductName());
-    	job.setAppDataJob(appDataJob);
     	job.setUid(reporting.getUid());
     	
     	final GenericPublicationMessageDto<IpfPreparationJob> messageDto = new GenericPublicationMessageDto<IpfPreparationJob>(
@@ -203,9 +191,9 @@ public class GenericConsumer implements MqiListener<CatalogEvent> {
 		reporting.end(
 				new ReportingMessage(
 						"AppDataJob %s for %s %s dispatched", 
-						appDataJob.getId(), 
+						0, 
 						processSettings.getProductType(), 
-						productName
+						event.getProductName()
         		)
 		);
 		return messageDto;
@@ -247,20 +235,20 @@ public class GenericConsumer implements MqiListener<CatalogEvent> {
 	}    
 	
 
-	private final AppDataJobProduct newProductFor(final GenericMessageDto<CatalogEvent> mqiMessage) {
-		final CatalogEvent event = mqiMessage.getBody();
-        final AppDataJobProduct productDto = new AppDataJobProduct();
-        
-		final CatalogEventAdapter eventAdapter = CatalogEventAdapter.of(mqiMessage);		
-		productDto.getMetadata().put("productName", event.getProductName());
-		productDto.getMetadata().put("productType", event.getProductType());
-		productDto.getMetadata().put("satelliteId", eventAdapter.satelliteId());
-		productDto.getMetadata().put("missionId", eventAdapter.missionId());
-		productDto.getMetadata().put("processMode", eventAdapter.processMode());
-		productDto.getMetadata().put("startTime", eventAdapter.startTime());
-		productDto.getMetadata().put("stopTime", eventAdapter.stopTime());     
-		productDto.getMetadata().put("timeliness", eventAdapter.timeliness());
-		productDto.getMetadata().put("acquistion", eventAdapter.swathType());
-        return productDto;
-	}
+//	private final AppDataJobProduct newProductFor(final GenericMessageDto<CatalogEvent> mqiMessage) {
+//		final CatalogEvent event = mqiMessage.getBody();
+//        final AppDataJobProduct productDto = new AppDataJobProduct();
+//        
+//		final CatalogEventAdapter eventAdapter = CatalogEventAdapter.of(mqiMessage);		
+//		productDto.getMetadata().put("productName", event.getProductName());
+//		productDto.getMetadata().put("productType", event.getProductType());
+//		productDto.getMetadata().put("satelliteId", eventAdapter.satelliteId());
+//		productDto.getMetadata().put("missionId", eventAdapter.missionId());
+//		productDto.getMetadata().put("processMode", eventAdapter.processMode());
+//		productDto.getMetadata().put("startTime", eventAdapter.startTime());
+//		productDto.getMetadata().put("stopTime", eventAdapter.stopTime());     
+//		productDto.getMetadata().put("timeliness", eventAdapter.timeliness());
+//		productDto.getMetadata().put("acquistion", eventAdapter.swathType());
+//        return productDto;
+//	}
 }

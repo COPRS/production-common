@@ -15,6 +15,8 @@ import org.apache.logging.log4j.Logger;
 import org.springframework.util.Assert;
 
 import esa.s1pdgs.cpoc.appcatalog.AppDataJobProduct;
+import esa.s1pdgs.cpoc.mqi.model.queue.CatalogEvent;
+import esa.s1pdgs.cpoc.mqi.model.queue.util.CatalogEventAdapter;
 import esa.s1pdgs.cpoc.xml.XmlConverter;
 import esa.s1pdgs.cpoc.xml.model.tasktable.routing.LevelProductsRoute;
 import esa.s1pdgs.cpoc.xml.model.tasktable.routing.LevelProductsRouting;
@@ -93,11 +95,11 @@ public class RoutingBasedTasktableMapper implements TasktableMapper {
 	}
 
 	@Override
-	public final List<String> tasktableFor(final AppDataJobProduct product) {
-        final String key = keyFunction.apply(product);
+	public final List<String> tasktableFor(final CatalogEvent product) {
+        final String key = keyFunction.apply(newProductFor(product));
 
         LOGGER.debug("Searching tasktable for {}", key);
-        List<String> taskTableHolder = new ArrayList<>();
+        final List<String> taskTableHolder = new ArrayList<>();
         
         for (final Map.Entry<Pattern, String> entry : routingMap.entrySet()) {
 			if (entry.getKey().matcher(key).matches()) {	
@@ -119,5 +121,22 @@ public class RoutingBasedTasktableMapper implements TasktableMapper {
         }
         
         return taskTableHolder;
+	}
+	
+	// FIXME check if filtering can be applied directly on metadata of catalog event to avoid this mapping
+	private final AppDataJobProduct newProductFor(final CatalogEvent event) {
+        final AppDataJobProduct productDto = new AppDataJobProduct();
+        
+		final CatalogEventAdapter eventAdapter = new CatalogEventAdapter(event);		
+		productDto.getMetadata().put("productName", event.getProductName());
+		productDto.getMetadata().put("productType", event.getProductType());
+		productDto.getMetadata().put("satelliteId", eventAdapter.satelliteId());
+		productDto.getMetadata().put("missionId", eventAdapter.missionId());
+		productDto.getMetadata().put("processMode", eventAdapter.processMode());
+		productDto.getMetadata().put("startTime", eventAdapter.startTime());
+		productDto.getMetadata().put("stopTime", eventAdapter.stopTime());     
+		productDto.getMetadata().put("timeliness", eventAdapter.timeliness());
+		productDto.getMetadata().put("acquistion", eventAdapter.swathType());
+        return productDto;
 	}
 }
