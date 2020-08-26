@@ -46,9 +46,11 @@ public class SardineXbipClientFactory implements XbipClientFactory {
 
 	@Override
 	public XbipClient newXbipClient(final URI serverUrl) {	
+		final XbipHostConfiguration config = hostConfigFor(serverUrl.getHost());
 		return new SardineXbipClient(				
-				newSardineFor(hostConfigFor(serverUrl.getHost())), 
-				serverUrl
+				newSardineFor(config), 
+				serverUrl,
+				config.getProgrammaticRecursion()
 		);
 	}
 	

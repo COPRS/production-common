@@ -17,6 +17,7 @@ public class XbipClientConfigurationProperties {
 		private String user;
 		private String pass;
 		private boolean trustSelfSignedCertificate = false;
+		private boolean programmaticRecursion = false;
 		private int connectTimeoutSec = 10;
 		
 		public String getServerName() {
@@ -58,12 +59,21 @@ public class XbipClientConfigurationProperties {
 		public void setConnectTimeoutSec(final int connectTimeoutSec) {
 			this.connectTimeoutSec = connectTimeoutSec;
 		}
+		
+		public boolean getProgrammaticRecursion() {
+			return programmaticRecursion;
+		}
+
+		public void setProgrammaticRecursion(final boolean programmaticRecursion) {
+			this.programmaticRecursion = programmaticRecursion;
+		}
 
 		@Override
 		public String toString() {
 			return "XbipHostConfiguration [serverName=" + serverName + ", user=" + user + 
 					", pass=****, trustSelfSignedCertificate=" + trustSelfSignedCertificate + 
-					", connectTimeoutSec=" + connectTimeoutSec +"]";
+					", connectTimeoutSec=" + connectTimeoutSec +", programmaticRecursion=" + 
+					programmaticRecursion + "]";
 		}
 		
 	}

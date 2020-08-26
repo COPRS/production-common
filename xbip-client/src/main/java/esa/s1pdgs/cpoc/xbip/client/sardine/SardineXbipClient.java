@@ -5,10 +5,13 @@ import java.io.InputStream;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.nio.file.Paths;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
 import org.apache.http.client.utils.URIBuilder;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import com.github.sardine.DavResource;
 import com.github.sardine.Sardine;
@@ -18,17 +21,27 @@ import esa.s1pdgs.cpoc.xbip.client.XbipEntry;
 import esa.s1pdgs.cpoc.xbip.client.XbipEntryFilter;
 import esa.s1pdgs.cpoc.xbip.client.XbipEntryImpl;
 
-public class SardineXbipClient implements XbipClient {	
+public class SardineXbipClient implements XbipClient {		
+	static final Logger LOG = LogManager.getLogger(SardineXbipClient.class);
+			
 	private final Sardine sardine;
 	private final URI url;
+	private final boolean programmaticRecursion;
 
-	SardineXbipClient(final Sardine sardine, final URI url) {
+	SardineXbipClient(final Sardine sardine, final URI url, final boolean programmaticRecursion) {
 		this.sardine = sardine;
 		this.url = url;
+		this.programmaticRecursion = programmaticRecursion;
 	}
 	
 	@Override
 	public final List<XbipEntry> list(final XbipEntryFilter filter) throws IOException {
+		// S1PRO-1847: special case if infinity depth is disabled on server
+		// each subdirectory needs to be traversed recursively
+		if (programmaticRecursion) {
+			LOG.info("Performing programmatic recursion on {}", url);
+			return listAllRecursively(url.toString(), filter);
+		}
 		return sardine.list(url.toString(), -1).stream()
 				.filter(r -> !r.isDirectory())
 				.map(r -> toXbipEntry(r))
@@ -75,4 +88,40 @@ public class SardineXbipClient implements XbipClient {
 		}
 		return davResource.getHref();
 	}
+	
+	// S1PRO-1847: Programmatic server tree traversal
+	private final List<XbipEntry> listAllRecursively(final String url, final XbipEntryFilter filter) throws IOException {
+		final List<XbipEntry> result = new ArrayList<>();
+		for (final DavResource davResource : sardine.list(url.toString(), 1)) {
+			// ignore hidden files (like PIC)
+			if (davResource.getName().startsWith(".")) {
+				LOG.trace("Ignoring hidden {}", davResource.getName());
+				continue;
+			}			
+			final URI uri = toUri(davResource);
+			
+			// ignore own URL (like PIC)
+			if (uri.toString().equals(url)) {
+				LOG.trace("Ignoring same entry {}", davResource.getName());
+				continue;
+			}
+			
+			if (davResource.isDirectory()) {
+				LOG.trace("Scanning subdirectory {}", davResource.getName());
+				result.addAll(listAllRecursively(uri.toString(), filter));
+				continue;
+			}
+			
+			final XbipEntry entry = toXbipEntry(davResource);
+			
+			if (!filter.accept(entry)) {
+				LOG.trace("Ignoring filtered entry {}", davResource.getName());
+				continue;
+			}
+			LOG.info("Found entry {}", davResource.getName());
+			result.add(entry);
+		}
+		return result;
+	}
+
 }

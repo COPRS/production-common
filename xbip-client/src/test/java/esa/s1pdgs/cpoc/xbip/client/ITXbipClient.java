@@ -4,6 +4,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 
 import java.net.URI;
+import java.util.List;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -34,7 +35,11 @@ public class ITXbipClient {
 		final XbipClientFactory factory = c.xbipClientFactory();		
 		final XbipClient uut = factory.newXbipClient(new URI("https://cgs01.sentinel1.eo.esa.int/NOMINAL/"));
 		
-		uut.list(XbipEntryFilter.ALLOW_ALL).stream()
+		final List<XbipEntry> result = uut.list(XbipEntryFilter.ALLOW_ALL);
+		
+		result.stream()
 			.forEach(e -> System.out.println(e));
+		
+		System.err.println(result.size());
 	}
 }
