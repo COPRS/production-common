@@ -10,7 +10,7 @@ public interface MqiListener<E> {
 		// by default, do nothing. services that need some error message creation can implement this method
 	}
 	
-	default void onWarning(final GenericMessageDto<E> message, final Exception warning) {
+	default void onWarning(final GenericMessageDto<E> message, final String warningMessage) {
 		// by default, do nothing. services that need some warning message creation can implement this method
 	}
 }

@@ -46,7 +46,6 @@ import esa.s1pdgs.cpoc.ipf.execution.worker.job.file.OutputProcessor;
 import esa.s1pdgs.cpoc.ipf.execution.worker.job.mqi.OutputProcuderFactory;
 import esa.s1pdgs.cpoc.ipf.execution.worker.job.process.PoolExecutorCallable;
 import esa.s1pdgs.cpoc.ipf.execution.worker.service.report.JobReportingInput;
-import esa.s1pdgs.cpoc.metadata.client.MetadataClient;
 import esa.s1pdgs.cpoc.mqi.client.GenericMqiClient;
 import esa.s1pdgs.cpoc.mqi.client.MessageFilter;
 import esa.s1pdgs.cpoc.mqi.client.MqiClient;
@@ -130,9 +129,6 @@ public class JobProcessor implements MqiListener<IpfExecutionJob> {
 	
 	private final long initDelayPollMs;
 	
-	private final MetadataClient mdcClient;
-
-
 	/**
 	 * @param job
 	 * @param appStatus
@@ -156,8 +152,7 @@ public class JobProcessor implements MqiListener<IpfExecutionJob> {
 			final ErrorRepoAppender errorAppender,
 			final StatusService mqiStatusService,
 			@Value("${process.init-delay-poll-ms}") final long initDelayPollMs,
-			@Value("${process.fixed-delay-ms}") final long pollingIntervalMs,
-			final MetadataClient mdcClient
+			@Value("${process.fixed-delay-ms}") final long pollingIntervalMs
 	) {
 		this.appStatus = appStatus;
 		this.devProperties = devProperties;
@@ -170,7 +165,6 @@ public class JobProcessor implements MqiListener<IpfExecutionJob> {
 		this.errorAppender = errorAppender;
 		this.initDelayPollMs = initDelayPollMs;
 		this.pollingIntervalMs = pollingIntervalMs;
-		this.mdcClient = mdcClient;
 	}
 	
 	@PostConstruct
@@ -268,9 +262,7 @@ public class JobProcessor implements MqiListener<IpfExecutionJob> {
 				this.properties.getSizeBatchDownload(), 
 				getPrefixMonitorLog(MonitorLogUtils.LOG_INPUT, job),
 				procExecutor, 
-				this.properties.getLevel(),
-				mdcClient,
-				job.getKeyObjectStorage()
+				this.properties.getLevel()
 		);
 
 		final OutputProcessor outputProcessor = new OutputProcessor(obsClient, procuderFactory, message, outputListFile,
@@ -302,6 +294,32 @@ public class JobProcessor implements MqiListener<IpfExecutionJob> {
         failedProcessing.setPredecessor(message.getBody().getIpfPreparationJobMessage());
         errorAppender.send(failedProcessing);
 		exitOnAppStatusStopOrWait();
+	}
+	
+	@Override
+	public void onWarning(final GenericMessageDto<IpfExecutionJob> message, final String warningMessage) {
+		LOGGER.warn(warningMessage);
+		
+		// 1. Write Warning Trace
+		
+		//final Reporting reportingWarning = ReportingUtils.newReportingBuilder()
+		//		.predecessor(message.getBody().getUid())
+		//		.newReporting("JobProcessing");
+		
+		// 2. Set the job to warning
+		
+		//message.getBody()
+
+		// 3. provide the job to the error topic (as well as to the nominal topic later on)
+		
+		FailedProcessingDto failedProcessing = new FailedProcessingDto(
+        		properties.getHostname(),
+        		new Date(), 
+        		String.format("Warning on handling IpfExecutionJob message %s: %s", message.getId(), warningMessage), 
+        		message
+        );
+        failedProcessing.setPredecessor(message.getBody().getIpfPreparationJobMessage());
+        errorAppender.send(failedProcessing);
 	}
 	
     protected List<GenericPublicationMessageDto<ProductionEvent>> processJob(
@@ -344,28 +362,23 @@ public class JobProcessor implements MqiListener<IpfExecutionJob> {
             } else {
                 LOGGER.info("{} Processing l0 outputs bypasssed",
                         getPrefixMonitorLog(MonitorLogUtils.LOG_OUTPUT, job));
-            }            
-            // S1PRO-1496: If there was a missing chunk, we simply let this request succeed but in addition
-            // we create an additional failed request in order to deal with the missing chunk and operator
-            // needs to decide, whether to restart it or delete it.
+            }
+            
+            // If there was a missing chunk, we submit a warning in order to deal with the
+            // missing chunk and operator needs to decide, whether to restart it or delete it.
             
             final List<String> missingChunks = downloadToBatch.stream()
             	.filter(o -> o.getFamily() == ProductFamily.INVALID)
             	.map(o -> o.getKey())
             	.collect(Collectors.toList());
-            
+       
             if (!missingChunks.isEmpty()) {
-                errorAppender.send(new FailedProcessingDto(
-                		properties.getHostname(),
-                		new Date(), 
-                		String.format(
-                				"Missing RAWs detected for successful production %s: %s. "
-                				+ "Restart if chunks become available or delete this request if they are lost", 
-                				message.getId(), 
-                				missingChunks
-                		), 
-                		message
-                ));
+            	onWarning(message, String.format(
+        				"Missing RAWs detected for successful production %s: %s. "
+        				+ "Restart if chunks become available or delete this request if they are lost", 
+        				message.getId(), 
+        				missingChunks
+        		));
             }
             return result;
 		} finally {
