@@ -50,6 +50,9 @@ public class S3MetadataController extends AbstractMetadataController<S3Metadata>
 		try {
 			List<S3Metadata> response = new ArrayList<>();
 
+			LOGGER.info("Received S3 MarginTT search query for family '{}', product type '{}', timeliness '{}'",
+					productFamily.toString(), productType, timeliness);
+
 			List<S3Metadata> result = esServices.marginTTQuery(
 					convertDateForSearch(startDate, -dt0,
 							DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSSSSS'Z'")),

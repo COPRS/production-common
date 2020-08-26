@@ -28,7 +28,6 @@ import esa.s1pdgs.cpoc.ipf.preparation.worker.config.IpfPreparationWorkerSetting
 import esa.s1pdgs.cpoc.ipf.preparation.worker.dispatch.JobDispatcherImpl;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.generator.JobGenerator;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.generator.JobGeneratorImpl;
-import esa.s1pdgs.cpoc.ipf.preparation.worker.model.ProductMode;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.model.tasktable.ElementMapper;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.model.tasktable.TaskTableAdapter;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.model.tasktable.TaskTableFactory;
@@ -231,7 +230,7 @@ public class IpfPreparationWorkerConfiguration {
 	    //final List<List<String>> tasks = tasktableAdapter.buildTasks();
 		final AuxQueryHandler auxQueryHandler = new AuxQueryHandler(
 				metadataClient, 
-				ProductMode.SLICING, //TODO clarify why mode is always slicing
+				settings.getProductMode(),
 				timeoutCheckerFactory.apply(tasktableAdapter.taskTable()),
 				tasktableAdapter
 		);
