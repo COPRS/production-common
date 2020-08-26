@@ -1125,7 +1125,7 @@ public class ExtractMetadataTest {
 		descriptor.setSatelliteId("A");
 		descriptor.setKeyObjectStorage(
 				"S3A_AX___BA__AX_20040702T223000_20040704T042158_20171130T082116___________________WER_D_AL____.SEN3");
-		descriptor.setProductFamily(ProductFamily.S3_AUXILIARY_FILE);
+		descriptor.setProductFamily(ProductFamily.S3_AUX);
 		descriptor.setInstanceId("_________________");
 		descriptor.setGeneratingCentre("WER");
 		descriptor.setClassId("D_AL____");
@@ -1165,7 +1165,7 @@ public class ExtractMetadataTest {
 		descriptor.setSatelliteId("B");
 		descriptor.setKeyObjectStorage(
 				"S3B_OL_1_EFR____20040703T003000_20040703T003200_20160204T070933_DDDD_001_002_FFFF_WER_D_NR_NNN.SEN3");
-		descriptor.setProductFamily(ProductFamily.S3_SAFE);
+		descriptor.setProductFamily(ProductFamily.S3_L1);
 		descriptor.setInstanceId("DDDD_001_002_FFFF");
 		descriptor.setGeneratingCentre("WER");
 		descriptor.setClassId("D_NR_NNN");

@@ -42,8 +42,8 @@ public enum ProductCategory {
     // S2 based categories
     LEVEL_INPUT(IngestionEvent.class), // represent level product that has been ingested
 	// S3 based categories
-	S3_AUXILIARY_FILES(ProductionEvent.class),
-	S3_LEVEL_PRODUCTS(ProductionEvent.class),
+	S3_AUX(ProductionEvent.class),
+	S3_PRODUCTS(ProductionEvent.class),
 	UNDEFINED(null);
 	
     /**
@@ -101,14 +101,23 @@ public enum ProductCategory {
 			case L2_ACN_ZIP:
 			case L2_SLICE_ZIP:
 			case L2A_ZIP:
-			case S3_AUXILIARY_FILE_ZIP:
-			case S3_SAFE_ZIP:
+			// S3 zip families
+			case S3_AUX_ZIP:
+			case S3_L0_ZIP:
+			case S3_L1_ZIP:
+			case S3_L2_ZIP:
+			case S3_CAL_ZIP:
+			case S3_PUG_ZIP:
 				return ProductCategory.COMPRESSION_JOBS;
-        	case S3_AUXILIARY_FILE:
-        		return ProductCategory.S3_AUXILIARY_FILES;
+        	case S3_AUX:
+        		return ProductCategory.S3_AUX;
         	case S3_GRANULES:
-        	case S3_SAFE:
-        		return ProductCategory.S3_LEVEL_PRODUCTS;
+        	case S3_L0:
+        	case S3_L1:
+        	case S3_L2:
+        	case S3_CAL:
+        	case S3_PUG:
+        		return ProductCategory.S3_PRODUCTS;
 	        default:
 	        	throw new IllegalArgumentException(
 	        			String.format("Cannot determine product category for family %s", family)

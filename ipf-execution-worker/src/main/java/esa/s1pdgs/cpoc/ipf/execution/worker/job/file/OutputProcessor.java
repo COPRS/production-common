@@ -305,8 +305,12 @@ public class OutputProcessor {
 				case L1_ACN:
 				case L2_SLICE:
 				case L2_ACN:
-				case S3_AUXILIARY_FILE:
-				case S3_SAFE:
+				case S3_AUX:
+				case S3_CAL:
+				case S3_L0:
+				case S3_L1:
+				case S3_L2:
+				case S3_PUG:
 					// If compatible object storage, put in a cache to
 					// upload per batch
 					LOGGER.info("Output {} is considered as belonging to the family {}", productName,

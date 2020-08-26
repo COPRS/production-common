@@ -10,9 +10,9 @@ public enum ApplicationLevel {
 	L0_SEGMENT(ProductFamily.L0_SEGMENT_JOB),
 	L1(ProductFamily.L1_JOB), 
 	L2(ProductFamily.L2_JOB),
-	S3_L0(ProductFamily.S3_GRANULES),
-	S3_L1(ProductFamily.S3_SAFE),
-	S3_L2(ProductFamily.S3_SAFE);
+	S3_L0(ProductFamily.S3_JOB),
+	S3_L1(ProductFamily.S3_JOB),
+	S3_L2(ProductFamily.S3_JOB);
 	
 	private final ProductFamily jobFamily;
 	

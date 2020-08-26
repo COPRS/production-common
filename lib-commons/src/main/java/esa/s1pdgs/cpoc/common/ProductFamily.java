@@ -47,13 +47,23 @@ public enum ProductFamily {
     L2A,
     L2A_ZIP,
     
-    // S3 Types
-    S3_AUXILIARY_FILE,
+    // S3 Types    
+    S3_AUX,
     S3_GRANULES,
-    S3_SAFE,
-    
-    S3_AUXILIARY_FILE_ZIP,
-    S3_SAFE_ZIP;
+    S3_L0,
+    S3_L1,
+    S3_L2,
+    S3_CAL,
+    S3_PUG,
+    // S3 Jobs
+    S3_JOB,
+    // S3 compressed types
+    S3_AUX_ZIP,
+    S3_L0_ZIP,
+    S3_L1_ZIP,
+    S3_L2_ZIP,
+    S3_CAL_ZIP,
+    S3_PUG_ZIP;
 
     /**
      * Get product family from value in string format

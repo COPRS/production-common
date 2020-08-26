@@ -111,7 +111,7 @@ public class CompressionTriggerService {
 		LOGGER.debug("Creating MQI consumer for category {} using {}", cat, config);
 		
 		if (EnumSet
-				.of(ProductCategory.LEVEL_SEGMENTS, ProductCategory.LEVEL_PRODUCTS, ProductCategory.S3_LEVEL_PRODUCTS)
+				.of(ProductCategory.LEVEL_SEGMENTS, ProductCategory.LEVEL_PRODUCTS, ProductCategory.S3_PRODUCTS)
 				.contains(cat)) {
 			return new MqiConsumer<ProductionEvent>(
 					mqiClient, 

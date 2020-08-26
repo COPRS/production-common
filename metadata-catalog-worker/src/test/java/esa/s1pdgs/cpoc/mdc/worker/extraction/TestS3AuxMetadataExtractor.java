@@ -122,7 +122,7 @@ public class TestS3AuxMetadataExtractor {
 		final GenericMessageDto<CatalogJob> message = new GenericMessageDto<CatalogJob>(123, "", Utils.newCatalogJob(
 				"S3A_AX___BA__AX_20040702T223000_20040704T042158_20171130T082116___________________WER_D_AL____.SEN3",
 				"S3A_AX___BA__AX_20040702T223000_20040704T042158_20171130T082116___________________WER_D_AL____.SEN3",
-				ProductFamily.S3_AUXILIARY_FILE, "NRT"));
+				ProductFamily.S3_AUX, "NRT"));
 
 		// Set up FileDescriptor to create expected result
 		final S3FileDescriptor expectedDescriptor = new S3FileDescriptor();
@@ -138,7 +138,7 @@ public class TestS3AuxMetadataExtractor {
 		expectedDescriptor.setSatelliteId("A");
 		expectedDescriptor.setKeyObjectStorage(
 				"S3A_AX___BA__AX_20040702T223000_20040704T042158_20171130T082116___________________WER_D_AL____.SEN3");
-		expectedDescriptor.setProductFamily(ProductFamily.S3_AUXILIARY_FILE);
+		expectedDescriptor.setProductFamily(ProductFamily.S3_AUX);
 		expectedDescriptor.setInstanceId("_________________");
 		expectedDescriptor.setGeneratingCentre("WER");
 		expectedDescriptor.setClassId("D_AL____");

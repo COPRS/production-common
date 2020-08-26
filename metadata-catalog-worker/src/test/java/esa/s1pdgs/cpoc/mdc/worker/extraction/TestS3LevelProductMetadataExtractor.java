@@ -171,7 +171,7 @@ public class TestS3LevelProductMetadataExtractor {
 		final GenericMessageDto<CatalogJob> message = new GenericMessageDto<CatalogJob>(123, "", Utils.newCatalogJob(
 				"S3B_OL_1_EFR____20040703T003000_20040703T003200_20160204T070933_DDDD_001_002_FFFF_WER_D_NR_NNN.SEN3",
 				"S3B_OL_1_EFR____20040703T003000_20040703T003200_20160204T070933_DDDD_001_002_FFFF_WER_D_NR_NNN.SEN3",
-				ProductFamily.S3_SAFE, "NRT"));
+				ProductFamily.S3_L1, "NRT"));
 
 		// Set up FileDescriptor to create expected result
 		final S3FileDescriptor expectedDescriptor = new S3FileDescriptor();
@@ -187,7 +187,7 @@ public class TestS3LevelProductMetadataExtractor {
 		expectedDescriptor.setSatelliteId("B");
 		expectedDescriptor.setKeyObjectStorage(
 				"S3B_OL_1_EFR____20040703T003000_20040703T003200_20160204T070933_DDDD_001_002_FFFF_WER_D_NR_NNN.SEN3");
-		expectedDescriptor.setProductFamily(ProductFamily.S3_SAFE);
+		expectedDescriptor.setProductFamily(ProductFamily.S3_L1);
 		expectedDescriptor.setInstanceId("DDDD_001_002_FFFF");
 		expectedDescriptor.setGeneratingCentre("WER");
 		expectedDescriptor.setClassId("D_NR_NNN");

@@ -104,7 +104,7 @@ public class MetadataExtractorFactory {
 		    			processConfiguration, 
 		    			obsClient
 		    	);
-		    case S3_AUXILIARY_FILES:
+		    case S3_AUX:
 				return new S3AuxMetadataExtractor(
 						esServices, 
 						mdBuilder, 
@@ -113,7 +113,7 @@ public class MetadataExtractorFactory {
 						processConfiguration, 
 						obsClient
 				);
-		    case S3_LEVEL_PRODUCTS:
+		    case S3_PRODUCTS:
 		    	return new S3LevelProductMetadataExtractor(
 		    			esServices, 
 		    			mdBuilder, 
@@ -135,8 +135,8 @@ public class MetadataExtractorFactory {
 								ProductCategory.PLANS_AND_REPORTS,
 								ProductCategory.LEVEL_SEGMENTS, 
 								ProductCategory.LEVEL_PRODUCTS,
-								ProductCategory.S3_AUXILIARY_FILES,
-								ProductCategory.S3_LEVEL_PRODUCTS
+								ProductCategory.S3_AUX,
+								ProductCategory.S3_PRODUCTS
 						)
 				)
 		);

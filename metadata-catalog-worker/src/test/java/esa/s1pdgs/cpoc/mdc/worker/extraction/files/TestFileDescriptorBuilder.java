@@ -272,7 +272,7 @@ public class TestFileDescriptorBuilder {
     	final CatalogJob dto = Utils.newCatalogJob(
                 "S3A_AX___BA__AX_20040702T223000_20040704T042158_20171130T082116___________________WER_D_AL____.SEN3",
                 "S3A_AX___BA__AX_20040702T223000_20040704T042158_20171130T082116___________________WER_D_AL____.SEN3",
-                ProductFamily.S3_AUXILIARY_FILE, 
+                ProductFamily.S3_AUX, 
                 "NRT"
         );  
     	
@@ -286,7 +286,7 @@ public class TestFileDescriptorBuilder {
 		expected.setMissionId("S3");
 		expected.setSatelliteId("A");
 		expected.setKeyObjectStorage("S3A_AX___BA__AX_20040702T223000_20040704T042158_20171130T082116___________________WER_D_AL____.SEN3");
-		expected.setProductFamily(ProductFamily.S3_AUXILIARY_FILE);
+		expected.setProductFamily(ProductFamily.S3_AUX);
 		expected.setInstanceId("_________________");
 		expected.setGeneratingCentre("WER");
 		expected.setClassId("D_AL____");
@@ -294,7 +294,7 @@ public class TestFileDescriptorBuilder {
 
         final File file = new File(testDir, "S3A_AX___BA__AX_20040702T223000_20040704T042158_20171130T082116___________________WER_D_AL____.SEN3/xfdumanifest.xml");
         final FileDescriptorBuilder uut = newDescriptorForPattern(PATTERN_S3_AUX);
-        final S3FileDescriptor result = uut.buildS3FileDescriptor(file, dto, ProductFamily.S3_AUXILIARY_FILE);
+        final S3FileDescriptor result = uut.buildS3FileDescriptor(file, dto, ProductFamily.S3_AUX);
         assertNotNull("File descriptor should not be null", result);
         assertEquals("File descriptor are not equals", expected, result);
     }
