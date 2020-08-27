@@ -78,7 +78,7 @@ public class MultipleProductCoverSearch {
 				elementMapper.inputFamilyOf(alternative.getFileType()), product.getSatelliteId(),
 				product.getStartTime(), product.getStopTime(), alternative.getDeltaTime0(), alternative.getDeltaTime1(),
 				timeliness);
-		
+
 		// Filter products for duplicates
 		products = DuplicateProductFilter.filterS3Metadata(products);
 
@@ -141,7 +141,7 @@ public class MultipleProductCoverSearch {
 
 		return isGranuleContinuous(products);
 	}
-	
+
 	/**
 	 * Convert list of metadata to needed objects
 	 * 
@@ -174,10 +174,14 @@ public class MultipleProductCoverSearch {
 
 			if (product.getGranulePosition().equals("LAST")) {
 				if (!successor.getGranulePosition().equals("FIRST")) {
+					LOGGER.info("Successor to LAST was not FIRST (actual: {}). List of products is not continuous.",
+							successor.getGranulePosition());
 					return false;
 				}
 			} else {
 				if (product.getGranuleNumber() + 1 != successor.getGranuleNumber()) {
+					LOGGER.info("Granule number not continuous. Expected {}, actual {}", product.getGranuleNumber() + 1,
+							successor.getGranuleNumber());
 					return false;
 				}
 			}

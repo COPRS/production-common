@@ -8,6 +8,9 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
 import esa.s1pdgs.cpoc.common.utils.DateUtils;
 import esa.s1pdgs.cpoc.metadata.model.S3Metadata;
 import esa.s1pdgs.cpoc.xml.model.joborder.JobOrderInput;
@@ -22,6 +25,8 @@ import esa.s1pdgs.cpoc.xml.model.joborder.JobOrderTimeInterval;
  *
  */
 public class DuplicateProductFilter {
+	private static final Logger LOGGER = LogManager.getLogger(DuplicateProductFilter.class);
+	
 	private static int CREATION_TIME_BEGIN_INDEX = 48;
 	private static int CREATION_TIME_END_INDEX = 63;
 
@@ -131,9 +136,11 @@ public class DuplicateProductFilter {
 	 * @return LocalDateTime object with creationTime
 	 */
 	private static LocalDateTime getCreationTimeFromFileName(String fileName) {
+		LOGGER.debug("Extract creationTime from filename \"{}\"", fileName);
 		Path path = Paths.get(fileName);
 		Path fName = path.getFileName();
 		String name = fName.toString();
+		LOGGER.debug("Reduced path to filename. Result: {}", name);
 		String creationTime = name.substring(CREATION_TIME_BEGIN_INDEX, CREATION_TIME_END_INDEX);
 
 		return LocalDateTime.parse(creationTime, formatter);
