@@ -687,6 +687,7 @@ public class EsServices {
 		final BoolQueryBuilder queryBuilder = QueryBuilders.boolQuery()
 				.must(QueryBuilders.rangeQuery("startTime").lt(stopTime))
 				.must(QueryBuilders.rangeQuery("stopTime").gt(startTime)).must(satelliteId(satelliteId))
+				.must(QueryBuilders.regexpQuery("productType.keyword", productType))
 				.must(QueryBuilders.termQuery(timeliness, true));
 
 		LOGGER.debug("query composed is {}", queryBuilder);
