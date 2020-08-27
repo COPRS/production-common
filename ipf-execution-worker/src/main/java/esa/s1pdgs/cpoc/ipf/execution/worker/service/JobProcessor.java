@@ -52,7 +52,9 @@ import esa.s1pdgs.cpoc.mqi.client.MqiClient;
 import esa.s1pdgs.cpoc.mqi.client.MqiConsumer;
 import esa.s1pdgs.cpoc.mqi.client.MqiListener;
 import esa.s1pdgs.cpoc.mqi.client.MqiMessageEventHandler;
+import esa.s1pdgs.cpoc.mqi.client.MqiPublishingJob;
 import esa.s1pdgs.cpoc.mqi.client.StatusService;
+import esa.s1pdgs.cpoc.mqi.model.queue.AbstractMessage;
 import esa.s1pdgs.cpoc.mqi.model.queue.IpfExecutionJob;
 import esa.s1pdgs.cpoc.mqi.model.queue.LevelJobInputDto;
 import esa.s1pdgs.cpoc.mqi.model.queue.ProductionEvent;
@@ -276,6 +278,7 @@ public class JobProcessor implements MqiListener<IpfExecutionJob> {
 		);
 		return new MqiMessageEventHandler.Builder<ProductionEvent>(category)
 				.onSuccess(res -> reporting.end(toReportingOutput(res), new ReportingMessage("End job processing")))
+				.onWarning(res -> reporting.warning(toReportingOutput(res), new ReportingMessage("End job processing")))
 				.onError(e -> reporting.error(errorReportMessage(e)))
 				.publishMessageProducer(() -> processJob(message, inputDownloader, outputProcessor, procExecutorSrv, procCompletionSrv, procExecutor, reporting))
 				.newResult();
@@ -299,19 +302,7 @@ public class JobProcessor implements MqiListener<IpfExecutionJob> {
 	@Override
 	public void onWarning(final GenericMessageDto<IpfExecutionJob> message, final String warningMessage) {
 		LOGGER.warn(warningMessage);
-		
-		// 1. Write Warning Trace
-		
-		//final Reporting reportingWarning = ReportingUtils.newReportingBuilder()
-		//		.predecessor(message.getBody().getUid())
-		//		.newReporting("JobProcessing");
-		
-		// 2. Set the job to warning
-		
-		//message.getBody()
-
-		// 3. provide the job to the error topic (as well as to the nominal topic later on)
-		
+				
 		FailedProcessingDto failedProcessing = new FailedProcessingDto(
         		properties.getHostname(),
         		new Date(), 
@@ -322,7 +313,7 @@ public class JobProcessor implements MqiListener<IpfExecutionJob> {
         errorAppender.send(failedProcessing);
 	}
 	
-    protected List<GenericPublicationMessageDto<ProductionEvent>> processJob(
+    protected MqiPublishingJob<ProductionEvent> processJob(
     		final GenericMessageDto<IpfExecutionJob> message,
             final InputDownloader inputDownloader,
             final OutputProcessor outputProcessor,
@@ -332,7 +323,7 @@ public class JobProcessor implements MqiListener<IpfExecutionJob> {
             final Reporting reporting /* TODO: Refactor to not expect an already begun reporting... */) throws Exception {
         boolean poolProcessing = false;
         final IpfExecutionJob job = message.getBody();
-        final List<GenericPublicationMessageDto<ProductionEvent>> result = new ArrayList<>();
+        final List<GenericPublicationMessageDto<? extends AbstractMessage>> productionEvents = new ArrayList<>();
         
         try {
             LOGGER.info("{} Starting process executor",
@@ -358,7 +349,7 @@ public class JobProcessor implements MqiListener<IpfExecutionJob> {
                 checkThreadInterrupted();
                 LOGGER.info("{} Processing l0 outputs",
                         getPrefixMonitorLog(MonitorLogUtils.LOG_OUTPUT, job));
-                result.addAll(outputProcessor.processOutput(reporting, reporting.getUid()));
+                productionEvents.addAll(outputProcessor.processOutput(reporting, reporting.getUid()));
             } else {
                 LOGGER.info("{} Processing l0 outputs bypasssed",
                         getPrefixMonitorLog(MonitorLogUtils.LOG_OUTPUT, job));
@@ -372,15 +363,13 @@ public class JobProcessor implements MqiListener<IpfExecutionJob> {
             	.map(o -> o.getKey())
             	.collect(Collectors.toList());
        
-            if (!missingChunks.isEmpty()) {
-            	onWarning(message, String.format(
+            String warningMessage = missingChunks.isEmpty() ? "" : String.format(
         				"Missing RAWs detected for successful production %s: %s. "
         				+ "Restart if chunks become available or delete this request if they are lost", 
         				message.getId(), 
         				missingChunks
-        		));
-            }
-            return result;
+        	);            
+            return new MqiPublishingJob<ProductionEvent>(productionEvents, warningMessage);            	
 		} finally {
             cleanJobProcessing(job, poolProcessing, procExecutorSrv);
         }
