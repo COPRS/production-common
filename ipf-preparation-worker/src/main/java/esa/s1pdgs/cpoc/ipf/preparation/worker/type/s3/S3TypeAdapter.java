@@ -137,7 +137,7 @@ public class S3TypeAdapter extends AbstractProductTypeAdapter implements Product
 
 			if (Instant.now().toEpochMilli() > timeoutTime) {
 				// Timeout reached
-				LOGGER.info("Timeout reached for job {}. Continue without missing products...");
+				LOGGER.info("Timeout reached for job {}. Continue without missing products...", job.getId());
 				setHasResultsToTrueForTimeoutReached(job);
 				return;
 			}
