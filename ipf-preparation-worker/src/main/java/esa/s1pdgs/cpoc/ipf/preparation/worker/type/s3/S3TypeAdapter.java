@@ -86,7 +86,8 @@ public class S3TypeAdapter extends AbstractProductTypeAdapter implements Product
 		for (TaskTableInputAlternative alternative : alternatives) {
 			try {
 				if (settings.getMarginProductTypes().contains(alternative.getFileType())) {
-					LOGGER.debug("Use additional logic 'MultipleProductCoverSearch' for product type {}", alternative.getFileType());
+					LOGGER.debug("Use additional logic 'MultipleProductCoverSearch' for product type {}",
+							alternative.getFileType());
 					MultipleProductCoverSearch mpcSearch = new MultipleProductCoverSearch(tasktableAdapter,
 							elementMapper, metadataClient, workerSettings);
 					tasks = mpcSearch.updateTaskInputsByAlternative(tasks, alternative, returnValue);
@@ -108,14 +109,14 @@ public class S3TypeAdapter extends AbstractProductTypeAdapter implements Product
 	@Override
 	public void customJobOrder(AppDataJob job, JobOrder jobOrder) {
 		LOGGER.debug("Customize Job order for S3...");
-		
+
 		for (JobOrderProc proc : jobOrder.getProcs()) {
 			for (int i = 0; i < proc.getInputs().size(); i++) {
 				JobOrderInput input = proc.getInputs().get(i);
 				if (settings.getMarginProductTypes().contains(input.getFileType())) {
 					JobOrderInput newInput = DuplicateProductFilter.filter(input);
 					LOGGER.debug("Update JobOrderInput {}. New Input: {}", input.getFileType(), newInput.toString());
-					
+
 					proc.updateInput(i, newInput);
 				}
 			}
@@ -136,6 +137,7 @@ public class S3TypeAdapter extends AbstractProductTypeAdapter implements Product
 
 			if (Instant.now().toEpochMilli() > timeoutTime) {
 				// Timeout reached
+				setHasResultsToTrueForTimeoutReached(job);
 				return;
 			}
 		}
@@ -168,6 +170,24 @@ public class S3TypeAdapter extends AbstractProductTypeAdapter implements Product
 		// If there is at least one input incomplete, try again
 		if (!missingAlternatives.isEmpty()) {
 			throw new IpfPrepWorkerInputsMissingException(missingAlternatives);
+		}
+	}
+
+	/**
+	 * When the timeout was reached set the boolean "hasResults" for all input to
+	 * true, that contain at least one product. The boolean "hasResults" is kept at
+	 * false from the additional logic, to determine whether or not the list of
+	 * products is enough to satisfy the additional constraints
+	 * 
+	 * @param job job to update
+	 */
+	private void setHasResultsToTrueForTimeoutReached(AppDataJob job) {
+		for (AppDataJobTaskInputs task : job.getAdditionalInputs()) {
+			for (AppDataJobInput input : task.getInputs()) {
+				if (!isEmpty(input.getFiles())) {
+					input.setHasResults(true);
+				}
+			}
 		}
 	}
 }

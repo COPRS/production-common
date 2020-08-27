@@ -116,7 +116,7 @@ public class MultipleProductCoverSearch {
 
 		LocalDateTime time = LocalDateTime.parse(startTime,
 				DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSSSSS'Z'"));
-		final LocalDateTime coverageMin = time.plusSeconds(Math.round(-t0));
+		final LocalDateTime coverageMin = time.minusSeconds(Math.round(t0));
 
 		time = LocalDateTime.parse(stopTime, DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSSSSS'Z'"));
 		final LocalDateTime coverageMax = time.plusSeconds(Math.round(t1));
