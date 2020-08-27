@@ -9,7 +9,7 @@ import esa.s1pdgs.cpoc.appcatalog.AppDataJobProduct;
 import esa.s1pdgs.cpoc.appcatalog.util.AppDataJobProductAdapter;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.type.AbstractProduct;
 
-public final class EdrsSessionProduct extends AbstractProduct {
+public class EdrsSessionProduct extends AbstractProduct {
 	private static final String DSIB1_ID = "dsib1";
 	private static final String DSIB2_ID = "dsib2";
 	

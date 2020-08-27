@@ -42,6 +42,7 @@ import esa.s1pdgs.cpoc.ipf.preparation.worker.timeout.InputTimeoutChecker;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.timeout.InputTimeoutCheckerImpl;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.type.ProductTypeAdapter;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.type.edrs.AiopPropertiesAdapter;
+import esa.s1pdgs.cpoc.ipf.preparation.worker.type.edrs.EdrsSessionProductValidator;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.type.edrs.EdrsSessionTypeAdapter;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.type.s3.S3TypeAdapter;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.type.segment.L0SegmentTypeAdapter;
@@ -131,7 +132,8 @@ public class IpfPreparationWorkerConfiguration {
 		if (processSettings.getLevel() == ApplicationLevel.L0) {
 			return new EdrsSessionTypeAdapter(
 					metadataClient, 
-					AiopPropertiesAdapter.of(aiopProperties)
+					AiopPropertiesAdapter.of(aiopProperties),
+					new EdrsSessionProductValidator()
 			);
 		}
 		else if (processSettings.getLevel() == ApplicationLevel.L0_SEGMENT) {

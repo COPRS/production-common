@@ -1,8 +1,6 @@
 package esa.s1pdgs.cpoc.ipf.preparation.worker.type.edrs;
 
 import java.io.File;
-import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -30,13 +28,16 @@ import esa.s1pdgs.cpoc.xml.model.joborder.JobOrder;
 public final class EdrsSessionTypeAdapter extends AbstractProductTypeAdapter implements ProductTypeAdapter {		
 	private final MetadataClient metadataClient;
     private final AiopPropertiesAdapter aiopAdapter;
+    private final EdrsSessionProductValidator validator;
       
 	public EdrsSessionTypeAdapter(
 			final MetadataClient metadataClient, 
-			final AiopPropertiesAdapter aiopAdapter
+			final AiopPropertiesAdapter aiopAdapter,
+			final EdrsSessionProductValidator validator
 	) {
 		this.metadataClient = metadataClient;
 		this.aiopAdapter = aiopAdapter;
+		this.validator = validator;
 	}
 	
 	@Override
@@ -77,8 +78,7 @@ public final class EdrsSessionTypeAdapter extends AbstractProductTypeAdapter imp
         	LOGGER.error("Error on query execution, retrying next time", me);
         }
 	    return product;
-	}
-	
+	}	
 
 	@Override
 	public final void validateInputSearch(final AppDataJob job) throws IpfPrepWorkerInputsMissingException {       	
@@ -86,44 +86,7 @@ public final class EdrsSessionTypeAdapter extends AbstractProductTypeAdapter imp
     	if (aiopAdapter.isTimedOut(job)) {	        		
     		return;
     	}
-       	final EdrsSessionProduct product = EdrsSessionProduct.of(job);       	    	
-
-    	if (product.getDsibForChannel(1) == null) {    
-    	  	throw new IpfPrepWorkerInputsMissingException(
-				  Collections.singletonMap(
-						  product.getProductName(), 
-						  "No DSIB for channel 1"
-				  )
-    	  	);
-    	}     
-    	if (product.getDsibForChannel(2) == null) { 
-    		throw new IpfPrepWorkerInputsMissingException(
-				  Collections.singletonMap(
-						  product.getProductName(), 
-						  "No DSIB for channel 2"
-				  )
-          	);
-    	} 
-    	final Map<String,String> missingRaws = missingRawsOf(product); 
-	    if (!missingRaws.isEmpty()) {
-            throw new IpfPrepWorkerInputsMissingException(missingRaws);
-        }
-	}
-	
-	private final Map<String,String> missingRawsOf(final EdrsSessionProduct product) {		
-    	final Map<String,String> missingRaws = new HashMap<>();
-    	
-    	for (final AppDataJobFile raw : product.getRawsForChannel(1)) {
-    		if (raw.getKeyObs() == null) {
-    			missingRaws.put(raw.getFilename(), "Missing RAW1 " + raw.getFilename());
-    		}
-    	}
-    	for (final AppDataJobFile raw : product.getRawsForChannel(2)) {
-    		if (raw.getKeyObs() == null) {
-    			missingRaws.put(raw.getFilename(), "Missing RAW2 " + raw.getFilename());
-    		}
-    	}
-    	return missingRaws;
+       	validator.assertIsComplete(EdrsSessionProduct.of(job));
 	}
 
 	@Override
