@@ -81,7 +81,9 @@ public class RequestRepositoryImpl implements RequestRepository {
 		assertNotNull("failed request", failedProcessing, id);
 		assertDtoDefined(id, failedProcessing);
 		assertTopicDefined(id, failedProcessing);
-		((AbstractMessage) failedProcessing.getDto()).increaseControlRetryCounter();
+		// TODO: is not possible to alter the retry counter here because the object being returned
+		// by Jackson is not a AbstractMessage its LinkedHashMap
+		// ((AbstractMessage) failedProcessing.getDto()).increaseControlRetryCounter();
 		kafkaSubmissionClient.resubmit(id, failedProcessing.getTopic(), failedProcessing.getDto(), status);
 		failedProcessingRepo.deleteById(id);
 	}
@@ -92,7 +94,9 @@ public class RequestRepositoryImpl implements RequestRepository {
 		assertNotNull("failed request", failedProcessing, id);
 		assertPredecessorDefined(id, failedProcessing);
 		assertPredecessorTopicDefined(id, failedProcessing);
-		((AbstractMessage) failedProcessing.getPredecessorDto()).increaseControlRetryCounter();
+		// TODO: is not possible to alter the retry counter here because the object being returned
+		// by Jackson is not a AbstractMessage its LinkedHashMap	
+		// ((AbstractMessage) failedProcessing.getPredecessorDto()).increaseControlRetryCounter(); 
 		kafkaSubmissionClient.resubmit(id, failedProcessing.getPredecessorTopic(), failedProcessing.getPredecessorDto(), status);
 		failedProcessingRepo.deleteById(id);
 	}
