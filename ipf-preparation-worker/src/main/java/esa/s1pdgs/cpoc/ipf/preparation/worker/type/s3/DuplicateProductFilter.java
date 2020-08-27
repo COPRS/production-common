@@ -65,17 +65,19 @@ public class DuplicateProductFilter {
 		String startTime = interval.getStart();
 		String stopTime = interval.getStop();
 
+		boolean returnValue = false;
+		
 		for (JobOrderTimeInterval other : intervals) {
 			if (other.getStart().equals(startTime) && other.getStop().equals(stopTime)) {
 				// We found a duplicate. Determine if the duplicate is newer than this product
 				LocalDateTime creationTime = getCreationTimeFromFileName(interval.getFileName());
 				LocalDateTime otherCreationTime = getCreationTimeFromFileName(other.getFileName());
 
-				return creationTime.isBefore(otherCreationTime);
+				returnValue = returnValue || creationTime.isBefore(otherCreationTime);
 			}
 		}
 
-		return false;
+		return returnValue;
 	}
 
 	/**
