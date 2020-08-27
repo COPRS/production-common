@@ -1,5 +1,7 @@
 package esa.s1pdgs.cpoc.ipf.preparation.worker.type.s3;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -34,8 +36,7 @@ public class DuplicateProductFilterTest {
 		;
 
 		input = DuplicateProductFilter.filter(input);
-		
-		System.out.println(input);
+		assertEquals(input.getNbFilenames(), 1);
 	}
 
 }
