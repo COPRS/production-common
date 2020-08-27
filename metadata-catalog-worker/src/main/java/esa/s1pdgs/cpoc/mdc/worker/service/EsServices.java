@@ -727,6 +727,14 @@ public class EsServices {
 							throw new MetadataMalformedException("stopTime");
 						}
 					}
+					if (source.containsKey("creationTime")) {
+						try {
+							local.setCreationTime(
+									DateUtils.convertToMetadataDateTimeFormat(source.get("creationTime").toString()));
+						} catch (final DateTimeParseException e) {
+							throw new MetadataMalformedException("creationTime");
+						}
+					}
 					r.add(local);
 				}
 				return r;

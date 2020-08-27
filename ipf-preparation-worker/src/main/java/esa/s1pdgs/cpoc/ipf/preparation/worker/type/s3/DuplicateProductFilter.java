@@ -8,6 +8,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import esa.s1pdgs.cpoc.common.utils.DateUtils;
+import esa.s1pdgs.cpoc.metadata.model.S3Metadata;
 import esa.s1pdgs.cpoc.xml.model.joborder.JobOrderInput;
 import esa.s1pdgs.cpoc.xml.model.joborder.JobOrderInputFile;
 import esa.s1pdgs.cpoc.xml.model.joborder.JobOrderTimeInterval;
@@ -19,7 +21,7 @@ import esa.s1pdgs.cpoc.xml.model.joborder.JobOrderTimeInterval;
  * @author Julian Kaping
  *
  */
-public class DuplicateProductFilter {	
+public class DuplicateProductFilter {
 	private static int CREATION_TIME_BEGIN_INDEX = 48;
 	private static int CREATION_TIME_END_INDEX = 63;
 
@@ -35,7 +37,7 @@ public class DuplicateProductFilter {
 	 * @param jobOrderInput input to check for duplicates
 	 * @return new JobOrderInput without duplicates
 	 */
-	public static JobOrderInput filter(final JobOrderInput jobOrderInput) {
+	public static JobOrderInput filterJobOrderInput(final JobOrderInput jobOrderInput) {
 		List<JobOrderTimeInterval> newIntervals = new ArrayList<>();
 		List<String> newFileNameStrings = new ArrayList<>();
 
@@ -54,25 +56,65 @@ public class DuplicateProductFilter {
 	}
 
 	/**
+	 * filter duplicate products from list of metadata
+	 * 
+	 * duplicates are products with the same product type, start time and stop time,
+	 * but different creation times. This filter deletes duplicates and keeps the
+	 * latest one (most recent creation time)
+	 * 
+	 * @return new list of metadata without duplicates
+	 */
+	public static List<S3Metadata> filterS3Metadata(final List<S3Metadata> products) {
+		List<S3Metadata> newList = new ArrayList<>();
+
+		for (S3Metadata product : products) {
+			if (!containsNewerProduct(product, products)) {
+				newList.add(product);
+			}
+		}
+
+		return newList;
+	}
+
+	/**
 	 * Checks if there are other intervals with the same start and stop time and a
 	 * newer creation time
 	 * 
-	 * @param interval interval for which should be checked if there are any newer
-	 *                 versions
 	 * @return true, if newer product exists
 	 */
 	private static boolean containsNewerProduct(JobOrderTimeInterval interval, List<JobOrderTimeInterval> intervals) {
 		String startTime = interval.getStart();
 		String stopTime = interval.getStop();
+		LocalDateTime creationTime = getCreationTimeFromFileName(interval.getFileName());
 
 		boolean returnValue = false;
-		
+
 		for (JobOrderTimeInterval other : intervals) {
 			if (other.getStart().equals(startTime) && other.getStop().equals(stopTime)) {
 				// We found a duplicate. Determine if the duplicate is newer than this product
-				LocalDateTime creationTime = getCreationTimeFromFileName(interval.getFileName());
 				LocalDateTime otherCreationTime = getCreationTimeFromFileName(other.getFileName());
 
+				returnValue = returnValue || creationTime.isBefore(otherCreationTime);
+			}
+		}
+
+		return returnValue;
+	}
+
+	/**
+	 * Checks if there are other products with the same validityStart and
+	 * validityStop and a newer creationTime
+	 * 
+	 * @return true, if newer product exists
+	 */
+	private static boolean containsNewerProduct(S3Metadata product, List<S3Metadata> products) {
+		boolean returnValue = false;
+		LocalDateTime creationTime = DateUtils.parse(product.getCreationTime());
+
+		for (S3Metadata other : products) {
+			if (other.getValidityStart().equals(product.getValidityStart())
+					&& other.getValidityStop().equals(product.getValidityStop())) {
+				LocalDateTime otherCreationTime = DateUtils.parse(other.getCreationTime());
 				returnValue = returnValue || creationTime.isBefore(otherCreationTime);
 			}
 		}

@@ -78,6 +78,9 @@ public class MultipleProductCoverSearch {
 				elementMapper.inputFamilyOf(alternative.getFileType()), product.getSatelliteId(),
 				product.getStartTime(), product.getStopTime(), alternative.getDeltaTime0(), alternative.getDeltaTime1(),
 				timeliness);
+		
+		// Filter products for duplicates
+		products = DuplicateProductFilter.filterS3Metadata(products);
 
 		// Check coverage
 		if (!products.isEmpty()) {
