@@ -151,7 +151,7 @@ public class MultipleProductCoverSearch {
 		List<AppDataJobFile> files = new ArrayList<>();
 
 		for (S3Metadata product : products) {
-			files.add(new AppDataJobFile(product.getProductType(), product.getKeyObjectStorage(),
+			files.add(new AppDataJobFile(product.getProductName(), product.getKeyObjectStorage(),
 					product.getValidityStart(), product.getValidityStop()));
 		}
 		return files;
