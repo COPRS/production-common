@@ -83,7 +83,8 @@ public class S3TypeAdapter extends AbstractProductTypeAdapter implements Product
 		// Loop over alternatives to execute additional logic per product type
 		for (TaskTableInputAlternative alternative : alternatives) {
 			try {
-				if (settings.getMarginProductTypes().contains(alternative.getFileType())) {
+				if (settings.getMpcSearch(tasktableAdapter.taskTable().getProcessorName())
+						.contains(alternative.getFileType())) {
 					LOGGER.debug("Use additional logic 'MultipleProductCoverSearch' for product type {}",
 							alternative.getFileType());
 					MultipleProductCoverSearch mpcSearch = new MultipleProductCoverSearch(tasktableAdapter,
@@ -148,7 +149,8 @@ public class S3TypeAdapter extends AbstractProductTypeAdapter implements Product
 		// logic
 		Map<String, String> missingAlternatives = new HashMap<>();
 		for (TaskTableInputAlternative alternative : alternatives) {
-			if (settings.getMarginProductTypes().contains(alternative.getFileType())) {
+			if (settings.getMpcSearch(taskTableAdapter.taskTable().getProcessorName())
+					.contains(alternative.getFileType())) {
 				missingAlternatives.put(alternative.getFileType(),
 						"Incomplete result set for " + alternative.getFileType());
 			}
