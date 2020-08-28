@@ -30,8 +30,6 @@ import esa.s1pdgs.cpoc.ipf.preparation.worker.type.ProductTypeAdapter;
 import esa.s1pdgs.cpoc.metadata.client.MetadataClient;
 import esa.s1pdgs.cpoc.mqi.model.queue.IpfExecutionJob;
 import esa.s1pdgs.cpoc.xml.model.joborder.JobOrder;
-import esa.s1pdgs.cpoc.xml.model.joborder.JobOrderInput;
-import esa.s1pdgs.cpoc.xml.model.joborder.JobOrderProc;
 import esa.s1pdgs.cpoc.xml.model.tasktable.TaskTableInputAlternative;
 
 public class S3TypeAdapter extends AbstractProductTypeAdapter implements ProductTypeAdapter {
@@ -108,19 +106,7 @@ public class S3TypeAdapter extends AbstractProductTypeAdapter implements Product
 
 	@Override
 	public void customJobOrder(AppDataJob job, JobOrder jobOrder) {
-		LOGGER.debug("Customize Job order for S3...");
-
-		for (JobOrderProc proc : jobOrder.getProcs()) {
-			for (int i = 0; i < proc.getInputs().size(); i++) {
-				JobOrderInput input = proc.getInputs().get(i);
-				if (settings.getMarginProductTypes().contains(input.getFileType())) {
-					JobOrderInput newInput = DuplicateProductFilter.filterJobOrderInput(input);
-					LOGGER.debug("Update JobOrderInput {}. New Input: {}", input.getFileType(), newInput.toString());
-
-					proc.updateInput(i, newInput);
-				}
-			}
-		}
+		// Nothing to do currently
 	}
 
 	@Override
