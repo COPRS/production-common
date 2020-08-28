@@ -28,10 +28,10 @@ import esa.s1pdgs.cpoc.mqi.client.MessageFilter;
 import esa.s1pdgs.cpoc.mqi.client.MqiConsumer;
 import esa.s1pdgs.cpoc.mqi.client.MqiListener;
 import esa.s1pdgs.cpoc.mqi.client.MqiMessageEventHandler;
+import esa.s1pdgs.cpoc.mqi.client.MqiPublishingJob;
 import esa.s1pdgs.cpoc.mqi.model.queue.NullMessage;
 import esa.s1pdgs.cpoc.mqi.model.queue.ProductionEvent;
 import esa.s1pdgs.cpoc.mqi.model.rest.GenericMessageDto;
-import esa.s1pdgs.cpoc.mqi.model.rest.GenericPublicationMessageDto;
 import esa.s1pdgs.cpoc.queuewatcher.config.ApplicationProperties;
 
 @Service
@@ -146,7 +146,7 @@ public class QueueWatcherService implements MqiListener<ProductionEvent> {
 				.newResult();
 	}
 
-	private List<GenericPublicationMessageDto<NullMessage>> handleMessage(
+	private MqiPublishingJob<NullMessage> handleMessage(
 			final String productName, 
 			final ProductCategory category
 	) {
@@ -156,7 +156,7 @@ public class QueueWatcherService implements MqiListener<ProductionEvent> {
 		} catch (final IOException e) {
 			LOGGER.error("Error occured while writing to CSV {}", LogUtils.toString(e));
 		}
-		return Collections.emptyList();
+		return new MqiPublishingJob<NullMessage>(Collections.emptyList());
 	}
 	
 	private final MqiConsumer<ProductionEvent> newConsumerFor(final ProductCategory category, final long interval, final long delay) {

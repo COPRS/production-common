@@ -29,6 +29,7 @@ import esa.s1pdgs.cpoc.errorrepo.ErrorRepoAppender;
 import esa.s1pdgs.cpoc.errorrepo.model.rest.FailedProcessingDto;
 import esa.s1pdgs.cpoc.mqi.client.MqiListener;
 import esa.s1pdgs.cpoc.mqi.client.MqiMessageEventHandler;
+import esa.s1pdgs.cpoc.mqi.client.MqiPublishingJob;
 import esa.s1pdgs.cpoc.mqi.model.queue.AbstractMessage;
 import esa.s1pdgs.cpoc.mqi.model.queue.NullMessage;
 import esa.s1pdgs.cpoc.mqi.model.rest.GenericMessageDto;
@@ -105,7 +106,7 @@ public class DisseminationTriggerListener<E extends AbstractMessage> implements 
 							handleTransferTo(message, config.getTarget());
 						}			
 					}	
-					return Collections.emptyList();
+					return new MqiPublishingJob<NullMessage>(Collections.emptyList());
 				})
 				.newResult();
 	}

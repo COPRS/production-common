@@ -19,6 +19,7 @@ import esa.s1pdgs.cpoc.ipf.preparation.worker.config.ProcessSettings;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.report.TaskTableLookupReportingOutput;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.type.ProductTypeAdapter;
 import esa.s1pdgs.cpoc.mqi.client.MqiMessageEventHandler;
+import esa.s1pdgs.cpoc.mqi.client.MqiPublishingJob;
 import esa.s1pdgs.cpoc.mqi.model.queue.CatalogEvent;
 import esa.s1pdgs.cpoc.mqi.model.queue.IpfPreparationJob;
 import esa.s1pdgs.cpoc.mqi.model.queue.NullMessage;
@@ -97,7 +98,7 @@ public class JobDispatcherImpl implements JobDispatcher {
 		            	);
 		            } 
 		    		handleJob(message, jobFromMessage, reporting.getUid(), tasktableFilename);
-		    		return Collections.emptyList();
+		    		return new MqiPublishingJob<NullMessage>(Collections.emptyList());
 				})
 				.newResult();
     }

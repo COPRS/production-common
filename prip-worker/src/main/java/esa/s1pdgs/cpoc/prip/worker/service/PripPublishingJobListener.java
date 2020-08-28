@@ -33,6 +33,7 @@ import esa.s1pdgs.cpoc.mqi.client.MessageFilter;
 import esa.s1pdgs.cpoc.mqi.client.MqiConsumer;
 import esa.s1pdgs.cpoc.mqi.client.MqiListener;
 import esa.s1pdgs.cpoc.mqi.client.MqiMessageEventHandler;
+import esa.s1pdgs.cpoc.mqi.client.MqiPublishingJob;
 import esa.s1pdgs.cpoc.mqi.model.queue.NullMessage;
 import esa.s1pdgs.cpoc.mqi.model.queue.PripPublishingJob;
 import esa.s1pdgs.cpoc.mqi.model.rest.GenericMessageDto;
@@ -126,7 +127,7 @@ public class PripPublishingJobListener implements MqiListener<PripPublishingJob>
 				))
 				.publishMessageProducer(() -> {
 					createAndSave(publishingJob);
-		    		return Collections.emptyList();
+		    		return new MqiPublishingJob<NullMessage>(Collections.emptyList());
 				})
 				.newResult();
 	}
