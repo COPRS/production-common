@@ -63,7 +63,7 @@ public class IpfExecutionJob extends AbstractMessage {
      */
     public IpfExecutionJob() {
     	super();
-    	setAllowedControlActions(Arrays.asList(ControlAction.RESTART));
+    	setAllowedControlActions(Arrays.asList(ControlAction.RESTART, ControlAction.REEVALUATE));
     }
 
     /**
@@ -78,7 +78,7 @@ public class IpfExecutionJob extends AbstractMessage {
         this.jobOrder = jobOrder;
         this.uid = reportingTaskUID;
         this.timeliness = timeliness;
-        setAllowedControlActions(Arrays.asList(ControlAction.RESTART));
+        setAllowedControlActions(Arrays.asList(ControlAction.RESTART, ControlAction.REEVALUATE));
     }
 
     /**
