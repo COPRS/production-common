@@ -158,6 +158,8 @@ public class CompressProcessor implements MqiListener<CompressionJob> {
 						checkThreadInterrupted();
 						LOGGER.info("Uploading compressed/uncompressed outputs for {}", job);
 						List<GenericPublicationMessageDto<CompressionEvent>> compressionEventDtos = fileUploader.processOutput(report);
+						
+						// ugly workaround for impossible casting issue:
 						List<GenericPublicationMessageDto<? extends AbstractMessage>> result = new ArrayList<>();
 						for (GenericPublicationMessageDto<CompressionEvent> compressionEventDto : compressionEventDtos) {
 							result.add(compressionEventDto);
