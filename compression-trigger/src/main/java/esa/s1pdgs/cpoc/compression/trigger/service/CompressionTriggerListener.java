@@ -13,6 +13,7 @@ import esa.s1pdgs.cpoc.errorrepo.ErrorRepoAppender;
 import esa.s1pdgs.cpoc.errorrepo.model.rest.FailedProcessingDto;
 import esa.s1pdgs.cpoc.mqi.client.MqiListener;
 import esa.s1pdgs.cpoc.mqi.client.MqiMessageEventHandler;
+import esa.s1pdgs.cpoc.mqi.client.MqiPublishingJob;
 import esa.s1pdgs.cpoc.mqi.model.queue.AbstractMessage;
 import esa.s1pdgs.cpoc.mqi.model.queue.CompressionDirection;
 import esa.s1pdgs.cpoc.mqi.model.queue.CompressionJob;
@@ -59,10 +60,10 @@ public class CompressionTriggerListener<E extends AbstractMessage> implements Mq
 					final CompressionJob job = mapper.toCompressionJob(event, reporting.getUid());
 					if(job.getCompressionDirection() == CompressionDirection.UNDEFINED) {
 						LOG.info(String.format("Skipping compressionJob for %s, productFamily: %s", event.getKeyObjectStorage(), event.getProductFamily()));
-						return Collections.emptyList();
+						return new MqiPublishingJob<CompressionJob>(Collections.emptyList());
 					}
 					job.setUid(reporting.getUid());
-					return Collections.singletonList(publish(message, job));
+					return new MqiPublishingJob<CompressionJob>(Collections.singletonList(publish(message, job)));
 				}).newResult();
 	}
 

@@ -35,6 +35,7 @@ import esa.s1pdgs.cpoc.mqi.client.MqiClient;
 import esa.s1pdgs.cpoc.mqi.client.MqiConsumer;
 import esa.s1pdgs.cpoc.mqi.client.MqiListener;
 import esa.s1pdgs.cpoc.mqi.client.MqiMessageEventHandler;
+import esa.s1pdgs.cpoc.mqi.client.MqiPublishingJob;
 import esa.s1pdgs.cpoc.mqi.model.queue.CatalogEvent;
 import esa.s1pdgs.cpoc.mqi.model.queue.CatalogJob;
 import esa.s1pdgs.cpoc.mqi.model.queue.util.CatalogEventAdapter;
@@ -161,7 +162,7 @@ public class MetadataExtractionService implements MqiListener<CatalogJob> {
 		return catEvent;
 	}
 	
-	private final List<GenericPublicationMessageDto<CatalogEvent>> handleMessage(
+	private final MqiPublishingJob<CatalogEvent> handleMessage(
 			final GenericMessageDto<CatalogJob> message, 
 			final Reporting reporting
 	) throws Exception {
@@ -203,7 +204,7 @@ public class MetadataExtractionService implements MqiListener<CatalogJob> {
 		);
 		messageDto.setInputKey(message.getInputKey());
 		messageDto.setOutputKey(determineOutputKeyDependentOnProductFamilyAndTimeliness(event));		    	
-		return Collections.singletonList(messageDto);
+		return new MqiPublishingJob<CatalogEvent>(Collections.singletonList(messageDto));
 	}
 	
 	private final ReportingOutput reportingOutput(final List<GenericPublicationMessageDto<CatalogEvent>> pubs) {

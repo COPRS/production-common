@@ -6,6 +6,7 @@ import java.nio.file.FileVisitOption;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
@@ -43,11 +44,14 @@ import esa.s1pdgs.cpoc.mqi.client.MessageFilter;
 import esa.s1pdgs.cpoc.mqi.client.MqiConsumer;
 import esa.s1pdgs.cpoc.mqi.client.MqiListener;
 import esa.s1pdgs.cpoc.mqi.client.MqiMessageEventHandler;
+import esa.s1pdgs.cpoc.mqi.client.MqiPublishingJob;
 import esa.s1pdgs.cpoc.mqi.client.StatusService;
+import esa.s1pdgs.cpoc.mqi.model.queue.AbstractMessage;
 import esa.s1pdgs.cpoc.mqi.model.queue.CompressionDirection;
 import esa.s1pdgs.cpoc.mqi.model.queue.CompressionEvent;
 import esa.s1pdgs.cpoc.mqi.model.queue.CompressionJob;
 import esa.s1pdgs.cpoc.mqi.model.rest.GenericMessageDto;
+import esa.s1pdgs.cpoc.mqi.model.rest.GenericPublicationMessageDto;
 import esa.s1pdgs.cpoc.obs_sdk.ObsClient;
 import esa.s1pdgs.cpoc.obs_sdk.ObsObject;
 import esa.s1pdgs.cpoc.obs_sdk.ObsServiceException;
@@ -140,7 +144,7 @@ public class CompressProcessor implements MqiListener<CompressionJob> {
 					try {
 						if(skip(job)) {							
 							LOGGER.warn("Skipping uncompression for {}", job);
-							return Collections.emptyList();							
+							return new MqiPublishingJob<CompressionEvent>(Collections.emptyList());							
 						} 
 						checkThreadInterrupted();
 						LOGGER.info("Downloading inputs for {}", job);
@@ -153,7 +157,12 @@ public class CompressProcessor implements MqiListener<CompressionJob> {
 			
 						checkThreadInterrupted();
 						LOGGER.info("Uploading compressed/uncompressed outputs for {}", job);
-						return fileUploader.processOutput(report);
+						List<GenericPublicationMessageDto<CompressionEvent>> compressionEventDtos = fileUploader.processOutput(report);
+						List<GenericPublicationMessageDto<? extends AbstractMessage>> result = new ArrayList<>();
+						for (GenericPublicationMessageDto<CompressionEvent> compressionEventDto : compressionEventDtos) {
+							result.add(compressionEventDto);
+						}
+						return new MqiPublishingJob<CompressionEvent>(result);
 					}
 					finally {
 						// initially, this has only been performed on InterruptedException but we discussed that it makes sense to

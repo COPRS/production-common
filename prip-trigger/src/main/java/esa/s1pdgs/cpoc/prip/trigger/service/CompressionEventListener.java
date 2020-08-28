@@ -22,6 +22,7 @@ import esa.s1pdgs.cpoc.mqi.client.MessageFilter;
 import esa.s1pdgs.cpoc.mqi.client.MqiConsumer;
 import esa.s1pdgs.cpoc.mqi.client.MqiListener;
 import esa.s1pdgs.cpoc.mqi.client.MqiMessageEventHandler;
+import esa.s1pdgs.cpoc.mqi.client.MqiPublishingJob;
 import esa.s1pdgs.cpoc.mqi.model.queue.CompressionEvent;
 import esa.s1pdgs.cpoc.mqi.model.queue.PripPublishingJob;
 import esa.s1pdgs.cpoc.mqi.model.rest.GenericMessageDto;
@@ -105,7 +106,7 @@ public class CompressionEventListener implements MqiListener<CompressionEvent> {
 							);
 
 					LOGGER.debug("end conversion of CompressionEvent to PublishingJob, sent message: {}", outputMessage);
-		    		return Collections.singletonList(outputMessage);
+		    		return new MqiPublishingJob<PripPublishingJob>(Collections.singletonList(outputMessage));
 				})
 				.newResult();
 	}

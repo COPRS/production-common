@@ -23,6 +23,7 @@ import esa.s1pdgs.cpoc.errorrepo.ErrorRepoAppender;
 import esa.s1pdgs.cpoc.errorrepo.model.rest.FailedProcessingDto;
 import esa.s1pdgs.cpoc.mqi.client.MqiListener;
 import esa.s1pdgs.cpoc.mqi.client.MqiMessageEventHandler;
+import esa.s1pdgs.cpoc.mqi.client.MqiPublishingJob;
 import esa.s1pdgs.cpoc.mqi.model.queue.EvictionManagementJob;
 import esa.s1pdgs.cpoc.mqi.model.queue.NullMessage;
 import esa.s1pdgs.cpoc.mqi.model.rest.GenericMessageDto;
@@ -83,7 +84,7 @@ public class DataLifecycleWorkerListener implements MqiListener<EvictionManageme
 							out,
 							new ReportingMessage("Updated eviction time for %s", job.getKeyObjectStorage())
 					);
-					return Collections.emptyList();
+					return new MqiPublishingJob<NullMessage>(Collections.emptyList());
 				})
 				.newResult();
     }

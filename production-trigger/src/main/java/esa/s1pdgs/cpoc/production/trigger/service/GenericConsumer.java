@@ -28,6 +28,8 @@ import esa.s1pdgs.cpoc.mqi.client.MessageFilter;
 import esa.s1pdgs.cpoc.mqi.client.MqiConsumer;
 import esa.s1pdgs.cpoc.mqi.client.MqiListener;
 import esa.s1pdgs.cpoc.mqi.client.MqiMessageEventHandler;
+import esa.s1pdgs.cpoc.mqi.client.MqiPublishingJob;
+import esa.s1pdgs.cpoc.mqi.model.queue.AbstractMessage;
 import esa.s1pdgs.cpoc.mqi.model.queue.CatalogEvent;
 import esa.s1pdgs.cpoc.mqi.model.queue.IpfPreparationJob;
 import esa.s1pdgs.cpoc.mqi.model.queue.util.CatalogEventAdapter;
@@ -121,7 +123,7 @@ public class GenericConsumer implements MqiListener<CatalogEvent> {
         );
 	}
         
-    private final List<GenericPublicationMessageDto<IpfPreparationJob>> handle(
+    private final MqiPublishingJob<IpfPreparationJob> handle(
     		final Reporting reporting, 
     		final GenericMessageDto<CatalogEvent> mqiMessage
     ) throws Exception {
@@ -139,7 +141,7 @@ public class GenericConsumer implements MqiListener<CatalogEvent> {
             final AppDataJobProductAdapter productAdapter = new AppDataJobProductAdapter(product);
             
             final List<String> taskTableNames = taskTableMapper.tasktableFor(product);
-            final List<GenericPublicationMessageDto<IpfPreparationJob>> messageDtos = new ArrayList<>(taskTableNames.size());
+            final List<GenericPublicationMessageDto<? extends AbstractMessage>> messageDtos = new ArrayList<>(taskTableNames.size());
             
             for (final String taskTableName: taskTableNames)
             {
@@ -159,13 +161,13 @@ public class GenericConsumer implements MqiListener<CatalogEvent> {
             	messageDtos.add(dispatch(mqiMessage, job, productName, reporting));
             }               
             LOGGER.info("Dispatching product {}", productName);
-            return messageDtos;          
+            return new MqiPublishingJob<IpfPreparationJob>(messageDtos);          
         }
         else {
            	LOGGER.debug("CatalogEvent for {} is ignored", productName); 
         }
         LOGGER.debug("Done handling consumption of product {}", productName);
-        return Collections.emptyList();
+        return new MqiPublishingJob<IpfPreparationJob>(Collections.emptyList());
     }
 	
 	private final GenericPublicationMessageDto<IpfPreparationJob> dispatch(

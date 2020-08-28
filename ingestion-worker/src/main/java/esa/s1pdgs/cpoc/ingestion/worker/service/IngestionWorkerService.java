@@ -33,6 +33,8 @@ import esa.s1pdgs.cpoc.mqi.client.MessageFilter;
 import esa.s1pdgs.cpoc.mqi.client.MqiConsumer;
 import esa.s1pdgs.cpoc.mqi.client.MqiListener;
 import esa.s1pdgs.cpoc.mqi.client.MqiMessageEventHandler;
+import esa.s1pdgs.cpoc.mqi.client.MqiPublishingJob;
+import esa.s1pdgs.cpoc.mqi.model.queue.AbstractMessage;
 import esa.s1pdgs.cpoc.mqi.model.queue.IngestionEvent;
 import esa.s1pdgs.cpoc.mqi.model.queue.IngestionJob;
 import esa.s1pdgs.cpoc.mqi.model.rest.GenericMessageDto;
@@ -155,12 +157,12 @@ public class IngestionWorkerService implements MqiListener<IngestionJob> {
 		}
 	}
 
-	final List<GenericPublicationMessageDto<IngestionEvent>> publish(
+	final MqiPublishingJob<IngestionEvent> publish(
 			final List<Product<IngestionEvent>> products, 
 			final GenericMessageDto<IngestionJob> message,
 			final UUID reportingId
 	) throws AbstractCodedException {				
-		final List<GenericPublicationMessageDto<IngestionEvent>> results = new ArrayList<>();		
+		final List<GenericPublicationMessageDto<? extends AbstractMessage>> results = new ArrayList<>();		
 		for (final Product<IngestionEvent> product : products) {
 			final IngestionEvent event = product.getDto();
 			event.setUid(reportingId);
@@ -175,6 +177,6 @@ public class IngestionWorkerService implements MqiListener<IngestionJob> {
 			LOG.info("publishing : {}", result);
 			results.add(result);
 		}
-		return results;
+		return new MqiPublishingJob<IngestionEvent>(results);
 	}	
 }
