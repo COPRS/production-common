@@ -49,6 +49,7 @@ public class MqiMessageFilter implements MessageFilter {
 		}
 
 		if (productFamily != message.getProductFamily()) {
+			LOG.debug("message not accepted, {} does not match configured family filter {}", message.getProductFamily(), productFamily);
 			return true;
 		}
 
