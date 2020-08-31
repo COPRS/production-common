@@ -19,6 +19,8 @@ public class AiopProperties {
 	private Map<String,String> rsEncode;
 	private long minimalWaitingTimeSec;
 	private boolean disableTimeout;
+	private String nrtOutputPath;
+	private String ptOutputPath;
 	
 	/**
 	 * @return the stationCodes
@@ -132,5 +134,21 @@ public class AiopProperties {
 
 	public void setDisableTimeout(boolean disableTimeout) {
 		this.disableTimeout = disableTimeout;
+	}
+
+	public String getNrtOutputPath() {
+		return nrtOutputPath;
+	}
+
+	public void setNrtOutputPath(String nrtOutputPath) {
+		this.nrtOutputPath = nrtOutputPath;
+	}
+
+	public String getPtOutputPath() {
+		return ptOutputPath;
+	}
+
+	public void setPtOutputPath(String ptOutputPath) {
+		this.ptOutputPath = ptOutputPath;
 	}
 }
