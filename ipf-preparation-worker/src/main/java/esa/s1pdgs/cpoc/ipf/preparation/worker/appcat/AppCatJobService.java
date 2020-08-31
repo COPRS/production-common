@@ -126,7 +126,7 @@ public class AppCatJobService {
 						job.setProduct(prod);						
 						job.setAdditionalInputs(queried.overridingInputs());					
 						
-						// dirty workaround for segment scenario
+						// dirty workaround for segment and session scenario
 						final AppDataJobProductAdapter productAdapter = new AppDataJobProductAdapter(prod);
 						job.setStartTime(productAdapter.getStartTime());
 						job.setStopTime(productAdapter.getStopTime());

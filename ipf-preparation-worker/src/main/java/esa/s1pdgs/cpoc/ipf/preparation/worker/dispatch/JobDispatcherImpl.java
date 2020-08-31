@@ -126,8 +126,9 @@ public class JobDispatcherImpl implements JobDispatcher {
 		productDto.getMetadata().put("satelliteId", eventAdapter.satelliteId());
 		productDto.getMetadata().put("missionId", eventAdapter.missionId());
 		productDto.getMetadata().put("processMode", eventAdapter.processMode());
-		productDto.getMetadata().put("startTime", eventAdapter.startTime());
-		productDto.getMetadata().put("stopTime", eventAdapter.stopTime());     
+		// S1PRO-1772: user productSensing accessors here to make start/stop optional here (RAWs don't have them)
+		productDto.getMetadata().put("startTime", eventAdapter.productSensingStartDate());
+		productDto.getMetadata().put("stopTime", eventAdapter.productSensingStopDate());     
 		productDto.getMetadata().put("timeliness", eventAdapter.timeliness());
 		productDto.getMetadata().put("acquistion", eventAdapter.swathType());
 	    return productDto;

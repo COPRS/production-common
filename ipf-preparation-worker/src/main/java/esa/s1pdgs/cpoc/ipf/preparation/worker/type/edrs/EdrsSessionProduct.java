@@ -76,4 +76,12 @@ public class EdrsSessionProduct extends AbstractProduct {
 		}
 		return DSIB2_ID;
 	}
+
+	public void setStartTime(final String startTime) {
+		product.setStartTime(startTime);
+	}
+
+	public void setStopTime(final String stopTime) {
+		product.setStopTime(stopTime);		
+	}
 }
