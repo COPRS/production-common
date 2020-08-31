@@ -436,6 +436,54 @@ public class EsServices {
 			throw new Exception(e.getMessage());
 		}
 	}
+	
+	public SearchMetadata latestValidity(final String beginDate, final String endDate, final String productType,
+			final ProductFamily productFamily, final String processMode, final String satelliteId) throws Exception {
+		final SearchSourceBuilder sourceBuilder = new SearchSourceBuilder();
+		// Generic fields
+		final BoolQueryBuilder queryBuilder = QueryBuilders.boolQuery()
+				.must(QueryBuilders.rangeQuery("validityStartTime").lt(endDate))
+				.must(QueryBuilders.rangeQuery("validityStopTime").gt(beginDate)).must(satelliteId(satelliteId))
+				.must(QueryBuilders.regexpQuery("productType.keyword", productType));
+		sourceBuilder.query(queryBuilder);
+		LOGGER.debug("latestValidity: query composed is {}", queryBuilder);
+
+		sourceBuilder.size(1);
+		sourceBuilder.sort(new FieldSortBuilder("validityStartTime").order(SortOrder.DESC));
+
+		final SearchRequest searchRequest = new SearchRequest(getIndexForProductFamily(productFamily, productType));
+		searchRequest.source(sourceBuilder);
+		try {
+			final SearchResponse searchResponse = elasticsearchDAO.search(searchRequest);
+			if (this.isNotEmpty(searchResponse)) {
+				final Map<String, Object> source = searchResponse.getHits().getAt(0).getSourceAsMap();
+				final SearchMetadata r = new SearchMetadata();
+				r.setProductName(source.get("productName").toString());
+				r.setProductType(source.get("productType").toString());
+				r.setKeyObjectStorage(source.get("url").toString());
+				if (source.containsKey("validityStartTime")) {
+					try {
+						r.setValidityStart(
+								DateUtils.convertToMetadataDateTimeFormat(source.get("validityStartTime").toString()));
+					} catch (final DateTimeParseException e) {
+						throw new MetadataMalformedException("validityStartTime");
+					}
+				}
+				if (source.containsKey("validityStopTime")) {
+					try {
+						r.setValidityStop(
+								DateUtils.convertToMetadataDateTimeFormat(source.get("validityStopTime").toString()));
+					} catch (final DateTimeParseException e) {
+						throw new MetadataMalformedException("validityStopTime");
+					}
+				}
+				return r;
+			}
+		} catch (final IOException e) {
+			throw new Exception(e.getMessage());
+		}
+		return null;	
+	}
 
 	private SearchMetadata toSearchMetadata(final SearchHit hit) {
 		final Map<String, Object> source = hit.getSourceAsMap();
