@@ -855,9 +855,15 @@ public class EsServices {
 				    }
 				}
 			}
+			else
+			{
+				return null;
+			}
 		} catch (final IOException e) {
 			throw new Exception(e.getMessage());
 		}
+		
+		
 		
 		final SearchMetadata local = new SearchMetadata();
 		local.setProductName(r.get("productName").toString());
