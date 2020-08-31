@@ -39,7 +39,7 @@ public class SardineXbipClient implements XbipClient {
 		// S1PRO-1847: special case if infinity depth is disabled on server
 		// each subdirectory needs to be traversed recursively
 		if (programmaticRecursion) {
-			LOG.info("Performing programmatic recursion on {}", url);
+			LOG.debug("Performing programmatic recursion on {}", url);
 			return listAllRecursively(url.toString(), filter);
 		}
 		return sardine.list(url.toString(), -1).stream()
@@ -113,7 +113,7 @@ public class SardineXbipClient implements XbipClient {
 				LOG.trace("Ignoring filtered entry {}", davResource.getName());
 				continue;
 			}
-			LOG.info("Found entry {}", davResource.getName());
+			LOG.debug("Found entry {}", davResource.getName());
 			result.add(entry);
 		}
 		return result;
