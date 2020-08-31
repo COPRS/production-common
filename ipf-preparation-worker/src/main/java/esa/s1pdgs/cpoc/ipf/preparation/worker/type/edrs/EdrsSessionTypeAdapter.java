@@ -19,6 +19,7 @@ import esa.s1pdgs.cpoc.ipf.preparation.worker.type.AbstractProductTypeAdapter;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.type.Product;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.type.ProductTypeAdapter;
 import esa.s1pdgs.cpoc.metadata.client.MetadataClient;
+import esa.s1pdgs.cpoc.metadata.model.EdrsSessionMetadata;
 import esa.s1pdgs.cpoc.mqi.model.queue.IpfExecutionJob;
 import esa.s1pdgs.cpoc.mqi.model.queue.LevelJobInputDto;
 import esa.s1pdgs.cpoc.mqi.model.queue.util.CatalogEventAdapter;
@@ -57,21 +58,27 @@ public final class EdrsSessionTypeAdapter extends AbstractProductTypeAdapter imp
         	final EdrsSessionMetadataAdapter edrsMetadata = EdrsSessionMetadataAdapter.parse(        			
         			metadataClient.getEdrsSessionFor(product.getSessionId())
         	);
+        	final EdrsSessionMetadata dsib1 = edrsMetadata.getChannel1();
+        	final EdrsSessionMetadata dsib2 = edrsMetadata.getChannel2();
         	
-        	if (edrsMetadata.getChannel1() == null) {    
+        	if (dsib1 == null) {    
         		product.setRawsForChannel(1, edrsMetadata.availableRaws1());
         	}   
-        	else {
-            	product.setDsibForChannel(1, edrsMetadata.getChannel1().getKeyObjectStorage());
+        	else {        	
+            	product.setDsibForChannel(1, dsib1.getKeyObjectStorage());
             	product.setRawsForChannel(1, edrsMetadata.raws1());
+            	product.setStartTime(dsib1.getStartTime());
+            	product.setStopTime(dsib1.getStopTime());            	
         	}
         	
-        	if (edrsMetadata.getChannel2() == null) { 
+        	if (dsib2 == null) { 
         		product.setRawsForChannel(2, edrsMetadata.availableRaws2());
         	} 
         	else {
-        		product.setDsibForChannel(2, edrsMetadata.getChannel2().getKeyObjectStorage());
+        		product.setDsibForChannel(2, dsib2.getKeyObjectStorage());
                	product.setRawsForChannel(2, edrsMetadata.raws2());
+            	product.setStartTime(dsib2.getStartTime());
+            	product.setStopTime(dsib2.getStopTime());  
         	}
         } 
         catch (final MetadataQueryException me) {
