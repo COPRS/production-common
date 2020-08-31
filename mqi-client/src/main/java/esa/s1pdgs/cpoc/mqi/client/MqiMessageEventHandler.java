@@ -83,7 +83,13 @@ public class MqiMessageEventHandler {
 				MqiConsumer.LOG.info("Publishing category {} message: {}", cat, message);
 				client.publish(message, cat);
 			}
-			return mqiPublishingJob.getWarning();
+			String warning = mqiPublishingJob.getWarning();
+			if (!"".equals(warning)) {
+				onWarning.accept(mqiPublishingJob.getMessages());
+			} else {
+				onSuccess.accept(mqiPublishingJob.getMessages());
+			}
+			return warning;
 		}
 		catch (final Exception e) {
 			onError.accept(e);
