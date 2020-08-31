@@ -30,6 +30,7 @@ status:
   delete-fixed-delay-ms: 1800000                                   # (fixed delay) period in milliseconds between 2 check if application shall be stopped or not
   max-error-counter-processing: 3                                  # the number of consecutive processing errors leading to the state FATALERROR
   max-error-counter-mqi: 30                                        # the number of consecutive MQI errors leading to the state FATALERROR
+  block-system-exit: true
 
 mqi:
   host-uri: http://localhost:8081                                # URI of the MQI server APIs

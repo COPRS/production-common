@@ -101,6 +101,8 @@ public enum ProductCategory {
 			case L2_ACN_ZIP:
 			case L2_SLICE_ZIP:
 			case L2A_ZIP:
+			case S3_AUXILIARY_FILE_ZIP:
+			case S3_SAFE_ZIP:
 				return ProductCategory.COMPRESSION_JOBS;
         	case S3_AUXILIARY_FILE:
         		return ProductCategory.S3_AUXILIARY_FILES;

@@ -18,7 +18,7 @@ import esa.s1pdgs.cpoc.obs_sdk.ObsClient;
 import esa.s1pdgs.cpoc.obs_sdk.ObsDownloadObject;
 import esa.s1pdgs.cpoc.report.ReportingFactory;
 
-public abstract class AbstractMetadataExtractor implements MetadataExtractor {
+public abstract class AbstractMetadataExtractor implements MetadataExtractor {	
 	protected final Logger logger = LogManager.getLogger(getClass());
 	
 	protected final EsServices esServices;
@@ -75,9 +75,22 @@ public abstract class AbstractMetadataExtractor implements MetadataExtractor {
     }
     
 	private final String getMetadataKeyObs(final String productKeyObs) {
-		if (productKeyObs.toLowerCase().endsWith(processConfiguration.getFileWithManifestExt())) {
-			return productKeyObs + "/" + processConfiguration.getManifestFilename();
-		} 
+		for (String manifestExt : processConfiguration.getManifestFilenames().keySet()) {
+			if (productKeyObs.toLowerCase().endsWith(manifestExt)) {
+				// Replace string "<PRODUCTNAME>" with productkey (OBS-Key without extension)
+				int lastIndexOfPoint = productKeyObs.lastIndexOf(".");
+				String productKey = productKeyObs;
+				if (lastIndexOfPoint != -1) {
+					productKey = productKeyObs.substring(0, lastIndexOfPoint);
+				}
+				
+				String manifestFilename = processConfiguration.getManifestFilenames().get(manifestExt)
+						.replace("<PRODUCTNAME>", productKey);
+
+				return productKeyObs + "/" + manifestFilename;
+			}
+		}
+
 		return productKeyObs;
 	}
 }

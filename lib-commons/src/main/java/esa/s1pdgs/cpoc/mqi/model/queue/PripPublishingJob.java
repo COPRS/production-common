@@ -1,13 +1,21 @@
 package esa.s1pdgs.cpoc.mqi.model.queue;
 
+import java.util.Arrays;
 import java.util.Date;
 import java.util.Objects;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 
+import esa.s1pdgs.cpoc.mqi.model.control.ControlAction;
+
 public class PripPublishingJob extends AbstractMessage {	
 	@JsonFormat(pattern="yyyy-MM-dd'T'HH:mm:ss.SSS'Z'", timezone="UTC")
 	private Date evictionDate;
+	
+	public PripPublishingJob() {
+		super();
+		setAllowedControlActions(Arrays.asList(ControlAction.RESTART));
+	}
 
 	public Date getEvictionDate() {
 		return evictionDate;
@@ -19,7 +27,8 @@ public class PripPublishingJob extends AbstractMessage {
 
 	@Override
 	public int hashCode() {
-		return Objects.hash(creationDate, evictionDate, hostname, keyObjectStorage, productFamily, uid);
+		return Objects.hash(creationDate, evictionDate, hostname, keyObjectStorage, productFamily, uid,
+				allowedControlActions, controlDemandType, controlDebug, controlRetryCounter);
 	}
 
 	@Override
@@ -39,7 +48,11 @@ public class PripPublishingJob extends AbstractMessage {
 				&& Objects.equals(hostname, other.hostname) 
 				&& Objects.equals(keyObjectStorage, other.keyObjectStorage)
 				&& Objects.equals(uid, other.uid)
-				&& productFamily == other.productFamily;
+				&& productFamily == other.productFamily
+				&& Objects.equals(allowedControlActions, other.getAllowedControlActions())
+		        && controlDemandType == other.controlDemandType
+		        && controlDebug == other.controlDebug
+		        && controlRetryCounter == other.controlRetryCounter;
 	}
 
 	@Override

@@ -1,12 +1,16 @@
 package esa.s1pdgs.cpoc.mqi.model.queue;
 
+import java.util.Collections;
 import java.util.Date;
+import java.util.List;
 import java.util.UUID;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import esa.s1pdgs.cpoc.common.ProductFamily;
+import esa.s1pdgs.cpoc.mqi.model.control.ControlAction;
+import esa.s1pdgs.cpoc.mqi.model.control.ControlDemandType;
 
 /**
  * This is supposed to be the basic element that is used in all other
@@ -45,6 +49,14 @@ public abstract class AbstractMessage {
 	@JsonFormat(pattern="yyyy-MM-dd'T'HH:mm:ss.SSS'Z'", timezone="UTC")
 	protected Date creationDate = new Date();
 	protected String hostname = DEFAULT_HOSTNAME;
+	
+	protected List<ControlAction> allowedControlActions = Collections.emptyList();
+	
+	protected ControlDemandType controlDemandType = ControlDemandType.NOMINAL;
+	
+	protected int controlRetryCounter = 0;
+	
+	protected boolean controlDebug = false;
 	
 	public AbstractMessage() {
 	}
@@ -93,11 +105,45 @@ public abstract class AbstractMessage {
 	public void setUid(final UUID uid) {
 		this.uid = uid;
 	}
+	
+	public List<ControlAction> getAllowedControlActions() {
+		return allowedControlActions;
+	}
+
+	public void setAllowedControlActions(List<ControlAction> allowedControlActions) {
+		this.allowedControlActions = allowedControlActions;
+	}
+
+	public ControlDemandType getControlDemandType() {
+		return controlDemandType;
+	}
+
+	public void setControlDemandType(ControlDemandType controlDemandType) {
+		this.controlDemandType = controlDemandType;
+	}
+
+	public int getControlRetryCounter() {
+		return controlRetryCounter;
+	}
+
+	public void increaseControlRetryCounter() {
+		++this.controlRetryCounter;
+	}
+
+	public boolean isControlDebug() {
+		return controlDebug;
+	}
+
+	public void setControlDebug(boolean controlDebug) {
+		this.controlDebug = controlDebug;
+	}
 
 	@Override
 	public String toString() {
 		return "AbstractMessage [productFamily=" + productFamily + ", keyObjectStorage=" + keyObjectStorage + ", uid="
-				+ uid + ", creationDate=" + creationDate + ", hostname=" + hostname + "]";
+				+ uid + ", creationDate=" + creationDate + ", hostname=" + hostname + ", allowedControlActions=" + allowedControlActions 
+				+ ", controlDemandType=" + controlDemandType + ", controlRetryCounter=" + controlRetryCounter 
+				+ ", controlDebug=" + controlDebug + "]";
 	}	
 	
 	

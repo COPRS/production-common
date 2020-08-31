@@ -1,9 +1,11 @@
 package esa.s1pdgs.cpoc.mqi.model.queue;
 
+import java.util.Arrays;
 import java.util.Objects;
 import java.util.UUID;
 
 import esa.s1pdgs.cpoc.common.ProductFamily;
+import esa.s1pdgs.cpoc.mqi.model.control.ControlAction;
 
 public class ProductionEvent extends AbstractMessage {
 	private String productName = NOT_DEFINED;
@@ -13,14 +15,17 @@ public class ProductionEvent extends AbstractMessage {
 
 	public ProductionEvent() {
 		super();
+		setAllowedControlActions(Arrays.asList(ControlAction.RESUBMIT));
 	}
 
 	public ProductionEvent(final String productName, final String keyObjectStorage, final ProductFamily family) {
-		this(productName, keyObjectStorage, family, null);		
+		this(productName, keyObjectStorage, family, null);	
+		setAllowedControlActions(Arrays.asList(ControlAction.RESUBMIT));
 	}
 
 	public ProductionEvent(final String productName, final String keyObjectStorage, final ProductFamily family, final String mode) {
 		this(productName, keyObjectStorage, family, mode, OQCFlag.NOT_CHECKED, null, UUID.randomUUID());
+		setAllowedControlActions(Arrays.asList(ControlAction.RESUBMIT));
 	}
 	
 	public ProductionEvent(
@@ -38,6 +43,7 @@ public class ProductionEvent extends AbstractMessage {
 		this.uid = reportUid;
 		this.oqcFlag = oqcFlag;
 		this.timeliness = timeliness;
+		setAllowedControlActions(Arrays.asList(ControlAction.RESUBMIT));
 	}
 
 	public String getMode() {
@@ -74,7 +80,8 @@ public class ProductionEvent extends AbstractMessage {
 
 	@Override
 	public int hashCode() {
-		return Objects.hash(creationDate, hostname, keyObjectStorage, mode, timeliness, oqcFlag, productFamily, productName, uid);
+		return Objects.hash(creationDate, hostname, keyObjectStorage, mode, timeliness, oqcFlag, productFamily, productName, uid,
+				allowedControlActions, controlDemandType, controlDebug, controlRetryCounter);
 	}
 
 	@Override
@@ -97,7 +104,11 @@ public class ProductionEvent extends AbstractMessage {
 				&& productFamily == other.productFamily
 				&& Objects.equals(timeliness, other.timeliness)
 				&& Objects.equals(uid, other.uid)
-				&& Objects.equals(productName, other.productName);
+				&& Objects.equals(productName, other.productName)
+				&& Objects.equals(allowedControlActions, other.getAllowedControlActions())
+		        && controlDemandType == other.controlDemandType
+		        && controlDebug == other.controlDebug
+		        && controlRetryCounter == other.controlRetryCounter;
 	}
 
 	@Override

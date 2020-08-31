@@ -52,6 +52,9 @@ public interface Reporting extends ReportingFactory {
 		public void end(final ReportingOutput output, final ReportingMessage reportingMessage) {}
 
 		@Override
+		public void warning(final ReportingOutput output, final ReportingMessage reportingMessage) {}
+
+		@Override
 		public void error(final ReportingMessage reportingMessage) {}
 
 		@Override
@@ -72,5 +75,6 @@ public interface Reporting extends ReportingFactory {
 	
 	void begin(ReportingInput input, ReportingMessage reportingMessage);
 	void end(ReportingOutput output, ReportingMessage reportingMessage);
+	void warning(ReportingOutput output, ReportingMessage reportingMessage);
 	void error(ReportingMessage reportingMessage);
 }

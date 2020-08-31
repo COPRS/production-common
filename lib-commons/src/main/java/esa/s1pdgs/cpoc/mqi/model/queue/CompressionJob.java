@@ -1,8 +1,10 @@
 package esa.s1pdgs.cpoc.mqi.model.queue;
 
+import java.util.Arrays;
 import java.util.Objects;
 
 import esa.s1pdgs.cpoc.common.ProductFamily;
+import esa.s1pdgs.cpoc.mqi.model.control.ControlAction;
 
 public class CompressionJob extends AbstractMessage {	
 	// use some sane defaults
@@ -12,6 +14,7 @@ public class CompressionJob extends AbstractMessage {
 
 	public CompressionJob() {
 		super();
+		setAllowedControlActions(Arrays.asList(ControlAction.RESTART));
 	}	
 
 	public CompressionJob(
@@ -25,6 +28,7 @@ public class CompressionJob extends AbstractMessage {
 		this.outputKeyObjectStorage = outputKeyObjectStorage;
 		this.outputProductFamily = outputProductFamily;
 		this.compressionDirection = compressionDirection;
+		setAllowedControlActions(Arrays.asList(ControlAction.RESTART));
 	}
 
 	public ProductFamily getOutputProductFamily() {
@@ -54,7 +58,8 @@ public class CompressionJob extends AbstractMessage {
 	@Override
 	public int hashCode() {
 		return Objects.hash(compressionDirection, creationDate, hostname, keyObjectStorage, outputKeyObjectStorage,
-				outputProductFamily, productFamily, uid);
+				outputProductFamily, productFamily, uid,
+				allowedControlActions, controlDemandType, controlDebug, controlRetryCounter);
 	}
 
 	@Override
@@ -76,7 +81,11 @@ public class CompressionJob extends AbstractMessage {
 				&& Objects.equals(outputKeyObjectStorage, other.outputKeyObjectStorage)
 				&& Objects.equals(uid, other.uid)
 				&& outputProductFamily == other.outputProductFamily 
-				&& productFamily == other.productFamily;
+				&& productFamily == other.productFamily
+				&& Objects.equals(allowedControlActions, other.getAllowedControlActions())
+		        && controlDemandType == other.controlDemandType
+		        && controlDebug == other.controlDebug
+		        && controlRetryCounter == other.controlRetryCounter;
 	}
 
 	@Override

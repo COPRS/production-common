@@ -1,6 +1,9 @@
 package esa.s1pdgs.cpoc.mqi.model.queue;
 
+import java.util.Arrays;
 import java.util.Objects;
+
+import esa.s1pdgs.cpoc.mqi.model.control.ControlAction;
 
 public class CatalogJob extends AbstractMessage {	
 	private String productName = NOT_DEFINED;
@@ -9,6 +12,11 @@ public class CatalogJob extends AbstractMessage {
     private OQCFlag oqcFlag = OQCFlag.NOT_CHECKED;
     private String timeliness;
     private String stationName;
+    
+    public CatalogJob() {
+    	super();
+    	setAllowedControlActions(Arrays.asList(ControlAction.RESTART));
+	}
     
 	public String getProductName() {
 		return productName;
@@ -61,7 +69,8 @@ public class CatalogJob extends AbstractMessage {
 	@Override
 	public int hashCode() {
 		return Objects.hash(creationDate, hostname, keyObjectStorage, relativePath, mode, oqcFlag, timeliness,
-				productFamily, productName, uid, stationName);
+				productFamily, productName, uid, stationName,
+				allowedControlActions, controlDemandType, controlDebug, controlRetryCounter);
 	}
 
 	@Override
@@ -86,7 +95,11 @@ public class CatalogJob extends AbstractMessage {
 				&& productFamily == other.productFamily
 				&& Objects.equals(uid, other.uid)
 				&& Objects.equals(stationName, other.stationName)
-				&& Objects.equals(productName, other.productName);
+				&& Objects.equals(productName, other.productName)
+				&& Objects.equals(allowedControlActions, other.getAllowedControlActions())
+		        && controlDemandType == other.controlDemandType
+		        && controlDebug == other.controlDebug
+		        && controlRetryCounter == other.controlRetryCounter;
 	}
 
 	@Override

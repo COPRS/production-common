@@ -59,20 +59,20 @@ public class MqiMessageFilter implements MessageFilter {
 
 		if (allowRegex == null) {
 			if (Pattern.matches(disallowRegex, message.getKeyObjectStorage())) {
-				LOG.debug("message not accepted, {} matches disallowRegex: {}", message.getKeyObjectStorage(), disallowRegex);
+				LOG.debug("message not accepted, {} matches disallowRegex: {} for family {}", message.getKeyObjectStorage(), disallowRegex, message.getProductFamily());
 				return false;
 			} else {
-				LOG.debug("message accepted, {} not matches disallowRegex: {}", message.getKeyObjectStorage(), disallowRegex);
+				LOG.debug("message accepted, {} not matches disallowRegex: {} for family {}", message.getKeyObjectStorage(), disallowRegex, message.getProductFamily());
 				return true;
 			}
 		}
 
 		if (disallowRegex == null) {
 			if (Pattern.matches(allowRegex, message.getKeyObjectStorage())) {
-				LOG.debug("message accepted, {} matches allowRegex: {}", message.getKeyObjectStorage(), allowRegex);
+				LOG.debug("message accepted, {} matches allowRegex: {} for family {}", message.getKeyObjectStorage(), allowRegex, message.getProductFamily());
 				return true;
 			} else {
-				LOG.debug("message not accepted, {} not matches allowRegex: {}", message.getKeyObjectStorage(), allowRegex);
+				LOG.debug("message not accepted, {} not matches allowRegex: {} for family {}", message.getKeyObjectStorage(), allowRegex, message.getProductFamily());
 				return false;
 			}
 		}

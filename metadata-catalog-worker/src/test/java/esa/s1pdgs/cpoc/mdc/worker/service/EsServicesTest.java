@@ -407,7 +407,7 @@ public class EsServicesTest{
         this.mockSearchRequest(response);
         
         try {
-            final List<SearchMetadata> result = esServices.valIntersect("beginDate", "endDate", "productType", "processMode", "satelliteId");
+            final List<SearchMetadata> result = esServices.valIntersect("beginDate", "endDate", "productType", ProductFamily.L0_SEGMENT, "processMode", "satelliteId");
             assertEquals("Search metadata are not equals", expectedResult, result);
         } catch (final Exception e) {
             fail("Exception occurred: " + e.getMessage());
@@ -417,7 +417,7 @@ public class EsServicesTest{
     @Test(expected = Exception.class)
     public void valIntersectIOExceptionTest() throws Exception {
         this.mockSearchRequestThrowIOException();
-        esServices.valIntersect("beginDate", "endDate", "productType", "processMode", "satelliteId");
+        esServices.valIntersect("beginDate", "endDate", "productType", ProductFamily.L0_SEGMENT, "processMode", "satelliteId");
     }
     
     @Test
@@ -438,7 +438,71 @@ public class EsServicesTest{
         this.mockSearchRequest(response);
         
         try {
-            final List<SearchMetadata> result = esServices.valIntersect("beginDate", "endDate", "productType", "processMode", "satelliteId");
+            final List<SearchMetadata> result = esServices.valIntersect("beginDate", "endDate", "productType", ProductFamily.L0_SEGMENT, "processMode", "satelliteId");
+            assertEquals("Search metadata are not equals", null, result);
+        } catch (final Exception e) {
+            fail("Exception occurred: " + e.getMessage());
+        }
+    }
+    
+    @Test
+    public void lastValIntersectTest() throws IOException {
+        // Product
+        final SearchMetadata expectedResult = new SearchMetadata();
+        expectedResult.setProductName("name");
+        expectedResult.setProductType("product_type");
+        expectedResult.setKeyObjectStorage("url");
+        expectedResult.setValidityStart("2000-01-01T00:00:00.000000Z");
+        expectedResult.setValidityStop("2001-01-01T00:00:00.000000Z");
+        
+        //Response
+        final BytesReference source = new BytesArray("{\"productName\":\"name\",\"url\""
+                + ":\"url\",\"startTime\":\"2000-01-01T00:00:00.000000Z\",\"stopTime\":"
+                + "\"2001-01-01T00:00:00.000000Z\", \"productType\": \"product_type\"}");
+        final SearchHit hit = new SearchHit(1);
+        hit.sourceRef(source);
+        final SearchHit[] hits = {hit};
+        final TotalHits totalHits = new TotalHits(1, Relation.EQUAL_TO);
+        final SearchHits searchHits = new SearchHits(hits, totalHits, 1.0F);
+        final SearchResponseSections searchResponsSections = new SearchResponseSections(searchHits, null, null, false, Boolean.FALSE, null, 0);
+        final SearchResponse response = new SearchResponse(searchResponsSections, "1", 1,1,0,25,null,null);
+        
+        //Mocking the search request
+        this.mockSearchRequest(response);
+        
+        try {
+            final SearchMetadata result = esServices.lastValIntersect("beginDate", "endDate", "productType", ProductFamily.L0_SEGMENT, "processMode", "satelliteId");
+            assertEquals("Search metadata are not equals", expectedResult, result);
+        } catch (final Exception e) {
+            fail("Exception occurred: " + e.getMessage());
+        }
+    }
+    
+    @Test(expected = Exception.class)
+    public void lastValIntersectIOExceptionTest() throws Exception {
+        this.mockSearchRequestThrowIOException();
+        esServices.lastValIntersect("beginDate", "endDate", "productType", ProductFamily.L0_SEGMENT, "processMode", "satelliteId");
+    }
+    
+    @Test
+    public void lastValIntersectNoHitTest() throws IOException {
+        //Response
+        final BytesReference source = new BytesArray("{\"productName\":\"name\",\"url\""
+                + ":\"url\",\"validityStartTime\":\"validityStartTime\",\"validityStopTime\":"
+                + "\"validityStopTime\", \"productType\": \"product_type\"}");
+        final SearchHit hit = new SearchHit(1);
+        hit.sourceRef(source);
+        final SearchHit[] hits = {hit};
+        final TotalHits totalHits = new TotalHits(0, Relation.EQUAL_TO);
+        final SearchHits searchHits = new SearchHits(hits, totalHits, 1.0F);
+        final SearchResponseSections searchResponsSections = new SearchResponseSections(searchHits, null, null, false, Boolean.FALSE, null, 0);
+        final SearchResponse response = new SearchResponse(searchResponsSections, "1", 1,1,0,25,null,null);
+        
+        //Mocking the search request
+        this.mockSearchRequest(response);
+        
+        try {
+            final SearchMetadata result = esServices.lastValIntersect("beginDate", "endDate", "productType", ProductFamily.L0_SEGMENT, "processMode", "satelliteId");
             assertEquals("Search metadata are not equals", null, result);
         } catch (final Exception e) {
             fail("Exception occurred: " + e.getMessage());

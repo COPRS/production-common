@@ -19,6 +19,15 @@ public enum TaskTableInputMode {
 
 	@XmlEnumValue("NON_SLICING")
 	NON_SLICING,
+	
+	@XmlEnumValue("NRT")
+	NRT,
+	
+	@XmlEnumValue("NTC")
+	NTC,
+	
+	@XmlEnumValue("STC")
+	STC,
  
     @XmlEnumValue("")
     BLANK;

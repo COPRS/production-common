@@ -34,13 +34,16 @@ public class FailedProcessing extends AbstractRequest {
 	private Date lastAssignmentDate; 
 	private Date failureDate;
 	private String failureMessage;
+	private Object predecessorDto;
+	private String predecessorTopic;
 	
 	public FailedProcessing()	{		
 	}
 
 	public FailedProcessing(long id, ProductCategory category, String topic, int partition, long offset, String group,
 			MessageState state, String sendingPod, Date lastSendDate, Date lastAckDate, int nbRetries, Object dto,
-			Date creationDate, String failedPod, Date lastAssignmentDate, Date failureDate, String failureMessage) {
+			Date creationDate, String failedPod, Date lastAssignmentDate, Date failureDate, String failureMessage,
+			Object predecessorDto, String predecessorTopic) {
 		super(category, topic, partition, offset, group, state, sendingPod, lastSendDate, lastAckDate, nbRetries, dto,
 				creationDate);
 		this.id = id;
@@ -48,10 +51,12 @@ public class FailedProcessing extends AbstractRequest {
 		this.lastAssignmentDate = lastAssignmentDate;
 		this.failureDate = failureDate;
 		this.failureMessage = failureMessage;
+		this.predecessorDto = predecessorDto;
+		this.predecessorTopic = predecessorTopic;
 	}
 	
 	@JsonIgnore
-	public static FailedProcessing valueOf(final MqiMessage message, final FailedProcessingDto failedProc)
+	public static FailedProcessing valueOf(final MqiMessage message, final FailedProcessingDto failedProc, final String predecessorTopic)
 	{
 		return new FailedProcessing(
 				message.getId(), 
@@ -70,7 +75,9 @@ public class FailedProcessing extends AbstractRequest {
 				failedProc.getFailedPod(), 
 				message.getLastReadDate(), 
 				failedProc.getFailedDate(), 
-				failedProc.getFailureMessage()
+				failedProc.getFailureMessage(),
+				failedProc.getPredecessor() != null ? failedProc.getPredecessor().getBody() : null,
+				predecessorTopic
 		);
 	}
 	
@@ -162,6 +169,16 @@ public class FailedProcessing extends AbstractRequest {
 		return super.getCreationDate();
 	}
 	
+	@JsonProperty("predecessor")
+	public Object getPredecessorDto() {
+		return this.predecessorDto;
+	}
+	
+	@JsonProperty("predecessorTopic")
+	public String getPredecessorTopic() {
+		return this.predecessorTopic;
+	}
+	
 	@Override
 	public boolean equals(java.lang.Object o) {
 		if (this == o) {
@@ -188,7 +205,9 @@ public class FailedProcessing extends AbstractRequest {
 				&& Objects.equals(this.getCreationDate(), failedProcessing.getCreationDate())
 				&& Objects.equals(this.failureDate, failedProcessing.failureDate)
 				&& Objects.equals(this.failureMessage, failedProcessing.failureMessage)
-				&& Objects.equals(this.getDto(), failedProcessing.getDto());
+				&& Objects.equals(this.getDto(), failedProcessing.getDto())
+		        && Objects.equals(this.getPredecessorDto(), failedProcessing.getPredecessorDto())
+		        && Objects.equals(this.getPredecessorTopic(), failedProcessing.getPredecessorTopic());
 	}
 
 	@Override
@@ -210,7 +229,9 @@ public class FailedProcessing extends AbstractRequest {
 				getCreationDate(), 
 				failureDate,
 				failureMessage,
-				getDto()
+				getDto(),
+				getPredecessorDto(),
+				getPredecessorTopic()
 		);
 	}
 
@@ -234,7 +255,9 @@ public class FailedProcessing extends AbstractRequest {
 		sb.append("    creationDate: ").append(toIndentedString(getCreationDate())).append("\n");
 		sb.append("    failureDate: ").append(toIndentedString(failureDate)).append("\n");
 		sb.append("    failureMessage: ").append(toIndentedString(failureMessage)).append("\n");
-		sb.append("    processingDetails: ").append(toIndentedString(getDto())).append("\n");		
+		sb.append("    processingDetails: ").append(toIndentedString(getDto())).append("\n");
+		sb.append("    predecessor: ").append(toIndentedString(getPredecessorDto())).append("\n");
+		sb.append("    predecessorTopic: ").append(toIndentedString(getPredecessorTopic())).append("\n");
 		sb.append("}");
 		return sb.toString();
 	}

@@ -78,6 +78,7 @@ public class TaskCallable implements Callable<TaskResult> {
         Process process = null;
         try {
             final ProcessBuilder builder = new ProcessBuilder();
+            LOGGER.info("Start IPFSimulator with binary {}, jobOrder {} and workingDirectory {}", binaryPath, jobOrderPath, workDirectory);
             builder.command(binaryPath, jobOrderPath);
             builder.directory(new File(workDirectory));
             process = builder.start();

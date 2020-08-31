@@ -62,7 +62,9 @@ public class MessageManager {
 			LOGGER.debug("{} new MqiMessage inserted {}", logPrefix, messageToInsert); 
 		    return messageToInsert;
 		}
-		LOGGER.debug("{} Found MqiMessage", logPrefix);  
+		else {
+			LOGGER.debug("{} Found MqiMessage: {}", logPrefix, responseFromDB);  
+		}		
 		final MqiMessage messageFromDB = responseFromDB.get(0);          
 		handleUpdateState(logPrefix, messageFromDB, body.isForce(), body.getPod());
 		return messageFromDB;

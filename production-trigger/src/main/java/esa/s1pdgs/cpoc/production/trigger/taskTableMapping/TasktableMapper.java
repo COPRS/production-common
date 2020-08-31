@@ -1,7 +1,9 @@
 package esa.s1pdgs.cpoc.production.trigger.taskTableMapping;
 
-import esa.s1pdgs.cpoc.appcatalog.AppDataJobProduct;
+import java.util.List;
+
+import esa.s1pdgs.cpoc.mqi.model.queue.CatalogEvent;
 
 public interface TasktableMapper {	
-	public String tasktableFor(AppDataJobProduct product);
+	public List<String> tasktableFor(CatalogEvent product);
 }

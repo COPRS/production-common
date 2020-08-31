@@ -1,12 +1,20 @@
 package esa.s1pdgs.cpoc.mqi.model.queue;
 
+import java.util.Arrays;
 import java.util.Map;
 import java.util.Objects;
+
+import esa.s1pdgs.cpoc.mqi.model.control.ControlAction;
 
 public class CatalogEvent extends AbstractMessage {	
 	private String productName;
 	private String productType;
 	private Map<String,Object> metadata;
+	
+	public CatalogEvent() {
+		super();
+		setAllowedControlActions(Arrays.asList(ControlAction.RESUBMIT));
+	}
 	
 	public String getProductName() {
 		return productName;
@@ -35,7 +43,8 @@ public class CatalogEvent extends AbstractMessage {
 	@Override
 	public int hashCode() {
 		return Objects.hash(creationDate, hostname, productName, productType,
-				keyObjectStorage, metadata, productFamily, uid);
+				keyObjectStorage, metadata, productFamily, uid,
+				allowedControlActions, controlDemandType, controlDebug, controlRetryCounter);
 	}
 
 	@Override
@@ -57,7 +66,11 @@ public class CatalogEvent extends AbstractMessage {
 				&& Objects.equals(metadata, other.metadata)
 				&& Objects.equals(keyObjectStorage, other.keyObjectStorage)
 				&& Objects.equals(uid, other.uid)
-				&& productFamily == other.productFamily;
+				&& productFamily == other.productFamily
+				&& Objects.equals(allowedControlActions, other.getAllowedControlActions())
+		        && controlDemandType == other.controlDemandType
+		        && controlDebug == other.controlDebug
+		        && controlRetryCounter == other.controlRetryCounter;
 	}
 
 	@Override

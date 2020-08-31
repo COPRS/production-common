@@ -1,11 +1,14 @@
 package esa.s1pdgs.cpoc.mqi.model.queue;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 import java.util.UUID;
 
 import esa.s1pdgs.cpoc.common.ProductFamily;
+import esa.s1pdgs.cpoc.mqi.model.control.ControlAction;
+import esa.s1pdgs.cpoc.mqi.model.rest.GenericMessageDto;
 
 /**
  * Exchanged object for the product category LevelJobs.
@@ -51,12 +54,16 @@ public class IpfExecutionJob extends AbstractMessage {
      * The pools shall be executed one after one if the previous execution is ok
      */
     private List<LevelJobPoolDto> pools= new ArrayList<>();
+    
+    
+    private GenericMessageDto<IpfPreparationJob> ipfPreparationJobMessage;
 
     /**
      * Default constructor
      */
     public IpfExecutionJob() {
     	super();
+    	setAllowedControlActions(Arrays.asList(ControlAction.RESTART, ControlAction.REEVALUATE));
     }
 
     /**
@@ -71,6 +78,7 @@ public class IpfExecutionJob extends AbstractMessage {
         this.jobOrder = jobOrder;
         this.uid = reportingTaskUID;
         this.timeliness = timeliness;
+        setAllowedControlActions(Arrays.asList(ControlAction.RESTART, ControlAction.REEVALUATE));
     }
 
     /**
@@ -217,11 +225,20 @@ public class IpfExecutionJob extends AbstractMessage {
     public void addPool(final LevelJobPoolDto pool) {
         this.pools.add(pool);
     }
+    
+	public GenericMessageDto<IpfPreparationJob> getIpfPreparationJobMessage() {
+		return ipfPreparationJobMessage;
+	}
+
+	public void setIpfPreparationJobMessage(GenericMessageDto<IpfPreparationJob> ipfPreparationJobMessage) {
+		this.ipfPreparationJobMessage = ipfPreparationJobMessage;
+	}
 
 	@Override
 	public int hashCode() {
 		return Objects.hash(creationDate, hostname, inputs, jobOrder, timeliness, keyObjectStorage, outputs, pools,
-				productFamily, productProcessMode, workDirectory,  uid);
+				productFamily, productProcessMode, workDirectory,  uid, ipfPreparationJobMessage,
+				allowedControlActions, controlDemandType, controlDebug, controlRetryCounter);
 	}
 
 	@Override
@@ -247,7 +264,12 @@ public class IpfExecutionJob extends AbstractMessage {
 				&& productFamily == other.productFamily
 				&& Objects.equals(productProcessMode, other.productProcessMode)
 				&& Objects.equals(workDirectory, other.workDirectory)
-				&& Objects.equals(uid, other.uid);
+				&& Objects.equals(uid, other.uid)
+				&& Objects.equals(ipfPreparationJobMessage, other.ipfPreparationJobMessage)
+				&& Objects.equals(allowedControlActions, other.getAllowedControlActions())
+		        && controlDemandType == other.controlDemandType
+		        && controlDebug == other.controlDebug
+		        && controlRetryCounter == other.controlRetryCounter;
 	}
 
 	@Override
@@ -256,7 +278,7 @@ public class IpfExecutionJob extends AbstractMessage {
 				+ ", creationDate=" + creationDate + ", hostname=" + hostname + ", productProcessMode="
 				+ productProcessMode + ", workDirectory=" + workDirectory + ", jobOrder=" + jobOrder +
 				", timeliness=" + timeliness + ", inputs=" + inputs + ", outputs=" + outputs +
-				", pools=" + pools + ", uid=" + uid +"]";
+				", pools=" + pools + ", uid=" + uid + ", ipfPreparationJobMessage=" + ipfPreparationJobMessage + "]";
 	}
 
 }

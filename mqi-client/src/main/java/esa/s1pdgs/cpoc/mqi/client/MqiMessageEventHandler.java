@@ -1,6 +1,5 @@
 package esa.s1pdgs.cpoc.mqi.client;
 
-import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.Callable;
 import java.util.function.Consumer;
@@ -14,15 +13,17 @@ public class MqiMessageEventHandler {
 	public static final class Builder<E extends AbstractMessage> {		
 		private final ProductCategory cat;
 		
-		private Callable<List<GenericPublicationMessageDto<E>>> processor = () -> Collections.emptyList();
+		@SuppressWarnings("unchecked")
+		private Callable<MqiPublishingJob<E>> processor = ()-> (MqiPublishingJob<E>)MqiPublishingJob.NULL;
 		private Consumer<List<GenericPublicationMessageDto<E>>> onSuccess = p -> {};
+		private Consumer<List<GenericPublicationMessageDto<E>>> onWarning = p -> {};
 		private Consumer<Exception> onError = p -> {};
 		
 		public Builder(final ProductCategory cat) {
 			this.cat = cat;
 		}
 
-		public final Builder<E> publishMessageProducer(final Callable<List<GenericPublicationMessageDto<E>>> messageProcessor) {
+		public final Builder<E> publishMessageProducer(final Callable<MqiPublishingJob<E>> messageProcessor) {
 			if (messageProcessor != null) {
 				processor = messageProcessor;
 			}
@@ -32,6 +33,13 @@ public class MqiMessageEventHandler {
 		public final Builder<E> onSuccess(final Consumer<List<GenericPublicationMessageDto<E>>> consumer) {
 			if (consumer != null) {
 				onSuccess = consumer;
+			}
+			return this;
+		}
+		
+		public final Builder<E> onWarning(final Consumer<List<GenericPublicationMessageDto<E>>> consumer) {
+			if (consumer != null) {
+				onWarning = consumer;
 			}
 			return this;
 		}
@@ -53,8 +61,9 @@ public class MqiMessageEventHandler {
 				.newResult();
 	}
 	
-	private final Callable<List<GenericPublicationMessageDto<? extends AbstractMessage>>> processor;
+	private final Callable<MqiPublishingJob<? extends AbstractMessage>> processor;
 	private final Consumer<List<GenericPublicationMessageDto<? extends AbstractMessage>>> onSuccess;
+	private final Consumer<List<GenericPublicationMessageDto<? extends AbstractMessage>>> onWarning;
 	private final Consumer<Exception> onError;
 	private final ProductCategory cat;
 	
@@ -62,18 +71,25 @@ public class MqiMessageEventHandler {
 	MqiMessageEventHandler(final Builder builder) {
 		this.processor	= builder.processor;
 		this.onSuccess 	= builder.onSuccess;
+		this.onWarning 	= builder.onWarning;
 		this.onError 	= builder.onError;
 		this.cat		= builder.cat;
 	}
 
-	public final void processMessages(final MqiClient client) throws Exception {		
+	public final String processMessages(final MqiClient client) throws Exception {		
 		try {
-			final List<GenericPublicationMessageDto<? extends AbstractMessage>> result = processor.call();
-			for (final GenericPublicationMessageDto<? extends AbstractMessage> message : result) {
+			final MqiPublishingJob<?> mqiPublishingJob = processor.call();			
+			for (final GenericPublicationMessageDto<? extends AbstractMessage> message : mqiPublishingJob.getMessages()) {
 				MqiConsumer.LOG.info("Publishing category {} message: {}", cat, message);
 				client.publish(message, cat);
-			}			
-			onSuccess.accept(result);
+			}
+			String warning = mqiPublishingJob.getWarning();
+			if (!"".equals(warning)) {
+				onWarning.accept(mqiPublishingJob.getMessages());
+			} else {
+				onSuccess.accept(mqiPublishingJob.getMessages());
+			}
+			return warning;
 		}
 		catch (final Exception e) {
 			onError.accept(e);

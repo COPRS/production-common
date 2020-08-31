@@ -49,6 +49,8 @@ public final class JobGeneratorImpl implements JobGenerator {
 						"querying input " + job.getProductName()
 				);
 				job.setProduct(queried.toProduct());
+				job.setAdditionalInputs(queried.overridingInputs());
+				
 				// FIXME dirty workaroung warning, the product above is still altered in validate by modifying 
 				// the start stop time for segments
 				performVoid(

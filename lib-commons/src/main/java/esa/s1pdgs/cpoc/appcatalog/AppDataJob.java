@@ -8,6 +8,7 @@ import java.util.UUID;
 
 import esa.s1pdgs.cpoc.common.ApplicationLevel;
 import esa.s1pdgs.cpoc.mqi.model.queue.CatalogEvent;
+import esa.s1pdgs.cpoc.mqi.model.queue.IpfPreparationJob;
 import esa.s1pdgs.cpoc.mqi.model.rest.GenericMessageDto;
 
 /**
@@ -76,9 +77,8 @@ public class AppDataJob {
     
     private UUID reportingId;
     
-    private long prepJobMessageId;
-    
-    private String prepJobInputQueue;
+    private GenericMessageDto<IpfPreparationJob> prepJobMessage;
+
     
     public AppDataJob(final long id) {
     	this();
@@ -248,22 +248,6 @@ public class AppDataJob {
 		this.reportingId = reportingId;
 	}
 	
-    public long getPrepJobMessageId() {
-		return prepJobMessageId;
-	}
-
-	public void setPrepJobMessageId(final long prepJobMessageId) {
-		this.prepJobMessageId = prepJobMessageId;
-	}
-
-	public String getPrepJobInputQueue() {
-		return prepJobInputQueue;
-	}
-
-	public void setPrepJobInputQueue(final String prepJobInputQueue) {
-		this.prepJobInputQueue = prepJobInputQueue;
-	}
-	
 	public String getTaskTableName() {
 		return taskTableName;
 	}
@@ -296,13 +280,21 @@ public class AppDataJob {
 		this.productName = productName;
 	}
 
+	public GenericMessageDto<IpfPreparationJob> getPrepJobMessage() {
+		return prepJobMessage;
+	}
+
+	public void setPrepJobMessage(GenericMessageDto<IpfPreparationJob> prepJobMessage) {
+		this.prepJobMessage = prepJobMessage;
+	}
+
 	/**
      * @see java.lang.Object#hashCode()
      */
     @Override
     public int hashCode() {
         return Objects.hash(id, level, pod, state, taskTableName, startTime, stopTime, productName,
-                creationDate, lastUpdateDate, messages, product, additionalInputs, generation, reportingId, prepJobInputQueue, prepJobMessageId);
+                creationDate, lastUpdateDate, messages, product, additionalInputs, generation, reportingId, prepJobMessage);
     }
     
     @Override
@@ -311,8 +303,8 @@ public class AppDataJob {
 			    + ", taskTableName=" + taskTableName + ", startTime=" + startTime + ", stopTime=" + stopTime
                 + ", creationDate=" + creationDate + ", lastUpdateDate=" + lastUpdateDate + ", messages=" + messages
                 + ", product=" + product + ", additionalInputs=" + additionalInputs + ", generation=" + generation
-                + ", reportingId=" + reportingId + ", prepJobMessageId=" + prepJobMessageId + ", productName=" + productName
-                + ", prepJobInputQueue=" + prepJobInputQueue + "]";
+                + ", reportingId=" + reportingId + ", prepJobMessage=" + prepJobMessage + ", productName=" + productName
+                + "]";
 	}
 
 	/**
@@ -341,8 +333,7 @@ public class AppDataJob {
                     && Objects.equals(additionalInputs, other.additionalInputs)
                     && Objects.equals(generation, other.generation)
                     && Objects.equals(productName, other.productName)
-                    && Objects.equals(prepJobInputQueue, other.prepJobInputQueue)
-                    && Objects.equals(prepJobMessageId, other.prepJobMessageId)
+                    && Objects.equals(prepJobMessage, other.prepJobMessage)
                     && Objects.equals(reportingId, other.reportingId);
         }
         return ret;

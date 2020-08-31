@@ -42,7 +42,9 @@ import esa.s1pdgs.cpoc.ipf.preparation.worker.timeout.InputTimeoutChecker;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.timeout.InputTimeoutCheckerImpl;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.type.ProductTypeAdapter;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.type.edrs.AiopPropertiesAdapter;
+import esa.s1pdgs.cpoc.ipf.preparation.worker.type.edrs.EdrsSessionProductValidator;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.type.edrs.EdrsSessionTypeAdapter;
+import esa.s1pdgs.cpoc.ipf.preparation.worker.type.s3.S3TypeAdapter;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.type.segment.L0SegmentTypeAdapter;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.type.slice.LevelSliceTypeAdapter;
 import esa.s1pdgs.cpoc.metadata.client.MetadataClient;
@@ -117,6 +119,9 @@ public class IpfPreparationWorkerConfiguration {
 	@Bean(name="jobGenerationTaskScheduler", destroyMethod = "shutdown")
     public ThreadPoolTaskScheduler threadPoolTaskScheduler(final TasktableManager ttManager) {
         final ThreadPoolTaskScheduler threadPoolTaskScheduler = new ThreadPoolTaskScheduler();
+        if (ttManager.size() == 0) {
+        	throw new IllegalStateException("No tasktable defined");
+        }       
         threadPoolTaskScheduler.setPoolSize(ttManager.size());
         threadPoolTaskScheduler.setThreadNamePrefix("JobGenerationTaskScheduler");
         return threadPoolTaskScheduler;
@@ -127,7 +132,8 @@ public class IpfPreparationWorkerConfiguration {
 		if (processSettings.getLevel() == ApplicationLevel.L0) {
 			return new EdrsSessionTypeAdapter(
 					metadataClient, 
-					AiopPropertiesAdapter.of(aiopProperties)
+					AiopPropertiesAdapter.of(aiopProperties),
+					new EdrsSessionProductValidator()
 			);
 		}
 		else if (processSettings.getLevel() == ApplicationLevel.L0_SEGMENT) {
@@ -147,6 +153,8 @@ public class IpfPreparationWorkerConfiguration {
 					sliceOverlap, 
 					sliceLength
 			);			
+		} else if (EnumSet.of(ApplicationLevel.S3_L0, ApplicationLevel.S3_L1).contains(processSettings.getLevel())) {
+			return new S3TypeAdapter();
 		}
 		throw new IllegalArgumentException(
 				String.format(
@@ -156,7 +164,8 @@ public class IpfPreparationWorkerConfiguration {
 								ApplicationLevel.L0, 
 								ApplicationLevel.L0_SEGMENT, 
 								ApplicationLevel.L1, 
-								ApplicationLevel.L2
+								ApplicationLevel.L2,
+								ApplicationLevel.S3_L0
 						)
 				)
 		);

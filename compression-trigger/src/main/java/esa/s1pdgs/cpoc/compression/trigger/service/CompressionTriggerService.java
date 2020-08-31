@@ -1,6 +1,7 @@
 package esa.s1pdgs.cpoc.compression.trigger.service;
 
 import java.util.Arrays;
+import java.util.EnumSet;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -109,7 +110,9 @@ public class CompressionTriggerService {
 	private final MqiConsumer<?> newMqiConsumerFor(final ProductCategory cat, final CategoryConfig config) {
 		LOGGER.debug("Creating MQI consumer for category {} using {}", cat, config);
 		
-		if (cat == ProductCategory.LEVEL_SEGMENTS || cat == ProductCategory.LEVEL_PRODUCTS) {
+		if (EnumSet
+				.of(ProductCategory.LEVEL_SEGMENTS, ProductCategory.LEVEL_PRODUCTS, ProductCategory.S3_LEVEL_PRODUCTS)
+				.contains(cat)) {
 			return new MqiConsumer<ProductionEvent>(
 					mqiClient, 
 					cat, 

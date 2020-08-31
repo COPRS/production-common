@@ -128,6 +128,15 @@ public final class ReportAdapter implements Reporting {
 	
 	@Override
 	public final void end(final ReportingOutput out, final ReportingMessage reportingMessage) {
+		end(Level.INFO, out, reportingMessage);
+	}
+
+	@Override
+	public final void warning(final ReportingOutput out, final ReportingMessage reportingMessage) {
+		end(Level.WARNING, out, reportingMessage);
+	}
+	
+	private final void end(final Level level, final ReportingOutput out, final ReportingMessage reportingMessage) {
 		final long deltaTMillis = getDeltaMillis();
 		final long transferAmount = reportingMessage.getTransferAmount();
 		final EndTask endTask = new EndTask(
@@ -143,7 +152,7 @@ public final class ReportAdapter implements Reporting {
 			endTask.setRate(calcRate(transferAmount, deltaTMillis));
 		}
 		appender.report(new JacksonReportEntry(		
-				new Header(Level.INFO), 
+				new Header(level), 
 				new Message(toString(reportingMessage)),
 				endTask
 		));

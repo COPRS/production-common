@@ -142,7 +142,7 @@ public class RequestRepositoryTest {
 		
 		verify(failedProcessingRepo, times(1)).findById(123);
 		verify(failedProcessingRepo, times(1)).deleteById(123);
-		verify(submissionClient, times(1)).resubmit(fp, fp.getDto(), AppStatus.NULL);
+		verify(submissionClient, times(1)).resubmit(fp.getId(), fp.getTopic(), fp.getDto(), AppStatus.NULL);
 	}
 
 	@Test(expected = RuntimeException.class)
@@ -272,7 +272,7 @@ public class RequestRepositoryTest {
 	private final FailedProcessing newFailedProcessing(final long id, final AbstractMessage mess) {
 		final FailedProcessing fpDto = new FailedProcessing();
 		fpDto.setId(123);
-		fpDto.setDto(Collections.singletonList(mess));
+		fpDto.setDto(mess);
 		fpDto.setTopic("myTopic");
 		return fpDto;
 	}

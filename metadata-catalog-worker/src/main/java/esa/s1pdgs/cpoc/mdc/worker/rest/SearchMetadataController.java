@@ -142,7 +142,35 @@ public class SearchMetadataController {
 		try {
 			final List<SearchMetadata> response = new ArrayList<>();
 			
-			if ("LatestValCover".equals(mode)) {
+			if ("ValCover".equals(mode)) {
+				final List<SearchMetadata> f = esServices.valCover(
+						productType, 
+						ProductFamily.fromValue(productFamily),
+						convertDateForSearch(startDate, -dt0, DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.999999'Z'")),
+						convertDateForSearch(stopDate, dt1, DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.000000'Z'")),
+						satellite, 
+						insConfId, 
+						processMode
+				);
+
+				if (f != null) {
+					LOGGER.debug("Query returned {} results", f.size());				
+
+					for (final SearchMetadata m : f) {
+						response.add(new SearchMetadata(
+								m.getProductName(), 
+								m.getProductType(), 
+								m.getKeyObjectStorage(),
+								m.getValidityStart(), 
+								m.getValidityStop(), 
+								m.getMissionId(), 
+								m.getSatelliteId(),
+								m.getStationCode()
+						));
+					}
+				}
+				return new ResponseEntity<>(response, HttpStatus.OK);
+			} else if ("LatestValCover".equals(mode)) {
 				final SearchMetadata f = esServices.lastValCover(
 						productType, 
 						ProductFamily.fromValue(productFamily),
@@ -172,7 +200,8 @@ public class SearchMetadataController {
 				final List<SearchMetadata> f = esServices.valIntersect(
 						convertDateForSearch(startDate, -dt0, DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSSSSS'Z'")),
 						convertDateForSearch(stopDate, dt1, DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSSSSS'Z'")),
-						productType, 
+						productType,
+						ProductFamily.fromValue(productFamily),
 						processMode, 
 						satellite
 				);
@@ -243,7 +272,30 @@ public class SearchMetadataController {
 					));
 				}
 				return new ResponseEntity<>(response, HttpStatus.OK);
-			} else {				
+			} else if ("LatestValIntersect".equals(mode)) {
+				final SearchMetadata f = esServices.lastValIntersect(
+						convertDateForSearch(startDate, -dt0, DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSSSSS'Z'")),
+						convertDateForSearch(stopDate, dt1, DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSSSSS'Z'")),
+						productType,
+						ProductFamily.fromValue(productFamily),
+						processMode, 
+						satellite
+						);
+				
+				if (f != null) {
+					response.add(new SearchMetadata(
+							f.getProductName(), 
+							f.getProductType(), 
+							f.getKeyObjectStorage(),
+							f.getValidityStart(), 
+							f.getValidityStop(), 
+							f.getMissionId(), 
+							f.getSatelliteId(),
+							f.getStationCode()
+					));
+				}
+				return new ResponseEntity<>(response, HttpStatus.OK);
+			} else {
 				LOGGER.error("Invalid selection policy mode {} for product type {}", mode, productType);				
 				return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
 			}

@@ -19,6 +19,7 @@ import esa.s1pdgs.cpoc.errorrepo.ErrorRepoAppender;
 import esa.s1pdgs.cpoc.errorrepo.model.rest.FailedProcessingDto;
 import esa.s1pdgs.cpoc.mqi.client.MqiListener;
 import esa.s1pdgs.cpoc.mqi.client.MqiMessageEventHandler;
+import esa.s1pdgs.cpoc.mqi.client.MqiPublishingJob;
 import esa.s1pdgs.cpoc.mqi.model.queue.AbstractMessage;
 import esa.s1pdgs.cpoc.mqi.model.queue.EvictionManagementJob;
 import esa.s1pdgs.cpoc.mqi.model.rest.GenericMessageDto;
@@ -75,7 +76,7 @@ public class DataLifecycleTriggerListener<E extends AbstractMessage> implements 
 							inputEvent.getProductFamily(), 
 							evictionManagementJob
 					);
-					return Collections.singletonList(outputMessage);
+					return new MqiPublishingJob<EvictionManagementJob>(Collections.singletonList(outputMessage));
 				})
 				.newResult();
 	}

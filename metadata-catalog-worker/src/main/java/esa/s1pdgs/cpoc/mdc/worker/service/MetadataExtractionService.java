@@ -28,13 +28,14 @@ import esa.s1pdgs.cpoc.mdc.worker.config.TriggerConfigurationProperties;
 import esa.s1pdgs.cpoc.mdc.worker.config.TriggerConfigurationProperties.CategoryConfig;
 import esa.s1pdgs.cpoc.mdc.worker.extraction.MetadataExtractor;
 import esa.s1pdgs.cpoc.mdc.worker.extraction.MetadataExtractorFactory;
-import esa.s1pdgs.cpoc.mdc.worker.extraction.report.SegmentReportingOutput;
+import esa.s1pdgs.cpoc.mdc.worker.extraction.report.MetadataExtractionReportingOutput;
 import esa.s1pdgs.cpoc.mdc.worker.status.AppStatusImpl;
 import esa.s1pdgs.cpoc.mqi.client.MessageFilter;
 import esa.s1pdgs.cpoc.mqi.client.MqiClient;
 import esa.s1pdgs.cpoc.mqi.client.MqiConsumer;
 import esa.s1pdgs.cpoc.mqi.client.MqiListener;
 import esa.s1pdgs.cpoc.mqi.client.MqiMessageEventHandler;
+import esa.s1pdgs.cpoc.mqi.client.MqiPublishingJob;
 import esa.s1pdgs.cpoc.mqi.model.queue.CatalogEvent;
 import esa.s1pdgs.cpoc.mqi.model.queue.CatalogJob;
 import esa.s1pdgs.cpoc.mqi.model.queue.util.CatalogEventAdapter;
@@ -48,6 +49,9 @@ import esa.s1pdgs.cpoc.report.ReportingUtils;
 @Service
 public class MetadataExtractionService implements MqiListener<CatalogJob> {
 	private static final Logger LOG = LogManager.getLogger(MetadataExtractionService.class);
+	
+	public static final String KEY_PRODUCT_SENSING_START = "product_sensing_start_date";
+	public static final String KEY_PRODUCT_SENSING_STOP = "product_sensing_stop_date";
 
     private final AppStatusImpl appStatus;
     private final ErrorRepoAppender errorAppender;
@@ -158,7 +162,7 @@ public class MetadataExtractionService implements MqiListener<CatalogJob> {
 		return catEvent;
 	}
 	
-	private final List<GenericPublicationMessageDto<CatalogEvent>> handleMessage(
+	private final MqiPublishingJob<CatalogEvent> handleMessage(
 			final GenericMessageDto<CatalogJob> message, 
 			final Reporting reporting
 	) throws Exception {
@@ -200,22 +204,31 @@ public class MetadataExtractionService implements MqiListener<CatalogJob> {
 		);
 		messageDto.setInputKey(message.getInputKey());
 		messageDto.setOutputKey(determineOutputKeyDependentOnProductFamilyAndTimeliness(event));		    	
-		return Collections.singletonList(messageDto);
+		return new MqiPublishingJob<CatalogEvent>(Collections.singletonList(messageDto));
 	}
 	
-	private final ReportingOutput reportingOutput(
-			final List<GenericPublicationMessageDto<CatalogEvent>> pubs
-	) {
-		final GenericPublicationMessageDto<CatalogEvent> pub = pubs.get(0);	
+	private final ReportingOutput reportingOutput(final List<GenericPublicationMessageDto<CatalogEvent>> pubs) {
+		final GenericPublicationMessageDto<CatalogEvent> pub = pubs.get(0);
 		final CatalogEventAdapter eventAdapter = CatalogEventAdapter.of(pub);
-				
-		// S1PRO-1247: deal with segment scenario
-		if (pub.getFamily() == ProductFamily.L0_SEGMENT) {				
-			return new SegmentReportingOutput(
-					eventAdapter.productConsolidation(),
-					eventAdapter.productSensingConsolidation()
-			);			
+		final MetadataExtractionReportingOutput output = new MetadataExtractionReportingOutput();
+		
+		// S1PRO-1678: trace sensing start/stop
+		final String productSensingStartDate = eventAdapter.productSensingStartDate();
+		if (!CatalogEventAdapter.NOT_DEFINED.equals( productSensingStartDate)) {
+			output.withSensingStart(productSensingStartDate);
 		}
-		return ReportingOutput.NULL;
+		final String productSensingStopDate = eventAdapter.productSensingStopDate();
+		if (!CatalogEventAdapter.NOT_DEFINED.equals(productSensingStopDate)) {
+			output.withSensingStop(productSensingStopDate);
+		}
+
+		// S1PRO-1247: deal with segment scenario
+		if (pub.getFamily() == ProductFamily.L0_SEGMENT) {
+			output.withConsolidation(eventAdapter.productConsolidation())
+					.withSensingConsolidation(eventAdapter.productSensingConsolidation());
+		}
+		
+		return output.build();
 	}
+	
 }

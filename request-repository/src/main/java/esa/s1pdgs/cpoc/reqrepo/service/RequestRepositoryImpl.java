@@ -17,6 +17,7 @@ import esa.s1pdgs.cpoc.appcatalog.common.Processing;
 import esa.s1pdgs.cpoc.appstatus.AppStatus;
 import esa.s1pdgs.cpoc.common.MessageState;
 import esa.s1pdgs.cpoc.errorrepo.model.rest.FailedProcessingDto;
+import esa.s1pdgs.cpoc.mqi.model.queue.AbstractMessage;
 import esa.s1pdgs.cpoc.mqi.model.rest.GenericMessageDto;
 import esa.s1pdgs.cpoc.reqrepo.kafka.producer.SubmissionClient;
 import esa.s1pdgs.cpoc.reqrepo.repo.FailedProcessingRepo;
@@ -47,7 +48,17 @@ public class RequestRepositoryImpl implements RequestRepository {
 		final GenericMessageDto<?> dto = failedProcessingDto.getProcessingDetails();
 		final MqiMessage message = mqiMessageRepository.findById(dto.getId());
 		assertNotNull("original request", message, dto.getId());
-		failedProcessingRepo.save(FailedProcessing.valueOf(message, failedProcessingDto));
+		
+		// FIXME: workaraound for retry counter, shall only be increased when restarting or reevaluating
+		((AbstractMessage) dto.getBody()).increaseControlRetryCounter();
+		
+		String predecessorTopic = null;
+		if(failedProcessingDto.getPredecessor() != null) {
+			final MqiMessage predecessorMessage = mqiMessageRepository.findById(failedProcessingDto.getPredecessor().getId());
+			assertNotNull("predecessor request", predecessorMessage, failedProcessingDto.getPredecessor().getId());
+			predecessorTopic = predecessorMessage.getTopic();
+		}
+		failedProcessingRepo.save(FailedProcessing.valueOf(message, failedProcessingDto, predecessorTopic));
 	}
 
 	@Override
@@ -71,8 +82,25 @@ public class RequestRepositoryImpl implements RequestRepository {
 	public synchronized void restartAndDeleteFailedProcessing(final long id) {
 		final FailedProcessing failedProcessing = failedProcessingRepo.findById(id);
 		assertNotNull("failed request", failedProcessing, id);
-		assertTopicDefined(id, failedProcessing);	
-		kafkaSubmissionClient.resubmit(failedProcessing, failedProcessing.getDto(), status);
+		assertDtoDefined(id, failedProcessing);
+		assertTopicDefined(id, failedProcessing);
+		// TODO: is not possible to alter the retry counter here because the object being returned
+		// by Jackson is not a AbstractMessage its LinkedHashMap
+		// ((AbstractMessage) failedProcessing.getDto()).increaseControlRetryCounter();
+		kafkaSubmissionClient.resubmit(id, failedProcessing.getTopic(), failedProcessing.getDto(), status);
+		failedProcessingRepo.deleteById(id);
+	}
+	
+	@Override
+	public void reevaluateAndDeleteFailedProcessing(long id) {
+		final FailedProcessing failedProcessing = failedProcessingRepo.findById(id);
+		assertNotNull("failed request", failedProcessing, id);
+		assertPredecessorDefined(id, failedProcessing);
+		assertPredecessorTopicDefined(id, failedProcessing);
+		// TODO: is not possible to alter the retry counter here because the object being returned
+		// by Jackson is not a AbstractMessage its LinkedHashMap	
+		// ((AbstractMessage) failedProcessing.getPredecessorDto()).increaseControlRetryCounter(); 
+		kafkaSubmissionClient.resubmit(id, failedProcessing.getPredecessorTopic(), failedProcessing.getPredecessorDto(), status);
 		failedProcessingRepo.deleteById(id);
 	}
 
@@ -137,12 +165,48 @@ public class RequestRepositoryImpl implements RequestRepository {
 		}
 	}
 	
+	private static final void assertDtoDefined(final long id, final FailedProcessing failedProcessing) {
+		if (failedProcessing.getDto() == null)
+		{
+			throw new RuntimeException(
+					String.format(
+							"Failed to restart request id %s as it has no message specified (not restartable)", 
+							id
+					)
+			);
+		}
+	}
+	
 	private static final void assertTopicDefined(final long id, final FailedProcessing failedProcessing) {
 		if (failedProcessing.getTopic() == null)
 		{
 			throw new RuntimeException(
 					String.format(
 							"Failed to restart request id %s as it has no topic specified (not restartable)", 
+							id
+					)
+			);
+		}
+	}
+	
+	private static final void assertPredecessorDefined(final long id, final FailedProcessing failedProcessing) {
+		if (failedProcessing.getPredecessorDto() == null)
+		{
+			throw new RuntimeException(
+					String.format(
+							"Failed to reevaluate request id %s as it has no predecessor specified (not reevaluatable)", 
+							id
+					)
+			);
+		}
+	}
+	
+	private static final void assertPredecessorTopicDefined(final long id, final FailedProcessing failedProcessing) {
+		if (failedProcessing.getPredecessorTopic() == null)
+		{
+			throw new RuntimeException(
+					String.format(
+							"Failed to reevaluate request id %s as it has no predecessor topic specified (not reevaluatable)", 
 							id
 					)
 			);

@@ -50,7 +50,7 @@ public class TestMqiConsumer {
 	@Test
 	public final void testOnNominalHandling_ShallAcknowledgePostively() throws Exception {
 		final MqiMessageEventHandler handler = new MqiMessageEventHandler.Builder<CatalogJob>(ProductCategory.AUXILIARY_FILES)
-				.publishMessageProducer(() -> Collections.singletonList(new GenericPublicationMessageDto<CatalogJob>()))
+				.publishMessageProducer(() -> new MqiPublishingJob<>(Collections.singletonList(new GenericPublicationMessageDto<CatalogJob>())))
 				.newResult();
 		
 		

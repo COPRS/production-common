@@ -123,7 +123,9 @@ public class AppCatJobService {
 				job -> {
 					if (queried != null) {
 						final AppDataJobProduct prod = queried.toProduct();
-						job.setProduct(prod);
+						job.setProduct(prod);						
+						job.setAdditionalInputs(queried.overridingInputs());					
+						
 						// dirty workaround for segment scenario
 						final AppDataJobProductAdapter productAdapter = new AppDataJobProductAdapter(prod);
 						job.setStartTime(productAdapter.getStartTime());
