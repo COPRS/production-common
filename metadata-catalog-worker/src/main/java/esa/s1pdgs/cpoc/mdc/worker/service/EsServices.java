@@ -4,6 +4,8 @@ import java.io.IOException;
 import java.math.BigInteger;
 import java.time.Duration;
 import java.time.LocalDateTime;
+import java.time.ZoneOffset;
+import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -545,7 +547,7 @@ public class EsServices {
 		searchRequest.source(sourceBuilder);
 		return searchRequest;
 	}
-
+	
 	/*
 	 * ClosestStopValidity Similar to 'ClosestStartValidity', this policy uses a
 	 * centre time calculated as (t0-t1) / 2 to determine auxiliary data, which is
@@ -665,6 +667,97 @@ public class EsServices {
 			throw new Exception(e.getMessage());
 		}
 		return null;
+	}
+	
+	public List<SearchMetadata> fullCoverage(final String beginDate, final String endDate, final String productType,
+			final ProductFamily productFamily, final String processMode, final String satelliteId) throws Exception {
+		final SearchSourceBuilder sourceBuilder = new SearchSourceBuilder();
+		// Generic fields
+		final BoolQueryBuilder queryBuilder = QueryBuilders.boolQuery()
+				.must(QueryBuilders.rangeQuery("startTime").lt(endDate))
+				.must(QueryBuilders.rangeQuery("stopTime").gt(beginDate))
+				.must(satelliteId(satelliteId))
+				.must(QueryBuilders.regexpQuery("productType.keyword", productType))
+				.must(QueryBuilders.termQuery("processMode.keyword", processMode));
+		sourceBuilder.query(queryBuilder);
+		LOGGER.debug("fullCoverage: query composed is {}", queryBuilder);
+		sourceBuilder.size(SIZE_LIMIT);
+		
+		final SearchRequest searchRequest = new SearchRequest(getIndexForProductFamily(productFamily, productType));
+		searchRequest.source(sourceBuilder);
+		try {
+			final SearchResponse searchResponse = elasticsearchDAO.search(searchRequest);
+			LOGGER.debug("fullCoverage: Total Hits Found  {}", this.getTotalSearchHitsStr(searchResponse.getHits()));
+
+			if (this.isNotEmpty(searchResponse)) {
+				final List<SearchMetadata> r = new ArrayList<>();
+				for (final SearchHit hit : searchResponse.getHits().getHits()) {
+					final Map<String, Object> source = hit.getSourceAsMap();
+					final SearchMetadata local = new SearchMetadata();
+					local.setProductName(source.get("productName").toString());
+					local.setProductType(source.get("productType").toString());
+					local.setKeyObjectStorage(source.get("url").toString());
+
+					if (source.containsKey("startTime")) {
+						try {
+							local.setValidityStart(
+									DateUtils.convertToMetadataDateTimeFormat(source.get("startTime").toString()));
+						} catch (final DateTimeParseException e) {
+							throw new MetadataMalformedException("startTime");
+						}
+					}
+					if (source.containsKey("stopTime")) {
+						try {
+							local.setValidityStop(
+									DateUtils.convertToMetadataDateTimeFormat(source.get("stopTime").toString()));
+						} catch (final DateTimeParseException e) {
+							throw new MetadataMalformedException("stopTime");
+						}
+					}
+					r.add(local);
+				}
+				return checkIfFullyCoverage(r,beginDate, endDate,0);
+			}
+		} catch (final IOException e) {
+			throw new Exception(e.getMessage());
+		}
+		
+		return null;
+	}
+	
+	private List<SearchMetadata> checkIfFullyCoverage(final List<SearchMetadata> products, final String beginDateStr, final String endDateStr, final int gapThresholdMillis) {		
+		final LocalDateTime beginDate = DateUtils.parse(beginDateStr);
+		final LocalDateTime endDate = DateUtils.parse(beginDateStr);
+		
+	    // We initialize the reference time with the start time of the interval
+	    long refTime = beginDate.toEpochSecond(ZoneOffset.UTC);
+	    
+	    for (SearchMetadata product: products) {
+	    	/*
+	         * Try to detect, if the product does have a follower. This happens, when the following
+	         * criteria are both true:
+	         * 1. The startTime of the product lies before or directly on the current
+	         *    (refTime + gapThresholdMillis)
+	         * 2. The stopTime of the product must be bigger than the current refTime (to avoid
+	         *     refTime gets smaller again)
+	         */
+	    	long startTime = DateUtils.parse(product.getValidityStart()).toEpochSecond(ZoneOffset.UTC);
+	    	long stopTime = DateUtils.parse(product.getValidityStop()).toEpochSecond(ZoneOffset.UTC);
+	        if ((startTime <= refTime+gapThresholdMillis) &&
+	            (stopTime > refTime))
+	        {
+	          refTime = stopTime;
+	        }
+	    }
+	    
+	    if ((refTime+gapThresholdMillis) >= (endDate.toEpochSecond(ZoneOffset.UTC)+gapThresholdMillis))
+	    {
+	      // No gaps, full coverage, return all results
+	      return products;
+	    }
+	    
+	    // There was a gap in the coverage, return nothing
+	    return Collections.emptyList();
 	}
 
 	/**

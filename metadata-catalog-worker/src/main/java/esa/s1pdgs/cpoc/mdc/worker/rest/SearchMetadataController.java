@@ -317,6 +317,33 @@ public class SearchMetadataController {
 							f.getStationCode()
 					));
 				}
+				return new ResponseEntity<>(response, HttpStatus.OK);				
+			} else if ("FullCoverage".equals(mode)) {
+				final List<SearchMetadata> f = esServices.fullCoverage(
+						convertDateForSearch(startDate, -dt0, DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSSSSS'Z'")),
+						convertDateForSearch(stopDate, dt1, DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSSSSS'Z'")),
+						productType,
+						ProductFamily.fromValue(productFamily),
+						processMode, 
+						satellite
+				);
+
+				if (f != null) {
+					LOGGER.debug("Query returned {} results", f.size());				
+
+					for (final SearchMetadata m : f) {
+						response.add(new SearchMetadata(
+								m.getProductName(), 
+								m.getProductType(), 
+								m.getKeyObjectStorage(),
+								m.getValidityStart(), 
+								m.getValidityStop(), 
+								m.getMissionId(), 
+								m.getSatelliteId(),
+								m.getStationCode()
+						));
+					}					
+				}
 				return new ResponseEntity<>(response, HttpStatus.OK);
 			} else if ("LatestValidityClosest".equals(mode)) {
 				final SearchMetadata f = esServices.latestValidityClosest(
