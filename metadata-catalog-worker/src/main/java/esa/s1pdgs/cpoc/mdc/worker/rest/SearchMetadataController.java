@@ -318,6 +318,29 @@ public class SearchMetadataController {
 					));
 				}
 				return new ResponseEntity<>(response, HttpStatus.OK);
+			} else if ("LatestValidityClosest".equals(mode)) {
+				final SearchMetadata f = esServices.latestValidityClosest(
+						convertDateForSearch(startDate, -dt0, DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSSSSS'Z'")),
+						convertDateForSearch(stopDate, dt1, DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSSSSS'Z'")),
+						productType,
+						ProductFamily.fromValue(productFamily),
+						processMode, 
+						satellite
+						);
+				
+				if (f != null) {
+					response.add(new SearchMetadata(
+							f.getProductName(), 
+							f.getProductType(), 
+							f.getKeyObjectStorage(),
+							f.getValidityStart(), 
+							f.getValidityStop(), 
+							f.getMissionId(), 
+							f.getSatelliteId(),
+							f.getStationCode()
+					));
+				}
+				return new ResponseEntity<>(response, HttpStatus.OK);
 			} else {
 				LOGGER.error("Invalid selection policy mode {} for product type {}", mode, productType);				
 				return new ResponseEntity<>(HttpStatus.BAD_REQUEST);

@@ -1,6 +1,7 @@
 package esa.s1pdgs.cpoc.mdc.worker.service;
 
 import java.io.IOException;
+import java.math.BigInteger;
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeParseException;
@@ -664,6 +665,80 @@ public class EsServices {
 			throw new Exception(e.getMessage());
 		}
 		return null;
+	}
+
+	/**
+	 * From ValIntersect result set, select the one where startTime - (start-T0 + stop+T1) is minimal.
+	 */
+	public SearchMetadata latestValidityClosest(final String beginDate, final String endDate, final String productType,
+			final ProductFamily productFamily, final String processMode, final String satelliteId) throws Exception {
+
+		final SearchSourceBuilder sourceBuilder = new SearchSourceBuilder();
+		// Generic fields
+		final BoolQueryBuilder queryBuilder = QueryBuilders.boolQuery()
+				.must(QueryBuilders.rangeQuery("startTime").lt(endDate))
+				.must(QueryBuilders.rangeQuery("stopTime").gt(beginDate)).must(satelliteId(satelliteId))
+				.must(QueryBuilders.regexpQuery("productType.keyword", productType))
+				.must(QueryBuilders.termQuery("processMode.keyword", processMode));
+		sourceBuilder.query(queryBuilder);
+		LOGGER.debug("latestValidityClosest: query composed is {}", queryBuilder);
+		sourceBuilder.size(SIZE_LIMIT);
+
+		final SearchRequest searchRequest = new SearchRequest(getIndexForProductFamily(productFamily, productType));
+		searchRequest.source(sourceBuilder);
+		
+		Map<String, Object> r = null;
+		try {
+			final SearchResponse searchResponse = elasticsearchDAO.search(searchRequest);
+			LOGGER.debug("latestValidityClosest: Total Hits Found  {}", this.getTotalSearchHitsStr(searchResponse.getHits()));
+			
+			if (this.isNotEmpty(searchResponse)) {
+			
+				BigInteger distance = null;
+				final BigInteger valStart = BigInteger.valueOf(Duration.parse(beginDate).getNano());
+				final BigInteger valStop  = BigInteger.valueOf(Duration.parse(endDate).getNano());
+				
+				for (final SearchHit candidate : searchResponse.getHits().getHits()) {
+					final Map<String, Object> source = candidate.getSourceAsMap();
+					
+					final BigInteger requested_starttime  = BigInteger.valueOf(Duration.parse(source.get("startTime").toString()).getNano());
+					
+					final BigInteger magic = requested_starttime.subtract(valStart.add(valStop));
+					
+					if ((distance == null) || (magic.compareTo(distance) < 0))
+				    {
+						distance = magic;
+						r = candidate.getSourceAsMap();
+				    }
+				}
+			}
+		} catch (final IOException e) {
+			throw new Exception(e.getMessage());
+		}
+		
+		final SearchMetadata local = new SearchMetadata();
+		local.setProductName(r.get("productName").toString());
+		local.setProductType(r.get("productType").toString());
+		local.setKeyObjectStorage(r.get("url").toString());
+
+		if (r.containsKey("startTime")) {
+			try {
+				local.setValidityStart(
+						DateUtils.convertToMetadataDateTimeFormat(r.get("startTime").toString()));
+			} catch (final DateTimeParseException e) {
+				throw new MetadataMalformedException("startTime");
+			}
+		}
+		if (r.containsKey("stopTime")) {
+			try {
+				local.setValidityStop(
+						DateUtils.convertToMetadataDateTimeFormat(r.get("stopTime").toString()));
+			} catch (final DateTimeParseException e) {
+				throw new MetadataMalformedException("stopTime");
+			}
+		}
+		
+		return local;
 	}
 
 	/**
