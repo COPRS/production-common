@@ -788,13 +788,13 @@ public class EsServices {
 			if (this.isNotEmpty(searchResponse)) {
 			
 				BigInteger distance = null;
-				final BigInteger valStart = BigInteger.valueOf(Duration.parse(beginDate).getNano());
-				final BigInteger valStop  = BigInteger.valueOf(Duration.parse(endDate).getNano());
+				final BigInteger valStart = BigInteger.valueOf(DateUtils.parse(beginDate).getNano());
+				final BigInteger valStop  = BigInteger.valueOf(DateUtils.parse(beginDate).getNano());
 				
 				for (final SearchHit candidate : searchResponse.getHits().getHits()) {
 					final Map<String, Object> source = candidate.getSourceAsMap();
 					
-					final BigInteger requested_starttime  = BigInteger.valueOf(Duration.parse(source.get("startTime").toString()).getNano());
+					final BigInteger requested_starttime  = BigInteger.valueOf(DateUtils.parse(source.get("startTime").toString()).getNano());
 					
 					final BigInteger magic = requested_starttime.subtract(valStart.add(valStop));
 					
