@@ -49,6 +49,9 @@ public class RequestRepositoryImpl implements RequestRepository {
 		final MqiMessage message = mqiMessageRepository.findById(dto.getId());
 		assertNotNull("original request", message, dto.getId());
 		
+		// FIXME: workaraound for retry counter, shall only be increased when restarting or reevaluating
+		((AbstractMessage) dto.getBody()).increaseControlRetryCounter();
+		
 		String predecessorTopic = null;
 		if(failedProcessingDto.getPredecessor() != null) {
 			final MqiMessage predecessorMessage = mqiMessageRepository.findById(failedProcessingDto.getPredecessor().getId());
