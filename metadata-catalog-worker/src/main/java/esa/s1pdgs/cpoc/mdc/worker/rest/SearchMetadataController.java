@@ -317,7 +317,6 @@ public class SearchMetadataController {
 							f.getStationCode()
 					));
 				}
-<<<<<<< HEAD
 				return new ResponseEntity<>(response, HttpStatus.OK);				
 			} else if ("FullCoverage".equals(mode)) {
 				final List<SearchMetadata> f = esServices.fullCoverage(
@@ -345,8 +344,6 @@ public class SearchMetadataController {
 						));
 					}					
 				}
-=======
->>>>>>> branch 's3-develop' of https://gitlab.s1pdgs.eu/werum/processing/s1pro-core.git
 				return new ResponseEntity<>(response, HttpStatus.OK);
 			} else {
 				LOGGER.error("Invalid selection policy mode {} for product type {}", mode, productType);				
