@@ -5,7 +5,6 @@ import java.math.BigInteger;
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
-import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -939,13 +938,83 @@ public class EsServices {
 		}
 		return null;
 	}
+	
+	/**
+	 * Returned product covers entire interval and has the closest start time to the
+	 * beginning of the interval
+	 * 
+	 * @return product that matches mode
+	 * @throws Exception if start or stop time is in an invalid format, or the
+	 *                   search itself throws an error
+	 */
+	public SearchMetadata latestValCoverClosest(final String beginDate, final String endDate, final String productType,
+			final ProductFamily productFamily, final String processMode, final String satelliteId) throws Exception {
+		final SearchSourceBuilder sourceBuilder = new SearchSourceBuilder();
+		// Generic fields
+		final BoolQueryBuilder queryBuilder = QueryBuilders.boolQuery()
+				.must(QueryBuilders.rangeQuery("validityStartTime").lte(beginDate))
+				.must(QueryBuilders.rangeQuery("validityStopTime").gte(endDate)).must(satelliteId(satelliteId))
+				.must(QueryBuilders.regexpQuery("productType.keyword", productType));
+		sourceBuilder.query(queryBuilder);
+		LOGGER.debug("latestValCoverClosest: query composed is {}", queryBuilder);
+
+		sourceBuilder.size(SIZE_LIMIT);
+		sourceBuilder.sort(new FieldSortBuilder("creationTime").order(SortOrder.DESC));
+
+		final SearchRequest searchRequest = new SearchRequest(getIndexForProductFamily(productFamily, productType));
+		searchRequest.source(sourceBuilder);
+		try {
+			final SearchResponse searchResponse = elasticsearchDAO.search(searchRequest);
+			if (this.isNotEmpty(searchResponse)) {
+				SearchMetadata result = null;
+				for (final SearchHit hit : searchResponse.getHits().getHits()) {					
+					final Map<String, Object> source = hit.getSourceAsMap();
+					
+					/* 
+					 * Update result product, if we don't have a result product yet, or the start
+					 * time is after the current result product. If start times are the same we keep
+					 * the current result product, because it has the later creationTime of the two
+					 * (sorting of search query)
+					 */
+					if (source.containsKey("startTime")
+							&& (result == null || DateUtils.parse(result.getValidityStart())
+									.isBefore(DateUtils.parse(source.get("startTime").toString())))) {					
+						final SearchMetadata local = new SearchMetadata();
+						local.setProductName(source.get("productName").toString());
+						local.setProductType(source.get("productType").toString());
+						local.setKeyObjectStorage(source.get("url").toString());
+	
+						try {
+							local.setValidityStart(
+									DateUtils.convertToMetadataDateTimeFormat(source.get("startTime").toString()));
+						} catch (final DateTimeParseException e) {
+							throw new MetadataMalformedException("startTime");
+						}
+						if (source.containsKey("stopTime")) {
+							try {
+								local.setValidityStop(
+										DateUtils.convertToMetadataDateTimeFormat(source.get("stopTime").toString()));
+							} catch (final DateTimeParseException e) {
+								throw new MetadataMalformedException("stopTime");
+							}
+						}
+						result = local;
+					}
+				}
+				return result;
+			}
+		} catch (final IOException e) {
+			throw new Exception(e.getMessage());
+		}
+		return null;
+	}
 
 	/**
 	 * Queries the elastic search for products matching the given parameters. Query
 	 * build is based on the marginTT workflow extension.
 	 * 
 	 * @return list of matching products
-	 * @throws Exception if start or stop time is in an invalid format, or the searh
+	 * @throws Exception if start or stop time is in an invalid format, or the search
 	 *                   itself throws an error
 	 */
 	public List<S3Metadata> marginTTQuery(final String startTime, final String stopTime, final String productType,
