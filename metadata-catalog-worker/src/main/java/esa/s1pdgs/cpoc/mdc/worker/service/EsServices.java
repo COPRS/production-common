@@ -759,6 +759,56 @@ public class EsServices {
 	    // There was a gap in the coverage, return nothing
 	    return Collections.emptyList();
 	}
+	
+	public SearchMetadata latestStopValidity (final String beginDate, final String endDate, final String productType,
+			final ProductFamily productFamily, final String processMode, final String satelliteId) throws Exception {
+		final SearchSourceBuilder sourceBuilder = new SearchSourceBuilder();
+		// Generic fields
+		final BoolQueryBuilder queryBuilder = QueryBuilders.boolQuery()
+				.must(QueryBuilders.regexpQuery("productType.keyword", productType))
+				.must(satelliteId(satelliteId));
+		
+		sourceBuilder.query(queryBuilder);
+		LOGGER.debug("latestStopValidity: query composed is {}", queryBuilder);
+		
+		sourceBuilder.size(1);
+		sourceBuilder.sort(new FieldSortBuilder("stopTime").order(SortOrder.DESC));
+		
+		final SearchRequest searchRequest = new SearchRequest(getIndexForProductFamily(productFamily, productType));
+		searchRequest.source(sourceBuilder);
+		
+		try {
+			final SearchResponse searchResponse = elasticsearchDAO.search(searchRequest);
+			if (this.isNotEmpty(searchResponse)) {
+				final Map<String, Object> source = searchResponse.getHits().getAt(0).getSourceAsMap();
+				final SearchMetadata r = new SearchMetadata();
+				r.setProductName(source.get("productName").toString());
+				r.setProductType(source.get("productType").toString());
+				r.setKeyObjectStorage(source.get("url").toString());
+				if (source.containsKey("validityStartTime")) {
+					try {
+						r.setValidityStart(
+								DateUtils.convertToMetadataDateTimeFormat(source.get("validityStartTime").toString()));
+					} catch (final DateTimeParseException e) {
+						throw new MetadataMalformedException("validityStartTime");
+					}
+				}
+				if (source.containsKey("validityStopTime")) {
+					try {
+						r.setValidityStop(
+								DateUtils.convertToMetadataDateTimeFormat(source.get("validityStopTime").toString()));
+					} catch (final DateTimeParseException e) {
+						throw new MetadataMalformedException("validityStopTime");
+					}
+				}
+				return r;
+			}
+		} catch (final IOException e) {
+			throw new Exception(e.getMessage());
+		}
+		
+		return null;
+	}
 
 	/**
 	 * From ValIntersect result set, select the one where startTime - (start-T0 + stop+T1) is minimal.
@@ -770,7 +820,8 @@ public class EsServices {
 		// Generic fields
 		final BoolQueryBuilder queryBuilder = QueryBuilders.boolQuery()
 				.must(QueryBuilders.rangeQuery("startTime").lt(endDate))
-				.must(QueryBuilders.rangeQuery("stopTime").gt(beginDate)).must(satelliteId(satelliteId))
+				.must(QueryBuilders.rangeQuery("stopTime").gt(beginDate))
+				.must(satelliteId(satelliteId))
 				.must(QueryBuilders.regexpQuery("productType.keyword", productType))
 				.must(QueryBuilders.termQuery("processMode.keyword", processMode));
 		sourceBuilder.query(queryBuilder);
