@@ -33,7 +33,7 @@ public final class EdrsSessionProductValidator {
        		if (!raws1.isEmpty()) {
        			missing.put(product.getProductName(),"No DSIB for channel 1");   
        		}
-       		else {
+       		else if (missing.isEmpty()) {
        			LOG.info("channel2 is complete for {}. Continue without channel1", product.getProductName());
        		}
        	}
@@ -44,7 +44,7 @@ public final class EdrsSessionProductValidator {
        		if (!raws2.isEmpty()) {
        			missing.put(product.getProductName(),"No DSIB for channel 2"); 
        		}
-       		else {
+       		else if (missing.isEmpty()) {
        			LOG.info("channel1 is complete for {}. Continue without channel2", product.getProductName());
        		}
        	}
