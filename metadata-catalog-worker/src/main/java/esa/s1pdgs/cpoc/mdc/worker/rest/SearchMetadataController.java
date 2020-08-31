@@ -295,6 +295,56 @@ public class SearchMetadataController {
 					));
 				}
 				return new ResponseEntity<>(response, HttpStatus.OK);
+			} else if ("LatestValidity".equals(mode)) {
+				final SearchMetadata f = esServices.latestValidity(
+						convertDateForSearch(startDate, -dt0, DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSSSSS'Z'")),
+						convertDateForSearch(stopDate, dt1, DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSSSSS'Z'")),
+						productType,
+						ProductFamily.fromValue(productFamily),
+						processMode, 
+						satellite
+						);
+				
+				if (f != null) {
+					response.add(new SearchMetadata(
+							f.getProductName(), 
+							f.getProductType(), 
+							f.getKeyObjectStorage(),
+							f.getValidityStart(), 
+							f.getValidityStop(), 
+							f.getMissionId(), 
+							f.getSatelliteId(),
+							f.getStationCode()
+					));
+				}
+				return new ResponseEntity<>(response, HttpStatus.OK);				
+			} else if ("FullCoverage".equals(mode)) {
+				final List<SearchMetadata> f = esServices.fullCoverage(
+						convertDateForSearch(startDate, -dt0, DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSSSSS'Z'")),
+						convertDateForSearch(stopDate, dt1, DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSSSSS'Z'")),
+						productType,
+						ProductFamily.fromValue(productFamily),
+						processMode, 
+						satellite
+				);
+
+				if (f != null) {
+					LOGGER.debug("Query returned {} results", f.size());				
+
+					for (final SearchMetadata m : f) {
+						response.add(new SearchMetadata(
+								m.getProductName(), 
+								m.getProductType(), 
+								m.getKeyObjectStorage(),
+								m.getValidityStart(), 
+								m.getValidityStop(), 
+								m.getMissionId(), 
+								m.getSatelliteId(),
+								m.getStationCode()
+						));
+					}					
+				}
+				return new ResponseEntity<>(response, HttpStatus.OK);
 			} else {
 				LOGGER.error("Invalid selection policy mode {} for product type {}", mode, productType);				
 				return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
