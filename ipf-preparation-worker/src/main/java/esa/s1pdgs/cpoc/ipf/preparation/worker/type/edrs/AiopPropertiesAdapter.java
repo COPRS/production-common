@@ -23,15 +23,21 @@ public final class AiopPropertiesAdapter {
 	private Map<String,Map<String,String>> aiopProperties;
 	private long minimalWaitingTimeSec;	
 	private boolean disableTimeout;
+	private String nrtOutputPath;
+	private String ptOutputPath;
 	
 	public AiopPropertiesAdapter(
 			final Map<String, Map<String, String>> aiopProperties, 
 			final long minimalWaitingTimeSec,
-			final boolean disableTimeout
+			final boolean disableTimeout,
+			final String nrtOutputPath,
+			final String ptOutputPath			
 		) {
 		this.aiopProperties = aiopProperties;
 		this.minimalWaitingTimeSec = minimalWaitingTimeSec;
 		this.disableTimeout = disableTimeout;
+		this.nrtOutputPath = nrtOutputPath;
+		this.ptOutputPath = ptOutputPath;
 	}
 
 	public static final AiopPropertiesAdapter of(final AiopProperties props) {        
@@ -60,7 +66,9 @@ public final class AiopPropertiesAdapter {
         return new AiopPropertiesAdapter(
         		aiopProperties, 
         		props.getMinimalWaitingTimeSec(),  
-        		props.getDisableTimeout()
+        		props.getDisableTimeout(),
+        		props.getNrtOutputPath(),
+        		props.getPtOutputPath()
         );
 	}
 	
@@ -114,6 +122,8 @@ public final class AiopPropertiesAdapter {
     		} 
     	}    	
     	aiopParams.put("Processing_Station", stationCode);    	
+    	aiopParams.put("NRTOutputPath", nrtOutputPath.replace("<WORKING_DIR_NUMBER>", Long.toString(job.getId())));
+    	aiopParams.put("PTOutputPath", ptOutputPath.replace("<WORKING_DIR_NUMBER>", Long.toString(job.getId())));
     	return aiopParams;
 	}
 	
