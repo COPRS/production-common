@@ -100,12 +100,6 @@ public class SardineXbipClient implements XbipClient {
 			}			
 			final URI uri = toUri(davResource);
 			
-			// ignore own URL (like PIC)
-			if (uri.toString().equals(url)) {
-				LOG.trace("Ignoring same entry {}", davResource.getName());
-				continue;
-			}
-			
 			if (davResource.isDirectory()) {
 				LOG.trace("Scanning subdirectory {}", davResource.getName());
 				result.addAll(listAllRecursively(uri.toString(), filter));
