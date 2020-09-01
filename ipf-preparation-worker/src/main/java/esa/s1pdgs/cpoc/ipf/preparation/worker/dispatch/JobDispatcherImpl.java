@@ -112,9 +112,9 @@ public class JobDispatcherImpl implements JobDispatcher {
 		final Optional<AppDataJob> jobForMess = appCat.findJobFor(firstMessage); 
 		final CatalogEventAdapter eventAdapter = CatalogEventAdapter.of(firstMessage);
 		final Optional<AppDataJob> specificJob = typeAdapter.findAssociatedJobFor(appCat, eventAdapter);
-		
+						
 		// there is already a job for this message --> possible restart scenario --> just update the pod name 
-		if (jobForMess.isPresent()) {		
+		if (jobForMess.isPresent() && jobForMess.get().getTaskTableName().equals(tasktableFilename)) {		
 			final AppDataJob job = jobForMess.get();
 			LOGGER.warn("Found job {} already associated to mqiMessage {}. Ignoring new message ...",
 					job.getId(), firstMessage.getId());		
