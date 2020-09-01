@@ -1089,7 +1089,7 @@ public class EsServices {
 	public String getL1Triggering(final ProductFamily productFamily, final String productName) throws Exception {
 		final SearchSourceBuilder sourceBuilder = new SearchSourceBuilder();
 		final BoolQueryBuilder queryBuilder = QueryBuilders.boolQuery()
-				.must(QueryBuilders.termQuery("productName", productName));
+				.must(QueryBuilders.termQuery("productName.keyword", productName));
 
 		LOGGER.debug("query composed is {}", queryBuilder);
 
