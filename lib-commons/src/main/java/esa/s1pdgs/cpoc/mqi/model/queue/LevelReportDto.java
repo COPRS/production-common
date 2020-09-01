@@ -47,7 +47,7 @@ public class LevelReportDto extends AbstractMessage {
 	@Override
 	public int hashCode() {
 		return Objects.hash(content, creationDate, hostname, keyObjectStorage, productFamily, uid,
-				allowedControlActions, controlDemandType, controlDebug, controlRetryCounter);
+				allowedActions, demandType, debug, retryCounter);
 	}
 
 	@Override
@@ -68,10 +68,10 @@ public class LevelReportDto extends AbstractMessage {
 				&& Objects.equals(keyObjectStorage, other.keyObjectStorage)
 				&& Objects.equals(uid, other.uid)
 				&& productFamily == other.productFamily
-				&& Objects.equals(allowedControlActions, other.getAllowedControlActions())
-		        && controlDemandType == other.controlDemandType
-		        && controlDebug == other.controlDebug
-		        && controlRetryCounter == other.controlRetryCounter;
+				&& Objects.equals(allowedActions, other.getAllowedActions())
+		        && demandType == other.demandType
+		        && debug == other.debug
+		        && retryCounter == other.retryCounter;
 	}
 
 	@Override

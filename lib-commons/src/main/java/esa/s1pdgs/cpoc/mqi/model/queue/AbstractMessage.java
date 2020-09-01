@@ -9,8 +9,8 @@ import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import esa.s1pdgs.cpoc.common.ProductFamily;
-import esa.s1pdgs.cpoc.mqi.model.control.ControlAction;
-import esa.s1pdgs.cpoc.mqi.model.control.ControlDemandType;
+import esa.s1pdgs.cpoc.mqi.model.control.AllowedAction;
+import esa.s1pdgs.cpoc.mqi.model.control.DemandType;
 
 /**
  * This is supposed to be the basic element that is used in all other
@@ -50,13 +50,13 @@ public abstract class AbstractMessage {
 	protected Date creationDate = new Date();
 	protected String hostname = DEFAULT_HOSTNAME;
 	
-	protected List<ControlAction> allowedControlActions = Collections.emptyList();
+	protected List<AllowedAction> allowedActions = Collections.emptyList();
 	
-	protected ControlDemandType controlDemandType = ControlDemandType.NOMINAL;
+	protected DemandType demandType = DemandType.NOMINAL;
 	
-	protected int controlRetryCounter = 0;
+	protected int retryCounter = 0;
 	
-	protected boolean controlDebug = false;
+	protected boolean debug = false;
 	
 	public AbstractMessage() {
 	}
@@ -106,44 +106,43 @@ public abstract class AbstractMessage {
 		this.uid = uid;
 	}
 	
-	public List<ControlAction> getAllowedControlActions() {
-		return allowedControlActions;
+	public List<AllowedAction> getAllowedActions() {
+		return allowedActions;
 	}
 
-	public void setAllowedControlActions(List<ControlAction> allowedControlActions) {
-		this.allowedControlActions = allowedControlActions;
+	public void setAllowedActions(List<AllowedAction> allowedActions) {
+		this.allowedActions = allowedActions;
 	}
 
-	public ControlDemandType getControlDemandType() {
-		return controlDemandType;
+	public DemandType getDemandType() {
+		return demandType;
 	}
 
-	public void setControlDemandType(ControlDemandType controlDemandType) {
-		this.controlDemandType = controlDemandType;
+	public void setDemandType(DemandType demandType) {
+		this.demandType = demandType;
 	}
 
-	public int getControlRetryCounter() {
-		return controlRetryCounter;
+	public int getRetryCounter() {
+		return retryCounter;
 	}
 
-	public void increaseControlRetryCounter() {
-		++this.controlRetryCounter;
+	public void increaseRetryCounter() {
+		++this.retryCounter;
 	}
 
-	public boolean isControlDebug() {
-		return controlDebug;
+	public boolean isDebug() {
+		return debug;
 	}
 
-	public void setControlDebug(boolean controlDebug) {
-		this.controlDebug = controlDebug;
+	public void setDebug(boolean debug) {
+		this.debug = debug;
 	}
 
 	@Override
 	public String toString() {
 		return "AbstractMessage [productFamily=" + productFamily + ", keyObjectStorage=" + keyObjectStorage + ", uid="
-				+ uid + ", creationDate=" + creationDate + ", hostname=" + hostname + ", allowedControlActions=" + allowedControlActions 
-				+ ", controlDemandType=" + controlDemandType + ", controlRetryCounter=" + controlRetryCounter 
-				+ ", controlDebug=" + controlDebug + "]";
+				+ uid + ", creationDate=" + creationDate + ", hostname=" + hostname + ", allowedActions=" + allowedActions 
+				+ ", demandType=" + demandType + ", retryCounter=" + retryCounter + ", debug=" + debug + "]";
 	}	
 	
 	

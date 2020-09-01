@@ -5,7 +5,7 @@ import java.util.Objects;
 import java.util.UUID;
 
 import esa.s1pdgs.cpoc.common.ProductFamily;
-import esa.s1pdgs.cpoc.mqi.model.control.ControlAction;
+import esa.s1pdgs.cpoc.mqi.model.control.AllowedAction;
 
 public class ProductionEvent extends AbstractMessage {
 	private String productName = NOT_DEFINED;
@@ -15,17 +15,17 @@ public class ProductionEvent extends AbstractMessage {
 
 	public ProductionEvent() {
 		super();
-		setAllowedControlActions(Arrays.asList(ControlAction.RESUBMIT));
+		setAllowedActions(Arrays.asList(AllowedAction.RESUBMIT));
 	}
 
 	public ProductionEvent(final String productName, final String keyObjectStorage, final ProductFamily family) {
 		this(productName, keyObjectStorage, family, null);	
-		setAllowedControlActions(Arrays.asList(ControlAction.RESUBMIT));
+		setAllowedActions(Arrays.asList(AllowedAction.RESUBMIT));
 	}
 
 	public ProductionEvent(final String productName, final String keyObjectStorage, final ProductFamily family, final String mode) {
 		this(productName, keyObjectStorage, family, mode, OQCFlag.NOT_CHECKED, null, UUID.randomUUID());
-		setAllowedControlActions(Arrays.asList(ControlAction.RESUBMIT));
+		setAllowedActions(Arrays.asList(AllowedAction.RESUBMIT));
 	}
 	
 	public ProductionEvent(
@@ -43,7 +43,7 @@ public class ProductionEvent extends AbstractMessage {
 		this.uid = reportUid;
 		this.oqcFlag = oqcFlag;
 		this.timeliness = timeliness;
-		setAllowedControlActions(Arrays.asList(ControlAction.RESUBMIT));
+		setAllowedActions(Arrays.asList(AllowedAction.RESUBMIT));
 	}
 
 	public String getMode() {
@@ -81,7 +81,7 @@ public class ProductionEvent extends AbstractMessage {
 	@Override
 	public int hashCode() {
 		return Objects.hash(creationDate, hostname, keyObjectStorage, mode, timeliness, oqcFlag, productFamily, productName, uid,
-				allowedControlActions, controlDemandType, controlDebug, controlRetryCounter);
+				allowedActions, demandType, debug, retryCounter);
 	}
 
 	@Override
@@ -105,10 +105,10 @@ public class ProductionEvent extends AbstractMessage {
 				&& Objects.equals(timeliness, other.timeliness)
 				&& Objects.equals(uid, other.uid)
 				&& Objects.equals(productName, other.productName)
-				&& Objects.equals(allowedControlActions, other.getAllowedControlActions())
-		        && controlDemandType == other.controlDemandType
-		        && controlDebug == other.controlDebug
-		        && controlRetryCounter == other.controlRetryCounter;
+				&& Objects.equals(allowedActions, other.getAllowedActions())
+		        && demandType == other.demandType
+		        && debug == other.debug
+		        && retryCounter == other.retryCounter;
 	}
 
 	@Override

@@ -6,7 +6,7 @@ import java.util.Objects;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 
-import esa.s1pdgs.cpoc.mqi.model.control.ControlAction;
+import esa.s1pdgs.cpoc.mqi.model.control.AllowedAction;
 
 public class EvictionManagementJob extends AbstractMessage {
 
@@ -17,7 +17,7 @@ public class EvictionManagementJob extends AbstractMessage {
 	
 	public EvictionManagementJob() {
 		super();
-		setAllowedControlActions(Arrays.asList(ControlAction.RESTART));
+		setAllowedActions(Arrays.asList(AllowedAction.RESTART));
 	}
 
 	public Date getEvictionDate() {
@@ -39,7 +39,7 @@ public class EvictionManagementJob extends AbstractMessage {
 	@Override
 	public int hashCode() {
 		return Objects.hash(evictionDate, unlimited, creationDate, hostname, keyObjectStorage, productFamily, uid,
-				allowedControlActions, controlDemandType, controlDebug, controlRetryCounter);
+				allowedActions, demandType, debug, retryCounter);
 	}
 
 	@Override
@@ -53,10 +53,10 @@ public class EvictionManagementJob extends AbstractMessage {
 				&& Objects.equals(hostname, other.hostname) && Objects.equals(keyObjectStorage, other.keyObjectStorage)
 				&& Objects.equals(uid, other.uid) && productFamily == other.productFamily
 				&& unlimited == other.unlimited
-				&& Objects.equals(allowedControlActions, other.getAllowedControlActions())
-		        && controlDemandType == other.controlDemandType
-		        && controlDebug == other.controlDebug
-		        && controlRetryCounter == other.controlRetryCounter;
+				&& Objects.equals(allowedActions, other.getAllowedActions())
+		        && demandType == other.demandType
+		        && debug == other.debug
+		        && retryCounter == other.retryCounter;
 	}
 
 	@Override

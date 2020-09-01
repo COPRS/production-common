@@ -5,7 +5,7 @@ import java.util.Objects;
 import java.util.UUID;
 
 import esa.s1pdgs.cpoc.common.ProductFamily;
-import esa.s1pdgs.cpoc.mqi.model.control.ControlAction;
+import esa.s1pdgs.cpoc.mqi.model.control.AllowedAction;
 
 public class IngestionJob extends AbstractMessage {	
 	
@@ -34,7 +34,7 @@ public class IngestionJob extends AbstractMessage {
 		
 	public IngestionJob() {
 		super();
-		setAllowedControlActions(Arrays.asList(ControlAction.RESTART));
+		setAllowedActions(Arrays.asList(AllowedAction.RESTART));
 	}
 
 	public IngestionJob(
@@ -57,7 +57,7 @@ public class IngestionJob extends AbstractMessage {
 		this.stationName		= stationName;
 		this.mode               = mode;
 		this.timeliness        = timeliness;
-		setAllowedControlActions(Arrays.asList(ControlAction.RESTART));
+		setAllowedActions(Arrays.asList(AllowedAction.RESTART));
 	}
 
 	public String getPickupBaseURL() {
@@ -120,7 +120,7 @@ public class IngestionJob extends AbstractMessage {
 	public int hashCode() {
 		return Objects.hash(creationDate, hostname, keyObjectStorage, pickupBaseURL, productFamily,
 				relativePath, productName, uid, productSizeByte, stationName, mode, timeliness,
-				allowedControlActions, controlDemandType, controlDebug, controlRetryCounter);
+				allowedActions, demandType, debug, retryCounter);
 	}
 
 	@Override
@@ -147,10 +147,10 @@ public class IngestionJob extends AbstractMessage {
 				&& Objects.equals(timeliness, other.timeliness)
 				&& productSizeByte == other.productSizeByte 
 				&& Objects.equals(productName, other.productName)
-				&& Objects.equals(allowedControlActions, other.getAllowedControlActions())
-		        && controlDemandType == other.controlDemandType
-		        && controlDebug == other.controlDebug
-		        && controlRetryCounter == other.controlRetryCounter;
+				&& Objects.equals(allowedActions, other.getAllowedActions())
+		        && demandType == other.demandType
+		        && debug == other.debug
+		        && retryCounter == other.retryCounter;
 	}
 
 	@Override
