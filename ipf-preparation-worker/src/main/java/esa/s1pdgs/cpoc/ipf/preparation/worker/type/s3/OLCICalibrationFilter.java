@@ -19,18 +19,20 @@ public class OLCICalibrationFilter {
 	}
 
 	/**
-	 * Checks if the L1Triggering flag on the metadata is set to "NONE"
+	 * Checks if the L1Triggering flag on the metadata is not the same as the last 3
+	 * characters of the processor
 	 * 
 	 * @param productName product name of the main input product
 	 * @return true if job should be discarded
 	 * @throws MetadataQueryException on error in query execution
 	 */
-	public boolean checkIfJobShouldBeDiscarded(final String productName) throws MetadataQueryException {
+	public boolean checkIfJobShouldBeDiscarded(final String productName, final String processorName)
+			throws MetadataQueryException {
 		ProductFamily productFamily = extractProductFamilyFromProductName(productName);
 		String response = this.metadataClient.getL1TriggeringForProductName(productFamily, productName);
 
-		// Discard job, if response is "NONE"
-		return response.equals("NONE");
+		// Discard job, if response doesn't match processor name
+		return !response.equals(processorName.substring(processorName.length() - 3));
 	}
 
 	/**
