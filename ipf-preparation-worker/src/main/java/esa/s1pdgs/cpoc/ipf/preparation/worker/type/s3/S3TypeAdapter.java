@@ -69,7 +69,8 @@ public class S3TypeAdapter extends AbstractProductTypeAdapter implements Product
 					tasktableAdapter.taskTable().getProcessorName());
 			OLCICalibrationFilter olciCalFilter = new OLCICalibrationFilter(metadataClient, elementMapper);
 			try {
-				boolean discardJob = olciCalFilter.checkIfJobShouldBeDiscarded(job.getProductName());
+				boolean discardJob = olciCalFilter.checkIfJobShouldBeDiscarded(job.getProductName(),
+						tasktableAdapter.taskTable().getProcessorName());
 				if (discardJob) {
 					// Skip the rest of the mainInputSearch - job is discarded anyways
 					returnValue.setDiscardJob(discardJob);
