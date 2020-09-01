@@ -6,7 +6,7 @@ import java.util.Objects;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 
-import esa.s1pdgs.cpoc.mqi.model.control.ControlAction;
+import esa.s1pdgs.cpoc.mqi.model.control.AllowedAction;
 
 public class PripPublishingJob extends AbstractMessage {	
 	@JsonFormat(pattern="yyyy-MM-dd'T'HH:mm:ss.SSS'Z'", timezone="UTC")
@@ -14,7 +14,7 @@ public class PripPublishingJob extends AbstractMessage {
 	
 	public PripPublishingJob() {
 		super();
-		setAllowedControlActions(Arrays.asList(ControlAction.RESTART));
+		setAllowedActions(Arrays.asList(AllowedAction.RESTART));
 	}
 
 	public Date getEvictionDate() {
@@ -28,7 +28,7 @@ public class PripPublishingJob extends AbstractMessage {
 	@Override
 	public int hashCode() {
 		return Objects.hash(creationDate, evictionDate, hostname, keyObjectStorage, productFamily, uid,
-				allowedControlActions, controlDemandType, controlDebug, controlRetryCounter);
+				allowedActions, demandType, debug, retryCounter);
 	}
 
 	@Override
@@ -49,10 +49,10 @@ public class PripPublishingJob extends AbstractMessage {
 				&& Objects.equals(keyObjectStorage, other.keyObjectStorage)
 				&& Objects.equals(uid, other.uid)
 				&& productFamily == other.productFamily
-				&& Objects.equals(allowedControlActions, other.getAllowedControlActions())
-		        && controlDemandType == other.controlDemandType
-		        && controlDebug == other.controlDebug
-		        && controlRetryCounter == other.controlRetryCounter;
+				&& Objects.equals(allowedActions, other.getAllowedActions())
+		        && demandType == other.demandType
+		        && debug == other.debug
+		        && retryCounter == other.retryCounter;
 	}
 
 	@Override

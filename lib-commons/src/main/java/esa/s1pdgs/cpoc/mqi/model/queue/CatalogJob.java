@@ -3,7 +3,7 @@ package esa.s1pdgs.cpoc.mqi.model.queue;
 import java.util.Arrays;
 import java.util.Objects;
 
-import esa.s1pdgs.cpoc.mqi.model.control.ControlAction;
+import esa.s1pdgs.cpoc.mqi.model.control.AllowedAction;
 
 public class CatalogJob extends AbstractMessage {	
 	private String productName = NOT_DEFINED;
@@ -15,7 +15,7 @@ public class CatalogJob extends AbstractMessage {
     
     public CatalogJob() {
     	super();
-    	setAllowedControlActions(Arrays.asList(ControlAction.RESTART));
+    	setAllowedActions(Arrays.asList(AllowedAction.RESTART));
 	}
     
 	public String getProductName() {
@@ -70,7 +70,7 @@ public class CatalogJob extends AbstractMessage {
 	public int hashCode() {
 		return Objects.hash(creationDate, hostname, keyObjectStorage, relativePath, mode, oqcFlag, timeliness,
 				productFamily, productName, uid, stationName,
-				allowedControlActions, controlDemandType, controlDebug, controlRetryCounter);
+				allowedActions, demandType, debug, retryCounter);
 	}
 
 	@Override
@@ -96,10 +96,10 @@ public class CatalogJob extends AbstractMessage {
 				&& Objects.equals(uid, other.uid)
 				&& Objects.equals(stationName, other.stationName)
 				&& Objects.equals(productName, other.productName)
-				&& Objects.equals(allowedControlActions, other.getAllowedControlActions())
-		        && controlDemandType == other.controlDemandType
-		        && controlDebug == other.controlDebug
-		        && controlRetryCounter == other.controlRetryCounter;
+				&& Objects.equals(allowedActions, other.getAllowedActions())
+		        && demandType == other.demandType
+		        && debug == other.debug
+		        && retryCounter == other.retryCounter;
 	}
 
 	@Override

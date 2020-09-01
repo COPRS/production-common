@@ -4,7 +4,7 @@ import java.util.Arrays;
 import java.util.Objects;
 
 import esa.s1pdgs.cpoc.common.ProductFamily;
-import esa.s1pdgs.cpoc.mqi.model.control.ControlAction;
+import esa.s1pdgs.cpoc.mqi.model.control.AllowedAction;
 
 /**
  * DTO object used to transfer EDRS session files between MQI and application
@@ -21,7 +21,7 @@ public class IngestionEvent extends AbstractMessage {
 	
 	public IngestionEvent() {
 		super();
-		setAllowedControlActions(Arrays.asList(ControlAction.RESUBMIT));
+		setAllowedActions(Arrays.asList(AllowedAction.RESUBMIT));
 	}
 
 	public IngestionEvent(
@@ -40,7 +40,7 @@ public class IngestionEvent extends AbstractMessage {
 		this.stationName = stationName;
 		this.mode = mode;
 		this.timeliness = timeliness;
-		setAllowedControlActions(Arrays.asList(ControlAction.RESUBMIT));
+		setAllowedActions(Arrays.asList(AllowedAction.RESUBMIT));
 	}
 
 	public String getProductName() {
@@ -105,7 +105,7 @@ public class IngestionEvent extends AbstractMessage {
 				uid,
 				productSizeByte,
 				stationName,
-				allowedControlActions, controlDemandType, controlDebug, controlRetryCounter);
+				allowedActions, demandType, debug, retryCounter);
 	}
 
 	@Override
@@ -131,10 +131,10 @@ public class IngestionEvent extends AbstractMessage {
 				&& Objects.equals(uid, other.uid)
 				&& productSizeByte == other.productSizeByte
 				&& Objects.equals(relativePath, other.relativePath)
-				&& Objects.equals(allowedControlActions, other.getAllowedControlActions())
-		        && controlDemandType == other.controlDemandType
-		        && controlDebug == other.controlDebug
-		        && controlRetryCounter == other.controlRetryCounter;
+				&& Objects.equals(allowedActions, other.getAllowedActions())
+		        && demandType == other.demandType
+		        && debug == other.debug
+		        && retryCounter == other.retryCounter;
 	}
 	
 	
