@@ -4,7 +4,7 @@ import java.util.Arrays;
 import java.util.Objects;
 
 import esa.s1pdgs.cpoc.common.ProductFamily;
-import esa.s1pdgs.cpoc.mqi.model.control.ControlAction;
+import esa.s1pdgs.cpoc.mqi.model.control.AllowedAction;
 
 public class CompressionJob extends AbstractMessage {	
 	// use some sane defaults
@@ -14,7 +14,7 @@ public class CompressionJob extends AbstractMessage {
 
 	public CompressionJob() {
 		super();
-		setAllowedControlActions(Arrays.asList(ControlAction.RESTART));
+		setAllowedActions(Arrays.asList(AllowedAction.RESTART));
 	}	
 
 	public CompressionJob(
@@ -28,7 +28,7 @@ public class CompressionJob extends AbstractMessage {
 		this.outputKeyObjectStorage = outputKeyObjectStorage;
 		this.outputProductFamily = outputProductFamily;
 		this.compressionDirection = compressionDirection;
-		setAllowedControlActions(Arrays.asList(ControlAction.RESTART));
+		setAllowedActions(Arrays.asList(AllowedAction.RESTART));
 	}
 
 	public ProductFamily getOutputProductFamily() {
@@ -59,7 +59,7 @@ public class CompressionJob extends AbstractMessage {
 	public int hashCode() {
 		return Objects.hash(compressionDirection, creationDate, hostname, keyObjectStorage, outputKeyObjectStorage,
 				outputProductFamily, productFamily, uid,
-				allowedControlActions, controlDemandType, controlDebug, controlRetryCounter);
+				allowedActions, demandType, debug, retryCounter);
 	}
 
 	@Override
@@ -82,10 +82,10 @@ public class CompressionJob extends AbstractMessage {
 				&& Objects.equals(uid, other.uid)
 				&& outputProductFamily == other.outputProductFamily 
 				&& productFamily == other.productFamily
-				&& Objects.equals(allowedControlActions, other.getAllowedControlActions())
-		        && controlDemandType == other.controlDemandType
-		        && controlDebug == other.controlDebug
-		        && controlRetryCounter == other.controlRetryCounter;
+				&& Objects.equals(allowedActions, other.getAllowedActions())
+		        && demandType == other.demandType
+		        && debug == other.debug
+		        && retryCounter == other.retryCounter;
 	}
 
 	@Override

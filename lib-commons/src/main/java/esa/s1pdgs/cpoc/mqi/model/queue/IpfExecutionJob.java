@@ -7,7 +7,7 @@ import java.util.Objects;
 import java.util.UUID;
 
 import esa.s1pdgs.cpoc.common.ProductFamily;
-import esa.s1pdgs.cpoc.mqi.model.control.ControlAction;
+import esa.s1pdgs.cpoc.mqi.model.control.AllowedAction;
 import esa.s1pdgs.cpoc.mqi.model.rest.GenericMessageDto;
 
 /**
@@ -63,7 +63,7 @@ public class IpfExecutionJob extends AbstractMessage {
      */
     public IpfExecutionJob() {
     	super();
-    	setAllowedControlActions(Arrays.asList(ControlAction.RESTART, ControlAction.REEVALUATE));
+    	setAllowedActions(Arrays.asList(AllowedAction.RESTART, AllowedAction.REEVALUATE));
     }
 
     /**
@@ -78,7 +78,7 @@ public class IpfExecutionJob extends AbstractMessage {
         this.jobOrder = jobOrder;
         this.uid = reportingTaskUID;
         this.timeliness = timeliness;
-        setAllowedControlActions(Arrays.asList(ControlAction.RESTART, ControlAction.REEVALUATE));
+        setAllowedActions(Arrays.asList(AllowedAction.RESTART, AllowedAction.REEVALUATE));
     }
 
     /**
@@ -238,7 +238,7 @@ public class IpfExecutionJob extends AbstractMessage {
 	public int hashCode() {
 		return Objects.hash(creationDate, hostname, inputs, jobOrder, timeliness, keyObjectStorage, outputs, pools,
 				productFamily, productProcessMode, workDirectory,  uid, ipfPreparationJobMessage,
-				allowedControlActions, controlDemandType, controlDebug, controlRetryCounter);
+				allowedActions, demandType, debug, retryCounter);
 	}
 
 	@Override
@@ -266,10 +266,10 @@ public class IpfExecutionJob extends AbstractMessage {
 				&& Objects.equals(workDirectory, other.workDirectory)
 				&& Objects.equals(uid, other.uid)
 				&& Objects.equals(ipfPreparationJobMessage, other.ipfPreparationJobMessage)
-				&& Objects.equals(allowedControlActions, other.getAllowedControlActions())
-		        && controlDemandType == other.controlDemandType
-		        && controlDebug == other.controlDebug
-		        && controlRetryCounter == other.controlRetryCounter;
+				&& Objects.equals(allowedActions, other.getAllowedActions())
+		        && demandType == other.demandType
+		        && debug == other.debug
+		        && retryCounter == other.retryCounter;
 	}
 
 	@Override

@@ -4,7 +4,7 @@ import java.util.Collections;
 import java.util.Objects;
 
 import esa.s1pdgs.cpoc.common.ApplicationLevel;
-import esa.s1pdgs.cpoc.mqi.model.control.ControlAction;
+import esa.s1pdgs.cpoc.mqi.model.control.AllowedAction;
 import esa.s1pdgs.cpoc.mqi.model.rest.GenericMessageDto;
 
 public class IpfPreparationJob extends AbstractMessage {	
@@ -15,7 +15,7 @@ public class IpfPreparationJob extends AbstractMessage {
     private String stopTime;    
 
     public IpfPreparationJob() {
-		allowedControlActions = Collections.singletonList(ControlAction.RESTART);
+		allowedActions = Collections.singletonList(AllowedAction.RESTART);
 	}
     
 	public ApplicationLevel getLevel() {
@@ -72,10 +72,10 @@ public class IpfPreparationJob extends AbstractMessage {
 			    taskTableName,
 			    startTime,  
 			    stopTime,   
-			    allowedControlActions,
-			    controlDemandType,
-			    controlRetryCounter,
-			    controlDebug
+			    allowedActions,
+			    demandType,
+			    retryCounter,
+			    debug
 		);
 	}
 
@@ -96,10 +96,10 @@ public class IpfPreparationJob extends AbstractMessage {
 				&& Objects.equals(keyObjectStorage, other.keyObjectStorage)
 				&& Objects.equals(uid, other.uid)
 			    && Objects.equals(level,other.level)	    
-			    && Objects.equals(allowedControlActions, other.allowedControlActions)
-			    && Objects.equals(controlDemandType, other.controlDemandType)
-			    && Objects.equals(controlRetryCounter, other.controlRetryCounter)
-			    && Objects.equals(controlDebug, other.controlDebug)			    
+			    && Objects.equals(allowedActions, other.allowedActions)
+			    && Objects.equals(demandType, other.demandType)
+			    && Objects.equals(retryCounter, other.retryCounter)
+			    && Objects.equals(debug, other.debug)			    
 			    && Objects.equals(eventMessage, other.eventMessage)
 			    && Objects.equals(taskTableName,other.taskTableName)
 			    && Objects.equals(startTime, other.startTime)
@@ -112,8 +112,8 @@ public class IpfPreparationJob extends AbstractMessage {
 		return "IpfPreparationJob [level=" + level + ", eventMessage=" + eventMessage + ", taskTableName="
 				+ taskTableName + ", startTime=" + startTime + ", stopTime=" + stopTime 
 				+ ", productFamily=" + productFamily + ", keyObjectStorage=" + keyObjectStorage + ", uid=" + uid
-				+ ", creationDate=" + creationDate + ", hostname=" + hostname + ", allowedControlActions="
-				+ allowedControlActions + ", controlDemandType=" + controlDemandType + ", controlRetryCounter="
-				+ controlRetryCounter + ", controlDebug=" + controlDebug + "]";
+				+ ", creationDate=" + creationDate + ", hostname=" + hostname + ", allowedActions="
+				+ allowedActions + ", demandType=" + demandType + ", retryCounter="
+				+ retryCounter + ", debug=" + debug + "]";
 	}
 }

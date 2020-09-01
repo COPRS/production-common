@@ -295,7 +295,7 @@ public class JobProcessor implements MqiListener<IpfExecutionJob> {
         		message
         );
         // FIXME: workaraound for retry counter, shall only be increased when restarting or reevaluating
-        message.getBody().getIpfPreparationJobMessage().getBody().increaseControlRetryCounter();
+        message.getBody().getIpfPreparationJobMessage().getBody().increaseRetryCounter();
         failedProcessing.setPredecessor(message.getBody().getIpfPreparationJobMessage());
         errorAppender.send(failedProcessing);
 		exitOnAppStatusStopOrWait();
@@ -312,7 +312,7 @@ public class JobProcessor implements MqiListener<IpfExecutionJob> {
         		message
         );
 		// FIXME: workaraound for retry counter, shall only be increased when restarting or reevaluating
-		message.getBody().getIpfPreparationJobMessage().getBody().increaseControlRetryCounter();
+		message.getBody().getIpfPreparationJobMessage().getBody().increaseRetryCounter();
         failedProcessing.setPredecessor(message.getBody().getIpfPreparationJobMessage());
         errorAppender.send(failedProcessing);
 	}
