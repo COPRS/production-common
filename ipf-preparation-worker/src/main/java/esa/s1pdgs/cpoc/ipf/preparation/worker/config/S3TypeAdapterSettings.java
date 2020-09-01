@@ -24,10 +24,16 @@ public class S3TypeAdapterSettings {
 	 * map containing the product types for each tasktable on which the mpcSearch
 	 * should be executed
 	 * 
-	 * key is the processor name (ex. S3A_OL1), values the product types (ex.
+	 * key is the processor name (ex. S3A_OL1), values are the product types (ex.
 	 * OL_0_EFR___)
 	 */
 	private Map<String, List<String>> mpcSearch = new HashMap<>();
+
+	/**
+	 * list of processors on which the additional logic for OLCI calibration should
+	 * be executed
+	 */
+	private List<String> olciCalibration = new ArrayList<>();
 
 	public Map<String, List<String>> getMpcSearch() {
 		return mpcSearch;
@@ -50,5 +56,13 @@ public class S3TypeAdapterSettings {
 
 	public void setMpcSearch(Map<String, List<String>> mpcSearch) {
 		this.mpcSearch = mpcSearch;
+	}
+
+	public List<String> getOlciCalibration() {
+		return olciCalibration;
+	}
+
+	public void setOlciCalibration(List<String> olciCalibration) {
+		this.olciCalibration = olciCalibration;
 	}
 }

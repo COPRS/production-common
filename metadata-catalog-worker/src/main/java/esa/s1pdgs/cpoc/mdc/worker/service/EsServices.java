@@ -438,7 +438,7 @@ public class EsServices {
 			throw new Exception(e.getMessage());
 		}
 	}
-	
+
 	public SearchMetadata latestValidity(final String beginDate, final String endDate, final String productType,
 			final ProductFamily productFamily, final String processMode, final String satelliteId) throws Exception {
 		final SearchSourceBuilder sourceBuilder = new SearchSourceBuilder();
@@ -484,7 +484,7 @@ public class EsServices {
 		} catch (final IOException e) {
 			throw new Exception(e.getMessage());
 		}
-		return null;	
+		return null;
 	}
 
 	private SearchMetadata toSearchMetadata(final SearchHit hit) {
@@ -546,7 +546,7 @@ public class EsServices {
 		searchRequest.source(sourceBuilder);
 		return searchRequest;
 	}
-	
+
 	/*
 	 * ClosestStopValidity Similar to 'ClosestStartValidity', this policy uses a
 	 * centre time calculated as (t0-t1) / 2 to determine auxiliary data, which is
@@ -667,21 +667,20 @@ public class EsServices {
 		}
 		return null;
 	}
-	
+
 	public List<SearchMetadata> fullCoverage(final String beginDate, final String endDate, final String productType,
 			final ProductFamily productFamily, final String processMode, final String satelliteId) throws Exception {
 		final SearchSourceBuilder sourceBuilder = new SearchSourceBuilder();
 		// Generic fields
 		final BoolQueryBuilder queryBuilder = QueryBuilders.boolQuery()
 				.must(QueryBuilders.rangeQuery("startTime").lt(endDate))
-				.must(QueryBuilders.rangeQuery("stopTime").gt(beginDate))
-				.must(satelliteId(satelliteId))
+				.must(QueryBuilders.rangeQuery("stopTime").gt(beginDate)).must(satelliteId(satelliteId))
 				.must(QueryBuilders.regexpQuery("productType.keyword", productType))
 				.must(QueryBuilders.termQuery("processMode.keyword", processMode));
 		sourceBuilder.query(queryBuilder);
 		LOGGER.debug("fullCoverage: query composed is {}", queryBuilder);
 		sourceBuilder.size(SIZE_LIMIT);
-		
+
 		final SearchRequest searchRequest = new SearchRequest(getIndexForProductFamily(productFamily, productType));
 		searchRequest.source(sourceBuilder);
 		try {
@@ -715,67 +714,63 @@ public class EsServices {
 					}
 					r.add(local);
 				}
-				return checkIfFullyCoverage(r,beginDate, endDate,0);
+				return checkIfFullyCoverage(r, beginDate, endDate, 0);
 			}
 		} catch (final IOException e) {
 			throw new Exception(e.getMessage());
 		}
-		
+
 		return null;
 	}
-	
-	private List<SearchMetadata> checkIfFullyCoverage(final List<SearchMetadata> products, final String beginDateStr, final String endDateStr, final int gapThresholdMillis) {		
+
+	private List<SearchMetadata> checkIfFullyCoverage(final List<SearchMetadata> products, final String beginDateStr,
+			final String endDateStr, final int gapThresholdMillis) {
 		final LocalDateTime beginDate = DateUtils.parse(beginDateStr);
 		final LocalDateTime endDate = DateUtils.parse(beginDateStr);
-		
-	    // We initialize the reference time with the start time of the interval
-	    long refTime = beginDate.toEpochSecond(ZoneOffset.UTC);
-	    
-	    for (SearchMetadata product: products) {
-	    	/*
-	         * Try to detect, if the product does have a follower. This happens, when the following
-	         * criteria are both true:
-	         * 1. The startTime of the product lies before or directly on the current
-	         *    (refTime + gapThresholdMillis)
-	         * 2. The stopTime of the product must be bigger than the current refTime (to avoid
-	         *     refTime gets smaller again)
-	         */
-	    	long startTime = DateUtils.parse(product.getValidityStart()).toEpochSecond(ZoneOffset.UTC);
-	    	long stopTime = DateUtils.parse(product.getValidityStop()).toEpochSecond(ZoneOffset.UTC);
-	        if ((startTime <= refTime+gapThresholdMillis) &&
-	            (stopTime > refTime))
-	        {
-	          refTime = stopTime;
-	        }
-	    }
-	    
-	    if ((refTime+gapThresholdMillis) >= (endDate.toEpochSecond(ZoneOffset.UTC)+gapThresholdMillis))
-	    {
-	      // No gaps, full coverage, return all results
-	      return products;
-	    }
-	    
-	    // There was a gap in the coverage, return nothing
-	    return Collections.emptyList();
+
+		// We initialize the reference time with the start time of the interval
+		long refTime = beginDate.toEpochSecond(ZoneOffset.UTC);
+
+		for (SearchMetadata product : products) {
+			/*
+			 * Try to detect, if the product does have a follower. This happens, when the
+			 * following criteria are both true: 1. The startTime of the product lies before
+			 * or directly on the current (refTime + gapThresholdMillis) 2. The stopTime of
+			 * the product must be bigger than the current refTime (to avoid refTime gets
+			 * smaller again)
+			 */
+			long startTime = DateUtils.parse(product.getValidityStart()).toEpochSecond(ZoneOffset.UTC);
+			long stopTime = DateUtils.parse(product.getValidityStop()).toEpochSecond(ZoneOffset.UTC);
+			if ((startTime <= refTime + gapThresholdMillis) && (stopTime > refTime)) {
+				refTime = stopTime;
+			}
+		}
+
+		if ((refTime + gapThresholdMillis) >= (endDate.toEpochSecond(ZoneOffset.UTC) + gapThresholdMillis)) {
+			// No gaps, full coverage, return all results
+			return products;
+		}
+
+		// There was a gap in the coverage, return nothing
+		return Collections.emptyList();
 	}
-	
-	public SearchMetadata latestStopValidity (final String beginDate, final String endDate, final String productType,
+
+	public SearchMetadata latestStopValidity(final String beginDate, final String endDate, final String productType,
 			final ProductFamily productFamily, final String processMode, final String satelliteId) throws Exception {
 		final SearchSourceBuilder sourceBuilder = new SearchSourceBuilder();
 		// Generic fields
 		final BoolQueryBuilder queryBuilder = QueryBuilders.boolQuery()
-				.must(QueryBuilders.regexpQuery("productType.keyword", productType))
-				.must(satelliteId(satelliteId));
-		
+				.must(QueryBuilders.regexpQuery("productType.keyword", productType)).must(satelliteId(satelliteId));
+
 		sourceBuilder.query(queryBuilder);
 		LOGGER.debug("latestStopValidity: query composed is {}", queryBuilder);
-		
+
 		sourceBuilder.size(1);
 		sourceBuilder.sort(new FieldSortBuilder("stopTime").order(SortOrder.DESC));
-		
+
 		final SearchRequest searchRequest = new SearchRequest(getIndexForProductFamily(productFamily, productType));
 		searchRequest.source(sourceBuilder);
-		
+
 		try {
 			final SearchResponse searchResponse = elasticsearchDAO.search(searchRequest);
 			if (this.isNotEmpty(searchResponse)) {
@@ -805,12 +800,13 @@ public class EsServices {
 		} catch (final IOException e) {
 			throw new Exception(e.getMessage());
 		}
-		
+
 		return null;
 	}
 
 	/**
-	 * From ValIntersect result set, select the one where startTime - (start-T0 + stop+T1) is minimal.
+	 * From ValIntersect result set, select the one where startTime - (start-T0 +
+	 * stop+T1) is minimal.
 	 */
 	public SearchMetadata latestValidityClosest(final String beginDate, final String endDate, final String productType,
 			final ProductFamily productFamily, final String processMode, final String satelliteId) throws Exception {
@@ -819,8 +815,7 @@ public class EsServices {
 		// Generic fields
 		final BoolQueryBuilder queryBuilder = QueryBuilders.boolQuery()
 				.must(QueryBuilders.rangeQuery("startTime").lt(endDate))
-				.must(QueryBuilders.rangeQuery("stopTime").gt(beginDate))
-				.must(satelliteId(satelliteId))
+				.must(QueryBuilders.rangeQuery("stopTime").gt(beginDate)).must(satelliteId(satelliteId))
 				.must(QueryBuilders.regexpQuery("productType.keyword", productType))
 				.must(QueryBuilders.termQuery("processMode.keyword", processMode));
 		sourceBuilder.query(queryBuilder);
@@ -829,42 +824,39 @@ public class EsServices {
 
 		final SearchRequest searchRequest = new SearchRequest(getIndexForProductFamily(productFamily, productType));
 		searchRequest.source(sourceBuilder);
-		
+
 		Map<String, Object> r = null;
 		try {
 			final SearchResponse searchResponse = elasticsearchDAO.search(searchRequest);
-			LOGGER.debug("latestValidityClosest: Total Hits Found  {}", this.getTotalSearchHitsStr(searchResponse.getHits()));
-			
+			LOGGER.debug("latestValidityClosest: Total Hits Found  {}",
+					this.getTotalSearchHitsStr(searchResponse.getHits()));
+
 			if (this.isNotEmpty(searchResponse)) {
-			
+
 				BigInteger distance = null;
 				final BigInteger valStart = BigInteger.valueOf(DateUtils.parse(beginDate).getNano());
-				final BigInteger valStop  = BigInteger.valueOf(DateUtils.parse(beginDate).getNano());
-				
+				final BigInteger valStop = BigInteger.valueOf(DateUtils.parse(beginDate).getNano());
+
 				for (final SearchHit candidate : searchResponse.getHits().getHits()) {
 					final Map<String, Object> source = candidate.getSourceAsMap();
-					
-					final BigInteger requested_starttime  = BigInteger.valueOf(DateUtils.parse(source.get("startTime").toString()).getNano());
-					
+
+					final BigInteger requested_starttime = BigInteger
+							.valueOf(DateUtils.parse(source.get("startTime").toString()).getNano());
+
 					final BigInteger magic = requested_starttime.subtract(valStart.add(valStop));
-					
-					if ((distance == null) || (magic.compareTo(distance) < 0))
-				    {
+
+					if ((distance == null) || (magic.compareTo(distance) < 0)) {
 						distance = magic;
 						r = candidate.getSourceAsMap();
-				    }
+					}
 				}
-			}
-			else
-			{
+			} else {
 				return null;
 			}
 		} catch (final IOException e) {
 			throw new Exception(e.getMessage());
 		}
-		
-		
-		
+
 		final SearchMetadata local = new SearchMetadata();
 		local.setProductName(r.get("productName").toString());
 		local.setProductType(r.get("productType").toString());
@@ -872,21 +864,19 @@ public class EsServices {
 
 		if (r.containsKey("startTime")) {
 			try {
-				local.setValidityStart(
-						DateUtils.convertToMetadataDateTimeFormat(r.get("startTime").toString()));
+				local.setValidityStart(DateUtils.convertToMetadataDateTimeFormat(r.get("startTime").toString()));
 			} catch (final DateTimeParseException e) {
 				throw new MetadataMalformedException("startTime");
 			}
 		}
 		if (r.containsKey("stopTime")) {
 			try {
-				local.setValidityStop(
-						DateUtils.convertToMetadataDateTimeFormat(r.get("stopTime").toString()));
+				local.setValidityStop(DateUtils.convertToMetadataDateTimeFormat(r.get("stopTime").toString()));
 			} catch (final DateTimeParseException e) {
 				throw new MetadataMalformedException("stopTime");
 			}
 		}
-		
+
 		return local;
 	}
 
@@ -944,7 +934,7 @@ public class EsServices {
 		}
 		return null;
 	}
-	
+
 	/**
 	 * Returned product covers entire interval and has the closest start time to the
 	 * beginning of the interval
@@ -973,23 +963,22 @@ public class EsServices {
 			final SearchResponse searchResponse = elasticsearchDAO.search(searchRequest);
 			if (this.isNotEmpty(searchResponse)) {
 				SearchMetadata result = null;
-				for (final SearchHit hit : searchResponse.getHits().getHits()) {					
+				for (final SearchHit hit : searchResponse.getHits().getHits()) {
 					final Map<String, Object> source = hit.getSourceAsMap();
-					
-					/* 
+
+					/*
 					 * Update result product, if we don't have a result product yet, or the start
 					 * time is after the current result product. If start times are the same we keep
 					 * the current result product, because it has the later creationTime of the two
 					 * (sorting of search query)
 					 */
-					if (source.containsKey("startTime")
-							&& (result == null || DateUtils.parse(result.getValidityStart())
-									.isBefore(DateUtils.parse(source.get("startTime").toString())))) {					
+					if (source.containsKey("startTime") && (result == null || DateUtils.parse(result.getValidityStart())
+							.isBefore(DateUtils.parse(source.get("startTime").toString())))) {
 						final SearchMetadata local = new SearchMetadata();
 						local.setProductName(source.get("productName").toString());
 						local.setProductType(source.get("productType").toString());
 						local.setKeyObjectStorage(source.get("url").toString());
-	
+
 						try {
 							local.setValidityStart(
 									DateUtils.convertToMetadataDateTimeFormat(source.get("startTime").toString()));
@@ -1020,8 +1009,8 @@ public class EsServices {
 	 * build is based on the marginTT workflow extension.
 	 * 
 	 * @return list of matching products
-	 * @throws Exception if start or stop time is in an invalid format, or the search
-	 *                   itself throws an error
+	 * @throws Exception if start or stop time is in an invalid format, or the
+	 *                   search itself throws an error
 	 */
 	public List<S3Metadata> marginTTQuery(final String startTime, final String stopTime, final String productType,
 			final String satelliteId, final String timeliness, final ProductFamily productFamily) throws Exception {
@@ -1087,6 +1076,47 @@ public class EsServices {
 		}
 
 		return null;
+	}
+
+	/**
+	 * Extract the metadata information "L1Triggering" from the given productName.
+	 * 
+	 * @param productFamily productFamily of the product, used to determine index
+	 * @param productName   productName to query for
+	 * @return L1Triggering information, "NONE" as default
+	 * @throws Exception error on query execution
+	 */
+	public String getL1Triggering(final ProductFamily productFamily, final String productName) throws Exception {
+		final SearchSourceBuilder sourceBuilder = new SearchSourceBuilder();
+		final BoolQueryBuilder queryBuilder = QueryBuilders.boolQuery()
+				.must(QueryBuilders.termQuery("productName", productName));
+
+		LOGGER.debug("query composed is {}", queryBuilder);
+
+		sourceBuilder.query(queryBuilder);
+		sourceBuilder.size(1);
+		sourceBuilder.sort(new FieldSortBuilder("creationTime").order(SortOrder.DESC));
+
+		final String index = productFamily.name().toLowerCase();
+		final SearchRequest searchRequest = new SearchRequest(index);
+		searchRequest.source(sourceBuilder);
+
+		try {
+			final SearchResponse searchResponse = elasticsearchDAO.search(searchRequest);
+			if (this.isNotEmpty(searchResponse)) {
+				final Map<String, Object> source = searchResponse.getHits().getAt(0).getSourceAsMap();
+				if (source.containsKey("L1Triggering")) {
+					return source.get("L1Triggering").toString();
+				}
+			}
+
+		} catch (final IOException e) {
+			throw new Exception(e.getMessage());
+		}
+
+		// In case of error, no product with this productname or missing L1Triggering
+		// flag return "NONE"
+		return "NONE";
 	}
 
 	public List<SearchMetadata> intervalQuery(final String startTime, final String stopTime,

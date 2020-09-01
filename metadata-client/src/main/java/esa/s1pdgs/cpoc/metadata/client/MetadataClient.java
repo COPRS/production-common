@@ -180,6 +180,35 @@ public class MetadataClient {
 	}
 
 	/**
+	 * Extracts the L1Triggering information for the givebn productName
+	 * 
+	 * @param productFamily productFamily of the product
+	 * @param productName   productName which L1Triggering should be extracted from
+	 * @return L1Triggering information
+	 * @throws MetadataQueryException on error on query execution
+	 */
+	public String getL1TriggeringForProductName(final ProductFamily productFamily, final String productName) throws MetadataQueryException {
+		final String uri = this.metadataBaseUri + MetadataCatalogRestPath.S3_METADATA.path() + "/l1triggering";
+
+		final UriComponentsBuilder builder = UriComponentsBuilder.fromUriString(uri)
+				.queryParam("productFamily", productFamily.toString()).queryParam("productName", productName);
+
+		final ResponseEntity<String> response = query(builder.build().toUri(),
+				new ParameterizedTypeReference<String>() {
+				});
+
+		if (response == null || response.getBody() == null) {
+			LOGGER.debug("L1Triggering metadata query for family '{}' and product name '{}' returned no results",
+					productFamily, productName);
+			return "NONE";
+		} else {
+			LOGGER.info("L1Triggering metadata query for family '{}' and product name '{}' returned {}",
+					productFamily.toString(), productName, response.getBody());
+			return response.getBody();
+		}
+	}
+
+	/**
 	 * @param query
 	 * @param t0
 	 * @param t1

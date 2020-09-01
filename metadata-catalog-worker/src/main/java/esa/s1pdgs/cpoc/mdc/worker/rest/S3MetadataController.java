@@ -39,7 +39,7 @@ public class S3MetadataController extends AbstractMetadataController<S3Metadata>
 	 * @return list of matching products
 	 */
 	@RequestMapping(path = "/{productType}/marginTT")
-	public ResponseEntity<List<S3Metadata>> get(@PathVariable(name = "productType") String productType,
+	public ResponseEntity<List<S3Metadata>> getMarginTTProducts(@PathVariable(name = "productType") String productType,
 			@RequestParam(name = "productFamily") final String productFamily,
 			@RequestParam(name = "satellite") final String satellite, @RequestParam(name = "t0") final String startDate,
 			@RequestParam(name = "t1") final String stopDate,
@@ -74,6 +74,35 @@ public class S3MetadataController extends AbstractMetadataController<S3Metadata>
 			return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
 		} catch (final Exception e) {
 			LOGGER.error("Error on performing marginTT for product type {}: {}", productType, LogUtils.toString(e));
+			return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+		}
+	}
+
+	/**
+	 * Retrieve the L1Triggering information for the given productName from the
+	 * elasticsearch
+	 * 
+	 * @param productFamily product family of the product, used to determine index
+	 * @param productName   product name, which L1Triggering should be extracted
+	 * @return L1Triggering, "NONE" as default
+	 */
+	@RequestMapping(path = "/l1triggering")
+	public ResponseEntity<String> getL1Triggering(@RequestParam(name = "productFamily") final String productFamily,
+			@RequestParam(name = "productName") final String productName) {
+		try {
+			LOGGER.info("Received L1Triggering query for productFamily '{}' and productName '{}'",
+					productFamily.toString(), productName);
+
+			String response = esServices.getL1Triggering(ProductFamily.fromValue(productFamily), productName);
+
+			return new ResponseEntity<>(response, HttpStatus.OK);
+		} catch (final AbstractCodedException e) {
+			LOGGER.error("Error on performing L1Triggering search for product name {}: [code {}] {}", productName,
+					e.getCode().getCode(), e.getLogMessage());
+			return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+		} catch (final Exception e) {
+			LOGGER.error("Error on performing L1Triggering search for product name {}: {}", productName,
+					LogUtils.toString(e));
 			return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
 		}
 	}

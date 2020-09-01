@@ -15,6 +15,11 @@ public class S3Product extends AbstractProduct {
 	 */
 	private List<AppDataJobTaskInputs> additionalInputs;
 	
+	/**
+	 * Flag that signals whether or not the job should be discarded
+	 */
+	private boolean discardJob = false;
+	
 	public static final S3Product of(final AppDataJob job) {
 		S3Product returnValue = of(job.getProduct());
 		
@@ -35,9 +40,18 @@ public class S3Product extends AbstractProduct {
 		this.additionalInputs = additionalInputs;
 	}
 	
+	public void setDiscardJob(boolean discardJob) {
+		this.discardJob = discardJob;
+	}
+	
 	@Override
 	public List<AppDataJobTaskInputs> overridingInputs() {
 		return additionalInputs;
+	}
+	
+	@Override
+	public boolean shouldJobBeDiscarded() {
+		return discardJob;
 	}
 
 }

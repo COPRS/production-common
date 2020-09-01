@@ -63,6 +63,23 @@ public class S3TypeAdapter extends AbstractProductTypeAdapter implements Product
 		final TaskTableAdapter tasktableAdapter = new TaskTableAdapter(ttFile,
 				ttFactory.buildTaskTable(ttFile, processSettings.getLevel()), elementMapper);
 
+		// Discard logic for OLCI Calibration
+		if (settings.getOlciCalibration().contains(tasktableAdapter.taskTable().getProcessorName())) {
+			LOGGER.debug("Use additional logic 'OLCICalibrationFilter' for tasktable processor {}",
+					tasktableAdapter.taskTable().getProcessorName());
+			OLCICalibrationFilter olciCalFilter = new OLCICalibrationFilter(metadataClient, elementMapper);
+			try {
+				boolean discardJob = olciCalFilter.checkIfJobShouldBeDiscarded(job.getProductName());
+				if (discardJob) {
+					// Skip the rest of the mainInputSearch - job is discarded anyways
+					returnValue.setDiscardJob(discardJob);
+					return returnValue;
+				}
+			} catch (final MetadataQueryException me) {
+				LOGGER.error("Error on query execution, retrying next time", me);
+			}
+		}
+
 		// Get inputs of tasks
 		List<AppDataJobTaskInputs> tasks;
 		if (isEmpty(job.getAdditionalInputs())) {

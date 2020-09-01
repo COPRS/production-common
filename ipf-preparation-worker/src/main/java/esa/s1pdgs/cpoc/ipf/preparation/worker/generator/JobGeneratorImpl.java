@@ -51,13 +51,16 @@ public final class JobGeneratorImpl implements JobGenerator {
 				job.setProduct(queried.toProduct());
 				job.setAdditionalInputs(queried.overridingInputs());
 				
-				// FIXME dirty workaroung warning, the product above is still altered in validate by modifying 
-				// the start stop time for segments
-				performVoid(
-					() -> typeAdapter.validateInputSearch(job), 
-					"validating availability of input products for " + job.getProductName()
-				);
-				newState = outputState;
+				// Discard logic: skip validation of mainInputSearch - job is discarded anyways
+				if (!queried.shouldJobBeDiscarded()) {	
+					// FIXME dirty workaroung warning, the product above is still altered in validate by modifying 
+					// the start stop time for segments
+					performVoid(
+						() -> typeAdapter.validateInputSearch(job), 
+						"validating availability of input products for " + job.getProductName()
+					);
+					newState = outputState;
+				}
 			}
 			finally
 			{

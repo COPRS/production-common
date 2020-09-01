@@ -130,6 +130,11 @@ public class AppCatJobService {
 						final AppDataJobProductAdapter productAdapter = new AppDataJobProductAdapter(prod);
 						job.setStartTime(productAdapter.getStartTime());
 						job.setStopTime(productAdapter.getStopTime());
+						
+						if (queried.shouldJobBeDiscarded()) {
+							// Job is done
+							job.setState(AppDataJobState.TERMINATED);
+						}
 					}
 					// no transition?
 					if (job.getGeneration().getState() == outputState) {
