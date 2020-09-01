@@ -294,6 +294,8 @@ public class JobProcessor implements MqiListener<IpfExecutionJob> {
         		String.format("Error on handling IpfExecutionJob message %s: %s", message.getId(), LogUtils.toString(error)), 
         		message
         );
+        // FIXME: workaraound for retry counter, shall only be increased when restarting or reevaluating
+        message.getBody().getIpfPreparationJobMessage().getBody().increaseControlRetryCounter();
         failedProcessing.setPredecessor(message.getBody().getIpfPreparationJobMessage());
         errorAppender.send(failedProcessing);
 		exitOnAppStatusStopOrWait();
@@ -309,6 +311,8 @@ public class JobProcessor implements MqiListener<IpfExecutionJob> {
         		String.format("Warning on handling IpfExecutionJob message %s: %s", message.getId(), warningMessage), 
         		message
         );
+		// FIXME: workaraound for retry counter, shall only be increased when restarting or reevaluating
+		message.getBody().getIpfPreparationJobMessage().getBody().increaseControlRetryCounter();
         failedProcessing.setPredecessor(message.getBody().getIpfPreparationJobMessage());
         errorAppender.send(failedProcessing);
 	}
