@@ -61,7 +61,7 @@ public class AppCatJobService {
 	
 	public Optional<List<AppDataJob>> findJobsFor(final GenericMessageDto<CatalogEvent> mqiMessage) 
 			throws AbstractCodedException {
-		return first(
+		return returnOrEmpty(
 				appCatClient.findByMessagesId(mqiMessage.getId()), 
 				String.format("mqiMessage %s", mqiMessage.getId())
 		);	
@@ -225,6 +225,14 @@ public class AppCatJobService {
 
 	private final boolean isEmpty(final List<AppDataJob> jobs) {
 		return jobs == null || jobs.isEmpty();
+	}
+	
+	private final Optional<List<AppDataJob>> returnOrEmpty(final List<AppDataJob> result, final String desc) {
+		if (isEmpty(result)) {
+			LOG.debug("No AppDataJob found for {}", desc);
+			return Optional.empty();
+		}
+		return Optional.of(result);	
 	}
 }
 
