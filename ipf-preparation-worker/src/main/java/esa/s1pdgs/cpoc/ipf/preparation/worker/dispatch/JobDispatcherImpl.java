@@ -3,6 +3,7 @@ package esa.s1pdgs.cpoc.ipf.preparation.worker.dispatch;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -109,13 +110,13 @@ public class JobDispatcherImpl implements JobDispatcher {
 	) throws AbstractCodedException {
     	final GenericMessageDto<CatalogEvent> firstMessage = jobFromMessage.getMessages().get(0);
     	
-		final Optional<AppDataJob> jobForMess = appCat.findJobFor(firstMessage); 
+		final Optional<List<AppDataJob>> jobForMess = appCat.findJobsFor(firstMessage); 
 		final CatalogEventAdapter eventAdapter = CatalogEventAdapter.of(firstMessage);
 		final Optional<AppDataJob> specificJob = typeAdapter.findAssociatedJobFor(appCat, eventAdapter);
 						
 		// there is already a job for this message --> possible restart scenario --> just update the pod name 
-		if (jobForMess.isPresent() && jobForMess.get().getTaskTableName().equals(tasktableFilename)) {		
-			final AppDataJob job = jobForMess.get();
+		if (jobForMess.isPresent() && getJobMatchingTasktable(jobForMess.get(), tasktableFilename) != null) {
+			final AppDataJob job = getJobMatchingTasktable(jobForMess.get(), tasktableFilename);
 			LOGGER.warn("Found job {} already associated to mqiMessage {}. Ignoring new message ...",
 					job.getId(), firstMessage.getId());		
 		}
@@ -148,6 +149,19 @@ public class JobDispatcherImpl implements JobDispatcher {
 		    final AppDataJob newlyCreatedJob = appCat.create(jobFromMessage);
 		    LOGGER.info("dispatched job {}", newlyCreatedJob.getId());                
 		}
+	}
+	
+	/**
+	 * Returns the job of the list with the matching tasktable name. Returns null if
+	 * no matching job was found
+	 */
+	private AppDataJob getJobMatchingTasktable(List<AppDataJob> jobs, String taskTableName) {
+		for (AppDataJob job : jobs) {
+			if (job.getTaskTableName().equals(taskTableName)) {
+				return job;
+			}
+		}
+		return null;
 	}
 
 }

@@ -59,7 +59,7 @@ public class AppCatJobService {
 		return null;
 	}
 	
-	public Optional<AppDataJob> findJobFor(final GenericMessageDto<CatalogEvent> mqiMessage) 
+	public Optional<List<AppDataJob>> findJobsFor(final GenericMessageDto<CatalogEvent> mqiMessage) 
 			throws AbstractCodedException {
 		return first(
 				appCatClient.findByMessagesId(mqiMessage.getId()), 
