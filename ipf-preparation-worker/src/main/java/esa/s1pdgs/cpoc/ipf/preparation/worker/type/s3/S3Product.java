@@ -44,6 +44,14 @@ public class S3Product extends AbstractProduct {
 		this.discardJob = discardJob;
 	}
 	
+	public final void setStartTime(final String start) {
+		product.setStartTime(start);
+	}
+	
+	public final void setStopTime(final String stop) {
+		product.setStopTime(stop);
+	}
+	
 	@Override
 	public List<AppDataJobTaskInputs> overridingInputs() {
 		return additionalInputs;

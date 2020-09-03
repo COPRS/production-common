@@ -122,6 +122,17 @@ public class S3TypeAdapter extends AbstractProductTypeAdapter implements Product
 					MultipleProductCoverSearch mpcSearch = new MultipleProductCoverSearch(tasktableAdapter,
 							elementMapper, metadataClient, workerSettings);
 					tasks = mpcSearch.updateTaskInputsForViscal(tasks, alternative, job, returnValue);
+
+					/*
+					 * In a following step the start and stop time of the job will be set to the
+					 * start and stop time of the product. That step is ruining the
+					 * RangeSearch-logic so we anticipate that update and preemptively set the
+					 * products start and stop time to the ones from the job
+					 * 
+					 * @see AppDataJobService#updateProduct()
+					 */
+					returnValue.setStartTime(job.getStartTime());
+					returnValue.setStopTime(job.getStopTime());
 				}
 			} catch (final MetadataQueryException me) {
 				LOGGER.error("Error on query execution, retrying next time", me);
@@ -153,7 +164,7 @@ public class S3TypeAdapter extends AbstractProductTypeAdapter implements Product
 			try {
 				MultipleProductCoverSearch.Range range = mpcSearch.getIntersectingANXRange(job.getProductName(),
 						rangeSettings.getAnxOffsetInS(), rangeSettings.getRangeLengthInS());
-				
+
 				if (range != null) {
 					job.setStartTime(DateUtils.formatToMetadataDateTimeFormat(range.getStart()));
 					job.setStopTime(DateUtils.formatToMetadataDateTimeFormat(range.getStop()));
@@ -232,7 +243,8 @@ public class S3TypeAdapter extends AbstractProductTypeAdapter implements Product
 		String productType = job.getProductName().substring(4, 15);
 
 		/*
-		 * For VISCAL check if there already exists a job, that is responsible for the given interval
+		 * For VISCAL check if there already exists a job, that is responsible for the
+		 * given interval
 		 */
 		if (settings.isRangeSearchActiveForProductType(ttAdapter.taskTable().getProcessorName(), productType)) {
 			LOGGER.debug("Look for existing job for productType {}", productType);
