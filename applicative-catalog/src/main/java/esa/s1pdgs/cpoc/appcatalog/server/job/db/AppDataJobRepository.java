@@ -38,7 +38,7 @@ public interface AppDataJobRepository
     @Query(value = "{ 'product.metadata.dataTakeId' : ?0, 'state' : { $ne: 'TERMINATED' } }")
     List<AppDataJob> findByProductDataTakeId(final String dataTakeId);
     
-    @Query(value = "{ 'product.productName' : { $regex : ?0 }, 'state' : { $ne: 'TERMINATED' } }")
+    @Query(value = "{ 'productName' : { $regex : ?0 }, 'state' : { $ne: 'TERMINATED' } }")
     List<AppDataJob> findByProductType(final String productType);
     
     @Query(value = "{ 'product.metadata.sessionId' : ?0, 'state' : { $ne: 'TERMINATED' } }")
