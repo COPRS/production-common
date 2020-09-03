@@ -47,10 +47,7 @@ public class JobController {
     
     @RequestMapping(method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE, path = "/jobs/findByProductType/{productType}")
     public List<AppDataJob> findByProductType(@PathVariable(name = "productType") final String productType) {
-    	LOGGER.debug("Search AppDataJobs for productType {}", productType);
-    	List<AppDataJob> returnValue = appDataJobService.findByProductType(productType);
-    	LOGGER.debug("Found {} results for productType {}", returnValue.size(), productType);
-    	return returnValue;
+    	return appDataJobService.findByProductType(productType);
     }
 
     @RequestMapping(method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE, path = "/jobs/findByProductSessionId/{sessionId}")

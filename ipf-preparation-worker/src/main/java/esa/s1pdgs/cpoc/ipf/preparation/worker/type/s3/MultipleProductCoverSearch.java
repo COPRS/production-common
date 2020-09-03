@@ -294,14 +294,14 @@ public class MultipleProductCoverSearch {
 		LocalDateTime rangeStop = rangeStart.plus(rangeLengthInS, ChronoUnit.SECONDS);
 		Range anxRange = new Range(rangeStart, rangeStop);
 
-		LOGGER.debug("Check if range {} intersects with anxRange {}", productRange, anxRange);
+		LOGGER.trace("Check if range {} intersects with anxRange {}", productRange, anxRange);
 		
 		if (productRange.intersects(anxRange)) {
-			LOGGER.debug("Ranges intersect!");
+			LOGGER.trace("Ranges intersect!");
 			return anxRange;
 		}
 
-		LOGGER.debug("Ranges do not intersect!");
+		LOGGER.trace("Ranges do not intersect!");
 		return null;
 	}
 

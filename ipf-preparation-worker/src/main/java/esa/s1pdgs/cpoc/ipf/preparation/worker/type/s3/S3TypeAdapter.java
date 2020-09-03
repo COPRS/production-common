@@ -247,7 +247,8 @@ public class S3TypeAdapter extends AbstractProductTypeAdapter implements Product
 		 * given interval
 		 */
 		if (settings.isRangeSearchActiveForProductType(ttAdapter.taskTable().getProcessorName(), productType)) {
-			LOGGER.debug("Look for existing job for productType {}", productType);
+			LOGGER.debug("Look for existing job for productType {} and tasktable {}", productType,
+					job.getTaskTableName());
 			Optional<List<AppDataJob>> jobsInDatabase = appCat.findJobsForProductType(productType);
 
 			if (jobsInDatabase.isPresent()) {
