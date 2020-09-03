@@ -178,9 +178,10 @@ public class GenericConsumer implements MqiListener<CatalogEvent> {
         job.setLevel(processSettings.getLevel());
         job.setHostname(processSettings.getHostname());
         job.setEventMessage(mqiMessage);     
-    	job.setTaskTableName(taskTableName);    	
-    	job.setStartTime(eventAdapter.startTime());
-    	job.setStopTime(eventAdapter.stopTime());
+    	job.setTaskTableName(taskTableName);   
+    	// S1PRO-1772: user productSensing accessors here to make start/stop optional here (RAWs don't have them)
+    	job.setStartTime(eventAdapter.productSensingStartDate());
+    	job.setStopTime(eventAdapter.productSensingStopDate());
     	job.setProductFamily(event.getProductFamily());
     	job.setKeyObjectStorage(event.getProductName());
     	job.setUid(reporting.getUid());

@@ -1,6 +1,8 @@
 package esa.s1pdgs.cpoc.ipf.preparation.worker.type.edrs;
 
 import java.io.File;
+import java.time.Duration;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -10,15 +12,18 @@ import org.springframework.util.Assert;
 
 import esa.s1pdgs.cpoc.appcatalog.AppDataJob;
 import esa.s1pdgs.cpoc.appcatalog.AppDataJobFile;
+import esa.s1pdgs.cpoc.common.EdrsSessionFileType;
 import esa.s1pdgs.cpoc.common.ProductFamily;
 import esa.s1pdgs.cpoc.common.errors.AbstractCodedException;
 import esa.s1pdgs.cpoc.common.errors.processing.IpfPrepWorkerInputsMissingException;
 import esa.s1pdgs.cpoc.common.errors.processing.MetadataQueryException;
+import esa.s1pdgs.cpoc.common.utils.DateUtils;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.appcat.AppCatJobService;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.type.AbstractProductTypeAdapter;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.type.Product;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.type.ProductTypeAdapter;
 import esa.s1pdgs.cpoc.metadata.client.MetadataClient;
+import esa.s1pdgs.cpoc.metadata.model.EdrsSessionMetadata;
 import esa.s1pdgs.cpoc.mqi.model.queue.IpfExecutionJob;
 import esa.s1pdgs.cpoc.mqi.model.queue.LevelJobInputDto;
 import esa.s1pdgs.cpoc.mqi.model.queue.util.CatalogEventAdapter;
@@ -57,21 +62,27 @@ public final class EdrsSessionTypeAdapter extends AbstractProductTypeAdapter imp
         	final EdrsSessionMetadataAdapter edrsMetadata = EdrsSessionMetadataAdapter.parse(        			
         			metadataClient.getEdrsSessionFor(product.getSessionId())
         	);
+        	final EdrsSessionMetadata dsib1 = edrsMetadata.getChannel1();
+        	final EdrsSessionMetadata dsib2 = edrsMetadata.getChannel2();
         	
-        	if (edrsMetadata.getChannel1() == null) {    
+        	if (dsib1 == null) {    
         		product.setRawsForChannel(1, edrsMetadata.availableRaws1());
         	}   
-        	else {
-            	product.setDsibForChannel(1, edrsMetadata.getChannel1().getKeyObjectStorage());
+        	else {        	
+            	product.setDsibForChannel(1, dsib1.getKeyObjectStorage());
             	product.setRawsForChannel(1, edrsMetadata.raws1());
+            	product.setStartTime(dsib1.getStartTime());
+            	product.setStopTime(dsib1.getStopTime());            	
         	}
         	
-        	if (edrsMetadata.getChannel2() == null) { 
+        	if (dsib2 == null) { 
         		product.setRawsForChannel(2, edrsMetadata.availableRaws2());
         	} 
         	else {
-        		product.setDsibForChannel(2, edrsMetadata.getChannel2().getKeyObjectStorage());
+        		product.setDsibForChannel(2, dsib2.getKeyObjectStorage());
                	product.setRawsForChannel(2, edrsMetadata.raws2());
+            	product.setStartTime(dsib2.getStartTime());
+            	product.setStopTime(dsib2.getStopTime());  
         	}
         } 
         catch (final MetadataQueryException me) {
@@ -97,6 +108,29 @@ public final class EdrsSessionTypeAdapter extends AbstractProductTypeAdapter imp
 		product.setProductName(eventAdapter.sessionId());
 		product.setSessionId(eventAdapter.sessionId());
 		product.setStationCode(eventAdapter.stationCode());
+		
+		// S1PRO-1772: logic from PIC: For chunks, start/stop time is not known, so as the default value
+		// now and now+3h is used
+		if (eventAdapter.productType().equals(EdrsSessionFileType.RAW.toString())) {
+			final LocalDateTime now = LocalDateTime.now();
+			final LocalDateTime nowPlusOffset = now.plus(
+					Duration.parse(
+							System.getProperty("edrs.raw.nowOffsetForDefaultStopTime","PT3H") // default: 3h
+					)
+			);			
+			final String startTime = DateUtils.formatToMetadataDateTimeFormat(now);
+			final String stopTime = DateUtils.formatToMetadataDateTimeFormat(nowPlusOffset);
+			product.setStartTime(startTime);
+			product.setStopTime(stopTime);
+			job.setStartTime(startTime);
+			job.setStopTime(stopTime);
+		}
+		else {
+			product.setStartTime(eventAdapter.startTime());
+			product.setStopTime(eventAdapter.stopTime());
+			job.setStartTime(eventAdapter.startTime());
+			job.setStopTime(eventAdapter.stopTime());
+		}
 	}
 	
 	@Override

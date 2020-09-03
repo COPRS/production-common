@@ -1277,4 +1277,35 @@ public class ExtractMetadataTest {
 		assertEquals(1, extractor.totalNumberOfSlice(startTime, stopTime, sliceType));
 	}
 
+	@Test
+	public void testDoNothing() {
+		String rawCoordinatesInput = "70.0,170.0 70.0,170.0 -70.0,150.0 -70.0,170.0";
+		String rawCoordinatesExpectedResult = "70.0,170.0 70.0,170.0 -70.0,150.0 -70.0,170.0";
+		
+		assertEquals(rawCoordinatesExpectedResult, extractor.improveRawCoordinatesIfDateLineCrossing(rawCoordinatesInput));
+	}
+	
+	@Test
+	public void testIncreaseOne() {
+		String rawCoordinatesInput = "70.0,-170.0 70.0,170.0 -70.0,150.0 -70.0,170.0";
+		String rawCoordinatesExpectedResult = "70.0,190.0 70.0,170.0 -70.0,150.0 -70.0,170.0";
+		
+		assertEquals(rawCoordinatesExpectedResult, extractor.improveRawCoordinatesIfDateLineCrossing(rawCoordinatesInput));
+	}
+	
+	@Test
+	public void testDecreaseOne() {
+		String rawCoordinatesInput = "70.0,-170.0 70.0,-170.0 -70.0,150.0 -70.0,-170.0";
+		String rawCoordinatesExpectedResult = "70.0,-170.0 70.0,-170.0 -70.0,-210.0 -70.0,-170.0";
+		
+		assertEquals(rawCoordinatesExpectedResult, extractor.improveRawCoordinatesIfDateLineCrossing(rawCoordinatesInput));
+	}
+	
+	@Test
+	public void testIncreaseOne2() {
+		String rawCoordinatesInput = "12.378114,48.279240 12.829241,50.603844 11.081389,-50.958828 10.625828,48.649940";
+		String rawCoordinatesExpectedResult = "12.378114,48.279240 12.829241,50.603844 11.081389,309.041172 10.625828,48.649940";
+		
+		assertEquals(rawCoordinatesExpectedResult, extractor.improveRawCoordinatesIfDateLineCrossing(rawCoordinatesInput));
+	}
 }

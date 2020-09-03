@@ -29,6 +29,10 @@ public final class CatalogEventAdapter {
 		return new CatalogEventAdapter(mqiMessage.getDto());
 	}
 	
+	public final String productType() {
+		return getStringValue("productType", "NOT_KNOWN");
+	}
+	
 	public final String sessionId() {
 		return getStringValue("sessionId");
 	}
