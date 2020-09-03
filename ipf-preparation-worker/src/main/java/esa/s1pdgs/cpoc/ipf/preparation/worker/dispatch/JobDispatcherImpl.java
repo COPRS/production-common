@@ -95,7 +95,12 @@ public class JobDispatcherImpl implements JobDispatcher {
 		            			)
 		            	);
 		            } 
-		    		handleJob(message, jobFromMessage, reporting.getUid(), tasktableFilename);
+		            // Allow additional logic in TypeAdapter to drop a job completely
+		            if (jobFromMessage.getState() != AppDataJobState.TERMINATED) {
+		            	handleJob(message, jobFromMessage, reporting.getUid(), tasktableFilename);
+		            } else {
+		            	LOGGER.info("No job for message {} created. Job was already TERMINATED.", message.getId());
+		            }
 		    		return Collections.emptyList();
 				})
 				.newResult();

@@ -222,7 +222,7 @@ public class MetadataClient {
 	 * @return S3Metadata
 	 * @throws MetadataQueryException on error on query execution
 	 */
-	public S3Metadata getS3MetatataForProduct(final ProductFamily productFamily, final String productName) throws MetadataQueryException {
+	public S3Metadata getS3MetadataForProduct(final ProductFamily productFamily, final String productName) throws MetadataQueryException {
 		final String uri = this.metadataBaseUri + MetadataCatalogRestPath.S3_METADATA.path() + "/" + productFamily.toString();
 
 		final UriComponentsBuilder builder = UriComponentsBuilder.fromUriString(uri)

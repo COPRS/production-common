@@ -15,6 +15,7 @@ import org.apache.logging.log4j.Logger;
 
 import esa.s1pdgs.cpoc.appcatalog.AppDataJob;
 import esa.s1pdgs.cpoc.appcatalog.AppDataJobInput;
+import esa.s1pdgs.cpoc.appcatalog.AppDataJobState;
 import esa.s1pdgs.cpoc.appcatalog.AppDataJobTaskInputs;
 import esa.s1pdgs.cpoc.common.errors.AbstractCodedException;
 import esa.s1pdgs.cpoc.common.errors.processing.IpfPrepWorkerInputsMissingException;
@@ -152,10 +153,13 @@ public class S3TypeAdapter extends AbstractProductTypeAdapter implements Product
 			try {
 				MultipleProductCoverSearch.Range range = mpcSearch.getIntersectingANXRange(job.getProductName(),
 						rangeSettings.getAnxOffsetInS(), rangeSettings.getRangeLengthInS());
-
+				
 				if (range != null) {
 					job.setStartTime(DateUtils.formatToMetadataDateTimeFormat(range.getStart()));
 					job.setStopTime(DateUtils.formatToMetadataDateTimeFormat(range.getStop()));
+				} else {
+					// Discard Job
+					job.setState(AppDataJobState.TERMINATED);
 				}
 			} catch (MetadataQueryException e) {
 				LOGGER.error("Error while determining viscal range, skip changing interval for AppDataJob", e);

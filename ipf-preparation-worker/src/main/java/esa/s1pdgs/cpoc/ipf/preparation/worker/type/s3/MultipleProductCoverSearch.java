@@ -68,6 +68,11 @@ public class MultipleProductCoverSearch {
 		public void setStop(LocalDateTime stop) {
 			this.stop = stop;
 		}
+		
+		@Override
+		public String toString() {
+			return "Range [start=" + start + ", stop=" + stop + "]";
+		}
 
 		/**
 		 * Checks if this range intersects with the given range
@@ -191,7 +196,7 @@ public class MultipleProductCoverSearch {
 			throws MetadataQueryException {
 		String productType = productName.substring(4, 15);
 
-		S3Metadata metadata = metadataClient.getS3MetatataForProduct(elementMapper.inputFamilyOf(productType),
+		S3Metadata metadata = metadataClient.getS3MetadataForProduct(elementMapper.inputFamilyOf(productType),
 				productName);
 
 		Range productRange = new Range(DateUtils.parse(metadata.getValidityStart()),
@@ -289,10 +294,14 @@ public class MultipleProductCoverSearch {
 		LocalDateTime rangeStop = rangeStart.plus(rangeLengthInS, ChronoUnit.SECONDS);
 		Range anxRange = new Range(rangeStart, rangeStop);
 
+		LOGGER.debug("Check if range {} intersects with anxRange {}", productRange, anxRange);
+		
 		if (productRange.intersects(anxRange)) {
+			LOGGER.debug("Ranges intersect!");
 			return anxRange;
 		}
 
+		LOGGER.debug("Ranges do not intersect!");
 		return null;
 	}
 
