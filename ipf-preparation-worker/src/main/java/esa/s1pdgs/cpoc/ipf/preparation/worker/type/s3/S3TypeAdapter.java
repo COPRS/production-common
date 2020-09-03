@@ -266,6 +266,8 @@ public class S3TypeAdapter extends AbstractProductTypeAdapter implements Product
 					}
 				}
 			}
+			LOGGER.debug("No existing job for productType {} and tasktable {} found", productType,
+					job.getTaskTableName());
 		}
 
 		return Optional.empty();
