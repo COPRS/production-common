@@ -21,6 +21,47 @@ import org.springframework.context.annotation.Configuration;
 public class S3TypeAdapterSettings {
 
 	/**
+	 * Settings for the RangeCover logic
+	 * 
+	 * @author Julian Kaping
+	 */
+	public static class RangeCoverSettings {
+		private String productType;
+		private long anxOffsetInS;
+		private long rangeLengthInS;
+
+		public String getProductType() {
+			return productType;
+		}
+
+		public void setProductType(String productType) {
+			this.productType = productType;
+		}
+
+		public long getAnxOffsetInS() {
+			return anxOffsetInS;
+		}
+
+		public void setAnxOffsetInS(long anxOffsetInS) {
+			this.anxOffsetInS = anxOffsetInS;
+		}
+
+		public long getRangeLengthInS() {
+			return rangeLengthInS;
+		}
+
+		public void setRangeLengthInS(long rangeLengthInS) {
+			this.rangeLengthInS = rangeLengthInS;
+		}
+
+		@Override
+		public String toString() {
+			return "RangeCoverSettings [productType=" + productType + ", anxOffsetInS=" + anxOffsetInS
+					+ ", rangeLengthInS=" + rangeLengthInS + "]";
+		}
+	}
+
+	/**
 	 * map containing the product types for each tasktable on which the mpcSearch
 	 * should be executed
 	 * 
@@ -28,6 +69,14 @@ public class S3TypeAdapterSettings {
 	 * OL_0_EFR___)
 	 */
 	private Map<String, List<String>> mpcSearch = new HashMap<>();
+
+	/**
+	 * map containing the settings for the rangeCover logic
+	 * 
+	 * key is the processor name (ex. S3A_OL1), values are the product types (ex.
+	 * OL_0_EFR___), offset and rangeLength (in seconds)
+	 */
+	private Map<String, RangeCoverSettings> rangeSearch = new HashMap<>();
 
 	/**
 	 * list of processors on which the additional logic for OLCI calibration should
@@ -56,6 +105,29 @@ public class S3TypeAdapterSettings {
 
 	public void setMpcSearch(Map<String, List<String>> mpcSearch) {
 		this.mpcSearch = mpcSearch;
+	}
+
+	public Map<String, RangeCoverSettings> getRangeSearch() {
+		return rangeSearch;
+	}
+
+	/**
+	 * Returns if the RangeCoverSearch should be executed for the given productType
+	 * 
+	 * @param processorName tasktable processor name
+	 * @param productType   productType to check (ex. OL_1_EFR___)
+	 * @return true if the logic should be applied
+	 */
+	public boolean isRangeSearchActiveForProductType(String processorName, String productType) {
+		RangeCoverSettings rcSettings = rangeSearch.get(processorName);
+		if (rcSettings != null) {
+			return rcSettings.getProductType().equals(productType);
+		}
+		return false;
+	}
+
+	public void setRangeSearch(Map<String, RangeCoverSettings> rangeSearch) {
+		this.rangeSearch = rangeSearch;
 	}
 
 	public List<String> getOlciCalibration() {

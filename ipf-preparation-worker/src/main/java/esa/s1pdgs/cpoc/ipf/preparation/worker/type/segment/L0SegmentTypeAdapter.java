@@ -43,8 +43,8 @@ public final class L0SegmentTypeAdapter extends AbstractProductTypeAdapter imple
 	}
 	
 	@Override
-	public final Optional<AppDataJob> findAssociatedJobFor(final AppCatJobService appCat, final CatalogEventAdapter catEvent)
-			throws AbstractCodedException {
+	public final Optional<AppDataJob> findAssociatedJobFor(final AppCatJobService appCat,
+			final CatalogEventAdapter catEvent, final AppDataJob job) throws AbstractCodedException {
 		return appCat.findJobForDatatakeId(catEvent.datatakeId());
 	}
 

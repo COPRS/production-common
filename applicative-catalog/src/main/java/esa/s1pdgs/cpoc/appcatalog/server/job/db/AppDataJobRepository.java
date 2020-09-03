@@ -35,13 +35,18 @@ public interface AppDataJobRepository
     @Query(value = "{ 'messages._id' : ?0, 'state' : { $ne: 'TERMINATED' } }")
     List<AppDataJob> findByMessagesId(final long messageId);
 
-    @Query(value = "{ 'product.metadata.sessionId' : ?0, 'state' : { $ne: 'TERMINATED' } }")
-    List<AppDataJob> findByProductSessionId(final String sessionId);
-    
     @Query(value = "{ 'product.metadata.dataTakeId' : ?0, 'state' : { $ne: 'TERMINATED' } }")
     List<AppDataJob> findByProductDataTakeId(final String dataTakeId);
     
+    @Query(value = "{ 'product.productName' : { $regex : ?0 }, 'state' : { $ne: 'TERMINATED' } }")
+    List<AppDataJob> findByProductType(final String productType);
+    
+    @Query(value = "{ 'product.metadata.sessionId' : ?0, 'state' : { $ne: 'TERMINATED' } }")
+    List<AppDataJob> findByProductSessionId(final String sessionId);
+    
     @Query(value = "{ 'state' : 'GENERATING', 'generation.state' : { $ne: 'SENT' }, 'generation.taskTable' : ?0 }", sort = "{ 'generation.lastUpdateDate': 1 }")
     List<AppDataJob> findJobInStateGenerating(final String taskTable);
+    
+
 
 }

@@ -112,7 +112,7 @@ public class JobDispatcherImpl implements JobDispatcher {
     	
 		final Optional<List<AppDataJob>> jobForMess = appCat.findJobsFor(firstMessage); 
 		final CatalogEventAdapter eventAdapter = CatalogEventAdapter.of(firstMessage);
-		final Optional<AppDataJob> specificJob = typeAdapter.findAssociatedJobFor(appCat, eventAdapter);
+		final Optional<AppDataJob> specificJob = typeAdapter.findAssociatedJobFor(appCat, eventAdapter, jobFromMessage);
 						
 		// there is already a job for this message --> possible restart scenario --> just update the pod name 
 		if (jobForMess.isPresent() && getJobMatchingTasktable(jobForMess.get(), tasktableFilename) != null) {

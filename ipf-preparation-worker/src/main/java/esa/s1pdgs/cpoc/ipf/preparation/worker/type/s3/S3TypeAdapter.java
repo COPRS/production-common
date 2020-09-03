@@ -8,6 +8,7 @@ import java.time.Instant;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -15,8 +16,11 @@ import org.apache.logging.log4j.Logger;
 import esa.s1pdgs.cpoc.appcatalog.AppDataJob;
 import esa.s1pdgs.cpoc.appcatalog.AppDataJobInput;
 import esa.s1pdgs.cpoc.appcatalog.AppDataJobTaskInputs;
+import esa.s1pdgs.cpoc.common.errors.AbstractCodedException;
 import esa.s1pdgs.cpoc.common.errors.processing.IpfPrepWorkerInputsMissingException;
 import esa.s1pdgs.cpoc.common.errors.processing.MetadataQueryException;
+import esa.s1pdgs.cpoc.common.utils.DateUtils;
+import esa.s1pdgs.cpoc.ipf.preparation.worker.appcat.AppCatJobService;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.config.IpfPreparationWorkerSettings;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.config.ProcessSettings;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.config.S3TypeAdapterSettings;
@@ -29,6 +33,7 @@ import esa.s1pdgs.cpoc.ipf.preparation.worker.type.Product;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.type.ProductTypeAdapter;
 import esa.s1pdgs.cpoc.metadata.client.MetadataClient;
 import esa.s1pdgs.cpoc.mqi.model.queue.IpfExecutionJob;
+import esa.s1pdgs.cpoc.mqi.model.queue.util.CatalogEventAdapter;
 import esa.s1pdgs.cpoc.xml.model.joborder.JobOrder;
 import esa.s1pdgs.cpoc.xml.model.tasktable.TaskTableInputAlternative;
 
@@ -59,9 +64,7 @@ public class S3TypeAdapter extends AbstractProductTypeAdapter implements Product
 		S3Product returnValue = S3Product.of(job);
 
 		// Create tasktable Adapter for tasktable defined by Job
-		final File ttFile = new File(workerSettings.getDiroftasktables(), job.getTaskTableName());
-		final TaskTableAdapter tasktableAdapter = new TaskTableAdapter(ttFile,
-				ttFactory.buildTaskTable(ttFile, processSettings.getLevel()), elementMapper);
+		final TaskTableAdapter tasktableAdapter = getTTAdapterForTaskTableName(job.getTaskTableName());
 
 		// Discard logic for OLCI Calibration
 		if (settings.getOlciCalibration().contains(tasktableAdapter.taskTable().getProcessorName())) {
@@ -104,11 +107,20 @@ public class S3TypeAdapter extends AbstractProductTypeAdapter implements Product
 			try {
 				if (settings.getMpcSearch(tasktableAdapter.taskTable().getProcessorName())
 						.contains(alternative.getFileType())) {
-					LOGGER.debug("Use additional logic 'MultipleProductCoverSearch' for product type {}",
+					LOGGER.debug("Use additional logic 'MultipleProductCoverSearch (MarginTT)' for product type {}",
 							alternative.getFileType());
 					MultipleProductCoverSearch mpcSearch = new MultipleProductCoverSearch(tasktableAdapter,
 							elementMapper, metadataClient, workerSettings);
 					tasks = mpcSearch.updateTaskInputsByAlternative(tasks, alternative, returnValue);
+				}
+
+				if (settings.isRangeSearchActiveForProductType(tasktableAdapter.taskTable().getProcessorName(),
+						alternative.getFileType())) {
+					LOGGER.debug("Use additional logic 'MultipleProductCoverSearch (Viscal)' for product type {}",
+							alternative.getFileType());
+					MultipleProductCoverSearch mpcSearch = new MultipleProductCoverSearch(tasktableAdapter,
+							elementMapper, metadataClient, workerSettings);
+					tasks = mpcSearch.updateTaskInputsForViscal(tasks, alternative, job, returnValue);
 				}
 			} catch (final MetadataQueryException me) {
 				LOGGER.error("Error on query execution, retrying next time", me);
@@ -121,7 +133,34 @@ public class S3TypeAdapter extends AbstractProductTypeAdapter implements Product
 
 	@Override
 	public void customAppDataJob(AppDataJob job) {
-		// Nothing to do currently
+		// Create tasktable Adapter for tasktable defined by Job
+		final TaskTableAdapter ttAdapter = getTTAdapterForTaskTableName(job.getTaskTableName());
+
+		String productType = job.getProductName().substring(4, 15);
+
+		/*
+		 * Change time interval for job when range search is active This is needed for
+		 * VISCAL (SLSTR Calibration)
+		 */
+		if (settings.isRangeSearchActiveForProductType(ttAdapter.taskTable().getProcessorName(), productType)) {
+			S3TypeAdapterSettings.RangeCoverSettings rangeSettings = settings.getRangeSearch()
+					.get(ttAdapter.taskTable().getProcessorName());
+
+			MultipleProductCoverSearch mpcSearch = new MultipleProductCoverSearch(ttAdapter, elementMapper,
+					metadataClient, workerSettings);
+
+			try {
+				MultipleProductCoverSearch.Range range = mpcSearch.getIntersectingANXRange(job.getProductName(),
+						rangeSettings.getAnxOffsetInS(), rangeSettings.getRangeLengthInS());
+
+				if (range != null) {
+					job.setStartTime(DateUtils.formatToMetadataDateTimeFormat(range.getStart()));
+					job.setStopTime(DateUtils.formatToMetadataDateTimeFormat(range.getStop()));
+				}
+			} catch (MetadataQueryException e) {
+				LOGGER.error("Error while determining viscal range, skip changing interval for AppDataJob", e);
+			}
+		}
 	}
 
 	@Override
@@ -151,9 +190,7 @@ public class S3TypeAdapter extends AbstractProductTypeAdapter implements Product
 
 		// Check that each Input which should have results contains results or that
 		// timeout is expired
-		final File ttFile = new File(workerSettings.getDiroftasktables(), job.getTaskTableName());
-		final TaskTableAdapter taskTableAdapter = new TaskTableAdapter(ttFile,
-				ttFactory.buildTaskTable(ttFile, processSettings.getLevel()), elementMapper);
+		final TaskTableAdapter taskTableAdapter = getTTAdapterForTaskTableName(job.getTaskTableName());
 
 		// Extract a list of all inputs from the tasks
 		List<AppDataJobInput> inputsWithNoResults = job.getAdditionalInputs().stream()
@@ -169,7 +206,9 @@ public class S3TypeAdapter extends AbstractProductTypeAdapter implements Product
 		Map<String, String> missingAlternatives = new HashMap<>();
 		for (TaskTableInputAlternative alternative : alternatives) {
 			if (settings.getMpcSearch(taskTableAdapter.taskTable().getProcessorName())
-					.contains(alternative.getFileType())) {
+					.contains(alternative.getFileType())
+					|| settings.isRangeSearchActiveForProductType(taskTableAdapter.taskTable().getProcessorName(),
+							alternative.getFileType())) {
 				missingAlternatives.put(alternative.getFileType(),
 						"Incomplete result set for " + alternative.getFileType());
 			}
@@ -179,6 +218,40 @@ public class S3TypeAdapter extends AbstractProductTypeAdapter implements Product
 		if (!missingAlternatives.isEmpty()) {
 			throw new IpfPrepWorkerInputsMissingException(missingAlternatives);
 		}
+	}
+
+	@Override
+	public Optional<AppDataJob> findAssociatedJobFor(final AppCatJobService appCat, final CatalogEventAdapter catEvent,
+			final AppDataJob job) throws AbstractCodedException {
+		// Create tasktable Adapter for tasktable defined by Job
+		final TaskTableAdapter ttAdapter = getTTAdapterForTaskTableName(job.getTaskTableName());
+		String productType = job.getProductName().substring(4, 15);
+
+		/*
+		 * For VISCAL check if there already exists a job, that is responsible for the given interval
+		 */
+		if (settings.isRangeSearchActiveForProductType(ttAdapter.taskTable().getProcessorName(), productType)) {
+			LOGGER.debug("Look for existing job for productType {}", productType);
+			Optional<List<AppDataJob>> jobsInDatabase = appCat.findJobsForProductType(productType);
+
+			if (jobsInDatabase.isPresent()) {
+				MultipleProductCoverSearch.Range newJobRange = new MultipleProductCoverSearch.Range(
+						DateUtils.parse(job.getStartTime()), DateUtils.parse(job.getStopTime()));
+
+				for (AppDataJob jobInDatabase : jobsInDatabase.get()) {
+					MultipleProductCoverSearch.Range databaseJobRange = new MultipleProductCoverSearch.Range(
+							DateUtils.parse(jobInDatabase.getStartTime()),
+							DateUtils.parse(jobInDatabase.getStopTime()));
+
+					if (jobInDatabase.getTaskTableName().equals(job.getTaskTableName())
+							&& newJobRange.intersects(databaseJobRange)) {
+						return Optional.of(jobInDatabase);
+					}
+				}
+			}
+		}
+
+		return Optional.empty();
 	}
 
 	/**
@@ -197,5 +270,19 @@ public class S3TypeAdapter extends AbstractProductTypeAdapter implements Product
 				}
 			}
 		}
+	}
+
+	/**
+	 * Create a TaskTableAdapter for the given tasktable
+	 * 
+	 * @param taskTable name of the taskTable
+	 * @return TaskTableAdapter to access the tasktable information
+	 */
+	private TaskTableAdapter getTTAdapterForTaskTableName(String taskTable) {
+		final File ttFile = new File(workerSettings.getDiroftasktables(), taskTable);
+		final TaskTableAdapter tasktableAdapter = new TaskTableAdapter(ttFile,
+				ttFactory.buildTaskTable(ttFile, processSettings.getLevel()), elementMapper);
+
+		return tasktableAdapter;
 	}
 }

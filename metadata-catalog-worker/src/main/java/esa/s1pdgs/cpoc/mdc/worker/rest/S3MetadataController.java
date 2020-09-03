@@ -1,7 +1,5 @@
 package esa.s1pdgs.cpoc.mdc.worker.rest;
 
-import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -38,13 +36,11 @@ public class S3MetadataController extends AbstractMetadataController<S3Metadata>
 	 * 
 	 * @return list of matching products
 	 */
-	@RequestMapping(path = "/{productType}/marginTT")
-	public ResponseEntity<List<S3Metadata>> getMarginTTProducts(@PathVariable(name = "productType") String productType,
+	@RequestMapping(path = "/{productType}/range")
+	public ResponseEntity<List<S3Metadata>> getProductsInRange(@PathVariable(name = "productType") String productType,
 			@RequestParam(name = "productFamily") final String productFamily,
-			@RequestParam(name = "satellite") final String satellite, @RequestParam(name = "t0") final String startDate,
-			@RequestParam(name = "t1") final String stopDate,
-			@RequestParam(value = "dt0", defaultValue = "0.0") final double dt0,
-			@RequestParam(value = "dt1", defaultValue = "0.0") final double dt1,
+			@RequestParam(name = "satellite") final String satellite,
+			@RequestParam(name = "start") final String rangeStart, @RequestParam(name = "stop") final String rangeStop,
 			@RequestParam(value = "timeliness") final String timeliness) {
 
 		try {
@@ -53,11 +49,8 @@ public class S3MetadataController extends AbstractMetadataController<S3Metadata>
 			LOGGER.info("Received S3 MarginTT search query for family '{}', product type '{}', timeliness '{}'",
 					productFamily.toString(), productType, timeliness);
 
-			List<S3Metadata> result = esServices.marginTTQuery(
-					convertDateForSearch(startDate, -dt0,
-							DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSSSSS'Z'")),
-					convertDateForSearch(stopDate, dt1, DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSSSSS'Z'")),
-					productType, satellite, timeliness, ProductFamily.fromValue(productFamily));
+			List<S3Metadata> result = esServices.rangeCoverQuery(rangeStart, rangeStop, productType, satellite,
+					timeliness, ProductFamily.fromValue(productFamily));
 
 			if (result != null) {
 				LOGGER.debug("Query returned {} results", result.size());
@@ -107,12 +100,32 @@ public class S3MetadataController extends AbstractMetadataController<S3Metadata>
 		}
 	}
 
-	private String convertDateForSearch(final String dateStr, final double delta,
-			final DateTimeFormatter outFormatter) {
-		final LocalDateTime time = LocalDateTime.parse(dateStr,
-				DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSSSSS'Z'"));
-		final LocalDateTime timePlus = time.plusSeconds(Math.round(delta));
-		return timePlus.format(outFormatter);
-	}
+	/**
+	 * Retrieve the metadata for a given productName
+	 * 
+	 * @param productFamily product family of the product, used to determine index
+	 * @param productName   product name, which the metadata should be extracted
+	 * @return S3Metadata-Object
+	 */
+	@RequestMapping(path = "/{productFamily}")
+	public ResponseEntity<S3Metadata> getMetadataForProduct(
+			@PathVariable(name = "productFamily") final String productFamily,
+			@RequestParam(name = "productName") final String productName) {
+		try {
+			LOGGER.info("Received S3Metadata query for productFamily '{}' and productName '{}'",
+					productFamily.toString(), productName);
 
+			S3Metadata response = esServices.getS3ProductMetadata(ProductFamily.fromValue(productFamily), productName);
+
+			return new ResponseEntity<>(response, HttpStatus.OK);
+		} catch (final AbstractCodedException e) {
+			LOGGER.error("Error on performing S3Metadata search for product name {}: [code {}] {}", productName,
+					e.getCode().getCode(), e.getLogMessage());
+			return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+		} catch (final Exception e) {
+			LOGGER.error("Error on performing S3Metadata search for product name {}: {}", productName,
+					LogUtils.toString(e));
+			return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+		}
+	}
 }

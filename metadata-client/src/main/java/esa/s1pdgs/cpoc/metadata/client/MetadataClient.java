@@ -2,6 +2,7 @@ package esa.s1pdgs.cpoc.metadata.client;
 
 import java.net.URI;
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.Callable;
@@ -154,15 +155,20 @@ public class MetadataClient {
 	 * 
 	 * @return list of matching products
 	 */
-	public List<S3Metadata> getProductsForMarginWFX(final String productType, final ProductFamily productFamily,
+	public List<S3Metadata> getProductsInRange(final String productType, final ProductFamily productFamily,
 			final String satelliteId, final String t0, final String t1, final double dt0, final double dt1,
 			final String timeliness) throws MetadataQueryException {
 		final String uri = this.metadataBaseUri + MetadataCatalogRestPath.S3_METADATA.path() + "/" + productType
-				+ "/marginTT";
+				+ "/range";
+
+		final String rangeStart = convertDateForSearch(t0, -dt0,
+				DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSSSSS'Z'"));
+		final String rangeStop = convertDateForSearch(t1, dt1,
+				DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSSSSS'Z'"));
+
 		final UriComponentsBuilder builder = UriComponentsBuilder.fromUriString(uri)
 				.queryParam("productFamily", productFamily.toString()).queryParam("satellite", satelliteId)
-				.queryParam("t0", t0).queryParam("t1", t1).queryParam("dt0", dt0).queryParam("dt1", dt1)
-				.queryParam("timeliness", timeliness);
+				.queryParam("start", rangeStart).queryParam("stop", rangeStop).queryParam("timeliness", timeliness);
 
 		final ResponseEntity<List<S3Metadata>> response = query(builder.build().toUri(),
 				new ParameterizedTypeReference<List<S3Metadata>>() {
@@ -180,7 +186,7 @@ public class MetadataClient {
 	}
 
 	/**
-	 * Extracts the L1Triggering information for the givebn productName
+	 * Extracts the L1Triggering information for the given productName
 	 * 
 	 * @param productFamily productFamily of the product
 	 * @param productName   productName which L1Triggering should be extracted from
@@ -203,6 +209,35 @@ public class MetadataClient {
 			return "NONE";
 		} else {
 			LOGGER.info("L1Triggering metadata query for family '{}' and product name '{}' returned {}",
+					productFamily.toString(), productName, response.getBody());
+			return response.getBody();
+		}
+	}
+	
+	/**
+	 * Extracts the S3Metadata information for the given productName
+	 * 
+	 * @param productFamily productFamily of the product
+	 * @param productName   productName which metadata should be extracted
+	 * @return S3Metadata
+	 * @throws MetadataQueryException on error on query execution
+	 */
+	public S3Metadata getS3MetatataForProduct(final ProductFamily productFamily, final String productName) throws MetadataQueryException {
+		final String uri = this.metadataBaseUri + MetadataCatalogRestPath.S3_METADATA.path() + "/" + productFamily.toString();
+
+		final UriComponentsBuilder builder = UriComponentsBuilder.fromUriString(uri)
+				.queryParam("productFamily", productFamily.toString()).queryParam("productName", productName);
+
+		final ResponseEntity<S3Metadata> response = query(builder.build().toUri(),
+				new ParameterizedTypeReference<S3Metadata>() {
+				});
+
+		if (response == null || response.getBody() == null) {
+			LOGGER.debug("S3Metadata query for family '{}' and product name '{}' returned no results",
+					productFamily, productName);
+			return null;
+		} else {
+			LOGGER.info("S3Metadata query for family '{}' and product name '{}' returned {}",
 					productFamily.toString(), productName, response.getBody());
 			return response.getBody();
 		}
@@ -420,5 +455,15 @@ public class MetadataClient {
 			}
 		}
 		return -1; // To indicate that null was returned and not an empty list
+	}
+	
+	/**
+	 * Converts the given dateStr and delta a dateString of the given outputFormat
+	 */
+	private String convertDateForSearch(final String dateStr, final double delta,
+			final DateTimeFormatter outFormatter) {
+		final LocalDateTime time = DateUtils.parse(dateStr);
+		final LocalDateTime timePlus = time.plusSeconds(Math.round(delta));
+		return timePlus.format(outFormatter);
 	}
 }

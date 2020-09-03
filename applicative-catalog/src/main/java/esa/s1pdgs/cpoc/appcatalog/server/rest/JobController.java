@@ -44,6 +44,11 @@ public class JobController {
     public List<AppDataJob> findByMessagesId(@PathVariable(name = "messageId") final Long messageId) {
     	return appDataJobService.findByMessagesId(messageId);
     }
+    
+    @RequestMapping(method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE, path = "/jobs/findByProductType/{productType}")
+    public List<AppDataJob> findByProductType(@PathVariable(name = "productType") final String productType) {
+    	return appDataJobService.findByProductType(productType);
+    }
 
     @RequestMapping(method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE, path = "/jobs/findByProductSessionId/{sessionId}")
     public List<AppDataJob> findByProductSessionId(@PathVariable(name = "sessionId") final String sessionId) {

@@ -40,8 +40,8 @@ public final class EdrsSessionTypeAdapter extends AbstractProductTypeAdapter imp
 	}
 	
 	@Override
-	public final Optional<AppDataJob> findAssociatedJobFor(final AppCatJobService appCat, final CatalogEventAdapter catEvent) 
-			throws AbstractCodedException {
+	public final Optional<AppDataJob> findAssociatedJobFor(final AppCatJobService appCat,
+			final CatalogEventAdapter catEvent, final AppDataJob job) throws AbstractCodedException {
 		return appCat.findJobForSession(catEvent.sessionId());
 	}
 

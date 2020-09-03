@@ -118,6 +118,11 @@ public class AppCatalogJobClient {
             throws AbstractCodedException {
     	return findAppDataJobsBy("findByMessagesId", Long.toString(messageId));
     }
+    
+    public List<AppDataJob> findByProductType(final String productType) 
+    		throws AbstractCodedException {
+    	return findAppDataJobsBy("findByProductType", productType);
+    }
 
     public List<AppDataJob> findByProductSessionId(final String sessionId)
             throws AbstractCodedException {

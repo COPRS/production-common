@@ -1012,7 +1012,7 @@ public class EsServices {
 	 * @throws Exception if start or stop time is in an invalid format, or the
 	 *                   search itself throws an error
 	 */
-	public List<S3Metadata> marginTTQuery(final String startTime, final String stopTime, final String productType,
+	public List<S3Metadata> rangeCoverQuery(final String startTime, final String stopTime, final String productType,
 			final String satelliteId, final String timeliness, final ProductFamily productFamily) throws Exception {
 		final SearchSourceBuilder sourceBuilder = new SearchSourceBuilder();
 		final BoolQueryBuilder queryBuilder = QueryBuilders.boolQuery()
@@ -1117,6 +1117,89 @@ public class EsServices {
 		// In case of error, no product with this productname or missing L1Triggering
 		// flag return "NONE"
 		return "NONE";
+	}
+	
+	/**
+	 * Extract the metadata information for a given product
+	 * 
+	 * @param productFamily productFamily of the product, used to determine index
+	 * @param productName   productName to query for
+	 * @return metadata of the product
+	 * @throws Exception error on query execution
+	 */
+	public S3Metadata getS3ProductMetadata(final ProductFamily productFamily, final String productName) throws Exception {
+		final SearchSourceBuilder sourceBuilder = new SearchSourceBuilder();
+		final BoolQueryBuilder queryBuilder = QueryBuilders.boolQuery()
+				.must(QueryBuilders.termQuery("productName.keyword", productName));
+
+		LOGGER.debug("query composed is {}", queryBuilder);
+
+		sourceBuilder.query(queryBuilder);
+		sourceBuilder.size(1);
+		sourceBuilder.sort(new FieldSortBuilder("creationTime").order(SortOrder.DESC));
+
+		final String index = productFamily.name().toLowerCase();
+		final SearchRequest searchRequest = new SearchRequest(index);
+		searchRequest.source(sourceBuilder);
+
+		try {
+			final SearchResponse searchResponse = elasticsearchDAO.search(searchRequest);
+			if (this.isNotEmpty(searchResponse)) {
+				final Map<String, Object> source = searchResponse.getHits().getAt(0).getSourceAsMap();
+				final S3Metadata local = new S3Metadata();
+				local.setProductName(source.get("productName").toString());
+				local.setProductType(source.get("productType").toString());
+				local.setKeyObjectStorage(source.get("url").toString());
+				local.setGranuleNumber(Integer.parseInt(source.get("granuleNumber").toString()));
+				local.setGranulePosition(source.get("granulePosition").toString());
+				if (source.containsKey("startTime")) {
+					try {
+						local.setValidityStart(
+								DateUtils.convertToMetadataDateTimeFormat(source.get("startTime").toString()));
+					} catch (final DateTimeParseException e) {
+						throw new MetadataMalformedException("startTime");
+					}
+				}
+				if (source.containsKey("stopTime")) {
+					try {
+						local.setValidityStop(
+								DateUtils.convertToMetadataDateTimeFormat(source.get("stopTime").toString()));
+					} catch (final DateTimeParseException e) {
+						throw new MetadataMalformedException("stopTime");
+					}
+				}
+				if (source.containsKey("creationTime")) {
+					try {
+						local.setCreationTime(
+								DateUtils.convertToMetadataDateTimeFormat(source.get("creationTime").toString()));
+					} catch (final DateTimeParseException e) {
+						throw new MetadataMalformedException("creationTime");
+					}
+				}
+				if (source.containsKey("utcTime")) {
+					try {
+						local.setAnxTime(
+								DateUtils.convertToMetadataDateTimeFormat(source.get("utcTime").toString()));
+					} catch (final DateTimeParseException e) {
+						throw new MetadataMalformedException("utcTime");
+					}
+				}
+				if (source.containsKey("utc1Time")) {
+					try {
+						local.setAnx1Time(
+								DateUtils.convertToMetadataDateTimeFormat(source.get("utc1Time").toString()));
+					} catch (final DateTimeParseException e) {
+						throw new MetadataMalformedException("utc1Time");
+					}
+				}
+				return local;
+			}
+
+		} catch (final IOException e) {
+			throw new Exception(e.getMessage());
+		}
+		
+		return null;
 	}
 
 	public List<SearchMetadata> intervalQuery(final String startTime, final String stopTime,

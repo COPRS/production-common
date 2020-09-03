@@ -67,6 +67,13 @@ public class AppCatJobService {
 		);	
 	}
 	
+	public Optional<List<AppDataJob>> findJobsForProductType(final String productType) throws AbstractCodedException {
+		return returnOrEmpty(
+				appCatClient.findByProductType(productType), 
+				String.format("productType %s", productType)
+		);
+	}
+	
 	public final Optional<AppDataJob> findJobForSession(final String sessionId) throws AbstractCodedException {
 		return first(
 				appCatClient.findByProductSessionId(sessionId), 

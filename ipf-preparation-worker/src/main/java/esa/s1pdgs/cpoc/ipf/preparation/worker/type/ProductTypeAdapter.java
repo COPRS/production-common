@@ -33,7 +33,8 @@ public interface ProductTypeAdapter {
 	// default implementation. Only required for S1 special scenarios (session, segments)
 	default Optional<AppDataJob> findAssociatedJobFor(
 			final AppCatJobService appCat, 
-			final CatalogEventAdapter catEvent
+			final CatalogEventAdapter catEvent,
+			final AppDataJob job
     ) throws AbstractCodedException {
 		return Optional.empty();
 	}

@@ -65,6 +65,10 @@ public class AppDataJobService {
     public List<AppDataJob> findByMessagesId(final long messageId) {
     	return appDataJobRepository.findByMessagesId(messageId);
     }
+    
+    public List<AppDataJob> findByProductType(final String productType) {
+    	return appDataJobRepository.findByProductType(productType);
+    }
 
     public List<AppDataJob> findByProductSessionId(final String sessionId) {
     	return appDataJobRepository.findByProductSessionId(sessionId);

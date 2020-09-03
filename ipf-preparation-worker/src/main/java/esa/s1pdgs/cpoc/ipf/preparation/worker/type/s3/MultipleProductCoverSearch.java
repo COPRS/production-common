@@ -4,6 +4,7 @@ import static java.util.stream.Collectors.toMap;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -13,10 +14,12 @@ import java.util.Map;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import esa.s1pdgs.cpoc.appcatalog.AppDataJob;
 import esa.s1pdgs.cpoc.appcatalog.AppDataJobFile;
 import esa.s1pdgs.cpoc.appcatalog.AppDataJobInput;
 import esa.s1pdgs.cpoc.appcatalog.AppDataJobTaskInputs;
 import esa.s1pdgs.cpoc.common.errors.processing.MetadataQueryException;
+import esa.s1pdgs.cpoc.common.utils.DateUtils;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.config.IpfPreparationWorkerSettings;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.model.ProductMode;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.model.tasktable.ElementMapper;
@@ -40,6 +43,42 @@ import esa.s1pdgs.cpoc.xml.model.tasktable.enums.TaskTableMandatoryEnum;
  *
  */
 public class MultipleProductCoverSearch {
+
+	public static class Range {
+		private LocalDateTime start;
+		private LocalDateTime stop;
+
+		public Range(LocalDateTime start, LocalDateTime stop) {
+			this.start = start;
+			this.stop = stop;
+		}
+
+		public LocalDateTime getStart() {
+			return start;
+		}
+
+		public void setStart(LocalDateTime start) {
+			this.start = start;
+		}
+
+		public LocalDateTime getStop() {
+			return stop;
+		}
+
+		public void setStop(LocalDateTime stop) {
+			this.stop = stop;
+		}
+
+		/**
+		 * Checks if this range intersects with the given range
+		 * 
+		 * @param other range to check whether this range intersects with
+		 * @return true, if ranges intersect
+		 */
+		public boolean intersects(Range other) {
+			return !other.getStart().isAfter(stop) && !other.getStop().isBefore(start);
+		}
+	}
 
 	private static final Logger LOGGER = LogManager.getLogger(MultipleProductCoverSearch.class);
 
@@ -73,8 +112,9 @@ public class MultipleProductCoverSearch {
 	 */
 	public List<AppDataJobTaskInputs> updateTaskInputsByAlternative(List<AppDataJobTaskInputs> tasks,
 			final TaskTableInputAlternative alternative, final S3Product product) throws MetadataQueryException {
+		// TODO: Allow other timeliness
 		String timeliness = "NRT";
-		List<S3Metadata> products = metadataClient.getProductsForMarginWFX(alternative.getFileType(),
+		List<S3Metadata> products = metadataClient.getProductsInRange(alternative.getFileType(),
 				elementMapper.inputFamilyOf(alternative.getFileType()), product.getSatelliteId(),
 				product.getStartTime(), product.getStopTime(), alternative.getDeltaTime0(), alternative.getDeltaTime1(),
 				timeliness);
@@ -85,7 +125,7 @@ public class MultipleProductCoverSearch {
 		// Check coverage
 		if (!products.isEmpty()) {
 			boolean intervalCovered = checkCoverage(product.getStartTime(), product.getStopTime(),
-					alternative.getDeltaTime0(), alternative.getDeltaTime1(), "NRT", products);
+					alternative.getDeltaTime0(), alternative.getDeltaTime1(), timeliness, products);
 
 			// Set results on matching tasks
 			tasks = updateAppDataJobTaskInputs(tasks, products, intervalCovered, alternative,
@@ -93,6 +133,84 @@ public class MultipleProductCoverSearch {
 		}
 
 		return tasks;
+	}
+
+	/**
+	 * Search for products to cover the interval of the AppDataJob
+	 * 
+	 * @param tasks       List of tasks which should be updated
+	 * @param alternative TaskTableInputAlternative for which products should be
+	 *                    searched
+	 * @param job         object which holds information to the needed interval
+	 * @param product     object to transmit data back to the job.
+	 * @return List of tasks, updated with products for the interval.
+	 * @throws MetadataQueryException On error retrieving products from the
+	 *                                metadataClient
+	 */
+	public List<AppDataJobTaskInputs> updateTaskInputsForViscal(List<AppDataJobTaskInputs> tasks,
+			final TaskTableInputAlternative alternative, final AppDataJob job, final S3Product product)
+			throws MetadataQueryException {
+		// TODO: Allow other timeliness
+		String timeliness = "NRT";
+		List<S3Metadata> products = metadataClient.getProductsInRange(alternative.getFileType(),
+				elementMapper.inputFamilyOf(alternative.getFileType()), product.getSatelliteId(), job.getStartTime(),
+				job.getStopTime(), 0.0, 0.0, timeliness);
+
+		// Filter products for duplicates
+		products = DuplicateProductFilter.filterS3Metadata(products);
+
+		// Check coverage
+		if (!products.isEmpty()) {
+			boolean intervalCovered = checkCoverage(product.getStartTime(), product.getStopTime(), 0.0, 0.0, timeliness,
+					products);
+
+			// Set results on matching tasks
+			tasks = updateAppDataJobTaskInputs(tasks, products, intervalCovered, alternative,
+					prepSettings.getProductMode(), ttAdapter);
+		}
+
+		return tasks;
+	}
+
+	/**
+	 * Retrieve the intersecting anxRange for the product, if there exists one.
+	 * 
+	 * This method checks if the anxTime of the product (modified with anxOffset and
+	 * rangeLength) creates a range that intersects with the validity time of the
+	 * product itself. The same is done for the anx1Time. If one of the two
+	 * intersects (anxTime has a greater priority), that range is returned. If no
+	 * range is intersecting null is returned.
+	 * 
+	 * @param productName    product to check for intersecting anx-ranges
+	 * @param anxOffsetInS   offset in seconds for range start
+	 * @param rangeLengthInS length in seconds of range
+	 * @return ANX-range that intersects with product validity, null if none exists
+	 * @throws MetadataQueryException on error in metadata query
+	 */
+	public Range getIntersectingANXRange(final String productName, final long anxOffsetInS, final long rangeLengthInS)
+			throws MetadataQueryException {
+		String productType = productName.substring(4, 15);
+
+		S3Metadata metadata = metadataClient.getS3MetatataForProduct(elementMapper.inputFamilyOf(productType),
+				productName);
+
+		Range productRange = new Range(DateUtils.parse(metadata.getValidityStart()),
+				DateUtils.parse(metadata.getValidityStop()));
+
+		if (metadata.getAnxTime() != null) {
+			Range result = getIntersectingRange(productRange, metadata.getAnxTime(), anxOffsetInS, rangeLengthInS);
+			if (result != null) {
+				return result;
+			}
+		}
+
+		if (metadata.getAnx1Time() != null) {
+			Range result = getIntersectingRange(productRange, metadata.getAnx1Time(), anxOffsetInS, rangeLengthInS);
+			if (result != null) {
+				return result;
+			}
+		}
+		return null;
 	}
 
 	/**
@@ -155,6 +273,27 @@ public class MultipleProductCoverSearch {
 					product.getValidityStart(), product.getValidityStop()));
 		}
 		return files;
+	}
+
+	/**
+	 * Returns the resulting range of anx + anxOffset (length rangeLength) if the
+	 * productRange intersects with that range
+	 * 
+	 * @return Range(anx + anxOffset, anx + anxOffset + rangeLength) if productRange
+	 *         intersects with that range
+	 */
+	private Range getIntersectingRange(Range productRange, String anxTime, long anxOffsetInS, long rangeLengthInS) {
+		LocalDateTime anx = DateUtils.parse(anxTime);
+
+		LocalDateTime rangeStart = anx.plus(anxOffsetInS, ChronoUnit.SECONDS);
+		LocalDateTime rangeStop = rangeStart.plus(rangeLengthInS, ChronoUnit.SECONDS);
+		Range anxRange = new Range(rangeStart, rangeStop);
+
+		if (productRange.intersects(anxRange)) {
+			return anxRange;
+		}
+
+		return null;
 	}
 
 	/**
