@@ -457,7 +457,7 @@ public class EsServicesTest{
         
         //Response
         final BytesReference source = new BytesArray("{\"productName\":\"name\",\"url\""
-                + ":\"url\",\"startTime\":\"2000-01-01T00:00:00.000000Z\",\"stopTime\":"
+                + ":\"url\",\"validityStartTime\":\"2000-01-01T00:00:00.000000Z\",\"validityStopTime\":"
                 + "\"2001-01-01T00:00:00.000000Z\", \"productType\": \"product_type\"}");
         final SearchHit hit = new SearchHit(1);
         hit.sourceRef(source);
