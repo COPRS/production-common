@@ -28,7 +28,7 @@ public class AppCatalogMessagePersistence<T extends AbstractMessage> implements 
     private final KafkaProperties properties;
     private final OtherApplicationService otherAppService;
 
-    public AppCatalogMessagePersistence(AppCatalogMqiService<T> appCatalogMqiService,
+    public AppCatalogMessagePersistence(final AppCatalogMqiService<T> appCatalogMqiService,
                                         final KafkaProperties properties,
                                         final OtherApplicationService otherAppService) {
 
@@ -38,47 +38,57 @@ public class AppCatalogMessagePersistence<T extends AbstractMessage> implements 
     }
 
     @Override
-    public void read(ConsumerRecord<String, T> data, final Acknowledgment acknowledgment, GenericConsumer<T> genericConsumer, ProductCategory category) throws Exception {
+    public void read(final ConsumerRecord<String, T> data, final Acknowledgment acknowledgment, final GenericConsumer<T> genericConsumer, final ProductCategory category) throws Exception {
         final AppCatMessageDto<T> result = saveInAppCat(data, false, category);
         handleMessage(data, acknowledgment, result, genericConsumer, category);
     }
 
     @Override
-    public List<AppCatMessageDto<T>> next(ProductCategory category, String podName) throws AbstractCodedException {
+    public List<AppCatMessageDto<T>> next(final ProductCategory category, final String podName) throws AbstractCodedException {
         return appCatalogMqiService.next(category, podName);
     }
 
     @Override
-    public boolean send(ProductCategory category, long messageId, AppCatSendMessageDto body) throws AbstractCodedException {
+    public boolean send(final ProductCategory category, final long messageId, final AppCatSendMessageDto body) throws AbstractCodedException {
         return appCatalogMqiService.send(category, messageId, body);
     }
 
     @Override
-    public boolean ack(ProductCategory category, long messageId, Ack ack) throws AbstractCodedException {
+    public boolean ack(final ProductCategory category, final long messageId, final Ack ack) throws AbstractCodedException {
         return appCatalogMqiService.ack(category, messageId, ack);
     }
 
     @Override
-    public AppCatMessageDto<T> get(ProductCategory category, long messageId) throws AbstractCodedException {
+    public AppCatMessageDto<T> get(final ProductCategory category, final long messageId) throws AbstractCodedException {
         return appCatalogMqiService.get(category, messageId);
     }
 
     @Override
-    public int getNbReadingMessages(String topic, String podName) throws AbstractCodedException {
+    public int getNbReadingMessages(final String topic, final String podName) throws AbstractCodedException {
         return appCatalogMqiService.getNbReadingMessages(topic, podName);
     }
 
     @Override
-    public long getEarliestOffset(String topic, int partition, String group) throws AbstractCodedException {
+    public long getEarliestOffset(final String topic, final int partition, final String group) throws AbstractCodedException {
         return appCatalogMqiService.getEarliestOffset(topic, partition, group);
     }
 
+    /* 
+     * Ok, from my understanding of MQI, all this weird handling should result in following behavior:
+     * For all messages that are not in state ACK (which is ignored), the consumer is paused on successful consumption 
+     * of a single message (which has been persisted in mongo). So as long as the message is not handled by the service,
+     * no new message will be consumed by this MQI instance, so sibling instances on other pods may consume them from
+     * kafka.
+     * This should work and be safe for almost all scenarios. Though, if MQI has an active message in mongo and the pod 
+     * dies (e.g. by downscaling), the message will remain in mongo forever and no other pod will ever deal with it, if 
+     * there is no other logic dealing with such scenarios (maybe in app-cat).
+     */
     final void handleMessage(
             final ConsumerRecord<String, T> data,
             final Acknowledgment acknowledgment,
             final AppCatMessageDto<T> result,
             final GenericConsumer<T> genericConsumer,
-            ProductCategory category) throws AbstractCodedException {
+            final ProductCategory category) throws AbstractCodedException {
         final T message = data.value();
 
         // Deal with result
@@ -124,7 +134,7 @@ public class AppCatalogMessagePersistence<T extends AbstractMessage> implements 
      */
     final boolean messageShallBeIgnored(
             final ConsumerRecord<String, T> data,
-            final AppCatMessageDto<T> mess, ProductCategory category)
+            final AppCatMessageDto<T> mess, final ProductCategory category)
             throws AbstractCodedException {
         boolean ret;
         // Ask to the other application
@@ -168,7 +178,7 @@ public class AppCatalogMessagePersistence<T extends AbstractMessage> implements 
         }
     }
 
-    private AppCatMessageDto<T> saveInAppCat(final ConsumerRecord<String, T> data, final boolean force, ProductCategory category) throws AbstractCodedException {
+    private AppCatMessageDto<T> saveInAppCat(final ConsumerRecord<String, T> data, final boolean force, final ProductCategory category) throws AbstractCodedException {
         return appCatalogMqiService.read(category, data.topic(), data.partition(), data.offset(), new AppCatReadMessageDto<>(
                 properties.getConsumer().getGroupId(),
                 properties.getHostname(),

@@ -66,6 +66,8 @@ public interface RequestRepository {
 	FailedProcessing getFailedProcessingById(long id);
 
 	void restartAndDeleteFailedProcessing(long id);
+	
+	void reevaluateAndDeleteFailedProcessing(long id);
 
 	void deleteFailedProcessing(long id);
 

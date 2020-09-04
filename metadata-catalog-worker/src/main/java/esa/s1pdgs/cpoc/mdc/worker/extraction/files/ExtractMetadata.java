@@ -310,7 +310,7 @@ public class ExtractMetadata {
 
 				final List<String> packetStoreIDs = new ArrayList<>();
 				if (metadataJSONObject.get("packetStoreID") instanceof JSONArray) {
-					final JSONArray jsonArray = ((JSONArray) metadataJSONObject.get("packetStoreID"));
+					final JSONArray jsonArray = (JSONArray) metadataJSONObject.get("packetStoreID");
 					for (int i = 0; i < jsonArray.length(); i++) {
 						packetStoreIDs.add(Integer.toString(jsonArray.getInt(i)));
 					}
@@ -824,6 +824,99 @@ public class ExtractMetadata {
 		}
 	}
 
+	/**
+	 * Workaround for Elastic Search to be able to find a date line crossing polygon
+	 * by an intersecting polygon: 
+	 * If all but one of the longitude values are negative, the positive value is shifted by -360°. 
+	 * If all but one of the longitude values are positive, the negative value is shifted by +360°.
+	 * 
+	 * @param rawCoordinatesFromManifest
+	 * @return improved raw coordinates
+	 */
+	protected String improveRawCoordinatesIfDateLineCrossing(final String rawCoordinatesFromManifest) {
+
+		String improvedRawCoordinatesFromManifest = rawCoordinatesFromManifest;
+		boolean modified = false;
+
+		String[] points = rawCoordinatesFromManifest.split(" ");
+
+		if (points.length == 5 && points[0].equals(points[4])) {
+			points = Arrays.copyOf(points, 4);
+		}
+
+		if (points.length != 4) {
+			throw new IllegalArgumentException("4 coordinates are expected");
+		} else {
+			final String[] aPoint = points[0].split(",");
+			Double aLongitude = Double.valueOf(aPoint[1]);
+
+			final String[] bPoint = points[1].split(",");
+			Double bLongitude = Double.valueOf(bPoint[1]);
+
+			final String[] cPoint = points[2].split(",");
+			Double cLongitude = Double.valueOf(cPoint[1]);
+
+			final String[] dPoint = points[3].split(",");
+			Double dLongitude = Double.valueOf(dPoint[1]);
+
+			final int offset = 360;
+
+			// All negative but one -> decrease one by offset
+			if (aLongitude >= 0 && bLongitude < 0 && cLongitude < 0 && dLongitude < 0) {
+				aLongitude = aLongitude - offset;
+				aPoint[1] = aLongitude.toString();
+				points[0] = String.join(",", aPoint);
+				modified = true;
+			} else if (bLongitude >= 0 && aLongitude < 0 && cLongitude < 0 && dLongitude < 0) {
+				bLongitude = bLongitude - offset;
+				bPoint[1] = bLongitude.toString();
+				points[1] = String.join(",", bPoint);
+				modified = true;
+			} else if (cLongitude >= 0 && aLongitude < 0 && bLongitude < 0 && dLongitude < 0) {
+				cLongitude = cLongitude - offset;
+				cPoint[1] = cLongitude.toString();
+				points[2] = String.join(",", cPoint);
+				modified = true;
+			} else if (dLongitude >= 0 && aLongitude < 0 && bLongitude < 0 && cLongitude < 0) {
+				dLongitude = dLongitude - offset;
+				dPoint[1] = dLongitude.toString();
+				points[3] = String.join(",", dPoint);
+				modified = true;
+			}
+
+			// All positive but one -> increase one by offset
+			if (aLongitude <= 0 && bLongitude > 0 && cLongitude > 0 && dLongitude > 0) {
+				aLongitude = aLongitude + offset;
+				aPoint[1] = aLongitude.toString();
+				points[0] = String.join(",", aPoint);
+				modified = true;
+			} else if (bLongitude <= 0 && aLongitude > 0 && cLongitude > 0 && dLongitude > 0) {
+				bLongitude = bLongitude + offset;
+				bPoint[1] = bLongitude.toString();
+				points[1] = String.join(",", bPoint);
+				modified = true;
+			} else if (cLongitude <= 0 && aLongitude > 0 && bLongitude > 0 && dLongitude > 0) {
+				cLongitude = cLongitude + offset;
+				cPoint[1] = cLongitude.toString();
+				points[2] = String.join(",", cPoint);
+				modified = true;
+			} else if (dLongitude <= 0 && aLongitude > 0 && bLongitude > 0 && cLongitude > 0) {
+				dLongitude = dLongitude + offset;
+				dPoint[1] = dLongitude.toString();
+				points[3] = String.join(",", dPoint);
+				modified = true;
+			}
+
+			improvedRawCoordinatesFromManifest = String.join(" ", points);
+		}
+		
+		if (modified) {
+			LOGGER.info("coords are crossing date line - shifting from {} to {} ", rawCoordinatesFromManifest, improvedRawCoordinatesFromManifest);
+		}
+		
+		return improvedRawCoordinatesFromManifest;
+	}
+	
 	private JSONObject processCoordinatesforWVL0(final String rawCoordinatesFromManifest) {
 		// Snippet from manifest
 		// -74.8571,-120.3411 -75.4484,-121.9204
@@ -858,7 +951,8 @@ public class ExtractMetadata {
 		// Snippet from manifest
 		// 12.378114,48.279240 12.829241,50.603844 11.081389,50.958828
 		// 10.625828,48.649940
-		String[] points = rawCoordinatesFromManifest.split(" ");
+		
+		String[] points = improveRawCoordinatesIfDateLineCrossing(rawCoordinatesFromManifest).split(" ");
 
 		if (points.length == 5 && points[0].equals(points[4])) {
 			points = Arrays.copyOf(points, 4);
@@ -907,7 +1001,7 @@ public class ExtractMetadata {
 		// 36.7787,86.8273 38.7338,86.4312 38.4629,83.6235 36.5091,84.0935
 		// 36.7787,86.8273
 		LOGGER.debug("l0 coords: {} ", rawCoordinatesFromManifest);
-		String[] points = rawCoordinatesFromManifest.split(" ");
+		String[] points = improveRawCoordinatesIfDateLineCrossing(rawCoordinatesFromManifest).split(" ");
 
 		if (points.length == 5 && points[0].equals(points[4])) {
 			points = Arrays.copyOf(points, 4);

@@ -102,9 +102,16 @@ public final class MqiConsumer<E extends AbstractMessage> implements Runnable {
 								String.format("MqiListener implementation %s returned null", mqiListener.getClass())
 						);
 					}	
-					handler.processMessages(client);				
-					client.ack(new AckMessageDto(message.getId(), Ack.OK, null, false), category);
-					LOG.info("{} handled {} successfully, done!", this, message.getId());
+					
+					String warning = handler.processMessages(client);
+					if (!"".equals(warning)) {
+						mqiListener.onWarning(message, warning);
+						client.ack(new AckMessageDto(message.getId(), Ack.WARN, null, false), category);
+						LOG.info("{} handled {} with warning, done!", this, message.getId());
+					} else {
+						client.ack(new AckMessageDto(message.getId(), Ack.OK, null, false), category);
+						LOG.info("{} handled {} successfully, done!", this, message.getId());
+					}
 				// should be thrown if publish() or ack() is failing	
 				} catch (final MqiAckApiError | MqiPublishApiError ace) {
 					// S1PRO-1406: simply propagate exception to initiate shutdown in case publish or ack fails

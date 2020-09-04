@@ -1,8 +1,10 @@
 package esa.s1pdgs.cpoc.mqi.model.queue;
 
+import java.util.Arrays;
 import java.util.Objects;
 
 import esa.s1pdgs.cpoc.common.ProductFamily;
+import esa.s1pdgs.cpoc.mqi.model.control.AllowedAction;
 
 public class CompressionEvent extends AbstractMessage {	
 	
@@ -10,16 +12,19 @@ public class CompressionEvent extends AbstractMessage {
 	
 	public CompressionEvent() {
 		super();
+		setAllowedActions(Arrays.asList(AllowedAction.RESUBMIT));
 	}
 	
 	public CompressionEvent(final ProductFamily productFamily, final String keyObjectStorage, final CompressionDirection compressionDirection) {
 		super(productFamily, keyObjectStorage);
 		this.compressionDirection = compressionDirection;
+		setAllowedActions(Arrays.asList(AllowedAction.RESUBMIT));
 	}
 
 	@Override
 	public int hashCode() {
-		return Objects.hash(creationDate, hostname, keyObjectStorage, productFamily, uid, compressionDirection);
+		return Objects.hash(creationDate, hostname, keyObjectStorage, productFamily, uid, compressionDirection,
+				allowedActions, demandType, debug, retryCounter);
 	}
 
 	@Override
@@ -39,7 +44,11 @@ public class CompressionEvent extends AbstractMessage {
 				&& Objects.equals(keyObjectStorage, other.keyObjectStorage) 
 				&& Objects.equals(uid, other.uid)
 				&& productFamily == other.productFamily
-		        && compressionDirection == other.compressionDirection;
+		        && compressionDirection == other.compressionDirection
+		        && Objects.equals(allowedActions, other.getAllowedActions())
+		        && demandType == other.demandType
+		        && debug == other.debug
+		        && retryCounter == other.retryCounter;
 	}
 
 	@Override

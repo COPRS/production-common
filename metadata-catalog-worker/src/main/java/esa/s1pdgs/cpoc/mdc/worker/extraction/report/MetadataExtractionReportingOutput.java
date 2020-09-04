@@ -1,11 +1,14 @@
 package esa.s1pdgs.cpoc.mdc.worker.extraction.report;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 import esa.s1pdgs.cpoc.report.ReportingOutput;
 
+@JsonInclude(Include.NON_NULL) // following SD-05-2100-1 S1PRO-REPORT-API only include non null attributes
 public class MetadataExtractionReportingOutput implements ReportingOutput {
-	
+
 	@JsonProperty("product_sensing_start_date")
 	private String productSensingStartDate; // S1PRO-1678
 	
@@ -50,6 +53,7 @@ public class MetadataExtractionReportingOutput implements ReportingOutput {
 				|| null != this.productConsolidation || null != this.productSensingConsolidation) {
 			return this;
 		} else {
+			// following SD-05-2100-1 S1PRO-REPORT-API only trace what's there, no data -> no output
 			return ReportingOutput.NULL;
 		}
 	}

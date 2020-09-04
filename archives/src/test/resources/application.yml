@@ -28,7 +28,7 @@ status:
   delete-fixed-delay-ms: 3000
   max-error-counter-slices: 3
   max-error-counter-reports: 3
-
+  block-system-exit: true
     
 # File
 file:

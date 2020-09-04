@@ -104,6 +104,7 @@ public class Publisher {
 		);
 		execJob.setCreationDate(new Date());
 		execJob.setHostname(settings.getHostname());
+		execJob.setIpfPreparationJobMessage(job.getPrepJobMessage());
 
 		try {
 			// Add jobOrder inputs to the DTO
@@ -168,11 +169,11 @@ public class Publisher {
 		LOGGER.info("Publishing job {} (product {})", job.getId(), job.getProductName());
 		final GenericPublicationMessageDto<IpfExecutionJob> messageToPublish =
 				new GenericPublicationMessageDto<>(
-						job.getPrepJobMessageId(),
+						job.getPrepJobMessage().getId(),
 						execJob.getProductFamily(),
 						execJob
 				);
-		messageToPublish.setInputKey(job.getPrepJobInputQueue());
+		messageToPublish.setInputKey(job.getPrepJobMessage().getInputKey());
 		messageToPublish.setOutputKey(execJob.getProductFamily().name());
 		mqiClient.publish(messageToPublish, ProductCategory.LEVEL_JOBS);
 	}

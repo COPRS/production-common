@@ -61,12 +61,11 @@ public final class Inbox {
 	}
 	
 	public final void poll() {
-		try {
+		try {			
 			final PollingRun pollingRun = PollingRun.newInstance(
 					ingestionTriggerServiceTransactional.getAllForPath(inboxAdapter.inboxURL(), stationName),
 					inboxAdapter.read(InboxFilter.ALLOW_ALL)
-			);
-						
+			);						
 			// when a product has been removed from the inbox directory, it shall be removed
 			// from the persistence so it will not be ignored if it occurs again on the inbox
 			ingestionTriggerServiceTransactional.removeFinished(pollingRun.finishedElements());
@@ -109,7 +108,7 @@ public final class Inbox {
 		return false;
 	}
 
-	private Optional<InboxEntry> handleEntry(final InboxEntry entry) {
+	final Optional<InboxEntry> handleEntry(final InboxEntry entry) {
 		final Reporting reporting = ReportingUtils.newReportingBuilder()
 				.newReporting("IngestionTrigger");
 

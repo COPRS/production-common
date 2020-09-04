@@ -10,6 +10,7 @@ import java.util.UUID;
 import esa.s1pdgs.cpoc.appcatalog.AppDataJob;
 import esa.s1pdgs.cpoc.appcatalog.AppDataJobGeneration;
 import esa.s1pdgs.cpoc.appcatalog.AppDataJobGenerationState;
+import esa.s1pdgs.cpoc.appcatalog.AppDataJobProduct;
 import esa.s1pdgs.cpoc.appcatalog.AppDataJobState;
 import esa.s1pdgs.cpoc.common.ProductCategory;
 import esa.s1pdgs.cpoc.common.errors.AbstractCodedException;
@@ -19,6 +20,7 @@ import esa.s1pdgs.cpoc.ipf.preparation.worker.config.ProcessSettings;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.report.TaskTableLookupReportingOutput;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.type.ProductTypeAdapter;
 import esa.s1pdgs.cpoc.mqi.client.MqiMessageEventHandler;
+import esa.s1pdgs.cpoc.mqi.client.MqiPublishingJob;
 import esa.s1pdgs.cpoc.mqi.model.queue.CatalogEvent;
 import esa.s1pdgs.cpoc.mqi.model.queue.IpfPreparationJob;
 import esa.s1pdgs.cpoc.mqi.model.queue.NullMessage;
@@ -57,7 +59,8 @@ public class JobDispatcherImpl implements JobDispatcher {
 	@Override
 	public final MqiMessageEventHandler dispatch(final GenericMessageDto<IpfPreparationJob> message) throws Exception {
     	final IpfPreparationJob prepJob = message.getBody();
-    	final AppDataJob jobFromMessage = prepJob.getAppDataJob();    	
+    	
+    	final AppDataJob jobFromMessage = toAppDataJob(prepJob);
         
         final Reporting reporting = ReportingUtils.newReportingBuilder()
         		.predecessor(prepJob.getUid())
@@ -95,16 +98,48 @@ public class JobDispatcherImpl implements JobDispatcher {
 		            			)
 		            	);
 		            } 
+
 		            // Allow additional logic in TypeAdapter to drop a job completely
 		            if (jobFromMessage.getState() != AppDataJobState.TERMINATED) {
 		            	handleJob(message, jobFromMessage, reporting.getUid(), tasktableFilename);
 		            } else {
 		            	LOGGER.info("No job for message {} created. Job was already TERMINATED.", message.getId());
 		            }
-		    		return Collections.emptyList();
+					return new MqiPublishingJob<NullMessage>(Collections.emptyList());
 				})
 				.newResult();
     }
+
+	private final AppDataJob toAppDataJob(final IpfPreparationJob prepJob) {
+        final AppDataJob job = new AppDataJob();
+        job.setLevel(prepJob.getLevel());
+        job.setPod(prepJob.getHostname());
+        job.getMessages().add(prepJob.getEventMessage());
+        job.setProduct(newProductFor(prepJob.getEventMessage())); 
+    	job.setTaskTableName(prepJob.getTaskTableName());     
+    	job.setStartTime(prepJob.getStartTime());
+    	job.setStopTime(prepJob.getStopTime());
+    	job.setProductName(prepJob.getKeyObjectStorage());     
+    	return job;    	
+	}
+	
+	private final AppDataJobProduct newProductFor(final GenericMessageDto<CatalogEvent> mqiMessage) {
+		final CatalogEvent event = mqiMessage.getBody();
+	    final AppDataJobProduct productDto = new AppDataJobProduct();
+	    
+		final CatalogEventAdapter eventAdapter = CatalogEventAdapter.of(mqiMessage);		
+		productDto.getMetadata().put("productName", event.getProductName());
+		productDto.getMetadata().put("productType", event.getProductType());
+		productDto.getMetadata().put("satelliteId", eventAdapter.satelliteId());
+		productDto.getMetadata().put("missionId", eventAdapter.missionId());
+		productDto.getMetadata().put("processMode", eventAdapter.processMode());
+		// S1PRO-1772: user productSensing accessors here to make start/stop optional here (RAWs don't have them)
+		productDto.getMetadata().put("startTime", eventAdapter.productSensingStartDate());
+		productDto.getMetadata().put("stopTime", eventAdapter.productSensingStopDate());     
+		productDto.getMetadata().put("timeliness", eventAdapter.timeliness());
+		productDto.getMetadata().put("acquistion", eventAdapter.swathType());
+	    return productDto;
+	}
 
 	// This needs to be synchronized to avoid duplicate jobs
 	private final synchronized void handleJob(
@@ -145,8 +180,7 @@ public class JobDispatcherImpl implements JobDispatcher {
 		    gen.setLastUpdateDate(now);
 		    
 		    jobFromMessage.setGeneration(gen);
-		    jobFromMessage.setPrepJobMessageId(message.getId());
-		    jobFromMessage.setPrepJobInputQueue(message.getInputKey());
+		    jobFromMessage.setPrepJobMessage(message);
 		    jobFromMessage.setReportingId(reportingUid);
 		    jobFromMessage.setState(AppDataJobState.GENERATING); // will activate that this request can be polled
 		    jobFromMessage.setPod(settings.getHostname()); 

@@ -1,9 +1,11 @@
 package esa.s1pdgs.cpoc.mqi.model.queue;
 
+import java.util.Arrays;
 import java.util.Objects;
 import java.util.UUID;
 
 import esa.s1pdgs.cpoc.common.ProductFamily;
+import esa.s1pdgs.cpoc.mqi.model.control.AllowedAction;
 
 public class IngestionJob extends AbstractMessage {	
 	
@@ -32,6 +34,7 @@ public class IngestionJob extends AbstractMessage {
 		
 	public IngestionJob() {
 		super();
+		setAllowedActions(Arrays.asList(AllowedAction.RESTART));
 	}
 
 	public IngestionJob(
@@ -54,6 +57,7 @@ public class IngestionJob extends AbstractMessage {
 		this.stationName		= stationName;
 		this.mode               = mode;
 		this.timeliness        = timeliness;
+		setAllowedActions(Arrays.asList(AllowedAction.RESTART));
 	}
 
 	public String getPickupBaseURL() {
@@ -115,7 +119,8 @@ public class IngestionJob extends AbstractMessage {
 	@Override
 	public int hashCode() {
 		return Objects.hash(creationDate, hostname, keyObjectStorage, pickupBaseURL, productFamily,
-				relativePath, productName, uid, productSizeByte, stationName, mode, timeliness);
+				relativePath, productName, uid, productSizeByte, stationName, mode, timeliness,
+				allowedActions, demandType, debug, retryCounter);
 	}
 
 	@Override
@@ -141,7 +146,11 @@ public class IngestionJob extends AbstractMessage {
 				&& Objects.equals(mode, other.mode)
 				&& Objects.equals(timeliness, other.timeliness)
 				&& productSizeByte == other.productSizeByte 
-				&& Objects.equals(productName, other.productName);
+				&& Objects.equals(productName, other.productName)
+				&& Objects.equals(allowedActions, other.getAllowedActions())
+		        && demandType == other.demandType
+		        && debug == other.debug
+		        && retryCounter == other.retryCounter;
 	}
 
 	@Override

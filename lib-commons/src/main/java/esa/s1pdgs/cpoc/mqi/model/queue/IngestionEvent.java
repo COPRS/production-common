@@ -1,8 +1,10 @@
 package esa.s1pdgs.cpoc.mqi.model.queue;
 
+import java.util.Arrays;
 import java.util.Objects;
 
 import esa.s1pdgs.cpoc.common.ProductFamily;
+import esa.s1pdgs.cpoc.mqi.model.control.AllowedAction;
 
 /**
  * DTO object used to transfer EDRS session files between MQI and application
@@ -19,6 +21,7 @@ public class IngestionEvent extends AbstractMessage {
 	
 	public IngestionEvent() {
 		super();
+		setAllowedActions(Arrays.asList(AllowedAction.RESUBMIT));
 	}
 
 	public IngestionEvent(
@@ -37,6 +40,7 @@ public class IngestionEvent extends AbstractMessage {
 		this.stationName = stationName;
 		this.mode = mode;
 		this.timeliness = timeliness;
+		setAllowedActions(Arrays.asList(AllowedAction.RESUBMIT));
 	}
 
 	public String getProductName() {
@@ -100,8 +104,8 @@ public class IngestionEvent extends AbstractMessage {
 				relativePath, 
 				uid,
 				productSizeByte,
-				stationName
-		);
+				stationName,
+				allowedActions, demandType, debug, retryCounter);
 	}
 
 	@Override
@@ -126,7 +130,11 @@ public class IngestionEvent extends AbstractMessage {
 				&& Objects.equals(timeliness, other.timeliness)
 				&& Objects.equals(uid, other.uid)
 				&& productSizeByte == other.productSizeByte
-				&& Objects.equals(relativePath, other.relativePath);
+				&& Objects.equals(relativePath, other.relativePath)
+				&& Objects.equals(allowedActions, other.getAllowedActions())
+		        && demandType == other.demandType
+		        && debug == other.debug
+		        && retryCounter == other.retryCounter;
 	}
 	
 	

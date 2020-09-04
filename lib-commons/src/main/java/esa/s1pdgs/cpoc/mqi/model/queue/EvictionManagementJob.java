@@ -1,9 +1,12 @@
 package esa.s1pdgs.cpoc.mqi.model.queue;
 
+import java.util.Arrays;
 import java.util.Date;
 import java.util.Objects;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
+
+import esa.s1pdgs.cpoc.mqi.model.control.AllowedAction;
 
 public class EvictionManagementJob extends AbstractMessage {
 
@@ -11,6 +14,11 @@ public class EvictionManagementJob extends AbstractMessage {
 	private Date evictionDate;
 
 	private boolean unlimited;
+	
+	public EvictionManagementJob() {
+		super();
+		setAllowedActions(Arrays.asList(AllowedAction.RESTART));
+	}
 
 	public Date getEvictionDate() {
 		return evictionDate;
@@ -30,7 +38,8 @@ public class EvictionManagementJob extends AbstractMessage {
 
 	@Override
 	public int hashCode() {
-		return Objects.hash(evictionDate, unlimited, creationDate, hostname, keyObjectStorage, productFamily, uid);
+		return Objects.hash(evictionDate, unlimited, creationDate, hostname, keyObjectStorage, productFamily, uid,
+				allowedActions, demandType, debug, retryCounter);
 	}
 
 	@Override
@@ -43,7 +52,11 @@ public class EvictionManagementJob extends AbstractMessage {
 		return Objects.equals(evictionDate, other.evictionDate) && Objects.equals(creationDate, other.creationDate)
 				&& Objects.equals(hostname, other.hostname) && Objects.equals(keyObjectStorage, other.keyObjectStorage)
 				&& Objects.equals(uid, other.uid) && productFamily == other.productFamily
-				&& unlimited == other.unlimited;
+				&& unlimited == other.unlimited
+				&& Objects.equals(allowedActions, other.getAllowedActions())
+		        && demandType == other.demandType
+		        && debug == other.debug
+		        && retryCounter == other.retryCounter;
 	}
 
 	@Override

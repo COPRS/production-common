@@ -1,12 +1,16 @@
 package esa.s1pdgs.cpoc.mqi.model.queue;
 
+import java.util.Collections;
 import java.util.Date;
+import java.util.List;
 import java.util.UUID;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import esa.s1pdgs.cpoc.common.ProductFamily;
+import esa.s1pdgs.cpoc.mqi.model.control.AllowedAction;
+import esa.s1pdgs.cpoc.mqi.model.control.DemandType;
 
 /**
  * This is supposed to be the basic element that is used in all other
@@ -45,6 +49,14 @@ public abstract class AbstractMessage {
 	@JsonFormat(pattern="yyyy-MM-dd'T'HH:mm:ss.SSS'Z'", timezone="UTC")
 	protected Date creationDate = new Date();
 	protected String hostname = DEFAULT_HOSTNAME;
+	
+	protected List<AllowedAction> allowedActions = Collections.emptyList();
+	
+	protected DemandType demandType = DemandType.NOMINAL;
+	
+	protected int retryCounter = 0;
+	
+	protected boolean debug = false;
 	
 	public AbstractMessage() {
 	}
@@ -93,11 +105,44 @@ public abstract class AbstractMessage {
 	public void setUid(final UUID uid) {
 		this.uid = uid;
 	}
+	
+	public List<AllowedAction> getAllowedActions() {
+		return allowedActions;
+	}
+
+	public void setAllowedActions(List<AllowedAction> allowedActions) {
+		this.allowedActions = allowedActions;
+	}
+
+	public DemandType getDemandType() {
+		return demandType;
+	}
+
+	public void setDemandType(DemandType demandType) {
+		this.demandType = demandType;
+	}
+
+	public int getRetryCounter() {
+		return retryCounter;
+	}
+
+	public void increaseRetryCounter() {
+		++this.retryCounter;
+	}
+
+	public boolean isDebug() {
+		return debug;
+	}
+
+	public void setDebug(boolean debug) {
+		this.debug = debug;
+	}
 
 	@Override
 	public String toString() {
 		return "AbstractMessage [productFamily=" + productFamily + ", keyObjectStorage=" + keyObjectStorage + ", uid="
-				+ uid + ", creationDate=" + creationDate + ", hostname=" + hostname + "]";
+				+ uid + ", creationDate=" + creationDate + ", hostname=" + hostname + ", allowedActions=" + allowedActions 
+				+ ", demandType=" + demandType + ", retryCounter=" + retryCounter + ", debug=" + debug + "]";
 	}	
 	
 	

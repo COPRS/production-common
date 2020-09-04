@@ -15,6 +15,7 @@ public class FailedProcessingDto {
 	private Date failedDate;
 	private String failureMessage;
 	private GenericMessageDto<?> processingDetails;
+	private GenericMessageDto<?> predecessor;
 	
 	public FailedProcessingDto() {
 	}
@@ -61,9 +62,17 @@ public class FailedProcessingDto {
 		this.processingDetails = processingDetails;
 	}
 
+	public GenericMessageDto<?> getPredecessor() {
+		return predecessor;
+	}
+
+	public void setPredecessor(GenericMessageDto<?> predecessor) {
+		this.predecessor = predecessor;
+	}
+
 	@Override
 	public String toString() {
 		return "FailedProcessingDto [failedPod=" + failedPod + ", failedDate=" + failedDate + ", failureMessage="
-				+ failureMessage + ", processingDetails=" + processingDetails + "]";
+				+ failureMessage + ", processingDetails=" + processingDetails + ", predecessor=" + predecessor + "]";
 	}
 }

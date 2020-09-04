@@ -2,7 +2,6 @@ package esa.s1pdgs.cpoc.mdc.trigger;
 
 import java.util.Collections;
 import java.util.Date;
-import java.util.List;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -14,6 +13,7 @@ import esa.s1pdgs.cpoc.errorrepo.model.rest.FailedProcessingDto;
 import esa.s1pdgs.cpoc.mdc.trigger.config.ProcessConfiguration;
 import esa.s1pdgs.cpoc.mqi.client.MqiListener;
 import esa.s1pdgs.cpoc.mqi.client.MqiMessageEventHandler;
+import esa.s1pdgs.cpoc.mqi.client.MqiPublishingJob;
 import esa.s1pdgs.cpoc.mqi.model.queue.AbstractMessage;
 import esa.s1pdgs.cpoc.mqi.model.queue.CatalogJob;
 import esa.s1pdgs.cpoc.mqi.model.rest.GenericMessageDto;
@@ -73,7 +73,7 @@ public final class MetadataTriggerListener<E extends AbstractMessage> implements
 	
 	// --------------------------------------------------------------------------
 	
-	private final List<GenericPublicationMessageDto<CatalogJob>> newPublicationMessage(
+	private final MqiPublishingJob<CatalogJob> newPublicationMessage(
 			final Reporting reporting, 
 			final GenericMessageDto<E> message
 	) {
@@ -85,7 +85,7 @@ public final class MetadataTriggerListener<E extends AbstractMessage> implements
     	);
     	messageDto.setInputKey(message.getInputKey());
     	messageDto.setOutputKey(job.getProductFamily().name());
-    	return Collections.singletonList(messageDto);
+    	return new MqiPublishingJob<CatalogJob>(Collections.singletonList(messageDto));
 	}
 
 	private final void reportError(final String eventType, final Reporting reporting, final Exception e) {			

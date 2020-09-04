@@ -10,6 +10,8 @@ import esa.s1pdgs.cpoc.mqi.model.rest.GenericMessageDto;
 import esa.s1pdgs.cpoc.mqi.model.rest.MessageDto;
 
 public final class CatalogEventAdapter {
+	
+	public static final String NOT_DEFINED = "NOT_DEFINED";
 
 	private final CatalogEvent event;
 
@@ -25,6 +27,10 @@ public final class CatalogEventAdapter {
 	
 	public static final CatalogEventAdapter of(final MessageDto<CatalogEvent> mqiMessage) {
 		return new CatalogEventAdapter(mqiMessage.getDto());
+	}
+	
+	public final String productType() {
+		return getStringValue("productType", "NOT_KNOWN");
 	}
 	
 	public final String sessionId() {
@@ -76,11 +82,19 @@ public final class CatalogEventAdapter {
 	}
 	
 	public final String productConsolidation() {
-		return getStringValue("productConsolidation", "NOT_DEFINED");
+		return getStringValue("productConsolidation", NOT_DEFINED);
 	}
 	
 	public final String productSensingConsolidation() {
-		return getStringValue("productSensingConsolidation", "NOT_DEFINED");
+		return getStringValue("productSensingConsolidation", NOT_DEFINED);
+	}
+	
+	public final String productSensingStartDate() {
+		return getStringValue("startTime", NOT_DEFINED);
+	}
+	
+	public final String productSensingStopDate() {
+		return getStringValue("stopTime", NOT_DEFINED);
 	}
 	
 	public final List<String> listValues(final String name) {

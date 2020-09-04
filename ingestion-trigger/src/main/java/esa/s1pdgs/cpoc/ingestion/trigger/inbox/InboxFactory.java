@@ -13,6 +13,7 @@ import esa.s1pdgs.cpoc.common.ProductFamily;
 import esa.s1pdgs.cpoc.ingestion.trigger.config.InboxConfiguration;
 import esa.s1pdgs.cpoc.ingestion.trigger.filter.BlacklistRegexRelativePathInboxFilter;
 import esa.s1pdgs.cpoc.ingestion.trigger.filter.JoinedFilter;
+import esa.s1pdgs.cpoc.ingestion.trigger.filter.MinimumModificationDateFilter;
 import esa.s1pdgs.cpoc.ingestion.trigger.filter.WhitelistRegexRelativePathInboxFilter;
 import esa.s1pdgs.cpoc.ingestion.trigger.fs.FilesystemInboxAdapterFactory;
 import esa.s1pdgs.cpoc.ingestion.trigger.kafka.producer.KafkaSubmissionClient;
@@ -43,12 +44,15 @@ public class InboxFactory {
 		this.xbipInboxAdapterFactory = xbipInboxAdapterFactory;
 	}
 	
-	public Inbox newInbox(final InboxConfiguration config) throws IOException, URISyntaxException {
+
+	
+	public Inbox newInbox(final InboxConfiguration config) throws IOException, URISyntaxException {		
 		return new Inbox(
 				newInboxAdapter(config),
 				new JoinedFilter(
 						new BlacklistRegexRelativePathInboxFilter(Pattern.compile(config.getIgnoreRegex())),
-						new WhitelistRegexRelativePathInboxFilter(Pattern.compile(config.getMatchRegex()))
+						new WhitelistRegexRelativePathInboxFilter(Pattern.compile(config.getMatchRegex())),
+						new MinimumModificationDateFilter(config.getIgnoreFilesBeforeDate())
 				),
 				ingestionTriggerServiceTransactional, 
 				new KafkaSubmissionClient(kafkaTemplate, config.getTopic()),
@@ -56,7 +60,7 @@ public class InboxFactory {
 				config.getStationName(),
 				config.getMode(),
 				config.getTimeliness(),
-				newProductNameEvaluatorFor(config)
+				newProductNameEvaluatorFor(config)				
 		);
 	}
 	

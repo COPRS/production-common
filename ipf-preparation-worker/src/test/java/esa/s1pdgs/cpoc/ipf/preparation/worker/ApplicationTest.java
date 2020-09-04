@@ -10,7 +10,6 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.junit4.SpringRunner;
 
-import esa.s1pdgs.cpoc.appcatalog.AppDataJob;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.service.IpfPreparationService;
 import esa.s1pdgs.cpoc.mqi.model.queue.CatalogEvent;
 import esa.s1pdgs.cpoc.mqi.model.queue.IpfPreparationJob;
@@ -38,14 +37,8 @@ public class ApplicationTest {
 
 	private IpfPreparationJob newPrepJob() {
 		final IpfPreparationJob job = new IpfPreparationJob();
-		job.setAppDataJob(newJob());
-		return job;
-	}
-
-	private AppDataJob newJob() {
-		final AppDataJob job = new AppDataJob();
-		job.setProductName("fooBar");
-		job.getMessages().add(new GenericMessageDto<CatalogEvent>(1, "foo", newCatEvent()));
+		job.setKeyObjectStorage("fooBar");
+		job.setEventMessage(new GenericMessageDto<CatalogEvent>(1, "foo", newCatEvent()));
 		return job;
 	}
 
@@ -59,7 +52,10 @@ public class ApplicationTest {
 		final Map<String, Object> map = new LinkedHashMap<>();
 		map.put("sessionId", "123");
 		map.put("stationCode", "DIMS");
-		
+		map.put("satelliteId", "A");
+		map.put("missionId", "S1");
+		map.put("startTime", "2020-08-25T16:57:53.239");
+		map.put("stopTime", "2020-08-25T16:57:54.239");
 		return map;
 	}
 }
