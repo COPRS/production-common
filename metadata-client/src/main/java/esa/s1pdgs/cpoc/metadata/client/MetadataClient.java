@@ -4,6 +4,7 @@ import java.net.URI;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.Callable;
 
@@ -13,6 +14,7 @@ import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.util.CollectionUtils;
 import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;
@@ -173,16 +175,26 @@ public class MetadataClient {
 		final ResponseEntity<List<S3Metadata>> response = query(builder.build().toUri(),
 				new ParameterizedTypeReference<List<S3Metadata>>() {
 				});
+		return extractResult(productType, productFamily, response);		
+	}
 
-		if (response == null || response.getBody() == null) {
+	private final List<S3Metadata> extractResult(final String productType, final ProductFamily productFamily,
+			final ResponseEntity<List<S3Metadata>> response) {
+		if (response == null) {
+			LOGGER.debug("MarginTT metadata query for family '{}' and product type '{}' returned null",
+					productFamily, productType);
+			return Collections.emptyList();
+		}
+		final List<S3Metadata> queryResults = response.getBody();
+		
+		if (CollectionUtils.isEmpty(queryResults)) {
 			LOGGER.debug("MarginTT metadata query for family '{}' and product type '{}' returned no results",
 					productFamily, productType);
-			return new ArrayList<>();
-		} else {
-			LOGGER.info("MarginTT metadata query for family '{}' and product type '{}' returned {} results",
-					productFamily, productType, response.getBody().size());
-			return response.getBody();
+			return Collections.emptyList();
 		}
+		LOGGER.info("MarginTT metadata query for family '{}' and product type '{}' returned {} results",
+				productFamily, productType, queryResults.size());
+		return queryResults;
 	}
 
 	/**
