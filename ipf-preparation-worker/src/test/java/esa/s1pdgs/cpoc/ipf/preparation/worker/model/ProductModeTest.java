@@ -6,7 +6,6 @@ import static org.junit.Assert.assertTrue;
 
 import org.junit.Test;
 
-import esa.s1pdgs.cpoc.ipf.preparation.worker.model.ProductMode;
 import esa.s1pdgs.cpoc.xml.model.tasktable.enums.TaskTableInputMode;
 
 /**
@@ -18,11 +17,14 @@ public class ProductModeTest {
     
     @Test
     public void testBasic() {
-        assertEquals(4, ProductMode.values().length);
+        assertEquals(7, ProductMode.values().length);
         assertEquals(ProductMode.ALWAYS, ProductMode.valueOf("ALWAYS"));
         assertEquals(ProductMode.BLANK, ProductMode.valueOf("BLANK"));
         assertEquals(ProductMode.NON_SLICING, ProductMode.valueOf("NON_SLICING"));
         assertEquals(ProductMode.SLICING, ProductMode.valueOf("SLICING"));
+        assertEquals(ProductMode.NRT, ProductMode.valueOf("NRT"));
+        assertEquals(ProductMode.STC, ProductMode.valueOf("STC"));
+        assertEquals(ProductMode.NTC, ProductMode.valueOf("NTC"));
     }
 	
 	/**
