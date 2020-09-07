@@ -241,7 +241,7 @@ public class IpfPreparationWorkerConfiguration {
 		);
 		
 		final JobOrderAdapter.Factory jobOrderFactory = new JobOrderAdapter.Factory(
-				() -> tasktableAdapter.newJobOrder(processSettings),
+				() -> tasktableAdapter.newJobOrder(processSettings, settings.getProductMode()),
 				typeAdapter,
 				elementMapper,
 				xmlConverter

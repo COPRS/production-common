@@ -97,9 +97,9 @@ public class TaskTableAdapter {
 		return tasks;
 	}
 	
-	public final JobOrder newJobOrder(final ProcessSettings settings) {
+	public final JobOrder newJobOrder(final ProcessSettings settings, final ProductMode mode) {
 		// Build from task table
-		final TaskTableToJobOrderConverter converter = new TaskTableToJobOrderConverter(ProductMode.SLICING); //FIXME configure me!!!
+		final TaskTableToJobOrderConverter converter = new TaskTableToJobOrderConverter(mode);
 		final JobOrder jobOrderTemplate = converter.apply(taskTable);
 
 		// Update values from configuration file
