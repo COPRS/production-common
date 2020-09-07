@@ -16,6 +16,7 @@ import esa.s1pdgs.cpoc.mdc.worker.config.ProcessConfiguration;
 import esa.s1pdgs.cpoc.mdc.worker.extraction.files.FileDescriptorBuilder;
 import esa.s1pdgs.cpoc.mdc.worker.extraction.files.LandMaskExtractor;
 import esa.s1pdgs.cpoc.mdc.worker.extraction.files.MetadataBuilder;
+import esa.s1pdgs.cpoc.mdc.worker.extraction.files.OverpassMaskExtractor;
 import esa.s1pdgs.cpoc.mdc.worker.extraction.model.AuxDescriptor;
 import esa.s1pdgs.cpoc.mdc.worker.service.EsServices;
 import esa.s1pdgs.cpoc.mqi.model.queue.CatalogJob;
@@ -63,12 +64,28 @@ public final class AuxMetadataExtractor extends AbstractMetadataExtractor {
 					for (final JSONObject land : landMasks) {
 						logger.debug("Uploading land mask for {}", land.getString("name"));
 						logger.trace("land mask json: {}",land.toString());
-						esServices.createGeoMetadata(land,"land"+c);
+						esServices.createLandmaskGeoMetadata(land,"land"+c);
 						logger.debug("Uploading land mask finished for {}", land.getString("name"));
 						c++;
 					}
 				} catch (final Exception ex) {
 					logger.error("An error occurred while ingesting land mask documents: {}", LogUtils.toString(ex));
+					throw new InternalErrorException(Exceptions.messageOf(ex), ex);
+				}
+			} else if (configFileDesc.getProductType().equals("MSK_OVRPAS")) {
+				try {
+					final List<JSONObject> overpassMasks = new OverpassMaskExtractor().extract(metadataFile);
+					logger.info("Uploading {} overpass mask polygons", overpassMasks.size());
+					int c=0;
+					for (final JSONObject overpass : overpassMasks) {
+						logger.debug("Uploading overpass mask for {}", overpass.getString("name"));
+						logger.trace("overpass mask json: {}",overpass.toString());
+						esServices.createOverpassMaskGeoMetadata(overpass,"overpass"+c);
+						logger.debug("Uploading overpass mask finished for {}", overpass.getString("name"));
+						c++;
+					}
+				} catch (final Exception ex) {
+					logger.error("An error occurred while ingesting overpass mask documents: {}", LogUtils.toString(ex));
 					throw new InternalErrorException(Exceptions.messageOf(ex), ex);
 				}
 			}
