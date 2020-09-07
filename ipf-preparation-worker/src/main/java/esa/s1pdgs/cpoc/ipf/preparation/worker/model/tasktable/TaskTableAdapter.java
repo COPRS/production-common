@@ -195,11 +195,20 @@ public class TaskTableAdapter {
 		return result;
 	}
 
-	public Map<TaskTableInputAlternative.TaskTableInputAltKey, List<TaskTableInputAlternative>> allTaskTableInputAlternatives() {
+	/**
+	 * Create a list of all alternatives of the tasktable
+	 * @return list of all alternatives
+	 */
+	public List<TaskTableInputAlternative> getAllAlternatives() {
 		return taskTable.getPools().stream()
 				.flatMap(TaskTablePool::tasks)
 				.flatMap(TaskTableTask::inputs)
 				.flatMap(TaskTableInput::alternativesOrdered)
+				.collect(toList());
+	}
+	
+	public Map<TaskTableInputAlternative.TaskTableInputAltKey, List<TaskTableInputAlternative>> allTaskTableInputAlternatives() {
+		return getAllAlternatives().stream()
 				.filter(alt -> alt.getOrigin() == TaskTableInputOrigin.DB)
 				.collect(groupingBy(TaskTableInputAlternative::getTaskTableInputAltKey));
 	}
