@@ -66,7 +66,7 @@ public final class AuxMetadataExtractor extends AbstractMetadataExtractor {
 						logger.debug("Uploading land mask {}", id);
 						logger.trace("land mask json: {}",land.toString());
 						esServices.createLandmaskGeoMetadata(land, id);
-						logger.debug("Uploading land mask finished for {}", id);
+						logger.debug("Finished uploading land mask {}", id);
 						c++;
 					}
 				} catch (final Exception ex) {
@@ -80,10 +80,10 @@ public final class AuxMetadataExtractor extends AbstractMetadataExtractor {
 					int c=0;
 					for (final JSONObject overpass : overpassMasks) {
 						String id = configFileDesc.getProductName() + "/feature" + c;
-						logger.debug("Uploading overpass mask for {}", id);
+						logger.debug("Uploading overpass mask {}", id);
 						logger.trace("overpass mask json: {}",overpass.toString());
 						esServices.createOverpassMaskGeoMetadata(overpass, id);
-						logger.debug("Uploading overpass mask finished for {}", id);
+						logger.debug("Finished uploading overpass mask {}", id);
 						c++;
 					}
 				} catch (final Exception ex) {
