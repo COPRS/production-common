@@ -57,15 +57,16 @@ public final class AuxMetadataExtractor extends AbstractMetadataExtractor {
 			 */
 			// TODO: Having this logic in the Auxiliary Extract might not be the best place, maybe a new one for masks would be better
 			if (configFileDesc.getProductType().equals("MSK__LAND_")) {			
-				try {
+				try {					
 					final List<JSONObject> landMasks = new LandMaskExtractor().extract(metadataFile);
 					logger.info("Uploading {} land mask polygons", landMasks.size());
 					int c=0;
 					for (final JSONObject land : landMasks) {
-						logger.debug("Uploading land mask for {}", land.getString("name"));
+						String id = configFileDesc.getProductName() + "/feature" + c;
+						logger.debug("Uploading land mask {}", id);
 						logger.trace("land mask json: {}",land.toString());
-						esServices.createLandmaskGeoMetadata(land,"land"+c);
-						logger.debug("Uploading land mask finished for {}", land.getString("name"));
+						esServices.createLandmaskGeoMetadata(land, id);
+						logger.debug("Uploading land mask finished for {}", id);
 						c++;
 					}
 				} catch (final Exception ex) {
@@ -78,10 +79,11 @@ public final class AuxMetadataExtractor extends AbstractMetadataExtractor {
 					logger.info("Uploading {} overpass mask polygons", overpassMasks.size());
 					int c=0;
 					for (final JSONObject overpass : overpassMasks) {
-						logger.debug("Uploading overpass mask for {}", overpass.getString("name"));
+						String id = configFileDesc.getProductName() + "/feature" + c;
+						logger.debug("Uploading overpass mask for {}", id);
 						logger.trace("overpass mask json: {}",overpass.toString());
-						esServices.createOverpassMaskGeoMetadata(overpass,"overpass"+c);
-						logger.debug("Uploading overpass mask finished for {}", overpass.getString("name"));
+						esServices.createOverpassMaskGeoMetadata(overpass, id);
+						logger.debug("Uploading overpass mask finished for {}", id);
 						c++;
 					}
 				} catch (final Exception ex) {

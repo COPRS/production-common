@@ -205,15 +205,15 @@ public class EsServices {
 		}
 	}
 
-	public void createLandmaskGeoMetadata(final JSONObject product, final String landName) throws Exception {
+	public void createLandmaskGeoMetadata(final JSONObject product, final String id) throws Exception {
 		try {
-			final IndexRequest request = new IndexRequest("landmask").id(landName).source(product.toString(),
+			final IndexRequest request = new IndexRequest("landmask").id(id).source(product.toString(),
 					XContentType.JSON);
 
 			final IndexResponse response = elasticsearchDAO.index(request);
 
 			if (response.status() != RestStatus.CREATED) {
-				throw new MetadataCreationException(landName, response.status().toString(),
+				throw new MetadataCreationException(id, response.status().toString(),
 						response.getResult().toString());
 			}
 		} catch (JSONException | IOException e) {
@@ -221,15 +221,15 @@ public class EsServices {
 		}
 	}
 	
-	public void createOverpassMaskGeoMetadata(final JSONObject product, final String overpassName) throws Exception {
+	public void createOverpassMaskGeoMetadata(final JSONObject product, final String id) throws Exception {
 		try {
-			final IndexRequest request = new IndexRequest("overpassmask").id(overpassName).source(product.toString(),
+			final IndexRequest request = new IndexRequest("overpassmask").id(id).source(product.toString(),
 					XContentType.JSON);
 
 			final IndexResponse response = elasticsearchDAO.index(request);
 
 			if (response.status() != RestStatus.CREATED) {
-				throw new MetadataCreationException(overpassName, response.status().toString(),
+				throw new MetadataCreationException(id, response.status().toString(),
 						response.getResult().toString());
 			}
 		} catch (JSONException | IOException e) {
