@@ -1,6 +1,7 @@
 package esa.s1pdgs.cpoc.ipf.preparation.worker.type.slice;
 
 import java.util.Collections;
+import java.util.List;
 import java.util.Map;
 
 import esa.s1pdgs.cpoc.appcatalog.AppDataJob;
@@ -16,6 +17,7 @@ import esa.s1pdgs.cpoc.metadata.client.MetadataClient;
 import esa.s1pdgs.cpoc.metadata.model.L0AcnMetadata;
 import esa.s1pdgs.cpoc.metadata.model.L0SliceMetadata;
 import esa.s1pdgs.cpoc.mqi.model.queue.IpfExecutionJob;
+import esa.s1pdgs.cpoc.mqi.model.queue.IpfPreparationJob;
 import esa.s1pdgs.cpoc.mqi.model.queue.util.CatalogEventAdapter;
 import esa.s1pdgs.cpoc.xml.model.joborder.JobOrder;
 import esa.s1pdgs.cpoc.xml.model.joborder.JobOrderSensingTime;
@@ -96,11 +98,15 @@ public final class LevelSliceTypeAdapter extends AbstractProductTypeAdapter impl
 	}
 
 	@Override
-	public void customAppDataJob(final AppDataJob job) {
-		final CatalogEventAdapter eventAdapter = CatalogEventAdapter.of(job);
-		final LevelSliceProduct product = LevelSliceProduct.of(job);		
+	public List<AppDataJob> createAppDataJobs(IpfPreparationJob job) {
+		AppDataJob appDataJob = toAppDataJob(job);
+		
+		final CatalogEventAdapter eventAdapter = CatalogEventAdapter.of(appDataJob);
+		final LevelSliceProduct product = LevelSliceProduct.of(appDataJob);		
 		product.setAcquisition(eventAdapter.swathType()); 
         product.setPolarisation(eventAdapter.polarisation());
+        
+        return Collections.singletonList(appDataJob);
 	}
 
 	@Override

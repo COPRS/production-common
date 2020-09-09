@@ -10,7 +10,6 @@ import java.util.UUID;
 import esa.s1pdgs.cpoc.appcatalog.AppDataJob;
 import esa.s1pdgs.cpoc.appcatalog.AppDataJobGeneration;
 import esa.s1pdgs.cpoc.appcatalog.AppDataJobGenerationState;
-import esa.s1pdgs.cpoc.appcatalog.AppDataJobProduct;
 import esa.s1pdgs.cpoc.appcatalog.AppDataJobState;
 import esa.s1pdgs.cpoc.common.ProductCategory;
 import esa.s1pdgs.cpoc.common.errors.AbstractCodedException;
@@ -59,87 +58,49 @@ public class JobDispatcherImpl implements JobDispatcher {
 	@Override
 	public final MqiMessageEventHandler dispatch(final GenericMessageDto<IpfPreparationJob> message) throws Exception {
     	final IpfPreparationJob prepJob = message.getBody();
-    	
-    	final AppDataJob jobFromMessage = toAppDataJob(prepJob);
         
         final Reporting reporting = ReportingUtils.newReportingBuilder()
         		.predecessor(prepJob.getUid())
         		.newReporting("TaskTableLookup");
         
-        typeAdapter.customAppDataJob(jobFromMessage);
-    	LOGGER.trace("== dispatch job {}", jobFromMessage.toString());
-    	
-        final String tasktableFilename = jobFromMessage.getTaskTableName();
+        final List<AppDataJob> jobs = typeAdapter.createAppDataJobs(prepJob);
         
-    	reporting.begin(
-    			ReportingUtils.newFilenameReportingInputFor(prepJob.getProductFamily(), jobFromMessage.getProductName()),
-    			new ReportingMessage("Start associating TaskTables to AppDataJob", jobFromMessage.getId())
+        reporting.begin(
+    			ReportingUtils.newFilenameReportingInputFor(prepJob.getProductFamily(), prepJob.getKeyObjectStorage()),
+    			new ReportingMessage("Start associating TaskTables to created AppDataJobs")
     	); 
     	
 		return new MqiMessageEventHandler.Builder<NullMessage>(ProductCategory.UNDEFINED)
 				.onSuccess(res -> reporting.end(
-	            		new TaskTableLookupReportingOutput(Collections.singletonList(tasktableFilename)),
-	            		new ReportingMessage("End associating TaskTables to AppDataJob")
+	            		new TaskTableLookupReportingOutput(Collections.singletonList(prepJob.getTaskTableName())),
+	            		new ReportingMessage("End associating TaskTables to AppDataJobs")
 	            ))
 				.onError(e -> reporting.error(new ReportingMessage(
-	        			"Error associating TaskTables to AppDataJob: %s", 
+	        			"Error associating TaskTables to AppDataJobs: %s", 
 	        			LogUtils.toString(e)
 	        	)))
 				.publishMessageProducer(() -> {
-					LOGGER.trace("Got TaskTable {}", tasktableFilename);
-		            
-		            // assert that there is a job generator for the assigned tasktable
-		            if (!generatorAvailableForTasktableNames.contains(tasktableFilename))  {
-		            	throw new IllegalStateException(
-		            			String.format(
-		            					"No job generator found for tasktable %s. Available are: %s", 
-		            					tasktableFilename,
-		            					generatorAvailableForTasktableNames
-		            			)
-		            	);
-		            } 
+					for (AppDataJob job : jobs) {
+			        	LOGGER.trace("== dispatch job {}", job.toString());
+			        	
+			            final String tasktableFilename = job.getTaskTableName();
+			            
+			            LOGGER.trace("Got TaskTable {}", tasktableFilename);
+			            
+						// assert that there is a job generator for the assigned tasktable
+						if (!generatorAvailableForTasktableNames.contains(tasktableFilename)) {
+							throw new IllegalStateException(
+									String.format("No job generator found for tasktable %s. Available are: %s", tasktableFilename,
+											generatorAvailableForTasktableNames));
+						}
 
-		            // Allow additional logic in TypeAdapter to drop a job completely
-		            if (jobFromMessage.getState() != AppDataJobState.TERMINATED) {
-		            	handleJob(message, jobFromMessage, reporting.getUid(), tasktableFilename);
-		            } else {
-		            	LOGGER.info("No job for message {} created. Job was already TERMINATED.", message.getId());
-		            }
+			            handleJob(message, job, reporting.getUid(), tasktableFilename);
+			        } 
+					
 					return new MqiPublishingJob<NullMessage>(Collections.emptyList());
 				})
 				.newResult();
     }
-
-	private final AppDataJob toAppDataJob(final IpfPreparationJob prepJob) {
-        final AppDataJob job = new AppDataJob();
-        job.setLevel(prepJob.getLevel());
-        job.setPod(prepJob.getHostname());
-        job.getMessages().add(prepJob.getEventMessage());
-        job.setProduct(newProductFor(prepJob.getEventMessage())); 
-    	job.setTaskTableName(prepJob.getTaskTableName());     
-    	job.setStartTime(prepJob.getStartTime());
-    	job.setStopTime(prepJob.getStopTime());
-    	job.setProductName(prepJob.getKeyObjectStorage());     
-    	return job;    	
-	}
-	
-	private final AppDataJobProduct newProductFor(final GenericMessageDto<CatalogEvent> mqiMessage) {
-		final CatalogEvent event = mqiMessage.getBody();
-	    final AppDataJobProduct productDto = new AppDataJobProduct();
-	    
-		final CatalogEventAdapter eventAdapter = CatalogEventAdapter.of(mqiMessage);		
-		productDto.getMetadata().put("productName", event.getProductName());
-		productDto.getMetadata().put("productType", event.getProductType());
-		productDto.getMetadata().put("satelliteId", eventAdapter.satelliteId());
-		productDto.getMetadata().put("missionId", eventAdapter.missionId());
-		productDto.getMetadata().put("processMode", eventAdapter.processMode());
-		// S1PRO-1772: user productSensing accessors here to make start/stop optional here (RAWs don't have them)
-		productDto.getMetadata().put("startTime", eventAdapter.productSensingStartDate());
-		productDto.getMetadata().put("stopTime", eventAdapter.productSensingStopDate());     
-		productDto.getMetadata().put("timeliness", eventAdapter.timeliness());
-		productDto.getMetadata().put("acquistion", eventAdapter.swathType());
-	    return productDto;
-	}
 
 	// This needs to be synchronized to avoid duplicate jobs
 	private final synchronized void handleJob(

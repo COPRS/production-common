@@ -6,6 +6,7 @@ import static org.springframework.util.CollectionUtils.isEmpty;
 import java.io.File;
 import java.time.Instant;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -16,7 +17,6 @@ import org.apache.logging.log4j.Logger;
 
 import esa.s1pdgs.cpoc.appcatalog.AppDataJob;
 import esa.s1pdgs.cpoc.appcatalog.AppDataJobInput;
-import esa.s1pdgs.cpoc.appcatalog.AppDataJobState;
 import esa.s1pdgs.cpoc.appcatalog.AppDataJobTaskInputs;
 import esa.s1pdgs.cpoc.common.errors.AbstractCodedException;
 import esa.s1pdgs.cpoc.common.errors.processing.IpfPrepWorkerInputsMissingException;
@@ -35,6 +35,7 @@ import esa.s1pdgs.cpoc.ipf.preparation.worker.type.Product;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.type.ProductTypeAdapter;
 import esa.s1pdgs.cpoc.metadata.client.MetadataClient;
 import esa.s1pdgs.cpoc.mqi.model.queue.IpfExecutionJob;
+import esa.s1pdgs.cpoc.mqi.model.queue.IpfPreparationJob;
 import esa.s1pdgs.cpoc.mqi.model.queue.LevelJobInputDto;
 import esa.s1pdgs.cpoc.mqi.model.queue.util.CatalogEventAdapter;
 import esa.s1pdgs.cpoc.xml.model.joborder.JobOrder;
@@ -147,14 +148,16 @@ public class S3TypeAdapter extends AbstractProductTypeAdapter implements Product
 	}
 
 	@Override
-	public void customAppDataJob(AppDataJob job) {
-		// Create tasktable Adapter for tasktable defined by Job
-		final TaskTableAdapter ttAdapter = getTTAdapterForTaskTableName(job.getTaskTableName());
+	public List<AppDataJob> createAppDataJobs(IpfPreparationJob job) {
+		AppDataJob appDataJob = toAppDataJob(job);
 
-		String productType = job.getProductName().substring(4, 15);
+		// Create tasktable Adapter for tasktable defined by Job
+		final TaskTableAdapter ttAdapter = getTTAdapterForTaskTableName(appDataJob.getTaskTableName());
+
+		String productType = appDataJob.getProductName().substring(4, 15);
 
 		/*
-		 * Change time interval for job when range search is active This is needed for
+		 * Change time interval for job when range search is active. This is needed for
 		 * VISCAL (SLSTR Calibration)
 		 */
 		if (settings.isRangeSearchActiveForProductType(ttAdapter.taskTable().getProcessorName(), productType)) {
@@ -165,20 +168,23 @@ public class S3TypeAdapter extends AbstractProductTypeAdapter implements Product
 					metadataClient, workerSettings);
 
 			try {
-				MultipleProductCoverSearch.Range range = mpcSearch.getIntersectingANXRange(job.getProductName(),
+				MultipleProductCoverSearch.Range range = mpcSearch.getIntersectingANXRange(appDataJob.getProductName(),
 						rangeSettings.getAnxOffsetInS(), rangeSettings.getRangeLengthInS());
 
 				if (range != null) {
-					job.setStartTime(DateUtils.formatToMetadataDateTimeFormat(range.getStart()));
-					job.setStopTime(DateUtils.formatToMetadataDateTimeFormat(range.getStop()));
+					appDataJob.setStartTime(DateUtils.formatToMetadataDateTimeFormat(range.getStart()));
+					appDataJob.setStopTime(DateUtils.formatToMetadataDateTimeFormat(range.getStop()));
 				} else {
 					// Discard Job
-					job.setState(AppDataJobState.TERMINATED);
+					LOGGER.info("Product not in range. Skip creating AppDataJob.");
+					return Collections.emptyList();
 				}
 			} catch (MetadataQueryException e) {
 				LOGGER.error("Error while determining viscal range, skip changing interval for AppDataJob", e);
 			}
 		}
+		
+		return Collections.singletonList(appDataJob);
 	}
 
 	@Override

@@ -3,6 +3,7 @@ package esa.s1pdgs.cpoc.ipf.preparation.worker.type.edrs;
 import java.io.File;
 import java.time.Duration;
 import java.time.LocalDateTime;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -25,6 +26,7 @@ import esa.s1pdgs.cpoc.ipf.preparation.worker.type.ProductTypeAdapter;
 import esa.s1pdgs.cpoc.metadata.client.MetadataClient;
 import esa.s1pdgs.cpoc.metadata.model.EdrsSessionMetadata;
 import esa.s1pdgs.cpoc.mqi.model.queue.IpfExecutionJob;
+import esa.s1pdgs.cpoc.mqi.model.queue.IpfPreparationJob;
 import esa.s1pdgs.cpoc.mqi.model.queue.LevelJobInputDto;
 import esa.s1pdgs.cpoc.mqi.model.queue.util.CatalogEventAdapter;
 import esa.s1pdgs.cpoc.xml.model.joborder.AbstractJobOrderConf;
@@ -101,9 +103,11 @@ public final class EdrsSessionTypeAdapter extends AbstractProductTypeAdapter imp
 	}
 
 	@Override
-	public final void customAppDataJob(final AppDataJob job) {			
-		final CatalogEventAdapter eventAdapter = CatalogEventAdapter.of(job);				
-		final EdrsSessionProduct product = EdrsSessionProduct.of(job);		
+	public List<AppDataJob> createAppDataJobs(IpfPreparationJob job) {
+		AppDataJob appDataJob = toAppDataJob(job);
+		
+		final CatalogEventAdapter eventAdapter = CatalogEventAdapter.of(appDataJob);				
+		final EdrsSessionProduct product = EdrsSessionProduct.of(appDataJob);		
 		// IMPORTANT workaround!!! Allows to get the session identifier in exec-worker
 		product.setProductName(eventAdapter.sessionId());
 		product.setSessionId(eventAdapter.sessionId());
@@ -122,15 +126,17 @@ public final class EdrsSessionTypeAdapter extends AbstractProductTypeAdapter imp
 			final String stopTime = DateUtils.formatToMetadataDateTimeFormat(nowPlusOffset);
 			product.setStartTime(startTime);
 			product.setStopTime(stopTime);
-			job.setStartTime(startTime);
-			job.setStopTime(stopTime);
+			appDataJob.setStartTime(startTime);
+			appDataJob.setStopTime(stopTime);
 		}
 		else {
 			product.setStartTime(eventAdapter.startTime());
 			product.setStopTime(eventAdapter.stopTime());
-			job.setStartTime(eventAdapter.startTime());
-			job.setStopTime(eventAdapter.stopTime());
+			appDataJob.setStartTime(eventAdapter.startTime());
+			appDataJob.setStopTime(eventAdapter.stopTime());
 		}
+		
+		return Collections.singletonList(appDataJob);
 	}
 	
 	@Override

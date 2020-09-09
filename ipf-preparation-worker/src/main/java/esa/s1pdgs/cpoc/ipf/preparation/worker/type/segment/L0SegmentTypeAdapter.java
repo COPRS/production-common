@@ -27,6 +27,7 @@ import esa.s1pdgs.cpoc.metadata.client.MetadataClient;
 import esa.s1pdgs.cpoc.metadata.model.AbstractMetadata;
 import esa.s1pdgs.cpoc.metadata.model.LevelSegmentMetadata;
 import esa.s1pdgs.cpoc.mqi.model.queue.IpfExecutionJob;
+import esa.s1pdgs.cpoc.mqi.model.queue.IpfPreparationJob;
 import esa.s1pdgs.cpoc.mqi.model.queue.util.CatalogEventAdapter;
 import esa.s1pdgs.cpoc.xml.model.joborder.JobOrder;
 
@@ -174,12 +175,16 @@ public final class L0SegmentTypeAdapter extends AbstractProductTypeAdapter imple
 	}
 
 	@Override
-	public final void customAppDataJob(final AppDataJob job) {
-		final CatalogEventAdapter eventAdapter = CatalogEventAdapter.of(job);
-		final L0SegmentProduct product = L0SegmentProduct.of(job);
+	public List<AppDataJob> createAppDataJobs(IpfPreparationJob job) {
+		AppDataJob appDataJob = toAppDataJob(job);
+		
+		final CatalogEventAdapter eventAdapter = CatalogEventAdapter.of(appDataJob);
+		final L0SegmentProduct product = L0SegmentProduct.of(appDataJob);
 		product.setAcquistion(eventAdapter.swathType());
 		product.setDataTakeId(eventAdapter.datatakeId());
 		product.setProductName("l0_segments_for_" + eventAdapter.datatakeId());
+		
+		return Collections.singletonList(appDataJob);
 	}
 
 	@Override
