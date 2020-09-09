@@ -45,9 +45,6 @@ public class OverpassMaskExtractor {
 		for (int i = 0; i < jsonArray.length(); ++i) {
 			JSONObject obj = new JSONObject();
 			JSONObject currentFeature = jsonArray.getJSONObject(i);
-			if (currentFeature.has("properties") && currentFeature.getJSONObject("properties").has("sov_a3")) {
-				obj.put("name", currentFeature.getJSONObject("properties").get("sov_a3"));				
-			}
 			obj.put("geometry", currentFeature.getJSONObject("geometry"));
 			result.add(obj);
 		}
