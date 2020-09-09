@@ -63,7 +63,118 @@ public class S3TypeAdapter extends AbstractProductTypeAdapter implements Product
 		this.workerSettings = workerSettings;
 		this.settings = settings;
 	}
+	
+	@Override
+	public List<AppDataJob> createAppDataJobs(IpfPreparationJob job) {
+		AppDataJob appDataJob = toAppDataJob(job);
 
+		// Create tasktable Adapter for tasktable defined by Job
+		final TaskTableAdapter ttAdapter = getTTAdapterForTaskTableName(appDataJob.getTaskTableName());
+
+		String productType = appDataJob.getProductName().substring(4, 15);		
+		
+		/*
+		 * Change time interval for job when range search is active. This is needed for
+		 * VISCAL (SLSTR Calibration)
+		 */
+		if (settings.isRangeSearchActiveForProductType(ttAdapter.taskTable().getProcessorName(), productType)) {
+			S3TypeAdapterSettings.RangeCoverSettings rangeSettings = settings.getRangeSearch()
+					.get(ttAdapter.taskTable().getProcessorName());
+
+			MultipleProductCoverSearch mpcSearch = new MultipleProductCoverSearch(ttAdapter, elementMapper,
+					metadataClient, workerSettings);
+
+			try {
+				MultipleProductCoverSearch.Range range = mpcSearch.getIntersectingANXRange(appDataJob.getProductName(),
+						rangeSettings.getAnxOffsetInS(), rangeSettings.getRangeLengthInS());
+
+				if (range != null) {
+					appDataJob.setStartTime(DateUtils.formatToMetadataDateTimeFormat(range.getStart()));
+					appDataJob.setStopTime(DateUtils.formatToMetadataDateTimeFormat(range.getStop()));
+				} else {
+					// Discard Job
+					LOGGER.info("Product not in range. Skip creating AppDataJob.");
+					return Collections.emptyList();
+				}
+			} catch (MetadataQueryException e) {
+				LOGGER.error("Error while determining viscal range, skip changing interval for AppDataJob", e);
+			}
+		}
+		
+		// Default case
+		return Collections.singletonList(appDataJob);
+	}
+
+	@Override
+	public void customJobOrder(AppDataJob job, JobOrder jobOrder) {
+		// Nothing to do currently
+	}
+
+	/**
+	 * Remove Inputs of ExecutionJob that are referring to a
+	 * TaskTableInputAlternative of origin PROC.
+	 * 
+	 * If those aren't removed, the InputDownloader of the ExecutionWorker will try
+	 * to download a file from the OBS but exits with an IllegalArgumentException
+	 */
+	@Override
+	public void customJobDto(AppDataJob job, IpfExecutionJob dto) {
+		final TaskTableAdapter ttAdapter = getTTAdapterForTaskTableName(job.getTaskTableName());
+
+		// Create list of all FileTypes of TaskTableInputAlternatives of Origin PROC
+		List<String> procAlternatives = ttAdapter.getAllAlternatives().stream()
+				.filter(alternative -> alternative.getOrigin() == TaskTableInputOrigin.PROC)
+				.map(alternative -> alternative.getFileType()).collect(toList());
+
+		List<LevelJobInputDto> newInputs = new ArrayList<>();
+		for (LevelJobInputDto input : dto.getInputs()) {
+			File file = new File(input.getLocalPath());
+			if (!procAlternatives.contains(file.getName())) {
+				newInputs.add(input);
+			}
+		}
+
+		dto.setInputs(newInputs);
+	}
+	
+	@Override
+	public Optional<AppDataJob> findAssociatedJobFor(final AppCatJobService appCat, final CatalogEventAdapter catEvent,
+			final AppDataJob job) throws AbstractCodedException {
+		// Create tasktable Adapter for tasktable defined by Job
+		final TaskTableAdapter ttAdapter = getTTAdapterForTaskTableName(job.getTaskTableName());
+		String productType = job.getProductName().substring(4, 15);
+
+		/*
+		 * For VISCAL check if there already exists a job, that is responsible for the
+		 * given interval
+		 */
+		if (settings.isRangeSearchActiveForProductType(ttAdapter.taskTable().getProcessorName(), productType)) {
+			LOGGER.debug("Look for existing job for productType {} and tasktable {}", productType,
+					job.getTaskTableName());
+			Optional<List<AppDataJob>> jobsInDatabase = appCat.findJobsForProductType(productType);
+
+			if (jobsInDatabase.isPresent()) {
+				MultipleProductCoverSearch.Range newJobRange = new MultipleProductCoverSearch.Range(
+						DateUtils.parse(job.getStartTime()), DateUtils.parse(job.getStopTime()));
+
+				for (AppDataJob jobInDatabase : jobsInDatabase.get()) {
+					MultipleProductCoverSearch.Range databaseJobRange = new MultipleProductCoverSearch.Range(
+							DateUtils.parse(jobInDatabase.getStartTime()),
+							DateUtils.parse(jobInDatabase.getStopTime()));
+
+					if (jobInDatabase.getTaskTableName().equals(job.getTaskTableName())
+							&& newJobRange.intersects(databaseJobRange)) {
+						return Optional.of(jobInDatabase);
+					}
+				}
+			}
+			LOGGER.debug("No existing job for productType {} and tasktable {} found", productType,
+					job.getTaskTableName());
+		}
+
+		return Optional.empty();
+	}
+	
 	@Override
 	public Product mainInputSearch(AppDataJob job) throws IpfPrepWorkerInputsMissingException {
 		S3Product returnValue = S3Product.of(job);
@@ -148,78 +259,6 @@ public class S3TypeAdapter extends AbstractProductTypeAdapter implements Product
 	}
 
 	@Override
-	public List<AppDataJob> createAppDataJobs(IpfPreparationJob job) {
-		AppDataJob appDataJob = toAppDataJob(job);
-
-		// Create tasktable Adapter for tasktable defined by Job
-		final TaskTableAdapter ttAdapter = getTTAdapterForTaskTableName(appDataJob.getTaskTableName());
-
-		String productType = appDataJob.getProductName().substring(4, 15);
-
-		/*
-		 * Change time interval for job when range search is active. This is needed for
-		 * VISCAL (SLSTR Calibration)
-		 */
-		if (settings.isRangeSearchActiveForProductType(ttAdapter.taskTable().getProcessorName(), productType)) {
-			S3TypeAdapterSettings.RangeCoverSettings rangeSettings = settings.getRangeSearch()
-					.get(ttAdapter.taskTable().getProcessorName());
-
-			MultipleProductCoverSearch mpcSearch = new MultipleProductCoverSearch(ttAdapter, elementMapper,
-					metadataClient, workerSettings);
-
-			try {
-				MultipleProductCoverSearch.Range range = mpcSearch.getIntersectingANXRange(appDataJob.getProductName(),
-						rangeSettings.getAnxOffsetInS(), rangeSettings.getRangeLengthInS());
-
-				if (range != null) {
-					appDataJob.setStartTime(DateUtils.formatToMetadataDateTimeFormat(range.getStart()));
-					appDataJob.setStopTime(DateUtils.formatToMetadataDateTimeFormat(range.getStop()));
-				} else {
-					// Discard Job
-					LOGGER.info("Product not in range. Skip creating AppDataJob.");
-					return Collections.emptyList();
-				}
-			} catch (MetadataQueryException e) {
-				LOGGER.error("Error while determining viscal range, skip changing interval for AppDataJob", e);
-			}
-		}
-		
-		return Collections.singletonList(appDataJob);
-	}
-
-	@Override
-	public void customJobOrder(AppDataJob job, JobOrder jobOrder) {
-		// Nothing to do currently
-	}
-
-	/**
-	 * Remove Inputs of ExecutionJob that are referring to a
-	 * TaskTableInputAlternative of origin PROC.
-	 * 
-	 * If those aren't removed, the InputDownloader of the ExecutionWorker will try
-	 * to download a file from the OBS but exits with an IllegalArgumentException
-	 */
-	@Override
-	public void customJobDto(AppDataJob job, IpfExecutionJob dto) {
-		final TaskTableAdapter ttAdapter = getTTAdapterForTaskTableName(job.getTaskTableName());
-
-		// Create list of all FileTypes of TaskTableInputAlternatives of Origin PROC
-		List<String> procAlternatives = ttAdapter.getAllAlternatives().stream()
-				.filter(alternative -> alternative.getOrigin() == TaskTableInputOrigin.PROC)
-				.map(alternative -> alternative.getFileType()).collect(toList());
-
-		List<LevelJobInputDto> newInputs = new ArrayList<>();
-		for (LevelJobInputDto input : dto.getInputs()) {
-			File file = new File(input.getLocalPath());
-			if (!procAlternatives.contains(file.getName())) {
-				newInputs.add(input);
-			}
-		}
-
-		dto.setInputs(newInputs);
-	}
-
-	@Override
 	public void validateInputSearch(AppDataJob job) throws IpfPrepWorkerInputsMissingException {
 		// Check if timeout is reached -> start job with current input
 		if (workerSettings.getWaitprimarycheck().getMaxTimelifeS() != 0) {
@@ -264,44 +303,6 @@ public class S3TypeAdapter extends AbstractProductTypeAdapter implements Product
 		if (!missingAlternatives.isEmpty()) {
 			throw new IpfPrepWorkerInputsMissingException(missingAlternatives);
 		}
-	}
-
-	@Override
-	public Optional<AppDataJob> findAssociatedJobFor(final AppCatJobService appCat, final CatalogEventAdapter catEvent,
-			final AppDataJob job) throws AbstractCodedException {
-		// Create tasktable Adapter for tasktable defined by Job
-		final TaskTableAdapter ttAdapter = getTTAdapterForTaskTableName(job.getTaskTableName());
-		String productType = job.getProductName().substring(4, 15);
-
-		/*
-		 * For VISCAL check if there already exists a job, that is responsible for the
-		 * given interval
-		 */
-		if (settings.isRangeSearchActiveForProductType(ttAdapter.taskTable().getProcessorName(), productType)) {
-			LOGGER.debug("Look for existing job for productType {} and tasktable {}", productType,
-					job.getTaskTableName());
-			Optional<List<AppDataJob>> jobsInDatabase = appCat.findJobsForProductType(productType);
-
-			if (jobsInDatabase.isPresent()) {
-				MultipleProductCoverSearch.Range newJobRange = new MultipleProductCoverSearch.Range(
-						DateUtils.parse(job.getStartTime()), DateUtils.parse(job.getStopTime()));
-
-				for (AppDataJob jobInDatabase : jobsInDatabase.get()) {
-					MultipleProductCoverSearch.Range databaseJobRange = new MultipleProductCoverSearch.Range(
-							DateUtils.parse(jobInDatabase.getStartTime()),
-							DateUtils.parse(jobInDatabase.getStopTime()));
-
-					if (jobInDatabase.getTaskTableName().equals(job.getTaskTableName())
-							&& newJobRange.intersects(databaseJobRange)) {
-						return Optional.of(jobInDatabase);
-					}
-				}
-			}
-			LOGGER.debug("No existing job for productType {} and tasktable {} found", productType,
-					job.getTaskTableName());
-		}
-
-		return Optional.empty();
 	}
 
 	/**

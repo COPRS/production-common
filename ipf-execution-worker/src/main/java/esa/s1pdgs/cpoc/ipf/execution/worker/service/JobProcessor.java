@@ -231,7 +231,9 @@ public class JobProcessor implements MqiListener<IpfExecutionJob> {
 		} else if (properties.getLevel() == ApplicationLevel.L0_SEGMENT) {
 			outputListFile = job.getWorkDirectory() + "L0ASProcList.LIST";
 			category = ProductCategory.LEVEL_PRODUCTS;
-		} else if (EnumSet.of(ApplicationLevel.S3_L0, ApplicationLevel.S3_L1, ApplicationLevel.S3_L2).contains(properties.getLevel())){
+		} else if (EnumSet
+				.of(ApplicationLevel.S3_L0, ApplicationLevel.S3_L1, ApplicationLevel.S3_L2, ApplicationLevel.S3_PDU)
+				.contains(properties.getLevel())) {
 			outputListFile = job.getWorkDirectory() + "product.LIST";
 			category = ProductCategory.S3_PRODUCTS;
 		}
