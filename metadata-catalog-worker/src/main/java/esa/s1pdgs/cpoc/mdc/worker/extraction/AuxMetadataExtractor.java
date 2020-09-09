@@ -62,7 +62,7 @@ public final class AuxMetadataExtractor extends AbstractMetadataExtractor {
 					logger.info("Uploading {} land mask polygons", landMasks.size());
 					int c=0;
 					for (final JSONObject land : landMasks) {
-						String id = configFileDesc.getProductName() + "/feature" + c;
+						String id = configFileDesc.getProductName() + "/features/" + c;
 						logger.debug("Uploading land mask {}", id);
 						logger.trace("land mask json: {}",land.toString());
 						esServices.createLandmaskGeoMetadata(land, id);
@@ -79,7 +79,7 @@ public final class AuxMetadataExtractor extends AbstractMetadataExtractor {
 					logger.info("Uploading {} overpass mask polygons", overpassMasks.size());
 					int c=0;
 					for (final JSONObject overpass : overpassMasks) {
-						String id = configFileDesc.getProductName() + "/feature" + c;
+						String id = configFileDesc.getProductName() + "/features/" + c;
 						logger.debug("Uploading overpass mask {}", id);
 						logger.trace("overpass mask json: {}",overpass.toString());
 						esServices.createOverpassMaskGeoMetadata(overpass, id);
