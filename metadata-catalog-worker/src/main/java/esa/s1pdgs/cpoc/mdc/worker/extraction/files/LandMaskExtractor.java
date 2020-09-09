@@ -47,8 +47,6 @@ public class LandMaskExtractor {
 			JSONObject currentFeature = jsonArray.getJSONObject(i);
 			if (currentFeature.has("properties") && currentFeature.getJSONObject("properties").has("sov_a3")) {
 				obj.put("name", currentFeature.getJSONObject("properties").get("sov_a3"));				
-			} else {
-				obj.put("name", "undefined");
 			}
 			obj.put("geometry", currentFeature.getJSONObject("geometry"));
 			result.add(obj);
