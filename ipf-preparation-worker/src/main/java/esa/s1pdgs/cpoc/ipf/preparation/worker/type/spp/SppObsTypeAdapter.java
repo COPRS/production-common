@@ -50,10 +50,10 @@ public class SppObsTypeAdapter extends AbstractProductTypeAdapter implements Pro
         final CatalogEventAdapter catalogEvent = CatalogEventAdapter.of(job);
         final AuxResorbProduct auxResorb = AuxResorbProduct.of(job);
 
-        auxResorb.setStartTime(catalogEvent.startTime());
-        auxResorb.setStopTime(catalogEvent.stopTime());
-        job.setStartTime(catalogEvent.startTime());
-        job.setStopTime(catalogEvent.stopTime());
+        auxResorb.setStartTime(catalogEvent.validityStartTime());
+        auxResorb.setStopTime(catalogEvent.validityStopTime());
+        job.setStartTime(catalogEvent.validityStartTime());
+        job.setStopTime(catalogEvent.validityStopTime());
     }
 
     @Override
