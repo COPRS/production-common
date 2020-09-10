@@ -166,7 +166,7 @@ public class IpfPreparationWorkerConfiguration {
 					s3TypeAdapterSettings
 			);
 		} else if (processSettings.getLevel() == ApplicationLevel.SPP_OBS) {
-			return new SppObsTypeAdapter();
+			return new SppObsTypeAdapter(metadataClient);
 		}
 		throw new IllegalArgumentException(
 				String.format(
