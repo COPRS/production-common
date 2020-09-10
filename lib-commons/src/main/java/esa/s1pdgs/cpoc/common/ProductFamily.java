@@ -41,6 +41,11 @@ public enum ProductFamily {
     L2_ACN_ZIP, //
     L2_SLICE_ZIP,
     PLAN_AND_REPORT_ZIP,
+
+    //SPP types
+    SPP_OBS_JOB,
+    SPP_OBS,
+    SPP_OBS_REPORT,
     
     // S2QT types
     L1C,
@@ -68,8 +73,6 @@ public enum ProductFamily {
     /**
      * Get product family from value in string format
      * 
-     * @param value
-     * @return
      */
     public static ProductFamily fromValue(final String value) {
         ProductFamily ret;
