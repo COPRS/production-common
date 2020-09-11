@@ -12,6 +12,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.function.Function;
 
+import esa.s1pdgs.cpoc.ipf.preparation.worker.type.spp.SppObsTypeAdapter;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -164,6 +165,8 @@ public class IpfPreparationWorkerConfiguration {
 					settings,
 					s3TypeAdapterSettings
 			);
+		} else if (processSettings.getLevel() == ApplicationLevel.SPP_OBS) {
+			return new SppObsTypeAdapter(metadataClient);
 		}
 		throw new IllegalArgumentException(
 				String.format(
