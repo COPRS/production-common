@@ -269,7 +269,7 @@ public class JobProcessor implements MqiListener<IpfExecutionJob> {
 
 		final OutputProcessor outputProcessor = new OutputProcessor(obsClient, procuderFactory, message, outputListFile,
 				this.properties.getSizeBatchUpload(), getPrefixMonitorLog(MonitorLogUtils.LOG_OUTPUT, job),
-				this.properties.getLevel(), properties, job.isDebug());
+				this.properties.getLevel(), properties);
 		
 		
 		reporting.begin(

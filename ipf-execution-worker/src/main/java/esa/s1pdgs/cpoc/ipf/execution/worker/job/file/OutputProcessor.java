@@ -125,6 +125,8 @@ public class OutputProcessor {
 	private final ApplicationProperties properties;
 	
 	private final boolean debugMode;
+	
+	private final String uploadPrefix;
 
 	public static enum AcquisitionMode {
 		EW, IW, SM, WV
@@ -144,8 +146,7 @@ public class OutputProcessor {
 	 */
 	public OutputProcessor(final ObsClient obsClient, final OutputProcuderFactory procuderFactory,
 			final GenericMessageDto<IpfExecutionJob> inputMessage, final String listFile, final int sizeUploadBatch,
-			final String prefixMonitorLogs, final ApplicationLevel appLevel, final ApplicationProperties properties,
-			final boolean debugMode) {
+			final String prefixMonitorLogs, final ApplicationLevel appLevel, final ApplicationProperties properties) {
 		this.obsClient = obsClient;
 		this.procuderFactory = procuderFactory;
 		this.listFile = listFile;
@@ -156,7 +157,18 @@ public class OutputProcessor {
 		this.prefixMonitorLogs = prefixMonitorLogs;
 		this.appLevel = appLevel;
 		this.properties = properties;
-		this.debugMode = debugMode;
+		this.debugMode = inputMessage.getDto().isDebug();
+		
+		// FIXME: this needs to be removed from the constructor, but at the moment it'S the easiest way until refactoring
+		// story is implemented
+		if (debugMode) {
+			uploadPrefix = inputMessage.getBody().getKeyObjectStorage() + "-" + 
+					inputMessage.getBody().getRetryCounter() + "/";
+		}
+		else {
+			uploadPrefix = "";
+		}
+		
 	}
 
 	/**
@@ -255,7 +267,7 @@ public class OutputProcessor {
 									new GhostHandlingSegmentReportingOutput(false),
 									new ReportingMessage("%s (%s) is not a ghost candidate", productName, family)
 							);
-							uploadBatch.add(new FileObsUploadObject(family, productName, file));
+							uploadBatch.add(newUploadObject(family,productName,file));
 							outputToPublish.add(
 								new ObsQueueMessage(family, productName, productName, inputMessage.getBody().getProductProcessMode(),oqcFlag));
 
@@ -266,14 +278,14 @@ public class OutputProcessor {
 									new GhostHandlingSegmentReportingOutput(true),
 									new ReportingMessage("%s (%s) is a ghost candidate", productName, family)
 							);
-							uploadBatch.add(new FileObsUploadObject(ProductFamily.GHOST, productName, file));
+							uploadBatch.add(newUploadObject(ProductFamily.GHOST,productName, file));
 						}
 						productSize += size(file);
 					}
 					else {
 						LOGGER.info("Output {} is considered as belonging to the family {}", productName,
 								matchOutput.getFamily());
-						uploadBatch.add(new FileObsUploadObject(family, productName, file));
+						uploadBatch.add(newUploadObject(family, productName, file));
 						outputToPublish.add(new ObsQueueMessage(family, productName, productName,
 								inputMessage.getBody().getProductProcessMode(),oqcFlag));
 						productSize += size(file);
@@ -289,14 +301,14 @@ public class OutputProcessor {
 					// Specific case of the L0 wrapper
 					if (appLevel == ApplicationLevel.L0) {
 						LOGGER.warn("Product {} is not expected as output of AIO", productName);
-						uploadBatch.add(new FileObsUploadObject(family, productName, file));
+						uploadBatch.add(newUploadObject(family, productName, file));
 						outputToPublish.add(new ObsQueueMessage(family, productName, productName,
 								inputMessage.getBody().getProductProcessMode(),oqcFlag));
 						productSize += size(file);
 					} else {
 						LOGGER.info("Output {} (ACN, BLANK) is considered as belonging to the family {}", productName,
 								matchOutput.getFamily());
-						uploadBatch.add(new FileObsUploadObject(family, productName, file));
+						uploadBatch.add(newUploadObject(family, productName, file));
 						outputToPublish.add(new ObsQueueMessage(family, productName, productName,
 								inputMessage.getBody().getProductProcessMode(),oqcFlag));
 						productSize += size(file);
@@ -316,7 +328,7 @@ public class OutputProcessor {
 					// upload per batch
 					LOGGER.info("Output {} is considered as belonging to the family {}", productName,
 							matchOutput.getFamily());
-					uploadBatch.add(new FileObsUploadObject(family, productName, file));
+					uploadBatch.add(newUploadObject(family, productName, file));
 					outputToPublish.add(new ObsQueueMessage(family, productName, productName,
 							inputMessage.getBody().getProductProcessMode(), oqcFlag));
 					productSize += size(file);
@@ -529,13 +541,21 @@ public class OutputProcessor {
 			if (Thread.currentThread().isInterrupted()) {
 				throw new InternalErrorException("The current thread as been interrupted");
 			}
-			this.obsClient.upload(sublist, reportingFactory);
+			obsClient.upload(sublist, reportingFactory);
 		}
 		// ok, this seems to be some kind of 'poison pill' pattern here to indicate that upload is done.
 		// as nothing else is done. If there is a remainder in 'outputToPublish', I guess it will be published
 		// but it will not be uploaded. But to be safe, we add it also here...
 		res.addAll(publishAccordingUploadFiles(nbPool - 1, NOT_KEY_OBS, outputToPublish, uuid));
 		return res;
+	}
+	
+	private final FileObsUploadObject newUploadObject(final ProductFamily family, final String productName, final File file) {
+		return new FileObsUploadObject(
+				family, 
+				uploadPrefix + productName, 
+				file
+		);
 	}
 	
 	/**
@@ -643,6 +663,7 @@ public class OutputProcessor {
 			// S1PRO-1856: for debug, no publishing and upload will be into OBS DEBUG bucket
 			if (debugMode) {
 				for (final FileObsUploadObject obj : uploadBatch) {
+					// TODO add prefix
 					obj.setFamily(ProductFamily.DEBUG);
 				}
 				outputToPublish = new ArrayList<>();

@@ -177,7 +177,7 @@ public class OutputProcessorTest {
 
         processor =
                 new OutputProcessor(obsClient, procuderFactory, inputMessage,
-                        PATH_DIRECTORY_TEST + "/outputs.list", 2, "MONITOR", ApplicationLevel.L0, properties,false);
+                        PATH_DIRECTORY_TEST + "/outputs.list", 2, "MONITOR", ApplicationLevel.L0, properties);
 
         // Mocks
         doNothing().when(obsClient).upload(Mockito.any(), Mockito.any());
@@ -393,7 +393,7 @@ public class OutputProcessorTest {
     public void testSortOutputsForLOSegmentFast() throws AbstractCodedException {
         processor =
                 new OutputProcessor(obsClient, procuderFactory, inputMessage,
-                        PATH_DIRECTORY_TEST + "outputs.list", 2, "MONITOR", ApplicationLevel.L0_SEGMENT, properties,false);
+                        PATH_DIRECTORY_TEST + "outputs.list", 2, "MONITOR", ApplicationLevel.L0_SEGMENT, properties);
         
         final List<FileObsUploadObject> uploadBatch = new ArrayList<>();
         final List<ObsQueueMessage> outputToPublish = new ArrayList<>();
@@ -476,7 +476,7 @@ public class OutputProcessorTest {
         inputMessage.getBody().setProductProcessMode("NRT");
         processor =
                 new OutputProcessor(obsClient, procuderFactory, inputMessage,
-                        PATH_DIRECTORY_TEST + "outputs.list", 2, "MONITOR", ApplicationLevel.L1, properties,false);
+                        PATH_DIRECTORY_TEST + "outputs.list", 2, "MONITOR", ApplicationLevel.L1, properties);
         
         final List<FileObsUploadObject> uploadBatch = new ArrayList<>();
         final List<ObsQueueMessage> outputToPublish = new ArrayList<>();
@@ -544,7 +544,7 @@ public class OutputProcessorTest {
     public void testSortOutputsForL1RealOutputs() throws AbstractCodedException {
         processor =
                 new OutputProcessor(obsClient, procuderFactory, inputMessage,
-                        PATH_DIRECTORY_TEST + "outputs.list", 2, "MONITOR", ApplicationLevel.L1, properties,false);
+                        PATH_DIRECTORY_TEST + "outputs.list", 2, "MONITOR", ApplicationLevel.L1, properties);
         
         final List<FileObsUploadObject> uploadBatch = new ArrayList<>();
         final List<ObsQueueMessage> outputToPublish = new ArrayList<>();

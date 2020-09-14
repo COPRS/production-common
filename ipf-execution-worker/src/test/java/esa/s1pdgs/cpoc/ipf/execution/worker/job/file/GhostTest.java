@@ -36,7 +36,7 @@ public class GhostTest {
 		properties.setThresholdWv(30);
 
 		processor = new OutputProcessor(obsClient, procuderFactory, inputMessage, "outputs.list", 2, "MONITOR",
-				ApplicationLevel.L0, properties,false);
+				ApplicationLevel.L0, properties);
 	}
 
 	@Test
