@@ -45,7 +45,7 @@ public class AuxMetadataTest {
         ObjectReader reader = new ObjectMapper().reader().forType(AuxMetadata.class);
         AuxMetadata parsed = reader.readValue(string.toString());
 
-        writer.writeValue(System.out, parsed);
+        System.out.println("parsed: " + parsed);
 
         assertThat(parsed, is(equalTo(metadata)));
     }

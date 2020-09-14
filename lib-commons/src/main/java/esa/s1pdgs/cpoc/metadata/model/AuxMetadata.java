@@ -45,6 +45,21 @@ public class AuxMetadata extends AbstractMetadata {
     }
 
     @Override
+    public String toString() {
+        return "AuxMetadata [" +
+                "additionalProperties=" + additionalProperties +
+                ", productName='" + productName + '\'' +
+                ", productType='" + productType + '\'' +
+                ", keyObjectStorage='" + keyObjectStorage + '\'' +
+                ", validityStart='" + validityStart + '\'' +
+                ", validityStop='" + validityStop + '\'' +
+                ", missionId='" + missionId + '\'' +
+                ", satelliteId='" + satelliteId + '\'' +
+                ", stationCode='" + stationCode + '\'' +
+                ']';
+    }
+
+    @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
