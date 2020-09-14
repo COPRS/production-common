@@ -1,8 +1,14 @@
 package esa.s1pdgs.cpoc.metadata.model;
 
 import java.util.Map;
+import java.util.Objects;
 import java.util.function.Consumer;
 
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+
+@JsonSerialize(using = AuxMetadataSerializer.class)
+@JsonDeserialize(using = AuxMetadataDeserializer.class)
 public class AuxMetadata extends AbstractMetadata {
 
     private final Map<String, String> additionalProperties;
@@ -28,9 +34,27 @@ public class AuxMetadata extends AbstractMetadata {
         return additionalProperties.get(additionalProperty);
     }
 
+    public Map<String, String> getAdditionalProperties() {
+        return additionalProperties;
+    }
+
     public void ifPresent(String additionalProperty, Consumer<String> consumer) {
         if(has(additionalProperty)) {
             consumer.accept(get(additionalProperty));
         }
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        if (!super.equals(o)) return false;
+        AuxMetadata that = (AuxMetadata) o;
+        return Objects.equals(additionalProperties, that.additionalProperties);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(super.hashCode(), additionalProperties);
     }
 }

@@ -102,6 +102,7 @@ public class SearchMetadataController {
 	@RequestMapping(method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE, path = "/{productType}/searchAuxiliary")
 	public ResponseEntity<AuxMetadata> searchAuxiliary(@PathVariable(name = "productType") final String productType,
 													   @RequestParam(name = "productName") final String productName) {
+		LOGGER.info("Performing auxiliary search for type '{}', name '{}'", productType, productName);
 
 		try {
 			final AuxMetadata auxMetadata = esServices.auxiliaryQuery(productType, productName);
