@@ -43,12 +43,8 @@ import esa.s1pdgs.cpoc.obs_sdk.ObsClient;
 import esa.s1pdgs.cpoc.obs_sdk.ObsEmptyFileException;
 import esa.s1pdgs.cpoc.report.Reporting;
 import esa.s1pdgs.cpoc.report.ReportingFactory;
-import esa.s1pdgs.cpoc.report.ReportingFilenameEntries;
-import esa.s1pdgs.cpoc.report.ReportingFilenameEntry;
 import esa.s1pdgs.cpoc.report.ReportingMessage;
-import esa.s1pdgs.cpoc.report.ReportingOutput;
 import esa.s1pdgs.cpoc.report.ReportingUtils;
-import esa.s1pdgs.cpoc.report.message.output.FilenameReportingOutput;
 
 /**
  * Process outputs according their family: - publication in message queue system
@@ -669,15 +665,6 @@ public class OutputProcessor {
 			throw e;
 		}
 	}
-
-	private final ReportingOutput toReportingOutput(final List<ObsQueueMessage> outputToPublish) {		
-		final List<ReportingFilenameEntry> reportingEntries = outputToPublish.stream()
-				.map(m -> new ReportingFilenameEntry(m.getFamily(), m.getProductName()))
-				.collect(Collectors.toList());
-		
-		return new FilenameReportingOutput(new ReportingFilenameEntries(reportingEntries));
-	}
-	
 	
 	private long size(final File file) throws InternalErrorException {
 		try {
