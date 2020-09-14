@@ -70,6 +70,8 @@ import esa.s1pdgs.cpoc.metadata.model.SearchMetadata;
 @Service
 public class EsServices {
 
+	private static final String LANDMASK_FOOTPRINT_INDEX_NAME = "landmask_footprint";
+	private static final String OVERPASSMASK_FOOTPRINT_INDEX_NAME = "overpassmask_footprint";
 	private static final String REQUIRED_INSTRUMENT_ID_PATTERN = "(aux_pp1|aux_pp2|aux_cal|aux_ins)";
 	static final String REQUIRED_SATELLITE_ID_PATTERN = "(aux_.*)";
 
@@ -207,7 +209,7 @@ public class EsServices {
 
 	public void createLandmaskGeoMetadata(final JSONObject product, final String id) throws Exception {
 		try {
-			final IndexRequest request = new IndexRequest("landmask").id(id).source(product.toString(),
+			final IndexRequest request = new IndexRequest(LANDMASK_FOOTPRINT_INDEX_NAME).id(id).source(product.toString(),
 					XContentType.JSON);
 
 			final IndexResponse response = elasticsearchDAO.index(request);
@@ -223,7 +225,7 @@ public class EsServices {
 	
 	public void createOverpassMaskGeoMetadata(final JSONObject product, final String id) throws Exception {
 		try {
-			final IndexRequest request = new IndexRequest("overpassmask").id(id).source(product.toString(),
+			final IndexRequest request = new IndexRequest(OVERPASSMASK_FOOTPRINT_INDEX_NAME).id(id).source(product.toString(),
 					XContentType.JSON);
 
 			final IndexResponse response = elasticsearchDAO.index(request);
@@ -1614,7 +1616,7 @@ public class EsServices {
 			sourceBuilder.query(queryBuilder);
 			sourceBuilder.size(SIZE_LIMIT);
 
-			final SearchRequest request = new SearchRequest("landmask");
+			final SearchRequest request = new SearchRequest(LANDMASK_FOOTPRINT_INDEX_NAME);
 			request.source(sourceBuilder);
 
 			final SearchResponse searchResponse = elasticsearchDAO.search(request);
