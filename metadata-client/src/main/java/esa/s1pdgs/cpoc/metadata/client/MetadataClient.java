@@ -23,6 +23,7 @@ import esa.s1pdgs.cpoc.common.ProductFamily;
 import esa.s1pdgs.cpoc.common.errors.processing.MetadataQueryException;
 import esa.s1pdgs.cpoc.common.utils.DateUtils;
 import esa.s1pdgs.cpoc.common.utils.Retries;
+import esa.s1pdgs.cpoc.metadata.model.AuxMetadata;
 import esa.s1pdgs.cpoc.metadata.model.EdrsSessionMetadata;
 import esa.s1pdgs.cpoc.metadata.model.L0AcnMetadata;
 import esa.s1pdgs.cpoc.metadata.model.L0SliceMetadata;
@@ -51,10 +52,6 @@ public class MetadataClient {
 	 * If productType = blank, the metadata catalog will extract the product type
 	 * from the product name
 	 * 
-	 * @param productType
-	 * @param productName
-	 * @return
-	 * @throws MetadataQueryException
 	 */
 	public List<EdrsSessionMetadata> getEdrsSessionFor(final String sessionId) throws MetadataQueryException {
 
@@ -76,9 +73,6 @@ public class MetadataClient {
 
 	/**
 	 * 
-	 * @param productName
-	 * @return
-	 * @throws MetadataQueryException
 	 */
 	public L0SliceMetadata getL0Slice(final String productName) throws MetadataQueryException {
 
@@ -98,10 +92,6 @@ public class MetadataClient {
 	}
 
 	/**
-	 * @param family
-	 * @param productName
-	 * @return
-	 * @throws MetadataQueryException
 	 */
 	public List<LevelSegmentMetadata> getLevelSegments(final String dataTakeId) throws MetadataQueryException {
 		final String uri = this.metadataBaseUri + MetadataCatalogRestPath.LEVEL_SEGMENT.path() + "/" + dataTakeId;
@@ -120,10 +110,6 @@ public class MetadataClient {
 	}
 
 	/**
-	 * @param productName
-	 * @param processMode
-	 * @return
-	 * @throws MetadataQueryException
 	 */
 	public L0AcnMetadata getFirstACN(final String productName, final String processMode) throws MetadataQueryException {
 
@@ -178,8 +164,8 @@ public class MetadataClient {
 		return extractResult(productType, productFamily, response);		
 	}
 
-	private final List<S3Metadata> extractResult(final String productType, final ProductFamily productFamily,
-			final ResponseEntity<List<S3Metadata>> response) {
+	private List<S3Metadata> extractResult(final String productType, final ProductFamily productFamily,
+										   final ResponseEntity<List<S3Metadata>> response) {
 		if (response == null) {
 			LOGGER.debug("MarginTT metadata query for family '{}' and product type '{}' returned null",
 					productFamily, productType);
@@ -256,14 +242,6 @@ public class MetadataClient {
 	}
 
 	/**
-	 * @param query
-	 * @param t0
-	 * @param t1
-	 * @param satelliteId
-	 * @param instrumentConfigurationId
-	 * @param processMode
-	 * @return
-	 * @throws MetadataQueryException
 	 */
 	public List<SearchMetadata> search(final SearchMetadataQuery query, final String t0, final String t1,
 			final String satelliteId, final int instrumentConfigurationId, final String processMode,
@@ -301,11 +279,6 @@ public class MetadataClient {
 	}
 
 	/**
-	 * @param family
-	 * @param intervalStart
-	 * @param intervalStop
-	 * @return
-	 * @throws MetadataQueryException
 	 */
 	public List<SearchMetadata> query(final ProductFamily family, final LocalDateTime intervalStart,
 			final LocalDateTime intervalStop) throws MetadataQueryException {
@@ -332,15 +305,33 @@ public class MetadataClient {
 		}
 	}
 
+	public AuxMetadata queryAuxiliary(final String productType, final String productName) throws MetadataQueryException {
+
+		final String uri = this.metadataBaseUri + MetadataCatalogRestPath.METADATA.path() + "/" + productType
+				+ "/searchAuxiliary";
+
+		final UriComponentsBuilder builder = UriComponentsBuilder.fromUriString(uri).queryParam("productName",
+				productName);
+
+		final ResponseEntity<AuxMetadata> response = query(builder.build().toUri(),
+				new ParameterizedTypeReference<AuxMetadata>() {
+				});
+
+		if (response == null || response.getBody() == null) {
+			LOGGER.error("Metadata query for type '{}' and product name {} returned no result", productType, productName);
+			throw new MetadataQueryException(String.format(
+					"Metadata query for type '%s' and product name %s returned no result", productType, productName));
+		} else {
+			LOGGER.info("Metadata query for type '{}' and product name {} returned 1 result", productType, productName);
+			return response.getBody();
+		}
+	}
+
 	/**
 	 * Searches for the product with given productName and in the index =
 	 * productFamily. The returned metadata contains only validity start and stop
 	 * time.
 	 * 
-	 * @param family
-	 * @param productName
-	 * @return
-	 * @throws MetadataQueryException
 	 */
 	public SearchMetadata queryByFamilyAndProductName(final String family, final String productName)
 			throws MetadataQueryException {
@@ -366,10 +357,6 @@ public class MetadataClient {
 	}
 
 	/**
-	 * @param family
-	 * @param productName
-	 * @return
-	 * @throws MetadataQueryException
 	 */
 	public int getSeaCoverage(final ProductFamily family, final String productName) throws MetadataQueryException {
 

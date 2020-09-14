@@ -1,5 +1,7 @@
 package esa.s1pdgs.cpoc.mdc.worker.service;
 
+import static java.util.stream.Collectors.toMap;
+
 import java.io.IOException;
 import java.math.BigInteger;
 import java.time.Duration;
@@ -54,6 +56,7 @@ import esa.s1pdgs.cpoc.common.utils.DateUtils;
 import esa.s1pdgs.cpoc.common.utils.LogUtils;
 import esa.s1pdgs.cpoc.common.utils.Retries;
 import esa.s1pdgs.cpoc.mdc.worker.es.ElasticsearchDAO;
+import esa.s1pdgs.cpoc.metadata.model.AuxMetadata;
 import esa.s1pdgs.cpoc.metadata.model.EdrsSessionMetadata;
 import esa.s1pdgs.cpoc.metadata.model.L0AcnMetadata;
 import esa.s1pdgs.cpoc.metadata.model.L0SliceMetadata;
@@ -1281,6 +1284,37 @@ public class EsServices {
 		return null;
 	}
 
+	public AuxMetadata auxiliaryQuery(final String searchProductType, final String searchProductName) throws IOException, MetadataNotPresentException, MetadataMalformedException {
+
+		final Map<String, Object> source = getRequest(searchProductType, searchProductName);
+
+		if (source.isEmpty()) {
+			throw new MetadataNotPresentException(searchProductName);
+		}
+
+		final String productName = getProperty(source, "productName", orThrowMalformed("productName"));
+		final String productType = getProperty(source, "productType", orThrowMalformed("productType"));
+		final String keyObjectStorage = getProperty(source, "url", orThrowMalformed("url"));
+		final String validityStart = getPropertyAsDate(source, "validityStartTime", orThrowMalformed("validityStartTime"));
+		final String validityStop = getPropertyAsDate(source, "validityStopTime", orThrowMalformed("validityStopTime"));
+		final String missionId = getProperty(source, "missionId", orThrowMalformed("missionId"));
+		final String satelliteId = getProperty(source, "satelliteId", orThrowMalformed("satelliteId"));
+
+		Map<String, String> additionalProperties = source.entrySet().stream().collect(toMap(Map.Entry::getKey, e -> e.getValue().toString()));
+
+		return new AuxMetadata(
+				productName,
+				productType,
+				keyObjectStorage,
+				validityStart,
+				validityStop,
+				missionId,
+				satelliteId,
+				"UNDEFINED",
+				additionalProperties
+		);
+	}
+
 	/**
 	 * Searches for the product with given productName and in the index =
 	 * productFamily. Returns only validity start and stop time.
@@ -1298,26 +1332,8 @@ public class EsServices {
 
 		final SearchMetadata searchMetadata = new SearchMetadata();
 
-		if (source.containsKey("startTime")) {
-			try {
-				searchMetadata.setValidityStart(
-						DateUtils.convertToMetadataDateTimeFormat(source.get("startTime").toString()));
-			} catch (final DateTimeParseException e) {
-				throw new MetadataMalformedException("startTime");
-			}
-		} else {
-			throw new MetadataMalformedException("startTime");
-		}
-		if (source.containsKey("stopTime")) {
-			try {
-				searchMetadata
-						.setValidityStop(DateUtils.convertToMetadataDateTimeFormat(source.get("stopTime").toString()));
-			} catch (final DateTimeParseException e) {
-				throw new MetadataMalformedException("stopTime");
-			}
-		} else {
-			throw new MetadataMalformedException("stopTime");
-		}
+		searchMetadata.setValidityStart(getPropertyAsDate(source, "startTime", orThrowMalformed("startTime")));
+		searchMetadata.setValidityStop(getPropertyAsDate(source, "stopTime", orThrowMalformed("stopTime")));
 
 		Map<String, Object> coordinates = null;
 		if (source.containsKey("sliceCoordinates")) {
@@ -1346,6 +1362,33 @@ public class EsServices {
 		searchMetadata.setFootprint(footprint);
 
 		return searchMetadata;
+	}
+
+	private static DefaultProvider orThrowMalformed(String key) {
+		return () -> {
+			throw new MetadataMalformedException((key));
+		};
+	}
+
+	@FunctionalInterface
+	private interface DefaultProvider {
+		String get() throws MetadataMalformedException;
+	}
+
+	private String getProperty(Map<String, Object> source, String key, DefaultProvider defaultProvider) throws MetadataMalformedException {
+		if (!source.containsKey(key)) {
+			return defaultProvider.get();
+		}
+
+		return source.get(key).toString();
+	}
+
+	private String getPropertyAsDate(Map<String, Object> source, String key, DefaultProvider defaultProvider) throws MetadataMalformedException {
+		try {
+			return DateUtils.convertToMetadataDateTimeFormat(getProperty(source, key, defaultProvider));
+		} catch (DateTimeParseException e) {
+			throw new MetadataMalformedException(key);
+		}
 	}
 
 	public List<LevelSegmentMetadata> getLevelSegmentMetadataFor(final String dataTakeId) throws Exception {

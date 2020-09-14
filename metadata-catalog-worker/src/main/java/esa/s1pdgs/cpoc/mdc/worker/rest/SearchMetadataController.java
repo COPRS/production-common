@@ -22,6 +22,7 @@ import esa.s1pdgs.cpoc.common.errors.AbstractCodedException;
 import esa.s1pdgs.cpoc.common.errors.processing.MetadataNotPresentException;
 import esa.s1pdgs.cpoc.common.utils.LogUtils;
 import esa.s1pdgs.cpoc.mdc.worker.service.EsServices;
+import esa.s1pdgs.cpoc.metadata.model.AuxMetadata;
 import esa.s1pdgs.cpoc.metadata.model.SearchMetadata;
 
 @RestController
@@ -97,14 +98,29 @@ public class SearchMetadataController {
 
 		return new ResponseEntity<>(response, HttpStatus.OK);
 	}
+
+	@RequestMapping(method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE, path = "/{productType}/searchAuxiliary")
+	public ResponseEntity<AuxMetadata> searchAuxiliary(@PathVariable(name = "productType") final String productType,
+													   @RequestParam(name = "productName") final String productName) {
+
+		try {
+			final AuxMetadata auxMetadata = esServices.auxiliaryQuery(productType, productName);
+			return new ResponseEntity<>(auxMetadata, HttpStatus.OK);
+
+		} catch (MetadataNotPresentException e) {
+			LOGGER.warn("{} '{}' of type {} not available [code {}] {}",
+					this.getClass().getSimpleName(), productName, productType, e.getCode().getCode(), e.getLogMessage());
+			return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+		} catch (Exception e) {
+			LOGGER.error("Query error while doing product name search: {}", LogUtils.toString(e));
+			return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+		}
+	}
 	
 	/**
 	 * Searches for the product with given productName and in the index =
 	 * productFamily. Returns only validity start and stop time.
 	 * 
-	 * @param productFamily
-	 * @param productName
-	 * @return
 	 */
 	@RequestMapping(method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE, path = "/{productFamily}/searchProductName")
 	public ResponseEntity<SearchMetadata> searchProductName(
