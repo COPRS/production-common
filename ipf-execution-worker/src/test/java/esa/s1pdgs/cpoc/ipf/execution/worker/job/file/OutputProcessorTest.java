@@ -27,8 +27,7 @@ import org.junit.Test;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
-
-import com.amazonaws.util.IOUtils;
+import org.springframework.util.StreamUtils;
 
 import esa.s1pdgs.cpoc.common.ApplicationLevel;
 import esa.s1pdgs.cpoc.common.ProductFamily;
@@ -178,7 +177,7 @@ public class OutputProcessorTest {
 
         processor =
                 new OutputProcessor(obsClient, procuderFactory, inputMessage,
-                        PATH_DIRECTORY_TEST + "/outputs.list", 2, "MONITOR", ApplicationLevel.L0, properties);
+                        PATH_DIRECTORY_TEST + "/outputs.list", 2, "MONITOR", ApplicationLevel.L0, properties,false);
 
         // Mocks
         doNothing().when(obsClient).upload(Mockito.any(), Mockito.any());
@@ -189,7 +188,7 @@ public class OutputProcessorTest {
 
         try (final InputStream in = Streams.getInputStream("outputs.list");
         	 final OutputStream out = new BufferedOutputStream(new FileOutputStream(new File(tmpDir, "outputs.list")))) {
-        	IOUtils.copy(in, out);
+        	StreamUtils.copy(in, out);
         }        
     }
     
@@ -394,7 +393,7 @@ public class OutputProcessorTest {
     public void testSortOutputsForLOSegmentFast() throws AbstractCodedException {
         processor =
                 new OutputProcessor(obsClient, procuderFactory, inputMessage,
-                        PATH_DIRECTORY_TEST + "outputs.list", 2, "MONITOR", ApplicationLevel.L0_SEGMENT, properties);
+                        PATH_DIRECTORY_TEST + "outputs.list", 2, "MONITOR", ApplicationLevel.L0_SEGMENT, properties,false);
         
         final List<FileObsUploadObject> uploadBatch = new ArrayList<>();
         final List<ObsQueueMessage> outputToPublish = new ArrayList<>();
@@ -477,7 +476,7 @@ public class OutputProcessorTest {
         inputMessage.getBody().setProductProcessMode("NRT");
         processor =
                 new OutputProcessor(obsClient, procuderFactory, inputMessage,
-                        PATH_DIRECTORY_TEST + "outputs.list", 2, "MONITOR", ApplicationLevel.L1, properties);
+                        PATH_DIRECTORY_TEST + "outputs.list", 2, "MONITOR", ApplicationLevel.L1, properties,false);
         
         final List<FileObsUploadObject> uploadBatch = new ArrayList<>();
         final List<ObsQueueMessage> outputToPublish = new ArrayList<>();
@@ -545,7 +544,7 @@ public class OutputProcessorTest {
     public void testSortOutputsForL1RealOutputs() throws AbstractCodedException {
         processor =
                 new OutputProcessor(obsClient, procuderFactory, inputMessage,
-                        PATH_DIRECTORY_TEST + "outputs.list", 2, "MONITOR", ApplicationLevel.L1, properties);
+                        PATH_DIRECTORY_TEST + "outputs.list", 2, "MONITOR", ApplicationLevel.L1, properties,false);
         
         final List<FileObsUploadObject> uploadBatch = new ArrayList<>();
         final List<ObsQueueMessage> outputToPublish = new ArrayList<>();

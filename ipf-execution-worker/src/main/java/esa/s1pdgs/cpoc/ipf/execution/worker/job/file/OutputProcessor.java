@@ -127,6 +127,8 @@ public class OutputProcessor {
 	 * Application properties
 	 */
 	private final ApplicationProperties properties;
+	
+	private final boolean debugMode;
 
 	public static enum AcquisitionMode {
 		EW, IW, SM, WV
@@ -146,7 +148,8 @@ public class OutputProcessor {
 	 */
 	public OutputProcessor(final ObsClient obsClient, final OutputProcuderFactory procuderFactory,
 			final GenericMessageDto<IpfExecutionJob> inputMessage, final String listFile, final int sizeUploadBatch,
-			final String prefixMonitorLogs, final ApplicationLevel appLevel, final ApplicationProperties properties) {
+			final String prefixMonitorLogs, final ApplicationLevel appLevel, final ApplicationProperties properties,
+			final boolean debugMode) {
 		this.obsClient = obsClient;
 		this.procuderFactory = procuderFactory;
 		this.listFile = listFile;
@@ -157,6 +160,7 @@ public class OutputProcessor {
 		this.prefixMonitorLogs = prefixMonitorLogs;
 		this.appLevel = appLevel;
 		this.properties = properties;
+		this.debugMode = debugMode;
 	}
 
 	/**
@@ -222,7 +226,8 @@ public class OutputProcessor {
 				final OQCFlag oqcFlag = executor.executeOQC(file, family, matchOutput, new OQCDefaultTaskFactory(), reportingFactory);
 				LOGGER.info("Result of OQC validation was: {}", oqcFlag);
 
-				switch (family) {
+				switch (family) {		
+					
 				case L0_REPORT:
 				case L1_REPORT:
 				case L2_REPORT:
@@ -634,11 +639,20 @@ public class OutputProcessor {
 
 		// Sort outputs
 		final List<FileObsUploadObject> uploadBatch = new ArrayList<>();
-		final List<ObsQueueMessage> outputToPublish = new ArrayList<>();
-		final List<FileQueueMessage> reportToPublish = new ArrayList<>();
+		List<ObsQueueMessage> outputToPublish = new ArrayList<>();
+		List<FileQueueMessage> reportToPublish = new ArrayList<>();
 			
 		sortOutputs(lines, uploadBatch, outputToPublish, reportToPublish, reportingFactory);
 		try {
+			// S1PRO-1856: for debug, no publishing and upload will be into OBS DEBUG bucket
+			if (debugMode) {
+				for (final FileObsUploadObject obj : uploadBatch) {
+					obj.setFamily(ProductFamily.DEBUG);
+				}
+				outputToPublish = new ArrayList<>();
+				reportToPublish = new ArrayList<>();
+			}		
+			
 			// Upload per batch the output
 			// S1PRO-1494: WARNING--- list will be emptied by this method. For reporting, make a copy beforehand
 			//final List<ObsQueueMessage> outs = new ArrayList<>(outputToPublish);			

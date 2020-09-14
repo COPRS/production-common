@@ -4,19 +4,15 @@ import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.nio.file.Files;
-
-import org.apache.commons.io.IOUtils;
 
 public class SystemUtils {
 
     public static String getCmdMkdir() {
-        boolean isWindows = System.getProperty("os.name").toLowerCase()
+        final boolean isWindows = System.getProperty("os.name").toLowerCase()
                 .startsWith("windows");
         String command = "mkdir";
         if (isWindows) {
@@ -26,7 +22,7 @@ public class SystemUtils {
     }
 
     public static String getCmdRmdir() {
-        boolean isWindows = System.getProperty("os.name").toLowerCase()
+        final boolean isWindows = System.getProperty("os.name").toLowerCase()
                 .startsWith("windows");
         String command = "rmdir";
         if (isWindows) {
@@ -36,7 +32,7 @@ public class SystemUtils {
     }
 
     public static String getCmdLs() {
-        boolean isWindows = System.getProperty("os.name").toLowerCase()
+        final boolean isWindows = System.getProperty("os.name").toLowerCase()
                 .startsWith("windows");
         String command = "ls";
         if (isWindows) {
@@ -46,7 +42,7 @@ public class SystemUtils {
     }
 
     public static String getCmdFalse() {
-        boolean isWindows = System.getProperty("os.name").toLowerCase()
+        final boolean isWindows = System.getProperty("os.name").toLowerCase()
                 .startsWith("windows");
         String command = "false";
         if (isWindows) {
@@ -56,7 +52,7 @@ public class SystemUtils {
     }
 
     public static String getCmdTrue() {
-        boolean isWindows = System.getProperty("os.name").toLowerCase()
+        final boolean isWindows = System.getProperty("os.name").toLowerCase()
                 .startsWith("windows");
         String command = "true";
         if (isWindows) {
@@ -66,7 +62,7 @@ public class SystemUtils {
     }
 
     public static String getCmdSleep() {
-        boolean isWindows = System.getProperty("os.name").toLowerCase()
+        final boolean isWindows = System.getProperty("os.name").toLowerCase()
                 .startsWith("windows");
         String command = "sleep";
         if (isWindows) {
