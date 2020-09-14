@@ -28,6 +28,7 @@ public enum ProductCategory {
     LEVEL_PRODUCTS(ProductionEvent.class), 
     LEVEL_REPORTS(LevelReportDto.class), 
     LEVEL_SEGMENTS(ProductionEvent.class),
+    DEBUG_PRODUCTS(ProductionEvent.class),
     COMPRESSION_JOBS(CompressionJob.class),
     COMPRESSED_PRODUCTS(CompressionEvent.class),
     INGESTION(IngestionJob.class),
@@ -90,7 +91,9 @@ public enum ProductCategory {
 	            return ProductCategory.LEVEL_SEGMENTS;
 	        case L1C:
 	        case L2A:
-	        	return ProductCategory.LEVEL_INPUT;	            
+	        	return ProductCategory.LEVEL_INPUT;
+	        case DEBUG:
+	        	return ProductCategory.DEBUG_PRODUCTS;
 			case AUXILIARY_FILE_ZIP:
 			case L0_ACN_ZIP:
 			case L0_BLANK_ZIP:
