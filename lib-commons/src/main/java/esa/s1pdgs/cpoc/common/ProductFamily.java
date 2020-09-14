@@ -30,6 +30,7 @@ public enum ProductFamily {
     L2_SLICE, //
     L2_JOB, //
     L2_REPORT, //
+    DEBUG, // for debug bucket in obs
     // ZIP Product families
     AUXILIARY_FILE_ZIP, //
     L0_ACN_ZIP, //
@@ -81,7 +82,7 @@ public enum ProductFamily {
         } else {
             try {
                 ret = ProductFamily.valueOf(value);
-            } catch (IllegalArgumentException ex) {
+            } catch (final IllegalArgumentException ex) {
             	ex.printStackTrace();
                 ret = ProductFamily.BLANK;
             }

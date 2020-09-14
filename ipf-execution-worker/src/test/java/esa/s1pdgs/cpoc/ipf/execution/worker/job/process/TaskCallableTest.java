@@ -13,10 +13,10 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.function.Consumer;
 
-import org.apache.commons.io.IOUtils;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
+import org.springframework.util.StreamUtils;
 
 import esa.s1pdgs.cpoc.ipf.execution.worker.test.SystemUtils;
 import esa.s1pdgs.cpoc.report.Reporting;
@@ -40,7 +40,7 @@ public class TaskCallableTest {
     	try (final InputStream in = SystemUtils.getInputStream("ipf.sh");
     		 final OutputStream out = SystemUtils.newFileOutputStream(ipf))
     	{
-        	IOUtils.copy(in,out);
+        	StreamUtils.copy(in,out);
     	}
     	ipf.setExecutable(true);
 	}
