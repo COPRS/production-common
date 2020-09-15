@@ -628,6 +628,15 @@ public class ExtractMetadata {
 					throw new MetadataMalformedException("creationTime");
 				}
 			}
+			
+			if (metadataJSONObject.has("selectedOrbitFirstAzimuthTimeUtc")) {
+				try {
+					metadataJSONObject.put("selectedOrbitFirstAzimuthTimeUtc",
+							DateUtils.convertToMetadataDateTimeFormat(metadataJSONObject.getString("selectedOrbitFirstAzimuthTimeUtc")));
+				} catch (final DateTimeParseException e) {
+					throw new MetadataMalformedException("selectedOrbitFirstAzimuthTimeUtc");
+				}
+			}
 
 			metadataJSONObject.put("productName", descriptor.getProductName());
 			metadataJSONObject.put("productClass", descriptor.getProductClass());

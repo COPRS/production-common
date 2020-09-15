@@ -1,8 +1,11 @@
 package esa.s1pdgs.cpoc.ipf.preparation.worker.type.spp;
 
+import java.time.format.DateTimeFormatter;
+
 import org.springframework.util.Assert;
 
 import esa.s1pdgs.cpoc.appcatalog.AppDataJob;
+import esa.s1pdgs.cpoc.appcatalog.AppDataJobProduct;
 import esa.s1pdgs.cpoc.common.errors.processing.IpfPrepWorkerInputsMissingException;
 import esa.s1pdgs.cpoc.common.errors.processing.MetadataQueryException;
 import esa.s1pdgs.cpoc.common.utils.DateUtils;
@@ -13,12 +16,11 @@ import esa.s1pdgs.cpoc.metadata.client.MetadataClient;
 import esa.s1pdgs.cpoc.metadata.model.AuxMetadata;
 import esa.s1pdgs.cpoc.mqi.model.queue.IpfExecutionJob;
 import esa.s1pdgs.cpoc.mqi.model.queue.util.CatalogEventAdapter;
-import esa.s1pdgs.cpoc.xml.model.joborder.AbstractJobOrderConf;
 import esa.s1pdgs.cpoc.xml.model.joborder.JobOrder;
-import esa.s1pdgs.cpoc.xml.model.joborder.JobOrderProcParam;
 
 public class SppObsTypeAdapter extends AbstractProductTypeAdapter implements ProductTypeAdapter {
 
+    private static final DateTimeFormatter JO_TIME_FORMATTER = DateTimeFormatter.ofPattern("yyyyMMdd'T'HHmmss.SSSSSS");
     private final MetadataClient metadataClient;
 
     public SppObsTypeAdapter(MetadataClient metadataClient) {
@@ -43,7 +45,7 @@ public class SppObsTypeAdapter extends AbstractProductTypeAdapter implements Pro
             searchResult.ifPresent(
                     "selectedOrbitFirstAzimuthTimeUtc",
                     time -> auxResorb.setSelectedOrbitFirstAzimuthTimeUtc(
-                            DateUtils.convertToMetadataDateTimeFormat(time)
+                            DateUtils.convertToAnotherFormat(time, AppDataJobProduct.TIME_FORMATTER, JO_TIME_FORMATTER)
                     ));
 
         } catch (MetadataQueryException e) {
@@ -76,17 +78,7 @@ public class SppObsTypeAdapter extends AbstractProductTypeAdapter implements Pro
     public void customJobOrder(AppDataJob job, JobOrder jobOrder) {
         AuxResorbProduct auxResorb = AuxResorbProduct.of(job);
 
-        AbstractJobOrderConf jobOrderConf = jobOrder.getConf();
-
-        if (!hasProcParam(jobOrderConf, "selectedOrbitFirstAzimuthTimeUtc")) {
-            jobOrderConf.addProcParam(
-                    new JobOrderProcParam("selectedOrbitFirstAzimuthTimeUtc", auxResorb.getSelectedOrbitFirstAzimuthTimeUtc()));
-        }
-    }
-
-    private boolean hasProcParam(final AbstractJobOrderConf jobOrderConf, final String name) {
-        return jobOrderConf.getProcParams()
-                .stream().anyMatch(param -> param.getName().equals(name));
+        updateProcParam(jobOrder, "selectedOrbitFirstAzimuthTime", auxResorb.getSelectedOrbitFirstAzimuthTimeUtc());
     }
 
     @Override
