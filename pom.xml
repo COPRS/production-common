@@ -317,6 +317,7 @@
 		<module>ipf-execution-worker</module>
 		<module>request-repository</module>
 		<module>queue-watcher</module>
+		<module>on-demand-interface-provider</module>
 		<module>metadata-catalog-trigger</module>
 		<module>metadata-catalog-worker</module>
 		<module>metadata-client</module>
