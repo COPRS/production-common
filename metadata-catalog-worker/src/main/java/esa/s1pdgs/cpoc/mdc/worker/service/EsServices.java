@@ -73,8 +73,8 @@ import esa.s1pdgs.cpoc.metadata.model.SearchMetadata;
 @Service
 public class EsServices {
 
-	private static final String LANDMASK_FOOTPRINT_INDEX_NAME = "landmask_footprint";
-	private static final String OVERPASSMASK_FOOTPRINT_INDEX_NAME = "overpassmask_footprint";
+	private static final String LANDMASK_FOOTPRINT_INDEX_NAME = "landmask";
+	private static final String OVERPASSMASK_FOOTPRINT_INDEX_NAME = "overpassmask";
 	private static final String REQUIRED_INSTRUMENT_ID_PATTERN = "(aux_pp1|aux_pp2|aux_cal|aux_ins)";
 	static final String REQUIRED_SATELLITE_ID_PATTERN = "(aux_.*)";
 
