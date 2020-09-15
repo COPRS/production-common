@@ -20,7 +20,7 @@ import esa.s1pdgs.cpoc.xml.model.joborder.JobOrder;
 
 public class SppObsTypeAdapter extends AbstractProductTypeAdapter implements ProductTypeAdapter {
 
-    private static final DateTimeFormatter JO_TIME_FORMATTER = DateTimeFormatter.ofPattern("yyyyMMdd'T'HHmmss.SSSSSS");
+    private static final DateTimeFormatter JO_TIME_FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSSSSS");
     private final MetadataClient metadataClient;
 
     public SppObsTypeAdapter(MetadataClient metadataClient) {
@@ -45,7 +45,11 @@ public class SppObsTypeAdapter extends AbstractProductTypeAdapter implements Pro
             searchResult.ifPresent(
                     "selectedOrbitFirstAzimuthTimeUtc",
                     time -> auxResorb.setSelectedOrbitFirstAzimuthTimeUtc(
-                            DateUtils.convertToAnotherFormat(time, AppDataJobProduct.TIME_FORMATTER, JO_TIME_FORMATTER)
+                            DateUtils.convertToAnotherFormat(
+                                    withZ(time),
+                                    AppDataJobProduct.TIME_FORMATTER,
+                                    JO_TIME_FORMATTER
+                            )
                     ));
 
         } catch (MetadataQueryException e) {
@@ -53,6 +57,13 @@ public class SppObsTypeAdapter extends AbstractProductTypeAdapter implements Pro
         }
 
         return auxResorb;
+    }
+
+    private String withZ(final String time) {
+        if (!time.endsWith("Z")) {
+            return time + 'Z';
+        }
+        return time;
     }
 
     @Override
