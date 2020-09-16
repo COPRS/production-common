@@ -12,6 +12,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.function.Function;
 
+import esa.s1pdgs.cpoc.ipf.preparation.worker.type.spp.SppObsPropertiesAdapter;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.type.spp.SppObsTypeAdapter;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -70,6 +71,7 @@ public class IpfPreparationWorkerConfiguration {
 	private final ProcessSettings processSettings;
     private final MetadataClient metadataClient;
     private final AiopProperties aiopProperties;
+    private final SppObsProperties sppObsProperties;
 	private final TaskTableFactory taskTableFactory;
 	private final ElementMapper elementMapper;
     private final AppCatJobService appCatService;
@@ -87,6 +89,7 @@ public class IpfPreparationWorkerConfiguration {
 			final ProcessSettings processSettings,
 		    final MetadataClient metadataClient,
 		    final AiopProperties aiopProperties,
+		    final SppObsProperties sppObsProperties,
 		    final XmlConverter xmlConverter,
 			final TaskTableFactory taskTableFactory,
 			final ElementMapper elementMapper,
@@ -102,6 +105,7 @@ public class IpfPreparationWorkerConfiguration {
 		this.processSettings = processSettings;
 		this.metadataClient = metadataClient;
 		this.aiopProperties = aiopProperties;
+		this.sppObsProperties = sppObsProperties;
 		this.taskTableFactory = taskTableFactory;
 		this.elementMapper = elementMapper;
 		this.appCatService = appCatService;
@@ -166,7 +170,7 @@ public class IpfPreparationWorkerConfiguration {
 					s3TypeAdapterSettings
 			);
 		} else if (processSettings.getLevel() == ApplicationLevel.SPP_OBS) {
-			return new SppObsTypeAdapter(metadataClient);
+			return new SppObsTypeAdapter(metadataClient, SppObsPropertiesAdapter.of(sppObsProperties));
 		}
 		throw new IllegalArgumentException(
 				String.format(

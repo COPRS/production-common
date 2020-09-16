@@ -25,6 +25,7 @@
 		<jacoco.version>0.7.5.201505241946</jacoco.version>
 		<json.version>20171018</json.version>
 		<moxy.version>2.5.0</moxy.version>
+		<openapi4j.version>1.0.4</openapi4j.version>
 		<equalsverifier.version>2.4.6</equalsverifier.version>
 		<aws.version>1.11.271</aws.version>		
 		<jsch.version>0.1.53</jsch.version>
@@ -281,6 +282,26 @@
 				<version>${moxy.version}</version>
 			</dependency>
 			<dependency>
+				<groupId>org.openapi4j</groupId>
+				<artifactId>openapi-operation-validator</artifactId>
+				<version>${openapi4j.version}</version>
+			</dependency>
+			<dependency>
+			    <groupId>org.openapi4j</groupId>
+    			<artifactId>openapi-operation-servlet</artifactId>
+				<version>${openapi4j.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.openapi4j</groupId>
+				<artifactId>openapi-schema-validator</artifactId>
+				<version>${openapi4j.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.openapi4j</groupId>
+				<artifactId>openapi-parser</artifactId>
+				<version>${openapi4j.version}</version>
+			</dependency>
+			<dependency>
 				<groupId>org.awaitility</groupId>
 				<artifactId>awaitility</artifactId>
 				<version>3.1.1</version>
@@ -297,7 +318,7 @@
 			    <artifactId>assertj-core</artifactId>
 			    <version>3.13.2</version>
 			    <scope>test</scope>
-			</dependency>		
+			</dependency>
 		</dependencies>
 	</dependencyManagement>
 
