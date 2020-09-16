@@ -190,4 +190,6 @@ aiop:
     cgs4: "yes"
     erds: "yes"
 
-  
+spp:
+  obs-timeout-sec: 1978
+  minimal-waiting-time-sec: 134

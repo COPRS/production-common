@@ -1,8 +1,12 @@
 package esa.s1pdgs.cpoc.ipf.preparation.worker.type.spp;
 
 import java.time.format.DateTimeFormatter;
+import java.util.Collections;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.util.Assert;
+import org.springframework.util.StringUtils;
 
 import esa.s1pdgs.cpoc.appcatalog.AppDataJob;
 import esa.s1pdgs.cpoc.appcatalog.AppDataJobProduct;
@@ -20,11 +24,15 @@ import esa.s1pdgs.cpoc.xml.model.joborder.JobOrder;
 
 public class SppObsTypeAdapter extends AbstractProductTypeAdapter implements ProductTypeAdapter {
 
+    private static final Logger LOG = LoggerFactory.getLogger(SppObsPropertiesAdapter.class);
+
     private static final DateTimeFormatter JO_TIME_FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSSSSS");
     private final MetadataClient metadataClient;
+    private final SppObsPropertiesAdapter configuration;
 
-    public SppObsTypeAdapter(MetadataClient metadataClient) {
+    public SppObsTypeAdapter(MetadataClient metadataClient, SppObsPropertiesAdapter configuration) {
         this.metadataClient = metadataClient;
+        this.configuration = configuration;
     }
 
     @Override
@@ -68,9 +76,17 @@ public class SppObsTypeAdapter extends AbstractProductTypeAdapter implements Pro
 
     @Override
     public void validateInputSearch(AppDataJob job) throws IpfPrepWorkerInputsMissingException {
-        //TODO implement
-        //TODO check if the selectedOrbitFirstAzimuthTimeUtc is available
-        //TODO check timeout (before other checks, analog to edrsSession) (always throw exception when timeout is NOT reached)
+        if (configuration.shouldWait(job)) {
+            LOG.info("timeout for Spp Obs job {} for AUX_RESORB {} not reached yet", job.getId(), AuxResorbProduct.of(job).getProductName());
+            throw new IpfPrepWorkerInputsMissingException(Collections.emptyMap());
+        }
+
+        final String selectedOrbitFirstAzimuthTimeUtc = AuxResorbProduct.of(job).getSelectedOrbitFirstAzimuthTimeUtc();
+
+        if (StringUtils.isEmpty(selectedOrbitFirstAzimuthTimeUtc)) {
+            LOG.error("the selectedOrbitFirstAzimuthTime is missing for job {} of AUX_RESORB {}", job.getId(), AuxResorbProduct.of(job).getProductName());
+            throw new IpfPrepWorkerInputsMissingException(Collections.emptyMap());
+        }
     }
 
     @Override
