@@ -47,6 +47,8 @@ public enum ProductFamily {
     SPP_OBS_JOB,
     SPP_OBS,
     SPP_OBS_REPORT,
+    // SPP compressed types
+    SPP_OBS_ZIP,
     
     // S2QT types
     L1C,
