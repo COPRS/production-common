@@ -21,7 +21,7 @@ import esa.s1pdgs.cpoc.mqi.model.control.DemandType;
  * @author florian_sievert
  *
  */
-@JsonTypeInfo(use = JsonTypeInfo.Id.CLASS, include = JsonTypeInfo.As.PROPERTY, property = "@class")
+@JsonTypeInfo(use = JsonTypeInfo.Id.CLASS, include = JsonTypeInfo.As.PROPERTY, property = "_class")
 public abstract class AbstractMessage {
 	@JsonIgnore
 	public static final String DEFAULT_HOSTNAME = System.getenv("HOSTNAME");
