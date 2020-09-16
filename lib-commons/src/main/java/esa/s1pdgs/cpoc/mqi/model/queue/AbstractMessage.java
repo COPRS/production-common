@@ -7,7 +7,6 @@ import java.util.UUID;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonTypeInfo;
 
 import esa.s1pdgs.cpoc.common.ProductFamily;
 import esa.s1pdgs.cpoc.mqi.model.control.AllowedAction;
@@ -21,7 +20,7 @@ import esa.s1pdgs.cpoc.mqi.model.control.DemandType;
  * @author florian_sievert
  *
  */
-@JsonTypeInfo(use = JsonTypeInfo.Id.CLASS, include = JsonTypeInfo.As.PROPERTY, property = "_class")
+//@JsonTypeInfo(use = JsonTypeInfo.Id.CLASS, include = JsonTypeInfo.As.PROPERTY, property = "_class")
 public abstract class AbstractMessage {
 	@JsonIgnore
 	public static final String DEFAULT_HOSTNAME = System.getenv("HOSTNAME");
