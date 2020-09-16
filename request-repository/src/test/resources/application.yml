@@ -10,7 +10,11 @@ logging:
 # REST controller
 server:
   port: 8080      
-  
+
+# OpenAPI validator
+openapi:
+  spec-file: src/test/resources/s1pro-api_openapi.yaml
+
 # KAFKA
 kafka:
   bootstrap-servers: localhost:9093                              # the bootstrap servers for KAFKA
