@@ -9,11 +9,13 @@ import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.annotation.DirtiesContext;
+import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit4.SpringRunner;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest
 @DirtiesContext
+@ActiveProfiles("sppobs")
 public class SppObsPropertiesTest {
 
     @Autowired
@@ -21,11 +23,11 @@ public class SppObsPropertiesTest {
 
     @Test
     public void testGetObsTimeoutSec() {
-        assertThat(properties.getObsTimeoutSec(), is(equalTo(1978L)));
+        assertThat(properties.getObsTimeoutSec(), is(equalTo(90_000L)));
     }
 
     @Test
     public void testGetMinimalWaitingTimeSec() {
-        assertThat(properties.getMinimalWaitingTimeSec(), is(equalTo(134L)));
+        assertThat(properties.getMinimalWaitingTimeSec(), is(equalTo(10_800L)));
     }
 }

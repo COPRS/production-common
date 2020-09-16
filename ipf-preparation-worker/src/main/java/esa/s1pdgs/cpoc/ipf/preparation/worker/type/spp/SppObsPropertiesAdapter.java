@@ -30,7 +30,7 @@ public class SppObsPropertiesAdapter {
 
         Instant actualTimeout = max(timoutFromProductStart, minimalTimeout);
 
-        return Instant.now().isAfter(actualTimeout);
+        return Instant.now().isBefore(actualTimeout);
     }
 
     private static Instant max(Instant one, Instant other) {
