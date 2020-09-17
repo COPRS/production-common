@@ -9,6 +9,7 @@ import esa.s1pdgs.cpoc.common.errors.processing.IpfPrepWorkerInputsMissingExcept
 import esa.s1pdgs.cpoc.common.errors.processing.MetadataQueryException;
 import esa.s1pdgs.cpoc.common.utils.DateUtils;
 import esa.s1pdgs.cpoc.common.utils.Exceptions;
+import esa.s1pdgs.cpoc.ipf.preparation.worker.model.tasktable.TaskTableAdapter;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.type.AbstractProductTypeAdapter;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.type.Product;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.type.ProductTypeAdapter;
@@ -36,7 +37,7 @@ public final class LevelSliceTypeAdapter extends AbstractProductTypeAdapter impl
 	}
 
 	@Override
-	public final Product mainInputSearch(final AppDataJob job) throws IpfPrepWorkerInputsMissingException {	
+	public final Product mainInputSearch(final AppDataJob job, final TaskTableAdapter tasktableAdpter) throws IpfPrepWorkerInputsMissingException {	
 		final LevelSliceProduct product = LevelSliceProduct.of(job);
 		
 		// Retrieve instrument configuration id and slice number
@@ -69,7 +70,7 @@ public final class LevelSliceTypeAdapter extends AbstractProductTypeAdapter impl
 	}
 	
 	@Override
-	public void validateInputSearch(final AppDataJob job) throws IpfPrepWorkerInputsMissingException {
+	public void validateInputSearch(final AppDataJob job, final TaskTableAdapter tasktableAdpter) throws IpfPrepWorkerInputsMissingException {
 		final LevelSliceProduct product = LevelSliceProduct.of(job);
 		
 		// there needs to be a slice

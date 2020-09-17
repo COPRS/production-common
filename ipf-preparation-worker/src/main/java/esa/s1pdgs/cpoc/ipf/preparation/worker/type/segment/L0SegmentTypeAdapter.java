@@ -2,6 +2,7 @@ package esa.s1pdgs.cpoc.ipf.preparation.worker.type.segment;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
@@ -14,12 +15,16 @@ import org.springframework.util.CollectionUtils;
 
 import esa.s1pdgs.cpoc.appcatalog.AppDataJob;
 import esa.s1pdgs.cpoc.appcatalog.AppDataJobProduct;
+import esa.s1pdgs.cpoc.appcatalog.AppDataJobTaskInputs;
 import esa.s1pdgs.cpoc.appcatalog.util.AppDataJobProductAdapter;
 import esa.s1pdgs.cpoc.common.errors.AbstractCodedException;
 import esa.s1pdgs.cpoc.common.errors.processing.IpfPrepWorkerInputsMissingException;
 import esa.s1pdgs.cpoc.common.errors.processing.MetadataQueryException;
 import esa.s1pdgs.cpoc.common.utils.DateUtils;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.appcat.AppCatJobService;
+import esa.s1pdgs.cpoc.ipf.preparation.worker.generator.DiscardedException;
+import esa.s1pdgs.cpoc.ipf.preparation.worker.model.ProductMode;
+import esa.s1pdgs.cpoc.ipf.preparation.worker.model.tasktable.TaskTableAdapter;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.type.AbstractProductTypeAdapter;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.type.Product;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.type.ProductTypeAdapter;
@@ -29,34 +34,38 @@ import esa.s1pdgs.cpoc.metadata.model.LevelSegmentMetadata;
 import esa.s1pdgs.cpoc.mqi.model.queue.IpfExecutionJob;
 import esa.s1pdgs.cpoc.mqi.model.queue.util.CatalogEventAdapter;
 import esa.s1pdgs.cpoc.xml.model.joborder.JobOrder;
+import esa.s1pdgs.cpoc.xml.model.tasktable.TaskTableInput;
 
-public final class L0SegmentTypeAdapter extends AbstractProductTypeAdapter implements ProductTypeAdapter {
+public final class L0SegmentTypeAdapter extends AbstractProductTypeAdapter implements ProductTypeAdapter {	
 	private final MetadataClient metadataClient;
+	private final ProductMode productMode;
 	private final long timeoutInputSearchMs;
 
 	public L0SegmentTypeAdapter(
 			final MetadataClient metadataClient,
+			final ProductMode productMode,
 			final long timeoutInputSearchMs
 	) {
 		this.metadataClient = metadataClient;
 		this.timeoutInputSearchMs = timeoutInputSearchMs;
+		this.productMode = productMode;
 	}
 	
 	@Override
 	public final Optional<AppDataJob> findAssociatedJobFor(final AppCatJobService appCat,
 			final CatalogEventAdapter catEvent, final AppDataJob job) throws AbstractCodedException {
-		return appCat.findJobForDatatakeId(catEvent.datatakeId());
+		return appCat.findJobForDatatakeId(catEvent.datatakeId(), catEvent.productType());
 	}
-
+		
 	@Override
-	public final Product mainInputSearch(final AppDataJob job) throws IpfPrepWorkerInputsMissingException {	
+	public final Product mainInputSearch(final AppDataJob job, final TaskTableAdapter tasktableAdpter) throws IpfPrepWorkerInputsMissingException {	
 		final L0SegmentProduct product = L0SegmentProduct.of(job);
 		
 		try {			
 			for (final LevelSegmentMetadata metadata : metadataClient.getLevelSegments(product.getDataTakeId())) {				
 				LOGGER.debug("Found {} in MDC for {}", metadata.getProductName(),  product.getProductName());
 				product.addSegmentMetadata(metadata);
-			}			
+			}
 		}
 		catch (final MetadataQueryException e) {
 			LOGGER.debug("== preSearch: Exception- Missing segment for lastname {}. Trying next time...", product.getProductName());
@@ -65,11 +74,73 @@ public final class L0SegmentTypeAdapter extends AbstractProductTypeAdapter imple
 	}	
 	
 	@Override
-	public void validateInputSearch(final AppDataJob job) throws IpfPrepWorkerInputsMissingException {
-		final L0SegmentProduct product = L0SegmentProduct.of(job);
+	public void validateInputSearch(final AppDataJob job, final TaskTableAdapter tasktableAdpter) throws IpfPrepWorkerInputsMissingException {
+		final L0SegmentProduct product = L0SegmentProduct.of(job);	
 		
-		boolean fullCoverage = false;
+		if (product.isRfc()) {
+			handleRfcSegments(job, product, tasktableAdpter);
+		}
+		else {
+			handleNonRfSegments(job, product);
+		}
+	}
+	
+	// S1PRO-1851: Handling of RFC product 
+	private final void handleRfcSegments(final AppDataJob job, final L0SegmentProduct product, final TaskTableAdapter taskTableAdapter) {		
+		final Map<String, List<LevelSegmentMetadata>> segmentsGroupByPol = product.segmentsForPolaristions();
 
+		final List<String> pols = segmentsGroupByPol.entrySet().stream()
+				.filter(e -> !e.getValue().isEmpty())
+				.map(e -> e.getKey())
+				.collect(Collectors.toList());
+		
+		if (pols.size() == 1) {
+			throw new DiscardedException(
+					String.format("Discarding single RFC product %s", product.getProductName())
+			);
+		}
+		else if (pols.size() != 2) {
+			throw new DiscardedException(
+					String.format("Discarding due to umexpected number or polarisations for RFC product %s", 
+							product.getProductName())
+			);
+		}
+
+		final String polA = pols.get(0);
+		final String polB = pols.get(1);
+		final List<LevelSegmentMetadata> segmentsA = segmentsGroupByPol.get(polA);
+		final List<LevelSegmentMetadata> segmentsB = segmentsGroupByPol.get(polB);
+		// Check polarisations
+		if (!isDoublePolarisation(polA, polB)) {
+			throw new DiscardedException(
+					String.format(
+							"Discarding RFC %s due to polarisation mismatch: %s", 
+							product.getProductName(),
+							pols
+					)
+			);
+		}			
+		final DateTimeFormatter formatter = AppDataJobProduct.TIME_FORMATTER;
+		final String sensingStart = least(getStartSensingDate(segmentsA, formatter), getStartSensingDate(segmentsB, formatter),
+				formatter);
+		final String sensingStop = more(getStopSensingDate(segmentsA, formatter), getStopSensingDate(segmentsB, formatter),
+				formatter);
+		product.setStartTime(sensingStart);
+		product.setStopTime(sensingStop);
+		
+		final List<AppDataJobTaskInputs> overridingInputs = new ArrayList<>();
+				
+		// dirty workaround to find the first input as the inputs are not ordered.
+		for (final Map.Entry<String, TaskTableInput> ttInput : taskTableAdapter.taskTableInputsFor(productMode).entrySet()) {
+			// TODO add queried inputs as preselected inputs to appDataJob
+			// FIXME			
+		}
+		product.overridingInputs(overridingInputs);			
+
+	}
+
+	private final void handleNonRfSegments(final AppDataJob job, final L0SegmentProduct product)
+			throws IpfPrepWorkerInputsMissingException {
 		// Retrieve the segments
 		final Map<String, String> missingMetadata = new HashMap<>();
 		final Map<String, List<LevelSegmentMetadata>> segmentsGroupByPol = product.segmentsForPolaristions();
@@ -91,6 +162,9 @@ public final class L0SegmentTypeAdapter extends AbstractProductTypeAdapter imple
 		// Check polarisation right
 		String sensingStart = null;
 		String sensingStop = null;
+		
+		
+		boolean fullCoverage = false;
 		if (pols.size() <= 0 || pols.size() > 2) {
 			missingMetadata.put(product.getProductName(), "Invalid number of polarisation " + pols.size());
 		} else if (pols.size() == 1) {

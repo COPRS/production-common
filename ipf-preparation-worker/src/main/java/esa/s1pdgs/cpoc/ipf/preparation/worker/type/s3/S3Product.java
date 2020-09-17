@@ -15,13 +15,8 @@ public class S3Product extends AbstractProduct {
 	 */
 	private List<AppDataJobTaskInputs> additionalInputs;
 	
-	/**
-	 * Flag that signals whether or not the job should be discarded
-	 */
-	private boolean discardJob = false;
-	
 	public static final S3Product of(final AppDataJob job) {
-		S3Product returnValue = of(job.getProduct());
+		final S3Product returnValue = of(job.getProduct());
 		
 		returnValue.setAdditionalInputs(job.getAdditionalInputs());
 		
@@ -36,12 +31,8 @@ public class S3Product extends AbstractProduct {
 		super(product);
 	}
 
-	public void setAdditionalInputs(List<AppDataJobTaskInputs> additionalInputs) {
+	public void setAdditionalInputs(final List<AppDataJobTaskInputs> additionalInputs) {
 		this.additionalInputs = additionalInputs;
-	}
-	
-	public void setDiscardJob(boolean discardJob) {
-		this.discardJob = discardJob;
 	}
 	
 	public final void setStartTime(final String start) {
@@ -56,10 +47,4 @@ public class S3Product extends AbstractProduct {
 	public List<AppDataJobTaskInputs> overridingInputs() {
 		return additionalInputs;
 	}
-	
-	@Override
-	public boolean shouldJobBeDiscarded() {
-		return discardJob;
-	}
-
 }

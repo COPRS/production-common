@@ -12,8 +12,6 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.function.Function;
 
-import esa.s1pdgs.cpoc.ipf.preparation.worker.type.spp.SppObsPropertiesAdapter;
-import esa.s1pdgs.cpoc.ipf.preparation.worker.type.spp.SppObsTypeAdapter;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -48,6 +46,8 @@ import esa.s1pdgs.cpoc.ipf.preparation.worker.type.edrs.EdrsSessionTypeAdapter;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.type.s3.S3TypeAdapter;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.type.segment.L0SegmentTypeAdapter;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.type.slice.LevelSliceTypeAdapter;
+import esa.s1pdgs.cpoc.ipf.preparation.worker.type.spp.SppObsPropertiesAdapter;
+import esa.s1pdgs.cpoc.ipf.preparation.worker.type.spp.SppObsTypeAdapter;
 import esa.s1pdgs.cpoc.metadata.client.MetadataClient;
 import esa.s1pdgs.cpoc.mqi.client.MessageFilter;
 import esa.s1pdgs.cpoc.mqi.client.MqiClient;
@@ -135,7 +135,10 @@ public class IpfPreparationWorkerConfiguration {
     }
 
 	@Bean
-	public ProductTypeAdapter typeAdapter() {
+	@Autowired
+	public ProductTypeAdapter typeAdapter(
+			final Function<File, TaskTableAdapter> tasktableAdapterForFile
+	) {
 		if (processSettings.getLevel() == ApplicationLevel.L0) {
 			return new EdrsSessionTypeAdapter(
 					metadataClient, 
@@ -148,6 +151,7 @@ public class IpfPreparationWorkerConfiguration {
 			
 			return new L0SegmentTypeAdapter(
 					metadataClient, 
+					settings.getProductMode(),
 					timeoutInputSearchMs
 			);			
 		}
@@ -196,12 +200,17 @@ public class IpfPreparationWorkerConfiguration {
 			final TasktableManager ttManager, 
 			final ThreadPoolTaskScheduler taskScheduler,
 			final ProductTypeAdapter typeAdapter,
-			final Function<TaskTable, InputTimeoutChecker> timeoutCheckerFactory
+			final Function<TaskTable, InputTimeoutChecker> timeoutCheckerFactory,
+			final Function<File, TaskTableAdapter> tasktableAdapterForFile
 	) {		
 		final Map<String, JobGenerator> generators = new HashMap<>(ttManager.size());	
 
 		for (final File taskTableFile : ttManager.tasktables()) {				
-			final JobGenerator jobGenerator = newJobGenerator(taskTableFile, typeAdapter, timeoutCheckerFactory);
+			final JobGenerator jobGenerator = newJobGenerator(
+					tasktableAdapterForFile.apply(taskTableFile), 
+					typeAdapter, 
+					timeoutCheckerFactory
+			);
 			generators.put(taskTableFile.getName(), jobGenerator);
 		    // --> Launch generators
 			taskScheduler.scheduleWithFixedDelay(jobGenerator, settings.getJobgenfixedrate());
@@ -229,17 +238,20 @@ public class IpfPreparationWorkerConfiguration {
 		return service;
 	}
 	
+	@Bean
+	public Function<File, TaskTableAdapter> tasktableAdapterForFile() {		
+		return file -> new TaskTableAdapter(
+				file, 
+				taskTableFactory.buildTaskTable(file, processSettings.getLevel()), 
+				elementMapper
+		);		
+	}
+	
 	private JobGenerator newJobGenerator(
-			final File taskTableFile, 
+			final TaskTableAdapter tasktableAdapter,
 			final ProductTypeAdapter typeAdapter,
 			final Function<TaskTable, InputTimeoutChecker> timeoutCheckerFactory
 	) {		
-		final TaskTableAdapter tasktableAdapter = new TaskTableAdapter(
-				taskTableFile, 
-				taskTableFactory.buildTaskTable(taskTableFile, processSettings.getLevel()), 
-				elementMapper
-		);			    
-	    //final List<List<String>> tasks = tasktableAdapter.buildTasks();
 		final AuxQueryHandler auxQueryHandler = new AuxQueryHandler(
 				metadataClient, 
 				settings.getProductMode(),

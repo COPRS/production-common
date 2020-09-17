@@ -45,22 +45,18 @@ public final class JobGeneratorImpl implements JobGenerator {
 			Product queried = null;
 			try {
 				queried = perform(
-						() -> typeAdapter.mainInputSearch(job),
+						() -> typeAdapter.mainInputSearch(job, tasktableAdapter),
 						"querying input " + job.getProductName()
 				);
 				job.setProduct(queried.toProduct());
 				job.setAdditionalInputs(queried.overridingInputs());
-				
-				// Discard logic: skip validation of mainInputSearch - job is discarded anyways
-				if (!queried.shouldJobBeDiscarded()) {	
-					// FIXME dirty workaroung warning, the product above is still altered in validate by modifying 
-					// the start stop time for segments
-					performVoid(
-						() -> typeAdapter.validateInputSearch(job), 
-						"validating availability of input products for " + job.getProductName()
-					);
-					newState = outputState;
-				}
+				// FIXME dirty workaround warning, the product above is still altered in validate by modifying 
+				// the start stop time for segments
+				performVoid(
+					() -> typeAdapter.validateInputSearch(job, tasktableAdapter), 
+					"validating availability of input products for " + job.getProductName()
+				);
+				newState = outputState;
 			}
 			finally
 			{
@@ -152,6 +148,10 @@ public final class JobGeneratorImpl implements JobGenerator {
 				LOGGER.debug("Trying job generation for appDataJob {}", job.getId());
 				JobGenerationStateTransitions.ofInputState(job.getGeneration().getState())
 						.performTransitionOn(new JobGeneration(job));
+			}
+			catch (final DiscardedException e) {
+				LOGGER.info("Job {} has been discarded: {}", job.getId(), e.getMessage());
+				appCatService.terminate(job);
 			}
 			catch (final Exception e) {
 				final Throwable error = Exceptions.unwrap(e);

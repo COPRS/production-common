@@ -104,7 +104,7 @@ public class AppCatalogJobClientTest {
 	                Mockito.any(),
 	                Mockito.any(ParameterizedTypeReference.class)
 	    );        
-        client.findByProductDataTakeId("dataTakeId");
+        client.findByProductDataTakeId("fooBar","dataTakeId");
     }
 
     @SuppressWarnings("unchecked")
@@ -169,7 +169,7 @@ public class AppCatalogJobClientTest {
     public void testFindByProductDataTakeId() throws Exception {
     	runSearchTest(
     			() -> {
-    			    client.findByProductDataTakeId("dataTakeId");
+    			    client.findByProductDataTakeId("fooBar","dataTakeId");
     		        return null;
     			},
     			"findByProductDataTakeId",

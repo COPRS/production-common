@@ -82,11 +82,11 @@ public class JobControllerTest extends RestControllerTest{
     	
     	doReturn(jobsDb)
 			.when(appDataJobService)
-			.findByProductDataTakeId(Mockito.anyString());
+			.findByProductDataTakeId(Mockito.anyString(), Mockito.anyString());
     	
-    	appDataJobService.findByProductDataTakeId("dataTakeId");
+    	appDataJobService.findByProductDataTakeId("fooBar","dataTakeId");
     	
-    	verify(appDataJobService, times(1)).findByProductDataTakeId(Mockito.eq("dataTakeId"));
+    	verify(appDataJobService, times(1)).findByProductDataTakeId(Mockito.eq("fooBar"), Mockito.eq("dataTakeId"));
     }
     
     @Test
