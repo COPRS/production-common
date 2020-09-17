@@ -13,6 +13,7 @@ server:
 
 # OpenAPI validator
 openapi:
+  disable-validation: false
   spec-file: src/test/resources/s1pro-api_openapi.yaml
 
 # KAFKA
