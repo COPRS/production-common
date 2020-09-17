@@ -110,7 +110,7 @@ info:
   version: V1.4.0
 servers:
 #TODO: provide list of servers in different environments
-- url: https://s1pro-api-svc/api/v1/
+- url: https://s1pro-api-svc/api/v1
 tags:
 - name: ProcessingTypes
   description: All supported processing types of S1PRO subsystem. A `ProcessingType` is equivalient to a KAFKA-topic

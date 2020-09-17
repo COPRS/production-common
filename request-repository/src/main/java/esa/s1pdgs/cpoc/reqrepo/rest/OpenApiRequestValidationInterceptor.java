@@ -49,7 +49,7 @@ public class OpenApiRequestValidationInterceptor implements HandlerInterceptor, 
 			try {
 				@SuppressWarnings("unused")
 				RequestParameters requestParameters = requestValidator.validate(servletRequest);
-				LOGGER.debug("Check against OpenAPI specification successful. Valid request: %s");
+				LOGGER.debug(String.format("Check against OpenAPI specification successful. Valid request: %s", request));
 			} catch (ValidationException e) {
 				LOGGER.debug(String.format("Check against OpenAPI specification failed. Invalid request: %s", request));
 		        response.sendError(HttpStatus.BAD_REQUEST.value());
