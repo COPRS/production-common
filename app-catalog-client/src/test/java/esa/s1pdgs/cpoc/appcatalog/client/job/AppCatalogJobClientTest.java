@@ -173,7 +173,7 @@ public class AppCatalogJobClientTest {
     		        return null;
     			},
     			"findByProductDataTakeId",
-    			"dataTakeId"
+    			"fooBar/dataTakeId"
     	);
     }
     
