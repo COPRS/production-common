@@ -1,5 +1,8 @@
 package esa.s1pdgs.cpoc.reqrepo.rest;
 
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
@@ -25,14 +28,17 @@ public class OpenApiRequestValidationInterceptor implements HandlerInterceptor, 
 
 	private final RequestValidator requestValidator;
 	private final boolean disableValidation;
+    private final Pattern pathExclusionPattern;
 	
 	@Autowired
 	public OpenApiRequestValidationInterceptor(
 		final RequestValidator requestValidator,
-		@Value("${openapi.disable-validation:false}") final boolean disableValidation)
+		@Value("${openapi.disable-validation:false}") final boolean disableValidation,
+		@Value("${openapi.path-exclusion-regex:}") final String pathExclusionRegex)
 	{
 		this.requestValidator = requestValidator;
 		this.disableValidation = disableValidation;
+		pathExclusionPattern = Pattern.compile(pathExclusionRegex);
 	}
 	
 	@Override
@@ -41,14 +47,17 @@ public class OpenApiRequestValidationInterceptor implements HandlerInterceptor, 
 	}
 	
 	@Override
-	public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) throws Exception {
+	public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) throws Exception {		
+		final String path = request.getContextPath() + request.getServletPath();
 		if (disableValidation) {
 			LOGGER.debug("Skipping OpenAPI specification validation");
-		} else {			
-			Request servletRequest = ServletRequest.of(request);
+		} else if (pathExclusionPattern.matcher(path).matches()) {
+			LOGGER.debug(String.format("Skipping OpenAPI specification validation for path: %s", path));
+		} else {
+			final Request servletRequest = ServletRequest.of(request);
 			try {
 				@SuppressWarnings("unused")
-				RequestParameters requestParameters = requestValidator.validate(servletRequest);
+				final RequestParameters requestParameters = requestValidator.validate(servletRequest);
 				LOGGER.debug(String.format("Check against OpenAPI specification successful. Valid request: %s", request));
 			} catch (ValidationException e) {
 				LOGGER.debug(String.format("Check against OpenAPI specification failed. Invalid request: %s", request));
