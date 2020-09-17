@@ -19,6 +19,7 @@ import esa.s1pdgs.cpoc.common.errors.processing.IpfPrepWorkerInputsMissingExcept
 import esa.s1pdgs.cpoc.common.errors.processing.MetadataQueryException;
 import esa.s1pdgs.cpoc.common.utils.DateUtils;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.appcat.AppCatJobService;
+import esa.s1pdgs.cpoc.ipf.preparation.worker.model.tasktable.TaskTableAdapter;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.type.AbstractProductTypeAdapter;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.type.Product;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.type.ProductTypeAdapter;
@@ -52,7 +53,7 @@ public final class EdrsSessionTypeAdapter extends AbstractProductTypeAdapter imp
 	}
 
 	@Override
-	public final Product mainInputSearch(final AppDataJob job) {	
+	public final Product mainInputSearch(final AppDataJob job, final TaskTableAdapter tasktableAdpter) {	
     	Assert.notNull(job, "Provided AppDataJob is null");
        	Assert.notNull(job.getProduct(), "Provided AppDataJobProduct is null");
 
@@ -92,7 +93,7 @@ public final class EdrsSessionTypeAdapter extends AbstractProductTypeAdapter imp
 	}	
 
 	@Override
-	public final void validateInputSearch(final AppDataJob job) throws IpfPrepWorkerInputsMissingException {       	
+	public final void validateInputSearch(final AppDataJob job, final TaskTableAdapter tasktableAdpter) throws IpfPrepWorkerInputsMissingException {       	
         // S1PRO-1101: if timeout for primary search is reached -> just start the job 
     	if (aiopAdapter.isTimedOut(job)) {	        		
     		return;

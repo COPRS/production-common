@@ -71,9 +71,9 @@ public class AppDataJobServiceTest {
     @Test
     public void findByProductDataTakeIdTest() {
     	doReturn(new ArrayList<AppDataJob>()).when(appDataJobRepository)
-			.findByProductDataTakeId(Mockito.anyString());
-    	appDataJobService.findByProductDataTakeId("dataTakeId");
-    	verify(appDataJobRepository, times(1)).findByProductDataTakeId(Mockito.eq("dataTakeId"));
+			.findByProductDataTakeId_NonRfc(Mockito.anyString());
+    	appDataJobService.findByProductDataTakeId("fooBar","dataTakeId");
+    	verify(appDataJobRepository, times(1)).findByProductDataTakeId_NonRfc(Mockito.eq("dataTakeId"));
     }
     
     @Test

@@ -6,15 +6,19 @@ import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Predicate;
 
 import esa.s1pdgs.cpoc.appcatalog.AppDataJob;
 import esa.s1pdgs.cpoc.appcatalog.AppDataJobFile;
 import esa.s1pdgs.cpoc.appcatalog.AppDataJobProduct;
+import esa.s1pdgs.cpoc.appcatalog.AppDataJobTaskInputs;
 import esa.s1pdgs.cpoc.appcatalog.util.AppDataJobProductAdapter;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.type.AbstractProduct;
 import esa.s1pdgs.cpoc.metadata.model.LevelSegmentMetadata;
 
 public class L0SegmentProduct extends AbstractProduct {	
+	static final String RFC_TYPE = "RF_RAW__0S";
+	
 	private static final String DATATAKE_ID = "datatakeId";
 	private static final String PRODUCT_SENSING_CONSOLIDATION = "productSensingConsolidation";
 	private static final String CONSOLIDATION = "consolidation";
@@ -34,7 +38,23 @@ public class L0SegmentProduct extends AbstractProduct {
 				new AppDataJobProductAdapter(product)
 		);
 	}
-
+	
+	private static boolean isRfc(final String productType) {
+		return RFC_TYPE.equals(productType);
+	}
+	
+	private static Predicate<LevelSegmentMetadata> typeFilterFor(final String type) {
+		if (type.equals("RF_RAW__0S")) {
+			return p -> isRfc(p.getProductType());
+		}
+		// allow everything but rfc type (default segment handling)
+		return p -> !isRfc(p.getProductType());
+	}
+	
+	public final boolean isRfc() {
+		return isRfc(product.getProductType());
+	}
+	
 	public final void setAcquistion(final String swathType) {
 		product.setStringValue("acquistion", swathType);		
 	}
@@ -60,6 +80,10 @@ public class L0SegmentProduct extends AbstractProduct {
 	}
 
 	public final void addSegmentMetadata(final LevelSegmentMetadata metadata) {
+		// Ignore RFC/NON-RFC files mutually exclusively
+		if (!typeFilterFor(product.getProductType()).test(metadata)) {
+			return;
+		}		
 		final List<AppDataJobFile> res = product.getProductsFor(metadata.getPolarisation());
 		
 		final AppDataJobFile segment = new AppDataJobFile(
@@ -88,6 +112,17 @@ public class L0SegmentProduct extends AbstractProduct {
 		return result;	
 	}
 	
+	private final List<AppDataJobTaskInputs> overridingInputs = new ArrayList<>();
+	
+	public final void overridingInputs(final List<AppDataJobTaskInputs> overridingInputs) {
+		overridingInputs.addAll(overridingInputs);
+	}
+	
+	@Override
+	public List<AppDataJobTaskInputs> overridingInputs() {
+		return overridingInputs;
+	}
+
 	private final Map<String,String> toMetadataMap(final LevelSegmentMetadata metadata) {
 		final Map<String,String> result = new LinkedHashMap<>();
 		result.put(DATATAKE_ID, String.valueOf(metadata.getDatatakeId()));

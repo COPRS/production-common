@@ -55,9 +55,12 @@ public class JobController {
     	return appDataJobService.findByProductSessionId(sessionId);
     }
     
-    @RequestMapping(method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE, path = "/jobs/findByProductDataTakeId/{dataTakeId}")
-    public List<AppDataJob> findByProductDataTakeId(@PathVariable(name = "dataTakeId") final String dataTakeId) {
-    	return appDataJobService.findByProductDataTakeId(dataTakeId);
+    @RequestMapping(method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE, path = "/jobs/findByProductDataTakeId/{productType}/{dataTakeId}")
+    public List<AppDataJob> findByProductDataTakeId(
+    		@PathVariable(name = "productType") final String productType,
+    		@PathVariable(name = "dataTakeId") final String dataTakeId
+    ) {
+    	return appDataJobService.findByProductDataTakeId(productType, dataTakeId);
     }
     
     @RequestMapping(method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE, path = "/jobs/findJobInStateGenerating/{taskTable}")

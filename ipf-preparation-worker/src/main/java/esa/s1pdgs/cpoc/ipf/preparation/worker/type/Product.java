@@ -27,14 +27,4 @@ public interface Product {
 	default List<AppDataJobTaskInputs> overridingInputs() {
 		return Collections.emptyList();
 	}
-
-	/**
-	 * Method to allow additional logic in ProductTypeAdapter to discard a job. If
-	 * this returns true, the updateJob method sets the job state to TERMINATED.
-	 * 
-	 * @return true if job should be discarded
-	 */
-	default boolean shouldJobBeDiscarded() {
-		return false;
-	}
 }

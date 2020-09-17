@@ -5,7 +5,6 @@ import static java.util.stream.Collectors.toMap;
 import static org.springframework.util.CollectionUtils.isEmpty;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -23,6 +22,7 @@ import esa.s1pdgs.cpoc.appcatalog.util.AppDataJobProductAdapter;
 import esa.s1pdgs.cpoc.common.errors.processing.IpfPrepWorkerInputsMissingException;
 import esa.s1pdgs.cpoc.common.errors.processing.MetadataQueryException;
 import esa.s1pdgs.cpoc.common.utils.DateUtils;
+import esa.s1pdgs.cpoc.ipf.preparation.worker.generator.DiscardedException;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.model.ProductMode;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.model.metadata.SearchMetadataResult;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.model.tasktable.TaskTableAdapter;
@@ -56,7 +56,7 @@ public class AuxQuery {
 		this.taskTableAdapter = ttAdapter;
 	}
 
-	public final List<AppDataJobTaskInputs> queryAux() {
+	public final List<AppDataJobTaskInputs> queryAux() throws DiscardedException {
 		LOGGER.debug("Searching required AUX for job {} (product: {})", job.getId(), job.getProductName());
 		final Map<TaskTableInputAlternative.TaskTableInputAltKey, SearchMetadataResult> results = performAuxQueriesFor(
 				QueryUtils.alternativesOf(inputsWithoutResultsOf(job), taskTableAdapter, mode));
@@ -73,7 +73,7 @@ public class AuxQuery {
 
 	public final void validate(final AppDataJob job) throws IpfPrepWorkerInputsMissingException {
 		final List<AppDataJobInput> missingInputs = inputsWithoutResultsOf(job);
-		final Map<String, TaskTableInput> taskTableInputs = taskTableInputs();
+		final Map<String, TaskTableInput> taskTableInputs = taskTableAdapter.taskTableInputsFor(mode);
 		final List<AppDataJobInput> timedOutInputs = new ArrayList<>();
 
 		final Map<String, String> missingMetadata = new HashMap<>();
@@ -135,11 +135,6 @@ public class AuxQuery {
 		return job.getAdditionalInputs();
 	}
 
-	private Map<String, TaskTableInput> taskTableInputs() {
-		return QueryUtils.inputsMappedTo(Collections::singletonMap, taskTableAdapter, mode).stream().flatMap(map -> map.entrySet().stream())
-				.collect(toMap(Map.Entry::getKey, Map.Entry::getValue));
-	}
-
 	private Map<TaskTableInputAlternative.TaskTableInputAltKey, SearchMetadataResult> toQueries(
 			final Map<TaskTableInputAlternative.TaskTableInputAltKey, SearchMetadataQuery> metadataQueriesTemplate) {
 		return metadataQueriesTemplate.entrySet().stream().collect(
@@ -189,7 +184,7 @@ public class AuxQuery {
 	private List<AppDataJobTaskInputs> distributeResults(
 			final Map<TaskTableInputAlternative.TaskTableInputAltKey, SearchMetadataResult> metadataQueries) {
 		final Map<String, AppDataJobInput> referenceInputs = new HashMap<>();
-		final Map<String, TaskTableInput> taskTableInputs = taskTableInputs();
+		final Map<String, TaskTableInput> taskTableInputs = taskTableAdapter.taskTableInputsFor(mode);
 		final Map<String, String> unsatisfiedReferences = new HashMap<>();
 
 		final List<AppDataJobInput> futureInputs = new ArrayList<>();
@@ -199,8 +194,10 @@ public class AuxQuery {
 				if (mode.isCompatibleWithTaskTableMode(taskTableInput.getMode())) {
 					// returns null, if not found
 					final AppDataJobInput foundInput = convert(
-							taskTableAdapter.findInput(job, taskTableInput, metadataQueries), reference,
-							taskTableInput.getMandatory());
+							taskTableAdapter.findInput(job, taskTableInput, metadataQueries),
+							reference,
+							taskTableInput.getMandatory()
+					);
 
 					if (foundInput != null) {
 						LOGGER.info("found input {} for job {}", foundInput, job.getId());

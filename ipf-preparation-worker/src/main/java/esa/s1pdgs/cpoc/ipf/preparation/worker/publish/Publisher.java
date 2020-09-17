@@ -18,6 +18,7 @@ import esa.s1pdgs.cpoc.common.errors.AbstractCodedException;
 import esa.s1pdgs.cpoc.common.errors.InternalErrorException;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.config.IpfPreparationWorkerSettings;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.config.ProcessSettings;
+import esa.s1pdgs.cpoc.ipf.preparation.worker.generator.DiscardedException;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.model.tasktable.TaskTableAdapter;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.type.ProductTypeAdapter;
 import esa.s1pdgs.cpoc.mqi.client.MqiClient;
@@ -60,7 +61,7 @@ public class Publisher {
 		this.typeAdapter = typeAdapter;
 	}
 
-	public void send(final AppDataJob job)  {
+	public void send(final AppDataJob job) throws DiscardedException {
 		final Reporting reporting = ReportingUtils.newReportingBuilder()
 				.predecessor(job.getReportingId())
 				.newReporting("JobGenerator");

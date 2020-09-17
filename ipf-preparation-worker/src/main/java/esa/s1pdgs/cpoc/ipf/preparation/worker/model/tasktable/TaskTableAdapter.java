@@ -2,6 +2,7 @@ package esa.s1pdgs.cpoc.ipf.preparation.worker.model.tasktable;
 
 import static java.util.stream.Collectors.groupingBy;
 import static java.util.stream.Collectors.toList;
+import static java.util.stream.Collectors.toMap;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -19,6 +20,7 @@ import esa.s1pdgs.cpoc.ipf.preparation.worker.config.ProcessSettings;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.model.ProductMode;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.model.converter.TaskTableToJobOrderConverter;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.model.metadata.SearchMetadataResult;
+import esa.s1pdgs.cpoc.ipf.preparation.worker.query.QueryUtils;
 import esa.s1pdgs.cpoc.metadata.client.SearchMetadataQuery;
 import esa.s1pdgs.cpoc.metadata.model.AbstractMetadata;
 import esa.s1pdgs.cpoc.metadata.model.SearchMetadata;
@@ -95,6 +97,12 @@ public class TaskTableAdapter {
 			poolNumber++;
 		}
 		return tasks;
+	}
+	
+	public final Map<String, TaskTableInput> taskTableInputsFor(final ProductMode mode) {
+		return QueryUtils.inputsMappedTo(Collections::singletonMap, this, mode).stream()
+				.flatMap(map -> map.entrySet().stream())
+				.collect(toMap(Map.Entry::getKey, Map.Entry::getValue));
 	}
 	
 	public final JobOrder newJobOrder(final ProcessSettings settings) {

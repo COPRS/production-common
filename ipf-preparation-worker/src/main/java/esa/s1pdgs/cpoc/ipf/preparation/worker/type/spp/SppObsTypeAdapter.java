@@ -13,6 +13,7 @@ import esa.s1pdgs.cpoc.appcatalog.AppDataJobProduct;
 import esa.s1pdgs.cpoc.common.errors.processing.IpfPrepWorkerInputsMissingException;
 import esa.s1pdgs.cpoc.common.errors.processing.MetadataQueryException;
 import esa.s1pdgs.cpoc.common.utils.DateUtils;
+import esa.s1pdgs.cpoc.ipf.preparation.worker.model.tasktable.TaskTableAdapter;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.type.AbstractProductTypeAdapter;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.type.Product;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.type.ProductTypeAdapter;
@@ -30,13 +31,13 @@ public class SppObsTypeAdapter extends AbstractProductTypeAdapter implements Pro
     private final MetadataClient metadataClient;
     private final SppObsPropertiesAdapter configuration;
 
-    public SppObsTypeAdapter(MetadataClient metadataClient, SppObsPropertiesAdapter configuration) {
+    public SppObsTypeAdapter(final MetadataClient metadataClient, final SppObsPropertiesAdapter configuration) {
         this.metadataClient = metadataClient;
         this.configuration = configuration;
     }
 
     @Override
-    public Product mainInputSearch(AppDataJob job) {
+    public Product mainInputSearch(final AppDataJob job, final TaskTableAdapter tasktableAdpter) {
 
         Assert.notNull(job, "Provided AppDataJob is null");
         Assert.notNull(job.getProduct(), "Provided AppDataJobProduct is null");
@@ -45,7 +46,7 @@ public class SppObsTypeAdapter extends AbstractProductTypeAdapter implements Pro
 
         try {
 
-            AuxMetadata searchResult = metadataClient.queryAuxiliary("AUX_RESORB", auxResorb.getProductName());
+            final AuxMetadata searchResult = metadataClient.queryAuxiliary("AUX_RESORB", auxResorb.getProductName());
 
             auxResorb.setStartTime(searchResult.getValidityStart());
             auxResorb.setStopTime(searchResult.getValidityStop());
@@ -60,7 +61,7 @@ public class SppObsTypeAdapter extends AbstractProductTypeAdapter implements Pro
                             )
                     ));
 
-        } catch (MetadataQueryException e) {
+        } catch (final MetadataQueryException e) {
             LOGGER.error("Error on query execution, retrying next time", e);
         }
 
@@ -75,7 +76,7 @@ public class SppObsTypeAdapter extends AbstractProductTypeAdapter implements Pro
     }
 
     @Override
-    public void validateInputSearch(AppDataJob job) throws IpfPrepWorkerInputsMissingException {
+    public void validateInputSearch(final AppDataJob job, final TaskTableAdapter tasktableAdpter) throws IpfPrepWorkerInputsMissingException {
         if (configuration.shouldWait(job)) {
             LOG.info("timeout for Spp Obs job {} for AUX_RESORB {} not reached yet", job.getId(), AuxResorbProduct.of(job).getProductName());
             throw new IpfPrepWorkerInputsMissingException(Collections.emptyMap());
@@ -90,7 +91,7 @@ public class SppObsTypeAdapter extends AbstractProductTypeAdapter implements Pro
     }
 
     @Override
-    public void customAppDataJob(AppDataJob job) {
+    public void customAppDataJob(final AppDataJob job) {
 
         final CatalogEventAdapter catalogEvent = CatalogEventAdapter.of(job);
         final AuxResorbProduct auxResorb = AuxResorbProduct.of(job);
@@ -102,14 +103,14 @@ public class SppObsTypeAdapter extends AbstractProductTypeAdapter implements Pro
     }
 
     @Override
-    public void customJobOrder(AppDataJob job, JobOrder jobOrder) {
-        AuxResorbProduct auxResorb = AuxResorbProduct.of(job);
+    public void customJobOrder(final AppDataJob job, final JobOrder jobOrder) {
+        final AuxResorbProduct auxResorb = AuxResorbProduct.of(job);
 
         updateProcParam(jobOrder, "selectedOrbitFirstAzimuthTime", auxResorb.getSelectedOrbitFirstAzimuthTimeUtc());
     }
 
     @Override
-    public void customJobDto(AppDataJob job, IpfExecutionJob dto) {
+    public void customJobDto(final AppDataJob job, final IpfExecutionJob dto) {
 
     }
 }

@@ -9,6 +9,8 @@ import esa.s1pdgs.cpoc.appcatalog.AppDataJob;
 import esa.s1pdgs.cpoc.common.errors.AbstractCodedException;
 import esa.s1pdgs.cpoc.common.errors.processing.IpfPrepWorkerInputsMissingException;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.appcat.AppCatJobService;
+import esa.s1pdgs.cpoc.ipf.preparation.worker.generator.DiscardedException;
+import esa.s1pdgs.cpoc.ipf.preparation.worker.model.tasktable.TaskTableAdapter;
 import esa.s1pdgs.cpoc.mqi.model.queue.IpfExecutionJob;
 import esa.s1pdgs.cpoc.mqi.model.queue.util.CatalogEventAdapter;
 import esa.s1pdgs.cpoc.xml.model.joborder.JobOrder;
@@ -16,11 +18,11 @@ import esa.s1pdgs.cpoc.xml.model.joborder.JobOrder;
 public interface ProductTypeAdapter {	
 	Logger LOGGER = LogManager.getLogger(ProductTypeAdapter.class);
 	
-	default Product mainInputSearch(final AppDataJob job) throws IpfPrepWorkerInputsMissingException {
+	default Product mainInputSearch(final AppDataJob job, final TaskTableAdapter tasktableAdpter) throws IpfPrepWorkerInputsMissingException, DiscardedException {
 		return Product.nullProduct(job);
 	}
 	
-	default void validateInputSearch(final AppDataJob job) throws IpfPrepWorkerInputsMissingException {
+	default void validateInputSearch(final AppDataJob job, final TaskTableAdapter tasktableAdpter) throws IpfPrepWorkerInputsMissingException, DiscardedException {
 		// default implementation: don't validate
 	}
 	
