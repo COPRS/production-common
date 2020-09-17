@@ -14,7 +14,7 @@ server:
 # OpenAPI validator
 openapi:
   disable-validation: false
-  path-exclusion-regex: ^\/(app\/status|error\?.*)$
+  path-exclusion-regex: ^\/(app\/status|error)$
   spec-file: src/test/resources/s1pro-api_openapi.yaml
 
 # KAFKA
