@@ -27,7 +27,7 @@ public class OpenApiRequestValidationInterceptor implements HandlerInterceptor {
 	@Autowired
 	public OpenApiRequestValidationInterceptor(
 		final RequestValidator requestValidator,
-		@Value("${openapi.disable-validation}:false") final boolean disableValidation)
+		@Value("${openapi.disable-validation:false}") final boolean disableValidation)
 	{
 		this.requestValidator = requestValidator;
 		this.disableValidation = disableValidation;
