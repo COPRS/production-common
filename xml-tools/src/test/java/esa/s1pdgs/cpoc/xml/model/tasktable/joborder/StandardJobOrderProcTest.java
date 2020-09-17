@@ -10,17 +10,18 @@ import java.util.List;
 
 import org.junit.Test;
 
-import esa.s1pdgs.cpoc.xml.model.joborder.JobOrderBreakpoint;
+import esa.s1pdgs.cpoc.common.ApplicationLevel;
+import esa.s1pdgs.cpoc.xml.model.joborder.StandardJobOrderBreakpoint;
 import esa.s1pdgs.cpoc.xml.model.joborder.JobOrderInput;
 import esa.s1pdgs.cpoc.xml.model.joborder.JobOrderOutput;
-import esa.s1pdgs.cpoc.xml.model.joborder.JobOrderProc;
+import esa.s1pdgs.cpoc.xml.model.joborder.StandardJobOrderProc;
 import nl.jqno.equalsverifier.EqualsVerifier;
 import nl.jqno.equalsverifier.Warning;
 
 /**
  * 
  */
-public class JobOrderProcTest {
+public class StandardJobOrderProcTest {
 	
 	/**
 	 * Test constructors
@@ -28,7 +29,7 @@ public class JobOrderProcTest {
 	@Test
 	public void testConstructors() {
 		
-		JobOrderBreakpoint breakpt = new JobOrderBreakpoint("true", Arrays.asList("file1"));
+		StandardJobOrderBreakpoint breakpt = new StandardJobOrderBreakpoint("true", Arrays.asList("file1"));
 		
 		JobOrderInput input1 = new JobOrderInput("type1", null, null, null, null);
 		JobOrderInput input2 = new JobOrderInput("type2", null, null, null, null);
@@ -39,14 +40,14 @@ public class JobOrderProcTest {
 		JobOrderOutput output3 = new JobOrderOutput("type6", null, null);
 		List<JobOrderOutput> outputs = Arrays.asList(output1, output2, output3);
 		
-		JobOrderProc obj = new JobOrderProc();
+		StandardJobOrderProc obj = new StandardJobOrderProc();
 		obj.setTaskName("name");
 		obj.setTaskVersion("vers");
 		obj.setBreakpoint(breakpt);
 		obj.setInputs(inputs);
 		obj.setOutputs(outputs);
 		
-		JobOrderProc clone = new JobOrderProc(obj);
+		StandardJobOrderProc clone = new StandardJobOrderProc(obj, ApplicationLevel.L0);
 		assertEquals(obj.getTaskName(), clone.getTaskName());
 		assertEquals(obj.getTaskVersion(), clone.getTaskVersion());
 		assertEquals(obj.getBreakpoint(), clone.getBreakpoint());
@@ -54,18 +55,18 @@ public class JobOrderProcTest {
 		assertEquals(obj.getOutputs().get(1), clone.getOutputs().get(1));
 		
 		obj.setBreakpoint(null);
-		JobOrderProc clone2 = new JobOrderProc(obj);
+		StandardJobOrderProc clone2 = new StandardJobOrderProc(obj, ApplicationLevel.L0);
 		assertNull(clone2.getBreakpoint());
 		
 		obj.setInputs(new ArrayList<>());
 		obj.addInput(null);
-		JobOrderProc clone3 = new JobOrderProc(obj);
+		StandardJobOrderProc clone3 = new StandardJobOrderProc(obj, ApplicationLevel.L0);
 		assertTrue(obj.getInputs().size() == 1);
 		assertTrue(clone3.getInputs().size() == 0);
 		
 		obj.setOutputs(new ArrayList<>());
 		obj.addOutput(null);
-		JobOrderProc clone4 = new JobOrderProc(obj);
+		StandardJobOrderProc clone4 = new StandardJobOrderProc(obj, ApplicationLevel.L0);
 		assertTrue(obj.getOutputs().size() == 1);
 		assertTrue(clone4.getOutputs().size() == 0);
 	}
@@ -76,7 +77,7 @@ public class JobOrderProcTest {
 	@Test
 	public void testToString() {
 		
-		JobOrderBreakpoint breakpt = new JobOrderBreakpoint("true", Arrays.asList("file1"));
+		StandardJobOrderBreakpoint breakpt = new StandardJobOrderBreakpoint("true", Arrays.asList("file1"));
 		
 		JobOrderInput input1 = new JobOrderInput("type1", null, null, null, null);
 		JobOrderInput input2 = new JobOrderInput("type2", null, null, null, null);
@@ -87,7 +88,7 @@ public class JobOrderProcTest {
 		JobOrderOutput output3 = new JobOrderOutput("type6", null, null);
 		List<JobOrderOutput> outputs = Arrays.asList(output1, output2, output3);
 		
-		JobOrderProc obj = new JobOrderProc();
+		StandardJobOrderProc obj = new StandardJobOrderProc();
 		obj.setTaskName("name");
 		obj.setTaskVersion("vers");
 		obj.setBreakpoint(breakpt);
@@ -109,7 +110,7 @@ public class JobOrderProcTest {
 	 */
 	@Test
 	public void testEquals() {
-		EqualsVerifier.forClass(JobOrderProc.class).usingGetClass().suppress(Warning.NONFINAL_FIELDS).verify();
+		EqualsVerifier.forClass(StandardJobOrderProc.class).usingGetClass().suppress(Warning.NONFINAL_FIELDS).verify();
 	}
 
 }

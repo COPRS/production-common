@@ -9,7 +9,7 @@ import esa.s1pdgs.cpoc.xml.model.joborder.JobOrderProcParam;
 import nl.jqno.equalsverifier.EqualsVerifier;
 import nl.jqno.equalsverifier.Warning;
 
-public class JobOrderProcParamTest {
+public class StandardJobOrderProcParamTest {
 	
 	/**
 	 * Test constructors

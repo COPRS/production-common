@@ -6,9 +6,9 @@ import esa.s1pdgs.cpoc.common.ApplicationLevel;
 import esa.s1pdgs.cpoc.common.ProductFamily;
 import esa.s1pdgs.cpoc.xml.model.joborder.AbstractJobOrderConf;
 import esa.s1pdgs.cpoc.xml.model.joborder.JobOrder;
-import esa.s1pdgs.cpoc.xml.model.joborder.JobOrderBreakpoint;
+import esa.s1pdgs.cpoc.xml.model.joborder.StandardJobOrderBreakpoint;
 import esa.s1pdgs.cpoc.xml.model.joborder.JobOrderOutput;
-import esa.s1pdgs.cpoc.xml.model.joborder.JobOrderProc;
+import esa.s1pdgs.cpoc.xml.model.joborder.StandardJobOrderProc;
 import esa.s1pdgs.cpoc.xml.model.joborder.JobOrderProcParam;
 import esa.s1pdgs.cpoc.xml.model.joborder.L0JobOrderConf;
 import esa.s1pdgs.cpoc.xml.model.joborder.enums.JobOrderDestination;
@@ -363,10 +363,10 @@ public class TestGenericUtils {
 		conf.addConfigFile("/usr/local/conf/AIOP/ISIPFormat.xml");
 		conf.addConfigFile("/usr/local/conf/AIOP/ExplorerWrapper.xml");
 
-		final JobOrderProc proc1 = new JobOrderProc();
+		final StandardJobOrderProc proc1 = new StandardJobOrderProc();
 		proc1.setTaskName("AIOP_PROC_APP");
 		proc1.setTaskVersion("01.00");
-		proc1.setBreakpoint(new JobOrderBreakpoint("OFF", new ArrayList<>()));
+		proc1.setBreakpoint(new StandardJobOrderBreakpoint("OFF", new ArrayList<>()));
 		if (xmlOnly) {
 			proc1.addOutput(new JobOrderOutput("SM_RAW__0S", JobOrderFileNameType.REGEXP,
 					"/data/localWD/564061776/^S1[A-B]_S[1-6]_RAW__0S.*$"));
@@ -441,20 +441,20 @@ public class TestGenericUtils {
 					ProductFamily.L0_REPORT));
 		}
 
-		final JobOrderProc proc2 = new JobOrderProc();
+		final StandardJobOrderProc proc2 = new StandardJobOrderProc();
 		proc2.setTaskName("AIOP_PROC_APP");
 		proc2.setTaskVersion("01.00");
-		proc2.setBreakpoint(new JobOrderBreakpoint("OFF", new ArrayList<>()));
+		proc2.setBreakpoint(new StandardJobOrderBreakpoint("OFF", new ArrayList<>()));
 
-		final JobOrderProc proc3 = new JobOrderProc();
+		final StandardJobOrderProc proc3 = new StandardJobOrderProc();
 		proc3.setTaskName("AIOP_DPASSEMBLER_APP");
 		proc3.setTaskVersion("01.00");
-		proc3.setBreakpoint(new JobOrderBreakpoint("OFF", new ArrayList<>()));
+		proc3.setBreakpoint(new StandardJobOrderBreakpoint("OFF", new ArrayList<>()));
 
-		final JobOrderProc proc4 = new JobOrderProc();
+		final StandardJobOrderProc proc4 = new StandardJobOrderProc();
 		proc4.setTaskName("AIOP_LIST_APP");
 		proc4.setTaskVersion("01.00");
-		proc4.setBreakpoint(new JobOrderBreakpoint("OFF", new ArrayList<>()));
+		proc4.setBreakpoint(new StandardJobOrderBreakpoint("OFF", new ArrayList<>()));
 
 		final JobOrder job = new JobOrder();
 		job.setConf(conf);

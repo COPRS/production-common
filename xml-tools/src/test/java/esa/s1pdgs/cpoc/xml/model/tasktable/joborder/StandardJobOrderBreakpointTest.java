@@ -9,14 +9,14 @@ import java.util.List;
 
 import org.junit.Test;
 
-import esa.s1pdgs.cpoc.xml.model.joborder.JobOrderBreakpoint;
+import esa.s1pdgs.cpoc.xml.model.joborder.StandardJobOrderBreakpoint;
 import nl.jqno.equalsverifier.EqualsVerifier;
 import nl.jqno.equalsverifier.Warning;
 
 /**
  * 
  */
-public class JobOrderBreakpointTest {
+public class StandardJobOrderBreakpointTest {
 	
 	/**
 	 * Test constructors
@@ -24,23 +24,23 @@ public class JobOrderBreakpointTest {
 	@Test
 	public void testConstructors() {
 		
-		JobOrderBreakpoint obj = new JobOrderBreakpoint();
+		StandardJobOrderBreakpoint obj = new StandardJobOrderBreakpoint();
 		obj.setEnable("true");
 		List<String> files = Arrays.asList("file1","file2");
 		obj.addFiles(files);
 		
-		JobOrderBreakpoint clone = new JobOrderBreakpoint(obj);
+		StandardJobOrderBreakpoint clone = new StandardJobOrderBreakpoint(obj);
 		assertEquals(obj.getNbFiles(), clone.getNbFiles());
 		assertEquals(2, clone.getNbFiles());
 		assertEquals(obj.getEnable(), clone.getEnable());
 		assertEquals(obj.getFiles().get(0), clone.getFiles().get(0));
 		
-		obj = new JobOrderBreakpoint("false", null);
+		obj = new StandardJobOrderBreakpoint("false", null);
 		assertEquals(0, obj.getNbFiles());
 		assertEquals(0, obj.getFiles().size());
 		assertEquals("false", obj.getEnable());
 		
-		obj = new JobOrderBreakpoint("faflse", new ArrayList<>());
+		obj = new StandardJobOrderBreakpoint("faflse", new ArrayList<>());
 		assertEquals(0, obj.getNbFiles());
 		assertEquals(0, obj.getFiles().size());
 		assertEquals("faflse", obj.getEnable());
@@ -52,13 +52,12 @@ public class JobOrderBreakpointTest {
 	@Test
 	public void testToString() {
 		
-		JobOrderBreakpoint obj = new JobOrderBreakpoint();
+		StandardJobOrderBreakpoint obj = new StandardJobOrderBreakpoint();
 		obj.setEnable("true");
 		List<String> files = Arrays.asList("file1","file2");
 		obj.addFiles(files);
 		
 		String str = obj.toString();
-		assertTrue(str.contains("enable: true"));
 		assertTrue(str.contains("files: " + files.toString()));
 		assertTrue(str.contains("nbFiles: 2"));
 	}
@@ -68,7 +67,7 @@ public class JobOrderBreakpointTest {
 	 */
 	@Test
 	public void testEquals() {
-		EqualsVerifier.forClass(JobOrderBreakpoint.class).usingGetClass().suppress(Warning.NONFINAL_FIELDS).verify();
+		EqualsVerifier.forClass(StandardJobOrderBreakpoint.class).usingGetClass().suppress(Warning.NONFINAL_FIELDS).verify();
 	}
 
 }

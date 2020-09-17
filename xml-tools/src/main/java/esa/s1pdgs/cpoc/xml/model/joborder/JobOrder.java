@@ -36,7 +36,7 @@ public class JobOrder {
 	 */
 	@XmlElementWrapper(name = "List_of_Ipf_Procs")
 	@XmlElement(name = "Ipf_Proc")
-	private List<JobOrderProc> procs;
+	private List<AbstractJobOrderProc> procs;
 
 	/**
 	 * Number of processors. Automatically field
@@ -70,7 +70,13 @@ public class JobOrder {
 		}
 		this.procs.addAll(obj.getProcs().stream()
 				.filter(item -> item != null)
-				.map(item -> new JobOrderProc(item))
+				.map(item -> {
+					if(applicationLevel == ApplicationLevel.SPP_OBS) {
+						return new SppObsJobOrderProc(item);
+					}
+
+					return new StandardJobOrderProc(item, applicationLevel);
+				})
 				.collect(Collectors.toList()));
 		this.nbProcs = this.procs.size();
 	}
@@ -93,7 +99,7 @@ public class JobOrder {
 	/**
 	 * @return the procs
 	 */
-	public List<JobOrderProc> getProcs() {
+	public List<AbstractJobOrderProc> getProcs() {
 		return procs;
 	}
 
@@ -101,7 +107,7 @@ public class JobOrder {
 	 * 
 	 * @param proc
 	 */
-	public void addProc(final JobOrderProc proc) {
+	public void addProc(final AbstractJobOrderProc proc) {
 		this.procs.add(proc);
 		this.nbProcs++;
 	}
@@ -110,7 +116,7 @@ public class JobOrder {
 	 * 
 	 * @param procs
 	 */
-	public void addProcs(final List<JobOrderProc> procs) {
+	public void addProcs(final List<AbstractJobOrderProc> procs) {
 		if (procs != null) {
 			this.procs.addAll(procs);
 			this.nbProcs += procs.size();
