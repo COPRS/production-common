@@ -67,5 +67,7 @@ public class DateUtilsTest {
     	assertEquals("2000-01-01T00:00:00.123456Z", DateUtils.convertToMetadataDateTimeFormat("2000-01-01T00:00:00.123456"));
     	assertEquals("2000-01-01T00:00:00.000000Z", DateUtils.convertToMetadataDateTimeFormat("2000-01-01T00:00:00"));
     	assertEquals("2000-01-01T00:00:00.000000Z", DateUtils.convertToMetadataDateTimeFormat("UTC=2000-01-01T00:00:00"));
+    	
+    	assertEquals("2020-09-10T23:37:12.123573Z", DateUtils.convertToMetadataDateTimeFormat("UTC=2020-09-10T23:37:12.123573"));
     }
 }
