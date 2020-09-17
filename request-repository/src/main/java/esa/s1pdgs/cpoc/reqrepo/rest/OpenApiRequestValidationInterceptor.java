@@ -15,9 +15,11 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
 import org.springframework.web.servlet.HandlerInterceptor;
+import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
+import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
 @Component
-public class OpenApiRequestValidationInterceptor implements HandlerInterceptor {
+public class OpenApiRequestValidationInterceptor implements HandlerInterceptor, WebMvcConfigurer {
 
 	static final Logger LOGGER = LogManager.getLogger(OpenApiRequestValidationInterceptor.class);
 
@@ -31,6 +33,11 @@ public class OpenApiRequestValidationInterceptor implements HandlerInterceptor {
 	{
 		this.requestValidator = requestValidator;
 		this.disableValidation = disableValidation;
+	}
+	
+	@Override
+	public void addInterceptors(InterceptorRegistry registry) {
+		registry.addInterceptor(this);
 	}
 	
 	@Override
