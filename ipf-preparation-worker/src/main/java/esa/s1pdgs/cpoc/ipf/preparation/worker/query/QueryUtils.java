@@ -50,7 +50,7 @@ public class QueryUtils {
 				.collect(toList());
 
 		final Map<String, List<TaskTableInputAlternative>> taskTableAlternativesMappedToReferences = inputsMappedTo(
-				(reference, input) -> singletonMap(reference, input.getAlternatives()), taskTableAdapter, mode).stream()
+				(reference, input) -> singletonMap(reference, input.getAlternatives()), taskTableAdapter).stream()
 						.flatMap(map -> map.entrySet().stream()).collect(toMap(Map.Entry::getKey, Map.Entry::getValue));
 
 		return taskTableAlternativesMappedToReferences.entrySet().stream()
@@ -66,12 +66,11 @@ public class QueryUtils {
 	 * @param ttAdapter Adapter to access the contents of the TaskTable
 	 * @return
 	 */
-	public static List<AppDataJobTaskInputs> buildInitialInputs(ProductMode mode, TaskTableAdapter ttAdapter) {
+	public static List<AppDataJobTaskInputs> buildInitialInputs(final TaskTableAdapter ttAdapter) {
 		return taskTableTasksAndInputsMappedTo(
 				(jobInputList, task) -> new AppDataJobTaskInputs(task.getName(), task.getVersion(), jobInputList),
 				(reference, input) -> new AppDataJobInput(reference, "", "",
 						TaskTableMandatoryEnum.YES.equals(input.getMandatory()), emptyList()),
-				mode,
 				ttAdapter);
 	}
 
@@ -89,11 +88,10 @@ public class QueryUtils {
 	 *         based on inputMapFunction
 	 */
 	public static <T> List<T> inputsMappedTo(final BiFunction<String, TaskTableInput, T> inputMapFunction,
-			final TaskTableAdapter taskTableAdapter, final ProductMode mode) {
+			final TaskTableAdapter taskTableAdapter) {
 		return taskTableTasksAndInputsMappedTo(
 				(list, task) -> list,
 				inputMapFunction,
-				mode,
 				taskTableAdapter).stream()
 				.flatMap(Collection::stream).collect(toList());
 	}
@@ -106,8 +104,8 @@ public class QueryUtils {
 	 * @param inputsWithId Map of all inputs inside the tasktable
 	 * @return TaskTableInputMode of the input
 	 */
-	public static TaskTableInputMode modeOfInputOrReference(TaskTableInput input,
-			Map<String, TaskTableInput> inputsWithId) {
+	public static TaskTableInputMode modeOfInputOrReference(final TaskTableInput input,
+			final Map<String, TaskTableInput> inputsWithId) {
 		if (StringUtils.isEmpty(input.getReference())) {
 			return input.getMode();
 		}
@@ -121,10 +119,9 @@ public class QueryUtils {
 		return reference.getMode();
 	}
 
-	//TODO  persist ProductMode inside of TaskTableAdapter so we don't need to pass mode to each method
-	public static Optional<TaskAndInput> getTaskForReference(final String inputReference, final TaskTableAdapter adapter, final ProductMode mode) {
+	public static Optional<TaskAndInput> getTaskForReference(final String inputReference, final TaskTableAdapter adapter) {
 
-		BiFunction<List<Optional<TaskTableInput>>, TaskTableTask, Optional<TaskAndInput>> toTask = (list, task) -> {
+		final BiFunction<List<Optional<TaskTableInput>>, TaskTableTask, Optional<TaskAndInput>> toTask = (list, task) -> {
 			if (list.stream().anyMatch(Optional::isPresent)) {
 				return Optional.of(new TaskAndInput(task, list.stream().filter(Optional::isPresent).findAny().get().get()));
 			}
@@ -132,7 +129,7 @@ public class QueryUtils {
 			return Optional.empty();
 		};
 
-		BiFunction<String, TaskTableInput, Optional<TaskTableInput>> toDo = (reference, input) -> {
+		final BiFunction<String, TaskTableInput, Optional<TaskTableInput>> toDo = (reference, input) -> {
 			if (reference.equals(inputReference)) {
 				return Optional.of(input);
 			}
@@ -140,17 +137,30 @@ public class QueryUtils {
 			return Optional.empty();
 		};
 
-		List<Optional<TaskAndInput>> optionals = taskTableTasksAndInputsMappedTo(toTask, toDo, mode, adapter);
+		final List<Optional<TaskAndInput>> optionals = taskTableTasksAndInputsMappedTo(toTask, toDo, adapter);
 		return optionals.stream().filter(Optional::isPresent).map(Optional::get).findAny();
 	}
 
+	// dirty workaround class until this all get refactored
 	public static final class TaskAndInput {
-		public TaskTableTask task;
-		public TaskTableInput input;
+		private final TaskTableTask task;
+		private final TaskTableInput input;
 
-		public TaskAndInput(TaskTableTask task, TaskTableInput input) {
+		public TaskAndInput(final TaskTableTask task, final TaskTableInput input) {
 			this.task = task;
 			this.input = input;
+		}
+		
+		public final String getName() {
+			return task.getName();
+		}
+		
+		public final String getVersion() {
+			return task.getVersion();
+		}
+		
+		public final TaskTableInput getInput() {
+			return input;
 		}
 	}
 
@@ -182,7 +192,6 @@ public class QueryUtils {
 	public static <MAPPED_INPUT, MAPPED_TASK> List<MAPPED_TASK> taskTableTasksAndInputsMappedTo(
 			final BiFunction<List<MAPPED_INPUT>, TaskTableTask, MAPPED_TASK> taskMapFunction,
 			final BiFunction<String, TaskTableInput, MAPPED_INPUT> inputMapFunction,
-			final ProductMode mode,
 			final TaskTableAdapter ttAdapter) {
 
 		final Map<String, TaskTableInput> inputsWithId = collectInputsWithId(ttAdapter);
@@ -197,7 +206,7 @@ public class QueryUtils {
 			final List<MAPPED_INPUT> mappedInputs = taskInputsMappedTo(
 					taskReference,
 					taskInputs,
-					mode,
+					ttAdapter.mode(),
 					inputMapFunction,
 					inputsWithId);
 
@@ -207,7 +216,7 @@ public class QueryUtils {
 		return mappedTasks;
 	}
 
-	private static Map<String, TaskTableInput> collectInputsWithId(TaskTableAdapter ttAdapter) {
+	private static Map<String, TaskTableInput> collectInputsWithId(final TaskTableAdapter ttAdapter) {
 		return ttAdapter.getTasks().values().stream()
 				.flatMap(task -> task.getInputs().stream()).filter(input -> !StringUtils.isEmpty(input.getId()))
 				.collect(toMap(TaskTableInput::getId, i -> i));

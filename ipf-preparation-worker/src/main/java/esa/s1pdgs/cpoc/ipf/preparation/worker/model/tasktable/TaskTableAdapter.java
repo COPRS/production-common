@@ -41,11 +41,13 @@ public class TaskTableAdapter {
 	private final File file;
 	private final TaskTable taskTable;
 	private final ElementMapper elementMapper;
+	private final ProductMode productMode;
 	
-	public TaskTableAdapter(final File file, final TaskTable taskTable, final ElementMapper elementMapper) {
+	public TaskTableAdapter(final File file, final TaskTable taskTable, final ElementMapper elementMapper, final ProductMode productMode) {
 		this.file = file;
 		this.taskTable = taskTable;
 		this.elementMapper = elementMapper;
+		this.productMode = productMode;
 	}
 	
 	public final File file() {
@@ -54,6 +56,10 @@ public class TaskTableAdapter {
 	
 	public final TaskTable taskTable() {
 		return taskTable;
+	}
+	
+	public final ProductMode mode() {
+		return productMode;
 	}
 
 	public Iterable<TaskTablePool> pools() {
@@ -99,8 +105,8 @@ public class TaskTableAdapter {
 		return tasks;
 	}
 	
-	public final Map<String, TaskTableInput> taskTableInputsFor(final ProductMode mode) {
-		return QueryUtils.inputsMappedTo(Collections::singletonMap, this, mode).stream()
+	public final Map<String, TaskTableInput> taskTableInputs() {
+		return QueryUtils.inputsMappedTo(Collections::singletonMap, this).stream()
 				.flatMap(map -> map.entrySet().stream())
 				.collect(toMap(Map.Entry::getKey, Map.Entry::getValue));
 	}

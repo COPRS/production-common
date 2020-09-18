@@ -73,7 +73,7 @@ public class AuxQuery {
 
 	public final void validate(final AppDataJob job) throws IpfPrepWorkerInputsMissingException {
 		final List<AppDataJobInput> missingInputs = inputsWithoutResultsOf(job);
-		final Map<String, TaskTableInput> taskTableInputs = taskTableAdapter.taskTableInputsFor(mode);
+		final Map<String, TaskTableInput> taskTableInputs = taskTableAdapter.taskTableInputs();
 		final List<AppDataJobInput> timedOutInputs = new ArrayList<>();
 
 		final Map<String, String> missingMetadata = new HashMap<>();
@@ -129,7 +129,7 @@ public class AuxQuery {
 
 	private List<AppDataJobTaskInputs> inputsOf(final AppDataJob job) {
 		if (isEmpty(job.getAdditionalInputs())) {
-			return QueryUtils.buildInitialInputs(mode, taskTableAdapter);
+			return QueryUtils.buildInitialInputs(taskTableAdapter);
 		}
 
 		return job.getAdditionalInputs();
@@ -184,7 +184,7 @@ public class AuxQuery {
 	private List<AppDataJobTaskInputs> distributeResults(
 			final Map<TaskTableInputAlternative.TaskTableInputAltKey, SearchMetadataResult> metadataQueries) {
 		final Map<String, AppDataJobInput> referenceInputs = new HashMap<>();
-		final Map<String, TaskTableInput> taskTableInputs = taskTableAdapter.taskTableInputsFor(mode);
+		final Map<String, TaskTableInput> taskTableInputs = taskTableAdapter.taskTableInputs();
 		final Map<String, String> unsatisfiedReferences = new HashMap<>();
 
 		final List<AppDataJobInput> futureInputs = new ArrayList<>();

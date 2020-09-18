@@ -48,7 +48,7 @@ public class MultipleProductCoverSearch {
 		private LocalDateTime start;
 		private LocalDateTime stop;
 
-		public Range(LocalDateTime start, LocalDateTime stop) {
+		public Range(final LocalDateTime start, final LocalDateTime stop) {
 			this.start = start;
 			this.stop = stop;
 		}
@@ -57,7 +57,7 @@ public class MultipleProductCoverSearch {
 			return start;
 		}
 
-		public void setStart(LocalDateTime start) {
+		public void setStart(final LocalDateTime start) {
 			this.start = start;
 		}
 
@@ -65,7 +65,7 @@ public class MultipleProductCoverSearch {
 			return stop;
 		}
 
-		public void setStop(LocalDateTime stop) {
+		public void setStop(final LocalDateTime stop) {
 			this.stop = stop;
 		}
 		
@@ -80,7 +80,7 @@ public class MultipleProductCoverSearch {
 		 * @param other range to check whether this range intersects with
 		 * @return true, if ranges intersect
 		 */
-		public boolean intersects(Range other) {
+		public boolean intersects(final Range other) {
 			return !other.getStart().isAfter(stop) && !other.getStop().isBefore(start);
 		}
 	}
@@ -92,8 +92,8 @@ public class MultipleProductCoverSearch {
 	private final MetadataClient metadataClient;
 	private final IpfPreparationWorkerSettings prepSettings;
 
-	public MultipleProductCoverSearch(TaskTableAdapter ttAdapter, ElementMapper elementMapper,
-			MetadataClient metadataClient, IpfPreparationWorkerSettings prepSettings) {
+	public MultipleProductCoverSearch(final TaskTableAdapter ttAdapter, final ElementMapper elementMapper,
+			final MetadataClient metadataClient, final IpfPreparationWorkerSettings prepSettings) {
 		this.ttAdapter = ttAdapter;
 		this.elementMapper = elementMapper;
 		this.metadataClient = metadataClient;
@@ -118,7 +118,7 @@ public class MultipleProductCoverSearch {
 	public List<AppDataJobTaskInputs> updateTaskInputsByAlternative(List<AppDataJobTaskInputs> tasks,
 			final TaskTableInputAlternative alternative, final S3Product product) throws MetadataQueryException {
 		// TODO: Allow other timeliness
-		String timeliness = "NRT";
+		final String timeliness = "NRT";
 		List<S3Metadata> products = metadataClient.getProductsInRange(alternative.getFileType(),
 				elementMapper.inputFamilyOf(alternative.getFileType()), product.getSatelliteId(),
 				product.getStartTime(), product.getStopTime(), alternative.getDeltaTime0(), alternative.getDeltaTime1(),
@@ -129,7 +129,7 @@ public class MultipleProductCoverSearch {
 
 		// Check coverage
 		if (!products.isEmpty()) {
-			boolean intervalCovered = checkCoverage(product.getStartTime(), product.getStopTime(),
+			final boolean intervalCovered = checkCoverage(product.getStartTime(), product.getStopTime(),
 					alternative.getDeltaTime0(), alternative.getDeltaTime1(), timeliness, products);
 
 			// Set results on matching tasks
@@ -156,7 +156,7 @@ public class MultipleProductCoverSearch {
 			final TaskTableInputAlternative alternative, final AppDataJob job, final S3Product product)
 			throws MetadataQueryException {
 		// TODO: Allow other timeliness
-		String timeliness = "NRT";
+		final String timeliness = "NRT";
 		List<S3Metadata> products = metadataClient.getProductsInRange(alternative.getFileType(),
 				elementMapper.inputFamilyOf(alternative.getFileType()), product.getSatelliteId(), job.getStartTime(),
 				job.getStopTime(), 0.0, 0.0, timeliness);
@@ -166,7 +166,7 @@ public class MultipleProductCoverSearch {
 
 		// Check coverage
 		if (!products.isEmpty()) {
-			boolean intervalCovered = checkCoverage(product.getStartTime(), product.getStopTime(), 0.0, 0.0, timeliness,
+			final boolean intervalCovered = checkCoverage(product.getStartTime(), product.getStopTime(), 0.0, 0.0, timeliness,
 					products);
 
 			// Set results on matching tasks
@@ -194,23 +194,23 @@ public class MultipleProductCoverSearch {
 	 */
 	public Range getIntersectingANXRange(final String productName, final long anxOffsetInS, final long rangeLengthInS)
 			throws MetadataQueryException {
-		String productType = productName.substring(4, 15);
+		final String productType = productName.substring(4, 15);
 
-		S3Metadata metadata = metadataClient.getS3MetadataForProduct(elementMapper.inputFamilyOf(productType),
+		final S3Metadata metadata = metadataClient.getS3MetadataForProduct(elementMapper.inputFamilyOf(productType),
 				productName);
 
-		Range productRange = new Range(DateUtils.parse(metadata.getValidityStart()),
+		final Range productRange = new Range(DateUtils.parse(metadata.getValidityStart()),
 				DateUtils.parse(metadata.getValidityStop()));
 
 		if (metadata.getAnxTime() != null) {
-			Range result = getIntersectingRange(productRange, metadata.getAnxTime(), anxOffsetInS, rangeLengthInS);
+			final Range result = getIntersectingRange(productRange, metadata.getAnxTime(), anxOffsetInS, rangeLengthInS);
 			if (result != null) {
 				return result;
 			}
 		}
 
 		if (metadata.getAnx1Time() != null) {
-			Range result = getIntersectingRange(productRange, metadata.getAnx1Time(), anxOffsetInS, rangeLengthInS);
+			final Range result = getIntersectingRange(productRange, metadata.getAnx1Time(), anxOffsetInS, rangeLengthInS);
 			if (result != null) {
 				return result;
 			}
@@ -271,9 +271,9 @@ public class MultipleProductCoverSearch {
 	 * @return list of AppDataJobFile
 	 */
 	private List<AppDataJobFile> convertMetadataToAppDataJobFiles(final List<S3Metadata> products) {
-		List<AppDataJobFile> files = new ArrayList<>();
+		final List<AppDataJobFile> files = new ArrayList<>();
 
-		for (S3Metadata product : products) {
+		for (final S3Metadata product : products) {
 			files.add(new AppDataJobFile(product.getProductName(), product.getKeyObjectStorage(),
 					product.getValidityStart(), product.getValidityStop()));
 		}
@@ -287,12 +287,12 @@ public class MultipleProductCoverSearch {
 	 * @return Range(anx + anxOffset, anx + anxOffset + rangeLength) if productRange
 	 *         intersects with that range
 	 */
-	private Range getIntersectingRange(Range productRange, String anxTime, long anxOffsetInS, long rangeLengthInS) {
-		LocalDateTime anx = DateUtils.parse(anxTime);
+	private Range getIntersectingRange(final Range productRange, final String anxTime, final long anxOffsetInS, final long rangeLengthInS) {
+		final LocalDateTime anx = DateUtils.parse(anxTime);
 
-		LocalDateTime rangeStart = anx.plus(anxOffsetInS, ChronoUnit.SECONDS);
-		LocalDateTime rangeStop = rangeStart.plus(rangeLengthInS, ChronoUnit.SECONDS);
-		Range anxRange = new Range(rangeStart, rangeStop);
+		final LocalDateTime rangeStart = anx.plus(anxOffsetInS, ChronoUnit.SECONDS);
+		final LocalDateTime rangeStop = rangeStart.plus(rangeLengthInS, ChronoUnit.SECONDS);
+		final Range anxRange = new Range(rangeStart, rangeStop);
 
 		LOGGER.trace("Check if range {} intersects with anxRange {}", productRange, anxRange);
 		
@@ -314,11 +314,11 @@ public class MultipleProductCoverSearch {
 	 * @param products List of products which should be checked for continuity
 	 * @return true if list is continuous, false if not
 	 */
-	private boolean isGranuleContinuous(List<S3Metadata> products) {
+	private boolean isGranuleContinuous(final List<S3Metadata> products) {
 
 		for (int i = 0; i < products.size() - 1; i++) {
-			S3Metadata product = products.get(i);
-			S3Metadata successor = products.get(i + 1);
+			final S3Metadata product = products.get(i);
+			final S3Metadata successor = products.get(i + 1);
 
 			if (product.getGranulePosition().equals("LAST")) {
 				if (!successor.getGranulePosition().equals("FIRST")) {
@@ -348,18 +348,18 @@ public class MultipleProductCoverSearch {
 	 * @param alternative tasktable alternative to determine the correct tasks
 	 * @return updated list of tasks
 	 */
-	private List<AppDataJobTaskInputs> updateAppDataJobTaskInputs(List<AppDataJobTaskInputs> tasks,
-			List<S3Metadata> products, boolean complete, TaskTableInputAlternative alternative, ProductMode mode,
-			TaskTableAdapter taskTableAdapter) {
-		Map<String, TaskTableInput> taskTableInputs = QueryUtils
-				.taskTableTasksAndInputsMappedTo((list, task) -> list, Collections::singletonMap, mode,
+	private List<AppDataJobTaskInputs> updateAppDataJobTaskInputs(final List<AppDataJobTaskInputs> tasks,
+			final List<S3Metadata> products, final boolean complete, final TaskTableInputAlternative alternative, final ProductMode mode,
+			final TaskTableAdapter taskTableAdapter) {
+		final Map<String, TaskTableInput> taskTableInputs = QueryUtils
+				.taskTableTasksAndInputsMappedTo((list, task) -> list, Collections::singletonMap,
 						taskTableAdapter)
 				.stream().flatMap(Collection::stream).flatMap(map -> map.entrySet().stream())
 				.collect(toMap(Map.Entry::getKey, Map.Entry::getValue));
 
-		for (AppDataJobTaskInputs task : tasks) {
-			for (AppDataJobInput input : task.getInputs()) {
-				TaskTableInput ttInput = taskTableInputs.get(input.getTaskTableInputReference());
+		for (final AppDataJobTaskInputs task : tasks) {
+			for (final AppDataJobInput input : task.getInputs()) {
+				final TaskTableInput ttInput = taskTableInputs.get(input.getTaskTableInputReference());
 				if (ttInput.getAlternatives().contains(alternative)) {
 					input.setHasResults(complete);
 					input.setFileNameType(alternative.getFileNameType().toString());

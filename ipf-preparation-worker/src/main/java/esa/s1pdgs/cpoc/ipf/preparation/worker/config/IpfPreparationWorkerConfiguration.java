@@ -151,7 +151,6 @@ public class IpfPreparationWorkerConfiguration {
 			
 			return new L0SegmentTypeAdapter(
 					metadataClient, 
-					settings.getProductMode(),
 					timeoutInputSearchMs
 			);			
 		}
@@ -243,7 +242,8 @@ public class IpfPreparationWorkerConfiguration {
 		return file -> new TaskTableAdapter(
 				file, 
 				taskTableFactory.buildTaskTable(file, processSettings.getLevel()), 
-				elementMapper
+				elementMapper,
+				settings.getProductMode()
 		);		
 	}
 	

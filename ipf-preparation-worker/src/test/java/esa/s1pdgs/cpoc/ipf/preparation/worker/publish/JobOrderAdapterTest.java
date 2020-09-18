@@ -30,6 +30,7 @@ import esa.s1pdgs.cpoc.appcatalog.AppDataJobInput;
 import esa.s1pdgs.cpoc.appcatalog.AppDataJobProduct;
 import esa.s1pdgs.cpoc.appcatalog.AppDataJobTaskInputs;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.config.ProcessSettings;
+import esa.s1pdgs.cpoc.ipf.preparation.worker.model.ProductMode;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.model.tasktable.ElementMapper;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.model.tasktable.TaskTableAdapter;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.model.tasktable.TaskTableFactory;
@@ -71,7 +72,8 @@ public class JobOrderAdapterTest {
         final TaskTableAdapter taskTableAdapter = new TaskTableAdapter(
                 xmlFile,
                 taskTableFactory.buildTaskTable(xmlFile, processSettings.getLevel()),
-                elementMapper
+                elementMapper,
+                ProductMode.ALWAYS
         );
 
         final JobOrder jobOrder = taskTableAdapter.newJobOrder(processSettings);
