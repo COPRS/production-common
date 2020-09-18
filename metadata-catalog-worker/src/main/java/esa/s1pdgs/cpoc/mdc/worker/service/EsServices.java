@@ -750,7 +750,7 @@ public class EsServices {
 		// We initialize the reference time with the start time of the interval
 		long refTime = beginDate.toEpochSecond(ZoneOffset.UTC);
 
-		for (SearchMetadata product : products) {
+		for (final SearchMetadata product : products) {
 			/*
 			 * Try to detect, if the product does have a follower. This happens, when the
 			 * following criteria are both true: 1. The startTime of the product lies before
@@ -758,8 +758,8 @@ public class EsServices {
 			 * the product must be bigger than the current refTime (to avoid refTime gets
 			 * smaller again)
 			 */
-			long startTime = DateUtils.parse(product.getValidityStart()).toEpochSecond(ZoneOffset.UTC);
-			long stopTime = DateUtils.parse(product.getValidityStop()).toEpochSecond(ZoneOffset.UTC);
+			final long startTime = DateUtils.parse(product.getValidityStart()).toEpochSecond(ZoneOffset.UTC);
+			final long stopTime = DateUtils.parse(product.getValidityStop()).toEpochSecond(ZoneOffset.UTC);
 			if ((startTime <= refTime + gapThresholdMillis) && (stopTime > refTime)) {
 				refTime = stopTime;
 			}
@@ -1300,7 +1300,7 @@ public class EsServices {
 		final String missionId = getProperty(source, "missionId", orThrowMalformed("missionId"));
 		final String satelliteId = getProperty(source, "satelliteId", orThrowMalformed("satelliteId"));
 
-		Map<String, String> additionalProperties = source.entrySet().stream().collect(toMap(Map.Entry::getKey, e -> e.getValue().toString()));
+		final Map<String, String> additionalProperties = source.entrySet().stream().collect(toMap(Map.Entry::getKey, e -> e.getValue().toString()));
 
 		return new AuxMetadata(
 				productName,
@@ -1323,8 +1323,10 @@ public class EsServices {
 	@SuppressWarnings("unchecked")
 	public SearchMetadata productNameQuery(final String productFamily, final String productName)
 			throws MetadataMalformedException, MetadataNotPresentException, IOException {
+		
+		final String index = getIndexFor(productFamily);
 
-		final Map<String, Object> source = getRequest(productFamily, productName);
+		final Map<String, Object> source = getRequest(index, productName);
 
 		if (source.isEmpty()) {
 			throw new MetadataNotPresentException(productName);
@@ -1366,7 +1368,7 @@ public class EsServices {
 		return searchMetadata;
 	}
 
-	private static DefaultProvider orThrowMalformed(String key) {
+	private static DefaultProvider orThrowMalformed(final String key) {
 		return () -> {
 			throw new MetadataMalformedException((key));
 		};
@@ -1377,7 +1379,7 @@ public class EsServices {
 		String get() throws MetadataMalformedException;
 	}
 
-	private String getProperty(Map<String, Object> source, String key, DefaultProvider defaultProvider) throws MetadataMalformedException {
+	private String getProperty(final Map<String, Object> source, final String key, final DefaultProvider defaultProvider) throws MetadataMalformedException {
 		if (!source.containsKey(key)) {
 			return defaultProvider.get();
 		}
@@ -1385,10 +1387,10 @@ public class EsServices {
 		return source.get(key).toString();
 	}
 
-	private String getPropertyAsDate(Map<String, Object> source, String key, DefaultProvider defaultProvider) throws MetadataMalformedException {
+	private String getPropertyAsDate(final Map<String, Object> source, final String key, final DefaultProvider defaultProvider) throws MetadataMalformedException {
 		try {
 			return DateUtils.convertToMetadataDateTimeFormat(getProperty(source, key, defaultProvider));
-		} catch (DateTimeParseException e) {
+		} catch (final DateTimeParseException e) {
 			throw new MetadataMalformedException(key);
 		}
 	}
@@ -1539,6 +1541,21 @@ public class EsServices {
 		return new HashMap<>();
 	}
 
+	private String getIndexFor(final String family) {
+		if (ProductFamily.AUXILIARY_FILE.toString().toLowerCase().equals(family.toLowerCase())) {			
+			/*
+			 * FIXME
+			 * DIRTY WORKAROUND WARRNING:
+			 * 
+			 * shoud be replaced with proper type mapping
+			 * 
+			 * 
+			 */
+			return "aux_resorb";
+		}
+		return family.toLowerCase();
+	}
+
 	private L0AcnMetadata extractInfoForL0ACN(final Map<String, Object> source) throws MetadataMalformedException {
 		final L0AcnMetadata r = new L0AcnMetadata();
 		if (source.containsKey("productName")) {
@@ -1676,7 +1693,7 @@ public class EsServices {
 	}
 
 	@SuppressWarnings("unchecked")
-	private Geometry extractPolygonFrom(GetResponse response) {
+	private Geometry extractPolygonFrom(final GetResponse response) {
 		// TODO FIXME this needs to be fixed to use a proper abstraction
 		final Map<String, Object> sliceCoordinates = (Map<String, Object>) response.getSourceAsMap()
 				.get("sliceCoordinates");
