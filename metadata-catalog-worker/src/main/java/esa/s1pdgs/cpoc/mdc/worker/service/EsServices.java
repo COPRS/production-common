@@ -1332,6 +1332,8 @@ public class EsServices {
 
 		final SearchMetadata searchMetadata = new SearchMetadata();
 
+		searchMetadata.setSwathtype((String) source.getOrDefault("swathtype", "UNDEFINED"));
+		
 		searchMetadata.setValidityStart(getPropertyAsDate(source, "startTime", orThrowMalformed("startTime")));
 		searchMetadata.setValidityStop(getPropertyAsDate(source, "stopTime", orThrowMalformed("stopTime")));
 

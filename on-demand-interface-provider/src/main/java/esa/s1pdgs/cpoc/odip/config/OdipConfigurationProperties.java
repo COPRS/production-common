@@ -6,45 +6,34 @@ import java.util.Map;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Configuration;
 
-import esa.s1pdgs.cpoc.common.ProductCategory;
-
 @Configuration
-@ConfigurationProperties("trigger")
+@ConfigurationProperties("odip")
 public class OdipConfigurationProperties {
-	public static class CategoryConfig
-	{
-		private long fixedDelayMs = 500L;
-		private long initDelayPolMs = 2000L;
 
-		public long getFixedDelayMs() {
-			return fixedDelayMs;
-		}
+	private String timeliness;
 
-		public void setFixedDelayMs(final long fixedDelayMs) {
-			this.fixedDelayMs = fixedDelayMs;
-		}
+	private Map<String, String> productionTypeToProductFamily = new LinkedHashMap<>();
 
-		public long getInitDelayPolMs() {
-			return initDelayPolMs;
-		}
-
-		public void setInitDelayPolMs(final long initDelayPolMs) {
-			this.initDelayPolMs = initDelayPolMs;
-		}
-
-		@Override
-		public String toString() {
-			return "CategoryConfig [fixedDelayMs=" + fixedDelayMs + ", initDelayPolMs=" + initDelayPolMs + "]";
-		}
+	public Map<String, String> getProductionTypeToProductFamily() {
+		return productionTypeToProductFamily;
 	}
 
-	private Map<ProductCategory, CategoryConfig> productCategories = new LinkedHashMap<>();
-
-	public Map<ProductCategory, CategoryConfig> getProductCategories() {
-		return productCategories;
+	public void setProductionTypeToProductFamily(Map<String, String> productionTypeToProductFamily) {
+		this.productionTypeToProductFamily = productionTypeToProductFamily;
 	}
 
-	public void setProductCategories(final Map<ProductCategory, CategoryConfig> productCategories) {
-		this.productCategories = productCategories;
+	public String getTimeliness() {
+		return timeliness;
 	}
+
+	public void setTimeliness(String timeliness) {
+		this.timeliness = timeliness;
+	}
+
+	@Override
+	public String toString() {
+		return "OdipConfigurationProperties [timeliness=" + timeliness + ", productionTypeToProductFamily="
+				+ productionTypeToProductFamily + "]";
+	}
+
 }
