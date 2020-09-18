@@ -54,6 +54,11 @@ public abstract class AbstractMetadata {
     protected String stationCode;
     
     /**
+     * Swath Type
+     */
+    protected String swathtype;
+    
+    /**
      * @param productName
      * @param productType
      * @param keyObjectStorage
@@ -197,10 +202,18 @@ public abstract class AbstractMetadata {
 		this.stationCode = stationCode;
 	}
 
+	public String getSwathtype() {
+		return swathtype;
+	}
+	
+	public void setSwathtype(String swathtype) {
+		this.swathtype = swathtype;
+	}
+	
 	public String toAbstractString() {
 		return String.format(
-				"\"productName\":\"%s\",\"productType\":\"%s\",\"keyObjectStorage\":\"%s\",\"validityStart\":\"%s\",\"validityStop\":\"%s\",\"missionId\":\"%s\",\"satelliteId\":\"%s\",\"stationCode\":\"%s\"",
-				productName, productType, keyObjectStorage, validityStart, validityStop, missionId, satelliteId, stationCode);
+				"\"productName\":\"%s\",\"productType\":\"%s\",\"keyObjectStorage\":\"%s\",\"validityStart\":\"%s\",\"validityStop\":\"%s\",\"missionId\":\"%s\",\"satelliteId\":\"%s\",\"stationCode\":\"%s\",\"swathtype\":\"%s\"",
+				productName, productType, keyObjectStorage, validityStart, validityStop, missionId, satelliteId, stationCode, swathtype);
 	}
 
 	/**
@@ -209,7 +222,7 @@ public abstract class AbstractMetadata {
     @Override
     public int hashCode() {
         return Objects.hash(productName, productType, keyObjectStorage,
-                validityStart, validityStop, missionId, satelliteId, stationCode);
+                validityStart, validityStop, missionId, satelliteId, stationCode, swathtype);
     }
 
     /**
@@ -231,7 +244,8 @@ public abstract class AbstractMetadata {
                     && Objects.equals(validityStop, other.validityStop)
 		            && Objects.equals(missionId, other.missionId)
 		            && Objects.equals(satelliteId, other.satelliteId)
-		            && Objects.equals(stationCode, other.stationCode);
+		            && Objects.equals(stationCode, other.stationCode)
+		            && Objects.equals(swathtype, other.swathtype);
         }
         return ret;
     }
