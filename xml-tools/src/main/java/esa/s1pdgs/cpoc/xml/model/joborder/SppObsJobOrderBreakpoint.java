@@ -7,4 +7,12 @@ import javax.xml.bind.annotation.XmlRootElement;
 @XmlRootElement(name = "BreakPoint")
 @XmlAccessorType(XmlAccessType.NONE)
 public class SppObsJobOrderBreakpoint extends AbstractJobOrderBreakpoint {
+
+    public SppObsJobOrderBreakpoint(AbstractJobOrderBreakpoint other) {
+        super(other);
+    }
+
+    public SppObsJobOrderBreakpoint() {
+        super();
+    }
 }

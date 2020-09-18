@@ -95,11 +95,52 @@ public class TaskTableToJobOrderConverterTest {
 
 		final TaskTableToJobOrderConverter converter = new TaskTableToJobOrderConverter(ProductMode.SLICING);
 
+		final JobOrder jobOrder = converter.apply(taskTable);
+
+		applyObsParameter(jobOrder);
+
+		final String jobOrderXml = xmlConverter.convertFromObjectToXMLString(jobOrder);
+
+		final String expectedJobOrder =
+				new String(Files.readAllBytes(
+						new File(getClass().getResource(
+								"/JobOrder_SPP_OBS_expected.xml").toURI()).toPath()),
+						StandardCharsets.UTF_8);
+
+		assertThat(jobOrderXml, is(equalTo(expectedJobOrder)));
+	}
+
+	@Test
+	public void testJobOrderCloning() throws IOException, JAXBException, URISyntaxException {
+
+		final File taskTableFile = new File(getClass().getResource("/OBS_TT_01_taskTable.xml").toURI());
+
+		final XmlConverter xmlConverter = new XmlConfig().xmlConverter();
+		final TaskTable taskTable =
+				new TaskTableFactory(xmlConverter).buildTaskTable(taskTableFile, ApplicationLevel.SPP_OBS);
+
+		final TaskTableToJobOrderConverter converter = new TaskTableToJobOrderConverter(ProductMode.SLICING);
+
+		final JobOrder jobOrder = new JobOrder(converter.apply(taskTable), ApplicationLevel.SPP_OBS);
+
+		applyObsParameter(jobOrder);
+
+		final String jobOrderXml = xmlConverter.convertFromObjectToXMLString(jobOrder);
+
+		final String expectedJobOrder =
+				new String(Files.readAllBytes(
+						new File(getClass().getResource(
+								"/JobOrder_SPP_OBS_expected.xml").toURI()).toPath()),
+						StandardCharsets.UTF_8);
+
+		assertThat(jobOrderXml, is(equalTo(expectedJobOrder)));
+	}
+
+	private void applyObsParameter(JobOrder jobOrder) {
 		JobOrderSensingTime sensingTime = new JobOrderSensingTime();
 		sensingTime.setStart("20200121_183236000000");
 		sensingTime.setStop("20200121_215006000000");
 
-		final JobOrder jobOrder = converter.apply(taskTable);
 		AbstractJobOrderConf jobOrderConf = jobOrder.getConf();
 		jobOrderConf.setStderrLogLevel("INFO");
 		jobOrderConf.setStdoutLogLevel("INFO");
@@ -127,15 +168,5 @@ public class TaskTableToJobOrderConverterTest {
 		jobOrderOutput.setFileType("___OBS__SS");
 		jobOrderOutput.setFileNameType(JobOrderFileNameType.DIRECTORY);
 		jobOrderOutput.setFileName("/data/localWD/129");
-
-		final String jobOrderXml = xmlConverter.convertFromObjectToXMLString(jobOrder);
-
-		final String expectedJobOrder =
-				new String(Files.readAllBytes(
-						new File(getClass().getResource(
-								"/JobOrder_SPP_OBS_expected.xml").toURI()).toPath()),
-						StandardCharsets.UTF_8);
-
-		assertThat(jobOrderXml, is(equalTo(expectedJobOrder)));
 	}
 }

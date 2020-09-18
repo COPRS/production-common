@@ -65,6 +65,8 @@ public class JobOrder {
 			this.conf = new L0JobOrderConf(obj.getConf());
 		} else if (applicationLevel == ApplicationLevel.L2) {
 			this.conf = new L2JobOrderConf(obj.getConf());
+		} else if(applicationLevel == ApplicationLevel.SPP_OBS) {
+			this.conf = new SppObsJobOrderConf(obj.getConf());
 		} else {
 			this.conf = new L1JobOrderConf(obj.getConf());
 		}

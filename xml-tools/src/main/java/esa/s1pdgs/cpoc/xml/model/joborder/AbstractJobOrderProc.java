@@ -75,14 +75,18 @@ public abstract class AbstractJobOrderProc {
      */
     public AbstractJobOrderProc(final AbstractJobOrderProc obj, ApplicationLevel applicationLevel) {
         this();
-        this.inputs.addAll(obj.getInputs().stream().filter(item -> item != null).map(item -> new JobOrderInput(item))
+        this.inputs.addAll(obj.getInputs().stream().filter(Objects::nonNull).map(JobOrderInput::new)
                 .collect(Collectors.toList()));
         this.nbInputs = this.inputs.size();
-        this.outputs.addAll(obj.getOutputs().stream().filter(item -> item != null).map(item -> new JobOrderOutput(item))
+        this.outputs.addAll(obj.getOutputs().stream().filter(Objects::nonNull).map(JobOrderOutput::new)
                 .collect(Collectors.toList()));
         this.nbOutputs = this.outputs.size();
         if (obj.getBreakpoint() != null) {
-            setBreakpoint(new StandardJobOrderBreakpoint(obj.getBreakpoint()));
+            if(applicationLevel == ApplicationLevel.SPP_OBS) {
+                setBreakpoint(new SppObsJobOrderBreakpoint(obj.getBreakpoint()));
+            } else {
+                setBreakpoint(new StandardJobOrderBreakpoint(obj.getBreakpoint()));
+            }
         }
         this.taskName = obj.getTaskName();
         this.taskVersion = obj.getTaskVersion();
