@@ -9,9 +9,11 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.function.BiFunction;
 import java.util.stream.Collectors;
 
 import org.springframework.util.CollectionUtils;
+import org.springframework.util.StringUtils;
 
 import esa.s1pdgs.cpoc.appcatalog.AppDataJob;
 import esa.s1pdgs.cpoc.appcatalog.AppDataJobProduct;
@@ -25,6 +27,7 @@ import esa.s1pdgs.cpoc.ipf.preparation.worker.appcat.AppCatJobService;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.generator.DiscardedException;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.model.ProductMode;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.model.tasktable.TaskTableAdapter;
+import esa.s1pdgs.cpoc.ipf.preparation.worker.query.QueryUtils;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.type.AbstractProductTypeAdapter;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.type.Product;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.type.ProductTypeAdapter;
@@ -35,6 +38,7 @@ import esa.s1pdgs.cpoc.mqi.model.queue.IpfExecutionJob;
 import esa.s1pdgs.cpoc.mqi.model.queue.util.CatalogEventAdapter;
 import esa.s1pdgs.cpoc.xml.model.joborder.JobOrder;
 import esa.s1pdgs.cpoc.xml.model.tasktable.TaskTableInput;
+import esa.s1pdgs.cpoc.xml.model.tasktable.TaskTableTask;
 
 public final class L0SegmentTypeAdapter extends AbstractProductTypeAdapter implements ProductTypeAdapter {	
 	private final MetadataClient metadataClient;
@@ -133,9 +137,50 @@ public final class L0SegmentTypeAdapter extends AbstractProductTypeAdapter imple
 		// dirty workaround to find the first input as the inputs are not ordered.
 		for (final Map.Entry<String, TaskTableInput> ttInput : taskTableAdapter.taskTableInputsFor(productMode).entrySet()) {
 			// TODO add queried inputs as preselected inputs to appDataJob
-			// FIXME			
+			// FIXME
 		}
-		product.overridingInputs(overridingInputs);			
+
+		// Possible solution:
+		// Assume we are searching for Inputs with FILE_TYPE = RFC in TaskTable:
+
+		// we have to search through all Inputs and find these Inputs which have an alternative with
+		// FILE_TYPE = RFC
+
+		// we need the inputReference String for these Inputs
+		// so we can use QueryUtils.taskTableTasksAndInputsMappedTo to get these references:
+
+		// for each taskTableInput which has an alternative with FILE_TYPE = RFC
+		// => return the referenceString
+		// if the taskTableInput has no such Alternative
+		// => return an empty String
+
+		// for each task collect all nonEmpty reference strings and return a List of them
+
+		// at the end we have a List<List<String>> which we convert to List<String> using flatMap
+
+		final String fileTypeRfc = "RFC";
+
+		BiFunction<List<String>, TaskTableTask, List<String>> toReferenceList
+				= (references, task) -> references.stream().filter(StringUtils::hasText).collect(Collectors.toList());
+
+		BiFunction<String, TaskTableInput, String> toReference
+				= (reference, input) -> {
+			if(input.alternativesOrdered().anyMatch(alt -> alt.getFileType() == "RFC")) {
+				return reference;
+			}
+
+			return "";
+		};
+
+		List<String> references
+				= QueryUtils.taskTableTasksAndInputsMappedTo(
+				toReferenceList,
+				toReference,
+				productMode,
+				taskTableAdapter)
+				.stream().flatMap(List::stream).collect(Collectors.toList());
+
+		product.overridingInputs(overridingInputs);
 
 	}
 
