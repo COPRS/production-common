@@ -9,6 +9,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.function.BiFunction;
 
 import org.springframework.util.StringUtils;
@@ -118,6 +119,39 @@ public class QueryUtils {
 		}
 
 		return reference.getMode();
+	}
+
+	//TODO  persist ProductMode inside of TaskTableAdapter so we don't need to pass mode to each method
+	public static Optional<TaskAndInput> getTaskForReference(final String inputReference, final TaskTableAdapter adapter, final ProductMode mode) {
+
+		BiFunction<List<Optional<TaskTableInput>>, TaskTableTask, Optional<TaskAndInput>> toTask = (list, task) -> {
+			if (list.stream().anyMatch(Optional::isPresent)) {
+				return Optional.of(new TaskAndInput(task, list.stream().filter(Optional::isPresent).findAny().get().get()));
+			}
+
+			return Optional.empty();
+		};
+
+		BiFunction<String, TaskTableInput, Optional<TaskTableInput>> toDo = (reference, input) -> {
+			if (reference.equals(inputReference)) {
+				return Optional.of(input);
+			}
+
+			return Optional.empty();
+		};
+
+		List<Optional<TaskAndInput>> optionals = taskTableTasksAndInputsMappedTo(toTask, toDo, mode, adapter);
+		return optionals.stream().filter(Optional::isPresent).map(Optional::get).findAny();
+	}
+
+	public static final class TaskAndInput {
+		public TaskTableTask task;
+		public TaskTableInput input;
+
+		public TaskAndInput(TaskTableTask task, TaskTableInput input) {
+			this.task = task;
+			this.input = input;
+		}
 	}
 
 	/**

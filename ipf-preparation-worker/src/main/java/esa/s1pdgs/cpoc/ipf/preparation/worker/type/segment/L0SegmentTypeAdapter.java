@@ -16,6 +16,8 @@ import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 
 import esa.s1pdgs.cpoc.appcatalog.AppDataJob;
+import esa.s1pdgs.cpoc.appcatalog.AppDataJobFile;
+import esa.s1pdgs.cpoc.appcatalog.AppDataJobInput;
 import esa.s1pdgs.cpoc.appcatalog.AppDataJobProduct;
 import esa.s1pdgs.cpoc.appcatalog.AppDataJobTaskInputs;
 import esa.s1pdgs.cpoc.appcatalog.util.AppDataJobProductAdapter;
@@ -39,6 +41,8 @@ import esa.s1pdgs.cpoc.mqi.model.queue.util.CatalogEventAdapter;
 import esa.s1pdgs.cpoc.xml.model.joborder.JobOrder;
 import esa.s1pdgs.cpoc.xml.model.tasktable.TaskTableInput;
 import esa.s1pdgs.cpoc.xml.model.tasktable.TaskTableTask;
+import esa.s1pdgs.cpoc.xml.model.tasktable.enums.TaskTableFileNameType;
+import esa.s1pdgs.cpoc.xml.model.tasktable.enums.TaskTableMandatoryEnum;
 
 public final class L0SegmentTypeAdapter extends AbstractProductTypeAdapter implements ProductTypeAdapter {	
 	private final MetadataClient metadataClient;
@@ -180,8 +184,39 @@ public final class L0SegmentTypeAdapter extends AbstractProductTypeAdapter imple
 				taskTableAdapter)
 				.stream().flatMap(List::stream).collect(Collectors.toList());
 
+		for(String reference : references) {
+			Optional<QueryUtils.TaskAndInput> optionalTask = QueryUtils.getTaskForReference(reference, taskTableAdapter, productMode);
+			if(optionalTask.isPresent()) {
+				QueryUtils.TaskAndInput task = optionalTask.get();
+				AppDataJobTaskInputs taskInputs =
+						new AppDataJobTaskInputs(task.task.getName(), task.task.getVersion(), toInputs(reference,task.input, segmentsA, segmentsB));
+				overridingInputs.add(taskInputs);
+			}
+		}
+
 		product.overridingInputs(overridingInputs);
 
+	}
+
+	private List<AppDataJobInput> toInputs(String inputReference, TaskTableInput input, List<LevelSegmentMetadata> segmentsA, List<LevelSegmentMetadata> segmentsB) {
+
+		//TODO
+		TaskTableFileNameType fileNameType = input.alternativesOrdered().filter(a -> a.getFileType().equals("RFC????")).findAny().map(a -> a.getFileNameType()).orElse(TaskTableFileNameType.BLANK);
+
+		List<AppDataJobFile> files = new ArrayList<>();
+		for (LevelSegmentMetadata segmentA : segmentsA) {
+			files.add(new AppDataJobFile(segmentA.getProductName(), segmentA.getKeyObjectStorage(), segmentA.getValidityStart(), segmentA.getValidityStop()));
+		}
+
+		//TODO segmentsB
+
+		return Collections.singletonList(
+				new AppDataJobInput(
+						inputReference,
+						L0SegmentProduct.RFC_TYPE,
+						fileNameType.toString(),
+						input.getMandatory().equals(TaskTableMandatoryEnum.YES),
+						files));
 	}
 
 	private final void handleNonRfSegments(final AppDataJob job, final L0SegmentProduct product)
