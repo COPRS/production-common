@@ -27,7 +27,6 @@ import esa.s1pdgs.cpoc.common.errors.processing.MetadataQueryException;
 import esa.s1pdgs.cpoc.common.utils.DateUtils;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.appcat.AppCatJobService;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.generator.DiscardedException;
-import esa.s1pdgs.cpoc.ipf.preparation.worker.model.ProductMode;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.model.tasktable.TaskTableAdapter;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.query.QueryUtils;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.type.AbstractProductTypeAdapter;
@@ -46,17 +45,14 @@ import esa.s1pdgs.cpoc.xml.model.tasktable.enums.TaskTableMandatoryEnum;
 
 public final class L0SegmentTypeAdapter extends AbstractProductTypeAdapter implements ProductTypeAdapter {	
 	private final MetadataClient metadataClient;
-	private final ProductMode productMode;
 	private final long timeoutInputSearchMs;
 
 	public L0SegmentTypeAdapter(
 			final MetadataClient metadataClient,
-			final ProductMode productMode,
 			final long timeoutInputSearchMs
 	) {
 		this.metadataClient = metadataClient;
 		this.timeoutInputSearchMs = timeoutInputSearchMs;
-		this.productMode = productMode;
 	}
 	
 	@Override
@@ -139,12 +135,6 @@ public final class L0SegmentTypeAdapter extends AbstractProductTypeAdapter imple
 		final List<AppDataJobTaskInputs> overridingInputs = new ArrayList<>();
 				
 		// dirty workaround to find the first input as the inputs are not ordered.
-		for (final Map.Entry<String, TaskTableInput> ttInput : taskTableAdapter.taskTableInputsFor(productMode).entrySet()) {
-			// TODO add queried inputs as preselected inputs to appDataJob
-			// FIXME
-		}
-
-		// Possible solution:
 		// Assume we are searching for Inputs with FILE_TYPE = RFC in TaskTable:
 
 		// we have to search through all Inputs and find these Inputs which have an alternative with
@@ -161,54 +151,71 @@ public final class L0SegmentTypeAdapter extends AbstractProductTypeAdapter imple
 		// for each task collect all nonEmpty reference strings and return a List of them
 
 		// at the end we have a List<List<String>> which we convert to List<String> using flatMap
+		final BiFunction<List<String>, TaskTableTask, List<String>> toReferenceList = (references, task) -> references.stream()
+				.filter(StringUtils::hasText)
+				.collect(Collectors.toList());
 
-		final String fileTypeRfc = "RFC";
-
-		BiFunction<List<String>, TaskTableTask, List<String>> toReferenceList
-				= (references, task) -> references.stream().filter(StringUtils::hasText).collect(Collectors.toList());
-
-		BiFunction<String, TaskTableInput, String> toReference
-				= (reference, input) -> {
-			if(input.alternativesOrdered().anyMatch(alt -> alt.getFileType() == "RFC")) {
+		final BiFunction<String, TaskTableInput, String> toReference = (reference, input) -> {
+			if(input.alternativesOrdered().anyMatch(alt -> alt.getFileType().equals(L0SegmentProduct.RFC_TYPE))) {
 				return reference;
 			}
-
 			return "";
 		};
 
-		List<String> references
-				= QueryUtils.taskTableTasksAndInputsMappedTo(
+		final List<String> references = QueryUtils.taskTableTasksAndInputsMappedTo(
 				toReferenceList,
 				toReference,
-				productMode,
 				taskTableAdapter)
-				.stream().flatMap(List::stream).collect(Collectors.toList());
+				.stream()
+				.flatMap(List::stream)
+				.collect(Collectors.toList());
 
-		for(String reference : references) {
-			Optional<QueryUtils.TaskAndInput> optionalTask = QueryUtils.getTaskForReference(reference, taskTableAdapter, productMode);
-			if(optionalTask.isPresent()) {
-				QueryUtils.TaskAndInput task = optionalTask.get();
-				AppDataJobTaskInputs taskInputs =
-						new AppDataJobTaskInputs(task.task.getName(), task.task.getVersion(), toInputs(reference,task.input, segmentsA, segmentsB));
+		for (final String reference : references) {
+			final Optional<QueryUtils.TaskAndInput> optionalTask = QueryUtils.getTaskForReference(
+					reference, 
+					taskTableAdapter
+			);
+			if (optionalTask.isPresent()) {
+				final QueryUtils.TaskAndInput task = optionalTask.get();
+				final AppDataJobTaskInputs taskInputs = new AppDataJobTaskInputs(
+						task.getName(), 
+						task.getVersion(), 
+						toInputs(reference, task.getInput(), segmentsA, segmentsB)
+				);
 				overridingInputs.add(taskInputs);
 			}
 		}
-
 		product.overridingInputs(overridingInputs);
-
 	}
 
-	private List<AppDataJobInput> toInputs(String inputReference, TaskTableInput input, List<LevelSegmentMetadata> segmentsA, List<LevelSegmentMetadata> segmentsB) {
+	private List<AppDataJobInput> toInputs(
+			final String inputReference, 
+			final TaskTableInput input, 
+			final List<LevelSegmentMetadata> segmentsA, 
+			final List<LevelSegmentMetadata> segmentsB
+	) {
+		final TaskTableFileNameType fileNameType = input.alternativesOrdered()
+				.filter(a -> a.getFileType().equals(L0SegmentProduct.RFC_TYPE))
+				.findAny()
+				.map(a -> a.getFileNameType()).orElse(TaskTableFileNameType.BLANK);
 
-		//TODO
-		TaskTableFileNameType fileNameType = input.alternativesOrdered().filter(a -> a.getFileType().equals("RFC????")).findAny().map(a -> a.getFileNameType()).orElse(TaskTableFileNameType.BLANK);
-
-		List<AppDataJobFile> files = new ArrayList<>();
-		for (LevelSegmentMetadata segmentA : segmentsA) {
-			files.add(new AppDataJobFile(segmentA.getProductName(), segmentA.getKeyObjectStorage(), segmentA.getValidityStart(), segmentA.getValidityStop()));
+		final List<AppDataJobFile> files = new ArrayList<>();
+		for (final LevelSegmentMetadata segment : segmentsA) {
+			files.add(new AppDataJobFile(
+					segment.getProductName(), 
+					segment.getKeyObjectStorage(), 
+					segment.getValidityStart(), 
+					segment.getValidityStop()
+			));
 		}
-
-		//TODO segmentsB
+		for (final LevelSegmentMetadata segment : segmentsB) {
+			files.add(new AppDataJobFile(
+					segment.getProductName(), 
+					segment.getKeyObjectStorage(), 
+					segment.getValidityStart(), 
+					segment.getValidityStop()
+			));
+		}
 
 		return Collections.singletonList(
 				new AppDataJobInput(
@@ -216,7 +223,9 @@ public final class L0SegmentTypeAdapter extends AbstractProductTypeAdapter imple
 						L0SegmentProduct.RFC_TYPE,
 						fileNameType.toString(),
 						input.getMandatory().equals(TaskTableMandatoryEnum.YES),
-						files));
+						files
+				)
+		);
 	}
 
 	private final void handleNonRfSegments(final AppDataJob job, final L0SegmentProduct product)

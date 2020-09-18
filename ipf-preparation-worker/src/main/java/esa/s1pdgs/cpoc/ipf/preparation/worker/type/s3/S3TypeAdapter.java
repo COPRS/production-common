@@ -91,7 +91,7 @@ public class S3TypeAdapter extends AbstractProductTypeAdapter implements Product
 		// Get inputs of tasks
 		List<AppDataJobTaskInputs> tasks;
 		if (isEmpty(job.getAdditionalInputs())) {
-			tasks = QueryUtils.buildInitialInputs(workerSettings.getProductMode(), tasktableAdapter);
+			tasks = QueryUtils.buildInitialInputs(tasktableAdapter);
 		} else {
 			tasks = job.getAdditionalInputs();
 		}
@@ -301,8 +301,12 @@ public class S3TypeAdapter extends AbstractProductTypeAdapter implements Product
 	 */
 	private TaskTableAdapter getTTAdapterForTaskTableName(final String taskTable) {
 		final File ttFile = new File(workerSettings.getDiroftasktables(), taskTable);
-		final TaskTableAdapter tasktableAdapter = new TaskTableAdapter(ttFile,
-				ttFactory.buildTaskTable(ttFile, processSettings.getLevel()), elementMapper);
+		final TaskTableAdapter tasktableAdapter = new TaskTableAdapter(
+				ttFile,
+				ttFactory.buildTaskTable(ttFile, processSettings.getLevel()), 
+				elementMapper,
+				workerSettings.getProductMode()
+		);
 
 		return tasktableAdapter;
 	}
