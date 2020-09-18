@@ -17,7 +17,7 @@ public enum ApplicationLevel {
 	
 	private final ProductFamily jobFamily;
 	
-	private ApplicationLevel(final ProductFamily jobFamily) {
+	ApplicationLevel(final ProductFamily jobFamily) {
 		this.jobFamily = jobFamily;
 	}
 

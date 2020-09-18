@@ -224,6 +224,7 @@ public class JobProcessor implements MqiListener<IpfExecutionJob> {
 		final ProductCategory category;
 
 		// Build output list filename
+		// TODO the file name of the output.LIST file should be configurable
 		final String outputListFile;
 		if (properties.getLevel() == ApplicationLevel.L0) {
 			outputListFile = job.getWorkDirectory() + "AIOProc.LIST";

@@ -3,10 +3,15 @@ package esa.s1pdgs.cpoc.ipf.preparation.worker.type.spp;
 import java.time.Duration;
 import java.time.Instant;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import esa.s1pdgs.cpoc.appcatalog.AppDataJob;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.config.SppObsProperties;
 
 public class SppObsPropertiesAdapter {
+
+    private static final Logger LOG = LoggerFactory.getLogger(SppObsPropertiesAdapter.class);
 
     private final SppObsProperties properties;
 
@@ -29,6 +34,8 @@ public class SppObsPropertiesAdapter {
 
 
         Instant actualTimeout = max(timoutFromProductStart, minimalTimeout);
+
+        LOG.debug("OBS processing should wait until {}", actualTimeout);
 
         return Instant.now().isBefore(actualTimeout);
     }
