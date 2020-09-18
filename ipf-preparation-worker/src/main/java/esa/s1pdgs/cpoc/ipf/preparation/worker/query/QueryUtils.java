@@ -67,9 +67,10 @@ public class QueryUtils {
 	 */
 	public static List<AppDataJobTaskInputs> buildInitialInputs(ProductMode mode, TaskTableAdapter ttAdapter) {
 		return taskTableTasksAndInputsMappedTo(
+				(jobInputList, task) -> new AppDataJobTaskInputs(task.getName(), task.getVersion(), jobInputList),
 				(reference, input) -> new AppDataJobInput(reference, "", "",
 						TaskTableMandatoryEnum.YES.equals(input.getMandatory()), emptyList()),
-				(jobInputList, task) -> new AppDataJobTaskInputs(task.getName(), task.getVersion(), jobInputList), mode,
+				mode,
 				ttAdapter);
 	}
 
@@ -88,7 +89,11 @@ public class QueryUtils {
 	 */
 	public static <T> List<T> inputsMappedTo(final BiFunction<String, TaskTableInput, T> inputMapFunction,
 			final TaskTableAdapter taskTableAdapter, final ProductMode mode) {
-		return taskTableTasksAndInputsMappedTo(inputMapFunction, (list, task) -> list, mode, taskTableAdapter).stream()
+		return taskTableTasksAndInputsMappedTo(
+				(list, task) -> list,
+				inputMapFunction,
+				mode,
+				taskTableAdapter).stream()
 				.flatMap(Collection::stream).collect(toList());
 	}
 
@@ -116,46 +121,80 @@ public class QueryUtils {
 	}
 
 	/**
-	 * Creates a list (length = number of tasks in tasktable) of type U using the
+	 * Creates a list (length = number of tasks in taskTable) of type MAPPED_TASK using the
 	 * given functions.
+	 *
+	 * Traverses through all tasks and inputs of a taskTable. For each taskTable input the inputMapFunction
+	 * is applied resulting in a MAPPED_INPUT. Then a List<MAPPED_INPUT> is applied to the taskMapFunction resulting in
+	 * a MAPPED_TASK. After all a List<MAPPED_TASK> is returned.
+	 *
+	 * While traversing the Pools / Task / Input number is increased to create a reference String to identify an input
+	 * by it`s position in the taskTable. This reference is passed to the inputMapFunction
 	 * 
-	 * @param <T>              result type of inputMapFunction, type of entries for
+	 * @param <MAPPED_INPUT>   result type of inputMapFunction, type of entries for
 	 *                         the list used as first parameter in taskMapFunction
-	 * @param <U>              result type of taskMapFunction, type of entries of
+	 * @param <MAPPED_TASK>    result type of taskMapFunction, type of entries of
 	 *                         the result map
+	 * @param taskMapFunction  creates entries for result list
 	 * @param inputMapFunction creates entries for list used as first parameter of
 	 *                         taskMapFunction (size = number of inputs for task in
 	 *                         tasktable)
-	 * @param taskMapFunction  creates entries for result list
 	 * @param mode             specifies acceptable mode of tasktable inputs
 	 *                         {@link #modeOfInputOrReference}
 	 * @param ttAdapter        adapter to access contents of tasktable
 	 * @return list (length = number of tasks in tasktable) with entries based on
 	 *         taskMapFunction
 	 */
-	public static <T, U> List<U> taskTableTasksAndInputsMappedTo(
-			final BiFunction<String, TaskTableInput, T> inputMapFunction,
-			final BiFunction<List<T>, TaskTableTask, U> taskMapFunction, final ProductMode mode,
+	public static <MAPPED_INPUT, MAPPED_TASK> List<MAPPED_TASK> taskTableTasksAndInputsMappedTo(
+			final BiFunction<List<MAPPED_INPUT>, TaskTableTask, MAPPED_TASK> taskMapFunction,
+			final BiFunction<String, TaskTableInput, MAPPED_INPUT> inputMapFunction,
+			final ProductMode mode,
 			final TaskTableAdapter ttAdapter) {
-		final List<U> mappedTasks = new ArrayList<>();
 
-		final Map<String, TaskTableInput> inputsWithId = ttAdapter.getTasks().values().stream()
-				.flatMap(task -> task.getInputs().stream()).filter(input -> !StringUtils.isEmpty(input.getId()))
-				.collect(toMap(TaskTableInput::getId, i -> i));
+		final Map<String, TaskTableInput> inputsWithId = collectInputsWithId(ttAdapter);
+
+		final List<MAPPED_TASK> mappedTasks = new ArrayList<>();
 
 		for (final Map.Entry<String, TaskTableTask> taskEntry : ttAdapter.getTasks().entrySet()) {
-			final List<T> mappedInputs = new ArrayList<>();
-			int inputNumber = 0;
-			for (final TaskTableInput input : taskEntry.getValue().getInputs()) {
-				if (mode.isCompatibleWithTaskTableMode(modeOfInputOrReference(input, inputsWithId))) {
-					final String reference = String.format("%sI%s", taskEntry.getKey(), inputNumber);
-					mappedInputs.add(inputMapFunction.apply(reference, input));
-				}
-				inputNumber++;
-			}
+
+			final String taskReference = taskEntry.getKey();
+			final List<TaskTableInput> taskInputs = taskEntry.getValue().getInputs();
+
+			final List<MAPPED_INPUT> mappedInputs = taskInputsMappedTo(
+					taskReference,
+					taskInputs,
+					mode,
+					inputMapFunction,
+					inputsWithId);
+
 			mappedTasks.add(taskMapFunction.apply(mappedInputs, taskEntry.getValue()));
 		}
 
 		return mappedTasks;
+	}
+
+	private static Map<String, TaskTableInput> collectInputsWithId(TaskTableAdapter ttAdapter) {
+		return ttAdapter.getTasks().values().stream()
+				.flatMap(task -> task.getInputs().stream()).filter(input -> !StringUtils.isEmpty(input.getId()))
+				.collect(toMap(TaskTableInput::getId, i -> i));
+	}
+
+	private static <MAPPED_INPUT> List<MAPPED_INPUT> taskInputsMappedTo(
+			final String taskReference,
+			final List<TaskTableInput> inputs,
+			final ProductMode mode,
+			final BiFunction<String, TaskTableInput, MAPPED_INPUT> inputMapFunction,
+			final Map<String, TaskTableInput> inputsWithId) {
+
+		final List<MAPPED_INPUT> mappedInputs = new ArrayList<>();
+		int inputNumber = 0;
+		for (final TaskTableInput input : inputs) {
+			if (mode.isCompatibleWithTaskTableMode(modeOfInputOrReference(input, inputsWithId))) {
+				final String reference = String.format("%sI%s", taskReference, inputNumber);
+				mappedInputs.add(inputMapFunction.apply(reference, input));
+			}
+			inputNumber++;
+		}
+		return mappedInputs;
 	}
 }

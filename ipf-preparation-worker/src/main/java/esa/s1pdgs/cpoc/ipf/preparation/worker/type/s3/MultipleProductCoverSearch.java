@@ -352,7 +352,7 @@ public class MultipleProductCoverSearch {
 			List<S3Metadata> products, boolean complete, TaskTableInputAlternative alternative, ProductMode mode,
 			TaskTableAdapter taskTableAdapter) {
 		Map<String, TaskTableInput> taskTableInputs = QueryUtils
-				.taskTableTasksAndInputsMappedTo(Collections::singletonMap, (list, task) -> list, mode,
+				.taskTableTasksAndInputsMappedTo((list, task) -> list, Collections::singletonMap, mode,
 						taskTableAdapter)
 				.stream().flatMap(Collection::stream).flatMap(map -> map.entrySet().stream())
 				.collect(toMap(Map.Entry::getKey, Map.Entry::getValue));
