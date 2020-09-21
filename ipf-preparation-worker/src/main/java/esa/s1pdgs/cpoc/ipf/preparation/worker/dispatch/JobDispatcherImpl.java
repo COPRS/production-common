@@ -80,22 +80,24 @@ public class JobDispatcherImpl implements JobDispatcher {
 	        			LogUtils.toString(e)
 	        	)))
 				.publishMessageProducer(() -> {
-					for (AppDataJob job : jobs) {
-			        	LOGGER.trace("== dispatch job {}", job.toString());
-			        	
-			            final String tasktableFilename = job.getTaskTableName();
-			            
-			            LOGGER.trace("Got TaskTable {}", tasktableFilename);
-			            
-						// assert that there is a job generator for the assigned tasktable
-						if (!generatorAvailableForTasktableNames.contains(tasktableFilename)) {
-							throw new IllegalStateException(
-									String.format("No job generator found for tasktable %s. Available are: %s", tasktableFilename,
-											generatorAvailableForTasktableNames));
-						}
-
-			            handleJob(message, job, reporting.getUid(), tasktableFilename);
-			        } 
+					if (jobs != null) {
+						for (AppDataJob job : jobs) {
+				        	LOGGER.trace("== dispatch job {}", job.toString());
+				        	
+				            final String tasktableFilename = job.getTaskTableName();
+				            
+				            LOGGER.trace("Got TaskTable {}", tasktableFilename);
+				            
+							// assert that there is a job generator for the assigned tasktable
+							if (!generatorAvailableForTasktableNames.contains(tasktableFilename)) {
+								throw new IllegalStateException(
+										String.format("No job generator found for tasktable %s. Available are: %s", tasktableFilename,
+												generatorAvailableForTasktableNames));
+							}
+	
+				            handleJob(message, job, reporting.getUid(), tasktableFilename);
+				        } 
+					}
 					
 					return new MqiPublishingJob<NullMessage>(Collections.emptyList());
 				})

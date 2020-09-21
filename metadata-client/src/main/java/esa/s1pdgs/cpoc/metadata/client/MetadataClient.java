@@ -138,8 +138,9 @@ public class MetadataClient {
 	}
 
 	/**
-	 * Interface to access products needed for the marginTT workflow extension
-	 * (sentinel 3 mission)
+	 * Interface to access products needed for the
+	 * {@link esa.s1pdgs.cpoc.ipf.preparation.worker.type.s3.MultipleProductCoverSearch}
+	 * workflow extension (sentinel 3 mission)
 	 * 
 	 * @return list of matching products
 	 */
@@ -162,25 +163,6 @@ public class MetadataClient {
 				new ParameterizedTypeReference<List<S3Metadata>>() {
 				});
 		return extractResult(productType, productFamily, response);		
-	}
-
-	private List<S3Metadata> extractResult(final String productType, final ProductFamily productFamily,
-										   final ResponseEntity<List<S3Metadata>> response) {
-		if (response == null) {
-			LOGGER.debug("MarginTT metadata query for family '{}' and product type '{}' returned null",
-					productFamily, productType);
-			return Collections.emptyList();
-		}
-		final List<S3Metadata> queryResults = response.getBody();
-		
-		if (CollectionUtils.isEmpty(queryResults)) {
-			LOGGER.debug("MarginTT metadata query for family '{}' and product type '{}' returned no results",
-					productFamily, productType);
-			return Collections.emptyList();
-		}
-		LOGGER.info("MarginTT metadata query for family '{}' and product type '{}' returned {} results",
-				productFamily, productType, queryResults.size());
-		return queryResults;
 	}
 
 	/**
@@ -224,7 +206,7 @@ public class MetadataClient {
 		final String uri = this.metadataBaseUri + MetadataCatalogRestPath.S3_METADATA.path() + "/" + productFamily.toString();
 
 		final UriComponentsBuilder builder = UriComponentsBuilder.fromUriString(uri)
-				.queryParam("productFamily", productFamily.toString()).queryParam("productName", productName);
+				.queryParam("productName", productName);
 
 		final ResponseEntity<S3Metadata> response = query(builder.build().toUri(),
 				new ParameterizedTypeReference<S3Metadata>() {
@@ -239,6 +221,30 @@ public class MetadataClient {
 					productFamily.toString(), productName, response.getBody());
 			return response.getBody();
 		}
+	}
+	
+	/**
+	 * 
+	 * @param productFamily
+	 * @param productType
+	 * @param satelliteId
+	 * @param orbit
+	 * @return
+	 * @throws MetadataQueryException
+	 */
+	public List<S3Metadata> getProductsForOrbit(final ProductFamily productFamily, final String productType,
+			final String satelliteId, final long orbit) throws MetadataQueryException {
+		final String uri = this.metadataBaseUri + MetadataCatalogRestPath.S3_METADATA.path() + "/" + productType
+				+ "/orbit";
+
+		final UriComponentsBuilder builder = UriComponentsBuilder.fromUriString(uri)
+				.queryParam("productFamily", productFamily.toString()).queryParam("satellite", satelliteId)
+				.queryParam("orbitNumber", orbit);
+
+		final ResponseEntity<List<S3Metadata>> response = query(builder.build().toUri(),
+				new ParameterizedTypeReference<List<S3Metadata>>() {
+				});
+		return extractResult(productType, productFamily, response);
 	}
 
 	/**
@@ -398,6 +404,25 @@ public class MetadataClient {
 		LOGGER.debug("Got coverage {}", coverage);
 		return coverage;
 
+	}
+	
+	private final List<S3Metadata> extractResult(final String productType, final ProductFamily productFamily,
+			final ResponseEntity<List<S3Metadata>> response) {
+		if (response == null) {
+			LOGGER.debug("Metadata query for family '{}' and product type '{}' returned null",
+					productFamily, productType);
+			return Collections.emptyList();
+		}
+		final List<S3Metadata> queryResults = response.getBody();
+		
+		if (CollectionUtils.isEmpty(queryResults)) {
+			LOGGER.debug("Metadata query for family '{}' and product type '{}' returned no results",
+					productFamily, productType);
+			return Collections.emptyList();
+		}
+		LOGGER.info("Metadata query for family '{}' and product type '{}' returned {} results",
+				productFamily, productType, queryResults.size());
+		return queryResults;
 	}
 
 	private <T> ResponseEntity<T> query(final URI uri, final ParameterizedTypeReference<T> responseType)

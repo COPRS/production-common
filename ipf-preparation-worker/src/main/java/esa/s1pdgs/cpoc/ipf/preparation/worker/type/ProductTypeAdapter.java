@@ -28,7 +28,7 @@ public interface ProductTypeAdapter {
 		// default implementation: don't validate
 	}
 	
-	List<AppDataJob> createAppDataJobs(final IpfPreparationJob job);
+	List<AppDataJob> createAppDataJobs(final IpfPreparationJob job) throws Exception;
 	
     void customJobOrder(final AppDataJob job, final JobOrder jobOrder);
 	

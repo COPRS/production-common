@@ -72,6 +72,46 @@ public class S3MetadataController extends AbstractMetadataController<S3Metadata>
 	}
 
 	/**
+	 * Queries the elastic search for products matching the given parameters. Query
+	 * build is based on the marginTT workflow extension.
+	 * 
+	 * @return list of matching products
+	 */
+	@RequestMapping(path = "/{productType}/orbit")
+	public ResponseEntity<List<S3Metadata>> getProductsForOrbit(@PathVariable(name = "productType") String productType,
+			@RequestParam(name = "productFamily") final String productFamily,
+			@RequestParam(name = "satellite") final String satellite,
+			@RequestParam(name = "orbitNumber") final long orbitNumber) {
+
+		try {
+			List<S3Metadata> response = new ArrayList<>();
+
+			LOGGER.info("Received Orbit search query for family '{}', product type '{}', orbitNumber '{}'",
+					productFamily.toString(), productType, orbitNumber);
+
+			List<S3Metadata> result = esServices.getProductsForOrbit(ProductFamily.fromValue(productFamily),
+					productType, satellite, orbitNumber);
+
+			if (result != null) {
+				LOGGER.debug("Query returned {} results", result.size());
+
+				for (S3Metadata s : result) {
+					response.add(s);
+				}
+			}
+
+			return new ResponseEntity<>(response, HttpStatus.OK);
+		} catch (final AbstractCodedException e) {
+			LOGGER.error("Error on performing Orbit search for product type {}: [code {}] {}", productType,
+					e.getCode().getCode(), e.getLogMessage());
+			return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+		} catch (final Exception e) {
+			LOGGER.error("Error on performing Orbit for product type {}: {}", productType, LogUtils.toString(e));
+			return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+		}
+	}
+
+	/**
 	 * Retrieve the L1Triggering information for the given productName from the
 	 * elasticsearch
 	 * 

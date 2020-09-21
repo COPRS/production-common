@@ -10,11 +10,13 @@ import java.util.Objects;
  */
 public class S3Metadata extends AbstractMetadata {
 
-	private int granuleNumber;
-	private String granulePosition;
-	private String creationTime;
+	private String absoluteStartOrbit;
 	private String anxTime;
 	private String anx1Time;
+	private String creationTime;
+	private int granuleNumber;
+	private String granulePosition;
+	private String insertionTime;
 
 	public S3Metadata(final String productName, final String productType, final String keyObjectStorage,
 			final String validityStart, final String validityStop, final String missionId, final String satelliteId,
@@ -30,7 +32,38 @@ public class S3Metadata extends AbstractMetadata {
 	}
 
 	public S3Metadata() {
+	}
 
+	public String getAbsoluteStartOrbit() {
+		return absoluteStartOrbit;
+	}
+
+	public void setAbsoluteStartOrbit(String absoluteStartOrbit) {
+		this.absoluteStartOrbit = absoluteStartOrbit;
+	}
+	
+	public String getAnxTime() {
+		return anxTime;
+	}
+
+	public void setAnxTime(String anxTime) {
+		this.anxTime = anxTime;
+	}
+
+	public String getAnx1Time() {
+		return anx1Time;
+	}
+
+	public void setAnx1Time(String anx1Time) {
+		this.anx1Time = anx1Time;
+	}
+	
+	public String getCreationTime() {
+		return creationTime;
+	}
+
+	public void setCreationTime(String creationTime) {
+		this.creationTime = creationTime;
 	}
 
 	public int getGranuleNumber() {
@@ -48,36 +81,21 @@ public class S3Metadata extends AbstractMetadata {
 	public void setGranulePosition(String granulePosition) {
 		this.granulePosition = granulePosition;
 	}
-
-	public String getCreationTime() {
-		return creationTime;
+	
+	public String getInsertionTime() {
+		return insertionTime;
 	}
 
-	public void setCreationTime(String creationTime) {
-		this.creationTime = creationTime;
-	}
-
-	public String getAnxTime() {
-		return anxTime;
-	}
-
-	public void setAnxTime(String anxTime) {
-		this.anxTime = anxTime;
-	}
-
-	public String getAnx1Time() {
-		return anx1Time;
-	}
-
-	public void setAnx1Time(String anx1Time) {
-		this.anx1Time = anx1Time;
+	public void setInsertionTime(String insertionTime) {
+		this.insertionTime = insertionTime;
 	}
 
 	@Override
 	public int hashCode() {
 		final int prime = 31;
 		int result = super.hashCode();
-		result = prime * result + Objects.hash(granuleNumber, granulePosition, creationTime, anxTime, anx1Time);
+		result = prime * result + Objects.hash(absoluteStartOrbit, anx1Time, anxTime, creationTime, granuleNumber,
+				granulePosition, insertionTime);
 		return result;
 	}
 
@@ -93,17 +111,19 @@ public class S3Metadata extends AbstractMetadata {
 			return false;
 		}
 		S3Metadata other = (S3Metadata) obj;
-		return granuleNumber == other.granuleNumber && Objects.equals(granulePosition, other.granulePosition)
-				&& Objects.equals(creationTime, other.creationTime) && Objects.equals(anxTime, other.anxTime)
-				&& Objects.equals(anx1Time, other.anx1Time);
+		return Objects.equals(absoluteStartOrbit, other.absoluteStartOrbit) && Objects.equals(anx1Time, other.anx1Time)
+				&& Objects.equals(anxTime, other.anxTime) && Objects.equals(creationTime, other.creationTime)
+				&& granuleNumber == other.granuleNumber && Objects.equals(granulePosition, other.granulePosition)
+				&& Objects.equals(insertionTime, other.insertionTime);
 	}
 
 	@Override
 	public String toString() {
-		return "S3Metadata [granuleNumber=" + granuleNumber + ", granulePosition=" + granulePosition + ", creationTime="
-				+ creationTime + ", anxTime=" + anxTime + ", anx1Time=" + anx1Time + ", productName=" + productName
-				+ ", productType=" + productType + ", keyObjectStorage=" + keyObjectStorage + ", validityStart="
-				+ validityStart + ", validityStop=" + validityStop + ", missionId=" + missionId + ", satelliteId="
-				+ satelliteId + ", stationCode=" + stationCode + "]";
+		return "S3Metadata [absoluteStartOrbit=" + absoluteStartOrbit + ", anxTime=" + anxTime + ", anx1Time="
+				+ anx1Time + ", creationTime=" + creationTime + ", granuleNumber=" + granuleNumber
+				+ ", granulePosition=" + granulePosition + ", insertionTime=" + insertionTime + ", productName="
+				+ productName + ", productType=" + productType + ", keyObjectStorage=" + keyObjectStorage
+				+ ", validityStart=" + validityStart + ", validityStop=" + validityStop + ", missionId=" + missionId
+				+ ", satelliteId=" + satelliteId + ", stationCode=" + stationCode + "]";
 	}
 }

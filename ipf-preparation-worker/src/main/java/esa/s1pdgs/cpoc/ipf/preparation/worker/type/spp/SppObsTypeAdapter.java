@@ -2,6 +2,7 @@ package esa.s1pdgs.cpoc.ipf.preparation.worker.type.spp;
 
 import java.time.format.DateTimeFormatter;
 import java.util.Collections;
+import java.util.List;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -20,6 +21,7 @@ import esa.s1pdgs.cpoc.ipf.preparation.worker.type.ProductTypeAdapter;
 import esa.s1pdgs.cpoc.metadata.client.MetadataClient;
 import esa.s1pdgs.cpoc.metadata.model.AuxMetadata;
 import esa.s1pdgs.cpoc.mqi.model.queue.IpfExecutionJob;
+import esa.s1pdgs.cpoc.mqi.model.queue.IpfPreparationJob;
 import esa.s1pdgs.cpoc.mqi.model.queue.util.CatalogEventAdapter;
 import esa.s1pdgs.cpoc.xml.model.joborder.JobOrder;
 
@@ -91,15 +93,18 @@ public class SppObsTypeAdapter extends AbstractProductTypeAdapter implements Pro
     }
 
     @Override
-    public void customAppDataJob(final AppDataJob job) {
+	public List<AppDataJob> createAppDataJobs(IpfPreparationJob job) {
+		AppDataJob appDataJob = toAppDataJob(job);
 
-        final CatalogEventAdapter catalogEvent = CatalogEventAdapter.of(job);
-        final AuxResorbProduct auxResorb = AuxResorbProduct.of(job);
+        final CatalogEventAdapter catalogEvent = CatalogEventAdapter.of(appDataJob);
+        final AuxResorbProduct auxResorb = AuxResorbProduct.of(appDataJob);
 
         auxResorb.setStartTime(catalogEvent.validityStartTime());
         auxResorb.setStopTime(catalogEvent.validityStopTime());
-        job.setStartTime(catalogEvent.validityStartTime());
-        job.setStopTime(catalogEvent.validityStopTime());
+        appDataJob.setStartTime(catalogEvent.validityStartTime());
+        appDataJob.setStopTime(catalogEvent.validityStopTime());
+        
+        return Collections.singletonList(appDataJob);
     }
 
     @Override

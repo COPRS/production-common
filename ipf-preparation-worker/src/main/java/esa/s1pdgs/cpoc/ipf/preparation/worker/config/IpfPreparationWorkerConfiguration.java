@@ -43,6 +43,7 @@ import esa.s1pdgs.cpoc.ipf.preparation.worker.type.ProductTypeAdapter;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.type.edrs.AiopPropertiesAdapter;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.type.edrs.EdrsSessionProductValidator;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.type.edrs.EdrsSessionTypeAdapter;
+import esa.s1pdgs.cpoc.ipf.preparation.worker.type.pdu.PDUTypeAdapter;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.type.s3.S3TypeAdapter;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.type.segment.L0SegmentTypeAdapter;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.type.slice.LevelSliceTypeAdapter;
@@ -77,6 +78,7 @@ public class IpfPreparationWorkerConfiguration {
     private final AppCatJobService appCatService;
     private final XmlConverter xmlConverter;
     private final S3TypeAdapterSettings s3TypeAdapterSettings;
+    private final PDUSettings pduSettings;
     
 	@Autowired
 	public IpfPreparationWorkerConfiguration(
@@ -94,7 +96,8 @@ public class IpfPreparationWorkerConfiguration {
 			final TaskTableFactory taskTableFactory,
 			final ElementMapper elementMapper,
 		    final AppCatJobService appCatService,
-		    final S3TypeAdapterSettings s3TypeAdapterSettings
+		    final S3TypeAdapterSettings s3TypeAdapterSettings,
+		    final PDUSettings pduSettings
 	) {
 		this.appStatus = appStatus;
 		this.mqiClient = mqiClient;
@@ -111,6 +114,7 @@ public class IpfPreparationWorkerConfiguration {
 		this.appCatService = appCatService;
 		this.xmlConverter = xmlConverter;
 		this.s3TypeAdapterSettings = s3TypeAdapterSettings;
+		this.pduSettings = pduSettings;
 	}
 
 	@Bean
@@ -172,9 +176,18 @@ public class IpfPreparationWorkerConfiguration {
 					settings,
 					s3TypeAdapterSettings
 			);
+		} else if (processSettings.getLevel() == ApplicationLevel.S3_PDU) {
+			return new PDUTypeAdapter(
+					metadataClient,
+					taskTableFactory,
+					elementMapper,
+					processSettings,
+					settings,
+					pduSettings
+			);
 		} else if (processSettings.getLevel() == ApplicationLevel.SPP_OBS) {
 			return new SppObsTypeAdapter(metadataClient, SppObsPropertiesAdapter.of(sppObsProperties));
-		}
+		} 
 		throw new IllegalArgumentException(
 				String.format(
 						"Unsupported Application Level '%s'. Available are: %s", 
@@ -186,7 +199,9 @@ public class IpfPreparationWorkerConfiguration {
 								ApplicationLevel.L2,
 								ApplicationLevel.S3_L0,
 								ApplicationLevel.S3_L1,
-								ApplicationLevel.S3_L2
+								ApplicationLevel.S3_L2,
+								ApplicationLevel.S3_PDU,
+								ApplicationLevel.SPP_OBS
 						)
 				)
 		);
