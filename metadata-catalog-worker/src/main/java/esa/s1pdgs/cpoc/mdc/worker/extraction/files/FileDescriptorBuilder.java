@@ -29,7 +29,7 @@ import esa.s1pdgs.cpoc.mqi.model.queue.CatalogJob;
  */
 public class FileDescriptorBuilder {
 
-	private static final List<String> AUX_ECE_TYPES = Arrays.asList("AMV_ERRMAT", "AMH_ERRMAT");
+	static final List<String> AUX_ECE_TYPES = Arrays.asList("AMV_ERRMAT", "AMH_ERRMAT");
 
 	/**
 	 * Pattern for files to extract data
@@ -81,46 +81,38 @@ public class FileDescriptorBuilder {
 			throw new MetadataIgnoredFileException(file.getName());
 		}
 
-		// Check if key matches the pattern
-		AuxDescriptor configFile = null;
-		final Matcher m = pattern.matcher(relativePath);
-		if (m.matches()) {
-			// Extract product name
-			String productName = relativePath;
-			final int indexFirstSeparator = relativePath.indexOf("/");
-			if (indexFirstSeparator != -1) {
-				productName = relativePath.substring(0, indexFirstSeparator);
-			}
-			// Extract filename
-			String filename = relativePath;
-			final int indexLastSeparator = relativePath.lastIndexOf("/");
-			if (indexLastSeparator != -1) {
-				filename = relativePath.substring(indexLastSeparator + 1);
-			}
-			// Build descriptor
-			configFile = new AuxDescriptor();
-			configFile.setFilename(filename);
-			configFile.setRelativePath(relativePath);
-			configFile.setKeyObjectStorage(productName);
-			configFile.setProductName(productName);
-			configFile.setMissionId(m.group(1));
-			configFile.setSatelliteId(m.group(2));
-			configFile.setProductClass(m.group(4));
-
-			String typeString = m.group(5);
-
-			if (AUX_ECE_TYPES.contains(typeString)) {
-				typeString = "AUX_ECE";
-			}
-			configFile.setProductType(typeString);
-			configFile.setProductFamily(ProductFamily.AUXILIARY_FILE);
-			configFile.setExtension(FileExtension.valueOfIgnoreCase(m.group(6).toUpperCase()));
-
-		} else {
+		// final Matcher m = pattern.matcher(relativePath);
+		
+		final AuxFilenameMetadataExtractor auxExtract = new AuxFilenameMetadataExtractor(pattern.matcher(relativePath)); 
+		if (!auxExtract.matches()) {
 			throw new MetadataFilePathException(relativePath, "CONFIG",
 					String.format("File %s does not match the configuration file pattern %s", relativePath, pattern));
+		}				
+		
+		// Extract product name
+		String productName = relativePath;
+		final int indexFirstSeparator = relativePath.indexOf("/");
+		if (indexFirstSeparator != -1) {
+			productName = relativePath.substring(0, indexFirstSeparator);
 		}
-
+		// Extract filename
+		String filename = relativePath;
+		final int indexLastSeparator = relativePath.lastIndexOf("/");
+		if (indexLastSeparator != -1) {
+			filename = relativePath.substring(indexLastSeparator + 1);
+		}
+		// Build descriptor
+		final AuxDescriptor configFile = new AuxDescriptor();
+		configFile.setFilename(filename);
+		configFile.setRelativePath(relativePath);
+		configFile.setKeyObjectStorage(productName);
+		configFile.setProductName(productName);
+		configFile.setMissionId(auxExtract.getMissionId());
+		configFile.setSatelliteId(auxExtract.getSatelliteId());
+		configFile.setProductClass(auxExtract.getProductClass());
+		configFile.setProductType(auxExtract.getFileType());
+		configFile.setProductFamily(ProductFamily.AUXILIARY_FILE);
+		configFile.setExtension(FileExtension.valueOfIgnoreCase(auxExtract.getExtension()));
 		return configFile;
 	}
 
@@ -162,8 +154,8 @@ public class FileDescriptorBuilder {
 			descriptor.setRelativePath(catJob.getRelativePath());
 			descriptor.setKeyObjectStorage(catJob.getKeyObjectStorage());
 			descriptor.setProductFamily(catJob.getProductFamily());
-			descriptor.setExtension(ext);
-			descriptor.setEdrsSessionFileType(EdrsSessionFileType.valueFromExtension(ext));
+			descriptor.setExtension(ext); // FIXME: is this really required and WHY...
+			descriptor.setEdrsSessionFileType(EdrsSessionFileType.ofFilename(file.getName()));
 
 			descriptor.setMissionId(metadataFromPath.get("missionId"));
 			descriptor.setSatelliteId(metadataFromPath.get("satelliteId"));
@@ -257,7 +249,7 @@ public class FileDescriptorBuilder {
 	 * @param file file, for which the descriptor should be generated
 	 * @return Descriptor, containing information extracted from the filename
 	 */
-	public S3FileDescriptor buildS3FileDescriptor(File file, CatalogJob product, ProductFamily productFamily)
+	public S3FileDescriptor buildS3FileDescriptor(final File file, final CatalogJob product, final ProductFamily productFamily)
 			throws MetadataFilePathException, MetadataIgnoredFileException {
 		final String absolutePath = file.getAbsolutePath();
 		if (absolutePath.length() <= localDirectory.getAbsolutePath().length()) {
@@ -288,7 +280,7 @@ public class FileDescriptorBuilder {
 				filename = relativePath.substring(indexLastSeparator + 1);
 			}
 			// Determine file extension
-			FileExtension extension = FileExtension.valueOfIgnoreCase(m.group(12));
+			final FileExtension extension = FileExtension.valueOfIgnoreCase(m.group(12));
 
 			descriptor = new S3FileDescriptor();
 			descriptor.setProductType(m.group(3));
