@@ -64,7 +64,7 @@ public class S3TypeAdapter extends AbstractProductTypeAdapter implements Product
 		this.workerSettings = workerSettings;
 		this.settings = settings;
 	}
-	
+
 	@Override
 	public List<AppDataJob> createAppDataJobs(IpfPreparationJob job) {
 		AppDataJob appDataJob = toAppDataJob(job);
@@ -72,8 +72,8 @@ public class S3TypeAdapter extends AbstractProductTypeAdapter implements Product
 		// Create tasktable Adapter for tasktable defined by Job
 		final TaskTableAdapter ttAdapter = getTTAdapterForTaskTableName(appDataJob.getTaskTableName());
 
-		String productType = appDataJob.getProductName().substring(4, 15);		
-		
+		String productType = appDataJob.getProductName().substring(4, 15);
+
 		/*
 		 * Change time interval for job when range search is active. This is needed for
 		 * VISCAL (SLSTR Calibration)
@@ -101,13 +101,14 @@ public class S3TypeAdapter extends AbstractProductTypeAdapter implements Product
 				LOGGER.error("Error while determining viscal range, skip changing interval for AppDataJob", e);
 			}
 		}
-		
+
 		// Default case
 		return Collections.singletonList(appDataJob);
 	}
-	
+
 	@Override
-	public Product mainInputSearch(final AppDataJob job, final TaskTableAdapter tasktableAdapter) throws IpfPrepWorkerInputsMissingException {
+	public Product mainInputSearch(final AppDataJob job, final TaskTableAdapter tasktableAdapter)
+			throws IpfPrepWorkerInputsMissingException {
 		final S3Product returnValue = S3Product.of(job);
 
 		// Discard logic for OLCI Calibration
@@ -122,8 +123,7 @@ public class S3TypeAdapter extends AbstractProductTypeAdapter implements Product
 					LOGGER.info("Discard job {} because of 'OLCICalibrationFilter'", job.getId());
 					// Skip the rest of the mainInputSearch - job is discarded anyways
 					throw new DiscardedException(
-							String.format("Discard job %s because of 'OLCICalibrationFilter'", job.getId())
-					);
+							String.format("Discard job %s because of 'OLCICalibrationFilter'", job.getId()));
 				}
 			} catch (final MetadataQueryException me) {
 				LOGGER.error("Error on query execution, retrying next time", me);
@@ -144,8 +144,8 @@ public class S3TypeAdapter extends AbstractProductTypeAdapter implements Product
 				.collect(toList());
 
 		// Create list of alternatives of those inputs
-		final List<TaskTableInputAlternative> alternatives = QueryUtils.alternativesOf(inputsWithNoResults, tasktableAdapter,
-				workerSettings.getProductMode());
+		final List<TaskTableInputAlternative> alternatives = QueryUtils.alternativesOf(inputsWithNoResults,
+				tasktableAdapter, workerSettings.getProductMode());
 
 		// Loop over alternatives to execute additional logic per product type
 		for (final TaskTableInputAlternative alternative : alternatives) {
@@ -156,7 +156,9 @@ public class S3TypeAdapter extends AbstractProductTypeAdapter implements Product
 							alternative.getFileType());
 					final MultipleProductCoverSearch mpcSearch = new MultipleProductCoverSearch(tasktableAdapter,
 							elementMapper, metadataClient, workerSettings);
-					tasks = mpcSearch.updateTaskInputsByAlternative(tasks, alternative, returnValue);
+					tasks = mpcSearch.updateTaskInputs(tasks, alternative, returnValue.getSatelliteId(),
+							returnValue.getStartTime(), returnValue.getStopTime(), alternative.getDeltaTime0(),
+							alternative.getDeltaTime1(), "NRT");
 				}
 
 				if (settings.isRangeSearchActiveForProductType(tasktableAdapter.taskTable().getProcessorName(),
@@ -165,7 +167,8 @@ public class S3TypeAdapter extends AbstractProductTypeAdapter implements Product
 							alternative.getFileType());
 					final MultipleProductCoverSearch mpcSearch = new MultipleProductCoverSearch(tasktableAdapter,
 							elementMapper, metadataClient, workerSettings);
-					tasks = mpcSearch.updateTaskInputsForViscal(tasks, alternative, job, returnValue);
+					tasks = mpcSearch.updateTaskInputs(tasks, alternative, returnValue.getSatelliteId(),
+							job.getStartTime(), job.getStopTime(), "NRT");
 
 					/*
 					 * In a following step the start and stop time of the job will be set to the
@@ -220,7 +223,8 @@ public class S3TypeAdapter extends AbstractProductTypeAdapter implements Product
 	}
 
 	@Override
-	public void validateInputSearch(final AppDataJob job, final TaskTableAdapter taskTableAdapter) throws IpfPrepWorkerInputsMissingException {
+	public void validateInputSearch(final AppDataJob job, final TaskTableAdapter taskTableAdapter)
+			throws IpfPrepWorkerInputsMissingException {
 		// Check if timeout is reached -> start job with current input
 		if (workerSettings.getWaitprimarycheck().getMaxTimelifeS() != 0) {
 			final long startTime = job.getGeneration().getCreationDate().toInstant().toEpochMilli();
@@ -233,15 +237,15 @@ public class S3TypeAdapter extends AbstractProductTypeAdapter implements Product
 				return;
 			}
 		}
-		
+
 		// Extract a list of all inputs from the tasks
 		final List<AppDataJobInput> inputsWithNoResults = job.getAdditionalInputs().stream()
 				.flatMap(taskInputs -> taskInputs.getInputs().stream().filter(input -> !input.getHasResults()))
 				.collect(toList());
 
 		// Create list of alternatives
-		final List<TaskTableInputAlternative> alternatives = QueryUtils.alternativesOf(inputsWithNoResults, taskTableAdapter,
-				workerSettings.getProductMode());
+		final List<TaskTableInputAlternative> alternatives = QueryUtils.alternativesOf(inputsWithNoResults,
+				taskTableAdapter, workerSettings.getProductMode());
 
 		// Check if there is an alternative which should have been filled by additional
 		// logic
@@ -299,7 +303,7 @@ public class S3TypeAdapter extends AbstractProductTypeAdapter implements Product
 
 		return Optional.empty();
 	}
-	
+
 	/**
 	 * When the timeout was reached set the boolean "hasResults" for all input to
 	 * true, that contain at least one product. The boolean "hasResults" is kept at
@@ -326,12 +330,9 @@ public class S3TypeAdapter extends AbstractProductTypeAdapter implements Product
 	 */
 	private TaskTableAdapter getTTAdapterForTaskTableName(final String taskTable) {
 		final File ttFile = new File(workerSettings.getDiroftasktables(), taskTable);
-		final TaskTableAdapter tasktableAdapter = new TaskTableAdapter(
-				ttFile,
-				ttFactory.buildTaskTable(ttFile, processSettings.getLevel()), 
-				elementMapper,
-				workerSettings.getProductMode()
-		);
+		final TaskTableAdapter tasktableAdapter = new TaskTableAdapter(ttFile,
+				ttFactory.buildTaskTable(ttFile, processSettings.getLevel()), elementMapper,
+				workerSettings.getProductMode());
 
 		return tasktableAdapter;
 	}

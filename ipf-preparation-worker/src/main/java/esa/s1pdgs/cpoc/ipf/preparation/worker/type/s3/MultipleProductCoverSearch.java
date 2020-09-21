@@ -14,7 +14,6 @@ import java.util.Map;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import esa.s1pdgs.cpoc.appcatalog.AppDataJob;
 import esa.s1pdgs.cpoc.appcatalog.AppDataJobFile;
 import esa.s1pdgs.cpoc.appcatalog.AppDataJobInput;
 import esa.s1pdgs.cpoc.appcatalog.AppDataJobTaskInputs;
@@ -68,7 +67,7 @@ public class MultipleProductCoverSearch {
 		public void setStop(final LocalDateTime stop) {
 			this.stop = stop;
 		}
-		
+
 		@Override
 		public String toString() {
 			return "Range [start=" + start + ", stop=" + stop + "]";
@@ -101,6 +100,28 @@ public class MultipleProductCoverSearch {
 	}
 
 	/**
+	 * Search for products to cover the interval startTime -> stopTime
+	 * 
+	 * To check whether the found products are enough to cover the interval, either
+	 * check the granule numbers (NRT) or check the gaps between the products
+	 * 
+	 * @param tasks       List of tasks which should be updated
+	 * @param alternative TaskTableInputAlternative for which products should be
+	 *                    searched
+	 * @param satelliteId satelliteId for the search query
+	 * @param startTime   start time for the interval
+	 * @param stopTime    stop time for the interval
+	 * @param timeliness  timeliness for query and coverage check
+	 * @throws MetadataQueryException On error retrieving products from the
+	 *                                metadataClient
+	 */
+	public List<AppDataJobTaskInputs> updateTaskInputs(List<AppDataJobTaskInputs> tasks,
+			final TaskTableInputAlternative alternative, final String satelliteId, final String startTime,
+			final String stopTime, final String timeliness) throws MetadataQueryException {
+		return updateTaskInputs(tasks, alternative, satelliteId, startTime, stopTime, 0.0, 0.0, timeliness);
+	}
+
+	/**
 	 * Search for products to cover the interval startTime - t0 -> stopTime + t1
 	 * 
 	 * To check whether the found products are enough to cover the interval, either
@@ -109,19 +130,21 @@ public class MultipleProductCoverSearch {
 	 * @param tasks       List of tasks which should be updated
 	 * @param alternative TaskTableInputAlternative for which products should be
 	 *                    searched
-	 * @param product     object to transmit data back to the job. Used here to
-	 *                    extract information to start and stop time
-	 * @return List of tasks, updated with products for the interval.
+	 * @param satelliteId satelliteId for the search query
+	 * @param startTime   start time for the interval
+	 * @param stopTime    stop time for the interval
+	 * @param t0          delta which should be subtracted from the start time for the interval
+	 * @param t1          delta which should be added to the stop time for the interval
+	 * @param timeliness  timeliness for query and coverage check
 	 * @throws MetadataQueryException On error retrieving products from the
 	 *                                metadataClient
 	 */
-	public List<AppDataJobTaskInputs> updateTaskInputsByAlternative(List<AppDataJobTaskInputs> tasks,
-			final TaskTableInputAlternative alternative, final S3Product product) throws MetadataQueryException {
-		// TODO: Allow other timeliness
-		final String timeliness = "NRT";
+	public List<AppDataJobTaskInputs> updateTaskInputs(List<AppDataJobTaskInputs> tasks,
+			final TaskTableInputAlternative alternative, final String satelliteId, final String startTime,
+			final String stopTime, final double t0, final double t1, final String timeliness)
+			throws MetadataQueryException {
 		List<S3Metadata> products = metadataClient.getProductsInRange(alternative.getFileType(),
-				elementMapper.inputFamilyOf(alternative.getFileType()), product.getSatelliteId(),
-				product.getStartTime(), product.getStopTime(), alternative.getDeltaTime0(), alternative.getDeltaTime1(),
+				elementMapper.inputFamilyOf(alternative.getFileType()), satelliteId, startTime, stopTime, t0, t1,
 				timeliness);
 
 		// Filter products for duplicates
@@ -129,45 +152,7 @@ public class MultipleProductCoverSearch {
 
 		// Check coverage
 		if (!products.isEmpty()) {
-			final boolean intervalCovered = checkCoverage(product.getStartTime(), product.getStopTime(),
-					alternative.getDeltaTime0(), alternative.getDeltaTime1(), timeliness, products);
-
-			// Set results on matching tasks
-			tasks = updateAppDataJobTaskInputs(tasks, products, intervalCovered, alternative,
-					prepSettings.getProductMode(), ttAdapter);
-		}
-
-		return tasks;
-	}
-
-	/**
-	 * Search for products to cover the interval of the AppDataJob
-	 * 
-	 * @param tasks       List of tasks which should be updated
-	 * @param alternative TaskTableInputAlternative for which products should be
-	 *                    searched
-	 * @param job         object which holds information to the needed interval
-	 * @param product     object to transmit data back to the job.
-	 * @return List of tasks, updated with products for the interval.
-	 * @throws MetadataQueryException On error retrieving products from the
-	 *                                metadataClient
-	 */
-	public List<AppDataJobTaskInputs> updateTaskInputsForViscal(List<AppDataJobTaskInputs> tasks,
-			final TaskTableInputAlternative alternative, final AppDataJob job, final S3Product product)
-			throws MetadataQueryException {
-		// TODO: Allow other timeliness
-		final String timeliness = "NRT";
-		List<S3Metadata> products = metadataClient.getProductsInRange(alternative.getFileType(),
-				elementMapper.inputFamilyOf(alternative.getFileType()), product.getSatelliteId(), job.getStartTime(),
-				job.getStopTime(), 0.0, 0.0, timeliness);
-
-		// Filter products for duplicates
-		products = DuplicateProductFilter.filterS3Metadata(products);
-
-		// Check coverage
-		if (!products.isEmpty()) {
-			final boolean intervalCovered = checkCoverage(product.getStartTime(), product.getStopTime(), 0.0, 0.0, timeliness,
-					products);
+			final boolean intervalCovered = checkCoverage(startTime, stopTime, t0, t1, timeliness, products);
 
 			// Set results on matching tasks
 			tasks = updateAppDataJobTaskInputs(tasks, products, intervalCovered, alternative,
@@ -203,14 +188,16 @@ public class MultipleProductCoverSearch {
 				DateUtils.parse(metadata.getValidityStop()));
 
 		if (metadata.getAnxTime() != null) {
-			final Range result = getIntersectingRange(productRange, metadata.getAnxTime(), anxOffsetInS, rangeLengthInS);
+			final Range result = getIntersectingRange(productRange, metadata.getAnxTime(), anxOffsetInS,
+					rangeLengthInS);
 			if (result != null) {
 				return result;
 			}
 		}
 
 		if (metadata.getAnx1Time() != null) {
-			final Range result = getIntersectingRange(productRange, metadata.getAnx1Time(), anxOffsetInS, rangeLengthInS);
+			final Range result = getIntersectingRange(productRange, metadata.getAnx1Time(), anxOffsetInS,
+					rangeLengthInS);
 			if (result != null) {
 				return result;
 			}
@@ -287,7 +274,8 @@ public class MultipleProductCoverSearch {
 	 * @return Range(anx + anxOffset, anx + anxOffset + rangeLength) if productRange
 	 *         intersects with that range
 	 */
-	private Range getIntersectingRange(final Range productRange, final String anxTime, final long anxOffsetInS, final long rangeLengthInS) {
+	private Range getIntersectingRange(final Range productRange, final String anxTime, final long anxOffsetInS,
+			final long rangeLengthInS) {
 		final LocalDateTime anx = DateUtils.parse(anxTime);
 
 		final LocalDateTime rangeStart = anx.plus(anxOffsetInS, ChronoUnit.SECONDS);
@@ -295,7 +283,7 @@ public class MultipleProductCoverSearch {
 		final Range anxRange = new Range(rangeStart, rangeStop);
 
 		LOGGER.trace("Check if range {} intersects with anxRange {}", productRange, anxRange);
-		
+
 		if (productRange.intersects(anxRange)) {
 			LOGGER.trace("Ranges intersect!");
 			return anxRange;
@@ -349,11 +337,10 @@ public class MultipleProductCoverSearch {
 	 * @return updated list of tasks
 	 */
 	private List<AppDataJobTaskInputs> updateAppDataJobTaskInputs(final List<AppDataJobTaskInputs> tasks,
-			final List<S3Metadata> products, final boolean complete, final TaskTableInputAlternative alternative, final ProductMode mode,
-			final TaskTableAdapter taskTableAdapter) {
+			final List<S3Metadata> products, final boolean complete, final TaskTableInputAlternative alternative,
+			final ProductMode mode, final TaskTableAdapter taskTableAdapter) {
 		final Map<String, TaskTableInput> taskTableInputs = QueryUtils
-				.taskTableTasksAndInputsMappedTo((list, task) -> list, Collections::singletonMap,
-						taskTableAdapter)
+				.taskTableTasksAndInputsMappedTo((list, task) -> list, Collections::singletonMap, taskTableAdapter)
 				.stream().flatMap(Collection::stream).flatMap(map -> map.entrySet().stream())
 				.collect(toMap(Map.Entry::getKey, Map.Entry::getValue));
 

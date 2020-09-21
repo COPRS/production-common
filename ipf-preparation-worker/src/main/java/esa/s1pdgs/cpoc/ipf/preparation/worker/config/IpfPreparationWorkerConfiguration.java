@@ -179,9 +179,7 @@ public class IpfPreparationWorkerConfiguration {
 		} else if (processSettings.getLevel() == ApplicationLevel.S3_PDU) {
 			return new PDUTypeAdapter(
 					metadataClient,
-					taskTableFactory,
 					elementMapper,
-					processSettings,
 					settings,
 					pduSettings
 			);
