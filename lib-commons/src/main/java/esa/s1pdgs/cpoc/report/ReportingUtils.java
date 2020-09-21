@@ -12,7 +12,7 @@ import esa.s1pdgs.cpoc.report.message.output.FilenameReportingOutput;
 
 public final class ReportingUtils {
 	// default pattern to use if no other is configured
-	private static String segmentBlacklistPattern = "^S1([A-Z_]{1}).*(GP|HK|RF).*SAFE(.zip)?$";
+	private static String segmentBlacklistPattern = "^S1([A-Z_]{1}).*(GP|HK).*SAFE(.zip)?$";
 	
 	private static final Predicate<ReportingFilenameEntry> SEGMENT_FILTER = e -> {
 		return ( e.getFamily().equals(ProductFamily.L0_SEGMENT) && !toFlatFilename(e.getProductName())
