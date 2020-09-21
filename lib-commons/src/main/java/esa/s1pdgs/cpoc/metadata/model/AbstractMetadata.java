@@ -1,6 +1,8 @@
 package esa.s1pdgs.cpoc.metadata.model;
 
 import java.time.format.DateTimeFormatter;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Objects;
 
 /**
@@ -57,6 +59,8 @@ public abstract class AbstractMetadata {
      * Swath Type
      */
     protected String swathtype;
+
+    protected Map<String, String> additionalProperties = new HashMap<>();
     
     /**
      * @param productName
@@ -209,8 +213,20 @@ public abstract class AbstractMetadata {
 	public void setSwathtype(String swathtype) {
 		this.swathtype = swathtype;
 	}
-	
-	public String toAbstractString() {
+
+    public Map<String, String> getAdditionalProperties() {
+        return additionalProperties;
+    }
+
+    public void setAdditionalProperties(Map<String, String> additionalProperties) {
+        this.additionalProperties = additionalProperties;
+    }
+
+    public void addAdditionalProperty(String key, String value) {
+	    additionalProperties.put(key, value);
+    }
+
+    public String toAbstractString() {
 		return String.format(
 				"\"productName\":\"%s\",\"productType\":\"%s\",\"keyObjectStorage\":\"%s\",\"validityStart\":\"%s\",\"validityStop\":\"%s\",\"missionId\":\"%s\",\"satelliteId\":\"%s\",\"stationCode\":\"%s\",\"swathtype\":\"%s\"",
 				productName, productType, keyObjectStorage, validityStart, validityStop, missionId, satelliteId, stationCode, swathtype);
@@ -222,7 +238,7 @@ public abstract class AbstractMetadata {
     @Override
     public int hashCode() {
         return Objects.hash(productName, productType, keyObjectStorage,
-                validityStart, validityStop, missionId, satelliteId, stationCode, swathtype);
+                validityStart, validityStop, missionId, satelliteId, stationCode, swathtype, additionalProperties);
     }
 
     /**
@@ -245,7 +261,8 @@ public abstract class AbstractMetadata {
 		            && Objects.equals(missionId, other.missionId)
 		            && Objects.equals(satelliteId, other.satelliteId)
 		            && Objects.equals(stationCode, other.stationCode)
-		            && Objects.equals(swathtype, other.swathtype);
+		            && Objects.equals(swathtype, other.swathtype)
+                    && Objects.equals(additionalProperties, other.additionalProperties);
         }
         return ret;
     }

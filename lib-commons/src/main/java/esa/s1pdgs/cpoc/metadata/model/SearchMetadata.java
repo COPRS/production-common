@@ -49,30 +49,25 @@ public class SearchMetadata extends AbstractMetadata {
 		return String.format("{%s}", super.toAbstractString());
 	}
 
-	/**
-	 * @see java.lang.Object#hashCode()
-	 */
+	@Override
+	public boolean equals(Object o) {
+		if (this == o) return true;
+		if (o == null || getClass() != o.getClass()) return false;
+		if (!super.equals(o)) return false;
+		SearchMetadata metadata = (SearchMetadata) o;
+		return Objects.equals(footprint, metadata.footprint);
+	}
+
 	@Override
 	public int hashCode() {
 		return Objects.hash(super.hashCode(), footprint);
 	}
 
 	/**
-	 * @see java.lang.Object#equals(java.lang.Object)
+	 * @see java.lang.Object#hashCode()
 	 */
-	@Override
-	public boolean equals(final Object obj) {
-		boolean ret;
-		if (this == obj) {
-			ret = true;
-		} else if (obj == null || getClass() != obj.getClass()) {
-			ret = false;
-		} else {
-			SearchMetadata other = (SearchMetadata) obj;
-			ret = super.equals(other) && footprint == other.footprint;
-		}
-		return ret;
-	}
+
+
 
 	@Override
 	public String toString() {
