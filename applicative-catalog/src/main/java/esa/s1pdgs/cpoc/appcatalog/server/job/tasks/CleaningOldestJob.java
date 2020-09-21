@@ -46,10 +46,6 @@ public class CleaningOldestJob {
     private final Map<String, Long> maxAgeJobsLevelSegments;
 
     /**
-     * @param appDataJobService
-     * @param category
-     * @param maxAgeJobs
-     * @param maxNbErrorsGenerations
      */
     @Autowired
     public CleaningOldestJob(final AppDataJobService appDataJobService,
@@ -83,8 +79,6 @@ public class CleaningOldestJob {
 
     /**
      * 
-     * @param state
-     * @param isError
      */
     private void cleanJobsByState(final AppDataJobState state, final boolean isError) {
         // EDRS sessions
@@ -114,14 +108,16 @@ public class CleaningOldestJob {
                 maxAgeJobsLevelProducts.get(state.name().toLowerCase()),
                 isError
         );
+        cleanJobsByStateAndCategory(
+                state,
+                ApplicationLevel.SPP_OBS,
+                maxAgeJobsLevelProducts.get(state.name().toLowerCase()),
+                isError
+        );
     }
 
     /**
      * 
-     * @param state
-     * @param category
-     * @param maxAge
-     * @param isError
      */
     private void cleanJobsByStateAndCategory(
     		final AppDataJobState state,
