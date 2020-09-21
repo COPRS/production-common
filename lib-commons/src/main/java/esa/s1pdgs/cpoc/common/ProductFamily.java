@@ -46,7 +46,6 @@ public enum ProductFamily {
     //SPP types
     SPP_OBS_JOB,
     SPP_OBS,
-    SPP_OBS_REPORT,
     // SPP compressed types
     SPP_OBS_ZIP,
     
