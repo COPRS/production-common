@@ -39,6 +39,7 @@ import org.mockito.MockitoAnnotations;
 
 import esa.s1pdgs.cpoc.common.ProductFamily;
 import esa.s1pdgs.cpoc.common.errors.processing.MetadataMalformedException;
+import esa.s1pdgs.cpoc.mdc.worker.config.MdcWorkerConfigurationProperties;
 import esa.s1pdgs.cpoc.mdc.worker.es.ElasticsearchDAO;
 import esa.s1pdgs.cpoc.metadata.model.EdrsSessionMetadata;
 import esa.s1pdgs.cpoc.metadata.model.L0AcnMetadata;
@@ -57,7 +58,7 @@ public class EsServicesTest{
 	@Before
 	public void init() throws IOException {
 		MockitoAnnotations.initMocks(this);
-		esServices = new EsServices(elasticsearchDAO);
+		esServices = new EsServices(elasticsearchDAO, new MdcWorkerConfigurationProperties());
 		
 	}
 	
