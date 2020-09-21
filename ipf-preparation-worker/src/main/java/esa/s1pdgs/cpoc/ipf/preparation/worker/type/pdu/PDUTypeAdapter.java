@@ -1,5 +1,6 @@
 package esa.s1pdgs.cpoc.ipf.preparation.worker.type.pdu;
 
+import java.util.Collections;
 import java.util.List;
 
 import org.apache.logging.log4j.LogManager;
@@ -14,7 +15,6 @@ import esa.s1pdgs.cpoc.ipf.preparation.worker.model.pdu.PDUType;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.model.tasktable.ElementMapper;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.model.tasktable.TaskTableFactory;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.type.AbstractProductTypeAdapter;
-import esa.s1pdgs.cpoc.ipf.preparation.worker.type.s3.S3TypeAdapter;
 import esa.s1pdgs.cpoc.metadata.client.MetadataClient;
 import esa.s1pdgs.cpoc.mqi.model.queue.IpfExecutionJob;
 import esa.s1pdgs.cpoc.mqi.model.queue.IpfPreparationJob;
@@ -22,7 +22,7 @@ import esa.s1pdgs.cpoc.xml.model.joborder.JobOrder;
 
 public class PDUTypeAdapter extends AbstractProductTypeAdapter {
 
-	private static final Logger LOGGER = LogManager.getLogger(S3TypeAdapter.class);
+	private static final Logger LOGGER = LogManager.getLogger(PDUTypeAdapter.class);
 
 	private MetadataClient metadataClient;
 	private TaskTableFactory ttFactory;
@@ -53,7 +53,7 @@ public class PDUTypeAdapter extends AbstractProductTypeAdapter {
 			}
 		}
 
-		return null;
+		return Collections.emptyList();
 	}
 
 	@Override
