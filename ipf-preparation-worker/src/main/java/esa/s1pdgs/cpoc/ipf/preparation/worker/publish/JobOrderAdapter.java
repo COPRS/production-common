@@ -30,11 +30,11 @@ import esa.s1pdgs.cpoc.ipf.preparation.worker.model.tasktable.TaskTableAdapter;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.type.ProductTypeAdapter;
 import esa.s1pdgs.cpoc.mqi.model.queue.LevelJobOutputDto;
 import esa.s1pdgs.cpoc.xml.XmlConverter;
+import esa.s1pdgs.cpoc.xml.model.joborder.AbstractJobOrderProc;
 import esa.s1pdgs.cpoc.xml.model.joborder.JobOrder;
 import esa.s1pdgs.cpoc.xml.model.joborder.JobOrderInput;
 import esa.s1pdgs.cpoc.xml.model.joborder.JobOrderInputFile;
 import esa.s1pdgs.cpoc.xml.model.joborder.JobOrderOutput;
-import esa.s1pdgs.cpoc.xml.model.joborder.JobOrderProc;
 import esa.s1pdgs.cpoc.xml.model.joborder.JobOrderProcParam;
 import esa.s1pdgs.cpoc.xml.model.joborder.JobOrderSensingTime;
 import esa.s1pdgs.cpoc.xml.model.joborder.JobOrderTimeInterval;
@@ -99,7 +99,7 @@ public final class JobOrderAdapter
 			return new JobOrderAdapter(xmlConverter, jobOrderFile, jobOrder);
 		}
 
-		private void replacePlaceHolderWithResults(final JobOrderProc p, final Map<String, AppDataJobInput> inputsByReference) {
+		private void replacePlaceHolderWithResults(final AbstractJobOrderProc p, final Map<String, AppDataJobInput> inputsByReference) {
 			final List<JobOrderInput> jobOrderInputs = new ArrayList<>();
 
 			p.getInputs().forEach(placeHolder -> {

@@ -24,7 +24,6 @@ import esa.s1pdgs.cpoc.common.ProductFamily;
 import esa.s1pdgs.cpoc.common.errors.AbstractCodedException;
 import esa.s1pdgs.cpoc.common.errors.InternalErrorException;
 import esa.s1pdgs.cpoc.common.errors.UnknownFamilyException;
-import esa.s1pdgs.cpoc.common.errors.obs.ObsException;
 import esa.s1pdgs.cpoc.ipf.execution.worker.config.ApplicationProperties;
 import esa.s1pdgs.cpoc.ipf.execution.worker.job.model.mqi.FileQueueMessage;
 import esa.s1pdgs.cpoc.ipf.execution.worker.job.model.mqi.ObsQueueMessage;
@@ -40,15 +39,10 @@ import esa.s1pdgs.cpoc.mqi.model.rest.GenericMessageDto;
 import esa.s1pdgs.cpoc.mqi.model.rest.GenericPublicationMessageDto;
 import esa.s1pdgs.cpoc.obs_sdk.FileObsUploadObject;
 import esa.s1pdgs.cpoc.obs_sdk.ObsClient;
-import esa.s1pdgs.cpoc.obs_sdk.ObsEmptyFileException;
 import esa.s1pdgs.cpoc.report.Reporting;
 import esa.s1pdgs.cpoc.report.ReportingFactory;
-import esa.s1pdgs.cpoc.report.ReportingFilenameEntries;
-import esa.s1pdgs.cpoc.report.ReportingFilenameEntry;
 import esa.s1pdgs.cpoc.report.ReportingMessage;
-import esa.s1pdgs.cpoc.report.ReportingOutput;
 import esa.s1pdgs.cpoc.report.ReportingUtils;
-import esa.s1pdgs.cpoc.report.message.output.FilenameReportingOutput;
 
 /**
  * Process outputs according their family: - publication in message queue system
@@ -127,6 +121,10 @@ public class OutputProcessor {
 	 * Application properties
 	 */
 	private final ApplicationProperties properties;
+	
+	private final boolean debugMode;
+	
+	private final String uploadPrefix;
 
 	public static enum AcquisitionMode {
 		EW, IW, SM, WV
@@ -135,14 +133,6 @@ public class OutputProcessor {
 	/**
 	 * Constructor
 	 * 
-	 * @param obsClient
-	 * @param outputProcuderFactory
-	 * @param workDirectory
-	 * @param authorizedOutputs
-	 * @param listFile
-	 * @param sizeS3UploadBatch
-	 * @param prefixMonitorLogs
-	 * @param properties
 	 */
 	public OutputProcessor(final ObsClient obsClient, final OutputProcuderFactory procuderFactory,
 			final GenericMessageDto<IpfExecutionJob> inputMessage, final String listFile, final int sizeUploadBatch,
@@ -157,12 +147,23 @@ public class OutputProcessor {
 		this.prefixMonitorLogs = prefixMonitorLogs;
 		this.appLevel = appLevel;
 		this.properties = properties;
+		this.debugMode = inputMessage.getDto().isDebug();
+		
+		// FIXME: this needs to be removed from the constructor, but at the moment it'S the easiest way until refactoring
+		// story is implemented
+		if (debugMode) {
+			uploadPrefix = inputMessage.getBody().getKeyObjectStorage() + "-" + 
+					inputMessage.getBody().getRetryCounter() + "/";
+		}
+		else {
+			uploadPrefix = "";
+		}
+		
 	}
 
 	/**
 	 * Extract the list of outputs from a file
 	 * 
-	 * @return
 	 * @throws InternalErrorException
 	 */
 	private List<String> extractFiles() throws InternalErrorException {
@@ -175,7 +176,7 @@ public class OutputProcessor {
 		}
 	}
 
-	private final ProductFamily familyOf(final LevelJobOutputDto output) {
+	private ProductFamily familyOf(final LevelJobOutputDto output) {
 		final ProductFamily family = ProductFamily.fromValue(output.getFamily());
 		if (family == ProductFamily.L0_SLICE && appLevel == ApplicationLevel.L0){			
 			return ProductFamily.L0_SEGMENT;
@@ -187,11 +188,6 @@ public class OutputProcessor {
 	 * Sort outputs and convert them into object for message queue system or OBS
 	 * according the output define in the job they match
 	 * 
-	 * @param lines
-	 * @param uploadBatch
-	 * @param outputToPublish
-	 * @param reportToPublish
-	 * @throws UnknownFamilyException
 	 */
 	final long sortOutputs(final List<String> lines, final List<FileObsUploadObject> uploadBatch,
 			final List<ObsQueueMessage> outputToPublish, final List<FileQueueMessage> reportToPublish, final ReportingFactory reportingFactory)
@@ -222,7 +218,8 @@ public class OutputProcessor {
 				final OQCFlag oqcFlag = executor.executeOQC(file, family, matchOutput, new OQCDefaultTaskFactory(), reportingFactory);
 				LOGGER.info("Result of OQC validation was: {}", oqcFlag);
 
-				switch (family) {
+				switch (family) {		
+					
 				case L0_REPORT:
 				case L1_REPORT:
 				case L2_REPORT:
@@ -254,7 +251,7 @@ public class OutputProcessor {
 									new GhostHandlingSegmentReportingOutput(false),
 									new ReportingMessage("%s (%s) is not a ghost candidate", productName, family)
 							);
-							uploadBatch.add(new FileObsUploadObject(family, productName, file));
+							uploadBatch.add(newUploadObject(family,productName,file));
 							outputToPublish.add(
 								new ObsQueueMessage(family, productName, productName, inputMessage.getBody().getProductProcessMode(),oqcFlag));
 
@@ -265,14 +262,14 @@ public class OutputProcessor {
 									new GhostHandlingSegmentReportingOutput(true),
 									new ReportingMessage("%s (%s) is a ghost candidate", productName, family)
 							);
-							uploadBatch.add(new FileObsUploadObject(ProductFamily.GHOST, productName, file));
+							uploadBatch.add(newUploadObject(ProductFamily.GHOST,productName, file));
 						}
 						productSize += size(file);
 					}
 					else {
 						LOGGER.info("Output {} is considered as belonging to the family {}", productName,
 								matchOutput.getFamily());
-						uploadBatch.add(new FileObsUploadObject(family, productName, file));
+						uploadBatch.add(newUploadObject(family, productName, file));
 						outputToPublish.add(new ObsQueueMessage(family, productName, productName,
 								inputMessage.getBody().getProductProcessMode(),oqcFlag));
 						productSize += size(file);
@@ -288,14 +285,14 @@ public class OutputProcessor {
 					// Specific case of the L0 wrapper
 					if (appLevel == ApplicationLevel.L0) {
 						LOGGER.warn("Product {} is not expected as output of AIO", productName);
-						uploadBatch.add(new FileObsUploadObject(family, productName, file));
+						uploadBatch.add(newUploadObject(family, productName, file));
 						outputToPublish.add(new ObsQueueMessage(family, productName, productName,
 								inputMessage.getBody().getProductProcessMode(),oqcFlag));
 						productSize += size(file);
 					} else {
 						LOGGER.info("Output {} (ACN, BLANK) is considered as belonging to the family {}", productName,
 								matchOutput.getFamily());
-						uploadBatch.add(new FileObsUploadObject(family, productName, file));
+						uploadBatch.add(newUploadObject(family, productName, file));
 						outputToPublish.add(new ObsQueueMessage(family, productName, productName,
 								inputMessage.getBody().getProductProcessMode(),oqcFlag));
 						productSize += size(file);
@@ -305,6 +302,7 @@ public class OutputProcessor {
 				case L1_ACN:
 				case L2_SLICE:
 				case L2_ACN:
+				case SPP_OBS: //just trying
 				case S3_AUX:
 				case S3_CAL:
 				case S3_L0:
@@ -315,7 +313,7 @@ public class OutputProcessor {
 					// upload per batch
 					LOGGER.info("Output {} is considered as belonging to the family {}", productName,
 							matchOutput.getFamily());
-					uploadBatch.add(new FileObsUploadObject(family, productName, file));
+					uploadBatch.add(newUploadObject(family, productName, file));
 					outputToPublish.add(new ObsQueueMessage(family, productName, productName,
 							inputMessage.getBody().getProductProcessMode(), oqcFlag));
 					productSize += size(file);
@@ -362,14 +360,14 @@ public class OutputProcessor {
 		final String startDateString = productName.substring(17, 32);
 		final String endDateString = productName.substring(33, 48);
 
-		Duration duration = null;
+		Duration duration;
 		try {
 
 			final LocalDateTime startTime = LocalDateTime.parse(startDateString,
 					DateTimeFormatter.ofPattern("yyyyMMdd'T'HHmmss"));
 			final LocalDateTime endTime = LocalDateTime.parse(endDateString,
 					DateTimeFormatter.ofPattern("yyyyMMdd'T'HHmmss"));
-			LOGGER.trace("Extracted dates from ghost candidate: startDate {}, endDate {}, polarisation {}", startTime,
+			LOGGER.trace("Extracted dates from ghost candidate: startDate {}, endDate {}", startTime,
 					endTime);
 
 			duration = Duration.between(startTime, endTime);
@@ -437,8 +435,6 @@ public class OutputProcessor {
 	/**
 	 * Extract the product name from the line of the result file
 	 * 
-	 * @param line
-	 * @return
 	 */
 	private String getProductName(final String line) {
 		// Extract the product name and the complete filepath
@@ -460,9 +456,6 @@ public class OutputProcessor {
 	 * concatenation of the working directory and the line. But for .ISIP files, we
 	 * considers the .SAFE file is the .ISIP directory
 	 * 
-	 * @param line
-	 * @param productName
-	 * @return
 	 */
 	private String getFilePath(final String line, final String productName) {
 		String filePath = workDirectory + line;
@@ -476,8 +469,6 @@ public class OutputProcessor {
 	/**
 	 * Search if a output defined in the job matches with the product name
 	 * 
-	 * @param productName
-	 * @return
 	 */
 	private LevelJobOutputDto getMatchOutput(final String productName) {
 		for (final LevelJobOutputDto jobOutputDto : authorizedOutputs) {
@@ -491,10 +482,6 @@ public class OutputProcessor {
 	/**
 	 * Process product: upload in OBS and publish in message queue system per batch
 	 * 
-	 * @param uploadBatch
-	 * @param outputToPublish
-	 * @throws AbstractCodedException
-	 * @throws ObsEmptyFileException 
 	 */
 	final List<GenericPublicationMessageDto<ProductionEvent>> processProducts(
 			final ReportingFactory reportingFactory, 
@@ -515,7 +502,7 @@ public class OutputProcessor {
 		// and this piece of code should never become operational.
 		final List<GenericPublicationMessageDto<ProductionEvent>> res = new ArrayList<>();
 		
-		final double size = Double.valueOf(uploadBatch.size());
+		final double size = uploadBatch.size();
 		final double nbPool = Math.ceil(size / sizeUploadBatch);
 
 		for (int i = 0; i < nbPool; i++) {
@@ -528,7 +515,7 @@ public class OutputProcessor {
 			if (Thread.currentThread().isInterrupted()) {
 				throw new InternalErrorException("The current thread as been interrupted");
 			}
-			this.obsClient.upload(sublist, reportingFactory);
+			obsClient.upload(sublist, reportingFactory);
 		}
 		// ok, this seems to be some kind of 'poison pill' pattern here to indicate that upload is done.
 		// as nothing else is done. If there is a remainder in 'outputToPublish', I guess it will be published
@@ -537,16 +524,20 @@ public class OutputProcessor {
 		return res;
 	}
 	
+	private FileObsUploadObject newUploadObject(final ProductFamily family, final String productName, final File file) {
+		return new FileObsUploadObject(
+				family, 
+				uploadPrefix + productName, 
+				file
+		);
+	}
+	
 	/**
 	 * Public uploaded files, i.e. unitl the output to publish is the next key to
 	 * upload
 	 * 
-	 * @param nbBatch
-	 * @param nextKeyUpload
-	 * @param outputToPublish
-	 * @throws Exception 
 	 */
-	private final List<GenericPublicationMessageDto<ProductionEvent>> publishAccordingUploadFiles(
+	private List<GenericPublicationMessageDto<ProductionEvent>> publishAccordingUploadFiles(
 			final double nbBatch,
 			final String nextKeyUpload, 
 			final List<ObsQueueMessage> outputToPublish,
@@ -572,7 +563,7 @@ public class OutputProcessor {
 		return result;
 	}
 
-	private final GenericPublicationMessageDto<ProductionEvent> publish(
+	private GenericPublicationMessageDto<ProductionEvent> publish(
 			final UUID uuid, 
 			final ObsQueueMessage msg
 	) throws Exception {
@@ -593,8 +584,6 @@ public class OutputProcessor {
 	/**
 	 * Publish reports in message queue system
 	 * 
-	 * @param reportToPublish
-	 * @throws AbstractCodedException
 	 */
 	protected void processReports(final List<FileQueueMessage> reportToPublish,	final UUID uuid) throws AbstractCodedException {
 
@@ -622,11 +611,6 @@ public class OutputProcessor {
 
 	/**
 	 * Function which process all the output of L0 process
-	 * @throws ObsEmptyFileException 
-	 * 
-	 * @throws ObsException
-	 * @throws IOException
-	 * @throws ObsEmptyFileException 
 	 */
 	public List<GenericPublicationMessageDto<ProductionEvent>> processOutput(final ReportingFactory reportingFactory, final UUID uuid) throws Exception {
 		// Extract files
@@ -634,18 +618,28 @@ public class OutputProcessor {
 
 		// Sort outputs
 		final List<FileObsUploadObject> uploadBatch = new ArrayList<>();
-		final List<ObsQueueMessage> outputToPublish = new ArrayList<>();
-		final List<FileQueueMessage> reportToPublish = new ArrayList<>();
+		List<ObsQueueMessage> outputToPublish = new ArrayList<>();
+		List<FileQueueMessage> reportToPublish = new ArrayList<>();
 			
 		sortOutputs(lines, uploadBatch, outputToPublish, reportToPublish, reportingFactory);
 		try {
+			// S1PRO-1856: for debug, no publishing and upload will be into OBS DEBUG bucket
+			if (debugMode) {
+				for (final FileObsUploadObject obj : uploadBatch) {
+					// TODO add prefix
+					obj.setFamily(ProductFamily.DEBUG);
+				}
+				outputToPublish = new ArrayList<>();
+				reportToPublish = new ArrayList<>();
+			}
+
 			// Upload per batch the output
 			// S1PRO-1494: WARNING--- list will be emptied by this method. For reporting, make a copy beforehand
-			//final List<ObsQueueMessage> outs = new ArrayList<>(outputToPublish);			
+			//final List<ObsQueueMessage> outs = new ArrayList<>(outputToPublish);
 			final List<GenericPublicationMessageDto<ProductionEvent>> res = processProducts(
-					reportingFactory, 
-					uploadBatch, 
-					outputToPublish, 
+					reportingFactory,
+					uploadBatch,
+					outputToPublish,
 					uuid
 			);
 			// Publish reports
@@ -655,15 +649,6 @@ public class OutputProcessor {
 			throw e;
 		}
 	}
-
-	private final ReportingOutput toReportingOutput(final List<ObsQueueMessage> outputToPublish) {		
-		final List<ReportingFilenameEntry> reportingEntries = outputToPublish.stream()
-				.map(m -> new ReportingFilenameEntry(m.getFamily(), m.getProductName()))
-				.collect(Collectors.toList());
-		
-		return new FilenameReportingOutput(new ReportingFilenameEntries(reportingEntries));
-	}
-	
 	
 	private long size(final File file) throws InternalErrorException {
 		try {

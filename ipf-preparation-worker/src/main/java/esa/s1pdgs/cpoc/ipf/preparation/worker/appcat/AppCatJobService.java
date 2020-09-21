@@ -81,9 +81,12 @@ public class AppCatJobService {
 		);	
 	}
 	
-	public final Optional<AppDataJob> findJobForDatatakeId(final String dataTakeId) throws AbstractCodedException {
+	public final Optional<AppDataJob> findJobForDatatakeId(
+			final String dataTakeId,
+			final String productType
+	) throws AbstractCodedException {
 		return first(
-				appCatClient.findByProductDataTakeId(dataTakeId), 
+				appCatClient.findByProductDataTakeId(productType, dataTakeId), 
 				String.format("dataTakeId %s", dataTakeId)
 		);	
 	}
@@ -137,11 +140,6 @@ public class AppCatJobService {
 						final AppDataJobProductAdapter productAdapter = new AppDataJobProductAdapter(prod);
 						job.setStartTime(productAdapter.getStartTime());
 						job.setStopTime(productAdapter.getStopTime());
-						
-						if (queried.shouldJobBeDiscarded()) {
-							// Job is done
-							job.setState(AppDataJobState.TERMINATED);
-						}
 					}
 					// no transition?
 					if (job.getGeneration().getState() == outputState) {

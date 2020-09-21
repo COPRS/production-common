@@ -74,8 +74,12 @@ public class AppDataJobService {
     	return appDataJobRepository.findByProductSessionId(sessionId);
     }
     
-    public List<AppDataJob> findByProductDataTakeId(final String dataTakeId) {
-    	return appDataJobRepository.findByProductDataTakeId(dataTakeId);
+    public List<AppDataJob> findByProductDataTakeId(final String productType, final String dataTakeId) {
+    	// sorry, dirty workaround to identify RFC jobs
+    	if (productType.toUpperCase().equals("RF_RAW__0S")) {
+    		return appDataJobRepository.findByProductDataTakeId_Rfc(dataTakeId);
+    	}  	
+    	return appDataJobRepository.findByProductDataTakeId_NonRfc(dataTakeId);
     }
     
     public List<AppDataJob> findJobInStateGenerating(final String taskTable) {

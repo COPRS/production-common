@@ -18,6 +18,7 @@ public class DateUtils {
 		FORMATS.put(s -> s.length() == 26, DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSSSSS"));
 		FORMATS.put(s -> s.length() == 24 && s.endsWith("Z"), ODATA_DATE_FORMATTER);
 		FORMATS.put(s -> s.length() == 23 && s.startsWith("UTC="), DateTimeFormatter.ofPattern("'UTC='yyyy-MM-dd'T'HH:mm:ss"));
+		FORMATS.put(s -> s.length() == 30 && s.startsWith("UTC="), DateTimeFormatter.ofPattern("'UTC='yyyy-MM-dd'T'HH:mm:ss.SSSSSS"));
 		FORMATS.put(s -> s.length() == 19, DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss"));
 	}
 

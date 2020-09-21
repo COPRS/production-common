@@ -27,8 +27,7 @@ import org.junit.Test;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
-
-import com.amazonaws.util.IOUtils;
+import org.springframework.util.StreamUtils;
 
 import esa.s1pdgs.cpoc.common.ApplicationLevel;
 import esa.s1pdgs.cpoc.common.ProductFamily;
@@ -189,7 +188,7 @@ public class OutputProcessorTest {
 
         try (final InputStream in = Streams.getInputStream("outputs.list");
         	 final OutputStream out = new BufferedOutputStream(new FileOutputStream(new File(tmpDir, "outputs.list")))) {
-        	IOUtils.copy(in, out);
+        	StreamUtils.copy(in, out);
         }        
     }
     

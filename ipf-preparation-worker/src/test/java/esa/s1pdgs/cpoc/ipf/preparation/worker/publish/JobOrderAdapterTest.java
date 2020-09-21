@@ -36,9 +36,10 @@ import esa.s1pdgs.cpoc.ipf.preparation.worker.model.tasktable.TaskTableAdapter;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.model.tasktable.TaskTableFactory;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.type.ProductTypeAdapter;
 import esa.s1pdgs.cpoc.xml.XmlConverter;
+import esa.s1pdgs.cpoc.xml.model.joborder.AbstractJobOrderProc;
 import esa.s1pdgs.cpoc.xml.model.joborder.JobOrder;
 import esa.s1pdgs.cpoc.xml.model.joborder.JobOrderInputFile;
-import esa.s1pdgs.cpoc.xml.model.joborder.JobOrderProc;
+import esa.s1pdgs.cpoc.xml.model.joborder.StandardJobOrderProc;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest
@@ -71,7 +72,8 @@ public class JobOrderAdapterTest {
         final TaskTableAdapter taskTableAdapter = new TaskTableAdapter(
                 xmlFile,
                 taskTableFactory.buildTaskTable(xmlFile, processSettings.getLevel()),
-                elementMapper
+                elementMapper,
+                ProductMode.ALWAYS
         );
 
         final JobOrder jobOrder = taskTableAdapter.newJobOrder(processSettings, ProductMode.SLICING);
@@ -129,8 +131,8 @@ public class JobOrderAdapterTest {
 
     }
 
-    private JobOrderProc procOfType(final String type, final JobOrder jobOrder) {
-        final Optional<JobOrderProc> proc = jobOrder.getProcs().stream().filter(p -> p.getTaskName().equals(type)).findFirst();
+    private AbstractJobOrderProc procOfType(final String type, final JobOrder jobOrder) {
+        final Optional<AbstractJobOrderProc> proc = jobOrder.getProcs().stream().filter(p -> p.getTaskName().equals(type)).findFirst();
 
         if (!proc.isPresent()) {
             throw new IllegalArgumentException(format("job order does not have proc %s", type));
@@ -140,15 +142,15 @@ public class JobOrderAdapterTest {
     }
 
     //check if proc has expectedInputs where in input is defined by "resultFileName"
-    private Matcher<JobOrderProc> hasInputs(final String... expectedInputs) {
-        return new CustomMatcher<JobOrderProc>(format("proc with inputs %s", asList(expectedInputs))) {
+    private Matcher<AbstractJobOrderProc> hasInputs(final String... expectedInputs) {
+        return new CustomMatcher<AbstractJobOrderProc>(format("proc with inputs %s", asList(expectedInputs))) {
             @Override
             public boolean matches(final Object item) {
-                if (!(item instanceof JobOrderProc)) {
+                if (!(item instanceof StandardJobOrderProc)) {
                     return false;
                 }
 
-                final JobOrderProc actual = (JobOrderProc) item;
+                final StandardJobOrderProc actual = (StandardJobOrderProc) item;
 
                 final List<String> actualInputs = actual.getInputs().stream()
                         .flatMap(i -> i.getFilenames().stream().map(JobOrderInputFile::getFilename))

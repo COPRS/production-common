@@ -1,16 +1,32 @@
 package esa.s1pdgs.cpoc.ipf.preparation.worker.model.converter;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
+import static org.hamcrest.CoreMatchers.equalTo;
+import static org.hamcrest.CoreMatchers.is;
+import static org.junit.Assert.*;
+
+import java.io.File;
+import java.io.IOException;
+import java.net.URISyntaxException;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+
+import javax.xml.bind.JAXBException;
 
 import org.junit.Test;
 
+import esa.s1pdgs.cpoc.common.ApplicationLevel;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.model.ProductMode;
-import esa.s1pdgs.cpoc.ipf.preparation.worker.type.Product;
+import esa.s1pdgs.cpoc.ipf.preparation.worker.model.tasktable.TaskTableFactory;
+import esa.s1pdgs.cpoc.xml.XmlConverter;
+import esa.s1pdgs.cpoc.xml.config.XmlConfig;
+import esa.s1pdgs.cpoc.xml.model.joborder.AbstractJobOrderConf;
+import esa.s1pdgs.cpoc.xml.model.joborder.AbstractJobOrderProc;
 import esa.s1pdgs.cpoc.xml.model.joborder.JobOrder;
+import esa.s1pdgs.cpoc.xml.model.joborder.JobOrderInput;
 import esa.s1pdgs.cpoc.xml.model.joborder.JobOrderOutput;
+import esa.s1pdgs.cpoc.xml.model.joborder.JobOrderSensingTime;
+import esa.s1pdgs.cpoc.xml.model.joborder.JobOrderTimeInterval;
+import esa.s1pdgs.cpoc.xml.model.joborder.StandardJobOrderBreakpoint;
 import esa.s1pdgs.cpoc.xml.model.joborder.enums.JobOrderFileNameType;
 import esa.s1pdgs.cpoc.xml.model.tasktable.TaskTable;
 import esa.s1pdgs.cpoc.xml.model.tasktable.TaskTableOuput;
@@ -51,7 +67,8 @@ public class TaskTableToJobOrderConverterTest {
 		assertEquals("[Procs] Invalid name", task13.getName(), o.getProcs().get(2).getTaskName());
 		assertEquals("[Procs] Invalid name", task13.getVersion(), o.getProcs().get(2).getTaskVersion());
 		assertNotNull("[Procs] Invalid breakpoint", o.getProcs().get(2).getBreakpoint());
-		assertEquals("[Procs] Invalid breakpoint enable", "OFF", o.getProcs().get(2).getBreakpoint().getEnable());
+		assertTrue(o.getProcs().get(2).getBreakpoint() instanceof StandardJobOrderBreakpoint);
+		assertEquals("[Procs] Invalid breakpoint enable", "OFF", ((StandardJobOrderBreakpoint) o.getProcs().get(2).getBreakpoint()).getEnable());
 
 		assertTrue("[Inputs] Invalid number", 2 == o.getProcs().get(0).getInputs().size());
 
@@ -67,4 +84,89 @@ public class TaskTableToJobOrderConverterTest {
 		});
 	}
 
+	@Test
+	public void testConverterForSppObs() throws IOException, JAXBException, URISyntaxException {
+
+		final File taskTableFile = new File(getClass().getResource("/OBS_TT_01_taskTable.xml").toURI());
+
+		final XmlConverter xmlConverter = new XmlConfig().xmlConverter();
+		final TaskTable taskTable =
+				new TaskTableFactory(xmlConverter).buildTaskTable(taskTableFile, ApplicationLevel.SPP_OBS);
+
+		final TaskTableToJobOrderConverter converter = new TaskTableToJobOrderConverter(ProductMode.SLICING);
+
+		final JobOrder jobOrder = converter.apply(taskTable);
+
+		applyObsParameter(jobOrder);
+
+		final String jobOrderXml = xmlConverter.convertFromObjectToXMLString(jobOrder);
+
+		final String expectedJobOrder =
+				new String(Files.readAllBytes(
+						new File(getClass().getResource(
+								"/JobOrder_SPP_OBS_expected.xml").toURI()).toPath()),
+						StandardCharsets.UTF_8);
+
+		assertThat(jobOrderXml, is(equalTo(expectedJobOrder)));
+	}
+
+	@Test
+	public void testJobOrderCloning() throws IOException, JAXBException, URISyntaxException {
+
+		final File taskTableFile = new File(getClass().getResource("/OBS_TT_01_taskTable.xml").toURI());
+
+		final XmlConverter xmlConverter = new XmlConfig().xmlConverter();
+		final TaskTable taskTable =
+				new TaskTableFactory(xmlConverter).buildTaskTable(taskTableFile, ApplicationLevel.SPP_OBS);
+
+		final TaskTableToJobOrderConverter converter = new TaskTableToJobOrderConverter(ProductMode.SLICING);
+
+		final JobOrder jobOrder = new JobOrder(converter.apply(taskTable), ApplicationLevel.SPP_OBS);
+
+		applyObsParameter(jobOrder);
+
+		final String jobOrderXml = xmlConverter.convertFromObjectToXMLString(jobOrder);
+
+		final String expectedJobOrder =
+				new String(Files.readAllBytes(
+						new File(getClass().getResource(
+								"/JobOrder_SPP_OBS_expected.xml").toURI()).toPath()),
+						StandardCharsets.UTF_8);
+
+		assertThat(jobOrderXml, is(equalTo(expectedJobOrder)));
+	}
+
+	private void applyObsParameter(JobOrder jobOrder) {
+		JobOrderSensingTime sensingTime = new JobOrderSensingTime();
+		sensingTime.setStart("20200121_183236000000");
+		sensingTime.setStop("20200121_215006000000");
+
+		AbstractJobOrderConf jobOrderConf = jobOrder.getConf();
+		jobOrderConf.setStderrLogLevel("INFO");
+		jobOrderConf.setStdoutLogLevel("INFO");
+		jobOrderConf.setBreakPointEnable(false);
+		jobOrderConf.setProcessingStation("DPA_");
+		jobOrderConf.setSensingTime(sensingTime);
+		jobOrderConf.getProcParams().get(0).setValue("2020-01-21T18:32:46.331273");
+
+		AbstractJobOrderProc jobOrderProc = jobOrder.getProcs().get(0);
+		jobOrderProc.getInputs().remove(1);
+		jobOrderProc.getInputs().remove(1);
+		jobOrderProc.setInputs(jobOrderProc.getInputs());
+
+		JobOrderInput jobOrderInput = jobOrderProc.getInputs().get(0);
+		jobOrderInput.setFileType("AUX_RES");
+		jobOrderInput.setFileNameType(JobOrderFileNameType.PHYSICAL);
+		jobOrderInput.addFilename("/data/localWD/129/S1B_OPER_AUX_RESORB_OPOD_20200121T223141_V20200121T183236_20200121T215006.EOF", "");
+		jobOrderInput.addTimeInterval(
+				new JobOrderTimeInterval(
+						"20200121_183236000000",
+						"20200121_215006000000",
+						"/data/localWD/129/S1B_OPER_AUX_RESORB_OPOD_20200121T223141_V20200121T183236_20200121T215006.EOF"));
+
+		JobOrderOutput jobOrderOutput = jobOrderProc.getOutputs().get(0);
+		jobOrderOutput.setFileType("___OBS__SS");
+		jobOrderOutput.setFileNameType(JobOrderFileNameType.DIRECTORY);
+		jobOrderOutput.setFileName("/data/localWD/129");
+	}
 }

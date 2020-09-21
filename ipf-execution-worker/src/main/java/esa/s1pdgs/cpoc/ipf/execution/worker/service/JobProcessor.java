@@ -224,6 +224,7 @@ public class JobProcessor implements MqiListener<IpfExecutionJob> {
 		final ProductCategory category;
 
 		// Build output list filename
+		// TODO the file name of the output.LIST file should be configurable
 		final String outputListFile;
 		if (properties.getLevel() == ApplicationLevel.L0) {
 			outputListFile = job.getWorkDirectory() + "AIOProc.LIST";
@@ -290,7 +291,7 @@ public class JobProcessor implements MqiListener<IpfExecutionJob> {
 	public void onTerminalError(final GenericMessageDto<IpfExecutionJob> message, final Exception error) {
         LOGGER.error(error);
         
-        FailedProcessingDto failedProcessing = new FailedProcessingDto(
+        final FailedProcessingDto failedProcessing = new FailedProcessingDto(
         		properties.getHostname(),
         		new Date(), 
         		String.format("Error on handling IpfExecutionJob message %s: %s", message.getId(), LogUtils.toString(error)), 
@@ -307,7 +308,7 @@ public class JobProcessor implements MqiListener<IpfExecutionJob> {
 	public void onWarning(final GenericMessageDto<IpfExecutionJob> message, final String warningMessage) {
 		LOGGER.warn(warningMessage);
 				
-		FailedProcessingDto failedProcessing = new FailedProcessingDto(
+		final FailedProcessingDto failedProcessing = new FailedProcessingDto(
         		properties.getHostname(),
         		new Date(), 
         		String.format("Warning on handling IpfExecutionJob message %s: %s", message.getId(), warningMessage), 
@@ -369,7 +370,7 @@ public class JobProcessor implements MqiListener<IpfExecutionJob> {
             	.map(o -> o.getKey())
             	.collect(Collectors.toList());
        
-            String warningMessage = missingChunks.isEmpty() ? "" : String.format(
+            final String warningMessage = missingChunks.isEmpty() ? "" : String.format(
         				"Missing RAWs detected for successful production %s: %s. "
         				+ "Restart if chunks become available or delete this request if they are lost", 
         				message.getId(), 

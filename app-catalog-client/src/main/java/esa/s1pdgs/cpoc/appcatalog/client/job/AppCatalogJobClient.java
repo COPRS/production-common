@@ -129,9 +129,10 @@ public class AppCatalogJobClient {
     	return findAppDataJobsBy("findByProductSessionId", sessionId);
     }
 
-    public List<AppDataJob> findByProductDataTakeId(final String dataTakeId)
+    public List<AppDataJob> findByProductDataTakeId(final String productType, final String dataTakeId)
             throws AbstractCodedException {
-    	return findAppDataJobsBy("findByProductDataTakeId", dataTakeId);
+    	// sorry for the dirty workaround here but I'm lacking time to clean this up right now.
+    	return findAppDataJobsBy("findByProductDataTakeId", productType + "/" + dataTakeId);
     }
 
     public List<AppDataJob> findJobInStateGenerating(final String taskTable) 

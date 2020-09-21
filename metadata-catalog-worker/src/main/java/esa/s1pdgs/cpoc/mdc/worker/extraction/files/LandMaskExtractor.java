@@ -4,7 +4,6 @@ import java.io.File;
 import java.io.IOException;
 import java.io.StringReader;
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 
 import javax.xml.parsers.DocumentBuilder;
@@ -45,9 +44,8 @@ public class LandMaskExtractor {
 
 		for (int i = 0; i < jsonArray.length(); ++i) {
 			JSONObject obj = new JSONObject();
-			obj.put("name", jsonArray.getJSONObject(i).getJSONObject("properties").get("sov_a3"));
-			obj.put("geometry", jsonArray.getJSONObject(i).getJSONObject("geometry"));
-
+			JSONObject currentFeature = jsonArray.getJSONObject(i);
+			obj.put("geometry", currentFeature.getJSONObject("geometry"));
 			result.add(obj);
 		}
 

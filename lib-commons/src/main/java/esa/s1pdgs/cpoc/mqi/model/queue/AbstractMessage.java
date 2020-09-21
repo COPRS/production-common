@@ -20,6 +20,7 @@ import esa.s1pdgs.cpoc.mqi.model.control.DemandType;
  * @author florian_sievert
  *
  */
+//@JsonTypeInfo(use = JsonTypeInfo.Id.CLASS, include = JsonTypeInfo.As.PROPERTY, property = "_class")
 public abstract class AbstractMessage {
 	@JsonIgnore
 	public static final String DEFAULT_HOSTNAME = System.getenv("HOSTNAME");
@@ -110,7 +111,7 @@ public abstract class AbstractMessage {
 		return allowedActions;
 	}
 
-	public void setAllowedActions(List<AllowedAction> allowedActions) {
+	public void setAllowedActions(final List<AllowedAction> allowedActions) {
 		this.allowedActions = allowedActions;
 	}
 
@@ -118,7 +119,7 @@ public abstract class AbstractMessage {
 		return demandType;
 	}
 
-	public void setDemandType(DemandType demandType) {
+	public void setDemandType(final DemandType demandType) {
 		this.demandType = demandType;
 	}
 
@@ -134,7 +135,7 @@ public abstract class AbstractMessage {
 		return debug;
 	}
 
-	public void setDebug(boolean debug) {
+	public void setDebug(final boolean debug) {
 		this.debug = debug;
 	}
 

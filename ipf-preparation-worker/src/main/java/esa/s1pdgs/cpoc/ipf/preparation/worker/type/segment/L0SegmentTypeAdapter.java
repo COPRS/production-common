@@ -2,24 +2,33 @@ package esa.s1pdgs.cpoc.ipf.preparation.worker.type.segment;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.function.BiFunction;
 import java.util.stream.Collectors;
 
 import org.springframework.util.CollectionUtils;
+import org.springframework.util.StringUtils;
 
 import esa.s1pdgs.cpoc.appcatalog.AppDataJob;
+import esa.s1pdgs.cpoc.appcatalog.AppDataJobFile;
+import esa.s1pdgs.cpoc.appcatalog.AppDataJobInput;
 import esa.s1pdgs.cpoc.appcatalog.AppDataJobProduct;
+import esa.s1pdgs.cpoc.appcatalog.AppDataJobTaskInputs;
 import esa.s1pdgs.cpoc.appcatalog.util.AppDataJobProductAdapter;
 import esa.s1pdgs.cpoc.common.errors.AbstractCodedException;
 import esa.s1pdgs.cpoc.common.errors.processing.IpfPrepWorkerInputsMissingException;
 import esa.s1pdgs.cpoc.common.errors.processing.MetadataQueryException;
 import esa.s1pdgs.cpoc.common.utils.DateUtils;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.appcat.AppCatJobService;
+import esa.s1pdgs.cpoc.ipf.preparation.worker.generator.DiscardedException;
+import esa.s1pdgs.cpoc.ipf.preparation.worker.model.tasktable.TaskTableAdapter;
+import esa.s1pdgs.cpoc.ipf.preparation.worker.query.QueryUtils;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.type.AbstractProductTypeAdapter;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.type.Product;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.type.ProductTypeAdapter;
@@ -30,8 +39,12 @@ import esa.s1pdgs.cpoc.mqi.model.queue.IpfExecutionJob;
 import esa.s1pdgs.cpoc.mqi.model.queue.IpfPreparationJob;
 import esa.s1pdgs.cpoc.mqi.model.queue.util.CatalogEventAdapter;
 import esa.s1pdgs.cpoc.xml.model.joborder.JobOrder;
+import esa.s1pdgs.cpoc.xml.model.tasktable.TaskTableInput;
+import esa.s1pdgs.cpoc.xml.model.tasktable.TaskTableTask;
+import esa.s1pdgs.cpoc.xml.model.tasktable.enums.TaskTableFileNameType;
+import esa.s1pdgs.cpoc.xml.model.tasktable.enums.TaskTableMandatoryEnum;
 
-public final class L0SegmentTypeAdapter extends AbstractProductTypeAdapter implements ProductTypeAdapter {
+public final class L0SegmentTypeAdapter extends AbstractProductTypeAdapter implements ProductTypeAdapter {	
 	private final MetadataClient metadataClient;
 	private final long timeoutInputSearchMs;
 
@@ -46,18 +59,18 @@ public final class L0SegmentTypeAdapter extends AbstractProductTypeAdapter imple
 	@Override
 	public final Optional<AppDataJob> findAssociatedJobFor(final AppCatJobService appCat,
 			final CatalogEventAdapter catEvent, final AppDataJob job) throws AbstractCodedException {
-		return appCat.findJobForDatatakeId(catEvent.datatakeId());
+		return appCat.findJobForDatatakeId(catEvent.datatakeId(), catEvent.productType());
 	}
-
+		
 	@Override
-	public final Product mainInputSearch(final AppDataJob job) throws IpfPrepWorkerInputsMissingException {	
+	public final Product mainInputSearch(final AppDataJob job, final TaskTableAdapter tasktableAdpter) throws IpfPrepWorkerInputsMissingException {	
 		final L0SegmentProduct product = L0SegmentProduct.of(job);
 		
 		try {			
 			for (final LevelSegmentMetadata metadata : metadataClient.getLevelSegments(product.getDataTakeId())) {				
 				LOGGER.debug("Found {} in MDC for {}", metadata.getProductName(),  product.getProductName());
 				product.addSegmentMetadata(metadata);
-			}			
+			}
 		}
 		catch (final MetadataQueryException e) {
 			LOGGER.debug("== preSearch: Exception- Missing segment for lastname {}. Trying next time...", product.getProductName());
@@ -66,11 +79,158 @@ public final class L0SegmentTypeAdapter extends AbstractProductTypeAdapter imple
 	}	
 	
 	@Override
-	public void validateInputSearch(final AppDataJob job) throws IpfPrepWorkerInputsMissingException {
-		final L0SegmentProduct product = L0SegmentProduct.of(job);
+	public void validateInputSearch(final AppDataJob job, final TaskTableAdapter tasktableAdpter) throws IpfPrepWorkerInputsMissingException {
+		final L0SegmentProduct product = L0SegmentProduct.of(job);	
 		
-		boolean fullCoverage = false;
+		if (product.isRfc()) {
+			handleRfcSegments(job, product, tasktableAdpter);
+		}
+		else {
+			handleNonRfSegments(job, product);
+		}
+	}
+	
+	// S1PRO-1851: Handling of RFC product 
+	private final void handleRfcSegments(final AppDataJob job, final L0SegmentProduct product, final TaskTableAdapter taskTableAdapter) {		
+		final Map<String, List<LevelSegmentMetadata>> segmentsGroupByPol = product.segmentsForPolaristions();
 
+		final List<String> pols = segmentsGroupByPol.entrySet().stream()
+				.filter(e -> !e.getValue().isEmpty())
+				.map(e -> e.getKey())
+				.collect(Collectors.toList());
+		
+		if (pols.size() == 1) {
+			throw new DiscardedException(
+					String.format("Discarding single RFC product %s", product.getProductName())
+			);
+		}
+		else if (pols.size() != 2) {
+			throw new DiscardedException(
+					String.format("Discarding due to umexpected number or polarisations for RFC product %s", 
+							product.getProductName())
+			);
+		}
+
+		final String polA = pols.get(0);
+		final String polB = pols.get(1);
+		final List<LevelSegmentMetadata> segmentsA = segmentsGroupByPol.get(polA);
+		final List<LevelSegmentMetadata> segmentsB = segmentsGroupByPol.get(polB);
+		// Check polarisations
+		if (!isDoublePolarisation(polA, polB)) {
+			throw new DiscardedException(
+					String.format(
+							"Discarding RFC %s due to polarisation mismatch: %s", 
+							product.getProductName(),
+							pols
+					)
+			);
+		}			
+		final DateTimeFormatter formatter = AppDataJobProduct.TIME_FORMATTER;
+		final String sensingStart = least(getStartSensingDate(segmentsA, formatter), getStartSensingDate(segmentsB, formatter),
+				formatter);
+		final String sensingStop = more(getStopSensingDate(segmentsA, formatter), getStopSensingDate(segmentsB, formatter),
+				formatter);
+		product.setStartTime(sensingStart);
+		product.setStopTime(sensingStop);
+		
+		final List<AppDataJobTaskInputs> overridingInputs = new ArrayList<>();
+				
+		// dirty workaround to find the first input as the inputs are not ordered.
+		// Assume we are searching for Inputs with FILE_TYPE = RFC in TaskTable:
+
+		// we have to search through all Inputs and find these Inputs which have an alternative with
+		// FILE_TYPE = RFC
+
+		// we need the inputReference String for these Inputs
+		// so we can use QueryUtils.taskTableTasksAndInputsMappedTo to get these references:
+
+		// for each taskTableInput which has an alternative with FILE_TYPE = RFC
+		// => return the referenceString
+		// if the taskTableInput has no such Alternative
+		// => return an empty String
+
+		// for each task collect all nonEmpty reference strings and return a List of them
+
+		// at the end we have a List<List<String>> which we convert to List<String> using flatMap
+		final BiFunction<List<String>, TaskTableTask, List<String>> toReferenceList = (references, task) -> references.stream()
+				.filter(StringUtils::hasText)
+				.collect(Collectors.toList());
+
+		final BiFunction<String, TaskTableInput, String> toReference = (reference, input) -> {
+			if(input.alternativesOrdered().anyMatch(alt -> alt.getFileType().equals(L0SegmentProduct.RFC_TYPE))) {
+				return reference;
+			}
+			return "";
+		};
+
+		final List<String> references = QueryUtils.taskTableTasksAndInputsMappedTo(
+				toReferenceList,
+				toReference,
+				taskTableAdapter)
+				.stream()
+				.flatMap(List::stream)
+				.collect(Collectors.toList());
+
+		for (final String reference : references) {
+			final Optional<QueryUtils.TaskAndInput> optionalTask = QueryUtils.getTaskForReference(
+					reference, 
+					taskTableAdapter
+			);
+			if (optionalTask.isPresent()) {
+				final QueryUtils.TaskAndInput task = optionalTask.get();
+				final AppDataJobTaskInputs taskInputs = new AppDataJobTaskInputs(
+						task.getName(), 
+						task.getVersion(), 
+						toInputs(reference, task.getInput(), segmentsA, segmentsB)
+				);
+				overridingInputs.add(taskInputs);
+			}
+		}
+		product.overridingInputs(overridingInputs);
+	}
+
+	private List<AppDataJobInput> toInputs(
+			final String inputReference, 
+			final TaskTableInput input, 
+			final List<LevelSegmentMetadata> segmentsA, 
+			final List<LevelSegmentMetadata> segmentsB
+	) {
+		final TaskTableFileNameType fileNameType = input.alternativesOrdered()
+				.filter(a -> a.getFileType().equals(L0SegmentProduct.RFC_TYPE))
+				.findAny()
+				.map(a -> a.getFileNameType()).orElse(TaskTableFileNameType.BLANK);
+
+		final List<AppDataJobFile> files = new ArrayList<>();
+		for (final LevelSegmentMetadata segment : segmentsA) {
+			files.add(new AppDataJobFile(
+					segment.getProductName(), 
+					segment.getKeyObjectStorage(), 
+					segment.getValidityStart(), 
+					segment.getValidityStop()
+			));
+		}
+		for (final LevelSegmentMetadata segment : segmentsB) {
+			files.add(new AppDataJobFile(
+					segment.getProductName(), 
+					segment.getKeyObjectStorage(), 
+					segment.getValidityStart(), 
+					segment.getValidityStop()
+			));
+		}
+
+		return Collections.singletonList(
+				new AppDataJobInput(
+						inputReference,
+						L0SegmentProduct.RFC_TYPE,
+						fileNameType.toString(),
+						input.getMandatory().equals(TaskTableMandatoryEnum.YES),
+						files
+				)
+		);
+	}
+
+	private final void handleNonRfSegments(final AppDataJob job, final L0SegmentProduct product)
+			throws IpfPrepWorkerInputsMissingException {
 		// Retrieve the segments
 		final Map<String, String> missingMetadata = new HashMap<>();
 		final Map<String, List<LevelSegmentMetadata>> segmentsGroupByPol = product.segmentsForPolaristions();
@@ -92,6 +252,9 @@ public final class L0SegmentTypeAdapter extends AbstractProductTypeAdapter imple
 		// Check polarisation right
 		String sensingStart = null;
 		String sensingStop = null;
+		
+		
+		boolean fullCoverage = false;
 		if (pols.size() <= 0 || pols.size() > 2) {
 			missingMetadata.put(product.getProductName(), "Invalid number of polarisation " + pols.size());
 		} else if (pols.size() == 1) {

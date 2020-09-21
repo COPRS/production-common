@@ -1,0 +1,1582 @@
+openapi: 3.0.1
+info:
+  title: S1PRO-API
+  description: >
+    This API provides acces to the S1PRO subsystem
+      
+      ## Changelog
+      ### V1.0.0
+      - initial version
+      ### V1.0.1
+      - added usage notes section
+      ### V1.0.2
+      - put s1pro-api-svc as server/service name instead of localhost
+      ### V1.2.0
+      - minor editorial changes
+      - changed type of `id` from UUID-string to long to match implementation in MQI persistence
+      - added validation API `/validate`
+      - added batch method for delete of FailledProcessings `POST /failedProcessings/delete`
+      - added batch method for restart of FailledProcessings `POST /failedProcessings/restart`
+      - changed `ApiRespones` Schema (used as a return for void and batch methods) to provide
+        - entity-type targetet by the batch action (e.g. FailedProcessing)
+        - performed action (enum type, "delete" or "restart")
+        - array of successfully handeled ids
+        - array of skipped ids
+      ### V1.2.1
+      - added `GET /processings/count` with same filtering as `GET /processings`
+      - added `GET /failedProcessings/count`
+      ### V1.3.0
+      - fixed typos in comments
+      - added methods to handle downlink session (list, delete and process by AIO processor)
+      - added methods to handle datatakes (list and process by L0ASP processor)
+      - added methods to handle L0 slices (list and process by L1/L2 processors)
+      - added concept of tags
+      - changed "requestBody" format from `application/x-www-form-urlencoded` to `application/json` for all API methods
+      - added `GET /products` and `GET /products/count` to list and count products
+      - added `PUT /products/{filename}/retention` to handle product retention (data lifecycle)
+      - added `PUT /products/{filename}/freeze` to handle quick freeze of product (data lifecycle)
+      - fixed missing return objects for restart on failed jobs
+      ### V1.4.0
+      - removed all methods which are not implemented yet and will probably look different in the future:
+        - removed methods to handle downlink session (list, delete and process by AIO processor) as it is not needed and not implemented yet
+        - removed methods to handle datatakes (list and process by L0ASP processor) as it is not needed and not implemented yet
+        - removed methods to handle L0 slices (list and process by L1/L2 processors) as it is not needed and not implemented yet
+        - removed methods to handle products as it is not implemented yet
+      - added resubmit endpoint for events
+      - added reevaluate endpoint for jobs
+      - added schemas for different DTO objects of prodcessings and failed processings
+      
+      ## Usage Notes
+      
+      ### API security
+      The API is protected by a API key. This is a token (string) agreed by server an client and used to authenticate the client. The client needs to provide the (configurable) API key on every request as a HTTP-Header attribute, e.g. `ApiKey: <yourApiKey>`. The server validates the key send by the client and only allows access if the key is known to the server, else a HTTP error 403 is raised.
+      
+      ### View and manage failed processings 
+      To get a list of failed processings call `GET /failedProcessings`. It will return a list of all failed processings. Operators can review the entries and either restart the processing by `POST /failedProcessings/{id}/restart` or delete a failed processing by `DELETE /failedProcessings/{id}`. In both cases the failed processing is no longer present in the list of failed processings. In case of a restart a failed processing is issued again to the queues eventually resulting in a new processing.
+      
+      A single failed procesing can be viewed by `GET /failedProcessings/{id}`.
+      
+      Batch delete can be performed by `POST /failedProcessings/delete`.
+      
+      Batch restart can be performed by `POST /failedProcessings/restart`.
+      
+      ### View ongoing processings
+      To get a list of processings call `GET /processings`. It will return a list of all processings. As the list might get long, paging can be used to limit the number of results returned. Also filtering is possible by providing additional parameters to filter on ProcessingType and status.
+      
+      To get the *waiting* processings filter by status=READ e.g. `GET /processings?processingType=t-pdgs-auxiliary-files&processingStatus=READ&pageSize=25&pageNumber=0`.
+      
+      To get the *running* processings filter by status=SEND e.g. `GET /processings?processingType=t-pdgs-auxiliary-files&processingStatus=SEND&pageSize=25&pageNumber=0`.
+      
+      A single procesing can be viewed by `GET /processings/{id}`.
+      
+      A list of supported `ProcessingType` is available at `GET /processingTypes`
+      
+      ### Validate Metadata Catalog vs Object Storage content
+      S1PRO stores metadata of products in a Metadata Catalog and binary files in Object Storage (OBS). Due to issues both storages might get inconsistent, e.g. entries in catalog exists but not in OBS or the otherway round. To validate both storages are consistent, call `POST /validate`.
+      
+      ## Pattern matching in queries
+      Some query parameter support wildcard pattern to search for strings.
+      This API supports the following wildcard operators in such patterns
+      - `?`, which matches any single character
+      - `*`, which can match zero or more characters, including an empty one
+      
+      **Avoid beginning patterns with `*` or `?`. This can increase the iterations needed to find matching terms and slow search performance.**
+      
+      ### Examples
+      Under the assumption of a data base of the following downlink sessions
+      - L20191003131632675001058 (A)
+      - S1A__MTI__________030165 (B)
+      - S1B__MTI__________019181 (C)
+      - L20191003131632675001057 (D)
+      - S1A__MPS__________030158 (E)
+      
+      ## Tags
+      S1PRO supports the concept of tags. Some dedicated workflows like re-processing might cause objects like products to be flaged with a tag to indicate the special-case. In a similar way, e.g. a re-transfer of downlink sessions might cause a tag like "retransfer" or similar.
+      This concept is very generic and is not designed to be used by algorithms but only as hints to humans as tag-spelling might change without notice while a human is still able to understand the semantic.
+      
+      To get a list of well-known and supported tags, call `GET /tags`.
+      
+      Tags can be used to filter. To allow flexibility, the assumption is, that operators "knows" the tag or tag-pattern to search for, so tags are not selected from a predifined list.
+      
+      
+  termsOfService: http://www.werum.de
+  contact:
+    name: Werum S1PRO Engineering
+    url: http://www.werum.de
+    email: torben.kessler@werum.de
+  license:
+    name: License of API
+    url: http://www.werum.de 
+  version: V1.4.0
+servers:
+#TODO: provide list of servers in different environments
+- url: https://s1pro-api-svc/api/v1
+tags:
+- name: ProcessingTypes
+  description: All supported processing types of S1PRO subsystem. A `ProcessingType` is equivalient to a KAFKA-topic
+- name: Processings
+  description: Current ongoing processings of S1PRO subsystem. Main purpose is, to provide the monitoring subsystem of S1ITC with information about processings and the ability to interact with S1PRO subsystem. A `Processing` is equivalent to a MQI message stored in ApplicationCatalog.
+- name: FailedProcessings
+  description: Failed processings of S1PRO subsystem. Main purpose is, to provide the monitoring subsystem of S1ITC with information about failed processings and the ability to interact with S1PRO subsystem. A `FailedProcessing` is created when execution of a `Processing` failed.
+paths:
+  /processingTypes:
+    get:
+      tags:
+      - ProcessingTypes
+      summary: get the list of processing types supported by S1PRO
+      operationId: getProcessingTypes
+      parameters:
+      - name: ApiKey
+        in: header
+        required: true
+        style: simple
+        schema:
+          type: string
+      responses:
+        200:
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: string
+          links:
+            processings:
+              operationId: getProcessings
+              description: >
+                The values returned in the response can be used as
+                the `processingType` parameter in `GET /processings`.
+        400:
+          description: Invalid parameters supplied
+          content: {}
+        403:
+          description: Forbidden, e.g. Invalid API key supplied
+          content: {}
+        500:
+          description: Internal Server Error
+          content: {}
+      deprecated: false
+      security:
+      - ApiKey: []
+  /processings:
+    get:
+      tags:
+      - Processings
+      summary: get the list of processings ordered by creation time (ascending)
+      operationId: getProcessings
+      parameters:
+      - name: ApiKey
+        in: header
+        required: true
+        style: simple
+        schema:
+          type: string
+      - name: processingType
+        in: query
+        description: Type values that need to be considered for filtering. one of
+          the values returned by `processingTypes`
+        required: false
+        style: form
+        explode: true
+        schema:
+          type: array
+          items:
+            type: string
+      - name: processingStatus
+        in: query
+        description: Status values that need to be considered for filtering
+        required: false
+        style: form
+        explode: true
+        schema:
+          type: array
+          items:
+            type: string
+            enum:
+            - READ
+            - SEND
+            - ACK_OK
+            - ACK_KO
+            - ACK_WARN
+      - name: pageSize
+        in: query
+        description: Number of processings returned per page (default is unlimited)
+        required: false
+        style: form
+        schema:
+          type: integer
+      - name: pageNumber
+        in: query
+        description: Page number, first page is pageNumber=0 (default). Only used in case `pageSize` is provided.
+        required: false
+        style: form
+        schema:
+          type: integer
+      responses:
+        200:
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Processing'
+        400:
+          description: Invalid parameters supplied
+          content: {}
+        403:
+          description: Forbidden, e.g. Invalid API key supplied
+          content: {}
+        500:
+          description: Internal Server Error
+          content: {}
+      deprecated: false
+      security:
+      - ApiKey: []
+  /processings/count:
+    get:
+      tags:
+      - Processings
+      summary: get the number of processings
+      operationId: countProcessings
+      parameters:
+      - name: ApiKey
+        in: header
+        required: true
+        style: simple
+        schema:
+          type: string
+      - name: processingType
+        in: query
+        description: Type values that need to be considered for filtering. one of
+          the values returned by `processingTypes`
+        required: false
+        style: form
+        explode: true
+        schema:
+          type: array
+          items:
+            type: string
+      - name: processingStatus
+        in: query
+        description: Status values that need to be considered for filtering
+        required: false
+        style: form
+        explode: true
+        schema:
+          type: array
+          items:
+            type: string
+            enum:
+            - READ
+            - SEND
+            - ACK_OK
+            - ACK_KO
+            - ACK_WARN
+      responses:
+        200:
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: integer
+                format: int64
+                description: number of processings matching the query criteria
+        400:
+          description: Invalid parameters supplied
+          content: {}
+        403:
+          description: Forbidden, e.g. Invalid API key supplied
+          content: {}
+        500:
+          description: Internal Server Error
+          content: {}
+      deprecated: false
+      security:
+      - ApiKey: []
+  /processings/{id}:
+    get:
+      tags:
+      - Processings
+      summary: get processing by id
+      operationId: getProcessingById
+      parameters:
+      - name: ApiKey
+        in: header
+        required: true
+        style: simple
+        schema:
+          type: string
+      - name: id
+        in: path
+        description: Processing id to get
+        required: true
+        style: simple
+        schema:
+          type: integer
+          format: int64
+      responses:
+        200:
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Processing'
+        400:
+          description: Invalid parameters supplied
+          content: {}
+        403:
+          description: Forbidden, e.g. Invalid API key supplied
+          content: {}
+        404:
+          description: item not found
+          content: {}
+        500:
+          description: Internal Server Error
+          content: {}
+      deprecated: false
+      security:
+      - ApiKey: []
+  /failedProcessings:
+    get:
+      tags:
+      - FailedProcessings
+      summary: get the list of failed processings ordered by creation time (ascending)
+      operationId: getFailedProcessingList
+      parameters:
+      - name: ApiKey
+        in: header
+        required: true
+        style: simple
+        schema:
+          type: string
+      responses:
+        200:
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/FailedProcessing'
+        400:
+          description: Invalid parameters supplied
+          content: {}
+        403:
+          description: Forbidden, e.g. Invalid API key supplied
+          content: {}
+        500:
+          description: Internal Server Error
+          content: {}
+      deprecated: false
+      security:
+      - ApiKey: []
+  /failedProcessings/count:
+    get:
+      tags:
+      - FailedProcessings
+      summary: get the number of failed processings
+      operationId: countFailedProcessingList
+      parameters:
+      - name: ApiKey
+        in: header
+        required: true
+        style: simple
+        schema:
+          type: string
+      responses:
+        200:
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: integer
+                format: int64
+                description: number of failed processings
+        400:
+          description: Invalid parameters supplied
+          content: {}
+        403:
+          description: Forbidden, e.g. Invalid API key supplied
+          content: {}
+        500:
+          description: Internal Server Error
+          content: {}
+      deprecated: false
+      security:
+      - ApiKey: []
+  /failedProcessings/{id}:
+    get:
+      tags:
+      - FailedProcessings
+      summary: get failed processing by id
+      operationId: getFailedProcessingById
+      parameters:
+      - name: ApiKey
+        in: header
+        required: true
+        style: simple
+        schema:
+          type: string
+      - name: id
+        in: path
+        description: "`id` of FailedProcessing to get"
+        required: true
+        style: simple
+        schema:
+          type: integer
+          format: int64
+      responses:
+        200:
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FailedProcessing'
+        400:
+          description: Invalid parameters supplied
+          content: {}
+        403:
+          description: Forbidden, e.g. Invalid API key supplied
+          content: {}
+        404:
+          description: item not found
+          content: {}
+        500:
+          description: Internal Server Error
+          content: {}
+      deprecated: false
+      security:
+      - ApiKey: []
+    delete:
+      tags:
+      - FailedProcessings
+      summary: Deletes a failed processing by id
+      operationId: deleteFailedProcessing
+      parameters:
+      - name: ApiKey
+        in: header
+        required: true
+        style: simple
+        schema:
+          type: string
+      - name: id
+        in: path
+        description: "`id` of FailedProcessing to delete"
+        required: true
+        style: simple
+        schema:
+          type: integer
+          format: int64
+      responses:
+        200:
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse'
+        400:
+          description: Invalid parameters supplied
+          content: {}
+        403:
+          description: Forbidden, e.g. Invalid API key supplied
+          content: {}
+        404:
+          description: item not found
+          content: {}
+      security:
+      - ApiKey: []
+  /failedProcessings/delete:
+    post:
+      tags:
+      - FailedProcessings
+      summary: delete multiple failed processings in a batch. Ids for not existing failed processings are ignored.
+      operationId: deleteFailedProcessingsInBatch
+      parameters:
+      - name: ApiKey
+        in: header
+        required: true
+        style: simple
+        schema:
+          type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                ids:
+                  description: "array of `id`s of FailedProcessing to delete"
+                  type: array
+                  items:
+                    type: integer
+                    format: int64
+      responses:
+        200:
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse'
+        400:
+          description: Invalid parameters supplied
+          content: {}
+        403:
+          description: Forbidden, e.g. Invalid API key supplied
+          content: {}
+        404:
+          description: item not found
+          content: {}
+        500:
+          description: Internal Server Error
+          content: {}
+      deprecated: false
+      security:
+      - ApiKey: []
+  /failedProcessings/{id}/reevaluate:
+    post:
+      tags:
+      - FailedProcessings
+      summary: reevaluate a failed processing job. This removes the failed processing from
+        the list and restarts it.
+      operationId: reevaluateFailedProcessing
+      parameters:
+      - name: ApiKey
+        in: header
+        required: true
+        style: simple
+        schema:
+          type: string
+      - name: id
+        in: path
+        description: "`id` of FailedProcessing job to reevaluate"
+        required: true
+        style: simple
+        schema:
+          type: integer
+          format: int64
+      responses:
+        200:
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse'
+        400:
+          description: Invalid parameters supplied
+          content: {}
+        403:
+          description: Forbidden, e.g. Invalid API key supplied
+          content: {}
+        404:
+          description: item not found
+          content: {}
+        500:
+          description: Internal Server Error
+          content: {}
+      deprecated: false
+      security:
+      - ApiKey: []
+  /failedProcessings/reevaluate:
+    post:
+      tags:
+      - FailedProcessings
+      summary: reevaluate multiple failed processing jobs in a batch. This removes the failed processings from
+        the list and restarts them. Ids for not existing failed processings are ignored.
+      operationId: reevaluateFailedProcessingsInBatch
+      parameters:
+      - name: ApiKey
+        in: header
+        required: true
+        style: simple
+        schema:
+          type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                ids:
+                  description: "array of `id`s of FailedProcessing job to reevaluate"
+                  type: array
+                  items:
+                    type: integer
+                    format: int64
+      responses:
+        200:
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse'
+        400:
+          description: Invalid parameters supplied
+          content: {}
+        403:
+          description: Forbidden, e.g. Invalid API key supplied
+          content: {}
+        404:
+          description: item not found
+          content: {}
+        500:
+          description: Internal Server Error
+          content: {}
+      deprecated: false
+      security:
+      - ApiKey: []
+  /failedProcessings/{id}/restart:
+    post:
+      tags:
+      - FailedProcessings
+      summary: restart a failed processing job. This removes the failed processing from
+        the list and restarts it.
+      operationId: restartFailedProcessing
+      parameters:
+      - name: ApiKey
+        in: header
+        required: true
+        style: simple
+        schema:
+          type: string
+      - name: id
+        in: path
+        description: "`id` of FailedProcessing job to restart"
+        required: true
+        style: simple
+        schema:
+          type: integer
+          format: int64
+      responses:
+        200:
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse'
+        400:
+          description: Invalid parameters supplied
+          content: {}
+        403:
+          description: Forbidden, e.g. Invalid API key supplied
+          content: {}
+        404:
+          description: item not found
+          content: {}
+        500:
+          description: Internal Server Error
+          content: {}
+      deprecated: false
+      security:
+      - ApiKey: []
+  /failedProcessings/restart:
+    post:
+      tags:
+      - FailedProcessings
+      summary: restart multiple failed processing jobs in a batch. This removes the failed processings from
+        the list and restarts them. Ids for not existing failed processings are ignored.
+      operationId: restartFailedProcessingsInBatch
+      parameters:
+      - name: ApiKey
+        in: header
+        required: true
+        style: simple
+        schema:
+          type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                ids:
+                  description: "array of `id`s of FailedProcessing job to restart"
+                  type: array
+                  items:
+                    type: integer
+                    format: int64
+      responses:
+        200:
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse'
+        400:
+          description: Invalid parameters supplied
+          content: {}
+        403:
+          description: Forbidden, e.g. Invalid API key supplied
+          content: {}
+        404:
+          description: item not found
+          content: {}
+        500:
+          description: Internal Server Error
+          content: {}
+      deprecated: false
+  /failedProcessings/{id}/resubmit:
+    post:
+      tags:
+      - FailedProcessings
+      summary: resubmit a failed processing event. This removes the failed processing from
+        the list and resubmits it.
+      operationId: resubmitFailedProcessing
+      parameters:
+      - name: ApiKey
+        in: header
+        required: true
+        style: simple
+        schema:
+          type: string
+      - name: id
+        in: path
+        description: "`id` of FailedProcessing event to resubmit"
+        required: true
+        style: simple
+        schema:
+          type: integer
+          format: int64
+      responses:
+        200:
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse'
+        400:
+          description: Invalid parameters supplied
+          content: {}
+        403:
+          description: Forbidden, e.g. Invalid API key supplied
+          content: {}
+        404:
+          description: item not found
+          content: {}
+        500:
+          description: Internal Server Error
+          content: {}
+      deprecated: false
+      security:
+      - ApiKey: []
+  /failedProcessings/resubmit:
+    post:
+      tags:
+      - FailedProcessings
+      summary: resubmit multiple failed processing events in a batch. This removes the failed processings from
+        the list and resubmit them. Ids for not existing failed processings are ignored.
+      operationId: resubmitFailedProcessingsInBatch
+      parameters:
+      - name: ApiKey
+        in: header
+        required: true
+        style: simple
+        schema:
+          type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                ids:
+                  description: "array of `id`s of FailedProcessing events to resubmit"
+                  type: array
+                  items:
+                    type: integer
+                    format: int64
+      responses:
+        200:
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse'
+        400:
+          description: Invalid parameters supplied
+          content: {}
+        403:
+          description: Forbidden, e.g. Invalid API key supplied
+          content: {}
+        404:
+          description: item not found
+          content: {}
+        500:
+          description: Internal Server Error
+          content: {}
+      deprecated: false
+  /validate:
+    post:
+      tags:
+      - ConsistencyCheck
+      summary: Trigger validation for inconsistency between Catalog and OBS for all products ingested in the time interval 'now-X' and 'now-Y' where X and Y are configurable. The algorithm is basically to search for all products ingested in the time frame in catalog and all files stored in the time frame in the OBS and compare both lists. Any entry only found in one of the lists is double-checked for existence in the other storage and if it's rearlly missing, it is reported via S1PRO-REPORT-API.
+      operationId: validate
+      responses:
+        200:
+          description: OK, Validation was successfully triggered. For results see S1PRO-REPORT-API.
+          content: 
+            application/json:
+              schema:
+                type: boolean
+                description: true if validation was started
+        403:
+          description: Forbidden, e.g. Invalid API key supplied
+          content: {}
+        500:
+          description: Internal Server Error
+          content: {}
+      deprecated: false
+      security:
+      - ApiKey: []
+components:
+  schemas:
+    ApiResponse:
+      type: object
+      properties:
+        entity:
+          type: string
+          enum:
+           - FailedProcessing
+        action:
+          type: string
+          enum:
+           - restart
+           - reevaluate
+           - delete
+          description: action performed
+        idsWithSuccess:
+          type: array
+          description: list of ids, where 'action' was be applied succesfully
+          items:
+            type: integer
+            format: int64
+        idsSkipped:
+          type: array
+          description: list of ids, where 'action' was not applied, e.g. object not found or other reasons
+          items:
+            type: integer
+            format: int64
+      description: Message container in case of successfull operations
+    Processor:
+      type: object
+      properties:
+        identifier:
+          description: "unique identifier of processor, based on processor name and version"
+          type: string
+        name:
+          type: string
+          description: name of the processor
+        version:
+          type: string
+          description: version of the processor
+        processorGroup:
+          type: string
+          enum:
+          - DOWNLINK_SESSION
+          - DATATAKE
+          - L0_SLICE
+          description: group to aggregate similar processors. Grouping is oriented on main-input product type, so processors of the same group can operate on same kind of data.
+    Processing: # a Processing is implemented by esa.s1pdgs.cpoc.appcatalog.server.mqi.db.MqiMessage
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+          description: id of the processing
+        processingType:
+          type: string
+          description: type of processing (ProcessingType is equivalent to "topic" of KAFKA Queue??)
+        processingStatus:
+          type: string
+          description: status of processing
+          enum:
+          - READ
+          - SEND
+          - ACK_OK
+          - ACK_KO
+          - ACK_WARN
+        productCategory:
+          type: string
+          description: Category of the product
+          enum:
+          - AUXILIARY_FILES
+          - EDRS_SESSIONS
+          - LEVEL_JOBS
+          - LEVEL_PRODUCTS
+          - LEVEL_REPORTS
+          - LEVEL_SEGMENTS
+        partition:
+          type: string
+          description: KAFKA-Partition number (for debug information only)
+        offset:
+          type: integer
+          description: KAFKA-Offset of the Processing (for debug information only)
+          format: int64
+        group:
+          type: string
+          description: KAFKA Consumer Group of the Processing (for debug information only)
+        assignedPod:
+          type: string
+          description: K8s-Pod that performs the Processing
+        lastAssignmentDate:
+          type: string
+          description: Date when the `assignedPod` was assigned to the Processing
+          format: date-time
+        sendingPod:
+          type: string
+          description: K8s-Pod who send the Processing
+        lastSendDate:
+          type: string
+          description: Date when the `sendingPod` last send the Processing
+          format: date-time
+        lastAckDate:
+          type: string
+          description: Date when the Processing was last acknowledged
+          format: date-time
+        nbRetries:
+          type: string
+          description: Number of automated retries of the Processing
+        creationDate:
+          type: string
+          description: Creation date of the Processing
+          format: date-time
+        processingDetails:
+          #processingDetails is very generic and there probably will be some refinement in later versions of this API to be more precise on potential content
+          type: object
+          description: "`dto` object from MqiMessage"
+          oneOf:
+            - $ref: '#/components/schemas/IngestionJobDto'
+            - $ref: '#/components/schemas/CatalogJobDto'
+            - $ref: '#/components/schemas/IpfPreparationJobDto'
+            - $ref: '#/components/schemas/IpfExecutionJobDto'
+            - $ref: '#/components/schemas/CompressionJobDto'
+            - $ref: '#/components/schemas/PripJobDto'
+        predecessorDto:
+          #predecessorDto is very generic and there probably will be some refinement in later versions of this API to be more precise on potential content
+          type: object
+          description: "`predecessorDto` object from MqiMessage, which is used for reevaluation of jobs"
+          oneOf:
+            - $ref: '#/components/schemas/IngestionEventDto'
+            - $ref: '#/components/schemas/CatalogEventDto'
+            - $ref: '#/components/schemas/ProductionEventDto'
+            - $ref: '#/components/schemas/CompressionEventDto'
+            - $ref: '#/components/schemas/IngestionJobDto'
+            - $ref: '#/components/schemas/CatalogJobDto'
+            - $ref: '#/components/schemas/IpfPreparationJobDto'
+            - $ref: '#/components/schemas/IpfExecutionJobDto'
+            - $ref: '#/components/schemas/CompressionJobDto'
+            - $ref: '#/components/schemas/PripJobDto'
+    FailedProcessing:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+          description: id of the failed processing
+        processingType:
+          # ProcessingType is equivalent to "topic" of KAFKA Queue
+          type: string
+          description: type of failed processing
+        processingStatus:
+          type: string
+          description: status of failed processing
+          enum:
+          - READ
+          - SEND
+          - ACK_OK
+          - ACK_KO
+          - ACK_WARN
+        productCategory:
+          type: string
+          description: Category of the product
+          enum:
+          - AUXILIARY_FILES
+          - EDRS_SESSIONS
+          - LEVEL_JOBS
+          - LEVEL_PRODUCTS
+          - LEVEL_REPORTS
+          - LEVEL_SEGMENTS
+        partition:
+          type: string
+          description: KAFKA-Partition number (for debug information only)
+        offset:
+          type: integer
+          description: KAFKA-Offset of the Processing (for debug information only)
+          format: int64
+        group:
+          type: string
+          description: KAFKA Consumer Group of the Processing (for debug information only)
+        failedPod:
+          type: string
+          description: K8s-Pod who failed to perform the Processing
+        lastAssignmentDate:
+          type: string
+          description: Date when the `failedPod` was last assigned to the Processing
+          format: date-time
+        sendingPod:
+          type: string
+          description: K8s-Pod who send the Processing
+        lastSendDate:
+          type: string
+          description: Date when the `sendingPod` last send the Processing
+          format: date-time
+        lastAckDate:
+          type: string
+          description: Date when the Processing was last acknowledged
+          format: date-time
+        nbRetries:
+          type: string
+          description: Number of automatic retries of the Processing until it failed finaly
+        creationDate:
+          type: string
+          description: Creation date of the Processing
+          format: date-time
+        failureDate:
+          type: string
+          description: date when the Processing failed
+          format: date-time
+        failureMessage:
+          type: string
+          description: error message explaining the failure
+        processingDetails:
+          #processingDetails is very generic and there probably will be some refinement in later versions of this API to be more precise on potential content
+          type: object
+          description: "`dto` object from MqiMessage"
+          oneOf:
+            - $ref: '#/components/schemas/IngestionEventDto'
+            - $ref: '#/components/schemas/CatalogEventDto'
+            - $ref: '#/components/schemas/ProductionEventDto'
+            - $ref: '#/components/schemas/CompressionEventDto'
+            - $ref: '#/components/schemas/IngestionJobDto'
+            - $ref: '#/components/schemas/CatalogJobDto'
+            - $ref: '#/components/schemas/IpfPreparationJobDto'
+            - $ref: '#/components/schemas/IpfExecutionJobDto'
+            - $ref: '#/components/schemas/CompressionJobDto'
+            - $ref: '#/components/schemas/PripJobDto'
+        predecessorDto:
+          #predecessorDto is very generic and there probably will be some refinement in later versions of this API to be more precise on potential content
+          type: object
+          description: "`predecessorDto` object from MqiMessage, which is used for reevaluation of jobs"
+          oneOf:
+            - $ref: '#/components/schemas/IngestionEventDto'
+            - $ref: '#/components/schemas/CatalogEventDto'
+            - $ref: '#/components/schemas/ProductionEventDto'
+            - $ref: '#/components/schemas/CompressionEventDto'
+            - $ref: '#/components/schemas/IngestionJobDto'
+            - $ref: '#/components/schemas/CatalogJobDto'
+            - $ref: '#/components/schemas/IpfPreparationJobDto'
+            - $ref: '#/components/schemas/IpfExecutionJobDto'
+            - $ref: '#/components/schemas/CompressionJobDto'
+            - $ref: '#/components/schemas/PripJobDto'
+    AbstractDto:
+      description: base object for all DTO objects on failedProcessings
+      type: object
+      properties:
+        uid: 
+          type: string
+          format: uuid
+          description: event or job id
+          example: ''
+        keyObjectStorage:
+          type: string
+          description: usually the product name, but can also be e.g. file name
+          example: ''
+        productFamily:
+          type: string
+          deprecated: true
+          example: ''
+        creationDate:
+          type: string
+          description: creation date of the job
+          example: '2020-01-20T12:40:37.464424Z'
+        allowedActions:
+          type: array
+          items:
+            type: string
+            enum:
+              - RESBUMIT
+              - RESTART
+              - REEVALUATE
+              - NO_ACTION
+          example: [RESTART, REEVALUATE]
+        debug:
+          type: boolean
+          default: false
+          description: flag for operator debug mode
+          example: true
+        demandType:
+          type: string
+          enum:
+            - EXTERNAL_DEMAND
+            - EXTERNAL_CUSTOM_DEMAND
+            - INTERNAL_DEMAND
+            - SYSTEMATIC
+          description: demand type is to indicate if a processing was triggered from an user, an operator or systematically
+          example: 'EXTERNAL_DEMAND'
+        retryCounter:
+          type: integer
+          description: retry counter for explicit restarts or reevaluations via REST
+          example: 1
+    AbstractEventDto:
+      description: data transfer object for events
+      allOf: 
+        - $ref: '#/components/schemas/AbstractDto'
+    IngestionEventDto:
+      description: data transfer object for ingestion events
+      allOf: 
+        - $ref: '#/components/schemas/AbstractEventDto'
+        - type: object
+          properties:
+            relativePath:
+              type: string
+              description: relative path from base url to data
+              example: ''
+            productName:
+              type: string
+              description: product name
+              example: 'S1A_WV_RAW__0SSV_20200120T124037_20200120T124728_030884_038B5D_3C86.SAFE'
+            productSizeByte:
+              type: integer
+              format: int64
+              description: size of the product
+              example: 951324687
+            stationName:
+              type: string
+              description: the station name
+              example: 'WILE'
+            mode:
+              type: string
+              description: processing mode
+              example: ''
+            timeliness:
+              type: string
+              description: timeliness
+              example: 'FAST24'
+    CatalogEventDto:
+      description: data transfer object for catalog events
+      allOf: 
+        - $ref: '#/components/schemas/AbstractEventDto'
+        - type: object
+          properties:
+            productName:
+              type: string
+              description: product name
+              example: 'S1A_WV_RAW__0SSV_20200120T124037_20200120T124728_030884_038B5D_3C86.SAFE'
+            product_type:
+              type: string
+              description: the product type
+              example: ''
+            metadata:
+              type: object
+              additionalProperties: true
+    ProductionEventDto:
+      description: data transfer object for production events
+      allOf: 
+        - $ref: '#/components/schemas/AbstractEventDto'
+        - type: object
+          properties:
+            productName:
+              type: string
+              description: product name
+              example: 'S1A_WV_RAW__0SSV_20200120T124037_20200120T124728_030884_038B5D_3C86.SAFE'
+            mode:
+              type: string
+              description: processing mode
+              example: ''
+            oqcFlag:
+              type: string
+              description: quality check status
+              enum:
+                - CHECKED_OK
+                - CHECKED_NOK
+                - NOT_CHECKED
+            timeliness:
+              type: string
+              description: timeliness
+              example: 'FAST24'
+    CompressionEventDto:
+      description: data transfer object for compression events
+      allOf: 
+        - $ref: '#/components/schemas/AbstractEventDto'
+    AbstractJobDto:
+      description: data transfer object for jobs
+      allOf: 
+        - $ref: '#/components/schemas/AbstractDto'
+    IngestionJobDto:
+      description: data transfer object for ingestion jobs
+      allOf: 
+        - $ref: '#/components/schemas/AbstractJobDto'
+        - type: object
+          properties:
+            pickupBaseURL:
+              type: string
+              description: base URL for the pickup point
+              example: ''
+            relativePath:
+              type: string
+              description: relative path from base url to data
+              example: ''
+            productName:
+              type: string
+              description: product name
+              example: 'S1A_WV_RAW__0SSV_20200120T124037_20200120T124728_030884_038B5D_3C86.SAFE'
+            productSizeByte:
+              type: integer
+              format: int64
+              description: size of the product
+              example: 951324687
+            stationName:
+              type: string
+              description: the station name
+              example: 'WILE'
+            mode:
+              type: string
+              description: processing mode
+              example: ''
+            timeliness:
+              type: string
+              description: timeliness
+              example: 'FAST24'
+    CatalogJobDto:
+      description: data transfer object for catalog jobs
+      allOf: 
+        - $ref: '#/components/schemas/AbstractJobDto'
+        - type: object
+          properties:
+            productName:
+              type: string
+              description: product name
+              example: 'S1A_WV_RAW__0SSV_20200120T124037_20200120T124728_030884_038B5D_3C86.SAFE'
+            relativePath:
+              type: string
+              description: relative path
+              example: ''
+            stationName:
+              type: string
+              description: the station name
+              example: 'WILE'
+            mode:
+              type: string
+              description: processing mode
+              example: ''
+            oqcFlag:
+              type: string
+              description: quality check status
+              enum:
+                - CHECKED_OK
+                - CHECKED_NOK
+                - NOT_CHECKED
+            timeliness:
+              type: string
+              description: timeliness
+              example: 'FAST24'
+    IpfPreparationJobDto:
+      description: data transfer object for production preparation jobs
+      allOf: 
+        - $ref: '#/components/schemas/AbstractJobDto'
+        - type: object
+          properties:
+            ipfName:
+              type: string
+              description: integrated processing facility name
+              example: ''
+            ipfVersion:
+              type: string
+              description: integrated processing facility version
+              example: ''
+            preselectednputs:
+              type: array
+              items:
+                type: string
+              example: ''
+            appDataJob:
+              type: object
+              properties:
+                id:
+                  type: integer
+                  format: int64
+                  example: 159
+                level:
+                  type: string
+                  description: level
+                  enum:
+                    - L0
+                    - L0_SEGMENT
+                    - L1
+                    - L2
+                  example: 'L2'
+                pod:
+                  type: string
+                  description: name of the pod generating the jobs
+                  example: ''
+                state:
+                  type: string
+                  description: Global state of the job (aggregation of the states of all its job generations
+                  enum:
+                    - WAITING
+                    - DISPATCHING
+                    - GENERATING
+                    - TERMINATED
+                  example: 'WAITING'
+                taskTableName:
+                  type: string
+                  description: name of the relevant TaskTable
+                  example: ''
+                productName:
+                  type: string
+                  description: product name
+                  example: 'S1A_WV_RAW__0SSV_20200120T124037_20200120T124728_030884_038B5D_3C86.SAFE'
+                startTime:
+                  type: string
+                  description: start time
+                  example: '2020-01-20T12:40:37.464424Z'
+                stopTime:
+                  type: string
+                  description: stop time
+                  example: '2020-01-20T12:47:28.677696Z'
+                creationDate:
+                  type: string
+                  description: creation date of the job
+                  example: '2020-01-20T12:40:37.464424Z'
+                lastUpdateDate:
+                  type: string
+                  description: last update date of the job
+                  example: '2020-01-20T12:40:37.464424Z'
+                messages:
+                  type: array
+                  items:
+                    type: object
+                    properties:
+                      id:
+                        type: integer
+                        format: int64
+                        description: message identifier
+                        example: 483
+                      inputKey:
+                        type: string
+                        description: input key
+                        example: ''
+                      body:
+                        $ref: '#/components/schemas/CatalogEventDto'
+                product:
+                  type: object
+                  properties:
+                    metadata:
+                      type: object
+                      additionalProperties: true
+                    inputs:
+                      type: object
+                      additionalProperties:
+                        $ref: '#/components/schemas/AppDataJobFile'
+                additionalInputs:
+                  type: array
+                  items:
+                    type: object
+                    properties:
+                      taskName:
+                        type: string
+                        description: task name
+                        example: ''
+                      taskVersion:
+                        type: string
+                        description: task version
+                        example: ''
+                      inputs:
+                        type: array
+                        items:
+                          type: object
+                          properties:
+                            taskTableInputReference:
+                              type: string
+                              description: TaskTable input reference
+                              example: ''
+                            fileType:
+                              type: string
+                              description: file type
+                              example: ''
+                            fileNameType:
+                              type: string
+                              description: file name type
+                              example: ''
+                            mandatory:
+                              type: boolean
+                              description: mandatory input flag
+                              example: true
+                            hasResults:
+                              type: boolean
+                              description: has results flag
+                              example: false
+                            files:
+                              type: array
+                              items:
+                                $ref: '#/components/schemas/AppDataJobFile'
+                generation:
+                  type: object
+                  properties:     
+                    creationDate:
+                      type: string
+                      description: creation date of the job generation
+                      example: '2020-01-20T12:40:37.464424Z'
+                    lastUpdateDate:
+                      type: string
+                      description: date of the last modification done on the job generation
+                      example: '2020-01-20T12:40:37.464424Z'
+                    taskTable:
+                      type: string
+                      description: task table
+                      example: ''
+                    state:
+                      type: string
+                      description: generation state
+                      enum:
+                        - INITIAL
+                        - PRIMARY_CHECK
+                        - READY
+                        - SENT
+                      example: 'SENT'
+                    nbErrors:
+                      type: integer
+                      description: number of errors
+                      example: 2
+                reportingId:
+                  type: string
+                  description: UUID for reporting
+                  example: ''
+                prepJobMessageId:
+                  type: integer
+                  format: int64
+                  description: preparation job message ID
+                  example: ''
+                prepJobInputQueue:
+                  type: string
+                  description: preparation job input queue
+                  example: '' 
+    IpfExecutionJobDto:
+      description: data transfer object for production execution jobs
+      allOf: 
+        - $ref: '#/components/schemas/AbstractJobDto'
+        - type: object
+          properties:
+            productProcessMode:
+              type: string
+              description: product process mode
+              example: ''
+            workDirectory:
+              type: string
+              description: local work directory
+              example: ''
+            jobOrder:
+              type: string
+              description: local path to the job order
+              example: ''
+            timeliness:
+              type: string
+              description: timeliness
+              example: 'FAST24'
+            inputs:
+              type: array
+              items:
+                type: object
+                properties:
+                  family:
+                    type: string
+                    description: product family
+                    example: ''
+                  localPath:
+                    type: string
+                    description: local path on the target host
+                    example: ''
+                  contentRef:
+                    type: string
+                    description: The reference to the content. Can be the object storage or directly in the string according the family
+                    example: ''
+            outputs:
+              type: array
+              items:
+                type: object
+                properties:
+                  family:
+                    type: string
+                    description: product family
+                    example: ''
+                  regexp:
+                    type: string
+                    description: regular expression
+                    example: ''
+                  oqcCheck:
+                    type: boolean
+                    description: flag if oqcCheck for the wrapper required for this output
+                    example: ''
+            pools:
+              type: array
+              items:
+                type: object
+                properties:
+                  tasks:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        binaryPath:
+                          type: string
+                          description: absolute path of the binary
+                          example: '' 
+    CompressionJobDto:
+      description: data transfer object for compressions
+      allOf: 
+        - $ref: '#/components/schemas/AbstractJobDto'
+        - type: object
+          properties:
+            outputProductFamily:
+              type: string
+              description: product family for output
+              example: ''
+            outputKeyObjectStorage:
+              type: string
+              description: object store key for output product
+              example: ''
+            compressionDirection:
+              type: string
+              description: flag to indicate compression or decompression task
+              enum:
+                - UNDEFINED
+                - COMPRESS
+                - UNCOMPRESS
+              example: COMPRESS
+    PripJobDto:
+      description: data transfer object for PRIP jobs
+      allOf: 
+        - $ref: '#/components/schemas/AbstractJobDto'
+        - type: object
+          properties:
+            evictionDate:
+              type: string
+              description: eviction time
+              example: '2021-01-20T12:40:37.464424Z'
+    AppDataJobFile:
+      type: object
+      properties:
+        fileName:
+          type: string
+          description: file name
+          example: ''
+        keyObs:
+          type: string
+          description: key in object storage
+        startDate:
+          type: string
+          description: start date
+          example: '2016-01-20T12:40:37.464424Z'
+        stopDate:
+          type: string
+          description: stop date
+          example: '2027-01-20T12:47:28.677696Z'
+        metadata:
+          type: string
+          additionalProperties: true
+  securitySchemes:
+    ApiKey:
+      type: apiKey
+      name: ApiKey
+      in: header

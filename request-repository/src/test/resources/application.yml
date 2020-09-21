@@ -10,7 +10,13 @@ logging:
 # REST controller
 server:
   port: 8080      
-  
+
+# OpenAPI validator
+openapi:
+  disable-validation: true
+  path-exclusion-regex: ^\/(app\/status|error)$
+  spec-file: src/test/resources/s1pro-api_openapi.yaml
+
 # KAFKA
 kafka:
   bootstrap-servers: localhost:9093                              # the bootstrap servers for KAFKA
@@ -33,3 +39,4 @@ status:
   delete-fixed-delay-ms: 3000
   max-error-counter: 30
   block-system-exit: true
+

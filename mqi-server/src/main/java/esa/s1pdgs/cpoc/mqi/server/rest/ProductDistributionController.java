@@ -47,11 +47,12 @@ public class ProductDistributionController {
 	{		
 		private final HttpStatus status;
 		
-		public ProductDistributionException() {
-			this(HttpStatus.INTERNAL_SERVER_ERROR);
+		public ProductDistributionException(final Throwable cause) {
+			this(HttpStatus.INTERNAL_SERVER_ERROR, cause);
 		}
 
-		public ProductDistributionException(HttpStatus status) {
+		public ProductDistributionException(final HttpStatus status, final Throwable cause) {
+		    super(cause);
 			this.status = status;
 		}
 
@@ -143,7 +144,7 @@ public class ProductDistributionController {
                     "[MONITOR] [category {}] [api ack] [messageId {}] [code {}] [error {}]",
                     category, ackDto.getMessageId(), mcna.getCode().getCode(),
                     mcna.getLogMessage());            
-            throw new ProductDistributionException();
+            throw new ProductDistributionException(mcna);
         }
         LOGGER.info("[MONITOR] [category {}] [api ack] [messageId {}] [httpCode {}] End", category, ackDto.getMessageId(), 200); 
     }
@@ -181,12 +182,12 @@ public class ProductDistributionController {
                     category, 200, mess.getInputMessageId(), mess.getMessageToPublish().getKeyObjectStorage());
         } catch (MqiPublicationError kse) {
             LOGGER.error("[publish] KafkaSendException occurred: {}", kse.getMessage());
-            throw new ProductDistributionException(HttpStatus.GATEWAY_TIMEOUT);
+            throw new ProductDistributionException(HttpStatus.GATEWAY_TIMEOUT, kse);
         } catch (MqiCategoryNotAvailable | MqiRouteNotAvailable mcna) {
             LOGGER.error(
                     "[MONITOR] [category {}] [api publish] [code {}] [error {}]",
                     category, mcna.getCode().getCode(), mcna.getLogMessage());
-            throw new ProductDistributionException();
+            throw new ProductDistributionException(mcna);
         } catch (IOException e) {
         	LOGGER.error("Could not deserialize JSON {}", message);
         	LOGGER.error(e);
@@ -203,7 +204,7 @@ public class ProductDistributionController {
 	        LOGGER.error(
                     "[MONITOR] [category {}] [api next] [code {}] [error {}]",
                     category, e.getCode().getCode(), e.getLogMessage());	        
-	        throw new ProductDistributionException();
+	        throw new ProductDistributionException(e);
 		}    	
     }
 }

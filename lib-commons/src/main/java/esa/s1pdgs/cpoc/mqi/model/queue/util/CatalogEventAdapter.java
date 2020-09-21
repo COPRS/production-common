@@ -72,6 +72,14 @@ public final class CatalogEventAdapter {
 	public final String stopTime() {
 		return getStringValue("stopTime");		
 	}
+
+	public final String validityStartTime() {
+		return getStringValue("validityStartTime");
+	}
+
+	public final String validityStopTime() {
+		return getStringValue("validityStopTime");
+	}
 	
 	public final String polarisation() {
 		return getStringValue("polarisation");

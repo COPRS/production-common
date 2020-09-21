@@ -1,5 +1,7 @@
 package esa.s1pdgs.cpoc.mdc.worker.service;
 
+import static java.util.stream.Collectors.toMap;
+
 import java.io.IOException;
 import java.math.BigInteger;
 import java.time.Duration;
@@ -54,6 +56,7 @@ import esa.s1pdgs.cpoc.common.utils.DateUtils;
 import esa.s1pdgs.cpoc.common.utils.LogUtils;
 import esa.s1pdgs.cpoc.common.utils.Retries;
 import esa.s1pdgs.cpoc.mdc.worker.es.ElasticsearchDAO;
+import esa.s1pdgs.cpoc.metadata.model.AuxMetadata;
 import esa.s1pdgs.cpoc.metadata.model.EdrsSessionMetadata;
 import esa.s1pdgs.cpoc.metadata.model.L0AcnMetadata;
 import esa.s1pdgs.cpoc.metadata.model.L0SliceMetadata;
@@ -70,6 +73,8 @@ import esa.s1pdgs.cpoc.metadata.model.SearchMetadata;
 @Service
 public class EsServices {
 
+	private static final String LANDMASK_FOOTPRINT_INDEX_NAME = "landmask";
+	private static final String OVERPASSMASK_FOOTPRINT_INDEX_NAME = "overpassmask";
 	private static final String REQUIRED_INSTRUMENT_ID_PATTERN = "(aux_pp1|aux_pp2|aux_cal|aux_ins)";
 	static final String REQUIRED_SATELLITE_ID_PATTERN = "(aux_.*)";
 
@@ -205,24 +210,38 @@ public class EsServices {
 		}
 	}
 
-	public void createGeoMetadata(final JSONObject product, final String landName) throws Exception {
+	public void createLandmaskGeoMetadata(final JSONObject product, final String id) throws Exception {
 		try {
-//			String landName = product.getString("name");
-
-			final IndexRequest request = new IndexRequest("landmask").id(landName).source(product.toString(),
+			final IndexRequest request = new IndexRequest(LANDMASK_FOOTPRINT_INDEX_NAME).id(id).source(product.toString(),
 					XContentType.JSON);
 
 			final IndexResponse response = elasticsearchDAO.index(request);
 
 			if (response.status() != RestStatus.CREATED) {
-				throw new MetadataCreationException(landName, response.status().toString(),
+				throw new MetadataCreationException(id, response.status().toString(),
 						response.getResult().toString());
 			}
 		} catch (JSONException | IOException e) {
 			throw new Exception(e);
 		}
 	}
+	
+	public void createOverpassMaskGeoMetadata(final JSONObject product, final String id) throws Exception {
+		try {
+			final IndexRequest request = new IndexRequest(OVERPASSMASK_FOOTPRINT_INDEX_NAME).id(id).source(product.toString(),
+					XContentType.JSON);
 
+			final IndexResponse response = elasticsearchDAO.index(request);
+
+			if (response.status() != RestStatus.CREATED) {
+				throw new MetadataCreationException(id, response.status().toString(),
+						response.getResult().toString());
+			}
+		} catch (JSONException | IOException e) {
+			throw new Exception(e);
+		}
+	}
+	
 	/**
 	 * Function which return the products that correspond to the valCover
 	 * specification If there is no corresponding product return null
@@ -238,8 +257,8 @@ public class EsServices {
 		final SearchSourceBuilder sourceBuilder = new SearchSourceBuilder();
 		// Generic fields
 		BoolQueryBuilder queryBuilder = QueryBuilders.boolQuery()
-				.must(QueryBuilders.rangeQuery("validityStartTime").lt(beginDate))
-				.must(QueryBuilders.rangeQuery("validityStopTime").gt(endDate)).must(satelliteId(satelliteId));
+				.must(QueryBuilders.rangeQuery("validityStartTime").lte(beginDate))
+				.must(QueryBuilders.rangeQuery("validityStopTime").gte(endDate)).must(satelliteId(satelliteId));
 		// Product type
 		if (category == ProductCategory.LEVEL_PRODUCTS || category == ProductCategory.LEVEL_SEGMENTS) {
 			queryBuilder = queryBuilder.must(QueryBuilders.regexpQuery("productType.keyword", productType));
@@ -312,8 +331,8 @@ public class EsServices {
 		final SearchSourceBuilder sourceBuilder = new SearchSourceBuilder();
 		// Generic fields
 		BoolQueryBuilder queryBuilder = QueryBuilders.boolQuery()
-				.must(QueryBuilders.rangeQuery("validityStartTime").lt(beginDate))
-				.must(QueryBuilders.rangeQuery("validityStopTime").gt(endDate)).must(satelliteId(satelliteId));
+				.must(QueryBuilders.rangeQuery("validityStartTime").lte(beginDate))
+				.must(QueryBuilders.rangeQuery("validityStopTime").gte(endDate)).must(satelliteId(satelliteId));
 		// Product type
 		if (category == ProductCategory.LEVEL_PRODUCTS || category == ProductCategory.LEVEL_SEGMENTS) {
 			queryBuilder = queryBuilder.must(QueryBuilders.regexpQuery("productType.keyword", productType));
@@ -731,7 +750,7 @@ public class EsServices {
 		// We initialize the reference time with the start time of the interval
 		long refTime = beginDate.toEpochSecond(ZoneOffset.UTC);
 
-		for (SearchMetadata product : products) {
+		for (final SearchMetadata product : products) {
 			/*
 			 * Try to detect, if the product does have a follower. This happens, when the
 			 * following criteria are both true: 1. The startTime of the product lies before
@@ -739,8 +758,8 @@ public class EsServices {
 			 * the product must be bigger than the current refTime (to avoid refTime gets
 			 * smaller again)
 			 */
-			long startTime = DateUtils.parse(product.getValidityStart()).toEpochSecond(ZoneOffset.UTC);
-			long stopTime = DateUtils.parse(product.getValidityStop()).toEpochSecond(ZoneOffset.UTC);
+			final long startTime = DateUtils.parse(product.getValidityStart()).toEpochSecond(ZoneOffset.UTC);
+			final long stopTime = DateUtils.parse(product.getValidityStop()).toEpochSecond(ZoneOffset.UTC);
 			if ((startTime <= refTime + gapThresholdMillis) && (stopTime > refTime)) {
 				refTime = stopTime;
 			}
@@ -1265,6 +1284,37 @@ public class EsServices {
 		return null;
 	}
 
+	public AuxMetadata auxiliaryQuery(final String searchProductType, final String searchProductName) throws IOException, MetadataNotPresentException, MetadataMalformedException {
+
+		final Map<String, Object> source = getRequest(searchProductType, searchProductName);
+
+		if (source.isEmpty()) {
+			throw new MetadataNotPresentException(searchProductName);
+		}
+
+		final String productName = getProperty(source, "productName", orThrowMalformed("productName"));
+		final String productType = getProperty(source, "productType", orThrowMalformed("productType"));
+		final String keyObjectStorage = getProperty(source, "url", orThrowMalformed("url"));
+		final String validityStart = getPropertyAsDate(source, "validityStartTime", orThrowMalformed("validityStartTime"));
+		final String validityStop = getPropertyAsDate(source, "validityStopTime", orThrowMalformed("validityStopTime"));
+		final String missionId = getProperty(source, "missionId", orThrowMalformed("missionId"));
+		final String satelliteId = getProperty(source, "satelliteId", orThrowMalformed("satelliteId"));
+
+		final Map<String, String> additionalProperties = source.entrySet().stream().collect(toMap(Map.Entry::getKey, e -> e.getValue().toString()));
+
+		return new AuxMetadata(
+				productName,
+				productType,
+				keyObjectStorage,
+				validityStart,
+				validityStop,
+				missionId,
+				satelliteId,
+				"UNDEFINED",
+				additionalProperties
+		);
+	}
+
 	/**
 	 * Searches for the product with given productName and in the index =
 	 * productFamily. Returns only validity start and stop time.
@@ -1273,8 +1323,10 @@ public class EsServices {
 	@SuppressWarnings("unchecked")
 	public SearchMetadata productNameQuery(final String productFamily, final String productName)
 			throws MetadataMalformedException, MetadataNotPresentException, IOException {
+		
+		final String index = getIndexFor(productFamily);
 
-		final Map<String, Object> source = getRequest(productFamily, productName);
+		final Map<String, Object> source = getRequest(index, productName);
 
 		if (source.isEmpty()) {
 			throw new MetadataNotPresentException(productName);
@@ -1282,26 +1334,10 @@ public class EsServices {
 
 		final SearchMetadata searchMetadata = new SearchMetadata();
 
-		if (source.containsKey("startTime")) {
-			try {
-				searchMetadata.setValidityStart(
-						DateUtils.convertToMetadataDateTimeFormat(source.get("startTime").toString()));
-			} catch (final DateTimeParseException e) {
-				throw new MetadataMalformedException("startTime");
-			}
-		} else {
-			throw new MetadataMalformedException("startTime");
-		}
-		if (source.containsKey("stopTime")) {
-			try {
-				searchMetadata
-						.setValidityStop(DateUtils.convertToMetadataDateTimeFormat(source.get("stopTime").toString()));
-			} catch (final DateTimeParseException e) {
-				throw new MetadataMalformedException("stopTime");
-			}
-		} else {
-			throw new MetadataMalformedException("stopTime");
-		}
+		searchMetadata.setSwathtype((String) source.getOrDefault("swathtype", "UNDEFINED"));
+		
+		searchMetadata.setValidityStart(getPropertyAsDate(source, "startTime", orThrowMalformed("startTime")));
+		searchMetadata.setValidityStop(getPropertyAsDate(source, "stopTime", orThrowMalformed("stopTime")));
 
 		Map<String, Object> coordinates = null;
 		if (source.containsKey("sliceCoordinates")) {
@@ -1330,6 +1366,33 @@ public class EsServices {
 		searchMetadata.setFootprint(footprint);
 
 		return searchMetadata;
+	}
+
+	private static DefaultProvider orThrowMalformed(final String key) {
+		return () -> {
+			throw new MetadataMalformedException((key));
+		};
+	}
+
+	@FunctionalInterface
+	private interface DefaultProvider {
+		String get() throws MetadataMalformedException;
+	}
+
+	private String getProperty(final Map<String, Object> source, final String key, final DefaultProvider defaultProvider) throws MetadataMalformedException {
+		if (!source.containsKey(key)) {
+			return defaultProvider.get();
+		}
+
+		return source.get(key).toString();
+	}
+
+	private String getPropertyAsDate(final Map<String, Object> source, final String key, final DefaultProvider defaultProvider) throws MetadataMalformedException {
+		try {
+			return DateUtils.convertToMetadataDateTimeFormat(getProperty(source, key, defaultProvider));
+		} catch (final DateTimeParseException e) {
+			throw new MetadataMalformedException(key);
+		}
 	}
 
 	public List<LevelSegmentMetadata> getLevelSegmentMetadataFor(final String dataTakeId) throws Exception {
@@ -1478,6 +1541,21 @@ public class EsServices {
 		return new HashMap<>();
 	}
 
+	private String getIndexFor(final String family) {
+		if (ProductFamily.AUXILIARY_FILE.toString().toLowerCase().equals(family.toLowerCase())) {			
+			/*
+			 * FIXME
+			 * DIRTY WORKAROUND WARRNING:
+			 * 
+			 * shoud be replaced with proper type mapping
+			 * 
+			 * 
+			 */
+			return "aux_resorb";
+		}
+		return family.toLowerCase();
+	}
+
 	private L0AcnMetadata extractInfoForL0ACN(final Map<String, Object> source) throws MetadataMalformedException {
 		final L0AcnMetadata r = new L0AcnMetadata();
 		if (source.containsKey("productName")) {
@@ -1600,7 +1678,7 @@ public class EsServices {
 			sourceBuilder.query(queryBuilder);
 			sourceBuilder.size(SIZE_LIMIT);
 
-			final SearchRequest request = new SearchRequest("landmask");
+			final SearchRequest request = new SearchRequest(LANDMASK_FOOTPRINT_INDEX_NAME);
 			request.source(sourceBuilder);
 
 			final SearchResponse searchResponse = elasticsearchDAO.search(request);
@@ -1615,7 +1693,7 @@ public class EsServices {
 	}
 
 	@SuppressWarnings("unchecked")
-	private Geometry extractPolygonFrom(GetResponse response) {
+	private Geometry extractPolygonFrom(final GetResponse response) {
 		// TODO FIXME this needs to be fixed to use a proper abstraction
 		final Map<String, Object> sliceCoordinates = (Map<String, Object>) response.getSourceAsMap()
 				.get("sliceCoordinates");

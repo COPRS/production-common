@@ -1,0 +1,43 @@
+#TODO: figure out why I need this here and in bootstrap.yml
+spring:
+  main:
+    banner-mode: "off"
+  application:
+    name: s1pdgs-on-demand-interface-provider
+  jackson:
+    serialization:
+      indent_output: true
+    
+# REST controller
+server:
+  port: 8081      
+  
+# KAFKA
+kafka:
+  bootstrap-servers: localhost                                  # the bootstrap servers for KAFKA
+  maxRetries: 10                                                # the group identifier to use for KAFKA publishers  
+  topic: t-pdgs-operator-demand-events
+
+metadata:
+  host: localhost 
+  rest-api_nb-retry: 100  
+  rest-api_tempo-retry-ms: 3000
+
+odip:
+  timeliness: operator-demand
+  production-type-to-product-family:                            # mapping from production type to product family
+    AIOP: EDRS_SESSION
+    ASP: L0_SEGMENT
+    L1: L0_SLICE
+    L2: L0_SLICE
+    OBS: AUXILIARY_FILE
+
+# MongoDB
+mongodb:
+  host: ${mongo_db_host:localhost}
+  port: ${mongo_db_port:27017}
+  database: ${mongo_db_database:s1pdgs}
+  
+status:
+  delete-fixed-delay-ms: 3000
+  max-error-counter: 30

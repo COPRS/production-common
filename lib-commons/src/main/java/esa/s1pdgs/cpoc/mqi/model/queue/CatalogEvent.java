@@ -42,9 +42,20 @@ public class CatalogEvent extends AbstractMessage {
 
 	@Override
 	public int hashCode() {
-		return Objects.hash(creationDate, hostname, productName, productType,
-				keyObjectStorage, metadata, productFamily, uid,
-				allowedActions, demandType, debug, retryCounter);
+		return Objects.hash(
+				creationDate, 
+				hostname, 
+				productName, 
+				productType,
+				keyObjectStorage, 
+				metadata, 
+				productFamily, 
+				uid,
+				allowedActions, 
+				demandType, 
+				debug, 
+				retryCounter
+		);
 	}
 
 	@Override

@@ -72,7 +72,7 @@ public class AppStatusImplTest {
         timeBefore = appStatus.getStatus().getDateLastChangeMs();
         appStatus.setWaiting();
         assertTrue(appStatus.getStatus().isWaiting());
-        assertEquals(timeBefore, appStatus.getStatus().getDateLastChangeMs());
+        assertTrue(timeBefore <= appStatus.getStatus().getDateLastChangeMs());
         
         appStatus.setError("PROCESSING");
         timeBefore = appStatus.getStatus().getDateLastChangeMs();
@@ -90,13 +90,13 @@ public class AppStatusImplTest {
         timeBefore = appStatus.getStatus().getDateLastChangeMs();
         appStatus.setWaiting();
         assertFalse(appStatus.getStatus().isWaiting());
-        assertEquals(timeBefore, appStatus.getStatus().getDateLastChangeMs());
+        assertTrue(timeBefore <= appStatus.getStatus().getDateLastChangeMs());
         
         appStatus.setStopping();
         timeBefore = appStatus.getStatus().getDateLastChangeMs();
         appStatus.setWaiting();
         assertFalse(appStatus.getStatus().isWaiting());
-        assertEquals(timeBefore, appStatus.getStatus().getDateLastChangeMs());
+        assertTrue(timeBefore <= appStatus.getStatus().getDateLastChangeMs());
     }
 
     /**
