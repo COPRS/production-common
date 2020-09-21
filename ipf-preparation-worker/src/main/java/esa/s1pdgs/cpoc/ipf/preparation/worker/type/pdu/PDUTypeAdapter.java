@@ -58,14 +58,15 @@ public class PDUTypeAdapter extends AbstractProductTypeAdapter {
 
 	@Override
 	public void customJobOrder(AppDataJob job, JobOrder jobOrder) {
-		// TODO Auto-generated method stub
-
+		String frameNumber = (String) job.getProduct().getMetadata().get(PDUProduct.FRAME_NUMBER);
+		if (frameNumber != null) {
+			updateProcParam(jobOrder, "MtdPDUFrameNumbers", frameNumber.toString());
+		}
 	}
 
 	@Override
 	public void customJobDto(AppDataJob job, IpfExecutionJob dto) {
 		// TODO Auto-generated method stub
-
 	}
 
 }

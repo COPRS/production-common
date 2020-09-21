@@ -76,7 +76,9 @@ public class PDUFrameGeneration {
 
 				List<TimeInterval> timeIntervals = generateTimeIntervals(startTime, metadata.getAnx1Time(),
 						settings.getLengthInS());
+
 				List<AppDataJob> jobs = new ArrayList<>();
+				Integer frameNumber = 1;
 				for (TimeInterval interval : timeIntervals) {
 					LOGGER.debug("Create AppDataJob for PDU time interval: [{}; {}]",
 							DateUtils.formatToMetadataDateTimeFormat(interval.getStart()),
@@ -85,7 +87,10 @@ public class PDUFrameGeneration {
 					appDataJob.setStartTime(DateUtils.formatToMetadataDateTimeFormat(interval.getStart()));
 					appDataJob.setStopTime(DateUtils.formatToMetadataDateTimeFormat(interval.getStop()));
 
+					appDataJob.getProduct().getMetadata().put(PDUProduct.FRAME_NUMBER, frameNumber.toString());
 					jobs.add(appDataJob);
+
+					frameNumber++;
 				}
 
 				return jobs;

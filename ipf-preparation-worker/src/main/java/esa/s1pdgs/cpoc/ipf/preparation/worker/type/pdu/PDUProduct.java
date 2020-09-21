@@ -7,6 +7,8 @@ import esa.s1pdgs.cpoc.ipf.preparation.worker.type.AbstractProduct;
 
 public class PDUProduct extends AbstractProduct {
 
+	public static final String FRAME_NUMBER = "frameNumber";
+	
 	public static final PDUProduct of(final AppDataJob job) {
 		return of(job.getProduct());
 	}
@@ -17,5 +19,13 @@ public class PDUProduct extends AbstractProduct {
 
 	public PDUProduct(final AppDataJobProductAdapter product) {
 		super(product);
+	}
+	
+	public final void setFrameNumber(final int frameNumber) {
+		product.setIntegerValue("frameNumber", frameNumber);
+	}
+	
+	public final int getFrameNumber() {
+		return product.getIntegerValue("frameNumber");
 	}
 }
