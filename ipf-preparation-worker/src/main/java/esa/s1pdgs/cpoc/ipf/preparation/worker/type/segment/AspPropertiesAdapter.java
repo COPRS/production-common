@@ -1,7 +1,7 @@
 package esa.s1pdgs.cpoc.ipf.preparation.worker.type.segment;
 
 import java.time.LocalDateTime;
-import java.time.ZoneOffset;
+import java.time.ZoneId;
 import java.util.Date;
 
 import org.apache.logging.log4j.LogManager;
@@ -55,7 +55,7 @@ public final class AspPropertiesAdapter {
 		return !this.disableTimeout && this.checkTimeoutReached(job,sensingEndTime);
 	}
 	
-	private boolean checkTimeoutReached(final AppDataJob job,final String sensingEndTimeStr) {
+	private boolean checkTimeoutReached(final AppDataJob job, final String sensingEndTimeStr) {
 		// S1PRO-1797 / S1PRO-1905: timeout for L0ASP in PT/NRT/FAST mode
 		final L0SegmentProduct product = L0SegmentProduct.of(job);
     	final String processMode = product.getProcessMode();
@@ -71,10 +71,11 @@ public final class AspPropertiesAdapter {
 		}
 		
 		if (null != minimalTimeout && null != nominalTimeout) {
-			final LocalDateTime now = LocalDateTime.now(ZoneOffset.UTC);
+			final LocalDateTime now = LocalDateTime.now(ZoneId.of("UTC"));
 			final LocalDateTime sensingStopTime = DateUtils.parse(sensingEndTimeStr);
-			final Date jobCreationDate = job.getGeneration().getCreationDate();
-			final LocalDateTime jobCreationDateTime = LocalDateTime.ofInstant(jobCreationDate.toInstant(), ZoneOffset.UTC);
+			//final Date jobCreationDate = job.getGeneration().getCreationDate();
+			final Date jobCreationDate = job.getCreationDate();
+			final LocalDateTime jobCreationDateTime = LocalDateTime.ofInstant(jobCreationDate.toInstant(), ZoneId.of("UTC"));
 			
 			final LocalDateTime timeoutThreshold;
 			if(sensingStopTime.plusHours(nominalTimeout).minusHours(minimalTimeout).isBefore(now)) {
