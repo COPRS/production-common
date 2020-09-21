@@ -1361,8 +1361,18 @@ public class EsServices {
 
 		searchMetadata.setSwathtype((String) source.getOrDefault("swathtype", "UNDEFINED"));
 		
-		searchMetadata.setValidityStart(getPropertyAsDate(source, "startTime", orThrowMalformed("startTime")));
-		searchMetadata.setValidityStop(getPropertyAsDate(source, "stopTime", orThrowMalformed("stopTime")));
+		// dirty workaround: 
+		if (source.containsKey("startTime") && source.containsKey("stopTime")) {
+			searchMetadata.setValidityStart(getPropertyAsDate(source, "startTime", orThrowMalformed("startTime")));
+			searchMetadata.setValidityStop(getPropertyAsDate(source, "stopTime", orThrowMalformed("stopTime")));
+		}
+		else if (source.containsKey("validityStartTime") && source.containsKey("validityStopTime")) {
+			searchMetadata.setValidityStart(getPropertyAsDate(source, "validityStartTime", orThrowMalformed("validityStartTime")));
+			searchMetadata.setValidityStart(getPropertyAsDate(source, "validityStopTime", orThrowMalformed("validityStopTime")));
+		}
+		else {
+			throw new MetadataMalformedException("start/stop times");
+		}
 
 		Map<String, Object> coordinates = null;
 		if (source.containsKey("sliceCoordinates")) {
