@@ -44,6 +44,7 @@ import esa.s1pdgs.cpoc.ipf.preparation.worker.type.edrs.AiopPropertiesAdapter;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.type.edrs.EdrsSessionProductValidator;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.type.edrs.EdrsSessionTypeAdapter;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.type.s3.S3TypeAdapter;
+import esa.s1pdgs.cpoc.ipf.preparation.worker.type.segment.AspPropertiesAdapter;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.type.segment.L0SegmentTypeAdapter;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.type.slice.LevelSliceTypeAdapter;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.type.spp.SppObsPropertiesAdapter;
@@ -71,6 +72,7 @@ public class IpfPreparationWorkerConfiguration {
 	private final ProcessSettings processSettings;
     private final MetadataClient metadataClient;
     private final AiopProperties aiopProperties;
+    private final AspProperties aspProperties;
     private final SppObsProperties sppObsProperties;
 	private final TaskTableFactory taskTableFactory;
 	private final ElementMapper elementMapper;
@@ -89,6 +91,7 @@ public class IpfPreparationWorkerConfiguration {
 			final ProcessSettings processSettings,
 		    final MetadataClient metadataClient,
 		    final AiopProperties aiopProperties,
+		    final AspProperties aspProperties,
 		    final SppObsProperties sppObsProperties,
 		    final XmlConverter xmlConverter,
 			final TaskTableFactory taskTableFactory,
@@ -105,6 +108,7 @@ public class IpfPreparationWorkerConfiguration {
 		this.processSettings = processSettings;
 		this.metadataClient = metadataClient;
 		this.aiopProperties = aiopProperties;
+		this.aspProperties = aspProperties;
 		this.sppObsProperties = sppObsProperties;
 		this.taskTableFactory = taskTableFactory;
 		this.elementMapper = elementMapper;
@@ -147,11 +151,9 @@ public class IpfPreparationWorkerConfiguration {
 			);
 		}
 		else if (processSettings.getLevel() == ApplicationLevel.L0_SEGMENT) {
-			final long timeoutInputSearchMs = settings.getWaitprimarycheck().getMaxTimelifeS() * 1000L;
-			
 			return new L0SegmentTypeAdapter(
 					metadataClient, 
-					timeoutInputSearchMs
+					AspPropertiesAdapter.of(this.aspProperties)
 			);			
 		}
 		else if (EnumSet.of(ApplicationLevel.L1, ApplicationLevel.L2).contains(processSettings.getLevel())) {
