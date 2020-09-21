@@ -1349,7 +1349,7 @@ public class EsServices {
 	public SearchMetadata productNameQuery(final String productFamily, final String productName)
 			throws MetadataMalformedException, MetadataNotPresentException, IOException {
 		
-		final String index = getIndexFor(productFamily);
+		final String index = getIndexForFilename(ProductFamily.valueOf(productFamily), productName);
 
 		final Map<String, Object> source = getRequest(index, productName);
 
