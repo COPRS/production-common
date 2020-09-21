@@ -68,7 +68,7 @@ public final class GenericMessageListener<T extends AbstractMessage> implements 
         	    return;
         	}
         	final T message = data.value();
-        	LOGGER.debug("Handling message from kafka topic {}: {}", data.topic(), message);
+        	LOGGER.debug("Handling message from kafka topic {} partition {} offset {}: {}", data.topic(), data.partition(), data.offset(), message);
         	
             // Save message
 			messagePersistence.read(data, acknowledgment, genericConsumer, category);
