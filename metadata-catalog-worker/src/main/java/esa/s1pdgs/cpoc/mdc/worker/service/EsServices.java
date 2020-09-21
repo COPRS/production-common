@@ -1365,6 +1365,8 @@ public class EsServices {
 		}
 		searchMetadata.setFootprint(footprint);
 
+		source.forEach((key, value) -> searchMetadata.addAdditionalProperty(key, value.toString()));
+
 		return searchMetadata;
 	}
 
