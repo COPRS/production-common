@@ -140,7 +140,7 @@ public class EsServices {
 	 * index named [productType] with id [productName]
 	 * 
 	 */
-	public void createMetadata(final JSONObject product) throws Exception {
+	void createMetadata(final JSONObject product) throws Exception {
 		try {
 			final String productType;
 			final ProductFamily family = ProductFamily.valueOf(product.getString("productFamily"));
@@ -306,6 +306,7 @@ public class EsServices {
 							throw new MetadataMalformedException("validityStopTime");
 						}
 					}
+					source.forEach((key, value) -> local.addAdditionalProperty(key, value.toString()));
 					r.add(local);
 				}
 				return r;
@@ -380,6 +381,7 @@ public class EsServices {
 						throw new MetadataMalformedException("validityStopTime");
 					}
 				}
+				source.forEach((key, value) -> r.addAdditionalProperty(key, value.toString()));
 				return r;
 			}
 		} catch (final IOException e) {
@@ -498,6 +500,7 @@ public class EsServices {
 						throw new MetadataMalformedException("validityStopTime");
 					}
 				}
+				source.forEach((key, value) -> r.addAdditionalProperty(key, value.toString()));
 				return r;
 			}
 		} catch (final IOException e) {
@@ -518,6 +521,9 @@ public class EsServices {
 		if (source.containsKey("validityStopTime")) {
 			r.setValidityStop(DateUtils.convertToMetadataDateTimeFormat(source.get("validityStopTime").toString()));
 		}
+
+		source.forEach((key, value) -> r.addAdditionalProperty(key, value.toString()));
+
 		return r;
 	}
 
@@ -677,6 +683,7 @@ public class EsServices {
 							throw new MetadataMalformedException("stopTime");
 						}
 					}
+					source.forEach((key, value) -> local.addAdditionalProperty(key, value.toString()));
 					r.add(local);
 				}
 				return r;
@@ -731,6 +738,9 @@ public class EsServices {
 							throw new MetadataMalformedException("stopTime");
 						}
 					}
+
+					source.forEach((key, value) -> local.addAdditionalProperty(key, value.toString()));
+
 					r.add(local);
 				}
 				return checkIfFullyCoverage(r, beginDate, endDate, 0);
@@ -814,6 +824,7 @@ public class EsServices {
 						throw new MetadataMalformedException("validityStopTime");
 					}
 				}
+				source.forEach((key, value) -> r.addAdditionalProperty(key, value.toString()));
 				return r;
 			}
 		} catch (final IOException e) {
@@ -896,6 +907,8 @@ public class EsServices {
 			}
 		}
 
+		r.forEach((key, value) -> local.addAdditionalProperty(key, value.toString()));
+
 		return local;
 	}
 
@@ -946,6 +959,7 @@ public class EsServices {
 						throw new MetadataMalformedException("validityStopTime");
 					}
 				}
+				source.forEach((key, value) -> r.addAdditionalProperty(key, value.toString()));
 				return r;
 			}
 		} catch (final IOException e) {
@@ -1012,6 +1026,7 @@ public class EsServices {
 								throw new MetadataMalformedException("stopTime");
 							}
 						}
+						source.forEach((key, value) -> local.addAdditionalProperty(key, value.toString()));
 						result = local;
 					}
 				}
@@ -1086,6 +1101,7 @@ public class EsServices {
 							throw new MetadataMalformedException("creationTime");
 						}
 					}
+					source.forEach((key, value) -> local.addAdditionalProperty(key, value.toString()));
 					r.add(local);
 				}
 				return r;
@@ -1211,6 +1227,7 @@ public class EsServices {
 						throw new MetadataMalformedException("utc1Time");
 					}
 				}
+				source.forEach((key, value) -> local.addAdditionalProperty(key, value.toString()));
 				return local;
 			}
 
@@ -1273,8 +1290,10 @@ public class EsServices {
 							throw new MetadataMalformedException("stopTime");
 						}
 					}
+					source.forEach((key, value) -> local.addAdditionalProperty(key, value.toString()));
 					r.add(local);
 				}
+
 				return r;
 			}
 		} catch (final IOException e) {
@@ -1491,6 +1510,9 @@ public class EsServices {
 		@SuppressWarnings("unchecked")
 		final List<String> rawNames = (List<String>) source.getOrDefault("rawNames", Collections.emptyList());
 		r.setRawNames(rawNames);
+
+		source.forEach((key, value) -> r.addAdditionalProperty(key, value.toString()));
+
 		return r;
 	}
 
@@ -1608,6 +1630,8 @@ public class EsServices {
 		} else {
 			throw new MetadataMalformedException("dataTakeId");
 		}
+
+		source.forEach((key, value) -> r.addAdditionalProperty(key, value.toString()));
 		return r;
 	}
 
@@ -1769,6 +1793,7 @@ public class EsServices {
 		} else {
 			r.setProductSensingConsolidation("NOT_DEFINED");
 		}
+		source.forEach((key, value) -> r.addAdditionalProperty(key, value.toString()));
 		return r;
 	}
 
