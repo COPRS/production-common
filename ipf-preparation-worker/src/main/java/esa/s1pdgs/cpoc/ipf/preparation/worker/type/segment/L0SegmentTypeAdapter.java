@@ -45,14 +45,14 @@ import esa.s1pdgs.cpoc.xml.model.tasktable.enums.TaskTableMandatoryEnum;
 
 public final class L0SegmentTypeAdapter extends AbstractProductTypeAdapter implements ProductTypeAdapter {	
 	private final MetadataClient metadataClient;
-	private final long timeoutInputSearchMs;
+	private final AspPropertiesAdapter aspPropertiesAdapter;
 
 	public L0SegmentTypeAdapter(
 			final MetadataClient metadataClient,
-			final long timeoutInputSearchMs
+			final AspPropertiesAdapter aspPropertiesAdapter
 	) {
 		this.metadataClient = metadataClient;
-		this.timeoutInputSearchMs = timeoutInputSearchMs;
+		this.aspPropertiesAdapter = aspPropertiesAdapter;
 	}
 	
 	@Override
@@ -319,10 +319,9 @@ public final class L0SegmentTypeAdapter extends AbstractProductTypeAdapter imple
 		
 		// Check if we add the coverage
 		if (!fullCoverage) {
-			final Date currentDate = new Date();
-			if (job.getGeneration().getCreationDate().getTime() < currentDate.getTime() - timeoutInputSearchMs) {
+			if (this.aspPropertiesAdapter.isTimeoutReached(job, sensingStop)) {
 				LOGGER.warn("Continue generation of {} {} even if sensing gaps", product.getProductName(),
-						job.getGeneration());				
+						job.getGeneration());
 				product.setStartTime(sensingStart);
 				product.setStopTime(sensingStop);
 			} else {
