@@ -62,6 +62,7 @@ import esa.s1pdgs.cpoc.mqi.model.rest.GenericMessageDto;
 import esa.s1pdgs.cpoc.mqi.model.rest.GenericPublicationMessageDto;
 import esa.s1pdgs.cpoc.obs_sdk.ObsClient;
 import esa.s1pdgs.cpoc.obs_sdk.ObsDownloadObject;
+import esa.s1pdgs.cpoc.obs_sdk.ObsObject;
 import esa.s1pdgs.cpoc.report.Reporting;
 import esa.s1pdgs.cpoc.report.ReportingFilenameEntries;
 import esa.s1pdgs.cpoc.report.ReportingFilenameEntry;
@@ -132,15 +133,6 @@ public class JobProcessor implements MqiListener<IpfExecutionJob> {
 	private final long initDelayPollMs;
 	
 	/**
-	 * @param job
-	 * @param appStatus
-	 * @param properties
-	 * @param devProperties
-	 * @param kafkaContainerId
-	 * @param kafkaRegistry
-	 * @param obsClient
-	 * @param procuderFactory
-	 * @param outputListFile
 	 */
 	@Autowired
 	public JobProcessor(
@@ -174,9 +166,9 @@ public class JobProcessor implements MqiListener<IpfExecutionJob> {
 		// allow disabling polling (e.g. for junit test) by configuring the polling interval
 		if (pollingIntervalMs > 0L) {
 			final ExecutorService service = Executors.newFixedThreadPool(1);
-			service.execute(new MqiConsumer<IpfExecutionJob>(
+			service.execute(new MqiConsumer<>(
 					mqiClient,
-					ProductCategory.LEVEL_JOBS, 
+					ProductCategory.LEVEL_JOBS,
 					this,
 					messageFilter,
 					pollingIntervalMs,
@@ -188,7 +180,7 @@ public class JobProcessor implements MqiListener<IpfExecutionJob> {
 
 
 	@Override
-	public final MqiMessageEventHandler onMessage(final GenericMessageDto<IpfExecutionJob> message) throws Exception {
+	public final MqiMessageEventHandler onMessage(final GenericMessageDto<IpfExecutionJob> message) {
 		LOGGER.info("Initializing job processing {}", message);
 
 		// ----------------------------------------------------------
@@ -235,6 +227,9 @@ public class JobProcessor implements MqiListener<IpfExecutionJob> {
 		} else if (EnumSet.of(ApplicationLevel.S3_L0, ApplicationLevel.S3_L1, ApplicationLevel.S3_L2).contains(properties.getLevel())){
 			outputListFile = job.getWorkDirectory() + "product.LIST";
 			category = ProductCategory.S3_PRODUCTS;
+		} else if(properties.getLevel() == ApplicationLevel.SPP_OBS) {
+			outputListFile = job.getWorkDirectory() + workdir.getName() + ".LIST";
+			category = ProductCategory.SPP_PRODUCTS;
 		}
 		else {
 			outputListFile = job.getWorkDirectory() + workdir.getName() + ".LIST";
@@ -365,7 +360,7 @@ public class JobProcessor implements MqiListener<IpfExecutionJob> {
             
             final List<String> missingChunks = downloadToBatch.stream()
             	.filter(o -> o.getFamily() == ProductFamily.INVALID)
-            	.map(o -> o.getKey())
+            	.map(ObsObject::getKey)
             	.collect(Collectors.toList());
        
             final String warningMessage = missingChunks.isEmpty() ? "" : String.format(
@@ -374,13 +369,13 @@ public class JobProcessor implements MqiListener<IpfExecutionJob> {
         				message.getId(), 
         				missingChunks
         	);            
-            return new MqiPublishingJob<ProductionEvent>(productionEvents, warningMessage);            	
+            return new MqiPublishingJob<>(productionEvents, warningMessage);
 		} finally {
             cleanJobProcessing(job, poolProcessing, procExecutorSrv);
         }
     }
     
-	private final ReportingOutput toReportingOutput(final List<GenericPublicationMessageDto<ProductionEvent>> out) {		
+	private ReportingOutput toReportingOutput(final List<GenericPublicationMessageDto<ProductionEvent>> out) {
 		final List<ReportingFilenameEntry> reportingEntries = out.stream()
 				.map(m -> new ReportingFilenameEntry(m.getFamily(), new File(m.getDto().getProductName()).getName()))
 				.collect(Collectors.toList());
@@ -393,8 +388,6 @@ public class JobProcessor implements MqiListener<IpfExecutionJob> {
 	/**
 	 * Get the prefix for monitor logs according the step for this class instance
 	 * 
-	 * @param step
-	 * @return
 	 */
 	protected String getPrefixMonitorLog(final String step, final IpfExecutionJob job) {
 		return MonitorLogUtils.getPrefixMonitorLog(step, job);
@@ -403,7 +396,6 @@ public class JobProcessor implements MqiListener<IpfExecutionJob> {
 	/**
 	 * Check if thread interrupted
 	 * 
-	 * @throws InterruptedException
 	 */
 	protected void checkThreadInterrupted() throws InterruptedException {
 		if (Thread.currentThread().isInterrupted()) {
@@ -414,8 +406,6 @@ public class JobProcessor implements MqiListener<IpfExecutionJob> {
 	/**
 	 * Wait for the processes execution completion
 	 * 
-	 * @throws InterruptedException
-	 * @throws AbstractCodedException
 	 */
 	protected void waitForPoolProcessesEnding(final ExecutorCompletionService<Void> procCompletionSrv)
 			throws InterruptedException, AbstractCodedException {
@@ -434,9 +424,6 @@ public class JobProcessor implements MqiListener<IpfExecutionJob> {
 	}
 
 	/**
-	 * @param job
-	 * @param poolProcessing
-	 * @param procExecutorSrv
 	 */
 	protected void cleanJobProcessing(final IpfExecutionJob job, final boolean poolProcessing,
 			final ExecutorService procExecutorSrv) {
@@ -476,13 +463,13 @@ public class JobProcessor implements MqiListener<IpfExecutionJob> {
 		}
 	}
 	
-	private final List<ReportingFilenameEntry> toReportFilenames(final IpfExecutionJob job) {
+	private List<ReportingFilenameEntry> toReportFilenames(final IpfExecutionJob job) {
 		return job.getInputs().stream()
-			.map(j -> newEntry(j))
+			.map(this::newEntry)
 			.collect(Collectors.toList());
 	}
 	
-	private final ReportingFilenameEntry newEntry(final LevelJobInputDto input) {
+	private ReportingFilenameEntry newEntry(final LevelJobInputDto input) {
 		return new ReportingFilenameEntry(
 				ProductFamily.fromValue(input.getFamily()),
 				new File(input.getLocalPath()).getName()
@@ -490,13 +477,13 @@ public class JobProcessor implements MqiListener<IpfExecutionJob> {
 	}
 
 	// checks AppStatus, whether app shall be stopped and in that case, shut down this service as well
-	private final void exitOnAppStatusStopOrWait() {
+	private void exitOnAppStatusStopOrWait() {
 		if (appStatus.getStatus().isStopping()) {
 			// TODO send stop to the MQI
 			try {
 				mqiStatusService.stop();
 			} catch (final AbstractCodedException ace) {
-				LOGGER.error("MQI service couldn't be stopped {}", ace);
+				LOGGER.error("MQI service couldn't be stopped", ace);
 			}
 			appStatus.setShallBeStopped(true);
 			appStatus.forceStopping(); // only stops when isShallBeStopped() == true
@@ -508,7 +495,7 @@ public class JobProcessor implements MqiListener<IpfExecutionJob> {
 		}
 	}
 	
-	private final ReportingMessage errorReportMessage(final Exception e) {
+	private ReportingMessage errorReportMessage(final Exception e) {
 		if (e instanceof AbstractCodedException) {
 			final AbstractCodedException ace = (AbstractCodedException) e;
 			return new ReportingMessage("[code {}] {}", ace.getCode().getCode(), ace.getLogMessage());
