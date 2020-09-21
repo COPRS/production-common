@@ -107,11 +107,8 @@ public class S3TypeAdapter extends AbstractProductTypeAdapter implements Product
 	}
 	
 	@Override
-	public Product mainInputSearch(final AppDataJob job, final TaskTableAdapter tasktableAdpter) throws IpfPrepWorkerInputsMissingException {
+	public Product mainInputSearch(final AppDataJob job, final TaskTableAdapter tasktableAdapter) throws IpfPrepWorkerInputsMissingException {
 		final S3Product returnValue = S3Product.of(job);
-
-		// Create tasktable Adapter for tasktable defined by Job
-		final TaskTableAdapter tasktableAdapter = getTTAdapterForTaskTableName(job.getTaskTableName());
 
 		// Discard logic for OLCI Calibration
 		if (settings.getOlciCalibration().contains(tasktableAdapter.taskTable().getProcessorName())) {
@@ -223,7 +220,7 @@ public class S3TypeAdapter extends AbstractProductTypeAdapter implements Product
 	}
 
 	@Override
-	public void validateInputSearch(final AppDataJob job, final TaskTableAdapter tasktableAdpter) throws IpfPrepWorkerInputsMissingException {
+	public void validateInputSearch(final AppDataJob job, final TaskTableAdapter taskTableAdapter) throws IpfPrepWorkerInputsMissingException {
 		// Check if timeout is reached -> start job with current input
 		if (workerSettings.getWaitprimarycheck().getMaxTimelifeS() != 0) {
 			final long startTime = job.getGeneration().getCreationDate().toInstant().toEpochMilli();
@@ -236,11 +233,7 @@ public class S3TypeAdapter extends AbstractProductTypeAdapter implements Product
 				return;
 			}
 		}
-
-		// Check that each Input which should have results contains results or that
-		// timeout is expired
-		final TaskTableAdapter taskTableAdapter = getTTAdapterForTaskTableName(job.getTaskTableName());
-
+		
 		// Extract a list of all inputs from the tasks
 		final List<AppDataJobInput> inputsWithNoResults = job.getAdditionalInputs().stream()
 				.flatMap(taskInputs -> taskInputs.getInputs().stream().filter(input -> !input.getHasResults()))
@@ -306,7 +299,7 @@ public class S3TypeAdapter extends AbstractProductTypeAdapter implements Product
 
 		return Optional.empty();
 	}
-
+	
 	/**
 	 * When the timeout was reached set the boolean "hasResults" for all input to
 	 * true, that contain at least one product. The boolean "hasResults" is kept at
