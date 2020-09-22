@@ -97,7 +97,7 @@ public class AspPropertiesAdapterTest {
 	// --------------------------------------------------------------------------
 
 	private final AppDataJob newJobWithMetadata(final String jobCreationDateStr, final String sensingStopTime,
-			final String processMode) throws ParseException {
+			final String timeliness) throws ParseException {
 		final AppDataJob job = new AppDataJob();
 		final CatalogEvent event = new CatalogEvent();
 		event.setMetadata(Collections.emptyMap());
@@ -111,7 +111,7 @@ public class AspPropertiesAdapterTest {
 		job.setCreationDate(jobCreation);
 		
 		final AppDataJobProduct appDataJobProduct = new AppDataJobProduct();
-		appDataJobProduct.getMetadata().put("processMode", processMode);
+		appDataJobProduct.getMetadata().put("timeliness", timeliness);
 		appDataJobProduct.getMetadata().put("productName", "product123");
 		job.setProduct(appDataJobProduct);
 
