@@ -78,6 +78,8 @@ public class GenericConsumer implements MqiListener<CatalogEvent> {
 	public void initService() {
 		appStatus.setWaiting();
 				
+		// since on demand events are all on the same kafka topic, each production trigger needs to 
+		// ignore the events of production trigger that are handling a different applicationLevel
 		final List<MessageFilter> onDemandMessageFilter = new ArrayList<>();
 		onDemandMessageFilter.add(new MessageFilter() {			
 			@Override
