@@ -77,6 +77,7 @@ public class OnDemandService {
 //			metadataAsMap.put("acquistion", metadata.getSwathtype());
 //			metadataAsMap.put("stationCode", metadata.getStationCode());
 //			metadataAsMap.put("keyObjectStorage", metadata.getKeyObjectStorage());
+			event.setProductType(metadata.getAdditionalProperties().getOrDefault("productType", "NOT_KNOWN"));
 			metadataAsMap.putAll(metadata.getAdditionalProperties());
 			if (!metadata.getFootprint().isEmpty()) {
 				metadataAsMap.put("footprint", metadata.getFootprint());
