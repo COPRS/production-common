@@ -5,6 +5,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.UUID;
 
+import esa.s1pdgs.cpoc.common.ApplicationLevel;
 import esa.s1pdgs.cpoc.common.ProductFamily;
 import esa.s1pdgs.cpoc.mqi.model.control.AllowedAction;
 import esa.s1pdgs.cpoc.mqi.model.control.DemandType;
@@ -18,7 +19,7 @@ public class OnDemandEvent extends AbstractMessage {
 
 	private String productName;
 	private String mode = "NOMINAL";
-	private String productionType;
+	private ApplicationLevel productionType;
 	private String productType;
 	private Map<String, Object> metadata;
 	
@@ -26,8 +27,8 @@ public class OnDemandEvent extends AbstractMessage {
 		super();
 	}
 
-	public OnDemandEvent(ProductFamily productFamily, String keyObjectStorage, String productName,
-			String productionType, String mode) {
+	public OnDemandEvent(final ProductFamily productFamily, final String keyObjectStorage, final String productName,
+			final ApplicationLevel productionType, final String mode) {
 		super(productFamily, keyObjectStorage);
 
 		this.productName = productName;
@@ -44,7 +45,7 @@ public class OnDemandEvent extends AbstractMessage {
 		return productName;
 	}
 
-	public void setProductName(String productName) {
+	public void setProductName(final String productName) {
 		this.productName = productName;
 	}
 
@@ -52,15 +53,15 @@ public class OnDemandEvent extends AbstractMessage {
 		return mode;
 	}
 
-	public void setMode(String mode) {
+	public void setMode(final String mode) {
 		this.mode = mode;
 	}
 
-	public String getProductionType() {
+	public ApplicationLevel getProductionType() {
 		return productionType;
 	}
 
-	public void setProductionType(String productionType) {
+	public void setProductionType(final ApplicationLevel productionType) {
 		this.productionType = productionType;
 	}
 
@@ -68,7 +69,7 @@ public class OnDemandEvent extends AbstractMessage {
 		return productType;
 	}
 
-	public void setProductType(String productType) {
+	public void setProductType(final String productType) {
 		this.productType = productType;
 	}
 
@@ -76,7 +77,7 @@ public class OnDemandEvent extends AbstractMessage {
 		return metadata;
 	}
 
-	public void setMetadata(Map<String, Object> metadata) {
+	public void setMetadata(final Map<String, Object> metadata) {
 		this.metadata = metadata;
 	}
 
@@ -87,14 +88,14 @@ public class OnDemandEvent extends AbstractMessage {
 	}
 
 	@Override
-	public boolean equals(Object obj) {
+	public boolean equals(final Object obj) {
 		if (this == obj)
 			return true;
 		if (obj == null)
 			return false;
 		if (getClass() != obj.getClass())
 			return false;
-		OnDemandEvent other = (OnDemandEvent) obj;
+		final OnDemandEvent other = (OnDemandEvent) obj;
 		return Objects.equals(metadata, other.metadata) && Objects.equals(mode, other.mode)
 				&& Objects.equals(productName, other.productName) && Objects.equals(productType, other.productType)
 				&& Objects.equals(productionType, other.productionType) && Objects.equals(hostname, other.hostname)
