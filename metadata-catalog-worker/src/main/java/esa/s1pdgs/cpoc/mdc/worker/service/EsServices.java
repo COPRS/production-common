@@ -1132,7 +1132,6 @@ public class EsServices {
 
 		try {
 			final SearchResponse searchResponse = elasticsearchDAO.search(searchRequest);
-			LOGGER.debug("S3Metadata result: {}", searchResponse);
 			if (this.isNotEmpty(searchResponse)) {
 				return toS3Metadata(searchResponse.getHits().getAt(0));
 			}
@@ -1795,6 +1794,7 @@ public class EsServices {
 		final S3Metadata local = new S3Metadata();
 		local.setProductName(source.get("productName").toString());
 		local.setProductType(source.get("productType").toString());
+		local.setSatelliteId(source.get("satelliteId").toString());
 		local.setKeyObjectStorage(source.get("url").toString());
 		local.setGranuleNumber(Integer.parseInt(source.get("granuleNumber").toString()));
 		local.setGranulePosition(source.get("granulePosition").toString());
