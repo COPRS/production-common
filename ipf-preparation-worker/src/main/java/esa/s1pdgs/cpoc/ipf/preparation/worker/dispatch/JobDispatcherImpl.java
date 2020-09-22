@@ -81,22 +81,20 @@ public class JobDispatcherImpl implements JobDispatcher {
 	        	)))
 				.publishMessageProducer(() -> {
 					if (jobs != null) {
-						for (AppDataJob job : jobs) {
-				        	LOGGER.trace("== dispatch job {}", job.toString());
-				        	
-				            final String tasktableFilename = job.getTaskTableName();
-				            
-				            LOGGER.trace("Got TaskTable {}", tasktableFilename);
-				            
-							// assert that there is a job generator for the assigned tasktable
-							if (!generatorAvailableForTasktableNames.contains(tasktableFilename)) {
-								throw new IllegalStateException(
-										String.format("No job generator found for tasktable %s. Available are: %s", tasktableFilename,
-												generatorAvailableForTasktableNames));
-							}
-	
-				            handleJob(message, job, reporting.getUid(), tasktableFilename);
-				        } 
+						AppDataJob firstJob = jobs.get(0);
+						
+			            final String tasktableFilename = firstJob.getTaskTableName();
+			            
+			            LOGGER.trace("Got TaskTable {}", tasktableFilename);
+			            
+						// assert that there is a job generator for the assigned tasktable
+						if (!generatorAvailableForTasktableNames.contains(tasktableFilename)) {
+							throw new IllegalStateException(
+									String.format("No job generator found for tasktable %s. Available are: %s", tasktableFilename,
+											generatorAvailableForTasktableNames));
+						}
+
+			            handleJobs(message, jobs, reporting.getUid(), tasktableFilename);
 					}
 					
 					return new MqiPublishingJob<NullMessage>(Collections.emptyList());
@@ -105,17 +103,19 @@ public class JobDispatcherImpl implements JobDispatcher {
     }
 
 	// This needs to be synchronized to avoid duplicate jobs
-	private final synchronized void handleJob(
+	private final synchronized void handleJobs(
 			final GenericMessageDto<IpfPreparationJob> message, 
-			final AppDataJob jobFromMessage,
+			final List<AppDataJob> jobsFromMessage,
 			final UUID reportingUid,
 			final String tasktableFilename
 	) throws AbstractCodedException {
-    	final GenericMessageDto<CatalogEvent> firstMessage = jobFromMessage.getMessages().get(0);
+		AppDataJob firstJob = jobsFromMessage.get(0);
+		
+    	final GenericMessageDto<CatalogEvent> firstMessage = firstJob.getMessages().get(0);
     	
 		final Optional<List<AppDataJob>> jobForMess = appCat.findJobsFor(firstMessage); 
 		final CatalogEventAdapter eventAdapter = CatalogEventAdapter.of(firstMessage);
-		final Optional<AppDataJob> specificJob = typeAdapter.findAssociatedJobFor(appCat, eventAdapter, jobFromMessage);
+		final Optional<AppDataJob> specificJob = typeAdapter.findAssociatedJobFor(appCat, eventAdapter, firstJob);
 						
 		// there is already a job for this message --> possible restart scenario --> just update the pod name 
 		if (jobForMess.isPresent() && getJobMatchingTasktable(jobForMess.get(), tasktableFilename) != null) {
@@ -130,26 +130,28 @@ public class JobDispatcherImpl implements JobDispatcher {
 			appCat.appendMessage(existingJob.getId(), firstMessage);
 		}
 		else {
-			LOGGER.debug("Persisting new job for message {} (catalog event message {}) ...",
+			LOGGER.debug("Persisting new job(s) for message {} (catalog event message {}) ...",
 					message.getId(), firstMessage.getId());
 			
-			// no job yet associated to this message --> create job and persist
-		    final Date now = new Date();         
-		    final AppDataJobGeneration gen = new AppDataJobGeneration();
-		    gen.setState(AppDataJobGenerationState.INITIAL);
-		    gen.setTaskTable(tasktableFilename);
-		    gen.setNbErrors(0);
-		    gen.setCreationDate(now);
-		    gen.setLastUpdateDate(now);
-		    
-		    jobFromMessage.setGeneration(gen);
-		    jobFromMessage.setPrepJobMessage(message);
-		    jobFromMessage.setReportingId(reportingUid);
-		    jobFromMessage.setState(AppDataJobState.GENERATING); // will activate that this request can be polled
-		    jobFromMessage.setPod(settings.getHostname()); 
-		    
-		    final AppDataJob newlyCreatedJob = appCat.create(jobFromMessage);
-		    LOGGER.info("dispatched job {}", newlyCreatedJob.getId());                
+			// no job yet associated to this message --> create jobs and persist
+			for (final AppDataJob job : jobsFromMessage) {
+			    final Date now = new Date();         
+			    final AppDataJobGeneration gen = new AppDataJobGeneration();
+			    gen.setState(AppDataJobGenerationState.INITIAL);
+			    gen.setTaskTable(tasktableFilename);
+			    gen.setNbErrors(0);
+			    gen.setCreationDate(now);
+			    gen.setLastUpdateDate(now);
+			    
+			    job.setGeneration(gen);
+			    job.setPrepJobMessage(message);
+			    job.setReportingId(reportingUid);
+			    job.setState(AppDataJobState.GENERATING); // will activate that this request can be polled
+			    job.setPod(settings.getHostname()); 
+			    
+			    final AppDataJob newlyCreatedJob = appCat.create(job);
+			    LOGGER.info("dispatched job {}", newlyCreatedJob.getId());
+			}
 		}
 	}
 	
