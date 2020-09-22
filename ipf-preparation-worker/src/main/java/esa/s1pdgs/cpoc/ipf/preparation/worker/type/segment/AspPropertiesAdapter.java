@@ -87,6 +87,9 @@ public final class AspPropertiesAdapter {
 			if(!now.isBefore(timeoutThreshold)) {
 				LOGGER.warn("Timeout reached for product {}", product.getProductName());
 				return true;
+			}else {
+				LOGGER.debug("product {} has not yet reached timout at {}", product.getProductName(),
+						DateUtils.formatToMetadataDateTimeFormat(timeoutThreshold));
 			}
 		}
 
