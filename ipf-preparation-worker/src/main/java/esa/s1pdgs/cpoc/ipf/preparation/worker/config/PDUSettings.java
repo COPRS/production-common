@@ -54,7 +54,7 @@ public class PDUSettings {
 		return config;
 	}
 
-	public void setPdu(Map<String, PDUTypeSettings> config) {
+	public void setConfig(Map<String, PDUTypeSettings> config) {
 		this.config = config;
 	}
 }
