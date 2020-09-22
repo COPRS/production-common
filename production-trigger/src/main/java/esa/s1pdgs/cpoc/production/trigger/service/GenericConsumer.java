@@ -93,7 +93,7 @@ public class GenericConsumer implements MqiListener<CatalogEvent> {
 		onDemandMessageFilter.addAll(messageFilter);
 		
 		if (processSettings.getFixedDelayMs() > 0) {
-			final ExecutorService service = Executors.newFixedThreadPool(1);
+			final ExecutorService service = Executors.newFixedThreadPool(2);
 			service.execute(new MqiConsumer<CatalogEvent>(
 	    			mqiClient, 
 	    			ProductCategory.CATALOG_EVENT, 
