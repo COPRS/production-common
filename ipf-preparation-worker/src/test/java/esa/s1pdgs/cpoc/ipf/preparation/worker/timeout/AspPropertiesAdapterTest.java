@@ -1,20 +1,15 @@
 package esa.s1pdgs.cpoc.ipf.preparation.worker.timeout;
 
-import static org.junit.Assert.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
-import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
 import java.util.Collections;
 import java.util.Date;
-import java.util.Locale;
-import java.util.Map;
 
 import org.junit.Test;
 
@@ -23,7 +18,6 @@ import esa.s1pdgs.cpoc.appcatalog.AppDataJobProduct;
 import esa.s1pdgs.cpoc.common.utils.DateUtils;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.config.AspProperties;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.type.segment.AspPropertiesAdapter;
-import esa.s1pdgs.cpoc.ipf.preparation.worker.type.segment.L0SegmentProduct;
 import esa.s1pdgs.cpoc.mqi.model.queue.CatalogEvent;
 import esa.s1pdgs.cpoc.mqi.model.rest.GenericMessageDto;
 
@@ -102,7 +96,7 @@ public class AspPropertiesAdapterTest {
 
 	// --------------------------------------------------------------------------
 
-	private final AppDataJob newJobWithMetadata(final String jobCreationDate, final String sensingStopTime,
+	private final AppDataJob newJobWithMetadata(final String jobCreationDateStr, final String sensingStopTime,
 			final String processMode) throws ParseException {
 		final AppDataJob job = new AppDataJob();
 		final CatalogEvent event = new CatalogEvent();
@@ -111,8 +105,11 @@ public class AspPropertiesAdapterTest {
 		final GenericMessageDto<CatalogEvent> mess = new GenericMessageDto<CatalogEvent>(1, "topic", event);
 		job.getMessages().add(mess);
 		job.setStopTime(sensingStopTime);
-		job.setCreationDate(new SimpleDateFormat(METADATA_DATE_FORMAT).parse(jobCreationDate)); // TODO: check timezone
-
+		
+		final Instant jobCreationInstant = Instant.parse(jobCreationDateStr);
+		final Date jobCreation = Date.from(jobCreationInstant);
+		job.setCreationDate(jobCreation);
+		
 		final AppDataJobProduct appDataJobProduct = new AppDataJobProduct();
 		appDataJobProduct.getMetadata().put("processMode", processMode);
 		appDataJobProduct.getMetadata().put("productName", "product123");
