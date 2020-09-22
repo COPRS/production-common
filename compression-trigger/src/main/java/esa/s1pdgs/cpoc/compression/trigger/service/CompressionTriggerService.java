@@ -1,10 +1,7 @@
 package esa.s1pdgs.cpoc.compression.trigger.service;
 
-import java.util.Arrays;
-import java.util.EnumSet;
 import java.util.List;
 import java.util.Map;
-import java.util.UUID;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -37,39 +34,33 @@ public class CompressionTriggerService {
 	private static final String SUFFIX_ZIPPRODUCTFAMILY = "_ZIP";
 	private static final String SUFFIX_ZIPPPRODUCTFILE = ".zip";
 	
-	private static final CompressionJobMapper<ProductionEvent> PROD_MAPPER = new CompressionJobMapper<ProductionEvent>() {
-		@Override
-		public final CompressionJob toCompressionJob(final ProductionEvent event, final UUID reportingId) {
-			CompressionDirection compressionDirection;
+	private static final CompressionJobMapper<ProductionEvent> PROD_MAPPER = (event, reportingId) -> {
+		CompressionDirection compressionDirection;
 
-			if (event.getProductFamily().toString().endsWith(SUFFIX_ZIPPRODUCTFAMILY)) {
-				compressionDirection = CompressionDirection.UNDEFINED;
-			} else {
-				compressionDirection = CompressionDirection.COMPRESS;
-			}
+		if (event.getProductFamily().toString().endsWith(SUFFIX_ZIPPRODUCTFAMILY)) {
+			compressionDirection = CompressionDirection.UNDEFINED;
+		} else {
+			compressionDirection = CompressionDirection.COMPRESS;
+		}
 
-			return new CompressionJob(event.getKeyObjectStorage(), event.getProductFamily(),
-					getCompressedKeyObjectStorage(event.getKeyObjectStorage()),
-					getCompressedProductFamily(event.getProductFamily()), compressionDirection);
-			
-		}		
+		return new CompressionJob(event.getKeyObjectStorage(), event.getProductFamily(),
+				getCompressedKeyObjectStorage(event.getKeyObjectStorage()),
+				getCompressedProductFamily(event.getProductFamily()), compressionDirection);
+
 	};
 	
-	private static final CompressionJobMapper<IngestionEvent> INGESTION_MAPPER = new CompressionJobMapper<IngestionEvent>() {
-		@Override
-		public final CompressionJob toCompressionJob(final IngestionEvent event, final UUID reportingId) {
-			CompressionDirection compressionDirection;
+	private static final CompressionJobMapper<IngestionEvent> INGESTION_MAPPER = (event, reportingId) -> {
+		CompressionDirection compressionDirection;
 
-			if (event.getProductFamily().toString().endsWith(SUFFIX_ZIPPRODUCTFAMILY)) {
-				compressionDirection = CompressionDirection.UNCOMPRESS;
-			} else {
-				compressionDirection = CompressionDirection.UNDEFINED;
-			}
+		if (event.getProductFamily().toString().endsWith(SUFFIX_ZIPPRODUCTFAMILY)) {
+			compressionDirection = CompressionDirection.UNCOMPRESS;
+		} else {
+			compressionDirection = CompressionDirection.UNDEFINED;
+		}
 
-			return new CompressionJob(event.getKeyObjectStorage(), event.getProductFamily(),
-					removeZipSuffix(event.getKeyObjectStorage()),
-					ProductFamily.fromValue(removeZipSuffix(event.getProductFamily().toString())), compressionDirection);
-		}		
+		return new CompressionJob(event.getKeyObjectStorage(), event.getProductFamily(),
+				removeZipSuffix(event.getKeyObjectStorage()),
+				ProductFamily.fromValue(removeZipSuffix(event.getProductFamily().toString())), compressionDirection);
 	};
 
 	private final MqiClient mqiClient;
@@ -107,26 +98,24 @@ public class CompressionTriggerService {
 		}
 	}
 	
-	private final MqiConsumer<?> newMqiConsumerFor(final ProductCategory cat, final CategoryConfig config) {
+	private MqiConsumer<?> newMqiConsumerFor(final ProductCategory cat, final CategoryConfig config) {
 		LOGGER.debug("Creating MQI consumer for category {} using {}", cat, config);
-		
-		if (EnumSet
-				.of(ProductCategory.LEVEL_SEGMENTS, ProductCategory.LEVEL_PRODUCTS, ProductCategory.S3_PRODUCTS)
-				.contains(cat)) {
-			return new MqiConsumer<ProductionEvent>(
-					mqiClient, 
-					cat, 
-					new CompressionTriggerListener(PROD_MAPPER, errorAppender, processConfig),
+
+		if (ProductionEvent.class.isAssignableFrom(cat.getDtoClass())) {
+			return new MqiConsumer<>(
+					mqiClient,
+					cat,
+					new CompressionTriggerListener<>(PROD_MAPPER, errorAppender, processConfig),
 					messageFilter,
 					config.getFixedDelayMs(),
 					config.getInitDelayPolMs(),
 					appStatus
 			);
-		} else if (cat == ProductCategory.INGESTION_EVENT) {
-			return new MqiConsumer<IngestionEvent>(
-					mqiClient, 
-					cat, 
-					new CompressionTriggerListener(INGESTION_MAPPER, errorAppender, processConfig),
+		} else if (IngestionEvent.class.isAssignableFrom(cat.getDtoClass())) {
+			return new MqiConsumer<>(
+					mqiClient,
+					cat,
+					new CompressionTriggerListener<>(INGESTION_MAPPER, errorAppender, processConfig),
 					messageFilter,
 					config.getFixedDelayMs(),
 					config.getInitDelayPolMs(),
@@ -136,9 +125,8 @@ public class CompressionTriggerService {
 		}
 		throw new IllegalArgumentException(
 				String.format(
-						"Invalid product category %s. Available are %s", 
-						cat, 
-						Arrays.asList(ProductCategory.LEVEL_PRODUCTS, ProductCategory.LEVEL_SEGMENTS, ProductCategory.INGESTION_EVENT)
+						"Invalid product category %s. Available are categories with associated dtos of type ProductionEvent or IngestionEvent",
+						cat
 				)
 		);
 	}

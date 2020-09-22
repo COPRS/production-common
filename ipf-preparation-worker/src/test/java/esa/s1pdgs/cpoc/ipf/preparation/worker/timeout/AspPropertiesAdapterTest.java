@@ -6,6 +6,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import java.text.ParseException;
 import java.time.Instant;
 import java.time.LocalDateTime;
+import java.time.Month;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.Collections;
@@ -42,7 +43,8 @@ public class AspPropertiesAdapterTest {
 
 		final AppDataJob job = this.newJobWithMetadata(jobCreationTime, sensingEndTime, "FAST24");
 
-		assertFalse(aspPropertiesAdapter.isTimeoutReached(job, sensingEndTime), "Expected timeout to be disabled!");
+		assertFalse(aspPropertiesAdapter.isTimeoutReached(job, sensingEndTime, LocalDateTime.now(ZoneId.of("UTC"))),
+				"Expected timeout to be disabled!");
 	}
 
 	@Test
@@ -55,9 +57,9 @@ public class AspPropertiesAdapterTest {
 
 		final AppDataJob job = this.newJobWithMetadata(jobCreationTime, sensingEndTime, "FAST24");
 
-		assertTrue(aspPropertiesAdapter.isTimeoutReached(job, sensingEndTime),
+		assertTrue(aspPropertiesAdapter.isTimeoutReached(job, sensingEndTime, LocalDateTime.now(ZoneId.of("UTC"))),
 				"Expected timeout to be enabled and reached!");
-		assertTrue(aspPropertiesAdapter2.isTimeoutReached(job, sensingEndTime),
+		assertTrue(aspPropertiesAdapter2.isTimeoutReached(job, sensingEndTime, LocalDateTime.now(ZoneId.of("UTC"))),
 				"Expected timeout to be enabled and reached!");
 	}
 
@@ -73,7 +75,8 @@ public class AspPropertiesAdapterTest {
 
 		final AppDataJob job = this.newJobWithMetadata(jobCreationTime, sensingEndTime, "FAST24");
 
-		assertTrue(aspPropertiesAdapter.isTimeoutReached(job, sensingEndTime), "Expected timeout to be reached!");
+		assertTrue(aspPropertiesAdapter.isTimeoutReached(job, sensingEndTime, LocalDateTime.now(ZoneId.of("UTC"))),
+				"Expected timeout to be reached!");
 	}
 
 	@Test
@@ -90,8 +93,23 @@ public class AspPropertiesAdapterTest {
 
 		final AppDataJob job = this.newJobWithMetadata(jobCreationTime, sensingEndTime, "FAST24");
 
-		assertFalse(aspPropertiesAdapter.isTimeoutReached(job, sensingEndTime),
+		assertFalse(aspPropertiesAdapter.isTimeoutReached(job, sensingEndTime, LocalDateTime.now(ZoneId.of("UTC"))),
 				"Expected timeout to not be reached!");
+	}
+	
+	@Test
+	public final void testTimeout() throws ParseException {
+		final AspPropertiesAdapter aspPropertiesAdapter = AspPropertiesAdapter.of(this.createAspProperties());
+
+		final String sensingEndTime = "2020-01-20T16:10:20.725380Z";
+		final String jobCreationTime = "2020-09-22T07:36:54.979Z";
+
+		final AppDataJob job = this.newJobWithMetadata(jobCreationTime, sensingEndTime, "FAST24");
+
+		assertFalse(aspPropertiesAdapter.isTimeoutReached(job, sensingEndTime,
+				LocalDateTime.of(2020, Month.SEPTEMBER, 22, 10, 0, 0)), "Expected timeout to not be reached!");
+		assertTrue(aspPropertiesAdapter.isTimeoutReached(job, sensingEndTime,
+				LocalDateTime.of(2020, Month.SEPTEMBER, 22, 11, 0, 0)), "Expected timeout to be reached!");
 	}
 
 	// --------------------------------------------------------------------------

@@ -52,11 +52,11 @@ public final class AspPropertiesAdapter {
         );
 	}
 	
-	public final boolean isTimeoutReached(final AppDataJob job,final String sensingEndTime) {
-		return !this.disableTimeout && this.checkTimeoutReached(job,sensingEndTime);
+	public final boolean isTimeoutReached(final AppDataJob job, final String sensingEndTime, final LocalDateTime now) {
+		return !this.disableTimeout && this.checkTimeoutReached(job, sensingEndTime, now);
 	}
 	
-	private boolean checkTimeoutReached(final AppDataJob job, final String sensingEndTimeStr) {
+	private boolean checkTimeoutReached(final AppDataJob job, final String sensingEndTimeStr,final LocalDateTime now) {
 		// S1PRO-1797 / S1PRO-1905: timeout for L0ASP in PT/NRT/FAST mode
 		final L0SegmentProduct product = L0SegmentProduct.of(job);
     	final AppDataJobProduct jobProduct = job.getProduct();
@@ -73,7 +73,6 @@ public final class AspPropertiesAdapter {
 		}
 		
 		if (null != minimalTimeout && null != nominalTimeout) {
-			final LocalDateTime now = LocalDateTime.now(ZoneId.of("UTC"));
 			final LocalDateTime sensingStopTime = DateUtils.parse(sensingEndTimeStr);
 			//final Date jobCreationDate = job.getGeneration().getCreationDate();
 			final Date jobCreationDate = job.getCreationDate();
