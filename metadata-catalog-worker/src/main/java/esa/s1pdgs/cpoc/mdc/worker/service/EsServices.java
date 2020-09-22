@@ -13,6 +13,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.regex.Pattern;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -55,7 +56,10 @@ import esa.s1pdgs.cpoc.common.errors.processing.MetadataNotPresentException;
 import esa.s1pdgs.cpoc.common.utils.DateUtils;
 import esa.s1pdgs.cpoc.common.utils.LogUtils;
 import esa.s1pdgs.cpoc.common.utils.Retries;
+import esa.s1pdgs.cpoc.mdc.worker.config.MdcWorkerConfigurationProperties;
+import esa.s1pdgs.cpoc.mdc.worker.config.MdcWorkerConfigurationProperties.CategoryConfig;
 import esa.s1pdgs.cpoc.mdc.worker.es.ElasticsearchDAO;
+import esa.s1pdgs.cpoc.mdc.worker.extraction.files.AuxFilenameMetadataExtractor;
 import esa.s1pdgs.cpoc.metadata.model.AuxMetadata;
 import esa.s1pdgs.cpoc.metadata.model.EdrsSessionMetadata;
 import esa.s1pdgs.cpoc.metadata.model.L0AcnMetadata;
@@ -89,10 +93,12 @@ public class EsServices {
 	 * Elasticsearch client
 	 */
 	private final ElasticsearchDAO elasticsearchDAO;
-
+    private final MdcWorkerConfigurationProperties properties;
+	
 	@Autowired
-	public EsServices(final ElasticsearchDAO elasticsearchDAO) {
+	public EsServices(final ElasticsearchDAO elasticsearchDAO, final MdcWorkerConfigurationProperties properties) {
 		this.elasticsearchDAO = elasticsearchDAO;
+		this.properties = properties;
 	}
 
 	/**
@@ -1343,7 +1349,7 @@ public class EsServices {
 	public SearchMetadata productNameQuery(final String productFamily, final String productName)
 			throws MetadataMalformedException, MetadataNotPresentException, IOException {
 		
-		final String index = getIndexFor(productFamily);
+		final String index = getIndexForFilename(ProductFamily.valueOf(productFamily), productName);
 
 		final Map<String, Object> source = getRequest(index, productName);
 
@@ -1355,8 +1361,18 @@ public class EsServices {
 
 		searchMetadata.setSwathtype((String) source.getOrDefault("swathtype", "UNDEFINED"));
 		
-		searchMetadata.setValidityStart(getPropertyAsDate(source, "startTime", orThrowMalformed("startTime")));
-		searchMetadata.setValidityStop(getPropertyAsDate(source, "stopTime", orThrowMalformed("stopTime")));
+		// dirty workaround: 
+		if (source.containsKey("startTime") && source.containsKey("stopTime")) {
+			searchMetadata.setValidityStart(getPropertyAsDate(source, "startTime", orThrowMalformed("startTime")));
+			searchMetadata.setValidityStop(getPropertyAsDate(source, "stopTime", orThrowMalformed("stopTime")));
+		}
+		else if (source.containsKey("validityStartTime") && source.containsKey("validityStopTime")) {
+			searchMetadata.setValidityStart(getPropertyAsDate(source, "validityStartTime", orThrowMalformed("validityStartTime")));
+			searchMetadata.setValidityStart(getPropertyAsDate(source, "validityStopTime", orThrowMalformed("validityStopTime")));
+		}
+		else {
+			throw new MetadataMalformedException("start/stop times");
+		}
 
 		Map<String, Object> coordinates = null;
 		if (source.containsKey("sliceCoordinates")) {
@@ -1565,20 +1581,6 @@ public class EsServices {
 		return new HashMap<>();
 	}
 
-	private String getIndexFor(final String family) {
-		if (ProductFamily.AUXILIARY_FILE.toString().toLowerCase().equals(family.toLowerCase())) {			
-			/*
-			 * FIXME
-			 * DIRTY WORKAROUND WARRNING:
-			 * 
-			 * shoud be replaced with proper type mapping
-			 * 
-			 * 
-			 */
-			return "aux_resorb";
-		}
-		return family.toLowerCase();
-	}
 
 	private L0AcnMetadata extractInfoForL0ACN(final Map<String, Object> source) throws MetadataMalformedException {
 		final L0AcnMetadata r = new L0AcnMetadata();
@@ -1823,6 +1825,40 @@ public class EsServices {
 			}
 		}
 		return false;
+	}
+	
+	private final String getIndexForFilename(final ProductFamily family, final String productName) {	
+		if (ProductFamily.AUXILIARY_FILE == family) {	
+			// FIXME: idea here is to use the same config as for metadata extraction in order to 
+			// detect the correct product type.
+			// In the long run, this needs to be moved to a separate entity handling product type
+			// mapping in a generic manner	
+			final CategoryConfig config = properties.getProductCategories().get(ProductCategory.AUXILIARY_FILES);
+			if (config == null) {
+				throw new RuntimeException(
+						String.format("No %s configuration in %s", family, properties.getProductCategories())
+				);
+			}
+			final Pattern auxPattern = Pattern.compile(config.getPatternConfig(), Pattern.CASE_INSENSITIVE);			
+			final AuxFilenameMetadataExtractor met = new AuxFilenameMetadataExtractor(auxPattern.matcher(productName));
+			if (!met.matches()) {
+				throw new RuntimeException(
+						String.format(
+								"Product name %s does not match configured pattern %s", 
+								productName, 
+								config.getPatternConfig()
+						)
+				);
+			}	
+			return met.getFileType().toLowerCase();			
+		}
+		else if (ProductFamily.EDRS_SESSION == family) {
+			// FIXME dirty workaround here. As sessions are not atomic, simply use a DSIB here
+			// this really needs to be cleaned up for the future
+			return EdrsSessionFileType.ofFilename(productName).toString().toLowerCase();			
+		}
+		// nominal case
+		return family.name().toLowerCase();		
 	}
 
 	/**

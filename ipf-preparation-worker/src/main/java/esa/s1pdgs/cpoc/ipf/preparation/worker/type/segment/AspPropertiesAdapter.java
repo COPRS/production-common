@@ -8,6 +8,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import esa.s1pdgs.cpoc.appcatalog.AppDataJob;
+import esa.s1pdgs.cpoc.appcatalog.AppDataJobProduct;
 import esa.s1pdgs.cpoc.common.utils.DateUtils;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.config.AspProperties;
 
@@ -58,14 +59,15 @@ public final class AspPropertiesAdapter {
 	private boolean checkTimeoutReached(final AppDataJob job, final String sensingEndTimeStr) {
 		// S1PRO-1797 / S1PRO-1905: timeout for L0ASP in PT/NRT/FAST mode
 		final L0SegmentProduct product = L0SegmentProduct.of(job);
-    	final String processMode = product.getProcessMode();
+    	final AppDataJobProduct jobProduct = job.getProduct();
+    	final String timeliness = (String) jobProduct.getMetadata().get("timeliness");
 
     	Long minimalTimeout = null;
     	Long nominalTimeout = null;
-		if ("PT".equals(processMode) || "NRT".equals(processMode)) {
+		if ("PT".equals(timeliness) || "NRT".equals(timeliness)) {
 			minimalTimeout = Long.valueOf( this.waitingTimeHoursMinimalNrtPt);
 			nominalTimeout = Long.valueOf( this.waitingTimeHoursNominalNrtPt);
-		} else if ("FAST24".equals(processMode)) {
+		} else if ("FAST24".equals(timeliness)) {
 			minimalTimeout = Long.valueOf( this.waitingTimeHoursMinimalFast);
 			nominalTimeout = Long.valueOf( this.waitingTimeHoursNominalFast);
 		}
@@ -87,6 +89,9 @@ public final class AspPropertiesAdapter {
 			if(!now.isBefore(timeoutThreshold)) {
 				LOGGER.warn("Timeout reached for product {}", product.getProductName());
 				return true;
+			}else {
+				LOGGER.debug("product {} has not yet reached timout at {}", product.getProductName(),
+						DateUtils.formatToMetadataDateTimeFormat(timeoutThreshold));
 			}
 		}
 

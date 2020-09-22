@@ -49,12 +49,12 @@ public class TestOnDemandRestController extends RestControllerTest {
 		this.initMockMvc(this.controller);
 	}
 
-	private void mockQueryByFamilyAndProductName(SearchMetadata response) throws Exception {
+	private void mockQueryByFamilyAndProductName(final SearchMetadata response) throws Exception {
 		doReturn(response).when(metadataClient).queryByFamilyAndProductName(Mockito.any(String.class),
 				Mockito.any(String.class));
 	}
 
-	private void mockGetProductionTypeToProductFamily(Map<String, String> response) {
+	private void mockGetProductionTypeToProductFamily(final Map<String, String> response) {
 		doReturn(response).when(properties).getProductionTypeToProductFamily();
 	}
 
@@ -80,6 +80,12 @@ public class TestOnDemandRestController extends RestControllerTest {
 						"2020-09-15T09:45:00.000000Z", "MissionIdA", "SatelliteIdA", "StationCodeA"));
 
 		request(requestBuilder).andExpect(MockMvcResultMatchers.status().isOk()).andReturn();
+	}
+	
+	@Test
+	public final void dumpForCluster() throws Exception {
+		final String jsonContent = asJsonString(new OnDemandProcessingRequest("S1B_OPER_AUX_RESORB_OPOD_20200911T053929_V20200911T011556_20200911T043326.EOF", false, "NOMINAL", "OBS"));
+		System.out.println(jsonContent.replace("\"", "\\\""));
 	}
 
 }

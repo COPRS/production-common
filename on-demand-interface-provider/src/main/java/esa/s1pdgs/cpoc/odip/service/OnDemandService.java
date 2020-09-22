@@ -40,48 +40,55 @@ public class OnDemandService {
 	}
 
 	public void submit(final OnDemandProcessingRequest request) {
-		LOGGER.info("(Re-)Submitting following message {}", request);
+		LOGGER.info("(Re-)Submitting following request {}", request);
 
 		String productName = request.getProductName();
-		String productionType = request.getProductionType();
-		String mode = request.getMode();
-		boolean debug = request.isDebug();
+		final String productionType = request.getProductionType();
+		final String mode = request.getMode();
+		final boolean debug = request.isDebug();
 		
 		assertNotNull("product name", productName);
 		assertNotNull("production type", productionType);
 		assertNotNull("mode", mode);
 		
-		String keyObjectStorage = productName;
+		final String keyObjectStorage = productName;
 		if ("AIOP".equalsIgnoreCase(productionType)) {
 			productName = productName.substring(0, productName.indexOf('/'));
 		}
 
-		ProductFamily productFamily = ProductFamily
+		final ProductFamily productFamily = ProductFamily
 				.valueOf(properties.getProductionTypeToProductFamily().get(productionType));
 
-		OnDemandEvent event = new OnDemandEvent(productFamily, keyObjectStorage, productName, productionType, mode);
+		final OnDemandEvent event = new OnDemandEvent(productFamily, keyObjectStorage, productName, productionType, mode);
 		event.setDebug(debug);
 
 		try {
-			SearchMetadata metadata = this.metadataClient.queryByFamilyAndProductName(productFamily.name(),
+			LOGGER.info("Querying mdc with product family '{}' and product name '{}'...", productFamily.name(), request.getProductName());
+			final SearchMetadata metadata = this.metadataClient.queryByFamilyAndProductName(productFamily.name(),
 					request.getProductName());
+			LOGGER.info("Query result: {}", metadata);
 
-			Map<String, Object> metadataAsMap = new HashMap<>();
-			metadataAsMap.put("productName", metadata.getProductName());
-			metadataAsMap.put("productType", metadata.getProductType());
-			metadataAsMap.put("satelliteId", metadata.getSatelliteId());
-			metadataAsMap.put("missionId", metadata.getMissionId());
-			metadataAsMap.put("processMode", mode);
+			final Map<String, Object> metadataAsMap = new HashMap<>();
+			// TODO check if all metadata is provided
+//			metadataAsMap.put("productName", metadata.getProductName());
+//			metadataAsMap.put("productType", metadata.getProductType());
+//			metadataAsMap.put("satelliteId", metadata.getSatelliteId());
+//			metadataAsMap.put("missionId", metadata.getMissionId());		
+//			metadataAsMap.put("acquistion", metadata.getSwathtype());
+//			metadataAsMap.put("stationCode", metadata.getStationCode());
+//			metadataAsMap.put("keyObjectStorage", metadata.getKeyObjectStorage());
+			metadataAsMap.putAll(metadata.getAdditionalProperties());
+			if (!metadata.getFootprint().isEmpty()) {
+				metadataAsMap.put("footprint", metadata.getFootprint());
+			}
 			metadataAsMap.put("startTime", metadata.getValidityStart());
 			metadataAsMap.put("stopTime", metadata.getValidityStop());
+			metadataAsMap.put("processMode", mode);
 			metadataAsMap.put("timeliness", properties.getTimeliness());
-			metadataAsMap.put("acquistion", metadata.getSwathtype());
-			metadataAsMap.put("stationCode", metadata.getStationCode());
-			metadataAsMap.put("keyObjectStorage", metadata.getKeyObjectStorage());
-
 			event.setMetadata(metadataAsMap);
 
-		} catch (MetadataQueryException e) {
+		} catch (final MetadataQueryException e) {
+			LOGGER.info("Querying mdc failed", e);
 			throw new RuntimeException(e);
 		}
 

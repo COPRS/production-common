@@ -41,7 +41,7 @@ public class SearchMetadata extends AbstractMetadata {
 		return footprint;
 	}
 
-	public void setFootprint(List<List<Double>> footprint) {
+	public void setFootprint(final List<List<Double>> footprint) {
 		this.footprint = footprint;
 	}
 
@@ -50,11 +50,11 @@ public class SearchMetadata extends AbstractMetadata {
 	}
 
 	@Override
-	public boolean equals(Object o) {
+	public boolean equals(final Object o) {
 		if (this == o) return true;
 		if (o == null || getClass() != o.getClass()) return false;
 		if (!super.equals(o)) return false;
-		SearchMetadata metadata = (SearchMetadata) o;
+		final SearchMetadata metadata = (SearchMetadata) o;
 		return Objects.equals(footprint, metadata.footprint);
 	}
 
@@ -73,6 +73,7 @@ public class SearchMetadata extends AbstractMetadata {
 	public String toString() {
 		return "SearchMetadata [productName=" + productName + ", productType=" + productType + ", keyObjectStorage="
 				+ keyObjectStorage + ", validityStart=" + validityStart + ", validityStop=" + validityStop
-				+ ", missionId=" + missionId + ", satelliteId=" + satelliteId + ", stationCode=" + stationCode + ", footprint=" + footprint + "]";
+				+ ", missionId=" + missionId + ", satelliteId=" + satelliteId + ", stationCode=" + stationCode + 
+				", footprint=" + footprint + ", addProps=" + additionalProperties + "]";
 	}
 }
