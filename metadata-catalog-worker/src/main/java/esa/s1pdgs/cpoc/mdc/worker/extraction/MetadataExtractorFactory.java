@@ -104,6 +104,15 @@ public class MetadataExtractorFactory {
 		    			processConfiguration, 
 		    			obsClient
 		    	);
+		    case SPP_PRODUCTS:
+		    	return new SppProductMetadataExtractor(
+		    			esServices, 
+		    			mdBuilder, 
+		    			fileDescriptorBuilder, 
+		    			config.getLocalDirectory(), 
+		    			processConfiguration, 
+		    			obsClient
+		    	);
 		    case S3_AUX:
 				return new S3AuxMetadataExtractor(
 						esServices, 
