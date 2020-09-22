@@ -80,7 +80,7 @@ public class JobDispatcherImpl implements JobDispatcher {
 	        			LogUtils.toString(e)
 	        	)))
 				.publishMessageProducer(() -> {
-					if (jobs != null) {
+					if (jobs != null && !jobs.isEmpty()) {
 						AppDataJob firstJob = jobs.get(0);
 						
 			            final String tasktableFilename = firstJob.getTaskTableName();
