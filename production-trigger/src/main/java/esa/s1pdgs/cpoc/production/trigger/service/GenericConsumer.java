@@ -74,9 +74,22 @@ public class GenericConsumer implements MqiListener<CatalogEvent> {
 		this.taskTableMapper = taskTableMapper;
     }
 
-	@PostConstruct
+    @PostConstruct
 	public void initService() {
 		appStatus.setWaiting();
+				
+		final List<MessageFilter> onDemandMessageFilter = new ArrayList<>();
+		onDemandMessageFilter.add(new MessageFilter() {			
+			@Override
+			public boolean accept(final AbstractMessage message) {
+				if (message.getClass().equals(OnDemandEvent.class)) {
+					return ((OnDemandEvent)message).getProductionType() == processSettings.getLevel();
+				}
+				return false;
+			}
+		});
+		onDemandMessageFilter.addAll(messageFilter);
+		
 		if (processSettings.getFixedDelayMs() > 0) {
 			final ExecutorService service = Executors.newFixedThreadPool(1);
 			service.execute(new MqiConsumer<CatalogEvent>(
@@ -92,7 +105,7 @@ public class GenericConsumer implements MqiListener<CatalogEvent> {
 	    			mqiClient, 
 	    			ProductCategory.ON_DEMAND_EVENT, 
 	    			m -> onMessage(toCatalogEvent(m)),
-	    			messageFilter,
+	    			onDemandMessageFilter,
 	    			processSettings.getFixedDelayMs(),
 					processSettings.getInitialDelayMs(), 
 					appStatus

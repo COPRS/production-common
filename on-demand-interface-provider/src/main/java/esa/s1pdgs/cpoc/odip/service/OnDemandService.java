@@ -11,6 +11,7 @@ import org.springframework.stereotype.Service;
 
 import esa.s1pdgs.cpoc.appcatalog.common.OnDemandProcessingRequest;
 import esa.s1pdgs.cpoc.appstatus.AppStatus;
+import esa.s1pdgs.cpoc.common.ApplicationLevel;
 import esa.s1pdgs.cpoc.common.ProductFamily;
 import esa.s1pdgs.cpoc.common.errors.processing.MetadataQueryException;
 import esa.s1pdgs.cpoc.metadata.client.MetadataClient;
@@ -43,21 +44,20 @@ public class OnDemandService {
 		LOGGER.info("(Re-)Submitting following request {}", request);
 
 		String productName = request.getProductName();
-		final String productionType = request.getProductionType();
+		final ApplicationLevel productionType = ApplicationLevel.valueOf(request.getProductionType());
 		final String mode = request.getMode();
 		final boolean debug = request.isDebug();
 		
 		assertNotNull("product name", productName);
-		assertNotNull("production type", productionType);
 		assertNotNull("mode", mode);
 		
 		final String keyObjectStorage = productName;
-		if ("AIOP".equalsIgnoreCase(productionType)) {
+		if (ApplicationLevel.L0_SEGMENT.equals(productionType)) {
 			productName = productName.substring(0, productName.indexOf('/'));
 		}
 
 		final ProductFamily productFamily = ProductFamily
-				.valueOf(properties.getProductionTypeToProductFamily().get(productionType));
+				.valueOf(properties.getProductionTypeToProductFamily().get(productionType.toString()));
 
 		final OnDemandEvent event = new OnDemandEvent(productFamily, keyObjectStorage, productName, productionType, mode);
 		event.setDebug(debug);
