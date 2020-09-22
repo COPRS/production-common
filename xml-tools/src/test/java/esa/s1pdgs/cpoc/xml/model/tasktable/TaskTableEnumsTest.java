@@ -49,11 +49,13 @@ public class TaskTableEnumsTest {
 
     @Test
     public void testEnumTaskTableInputOrigin() {
-        assertEquals(3, TaskTableInputOrigin.values().length);
+        assertEquals(4, TaskTableInputOrigin.values().length);
         assertEquals(TaskTableInputOrigin.DB,
                 TaskTableInputOrigin.valueOf("DB"));
         assertEquals(TaskTableInputOrigin.PROC,
                 TaskTableInputOrigin.valueOf("PROC"));
+        assertEquals(TaskTableInputOrigin.LOG,
+                TaskTableInputOrigin.valueOf("LOG"));
         assertEquals(TaskTableInputOrigin.BLANK,
                 TaskTableInputOrigin.valueOf("BLANK"));
     }
