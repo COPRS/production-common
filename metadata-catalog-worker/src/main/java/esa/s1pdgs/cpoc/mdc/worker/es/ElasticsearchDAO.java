@@ -2,6 +2,8 @@ package esa.s1pdgs.cpoc.mdc.worker.es;
 
 import java.io.IOException;
 
+import org.elasticsearch.action.admin.indices.refresh.RefreshRequest;
+import org.elasticsearch.action.admin.indices.refresh.RefreshResponse;
 import org.elasticsearch.action.get.GetRequest;
 import org.elasticsearch.action.get.GetResponse;
 import org.elasticsearch.action.index.IndexRequest;
@@ -35,5 +37,8 @@ public class ElasticsearchDAO {
 		return this.restHighLevelClient.search(searchRequest, RequestOptions.DEFAULT);
 	}
 
+	public RefreshResponse refresh(RefreshRequest refreshRequest) throws IOException {
+		return this.restHighLevelClient.indices().refresh(refreshRequest, RequestOptions.DEFAULT);
+	}
 
 }

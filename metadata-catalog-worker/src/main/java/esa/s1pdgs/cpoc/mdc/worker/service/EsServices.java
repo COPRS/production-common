@@ -19,6 +19,7 @@ import org.apache.logging.log4j.Logger;
 import org.apache.lucene.search.TotalHits;
 import org.apache.lucene.search.TotalHits.Relation;
 import org.elasticsearch.ElasticsearchStatusException;
+import org.elasticsearch.action.admin.indices.refresh.RefreshRequest;
 import org.elasticsearch.action.get.GetRequest;
 import org.elasticsearch.action.get.GetResponse;
 import org.elasticsearch.action.index.IndexRequest;
@@ -239,6 +240,26 @@ public class EsServices {
 			}
 		} catch (JSONException | IOException e) {
 			throw new Exception(e);
+		}
+	}
+	
+	/**
+	 * Refresh the index to ensure new documents can be found. The index is
+	 * extracted from the family and type.
+	 * 
+	 * @param productFamily productFamily of the product that will be searched in
+	 *                      the future
+	 * @param productType   product type of the product that will be searched in the
+	 *                      future
+	 */
+	public void refreshIndex(final ProductFamily productFamily, final String productType) throws Exception {
+		String index = getIndexForProductFamily(productFamily, productType);
+		RefreshRequest request = new RefreshRequest(index);
+
+		try {
+			elasticsearchDAO.refresh(request);
+		} catch (final IOException e) {
+			throw new Exception(e.getMessage());
 		}
 	}
 	

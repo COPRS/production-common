@@ -141,6 +141,35 @@ public class S3MetadataController extends AbstractMetadataController<S3Metadata>
 	}
 
 	/**
+	 * Refresh the index determined by product family and type, to ensure new
+	 * documents are searchable
+	 * 
+	 * @param productFamily product family to determine index
+	 * @param productType   product type to determine index
+	 * @return Empty Response
+	 */
+	@RequestMapping(path = "/refreshIndex/{productFamily}")
+	public ResponseEntity<String> refreshIndex(@PathVariable(name = "productFamily") final String productFamily,
+			@RequestParam(name = "productType") final String productType) {
+		try {
+			LOGGER.info("Received refresh message for productFamily '{}' and productType '{}'",
+					productFamily.toString(), productType);
+
+			esServices.refreshIndex(ProductFamily.fromValue(productFamily), productType);
+
+			return ResponseEntity.ok().build();
+		} catch (final AbstractCodedException e) {
+			LOGGER.error("Error on refreshing index for productFamily {} and productType {}: [code {}] {}",
+					productFamily, productType, e.getCode().getCode(), e.getLogMessage());
+			return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+		} catch (final Exception e) {
+			LOGGER.error("Error on refreshing index for productFamily {} and productType {}: {}", productFamily,
+					productType, LogUtils.toString(e));
+			return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+		}
+	}
+
+	/**
 	 * Retrieve the metadata for a given productName
 	 * 
 	 * @param productFamily product family of the product, used to determine index

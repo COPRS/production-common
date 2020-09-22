@@ -52,8 +52,19 @@ public class PDUFrameGeneration {
 
 	public List<AppDataJob> generateAppDataJobs(final IpfPreparationJob job) throws MetadataQueryException {
 		// Get metadata for product
-		final S3Metadata metadata = mdClient.getS3MetadataForProduct(job.getProductFamily(),
+		S3Metadata metadata = mdClient.getS3MetadataForProduct(job.getProductFamily(),
 				job.getEventMessage().getBody().getProductName());
+		
+		if (metadata == null) {
+			// It may be that the elastic search is not updated yet. Refresh the index and try again
+			mdClient.refreshIndex(job.getProductFamily(), job.getEventMessage().getBody().getProductType());
+			metadata = mdClient.getS3MetadataForProduct(job.getProductFamily(),
+					job.getEventMessage().getBody().getProductName());
+			if (metadata == null) {
+				// If metadata is still null, there may be an inconsistency with the es index - abort!
+				throw new MetadataQueryException("Could not retrieve metadata information for product of IpfPreparationJob");
+			}
+		}
 
 		final List<S3Metadata> productsOfThisOrbit = mdClient.getProductsForOrbit(job.getProductFamily(),
 				job.getEventMessage().getBody().getProductType(), metadata.getSatelliteId(),
