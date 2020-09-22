@@ -63,9 +63,11 @@ public class OnDemandService {
 		event.setDebug(debug);
 
 		try {
+			LOGGER.info("Querying mdc with product family '{}' and product name '{}'...", productFamily.name(), request.getProductName());
 			SearchMetadata metadata = this.metadataClient.queryByFamilyAndProductName(productFamily.name(),
 					request.getProductName());
-
+			LOGGER.info("Query result: {}", metadata);
+			
 			Map<String, Object> metadataAsMap = new HashMap<>();
 			metadataAsMap.put("productName", metadata.getProductName());
 			metadataAsMap.put("productType", metadata.getProductType());
@@ -82,6 +84,7 @@ public class OnDemandService {
 			event.setMetadata(metadataAsMap);
 
 		} catch (MetadataQueryException e) {
+			LOGGER.info("Querying mdc failed", e);
 			throw new RuntimeException(e);
 		}
 
