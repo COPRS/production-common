@@ -23,10 +23,12 @@ import esa.s1pdgs.cpoc.ipf.preparation.worker.model.tasktable.TaskTableAdapter;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.type.ProductTypeAdapter;
 import esa.s1pdgs.cpoc.mqi.client.MqiClient;
 import esa.s1pdgs.cpoc.mqi.model.queue.IpfExecutionJob;
+import esa.s1pdgs.cpoc.mqi.model.queue.IpfPreparationJob;
 import esa.s1pdgs.cpoc.mqi.model.queue.LevelJobInputDto;
 import esa.s1pdgs.cpoc.mqi.model.queue.LevelJobOutputDto;
 import esa.s1pdgs.cpoc.mqi.model.queue.LevelJobPoolDto;
 import esa.s1pdgs.cpoc.mqi.model.queue.LevelJobTaskDto;
+import esa.s1pdgs.cpoc.mqi.model.rest.GenericMessageDto;
 import esa.s1pdgs.cpoc.mqi.model.rest.GenericPublicationMessageDto;
 import esa.s1pdgs.cpoc.report.Reporting;
 import esa.s1pdgs.cpoc.report.ReportingMessage;
@@ -105,8 +107,11 @@ public class Publisher {
 		);
 		execJob.setCreationDate(new Date());
 		execJob.setHostname(settings.getHostname());
-		execJob.setIpfPreparationJobMessage(job.getPrepJobMessage());
-
+		
+		final GenericMessageDto<IpfPreparationJob> prepJob = job.getPrepJobMessage();		
+		execJob.setIpfPreparationJobMessage(prepJob);	
+		execJob.setDebug(prepJob.getBody().isDebug());
+		
 		try {
 			// Add jobOrder inputs to the DTO
 			jobOrderAdapter.distinctInputs().forEach(input -> {

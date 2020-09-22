@@ -94,6 +94,7 @@ public class GenericConsumer implements MqiListener<CatalogEvent> {
 		
 		if (processSettings.getFixedDelayMs() > 0) {
 			final ExecutorService service = Executors.newFixedThreadPool(2);
+			
 			service.execute(new MqiConsumer<CatalogEvent>(
 	    			mqiClient, 
 	    			ProductCategory.CATALOG_EVENT, 
@@ -102,7 +103,8 @@ public class GenericConsumer implements MqiListener<CatalogEvent> {
 	    			processSettings.getFixedDelayMs(),
 					processSettings.getInitialDelayMs(), 
 					appStatus
-			));			
+			));
+			
 			service.execute(new MqiConsumer<OnDemandEvent>(
 	    			mqiClient, 
 	    			ProductCategory.ON_DEMAND_EVENT, 
@@ -231,6 +233,7 @@ public class GenericConsumer implements MqiListener<CatalogEvent> {
     	job.setProductFamily(event.getProductFamily());
     	job.setKeyObjectStorage(event.getProductName());
     	job.setUid(reporting.getUid());
+    	job.setDebug(event.isDebug());
     	
     	final GenericPublicationMessageDto<IpfPreparationJob> messageDto = new GenericPublicationMessageDto<IpfPreparationJob>(
     			mqiMessage.getId(), 
