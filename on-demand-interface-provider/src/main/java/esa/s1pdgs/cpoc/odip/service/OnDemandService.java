@@ -40,7 +40,7 @@ public class OnDemandService {
 	}
 
 	public void submit(final OnDemandProcessingRequest request) {
-		LOGGER.info("(Re-)Submitting following message {}", request);
+		LOGGER.info("(Re-)Submitting following request {}", request);
 
 		String productName = request.getProductName();
 		String productionType = request.getProductionType();
