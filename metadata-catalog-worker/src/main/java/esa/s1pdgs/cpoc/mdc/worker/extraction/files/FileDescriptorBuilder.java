@@ -51,6 +51,10 @@ public class FileDescriptorBuilder {
 		this.localDirectory = localDirectory;
 		this.pattern = pattern;
 	}
+	
+	public Pattern getPattern() {
+		return pattern;
+	}
 
 	@Override
 	public String toString() {
