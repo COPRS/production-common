@@ -1,11 +1,16 @@
 package esa.s1pdgs.cpoc.odip.kafka.producer;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.springframework.kafka.core.KafkaTemplate;
 
 import esa.s1pdgs.cpoc.appstatus.AppStatus;
 import esa.s1pdgs.cpoc.common.utils.Exceptions;
+import esa.s1pdgs.cpoc.odip.service.OnDemandService;
 
 public class KafkaSubmissionClient implements SubmissionClient {
+	
+	public static final Logger LOGGER = LogManager.getLogger(KafkaSubmissionClient.class);
 	
 	private final KafkaTemplate<String, Object> client;
 	
@@ -19,6 +24,7 @@ public class KafkaSubmissionClient implements SubmissionClient {
 	@Override
 	public void resubmit(final Object message, final AppStatus appStatus) {    		
 		try {
+			LOGGER.info("(Re-)Submitting following message '{}' to topic '{}'", message, topic);
 			client.send(topic, message).get();
 		} catch (final Exception e) {
 			final Throwable cause = Exceptions.unwrap(e);
