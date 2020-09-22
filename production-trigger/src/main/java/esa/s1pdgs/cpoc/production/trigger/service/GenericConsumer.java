@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.regex.Pattern;
@@ -29,6 +30,7 @@ import esa.s1pdgs.cpoc.mqi.client.MqiPublishingJob;
 import esa.s1pdgs.cpoc.mqi.model.queue.AbstractMessage;
 import esa.s1pdgs.cpoc.mqi.model.queue.CatalogEvent;
 import esa.s1pdgs.cpoc.mqi.model.queue.IpfPreparationJob;
+import esa.s1pdgs.cpoc.mqi.model.queue.OnDemandEvent;
 import esa.s1pdgs.cpoc.mqi.model.queue.util.CatalogEventAdapter;
 import esa.s1pdgs.cpoc.mqi.model.rest.GenericMessageDto;
 import esa.s1pdgs.cpoc.mqi.model.rest.GenericPublicationMessageDto;
@@ -85,6 +87,15 @@ public class GenericConsumer implements MqiListener<CatalogEvent> {
 	    			processSettings.getFixedDelayMs(),
 					processSettings.getInitialDelayMs(), 
 					appStatus
+			));			
+			service.execute(new MqiConsumer<OnDemandEvent>(
+	    			mqiClient, 
+	    			ProductCategory.ON_DEMAND_EVENT, 
+	    			m -> onMessage(toCatalogEvent(m)),
+	    			messageFilter,
+	    			processSettings.getFixedDelayMs(),
+					processSettings.getInitialDelayMs(), 
+					appStatus
 			));
 		}
 	} 
@@ -119,6 +130,25 @@ public class GenericConsumer implements MqiListener<CatalogEvent> {
         	new FailedProcessingDto(processSettings.getHostname(), new Date(), error.getMessage(), message)
         );
 	}
+    
+    // dirty workaround to avoid changing appDataJob persistence
+    private final GenericMessageDto<CatalogEvent>  toCatalogEvent(final GenericMessageDto<OnDemandEvent> mess) {
+    	final OnDemandEvent onDemandEvent = mess.getBody();
+    	
+    	final CatalogEvent catEvent = new CatalogEvent();
+		catEvent.setProductName(onDemandEvent.getProductName());
+		catEvent.setKeyObjectStorage(onDemandEvent.getKeyObjectStorage());
+		catEvent.setProductFamily(onDemandEvent.getProductFamily());
+		final Map<String, Object> metadata = onDemandEvent.getMetadata();
+		catEvent.setProductType(metadata.get("productType").toString());
+		catEvent.setMetadata(metadata);		
+		
+    	catEvent.setAllowedActions(onDemandEvent.getAllowedActions());
+    	catEvent.setDebug(onDemandEvent.isDebug());
+    	catEvent.setDemandType(onDemandEvent.getDemandType());
+    	
+    	return new GenericMessageDto<CatalogEvent>(mess.getId(), mess.getInputKey(), catEvent);
+    }
         
     private final MqiPublishingJob<IpfPreparationJob> handle(
     		final Reporting reporting, 
