@@ -1,10 +1,10 @@
 package esa.s1pdgs.cpoc.ipf.preparation.worker.type.segment;
 
 import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -319,7 +319,7 @@ public final class L0SegmentTypeAdapter extends AbstractProductTypeAdapter imple
 		
 		// Check if we add the coverage
 		if (!fullCoverage) {
-			if (this.aspPropertiesAdapter.isTimeoutReached(job, sensingStop)) {
+			if (this.aspPropertiesAdapter.isTimeoutReached(job, sensingStop, LocalDateTime.now(ZoneId.of("UTC")))) {
 				LOGGER.warn("Continue generation of {} {} even if sensing gaps", product.getProductName(),
 						job.getGeneration());
 				product.setStartTime(sensingStart);
