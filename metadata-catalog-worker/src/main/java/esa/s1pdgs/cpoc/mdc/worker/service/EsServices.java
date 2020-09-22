@@ -1132,6 +1132,7 @@ public class EsServices {
 
 		try {
 			final SearchResponse searchResponse = elasticsearchDAO.search(searchRequest);
+			LOGGER.debug("S3Metadata result: {}", searchResponse);
 			if (this.isNotEmpty(searchResponse)) {
 				return toS3Metadata(searchResponse.getHits().getAt(0));
 			}
