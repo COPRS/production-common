@@ -50,11 +50,13 @@ public final class ElementMapper {
 	 * If not returns defaultFamily.
 	 */
 	private final ProductFamily familyOf(final Map<String, ProductFamily> map, final String fileType,
-			final ProductFamily defaultFamily) {		
-		for (final Map.Entry<String, ProductFamily> entry : map.entrySet()) {
-			final String regex = entry.getKey();
-			if (fileType.matches(regex) || fileType.equals(regex)) {
-				return entry.getValue();
+			final ProductFamily defaultFamily) {
+		if (fileType != null) {
+			for (final Map.Entry<String, ProductFamily> entry : map.entrySet()) {
+				final String regex = entry.getKey();
+				if (fileType.matches(regex) || fileType.equals(regex)) {
+					return entry.getValue();
+				}
 			}
 		}
 		return defaultFamily;
