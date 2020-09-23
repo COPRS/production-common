@@ -54,6 +54,7 @@ public class PDUTypeAdapter extends AbstractProductTypeAdapter {
 	public PDUTypeAdapter(final MetadataClient metadataClient, final TaskTableFactory ttFactory,
 			final ElementMapper elementMapper, final ProcessSettings processSettings,
 			final IpfPreparationWorkerSettings workerSettings, final PDUSettings settings) {
+		this.metadataClient = metadataClient;
 		this.ttFactory = ttFactory;
 		this.elementMapper = elementMapper;
 		this.processSettings = processSettings;
