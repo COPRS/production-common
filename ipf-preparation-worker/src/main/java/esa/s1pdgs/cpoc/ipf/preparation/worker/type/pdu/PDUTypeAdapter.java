@@ -3,7 +3,9 @@ package esa.s1pdgs.cpoc.ipf.preparation.worker.type.pdu;
 import static java.util.stream.Collectors.toList;
 import static org.springframework.util.CollectionUtils.isEmpty;
 
+import java.io.File;
 import java.time.Instant;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -19,11 +21,13 @@ import esa.s1pdgs.cpoc.common.errors.processing.IpfPrepWorkerInputsMissingExcept
 import esa.s1pdgs.cpoc.common.errors.processing.MetadataQueryException;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.config.IpfPreparationWorkerSettings;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.config.PDUSettings;
+import esa.s1pdgs.cpoc.ipf.preparation.worker.config.ProcessSettings;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.config.PDUSettings.PDUTypeSettings;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.generator.DiscardedException;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.model.pdu.PDUType;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.model.tasktable.ElementMapper;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.model.tasktable.TaskTableAdapter;
+import esa.s1pdgs.cpoc.ipf.preparation.worker.model.tasktable.TaskTableFactory;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.query.QueryUtils;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.type.AbstractProductTypeAdapter;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.type.Product;
@@ -31,22 +35,28 @@ import esa.s1pdgs.cpoc.ipf.preparation.worker.type.s3.MultipleProductCoverSearch
 import esa.s1pdgs.cpoc.metadata.client.MetadataClient;
 import esa.s1pdgs.cpoc.mqi.model.queue.IpfExecutionJob;
 import esa.s1pdgs.cpoc.mqi.model.queue.IpfPreparationJob;
+import esa.s1pdgs.cpoc.mqi.model.queue.LevelJobInputDto;
 import esa.s1pdgs.cpoc.xml.model.joborder.JobOrder;
 import esa.s1pdgs.cpoc.xml.model.tasktable.TaskTableInputAlternative;
+import esa.s1pdgs.cpoc.xml.model.tasktable.enums.TaskTableInputOrigin;
 
 public class PDUTypeAdapter extends AbstractProductTypeAdapter {
 
 	private static final Logger LOGGER = LogManager.getLogger(PDUTypeAdapter.class);
 
 	private MetadataClient metadataClient;
+	private TaskTableFactory ttFactory;
 	private ElementMapper elementMapper;
+	private ProcessSettings processSettings;
 	private IpfPreparationWorkerSettings workerSettings;
 	private PDUSettings settings;
 
-	public PDUTypeAdapter(final MetadataClient metadataClient, final ElementMapper elementMapper,
+	public PDUTypeAdapter(final MetadataClient metadataClient, final TaskTableFactory ttFactory,
+			final ElementMapper elementMapper, final ProcessSettings processSettings,
 			final IpfPreparationWorkerSettings workerSettings, final PDUSettings settings) {
-		this.metadataClient = metadataClient;
+		this.ttFactory = ttFactory;
 		this.elementMapper = elementMapper;
+		this.processSettings = processSettings;
 		this.workerSettings = workerSettings;
 		this.settings = settings;
 	}
@@ -73,9 +83,31 @@ public class PDUTypeAdapter extends AbstractProductTypeAdapter {
 		}
 	}
 
+	/**
+	 * Remove Inputs of ExecutionJob that are referring to a
+	 * TaskTableInputAlternative of origin PROC.
+	 * 
+	 * If those aren't removed, the InputDownloader of the ExecutionWorker will try
+	 * to download a file from the OBS but exits with an IllegalArgumentException
+	 */
 	@Override
 	public void customJobDto(AppDataJob job, IpfExecutionJob dto) {
-		// TODO Auto-generated method stub
+		final TaskTableAdapter ttAdapter = getTTAdapterForTaskTableName(job.getTaskTableName());
+
+		// Create list of all FileTypes of TaskTableInputAlternatives of Origin PROC
+		List<String> procAlternatives = ttAdapter.getAllAlternatives().stream()
+				.filter(alternative -> alternative.getOrigin() == TaskTableInputOrigin.PROC)
+				.map(alternative -> alternative.getFileType()).collect(toList());
+
+		List<LevelJobInputDto> newInputs = new ArrayList<>();
+		for (LevelJobInputDto input : dto.getInputs()) {
+			File file = new File(input.getLocalPath());
+			if (!procAlternatives.contains(file.getName())) {
+				newInputs.add(input);
+			}
+		}
+
+		dto.setInputs(newInputs);
 	}
 
 	@Override
@@ -192,5 +224,20 @@ public class PDUTypeAdapter extends AbstractProductTypeAdapter {
 				}
 			}
 		}
+	}
+	
+	/**
+	 * Create a TaskTableAdapter for the given tasktable
+	 * 
+	 * @param taskTable name of the taskTable
+	 * @return TaskTableAdapter to access the tasktable information
+	 */
+	private TaskTableAdapter getTTAdapterForTaskTableName(final String taskTable) {
+		final File ttFile = new File(workerSettings.getDiroftasktables(), taskTable);
+		final TaskTableAdapter tasktableAdapter = new TaskTableAdapter(ttFile,
+				ttFactory.buildTaskTable(ttFile, processSettings.getLevel()), elementMapper,
+				workerSettings.getProductMode());
+
+		return tasktableAdapter;
 	}
 }
