@@ -43,7 +43,7 @@ public class OnDemandService {
 	public void submit(final OnDemandProcessingRequest request) {
 		LOGGER.info("(Re-)Submitting following request {}", request);
 
-		String productName = request.getProductName();
+		final String productName = request.getProductName();
 		final ApplicationLevel productionType = ApplicationLevel.valueOf(request.getProductionType());
 		final String mode = request.getMode();
 		final boolean debug = request.isDebug();
@@ -52,10 +52,6 @@ public class OnDemandService {
 		assertNotNull("mode", mode);
 		
 		final String keyObjectStorage = productName;
-		if (ApplicationLevel.L0_SEGMENT.equals(productionType)) {
-			productName = productName.substring(0, productName.indexOf('/'));
-		}
-
 		final ProductFamily productFamily = ProductFamily
 				.valueOf(properties.getProductionTypeToProductFamily().get(productionType.toString()));
 
