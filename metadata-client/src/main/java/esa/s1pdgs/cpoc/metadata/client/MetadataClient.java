@@ -227,15 +227,17 @@ public class MetadataClient {
 	}
 
 	/**
+	 * Extract the first product (based on insertionTime) of an orbit
 	 * 
-	 * @param productFamily
-	 * @param productType
-	 * @param satelliteId
-	 * @param orbit
-	 * @return
+	 * @param productFamily productFamily of the product
+	 * @param productType   productType of the product
+	 * @param satelliteId   satelliteId of the product
+	 * @param orbit         orbit number
+	 * @return first product of the orbit or not product if no products exist for
+	 *         orbit number
 	 * @throws MetadataQueryException
 	 */
-	public List<S3Metadata> getProductsForOrbit(final ProductFamily productFamily, final String productType,
+	public S3Metadata getFirstProductForOrbit(final ProductFamily productFamily, final String productType,
 			final String satelliteId, final long orbit) throws MetadataQueryException {
 		final String uri = this.metadataBaseUri + MetadataCatalogRestPath.S3_METADATA.path() + "/" + productType
 				+ "/orbit";
@@ -244,10 +246,19 @@ public class MetadataClient {
 				.queryParam("productFamily", productFamily.toString()).queryParam("satellite", satelliteId)
 				.queryParam("orbitNumber", orbit);
 
-		final ResponseEntity<List<S3Metadata>> response = query(builder.build().toUri(),
-				new ParameterizedTypeReference<List<S3Metadata>>() {
+		final ResponseEntity<S3Metadata> response = query(builder.build().toUri(),
+				new ParameterizedTypeReference<S3Metadata>() {
 				});
-		return extractResult(productType, productFamily, response);
+
+		if (response == null || response.getBody() == null) {
+			LOGGER.debug("First Product of Orbit query for product type '{}' and orbit '{}' returned no results",
+					productType, orbit);
+			return null;
+		} else {
+			LOGGER.info("First Product of Orbit query for product type '{}' and orbit '{}' returned {}", productType,
+					orbit, response.getBody());
+			return response.getBody();
+		}
 	}
 
 	/**

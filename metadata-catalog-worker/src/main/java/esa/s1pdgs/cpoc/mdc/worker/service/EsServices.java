@@ -1170,7 +1170,7 @@ public class EsServices {
 	 * @return list of matching products
 	 * @throws Exception if the search throws an error
 	 */
-	public List<S3Metadata> getProductsForOrbit(final ProductFamily productFamily, final String productType,
+	public S3Metadata getFirstProductForOrbit(final ProductFamily productFamily, final String productType,
 			final String satelliteId, final long orbitNumber) throws Exception {
 		final SearchSourceBuilder sourceBuilder = new SearchSourceBuilder();
 		final BoolQueryBuilder queryBuilder = QueryBuilders.boolQuery()
@@ -1182,7 +1182,7 @@ public class EsServices {
 
 		sourceBuilder.query(queryBuilder);
 		sourceBuilder.sort("insertionTime", SortOrder.ASC);
-		sourceBuilder.size(SIZE_LIMIT);
+		sourceBuilder.size(1);
 
 		final String index = productFamily.name().toLowerCase();
 		final SearchRequest searchRequest = new SearchRequest(index);
@@ -1191,11 +1191,7 @@ public class EsServices {
 		try {
 			final SearchResponse searchResponse = elasticsearchDAO.search(searchRequest);
 			if (this.isNotEmpty(searchResponse)) {
-				final List<S3Metadata> r = new ArrayList<>();
-				for (final SearchHit hit : searchResponse.getHits().getHits()) {
-					r.add(toS3Metadata(hit));
-				}
-				return r;
+				return toS3Metadata(searchResponse.getHits().getAt(0));
 			}
 		} catch (final IOException e) {
 			throw new Exception(e.getMessage());

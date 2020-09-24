@@ -46,23 +46,22 @@ public class PDUFrameGeneration {
 			}
 		}
 
-		final List<S3Metadata> productsOfThisOrbit = mdClient.getProductsForOrbit(job.getProductFamily(),
+		final S3Metadata firstOfOrbit = mdClient.getFirstProductForOrbit(job.getProductFamily(),
 				job.getEventMessage().getBody().getProductType(), metadata.getSatelliteId(),
 				Long.parseLong(metadata.getAbsoluteStartOrbit()));
 
 		// Check if this product is the first of its orbit
-		if (productsOfThisOrbit != null && !productsOfThisOrbit.isEmpty()) {
-			final S3Metadata firstOfOrbit = productsOfThisOrbit.get(0);
+		if (firstOfOrbit != null) {
 			if (firstOfOrbit.getInsertionTime().equals(metadata.getInsertionTime())) {
 				// Product is first of orbit, generate PDU-Jobs
 				LOGGER.debug("Product is first in orbit - generate PDUs with type FRAME");
-				final List<S3Metadata> productsOfLastOrbit = mdClient.getProductsForOrbit(job.getProductFamily(),
+				final S3Metadata firstOfLastOrbit = mdClient.getFirstProductForOrbit(job.getProductFamily(),
 						job.getEventMessage().getBody().getProductType(), metadata.getSatelliteId(),
 						Long.parseLong(metadata.getAbsoluteStartOrbit()) - 1);
 
 				String startTime = metadata.getAnxTime();
-				if (productsOfLastOrbit != null && !productsOfLastOrbit.isEmpty()) {
-					startTime = productsOfLastOrbit.get(0).getAnx1Time();
+				if (firstOfLastOrbit != null) {
+					startTime = firstOfLastOrbit.getAnx1Time();
 				}
 
 				List<TimeInterval> timeIntervals = generateTimeIntervals(startTime, metadata.getAnx1Time(),
