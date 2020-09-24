@@ -55,7 +55,7 @@ public class CompressionTriggerService {
 		if (event.getProductFamily().toString().endsWith(SUFFIX_ZIPPRODUCTFAMILY)) {
 			compressionDirection = CompressionDirection.UNCOMPRESS;
 		} else {
-			compressionDirection = CompressionDirection.UNDEFINED;
+			compressionDirection = CompressionDirection.COMPRESS;
 		}
 
 		return new CompressionJob(event.getKeyObjectStorage(), event.getProductFamily(),
