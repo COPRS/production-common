@@ -27,6 +27,7 @@ import esa.s1pdgs.cpoc.ipf.preparation.worker.model.tasktable.TaskTableAdapter;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.query.QueryUtils;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.type.AbstractProductTypeAdapter;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.type.Product;
+import esa.s1pdgs.cpoc.ipf.preparation.worker.type.pdu.generation.PDUFrameGeneration;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.type.s3.MultipleProductCoverSearch;
 import esa.s1pdgs.cpoc.metadata.client.MetadataClient;
 import esa.s1pdgs.cpoc.mqi.model.queue.IpfExecutionJob;

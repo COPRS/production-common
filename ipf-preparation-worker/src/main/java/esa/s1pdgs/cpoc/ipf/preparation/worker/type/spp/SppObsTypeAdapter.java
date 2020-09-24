@@ -94,7 +94,7 @@ public class SppObsTypeAdapter extends AbstractProductTypeAdapter implements Pro
 
     @Override
 	public List<AppDataJob> createAppDataJobs(IpfPreparationJob job) {
-		AppDataJob appDataJob = toAppDataJob(job);
+		AppDataJob appDataJob = AppDataJob.fromPreparationJob(job);
 
         final CatalogEventAdapter catalogEvent = CatalogEventAdapter.of(appDataJob);
         final AuxResorbProduct auxResorb = AuxResorbProduct.of(appDataJob);

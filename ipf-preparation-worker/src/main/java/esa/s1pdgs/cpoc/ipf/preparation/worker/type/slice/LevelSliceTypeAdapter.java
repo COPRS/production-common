@@ -100,7 +100,7 @@ public final class LevelSliceTypeAdapter extends AbstractProductTypeAdapter impl
 
 	@Override
 	public List<AppDataJob> createAppDataJobs(IpfPreparationJob job) {
-		AppDataJob appDataJob = toAppDataJob(job);
+		AppDataJob appDataJob = AppDataJob.fromPreparationJob(job);
 		
 		final CatalogEventAdapter eventAdapter = CatalogEventAdapter.of(appDataJob);
 		final LevelSliceProduct product = LevelSliceProduct.of(appDataJob);		

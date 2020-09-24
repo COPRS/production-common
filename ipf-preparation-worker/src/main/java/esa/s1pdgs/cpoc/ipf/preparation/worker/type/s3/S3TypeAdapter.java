@@ -65,7 +65,7 @@ public class S3TypeAdapter extends AbstractProductTypeAdapter implements Product
 
 	@Override
 	public List<AppDataJob> createAppDataJobs(IpfPreparationJob job) {
-		AppDataJob appDataJob = toAppDataJob(job);
+		AppDataJob appDataJob = AppDataJob.fromPreparationJob(job);
 
 		// Create tasktable Adapter for tasktable defined by Job
 		final TaskTableAdapter ttAdapter = getTTAdapterForTaskTableName(appDataJob.getTaskTableName());

@@ -1,4 +1,4 @@
-package esa.s1pdgs.cpoc.ipf.preparation.worker.type.pdu;
+package esa.s1pdgs.cpoc.ipf.preparation.worker.type.pdu.generation;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -9,17 +9,14 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import esa.s1pdgs.cpoc.appcatalog.AppDataJob;
-import esa.s1pdgs.cpoc.appcatalog.AppDataJobProduct;
 import esa.s1pdgs.cpoc.common.errors.processing.MetadataQueryException;
 import esa.s1pdgs.cpoc.common.utils.DateUtils;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.config.PDUSettings.PDUTypeSettings;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.model.TimeInterval;
+import esa.s1pdgs.cpoc.ipf.preparation.worker.type.pdu.PDUProduct;
 import esa.s1pdgs.cpoc.metadata.client.MetadataClient;
 import esa.s1pdgs.cpoc.metadata.model.S3Metadata;
-import esa.s1pdgs.cpoc.mqi.model.queue.CatalogEvent;
 import esa.s1pdgs.cpoc.mqi.model.queue.IpfPreparationJob;
-import esa.s1pdgs.cpoc.mqi.model.queue.util.CatalogEventAdapter;
-import esa.s1pdgs.cpoc.mqi.model.rest.GenericMessageDto;
 
 public class PDUFrameGeneration {
 
@@ -77,7 +74,7 @@ public class PDUFrameGeneration {
 					LOGGER.debug("Create AppDataJob for PDU time interval: [{}; {}]",
 							DateUtils.formatToMetadataDateTimeFormat(interval.getStart()),
 							DateUtils.formatToMetadataDateTimeFormat(interval.getStop()));
-					AppDataJob appDataJob = toAppDataJob(job);
+					AppDataJob appDataJob = AppDataJob.fromPreparationJob(job);
 					appDataJob.setStartTime(DateUtils.formatToMetadataDateTimeFormat(interval.getStart()));
 					appDataJob.setStopTime(DateUtils.formatToMetadataDateTimeFormat(interval.getStop()));
 
@@ -112,35 +109,5 @@ public class PDUFrameGeneration {
 		}
 
 		return intervals;
-	}
-
-	private final AppDataJobProduct newProductFor(final GenericMessageDto<CatalogEvent> mqiMessage) {
-		final CatalogEvent event = mqiMessage.getBody();
-		final AppDataJobProduct productDto = new AppDataJobProduct();
-
-		final CatalogEventAdapter eventAdapter = CatalogEventAdapter.of(mqiMessage);
-		productDto.getMetadata().put("productName", event.getProductName());
-		productDto.getMetadata().put("productType", event.getProductType());
-		productDto.getMetadata().put("satelliteId", eventAdapter.satelliteId());
-		productDto.getMetadata().put("missionId", eventAdapter.missionId());
-		productDto.getMetadata().put("processMode", eventAdapter.processMode());
-		productDto.getMetadata().put("startTime", eventAdapter.productSensingStartDate());
-		productDto.getMetadata().put("stopTime", eventAdapter.productSensingStopDate());
-		productDto.getMetadata().put("timeliness", eventAdapter.timeliness());
-		productDto.getMetadata().put("acquistion", eventAdapter.swathType());
-		return productDto;
-	}
-
-	private final AppDataJob toAppDataJob(final IpfPreparationJob prepJob) {
-		final AppDataJob job = new AppDataJob();
-		job.setLevel(prepJob.getLevel());
-		job.setPod(prepJob.getHostname());
-		job.getMessages().add(prepJob.getEventMessage());
-		job.setProduct(newProductFor(prepJob.getEventMessage()));
-		job.setTaskTableName(prepJob.getTaskTableName());
-		job.setStartTime(prepJob.getStartTime());
-		job.setStopTime(prepJob.getStopTime());
-		job.setProductName(prepJob.getKeyObjectStorage());
-		return job;
 	}
 }

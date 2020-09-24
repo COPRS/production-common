@@ -105,7 +105,7 @@ public final class EdrsSessionTypeAdapter extends AbstractProductTypeAdapter imp
 
 	@Override
 	public List<AppDataJob> createAppDataJobs(IpfPreparationJob job) {
-		AppDataJob appDataJob = toAppDataJob(job);
+		AppDataJob appDataJob = AppDataJob.fromPreparationJob(job);
 		
 		final CatalogEventAdapter eventAdapter = CatalogEventAdapter.of(appDataJob);				
 		final EdrsSessionProduct product = EdrsSessionProduct.of(appDataJob);		
