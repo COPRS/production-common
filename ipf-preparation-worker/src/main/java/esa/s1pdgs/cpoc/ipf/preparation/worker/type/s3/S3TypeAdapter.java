@@ -5,7 +5,6 @@ import static org.springframework.util.CollectionUtils.isEmpty;
 
 import java.io.File;
 import java.time.Instant;
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -37,11 +36,9 @@ import esa.s1pdgs.cpoc.ipf.preparation.worker.type.ProductTypeAdapter;
 import esa.s1pdgs.cpoc.metadata.client.MetadataClient;
 import esa.s1pdgs.cpoc.mqi.model.queue.IpfExecutionJob;
 import esa.s1pdgs.cpoc.mqi.model.queue.IpfPreparationJob;
-import esa.s1pdgs.cpoc.mqi.model.queue.LevelJobInputDto;
 import esa.s1pdgs.cpoc.mqi.model.queue.util.CatalogEventAdapter;
 import esa.s1pdgs.cpoc.xml.model.joborder.JobOrder;
 import esa.s1pdgs.cpoc.xml.model.tasktable.TaskTableInputAlternative;
-import esa.s1pdgs.cpoc.xml.model.tasktable.enums.TaskTableInputOrigin;
 
 public class S3TypeAdapter extends AbstractProductTypeAdapter implements ProductTypeAdapter {
 
@@ -204,22 +201,7 @@ public class S3TypeAdapter extends AbstractProductTypeAdapter implements Product
 	 */
 	@Override
 	public void customJobDto(AppDataJob job, IpfExecutionJob dto) {
-		final TaskTableAdapter ttAdapter = getTTAdapterForTaskTableName(job.getTaskTableName());
-
-		// Create list of all FileTypes of TaskTableInputAlternatives of Origin PROC
-		List<String> procAlternatives = ttAdapter.getAllAlternatives().stream()
-				.filter(alternative -> alternative.getOrigin() == TaskTableInputOrigin.PROC)
-				.map(alternative -> alternative.getFileType()).collect(toList());
-
-		List<LevelJobInputDto> newInputs = new ArrayList<>();
-		for (LevelJobInputDto input : dto.getInputs()) {
-			File file = new File(input.getLocalPath());
-			if (!procAlternatives.contains(file.getName())) {
-				newInputs.add(input);
-			}
-		}
-
-		dto.setInputs(newInputs);
+		// Nothing to do currently
 	}
 
 	@Override

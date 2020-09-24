@@ -1,5 +1,7 @@
 package esa.s1pdgs.cpoc.ipf.preparation.worker.publish;
 
+import static java.util.stream.Collectors.toList;
+
 import java.io.File;
 import java.io.IOException;
 import java.util.Date;
@@ -34,10 +36,11 @@ import esa.s1pdgs.cpoc.report.ReportingOutput;
 import esa.s1pdgs.cpoc.report.ReportingUtils;
 import esa.s1pdgs.cpoc.report.message.output.JobOrderReportingOutput;
 import esa.s1pdgs.cpoc.xml.model.joborder.JobOrderInputFile;
+import esa.s1pdgs.cpoc.xml.model.tasktable.enums.TaskTableInputOrigin;
 
-public class Publisher {	
+public class Publisher {
 	private static final Logger LOGGER = LogManager.getLogger(Publisher.class);
-	
+
 	private final IpfPreparationWorkerSettings prepperSettings;
 	private final ProcessSettings settings;
 	private final MqiClient mqiClient;
@@ -45,14 +48,9 @@ public class Publisher {
 	private final JobOrderAdapter.Factory jobOrderFactory;
 	private final ProductTypeAdapter typeAdapter;
 
-	public Publisher(
-			final IpfPreparationWorkerSettings prepperSettings,
-			final ProcessSettings settings,
-			final MqiClient mqiClient,
-			final TaskTableAdapter tasktableAdapter,
-			final JobOrderAdapter.Factory jobOrderFactory,
-			final ProductTypeAdapter typeAdapter
-	) {
+	public Publisher(final IpfPreparationWorkerSettings prepperSettings, final ProcessSettings settings,
+			final MqiClient mqiClient, final TaskTableAdapter tasktableAdapter,
+			final JobOrderAdapter.Factory jobOrderFactory, final ProductTypeAdapter typeAdapter) {
 		this.prepperSettings = prepperSettings;
 		this.settings = settings;
 		this.mqiClient = mqiClient;
@@ -62,69 +60,48 @@ public class Publisher {
 	}
 
 	public void send(final AppDataJob job) throws DiscardedException {
-		final Reporting reporting = ReportingUtils.newReportingBuilder()
-				.predecessor(job.getReportingId())
+		final Reporting reporting = ReportingUtils.newReportingBuilder().predecessor(job.getReportingId())
 				.newReporting("JobGenerator");
 
 		reporting.begin(new ReportingMessage("Start job generation"));
-		
+
 		try {
 			final JobOrderAdapter jobOrderAdapter = jobOrderFactory.newJobOrderFor(job);
-			
+
 			// Second, build the DTO
 			publishJob(job, createIpfExecutionJob(job, jobOrderAdapter, reporting));
-			
-			final ReportingOutput reportOut = new JobOrderReportingOutput(
-					jobOrderAdapter.getJobOrderName(), 
-					jobOrderAdapter.toProcParamMap(tasktableAdapter)
-			);
-			reporting.end(reportOut,new ReportingMessage("End job generation"));
+
+			final ReportingOutput reportOut = new JobOrderReportingOutput(jobOrderAdapter.getJobOrderName(),
+					jobOrderAdapter.toProcParamMap(tasktableAdapter));
+			reporting.end(reportOut, new ReportingMessage("End job generation"));
 		} catch (final AbstractCodedException e) {
 			// TODO cause is not contained in reporting message
 			reporting.error(new ReportingMessage("Error on job generation"));
 		}
 	}
 
-	private IpfExecutionJob createIpfExecutionJob(
-			final AppDataJob job, 
-			final JobOrderAdapter jobOrderAdapter,
-			final Reporting reporting
-	) throws InternalErrorException {
+	private IpfExecutionJob createIpfExecutionJob(final AppDataJob job, final JobOrderAdapter jobOrderAdapter,
+			final Reporting reporting) throws InternalErrorException {
 		final AppDataJobProductAdapter product = new AppDataJobProductAdapter(job.getProduct());
-		
+
 		final File joborder = new File(jobOrderAdapter.getWorkdir(), jobOrderAdapter.getJobOrderName());
-		
-		final IpfExecutionJob execJob = new IpfExecutionJob(
-				settings.getLevel().toFamily(),
-				product.getProductName(),
-				product.getProcessMode(),
-				jobOrderAdapter.getWorkdir().getPath() + "/",
-				joborder.getPath(),
-				product.getStringValue("timeliness", ""),
-				reporting.getUid()
-		);
+
+		final IpfExecutionJob execJob = new IpfExecutionJob(settings.getLevel().toFamily(), product.getProductName(),
+				product.getProcessMode(), jobOrderAdapter.getWorkdir().getPath() + "/", joborder.getPath(),
+				product.getStringValue("timeliness", ""), reporting.getUid());
 		execJob.setCreationDate(new Date());
 		execJob.setHostname(settings.getHostname());
 		execJob.setIpfPreparationJobMessage(job.getPrepJobMessage());
 
 		try {
-			// Add jobOrder inputs to the DTO
-			jobOrderAdapter.distinctInputs().forEach(input -> {
-				for (final JobOrderInputFile file : input.getFilenames()) {
-					execJob.addInput(new LevelJobInputDto(input.getFamily().name(), file.getFilename(),
-							file.getKeyObjectStorage()));
-				}
-			});
+			// Add jobOrder inputs to ExecJob (except PROC inputs)
+			addInputsToExecJob(jobOrderAdapter, execJob);
 
 			final String jobOrderXml = jobOrderAdapter.toXml();
 			LOGGER.trace("Adding input JobOrderXml '{}' for product '{}'", jobOrderXml, product.getProductName());
 
 			// Add the jobOrder itself in inputs
-			execJob.addInput(new LevelJobInputDto(
-					ProductFamily.JOB_ORDER.name(), 
-					joborder.getPath(), 
-					jobOrderXml
-			));
+			execJob.addInput(new LevelJobInputDto(ProductFamily.JOB_ORDER.name(), joborder.getPath(), jobOrderXml));
 
 			// Add jobOrder outputs to the DTO
 			execJob.addOutputs(jobOrderAdapter.physicalOutputs());
@@ -143,10 +120,30 @@ public class Publisher {
 
 			typeAdapter.customJobDto(job, execJob);
 			return execJob;
-		}
-		catch (IOException | JAXBException e) {
+		} catch (IOException | JAXBException e) {
 			throw new InternalErrorException("Cannot send the job", e);
 		}
+	}
+
+	/**
+	 * Add inputs from job order to execution job. Ignore PROC inputs, as they
+	 * should not be downloaded from the OBS
+	 */
+	private void addInputsToExecJob(final JobOrderAdapter jobOrderAdapter, IpfExecutionJob execJob) {
+		// Create list of all FileTypes of TaskTableInputAlternatives of Origin PROC
+		List<String> procAlternatives = tasktableAdapter.getAllAlternatives().stream()
+				.filter(alternative -> alternative.getOrigin() == TaskTableInputOrigin.PROC)
+				.map(alternative -> alternative.getFileType()).collect(toList());
+
+		jobOrderAdapter.distinctInputs().forEach(input -> {
+			for (final JobOrderInputFile inputFile : input.getFilenames()) {
+				File file = new File(inputFile.getFilename());
+				if (!procAlternatives.contains(file.getName())) {
+					execJob.addInput(new LevelJobInputDto(input.getFamily().name(), inputFile.getFilename(),
+							inputFile.getKeyObjectStorage()));
+				}
+			}
+		});
 	}
 
 	private IpfExecutionJob addOqcFlags(final IpfExecutionJob execJob) {
@@ -168,12 +165,8 @@ public class Publisher {
 
 	private void publishJob(final AppDataJob job, final IpfExecutionJob execJob) throws AbstractCodedException {
 		LOGGER.info("Publishing job {} (product {})", job.getId(), job.getProductName());
-		final GenericPublicationMessageDto<IpfExecutionJob> messageToPublish =
-				new GenericPublicationMessageDto<>(
-						job.getPrepJobMessage().getId(),
-						execJob.getProductFamily(),
-						execJob
-				);
+		final GenericPublicationMessageDto<IpfExecutionJob> messageToPublish = new GenericPublicationMessageDto<>(
+				job.getPrepJobMessage().getId(), execJob.getProductFamily(), execJob);
 		messageToPublish.setInputKey(job.getPrepJobMessage().getInputKey());
 		messageToPublish.setOutputKey(execJob.getProductFamily().name());
 		mqiClient.publish(messageToPublish, ProductCategory.LEVEL_JOBS);
