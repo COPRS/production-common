@@ -45,6 +45,7 @@ import esa.s1pdgs.cpoc.ipf.execution.worker.job.file.InputDownloader;
 import esa.s1pdgs.cpoc.ipf.execution.worker.job.file.OutputProcessor;
 import esa.s1pdgs.cpoc.ipf.execution.worker.job.mqi.OutputProcuderFactory;
 import esa.s1pdgs.cpoc.ipf.execution.worker.job.process.PoolExecutorCallable;
+import esa.s1pdgs.cpoc.ipf.execution.worker.service.report.IpfFilenameReportingOutput;
 import esa.s1pdgs.cpoc.ipf.execution.worker.service.report.JobReportingInput;
 import esa.s1pdgs.cpoc.mqi.client.GenericMqiClient;
 import esa.s1pdgs.cpoc.mqi.client.MessageFilter;
@@ -69,7 +70,6 @@ import esa.s1pdgs.cpoc.report.ReportingFilenameEntry;
 import esa.s1pdgs.cpoc.report.ReportingMessage;
 import esa.s1pdgs.cpoc.report.ReportingOutput;
 import esa.s1pdgs.cpoc.report.ReportingUtils;
-import esa.s1pdgs.cpoc.report.message.output.FilenameReportingOutput;
 
 /**
  * Process a jobs
@@ -273,8 +273,8 @@ public class JobProcessor implements MqiListener<IpfExecutionJob> {
 				new ReportingMessage("Start job processing")
 		);
 		return new MqiMessageEventHandler.Builder<ProductionEvent>(category)
-				.onSuccess(res -> reporting.end(toReportingOutput(res), new ReportingMessage("End job processing")))
-				.onWarning(res -> reporting.warning(toReportingOutput(res), new ReportingMessage("End job processing")))
+				.onSuccess(res -> reporting.end(toReportingOutput(res, job.isDebug()), new ReportingMessage("End job processing")))
+				.onWarning(res -> reporting.warning(toReportingOutput(res, job.isDebug()), new ReportingMessage("End job processing")))
 				.onError(e -> reporting.error(errorReportMessage(e)))
 				.publishMessageProducer(() -> processJob(message, inputDownloader, outputProcessor, procExecutorSrv, procCompletionSrv, procExecutor, reporting))
 				.newResult();
@@ -375,16 +375,13 @@ public class JobProcessor implements MqiListener<IpfExecutionJob> {
         }
     }
     
-	private ReportingOutput toReportingOutput(final List<GenericPublicationMessageDto<ProductionEvent>> out) {
+	private ReportingOutput toReportingOutput(final List<GenericPublicationMessageDto<ProductionEvent>> out, final boolean debug) {
 		final List<ReportingFilenameEntry> reportingEntries = out.stream()
 				.map(m -> new ReportingFilenameEntry(m.getFamily(), new File(m.getDto().getProductName()).getName()))
-				.collect(Collectors.toList());
-		
-		return new FilenameReportingOutput(new ReportingFilenameEntries(reportingEntries));
+				.collect(Collectors.toList());		
+		return new IpfFilenameReportingOutput(new ReportingFilenameEntries(reportingEntries), debug);
 	}
     
-    
-
 	/**
 	 * Get the prefix for monitor logs according the step for this class instance
 	 * 
