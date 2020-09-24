@@ -13,6 +13,7 @@ import esa.s1pdgs.cpoc.appcatalog.AppDataJobProduct;
 import esa.s1pdgs.cpoc.common.errors.processing.MetadataQueryException;
 import esa.s1pdgs.cpoc.common.utils.DateUtils;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.config.PDUSettings.PDUTypeSettings;
+import esa.s1pdgs.cpoc.ipf.preparation.worker.model.TimeInterval;
 import esa.s1pdgs.cpoc.metadata.client.MetadataClient;
 import esa.s1pdgs.cpoc.metadata.model.S3Metadata;
 import esa.s1pdgs.cpoc.mqi.model.queue.CatalogEvent;
@@ -23,24 +24,6 @@ import esa.s1pdgs.cpoc.mqi.model.rest.GenericMessageDto;
 public class PDUFrameGeneration {
 
 	private static final Logger LOGGER = LogManager.getLogger(PDUFrameGeneration.class);
-
-	private static class TimeInterval {
-		private LocalDateTime start;
-		private LocalDateTime stop;
-
-		public TimeInterval(LocalDateTime start, LocalDateTime stop) {
-			this.start = start;
-			this.stop = stop;
-		}
-
-		public LocalDateTime getStart() {
-			return start;
-		}
-
-		public LocalDateTime getStop() {
-			return stop;
-		}
-	}
 
 	private final PDUTypeSettings settings;
 	private final MetadataClient mdClient;

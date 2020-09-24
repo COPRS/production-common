@@ -21,6 +21,7 @@ import esa.s1pdgs.cpoc.common.errors.processing.MetadataQueryException;
 import esa.s1pdgs.cpoc.common.utils.DateUtils;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.config.IpfPreparationWorkerSettings;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.model.ProductMode;
+import esa.s1pdgs.cpoc.ipf.preparation.worker.model.TimeInterval;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.model.tasktable.ElementMapper;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.model.tasktable.TaskTableAdapter;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.query.QueryUtils;
@@ -42,47 +43,6 @@ import esa.s1pdgs.cpoc.xml.model.tasktable.enums.TaskTableMandatoryEnum;
  *
  */
 public class MultipleProductCoverSearch {
-
-	public static class Range {
-		private LocalDateTime start;
-		private LocalDateTime stop;
-
-		public Range(final LocalDateTime start, final LocalDateTime stop) {
-			this.start = start;
-			this.stop = stop;
-		}
-
-		public LocalDateTime getStart() {
-			return start;
-		}
-
-		public void setStart(final LocalDateTime start) {
-			this.start = start;
-		}
-
-		public LocalDateTime getStop() {
-			return stop;
-		}
-
-		public void setStop(final LocalDateTime stop) {
-			this.stop = stop;
-		}
-
-		@Override
-		public String toString() {
-			return "Range [start=" + start + ", stop=" + stop + "]";
-		}
-
-		/**
-		 * Checks if this range intersects with the given range
-		 * 
-		 * @param other range to check whether this range intersects with
-		 * @return true, if ranges intersect
-		 */
-		public boolean intersects(final Range other) {
-			return !other.getStart().isAfter(stop) && !other.getStop().isBefore(start);
-		}
-	}
 
 	private static final Logger LOGGER = LogManager.getLogger(MultipleProductCoverSearch.class);
 
@@ -177,18 +137,18 @@ public class MultipleProductCoverSearch {
 	 * @return ANX-range that intersects with product validity, null if none exists
 	 * @throws MetadataQueryException on error in metadata query
 	 */
-	public Range getIntersectingANXRange(final String productName, final long anxOffsetInS, final long rangeLengthInS)
+	public TimeInterval getIntersectingANXRange(final String productName, final long anxOffsetInS, final long rangeLengthInS)
 			throws MetadataQueryException {
 		final String productType = productName.substring(4, 15);
 
 		final S3Metadata metadata = metadataClient.getS3MetadataForProduct(elementMapper.inputFamilyOf(productType),
 				productName);
 
-		final Range productRange = new Range(DateUtils.parse(metadata.getValidityStart()),
+		final TimeInterval productRange = new TimeInterval(DateUtils.parse(metadata.getValidityStart()),
 				DateUtils.parse(metadata.getValidityStop()));
 
 		if (metadata.getAnxTime() != null) {
-			final Range result = getIntersectingRange(productRange, metadata.getAnxTime(), anxOffsetInS,
+			final TimeInterval result = getIntersectingRange(productRange, metadata.getAnxTime(), anxOffsetInS,
 					rangeLengthInS);
 			if (result != null) {
 				return result;
@@ -196,7 +156,7 @@ public class MultipleProductCoverSearch {
 		}
 
 		if (metadata.getAnx1Time() != null) {
-			final Range result = getIntersectingRange(productRange, metadata.getAnx1Time(), anxOffsetInS,
+			final TimeInterval result = getIntersectingRange(productRange, metadata.getAnx1Time(), anxOffsetInS,
 					rangeLengthInS);
 			if (result != null) {
 				return result;
@@ -274,13 +234,13 @@ public class MultipleProductCoverSearch {
 	 * @return Range(anx + anxOffset, anx + anxOffset + rangeLength) if productRange
 	 *         intersects with that range
 	 */
-	private Range getIntersectingRange(final Range productRange, final String anxTime, final long anxOffsetInS,
+	private TimeInterval getIntersectingRange(final TimeInterval productRange, final String anxTime, final long anxOffsetInS,
 			final long rangeLengthInS) {
 		final LocalDateTime anx = DateUtils.parse(anxTime);
 
 		final LocalDateTime rangeStart = anx.plus(anxOffsetInS, ChronoUnit.SECONDS);
 		final LocalDateTime rangeStop = rangeStart.plus(rangeLengthInS, ChronoUnit.SECONDS);
-		final Range anxRange = new Range(rangeStart, rangeStop);
+		final TimeInterval anxRange = new TimeInterval(rangeStart, rangeStop);
 
 		LOGGER.trace("Check if range {} intersects with anxRange {}", productRange, anxRange);
 

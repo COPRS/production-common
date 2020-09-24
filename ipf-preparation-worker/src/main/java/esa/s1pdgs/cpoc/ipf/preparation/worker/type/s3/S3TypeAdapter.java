@@ -26,6 +26,7 @@ import esa.s1pdgs.cpoc.ipf.preparation.worker.config.IpfPreparationWorkerSetting
 import esa.s1pdgs.cpoc.ipf.preparation.worker.config.ProcessSettings;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.config.S3TypeAdapterSettings;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.generator.DiscardedException;
+import esa.s1pdgs.cpoc.ipf.preparation.worker.model.TimeInterval;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.model.tasktable.ElementMapper;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.model.tasktable.TaskTableAdapter;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.model.tasktable.TaskTableFactory;
@@ -83,7 +84,7 @@ public class S3TypeAdapter extends AbstractProductTypeAdapter implements Product
 					metadataClient, workerSettings);
 
 			try {
-				MultipleProductCoverSearch.Range range = mpcSearch.getIntersectingANXRange(appDataJob.getProductName(),
+				TimeInterval range = mpcSearch.getIntersectingANXRange(appDataJob.getProductName(),
 						rangeSettings.getAnxOffsetInS(), rangeSettings.getRangeLengthInS());
 
 				if (range != null) {
@@ -265,11 +266,11 @@ public class S3TypeAdapter extends AbstractProductTypeAdapter implements Product
 			final Optional<List<AppDataJob>> jobsInDatabase = appCat.findJobsForProductType(productType);
 
 			if (jobsInDatabase.isPresent()) {
-				final MultipleProductCoverSearch.Range newJobRange = new MultipleProductCoverSearch.Range(
-						DateUtils.parse(job.getStartTime()), DateUtils.parse(job.getStopTime()));
+				final TimeInterval newJobRange = new TimeInterval(DateUtils.parse(job.getStartTime()),
+						DateUtils.parse(job.getStopTime()));
 
 				for (final AppDataJob jobInDatabase : jobsInDatabase.get()) {
-					final MultipleProductCoverSearch.Range databaseJobRange = new MultipleProductCoverSearch.Range(
+					final TimeInterval databaseJobRange = new TimeInterval(
 							DateUtils.parse(jobInDatabase.getStartTime()),
 							DateUtils.parse(jobInDatabase.getStopTime()));
 
