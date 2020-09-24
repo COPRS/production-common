@@ -20,8 +20,16 @@ public class TimeInterval {
 		return start;
 	}
 
+	public void setStart(LocalDateTime start) {
+		this.start = start;
+	}
+	
 	public LocalDateTime getStop() {
 		return stop;
+	}
+
+	public void setStop(LocalDateTime stop) {
+		this.stop = stop;
 	}
 
 	@Override

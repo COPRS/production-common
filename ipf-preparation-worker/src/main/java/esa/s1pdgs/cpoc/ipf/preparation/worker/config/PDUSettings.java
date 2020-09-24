@@ -30,23 +30,26 @@ public class PDUSettings {
 		/**
 		 * Offset for stripes of reference ORBIT
 		 */
-		private long offsetInS;
+		private long offsetInS = 0;
 		
 		/**
 		 * Reference point for stripes (dump start [DUMP] or anx time [ORBIT])
 		 */
-		private PDUReferencePoint reference;
+		private PDUReferencePoint reference = PDUReferencePoint.ORBIT;
 		
 		/**
 		 * Type of PDUs that should be generated
 		 */
-		private PDUType type;
+		private PDUType type = PDUType.FRAME;
 		
 		public long getLengthInS() {
 			return lengthInS;
 		}
 
 		public void setLengthInS(long lengthInS) {
+			if (lengthInS <= 0) {
+				throw new IllegalArgumentException("lengthInS has to be greater than 0");
+			}
 			this.lengthInS = lengthInS;
 		}
 		
