@@ -6,6 +6,7 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Configuration;
 
+import esa.s1pdgs.cpoc.ipf.preparation.worker.model.pdu.PDUReferencePoint;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.model.pdu.PDUType;
 
 /**
@@ -27,6 +28,16 @@ public class PDUSettings {
 		private long lengthInS;
 		
 		/**
+		 * Offset for stripes of reference ORBIT
+		 */
+		private long offsetInS;
+		
+		/**
+		 * Reference point for stripes (dump start [DUMP] or anx time [ORBIT])
+		 */
+		private PDUReferencePoint reference;
+		
+		/**
 		 * Type of PDUs that should be generated
 		 */
 		private PDUType type;
@@ -37,6 +48,22 @@ public class PDUSettings {
 
 		public void setLengthInS(long lengthInS) {
 			this.lengthInS = lengthInS;
+		}
+		
+		public long getOffsetInS() {
+			return offsetInS;
+		}
+		
+		public void setOffsetInS(long offsetInS) {
+			this.offsetInS = offsetInS;
+		}
+		
+		public PDUReferencePoint getReference() {
+			return reference;
+		}
+
+		public void setType(PDUReferencePoint reference) {
+			this.reference = reference;
 		}
 
 		public PDUType getType() {

@@ -21,13 +21,12 @@ import esa.s1pdgs.cpoc.ipf.preparation.worker.config.IpfPreparationWorkerSetting
 import esa.s1pdgs.cpoc.ipf.preparation.worker.config.PDUSettings;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.config.PDUSettings.PDUTypeSettings;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.generator.DiscardedException;
-import esa.s1pdgs.cpoc.ipf.preparation.worker.model.pdu.PDUType;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.model.tasktable.ElementMapper;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.model.tasktable.TaskTableAdapter;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.query.QueryUtils;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.type.AbstractProductTypeAdapter;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.type.Product;
-import esa.s1pdgs.cpoc.ipf.preparation.worker.type.pdu.generation.PDUFrameGeneration;
+import esa.s1pdgs.cpoc.ipf.preparation.worker.type.pdu.generator.PDUGenerator;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.type.s3.MultipleProductCoverSearch;
 import esa.s1pdgs.cpoc.metadata.client.MetadataClient;
 import esa.s1pdgs.cpoc.mqi.model.queue.IpfExecutionJob;
@@ -57,8 +56,8 @@ public class PDUTypeAdapter extends AbstractProductTypeAdapter {
 		PDUTypeSettings typeSettings = settings.getConfig().get(job.getEventMessage().getBody().getProductType());
 
 		if (typeSettings != null) {
-			if (typeSettings.getType() == PDUType.FRAME) {
-				PDUFrameGeneration jobGenerator = new PDUFrameGeneration(typeSettings, metadataClient);
+			PDUGenerator jobGenerator = PDUGenerator.getPDUGenerator(typeSettings, metadataClient);
+			if (jobGenerator != null) {
 				return jobGenerator.generateAppDataJobs(job);
 			}
 		}
@@ -74,13 +73,6 @@ public class PDUTypeAdapter extends AbstractProductTypeAdapter {
 		}
 	}
 
-	/**
-	 * Remove Inputs of ExecutionJob that are referring to a
-	 * TaskTableInputAlternative of origin PROC.
-	 * 
-	 * If those aren't removed, the InputDownloader of the ExecutionWorker will try
-	 * to download a file from the OBS but exits with an IllegalArgumentException
-	 */
 	@Override
 	public void customJobDto(AppDataJob job, IpfExecutionJob dto) {
 		// Nothing to do currently
