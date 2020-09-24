@@ -622,32 +622,39 @@ public class OutputProcessor {
 		List<FileQueueMessage> reportToPublish = new ArrayList<>();
 			
 		sortOutputs(lines, uploadBatch, outputToPublish, reportToPublish, reportingFactory);
-		try {
-			// S1PRO-1856: for debug, no publishing and upload will be into OBS DEBUG bucket
-			if (debugMode) {
-				for (final FileObsUploadObject obj : uploadBatch) {
-					// TODO add prefix
-					obj.setFamily(ProductFamily.DEBUG);
-				}
-				outputToPublish = new ArrayList<>();
-				reportToPublish = new ArrayList<>();
+		// S1PRO-1856: for debug, no publishing and upload will be into OBS DEBUG bucket
+		if (debugMode) {
+			for (final FileObsUploadObject obj : uploadBatch) {
+				// TODO add prefix
+				obj.setFamily(ProductFamily.DEBUG);
 			}
-
-			// Upload per batch the output
-			// S1PRO-1494: WARNING--- list will be emptied by this method. For reporting, make a copy beforehand
-			//final List<ObsQueueMessage> outs = new ArrayList<>(outputToPublish);
-			final List<GenericPublicationMessageDto<ProductionEvent>> res = processProducts(
-					reportingFactory,
-					uploadBatch,
-					outputToPublish,
-					uuid
-			);
-			// Publish reports
-			processReports(reportToPublish, uuid);
-			return res;
-		} catch (final Exception e) {
-			throw e;
+			outputToPublish = new ArrayList<>();
+			reportToPublish = new ArrayList<>();
 		}
+
+		// Upload per batch the output
+		// S1PRO-1494: WARNING--- list will be emptied by this method. For reporting, make a copy beforehand
+		//final List<ObsQueueMessage> outs = new ArrayList<>(outputToPublish);
+		final List<GenericPublicationMessageDto<ProductionEvent>> res = processProducts(
+				reportingFactory,
+				uploadBatch,
+				outputToPublish,
+				uuid
+		);
+		// Publish reports
+		processReports(reportToPublish, uuid);
+		
+		// always fail, if debug mode is set
+		if (debugMode) {
+			throw new IllegalStateException(
+					String.format(
+							"Successfully produced outputs in debugMode and uploaded results to debug bucket at: %s", 
+							uploadPrefix
+					)
+			); 
+		}		
+		return res;
+
 	}
 	
 	private long size(final File file) throws InternalErrorException {
