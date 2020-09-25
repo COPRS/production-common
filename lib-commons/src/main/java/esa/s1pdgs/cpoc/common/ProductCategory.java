@@ -5,6 +5,7 @@ import esa.s1pdgs.cpoc.mqi.model.queue.CatalogEvent;
 import esa.s1pdgs.cpoc.mqi.model.queue.CatalogJob;
 import esa.s1pdgs.cpoc.mqi.model.queue.CompressionEvent;
 import esa.s1pdgs.cpoc.mqi.model.queue.CompressionJob;
+import esa.s1pdgs.cpoc.mqi.model.queue.DownloadJob;
 import esa.s1pdgs.cpoc.mqi.model.queue.EvictionManagementJob;
 import esa.s1pdgs.cpoc.mqi.model.queue.IngestionEvent;
 import esa.s1pdgs.cpoc.mqi.model.queue.IngestionJob;
@@ -43,6 +44,7 @@ public enum ProductCategory {
     EVICTION_MANAGEMENT_JOBS(EvictionManagementJob.class),
     LTA_DOWNLOAD_EVENT(LtaDownloadEvent.class), 
     ON_DEMAND_EVENT(OnDemandEvent.class),
+    DOWNLOAD_JOB(DownloadJob.class),
     // S2 based categories
     LEVEL_INPUT(IngestionEvent.class), // represent level product that has been ingested
 	// S3 based categories
