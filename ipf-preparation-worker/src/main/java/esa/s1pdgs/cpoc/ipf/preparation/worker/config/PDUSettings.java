@@ -65,7 +65,7 @@ public class PDUSettings {
 			return reference;
 		}
 
-		public void setType(PDUReferencePoint reference) {
+		public void setReference(PDUReferencePoint reference) {
 			this.reference = reference;
 		}
 
