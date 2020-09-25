@@ -1368,7 +1368,7 @@ public class EsServices {
 		}
 		else if (source.containsKey("validityStartTime") && source.containsKey("validityStopTime")) {
 			searchMetadata.setValidityStart(getPropertyAsDate(source, "validityStartTime", orThrowMalformed("validityStartTime")));
-			searchMetadata.setValidityStart(getPropertyAsDate(source, "validityStopTime", orThrowMalformed("validityStopTime")));
+			searchMetadata.setValidityStop(getPropertyAsDate(source, "validityStopTime", orThrowMalformed("validityStopTime")));
 		}
 		else {
 			throw new MetadataMalformedException("start/stop times");
