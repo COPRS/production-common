@@ -192,6 +192,9 @@ public class S3TypeAdapter extends AbstractProductTypeAdapter implements Product
 	public void customJobOrder(final AppDataJob job, final JobOrder jobOrder) {
 		TaskTableAdapter taskTableAdapter = getTTAdapterForTaskTableName(job.getTaskTableName());
 
+		LOGGER.debug("Fill dynamic process parameters based on tasktable {}", job.getTaskTableName());
+		
+		LOGGER.debug(taskTableAdapter.taskTable().toString());
 		/*
 		 * For each dynamic process parameter defined in the tasktable do the following:
 		 * 
