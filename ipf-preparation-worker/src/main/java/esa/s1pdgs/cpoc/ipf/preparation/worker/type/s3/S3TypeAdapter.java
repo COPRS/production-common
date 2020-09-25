@@ -204,6 +204,7 @@ public class S3TypeAdapter extends AbstractProductTypeAdapter implements Product
 		 * If the resulting value is not null, write the parameter on the job order
 		 */
 		taskTableAdapter.taskTable().getDynProcParams().forEach(dynProcParam -> {
+			LOGGER.debug("Handle dynamic process parameter \"{}\"", dynProcParam.getName());
 			String result = dynProcParam.getDefaultValue();
 
 			if (this.settings.getDynProcParams().containsKey(dynProcParam.getName())) {
@@ -215,6 +216,7 @@ public class S3TypeAdapter extends AbstractProductTypeAdapter implements Product
 			}
 
 			if (result != null) {
+				LOGGER.debug("Dynamic process parameter got value {}", result);
 				updateProcParam(jobOrder, dynProcParam.getName(), result);
 			}
 		});
