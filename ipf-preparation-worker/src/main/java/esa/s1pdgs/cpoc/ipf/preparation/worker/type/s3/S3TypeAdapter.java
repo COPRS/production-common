@@ -193,8 +193,6 @@ public class S3TypeAdapter extends AbstractProductTypeAdapter implements Product
 		TaskTableAdapter taskTableAdapter = getTTAdapterForTaskTableName(job.getTaskTableName());
 
 		LOGGER.debug("Fill dynamic process parameters based on tasktable {}", job.getTaskTableName());
-		
-		LOGGER.debug(taskTableAdapter.taskTable().toString());
 		/*
 		 * For each dynamic process parameter defined in the tasktable do the following:
 		 * 
@@ -207,7 +205,7 @@ public class S3TypeAdapter extends AbstractProductTypeAdapter implements Product
 		 * If the resulting value is not null, write the parameter on the job order
 		 */
 		taskTableAdapter.taskTable().getDynProcParams().forEach(dynProcParam -> {
-			LOGGER.debug("Handle dynamic process parameter \"{}\"", dynProcParam.getName());
+			LOGGER.trace("Handle dynamic process parameter \"{}\"", dynProcParam.getName());
 			String result = dynProcParam.getDefaultValue();
 
 			if (this.settings.getDynProcParams().containsKey(dynProcParam.getName())) {
@@ -219,7 +217,7 @@ public class S3TypeAdapter extends AbstractProductTypeAdapter implements Product
 			}
 
 			if (result != null) {
-				LOGGER.debug("Dynamic process parameter got value {}", result);
+				LOGGER.trace("Dynamic process parameter got value {}", result);
 				updateProcParam(jobOrder, dynProcParam.getName(), result);
 			}
 		});
