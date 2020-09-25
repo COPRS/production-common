@@ -50,17 +50,18 @@ public class CompressionTriggerService {
 	};
 	
 	private static final CompressionJobMapper<IngestionEvent> INGESTION_MAPPER = (event, reportingId) -> {
-		CompressionDirection compressionDirection;
 
 		if (event.getProductFamily().toString().endsWith(SUFFIX_ZIPPRODUCTFAMILY)) {
-			compressionDirection = CompressionDirection.UNCOMPRESS;
+			return new CompressionJob(event.getKeyObjectStorage(), event.getProductFamily(),
+					removeZipSuffix(event.getKeyObjectStorage()),
+					ProductFamily.fromValue(removeZipSuffix(event.getProductFamily().toString())),
+					CompressionDirection.UNCOMPRESS);
 		} else {
-			compressionDirection = CompressionDirection.COMPRESS;
+			return new CompressionJob(event.getKeyObjectStorage(), event.getProductFamily(),
+					getCompressedKeyObjectStorage(event.getKeyObjectStorage()),
+					getCompressedProductFamily(event.getProductFamily()), CompressionDirection.COMPRESS);
 		}
 
-		return new CompressionJob(event.getKeyObjectStorage(), event.getProductFamily(),
-				removeZipSuffix(event.getKeyObjectStorage()),
-				ProductFamily.fromValue(removeZipSuffix(event.getProductFamily().toString())), compressionDirection);
 	};
 
 	private final MqiClient mqiClient;
