@@ -116,19 +116,18 @@ public class MemoryConsumerAwareRebalanceListener
                         defaultMode, LogUtils.toString(e));
             }
             if (startingOffset == -3) {
-                LOGGER.info("[MONITOR] [rebalance] Leaving it alone");
+                LOGGER.info("[MONITOR] [rebalance] Leaving topic {} partition {} alone", topicPartition.topic(), topicPartition.partition());
             } else if (startingOffset == -2) {
-                LOGGER.info("[MONITOR] [rebalance] Setting offset to end");
+                LOGGER.info("[MONITOR] [rebalance] Setting offset of topic {} partition {} to end", topicPartition.topic(), topicPartition.partition());
                 consumer.seekToEnd(singletonList(topicPartition));
             } else if (startingOffset == -1) {
-                LOGGER.info("[MONITOR] [rebalance] Setting offset to begining");
+                LOGGER.info("[MONITOR] [rebalance] Setting offset of topic {} partition {} to beginning", topicPartition.topic(), topicPartition.partition());
                 consumer.seekToBeginning(singletonList(topicPartition));
             } else {
-                LOGGER.info("[MONITOR] [rebalance] Resetting offset to {}",
+                LOGGER.info("[MONITOR] [rebalance] Resetting offset of topic {} partition {} to {}", topicPartition.topic(), topicPartition.partition(),
                         startingOffset);
                 consumer.seek(topicPartition, startingOffset);
             }
         }
     }
-
 }
