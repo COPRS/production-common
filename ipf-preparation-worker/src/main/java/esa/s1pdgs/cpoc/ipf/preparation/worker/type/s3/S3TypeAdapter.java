@@ -67,6 +67,9 @@ public class S3TypeAdapter extends AbstractProductTypeAdapter implements Product
 	public List<AppDataJob> createAppDataJobs(IpfPreparationJob job) {
 		AppDataJob appDataJob = AppDataJob.fromPreparationJob(job);
 
+		// Add more metadata to AppDataJob
+		appDataJob.getProduct().getMetadata().putAll(job.getEventMessage().getBody().getMetadata());
+
 		// Create tasktable Adapter for tasktable defined by Job
 		final TaskTableAdapter ttAdapter = getTTAdapterForTaskTableName(appDataJob.getTaskTableName());
 
@@ -196,11 +199,9 @@ public class S3TypeAdapter extends AbstractProductTypeAdapter implements Product
 		/*
 		 * For each dynamic process parameter defined in the tasktable do the following:
 		 * 
-		 * 1. Extract the default value 
-		 * 2. If we have a static configuration for this parameter name 
-		 *    in the s3 type settings, use that value 
-		 * 3. If the parameter name is part of the main product metadata, 
-		 *    use the value of the metadata
+		 * 1. Extract the default value 2. If we have a static configuration for this
+		 * parameter name in the s3 type settings, use that value 3. If the parameter
+		 * name is part of the main product metadata, use the value of the metadata
 		 * 
 		 * If the resulting value is not null, write the parameter on the job order
 		 */
