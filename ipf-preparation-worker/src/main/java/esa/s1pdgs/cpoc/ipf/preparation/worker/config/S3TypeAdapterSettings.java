@@ -84,6 +84,11 @@ public class S3TypeAdapterSettings {
 	 */
 	private List<String> olciCalibration = new ArrayList<>();
 
+	/**
+	 * map for dynamic process parameters which are not part of the metadata (ex. facilityName)
+	 */
+	private Map<String, String> dynProcParams = new HashMap<>();
+
 	public Map<String, List<String>> getMpcSearch() {
 		return mpcSearch;
 	}
@@ -136,5 +141,13 @@ public class S3TypeAdapterSettings {
 
 	public void setOlciCalibration(List<String> olciCalibration) {
 		this.olciCalibration = olciCalibration;
+	}
+	
+	public Map<String, String> getDynProcParams() {
+		return dynProcParams;
+	}
+
+	public void setDynProcParams(Map<String, String> dynProcParams) {
+		this.dynProcParams = dynProcParams;
 	}
 }

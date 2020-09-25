@@ -190,7 +190,34 @@ public class S3TypeAdapter extends AbstractProductTypeAdapter implements Product
 
 	@Override
 	public void customJobOrder(final AppDataJob job, final JobOrder jobOrder) {
-		// Nothing to do currently
+		TaskTableAdapter taskTableAdapter = getTTAdapterForTaskTableName(job.getTaskTableName());
+
+		/*
+		 * For each dynamic process parameter defined in the tasktable do the following:
+		 * 
+		 * 1. Extract the default value 
+		 * 2. If we have a static configuration for this parameter name 
+		 *    in the s3 type settings, use that value 
+		 * 3. If the parameter name is part of the main product metadata, 
+		 *    use the value of the metadata
+		 * 
+		 * If the resulting value is not null, write the parameter on the job order
+		 */
+		taskTableAdapter.taskTable().getDynProcParams().forEach(dynProcParam -> {
+			String result = dynProcParam.getDefaultValue();
+
+			if (this.settings.getDynProcParams().containsKey(dynProcParam.getName())) {
+				result = this.settings.getDynProcParams().get(dynProcParam.getName());
+			}
+
+			if (job.getProduct().getMetadata().containsKey(dynProcParam.getName())) {
+				result = job.getProduct().getMetadata().get(dynProcParam.getName()).toString();
+			}
+
+			if (result != null) {
+				updateProcParam(jobOrder, dynProcParam.getName(), result);
+			}
+		});
 	}
 
 	/**
