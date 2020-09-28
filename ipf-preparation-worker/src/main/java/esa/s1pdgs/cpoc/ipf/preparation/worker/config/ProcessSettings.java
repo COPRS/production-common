@@ -1,5 +1,6 @@
 package esa.s1pdgs.cpoc.ipf.preparation.worker.config;
 
+import java.util.HashMap;
 import java.util.Map;
 
 import org.springframework.boot.context.properties.ConfigurationProperties;
@@ -73,7 +74,7 @@ public class ProcessSettings {
      * use for file name.<br/>
      * This is used to customize the way to match the outputs in the job
      */
-    private Map<String, String> outputregexps;
+    private Map<String, String> outputregexps = new HashMap<>();
     
     // 0 --> means that it least needs to be covered
     private int minSeaCoveragePercentage = 0;
