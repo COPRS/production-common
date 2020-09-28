@@ -1,5 +1,6 @@
 package esa.s1pdgs.cpoc.ipf.preparation.worker.type.pdu.generator;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -48,7 +49,7 @@ public class PDUStripeGenerator extends AbstractPDUGenerator implements PDUGener
 
 				List<TimeInterval> timeIntervals = generateTimeIntervals(startTime, metadata.getAnx1Time(),
 						settings.getLengthInS());
-				
+
 				// Add offset to all time intervals start and stop times
 				if (settings.getOffsetInS() > 0) {
 					long offset = settings.getOffsetInS();
@@ -75,9 +76,54 @@ public class PDUStripeGenerator extends AbstractPDUGenerator implements PDUGener
 
 			LOGGER.debug("Product is not first in orbit - skip PDU generation");
 			return Collections.emptyList();
+		} else if (settings.getReference() == PDUReferencePoint.DUMP) {
+			S3Metadata metadata = getMetadataForJobProduct(mdClient, job);
+
+			List<TimeInterval> intervals = findTimeIntervalsForMetadata(metadata, settings.getLengthInS());
+
+			List<AppDataJob> jobs = new ArrayList<>();
+			for (TimeInterval interval : intervals) {
+				LOGGER.debug("Create AppDataJob for PDU time interval: [{}; {}]",
+						DateUtils.formatToMetadataDateTimeFormat(interval.getStart()),
+						DateUtils.formatToMetadataDateTimeFormat(interval.getStop()));
+				AppDataJob appDataJob = AppDataJob.fromPreparationJob(job);
+				appDataJob.setStartTime(DateUtils.formatToMetadataDateTimeFormat(interval.getStart()));
+				appDataJob.setStopTime(DateUtils.formatToMetadataDateTimeFormat(interval.getStop()));
+
+				jobs.add(appDataJob);
+			}
+
+			return jobs;
 		}
-		
+
 		LOGGER.warn("Invalid reference point for pdu type STRIPE");
 		return Collections.emptyList();
+	}
+
+	/**
+	 * Create time intervals for PDU, so that the validityTime is inside the PDU
+	 * intervals
+	 */
+	private List<TimeInterval> findTimeIntervalsForMetadata(final S3Metadata metadata, final long length) {
+		List<TimeInterval> intervals = new ArrayList<>();
+
+		LocalDateTime intervalStart = DateUtils.parse(metadata.getDumpStart());
+		final LocalDateTime finalStop = DateUtils.parse(metadata.getValidityStop());
+
+		final TimeInterval validityInterval = new TimeInterval(DateUtils.parse(metadata.getValidityStart()), finalStop);
+
+		// Create next possible PDU interval and check if product is inside that
+		// interval, if it is, add interval to list
+		while (intervalStart.isBefore(finalStop)) {
+			final LocalDateTime nextStop = intervalStart.plusSeconds(length);
+			final TimeInterval interval = new TimeInterval(intervalStart, nextStop);
+
+			if (validityInterval.intersects(interval)) {
+				intervals.add(interval);
+			}
+			intervalStart = nextStop;
+		}
+
+		return intervals;
 	}
 }

@@ -8,6 +8,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -15,12 +16,16 @@ import org.apache.logging.log4j.Logger;
 import esa.s1pdgs.cpoc.appcatalog.AppDataJob;
 import esa.s1pdgs.cpoc.appcatalog.AppDataJobInput;
 import esa.s1pdgs.cpoc.appcatalog.AppDataJobTaskInputs;
+import esa.s1pdgs.cpoc.common.errors.AbstractCodedException;
 import esa.s1pdgs.cpoc.common.errors.processing.IpfPrepWorkerInputsMissingException;
 import esa.s1pdgs.cpoc.common.errors.processing.MetadataQueryException;
+import esa.s1pdgs.cpoc.ipf.preparation.worker.appcat.AppCatJobService;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.config.IpfPreparationWorkerSettings;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.config.PDUSettings;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.config.PDUSettings.PDUTypeSettings;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.generator.DiscardedException;
+import esa.s1pdgs.cpoc.ipf.preparation.worker.model.pdu.PDUReferencePoint;
+import esa.s1pdgs.cpoc.ipf.preparation.worker.model.pdu.PDUType;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.model.tasktable.ElementMapper;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.model.tasktable.TaskTableAdapter;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.query.QueryUtils;
@@ -29,8 +34,10 @@ import esa.s1pdgs.cpoc.ipf.preparation.worker.type.Product;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.type.pdu.generator.PDUGenerator;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.type.s3.MultipleProductCoverSearch;
 import esa.s1pdgs.cpoc.metadata.client.MetadataClient;
+import esa.s1pdgs.cpoc.metadata.model.S3Metadata;
 import esa.s1pdgs.cpoc.mqi.model.queue.IpfExecutionJob;
 import esa.s1pdgs.cpoc.mqi.model.queue.IpfPreparationJob;
+import esa.s1pdgs.cpoc.mqi.model.queue.util.CatalogEventAdapter;
 import esa.s1pdgs.cpoc.xml.model.joborder.JobOrder;
 import esa.s1pdgs.cpoc.xml.model.tasktable.TaskTableInputAlternative;
 
@@ -79,6 +86,32 @@ public class PDUTypeAdapter extends AbstractProductTypeAdapter {
 	}
 
 	@Override
+	public Optional<AppDataJob> findAssociatedJobFor(AppCatJobService appCat, CatalogEventAdapter catEvent,
+			AppDataJob job) throws AbstractCodedException {
+		PDUTypeSettings typeSettings = settings.getConfig().get(catEvent.productType());
+
+		if (typeSettings != null) {
+
+			// For DUMP based STRIPE PDUs check if there already is a job for this interval
+			if (typeSettings.getType() == PDUType.STRIPE && typeSettings.getReference() == PDUReferencePoint.DUMP) {
+				Optional<List<AppDataJob>> productTypeJobs = appCat.findJobsForProductType(catEvent.productType());
+
+				if (productTypeJobs.isPresent()) {
+					for (AppDataJob databaseJob : productTypeJobs.get()) {
+						// Only check start time, because the stop time may have been adjusted already
+						if (databaseJob.getTaskTableName().equals(job.getTaskTableName())
+								&& databaseJob.getStartTime().equals(job.getStartTime())) {
+							return Optional.of(databaseJob);
+						}
+					}
+				}
+			}
+		}
+
+		return Optional.empty();
+	}
+
+	@Override
 	public Product mainInputSearch(AppDataJob job, TaskTableAdapter tasktableAdapter)
 			throws IpfPrepWorkerInputsMissingException, DiscardedException {
 		final PDUProduct returnValue = PDUProduct.of(job);
@@ -123,6 +156,28 @@ public class PDUTypeAdapter extends AbstractProductTypeAdapter {
 					 */
 					returnValue.setStartTime(job.getStartTime());
 					returnValue.setStopTime(job.getStopTime());
+
+					// For dump based STRIPEs we have to adjust the stop time to the validityStop of
+					// the LAST granule (if that one is inside this interval)
+					if (typeSettings.getType() == PDUType.STRIPE
+							&& typeSettings.getReference() == PDUReferencePoint.DUMP) {
+						// Check if products contain Granule with position LAST, if so update stop time
+						// of interval
+						List<S3Metadata> products = metadataClient.getProductsInRange(alternative.getFileType(),
+							elementMapper.inputFamilyOf(alternative.getFileType()), returnValue.getSatelliteId(), job.getStartTime(), job.getStopTime(), 0.0, 0.0,
+							"NRT");
+						
+						for (S3Metadata product : products) {
+							if (product.getGranulePosition().equals("LAST")) {
+								returnValue.setStopTime(product.getValidityStop());
+								
+								// Update tasks again
+								tasks = mpcSearch.updateTaskInputs(tasks, alternative, returnValue.getSatelliteId(),
+										job.getStartTime(), product.getValidityStop(), "NRT");
+								break;
+							}
+						}
+					}
 				}
 			} catch (final MetadataQueryException me) {
 				LOGGER.error("Error on query execution, retrying next time", me);
