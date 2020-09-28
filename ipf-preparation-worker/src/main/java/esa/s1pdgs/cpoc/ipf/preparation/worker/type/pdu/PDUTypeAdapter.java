@@ -19,6 +19,7 @@ import esa.s1pdgs.cpoc.appcatalog.AppDataJobTaskInputs;
 import esa.s1pdgs.cpoc.common.errors.AbstractCodedException;
 import esa.s1pdgs.cpoc.common.errors.processing.IpfPrepWorkerInputsMissingException;
 import esa.s1pdgs.cpoc.common.errors.processing.MetadataQueryException;
+import esa.s1pdgs.cpoc.common.utils.DateUtils;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.appcat.AppCatJobService;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.config.IpfPreparationWorkerSettings;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.config.PDUSettings;
@@ -74,10 +75,15 @@ public class PDUTypeAdapter extends AbstractProductTypeAdapter {
 
 	@Override
 	public void customJobOrder(AppDataJob job, JobOrder jobOrder) {
+		// Add FrameNumber if it exists in metadata
 		String frameNumber = (String) job.getProduct().getMetadata().get(PDUProduct.FRAME_NUMBER);
 		if (frameNumber != null) {
 			updateProcParam(jobOrder, "MtdPDUFrameNumbers", frameNumber);
 		}
+		
+		// Add PDUTimeIntervals for all PDUs
+		String timeIntervals = "[" + DateUtils.convertToPDUDateTimeFormat(job.getStartTime()) + "," + DateUtils.convertToPDUDateTimeFormat(job.getStopTime()) + "]";
+		updateProcParam(jobOrder, "PDUTimeIntervals", timeIntervals); 
 	}
 
 	@Override
