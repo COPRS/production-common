@@ -19,6 +19,7 @@ public class XbipClientConfigurationProperties {
 		private boolean trustSelfSignedCertificate = false;
 		private boolean programmaticRecursion = false;
 		private int connectTimeoutSec = 10;
+		private boolean enablePreemptiveAuthentication = true;
 		
 		public String getServerName() {
 			return serverName;
@@ -67,15 +68,22 @@ public class XbipClientConfigurationProperties {
 		public void setProgrammaticRecursion(final boolean programmaticRecursion) {
 			this.programmaticRecursion = programmaticRecursion;
 		}
+		
+		public boolean isEnablePreemptiveAuthentication() {
+			return enablePreemptiveAuthentication;
+		}
+
+		public void setEnablePreemptiveAuthentication(boolean enablePreemptiveAuthentication) {
+			this.enablePreemptiveAuthentication = enablePreemptiveAuthentication;
+		}
 
 		@Override
 		public String toString() {
 			return "XbipHostConfiguration [serverName=" + serverName + ", user=" + user + 
 					", pass=****, trustSelfSignedCertificate=" + trustSelfSignedCertificate + 
 					", connectTimeoutSec=" + connectTimeoutSec +", programmaticRecursion=" + 
-					programmaticRecursion + "]";
+					programmaticRecursion + ", enablePreemptiveAuthentication=" + enablePreemptiveAuthentication + "]";
 		}
-		
 	}
 	
 	private String proxyHost;

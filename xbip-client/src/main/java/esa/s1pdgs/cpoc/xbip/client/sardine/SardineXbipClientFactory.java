@@ -3,6 +3,7 @@ package esa.s1pdgs.cpoc.xbip.client.sardine;
 import java.io.IOException;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
+import java.net.MalformedURLException;
 import java.net.Proxy;
 import java.net.Proxy.Type;
 import java.net.ProxySelector;
@@ -48,7 +49,7 @@ public class SardineXbipClientFactory implements XbipClientFactory {
 	public XbipClient newXbipClient(final URI serverUrl) {	
 		final XbipHostConfiguration config = hostConfigFor(serverUrl.getHost());
 		return new SardineXbipClient(				
-				newSardineFor(config), 
+				newSardineFor(config, serverUrl), 
 				serverUrl,
 				config.getProgrammaticRecursion()
 		);
@@ -98,7 +99,9 @@ public class SardineXbipClientFactory implements XbipClientFactory {
 	}
 	
 		
-	private final Sardine newSardineFor(final XbipHostConfiguration hostConfig) {			
+	private final Sardine newSardineFor(final XbipHostConfiguration hostConfig, URI serverUrl) {
+		Sardine sardine = null;
+		
 		if (hostConfig.isTrustSelfSignedCertificate()) {
 			LOG.debug("Trusting SSL for server {}", hostConfig.getServerName());		
 			try {
@@ -111,9 +114,8 @@ public class SardineXbipClientFactory implements XbipClientFactory {
 			    );
 				
 				final int timeout = 5*60; // seconds (5 minutes)
-		
 				
-				return new SardineImpl(hostConfig.getUser(), hostConfig.getPass(), proxy()) {
+				sardine = new SardineImpl(hostConfig.getUser(), hostConfig.getPass(), proxy()) {
 					@Override
 					protected ConnectionSocketFactory createDefaultSecureSocketFactory() {
 						return sslsf;
@@ -143,7 +145,21 @@ public class SardineXbipClientFactory implements XbipClientFactory {
 				);
 			}
 		}
-		return SardineFactory.begin(hostConfig.getUser(), hostConfig.getPass(), proxy());
+		
+		if (null == sardine) {
+			sardine = SardineFactory.begin(hostConfig.getUser(), hostConfig.getPass(), this.proxy());
+		}
+		
+		if (hostConfig.isEnablePreemptiveAuthentication()) {
+			try {
+				sardine.enablePreemptiveAuthentication(serverUrl.toURL()); // S1PRO-1862
+				LOG.debug("Enabling preemptive basic authentication for xbip interface to server {}", hostConfig.getServerName());
+			} catch (MalformedURLException e) {
+				LOG.warn("Error enabling preemptive basic authentication for xbip interface to server {}: {}", hostConfig.getServerName(), e.getMessage());
+			}
+		}
+		
+		return sardine;
 	}
 
 }
