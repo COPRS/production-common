@@ -49,14 +49,16 @@ public abstract class AbstractPDUGenerator {
 	 * @param length maximum length for the intervals (last one could be shorter)
 	 * @return list of created intervals (may be empty if start = stop)
 	 */
-	protected List<TimeInterval> generateTimeIntervals(final String start, final String stop, final long length) {
+	protected List<TimeInterval> generateTimeIntervals(final String start, final String stop, final double length) {
 		List<TimeInterval> intervals = new ArrayList<>();
 
 		LocalDateTime currentStop = DateUtils.parse(start);
 		final LocalDateTime finalStop = DateUtils.parse(stop);
 
 		while (currentStop.isBefore(finalStop)) {
-			LocalDateTime newStop = currentStop.plusSeconds(length);
+			long lengthInNanos = (long) (length * 1000000000L);
+			
+			LocalDateTime newStop = currentStop.plusNanos(lengthInNanos);
 			if (newStop.isAfter(finalStop)) {
 				intervals.add(new TimeInterval(currentStop, finalStop));
 			} else {

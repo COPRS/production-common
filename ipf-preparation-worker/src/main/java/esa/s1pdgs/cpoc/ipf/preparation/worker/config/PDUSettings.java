@@ -25,12 +25,12 @@ public class PDUSettings {
 		/**
 		 * Length of frames or stripes
 		 */
-		private long lengthInS;
+		private double lengthInS;
 		
 		/**
 		 * Offset for stripes of reference ORBIT
 		 */
-		private long offsetInS = 0;
+		private double offsetInS = 0.0;
 		
 		/**
 		 * Reference point for stripes (dump start [DUMP] or anx time [ORBIT])
@@ -42,22 +42,22 @@ public class PDUSettings {
 		 */
 		private PDUType type = PDUType.FRAME;
 		
-		public long getLengthInS() {
+		public double getLengthInS() {
 			return lengthInS;
 		}
 
-		public void setLengthInS(long lengthInS) {
-			if (lengthInS <= 0) {
+		public void setLengthInS(double lengthInS) {
+			if (lengthInS <= 0.0) {
 				throw new IllegalArgumentException("lengthInS has to be greater than 0");
 			}
 			this.lengthInS = lengthInS;
 		}
 		
-		public long getOffsetInS() {
+		public double getOffsetInS() {
 			return offsetInS;
 		}
 		
-		public void setOffsetInS(long offsetInS) {
+		public void setOffsetInS(double offsetInS) {
 			this.offsetInS = offsetInS;
 		}
 		

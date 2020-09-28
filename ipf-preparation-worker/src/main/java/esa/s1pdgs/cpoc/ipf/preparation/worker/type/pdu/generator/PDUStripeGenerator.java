@@ -52,10 +52,10 @@ public class PDUStripeGenerator extends AbstractPDUGenerator implements PDUGener
 
 				// Add offset to all time intervals start and stop times
 				if (settings.getOffsetInS() > 0) {
-					long offset = settings.getOffsetInS();
+					long offsetInNanos = (long) (settings.getOffsetInS() * 1000000000L);
 					for (TimeInterval interval : timeIntervals) {
-						interval.setStart(interval.getStart().plusSeconds(offset));
-						interval.setStop(interval.getStop().plusSeconds(offset));
+						interval.setStart(interval.getStart().plusNanos(offsetInNanos));
+						interval.setStop(interval.getStop().plusNanos(offsetInNanos));
 					}
 				}
 
@@ -104,7 +104,7 @@ public class PDUStripeGenerator extends AbstractPDUGenerator implements PDUGener
 	 * Create time intervals for PDU, so that the validityTime is inside the PDU
 	 * intervals
 	 */
-	private List<TimeInterval> findTimeIntervalsForMetadata(final S3Metadata metadata, final long length) {
+	private List<TimeInterval> findTimeIntervalsForMetadata(final S3Metadata metadata, final double length) {
 		List<TimeInterval> intervals = new ArrayList<>();
 
 		LocalDateTime intervalStart = DateUtils.parse(metadata.getDumpStart());
@@ -115,7 +115,8 @@ public class PDUStripeGenerator extends AbstractPDUGenerator implements PDUGener
 		// Create next possible PDU interval and check if product is inside that
 		// interval, if it is, add interval to list
 		while (intervalStart.isBefore(finalStop)) {
-			final LocalDateTime nextStop = intervalStart.plusSeconds(length);
+			long lengthInNanos = (long) (length * 1000000000L);
+			final LocalDateTime nextStop = intervalStart.plusNanos(lengthInNanos);
 			final TimeInterval interval = new TimeInterval(intervalStart, nextStop);
 
 			if (validityInterval.intersects(interval)) {
