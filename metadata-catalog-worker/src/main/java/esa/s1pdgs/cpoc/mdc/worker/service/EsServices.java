@@ -1864,6 +1864,14 @@ public class EsServices {
 				throw new MetadataMalformedException("insertionTime");
 			}
 		}
+		if (source.containsKey("dumpStart")) {
+			try {
+				local.setDumpStart(
+						DateUtils.convertToMetadataDateTimeFormat(source.get("dumpStart").toString()));
+			} catch (final DateTimeParseException e) {
+				throw new MetadataMalformedException("dumpStart");
+			}
+		}
 		return local;
 	}
 }

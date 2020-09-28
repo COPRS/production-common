@@ -14,6 +14,7 @@ public class S3Metadata extends AbstractMetadata {
 	private String anxTime;
 	private String anx1Time;
 	private String creationTime;
+	private String dumpStart;
 	private int granuleNumber;
 	private String granulePosition;
 	private String insertionTime;
@@ -21,7 +22,7 @@ public class S3Metadata extends AbstractMetadata {
 	public S3Metadata(final String productName, final String productType, final String keyObjectStorage,
 			final String validityStart, final String validityStop, final String missionId, final String satelliteId,
 			final String stationCode, final int granuleNumber, final String granulePosition, final String creationTime,
-			final String anxTime, final String anx1Time) {
+			final String anxTime, final String anx1Time, final String dumpStart) {
 		super(productName, productType, keyObjectStorage, validityStart, validityStop, missionId, satelliteId,
 				stationCode);
 		this.granuleNumber = granuleNumber;
@@ -29,6 +30,7 @@ public class S3Metadata extends AbstractMetadata {
 		this.creationTime = creationTime;
 		this.anxTime = anxTime;
 		this.anx1Time = anx1Time;
+		this.dumpStart = dumpStart;
 	}
 
 	public S3Metadata() {
@@ -64,6 +66,14 @@ public class S3Metadata extends AbstractMetadata {
 
 	public void setCreationTime(String creationTime) {
 		this.creationTime = creationTime;
+	}
+
+	public String getDumpStart() {
+		return dumpStart;
+	}
+
+	public void setDumpStart(String dumpStart) {
+		this.dumpStart = dumpStart;
 	}
 
 	public int getGranuleNumber() {
