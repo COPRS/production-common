@@ -169,6 +169,7 @@ public class PDUTypeAdapter extends AbstractProductTypeAdapter {
 						
 						for (S3Metadata product : products) {
 							if (product.getGranulePosition().equals("LAST")) {
+								LOGGER.debug("Update job stop time to {}", product.getValidityStop());
 								returnValue.setStopTime(product.getValidityStop());
 								
 								// Update tasks again
