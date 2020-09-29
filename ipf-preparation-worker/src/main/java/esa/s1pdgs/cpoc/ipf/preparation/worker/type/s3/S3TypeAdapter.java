@@ -38,6 +38,7 @@ import esa.s1pdgs.cpoc.metadata.client.MetadataClient;
 import esa.s1pdgs.cpoc.mqi.model.queue.IpfExecutionJob;
 import esa.s1pdgs.cpoc.mqi.model.queue.IpfPreparationJob;
 import esa.s1pdgs.cpoc.mqi.model.queue.util.CatalogEventAdapter;
+import esa.s1pdgs.cpoc.xml.model.joborder.AbstractJobOrderProc;
 import esa.s1pdgs.cpoc.xml.model.joborder.JobOrder;
 import esa.s1pdgs.cpoc.xml.model.tasktable.TaskTableInputAlternative;
 
@@ -222,6 +223,20 @@ public class S3TypeAdapter extends AbstractProductTypeAdapter implements Product
 				updateProcParam(jobOrder, dynProcParam.getName(), result);
 			}
 		});
+
+		/*
+		 * Remove optional outputs from last proc, except for configurated additional
+		 * outputs
+		 */
+		if (!jobOrder.getProcs().isEmpty()) {
+			AbstractJobOrderProc proc = jobOrder.getProcs().get(jobOrder.getProcs().size() - 1);
+			List<String> additionalOutputs = settings
+					.getOptionalOutputsForTaskTable(taskTableAdapter.taskTable().getProcessorName());
+
+			proc.setOutputs(proc.getOutputs().stream()
+					.filter(output -> output.isMandatory() || additionalOutputs.contains(output.getFileType()))
+					.collect(toList()));
+		}
 	}
 
 	/**

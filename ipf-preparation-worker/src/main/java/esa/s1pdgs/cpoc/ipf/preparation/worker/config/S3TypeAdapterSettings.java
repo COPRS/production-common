@@ -85,9 +85,16 @@ public class S3TypeAdapterSettings {
 	private List<String> olciCalibration = new ArrayList<>();
 
 	/**
-	 * map for dynamic process parameters which are not part of the metadata (ex. facilityName)
+	 * map for dynamic process parameters which are not part of the metadata (ex.
+	 * facilityName)
 	 */
 	private Map<String, String> dynProcParams = new HashMap<>();
+
+	/**
+	 * Enable optional outputs for tasktable key = task table name value = list of
+	 * optional outputs to enable
+	 */
+	private Map<String, List<String>> optionalOutputs = new HashMap<>();
 
 	public Map<String, List<String>> getMpcSearch() {
 		return mpcSearch;
@@ -142,12 +149,36 @@ public class S3TypeAdapterSettings {
 	public void setOlciCalibration(List<String> olciCalibration) {
 		this.olciCalibration = olciCalibration;
 	}
-	
+
 	public Map<String, String> getDynProcParams() {
 		return dynProcParams;
 	}
 
 	public void setDynProcParams(Map<String, String> dynProcParams) {
 		this.dynProcParams = dynProcParams;
+	}
+
+	public Map<String, List<String>> getOptionalOutputs() {
+		return optionalOutputs;
+	}
+
+	public void setOptionalOutputs(Map<String, List<String>> optionalOutputs) {
+		this.optionalOutputs = optionalOutputs;
+	}
+
+	/**
+	 * Get the list of additional output types for a given processor name. In case
+	 * there is no entry in the map an empty list is returned
+	 * 
+	 * @param key processor name for which the additional output types should be
+	 *            retrieved
+	 * @return list of additional output types, or empty list if no entry in map
+	 */
+	public List<String> getOptionalOutputsForTaskTable(String taskTable) {
+		List<String> result = optionalOutputs.get(taskTable);
+		if (result == null) {
+			return new ArrayList<>();
+		}
+		return result;
 	}
 }
