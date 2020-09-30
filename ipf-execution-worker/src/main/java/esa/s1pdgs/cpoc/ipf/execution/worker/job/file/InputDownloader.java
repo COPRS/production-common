@@ -205,8 +205,10 @@ public class InputDownloader {
                     String fileContent = input.getContentRef();
                     if (jobOrderXslt != null && !jobOrderXslt.isEmpty()) {
                     	try {
+                    		LOGGER.info("Transforming job order with xslt from file '{}'", jobOrderXslt);
                     		fileContent = transformJobOrder(fileContent);
                     	} catch (TransformerException e) {
+                    		LOGGER.error("Failed to transform job order with xslt. Maybe there is an issue with the xslt file ({})?", jobOrderXslt);
                     		throw new InternalErrorException("An exception occured while transforming the Joborder: " + e.getMessage());
                     	}
                     }
@@ -315,14 +317,13 @@ public class InputDownloader {
      * Transform given jobOrder with the xslt in variable jobOrderXslt
      * @throws TransformerException 
      */
-    public final String transformJobOrder(String jobOrder) throws TransformerException {
+    private final String transformJobOrder(String jobOrder) throws TransformerException {
     	TransformerFactory factory = TransformerFactory.newInstance();
     	Source xslt  = new StreamSource(new File(jobOrderXslt));
     	Transformer transformer = factory.newTransformer(xslt);
     	
     	StringWriter outputWriter = new StringWriter();
     	transformer.transform(new StreamSource(new StringReader(jobOrder)), new StreamResult(outputWriter));
-    	
     	return outputWriter.toString();
     }
 }
