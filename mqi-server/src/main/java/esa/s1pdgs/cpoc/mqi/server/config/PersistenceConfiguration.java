@@ -2,6 +2,7 @@ package esa.s1pdgs.cpoc.mqi.server.config;
 
 import static esa.s1pdgs.cpoc.mqi.server.config.MessagePersistenceStrategy.APP_CATALOG_MESSAGE_PERSISTENCE;
 import static esa.s1pdgs.cpoc.mqi.server.config.MessagePersistenceStrategy.IN_MEMORY_MESSAGE_PERSISTENCE;
+import static java.lang.String.format;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -97,7 +98,7 @@ public class PersistenceConfiguration<T extends AbstractMessage> {
         } else if (IN_MEMORY_MESSAGE_PERSISTENCE.getValue().equals(messagePersistenceStrategy)) {
             return new InMemoryMessagePersistence<>(properties, inMemoryConfig);
         } else {
-            throw new IllegalArgumentException(String.format("Unknown message persistence strategy %s. Available are %s.", messagePersistenceStrategy, SUPPORTED_MESSAGE_PERSISTENCE_STRATEGIES));
+            throw new IllegalArgumentException(format("Unknown message persistence strategy %s. Available are %s.", messagePersistenceStrategy, SUPPORTED_MESSAGE_PERSISTENCE_STRATEGIES));
         }
     }
     

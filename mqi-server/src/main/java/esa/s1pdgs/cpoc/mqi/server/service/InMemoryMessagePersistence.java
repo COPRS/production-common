@@ -1,7 +1,5 @@
 package esa.s1pdgs.cpoc.mqi.server.service;
 
-import static java.util.Comparator.comparing;
-
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
@@ -124,15 +122,9 @@ public class InMemoryMessagePersistence<T extends AbstractMessage> implements Me
     @Override
     public long getEarliestOffset(String topic, int partition, String group) {
 
-        final Optional<MessageAndAcknowledgement<T>> earliestMessage = messages.stream()
-                .filter(m -> m.message.getTopic().equals(topic) && m.message.getPartition() == partition && m.message.getGroup().equals(group))
-                .min(comparing(a -> a.message.getLastReadDate()));
+        //always return default offset (we don't want to re consume messages again)
+        return defaultOffset;
 
-        if (!earliestMessage.isPresent()) {
-            return defaultOffset;
-        }
-
-        return earliestMessage.get().message.getOffset();
     }
 
     private static class MessageAndAcknowledgement<T> {
