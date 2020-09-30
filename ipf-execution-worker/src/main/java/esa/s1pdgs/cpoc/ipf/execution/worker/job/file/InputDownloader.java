@@ -212,7 +212,7 @@ public class InputDownloader {
                     }
                     
                     FileUtils.writeFile(input.getLocalPath(),
-                            input.getContentRef());
+                            fileContent);
                     break;
                 case "EDRS_SESSION":
                 case "AUXILIARY_FILE":
