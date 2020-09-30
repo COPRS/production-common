@@ -1,9 +1,18 @@
 package esa.s1pdgs.cpoc.ipf.execution.worker.job.file;
 
 import java.io.File;
+import java.io.StringReader;
+import java.io.StringWriter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
+
+import javax.xml.transform.Source;
+import javax.xml.transform.Transformer;
+import javax.xml.transform.TransformerException;
+import javax.xml.transform.TransformerFactory;
+import javax.xml.transform.stream.StreamResult;
+import javax.xml.transform.stream.StreamSource;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -81,6 +90,11 @@ public class InputDownloader {
     private final ApplicationLevel appLevel;
 
     /**
+     * XSLT file to apply on the joborder
+     */
+    private final String jobOrderXslt;
+    
+    /**
      * Constructor
      * 
      * @param obsClient
@@ -95,7 +109,7 @@ public class InputDownloader {
             final String localWorkingDir, final List<LevelJobInputDto> inputs,
             final int sizeDownBatch, final String prefixMonitorLogs,
             final PoolExecutorCallable poolProcExecutor,
-            final ApplicationLevel appLevel) {
+            final ApplicationLevel appLevel, final String jobOrderXslt) {
         this.obsClient = obsClient;
         this.localWorkingDir = localWorkingDir;
         this.inputs = inputs;
@@ -103,6 +117,7 @@ public class InputDownloader {
         this.poolProcExecutor = poolProcExecutor;
         this.appLevel = appLevel;
         this.prefixMonitorLogs = prefixMonitorLogs;
+        this.jobOrderXslt = jobOrderXslt;
     }
 
     /**
@@ -187,6 +202,15 @@ public class InputDownloader {
                 case "JOB_ORDER":
                     LOGGER.info("Job order will be stored in {}",
                             input.getLocalPath());
+                    String fileContent = input.getContentRef();
+                    if (jobOrderXslt != null && !jobOrderXslt.isEmpty()) {
+                    	try {
+                    		fileContent = transformJobOrder(fileContent);
+                    	} catch (TransformerException e) {
+                    		throw new InternalErrorException("An exception occured while transforming the Joborder: " + e.getMessage());
+                    	}
+                    }
+                    
                     FileUtils.writeFile(input.getLocalPath(),
                             input.getContentRef());
                     break;
@@ -285,5 +309,20 @@ public class InputDownloader {
                 }
             }
         }
+    }
+    
+    /**
+     * Transform given jobOrder with the xslt in variable jobOrderXslt
+     * @throws TransformerException 
+     */
+    public final String transformJobOrder(String jobOrder) throws TransformerException {
+    	TransformerFactory factory = TransformerFactory.newInstance();
+    	Source xslt  = new StreamSource(new File(jobOrderXslt));
+    	Transformer transformer = factory.newTransformer(xslt);
+    	
+    	StringWriter outputWriter = new StringWriter();
+    	transformer.transform(new StreamSource(new StringReader(jobOrder)), new StreamResult(outputWriter));
+    	
+    	return outputWriter.toString();
     }
 }

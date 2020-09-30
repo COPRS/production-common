@@ -85,8 +85,9 @@ public class ApplicationProperties {
     
 	private List<String> plaintextTaskPatterns = new ArrayList<>();
 
+	private String pathJobOrderXslt = "";
 
-    /**
+	/**
      * Default constructor
      */
     public ApplicationProperties() {
@@ -314,5 +315,13 @@ public class ApplicationProperties {
 
 	public void setPlaintextTaskPatterns(final List<String> plaintextTaskPatterns) {
 		this.plaintextTaskPatterns = plaintextTaskPatterns;
+	}
+	
+    public String getPathJobOrderXslt() {
+		return pathJobOrderXslt;
+	}
+
+	public void setPathJobOrderXslt(String pathJobOrderXslt) {
+		this.pathJobOrderXslt = pathJobOrderXslt;
 	}
 }
