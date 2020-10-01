@@ -41,16 +41,33 @@ public class InMemoryMessagePersistence<T extends AbstractMessage> implements Me
     @Override
     public void read(final ConsumerRecord<String, T> data, final Acknowledgment acknowledgment, final GenericConsumer<T> genericConsumer, final ProductCategory category) {
 
+        if(messageAlreadyRead(data)) {
+            LOG.info("Message from kafka topic {} partition {} offset {}: already read, skipping",
+                    data.topic(), data.partition(), data.offset());
+            return;
+        }
+
         final AppCatMessageDto<T> newEntry = new AppCatMessageDto<>(category, sequence.incrementAndGet(), data.topic(), data.partition(), data.offset());
         newEntry.setCreationDate(new Date());
         newEntry.setDto(data.value());
+        newEntry.setOffset(data.offset());
+        newEntry.setPartition(data.partition());
         newEntry.setGroup(properties.getConsumer().getGroupId());
+        newEntry.setTopic(data.topic());
         newEntry.setReadingPod(properties.getHostname()); //readingPod = body.getPod (see esa.s1pdgs.cpoc.appcatalog.server.service.MessageManager.insertOrUpdate)
         newEntry.setLastReadDate(new Date());
         //TODO any else fields to set?
         messages.add(new MessageAndAcknowledgement<>(newEntry, acknowledgment));
 
         validateMessageSizesForConsumer(genericConsumer);
+    }
+
+    private boolean messageAlreadyRead(ConsumerRecord<String, T> data) {
+        return messages.stream().anyMatch(
+                m -> m.message.getTopic().equals(data.topic())
+                        && m.message.getPartition() == data.partition()
+                        && m.message.getOffset() == data.offset()
+        );
     }
 
     @Override
@@ -81,6 +98,9 @@ public class InMemoryMessagePersistence<T extends AbstractMessage> implements Me
 
         messages.remove(messageDto.get());
         messageDto.get().acknowledgment.acknowledge();
+        AppCatMessageDto<T> message = messageDto.get().message;
+        LOG.debug("Message from kafka topic {} partition {} offset {}: acknowledged",
+                message.getTopic(), message.getPartition(), message.getOffset());
 
         return true;
     }

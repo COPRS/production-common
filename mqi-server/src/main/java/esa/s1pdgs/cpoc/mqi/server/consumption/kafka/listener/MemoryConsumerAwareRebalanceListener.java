@@ -3,6 +3,9 @@ package esa.s1pdgs.cpoc.mqi.server.consumption.kafka.listener;
 import static java.util.Collections.singletonList;
 
 import java.util.Collection;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 import org.apache.kafka.clients.consumer.Consumer;
 import org.apache.kafka.common.TopicPartition;
@@ -74,9 +77,9 @@ public class MemoryConsumerAwareRebalanceListener
      */
     @Override
     public void onPartitionsRevokedBeforeCommit(final Consumer<?, ?> consumer,
-            final Collection<TopicPartition> partitions) {
+                                                final Collection<TopicPartition> partitions) {
         LOGGER.info(
-                "[MONITOR] [rebalance] onPartitionsRevokedBeforeCommit call");
+                "[MONITOR] [rebalance] onPartitionsRevokedBeforeCommit call for partitions {}", humanReadable(partitions));
     }
 
     /**
@@ -84,8 +87,18 @@ public class MemoryConsumerAwareRebalanceListener
      */
     @Override
     public void onPartitionsRevokedAfterCommit(final Consumer<?, ?> consumer,
-            final Collection<TopicPartition> partitions) {
-        LOGGER.info("[MONITOR] [rebalance] onPartitionsRevokedAfterCommit call");
+                                               final Collection<TopicPartition> partitions) {
+        LOGGER.info("[MONITOR] [rebalance] onPartitionsRevokedAfterCommit call for partitions {}", humanReadable(partitions));
+    }
+
+    private String humanReadable(final Collection<TopicPartition> partitions) {
+        Map<String, List<TopicPartition>> tps =
+                partitions.stream().collect(Collectors.groupingBy(TopicPartition::topic));
+        return tps.entrySet().stream()
+                .map(e ->
+                        e.getKey() + " (" + e.getValue().stream()
+                                .map(tp -> String.valueOf(tp.partition())).collect(Collectors.joining(", ")) + ")")
+                .collect(Collectors.joining(", "));
     }
 
     /**
@@ -94,7 +107,7 @@ public class MemoryConsumerAwareRebalanceListener
     @Override
     public void onPartitionsAssigned(final Consumer<?, ?> consumer,
             final Collection<TopicPartition> partitions) {
-        LOGGER.info("[MONITOR] [rebalance] onPartitionsAssigned call");
+        LOGGER.info("[MONITOR] [rebalance] onPartitionsAssigned call for partitions {}", humanReadable(partitions));
         // We seek the consumer on the right offset
         for (TopicPartition topicPartition : partitions) {
             LOGGER.debug(
