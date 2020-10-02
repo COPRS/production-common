@@ -11,6 +11,9 @@ public class TimeInterval {
 	private LocalDateTime start;
 	private LocalDateTime stop;
 
+	public TimeInterval() {
+	}
+	
 	public TimeInterval(LocalDateTime start, LocalDateTime stop) {
 		this.start = start;
 		this.stop = stop;
