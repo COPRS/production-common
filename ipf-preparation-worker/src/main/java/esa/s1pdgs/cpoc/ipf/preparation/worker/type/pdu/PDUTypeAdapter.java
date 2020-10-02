@@ -4,16 +4,19 @@ import static java.util.stream.Collectors.toList;
 import static org.springframework.util.CollectionUtils.isEmpty;
 
 import java.time.Instant;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import esa.s1pdgs.cpoc.appcatalog.AppDataJob;
+import esa.s1pdgs.cpoc.appcatalog.AppDataJobFile;
 import esa.s1pdgs.cpoc.appcatalog.AppDataJobInput;
 import esa.s1pdgs.cpoc.appcatalog.AppDataJobTaskInputs;
 import esa.s1pdgs.cpoc.common.errors.AbstractCodedException;
@@ -25,6 +28,7 @@ import esa.s1pdgs.cpoc.ipf.preparation.worker.config.IpfPreparationWorkerSetting
 import esa.s1pdgs.cpoc.ipf.preparation.worker.config.PDUSettings;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.config.PDUSettings.PDUTypeSettings;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.generator.DiscardedException;
+import esa.s1pdgs.cpoc.ipf.preparation.worker.model.TimeInterval;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.model.pdu.PDUReferencePoint;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.model.pdu.PDUType;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.model.tasktable.ElementMapper;
@@ -80,10 +84,15 @@ public class PDUTypeAdapter extends AbstractProductTypeAdapter {
 		if (frameNumber != null) {
 			updateProcParam(jobOrder, "MtdPDUFrameNumbers", frameNumber);
 		}
-		
+
 		// Add PDUTimeIntervals for all PDUs
-		String timeIntervals = "[" + DateUtils.convertToPDUDateTimeFormat(job.getStartTime()) + "," + DateUtils.convertToPDUDateTimeFormat(job.getStopTime()) + "]";
-		updateProcParam(jobOrder, "PDUTimeIntervals", timeIntervals); 
+		String timeIntervals = (String) job.getProduct().getMetadata().get(PDUProduct.PDU_TIME_INTERVALS);
+		if (timeIntervals == null) {
+			timeIntervals = "[" + DateUtils.convertToPDUDateTimeFormat(job.getStartTime()) + ","
+					+ DateUtils.convertToPDUDateTimeFormat(job.getStopTime()) + "]";
+		}
+
+		updateProcParam(jobOrder, "PDUTimeIntervals", timeIntervals);
 	}
 
 	@Override
@@ -170,14 +179,14 @@ public class PDUTypeAdapter extends AbstractProductTypeAdapter {
 						// Check if products contain Granule with position LAST, if so update stop time
 						// of interval
 						List<S3Metadata> products = metadataClient.getProductsInRange(alternative.getFileType(),
-							elementMapper.inputFamilyOf(alternative.getFileType()), returnValue.getSatelliteId(), job.getStartTime(), job.getStopTime(), 0.0, 0.0,
-							"NRT");
-						
+								elementMapper.inputFamilyOf(alternative.getFileType()), returnValue.getSatelliteId(),
+								job.getStartTime(), job.getStopTime(), 0.0, 0.0, "NRT");
+
 						for (S3Metadata product : products) {
 							if (product.getGranulePosition().equals("LAST")) {
 								LOGGER.debug("Update job stop time to {}", product.getValidityStop());
 								returnValue.setStopTime(product.getValidityStop());
-								
+
 								// Update tasks again
 								tasks = mpcSearch.updateTaskInputs(tasks, alternative, returnValue.getSatelliteId(),
 										job.getStartTime(), product.getValidityStop(), "NRT");
@@ -206,6 +215,7 @@ public class PDUTypeAdapter extends AbstractProductTypeAdapter {
 			if (Instant.now().toEpochMilli() > timeoutTime) {
 				// Timeout reached
 				LOGGER.info("Timeout reached for job {}. Continue without missing products...", job.getId());
+				handleTimeout(job, taskTableAdapter);
 				setHasResultsToTrueForTimeoutReached(job);
 				return;
 			}
@@ -222,6 +232,7 @@ public class PDUTypeAdapter extends AbstractProductTypeAdapter {
 
 		// Check if there is an alternative which should have been filled by additional
 		// logic
+
 		final Map<String, String> missingAlternatives = new HashMap<>();
 		for (final TaskTableInputAlternative alternative : alternatives) {
 			PDUTypeSettings typeSettings = settings.getConfig().get(alternative.getFileType());
@@ -252,6 +263,63 @@ public class PDUTypeAdapter extends AbstractProductTypeAdapter {
 				if (!isEmpty(input.getFiles())) {
 					input.setHasResults(true);
 				}
+			}
+		}
+	}
+
+	/**
+	 * Handle Timeout for PDU Generation
+	 * 
+	 * Determine if the PDU product has files attached. If no file is attached, drop
+	 * job all together, otherwise construct correct time intervals
+	 */
+	private void handleTimeout(AppDataJob job, TaskTableAdapter ttAdapter) {
+		// Extract a list of all inputs from the tasks
+		final List<AppDataJobInput> incompleteInputs = job.getAdditionalInputs().stream()
+				.flatMap(taskInputs -> taskInputs.getInputs().stream().filter(input -> !input.getHasResults()))
+				.collect(toList());
+
+		// Determine PDU Input
+		AppDataJobInput pduInput = null;
+		PDUTypeSettings typeSettings = null;
+		for (AppDataJobInput input : incompleteInputs) {
+			List<TaskTableInputAlternative> alternatives = QueryUtils.alternativesOf(Collections.singletonList(input),
+					ttAdapter, workerSettings.getProductMode());
+
+			for (TaskTableInputAlternative alternative : alternatives) {
+				typeSettings = settings.getConfig().get(alternative.getFileType());
+				if (typeSettings != null) {
+					pduInput = input;
+					break;
+				}
+			}
+			if (pduInput != null) {
+				break;
+			}
+		}
+
+		// Calculate new TimeIntervals for PUG
+		if (pduInput != null) {
+			if (!pduInput.getFiles().isEmpty()) {
+				List<TimeInterval> intervals = new ArrayList<>();
+				for (AppDataJobFile file : pduInput.getFiles()) {
+					intervals.add(
+							new TimeInterval(DateUtils.parse(file.getStartDate()), DateUtils.parse(file.getEndDate())));
+				}
+				TimeInterval jobInterval = new TimeInterval(DateUtils.parse(job.getStartTime()),
+						DateUtils.parse(job.getStopTime()));
+				intervals = PDUGapHandler.mergeTimeIntervals(jobInterval, intervals,
+						typeSettings.getGapThreshholdInS());
+
+				String pduTimeIntervals = intervals.stream()
+						.map(i -> "[" + DateUtils.formatToPDUDateTimeFormat(i.getStart()) + ","
+								+ DateUtils.formatToPDUDateTimeFormat(i.getStop()) + "]")
+						.collect(Collectors.joining(";"));
+
+				job.getProduct().getMetadata().put(PDUProduct.PDU_TIME_INTERVALS, pduTimeIntervals);
+			} else {
+				// No files at all - terminate job
+				throw new DiscardedException("No files for PDU generation");
 			}
 		}
 	}

@@ -11,6 +11,7 @@ import esa.s1pdgs.cpoc.ipf.preparation.worker.type.AbstractProduct;
 public class PDUProduct extends AbstractProduct {
 
 	public static final String FRAME_NUMBER = "frameNumber";
+	public static final String PDU_TIME_INTERVALS = "PDUTimeIntervals";
 	
 	public static final PDUProduct of(final AppDataJob job) {
 		return of(job.getProduct());
@@ -31,11 +32,11 @@ public class PDUProduct extends AbstractProduct {
 	}
 	
 	public final void setFrameNumber(final int frameNumber) {
-		product.setIntegerValue("frameNumber", frameNumber);
+		product.setIntegerValue(FRAME_NUMBER, frameNumber);
 	}
 	
 	public final int getFrameNumber() {
-		return product.getIntegerValue("frameNumber");
+		return product.getIntegerValue(FRAME_NUMBER);
 	}
 	
 	public void setAdditionalInputs(final List<AppDataJobTaskInputs> additionalInputs) {
@@ -48,6 +49,14 @@ public class PDUProduct extends AbstractProduct {
 	
 	public final void setStopTime(final String stop) {
 		product.setStopTime(stop);
+	}
+	
+	public final void setPDUTimeIntervals(final String pduTimeIntervals) {
+		product.setStringValue(PDU_TIME_INTERVALS, pduTimeIntervals);
+	}
+	
+	public final String getPDUTimeIntervals() {
+		return product.getStringValue(PDU_TIME_INTERVALS);
 	}
 	
 	@Override

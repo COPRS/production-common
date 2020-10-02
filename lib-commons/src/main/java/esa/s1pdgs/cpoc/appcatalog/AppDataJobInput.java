@@ -2,6 +2,7 @@ package esa.s1pdgs.cpoc.appcatalog;
 
 import static java.util.stream.Collectors.toList;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 
@@ -47,6 +48,9 @@ public class AppDataJobInput {
     }
 
     public List<AppDataJobFile> getFiles() {
+    	if (files == null) {
+    		return Collections.emptyList();
+    	}
         return files;
     }
 

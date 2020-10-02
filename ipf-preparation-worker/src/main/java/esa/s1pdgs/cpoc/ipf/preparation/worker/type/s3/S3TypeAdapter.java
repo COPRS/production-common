@@ -225,7 +225,7 @@ public class S3TypeAdapter extends AbstractProductTypeAdapter implements Product
 		});
 
 		/*
-		 * Remove optional outputs from last proc, except for configurated additional
+		 * Remove optional outputs from last proc, except for configured additional
 		 * outputs
 		 */
 		if (!jobOrder.getProcs().isEmpty()) {

@@ -21,27 +21,33 @@ import esa.s1pdgs.cpoc.ipf.preparation.worker.model.pdu.PDUType;
 public class PDUSettings {
 
 	public static class PDUTypeSettings {
-		
+
 		/**
 		 * Length of frames or stripes
 		 */
 		private double lengthInS;
-		
+
 		/**
 		 * Offset for stripes of reference ORBIT
 		 */
 		private double offsetInS = 0.0;
-		
+
 		/**
 		 * Reference point for stripes (dump start [DUMP] or anx time [ORBIT])
 		 */
 		private PDUReferencePoint reference = PDUReferencePoint.ORBIT;
-		
+
 		/**
 		 * Type of PDUs that should be generated
 		 */
 		private PDUType type = PDUType.FRAME;
-		
+
+		/**
+		 * Threshhold for the gap handler to determine if two intervals should be
+		 * handled as continuous
+		 */
+		private double gapThreshholdInS = 0.0;
+
 		public double getLengthInS() {
 			return lengthInS;
 		}
@@ -52,15 +58,15 @@ public class PDUSettings {
 			}
 			this.lengthInS = lengthInS;
 		}
-		
+
 		public double getOffsetInS() {
 			return offsetInS;
 		}
-		
+
 		public void setOffsetInS(double offsetInS) {
 			this.offsetInS = offsetInS;
 		}
-		
+
 		public PDUReferencePoint getReference() {
 			return reference;
 		}
@@ -76,8 +82,16 @@ public class PDUSettings {
 		public void setType(PDUType type) {
 			this.type = type;
 		}
+		
+		public double getGapThreshholdInS() {
+			return gapThreshholdInS;
+		}
+
+		public void setGapThreshholdInS(double gapThreshholdInS) {
+			this.gapThreshholdInS = gapThreshholdInS;
+		}
 	}
-	
+
 	private Map<String, PDUTypeSettings> config;
 
 	public Map<String, PDUTypeSettings> getConfig() {
