@@ -109,9 +109,11 @@ public class MemoryConsumerAwareRebalanceListenerTest {
      * Test onPartitionsRevokedAfterCommit
      */
     @Test
-    public void testonPartitionsRevokedAfterCommit() {
+    public void testOnPartitionsRevokedAfterCommit() {
         listener.onPartitionsRevokedAfterCommit(consumer, partitions);
-        verifyZeroInteractions(messagePersistence);
+        partitions.forEach(partition ->
+                verify(messagePersistence).handlePartitionRevoke(partition.topic(), partition.partition())
+        );
     }
 
     /**
