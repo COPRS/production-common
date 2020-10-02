@@ -316,7 +316,16 @@ public class PDUTypeAdapter extends AbstractProductTypeAdapter {
 								+ DateUtils.formatToPDUDateTimeFormat(i.getStop()) + "]")
 						.collect(Collectors.joining(";"));
 
+				LOGGER.info("Adjust PDUTimeIntervals to {}", pduTimeIntervals);
 				job.getProduct().getMetadata().put(PDUProduct.PDU_TIME_INTERVALS, pduTimeIntervals);
+
+				String newStartTime = DateUtils.formatToMetadataDateTimeFormat(intervals.get(0).getStart());
+				String newStopTime = DateUtils
+						.formatToMetadataDateTimeFormat(intervals.get(intervals.size() - 1).getStop());
+
+				LOGGER.debug("Adjust job time to [{},{}]", newStartTime, newStopTime);
+				job.getProduct().getMetadata().put("startTime", newStartTime);
+				job.getProduct().getMetadata().put("stopTime", newStopTime);
 			} else {
 				// No files at all - terminate job
 				throw new DiscardedException("No files for PDU generation");
