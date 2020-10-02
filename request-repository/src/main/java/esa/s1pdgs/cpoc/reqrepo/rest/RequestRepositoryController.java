@@ -21,6 +21,7 @@ import org.springframework.web.bind.annotation.RestController;
 import esa.s1pdgs.cpoc.appcatalog.common.FailedProcessing;
 import esa.s1pdgs.cpoc.appcatalog.common.Processing;
 import esa.s1pdgs.cpoc.common.MessageState;
+import esa.s1pdgs.cpoc.reqrepo.rest.model.IdListDto;
 import esa.s1pdgs.cpoc.reqrepo.service.RequestRepository;
 
 @RestController
@@ -176,7 +177,7 @@ public class RequestRepositoryController {
 	@RequestMapping(method = RequestMethod.POST,  path = "failedProcessings/delete")
 	public ApiResponse deleteFailedProcessings(
 			@RequestHeader("ApiKey") final String apiKey,
-			@RequestBody final List<String> ids
+			@RequestBody IdListDto ids
 	) {
 		LOGGER.info("delete the failed processings with id {}", ids);
 		assertValidApiKey(apiKey);
@@ -184,7 +185,7 @@ public class RequestRepositoryController {
 		final List<Long> success = new ArrayList<>();
 		final List<Long> failed = new ArrayList<>();
 		
-		for (final String id : ids) {
+		for (final String id : ids.getIds()) {
 			final long idInt = parseId(id);
 			try {
 				requestRepository.deleteFailedProcessing(idInt);
@@ -199,7 +200,7 @@ public class RequestRepositoryController {
 	@RequestMapping(method = RequestMethod.POST,  path = "failedProcessings/restart")
 	public ApiResponse restartFailedProcessings(
 			@RequestHeader("ApiKey") final String apiKey,
-			@RequestBody final List<String> ids
+			@RequestBody final IdListDto ids
 	) {
 		LOGGER.info("restart the failed processings with id {}", ids);
 		assertValidApiKey(apiKey);
@@ -207,7 +208,7 @@ public class RequestRepositoryController {
 		final List<Long> success = new ArrayList<>();
 		final List<Long> failed = new ArrayList<>();
 		
-		for (final String id : ids) {
+		for (final String id : ids.getIds()) {
 			final long idInt = parseId(id);
 			try {
 				requestRepository.restartAndDeleteFailedProcessing(idInt);
@@ -222,7 +223,7 @@ public class RequestRepositoryController {
 	@RequestMapping(method = RequestMethod.POST,  path = "failedProcessings/resubmit")
 	public ApiResponse resubmitFailedProcessings(
 			@RequestHeader("ApiKey") final String apiKey,
-			@RequestBody final List<String> ids
+			@RequestBody final IdListDto ids
 	) {
 		LOGGER.info("resubmit the failed processings with id {}", ids);
 		assertValidApiKey(apiKey);
@@ -230,7 +231,7 @@ public class RequestRepositoryController {
 		final List<Long> success = new ArrayList<>();
 		final List<Long> failed = new ArrayList<>();
 		
-		for (final String id : ids) {
+		for (final String id : ids.getIds()) {
 			final long idInt = parseId(id);
 			try {
 				requestRepository.restartAndDeleteFailedProcessing(idInt);
@@ -245,7 +246,7 @@ public class RequestRepositoryController {
 	@RequestMapping(method = RequestMethod.POST,  path = "failedProcessings/reevaluate")
 	public ApiResponse reevaluateFailedProcessings(
 			@RequestHeader("ApiKey") final String apiKey,
-			@RequestBody final List<String> ids
+			@RequestBody final IdListDto ids
 	) {
 		LOGGER.info("reevaluate the failed processings with id {}", ids);
 		assertValidApiKey(apiKey);
@@ -253,7 +254,7 @@ public class RequestRepositoryController {
 		final List<Long> success = new ArrayList<>();
 		final List<Long> failed = new ArrayList<>();
 		
-		for (final String id : ids) {
+		for (final String id : ids.getIds()) {
 			final long idInt = parseId(id);
 			try {
 				requestRepository.reevaluateAndDeleteFailedProcessing(idInt);
