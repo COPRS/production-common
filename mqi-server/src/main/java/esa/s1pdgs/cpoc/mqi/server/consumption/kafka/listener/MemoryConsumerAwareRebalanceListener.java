@@ -89,6 +89,7 @@ public class MemoryConsumerAwareRebalanceListener
     public void onPartitionsRevokedAfterCommit(final Consumer<?, ?> consumer,
                                                final Collection<TopicPartition> partitions) {
         LOGGER.info("[MONITOR] [rebalance] onPartitionsRevokedAfterCommit call for partitions {}", humanReadable(partitions));
+        partitions.forEach(partition -> messagePersistence.handlePartitionRevoke(partition.topic(), partition.partition()));
     }
 
     private String humanReadable(final Collection<TopicPartition> partitions) {

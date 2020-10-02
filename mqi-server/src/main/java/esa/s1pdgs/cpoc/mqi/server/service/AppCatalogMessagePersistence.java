@@ -178,6 +178,11 @@ public class AppCatalogMessagePersistence<T extends AbstractMessage> implements 
         }
     }
 
+    @Override
+    public void handlePartitionRevoke(String topic, int partition) {
+        //nothing to do here
+    }
+
     private AppCatMessageDto<T> saveInAppCat(final ConsumerRecord<String, T> data, final boolean force, final ProductCategory category) throws AbstractCodedException {
         return appCatalogMqiService.read(category, data.topic(), data.partition(), data.offset(), new AppCatReadMessageDto<>(
                 properties.getConsumer().getGroupId(),

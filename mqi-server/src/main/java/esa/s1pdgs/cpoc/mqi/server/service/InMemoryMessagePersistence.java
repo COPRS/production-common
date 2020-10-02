@@ -1,12 +1,16 @@
 package esa.s1pdgs.cpoc.mqi.server.service;
 
+import static java.util.Comparator.comparingLong;
+import static java.util.stream.Collectors.toList;
+
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicLong;
-import java.util.stream.Collectors;
 
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.apache.logging.log4j.LogManager;
@@ -15,6 +19,7 @@ import org.springframework.kafka.support.Acknowledgment;
 
 import esa.s1pdgs.cpoc.appcatalog.rest.AppCatMessageDto;
 import esa.s1pdgs.cpoc.appcatalog.rest.AppCatSendMessageDto;
+import esa.s1pdgs.cpoc.common.MessageState;
 import esa.s1pdgs.cpoc.common.ProductCategory;
 import esa.s1pdgs.cpoc.mqi.model.queue.AbstractMessage;
 import esa.s1pdgs.cpoc.mqi.model.rest.Ack;
@@ -31,11 +36,13 @@ public class InMemoryMessagePersistence<T extends AbstractMessage> implements Me
     private final KafkaProperties properties;
     private final int defaultOffset;
     private final int messageThresholdHigh;
+    private final Map<String, Map<Integer, Long>> acknowledgedOffsets;
 
     public InMemoryMessagePersistence(final KafkaProperties properties, final PersistenceConfiguration.InMemoryMessagePersistenceConfiguration configuration) {
         this.properties = properties;
         this.defaultOffset = configuration.getDefaultOffset();
         this.messageThresholdHigh = configuration.getInMemoryPersistenceHighThreshold();
+        acknowledgedOffsets = new ConcurrentHashMap<>();
     }
 
     @Override
@@ -43,6 +50,12 @@ public class InMemoryMessagePersistence<T extends AbstractMessage> implements Me
 
         if(messageAlreadyRead(data)) {
             LOG.info("Message from kafka topic {} partition {} offset {}: already read, skipping",
+                    data.topic(), data.partition(), data.offset());
+            return;
+        }
+
+        if(messageBelowMaxOffset(data)) {
+            LOG.info("Message from kafka topic {} partition {} offset {}: already acknowledged, skipping",
                     data.topic(), data.partition(), data.offset());
             return;
         }
@@ -56,10 +69,27 @@ public class InMemoryMessagePersistence<T extends AbstractMessage> implements Me
         newEntry.setTopic(data.topic());
         newEntry.setReadingPod(properties.getHostname()); //readingPod = body.getPod (see esa.s1pdgs.cpoc.appcatalog.server.service.MessageManager.insertOrUpdate)
         newEntry.setLastReadDate(new Date());
+        newEntry.setState(MessageState.READ);
         //TODO any else fields to set?
         messages.add(new MessageAndAcknowledgement<>(newEntry, acknowledgment));
 
         validateMessageSizesForConsumer(genericConsumer);
+    }
+
+    private boolean messageBelowMaxOffset(ConsumerRecord<String,T> data) {
+        String topic = data.topic();
+        Integer partition = data.partition();
+        long offset = data.offset();
+
+        if(!acknowledgedOffsets.containsKey(topic)) {
+            return false;
+        }
+
+        if(!acknowledgedOffsets.get(topic).containsKey(partition)) {
+            return false;
+        }
+
+        return offset <= acknowledgedOffsets.get(topic).get(partition);
     }
 
     private boolean messageAlreadyRead(ConsumerRecord<String, T> data) {
@@ -75,7 +105,7 @@ public class InMemoryMessagePersistence<T extends AbstractMessage> implements Me
         return messages.stream()
                 .filter(m -> m.message.getCategory().equals(category) && m.message.getReadingPod().equals(podName))
                 .map(m -> m.message)
-                .collect(Collectors.toList());
+                .collect(toList());
     }
 
     @Override
@@ -83,6 +113,7 @@ public class InMemoryMessagePersistence<T extends AbstractMessage> implements Me
         final AppCatMessageDto<T> messageDto = get(category, messageId);
 
         messageDto.setLastReadDate(new Date());
+        messageDto.setState(MessageState.SEND);
 
         return true; //always true, we don't check double messages here
     }
@@ -102,7 +133,17 @@ public class InMemoryMessagePersistence<T extends AbstractMessage> implements Me
         LOG.debug("Message from kafka topic {} partition {} offset {}: acknowledged",
                 message.getTopic(), message.getPartition(), message.getOffset());
 
+        updateAcknowledgedOffsetFor(message.getTopic(), message.getPartition(), message.getOffset());
+
         return true;
+    }
+
+    private void updateAcknowledgedOffsetFor(String topic, int partition, long offset) {
+        if(!acknowledgedOffsets.containsKey(topic)) {
+            acknowledgedOffsets.put(topic, new ConcurrentHashMap<>());
+        }
+
+        acknowledgedOffsets.get(topic).put(partition, offset);
     }
 
     @Override
@@ -145,6 +186,21 @@ public class InMemoryMessagePersistence<T extends AbstractMessage> implements Me
         //always return default offset (we don't want to re consume messages again)
         return defaultOffset;
 
+    }
+
+    @Override
+    public void handlePartitionRevoke(String topic, int partition) {
+        List<MessageAndAcknowledgement<T>> toBeRemoved =
+                messages.stream().filter(
+                        m -> m.message.getTopic().equals(topic) && m.message.getPartition() == partition
+                                && m.message.getState() == MessageState.READ
+                ).collect(toList());
+        messages.removeAll(toBeRemoved);
+        String maxOffset =
+                toBeRemoved.stream()
+                        .max(comparingLong(a -> a.message.getOffset()))
+                        .map(m -> String.valueOf(m.message.getOffset())).orElse("n/a");
+        LOG.debug("removed {} pre-fetched messages up to offset {} for revoked topic {} partition {}", toBeRemoved.size(), maxOffset, topic, partition);
     }
 
     private static class MessageAndAcknowledgement<T> {

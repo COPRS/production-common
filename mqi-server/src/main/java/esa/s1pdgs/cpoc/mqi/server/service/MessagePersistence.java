@@ -28,4 +28,6 @@ public interface MessagePersistence<T extends AbstractMessage> {
     int getNbReadingMessages(String topic, String podName) throws AbstractCodedException;
 
     long getEarliestOffset(String topic, int partition, String group) throws AbstractCodedException;
+
+    void handlePartitionRevoke(String topic, int partition);
 }

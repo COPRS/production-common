@@ -296,9 +296,10 @@ public class InMemoryMessagePersistenceTest {
         final long earliestOffsetTropic = messagePersistence.getEarliestOffset("tropic", 1, "group1");
         final long earliestOffsetTopicOtherPartition = messagePersistence.getEarliestOffset("tropic", 2, "group1");
 
-        assertThat(earliestOffsetTopic, is(277L));
-        assertThat(earliestOffsetTropic, is(156L));
-        assertThat(earliestOffsetTopicOtherPartition, is(-3L)); //default offset
+        //always default offset
+        assertThat(earliestOffsetTopic, is(-3L));
+        assertThat(earliestOffsetTropic, is(-3L));
+        assertThat(earliestOffsetTopicOtherPartition, is(-3L));
     }
 
     @Test
