@@ -44,14 +44,14 @@ public class TestAppCatJobService {
 	public final void testNext_AppCatReturnedNull_ShallReturnNull() throws Exception {
 		final String tasktableName = "foo";
 	  	doReturn(null).when(appCatClient).findJobInStateGenerating(Mockito.eq(tasktableName));
-	  	assertNull(uut.next(tasktableName));
+	  	assertNull(uut.next(tasktableName, null));
 	}
 	
 	@Test
 	public final void testNext_AppCatReturnedNulEmptyList_ShallReturnNull() throws Exception {
 		final String tasktableName = "foo";
 	  	doReturn(Collections.emptyList()).when(appCatClient).findJobInStateGenerating(Mockito.eq(tasktableName));
-	  	assertNull(uut.next(tasktableName));
+	  	assertNull(uut.next(tasktableName, null));
 	}
 	
 	@Test
@@ -60,7 +60,7 @@ public class TestAppCatJobService {
 		final AppDataJob job = new AppDataJob();	
 	  	doReturn(Collections.singletonList(job)).when(appCatClient).findJobInStateGenerating(Mockito.eq(tasktableName));
     	doReturn(true).when(gracePeriodHandler).isWithinGracePeriod(Mockito.any(), Mockito.eq(job.getGeneration()));
-     	assertNull(uut.next(tasktableName));
+     	assertNull(uut.next(tasktableName, null));
 		verify(gracePeriodHandler, times(1)).isWithinGracePeriod(Mockito.any(), Mockito.eq(job.getGeneration()));	
 	}
 	
@@ -70,7 +70,7 @@ public class TestAppCatJobService {
 		final AppDataJob job = new AppDataJob();	
 	  	doReturn(Collections.singletonList(job)).when(appCatClient).findJobInStateGenerating(Mockito.eq(tasktableName));
     	doReturn(false).when(gracePeriodHandler).isWithinGracePeriod(Mockito.any(), Mockito.eq(job.getGeneration()));
-    	assertEquals(job, uut.next(tasktableName));
+    	assertEquals(job, uut.next(tasktableName, null));
 		verify(gracePeriodHandler, times(1)).isWithinGracePeriod(Mockito.any(), Mockito.eq(job.getGeneration()));	
 	}
 //	
