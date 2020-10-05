@@ -22,10 +22,10 @@ public class MetadataExtractionReportingOutput implements ReportingOutput {
 	private String productSensingConsolidation; // S1PRO-1247
 	
 	@JsonProperty("channel_identifier_short")
-	private String channelIdentifierShort; // S1PRO-1840
+	private int channelIdentifierShort; // S1PRO-1840
 	
 	@JsonProperty("raw_count_short")
-	private String rawCountShort; // S1PRO-1840
+	private int rawCountShort; // S1PRO-1840
 	
 	// --------------------------------------------------------------------------
 	
@@ -98,19 +98,19 @@ public class MetadataExtractionReportingOutput implements ReportingOutput {
 		this.productSensingConsolidation = productSensingConsolidation;
 	}
 
-	public String getChannelIdentifierShort() {
+	public int getChannelIdentifierShort() {
 		return channelIdentifierShort;
 	}
 	
-	public void setChannelIdentifierShort(String channelIdentifierShort) {
+	public void setChannelIdentifierShort(int channelIdentifierShort) {
 		this.channelIdentifierShort = channelIdentifierShort;
 	}
 	
-	public String getRawCountShort() {
+	public int getRawCountShort() {
 		return rawCountShort;
 	}
 	
-	public void setRawCountShort(String rawCountShort) {
+	public void setRawCountShort(int rawCountShort) {
 		this.rawCountShort = rawCountShort;
 	}
 }
