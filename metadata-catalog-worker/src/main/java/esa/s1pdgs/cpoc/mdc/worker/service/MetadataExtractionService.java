@@ -200,14 +200,9 @@ public class MetadataExtractionService implements MqiListener<CatalogJob> {
 
 		// S1PRO-1840: report channel identifier and raw count
 		if (pub.getFamily() == ProductFamily.EDRS_SESSION) {
-			final String channelIdentifier = eventAdapter.getChannelId();
-			if (!CatalogEventAdapter.NOT_DEFINED.equals(channelIdentifier)) {
-				output.setChannelIdentifierShort(channelIdentifier);
-			}
-			final List<String> rawNames = eventAdapter.getRawNames();
-			if (rawNames != null) {
-				output.setRawCountShort(String.valueOf(rawNames.size()));
-			}
+			output.setChannelIdentifierShort(String.valueOf(eventAdapter.channelId()));
+			final List<String> rawNames = eventAdapter.rawNames();
+			output.setRawCountShort(String.valueOf(rawNames != null ? rawNames.size() : 0));
 		}
 
 		return output.build();
