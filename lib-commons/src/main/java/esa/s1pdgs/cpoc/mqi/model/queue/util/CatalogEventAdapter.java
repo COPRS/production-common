@@ -105,6 +105,14 @@ public final class CatalogEventAdapter {
 		return getStringValue("stopTime", NOT_DEFINED);
 	}
 	
+	public final String getChannelId() {
+		return getStringValue("channelId", NOT_DEFINED);
+	}
+	
+	public final List<String> getRawNames() {
+		return listValues("rawNames");
+	}
+	
 	public final List<String> listValues(final String name) {
 		return (List<String>) event.getMetadata().get(name);
 	}
