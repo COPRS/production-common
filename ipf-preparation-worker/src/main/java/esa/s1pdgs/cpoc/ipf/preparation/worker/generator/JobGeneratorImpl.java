@@ -139,7 +139,7 @@ public final class JobGeneratorImpl implements JobGenerator {
 		try {
 			final String tasktableName = tasktableAdapter.file().getName();
 			
-			final AppDataJob job = appCatService.next(tasktableName);
+			final AppDataJob job = appCatService.next(tasktableName, settings.getProcessingGroup());
 			if (job == null) {
 				LOGGER.trace("Found no applicable job to handle for tasktable {}", tasktableName);
 				return;

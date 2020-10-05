@@ -12,6 +12,7 @@ import esa.s1pdgs.cpoc.appcatalog.AppDataJob;
 import esa.s1pdgs.cpoc.common.errors.processing.MetadataQueryException;
 import esa.s1pdgs.cpoc.common.utils.DateUtils;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.config.PDUSettings.PDUTypeSettings;
+import esa.s1pdgs.cpoc.ipf.preparation.worker.config.ProcessSettings;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.model.TimeInterval;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.model.pdu.PDUReferencePoint;
 import esa.s1pdgs.cpoc.metadata.client.MetadataClient;
@@ -22,10 +23,13 @@ public class PDUStripeGenerator extends AbstractPDUGenerator implements PDUGener
 	private static final Logger LOGGER = LogManager.getLogger(PDUStripeGenerator.class);
 
 	private final PDUTypeSettings settings;
+	private final ProcessSettings processSettings;
 	private final MetadataClient mdClient;
 
-	public PDUStripeGenerator(final PDUTypeSettings settings, final MetadataClient mdClient) {
+	public PDUStripeGenerator(final ProcessSettings processSettings, final PDUTypeSettings settings,
+			final MetadataClient mdClient) {
 		this.settings = settings;
+		this.processSettings = processSettings;
 		this.mdClient = mdClient;
 	}
 
@@ -67,6 +71,10 @@ public class PDUStripeGenerator extends AbstractPDUGenerator implements PDUGener
 					AppDataJob appDataJob = AppDataJob.fromPreparationJob(job);
 					appDataJob.setStartTime(DateUtils.formatToMetadataDateTimeFormat(interval.getStart()));
 					appDataJob.setStopTime(DateUtils.formatToMetadataDateTimeFormat(interval.getStop()));
+
+					if (processSettings.getProcessingGroup() != null) {
+						appDataJob.setProcessingGroup(processSettings.getProcessingGroup());
+					}
 
 					jobs.add(appDataJob);
 				}

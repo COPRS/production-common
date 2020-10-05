@@ -5,6 +5,7 @@ import java.util.List;
 import esa.s1pdgs.cpoc.appcatalog.AppDataJob;
 import esa.s1pdgs.cpoc.common.errors.processing.MetadataQueryException;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.config.PDUSettings.PDUTypeSettings;
+import esa.s1pdgs.cpoc.ipf.preparation.worker.config.ProcessSettings;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.model.pdu.PDUType;
 import esa.s1pdgs.cpoc.metadata.client.MetadataClient;
 import esa.s1pdgs.cpoc.mqi.model.queue.IpfPreparationJob;
@@ -20,11 +21,12 @@ public interface PDUGenerator {
 	 * @param mdClient MetadataClient for constrcutor of PDUGenerator
 	 * @return instance of PDUGenerator, or null if none is suitable
 	 */
-	public static PDUGenerator getPDUGenerator(PDUTypeSettings settings, MetadataClient mdClient) {
+	public static PDUGenerator getPDUGenerator(final ProcessSettings processSettings,
+			PDUTypeSettings settings, MetadataClient mdClient) {
 		if (settings.getType() == PDUType.FRAME) {
-			return new PDUFrameGenerator(settings, mdClient);
+			return new PDUFrameGenerator(processSettings, settings, mdClient);
 		} else if (settings.getType() == PDUType.STRIPE) {
-			return new PDUStripeGenerator(settings, mdClient);
+			return new PDUStripeGenerator(processSettings, settings, mdClient);
 		}
 
 		return null;

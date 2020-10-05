@@ -80,6 +80,14 @@ public class AppDataJob {
     
     private GenericMessageDto<IpfPreparationJob> prepJobMessage;
     
+    /**
+	 * Processing group to identify AppDataJobs in the JobGenerator. Is used
+	 * additionally to the tasktableName to determine if a job is suitable for a
+	 * generator. Needed if two separate preparation worker use the same TaskTable
+	 * with different settings (ex. timeliness)
+	 */
+    private String processingGroup;
+
 	/**
 	 * generate an AppDataJob from an IpfPreparationJob
 	 * 
@@ -323,56 +331,49 @@ public class AppDataJob {
 	public void setPrepJobMessage(GenericMessageDto<IpfPreparationJob> prepJobMessage) {
 		this.prepJobMessage = prepJobMessage;
 	}
-
-	/**
-     * @see java.lang.Object#hashCode()
-     */
-    @Override
-    public int hashCode() {
-        return Objects.hash(id, level, pod, state, taskTableName, startTime, stopTime, productName,
-                creationDate, lastUpdateDate, messages, product, additionalInputs, generation, reportingId, prepJobMessage);
-    }
-    
-    @Override
-	public String toString() {
-		return "AppDataJob [id=" + id + ", level=" + level + ", pod=" + pod + ", state=" + state
-			    + ", taskTableName=" + taskTableName + ", startTime=" + startTime + ", stopTime=" + stopTime
-                + ", creationDate=" + creationDate + ", lastUpdateDate=" + lastUpdateDate + ", messages=" + messages
-                + ", product=" + product + ", additionalInputs=" + additionalInputs + ", generation=" + generation
-                + ", reportingId=" + reportingId + ", prepJobMessage=" + prepJobMessage + ", productName=" + productName
-                + "]";
+	
+	public String getProcessingGroup() {
+		return processingGroup;
 	}
 
-	/**
-     * @see java.lang.Object#equals(java.lang.Object)
-     */
-    @Override
-    public boolean equals(final Object obj) {
-        boolean ret;
-        if (this == obj) {
-            ret = true;
-        } else if (obj == null || getClass() != obj.getClass()) {
-            ret = false;
-        } else {
-            final AppDataJob other = (AppDataJob) obj;
-            ret =  id == other.id
-                    && Objects.equals(level, other.level)
-                    && Objects.equals(pod, other.pod)
-                    && Objects.equals(state, other.state)                    
-                    && Objects.equals(taskTableName, other.taskTableName)
-                    && Objects.equals(startTime, other.startTime)
-                    && Objects.equals(stopTime, other.stopTime)
-                    && Objects.equals(creationDate, other.creationDate)
-                    && Objects.equals(lastUpdateDate, other.lastUpdateDate)
-                    && Objects.equals(messages, other.messages)
-                    && Objects.equals(product, other.product)
-                    && Objects.equals(additionalInputs, other.additionalInputs)
-                    && Objects.equals(generation, other.generation)
-                    && Objects.equals(productName, other.productName)
-                    && Objects.equals(prepJobMessage, other.prepJobMessage)
-                    && Objects.equals(reportingId, other.reportingId);
-        }
-        return ret;
-    }
+	public void setProcessingGroup(String processingGroup) {
+		this.processingGroup = processingGroup;
+	}
 
+	@Override
+	public String toString() {
+		return "AppDataJob [id=" + id + ", level=" + level + ", pod=" + pod + ", state=" + state + ", taskTableName="
+				+ taskTableName + ", startTime=" + startTime + ", stopTime=" + stopTime + ", productName=" + productName
+				+ ", creationDate=" + creationDate + ", lastUpdateDate=" + lastUpdateDate + ", messages=" + messages
+				+ ", product=" + product + ", additionalInputs=" + additionalInputs + ", generation=" + generation
+				+ ", reportingId=" + reportingId + ", prepJobMessage=" + prepJobMessage + ", processingGroup="
+				+ processingGroup + "]";
+	}
+
+	@Override
+	public int hashCode() {
+		return Objects.hash(additionalInputs, creationDate, generation, id, lastUpdateDate, level, messages, pod,
+				prepJobMessage, processingGroup, product, productName, reportingId, startTime, state, stopTime,
+				taskTableName);
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj) {
+			return true;
+		}
+		if (!(obj instanceof AppDataJob)) {
+			return false;
+		}
+		AppDataJob other = (AppDataJob) obj;
+		return Objects.equals(additionalInputs, other.additionalInputs)
+				&& Objects.equals(creationDate, other.creationDate) && Objects.equals(generation, other.generation)
+				&& id == other.id && Objects.equals(lastUpdateDate, other.lastUpdateDate) && level == other.level
+				&& Objects.equals(messages, other.messages) && Objects.equals(pod, other.pod)
+				&& Objects.equals(prepJobMessage, other.prepJobMessage)
+				&& Objects.equals(processingGroup, other.processingGroup) && Objects.equals(product, other.product)
+				&& Objects.equals(productName, other.productName) && Objects.equals(reportingId, other.reportingId)
+				&& Objects.equals(startTime, other.startTime) && state == other.state
+				&& Objects.equals(stopTime, other.stopTime) && Objects.equals(taskTableName, other.taskTableName);
+	}
 }

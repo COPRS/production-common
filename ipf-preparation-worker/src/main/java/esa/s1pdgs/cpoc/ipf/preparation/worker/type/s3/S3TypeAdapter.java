@@ -67,7 +67,10 @@ public class S3TypeAdapter extends AbstractProductTypeAdapter implements Product
 	@Override
 	public List<AppDataJob> createAppDataJobs(IpfPreparationJob job) {
 		AppDataJob appDataJob = AppDataJob.fromPreparationJob(job);
-
+		if (processSettings.getProcessingGroup() != null) {
+			appDataJob.setProcessingGroup(processSettings.getProcessingGroup());
+		}
+		
 		// Add more metadata to AppDataJob
 		appDataJob.getProduct().getMetadata().putAll(job.getEventMessage().getBody().getMetadata());
 

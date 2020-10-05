@@ -11,6 +11,7 @@ import esa.s1pdgs.cpoc.appcatalog.AppDataJob;
 import esa.s1pdgs.cpoc.common.errors.processing.MetadataQueryException;
 import esa.s1pdgs.cpoc.common.utils.DateUtils;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.config.PDUSettings.PDUTypeSettings;
+import esa.s1pdgs.cpoc.ipf.preparation.worker.config.ProcessSettings;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.model.TimeInterval;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.type.pdu.PDUProduct;
 import esa.s1pdgs.cpoc.metadata.client.MetadataClient;
@@ -22,10 +23,12 @@ public class PDUFrameGenerator extends AbstractPDUGenerator implements PDUGenera
 	private static final Logger LOGGER = LogManager.getLogger(PDUFrameGenerator.class);
 
 	private final PDUTypeSettings settings;
+	private final ProcessSettings processSettings;
 	private final MetadataClient mdClient;
 
-	public PDUFrameGenerator(final PDUTypeSettings settings, final MetadataClient mdClient) {
+	public PDUFrameGenerator(final ProcessSettings processSettings, final PDUTypeSettings settings, final MetadataClient mdClient) {
 		this.settings = settings;
+		this.processSettings = processSettings;
 		this.mdClient = mdClient;
 	}
 
@@ -60,6 +63,11 @@ public class PDUFrameGenerator extends AbstractPDUGenerator implements PDUGenera
 				appDataJob.setStopTime(DateUtils.formatToMetadataDateTimeFormat(interval.getStop()));
 
 				appDataJob.getProduct().getMetadata().put(PDUProduct.FRAME_NUMBER, frameNumber.toString());
+				
+				if (processSettings.getProcessingGroup() != null) {
+					appDataJob.setProcessingGroup(processSettings.getProcessingGroup());
+				}
+				
 				jobs.add(appDataJob);
 
 				frameNumber++;

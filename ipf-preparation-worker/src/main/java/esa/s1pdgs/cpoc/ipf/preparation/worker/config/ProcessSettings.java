@@ -76,10 +76,18 @@ public class ProcessSettings {
      */
     private Map<String, String> outputregexps = new HashMap<>();
     
+	/**
+	 * processing group to identify AppDataJobs in the JobGenerator. Is used
+	 * additionally to the tasktableName to determine if a job is suitable for the
+	 * generator. Needed if two separate Preparation Worker use the same TaskTable
+	 * with different settings (ex. timeliness)
+	 */
+	private String processingGroup;
+    
     // 0 --> means that it least needs to be covered
     private int minSeaCoveragePercentage = 0;
 
-    /**
+	/**
      * @return the level
      */
     public ApplicationLevel getLevel() {
@@ -213,5 +221,13 @@ public class ProcessSettings {
 
 	public void setTriggerHostname(final String triggerHostname) {
 		this.triggerHostname = triggerHostname;
+	}
+
+	public String getProcessingGroup() {
+		return processingGroup;
+	}
+
+	public void setProcessingGroup(String processingGroup) {
+		this.processingGroup = processingGroup;
 	}
 }

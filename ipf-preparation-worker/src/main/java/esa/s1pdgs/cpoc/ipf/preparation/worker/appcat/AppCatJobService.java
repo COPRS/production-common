@@ -43,9 +43,18 @@ public class AppCatJobService {
 		return appCatClient.newJob(job);
 	}   
 
-	public AppDataJob next(final String tasktableName) throws AbstractCodedException {		
+	public AppDataJob next(final String tasktableName, final String processingGroup) throws AbstractCodedException {		
 		for (final AppDataJob appDataJob : nextForTasktable(tasktableName)) {			
 			final AppDataJobGeneration jobGen = appDataJob.getGeneration();
+			
+			// Only process AppDataJobs of the configured processingGroup
+			if (processingGroup != null) {
+				if (!processingGroup.equals(appDataJob.getProcessingGroup())) {
+					LOG.trace("Job {} not processed because it belongs to another processing group ({} != {})",
+							appDataJob.getId(), processingGroup, appDataJob.getProcessingGroup());
+					continue;
+				}
+			}
 			
 			// check if grace period for state INITIAL and PRIMARY_CHECK is exceeded	
 			if (gracePeriodHandler.isWithinGracePeriod(new Date(),jobGen)) {

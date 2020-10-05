@@ -181,6 +181,7 @@ public class IpfPreparationWorkerConfiguration {
 					metadataClient,
 					elementMapper,
 					settings,
+					processSettings,
 					pduSettings
 			);
 		} else if (processSettings.getLevel() == ApplicationLevel.SPP_OBS) {

@@ -27,6 +27,7 @@ import esa.s1pdgs.cpoc.ipf.preparation.worker.appcat.AppCatJobService;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.config.IpfPreparationWorkerSettings;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.config.PDUSettings;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.config.PDUSettings.PDUTypeSettings;
+import esa.s1pdgs.cpoc.ipf.preparation.worker.config.ProcessSettings;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.generator.DiscardedException;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.model.TimeInterval;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.model.pdu.PDUReferencePoint;
@@ -53,13 +54,16 @@ public class PDUTypeAdapter extends AbstractProductTypeAdapter {
 	private MetadataClient metadataClient;
 	private ElementMapper elementMapper;
 	private IpfPreparationWorkerSettings workerSettings;
+	private ProcessSettings processSettings;
 	private PDUSettings settings;
 
 	public PDUTypeAdapter(final MetadataClient metadataClient, final ElementMapper elementMapper,
-			final IpfPreparationWorkerSettings workerSettings, final PDUSettings settings) {
+			final IpfPreparationWorkerSettings workerSettings, final ProcessSettings processSettings,
+			final PDUSettings settings) {
 		this.metadataClient = metadataClient;
 		this.elementMapper = elementMapper;
 		this.workerSettings = workerSettings;
+		this.processSettings = processSettings;
 		this.settings = settings;
 	}
 
@@ -68,7 +72,7 @@ public class PDUTypeAdapter extends AbstractProductTypeAdapter {
 		PDUTypeSettings typeSettings = settings.getConfig().get(job.getEventMessage().getBody().getProductType());
 
 		if (typeSettings != null) {
-			PDUGenerator jobGenerator = PDUGenerator.getPDUGenerator(typeSettings, metadataClient);
+			PDUGenerator jobGenerator = PDUGenerator.getPDUGenerator(processSettings, typeSettings, metadataClient);
 			if (jobGenerator != null) {
 				return jobGenerator.generateAppDataJobs(job);
 			}
