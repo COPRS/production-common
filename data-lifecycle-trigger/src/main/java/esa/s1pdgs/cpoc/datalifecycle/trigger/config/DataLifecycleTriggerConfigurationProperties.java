@@ -77,10 +77,26 @@ public class DataLifecycleTriggerConfigurationProperties {
 					productFamily, filePattern, retentionTimeDays);
 		}
 	}
+	
+	// --------------------------------------------------------------------------
 
 	private Map<ProductCategory, CategoryConfig> productCategories = new LinkedHashMap<>();
 	
 	private List<RetentionPolicy> retentionPolicies = new ArrayList<>();
+	
+	// regular expressions in Java format
+	private String patternPersistentInUncompressedStorage;
+	private String patternPersistentInCompressedStorage;
+	private String patternAvailableInLta;
+	
+	// --------------------------------------------------------------------------
+	
+	@Override
+	public String toString() {
+		return String.format("DataLifecycleTriggerConfigurationProperties [productCategories=%s, retentionPolicies=%s]", productCategories, retentionPolicies);
+	}
+	
+	// --------------------------------------------------------------------------
 
 	public Map<ProductCategory, CategoryConfig> getProductCategories() {
 		return productCategories;
@@ -97,10 +113,29 @@ public class DataLifecycleTriggerConfigurationProperties {
 	public void setRetentionPolicies(List<RetentionPolicy> retentionPolicies) {
 		this.retentionPolicies = retentionPolicies;
 	}
-	
-	@Override
-	public String toString() {
-		return String.format("DataLifecycleTriggerConfigurationProperties [productCategories=%s, retentionPolicies=%s]", productCategories, retentionPolicies);
+
+	public String getPatternPersistentInUncompressedStorage() {
+		return this.patternPersistentInUncompressedStorage;
 	}
 
+	public void setPatternPersistentInUncompressedStorage(String patternPersistentInUncompressedStorage) {
+		this.patternPersistentInUncompressedStorage = patternPersistentInUncompressedStorage;
+	}
+
+	public String getPatternPersistentInCompressedStorage() {
+		return this.patternPersistentInCompressedStorage;
+	}
+
+	public void setPatternPersistentInCompressedStorage(String patternPersistentInCompressedStorage) {
+		this.patternPersistentInCompressedStorage = patternPersistentInCompressedStorage;
+	}
+
+	public String getPatternAvailableInLta() {
+		return this.patternAvailableInLta;
+	}
+
+	public void setPatternAvailableInLta(String patternAvailableInLta) {
+		this.patternAvailableInLta = patternAvailableInLta;
+	}
+	
 }

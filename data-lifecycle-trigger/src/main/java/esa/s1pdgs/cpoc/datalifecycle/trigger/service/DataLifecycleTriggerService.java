@@ -15,6 +15,7 @@ import esa.s1pdgs.cpoc.common.ProductCategory;
 import esa.s1pdgs.cpoc.datalifecycle.trigger.config.DataLifecycleTriggerConfigurationProperties;
 import esa.s1pdgs.cpoc.datalifecycle.trigger.config.DataLifecycleTriggerConfigurationProperties.CategoryConfig;
 import esa.s1pdgs.cpoc.datalifecycle.trigger.config.ProcessConfiguration;
+import esa.s1pdgs.cpoc.datalifecycle.trigger.domain.persistence.DataLifecycleMetadataRepository;
 import esa.s1pdgs.cpoc.errorrepo.ErrorRepoAppender;
 import esa.s1pdgs.cpoc.mqi.client.MessageFilter;
 import esa.s1pdgs.cpoc.mqi.client.MqiClient;
@@ -36,6 +37,9 @@ public class DataLifecycleTriggerService {
 	private final AppStatus appStatus;
 	private final ErrorRepoAppender errorRepoAppender;
 	private final ProcessConfiguration processConfig;
+	private final DataLifecycleMetadataRepository metadataRepo;
+	
+	// --------------------------------------------------------------------------
 
 	@Autowired
 	public DataLifecycleTriggerService(
@@ -44,7 +48,8 @@ public class DataLifecycleTriggerService {
 			final List<MessageFilter> messageFilter,
 			final AppStatus appStatus, 
 			final ErrorRepoAppender errorRepoAppender,
-			final ProcessConfiguration processConfig
+			final ProcessConfiguration processConfig,
+			final DataLifecycleMetadataRepository metadataRepo
 	) {
 		this.configurationProperties = configurationProperties;
 		this.mqiClient = mqiClient;
@@ -52,6 +57,7 @@ public class DataLifecycleTriggerService {
 		this.appStatus = appStatus;
 		this.errorRepoAppender = errorRepoAppender;
 		this.processConfig = processConfig;
+		this.metadataRepo = metadataRepo;
 	}
 	
 	@PostConstruct
@@ -62,13 +68,19 @@ public class DataLifecycleTriggerService {
 			executorService.execute(newConsumerFor(cat));
 		}
 	}
+	
+	// --------------------------------------------------------------------------
 
 	private final <E extends AbstractMessage> MqiConsumer<E> newConsumerFor(final ProductCategory cat) {
 		final CategoryConfig conf = configurationProperties.getProductCategories().get(cat);
 		final DataLifecycleTriggerListener<E> listener = new DataLifecycleTriggerListener<>(
 				errorRepoAppender, 
 				processConfig,
-				configurationProperties.getRetentionPolicies()
+				configurationProperties.getRetentionPolicies(),
+				this.metadataRepo,
+				this.configurationProperties.getPatternPersistentInUncompressedStorage(),
+				this.configurationProperties.getPatternPersistentInCompressedStorage(),
+				this.configurationProperties.getPatternAvailableInLta()
 		);
 		return new MqiConsumer<E>(
 				mqiClient,
