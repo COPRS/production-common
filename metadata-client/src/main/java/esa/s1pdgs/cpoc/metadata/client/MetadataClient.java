@@ -397,7 +397,53 @@ public class MetadataClient {
 		}
 		LOGGER.debug("Got coverage {}", coverage);
 		return coverage;
+	}
+	
+	public int getOverpassCoverage(final ProductFamily family, final String productName) throws MetadataQueryException {
+		MetadataCatalogRestPath metadataCatalogRestPath;
+		switch (family) {
+			case L1_SLICE: metadataCatalogRestPath = MetadataCatalogRestPath.L1_SLICE; break;  
+			case L1_ACN: metadataCatalogRestPath = MetadataCatalogRestPath.L1_ACN; break;
+			default: throw new RuntimeException(String.format("ProductFamily %s not supported for overpass coverage check", family));
+		}
+		
+		final String uri = this.metadataBaseUri + metadataCatalogRestPath.path() + "/" + family + "/"
+				+ productName + "/overpassCoverage";
 
+		final String commandDescription = String.format("call rest metadata for overpass coverage check on %s", uri);
+
+		final ResponseEntity<Integer> result = performWithRetries(commandDescription, () -> {
+			int notAvailableRetries = 10;
+			LOGGER.debug(commandDescription);
+			ResponseEntity<Integer> response = this.restTemplate.exchange(uri, HttpMethod.GET, null, Integer.class);
+			while (response.getStatusCode() == HttpStatus.NO_CONTENT) {
+				LOGGER.debug("Product not available yet. Waiting...");
+				try {
+					Thread.sleep(this.retryInMillis);
+				} catch (final InterruptedException e) {
+					throw new MetadataQueryException(e.getMessage(), e);
+				}
+				notAvailableRetries--;
+				LOGGER.debug("Retrying call rest metadata for sea coverage check on  {}", uri);
+				response = this.restTemplate.exchange(uri, HttpMethod.GET, null, Integer.class);
+				if (notAvailableRetries <= 0) {
+					LOGGER.trace("Max number of retries reached for {}", productName);
+					break;
+				}
+			}
+			handleReturnValueErrors(uri, response);
+			return response;
+		});
+
+		if (result == null) {
+			throw new MetadataQueryException("Query for overpass coverage returns no result for " + productName);
+		}
+		final Integer coverage = result.getBody();
+		if (coverage == null) {
+			throw new MetadataQueryException("Query for overpass coverage returns no result body for " + productName);
+		}
+		LOGGER.debug("Got coverage {}", coverage);
+		return coverage;
 	}
 
 	private <T> ResponseEntity<T> query(final URI uri, final ParameterizedTypeReference<T> responseType)

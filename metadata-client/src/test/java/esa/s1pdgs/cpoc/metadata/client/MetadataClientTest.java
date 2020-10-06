@@ -603,6 +603,33 @@ public class MetadataClientTest {
 	}
 	
 	@Test
+	public void testOverpassCoverage() throws MetadataQueryException {
+
+		final ResponseEntity<Integer> responseEntity = new ResponseEntity<Integer>(Integer.valueOf(100), HttpStatus.OK);
+
+		when(restTemplate.exchange(Mockito.anyString(), eq(HttpMethod.GET), eq(null), eq(Integer.class)))
+				.thenReturn(responseEntity);
+
+		final int coverage = this.metadataClient.getOverpassCoverage(ProductFamily.L1_SLICE,
+				"S1A_EW_GRDM_1SDH_20200120T123336_20200120T123440_030884_038B5C_5189.SAFE");
+
+		assertEquals(100, coverage);
+
+	}
+	
+	@Test
+	public void testGetOverpassCoverageNoContent() throws MetadataQueryException {
+
+		final ResponseEntity<Integer> responseEntity = new ResponseEntity<Integer>(HttpStatus.NO_CONTENT);
+
+		when(restTemplate.exchange(Mockito.anyString(), eq(HttpMethod.GET), eq(null), eq(Integer.class)))
+				.thenReturn(responseEntity);
+		thrown.expect(MetadataQueryException.class);
+		this.metadataClient.getOverpassCoverage(ProductFamily.L1_SLICE,
+				"S1A_EW_GRDM_1SDH_20200120T123336_20200120T123440_030884_038B5C_5189.SAFE");
+	}
+	
+	@Test
 	public void testQueryByFamilyAndProductNameOk() throws MetadataQueryException {
 		final String file = "S1A_IW_RAW__0SDV_20171213T121623_20171213T121656_019684_021735_C6DB.SAFE";
 		final SearchMetadata expectedResult = new SearchMetadata();
