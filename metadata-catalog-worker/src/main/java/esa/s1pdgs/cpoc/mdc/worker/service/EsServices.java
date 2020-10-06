@@ -1710,13 +1710,42 @@ public class EsServices {
 			request.source(sourceBuilder);
 
 			final SearchResponse searchResponse = elasticsearchDAO.search(request);
-			if (this.isNotEmpty(searchResponse)) {
-				return 0;
+			if (isNotEmpty(searchResponse)) {
+				return 0; // INFO: the value range is inverse, because the maskfile contains land, not sea
 			}
 			// TODO FIXME implement coverage calculation
 			return 100;
 		} catch (final Exception e) {
 			throw new RuntimeException("Failed to check for sea coverage", e);
+		}
+	}
+	
+	public int getOverpassCoverage(final ProductFamily family, final String productName) {
+		try {
+			final GetResponse response = elasticsearchDAO.get(new GetRequest(family.name().toLowerCase(), productName));
+			if (!response.isExists()) {
+				throw new MetadataNotPresentException(productName);
+			}
+
+			final GeoShapeQueryBuilder queryBuilder = QueryBuilders.geoShapeQuery("geometry",
+					extractPolygonFrom(response));
+			queryBuilder.relation(ShapeRelation.CONTAINS);
+			LOGGER.debug("Using {}", queryBuilder);
+			final SearchSourceBuilder sourceBuilder = new SearchSourceBuilder();
+			sourceBuilder.query(queryBuilder);
+			sourceBuilder.size(SIZE_LIMIT);
+
+			final SearchRequest request = new SearchRequest(OVERPASSMASK_FOOTPRINT_INDEX_NAME);
+			request.source(sourceBuilder);
+
+			final SearchResponse searchResponse = elasticsearchDAO.search(request);
+			if (isNotEmpty(searchResponse)) {
+				// TODO FIXME implement coverage calculation
+				return 100; // INFO: opposite to Sea Coverage check, the value range is not inverse, as the maskfile contains overpasses)
+			}			
+			return 0;
+		} catch (final Exception e) {
+			throw new RuntimeException("Failed to check for overpass coverage", e);
 		}
 	}
 
