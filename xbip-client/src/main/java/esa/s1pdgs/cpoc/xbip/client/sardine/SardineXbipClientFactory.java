@@ -55,11 +55,11 @@ public class SardineXbipClientFactory implements XbipClientFactory {
 		);
 	}
 	
-	private final XbipHostConfiguration hostConfigFor(final String server) {
+	private XbipHostConfiguration hostConfigFor(final String server) {
 		// lookup host configuration for the given URL	
 		for (final XbipHostConfiguration hostConfig : config.getHostConfigs()) {
 			if (server.equals(hostConfig.getServerName())) {
-				LOG.trace("Found config {}" + hostConfig);
+				LOG.trace("Found config {}" , hostConfig);
 				return hostConfig;
 			}
 		}
@@ -68,7 +68,7 @@ public class SardineXbipClientFactory implements XbipClientFactory {
 		);
 	}
 	
-	private final ProxySelector proxy() {
+	private ProxySelector proxy() {
 		if (config.getProxyHost() != null) {
 			LOG.debug("Using Proxy {}:{}",config.getProxyHost(), config.getProxyPort());			
 			return new ProxySelector() {			
@@ -99,7 +99,7 @@ public class SardineXbipClientFactory implements XbipClientFactory {
 	}
 	
 		
-	private final Sardine newSardineFor(final XbipHostConfiguration hostConfig, URI serverUrl) {
+	private Sardine newSardineFor(final XbipHostConfiguration hostConfig, URI serverUrl) {
 		Sardine sardine = null;
 		
 		if (hostConfig.isTrustSelfSignedCertificate()) {
@@ -113,8 +113,8 @@ public class SardineXbipClientFactory implements XbipClientFactory {
 			            NoopHostnameVerifier.INSTANCE
 			    );
 				
-				final int timeout = 5*60; // seconds (5 minutes)
-				
+				final int timeoutSec = hostConfig.getConnectTimeoutSec();
+
 				sardine = new SardineImpl(hostConfig.getUser(), hostConfig.getPass(), proxy()) {
 					@Override
 					protected ConnectionSocketFactory createDefaultSecureSocketFactory() {
@@ -129,9 +129,9 @@ public class SardineXbipClientFactory implements XbipClientFactory {
 						final HttpClientBuilder res = super.configure(selector, credentials);
 						
 						final RequestConfig config = RequestConfig.custom()
-							      .setConnectTimeout(timeout * 1000)
-							      .setConnectionRequestTimeout(timeout * 1000)
-							      .setSocketTimeout(timeout * 1000)
+							      .setConnectTimeout(timeoutSec * 1000)
+							      .setConnectionRequestTimeout(timeoutSec * 1000)
+							      .setSocketTimeout(timeoutSec * 1000)
 							      .build();
 							
 						res.setDefaultRequestConfig(config);
