@@ -4,6 +4,7 @@ import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 import org.junit.Assert;
@@ -12,12 +13,27 @@ import org.junit.Test;
 
 import esa.s1pdgs.cpoc.common.ProductFamily;
 import esa.s1pdgs.cpoc.datalifecycle.trigger.config.DataLifecycleTriggerConfigurationProperties.RetentionPolicy;
+import esa.s1pdgs.cpoc.datalifecycle.trigger.domain.model.DataLifecycleMetadata;
+import esa.s1pdgs.cpoc.datalifecycle.trigger.domain.persistence.DataLifecycleMetadataRepository;
+import esa.s1pdgs.cpoc.datalifecycle.trigger.domain.persistence.DataLifecycleMetadataRepositoryException;
 import esa.s1pdgs.cpoc.mqi.model.queue.EvictionManagementJob;
 import esa.s1pdgs.cpoc.mqi.model.queue.IngestionEvent;
 
 public class DataLifecycleTriggerListenerTest {
 	
 	List<RetentionPolicy> retentionPolicies = new ArrayList<>();
+	
+	private DataLifecycleMetadataRepository metadataRepoMock = new DataLifecycleMetadataRepository() {
+		@Override
+		public void save(DataLifecycleMetadata metadata) throws DataLifecycleMetadataRepositoryException {
+			// nothing
+		}
+		@Override
+		public Optional<DataLifecycleMetadata> findByProductName(String name)
+				throws DataLifecycleMetadataRepositoryException {
+			return Optional.empty();
+		}
+	};
 	
 	@Before
 	public void init() {
@@ -58,9 +74,9 @@ public class DataLifecycleTriggerListenerTest {
 		final Date creationDate = Date.from(Instant.parse("2000-01-01T00:00:00.00z"));
 		final String obsKey = "L20191204153633245000201/DCS_02_L20191204153633245000201_ch2_DSDB_00027.raw";
 		
-		final DataLifecycleTriggerListener<IngestionEvent> dtl = new DataLifecycleTriggerListener<>(null, null, null);
+		final DataLifecycleTriggerListener<IngestionEvent> dtl = new DataLifecycleTriggerListener<>(null, null, null, this.metadataRepoMock, null, null, null);
 		final Date evictionDate = dtl.calculateEvictionDate(retentionPolicies, creationDate, ProductFamily.EDRS_SESSION,
-				obsKey);
+				dtl.getFileName(obsKey));
 		Assert.assertEquals(Instant.parse("2000-01-05T00:00:00.00z"), evictionDate.toInstant());
 	}
 	
@@ -73,7 +89,7 @@ public class DataLifecycleTriggerListenerTest {
 		
 		final IngestionEvent inputEvent = toInputEvent(creationDate, obsKey, productFamily);
 		
-		final DataLifecycleTriggerListener<IngestionEvent> dtl = new DataLifecycleTriggerListener<>(null, null, null);
+		final DataLifecycleTriggerListener<IngestionEvent> dtl = new DataLifecycleTriggerListener<>(null, null, null, this.metadataRepoMock, null, null, null);
 		final EvictionManagementJob evictionManagementJob = dtl.toEvictionManagementJob(inputEvent, retentionPolicies, UUID.randomUUID());
 		Assert.assertEquals(productFamily, evictionManagementJob.getProductFamily());
 		Assert.assertEquals(Date.from(Instant.parse("2000-01-05T00:00:00.00z")), evictionManagementJob.getEvictionDate());
@@ -90,7 +106,7 @@ public class DataLifecycleTriggerListenerTest {
 		
 		final IngestionEvent inputEvent = toInputEvent(creationDate, obsKey, productFamily);
 		
-		final DataLifecycleTriggerListener<IngestionEvent> dtl = new DataLifecycleTriggerListener<>(null, null, null);
+		final DataLifecycleTriggerListener<IngestionEvent> dtl = new DataLifecycleTriggerListener<>(null, null, null, this.metadataRepoMock, null, null, null);
 		final EvictionManagementJob evictionManagementJob = dtl.toEvictionManagementJob(inputEvent, retentionPolicies, UUID.randomUUID());
 		Assert.assertEquals(productFamily, evictionManagementJob.getProductFamily());
 		Assert.assertEquals(null, evictionManagementJob.getEvictionDate());
@@ -107,7 +123,7 @@ public class DataLifecycleTriggerListenerTest {
 		
 		final IngestionEvent inputEvent = toInputEvent(creationDate, obsKey, productFamily);
 		
-		final DataLifecycleTriggerListener<IngestionEvent> dtl = new DataLifecycleTriggerListener<>(null, null, null);
+		final DataLifecycleTriggerListener<IngestionEvent> dtl = new DataLifecycleTriggerListener<>(null, null, null, this.metadataRepoMock, null, null, null);
 		final EvictionManagementJob evictionManagementJob = dtl.toEvictionManagementJob(inputEvent, retentionPolicies, UUID.randomUUID());
 		Assert.assertEquals(productFamily, evictionManagementJob.getProductFamily());
 		Assert.assertEquals(Date.from(Instant.parse("2000-01-08T00:00:00.00z")), evictionManagementJob.getEvictionDate());
@@ -125,7 +141,7 @@ public class DataLifecycleTriggerListenerTest {
 		
 		final IngestionEvent inputEvent = toInputEvent(creationDate, obsKey, productFamily);
 		
-		final DataLifecycleTriggerListener<IngestionEvent> dtl = new DataLifecycleTriggerListener<>(null, null, null);
+		final DataLifecycleTriggerListener<IngestionEvent> dtl = new DataLifecycleTriggerListener<>(null, null, null, this.metadataRepoMock, null, null, null);
 		final EvictionManagementJob evictionManagementJob = dtl.toEvictionManagementJob(inputEvent, retentionPolicies, UUID.randomUUID());
 		Assert.assertEquals(productFamily, evictionManagementJob.getProductFamily());
 		Assert.assertEquals(null, evictionManagementJob.getEvictionDate());

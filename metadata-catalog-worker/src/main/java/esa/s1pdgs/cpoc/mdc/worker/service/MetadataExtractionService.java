@@ -49,32 +49,26 @@ import esa.s1pdgs.cpoc.report.ReportingUtils;
 @Service
 public class MetadataExtractionService implements MqiListener<CatalogJob> {
 	private static final Logger LOG = LogManager.getLogger(MetadataExtractionService.class);
-	
+
 	public static final String KEY_PRODUCT_SENSING_START = "product_sensing_start_date";
 	public static final String KEY_PRODUCT_SENSING_STOP = "product_sensing_stop_date";
 
-    private final AppStatusImpl appStatus;
-    private final ErrorRepoAppender errorAppender;
-    private final ProcessConfiguration processConfiguration;
-    private final EsServices esServices;
-    private final MqiClient mqiClient;
-    private final List<MessageFilter> messageFilter;
-    private final MdcWorkerConfigurationProperties properties;
-    private final MetadataExtractorFactory extractorFactory;
-    private final TriggerConfigurationProperties triggerConfiguration;
-        
-    @Autowired
-    public MetadataExtractionService(
-    		final AppStatusImpl appStatus,
-			final ErrorRepoAppender errorAppender, 
-			final ProcessConfiguration processConfiguration, 
-			final EsServices esServices,
-			final MqiClient mqiClient,
-			final List<MessageFilter> messageFilter,
-			final MdcWorkerConfigurationProperties properties,
+	private final AppStatusImpl appStatus;
+	private final ErrorRepoAppender errorAppender;
+	private final ProcessConfiguration processConfiguration;
+	private final EsServices esServices;
+	private final MqiClient mqiClient;
+	private final List<MessageFilter> messageFilter;
+	private final MdcWorkerConfigurationProperties properties;
+	private final MetadataExtractorFactory extractorFactory;
+	private final TriggerConfigurationProperties triggerConfiguration;
+
+	@Autowired
+	public MetadataExtractionService(final AppStatusImpl appStatus, final ErrorRepoAppender errorAppender,
+			final ProcessConfiguration processConfiguration, final EsServices esServices, final MqiClient mqiClient,
+			final List<MessageFilter> messageFilter, final MdcWorkerConfigurationProperties properties,
 			final MetadataExtractorFactory extractorFactory,
-			final TriggerConfigurationProperties triggerConfiguration
-	) {
+			final TriggerConfigurationProperties triggerConfiguration) {
 		this.appStatus = appStatus;
 		this.errorAppender = errorAppender;
 		this.processConfiguration = processConfiguration;
@@ -87,44 +81,37 @@ public class MetadataExtractionService implements MqiListener<CatalogJob> {
 	}
 
 	@PostConstruct
-    public void init() {	
-		final Map<ProductCategory, CategoryConfig> entries = triggerConfiguration.getProductCategories();		
+	public void init() {
+		final Map<ProductCategory, CategoryConfig> entries = triggerConfiguration.getProductCategories();
 		final ExecutorService service = Executors.newFixedThreadPool(entries.size());
-		
-		for (final Map.Entry<ProductCategory, CategoryConfig> entry : entries.entrySet()) {			
+
+		for (final Map.Entry<ProductCategory, CategoryConfig> entry : entries.entrySet()) {
 			service.execute(newConsumerFor(entry.getKey(), entry.getValue()));
 		}
-    }
-	
+	}
+
 	@Override
-	public final MqiMessageEventHandler onMessage(final GenericMessageDto<CatalogJob> message) throws Exception {	
-		final CatalogJob catJob = message.getBody();	
-		final Reporting reporting = ReportingUtils.newReportingBuilder()
-				.predecessor(catJob.getUid())				
+	public final MqiMessageEventHandler onMessage(final GenericMessageDto<CatalogJob> message) throws Exception {
+		final CatalogJob catJob = message.getBody();
+		final Reporting reporting = ReportingUtils.newReportingBuilder().predecessor(catJob.getUid())
 				.newReporting("MetadataExtraction");
-    
-		reporting.begin(
-				ReportingUtils.newFilenameReportingInputFor(catJob.getProductFamily(), catJob.getProductName()),
-				new ReportingMessage("Starting metadata extraction")
-		);   
+
+		reporting.begin(ReportingUtils.newFilenameReportingInputFor(catJob.getProductFamily(), catJob.getProductName()),
+				new ReportingMessage("Starting metadata extraction"));
 		return new MqiMessageEventHandler.Builder<CatalogEvent>(ProductCategory.CATALOG_EVENT)
 				.onSuccess(res -> reporting.end(reportingOutput(res), new ReportingMessage("End metadata extraction")))
-				.onError(e -> reporting.error(new ReportingMessage("Metadata extraction failed: %s", LogUtils.toString(e))))				
-				.publishMessageProducer(() -> handleMessage(message, reporting))
-				.newResult();
+				.onError(e -> reporting
+						.error(new ReportingMessage("Metadata extraction failed: %s", LogUtils.toString(e))))
+				.publishMessageProducer(() -> handleMessage(message, reporting)).newResult();
 	}
-	
+
 	@Override
 	public final void onTerminalError(final GenericMessageDto<CatalogJob> message, final Exception error) {
 		LOG.error(error);
-        errorAppender.send(new FailedProcessingDto(
-        		processConfiguration.getHostname(),
-        		new Date(),
-        		error.getMessage(),
-        		message
-        )); 
+		errorAppender.send(
+				new FailedProcessingDto(processConfiguration.getHostname(), new Date(), error.getMessage(), message));
 	}
-	
+
 	private String determineOutputKeyDependentOnProductFamilyAndTimeliness(final CatalogEvent event) {
 
 		String outputKey = "";
@@ -141,40 +128,29 @@ public class MetadataExtractionService implements MqiListener<CatalogJob> {
 
 	private final MqiConsumer<CatalogJob> newConsumerFor(final ProductCategory category, final CategoryConfig config) {
 		LOG.debug("Creating MQI consumer for category {} using {}", category, config);
-		return new MqiConsumer<CatalogJob>(
-				mqiClient, 
-				category, 
-				this,
-				messageFilter,
-				config.getFixedDelayMs(),
-				config.getInitDelayPollMs(),
-				appStatus
-		);
+		return new MqiConsumer<CatalogJob>(mqiClient, category, this, messageFilter, config.getFixedDelayMs(),
+				config.getInitDelayPollMs(), appStatus);
 	}
-	
+
 	private final CatalogEvent toCatalogEvent(final CatalogJob catJob, final JSONObject metadata) {
 		final CatalogEvent catEvent = new CatalogEvent();
 		catEvent.setProductName(catJob.getProductName());
 		catEvent.setKeyObjectStorage(catJob.getKeyObjectStorage());
 		catEvent.setProductFamily(catJob.getProductFamily());
 		catEvent.setProductType(metadata.getString("productType"));
-		catEvent.setMetadata(metadata.toMap());		
+		catEvent.setMetadata(metadata.toMap());
 		return catEvent;
 	}
-	
-	private final MqiPublishingJob<CatalogEvent> handleMessage(
-			final GenericMessageDto<CatalogJob> message, 
-			final Reporting reporting
-	) throws Exception {
+
+	private final MqiPublishingJob<CatalogEvent> handleMessage(final GenericMessageDto<CatalogJob> message,
+			final Reporting reporting) throws Exception {
 		final CatalogJob catJob = message.getBody();
 		final String productName = catJob.getProductName();
 		final ProductFamily family = catJob.getProductFamily();
 		final ProductCategory category = ProductCategory.of(family);
 
-		final MetadataExtractor extractor = extractorFactory.newMetadataExtractorFor(
-				category,
-				properties.getProductCategories().get(category)
-		);
+		final MetadataExtractor extractor = extractorFactory.newMetadataExtractorFor(category,
+				properties.getProductCategories().get(category));
 		final JSONObject metadata = extractor.extract(reporting, message);
 
 		// TODO move to extractor
@@ -188,33 +164,27 @@ public class MetadataExtractionService implements MqiListener<CatalogJob> {
 		}
 		LOG.debug("Metadata extracted: {} for product: {}", metadata, productName);
 
-		esServices.createMetadataWithRetries(
-				metadata, 
-				productName, 
-				properties.getProductInsertion().getMaxRetries(),
-				properties.getProductInsertion().getTempoRetryMs()
-		);
-		
+		esServices.createMetadataWithRetries(metadata, productName, properties.getProductInsertion().getMaxRetries(),
+				properties.getProductInsertion().getTempoRetryMs());
+
 		final CatalogEvent event = toCatalogEvent(message.getBody(), metadata);
 		event.setUid(reporting.getUid());
 		final GenericPublicationMessageDto<CatalogEvent> messageDto = new GenericPublicationMessageDto<CatalogEvent>(
-				message.getId(), 
-				event.getProductFamily(), 
-				event
-		);
+				message.getId(), event.getProductFamily(), event);
 		messageDto.setInputKey(message.getInputKey());
-		messageDto.setOutputKey(determineOutputKeyDependentOnProductFamilyAndTimeliness(event));		    	
+		messageDto.setOutputKey(determineOutputKeyDependentOnProductFamilyAndTimeliness(event));
 		return new MqiPublishingJob<CatalogEvent>(Collections.singletonList(messageDto));
 	}
-	
+
 	private final ReportingOutput reportingOutput(final List<GenericPublicationMessageDto<CatalogEvent>> pubs) {
 		final GenericPublicationMessageDto<CatalogEvent> pub = pubs.get(0);
 		final CatalogEventAdapter eventAdapter = CatalogEventAdapter.of(pub);
-		final MetadataExtractionReportingOutput output = new MetadataExtractionReportingOutput();
-		
+
+		final MetadataExtractionReportingOutput output = new MetadataExtractionReportingOutput(); // -> zwei neue Felder
+
 		// S1PRO-1678: trace sensing start/stop
 		final String productSensingStartDate = eventAdapter.productSensingStartDate();
-		if (!CatalogEventAdapter.NOT_DEFINED.equals( productSensingStartDate)) {
+		if (!CatalogEventAdapter.NOT_DEFINED.equals(productSensingStartDate)) {
 			output.withSensingStart(productSensingStartDate);
 		}
 		final String productSensingStopDate = eventAdapter.productSensingStopDate();
@@ -227,8 +197,15 @@ public class MetadataExtractionService implements MqiListener<CatalogJob> {
 			output.withConsolidation(eventAdapter.productConsolidation())
 					.withSensingConsolidation(eventAdapter.productSensingConsolidation());
 		}
-		
+
+		// S1PRO-1840: report channel identifier and raw count
+		if (pub.getFamily() == ProductFamily.EDRS_SESSION) {
+			output.setChannelIdentifierShort(eventAdapter.channelId());
+			final List<String> rawNames = eventAdapter.rawNames();
+			output.setRawCountShort(rawNames != null ? rawNames.size() : 0);
+		}
+
 		return output.build();
 	}
-	
+
 }
