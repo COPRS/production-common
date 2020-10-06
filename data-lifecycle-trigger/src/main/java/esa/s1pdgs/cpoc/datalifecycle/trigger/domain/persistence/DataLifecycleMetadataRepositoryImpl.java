@@ -99,7 +99,7 @@ public class DataLifecycleMetadataRepositoryImpl implements DataLifecycleMetadat
 				QueryBuilders.termQuery(DataLifecycleMetadata.FIELD_NAME.PRODUCT_NAME.fieldName() + ".keyword", name));
 		
 		final List<DataLifecycleMetadata> result = this.query(queryBuilder, null, null,
-				DataLifecycleMetadata.FIELD_NAME.PRODUCT_NAME.fieldName(), SortOrder.ASC);
+				DataLifecycleMetadata.FIELD_NAME.PRODUCT_NAME.fieldName() + ".keyword", SortOrder.ASC);
 		
 		if (result.isEmpty()) {
 			return Optional.empty();
