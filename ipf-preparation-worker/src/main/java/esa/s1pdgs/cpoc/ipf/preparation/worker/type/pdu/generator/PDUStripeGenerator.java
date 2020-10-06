@@ -63,23 +63,7 @@ public class PDUStripeGenerator extends AbstractPDUGenerator implements PDUGener
 					}
 				}
 
-				List<AppDataJob> jobs = new ArrayList<>();
-				for (TimeInterval interval : timeIntervals) {
-					LOGGER.debug("Create AppDataJob for PDU time interval: [{}; {}]",
-							DateUtils.formatToMetadataDateTimeFormat(interval.getStart()),
-							DateUtils.formatToMetadataDateTimeFormat(interval.getStop()));
-					AppDataJob appDataJob = AppDataJob.fromPreparationJob(job);
-					appDataJob.setStartTime(DateUtils.formatToMetadataDateTimeFormat(interval.getStart()));
-					appDataJob.setStopTime(DateUtils.formatToMetadataDateTimeFormat(interval.getStop()));
-
-					if (processSettings.getProcessingGroup() != null) {
-						appDataJob.setProcessingGroup(processSettings.getProcessingGroup());
-					}
-
-					jobs.add(appDataJob);
-				}
-
-				return jobs;
+				return createJobsFromTimeIntervals(timeIntervals, job);
 			}
 
 			LOGGER.debug("Product is not first in orbit - skip PDU generation");
@@ -88,20 +72,8 @@ public class PDUStripeGenerator extends AbstractPDUGenerator implements PDUGener
 			S3Metadata metadata = getMetadataForJobProduct(mdClient, job);
 
 			List<TimeInterval> intervals = findTimeIntervalsForMetadata(metadata, settings.getLengthInS());
-
-			List<AppDataJob> jobs = new ArrayList<>();
-			for (TimeInterval interval : intervals) {
-				LOGGER.debug("Create AppDataJob for PDU time interval: [{}; {}]",
-						DateUtils.formatToMetadataDateTimeFormat(interval.getStart()),
-						DateUtils.formatToMetadataDateTimeFormat(interval.getStop()));
-				AppDataJob appDataJob = AppDataJob.fromPreparationJob(job);
-				appDataJob.setStartTime(DateUtils.formatToMetadataDateTimeFormat(interval.getStart()));
-				appDataJob.setStopTime(DateUtils.formatToMetadataDateTimeFormat(interval.getStop()));
-
-				jobs.add(appDataJob);
-			}
-
-			return jobs;
+			
+			return createJobsFromTimeIntervals(intervals, job);
 		}
 
 		LOGGER.warn("Invalid reference point for pdu type STRIPE");
@@ -134,5 +106,30 @@ public class PDUStripeGenerator extends AbstractPDUGenerator implements PDUGener
 		}
 
 		return intervals;
+	}
+
+	/**
+	 * Create a list of AppDataJobs from the given list of time intervals
+	 */
+	private List<AppDataJob> createJobsFromTimeIntervals(final List<TimeInterval> intervals,
+			IpfPreparationJob preparationJob) {
+		List<AppDataJob> jobs = new ArrayList<>();
+
+		for (TimeInterval interval : intervals) {
+			LOGGER.debug("Create AppDataJob for PDU time interval: [{}; {}]",
+					DateUtils.formatToMetadataDateTimeFormat(interval.getStart()),
+					DateUtils.formatToMetadataDateTimeFormat(interval.getStop()));
+			AppDataJob appDataJob = AppDataJob.fromPreparationJob(preparationJob);
+			appDataJob.setStartTime(DateUtils.formatToMetadataDateTimeFormat(interval.getStart()));
+			appDataJob.setStopTime(DateUtils.formatToMetadataDateTimeFormat(interval.getStop()));
+
+			if (processSettings.getProcessingGroup() != null) {
+				appDataJob.setProcessingGroup(processSettings.getProcessingGroup());
+			}
+
+			jobs.add(appDataJob);
+		}
+
+		return jobs;
 	}
 }
