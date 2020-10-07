@@ -41,6 +41,9 @@ import esa.s1pdgs.cpoc.mqi.model.queue.IpfPreparationJob;
 import esa.s1pdgs.cpoc.mqi.model.queue.util.CatalogEventAdapter;
 import esa.s1pdgs.cpoc.xml.model.joborder.AbstractJobOrderProc;
 import esa.s1pdgs.cpoc.xml.model.joborder.JobOrder;
+import esa.s1pdgs.cpoc.xml.model.joborder.JobOrderInput;
+import esa.s1pdgs.cpoc.xml.model.joborder.JobOrderInputFile;
+import esa.s1pdgs.cpoc.xml.model.joborder.JobOrderTimeInterval;
 import esa.s1pdgs.cpoc.xml.model.tasktable.TaskTableInputAlternative;
 
 public class S3TypeAdapter extends AbstractProductTypeAdapter implements ProductTypeAdapter {
@@ -160,10 +163,10 @@ public class S3TypeAdapter extends AbstractProductTypeAdapter implements Product
 						alternative.getFileType())) {
 					LOGGER.debug("Use additional logic 'MultipleProductCoverSearch (MarginTT)' for product type {}",
 							alternative.getFileType());
-					
+
 					MPCSearchSettings mpcSettings = settings.getMpcSearch()
 							.get(tasktableAdapter.taskTable().getProcessorName());
-					
+
 					final MultipleProductCoverSearch mpcSearch = new MultipleProductCoverSearch(tasktableAdapter,
 							elementMapper, metadataClient, workerSettings, mpcSettings.isDisableFirstLastWaiting());
 					tasks = mpcSearch.updateTaskInputs(tasks, alternative, returnValue.getSatelliteId(),
@@ -232,6 +235,34 @@ public class S3TypeAdapter extends AbstractProductTypeAdapter implements Product
 			}
 		});
 
+		/*
+		 * Move the main input on the first proc to the first position
+		 */
+		if (!jobOrder.getProcs().isEmpty()) {
+			AbstractJobOrderProc proc = jobOrder.getProcs().get(0);
+			JobOrderInput firstInput = proc.getInputs().get(0);
+			
+			int index;
+			for (index = 0; index < firstInput.getNbFilenames(); index++) {
+				if (firstInput.getFilenames().get(index).getFilename().matches(".*" + job.getProductName())) {
+					// this product needs to be the first
+					break;
+				}
+			}
+			
+			// If product isn't already the first, move it there
+			if (index > 0) {
+				JobOrderInputFile file = firstInput.getFilenames().get(index);
+				JobOrderTimeInterval interval = firstInput.getTimeIntervals().get(index);
+				
+				firstInput.getFilenames().remove(index);
+				firstInput.getTimeIntervals().remove(index);
+				
+				firstInput.getFilenames().add(0, file);
+				firstInput.getTimeIntervals().add(0, interval);
+			}
+		}
+		
 		/*
 		 * Remove optional outputs from last proc, except for configured additional
 		 * outputs
