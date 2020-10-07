@@ -252,6 +252,7 @@ public class S3TypeAdapter extends AbstractProductTypeAdapter implements Product
 			
 			// If product isn't already the first, move it there
 			if (index > 0) {
+				LOGGER.debug("Move main input to first position");
 				JobOrderInputFile file = firstInput.getFilenames().get(index);
 				JobOrderTimeInterval interval = firstInput.getTimeIntervals().get(index);
 				
