@@ -150,6 +150,10 @@ public class AppCatJobService {
 						job.setStartTime(productAdapter.getStartTime());
 						job.setStopTime(productAdapter.getStopTime());
 					}
+					
+					// Before updating the state -> save last state
+					job.getGeneration().setPreviousState(job.getGeneration().getState());
+					
 					// no transition?
 					if (job.getGeneration().getState() == outputState) {
 						// don't update jobs last modified date here to enable timeout, just update the generations 
@@ -174,6 +178,10 @@ public class AppCatJobService {
 					if (!queried.isEmpty()) {
 						job.setAdditionalInputs(queried);	
 					}
+					
+					// Before updating the state -> save last state
+					job.getGeneration().setPreviousState(job.getGeneration().getState());
+					
 					// no transition?
 					if (job.getGeneration().getState() == outputState) {
 						// don't update jobs last modified date here to enable timeout, just update the generation time
@@ -194,6 +202,9 @@ public class AppCatJobService {
 			throws AppCatJobUpdateFailed {
 		performUpdate(
 				job -> {
+					// Before updating the state -> save last state
+					job.getGeneration().setPreviousState(job.getGeneration().getState());
+					
 					// no transition?
 					if (job.getGeneration().getState() == outputState) {
 						// don't update jobs last modified date here to enable timeout, just update the generation time

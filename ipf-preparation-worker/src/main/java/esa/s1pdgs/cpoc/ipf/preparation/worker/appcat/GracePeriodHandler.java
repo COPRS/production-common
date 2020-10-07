@@ -25,6 +25,11 @@ public class GracePeriodHandler {
 	}
 	
 	private final long getGracePeriodMillis(final AppDataJobGeneration jobGen) {
+		// If this is the first time the job is in this state: no grace period
+		if (!jobGen.getState().equals(jobGen.getPreviousState())) {
+			return 0L;
+		}
+		
 		if (jobGen.getState() == AppDataJobGenerationState.INITIAL) {
 			return settings.getWaitprimarycheck().getTempo();
 		} 
