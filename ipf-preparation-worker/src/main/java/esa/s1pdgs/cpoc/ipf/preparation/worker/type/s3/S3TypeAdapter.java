@@ -242,10 +242,11 @@ public class S3TypeAdapter extends AbstractProductTypeAdapter implements Product
 			AbstractJobOrderProc proc = jobOrder.getProcs().get(0);
 			JobOrderInput firstInput = proc.getInputs().get(0);
 			
-			int index;
-			for (index = 0; index < firstInput.getNbFilenames(); index++) {
-				if (firstInput.getFilenames().get(index).getFilename().matches(".*" + job.getProductName())) {
+			int index = 0;
+			for (int i = 0; i < firstInput.getNbFilenames(); i++) {
+				if (firstInput.getFilenames().get(i).getFilename().matches(".*" + job.getProductName())) {
 					// this product needs to be the first
+					index = i;
 					break;
 				}
 			}
