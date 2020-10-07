@@ -8,6 +8,8 @@ import java.util.function.Function;
 
 import org.json.JSONObject;
 
+import esa.s1pdgs.cpoc.common.utils.DateUtils;
+
 /**
  * Data lifecycle metadata class.
  */
@@ -18,9 +20,9 @@ public class DataLifecycleMetadata {
 		PATH_IN_UNCOMPRESSED_STORAGE("PathInUncompressedStorage", DataLifecycleMetadata::getPathInUncompressedStorage), //
 		PATH_IN_COMPRESSED_STORAGE("PathInCompressedStorage", DataLifecycleMetadata::getPathInCompressedStorage), //
 		EVICTION_DATE_IN_UNCOMPRESSED_STORAGE("EvictionDateInUncompressedStorage",
-				DataLifecycleMetadata::getEvictionDateInUncompressedStorage), //
+				DataLifecycleMetadata::getEvictionDateInUncompressedStorageAsString), //
 		EVICTION_DATE_IN_COMPRESSED_STORAGE("EvictionDateInCompressedStorage",
-				DataLifecycleMetadata::getEvictionDateInCompressedStorage), //
+				DataLifecycleMetadata::getEvictionDateInCompressedStorageAsString), //
 		PERSISTENT_IN_UNCOMPRESSED_STORAGE("PersistentInUncompressedStorage",
 				DataLifecycleMetadata::getPersistentInUncompressedStorage), //
 		PERSISTENT_IN_COMPRESSED_STORAGE("PersistentInCompressedStorage",
@@ -177,6 +179,12 @@ public class DataLifecycleMetadata {
 	public LocalDateTime getEvictionDateInUncompressedStorage() {
 		return evictionDateInUncompressedStorage;
 	}
+	
+	public String getEvictionDateInUncompressedStorageAsString() {
+		return (null != this.evictionDateInUncompressedStorage)
+				? DateUtils.formatToMetadataDateTimeFormat(this.evictionDateInUncompressedStorage)
+				: null;
+	}
 
 	public void setEvictionDateInUncompressedStorage(LocalDateTime evictionDateInUncompressedStorage) {
 		this.evictionDateInUncompressedStorage = evictionDateInUncompressedStorage;
@@ -184,6 +192,12 @@ public class DataLifecycleMetadata {
 
 	public LocalDateTime getEvictionDateInCompressedStorage() {
 		return evictionDateInCompressedStorage;
+	}
+	
+	public String getEvictionDateInCompressedStorageAsString() {
+		return (null != this.evictionDateInCompressedStorage)
+				? DateUtils.formatToMetadataDateTimeFormat(this.evictionDateInCompressedStorage)
+				: null;
 	}
 
 	public void setEvictionDateInCompressedStorage(LocalDateTime evictionDateInCompressedStorage) {

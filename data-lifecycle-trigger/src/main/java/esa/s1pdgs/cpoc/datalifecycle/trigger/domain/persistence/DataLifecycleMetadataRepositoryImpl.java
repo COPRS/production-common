@@ -64,7 +64,7 @@ public class DataLifecycleMetadataRepositoryImpl implements DataLifecycleMetadat
 	@Override
 	public void save(DataLifecycleMetadata metadata) throws DataLifecycleMetadataRepositoryException {
 		final IndexRequest request = new IndexRequest(this.elasticsearchIndex).id(metadata.getProductName())
-				.source(metadata.toString(), XContentType.JSON);
+				.source(metadata.toJson().toString(), XContentType.JSON);
 		LOG.debug("product data lifecycle metadata save request ("
 				+ this.elasticsearchClient.getLowLevelClient().getNodes().get(0).getHost() + "): " + request);
 
