@@ -208,6 +208,10 @@ public class DisseminationProperties {
     private Map<String, OutboxConfiguration> outboxes = new LinkedHashMap<>();
 	private Map<ProductCategory, List<DisseminationTypeConfiguration>> categories = new LinkedHashMap<>();
 	
+	private boolean disableOverpassCheck = true;
+	private String overpassCoverageCheckPattern = "$a"; // per default, don't match anything
+	private int minOverpassCoveragePercentage = 100;
+	
 	public long getPollingIntervalMs() {
 		return pollingIntervalMs;
 	}
@@ -256,10 +260,36 @@ public class DisseminationProperties {
 		this.categories = categories;
 	}
 
+	public boolean isDisableOverpassCheck() {
+		return disableOverpassCheck;
+	}
+
+	public void setDisableOverpassCheck(boolean disableOverpassCheck) {
+		this.disableOverpassCheck = disableOverpassCheck;
+	}
+
+	public String getOverpassCoverageCheckPattern() {
+		return overpassCoverageCheckPattern;
+	}
+
+	public void setOverpassCoverageCheckPattern(String overpassCoverageCheckPattern) {
+		this.overpassCoverageCheckPattern = overpassCoverageCheckPattern;
+	}
+
+	public int getMinOverpassCoveragePercentage() {
+		return minOverpassCoveragePercentage;
+	}
+
+	public void setMinOverpassCoveragePercentage(int minOverpassCoveragePercentage) {
+		this.minOverpassCoveragePercentage = minOverpassCoveragePercentage;
+	}
+	
 	@Override
 	public String toString() {
 		return "DisseminationProperties [pollingIntervalMs=" + pollingIntervalMs + ", maxRetries=" + maxRetries
 				+ ", tempoRetryMs=" + tempoRetryMs + ", hostname=" + hostname + ", outboxes=" + outboxes
-				+ ", categories=" + categories + "]";
+				+ ", categories=" + categories + ", disableOverpassCheck=" + disableOverpassCheck
+				+ ", minOverpassCoveragePercentage=" + minOverpassCoveragePercentage
+				+ ", overpassCoverageCheckPattern=" + overpassCoverageCheckPattern + "]";
 	}
 }

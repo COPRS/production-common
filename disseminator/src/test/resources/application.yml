@@ -20,6 +20,11 @@ dissemination:
       - target: myLittleOutbox
         regex: ^([0-9a-z][0-9a-z]){1}([0-9a-z_]){1}(_(OPER|TEST))?_(AUX_OBMEMC|AUX_PP1|AUX_PP2|AUX_CAL|AUX_INS|AUX_RESORB|AUX_WND|AUX_ICE|AUX_SCS|AMV_ERRMAT|AMH_ERRMAT|AUX_WAV|MPL_ORBPRE|MPL_ORBSCT)_\w{1,}\.(XML|EOF|SAFE)(/.*)?$
 
+metadata:
+  host: localhost
+  rest-api_nb-retry: 100  
+  rest-api_tempo-retry-ms: 3000 
+
 # KAFKA
 kafka:
   bootstrap-servers: localhost:9093                              # the bootstrap servers for KAFKA

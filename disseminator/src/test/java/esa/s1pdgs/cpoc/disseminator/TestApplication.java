@@ -66,7 +66,7 @@ public class TestApplication {
 	
 	@Test
 	public final void testConfigsFor() {
-		final DisseminationTriggerListener<ProductionEvent> uut = new DisseminationTriggerListener<>(null, properties, ErrorRepoAppender.NULL);
+		final DisseminationTriggerListener<ProductionEvent> uut = new DisseminationTriggerListener<>(null, null, properties, ErrorRepoAppender.NULL);
 		
 		// noting should be configured for EDRS_SESSION
 		assertEquals(Collections.emptyList(), uut.configsFor(ProductFamily.EDRS_SESSION));
@@ -77,7 +77,7 @@ public class TestApplication {
 	
 	@Test
 	public final void testOnMessage_OnNotConfiguredFamily_ShallDoNothing() {	
-		final DisseminationTriggerListener<ProductionEvent> uut = new DisseminationTriggerListener<>(null, properties, ErrorRepoAppender.NULL);
+		final DisseminationTriggerListener<ProductionEvent> uut = new DisseminationTriggerListener<>(null, null, properties, ErrorRepoAppender.NULL);
 
 		final ProductionEvent fakeProduct = new ProductionEvent("fakeProduct", "my/key", ProductFamily.BLANK);
 		final GenericMessageDto<ProductionEvent> fakeMessage = new GenericMessageDto<ProductionEvent>(123, "myKey", fakeProduct); 
@@ -91,7 +91,7 @@ public class TestApplication {
 				return true;
 			}			
 		};		
-		final DisseminationTriggerListener<ProductionEvent> uut = new DisseminationTriggerListener<>(fakeObsClient, properties, ErrorRepoAppender.NULL);
+		final DisseminationTriggerListener<ProductionEvent> uut = new DisseminationTriggerListener<>(fakeObsClient, null, properties, ErrorRepoAppender.NULL);
 
 		final ProductionEvent fakeProduct = new ProductionEvent("fakeProduct", "my/key", ProductFamily.BLANK);
 		final GenericMessageDto<ProductionEvent> fakeMessage = new GenericMessageDto<ProductionEvent>(123, "myKey", fakeProduct); 

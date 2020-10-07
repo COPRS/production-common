@@ -5,6 +5,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.regex.Pattern;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -23,10 +24,12 @@ import esa.s1pdgs.cpoc.disseminator.outbox.LocalOutboxClient;
 import esa.s1pdgs.cpoc.disseminator.outbox.OutboxClient;
 import esa.s1pdgs.cpoc.disseminator.outbox.SftpOutboxClient;
 import esa.s1pdgs.cpoc.disseminator.path.PathEvaluater;
+import esa.s1pdgs.cpoc.disseminator.report.OverpassCoverageCheckReportingOutput;
 import esa.s1pdgs.cpoc.disseminator.service.DisseminationException;
 import esa.s1pdgs.cpoc.disseminator.service.DisseminationService;
 import esa.s1pdgs.cpoc.errorrepo.ErrorRepoAppender;
 import esa.s1pdgs.cpoc.errorrepo.model.rest.FailedProcessingDto;
+import esa.s1pdgs.cpoc.metadata.client.MetadataClient;
 import esa.s1pdgs.cpoc.mqi.client.MqiListener;
 import esa.s1pdgs.cpoc.mqi.client.MqiMessageEventHandler;
 import esa.s1pdgs.cpoc.mqi.client.MqiPublishingJob;
@@ -38,6 +41,7 @@ import esa.s1pdgs.cpoc.obs_sdk.ObsObject;
 import esa.s1pdgs.cpoc.obs_sdk.ObsServiceException;
 import esa.s1pdgs.cpoc.obs_sdk.SdkClientException;
 import esa.s1pdgs.cpoc.report.Reporting;
+import esa.s1pdgs.cpoc.report.ReportingFactory;
 import esa.s1pdgs.cpoc.report.ReportingMessage;
 import esa.s1pdgs.cpoc.report.ReportingUtils;
 import esa.s1pdgs.cpoc.report.message.output.OutboxReportingOutput;
@@ -56,26 +60,32 @@ public class DisseminationTriggerListener<E extends AbstractMessage> implements 
 	
     private final ObsClient obsClient;
 	private final DisseminationProperties properties;
+	private final MetadataClient metadataClient;
 	private final ErrorRepoAppender errorAppender;
 	private final Map<String,OutboxClient> clientForTargets = new HashMap<>();
-
+	private final Pattern overpassCoverageCheckPattern; 
+	
 	public static <E extends AbstractMessage> DisseminationTriggerListener<E> valueOf(
 			final Class<E> dtoClass,
 		    final ObsClient obsClient,
+		    final MetadataClient metadataClient,
 			final DisseminationProperties properties,
 			final ErrorRepoAppender errorAppender
 	) {
-		return new DisseminationTriggerListener<E>(obsClient, properties, errorAppender);
+		return new DisseminationTriggerListener<E>(obsClient, metadataClient, properties, errorAppender);
 	}
 	
 	public DisseminationTriggerListener(
 		    final ObsClient obsClient,
+		    final MetadataClient metadataClient,
 			final DisseminationProperties properties,
 			final ErrorRepoAppender errorAppender
 	) {
 		this.obsClient = obsClient;
+		this.metadataClient = metadataClient;
 		this.properties = properties;
 		this.errorAppender = errorAppender;
+		this.overpassCoverageCheckPattern = Pattern.compile(properties.getOverpassCoverageCheckPattern());
 	}
 	
 	public void initListener() {
@@ -142,19 +152,39 @@ public class DisseminationTriggerListener<E extends AbstractMessage> implements 
 				new ReportingMessage("Start dissemination of product to outbox {}", target) 
 		);
 		
+		boolean acceptFile = true;
+		boolean disableOverpassCheck = true;
+
 		try {
 			assertExists(body);
-			final OutboxClient outboxClient = clientForTarget(target);
-			final String targetUrl = Retries.performWithRetries(
-					() -> outboxClient.transfer(new ObsObject(body.getProductFamily(), body.getKeyObjectStorage()), reporting), 
-					"Transfer of " + body.getKeyObjectStorage() + " to " + target,
-					properties.getMaxRetries(), 
-					properties.getTempoRetryMs()
-			);
-			reporting.end(
-					new OutboxReportingOutput(targetUrl),
-					new ReportingMessage("End dissemination of product to outbox {}", target)
-			);
+
+			if (properties.isDisableOverpassCheck()) {
+				LOG.trace("Overpass check is disabled");
+			} else {
+				acceptFile = isAllowedByOverpassCheck(body.getProductFamily(), body.getKeyObjectStorage(), reporting);
+			}
+			
+			if (acceptFile) {
+				final OutboxClient outboxClient = clientForTarget(target);
+				final String targetUrl = Retries.performWithRetries(
+						() -> outboxClient.transfer(new ObsObject(body.getProductFamily(), body.getKeyObjectStorage()), reporting), 
+						"Transfer of " + body.getKeyObjectStorage() + " to " + target,
+						properties.getMaxRetries(), 
+						properties.getTempoRetryMs()
+				);
+				reporting.end(
+						new OutboxReportingOutput(targetUrl),
+						new ReportingMessage("End dissemination of product to outbox {}", target)
+				);
+			} else{
+				if (!disableOverpassCheck) {
+					LOG.warn("Ignoring file %s of ProductFamily of %s because it is not over overpass", body.getKeyObjectStorage(), body.getProductFamily());
+					reporting.end(new ReportingMessage("File %s of ProductFamily of %s is ignored because it is not over overpass", body.getKeyObjectStorage(), body.getProductFamily()));
+				} else {
+					LOG.warn("Ignoring file %s of ProductFamily of %s", body.getKeyObjectStorage(), body.getProductFamily());
+					reporting.end(new ReportingMessage("File %s of ProductFamily of %s is ignored", body.getKeyObjectStorage(), body.getProductFamily()));
+				}
+			}
 		} catch (final Exception e) {					
 			final String messageString = errorMessageFor(e, target);			
 			reporting.error(new ReportingMessage(messageString));																	
@@ -162,6 +192,42 @@ public class DisseminationTriggerListener<E extends AbstractMessage> implements 
 		} 
 	}	
 
+	private final boolean isAllowedByOverpassCheck(final ProductFamily family, final String productName, final ReportingFactory reporting) throws Exception {
+        if (overpassCoverageCheckPattern.matcher(productName).matches()) {
+	        if (!(family == ProductFamily.L1_SLICE || family == ProductFamily.L1_ACN)) {
+	        	throw new RuntimeException(String.format("Unsupported ProductFamily %s for overpass check", family));
+	        } else {
+	        	final Reporting overpassReport = reporting.newReporting("OverpassCoverageCheck");
+			    try {
+			    	overpassReport.begin(
+			    			ReportingUtils.newFilenameReportingInputFor(family, productName),
+			    			new ReportingMessage("Checking overpass coverage")
+					);
+					if (metadataClient.getOverpassCoverage(family, productName) >= properties.getMinOverpassCoveragePercentage()) {
+						overpassReport.end(
+								new OverpassCoverageCheckReportingOutput(true), 
+								new ReportingMessage("Product %s is over overpass", productName)
+						);
+						return true;
+					} else {
+						overpassReport.end(
+								new OverpassCoverageCheckReportingOutput(false), 
+								new ReportingMessage("Product %s is not over overpass", productName)
+			    		);
+						return false;
+					}			
+				} catch (final Exception e) {
+					overpassReport.error(new ReportingMessage("OverpassCoverage check failed: %s", LogUtils.toString(e)));
+					throw e;
+				}
+	        }
+        } else {
+        	LOG.trace("Skipping overpass check. Product %s does not match pattern %s", productName, overpassCoverageCheckPattern.pattern());
+        	return true;
+        }
+	}
+	
+	
 	final void assertExists(final AbstractMessage message) throws ObsServiceException, SdkClientException {
 		if (!obsClient.prefixExists(new ObsObject(message.getProductFamily(), message.getKeyObjectStorage()))) {
 			throw new DisseminationException(

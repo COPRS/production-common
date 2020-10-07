@@ -20,6 +20,7 @@ import esa.s1pdgs.cpoc.disseminator.DisseminationTriggerListener;
 import esa.s1pdgs.cpoc.disseminator.config.DisseminationProperties;
 import esa.s1pdgs.cpoc.disseminator.config.DisseminationProperties.DisseminationTypeConfiguration;
 import esa.s1pdgs.cpoc.errorrepo.ErrorRepoAppender;
+import esa.s1pdgs.cpoc.metadata.client.MetadataClient;
 import esa.s1pdgs.cpoc.mqi.client.GenericMqiClient;
 import esa.s1pdgs.cpoc.mqi.client.MessageFilter;
 import esa.s1pdgs.cpoc.mqi.client.MqiConsumer;
@@ -34,6 +35,7 @@ public class DisseminationService {
 	
 	private final GenericMqiClient client;
     private final ObsClient obsClient;
+    private final MetadataClient metadataClient;
 	private final DisseminationProperties properties;
 	private final ErrorRepoAppender errorAppender;
 	private final AppStatus appStatus;
@@ -45,6 +47,7 @@ public class DisseminationService {
 			final GenericMqiClient client,
 			final List<MessageFilter> messageFilter,
 		    final ObsClient obsClient,
+		    final MetadataClient metadataClient,
 			final DisseminationProperties properties,
 			final ErrorRepoAppender errorAppender,
 			final AppStatus appStatus
@@ -52,6 +55,7 @@ public class DisseminationService {
 		this.client = client;
 		this.messageFilter = messageFilter;
 		this.obsClient = obsClient;
+		this.metadataClient = metadataClient;
 		this.properties = properties;
 		this.errorAppender = errorAppender;
 		this.appStatus = appStatus;
@@ -97,7 +101,7 @@ public class DisseminationService {
 	private final DisseminationTriggerListener<?> newDisseminationTriggerListenerFor(final ProductCategory category) {
 		LOG.debug("Creating DisseminationTriggerListener for category {}", category);
 		if (SUPPORTED_EVENTS.contains(category)) {
-				return DisseminationTriggerListener.valueOf(category.getDtoClass(), obsClient, properties, errorAppender);
+				return DisseminationTriggerListener.valueOf(category.getDtoClass(), obsClient, metadataClient, properties, errorAppender);
 		}
 		throw new IllegalArgumentException(String.format(
 				"Invalid product category %s. Available are %s", 
