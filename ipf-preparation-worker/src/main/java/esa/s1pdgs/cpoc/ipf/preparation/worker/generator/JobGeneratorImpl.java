@@ -218,6 +218,10 @@ public final class JobGeneratorImpl implements JobGenerator {
 					e
 			);
 		}
+		// expected on discard scenarios -> terminate job
+		catch (final DiscardedException e) {
+			throw e;
+		}
 		catch (final Exception e) {
 			throw new RuntimeException(
 					String.format("Fatal error on %s: %s", name, Exceptions.messageOf(e)),
