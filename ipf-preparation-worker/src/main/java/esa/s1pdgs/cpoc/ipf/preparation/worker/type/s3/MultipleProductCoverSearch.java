@@ -50,13 +50,21 @@ public class MultipleProductCoverSearch {
 	private final ElementMapper elementMapper;
 	private final MetadataClient metadataClient;
 	private final IpfPreparationWorkerSettings prepSettings;
+	private final boolean disableFirstLastWaiting;
 
 	public MultipleProductCoverSearch(final TaskTableAdapter ttAdapter, final ElementMapper elementMapper,
 			final MetadataClient metadataClient, final IpfPreparationWorkerSettings prepSettings) {
+		this(ttAdapter, elementMapper, metadataClient, prepSettings, false);
+	}
+	
+	public MultipleProductCoverSearch(final TaskTableAdapter ttAdapter, final ElementMapper elementMapper,
+			final MetadataClient metadataClient, final IpfPreparationWorkerSettings prepSettings,
+			final boolean disableFirstLastWaiting) {
 		this.ttAdapter = ttAdapter;
 		this.elementMapper = elementMapper;
 		this.metadataClient = metadataClient;
 		this.prepSettings = prepSettings;
+		this.disableFirstLastWaiting = disableFirstLastWaiting;
 	}
 
 	/**
@@ -93,8 +101,10 @@ public class MultipleProductCoverSearch {
 	 * @param satelliteId satelliteId for the search query
 	 * @param startTime   start time for the interval
 	 * @param stopTime    stop time for the interval
-	 * @param t0          delta which should be subtracted from the start time for the interval
-	 * @param t1          delta which should be added to the stop time for the interval
+	 * @param t0          delta which should be subtracted from the start time for
+	 *                    the interval
+	 * @param t1          delta which should be added to the stop time for the
+	 *                    interval
 	 * @param timeliness  timeliness for query and coverage check
 	 * @throws MetadataQueryException On error retrieving products from the
 	 *                                metadataClient
@@ -137,8 +147,8 @@ public class MultipleProductCoverSearch {
 	 * @return ANX-range that intersects with product validity, null if none exists
 	 * @throws MetadataQueryException on error in metadata query
 	 */
-	public TimeInterval getIntersectingANXRange(final String productName, final long anxOffsetInS, final long rangeLengthInS)
-			throws MetadataQueryException {
+	public TimeInterval getIntersectingANXRange(final String productName, final long anxOffsetInS,
+			final long rangeLengthInS) throws MetadataQueryException {
 		final String productType = productName.substring(4, 15);
 
 		final S3Metadata metadata = metadataClient.getS3MetadataForProduct(elementMapper.inputFamilyOf(productType),
@@ -199,12 +209,19 @@ public class MultipleProductCoverSearch {
 		final LocalDateTime lastStop = LocalDateTime.parse(last.getValidityStop(),
 				DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSSSSS'Z'"));
 
-		if (firstStart.isAfter(coverageMin)) {
+		// Interval is not covered if the start time is not covered
+		// Exception: If the earliest granule has position FIRST and those products
+		// should not wait for left neighbors (ex. OLCI)
+		if (firstStart.isAfter(coverageMin)
+				&& !(disableFirstLastWaiting && first.getGranulePosition().equals("FIRST"))) {
 			LOGGER.info("CheckCoverage: First start time is after interval beginning. Interval is not covered");
 			return false;
 		}
 
-		if (lastStop.isBefore(coverageMax)) {
+		// Interval is not covered if the stop time is not covered
+		// Exception: If the last granule has position LAST and those products
+		// should not wait for right neighbors (ex. OLCI)
+		if (lastStop.isBefore(coverageMax) && !(disableFirstLastWaiting && last.getGranulePosition().equals("LAST"))) {
 			LOGGER.info("CheckCoverage: Last stop time is before interval ending. Interval is not covered");
 			return false;
 		}
@@ -234,8 +251,8 @@ public class MultipleProductCoverSearch {
 	 * @return Range(anx + anxOffset, anx + anxOffset + rangeLength) if productRange
 	 *         intersects with that range
 	 */
-	private TimeInterval getIntersectingRange(final TimeInterval productRange, final String anxTime, final long anxOffsetInS,
-			final long rangeLengthInS) {
+	private TimeInterval getIntersectingRange(final TimeInterval productRange, final String anxTime,
+			final long anxOffsetInS, final long rangeLengthInS) {
 		final LocalDateTime anx = DateUtils.parse(anxTime);
 
 		final LocalDateTime rangeStart = anx.plus(anxOffsetInS, ChronoUnit.SECONDS);

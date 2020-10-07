@@ -62,13 +62,46 @@ public class S3TypeAdapterSettings {
 	}
 
 	/**
+	 * Settings for the MultipleCoverSearch
+	 * 
+	 * @author Julian Kaping
+	 */
+	public static class MPCSearchSettings {
+		private String productType;
+		private boolean disableFirstLastWaiting = false;
+
+		public String getProductType() {
+			return productType;
+		}
+
+		public void setProductType(String productType) {
+			this.productType = productType;
+		}
+
+		public boolean isDisableFirstLastWaiting() {
+			return disableFirstLastWaiting;
+		}
+
+		public void setDisableFirstLastWaiting(boolean disableFirstLastWaiting) {
+			this.disableFirstLastWaiting = disableFirstLastWaiting;
+		}
+
+		@Override
+		public String toString() {
+			return "MPCSearchSettings [productType=" + productType + ", disableFirstLastWaiting="
+					+ disableFirstLastWaiting + "]";
+		}
+	}
+
+	/**
 	 * map containing the product types for each tasktable on which the mpcSearch
 	 * should be executed
 	 * 
 	 * key is the processor name (ex. S3A_OL1), values are the product types (ex.
-	 * OL_0_EFR___)
+	 * OL_0_EFR___) and information if the first and last granules should be waiting
+	 * for neighbors
 	 */
-	private Map<String, List<String>> mpcSearch = new HashMap<>();
+	private Map<String, MPCSearchSettings> mpcSearch = new HashMap<>();
 
 	/**
 	 * map containing the settings for the rangeCover logic
@@ -96,26 +129,27 @@ public class S3TypeAdapterSettings {
 	 */
 	private Map<String, List<String>> optionalOutputs = new HashMap<>();
 
-	public Map<String, List<String>> getMpcSearch() {
+	public Map<String, MPCSearchSettings> getMpcSearch() {
 		return mpcSearch;
 	}
 
 	/**
-	 * Get the list of product types for a given processor name. In case there is no
-	 * entry in the map an empty list is returned
+	 * Returns if the MultipleProductCoverSearch should be executed for the given
+	 * productType
 	 * 
-	 * @param key processor name for which the product types should be retrieved
-	 * @return list of product types, or empty list if no entry in map
+	 * @param processorName tasktable processor name
+	 * @param productType   productType to check (ex. OL_1_EFR___)
+	 * @return true if the logic should be applied
 	 */
-	public List<String> getMpcSearch(String key) {
-		List<String> result = mpcSearch.get(key);
-		if (result == null) {
-			return new ArrayList<>();
+	public boolean isMPCSearchActiveForProductType(String processorName, String productType) {
+		MPCSearchSettings mpcSettings = mpcSearch.get(processorName);
+		if (mpcSettings != null) {
+			return mpcSettings.getProductType().equals(productType);
 		}
-		return result;
+		return false;
 	}
 
-	public void setMpcSearch(Map<String, List<String>> mpcSearch) {
+	public void setMpcSearch(Map<String, MPCSearchSettings> mpcSearch) {
 		this.mpcSearch = mpcSearch;
 	}
 

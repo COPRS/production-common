@@ -70,7 +70,7 @@ public class S3TypeAdapter extends AbstractProductTypeAdapter implements Product
 		if (processSettings.getProcessingGroup() != null) {
 			appDataJob.setProcessingGroup(processSettings.getProcessingGroup());
 		}
-		
+
 		// Add more metadata to AppDataJob
 		appDataJob.getProduct().getMetadata().putAll(job.getEventMessage().getBody().getMetadata());
 
@@ -155,8 +155,8 @@ public class S3TypeAdapter extends AbstractProductTypeAdapter implements Product
 		// Loop over alternatives to execute additional logic per product type
 		for (final TaskTableInputAlternative alternative : alternatives) {
 			try {
-				if (settings.getMpcSearch(tasktableAdapter.taskTable().getProcessorName())
-						.contains(alternative.getFileType())) {
+				if (settings.isMPCSearchActiveForProductType(tasktableAdapter.taskTable().getProcessorName(),
+						alternative.getFileType())) {
 					LOGGER.debug("Use additional logic 'MultipleProductCoverSearch (MarginTT)' for product type {}",
 							alternative.getFileType());
 					final MultipleProductCoverSearch mpcSearch = new MultipleProductCoverSearch(tasktableAdapter,
@@ -283,8 +283,8 @@ public class S3TypeAdapter extends AbstractProductTypeAdapter implements Product
 		// logic
 		final Map<String, String> missingAlternatives = new HashMap<>();
 		for (final TaskTableInputAlternative alternative : alternatives) {
-			if (settings.getMpcSearch(taskTableAdapter.taskTable().getProcessorName())
-					.contains(alternative.getFileType())
+			if (settings.isMPCSearchActiveForProductType(taskTableAdapter.taskTable().getProcessorName(),
+					alternative.getFileType())
 					|| settings.isRangeSearchActiveForProductType(taskTableAdapter.taskTable().getProcessorName(),
 							alternative.getFileType())) {
 				missingAlternatives.put(alternative.getFileType(),
