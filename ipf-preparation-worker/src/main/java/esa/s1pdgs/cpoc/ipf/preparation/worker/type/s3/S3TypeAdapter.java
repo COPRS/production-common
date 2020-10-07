@@ -25,6 +25,7 @@ import esa.s1pdgs.cpoc.ipf.preparation.worker.appcat.AppCatJobService;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.config.IpfPreparationWorkerSettings;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.config.ProcessSettings;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.config.S3TypeAdapterSettings;
+import esa.s1pdgs.cpoc.ipf.preparation.worker.config.S3TypeAdapterSettings.MPCSearchSettings;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.generator.DiscardedException;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.model.TimeInterval;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.model.tasktable.ElementMapper;
@@ -159,8 +160,12 @@ public class S3TypeAdapter extends AbstractProductTypeAdapter implements Product
 						alternative.getFileType())) {
 					LOGGER.debug("Use additional logic 'MultipleProductCoverSearch (MarginTT)' for product type {}",
 							alternative.getFileType());
+					
+					MPCSearchSettings mpcSettings = settings.getMpcSearch()
+							.get(tasktableAdapter.taskTable().getProcessorName());
+					
 					final MultipleProductCoverSearch mpcSearch = new MultipleProductCoverSearch(tasktableAdapter,
-							elementMapper, metadataClient, workerSettings);
+							elementMapper, metadataClient, workerSettings, mpcSettings.isDisableFirstLastWaiting());
 					tasks = mpcSearch.updateTaskInputs(tasks, alternative, returnValue.getSatelliteId(),
 							returnValue.getStartTime(), returnValue.getStopTime(), alternative.getDeltaTime0(),
 							alternative.getDeltaTime1(), "NRT");
