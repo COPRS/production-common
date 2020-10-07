@@ -1,5 +1,7 @@
 package esa.s1pdgs.cpoc.common;
 
+import java.util.Objects;
+
 /**
  * Product family. Determinate the concerned topics, buckets in OBS, ...
  * 
@@ -71,6 +73,14 @@ public enum ProductFamily {
     S3_L2_ZIP,
     S3_CAL_ZIP,
     S3_PUG_ZIP;
+	
+	// --------------------------------------------------------------------------
+	
+	public boolean isCompressed() {
+		return ProductFamily.isCompressed(this);
+	}
+	
+	// --------------------------------------------------------------------------
 
     /**
      * Get product family from value in string format
@@ -90,4 +100,9 @@ public enum ProductFamily {
         }
         return ret;
     }
+    
+	public static boolean isCompressed(final ProductFamily productFamily) {
+		return Objects.requireNonNull(productFamily, "productFamily must not be null!").name().endsWith("_ZIP");
+	}
+    
 }

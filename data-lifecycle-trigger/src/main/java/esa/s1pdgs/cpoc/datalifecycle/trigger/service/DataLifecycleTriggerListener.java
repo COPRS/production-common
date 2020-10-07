@@ -142,7 +142,7 @@ public class DataLifecycleTriggerListener<E extends AbstractMessage> implements 
 		
 		final String fileName = this.getFileName(obsKey);
 		final String productName = this.getProductName(obsKey);
-		final boolean isCompressedStorage = this.isCompressedStorage(obsKey);
+		final boolean isCompressedStorage = inputEvent.getProductFamily().isCompressed();
 		
 		final Optional<DataLifecycleMetadata> oExistingMetadata;
 		try {
@@ -235,10 +235,6 @@ public class DataLifecycleTriggerListener<E extends AbstractMessage> implements 
 		}else {
 			return FilenameUtils.getName(obsKey);
 		}
-	}
-	
-	boolean isCompressedStorage(final String obsKey) {
-		return obsKey.contains("-zip/");
 	}
 	
 	boolean isAvailableInLta(final String obsKey) {
