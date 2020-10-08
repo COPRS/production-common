@@ -40,6 +40,8 @@ public class DataLifecycleMetadataRepositoryImpl implements DataLifecycleMetadat
 	
 	private static final Logger LOG = LogManager.getLogger(DataLifecycleMetadataRepositoryImpl.class);
 
+	private static final String String = null;
+
 	private final RestHighLevelClient elasticsearchClient;
 	private final EsClientConfiguration config;
 	private String elasticsearchIndex;
@@ -179,16 +181,23 @@ public class DataLifecycleMetadataRepositoryImpl implements DataLifecycleMetadat
 				(String) sourceAsMap.get(DataLifecycleMetadata.FIELD_NAME.PATH_IN_UNCOMPRESSED_STORAGE.fieldName()));
 		metadata.setPathInCompressedStorage(
 				(String) sourceAsMap.get(DataLifecycleMetadata.FIELD_NAME.PATH_IN_COMPRESSED_STORAGE.fieldName()));
-		metadata.setEvictionDateInUncompressedStorage(DateUtils.parse((String) sourceAsMap
-				.get(DataLifecycleMetadata.FIELD_NAME.EVICTION_DATE_IN_UNCOMPRESSED_STORAGE.fieldName())));
-		metadata.setEvictionDateInCompressedStorage(DateUtils.parse((String) sourceAsMap
-				.get(DataLifecycleMetadata.FIELD_NAME.EVICTION_DATE_IN_COMPRESSED_STORAGE.fieldName())));
 		metadata.setPersistentInUncompressedStorage((Boolean) sourceAsMap
 				.get(DataLifecycleMetadata.FIELD_NAME.PERSISTENT_IN_UNCOMPRESSED_STORAGE.fieldName()));
 		metadata.setPersistentInCompressedStorage((Boolean) sourceAsMap
 				.get(DataLifecycleMetadata.FIELD_NAME.PERSISTENT_IN_COMPRESSED_STORAGE.fieldName()));
 		metadata.setAvailableInLta(
 				(Boolean) sourceAsMap.get(DataLifecycleMetadata.FIELD_NAME.AVAILABLE_IN_LTA.fieldName()));
+		
+		final String evictionDateInUncompressedStorage = (String) sourceAsMap
+				.get(DataLifecycleMetadata.FIELD_NAME.EVICTION_DATE_IN_UNCOMPRESSED_STORAGE.fieldName());
+		metadata.setEvictionDateInUncompressedStorage(
+				(null != evictionDateInUncompressedStorage) ? DateUtils.parse(evictionDateInUncompressedStorage)
+						: null);
+		
+		final String evictionDateInCompressedStorage = (String) sourceAsMap
+				.get(DataLifecycleMetadata.FIELD_NAME.EVICTION_DATE_IN_COMPRESSED_STORAGE.fieldName());
+		metadata.setEvictionDateInCompressedStorage(
+				(null != evictionDateInCompressedStorage) ? DateUtils.parse(evictionDateInCompressedStorage) : null);
 		
 		LOG.debug("mapped product data lifecycle metadata from search result: " + metadata);
 		return metadata;
