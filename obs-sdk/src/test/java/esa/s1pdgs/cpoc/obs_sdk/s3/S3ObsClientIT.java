@@ -14,14 +14,14 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.URISyntaxException;
 import java.net.URL;
-import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.time.Duration;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
+import java.util.Arrays;
 import java.util.List;
-import java.util.Map;
 import java.util.stream.Collectors;
 
 import org.apache.commons.io.IOUtils;
@@ -55,7 +55,6 @@ import esa.s1pdgs.cpoc.obs_sdk.StreamObsUploadObject;
 import esa.s1pdgs.cpoc.obs_sdk.report.ReportingProductFactory;
 import esa.s1pdgs.cpoc.report.ReportingFactory;
 
-@Ignore
 @RunWith(SpringRunner.class)
 @TestPropertySource("classpath:obs-aws-s3.properties")
 @ContextConfiguration(classes = {ObsConfigurationProperties.class})
@@ -390,7 +389,7 @@ public class S3ObsClientIT {
     }
 
     @Test
-    public final void getAllAsStreamTest() throws Exception {
+    public final void list() throws Exception {
         assertFalse(uut.exists(new ObsObject(auxiliaryFiles, testFilePrefix1 + testFileName1)));
         assertFalse(uut.exists(new ObsObject(auxiliaryFiles, testFilePrefix1 + testFileName2)));
         uut.upload(singletonList(new FileObsUploadObject(auxiliaryFiles, testFilePrefix1 + testFileName1, testFile1)), ReportingFactory.NULL);
@@ -398,26 +397,24 @@ public class S3ObsClientIT {
         assertTrue(uut.exists(new ObsObject(auxiliaryFiles, testFilePrefix1 + testFileName1)));
         assertTrue(uut.exists(new ObsObject(auxiliaryFiles, testFilePrefix1 + testFileName2)));
 
-        String retrievedTestfile1Content = null;
-        String retrievedTestfile2Content = null;
-        final Map<String,InputStream> res = uut.getAllAsInputStream(auxiliaryFiles, testFilePrefix1);
-        for (final Map.Entry<String,InputStream> entry : res.entrySet()) {
-            try (final InputStream in = entry.getValue()) {
-                final String content = IOUtils.toString(in, Charset.defaultCharset());
+        final List<String> res = uut.list(auxiliaryFiles, testFilePrefix1);
+        assertEquals(Arrays.asList("abc/def/testfile1.txt", "abc/def/testfile2.txt"), res);
+    }
 
-                if ("abc/def/testfile1.txt".equals(entry.getKey())) {
-                    retrievedTestfile1Content = content;
-                }
-                else if ("abc/def/testfile2.txt".equals(entry.getKey())) {
-                    retrievedTestfile2Content = content;
-                }
-                else {
-                    fail();
-                }
-            }
-        }
-        assertEquals("test", retrievedTestfile1Content);
-        assertEquals("test2", retrievedTestfile2Content);
+    @Test
+    public final void getAsStream() throws Exception {
+        assertFalse(uut.exists(new ObsObject(auxiliaryFiles, testFilePrefix1 + testFileName1)));
+        assertFalse(uut.exists(new ObsObject(auxiliaryFiles, testFilePrefix1 + testFileName2)));
+        uut.upload(singletonList(new FileObsUploadObject(auxiliaryFiles, testFilePrefix1 + testFileName1, testFile1)), ReportingFactory.NULL);
+        uut.upload(singletonList(new FileObsUploadObject(auxiliaryFiles, testFilePrefix1 + testFileName2, testFile2)), ReportingFactory.NULL);
+        assertTrue(uut.exists(new ObsObject(auxiliaryFiles, testFilePrefix1 + testFileName1)));
+        assertTrue(uut.exists(new ObsObject(auxiliaryFiles, testFilePrefix1 + testFileName2)));
+
+        final String retrievedTestFile1Content = IOUtils.toString(uut.getAsStream(auxiliaryFiles, "abc/def/testfile1.txt"), StandardCharsets.UTF_8);
+        final String retrievedTestFile2Content = IOUtils.toString(uut.getAsStream(auxiliaryFiles, "abc/def/testfile2.txt"), StandardCharsets.UTF_8);
+
+        assertEquals("test", retrievedTestFile1Content);
+        assertEquals("test2", retrievedTestFile2Content);
     }
 
     @Test

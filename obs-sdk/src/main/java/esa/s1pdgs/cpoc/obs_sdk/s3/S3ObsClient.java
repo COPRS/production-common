@@ -16,6 +16,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -292,15 +293,23 @@ public class S3ObsClient extends AbstractObsClient {
 	}
 
 	@Override
-	public Map<String, InputStream> getAllAsInputStream(final ProductFamily family, final String keyPrefix)
-			throws SdkClientException {
+	public List<String> list(ProductFamily family, String keyPrefix) throws SdkClientException {
 		ValidArgumentAssertion.assertValidArgument(family);
 		ValidArgumentAssertion.assertValidPrefixArgument(keyPrefix);
 		final String bucket = getBucketFor(family);
 		LOGGER.debug("Getting all files in bucket {} with prefix {}", bucket, keyPrefix);
-		final Map<String, InputStream> result = s3Services.getAllAsInputStream(bucket, keyPrefix);
-		LOGGER.debug("Found {} elements in bucket {} with prefix {}", result.size(), bucket, keyPrefix);			
+		final List<String> result = s3Services.getAll(bucket, keyPrefix)
+				.stream().map(S3ObjectSummary::getKey).collect(Collectors.toList());
+		LOGGER.debug("Found {} elements in bucket {} with prefix {}", result.size(), bucket, keyPrefix);
 		return result;
+	}
+
+	@Override
+	public InputStream getAsStream(ProductFamily family, String key) throws SdkClientException {
+		ValidArgumentAssertion.assertValidArgument(family);
+		ValidArgumentAssertion.assertValidPrefixArgument(key);
+		final String bucket = getBucketFor(family);
+		return s3Services.getAsInputStream(bucket, key);
 	}
 
 	@Override

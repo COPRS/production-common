@@ -1,15 +1,15 @@
 package esa.s1pdgs.cpoc.disseminator.outbox;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Files;
-import java.util.Arrays;
 import java.util.Collections;
-import java.util.Map;
+import java.util.List;
 
 import org.apache.sshd.SshServer;
 import org.apache.sshd.common.file.virtualfs.VirtualFileSystemFactory;
@@ -58,7 +58,7 @@ public class TestSftpOutboxClient {
 	private File testDir;
 	
 	@BeforeClass
-	public static final void setupClass() throws Exception {
+	public static void setupClass() throws Exception {
 		rootDir = Files.createTempDirectory("testSshServer").toFile();
 		rootDir.deleteOnExit();
 		
@@ -76,7 +76,7 @@ public class TestSftpOutboxClient {
 		keyFile.deleteOnExit();		
 		sshd.setKeyPairProvider(provider);
 		
-		sshd.setSubsystemFactories(Arrays.asList(new SftpSubsystem.Factory()));
+		sshd.setSubsystemFactories(Collections.singletonList(new SftpSubsystem.Factory()));
 		sshd.setCommandFactory(new ScpCommandFactory());
 		sshd.setPasswordAuthenticator(new SimplePasswordAuthenticator(USER, PASS));
 		sshd.setFileSystemFactory(new VirtualFileSystemFactory(rootDir.getPath()));
@@ -85,7 +85,7 @@ public class TestSftpOutboxClient {
 	}
 	
 	@AfterClass
-	public static final void tearDownClass() throws Exception {
+	public static void tearDownClass() throws Exception {
 		sshd.stop();
 		FileUtils.delete(rootDir.getPath());
 	}
@@ -96,7 +96,7 @@ public class TestSftpOutboxClient {
 	}
 	
 	@After
-	public final void tearDown() throws IOException {
+	public final void tearDown() {
 		FileUtils.delete(testDir.getPath());
 	}
 	
@@ -104,10 +104,15 @@ public class TestSftpOutboxClient {
 	public final void testUpload_OnNonExistingDirectory_ShallCreateParentDirectoriesLazily() throws Exception {
 		final FakeObsClient fakeObsClient = new FakeObsClient() {
 			@Override
-			public Map<String, InputStream> getAllAsInputStream(final ProductFamily family, final String keyPrefix) {
-				return Collections.singletonMap("my/little/file", new ByteArrayInputStream("expected file content".getBytes()));
-			}			
-		};		
+			public List<String> list(final ProductFamily family, final String keyPrefix) {
+				return Collections.singletonList("my/little/file");
+			}
+
+			@Override
+			public InputStream getAsStream(ProductFamily family, String key) {
+				return new ByteArrayInputStream("expected file content".getBytes());
+			}
+		};
 		final OutboxConfiguration config = new OutboxConfiguration();
 		config.setPath(testDir.getPath());
 		config.setUsername(USER);
@@ -120,8 +125,7 @@ public class TestSftpOutboxClient {
 		uut.transfer(new ObsObject(ProductFamily.BLANK, "my/little/file"), ReportingFactory.NULL);
 		
 		final File expectedFile = new File(dir, "my/little/file");
-		assertEquals(true, expectedFile.exists());
-		
+		assertTrue(expectedFile.exists());
 		assertEquals("expected file content", FileUtils.readFile(expectedFile));
 	}
 	
@@ -129,10 +133,15 @@ public class TestSftpOutboxClient {
 	public final void testUpload_OnExistingDirectory_ShallTransferFile() throws Exception {
 		final FakeObsClient fakeObsClient = new FakeObsClient() {
 			@Override
-			public Map<String, InputStream> getAllAsInputStream(final ProductFamily family, final String keyPrefixReporting) {
-				return Collections.singletonMap("my/little/file", new ByteArrayInputStream("expected file content".getBytes()));
-			}			
-		};	
+			public List<String> list(final ProductFamily family, final String keyPrefixReporting) {
+				return Collections.singletonList("my/little/file");
+			}
+
+			@Override
+			public InputStream getAsStream(ProductFamily family, String key) {
+				return new ByteArrayInputStream("expected file content".getBytes());
+			}
+		};
 		
 		final OutboxConfiguration config = new OutboxConfiguration();
 		config.setPath(testDir.getPath());
@@ -147,8 +156,7 @@ public class TestSftpOutboxClient {
 		uut.transfer(new ObsObject(ProductFamily.BLANK, "my/little/file"), ReportingFactory.NULL);
 		
 		final File expectedFile = new File(dir, "my/little/file");
-		assertEquals(true, expectedFile.exists());
-		
+		assertTrue(expectedFile.exists());
 		assertEquals("expected file content", FileUtils.readFile(expectedFile));
 	}
 

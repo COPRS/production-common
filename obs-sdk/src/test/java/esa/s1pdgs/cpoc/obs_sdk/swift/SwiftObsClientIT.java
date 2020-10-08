@@ -331,35 +331,4 @@ public class SwiftObsClientIT {
 		final int count = uut.numberOfObjects(auxiliaryFiles, testFilePrefix);
 		assertEquals(2, count);
 	}
-	
-	@Test
-	public final void getAllAsStreamTest() throws Exception {
-		assertFalse(uut.exists(new ObsObject(auxiliaryFiles, testFilePrefix + testFileName1)));
-		assertFalse(uut.exists(new ObsObject(auxiliaryFiles, testFilePrefix + testFileName2)));
-		uut.upload(singletonList(new FileObsUploadObject(auxiliaryFiles, testFilePrefix + testFileName1, testFile1)), ReportingFactory.NULL);
-		uut.upload(singletonList(new FileObsUploadObject(auxiliaryFiles, testFilePrefix + testFileName2, testFile2)), ReportingFactory.NULL);
-		assertTrue(uut.exists(new ObsObject(auxiliaryFiles, testFilePrefix + testFileName1)));
-		assertTrue(uut.exists(new ObsObject(auxiliaryFiles, testFilePrefix + testFileName2)));
-		
-		String retrievedTestfile1Content = null;
-		String retrievedTestfile2Content = null;
-		final Map<String,InputStream> res = uut.getAllAsInputStream(auxiliaryFiles, testFilePrefix);
-		for (final Map.Entry<String,InputStream> entry : res.entrySet()) {
-			try (final InputStream in = entry.getValue()) {
-				final String content = IOUtils.toString(in, Charset.defaultCharset());
-				
-				if ("abc/def/testfile1.txt".equals(entry.getKey())) {
-					retrievedTestfile1Content = content;
-				}
-				else if ("abc/def/testfile2.txt".equals(entry.getKey())) {
-					retrievedTestfile2Content = content;
-				}
-				else {
-					fail();
-				}
-			}
-		}
-		assertEquals("test", retrievedTestfile1Content);
-		assertEquals("test2", retrievedTestfile2Content);
-	}
 }

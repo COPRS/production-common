@@ -2,6 +2,8 @@
 package esa.s1pdgs.cpoc.datalifecycle.trigger.domain.persistence;
 
 import java.io.IOException;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -63,6 +65,8 @@ public class DataLifecycleMetadataRepositoryImpl implements DataLifecycleMetadat
 	
 	@Override
 	public void save(DataLifecycleMetadata metadata) throws DataLifecycleMetadataRepositoryException {
+		metadata.setLastModified(LocalDateTime.now(ZoneId.of("UTC")));
+		
 		final IndexRequest request = new IndexRequest(this.elasticsearchIndex).id(metadata.getProductName())
 				.source(metadata.toJson().toString(), XContentType.JSON);
 		LOG.debug("product data lifecycle metadata save request ("
@@ -179,16 +183,27 @@ public class DataLifecycleMetadataRepositoryImpl implements DataLifecycleMetadat
 				(String) sourceAsMap.get(DataLifecycleMetadata.FIELD_NAME.PATH_IN_UNCOMPRESSED_STORAGE.fieldName()));
 		metadata.setPathInCompressedStorage(
 				(String) sourceAsMap.get(DataLifecycleMetadata.FIELD_NAME.PATH_IN_COMPRESSED_STORAGE.fieldName()));
-		metadata.setEvictionDateInUncompressedStorage(DateUtils.parse((String) sourceAsMap
-				.get(DataLifecycleMetadata.FIELD_NAME.EVICTION_DATE_IN_UNCOMPRESSED_STORAGE.fieldName())));
-		metadata.setEvictionDateInCompressedStorage(DateUtils.parse((String) sourceAsMap
-				.get(DataLifecycleMetadata.FIELD_NAME.EVICTION_DATE_IN_COMPRESSED_STORAGE.fieldName())));
 		metadata.setPersistentInUncompressedStorage((Boolean) sourceAsMap
 				.get(DataLifecycleMetadata.FIELD_NAME.PERSISTENT_IN_UNCOMPRESSED_STORAGE.fieldName()));
 		metadata.setPersistentInCompressedStorage((Boolean) sourceAsMap
 				.get(DataLifecycleMetadata.FIELD_NAME.PERSISTENT_IN_COMPRESSED_STORAGE.fieldName()));
 		metadata.setAvailableInLta(
 				(Boolean) sourceAsMap.get(DataLifecycleMetadata.FIELD_NAME.AVAILABLE_IN_LTA.fieldName()));
+		
+		final String evictionDateInUncompressedStorage = (String) sourceAsMap
+				.get(DataLifecycleMetadata.FIELD_NAME.EVICTION_DATE_IN_UNCOMPRESSED_STORAGE.fieldName());
+		metadata.setEvictionDateInUncompressedStorage(
+				(null != evictionDateInUncompressedStorage) ? DateUtils.parse(evictionDateInUncompressedStorage)
+						: null);
+		
+		final String evictionDateInCompressedStorage = (String) sourceAsMap
+				.get(DataLifecycleMetadata.FIELD_NAME.EVICTION_DATE_IN_COMPRESSED_STORAGE.fieldName());
+		metadata.setEvictionDateInCompressedStorage(
+				(null != evictionDateInCompressedStorage) ? DateUtils.parse(evictionDateInCompressedStorage) : null);
+		
+		final String lastModified = (String) sourceAsMap
+				.get(DataLifecycleMetadata.FIELD_NAME.LAST_MODIFIED.fieldName());
+		metadata.setLastModified((null != lastModified) ? DateUtils.parse(lastModified) : null);
 		
 		LOG.debug("mapped product data lifecycle metadata from search result: " + metadata);
 		return metadata;
