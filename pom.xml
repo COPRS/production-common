@@ -326,6 +326,7 @@
 		<module>applicative-catalog</module>
 		<module>app-catalog-client</module>
 		<module>xbip-client</module>
+		<module>auxip-client</module>
 		<module>error-repo-client</module>
 		<module>app-status</module>
 		<module>archives</module>
@@ -355,5 +356,6 @@
 		<module>compression-trigger</module>
 		<module>compression-worker</module>
 		<module>xml-tools</module>
+		<module>auxip-client</module>
 	</modules>
 </project>
