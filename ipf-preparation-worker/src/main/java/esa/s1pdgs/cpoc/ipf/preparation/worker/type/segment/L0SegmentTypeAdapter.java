@@ -27,6 +27,7 @@ import esa.s1pdgs.cpoc.common.errors.processing.MetadataQueryException;
 import esa.s1pdgs.cpoc.common.utils.DateUtils;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.appcat.AppCatJobService;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.generator.DiscardedException;
+import esa.s1pdgs.cpoc.ipf.preparation.worker.generator.TimedOutException;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.model.tasktable.TaskTableAdapter;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.query.QueryUtils;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.type.AbstractProductTypeAdapter;
@@ -325,6 +326,7 @@ public final class L0SegmentTypeAdapter extends AbstractProductTypeAdapter imple
 						job.getGeneration());
 				product.setStartTime(sensingStart);
 				product.setStopTime(sensingStop);
+				throw new TimedOutException();
 			} else {
 				throw new IpfPrepWorkerInputsMissingException(missingMetadata);
 			}
@@ -337,8 +339,8 @@ public final class L0SegmentTypeAdapter extends AbstractProductTypeAdapter imple
 	}
 
 	@Override
-	public List<AppDataJob> createAppDataJobs(IpfPreparationJob job) {
-		AppDataJob appDataJob = AppDataJob.fromPreparationJob(job);
+	public List<AppDataJob> createAppDataJobs(final IpfPreparationJob job) {
+		final AppDataJob appDataJob = AppDataJob.fromPreparationJob(job);
 		
 		final CatalogEventAdapter eventAdapter = CatalogEventAdapter.of(appDataJob);
 		final L0SegmentProduct product = L0SegmentProduct.of(appDataJob);

@@ -97,6 +97,7 @@ public class Publisher {
 		final GenericMessageDto<IpfPreparationJob> prepJob = job.getPrepJobMessage();		
 		execJob.setIpfPreparationJobMessage(prepJob);	
 		execJob.setDebug(prepJob.getBody().isDebug());
+		execJob.setTimedOut(job.getTimedOut());
 		
 		try {
 			// Add jobOrder inputs to ExecJob (except PROC inputs)
@@ -134,15 +135,15 @@ public class Publisher {
 	 * Add inputs from job order to execution job. Ignore PROC inputs, as they
 	 * should not be downloaded from the OBS
 	 */
-	private void addInputsToExecJob(final JobOrderAdapter jobOrderAdapter, IpfExecutionJob execJob) {
+	private void addInputsToExecJob(final JobOrderAdapter jobOrderAdapter, final IpfExecutionJob execJob) {
 		// Create list of all FileTypes of TaskTableInputAlternatives of Origin PROC
-		List<String> procAlternatives = tasktableAdapter.getAllAlternatives().stream()
+		final List<String> procAlternatives = tasktableAdapter.getAllAlternatives().stream()
 				.filter(alternative -> alternative.getOrigin() == TaskTableInputOrigin.PROC)
 				.map(alternative -> alternative.getFileType()).collect(toList());
 
 		jobOrderAdapter.distinctInputs().forEach(input -> {
 			for (final JobOrderInputFile inputFile : input.getFilenames()) {
-				File file = new File(inputFile.getFilename());
+				final File file = new File(inputFile.getFilename());
 				if (!procAlternatives.contains(file.getName())) {
 					execJob.addInput(new LevelJobInputDto(input.getFamily().name(), inputFile.getFilename(),
 							inputFile.getKeyObjectStorage()));

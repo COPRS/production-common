@@ -365,13 +365,26 @@ public class JobProcessor implements MqiListener<IpfExecutionJob> {
             	.filter(o -> o.getFamily() == ProductFamily.INVALID)
             	.map(ObsObject::getKey)
             	.collect(Collectors.toList());
-       
-            final String warningMessage = missingChunks.isEmpty() ? "" : String.format(
+            
+            final String warningMessage;            
+            if (missingChunks.isEmpty()) {
+            	warningMessage = String.format(
         				"Missing RAWs detected for successful production %s: %s. "
         				+ "Restart if chunks become available or delete this request if they are lost", 
         				message.getId(), 
         				missingChunks
-        	);            
+            	); 
+            }
+            else if (job.isTimedOut()) {
+            	warningMessage = String.format(
+        				"JobGeneration timed out before successful production %s. "
+        				+ "Restart if missing inputs become available or delete this request if they are lost", 
+        				message.getId()
+            	); 
+            }
+            else {
+            	warningMessage = "";
+            }
             return new MqiPublishingJob<>(productionEvents, warningMessage);
 		} finally {
             cleanJobProcessing(job, poolProcessing, procExecutorSrv);

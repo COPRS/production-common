@@ -20,6 +20,7 @@ import esa.s1pdgs.cpoc.common.errors.processing.IpfPrepWorkerInputsMissingExcept
 import esa.s1pdgs.cpoc.common.errors.processing.MetadataQueryException;
 import esa.s1pdgs.cpoc.common.utils.DateUtils;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.appcat.AppCatJobService;
+import esa.s1pdgs.cpoc.ipf.preparation.worker.generator.TimedOutException;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.model.tasktable.TaskTableAdapter;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.type.AbstractProductTypeAdapter;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.type.Product;
@@ -98,14 +99,14 @@ public final class EdrsSessionTypeAdapter extends AbstractProductTypeAdapter imp
 	public final void validateInputSearch(final AppDataJob job, final TaskTableAdapter tasktableAdpter) throws IpfPrepWorkerInputsMissingException {       	
         // S1PRO-1101: if timeout for primary search is reached -> just start the job 
     	if (aiopAdapter.isTimedOut(job)) {	        		
-    		return;
+    		throw new TimedOutException();
     	}
        	validator.assertIsComplete(EdrsSessionProduct.of(job));
 	}
 
 	@Override
-	public List<AppDataJob> createAppDataJobs(IpfPreparationJob job) {
-		AppDataJob appDataJob = AppDataJob.fromPreparationJob(job);
+	public List<AppDataJob> createAppDataJobs(final IpfPreparationJob job) {
+		final AppDataJob appDataJob = AppDataJob.fromPreparationJob(job);
 		
 		final CatalogEventAdapter eventAdapter = CatalogEventAdapter.of(appDataJob);				
 		final EdrsSessionProduct product = EdrsSessionProduct.of(appDataJob);		

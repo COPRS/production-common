@@ -87,6 +87,8 @@ public class AppDataJob {
 	 * with different settings (ex. timeliness)
 	 */
     private String processingGroup;
+    
+    private boolean timedOut = false;
 
 	/**
 	 * generate an AppDataJob from an IpfPreparationJob
@@ -340,6 +342,14 @@ public class AppDataJob {
 		this.processingGroup = processingGroup;
 	}
 
+	public boolean getTimedOut() {
+		return timedOut;
+	}
+
+	public void setTimedOut(final boolean timedOut) {
+		this.timedOut = timedOut;
+	}
+
 	@Override
 	public String toString() {
 		return "AppDataJob [id=" + id + ", level=" + level + ", pod=" + pod + ", state=" + state + ", taskTableName="
@@ -347,14 +357,14 @@ public class AppDataJob {
 				+ ", creationDate=" + creationDate + ", lastUpdateDate=" + lastUpdateDate + ", messages=" + messages
 				+ ", product=" + product + ", additionalInputs=" + additionalInputs + ", generation=" + generation
 				+ ", reportingId=" + reportingId + ", prepJobMessage=" + prepJobMessage + ", processingGroup="
-				+ processingGroup + "]";
+				+ processingGroup + ", timedOut=" + timedOut + "]";
 	}
 
 	@Override
 	public int hashCode() {
 		return Objects.hash(additionalInputs, creationDate, generation, id, lastUpdateDate, level, messages, pod,
 				prepJobMessage, processingGroup, product, productName, reportingId, startTime, state, stopTime,
-				taskTableName);
+				taskTableName,timedOut);
 	}
 
 	@Override
@@ -367,13 +377,22 @@ public class AppDataJob {
 		}
 		final AppDataJob other = (AppDataJob) obj;
 		return Objects.equals(additionalInputs, other.additionalInputs)
-				&& Objects.equals(creationDate, other.creationDate) && Objects.equals(generation, other.generation)
-				&& id == other.id && Objects.equals(lastUpdateDate, other.lastUpdateDate) && level == other.level
-				&& Objects.equals(messages, other.messages) && Objects.equals(pod, other.pod)
+				&& Objects.equals(creationDate, other.creationDate) 
+				&& Objects.equals(generation, other.generation)
+				&& id == other.id 
+				&& Objects.equals(lastUpdateDate, other.lastUpdateDate) 
+				&& level == other.level
+				&& Objects.equals(messages, other.messages) 
+				&& timedOut == other.timedOut
+				&& Objects.equals(pod, other.pod)
 				&& Objects.equals(prepJobMessage, other.prepJobMessage)
-				&& Objects.equals(processingGroup, other.processingGroup) && Objects.equals(product, other.product)
-				&& Objects.equals(productName, other.productName) && Objects.equals(reportingId, other.reportingId)
-				&& Objects.equals(startTime, other.startTime) && state == other.state
-				&& Objects.equals(stopTime, other.stopTime) && Objects.equals(taskTableName, other.taskTableName);
+				&& Objects.equals(processingGroup, other.processingGroup) 
+				&& Objects.equals(product, other.product)
+				&& Objects.equals(productName, other.productName) 
+				&& Objects.equals(reportingId, other.reportingId)
+				&& Objects.equals(startTime, other.startTime) 
+				&& state == other.state
+				&& Objects.equals(stopTime, other.stopTime) 
+				&& Objects.equals(taskTableName, other.taskTableName);
 	}
 }

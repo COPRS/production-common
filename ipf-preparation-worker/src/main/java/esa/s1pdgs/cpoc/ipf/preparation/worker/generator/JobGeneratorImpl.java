@@ -5,6 +5,7 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.concurrent.Callable;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.stream.Collectors;
 
 import esa.s1pdgs.cpoc.appcatalog.AppDataJob;
@@ -42,6 +43,7 @@ public final class JobGeneratorImpl implements JobGenerator {
 		public final void mainInputSearch(final AppDataJobGenerationState outputState) throws JobStateTransistionFailed {			
 			AppDataJobGenerationState newState = job.getGeneration().getState();
 			
+			final AtomicBoolean timeout = new AtomicBoolean(false);
 			Product queried = null;
 			try {
 				queried = perform(
@@ -53,14 +55,20 @@ public final class JobGeneratorImpl implements JobGenerator {
 				// FIXME dirty workaround warning, the product above is still altered in validate by modifying 
 				// the start stop time for segments
 				performVoid(
-					() -> typeAdapter.validateInputSearch(job, tasktableAdapter), 
+					() -> {
+						try {
+							typeAdapter.validateInputSearch(job, tasktableAdapter);
+						} catch (final TimedOutException e) {
+							timeout.set(true);
+						} 
+					},
 					"validating availability of input products for " + job.getProductName()
 				);
 				newState = outputState;
 			}
 			finally
 			{
-				appCatService.updateProduct(job.getId(), queried, newState);
+				appCatService.updateProduct(job.getId(), queried, newState, timeout.get());
 			}			
 		}
 		

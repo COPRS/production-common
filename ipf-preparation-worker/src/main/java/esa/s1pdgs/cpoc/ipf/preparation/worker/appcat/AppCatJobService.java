@@ -136,10 +136,11 @@ public class AppCatJobService {
 	}
 
 
-	public final void updateProduct(final long id, final Product queried, final AppDataJobGenerationState outputState) 
+	public final void updateProduct(final long id, final Product queried, final AppDataJobGenerationState outputState, final boolean timedOut) 
 			throws AppCatJobUpdateFailed {
 		performUpdate(
-				job -> {
+				job -> {					
+					job.setTimedOut(timedOut);
 					if (queried != null) {
 						final AppDataJobProduct prod = queried.toProduct();
 						job.setProduct(prod);						

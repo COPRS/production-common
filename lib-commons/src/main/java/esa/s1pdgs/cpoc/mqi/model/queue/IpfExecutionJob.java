@@ -57,6 +57,8 @@ public class IpfExecutionJob extends AbstractMessage {
     
     
     private GenericMessageDto<IpfPreparationJob> ipfPreparationJobMessage;
+    
+    private boolean timedOut = false;
 
     /**
      * Default constructor
@@ -230,15 +232,23 @@ public class IpfExecutionJob extends AbstractMessage {
 		return ipfPreparationJobMessage;
 	}
 
-	public void setIpfPreparationJobMessage(GenericMessageDto<IpfPreparationJob> ipfPreparationJobMessage) {
+	public void setIpfPreparationJobMessage(final GenericMessageDto<IpfPreparationJob> ipfPreparationJobMessage) {
 		this.ipfPreparationJobMessage = ipfPreparationJobMessage;
+	}
+
+	public boolean isTimedOut() {
+		return timedOut;
+	}
+
+	public void setTimedOut(final boolean timedOut) {
+		this.timedOut = timedOut;
 	}
 
 	@Override
 	public int hashCode() {
 		return Objects.hash(creationDate, hostname, inputs, jobOrder, timeliness, keyObjectStorage, outputs, pools,
 				productFamily, productProcessMode, workDirectory,  uid, ipfPreparationJobMessage,
-				allowedActions, demandType, debug, retryCounter);
+				allowedActions, demandType, debug, retryCounter, timedOut);
 	}
 
 	@Override
@@ -262,6 +272,7 @@ public class IpfExecutionJob extends AbstractMessage {
 				&& Objects.equals(outputs, other.outputs)
 				&& Objects.equals(pools, other.pools) 
 				&& productFamily == other.productFamily
+				&& timedOut == other.timedOut
 				&& Objects.equals(productProcessMode, other.productProcessMode)
 				&& Objects.equals(workDirectory, other.workDirectory)
 				&& Objects.equals(uid, other.uid)
@@ -278,7 +289,8 @@ public class IpfExecutionJob extends AbstractMessage {
 				+ ", creationDate=" + creationDate + ", hostname=" + hostname + ", productProcessMode="
 				+ productProcessMode + ", workDirectory=" + workDirectory + ", jobOrder=" + jobOrder +
 				", timeliness=" + timeliness + ", inputs=" + inputs + ", outputs=" + outputs +
-				", pools=" + pools + ", uid=" + uid + ", ipfPreparationJobMessage=" + ipfPreparationJobMessage + "]";
+				", pools=" + pools + ", timedOut=" + timedOut + ", uid=" + uid +
+				", ipfPreparationJobMessage=" + ipfPreparationJobMessage + "]";
 	}
 
 }
