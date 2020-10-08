@@ -67,15 +67,15 @@ public class S3TypeAdapterSettings {
 	 * @author Julian Kaping
 	 */
 	public static class MPCSearchSettings {
-		private String productType;
+		private List<String> productTypes;
 		private boolean disableFirstLastWaiting = false;
 
-		public String getProductType() {
-			return productType;
+		public List<String> getProductTypes() {
+			return productTypes;
 		}
 
-		public void setProductType(String productType) {
-			this.productType = productType;
+		public void setProductTypes(List<String> productTypes) {
+			this.productTypes = productTypes;
 		}
 
 		public boolean isDisableFirstLastWaiting() {
@@ -88,7 +88,7 @@ public class S3TypeAdapterSettings {
 
 		@Override
 		public String toString() {
-			return "MPCSearchSettings [productType=" + productType + ", disableFirstLastWaiting="
+			return "MPCSearchSettings [productType=" + productTypes + ", disableFirstLastWaiting="
 					+ disableFirstLastWaiting + "]";
 		}
 	}
@@ -144,7 +144,7 @@ public class S3TypeAdapterSettings {
 	public boolean isMPCSearchActiveForProductType(String processorName, String productType) {
 		MPCSearchSettings mpcSettings = mpcSearch.get(processorName);
 		if (mpcSettings != null) {
-			return mpcSettings.getProductType().equals(productType);
+			return mpcSettings.getProductTypes().contains(productType);
 		}
 		return false;
 	}
