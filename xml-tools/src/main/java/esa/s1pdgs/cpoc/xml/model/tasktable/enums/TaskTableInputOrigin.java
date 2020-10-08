@@ -16,6 +16,9 @@ public enum TaskTableInputOrigin {
 
 	@XmlEnumValue("DB")
 	DB,
+	
+	@XmlEnumValue("LOG")
+	LOG,
  
     @XmlEnumValue("")
     BLANK;

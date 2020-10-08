@@ -20,6 +20,7 @@ import org.apache.logging.log4j.Logger;
 import org.apache.lucene.search.TotalHits;
 import org.apache.lucene.search.TotalHits.Relation;
 import org.elasticsearch.ElasticsearchStatusException;
+import org.elasticsearch.action.admin.indices.refresh.RefreshRequest;
 import org.elasticsearch.action.get.GetRequest;
 import org.elasticsearch.action.get.GetResponse;
 import org.elasticsearch.action.index.IndexRequest;
@@ -245,6 +246,26 @@ public class EsServices {
 			}
 		} catch (JSONException | IOException e) {
 			throw new Exception(e);
+		}
+	}
+	
+	/**
+	 * Refresh the index to ensure new documents can be found. The index is
+	 * extracted from the family and type.
+	 * 
+	 * @param productFamily productFamily of the product that will be searched in
+	 *                      the future
+	 * @param productType   product type of the product that will be searched in the
+	 *                      future
+	 */
+	public void refreshIndex(final ProductFamily productFamily, final String productType) throws Exception {
+		final String index = getIndexForProductFamily(productFamily, productType);
+		final RefreshRequest request = new RefreshRequest(index);
+
+		try {
+			elasticsearchDAO.refresh(request);
+		} catch (final IOException e) {
+			throw new Exception(e.getMessage());
 		}
 	}
 	
@@ -1076,39 +1097,7 @@ public class EsServices {
 			if (this.isNotEmpty(searchResponse)) {
 				final List<S3Metadata> r = new ArrayList<>();
 				for (final SearchHit hit : searchResponse.getHits().getHits()) {
-					final Map<String, Object> source = hit.getSourceAsMap();
-					final S3Metadata local = new S3Metadata();
-					local.setProductName(source.get("productName").toString());
-					local.setProductType(source.get("productType").toString());
-					local.setKeyObjectStorage(source.get("url").toString());
-					local.setGranuleNumber(Integer.parseInt(source.get("granuleNumber").toString()));
-					local.setGranulePosition(source.get("granulePosition").toString());
-					if (source.containsKey("startTime")) {
-						try {
-							local.setValidityStart(
-									DateUtils.convertToMetadataDateTimeFormat(source.get("startTime").toString()));
-						} catch (final DateTimeParseException e) {
-							throw new MetadataMalformedException("startTime");
-						}
-					}
-					if (source.containsKey("stopTime")) {
-						try {
-							local.setValidityStop(
-									DateUtils.convertToMetadataDateTimeFormat(source.get("stopTime").toString()));
-						} catch (final DateTimeParseException e) {
-							throw new MetadataMalformedException("stopTime");
-						}
-					}
-					if (source.containsKey("creationTime")) {
-						try {
-							local.setCreationTime(
-									DateUtils.convertToMetadataDateTimeFormat(source.get("creationTime").toString()));
-						} catch (final DateTimeParseException e) {
-							throw new MetadataMalformedException("creationTime");
-						}
-					}
-					source.forEach((key, value) -> local.addAdditionalProperty(key, value.toString()));
-					r.add(local);
+					r.add(toS3Metadata(hit));
 				}
 				return r;
 			}
@@ -1186,61 +1175,48 @@ public class EsServices {
 		try {
 			final SearchResponse searchResponse = elasticsearchDAO.search(searchRequest);
 			if (this.isNotEmpty(searchResponse)) {
-				final Map<String, Object> source = searchResponse.getHits().getAt(0).getSourceAsMap();
-				final S3Metadata local = new S3Metadata();
-				local.setProductName(source.get("productName").toString());
-				local.setProductType(source.get("productType").toString());
-				local.setKeyObjectStorage(source.get("url").toString());
-				local.setGranuleNumber(Integer.parseInt(source.get("granuleNumber").toString()));
-				local.setGranulePosition(source.get("granulePosition").toString());
-				if (source.containsKey("startTime")) {
-					try {
-						local.setValidityStart(
-								DateUtils.convertToMetadataDateTimeFormat(source.get("startTime").toString()));
-					} catch (final DateTimeParseException e) {
-						throw new MetadataMalformedException("startTime");
-					}
-				}
-				if (source.containsKey("stopTime")) {
-					try {
-						local.setValidityStop(
-								DateUtils.convertToMetadataDateTimeFormat(source.get("stopTime").toString()));
-					} catch (final DateTimeParseException e) {
-						throw new MetadataMalformedException("stopTime");
-					}
-				}
-				if (source.containsKey("creationTime")) {
-					try {
-						local.setCreationTime(
-								DateUtils.convertToMetadataDateTimeFormat(source.get("creationTime").toString()));
-					} catch (final DateTimeParseException e) {
-						throw new MetadataMalformedException("creationTime");
-					}
-				}
-				if (source.containsKey("utcTime")) {
-					try {
-						local.setAnxTime(
-								DateUtils.convertToMetadataDateTimeFormat(source.get("utcTime").toString()));
-					} catch (final DateTimeParseException e) {
-						throw new MetadataMalformedException("utcTime");
-					}
-				}
-				if (source.containsKey("utc1Time")) {
-					try {
-						local.setAnx1Time(
-								DateUtils.convertToMetadataDateTimeFormat(source.get("utc1Time").toString()));
-					} catch (final DateTimeParseException e) {
-						throw new MetadataMalformedException("utc1Time");
-					}
-				}
-				source.forEach((key, value) -> local.addAdditionalProperty(key, value.toString()));
-				return local;
+				return toS3Metadata(searchResponse.getHits().getAt(0));
 			}
-
 		} catch (final IOException e) {
 			throw new Exception(e.getMessage());
 		}
 		
+		return null;
+	}
+	
+	/**
+	 * Queries the elastic search for products of the given orbit number
+	 * 
+	 * @return list of matching products
+	 * @throws Exception if the search throws an error
+	 */
+	public S3Metadata getFirstProductForOrbit(final ProductFamily productFamily, final String productType,
+			final String satelliteId, final long orbitNumber) throws Exception {
+		final SearchSourceBuilder sourceBuilder = new SearchSourceBuilder();
+		final BoolQueryBuilder queryBuilder = QueryBuilders.boolQuery()
+				.must(QueryBuilders.regexpQuery("productType.keyword", productType))
+				.must(satelliteId(satelliteId))
+				.must(QueryBuilders.termQuery("absoluteStartOrbit", orbitNumber));
+
+		LOGGER.debug("query composed is {}", queryBuilder);
+
+		sourceBuilder.query(queryBuilder);
+		sourceBuilder.sort("insertionTime", SortOrder.ASC);
+		sourceBuilder.size(1);
+
+		final String index = productFamily.name().toLowerCase();
+		final SearchRequest searchRequest = new SearchRequest(index);
+		searchRequest.source(sourceBuilder);
+
+		try {
+			final SearchResponse searchResponse = elasticsearchDAO.search(searchRequest);
+			if (this.isNotEmpty(searchResponse)) {
+				return toS3Metadata(searchResponse.getHits().getAt(0));
+			}
+		} catch (final IOException e) {
+			throw new Exception(e.getMessage());
+		}
+
 		return null;
 	}
 
@@ -1913,5 +1889,78 @@ public class EsServices {
 			}
 		}
 		return "0";
+	}
+	
+	/**
+	 * Converts a search hit to an S3Metadata object
+	 */
+	private S3Metadata toS3Metadata(final SearchHit searchHit) throws MetadataMalformedException {
+		final Map<String, Object> source = searchHit.getSourceAsMap();
+		
+		final S3Metadata local = new S3Metadata();
+		local.setProductName(source.get("productName").toString());
+		local.setProductType(source.get("productType").toString());
+		local.setSatelliteId(source.get("satelliteId").toString());
+		local.setKeyObjectStorage(source.get("url").toString());
+		local.setGranuleNumber(Integer.parseInt(source.get("granuleNumber").toString()));
+		local.setGranulePosition(source.get("granulePosition").toString());
+		local.setAbsoluteStartOrbit(source.get("absoluteStartOrbit").toString());
+		if (source.containsKey("startTime")) {
+			try {
+				local.setValidityStart(
+						DateUtils.convertToMetadataDateTimeFormat(source.get("startTime").toString()));
+			} catch (final DateTimeParseException e) {
+				throw new MetadataMalformedException("startTime");
+			}
+		}
+		if (source.containsKey("stopTime")) {
+			try {
+				local.setValidityStop(
+						DateUtils.convertToMetadataDateTimeFormat(source.get("stopTime").toString()));
+			} catch (final DateTimeParseException e) {
+				throw new MetadataMalformedException("stopTime");
+			}
+		}
+		if (source.containsKey("creationTime")) {
+			try {
+				local.setCreationTime(
+						DateUtils.convertToMetadataDateTimeFormat(source.get("creationTime").toString()));
+			} catch (final DateTimeParseException e) {
+				throw new MetadataMalformedException("creationTime");
+			}
+		}
+		if (source.containsKey("utcTime")) {
+			try {
+				local.setAnxTime(
+						DateUtils.convertToMetadataDateTimeFormat(source.get("utcTime").toString()));
+			} catch (final DateTimeParseException e) {
+				throw new MetadataMalformedException("utcTime");
+			}
+		}
+		if (source.containsKey("utc1Time")) {
+			try {
+				local.setAnx1Time(
+						DateUtils.convertToMetadataDateTimeFormat(source.get("utc1Time").toString()));
+			} catch (final DateTimeParseException e) {
+				throw new MetadataMalformedException("utc1Time");
+			}
+		}
+		if (source.containsKey("insertionTime")) {
+			try {
+				local.setInsertionTime(
+						DateUtils.convertToMetadataDateTimeFormat(source.get("insertionTime").toString()));
+			} catch (final DateTimeParseException e) {
+				throw new MetadataMalformedException("insertionTime");
+			}
+		}
+		if (source.containsKey("dumpStart")) {
+			try {
+				local.setDumpStart(
+						DateUtils.convertToMetadataDateTimeFormat(source.get("dumpStart").toString()));
+			} catch (final DateTimeParseException e) {
+				throw new MetadataMalformedException("dumpStart");
+			}
+		}
+		return local;
 	}
 }

@@ -139,7 +139,7 @@ public final class JobGeneratorImpl implements JobGenerator {
 		try {
 			final String tasktableName = tasktableAdapter.file().getName();
 			
-			final AppDataJob job = appCatService.next(tasktableName);
+			final AppDataJob job = appCatService.next(tasktableName, settings.getProcessingGroup());
 			if (job == null) {
 				LOGGER.trace("Found no applicable job to handle for tasktable {}", tasktableName);
 				return;
@@ -217,6 +217,10 @@ public final class JobGeneratorImpl implements JobGenerator {
 					String.format("Error on persisting change of '%s': %s", name, Exceptions.messageOf(e)), 
 					e
 			);
+		}
+		// expected on discard scenarios -> terminate job
+		catch (final DiscardedException e) {
+			throw e;
 		}
 		catch (final Exception e) {
 			throw new RuntimeException(

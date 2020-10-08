@@ -4,7 +4,8 @@ import esa.s1pdgs.cpoc.xml.model.joborder.JobOrder;
 import esa.s1pdgs.cpoc.xml.model.joborder.JobOrderProcParam;
 
 public abstract class AbstractProductTypeAdapter implements ProductTypeAdapter {		
-    protected final void updateProcParam(final JobOrder jobOrder, final String name, final String newValue) {
+	
+	protected final void updateProcParam(final JobOrder jobOrder, final String name, final String newValue) {
         if (jobOrder.getConf().getProcParams() == null) {
         	return;
         }

@@ -76,7 +76,7 @@ public class JobOrderAdapterTest {
                 ProductMode.ALWAYS
         );
 
-        final JobOrder jobOrder = taskTableAdapter.newJobOrder(processSettings);
+        final JobOrder jobOrder = taskTableAdapter.newJobOrder(processSettings, ProductMode.SLICING);
 
         final JobOrderAdapter.Factory jobOrderFactory = new JobOrderAdapter.Factory(
                 () -> jobOrder,

@@ -43,9 +43,18 @@ public class AppCatJobService {
 		return appCatClient.newJob(job);
 	}   
 
-	public AppDataJob next(final String tasktableName) throws AbstractCodedException {		
+	public AppDataJob next(final String tasktableName, final String processingGroup) throws AbstractCodedException {		
 		for (final AppDataJob appDataJob : nextForTasktable(tasktableName)) {			
 			final AppDataJobGeneration jobGen = appDataJob.getGeneration();
+			
+			// Only process AppDataJobs of the configured processingGroup
+			if (processingGroup != null) {
+				if (!processingGroup.equals(appDataJob.getProcessingGroup())) {
+					LOG.trace("Job {} not processed because it belongs to another processing group ({} != {})",
+							appDataJob.getId(), processingGroup, appDataJob.getProcessingGroup());
+					continue;
+				}
+			}
 			
 			// check if grace period for state INITIAL and PRIMARY_CHECK is exceeded	
 			if (gracePeriodHandler.isWithinGracePeriod(new Date(),jobGen)) {
@@ -141,6 +150,10 @@ public class AppCatJobService {
 						job.setStartTime(productAdapter.getStartTime());
 						job.setStopTime(productAdapter.getStopTime());
 					}
+					
+					// Before updating the state -> save last state
+					job.getGeneration().setPreviousState(job.getGeneration().getState());
+					
 					// no transition?
 					if (job.getGeneration().getState() == outputState) {
 						// don't update jobs last modified date here to enable timeout, just update the generations 
@@ -165,6 +178,10 @@ public class AppCatJobService {
 					if (!queried.isEmpty()) {
 						job.setAdditionalInputs(queried);	
 					}
+					
+					// Before updating the state -> save last state
+					job.getGeneration().setPreviousState(job.getGeneration().getState());
+					
 					// no transition?
 					if (job.getGeneration().getState() == outputState) {
 						// don't update jobs last modified date here to enable timeout, just update the generation time
@@ -185,6 +202,9 @@ public class AppCatJobService {
 			throws AppCatJobUpdateFailed {
 		performUpdate(
 				job -> {
+					// Before updating the state -> save last state
+					job.getGeneration().setPreviousState(job.getGeneration().getState());
+					
 					// no transition?
 					if (job.getGeneration().getState() == outputState) {
 						// don't update jobs last modified date here to enable timeout, just update the generation time

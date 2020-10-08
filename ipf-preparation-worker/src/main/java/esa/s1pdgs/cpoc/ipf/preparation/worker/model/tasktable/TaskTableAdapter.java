@@ -111,9 +111,9 @@ public class TaskTableAdapter {
 				.collect(toMap(Map.Entry::getKey, Map.Entry::getValue));
 	}
 	
-	public final JobOrder newJobOrder(final ProcessSettings settings) {
+	public final JobOrder newJobOrder(final ProcessSettings settings, final ProductMode mode) {
 		// Build from task table
-		final TaskTableToJobOrderConverter converter = new TaskTableToJobOrderConverter(ProductMode.SLICING); //FIXME configure me!!!
+		final TaskTableToJobOrderConverter converter = new TaskTableToJobOrderConverter(mode);
 		final JobOrder jobOrderTemplate = converter.apply(taskTable);
 
 		// Update values from configuration file
@@ -209,11 +209,20 @@ public class TaskTableAdapter {
 		return result;
 	}
 
-	public Map<TaskTableInputAlternative.TaskTableInputAltKey, List<TaskTableInputAlternative>> allTaskTableInputAlternatives() {
+	/**
+	 * Create a list of all alternatives of the tasktable
+	 * @return list of all alternatives
+	 */
+	public List<TaskTableInputAlternative> getAllAlternatives() {
 		return taskTable.getPools().stream()
 				.flatMap(TaskTablePool::tasks)
 				.flatMap(TaskTableTask::inputs)
 				.flatMap(TaskTableInput::alternativesOrdered)
+				.collect(toList());
+	}
+	
+	public Map<TaskTableInputAlternative.TaskTableInputAltKey, List<TaskTableInputAlternative>> allTaskTableInputAlternatives() {
+		return getAllAlternatives().stream()
 				.filter(alt -> alt.getOrigin() == TaskTableInputOrigin.DB)
 				.collect(groupingBy(TaskTableInputAlternative::getTaskTableInputAltKey));
 	}

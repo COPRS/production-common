@@ -1,5 +1,6 @@
 package esa.s1pdgs.cpoc.ipf.preparation.worker.type;
 
+import java.util.List;
 import java.util.Optional;
 
 import org.apache.logging.log4j.LogManager;
@@ -12,6 +13,7 @@ import esa.s1pdgs.cpoc.ipf.preparation.worker.appcat.AppCatJobService;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.generator.DiscardedException;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.model.tasktable.TaskTableAdapter;
 import esa.s1pdgs.cpoc.mqi.model.queue.IpfExecutionJob;
+import esa.s1pdgs.cpoc.mqi.model.queue.IpfPreparationJob;
 import esa.s1pdgs.cpoc.mqi.model.queue.util.CatalogEventAdapter;
 import esa.s1pdgs.cpoc.xml.model.joborder.JobOrder;
 
@@ -26,7 +28,7 @@ public interface ProductTypeAdapter {
 		// default implementation: don't validate
 	}
 	
-	void customAppDataJob(final AppDataJob job);
+	List<AppDataJob> createAppDataJobs(final IpfPreparationJob job) throws Exception;
 	
     void customJobOrder(final AppDataJob job, final JobOrder jobOrder);
 	

@@ -72,6 +72,35 @@ public class S3MetadataController extends AbstractMetadataController<S3Metadata>
 	}
 
 	/**
+	 * Queries the elastic search for the first product (insertionTime) of a given
+	 * orbit.
+	 */
+	@RequestMapping(path = "/{productType}/orbit")
+	public ResponseEntity<S3Metadata> getFirstProductForOrbit(@PathVariable(name = "productType") String productType,
+			@RequestParam(name = "productFamily") final String productFamily,
+			@RequestParam(name = "satellite") final String satellite,
+			@RequestParam(name = "orbitNumber") final long orbitNumber) {
+
+		try {
+			LOGGER.info("Received Orbit search query for family '{}', product type '{}', orbitNumber '{}'",
+					productFamily.toString(), productType, orbitNumber);
+
+			S3Metadata result = esServices.getFirstProductForOrbit(ProductFamily.fromValue(productFamily), productType,
+					satellite, orbitNumber);
+
+			return new ResponseEntity<>(result, HttpStatus.OK);
+		} catch (final AbstractCodedException e) {
+			LOGGER.error("Error on performing Orbit search for product type {} and orbit {}: [code {}] {}", productType,
+					orbitNumber, e.getCode().getCode(), e.getLogMessage());
+			return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+		} catch (final Exception e) {
+			LOGGER.error("Error on performing Orbit for product type {} and orbit {}: {}", productType, orbitNumber,
+					LogUtils.toString(e));
+			return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+		}
+	}
+
+	/**
 	 * Retrieve the L1Triggering information for the given productName from the
 	 * elasticsearch
 	 * 
@@ -96,6 +125,35 @@ public class S3MetadataController extends AbstractMetadataController<S3Metadata>
 		} catch (final Exception e) {
 			LOGGER.error("Error on performing L1Triggering search for product name {}: {}", productName,
 					LogUtils.toString(e));
+			return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+		}
+	}
+
+	/**
+	 * Refresh the index determined by product family and type, to ensure new
+	 * documents are searchable
+	 * 
+	 * @param productFamily product family to determine index
+	 * @param productType   product type to determine index
+	 * @return Empty Response
+	 */
+	@RequestMapping(path = "/refreshIndex/{productFamily}")
+	public ResponseEntity<String> refreshIndex(@PathVariable(name = "productFamily") final String productFamily,
+			@RequestParam(name = "productType") final String productType) {
+		try {
+			LOGGER.info("Received refresh message for productFamily '{}' and productType '{}'",
+					productFamily.toString(), productType);
+
+			esServices.refreshIndex(ProductFamily.fromValue(productFamily), productType);
+
+			return ResponseEntity.ok().build();
+		} catch (final AbstractCodedException e) {
+			LOGGER.error("Error on refreshing index for productFamily {} and productType {}: [code {}] {}",
+					productFamily, productType, e.getCode().getCode(), e.getLogMessage());
+			return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+		} catch (final Exception e) {
+			LOGGER.error("Error on refreshing index for productFamily {} and productType {}: {}", productFamily,
+					productType, LogUtils.toString(e));
 			return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
 		}
 	}

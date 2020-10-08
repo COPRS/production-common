@@ -28,6 +28,11 @@ public class AppDataJobGeneration {
      * State of the job generation
      */
     private AppDataJobGenerationState state;
+    
+    /**
+     * Previous state of the job generation
+     */
+    private AppDataJobGenerationState previousState;
 
     /**
      * Number of consecutive errors
@@ -37,6 +42,7 @@ public class AppDataJobGeneration {
     public AppDataJobGeneration() {
         super();
         this.state = AppDataJobGenerationState.INITIAL;
+        this.previousState = null;
         this.creationDate = new Date();
         this.nbErrors = 0;
     }
@@ -46,6 +52,7 @@ public class AppDataJobGeneration {
 		this.lastUpdateDate = clone.lastUpdateDate;
 		this.taskTable = clone.taskTable;
 		this.state = clone.state;
+		this.previousState = clone.previousState;
 		this.nbErrors = clone.nbErrors;
 	}
 
@@ -100,13 +107,28 @@ public class AppDataJobGeneration {
     public AppDataJobGenerationState getState() {
         return state;
     }
-
+    
     /**
      * @param state
      *            the state to set
      */
     public void setState(final AppDataJobGenerationState state) {
         this.state = state;
+    }
+    
+    /**
+     * @return the previous state
+     */
+    public AppDataJobGenerationState getPreviousState() {
+        return previousState;
+    }
+    
+    /**
+     * @param previousState
+     *            the previous state to set
+     */
+    public void setPreviousState(final AppDataJobGenerationState previousState) {
+        this.previousState = previousState;
     }
 
     /**
