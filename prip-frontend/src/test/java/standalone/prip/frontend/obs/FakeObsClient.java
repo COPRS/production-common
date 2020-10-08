@@ -75,11 +75,15 @@ public class FakeObsClient implements ObsClient {
 	}
 
 	@Override
-	public Map<String, InputStream> getAllAsInputStream(final ProductFamily family, final String keyPrefix)
-			throws SdkClientException {
+	public InputStream getAsStream(ProductFamily family, String key) throws SdkClientException {
 		return null;
 	}
-	
+
+	@Override
+	public List<String> list(ProductFamily family, String keyPrefix) throws SdkClientException {
+		return null;
+	}
+
 	@Override
 	public void validate(final ObsObject object) throws ObsServiceException {
 	    // TODO Auto-generated method stub

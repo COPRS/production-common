@@ -253,15 +253,13 @@ public class SwiftObsClient extends AbstractObsClient {
 	}
 	
 	@Override
-	public Map<String, InputStream> getAllAsInputStream(final ProductFamily family, final String keyPrefix
-			) throws SdkClientException {	
-		ValidArgumentAssertion.assertValidArgument(family);
-		ValidArgumentAssertion.assertValidPrefixArgument(keyPrefix);
-		final String bucket = getBucketFor(family);
-		LOGGER.debug("Getting all files in bucket {} with prefix {}", bucket, keyPrefix);		
-		final Map<String, InputStream> result = swiftObsServices.getAllAsInputStream(bucket, keyPrefix);
-		LOGGER.debug("Found {} elements in bucket {} with prefix {}", result.size(), bucket, keyPrefix);
-		return result;
+	public List<String> list(ProductFamily family, String keyPrefix) throws SdkClientException {
+		throw new UnsupportedOperationException("list");
+	}
+
+	@Override
+	public InputStream getAsStream(ProductFamily family, String key) throws SdkClientException {
+		throw new UnsupportedOperationException("getAsStream");
 	}
 
 	@Override

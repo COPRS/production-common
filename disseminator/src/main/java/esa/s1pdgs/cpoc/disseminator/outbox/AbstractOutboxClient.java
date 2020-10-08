@@ -3,11 +3,11 @@ package esa.s1pdgs.cpoc.disseminator.outbox;
 import java.io.File;
 import java.io.InputStream;
 import java.nio.file.Path;
-import java.util.Map;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import esa.s1pdgs.cpoc.common.ProductFamily;
 import esa.s1pdgs.cpoc.disseminator.config.DisseminationProperties.OutboxConfiguration;
 import esa.s1pdgs.cpoc.disseminator.path.PathEvaluater;
 import esa.s1pdgs.cpoc.obs_sdk.ObsClient;
@@ -32,9 +32,14 @@ public abstract class AbstractOutboxClient implements OutboxClient {
 		return "OutboxClient-" + config.getProtocol();
 	}
 	
-	protected final Iterable<Map.Entry<String, InputStream>> entries(final ObsObject obsObject) throws SdkClientException {
-		return obsClient.getAllAsInputStream(obsObject.getFamily(), obsObject.getKey()).entrySet();
+	protected final Iterable<String> entries(final ObsObject obsObject) throws SdkClientException {
+		return obsClient.list(obsObject.getFamily(), obsObject.getKey());
 	}
+
+	protected final InputStream stream(final ProductFamily family, final String key) throws SdkClientException {
+		return obsClient.getAsStream(family, key);
+	}
+
 
 	protected final void createParentIfRequired(final File file) {
 		final File parent = file.getParentFile();
@@ -52,7 +57,7 @@ public abstract class AbstractOutboxClient implements OutboxClient {
 		return path;
 	}
 	
-	private final void mkdirLocal(final File file) {
+	private void mkdirLocal(final File file) {
 		if (!file.exists()) {
 			logger.debug("Creating directory {}", file);
 			file.mkdirs();

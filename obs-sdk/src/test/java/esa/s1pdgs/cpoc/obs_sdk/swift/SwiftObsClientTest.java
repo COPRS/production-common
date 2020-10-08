@@ -1,24 +1,20 @@
 package esa.s1pdgs.cpoc.obs_sdk.swift;
 
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 import static org.mockito.ArgumentMatchers.*;
-import static org.mockito.Mockito.doReturn;
-import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.*;
 
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.time.Instant;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Date;
+import java.util.LinkedList;
+import java.util.List;
 
-import esa.s1pdgs.cpoc.obs_sdk.*;
-import esa.s1pdgs.cpoc.obs_sdk.s3.S3SdkClientException;
-import esa.s1pdgs.cpoc.report.ReportingFactory;
 import org.javaswift.joss.client.core.AbstractStoredObject;
 import org.javaswift.joss.client.mock.AccountMock;
 import org.javaswift.joss.client.mock.ContainerMock;
@@ -37,7 +33,17 @@ import org.mockito.MockitoAnnotations;
 import esa.s1pdgs.cpoc.common.ProductFamily;
 import esa.s1pdgs.cpoc.common.errors.AbstractCodedException;
 import esa.s1pdgs.cpoc.common.errors.obs.ObsException;
+import esa.s1pdgs.cpoc.obs_sdk.FileObsUploadObject;
+import esa.s1pdgs.cpoc.obs_sdk.Md5;
+import esa.s1pdgs.cpoc.obs_sdk.ObsConfigurationProperties;
+import esa.s1pdgs.cpoc.obs_sdk.ObsDownloadObject;
+import esa.s1pdgs.cpoc.obs_sdk.ObsEmptyFileException;
+import esa.s1pdgs.cpoc.obs_sdk.ObsObject;
+import esa.s1pdgs.cpoc.obs_sdk.ObsServiceException;
+import esa.s1pdgs.cpoc.obs_sdk.SdkClientException;
+import esa.s1pdgs.cpoc.obs_sdk.StreamObsUploadObject;
 import esa.s1pdgs.cpoc.obs_sdk.report.ReportingProductFactory;
+import esa.s1pdgs.cpoc.report.ReportingFactory;
 
 public class SwiftObsClientTest {
 
@@ -344,14 +350,6 @@ public class SwiftObsClientTest {
     	assertThatThrownBy(() -> client.move(new ObsObject(ProductFamily.AUXILIARY_FILE, ""), ProductFamily.AUXILIARY_FILE)).isInstanceOf(IllegalArgumentException.class).hasMessageContaining("Invalid key (empty)");
     	assertThatThrownBy(() -> client.move(new ObsObject(ProductFamily.AUXILIARY_FILE, "key"), null)).isInstanceOf(IllegalArgumentException.class).hasMessageContaining("Invalid product family: null");
 	}
-	
-	@Test
-	public void testGetAllAsInputStreamValidArgumentAssertion() throws AbstractCodedException {
-    	assertThatThrownBy(() -> client.getAllAsInputStream(null, "prefix")).isInstanceOf(IllegalArgumentException.class).hasMessageContaining("Invalid product family: null");
-    	assertThatThrownBy(() -> client.getAllAsInputStream(ProductFamily.AUXILIARY_FILE, null)).isInstanceOf(IllegalArgumentException.class).hasMessageContaining("Invalid prefix: null");
-    	assertThatThrownBy(() -> client.getAllAsInputStream(ProductFamily.AUXILIARY_FILE, "")).isInstanceOf(IllegalArgumentException.class).hasMessageContaining("Invalid prefix (empty)");
-	}
-
 }
 
 

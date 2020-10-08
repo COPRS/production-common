@@ -373,15 +373,14 @@ public abstract class AbstractObsClient implements ObsClient {
     public void validate(final ObsObject object) throws ObsServiceException, ObsValidationException {
 		ValidArgumentAssertion.assertValidArgument(object);			
 		try {
-			final Map<String, InputStream> isMap = getAllAsInputStream(object.getFamily(), Md5.md5KeyFor(object));
+			final List<String> isMap = list(object.getFamily(), Md5.md5KeyFor(object));
 			if (isMap.size() > 1) {
-				Utils.closeQuietly(isMap.values());
 				throw new ObsValidationException("More than one checksum file returned");
 			}	
 			if (isMap.isEmpty()) {
 				throw new ObsValidationException("Checksum file not found for: {} of family {}", object.getKey(), object.getFamily());
 			} 
-			try(final InputStream is = isMap.get(Md5.md5KeyFor(object))) {
+			try(final InputStream is = getAsStream(object.getFamily(), Md5.md5KeyFor(object))) {
 				final Map<String,String> md5sums = collectETags(object);
 				try(BufferedReader reader = new BufferedReader(new InputStreamReader(is))) {
 					String line;
@@ -408,9 +407,6 @@ public abstract class AbstractObsClient implements ObsClient {
 					throw new ObsValidationException("Unexpected object found: {} for {} of family {}", key, object.getKey(), object.getFamily());
 				}
 			}
-			finally {
-				Utils.closeQuietly(isMap.values());
-			}			
 		} catch (SdkClientException | ObsException | IOException e) {
 			throw new ObsServiceException("Unexpected error: " + e.getMessage(), e);
 		}
@@ -421,23 +417,18 @@ public abstract class AbstractObsClient implements ObsClient {
 
 	@Override
 	public String getChecksum(final ObsObject object) throws ObsException {
-		try {
-			final Map<String, InputStream> streams = getAllAsInputStream(object.getFamily(), Md5.md5KeyFor(object));
-			try {
-				final Optional<Md5.Entry> result = Md5.readFrom(streams.get(Md5.md5KeyFor(object)))
-						.stream().filter(md5 -> md5.getFileName().equals(object.getKey())).findFirst();
+		try(final InputStream in = getAsStream(object.getFamily(), Md5.md5KeyFor(object))) {
+			final Optional<Md5.Entry> result = Md5.readFrom(in)
+					.stream().filter(md5 -> md5.getFileName().equals(object.getKey())).findFirst();
 
-				if(!result.isPresent()) {
-					throw new ObsException(AbstractCodedException.ErrorCode.INTERNAL_ERROR,
-							object.getFamily(),
-							object.getKey(),
-							"md5sum cold not determined (not contained in md5sum file)");
-				}
-
-				return result.get().getMd5Hash();
-			} finally {
-				Utils.closeQuietly(streams.values());
+			if(!result.isPresent()) {
+				throw new ObsException(AbstractCodedException.ErrorCode.INTERNAL_ERROR,
+						object.getFamily(),
+						object.getKey(),
+						"md5sum cold not determined (not contained in md5sum file)");
 			}
+
+			return result.get().getMd5Hash();
 		} catch (SdkClientException | IOException e) {
 			throw new ObsException(object.getFamily(), object.getKey(), e);
 		}

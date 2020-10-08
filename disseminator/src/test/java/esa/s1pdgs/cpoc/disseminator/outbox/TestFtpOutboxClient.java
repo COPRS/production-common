@@ -1,6 +1,7 @@
 package esa.s1pdgs.cpoc.disseminator.outbox;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 import java.io.ByteArrayInputStream;
 import java.io.File;
@@ -8,7 +9,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Files;
 import java.util.Collections;
-import java.util.Map;
+import java.util.List;
 
 import org.apache.ftpserver.ConnectionConfigFactory;
 import org.apache.ftpserver.FtpServer;
@@ -43,7 +44,7 @@ public class TestFtpOutboxClient {
 	private File testDir;
 	
 	@BeforeClass
-	public static final void setupClass() throws Exception {
+	public static void setupClass() throws Exception {
 		rootDir = Files.createTempDirectory("testSshServer").toFile();
 		rootDir.deleteOnExit();		
 		
@@ -73,17 +74,15 @@ public class TestFtpOutboxClient {
                 
         final String prefix = "ftpserver.user." + user.getName();
 
-        final String template = new StringBuilder(500)
-          .append(prefix).append(".homedirectory=%s\n")
-          .append(prefix).append(".userpassword=%s\n")
-          .append(prefix).append(".enableflag=true\n")
-          .append(prefix).append(".writepermission=true\n")
-          .append(prefix).append(".idletime=0\n")
-          .append(prefix).append(".maxloginnumber=200\n")
-          .append(prefix).append(".maxloginperip=200\n")
-          .append(prefix).append(".uploadrate=0\n")
-          .append(prefix).append(".downloadrate=0\n\n")
-          .toString();
+        final String template = prefix + ".homedirectory=%s\n" +
+				prefix + ".userpassword=%s\n" +
+				prefix + ".enableflag=true\n" +
+				prefix + ".writepermission=true\n" +
+				prefix + ".idletime=0\n" +
+				prefix + ".maxloginnumber=200\n" +
+				prefix + ".maxloginperip=200\n" +
+				prefix + ".uploadrate=0\n" +
+				prefix + ".downloadrate=0\n\n";
 
         final String configString = String.format(template, user.getHomeDirectory(), user.getPassword());
         
@@ -96,7 +95,7 @@ public class TestFtpOutboxClient {
 	}
 	
 	@AfterClass
-	public static final void tearDownClass() throws Exception {
+	public static void tearDownClass() {
 		ftpServer.stop();
 		FileUtils.delete(rootDir.getPath());		
 	}
@@ -107,7 +106,7 @@ public class TestFtpOutboxClient {
 	}
 	
 	@After
-	public final void tearDown() throws IOException {
+	public final void tearDown() {
 		FileUtils.delete(testDir.getPath());
 	}
 	
@@ -115,10 +114,15 @@ public class TestFtpOutboxClient {
 	public final void testFoo() throws Exception {
 		final FakeObsClient fakeObsClient = new FakeObsClient() {
 			@Override
-			public Map<String, InputStream> getAllAsInputStream(final ProductFamily family, final String keyPrefix) {
-				return Collections.singletonMap("my/little/file", new ByteArrayInputStream("expected file content".getBytes()));
-			}			
-		};		
+			public List<String> list(final ProductFamily family, final String keyPrefix) {
+				return Collections.singletonList("my/little/file");
+			}
+
+			@Override
+			public InputStream getAsStream(ProductFamily family, String key) {
+				return new ByteArrayInputStream("expected file content".getBytes());
+			}
+		};
 		final OutboxConfiguration config = new OutboxConfiguration();
 		config.setPath(testDir.getPath());
 		config.setUsername(USER);
@@ -132,8 +136,7 @@ public class TestFtpOutboxClient {
 		uut.transfer(new ObsObject(ProductFamily.BLANK, "my/little/file"), ReportingFactory.NULL);
 		
 		final File expectedFile = new File(dir, "my/little/file");
-		assertEquals(true, expectedFile.exists());
-		
+		assertTrue(expectedFile.exists());
 		assertEquals("expected file content", FileUtils.readFile(expectedFile));
 	}
 }
