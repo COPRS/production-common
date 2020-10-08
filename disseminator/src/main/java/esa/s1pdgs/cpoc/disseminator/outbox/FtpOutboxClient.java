@@ -3,7 +3,6 @@ package esa.s1pdgs.cpoc.disseminator.outbox;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Path;
-import java.util.Map;
 
 import org.apache.commons.net.PrintCommandListener;
 import org.apache.commons.net.ftp.FTP;
@@ -36,7 +35,7 @@ public class FtpOutboxClient extends AbstractOutboxClient {
 	public String transfer(final ObsObject obsObject, final ReportingFactory reportingFactory) throws Exception {
 		final FTPClient ftpClient = new FTPClient();
 		ftpClient.addProtocolCommandListener(
-				new PrintCommandListener(new LogPrintWriter(s -> logger.debug(s)), true)
+				new PrintCommandListener(new LogPrintWriter(logger::debug), true)
 		);
 		final int port = (config.getPort() > 0) ? config.getPort(): DEFAULT_PORT;
 		ftpClient.connect(config.getHostname(), port);
@@ -67,9 +66,9 @@ public class FtpOutboxClient extends AbstractOutboxClient {
 			final String retVal = config.getProtocol().toString().toLowerCase() + "://" + config.getHostname() + 
 					path.toString();
 					
-			for (final Map.Entry<String, InputStream> entry : entries(obsObject)) {
+			for (final String entry : entries(obsObject)) {
 				
-				final Path dest = path.resolve(entry.getKey());
+				final Path dest = path.resolve(entry);
     			
     			String currentPath = "";
     			
@@ -92,8 +91,8 @@ public class FtpOutboxClient extends AbstractOutboxClient {
 	 				assertPositiveCompletion(ftpClient);	    	 
     			}		    
     			
-    			try (final InputStream in = entry.getValue()) {
-    				logger.info("Uploading {} to {}", entry.getKey(), dest);
+    			try (final InputStream in = stream(obsObject.getFamily(), entry)) {
+    				logger.info("Uploading {} to {}", entry, dest);
     				ftpClient.storeFile(dest.toString(), in);
     				assertPositiveCompletion(ftpClient);	    				
     			}
@@ -112,7 +111,7 @@ public class FtpOutboxClient extends AbstractOutboxClient {
     	}
 	}	
 	
-	static final void assertPositiveCompletion(final FTPClient client) throws IOException {
+	static void assertPositiveCompletion(final FTPClient client) throws IOException {
 		if (!FTPReply.isPositiveCompletion(client.getReplyCode())) {
 			throw new IOException("Error on command execution. Reply was: " + client.getReplyString());
 		}

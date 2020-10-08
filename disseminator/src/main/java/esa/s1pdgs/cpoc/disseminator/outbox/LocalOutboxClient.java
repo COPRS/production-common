@@ -6,7 +6,6 @@ import java.io.FileOutputStream;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.nio.file.Path;
-import java.util.Map;
 
 import org.apache.commons.io.IOUtils;
 
@@ -31,15 +30,15 @@ public final class LocalOutboxClient extends AbstractOutboxClient {
 	@Override
 	public final String transfer(final ObsObject obsObject, final ReportingFactory reportingFactory) throws Exception {		
 		final Path path = evaluatePathFor(obsObject);	
-		for (final Map.Entry<String, InputStream> entry : entries(obsObject)) {
+		for (final String entry : entries(obsObject)) {
 			
-			final File destination = path.resolve(entry.getKey()).toFile();
+			final File destination = path.resolve(entry).toFile();
 			createParentIfRequired(destination);
 			
-			try (final InputStream in = entry.getValue();
+			try (final InputStream in = stream(obsObject.getFamily(), entry);
 				 final OutputStream out = new BufferedOutputStream(new FileOutputStream(destination))
 			) {				
-				logger.info("Transferring {} to {}", entry.getKey(), destination);
+				logger.info("Transferring {} to {}", entry, destination);
 				IOUtils.copyLarge(in, out, new byte[config.getBufferSize()]);    				
 			}
 		}

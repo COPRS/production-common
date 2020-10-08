@@ -341,7 +341,7 @@ public class S3ObsServices {
 		}
 	}
 
-	private List<S3ObjectSummary> getAll(final String bucketName, final String prefix) {
+	public List<S3ObjectSummary> getAll(final String bucketName, final String prefix) {
 		final List<S3ObjectSummary> result = new ArrayList<>();
 		ObjectListing listing = null;
 		do {
@@ -374,7 +374,15 @@ public class S3ObsServices {
 		} catch (final com.amazonaws.SdkClientException e) {
 			throw new S3ObsServiceException(bucketName, prefix, format("Listing fails: %s", e.getMessage()), e);
 		}
+	}
 
+	public final InputStream getAsInputStream(final String bucketName, final String key) throws S3ObsServiceException {
+		try {
+			final S3Object obj = s3client.getObject(bucketName, key);
+			return new S3ObsInputStream(obj, obj.getObjectContent());
+		} catch (final com.amazonaws.SdkClientException e) {
+			throw new S3ObsServiceException(bucketName, key, format("Reading fails: %s", e.getMessage()), e);
+		}
 	}
 
 	public final Map<String, String> collectETags(final String bucketName, final String prefix)

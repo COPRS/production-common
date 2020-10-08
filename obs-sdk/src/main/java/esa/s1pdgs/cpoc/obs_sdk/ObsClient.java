@@ -81,7 +81,9 @@ public interface ObsClient {
 
     Map<String,ObsObject> listInterval(final ProductFamily family, Date intervalStart, Date intervalEnd) throws SdkClientException;
 
-    Map<String, InputStream> getAllAsInputStream(final ProductFamily family, final String keyPrefix) throws SdkClientException;
+    List<String> list(final ProductFamily family, final String keyPrefix) throws SdkClientException;
+
+    InputStream getAsStream(final ProductFamily family, final String key) throws SdkClientException;
 
     /**
      * Performing a validation check on the given product. All checksum of the product manifest are verified and it
