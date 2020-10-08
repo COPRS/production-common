@@ -2,6 +2,8 @@
 package esa.s1pdgs.cpoc.datalifecycle.trigger.domain.persistence;
 
 import java.io.IOException;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -40,8 +42,6 @@ public class DataLifecycleMetadataRepositoryImpl implements DataLifecycleMetadat
 	
 	private static final Logger LOG = LogManager.getLogger(DataLifecycleMetadataRepositoryImpl.class);
 
-	private static final String String = null;
-
 	private final RestHighLevelClient elasticsearchClient;
 	private final EsClientConfiguration config;
 	private String elasticsearchIndex;
@@ -65,6 +65,8 @@ public class DataLifecycleMetadataRepositoryImpl implements DataLifecycleMetadat
 	
 	@Override
 	public void save(DataLifecycleMetadata metadata) throws DataLifecycleMetadataRepositoryException {
+		metadata.setLastModified(LocalDateTime.now(ZoneId.of("UTC")));
+		
 		final IndexRequest request = new IndexRequest(this.elasticsearchIndex).id(metadata.getProductName())
 				.source(metadata.toJson().toString(), XContentType.JSON);
 		LOG.debug("product data lifecycle metadata save request ("
@@ -198,6 +200,10 @@ public class DataLifecycleMetadataRepositoryImpl implements DataLifecycleMetadat
 				.get(DataLifecycleMetadata.FIELD_NAME.EVICTION_DATE_IN_COMPRESSED_STORAGE.fieldName());
 		metadata.setEvictionDateInCompressedStorage(
 				(null != evictionDateInCompressedStorage) ? DateUtils.parse(evictionDateInCompressedStorage) : null);
+		
+		final String lastModified = (String) sourceAsMap
+				.get(DataLifecycleMetadata.FIELD_NAME.LAST_MODIFIED.fieldName());
+		metadata.setLastModified((null != lastModified) ? DateUtils.parse(lastModified) : null);
 		
 		LOG.debug("mapped product data lifecycle metadata from search result: " + metadata);
 		return metadata;
