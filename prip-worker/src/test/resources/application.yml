@@ -27,6 +27,8 @@ elasticsearch:
   
 # PRIP Worker config
 prip-worker:
+  metadata-unavailable-retries-number: 10
+  metadata-unavailable-retries-interval-ms: 5000  
   publishing-job-listener:
     polling-interval-ms: 200
     polling-initial-delay-ms: 5000

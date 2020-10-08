@@ -26,6 +26,7 @@ import esa.s1pdgs.cpoc.common.errors.obs.ObsException;
 import esa.s1pdgs.cpoc.common.errors.processing.MetadataQueryException;
 import esa.s1pdgs.cpoc.common.utils.DateUtils;
 import esa.s1pdgs.cpoc.common.utils.LogUtils;
+import esa.s1pdgs.cpoc.common.utils.Retries;
 import esa.s1pdgs.cpoc.metadata.client.MetadataClient;
 import esa.s1pdgs.cpoc.metadata.model.SearchMetadata;
 import esa.s1pdgs.cpoc.mqi.client.GenericMqiClient;
@@ -44,6 +45,7 @@ import esa.s1pdgs.cpoc.prip.model.Checksum;
 import esa.s1pdgs.cpoc.prip.model.GeoShapePolygon;
 import esa.s1pdgs.cpoc.prip.model.PripGeoCoordinate;
 import esa.s1pdgs.cpoc.prip.model.PripMetadata;
+import esa.s1pdgs.cpoc.prip.worker.configuration.ApplicationProperties;
 import esa.s1pdgs.cpoc.prip.worker.report.PripReportingInput;
 import esa.s1pdgs.cpoc.prip.worker.report.PripReportingOutput;
 import esa.s1pdgs.cpoc.report.Reporting;
@@ -64,6 +66,7 @@ public class PripPublishingJobListener implements MqiListener<PripPublishingJob>
 	private final long pollingInitialDelayMs;
 	private final PripMetadataRepository pripMetadataRepo;
 	private final AppStatus appStatus;
+	private final ApplicationProperties props;
 
 	@Autowired
 	public PripPublishingJobListener(
@@ -74,7 +77,8 @@ public class PripPublishingJobListener implements MqiListener<PripPublishingJob>
 			final PripMetadataRepository pripMetadataRepo,
 			@Value("${prip-worker.publishing-job-listener.polling-interval-ms}") final long pollingIntervalMs,
 			@Value("${prip-worker.publishing-job-listener.polling-initial-delay-ms}") final long pollingInitialDelayMs,
-			final AppStatus appStatus
+			final AppStatus appStatus,
+			final ApplicationProperties props
 	) {
 		this.mqiClient = mqiClient;
 		this.messageFilter = messageFilter;
@@ -84,6 +88,7 @@ public class PripPublishingJobListener implements MqiListener<PripPublishingJob>
 		this.pollingIntervalMs = pollingIntervalMs;
 		this.pollingInitialDelayMs = pollingInitialDelayMs;
 		this.appStatus = appStatus;
+		this.props = props;
 	}
 	
 	@PostConstruct
@@ -132,7 +137,7 @@ public class PripPublishingJobListener implements MqiListener<PripPublishingJob>
 				.newResult();
 	}
 
-	private final void createAndSave(final PripPublishingJob publishingJob) throws MetadataQueryException {
+	private final void createAndSave(final PripPublishingJob publishingJob) throws MetadataQueryException, InterruptedException {
 		final LocalDateTime creationDate = LocalDateTime.now().truncatedTo(ChronoUnit.MILLIS);
 
 		final SearchMetadata searchMetadata = queryMetadata(
@@ -169,10 +174,17 @@ public class PripPublishingJobListener implements MqiListener<PripPublishingJob>
 		LOGGER.debug("end of saving PRIP metadata: {}", pripMetadata);
 	}
 	
-	private SearchMetadata queryMetadata(final ProductFamily productFamily, final String keyObjectStorage) throws MetadataQueryException {
-
-		return  metadataClient.queryByFamilyAndProductName(removeZipSuffix(productFamily.name()),
-				removeZipSuffix(keyObjectStorage));
+	private SearchMetadata queryMetadata(final ProductFamily productFamily, final String keyObjectStorage) throws MetadataQueryException, InterruptedException {
+		return Retries.performWithRetries(() -> {
+				return metadataClient.queryByFamilyAndProductName(
+						removeZipSuffix(productFamily.name()),
+						removeZipSuffix(keyObjectStorage)
+				);
+			}, 
+			"metadata query for " + keyObjectStorage, 
+			props.getMetadataUnavailableRetriesNumber(), 
+			props.getMetadataUnavailableRetriesIntervalMs()
+	    );
 
 }
 	
