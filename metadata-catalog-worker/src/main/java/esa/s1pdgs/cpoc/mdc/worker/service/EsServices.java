@@ -1729,7 +1729,7 @@ public class EsServices {
 
 			final GeoShapeQueryBuilder queryBuilder = QueryBuilders.geoShapeQuery("geometry",
 					extractPolygonFrom(response));
-			queryBuilder.relation(ShapeRelation.CONTAINS);
+			queryBuilder.relation(ShapeRelation.INTERSECTS);
 			LOGGER.debug("Using {}", queryBuilder);
 			final SearchSourceBuilder sourceBuilder = new SearchSourceBuilder();
 			sourceBuilder.query(queryBuilder);
