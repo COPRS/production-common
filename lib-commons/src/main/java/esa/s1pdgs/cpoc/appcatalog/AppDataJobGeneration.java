@@ -154,8 +154,8 @@ public class AppDataJobGeneration {
     @Override
     public String toString() {
         return String.format(
-                "{creationDate: %s, lastUpdateDate: %s, taskTable: %s, state: %s, nbErrors: %s}",
-                creationDate, lastUpdateDate, taskTable, state, nbErrors);
+                "{creationDate: %s, lastUpdateDate: %s, taskTable: %s, state: %s, nbErrors: %s, prevState: %s}",
+                creationDate, lastUpdateDate, taskTable, state, nbErrors, previousState);
     }
 
     /**
@@ -164,7 +164,7 @@ public class AppDataJobGeneration {
     @Override
     public int hashCode() {
         return Objects.hash(creationDate, lastUpdateDate, taskTable, state,
-                nbErrors);
+                nbErrors, previousState);
     }
 
     /**
@@ -183,6 +183,7 @@ public class AppDataJobGeneration {
                     && Objects.equals(lastUpdateDate, other.lastUpdateDate)
                     && Objects.equals(taskTable, other.taskTable)
                     && Objects.equals(state, other.state)
+                    && Objects.equals(previousState, other.previousState)
                     && nbErrors == other.nbErrors;
         }
         return ret;
