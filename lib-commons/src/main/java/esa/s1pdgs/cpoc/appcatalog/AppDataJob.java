@@ -328,7 +328,7 @@ public class AppDataJob {
 		return prepJobMessage;
 	}
 
-	public void setPrepJobMessage(GenericMessageDto<IpfPreparationJob> prepJobMessage) {
+	public void setPrepJobMessage(final GenericMessageDto<IpfPreparationJob> prepJobMessage) {
 		this.prepJobMessage = prepJobMessage;
 	}
 	
@@ -336,7 +336,7 @@ public class AppDataJob {
 		return processingGroup;
 	}
 
-	public void setProcessingGroup(String processingGroup) {
+	public void setProcessingGroup(final String processingGroup) {
 		this.processingGroup = processingGroup;
 	}
 
@@ -358,14 +358,14 @@ public class AppDataJob {
 	}
 
 	@Override
-	public boolean equals(Object obj) {
+	public boolean equals(final Object obj) {
 		if (this == obj) {
 			return true;
 		}
-		if (!(obj instanceof AppDataJob)) {
+		if ((obj == null) || !(AppDataJob.class.equals(obj.getClass()))) {
 			return false;
 		}
-		AppDataJob other = (AppDataJob) obj;
+		final AppDataJob other = (AppDataJob) obj;
 		return Objects.equals(additionalInputs, other.additionalInputs)
 				&& Objects.equals(creationDate, other.creationDate) && Objects.equals(generation, other.generation)
 				&& id == other.id && Objects.equals(lastUpdateDate, other.lastUpdateDate) && level == other.level
