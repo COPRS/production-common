@@ -215,6 +215,7 @@ public class AppCatJobService {
 						// set the previous state to output state in order to wait before termination
 						job.getGeneration().setPreviousState(outputState);
 						job.getGeneration().setState(outputState);
+						job.setLastUpdateDate(new Date());
 					}
 				}, 
 				id, 
@@ -227,6 +228,7 @@ public class AppCatJobService {
 				job -> {
 					// complete job 
 			    	LOG.info("Finishing appDataJob {} for product {}", job.getId(), job.getProductName());
+			    	job.getGeneration().setState(outputState);
 			    	job.setState(AppDataJobState.TERMINATED);  
 				}, 
 				id, 
