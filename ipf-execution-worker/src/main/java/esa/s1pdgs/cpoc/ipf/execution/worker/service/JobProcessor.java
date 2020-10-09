@@ -367,7 +367,7 @@ public class JobProcessor implements MqiListener<IpfExecutionJob> {
             	.collect(Collectors.toList());
             
             final String warningMessage;            
-            if (missingChunks.isEmpty()) {
+            if (!missingChunks.isEmpty()) {
             	warningMessage = String.format(
         				"Missing RAWs detected for successful production %s: %s. "
         				+ "Restart if chunks become available or delete this request if they are lost", 
