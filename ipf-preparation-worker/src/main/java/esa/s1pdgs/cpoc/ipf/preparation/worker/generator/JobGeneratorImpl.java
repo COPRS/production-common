@@ -111,7 +111,7 @@ public final class JobGeneratorImpl implements JobGenerator {
 		}
 		
 		@Override
-		public void terminate(final AppDataJobGenerationState outputState) throws JobStateTransistionFailed {
+		public final void terminate(final AppDataJobGenerationState outputState) throws JobStateTransistionFailed {
 			appCatService.updateToTerminate(job.getId(), outputState);		
 		}
 		
