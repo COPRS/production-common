@@ -36,6 +36,9 @@ public class GracePeriodHandler {
 		if (jobGen.getState() == AppDataJobGenerationState.PRIMARY_CHECK) {
 			return settings.getWaitmetadatainput().getTempo();
 		} 
+		if (jobGen.getState() == AppDataJobGenerationState.SENT) {
+			return settings.getWaitaftersend().getTempo();
+		} 		
 		// default: no grace period
 		return 0L;
 	}

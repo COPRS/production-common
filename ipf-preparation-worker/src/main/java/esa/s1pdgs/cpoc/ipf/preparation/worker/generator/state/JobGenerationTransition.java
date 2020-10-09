@@ -6,4 +6,5 @@ public interface JobGenerationTransition {
 	public void mainInputSearch( AppDataJobGenerationState outputState) throws JobStateTransistionFailed;	
 	public void auxSearch( AppDataJobGenerationState outputState) throws JobStateTransistionFailed;	
 	public void send( AppDataJobGenerationState outputState) throws JobStateTransistionFailed;
+	public void terminate( AppDataJobGenerationState outputState) throws JobStateTransistionFailed;
 }

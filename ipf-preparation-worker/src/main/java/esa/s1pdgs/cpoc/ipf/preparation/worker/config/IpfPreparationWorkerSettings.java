@@ -162,6 +162,8 @@ public class IpfPreparationWorkerSettings {
 	 * Delay configuration between 2 check of inputs metadata search for a job
 	 */
 	private WaitTempo waitmetadatainput = new WaitTempo();
+	
+	private WaitTempo waitaftersend = new WaitTempo();
 
 	/**
 	 * Location of task table XML files
@@ -364,6 +366,14 @@ public class IpfPreparationWorkerSettings {
 	public void setWaitmetadatainput(final WaitTempo waitmetadatainput) {
 		this.waitmetadatainput = waitmetadatainput;
 	}
+	
+	public WaitTempo getWaitaftersend() {
+		return waitaftersend;
+	}
+
+	public void setWaitaftersend(final WaitTempo waitaftersend) {
+		this.waitaftersend = waitaftersend;
+	}
 
 	/**
 	 * @return the diroftasktables
@@ -520,7 +530,7 @@ public class IpfPreparationWorkerSettings {
 		return productMode;
 	}
 
-	public void setProductMode(ProductMode productMode) {
+	public void setProductMode(final ProductMode productMode) {
 		this.productMode = productMode;
 	}
 

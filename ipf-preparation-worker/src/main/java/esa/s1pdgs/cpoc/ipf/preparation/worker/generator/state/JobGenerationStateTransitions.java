@@ -20,6 +20,11 @@ public enum JobGenerationStateTransitions implements JobGenerationStateTransitio
 			AppDataJobGenerationState.READY, 
 			AppDataJobGenerationState.SENT,  
 			j -> j.send(AppDataJobGenerationState.SENT)
+	),
+	SENT_2_END(
+			AppDataJobGenerationState.SENT,
+			AppDataJobGenerationState.END,
+			j -> j.terminate(AppDataJobGenerationState.END)
 	);
 	
 	private static final Logger LOGGER = LogManager.getLogger(JobGenerationStateTransitions.class);

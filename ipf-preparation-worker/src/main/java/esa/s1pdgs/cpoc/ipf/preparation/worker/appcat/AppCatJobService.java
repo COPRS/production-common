@@ -55,8 +55,7 @@ public class AppCatJobService {
 					continue;
 				}
 			}
-			
-			// check if grace period for state INITIAL and PRIMARY_CHECK is exceeded	
+			// check if grace period for state INITIAL, PRIMARY_CHECK and SENT is exceeded
 			if (gracePeriodHandler.isWithinGracePeriod(new Date(),jobGen)) {
 				LOG.debug("Job {} is still in grace period...", appDataJob.getId());
 				continue;
@@ -203,24 +202,36 @@ public class AppCatJobService {
 			throws AppCatJobUpdateFailed {
 		performUpdate(
 				job -> {
-					// Before updating the state -> save last state
-					job.getGeneration().setPreviousState(job.getGeneration().getState());
-					
 					// no transition?
 					if (job.getGeneration().getState() == outputState) {
+						// Before updating the state -> save last state
+						job.getGeneration().setPreviousState(job.getGeneration().getState());
+						
 						// don't update jobs last modified date here to enable timeout, just update the generation time
 						job.getGeneration().setLastUpdateDate(new Date());
 						job.getGeneration().setNbErrors(job.getGeneration().getNbErrors()+1);
 					}
-					else {
-						// it's done
+					else {		
+						// set the previous state to output state in order to wait before termination
+						job.getGeneration().setPreviousState(outputState);
 						job.getGeneration().setState(outputState);
-				    	job.setState(AppDataJobState.TERMINATED);  
 					}
 				}, 
 				id, 
 				"send"
 		);
+	}
+	
+	public void updateToTerminate(final long id, final AppDataJobGenerationState outputState) {
+		performUpdate(
+				job -> {
+					// complete job 
+			    	LOG.info("Finishing appDataJob {} for product {}", job.getId(), job.getProductName());
+			    	job.setState(AppDataJobState.TERMINATED);  
+				}, 
+				id, 
+				"wait"
+		);		
 	}
 		
 	private final AppDataJob findOrFail(final long jobId) throws AbstractCodedException {
@@ -260,6 +271,8 @@ public class AppCatJobService {
 		}
 		return Optional.of(result);	
 	}
+
+
 }
 
 

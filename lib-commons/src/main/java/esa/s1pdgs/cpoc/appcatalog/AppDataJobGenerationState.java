@@ -6,5 +6,5 @@ package esa.s1pdgs.cpoc.appcatalog;
  * @author Viveris Technologies
  */
 public enum AppDataJobGenerationState {
-    INITIAL, PRIMARY_CHECK, READY, SENT;
+    INITIAL, PRIMARY_CHECK, READY, SENT, END;
 }
