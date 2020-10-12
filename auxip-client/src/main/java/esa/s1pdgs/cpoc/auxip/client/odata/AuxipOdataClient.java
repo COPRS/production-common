@@ -89,8 +89,7 @@ public class AuxipOdataClient implements AuxipClient {
 		final URI productDownloadUrl = this.rootServiceUrl
 				.resolve("Products(" + productMetadataId.toString() + ")/$value");
 
-		// TODO @MSc: impl, wir brauchen einen inputstream
-		return null;
+		return this.odataClient.getRetrieveRequestFactory().getMediaRequest(productDownloadUrl).execute().getRawResponse();
 	}
 	
 	// --------------------------------------------------------------------------
