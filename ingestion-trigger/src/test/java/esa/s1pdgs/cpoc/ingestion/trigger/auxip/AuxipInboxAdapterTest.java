@@ -204,6 +204,11 @@ public class AuxipInboxAdapterTest {
             }
 
             @Override
+            public URI getRootServiceUrl() {
+                return URI.create("https://auxip");
+            }
+
+            @Override
             public UUID getId() {
                 return UUID.randomUUID();
             }
