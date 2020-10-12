@@ -1,5 +1,6 @@
 package esa.s1pdgs.cpoc.auxip.client.odata;
 
+import java.io.InputStream;
 import java.net.URI;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -37,6 +38,8 @@ public class AuxipOdataClient implements AuxipClient {
 
 	private final ODataClient odataClient;
 	private final AuxipHostConfiguration hostConfig;
+	private final URI rootServiceUrl;
+	
 	private final String entitySetName;
 	private final String creationDateAttrName;
 	private final String productNameAttrName;
@@ -54,6 +57,9 @@ public class AuxipOdataClient implements AuxipClient {
 		this.productNameAttrName = Objects.requireNonNull(hostConfig.getProductNameAttrName(),
 				"product name attribute name must not be null!");
 		this.idAttrName = Objects.requireNonNull(hostConfig.getIdAttrName(), "id attribute name must not be null!");
+		
+		this.rootServiceUrl = URI.create(
+				Objects.requireNonNull(this.hostConfig.getServiceRootUri(), "the root service URL must not be null!"));
 	}
 
 	// --------------------------------------------------------------------------
@@ -77,7 +83,16 @@ public class AuxipOdataClient implements AuxipClient {
 
 		return result;
 	}
+	
+	@Override
+	public InputStream read(@NonNull UUID productMetadataId) {
+		final URI productDownloadUrl = this.rootServiceUrl
+				.resolve("Products(" + productMetadataId.toString() + ")/$value");
 
+		// TODO @MSc: impl, wir brauchen einen inputstream
+		return null;
+	}
+	
 	// --------------------------------------------------------------------------
 
 	private URIFilter buildFilters(LocalDateTime from, LocalDateTime to, String productNameContains) {
@@ -145,7 +160,7 @@ public class AuxipOdataClient implements AuxipClient {
 		if (null != response) {
 			while (response.hasNext()) {
 				final ClientEntity entity = (ClientEntity) response.next();
-				final AuxipOdataProductMetadata metadata = new AuxipOdataProductMetadata();
+				final AuxipOdataProductMetadata metadata = new AuxipOdataProductMetadata(this.rootServiceUrl);
 
 				// map ID
 				final ClientProperty idProperty = entity.getProperty(this.idAttrName);
