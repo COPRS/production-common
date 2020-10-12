@@ -62,7 +62,7 @@ public class FtpOutboxClient extends AbstractOutboxClient {
 	        }
 	        assertPositiveCompletion(ftpClient);        
 	        
-			final Path path = evaluatePathFor(obsObject);	
+			final Path path = evaluatePathForAndMakeDirectory(obsObject);	
 			final String retVal = config.getProtocol().toString().toLowerCase() + "://" + config.getHostname() + 
 					path.toString();
 					

@@ -53,11 +53,16 @@ public abstract class AbstractOutboxClient implements OutboxClient {
 	
 	protected final Path evaluatePathFor(final ObsObject obsObject) {
 		final Path path = pathEvaluator.outputPath(config.getPath(), obsObject);	
+		return path;
+	}
+	
+	protected final Path evaluatePathForAndMakeDirectory(final ObsObject obsObject) {
+		final Path path = pathEvaluator.outputPath(config.getPath(), obsObject);	
 		mkdirLocal(path.toFile());
 		return path;
 	}
 	
-	private void mkdirLocal(final File file) {
+	protected void mkdirLocal(final File file) {
 		if (!file.exists()) {
 			logger.debug("Creating directory {}", file);
 			file.mkdirs();

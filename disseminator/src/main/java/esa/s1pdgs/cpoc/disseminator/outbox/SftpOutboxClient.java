@@ -53,7 +53,7 @@ public final class SftpOutboxClient extends AbstractOutboxClient {
 		    channel.connect();
 		
 	    	try {	
-				final Path path = evaluatePathFor(obsObject);	
+				final Path path = evaluatePathForAndMakeDirectory(obsObject);	
 				final String retVal = config.getProtocol().toString().toLowerCase() + "://" + config.getHostname() + 
 						path.toString();
 				
