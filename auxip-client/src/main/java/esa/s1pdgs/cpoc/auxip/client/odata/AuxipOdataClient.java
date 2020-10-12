@@ -4,6 +4,7 @@ import java.net.URI;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 
@@ -15,6 +16,8 @@ import org.apache.olingo.client.api.communication.response.ODataRetrieveResponse
 import org.apache.olingo.client.api.domain.ClientEntity;
 import org.apache.olingo.client.api.domain.ClientEntitySet;
 import org.apache.olingo.client.api.domain.ClientEntitySetIterator;
+import org.apache.olingo.client.api.uri.FilterArg;
+import org.apache.olingo.client.api.uri.FilterArgFactory;
 import org.apache.olingo.client.api.uri.FilterFactory;
 import org.apache.olingo.client.api.uri.URIBuilder;
 import org.apache.olingo.client.api.uri.URIFilter;
@@ -23,6 +26,7 @@ import org.springframework.lang.NonNull;
 import esa.s1pdgs.cpoc.auxip.client.AuxipClient;
 import esa.s1pdgs.cpoc.auxip.client.AuxipProductMetadata;
 import esa.s1pdgs.cpoc.auxip.client.config.AuxipClientConfigurationProperties.AuxipHostConfiguration;
+import esa.s1pdgs.cpoc.common.utils.DateUtils;
 
 /**
  * OData implementation of the AUXIP client
@@ -34,6 +38,8 @@ public class AuxipOdataClient implements AuxipClient {
 	private final AuxipHostConfiguration hostConfig;
 	private final String entitySetName;
 	private final String creationDateAttrName;
+	private final String productNameAttrName;
+	private final String idAttrName;
 	
 	// --------------------------------------------------------------------------
 
@@ -43,6 +49,9 @@ public class AuxipOdataClient implements AuxipClient {
 		this.entitySetName = Objects.requireNonNull(entitySetName, "entity set name must not be null!");
 		this.creationDateAttrName = Objects.requireNonNull(hostConfig.getCreationDateAttributeName(),
 				"creation date attribute name must not be null!");
+		this.productNameAttrName = Objects.requireNonNull(hostConfig.getProductNameAttrName(),
+				"product name attribute name must not be null!");
+		this.idAttrName = Objects.requireNonNull(hostConfig.getIdAttrName(), "id attribute name must not be null!");
 	}
 
 	// --------------------------------------------------------------------------
@@ -60,38 +69,50 @@ public class AuxipOdataClient implements AuxipClient {
 	
 	@Override
 	public List<AuxipProductMetadata> getMetadata(@NonNull LocalDateTime from, @NonNull LocalDateTime to,
-			Integer pageSize, Integer offset, Collection<String> productNameContains) {
-		final List<URIFilter> filters = this.buildFilters(from, to);
-		final URI queryUri = this.buildQueryUri(filters, pageSize, offset);
-		final ClientEntitySetIterator<ClientEntitySet, ClientEntity> response = this.readEntities(queryUri);
-		// TODO @MSc: filter (AuxipProductFilters, java filtering) and map response to
-		// AuxipProductMetadata
-		return null;
+			Integer pageSize, Integer offset) {
+		return this.getMetadata(from, to, pageSize, offset, null);
 	}
 	
 	@Override
 	public List<AuxipProductMetadata> getMetadata(@NonNull LocalDateTime from, @NonNull LocalDateTime to,
-			Integer pageSize, Integer offset) {
-		// TODO @MSc: impl
+			Integer pageSize, Integer offset, String productNameContains) {
+		final URIFilter filters = this.buildFilters(from, to, productNameContains);
+		
+		final URI queryUri = this.buildQueryUri(Collections.singletonList(filters), pageSize, offset);
+		final ClientEntitySetIterator<ClientEntitySet, ClientEntity> response = this.readEntities(queryUri);
+		// TODO @MSc: map response to AuxipProductMetadata
+		
 		return null;
 	}
 	
 	// --------------------------------------------------------------------------
 	
-	private List<URIFilter> buildFilters(LocalDateTime from, LocalDateTime to) {
-		final List<URIFilter> filters = new ArrayList<>();
+	private URIFilter buildFilters(LocalDateTime from, LocalDateTime to, String productNameContains) {
 		final FilterFactory filterFactory = this.odataClient.getFilterFactory();
-		
-		// TODO @MSc: parse date to OData format mit DateUtils und 
-		//filterFactory.ge(this.creationDateAttrName, from);
-		//filters.add(e);
-		//filterFactory.lt(this.creationDateAttrName, to);
-		//filters.add(e);
 
-		return filters;
+		// timeframe filter
+		final URIFilter lowerBoundFilter = filterFactory.ge(this.creationDateAttrName,
+				DateUtils.formatToOdataDateTimeFormat(from));
+		final URIFilter upperBoundFilter = filterFactory.lt(this.creationDateAttrName,
+				DateUtils.formatToOdataDateTimeFormat(to));
+		final URIFilter timeframeFilter = filterFactory.and(lowerBoundFilter, upperBoundFilter);
+
+		// product name filter
+		URIFilter productNameFilter = null;
+		if (null != productNameContains && !productNameContains.isEmpty()) {
+			final FilterArgFactory argFactory = filterFactory.getArgFactory();
+			productNameFilter = filterFactory.match(argFactory.contains(argFactory.property(this.productNameAttrName),
+					argFactory.literal(productNameContains)));
+		}
+
+		if (null != productNameFilter) {
+			return filterFactory.and(timeframeFilter, productNameFilter);
+		} else {
+			return timeframeFilter;
+		}
 	}
 	
-	private URI buildQueryUri(final List<URIFilter> filters, final Integer top, final Integer skip) {
+	private URI buildQueryUri(final List<URIFilter> filters, final Integer pageSize, final Integer offset) {
 		final URIBuilder uriBuilder = this.odataClient.newURIBuilder(this.hostConfig.getServiceRootUri())
 				.appendEntitySetSegment(this.entitySetName);
 
@@ -99,12 +120,12 @@ public class AuxipOdataClient implements AuxipClient {
 			filters.forEach(f -> uriBuilder.filter(f));
 		}
 
-		if (null != top) {
-			uriBuilder.top(top);
+		if (null != pageSize) {
+			uriBuilder.top(pageSize);
 		}
 
-		if (null != skip) {
-			uriBuilder.skip(skip);
+		if (null != offset) {
+			uriBuilder.skip(offset);
 		}
 		
 		uriBuilder.orderBy(this.creationDateAttrName + " asc");
