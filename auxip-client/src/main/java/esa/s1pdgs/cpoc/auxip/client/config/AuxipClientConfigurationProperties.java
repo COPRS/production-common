@@ -21,15 +21,18 @@ public class AuxipClientConfigurationProperties {
 		private int connectTimeoutSec = 10;
 		private boolean enablePreemptiveAuthentication = true;
 		private String creationDateAttributeName; // in legacy PRIP instances 'PublicationDate', in cloud PRIP 'creationDate'
+		private String productNameAttrName; // in legacy PRIP instances 'Name', in cloud PRIP 'name'
+		private String idAttrName; // in legacy PRIP instances 'Id', in cloud PRIP 'id'
 		
 		// - - - - - - - - - - - - - - - - - -
 		
 		@Override
 		public String toString() {
-			return "XbipHostConfiguration [serviceRootUri=" + this.serviceRootUri + ", user=" + this.user
+			return "AuxipHostConfiguration [serviceRootUri=" + this.serviceRootUri + ", user=" + this.user
 					+ ", pass=****, trustSelfSignedCertificate=" + this.trustSelfSignedCertificate
 					+ ", connectTimeoutSec=" + this.connectTimeoutSec + ", creationDateAttributeName="
-					+ this.creationDateAttributeName + ", enablePreemptiveAuthentication="
+					+ this.creationDateAttributeName + ", productNameAttrName=" + this.productNameAttrName
+					+ ", idAttrName=" + this.idAttrName + ", enablePreemptiveAuthentication="
 					+ this.enablePreemptiveAuthentication + "]";
 		}
 
@@ -89,6 +92,22 @@ public class AuxipClientConfigurationProperties {
 
 		public void setCreationDateAttributeName(String creationDateAttributeName) {
 			this.creationDateAttributeName = creationDateAttributeName;
+		}
+
+		public String getProductNameAttrName() {
+			return this.productNameAttrName;
+		}
+
+		public void setProductNameAttrName(String productNameAttrName) {
+			this.productNameAttrName = productNameAttrName;
+		}
+
+		public String getIdAttrName() {
+			return this.idAttrName;
+		}
+
+		public void setIdAttrName(String idAttrName) {
+			this.idAttrName = idAttrName;
 		}
 	}
 	
