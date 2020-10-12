@@ -110,14 +110,15 @@ public class AuxQuery {
 			throw new IpfPrepWorkerInputsMissingException(missingMetadata);
 		}
 
-		// remove timed out inputs from job
-		LOGGER.info("removing timed out inputs from job {}; {}", job.getId(), timedOutInputs);
-		job.getAdditionalInputs().forEach(taskInputs -> {
-			final List<AppDataJobInput> inputs = new ArrayList<>(taskInputs.getInputs());
-			inputs.removeAll(missingInputs);
-
-			taskInputs.setInputs(inputs);
-		});
+		if(!timedOutInputs.isEmpty()) {
+			// remove timed out inputs from job
+			LOGGER.info("removing timed out inputs from job {}; {}", job.getId(), timedOutInputs);
+			job.getAdditionalInputs().forEach(taskInputs -> {
+				final List<AppDataJobInput> inputs = new ArrayList<>(taskInputs.getInputs());
+				inputs.removeAll(timedOutInputs);
+				taskInputs.setInputs(inputs);
+			});
+		}
 
 	}
 
