@@ -7,14 +7,14 @@ import static java.util.Optional.empty;
 import static java.util.stream.Collectors.toList;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
 
 import java.net.URI;
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
+import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
 import java.util.Date;
 import java.util.List;
@@ -25,8 +25,8 @@ import org.hamcrest.CustomMatcher;
 import org.hamcrest.Matcher;
 import org.junit.Before;
 import org.junit.Test;
+import org.mockito.ArgumentMatcher;
 import org.mockito.Mock;
-import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 
 import esa.s1pdgs.cpoc.auxip.client.AuxipClient;
@@ -141,9 +141,6 @@ public class AuxipInboxAdapterTest {
     public void listTimeWindowTooCloseToNow() {
         final LocalDateTime start = LocalDateTime.now().minus(Duration.ofSeconds(235 + 500));
 
-        final LocalDateTime expectedStart = start.minus(Duration.ofSeconds(24));
-        final LocalDateTime expectedStop = expectedStart.plus(Duration.ofSeconds(235));
-
         when(processConfiguration.getHostname()).thenReturn("localhost");
         when(auxipConfiguration.getMaxPageSize()).thenReturn(3);
         when(auxipConfiguration.getOffsetFromNowSec()).thenReturn(1000);
@@ -197,6 +194,16 @@ public class AuxipInboxAdapterTest {
             }
 
             @Override
+            public LocalDateTime getCreationDate() {
+                return LocalDateTime.now();
+            }
+
+            @Override
+            public List<String> getParsingErrors() {
+                return emptyList();
+            }
+
+            @Override
             public UUID getId() {
                 return UUID.randomUUID();
             }
@@ -205,5 +212,33 @@ public class AuxipInboxAdapterTest {
 
     @Test
     public void advanceAfterPublish() {
+
+        final LocalDateTime start = LocalDateTime.parse("1978-08-08T14:00:00.000");
+        final LocalDateTime expectedNewStart = start.plus(Duration.ofSeconds(25489584));
+
+        when(auxipConfiguration.getTimeWindowSec()).thenReturn(25489584);
+        when(processConfiguration.getHostname()).thenReturn("localhost");
+        when(auxipRepository.findByProcessingPodAndPripUrl("localhost", "https://auxip")).thenReturn(auxipState(start));
+
+        AuxipInboxAdapter uut = new AuxipInboxAdapter(
+                inboxEntryFactory,
+                auxipConfiguration,
+                processConfiguration,
+                auxipClient,
+                URI.create("https://auxip"),
+                "WILE",
+                auxipRepository);
+
+
+        uut.advanceAfterPublish();
+
+        verify(auxipRepository).save(argThat(isAuxipStateWithDate(expectedNewStart)));
+    }
+
+    private ArgumentMatcher<AuxipState> isAuxipStateWithDate(final LocalDateTime expectedStart) {
+        return auxipState -> {
+            Date expected = new Date(expectedStart.toInstant(ZoneOffset.UTC).toEpochMilli());
+            return auxipState.getNextWindowStart().equals(expected);
+        };
     }
 }

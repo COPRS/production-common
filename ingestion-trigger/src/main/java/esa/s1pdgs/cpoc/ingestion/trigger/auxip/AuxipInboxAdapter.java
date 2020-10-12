@@ -70,8 +70,6 @@ public class AuxipInboxAdapter extends AbstractInboxAdapter {
                 new AuxipMetadataSpliterator(timeWindow, auxipClient, configuration.getMaxPageSize(), inboxURL),
                 false);
 
-        //TODO filter
-
         return stream.map(this::toEntrySupplier);
     }
 
