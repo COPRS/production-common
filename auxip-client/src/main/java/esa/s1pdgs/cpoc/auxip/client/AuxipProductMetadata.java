@@ -1,5 +1,6 @@
 package esa.s1pdgs.cpoc.auxip.client;
 
+import java.net.URI;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
@@ -13,5 +14,7 @@ public interface AuxipProductMetadata {
 	LocalDateTime getCreationDate();
 	
 	List<String> getParsingErrors();
+	
+	URI getRootServiceUrl();
 
 }
