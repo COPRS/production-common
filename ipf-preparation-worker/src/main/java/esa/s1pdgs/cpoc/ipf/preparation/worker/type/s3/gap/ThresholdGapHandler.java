@@ -32,7 +32,7 @@ public class ThresholdGapHandler extends AbstractGapHandler {
 			final LocalDateTime productStop = LocalDateTime.parse(product.getValidityStop(),
 					DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSSSSS'Z'"));
 			
-			if (currentStart.plusNanos((long) (threshold * SECONDS_TO_NANOS)).isAfter(productStart)) {
+			if (currentStart.plusNanos((long) (threshold * SECONDS_TO_NANOS)).isBefore(productStart)) {
 				LOGGER.debug("Big gap detected - interval not covered");
 				return false;
 			}
@@ -40,7 +40,7 @@ public class ThresholdGapHandler extends AbstractGapHandler {
 			currentStart = productStop;
 		}
 		
-		if (stopTime.minusNanos((long) (threshold * SECONDS_TO_NANOS)).isBefore(currentStart)) {
+		if (stopTime.minusNanos((long) (threshold * SECONDS_TO_NANOS)).isAfter(currentStart)) {
 			LOGGER.debug("Last stop is too early (Big gap at stop) - interval not covered");
 			return false;
 		}
