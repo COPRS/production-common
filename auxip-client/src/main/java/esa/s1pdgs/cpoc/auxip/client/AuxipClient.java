@@ -1,7 +1,10 @@
 package esa.s1pdgs.cpoc.auxip.client;
 
+import java.io.InputStream;
+import java.net.URI;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.UUID;
 
 import org.springframework.lang.NonNull;
 
@@ -33,6 +36,6 @@ public interface AuxipClient {
 	List<AuxipProductMetadata> getMetadata(@NonNull LocalDateTime from, @NonNull LocalDateTime to, Integer pageSize,
 			Integer offset, String productNameContains);
 	
-	//InputStream read(AuxipProductMetadata metadata);
+	InputStream read(@NonNull UUID productMetadataId);
 
 }
