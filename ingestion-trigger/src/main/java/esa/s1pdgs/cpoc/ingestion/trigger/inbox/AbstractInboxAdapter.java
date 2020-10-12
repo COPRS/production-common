@@ -57,11 +57,16 @@ public abstract class AbstractInboxAdapter implements InboxAdapter {
 		LOG.trace("Reading inbox directory '{}'", inboxURL.toString());
 		final List<InboxEntry> entries = list()
 				.filter(x -> !Paths.get(inboxURL.getPath()).equals(x.getPath()))
-				.map(x -> x.getEntry())
-				.filter(e -> filter.accept(e))
+				.map(EntrySupplier::getEntry)
+				.filter(filter::accept)
 				.collect(Collectors.toList());
 		LOG.trace("Found {} entries in inbox directory '{}': {}", entries.size(), inboxURL.toString(), entries);
 		return entries;
+	}
+
+	@Override
+	public void advanceAfterPublish() {
+		//do nothing as default
 	}
 
 	@Override

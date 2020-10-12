@@ -4,7 +4,8 @@ import java.util.Date;
 
 import esa.s1pdgs.cpoc.common.ProductFamily;
 
-public class InboxConfiguration {	
+public class InboxConfiguration {
+	private String type;
 	private String directory;
 	private String matchRegex;
 	private String ignoreRegex;
@@ -20,6 +21,14 @@ public class InboxConfiguration {
 	private Date ignoreFilesBeforeDate = ConfigDateConverter.DEFAULT_START_DATE;
 	
 	private ProductFamily family = ProductFamily.BLANK;
+
+	public String getType() {
+		return type;
+	}
+
+	public void setType(String type) {
+		this.type = type;
+	}
 
 	public String getDirectory() {
 		return directory;
@@ -111,7 +120,7 @@ public class InboxConfiguration {
 
 	@Override
 	public String toString() {
-		return "InboxConfiguration [directory=" + directory + ", matchRegex=" + matchRegex + ", ignoreRegex="
+		return "InboxConfiguration [type=" + type + ", directory=" + directory + ", matchRegex=" + matchRegex + ", ignoreRegex="
 				+ ignoreRegex + ", topic=" + topic + ", stationName=" + stationName + ", mode=" + mode + ", timeliness="
 				+ timeliness + ", sessionNamePattern=" + sessionNamePattern + ", sessionNameGroupIndex="
 				+ sessionNameGroupIndex + ", ignoreFilesBeforeDate=" + ignoreFilesBeforeDate + ", family=" + family
