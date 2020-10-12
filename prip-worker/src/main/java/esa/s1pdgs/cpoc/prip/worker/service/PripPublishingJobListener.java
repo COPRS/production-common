@@ -27,6 +27,8 @@ import esa.s1pdgs.cpoc.common.errors.processing.MetadataQueryException;
 import esa.s1pdgs.cpoc.common.utils.DateUtils;
 import esa.s1pdgs.cpoc.common.utils.LogUtils;
 import esa.s1pdgs.cpoc.common.utils.Retries;
+import esa.s1pdgs.cpoc.errorrepo.ErrorRepoAppender;
+import esa.s1pdgs.cpoc.errorrepo.model.rest.FailedProcessingDto;
 import esa.s1pdgs.cpoc.metadata.client.MetadataClient;
 import esa.s1pdgs.cpoc.metadata.model.SearchMetadata;
 import esa.s1pdgs.cpoc.mqi.client.GenericMqiClient;
@@ -67,6 +69,7 @@ public class PripPublishingJobListener implements MqiListener<PripPublishingJob>
 	private final PripMetadataRepository pripMetadataRepo;
 	private final AppStatus appStatus;
 	private final ApplicationProperties props;
+	private final ErrorRepoAppender errorAppender;
 
 	@Autowired
 	public PripPublishingJobListener(
@@ -78,7 +81,8 @@ public class PripPublishingJobListener implements MqiListener<PripPublishingJob>
 			@Value("${prip-worker.publishing-job-listener.polling-interval-ms}") final long pollingIntervalMs,
 			@Value("${prip-worker.publishing-job-listener.polling-initial-delay-ms}") final long pollingInitialDelayMs,
 			final AppStatus appStatus,
-			final ApplicationProperties props
+			final ApplicationProperties props,
+			final ErrorRepoAppender errorAppender
 	) {
 		this.mqiClient = mqiClient;
 		this.messageFilter = messageFilter;
@@ -89,6 +93,7 @@ public class PripPublishingJobListener implements MqiListener<PripPublishingJob>
 		this.pollingInitialDelayMs = pollingInitialDelayMs;
 		this.appStatus = appStatus;
 		this.props = props;
+		this.errorAppender = errorAppender;
 	}
 	
 	@PostConstruct
@@ -127,9 +132,14 @@ public class PripPublishingJobListener implements MqiListener<PripPublishingJob>
 						PripReportingOutput.newInstance(new Date()), 
 						new ReportingMessage("Finished publishing file %s in PRIP", name)
 				))
-				.onError(e -> reporting.error(
-						new ReportingMessage("Error on publishing file %s in PRIP: %s", name, LogUtils.toString(e))
-				))
+				.onError(e -> {
+					final String errorMessage = String.format("Error on publishing file %s in PRIP: %s", name, LogUtils.toString(e));
+					reporting.error(new ReportingMessage(errorMessage));
+					LOGGER.error(errorMessage);
+					errorAppender.send(
+							new FailedProcessingDto(props.getHostname(), new Date(), errorMessage, message));
+
+				})
 				.publishMessageProducer(() -> {
 					createAndSave(publishingJob);
 		    		return new MqiPublishingJob<NullMessage>(Collections.emptyList());

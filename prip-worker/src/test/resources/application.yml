@@ -13,6 +13,13 @@ mqi:
   max-retries: 100                                              # the maximal number of consecutive retries following a MQI request error 
   tempo-retry-ms: 10000                                         #
   
+# KAFKA config for error queue
+kafka:
+  bootstrap-servers: ${kafka_bootstrap-servers:kafka-headless:9092}   # the bootstrap servers for KAFKA
+  group-id: error                                                # the group identifier to use for KAFKA publishers  
+  max-retries: 10                                                # number of retries if kafka is not available
+  error-topic: t-pdgs-errors  
+  
 metadata:
   host: localhost:8080
   rest-api_nb-retry: 3
@@ -27,6 +34,7 @@ elasticsearch:
   
 # PRIP Worker config
 prip-worker:
+  hostname: localhost
   metadata-unavailable-retries-number: 10
   metadata-unavailable-retries-interval-ms: 5000  
   publishing-job-listener:
