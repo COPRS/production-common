@@ -3,6 +3,7 @@ package esa.s1pdgs.cpoc.auxip.client.odata;
 import java.net.URI;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.Objects;
 
@@ -20,7 +21,6 @@ import org.apache.olingo.client.api.uri.URIFilter;
 import org.springframework.lang.NonNull;
 
 import esa.s1pdgs.cpoc.auxip.client.AuxipClient;
-import esa.s1pdgs.cpoc.auxip.client.AuxipProductFilter;
 import esa.s1pdgs.cpoc.auxip.client.AuxipProductMetadata;
 import esa.s1pdgs.cpoc.auxip.client.config.AuxipClientConfigurationProperties.AuxipHostConfiguration;
 
@@ -47,13 +47,32 @@ public class AuxipOdataClient implements AuxipClient {
 
 	// --------------------------------------------------------------------------
 	
+//	@Override
+//	public List<AuxipProductMetadata> getMetadata(@NonNull LocalDateTime from, @NonNull LocalDateTime to, Integer top,
+//			Integer skip, Collection<String> productNameContains) {
+//		final List<URIFilter> filters = this.buildFilters(from, to);
+//		final URI queryUri = this.buildQueryUri(filters, top, skip);
+//		final ClientEntitySetIterator<ClientEntitySet, ClientEntity> response = this.readEntities(queryUri);
+//		// TODO @MSc: filter (AuxipProductFilters, java filtering) and map response to
+//		// AuxipProductMetadata
+//		return null;
+//	}
+	
 	@Override
-	public List<AuxipProductMetadata> list(@NonNull LocalDateTime from, @NonNull LocalDateTime to, Integer top, Integer skip,
-			AuxipProductFilter filter) {
+	public List<AuxipProductMetadata> getMetadata(@NonNull LocalDateTime from, @NonNull LocalDateTime to,
+			Integer pageSize, Integer offset, Collection<String> productNameContains) {
 		final List<URIFilter> filters = this.buildFilters(from, to);
-		final URI queryUri = this.buildQueryUri(filters, top, skip);
-		final ClientEntitySetIterator<ClientEntitySet,ClientEntity> response = this.readEntities(queryUri);
-		// TODO @MSc: filter (AuxipProductFilters, java filtering) and map response to AuxipProductMetadata
+		final URI queryUri = this.buildQueryUri(filters, pageSize, offset);
+		final ClientEntitySetIterator<ClientEntitySet, ClientEntity> response = this.readEntities(queryUri);
+		// TODO @MSc: filter (AuxipProductFilters, java filtering) and map response to
+		// AuxipProductMetadata
+		return null;
+	}
+	
+	@Override
+	public List<AuxipProductMetadata> getMetadata(@NonNull LocalDateTime from, @NonNull LocalDateTime to,
+			Integer pageSize, Integer offset) {
+		// TODO @MSc: impl
 		return null;
 	}
 	
