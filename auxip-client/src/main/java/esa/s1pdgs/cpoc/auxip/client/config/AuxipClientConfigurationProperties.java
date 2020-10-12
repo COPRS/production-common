@@ -14,34 +14,37 @@ import org.springframework.context.annotation.PropertySource;
 public class AuxipClientConfigurationProperties {
 	
 	public static class AuxipHostConfiguration {
-		private String serverName;
+		private String serviceRootUri;
 		private String user;
 		private String pass;
 		private boolean trustSelfSignedCertificate = false;
 		private int connectTimeoutSec = 10;
 		private boolean enablePreemptiveAuthentication = true;
+		private String creationDateAttributeName; // in legacy PRIP instances 'PublicationDate', in cloud PRIP 'creationDate'
 		
 		// - - - - - - - - - - - - - - - - - -
 		
 		@Override
 		public String toString() {
-			return "XbipHostConfiguration [serverName=" + serverName + ", user=" + user
-					+ ", pass=****, trustSelfSignedCertificate=" + trustSelfSignedCertificate + ", connectTimeoutSec="
-					+ connectTimeoutSec + ", enablePreemptiveAuthentication=" + enablePreemptiveAuthentication + "]";
+			return "XbipHostConfiguration [serviceRootUri=" + this.serviceRootUri + ", user=" + this.user
+					+ ", pass=****, trustSelfSignedCertificate=" + this.trustSelfSignedCertificate
+					+ ", connectTimeoutSec=" + this.connectTimeoutSec + ", creationDateAttributeName="
+					+ this.creationDateAttributeName + ", enablePreemptiveAuthentication="
+					+ this.enablePreemptiveAuthentication + "]";
 		}
 
 		// - - - - - - - - - - - - - - - - - -
 		
-		public String getServerName() {
-			return serverName;
+		public String getServiceRootUri() {
+			return this.serviceRootUri;
 		}
 
-		public void setServerName(final String serverName) {
-			this.serverName = serverName;
+		public void setServiceRootUri(String serviceRootUri) {
+			this.serviceRootUri = serviceRootUri;
 		}
-
+		
 		public boolean isTrustSelfSignedCertificate() {
-			return trustSelfSignedCertificate;
+			return this.trustSelfSignedCertificate;
 		}
 
 		public void setTrustSelfSignedCertificate(final boolean trustSelfSignedCertificate) {
@@ -49,7 +52,7 @@ public class AuxipClientConfigurationProperties {
 		}
 
 		public String getUser() {
-			return user;
+			return this.user;
 		}
 
 		public void setUser(final String user) {
@@ -57,7 +60,7 @@ public class AuxipClientConfigurationProperties {
 		}
 
 		public String getPass() {
-			return pass;
+			return this.pass;
 		}
 
 		public void setPass(final String pass) {
@@ -65,7 +68,7 @@ public class AuxipClientConfigurationProperties {
 		}
 		
 		public int getConnectTimeoutSec() {
-			return connectTimeoutSec;
+			return this.connectTimeoutSec;
 		}
 
 		public void setConnectTimeoutSec(final int connectTimeoutSec) {
@@ -73,11 +76,19 @@ public class AuxipClientConfigurationProperties {
 		}
 		
 		public boolean isEnablePreemptiveAuthentication() {
-			return enablePreemptiveAuthentication;
+			return this.enablePreemptiveAuthentication;
 		}
 
 		public void setEnablePreemptiveAuthentication(boolean enablePreemptiveAuthentication) {
 			this.enablePreemptiveAuthentication = enablePreemptiveAuthentication;
+		}
+
+		public String getCreationDateAttributeName() {
+			return this.creationDateAttributeName;
+		}
+
+		public void setCreationDateAttributeName(String creationDateAttributeName) {
+			this.creationDateAttributeName = creationDateAttributeName;
 		}
 	}
 	
@@ -92,14 +103,14 @@ public class AuxipClientConfigurationProperties {
 	
 	@Override
 	public String toString() {
-		return "AuxipClientConfigurationProperties [proxyHost=" + proxyHost + ", proxyPort=" + proxyPort
-				+ ", hostConfigs=" + hostConfigs + "]";
+		return "AuxipClientConfigurationProperties [proxyHost=" + this.proxyHost + ", proxyPort=" + this.proxyPort
+				+ ", hostConfigs=" + this.hostConfigs + "]";
 	}
 	
 	// --------------------------------------------------------------------------
 
 	public List<AuxipHostConfiguration> getHostConfigs() {
-		return hostConfigs;
+		return this.hostConfigs;
 	}
 
 	public void setHostConfigs(final List<AuxipHostConfiguration> hostConfigs) {
@@ -107,7 +118,7 @@ public class AuxipClientConfigurationProperties {
 	}
 	
 	public String getProxyHost() {
-		return proxyHost;
+		return this.proxyHost;
 	}
 
 	public void setProxyHost(final String proxyHost) {
@@ -115,7 +126,7 @@ public class AuxipClientConfigurationProperties {
 	}
 
 	public int getProxyPort() {
-		return proxyPort;
+		return this.proxyPort;
 	}
 
 	public void setProxyPort(final int proxyPort) {
