@@ -80,6 +80,7 @@ public final class Inbox {
 				}
 				persist(newEntry);
 			}
+			inboxAdapter.advanceAfterPublish();
 			pollingRun.dumpTo(handledElements, log);
 			log.trace(pollingRun.toString());
 		} catch (final Exception e) {			

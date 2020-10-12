@@ -7,9 +7,11 @@ import esa.s1pdgs.cpoc.ingestion.trigger.entity.InboxEntry;
 import esa.s1pdgs.cpoc.ingestion.trigger.filter.InboxFilter;
 
 public interface InboxAdapter {
-	public List<InboxEntry> read(final InboxFilter filter) throws IOException;
+	List<InboxEntry> read(final InboxFilter filter) throws IOException;
 
-	public String description();
+	void advanceAfterPublish();
+
+	String description();
 	
-	public String inboxURL();
+	String inboxURL();
 }
