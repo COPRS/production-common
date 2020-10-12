@@ -42,7 +42,7 @@ public class AppDataJobGeneration {
     public AppDataJobGeneration() {
         super();
         this.state = AppDataJobGenerationState.INITIAL;
-        this.previousState = null;
+        this.previousState = AppDataJobGenerationState.INITIAL;
         this.creationDate = new Date();
         this.nbErrors = 0;
     }
