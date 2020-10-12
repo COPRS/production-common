@@ -6,6 +6,7 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 @ConfigurationProperties("prip-worker")
 public class ApplicationProperties {
+	private String hostname;
 	private int metadataUnavailableRetriesNumber = 10;
 	private long metadataUnavailableRetriesIntervalMs = 5000;
 	
@@ -24,4 +25,10 @@ public class ApplicationProperties {
 	public void setMetadataUnavailableRetriesIntervalMs(final long metadataUnavailableRetriesIntervalMs) {
 		this.metadataUnavailableRetriesIntervalMs = metadataUnavailableRetriesIntervalMs;
 	}
+	public String getHostname() {
+		return hostname;
+	}
+	public void setHostname(final String hostname) {
+		this.hostname = hostname;
+	}	
 }
