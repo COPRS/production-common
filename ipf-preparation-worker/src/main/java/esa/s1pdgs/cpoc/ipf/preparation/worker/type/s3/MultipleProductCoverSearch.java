@@ -25,6 +25,8 @@ import esa.s1pdgs.cpoc.ipf.preparation.worker.model.TimeInterval;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.model.tasktable.ElementMapper;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.model.tasktable.TaskTableAdapter;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.query.QueryUtils;
+import esa.s1pdgs.cpoc.ipf.preparation.worker.type.s3.gap.SequenceGapHandler;
+import esa.s1pdgs.cpoc.ipf.preparation.worker.type.s3.gap.ThresholdGapHandler;
 import esa.s1pdgs.cpoc.metadata.client.MetadataClient;
 import esa.s1pdgs.cpoc.metadata.model.S3Metadata;
 import esa.s1pdgs.cpoc.xml.model.tasktable.TaskTableInput;
@@ -51,20 +53,28 @@ public class MultipleProductCoverSearch {
 	private final MetadataClient metadataClient;
 	private final IpfPreparationWorkerSettings prepSettings;
 	private final boolean disableFirstLastWaiting;
+	private final double gapThreshold;
 
 	public MultipleProductCoverSearch(final TaskTableAdapter ttAdapter, final ElementMapper elementMapper,
 			final MetadataClient metadataClient, final IpfPreparationWorkerSettings prepSettings) {
-		this(ttAdapter, elementMapper, metadataClient, prepSettings, false);
+		this(ttAdapter, elementMapper, metadataClient, prepSettings, false, 0.0);
 	}
 	
 	public MultipleProductCoverSearch(final TaskTableAdapter ttAdapter, final ElementMapper elementMapper,
 			final MetadataClient metadataClient, final IpfPreparationWorkerSettings prepSettings,
 			final boolean disableFirstLastWaiting) {
+		this(ttAdapter, elementMapper, metadataClient, prepSettings, disableFirstLastWaiting, 0.0);
+	}
+	
+	public MultipleProductCoverSearch(final TaskTableAdapter ttAdapter, final ElementMapper elementMapper,
+			final MetadataClient metadataClient, final IpfPreparationWorkerSettings prepSettings,
+			final boolean disableFirstLastWaiting, final double gapThreshold) {
 		this.ttAdapter = ttAdapter;
 		this.elementMapper = elementMapper;
 		this.metadataClient = metadataClient;
 		this.prepSettings = prepSettings;
 		this.disableFirstLastWaiting = disableFirstLastWaiting;
+		this.gapThreshold = gapThreshold;
 	}
 
 	/**
@@ -180,53 +190,22 @@ public class MultipleProductCoverSearch {
 	 */
 	private boolean checkCoverage(final String startTime, final String stopTime, final double t0, final double t1,
 			final String timeliness, final List<S3Metadata> products) {
-		if (timeliness.equals("NRT")) {
-			return checkCoverageNRT(startTime, stopTime, t0, t1, products);
-		}
-
-		return true;
-	}
-
-	/**
-	 * For NRT the start and stop time should be covered (aka. the earliest start
-	 * Time is before startTime - t0 and the latest stop time is after stopTime +
-	 * t1) and the granule numbers have to be continuous
-	 */
-	private boolean checkCoverageNRT(final String startTime, final String stopTime, final double t0, final double t1,
-			final List<S3Metadata> products) {
-		final S3Metadata first = products.get(0);
-		final S3Metadata last = products.get(products.size() - 1);
-
 		LocalDateTime time = LocalDateTime.parse(startTime,
 				DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSSSSS'Z'"));
 		final LocalDateTime coverageMin = time.minusSeconds(Math.round(t0));
 
 		time = LocalDateTime.parse(stopTime, DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSSSSS'Z'"));
 		final LocalDateTime coverageMax = time.plusSeconds(Math.round(t1));
-
-		final LocalDateTime firstStart = LocalDateTime.parse(first.getValidityStart(),
-				DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSSSSS'Z'"));
-		final LocalDateTime lastStop = LocalDateTime.parse(last.getValidityStop(),
-				DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSSSSS'Z'"));
-
-		// Interval is not covered if the start time is not covered
-		// Exception: If the earliest granule has position FIRST and those products
-		// should not wait for left neighbors (ex. OLCI)
-		if (firstStart.isAfter(coverageMin)
-				&& !(disableFirstLastWaiting && first.getGranulePosition().equals("FIRST"))) {
-			LOGGER.info("CheckCoverage: First start time is after interval beginning. Interval is not covered");
-			return false;
+		
+		if (gapThreshold > 0.0) {
+			ThresholdGapHandler gapHandler = new ThresholdGapHandler(gapThreshold);
+			return gapHandler.isCovered(coverageMin, coverageMax, products);
+		} else if (timeliness.equals("NRT")) {
+			SequenceGapHandler gapHandler = new SequenceGapHandler(disableFirstLastWaiting);
+			return gapHandler.isCovered(coverageMin, coverageMax, products);
 		}
 
-		// Interval is not covered if the stop time is not covered
-		// Exception: If the last granule has position LAST and those products
-		// should not wait for right neighbors (ex. OLCI)
-		if (lastStop.isBefore(coverageMax) && !(disableFirstLastWaiting && last.getGranulePosition().equals("LAST"))) {
-			LOGGER.info("CheckCoverage: Last stop time is before interval ending. Interval is not covered");
-			return false;
-		}
-
-		return isGranuleContinuous(products);
+		return true;
 	}
 
 	/**
@@ -268,39 +247,6 @@ public class MultipleProductCoverSearch {
 
 		LOGGER.trace("Ranges do not intersect!");
 		return null;
-	}
-
-	/**
-	 * Check if the granule numbers are continuous.
-	 * 
-	 * Edge case: if the granule position is LAST the position of the successor has
-	 * to be FIRST
-	 * 
-	 * @param products List of products which should be checked for continuity
-	 * @return true if list is continuous, false if not
-	 */
-	private boolean isGranuleContinuous(final List<S3Metadata> products) {
-
-		for (int i = 0; i < products.size() - 1; i++) {
-			final S3Metadata product = products.get(i);
-			final S3Metadata successor = products.get(i + 1);
-
-			if (product.getGranulePosition().equals("LAST")) {
-				if (!successor.getGranulePosition().equals("FIRST")) {
-					LOGGER.info("Successor to LAST was not FIRST (actual: {}). List of products is not continuous.",
-							successor.getGranulePosition());
-					return false;
-				}
-			} else {
-				if (product.getGranuleNumber() + 1 != successor.getGranuleNumber()) {
-					LOGGER.info("Granule number not continuous. Expected {}, actual {}", product.getGranuleNumber() + 1,
-							successor.getGranuleNumber());
-					return false;
-				}
-			}
-		}
-
-		return true;
 	}
 
 	/**

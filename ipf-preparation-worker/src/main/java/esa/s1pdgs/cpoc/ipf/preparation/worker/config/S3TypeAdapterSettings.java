@@ -69,6 +69,7 @@ public class S3TypeAdapterSettings {
 	public static class MPCSearchSettings {
 		private List<String> productTypes;
 		private boolean disableFirstLastWaiting = false;
+		private double gapThreshold = 0.0;
 
 		public List<String> getProductTypes() {
 			return productTypes;
@@ -85,11 +86,19 @@ public class S3TypeAdapterSettings {
 		public void setDisableFirstLastWaiting(boolean disableFirstLastWaiting) {
 			this.disableFirstLastWaiting = disableFirstLastWaiting;
 		}
+		
+		public double getGapThreshold() {
+			return gapThreshold;
+		}
+
+		public void setGapThreshold(double gapThreshold) {
+			this.gapThreshold = gapThreshold;
+		}
 
 		@Override
 		public String toString() {
-			return "MPCSearchSettings [productType=" + productTypes + ", disableFirstLastWaiting="
-					+ disableFirstLastWaiting + "]";
+			return "MPCSearchSettings [productTypes=" + productTypes + ", disableFirstLastWaiting="
+					+ disableFirstLastWaiting + ", gapThreshold=" + gapThreshold + "]";
 		}
 	}
 

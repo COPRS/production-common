@@ -39,6 +39,7 @@ import esa.s1pdgs.cpoc.ipf.preparation.worker.type.AbstractProductTypeAdapter;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.type.Product;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.type.pdu.generator.PDUGenerator;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.type.s3.MultipleProductCoverSearch;
+import esa.s1pdgs.cpoc.ipf.preparation.worker.type.s3.gap.ThresholdGapHandler;
 import esa.s1pdgs.cpoc.metadata.client.MetadataClient;
 import esa.s1pdgs.cpoc.metadata.model.S3Metadata;
 import esa.s1pdgs.cpoc.mqi.model.queue.IpfExecutionJob;
@@ -312,8 +313,9 @@ public class PDUTypeAdapter extends AbstractProductTypeAdapter {
 				}
 				TimeInterval jobInterval = new TimeInterval(DateUtils.parse(job.getStartTime()),
 						DateUtils.parse(job.getStopTime()));
-				intervals = PDUGapHandler.mergeTimeIntervals(jobInterval, intervals,
-						typeSettings.getGapThreshholdInS());
+				
+				ThresholdGapHandler gapHandler = new ThresholdGapHandler(typeSettings.getGapThreshholdInS());
+				intervals = gapHandler.mergeTimeIntervals(jobInterval, intervals);
 
 				String pduTimeIntervals = intervals.stream()
 						.map(i -> "[" + DateUtils.formatToPDUDateTimeFormat(i.getStart()) + ","
