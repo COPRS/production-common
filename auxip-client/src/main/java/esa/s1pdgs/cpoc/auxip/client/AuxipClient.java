@@ -1,7 +1,6 @@
 package esa.s1pdgs.cpoc.auxip.client;
 
 import java.time.LocalDateTime;
-import java.util.Collection;
 import java.util.List;
 
 import org.springframework.lang.NonNull;
