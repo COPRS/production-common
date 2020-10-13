@@ -44,7 +44,10 @@ public final class LocalOutboxClient extends AbstractOutboxClient {
 				IOUtils.copyLarge(in, out, new byte[config.getBufferSize()]);    				
 			}
 		}
-		Files.move(path.resolve("." + obsObject.getKey()), path.resolve(obsObject.getKey()),
+		final Path dirWithDot = path.resolve("." + obsObject.getKey());
+		final Path finalDir = path.resolve(obsObject.getKey());
+		logger.debug("Moving {} to {}", dirWithDot, finalDir);
+		Files.move(dirWithDot, finalDir,
 				StandardCopyOption.ATOMIC_MOVE);
 		return path.toString();
 	}
