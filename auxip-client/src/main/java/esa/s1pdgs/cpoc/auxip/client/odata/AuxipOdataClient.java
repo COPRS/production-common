@@ -107,10 +107,12 @@ public class AuxipOdataClient implements AuxipClient {
 		final FilterFactory filterFactory = this.odataClient.getFilterFactory();
 
 		// timeframe filter
-		final URIFilter lowerBoundFilter = filterFactory.ge(this.creationDateAttrName,
-				DateUtils.formatToOdataDateTimeFormat(from));
-		final URIFilter upperBoundFilter = filterFactory.lt(this.creationDateAttrName,
-				DateUtils.formatToOdataDateTimeFormat(to));
+//		final URIFilter lowerBoundFilter = filterFactory.ge(this.creationDateAttrName,
+//				DateUtils.formatToOdataDateTimeFormat(from));
+//		final URIFilter upperBoundFilter = filterFactory.lt(this.creationDateAttrName,
+//				DateUtils.formatToOdataDateTimeFormat(to));
+		final URIFilter lowerBoundFilter = filterFactory.ge(this.creationDateAttrName, from);
+		final URIFilter upperBoundFilter = filterFactory.lt(this.creationDateAttrName, to);
 		final URIFilter timeframeFilter = filterFactory.and(lowerBoundFilter, upperBoundFilter);
 
 		// product name filter
