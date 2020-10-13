@@ -54,13 +54,13 @@ public abstract class AbstractInboxAdapter implements InboxAdapter {
 	
 	@Override
 	public List<InboxEntry> read(final InboxFilter filter) throws IOException {
-		LOG.trace("Reading inbox directory '{}'", inboxURL.toString());
+		LOG.debug("Reading inbox directory '{}'", inboxURL.toString());
 		final List<InboxEntry> entries = list()
 				.filter(x -> !Paths.get(inboxURL.getPath()).equals(x.getPath()))
 				.map(EntrySupplier::getEntry)
 				.filter(filter::accept)
 				.collect(Collectors.toList());
-		LOG.trace("Found {} entries in inbox directory '{}': {}", entries.size(), inboxURL.toString(), entries);
+		LOG.debug("Found {} entries in inbox directory '{}': {}", entries.size(), inboxURL.toString(), entries);
 		return entries;
 	}
 

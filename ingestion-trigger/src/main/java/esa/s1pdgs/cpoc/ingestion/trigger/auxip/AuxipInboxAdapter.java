@@ -151,7 +151,7 @@ public class AuxipInboxAdapter extends AbstractInboxAdapter {
         private final int pageSize;
         private final URI inboxUrl;
 
-        private int offset;
+        private int offset = 0;
         private final Deque<AuxipProductMetadata> collected = new ArrayDeque<>();
 
         public AuxipMetadataSpliterator(TimeWindow window, AuxipClient client, int pageSize, URI inboxUrl) {
