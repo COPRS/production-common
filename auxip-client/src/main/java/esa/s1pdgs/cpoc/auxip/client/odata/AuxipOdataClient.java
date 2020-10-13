@@ -82,6 +82,7 @@ public class AuxipOdataClient implements AuxipClient {
 		// retrieve and map
 		final ClientEntitySetIterator<ClientEntitySet, ClientEntity> response = this.readEntities(queryUri);
 		final List<AuxipProductMetadata> result = this.mapToMetadata(response);
+		LOG.debug("metadata search returned " + result.size() + " elements");
 
 		return result;
 	}
