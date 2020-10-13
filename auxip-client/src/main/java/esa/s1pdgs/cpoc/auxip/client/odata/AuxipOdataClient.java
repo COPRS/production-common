@@ -162,7 +162,8 @@ public class AuxipOdataClient implements AuxipClient {
 		
 		final ODataRetrieveResponse<ClientEntitySetIterator<ClientEntitySet, ClientEntity>> response = request
 				.execute();
-
+		LOG.debug("metadata search response status: " + response.getStatusCode() + " - " + response.getStatusMessage());
+		
 		return response.getBody();
 	}
 
