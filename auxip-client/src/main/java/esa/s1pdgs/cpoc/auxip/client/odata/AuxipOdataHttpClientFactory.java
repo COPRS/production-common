@@ -18,19 +18,28 @@ import org.apache.olingo.commons.api.http.HttpMethod;
 
 public class AuxipOdataHttpClientFactory extends DefaultHttpClientFactory {
 
-	private final String username;
-	private final String password;
+	private String username;
+	private String password;
+	private boolean sslValidation = true;
 
 	// --------------------------------------------------------------------------
 
 	public AuxipOdataHttpClientFactory() {
-		this.username = null;
-		this.password = null;
+	}
+	
+	public AuxipOdataHttpClientFactory(boolean sslValidation) {
+		this.sslValidation = sslValidation;
 	}
 
 	public AuxipOdataHttpClientFactory(String user, String pass) {
 		this.username = user;
 		this.password = pass;
+	}
+	
+	public AuxipOdataHttpClientFactory(String user, String pass, boolean sslValidation) {
+		this(user, pass);
+
+		this.sslValidation = sslValidation;
 	}
 
 	// --------------------------------------------------------------------------
@@ -39,7 +48,7 @@ public class AuxipOdataHttpClientFactory extends DefaultHttpClientFactory {
 	public DefaultHttpClient create(HttpMethod method, URI uri) {
 		final DefaultHttpClient httpClient;
 		
-		if ("https".equalsIgnoreCase(uri.getScheme())) {
+		if ("https".equalsIgnoreCase(uri.getScheme()) && !this.sslValidation) {
 			// ssl
 			final TrustStrategy acceptTrustStrategy = new TrustStrategy() {
 				@Override

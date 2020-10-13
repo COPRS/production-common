@@ -17,6 +17,7 @@ public class AuxipClientConfigurationProperties {
 		private String serviceRootUri;
 		private String user;
 		private String pass;
+		private boolean sslValidation = true;
 		private String creationDateAttributeName; // in legacy PRIP instances 'PublicationDate', in cloud PRIP 'creationDate'
 		private String productNameAttrName; // in legacy PRIP instances 'Name', in cloud PRIP 'name'
 		private String idAttrName; // in legacy PRIP instances 'Id', in cloud PRIP 'id'
@@ -78,6 +79,14 @@ public class AuxipClientConfigurationProperties {
 
 		public void setIdAttrName(String idAttrName) {
 			this.idAttrName = idAttrName;
+		}
+
+		public boolean isSslValidation() {
+			return this.sslValidation;
+		}
+
+		public void setSslValidation(boolean sslValidation) {
+			this.sslValidation = sslValidation;
 		}
 	}
 	

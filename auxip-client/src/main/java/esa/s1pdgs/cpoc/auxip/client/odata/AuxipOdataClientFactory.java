@@ -57,9 +57,10 @@ public class AuxipOdataClientFactory implements AuxipClientFactory {
 		// authentication
 		final AuxipOdataHttpClientFactory httpClientFactory;
 		if (needsAuthentication) {
-			httpClientFactory = new AuxipOdataHttpClientFactory(hostConfig.getUser(), hostConfig.getPass());
+			httpClientFactory = new AuxipOdataHttpClientFactory(hostConfig.getUser(), hostConfig.getPass(),
+					hostConfig.isSslValidation());
 		} else {
-			httpClientFactory = new AuxipOdataHttpClientFactory();
+			httpClientFactory = new AuxipOdataHttpClientFactory(hostConfig.isSslValidation());
 		}
 
 		// proxy
