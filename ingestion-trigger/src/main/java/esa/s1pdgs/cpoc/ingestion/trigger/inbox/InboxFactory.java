@@ -10,6 +10,7 @@ import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Component;
 
 import esa.s1pdgs.cpoc.common.ProductFamily;
+import esa.s1pdgs.cpoc.ingestion.trigger.auxip.AuxipInboxAdapterFactory;
 import esa.s1pdgs.cpoc.ingestion.trigger.config.InboxConfiguration;
 import esa.s1pdgs.cpoc.ingestion.trigger.filter.BlacklistRegexRelativePathInboxFilter;
 import esa.s1pdgs.cpoc.ingestion.trigger.filter.JoinedFilter;
@@ -30,18 +31,21 @@ public class InboxFactory {
 	private final IngestionTriggerServiceTransactional ingestionTriggerServiceTransactional;
 	private final FilesystemInboxAdapterFactory fileSystemInboxAdapterFactory;
 	private final XbipInboxAdapterFactory xbipInboxAdapterFactory;
+	private final AuxipInboxAdapterFactory auxipInboxAdapterFactory;
 
 	@Autowired
 	public InboxFactory(
 			final KafkaTemplate<String, IngestionJob> kafkaTemplate,
 			final IngestionTriggerServiceTransactional inboxPollingServiceTransactional,
 			final FilesystemInboxAdapterFactory fileSystemInboxAdapterFactory,
-			final XbipInboxAdapterFactory xbipInboxAdapterFactory
-	) {
+			final XbipInboxAdapterFactory xbipInboxAdapterFactory,
+			final AuxipInboxAdapterFactory auxipInboxAdapterFactory
+			) {
 		this.kafkaTemplate = kafkaTemplate;
 		this.ingestionTriggerServiceTransactional = inboxPollingServiceTransactional;
 		this.fileSystemInboxAdapterFactory = fileSystemInboxAdapterFactory;
 		this.xbipInboxAdapterFactory = xbipInboxAdapterFactory;
+		this.auxipInboxAdapterFactory = auxipInboxAdapterFactory;
 	}
 	
 
@@ -77,7 +81,11 @@ public class InboxFactory {
 	}
 	
 	
-	private final InboxAdapterFactory newInboxAdapterFactory(final String url) throws URISyntaxException {	
+	private final InboxAdapterFactory newInboxAdapterFactory(final String type, final String url) throws URISyntaxException {
+		if("prip".equals(type)) {
+			return auxipInboxAdapterFactory;
+		}
+
 		if (url.startsWith("https://")) {
 			return xbipInboxAdapterFactory;			
 		}
@@ -91,7 +99,7 @@ public class InboxFactory {
 	
 	private final InboxAdapter newInboxAdapter(final InboxConfiguration config) throws URISyntaxException {		
 		final String sanitizedUrl = normalizeInputUrl(config.getDirectory());
-		final InboxAdapterFactory inboxAdapterFactory = newInboxAdapterFactory(sanitizedUrl);
+		final InboxAdapterFactory inboxAdapterFactory = newInboxAdapterFactory(config.getType(), sanitizedUrl);
 		
 		return inboxAdapterFactory.newInboxAdapter(
 				new URI(sanitizedUrl), 
