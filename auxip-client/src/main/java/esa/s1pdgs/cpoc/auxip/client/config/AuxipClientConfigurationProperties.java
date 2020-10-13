@@ -17,9 +17,6 @@ public class AuxipClientConfigurationProperties {
 		private String serviceRootUri;
 		private String user;
 		private String pass;
-		private boolean trustSelfSignedCertificate = false;
-		private int connectTimeoutSec = 10;
-		private boolean enablePreemptiveAuthentication = true;
 		private String creationDateAttributeName; // in legacy PRIP instances 'PublicationDate', in cloud PRIP 'creationDate'
 		private String productNameAttrName; // in legacy PRIP instances 'Name', in cloud PRIP 'name'
 		private String idAttrName; // in legacy PRIP instances 'Id', in cloud PRIP 'id'
@@ -29,11 +26,8 @@ public class AuxipClientConfigurationProperties {
 		@Override
 		public String toString() {
 			return "AuxipHostConfiguration [serviceRootUri=" + this.serviceRootUri + ", user=" + this.user
-					+ ", pass=****, trustSelfSignedCertificate=" + this.trustSelfSignedCertificate
-					+ ", connectTimeoutSec=" + this.connectTimeoutSec + ", creationDateAttributeName="
-					+ this.creationDateAttributeName + ", productNameAttrName=" + this.productNameAttrName
-					+ ", idAttrName=" + this.idAttrName + ", enablePreemptiveAuthentication="
-					+ this.enablePreemptiveAuthentication + "]";
+					+ ", pass=****" + ", creationDateAttributeName=" + this.creationDateAttributeName
+					+ ", productNameAttrName=" + this.productNameAttrName + ", idAttrName=" + this.idAttrName + "]";
 		}
 
 		// - - - - - - - - - - - - - - - - - -
@@ -46,14 +40,6 @@ public class AuxipClientConfigurationProperties {
 			this.serviceRootUri = serviceRootUri;
 		}
 		
-		public boolean isTrustSelfSignedCertificate() {
-			return this.trustSelfSignedCertificate;
-		}
-
-		public void setTrustSelfSignedCertificate(final boolean trustSelfSignedCertificate) {
-			this.trustSelfSignedCertificate = trustSelfSignedCertificate;
-		}
-
 		public String getUser() {
 			return this.user;
 		}
@@ -70,22 +56,6 @@ public class AuxipClientConfigurationProperties {
 			this.pass = pass;
 		}
 		
-		public int getConnectTimeoutSec() {
-			return this.connectTimeoutSec;
-		}
-
-		public void setConnectTimeoutSec(final int connectTimeoutSec) {
-			this.connectTimeoutSec = connectTimeoutSec;
-		}
-		
-		public boolean isEnablePreemptiveAuthentication() {
-			return this.enablePreemptiveAuthentication;
-		}
-
-		public void setEnablePreemptiveAuthentication(boolean enablePreemptiveAuthentication) {
-			this.enablePreemptiveAuthentication = enablePreemptiveAuthentication;
-		}
-
 		public String getCreationDateAttributeName() {
 			return this.creationDateAttributeName;
 		}
