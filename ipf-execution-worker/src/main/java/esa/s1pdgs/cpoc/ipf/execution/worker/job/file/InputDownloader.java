@@ -228,8 +228,12 @@ public class InputDownloader {
                 case "S3_GRANULES":
                 case "S3_AUX":
                 case "S3_L0":
-                case "S3_L1":
-                case "S3_L2":
+                case "S3_L1_NRT":
+                case "S3_L1_STC":
+                case "S3_L1_NTC":
+                case "S3_L2_NRT":
+                case "S3_L2_STC":
+                case "S3_L2_NTC":
                 case "S3_CAL":
                 case "S3_PUG":
                     LOGGER.info("Input {}-{} will be stored in {}",

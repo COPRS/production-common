@@ -107,8 +107,12 @@ public enum ProductCategory {
 			// S3 zip families
 			case S3_AUX_ZIP:
 			case S3_L0_ZIP:
-			case S3_L1_ZIP:
-			case S3_L2_ZIP:
+			case S3_L1_NRT_ZIP:
+			case S3_L1_STC_ZIP:
+			case S3_L1_NTC_ZIP:
+			case S3_L2_NRT_ZIP:
+			case S3_L2_STC_ZIP:
+			case S3_L2_NTC_ZIP:
 			case S3_CAL_ZIP:
 			case S3_PUG_ZIP:
 				return ProductCategory.COMPRESSION_JOBS;
@@ -116,8 +120,12 @@ public enum ProductCategory {
         		return ProductCategory.S3_AUX;
         	case S3_GRANULES:
         	case S3_L0:
-        	case S3_L1:
-        	case S3_L2:
+        	case S3_L1_NRT:
+        	case S3_L1_STC:
+        	case S3_L1_NTC:
+        	case S3_L2_NRT:
+        	case S3_L2_STC:
+        	case S3_L2_NTC:
         	case S3_CAL:
         	case S3_PUG:
         		return ProductCategory.S3_PRODUCTS;
