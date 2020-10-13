@@ -187,7 +187,7 @@ public class MetadataClient {
 		if (response == null || response.getBody() == null) {
 			LOGGER.debug("L1Triggering metadata query for family '{}' and product name '{}' returned no results",
 					productFamily, productName);
-			return "NONE";
+			return null;
 		} else {
 			LOGGER.info("L1Triggering metadata query for family '{}' and product name '{}' returned {}",
 					productFamily.toString(), productName, response.getBody());
@@ -446,6 +446,40 @@ public class MetadataClient {
 		if (!response.getStatusCode().is2xxSuccessful()) {
 			throw new MetadataQueryException("Refresh of index for product family " + productFamily
 					+ " and product type " + productType + " was not successful");
+		}
+	}
+	
+	/**
+	 * Execute a command. If the result is null, refresh the index and try again.
+	 * 
+	 * This method should only be used, when one expects to receive always receive a
+	 * result (ex. retrieving metadata for the product of the catalog event),
+	 * otherwise this could impact performance.
+	 * 
+	 * @param command       command which should be executed
+	 * @param productType   product type, used to determine the index
+	 * @param productFamily product family, used to determine the index
+	 * 
+	 * @return result of the command
+	 * @throws MetadataQueryException on errors while fetching metadata
+	 */
+	public <T> T performWithReindexOnNull(final Callable<T> command, final String productType,
+			final ProductFamily productFamily) throws MetadataQueryException {
+		try {
+			T result = command.call();
+			if (result == null) {
+				LOGGER.info("Received result \"null\" but expected a result. Refresh index and try again.");
+				this.refreshIndex(productFamily, productType);
+				return command.call();
+			}
+
+			return result;
+		} catch (MetadataQueryException e) {
+			// Just pipe the exception through
+			throw e;
+		} catch (Exception e) {
+			throw new MetadataQueryException(
+					"Exception occured while executing metadata query with reindex on null result", e);
 		}
 	}
 

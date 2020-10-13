@@ -31,10 +31,12 @@ public class OLCICalibrationFilter {
 		ProductFamily productFamily = extractProductFamilyFromProductName(productName);
 		this.metadataClient.refreshIndex(productFamily,
 				productName.substring(PRODUCT_TYPE_BEGIN_INDEX, PRODUCT_TYPE_END_INDEX));
-		String response = this.metadataClient.getL1TriggeringForProductName(productFamily, productName);
+		String response = this.metadataClient.performWithReindexOnNull(
+				() -> this.metadataClient.getL1TriggeringForProductName(productFamily, productName),
+				productName.substring(PRODUCT_TYPE_BEGIN_INDEX, PRODUCT_TYPE_END_INDEX), productFamily);
 
 		// Discard job, if response doesn't match processor name
-		return !response.equals(processorName.substring(processorName.length() - 3));
+		return response == null || !response.equals(processorName.substring(processorName.length() - 3));
 	}
 
 	/**

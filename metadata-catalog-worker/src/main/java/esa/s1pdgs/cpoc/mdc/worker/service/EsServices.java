@@ -1123,9 +1123,8 @@ public class EsServices {
 			throw new Exception(e.getMessage());
 		}
 
-		// In case of error, no product with this productname or missing L1Triggering
-		// flag return "NONE"
-		return "NONE";
+		// In case of error, no product with this productname or missing L1Triggering return null
+		return null;
 	}
 	
 	/**
