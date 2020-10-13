@@ -3,6 +3,7 @@ package esa.s1pdgs.cpoc.auxip.client.odata;
 import java.io.InputStream;
 import java.net.URI;
 import java.time.LocalDateTime;
+import java.time.ZoneOffset;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -111,8 +112,8 @@ public class AuxipOdataClient implements AuxipClient {
 //				DateUtils.formatToOdataDateTimeFormat(from));
 //		final URIFilter upperBoundFilter = filterFactory.lt(this.creationDateAttrName,
 //				DateUtils.formatToOdataDateTimeFormat(to));
-		final URIFilter lowerBoundFilter = filterFactory.ge(this.creationDateAttrName, from);
-		final URIFilter upperBoundFilter = filterFactory.lt(this.creationDateAttrName, to);
+		final URIFilter lowerBoundFilter = filterFactory.ge(this.creationDateAttrName, from.toInstant(ZoneOffset.UTC));
+		final URIFilter upperBoundFilter = filterFactory.lt(this.creationDateAttrName, to.toInstant(ZoneOffset.UTC));
 		final URIFilter timeframeFilter = filterFactory.and(lowerBoundFilter, upperBoundFilter);
 
 		// product name filter
