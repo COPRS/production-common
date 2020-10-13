@@ -21,7 +21,6 @@ public class InboxAdapterManager {
 		return result.orElseThrow(() -> new IllegalArgumentException(
 				String.format(
 						"No InboxAdapter configured for uri: %s, available are %s",
-						uri.getScheme(),
 						uri,
 						uriRegexToInboxAdapter
 				)
@@ -38,7 +37,7 @@ public class InboxAdapterManager {
 	}
 
 	public static String uriRegexForFile() {
-		return "file://.*";
+		return "file:/.*";
 	}
 
 	public static String uriRegexFor(String hostName) {

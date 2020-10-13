@@ -43,6 +43,7 @@ public class InboxAdapterManagerTest {
         final InboxAdapterManager uut = new InboxAdapterManager(adapterMap);
 
         assertThat(uut.getInboxAdapterFor(URI.create("file://path/to/file")), is(fileAdapter));
+        assertThat(uut.getInboxAdapterFor(URI.create("file:/data/inbox/AUX/S1A_OPER_AUX_PREORB_OPOD_20200121T194542_V20200121T174401_20200122T001901.EOF")), is(fileAdapter));
         assertThat(uut.getInboxAdapterFor(URI.create("https://esa-copernicus.ksat.no/SENTINEL1/WILE/S1A_XXXABC.EOF")), is(xbipAdapter));
         assertThat(uut.getInboxAdapterFor(URI.create("http://195.77.80.11/SENTINEL1/WILE/S1A_XXXABC.SAFE")), is(xbipAdapter));
         assertThat(uut.getInboxAdapterFor(URI.create("195.77.80.11/SENTINEL1/WILE/S1A_XXXABC.SAFE")), is(xbipAdapter));
