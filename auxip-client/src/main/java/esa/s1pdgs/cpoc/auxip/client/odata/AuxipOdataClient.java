@@ -23,6 +23,7 @@ import org.apache.olingo.client.api.uri.FilterArgFactory;
 import org.apache.olingo.client.api.uri.FilterFactory;
 import org.apache.olingo.client.api.uri.URIBuilder;
 import org.apache.olingo.client.api.uri.URIFilter;
+import org.apache.olingo.commons.api.http.HttpStatusCode;
 import org.springframework.lang.NonNull;
 
 import esa.s1pdgs.cpoc.auxip.client.AuxipClient;
@@ -88,8 +89,16 @@ public class AuxipOdataClient implements AuxipClient {
 	public InputStream read(@NonNull UUID productMetadataId) {
 		final URI productDownloadUrl = this.rootServiceUrl
 				.resolve("Products(" + productMetadataId.toString() + ")/$value");
+		
+		LOG.debug("sending download request: " + productDownloadUrl);
 
-		return this.odataClient.getRetrieveRequestFactory().getMediaRequest(productDownloadUrl).execute().getRawResponse();
+		final ODataRetrieveResponse<InputStream> response = this.odataClient.getRetrieveRequestFactory()
+				.getMediaRequest(productDownloadUrl).execute();
+		
+		LOG.debug("download request (" + productDownloadUrl + ") response status: " + response.getStatusCode() + " - "
+				+ response.getStatusMessage());
+		
+		return response.getBody();
 	}
 	
 	// --------------------------------------------------------------------------
@@ -144,7 +153,7 @@ public class AuxipOdataClient implements AuxipClient {
 		final ODataEntitySetIteratorRequest<ClientEntitySet, ClientEntity> request = this.odataClient
 				.getRetrieveRequestFactory().getEntitySetIteratorRequest(absoluteUri);
 		request.setAccept("application/json");
-		LOG.debug("sending request to PRIP: " + absoluteUri.toString());
+		LOG.debug("sending request to PRIP: " + absoluteUri);
 		//LOG.debug("sending request to PRIP: " + request.toString());
 		
 		final ODataRetrieveResponse<ClientEntitySetIterator<ClientEntitySet, ClientEntity>> response = request
