@@ -15,7 +15,7 @@ import esa.s1pdgs.cpoc.auxip.client.config.AuxipClientConfigurationProperties.Au
 
 public class AuxipOdataClientFactory implements AuxipClientFactory {
 	private static final Logger LOG = LogManager.getLogger(AuxipOdataClientFactory.class);
-	
+
 	/** OData entity set name for the entities that will be queried */
 	public static final String ENTITY_SET_NAME = "Products";
 
@@ -31,19 +31,12 @@ public class AuxipOdataClientFactory implements AuxipClientFactory {
 
 	@Override
 	public AuxipClient newAuxipClient(final URI serverUrl) {
-		// TODO @MSc: impl
 		final AuxipHostConfiguration hostConfig = this.hostConfigFor(serverUrl.getHost());
-		final ODataClient odataClient = ODataClientFactory.getClient();
-		
-		// TODO @MSc: add proxy configuration and when configured use it here for the client
-//		if(proxy) {
-//			final ProxyWrappingHttpClientFactory clientFactory = new ProxyWrappingHttpClientFactory(proxy, proxyUsername, proxyPassword, wrapped);
-//			odataClient.getConfiguration().setHttpClientFactory(clientFactory);
-//		}
-		
+		final ODataClient odataClient = this.buildOdataClient(hostConfig);
+
 		return new AuxipOdataClient(odataClient, hostConfig, ENTITY_SET_NAME);
 	}
-	
+
 	private AuxipHostConfiguration hostConfigFor(final String serviceRootUri) {
 		// lookup host configuration for the given URL
 		for (final AuxipHostConfiguration hostConfig : this.config.getHostConfigs()) {
@@ -52,35 +45,47 @@ public class AuxipOdataClientFactory implements AuxipClientFactory {
 				return hostConfig;
 			}
 		}
-		throw new IllegalArgumentException(String.format("Could not find configuration for server '%s'", serviceRootUri));
+		throw new IllegalArgumentException(
+				String.format("Could not find configuration for server '%s'", serviceRootUri));
 	}
 
-//	private ProxySelector proxy() {
-//		if (null != this.config.getProxyHost()) {
-//			LOG.debug("Using Proxy {}:{}", config.getProxyHost(), this.config.getProxyPort());
-//			return new ProxySelector() {
-//				@Override
-//				public final List<Proxy> select(final URI uri) {
-//					try {
-//						return Collections.singletonList(new Proxy(Type.HTTP,
-//								new InetSocketAddress(
-//										InetAddress.getByName(AuxipOdataClientFactory.this.config.getProxyHost()),
-//										config.getProxyPort())));
-//						// FIXME proper error handling
-//					} catch (final UnknownHostException e) {
-//						LOG.error(e);
-//					}
-//					return Collections.emptyList();
-//				}
-//
-//				@Override
-//				public final void connectFailed(final URI uri, final SocketAddress sa, final IOException ioe) {
-//					LOG.error(ioe);
-//				}
-//			};
-//		}
-//
-//		return null;
-//	}
+	private ODataClient buildOdataClient(final AuxipHostConfiguration hostConfig) {
+		final ODataClient odataClient = ODataClientFactory.getClient();
+		final boolean needsAuthentication = null != hostConfig.getUser() && !hostConfig.getUser().isEmpty();
+		final boolean needsProxy = null != this.config.getProxy() && !this.config.getProxy().isEmpty();
+
+		// authentication
+		final AuxipOdataHttpClientFactory httpClientFactory;
+		if (needsAuthentication) {
+			httpClientFactory = new AuxipOdataHttpClientFactory(hostConfig.getUser(), hostConfig.getPass(),
+					hostConfig.isSslValidation());
+		} else {
+			httpClientFactory = new AuxipOdataHttpClientFactory(hostConfig.isSslValidation());
+		}
+
+		// proxy
+		ProxyWrappingHttpClientFactory proxyWrappingHttpClientFactory = null;
+		if (needsProxy) {
+			URI proxyUri = null;
+			try {
+				proxyUri = URI.create(this.config.getProxy());
+			} catch (Exception e) {
+				LOG.error("could not build proxy URI from '" + this.config.getProxy() + "' and will not use proxy: "
+						+ e.getMessage());
+			}
+
+			if (null != proxyUri) {
+				proxyWrappingHttpClientFactory = new ProxyWrappingHttpClientFactory(proxyUri, httpClientFactory);
+			}
+		}
+
+		if (null != proxyWrappingHttpClientFactory) {
+			odataClient.getConfiguration().setHttpClientFactory(proxyWrappingHttpClientFactory);
+		} else if (null != httpClientFactory) {
+			odataClient.getConfiguration().setHttpClientFactory(httpClientFactory);
+		}
+
+		return odataClient;
+	}
 
 }
