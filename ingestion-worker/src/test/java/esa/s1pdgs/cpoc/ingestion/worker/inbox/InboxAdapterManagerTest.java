@@ -37,6 +37,7 @@ public class InboxAdapterManagerTest {
         adapterMap.put(InboxAdapterManager.uriRegexForFile(), fileAdapter);
         adapterMap.put(InboxAdapterManager.uriRegexFor("esa-copernicus.ksat.no"), xbipAdapter);
         adapterMap.put(InboxAdapterManager.uriRegexFor("195.77.80.11"), xbipAdapter);
+        adapterMap.put(InboxAdapterManager.uriRegexFor("${cgs1.host}"), xbipAdapter);
         adapterMap.put(InboxAdapterManager.uriRegexFor("prip.sentinel1.eo.esa.int"), auxipAdapter);
 
         final InboxAdapterManager uut = new InboxAdapterManager(adapterMap);
