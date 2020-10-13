@@ -31,7 +31,7 @@ public class AuxipOdataClientFactory implements AuxipClientFactory {
 
 	@Override
 	public AuxipClient newAuxipClient(final URI serverUrl) {
-		final AuxipHostConfiguration hostConfig = this.hostConfigFor(serverUrl.getHost());
+		final AuxipHostConfiguration hostConfig = this.hostConfigFor(serverUrl.toString());
 		final ODataClient odataClient = this.buildOdataClient(hostConfig);
 
 		return new AuxipOdataClient(odataClient, hostConfig, ENTITY_SET_NAME);
