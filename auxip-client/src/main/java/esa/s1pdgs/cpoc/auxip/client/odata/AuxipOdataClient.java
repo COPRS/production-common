@@ -129,7 +129,7 @@ public class AuxipOdataClient implements AuxipClient {
 	}
 
 	private URI buildQueryUri(final List<URIFilter> filters, final Integer pageSize, final Integer offset) {
-		final URIBuilder uriBuilder = this.odataClient.newURIBuilder(this.hostConfig.getServiceRootUri())
+		final URIBuilder uriBuilder = this.odataClient.newURIBuilder(this.rootServiceUrl.toString())
 				.appendEntitySetSegment(this.entitySetName);
 
 		if (null != filters && !filters.isEmpty()) {

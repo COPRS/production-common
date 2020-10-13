@@ -113,8 +113,7 @@ public class AuxipClientConfigurationProperties {
 	
 	// --------------------------------------------------------------------------
 	
-	private String proxyHost;
-	private int proxyPort = 80;
+	private String proxy;
 
 	private List<AuxipHostConfiguration> hostConfigs;
 	
@@ -122,8 +121,7 @@ public class AuxipClientConfigurationProperties {
 	
 	@Override
 	public String toString() {
-		return "AuxipClientConfigurationProperties [proxyHost=" + this.proxyHost + ", proxyPort=" + this.proxyPort
-				+ ", hostConfigs=" + this.hostConfigs + "]";
+		return "AuxipClientConfigurationProperties [proxy=" + this.proxy + ", hostConfigs=" + this.hostConfigs + "]";
 	}
 	
 	// --------------------------------------------------------------------------
@@ -136,20 +134,12 @@ public class AuxipClientConfigurationProperties {
 		this.hostConfigs = hostConfigs;
 	}
 	
-	public String getProxyHost() {
-		return this.proxyHost;
+	public String getProxy() {
+		return this.proxy;
 	}
 
-	public void setProxyHost(final String proxyHost) {
-		this.proxyHost = proxyHost;
-	}
-
-	public int getProxyPort() {
-		return this.proxyPort;
-	}
-
-	public void setProxyPort(final int proxyPort) {
-		this.proxyPort = proxyPort;
+	public void setProxy(final String proxy) {
+		this.proxy = proxy;
 	}
 
 }

@@ -6,6 +6,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.apache.olingo.client.api.ODataClient;
 import org.apache.olingo.client.core.ODataClientFactory;
+import org.apache.olingo.client.core.http.BasicAuthHttpClientFactory;
 import org.apache.olingo.client.core.http.ProxyWrappingHttpClientFactory;
 
 import esa.s1pdgs.cpoc.auxip.client.AuxipClient;
@@ -31,15 +32,8 @@ public class AuxipOdataClientFactory implements AuxipClientFactory {
 
 	@Override
 	public AuxipClient newAuxipClient(final URI serverUrl) {
-		// TODO @MSc: impl
 		final AuxipHostConfiguration hostConfig = this.hostConfigFor(serverUrl.getHost());
-		final ODataClient odataClient = ODataClientFactory.getClient();
-		
-		// TODO @MSc: add proxy configuration and when configured use it here for the client
-//		if(proxy) {
-//			final ProxyWrappingHttpClientFactory clientFactory = new ProxyWrappingHttpClientFactory(proxy, proxyUsername, proxyPassword, wrapped);
-//			odataClient.getConfiguration().setHttpClientFactory(clientFactory);
-//		}
+		final ODataClient odataClient = this.buildOdataClient(hostConfig);
 		
 		return new AuxipOdataClient(odataClient, hostConfig, ENTITY_SET_NAME);
 	}
@@ -54,33 +48,44 @@ public class AuxipOdataClientFactory implements AuxipClientFactory {
 		}
 		throw new IllegalArgumentException(String.format("Could not find configuration for server '%s'", serviceRootUri));
 	}
+	
+	private ODataClient buildOdataClient(final AuxipHostConfiguration hostConfig) {
+		final ODataClient odataClient = ODataClientFactory.getClient();
 
-//	private ProxySelector proxy() {
-//		if (null != this.config.getProxyHost()) {
-//			LOG.debug("Using Proxy {}:{}", config.getProxyHost(), this.config.getProxyPort());
-//			return new ProxySelector() {
-//				@Override
-//				public final List<Proxy> select(final URI uri) {
-//					try {
-//						return Collections.singletonList(new Proxy(Type.HTTP,
-//								new InetSocketAddress(
-//										InetAddress.getByName(AuxipOdataClientFactory.this.config.getProxyHost()),
-//										config.getProxyPort())));
-//						// FIXME proper error handling
-//					} catch (final UnknownHostException e) {
-//						LOG.error(e);
-//					}
-//					return Collections.emptyList();
-//				}
-//
-//				@Override
-//				public final void connectFailed(final URI uri, final SocketAddress sa, final IOException ioe) {
-//					LOG.error(ioe);
-//				}
-//			};
-//		}
-//
-//		return null;
-//	}
+		// authentication
+		BasicAuthHttpClientFactory basicAuthHttpClientFactory = null;
+		if (null != hostConfig.getUser() && !hostConfig.getUser().isEmpty()) {
+			basicAuthHttpClientFactory = new BasicAuthHttpClientFactory(hostConfig.getUser(), hostConfig.getPass());
+		}
+
+		// proxy
+		ProxyWrappingHttpClientFactory proxyWrappingHttpClientFactory = null;
+		if (null != this.config.getProxy() && !this.config.getProxy().isEmpty()) {
+			URI proxyUri = null;
+			try {
+				proxyUri = URI.create(this.config.getProxy());
+			} catch (Exception e) {
+				LOG.error("could not build proxy URI from '" + this.config.getProxy() + "' and will not use proxy: "
+						+ e.getMessage());
+			}
+
+			if (null != proxyUri) {
+				if (null != basicAuthHttpClientFactory) {
+					proxyWrappingHttpClientFactory = new ProxyWrappingHttpClientFactory(proxyUri,
+							basicAuthHttpClientFactory);
+				} else {
+					proxyWrappingHttpClientFactory = new ProxyWrappingHttpClientFactory(proxyUri);
+				}
+			}
+		}
+
+		if (null != proxyWrappingHttpClientFactory) {
+			odataClient.getConfiguration().setHttpClientFactory(proxyWrappingHttpClientFactory);
+		} else if (null != basicAuthHttpClientFactory) {
+			odataClient.getConfiguration().setHttpClientFactory(basicAuthHttpClientFactory);
+		}
+
+		return odataClient;
+	}
 
 }
