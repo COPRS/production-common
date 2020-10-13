@@ -5,9 +5,7 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.StandardCopyOption;
 
 import org.apache.commons.io.IOUtils;
 
@@ -31,12 +29,10 @@ public final class LocalOutboxClient extends AbstractOutboxClient {
 
 	@Override
 	public final String transfer(final ObsObject obsObject, final ReportingFactory reportingFactory) throws Exception {		
-		final Path path = evaluatePathFor(obsObject);
-		final Path pathWithDotPrefix = path.getParent().resolve("." + path.getFileName());
-		mkdirLocal(pathWithDotPrefix.toFile());
+		final Path path = evaluatePathFor(obsObject);	
 		for (final String entry : entries(obsObject)) {
 			
-			final File destination = pathWithDotPrefix.resolve(entry).toFile();
+			final File destination = path.resolve(entry).toFile();
 			createParentIfRequired(destination);
 			
 			try (final InputStream in = stream(obsObject.getFamily(), entry);
@@ -46,7 +42,6 @@ public final class LocalOutboxClient extends AbstractOutboxClient {
 				IOUtils.copyLarge(in, out, new byte[config.getBufferSize()]);    				
 			}
 		}
-		Files.move(pathWithDotPrefix, path, StandardCopyOption.ATOMIC_MOVE);
 		return path.toString();
 	}
 }
