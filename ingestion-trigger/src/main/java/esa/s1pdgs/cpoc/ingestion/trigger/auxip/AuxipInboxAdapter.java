@@ -90,10 +90,11 @@ public class AuxipInboxAdapter extends AbstractInboxAdapter {
     }
 
     private InboxEntry toInboxEntry(final AuxipProductMetadata auxipMetadata) {
+        //TODO add server URI, otherwise worker is not able to identify this as an auxip product
         return new InboxEntry(
+                auxipMetadata.getId().toString(),
                 auxipMetadata.getProductName(),
-                auxipMetadata.getProductName(),
-                auxipMetadata.getProductName(),
+                auxipMetadata.getRootServiceUrl().toString(),
                 new Date(0),
                 -1,
                 processConfiguration.getHostname());
