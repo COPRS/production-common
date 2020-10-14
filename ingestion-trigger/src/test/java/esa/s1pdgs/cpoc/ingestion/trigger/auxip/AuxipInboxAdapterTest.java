@@ -212,6 +212,11 @@ public class AuxipInboxAdapterTest {
             public UUID getId() {
                 return UUID.randomUUID();
             }
+
+            @Override
+            public long getContentLength() {
+                return 1232434L;
+            }
         }).collect(toList());
     }
 

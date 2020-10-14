@@ -17,4 +17,6 @@ public interface AuxipProductMetadata {
 	
 	URI getRootServiceUrl();
 
+	long getContentLength();
+
 }

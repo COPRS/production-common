@@ -56,6 +56,7 @@ public class AuxipOdataClient implements AuxipClient {
 	private final String creationDateAttrName;
 	private final String productNameAttrName;
 	private final String idAttrName;
+	private final String contentLengthAttrName = "ContentLength";
 
 	// --------------------------------------------------------------------------
 
@@ -70,7 +71,7 @@ public class AuxipOdataClient implements AuxipClient {
 		this.productNameAttrName = Objects.requireNonNull(hostConfig.getProductNameAttrName(),
 				"product name attribute name must not be null!");
 		this.idAttrName = Objects.requireNonNull(hostConfig.getIdAttrName(), "id attribute name must not be null!");
-		
+
 		this.rootServiceUrl = URI.create(
 				Objects.requireNonNull(this.hostConfig.getServiceRootUri(), "the root service URL must not be null!"));
 		this.downloadClient = downloadClient;
@@ -277,6 +278,28 @@ public class AuxipOdataClient implements AuxipClient {
 					metadata.addParsingError("could not parse creation date attribute '" + this.creationDateAttrName
 							+ "': attribute not found or value null");
 				}
+
+				// map content length
+				final ClientProperty contentLengthProperty = entity.getProperty(this.contentLengthAttrName);
+				if (null != contentLengthProperty) {
+					final ClientPrimitiveValue contentLengthValue = contentLengthProperty.getPrimitiveValue();
+
+					if (null != contentLengthValue) {
+						final String contentLengthString = contentLengthValue.toString();
+						try {
+							metadata.setContentLength(Long.parseLong(contentLengthString));
+						} catch (final IllegalArgumentException e) {
+							metadata.addParsingError("could not parse contentLength attribute '" + this.contentLengthAttrName
+									+ "': error parsing value '" + contentLengthString + "' to long; " + e.getMessage());
+						}
+					} else {
+						metadata.addParsingError("could not parse contentLength attribute '" + this.contentLengthAttrName + "': value null");
+					}
+				} else {
+					metadata.addParsingError("could not parse contentLength attribute '" + this.contentLengthAttrName
+							+ "': attribute not found or value null");
+				}
+
 
 				result.add(metadata);
 			}

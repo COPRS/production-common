@@ -15,7 +15,8 @@ public class AuxipOdataProductMetadata implements AuxipProductMetadata {
 	private String productName;
 	private LocalDateTime creationDate;
 	
-	private URI rootServiceUrl;
+	private final URI rootServiceUrl;
+	private long contentLength;
 	private final List<String> parsingErrors = new ArrayList<>();
 	
 	// --------------------------------------------------------------------------
@@ -51,7 +52,12 @@ public class AuxipOdataProductMetadata implements AuxipProductMetadata {
 	public URI getRootServiceUrl() {
 		return this.rootServiceUrl;
 	}
-	
+
+	@Override
+	public long getContentLength() {
+		return contentLength;
+	}
+
 	// --------------------------------------------------------------------------
 
 	public void setId(UUID id) {
@@ -68,6 +74,10 @@ public class AuxipOdataProductMetadata implements AuxipProductMetadata {
 
 	public void addParsingError(String parsingError) {
 		this.parsingErrors.add(parsingError);
+	}
+
+	public void setContentLength(long contentLength) {
+		this.contentLength = contentLength;
 	}
 
 }

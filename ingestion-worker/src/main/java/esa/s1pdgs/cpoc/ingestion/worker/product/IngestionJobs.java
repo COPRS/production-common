@@ -14,13 +14,13 @@ public class IngestionJobs {
 
 		try {
 			final URI baseUri = new URI(ingestion.getPickupBaseURL());			
-			final Path resultPath = Paths.get(baseUri.getPath())
-					.resolve(ingestion.getRelativePath());
 
 			URIBuilder uriBuilder = new URIBuilder(baseUri);
 
 			//TODO move this logic into adapter itself
 			if(!"auxip".equals(ingestion.getInboxType())) {
+				final Path resultPath = Paths.get(baseUri.getPath())
+						.resolve(ingestion.getRelativePath());
 				uriBuilder.setPath(resultPath.toAbsolutePath().toString());
 			}
 
