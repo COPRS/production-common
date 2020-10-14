@@ -12,6 +12,7 @@ import esa.s1pdgs.cpoc.auxip.client.AuxipClient;
 import esa.s1pdgs.cpoc.auxip.client.AuxipClientFactory;
 import esa.s1pdgs.cpoc.auxip.client.config.AuxipClientConfigurationProperties;
 import esa.s1pdgs.cpoc.auxip.client.config.AuxipClientConfigurationProperties.AuxipHostConfiguration;
+import esa.s1pdgs.cpoc.common.utils.StringUtil;
 
 public class AuxipOdataClientFactory implements AuxipClientFactory {
 	private static final Logger LOG = LogManager.getLogger(AuxipOdataClientFactory.class);
@@ -40,13 +41,17 @@ public class AuxipOdataClientFactory implements AuxipClientFactory {
 	private AuxipHostConfiguration hostConfigFor(final String serviceRootUri) {
 		// lookup host configuration for the given URL
 		for (final AuxipHostConfiguration hostConfig : this.config.getHostConfigs()) {
-			if (serviceRootUri.equals(hostConfig.getServiceRootUri())) {
+			if (this.urisEqual(serviceRootUri, hostConfig.getServiceRootUri())) {
 				LOG.trace("Found config {}", hostConfig);
 				return hostConfig;
 			}
 		}
 		throw new IllegalArgumentException(
 				String.format("Could not find configuration for server '%s'", serviceRootUri));
+	}
+	
+	private boolean urisEqual(final String serviceRootUri1, final String serviceRootUri2) {
+		return StringUtil.removeTrailing(serviceRootUri1, "/").equals(StringUtil.removeTrailing(serviceRootUri2, "/"));
 	}
 
 	private ODataClient buildOdataClient(final AuxipHostConfiguration hostConfig) {
@@ -87,5 +92,5 @@ public class AuxipOdataClientFactory implements AuxipClientFactory {
 
 		return odataClient;
 	}
-
+	
 }
