@@ -2,7 +2,9 @@ package esa.s1pdgs.cpoc.auxip.client.odata;
 
 import java.io.InputStream;
 import java.net.URI;
+import java.time.Instant;
 import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.time.ZoneOffset;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -29,7 +31,6 @@ import org.springframework.lang.NonNull;
 import esa.s1pdgs.cpoc.auxip.client.AuxipClient;
 import esa.s1pdgs.cpoc.auxip.client.AuxipProductMetadata;
 import esa.s1pdgs.cpoc.auxip.client.config.AuxipClientConfigurationProperties.AuxipHostConfiguration;
-import esa.s1pdgs.cpoc.common.utils.DateUtils;
 
 /**
  * OData implementation of the AUXIP client
@@ -215,7 +216,7 @@ public class AuxipOdataClient implements AuxipClient {
 					if (null != creationDateValue) {
 						final String creationDateString = creationDateValue.toString();
 						try {
-							metadata.setCreationDate(DateUtils.parse(creationDateString));
+							metadata.setCreationDate(LocalDateTime.ofInstant(Instant.parse(creationDateString), ZoneId.of("UTC")));
 						} catch (Exception e) {
 							metadata.addParsingError(
 									"could not parse creation date attribute '" + this.creationDateAttrName
