@@ -5,8 +5,6 @@ import java.nio.file.Path;
 import java.util.Collections;
 import java.util.List;
 
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -20,7 +18,6 @@ import esa.s1pdgs.cpoc.report.ReportingFactory;
 
 @Service
 public class ProductServiceImpl implements ProductService {
-	static final Logger LOG = LogManager.getLogger(ProductServiceImpl.class);
 
 	private final ObsClient obsClient;
 
@@ -40,6 +37,8 @@ public class ProductServiceImpl implements ProductService {
 
 		final ObsAdapter obsAdapter = newObsAdapterFor(reportingFactory);
 
+		final String obsKey = obsKeyFor(ingestion);
+
 		final IngestionEvent dto = new IngestionEvent(
 				family, 
 				ingestion.getProductName(), 
@@ -49,20 +48,28 @@ public class ProductServiceImpl implements ProductService {
 				ingestion.getMode(),
 				ingestion.getTimeliness()
 		);
-		final Product<IngestionEvent> prod = new Product<IngestionEvent>(family, uri, dto);
+		final Product<IngestionEvent> prod = new Product<>(family, uri, dto);
 		obsAdapter.upload(
 				family, 
 				inboxAdapter.read(uri, ingestion.getProductName(), ingestion.getProductSizeByte()),
-				ingestion.getProductName()
+				obsKey
 		);
 		return Collections.singletonList(prod);
+	}
+
+	private String obsKeyFor(IngestionJob ingestion) {
+		if("auxip".equals(ingestion.getInboxType())) {
+			return ingestion.getRelativePath();
+		}
+
+		return ingestion.getProductName();
 	}
 
 	final String toObsKey(final Path relPath) {
 		return relPath.toString();
 	}
 
-	private final ObsAdapter newObsAdapterFor(final ReportingFactory reportingFactory) {
+	private ObsAdapter newObsAdapterFor(final ReportingFactory reportingFactory) {
 		return new ObsAdapter(obsClient, reportingFactory);
 	}
 
