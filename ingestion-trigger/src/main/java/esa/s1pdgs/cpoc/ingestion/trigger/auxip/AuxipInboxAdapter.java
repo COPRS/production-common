@@ -90,6 +90,7 @@ public class AuxipInboxAdapter extends AbstractInboxAdapter {
     }
 
     private InboxEntry toInboxEntry(final AuxipProductMetadata auxipMetadata) {
+        LOG.debug("handling auxip metadata: {} with errors: {}", auxipMetadata, auxipMetadata.getParsingErrors());
         return new InboxEntry(
                 auxipMetadata.getId().toString(),
                 auxipMetadata.getProductName(),
