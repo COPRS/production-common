@@ -18,6 +18,7 @@ import esa.s1pdgs.cpoc.ingestion.trigger.filter.MinimumModificationDateFilter;
 import esa.s1pdgs.cpoc.ingestion.trigger.filter.WhitelistRegexRelativePathInboxFilter;
 import esa.s1pdgs.cpoc.ingestion.trigger.fs.FilesystemInboxAdapterFactory;
 import esa.s1pdgs.cpoc.ingestion.trigger.kafka.producer.KafkaSubmissionClient;
+import esa.s1pdgs.cpoc.ingestion.trigger.name.AuxipProductNameEvaluator;
 import esa.s1pdgs.cpoc.ingestion.trigger.name.FlatProductNameEvaluator;
 import esa.s1pdgs.cpoc.ingestion.trigger.name.ProductNameEvaluator;
 import esa.s1pdgs.cpoc.ingestion.trigger.name.SessionProductNameEvaluator;
@@ -108,6 +109,11 @@ public class InboxFactory {
 	}
 	
 	final ProductNameEvaluator newProductNameEvaluatorFor(final InboxConfiguration config) {
+		if("prip".equals(config.getType())) {
+			return new AuxipProductNameEvaluator();
+		}
+
+
 		if (config.getFamily() == ProductFamily.EDRS_SESSION 
 				|| config.getFamily() == ProductFamily.SESSION_RETRANSFER) {
 			return new SessionProductNameEvaluator(

@@ -179,7 +179,7 @@ public class AuxipInboxAdapterTest {
             public boolean matches(Object o) {
                 @SuppressWarnings("unchecked")
                 List<AbstractInboxAdapter.EntrySupplier> actual = (List<AbstractInboxAdapter.EntrySupplier>) o;
-                List<String> actualMapped = actual.stream().map(entry -> entry.getEntry().getName()).collect(toList());
+                List<String> actualMapped = actual.stream().map(entry -> entry.getEntry().getRelativePath()).collect(toList());
 
                 return actualMapped.equals(asList(ids));
             }

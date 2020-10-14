@@ -132,7 +132,7 @@ public final class Inbox {
 		}
 		
 		try {
-			final String publishedName = nameEvaluator.evaluateFrom(Paths.get(entry.getRelativePath()));
+			final String publishedName = nameEvaluator.evaluateFrom(entry);
 			log.debug("Publishing new entry {} to kafka queue: {}", publishedName, entry);
 			client.publish(
 					new IngestionJob(
