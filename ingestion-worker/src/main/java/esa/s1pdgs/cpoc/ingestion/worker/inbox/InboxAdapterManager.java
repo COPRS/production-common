@@ -41,6 +41,6 @@ public class InboxAdapterManager {
 	}
 
 	public static String uriRegexFor(String hostName) {
-		return String.format(".*://%s.*", hostName.replaceAll("[${}]", ""));
+		return String.format(".*%s.*", hostName.replaceAll("[${}]", ""));
 	}
 }
