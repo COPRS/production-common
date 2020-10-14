@@ -39,6 +39,7 @@ public class InboxAdapterManagerTest {
         adapterMap.put(InboxAdapterManager.uriRegexFor("195.77.80.11"), xbipAdapter);
         adapterMap.put(InboxAdapterManager.uriRegexFor("${cgs1.host}"), xbipAdapter);
         adapterMap.put(InboxAdapterManager.uriRegexFor("prip.sentinel1.eo.esa.int"), auxipAdapter);
+        adapterMap.put(InboxAdapterManager.uriRegexFor("https://prip.sentinel1.eo.esa.int:443/prif/odata"), auxipAdapter);
 
         final InboxAdapterManager uut = new InboxAdapterManager(adapterMap);
 
@@ -51,6 +52,8 @@ public class InboxAdapterManagerTest {
         assertThat(uut.getInboxAdapterFor(URI.create("https://prip.sentinel1.eo.esa.int/prif/odata/Products?$format=json")), is(auxipAdapter));
         assertThat(uut.getInboxAdapterFor(URI.create("http://prip.sentinel1.eo.esa.int/prif/odata/Products?$format=json")), is(auxipAdapter));
         assertThat(uut.getInboxAdapterFor(URI.create("http://prip.sentinel1.eo.esa.int:9090/prif/odata/Products?$format=json")), is(auxipAdapter));
+        assertThat(uut.getInboxAdapterFor(URI.create("https://prip.sentinel1.eo.esa.int:443/prif/odata/S1__AUX_WND_V20201009T180000_G20201008T060301.SAFE.zip")), is(auxipAdapter));
+
     }
 
     @Test
