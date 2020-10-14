@@ -150,18 +150,6 @@ public class MessageConsumptionController<T extends AbstractMessage> {
     final Comparator<AppCatMessageDto<? extends AbstractMessage>> priorityComparatorFor(final ProductCategory category)
     {
     	return (o1, o2) -> {
-			LOGGER.info("DEBUG-1864: category: " + category);
-			LOGGER.info("DEBUG-1864: consumers: " + consumers);
-			LOGGER.info("DEBUG-1864: consumers.get(category): " + consumers.get(category));
-			LOGGER.info("DEBUG-1864: o1: " + o1);
-			LOGGER.info("DEBUG-1864: o2: " + o2);
-			LOGGER.info("DEBUG-1864: o1.getTopic(): " + o1.getTopic());
-			LOGGER.info("DEBUG-1864: o2.getTopic(): " + o2.getTopic());
-			LOGGER.info("DEBUG-1864: consumers.get(category).get(o1.getTopic()): " + consumers.get(category).get(o1.getTopic()));
-			LOGGER.info("DEBUG-1864: consumers.get(category).get(o2.getTopic()): " + consumers.get(category).get(o2.getTopic()));
-			LOGGER.info("DEBUG-1864: consumers.get(category).get(o1.getTopic()).getPriority(): " + consumers.get(category).get(o1.getTopic()).getPriority());
-			LOGGER.info("DEBUG-1864: consumers.get(category).get(o2.getTopic()).getPriority(): " + consumers.get(category).get(o2.getTopic()).getPriority());
-    		
             if(consumers.get(category).get(o1.getTopic()).getPriority() >
                 consumers.get(category).get(o2.getTopic()).getPriority()) {
                 return -1;
