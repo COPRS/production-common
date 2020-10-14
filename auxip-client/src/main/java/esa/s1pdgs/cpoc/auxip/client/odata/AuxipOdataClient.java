@@ -1,5 +1,7 @@
 package esa.s1pdgs.cpoc.auxip.client.odata;
 
+import java.io.BufferedInputStream;
+import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
 import java.time.Instant;
@@ -12,6 +14,12 @@ import java.util.List;
 import java.util.Objects;
 import java.util.UUID;
 
+import org.apache.http.HttpEntity;
+import org.apache.http.HttpStatus;
+import org.apache.http.client.methods.CloseableHttpResponse;
+import org.apache.http.client.methods.HttpGet;
+import org.apache.http.client.protocol.HttpClientContext;
+import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.apache.olingo.client.api.ODataClient;
@@ -39,6 +47,8 @@ public class AuxipOdataClient implements AuxipClient {
 	static final Logger LOG = LogManager.getLogger(AuxipOdataClient.class);
 
 	private final ODataClient odataClient;
+	private final CloseableHttpClient downloadClient;
+	private final HttpClientContext context;
 	private final AuxipHostConfiguration hostConfig;
 	private final URI rootServiceUrl;
 	
@@ -50,7 +60,8 @@ public class AuxipOdataClient implements AuxipClient {
 	// --------------------------------------------------------------------------
 
 	AuxipOdataClient(final ODataClient odataClient, final AuxipHostConfiguration hostConfig,
-			final String entitySetName) {
+			final String entitySetName, final CloseableHttpClient downloadClient, final HttpClientContext context) {
+		// TODO FIXME move logic/assertions to factory
 		this.odataClient = Objects.requireNonNull(odataClient, "OData client must not be null!");
 		this.hostConfig = Objects.requireNonNull(hostConfig, "host configuration must not be null!");
 		this.entitySetName = Objects.requireNonNull(entitySetName, "entity set name must not be null!");
@@ -62,19 +73,21 @@ public class AuxipOdataClient implements AuxipClient {
 		
 		this.rootServiceUrl = URI.create(
 				Objects.requireNonNull(this.hostConfig.getServiceRootUri(), "the root service URL must not be null!"));
+		this.downloadClient = downloadClient;
+		this.context = context;
 	}
 
 	// --------------------------------------------------------------------------
 
 	@Override
-	public List<AuxipProductMetadata> getMetadata(@NonNull LocalDateTime from, @NonNull LocalDateTime to,
-			Integer pageSize, Integer offset) {
+	public List<AuxipProductMetadata> getMetadata(@NonNull final LocalDateTime from, @NonNull final LocalDateTime to,
+			final Integer pageSize, final Integer offset) {
 		return this.getMetadata(from, to, pageSize, offset, null);
 	}
 
 	@Override
-	public List<AuxipProductMetadata> getMetadata(@NonNull LocalDateTime from, @NonNull LocalDateTime to,
-			Integer pageSize, Integer offset, String productNameContains) {
+	public List<AuxipProductMetadata> getMetadata(@NonNull final LocalDateTime from, @NonNull final LocalDateTime to,
+			final Integer pageSize, final Integer offset, final String productNameContains) {
 		// prepare
 		final URIFilter filters = this.buildFilters(from, to, productNameContains);
 		final URI queryUri = this.buildQueryUri(Collections.singletonList(filters), pageSize, offset);
@@ -88,24 +101,58 @@ public class AuxipOdataClient implements AuxipClient {
 	}
 	
 	@Override
-	public InputStream read(@NonNull UUID productMetadataId) {
+	public InputStream read(@NonNull final UUID productMetadataId) {		
+		// FIXME trailing slash is mandatory for this to work
 		final URI productDownloadUrl = this.rootServiceUrl
 				.resolve("Products(" + productMetadataId.toString() + ")/$value");
 		
-		LOG.debug("sending download request: " + productDownloadUrl);
-
-		final ODataRetrieveResponse<InputStream> response = this.odataClient.getRetrieveRequestFactory()
-				.getMediaRequest(productDownloadUrl).execute();
-		
-		LOG.debug("download request (" + productDownloadUrl + ") response status: " + response.getStatusCode() + " - "
-				+ response.getStatusMessage());
-		
-		return response.getBody();
+		LOG.debug("sending download request: " + productDownloadUrl);		
+		if (hostConfig.isUseHttpClientDownload()) {			
+		    final HttpGet httpget = new HttpGet(productDownloadUrl.toString());
+		    try {
+				final CloseableHttpResponse response = downloadClient.execute(httpget, context);
+				final HttpEntity entity = response.getEntity();
+				
+			    // check if something has been returned and no error occurred
+			    if ((entity == null) || (response.getStatusLine().getStatusCode() != HttpStatus.SC_OK))
+			    {
+			    	throw new RuntimeException(
+			    			String.format("Error on download of %s: %s", productMetadataId, response.getStatusLine())
+			    	);
+			    }				
+				return new BufferedInputStream(entity.getContent())
+				{
+				  @Override public final void close() throws IOException
+				  {
+				    try
+				    {
+				      super.close();
+				    }
+				    finally
+				    {
+				      response.close();
+				    }
+				  }
+				};
+			} catch (final Exception e) {
+				// TODO error handling
+				throw new RuntimeException(e);
+			}	
+		}
+		else {
+			final ODataRetrieveResponse<InputStream> response = this.odataClient.getRetrieveRequestFactory()
+					.getMediaRequest(productDownloadUrl).execute();
+			
+			LOG.debug("download request (" + productDownloadUrl + ") response status: " + response.getStatusCode() + " - "
+					+ response.getStatusMessage());
+			
+			return response.getBody();
+		}
 	}
 	
 	// --------------------------------------------------------------------------
 
-	private URIFilter buildFilters(LocalDateTime from, LocalDateTime to, String productNameContains) {
+	private URIFilter buildFilters(final LocalDateTime from, final LocalDateTime to, final String productNameContains) {
 		final FilterFactory filterFactory = this.odataClient.getFilterFactory();
 
 		// timeframe filter
@@ -168,7 +215,7 @@ public class AuxipOdataClient implements AuxipClient {
 
 		if (null != response) {
 			while (response.hasNext()) {
-				final ClientEntity entity = (ClientEntity) response.next();
+				final ClientEntity entity = response.next();
 				final AuxipOdataProductMetadata metadata = new AuxipOdataProductMetadata(this.rootServiceUrl);
 
 				// map ID
@@ -180,7 +227,7 @@ public class AuxipOdataClient implements AuxipClient {
 						final String idString = idValue.toString();
 						try {
 							metadata.setId(UUID.fromString(idString));
-						} catch (IllegalArgumentException e) {
+						} catch (final IllegalArgumentException e) {
 							metadata.addParsingError("could not parse ID attribute '" + this.idAttrName
 									+ "': error parsing value '" + idString + "' to UUID; " + e.getMessage());
 						}
@@ -217,7 +264,7 @@ public class AuxipOdataClient implements AuxipClient {
 						final String creationDateString = creationDateValue.toString();
 						try {
 							metadata.setCreationDate(LocalDateTime.ofInstant(Instant.parse(creationDateString), ZoneId.of("UTC")));
-						} catch (Exception e) {
+						} catch (final Exception e) {
 							metadata.addParsingError(
 									"could not parse creation date attribute '" + this.creationDateAttrName
 											+ "': error parsing date '" + creationDateString + "'; " + e.getMessage());

@@ -21,6 +21,7 @@ public class AuxipClientConfigurationProperties {
 		private String creationDateAttributeName; // in legacy PRIP instances 'PublicationDate', in cloud PRIP 'creationDate'
 		private String productNameAttrName; // in legacy PRIP instances 'Name', in cloud PRIP 'name'
 		private String idAttrName; // in legacy PRIP instances 'Id', in cloud PRIP 'id'
+		private boolean useHttpClientDownload = true;
 		
 		// - - - - - - - - - - - - - - - - - -
 		
@@ -28,7 +29,8 @@ public class AuxipClientConfigurationProperties {
 		public String toString() {
 			return "AuxipHostConfiguration [serviceRootUri=" + this.serviceRootUri + ", user=" + this.user
 					+ ", pass=****" + ", creationDateAttributeName=" + this.creationDateAttributeName
-					+ ", productNameAttrName=" + this.productNameAttrName + ", idAttrName=" + this.idAttrName + "]";
+					+ ", productNameAttrName=" + this.productNameAttrName + ", idAttrName=" + this.idAttrName + 
+					", useHttpClientDownload="+useHttpClientDownload+"]";
 		}
 
 		// - - - - - - - - - - - - - - - - - -
@@ -37,7 +39,7 @@ public class AuxipClientConfigurationProperties {
 			return this.serviceRootUri;
 		}
 
-		public void setServiceRootUri(String serviceRootUri) {
+		public void setServiceRootUri(final String serviceRootUri) {
 			this.serviceRootUri = serviceRootUri;
 		}
 		
@@ -61,7 +63,7 @@ public class AuxipClientConfigurationProperties {
 			return this.creationDateAttributeName;
 		}
 
-		public void setCreationDateAttributeName(String creationDateAttributeName) {
+		public void setCreationDateAttributeName(final String creationDateAttributeName) {
 			this.creationDateAttributeName = creationDateAttributeName;
 		}
 
@@ -69,7 +71,7 @@ public class AuxipClientConfigurationProperties {
 			return this.productNameAttrName;
 		}
 
-		public void setProductNameAttrName(String productNameAttrName) {
+		public void setProductNameAttrName(final String productNameAttrName) {
 			this.productNameAttrName = productNameAttrName;
 		}
 
@@ -77,7 +79,7 @@ public class AuxipClientConfigurationProperties {
 			return this.idAttrName;
 		}
 
-		public void setIdAttrName(String idAttrName) {
+		public void setIdAttrName(final String idAttrName) {
 			this.idAttrName = idAttrName;
 		}
 
@@ -85,8 +87,16 @@ public class AuxipClientConfigurationProperties {
 			return this.sslValidation;
 		}
 
-		public void setSslValidation(boolean sslValidation) {
+		public void setSslValidation(final boolean sslValidation) {
 			this.sslValidation = sslValidation;
+		}
+
+		public boolean isUseHttpClientDownload() {
+			return useHttpClientDownload;
+		}
+
+		public void setUseHttpClientDownload(final boolean useHttpClientDownload) {
+			this.useHttpClientDownload = useHttpClientDownload;
 		}
 	}
 	
