@@ -41,7 +41,7 @@ public class ProductServiceImpl implements ProductService {
 
 		final IngestionEvent dto = new IngestionEvent(
 				family, 
-				ingestion.getProductName(), 
+				obsKey,
 				ingestion.getRelativePath(), 
 				ingestion.getProductSizeByte(),
 				ingestion.getStationName(),
