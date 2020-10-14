@@ -61,7 +61,7 @@ public class AuxipOdataHttpClientFactory extends DefaultHttpClientFactory {
 			try {
 				final SSLSocketFactory ssf = new SSLSocketFactory(acceptTrustStrategy,
 						SSLSocketFactory.ALLOW_ALL_HOSTNAME_VERIFIER);
-				registry.register(new Scheme(uri.getScheme(), uri.getPort(), ssf)); // TODO @MSc: port kann leer sein, dann 443 verwenden
+				registry.register(new Scheme(uri.getScheme(), (0 < uri.getPort() ? uri.getPort() : 443), ssf));
 			} catch (Exception e) {
 				throw new ODataRuntimeException("error setting up ssl socket factory for odata client", e);
 			}
