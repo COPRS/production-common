@@ -62,7 +62,7 @@ public class AuxipInboxAdapter extends AbstractInboxAdapter {
         TimeWindow timeWindow = timeWindowFrom(state);
 
         if(timeWindow.toCloseTo(LocalDateTime.now().minus(Duration.ofSeconds(configuration.getOffsetFromNowSec())))) {
-            LOG.info("time window is to close to now, skipping");
+            LOG.info("time window {} is too close to now, skipping", timeWindow);
             return Stream.empty();
         }
 
@@ -90,12 +90,11 @@ public class AuxipInboxAdapter extends AbstractInboxAdapter {
     }
 
     private InboxEntry toInboxEntry(final AuxipProductMetadata auxipMetadata) {
-        //TODO add server URI, otherwise worker is not able to identify this as an auxip product
         return new InboxEntry(
                 auxipMetadata.getId().toString(),
                 auxipMetadata.getProductName(),
                 auxipMetadata.getRootServiceUrl().toString(),
-                new Date(0),
+                new Date(auxipMetadata.getCreationDate().toInstant(ZoneOffset.UTC).toEpochMilli()),
                 -1,
                 processConfiguration.getHostname());
     }
@@ -140,7 +139,7 @@ public class AuxipInboxAdapter extends AbstractInboxAdapter {
 
         @Override
         public String toString() {
-            return "start " + start + ", stop " + stop;
+            return "[start " + start + ", stop " + stop + "]";
         }
     }
 
