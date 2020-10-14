@@ -9,9 +9,9 @@ import org.junit.Test;
 
 import esa.s1pdgs.cpoc.common.ProductFamily;
 import esa.s1pdgs.cpoc.ingestion.trigger.config.InboxConfiguration;
+import esa.s1pdgs.cpoc.ingestion.trigger.entity.InboxEntry;
 import esa.s1pdgs.cpoc.ingestion.trigger.name.ProductNameEvaluator;
 
-@Ignore
 public class TestInboxFactory {
 	@Test
 	public final void testNewProductNameEvaluatorFor_DefaultConfig() {
@@ -21,9 +21,11 @@ public class TestInboxFactory {
 		final InboxFactory uut = new InboxFactory(null, null, null, null, null);
 			
 		final ProductNameEvaluator eval = uut.newProductNameEvaluatorFor(defConfig);
-/*		assertEquals(
+		InboxEntry entry = new InboxEntry();
+		entry.setRelativePath("S1B/L20180724144436762001030/ch02/DCS_02_L20180724144436762001030_ch2_DSDB_00025.raw");
+		assertEquals(
 				"L20180724144436762001030/ch02/DCS_02_L20180724144436762001030_ch2_DSDB_00025.raw", 
-				eval.evaluateFrom(Paths.get("S1B/L20180724144436762001030/ch02/DCS_02_L20180724144436762001030_ch2_DSDB_00025.raw"))
-		);*/
+				eval.evaluateFrom(entry)
+		);
 	}
 }
