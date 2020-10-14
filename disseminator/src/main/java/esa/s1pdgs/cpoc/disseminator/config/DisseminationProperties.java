@@ -43,6 +43,8 @@ public class DisseminationProperties {
 		private boolean implicitSsl = true;
 		
 		private boolean ftpPasv = false;
+		
+		private boolean skipExisting = true;
 						
 		public Protocol getProtocol() {
 			return protocol;
@@ -163,6 +165,14 @@ public class DisseminationProperties {
 		public void setFtpPasv(boolean ftpPasv) {
 			this.ftpPasv = ftpPasv;
 		}
+		
+		public boolean isSkipExisting() {
+			return skipExisting;
+		}
+
+		public void setSkipExisting(boolean skipExisting) {
+			this.skipExisting = skipExisting;
+		}
 
 		@Override
 		public String toString() {
@@ -170,7 +180,8 @@ public class DisseminationProperties {
 					+ ", password=<NOT_SHOWN>, keyFile=" + keyFile + ", hostname=" + hostname + ", port=" + port + 
 					", pathEvaluator=" + pathEvaluator + ", bufferSize=" + bufferSize+ ", ftpPasv=" + ftpPasv
 					+ ", keystoreFile=" + keystoreFile + ", keystorePass=<NOT_SHOWN>, truststoreFile="
-					+ truststoreFile + ", truststorePass=<NOT_SHOWN>, implicitSsl=" + implicitSsl + "]";
+					+ truststoreFile + ", truststorePass=<NOT_SHOWN>, implicitSsl=" + implicitSsl 
+					+ ", skipExisting=" + skipExisting + "]";
 		}
 	}
 	

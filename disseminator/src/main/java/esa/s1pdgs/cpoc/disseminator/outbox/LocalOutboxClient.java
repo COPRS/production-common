@@ -32,6 +32,13 @@ public final class LocalOutboxClient extends AbstractOutboxClient {
 	@Override
 	public final String transfer(final ObsObject obsObject, final ReportingFactory reportingFactory) throws Exception {		
 		final Path path = evaluatePathFor(obsObject);
+		final Path finalName = path.resolve(obsObject.getKey());
+		
+		if(config.isSkipExisting() && finalName.toFile().exists()) {
+			logger.warn("Skipping transfer, it already exists: {}", finalName);
+			return path.toString();
+		}
+		
 		for (final String entry : entries(obsObject)) {
 			
 			final File destination = path.resolve("." + entry).toFile();
@@ -44,10 +51,10 @@ public final class LocalOutboxClient extends AbstractOutboxClient {
 				IOUtils.copyLarge(in, out, new byte[config.getBufferSize()]);    				
 			}
 		}
-		final Path dirWithDot = path.resolve("." + obsObject.getKey());
-		final Path finalDir = path.resolve(obsObject.getKey());
-		logger.debug("Moving {} to {}", dirWithDot, finalDir);
-		Files.move(dirWithDot, finalDir,
+		final Path nameWithDot = path.resolve("." + obsObject.getKey());
+		
+		logger.debug("Moving {} to {}", nameWithDot, finalName);
+		Files.move(nameWithDot, finalName,
 				StandardCopyOption.ATOMIC_MOVE);
 		return path.toString();
 	}
