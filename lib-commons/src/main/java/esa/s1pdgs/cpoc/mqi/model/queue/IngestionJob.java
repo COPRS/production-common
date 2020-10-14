@@ -15,6 +15,11 @@ public class IngestionJob extends AbstractMessage {
 	private String pickupBaseURL;
 
 	/**
+	 * type of inbox, e.g. prip, xbip, file etc.
+	 */
+	private String inboxType;
+
+	/**
 	 * path to file/folder relative to pickupBaseURL
 	 */
 	private String relativePath;
@@ -46,7 +51,8 @@ public class IngestionJob extends AbstractMessage {
 			final UUID uuid,
 			final String stationName,
 			final String mode,
-			final String timeliness
+			final String timeliness,
+			final String inboxType
 	) {
 		super(family, productName);
 		this.pickupBaseURL 		= pickupBaseURL;
@@ -56,7 +62,8 @@ public class IngestionJob extends AbstractMessage {
 		this.uid				= uuid;
 		this.stationName		= stationName;
 		this.mode               = mode;
-		this.timeliness        = timeliness;
+		this.timeliness         = timeliness;
+		this.inboxType          = inboxType;
 		setAllowedActions(Arrays.asList(AllowedAction.RESTART));
 	}
 
@@ -116,11 +123,19 @@ public class IngestionJob extends AbstractMessage {
 		this.timeliness = timeliness;
 	}
 
+	public String getInboxType() {
+		return inboxType;
+	}
+
+	public void setInboxType(String inboxType) {
+		this.inboxType = inboxType;
+	}
+
 	@Override
 	public int hashCode() {
 		return Objects.hash(creationDate, hostname, keyObjectStorage, pickupBaseURL, productFamily,
 				relativePath, productName, uid, productSizeByte, stationName, mode, timeliness,
-				allowedActions, demandType, debug, retryCounter);
+				allowedActions, demandType, debug, retryCounter, inboxType);
 	}
 
 	@Override
@@ -150,7 +165,8 @@ public class IngestionJob extends AbstractMessage {
 				&& Objects.equals(allowedActions, other.getAllowedActions())
 		        && demandType == other.demandType
 		        && debug == other.debug
-		        && retryCounter == other.retryCounter;
+		        && retryCounter == other.retryCounter
+				&& Objects.equals(inboxType, other.inboxType);
 	}
 
 	@Override
@@ -158,6 +174,7 @@ public class IngestionJob extends AbstractMessage {
 		return "IngestionJob [productFamily=" + productFamily + ", keyObjectStorage=" + keyObjectStorage
 				+ ", creationDate=" + creationDate + ", hostname=" + hostname + ", relativePath=" + relativePath
 				+ ", pickupBaseURL=" + pickupBaseURL + ", productName=" + productName + ", uid=" + uid +
-				", productSizeByte="+productSizeByte+", stationName=" + stationName + ", mode=" + mode + ", timeliness=" + timeliness +"]";
+				", productSizeByte=" + productSizeByte + ", stationName=" + stationName + ", mode=" + mode +
+				", timeliness=" + timeliness + ", inboxType=" + inboxType + "]";
 	}	
 }

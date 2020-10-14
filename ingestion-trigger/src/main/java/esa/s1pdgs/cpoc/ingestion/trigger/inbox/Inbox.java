@@ -144,7 +144,8 @@ public final class Inbox {
 						reporting.getUid(),
 						stationName,
 						mode,
-						timeliness
+						timeliness,
+						entry.getInboxType()
 					)
 			);
 			reporting.end(

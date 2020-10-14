@@ -10,14 +10,21 @@ import org.apache.http.client.utils.URIBuilder;
 import esa.s1pdgs.cpoc.mqi.model.queue.IngestionJob;
 
 public class IngestionJobs {
-	public static final URI toUri(final IngestionJob ingestion) {
+	public static URI toUri(final IngestionJob ingestion) {
+
 		try {
 			final URI baseUri = new URI(ingestion.getPickupBaseURL());			
 			final Path resultPath = Paths.get(baseUri.getPath())
-					.resolve(ingestion.getRelativePath());			
-			
-			return new URIBuilder(baseUri)
-					.setPath(resultPath.toAbsolutePath().toString())
+					.resolve(ingestion.getRelativePath());
+
+			URIBuilder uriBuilder = new URIBuilder(baseUri);
+
+			//TODO move this logic into adapter itself
+			if(!"auxip".equals(ingestion.getInboxType())) {
+				uriBuilder.setPath(resultPath.toAbsolutePath().toString());
+			}
+
+			return uriBuilder
 					.build();
 		} catch (final URISyntaxException e) {
 			throw new RuntimeException(
@@ -35,10 +42,10 @@ public class IngestionJobs {
 	 * 'substracts' {@code name} from the path given in {@code uri} 
 	 */
 	public static Path basePath(final URI uri, final String name) {	
-		return Paths.get(uri.getPath().toString().substring(0, uri.getPath().toString().indexOf(name)));
+		return Paths.get(uri.getPath().substring(0, uri.getPath().indexOf(name)));
 	}
 	
-	public static final String filename(final IngestionJob ingestion) {		
+	public static String filename(final IngestionJob ingestion) {
 		final String nameWithoutTrailingSlash = ingestion.getKeyObjectStorage().endsWith("/") ?
 				ingestion.getKeyObjectStorage().substring(0,ingestion.getKeyObjectStorage().length()-1) :
 			    ingestion.getKeyObjectStorage();

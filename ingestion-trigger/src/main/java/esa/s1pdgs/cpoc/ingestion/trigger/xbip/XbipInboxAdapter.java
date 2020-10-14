@@ -36,7 +36,8 @@ public class XbipInboxAdapter extends AbstractInboxAdapter {
 				xbipEntry.getPath(), 
 				xbipEntry.getLastModified(), 
 				xbipEntry.getSize(),
-				stationName
+				stationName,
+				"xbip"
 		);
 	}
 }

@@ -49,6 +49,7 @@ public class InboxAdapterManagerConfiguration {
 		final InboxAdapter auxip = new AuxipInboxAdapter(auxipClientFactory);
 		final InboxAdapter file = new FilesystemInboxAdapter(properties);
 
+		//TODO replace this mechanism by adding the inbox type to IngestionJob and evaluate it here
 		xbipClientConfigurationProperties.getHostConfigs()
 				.forEach(xbipHost -> inboxAdapter.put(uriRegexFor(xbipHost.getServerName()), xbip));
 

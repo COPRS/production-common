@@ -105,7 +105,8 @@ public class TestFilesystemInboxAdapter {
 				UUID.randomUUID(), 
 				"MPS_",
 				"NOMINAL",
-                "FAST24"
+                "FAST24",
+				"file"
 		);		
 		final URI uri = IngestionJobs.toUri(job);
 		
@@ -139,7 +140,8 @@ public class TestFilesystemInboxAdapter {
 				UUID.randomUUID(), 
 				"MPS_",
 				"NOMINAL",
-                "FAST24"
+                "FAST24",
+				"file"
 		);		
 		final URI uri = IngestionJobs.toUri(job);
 		

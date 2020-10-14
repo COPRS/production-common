@@ -40,7 +40,8 @@ public class FilesystemInboxAdapter extends AbstractInboxAdapter {
 				path, 
 				lastModified, 
 				size,
-				stationName
+				stationName,
+				"file"
 		);
 	}
 }

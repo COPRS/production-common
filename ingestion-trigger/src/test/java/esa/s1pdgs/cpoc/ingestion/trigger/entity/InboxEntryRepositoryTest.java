@@ -1,5 +1,11 @@
 package esa.s1pdgs.cpoc.ingestion.trigger.entity;
 
+import static org.hamcrest.CoreMatchers.*;
+import static org.hamcrest.Matchers.empty;
+import static org.junit.Assert.assertThat;
+
+import java.util.Date;
+
 import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -7,12 +13,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.data.mongo.DataMongoTest;
 import org.springframework.data.mongodb.repository.config.EnableMongoRepositories;
 import org.springframework.test.context.junit4.SpringRunner;
-
-import java.util.Date;
-
-import static org.hamcrest.CoreMatchers.*;
-import static org.hamcrest.Matchers.empty;
-import static org.junit.Assert.assertThat;
 
 @Ignore // test collides with MongoConfiguration
 @RunWith(SpringRunner.class)
@@ -25,7 +25,7 @@ public class InboxEntryRepositoryTest {
 
     @Test
     public void findByPickupURL() {
-        InboxEntry entry = new InboxEntry("tehName", "tehPath", "tehPickUrl", new Date(), 100);
+        InboxEntry entry = new InboxEntry("tehName", "tehPath", "tehPickUrl", new Date(), 100, null, "file");
         entry.setProcessingPod("ingestor-01");
         repository.save(entry);
 

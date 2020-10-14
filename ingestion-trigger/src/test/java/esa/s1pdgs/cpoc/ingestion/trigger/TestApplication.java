@@ -69,7 +69,8 @@ public class TestApplication {
 				inboxPath.resolve("WILE/S1B/L20180724144436762001030/ch01/DCS_02_L20180724144436762001030_ch1_DSIB.xml"),
 				new Date(),
 				0,
-				"WILE"
+				"WILE",
+				null
 		);
 
 		final InboxEntry entry2 = factory.newInboxEntry(
@@ -77,6 +78,7 @@ public class TestApplication {
 				inboxPath.resolve("AUX/S1__AUX_ICE_V20160501T120000_G20160502T043607.SAFE"),
 				new Date(),
 				0,
+				null,
 				null
 		);
 

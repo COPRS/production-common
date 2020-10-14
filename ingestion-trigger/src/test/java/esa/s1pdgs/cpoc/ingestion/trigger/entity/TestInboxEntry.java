@@ -80,6 +80,7 @@ public class TestInboxEntry {
 				Paths.get(path),
 				new Date(),
 				0,
+				null,
 				null
 		);
 	}

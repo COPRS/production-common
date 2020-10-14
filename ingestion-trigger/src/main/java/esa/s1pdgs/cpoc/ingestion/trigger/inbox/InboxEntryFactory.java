@@ -12,6 +12,7 @@ public interface InboxEntryFactory {
 			Path path,
 			Date lastModified, 
 			long size, 
-			String stationName
+			String stationName,
+			String inboxType
 	);
 }

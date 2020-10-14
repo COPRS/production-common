@@ -26,27 +26,20 @@ public class InboxEntry {
 	private long size;
 	private String stationName;
 	private String processingPod;
+	private String inboxType;
 
 	public InboxEntry() {
 	}
 
 	public InboxEntry(final String name, final String relativePath, final String pickupURL, final Date lastModified,
-					  final long size) {
-		this.name = name;
-		this.relativePath = relativePath;
-		this.pickupURL = pickupURL;
-		this.lastModified = lastModified;
-		this.size = size;
-	}
-
-	public InboxEntry(final String name, final String relativePath, final String pickupURL, final Date lastModified,
-					  final long size, final String processingPod) {
+					  final long size, final String processingPod, final String inboxType) {
 		this.name = name;
 		this.relativePath = relativePath;
 		this.pickupURL = pickupURL;
 		this.lastModified = lastModified;
 		this.size = size;
 		this.processingPod = processingPod;
+		this.inboxType = inboxType;
 	}
 
 	public String getName() {
@@ -101,6 +94,14 @@ public class InboxEntry {
 
 	public void setProcessingPod(String processingPod) { this.processingPod = processingPod; }
 
+	public String getInboxType() {
+		return inboxType;
+	}
+
+	public void setInboxType(String inboxType) {
+		this.inboxType = inboxType;
+	}
+
 	@Override
 	public boolean equals(final Object obj) {
 		if (this == obj) {
@@ -119,17 +120,18 @@ public class InboxEntry {
 				Objects.equals(pickupURL, other.pickupURL)
 				&& Objects.equals(relativePath, other.relativePath)
 				&& Objects.equals(stationName, other.stationName)
-				&& Objects.equals(processingPod, other.processingPod);
+				&& Objects.equals(processingPod, other.processingPod)
+				&& Objects.equals(inboxType, other.inboxType);
 	}
 
 	@Override
 	public int hashCode() {
-		return Objects.hash(name, pickupURL, relativePath, stationName, processingPod);
+		return Objects.hash(name, pickupURL, relativePath, stationName, processingPod, inboxType);
 	}
 
 	@Override
 	public String toString() {
-		return format("InboxEntry [name=%s, relativePath=%s, pickupURL=%s, lastModified=%s, size=%s, stationName=%s, processingPod=%s]", name,
-				relativePath, pickupURL, lastModified, size, stationName, processingPod);
+		return format("InboxEntry [name=%s, relativePath=%s, pickupURL=%s, lastModified=%s, size=%s, stationName=%s, processingPod=%s, inboxType=%s]", name,
+				relativePath, pickupURL, lastModified, size, stationName, processingPod, inboxType);
 	}
 }
