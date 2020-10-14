@@ -28,7 +28,7 @@ public class ITXbipInboxAdapter {
 		
 		final List<InboxAdapterEntry> entries = uut.read(
 				new URI("https://cgs01.sentinel1.eo.esa.int/NOMINAL/S1A/DCS_04_20200403151525031965_dat/"), 
-				"DCS_04_20200403151525031965_dat"
+				"DCS_04_20200403151525031965_dat", 123L
 		);
 		entries.forEach(e -> System.out.println(e));
 	}

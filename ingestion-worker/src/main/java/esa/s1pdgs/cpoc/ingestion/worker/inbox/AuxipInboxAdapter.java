@@ -17,11 +17,10 @@ public class AuxipInboxAdapter implements InboxAdapter {
     }
 
     @Override
-    public List<InboxAdapterEntry> read(URI uri, String name) {
-        // https://prip.sentinel1.eo.esa.int:443/prif/odata/S1A_OPER_AUX_RESORB_OPOD_20201008T162440_V20201008T122310_20201008T154040.EOF.zip
+    public List<InboxAdapterEntry> read(final URI uri, final String name, final long size) {
         final AuxipClient auxipClient = clientFactory.newAuxipClient(uri);
         final InputStream in = auxipClient.read(UUID.fromString(name));
-        return Collections.singletonList(new InboxAdapterEntry(name, in, -1));
+        return Collections.singletonList(new InboxAdapterEntry(name, in, size));
     }
 
     @Override

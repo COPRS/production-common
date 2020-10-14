@@ -52,7 +52,7 @@ public class ProductServiceImpl implements ProductService {
 		final Product<IngestionEvent> prod = new Product<IngestionEvent>(family, uri, dto);
 		obsAdapter.upload(
 				family, 
-				inboxAdapter.read(uri, ingestion.getProductName()), 
+				inboxAdapter.read(uri, ingestion.getProductName(), ingestion.getProductSizeByte()),
 				ingestion.getProductName()
 		);
 		return Collections.singletonList(prod);
