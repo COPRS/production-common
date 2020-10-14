@@ -24,7 +24,6 @@ import org.apache.olingo.client.api.uri.FilterArgFactory;
 import org.apache.olingo.client.api.uri.FilterFactory;
 import org.apache.olingo.client.api.uri.URIBuilder;
 import org.apache.olingo.client.api.uri.URIFilter;
-import org.apache.olingo.commons.api.http.HttpStatusCode;
 import org.springframework.lang.NonNull;
 
 import esa.s1pdgs.cpoc.auxip.client.AuxipClient;
@@ -109,10 +108,6 @@ public class AuxipOdataClient implements AuxipClient {
 		final FilterFactory filterFactory = this.odataClient.getFilterFactory();
 
 		// timeframe filter
-//		final URIFilter lowerBoundFilter = filterFactory.ge(this.creationDateAttrName,
-//				DateUtils.formatToOdataDateTimeFormat(from));
-//		final URIFilter upperBoundFilter = filterFactory.lt(this.creationDateAttrName,
-//				DateUtils.formatToOdataDateTimeFormat(to));
 		final URIFilter lowerBoundFilter = filterFactory.ge(this.creationDateAttrName, from.toInstant(ZoneOffset.UTC));
 		final URIFilter upperBoundFilter = filterFactory.lt(this.creationDateAttrName, to.toInstant(ZoneOffset.UTC));
 		final URIFilter timeframeFilter = filterFactory.and(lowerBoundFilter, upperBoundFilter);
