@@ -30,7 +30,7 @@ public final class FilesystemInboxAdapter implements InboxAdapter {
 	}
 	
 	@Override
-	public final List<InboxAdapterEntry> read(final URI uri, final String name, final long size) throws Exception {
+	public final List<InboxAdapterEntry> read(final URI uri, final String name, final String relativePath, final long size) throws Exception {
 		final Path basePath = IngestionJobs.basePath(uri, name);
 	
 		return Files.walk(Paths.get(uri.getPath()), FileVisitOption.FOLLOW_LINKS)

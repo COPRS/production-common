@@ -17,10 +17,10 @@ public class AuxipInboxAdapter implements InboxAdapter {
     }
 
     @Override
-    public List<InboxAdapterEntry> read(final URI uri, final String name, final long size) {
+    public List<InboxAdapterEntry> read(final URI uri, final String name, final String relativePath, final long size) {
         final AuxipClient auxipClient = clientFactory.newAuxipClient(uri);
         final InputStream in = auxipClient.read(UUID.fromString(name));
-        return Collections.singletonList(new InboxAdapterEntry(name, in, size));
+        return Collections.singletonList(new InboxAdapterEntry(relativePath, in, size));
     }
 
     @Override

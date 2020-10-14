@@ -41,7 +41,7 @@ public class TestFilesystemInboxAdapter {
 	
 	@Test
 	public final void testRead_OnSingleNonDirectoryFile_ShallReturnOneStream() throws Exception {
-		final List<InboxAdapterEntry> in = uut.read(singleFile.toURI(), singleFile.getName(), 123L);
+		final List<InboxAdapterEntry> in = uut.read(singleFile.toURI(), singleFile.getName(), "", 123L);
 		try {
 			assertEquals(1, in.size());
 			
@@ -110,7 +110,7 @@ public class TestFilesystemInboxAdapter {
 		);		
 		final URI uri = IngestionJobs.toUri(job);
 		
-		final List<InboxAdapterEntry> entries = uut.read(uri, job.getProductName(), 123L);
+		final List<InboxAdapterEntry> entries = uut.read(uri, job.getProductName(), "", 123L);
 		assertEquals(1, entries.size());		
 		final InboxAdapterEntry entry = entries.get(0);
 		assertEquals("S1B__MPS__________017080/ch01/DCS_95_S1B__MPS__________017080_ch1_DSIB.xml", entry.key());
@@ -145,7 +145,7 @@ public class TestFilesystemInboxAdapter {
 		);		
 		final URI uri = IngestionJobs.toUri(job);
 		
-		final List<InboxAdapterEntry> entries = uut.read(uri, job.getProductName(), 123L);
+		final List<InboxAdapterEntry> entries = uut.read(uri, job.getProductName(), "", 123L);
 		entries.stream()
 			.forEach(e -> System.out.println(e));
 		
