@@ -164,7 +164,7 @@ public class PDUTypeAdapter extends AbstractProductTypeAdapter {
 					final MultipleProductCoverSearch mpcSearch = new MultipleProductCoverSearch(tasktableAdapter,
 							elementMapper, metadataClient, workerSettings);
 					tasks = mpcSearch.updateTaskInputs(tasks, alternative, returnValue.getSatelliteId(),
-							job.getStartTime(), job.getStopTime(), "NRT");
+							job.getStartTime(), job.getStopTime(), workerSettings.getProductMode().toString());
 
 					/*
 					 * In a following step the start and stop time of the job will be set to the
@@ -185,7 +185,8 @@ public class PDUTypeAdapter extends AbstractProductTypeAdapter {
 						// of interval
 						List<S3Metadata> products = metadataClient.getProductsInRange(alternative.getFileType(),
 								elementMapper.inputFamilyOf(alternative.getFileType()), returnValue.getSatelliteId(),
-								job.getStartTime(), job.getStopTime(), 0.0, 0.0, "NRT");
+								job.getStartTime(), job.getStopTime(), 0.0, 0.0,
+								workerSettings.getProductMode().toString());
 
 						for (S3Metadata product : products) {
 							if (product.getGranulePosition().equals("LAST")) {
@@ -194,7 +195,8 @@ public class PDUTypeAdapter extends AbstractProductTypeAdapter {
 
 								// Update tasks again
 								tasks = mpcSearch.updateTaskInputs(tasks, alternative, returnValue.getSatelliteId(),
-										job.getStartTime(), product.getValidityStop(), "NRT");
+										job.getStartTime(), product.getValidityStop(),
+										workerSettings.getProductMode().toString());
 								break;
 							}
 						}
@@ -313,7 +315,7 @@ public class PDUTypeAdapter extends AbstractProductTypeAdapter {
 				}
 				TimeInterval jobInterval = new TimeInterval(DateUtils.parse(job.getStartTime()),
 						DateUtils.parse(job.getStopTime()));
-				
+
 				ThresholdGapHandler gapHandler = new ThresholdGapHandler(typeSettings.getGapThreshholdInS());
 				intervals = gapHandler.mergeTimeIntervals(jobInterval, intervals);
 
