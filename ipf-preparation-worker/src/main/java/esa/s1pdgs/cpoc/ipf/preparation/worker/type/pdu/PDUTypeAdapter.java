@@ -98,6 +98,9 @@ public class PDUTypeAdapter extends AbstractProductTypeAdapter {
 		}
 
 		updateProcParam(jobOrder, "PDUTimeIntervals", timeIntervals);
+		
+		// Update timeliness
+		updateProcParam(jobOrder, "orderType", workerSettings.getProductMode().toString());
 	}
 
 	@Override
