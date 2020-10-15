@@ -200,12 +200,10 @@ public class MultipleProductCoverSearch {
 		if (gapThreshold > 0.0) {
 			ThresholdGapHandler gapHandler = new ThresholdGapHandler(gapThreshold);
 			return gapHandler.isCovered(coverageMin, coverageMax, products);
-		} else if (timeliness.equals("NRT")) {
+		} else {
 			SequenceGapHandler gapHandler = new SequenceGapHandler(disableFirstLastWaiting);
 			return gapHandler.isCovered(coverageMin, coverageMax, products);
 		}
-
-		return true;
 	}
 
 	/**
