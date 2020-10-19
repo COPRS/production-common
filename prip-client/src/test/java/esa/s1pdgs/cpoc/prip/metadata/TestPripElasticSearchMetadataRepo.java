@@ -190,7 +190,7 @@ public class TestPripElasticSearchMetadataRepo {
 		creationDateIntervals.add(f1);
 		creationDateIntervals.add(f2);
 
-		final List<PripMetadata> result = repo.findWithFilters(Collections.EMPTY_LIST, creationDateIntervals, Optional.empty(), Optional.empty());
+		final List<PripMetadata> result = repo.findWithFilters(Collections.emptyList(), creationDateIntervals, Optional.empty(), Optional.empty());
 
 		assertTrue(result.contains(pripMetadata1));
 		assertTrue(result.contains(pripMetadata2));
@@ -235,12 +235,16 @@ public class TestPripElasticSearchMetadataRepo {
 		f3.setFunction(PripTextFilter.Function.CONTAINS);
 		f3.setText("_001027_".toLowerCase());
 		f3.setFieldName(FIELD_NAMES.NAME);
+		
+		final PripTextFilter f4 = new PripTextFilter(FIELD_NAMES.NAME, PripTextFilter.Function.ENDS_WITH,
+				"productName");
 
 		nameFilters.add(f1);
 		nameFilters.add(f2);
 		nameFilters.add(f3);
+		nameFilters.add(f4);
 
-		final List<PripMetadata> result = repo.findWithFilters(nameFilters, Collections.EMPTY_LIST, Optional.empty(), Optional.empty());
+		final List<PripMetadata> result = repo.findWithFilters(nameFilters, Collections.emptyList(), Optional.empty(), Optional.empty());
 
 		assertTrue(result.contains(pripMetadata1));
 		assertTrue(result.contains(pripMetadata2));

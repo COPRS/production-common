@@ -57,7 +57,7 @@ public class ProductsFilterVisitor implements ExpressionVisitor<Object> {
 
 	public ProductsFilterVisitor() {
 
-		supportedMethods = Arrays.asList(MethodKind.CONTAINS, MethodKind.STARTSWITH);
+		supportedMethods = Arrays.asList(MethodKind.CONTAINS, MethodKind.STARTSWITH, MethodKind.ENDSWITH);
 		
 		pripDateTimeFilters = new ArrayList<>();
 		pripTextFilters = new ArrayList<>();
@@ -225,26 +225,22 @@ public class ProductsFilterVisitor implements ExpressionVisitor<Object> {
 	public Object visitMethodCall(MethodKind methodCall, List<Object> parameters)
 			throws ExpressionVisitException, ODataApplicationException {
 		
-		if (!supportedMethods.contains(methodCall)) {
+		if (!this.supportedMethods.contains(methodCall)) {
 			return null;
 		}
 		
 		LOGGER.debug("got method {}", methodCall.name());
 		
 		if (parameters.size() == 2 && parameters.get(0) instanceof Member && parameters.get(1) instanceof Literal
-				&& pripTextPropertyFieldNames.containsKey(memberText((Member) parameters.get(0))) ) {
+				&& this.pripTextPropertyFieldNames.containsKey(memberText((Member) parameters.get(0))) ) {
 			
-			FIELD_NAMES fieldName = pripTextPropertyFieldNames.get(memberText((Member) parameters.get(0)));
-			PripTextFilter textFilter = new PripTextFilter();
-			textFilter.setFieldName(fieldName);
-			if (methodCall.equals(MethodKind.CONTAINS)) {
-				textFilter.setFunction(PripTextFilter.Function.CONTAINS);
-			} else if (methodCall.equals(MethodKind.STARTSWITH)) {
-				textFilter.setFunction(PripTextFilter.Function.STARTS_WITH);
-			}
-			String s = ((Literal) parameters.get(1)).getText();
-			textFilter.setText(s.substring(1, s.length() - 1));
-			pripTextFilters.add(textFilter);
+			final FIELD_NAMES fieldName = this.pripTextPropertyFieldNames.get(memberText((Member) parameters.get(0)));
+			final Function filterFunction = PripTextFilter.Function.fromString(methodCall.name());
+			final String literal = ((Literal) parameters.get(1)).getText();
+			final String text = literal.substring(1, literal.length() - 1);
+			final PripTextFilter textFilter = new PripTextFilter(fieldName, filterFunction, text);
+			
+			this.pripTextFilters.add(textFilter);
 			LOGGER.debug("using filter {} ", textFilter);
 			
 		} else {
