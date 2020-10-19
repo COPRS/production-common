@@ -198,6 +198,10 @@ public class PripElasticSearchMetadataRepo implements PripMetadataRepository {
 				queryBuilder.must(QueryBuilders.wildcardQuery(filter.getFieldName().fieldName(),
 						String.format("%s*", filter.getText())));
 				break;
+			case ENDS_WITH:
+				queryBuilder.must(QueryBuilders.wildcardQuery(filter.getFieldName().fieldName(),
+						String.format("*%s", filter.getText())));
+				break;
 			case CONTAINS:
 				queryBuilder.must(QueryBuilders.wildcardQuery(filter.getFieldName().fieldName(),
 						String.format("*%s*", filter.getText())));

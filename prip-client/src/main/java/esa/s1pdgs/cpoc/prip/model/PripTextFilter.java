@@ -5,12 +5,60 @@ import java.util.Objects;
 public class PripTextFilter {
 
 	public enum Function {
-		STARTS_WITH, CONTAINS, EQUALS
+		STARTS_WITH("startswith"), //
+		ENDS_WITH("endswith"), //
+		CONTAINS("contains"), //
+		EQUALS("eq");
+		
+		private String functionName;
+		
+		private Function(String functionName) {
+			this.functionName = functionName;
+		}
+
+		public String getFunctionName() {
+			return this.functionName;
+		}
+		
+		public static Function fromString(String function) {
+			if (STARTS_WITH.functionName.equalsIgnoreCase(function) || STARTS_WITH.name().equalsIgnoreCase(function)) {
+				return STARTS_WITH;
+			}
+			if (ENDS_WITH.functionName.equalsIgnoreCase(function) || ENDS_WITH.name().equalsIgnoreCase(function)) {
+				return ENDS_WITH;
+			}
+			if (CONTAINS.functionName.equalsIgnoreCase(function) || CONTAINS.name().equalsIgnoreCase(function)) {
+				return CONTAINS;
+			}
+			if (EQUALS.functionName.equalsIgnoreCase(function) || EQUALS.name().equalsIgnoreCase(function)) {
+				return EQUALS;
+			}
+
+			throw new IllegalArgumentException(String.format("text filter function not supported: %s", function));
+		}
 	}
+	
+	// --------------------------------------------------------------------------
 
 	private Function function;
 	private String text;
 	private PripMetadata.FIELD_NAMES fieldName;
+	
+	// --------------------------------------------------------------------------
+
+	public PripTextFilter() {
+		super();
+	}
+
+	public PripTextFilter(PripMetadata.FIELD_NAMES fieldName, Function function, String text) {
+		this();
+
+		this.fieldName = Objects.requireNonNull(fieldName);
+		this.function = Objects.requireNonNull(function);
+		this.text = Objects.requireNonNull(text);
+	}
+
+	// --------------------------------------------------------------------------
 
 	public Function getFunction() {
 		return function;
