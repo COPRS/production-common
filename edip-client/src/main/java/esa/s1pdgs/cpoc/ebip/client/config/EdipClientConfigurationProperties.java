@@ -21,8 +21,7 @@ public class EdipClientConfigurationProperties {
 		private boolean pasv;
 		private String sslProtocol = "TLS";
 		private boolean explictFtps = true;
-		
-		
+				
 		public String getServerName() {
 			return serverName;
 		}
@@ -68,7 +67,23 @@ public class EdipClientConfigurationProperties {
 
 		public void setPasv(final boolean pasv) {
 			this.pasv = pasv;
-		}		
+		}
+
+		public String getSslProtocol() {
+			return sslProtocol;
+		}
+
+		public void setSslProtocol(final String sslProtocol) {
+			this.sslProtocol = sslProtocol;
+		}
+
+		public boolean isExplictFtps() {
+			return explictFtps;
+		}
+
+		public void setExplictFtps(final boolean explictFtps) {
+			this.explictFtps = explictFtps;
+		}	
 	}
 	
 	private String proxyHost;

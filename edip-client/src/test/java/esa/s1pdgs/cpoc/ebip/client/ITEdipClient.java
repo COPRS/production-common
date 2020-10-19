@@ -7,7 +7,12 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.URI;
+import java.nio.file.FileVisitResult;
+import java.nio.file.FileVisitor;
 import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.SimpleFileVisitor;
+import java.nio.file.attribute.BasicFileAttributes;
 
 import org.apache.ftpserver.ConnectionConfigFactory;
 import org.apache.ftpserver.FtpServer;
@@ -45,9 +50,14 @@ public class ITEdipClient {
 	
 	@BeforeClass
 	public static void setupClass() throws Exception {
-		rootDir = Files.createTempDirectory("testSshServer").toFile();
-		rootDir.deleteOnExit();		
-		
+		final File leFile = Files.createTempDirectory("testSshServer").toFile();
+
+		rootDir = new File(leFile, "foo" + System.nanoTime());
+		rootDir.mkdirs();
+		rootDir.setWritable(true, false);
+		rootDir.setExecutable(true, false);
+		rootDir.deleteOnExit();
+			
 		final FtpServerFactory fact = new FtpServerFactory();
 
 		final ConnectionConfigFactory configFactory = new ConnectionConfigFactory();
@@ -99,6 +109,9 @@ public class ITEdipClient {
         user.setHomeDirectory(userDir.getPath());
         user.setEnabled(true);
         userDir.mkdirs();
+        
+    	final File uhu2 = new File(userDir,"uhu2");
+		FileUtils.writeFile(uhu2, "Bli Bla Blubb");
                 
         final String prefix = "ftpserver.user." + user.getName();
 
@@ -140,11 +153,21 @@ public class ITEdipClient {
 	}
 	
 	@Test
-	public final void testFoo() throws Exception {
-		final URI uri = new URI("ftps://localhost:4321/" + rootDir.getPath());
+	public final void testFoo() throws Exception {		
+		final URI uri = new URI("ftps://localhost:4321/");
 		final ApacheFtpEdipClient uut =  new ApacheFtpEdipClient(newConfig(), uri);
+		final FileVisitor<Path> vstr = new SimpleFileVisitor<Path>() {
+			@Override
+		      public FileVisitResult visitFile(final Path file, final BasicFileAttributes attrs)
+		          throws IOException {
+		        System.err.println(file);
+		        return FileVisitResult.CONTINUE;
+		      }
+		};
 		
-		System.out.println(uut.list(EdipEntryFilter.ALLOW_ALL));
+		System.out.println(Files.walkFileTree(rootDir.toPath(), vstr));
+		
+		System.err.println("lutzi: " + uut.list(EdipEntryFilter.ALLOW_ALL));
 
 	}
 	
@@ -152,7 +175,10 @@ public class ITEdipClient {
 		final EdipHostConfiguration result = new EdipHostConfiguration();
 		result.setServerName("localhost");
 		result.setPass(PASS);
-		result.setUser(USER);		
+		result.setUser(USER);	
+		result.setConnectTimeoutSec(100);
+		result.setExplictFtps(false);
+		result.setTrustSelfSignedCertificate(true);
 		return result;
 	}
 }

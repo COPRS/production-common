@@ -40,6 +40,7 @@ public class ApacheFtpEdipClient implements EdipClient {
 
 	@Override
 	public final List<EdipEntry> list(final EdipEntryFilter filter) throws IOException {
+		LOG.debug("Listing {}", uri.getPath());
 		return listRecursively(connectedClient(), uri.getPath(), filter);
 	}
 	
@@ -82,13 +83,13 @@ public class ApacheFtpEdipClient implements EdipClient {
 			ftpClient.addProtocolCommandListener(
 					new PrintCommandListener(new LogPrintWriter(s -> LOG.debug(s)), true)
 			);
-			ftpClient.setConnectTimeout(config.getConnectTimeoutSec());
+			ftpClient.setConnectTimeout(config.getConnectTimeoutSec()*1000);
 			connect(ftpClient);
 			return ftpClient;
 		}	
 		else {
 			// FTPS client creation			
-			final FTPSClient ftpsClient = new FTPSClient("TLS", true);
+			final FTPSClient ftpsClient = new FTPSClient(config.getSslProtocol(), !config.isExplictFtps());
 			ftpsClient.setConnectTimeout(config.getConnectTimeoutSec());
 			ftpsClient.addProtocolCommandListener(
 					new PrintCommandListener(new LogPrintWriter(s -> LOG.debug(s)), true)
@@ -131,15 +132,19 @@ public class ApacheFtpEdipClient implements EdipClient {
 	) 
 			throws IOException {
 		final List<EdipEntry> result = new ArrayList<>();
+		System.err.println("Recursive listing of " + path);
 		for (final FTPFile ftpFile : client.listFiles(path)) {
 			final EdipEntry entry = toEdipEntry(ftpFile);
 			if (!filter.accept(entry)) {
+				System.err.println("filtered " + path);
 				continue;
 			}			
 			if (ftpFile.isDirectory()) {
+				System.err.println("Dir " + path);
 				result.addAll(listRecursively(client, ftpFile.getName(), filter));
 			}
 			else {
+				System.err.println("File " + path);
 				result.add(toEdipEntry(ftpFile));
 			}
 		}
