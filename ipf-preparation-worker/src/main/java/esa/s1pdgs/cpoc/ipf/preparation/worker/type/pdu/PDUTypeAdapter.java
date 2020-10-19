@@ -39,6 +39,7 @@ import esa.s1pdgs.cpoc.ipf.preparation.worker.type.AbstractProductTypeAdapter;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.type.Product;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.type.pdu.generator.PDUGenerator;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.type.s3.MultipleProductCoverSearch;
+import esa.s1pdgs.cpoc.ipf.preparation.worker.type.s3.gap.ThresholdGapHandler;
 import esa.s1pdgs.cpoc.metadata.client.MetadataClient;
 import esa.s1pdgs.cpoc.metadata.model.S3Metadata;
 import esa.s1pdgs.cpoc.mqi.model.queue.IpfExecutionJob;
@@ -97,6 +98,9 @@ public class PDUTypeAdapter extends AbstractProductTypeAdapter {
 		}
 
 		updateProcParam(jobOrder, "PDUTimeIntervals", timeIntervals);
+		
+		// Update timeliness
+		updateProcParam(jobOrder, "orderType", workerSettings.getProductMode().toString());
 	}
 
 	@Override
@@ -163,7 +167,7 @@ public class PDUTypeAdapter extends AbstractProductTypeAdapter {
 					final MultipleProductCoverSearch mpcSearch = new MultipleProductCoverSearch(tasktableAdapter,
 							elementMapper, metadataClient, workerSettings);
 					tasks = mpcSearch.updateTaskInputs(tasks, alternative, returnValue.getSatelliteId(),
-							job.getStartTime(), job.getStopTime(), "NRT");
+							job.getStartTime(), job.getStopTime(), workerSettings.getProductMode().toString());
 
 					/*
 					 * In a following step the start and stop time of the job will be set to the
@@ -184,7 +188,8 @@ public class PDUTypeAdapter extends AbstractProductTypeAdapter {
 						// of interval
 						List<S3Metadata> products = metadataClient.getProductsInRange(alternative.getFileType(),
 								elementMapper.inputFamilyOf(alternative.getFileType()), returnValue.getSatelliteId(),
-								job.getStartTime(), job.getStopTime(), 0.0, 0.0, "NRT");
+								job.getStartTime(), job.getStopTime(), 0.0, 0.0,
+								workerSettings.getProductMode().toString());
 
 						for (S3Metadata product : products) {
 							if (product.getGranulePosition().equals("LAST")) {
@@ -193,7 +198,8 @@ public class PDUTypeAdapter extends AbstractProductTypeAdapter {
 
 								// Update tasks again
 								tasks = mpcSearch.updateTaskInputs(tasks, alternative, returnValue.getSatelliteId(),
-										job.getStartTime(), product.getValidityStop(), "NRT");
+										job.getStartTime(), product.getValidityStop(),
+										workerSettings.getProductMode().toString());
 								break;
 							}
 						}
@@ -312,8 +318,9 @@ public class PDUTypeAdapter extends AbstractProductTypeAdapter {
 				}
 				TimeInterval jobInterval = new TimeInterval(DateUtils.parse(job.getStartTime()),
 						DateUtils.parse(job.getStopTime()));
-				intervals = PDUGapHandler.mergeTimeIntervals(jobInterval, intervals,
-						typeSettings.getGapThreshholdInS());
+
+				ThresholdGapHandler gapHandler = new ThresholdGapHandler(typeSettings.getGapThreshholdInS());
+				intervals = gapHandler.mergeTimeIntervals(jobInterval, intervals);
 
 				String pduTimeIntervals = intervals.stream()
 						.map(i -> "[" + DateUtils.formatToPDUDateTimeFormat(i.getStart()) + ","

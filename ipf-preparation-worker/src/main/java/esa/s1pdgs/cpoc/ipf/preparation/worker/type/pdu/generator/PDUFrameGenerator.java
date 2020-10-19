@@ -26,7 +26,8 @@ public class PDUFrameGenerator extends AbstractPDUGenerator implements PDUGenera
 	private final ProcessSettings processSettings;
 	private final MetadataClient mdClient;
 
-	public PDUFrameGenerator(final ProcessSettings processSettings, final PDUTypeSettings settings, final MetadataClient mdClient) {
+	public PDUFrameGenerator(final ProcessSettings processSettings, final PDUTypeSettings settings,
+			final MetadataClient mdClient) {
 		this.settings = settings;
 		this.processSettings = processSettings;
 		this.mdClient = mdClient;
@@ -40,9 +41,11 @@ public class PDUFrameGenerator extends AbstractPDUGenerator implements PDUGenera
 		if (checkIfFirstInOrbit(metadata, this.mdClient, job)) {
 			// Product is first of orbit, generate PDU-Jobs
 			LOGGER.debug("Product is first in orbit - generate PDUs with type FRAME");
-			final S3Metadata firstOfLastOrbit = mdClient.getFirstProductForOrbit(job.getProductFamily(),
-					job.getEventMessage().getBody().getProductType(), metadata.getSatelliteId(),
-					Long.parseLong(metadata.getAbsoluteStartOrbit()) - 1);
+			final S3Metadata firstOfLastOrbit = mdClient.performWithReindexOnNull(
+					() -> mdClient.getFirstProductForOrbit(job.getProductFamily(),
+							job.getEventMessage().getBody().getProductType(), metadata.getSatelliteId(),
+							Long.parseLong(metadata.getAbsoluteStartOrbit()) - 1),
+					job.getEventMessage().getBody().getProductType(), job.getProductFamily());
 
 			String startTime = metadata.getAnxTime();
 			if (firstOfLastOrbit != null) {
@@ -63,11 +66,11 @@ public class PDUFrameGenerator extends AbstractPDUGenerator implements PDUGenera
 				appDataJob.setStopTime(DateUtils.formatToMetadataDateTimeFormat(interval.getStop()));
 
 				appDataJob.getProduct().getMetadata().put(PDUProduct.FRAME_NUMBER, frameNumber.toString());
-				
+
 				if (processSettings.getProcessingGroup() != null) {
 					appDataJob.setProcessingGroup(processSettings.getProcessingGroup());
 				}
-				
+
 				jobs.add(appDataJob);
 
 				frameNumber++;

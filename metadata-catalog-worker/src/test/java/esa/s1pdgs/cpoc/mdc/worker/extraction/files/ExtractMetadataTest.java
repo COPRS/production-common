@@ -1150,7 +1150,7 @@ public class ExtractMetadataTest {
 	@Test
 	public void testProcessProductXFDUFile() {
 		final JSONObject expectedResult = new JSONObject(
-				"{\"startTime\":\"2004-07-03T00:30:00.906000Z\", \"stopTime\":\"2004-07-03T00:32:00.906000Z\", \"creationTime\":\"2016-02-04T07:09:33.000000Z\", \"baselineCollection\":\"NNN\", \"boundingPolygon\":{\"points\":[\"-14.937040 -75.312935\",\"-11.387472 -75.312935\",\"-11.387472 -14.312935\",\"-14.387472 -14.312935\"]}, \"site\":\"dummy-text\", \"absoluteStartOrbit\":9895, \"absoluteStopOrbit\":9895, \"relativeStartOrbit\":2, \"relativeStopOrbit\":2, \"receivingGroundStation\":\"dummy-text\", \"instrumentName\":\"OLCI\", \"procTime\":\"2016-02-04T07:09:49.000845Z\", \"granuleNumber\":1, \"granulePosition\":\"FIRST\", \"dumpStart\":\"2004-07-03T00:28:17.706000Z\", \"utcTime\":\"2004-07-03T00:00:00.906000Z\", \"utc1Time\":\"2004-07-03T01:41:00.906000Z\", \"processingLevel\":1, \"procVersion\":1.0, \"procName\":\"ACQ-WERUM\", \"qualityIndicator\":\"dummy-text\", \"NRT\":true,\"STC\":false,\"NTC\":false, \"productName\":\"S3B_OL_1_EFR____20040703T003000_20040703T003200_20160204T070933_DDDD_001_002_FFFF_WER_D_NR_NNN.SEN3\", \"productClass\":\"OL\", \"productType\":\"OL_1_EFR___\", \"missionId\":\"S3\", \"satelliteId\":\"B\", \"url\":\"S3B_OL_1_EFR____20040703T003000_20040703T003200_20160204T070933_DDDD_001_002_FFFF_WER_D_NR_NNN.SEN3\", \"productFamily\":\"S3_L1\", \"instanceId\":\"DDDD_001_002_FFFF\", \"generatingCentre\":\"WER\", \"classId\":\"D_NR_NNN\", \"processMode\":\"NOMINAL\"}");
+				"{\"startTime\":\"2004-07-03T00:30:00.906000Z\", \"stopTime\":\"2004-07-03T00:32:00.906000Z\", \"creationTime\":\"2016-02-04T07:09:33.000000Z\", \"baselineCollection\":\"NNN\", \"boundingPolygon\":{\"points\":[\"-14.937040 -75.312935\",\"-11.387472 -75.312935\",\"-11.387472 -14.312935\",\"-14.387472 -14.312935\"]}, \"site\":\"dummy-text\", \"absoluteStartOrbit\":9895, \"absoluteStopOrbit\":9895, \"relativeStartOrbit\":2, \"relativeStopOrbit\":2, \"receivingGroundStation\":\"dummy-text\", \"instrumentName\":\"OLCI\", \"procTime\":\"2016-02-04T07:09:49.000845Z\", \"granuleNumber\":1, \"granulePosition\":\"FIRST\", \"dumpStart\":\"2004-07-03T00:28:17.706000Z\", \"utcTime\":\"2004-07-03T00:00:00.906000Z\", \"utc1Time\":\"2004-07-03T01:41:00.906000Z\", \"processingLevel\":1, \"procVersion\":1.0, \"procName\":\"ACQ-WERUM\", \"qualityIndicator\":\"dummy-text\", \"NRT\":true,\"STC\":false,\"NTC\":false, \"productName\":\"S3B_OL_1_EFR____20040703T003000_20040703T003200_20160204T070933_DDDD_001_002_FFFF_WER_D_NR_NNN.SEN3\", \"productClass\":\"OL\", \"productType\":\"OL_1_EFR___\", \"missionId\":\"S3\", \"satelliteId\":\"B\", \"url\":\"S3B_OL_1_EFR____20040703T003000_20040703T003200_20160204T070933_DDDD_001_002_FFFF_WER_D_NR_NNN.SEN3\", \"productFamily\":\"S3_L1_NRT\", \"instanceId\":\"DDDD_001_002_FFFF\", \"generatingCentre\":\"WER\", \"classId\":\"D_NR_NNN\", \"processMode\":\"NOMINAL\"}");
 
 		final S3FileDescriptor descriptor = new S3FileDescriptor();
 		descriptor.setProductType("OL_1_EFR___");
@@ -1165,7 +1165,7 @@ public class ExtractMetadataTest {
 		descriptor.setSatelliteId("B");
 		descriptor.setKeyObjectStorage(
 				"S3B_OL_1_EFR____20040703T003000_20040703T003200_20160204T070933_DDDD_001_002_FFFF_WER_D_NR_NNN.SEN3");
-		descriptor.setProductFamily(ProductFamily.S3_L1);
+		descriptor.setProductFamily(ProductFamily.S3_L1_NRT);
 		descriptor.setInstanceId("DDDD_001_002_FFFF");
 		descriptor.setGeneratingCentre("WER");
 		descriptor.setClassId("D_NR_NNN");

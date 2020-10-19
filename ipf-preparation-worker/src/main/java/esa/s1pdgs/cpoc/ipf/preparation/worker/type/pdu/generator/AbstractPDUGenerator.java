@@ -28,9 +28,11 @@ public abstract class AbstractPDUGenerator {
 	 */
 	protected boolean checkIfFirstInOrbit(final S3Metadata metadata, final MetadataClient mdClient,
 			final IpfPreparationJob job) throws MetadataQueryException {
-		final S3Metadata firstOfOrbit = mdClient.getFirstProductForOrbit(job.getProductFamily(),
-				job.getEventMessage().getBody().getProductType(), metadata.getSatelliteId(),
-				Long.parseLong(metadata.getAbsoluteStartOrbit()));
+		final S3Metadata firstOfOrbit = mdClient.performWithReindexOnNull(
+				() -> mdClient.getFirstProductForOrbit(job.getProductFamily(),
+						job.getEventMessage().getBody().getProductType(), metadata.getSatelliteId(),
+						Long.parseLong(metadata.getAbsoluteStartOrbit())),
+				job.getEventMessage().getBody().getProductType(), job.getProductFamily());
 
 		if (firstOfOrbit != null) {
 			return firstOfOrbit.getInsertionTime().equals(metadata.getInsertionTime());
@@ -57,7 +59,7 @@ public abstract class AbstractPDUGenerator {
 
 		while (currentStop.isBefore(finalStop)) {
 			long lengthInNanos = (long) (length * 1000000000L);
-			
+
 			LocalDateTime newStop = currentStop.plusNanos(lengthInNanos);
 			if (newStop.isAfter(finalStop)) {
 				intervals.add(new TimeInterval(currentStop, finalStop));
@@ -85,21 +87,16 @@ public abstract class AbstractPDUGenerator {
 	protected S3Metadata getMetadataForJobProduct(final MetadataClient mdClient, IpfPreparationJob job)
 			throws MetadataQueryException {
 		// Get metadata for product
-		S3Metadata metadata = mdClient.getS3MetadataForProduct(job.getProductFamily(),
-				job.getEventMessage().getBody().getProductName());
+		S3Metadata metadata = mdClient.performWithReindexOnNull(
+				() -> mdClient.getS3MetadataForProduct(job.getProductFamily(),
+						job.getEventMessage().getBody().getProductName()),
+				job.getEventMessage().getBody().getProductType(), job.getProductFamily());
 
 		if (metadata == null) {
-			// It may be that the elastic search is not updated yet. Refresh the index and
-			// try again
-			mdClient.refreshIndex(job.getProductFamily(), job.getEventMessage().getBody().getProductType());
-			metadata = mdClient.getS3MetadataForProduct(job.getProductFamily(),
-					job.getEventMessage().getBody().getProductName());
-			if (metadata == null) {
-				// If metadata is still null, there may be an inconsistency with the es index -
-				// abort!
-				throw new MetadataQueryException(
-						"Could not retrieve metadata information for product of IpfPreparationJob");
-			}
+			// If metadata is still null, there may be an inconsistency with the es index -
+			// abort!
+			throw new MetadataQueryException(
+					"Could not retrieve metadata information for product of IpfPreparationJob");
 		}
 
 		return metadata;

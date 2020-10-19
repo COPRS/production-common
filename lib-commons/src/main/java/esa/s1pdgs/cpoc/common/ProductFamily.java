@@ -60,8 +60,12 @@ public enum ProductFamily {
     S3_AUX,
     S3_GRANULES,
     S3_L0,
-    S3_L1,
-    S3_L2,
+    S3_L1_NRT,
+    S3_L1_STC,
+    S3_L1_NTC,
+    S3_L2_NRT,
+    S3_L2_STC,
+    S3_L2_NTC,
     S3_CAL,
     S3_PUG,
     // S3 Jobs
@@ -69,8 +73,12 @@ public enum ProductFamily {
     // S3 compressed types
     S3_AUX_ZIP,
     S3_L0_ZIP,
-    S3_L1_ZIP,
-    S3_L2_ZIP,
+    S3_L1_NRT_ZIP,
+    S3_L1_STC_ZIP,
+    S3_L1_NTC_ZIP,
+    S3_L2_NRT_ZIP,
+    S3_L2_STC_ZIP,
+    S3_L2_NTC_ZIP,
     S3_CAL_ZIP,
     S3_PUG_ZIP;
 	

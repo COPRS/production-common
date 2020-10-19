@@ -42,9 +42,11 @@ public class PDUStripeGenerator extends AbstractPDUGenerator implements PDUGener
 			if (checkIfFirstInOrbit(metadata, this.mdClient, job)) {
 				// Product is first of orbit, generate PDU-Jobs
 				LOGGER.debug("Product is first in orbit - generate PDUs with type STRIPE (Reference: Orbit)");
-				final S3Metadata firstOfLastOrbit = mdClient.getFirstProductForOrbit(job.getProductFamily(),
-						job.getEventMessage().getBody().getProductType(), metadata.getSatelliteId(),
-						Long.parseLong(metadata.getAbsoluteStartOrbit()) - 1);
+				final S3Metadata firstOfLastOrbit = mdClient.performWithReindexOnNull(
+						() -> mdClient.getFirstProductForOrbit(job.getProductFamily(),
+								job.getEventMessage().getBody().getProductType(), metadata.getSatelliteId(),
+								Long.parseLong(metadata.getAbsoluteStartOrbit()) - 1),
+						job.getEventMessage().getBody().getProductType(), job.getProductFamily());
 
 				String startTime = metadata.getAnxTime();
 				if (firstOfLastOrbit != null) {
@@ -72,7 +74,7 @@ public class PDUStripeGenerator extends AbstractPDUGenerator implements PDUGener
 			S3Metadata metadata = getMetadataForJobProduct(mdClient, job);
 
 			List<TimeInterval> intervals = findTimeIntervalsForMetadata(metadata, settings.getLengthInS());
-			
+
 			return createJobsFromTimeIntervals(intervals, job);
 		}
 

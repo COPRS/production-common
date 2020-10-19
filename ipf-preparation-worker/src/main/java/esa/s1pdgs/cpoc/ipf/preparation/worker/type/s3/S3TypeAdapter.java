@@ -168,10 +168,11 @@ public class S3TypeAdapter extends AbstractProductTypeAdapter implements Product
 							.get(tasktableAdapter.taskTable().getProcessorName());
 
 					final MultipleProductCoverSearch mpcSearch = new MultipleProductCoverSearch(tasktableAdapter,
-							elementMapper, metadataClient, workerSettings, mpcSettings.isDisableFirstLastWaiting());
+							elementMapper, metadataClient, workerSettings, mpcSettings.isDisableFirstLastWaiting(),
+							mpcSettings.getGapThreshold());
 					tasks = mpcSearch.updateTaskInputs(tasks, alternative, returnValue.getSatelliteId(),
 							returnValue.getStartTime(), returnValue.getStopTime(), alternative.getDeltaTime0(),
-							alternative.getDeltaTime1(), "NRT");
+							alternative.getDeltaTime1(), workerSettings.getProductMode().toString());
 				}
 
 				if (settings.isRangeSearchActiveForProductType(tasktableAdapter.taskTable().getProcessorName(),
@@ -181,7 +182,7 @@ public class S3TypeAdapter extends AbstractProductTypeAdapter implements Product
 					final MultipleProductCoverSearch mpcSearch = new MultipleProductCoverSearch(tasktableAdapter,
 							elementMapper, metadataClient, workerSettings);
 					tasks = mpcSearch.updateTaskInputs(tasks, alternative, returnValue.getSatelliteId(),
-							job.getStartTime(), job.getStopTime(), "NRT");
+							job.getStartTime(), job.getStopTime(), workerSettings.getProductMode().toString());
 
 					/*
 					 * In a following step the start and stop time of the job will be set to the
@@ -241,7 +242,7 @@ public class S3TypeAdapter extends AbstractProductTypeAdapter implements Product
 		if (!jobOrder.getProcs().isEmpty()) {
 			AbstractJobOrderProc proc = jobOrder.getProcs().get(0);
 			JobOrderInput firstInput = proc.getInputs().get(0);
-			
+
 			int index = 0;
 			for (int i = 0; i < firstInput.getNbFilenames(); i++) {
 				if (firstInput.getFilenames().get(i).getFilename().matches(".*" + job.getProductName())) {
@@ -250,21 +251,21 @@ public class S3TypeAdapter extends AbstractProductTypeAdapter implements Product
 					break;
 				}
 			}
-			
+
 			// If product isn't already the first, move it there
 			if (index > 0) {
 				LOGGER.debug("Move main input to first position");
 				JobOrderInputFile file = firstInput.getFilenames().get(index);
 				JobOrderTimeInterval interval = firstInput.getTimeIntervals().get(index);
-				
+
 				firstInput.getFilenames().remove(index);
 				firstInput.getTimeIntervals().remove(index);
-				
+
 				firstInput.getFilenames().add(0, file);
 				firstInput.getTimeIntervals().add(0, interval);
 			}
 		}
-		
+
 		/*
 		 * Remove optional outputs from last proc, except for configured additional
 		 * outputs
