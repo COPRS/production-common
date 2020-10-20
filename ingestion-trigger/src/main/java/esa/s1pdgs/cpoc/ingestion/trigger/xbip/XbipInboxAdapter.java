@@ -12,6 +12,9 @@ import esa.s1pdgs.cpoc.xbip.client.XbipEntry;
 import esa.s1pdgs.cpoc.xbip.client.XbipEntryFilter;
 
 public class XbipInboxAdapter extends AbstractInboxAdapter {
+	
+	public final static String INBOX_TYPE = "xbip";
+	
 	private final XbipClient xbipClient;
 	
 	public XbipInboxAdapter(
@@ -37,7 +40,7 @@ public class XbipInboxAdapter extends AbstractInboxAdapter {
 				xbipEntry.getLastModified(), 
 				xbipEntry.getSize(),
 				stationName,
-				"xbip"
+				INBOX_TYPE
 		);
 	}
 }
