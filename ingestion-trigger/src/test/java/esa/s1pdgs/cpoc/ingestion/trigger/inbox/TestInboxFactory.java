@@ -18,7 +18,7 @@ public class TestInboxFactory {
 		final InboxConfiguration defConfig = new InboxConfiguration();
 		defConfig.setFamily(ProductFamily.EDRS_SESSION);
 		
-		final InboxFactory uut = new InboxFactory(null, null, null, null, null);
+		final InboxFactory uut = new InboxFactory(null, null, null, null, null, null);
 			
 		final ProductNameEvaluator eval = uut.newProductNameEvaluatorFor(defConfig);
 		InboxEntry entry = new InboxEntry();
