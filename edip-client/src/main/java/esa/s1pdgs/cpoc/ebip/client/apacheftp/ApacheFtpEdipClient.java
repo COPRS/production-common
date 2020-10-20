@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.SocketException;
 import java.net.URI;
+import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
@@ -41,7 +42,7 @@ public class ApacheFtpEdipClient implements EdipClient {
 	@Override
 	public final List<EdipEntry> list(final EdipEntryFilter filter) throws IOException {
 		LOG.debug("Listing {}", uri.getPath());
-		return listRecursively(connectedClient(), uri.getPath(), filter);
+		return listRecursively(connectedClient(), Paths.get(uri.getPath()), filter);
 	}
 	
 	@Override
@@ -127,40 +128,48 @@ public class ApacheFtpEdipClient implements EdipClient {
 	
 	private List<EdipEntry> listRecursively(
 			final FTPClient client, 
-			final String path, 
+			final Path path, 
 			final EdipEntryFilter filter
 	) 
 			throws IOException {
 		final List<EdipEntry> result = new ArrayList<>();
-		System.err.println("Recursive listing of " + path);
-		for (final FTPFile ftpFile : client.listFiles(path)) {
-			final EdipEntry entry = toEdipEntry(ftpFile);
+		LOG.trace("Recursive listing of {}", path);
+		
+		for (final FTPFile ftpFile : client.listFiles(path.toString())) {
+			final EdipEntry entry = toEdipEntry(path, ftpFile);
 			if (!filter.accept(entry)) {
-				System.err.println("filtered " + path);
+				LOG.trace("{} ignored by {}", entry, filter);
 				continue;
 			}			
+			
 			if (ftpFile.isDirectory()) {
-				System.err.println("Dir " + path);
-				result.addAll(listRecursively(client, ftpFile.getName(), filter));
+				LOG.trace("Found dir {}", entry);
+				result.addAll(listRecursively(client, entry.getPath(), filter));
 			}
 			else {
-				System.err.println("File " + path);
-				result.add(toEdipEntry(ftpFile));
+				LOG.trace("Found file {}", entry);
+				result.add(entry);
 			}
 		}
 		return result;
 	}
 	
-	private final EdipEntry toEdipEntry(final FTPFile ftpFile) {
+	private final EdipEntry toEdipEntry(final Path path, final FTPFile ftpFile) {
+		final Path entryPath = path.resolve(ftpFile.getName());
+
 		return new EdipEntryImpl(
 				ftpFile.getName(), 
-				Paths.get(ftpFile.getName()), 
-				null, 
+				entryPath, 
+				toUri(entryPath), 
 				ftpFile.getTimestamp().getTime(), 
 				ftpFile.getSize()
 		);
 	}
 	
+	private final URI toUri(final Path entryPath) {		
+		return uri.resolve(entryPath.toString());		
+	}
+
 	static void assertPositiveCompletion(final FTPClient client) throws IOException {
 		if (!FTPReply.isPositiveCompletion(client.getReplyCode())) {
 			throw new IOException("Error on command execution. Reply was: " + client.getReplyString());

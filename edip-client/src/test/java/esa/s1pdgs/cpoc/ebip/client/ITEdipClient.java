@@ -1,18 +1,18 @@
 package esa.s1pdgs.cpoc.ebip.client;
 
+import static org.junit.Assert.assertEquals;
+
+import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.URI;
-import java.nio.file.FileVisitResult;
-import java.nio.file.FileVisitor;
 import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.SimpleFileVisitor;
-import java.nio.file.attribute.BasicFileAttributes;
+import java.util.List;
 
 import org.apache.ftpserver.ConnectionConfigFactory;
 import org.apache.ftpserver.FtpServer;
@@ -30,12 +30,15 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 import org.springframework.util.StreamUtils;
 
+import esa.s1pdgs.cpoc.common.errors.InternalErrorException;
 import esa.s1pdgs.cpoc.common.utils.FileUtils;
 import esa.s1pdgs.cpoc.common.utils.Streams;
 import esa.s1pdgs.cpoc.ebip.client.apacheftp.ApacheFtpEdipClient;
 import esa.s1pdgs.cpoc.ebip.client.config.EdipClientConfigurationProperties.EdipHostConfiguration;
 
 public class ITEdipClient {
+	private static final String CONTENT_RAW = "uhu";
+	private static final String CONTENT_DSIB = "Bli Bla Blubb";
 	private static final String USER = "user";
 	private static final String PASS = "pass";
 	private static final int PORT = 4321;
@@ -110,8 +113,7 @@ public class ITEdipClient {
         user.setEnabled(true);
         userDir.mkdirs();
         
-    	final File uhu2 = new File(userDir,"uhu2");
-		FileUtils.writeFile(uhu2, "Bli Bla Blubb");
+        createSessionsIn(userDir);
                 
         final String prefix = "ftpserver.user." + user.getName();
 
@@ -135,11 +137,23 @@ public class ITEdipClient {
         ftpServer.start();
 	}
 	
+
 	@AfterClass
 	public static void tearDownClass() {
 		ftpServer.stop();
 		keystoreFile.delete();
 		FileUtils.delete(rootDir.getPath());		
+	}
+	
+	private static void createSessionsIn(final File dir) throws InternalErrorException {
+		final File nominal = new File(dir,"NOMINAL");
+		final File s1a = new File(nominal,"S1A");
+		final File sessionDir = new File(s1a,"S1A_20200120185900030888");
+		sessionDir.mkdirs();
+    	final File dsib = new File(sessionDir,"DCS_01_S1A_20200120185900030888_ch1_DSIB.xml");
+    	final File raw = new File(sessionDir,"DCS_01_S1A_20200120185900030888_ch1_DSDB_00033.raw");
+		FileUtils.writeFile(dsib, CONTENT_DSIB);
+		FileUtils.writeFile(raw, CONTENT_RAW);
 	}
 	
 	@Before
@@ -154,20 +168,21 @@ public class ITEdipClient {
 	
 	@Test
 	public final void testFoo() throws Exception {		
-		final URI uri = new URI("ftps://localhost:4321/");
-		final ApacheFtpEdipClient uut =  new ApacheFtpEdipClient(newConfig(), uri);
-		final FileVisitor<Path> vstr = new SimpleFileVisitor<Path>() {
-			@Override
-		      public FileVisitResult visitFile(final Path file, final BasicFileAttributes attrs)
-		          throws IOException {
-		        System.err.println(file);
-		        return FileVisitResult.CONTINUE;
-		      }
-		};
+		final URI uri = new URI("ftps://localhost:4321/NOMINAL");
+		final ApacheFtpEdipClient uut = new ApacheFtpEdipClient(newConfig(), uri);
+		final List<EdipEntry> entries = uut.list(EdipEntryFilter.ALLOW_ALL);
+		assertEquals(2, entries.size());
+		//System.err.println(entries);
+	
+		for (final EdipEntry entry : entries) {
+			if (entry.getName().endsWith(".raw")) {
+				assertEquals(CONTENT_RAW, read(uut.read(entry)));
+			}
+			else {
+				assertEquals(CONTENT_DSIB,read(uut.read(entry)));
+			}
+		}
 		
-		System.out.println(Files.walkFileTree(rootDir.toPath(), vstr));
-		
-		System.err.println("lutzi: " + uut.list(EdipEntryFilter.ALLOW_ALL));
 
 	}
 	
@@ -180,5 +195,13 @@ public class ITEdipClient {
 		result.setExplictFtps(false);
 		result.setTrustSelfSignedCertificate(true);
 		return result;
+	}
+	
+	private final String read(final InputStream inputStream) throws IOException {
+		final ByteArrayOutputStream out = new ByteArrayOutputStream();
+		try (final BufferedInputStream in = new BufferedInputStream(inputStream)) {
+			StreamUtils.copy(in, out);
+		}
+		return new String(out.toByteArray());
 	}
 }
