@@ -18,7 +18,7 @@ public class EdipClientConfiguration {
 	}
 	
 	@Bean
-	public EdipClientFactory factory() {
+	public EdipClientFactory edipClientFactory() {
 		return new ApacheFtpEdipClientFactory(config);
 	}
 

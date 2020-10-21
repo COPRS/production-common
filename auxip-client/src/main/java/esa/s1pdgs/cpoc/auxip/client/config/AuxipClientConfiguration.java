@@ -18,7 +18,7 @@ public class AuxipClientConfiguration {
     }
 
     @Bean
-    public AuxipClientFactory factory() {
+    public AuxipClientFactory auxipClientFactory() {
         return new AuxipOdataClientFactory(config);
     }
 }
