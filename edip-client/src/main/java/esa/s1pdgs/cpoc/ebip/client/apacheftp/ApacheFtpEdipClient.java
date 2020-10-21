@@ -178,9 +178,18 @@ public class ApacheFtpEdipClient implements EdipClient {
 		}
 	}
 
-	private KeyStore newKeyStore(final InputStream inputStream, final String keystorePass) {
-		// TODO Auto-generated method stub
-		return null;
+	private final KeyStore newKeyStore(final InputStream inputStream, final String keystorePass) 
+			throws Exception {
+	    try
+	    {
+	      final KeyStore keystore = KeyStore.getInstance(KeyStore.getDefaultType());
+	      keystore.load(inputStream, keystorePass.toCharArray());
+	      return keystore;
+	    }
+	    finally
+	    {
+	      Streams.close(inputStream);
+	    }
 	}
 
 	private final FTPClient connect(final FTPClient ftpClient) throws SocketException, IOException {
