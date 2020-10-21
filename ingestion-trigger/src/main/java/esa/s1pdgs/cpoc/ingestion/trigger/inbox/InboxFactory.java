@@ -12,6 +12,8 @@ import org.springframework.stereotype.Component;
 import esa.s1pdgs.cpoc.common.ProductFamily;
 import esa.s1pdgs.cpoc.ingestion.trigger.auxip.AuxipInboxAdapterFactory;
 import esa.s1pdgs.cpoc.ingestion.trigger.config.InboxConfiguration;
+import esa.s1pdgs.cpoc.ingestion.trigger.edip.EdipInboxAdapter;
+import esa.s1pdgs.cpoc.ingestion.trigger.edip.EdipInboxAdapterFactory;
 import esa.s1pdgs.cpoc.ingestion.trigger.filter.BlacklistRegexRelativePathInboxFilter;
 import esa.s1pdgs.cpoc.ingestion.trigger.filter.JoinedFilter;
 import esa.s1pdgs.cpoc.ingestion.trigger.filter.MinimumModificationDateFilter;
@@ -33,6 +35,7 @@ public class InboxFactory {
 	private final FilesystemInboxAdapterFactory fileSystemInboxAdapterFactory;
 	private final XbipInboxAdapterFactory xbipInboxAdapterFactory;
 	private final AuxipInboxAdapterFactory auxipInboxAdapterFactory;
+	private final EdipInboxAdapterFactory edipInboxAdapterFactory;
 
 	@Autowired
 	public InboxFactory(
@@ -40,13 +43,15 @@ public class InboxFactory {
 			final IngestionTriggerServiceTransactional inboxPollingServiceTransactional,
 			final FilesystemInboxAdapterFactory fileSystemInboxAdapterFactory,
 			final XbipInboxAdapterFactory xbipInboxAdapterFactory,
-			final AuxipInboxAdapterFactory auxipInboxAdapterFactory
+			final AuxipInboxAdapterFactory auxipInboxAdapterFactory,
+			final EdipInboxAdapterFactory edipInboxAdapterFactory
 			) {
 		this.kafkaTemplate = kafkaTemplate;
 		this.ingestionTriggerServiceTransactional = inboxPollingServiceTransactional;
 		this.fileSystemInboxAdapterFactory = fileSystemInboxAdapterFactory;
 		this.xbipInboxAdapterFactory = xbipInboxAdapterFactory;
 		this.auxipInboxAdapterFactory = auxipInboxAdapterFactory;
+		this.edipInboxAdapterFactory = edipInboxAdapterFactory;
 	}
 	
 
@@ -85,6 +90,10 @@ public class InboxFactory {
 	private final InboxAdapterFactory newInboxAdapterFactory(final String type, final String url) throws URISyntaxException {
 		if("prip".equals(type)) {
 			return auxipInboxAdapterFactory;
+		}
+		
+		if (EdipInboxAdapter.INBOX_TYPE.equals(type)) {
+			return edipInboxAdapterFactory;
 		}
 
 		if (url.startsWith("https://")) {
