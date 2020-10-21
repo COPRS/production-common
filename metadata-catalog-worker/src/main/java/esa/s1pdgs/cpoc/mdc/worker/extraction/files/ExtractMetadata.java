@@ -207,7 +207,7 @@ public class ExtractMetadata {
 	 * @throws MetadataExtractionException
 	 * @throws MetadataMalformedException
 	 */
-	// FIXEME probably it means SAFE AUX FILE ???
+	// FIXME probably it means SAFE AUX FILE ???
 	public JSONObject processSAFEFile(final AuxDescriptor descriptor, final File inputMetadataFile)
 			throws MetadataExtractionException, MetadataMalformedException {
 
@@ -283,6 +283,8 @@ public class ExtractMetadata {
 		final File xsltFile = new File(this.xsltDirectory + XSLT_L0_SEGMENT_MANIFEST);
 		LOGGER.debug("extracting metadata for descriptor: {} ", descriptor);
 		JSONObject metadataJSONObject = transformXMLWithXSLTToJSON(manifestFile, xsltFile);
+
+		metadataJSONObject = removeEmptyStringElementsFromPolarisationChannelsArray(metadataJSONObject);
 
 		metadataJSONObject = putCommonMetadataToJSON(metadataJSONObject, descriptor);
 
@@ -456,6 +458,8 @@ public class ExtractMetadata {
 		final File xsltFile = new File(this.xsltDirectory + xsltMap.get(productFamily));
 		LOGGER.debug("extracting metadata for descriptor: {} ", descriptor);
 		JSONObject metadataJSONObject = transformXMLWithXSLTToJSON(manifestFile, xsltFile);
+
+		metadataJSONObject = removeEmptyStringElementsFromPolarisationChannelsArray(metadataJSONObject);
 
 		metadataJSONObject = putCommonMetadataToJSON(metadataJSONObject, descriptor);
 
@@ -728,6 +732,19 @@ public class ExtractMetadata {
 			throw new MetadataExtractionException(e);
 		}
 
+	}
+	
+	private JSONObject removeEmptyStringElementsFromPolarisationChannelsArray(final JSONObject metadataJSONObject) {
+		if (metadataJSONObject.has("polarisationChannels")) {
+			JSONArray polarisationChannels = (JSONArray)metadataJSONObject.get("polarisationChannels");
+			int idx = polarisationChannels.length();
+			while (--idx >= 0) {
+				if ("".equals(polarisationChannels.get(idx))) {
+					polarisationChannels.remove(idx);
+				}
+			}
+		}
+		return metadataJSONObject;
 	}
 
 	/**
