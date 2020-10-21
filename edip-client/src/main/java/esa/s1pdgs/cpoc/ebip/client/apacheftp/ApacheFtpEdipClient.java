@@ -7,10 +7,14 @@ import java.net.SocketException;
 import java.net.URI;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.security.KeyStore;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.net.ssl.KeyManager;
+import javax.net.ssl.KeyManagerFactory;
 import javax.net.ssl.TrustManager;
+import javax.net.ssl.TrustManagerFactory;
 
 import org.apache.commons.net.PrintCommandListener;
 import org.apache.commons.net.ftp.FTP;
@@ -21,7 +25,9 @@ import org.apache.commons.net.ftp.FTPSClient;
 import org.apache.commons.net.util.TrustManagerUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.springframework.util.StringUtils;
 
+import esa.s1pdgs.cpoc.common.utils.Streams;
 import esa.s1pdgs.cpoc.ebip.client.EdipClient;
 import esa.s1pdgs.cpoc.ebip.client.EdipEntry;
 import esa.s1pdgs.cpoc.ebip.client.EdipEntryFilter;
@@ -89,13 +95,13 @@ public class ApacheFtpEdipClient implements EdipClient {
 		        ftpClient.enterLocalActiveMode();
 	        }	        
 			return ftpClient;
-		} catch (final IOException e) {
+		} catch (final Exception e) {
 			// TODO add proper error handling
 			throw new RuntimeException(e);
 		}
 	}
 	
-	private final FTPClient newClient() throws IOException {	
+	private final FTPClient newClient() throws Exception {	
 		
 		if (!"ftps".equals(uri.getScheme())) {
 			final FTPClient ftpClient = new FTPClient();
@@ -114,15 +120,53 @@ public class ApacheFtpEdipClient implements EdipClient {
 			ftpsClient.addProtocolCommandListener(
 					new PrintCommandListener(new LogPrintWriter(s -> LOG.debug(s)), true)
 			);
-			// FIXME make certificates and checks configurable
-			final TrustManager trustManager;
-			if (config.isTrustSelfSignedCertificate()) {
-				trustManager = TrustManagerUtils.getAcceptAllTrustManager();
-			}
-			else {
-				trustManager = TrustManagerUtils.getValidateServerCertificateTrustManager();
-			}
-		    ftpsClient.setTrustManager(trustManager);
+			
+			// handle SSL
+		    // if a keystore is configured, client authentication will be enabled
+		    if (!StringUtils.isEmpty(config.getKeyManagerKeyStore()))
+		    {
+		      final String keystorePass = config.getKeyManagerKeyStorePassword();
+
+		      final KeyStore keyStore = newKeyStore(
+		          Streams.getInputStream(config.getKeyManagerKeyStore()),
+		          keystorePass
+		      );
+
+		      final KeyManagerFactory keyManagerFactory = KeyManagerFactory.getInstance(
+		          KeyManagerFactory.getDefaultAlgorithm()
+		      );
+		      keyManagerFactory.init(keyStore, keystorePass.toCharArray());
+
+		      final KeyManager[] keyManagers = keyManagerFactory.getKeyManagers();
+		      final KeyManager keyManager = keyManagers[0];
+
+		      ftpsClient.setKeyManager(keyManager);
+		      ftpsClient.setWantClientAuth(true);
+		    }
+
+		    if (!StringUtils.isEmpty(config.getTrustManagerKeyStore()))
+		    {
+		      final String trustManagerPassword = config.getTrustManagerKeyStorePassword();
+
+		      final KeyStore trustStore = newKeyStore(
+		          Streams.getInputStream(config.getTrustManagerKeyStore()),
+		          trustManagerPassword
+		      );
+
+		      final TrustManagerFactory trustMgrFactory = TrustManagerFactory.getInstance(
+		          TrustManagerFactory.getDefaultAlgorithm()
+		      );
+		      trustMgrFactory.init(trustStore);
+		      final TrustManager[] trustManagers = trustMgrFactory.getTrustManagers();
+		      final TrustManager keyManager = trustManagers[0];
+		      ftpsClient.setTrustManager(keyManager);
+		    }
+		    else if (config.isTrustSelfSignedCertificate()) {
+		      ftpsClient.setTrustManager(TrustManagerUtils.getAcceptAllTrustManager());
+		    }
+		    else {
+		    	ftpsClient.setTrustManager(TrustManagerUtils.getValidateServerCertificateTrustManager());
+		    }
 
 			connect(ftpsClient);	    
 		    ftpsClient.execPBSZ(0);
@@ -132,6 +176,11 @@ public class ApacheFtpEdipClient implements EdipClient {
 		    
 		    return ftpsClient;
 		}
+	}
+
+	private KeyStore newKeyStore(final InputStream inputStream, final String keystorePass) {
+		// TODO Auto-generated method stub
+		return null;
 	}
 
 	private final FTPClient connect(final FTPClient ftpClient) throws SocketException, IOException {
@@ -145,7 +194,7 @@ public class ApacheFtpEdipClient implements EdipClient {
 		return ftpClient;
 	}
 	
-	private List<EdipEntry> listRecursively(
+	private final List<EdipEntry> listRecursively(
 			final FTPClient client, 
 			final Path path, 
 			final EdipEntryFilter filter

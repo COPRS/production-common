@@ -21,7 +21,11 @@ public class EdipClientConfigurationProperties {
 		private boolean pasv;
 		private String sslProtocol = "TLS";
 		private boolean explictFtps = true;
-				
+		private String keyManagerKeyStore =  "";
+		private String keyManagerKeyStorePassword = "changeit"; // default JKS password
+		private String trustManagerKeyStore =  "";
+		private String trustManagerKeyStorePassword = "changeit"; // default JKS password
+						
 		public String getServerName() {
 			return serverName;
 		}
@@ -83,7 +87,39 @@ public class EdipClientConfigurationProperties {
 
 		public void setExplictFtps(final boolean explictFtps) {
 			this.explictFtps = explictFtps;
-		}	
+		}
+
+		public String getKeyManagerKeyStore() {
+			return keyManagerKeyStore;
+		}
+
+		public void setKeyManagerKeyStore(final String keyManagerKeyStore) {
+			this.keyManagerKeyStore = keyManagerKeyStore;
+		}
+
+		public String getKeyManagerKeyStorePassword() {
+			return keyManagerKeyStorePassword;
+		}
+
+		public void setKeyManagerKeyStorePassword(final String keyManagerKeyStorePassword) {
+			this.keyManagerKeyStorePassword = keyManagerKeyStorePassword;
+		}
+
+		public String getTrustManagerKeyStore() {
+			return trustManagerKeyStore;
+		}
+
+		public void setTrustManagerKeyStore(final String trustManagerKeyStore) {
+			this.trustManagerKeyStore = trustManagerKeyStore;
+		}
+
+		public String getTrustManagerKeyStorePassword() {
+			return trustManagerKeyStorePassword;
+		}
+
+		public void setTrustManagerKeyStorePassword(final String trustManagerKeyStorePassword) {
+			this.trustManagerKeyStorePassword = trustManagerKeyStorePassword;
+		}
 	}
 	
 	private String proxyHost;
