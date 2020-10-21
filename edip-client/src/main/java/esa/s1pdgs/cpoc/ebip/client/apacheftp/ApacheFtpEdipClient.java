@@ -1,5 +1,6 @@
 package esa.s1pdgs.cpoc.ebip.client.apacheftp;
 
+import java.io.BufferedInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.SocketException;
@@ -42,13 +43,30 @@ public class ApacheFtpEdipClient implements EdipClient {
 	@Override
 	public final List<EdipEntry> list(final EdipEntryFilter filter) throws IOException {
 		LOG.debug("Listing {}", uri.getPath());
-		return listRecursively(connectedClient(), Paths.get(uri.getPath()), filter);
+		
+		final FTPClient client = connectedClient();
+		
+		final List<EdipEntry> result = listRecursively(client, Paths.get(uri.getPath()), filter);		
+		client.logout();
+		client.disconnect();
+		return result;
 	}
 	
 	@Override
 	public final InputStream read(final EdipEntry entry) {
 		try {
-			return connectedClient().retrieveFileStream(entry.getPath().toString());
+			final FTPClient client = connectedClient();
+			return new BufferedInputStream(client.retrieveFileStream(entry.getPath().toString()))
+			{
+				@Override
+				public void close() throws IOException {
+					client.completePendingCommand();
+					super.close();			
+					client.logout();
+					client.disconnect();
+					assertPositiveCompletion(client);
+				}	
+			};
 		} catch (final IOException e) {
 			// TODO add proper error handling
 			throw new RuntimeException(e);
