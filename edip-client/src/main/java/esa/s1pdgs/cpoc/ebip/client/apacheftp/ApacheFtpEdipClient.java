@@ -1,6 +1,7 @@
 package esa.s1pdgs.cpoc.ebip.client.apacheftp;
 
 import java.io.BufferedInputStream;
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.SocketException;
@@ -174,10 +175,11 @@ public class ApacheFtpEdipClient implements EdipClient {
 	}
 	
 	private final EdipEntry toEdipEntry(final Path path, final FTPFile ftpFile) {
-		final Path entryPath = path.resolve(ftpFile.getName());
+		final String normalizedName = new File(ftpFile.getName()).getName();
+		final Path entryPath = path.resolve(normalizedName);
 
 		return new EdipEntryImpl(
-				ftpFile.getName(), 
+				normalizedName, 
 				entryPath, 
 				toUri(entryPath), 
 				ftpFile.getTimestamp().getTime(), 
