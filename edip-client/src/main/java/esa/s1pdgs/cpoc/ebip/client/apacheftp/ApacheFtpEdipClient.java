@@ -76,6 +76,7 @@ public class ApacheFtpEdipClient implements EdipClient {
 	private final FTPClient connectedClient() {
 		try {
 			final FTPClient ftpClient = newClient();
+			ftpClient.setRemoteVerificationEnabled(false);
 
 			if (!ftpClient.login(config.getUser(), config.getPass())) {
 	        	throw new RuntimeException("Could not authenticate user " + config.getUser());
