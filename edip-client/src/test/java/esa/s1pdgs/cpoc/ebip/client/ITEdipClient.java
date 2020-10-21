@@ -172,8 +172,7 @@ public class ITEdipClient {
 		final ApacheFtpEdipClient uut = new ApacheFtpEdipClient(newConfig(), uri);
 		final List<EdipEntry> entries = uut.list(EdipEntryFilter.ALLOW_ALL);
 		assertEquals(2, entries.size());
-		
-		System.err.println(entries);
+		//System.err.println(entries);
 	
 		for (final EdipEntry entry : entries) {
 			if (entry.getName().endsWith(".raw")) {
