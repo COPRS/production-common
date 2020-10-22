@@ -64,6 +64,23 @@ public class ExtractMetadata {
 	private static final String XSLT_S3_XFDU_XML = "XSLT_S3_XFDU_XML.xslt";
 	private static final String XSLT_S3_IIF_XML = "XSLT_S3_IIF_XML.xslt";
 
+	private static final List<String> nullableElements = Arrays.asList(
+			// for types that are not allowed to store an empty string, non-existence is mapped to null 
+			"sliceNumber", //
+			"totalNumberOfSlice", //
+			"instrumentConfigurationId", //
+			"missionDataTakeId", //
+			"coordinates", //
+			"processingDate", //
+			"qualityDataObjectID", //
+			"qualityNumOfElement", //
+			"qualityNumOfMissingElements", //
+			"qualityNumOfCorruptedElements", //
+			"qualityNumOfRSIncorrigibleElements", //
+			"qualityNumOfRSCorrectedElements", //
+			"qualityNumOfRSCorrectedSymbols" //
+	);
+	
 	/**
 	 * Mapping of family to XSLT file name
 	 */
@@ -285,7 +302,8 @@ public class ExtractMetadata {
 		JSONObject metadataJSONObject = transformXMLWithXSLTToJSON(manifestFile, xsltFile);
 
 		metadataJSONObject = removeEmptyStringElementsFromPolarisationChannelsArray(metadataJSONObject);
-
+		metadataJSONObject = convertEmptyStringToNullWhenNullableElement(metadataJSONObject);	
+		
 		metadataJSONObject = putCommonMetadataToJSON(metadataJSONObject, descriptor);
 
 		try {
@@ -459,7 +477,8 @@ public class ExtractMetadata {
 		LOGGER.debug("extracting metadata for descriptor: {} ", descriptor);
 		JSONObject metadataJSONObject = transformXMLWithXSLTToJSON(manifestFile, xsltFile);
 
-		metadataJSONObject = removeEmptyStringElementsFromPolarisationChannelsArray(metadataJSONObject);
+		metadataJSONObject = removeEmptyStringElementsFromPolarisationChannelsArray(metadataJSONObject);		
+		metadataJSONObject = convertEmptyStringToNullWhenNullableElement(metadataJSONObject);
 
 		metadataJSONObject = putCommonMetadataToJSON(metadataJSONObject, descriptor);
 
@@ -473,16 +492,18 @@ public class ExtractMetadata {
 
 			if (ProductFamily.L0_ACN.equals(productFamily) || ProductFamily.L0_SLICE.equals(productFamily)) {
 
-				if (!metadataJSONObject.has("sliceNumber")) {
+				if (!metadataJSONObject.has("sliceNumber") || metadataJSONObject.get("sliceNumber") == JSONObject.NULL) {
 					metadataJSONObject.put("sliceNumber", 1);
 				} else if (StringUtils.isEmpty(metadataJSONObject.get("sliceNumber").toString())) {
 					metadataJSONObject.put("sliceNumber", 1);
 				}
-				if (Arrays.asList("A", "C", "N").contains(descriptor.getProductClass())) {
-					if (metadataJSONObject.has("startTime") && metadataJSONObject.has("stopTime")) {
-						metadataJSONObject.put("totalNumberOfSlice", totalNumberOfSlice(
-								metadataJSONObject.getString("startTime"), metadataJSONObject.getString("stopTime"),
-								descriptor.getSwathtype().matches("S[1-6]") ? "SM" : descriptor.getSwathtype()));
+				if (!metadataJSONObject.has("totalNumberOfSlice") || metadataJSONObject.get("totalNumberOfSlice") == JSONObject.NULL) {				
+					if (Arrays.asList("A", "C", "N").contains(descriptor.getProductClass())) {
+						if (metadataJSONObject.has("startTime") && metadataJSONObject.has("stopTime")) {
+							metadataJSONObject.put("totalNumberOfSlice", totalNumberOfSlice(
+									metadataJSONObject.getString("startTime"), metadataJSONObject.getString("stopTime"),
+									descriptor.getSwathtype().matches("S[1-6]") ? "SM" : descriptor.getSwathtype()));
+						}
 					}
 				}
 			}
@@ -643,8 +664,15 @@ public class ExtractMetadata {
 			}
 
 			metadataJSONObject.put("productName", descriptor.getProductName());
-			metadataJSONObject.put("productClass", descriptor.getProductClass());
-			metadataJSONObject.put("productType", descriptor.getProductType());
+
+			if (!metadataJSONObject.has("productClass") || "".equals((String)metadataJSONObject.get("productClass"))) {
+				metadataJSONObject.put("productClass", descriptor.getProductClass());
+			}
+			
+			if (!metadataJSONObject.has("productType") || "".equals((String)metadataJSONObject.get("productType"))) {
+				metadataJSONObject.put("productType", descriptor.getProductType());
+			}
+			
 			metadataJSONObject.put("missionId", descriptor.getMissionId());
 			metadataJSONObject.put("satelliteId", descriptor.getSatelliteId());
 			metadataJSONObject.put("url", descriptor.getKeyObjectStorage());
@@ -710,12 +738,23 @@ public class ExtractMetadata {
 			final String dt = DateUtils.formatToMetadataDateTimeFormat(LocalDateTime.now());
 
 			metadataJSONObject.put("productName", descriptor.getProductName());
-			metadataJSONObject.put("productClass", descriptor.getProductClass());
-			metadataJSONObject.put("productType", descriptor.getProductType());
+			
+			if (!metadataJSONObject.has("productClass") || "".equals((String)metadataJSONObject.get("productClass"))) {
+				metadataJSONObject.put("productClass", descriptor.getProductClass());			
+			}
+			
+			if (!metadataJSONObject.has("productType") || "".equals((String)metadataJSONObject.get("productType"))) {
+				metadataJSONObject.put("productType", descriptor.getProductType());
+			}
+			
 			metadataJSONObject.put("resolution", descriptor.getResolution());
 			metadataJSONObject.put("missionId", descriptor.getMissionId());
 			metadataJSONObject.put("satelliteId", descriptor.getSatelliteId());
-			metadataJSONObject.put("swathtype", descriptor.getSwathtype());
+			
+			if (!metadataJSONObject.has("swathtype") || "".equals((String)metadataJSONObject.get("swathtype"))) {
+				metadataJSONObject.put("swathtype", descriptor.getSwathtype());
+			}
+			
 			metadataJSONObject.put("polarisation", descriptor.getPolarisation());
 			metadataJSONObject.put("dataTakeId", descriptor.getDataTakeId());
 			metadataJSONObject.put("url", descriptor.getKeyObjectStorage());
@@ -746,6 +785,15 @@ public class ExtractMetadata {
 		}
 		return metadataJSONObject;
 	}
+	
+	private JSONObject convertEmptyStringToNullWhenNullableElement(final JSONObject metadataJSONObject) {
+		for(String key : nullableElements) {
+			if (metadataJSONObject.has(key) && "".equals(metadataJSONObject.get(key).toString())) {
+				metadataJSONObject.put(key, JSONObject.NULL);
+			}
+		}
+		return metadataJSONObject;
+	}
 
 	/**
 	 * Common metadata from FileDescriptor to insert into S3-Metadata-Objects
@@ -754,8 +802,15 @@ public class ExtractMetadata {
 			throws MetadataExtractionException {
 		try {
 			metadataJSONObject.put("productName", descriptor.getProductName());
-			metadataJSONObject.put("productClass", descriptor.getProductClass());
-			metadataJSONObject.put("productType", descriptor.getProductType());
+			
+			if (!metadataJSONObject.has("productClass") || "".equals((String)metadataJSONObject.get("productClass"))) {
+				metadataJSONObject.put("productClass", descriptor.getProductClass());			
+			}
+			
+			if (!metadataJSONObject.has("productType") || "".equals((String)metadataJSONObject.get("productType"))) {
+				metadataJSONObject.put("productType", descriptor.getProductType());
+			}
+			
 			metadataJSONObject.put("missionId", descriptor.getMissionId());
 			metadataJSONObject.put("satelliteId", descriptor.getSatelliteId());
 			metadataJSONObject.put("url", descriptor.getKeyObjectStorage());
