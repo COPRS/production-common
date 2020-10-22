@@ -1,4 +1,4 @@
-package esa.s1pdgs.cpoc.reqrepo.kafka.consumption;
+package esa.s1pdgs.cpoc.reqrepo.consumption;
 
 
 import org.slf4j.Logger;
@@ -14,6 +14,7 @@ import esa.s1pdgs.cpoc.message.MessageConsumer;
 import esa.s1pdgs.cpoc.reqrepo.service.RequestRepository;
 
 public class ErrorQueueConsumer implements MessageConsumer<FailedProcessingDto> {
+
     private static final Logger LOG =
             LoggerFactory.getLogger(ErrorQueueConsumer.class);
 

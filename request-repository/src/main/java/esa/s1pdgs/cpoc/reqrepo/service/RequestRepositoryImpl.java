@@ -17,9 +17,8 @@ import esa.s1pdgs.cpoc.appcatalog.common.Processing;
 import esa.s1pdgs.cpoc.appstatus.AppStatus;
 import esa.s1pdgs.cpoc.common.MessageState;
 import esa.s1pdgs.cpoc.errorrepo.model.rest.FailedProcessingDto;
-import esa.s1pdgs.cpoc.mqi.model.queue.AbstractMessage;
+import esa.s1pdgs.cpoc.message.MessageProducer;
 import esa.s1pdgs.cpoc.mqi.model.rest.GenericMessageDto;
-import esa.s1pdgs.cpoc.reqrepo.kafka.producer.SubmissionClient;
 import esa.s1pdgs.cpoc.reqrepo.repo.FailedProcessingRepo;
 import esa.s1pdgs.cpoc.reqrepo.repo.MqiMessageRepo;
 
@@ -27,19 +26,19 @@ import esa.s1pdgs.cpoc.reqrepo.repo.MqiMessageRepo;
 public class RequestRepositoryImpl implements RequestRepository {
 	private final FailedProcessingRepo failedProcessingRepo;
 	private final MqiMessageRepo mqiMessageRepository;
-	private final SubmissionClient kafkaSubmissionClient;
+	private final MessageProducer<Object> messageProducer;
 	private final AppStatus status;
 
 	@Autowired
 	public RequestRepositoryImpl(
-			final MqiMessageRepo mqiMessageRepository, 
-			final FailedProcessingRepo failedProcessingRepo, 
-			final SubmissionClient kafkaSubmissionClient,
+			final MqiMessageRepo mqiMessageRepository,
+			final FailedProcessingRepo failedProcessingRepo,
+			MessageProducer<Object> messageProducer,
 			final AppStatus status
 	) {
 		this.mqiMessageRepository = mqiMessageRepository;
 		this.failedProcessingRepo = failedProcessingRepo;
-		this.kafkaSubmissionClient = kafkaSubmissionClient;
+		this.messageProducer = messageProducer;
 		this.status = status;
 	}
 
@@ -84,7 +83,7 @@ public class RequestRepositoryImpl implements RequestRepository {
 		// TODO: is not possible to alter the retry counter here because the object being returned
 		// by Jackson is not a AbstractMessage its LinkedHashMap
 		// ((AbstractMessage) failedProcessing.getDto()).increaseControlRetryCounter();
-		kafkaSubmissionClient.resubmit(id, failedProcessing.getTopic(), failedProcessing.getDto(), status);
+		resubmit(id, failedProcessing.getTopic(), failedProcessing.getDto(), status);
 		failedProcessingRepo.deleteById(id);
 	}
 	
@@ -97,7 +96,7 @@ public class RequestRepositoryImpl implements RequestRepository {
 		// TODO: is not possible to alter the retry counter here because the object being returned
 		// by Jackson is not a AbstractMessage its LinkedHashMap	
 		// ((AbstractMessage) failedProcessing.getPredecessorDto()).increaseControlRetryCounter(); 
-		kafkaSubmissionClient.resubmit(id, failedProcessing.getPredecessorTopic(), failedProcessing.getPredecessorDto(), status);
+		resubmit(id, failedProcessing.getPredecessorTopic(), failedProcessing.getPredecessorDto(), status);
 		failedProcessingRepo.deleteById(id);
 	}
 
@@ -131,7 +130,7 @@ public class RequestRepositoryImpl implements RequestRepository {
 		if (pageSize == null) {
 			return toExternal(mqiMessageRepository.findByStateInAndTopicInOrderByCreationDate(states, topics));
 		}		
-		final Pageable pageable = PageRequest.of(pageNumber.intValue(), pageSize.intValue(), Sort.by(Direction.ASC, "creationDate"));
+		final Pageable pageable = PageRequest.of(pageNumber, pageSize, Sort.by(Direction.ASC, "creationDate"));
 		return toExternal(mqiMessageRepository.findByStateInAndTopicIn(states, topics, pageable).getContent());
 	}
 	
@@ -143,17 +142,36 @@ public class RequestRepositoryImpl implements RequestRepository {
 		return mqiMessageRepository.countByStateInAndTopicIn(states, topics);
 	}
 
-	private final List<Processing> toExternal(final List<MqiMessage> messages)	{
+	private void resubmit(long id, String predecessorTopic, Object predecessorDto, AppStatus status) {
+		try {
+			messageProducer.send(predecessorTopic, predecessorDto);
+		} catch (final Exception e) {
+			status.getStatus().setFatalError();
+			throw new RuntimeException(
+					String.format(
+							"Error restarting failedRequest '%s' on topic '%s': %s",
+							id,
+							predecessorTopic,
+							e
+					),
+					e
+			);
+		}
+	}
+
+
+
+	private List<Processing> toExternal(final List<MqiMessage> messages)	{
 		if (messages == null)
 		{
 			return Collections.emptyList();
 		}		
 		return messages.stream()
-				.map(m -> new Processing(m))
+				.map(Processing::new)
 				.collect(Collectors.toList());
 	}
 	
-	static final void assertNotNull(final String name, final Object object, final long id) 
+	static void assertNotNull(final String name, final Object object, final long id)
 			throws IllegalArgumentException {
 		if (object == null) {
 			throw new IllegalArgumentException(
@@ -162,7 +180,7 @@ public class RequestRepositoryImpl implements RequestRepository {
 		}
 	}
 	
-	private static final void assertDtoDefined(final long id, final FailedProcessing failedProcessing) {
+	private static void assertDtoDefined(final long id, final FailedProcessing failedProcessing) {
 		if (failedProcessing.getDto() == null)
 		{
 			throw new RuntimeException(
@@ -174,7 +192,7 @@ public class RequestRepositoryImpl implements RequestRepository {
 		}
 	}
 	
-	private static final void assertTopicDefined(final long id, final FailedProcessing failedProcessing) {
+	private static void assertTopicDefined(final long id, final FailedProcessing failedProcessing) {
 		if (failedProcessing.getTopic() == null)
 		{
 			throw new RuntimeException(
@@ -186,7 +204,7 @@ public class RequestRepositoryImpl implements RequestRepository {
 		}
 	}
 	
-	private static final void assertPredecessorDefined(final long id, final FailedProcessing failedProcessing) {
+	private static void assertPredecessorDefined(final long id, final FailedProcessing failedProcessing) {
 		if (failedProcessing.getPredecessorDto() == null)
 		{
 			throw new RuntimeException(
@@ -198,7 +216,7 @@ public class RequestRepositoryImpl implements RequestRepository {
 		}
 	}
 	
-	private static final void assertPredecessorTopicDefined(final long id, final FailedProcessing failedProcessing) {
+	private static void assertPredecessorTopicDefined(final long id, final FailedProcessing failedProcessing) {
 		if (failedProcessing.getPredecessorTopic() == null)
 		{
 			throw new RuntimeException(

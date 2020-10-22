@@ -1,11 +1,7 @@
 package esa.s1pdgs.cpoc.reqrepo.service;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-import static org.mockito.Mockito.doReturn;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
+import static org.junit.Assert.*;
+import static org.mockito.Mockito.*;
 
 import java.util.Arrays;
 import java.util.Collections;
@@ -28,10 +24,10 @@ import esa.s1pdgs.cpoc.appstatus.AppStatus;
 import esa.s1pdgs.cpoc.common.MessageState;
 import esa.s1pdgs.cpoc.common.ProductFamily;
 import esa.s1pdgs.cpoc.errorrepo.model.rest.FailedProcessingDto;
+import esa.s1pdgs.cpoc.message.MessageProducer;
 import esa.s1pdgs.cpoc.mqi.model.queue.AbstractMessage;
 import esa.s1pdgs.cpoc.mqi.model.queue.ProductionEvent;
 import esa.s1pdgs.cpoc.mqi.model.rest.GenericMessageDto;
-import esa.s1pdgs.cpoc.reqrepo.kafka.producer.SubmissionClient;
 import esa.s1pdgs.cpoc.reqrepo.repo.FailedProcessingRepo;
 import esa.s1pdgs.cpoc.reqrepo.repo.MqiMessageRepo;
 
@@ -41,7 +37,7 @@ public class RequestRepositoryTest {
 	@Mock
 	private MqiMessageRepo mqiMessageRepository;	
 	@Mock
-	private SubmissionClient submissionClient;
+	private MessageProducer<Object> messageProducer;
 
 	private RequestRepository uut;
 
@@ -50,8 +46,8 @@ public class RequestRepositoryTest {
 		MockitoAnnotations.initMocks(this);
 		this.uut = new RequestRepositoryImpl(
 				mqiMessageRepository, 
-				failedProcessingRepo, 
-				submissionClient,
+				failedProcessingRepo,
+                messageProducer,
 				AppStatus.NULL
 		);
 	}
@@ -142,7 +138,7 @@ public class RequestRepositoryTest {
 		
 		verify(failedProcessingRepo, times(1)).findById(123);
 		verify(failedProcessingRepo, times(1)).deleteById(123);
-		verify(submissionClient, times(1)).resubmit(fp.getId(), fp.getTopic(), fp.getDto(), AppStatus.NULL);
+		verify(messageProducer, times(1)).send(fp.getTopic(), fp.getDto());
 	}
 
 	@Test(expected = RuntimeException.class)
@@ -255,7 +251,7 @@ public class RequestRepositoryTest {
 	
 	
 	
-	private final FailedProcessingDto newFailedProcessingDto(final long id) {
+	private FailedProcessingDto newFailedProcessingDto(final long id) {
 		final GenericMessageDto<?> mess = new GenericMessageDto<>();
 		mess.setId(id);
 		
@@ -265,11 +261,11 @@ public class RequestRepositoryTest {
 		return fpDto;
 	}
 	
-	private final FailedProcessing newFailedProcessing(final long id) {
+	private FailedProcessing newFailedProcessing(final long id) {
 		return newFailedProcessing(id, new ProductionEvent());
 	}
 	
-	private final FailedProcessing newFailedProcessing(final long id, final AbstractMessage mess) {
+	private FailedProcessing newFailedProcessing(final long id, final AbstractMessage mess) {
 		final FailedProcessing fpDto = new FailedProcessing();
 		fpDto.setId(123);
 		fpDto.setDto(mess);
@@ -277,11 +273,11 @@ public class RequestRepositoryTest {
 		return fpDto;
 	}
 	
-	private final MqiMessage newMqiMessage(final long id) {
+	private MqiMessage newMqiMessage(final long id) {
 		return newMqiMessage(id, MessageState.READ);
 	}
 	
-	private final MqiMessage newMqiMessage(final long id, final MessageState state) {
+	private MqiMessage newMqiMessage(final long id, final MessageState state) {
 		final MqiMessage mqiMsg = new MqiMessage();
 		mqiMsg.setId(id);
 		mqiMsg.setCreationDate(new Date());

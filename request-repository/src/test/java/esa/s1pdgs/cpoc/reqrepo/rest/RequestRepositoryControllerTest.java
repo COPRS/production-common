@@ -2,9 +2,7 @@ package esa.s1pdgs.cpoc.reqrepo.rest;
 
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.doThrow;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -27,8 +25,8 @@ import org.springframework.test.web.servlet.MockMvc;
 import esa.s1pdgs.cpoc.appcatalog.common.FailedProcessing;
 import esa.s1pdgs.cpoc.common.MessageState;
 import esa.s1pdgs.cpoc.common.ProductCategory;
+import esa.s1pdgs.cpoc.message.MessageProducer;
 import esa.s1pdgs.cpoc.mqi.model.rest.GenericMessageDto;
-import esa.s1pdgs.cpoc.reqrepo.kafka.producer.SubmissionClient;
 import esa.s1pdgs.cpoc.reqrepo.repo.FailedProcessingRepo;
 import esa.s1pdgs.cpoc.reqrepo.repo.MqiMessageRepo;
 import esa.s1pdgs.cpoc.reqrepo.service.RequestRepository;
@@ -47,7 +45,7 @@ public class RequestRepositoryControllerTest {
 	private FailedProcessingRepo failedProcessingRepo;
 
 	@MockBean
-	private SubmissionClient submissionClient;
+	private MessageProducer<Object> messageProducer;
 	
 	@MockBean
 	private RequestRepository requestRepository;
@@ -60,7 +58,7 @@ public class RequestRepositoryControllerTest {
 		TimeZone.setDefault(TimeZone.getTimeZone("UTC"));
 	}
 	
-	private final FailedProcessing newFailedProcessing() throws Exception
+	private FailedProcessing newFailedProcessing() throws Exception
 	{
 		final SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd'T'hh:mm:ss.SSS'Z'");
 		
@@ -81,7 +79,7 @@ public class RequestRepositoryControllerTest {
 		failedProcessingToReturn.setCreationDate(dateFormat.parse("2019-06-18T11:09:03.805Z"));
 		failedProcessingToReturn.setFailureDate(dateFormat.parse("2019-06-18T11:09:03.805Z"));
 		failedProcessingToReturn.setFailureMessage("dummyMessage");
-		failedProcessingToReturn.setDto(Collections.singletonList(new GenericMessageDto<Object>())); 
+		failedProcessingToReturn.setDto(Collections.singletonList(new GenericMessageDto<>()));
 		return failedProcessingToReturn;
 	}
 

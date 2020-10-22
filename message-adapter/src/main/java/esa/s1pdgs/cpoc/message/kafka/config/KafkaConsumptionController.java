@@ -4,7 +4,6 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
@@ -16,6 +15,7 @@ import org.apache.kafka.common.serialization.StringDeserializer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.kafka.core.ConsumerFactory;
 import org.springframework.kafka.core.DefaultKafkaConsumerFactory;
 import org.springframework.kafka.listener.AcknowledgingMessageListener;
@@ -24,6 +24,7 @@ import org.springframework.kafka.listener.ContainerProperties;
 import org.springframework.kafka.listener.MessageListener;
 import org.springframework.kafka.support.serializer.ErrorHandlingDeserializer;
 import org.springframework.kafka.support.serializer.JsonDeserializer;
+import org.springframework.lang.Nullable;
 import org.springframework.stereotype.Component;
 
 import esa.s1pdgs.cpoc.message.Consumption;
@@ -34,18 +35,19 @@ import esa.s1pdgs.cpoc.message.kafka.KafkaConsumption;
 import esa.s1pdgs.cpoc.message.kafka.KafkaMessage;
 
 @Component
+@ConditionalOnProperty("kafka.consumer.group-id")
 public class KafkaConsumptionController<M> {
 
     private static final Logger LOG = LoggerFactory.getLogger(KafkaConsumptionController.class);
 
     private final MessageConsumerFactory<M> consumerFactory;
     private final KafkaProperties kafkaProperties;
-    private final Optional<ConsumerRebalanceListener> rebalanceListener;
+    private final ConsumerRebalanceListener rebalanceListener;
 
     private final Map<String, ConcurrentMessageListenerContainer<String, M>> containers = new HashMap<>();
 
     @Autowired
-    public KafkaConsumptionController(MessageConsumerFactory<M> consumerFactory, KafkaProperties kafkaProperties, Optional<ConsumerRebalanceListener> rebalanceListener) {
+    public KafkaConsumptionController(MessageConsumerFactory<M> consumerFactory, KafkaProperties kafkaProperties, @Nullable ConsumerRebalanceListener rebalanceListener) {
         this.consumerFactory = consumerFactory;
         this.kafkaProperties = kafkaProperties;
         this.rebalanceListener = rebalanceListener;
@@ -100,6 +102,7 @@ public class KafkaConsumptionController<M> {
             );
             return null;
         });
+
         return new DefaultKafkaConsumerFactory<>(
                 consumerConfig(clientIdForTopic(topic)),
                 new StringDeserializer(),
@@ -137,7 +140,9 @@ public class KafkaConsumptionController<M> {
         containerProp.setPollTimeout(kafkaProperties.getListener().getPollTimeoutMs());
         containerProp.setAckMode(ContainerProperties.AckMode.MANUAL_IMMEDIATE);
 
-        rebalanceListener.ifPresent(containerProp::setConsumerRebalanceListener);
+        if(rebalanceListener != null) {
+            containerProp.setConsumerRebalanceListener(rebalanceListener);
+        }
 
         return containerProp;
     }
