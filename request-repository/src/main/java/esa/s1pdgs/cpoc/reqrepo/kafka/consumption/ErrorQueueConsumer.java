@@ -1,33 +1,47 @@
 package esa.s1pdgs.cpoc.reqrepo.kafka.consumption;
 
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.kafka.annotation.KafkaListener;
-import org.springframework.kafka.support.Acknowledgment;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import esa.s1pdgs.cpoc.common.errors.AbstractCodedException.ErrorCode;
 import esa.s1pdgs.cpoc.common.utils.LogUtils;
 import esa.s1pdgs.cpoc.errorrepo.model.rest.FailedProcessingDto;
+import esa.s1pdgs.cpoc.message.Acknowledgement;
+import esa.s1pdgs.cpoc.message.Consumption;
+import esa.s1pdgs.cpoc.message.Message;
+import esa.s1pdgs.cpoc.message.MessageConsumer;
 import esa.s1pdgs.cpoc.reqrepo.service.RequestRepository;
 
-public class ErrorQueueConsumer {
-    private static final Logger LOGGER =
-            LogManager.getLogger(ErrorQueueConsumer.class);
+public class ErrorQueueConsumer implements MessageConsumer<FailedProcessingDto> {
+    private static final Logger LOG =
+            LoggerFactory.getLogger(ErrorQueueConsumer.class);
 
-    private final RequestRepository requestRepository; 
-	
-    public ErrorQueueConsumer(@Autowired final RequestRepository requestRepository) {
-		this.requestRepository = requestRepository;
-	}
+    private final RequestRepository requestRepository;
+    private String errorTopic;
 
-	@KafkaListener(topics = "${kafka.topic.errors}", groupId = "${kafka.group-id}")
-	public void receive(final FailedProcessingDto failedProcessing, final Acknowledgment acknowledgment) {
-		try {
-			requestRepository.saveFailedProcessing(failedProcessing);		
-	    	acknowledgment.acknowledge();
-	    } catch (final Exception e) {
-	    	LOGGER.error("[code {}] Exception occurred during acknowledgment {}", ErrorCode.INTERNAL_ERROR.getCode(), LogUtils.toString(e));
-	    }
-	}
+    public ErrorQueueConsumer(final RequestRepository requestRepository, final String errorTopic) {
+        this.requestRepository = requestRepository;
+        this.errorTopic = errorTopic;
+    }
+
+    @Override
+    public void onMessage(Message<FailedProcessingDto> message, Acknowledgement acknowledgement, Consumption consumption) {
+        try {
+            requestRepository.saveFailedProcessing(message.data());
+            acknowledgement.acknowledge();
+        } catch (final Exception e) {
+            LOG.error("[code {}] Exception occurred during acknowledgment {}", ErrorCode.INTERNAL_ERROR.getCode(), LogUtils.toString(e));
+        }
+    }
+
+    @Override
+    public Class<FailedProcessingDto> messageType() {
+        return FailedProcessingDto.class;
+    }
+
+    @Override
+    public String topic() {
+        return errorTopic;
+    }
 }

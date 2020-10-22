@@ -1,22 +1,21 @@
 package esa.s1pdgs.cpoc.reqrepo.kafka.producer;
 
-import org.springframework.kafka.core.KafkaTemplate;
-
 import esa.s1pdgs.cpoc.appstatus.AppStatus;
 import esa.s1pdgs.cpoc.common.utils.Exceptions;
+import esa.s1pdgs.cpoc.message.MessageProducer;
 
-public class KafkaSubmissionClient implements SubmissionClient {
+public class MessageSubmissionClient implements SubmissionClient {
 	
-	private final KafkaTemplate<String, Object> client;
-	
-	public KafkaSubmissionClient(final KafkaTemplate<String, Object> client) {
-		this.client = client;
+	private final MessageProducer<Object> messageProducer;
+
+	public MessageSubmissionClient(MessageProducer<Object> messageProducer) {
+		this.messageProducer = messageProducer;
 	}
 
 	@Override
 	public void resubmit(final long failedProcessingId, final String topic, final Object message, final AppStatus appStatus) {    		
 		try {
-			client.send(topic, message).get();
+			messageProducer.send(topic, message);
 		} catch (final Exception e) {
 			final Throwable cause = Exceptions.unwrap(e);
 			appStatus.getStatus().setFatalError();

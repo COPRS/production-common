@@ -35,7 +35,6 @@ public class KafkaProducerConfiguration<M> {
      * Producer configuration
      *
      */
-    @Autowired
     private Map<String, Object> producerConfigs() {
         final Map<String, Object> props = new ConcurrentHashMap<>();
         props.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG,
