@@ -1,4 +1,4 @@
-package esa.s1pdgs.cpoc.message;
+package esa.s1pdgs.cpoc.message.kafka;
 
 import java.util.Map;
 

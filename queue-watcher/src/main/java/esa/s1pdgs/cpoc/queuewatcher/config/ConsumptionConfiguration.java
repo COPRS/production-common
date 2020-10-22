@@ -18,7 +18,7 @@ import org.springframework.context.annotation.Configuration;
 
 import esa.s1pdgs.cpoc.message.Acknowledgement;
 import esa.s1pdgs.cpoc.message.Consumption;
-import esa.s1pdgs.cpoc.message.ConsumptionConfigurationFactory;
+import esa.s1pdgs.cpoc.message.kafka.ConsumptionConfigurationFactory;
 import esa.s1pdgs.cpoc.message.Message;
 import esa.s1pdgs.cpoc.message.MessageConsumer;
 import esa.s1pdgs.cpoc.message.MessageConsumerFactory;

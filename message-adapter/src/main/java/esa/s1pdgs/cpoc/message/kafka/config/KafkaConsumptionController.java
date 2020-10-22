@@ -9,7 +9,6 @@ import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
 
 import org.apache.kafka.clients.consumer.ConsumerConfig;
-import org.apache.kafka.clients.consumer.ConsumerRebalanceListener;
 import org.apache.kafka.clients.consumer.RoundRobinAssignor;
 import org.apache.kafka.common.serialization.StringDeserializer;
 import org.slf4j.Logger;
@@ -28,7 +27,8 @@ import org.springframework.lang.Nullable;
 import org.springframework.stereotype.Component;
 
 import esa.s1pdgs.cpoc.message.Consumption;
-import esa.s1pdgs.cpoc.message.ConsumptionConfigurationFactory;
+import esa.s1pdgs.cpoc.message.kafka.ConsumptionConfigurationFactory;
+import esa.s1pdgs.cpoc.message.kafka.ContainerPropertiesFactory;
 import esa.s1pdgs.cpoc.message.MessageConsumer;
 import esa.s1pdgs.cpoc.message.MessageConsumerFactory;
 import esa.s1pdgs.cpoc.message.kafka.KafkaAcknowledgement;
@@ -43,24 +43,24 @@ public class KafkaConsumptionController<M> {
 
     private final MessageConsumerFactory<M> consumerFactory;
     private final KafkaProperties kafkaProperties;
-    private final ConsumerRebalanceListener rebalanceListener;
     private final ConsumptionConfigurationFactory consumptionConfigurationFactory;
+    private final ContainerPropertiesFactory<M> containerPropertiesFactory;
 
     private final Map<String, ConcurrentMessageListenerContainer<String, M>> containers = new HashMap<>();
 
     @Autowired
     public KafkaConsumptionController(MessageConsumerFactory<M> consumerFactory,
                                       KafkaProperties kafkaProperties,
-                                      @Nullable ConsumerRebalanceListener rebalanceListener,
-                                      @Nullable ConsumptionConfigurationFactory consumptionConfigurationFactory) {
+                                      @Nullable ConsumptionConfigurationFactory consumptionConfigurationFactory,
+                                      @Nullable ContainerPropertiesFactory<M> containerPropertiesFactory) {
         this.consumerFactory = consumerFactory;
         this.kafkaProperties = kafkaProperties;
-        this.rebalanceListener = rebalanceListener;
         this.consumptionConfigurationFactory = consumptionConfigurationFactory;
+        this.containerPropertiesFactory = containerPropertiesFactory;
     }
 
     @PostConstruct
-    public void initAndStartContainers() throws ClassNotFoundException {
+    public void initAndStartContainers() {
         List<MessageConsumer<M>> messageConsumers = consumerFactory.createConsumers();
 
         for (MessageConsumer<M> messageConsumer : messageConsumers) {
@@ -74,7 +74,7 @@ public class KafkaConsumptionController<M> {
         });
     }
 
-    private ConcurrentMessageListenerContainer<String, M> containerFor(MessageConsumer<M> messageConsumer) throws ClassNotFoundException {
+    private ConcurrentMessageListenerContainer<String, M> containerFor(MessageConsumer<M> messageConsumer) {
 
         final String topic = messageConsumer.topic();
 
@@ -94,7 +94,7 @@ public class KafkaConsumptionController<M> {
                 -> messageConsumer.onMessage(new KafkaMessage<>(data.value(), data), new KafkaAcknowledgement(acknowledgment), consumption);
     }
 
-    private <T> ConsumerFactory<String, T> consumerFactory(final String topic, final Class<T> dtoClass) throws ClassNotFoundException {
+    private <T> ConsumerFactory<String, T> consumerFactory(final String topic, final Class<T> dtoClass) {
         final JsonDeserializer<T> jsonDeserializer = new JsonDeserializer<>(dtoClass);
         jsonDeserializer.addTrustedPackages("*");
         final ErrorHandlingDeserializer<T> errorHandlingDeserializer = new ErrorHandlingDeserializer<>(jsonDeserializer);
@@ -116,7 +116,7 @@ public class KafkaConsumptionController<M> {
         );
     }
 
-    private Map<String, Object> consumerConfig(final String consumerId) throws ClassNotFoundException {
+    private Map<String, Object> consumerConfig(final String consumerId) {
         final Map<String, Object> props = new HashMap<>();
         props.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, kafkaProperties.getBootstrapServers());
         props.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class);
@@ -146,14 +146,16 @@ public class KafkaConsumptionController<M> {
     }
 
     private ContainerProperties containerProperties(final String topic, final MessageListener<String, M> messageListener) {
+
+
+        if(containerPropertiesFactory != null) {
+            return containerPropertiesFactory.containerPropertiesFor(topic, messageListener);
+        }
+
         final ContainerProperties containerProp = new ContainerProperties(topic);
         containerProp.setMessageListener(messageListener);
         containerProp.setPollTimeout(kafkaProperties.getListener().getPollTimeoutMs());
         containerProp.setAckMode(ContainerProperties.AckMode.MANUAL_IMMEDIATE);
-
-        if(rebalanceListener != null) {
-            containerProp.setConsumerRebalanceListener(rebalanceListener);
-        }
 
         return containerProp;
     }
