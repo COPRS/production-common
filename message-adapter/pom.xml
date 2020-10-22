@@ -8,7 +8,7 @@
 		<version>2.26.0-SNAPSHOT</version>
 	</parent>
 
-	<artifactId>s1pro-core-kafka-client</artifactId>
+	<artifactId>s1pro-core-message-adapter</artifactId>
 
 	<dependencies>
 		<dependency>

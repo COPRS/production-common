@@ -15,10 +15,9 @@ import org.springframework.kafka.support.serializer.JsonSerializer;
 
 import esa.s1pdgs.cpoc.message.MessageProducer;
 import esa.s1pdgs.cpoc.message.kafka.KafkaMessageProducer;
-import esa.s1pdgs.cpoc.mqi.model.queue.AbstractMessage;
 
 @Configuration
-public class KafkaProducerConfiguration {
+public class KafkaProducerConfiguration<M> {
 
     private final KafkaProperties properties;
 
@@ -28,7 +27,7 @@ public class KafkaProducerConfiguration {
     }
 
     @Bean
-    public MessageProducer<AbstractMessage> messageProducer() {
+    public MessageProducer<M> messageProducer() {
         return new KafkaMessageProducer<>(new KafkaTemplate<>(producerFactory()));
     }
 
@@ -51,7 +50,7 @@ public class KafkaProducerConfiguration {
         return props;
     }
 
-    private ProducerFactory<String, AbstractMessage> producerFactory() {
+    private ProducerFactory<String, M> producerFactory() {
         return new DefaultKafkaProducerFactory<>(producerConfigs());
     }
 

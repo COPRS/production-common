@@ -32,21 +32,20 @@ import esa.s1pdgs.cpoc.message.MessageConsumerFactory;
 import esa.s1pdgs.cpoc.message.kafka.KafkaAcknowledgement;
 import esa.s1pdgs.cpoc.message.kafka.KafkaConsumption;
 import esa.s1pdgs.cpoc.message.kafka.KafkaMessage;
-import esa.s1pdgs.cpoc.mqi.model.queue.AbstractMessage;
 
 @Component
-public class KafkaConsumptionController {
+public class KafkaConsumptionController<M> {
 
     private static final Logger LOG = LoggerFactory.getLogger(KafkaConsumptionController.class);
 
-    private final MessageConsumerFactory<AbstractMessage> consumerFactory;
+    private final MessageConsumerFactory<M> consumerFactory;
     private final KafkaProperties kafkaProperties;
     private final Optional<ConsumerRebalanceListener> rebalanceListener;
 
-    private final Map<String, ConcurrentMessageListenerContainer<String, AbstractMessage>> containers = new HashMap<>();
+    private final Map<String, ConcurrentMessageListenerContainer<String, M>> containers = new HashMap<>();
 
     @Autowired
-    public KafkaConsumptionController(MessageConsumerFactory<AbstractMessage> consumerFactory, KafkaProperties kafkaProperties, Optional<ConsumerRebalanceListener> rebalanceListener) {
+    public KafkaConsumptionController(MessageConsumerFactory<M> consumerFactory, KafkaProperties kafkaProperties, Optional<ConsumerRebalanceListener> rebalanceListener) {
         this.consumerFactory = consumerFactory;
         this.kafkaProperties = kafkaProperties;
         this.rebalanceListener = rebalanceListener;
@@ -54,9 +53,9 @@ public class KafkaConsumptionController {
 
     @PostConstruct
     public void initAndStartContainers() {
-        List<MessageConsumer<AbstractMessage>> messageConsumers = consumerFactory.createConsumers();
+        List<MessageConsumer<M>> messageConsumers = consumerFactory.createConsumers();
 
-        for (MessageConsumer<AbstractMessage> messageConsumer : messageConsumers) {
+        for (MessageConsumer<M> messageConsumer : messageConsumers) {
             containers.put(messageConsumer.topic(), containerFor(messageConsumer));
         }
 
@@ -67,12 +66,12 @@ public class KafkaConsumptionController {
         });
     }
 
-    private ConcurrentMessageListenerContainer<String, AbstractMessage> containerFor(MessageConsumer<AbstractMessage> messageConsumer) {
+    private ConcurrentMessageListenerContainer<String, M> containerFor(MessageConsumer<M> messageConsumer) {
 
         final String topic = messageConsumer.topic();
 
-        KafkaConsumption consumption = new KafkaConsumption();
-        final ConcurrentMessageListenerContainer<String, AbstractMessage> container = new ConcurrentMessageListenerContainer<>(
+        KafkaConsumption<M> consumption = new KafkaConsumption<>();
+        final ConcurrentMessageListenerContainer<String, M> container = new ConcurrentMessageListenerContainer<>(
                 consumerFactory(topic, messageConsumer.messageType()),
                 containerProperties(topic, listenerFor(messageConsumer, consumption))
         );
@@ -81,9 +80,9 @@ public class KafkaConsumptionController {
         return container;
     }
 
-    private MessageListener<String, AbstractMessage> listenerFor(MessageConsumer<AbstractMessage> messageConsumer, Consumption consumption) {
+    private MessageListener<String, M> listenerFor(MessageConsumer<M> messageConsumer, Consumption consumption) {
 
-        return (AcknowledgingMessageListener<String, AbstractMessage>) (data, acknowledgment)
+        return (AcknowledgingMessageListener<String, M>) (data, acknowledgment)
                 -> messageConsumer.onMessage(new KafkaMessage<>(data.value(), data), new KafkaAcknowledgement(acknowledgment), consumption);
     }
 
@@ -132,7 +131,7 @@ public class KafkaConsumptionController {
                 topic;
     }
 
-    private ContainerProperties containerProperties(final String topic, final MessageListener<String, AbstractMessage> messageListener) {
+    private ContainerProperties containerProperties(final String topic, final MessageListener<String, M> messageListener) {
         final ContainerProperties containerProp = new ContainerProperties(topic);
         containerProp.setMessageListener(messageListener);
         containerProp.setPollTimeout(kafkaProperties.getListener().getPollTimeoutMs());

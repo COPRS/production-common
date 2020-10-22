@@ -3,11 +3,10 @@ package esa.s1pdgs.cpoc.message.kafka;
 import org.springframework.kafka.listener.ConcurrentMessageListenerContainer;
 
 import esa.s1pdgs.cpoc.message.Consumption;
-import esa.s1pdgs.cpoc.mqi.model.queue.AbstractMessage;
 
-public class KafkaConsumption implements Consumption {
+public class KafkaConsumption<M> implements Consumption {
 
-    private ConcurrentMessageListenerContainer<String, ? extends AbstractMessage> kafkaContainer;
+    private ConcurrentMessageListenerContainer<String, M> kafkaContainer;
 
     @Override
     public void pause() {
@@ -20,7 +19,7 @@ public class KafkaConsumption implements Consumption {
     }
 
     //need setter her because container is created after consumption
-    public void setKafkaContainer(ConcurrentMessageListenerContainer<String, ? extends AbstractMessage> kafkaContainer) {
+    public void setKafkaContainer(ConcurrentMessageListenerContainer<String, M> kafkaContainer) {
         this.kafkaContainer = kafkaContainer;
     }
 }

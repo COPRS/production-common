@@ -3,20 +3,19 @@ package esa.s1pdgs.cpoc.message.kafka;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 
 import esa.s1pdgs.cpoc.message.Message;
-import esa.s1pdgs.cpoc.mqi.model.queue.AbstractMessage;
 
-public class KafkaMessage<T extends AbstractMessage> implements Message<T> {
+public class KafkaMessage<M> implements Message<M> {
 
-    private final T data;
-    private final ConsumerRecord<String, T> kafkaRecord;
+    private final M data;
+    private final ConsumerRecord<String, M> kafkaRecord;
 
-    public KafkaMessage(T data, ConsumerRecord<String, T> kafkaRecord) {
+    public KafkaMessage(M data, ConsumerRecord<String, M> kafkaRecord) {
         this.data = data;
         this.kafkaRecord = kafkaRecord;
     }
 
     @Override
-    public T data() {
+    public M data() {
         return data;
     }
 
