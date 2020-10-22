@@ -63,33 +63,6 @@ public class ExtractMetadata {
 	private static final String XSLT_S3_AUX_XFDU_XML = "XSLT_S3_AUX_XFDU_XML.xslt";
 	private static final String XSLT_S3_XFDU_XML = "XSLT_S3_XFDU_XML.xslt";
 	private static final String XSLT_S3_IIF_XML = "XSLT_S3_IIF_XML.xslt";
-
-	private static final List<String> nullableElements = Arrays.asList(
-			// for types that are not allowed to store an empty string, non-existence is mapped to null 
-			"sliceNumber", //
-			"totalNumberOfSlice", //
-			"instrumentConfigurationId", //
-			"missionDataTakeId", //
-			"coordinates", //
-			"processingDate", //
-			"qualityDataObjectID", //
-			"qualityNumOfElement", //
-			"qualityNumOfMissingElements", //
-			"qualityNumOfCorruptedElements", //
-			"qualityNumOfRSIncorrigibleElements", //
-			"qualityNumOfRSCorrectedElements", //
-			"qualityNumOfRSCorrectedSymbols", //
-			"processorName", //
-			"processorVersion", //
-			"segmentStartTime", //
-			"startTime", //
-			"validityStartTime", //
-			"startTimeANX", //
-			"creationTime", //
-			"stopTime", //
-			"validityStopTime", //
-			"stopTimeANX"
-	);
 	
 	/**
 	 * Mapping of family to XSLT file name
@@ -312,7 +285,6 @@ public class ExtractMetadata {
 		JSONObject metadataJSONObject = transformXMLWithXSLTToJSON(manifestFile, xsltFile);
 
 		metadataJSONObject = removeEmptyStringElementsFromPolarisationChannelsArray(metadataJSONObject);
-		metadataJSONObject = convertEmptyStringToNullWhenNullableElement(metadataJSONObject);	
 		
 		metadataJSONObject = putCommonMetadataToJSON(metadataJSONObject, descriptor);
 
@@ -488,7 +460,6 @@ public class ExtractMetadata {
 		JSONObject metadataJSONObject = transformXMLWithXSLTToJSON(manifestFile, xsltFile);
 
 		metadataJSONObject = removeEmptyStringElementsFromPolarisationChannelsArray(metadataJSONObject);		
-		metadataJSONObject = convertEmptyStringToNullWhenNullableElement(metadataJSONObject);
 
 		metadataJSONObject = putCommonMetadataToJSON(metadataJSONObject, descriptor);
 
@@ -502,12 +473,12 @@ public class ExtractMetadata {
 
 			if (ProductFamily.L0_ACN.equals(productFamily) || ProductFamily.L0_SLICE.equals(productFamily)) {
 
-				if (!metadataJSONObject.has("sliceNumber") || metadataJSONObject.get("sliceNumber") == JSONObject.NULL) {
+				if (!metadataJSONObject.has("sliceNumber") || "".equals(metadataJSONObject.get("sliceNumber").toString())) {
 					metadataJSONObject.put("sliceNumber", 1);
 				} else if (StringUtils.isEmpty(metadataJSONObject.get("sliceNumber").toString())) {
 					metadataJSONObject.put("sliceNumber", 1);
 				}
-				if (!metadataJSONObject.has("totalNumberOfSlice") || metadataJSONObject.get("totalNumberOfSlice") == JSONObject.NULL) {				
+				if (!metadataJSONObject.has("totalNumberOfSlice") || "".equals(metadataJSONObject.get("totalNumberOfSlice").toString())) {				
 					if (Arrays.asList("A", "C", "N").contains(descriptor.getProductClass())) {
 						if (metadataJSONObject.has("startTime") && metadataJSONObject.has("stopTime")) {
 							metadataJSONObject.put("totalNumberOfSlice", totalNumberOfSlice(
@@ -791,15 +762,6 @@ public class ExtractMetadata {
 				if ("".equals(polarisationChannels.get(idx))) {
 					polarisationChannels.remove(idx);
 				}
-			}
-		}
-		return metadataJSONObject;
-	}
-	
-	private JSONObject convertEmptyStringToNullWhenNullableElement(final JSONObject metadataJSONObject) {
-		for(String key : nullableElements) {
-			if (metadataJSONObject.has(key) && "".equals(metadataJSONObject.get(key).toString())) {
-				metadataJSONObject.put(key, JSONObject.NULL);
 			}
 		}
 		return metadataJSONObject;
