@@ -28,6 +28,7 @@ import org.springframework.lang.Nullable;
 import org.springframework.stereotype.Component;
 
 import esa.s1pdgs.cpoc.message.Consumption;
+import esa.s1pdgs.cpoc.message.ConsumptionConfigurationFactory;
 import esa.s1pdgs.cpoc.message.MessageConsumer;
 import esa.s1pdgs.cpoc.message.MessageConsumerFactory;
 import esa.s1pdgs.cpoc.message.kafka.KafkaAcknowledgement;
@@ -43,18 +44,23 @@ public class KafkaConsumptionController<M> {
     private final MessageConsumerFactory<M> consumerFactory;
     private final KafkaProperties kafkaProperties;
     private final ConsumerRebalanceListener rebalanceListener;
+    private final ConsumptionConfigurationFactory consumptionConfigurationFactory;
 
     private final Map<String, ConcurrentMessageListenerContainer<String, M>> containers = new HashMap<>();
 
     @Autowired
-    public KafkaConsumptionController(MessageConsumerFactory<M> consumerFactory, KafkaProperties kafkaProperties, @Nullable ConsumerRebalanceListener rebalanceListener) {
+    public KafkaConsumptionController(MessageConsumerFactory<M> consumerFactory,
+                                      KafkaProperties kafkaProperties,
+                                      @Nullable ConsumerRebalanceListener rebalanceListener,
+                                      @Nullable ConsumptionConfigurationFactory consumptionConfigurationFactory) {
         this.consumerFactory = consumerFactory;
         this.kafkaProperties = kafkaProperties;
         this.rebalanceListener = rebalanceListener;
+        this.consumptionConfigurationFactory = consumptionConfigurationFactory;
     }
 
     @PostConstruct
-    public void initAndStartContainers() {
+    public void initAndStartContainers() throws ClassNotFoundException {
         List<MessageConsumer<M>> messageConsumers = consumerFactory.createConsumers();
 
         for (MessageConsumer<M> messageConsumer : messageConsumers) {
@@ -68,7 +74,7 @@ public class KafkaConsumptionController<M> {
         });
     }
 
-    private ConcurrentMessageListenerContainer<String, M> containerFor(MessageConsumer<M> messageConsumer) {
+    private ConcurrentMessageListenerContainer<String, M> containerFor(MessageConsumer<M> messageConsumer) throws ClassNotFoundException {
 
         final String topic = messageConsumer.topic();
 
@@ -88,7 +94,7 @@ public class KafkaConsumptionController<M> {
                 -> messageConsumer.onMessage(new KafkaMessage<>(data.value(), data), new KafkaAcknowledgement(acknowledgment), consumption);
     }
 
-    private <T> ConsumerFactory<String, T> consumerFactory(final String topic, final Class<T> dtoClass) {
+    private <T> ConsumerFactory<String, T> consumerFactory(final String topic, final Class<T> dtoClass) throws ClassNotFoundException {
         final JsonDeserializer<T> jsonDeserializer = new JsonDeserializer<>(dtoClass);
         jsonDeserializer.addTrustedPackages("*");
         final ErrorHandlingDeserializer<T> errorHandlingDeserializer = new ErrorHandlingDeserializer<>(jsonDeserializer);
@@ -110,7 +116,7 @@ public class KafkaConsumptionController<M> {
         );
     }
 
-    private Map<String, Object> consumerConfig(final String consumerId) {
+    private Map<String, Object> consumerConfig(final String consumerId) throws ClassNotFoundException {
         final Map<String, Object> props = new HashMap<>();
         props.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, kafkaProperties.getBootstrapServers());
         props.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class);
@@ -124,6 +130,11 @@ public class KafkaConsumptionController<M> {
         props.put(ConsumerConfig.PARTITION_ASSIGNMENT_STRATEGY_CONFIG, Collections.singletonList(RoundRobinAssignor.class));
         props.put(ConsumerConfig.CLIENT_ID_CONFIG, consumerId);
         props.put(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, kafkaProperties.getConsumer().getAutoOffsetReset());
+
+        if(consumptionConfigurationFactory != null) {
+            props.putAll(consumptionConfigurationFactory.consumptionConfiguration());
+        }
+
         return props;
     }
 
