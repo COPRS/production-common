@@ -78,7 +78,17 @@ public class ExtractMetadata {
 			"qualityNumOfCorruptedElements", //
 			"qualityNumOfRSIncorrigibleElements", //
 			"qualityNumOfRSCorrectedElements", //
-			"qualityNumOfRSCorrectedSymbols" //
+			"qualityNumOfRSCorrectedSymbols", //
+			"processorName", //
+			"processorVersion", //
+			"segmentStartTime", //
+			"startTime", //
+			"validityStartTime", //
+			"startTimeANX", //
+			"creationTime", //
+			"stopTime", //
+			"validityStopTime", //
+			"stopTimeANX"
 	);
 	
 	/**
