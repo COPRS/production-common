@@ -1,7 +1,7 @@
 package esa.s1pdgs.cpoc.prip.frontend.service.edm;
 
 import static esa.s1pdgs.cpoc.prip.frontend.service.edm.EntityTypeProperties.Algorithm;
-import static esa.s1pdgs.cpoc.prip.frontend.service.edm.EntityTypeProperties.Checksums;
+import static esa.s1pdgs.cpoc.prip.frontend.service.edm.EntityTypeProperties.Checksum;
 import static esa.s1pdgs.cpoc.prip.frontend.service.edm.EntityTypeProperties.ContentDate;
 import static esa.s1pdgs.cpoc.prip.frontend.service.edm.EntityTypeProperties.ContentLength;
 import static esa.s1pdgs.cpoc.prip.frontend.service.edm.EntityTypeProperties.ContentType;
@@ -48,7 +48,7 @@ public class EdmProvider extends org.apache.olingo.commons.api.edm.provider.Csdl
 			.getFullQualifiedName();
 	public static final FullQualifiedName GEOSHAPE_POLYGON_TYPE_FQN = EdmPrimitiveTypeKind.GeographyPolygon.getFullQualifiedName();
 	
-	public static final FullQualifiedName CHECKSUM_TYPE_FQN = new FullQualifiedName(SERVICE_NAMESPACE, "Checksums");
+	public static final FullQualifiedName CHECKSUM_TYPE_FQN = new FullQualifiedName(SERVICE_NAMESPACE, "Checksum");
 	public static final FullQualifiedName TIMERANGE_TYPE_FQN = new FullQualifiedName(SERVICE_NAMESPACE,"TimeRange");
 	public static final FullQualifiedName PRODUCTION_TYPE_TYPE_FQN = new FullQualifiedName(SERVICE_NAMESPACE, "ProductionType");
 
@@ -82,7 +82,7 @@ public class EdmProvider extends org.apache.olingo.commons.api.edm.provider.Csdl
 			properties.add(new CsdlProperty().setName(ContentLength.name()).setType(INT_64_TYPE_FQN));
 			properties.add(new CsdlProperty().setName(PublicationDate.name()).setType(DATE_TIME_OFFSET_TYPE_FQN));
 			properties.add(new CsdlProperty().setName(EvictionDate.name()).setType(DATE_TIME_OFFSET_TYPE_FQN));
-			properties.add(new CsdlProperty().setName(Checksums.name()).setType(CHECKSUM_TYPE_FQN).setCollection(true));
+			properties.add(new CsdlProperty().setName(Checksum.name()).setType(CHECKSUM_TYPE_FQN).setCollection(true));
 			properties.add(new CsdlProperty().setName(ProductionType.name()).setType(PRODUCTION_TYPE_TYPE_FQN));
 			properties.add(new CsdlProperty().setName(ContentDate.name()).setType(TIMERANGE_TYPE_FQN));
 			properties.add(new CsdlProperty().setName(Footprint.name()).setType(GEOSHAPE_POLYGON_TYPE_FQN));

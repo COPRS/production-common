@@ -1,7 +1,7 @@
 package esa.s1pdgs.cpoc.prip.frontend.service.mapping;
 
 import static esa.s1pdgs.cpoc.prip.frontend.service.edm.EntityTypeProperties.Algorithm;
-import static esa.s1pdgs.cpoc.prip.frontend.service.edm.EntityTypeProperties.Checksums;
+import static esa.s1pdgs.cpoc.prip.frontend.service.edm.EntityTypeProperties.Checksum;
 import static esa.s1pdgs.cpoc.prip.frontend.service.edm.EntityTypeProperties.ContentDate;
 import static esa.s1pdgs.cpoc.prip.frontend.service.edm.EntityTypeProperties.ContentLength;
 import static esa.s1pdgs.cpoc.prip.frontend.service.edm.EntityTypeProperties.ContentType;
@@ -59,7 +59,7 @@ public class MappingUtil {
 				.addProperty(new Property(null, PublicationDate.name(), ValueType.PRIMITIVE, convertLocalDateTimeToTimestamp(pripMetadata.getCreationDate())))
 				.addProperty(new Property(null, EvictionDate.name(), ValueType.PRIMITIVE, convertLocalDateTimeToTimestamp(pripMetadata.getEvictionDate())))
 				.addProperty(new Property(null, ProductionType.name(), ValueType.ENUM, mapToProductionType(esa.s1pdgs.cpoc.prip.model.ProductionType.SYSTEMATIC_PRODUCTION)))
-				.addProperty(new Property(null, Checksums.name(), ValueType.COLLECTION_COMPLEX, mapToChecksumList(pripMetadata.getChecksums())))
+				.addProperty(new Property(null, Checksum.name(), ValueType.COLLECTION_COMPLEX, mapToChecksumList(pripMetadata.getChecksums())))
 				.addProperty(new Property(null, Footprint.name(), ValueType.GEOSPATIAL, mapToGeospatial(pripMetadata.getFootprint())));
 		entity.setMediaContentType(pripMetadata.getContentType());
 		entity.setId(uri);

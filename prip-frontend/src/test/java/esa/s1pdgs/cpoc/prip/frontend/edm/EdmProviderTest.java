@@ -31,7 +31,7 @@ public class EdmProviderTest {
 		CsdlEntityType entityType = uut.getEntityType(new FullQualifiedName("OData.CSC", "Product"));
 		List<CsdlProperty> properties = entityType.getProperties();
 		
-		assertEquals(Arrays.asList("Id", "Name", "ContentType", "ContentLength", "PublicationDate", "EvictionDate", "Checksums", "ProductionType", "ContentDate", "Footprint"),
+		assertEquals(Arrays.asList("Id", "Name", "ContentType", "ContentLength", "PublicationDate", "EvictionDate", "Checksum", "ProductionType", "ContentDate", "Footprint"),
 				properties.stream().map(p -> p.getName()).collect(Collectors.toList()));
 		
 		assertEquals(Arrays.asList( //
@@ -41,7 +41,7 @@ public class EdmProviderTest {
 				EdmPrimitiveTypeKind.Int64.getFullQualifiedName(), //
 				EdmPrimitiveTypeKind.DateTimeOffset.getFullQualifiedName(), //
 				EdmPrimitiveTypeKind.DateTimeOffset.getFullQualifiedName(), //
-				new FullQualifiedName("OData.CSC", "Checksums"), //
+				new FullQualifiedName("OData.CSC", "Checksum"), //
 				new FullQualifiedName("OData.CSC", "ProductionType"), //
 				new FullQualifiedName("OData.CSC", "TimeRange"),
 				EdmPrimitiveTypeKind.GeographyPolygon.getFullQualifiedName()), //
@@ -53,7 +53,7 @@ public class EdmProviderTest {
 	
 	@Test
 	public void testGetComplexType() throws ODataException {
-		CsdlComplexType complexType = uut.getComplexType(new FullQualifiedName("OData.CSC", "Checksums"));
+		CsdlComplexType complexType = uut.getComplexType(new FullQualifiedName("OData.CSC", "Checksum"));
 		List<CsdlProperty> properties = complexType.getProperties();
 		assertEquals("Algorithm", properties.get(0).getName());
 		assertEquals(EdmPrimitiveTypeKind.String.getFullQualifiedName(), properties.get(0).getTypeAsFQNObject());
