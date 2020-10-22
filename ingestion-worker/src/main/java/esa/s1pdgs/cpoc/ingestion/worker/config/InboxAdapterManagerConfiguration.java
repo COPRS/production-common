@@ -12,7 +12,10 @@ import org.springframework.context.annotation.Configuration;
 
 import esa.s1pdgs.cpoc.auxip.client.AuxipClientFactory;
 import esa.s1pdgs.cpoc.auxip.client.config.AuxipClientConfigurationProperties;
+import esa.s1pdgs.cpoc.ebip.client.EdipClientFactory;
+import esa.s1pdgs.cpoc.ebip.client.config.EdipClientConfigurationProperties;
 import esa.s1pdgs.cpoc.ingestion.worker.inbox.AuxipInboxAdapter;
+import esa.s1pdgs.cpoc.ingestion.worker.inbox.EdipInboxAdapter;
 import esa.s1pdgs.cpoc.ingestion.worker.inbox.FilesystemInboxAdapter;
 import esa.s1pdgs.cpoc.ingestion.worker.inbox.InboxAdapter;
 import esa.s1pdgs.cpoc.ingestion.worker.inbox.InboxAdapterManager;
@@ -25,20 +28,28 @@ public class InboxAdapterManagerConfiguration {
 
 	private final XbipClientFactory xbipClientFactory;
 	private final AuxipClientFactory auxipClientFactory;
+	private final EdipClientFactory edipClientFactory;
 	private final IngestionWorkerServiceConfigurationProperties properties;
 	private final AuxipClientConfigurationProperties auxipClientConfigurationProperties;
 	private final XbipClientConfigurationProperties xbipClientConfigurationProperties;
+	private final EdipClientConfigurationProperties edipClientConfigurationProperties;
 
 	@Autowired
 	public InboxAdapterManagerConfiguration(
 			final XbipClientFactory xbipClientFactory,
-			AuxipClientFactory auxipClientFactory, final IngestionWorkerServiceConfigurationProperties properties,
-			AuxipClientConfigurationProperties auxipClientConfigurationProperties, XbipClientConfigurationProperties xbipClientConfigurationProperties) {
+			final AuxipClientFactory auxipClientFactory,
+			final EdipClientFactory edipClientFactory,
+			final IngestionWorkerServiceConfigurationProperties properties,
+			AuxipClientConfigurationProperties auxipClientConfigurationProperties,
+			XbipClientConfigurationProperties xbipClientConfigurationProperties,
+			EdipClientConfigurationProperties edipClientConfigurationProperties) {
 		this.xbipClientFactory = xbipClientFactory;
 		this.auxipClientFactory = auxipClientFactory;
+		this.edipClientFactory = edipClientFactory;
 		this.properties = properties;
 		this.auxipClientConfigurationProperties = auxipClientConfigurationProperties;
 		this.xbipClientConfigurationProperties = xbipClientConfigurationProperties;
+		this.edipClientConfigurationProperties = edipClientConfigurationProperties;
 	}
 
 	@Bean
@@ -47,6 +58,7 @@ public class InboxAdapterManagerConfiguration {
 
 		final InboxAdapter xbip = new XbipInboxAdapter(xbipClientFactory);
 		final InboxAdapter auxip = new AuxipInboxAdapter(auxipClientFactory);
+		final InboxAdapter edip = new EdipInboxAdapter(edipClientFactory);
 		final InboxAdapter file = new FilesystemInboxAdapter(properties);
 
 		//TODO replace this mechanism by adding the inbox type to IngestionJob and evaluate it here
@@ -55,6 +67,9 @@ public class InboxAdapterManagerConfiguration {
 
 		auxipClientConfigurationProperties.getHostConfigs()
 				.forEach(auxipHost -> inboxAdapter.put(uriRegexFor(auxipHost.getServiceRootUri()), auxip));
+		
+		edipClientConfigurationProperties.getHostConfigs()
+			.forEach(edipHost -> inboxAdapter.put(uriRegexFor(edipHost.getServerName()), edip));
 
 		inboxAdapter.put(uriRegexForFile(), file);
 
