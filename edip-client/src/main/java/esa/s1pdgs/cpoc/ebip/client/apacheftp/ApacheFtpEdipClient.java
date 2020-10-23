@@ -68,23 +68,24 @@ public class ApacheFtpEdipClient implements EdipClient {
 	public final InputStream read(final EdipEntry entry) {
 		try {
 			final FTPClient client = connectedClient();
-			return new BufferedInputStream(client.retrieveFileStream(entry.getPath().toString()))
+			final InputStream res = new BufferedInputStream(client.retrieveFileStream(entry.getPath().toString()))
 			{
 				@Override
-				public void close() throws IOException {
-					try {
-						client.completePendingCommand();
-						super.close();			
-						client.logout();
-						client.disconnect();
-						assertPositiveCompletion(client);
-					} catch (final Exception e) {
-						// FIXME TODO dirty workaround, since NPE is thrown on 'completePendingCommand()' 
-						// call. It needs to be evaluated, if it has any further implications
-						// Transfer looks good and valid, tho...
-					}
+				public void close() throws IOException {	
+					client.completePendingCommand();
+					super.close();			
+					client.logout();
+					client.disconnect();
+					assertPositiveCompletion(client);
 				}	
 			};
+			// possibly a fix for the NPE issue described above
+			final int replyCode = client.getReplyCode();
+	        if (!FTPReply.isPositiveIntermediate(replyCode) && !FTPReply.isPositivePreliminary(replyCode)) {
+	        	res.close();
+	      		throw new IOException("Error on command execution. Reply was: " + client.getReplyString());
+	        }
+			return res;			
 		} catch (final IOException e) {
 			// TODO add proper error handling
 			throw new RuntimeException(e);
