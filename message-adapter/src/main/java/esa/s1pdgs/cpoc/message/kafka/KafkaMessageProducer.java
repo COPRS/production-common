@@ -31,4 +31,9 @@ public class KafkaMessageProducer<M> implements MessageProducer<M> {
             );
         }
     }
+
+    @Override
+    public String toString() {
+        return "KafkaMessageProducer";
+    }
 }

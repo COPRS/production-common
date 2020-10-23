@@ -10,14 +10,15 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import esa.s1pdgs.cpoc.common.ProductFamily;
+import esa.s1pdgs.cpoc.common.utils.Exceptions;
 import esa.s1pdgs.cpoc.common.utils.LogUtils;
 import esa.s1pdgs.cpoc.ingestion.trigger.entity.InboxEntry;
 import esa.s1pdgs.cpoc.ingestion.trigger.filter.InboxFilter;
-import esa.s1pdgs.cpoc.ingestion.trigger.kafka.producer.SubmissionClient;
 import esa.s1pdgs.cpoc.ingestion.trigger.name.ProductNameEvaluator;
 import esa.s1pdgs.cpoc.ingestion.trigger.report.IngestionTriggerReportingInput;
 import esa.s1pdgs.cpoc.ingestion.trigger.report.IngestionTriggerReportingOutput;
 import esa.s1pdgs.cpoc.ingestion.trigger.service.IngestionTriggerServiceTransactional;
+import esa.s1pdgs.cpoc.message.MessageProducer;
 import esa.s1pdgs.cpoc.mqi.model.queue.IngestionJob;
 import esa.s1pdgs.cpoc.report.Reporting;
 import esa.s1pdgs.cpoc.report.ReportingInput;
@@ -30,7 +31,8 @@ public final class Inbox {
 	private final InboxAdapter inboxAdapter;
 	private final InboxFilter filter;
 	private final IngestionTriggerServiceTransactional ingestionTriggerServiceTransactional;
-	private final SubmissionClient client;
+	private final MessageProducer<IngestionJob> messageProducer;
+	private final String topic;
 	private final ProductFamily family;
 	private final String stationName;
 	private final String mode;
@@ -40,8 +42,9 @@ public final class Inbox {
 	Inbox(
 			final InboxAdapter inboxAdapter, 
 			final InboxFilter filter,
-			final IngestionTriggerServiceTransactional ingestionTriggerServiceTransactional, 
-			final SubmissionClient client,
+			final IngestionTriggerServiceTransactional ingestionTriggerServiceTransactional,
+			final MessageProducer<IngestionJob> messageProducer,
+			final String topic,
 			final ProductFamily family,
 			final String stationName,
 			final String mode,
@@ -51,7 +54,8 @@ public final class Inbox {
 		this.inboxAdapter = inboxAdapter;
 		this.filter = filter;
 		this.ingestionTriggerServiceTransactional = ingestionTriggerServiceTransactional;
-		this.client = client;
+		this.messageProducer = messageProducer;
+		this.topic = topic;
 		this.family = family;
 		this.stationName = stationName;
 		this.mode = mode;
@@ -94,7 +98,7 @@ public final class Inbox {
 
 	@Override
 	public final String toString() {
-		return "Inbox [inboxAdapter=" + inboxAdapter + ", filter=" + filter + ", client=" + client + "]";
+		return "Inbox [inboxAdapter=" + inboxAdapter + ", filter=" + filter + ", messageProducer=" + messageProducer + "]";
 	}
 
 	private boolean isChildOf(final InboxEntry entry, final Set<InboxEntry> handledElements) {
@@ -134,7 +138,7 @@ public final class Inbox {
 		try {
 			final String publishedName = nameEvaluator.evaluateFrom(entry);
 			log.debug("Publishing new entry {} to kafka queue: {}", publishedName, entry);
-			client.publish(
+			publish(
 					new IngestionJob(
 						family, 
 						publishedName,
@@ -159,7 +163,23 @@ public final class Inbox {
 		}
 		return Optional.empty();
 	}
-	
+
+	private void publish(IngestionJob ingestionJob) {
+		try {
+			messageProducer.send(topic, ingestionJob);
+		} catch (final Exception e) {
+			throw new RuntimeException(
+					String.format(
+							"Error on publishing IngestionJob for %s to %s: %s",
+							ingestionJob.getProductName(),
+							topic,
+							Exceptions.messageOf(e)
+					),
+					e
+			);
+		}
+	}
+
 	private InboxEntry persist(final InboxEntry toBePersisted) {
 		final InboxEntry persisted = ingestionTriggerServiceTransactional.add(toBePersisted);
 		log.trace("Added {} to persistence", persisted);
