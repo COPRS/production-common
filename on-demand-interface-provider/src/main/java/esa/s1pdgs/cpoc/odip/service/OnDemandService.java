@@ -14,11 +14,13 @@ import esa.s1pdgs.cpoc.appstatus.AppStatus;
 import esa.s1pdgs.cpoc.common.ApplicationLevel;
 import esa.s1pdgs.cpoc.common.ProductFamily;
 import esa.s1pdgs.cpoc.common.errors.processing.MetadataQueryException;
+import esa.s1pdgs.cpoc.common.utils.Exceptions;
+import esa.s1pdgs.cpoc.message.MessageProducer;
 import esa.s1pdgs.cpoc.metadata.client.MetadataClient;
 import esa.s1pdgs.cpoc.metadata.model.SearchMetadata;
 import esa.s1pdgs.cpoc.mqi.model.queue.OnDemandEvent;
 import esa.s1pdgs.cpoc.odip.config.OdipConfigurationProperties;
-import esa.s1pdgs.cpoc.odip.kafka.producer.SubmissionClient;
+import esa.s1pdgs.cpoc.odip.config.TopicConfig;
 
 @Service
 public class OnDemandService {
@@ -28,14 +30,16 @@ public class OnDemandService {
 
 	private OdipConfigurationProperties properties;
 
-	private final SubmissionClient kafkaSubmissionClient;
+	private final TopicConfig topicConfig;
+	private final MessageProducer<OnDemandEvent> messageProducer;
 	private final AppStatus status;
 
 	@Autowired
-	public OnDemandService(final OdipConfigurationProperties properties, final SubmissionClient kafkaSubmissionClient,
-			final AppStatus status, final MetadataClient metadataClient) {
+	public OnDemandService(final OdipConfigurationProperties properties,
+						   final AppStatus status, final MetadataClient metadataClient, TopicConfig topicConfig, MessageProducer<OnDemandEvent> messageProducer) {
 		this.properties = properties;
-		this.kafkaSubmissionClient = kafkaSubmissionClient;
+		this.topicConfig = topicConfig;
+		this.messageProducer = messageProducer;
 		this.status = status;
 		this.metadataClient = metadataClient;
 	}
@@ -89,7 +93,24 @@ public class OnDemandService {
 			throw new RuntimeException(e);
 		}
 
-		kafkaSubmissionClient.resubmit(event, status);
+		resubmit(event, status);
+	}
+
+	private void resubmit(OnDemandEvent event, AppStatus appStatus) {
+		try {
+			LOGGER.info("(Re-)Submitting following message '{}' to topic '{}'", event, topicConfig.getTopic());
+			messageProducer.send(topicConfig.getTopic(), event);
+		} catch (final Exception e) {
+			appStatus.getStatus().setFatalError();
+			throw new RuntimeException(
+					String.format(
+							"Error (re)starting request on topic '%s': %s",
+							topicConfig.getTopic(),
+							Exceptions.messageOf(e)
+					),
+					e
+			);
+		}
 	}
 
 	static final void assertNotNull(final String name, final String value) 

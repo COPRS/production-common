@@ -15,8 +15,9 @@ server:
 # KAFKA
 kafka:
   bootstrap-servers: localhost                                  # the bootstrap servers for KAFKA
-  maxRetries: 10                                                # the group identifier to use for KAFKA publishers  
   topic: t-pdgs-operator-demand-events
+  producer:
+    max-retries: 10
 
 metadata:
   host: localhost 
