@@ -72,11 +72,13 @@ public class ApacheFtpEdipClient implements EdipClient {
 			{
 				@Override
 				public void close() throws IOException {	
-					client.completePendingCommand();
-					super.close();			
-					client.logout();
-					client.disconnect();
-					assertPositiveCompletion(client);
+					if (client.isConnected()) {
+						client.completePendingCommand();
+						super.close();			
+						client.logout();
+						client.disconnect();
+						assertPositiveCompletion(client);
+					}
 				}	
 			};
 			// possibly a fix for the NPE issue described above
