@@ -9,7 +9,10 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.security.KeyStore;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 
 import javax.net.ssl.KeyManager;
 import javax.net.ssl.KeyManagerFactory;
@@ -49,10 +52,13 @@ public class ApacheFtpEdipClient implements EdipClient {
 	@Override
 	public final List<EdipEntry> list(final EdipEntryFilter filter) throws IOException {
 		LOG.debug("Listing {}", uri.getPath());
+		final Path uriPath = Paths.get(uri.getPath());
 		
 		final FTPClient client = connectedClient();
 		
-		final List<EdipEntry> result = listRecursively(client, Paths.get(uri.getPath()), filter);		
+		final List<EdipEntry> result = getIfNotDirectory(client, uriPath)
+				.orElse(listRecursively(client, uriPath, filter));	
+		
 		client.logout();
 		client.disconnect();
 		return result;
@@ -203,21 +209,30 @@ public class ApacheFtpEdipClient implements EdipClient {
 		return ftpClient;
 	}
 	
+	private final Optional<List<EdipEntry>> getIfNotDirectory(final FTPClient client, final Path path) throws IOException {
+		final List<FTPFile> ftpFile = Arrays.asList(client.listFiles(path.toString()));
+		if (ftpFile.size() == 1 && !ftpFile.get(0).isDirectory()) {
+			return Optional.of(Collections.singletonList(toEdipEntry(path.getParent(), ftpFile.get(0))));
+		}
+		return Optional.empty();
+	}
+	
 	private final List<EdipEntry> listRecursively(
 			final FTPClient client, 
 			final Path path, 
 			final EdipEntryFilter filter
 	) 
 			throws IOException {
-		final List<EdipEntry> result = new ArrayList<>();
+		final List<EdipEntry> result = new ArrayList<>();	
 		LOG.trace("Recursive listing of {}", path);
 		
 		for (final FTPFile ftpFile : client.listFiles(path.toString())) {
 			final EdipEntry entry = toEdipEntry(path, ftpFile);
+			//System.err.println("FOO " + entry);
 			if (!filter.accept(entry)) {
 				LOG.trace("{} ignored by {}", entry, filter);
 				continue;
-			}			
+			}	
 			
 			if (ftpFile.isDirectory()) {
 				LOG.trace("Found dir {}", entry);
