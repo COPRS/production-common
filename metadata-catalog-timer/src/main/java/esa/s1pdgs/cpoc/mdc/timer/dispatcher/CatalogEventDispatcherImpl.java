@@ -16,7 +16,7 @@ import esa.s1pdgs.cpoc.metadata.model.SearchMetadata;
 import esa.s1pdgs.cpoc.mqi.model.queue.CatalogEvent;
 
 public class CatalogEventDispatcherImpl implements CatalogEventDispatcher {
-
+	
 	private MetadataClient metadataClient;
 	private CatalogEventTimerEntryRepository repository;
 	private Publisher publisher;
@@ -44,14 +44,17 @@ public class CatalogEventDispatcherImpl implements CatalogEventDispatcher {
 		} else {
 			intervalStart = LocalDateTime.ofInstant(entry.getLastCheckDate().toInstant(), ZoneId.systemDefault());
 		}
-
+		
+		LOGGER.debug("Retrieved last timestamp {}", intervalStart.toString());
 		LocalDateTime intervalStop = LocalDateTime.now();
 
 		try {
+			LOGGER.debug("Retrieve new products from database");
 			List<SearchMetadata> products = this.metadataClient.searchInterval(this.productFamily, this.productType,
 					intervalStart, intervalStop);
 
 			for (SearchMetadata product : products) {
+				LOGGER.info("Publish CatalogEvent for product {}", product.getProductName());
 				CatalogEvent event = toCatalogEvent(product);
 				this.publisher.publish(event);
 			}

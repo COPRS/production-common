@@ -5,6 +5,8 @@ import java.util.Set;
 
 import javax.annotation.PostConstruct;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -22,6 +24,8 @@ import esa.s1pdgs.cpoc.mqi.model.queue.CatalogEvent;
 
 @Configuration
 public class MetadataCatalogTimerConfiguration {
+
+	private static final Logger LOGGER = LogManager.getLogger(MetadataCatalogTimerConfiguration.class);
 
 	private MetadataCatalogTimerSettings settings;
 
@@ -52,7 +56,7 @@ public class MetadataCatalogTimerConfiguration {
 			TimerProperties config = entry.getValue();
 			CatalogEventDispatcher dispatcher = new CatalogEventDispatcherImpl(metadataClient, repository,
 					new KafkaPublisher(kafkaTemplate, config.getTopic()), entry.getKey(), config.getFamily());
-			
+
 			CronTrigger cronTrigger = new CronTrigger(config.getCron());
 			threadScheduler.schedule(dispatcher, cronTrigger);
 		}

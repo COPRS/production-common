@@ -24,8 +24,7 @@ public class MongoConfiguration {
     /**
      * Logger
      */
-    private static final Logger LOGGER =
-            LogManager.getLogger(MongoConfiguration.class);
+	private static final Logger LOGGER = LogManager.getLogger(MongoConfiguration.class);
 
     @Value("${mongodb.host}")
     private List<String> mongoDBHost;
