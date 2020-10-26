@@ -299,6 +299,32 @@ public class MetadataClient {
 	}
 
 	/**
+	 * Queries the products inside a given time interval for the given producttype
+	 */
+	public List<SearchMetadata> searchInterval(final ProductFamily productFamily, final String productType,
+			final LocalDateTime intervalStart, final LocalDateTime intervalStop) throws MetadataQueryException {
+		final String uri = this.metadataBaseUri + MetadataCatalogRestPath.METADATA.path() + "/"
+				+ productFamily.toString() + "/searchTypeInterval";
+
+		final UriComponentsBuilder builder = UriComponentsBuilder.fromUriString(uri)
+				.queryParam("productType", productType)
+				.queryParam("intervalStart", intervalStart.format(DateUtils.METADATA_DATE_FORMATTER))
+				.queryParam("intervalStop", intervalStop.format(DateUtils.METADATA_DATE_FORMATTER));
+
+		final ResponseEntity<List<SearchMetadata>> response = query(builder.build().toUri(),
+				new ParameterizedTypeReference<List<SearchMetadata>>() {
+				});
+
+		if (response == null || response.getBody() == null) {
+			LOGGER.debug("Metadata query for family '{}' returned no results", productFamily);
+			return new ArrayList<>();
+		} else {
+			LOGGER.info("Metadata query for family '{}' returned {} results", productFamily, numResults(response));
+			return response.getBody();
+		}
+	}
+	
+	/**
 	 */
 	public List<SearchMetadata> query(final ProductFamily family, final LocalDateTime intervalStart,
 			final LocalDateTime intervalStop) throws MetadataQueryException {
