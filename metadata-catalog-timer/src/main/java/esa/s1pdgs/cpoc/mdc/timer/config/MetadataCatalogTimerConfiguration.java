@@ -59,6 +59,8 @@ public class MetadataCatalogTimerConfiguration {
 
 			CronTrigger cronTrigger = new CronTrigger(config.getCron());
 			threadScheduler.schedule(dispatcher, cronTrigger);
+			LOGGER.info("Started new CatalogEventDispatcher ({}, {}, {})", entry.getKey(), config.getFamily(),
+					config.getCron());
 		}
 	}
 
