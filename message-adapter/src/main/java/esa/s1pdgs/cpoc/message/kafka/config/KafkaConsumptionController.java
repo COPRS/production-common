@@ -34,6 +34,7 @@ import esa.s1pdgs.cpoc.message.kafka.ContainerPropertiesFactory;
 import esa.s1pdgs.cpoc.message.MessageConsumer;
 import esa.s1pdgs.cpoc.message.MessageConsumerFactory;
 import esa.s1pdgs.cpoc.message.kafka.KafkaAcknowledgement;
+import esa.s1pdgs.cpoc.message.kafka.KafkaConsumerFactoryProvider;
 import esa.s1pdgs.cpoc.message.kafka.KafkaConsumption;
 import esa.s1pdgs.cpoc.message.kafka.KafkaMessage;
 
@@ -63,6 +64,7 @@ public class KafkaConsumptionController<M> implements ConsumptionController {
     private final KafkaProperties kafkaProperties;
     private final ConsumptionConfigurationFactory consumptionConfigurationFactory;
     private final ContainerPropertiesFactory<M> containerPropertiesFactory;
+    private final KafkaConsumerFactoryProvider<M> kafkaConsumerFactoryProvider;
 
     private final Map<String, ConcurrentMessageListenerContainer<String, M>> containers = new HashMap<>();
 
@@ -72,11 +74,13 @@ public class KafkaConsumptionController<M> implements ConsumptionController {
     public KafkaConsumptionController(MessageConsumerFactory<M> consumerFactory,
                                       KafkaProperties kafkaProperties,
                                       @Nullable ConsumptionConfigurationFactory consumptionConfigurationFactory,
-                                      @Nullable ContainerPropertiesFactory<M> containerPropertiesFactory) {
+                                      @Nullable ContainerPropertiesFactory<M> containerPropertiesFactory,
+                                      @Nullable KafkaConsumerFactoryProvider<M> kafkaConsumerFactoryProvider) {
         this.consumerFactory = consumerFactory;
         this.kafkaProperties = kafkaProperties;
         this.consumptionConfigurationFactory = consumptionConfigurationFactory;
         this.containerPropertiesFactory = containerPropertiesFactory;
+        this.kafkaConsumerFactoryProvider = kafkaConsumerFactoryProvider;
     }
 
     @PostConstruct
@@ -134,10 +138,10 @@ public class KafkaConsumptionController<M> implements ConsumptionController {
                 -> messageConsumer.onMessage(new KafkaMessage<>(data.value(), data), new KafkaAcknowledgement(acknowledgment), consumption);
     }
 
-    private <T> ConsumerFactory<String, T> consumerFactory(final String topic, final Class<T> dtoClass) {
-        final JsonDeserializer<T> jsonDeserializer = new JsonDeserializer<>(dtoClass);
+    private ConsumerFactory<String, M> consumerFactory(final String topic, final Class<M> dtoClass) {
+        final JsonDeserializer<M> jsonDeserializer = new JsonDeserializer<>(dtoClass);
         jsonDeserializer.addTrustedPackages("*");
-        final ErrorHandlingDeserializer<T> errorHandlingDeserializer = new ErrorHandlingDeserializer<>(jsonDeserializer);
+        final ErrorHandlingDeserializer<M> errorHandlingDeserializer = new ErrorHandlingDeserializer<>(jsonDeserializer);
 
         errorHandlingDeserializer.setFailedDeserializationFunction((failedDeserializationInfo) -> {
             LOG.error(
@@ -148,6 +152,14 @@ public class KafkaConsumptionController<M> implements ConsumptionController {
             );
             return null;
         });
+        
+        if(kafkaConsumerFactoryProvider != null) {
+            return kafkaConsumerFactoryProvider.consumerFactoryFor(
+                    consumerConfig(clientIdForTopic(topic)),
+                    new StringDeserializer(),
+                    errorHandlingDeserializer
+            );
+        }
 
         return new DefaultKafkaConsumerFactory<>(
                 consumerConfig(clientIdForTopic(topic)),

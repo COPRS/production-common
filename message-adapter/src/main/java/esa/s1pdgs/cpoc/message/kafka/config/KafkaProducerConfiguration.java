@@ -13,18 +13,22 @@ import org.springframework.kafka.core.DefaultKafkaProducerFactory;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.kafka.core.ProducerFactory;
 import org.springframework.kafka.support.serializer.JsonSerializer;
+import org.springframework.lang.Nullable;
 
 import esa.s1pdgs.cpoc.message.MessageProducer;
 import esa.s1pdgs.cpoc.message.kafka.KafkaMessageProducer;
+import esa.s1pdgs.cpoc.message.kafka.ProducerConfigurationFactory;
 
 @Configuration
 public class KafkaProducerConfiguration<M> {
 
     private final KafkaProperties properties;
+    private final ProducerConfigurationFactory producerConfigurationFactory;
 
     @Autowired
-    public KafkaProducerConfiguration(KafkaProperties properties) {
+    public KafkaProducerConfiguration(final KafkaProperties properties, @Nullable final ProducerConfigurationFactory producerConfigurationFactory) {
         this.properties = properties;
+        this.producerConfigurationFactory = producerConfigurationFactory;
     }
 
     @Bean
@@ -48,6 +52,11 @@ public class KafkaProducerConfiguration<M> {
         props.put(JsonSerializer.ADD_TYPE_INFO_HEADERS, false);
         props.put(ProducerConfig.RETRIES_CONFIG,
                 properties.getProducer().getMaxRetries());
+
+        if(producerConfigurationFactory != null) {
+            props.putAll(producerConfigurationFactory.producerConfiguration());
+        }
+
         return props;
     }
 

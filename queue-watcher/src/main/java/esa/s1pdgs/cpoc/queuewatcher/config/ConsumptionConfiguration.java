@@ -10,11 +10,14 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 import org.apache.kafka.clients.consumer.ConsumerConfig;
+import org.apache.kafka.common.serialization.Deserializer;
 import org.apache.kafka.common.serialization.StringDeserializer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.kafka.core.ConsumerFactory;
+import org.springframework.kafka.core.DefaultKafkaConsumerFactory;
 
 import esa.s1pdgs.cpoc.message.Acknowledgement;
 import esa.s1pdgs.cpoc.message.Consumption;
@@ -22,9 +25,10 @@ import esa.s1pdgs.cpoc.message.kafka.ConsumptionConfigurationFactory;
 import esa.s1pdgs.cpoc.message.Message;
 import esa.s1pdgs.cpoc.message.MessageConsumer;
 import esa.s1pdgs.cpoc.message.MessageConsumerFactory;
+import esa.s1pdgs.cpoc.message.kafka.KafkaConsumerFactoryProvider;
 
 @Configuration
-public class ConsumptionConfiguration {
+public class ConsumptionConfiguration<M> {
 
     private static final Logger LOG = LoggerFactory.getLogger(ConsumptionConfiguration.class);
 
@@ -43,6 +47,11 @@ public class ConsumptionConfiguration {
         final Map<String, Object> additionalProps = new HashMap<>();
         additionalProps.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class);
         return () -> additionalProps;
+    }
+
+    @Bean
+    public KafkaConsumerFactoryProvider<M> kafkaConsumerFactoryProvider() {
+        return (configs, keyDeserializer, valueDeserializer) -> new DefaultKafkaConsumerFactory<>(configs);
     }
 
     private MessageConsumer<String> consumerFor(final String topic, final ApplicationProperties properties) {
