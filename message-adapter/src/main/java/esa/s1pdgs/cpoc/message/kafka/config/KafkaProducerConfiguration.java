@@ -9,6 +9,8 @@ import org.apache.kafka.clients.admin.AdminClientConfig;
 import org.apache.kafka.clients.producer.Partitioner;
 import org.apache.kafka.clients.producer.ProducerConfig;
 import org.apache.kafka.common.serialization.StringSerializer;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Bean;
@@ -27,6 +29,8 @@ import esa.s1pdgs.cpoc.message.kafka.ProducerConfigurationFactory;
 
 @Configuration
 public class KafkaProducerConfiguration<M> {
+
+    private static final Logger LOG = LoggerFactory.getLogger(KafkaProducerConfiguration.class);
 
     private final KafkaProperties properties;
     private final ProducerConfigurationFactory producerConfigurationFactory;
@@ -65,6 +69,7 @@ public class KafkaProducerConfiguration<M> {
         }
 
         if(properties.getProducer().getLagBasedPartitioner() != null) {
+            LOG.info("using lag based partitioner");
             props.put(ProducerConfig.PARTITIONER_CLASS_CONFIG, lagBasedPartitioner());
         }
 

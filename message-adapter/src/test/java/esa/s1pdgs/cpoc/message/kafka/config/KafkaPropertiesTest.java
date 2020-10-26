@@ -1,6 +1,7 @@
 package esa.s1pdgs.cpoc.message.kafka.config;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
 
 import java.util.Collections;
 import java.util.HashMap;
@@ -27,7 +28,6 @@ import esa.s1pdgs.cpoc.message.MessageConsumerFactory;
 @RunWith(SpringRunner.class)
 @SpringBootTest
 @DirtiesContext
-@SpringBootApplication
 public class KafkaPropertiesTest {
 
     /**
@@ -59,12 +59,7 @@ public class KafkaPropertiesTest {
 
         // Producer
         assertEquals(10, properties.getProducer().getMaxRetries());
-        assertEquals(new Integer(180), properties.getProducer().getLagBasedPartitioner().getDelaySeconds());
-        assertEquals("compression-worker", properties.getProducer().getLagBasedPartitioner().getConsumerGroup());
-
-        assertEquals(new Integer(10), properties.getProducer().getLagBasedPartitioner().getTopicsWithPriority().get("t-pdgs-compression-jobs-nrt"));
-        assertEquals(new Integer(5), properties.getProducer().getLagBasedPartitioner().getTopicsWithPriority().get("t-pdgs-compression-jobs-fast"));
-        assertEquals(new Integer(20), properties.getProducer().getLagBasedPartitioner().getTopicsWithPriority().get("t-pdgs-compression-jobs-pt"));
+        assertNull(properties.getProducer().getLagBasedPartitioner());
     }
 
     /**
@@ -113,13 +108,5 @@ public class KafkaPropertiesTest {
 
         // Producer
         assertEquals(5, properties.getProducer().getMaxRetries());
-    }
-
-    @Configuration
-    public static class TestConfig {
-        @Bean
-        public MessageConsumerFactory<Object> emptyFactory() {
-            return Collections::emptyList;
-        }
     }
 }

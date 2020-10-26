@@ -10,22 +10,15 @@ logging:
   config: classpath:log4j2-test.yml
 
 kafka:
-  bootstrap-servers: localhost:9093
-  hostname: mqi-0
-  client-id: mqi-server
-  error-topic: t-pdgs-errors
-  consumer:
-    group-id: wrappers
-    max-poll-interval-ms: 3600000
-    max-poll-records: 1
-    session-timeout-ms: 10000
-    heartbeat-intv-ms: 3000
-    auto-offset-reset: latest
-    offset-dft-mode: -2
-  listener:
-    poll-timeout-ms: 500
   producer:
     max-retries: 10
+    lag-based-partitioner:
+      delay-seconds: 180
+      consumer-group: compression-worker
+      topics-with-priority:
+        t-pdgs-compression-jobs-nrt: 10
+        t-pdgs-compression-jobs-fast: 5
+        t-pdgs-compression-jobs-pt: 20
 
 application:
   hostname: wrapper-0
