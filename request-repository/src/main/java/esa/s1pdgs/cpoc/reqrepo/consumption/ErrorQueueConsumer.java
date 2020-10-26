@@ -19,7 +19,7 @@ public class ErrorQueueConsumer implements MessageConsumer<FailedProcessingDto> 
             LoggerFactory.getLogger(ErrorQueueConsumer.class);
 
     private final RequestRepository requestRepository;
-    private String errorTopic;
+    private final String errorTopic;
 
     public ErrorQueueConsumer(final RequestRepository requestRepository, final String errorTopic) {
         this.requestRepository = requestRepository;

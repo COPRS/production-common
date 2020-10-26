@@ -107,6 +107,7 @@ public class KafkaProperties {
     /**
      * @return the clientId
      */
+    //TODO move client id to consumer section as it is only used in consumption context
     public String getClientId() {
         return clientId;
     }
