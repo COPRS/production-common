@@ -73,15 +73,17 @@ public class KafkaProducerConfiguration<M> {
             props.put(ProducerConfig.PARTITIONER_CLASS_CONFIG, lagBasedPartitioner());
         }
 
+        LOG.info("using producer config {}", props);
+
         return props;
     }
 
-    private Partitioner lagBasedPartitioner() {
+    private Class<? extends Partitioner> lagBasedPartitioner() {
         Map<String, Object> adminConfig = new HashMap<>();
         adminConfig.put(AdminClientConfig.BOOTSTRAP_SERVERS_CONFIG, properties.getBootstrapServers());
         PartitionLagAnalyzer lagAnalyzer = new PartitionLagAnalyzer(Admin.create(adminConfig), properties);
         lagAnalyzer.start(); //TODO start/stop analyzer properly
-        return new LagBasedPartitioner(lagAnalyzer);
+        return LagBasedPartitioner.class;
     }
 
     private ProducerFactory<String, M> producerFactory() {

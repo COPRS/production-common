@@ -13,11 +13,12 @@ public class LagBasedPartitioner implements Partitioner {
     private static final Logger LOG = LoggerFactory.getLogger(LagBasedPartitioner.class);
 
     private final Partitioner backupPartitioner = new DefaultPartitioner();
-    private final PartitionLagAnalyzer lagAnalyzer;
+    private final PartitionLagAnalyzer lagAnalyzer = null;
 
-    public LagBasedPartitioner(PartitionLagAnalyzer lagAnalyzer) {
-        this.lagAnalyzer = lagAnalyzer;
-    }
+
+//    public LagBasedPartitioner(PartitionLagAnalyzer lagAnalyzer) {
+//        this.lagAnalyzer = lagAnalyzer;
+//    }
 
     @Override
     public int partition(String topic, Object key, byte[] keyBytes, Object value, byte[] valueBytes, Cluster cluster) {
