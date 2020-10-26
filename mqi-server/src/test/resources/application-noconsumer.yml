@@ -8,7 +8,7 @@ logging:
   
 # Kafka
 kafka:
-  bootstrap-servers: ${spring.embedded.kafka.brokers}
+  bootstrap-servers: localhost:9093
   hostname: wrapper-0
   client-id: wrapper
   error-topic: t-pdgs-errors

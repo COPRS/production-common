@@ -10,7 +10,6 @@ import org.junit.Test;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
-import org.springframework.kafka.support.Acknowledgment;
 
 import esa.s1pdgs.cpoc.appcatalog.client.mqi.AppCatalogMqiService;
 import esa.s1pdgs.cpoc.appcatalog.rest.AppCatMessageDto;
@@ -21,9 +20,10 @@ import esa.s1pdgs.cpoc.common.ProductFamily;
 import esa.s1pdgs.cpoc.common.errors.AbstractCodedException;
 import esa.s1pdgs.cpoc.common.errors.appcatalog.AppCatalogMqiGetOffsetApiError;
 import esa.s1pdgs.cpoc.common.errors.processing.StatusProcessingApiError;
+import esa.s1pdgs.cpoc.message.Acknowledgement;
+import esa.s1pdgs.cpoc.message.Consumption;
+import esa.s1pdgs.cpoc.message.kafka.config.KafkaProperties;
 import esa.s1pdgs.cpoc.mqi.model.queue.ProductionEvent;
-import esa.s1pdgs.cpoc.mqi.server.config.KafkaProperties;
-import esa.s1pdgs.cpoc.mqi.server.consumption.kafka.consumer.GenericConsumer;
 
 public class AppCatalogMessagePersistenceTest {
 
@@ -36,11 +36,8 @@ public class AppCatalogMessagePersistenceTest {
     @Mock
     private KafkaProperties.KafkaConsumerProperties consumerProperties;
 
-    /**
-     * Generic consumer
-     */
     @Mock
-    private GenericConsumer<ProductionEvent> genericConsumer;
+    private Consumption consumption;
 
     /**
      * Service for checking if a message is processing or not by another
@@ -55,7 +52,7 @@ public class AppCatalogMessagePersistenceTest {
      * Kafka acknowledgement
      */
     @Mock
-    private Acknowledgment acknowledgment;
+    private Acknowledgement acknowledgment;
 
 
     /**
@@ -86,9 +83,6 @@ public class AppCatalogMessagePersistenceTest {
         doReturn("group-name").when(consumerProperties).getGroupId();
 
         doNothing().when(acknowledgment).acknowledge();
-
-        doNothing().when(genericConsumer).pause();
-        //doNothing().when(acknowledgment).acknowledge();
 
         doReturn(-2L).when(mqiService).getEarliestOffset(Mockito.anyString(),
                 Mockito.eq(0), Mockito.anyString());
@@ -266,14 +260,14 @@ public class AppCatalogMessagePersistenceTest {
         doReturn(msgLight).when(mqiService).read(Mockito.any(), Mockito.anyString(),
                 Mockito.anyInt(), Mockito.anyLong(), Mockito.any());
 
-        messagePersistence.read(data, acknowledgment, genericConsumer, ProductCategory.AUXILIARY_FILES);
+        messagePersistence.read(data, acknowledgment, consumption, ProductCategory.AUXILIARY_FILES);
 
         verify(acknowledgment, times(1)).acknowledge();
-        verifyZeroInteractions(otherAppService);
+        verifyNoInteractions(otherAppService);
         if (pause) {
-            verify(genericConsumer, times(1)).pause();
+            verify(consumption, times(1)).pause();
         } else {
-            verifyZeroInteractions(genericConsumer);
+            verifyNoInteractions(consumption);
         }
     }
 
@@ -294,10 +288,10 @@ public class AppCatalogMessagePersistenceTest {
         doReturn(true).when(otherAppService).isProcessing(Mockito.anyString(),
                 Mockito.any(), Mockito.anyLong());
 
-        messagePersistence.read(data, acknowledgment, genericConsumer, ProductCategory.AUXILIARY_FILES);
+        messagePersistence.read(data, acknowledgment, consumption, ProductCategory.AUXILIARY_FILES);
 
         verify(acknowledgment, times(1)).acknowledge();
-        verifyZeroInteractions(genericConsumer);
+        verifyNoInteractions(consumption);
         verify(otherAppService, times(1)).isProcessing(Mockito.eq("other-name"),
                 Mockito.eq(ProductCategory.AUXILIARY_FILES), Mockito.eq(1234L));
     }
@@ -333,7 +327,7 @@ public class AppCatalogMessagePersistenceTest {
         doReturn(false).when(otherAppService).isProcessing(Mockito.anyString(),
                 Mockito.any(), Mockito.anyLong());
 
-        messagePersistence.read(data, acknowledgment, genericConsumer, ProductCategory.AUXILIARY_FILES);
+        messagePersistence.read(data, acknowledgment, consumption, ProductCategory.AUXILIARY_FILES);
 
         verify(mqiService, times(1)).read(Mockito.eq(ProductCategory.AUXILIARY_FILES),Mockito.eq(data.topic()),
                 Mockito.eq(data.partition()), Mockito.eq(data.offset()),
@@ -342,7 +336,7 @@ public class AppCatalogMessagePersistenceTest {
                 Mockito.eq(data.partition()), Mockito.eq(data.offset()),
                 Mockito.eq(expectedReadBodyForce));
         verify(acknowledgment, times(1)).acknowledge();
-        verify(genericConsumer, times(1)).pause();
+        verify(consumption, times(1)).pause();
         verify(otherAppService, times(1)).isProcessing(Mockito.eq("other-name"),
                 Mockito.eq(ProductCategory.AUXILIARY_FILES), Mockito.eq(1234L));
     }

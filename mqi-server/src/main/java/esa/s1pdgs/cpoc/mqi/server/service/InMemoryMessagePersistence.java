@@ -15,17 +15,17 @@ import java.util.concurrent.atomic.AtomicLong;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.springframework.kafka.support.Acknowledgment;
 
 import esa.s1pdgs.cpoc.appcatalog.rest.AppCatMessageDto;
 import esa.s1pdgs.cpoc.appcatalog.rest.AppCatSendMessageDto;
 import esa.s1pdgs.cpoc.common.MessageState;
 import esa.s1pdgs.cpoc.common.ProductCategory;
+import esa.s1pdgs.cpoc.message.Acknowledgement;
+import esa.s1pdgs.cpoc.message.Consumption;
+import esa.s1pdgs.cpoc.message.kafka.config.KafkaProperties;
 import esa.s1pdgs.cpoc.mqi.model.queue.AbstractMessage;
 import esa.s1pdgs.cpoc.mqi.model.rest.Ack;
-import esa.s1pdgs.cpoc.mqi.server.config.KafkaProperties;
 import esa.s1pdgs.cpoc.mqi.server.config.PersistenceConfiguration;
-import esa.s1pdgs.cpoc.mqi.server.consumption.kafka.consumer.GenericConsumer;
 
 public class InMemoryMessagePersistence<T extends AbstractMessage> implements MessagePersistence<T> {
 
@@ -46,7 +46,7 @@ public class InMemoryMessagePersistence<T extends AbstractMessage> implements Me
     }
 
     @Override
-    public void read(final ConsumerRecord<String, T> data, final Acknowledgment acknowledgment, final GenericConsumer<T> genericConsumer, final ProductCategory category) {
+    public void read(final ConsumerRecord<String, T> data, final Acknowledgement acknowledgment, final Consumption consumption, final ProductCategory category) {
 
         if(messageAlreadyRead(data)) {
             LOG.info("Message from kafka topic {} partition {} offset {}: already read, skipping",
@@ -73,7 +73,7 @@ public class InMemoryMessagePersistence<T extends AbstractMessage> implements Me
         //TODO any else fields to set?
         messages.add(new MessageAndAcknowledgement<>(newEntry, acknowledgment));
 
-        validateMessageSizesForConsumer(genericConsumer);
+        validateMessageSizesForConsumer(consumption, data.topic());
     }
 
     private boolean messageBelowMaxOffset(ConsumerRecord<String,T> data) {
@@ -165,13 +165,13 @@ public class InMemoryMessagePersistence<T extends AbstractMessage> implements Me
         return message.get();
     }
 
-    private void validateMessageSizesForConsumer(GenericConsumer<T> genericConsumer) {
-        final long countPerTopic = messages.stream().filter(m -> m.message.getTopic().equals(genericConsumer.getTopic())).count();
+    private void validateMessageSizesForConsumer(Consumption consumption, String topic) {
+        final long countPerTopic = messages.stream().filter(m -> m.message.getTopic().equals(topic)).count();
 
         //pause consumer to avoid memory leak, resuming is already handled in MessageConsumptionController
-        if (countPerTopic >= messageThresholdHigh && !genericConsumer.isPaused()) {
-            LOG.info("pausing consumer for topic {} ({} messages >= threshold {})", genericConsumer.getTopic(), countPerTopic, messageThresholdHigh);
-            genericConsumer.pause();
+        if (countPerTopic >= messageThresholdHigh && !consumption.isPaused()) {
+            LOG.info("pausing consumer for topic {} ({} messages >= threshold {})", topic, countPerTopic, messageThresholdHigh);
+            consumption.pause();
         }
     }
 
@@ -205,9 +205,9 @@ public class InMemoryMessagePersistence<T extends AbstractMessage> implements Me
 
     private static class MessageAndAcknowledgement<T> {
         private final AppCatMessageDto<T> message;
-        private final Acknowledgment acknowledgment;
+        private final Acknowledgement acknowledgment;
 
-        private MessageAndAcknowledgement(AppCatMessageDto<T> message, Acknowledgment acknowledgment) {
+        private MessageAndAcknowledgement(AppCatMessageDto<T> message, Acknowledgement acknowledgment) {
             this.message = message;
             this.acknowledgment = acknowledgment;
         }

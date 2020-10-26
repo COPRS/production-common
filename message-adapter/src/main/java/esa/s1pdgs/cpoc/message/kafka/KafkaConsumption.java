@@ -14,6 +14,11 @@ public class KafkaConsumption<M> implements Consumption {
     }
 
     @Override
+    public boolean isPaused() {
+        return kafkaContainer.isContainerPaused();
+    }
+
+    @Override
     public void resume() {
         kafkaContainer.resume();
     }

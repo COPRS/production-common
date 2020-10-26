@@ -1,18 +1,18 @@
-package esa.s1pdgs.cpoc.mqi.server.consumption.kafka.listener;
+package esa.s1pdgs.cpoc.mqi.server.consumption;
 
-import org.apache.kafka.clients.consumer.Consumer;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.springframework.kafka.listener.AcknowledgingConsumerAwareMessageListener;
-import org.springframework.kafka.support.Acknowledgment;
 
 import esa.s1pdgs.cpoc.appstatus.AppStatus;
 import esa.s1pdgs.cpoc.common.ProductCategory;
 import esa.s1pdgs.cpoc.common.errors.AbstractCodedException;
 import esa.s1pdgs.cpoc.common.utils.LogUtils;
+import esa.s1pdgs.cpoc.message.Acknowledgement;
+import esa.s1pdgs.cpoc.message.Consumption;
+import esa.s1pdgs.cpoc.message.Message;
+import esa.s1pdgs.cpoc.message.MessageConsumer;
 import esa.s1pdgs.cpoc.mqi.model.queue.AbstractMessage;
-import esa.s1pdgs.cpoc.mqi.server.consumption.kafka.consumer.GenericConsumer;
 import esa.s1pdgs.cpoc.mqi.server.service.MessagePersistence;
 
 /**
@@ -27,27 +27,29 @@ import esa.s1pdgs.cpoc.mqi.server.service.MessagePersistence;
  * @author Viveris Technologies
  * @param <T>
  */
-public final class GenericMessageListener<T extends AbstractMessage> implements AcknowledgingConsumerAwareMessageListener<String, T> {
+public final class GenericMessageListener<T extends AbstractMessage> implements MessageConsumer<T> {
 
     private static final Logger LOGGER = LogManager.getLogger(GenericMessageListener.class);
 
 	private final MessagePersistence<T> messagePersistence;
-	private final GenericConsumer<T> genericConsumer;
-    private final AppStatus appStatus;    
+    private final AppStatus appStatus;
     private final ProductCategory category;
+    private final String topic;
+    private final Class<T> messageType;
 
 	public GenericMessageListener(
     		final ProductCategory category,
             final MessagePersistence<T> messagePersistence,
-            final GenericConsumer<T> genericConsumer,
-            final AppStatus appStatus
+            final AppStatus appStatus,
+			final String topic,
+			final Class<T> messageType
     ) {
     	this.category = category;
 		this.messagePersistence = messagePersistence;
-		this.genericConsumer = genericConsumer;
         this.appStatus = appStatus;
+        this.topic = topic;
+        this.messageType = messageType;
 	}
-    
 
 
     /**
@@ -55,23 +57,24 @@ public final class GenericMessageListener<T extends AbstractMessage> implements 
      */
     @Override
     public void onMessage(
-    		final ConsumerRecord<String, T> data,
-            final Acknowledgment acknowledgment,
-            final Consumer<?, ?> consumer
+			final Message<T> message,
+			final Acknowledgement acknowledgment,
+			final Consumption consumption
     ) {
 
         try {
         	// handle invalid message type
-        	if (!category.getDtoClass().isAssignableFrom(data.value().getClass())) {
-        		LOGGER.debug("Invalid message type '{}' detected: {}", data.value().getClass().getName(), data.value());
-        	    acknowledge(data, acknowledgment);
+        	if (!category.getDtoClass().isAssignableFrom(message.data().getClass())) {
+        		LOGGER.debug("Invalid message type '{}' detected: {}", message.data().getClass().getName(), message.data());
+        	    acknowledge(message, acknowledgment);
         	    return;
         	}
-        	final T message = data.value();
-        	LOGGER.debug("Handling message from kafka topic {} partition {} offset {}: {}", data.topic(), data.partition(), data.offset(), message);
+        	@SuppressWarnings("unchecked")
+        	final ConsumerRecord<String, T> kafkaRecord = (ConsumerRecord<String, T>) message.internalMessage();
+        	LOGGER.debug("Handling message from kafka topic {} partition {} offset {}: {}", kafkaRecord.topic(), kafkaRecord.partition(), kafkaRecord.offset(), message);
         	
             // Save message
-			messagePersistence.read(data, acknowledgment, genericConsumer, category);
+			messagePersistence.read(kafkaRecord, acknowledgment, consumption, category);
             appStatus.setWaiting();
         } catch (final Exception e) {        	
         	if (e instanceof AbstractCodedException) {
@@ -88,22 +91,35 @@ public final class GenericMessageListener<T extends AbstractMessage> implements 
         }
     }
 
+	@Override
+	public Class<T> messageType() {
+		return messageType;
+	}
+
+	@Override
+	public String topic() {
+		return topic;
+	}
+
 	/**
 	 * Acknowledge KAFKA message
 	 *
 	 */
-	final void acknowledge(final ConsumerRecord<String, T> data,
-						   final Acknowledgment acknowledgment) {
+	final void acknowledge(final Message<T> message,
+						   final Acknowledgement acknowledgment) {
 		try {
-			LOGGER.debug("Acknowledging KAFKA message: {}", data.value());
+			LOGGER.debug("Acknowledging KAFKA message: {}", message.data());
 			acknowledgment.acknowledge();
 		} catch (final Exception e) {
+			@SuppressWarnings("unchecked")
+			ConsumerRecord<String, T> kafkaRecord = (ConsumerRecord<String, T>) message.internalMessage();
+
 			LOGGER.error(
 					"Error on acknowledging KAFKA message (topic: {}, partition: {}, offset: {}) {} : {}",
-					data.topic(),
-					data.partition(),
-					data.offset(),
-					data.value(),
+					kafkaRecord.topic(),
+					kafkaRecord.partition(),
+					kafkaRecord.offset(),
+					kafkaRecord.value(),
 					LogUtils.toString(e)
 			);
 		}

@@ -1,36 +1,32 @@
-package esa.s1pdgs.cpoc.mqi.server.config;
+package esa.s1pdgs.cpoc.message.kafka.config;
 
 import static org.junit.Assert.assertEquals;
 
-import org.junit.ClassRule;
+import java.util.Collections;
+
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.kafka.test.rule.EmbeddedKafkaRule;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.junit4.SpringRunner;
 
-import esa.s1pdgs.cpoc.mqi.server.config.KafkaProperties.KafkaConsumerProperties;
-import esa.s1pdgs.cpoc.mqi.server.config.KafkaProperties.KafkaListenerProperties;
-import esa.s1pdgs.cpoc.mqi.server.config.KafkaProperties.KafkaProducerProperties;
+import esa.s1pdgs.cpoc.message.MessageConsumerFactory;
+
 
 /**
  * Check the initialization of the kafka properties
- * 
+ *
  * @author Viveris Technologies
  */
 @RunWith(SpringRunner.class)
 @SpringBootTest
 @DirtiesContext
+@SpringBootApplication
 public class KafkaPropertiesTest {
-
-    /**
-     * Embedded Kafka
-     */
-    @ClassRule
-    public static EmbeddedKafkaRule embeddedKafka =
-            new EmbeddedKafkaRule(1, true, "t-pdgs-aio-execution-jobs");
 
     /**
      * Properties to test
@@ -68,11 +64,11 @@ public class KafkaPropertiesTest {
      */
     @Test
     public void testSetters() {
-        final KafkaProducerProperties producer = new KafkaProducerProperties();
+        final KafkaProperties.KafkaProducerProperties producer = new KafkaProperties.KafkaProducerProperties();
         producer.setMaxRetries(5);
-        final KafkaListenerProperties listener = new KafkaListenerProperties();
+        final KafkaProperties.KafkaListenerProperties listener = new KafkaProperties.KafkaListenerProperties();
         listener.setPollTimeoutMs(50);
-        final KafkaConsumerProperties consumer = new KafkaConsumerProperties();
+        final KafkaProperties.KafkaConsumerProperties consumer = new KafkaProperties.KafkaConsumerProperties();
         consumer.setGroupId("group-id");
         consumer.setHeartbeatIntvMs(1);
         consumer.setMaxPollIntervalMs(2);
@@ -111,4 +107,11 @@ public class KafkaPropertiesTest {
         assertEquals(5, properties.getProducer().getMaxRetries());
     }
 
+    @Configuration
+    public static class TestConfig {
+        @Bean
+        public MessageConsumerFactory<Object> emptyFactory() {
+            return Collections::emptyList;
+        }
+    }
 }

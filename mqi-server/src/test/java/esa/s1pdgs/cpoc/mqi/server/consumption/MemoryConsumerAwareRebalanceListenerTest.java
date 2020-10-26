@@ -1,4 +1,4 @@
-package esa.s1pdgs.cpoc.mqi.server.consumption.kafka.listener;
+package esa.s1pdgs.cpoc.mqi.server.consumption;
 
 import static java.util.Collections.singletonList;
 import static org.junit.Assert.assertEquals;
@@ -36,12 +36,12 @@ public class MemoryConsumerAwareRebalanceListenerTest {
      * Service of applicative data
      */
     @Mock
-    private MessagePersistence messagePersistence;
+    private MessagePersistence<?> messagePersistence;
 
     /**
      * Listener to test
      */
-    private MemoryConsumerAwareRebalanceListener listener;
+    private MemoryConsumerAwareRebalanceListener<?> listener;
 
     /**
      * Partitions
@@ -78,7 +78,7 @@ public class MemoryConsumerAwareRebalanceListenerTest {
                         .when(messagePersistence).getEarliestOffset(Mockito.anyString(),
                                 Mockito.eq(5), Mockito.anyString());
 
-        listener = new MemoryConsumerAwareRebalanceListener(messagePersistence,
+        listener = new MemoryConsumerAwareRebalanceListener<>(messagePersistence,
                 "groupname", -2);
     }
 
@@ -89,8 +89,8 @@ public class MemoryConsumerAwareRebalanceListenerTest {
     @Test
     public void testConstructor() {
 
-        MemoryConsumerAwareRebalanceListener listener =
-                new MemoryConsumerAwareRebalanceListener(messagePersistence, "groupname",
+        MemoryConsumerAwareRebalanceListener<?> listener =
+                new MemoryConsumerAwareRebalanceListener<>(messagePersistence, "groupname",
                         -2);
         assertEquals(-2, listener.getDefaultMode());
         assertEquals("groupname", listener.getGroup());
@@ -102,7 +102,7 @@ public class MemoryConsumerAwareRebalanceListenerTest {
     @Test
     public void testonPartitionsRevokedBeforeCommit() {
         listener.onPartitionsRevokedBeforeCommit(consumer, partitions);
-        verifyZeroInteractions(messagePersistence);
+        verifyNoInteractions(messagePersistence);
     }
 
     /**

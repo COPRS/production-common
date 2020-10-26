@@ -1,4 +1,4 @@
-package esa.s1pdgs.cpoc.mqi.server.consumption.kafka.listener;
+package esa.s1pdgs.cpoc.mqi.server.consumption;
 
 import static org.mockito.Mockito.*;
 
@@ -11,7 +11,6 @@ import org.junit.rules.ExpectedException;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
-import org.springframework.kafka.support.Acknowledgment;
 
 import esa.s1pdgs.cpoc.appstatus.AppStatus;
 import esa.s1pdgs.cpoc.common.ProductCategory;
@@ -19,10 +18,10 @@ import esa.s1pdgs.cpoc.common.ProductFamily;
 import esa.s1pdgs.cpoc.common.errors.AbstractCodedException;
 import esa.s1pdgs.cpoc.common.errors.appcatalog.AppCatalogMqiGetOffsetApiError;
 import esa.s1pdgs.cpoc.common.errors.appcatalog.AppCatalogMqiReadApiError;
+import esa.s1pdgs.cpoc.message.Acknowledgement;
+import esa.s1pdgs.cpoc.message.Consumption;
+import esa.s1pdgs.cpoc.message.Message;
 import esa.s1pdgs.cpoc.mqi.model.queue.ProductionEvent;
-import esa.s1pdgs.cpoc.mqi.server.config.KafkaProperties;
-import esa.s1pdgs.cpoc.mqi.server.config.KafkaProperties.KafkaConsumerProperties;
-import esa.s1pdgs.cpoc.mqi.server.consumption.kafka.consumer.GenericConsumer;
 import esa.s1pdgs.cpoc.mqi.server.service.MessagePersistence;
 
 /**
@@ -36,30 +35,19 @@ public class GenericMessageListenerTest {
     public ExpectedException thrown = ExpectedException.none();
 
     /**
-     * Properties
-     */
-    @Mock
-    private KafkaProperties properties;
-    @Mock
-    private KafkaConsumerProperties consumerProperties;
-
-    /**
      * Service for persisting data
      */
     @Mock
     private MessagePersistence<ProductionEvent> service;
 
     /**
-     * Generic consumer
+     * Message acknowledgement
      */
     @Mock
-    private GenericConsumer<ProductionEvent> genericConsumer;
+    private Acknowledgement acknowledgment;
 
-    /**
-     * Kafka acknowledgement
-     */
     @Mock
-    private Acknowledgment acknowledgment;
+    private Consumption consumption;
 
     /**
      * Application status
@@ -81,7 +69,10 @@ public class GenericMessageListenerTest {
     /**
      * Received record
      */
-    private ConsumerRecord<String, ProductionEvent> data;
+    @Mock
+    private Message<ProductionEvent> data;
+
+    private ConsumerRecord<String, ProductionEvent> interalData;
 
     /**
      * Initialization
@@ -91,34 +82,40 @@ public class GenericMessageListenerTest {
     public void init() throws AbstractCodedException {
         MockitoAnnotations.initMocks(this);
         
-        final ProductionEvent dto = new ProductionEvent("foo", "bar", ProductFamily.AUXILIARY_FILE);
+        final ProductionEvent dto = new ProductionEvent(
+                "foo",
+                "bar",
+                ProductFamily.AUXILIARY_FILE);
 
-        data = new ConsumerRecord<>("topic", 1, 145L,
+        interalData = new ConsumerRecord<>("topic", 1, 145L,
                 "key-record", dto);
 
-        doReturn("pod-name").when(properties).getHostname();
-        doReturn(consumerProperties).when(properties).getConsumer();
-        doReturn("group-name").when(consumerProperties).getGroupId();
+        doReturn(interalData).when(data).internalMessage();
+        doReturn(dto).when(data).data();
 
         doNothing().when(appStatus).setWaiting();
         doNothing().when(appStatus).setError("MQI");
 
-        doNothing().when(genericConsumer).pause();
         doNothing().when(acknowledgment).acknowledge();
 
         doReturn(-2L).when(service).getEarliestOffset(Mockito.anyString(),
-                Mockito.eq(0), Mockito.anyString());
+                eq(0), Mockito.anyString());
         doReturn(-1L).when(service).getEarliestOffset(Mockito.anyString(),
-                Mockito.eq(1), Mockito.anyString());
+                eq(1), Mockito.anyString());
         doReturn(0L).when(service).getEarliestOffset(Mockito.anyString(),
-                Mockito.eq(2), Mockito.anyString());
+                eq(2), Mockito.anyString());
         doReturn(128L).when(service).getEarliestOffset(Mockito.anyString(),
-                Mockito.eq(3), Mockito.anyString());
+                eq(3), Mockito.anyString());
         doThrow(new AppCatalogMqiGetOffsetApiError("uri", "message"))
                         .when(service).getEarliestOffset(Mockito.anyString(),
-                                Mockito.eq(4), Mockito.anyString());
+                                eq(4), Mockito.anyString());
 
-        listener = new GenericMessageListener<>(ProductCategory.AUXILIARY_FILES, service, genericConsumer, appStatus);
+        listener = new GenericMessageListener<>(
+                ProductCategory.AUXILIARY_FILES,
+                service,
+                appStatus,
+                "topic",
+                ProductionEvent.class);
     }
 
     /**
@@ -130,8 +127,7 @@ public class GenericMessageListenerTest {
 
         verify(acknowledgment, times(1)).acknowledge();
         verifyNoMoreInteractions(acknowledgment);
-        verifyZeroInteractions(genericConsumer);
-        verifyZeroInteractions(service);
+        verifyNoInteractions(service);
     }
 
     /**
@@ -145,8 +141,7 @@ public class GenericMessageListenerTest {
 
         verify(acknowledgment, times(1)).acknowledge();
         verifyNoMoreInteractions(acknowledgment);
-        verifyZeroInteractions(genericConsumer);
-        verifyZeroInteractions(service);
+        verifyNoInteractions(service);
     }
 
 
@@ -156,10 +151,15 @@ public class GenericMessageListenerTest {
      */
     @Test
     public void testOnMessage() throws Exception {
-        listener.onMessage(data, acknowledgment, onMsgConsumer);
+        listener.onMessage(data, acknowledgment, consumption);
 
-        verifyZeroInteractions(onMsgConsumer);
-        verify(service, times(1)).read(Mockito.eq(data), Mockito.eq(acknowledgment), Mockito.eq(genericConsumer), Mockito.eq(ProductCategory.AUXILIARY_FILES));
+        verifyNoInteractions(onMsgConsumer);
+        verify(service, times(1)).read(
+                eq(interalData),
+                eq(acknowledgment),
+                eq(consumption),
+                eq(ProductCategory.AUXILIARY_FILES));
+
         verify(appStatus, times(1)).setWaiting();
     }
 
@@ -171,14 +171,23 @@ public class GenericMessageListenerTest {
     public void testOnMessageWhenFirstReadFails()
             throws Exception {
         doThrow(new AppCatalogMqiReadApiError(ProductCategory.AUXILIARY_FILES,
-                "uri", "dto-object", "error-message")).when(service).read(Mockito.any(), Mockito.any(), Mockito.eq(genericConsumer), Mockito.eq(ProductCategory.AUXILIARY_FILES));
+                "uri", "dto-object", "error-message")).when(service)
+                .read(
+                        Mockito.any(),
+                        Mockito.any(),
+                        eq(consumption),
+                        eq(ProductCategory.AUXILIARY_FILES));
 
-        listener.onMessage(data, acknowledgment, onMsgConsumer);
+        listener.onMessage(data, acknowledgment, consumption);
 
         verify(appStatus, times(1)).setError("MQI");
         verifyNoMoreInteractions(appStatus);
-        verifyZeroInteractions(onMsgConsumer);
-        verifyZeroInteractions(genericConsumer);
-        verify(service, times(1)).read(Mockito.eq(data), Mockito.eq(acknowledgment), Mockito.eq(genericConsumer), Mockito.eq(ProductCategory.AUXILIARY_FILES));
+        verifyNoInteractions(consumption);
+        verify(service, times(1))
+                .read(
+                        eq(interalData),
+                        eq(acknowledgment),
+                        eq(consumption),
+                        eq(ProductCategory.AUXILIARY_FILES));
     }
 }

@@ -18,6 +18,7 @@ import org.springframework.context.annotation.Configuration;
 
 import esa.s1pdgs.cpoc.appcatalog.client.mqi.AppCatalogMqiService;
 import esa.s1pdgs.cpoc.appstatus.AppStatus;
+import esa.s1pdgs.cpoc.message.kafka.config.KafkaProperties;
 import esa.s1pdgs.cpoc.mqi.model.queue.AbstractMessage;
 import esa.s1pdgs.cpoc.mqi.server.service.AppCatalogMessagePersistence;
 import esa.s1pdgs.cpoc.mqi.server.service.InMemoryMessagePersistence;

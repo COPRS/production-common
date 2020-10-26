@@ -16,12 +16,12 @@ import esa.s1pdgs.cpoc.common.ProductFamily;
 import esa.s1pdgs.cpoc.common.errors.mqi.MqiCategoryNotAvailable;
 import esa.s1pdgs.cpoc.common.errors.mqi.MqiPublicationError;
 import esa.s1pdgs.cpoc.common.errors.mqi.MqiRouteNotAvailable;
+import esa.s1pdgs.cpoc.message.MessageProducer;
 import esa.s1pdgs.cpoc.mqi.model.queue.AbstractMessage;
 import esa.s1pdgs.cpoc.mqi.server.config.ApplicationProperties;
 import esa.s1pdgs.cpoc.mqi.server.config.ApplicationProperties.ProductCategoryProperties;
 import esa.s1pdgs.cpoc.mqi.server.config.ApplicationProperties.ProductCategoryPublicationProperties;
 import esa.s1pdgs.cpoc.mqi.server.converter.XmlConverter;
-import esa.s1pdgs.cpoc.mqi.server.publication.kafka.producer.GenericProducer;
 import esa.s1pdgs.cpoc.mqi.server.publication.routing.DefaultRoute;
 import esa.s1pdgs.cpoc.mqi.server.publication.routing.Route;
 import esa.s1pdgs.cpoc.mqi.server.publication.routing.Routing;
@@ -32,25 +32,25 @@ import esa.s1pdgs.cpoc.mqi.server.publication.routing.Routing;
  * @author Viveris Technologies
  */
 @Controller
-public class MessagePublicationController {
+public class MessagePublicationController<M extends AbstractMessage> {
 
 	private static final Logger LOGGER = LogManager.getLogger(MessagePublicationController.class);
 
 	private final Map<ProductCategory, Routing> routing;
 	private final ApplicationProperties appProperties;
 	private final XmlConverter xmlConverter;	
-	private final GenericProducer kafkaProducer;
+	private final MessageProducer<M> messageProducer;
 
 	@Autowired
 	public MessagePublicationController(
 			final ApplicationProperties appProperties,
 			final XmlConverter xmlConverter,
-			final GenericProducer kafkaProducer
+			final MessageProducer<M> messageProducer
 	) {
 		this.routing = new HashMap<>();
 		this.appProperties = appProperties;
 		this.xmlConverter = xmlConverter;
-		this.kafkaProducer = kafkaProducer;
+		this.messageProducer = messageProducer;
 	}
 
 	@PostConstruct
@@ -75,11 +75,11 @@ public class MessagePublicationController {
 	 * Publish a message of a given category
 	 * 
 	 */
-	public void publish(ProductCategory category, AbstractMessage dto, String inputKey, String outputKey)
+	public void publish(ProductCategory category, M dto, String inputKey, String outputKey)
 			throws MqiPublicationError, MqiCategoryNotAvailable, MqiRouteNotAvailable {		
 		final String topic = getTopic(category, dto.getProductFamily(), inputKey, outputKey);
 		LOGGER.debug("== Publishing message {}, to topic {} ", dto, topic);
-		kafkaProducer.send(topic, dto);
+		messageProducer.send(topic, dto);
 	}
 
 	/**

@@ -4,6 +4,8 @@ public interface Consumption {
 
     void pause();
 
+    boolean isPaused();
+
     void resume();
 
 }

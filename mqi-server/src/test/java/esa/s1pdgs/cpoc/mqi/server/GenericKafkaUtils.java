@@ -1,41 +1,11 @@
 package esa.s1pdgs.cpoc.mqi.server;
 
-import java.util.Map;
-import java.util.UUID;
+public class GenericKafkaUtils {
 
-import org.apache.kafka.clients.consumer.Consumer;
-import org.apache.kafka.clients.consumer.ConsumerConfig;
-import org.apache.kafka.clients.consumer.ConsumerRecord;
-import org.apache.kafka.clients.producer.Producer;
-import org.apache.kafka.clients.producer.ProducerConfig;
-import org.apache.kafka.clients.producer.ProducerRecord;
-import org.apache.kafka.common.serialization.StringDeserializer;
-import org.apache.kafka.common.serialization.StringSerializer;
-import org.springframework.kafka.core.DefaultKafkaConsumerFactory;
-import org.springframework.kafka.core.DefaultKafkaProducerFactory;
-import org.springframework.kafka.support.serializer.JsonDeserializer;
-import org.springframework.kafka.support.serializer.JsonSerializer;
-import org.springframework.kafka.test.rule.EmbeddedKafkaRule;
-import org.springframework.kafka.test.utils.KafkaTestUtils;
-
-import com.fasterxml.jackson.annotation.JsonInclude;
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
-
-import esa.s1pdgs.cpoc.mqi.model.queue.IngestionEvent;
-import esa.s1pdgs.cpoc.mqi.model.queue.IpfExecutionJob;
-import esa.s1pdgs.cpoc.mqi.model.queue.LevelReportDto;
-import esa.s1pdgs.cpoc.mqi.model.queue.ProductionEvent;
-
-public class GenericKafkaUtils<T> {
-
-    public final static String TOPIC_ERROR = "t-pdgs-errors";
     public final static String TOPIC_L0_JOBS = "t-pdgs-aio-execution-jobs";
     public final static String TOPIC_L0_PRODUCTS = "t-pdgs-aio-l0-slice-production-events-nrt"; // t-pdgs-l0-slices -> t-pdgs-aio-l0-slice-production-events-nrt
-    public final static String TOPIC_L0_ACNS = "t-pdgs-aio-l0-acn-production-events-nrt";
     public final static String TOPIC_L0_REPORTS = "t-pdgs-aio-production-report-events";
     public final static String TOPIC_L1_JOBS = "t-pdgs-l1-execution-jobs-nrt"; // ok t-pdgs-l1-jobs -> t-pdgs-l1-execution-jobs-nrt
-    public final static String TOPIC_L1_PRODUCTS = "t-pdgs-l0asp-l1-slice-production-events-nrt"; // ???
     public final static String TOPIC_L1_ACNS = "t-pdgs-l1-acn-production-events-nrt"; // t-pdgs-l1-acns -> t-pdgs-l1-acn-production-events-nrt
     public final static String TOPIC_L1_REPORTS = "t-pdgs-l1-production-report-events";
     public final static String TOPIC_EDRS_SESSIONS = "t-pdgs-session-file-ingestion-events";
@@ -43,117 +13,6 @@ public class GenericKafkaUtils<T> {
     public final static String TOPIC_L0_SEGMENTS = "t-pdgs-aio-l0-segment-production-events";
     
     public final static String TOPIC_L2_JOBS = "t-pdgs-l2-execution-jobs-fast"; // ok t-pdgs-l2-jobs -> t-pdgs-l2-execution-jobs-fast
-    public final static String TOPIC_L2_PRODUCTS = "t-pdgs-l2-slices-production-events-fast";
-    public final static String TOPIC_L2_ACNS = "t-pdgs-l2-acn-production-events-fast";
-    public final static String TOPIC_L2_REPORTS = "t-pdgs-l2-production-report-events";      
+    public final static String TOPIC_L2_REPORTS = "t-pdgs-l2-production-report-events";
     
-    private final EmbeddedKafkaRule embeddedKafka;
-
-    public GenericKafkaUtils(final EmbeddedKafkaRule embeddedKafka) {
-        this.embeddedKafka = embeddedKafka;
-    }
-
-    public ConsumerRecord<String, T> getReceivedRecord(String topic) {
-        Consumer<String, T> consumer =
-                new DefaultKafkaConsumerFactory<String, T>(consumerProps())
-                        .createConsumer();
-        embeddedKafka.getEmbeddedKafka().consumeFromAnEmbeddedTopic(consumer, topic);
-        return KafkaTestUtils.getSingleRecord(consumer, topic);
-    }
-
-    public ConsumerRecord<String, IngestionEvent> getReceivedRecordEdrsSession(
-            String topic) {
-        Consumer<String, IngestionEvent> consumer =
-                new DefaultKafkaConsumerFactory<>(
-                        consumerProps(), new StringDeserializer(),
-                        new JsonDeserializer<>(IngestionEvent.class)).createConsumer();
-        embeddedKafka.getEmbeddedKafka().consumeFromAnEmbeddedTopic(consumer, topic);
-        return KafkaTestUtils.getSingleRecord(consumer, topic);
-    }
-
-    public ConsumerRecord<String, ProductionEvent> getReceivedRecordAux(
-            String topic) {
-        Consumer<String, ProductionEvent> consumer =
-                new DefaultKafkaConsumerFactory<>(
-                        consumerProps(), new StringDeserializer(),
-                        new JsonDeserializer<>(ProductionEvent.class)).createConsumer();
-        embeddedKafka.getEmbeddedKafka().consumeFromAnEmbeddedTopic(consumer, topic);
-        return KafkaTestUtils.getSingleRecord(consumer, topic);
-    }
-
-    public ConsumerRecord<String, IpfExecutionJob> getReceivedRecordJobs(
-            String topic) {
-        Consumer<String, IpfExecutionJob> consumer =
-                new DefaultKafkaConsumerFactory<>(
-                        consumerProps(), new StringDeserializer(),
-                        new JsonDeserializer<>(IpfExecutionJob.class)).createConsumer();
-        embeddedKafka.getEmbeddedKafka().consumeFromAnEmbeddedTopic(consumer, topic);
-        return KafkaTestUtils.getSingleRecord(consumer, topic);
-    }
-
-    public ConsumerRecord<String, ProductionEvent> getReceivedRecordProducts(
-            String topic) {
-        Consumer<String, ProductionEvent> consumer =
-                new DefaultKafkaConsumerFactory<>(
-                        consumerProps(), new StringDeserializer(),
-                        new JsonDeserializer<>(ProductionEvent.class)).createConsumer();
-        embeddedKafka.getEmbeddedKafka().consumeFromAnEmbeddedTopic(consumer, topic);
-        return KafkaTestUtils.getSingleRecord(consumer, topic);
-    }
-
-    public ConsumerRecord<String, ProductionEvent> getReceivedRecordSegments(
-            String topic) {
-        Consumer<String, ProductionEvent> consumer =
-                new DefaultKafkaConsumerFactory<>(
-                        consumerProps(), new StringDeserializer(),
-                        new JsonDeserializer<>(ProductionEvent.class)).createConsumer();
-        embeddedKafka.getEmbeddedKafka().consumeFromAnEmbeddedTopic(consumer, topic);
-        return KafkaTestUtils.getSingleRecord(consumer, topic);
-    }
-
-    public ConsumerRecord<String, LevelReportDto> getReceivedRecordReports(
-            String topic) {
-        Consumer<String, LevelReportDto> consumer =
-                new DefaultKafkaConsumerFactory<>(
-                        consumerProps(), new StringDeserializer(),
-                        new JsonDeserializer<>(LevelReportDto.class)).createConsumer();
-        embeddedKafka.getEmbeddedKafka().consumeFromAnEmbeddedTopic(consumer, topic);
-        return KafkaTestUtils.getSingleRecord(consumer, topic);
-    }
-
-    public void sendMessageToKafka(T message, String topic)
-            throws InterruptedException,
-            java.util.concurrent.ExecutionException {
-        Producer<String, T> producer =
-                new DefaultKafkaProducerFactory<String, T>(producerProps())
-                        .createProducer();
-        producer.send(new ProducerRecord<>(topic, message)).get();
-    }
-
-    private Map<String, Object> consumerProps() {
-        Map<String, Object> props = KafkaTestUtils.consumerProps(
-                UUID.randomUUID().toString(), "true", embeddedKafka.getEmbeddedKafka());
-        props.put(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "earliest");
-        props.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG,
-                StringDeserializer.class);
-        props.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG,
-                JsonDeserializer.class);
-        return props;
-    }
-
-    private Map<String, Object> producerProps() {
-        Map<String, Object> props = KafkaTestUtils.producerProps(embeddedKafka.getEmbeddedKafka());
-        props.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG,
-                StringSerializer.class);
-        props.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG,
-                JsonSerializer.class);
-        return props;
-    }
-
-    public static String convertObjectToJsonString(Object dto)
-            throws JsonProcessingException {
-        ObjectMapper mapper = new ObjectMapper();
-        mapper.setSerializationInclusion(JsonInclude.Include.NON_NULL);
-        return mapper.writeValueAsString(dto);
-    }
 }

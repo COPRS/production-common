@@ -2,18 +2,17 @@ package esa.s1pdgs.cpoc.mqi.server.service;
 
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.Matchers.hasProperty;
-import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.verify;
 
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 
-import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.junit.Before;
-import org.junit.ClassRule;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
@@ -22,7 +21,6 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.kafka.test.rule.EmbeddedKafkaRule;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.junit4.SpringRunner;
 
@@ -32,6 +30,9 @@ import esa.s1pdgs.cpoc.common.ProductFamily;
 import esa.s1pdgs.cpoc.common.errors.mqi.MqiCategoryNotAvailable;
 import esa.s1pdgs.cpoc.common.errors.mqi.MqiPublicationError;
 import esa.s1pdgs.cpoc.common.errors.mqi.MqiRouteNotAvailable;
+import esa.s1pdgs.cpoc.message.MessageProducer;
+import esa.s1pdgs.cpoc.message.kafka.config.KafkaProperties;
+import esa.s1pdgs.cpoc.mqi.model.queue.AbstractMessage;
 import esa.s1pdgs.cpoc.mqi.model.queue.IngestionEvent;
 import esa.s1pdgs.cpoc.mqi.model.queue.IpfExecutionJob;
 import esa.s1pdgs.cpoc.mqi.model.queue.LevelReportDto;
@@ -40,9 +41,7 @@ import esa.s1pdgs.cpoc.mqi.server.GenericKafkaUtils;
 import esa.s1pdgs.cpoc.mqi.server.config.ApplicationProperties;
 import esa.s1pdgs.cpoc.mqi.server.config.ApplicationProperties.ProductCategoryProperties;
 import esa.s1pdgs.cpoc.mqi.server.config.ApplicationProperties.ProductCategoryPublicationProperties;
-import esa.s1pdgs.cpoc.mqi.server.config.KafkaProperties;
 import esa.s1pdgs.cpoc.mqi.server.converter.XmlConverter;
-import esa.s1pdgs.cpoc.mqi.server.publication.kafka.producer.GenericProducer;
 
 /**
  * @author Viveris Technologies
@@ -51,26 +50,6 @@ import esa.s1pdgs.cpoc.mqi.server.publication.kafka.producer.GenericProducer;
 @SpringBootTest
 @DirtiesContext
 public class MessagePublicationControllerTest {
-
-    @ClassRule
-    public static EmbeddedKafkaRule embeddedKafka = new EmbeddedKafkaRule(1, true,
-            GenericKafkaUtils.TOPIC_ERROR, 
-            GenericKafkaUtils.TOPIC_L0_PRODUCTS,
-            GenericKafkaUtils.TOPIC_L0_ACNS, 
-            GenericKafkaUtils.TOPIC_L0_REPORTS,
-            GenericKafkaUtils.TOPIC_L1_PRODUCTS,
-            GenericKafkaUtils.TOPIC_AUXILIARY_FILES,
-            GenericKafkaUtils.TOPIC_L1_ACNS, 
-            GenericKafkaUtils.TOPIC_L1_REPORTS,
-            GenericKafkaUtils.TOPIC_L0_JOBS, 
-            GenericKafkaUtils.TOPIC_L1_JOBS,
-            GenericKafkaUtils.TOPIC_EDRS_SESSIONS,
-            GenericKafkaUtils.TOPIC_L0_SEGMENTS,
-            GenericKafkaUtils.TOPIC_L2_JOBS,
-            GenericKafkaUtils.TOPIC_L2_REPORTS,
-            GenericKafkaUtils.TOPIC_L2_PRODUCTS,
-            GenericKafkaUtils.TOPIC_L2_ACNS
-            );
 
     @Rule
     public ExpectedException thrown = ExpectedException.none();
@@ -81,36 +60,27 @@ public class MessagePublicationControllerTest {
     @Autowired
     private XmlConverter xmlConverter;
     
-    @Autowired
-    private GenericProducer producer;
+    @Mock
+    private MessageProducer<AbstractMessage> producer;
 
     @Autowired
-    private MessagePublicationController autowiredController;
+    private MessagePublicationController<AbstractMessage> autowiredController;
 
     @Mock
     private ApplicationProperties appProperties;
 
-    private MessagePublicationController customController;
-    private GenericKafkaUtils<ProductionEvent> kafkaUtilsProducts;
-    private GenericKafkaUtils<LevelReportDto> kafkaUtilsReports;
-    private GenericKafkaUtils<IngestionEvent> kafkaUtilsEdrsSession;
-    private GenericKafkaUtils<IpfExecutionJob> kafkaUtilsJobs;
-    
+    private MessagePublicationController<AbstractMessage> customController;
+
     @Before
     public void init() {
         MockitoAnnotations.initMocks(this);
-
-        kafkaUtilsProducts = new GenericKafkaUtils<ProductionEvent>(embeddedKafka);
-        kafkaUtilsReports = new GenericKafkaUtils<LevelReportDto>(embeddedKafka);
-        kafkaUtilsEdrsSession = new GenericKafkaUtils<IngestionEvent>(embeddedKafka);
-        kafkaUtilsJobs = new GenericKafkaUtils<IpfExecutionJob>(embeddedKafka);
     }
 
     private void initCustomControllerForNoPublication() {
 
         doReturn(new HashMap<>()).when(appProperties).getProductCategories();
 
-        customController = new MessagePublicationController(appProperties,
+        customController = new MessagePublicationController<>(appProperties,
                  xmlConverter, producer);
         try {
             customController.initialize();
@@ -141,7 +111,7 @@ public class MessagePublicationControllerTest {
                         "./src/test/resources/routing-files/level-segments.xml")));
         doReturn(map).when(appProperties).getProductCategories();
 
-        customController = new MessagePublicationController(appProperties, xmlConverter, producer);
+        customController = new MessagePublicationController<>(appProperties, xmlConverter, producer);
         try {
             customController.initialize();
         } catch (IOException e) {
@@ -208,11 +178,7 @@ public class MessagePublicationControllerTest {
 
         customController.publish(ProductCategory.EDRS_SESSIONS, ingestionEvent, "NONE", "NONE");
 
-        final ConsumerRecord<String, IngestionEvent> record =
-                kafkaUtilsEdrsSession.getReceivedRecordEdrsSession(
-                        GenericKafkaUtils.TOPIC_EDRS_SESSIONS);
-
-        assertEquals(ingestionEvent, record.value());
+        verify(producer).send(eq(GenericKafkaUtils.TOPIC_EDRS_SESSIONS), eq(ingestionEvent));
     }
 
 
@@ -223,10 +189,7 @@ public class MessagePublicationControllerTest {
 
         customController.publish(ProductCategory.AUXILIARY_FILES, dto, "NONE", "NONE");
 
-        final ConsumerRecord<String, ProductionEvent> record = kafkaUtilsProducts
-                .getReceivedRecordAux(GenericKafkaUtils.TOPIC_AUXILIARY_FILES);
-
-        assertEquals(dto, record.value());
+        verify(producer).send(eq(GenericKafkaUtils.TOPIC_AUXILIARY_FILES), eq(dto));
     }
 
     @Test
@@ -237,10 +200,7 @@ public class MessagePublicationControllerTest {
 
         customController.publish(ProductCategory.LEVEL_PRODUCTS, dto, "NONE", "NONE");
 
-        final ConsumerRecord<String, ProductionEvent> record = kafkaUtilsProducts
-                .getReceivedRecordProducts(GenericKafkaUtils.TOPIC_L0_PRODUCTS);
-
-        assertEquals(dto, record.value());
+        verify(producer).send(eq(GenericKafkaUtils.TOPIC_L0_PRODUCTS), eq(dto));
     }
 
     @Test
@@ -251,10 +211,7 @@ public class MessagePublicationControllerTest {
 
         customController.publish(ProductCategory.LEVEL_PRODUCTS,dto, "t-pdgs-l1-execution-jobs-nrt", "L1_ACN");
 
-        final ConsumerRecord<String, ProductionEvent> record = kafkaUtilsProducts
-                .getReceivedRecordProducts(GenericKafkaUtils.TOPIC_L1_ACNS);
-
-        assertEquals(dto, record.value());
+        verify(producer).send(eq(GenericKafkaUtils.TOPIC_L1_ACNS), eq(dto));
     }
 
 
@@ -266,10 +223,8 @@ public class MessagePublicationControllerTest {
 
         customController.publish(ProductCategory.LEVEL_SEGMENTS, dto, "NONE", "NONE");
 
-        final ConsumerRecord<String, ProductionEvent> record = kafkaUtilsProducts
-                .getReceivedRecordSegments(GenericKafkaUtils.TOPIC_L0_SEGMENTS);
+        verify(producer).send(eq(GenericKafkaUtils.TOPIC_L0_SEGMENTS), eq(dto));
 
-        assertEquals(dto, record.value());
     }
 
     @Test
@@ -280,10 +235,8 @@ public class MessagePublicationControllerTest {
 
         customController.publish(ProductCategory.LEVEL_JOBS, dto, "t-pdgs-aio-l0-slice-production-events-nrt", "L1_JOB");
 
-        final ConsumerRecord<String, IpfExecutionJob> record = kafkaUtilsJobs
-                .getReceivedRecordJobs(GenericKafkaUtils.TOPIC_L1_JOBS);
+        verify(producer).send(eq(GenericKafkaUtils.TOPIC_L1_JOBS), eq(dto));
 
-        assertEquals(dto, record.value());
     }
 
     @Test
@@ -294,10 +247,7 @@ public class MessagePublicationControllerTest {
 
         customController.publish(ProductCategory.LEVEL_JOBS, dto, "NONE", "NONE");
 
-        final ConsumerRecord<String, IpfExecutionJob> record = kafkaUtilsJobs
-                .getReceivedRecordJobs(GenericKafkaUtils.TOPIC_L0_JOBS);
-
-        assertEquals(dto, record.value());
+        verify(producer).send(eq(GenericKafkaUtils.TOPIC_L0_JOBS), eq(dto));
     }
 
     @Test
@@ -308,10 +258,8 @@ public class MessagePublicationControllerTest {
 
         customController.publish(ProductCategory.LEVEL_JOBS, dto, "NONE", "NONE");
 
-        final ConsumerRecord<String, IpfExecutionJob> record = kafkaUtilsJobs
-                .getReceivedRecordJobs(GenericKafkaUtils.TOPIC_L2_JOBS);
+        verify(producer).send(eq(GenericKafkaUtils.TOPIC_L2_JOBS), eq(dto));
 
-        assertEquals(dto, record.value());
     }
 
     @Test
@@ -322,10 +270,8 @@ public class MessagePublicationControllerTest {
 
         customController.publish(ProductCategory.LEVEL_REPORTS, dto, "NONE", "NONE");
 
-        final ConsumerRecord<String, LevelReportDto> record = kafkaUtilsReports
-                .getReceivedRecordReports(GenericKafkaUtils.TOPIC_L1_REPORTS);
+        verify(producer).send(eq(GenericKafkaUtils.TOPIC_L1_REPORTS), eq(dto));
 
-        assertEquals(dto, record.value());
     }
 
     @Test
@@ -336,10 +282,8 @@ public class MessagePublicationControllerTest {
 
         customController.publish(ProductCategory.LEVEL_REPORTS, dto, "NONE", "NONE");
 
-        final ConsumerRecord<String, LevelReportDto> record = kafkaUtilsReports
-                .getReceivedRecordReports(GenericKafkaUtils.TOPIC_L0_REPORTS);
+        verify(producer).send(eq(GenericKafkaUtils.TOPIC_L0_REPORTS), eq(dto));
 
-        assertEquals(dto, record.value());
     }
     
     @Test
@@ -350,9 +294,7 @@ public class MessagePublicationControllerTest {
 
         customController.publish(ProductCategory.LEVEL_REPORTS, dto, "NONE", "NONE");
 
-        final ConsumerRecord<String, LevelReportDto> record = kafkaUtilsReports
-                .getReceivedRecordReports(GenericKafkaUtils.TOPIC_L2_REPORTS);
+        verify(producer).send(eq(GenericKafkaUtils.TOPIC_L2_REPORTS), eq(dto));
 
-        assertEquals(dto, record.value());
     }
 }

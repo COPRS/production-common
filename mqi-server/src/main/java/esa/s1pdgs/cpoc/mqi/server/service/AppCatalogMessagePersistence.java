@@ -5,7 +5,6 @@ import java.util.List;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.springframework.kafka.support.Acknowledgment;
 
 import esa.s1pdgs.cpoc.appcatalog.client.mqi.AppCatalogMqiService;
 import esa.s1pdgs.cpoc.appcatalog.rest.AppCatMessageDto;
@@ -15,10 +14,11 @@ import esa.s1pdgs.cpoc.common.MessageState;
 import esa.s1pdgs.cpoc.common.ProductCategory;
 import esa.s1pdgs.cpoc.common.errors.AbstractCodedException;
 import esa.s1pdgs.cpoc.common.utils.LogUtils;
+import esa.s1pdgs.cpoc.message.Acknowledgement;
+import esa.s1pdgs.cpoc.message.Consumption;
+import esa.s1pdgs.cpoc.message.kafka.config.KafkaProperties;
 import esa.s1pdgs.cpoc.mqi.model.queue.AbstractMessage;
 import esa.s1pdgs.cpoc.mqi.model.rest.Ack;
-import esa.s1pdgs.cpoc.mqi.server.config.KafkaProperties;
-import esa.s1pdgs.cpoc.mqi.server.consumption.kafka.consumer.GenericConsumer;
 
 public class AppCatalogMessagePersistence<T extends AbstractMessage> implements MessagePersistence<T> {
 
@@ -38,9 +38,9 @@ public class AppCatalogMessagePersistence<T extends AbstractMessage> implements 
     }
 
     @Override
-    public void read(final ConsumerRecord<String, T> data, final Acknowledgment acknowledgment, final GenericConsumer<T> genericConsumer, final ProductCategory category) throws Exception {
+    public void read(final ConsumerRecord<String, T> data, final Acknowledgement acknowledgment, final Consumption consumption, final ProductCategory category) throws Exception {
         final AppCatMessageDto<T> result = saveInAppCat(data, false, category);
-        handleMessage(data, acknowledgment, result, genericConsumer, category);
+        handleMessage(data, acknowledgment, result, consumption, category);
     }
 
     @Override
@@ -85,9 +85,9 @@ public class AppCatalogMessagePersistence<T extends AbstractMessage> implements 
      */
     final void handleMessage(
             final ConsumerRecord<String, T> data,
-            final Acknowledgment acknowledgment,
+            final Acknowledgement acknowledgment,
             final AppCatMessageDto<T> result,
-            final GenericConsumer<T> genericConsumer,
+            final Consumption consumption,
             final ProductCategory category) throws AbstractCodedException {
         final T message = data.value();
 
@@ -105,7 +105,7 @@ public class AppCatalogMessagePersistence<T extends AbstractMessage> implements 
                     LOGGER.debug("Message {} already processed by this pod (state is SEND). Ignoring and pausing consumption",
                             result.getId());
                     acknowledge(data, acknowledgment);
-                    genericConsumer.pause();
+                    consumption.pause();
                 } else {
                     // Message processing by another pod
                     if (messageShallBeIgnored(data, result, category)) {
@@ -116,7 +116,7 @@ public class AppCatalogMessagePersistence<T extends AbstractMessage> implements 
                                 result.getId());
                         // We have forced the reading
                         acknowledge(data, acknowledgment);
-                        genericConsumer.pause();
+                        consumption.pause();
                     }
                 }
                 break;
@@ -124,7 +124,7 @@ public class AppCatalogMessagePersistence<T extends AbstractMessage> implements 
                 // Message assigned
                 LOGGER.debug("Message {} assigned to this pod. Pausing consumption ...", result.getId());
                 acknowledge(data, acknowledgment);
-                genericConsumer.pause();
+                consumption.pause();
                 break;
         }
     }
@@ -162,7 +162,7 @@ public class AppCatalogMessagePersistence<T extends AbstractMessage> implements 
      * Acknowledge KAFKA message
      */
     private void acknowledge(final ConsumerRecord<String, T> data,
-                             final Acknowledgment acknowledgment) {
+                             final Acknowledgement acknowledgment) {
         try {
             LOGGER.debug("Acknowledging KAFKA message: {}", data.value());
             acknowledgment.acknowledge();

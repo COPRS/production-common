@@ -4,6 +4,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
@@ -27,6 +28,7 @@ import org.springframework.lang.Nullable;
 import org.springframework.stereotype.Component;
 
 import esa.s1pdgs.cpoc.message.Consumption;
+import esa.s1pdgs.cpoc.message.ConsumptionController;
 import esa.s1pdgs.cpoc.message.kafka.ConsumptionConfigurationFactory;
 import esa.s1pdgs.cpoc.message.kafka.ContainerPropertiesFactory;
 import esa.s1pdgs.cpoc.message.MessageConsumer;
@@ -37,9 +39,25 @@ import esa.s1pdgs.cpoc.message.kafka.KafkaMessage;
 
 @Component
 @ConditionalOnProperty("kafka.consumer.group-id")
-public class KafkaConsumptionController<M> {
+public class KafkaConsumptionController<M> implements ConsumptionController {
 
     private static final Logger LOG = LoggerFactory.getLogger(KafkaConsumptionController.class);
+
+    private static final Consumption NULL = new Consumption() {
+        @Override
+        public void pause() {
+        }
+
+        @Override
+        public boolean isPaused() {
+            //TODO what to return???
+            return false;
+        }
+
+        @Override
+        public void resume() {
+        }
+    };
 
     private final MessageConsumerFactory<M> consumerFactory;
     private final KafkaProperties kafkaProperties;
@@ -47,6 +65,8 @@ public class KafkaConsumptionController<M> {
     private final ContainerPropertiesFactory<M> containerPropertiesFactory;
 
     private final Map<String, ConcurrentMessageListenerContainer<String, M>> containers = new HashMap<>();
+
+    private final Map<String, Consumption> consumptionControls = new ConcurrentHashMap<>();
 
     @Autowired
     public KafkaConsumptionController(MessageConsumerFactory<M> consumerFactory,
@@ -64,7 +84,12 @@ public class KafkaConsumptionController<M> {
         List<MessageConsumer<M>> messageConsumers = consumerFactory.createConsumers();
 
         for (MessageConsumer<M> messageConsumer : messageConsumers) {
-            containers.put(messageConsumer.topic(), containerFor(messageConsumer));
+            ConcurrentMessageListenerContainer<String, M> container = containerFor(messageConsumer);
+            containers.put(messageConsumer.topic(), container);
+
+            KafkaConsumption<M> consumption = new KafkaConsumption<>();
+            consumption.setKafkaContainer(container);
+            consumptionControls.put(messageConsumer.topic(), consumption);
         }
 
         containers.forEach((topic, container) -> {
@@ -72,6 +97,21 @@ public class KafkaConsumptionController<M> {
             container.start();
 
         });
+    }
+
+    @Override
+    public void pause(String topic) {
+        consumptionControls.getOrDefault(topic, NULL).pause();
+    }
+
+    @Override
+    public boolean isPaused(String topic) {
+        return consumptionControls.getOrDefault(topic, NULL).isPaused();
+    }
+
+    @Override
+    public void resume(String topic) {
+        consumptionControls.getOrDefault(topic, NULL).resume();
     }
 
     private ConcurrentMessageListenerContainer<String, M> containerFor(MessageConsumer<M> messageConsumer) {
