@@ -6,10 +6,13 @@ import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.when;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 
 import org.apache.lucene.search.TotalHits;
@@ -21,6 +24,7 @@ import org.elasticsearch.action.index.IndexResponse;
 import org.elasticsearch.action.search.SearchRequest;
 import org.elasticsearch.action.search.SearchResponse;
 import org.elasticsearch.action.search.SearchResponseSections;
+import org.elasticsearch.action.search.ShardSearchFailure;
 import org.elasticsearch.common.bytes.BytesArray;
 import org.elasticsearch.common.bytes.BytesReference;
 import org.elasticsearch.index.Index;
@@ -29,6 +33,8 @@ import org.elasticsearch.index.seqno.SequenceNumbers;
 import org.elasticsearch.index.shard.ShardId;
 import org.elasticsearch.search.SearchHit;
 import org.elasticsearch.search.SearchHits;
+import org.elasticsearch.search.aggregations.InternalAggregations;
+import org.elasticsearch.search.internal.InternalSearchResponse;
 import org.json.JSONObject;
 import org.junit.Before;
 import org.junit.Test;
@@ -36,7 +42,10 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
+import org.mockito.invocation.InvocationOnMock;
+import org.mockito.stubbing.Answer;
 
+import esa.s1pdgs.cpoc.common.EdrsSessionFileType;
 import esa.s1pdgs.cpoc.common.ProductFamily;
 import esa.s1pdgs.cpoc.common.errors.processing.MetadataMalformedException;
 import esa.s1pdgs.cpoc.mdc.worker.config.MdcWorkerConfigurationProperties;
@@ -222,6 +231,13 @@ public class EsServicesTest{
 		expectedResult.setKeyObjectStorage("url");
 		expectedResult.setValidityStart("2000-01-01T00:00:00.000000Z");
 		expectedResult.setValidityStop("2001-01-01T00:00:00.000000Z");
+		expectedResult.setAdditionalProperties(new HashMap<String,String>() {{
+		    put("validityStartTime", "2000-01-01T00:00:00.000000Z");
+		    put("validityStopTime", "2001-01-01T00:00:00.000000Z");
+		    put("productName", "name");
+		    put("productType", "product_type");
+		    put("url", "url");
+		}});
 		
 		//Response
 		final BytesReference source = new BytesArray("{\"productName\":\"name\",\"url\""
@@ -256,6 +272,14 @@ public class EsServicesTest{
 		expectedResult.setKeyObjectStorage("url");
 		expectedResult.setValidityStart("2012-05-05T10:10:12.000120Z");
 		expectedResult.setValidityStop("2019-05-05T10:10:12.001230Z");
+		expectedResult.setAdditionalProperties(new HashMap<String,String>() {
+		{
+		    put("validityStartTime", "2012-05-05T10:10:12.000120Z");
+		    put("validityStopTime", "2019-05-05T10:10:12.001230Z");
+		    put("productName", "name");
+		    put("productType", "product_type");
+		    put("url", "url");
+		}});
 		
 		//Response
 		final BytesReference source = new BytesArray("{\"productName\":\"name\",\"url\""
@@ -288,6 +312,13 @@ public class EsServicesTest{
 		expectedResult.setKeyObjectStorage("url");
 		expectedResult.setValidityStart("2012-05-05T10:10:12.000120Z");
 		expectedResult.setValidityStop("2019-05-05T10:10:12.001230Z");
+		expectedResult.setAdditionalProperties(new HashMap<String,String>() {{
+		    put("validityStartTime", "2012-05-05T10:10:12.000120Z");
+		    put("validityStopTime", "2019-05-05T10:10:12.001230Z");
+		    put("productName", "name");
+		    put("productType", "product_type");
+		    put("url", "url");
+		}});
 		
 		//Response
 		final BytesReference source = new BytesArray("{\"productName\":\"name\",\"url\""
@@ -323,6 +354,13 @@ public class EsServicesTest{
 		expectedResult.setKeyObjectStorage("url");
 		expectedResult.setValidityStart("2000-01-01T00:00:00.000000Z");
 		expectedResult.setValidityStop("2001-01-01T00:00:00.000000Z");
+		expectedResult.setAdditionalProperties(new HashMap<String,String>() {{
+		    put("validityStartTime", "2000-01-01T00:00:00.000000Z");
+		    put("validityStopTime", "2001-01-01T00:00:00.000000Z");
+		    put("productName", "name");
+		    put("productType", "aux_res");
+		    put("url", "url");
+		}});
 		
 		//Response
 		final BytesReference source = new BytesArray("{\"productName\":\"name\",\"url\""
@@ -389,6 +427,14 @@ public class EsServicesTest{
         r.setKeyObjectStorage("url");
         r.setValidityStart("2000-01-01T00:00:00.000000Z");
         r.setValidityStop("2001-01-01T00:00:00.000000Z");
+        r.setAdditionalProperties(new HashMap<String,String>() {{
+		    put("startTime", "2000-01-01T00:00:00.000000Z");
+		    put("stopTime", "2001-01-01T00:00:00.000000Z");
+		    put("productName", "name");
+		    put("productType", "product_type");
+		    put("url", "url");
+		}});
+        
         final List<SearchMetadata> expectedResult = new ArrayList<>();
         expectedResult.add(r);
         
@@ -455,6 +501,13 @@ public class EsServicesTest{
         expectedResult.setKeyObjectStorage("url");
         expectedResult.setValidityStart("2000-01-01T00:00:00.000000Z");
         expectedResult.setValidityStop("2001-01-01T00:00:00.000000Z");
+        expectedResult.setAdditionalProperties(new HashMap<String,String>() {{
+		    put("validityStartTime", "2000-01-01T00:00:00.000000Z");
+		    put("validityStopTime", "2001-01-01T00:00:00.000000Z");
+		    put("productName", "name");
+		    put("productType", "product_type");
+		    put("url", "url");
+		}});
         
         //Response
         final BytesReference source = new BytesArray("{\"productName\":\"name\",\"url\""
@@ -515,7 +568,7 @@ public class EsServicesTest{
 		//Expected result
 		final EdrsSessionMetadata expectedResult = new EdrsSessionMetadata();
 		expectedResult.setProductName("name");
-		expectedResult.setProductType("type");
+		expectedResult.setProductType("product_type");
 		expectedResult.setKeyObjectStorage("url");
 		expectedResult.setSessionId("session");
 		expectedResult.setMissionId("mission");
@@ -526,19 +579,56 @@ public class EsServicesTest{
 		expectedResult.setSatelliteId("satellite");
 		expectedResult.setStationCode("station");
 		expectedResult.setRawNames(Collections.emptyList());
+		expectedResult.setChannelId(1);
+		expectedResult.setAdditionalProperties(new HashMap<String,String>() {{
+			put("validityStopTime", "2001-01-01T00:00:00.000000Z");
+			put("stationCode", "station");
+			put("missionId", "mission");
+			put("satelliteId", "satellite");
+			put("validityStartTime", "2000-01-01T00:00:00.000000Z");
+			put("startTime", "2000-01-01T00:00:00.000000Z");
+			put("stopTime", "2001-01-01T00:00:00.000000Z");
+			put("sessionId", "session");
+			put("productName", "name");
+			put("url", "url");
+			put("productType", "product_type");
+			put("channelId", "1");
+		}});
 		
 		//Response 
 		final BytesReference source = new BytesArray("{\"productName\":\"name\",\"url\""
 		        + ":\"url\",\"sessionId\":\"session\",\"startTime\":\"2000-01-01T00:00:00.000000Z\",\"stopTime\":\"2001-01-01T00:00:00.000000Z\",\"validityStartTime\":\"2000-01-01T00:00:00.000000Z\",\"validityStopTime\":"
-		        + "\"2001-01-01T00:00:00.000000Z\", \"productType\": \"product_type\", \"missionId\":\"mission\",\"satelliteId\":\"satellite\",\"stationCode\":\"station\"}");
-		final GetResult getResult = new GetResult("index", "type", "id", SequenceNumbers.UNASSIGNED_SEQ_NO, SequenceNumbers.UNASSIGNED_PRIMARY_TERM, 0L, true, source, null, null);
-		final GetResponse getResponse = new GetResponse(getResult);
+		        + "\"2001-01-01T00:00:00.000000Z\", \"productType\": \"product_type\", \"missionId\":\"mission\",\"satelliteId\":\"satellite\",\"stationCode\":\"station\",\"channelId\":\"1\"}");
 		
-		//Mocking the get Request
-		this.mockGetRequest(getResponse);
+		final SearchHit hit = new SearchHit(1);
+		hit.sourceRef(source);
+		final SearchHit[] hits = {hit};
+		final TotalHits totalHits = new TotalHits(1, Relation.EQUAL_TO);
+		final SearchHits searchHits = new SearchHits(hits, totalHits, 1.0F);
+		final SearchResponseSections searchResponsSections = new SearchResponseSections(searchHits, null, null, false, Boolean.FALSE, null, 0);
+		final SearchResponse response = new SearchResponse(searchResponsSections, "1", 1,1,0,25,null,null);
+
+		final SearchResponse emptyResponse = new SearchResponse(new InternalSearchResponse(
+				new SearchHits(new SearchHit[0], new TotalHits(0L, TotalHits.Relation.EQUAL_TO), Float.NaN),
+                InternalAggregations.EMPTY, null, null, false, null, 0), null, 0, 0, 0, 0L,
+				ShardSearchFailure.EMPTY_ARRAY, null);
+		
+		//Mocking the search request
+		Answer<SearchResponse> answer = new Answer<SearchResponse>() {
+	        public SearchResponse answer(InvocationOnMock invocation) throws Throwable {
+	        	List<String> indices = Arrays.asList(invocation.getArgument(0, SearchRequest.class).indices());
+	        	if (indices.contains(EdrsSessionFileType.SESSION.name().toLowerCase())) {
+	        		return response;
+	        	} else {
+	                return emptyResponse;
+	        	}
+	        }
+	    };
+		when(elasticsearchDAO.search(Mockito.any(SearchRequest.class))).thenAnswer(answer);
 		
 		try {
 			final List<EdrsSessionMetadata> result = esServices.getEdrsSessionsFor("session");
+			System.out.println(result.get(0).getAdditionalProperties());
 			assertEquals("Search metadata are not equals", Collections.singletonList(expectedResult), result);
 		} catch (final Exception e) {
 			e.printStackTrace();
@@ -714,6 +804,17 @@ public class EsServicesTest{
 		expectedResult.setInstrumentConfigurationId(0);
 		expectedResult.setNumberOfSlices(2);
 		expectedResult.setDatatakeId("datatakeId");
+		expectedResult.setAdditionalProperties(new HashMap<String,String>() {{	    
+		    put("productFamily", "l0_acn");
+		    put("totalNumberOfSlice", "2");
+		    put("instrumentConfigurationId", "0");
+		    put("startTime", "2000-01-01T00:00:00.000000Z");
+		    put("stopTime", "2001-01-01T00:00:00.000000Z");
+		    put("productName", "name");
+		    put("url", "url");
+		    put("productType", "product_type");
+		    put("dataTakeId", "datatakeId");
+		}});
 		
 		//Response
 		final BytesReference source = new BytesArray("{\"productName\":\"name\",\"url\""
