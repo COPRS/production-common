@@ -15,11 +15,11 @@ public class PartitionLagAnalyzer implements Runnable {
     private static final Logger LOG = LoggerFactory.getLogger(PartitionLagAnalyzer.class);
 
     private final Admin adminClient;
-    private KafkaProperties properties;
+    private final KafkaProperties properties;
 
     private volatile ScheduledExecutorService executor;
 
-    public PartitionLagAnalyzer(Admin adminClient, KafkaProperties properties) {
+    public PartitionLagAnalyzer(final Admin adminClient, final KafkaProperties properties) {
         this.adminClient = adminClient;
         this.properties = properties;
     }

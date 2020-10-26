@@ -70,20 +70,13 @@ public class KafkaProducerConfiguration<M> {
 
         if(properties.getProducer().getLagBasedPartitioner() != null) {
             LOG.info("using lag based partitioner");
-            props.put(ProducerConfig.PARTITIONER_CLASS_CONFIG, lagBasedPartitioner());
+            props.put(ProducerConfig.PARTITIONER_CLASS_CONFIG, LagBasedPartitioner.class);
+            props.put(LagBasedPartitioner.KAFKA_PROPERTIES, properties);
         }
 
         LOG.info("using producer config {}", props);
 
         return props;
-    }
-
-    private Class<? extends Partitioner> lagBasedPartitioner() {
-        Map<String, Object> adminConfig = new HashMap<>();
-        adminConfig.put(AdminClientConfig.BOOTSTRAP_SERVERS_CONFIG, properties.getBootstrapServers());
-        PartitionLagAnalyzer lagAnalyzer = new PartitionLagAnalyzer(Admin.create(adminConfig), properties);
-        lagAnalyzer.start(); //TODO start/stop analyzer properly
-        return LagBasedPartitioner.class;
     }
 
     private ProducerFactory<String, M> producerFactory() {

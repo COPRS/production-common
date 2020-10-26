@@ -1,24 +1,27 @@
 package esa.s1pdgs.cpoc.message.kafka;
 
+import java.util.HashMap;
 import java.util.Map;
 
+import org.apache.kafka.clients.admin.Admin;
+import org.apache.kafka.clients.admin.AdminClientConfig;
 import org.apache.kafka.clients.producer.Partitioner;
 import org.apache.kafka.clients.producer.internals.DefaultPartitioner;
 import org.apache.kafka.common.Cluster;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import esa.s1pdgs.cpoc.message.kafka.config.KafkaProperties;
+
 public class LagBasedPartitioner implements Partitioner {
+
+    public static final String KAFKA_PROPERTIES = LagBasedPartitioner.class.getSimpleName() + ".kafka.properties";
 
     private static final Logger LOG = LoggerFactory.getLogger(LagBasedPartitioner.class);
 
     private final Partitioner backupPartitioner = new DefaultPartitioner();
-    private final PartitionLagAnalyzer lagAnalyzer = null;
+    private volatile PartitionLagAnalyzer lagAnalyzer = null;
 
-
-//    public LagBasedPartitioner(PartitionLagAnalyzer lagAnalyzer) {
-//        this.lagAnalyzer = lagAnalyzer;
-//    }
 
     @Override
     public int partition(String topic, Object key, byte[] keyBytes, Object value, byte[] valueBytes, Cluster cluster) {
@@ -29,11 +32,22 @@ public class LagBasedPartitioner implements Partitioner {
 
     @Override
     public void close() {
+        if(lagAnalyzer != null) {
+            lagAnalyzer.stop();
+        }
     }
 
     @Override
     public void configure(Map<String, ?> configs) {
         LOG.debug("configure: {}", configs);
+        if(lagAnalyzer == null) {
+            Map<String, Object> adminConfig = new HashMap<>();
+            KafkaProperties kafkaProperties = (KafkaProperties) configs.get(LagBasedPartitioner.KAFKA_PROPERTIES);
+            adminConfig.put(AdminClientConfig.BOOTSTRAP_SERVERS_CONFIG, kafkaProperties.getBootstrapServers());
+            lagAnalyzer = new PartitionLagAnalyzer(Admin.create(adminConfig),kafkaProperties );
+            lagAnalyzer.start();
+        }
+
         backupPartitioner.configure(configs);
     }
 }
