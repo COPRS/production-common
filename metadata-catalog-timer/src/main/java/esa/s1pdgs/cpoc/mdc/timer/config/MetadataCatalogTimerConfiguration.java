@@ -8,7 +8,6 @@ import javax.annotation.PostConstruct;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
@@ -28,28 +27,25 @@ public class MetadataCatalogTimerConfiguration {
 	private static final Logger LOGGER = LogManager.getLogger(MetadataCatalogTimerConfiguration.class);
 
 	private MetadataCatalogTimerSettings settings;
+	private MetadataClient metadataClient;
+	private CatalogEventTimerEntryRepository repository;
+	private KafkaTemplate<String, CatalogEvent> kafkaTemplate;
+	private ThreadPoolTaskScheduler scheduler;
 
 	@Autowired
-	public MetadataCatalogTimerConfiguration(final MetadataCatalogTimerSettings settings) {
+	public MetadataCatalogTimerConfiguration(final MetadataCatalogTimerSettings settings,
+			final MetadataClient metadataClient, final CatalogEventTimerEntryRepository repository,
+			final KafkaTemplate<String, CatalogEvent> kafkaTemplate, final ThreadPoolTaskScheduler scheduler) {
 		this.settings = settings;
-	}
-
-	@Bean(name = "catEventTaskScheduler", destroyMethod = "shutdown")
-	public ThreadPoolTaskScheduler threadPoolTaskScheduler() {
-		final ThreadPoolTaskScheduler threadPoolTaskScheduler = new ThreadPoolTaskScheduler();
-		if (settings.getConfig().entrySet().size() == 0) {
-			throw new IllegalStateException("No timer based triggers defined");
-		}
-		threadPoolTaskScheduler.setPoolSize(settings.getConfig().entrySet().size());
-		threadPoolTaskScheduler.setThreadNamePrefix("catEventTaskScheduler");
-		return threadPoolTaskScheduler;
+		this.metadataClient = metadataClient;
+		this.repository = repository;
+		this.kafkaTemplate = kafkaTemplate;
+		this.scheduler = scheduler;
 	}
 
 	@PostConstruct
 	@Autowired
-	public void setupCatalogEventDispatcher(final ThreadPoolTaskScheduler threadScheduler,
-			final MetadataClient metadataClient, final CatalogEventTimerEntryRepository repository,
-			final KafkaTemplate<String, CatalogEvent> kafkaTemplate) {
+	public void setupCatalogEventDispatcher() {
 		Set<Entry<String, TimerProperties>> entries = settings.getConfig().entrySet();
 
 		for (Entry<String, TimerProperties> entry : entries) {
@@ -58,7 +54,7 @@ public class MetadataCatalogTimerConfiguration {
 					new KafkaPublisher(kafkaTemplate, config.getTopic()), entry.getKey(), config.getFamily());
 
 			CronTrigger cronTrigger = new CronTrigger(config.getCron());
-			threadScheduler.schedule(dispatcher, cronTrigger);
+			scheduler.schedule(dispatcher, cronTrigger);
 			LOGGER.info("Started new CatalogEventDispatcher ({}, {}, {})", entry.getKey(), config.getFamily(),
 					config.getCron());
 		}
