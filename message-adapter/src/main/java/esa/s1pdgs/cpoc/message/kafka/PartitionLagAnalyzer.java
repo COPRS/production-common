@@ -48,7 +48,7 @@ public class PartitionLagAnalyzer implements Runnable {
         LOG.debug("running lag kafka lag analyzing for consumer-group {}", properties.getProducer().getLagBasedPartitioner().getConsumerGroup());
         try {
             fetch();
-        } catch (InterruptedException | ExecutionException | TimeoutException e) {
+        } catch (Exception e) {
             LOG.error("error during fetch", e);
         }
     }
