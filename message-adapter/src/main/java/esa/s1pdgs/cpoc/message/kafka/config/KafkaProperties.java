@@ -1,5 +1,7 @@
 package esa.s1pdgs.cpoc.message.kafka.config;
 
+import java.util.Map;
+
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Configuration;
@@ -412,6 +414,8 @@ public class KafkaProperties {
          */
         private int maxRetries;
 
+        private KafkaLagBasedPartitionerProperties lagBasedPartitionerProperties;
+
         /**
          * Default constructor
          */
@@ -435,9 +439,50 @@ public class KafkaProperties {
             this.maxRetries = maxRetries;
         }
 
-		@Override
+        public KafkaLagBasedPartitionerProperties getLagBasedPartitioner() {
+            return lagBasedPartitionerProperties;
+        }
+
+        public void setLagBasedPartitioner(KafkaLagBasedPartitionerProperties lagBasedPartitionerProperties) {
+            this.lagBasedPartitionerProperties = lagBasedPartitionerProperties;
+        }
+
+        @Override
 		public String toString() {
 			return "KafkaProducerProperties [maxRetries=" + maxRetries + "]";
 		}
+    }
+
+    public static class KafkaLagBasedPartitionerProperties {
+
+        private String consumerGroup;
+
+        private Integer delaySeconds = 5 * 60;
+
+        private Map<String, Integer> topicsWithPriority;
+
+        public String getConsumerGroup() {
+            return consumerGroup;
+        }
+
+        public void setConsumerGroup(String consumerGroup) {
+            this.consumerGroup = consumerGroup;
+        }
+
+        public Map<String, Integer> getTopicsWithPriority() {
+            return topicsWithPriority;
+        }
+
+        public void setTopicsWithPriority(Map<String, Integer> topicsWithPriority) {
+            this.topicsWithPriority = topicsWithPriority;
+        }
+
+        public Integer getDelaySeconds() {
+            return delaySeconds;
+        }
+
+        public void setDelaySeconds(Integer delaySeconds) {
+            this.delaySeconds = delaySeconds;
+        }
     }
 }

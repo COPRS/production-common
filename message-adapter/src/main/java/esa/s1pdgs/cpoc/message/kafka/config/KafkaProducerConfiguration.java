@@ -1,8 +1,12 @@
 package esa.s1pdgs.cpoc.message.kafka.config;
 
+import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
+import org.apache.kafka.clients.admin.Admin;
+import org.apache.kafka.clients.admin.AdminClientConfig;
+import org.apache.kafka.clients.producer.Partitioner;
 import org.apache.kafka.clients.producer.ProducerConfig;
 import org.apache.kafka.common.serialization.StringSerializer;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,6 +21,8 @@ import org.springframework.lang.Nullable;
 
 import esa.s1pdgs.cpoc.message.MessageProducer;
 import esa.s1pdgs.cpoc.message.kafka.KafkaMessageProducer;
+import esa.s1pdgs.cpoc.message.kafka.LagBasedPartitioner;
+import esa.s1pdgs.cpoc.message.kafka.PartitionLagAnalyzer;
 import esa.s1pdgs.cpoc.message.kafka.ProducerConfigurationFactory;
 
 @Configuration
@@ -26,7 +32,8 @@ public class KafkaProducerConfiguration<M> {
     private final ProducerConfigurationFactory producerConfigurationFactory;
 
     @Autowired
-    public KafkaProducerConfiguration(final KafkaProperties properties, @Nullable final ProducerConfigurationFactory producerConfigurationFactory) {
+    public KafkaProducerConfiguration(final KafkaProperties properties,
+                                      @Nullable final ProducerConfigurationFactory producerConfigurationFactory) {
         this.properties = properties;
         this.producerConfigurationFactory = producerConfigurationFactory;
     }
@@ -57,7 +64,19 @@ public class KafkaProducerConfiguration<M> {
             props.putAll(producerConfigurationFactory.producerConfiguration());
         }
 
+        if(properties.getProducer().getLagBasedPartitioner() != null) {
+            props.put(ProducerConfig.PARTITIONER_CLASS_CONFIG, lagBasedPartitioner());
+        }
+
         return props;
+    }
+
+    private Partitioner lagBasedPartitioner() {
+        Map<String, Object> adminConfig = new HashMap<>();
+        adminConfig.put(AdminClientConfig.BOOTSTRAP_SERVERS_CONFIG, properties.getBootstrapServers());
+        PartitionLagAnalyzer lagAnalyzer = new PartitionLagAnalyzer(Admin.create(adminConfig), properties);
+        lagAnalyzer.start(); //TODO start/stop analyzer properly
+        return new LagBasedPartitioner(lagAnalyzer);
     }
 
     private ProducerFactory<String, M> producerFactory() {

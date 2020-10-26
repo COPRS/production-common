@@ -26,6 +26,14 @@ kafka:
     poll-timeout-ms: 500
   producer:
     max-retries: 10
+    lag-based-partitioner:
+      delay-seconds: 180
+      consumer-group: compression-worker
+      topics-with-priority:
+        t-pdgs-compression-jobs-nrt: 10
+        t-pdgs-compression-jobs-fast: 5
+        t-pdgs-compression-jobs-pt: 20
+
 application:
   hostname: wrapper-0
   max-error-counter: 3
