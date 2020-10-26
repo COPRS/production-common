@@ -44,10 +44,11 @@ public class MetadataCatalogTimerConfiguration {
 	}
 
 	@PostConstruct
-	@Autowired
 	public void setupCatalogEventDispatcher() {
 		Set<Entry<String, TimerProperties>> entries = settings.getConfig().entrySet();
 
+		LOGGER.info("Schedule configured CatalogEventDispatchers...");
+		
 		for (Entry<String, TimerProperties> entry : entries) {
 			TimerProperties config = entry.getValue();
 			CatalogEventDispatcher dispatcher = new CatalogEventDispatcherImpl(metadataClient, repository,
