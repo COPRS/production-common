@@ -88,6 +88,11 @@ public class PartitionLagAnalyzer implements Runnable {
             String consumerId = groupMember.consumerId();
             Set<TopicPartition> assignedPartitions = groupMember.assignment().topicPartitions();
             assignedPartitions.forEach(assignedPartition -> {
+                if(!latestOffsets.containsKey(assignedPartition) || !consumerOffsets.containsKey(assignedPartition)) {
+                    LOG.debug("no offset information for topic partition {}, skipping it ...", assignedPartition);
+                    return;
+                }
+
                 final long latestOffset = latestOffsets.get(assignedPartition).offset();
                 final long committedOffset = consumerOffsets.get(assignedPartition).offset();
                 final long lag = latestOffset - committedOffset;
