@@ -95,8 +95,7 @@ public class PartitionLagAnalyzer implements Runnable {
 
                 final long latestOffset = latestOffsets.get(assignedPartition).offset();
                 final long committedOffset = consumerOffsets.get(assignedPartition).offset();
-                final long lag = latestOffset - committedOffset;
-                final ConsumerLag consumerLag = new ConsumerLag(consumerId, assignedPartition.topic(), assignedPartition.partition(), lag);
+                final ConsumerLag consumerLag = new ConsumerLag(consumerId, assignedPartition.topic(), assignedPartition.partition(), latestOffset, committedOffset);
                 consumerLags.get(assignedPartition.topic()).add(consumerLag);
             });
         });
@@ -119,17 +118,29 @@ public class PartitionLagAnalyzer implements Runnable {
         }
     }
 
+    @Override
+    public String toString() {
+        KafkaProperties.KafkaLagBasedPartitionerProperties config = properties.getProducer().getLagBasedPartitioner();
+        return String.format(
+                "PartitionLagAnalyzer{ consumer-group: %s partitions: %s delay: %s}",
+                config.getConsumerGroup(),
+                config.getTopicsWithPriority().keySet(),
+                config.getDelaySeconds());
+    }
+
     public static class ConsumerLag {
         private final String consumerId;
         private final String topic;
         private final Integer partition;
-        private final Long lag;
+        private long committedOffset;
+        private long latestOffset;
 
-        public ConsumerLag(String consumerId, String topic, Integer partition, Long lag) {
+        public ConsumerLag(final String consumerId, final String topic, final Integer partition, long latestOffset, final long committedOffset) {
             this.consumerId = consumerId;
             this.topic = topic;
             this.partition = partition;
-            this.lag = lag;
+            this.committedOffset = committedOffset;
+            this.latestOffset = latestOffset;
         }
 
         public String getConsumerId() {
@@ -144,8 +155,16 @@ public class PartitionLagAnalyzer implements Runnable {
             return partition;
         }
 
-        public Long getLag() {
-            return lag;
+        public long getLag() {
+            return latestOffset - committedOffset;
+        }
+
+        public long getCommittedOffset() {
+            return committedOffset;
+        }
+
+        public long getLatestOffset() {
+            return latestOffset;
         }
 
         @Override
@@ -154,7 +173,9 @@ public class PartitionLagAnalyzer implements Runnable {
                     "consumerId='" + consumerId + '\'' +
                     ", topic='" + topic + '\'' +
                     ", partition=" + partition +
-                    ", lag=" + lag +
+                    ", committedOffset=" + committedOffset +
+                    ", latestOffset=" + latestOffset +
+                    ", lag=" + getLag() +
                     '}';
         }
     }
