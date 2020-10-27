@@ -5,6 +5,7 @@ import java.time.ZoneId;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
+import java.util.UUID;
 
 import esa.s1pdgs.cpoc.common.ProductFamily;
 import esa.s1pdgs.cpoc.common.errors.processing.MetadataQueryException;
@@ -104,6 +105,9 @@ public class CatalogEventDispatcherImpl implements CatalogEventDispatcher {
 		event.setKeyObjectStorage(metadata.getKeyObjectStorage());
 		event.setProductType(this.productType);
 		event.setMetadata(new HashMap<String, Object>());
+		event.setUid(UUID.randomUUID());
+		
+		event.getMetadata().put("satelliteId", this.satelliteId);
 
 		return event;
 	}
