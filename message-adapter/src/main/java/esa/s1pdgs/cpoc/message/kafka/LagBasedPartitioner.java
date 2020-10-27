@@ -5,14 +5,12 @@ import static java.util.Comparator.comparingLong;
 import static java.util.Map.Entry.comparingByValue;
 import static java.util.stream.Collectors.*;
 
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import org.apache.kafka.clients.admin.Admin;
-import org.apache.kafka.clients.admin.AdminClientConfig;
 import org.apache.kafka.clients.producer.Partitioner;
 import org.apache.kafka.clients.producer.internals.DefaultPartitioner;
 import org.apache.kafka.common.Cluster;
@@ -23,7 +21,8 @@ import esa.s1pdgs.cpoc.message.kafka.config.KafkaProperties;
 
 public class LagBasedPartitioner implements Partitioner {
 
-    public static final String KAFKA_PROPERTIES = LagBasedPartitioner.class.getSimpleName() + ".kafka.properties";
+    public static final String KAFKA_PROPERTIES = LagBasedPartitioner.class.getSimpleName() + ".properties";
+    public static final String PARTITION_LAG_FETCHER_SUPPLIER = LagBasedPartitioner.class + "fetcher.supplier";
 
     private static final Logger LOG = LoggerFactory.getLogger(LagBasedPartitioner.class);
 
@@ -125,6 +124,7 @@ public class LagBasedPartitioner implements Partitioner {
     }
 
     @Override
+    @SuppressWarnings("unchecked")
     public void configure(Map<String, ?> configs) {
         LOG.debug("configure: {}", configs);
         backupPartitioner.configure(configs);
@@ -134,9 +134,7 @@ public class LagBasedPartitioner implements Partitioner {
         }
 
         if (lagAnalyzer == null) {
-            Map<String, Object> adminConfig = new HashMap<>();
-            adminConfig.put(AdminClientConfig.BOOTSTRAP_SERVERS_CONFIG, kafkaProperties.getBootstrapServers());
-            lagAnalyzer = new PartitionLagFetcher(Admin.create(adminConfig), kafkaProperties);
+            lagAnalyzer = ((Supplier<PartitionLagFetcher>)configs.get(PARTITION_LAG_FETCHER_SUPPLIER)).get();
             lagAnalyzer.start();
         }
 
