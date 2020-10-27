@@ -299,7 +299,8 @@ public class MetadataClient {
 	}
 
 	/**
-	 * Queries the products inside a given time interval for the given producttype
+	 * Queries the products inside a given time interval for the given producttype.
+	 * The time interval is applied on the insertionTime
 	 */
 	public List<SearchMetadata> searchInterval(final ProductFamily productFamily, final String productType,
 			final LocalDateTime intervalStart, final LocalDateTime intervalStop) throws MetadataQueryException {
@@ -323,7 +324,7 @@ public class MetadataClient {
 			return response.getBody();
 		}
 	}
-	
+
 	/**
 	 */
 	public List<SearchMetadata> query(final ProductFamily family, final LocalDateTime intervalStart,
@@ -474,7 +475,7 @@ public class MetadataClient {
 					+ " and product type " + productType + " was not successful");
 		}
 	}
-	
+
 	/**
 	 * Execute a command. If the result is null, refresh the index and try again.
 	 * 

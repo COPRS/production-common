@@ -17,6 +17,8 @@ import esa.s1pdgs.cpoc.mqi.model.queue.CatalogEvent;
 
 public class CatalogEventDispatcherImpl implements CatalogEventDispatcher {
 	
+	private static final LocalDateTime MIN_DATE = LocalDateTime.of(2000, 1, 1, 0, 0);
+	
 	private MetadataClient metadataClient;
 	private CatalogEventTimerEntryRepository repository;
 	private Publisher publisher;
@@ -40,7 +42,7 @@ public class CatalogEventDispatcherImpl implements CatalogEventDispatcher {
 
 		// Get the intervalStart from the database entry
 		if (entry == null) {
-			intervalStart = LocalDateTime.MIN;
+			intervalStart = MIN_DATE;
 		} else {
 			intervalStart = LocalDateTime.ofInstant(entry.getLastCheckDate().toInstant(), ZoneId.systemDefault());
 		}
