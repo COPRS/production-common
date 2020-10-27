@@ -32,6 +32,7 @@ public class LagBasedPartitioner implements Partitioner {
 
     @Override
     public void close() {
+        backupPartitioner.close();
         if(lagAnalyzer != null) {
             lagAnalyzer.stop();
         }
@@ -40,6 +41,8 @@ public class LagBasedPartitioner implements Partitioner {
     @Override
     public void configure(Map<String, ?> configs) {
         LOG.debug("configure: {}", configs);
+        backupPartitioner.configure(configs);
+
         if(lagAnalyzer == null) {
             Map<String, Object> adminConfig = new HashMap<>();
             KafkaProperties kafkaProperties = (KafkaProperties) configs.get(LagBasedPartitioner.KAFKA_PROPERTIES);
@@ -47,7 +50,10 @@ public class LagBasedPartitioner implements Partitioner {
             lagAnalyzer = new PartitionLagAnalyzer(Admin.create(adminConfig),kafkaProperties );
             lagAnalyzer.start();
         }
+    }
 
-        backupPartitioner.configure(configs);
+    @Override
+    public void onNewBatch(String topic, Cluster cluster, int prevPartition) {
+        backupPartitioner.onNewBatch(topic, cluster, prevPartition);
     }
 }
