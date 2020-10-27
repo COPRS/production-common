@@ -24,15 +24,17 @@ public class CatalogEventDispatcherImpl implements CatalogEventDispatcher {
 	private Publisher publisher;
 	private String productType;
 	private ProductFamily productFamily;
+	private String satelliteId;
 
 	public CatalogEventDispatcherImpl(final MetadataClient metadataClient,
 			final CatalogEventTimerEntryRepository repository, final Publisher publisher, final String productType,
-			final ProductFamily productFamily) {
+			final ProductFamily productFamily, final String satelliteId) {
 		this.metadataClient = metadataClient;
 		this.repository = repository;
 		this.productType = productType;
 		this.productFamily = productFamily;
 		this.publisher = publisher;
+		this.satelliteId = satelliteId;
 	}
 
 	@Override
@@ -53,7 +55,7 @@ public class CatalogEventDispatcherImpl implements CatalogEventDispatcher {
 		try {
 			LOGGER.debug("Retrieve new products from database");
 			List<SearchMetadata> products = this.metadataClient.searchInterval(this.productFamily, this.productType,
-					intervalStart, intervalStop);
+					intervalStart, intervalStop, this.satelliteId);
 
 			for (SearchMetadata product : products) {
 				LOGGER.info("Publish CatalogEvent for product {}", product.getProductName());

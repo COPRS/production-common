@@ -303,14 +303,16 @@ public class MetadataClient {
 	 * The time interval is applied on the insertionTime
 	 */
 	public List<SearchMetadata> searchInterval(final ProductFamily productFamily, final String productType,
-			final LocalDateTime intervalStart, final LocalDateTime intervalStop) throws MetadataQueryException {
+			final LocalDateTime intervalStart, final LocalDateTime intervalStop, final String satelliteId)
+			throws MetadataQueryException {
 		final String uri = this.metadataBaseUri + MetadataCatalogRestPath.METADATA.path() + "/"
 				+ productFamily.toString() + "/searchTypeInterval";
 
 		final UriComponentsBuilder builder = UriComponentsBuilder.fromUriString(uri)
 				.queryParam("productType", productType)
 				.queryParam("intervalStart", intervalStart.format(DateUtils.METADATA_DATE_FORMATTER))
-				.queryParam("intervalStop", intervalStop.format(DateUtils.METADATA_DATE_FORMATTER));
+				.queryParam("intervalStop", intervalStop.format(DateUtils.METADATA_DATE_FORMATTER))
+				.queryParam("satelliteId", satelliteId);
 
 		final ResponseEntity<List<SearchMetadata>> response = query(builder.build().toUri(),
 				new ParameterizedTypeReference<List<SearchMetadata>>() {

@@ -48,11 +48,12 @@ public class MetadataCatalogTimerConfiguration {
 		Set<Entry<String, TimerProperties>> entries = settings.getConfig().entrySet();
 
 		LOGGER.info("Schedule configured CatalogEventDispatchers...");
-		
+
 		for (Entry<String, TimerProperties> entry : entries) {
 			TimerProperties config = entry.getValue();
 			CatalogEventDispatcher dispatcher = new CatalogEventDispatcherImpl(metadataClient, repository,
-					new KafkaPublisher(kafkaTemplate, config.getTopic()), entry.getKey(), config.getFamily());
+					new KafkaPublisher(kafkaTemplate, config.getTopic()), entry.getKey(), config.getFamily(),
+					config.getSatelliteId());
 
 			CronTrigger cronTrigger = new CronTrigger(config.getCron());
 			scheduler.schedule(dispatcher, cronTrigger);

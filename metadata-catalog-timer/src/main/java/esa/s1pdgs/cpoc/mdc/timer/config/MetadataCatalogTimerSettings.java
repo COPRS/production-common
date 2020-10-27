@@ -20,6 +20,8 @@ public class MetadataCatalogTimerSettings {
 		private ProductFamily family;
 		
 		private String topic;
+		
+		private String satelliteId;
 
 		public String getCron() {
 			return cron;
@@ -43,6 +45,14 @@ public class MetadataCatalogTimerSettings {
 		
 		public void setTopic(String topic) {
 			this.topic = topic;
+		}
+
+		public String getSatelliteId() {
+			return satelliteId;
+		}
+
+		public void setSatelliteId(String satelliteId) {
+			this.satelliteId = satelliteId;
 		}
 	}
 
