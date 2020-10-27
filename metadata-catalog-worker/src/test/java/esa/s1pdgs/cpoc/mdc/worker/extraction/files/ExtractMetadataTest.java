@@ -1308,4 +1308,18 @@ public class ExtractMetadataTest {
 		
 		assertEquals(rawCoordinatesExpectedResult, extractor.improveRawCoordinatesIfDateLineCrossing(rawCoordinatesInput));
 	}
+	
+	@Test
+	public void testConvertCoordinatesToClosedForm_whenNotClosedShallClose() {
+		String input = "81.3179,-81.9895 56.5997,-97.7338 56.0243,-91.2164 79.6240,-62.0955";
+		String expected = "81.3179,-81.9895 56.5997,-97.7338 56.0243,-91.2164 79.6240,-62.0955 81.3179,-81.9895";
+		assertEquals(expected, ExtractMetadata.convertCoordinatesToClosedForm(input));
+	}
+
+	@Test
+	public void testConvertCoordinatesToClosedForm_whenClosedShallNop() {
+		String input = "81.3179,-81.9895 56.5997,-97.7338 56.0243,-91.2164 79.6240,-62.0955 81.3179,-81.9895";
+		String expected = "81.3179,-81.9895 56.5997,-97.7338 56.0243,-91.2164 79.6240,-62.0955 81.3179,-81.9895";
+		assertEquals(expected, ExtractMetadata.convertCoordinatesToClosedForm(input));
+	}
 }

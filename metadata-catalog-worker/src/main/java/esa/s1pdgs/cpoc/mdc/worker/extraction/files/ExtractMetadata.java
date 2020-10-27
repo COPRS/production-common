@@ -465,10 +465,16 @@ public class ExtractMetadata {
 
 		try {
 
-			if (metadataJSONObject.has("sliceCoordinates")
+			if (metadataJSONObject.has("sliceCoordinates") // for use as polygon
 					&& !metadataJSONObject.getString("sliceCoordinates").isEmpty()) {
 				metadataJSONObject.put("sliceCoordinates",
 						processCoordinates(manifestFile, descriptor, metadataJSONObject.getString("sliceCoordinates")));
+			}
+
+			if (metadataJSONObject.has("coordinates") // for use as as-is metadata attribute (PRIP)
+					&& !metadataJSONObject.getString("coordinates").isEmpty()) {
+				metadataJSONObject.put("coordinates",
+								convertCoordinatesToClosedForm(metadataJSONObject.getString("coordinates")));
 			}
 
 			if (ProductFamily.L0_ACN.equals(productFamily) || ProductFamily.L0_SLICE.equals(productFamily)) {
@@ -875,6 +881,11 @@ public class ExtractMetadata {
 		} catch (final JSONException e) {
 			throw new MetadataExtractionException(e);
 		}
+	}
+	
+	public final static String convertCoordinatesToClosedForm(final String rawCoordinates) {
+		final String[] elements = rawCoordinates.split(" ");
+		return elements[0].equals(elements[elements.length - 1]) ? rawCoordinates : rawCoordinates + " " + elements[0]; 
 	}
 
 	/**
