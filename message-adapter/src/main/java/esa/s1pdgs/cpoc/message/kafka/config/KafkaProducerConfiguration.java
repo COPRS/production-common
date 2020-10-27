@@ -1,12 +1,8 @@
 package esa.s1pdgs.cpoc.message.kafka.config;
 
-import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
-import org.apache.kafka.clients.admin.Admin;
-import org.apache.kafka.clients.admin.AdminClientConfig;
-import org.apache.kafka.clients.producer.Partitioner;
 import org.apache.kafka.clients.producer.ProducerConfig;
 import org.apache.kafka.common.serialization.StringSerializer;
 import org.slf4j.Logger;
@@ -24,7 +20,6 @@ import org.springframework.lang.Nullable;
 import esa.s1pdgs.cpoc.message.MessageProducer;
 import esa.s1pdgs.cpoc.message.kafka.KafkaMessageProducer;
 import esa.s1pdgs.cpoc.message.kafka.LagBasedPartitioner;
-import esa.s1pdgs.cpoc.message.kafka.PartitionLagAnalyzer;
 import esa.s1pdgs.cpoc.message.kafka.ProducerConfigurationFactory;
 
 @Configuration
