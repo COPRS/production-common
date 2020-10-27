@@ -61,6 +61,11 @@ public class CatalogEventDispatcherImpl implements CatalogEventDispatcher {
 				this.publisher.publish(event);
 			}
 
+			if (entry == null) {
+				entry = new CatalogEventTimerEntry();
+				entry.setProductFamily(this.productFamily);
+				entry.setProductType(this.productType);
+			}
 			updateCatalogEventTimerEntry(entry, intervalStop);
 		} catch (MetadataQueryException e) {
 			LOGGER.warn("An exception occured while fetching new products: ", e);
