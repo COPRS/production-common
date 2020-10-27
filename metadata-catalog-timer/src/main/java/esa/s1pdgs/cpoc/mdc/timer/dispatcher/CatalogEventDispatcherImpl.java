@@ -66,6 +66,7 @@ public class CatalogEventDispatcherImpl implements CatalogEventDispatcher {
 				entry.setProductFamily(this.productFamily);
 				entry.setProductType(this.productType);
 			}
+			LOGGER.info("Update database entry for this dispatcher");
 			updateCatalogEventTimerEntry(entry, intervalStop);
 		} catch (MetadataQueryException e) {
 			LOGGER.warn("An exception occured while fetching new products: ", e);
@@ -113,6 +114,5 @@ public class CatalogEventDispatcherImpl implements CatalogEventDispatcher {
 		currentEntry.setLastCheckDate(Date.from(newTime.atZone(ZoneId.systemDefault()).toInstant()));
 
 		this.repository.save(currentEntry);
-
 	}
 }

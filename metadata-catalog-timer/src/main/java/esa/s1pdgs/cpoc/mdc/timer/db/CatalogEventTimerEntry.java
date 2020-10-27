@@ -3,6 +3,8 @@ package esa.s1pdgs.cpoc.mdc.timer.db;
 import java.util.Date;
 import java.util.Objects;
 
+import org.bson.types.ObjectId;
+import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.index.CompoundIndex;
 import org.springframework.data.mongodb.core.index.CompoundIndexes;
 import org.springframework.data.mongodb.core.mapping.Document;
@@ -15,11 +17,22 @@ import esa.s1pdgs.cpoc.common.ProductFamily;
 })
 public class CatalogEventTimerEntry {
 	
+	@Id
+	private ObjectId id;
+	
 	private String productType;
 	
 	private ProductFamily productFamily;
 	
 	private Date lastCheckDate;
+
+	public ObjectId getId() {
+		return id;
+	}
+
+	public void setId(ObjectId id) {
+		this.id = id;
+	}
 
 	public String getProductType() {
 		return productType;
@@ -47,7 +60,7 @@ public class CatalogEventTimerEntry {
 
 	@Override
 	public int hashCode() {
-		return Objects.hash(lastCheckDate, productFamily, productType);
+		return Objects.hash(id, lastCheckDate, productFamily, productType);
 	}
 
 	@Override
@@ -59,13 +72,13 @@ public class CatalogEventTimerEntry {
 			return false;
 		}
 		CatalogEventTimerEntry other = (CatalogEventTimerEntry) obj;
-		return Objects.equals(lastCheckDate, other.lastCheckDate) && productFamily == other.productFamily
-				&& Objects.equals(productType, other.productType);
+		return Objects.equals(id, other.id) && Objects.equals(lastCheckDate, other.lastCheckDate)
+				&& productFamily == other.productFamily && Objects.equals(productType, other.productType);
 	}
 
 	@Override
 	public String toString() {
-		return "CatalogEventTimerEntry [productType=" + productType + ", productFamily=" + productFamily
+		return "CatalogEventTimerEntry [id=" + id + ", productType=" + productType + ", productFamily=" + productFamily
 				+ ", lastCheckDate=" + lastCheckDate + "]";
 	}
 }
