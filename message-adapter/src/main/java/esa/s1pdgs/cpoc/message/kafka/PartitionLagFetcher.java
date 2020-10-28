@@ -42,7 +42,7 @@ public class PartitionLagFetcher implements Runnable {
     private volatile ScheduledExecutorService executor;
 
     private final Map<String, List<ConsumerLag>> consumerLags = new ConcurrentHashMap<>();
-    private final Map<TopicPartition, AtomicLong> interimCommits = new ConcurrentHashMap<>();
+    private final Map<TopicPartition, AtomicLong> interimPublications = new ConcurrentHashMap<>();
 
     public PartitionLagFetcher(final Admin adminClient, final KafkaProperties properties) {
         this.adminClient = adminClient;
@@ -56,7 +56,7 @@ public class PartitionLagFetcher implements Runnable {
         LOG.debug("running lag kafka lag analyzing for consumer-group {}", properties.getProducer().getLagBasedPartitioner().getConsumerGroup());
         try {
             consumerLags.clear();
-            interimCommits.clear();
+            interimPublications.clear();
             consumerLags.putAll(fetch());
         } catch (Exception e) {
             LOG.error("error during fetch", e);
@@ -66,17 +66,17 @@ public class PartitionLagFetcher implements Runnable {
     public Map<String, List<ConsumerLag>> getConsumerLags() {
         return consumerLags.values().stream()
                 .flatMap(Collection::stream)
-                .map(lag -> lag.includingInterimCommits(
-                        interimCommits.get(lag.getTopicPartition())))
+                .map(lag -> lag.includingInterimPublications(
+                        interimPublications.get(lag.getTopicPartition())))
                 .collect(groupingBy(ConsumerLag::getTopic));
     }
 
-    public void incInterimCommitsFor(TopicPartition partition) {
-        if (!interimCommits.containsKey(partition)) {
-            interimCommits.put(partition, new AtomicLong(0L));
+    public void incInterimPublicationsFor(TopicPartition partition) {
+        if (!interimPublications.containsKey(partition)) {
+            interimPublications.put(partition, new AtomicLong(0L));
         }
 
-        interimCommits.get(partition).incrementAndGet();
+        interimPublications.get(partition).incrementAndGet();
     }
 
     private Map<String, List<ConsumerLag>> fetch() throws InterruptedException, ExecutionException, TimeoutException {
@@ -159,7 +159,7 @@ public class PartitionLagFetcher implements Runnable {
 
     public static class ConsumerLag {
         private final String clientId;
-        private String hostName;
+        private final String hostName;
         private final String topic;
         private final Integer partition;
         private final long committedOffset;
@@ -210,12 +210,12 @@ public class PartitionLagFetcher implements Runnable {
             return latestOffset;
         }
 
-        public ConsumerLag includingInterimCommits(AtomicLong interimCommits) {
-            if (interimCommits == null || interimCommits.get() == 0L) {
+        public ConsumerLag includingInterimPublications(AtomicLong interimPublications) {
+            if (interimPublications == null || interimPublications.get() == 0L) {
                 return this;
             }
 
-            return new ConsumerLag(clientId, hostName, topic, partition, latestOffset, committedOffset + interimCommits.get());
+            return new ConsumerLag(clientId, hostName, topic, partition, latestOffset + interimPublications.get(), committedOffset);
         }
 
         @Override

@@ -37,7 +37,7 @@ public class LagBasedPartitioner implements Partitioner {
         Integer calculatedPartition = calculatePartitionViaLagFor(topic);
         if (calculatedPartition != null && calculatedPartition >= 0) {
             LOG.debug("calculated partition {} for new message on topic {}", calculatedPartition, topic);
-            lagAnalyzer.incInterimCommitsFor(new TopicPartition(topic, calculatedPartition));
+            lagAnalyzer.incInterimPublicationsFor(new TopicPartition(topic, calculatedPartition));
             return calculatedPartition;
         }
 

@@ -75,7 +75,7 @@ public class LagBasedPartitionerTest {
 
         int partition = uut.partition("topic10", null, null, null, null, null);
         assertThat(partition, is(equalTo(4)));
-        verify(fetcher).incInterimCommitsFor(new TopicPartition("topic10", 4));
+        verify(fetcher).incInterimPublicationsFor(new TopicPartition("topic10", 4));
     }
 
     @Test
@@ -107,7 +107,7 @@ public class LagBasedPartitionerTest {
 
         int partition = uut.partition("topic10", null, null, null, null, null);
         assertThat(partition, is(equalTo(2)));
-        verify(fetcher).incInterimCommitsFor(new TopicPartition("topic10", 2));
+        verify(fetcher).incInterimPublicationsFor(new TopicPartition("topic10", 2));
     }
 
     @Test
@@ -139,7 +139,7 @@ public class LagBasedPartitionerTest {
 
         int partition = uut.partition("topic20", null, null, null, null, null);
         assertThat(partition, is(equalTo(6)));
-        verify(fetcher).incInterimCommitsFor(new TopicPartition("topic20", 6));
+        verify(fetcher).incInterimPublicationsFor(new TopicPartition("topic20", 6));
     }
 
 
