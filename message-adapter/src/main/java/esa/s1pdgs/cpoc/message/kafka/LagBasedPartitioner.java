@@ -55,20 +55,21 @@ public class LagBasedPartitioner implements Partitioner {
 
         final Map.Entry<String, Long> consumerWithLowestLag = consumerWithLowestLag(sumOfLags);
 
-        if(consumerWithLowestLag == null) {
+        if (consumerWithLowestLag == null) {
             return null;
         }
 
-        LOG.debug("consumer with lowest lag is {} with summarized lag {}", consumerWithLowestLag.getKey(), consumerWithLowestLag.getValue());
+        LOG.debug("consumer with lowest lag for topic {} is {} with summarized lag {}", topic, consumerWithLowestLag.getKey(), consumerWithLowestLag.getValue());
 
         return partitionWithLowestLagForTopicAndConsumer(topic, consumerWithLowestLag.getKey());
     }
 
-    private Integer partitionWithLowestLagForTopicAndConsumer(final String topic, final String consumerId) {
+    //TODO same client has different consumer ids for different topics :(
+    private Integer partitionWithLowestLagForTopicAndConsumer(final String topic, final String rawClientId) {
         List<PartitionLagFetcher.ConsumerLag> consumerLags = lagAnalyzer.getConsumerLags().getOrDefault(topic, emptyList());
 
         return consumerLags.stream()
-                .filter(lag -> lag.getConsumerId().equals(consumerId))
+                .filter(lag -> lag.getRawClientId().equals(rawClientId))
                 .min(comparingLong(PartitionLagFetcher.ConsumerLag::getLag))
                 .map(PartitionLagFetcher.ConsumerLag::getPartition).orElse(null);
     }
@@ -91,13 +92,13 @@ public class LagBasedPartitioner implements Partitioner {
     private Map<String, Long> lagsForTopic(final String topic) {
         final List<PartitionLagFetcher.ConsumerLag> topicConsumerLags = lagAnalyzer.getConsumerLags().get(topic);
 
-        if(topicConsumerLags == null) {
+        if (topicConsumerLags == null) {
             return emptyMap();
         }
 
         return topicConsumerLags.stream()
                 .collect(groupingBy(
-                        PartitionLagFetcher.ConsumerLag::getConsumerId,
+                        PartitionLagFetcher.ConsumerLag::getRawClientId,
                         Collectors.<PartitionLagFetcher.ConsumerLag>summingLong(PartitionLagFetcher.ConsumerLag::getLag)));
     }
 
@@ -134,7 +135,7 @@ public class LagBasedPartitioner implements Partitioner {
         }
 
         if (lagAnalyzer == null) {
-            lagAnalyzer = ((Supplier<PartitionLagFetcher>)configs.get(PARTITION_LAG_FETCHER_SUPPLIER)).get();
+            lagAnalyzer = ((Supplier<PartitionLagFetcher>) configs.get(PARTITION_LAG_FETCHER_SUPPLIER)).get();
             lagAnalyzer.start();
         }
 

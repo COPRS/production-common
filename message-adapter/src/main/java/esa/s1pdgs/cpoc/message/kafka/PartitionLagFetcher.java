@@ -14,8 +14,6 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
-import java.util.function.Function;
-import java.util.function.Supplier;
 
 import org.apache.kafka.clients.admin.Admin;
 import org.apache.kafka.clients.admin.ConsumerGroupDescription;
@@ -28,6 +26,7 @@ import org.apache.kafka.common.TopicPartition;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import esa.s1pdgs.cpoc.message.kafka.config.KafkaConsumerClientId;
 import esa.s1pdgs.cpoc.message.kafka.config.KafkaProperties;
 
 public class PartitionLagFetcher implements Runnable {
@@ -95,7 +94,7 @@ public class PartitionLagFetcher implements Runnable {
 
         final ConsumerGroupDescription consumerGroupDescription = groupDescriptions.get(properties.getProducer().getLagBasedPartitioner().getConsumerGroup());
         consumerGroupDescription.members().forEach(groupMember -> {
-            String consumerId = groupMember.consumerId();
+            String clientId = groupMember.clientId();
             Set<TopicPartition> assignedPartitions = groupMember.assignment().topicPartitions();
             assignedPartitions.forEach(assignedPartition -> {
                 if(!latestOffsets.containsKey(assignedPartition) || !consumerOffsets.containsKey(assignedPartition)) {
@@ -105,7 +104,7 @@ public class PartitionLagFetcher implements Runnable {
 
                 final long latestOffset = latestOffsets.get(assignedPartition).offset();
                 final long committedOffset = consumerOffsets.get(assignedPartition).offset();
-                final ConsumerLag consumerLag = new ConsumerLag(consumerId, assignedPartition.topic(), assignedPartition.partition(), latestOffset, committedOffset);
+                final ConsumerLag consumerLag = new ConsumerLag(clientId, assignedPartition.topic(), assignedPartition.partition(), latestOffset, committedOffset);
                 consumerLags.get(assignedPartition.topic()).add(consumerLag);
             });
         });
@@ -139,22 +138,26 @@ public class PartitionLagFetcher implements Runnable {
     }
 
     public static class ConsumerLag {
-        private final String consumerId;
+        private final String clientId;
         private final String topic;
         private final Integer partition;
         private final long committedOffset;
         private final long latestOffset;
 
-        public ConsumerLag(final String consumerId, final String topic, final Integer partition, long latestOffset, final long committedOffset) {
-            this.consumerId = consumerId;
+        public ConsumerLag(final String clientId, final String topic, final Integer partition, long latestOffset, final long committedOffset) {
+            this.clientId = clientId;
             this.topic = topic;
             this.partition = partition;
             this.committedOffset = committedOffset;
             this.latestOffset = latestOffset;
         }
 
-        public String getConsumerId() {
-            return consumerId;
+        public String getClientId() {
+            return clientId;
+        }
+
+        public String getRawClientId() {
+            return KafkaConsumerClientId.rawIdForTopic(clientId, topic);
         }
 
         public String getTopic() {
@@ -180,7 +183,7 @@ public class PartitionLagFetcher implements Runnable {
         @Override
         public String toString() {
             return "ConsumerLag{" +
-                    "consumerId='" + consumerId + '\'' +
+                    "clientId='" + clientId + '\'' +
                     ", topic='" + topic + '\'' +
                     ", partition=" + partition +
                     ", committedOffset=" + committedOffset +

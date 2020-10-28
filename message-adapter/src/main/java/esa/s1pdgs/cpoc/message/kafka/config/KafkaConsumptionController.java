@@ -29,10 +29,10 @@ import org.springframework.stereotype.Component;
 
 import esa.s1pdgs.cpoc.message.Consumption;
 import esa.s1pdgs.cpoc.message.ConsumptionController;
-import esa.s1pdgs.cpoc.message.kafka.ConsumptionConfigurationFactory;
-import esa.s1pdgs.cpoc.message.kafka.ContainerPropertiesFactory;
 import esa.s1pdgs.cpoc.message.MessageConsumer;
 import esa.s1pdgs.cpoc.message.MessageConsumerFactory;
+import esa.s1pdgs.cpoc.message.kafka.ConsumptionConfigurationFactory;
+import esa.s1pdgs.cpoc.message.kafka.ContainerPropertiesFactory;
 import esa.s1pdgs.cpoc.message.kafka.KafkaAcknowledgement;
 import esa.s1pdgs.cpoc.message.kafka.KafkaConsumerFactoryProvider;
 import esa.s1pdgs.cpoc.message.kafka.KafkaConsumption;
@@ -192,9 +192,8 @@ public class KafkaConsumptionController<M> implements ConsumptionController {
 
     // use unique clientId to circumvent 'instance already exists' problem
     private String clientIdForTopic(final String topic) {
-        return kafkaProperties.getClientId() + "-" +
-                kafkaProperties.getHostname() + "-" +
-                topic;
+        return KafkaConsumerClientId
+                .clientIdForRawIdAndTopic(kafkaProperties.getClientId() + kafkaProperties.getHostname(), topic);
     }
 
     private ContainerProperties containerProperties(final String topic, final MessageListener<String, M> messageListener) {
