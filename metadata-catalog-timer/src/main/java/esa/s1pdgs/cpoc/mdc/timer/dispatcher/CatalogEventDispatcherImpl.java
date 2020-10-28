@@ -117,7 +117,10 @@ public class CatalogEventDispatcherImpl implements CatalogEventDispatcher {
 		event.setUid(UUID.randomUUID());
 		
 		event.getMetadata().put("satelliteId", this.satelliteId);
-
+		event.getMetadata().put("missionId", metadata.getMissionId());
+		event.getMetadata().put("startTime", metadata.getValidityStart());
+		event.getMetadata().put("stopTime", metadata.getValidityStop());
+		
 		return event;
 	}
 
