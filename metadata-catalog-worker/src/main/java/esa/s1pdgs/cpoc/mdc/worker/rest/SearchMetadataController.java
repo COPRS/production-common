@@ -114,7 +114,7 @@ public class SearchMetadataController {
 				"Received interval query for family '{}', startTime '{}', stopTime '{}', productType '{}', satelliteId '{}'",
 				productFamily, intervalStart, intervalStop, productType);
 
-		final List<SearchMetadata> response = new ArrayList<>();
+		final List<SearchMetadata> response;
 		String startTime;
 		String stopTime;
 		try {
@@ -129,20 +129,14 @@ public class SearchMetadataController {
 		}
 
 		try {
-			List<SearchMetadata> results = esServices.intervalTypeQuery(startTime, stopTime,
+			response = esServices.intervalTypeQuery(startTime, stopTime,
 					ProductFamily.fromValue(productFamily), productType, satelliteId);
 
-			if (results == null) {
+			if (response == null) {
 				LOGGER.info("No results returned.");
-				return new ResponseEntity<>(response, HttpStatus.OK);
+				return new ResponseEntity<>(new ArrayList<>(), HttpStatus.OK);
 			}
-			LOGGER.debug("Query returned {} results", results.size());
-
-			for (final SearchMetadata result : results) {
-				response.add(new SearchMetadata(result.getProductName(), result.getProductType(),
-						result.getKeyObjectStorage(), result.getValidityStart(), result.getValidityStop(),
-						result.getMissionId(), result.getSatelliteId(), result.getStationCode()));
-			}
+			LOGGER.debug("Query returned {} results", response.size());
 		} catch (final Exception ex) {
 			LOGGER.error("Query error while doing intervalSearch: {}", LogUtils.toString(ex));
 			return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
