@@ -141,6 +141,6 @@ public class LagBasedPartitionerTest {
 
 
     private PartitionLagFetcher.ConsumerLag lag(final String rawClientId, final String topic, final Integer partition, final long lag) {
-        return new PartitionLagFetcher.ConsumerLag(KafkaConsumerClientId.clientIdForRawIdAndTopic(rawClientId, topic), topic, partition, lag, 0);
+        return new PartitionLagFetcher.ConsumerLag(KafkaConsumerClientId.clientIdForRawIdAndTopic(rawClientId, topic) + "-0", topic, partition, lag, 0);
     }
 }

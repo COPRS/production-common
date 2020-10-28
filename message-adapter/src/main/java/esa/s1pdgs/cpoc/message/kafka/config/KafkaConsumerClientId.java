@@ -7,7 +7,7 @@ public class KafkaConsumerClientId {
     }
 
     public static String rawIdForTopic(final String clientId, final String topic) {
-        return clientId.replaceAll("-" + topic + "$", "");
+        return clientId.replaceAll("-" + topic + "-\\d+$", "");
     }
 
 }
