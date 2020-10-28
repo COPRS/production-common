@@ -56,7 +56,7 @@ public class AuxipOdataClient implements AuxipClient {
 	private final String creationDateAttrName;
 	private final String productNameAttrName;
 	private final String idAttrName;
-	private final String contentLengthAttrName = "ContentLength";
+	private final String contentLengthAttrName;
 
 	// --------------------------------------------------------------------------
 
@@ -71,6 +71,8 @@ public class AuxipOdataClient implements AuxipClient {
 		this.productNameAttrName = Objects.requireNonNull(hostConfig.getProductNameAttrName(),
 				"product name attribute name must not be null!");
 		this.idAttrName = Objects.requireNonNull(hostConfig.getIdAttrName(), "id attribute name must not be null!");
+		this.contentLengthAttrName = Objects.requireNonNull(hostConfig.getContentLengthAttrName(),
+				"content length attribute name must not be null!");
 
 		this.rootServiceUrl = URI.create(
 				Objects.requireNonNull(this.hostConfig.getServiceRootUri(), "the root service URL must not be null!"));
