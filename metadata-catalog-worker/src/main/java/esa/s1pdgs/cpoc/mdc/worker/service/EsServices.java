@@ -1278,6 +1278,7 @@ public class EsServices {
 
 		sourceBuilder.query(queryBuilder);
 		sourceBuilder.size(SIZE_LIMIT);
+		sourceBuilder.sort(new FieldSortBuilder("insertionTime").order(SortOrder.ASC));
 
 		final String index = getIndexForProductFamily(productFamily, productType);
 		final SearchRequest searchRequest = new SearchRequest(index);
@@ -1307,6 +1308,14 @@ public class EsServices {
 									DateUtils.convertToMetadataDateTimeFormat(source.get("stopTime").toString()));
 						} catch (final DateTimeParseException e) {
 							throw new MetadataMalformedException("stopTime");
+						}
+					}
+					if (source.containsKey("insertionTime")) {
+						try {
+							local.setInsertionTime(
+									DateUtils.convertToMetadataDateTimeFormat(source.get("insertionTime").toString()));
+						} catch (final DateTimeParseException e) {
+							throw new MetadataMalformedException("insertionTime");
 						}
 					}
 					r.add(local);

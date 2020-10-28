@@ -9,6 +9,7 @@ import java.util.UUID;
 
 import esa.s1pdgs.cpoc.common.ProductFamily;
 import esa.s1pdgs.cpoc.common.errors.processing.MetadataQueryException;
+import esa.s1pdgs.cpoc.common.utils.DateUtils;
 import esa.s1pdgs.cpoc.mdc.timer.db.CatalogEventTimerEntry;
 import esa.s1pdgs.cpoc.mdc.timer.db.CatalogEventTimerEntryRepository;
 import esa.s1pdgs.cpoc.mdc.timer.publish.Publisher;
@@ -58,19 +59,27 @@ public class CatalogEventDispatcherImpl implements CatalogEventDispatcher {
 			List<SearchMetadata> products = this.metadataClient.searchInterval(this.productFamily, this.productType,
 					intervalStart, intervalStop, this.satelliteId);
 
+			String lastInsertionTime = null;
+			
 			for (SearchMetadata product : products) {
 				LOGGER.info("Publish CatalogEvent for product {}", product.getProductName());
 				CatalogEvent event = toCatalogEvent(product);
 				this.publisher.publish(event);
+				
+				lastInsertionTime = product.getInsertionTime();
 			}
-
-			if (entry == null) {
-				entry = new CatalogEventTimerEntry();
-				entry.setProductFamily(this.productFamily);
-				entry.setProductType(this.productType);
+			
+			// Update database entry, if we produced new events
+			if (lastInsertionTime != null) {
+				if (entry == null) {
+					entry = new CatalogEventTimerEntry();
+					entry.setProductFamily(this.productFamily);
+					entry.setProductType(this.productType);
+				}
+				
+				LOGGER.info("Update database entry for this dispatcher");
+				updateCatalogEventTimerEntry(entry, DateUtils.parse(lastInsertionTime));
 			}
-			LOGGER.info("Update database entry for this dispatcher");
-			updateCatalogEventTimerEntry(entry, intervalStop);
 		} catch (MetadataQueryException e) {
 			LOGGER.warn("An exception occured while fetching new products: ", e);
 		} catch (Exception e) {

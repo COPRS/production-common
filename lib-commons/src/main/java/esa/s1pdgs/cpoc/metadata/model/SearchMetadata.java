@@ -14,6 +14,8 @@ public class SearchMetadata extends AbstractMetadata {
 
 	private List<List<Double>> footprint;
 	
+	private String insertionTime;
+	
 	/**
 	 * Constructor using fields
 	 * 
@@ -45,39 +47,46 @@ public class SearchMetadata extends AbstractMetadata {
 		this.footprint = footprint;
 	}
 
+	public String getInsertionTime() {
+		return insertionTime;
+	}
+
+	public void setInsertionTime(String insertionTime) {
+		this.insertionTime = insertionTime;
+	}
+
 	public String toJsonString() {
 		return String.format("{%s}", super.toAbstractString());
 	}
 
-	/**
-	 * @see java.lang.Object#hashCode()
-	 */
 	@Override
 	public int hashCode() {
-		return Objects.hash(super.hashCode(), footprint);
+		final int prime = 31;
+		int result = super.hashCode();
+		result = prime * result + Objects.hash(footprint, insertionTime);
+		return result;
 	}
 
-	/**
-	 * @see java.lang.Object#equals(java.lang.Object)
-	 */
 	@Override
-	public boolean equals(final Object obj) {
-		boolean ret;
+	public boolean equals(Object obj) {
 		if (this == obj) {
-			ret = true;
-		} else if (obj == null || getClass() != obj.getClass()) {
-			ret = false;
-		} else {
-			SearchMetadata other = (SearchMetadata) obj;
-			ret = super.equals(other) && footprint == other.footprint;
+			return true;
 		}
-		return ret;
+		if (!super.equals(obj)) {
+			return false;
+		}
+		if (!(obj instanceof SearchMetadata)) {
+			return false;
+		}
+		SearchMetadata other = (SearchMetadata) obj;
+		return Objects.equals(footprint, other.footprint) && Objects.equals(insertionTime, other.insertionTime);
 	}
 
 	@Override
 	public String toString() {
-		return "SearchMetadata [productName=" + productName + ", productType=" + productType + ", keyObjectStorage="
-				+ keyObjectStorage + ", validityStart=" + validityStart + ", validityStop=" + validityStop
-				+ ", missionId=" + missionId + ", satelliteId=" + satelliteId + ", stationCode=" + stationCode + ", footprint=" + footprint + "]";
+		return "SearchMetadata [footprint=" + footprint + ", insertionTime=" + insertionTime + ", productName="
+				+ productName + ", productType=" + productType + ", keyObjectStorage=" + keyObjectStorage
+				+ ", validityStart=" + validityStart + ", validityStop=" + validityStop + ", missionId=" + missionId
+				+ ", satelliteId=" + satelliteId + ", stationCode=" + stationCode + ", swathtype=" + swathtype + "]";
 	}
 }
