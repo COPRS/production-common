@@ -65,7 +65,7 @@ public class PartitionLagFetcher implements Runnable {
     private Map<String, List<ConsumerLag>> fetch() throws InterruptedException, ExecutionException, TimeoutException {
 
         final Set<String> topics = properties.getProducer().getLagBasedPartitioner().getTopicsWithPriority().keySet();
-        final Map<String, TopicDescription> topicDescriptions = adminClient.describeTopics(topics).all().get(10L, TimeUnit.SECONDS);
+        final Map<String, TopicDescription> topicDescriptions = adminClient.describeTopics(topics).all().get(TIMEOUT_SEC, TimeUnit.SECONDS);
 
         final List<TopicPartition> partitions = new ArrayList<>();
 
@@ -80,7 +80,7 @@ public class PartitionLagFetcher implements Runnable {
 
         final Map<String, ConsumerGroupDescription> groupDescriptions
                 = adminClient.describeConsumerGroups(
-                        singletonList(properties.getProducer().getLagBasedPartitioner().getConsumerGroup()))
+                singletonList(properties.getProducer().getLagBasedPartitioner().getConsumerGroup()))
                 .all().get(TIMEOUT_SEC, TimeUnit.SECONDS);
 
         final Map<TopicPartition, OffsetAndMetadata> consumerOffsets
@@ -94,17 +94,20 @@ public class PartitionLagFetcher implements Runnable {
 
         final ConsumerGroupDescription consumerGroupDescription = groupDescriptions.get(properties.getProducer().getLagBasedPartitioner().getConsumerGroup());
         consumerGroupDescription.members().forEach(groupMember -> {
-            String clientId = groupMember.clientId();
-            Set<TopicPartition> assignedPartitions = groupMember.assignment().topicPartitions();
+            final String clientId = groupMember.clientId();
+            final String hostName = groupMember.host();
+            final Set<TopicPartition> assignedPartitions = groupMember.assignment().topicPartitions();
+
             assignedPartitions.forEach(assignedPartition -> {
-                if(!latestOffsets.containsKey(assignedPartition) || !consumerOffsets.containsKey(assignedPartition)) {
+                if (!latestOffsets.containsKey(assignedPartition) || !consumerOffsets.containsKey(assignedPartition)) {
                     LOG.debug("no offset information for topic partition {}, skipping it ...", assignedPartition);
                     return;
                 }
 
                 final long latestOffset = latestOffsets.get(assignedPartition).offset();
                 final long committedOffset = consumerOffsets.get(assignedPartition).offset();
-                final ConsumerLag consumerLag = new ConsumerLag(clientId, assignedPartition.topic(), assignedPartition.partition(), latestOffset, committedOffset);
+                final ConsumerLag consumerLag
+                        = new ConsumerLag(clientId, hostName, assignedPartition.topic(), assignedPartition.partition(), latestOffset, committedOffset);
                 consumerLags.get(assignedPartition.topic()).add(consumerLag);
             });
         });
@@ -139,13 +142,15 @@ public class PartitionLagFetcher implements Runnable {
 
     public static class ConsumerLag {
         private final String clientId;
+        private String hostName;
         private final String topic;
         private final Integer partition;
         private final long committedOffset;
         private final long latestOffset;
 
-        public ConsumerLag(final String clientId, final String topic, final Integer partition, long latestOffset, final long committedOffset) {
+        public ConsumerLag(final String clientId, final String hostName, final String topic, final Integer partition, long latestOffset, final long committedOffset) {
             this.clientId = clientId;
+            this.hostName = hostName;
             this.topic = topic;
             this.partition = partition;
             this.committedOffset = committedOffset;
@@ -158,6 +163,10 @@ public class PartitionLagFetcher implements Runnable {
 
         public String getRawClientId() {
             return KafkaConsumerClientId.rawIdForTopic(clientId, topic);
+        }
+
+        public String getHostName() {
+            return hostName;
         }
 
         public String getTopic() {
@@ -184,6 +193,7 @@ public class PartitionLagFetcher implements Runnable {
         public String toString() {
             return "ConsumerLag{" +
                     "clientId='" + clientId + '\'' +
+                    ", host='" + hostName + '\'' +
                     ", topic='" + topic + '\'' +
                     ", partition=" + partition +
                     ", committedOffset=" + committedOffset +
