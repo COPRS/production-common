@@ -16,6 +16,7 @@ import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import esa.s1pdgs.cpoc.common.EdrsSessionFileType;
 import esa.s1pdgs.cpoc.common.ProductCategory;
 import esa.s1pdgs.cpoc.common.ProductFamily;
 import esa.s1pdgs.cpoc.common.utils.DateUtils;
@@ -29,6 +30,7 @@ import esa.s1pdgs.cpoc.mdc.worker.config.TriggerConfigurationProperties.Category
 import esa.s1pdgs.cpoc.mdc.worker.extraction.MetadataExtractor;
 import esa.s1pdgs.cpoc.mdc.worker.extraction.MetadataExtractorFactory;
 import esa.s1pdgs.cpoc.mdc.worker.extraction.report.MetadataExtractionReportingOutput;
+import esa.s1pdgs.cpoc.mdc.worker.extraction.report.MetadataExtractionReportingOutput.EffectiveDownlink;
 import esa.s1pdgs.cpoc.mdc.worker.status.AppStatusImpl;
 import esa.s1pdgs.cpoc.mqi.client.MessageFilter;
 import esa.s1pdgs.cpoc.mqi.client.MqiClient;
@@ -180,7 +182,7 @@ public class MetadataExtractionService implements MqiListener<CatalogJob> {
 		final GenericPublicationMessageDto<CatalogEvent> pub = pubs.get(0);
 		final CatalogEventAdapter eventAdapter = CatalogEventAdapter.of(pub);
 
-		final MetadataExtractionReportingOutput output = new MetadataExtractionReportingOutput(); // -> zwei neue Felder
+		final MetadataExtractionReportingOutput output = new MetadataExtractionReportingOutput();
 
 		// S1PRO-1678: trace sensing start/stop
 		final String productSensingStartDate = eventAdapter.productSensingStartDate();
@@ -203,6 +205,18 @@ public class MetadataExtractionService implements MqiListener<CatalogJob> {
 			output.setChannelIdentifierShort(eventAdapter.channelId());
 			final List<String> rawNames = eventAdapter.rawNames();
 			output.setRawCountShort(rawNames != null ? rawNames.size() : 0);
+		}
+
+		// S1PRO-2036: report station string, start time and stop time for DSIB files only, for all other report mission identifier and type
+		if (pub.getFamily() == ProductFamily.EDRS_SESSION && EdrsSessionFileType.SESSION.name().equalsIgnoreCase(eventAdapter.productType())) {
+			output.setStationString(eventAdapter.stationCode());
+			final EffectiveDownlink effectiveDownlink = new EffectiveDownlink();
+			effectiveDownlink.setStartDate(eventAdapter.startTime());
+			effectiveDownlink.setStopDate(eventAdapter.stopTime());
+			output.setEffectiveDownlink(effectiveDownlink);
+		} else {
+			output.setMissionIdentifierString(eventAdapter.missionId());
+			output.setTypeString(eventAdapter.productType());
 		}
 
 		return output.build();

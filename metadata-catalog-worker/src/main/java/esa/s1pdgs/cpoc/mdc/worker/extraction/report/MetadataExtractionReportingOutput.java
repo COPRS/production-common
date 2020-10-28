@@ -9,6 +9,42 @@ import esa.s1pdgs.cpoc.report.ReportingOutput;
 @JsonInclude(Include.NON_NULL) // following SD-05-2100-1 S1PRO-REPORT-API only include non null attributes
 public class MetadataExtractionReportingOutput implements ReportingOutput {
 
+    public static class EffectiveDownlink {
+        @JsonProperty("start_date")
+        private String startDate; // S1PRO-2036
+        
+        @JsonProperty("stop_date")
+        private String stopDate; // S1PRO-2036
+
+		public String getStartDate() {
+			return startDate;
+		}
+
+		public void setStartDate(String startDate) {
+			this.startDate = startDate;
+		}
+
+		public String getStopDate() {
+			return stopDate;
+		}
+
+		public void setStopDate(String stopDate) {
+			this.stopDate = stopDate;
+		}
+    }
+    
+    @JsonProperty("effective_downlink")
+    private EffectiveDownlink effectiveDownlink; // S1PRO-2036
+    
+    @JsonProperty("station_string")
+    private String stationString; // S1PRO-2036
+    
+    @JsonProperty("mission_identifier_string")
+    private String missionIdentifierString; // S1PRO-2036
+	
+    @JsonProperty("type_string")
+    private String typeString; // S1PRO-2036
+    
 	@JsonProperty("product_sensing_start_date")
 	private String productSensingStartDate; // S1PRO-1678
 	
@@ -112,5 +148,37 @@ public class MetadataExtractionReportingOutput implements ReportingOutput {
 	
 	public void setRawCountShort(int rawCountShort) {
 		this.rawCountShort = rawCountShort;
+	}
+	
+	public EffectiveDownlink getEffectiveDownlink() {
+		return effectiveDownlink;
+	}
+	
+	public void setEffectiveDownlink(EffectiveDownlink effectiveDownlink) {
+		this.effectiveDownlink = effectiveDownlink;
+	}
+	
+	public String getStationString() {
+		return stationString;
+	}
+	
+	public void setStationString(String stationString) {
+		this.stationString = stationString;
+	}
+	
+	public String getMissionIdentifierString() {
+		return missionIdentifierString;
+	}
+	
+	public void setMissionIdentifierString(String missionIdentifierString) {
+		this.missionIdentifierString = missionIdentifierString;
+	}
+	
+	public String getTypeString() {
+		return typeString;
+	}
+	
+	public void setTypeString(String typeString) {
+		this.typeString = typeString;
 	}
 }
