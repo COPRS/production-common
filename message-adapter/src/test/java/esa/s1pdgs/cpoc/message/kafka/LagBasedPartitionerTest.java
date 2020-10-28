@@ -4,14 +4,14 @@ import static java.util.Arrays.asList;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.is;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Supplier;
 
+import org.apache.kafka.common.TopicPartition;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mock;
@@ -75,6 +75,7 @@ public class LagBasedPartitionerTest {
 
         int partition = uut.partition("topic10", null, null, null, null, null);
         assertThat(partition, is(equalTo(4)));
+        verify(fetcher).incInterimCommitsFor(new TopicPartition("topic10", 4));
     }
 
     @Test
@@ -106,6 +107,7 @@ public class LagBasedPartitionerTest {
 
         int partition = uut.partition("topic10", null, null, null, null, null);
         assertThat(partition, is(equalTo(2)));
+        verify(fetcher).incInterimCommitsFor(new TopicPartition("topic10", 2));
     }
 
     @Test
@@ -137,6 +139,7 @@ public class LagBasedPartitionerTest {
 
         int partition = uut.partition("topic20", null, null, null, null, null);
         assertThat(partition, is(equalTo(6)));
+        verify(fetcher).incInterimCommitsFor(new TopicPartition("topic20", 6));
     }
 
 

@@ -14,6 +14,7 @@ import java.util.stream.Stream;
 import org.apache.kafka.clients.producer.Partitioner;
 import org.apache.kafka.clients.producer.internals.DefaultPartitioner;
 import org.apache.kafka.common.Cluster;
+import org.apache.kafka.common.TopicPartition;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -36,6 +37,7 @@ public class LagBasedPartitioner implements Partitioner {
         Integer calculatedPartition = calculatePartitionViaLagFor(topic);
         if (calculatedPartition != null && calculatedPartition >= 0) {
             LOG.debug("calculated partition {} for new message on topic {}", calculatedPartition, topic);
+            lagAnalyzer.incInterimCommitsFor(new TopicPartition(topic, calculatedPartition));
             return calculatedPartition;
         }
 
