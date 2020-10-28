@@ -1293,6 +1293,7 @@ public class EsServices {
 					final SearchMetadata local = new SearchMetadata();
 					local.setProductName(source.get("productName").toString());
 					local.setProductType(source.get("productType").toString());
+					local.setMissionId(source.get("missionId").toString());
 					local.setKeyObjectStorage(source.get("url").toString());
 					if (source.containsKey("startTime")) {
 						try {
