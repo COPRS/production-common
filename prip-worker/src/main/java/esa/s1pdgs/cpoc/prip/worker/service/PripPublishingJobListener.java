@@ -6,10 +6,14 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
 import java.util.UUID;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.regex.Pattern;
 
 import javax.annotation.PostConstruct;
 
@@ -48,6 +52,9 @@ import esa.s1pdgs.cpoc.prip.model.GeoShapePolygon;
 import esa.s1pdgs.cpoc.prip.model.PripGeoCoordinate;
 import esa.s1pdgs.cpoc.prip.model.PripMetadata;
 import esa.s1pdgs.cpoc.prip.worker.configuration.ApplicationProperties;
+import esa.s1pdgs.cpoc.prip.worker.configuration.ApplicationProperties.MetadataMapping;
+import esa.s1pdgs.cpoc.prip.worker.configuration.ApplicationProperties.ProductTypeRegexp;
+import esa.s1pdgs.cpoc.prip.worker.mapping.MdcToPripMapper;
 import esa.s1pdgs.cpoc.prip.worker.report.PripReportingInput;
 import esa.s1pdgs.cpoc.prip.worker.report.PripReportingOutput;
 import esa.s1pdgs.cpoc.report.Reporting;
@@ -70,7 +77,8 @@ public class PripPublishingJobListener implements MqiListener<PripPublishingJob>
 	private final AppStatus appStatus;
 	private final ApplicationProperties props;
 	private final ErrorRepoAppender errorAppender;
-
+	private final MdcToPripMapper mdcToPripMapper;
+	
 	@Autowired
 	public PripPublishingJobListener(
 			final GenericMqiClient mqiClient,
@@ -94,6 +102,7 @@ public class PripPublishingJobListener implements MqiListener<PripPublishingJob>
 		this.appStatus = appStatus;
 		this.props = props;
 		this.errorAppender = errorAppender;
+		mdcToPripMapper = new MdcToPripMapper(props.getProductTypeRegexp(), props.getMetadataMapping());
 	}
 	
 	@PostConstruct
@@ -155,7 +164,11 @@ public class PripPublishingJobListener implements MqiListener<PripPublishingJob>
 				publishingJob.getKeyObjectStorage()
 		);
 
-		final PripMetadata pripMetadata = new PripMetadata();
+		PripMetadata pripMetadata = new PripMetadata();
+		
+		Map<String, Object> pripAttributeData = mdcToPripMapper.map( // TODO: include this before saving
+				publishingJob.getKeyObjectStorage(), searchMetadata.getAdditionalProperties());
+		
 		pripMetadata.setId(UUID.randomUUID());
 		pripMetadata.setObsKey(publishingJob.getKeyObjectStorage());
 		pripMetadata.setName(publishingJob.getKeyObjectStorage());
@@ -196,7 +209,7 @@ public class PripPublishingJobListener implements MqiListener<PripPublishingJob>
 			props.getMetadataUnavailableRetriesIntervalMs()
 	    );
 
-}
+	}
 	
 	private long getContentLength(final ProductFamily family, final String key) {
 		long contentLength = 0;
