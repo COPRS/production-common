@@ -7,6 +7,8 @@ import java.util.regex.Pattern;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.json.JSONArray;
+import org.json.JSONException;
 
 import esa.s1pdgs.cpoc.common.utils.DateUtils;
 import esa.s1pdgs.cpoc.prip.worker.configuration.ApplicationProperties.MetadataMapping;
@@ -91,14 +93,21 @@ public class MdcToPripMapper {
 			final String mdcFieldName = entrySet.getKey();
 			final String attributeName = entrySet.getValue().getName();
 			final Type type = entrySet.getValue().getType();
-			final Object attributeValue;
+			Object attributeValue;
 			if (additionalProperties.containsKey(mdcFieldName)) {
 				final String inputValue = additionalProperties.get(mdcFieldName);
 				if (null == inputValue || "".equals(inputValue) && type != Type.STRING) {
 					attributeValue = null;
 				} else {
 					switch (type) {
-						case STRING: attributeValue = inputValue; break; // TODO concat if multiple strings
+						case STRING:
+							try {
+								JSONArray jsonArray = new JSONArray(inputValue);
+								attributeValue = jsonArray.join(",").replace("\"", "");
+							} catch (JSONException e) {
+								attributeValue = inputValue;
+							}
+							break;
 						case LONG: attributeValue = Long.parseLong(inputValue); break;
 						case DOUBLE: attributeValue = Double.parseDouble(inputValue); break;
 						case BOOLEAN: attributeValue = Boolean.parseBoolean(inputValue); break;
