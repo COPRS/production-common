@@ -1270,7 +1270,7 @@ public class EsServices {
 			final ProductFamily productFamily, final String productType, final String satelliteId) throws Exception {
 		final SearchSourceBuilder sourceBuilder = new SearchSourceBuilder();
 		final BoolQueryBuilder queryBuilder = QueryBuilders.boolQuery().must(QueryBuilders
-				.rangeQuery("insertionTime").gt(startTime).lte(stopTime))
+				.rangeQuery("insertionTime").from(startTime, false).to(stopTime))
 				.must(QueryBuilders.termQuery("satelliteId.keyword", satelliteId))
 				.must(QueryBuilders.regexpQuery("productType.keyword", productType));
 
