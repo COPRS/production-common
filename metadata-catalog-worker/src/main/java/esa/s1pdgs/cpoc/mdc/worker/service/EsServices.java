@@ -1264,13 +1264,13 @@ public class EsServices {
 	
 	/**
 	 * Searches for matchings products with an insertionTime inside the given
-	 * interval, and matching productFamily and productType
+	 * interval (lower bound not included), and matching productFamily and productType
 	 */
 	public List<SearchMetadata> intervalTypeQuery(final String startTime, final String stopTime,
 			final ProductFamily productFamily, final String productType, final String satelliteId) throws Exception {
 		final SearchSourceBuilder sourceBuilder = new SearchSourceBuilder();
 		final BoolQueryBuilder queryBuilder = QueryBuilders.boolQuery().must(QueryBuilders
-				.rangeQuery("insertionTime").from(startTime).to(stopTime))
+				.rangeQuery("insertionTime").gt(startTime).lte(stopTime))
 				.must(QueryBuilders.termQuery("satelliteId.keyword", satelliteId))
 				.must(QueryBuilders.regexpQuery("productType.keyword", productType));
 
