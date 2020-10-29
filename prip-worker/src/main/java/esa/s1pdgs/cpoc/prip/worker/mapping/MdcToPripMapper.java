@@ -57,7 +57,6 @@ public class MdcToPripMapper {
 		for (Entry<String, String> entrySet : mapping.entrySet()) {
 			final String from = entrySet.getValue();
 			final Type type;
-			System.out.println(entrySet.getKey());
 			int separatorPosition = entrySet.getKey().lastIndexOf('_');
 			switch (entrySet.getKey().substring(separatorPosition + 1)) {
 				case "string": type = Type.STRING; break;
