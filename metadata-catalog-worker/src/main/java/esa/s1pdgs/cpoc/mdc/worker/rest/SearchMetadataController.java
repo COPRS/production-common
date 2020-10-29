@@ -20,6 +20,7 @@ import org.springframework.web.bind.annotation.RestController;
 import esa.s1pdgs.cpoc.common.ProductFamily;
 import esa.s1pdgs.cpoc.common.errors.AbstractCodedException;
 import esa.s1pdgs.cpoc.common.errors.processing.MetadataNotPresentException;
+import esa.s1pdgs.cpoc.common.utils.DateUtils;
 import esa.s1pdgs.cpoc.common.utils.LogUtils;
 import esa.s1pdgs.cpoc.mdc.worker.service.EsServices;
 import esa.s1pdgs.cpoc.metadata.model.AuxMetadata;
@@ -118,8 +119,7 @@ public class SearchMetadataController {
 		String startTime;
 		String stopTime;
 		try {
-			startTime = convertDateForSearch(intervalStart, -0.0f,
-					DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.000000'Z'"));
+			startTime = convertDateForSearch(intervalStart, -0.0f, DateUtils.METADATA_DATE_FORMATTER);
 
 			stopTime = convertDateForSearch(intervalStop, 0.0f,
 					DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.999999'Z'"));
