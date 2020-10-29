@@ -200,15 +200,16 @@ public class MetadataExtractionService implements MqiListener<CatalogJob> {
 					.withSensingConsolidation(eventAdapter.productSensingConsolidation());
 		}
 
-		// S1PRO-1840: report channel identifier and raw count
+		// S1PRO-1840: report channel identifier
 		if (pub.getFamily() == ProductFamily.EDRS_SESSION) {
 			output.setChannelIdentifierShort(eventAdapter.channelId());
-			final List<String> rawNames = eventAdapter.rawNames();
-			output.setRawCountShort(rawNames != null ? rawNames.size() : 0);
 		}
 
+		// S1PRO-1840: report raw count for DSIB files only
 		// S1PRO-2036: report station string, start time and stop time for DSIB files only, for all other report mission identifier and type
 		if (pub.getFamily() == ProductFamily.EDRS_SESSION && EdrsSessionFileType.SESSION.name().equalsIgnoreCase(eventAdapter.productType())) {
+			final List<String> rawNames = eventAdapter.rawNames();
+			output.setRawCountShort(rawNames != null ? rawNames.size() : 0);
 			output.setStationString(eventAdapter.stationCode());
 			final EffectiveDownlink effectiveDownlink = new EffectiveDownlink();
 			effectiveDownlink.setStartDate(eventAdapter.startTime());
