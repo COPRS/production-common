@@ -5,12 +5,18 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.regex.Pattern;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
 import esa.s1pdgs.cpoc.common.utils.DateUtils;
 import esa.s1pdgs.cpoc.prip.worker.configuration.ApplicationProperties.MetadataMapping;
 import esa.s1pdgs.cpoc.prip.worker.configuration.ApplicationProperties.ProductTypeRegexp;
+import esa.s1pdgs.cpoc.prip.worker.service.PripPublishingJobListener;
 
 public class MdcToPripMapper {	
 
+	private static final Logger LOGGER = LogManager.getLogger(PripPublishingJobListener.class);
+	
 	private final Map<Pattern,Map<String,PripAttribute>> mappingConfiguration;
 
 	private class PripAttribute {
@@ -51,13 +57,17 @@ public class MdcToPripMapper {
 		for (Entry<String, String> entrySet : mapping.entrySet()) {
 			final String from = entrySet.getValue();
 			final Type type;
+			System.out.println(entrySet.getKey());
 			int separatorPosition = entrySet.getKey().lastIndexOf('_');
 			switch (entrySet.getKey().substring(separatorPosition + 1)) {
 				case "string": type = Type.STRING; break;
 				case "long": type = Type.LONG; break;
 				case "double": type = Type.DOUBLE; break;
 				case "date": type = Type.DATE; break;
-				default: throw new RuntimeException(String.format("Unsupported type extension specified for PRIP metadata mapping in %s", entrySet.getKey()));
+				case "boolean": type = Type.BOOLEAN; break;
+				default:
+					LOGGER.error("Unsupported type extension specified for PRIP metadata mapping in {}", entrySet.getKey());
+					throw new RuntimeException(String.format("Unsupported type extension specified for PRIP metadata mapping in %s", entrySet.getKey()));
 			}
 			final String to = entrySet.getKey().substring(0, separatorPosition);
 			result.put(from, new PripAttribute(to, type));
@@ -72,6 +82,7 @@ public class MdcToPripMapper {
 				return map(additionalProperties, mapping);
 			}
 		}
+		LOGGER.error("No matching product type regex found for productname {} in set of regex {}", productName, mappingConfiguration.keySet());
 		throw new RuntimeException(String.format("No matching product type regex found for productname %s in set of regex %s", productName, mappingConfiguration.keySet()));
 	}
 	
@@ -91,8 +102,11 @@ public class MdcToPripMapper {
 						case STRING: attributeValue = inputValue; break; // TODO concat if multiple strings
 						case LONG: attributeValue = Long.parseLong(inputValue); break;
 						case DOUBLE: attributeValue = Double.parseDouble(inputValue); break;
+						case BOOLEAN: attributeValue = Boolean.parseBoolean(inputValue); break;
 						case DATE: attributeValue = DateUtils.parse(inputValue); break;
-						default: throw new RuntimeException(String.format("Invalid type: %s", type));
+						default:
+							LOGGER.error("Unsupported attribute type: {}", type);
+							throw new RuntimeException(String.format("Unsupported attribute type: %s", type));
 					}
 				}
 				result.put(attributeName, attributeValue);
