@@ -217,7 +217,7 @@ public class MetadataExtractionService implements MqiListener<CatalogJob> {
 			output.setEffectiveDownlink(effectiveDownlink);
 		} else {
 			output.setMissionIdentifierString(eventAdapter.missionId());
-			output.setTypeString(eventAdapter.productType());
+			output.setTypeString(pub.getFamily().name());
 		}
 
 		return output.build();
