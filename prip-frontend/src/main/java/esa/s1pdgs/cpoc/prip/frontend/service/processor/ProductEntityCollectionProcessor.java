@@ -10,6 +10,8 @@ import org.apache.olingo.commons.api.data.ContextURL;
 import org.apache.olingo.commons.api.data.Entity;
 import org.apache.olingo.commons.api.data.EntityCollection;
 import org.apache.olingo.commons.api.edm.EdmEntitySet;
+import org.apache.olingo.commons.api.edm.EdmEntityType;
+import org.apache.olingo.commons.api.edm.EdmNavigationProperty;
 import org.apache.olingo.commons.api.format.ContentType;
 import org.apache.olingo.commons.api.http.HttpHeader;
 import org.apache.olingo.commons.api.http.HttpStatusCode;
@@ -28,18 +30,23 @@ import org.apache.olingo.server.api.serializer.SerializerResult;
 import org.apache.olingo.server.api.uri.UriInfo;
 import org.apache.olingo.server.api.uri.UriResource;
 import org.apache.olingo.server.api.uri.UriResourceEntitySet;
-import org.apache.olingo.server.api.uri.queryoption.CountOption;
+import org.apache.olingo.server.api.uri.UriResourceNavigation;
 import org.apache.olingo.server.api.uri.queryoption.FilterOption;
 import org.apache.olingo.server.api.uri.queryoption.SystemQueryOption;
 import org.apache.olingo.server.api.uri.queryoption.SystemQueryOptionKind;
 import org.apache.olingo.server.api.uri.queryoption.expression.Expression;
 import org.apache.olingo.server.api.uri.queryoption.expression.ExpressionVisitException;
+import org.apache.olingo.server.core.uri.UriInfoImpl;
+import org.apache.olingo.server.core.uri.UriResourceNavigationPropertyImpl;
+import org.apache.olingo.server.core.uri.queryoption.ExpandItemImpl;
+import org.apache.olingo.server.core.uri.queryoption.ExpandOptionImpl;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import esa.s1pdgs.cpoc.prip.frontend.service.edm.EdmProvider;
 import esa.s1pdgs.cpoc.prip.frontend.service.mapping.MappingUtil;
 import esa.s1pdgs.cpoc.prip.frontend.service.processor.visitor.ProductsFilterVisitor;
+import esa.s1pdgs.cpoc.prip.frontend.utils.OlingoUtil;
 import esa.s1pdgs.cpoc.prip.metadata.PripMetadataRepository;
 import esa.s1pdgs.cpoc.prip.model.PripDateTimeFilter;
 import esa.s1pdgs.cpoc.prip.model.PripMetadata;
@@ -52,6 +59,8 @@ public class ProductEntityCollectionProcessor implements EntityCollectionProcess
 	private OData odata;
 	private ServiceMetadata serviceMetadata;
 	private PripMetadataRepository pripMetadataRepository;
+	
+	// --------------------------------------------------------------------------
 
 	public ProductEntityCollectionProcessor(PripMetadataRepository pripMetadataRepository) {
 		this.pripMetadataRepository = pripMetadataRepository;
@@ -61,17 +70,59 @@ public class ProductEntityCollectionProcessor implements EntityCollectionProcess
 		this.odata = odata;
 		this.serviceMetadata = serviceMetadata;
 	}
+	
+	// --------------------------------------------------------------------------
 
 	@Override
 	public void readEntityCollection(ODataRequest request, ODataResponse response, UriInfo uriInfo,
 			ContentType responseFormat) throws ODataApplicationException, ODataLibraryException {
-		List<UriResource> resourcePaths = uriInfo.getUriResourceParts();
-		UriResourceEntitySet uriResourceEntitySet = (UriResourceEntitySet) resourcePaths.get(0);
-		EdmEntitySet edmEntitySet = uriResourceEntitySet.getEntitySet();
-
-		if (!EdmProvider.ES_PRODUCTS_NAME.equals(edmEntitySet.getName())) {
+		List<UriResource> resourceParts = uriInfo.getUriResourceParts();
+		UriResourceEntitySet uriResourceEntitySet = (UriResourceEntitySet) resourceParts.get(0);
+		EdmEntitySet startEdmEntitySet = uriResourceEntitySet.getEntitySet();
+		
+		if (!EdmProvider.ES_PRODUCTS_NAME.equals(startEdmEntitySet.getName())) {
 			return;
 		}
+		
+		final int segmentCount = resourceParts.size();
+		EdmEntitySet responseEdmEntitySet = null;
+	    EdmEntityType responseEdmEntityType;
+	    
+		if (segmentCount == 1) {
+			responseEdmEntitySet = startEdmEntitySet; // the response body is built from the first (and only) entitySet
+			responseEdmEntityType = startEdmEntitySet.getEntityType();
+		} else if (segmentCount == 2) {
+			final UriResource lastSegment = resourceParts.get(1);
+			
+			if (lastSegment instanceof UriResourceNavigation) {
+				final UriResourceNavigation uriResourceNavigation = (UriResourceNavigation) lastSegment;
+				final EdmNavigationProperty edmNavigationProperty = uriResourceNavigation.getProperty();
+				responseEdmEntityType = edmNavigationProperty.getType();
+				
+				if (!edmNavigationProperty.containsTarget()) {
+					responseEdmEntitySet = OlingoUtil.getNavigationTargetEntitySet(startEdmEntitySet, edmNavigationProperty);
+				} else {
+					responseEdmEntitySet = startEdmEntitySet;
+				}
+			} else {
+				responseEdmEntityType = startEdmEntitySet.getEntityType();
+			}
+		} else {
+			throw new ODataApplicationException("Only 2 UriResourceParts allowed",
+					HttpStatusCode.NOT_IMPLEMENTED.getStatusCode(), Locale.ROOT);
+		}
+		
+		// expand abstract type 'Attributes' if asked for
+		final ExpandOptionImpl expandOptions = (ExpandOptionImpl) uriInfo.getExpandOption();
+		if (null != expandOptions && EdmProvider.ATTRIBUTES_SET_NAME.equals(expandOptions.getText())) {
+			for (String setname : EdmProvider.ATTRIBUTES_TYPE_NAMES) {
+				final ExpandItemImpl item = new ExpandItemImpl().setResourcePath(new UriInfoImpl().addResourcePart(
+						new UriResourceNavigationPropertyImpl(responseEdmEntityType.getNavigationProperty(setname))));
+				expandOptions.addExpandItem(item);
+			}
+		}
+		
+		final ContextURL contextUrl = OlingoUtil.getContextUrl(responseEdmEntitySet, responseEdmEntityType, false);
 		
 		EntityCollection entityCollection = new EntityCollection();
 		List<PripDateTimeFilter> pripDateTimeFilters = Collections.emptyList();
@@ -124,10 +175,12 @@ public class ProductEntityCollectionProcessor implements EntityCollectionProcess
 			for (PripMetadata pripMetadata : queryResult) {
 				productList.add(MappingUtil.pripMetadataToEntity(pripMetadata, request.getRawBaseUri()));
 			}
-	
-			InputStream serializedContent = serializeEntityCollection(entityCollection, edmEntitySet,
-					request.getRawBaseUri(), responseFormat, Optional.empty());
-	
+			
+			// serialize
+			final InputStream serializedContent = this.serializeEntityCollection(entityCollection,
+					responseEdmEntityType, request.getRawBaseUri(), startEdmEntitySet.getName(), contextUrl,
+					responseFormat, uriInfo, expandOptions);
+			
 			response.setContent(serializedContent);
 			response.setStatusCode(HttpStatusCode.OK.getStatusCode());
 			response.setHeader(HttpHeader.CONTENT_TYPE, responseFormat.toContentTypeString());
@@ -145,9 +198,12 @@ public class ProductEntityCollectionProcessor implements EntityCollectionProcess
 			}
 
 			entityCollection.setCount(count);
-			InputStream serializedContent = serializeEntityCollection(entityCollection, edmEntitySet,
-					request.getRawBaseUri(), responseFormat, Optional.of(uriInfo.getCountOption()));
-			
+
+			// serialize
+			final InputStream serializedContent = this.serializeEntityCollection(entityCollection,
+					responseEdmEntityType, request.getRawBaseUri(), startEdmEntitySet.getName(), contextUrl,
+					responseFormat, uriInfo, expandOptions);
+
 			response.setContent(serializedContent);
 			response.setStatusCode(HttpStatusCode.OK.getStatusCode());
 			response.setHeader(HttpHeader.CONTENT_TYPE, responseFormat.toContentTypeString());
@@ -156,20 +212,31 @@ public class ProductEntityCollectionProcessor implements EntityCollectionProcess
 			
 		}
 	}
-
-	private InputStream serializeEntityCollection(EntityCollection entityCollection, EdmEntitySet edmEntitySet,
-			String rawBaseUri, ContentType format, Optional<CountOption> countOption) throws SerializerException {
-		ODataSerializer serializer = odata.createSerializer(format);
-		ContextURL contextUrl = ContextURL.with().entitySet(edmEntitySet).build();
-		Builder builder = EntityCollectionSerializerOptions.with()
-		.id(rawBaseUri + "/" + edmEntitySet.getName()).contextURL(contextUrl);
-		if (countOption.isPresent()) {
-			builder = builder.count(countOption.get());
+	
+	// --------------------------------------------------------------------------
+	
+	private InputStream serializeEntityCollection(EntityCollection entityCollection,
+			EdmEntityType responseEdmEntityType, String rawBaseUri, String entitySetNameForId, ContextURL contextUrl,
+			ContentType format, UriInfo uriInfo, ExpandOptionImpl expandOptions) throws SerializerException {
+		
+		final ODataSerializer serializer = this.odata.createSerializer(format);
+		final Builder optsBuilder = EntityCollectionSerializerOptions.with()
+				.id(rawBaseUri + "/" + entitySetNameForId)
+				.contextURL(contextUrl);
+		
+		if (null != expandOptions) {
+			optsBuilder.expand(expandOptions);
 		}
-		EntityCollectionSerializerOptions opts = builder.build();
-		SerializerResult serializerResult = serializer.entityCollection(serviceMetadata, edmEntitySet.getEntityType(),
-				entityCollection, opts);
+		if (null != uriInfo.getCountOption()) {
+			optsBuilder.count(uriInfo.getCountOption());
+		}
+		if (null != uriInfo.getSelectOption()) {
+			optsBuilder.select(uriInfo.getSelectOption());
+		}
+		
+		final SerializerResult serializerResult = serializer.entityCollection(this.serviceMetadata,
+				responseEdmEntityType, entityCollection, optsBuilder.build());
 		return serializerResult.getContent();
 	}
-
+	
 }

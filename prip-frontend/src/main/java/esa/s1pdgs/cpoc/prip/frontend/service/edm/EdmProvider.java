@@ -85,6 +85,14 @@ public class EdmProvider extends org.apache.olingo.commons.api.edm.provider.Csdl
 	public static final String DATE_ATTRIBUTES_SET_NAME = "DateTimeOffsetAttributes";
 	public static final String BOOLEAN_ATTRIBUTES_SET_NAME = "BooleanAttributes";
 	
+	public static final String[] ATTRIBUTES_TYPE_NAMES = new String[] {
+			STRING_ATTRIBUTES_SET_NAME,
+			INTEGER_ATTRIBUTES_SET_NAME,
+			DOUBLE_ATTRIBUTES_SET_NAME,
+			BOOLEAN_ATTRIBUTES_SET_NAME,
+			DATE_ATTRIBUTES_SET_NAME
+	};
+	
 	// --------------------------------------------------------------------------
 
 	@Override

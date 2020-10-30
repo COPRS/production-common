@@ -124,7 +124,6 @@
 	      <groupId>org.apache.olingo</groupId>
 	      <artifactId>odata-server-core</artifactId>
 	      <version>${odata.version}</version>
-	      <scope>runtime</scope>
 	    </dependency>
 	
 	    <dependency>
