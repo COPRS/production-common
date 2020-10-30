@@ -122,7 +122,12 @@ public class FailedProcessing extends AbstractRequest {
 	public void setFailureMessage(String failureMessage) {
 		this.failureMessage = failureMessage;
 	}
-
+	
+	@JsonProperty("summary")
+	public String getSummary() {
+		return failureMessage != null ? failureMessage.substring(0, Math.min(failureMessage.length(), 128)) : null;
+	}
+	
 	@JsonProperty("productCategory")
 	@Override
 	public ProductCategory getCategory() {
@@ -255,6 +260,7 @@ public class FailedProcessing extends AbstractRequest {
 		sb.append("    creationDate: ").append(toIndentedString(getCreationDate())).append("\n");
 		sb.append("    failureDate: ").append(toIndentedString(failureDate)).append("\n");
 		sb.append("    failureMessage: ").append(toIndentedString(failureMessage)).append("\n");
+		sb.append("    summary: ").append(toIndentedString(getSummary())).append("\n");
 		sb.append("    processingDetails: ").append(toIndentedString(getDto())).append("\n");
 		sb.append("    predecessor: ").append(toIndentedString(getPredecessorDto())).append("\n");
 		sb.append("    predecessorTopic: ").append(toIndentedString(getPredecessorTopic())).append("\n");
