@@ -3,6 +3,8 @@ package esa.s1pdgs.cpoc.prip.model;
 import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Objects;
 import java.util.UUID;
 import java.util.function.Function;
@@ -76,6 +78,8 @@ public class PripMetadata {
 	private ProductionType productionType;
 	
 	private GeoShapePolygon footprint;
+	
+	private Map<String, Object> attributes;
 
 	public PripMetadata() {
 	}
@@ -179,6 +183,14 @@ public class PripMetadata {
 	public void setFootprint(GeoShapePolygon footprint) {
 		this.footprint = footprint;
 	}
+	
+	public Map<String, Object> getAttributes() {
+		return attributes;
+	}
+	
+	public void setAttributes(Map<String, Object> attributes) {
+		this.attributes = attributes;
+	}
 
 	public JSONObject toJson() {
 		final JSONObject json = new JSONObject();
@@ -196,6 +208,18 @@ public class PripMetadata {
 				json.put(field.fieldName(), field.toJsonAccessor().apply(this));
 			}
 		});
+		
+		if (null != attributes) {
+			for (Entry<String, Object> attribute : attributes.entrySet()) {
+				String name = attribute.getKey();
+				Object value = attribute.getValue();				
+				if (value instanceof LocalDateTime) {
+					json.put(name, DateUtils.formatToOdataDateTimeFormat((LocalDateTime)value));					
+				} else {
+					json.put(name, value);
+				}
+			}
+		}
 
 		return json;
 	}
@@ -208,7 +232,7 @@ public class PripMetadata {
 	@Override
 	public int hashCode() {
 		return Objects.hash(checksums, contentDateEnd, contentDateStart, contentLength, contentType, creationDate,
-				evictionDate, id, name, obsKey, productFamily, productionType, footprint);
+				evictionDate, id, name, obsKey, productFamily, productionType, footprint, attributes);
 	}
 
 	@Override
@@ -225,7 +249,8 @@ public class PripMetadata {
 				&& Objects.equals(evictionDate, other.evictionDate) && Objects.equals(id, other.id)
 				&& Objects.equals(name, other.name) && Objects.equals(obsKey, other.obsKey)
 				&& productFamily == other.productFamily && productionType == other.productionType
-				&& Objects.equals(footprint, other.footprint);
+				&& Objects.equals(footprint, other.footprint)
+				&& Objects.equals(attributes, other.attributes);
 	}
 
 }

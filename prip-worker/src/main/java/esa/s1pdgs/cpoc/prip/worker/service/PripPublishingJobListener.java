@@ -164,11 +164,7 @@ public class PripPublishingJobListener implements MqiListener<PripPublishingJob>
 				publishingJob.getKeyObjectStorage()
 		);
 
-		PripMetadata pripMetadata = new PripMetadata();
-		
-		Map<String, Object> pripAttributeData = mdcToPripMapper.map( // TODO: include this before saving
-				publishingJob.getKeyObjectStorage(), searchMetadata.getAdditionalProperties());
-		
+		PripMetadata pripMetadata = new PripMetadata();		
 		pripMetadata.setId(UUID.randomUUID());
 		pripMetadata.setObsKey(publishingJob.getKeyObjectStorage());
 		pripMetadata.setName(publishingJob.getKeyObjectStorage());
@@ -182,6 +178,10 @@ public class PripPublishingJobListener implements MqiListener<PripPublishingJob>
 				.setChecksums(getChecksums(publishingJob.getProductFamily(), publishingJob.getKeyObjectStorage()));
 		pripMetadata.setContentDateStart(DateUtils.parse(searchMetadata.getValidityStart()).truncatedTo(ChronoUnit.MILLIS));
 		pripMetadata.setContentDateEnd(DateUtils.parse(searchMetadata.getValidityStop()).truncatedTo(ChronoUnit.MILLIS));
+		
+		Map<String, Object> pripAttributes = mdcToPripMapper.map(
+				publishingJob.getKeyObjectStorage(), searchMetadata.getAdditionalProperties());		
+		pripMetadata.setAttributes(pripAttributes);
 		
 		final List<PripGeoCoordinate> coordinates = new ArrayList<>();
 		if (null != searchMetadata.getFootprint()) {

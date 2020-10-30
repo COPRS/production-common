@@ -1,6 +1,7 @@
 package esa.s1pdgs.cpoc.prip.worker.mapping;
 
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.regex.Pattern;
@@ -70,7 +71,7 @@ public class MdcToPripMapper {
 					LOGGER.error("Unsupported type extension specified for PRIP metadata mapping in {}", entrySet.getKey());
 					throw new RuntimeException(String.format("Unsupported type extension specified for PRIP metadata mapping in %s", entrySet.getKey()));
 			}
-			final String to = entrySet.getKey().substring(0, separatorPosition);
+			final String to = entrySet.getKey();
 			result.put(from, new PripAttribute(to, type));
 		}
 		return result;
@@ -88,7 +89,7 @@ public class MdcToPripMapper {
 	}
 	
 	private Map<String,Object> map(Map<String, String> additionalProperties, final Map<String, PripAttribute> mapping) {
-		final Map<String,Object> result = new HashMap<>();
+		final Map<String,Object> result = new LinkedHashMap<>();
 		for (Entry<String, PripAttribute> entrySet : mapping.entrySet()) {
 			final String mdcFieldName = entrySet.getKey();
 			final String attributeName = entrySet.getValue().getName();
