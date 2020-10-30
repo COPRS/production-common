@@ -5,8 +5,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import javax.annotation.PostConstruct;
-
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14,21 +12,16 @@ import org.springframework.stereotype.Controller;
 
 import esa.s1pdgs.cpoc.appcatalog.rest.AppCatMessageDto;
 import esa.s1pdgs.cpoc.appcatalog.rest.AppCatSendMessageDto;
-import esa.s1pdgs.cpoc.appstatus.AppStatus;
 import esa.s1pdgs.cpoc.common.MessageState;
 import esa.s1pdgs.cpoc.common.ProductCategory;
 import esa.s1pdgs.cpoc.common.ResumeDetails;
 import esa.s1pdgs.cpoc.common.errors.AbstractCodedException;
 import esa.s1pdgs.cpoc.common.errors.mqi.MqiCategoryNotAvailable;
+import esa.s1pdgs.cpoc.message.ConsumptionController;
 import esa.s1pdgs.cpoc.mqi.model.queue.AbstractMessage;
 import esa.s1pdgs.cpoc.mqi.model.rest.Ack;
 import esa.s1pdgs.cpoc.mqi.model.rest.GenericMessageDto;
 import esa.s1pdgs.cpoc.mqi.server.config.ApplicationProperties;
-import esa.s1pdgs.cpoc.mqi.server.config.ApplicationProperties.ProductCategoryConsumptionProperties;
-import esa.s1pdgs.cpoc.mqi.server.config.ApplicationProperties.ProductCategoryProperties;
-import esa.s1pdgs.cpoc.mqi.server.config.KafkaProperties;
-import esa.s1pdgs.cpoc.mqi.server.consumption.kafka.consumer.GenericConsumer;
-import esa.s1pdgs.cpoc.mqi.server.consumption.kafka.consumer.GenericConsumer.Factory;
 
 /**
  * Manager of consumers
@@ -44,11 +37,6 @@ public class MessageConsumptionController<T extends AbstractMessage> {
     protected static final Logger LOGGER = LogManager.getLogger(MessageConsumptionController.class);
 
     /**
-     * List of consumers
-     */
-    final Map<ProductCategory, Map<String, GenericConsumer<?>>> consumers;
-
-    /**
      * Application properties
      */
     private final ApplicationProperties appProperties;
@@ -61,68 +49,29 @@ public class MessageConsumptionController<T extends AbstractMessage> {
      */
     private final OtherApplicationService otherAppService;
     
-    private final GenericConsumer.Factory<T> consumerFactory;
-    
-    MessageConsumptionController(
-    		final Map<ProductCategory, Map<String, GenericConsumer<?>>> consumers,
-			final ApplicationProperties appProperties, 
+    private final ConsumptionController consumptionController;
+
+    final Map<ProductCategory, Map<String, Integer>> topicPriorities = new HashMap<>();
+
+    @Autowired
+    public MessageConsumptionController(
+			final ApplicationProperties appProperties,
 			final MessagePersistence<T> messagePersistence,
 			final OtherApplicationService otherAppService,
-			final Factory<T> consumerFactory
+            final ConsumptionController consumptionController
 	) {
-		this.consumers = consumers;
 		this.appProperties = appProperties;
 		this.messagePersistence = messagePersistence;
 		this.otherAppService = otherAppService;
-		this.consumerFactory = consumerFactory;
+		this.consumptionController = consumptionController;
+
+
+		appProperties.getProductCategories().forEach((cat, catProps) -> {
+            topicPriorities.put(cat, new HashMap<>());
+            catProps.getConsumption().getTopicsWithPriority().forEach((topic, priority) -> topicPriorities.get(cat).put(topic, priority));
+        });
+
 	}
-
-	@Autowired
-    public MessageConsumptionController(
-            final ApplicationProperties appProperties,
-            final KafkaProperties kafkaProperties,
-            final MessagePersistence<T> messagePersistence,
-            final OtherApplicationService otherAppService,
-            final AppStatus appStatus) {
-		this(
-				new HashMap<>(), 
-				appProperties,
-                messagePersistence,
-				otherAppService, 
-				new GenericConsumer.Factory<>(kafkaProperties, messagePersistence, appStatus)
-		);
-    }
-
-	/**
-     * Start consumers according the configuration
-     */
-    @PostConstruct
-    public void startConsumers() {	
-        // Init the list of consumers
-        for (final Map.Entry<ProductCategory,ProductCategoryProperties> catEntry : appProperties.getProductCategories().entrySet()) {
-            final ProductCategory cat = catEntry.getKey();
-            final ProductCategoryConsumptionProperties prop = catEntry.getValue().getConsumption();
-            if (prop.isEnable()) {
-                LOGGER.info("Creating consumers on topics {} with for category {}", prop.getTopicsWithPriority(),cat);
-                final Map<String, GenericConsumer<?>> catConsumers = new HashMap<>();
-                for (final Map.Entry<String, Integer> entry : prop.getTopicsWithPriority().entrySet()) {
-                	final String topic = entry.getKey(); 
-                	final int priority = entry.getValue();
-                	LOGGER.debug("Creating new consumer with clientId {} on category {} (topic: {}) with priority {}", 
-                			consumerFactory.clientIdForTopic(topic), cat, topic, priority);
-                	catConsumers.put(topic, consumerFactory.newConsumerFor(cat, priority, topic));
-                }
-                consumers.put(cat, catConsumers);
-            }
-        }
-        // Start the consumers
-        for (final Map<String, GenericConsumer<?>> catConsumers : consumers.values()) {
-            for (final GenericConsumer<?> consumer : catConsumers.values()) {
-                LOGGER.info("Starting consumer on topic {}", consumer.getTopic());
-                consumer.start();
-            }
-        }
-    }
 
     /**
      * Get the next message for a given category
@@ -134,30 +83,27 @@ public class MessageConsumptionController<T extends AbstractMessage> {
     public GenericMessageDto<? extends AbstractMessage> nextMessage(final ProductCategory category)
     		throws AbstractCodedException {
     	// invalid category
-    	if (!consumers.containsKey(category)) {
+    	if (!topicPriorities.containsKey(category)) {
             throw new MqiCategoryNotAvailable(category, "consumer");
     	}
     	final GenericMessageDto<? extends AbstractMessage> message = nextMessageByCat(category);
         // if no message and consumer is pause => resume it
         if (message == null) {
-            for(final GenericConsumer<?> consumer : consumers.get(category).values()) {
-                consumer.resume();
-            }
+            topicPriorities.get(category).keySet().forEach(consumptionController::resume);
         }
         return message;
     }
-    
-    final Comparator<AppCatMessageDto<? extends AbstractMessage>> priorityComparatorFor(final ProductCategory category)
-    {
-    	return (o1, o2) -> {
-            if(consumers.get(category).get(o1.getTopic()).getPriority() >
-                consumers.get(category).get(o2.getTopic()).getPriority()) {
+
+    final Comparator<AppCatMessageDto<? extends AbstractMessage>> priorityComparatorFor(final ProductCategory category) {
+        return (o1, o2) -> {
+            if (topicPriorities.get(category).get(o1.getTopic()) >
+                    topicPriorities.get(category).get(o2.getTopic())) {
                 return -1;
-            } else if(consumers.get(category).get(o1.getTopic()).getPriority() ==
-                    consumers.get(category).get(o2.getTopic()).getPriority()) {
-                if(o1.getCreationDate()==null) {
+            } else if (topicPriorities.get(category).get(o1.getTopic())
+                    .equals(topicPriorities.get(category).get(o2.getTopic()))) {
+                if (o1.getCreationDate() == null) {
                     return 1;
-                } else if(o2.getCreationDate()==null) {
+                } else if (o2.getCreationDate() == null) {
                     return -1;
                 } else {
                     return o1.getCreationDate().compareTo(o2.getCreationDate());
@@ -265,7 +211,7 @@ public class MessageConsumptionController<T extends AbstractMessage> {
         ResumeDetails ret;
         int nbReadingMsg = 0;
         AppCatMessageDto<?> message = null;
-        if (consumers.containsKey(category)) {
+        if (topicPriorities.containsKey(category)) {
             try {
                 // Get resume details and topic
                 message = messagePersistence.get(category, identifier);
@@ -279,10 +225,9 @@ public class MessageConsumptionController<T extends AbstractMessage> {
                 // Resume consumer of concerned topic
                 if (!stop && nbReadingMsg <= 0 && message != null) {
                     // Resume consumer
-                    if (consumers.get(category)
+                    if (topicPriorities.get(category)
                             .containsKey(message.getTopic())) {
-                        consumers.get(category).get(message.getTopic())
-                                .resume();
+                        consumptionController.resume(message.getTopic());
                     } else {
                         LOGGER.warn(
                                 "[category {}] [messageCannot resume consumer for this topic because does not exist: {}",

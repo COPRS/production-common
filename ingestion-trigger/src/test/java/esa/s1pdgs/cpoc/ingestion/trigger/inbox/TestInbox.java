@@ -1,11 +1,8 @@
 package esa.s1pdgs.cpoc.ingestion.trigger.inbox;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.*;
+import static org.mockito.Mockito.*;
 
 import java.io.IOException;
 import java.util.Arrays;
@@ -15,6 +12,7 @@ import java.util.Optional;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 
 import esa.s1pdgs.cpoc.common.ProductFamily;
@@ -24,14 +22,15 @@ import esa.s1pdgs.cpoc.ingestion.trigger.entity.InboxEntryRepository;
 import esa.s1pdgs.cpoc.ingestion.trigger.filter.InboxFilter;
 import esa.s1pdgs.cpoc.ingestion.trigger.filter.JoinedFilter;
 import esa.s1pdgs.cpoc.ingestion.trigger.filter.MinimumModificationDateFilter;
-import esa.s1pdgs.cpoc.ingestion.trigger.kafka.producer.SubmissionClient;
 import esa.s1pdgs.cpoc.ingestion.trigger.name.FlatProductNameEvaluator;
 import esa.s1pdgs.cpoc.ingestion.trigger.service.IngestionTriggerServiceTransactional;
+import esa.s1pdgs.cpoc.message.MessageProducer;
+import esa.s1pdgs.cpoc.mqi.model.queue.IngestionJob;
 
 public class TestInbox {
 
     @Mock
-    SubmissionClient fakeKafkaClient;
+    MessageProducer<IngestionJob> fakeMessageProducer;
 
     @Mock
     InboxAdapter fakeAdapter;
@@ -60,7 +59,8 @@ public class TestInbox {
                 fakeAdapter,
                 InboxFilter.ALLOW_ALL,
                 new IngestionTriggerServiceTransactional(fakeRepo, processConfiguration),
-                fakeKafkaClient,
+                fakeMessageProducer,
+                "topic",
                 ProductFamily.EDRS_SESSION,
                 "WILE",
                 "NOMINAL",
@@ -70,7 +70,7 @@ public class TestInbox {
         uut.poll();
 
         verify(fakeRepo, times(2)).save(any());
-        verify(fakeKafkaClient, times(2)).publish(any());
+        verify(fakeMessageProducer, times(2)).send(eq("topic"), any());
     }
 
     @Test
@@ -93,7 +93,8 @@ public class TestInbox {
                 fakeAdapter,
                 InboxFilter.ALLOW_ALL,
                 new IngestionTriggerServiceTransactional(fakeRepo, processConfiguration),
-                fakeKafkaClient,
+                fakeMessageProducer,
+                "topic",
                 ProductFamily.EDRS_SESSION,
 				"WILE",
 				"NOMINAL",
@@ -103,7 +104,7 @@ public class TestInbox {
         uut.poll();
 
         verify(fakeRepo, times(0)).save(any());
-        verify(fakeKafkaClient, times(0)).publish(any());
+        verify(fakeMessageProducer, times(0)).send(eq("topic"), any());
     }
     
     @Test
@@ -114,7 +115,8 @@ public class TestInbox {
                 fakeAdapter,
                 new JoinedFilter(new MinimumModificationDateFilter(new Date(123456))),
                 new IngestionTriggerServiceTransactional(fakeRepo, processConfiguration),
-                fakeKafkaClient,
+                fakeMessageProducer,
+                "topic",
                 ProductFamily.EDRS_SESSION,
 				"WILE",
 				"NOMINAL",
@@ -130,7 +132,7 @@ public class TestInbox {
         final Optional<InboxEntry> accepted = uut.handleEntry(
         		new InboxEntry("foo2", "foo2", "/tmp", new Date(), 1, "ingestor-01", null)
         );
-        assertEquals(false, ignored.isPresent());
-        assertEquals(true, accepted.isPresent());
+        assertFalse(ignored.isPresent());
+        assertTrue(accepted.isPresent());
     }
 }

@@ -3,7 +3,7 @@ package esa.s1pdgs.cpoc.mqi.server.service;
 import static java.lang.String.valueOf;
 import static java.lang.Thread.sleep;
 import static org.hamcrest.CoreMatchers.*;
-import static org.junit.Assert.assertThat;
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.mockito.Mockito.*;
 
 import java.util.List;
@@ -16,17 +16,17 @@ import org.junit.rules.ExpectedException;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
-import org.springframework.kafka.support.Acknowledgment;
 
 import esa.s1pdgs.cpoc.appcatalog.rest.AppCatMessageDto;
 import esa.s1pdgs.cpoc.appcatalog.rest.AppCatSendMessageDto;
 import esa.s1pdgs.cpoc.common.ProductCategory;
 import esa.s1pdgs.cpoc.common.ProductFamily;
+import esa.s1pdgs.cpoc.message.Acknowledgement;
+import esa.s1pdgs.cpoc.message.Consumption;
+import esa.s1pdgs.cpoc.message.kafka.config.KafkaProperties;
 import esa.s1pdgs.cpoc.mqi.model.queue.ProductionEvent;
 import esa.s1pdgs.cpoc.mqi.model.rest.Ack;
-import esa.s1pdgs.cpoc.mqi.server.config.KafkaProperties;
 import esa.s1pdgs.cpoc.mqi.server.config.PersistenceConfiguration;
-import esa.s1pdgs.cpoc.mqi.server.consumption.kafka.consumer.GenericConsumer;
 
 public class InMemoryMessagePersistenceTest {
 
@@ -40,7 +40,7 @@ public class InMemoryMessagePersistenceTest {
     private KafkaProperties.KafkaConsumerProperties consumerProperties;
 
     @Mock
-    private GenericConsumer<ProductionEvent> genericConsumer;
+    private Consumption consumption;
 
     @Mock
     private PersistenceConfiguration.InMemoryMessagePersistenceConfiguration configuration;
@@ -54,8 +54,7 @@ public class InMemoryMessagePersistenceTest {
         when(consumerProperties.getGroupId()).thenReturn("group1");
         when(configuration.getDefaultOffset()).thenReturn(-3);
         when(configuration.getInMemoryPersistenceHighThreshold()).thenReturn(5);
-        when(genericConsumer.isPaused()).thenReturn(false);
-        when(genericConsumer.getTopic()).thenReturn("topic");
+        when(consumption.isPaused()).thenReturn(false);
     }
 
     @Test
@@ -65,23 +64,23 @@ public class InMemoryMessagePersistenceTest {
 
         final ProductionEvent event1 = new ProductionEvent("prod1", "prod1", ProductFamily.AUXILIARY_FILE);
         final ConsumerRecord<String, ProductionEvent> record1 = new ConsumerRecord<>("topic", 1, 1, "string", event1);
-        Acknowledgment acknowledgement1 = Mockito.mock(Acknowledgment.class);
+        Acknowledgement acknowledgement1 = mock(Acknowledgement.class);
 
         final ProductionEvent event2 = new ProductionEvent("prod2", "prod2", ProductFamily.AUXILIARY_FILE);
         final ConsumerRecord<String, ProductionEvent> record2 = new ConsumerRecord<>("topic", 1, 2, "string", event2);
-        Acknowledgment acknowledgement2 = Mockito.mock(Acknowledgment.class);
+        Acknowledgement acknowledgement2 = mock(Acknowledgement.class);
 
         final ProductionEvent event3 = new ProductionEvent("prod3", "prod3", ProductFamily.AUXILIARY_FILE);
         final ConsumerRecord<String, ProductionEvent> record3 = new ConsumerRecord<>("topic", 1, 3, "string", event3);
-        Acknowledgment acknowledgement3 = Mockito.mock(Acknowledgment.class);
+        Acknowledgement acknowledgement3 = mock(Acknowledgement.class);
 
-        messagePersistence.read(record1, acknowledgement1, genericConsumer, ProductCategory.AUXILIARY_FILES);
-        messagePersistence.read(record2, acknowledgement2, genericConsumer, ProductCategory.AUXILIARY_FILES);
-        messagePersistence.read(record3, acknowledgement3, genericConsumer, ProductCategory.AUXILIARY_FILES);
+        messagePersistence.read(record1, acknowledgement1, consumption, ProductCategory.AUXILIARY_FILES);
+        messagePersistence.read(record2, acknowledgement2, consumption, ProductCategory.AUXILIARY_FILES);
+        messagePersistence.read(record3, acknowledgement3, consumption, ProductCategory.AUXILIARY_FILES);
 
-        verifyZeroInteractions(acknowledgement1);
-        verifyZeroInteractions(acknowledgement2);
-        verifyZeroInteractions(acknowledgement3);
+        verifyNoInteractions(acknowledgement1);
+        verifyNoInteractions(acknowledgement2);
+        verifyNoInteractions(acknowledgement3);
 
         final List<AppCatMessageDto<ProductionEvent>> messagesPod1 = messagePersistence.next(ProductCategory.AUXILIARY_FILES, "pod1");
         assertThat(messagesPod1, is(notNullValue()));
@@ -119,18 +118,17 @@ public class InMemoryMessagePersistenceTest {
         final RecordAndAcknowledgement eventTopic4= RecordAndAcknowledgement.createNew("topic", 1, 6);
         final RecordAndAcknowledgement eventTopic5= RecordAndAcknowledgement.createNew("topic", 1, 7);
 
-        messagePersistence.read(eventTopic1.record, eventTopic1.acknowledgment, genericConsumer, ProductCategory.AUXILIARY_FILES);
-        messagePersistence.read(eventTopic2.record, eventTopic2.acknowledgment, genericConsumer, ProductCategory.AUXILIARY_FILES);
-        messagePersistence.read(eventTropic1.record, eventTropic1.acknowledgment, genericConsumer, ProductCategory.AUXILIARY_FILES);
-        messagePersistence.read(eventTopic3.record, eventTopic3.acknowledgment, genericConsumer, ProductCategory.AUXILIARY_FILES);
-        messagePersistence.read(eventTropic2.record, eventTropic2.acknowledgment, genericConsumer, ProductCategory.AUXILIARY_FILES);
-        messagePersistence.read(eventTopic4.record, eventTopic4.acknowledgment, genericConsumer, ProductCategory.AUXILIARY_FILES);
+        messagePersistence.read(eventTopic1.record, eventTopic1.acknowledgment, consumption, ProductCategory.AUXILIARY_FILES);
+        messagePersistence.read(eventTopic2.record, eventTopic2.acknowledgment, consumption, ProductCategory.AUXILIARY_FILES);
+        messagePersistence.read(eventTropic1.record, eventTropic1.acknowledgment, consumption, ProductCategory.AUXILIARY_FILES);
+        messagePersistence.read(eventTopic3.record, eventTopic3.acknowledgment, consumption, ProductCategory.AUXILIARY_FILES);
+        messagePersistence.read(eventTropic2.record, eventTropic2.acknowledgment, consumption, ProductCategory.AUXILIARY_FILES);
+        messagePersistence.read(eventTopic4.record, eventTopic4.acknowledgment, consumption, ProductCategory.AUXILIARY_FILES);
 
-        verify(genericConsumer, times(0)).pause();
+        verify(consumption, times(0)).pause();
+        messagePersistence.read(eventTopic5.record, eventTopic5.acknowledgment, consumption, ProductCategory.AUXILIARY_FILES);
 
-        messagePersistence.read(eventTopic5.record, eventTopic5.acknowledgment, genericConsumer, ProductCategory.AUXILIARY_FILES);
-
-        verify(genericConsumer, times(1)).pause();
+        verify(consumption, times(1)).pause();
     }
 
     @Test
@@ -140,12 +138,12 @@ public class InMemoryMessagePersistenceTest {
 
         final ProductionEvent event1 = new ProductionEvent("prod1", "prod1", ProductFamily.AUXILIARY_FILE);
         final ConsumerRecord<String, ProductionEvent> record1 = new ConsumerRecord<>("topic", 1, 1, "string", event1);
-        Acknowledgment acknowledgement1 = Mockito.mock(Acknowledgment.class);
+        Acknowledgement acknowledgement1 = Mockito.mock(Acknowledgement.class);
 
 
-        messagePersistence.read(record1, acknowledgement1, genericConsumer, ProductCategory.AUXILIARY_FILES);
+        messagePersistence.read(record1, acknowledgement1, consumption, ProductCategory.AUXILIARY_FILES);
 
-        verifyZeroInteractions(acknowledgement1);
+        verifyNoInteractions(acknowledgement1);
 
         final List<AppCatMessageDto<ProductionEvent>> messagesPod1 = messagePersistence.next(ProductCategory.AUXILIARY_FILES, "pod1");
         final AppCatMessageDto<ProductionEvent> message = messagesPod1.get(0);
@@ -164,11 +162,11 @@ public class InMemoryMessagePersistenceTest {
 
             final ProductionEvent event1 = new ProductionEvent("prod1", "prod1", ProductFamily.AUXILIARY_FILE);
             final ConsumerRecord<String, ProductionEvent> record1 = new ConsumerRecord<>("topic", 1, 1, "string", event1);
-            Acknowledgment acknowledgement1 = Mockito.mock(Acknowledgment.class);
+            Acknowledgement acknowledgement1 = Mockito.mock(Acknowledgement.class);
 
-            messagePersistence.read(record1, acknowledgement1, genericConsumer, ProductCategory.AUXILIARY_FILES);
+            messagePersistence.read(record1, acknowledgement1, consumption, ProductCategory.AUXILIARY_FILES);
 
-            verifyZeroInteractions(acknowledgement1);
+            verifyNoInteractions(acknowledgement1);
 
             final List<AppCatMessageDto<ProductionEvent>> messagesPod1 = messagePersistence.next(ProductCategory.AUXILIARY_FILES, "pod1");
             final AppCatMessageDto<ProductionEvent> message = messagesPod1.get(0);
@@ -191,11 +189,11 @@ public class InMemoryMessagePersistenceTest {
 
         final ProductionEvent event1 = new ProductionEvent("prod1", "prod1", ProductFamily.AUXILIARY_FILE);
         final ConsumerRecord<String, ProductionEvent> record1 = new ConsumerRecord<>("topic", 1, 1, "string", event1);
-        Acknowledgment acknowledgement1 = Mockito.mock(Acknowledgment.class);
+        Acknowledgement acknowledgement1 = Mockito.mock(Acknowledgement.class);
 
-        messagePersistence.read(record1, acknowledgement1, genericConsumer, ProductCategory.AUXILIARY_FILES);
+        messagePersistence.read(record1, acknowledgement1, consumption, ProductCategory.AUXILIARY_FILES);
 
-        verifyZeroInteractions(acknowledgement1);
+        verifyNoInteractions(acknowledgement1);
 
         final List<AppCatMessageDto<ProductionEvent>> messagesPod1 = messagePersistence.next(ProductCategory.AUXILIARY_FILES, "pod1");
         final AppCatMessageDto<ProductionEvent> message = messagesPod1.get(0);
@@ -216,18 +214,18 @@ public class InMemoryMessagePersistenceTest {
 
         final ProductionEvent event1 = new ProductionEvent("prod1", "prod1", ProductFamily.AUXILIARY_FILE);
         final ConsumerRecord<String, ProductionEvent> record1 = new ConsumerRecord<>("topic", 1, 1, "string", event1);
-        Acknowledgment acknowledgement1 = Mockito.mock(Acknowledgment.class);
+        Acknowledgement acknowledgement1 = Mockito.mock(Acknowledgement.class);
 
-        messagePersistence.read(record1, acknowledgement1, genericConsumer, ProductCategory.AUXILIARY_FILES);
+        messagePersistence.read(record1, acknowledgement1, consumption, ProductCategory.AUXILIARY_FILES);
 
-        verifyZeroInteractions(acknowledgement1);
+        verifyNoInteractions(acknowledgement1);
 
         final List<AppCatMessageDto<ProductionEvent>> messagesPod1 = messagePersistence.next(ProductCategory.AUXILIARY_FILES, "pod1");
         final AppCatMessageDto<ProductionEvent> message = messagesPod1.get(0);
 
         boolean ackResult = messagePersistence.ack(ProductCategory.AUXILIARY_FILES, message.getId() + 45, Ack.OK); //wrong id
         assertThat(ackResult, is(false));
-        verifyZeroInteractions(acknowledgement1);
+        verifyNoInteractions(acknowledgement1);
 
         final List<AppCatMessageDto<ProductionEvent>> messagesPod1AfterAck = messagePersistence.next(ProductCategory.AUXILIARY_FILES, "pod1");
         assertThat(messagesPod1AfterAck, is(notNullValue()));
@@ -242,19 +240,19 @@ public class InMemoryMessagePersistenceTest {
 
             final ProductionEvent event1 = new ProductionEvent("prod1", "prod1", ProductFamily.AUXILIARY_FILE);
             final ConsumerRecord<String, ProductionEvent> record1 = new ConsumerRecord<>("topic", 1, 1, "string", event1);
-            Acknowledgment acknowledgement1 = Mockito.mock(Acknowledgment.class);
+            Acknowledgement acknowledgement1 = Mockito.mock(Acknowledgement.class);
 
             final ProductionEvent event2 = new ProductionEvent("prod2", "prod2", ProductFamily.AUXILIARY_FILE);
             final ConsumerRecord<String, ProductionEvent> record2 = new ConsumerRecord<>("topic", 1, 2, "string", event2);
-            Acknowledgment acknowledgement2 = Mockito.mock(Acknowledgment.class);
+            Acknowledgement acknowledgement2 = Mockito.mock(Acknowledgement.class);
 
             final ProductionEvent event3 = new ProductionEvent("prod3", "prod2", ProductFamily.AUXILIARY_FILE);
             final ConsumerRecord<String, ProductionEvent> record3 = new ConsumerRecord<>("tropic", 1, 3, "string", event3);
-            Acknowledgment acknowledgement3 = Mockito.mock(Acknowledgment.class);
+            Acknowledgement acknowledgement3 = Mockito.mock(Acknowledgement.class);
 
-            messagePersistence.read(record1, acknowledgement1, genericConsumer, ProductCategory.AUXILIARY_FILES);
-            messagePersistence.read(record2, acknowledgement2, genericConsumer, ProductCategory.AUXILIARY_FILES);
-            messagePersistence.read(record3, acknowledgement3, genericConsumer, ProductCategory.AUXILIARY_FILES);
+            messagePersistence.read(record1, acknowledgement1, consumption, ProductCategory.AUXILIARY_FILES);
+            messagePersistence.read(record2, acknowledgement2, consumption, ProductCategory.AUXILIARY_FILES);
+            messagePersistence.read(record3, acknowledgement3, consumption, ProductCategory.AUXILIARY_FILES);
 
             final int nbReadingMessagesTopicPod1 = messagePersistence.getNbReadingMessages("topic", "pod1");
             final int nbReadingMessagesTropicPod1 = messagePersistence.getNbReadingMessages("tropic", "pod1");
@@ -276,21 +274,21 @@ public class InMemoryMessagePersistenceTest {
 
         final ProductionEvent event1 = new ProductionEvent("prod1", "prod1", ProductFamily.AUXILIARY_FILE);
         final ConsumerRecord<String, ProductionEvent> record1 = new ConsumerRecord<>("tropic", 1, 156, "string", event1);
-        Acknowledgment acknowledgement1 = Mockito.mock(Acknowledgment.class);
+        Acknowledgement acknowledgement1 = Mockito.mock(Acknowledgement.class);
 
         final ProductionEvent event2 = new ProductionEvent("prod2", "prod2", ProductFamily.AUXILIARY_FILE);
         final ConsumerRecord<String, ProductionEvent> record2 = new ConsumerRecord<>("topic", 1, 277, "string", event2);
-        Acknowledgment acknowledgement2 = Mockito.mock(Acknowledgment.class);
+        Acknowledgement acknowledgement2 = Mockito.mock(Acknowledgement.class);
 
         final ProductionEvent event3 = new ProductionEvent("prod3", "prod3", ProductFamily.AUXILIARY_FILE);
         final ConsumerRecord<String, ProductionEvent> record3 = new ConsumerRecord<>("topic", 1, 3003, "string", event3);
-        Acknowledgment acknowledgement3 = Mockito.mock(Acknowledgment.class);
+        Acknowledgement acknowledgement3 = Mockito.mock(Acknowledgement.class);
 
-        messagePersistence.read(record1, acknowledgement1, genericConsumer, ProductCategory.AUXILIARY_FILES);
+        messagePersistence.read(record1, acknowledgement1, consumption, ProductCategory.AUXILIARY_FILES);
         sleep(100); //assure different timestamps
-        messagePersistence.read(record2, acknowledgement2, genericConsumer, ProductCategory.AUXILIARY_FILES);
+        messagePersistence.read(record2, acknowledgement2, consumption, ProductCategory.AUXILIARY_FILES);
         sleep(100);
-        messagePersistence.read(record3, acknowledgement3, genericConsumer, ProductCategory.AUXILIARY_FILES);
+        messagePersistence.read(record3, acknowledgement3, consumption, ProductCategory.AUXILIARY_FILES);
 
         final long earliestOffsetTopic = messagePersistence.getEarliestOffset("topic", 1, "group1");
         final long earliestOffsetTropic = messagePersistence.getEarliestOffset("tropic", 1, "group1");
@@ -318,9 +316,9 @@ public class InMemoryMessagePersistenceTest {
 
     private static class RecordAndAcknowledgement {
         private final ConsumerRecord<String, ProductionEvent> record;
-        private final Acknowledgment acknowledgment;
+        private final Acknowledgement acknowledgment;
 
-        private RecordAndAcknowledgement(ConsumerRecord<String, ProductionEvent> record, Acknowledgment acknowledgment) {
+        private RecordAndAcknowledgement(ConsumerRecord<String, ProductionEvent> record, Acknowledgement acknowledgment) {
             this.record = record;
             this.acknowledgment = acknowledgment;
         }
@@ -328,7 +326,7 @@ public class InMemoryMessagePersistenceTest {
         private static RecordAndAcknowledgement createNew(final String topic, final int partition, final int offset) {
             final ProductionEvent event = new ProductionEvent("prod", "prod", ProductFamily.AUXILIARY_FILE);
             final ConsumerRecord<String, ProductionEvent> record = new ConsumerRecord<>(topic, partition, offset, "string", event);
-            Acknowledgment acknowledgement = Mockito.mock(Acknowledgment.class);
+            Acknowledgement acknowledgement = mock(Acknowledgement.class);
             return new RecordAndAcknowledgement(record, acknowledgement);
         }
     }

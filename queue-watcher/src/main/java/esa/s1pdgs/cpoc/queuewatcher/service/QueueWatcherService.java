@@ -44,7 +44,6 @@ public class QueueWatcherService implements MqiListener<ProductionEvent> {
 	
 	@Autowired
 	private List<MessageFilter> messageFilter;
-	
 
 	@Autowired
 	private ApplicationProperties properties;

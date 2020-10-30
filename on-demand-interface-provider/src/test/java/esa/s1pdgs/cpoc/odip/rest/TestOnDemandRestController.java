@@ -23,19 +23,18 @@ import esa.s1pdgs.cpoc.appstatus.AppStatus;
 import esa.s1pdgs.cpoc.metadata.client.MetadataClient;
 import esa.s1pdgs.cpoc.metadata.model.SearchMetadata;
 import esa.s1pdgs.cpoc.odip.config.OdipConfigurationProperties;
-import esa.s1pdgs.cpoc.odip.kafka.producer.SubmissionClient;
 import esa.s1pdgs.cpoc.odip.service.OnDemandService;
 
 public class TestOnDemandRestController extends RestControllerTest {
 
 	@Mock
 	private OnDemandService onDemandService;
+
 	@Mock
 	private MetadataClient metadataClient;
+
 	@Mock
 	private OdipConfigurationProperties properties;
-	@Mock
-	private SubmissionClient kafkaSubmissionClient;
 
 	private AppStatus status = AppStatus.NULL;
 

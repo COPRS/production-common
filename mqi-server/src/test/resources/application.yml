@@ -3,14 +3,14 @@ spring:
     name: s1pdgs-mqi-app
   kafka:
     consumer:
-        bootstrap-servers: ${spring.embedded.kafka.brokers}
+        bootstrap-servers: localhost:9093
     
 # Logging     
 logging:
   config: classpath:log4j2-test.yml
 
 kafka:
-  bootstrap-servers: ${spring.embedded.kafka.brokers}
+  bootstrap-servers: localhost:9093
   hostname: mqi-0
   client-id: mqi-server
   error-topic: t-pdgs-errors

@@ -44,7 +44,7 @@
 			<url>file://${project.basedir}/libs</url>
 		</repository>
 	</repositories>
-	
+
 	<build>
 		<pluginManagement>
 			<plugins>
@@ -337,6 +337,7 @@
 		<module>production-trigger</module>
  		<module>ipf-preparation-worker</module> 
 		<module>lib-commons</module>
+		<module>message-adapter</module>
 		<module>ipf-execution-worker</module>
 		<module>request-repository</module>
 		<module>queue-watcher</module>

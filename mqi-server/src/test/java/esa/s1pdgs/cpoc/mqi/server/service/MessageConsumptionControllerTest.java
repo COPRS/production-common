@@ -2,16 +2,8 @@ package esa.s1pdgs.cpoc.mqi.server.service;
 
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.Matchers.hasProperty;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
-import static org.mockito.Mockito.doReturn;
-import static org.mockito.Mockito.doThrow;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyNoMoreInteractions;
-import static org.mockito.Mockito.verifyZeroInteractions;
+import static org.junit.Assert.*;
+import static org.mockito.Mockito.*;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -23,7 +15,6 @@ import java.util.Map;
 import java.util.UUID;
 
 import org.junit.Before;
-import org.junit.ClassRule;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
@@ -33,7 +24,6 @@ import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.kafka.test.rule.EmbeddedKafkaRule;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.junit4.SpringRunner;
 
@@ -47,29 +37,20 @@ import esa.s1pdgs.cpoc.common.ResumeDetails;
 import esa.s1pdgs.cpoc.common.errors.AbstractCodedException;
 import esa.s1pdgs.cpoc.common.errors.mqi.MqiCategoryNotAvailable;
 import esa.s1pdgs.cpoc.common.errors.processing.StatusProcessingApiError;
+import esa.s1pdgs.cpoc.message.ConsumptionController;
 import esa.s1pdgs.cpoc.mqi.model.queue.AbstractMessage;
-import esa.s1pdgs.cpoc.mqi.model.queue.IngestionEvent;
 import esa.s1pdgs.cpoc.mqi.model.queue.IpfExecutionJob;
-import esa.s1pdgs.cpoc.mqi.model.queue.LevelReportDto;
 import esa.s1pdgs.cpoc.mqi.model.queue.ProductionEvent;
 import esa.s1pdgs.cpoc.mqi.model.rest.Ack;
 import esa.s1pdgs.cpoc.mqi.model.rest.GenericMessageDto;
-import esa.s1pdgs.cpoc.mqi.server.GenericKafkaUtils;
 import esa.s1pdgs.cpoc.mqi.server.config.ApplicationProperties;
 import esa.s1pdgs.cpoc.mqi.server.config.ApplicationProperties.ProductCategoryConsumptionProperties;
 import esa.s1pdgs.cpoc.mqi.server.config.ApplicationProperties.ProductCategoryProperties;
-import esa.s1pdgs.cpoc.mqi.server.config.KafkaProperties;
-import esa.s1pdgs.cpoc.mqi.server.consumption.kafka.consumer.GenericConsumer;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest
 @DirtiesContext
 public class MessageConsumptionControllerTest {
-
-    @ClassRule
-    public static EmbeddedKafkaRule embeddedKafka = new EmbeddedKafkaRule(1, false,
-            GenericKafkaUtils.TOPIC_ERROR, GenericKafkaUtils.TOPIC_L0_JOBS,
-            GenericKafkaUtils.TOPIC_EDRS_SESSIONS);
 
     @Rule
     public ExpectedException thrown = ExpectedException.none();
@@ -77,8 +58,8 @@ public class MessageConsumptionControllerTest {
     @Mock
     private ApplicationProperties appProperties;
 
-    @Autowired
-    private KafkaProperties kafkaProperties;
+    @Mock
+    private ConsumptionController consumptionController;
 
     @Mock
     private MessagePersistence<ProductionEvent> messagePersistence;
@@ -98,19 +79,23 @@ public class MessageConsumptionControllerTest {
     public void init() {
         MockitoAnnotations.initMocks(this);
 
+        //TODO rename
+        initTopicsWithPriorities();
+
         manager = new MessageConsumptionController<>(appProperties,
-                kafkaProperties, messagePersistence, otherService, appStatus);
+                messagePersistence, otherService, consumptionController);
+
+        assertEquals(6, manager.topicPriorities.size());
 
         doReturn("pod-name").when(appProperties).getHostname();
 
-        startManagerWithAllConsumers();
     }
 
     /**
      * Build the "manager" which is a message controller with all categories
      * activated
      */
-    private void startManagerWithAllConsumers() {
+    private void initTopicsWithPriorities() {
         final Map<String, Integer> auxTopicsWithPriority = new HashMap<>();
         auxTopicsWithPriority.put("topic", 100);
         auxTopicsWithPriority.put("topic-other", 10);
@@ -125,8 +110,6 @@ public class MessageConsumptionControllerTest {
         lRepTopicsWithPriority.put("another-topic", 10);
         final Map<String, Integer> lSegTopicsWithPriority = new HashMap<>();
         lSegTopicsWithPriority.put("topic", 100);
-        final Map<String, Integer> lErrorsTopics = new HashMap<>();
-        lErrorsTopics.put("topic", 100);
         final Map<ProductCategory, ProductCategoryProperties> map = new HashMap<>();
         final ProductCategoryConsumptionProperties prodCatAux =
                 new ProductCategoryConsumptionProperties(true);
@@ -160,76 +143,49 @@ public class MessageConsumptionControllerTest {
                 new ProductCategoryProperties(prodCatSeg, null));
         
         doReturn(map).when(appProperties).getProductCategories();
-
-        manager.startConsumers();
-        assertEquals(6, manager.consumers.size());
     }
 
     /**
      * Test initialization when all consumers
      */
     @Test
-    public void testPostConstructAllConsumer() {
+    public void testPriorities() {
 
         assertEquals(2,
-                manager.consumers.get(ProductCategory.AUXILIARY_FILES).size());
-        assertEquals("topic", manager.consumers
-                .get(ProductCategory.AUXILIARY_FILES).get("topic").getTopic());
-        assertEquals(ProductionEvent.class,
-                manager.consumers.get(ProductCategory.AUXILIARY_FILES)
-                        .get("topic").getConsumedMsgClass());
-        assertEquals("topic-other",
-                manager.consumers.get(ProductCategory.AUXILIARY_FILES)
-                        .get("topic-other").getTopic());
-        assertEquals(ProductionEvent.class,
-                manager.consumers.get(ProductCategory.AUXILIARY_FILES)
-                        .get("topic-other").getConsumedMsgClass());
+                manager.topicPriorities.get(ProductCategory.AUXILIARY_FILES).size());
+        assertEquals(new Integer(100), manager.topicPriorities
+                .get(ProductCategory.AUXILIARY_FILES).get("topic"));
+        assertEquals(new Integer(10),
+                manager.topicPriorities.get(ProductCategory.AUXILIARY_FILES)
+                        .get("topic-other"));
 
         assertEquals(1,
-                manager.consumers.get(ProductCategory.EDRS_SESSIONS).size());
-        assertEquals("topic", manager.consumers
-                .get(ProductCategory.EDRS_SESSIONS).get("topic").getTopic());
-        assertEquals(IngestionEvent.class,
-                manager.consumers.get(ProductCategory.EDRS_SESSIONS)
-                        .get("topic").getConsumedMsgClass());
+                manager.topicPriorities.get(ProductCategory.EDRS_SESSIONS).size());
+        assertEquals(new Integer(10), manager.topicPriorities
+                .get(ProductCategory.EDRS_SESSIONS).get("topic"));
 
         assertEquals(1,
-                manager.consumers.get(ProductCategory.LEVEL_PRODUCTS).size());
-        assertEquals("topic", manager.consumers
-                .get(ProductCategory.LEVEL_PRODUCTS).get("topic").getTopic());
-        assertEquals(ProductionEvent.class,
-                manager.consumers.get(ProductCategory.LEVEL_PRODUCTS)
-                        .get("topic").getConsumedMsgClass());
+                manager.topicPriorities.get(ProductCategory.LEVEL_PRODUCTS).size());
+        assertEquals(new Integer(100), manager.topicPriorities
+                .get(ProductCategory.LEVEL_PRODUCTS).get("topic"));
 
         assertEquals(1,
-                manager.consumers.get(ProductCategory.LEVEL_JOBS).size());
-        assertEquals("topic", manager.consumers.get(ProductCategory.LEVEL_JOBS)
-                .get("topic").getTopic());
-        assertEquals(IpfExecutionJob.class,
-                manager.consumers.get(ProductCategory.LEVEL_JOBS).get("topic")
-                        .getConsumedMsgClass());
+                manager.topicPriorities.get(ProductCategory.LEVEL_JOBS).size());
+        assertEquals(new Integer(10), manager.topicPriorities.get(ProductCategory.LEVEL_JOBS)
+                .get("topic"));
 
         assertEquals(2,
-                manager.consumers.get(ProductCategory.LEVEL_REPORTS).size());
-        assertEquals("topic", manager.consumers
-                .get(ProductCategory.LEVEL_REPORTS).get("topic").getTopic());
-        assertEquals(LevelReportDto.class,
-                manager.consumers.get(ProductCategory.LEVEL_REPORTS)
-                        .get("topic").getConsumedMsgClass());
-        assertEquals("another-topic",
-                manager.consumers.get(ProductCategory.LEVEL_REPORTS)
-                        .get("another-topic").getTopic());
-        assertEquals(LevelReportDto.class,
-                manager.consumers.get(ProductCategory.LEVEL_REPORTS)
-                        .get("another-topic").getConsumedMsgClass());
+                manager.topicPriorities.get(ProductCategory.LEVEL_REPORTS).size());
+        assertEquals(new Integer(100), manager.topicPriorities
+                .get(ProductCategory.LEVEL_REPORTS).get("topic"));
+        assertEquals(new Integer(10),
+                manager.topicPriorities.get(ProductCategory.LEVEL_REPORTS)
+                        .get("another-topic"));
 
         assertEquals(1,
-                manager.consumers.get(ProductCategory.LEVEL_SEGMENTS).size());
-        assertEquals("topic", manager.consumers.get(ProductCategory.LEVEL_SEGMENTS)
-                .get("topic").getTopic());
-        assertEquals(ProductionEvent.class,
-                manager.consumers.get(ProductCategory.LEVEL_SEGMENTS).get("topic")
-                        .getConsumedMsgClass());        
+                manager.topicPriorities.get(ProductCategory.LEVEL_SEGMENTS).size());
+        assertEquals(new Integer(100), manager.topicPriorities.get(ProductCategory.LEVEL_SEGMENTS)
+                .get("topic"));
     }
 
     /**
@@ -353,8 +309,8 @@ public class MessageConsumptionControllerTest {
     }
 
     @Test
-    public void testAckWhenStopNotAsk()
-            throws AbstractCodedException, InterruptedException {
+    public void testAckResumeWhenAcknowledged()
+            throws AbstractCodedException {
 
         final IpfExecutionJob dto = new IpfExecutionJob(ProductFamily.L1_JOB, "product-name", "NRT",
                 "work-dir", "job-order", "NRT", new UUID(23L, 42L));
@@ -370,20 +326,15 @@ public class MessageConsumptionControllerTest {
 
         final ResumeDetails expectedRd = new ResumeDetails("topic", dto);
 
-        Thread.sleep(2000);
-        manager.consumers.get(ProductCategory.LEVEL_JOBS).get("topic").pause();
-
-        Thread.sleep(2000);
         final ResumeDetails rd = manager.ackMessage(ProductCategory.LEVEL_JOBS, 123, Ack.OK, false);
         assertEquals(expectedRd, rd);
 
         // Check resume call
-        Thread.sleep(2000);
-        assertFalse(manager.consumers.get(ProductCategory.LEVEL_JOBS).get("topic").isPaused());
+        verify(consumptionController).resume("topic");
     }
 
     @Test
-    public void testAckWhenStopNotAskButTopicUnknown()
+    public void testAckNotResumeWhenTopicUnknown()
             throws AbstractCodedException {
 
         final IpfExecutionJob dto = new IpfExecutionJob(ProductFamily.L1_JOB, "product-name", "NRT", "work-dir", "job-order", "NRT", new UUID(23L, 42L));
@@ -402,24 +353,15 @@ public class MessageConsumptionControllerTest {
 
         final ResumeDetails expectedRd = new ResumeDetails("topic-unknown", dto);
 
-        final GenericConsumer<?> consi = manager.consumers.get(ProductCategory.LEVEL_JOBS).get("topic");
-        consi.pause();
-        
-        while (!consi.isPaused());
-        
-        assertTrue(consi.isPaused());
-        final ResumeDetails rd = manager.ackMessage(ProductCategory.LEVEL_JOBS, 123, Ack.OK, false);        
+        final ResumeDetails rd = manager.ackMessage(ProductCategory.LEVEL_JOBS, 123, Ack.OK, false);
         assertEquals(expectedRd, rd);
 
-        // Check resume call
-        assertTrue(consi.isPaused());
-        consi.resume();
-        
-        while (consi.isPaused());        
+        // Check resume not called
+        verify(consumptionController, times(0)).resume("topic");
     }
 
     @Test
-    public void testAckWhenStopAsk()
+    public void testAckNotResumingOtherTopic()
             throws AbstractCodedException {
 
         final IpfExecutionJob dto = new IpfExecutionJob(ProductFamily.L1_JOB, "product-name", "NRT",
@@ -433,39 +375,15 @@ public class MessageConsumptionControllerTest {
         doReturn(0).when(messagePersistence).getNbReadingMessages(Mockito.anyString(), Mockito.anyString());
 
         final ResumeDetails expectedRd = new ResumeDetails("topic4", dto);
-        final GenericConsumer<?> consi = manager.consumers.get(ProductCategory.LEVEL_JOBS).get("topic");
 
-        consi.pause();
-        while (!consi.isPaused());
-        
         final ResumeDetails rd = manager.ackMessage(ProductCategory.LEVEL_JOBS, 123, Ack.OK, true);
         assertEquals(expectedRd, rd);
-        assertTrue(consi.isPaused());
+
+        // Check not resumed topic
+        verify(consumptionController, times(0)).resume("topic");
+
     }
 
-    
-    @Test
-    public void testAckWhenStopAskL2() throws AbstractCodedException {
-        final IpfExecutionJob dto = new IpfExecutionJob(ProductFamily.L2_JOB, "product-name", "NRT", "work-dir", "job-order", "NRT", new UUID(23L, 42L));
-        final AppCatMessageDto<IpfExecutionJob> message =
-                new AppCatMessageDto<>(
-                        ProductCategory.LEVEL_JOBS, 123, "topic5", 1, 22, dto);
-
-        doReturn(true).when(messagePersistence).ack(Mockito.eq(ProductCategory.LEVEL_JOBS),Mockito.eq(123L), Mockito.any());
-        doReturn(message).when(messagePersistence).get(Mockito.eq(ProductCategory.LEVEL_JOBS),Mockito.eq(123L));
-        doReturn(0).when(messagePersistence).getNbReadingMessages(Mockito.anyString(), Mockito.anyString());
-
-        final ResumeDetails expectedRd = new ResumeDetails("topic5", dto);
-        
-        final GenericConsumer<?> consi = manager.consumers.get(ProductCategory.LEVEL_JOBS).get("topic");
-        consi.pause();
-        while (!consi.isPaused());
-
-        assertTrue(consi.isPaused());
-        final ResumeDetails rd = manager.ackMessage(ProductCategory.LEVEL_JOBS, 123, Ack.OK, true);
-        assertEquals(expectedRd, rd);
-        assertTrue(consi.isPaused());
-    }
     
     /**
      * Test send when message is READ
@@ -516,7 +434,7 @@ public class MessageConsumptionControllerTest {
 
         assertTrue(manager.send(ProductCategory.AUXILIARY_FILES, messagePersistence, msgLight));
         assertFalse(manager.send(ProductCategory.AUXILIARY_FILES, messagePersistence, msgLight2));
-        verifyZeroInteractions(otherService);
+        verifyNoInteractions(otherService);
         verify(messagePersistence, times(1)).send(Mockito.eq(ProductCategory.AUXILIARY_FILES),Mockito.eq(1234L),
                 Mockito.eq(expected));
         verify(messagePersistence, times(1)).send(Mockito.eq(ProductCategory.AUXILIARY_FILES),Mockito.eq(1235L),
