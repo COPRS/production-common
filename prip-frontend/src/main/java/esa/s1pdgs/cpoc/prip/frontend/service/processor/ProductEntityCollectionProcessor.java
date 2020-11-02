@@ -49,8 +49,7 @@ import esa.s1pdgs.cpoc.prip.frontend.service.processor.visitor.ProductsFilterVis
 import esa.s1pdgs.cpoc.prip.frontend.utils.OlingoUtil;
 import esa.s1pdgs.cpoc.prip.metadata.PripMetadataRepository;
 import esa.s1pdgs.cpoc.prip.model.PripMetadata;
-import esa.s1pdgs.cpoc.prip.model.filter.PripDateTimeFilter;
-import esa.s1pdgs.cpoc.prip.model.filter.PripTextFilter;
+import esa.s1pdgs.cpoc.prip.model.filter.PripQueryFilter;
 
 public class ProductEntityCollectionProcessor implements EntityCollectionProcessor {
 
@@ -123,10 +122,9 @@ public class ProductEntityCollectionProcessor implements EntityCollectionProcess
 		}
 		
 		final ContextURL contextUrl = OlingoUtil.getContextUrl(responseEdmEntitySet, responseEdmEntityType, false);
+		final EntityCollection entityCollection = new EntityCollection();
+		List<PripQueryFilter> queryFilters = Collections.emptyList();
 		
-		EntityCollection entityCollection = new EntityCollection();
-		List<PripDateTimeFilter> pripDateTimeFilters = Collections.emptyList();
-		List<PripTextFilter> pripTextFilters = Collections.emptyList();
 		for (SystemQueryOption queryOption : uriInfo.getSystemQueryOptions()) {
 			if (queryOption instanceof FilterOption && queryOption.getKind().equals(SystemQueryOptionKind.FILTER)) {
 				FilterOption filterOption = (FilterOption) queryOption;
@@ -134,16 +132,12 @@ public class ProductEntityCollectionProcessor implements EntityCollectionProcess
 				try {
 					ProductsFilterVisitor productFilterVistor = new ProductsFilterVisitor();
 					expression.accept(productFilterVistor); // also has a return value, which is currently not needed
-					pripDateTimeFilters = productFilterVistor.getPripDateTimeFilters();
-					pripTextFilters = productFilterVistor.getPripTextFilters();
-					// TODO @MSc: impl mapping im ProductFilterVisitor für alle typen, am besten zusammenfassen die filter wie in legacy, dann einheitliche schnittstelle zum repository
-					// (es fehlen noch, integer, boolean, double)
+					queryFilters =  productFilterVistor.getQueryFilters();
 				} catch (ExpressionVisitException | ODataApplicationException e) {
 					LOGGER.error("Invalid or unsupported filter expression: {}", filterOption.getText(), e);
 					response.setStatusCode(HttpStatusCode.BAD_REQUEST.getStatusCode());
 					return;
 				}
-
 			}
 		}
 		
@@ -168,10 +162,10 @@ public class ProductEntityCollectionProcessor implements EntityCollectionProcess
 			}
 				
 			List<PripMetadata> queryResult;
-			if (pripDateTimeFilters.isEmpty() && pripTextFilters.isEmpty()) {
-				queryResult = pripMetadataRepository.findAll(top, skip);
+			if (queryFilters.isEmpty()) {
+				queryResult = this.pripMetadataRepository.findAll(top, skip);
 			} else {
-				queryResult = pripMetadataRepository.findWithFilters(pripTextFilters, pripDateTimeFilters, top, skip);
+				queryResult = this.pripMetadataRepository.findWithFilters(queryFilters, top, skip);
 			} 
 			List<Entity> productList = entityCollection.getEntities();
 			for (PripMetadata pripMetadata : queryResult) {
@@ -194,10 +188,10 @@ public class ProductEntityCollectionProcessor implements EntityCollectionProcess
 			// Count Request
 			
 			int count = 0;
-			if (pripDateTimeFilters.isEmpty() && pripTextFilters.isEmpty()) {
+			if (queryFilters.isEmpty()) {
 				count = pripMetadataRepository.countAll();
 			} else {
-				count = pripMetadataRepository.countWithFilters(pripDateTimeFilters, pripTextFilters);
+				count = pripMetadataRepository.countWithFilters(queryFilters);
 			}
 
 			entityCollection.setCount(count);

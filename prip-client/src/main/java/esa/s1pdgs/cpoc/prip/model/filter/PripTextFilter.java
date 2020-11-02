@@ -58,7 +58,7 @@ public class PripTextFilter extends PripQueryFilter {
 		this(fieldName.fieldName());
 	}
 
-	public PripTextFilter(PripMetadata.FIELD_NAMES fieldName, Function function, String text) {
+	public PripTextFilter(String fieldName, Function function, String text) {
 		this(fieldName);
 
 		this.function = Objects.requireNonNull(function);

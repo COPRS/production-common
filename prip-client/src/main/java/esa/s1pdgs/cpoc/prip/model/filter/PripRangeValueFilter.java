@@ -28,7 +28,7 @@ public abstract class PripRangeValueFilter<T extends Object> extends PripQueryFi
 			return op;
 		}
 
-		public Operator fromString(String operator) {
+		public static Operator fromString(String operator) {
 			if (null == operator) {
 				throw new IllegalArgumentException("operator is required");
 			}
@@ -53,6 +53,25 @@ public abstract class PripRangeValueFilter<T extends Object> extends PripQueryFi
 			}
 
 			throw new IllegalArgumentException(String.format("operator not supported: %s", operator));
+		}
+		
+		public Operator getInverse() { // used for switching operands: x < 3 --> 3 > x
+			switch (this) {
+			case LT:
+				return GT;
+			case LE:
+				return GE;
+			case GT:
+				return LT;
+			case GE:
+				return LE;
+			case EQ:
+				return EQ;
+			case NE:
+				return NE;
+			default:
+				throw new IllegalArgumentException(String.format("operator not supported: %s", this));
+			}
 		}
 	}
 
