@@ -91,7 +91,8 @@ public class PripTextFilter extends PripQueryFilter {
 	
 	@Override
 	public String toString() {
-		return String.format("{\"%s\": \"%s\"}", (null == this.function) ? null : this.function.name(), this.text);
+		return this.getFieldName() + " " + (null != this.function ? this.function.name() : "NO_FUNCTION") + " "
+				+ this.text;
 	}
 	
 	// --------------------------------------------------------------------------
