@@ -1333,6 +1333,8 @@ public class EsServices {
 		}
 
 		final SearchMetadata searchMetadata = new SearchMetadata();
+		
+		searchMetadata.setProductType(source.get("productType").toString());
 
 		searchMetadata.setSwathtype((String) source.getOrDefault("swathtype", "UNDEFINED"));
 		
