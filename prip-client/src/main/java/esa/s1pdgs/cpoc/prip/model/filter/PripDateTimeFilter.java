@@ -5,7 +5,6 @@ import java.util.Objects;
 
 import esa.s1pdgs.cpoc.common.utils.DateUtils;
 import esa.s1pdgs.cpoc.prip.model.PripMetadata;
-import esa.s1pdgs.cpoc.prip.model.PripMetadata.FIELD_NAMES;
 
 /**
  * Date time filter for querying the persistence repository.
@@ -71,13 +70,13 @@ public class PripDateTimeFilter extends PripQueryFilter {
 	
 	@Override
 	public String toString() {
-		return String.format("{\"%s\":\"%s\"}", (operator == null) ? null : operator.getOperator(),
-				(dateTime == null) ? null : DateUtils.formatToMetadataDateTimeFormat(dateTime));
+		return this.getFieldName() + " " + (null != this.operator ? this.operator.o : "NO_OP") + " "
+				+ (null != this.dateTime ? DateUtils.formatToMetadataDateTimeFormat(this.dateTime) : null);
 	}
 
 	@Override
 	public int hashCode() {
-		return super.hashCode() + Objects.hash(this.dateTime, this.operator);
+		return super.hashCode() + Objects.hash(this.operator, this.dateTime);
 	}
 
 	@Override
