@@ -28,11 +28,11 @@ import esa.s1pdgs.cpoc.common.ProductFamily;
 import esa.s1pdgs.cpoc.prip.frontend.service.rest.OdataController;
 import esa.s1pdgs.cpoc.prip.metadata.PripMetadataRepository;
 import esa.s1pdgs.cpoc.prip.model.Checksum;
-import esa.s1pdgs.cpoc.prip.model.PripDateTimeFilter;
 import esa.s1pdgs.cpoc.prip.model.PripMetadata;
 import esa.s1pdgs.cpoc.prip.model.PripMetadata.FIELD_NAMES;
-import esa.s1pdgs.cpoc.prip.model.PripTextFilter;
-import esa.s1pdgs.cpoc.prip.model.PripDateTimeFilter.Operator;
+import esa.s1pdgs.cpoc.prip.model.filter.PripDateTimeFilter;
+import esa.s1pdgs.cpoc.prip.model.filter.PripTextFilter;
+import esa.s1pdgs.cpoc.prip.model.filter.PripDateTimeFilter.Operator;
 
 @RunWith(SpringRunner.class)
 @WebMvcTest(OdataController.class)
@@ -74,15 +74,13 @@ public class TestOdataController {
 		l.add(p2);
 
 		List<PripDateTimeFilter> creationDateFilters = new ArrayList<>();
-		PripDateTimeFilter f1 = new PripDateTimeFilter();
+		PripDateTimeFilter f1 = new PripDateTimeFilter(FIELD_NAMES.CREATION_DATE);
 		f1.setDateTime(LocalDateTime.of(2019, 01, 01, 00, 00, 00));
 		f1.setOperator(Operator.GT);
-		f1.setFieldName(FIELD_NAMES.CREATION_DATE);
 		
-		PripDateTimeFilter f2 = new PripDateTimeFilter();
+		PripDateTimeFilter f2 = new PripDateTimeFilter(FIELD_NAMES.CREATION_DATE);
 		f2.setDateTime(LocalDateTime.of(2020, 01, 06, 02, 00, 00));
 		f2.setOperator(Operator.LT);
-		f2.setFieldName(FIELD_NAMES.CREATION_DATE);
 		
 		creationDateFilters.add(f1);
 		creationDateFilters.add(f2);
@@ -104,15 +102,13 @@ public class TestOdataController {
 		l.add(p1);
 
 		List<PripDateTimeFilter> creationDateFilters = new ArrayList<>();
-		PripDateTimeFilter f1 = new PripDateTimeFilter();
+		PripDateTimeFilter f1 = new PripDateTimeFilter(FIELD_NAMES.CREATION_DATE);
 		f1.setDateTime(LocalDateTime.of(2019, 01, 01, 00, 00, 00));
 		f1.setOperator(Operator.GT);
-		f1.setFieldName(FIELD_NAMES.CREATION_DATE);
 		
-		PripDateTimeFilter f2 = new PripDateTimeFilter();
+		PripDateTimeFilter f2 = new PripDateTimeFilter(FIELD_NAMES.CREATION_DATE);
 		f2.setDateTime(LocalDateTime.of(2020, 01, 04, 00, 00, 00));
 		f2.setOperator(Operator.LT);
-		f2.setFieldName(FIELD_NAMES.CREATION_DATE);
 		
 		creationDateFilters.add(f1);
 		creationDateFilters.add(f2);
@@ -136,15 +132,13 @@ public class TestOdataController {
 		l.add(p1);
 
 		List<PripDateTimeFilter> creationDateFilters = new ArrayList<>();
-		PripDateTimeFilter f1 = new PripDateTimeFilter();
+		PripDateTimeFilter f1 = new PripDateTimeFilter(FIELD_NAMES.CONTENT_DATE_START);
 		f1.setDateTime(LocalDateTime.of(2019, 01, 01, 00, 00, 00));
 		f1.setOperator(Operator.GT);
-		f1.setFieldName(FIELD_NAMES.CONTENT_DATE_START);
 		
-		PripDateTimeFilter f2 = new PripDateTimeFilter();
+		PripDateTimeFilter f2 = new PripDateTimeFilter(FIELD_NAMES.CONTENT_DATE_END);
 		f2.setDateTime(LocalDateTime.of(2020, 01, 06, 02, 00, 00));
 		f2.setOperator(Operator.LT);
-		f2.setFieldName(FIELD_NAMES.CONTENT_DATE_END);
 		
 		creationDateFilters.add(f1);
 		creationDateFilters.add(f2);
@@ -166,10 +160,9 @@ public class TestOdataController {
 
 		List<PripTextFilter> nameFilters = new ArrayList<>();
 		
-		PripTextFilter n1 = new PripTextFilter();
+		PripTextFilter n1 = new PripTextFilter(FIELD_NAMES.NAME);
 		n1.setFunction(PripTextFilter.Function.STARTS_WITH);
 		n1.setText("name1");
-		n1.setFieldName(FIELD_NAMES.NAME);
 		nameFilters.add(n1);
 		
 		doReturn(l).when(pripMetadataRepository).findWithFilters(nameFilters, Collections.emptyList(), Optional.empty(), Optional.empty());
@@ -213,10 +206,9 @@ public class TestOdataController {
 
 		List<PripTextFilter> nameFilters = new ArrayList<>();
 		
-		PripTextFilter n1 = new PripTextFilter();
+		PripTextFilter n1 = new PripTextFilter(FIELD_NAMES.NAME);
 		n1.setFunction(PripTextFilter.Function.CONTAINS);
 		n1.setText("e1a");
-		n1.setFieldName(FIELD_NAMES.NAME);
 		nameFilters.add(n1);
 		
 		doReturn(l).when(pripMetadataRepository).findWithFilters(nameFilters, Collections.emptyList(), Optional.empty(), Optional.empty());
@@ -238,15 +230,13 @@ public class TestOdataController {
 
 		List<PripTextFilter> nameFilters = new ArrayList<>();
 		
-		PripTextFilter n2 = new PripTextFilter();
+		PripTextFilter n2 = new PripTextFilter(FIELD_NAMES.NAME);
 		n2.setFunction(PripTextFilter.Function.STARTS_WITH);
 		n2.setText("name");
-		n2.setFieldName(FIELD_NAMES.NAME);
 		nameFilters.add(n2);
 		
-		PripTextFilter n1 = new PripTextFilter();
+		PripTextFilter n1 = new PripTextFilter(FIELD_NAMES.NAME);
 		n1.setFunction(PripTextFilter.Function.CONTAINS);
-		n1.setFieldName(FIELD_NAMES.NAME);
 		n1.setText("e1a");
 		nameFilters.add(n1);
 		

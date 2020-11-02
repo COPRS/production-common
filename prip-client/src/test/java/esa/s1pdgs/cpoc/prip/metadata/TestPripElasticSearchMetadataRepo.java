@@ -37,11 +37,11 @@ import org.mockito.MockitoAnnotations;
 
 import esa.s1pdgs.cpoc.common.ProductFamily;
 import esa.s1pdgs.cpoc.prip.model.Checksum;
-import esa.s1pdgs.cpoc.prip.model.PripDateTimeFilter;
-import esa.s1pdgs.cpoc.prip.model.PripDateTimeFilter.Operator;
 import esa.s1pdgs.cpoc.prip.model.PripMetadata;
 import esa.s1pdgs.cpoc.prip.model.PripMetadata.FIELD_NAMES;
-import esa.s1pdgs.cpoc.prip.model.PripTextFilter;
+import esa.s1pdgs.cpoc.prip.model.filter.PripDateTimeFilter;
+import esa.s1pdgs.cpoc.prip.model.filter.PripTextFilter;
+import esa.s1pdgs.cpoc.prip.model.filter.PripDateTimeFilter.Operator;
 
 public class TestPripElasticSearchMetadataRepo {
 
@@ -177,15 +177,13 @@ public class TestPripElasticSearchMetadataRepo {
 
 		final List<PripDateTimeFilter> creationDateIntervals = new ArrayList<>();
 
-		final PripDateTimeFilter f1 = new PripDateTimeFilter();
+		final PripDateTimeFilter f1 = new PripDateTimeFilter(FIELD_NAMES.CREATION_DATE);
 		f1.setDateTime(LocalDateTime.of(2019, 10, 16, 10, 48, 52));
 		f1.setOperator(Operator.LT);
-		f1.setFieldName(FIELD_NAMES.CREATION_DATE);
 
-		final PripDateTimeFilter f2 = new PripDateTimeFilter();
+		final PripDateTimeFilter f2 = new PripDateTimeFilter(FIELD_NAMES.CREATION_DATE);
 		f2.setDateTime(LocalDateTime.of(2019, 10, 16, 10, 48, 50));
 		f2.setOperator(Operator.GT);
-		f2.setFieldName(FIELD_NAMES.CREATION_DATE);
 
 		creationDateIntervals.add(f1);
 		creationDateIntervals.add(f2);
@@ -221,20 +219,17 @@ public class TestPripElasticSearchMetadataRepo {
 
 		final List<PripTextFilter> nameFilters = new ArrayList<>();
 
-		final PripTextFilter f1 = new PripTextFilter();
+		final PripTextFilter f1 = new PripTextFilter(FIELD_NAMES.NAME);
 		f1.setFunction(PripTextFilter.Function.STARTS_WITH);
 		f1.setText("S1B".toLowerCase());
-		f1.setFieldName(FIELD_NAMES.NAME);
 
-		final PripTextFilter f2 = new PripTextFilter();
+		final PripTextFilter f2 = new PripTextFilter(FIELD_NAMES.NAME);
 		f2.setFunction(PripTextFilter.Function.CONTAINS);
 		f2.setText("1SS".toLowerCase());
-		f2.setFieldName(FIELD_NAMES.NAME);
 
-		final PripTextFilter f3 = new PripTextFilter();
+		final PripTextFilter f3 = new PripTextFilter(FIELD_NAMES.NAME);
 		f3.setFunction(PripTextFilter.Function.CONTAINS);
 		f3.setText("_001027_".toLowerCase());
-		f3.setFieldName(FIELD_NAMES.NAME);
 		
 		final PripTextFilter f4 = new PripTextFilter(FIELD_NAMES.NAME, PripTextFilter.Function.ENDS_WITH,
 				"productName");
@@ -275,35 +270,30 @@ public class TestPripElasticSearchMetadataRepo {
 
 		final List<PripDateTimeFilter> creationDateFilters = new ArrayList<>();
 
-		final PripDateTimeFilter f1 = new PripDateTimeFilter();
+		final PripDateTimeFilter f1 = new PripDateTimeFilter(FIELD_NAMES.CREATION_DATE);
 		f1.setDateTime(LocalDateTime.of(2019, 10, 16, 10, 48, 53));
 		f1.setOperator(Operator.LT);
-		f1.setFieldName(FIELD_NAMES.CREATION_DATE);
 
-		final PripDateTimeFilter f2 = new PripDateTimeFilter();
+		final PripDateTimeFilter f2 = new PripDateTimeFilter(FIELD_NAMES.CREATION_DATE);
 		f2.setDateTime(LocalDateTime.of(2019, 10, 16, 10, 48, 50));
 		f2.setOperator(Operator.GT);
-		f2.setFieldName(FIELD_NAMES.CREATION_DATE);
 
 		creationDateFilters.add(f1);
 		creationDateFilters.add(f2);
 
 		final List<PripTextFilter> nameFilters = new ArrayList<>();
 
-		final PripTextFilter n1 = new PripTextFilter();
+		final PripTextFilter n1 = new PripTextFilter(FIELD_NAMES.NAME);
 		n1.setFunction(PripTextFilter.Function.STARTS_WITH);
 		n1.setText("S1B".toLowerCase());
-		n1.setFieldName(FIELD_NAMES.NAME);
 
-		final PripTextFilter n2 = new PripTextFilter();
+		final PripTextFilter n2 = new PripTextFilter(FIELD_NAMES.NAME);
 		n2.setFunction(PripTextFilter.Function.CONTAINS);
 		n2.setText("1SS".toLowerCase());
-		n2.setFieldName(FIELD_NAMES.NAME);
 
-		final PripTextFilter n3 = new PripTextFilter();
+		final PripTextFilter n3 = new PripTextFilter(FIELD_NAMES.NAME);
 		n3.setFunction(PripTextFilter.Function.CONTAINS);
 		n3.setText("_001170_".toLowerCase());
-		n3.setFieldName(FIELD_NAMES.NAME);
 
 		nameFilters.add(n1);
 		nameFilters.add(n2);

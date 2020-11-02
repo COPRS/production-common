@@ -48,9 +48,9 @@ import esa.s1pdgs.cpoc.prip.frontend.service.mapping.MappingUtil;
 import esa.s1pdgs.cpoc.prip.frontend.service.processor.visitor.ProductsFilterVisitor;
 import esa.s1pdgs.cpoc.prip.frontend.utils.OlingoUtil;
 import esa.s1pdgs.cpoc.prip.metadata.PripMetadataRepository;
-import esa.s1pdgs.cpoc.prip.model.PripDateTimeFilter;
 import esa.s1pdgs.cpoc.prip.model.PripMetadata;
-import esa.s1pdgs.cpoc.prip.model.PripTextFilter;
+import esa.s1pdgs.cpoc.prip.model.filter.PripDateTimeFilter;
+import esa.s1pdgs.cpoc.prip.model.filter.PripTextFilter;
 
 public class ProductEntityCollectionProcessor implements EntityCollectionProcessor {
 
@@ -136,6 +136,8 @@ public class ProductEntityCollectionProcessor implements EntityCollectionProcess
 					expression.accept(productFilterVistor); // also has a return value, which is currently not needed
 					pripDateTimeFilters = productFilterVistor.getPripDateTimeFilters();
 					pripTextFilters = productFilterVistor.getPripTextFilters();
+					// TODO @MSc: impl mapping im ProductFilterVisitor für alle typen, am besten zusammenfassen die filter wie in legacy, dann einheitliche schnittstelle zum repository
+					// (es fehlen noch, integer, boolean, double)
 				} catch (ExpressionVisitException | ODataApplicationException e) {
 					LOGGER.error("Invalid or unsupported filter expression: {}", filterOption.getText(), e);
 					response.setStatusCode(HttpStatusCode.BAD_REQUEST.getStatusCode());
@@ -173,6 +175,7 @@ public class ProductEntityCollectionProcessor implements EntityCollectionProcess
 			} 
 			List<Entity> productList = entityCollection.getEntities();
 			for (PripMetadata pripMetadata : queryResult) {
+				// TODO @MSc: impl mapping from PripMetadata to OData/Olingo response
 				productList.add(MappingUtil.pripMetadataToEntity(pripMetadata, request.getRawBaseUri()));
 			}
 			

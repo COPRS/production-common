@@ -1,11 +1,16 @@
-package esa.s1pdgs.cpoc.prip.model;
+package esa.s1pdgs.cpoc.prip.model.filter;
 
 import java.time.LocalDateTime;
 import java.util.Objects;
 
 import esa.s1pdgs.cpoc.common.utils.DateUtils;
+import esa.s1pdgs.cpoc.prip.model.PripMetadata;
+import esa.s1pdgs.cpoc.prip.model.PripMetadata.FIELD_NAMES;
 
-public class PripDateTimeFilter {
+/**
+ * Date time filter for querying the persistence repository.
+ */
+public class PripDateTimeFilter extends PripQueryFilter {
 
 	public enum Operator {
 		LT("<"), GT(">"), LE("<="), GE(">=");
@@ -39,35 +44,31 @@ public class PripDateTimeFilter {
 			throw new IllegalArgumentException(String.format("operator not supported: %s", operator));
 		}
 	}
+	
+	// --------------------------------------------------------------------------
 
 	private LocalDateTime dateTime;
 	private Operator operator;
-	private PripMetadata.FIELD_NAMES fieldName;
-
-	public LocalDateTime getDateTime() {
-		return dateTime;
+	
+	// --------------------------------------------------------------------------
+	
+	public PripDateTimeFilter(String fieldName) {
+		super(fieldName);
 	}
-
-	public void setDateTime(LocalDateTime dateTime) {
-		this.dateTime = dateTime;
+	
+	public PripDateTimeFilter(PripMetadata.FIELD_NAMES fieldName) {
+		this(fieldName.fieldName());
 	}
+	
+	public PripDateTimeFilter(String fieldName, Operator operator, LocalDateTime dateTime) {
+		this(fieldName);
 
-	public Operator getOperator() {
-		return operator;
+		this.operator = Objects.requireNonNull(operator, "operator is required!");
+		this.dateTime = Objects.requireNonNull(dateTime, "datetime value is required!");
 	}
-
-	public void setOperator(Operator operator) {
-		this.operator = operator;
-	}
-
-	public PripMetadata.FIELD_NAMES getFieldName() {
-		return fieldName;
-	}
-
-	public void setFieldName(PripMetadata.FIELD_NAMES fieldName) {
-		this.fieldName = fieldName;
-	}
-
+	
+	// --------------------------------------------------------------------------
+	
 	@Override
 	public String toString() {
 		return String.format("{\"%s\":\"%s\"}", (operator == null) ? null : operator.getOperator(),
@@ -76,17 +77,42 @@ public class PripDateTimeFilter {
 
 	@Override
 	public int hashCode() {
-		return Objects.hash(dateTime, fieldName, operator);
+		return super.hashCode() + Objects.hash(this.dateTime, this.operator);
 	}
 
 	@Override
 	public boolean equals(Object obj) {
-		if (this == obj)
+		if (this == obj) {
 			return true;
-		if (!(obj instanceof PripDateTimeFilter))
+		}
+		if (null == obj) {
 			return false;
-		PripDateTimeFilter other = (PripDateTimeFilter) obj;
-		return Objects.equals(dateTime, other.dateTime) && fieldName == other.fieldName && operator == other.operator;
+		}
+		if (this.getClass() != obj.getClass()) {
+			return false;
+		}
+
+		final PripDateTimeFilter other = (PripDateTimeFilter) obj;
+		return super.equals(obj) && Objects.equals(this.operator, other.operator)
+				&& Objects.equals(this.dateTime, other.dateTime);
+	}
+	
+	// --------------------------------------------------------------------------
+
+	public LocalDateTime getDateTime() {
+		return this.dateTime;
+	}
+
+	public void setDateTime(LocalDateTime dateTime) {
+		this.dateTime = dateTime;
+	}
+
+	public Operator getOperator() {
+		return this.operator;
+	}
+
+	public void setOperator(Operator operator) {
+		this.operator = operator;
 	}
 
 }

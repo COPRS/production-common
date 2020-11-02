@@ -3,9 +3,9 @@ package esa.s1pdgs.cpoc.prip.metadata;
 import java.util.List;
 import java.util.Optional;
 
-import esa.s1pdgs.cpoc.prip.model.PripDateTimeFilter;
 import esa.s1pdgs.cpoc.prip.model.PripMetadata;
-import esa.s1pdgs.cpoc.prip.model.PripTextFilter;
+import esa.s1pdgs.cpoc.prip.model.filter.PripDateTimeFilter;
+import esa.s1pdgs.cpoc.prip.model.filter.PripTextFilter;
 
 public interface PripMetadataRepository {
 

@@ -37,11 +37,11 @@ import esa.s1pdgs.cpoc.common.ProductFamily;
 import esa.s1pdgs.cpoc.common.utils.DateUtils;
 import esa.s1pdgs.cpoc.prip.model.Checksum;
 import esa.s1pdgs.cpoc.prip.model.GeoShapePolygon;
-import esa.s1pdgs.cpoc.prip.model.PripDateTimeFilter;
 import esa.s1pdgs.cpoc.prip.model.PripGeoCoordinate;
 import esa.s1pdgs.cpoc.prip.model.PripGeoShape;
 import esa.s1pdgs.cpoc.prip.model.PripMetadata;
-import esa.s1pdgs.cpoc.prip.model.PripTextFilter;
+import esa.s1pdgs.cpoc.prip.model.filter.PripDateTimeFilter;
+import esa.s1pdgs.cpoc.prip.model.filter.PripTextFilter;
 
 @Service
 public class PripElasticSearchMetadataRepo implements PripMetadataRepository {
@@ -165,8 +165,7 @@ public class PripElasticSearchMetadataRepo implements PripMetadataRepository {
 			BoolQueryBuilder queryBuilder) {
 
 		for (PripDateTimeFilter filter : dateTimeFilters) {
-
-			RangeQueryBuilder rangeQueryBuilder = QueryBuilders.rangeQuery(filter.getFieldName().fieldName());
+			final RangeQueryBuilder rangeQueryBuilder = QueryBuilders.rangeQuery(filter.getFieldName());
 
 			switch (filter.getOperator()) {
 			case LE:
@@ -195,19 +194,19 @@ public class PripElasticSearchMetadataRepo implements PripMetadataRepository {
 
 			switch (filter.getFunction()) {
 			case STARTS_WITH:
-				queryBuilder.must(QueryBuilders.wildcardQuery(filter.getFieldName().fieldName(),
+				queryBuilder.must(QueryBuilders.wildcardQuery(filter.getFieldName(),
 						String.format("%s*", filter.getText())));
 				break;
 			case ENDS_WITH:
-				queryBuilder.must(QueryBuilders.wildcardQuery(filter.getFieldName().fieldName(),
+				queryBuilder.must(QueryBuilders.wildcardQuery(filter.getFieldName(),
 						String.format("*%s", filter.getText())));
 				break;
 			case CONTAINS:
-				queryBuilder.must(QueryBuilders.wildcardQuery(filter.getFieldName().fieldName(),
+				queryBuilder.must(QueryBuilders.wildcardQuery(filter.getFieldName(),
 						String.format("*%s*", filter.getText())));
 				break;
 			case EQUALS:
-				queryBuilder.must(QueryBuilders.matchQuery(filter.getFieldName().fieldName(), filter.getText())
+				queryBuilder.must(QueryBuilders.matchQuery(filter.getFieldName(), filter.getText())
 						.fuzziness(Fuzziness.ZERO).operator(Operator.AND));
 				break;
 			default:

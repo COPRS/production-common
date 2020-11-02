@@ -1,8 +1,13 @@
-package esa.s1pdgs.cpoc.prip.model;
+package esa.s1pdgs.cpoc.prip.model.filter;
 
 import java.util.Objects;
 
-public class PripTextFilter {
+import esa.s1pdgs.cpoc.prip.model.PripMetadata;
+
+/**
+ * Text filter for querying the persistence repository.
+ */
+public class PripTextFilter extends PripQueryFilter {
 
 	public enum Function {
 		STARTS_WITH("startswith"), //
@@ -42,26 +47,57 @@ public class PripTextFilter {
 
 	private Function function;
 	private String text;
-	private PripMetadata.FIELD_NAMES fieldName;
 	
 	// --------------------------------------------------------------------------
 
-	public PripTextFilter() {
-		super();
+	public PripTextFilter(String fieldName) {
+		super(fieldName);
+	}
+	
+	public PripTextFilter(PripMetadata.FIELD_NAMES fieldName) {
+		this(fieldName.fieldName());
 	}
 
 	public PripTextFilter(PripMetadata.FIELD_NAMES fieldName, Function function, String text) {
-		this();
+		this(fieldName);
 
-		this.fieldName = Objects.requireNonNull(fieldName);
 		this.function = Objects.requireNonNull(function);
 		this.text = Objects.requireNonNull(text);
 	}
 
 	// --------------------------------------------------------------------------
+	
+	@Override
+	public int hashCode() {
+		return super.hashCode() + Objects.hash(this.function, this.text);
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj) {
+			return true;
+		}
+		if (null == obj) {
+			return false;
+		}
+		if (this.getClass() != obj.getClass()) {
+			return false;
+		}
+
+		final PripTextFilter other = (PripTextFilter) obj;
+		return super.equals(obj) && Objects.equals(this.function, other.function)
+				&& Objects.equals(this.text, other.text);
+	}
+	
+	@Override
+	public String toString() {
+		return String.format("{\"%s\": \"%s\"}", (null == this.function) ? null : this.function.name(), this.text);
+	}
+	
+	// --------------------------------------------------------------------------
 
 	public Function getFunction() {
-		return function;
+		return this.function;
 	}
 
 	public void setFunction(Function function) {
@@ -69,39 +105,11 @@ public class PripTextFilter {
 	}
 
 	public String getText() {
-		return text;
+		return this.text;
 	}
 
 	public void setText(String text) {
 		this.text = text;
 	}
 
-	public PripMetadata.FIELD_NAMES getFieldName() {
-		return fieldName;
-	}
-
-	public void setFieldName(PripMetadata.FIELD_NAMES fieldName) {
-		this.fieldName = fieldName;
-	}
-
-	@Override
-	public String toString() {
-		return String.format("{\"%s\":\"%s\"}", (function == null) ? null : function.name(), text);
-	}
-
-	@Override
-	public int hashCode() {
-		return Objects.hash(fieldName, function, text);
-	}
-
-	@Override
-	public boolean equals(Object obj) {
-		if (this == obj)
-			return true;
-		if (!(obj instanceof PripTextFilter))
-			return false;
-		PripTextFilter other = (PripTextFilter) obj;
-		return fieldName == other.fieldName && function == other.function && Objects.equals(text, other.text);
-	}
-	
 }
