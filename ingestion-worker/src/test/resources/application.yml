@@ -20,6 +20,8 @@ kafka:
   group-id: error                                                # the group identifier to use for KAFKA publishers  
   max-retries: 10                                                # number of retries if kafka is not available
   error-topic: t-pdgs-errors
+  producer:
+    max-retries: 10
 
 # MQI config
 mqi:
