@@ -178,9 +178,9 @@ public class PripPublishingJobListener implements MqiListener<PripPublishingJob>
 				.setChecksums(getChecksums(publishingJob.getProductFamily(), publishingJob.getKeyObjectStorage()));
 		pripMetadata.setContentDateStart(DateUtils.parse(searchMetadata.getValidityStart()).truncatedTo(ChronoUnit.MILLIS));
 		pripMetadata.setContentDateEnd(DateUtils.parse(searchMetadata.getValidityStop()).truncatedTo(ChronoUnit.MILLIS));
-		
-		Map<String, Object> pripAttributes = mdcToPripMapper.map(
-				publishingJob.getKeyObjectStorage(), searchMetadata.getAdditionalProperties());		
+				
+		Map<String, Object> pripAttributes = mdcToPripMapper.map(publishingJob.getKeyObjectStorage(),
+				searchMetadata.getProductType(), searchMetadata.getAdditionalProperties());		
 		pripMetadata.setAttributes(pripAttributes);
 		
 		final List<PripGeoCoordinate> coordinates = new ArrayList<>();

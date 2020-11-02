@@ -77,15 +77,17 @@ public class MdcToPripMapper {
 		return result;
 	}
 	
-	public Map<String,Object> map(final String productName, final Map<String, String> additionalProperties) {
+	public Map<String,Object> map(final String productName, final String productType,
+			final Map<String, String> additionalProperties) {
 		for (Pattern pattern : mappingConfiguration.keySet()) {
-			if (pattern.matcher(productName).matches()) {
+			if (pattern.matcher(productType).matches()) {
 				Map<String, PripAttribute> mapping = mappingConfiguration.get(pattern);
 				return map(additionalProperties, mapping);
 			}
 		}
-		LOGGER.error("No matching product type regex found for productname {} in set of regex {}", productName, mappingConfiguration.keySet());
-		throw new RuntimeException(String.format("No matching product type regex found for productname %s in set of regex %s", productName, mappingConfiguration.keySet()));
+		LOGGER.debug("No matching product type regex found for productname {} with product type {} in set of regex {}",
+				productName, productType, mappingConfiguration.keySet());
+		return new LinkedHashMap<>();
 	}
 	
 	private Map<String,Object> map(Map<String, String> additionalProperties, final Map<String, PripAttribute> mapping) {
