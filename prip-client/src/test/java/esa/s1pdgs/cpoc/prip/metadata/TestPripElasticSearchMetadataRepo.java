@@ -41,7 +41,7 @@ import esa.s1pdgs.cpoc.prip.model.PripMetadata;
 import esa.s1pdgs.cpoc.prip.model.PripMetadata.FIELD_NAMES;
 import esa.s1pdgs.cpoc.prip.model.filter.PripDateTimeFilter;
 import esa.s1pdgs.cpoc.prip.model.filter.PripTextFilter;
-import esa.s1pdgs.cpoc.prip.model.filter.PripDateTimeFilter.Operator;
+import esa.s1pdgs.cpoc.prip.model.filter.PripRangeValueFilter.Operator;
 
 public class TestPripElasticSearchMetadataRepo {
 
@@ -178,11 +178,11 @@ public class TestPripElasticSearchMetadataRepo {
 		final List<PripDateTimeFilter> creationDateIntervals = new ArrayList<>();
 
 		final PripDateTimeFilter f1 = new PripDateTimeFilter(FIELD_NAMES.CREATION_DATE);
-		f1.setDateTime(LocalDateTime.of(2019, 10, 16, 10, 48, 52));
+		f1.setValue(LocalDateTime.of(2019, 10, 16, 10, 48, 52));
 		f1.setOperator(Operator.LT);
 
 		final PripDateTimeFilter f2 = new PripDateTimeFilter(FIELD_NAMES.CREATION_DATE);
-		f2.setDateTime(LocalDateTime.of(2019, 10, 16, 10, 48, 50));
+		f2.setValue(LocalDateTime.of(2019, 10, 16, 10, 48, 50));
 		f2.setOperator(Operator.GT);
 
 		creationDateIntervals.add(f1);
@@ -271,11 +271,11 @@ public class TestPripElasticSearchMetadataRepo {
 		final List<PripDateTimeFilter> creationDateFilters = new ArrayList<>();
 
 		final PripDateTimeFilter f1 = new PripDateTimeFilter(FIELD_NAMES.CREATION_DATE);
-		f1.setDateTime(LocalDateTime.of(2019, 10, 16, 10, 48, 53));
+		f1.setValue(LocalDateTime.of(2019, 10, 16, 10, 48, 53));
 		f1.setOperator(Operator.LT);
 
 		final PripDateTimeFilter f2 = new PripDateTimeFilter(FIELD_NAMES.CREATION_DATE);
-		f2.setDateTime(LocalDateTime.of(2019, 10, 16, 10, 48, 50));
+		f2.setValue(LocalDateTime.of(2019, 10, 16, 10, 48, 50));
 		f2.setOperator(Operator.GT);
 
 		creationDateFilters.add(f1);

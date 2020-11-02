@@ -37,9 +37,10 @@ import org.slf4j.LoggerFactory;
 
 import esa.s1pdgs.cpoc.prip.model.PripMetadata.FIELD_NAMES;
 import esa.s1pdgs.cpoc.prip.model.filter.PripDateTimeFilter;
+import esa.s1pdgs.cpoc.prip.model.filter.PripIntegerFilter;
 import esa.s1pdgs.cpoc.prip.model.filter.PripTextFilter;
-import esa.s1pdgs.cpoc.prip.model.filter.PripDateTimeFilter.Operator;
 import esa.s1pdgs.cpoc.prip.model.filter.PripTextFilter.Function;
+import esa.s1pdgs.cpoc.prip.model.filter.PripRangeValueFilter.Operator;
 
 public class ProductsFilterVisitor implements ExpressionVisitor<Object> {
 
@@ -96,11 +97,11 @@ public class ProductsFilterVisitor implements ExpressionVisitor<Object> {
 			// one side must be a DateTime Field, the other a literal
 			if (left instanceof Member && pripDateTimePropertyFieldNames.containsKey(leftOperand) && right instanceof Literal) {
 				pripDateTimeFilter1 = new PripDateTimeFilter(this.pripDateTimePropertyFieldNames.get(leftOperand));
-				pripDateTimeFilter1.setDateTime(convertToLocalDateTime(rightOperand));
+				pripDateTimeFilter1.setValue(convertToLocalDateTime(rightOperand));
 				pripDateTimeFilter1.setOperator(Operator.GE);
 			} else if (right instanceof Member && pripDateTimePropertyFieldNames.containsKey(rightOperand) && left instanceof Literal) {
 				pripDateTimeFilter1 = new PripDateTimeFilter(this.pripDateTimePropertyFieldNames.get(rightOperand));
-				pripDateTimeFilter1.setDateTime(convertToLocalDateTime(leftOperand));
+				pripDateTimeFilter1.setValue(convertToLocalDateTime(leftOperand));
 				pripDateTimeFilter1.setOperator(Operator.LE);
 			} else {
 				throw new ExpressionVisitException("Invalid or unsupported operand");
@@ -113,11 +114,11 @@ public class ProductsFilterVisitor implements ExpressionVisitor<Object> {
 			// one side must be a DateTime Field, the other a literal
 			if (left instanceof Member && pripDateTimePropertyFieldNames.containsKey(leftOperand) && right instanceof Literal) {
 				pripDateTimeFilter2 = new PripDateTimeFilter(this.pripDateTimePropertyFieldNames.get(leftOperand));
-				pripDateTimeFilter2.setDateTime(convertToLocalDateTime(rightOperand));
+				pripDateTimeFilter2.setValue(convertToLocalDateTime(rightOperand));
 				pripDateTimeFilter2.setOperator(Operator.GT);
 			} else if (right instanceof Member && pripDateTimePropertyFieldNames.containsKey(rightOperand) && left instanceof Literal) {
 				pripDateTimeFilter2 = new PripDateTimeFilter(this.pripDateTimePropertyFieldNames.get(rightOperand));
-				pripDateTimeFilter2.setDateTime(convertToLocalDateTime(leftOperand));
+				pripDateTimeFilter2.setValue(convertToLocalDateTime(leftOperand));
 				pripDateTimeFilter2.setOperator(Operator.LT);
 			} else {
 				throw new ExpressionVisitException("Invalid or unsupported operand");
@@ -130,11 +131,11 @@ public class ProductsFilterVisitor implements ExpressionVisitor<Object> {
 			// one side must be DateTime Field, the other a literal
 			if (left instanceof Member && pripDateTimePropertyFieldNames.containsKey(leftOperand) && right instanceof Literal) {
 				pripDateTimeFilter3 = new PripDateTimeFilter(this.pripDateTimePropertyFieldNames.get(leftOperand));
-				pripDateTimeFilter3.setDateTime(convertToLocalDateTime(rightOperand));
+				pripDateTimeFilter3.setValue(convertToLocalDateTime(rightOperand));
 				pripDateTimeFilter3.setOperator(Operator.LE);
 			} else if (right instanceof Member && pripDateTimePropertyFieldNames.containsKey(rightOperand) && left instanceof Literal) {
 				pripDateTimeFilter3 = new PripDateTimeFilter(this.pripDateTimePropertyFieldNames.get(rightOperand));
-				pripDateTimeFilter3.setDateTime(convertToLocalDateTime(leftOperand));
+				pripDateTimeFilter3.setValue(convertToLocalDateTime(leftOperand));
 				pripDateTimeFilter3.setOperator(Operator.GE);
 			} else {
 				throw new ExpressionVisitException("Invalid or unsupported operand");
@@ -147,11 +148,11 @@ public class ProductsFilterVisitor implements ExpressionVisitor<Object> {
 			// one side must be DateTime Field, the other a literal
 			if (left instanceof Member && pripDateTimePropertyFieldNames.containsKey(leftOperand) && right instanceof Literal) {
 				pripDateTimeFilter4 = new PripDateTimeFilter(this.pripDateTimePropertyFieldNames.get(leftOperand));
-				pripDateTimeFilter4.setDateTime(convertToLocalDateTime(rightOperand));
+				pripDateTimeFilter4.setValue(convertToLocalDateTime(rightOperand));
 				pripDateTimeFilter4.setOperator(Operator.LT);
 			} else if (right instanceof Member && pripDateTimePropertyFieldNames.containsKey(rightOperand) && left instanceof Literal) {
 				pripDateTimeFilter4 = new PripDateTimeFilter(this.pripDateTimePropertyFieldNames.get(rightOperand));
-				pripDateTimeFilter4.setDateTime(convertToLocalDateTime(leftOperand));
+				pripDateTimeFilter4.setValue(convertToLocalDateTime(leftOperand));
 				pripDateTimeFilter4.setOperator(Operator.GT);
 			} else {
 				throw new ExpressionVisitException("Invalid or unsupported operand");

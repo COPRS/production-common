@@ -169,16 +169,16 @@ public class PripElasticSearchMetadataRepo implements PripMetadataRepository {
 
 			switch (filter.getOperator()) {
 			case LE:
-				rangeQueryBuilder.lte(filter.getDateTime());
+				rangeQueryBuilder.lte(filter.getValue());
 				break;
 			case LT:
-				rangeQueryBuilder.lt(filter.getDateTime());
+				rangeQueryBuilder.lt(filter.getValue());
 				break;
 			case GE:
-				rangeQueryBuilder.gte(filter.getDateTime());
+				rangeQueryBuilder.gte(filter.getValue());
 				break;
 			case GT:
-				rangeQueryBuilder.gt(filter.getDateTime());
+				rangeQueryBuilder.gt(filter.getValue());
 				break;
 			default:
 				throw new IllegalArgumentException(
