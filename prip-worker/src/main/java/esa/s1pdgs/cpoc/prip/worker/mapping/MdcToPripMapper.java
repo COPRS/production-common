@@ -79,10 +79,12 @@ public class MdcToPripMapper {
 	
 	public Map<String,Object> map(final String productName, final String productType,
 			final Map<String, String> additionalProperties) {
-		for (Pattern pattern : mappingConfiguration.keySet()) {
-			if (pattern.matcher(productType).matches()) {
-				Map<String, PripAttribute> mapping = mappingConfiguration.get(pattern);
-				return map(additionalProperties, mapping);
+		if (null != productType) {
+			for (Pattern pattern : mappingConfiguration.keySet()) {
+				if (pattern.matcher(productType).matches()) {
+					Map<String, PripAttribute> mapping = mappingConfiguration.get(pattern);
+					return map(additionalProperties, mapping);
+				}
 			}
 		}
 		LOGGER.debug("No matching product type regex found for productname {} with product type {} in set of regex {}",
