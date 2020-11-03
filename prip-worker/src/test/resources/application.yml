@@ -282,7 +282,7 @@ prip-worker:
       attr_beginningDateTime_date: validityStartTime
       attr_productGeneration_string: productGeneration
       attr_instrumentConfigurationID_string: instrumentConfigurationId
-    aux_eof:
+    aux-eof:
       attr_platformShortName_string: platformShortName
       attr_platformSerialIdentifier_string: platformSerialIdentifier
       attr_productType_string: productType

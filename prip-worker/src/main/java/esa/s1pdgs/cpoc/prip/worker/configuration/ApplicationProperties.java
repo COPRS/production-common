@@ -1,25 +1,28 @@
 package esa.s1pdgs.cpoc.prip.worker.configuration;
 
+import java.util.LinkedHashMap;
 import java.util.Map;
 
 import org.springframework.boot.context.properties.ConfigurationProperties;
+import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Configuration;
 
 @Configuration
+@EnableConfigurationProperties
 @ConfigurationProperties("prip-worker")
 public class ApplicationProperties {
 	
 	public static class ProductTypeRegexp {
-		private String l0Std;
-		private String l0Ann;
-		private String l0Cal;
-		private String l0Noise;
-		private String l0Gps;
-		private String l0Hktm;
-		private String l1;
-		private String l2;
-		private String auxSafe;
-		private String auxEof;
+		private String l0Std = "^$a";
+		private String l0Ann = "^$a";
+		private String l0Cal = "^$a";
+		private String l0Noise = "^$a";
+		private String l0Gps = "^$a";
+		private String l0Hktm = "^$a";
+		private String l1 = "^$a";
+		private String l2 = "^$a";
+		private String auxSafe = "^$a";
+		private String auxEof = "^$a";
 		
 		public String getL0Std() {
 			return l0Std;
@@ -103,16 +106,16 @@ public class ApplicationProperties {
 	}
 	
 	public static class MetadataMapping {
-		private Map<String, String> l0Std;
-		private Map<String, String> l0Ann;
-		private Map<String, String> l0Cal;
-		private Map<String, String> l0Noise;
-		private Map<String, String> l0Gps;
-		private Map<String, String> l0Hktm;
-		private Map<String, String> l1;
-		private Map<String, String> l2;
-		private Map<String, String> auxSafe;
-		private Map<String, String> auxEof;
+		private Map<String, String> l0Std = new LinkedHashMap<>();
+		private Map<String, String> l0Ann = new LinkedHashMap<>();
+		private Map<String, String> l0Cal = new LinkedHashMap<>();
+		private Map<String, String> l0Noise = new LinkedHashMap<>();
+		private Map<String, String> l0Gps = new LinkedHashMap<>();
+		private Map<String, String> l0Hktm = new LinkedHashMap<>();
+		private Map<String, String> l1 = new LinkedHashMap<>();
+		private Map<String, String> l2 = new LinkedHashMap<>();
+		private Map<String, String> auxSafe = new LinkedHashMap<>();
+		private Map<String, String> auxEof = new LinkedHashMap<>();
 	
 		public Map<String, String> getL0Std() {
 			return l0Std;
@@ -198,8 +201,8 @@ public class ApplicationProperties {
 	private String hostname;
 	private int metadataUnavailableRetriesNumber = 10;
 	private long metadataUnavailableRetriesIntervalMs = 5000;
-	private ProductTypeRegexp productTypeRegexp;
-	private MetadataMapping metadataMapping;
+	private ProductTypeRegexp productTypeRegexp = new ProductTypeRegexp();
+	private MetadataMapping metadataMapping = new MetadataMapping();
 
 	public int getMetadataUnavailableRetriesNumber() {
 		return metadataUnavailableRetriesNumber;

@@ -38,11 +38,6 @@ public abstract class PripQueryFilter {
 		return Objects.equals(this.fieldName, other.fieldName);
 	}
 
-	@Override
-	public String toString() {
-		return String.format("{\"fieldName\":\"%s\"}", this.fieldName);
-	}
-
 	// --------------------------------------------------------------------------
 
 	public String getFieldName() {

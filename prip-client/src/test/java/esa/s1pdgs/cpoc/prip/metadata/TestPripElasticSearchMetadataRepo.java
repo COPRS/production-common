@@ -10,8 +10,9 @@ import static org.mockito.Mockito.verify;
 import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
-import java.util.Collections;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -40,8 +41,9 @@ import esa.s1pdgs.cpoc.prip.model.Checksum;
 import esa.s1pdgs.cpoc.prip.model.PripMetadata;
 import esa.s1pdgs.cpoc.prip.model.PripMetadata.FIELD_NAMES;
 import esa.s1pdgs.cpoc.prip.model.filter.PripDateTimeFilter;
+import esa.s1pdgs.cpoc.prip.model.filter.PripQueryFilter;
+import esa.s1pdgs.cpoc.prip.model.filter.PripRangeValueFilter.Operator;
 import esa.s1pdgs.cpoc.prip.model.filter.PripTextFilter;
-import esa.s1pdgs.cpoc.prip.model.filter.PripDateTimeFilter.Operator;
 
 public class TestPripElasticSearchMetadataRepo {
 
@@ -175,20 +177,20 @@ public class TestPripElasticSearchMetadataRepo {
 		doReturn(searchHits).when(searchResponse).getHits();
 		doReturn(searchResponse).when(restHighLevelClient).search(Mockito.any(), Mockito.any());
 
-		final List<PripDateTimeFilter> creationDateIntervals = new ArrayList<>();
+		final List<PripQueryFilter> creationDateIntervals = new ArrayList<>();
 
 		final PripDateTimeFilter f1 = new PripDateTimeFilter(FIELD_NAMES.CREATION_DATE);
-		f1.setDateTime(LocalDateTime.of(2019, 10, 16, 10, 48, 52));
+		f1.setValue(LocalDateTime.of(2019, 10, 16, 10, 48, 52));
 		f1.setOperator(Operator.LT);
 
 		final PripDateTimeFilter f2 = new PripDateTimeFilter(FIELD_NAMES.CREATION_DATE);
-		f2.setDateTime(LocalDateTime.of(2019, 10, 16, 10, 48, 50));
+		f2.setValue(LocalDateTime.of(2019, 10, 16, 10, 48, 50));
 		f2.setOperator(Operator.GT);
 
 		creationDateIntervals.add(f1);
 		creationDateIntervals.add(f2);
 
-		final List<PripMetadata> result = repo.findWithFilters(Collections.emptyList(), creationDateIntervals, Optional.empty(), Optional.empty());
+		final List<PripMetadata> result = repo.findWithFilters(creationDateIntervals, Optional.empty(), Optional.empty());
 
 		assertTrue(result.contains(pripMetadata1));
 		assertTrue(result.contains(pripMetadata2));
@@ -217,7 +219,7 @@ public class TestPripElasticSearchMetadataRepo {
 		doReturn(searchHits).when(searchResponse).getHits();
 		doReturn(searchResponse).when(restHighLevelClient).search(Mockito.any(), Mockito.any());
 
-		final List<PripTextFilter> nameFilters = new ArrayList<>();
+		final List<PripQueryFilter> nameFilters = new ArrayList<>();
 
 		final PripTextFilter f1 = new PripTextFilter(FIELD_NAMES.NAME);
 		f1.setFunction(PripTextFilter.Function.STARTS_WITH);
@@ -231,7 +233,7 @@ public class TestPripElasticSearchMetadataRepo {
 		f3.setFunction(PripTextFilter.Function.CONTAINS);
 		f3.setText("_001027_".toLowerCase());
 		
-		final PripTextFilter f4 = new PripTextFilter(FIELD_NAMES.NAME, PripTextFilter.Function.ENDS_WITH,
+		final PripTextFilter f4 = new PripTextFilter(FIELD_NAMES.NAME.fieldName(), PripTextFilter.Function.ENDS_WITH,
 				"productName");
 
 		nameFilters.add(f1);
@@ -239,7 +241,7 @@ public class TestPripElasticSearchMetadataRepo {
 		nameFilters.add(f3);
 		nameFilters.add(f4);
 
-		final List<PripMetadata> result = repo.findWithFilters(nameFilters, Collections.emptyList(), Optional.empty(), Optional.empty());
+		final List<PripMetadata> result = repo.findWithFilters(nameFilters, Optional.empty(), Optional.empty());
 
 		assertTrue(result.contains(pripMetadata1));
 		assertTrue(result.contains(pripMetadata2));
@@ -268,20 +270,18 @@ public class TestPripElasticSearchMetadataRepo {
 		doReturn(searchHits).when(searchResponse).getHits();
 		doReturn(searchResponse).when(restHighLevelClient).search(Mockito.any(), Mockito.any());
 
-		final List<PripDateTimeFilter> creationDateFilters = new ArrayList<>();
+		final List<PripQueryFilter> filters = new ArrayList<>();
 
 		final PripDateTimeFilter f1 = new PripDateTimeFilter(FIELD_NAMES.CREATION_DATE);
-		f1.setDateTime(LocalDateTime.of(2019, 10, 16, 10, 48, 53));
+		f1.setValue(LocalDateTime.of(2019, 10, 16, 10, 48, 53));
 		f1.setOperator(Operator.LT);
 
 		final PripDateTimeFilter f2 = new PripDateTimeFilter(FIELD_NAMES.CREATION_DATE);
-		f2.setDateTime(LocalDateTime.of(2019, 10, 16, 10, 48, 50));
+		f2.setValue(LocalDateTime.of(2019, 10, 16, 10, 48, 50));
 		f2.setOperator(Operator.GT);
 
-		creationDateFilters.add(f1);
-		creationDateFilters.add(f2);
-
-		final List<PripTextFilter> nameFilters = new ArrayList<>();
+		filters.add(f1);
+		filters.add(f2);
 
 		final PripTextFilter n1 = new PripTextFilter(FIELD_NAMES.NAME);
 		n1.setFunction(PripTextFilter.Function.STARTS_WITH);
@@ -295,11 +295,11 @@ public class TestPripElasticSearchMetadataRepo {
 		n3.setFunction(PripTextFilter.Function.CONTAINS);
 		n3.setText("_001170_".toLowerCase());
 
-		nameFilters.add(n1);
-		nameFilters.add(n2);
-		nameFilters.add(n3);
+		filters.add(n1);
+		filters.add(n2);
+		filters.add(n3);
 
-		final List<PripMetadata> result = repo.findWithFilters(nameFilters, creationDateFilters, Optional.empty(), Optional.empty());
+		final List<PripMetadata> result = repo.findWithFilters(filters, Optional.empty(), Optional.empty());
 
 		assertTrue(result.contains(pripMetadata1));
 		assertTrue(result.contains(pripMetadata2));
@@ -333,6 +333,16 @@ public class TestPripElasticSearchMetadataRepo {
 		pripMetadata.setCreationDate(creationDate);
 		pripMetadata.setEvictionDate(creationDate.plusDays(PripMetadata.DEFAULT_EVICTION_DAYS));
 		pripMetadata.setChecksums(checksums);
+		
+		Map<String,Object> attributes = new LinkedHashMap<>();
+		attributes.put("attr_name1_string", "value1");
+		attributes.put("attr_name2_long", 2);
+		attributes.put("attr_name3_double", 0.4);
+		attributes.put("attr_name4_boolean", true);
+		attributes.put("attr_name5_boolean", false);
+		attributes.put("attr_name6_date", LocalDateTime.of(2000, 1, 1, 0, 0));
+		
+		pripMetadata.setAttributes(attributes);
 		return pripMetadata;
 	}
 

@@ -16,11 +16,13 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 import org.apache.olingo.commons.api.edm.EdmEnumType;
 import org.apache.olingo.commons.api.edm.EdmPrimitiveTypeException;
 import org.apache.olingo.commons.api.edm.EdmType;
+import org.apache.olingo.commons.api.http.HttpStatusCode;
 import org.apache.olingo.commons.core.edm.primitivetype.EdmDateTimeOffset;
 import org.apache.olingo.server.api.ODataApplicationException;
 import org.apache.olingo.server.api.uri.UriResource;
@@ -35,46 +37,51 @@ import org.apache.olingo.server.api.uri.queryoption.expression.UnaryOperatorKind
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import esa.s1pdgs.cpoc.common.utils.StringUtil;
 import esa.s1pdgs.cpoc.prip.model.PripMetadata.FIELD_NAMES;
 import esa.s1pdgs.cpoc.prip.model.filter.PripDateTimeFilter;
+import esa.s1pdgs.cpoc.prip.model.filter.PripQueryFilter;
 import esa.s1pdgs.cpoc.prip.model.filter.PripTextFilter;
-import esa.s1pdgs.cpoc.prip.model.filter.PripDateTimeFilter.Operator;
 import esa.s1pdgs.cpoc.prip.model.filter.PripTextFilter.Function;
+import esa.s1pdgs.cpoc.prip.model.filter.PripRangeValueFilter.Operator;
 
 public class ProductsFilterVisitor implements ExpressionVisitor<Object> {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(ProductsFilterVisitor.class);
 
-	private List<MethodKind> supportedMethods;
+	private static final Map<String,FIELD_NAMES> PRIP_DATETIME_PROPERTY_FIELD_NAMES;	
+	private static final Map<String,FIELD_NAMES> PRIP_TEXT_PROPERTY_FIELD_NAMES;
+	private static final Map<String,FIELD_NAMES> PRIP_SUPPORTED_PROPERTY_FIELD_NAMES;
+	private static final List<String> PRIP_PRODUCTION_TYPES;
+	private static final List<MethodKind> SUPPORTED_METHODS;
 	
-	private List<PripDateTimeFilter> pripDateTimeFilters;
-	private List<PripTextFilter> pripTextFilters;
+	static {
+		PRIP_DATETIME_PROPERTY_FIELD_NAMES = new HashMap<>();
+		PRIP_DATETIME_PROPERTY_FIELD_NAMES.put(PublicationDate.name(), FIELD_NAMES.CREATION_DATE);
+		PRIP_DATETIME_PROPERTY_FIELD_NAMES.put(ContentDate.name() + "/" + Start.name(), FIELD_NAMES.CONTENT_DATE_START);
+		PRIP_DATETIME_PROPERTY_FIELD_NAMES.put(ContentDate.name() + "/" + End.name(), FIELD_NAMES.CONTENT_DATE_END);
+		
+		PRIP_TEXT_PROPERTY_FIELD_NAMES = new HashMap<>();
+		PRIP_TEXT_PROPERTY_FIELD_NAMES.put(Name.name(), FIELD_NAMES.NAME);
+		PRIP_TEXT_PROPERTY_FIELD_NAMES.put(ProductionType.name(), FIELD_NAMES.PRODUCTION_TYPE);
+		
+		PRIP_SUPPORTED_PROPERTY_FIELD_NAMES = new HashMap<>();
+		PRIP_SUPPORTED_PROPERTY_FIELD_NAMES.putAll(PRIP_DATETIME_PROPERTY_FIELD_NAMES);
+		PRIP_SUPPORTED_PROPERTY_FIELD_NAMES.putAll(PRIP_TEXT_PROPERTY_FIELD_NAMES);
+		
+		PRIP_PRODUCTION_TYPES = Arrays.asList(esa.s1pdgs.cpoc.prip.model.ProductionType.values()).stream()
+				.map(v -> v.getName()).collect(Collectors.toList());
+		
+		SUPPORTED_METHODS = Arrays.asList(MethodKind.CONTAINS, MethodKind.STARTSWITH, MethodKind.ENDSWITH);
+	}
 	
-	private Map<String,FIELD_NAMES> pripDateTimePropertyFieldNames;	
-	private Map<String,FIELD_NAMES> pripTextPropertyFieldNames;
-	
-	private List<String> pripProductionTypes;
+	private final List<PripQueryFilter> queryFilters = new ArrayList<>();
+//	private String lambdaVarName = null;
+//	private BinaryOperatorKind opKind = null;
 	
 	// --------------------------------------------------------------------------
 
 	public ProductsFilterVisitor() {
-
-		supportedMethods = Arrays.asList(MethodKind.CONTAINS, MethodKind.STARTSWITH, MethodKind.ENDSWITH);
-		
-		pripDateTimeFilters = new ArrayList<>();
-		pripTextFilters = new ArrayList<>();
-
-		pripDateTimePropertyFieldNames = new HashMap<>();
-		pripDateTimePropertyFieldNames.put(PublicationDate.name(), FIELD_NAMES.CREATION_DATE);
-		pripDateTimePropertyFieldNames.put(ContentDate.name() + "/" + Start.name(), FIELD_NAMES.CONTENT_DATE_START);
-		pripDateTimePropertyFieldNames.put(ContentDate.name() + "/" + End.name(), FIELD_NAMES.CONTENT_DATE_END);
-
-		pripTextPropertyFieldNames = new HashMap<>();
-		pripTextPropertyFieldNames.put(Name.name(), FIELD_NAMES.NAME);
-		pripTextPropertyFieldNames.put(ProductionType.name(), FIELD_NAMES.PRODUCTION_TYPE);
-
-		pripProductionTypes = Arrays.asList(esa.s1pdgs.cpoc.prip.model.ProductionType.values()).stream()
-				.map(v -> v.getName()).collect(Collectors.toList());
 	}
 	
 	// --------------------------------------------------------------------------
@@ -82,114 +89,65 @@ public class ProductsFilterVisitor implements ExpressionVisitor<Object> {
 	@Override
 	public Object visitBinaryOperator(BinaryOperatorKind operator, Object left, Object right)
 			throws ExpressionVisitException, ODataApplicationException {
+		
+		// attribute operation needs to be performed
+//		if (this.lambdaVarName != null && "att".equals(this.lambdaVarName)) {
+//			if ("Name".equals(left) && this.opKind == null) { // query additional attribute
+//				this.lambdaVarName = null;
+//				Field<CltaProductSearch<?>, ? extends Object> field = EdmUtil
+//						.mapODataAttributeToSearch2Field((String) right, searchModel);
+//				return field;
+//			} else if ("Value".equals(left) && this.opKind == null) { // query additional attribute
+//				this.opKind = operator;
+//				this.lambdaVarName = null;
+//				return right;
+//			} else if ("ValueType".equals(left) && this.opKind == null) { // fetch additional attribute
+//				this.opKind = null;
+//				this.lambdaVarName = null;
+//				// TODO: check if attribute type value needs to be checked against the related cltaProduct column ->
+//				// selectables.get(selectables.size()-1).getType().equals(right.getClass());
+//				return FilterableTerm.matchAll(Collections.emptyList());
+//			} else {
+//				throw new ODataApplicationException(
+//						String.format("Unsupported operator %s on attribute filter expression", operator.name()),
+//						HttpStatusCode.BAD_REQUEST.getStatusCode(), Locale.ROOT);
+//			}
+//		}
 
-		String leftOperand = operandToString(left);
-		String rightOperand = operandToString(right);
+		final String leftOperand = operandToString(left);
+		final String rightOperand = operandToString(right);
 
 		LOGGER.debug("got left operand: {} operator: {} right operand: {} ", leftOperand, operator, rightOperand);
-
+		
 		switch (operator) {
 		case AND:
 			break;
-		case GE:
-			final PripDateTimeFilter pripDateTimeFilter1;
-			// one side must be a DateTime Field, the other a literal
-			if (left instanceof Member && pripDateTimePropertyFieldNames.containsKey(leftOperand) && right instanceof Literal) {
-				pripDateTimeFilter1 = new PripDateTimeFilter(this.pripDateTimePropertyFieldNames.get(leftOperand));
-				pripDateTimeFilter1.setDateTime(convertToLocalDateTime(rightOperand));
-				pripDateTimeFilter1.setOperator(Operator.GE);
-			} else if (right instanceof Member && pripDateTimePropertyFieldNames.containsKey(rightOperand) && left instanceof Literal) {
-				pripDateTimeFilter1 = new PripDateTimeFilter(this.pripDateTimePropertyFieldNames.get(rightOperand));
-				pripDateTimeFilter1.setDateTime(convertToLocalDateTime(leftOperand));
-				pripDateTimeFilter1.setOperator(Operator.LE);
-			} else {
-				throw new ExpressionVisitException("Invalid or unsupported operand");
-			}
-			pripDateTimeFilters.add(pripDateTimeFilter1);
-			LOGGER.debug("using filter {} ", pripDateTimeFilter1);
-			break;
 		case GT:
-			final PripDateTimeFilter pripDateTimeFilter2;
-			// one side must be a DateTime Field, the other a literal
-			if (left instanceof Member && pripDateTimePropertyFieldNames.containsKey(leftOperand) && right instanceof Literal) {
-				pripDateTimeFilter2 = new PripDateTimeFilter(this.pripDateTimePropertyFieldNames.get(leftOperand));
-				pripDateTimeFilter2.setDateTime(convertToLocalDateTime(rightOperand));
-				pripDateTimeFilter2.setOperator(Operator.GT);
-			} else if (right instanceof Member && pripDateTimePropertyFieldNames.containsKey(rightOperand) && left instanceof Literal) {
-				pripDateTimeFilter2 = new PripDateTimeFilter(this.pripDateTimePropertyFieldNames.get(rightOperand));
-				pripDateTimeFilter2.setDateTime(convertToLocalDateTime(leftOperand));
-				pripDateTimeFilter2.setOperator(Operator.LT);
-			} else {
-				throw new ExpressionVisitException("Invalid or unsupported operand");
-			}
-			pripDateTimeFilters.add(pripDateTimeFilter2);
-			LOGGER.debug("using filter {} ", pripDateTimeFilter2);
-			break;
-		case LE:
-			final PripDateTimeFilter pripDateTimeFilter3;
-			// one side must be DateTime Field, the other a literal
-			if (left instanceof Member && pripDateTimePropertyFieldNames.containsKey(leftOperand) && right instanceof Literal) {
-				pripDateTimeFilter3 = new PripDateTimeFilter(this.pripDateTimePropertyFieldNames.get(leftOperand));
-				pripDateTimeFilter3.setDateTime(convertToLocalDateTime(rightOperand));
-				pripDateTimeFilter3.setOperator(Operator.LE);
-			} else if (right instanceof Member && pripDateTimePropertyFieldNames.containsKey(rightOperand) && left instanceof Literal) {
-				pripDateTimeFilter3 = new PripDateTimeFilter(this.pripDateTimePropertyFieldNames.get(rightOperand));
-				pripDateTimeFilter3.setDateTime(convertToLocalDateTime(leftOperand));
-				pripDateTimeFilter3.setOperator(Operator.GE);
-			} else {
-				throw new ExpressionVisitException("Invalid or unsupported operand");
-			}
-			pripDateTimeFilters.add(pripDateTimeFilter3);
-			LOGGER.debug("using filter {} ", pripDateTimeFilter3);
-			break;
+		case GE:
 		case LT:
-			final PripDateTimeFilter pripDateTimeFilter4;
-			// one side must be DateTime Field, the other a literal
-			if (left instanceof Member && pripDateTimePropertyFieldNames.containsKey(leftOperand) && right instanceof Literal) {
-				pripDateTimeFilter4 = new PripDateTimeFilter(this.pripDateTimePropertyFieldNames.get(leftOperand));
-				pripDateTimeFilter4.setDateTime(convertToLocalDateTime(rightOperand));
-				pripDateTimeFilter4.setOperator(Operator.LT);
-			} else if (right instanceof Member && pripDateTimePropertyFieldNames.containsKey(rightOperand) && left instanceof Literal) {
-				pripDateTimeFilter4 = new PripDateTimeFilter(this.pripDateTimePropertyFieldNames.get(rightOperand));
-				pripDateTimeFilter4.setDateTime(convertToLocalDateTime(leftOperand));
-				pripDateTimeFilter4.setOperator(Operator.GT);
-			} else {
-				throw new ExpressionVisitException("Invalid or unsupported operand");
-			}
-			pripDateTimeFilters.add(pripDateTimeFilter4);
-			LOGGER.debug("using filter {} ", pripDateTimeFilter4);
+		case LE:
+		{
+			final PripDateTimeFilter pripDateTimefilter = createDateTimeFilter(Operator.fromString(operator.name()),
+					left, right, leftOperand, rightOperand);
+			this.queryFilters.add(pripDateTimefilter);
+			LOGGER.debug("using filter: {} ", pripDateTimefilter);
 			break;
-		case EQ:
-			final PripTextFilter textFilter;
-			if (left instanceof Member && right instanceof Literal) {
-				textFilter = new PripTextFilter(this.pripTextPropertyFieldNames.get(leftOperand));
-				textFilter.setFunction(Function.EQUALS);
-				textFilter.setText(rightOperand.substring(1, rightOperand.length() - 1));
-			} else if(left instanceof Literal && right instanceof Member) {
-				textFilter = new PripTextFilter(this.pripTextPropertyFieldNames.get(rightOperand));
-				textFilter.setFunction(Function.EQUALS);
-				textFilter.setText(leftOperand.substring(1, leftOperand.length() - 1));
-			} else if (left instanceof Member && right instanceof List || left instanceof List && right instanceof Member) {
-				String memberText = left instanceof Member ? leftOperand : rightOperand;
-				String firstListElementText = left instanceof List ? leftOperand : rightOperand;
-				// BEGIN WORKAROUND TO RETURN EMPTY RESULT FOR ProductionType != systematic_production
-				if (ProductionType.name().equals("ProductionType") && !SYSTEMATIC_PRODUCTION.getName().equals(firstListElementText)) {
-					textFilter = new PripTextFilter(FIELD_NAMES.NAME);
-					textFilter.setFunction(Function.EQUALS);					
-					textFilter.setText("NOTEXISTINGPRODUCTNAME");
-				} else {
-					return null;
-				}
-				// END WORKAROUND TO RETURN EMPTY RESULT FOR ProductionType != systematic_production
-			} else {
-				throw new ExpressionVisitException("Invalid or unsupported operand");
-			}
-			pripTextFilters.add(textFilter);
-			LOGGER.debug("using filter {} ", textFilter);
-			break;
-		default:
-			throw new UnsupportedOperationException();
 		}
+		case EQ:
+		{
+			final PripTextFilter textFilter = createTextFilter(Function.fromString(operator.name()), left, right,
+					leftOperand, rightOperand);
+			if (null == textFilter) {
+				return null;
+			}
+			this.queryFilters.add(textFilter);
+			LOGGER.debug("using filter: {} ", textFilter);
+			break;
+		}
+		default:
+			throw new UnsupportedOperationException("Operator " + operator + " not supported!");
+		}
+
 		return null;
 	}
 
@@ -202,28 +160,36 @@ public class ProductsFilterVisitor implements ExpressionVisitor<Object> {
 	@Override
 	public Object visitMethodCall(MethodKind methodCall, List<Object> parameters)
 			throws ExpressionVisitException, ODataApplicationException {
-		
-		if (!this.supportedMethods.contains(methodCall)) {
+
+		if (!SUPPORTED_METHODS.contains(methodCall)) {
 			return null;
 		}
-		
+
 		LOGGER.debug("got method {}", methodCall.name());
-		
-		if (parameters.size() == 2 && parameters.get(0) instanceof Member && parameters.get(1) instanceof Literal
-				&& this.pripTextPropertyFieldNames.containsKey(memberText((Member) parameters.get(0))) ) {
-			
-			final FIELD_NAMES fieldName = this.pripTextPropertyFieldNames.get(memberText((Member) parameters.get(0)));
-			final Function filterFunction = PripTextFilter.Function.fromString(methodCall.name());
-			final String literal = ((Literal) parameters.get(1)).getText();
-			final String text = literal.substring(1, literal.length() - 1);
-			final PripTextFilter textFilter = new PripTextFilter(fieldName, filterFunction, text);
-			
-			this.pripTextFilters.add(textFilter);
-			LOGGER.debug("using filter {} ", textFilter);
-			
-		} else {
-			throw new ExpressionVisitException("Invalid or unsupported parameter");
+
+		if (parameters.size() != 2 || !(parameters.get(0) instanceof Member)
+				|| !(parameters.get(1) instanceof Literal)) {
+			throw new ODataApplicationException(
+					"Invalid or unsupported parameter(s): " + StringUtil.makeListString(",", parameters),
+					HttpStatusCode.BAD_REQUEST.getStatusCode(), null);
 		}
+
+		final Member field = (Member) parameters.get(0);
+		final String odataFieldname = this.memberText(field);
+
+		if (!isTextField(odataFieldname)) {
+			throw new ODataApplicationException("Unsupported field name: " + odataFieldname,
+					HttpStatusCode.BAD_REQUEST.getStatusCode(), null);
+		}
+
+		final String pripFieldName = mapToPripFieldName(odataFieldname).orElse(null); // we already checked if text field
+		final Function filterFunction = PripTextFilter.Function.fromString(methodCall.name());
+		final String literal = ((Literal) parameters.get(1)).getText();
+		final String text = literal.substring(1, literal.length() - 1);
+		final PripTextFilter textFilter = new PripTextFilter(pripFieldName, filterFunction, text);
+
+		this.queryFilters.add(textFilter);
+		LOGGER.debug("using filter: {} ", textFilter);
 
 		return null;
 	}
@@ -231,6 +197,20 @@ public class ProductsFilterVisitor implements ExpressionVisitor<Object> {
 	@Override
 	public Object visitLambdaExpression(String lambdaFunction, String lambdaVariable, Expression expression)
 			throws ExpressionVisitException, ODataApplicationException {
+		// siehe CLTA ProductFilterExpressionVisitor
+//		final ProductsFilterVisitor filterExpressionVisitor = new ProductsFilterVisitor();
+//		final Object term = expression.accept(filterExpressionVisitor);
+//
+//		if (term instanceof FilterableTerm) {
+//			if ("ANY".equals(lambdaFunction)) {
+//				return FilterableTerm.matchAny((FilterableTerm<CltaProductSearch<?>>) term);
+//			} else if ("ALL".equals(lambdaFunction)) {
+//				return FilterableTerm.matchAll((FilterableTerm<CltaProductSearch<?>>) term);
+//			}
+//		}
+//
+//		throw new ODataApplicationException("Unsupported lambda expression on filter expression",
+//				HttpStatusCode.BAD_REQUEST.getStatusCode(), Locale.ROOT);
 		throw new UnsupportedOperationException();
 	}
 
@@ -241,6 +221,54 @@ public class ProductsFilterVisitor implements ExpressionVisitor<Object> {
 
 	@Override
 	public Object visitMember(Member member) throws ExpressionVisitException, ODataApplicationException {
+		// siehe CLTA ProductFilterExpressionVisitor
+//		Object temp = null;
+//		String odataComplexValue = null;
+//
+//		for (UriResource uriResource : member.getResourcePath().getUriResourceParts()) {
+//			if (uriResource instanceof UriResourceLambdaAll) {
+//				final UriResourceLambdaAll all = (UriResourceLambdaAll) uriResource;
+//				temp = this.visitLambdaExpression("ALL", all.getLambdaVariable(), all.getExpression());
+//			} else if (uriResource instanceof UriResourceLambdaAny) {
+//				final UriResourceLambdaAny any = (UriResourceLambdaAny) uriResource;
+//				temp = this.visitLambdaExpression("ANY", any.getLambdaVariable(), any.getExpression());
+//			} else if (uriResource instanceof UriResourceComplexProperty) {
+//				final UriResourceComplexProperty complex = (UriResourceComplexProperty) uriResource;
+//				
+//				if (ContentDate.name().equals(complex.getSegmentValue())) {
+//					odataComplexValue = complex.getSegmentValue();
+//				} else {
+//					throw new ODataApplicationException("Unsupported complex filter",
+//							HttpStatusCode.BAD_REQUEST.getStatusCode(), Locale.ROOT);
+//				}
+//			} else if (uriResource instanceof UriResourceNavigation) {
+//				// nothing to do here so far
+//			} else if (uriResource instanceof UriResourceLambdaVariable) {
+//				final UriResourceLambdaVariable uriResourceLambdaVariable = (UriResourceLambdaVariable) uriResource;
+//				this.lambdaVarName = uriResourceLambdaVariable.getVariableName();
+//			} else if (uriResource instanceof UriResourcePrimitiveProperty) {
+//				final UriResourcePrimitiveProperty uriResourcePrimitiveProperty = (UriResourcePrimitiveProperty) uriResource;
+//				final String segVal = uriResourcePrimitiveProperty.getSegmentValue(true);
+//				
+//				if (this.lambdaVarName != null && "att".equals(this.lambdaVarName)) { // this is an atttribute left binary operand [Name or Value]
+//					temp = segVal;
+//				} else if (odataComplexValue != null) { // this could be only a ContentDate property
+//					temp = mapToPripFieldName(odataComplexValue + "/" + segVal).orElse(null);
+//				} else { // this is a primitive property [Name or PublicationDate or...]
+//					temp = mapToPripFieldName(segVal).orElse(null);
+//				}
+//				odataComplexValue = null;
+//			} else if (uriResource instanceof UriResourcePartTyped) {
+//				// temp = null;
+//			} else {
+//				throw new ODataApplicationException(
+//						"Unsupported complex filter " + uriResource.getKind().name() + " ("
+//								+ uriResource.getClass().getSimpleName() + ")",
+//						HttpStatusCode.BAD_REQUEST.getStatusCode(), Locale.ROOT);
+//			}
+//		}
+//
+//		return temp;
 		return member;
 	}
 
@@ -263,7 +291,7 @@ public class ProductsFilterVisitor implements ExpressionVisitor<Object> {
 	public Object visitEnum(EdmEnumType type, List<String> enumValues)
 			throws ExpressionVisitException, ODataApplicationException {
 		ArrayList<Object> acceptedEnumsValues = new ArrayList<>();
-		if (ProductionType.name().equals(type.getName()) && pripProductionTypes.contains(enumValues.get(0))) {
+		if (ProductionType.name().equals(type.getName()) && PRIP_PRODUCTION_TYPES.contains(enumValues.get(0))) {
 			acceptedEnumsValues.add(enumValues.get(0));
 		}
 		return acceptedEnumsValues;
@@ -296,12 +324,8 @@ public class ProductsFilterVisitor implements ExpressionVisitor<Object> {
 		}
 	}
 	
-	public List<PripDateTimeFilter> getPripDateTimeFilters() {
-		return this.pripDateTimeFilters;
-	}
-
-	public List<PripTextFilter> getPripTextFilters() {
-		return this.pripTextFilters;
+	public List<PripQueryFilter> getQueryFilters() {
+		return this.queryFilters;
 	}
 	
 	// --------------------------------------------------------------------------
@@ -313,6 +337,73 @@ public class ProductsFilterVisitor implements ExpressionVisitor<Object> {
 			text += (idx > 0 ? "/" : "") + uriResourceParts.get(idx).getSegmentValue();
 		}
 		return text;
+	}
+	
+	private static boolean isDateField(String odataFieldName) {
+		return PRIP_DATETIME_PROPERTY_FIELD_NAMES.containsKey(odataFieldName);
+	}
+
+	private static boolean isTextField(String odataFieldName) {
+		return PRIP_TEXT_PROPERTY_FIELD_NAMES.containsKey(odataFieldName);
+	}
+	
+	private static Optional<String> mapToPripFieldName(String odataFieldName) {
+		if (PRIP_SUPPORTED_PROPERTY_FIELD_NAMES.containsKey(odataFieldName)) {
+			return Optional.of(PRIP_SUPPORTED_PROPERTY_FIELD_NAMES.get(odataFieldName).fieldName());
+		}
+
+		return Optional.empty();
+	}
+	
+	private static PripDateTimeFilter createDateTimeFilter(Operator operator, Object left, Object right,
+			String leftOperand, String rightOperand) throws ODataApplicationException, ExpressionVisitException {
+		
+		if (left instanceof Member && right instanceof Literal) {
+			if (isDateField(leftOperand)) {
+				return new PripDateTimeFilter(mapToPripFieldName(leftOperand).orElse(null), operator,
+						convertToLocalDateTime(rightOperand));
+			}
+		} else if (left instanceof Literal && right instanceof Member) {
+			if (isDateField(rightOperand)) {
+				return new PripDateTimeFilter(mapToPripFieldName(rightOperand).orElse(null), operator.getInverse(),
+						convertToLocalDateTime(leftOperand));
+			}
+		}
+
+		throw new ODataApplicationException(
+				"Invalid or unsupported operand(s): " + leftOperand + " " + operator.getOperator() + " " + rightOperand,
+				HttpStatusCode.BAD_REQUEST.getStatusCode(), null);
+	}
+	
+	private static PripTextFilter createTextFilter(Function function, Object left, Object right,
+			String leftOperand, String rightOperand) throws ODataApplicationException {
+		
+		if (left instanceof Member && right instanceof Literal) {
+			if (isTextField(leftOperand)) {
+				return new PripTextFilter(mapToPripFieldName(leftOperand).orElse(null), function,
+						rightOperand.substring(1, rightOperand.length() - 1));
+			}
+		} else if(left instanceof Literal && right instanceof Member) {
+			if (isTextField(rightOperand)) {
+				return new PripTextFilter(mapToPripFieldName(rightOperand).orElse(null), function,
+						leftOperand.substring(1, leftOperand.length() - 1));
+			}
+		} else if (left instanceof Member && right instanceof List || left instanceof List && right instanceof Member) {
+			final String memberText = left instanceof Member ? leftOperand : rightOperand;
+			final String firstListElementText = left instanceof List ? leftOperand : rightOperand;
+			
+			// BEGIN WORKAROUND TO RETURN EMPTY RESULT FOR ProductionType != systematic_production
+			if (ProductionType.name().equals("ProductionType") && !SYSTEMATIC_PRODUCTION.getName().equals(firstListElementText)) {
+				return new PripTextFilter(FIELD_NAMES.NAME.fieldName(), Function.EQUALS, "NOTEXISTINGPRODUCTNAME");
+			} else {
+				return null;
+			}
+			// END WORKAROUND TO RETURN EMPTY RESULT FOR ProductionType != systematic_production
+		}
+		
+		throw new ODataApplicationException(
+				"Invalid or unsupported operand(s): " + leftOperand + " " + function.getFunctionName() + " " + rightOperand,
+				HttpStatusCode.BAD_REQUEST.getStatusCode(), null);
 	}
 
 }

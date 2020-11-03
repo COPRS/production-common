@@ -4,9 +4,11 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -25,7 +27,6 @@ import org.elasticsearch.common.xcontent.XContentType;
 import org.elasticsearch.index.query.BoolQueryBuilder;
 import org.elasticsearch.index.query.Operator;
 import org.elasticsearch.index.query.QueryBuilders;
-import org.elasticsearch.index.query.RangeQueryBuilder;
 import org.elasticsearch.search.SearchHit;
 import org.elasticsearch.search.builder.SearchSourceBuilder;
 import org.elasticsearch.search.sort.SortOrder;
@@ -34,13 +35,16 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import esa.s1pdgs.cpoc.common.ProductFamily;
+import esa.s1pdgs.cpoc.common.utils.CollectionUtil;
 import esa.s1pdgs.cpoc.common.utils.DateUtils;
 import esa.s1pdgs.cpoc.prip.model.Checksum;
 import esa.s1pdgs.cpoc.prip.model.GeoShapePolygon;
 import esa.s1pdgs.cpoc.prip.model.PripGeoCoordinate;
 import esa.s1pdgs.cpoc.prip.model.PripGeoShape;
 import esa.s1pdgs.cpoc.prip.model.PripMetadata;
-import esa.s1pdgs.cpoc.prip.model.filter.PripDateTimeFilter;
+import esa.s1pdgs.cpoc.prip.model.filter.PripBooleanFilter;
+import esa.s1pdgs.cpoc.prip.model.filter.PripQueryFilter;
+import esa.s1pdgs.cpoc.prip.model.filter.PripRangeValueFilter;
 import esa.s1pdgs.cpoc.prip.model.filter.PripTextFilter;
 
 @Service
@@ -123,96 +127,92 @@ public class PripElasticSearchMetadataRepo implements PripMetadataRepository {
 		return query(null, top, skip);
 	}
 
-//	@Override
-//	public List<PripMetadata> findByCreationDate(List<PripDateTimeFilter> creationDateFilters, Optional<Integer> top, Optional<Integer> skip) {
-//		LOGGER.info("finding PRIP metadata with creationDate filters {}", creationDateFilters);
-//		BoolQueryBuilder queryBuilder = QueryBuilders.boolQuery();
-//		buildQueryWithDateTimeFilters(creationDateFilters, queryBuilder, PripMetadata.FIELD_NAMES.CREATION_DATE);
-//		return query(queryBuilder, top, skip);
-//	}
-//
-//	@Override
-//	public List<PripMetadata> findByProductName(List<PripTextFilter> nameFilters, Optional<Integer> top, Optional<Integer> skip) {
-//		LOGGER.info("finding PRIP metadata with name filters {}", nameFilters);
-//		BoolQueryBuilder queryBuilder = QueryBuilders.boolQuery();
-//		buildQueryWithTextFilters(nameFilters, queryBuilder, PripMetadata.FIELD_NAMES.NAME);
-//		return query(queryBuilder, top, skip);
-//	}
-//
-//	@Override
-//	public List<PripMetadata> findByCreationDateAndProductName(List<PripDateTimeFilter> creationDateFilters,
-//			List<PripTextFilter> nameFilters, Optional<Integer> top, Optional<Integer> skip) {
-//		LOGGER.info("finding PRIP metadata with creationDate filters {} and name filters {}", creationDateFilters,
-//				nameFilters);
-//		BoolQueryBuilder queryBuilder = QueryBuilders.boolQuery();
-//		buildQueryWithDateTimeFilters(creationDateFilters, queryBuilder, PripMetadata.FIELD_NAMES.CREATION_DATE);
-//		buildQueryWithTextFilters(nameFilters, queryBuilder, PripMetadata.FIELD_NAMES.NAME);
-//		return query(queryBuilder, top, skip);
-//	}
-
 	@Override
-	public List<PripMetadata> findWithFilters(List<PripTextFilter> textFilters,
-			List<PripDateTimeFilter> dateTimeFilters, Optional<Integer> top, Optional<Integer> skip) {
-
-		LOGGER.info("finding PRIP metadata with date filters {} and text filters {}", dateTimeFilters, textFilters);
-		BoolQueryBuilder queryBuilder = QueryBuilders.boolQuery();
-		buildQueryWithDateTimeFilters(dateTimeFilters, queryBuilder);
-		buildQueryWithTextFilters(textFilters, queryBuilder);
+	public List<PripMetadata> findWithFilters(List<PripQueryFilter> filters, Optional<Integer> top,
+			Optional<Integer> skip) {
+		LOGGER.info("finding PRIP metadata with filters {}", filters);
+		
+		final BoolQueryBuilder queryBuilder = QueryBuilders.boolQuery();
+		buildQueryWithFilters(filters, queryBuilder);
+		
 		return query(queryBuilder, top, skip);
 	}
-
-	private void buildQueryWithDateTimeFilters(List<PripDateTimeFilter> dateTimeFilters,
-			BoolQueryBuilder queryBuilder) {
-
-		for (PripDateTimeFilter filter : dateTimeFilters) {
-			final RangeQueryBuilder rangeQueryBuilder = QueryBuilders.rangeQuery(filter.getFieldName());
-
-			switch (filter.getOperator()) {
-			case LE:
-				rangeQueryBuilder.lte(filter.getDateTime());
-				break;
-			case LT:
-				rangeQueryBuilder.lt(filter.getDateTime());
-				break;
-			case GE:
-				rangeQueryBuilder.gte(filter.getDateTime());
-				break;
-			case GT:
-				rangeQueryBuilder.gt(filter.getDateTime());
-				break;
-			default:
-				throw new IllegalArgumentException(
-						String.format("not supported filter operator: %s", filter.getOperator().name()));
+	
+	private static void buildQueryWithFilters(List<? extends PripQueryFilter> filters, BoolQueryBuilder queryBuilder) {
+		for (PripQueryFilter filter : CollectionUtil.nullToEmpty(filters)) {
+			if (filter instanceof PripRangeValueFilter) {
+				buildQueryWithRangeValueFilter((PripRangeValueFilter<?>)filter, queryBuilder);
+			}else if (filter instanceof PripTextFilter) {
+				buildQueryWithTextFilter((PripTextFilter)filter, queryBuilder);
+			}else if (filter instanceof PripBooleanFilter) {
+				buildQueryWithBooleanFilter((PripBooleanFilter)filter, queryBuilder);
+			}else {
+				throw new IllegalArgumentException(String.format("filter type not supported: %s", filter.getClass().getSimpleName()));
 			}
-			queryBuilder.must(rangeQueryBuilder);
+		}
+	}
+	
+	private static void buildQueryWithRangeValueFilter(PripRangeValueFilter<?> filter, BoolQueryBuilder queryBuilder) {
+		switch (filter.getOperator()) {
+		case LT:
+			queryBuilder.must(QueryBuilders.rangeQuery(filter.getFieldName()).lt(filter.getValue()));
+			break;
+		case LE:
+			queryBuilder.must(QueryBuilders.rangeQuery(filter.getFieldName()).lte(filter.getValue()));
+			break;
+		case GT:
+			queryBuilder.must(QueryBuilders.rangeQuery(filter.getFieldName()).gt(filter.getValue()));
+			break;
+		case GE:
+			queryBuilder.must(QueryBuilders.rangeQuery(filter.getFieldName()).gte(filter.getValue()));
+			break;
+		case EQ:
+			queryBuilder.must(QueryBuilders.termQuery(filter.getFieldName(), filter.getValue()));
+			break;
+		case NE:
+			queryBuilder.mustNot(QueryBuilders.termQuery(filter.getFieldName(), filter.getValue()));
+			break;
+		default:
+			throw new IllegalArgumentException(
+					String.format("filter operator not supported: %s", filter.getOperator().name()));
 		}
 	}
 
-	private void buildQueryWithTextFilters(List<PripTextFilter> textFilters, BoolQueryBuilder queryBuilder) {
-
-		for (PripTextFilter filter : textFilters) {
-
-			switch (filter.getFunction()) {
-			case STARTS_WITH:
-				queryBuilder.must(QueryBuilders.wildcardQuery(filter.getFieldName(),
-						String.format("%s*", filter.getText())));
-				break;
-			case ENDS_WITH:
-				queryBuilder.must(QueryBuilders.wildcardQuery(filter.getFieldName(),
-						String.format("*%s", filter.getText())));
-				break;
-			case CONTAINS:
-				queryBuilder.must(QueryBuilders.wildcardQuery(filter.getFieldName(),
-						String.format("*%s*", filter.getText())));
-				break;
-			case EQUALS:
-				queryBuilder.must(QueryBuilders.matchQuery(filter.getFieldName(), filter.getText())
-						.fuzziness(Fuzziness.ZERO).operator(Operator.AND));
-				break;
-			default:
-				throw new IllegalArgumentException(
-						String.format("not supported filter function: %s", filter.getFunction().name()));
-			}
+	private static void buildQueryWithTextFilter(PripTextFilter filter, BoolQueryBuilder queryBuilder) {
+		switch (filter.getFunction()) {
+		case STARTS_WITH:
+			queryBuilder
+					.must(QueryBuilders.wildcardQuery(filter.getFieldName(), String.format("%s*", filter.getText())));
+			break;
+		case ENDS_WITH:
+			queryBuilder
+					.must(QueryBuilders.wildcardQuery(filter.getFieldName(), String.format("*%s", filter.getText())));
+			break;
+		case CONTAINS:
+			queryBuilder
+					.must(QueryBuilders.wildcardQuery(filter.getFieldName(), String.format("*%s*", filter.getText())));
+			break;
+		case EQUALS:
+			queryBuilder.must(QueryBuilders.matchQuery(filter.getFieldName(), filter.getText())
+					.fuzziness(Fuzziness.ZERO).operator(Operator.AND));
+			break;
+		default:
+			throw new IllegalArgumentException(
+					String.format("not supported filter function: %s", filter.getFunction().name()));
+		}
+	}
+	
+	private static void buildQueryWithBooleanFilter(PripBooleanFilter filter, BoolQueryBuilder queryBuilder) {
+		switch (filter.getFunction()) {
+		case EQUALS:
+			queryBuilder.must(QueryBuilders.termQuery(filter.getFieldName(), filter.getValue().booleanValue()));
+			break;
+		case EQUALS_NOT:
+			queryBuilder.mustNot(QueryBuilders.termQuery(filter.getFieldName(), filter.getValue().booleanValue()));
+			break;
+		default:
+			throw new IllegalArgumentException(
+					String.format("not supported filter function: %s", filter.getFunction().name()));
 		}
 	}
 
@@ -286,6 +286,12 @@ public class PripElasticSearchMetadataRepo implements PripMetadataRepository {
 		pm.setChecksums(checksumList);
 		
 		pm.setFootprint(this.mapToGeoShapePolygon(sourceAsMap));
+		
+		pm.setAttributes(sourceAsMap.entrySet().stream().filter(p -> p.getKey().startsWith("attr_"))
+				.collect(Collectors.toMap(
+					Entry::getKey,
+					s -> s.getKey().endsWith("_date") ? DateUtils.parse((String)s.getValue()) : s.getValue()))
+				);
 
 		LOGGER.debug("hit {}", pm);
 		return pm;
@@ -328,15 +334,15 @@ public class PripElasticSearchMetadataRepo implements PripMetadataRepository {
 		LOGGER.info("counting PRIP metadata");
 		return count(null);
 	}
-
+	
 	@Override
-	public int countWithFilters(List<PripDateTimeFilter> creationDateFilters, List<PripTextFilter> nameFilters) {
-		LOGGER.info("counting PRIP metadata with creationDate filters {} and name filters {}", creationDateFilters,
-				nameFilters);
-		BoolQueryBuilder queryBuilder = QueryBuilders.boolQuery();
-		buildQueryWithDateTimeFilters(creationDateFilters, queryBuilder);
-		buildQueryWithTextFilters(nameFilters, queryBuilder);
-		return count(queryBuilder);
+	public int countWithFilters(List<PripQueryFilter> filters) {
+		LOGGER.info("counting PRIP metadata with filters {}", filters);
+		
+		final BoolQueryBuilder queryBuilder = QueryBuilders.boolQuery();
+		buildQueryWithFilters(filters, queryBuilder);
+
+		return this.count(queryBuilder);
 	}
 
 	private int count(BoolQueryBuilder queryBuilder) {
