@@ -290,8 +290,23 @@ public class PripElasticSearchMetadataRepo implements PripMetadataRepository {
 		pm.setAttributes(sourceAsMap.entrySet().stream().filter(p -> p.getKey().startsWith("attr_"))
 				.collect(Collectors.toMap(
 					Entry::getKey,
-					s -> s.getKey().endsWith("_date") ? DateUtils.parse((String)s.getValue()) : s.getValue()))
-				);
+					s -> {
+						final String key = s.getKey();
+						final Object value = s.getValue();
+						if (key.endsWith("_date")) {
+							return DateUtils.parse((String)s.getValue());
+						} else if (key.endsWith("_double")) {
+							if (value instanceof Long) {
+								return Double.valueOf((Long)value);
+							} else if (value instanceof Integer) {
+								return Double.valueOf((Integer)value);
+							}
+						} else if (key.endsWith("_long") && value instanceof Integer) {
+							return Long.valueOf((Integer)value);
+						}
+						return value;
+					}
+				)));
 
 		LOGGER.debug("hit {}", pm);
 		return pm;

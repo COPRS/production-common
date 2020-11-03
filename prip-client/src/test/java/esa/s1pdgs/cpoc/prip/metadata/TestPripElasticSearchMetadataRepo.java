@@ -336,11 +336,12 @@ public class TestPripElasticSearchMetadataRepo {
 		
 		Map<String,Object> attributes = new LinkedHashMap<>();
 		attributes.put("attr_name1_string", "value1");
-		attributes.put("attr_name2_long", 2);
+		attributes.put("attr_name2_long", 2L);
 		attributes.put("attr_name3_double", 0.4);
-		attributes.put("attr_name4_boolean", true);
-		attributes.put("attr_name5_boolean", false);
-		attributes.put("attr_name6_date", LocalDateTime.of(2000, 1, 1, 0, 0));
+		attributes.put("attr_name4_double", 1.0);
+		attributes.put("attr_name5_boolean", true);
+		attributes.put("attr_name6_boolean", false);
+		attributes.put("attr_name7_date", LocalDateTime.of(2000, 1, 1, 0, 0));
 		
 		pripMetadata.setAttributes(attributes);
 		return pripMetadata;
