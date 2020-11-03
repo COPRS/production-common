@@ -25,7 +25,6 @@ import org.elasticsearch.common.xcontent.XContentType;
 import org.elasticsearch.index.query.BoolQueryBuilder;
 import org.elasticsearch.index.query.Operator;
 import org.elasticsearch.index.query.QueryBuilders;
-import org.elasticsearch.index.query.RangeQueryBuilder;
 import org.elasticsearch.search.SearchHit;
 import org.elasticsearch.search.builder.SearchSourceBuilder;
 import org.elasticsearch.search.sort.SortOrder;
@@ -41,8 +40,9 @@ import esa.s1pdgs.cpoc.prip.model.GeoShapePolygon;
 import esa.s1pdgs.cpoc.prip.model.PripGeoCoordinate;
 import esa.s1pdgs.cpoc.prip.model.PripGeoShape;
 import esa.s1pdgs.cpoc.prip.model.PripMetadata;
-import esa.s1pdgs.cpoc.prip.model.filter.PripDateTimeFilter;
+import esa.s1pdgs.cpoc.prip.model.filter.PripBooleanFilter;
 import esa.s1pdgs.cpoc.prip.model.filter.PripQueryFilter;
+import esa.s1pdgs.cpoc.prip.model.filter.PripRangeValueFilter;
 import esa.s1pdgs.cpoc.prip.model.filter.PripTextFilter;
 
 @Service
@@ -125,33 +125,6 @@ public class PripElasticSearchMetadataRepo implements PripMetadataRepository {
 		return query(null, top, skip);
 	}
 
-//	@Override
-//	public List<PripMetadata> findByCreationDate(List<PripDateTimeFilter> creationDateFilters, Optional<Integer> top, Optional<Integer> skip) {
-//		LOGGER.info("finding PRIP metadata with creationDate filters {}", creationDateFilters);
-//		BoolQueryBuilder queryBuilder = QueryBuilders.boolQuery();
-//		buildQueryWithDateTimeFilters(creationDateFilters, queryBuilder, PripMetadata.FIELD_NAMES.CREATION_DATE);
-//		return query(queryBuilder, top, skip);
-//	}
-//
-//	@Override
-//	public List<PripMetadata> findByProductName(List<PripTextFilter> nameFilters, Optional<Integer> top, Optional<Integer> skip) {
-//		LOGGER.info("finding PRIP metadata with name filters {}", nameFilters);
-//		BoolQueryBuilder queryBuilder = QueryBuilders.boolQuery();
-//		buildQueryWithTextFilters(nameFilters, queryBuilder, PripMetadata.FIELD_NAMES.NAME);
-//		return query(queryBuilder, top, skip);
-//	}
-//
-//	@Override
-//	public List<PripMetadata> findByCreationDateAndProductName(List<PripDateTimeFilter> creationDateFilters,
-//			List<PripTextFilter> nameFilters, Optional<Integer> top, Optional<Integer> skip) {
-//		LOGGER.info("finding PRIP metadata with creationDate filters {} and name filters {}", creationDateFilters,
-//				nameFilters);
-//		BoolQueryBuilder queryBuilder = QueryBuilders.boolQuery();
-//		buildQueryWithDateTimeFilters(creationDateFilters, queryBuilder, PripMetadata.FIELD_NAMES.CREATION_DATE);
-//		buildQueryWithTextFilters(nameFilters, queryBuilder, PripMetadata.FIELD_NAMES.NAME);
-//		return query(queryBuilder, top, skip);
-//	}
-
 	@Override
 	public List<PripMetadata> findWithFilters(List<PripQueryFilter> filters, Optional<Integer> top,
 			Optional<Integer> skip) {
@@ -165,17 +138,19 @@ public class PripElasticSearchMetadataRepo implements PripMetadataRepository {
 	
 	private static void buildQueryWithFilters(List<? extends PripQueryFilter> filters, BoolQueryBuilder queryBuilder) {
 		for (PripQueryFilter filter : CollectionUtil.nullToEmpty(filters)) {
-			if (filter instanceof PripDateTimeFilter) {
-				buildQueryWithDateTimeFilter((PripDateTimeFilter)filter, queryBuilder);
+			if (filter instanceof PripRangeValueFilter) {
+				buildQueryWithRangeValueFilter((PripRangeValueFilter<?>)filter, queryBuilder);
 			}else if (filter instanceof PripTextFilter) {
 				buildQueryWithTextFilter((PripTextFilter)filter, queryBuilder);
+			}else if (filter instanceof PripBooleanFilter) {
+				buildQueryWithBooleanFilter((PripBooleanFilter)filter, queryBuilder);
 			}else {
 				throw new IllegalArgumentException(String.format("filter type not supported: %s", filter.getClass().getSimpleName()));
 			}
 		}
 	}
-
-	private static void buildQueryWithDateTimeFilter(PripDateTimeFilter filter, BoolQueryBuilder queryBuilder) {
+	
+	private static void buildQueryWithRangeValueFilter(PripRangeValueFilter<?> filter, BoolQueryBuilder queryBuilder) {
 		switch (filter.getOperator()) {
 		case LT:
 			queryBuilder.must(QueryBuilders.rangeQuery(filter.getFieldName()).lt(filter.getValue()));
@@ -218,6 +193,20 @@ public class PripElasticSearchMetadataRepo implements PripMetadataRepository {
 		case EQUALS:
 			queryBuilder.must(QueryBuilders.matchQuery(filter.getFieldName(), filter.getText())
 					.fuzziness(Fuzziness.ZERO).operator(Operator.AND));
+			break;
+		default:
+			throw new IllegalArgumentException(
+					String.format("not supported filter function: %s", filter.getFunction().name()));
+		}
+	}
+	
+	private static void buildQueryWithBooleanFilter(PripBooleanFilter filter, BoolQueryBuilder queryBuilder) {
+		switch (filter.getFunction()) {
+		case EQUALS:
+			queryBuilder.must(QueryBuilders.termQuery(filter.getFieldName(), filter.getValue().booleanValue()));
+			break;
+		case EQUALS_NOT:
+			queryBuilder.mustNot(QueryBuilders.termQuery(filter.getFieldName(), filter.getValue().booleanValue()));
 			break;
 		default:
 			throw new IllegalArgumentException(
