@@ -51,6 +51,7 @@ public class ProductsFilterVisitor implements ExpressionVisitor<Object> {
 
 	private static final Map<String,FIELD_NAMES> PRIP_DATETIME_PROPERTY_FIELD_NAMES;	
 	private static final Map<String,FIELD_NAMES> PRIP_TEXT_PROPERTY_FIELD_NAMES;
+	private static final Map<String,FIELD_NAMES> PRIP_SUPPORTED_PROPERTY_FIELD_NAMES;
 	private static final List<String> PRIP_PRODUCTION_TYPES;
 	private static final List<MethodKind> SUPPORTED_METHODS;
 	
@@ -64,6 +65,10 @@ public class ProductsFilterVisitor implements ExpressionVisitor<Object> {
 		PRIP_TEXT_PROPERTY_FIELD_NAMES.put(Name.name(), FIELD_NAMES.NAME);
 		PRIP_TEXT_PROPERTY_FIELD_NAMES.put(ProductionType.name(), FIELD_NAMES.PRODUCTION_TYPE);
 		
+		PRIP_SUPPORTED_PROPERTY_FIELD_NAMES = new HashMap<>();
+		PRIP_SUPPORTED_PROPERTY_FIELD_NAMES.putAll(PRIP_DATETIME_PROPERTY_FIELD_NAMES);
+		PRIP_SUPPORTED_PROPERTY_FIELD_NAMES.putAll(PRIP_TEXT_PROPERTY_FIELD_NAMES);
+		
 		PRIP_PRODUCTION_TYPES = Arrays.asList(esa.s1pdgs.cpoc.prip.model.ProductionType.values()).stream()
 				.map(v -> v.getName()).collect(Collectors.toList());
 		
@@ -71,6 +76,8 @@ public class ProductsFilterVisitor implements ExpressionVisitor<Object> {
 	}
 	
 	private final List<PripQueryFilter> queryFilters = new ArrayList<>();
+//	private String lambdaVarName = null;
+//	private BinaryOperatorKind opKind = null;
 	
 	// --------------------------------------------------------------------------
 
@@ -82,6 +89,30 @@ public class ProductsFilterVisitor implements ExpressionVisitor<Object> {
 	@Override
 	public Object visitBinaryOperator(BinaryOperatorKind operator, Object left, Object right)
 			throws ExpressionVisitException, ODataApplicationException {
+		
+		// attribute operation needs to be performed
+//		if (this.lambdaVarName != null && "att".equals(this.lambdaVarName)) {
+//			if ("Name".equals(left) && this.opKind == null) { // query additional attribute
+//				this.lambdaVarName = null;
+//				Field<CltaProductSearch<?>, ? extends Object> field = EdmUtil
+//						.mapODataAttributeToSearch2Field((String) right, searchModel);
+//				return field;
+//			} else if ("Value".equals(left) && this.opKind == null) { // query additional attribute
+//				this.opKind = operator;
+//				this.lambdaVarName = null;
+//				return right;
+//			} else if ("ValueType".equals(left) && this.opKind == null) { // fetch additional attribute
+//				this.opKind = null;
+//				this.lambdaVarName = null;
+//				// TODO: check if attribute type value needs to be checked against the related cltaProduct column ->
+//				// selectables.get(selectables.size()-1).getType().equals(right.getClass());
+//				return FilterableTerm.matchAll(Collections.emptyList());
+//			} else {
+//				throw new ODataApplicationException(
+//						String.format("Unsupported operator %s on attribute filter expression", operator.name()),
+//						HttpStatusCode.BAD_REQUEST.getStatusCode(), Locale.ROOT);
+//			}
+//		}
 
 		final String leftOperand = operandToString(left);
 		final String rightOperand = operandToString(right);
@@ -166,6 +197,20 @@ public class ProductsFilterVisitor implements ExpressionVisitor<Object> {
 	@Override
 	public Object visitLambdaExpression(String lambdaFunction, String lambdaVariable, Expression expression)
 			throws ExpressionVisitException, ODataApplicationException {
+		// siehe CLTA ProductFilterExpressionVisitor
+//		final ProductsFilterVisitor filterExpressionVisitor = new ProductsFilterVisitor();
+//		final Object term = expression.accept(filterExpressionVisitor);
+//
+//		if (term instanceof FilterableTerm) {
+//			if ("ANY".equals(lambdaFunction)) {
+//				return FilterableTerm.matchAny((FilterableTerm<CltaProductSearch<?>>) term);
+//			} else if ("ALL".equals(lambdaFunction)) {
+//				return FilterableTerm.matchAll((FilterableTerm<CltaProductSearch<?>>) term);
+//			}
+//		}
+//
+//		throw new ODataApplicationException("Unsupported lambda expression on filter expression",
+//				HttpStatusCode.BAD_REQUEST.getStatusCode(), Locale.ROOT);
 		throw new UnsupportedOperationException();
 	}
 
@@ -176,6 +221,54 @@ public class ProductsFilterVisitor implements ExpressionVisitor<Object> {
 
 	@Override
 	public Object visitMember(Member member) throws ExpressionVisitException, ODataApplicationException {
+		// siehe CLTA ProductFilterExpressionVisitor
+//		Object temp = null;
+//		String odataComplexValue = null;
+//
+//		for (UriResource uriResource : member.getResourcePath().getUriResourceParts()) {
+//			if (uriResource instanceof UriResourceLambdaAll) {
+//				final UriResourceLambdaAll all = (UriResourceLambdaAll) uriResource;
+//				temp = this.visitLambdaExpression("ALL", all.getLambdaVariable(), all.getExpression());
+//			} else if (uriResource instanceof UriResourceLambdaAny) {
+//				final UriResourceLambdaAny any = (UriResourceLambdaAny) uriResource;
+//				temp = this.visitLambdaExpression("ANY", any.getLambdaVariable(), any.getExpression());
+//			} else if (uriResource instanceof UriResourceComplexProperty) {
+//				final UriResourceComplexProperty complex = (UriResourceComplexProperty) uriResource;
+//				
+//				if (ContentDate.name().equals(complex.getSegmentValue())) {
+//					odataComplexValue = complex.getSegmentValue();
+//				} else {
+//					throw new ODataApplicationException("Unsupported complex filter",
+//							HttpStatusCode.BAD_REQUEST.getStatusCode(), Locale.ROOT);
+//				}
+//			} else if (uriResource instanceof UriResourceNavigation) {
+//				// nothing to do here so far
+//			} else if (uriResource instanceof UriResourceLambdaVariable) {
+//				final UriResourceLambdaVariable uriResourceLambdaVariable = (UriResourceLambdaVariable) uriResource;
+//				this.lambdaVarName = uriResourceLambdaVariable.getVariableName();
+//			} else if (uriResource instanceof UriResourcePrimitiveProperty) {
+//				final UriResourcePrimitiveProperty uriResourcePrimitiveProperty = (UriResourcePrimitiveProperty) uriResource;
+//				final String segVal = uriResourcePrimitiveProperty.getSegmentValue(true);
+//				
+//				if (this.lambdaVarName != null && "att".equals(this.lambdaVarName)) { // this is an atttribute left binary operand [Name or Value]
+//					temp = segVal;
+//				} else if (odataComplexValue != null) { // this could be only a ContentDate property
+//					temp = mapToPripFieldName(odataComplexValue + "/" + segVal).orElse(null);
+//				} else { // this is a primitive property [Name or PublicationDate or...]
+//					temp = mapToPripFieldName(segVal).orElse(null);
+//				}
+//				odataComplexValue = null;
+//			} else if (uriResource instanceof UriResourcePartTyped) {
+//				// temp = null;
+//			} else {
+//				throw new ODataApplicationException(
+//						"Unsupported complex filter " + uriResource.getKind().name() + " ("
+//								+ uriResource.getClass().getSimpleName() + ")",
+//						HttpStatusCode.BAD_REQUEST.getStatusCode(), Locale.ROOT);
+//			}
+//		}
+//
+//		return temp;
 		return member;
 	}
 
@@ -247,22 +340,16 @@ public class ProductsFilterVisitor implements ExpressionVisitor<Object> {
 	}
 	
 	private static boolean isDateField(String odataFieldName) {
-		// TODO @MSc: erweitern: wenn es ein 'Attributes' query ist, brauchen wir hier auch noch den type und können dann entscheiden
 		return PRIP_DATETIME_PROPERTY_FIELD_NAMES.containsKey(odataFieldName);
 	}
 
 	private static boolean isTextField(String odataFieldName) {
-		// TODO @MSc: erweitern: wenn es ein 'Attributes' query ist, brauchen wir hier auch noch den type und können dann entscheiden
 		return PRIP_TEXT_PROPERTY_FIELD_NAMES.containsKey(odataFieldName);
 	}
 	
 	private static Optional<String> mapToPripFieldName(String odataFieldName) {
-		// TODO @MSc: erweitern: wenn es ein 'Attributes' query ist, brauchen wir hier auch noch den type
-		// und können dann den PRIP fieldname zusammenbauen: attr_<OData_Bezeichner>_<datentyp>
-		if (PRIP_DATETIME_PROPERTY_FIELD_NAMES.containsKey(odataFieldName)) {
-			return Optional.of(PRIP_DATETIME_PROPERTY_FIELD_NAMES.get(odataFieldName).fieldName());
-		} else if (PRIP_TEXT_PROPERTY_FIELD_NAMES.containsKey(odataFieldName)) {
-			return Optional.of(PRIP_TEXT_PROPERTY_FIELD_NAMES.get(odataFieldName).fieldName());
+		if (PRIP_SUPPORTED_PROPERTY_FIELD_NAMES.containsKey(odataFieldName)) {
+			return Optional.of(PRIP_SUPPORTED_PROPERTY_FIELD_NAMES.get(odataFieldName).fieldName());
 		}
 
 		return Optional.empty();
