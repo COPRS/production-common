@@ -294,7 +294,7 @@ public class PripElasticSearchMetadataRepo implements PripMetadataRepository {
 						final String key = s.getKey();
 						final Object value = s.getValue();
 						if (key.endsWith("_date")) {
-							return DateUtils.parse((String)s.getValue());
+							return DateUtils.parse((String)value);
 						} else if (key.endsWith("_double")) {
 							if (value instanceof Long) {
 								return Double.valueOf((Long)value);
