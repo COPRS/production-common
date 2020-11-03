@@ -4,9 +4,11 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -284,6 +286,9 @@ public class PripElasticSearchMetadataRepo implements PripMetadataRepository {
 		pm.setChecksums(checksumList);
 		
 		pm.setFootprint(this.mapToGeoShapePolygon(sourceAsMap));
+		
+		pm.setAttributes(sourceAsMap.entrySet().stream().filter(p -> p.getKey().startsWith("attr_"))
+				.collect(Collectors.toMap(Entry::getKey, Entry::getValue)));
 
 		LOGGER.debug("hit {}", pm);
 		return pm;
