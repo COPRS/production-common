@@ -15,6 +15,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -26,6 +27,8 @@ import org.apache.olingo.commons.api.http.HttpStatusCode;
 import org.apache.olingo.commons.core.edm.primitivetype.EdmDateTimeOffset;
 import org.apache.olingo.server.api.ODataApplicationException;
 import org.apache.olingo.server.api.uri.UriResource;
+import org.apache.olingo.server.api.uri.UriResourceLambdaAny;
+import org.apache.olingo.server.api.uri.UriResourceNavigation;
 import org.apache.olingo.server.api.uri.queryoption.expression.BinaryOperatorKind;
 import org.apache.olingo.server.api.uri.queryoption.expression.Expression;
 import org.apache.olingo.server.api.uri.queryoption.expression.ExpressionVisitException;
@@ -41,9 +44,9 @@ import esa.s1pdgs.cpoc.common.utils.StringUtil;
 import esa.s1pdgs.cpoc.prip.model.PripMetadata.FIELD_NAMES;
 import esa.s1pdgs.cpoc.prip.model.filter.PripDateTimeFilter;
 import esa.s1pdgs.cpoc.prip.model.filter.PripQueryFilter;
+import esa.s1pdgs.cpoc.prip.model.filter.PripRangeValueFilter.Operator;
 import esa.s1pdgs.cpoc.prip.model.filter.PripTextFilter;
 import esa.s1pdgs.cpoc.prip.model.filter.PripTextFilter.Function;
-import esa.s1pdgs.cpoc.prip.model.filter.PripRangeValueFilter.Operator;
 
 public class ProductsFilterVisitor implements ExpressionVisitor<Object> {
 
@@ -76,48 +79,18 @@ public class ProductsFilterVisitor implements ExpressionVisitor<Object> {
 	}
 	
 	private final List<PripQueryFilter> queryFilters = new ArrayList<>();
-//	private String lambdaVarName = null;
-//	private BinaryOperatorKind opKind = null;
-	
-	// --------------------------------------------------------------------------
 
 	public ProductsFilterVisitor() {
 	}
 	
-	// --------------------------------------------------------------------------
-
 	@Override
 	public Object visitBinaryOperator(BinaryOperatorKind operator, Object left, Object right)
 			throws ExpressionVisitException, ODataApplicationException {
-		
-		// attribute operation needs to be performed
-//		if (this.lambdaVarName != null && "att".equals(this.lambdaVarName)) {
-//			if ("Name".equals(left) && this.opKind == null) { // query additional attribute
-//				this.lambdaVarName = null;
-//				Field<CltaProductSearch<?>, ? extends Object> field = EdmUtil
-//						.mapODataAttributeToSearch2Field((String) right, searchModel);
-//				return field;
-//			} else if ("Value".equals(left) && this.opKind == null) { // query additional attribute
-//				this.opKind = operator;
-//				this.lambdaVarName = null;
-//				return right;
-//			} else if ("ValueType".equals(left) && this.opKind == null) { // fetch additional attribute
-//				this.opKind = null;
-//				this.lambdaVarName = null;
-//				// TODO: check if attribute type value needs to be checked against the related cltaProduct column ->
-//				// selectables.get(selectables.size()-1).getType().equals(right.getClass());
-//				return FilterableTerm.matchAll(Collections.emptyList());
-//			} else {
-//				throw new ODataApplicationException(
-//						String.format("Unsupported operator %s on attribute filter expression", operator.name()),
-//						HttpStatusCode.BAD_REQUEST.getStatusCode(), Locale.ROOT);
-//			}
-//		}
 
 		final String leftOperand = operandToString(left);
 		final String rightOperand = operandToString(right);
 
-		LOGGER.debug("got left operand: {} operator: {} right operand: {} ", leftOperand, operator, rightOperand);
+		LOGGER.debug("got left operand: {} operator: {} right operand: {}", leftOperand, operator, rightOperand);
 		
 		switch (operator) {
 		case AND:
@@ -197,21 +170,17 @@ public class ProductsFilterVisitor implements ExpressionVisitor<Object> {
 	@Override
 	public Object visitLambdaExpression(String lambdaFunction, String lambdaVariable, Expression expression)
 			throws ExpressionVisitException, ODataApplicationException {
-		// siehe CLTA ProductFilterExpressionVisitor
-//		final ProductsFilterVisitor filterExpressionVisitor = new ProductsFilterVisitor();
-//		final Object term = expression.accept(filterExpressionVisitor);
-//
-//		if (term instanceof FilterableTerm) {
-//			if ("ANY".equals(lambdaFunction)) {
-//				return FilterableTerm.matchAny((FilterableTerm<CltaProductSearch<?>>) term);
-//			} else if ("ALL".equals(lambdaFunction)) {
-//				return FilterableTerm.matchAll((FilterableTerm<CltaProductSearch<?>>) term);
-//			}
-//		}
-//
-//		throw new ODataApplicationException("Unsupported lambda expression on filter expression",
-//				HttpStatusCode.BAD_REQUEST.getStatusCode(), Locale.ROOT);
-		throw new UnsupportedOperationException();
+
+		if ("ANY".equals(lambdaFunction)) {
+			final String type = "string"; // TODO: get correct type...
+			final AttributesFilterVisitor filterExpressionVisitor = new AttributesFilterVisitor(type);
+			final Object visitResult = expression.accept(filterExpressionVisitor);
+			System.out.println("visit result: " + visitResult);
+			return visitResult;
+		}
+
+		throw new ODataApplicationException("Unsupported lambda expression on filter expression",
+				HttpStatusCode.BAD_REQUEST.getStatusCode(), Locale.ROOT);
 	}
 
 	@Override
@@ -221,54 +190,19 @@ public class ProductsFilterVisitor implements ExpressionVisitor<Object> {
 
 	@Override
 	public Object visitMember(Member member) throws ExpressionVisitException, ODataApplicationException {
-		// siehe CLTA ProductFilterExpressionVisitor
-//		Object temp = null;
-//		String odataComplexValue = null;
-//
-//		for (UriResource uriResource : member.getResourcePath().getUriResourceParts()) {
-//			if (uriResource instanceof UriResourceLambdaAll) {
-//				final UriResourceLambdaAll all = (UriResourceLambdaAll) uriResource;
-//				temp = this.visitLambdaExpression("ALL", all.getLambdaVariable(), all.getExpression());
-//			} else if (uriResource instanceof UriResourceLambdaAny) {
-//				final UriResourceLambdaAny any = (UriResourceLambdaAny) uriResource;
-//				temp = this.visitLambdaExpression("ANY", any.getLambdaVariable(), any.getExpression());
-//			} else if (uriResource instanceof UriResourceComplexProperty) {
-//				final UriResourceComplexProperty complex = (UriResourceComplexProperty) uriResource;
-//				
-//				if (ContentDate.name().equals(complex.getSegmentValue())) {
-//					odataComplexValue = complex.getSegmentValue();
-//				} else {
-//					throw new ODataApplicationException("Unsupported complex filter",
-//							HttpStatusCode.BAD_REQUEST.getStatusCode(), Locale.ROOT);
-//				}
-//			} else if (uriResource instanceof UriResourceNavigation) {
-//				// nothing to do here so far
-//			} else if (uriResource instanceof UriResourceLambdaVariable) {
-//				final UriResourceLambdaVariable uriResourceLambdaVariable = (UriResourceLambdaVariable) uriResource;
-//				this.lambdaVarName = uriResourceLambdaVariable.getVariableName();
-//			} else if (uriResource instanceof UriResourcePrimitiveProperty) {
-//				final UriResourcePrimitiveProperty uriResourcePrimitiveProperty = (UriResourcePrimitiveProperty) uriResource;
-//				final String segVal = uriResourcePrimitiveProperty.getSegmentValue(true);
-//				
-//				if (this.lambdaVarName != null && "att".equals(this.lambdaVarName)) { // this is an atttribute left binary operand [Name or Value]
-//					temp = segVal;
-//				} else if (odataComplexValue != null) { // this could be only a ContentDate property
-//					temp = mapToPripFieldName(odataComplexValue + "/" + segVal).orElse(null);
-//				} else { // this is a primitive property [Name or PublicationDate or...]
-//					temp = mapToPripFieldName(segVal).orElse(null);
-//				}
-//				odataComplexValue = null;
-//			} else if (uriResource instanceof UriResourcePartTyped) {
-//				// temp = null;
-//			} else {
-//				throw new ODataApplicationException(
-//						"Unsupported complex filter " + uriResource.getKind().name() + " ("
-//								+ uriResource.getClass().getSimpleName() + ")",
-//						HttpStatusCode.BAD_REQUEST.getStatusCode(), Locale.ROOT);
-//			}
-//		}
-//
-//		return temp;
+		for (UriResource uriResource : member.getResourcePath().getUriResourceParts()) {
+			if (uriResource instanceof UriResourceNavigation) {
+				System.out.println("current uriResource: " +  uriResource);
+				//System.out.println("property: " + ((UriResourceNavigation)uriResource).getProperty().;
+			} else if (uriResource instanceof UriResourceLambdaAny) {
+				System.out.println("uriResource: " +  uriResource);
+				System.out.println("misc: " +  member.getResourcePath().getCustomQueryOptions());
+				final UriResourceLambdaAny any = (UriResourceLambdaAny) uriResource;
+				List<PripQueryFilter> filters = (List<PripQueryFilter>)visitLambdaExpression(
+						"ANY", any.getLambdaVariable(), any.getExpression());
+				System.out.println("FILTERS TO ADD: " + filters); // TODO add filters to other filters...
+			}
+		}
 		return member;
 	}
 
@@ -297,7 +231,7 @@ public class ProductsFilterVisitor implements ExpressionVisitor<Object> {
 		return acceptedEnumsValues;
 	}
 	
-	public String operandToString(Object operand) {
+	public static String operandToString(Object operand) {
 		String result = "";
 		if (operand instanceof Member) {
 			result = memberText((Member) operand);
@@ -328,9 +262,7 @@ public class ProductsFilterVisitor implements ExpressionVisitor<Object> {
 		return this.queryFilters;
 	}
 	
-	// --------------------------------------------------------------------------
-	
-	private String memberText(Member member) {
+	public static String memberText(Member member) {
 		String text = "";
 		List<UriResource> uriResourceParts = member.getResourcePath().getUriResourceParts();
 		for (int idx = 0; idx < uriResourceParts.size(); idx++) {
