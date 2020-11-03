@@ -32,41 +32,15 @@ public interface PripMetadataRepository {
 	 */
 	public List<PripMetadata> findAll(Optional<Integer> top, Optional<Integer> skip);
 
-//	/**
-//	 * Finds PRIP metadata by creation date using date time filters.
-//	 * Each of the the result matches with all filters provided for the field 'creationDate'.
-//	 * 
-//	 * @param creationDateFilters
-//	 * @param top
-//	 * @param skip
-//	 * @return
-//	 */
-//	public List<PripMetadata> findByCreationDate(List<PripDateTimeFilter> creationDateFilters, Optional<Integer> top, Optional<Integer> skip);
-//
-//	/**
-//	 * Finds PRIP metadata by product name using name filters. 
-//	 * Each of the the result matches with all filters provided for the field 'name'.
-//	 * 
-//	 * @param nameFilters
-//	 * @param top
-//	 * @param skip
-//	 * @return
-//	 */
-//	public List<PripMetadata> findByProductName(List<PripTextFilter> nameFilters, Optional<Integer> top, Optional<Integer> skip);
-//
-//	/**
-//	 * Finds PRIP metadata by creation date and name using date time and name filters.
-//	 * Each of the the result matches with all filters provided for the fields 'creationDate' and 'name'.
-//	 * 
-//	 * @param creationDateFilters can be empty
-//	 * @param nameFilters can be empty
-//	 * @param top
-//	 * @param skip
-//	 * @return
-//	 */
-//	public List<PripMetadata> findByCreationDateAndProductName(List<PripDateTimeFilter> creationDateFilters,
-//			List<PripTextFilter> nameFilters, Optional<Integer> top, Optional<Integer> skip);
-	
+	/**
+	 * Querying the repository with filters.
+	 * When filters are empty this is like calling {@link #findAll(Optional, Optional)}. 
+	 *
+	 * @param filters to narrow the query 
+	 * @param top for paging
+	 * @param skip fir paging
+	 * @return the search result
+	 */
 	public List<PripMetadata> findWithFilters(List<PripQueryFilter> filters, Optional<Integer> top, Optional<Integer> skip);
 
 	/**
