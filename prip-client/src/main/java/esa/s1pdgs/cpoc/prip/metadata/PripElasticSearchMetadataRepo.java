@@ -288,7 +288,10 @@ public class PripElasticSearchMetadataRepo implements PripMetadataRepository {
 		pm.setFootprint(this.mapToGeoShapePolygon(sourceAsMap));
 		
 		pm.setAttributes(sourceAsMap.entrySet().stream().filter(p -> p.getKey().startsWith("attr_"))
-				.collect(Collectors.toMap(Entry::getKey, Entry::getValue)));
+				.collect(Collectors.toMap(
+					Entry::getKey,
+					s -> s.getKey().endsWith("_date") ? DateUtils.parse((String)s.getValue()) : s.getValue()))
+				);
 
 		LOGGER.debug("hit {}", pm);
 		return pm;

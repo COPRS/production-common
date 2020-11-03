@@ -80,7 +80,6 @@ public class MappingUtil {
 
 		// TODO sort attributes
 		for(Entry<String, Object> entrySet : pripMetadata.getAttributes().entrySet()) {
-			final Object value = entrySet.getValue();
 			final FullQualifiedName valueType;
 			final int firstSeparatorPosition = entrySet.getKey().indexOf('_');
 			final int lastSeparatorPosition = entrySet.getKey().lastIndexOf('_');
@@ -93,8 +92,9 @@ public class MappingUtil {
 				case "date": valueType = EdmProvider.DATE_TIME_OFFSET_TYPE_FQN; break;
 				default: throw new RuntimeException(String.format("Unsupported type extension specified for PRIP metadata mapping in %s", entrySet.getKey()));
 			}
-			String odataPropertyName = entrySet.getKey().substring(firstSeparatorPosition + 1, lastSeparatorPosition);
-			Entity attributeEntity = new Entity();
+			final Object value = valueType == EdmProvider.DATE_TIME_OFFSET_TYPE_FQN ? convertLocalDateTimeToTimestamp((LocalDateTime)entrySet.getValue()) : entrySet.getValue();
+			final String odataPropertyName = entrySet.getKey().substring(firstSeparatorPosition + 1, lastSeparatorPosition);
+			final Entity attributeEntity = new Entity();
 			attributeEntity.addProperty(new Property(null, "Name", ValueType.PRIMITIVE, odataPropertyName));
 			attributeEntity.addProperty(new Property(null, "ValueType", ValueType.PRIMITIVE, valueType));
 			attributeEntity.addProperty(new Property(null, "Value", ValueType.PRIMITIVE, value));
