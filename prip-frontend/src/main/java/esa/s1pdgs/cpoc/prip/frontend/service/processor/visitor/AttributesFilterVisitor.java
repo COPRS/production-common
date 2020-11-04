@@ -1,6 +1,7 @@
 package esa.s1pdgs.cpoc.prip.frontend.service.processor.visitor;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import org.apache.olingo.commons.api.edm.EdmEnumType;
@@ -26,14 +27,14 @@ import esa.s1pdgs.cpoc.prip.model.filter.PripIntegerFilter;
 import esa.s1pdgs.cpoc.prip.model.filter.PripQueryFilter;
 import esa.s1pdgs.cpoc.prip.model.filter.PripRangeValueFilter;
 import esa.s1pdgs.cpoc.prip.model.filter.PripTextFilter;
+import esa.s1pdgs.cpoc.prip.model.filter.PripTextFilter.Function;
 
 public class AttributesFilterVisitor implements ExpressionVisitor<Object> {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(ProductsFilterVisitor.class);
 	
 	private String type = "";
-	private String fieldName = "";
-	private String value = "";
+	private List<String> fieldNames = new ArrayList<String>();
 	private BinaryOperatorKind op = null;
 	
 	private final List<PripQueryFilter> filters = new ArrayList<>();
@@ -49,30 +50,34 @@ public class AttributesFilterVisitor implements ExpressionVisitor<Object> {
 	@Override
 	public Object visitBinaryOperator(BinaryOperatorKind operator, Object left, Object right)
 			throws ExpressionVisitException, ODataApplicationException {
-
+		
 		final String leftOperand = ProductsFilterVisitor.operandToString(left);
 		final String rightOperand = ProductsFilterVisitor.operandToString(right);
 		LOGGER.debug("got left operand: {} operator: {} right operand: {}", leftOperand, operator, rightOperand);
 		
-		if ("att/Name".equals(leftOperand)) {
-			this.fieldName = "attr_" + removeQuotes(rightOperand) + "_" + type;
-		} else if ("att/Name".equals(rightOperand)) {
-			this.fieldName = "attr_" + removeQuotes(leftOperand)  + "_" + type;
-		}
+		String value = null;
 		
-		if ("att/Value".equals(leftOperand)) {
+		if ("att/Name".equals(leftOperand)) {
+			String fieldName = "attr_" + removeQuotes(rightOperand) + "_" + type;
+			if (!fieldNames.contains(fieldName)) {
+				fieldNames.add(fieldName);
+			}
+		} else if ("att/Name".equals(rightOperand)) {
+			String fieldName = "attr_" + removeQuotes(leftOperand)  + "_" + type;
+			if (!fieldNames.contains(fieldName)) {
+				fieldNames.add(fieldName);
+			}
+		} else if ("att/Value".equals(leftOperand)) {
 			value = rightOperand;
 			op = operator;
+			if (null !=  op && StringUtil.isNotEmpty(value)) {
+				filters.add(buildFilter(value, op));
+			}
 		} else if ("att/Value".equals(rightOperand)) {
 			value = leftOperand;
 			op = operator;
-		}
-		
-		if (StringUtil.isNotEmpty(this.fieldName) && null != this.op && StringUtil.isNotEmpty(this.value)) {
-			final PripQueryFilter filter = this.buildFilter();
-			
-			if (null != filter && !this.filters.contains(filter)) {
-				this.filters.add(filter);
+			if (null !=  op && StringUtil.isNotEmpty(value)) {
+				filters.add(buildFilter(value, op));
 			}
 		}
 
@@ -83,29 +88,29 @@ public class AttributesFilterVisitor implements ExpressionVisitor<Object> {
 		return StringUtil.removeTrailing(StringUtil.removeLeading(str, "'", "\""), "'","\"");
 	}
 	
-	private PripQueryFilter buildFilter() throws ExpressionVisitException {
+	private PripQueryFilter buildFilter(String value, BinaryOperatorKind op) throws ExpressionVisitException {
 		PripQueryFilter filter = null;
 		try {
 			switch (this.type) {
 			case "string":
-				filter = new PripTextFilter(this.fieldName, PripTextFilter.Function.fromString(this.op.name()),
-						this.value);
+				filter = new PripTextFilter("placeholder", PripTextFilter.Function.fromString(op.name()),
+						value);
 				break;
 			case "date":
-				filter = new PripDateTimeFilter(this.fieldName,	PripRangeValueFilter.Operator.fromString(this.op.name()),
-						ProductsFilterVisitor.convertToLocalDateTime(this.value));
+				filter = new PripDateTimeFilter("placeholder",	PripRangeValueFilter.Operator.fromString(op.name()),
+						ProductsFilterVisitor.convertToLocalDateTime(value));
 				break;
 			case "long":
-				filter = new PripIntegerFilter(this.fieldName, PripRangeValueFilter.Operator.fromString(this.op.name()),
-						Long.valueOf(this.value));
+				filter = new PripIntegerFilter("placeholder", PripRangeValueFilter.Operator.fromString(op.name()),
+						Long.valueOf(value));
 				break;
 			case "double":
-				filter = new PripDoubleFilter(this.fieldName, PripRangeValueFilter.Operator.fromString(this.op.name()),
-						Double.valueOf(this.value));
+				filter = new PripDoubleFilter("placeholder", PripRangeValueFilter.Operator.fromString(op.name()),
+						Double.valueOf(value));
 				break;
 			case "boolean":
-				filter = new PripBooleanFilter(this.fieldName, PripBooleanFilter.Function.fromString(this.op.name()),
-						Boolean.valueOf(this.value));
+				filter = new PripBooleanFilter("placeholder", PripBooleanFilter.Function.fromString(op.name()),
+						Boolean.valueOf(value));
 				break;
 			default:
 				throw new ExpressionVisitException("unsupported type: " + this.type);
@@ -169,7 +174,17 @@ public class AttributesFilterVisitor implements ExpressionVisitor<Object> {
 	// --------------------------------------------------------------------------
 
 	public List<PripQueryFilter> getFilters() {
-		return this.filters;
+		if (fieldNames.size() == 0) {
+			return Collections.emptyList();
+		} else if (fieldNames.size() == 1) {
+			String fieldName = fieldNames.get(0);
+			for (PripQueryFilter filter: filters) {
+				filter.setFieldName(fieldName);				
+			}
+			return filters;
+		} else {
+			return Collections.singletonList(new PripTextFilter("productFamily", Function.EQUALS, "n/a"));
+		}
 	}
 
 }
