@@ -79,27 +79,28 @@ public class MappingUtil {
 		entityCollections.put(EdmProvider.DATE_TIME_OFFSET_TYPE_FQN, new EntityCollection());
 
 		// TODO sort attributes
-		for(Entry<String, Object> entrySet : pripMetadata.getAttributes().entrySet()) {
-			final FullQualifiedName valueType;
-			final int firstSeparatorPosition = entrySet.getKey().indexOf('_');
-			final int lastSeparatorPosition = entrySet.getKey().lastIndexOf('_');
-			switch (entrySet.getKey().substring(lastSeparatorPosition + 1)) {
-				case "string":
-					valueType = EdmProvider.STRING_TYPE_FQN; break;
-				case "long": valueType = EdmProvider.INT_64_TYPE_FQN; break;
-				case "double": valueType = EdmProvider.DOUBLE_TYPE_FQN; break;
-				case "boolean": valueType = EdmProvider.BOOLEAN_TYPE_FQN; break;
-				case "date": valueType = EdmProvider.DATE_TIME_OFFSET_TYPE_FQN; break;
-				default: throw new RuntimeException(String.format("Unsupported type extension specified for PRIP metadata mapping in %s", entrySet.getKey()));
+		if (null != pripMetadata.getAttributes()) {
+			for(Entry<String, Object> entrySet : pripMetadata.getAttributes().entrySet()) {
+				final FullQualifiedName valueType;
+				final int firstSeparatorPosition = entrySet.getKey().indexOf('_');
+				final int lastSeparatorPosition = entrySet.getKey().lastIndexOf('_');
+				switch (entrySet.getKey().substring(lastSeparatorPosition + 1)) {
+					case "string": valueType = EdmProvider.STRING_TYPE_FQN; break;
+					case "long": valueType = EdmProvider.INT_64_TYPE_FQN; break;
+					case "double": valueType = EdmProvider.DOUBLE_TYPE_FQN; break;
+					case "boolean": valueType = EdmProvider.BOOLEAN_TYPE_FQN; break;
+					case "date": valueType = EdmProvider.DATE_TIME_OFFSET_TYPE_FQN; break;
+					default: throw new RuntimeException(String.format("Unsupported type extension specified for PRIP metadata mapping in %s", entrySet.getKey()));
+				}
+				final Object value = valueType == EdmProvider.DATE_TIME_OFFSET_TYPE_FQN ? convertLocalDateTimeToTimestamp((LocalDateTime)entrySet.getValue()) : entrySet.getValue();
+				final String odataPropertyName = entrySet.getKey().substring(firstSeparatorPosition + 1, lastSeparatorPosition);
+				final Entity attributeEntity = new Entity();
+				attributeEntity.addProperty(new Property(null, "Name", ValueType.PRIMITIVE, odataPropertyName));
+				attributeEntity.addProperty(new Property(null, "ValueType", ValueType.PRIMITIVE, valueType));
+				attributeEntity.addProperty(new Property(null, "Value", ValueType.PRIMITIVE, value));
+				final EntityCollection targetEntityCollection = entityCollections.get(valueType);
+				targetEntityCollection.getEntities().add(attributeEntity);
 			}
-			final Object value = valueType == EdmProvider.DATE_TIME_OFFSET_TYPE_FQN ? convertLocalDateTimeToTimestamp((LocalDateTime)entrySet.getValue()) : entrySet.getValue();
-			final String odataPropertyName = entrySet.getKey().substring(firstSeparatorPosition + 1, lastSeparatorPosition);
-			final Entity attributeEntity = new Entity();
-			attributeEntity.addProperty(new Property(null, "Name", ValueType.PRIMITIVE, odataPropertyName));
-			attributeEntity.addProperty(new Property(null, "ValueType", ValueType.PRIMITIVE, valueType));
-			attributeEntity.addProperty(new Property(null, "Value", ValueType.PRIMITIVE, value));
-			final EntityCollection targetEntityCollection = entityCollections.get(valueType);
-			targetEntityCollection.getEntities().add(attributeEntity);
 		}
 
 		Link stringLink = new Link();
