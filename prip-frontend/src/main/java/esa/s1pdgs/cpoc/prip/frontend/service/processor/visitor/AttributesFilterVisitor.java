@@ -35,7 +35,6 @@ public class AttributesFilterVisitor implements ExpressionVisitor<Object> {
 	
 	private String type = "";
 	private List<String> fieldNames = new ArrayList<String>();
-	private BinaryOperatorKind op = null;
 	
 	private final List<PripQueryFilter> filters = new ArrayList<>();
 	
@@ -69,15 +68,13 @@ public class AttributesFilterVisitor implements ExpressionVisitor<Object> {
 			}
 		} else if ("att/Value".equals(leftOperand)) {
 			value = rightOperand;
-			op = operator;
-			if (null !=  op && StringUtil.isNotEmpty(value)) {
-				filters.add(buildFilter(value, op));
+			if (null != operator && StringUtil.isNotEmpty(value)) {
+				filters.add(buildFilter(value, operator));
 			}
 		} else if ("att/Value".equals(rightOperand)) {
 			value = leftOperand;
-			op = operator;
-			if (null !=  op && StringUtil.isNotEmpty(value)) {
-				filters.add(buildFilter(value, op));
+			if (null != operator && StringUtil.isNotEmpty(value)) {
+				filters.add(buildFilter(value, operator));
 			}
 		}
 
