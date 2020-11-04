@@ -55,10 +55,10 @@ public class AttributesFilterVisitor implements ExpressionVisitor<Object> {
 			fieldName = "attr_" + leftOperand + "_" + type;
 		}
 		
-		if ("att/Value".equals("leftOperand")) {
+		if ("att/Value".equals(leftOperand)) {
 			value = rightOperand;
 			op = operator;
-		} else if ("att/Value".equals("rightOperand")) {
+		} else if ("att/Value".equals(rightOperand)) {
 			value = leftOperand;
 			op = operator;
 		}
@@ -68,6 +68,7 @@ public class AttributesFilterVisitor implements ExpressionVisitor<Object> {
 	}
 	
 	private PripQueryFilter buildFilter() {
+		System.out.println(String.format("build %s filter: %s %s %s", this.type, this.fieldName, this.op, this.value));
 		// TODO je nach type einen geeigneten PripQueryFilter subtype zurückgeben, oder mehrere (List<PripQueryFilter>)
 		// TODO not all operators work for all types/filters; throw bad request?
 		PripQueryFilter filter = null;

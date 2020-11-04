@@ -27,8 +27,8 @@ import org.apache.olingo.commons.api.edm.EdmType;
 import org.apache.olingo.commons.api.http.HttpStatusCode;
 import org.apache.olingo.commons.core.edm.primitivetype.EdmDateTimeOffset;
 import org.apache.olingo.server.api.ODataApplicationException;
-import org.apache.olingo.server.api.uri.UriInfoResource;
 import org.apache.olingo.server.api.uri.UriResource;
+import org.apache.olingo.server.api.uri.UriResourceLambdaAll;
 import org.apache.olingo.server.api.uri.UriResourceLambdaAny;
 import org.apache.olingo.server.api.uri.UriResourceNavigation;
 import org.apache.olingo.server.api.uri.queryoption.expression.BinaryOperatorKind;
@@ -173,16 +173,8 @@ public class ProductsFilterVisitor implements ExpressionVisitor<Object> {
 	@Override
 	public Object visitLambdaExpression(String lambdaFunction, String lambdaVariable, Expression expression)
 			throws ExpressionVisitException, ODataApplicationException {
-
-		if ("ANY".equals(lambdaFunction)) {
-			final String type = "string"; // TODO: get correct type...
-			final AttributesFilterVisitor filterExpressionVisitor = new AttributesFilterVisitor(type);
-			final Object visitResult = expression.accept(filterExpressionVisitor);
-			System.out.println("visit result: " + visitResult);
-			return visitResult;
-		}
-
-		throw new ODataApplicationException("Unsupported lambda expression on filter expression",
+		throw new ODataApplicationException(
+				"Unsupported lambda expression: " + lambdaFunction + " / " + lambdaVariable + " / " + expression,
 				HttpStatusCode.BAD_REQUEST.getStatusCode(), Locale.ROOT);
 	}
 
@@ -208,10 +200,15 @@ public class ProductsFilterVisitor implements ExpressionVisitor<Object> {
 				}
 				System.out.println("Type: " +  type);
 			} else if (uriResource instanceof UriResourceLambdaAny) {
+				final AttributesFilterVisitor filterExpressionVisitor = new AttributesFilterVisitor(type);
 				final UriResourceLambdaAny any = (UriResourceLambdaAny) uriResource;
-				List<PripQueryFilter> filters = (List<PripQueryFilter>)visitLambdaExpression(
-						"ANY", any.getLambdaVariable(), any.getExpression());
-				System.out.println("FILTERS TO ADD: " + filters); // TODO add filters to other filters...
+				final List<PripQueryFilter> filters = (List<PripQueryFilter>) any.getExpression().accept(filterExpressionVisitor);
+				this.queryFilters.addAll(filters);
+				
+				System.out.println("FILTERS TO ADD: " + filters);
+			} else if (uriResource instanceof UriResourceLambdaAll) {
+				throw new ODataApplicationException("Unsupported lambda expression on filter expression: all",
+						HttpStatusCode.BAD_REQUEST.getStatusCode(), Locale.ROOT);
 			}
 		}
 		return member;
