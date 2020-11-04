@@ -108,7 +108,7 @@ public class AttributesFilterVisitor implements ExpressionVisitor<Object> {
 						Boolean.valueOf(this.value));
 				break;
 			default:
-				break;
+				throw new ExpressionVisitException("unsupported type: " + this.type);
 			}
 		} catch (PripFilterOperatorException e) {
 			throw new ExpressionVisitException(e.getMessage());
