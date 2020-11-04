@@ -183,7 +183,7 @@ public class AttributesFilterVisitor implements ExpressionVisitor<Object> {
 			}
 			return filters;
 		} else {
-			return Collections.singletonList(new PripTextFilter("productFamily", Function.EQUALS, "n/a"));
+			return Collections.singletonList(new PripTextFilter("productFamily", Function.EQUALS, "'n/a'"));
 		}
 	}
 
