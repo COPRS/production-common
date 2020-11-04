@@ -21,11 +21,13 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 import org.apache.olingo.commons.api.edm.EdmEnumType;
+import org.apache.olingo.commons.api.edm.EdmNavigationProperty;
 import org.apache.olingo.commons.api.edm.EdmPrimitiveTypeException;
 import org.apache.olingo.commons.api.edm.EdmType;
 import org.apache.olingo.commons.api.http.HttpStatusCode;
 import org.apache.olingo.commons.core.edm.primitivetype.EdmDateTimeOffset;
 import org.apache.olingo.server.api.ODataApplicationException;
+import org.apache.olingo.server.api.uri.UriInfoResource;
 import org.apache.olingo.server.api.uri.UriResource;
 import org.apache.olingo.server.api.uri.UriResourceLambdaAny;
 import org.apache.olingo.server.api.uri.UriResourceNavigation;
@@ -41,6 +43,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import esa.s1pdgs.cpoc.common.utils.StringUtil;
+import esa.s1pdgs.cpoc.prip.frontend.service.edm.EdmProvider;
 import esa.s1pdgs.cpoc.prip.model.PripMetadata.FIELD_NAMES;
 import esa.s1pdgs.cpoc.prip.model.filter.PripDateTimeFilter;
 import esa.s1pdgs.cpoc.prip.model.filter.PripQueryFilter;
@@ -190,13 +193,21 @@ public class ProductsFilterVisitor implements ExpressionVisitor<Object> {
 
 	@Override
 	public Object visitMember(Member member) throws ExpressionVisitException, ODataApplicationException {
+		String type = "*";
 		for (UriResource uriResource : member.getResourcePath().getUriResourceParts()) {
-			if (uriResource instanceof UriResourceNavigation) {
-				System.out.println("current uriResource: " +  uriResource);
-				//System.out.println("property: " + ((UriResourceNavigation)uriResource).getProperty().;
+			if (uriResource instanceof UriResourceNavigation) {				
+				UriResourceNavigation uriResourceNavigation = (UriResourceNavigation) uriResource;
+				String tmp = uriResourceNavigation.getSegmentValue(true);
+				switch(tmp.substring(tmp.lastIndexOf(".") + 1)) {
+					case EdmProvider.ET_STRING_ATTRIBUTE_NAME: type = "string"; break;
+					case EdmProvider.ET_INTEGER_ATTRIBUTE_NAME: type = "long"; break;
+					case EdmProvider.ET_DOUBLE_ATTRIBUTE_NAME: type = "double"; break;
+					case EdmProvider.ET_BOOLEAN_ATTRIBUTE_NAME: type = "boolean"; break;
+					case EdmProvider.ET_DATE_ATTRIBUTE_NAME: type = "date"; break;
+					default:
+				}
+				System.out.println("Type: " +  type);
 			} else if (uriResource instanceof UriResourceLambdaAny) {
-				System.out.println("uriResource: " +  uriResource);
-				System.out.println("misc: " +  member.getResourcePath().getCustomQueryOptions());
 				final UriResourceLambdaAny any = (UriResourceLambdaAny) uriResource;
 				List<PripQueryFilter> filters = (List<PripQueryFilter>)visitLambdaExpression(
 						"ANY", any.getLambdaVariable(), any.getExpression());
