@@ -8,27 +8,28 @@ import java.sql.Timestamp;
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.TimeZone;
 import java.util.UUID;
 
 import org.apache.olingo.commons.api.data.ComplexValue;
 import org.apache.olingo.commons.api.data.Entity;
+import org.apache.olingo.commons.api.data.EntityCollection;
+import org.apache.olingo.commons.api.data.Link;
 import org.apache.olingo.commons.api.data.Property;
 import org.apache.olingo.commons.api.data.ValueType;
-import org.apache.olingo.commons.api.edm.geo.ComposedGeospatial;
 import org.apache.olingo.commons.api.edm.geo.Geospatial;
+import org.apache.olingo.commons.api.edm.geo.Geospatial.Dimension;
 import org.apache.olingo.commons.api.edm.geo.LineString;
 import org.apache.olingo.commons.api.edm.geo.Point;
 import org.apache.olingo.commons.api.edm.geo.Polygon;
 import org.apache.olingo.commons.api.edm.geo.SRID;
-import org.apache.olingo.commons.api.edm.geo.Geospatial.Dimension;
 import org.junit.Assert;
 import org.junit.Test;
-import org.locationtech.jts.geom.Coordinate;
 
+import esa.s1pdgs.cpoc.prip.frontend.service.edm.EdmProvider;
 import esa.s1pdgs.cpoc.prip.frontend.service.mapping.MappingUtil;
 import esa.s1pdgs.cpoc.prip.model.Checksum;
 import esa.s1pdgs.cpoc.prip.model.GeoShapePolygon;
@@ -119,6 +120,32 @@ public class TestMappingUtil {
 		expectedEntity.setMediaContentType("application/octet-stream");
 		expectedEntity.setId(uri);
 		
+		Link stringLink = new Link();
+		stringLink.setTitle(EdmProvider.STRING_ATTRIBUTES_SET_NAME);
+		stringLink.setInlineEntitySet(new EntityCollection());
+		expectedEntity.getNavigationLinks().add(stringLink);
+
+		Link longLink = new Link();
+		longLink.setTitle(EdmProvider.INTEGER_ATTRIBUTES_SET_NAME);
+		longLink.setInlineEntitySet(new EntityCollection());
+		expectedEntity.getNavigationLinks().add(longLink);
+
+		Link doubleLink = new Link();
+		doubleLink.setTitle(EdmProvider.DOUBLE_ATTRIBUTES_SET_NAME);
+		doubleLink.setInlineEntitySet(new EntityCollection());
+		expectedEntity.getNavigationLinks().add(doubleLink);
+
+		Link booleanLink = new Link();
+		booleanLink.setTitle(EdmProvider.BOOLEAN_ATTRIBUTES_SET_NAME);
+		booleanLink.setInlineEntitySet(new EntityCollection());
+		expectedEntity.getNavigationLinks().add(booleanLink);
+
+		Link dateLink = new Link();
+		dateLink.setTitle(EdmProvider.DATE_ATTRIBUTES_SET_NAME);
+		dateLink.setInlineEntitySet(new EntityCollection());
+		expectedEntity.getNavigationLinks().add(dateLink);
+		
+		
 		PripMetadata inputPripMetadata = new PripMetadata();
 		inputPripMetadata.setId(UUID.fromString("00000000-0000-0000-0000-000000000001"));
 		inputPripMetadata.setName("Name");
@@ -128,6 +155,7 @@ public class TestMappingUtil {
 		inputPripMetadata.setContentDateEnd(LocalDateTime.ofInstant(Instant.ofEpochMilli(222222222222L), TimeZone.getTimeZone("UTC").toZoneId()));
 		inputPripMetadata.setCreationDate(LocalDateTime.ofInstant(Instant.ofEpochMilli(100000000000L), TimeZone.getTimeZone("UTC").toZoneId()));
 		inputPripMetadata.setEvictionDate(LocalDateTime.ofInstant(Instant.ofEpochMilli(200000000000L), TimeZone.getTimeZone("UTC").toZoneId()));
+		inputPripMetadata.setAttributes(new LinkedHashMap<String,Object>());
 		
 		GeoShapePolygon inputPolygon = new GeoShapePolygon(Arrays.asList(
 				new PripGeoCoordinate(0.0, 1.0), new PripGeoCoordinate(2.0, 3.0),
