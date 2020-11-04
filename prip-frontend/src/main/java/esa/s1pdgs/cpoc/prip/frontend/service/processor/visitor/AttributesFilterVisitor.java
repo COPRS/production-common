@@ -1,6 +1,6 @@
 package esa.s1pdgs.cpoc.prip.frontend.service.processor.visitor;
 
-import java.util.Collections;
+import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.olingo.commons.api.edm.EdmEnumType;
@@ -18,6 +18,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import esa.s1pdgs.cpoc.common.utils.DateUtils;
+import esa.s1pdgs.cpoc.common.utils.StringUtil;
 import esa.s1pdgs.cpoc.prip.model.filter.PripBooleanFilter;
 import esa.s1pdgs.cpoc.prip.model.filter.PripDateTimeFilter;
 import esa.s1pdgs.cpoc.prip.model.filter.PripDoubleFilter;
@@ -35,9 +36,17 @@ public class AttributesFilterVisitor implements ExpressionVisitor<Object> {
 	private String value = "";
 	private BinaryOperatorKind op = null;
 	
+	private int count=0; // TODO remove; just for testing purposes
+	
+	private final List<PripQueryFilter> filters = new ArrayList<>();
+	
+	// --------------------------------------------------------------------------
+	
 	public AttributesFilterVisitor(String type) {
 		this.type = type;
 	}
+	
+	// --------------------------------------------------------------------------
 	
 	@Override
 	public Object visitBinaryOperator(BinaryOperatorKind operator, Object left, Object right)
@@ -47,11 +56,11 @@ public class AttributesFilterVisitor implements ExpressionVisitor<Object> {
 		final String rightOperand = ProductsFilterVisitor.operandToString(right);
 		LOGGER.debug("got left operand: {} operator: {} right operand: {}", leftOperand, operator, rightOperand);
 		
-		System.out.println(String.format("in converted: got left operand: %s operator: %s right operand: %s", leftOperand, operator, rightOperand));
+		System.out.println(String.format("AttributesFilterVisitor.visitBinaryOperator: %s %s %s", leftOperand, operator, rightOperand));
 		
-		if ("att/Name".equals(leftOperand) && operator == BinaryOperatorKind.EQ) {
+		if ("att/Name".equals(leftOperand)) {
 			fieldName = "attr_" + rightOperand + "_" + type;
-		} else if ("att/Name".equals(rightOperand) && operator == BinaryOperatorKind.EQ) {
+		} else if ("att/Name".equals(rightOperand)) {
 			fieldName = "attr_" + leftOperand + "_" + type;
 		}
 		
@@ -62,13 +71,28 @@ public class AttributesFilterVisitor implements ExpressionVisitor<Object> {
 			value = leftOperand;
 			op = operator;
 		}
+		
+		System.out.println("count: " + ++this.count);
+		System.out.println("type: " + this.type);
+		System.out.println("fieldname: " + this.fieldName);
+		System.out.println("operator: " + this.op);
+		System.out.println("value: " + this.value);
+		
+		if (StringUtil.isNotEmpty(this.fieldName) && StringUtil.isNotEmpty(this.value) && StringUtil.isNotEmpty(this.value)) {
+			final PripQueryFilter filter = this.buildFilter();
+			
+			if (null != filter && !this.filters.contains(filter)) {
+				this.filters.add(filter);
+			}
+			System.out.println("filters: " + this.filters);
+		}
 
-		final PripQueryFilter filter = this.buildFilter();
-		return (null != filter ? Collections.singletonList(filter) : Collections.emptyList());
+		return null;
 	}
 	
 	private PripQueryFilter buildFilter() {
-		System.out.println(String.format("build %s filter: %s %s %s", this.type, this.fieldName, this.op, this.value));
+		System.out.println(String.format("build %s filter: %s %s %s", this.type, this.fieldName,
+				(null != this.op ? this.op.name() : null), this.value));
 		// TODO je nach type einen geeigneten PripQueryFilter subtype zurückgeben, oder mehrere (List<PripQueryFilter>)
 		// TODO not all operators work for all types/filters; throw bad request?
 		PripQueryFilter filter = null;
@@ -119,13 +143,13 @@ public class AttributesFilterVisitor implements ExpressionVisitor<Object> {
 
 	@Override
 	public Object visitLiteral(Literal literal) throws ExpressionVisitException, ODataApplicationException {
-		System.out.println("literal:" + literal);
+		System.out.println("AttributesFilterVisitor.visitLiteral: " + literal);
 		return literal;
 	}
 
 	@Override
 	public Object visitMember(Member member) throws ExpressionVisitException, ODataApplicationException {
-		System.out.println("member:" + member);
+		System.out.println("AttributesFilterVisitor.visitMember: " + member);
 		return member;
 	}
 
@@ -148,6 +172,12 @@ public class AttributesFilterVisitor implements ExpressionVisitor<Object> {
 	public Object visitEnum(EdmEnumType type, List<String> enumValues)
 			throws ExpressionVisitException, ODataApplicationException {
 		throw new UnsupportedOperationException();
+	}
+	
+	// --------------------------------------------------------------------------
+
+	public List<PripQueryFilter> getFilters() {
+		return this.filters;
 	}
 
 }

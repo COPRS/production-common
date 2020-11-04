@@ -202,7 +202,9 @@ public class ProductsFilterVisitor implements ExpressionVisitor<Object> {
 			} else if (uriResource instanceof UriResourceLambdaAny) {
 				final AttributesFilterVisitor filterExpressionVisitor = new AttributesFilterVisitor(type);
 				final UriResourceLambdaAny any = (UriResourceLambdaAny) uriResource;
-				final List<PripQueryFilter> filters = (List<PripQueryFilter>) any.getExpression().accept(filterExpressionVisitor);
+				//final List<PripQueryFilter> filters = (List<PripQueryFilter>) any.getExpression().accept(filterExpressionVisitor);
+				any.getExpression().accept(filterExpressionVisitor);
+				final List<PripQueryFilter> filters = filterExpressionVisitor.getFilters();
 				this.queryFilters.addAll(filters);
 				
 				System.out.println("FILTERS TO ADD: " + filters);
