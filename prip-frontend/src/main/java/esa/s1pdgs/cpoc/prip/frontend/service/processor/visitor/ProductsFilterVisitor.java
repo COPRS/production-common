@@ -197,8 +197,8 @@ public class ProductsFilterVisitor implements ExpressionVisitor<Object> {
 		for (UriResource uriResource : member.getResourcePath().getUriResourceParts()) {
 			if (uriResource instanceof UriResourceNavigation) {				
 				UriResourceNavigation uriResourceNavigation = (UriResourceNavigation) uriResource;
-				String tmp = uriResourceNavigation.getSegmentValue(true);
-				switch(tmp.substring(tmp.lastIndexOf(".") + 1)) {
+				String typeRepresentation = uriResourceNavigation.getSegmentValue(true);
+				switch(typeRepresentation.substring(typeRepresentation.lastIndexOf(".") + 1)) {
 					case EdmProvider.ET_STRING_ATTRIBUTE_NAME: type = "string"; break;
 					case EdmProvider.ET_INTEGER_ATTRIBUTE_NAME: type = "long"; break;
 					case EdmProvider.ET_DOUBLE_ATTRIBUTE_NAME: type = "double"; break;
