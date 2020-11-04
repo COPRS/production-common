@@ -2,8 +2,6 @@ package esa.s1pdgs.cpoc.prip.model.filter;
 
 import java.util.Objects;
 
-import esa.s1pdgs.cpoc.prip.model.PripMetadata;
-
 /**
  * Boolean filter for querying the persistence repository.
  */
@@ -33,7 +31,7 @@ public class PripBooleanFilter extends PripQueryFilter {
 				return EQUALS_NOT;
 			}
 
-			throw new IllegalArgumentException(String.format("boolean function not supported: %s", function));
+			throw new PripFilterOperatorException(String.format("boolean function not supported: %s", function));
 		}
 	}
 	
