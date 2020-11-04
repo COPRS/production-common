@@ -48,15 +48,11 @@ public class PripBooleanFilter extends PripQueryFilter {
 		super(fieldName);
 	}
 	
-	public PripBooleanFilter(PripMetadata.FIELD_NAMES fieldName) {
-		this(fieldName.fieldName());
-	}
-
-	public PripBooleanFilter(PripMetadata.FIELD_NAMES fieldName, Function function, Boolean value) {
+	public PripBooleanFilter(String fieldName, Function function, Boolean value) {
 		this(fieldName);
 
 		this.function = Objects.requireNonNull(function);
-		this.setValue(Objects.requireNonNull(value));
+		this.value = (Objects.requireNonNull(value));
 	}
 
 	// --------------------------------------------------------------------------

@@ -1,5 +1,6 @@
 package esa.s1pdgs.cpoc.prip.frontend.service.processor.visitor;
 
+import java.util.Collections;
 import java.util.List;
 
 import org.apache.olingo.commons.api.edm.EdmEnumType;
@@ -15,6 +16,15 @@ import org.apache.olingo.server.api.uri.queryoption.expression.MethodKind;
 import org.apache.olingo.server.api.uri.queryoption.expression.UnaryOperatorKind;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import esa.s1pdgs.cpoc.common.utils.DateUtils;
+import esa.s1pdgs.cpoc.prip.model.filter.PripBooleanFilter;
+import esa.s1pdgs.cpoc.prip.model.filter.PripDateTimeFilter;
+import esa.s1pdgs.cpoc.prip.model.filter.PripDoubleFilter;
+import esa.s1pdgs.cpoc.prip.model.filter.PripIntegerFilter;
+import esa.s1pdgs.cpoc.prip.model.filter.PripQueryFilter;
+import esa.s1pdgs.cpoc.prip.model.filter.PripRangeValueFilter;
+import esa.s1pdgs.cpoc.prip.model.filter.PripTextFilter;
 
 public class AttributesFilterVisitor implements ExpressionVisitor<Object> {
 
@@ -37,7 +47,6 @@ public class AttributesFilterVisitor implements ExpressionVisitor<Object> {
 		final String rightOperand = ProductsFilterVisitor.operandToString(right);
 		LOGGER.debug("got left operand: {} operator: {} right operand: {}", leftOperand, operator, rightOperand);
 		
-		
 		System.out.println(String.format("in converted: got left operand: %s operator: %s right operand: %s", leftOperand, operator, rightOperand));
 		
 		if ("att/Name".equals(leftOperand) && operator == BinaryOperatorKind.EQ) {
@@ -53,8 +62,40 @@ public class AttributesFilterVisitor implements ExpressionVisitor<Object> {
 			value = leftOperand;
 			op = operator;
 		}
+
+		final PripQueryFilter filter = this.buildFilter();
+		return (null != filter ? Collections.singletonList(filter) : Collections.emptyList());
+	}
 	
-		return null;
+	private PripQueryFilter buildFilter() {
+		// TODO je nach type einen geeigneten PripQueryFilter subtype zurückgeben, oder mehrere (List<PripQueryFilter>)
+		// TODO not all operators work for all types/filters; throw bad request?
+		PripQueryFilter filter = null;
+		switch (this.type) {
+		case "string":
+			filter = new PripTextFilter(this.fieldName, PripTextFilter.Function.fromString(this.op.name()), this.value);
+			break;
+		case "date":
+			filter = new PripDateTimeFilter(this.fieldName, PripRangeValueFilter.Operator.fromString(this.op.name()),
+					DateUtils.parse(this.value));
+			break;
+		case "long":
+			filter = new PripIntegerFilter(this.fieldName, PripRangeValueFilter.Operator.fromString(this.op.name()),
+					Long.valueOf(this.value));
+			break;
+		case "double":
+			filter = new PripDoubleFilter(this.fieldName, PripRangeValueFilter.Operator.fromString(this.op.name()),
+					Double.valueOf(this.value));
+			break;
+		case "boolean":
+			filter = new PripBooleanFilter(this.fieldName, PripBooleanFilter.Function.fromString(this.op.name()),
+					Boolean.valueOf(this.value));
+			break;
+		default:
+			break;
+		}
+
+		return filter;
 	}
 
 	@Override
