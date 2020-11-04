@@ -57,12 +57,12 @@ public class AttributesFilterVisitor implements ExpressionVisitor<Object> {
 		
 		String value = null;
 		
-		if ("att/Name".equals(leftOperand)) {
+		if ("att/Name".equals(leftOperand) && operator == BinaryOperatorKind.EQ) {
 			String fieldName = "attr_" + removeQuotes(rightOperand) + "_" + type;
 			if (!fieldNames.contains(fieldName)) {
 				fieldNames.add(fieldName);
 			}
-		} else if ("att/Name".equals(rightOperand)) {
+		} else if ("att/Name".equals(rightOperand) && operator == BinaryOperatorKind.EQ) {
 			String fieldName = "attr_" + removeQuotes(leftOperand)  + "_" + type;
 			if (!fieldNames.contains(fieldName)) {
 				fieldNames.add(fieldName);
@@ -102,7 +102,7 @@ public class AttributesFilterVisitor implements ExpressionVisitor<Object> {
 				break;
 			case "long":
 				filter = new PripIntegerFilter("placeholder", PripRangeValueFilter.Operator.fromString(op.name()),
-						Long.valueOf(value));
+						Long.valueOf(value)); Variable rename
 				break;
 			case "double":
 				filter = new PripDoubleFilter("placeholder", PripRangeValueFilter.Operator.fromString(op.name()),
