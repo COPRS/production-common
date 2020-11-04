@@ -264,7 +264,7 @@ public class ProductsFilterVisitor implements ExpressionVisitor<Object> {
 			Instant instant = Instant.ofEpochMilli(EdmDateTimeOffset.getInstance().valueOfString(datetime, false, 0, 1000, 0, false, Long.class));
 			return LocalDateTime.ofInstant(instant, ZoneOffset.UTC);
 		} catch (EdmPrimitiveTypeException e) {
-			throw new ExpressionVisitException("Invalid or unsupported operand");
+			throw new ExpressionVisitException("Invalid or unsupported date time operand: " + datetime);
 		}
 	}
 	

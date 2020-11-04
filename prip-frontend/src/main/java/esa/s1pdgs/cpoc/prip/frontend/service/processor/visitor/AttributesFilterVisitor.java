@@ -78,7 +78,7 @@ public class AttributesFilterVisitor implements ExpressionVisitor<Object> {
 		System.out.println("operator: " + this.op);
 		System.out.println("value: " + this.value);
 		
-		if (StringUtil.isNotEmpty(this.fieldName) && StringUtil.isNotEmpty(this.value) && StringUtil.isNotEmpty(this.value)) {
+		if (StringUtil.isNotEmpty(this.fieldName) && null != this.op && StringUtil.isNotEmpty(this.value)) {
 			final PripQueryFilter filter = this.buildFilter();
 			
 			if (null != filter && !this.filters.contains(filter)) {
@@ -94,10 +94,9 @@ public class AttributesFilterVisitor implements ExpressionVisitor<Object> {
 		return StringUtil.removeTrailing(StringUtil.removeLeading(str, "'", "\""), "'","\"");
 	}
 	
-	private PripQueryFilter buildFilter() {
+	private PripQueryFilter buildFilter() throws ExpressionVisitException {
 		System.out.println(String.format("build %s filter: %s %s %s", this.type, this.fieldName,
 				(null != this.op ? this.op.name() : null), this.value));
-		// TODO je nach type einen geeigneten PripQueryFilter subtype zurückgeben, oder mehrere (List<PripQueryFilter>)
 		// TODO not all operators work for all types/filters; throw bad request?
 		PripQueryFilter filter = null;
 		switch (this.type) {
@@ -106,7 +105,7 @@ public class AttributesFilterVisitor implements ExpressionVisitor<Object> {
 			break;
 		case "date":
 			filter = new PripDateTimeFilter(this.fieldName, PripRangeValueFilter.Operator.fromString(this.op.name()),
-					DateUtils.parse(this.value));
+					ProductsFilterVisitor.convertToLocalDateTime(this.value));
 			break;
 		case "long":
 			filter = new PripIntegerFilter(this.fieldName, PripRangeValueFilter.Operator.fromString(this.op.name()),
