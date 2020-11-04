@@ -102,7 +102,7 @@ public class AttributesFilterVisitor implements ExpressionVisitor<Object> {
 				break;
 			case "long":
 				filter = new PripIntegerFilter("placeholder", PripRangeValueFilter.Operator.fromString(op.name()),
-						Long.valueOf(value)); Variable rename
+						Long.valueOf(value));
 				break;
 			case "double":
 				filter = new PripDoubleFilter("placeholder", PripRangeValueFilter.Operator.fromString(op.name()),
