@@ -59,9 +59,9 @@ public class AttributesFilterVisitor implements ExpressionVisitor<Object> {
 		System.out.println(String.format("AttributesFilterVisitor.visitBinaryOperator: %s %s %s", leftOperand, operator, rightOperand));
 		
 		if ("att/Name".equals(leftOperand)) {
-			fieldName = "attr_" + rightOperand + "_" + type;
+			this.fieldName = "attr_" + removeQuotes(rightOperand) + "_" + type;
 		} else if ("att/Name".equals(rightOperand)) {
-			fieldName = "attr_" + leftOperand + "_" + type;
+			this.fieldName = "attr_" + removeQuotes(leftOperand)  + "_" + type;
 		}
 		
 		if ("att/Value".equals(leftOperand)) {
@@ -88,6 +88,10 @@ public class AttributesFilterVisitor implements ExpressionVisitor<Object> {
 		}
 
 		return null;
+	}
+	
+	private static String removeQuotes(String str) {
+		return StringUtil.removeTrailing(StringUtil.removeLeading(str, "'", "\""), "'","\"");
 	}
 	
 	private PripQueryFilter buildFilter() {
