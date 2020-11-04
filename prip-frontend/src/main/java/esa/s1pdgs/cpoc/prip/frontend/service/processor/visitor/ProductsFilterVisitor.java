@@ -21,7 +21,6 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 import org.apache.olingo.commons.api.edm.EdmEnumType;
-import org.apache.olingo.commons.api.edm.EdmNavigationProperty;
 import org.apache.olingo.commons.api.edm.EdmPrimitiveTypeException;
 import org.apache.olingo.commons.api.edm.EdmType;
 import org.apache.olingo.commons.api.http.HttpStatusCode;
@@ -198,15 +197,12 @@ public class ProductsFilterVisitor implements ExpressionVisitor<Object> {
 					case EdmProvider.ET_DATE_ATTRIBUTE_NAME: type = "date"; break;
 					default:
 				}
-				System.out.println("Type: " +  type);
 			} else if (uriResource instanceof UriResourceLambdaAny) {
 				final AttributesFilterVisitor filterExpressionVisitor = new AttributesFilterVisitor(type);
 				final UriResourceLambdaAny any = (UriResourceLambdaAny) uriResource;
 				any.getExpression().accept(filterExpressionVisitor);
 				final List<PripQueryFilter> filters = filterExpressionVisitor.getFilters();
 				this.queryFilters.addAll(filters);
-				
-				System.out.println("FILTERS TO ADD: " + filters);
 			} else if (uriResource instanceof UriResourceLambdaAll) {
 				throw new ODataApplicationException("Unsupported lambda expression on filter expression: all",
 						HttpStatusCode.BAD_REQUEST.getStatusCode(), Locale.ROOT);

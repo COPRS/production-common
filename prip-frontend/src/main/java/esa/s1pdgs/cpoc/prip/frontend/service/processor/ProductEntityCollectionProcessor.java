@@ -169,7 +169,6 @@ public class ProductEntityCollectionProcessor implements EntityCollectionProcess
 			} 
 			List<Entity> productList = entityCollection.getEntities();
 			for (PripMetadata pripMetadata : queryResult) {
-				// TODO @MSc: impl mapping from PripMetadata to OData/Olingo response
 				productList.add(MappingUtil.pripMetadataToEntity(pripMetadata, request.getRawBaseUri()));
 			}
 			

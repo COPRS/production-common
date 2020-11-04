@@ -84,8 +84,6 @@ public class AttributesFilterVisitor implements ExpressionVisitor<Object> {
 	}
 	
 	private PripQueryFilter buildFilter() throws ExpressionVisitException {
-		System.out.println(String.format("build %s filter: %s %s %s", this.type, this.fieldName,
-				(null != this.op ? this.op.name() : null), this.value));
 		PripQueryFilter filter = null;
 		try {
 			switch (this.type) {
