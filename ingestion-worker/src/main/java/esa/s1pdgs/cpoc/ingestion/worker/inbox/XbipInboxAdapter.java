@@ -41,7 +41,7 @@ public final class XbipInboxAdapter implements InboxAdapter {
 		return "XbipInboxAdapter";
 	}
 	
-	private final InboxAdapterEntry toInboxAdapterEntry(final Path parent, final XbipEntry entry, final InputStream in) {
+	private InboxAdapterEntry toInboxAdapterEntry(final Path parent, final XbipEntry entry, final InputStream in) {
 		final Path thisPath = Paths.get(entry.getUri().getPath());		
 		return new InboxAdapterEntry(parent.relativize(thisPath).toString(), in, entry.getSize());
 	}

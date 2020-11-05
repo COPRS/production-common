@@ -16,12 +16,13 @@ import org.apache.logging.log4j.Logger;
 import com.github.sardine.DavResource;
 import com.github.sardine.Sardine;
 
+import esa.s1pdgs.cpoc.common.utils.Retries;
 import esa.s1pdgs.cpoc.xbip.client.XbipClient;
 import esa.s1pdgs.cpoc.xbip.client.XbipEntry;
 import esa.s1pdgs.cpoc.xbip.client.XbipEntryFilter;
 import esa.s1pdgs.cpoc.xbip.client.XbipEntryImpl;
 
-public class SardineXbipClient implements XbipClient {		
+public class SardineXbipClient implements XbipClient {
 	static final Logger LOG = LogManager.getLogger(SardineXbipClient.class);
 			
 	private final Sardine sardine;
@@ -42,11 +43,20 @@ public class SardineXbipClient implements XbipClient {
 			LOG.debug("Performing programmatic recursion on {}", url);
 			return listAllRecursively(url.toString(), filter);
 		}
-		return sardine.list(url.toString(), -1).stream()
-				.filter(r -> !r.isDirectory())
-				.map(r -> toXbipEntry(r))
-				.filter(e -> filter.accept(e))
-				.collect(Collectors.toList());
+		try {
+			return Retries.performWithRetries(
+					() -> sardine.list(url.toString(), -1).stream()
+							.filter(r -> !r.isDirectory())
+							.map(this::toXbipEntry)
+							.filter(filter::accept)
+							.collect(Collectors.toList()),
+					"list",
+					5,
+					3000);
+		} catch (InterruptedException e) {
+			LOG.error("retries interrupted");
+			throw new RuntimeException(e);
+		}
 	}
 
 	@Override
@@ -61,7 +71,7 @@ public class SardineXbipClient implements XbipClient {
 		}
 	}
 	
-	private final XbipEntry toXbipEntry(final DavResource davResource) {			
+	private XbipEntry toXbipEntry(final DavResource davResource) {
 		return new XbipEntryImpl(
 				davResource.getName(), 
 				Paths.get(davResource.getPath()), 
@@ -71,7 +81,7 @@ public class SardineXbipClient implements XbipClient {
 		);
 	}
 	
-	private final URI toUri(final DavResource davResource) {
+	private URI toUri(final DavResource davResource) {
 		// ok, some servers (like our test server) only return the absolute path as an URI.
 		// So this is a workaround to fix such conditions
 		if (!davResource.getHref().toString().startsWith(url.toString())) {
@@ -90,9 +100,9 @@ public class SardineXbipClient implements XbipClient {
 	}
 	
 	// S1PRO-1847: Programmatic server tree traversal
-	private final List<XbipEntry> listAllRecursively(final String url, final XbipEntryFilter filter) throws IOException {
+	private List<XbipEntry> listAllRecursively(final String url, final XbipEntryFilter filter) throws IOException {
 		final List<XbipEntry> result = new ArrayList<>();
-		for (final DavResource davResource : sardine.list(url.toString(), 1)) {
+		for (final DavResource davResource : sardine.list(url, 1)) {
 			// ignore hidden files (like PIC)
 			if (davResource.getName().startsWith(".")) {
 				LOG.trace("Ignoring hidden {}", davResource.getName());
