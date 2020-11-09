@@ -425,7 +425,7 @@ public class S3ObsServices {
 		try {
 			in = new FileInputStream(uploadFile);
 			return uploadStream(bucketName, keyName, in, uploadFile.length());
-		} catch (FileNotFoundException e) {
+		} catch (final FileNotFoundException e) {
 			throw new S3SdkClientException(bucketName, keyName, "could not create input stream for file "+ uploadFile, e);
 		} finally {
 			IOUtils.closeQuietly(in, null);
@@ -476,7 +476,7 @@ public class S3ObsServices {
 						final UploadResult result = upload.waitForUploadResult();
 						log(format("Upload object %s in bucket %s succeeded", keyName, bucketName));
 
-						return new Md5.Entry(md5Of(digestInputStream), result.getETag(), keyName);
+						return new Md5.Entry(md5Of(digestInputStream.getMessageDigest()), result.getETag(), keyName);
 					} catch (final InterruptedException e) {
 						throw new S3ObsServiceException(bucketName, keyName,
 								"Upload fails: interrupted during waiting multipart upload completion", e);
@@ -503,7 +503,7 @@ public class S3ObsServices {
 						throw new S3SdkClientException(bucketName, keyName,
 								format("Upload fails: %s", sce.getMessage()), sce);
 					}
-				} catch (NoSuchAlgorithmException e) {
+				} catch (final NoSuchAlgorithmException e) {
 					//thrown by MessageDigest.getInstance("MD5"), which should not happen
 					throw new S3SdkClientException(bucketName, keyName,
 							format("Upload fails: %s", e.getMessage()), e);
@@ -512,10 +512,8 @@ public class S3ObsServices {
 		}
 	}
 
-	private String md5Of(DigestInputStream digestInputStream) {
-		final MessageDigest messageDigest = digestInputStream.getMessageDigest();
+	private String md5Of(final MessageDigest messageDigest) {
 		final byte[] hash = messageDigest.digest();
-
 		return new BigInteger(1, hash).toString(16);
 	}
 
@@ -548,7 +546,7 @@ public class S3ObsServices {
 		s3client.setBucketLifecycleConfiguration(new SetBucketLifecycleConfigurationRequest(bucketName, lifecycleConfiguration));
 	}
 
-	public ObjectMetadata getObjectMetadata(String bucketName, String key) {
+	public ObjectMetadata getObjectMetadata(final String bucketName, final String key) {
 		return s3client.getObjectMetadata(bucketName, key);
 	}
 

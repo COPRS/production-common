@@ -46,7 +46,7 @@ public class TestProductServiceImpl {
 	@Before
 	public void setup() {
 		MockitoAnnotations.initMocks(this);
-		uut = new ProductServiceImpl(obsClient);
+		uut = new ProductServiceImpl(obsClient, true);
 		
 		doReturn(false).when(nonExistentFile).exists();
 		doReturn(false).when(nonExistentFile).canRead();
