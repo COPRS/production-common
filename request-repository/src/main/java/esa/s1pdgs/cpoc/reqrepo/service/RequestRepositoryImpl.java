@@ -33,7 +33,7 @@ public class RequestRepositoryImpl implements RequestRepository {
 	public RequestRepositoryImpl(
 			final MqiMessageRepo mqiMessageRepository,
 			final FailedProcessingRepo failedProcessingRepo,
-			MessageProducer<Object> messageProducer,
+			final MessageProducer<Object> messageProducer,
 			final AppStatus status
 	) {
 		this.mqiMessageRepository = mqiMessageRepository;
@@ -45,18 +45,19 @@ public class RequestRepositoryImpl implements RequestRepository {
 	@Override
 	public synchronized void saveFailedProcessing(final FailedProcessingDto failedProcessingDto) {
 		final GenericMessageDto<?> dto = failedProcessingDto.getProcessingDetails();
-		final MqiMessage message = mqiMessageRepository.findById(dto.getId());
-		assertNotNull("original request", message, dto.getId());
 		
-		String predecessorTopic = null;
-		if(failedProcessingDto.getPredecessor() != null) {
-			final MqiMessage predecessorMessage = mqiMessageRepository.findById(failedProcessingDto.getPredecessor().getId());
-			assertNotNull("predecessor request", predecessorMessage, failedProcessingDto.getPredecessor().getId());
-			predecessorTopic = predecessorMessage.getTopic();
-		}
-		failedProcessingRepo.save(FailedProcessing.valueOf(message, failedProcessingDto, predecessorTopic));
-	}
+		final MqiMessage message = mqiMessageRepository.findById(dto.getId());		
+		final FailedProcessingFactory factory = new FailedProcessingFactory(failedProcessingDto)
+				.message(message);
 
+		if (failedProcessingDto.getPredecessor() != null) {
+			final MqiMessage predecessorMessage = mqiMessageRepository.findById(failedProcessingDto.getPredecessor().getId());
+			factory.predecessorMessage(predecessorMessage);
+		}
+		final FailedProcessing failedProcessing = factory.newFailedProcessing();		
+		failedProcessingRepo.save(failedProcessing);
+	}
+	
 	@Override
 	public List<FailedProcessing> getFailedProcessings() {
 		return failedProcessingRepo.findAll(Sort.by(Direction.ASC, "creationTime"));
@@ -88,7 +89,7 @@ public class RequestRepositoryImpl implements RequestRepository {
 	}
 	
 	@Override
-	public void reevaluateAndDeleteFailedProcessing(long id) {
+	public void reevaluateAndDeleteFailedProcessing(final long id) {
 		final FailedProcessing failedProcessing = failedProcessingRepo.findById(id);
 		assertNotNull("failed request", failedProcessing, id);
 		assertPredecessorDefined(id, failedProcessing);
@@ -142,7 +143,7 @@ public class RequestRepositoryImpl implements RequestRepository {
 		return mqiMessageRepository.countByStateInAndTopicIn(states, topics);
 	}
 
-	private void resubmit(long id, String predecessorTopic, Object predecessorDto, AppStatus status) {
+	private void resubmit(final long id, final String predecessorTopic, final Object predecessorDto, final AppStatus status) {
 		try {
 			messageProducer.send(predecessorTopic, predecessorDto);
 		} catch (final Exception e) {
