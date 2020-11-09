@@ -14,6 +14,8 @@ public class SearchMetadata extends AbstractMetadata {
 
 	private List<List<Double>> footprint;
 	
+	private String insertionTime;
+	
 	/**
 	 * Constructor using fields
 	 * 
@@ -41,8 +43,16 @@ public class SearchMetadata extends AbstractMetadata {
 		return footprint;
 	}
 
-	public void setFootprint(final List<List<Double>> footprint) {
+	public void setFootprint(List<List<Double>> footprint) {
 		this.footprint = footprint;
+	}
+
+	public String getInsertionTime() {
+		return insertionTime;
+	}
+
+	public void setInsertionTime(String insertionTime) {
+		this.insertionTime = insertionTime;
 	}
 
 	public String toJsonString() {
@@ -50,30 +60,33 @@ public class SearchMetadata extends AbstractMetadata {
 	}
 
 	@Override
-	public boolean equals(final Object o) {
-		if (this == o) return true;
-		if (o == null || getClass() != o.getClass()) return false;
-		if (!super.equals(o)) return false;
-		final SearchMetadata metadata = (SearchMetadata) o;
-		return Objects.equals(footprint, metadata.footprint);
+	public int hashCode() {
+		final int prime = 31;
+		int result = super.hashCode();
+		result = prime * result + Objects.hash(footprint, insertionTime);
+		return result;
 	}
 
 	@Override
-	public int hashCode() {
-		return Objects.hash(super.hashCode(), footprint);
+	public boolean equals(Object obj) {
+		if (this == obj) {
+			return true;
+		}
+		if (!super.equals(obj)) {
+			return false;
+		}
+		if (!(obj instanceof SearchMetadata)) {
+			return false;
+		}
+		SearchMetadata other = (SearchMetadata) obj;
+		return Objects.equals(footprint, other.footprint) && Objects.equals(insertionTime, other.insertionTime);
 	}
-
-	/**
-	 * @see java.lang.Object#hashCode()
-	 */
-
-
 
 	@Override
 	public String toString() {
-		return "SearchMetadata [productName=" + productName + ", productType=" + productType + ", keyObjectStorage="
-				+ keyObjectStorage + ", validityStart=" + validityStart + ", validityStop=" + validityStop
-				+ ", missionId=" + missionId + ", satelliteId=" + satelliteId + ", stationCode=" + stationCode + 
-				", footprint=" + footprint + ", addProps=" + additionalProperties + "]";
+		return "SearchMetadata [footprint=" + footprint + ", insertionTime=" + insertionTime + ", productName="
+				+ productName + ", productType=" + productType + ", keyObjectStorage=" + keyObjectStorage
+				+ ", validityStart=" + validityStart + ", validityStop=" + validityStop + ", missionId=" + missionId
+				+ ", satelliteId=" + satelliteId + ", stationCode=" + stationCode + ", swathtype=" + swathtype + "]";
 	}
 }

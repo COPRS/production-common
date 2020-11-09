@@ -1283,6 +1283,74 @@ public class EsServices {
 
 		return null;
 	}
+	
+	/**
+	 * Searches for matchings products with an insertionTime inside the given
+	 * interval (lower bound not included), and matching productFamily and productType
+	 */
+	public List<SearchMetadata> intervalTypeQuery(final String startTime, final String stopTime,
+			final ProductFamily productFamily, final String productType, final String satelliteId) throws Exception {
+		final SearchSourceBuilder sourceBuilder = new SearchSourceBuilder();
+		final BoolQueryBuilder queryBuilder = QueryBuilders.boolQuery().must(QueryBuilders
+				.rangeQuery("insertionTime").from(startTime, false).to(stopTime))
+				.must(QueryBuilders.termQuery("satelliteId.keyword", satelliteId))
+				.must(QueryBuilders.regexpQuery("productType.keyword", productType));
+
+		LOGGER.debug("query composed is {}", queryBuilder);
+
+		sourceBuilder.query(queryBuilder);
+		sourceBuilder.size(SIZE_LIMIT);
+		sourceBuilder.sort(new FieldSortBuilder("insertionTime").order(SortOrder.ASC));
+
+		final String index = getIndexForProductFamily(productFamily, productType);
+		final SearchRequest searchRequest = new SearchRequest(index);
+		searchRequest.source(sourceBuilder);
+
+		try {
+			final SearchResponse searchResponse = elasticsearchDAO.search(searchRequest);
+			if (this.isNotEmpty(searchResponse)) {
+				final List<SearchMetadata> r = new ArrayList<>();
+				for (final SearchHit hit : searchResponse.getHits().getHits()) {
+					final Map<String, Object> source = hit.getSourceAsMap();
+					final SearchMetadata local = new SearchMetadata();
+					local.setProductName(source.get("productName").toString());
+					local.setProductType(source.get("productType").toString());
+					local.setMissionId(source.get("missionId").toString());
+					local.setKeyObjectStorage(source.get("url").toString());
+					if (source.containsKey("startTime")) {
+						try {
+							local.setValidityStart(
+									DateUtils.convertToMetadataDateTimeFormat(source.get("startTime").toString()));
+						} catch (final DateTimeParseException e) {
+							throw new MetadataMalformedException("startTime");
+						}
+					}
+					if (source.containsKey("stopTime")) {
+						try {
+							local.setValidityStop(
+									DateUtils.convertToMetadataDateTimeFormat(source.get("stopTime").toString()));
+						} catch (final DateTimeParseException e) {
+							throw new MetadataMalformedException("stopTime");
+						}
+					}
+					if (source.containsKey("insertionTime")) {
+						try {
+							local.setInsertionTime(
+									DateUtils.convertToMetadataDateTimeFormat(source.get("insertionTime").toString()));
+						} catch (final DateTimeParseException e) {
+							throw new MetadataMalformedException("insertionTime");
+						}
+					}
+					r.add(local);
+				}
+				return r;
+			}
+		} catch (final IOException e) {
+			throw new Exception(e.getMessage());
+		}
+
+		return null;
+	}
 
 	public AuxMetadata auxiliaryQuery(final String searchProductType, final String searchProductName) throws IOException, MetadataNotPresentException, MetadataMalformedException {
 
