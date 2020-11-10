@@ -3,8 +3,6 @@ package esa.s1pdgs.cpoc.errorrepo.model.rest;
 import java.util.Date;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
-import com.fasterxml.jackson.annotation.JsonInclude;
-import com.fasterxml.jackson.annotation.JsonInclude.Include;
 
 import esa.s1pdgs.cpoc.mqi.model.rest.GenericMessageDto;
 
@@ -12,7 +10,6 @@ import esa.s1pdgs.cpoc.mqi.model.rest.GenericMessageDto;
  * @author birol_colak@net.werum
  *
  */
-@JsonInclude(Include.NON_NULL)
 public class FailedProcessingDto {    
 	private String failedPod;
 	private Date failedDate;
