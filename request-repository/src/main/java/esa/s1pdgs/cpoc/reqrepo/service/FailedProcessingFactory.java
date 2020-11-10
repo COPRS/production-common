@@ -10,6 +10,7 @@ import esa.s1pdgs.cpoc.appcatalog.common.MqiMessage;
 import esa.s1pdgs.cpoc.common.MessageState;
 import esa.s1pdgs.cpoc.common.ProductCategory;
 import esa.s1pdgs.cpoc.errorrepo.model.rest.FailedProcessingDto;
+import esa.s1pdgs.cpoc.mqi.model.queue.AbstractMessage;
 import esa.s1pdgs.cpoc.mqi.model.rest.GenericMessageDto;
 
 final class FailedProcessingFactory
@@ -34,13 +35,13 @@ final class FailedProcessingFactory
 	private ProductCategory category = ProductCategory.UNDEFINED;
 	private int partition = -1;
 	private long offset = -1;
-	private String group = "UNKNOWN";
+	private String group = AbstractMessage.NOT_DEFINED;
 	private MessageState state = MessageState.ACK_KO;
-	private String sendingPod= "UNKNOWN";
-	private Date lastSendDate= new Date(0L);
-	private Date lastAckDate= new Date(0L);
-	private Date creationDate= new Date(0L);
-	private Date lastAssignmentDate= new Date(0L);
+	private String sendingPod = AbstractMessage.NOT_DEFINED;
+	private Date lastSendDate = new Date(0L);
+	private Date lastAckDate = new Date(0L);
+	private Date creationDate = new Date(0L);
+	private Date lastAssignmentDate = new Date(0L);
 	private int nbRetries = -1;
 	
 	public FailedProcessingFactory(final FailedProcessingDto failedProc) {

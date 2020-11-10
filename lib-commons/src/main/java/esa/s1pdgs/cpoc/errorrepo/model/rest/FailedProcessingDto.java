@@ -3,6 +3,8 @@ package esa.s1pdgs.cpoc.errorrepo.model.rest;
 import java.util.Date;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonInclude.Include;
 
 import esa.s1pdgs.cpoc.mqi.model.rest.GenericMessageDto;
 
@@ -10,6 +12,7 @@ import esa.s1pdgs.cpoc.mqi.model.rest.GenericMessageDto;
  * @author birol_colak@net.werum
  *
  */
+@JsonInclude(Include.NON_NULL)
 public class FailedProcessingDto {    
 	private String failedPod;
 	private Date failedDate;
@@ -20,8 +23,8 @@ public class FailedProcessingDto {
 	public FailedProcessingDto() {
 	}
 
-	public FailedProcessingDto(String failedPod, Date failedDate, String failureMessage,
-			GenericMessageDto<?> processingDetails) {
+	public FailedProcessingDto(final String failedPod, final Date failedDate, final String failureMessage,
+			final GenericMessageDto<?> processingDetails) {
 		super();
 		this.failedPod = failedPod;
 		this.failedDate = failedDate;
@@ -33,7 +36,7 @@ public class FailedProcessingDto {
 		return failedPod;
 	}
 
-	public void setFailedPod(String failedPod) {
+	public void setFailedPod(final String failedPod) {
 		this.failedPod = failedPod;
 	}
 
@@ -42,7 +45,7 @@ public class FailedProcessingDto {
 		return failedDate;
 	}
 
-	public void setFailedDate(Date failedDate) {
+	public void setFailedDate(final Date failedDate) {
 		this.failedDate = failedDate;
 	}
 
@@ -50,7 +53,7 @@ public class FailedProcessingDto {
 		return failureMessage;
 	}
 
-	public void setFailureMessage(String failureMessage) {
+	public void setFailureMessage(final String failureMessage) {
 		this.failureMessage = failureMessage;
 	}
 
@@ -58,7 +61,7 @@ public class FailedProcessingDto {
 		return processingDetails;
 	}
 
-	public void setProcessingDetails(GenericMessageDto<?> processingDetails) {
+	public void setProcessingDetails(final GenericMessageDto<?> processingDetails) {
 		this.processingDetails = processingDetails;
 	}
 
@@ -66,7 +69,7 @@ public class FailedProcessingDto {
 		return predecessor;
 	}
 
-	public void setPredecessor(GenericMessageDto<?> predecessor) {
+	public void setPredecessor(final GenericMessageDto<?> predecessor) {
 		this.predecessor = predecessor;
 	}
 
