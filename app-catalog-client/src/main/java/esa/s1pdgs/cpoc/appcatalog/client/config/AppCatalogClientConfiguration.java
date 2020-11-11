@@ -29,6 +29,7 @@ public class AppCatalogClientConfiguration {
 		this.properties = properties;
 		this.restTemplate = restTemplateBuilder
 				.setConnectTimeout(Duration.ofMillis(properties.getTmConnectMs()))
+				.setReadTimeout(Duration.ofMillis(properties.getTmReadMs()))
 				.build();
 	}
 	
