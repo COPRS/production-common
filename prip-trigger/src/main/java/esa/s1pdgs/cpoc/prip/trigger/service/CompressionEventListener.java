@@ -23,6 +23,7 @@ import esa.s1pdgs.cpoc.mqi.client.MqiConsumer;
 import esa.s1pdgs.cpoc.mqi.client.MqiListener;
 import esa.s1pdgs.cpoc.mqi.client.MqiMessageEventHandler;
 import esa.s1pdgs.cpoc.mqi.client.MqiPublishingJob;
+import esa.s1pdgs.cpoc.mqi.model.queue.CompressionDirection;
 import esa.s1pdgs.cpoc.mqi.model.queue.CompressionEvent;
 import esa.s1pdgs.cpoc.mqi.model.queue.PripPublishingJob;
 import esa.s1pdgs.cpoc.mqi.model.rest.GenericMessageDto;
@@ -75,6 +76,10 @@ public class CompressionEventListener implements MqiListener<CompressionEvent> {
 	public MqiMessageEventHandler onMessage(final GenericMessageDto<CompressionEvent> inputMessage) throws AbstractCodedException {
 		LOGGER.debug("starting conversion of CompressionEvent to PublishingJob, got message: {}", inputMessage);		
 		final CompressionEvent compressionEvent = inputMessage.getBody();
+		
+		if (compressionEvent.getCompressionDirection() == CompressionDirection.UNCOMPRESS) {
+			compressionEvent.convertForPublishingCompressed();
+		}
 		
 		final Reporting reporting = ReportingUtils.newReportingBuilder()
 				.predecessor(compressionEvent.getUid())
