@@ -3,6 +3,7 @@ package esa.s1pdgs.cpoc.obs_sdk.s3;
 import static java.lang.String.format;
 
 import java.io.BufferedInputStream;
+import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -94,7 +95,8 @@ public class S3ObsClient extends AbstractObsClient {
 //					config.getMaxRetries(), true);
 //			clientConfig.setRetryPolicy(retryPolicy);
 			
-			final AmazonS3ClientBuilder clientBuilder = AmazonS3ClientBuilder.standard().withClientConfiguration(clientConfig)
+			final AmazonS3ClientBuilder clientBuilder = AmazonS3ClientBuilder.standard()
+					.withClientConfiguration(clientConfig)
 					.withEndpointConfiguration(
 							new EndpointConfiguration(config.getEndpoint(), config.getEndpointRegion()))
 					.withCredentials(new AWSStaticCredentialsProvider(awsCreds))
@@ -104,16 +106,20 @@ public class S3ObsClient extends AbstractObsClient {
 			if (config.getDisableChunkedEncoding()) {
 				clientBuilder.disableChunkedEncoding();
 			}
-			
 			final AmazonS3 client = clientBuilder.build();
-
+			
 			final TransferManager manager = TransferManagerBuilder.standard()
 					.withMinimumUploadPartSize(config.getMinUploadPartSize() * 1024 * 1024)
 					.withMultipartUploadThreshold(config.getMultipartUploadThreshold() * 1024 * 1024)
-					.withS3Client(client).build();
+					.withS3Client(client)
+					.build();
 
-			final S3ObsServices s3Services = new S3ObsServices(client, manager, config.getMaxObsRetries(),
+			final S3ObsServices s3Services = new S3ObsServices(
+					client,
+					manager,
+					config.getMaxObsRetries(),
 					config.getBackoffThrottledBaseDelay());
+			
 			return new S3ObsClient(config, s3Services, factory);
 		}
 	}
@@ -183,8 +189,10 @@ public class S3ObsClient extends AbstractObsClient {
 	 * The awsClient however is able to handle this with {@link FileInputStream} input
 	 */
 	private InputStream maybeWithBuffer(final StreamObsUploadObject object) throws ObsServiceException {
-		if (getConfiguration().getDisableChunkedEncoding() && !(object.getInput() instanceof FileInputStream)) {
-
+		if (getConfiguration().getDisableChunkedEncoding() && 
+				!(object.getInput() instanceof FileInputStream) && // don't apply if product is in local filesystem
+				!(object.getInput() instanceof ByteArrayInputStream) // don't cache twice
+		) {
 			if (object.getContentLength() > getConfiguration().getMaxInputStreamBufferSize()) {
 				throw new S3ObsServiceException(getBucketFor(object.getFamily()),
 						object.getKey(),
@@ -192,10 +200,8 @@ public class S3ObsClient extends AbstractObsClient {
 								object.getContentLength(),
 								getConfiguration().getMaxInputStreamBufferSize()));
 			}
-
 			return new BufferedInputStream(object.getInput(), (int) object.getContentLength() + ADDITIONAL_BUFFER);
 		}
-
 		return object.getInput();
 	}
 
@@ -293,7 +299,7 @@ public class S3ObsClient extends AbstractObsClient {
 	}
 
 	@Override
-	public List<String> list(ProductFamily family, String keyPrefix) throws SdkClientException {
+	public List<String> list(final ProductFamily family, final String keyPrefix) throws SdkClientException {
 		ValidArgumentAssertion.assertValidArgument(family);
 		ValidArgumentAssertion.assertValidPrefixArgument(keyPrefix);
 		final String bucket = getBucketFor(family);
@@ -305,7 +311,7 @@ public class S3ObsClient extends AbstractObsClient {
 	}
 
 	@Override
-	public InputStream getAsStream(ProductFamily family, String key) throws SdkClientException {
+	public InputStream getAsStream(final ProductFamily family, final String key) throws SdkClientException {
 		ValidArgumentAssertion.assertValidArgument(family);
 		ValidArgumentAssertion.assertValidPrefixArgument(key);
 		final String bucket = getBucketFor(family);
@@ -345,12 +351,12 @@ public class S3ObsClient extends AbstractObsClient {
 	}
 	
 	@Override
-	public void setExpirationTime(ObsObject object, Instant expirationTime) throws ObsServiceException {
+	public void setExpirationTime(final ObsObject object, final Instant expirationTime) throws ObsServiceException {
 		s3Services.setExpirationTime(getBucketFor(object.getFamily()), object.getKey(), expirationTime);
 	}
 
 	@Override
-	public ObsObjectMetadata getMetadata(ObsObject object) throws ObsServiceException {
+	public ObsObjectMetadata getMetadata(final ObsObject object) throws ObsServiceException {
 		final ObjectMetadata metadata = s3Services.getObjectMetadata(getBucketFor(object.getFamily()), object.getKey());
 		return new ObsObjectMetadata(object.getKey(), metadata.getLastModified().toInstant());
 	}

@@ -10,6 +10,7 @@ public class IngestionWorkerServiceConfigurationProperties {
 	private int maxRetries = 2;	
 	private long tempoRetryMs = 100;
 	private String hostname = "localhost";
+	private boolean bufferInputs = false;
 	
 	public long getPollingIntervalMs() {
 		return pollingIntervalMs;
@@ -42,4 +43,12 @@ public class IngestionWorkerServiceConfigurationProperties {
 	public void setTempoRetryMs(final long tempoRetryMs) {
 		this.tempoRetryMs = tempoRetryMs;
 	}
+
+	public boolean isBufferInputs() {
+		return bufferInputs;
+	}
+
+	public void setBufferInputs(final boolean bufferInputs) {
+		this.bufferInputs = bufferInputs;
+	}	
 }
