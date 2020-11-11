@@ -1,5 +1,8 @@
 package esa.s1pdgs.cpoc.mqi.model.queue;
 
+import static esa.s1pdgs.cpoc.mqi.model.queue.util.CompressionEventUtil.composeCompressedKeyObjectStorage;
+import static esa.s1pdgs.cpoc.mqi.model.queue.util.CompressionEventUtil.composeCompressedProductFamily;
+
 import java.util.Arrays;
 import java.util.Objects;
 
@@ -19,6 +22,10 @@ public class CompressionEvent extends AbstractMessage {
 		super(productFamily, keyObjectStorage);
 		this.compressionDirection = compressionDirection;
 		setAllowedActions(Arrays.asList(AllowedAction.RESUBMIT));
+	}
+	
+	public CompressionDirection getCompressionDirection() {
+		return this.compressionDirection;
 	}
 
 	@Override
@@ -56,5 +63,10 @@ public class CompressionEvent extends AbstractMessage {
 		return "CompressionEvent [productFamily=" + productFamily + ", keyObjectStorage=" + keyObjectStorage
 				+ ", creationDate=" + creationDate + ", hostname=" + hostname + ", uid=" + uid + ", compressionDirection="
 						+ compressionDirection +"]";
+	}
+
+	public void convertForPublishingCompressed() {
+		this.setKeyObjectStorage(composeCompressedKeyObjectStorage(this.getKeyObjectStorage()));
+		this.setProductFamily(composeCompressedProductFamily(this.getProductFamily()));
 	}
 }
