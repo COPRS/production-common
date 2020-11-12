@@ -56,18 +56,13 @@ public final class LocalOutboxClient extends AbstractOutboxClient {
 		
 		if (!Strings.isEmpty(config.getChmodScriptPath())) {
 			logger.debug("Executing chmod script {} for {}", config.getChmodScriptPath(), nameWithDot);
-			executeChmodScript(path.toFile());
+			Process process = new ProcessBuilder(config.getChmodScriptPath(), nameWithDot.toFile().getAbsolutePath()).start();
+			process.waitFor();
 		}
 		
 		logger.debug("Moving {} to {}", nameWithDot, finalName);
 		Files.move(nameWithDot, finalName,
 				StandardCopyOption.ATOMIC_MOVE);
 		return path.toString();
-	}
-	
-	private void executeChmodScript(final File file) throws Exception {
-		final String filePath = file.getAbsolutePath().replace(" ", "\\ ");
-		Process process = new ProcessBuilder(config.getChmodScriptPath(), filePath).start();
-		process.waitFor();
 	}
 }
