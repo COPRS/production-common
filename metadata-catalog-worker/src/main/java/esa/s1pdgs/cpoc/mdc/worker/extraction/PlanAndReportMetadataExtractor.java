@@ -1,5 +1,8 @@
 package esa.s1pdgs.cpoc.mdc.worker.extraction;
 
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
 import org.json.JSONObject;
 
 import esa.s1pdgs.cpoc.common.errors.AbstractCodedException;
@@ -13,6 +16,9 @@ import esa.s1pdgs.cpoc.obs_sdk.ObsClient;
 import esa.s1pdgs.cpoc.report.ReportingFactory;
 
 public class PlanAndReportMetadataExtractor extends AbstractMetadataExtractor {
+	
+	// TODO S1PRO-2155: Externalize pattern configuration or rewrite existing pattern in configuration to have (possibly empty) mission ID group
+	private final static Pattern pattern = Pattern.compile("^([a-z][0-9])[0-9a-z_]_.*$", Pattern.CASE_INSENSITIVE);
 	
 	public PlanAndReportMetadataExtractor(
 			final EsServices esServices, 
@@ -28,12 +34,20 @@ public class PlanAndReportMetadataExtractor extends AbstractMetadataExtractor {
 	@Override
 	public JSONObject extract(ReportingFactory reportingFactory, GenericMessageDto<CatalogJob> message)
 			throws AbstractCodedException {
-		JSONObject metadata = new JSONObject();
+		JSONObject metadata = new JSONObject();		
 		metadata.put("productFamily", message.getBody().getProductFamily().name());
 		metadata.put("productName", message.getBody().getProductName());
 		metadata.put("productType", message.getBody().getProductFamily().name());
 		metadata.put("insertionTime", message.getBody().getCreationDate());
 		metadata.put("url", message.getBody().getKeyObjectStorage());
+		
+		Matcher matcher = pattern.matcher(message.getBody().getProductName());
+		if (matcher.matches()) {
+			metadata.put("missionId", matcher.group(1));			
+		} else {
+			// FIXME S1PRO-2155: handle case where missionId is not present
+		}
+		
 		return metadata;
 	}
 
