@@ -180,7 +180,7 @@ public class DisseminationProperties {
 			return chmodScriptPath;
 		}
 
-		public void setChmodScript(String chmodScriptPath) {
+		public void setChmodScriptPath(String chmodScriptPath) {
 			this.chmodScriptPath = chmodScriptPath;
 		}
 
