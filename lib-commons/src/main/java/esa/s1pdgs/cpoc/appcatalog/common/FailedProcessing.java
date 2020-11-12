@@ -7,15 +7,12 @@ import java.util.Objects;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonInclude;
-import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 import esa.s1pdgs.cpoc.common.MessageState;
 import esa.s1pdgs.cpoc.common.ProductCategory;
 import esa.s1pdgs.cpoc.errorrepo.model.rest.FailedProcessingDto;
 
-@JsonInclude(Include.NON_NULL)
 public class FailedProcessing extends AbstractRequest {
 	private static class AscendingCreationTimeComparator implements Comparator<FailedProcessing>, Serializable {
 		private static final long serialVersionUID = 1191382370884793376L;
