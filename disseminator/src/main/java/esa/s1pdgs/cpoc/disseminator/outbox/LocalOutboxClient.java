@@ -10,6 +10,7 @@ import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
 
 import org.apache.commons.io.IOUtils;
+import org.apache.logging.log4j.util.Strings;
 
 import esa.s1pdgs.cpoc.disseminator.config.DisseminationProperties.OutboxConfiguration;
 import esa.s1pdgs.cpoc.disseminator.path.PathEvaluater;
@@ -17,7 +18,7 @@ import esa.s1pdgs.cpoc.obs_sdk.ObsClient;
 import esa.s1pdgs.cpoc.obs_sdk.ObsObject;
 import esa.s1pdgs.cpoc.report.ReportingFactory;
 
-public final class LocalOutboxClient extends AbstractOutboxClient {	
+public final class LocalOutboxClient extends AbstractOutboxClient {
 	public static final class Factory implements OutboxClient.Factory {
 		@Override
 		public OutboxClient newClient(final ObsClient obsClient, final OutboxConfiguration config, final PathEvaluater eval) {
@@ -53,9 +54,20 @@ public final class LocalOutboxClient extends AbstractOutboxClient {
 		}
 		final Path nameWithDot = path.resolve("." + obsObject.getKey());
 		
+		if (!Strings.isEmpty(config.getChmodScriptPath())) {
+			logger.debug("Executing chmod script {} for {}", config.getChmodScriptPath(), nameWithDot);
+			executeChmodScript(path.toFile());
+		}
+		
 		logger.debug("Moving {} to {}", nameWithDot, finalName);
 		Files.move(nameWithDot, finalName,
 				StandardCopyOption.ATOMIC_MOVE);
 		return path.toString();
+	}
+	
+	private void executeChmodScript(final File file) throws Exception {
+		final String filePath = file.getAbsolutePath().replace(" ", "\\ ");
+		Process process = new ProcessBuilder(config.getChmodScriptPath(), filePath).start();
+		process.waitFor();
 	}
 }

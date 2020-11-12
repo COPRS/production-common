@@ -1,19 +1,18 @@
 package esa.s1pdgs.cpoc.prip.worker.service;
 
+import static esa.s1pdgs.cpoc.mqi.model.queue.util.CompressionEventUtil.removeZipSuffix;
+
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.UUID;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import java.util.regex.Pattern;
 
 import javax.annotation.PostConstruct;
 
@@ -52,8 +51,6 @@ import esa.s1pdgs.cpoc.prip.model.GeoShapePolygon;
 import esa.s1pdgs.cpoc.prip.model.PripGeoCoordinate;
 import esa.s1pdgs.cpoc.prip.model.PripMetadata;
 import esa.s1pdgs.cpoc.prip.worker.configuration.ApplicationProperties;
-import esa.s1pdgs.cpoc.prip.worker.configuration.ApplicationProperties.MetadataMapping;
-import esa.s1pdgs.cpoc.prip.worker.configuration.ApplicationProperties.ProductTypeRegexp;
 import esa.s1pdgs.cpoc.prip.worker.mapping.MdcToPripMapper;
 import esa.s1pdgs.cpoc.prip.worker.report.PripReportingInput;
 import esa.s1pdgs.cpoc.prip.worker.report.PripReportingOutput;
@@ -237,12 +234,4 @@ public class PripPublishingJobListener implements MqiListener<PripPublishingJob>
 		return Arrays.asList(checksum);
 	}
 	
-	static String removeZipSuffix(final String name) {
-		if (name.toLowerCase().endsWith(".zip")) {
-			return name.substring(0, name.length() - ".zip".length());
-		} else if (name.toLowerCase().endsWith("_zip")) {
-			return name.substring(0, name.length() - "_zip".length());
-		}
-		return name;
-	}
 }

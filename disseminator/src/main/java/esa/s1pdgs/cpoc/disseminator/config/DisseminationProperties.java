@@ -45,6 +45,8 @@ public class DisseminationProperties {
 		private boolean ftpPasv = false;
 		
 		private boolean skipExisting = true;
+		
+		private String chmodScriptPath = null;
 						
 		public Protocol getProtocol() {
 			return protocol;
@@ -174,6 +176,14 @@ public class DisseminationProperties {
 			this.skipExisting = skipExisting;
 		}
 
+		public String getChmodScriptPath() {
+			return chmodScriptPath;
+		}
+
+		public void setChmodScript(String chmodScriptPath) {
+			this.chmodScriptPath = chmodScriptPath;
+		}
+
 		@Override
 		public String toString() {
 			return "OutboxConfiguration [protocol=" + protocol + ", path=" + path + ", username=" + username
@@ -181,7 +191,7 @@ public class DisseminationProperties {
 					", pathEvaluator=" + pathEvaluator + ", bufferSize=" + bufferSize+ ", ftpPasv=" + ftpPasv
 					+ ", keystoreFile=" + keystoreFile + ", keystorePass=<NOT_SHOWN>, truststoreFile="
 					+ truststoreFile + ", truststorePass=<NOT_SHOWN>, implicitSsl=" + implicitSsl 
-					+ ", skipExisting=" + skipExisting + "]";
+					+ ", skipExisting=" + skipExisting + ", chmodScriptPath=" + chmodScriptPath + "]";
 		}
 	}
 	

@@ -1,7 +1,10 @@
 package esa.s1pdgs.cpoc.appcatalog.server.config;
 
+import static java.lang.String.format;
+import static java.util.stream.Collectors.joining;
+import static org.springframework.util.StringUtils.isEmpty;
+
 import java.util.List;
-import java.util.StringJoiner;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -44,14 +47,23 @@ public class MongoConfiguration {
     @Value("${mongodb.password:}")
     private String mongoPassword;
 
+    @Value("${mongodb.connectTimeoutMs:60000}")
+    private int connectTimeoutMs;
+
+    @Value("${mongodb.connectTimeoutMs:60000}")
+    private int socketTimeoutMS;
+
     public @Bean MongoClient mongoClient() {
-        LOGGER.info("New constructor");
-        StringJoiner stringJoinerHosts = new StringJoiner(",");       
-        mongoDBHost.forEach(host -> {
-        	stringJoinerHosts.add(host + ":" + mongoDBPort);
-        });
-        String credentials = "".equals(mongoUsername) ? "" : mongoUsername + ":" + mongoPassword + "@";
-        return MongoClients.create("mongodb://" + credentials + stringJoinerHosts.toString() + "/" + mongoDBDatabase + "?uuidRepresentation=STANDARD");
+        final String hosts = mongoDBHost.stream().map(host -> host + ":" + mongoDBPort).collect(joining(","));
+        String credentials = isEmpty(mongoUsername) ? "" : format("%s:%s@", mongoUsername, mongoPassword);
+
+        LOGGER.info("Creating mongo client for hosts {} to database {}", hosts, mongoDBDatabase);
+        return MongoClients.create(format("mongodb://%s%s/%s?uuidRepresentation=STANDARD&connectTimeoutMS=%s&socketTimeoutMS=%s",
+                credentials,
+                hosts,
+                mongoDBDatabase,
+                connectTimeoutMs,
+                socketTimeoutMS));
     }
 
     public @Bean MongoTemplate mongoTemplate() {
