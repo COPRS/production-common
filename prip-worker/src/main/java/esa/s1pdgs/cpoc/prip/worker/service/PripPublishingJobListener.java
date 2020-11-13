@@ -175,12 +175,12 @@ public class PripPublishingJobListener implements MqiListener<PripPublishingJob>
 				.setChecksums(getChecksums(publishingJob.getProductFamily(), publishingJob.getKeyObjectStorage()));
 		
 		// ValidityStart: mandatory field, only optional when plan and report
-		if (! ProductFamily.PLAN_AND_REPORT.equals(publishingJob.getProductFamily()) || null != searchMetadata.getValidityStart()) {
+		if (! ProductFamily.PLAN_AND_REPORT_ZIP.equals(publishingJob.getProductFamily()) || null != searchMetadata.getValidityStart()) {
 			pripMetadata.setContentDateStart(DateUtils.parse(searchMetadata.getValidityStart()).truncatedTo(ChronoUnit.MILLIS));
 		}
 		
 		// ValidityStop: mandatory field, only optional when plan and report
-		if (! ProductFamily.PLAN_AND_REPORT.equals(publishingJob.getProductFamily()) || null != searchMetadata.getValidityStop()) {
+		if (! ProductFamily.PLAN_AND_REPORT_ZIP.equals(publishingJob.getProductFamily()) || null != searchMetadata.getValidityStop()) {
 			pripMetadata.setContentDateEnd(DateUtils.parse(searchMetadata.getValidityStop()).truncatedTo(ChronoUnit.MILLIS));
 		}
 				
