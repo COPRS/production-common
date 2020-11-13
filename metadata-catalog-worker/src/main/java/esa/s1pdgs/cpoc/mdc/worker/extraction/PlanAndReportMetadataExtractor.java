@@ -17,8 +17,7 @@ import esa.s1pdgs.cpoc.report.ReportingFactory;
 
 public class PlanAndReportMetadataExtractor extends AbstractMetadataExtractor {
 	
-	// TODO S1PRO-2155: Externalize pattern configuration or rewrite existing pattern in configuration to have (possibly empty) mission ID group
-	private final static Pattern pattern = Pattern.compile("^([a-z][0-9])[0-9a-z_]_.*$", Pattern.CASE_INSENSITIVE);
+	private final static Pattern MISSION_ID_PATTERN = Pattern.compile("^([a-z][0-9])[0-9a-z_]_.*$", Pattern.CASE_INSENSITIVE);
 	
 	public PlanAndReportMetadataExtractor(
 			final EsServices esServices, 
@@ -41,11 +40,11 @@ public class PlanAndReportMetadataExtractor extends AbstractMetadataExtractor {
 		metadata.put("insertionTime", message.getBody().getCreationDate());
 		metadata.put("url", message.getBody().getKeyObjectStorage());
 		
-		Matcher matcher = pattern.matcher(message.getBody().getProductName());
+		Matcher matcher = MISSION_ID_PATTERN.matcher(message.getBody().getProductName());
 		if (matcher.matches()) {
 			metadata.put("missionId", matcher.group(1));			
 		} else {
-			// FIXME S1PRO-2155: handle case where missionId is not present
+			metadata.put("missionId", esa.s1pdgs.cpoc.mqi.model.queue.AbstractMessage.NOT_DEFINED);
 		}
 		
 		return metadata;
