@@ -173,8 +173,16 @@ public class PripPublishingJobListener implements MqiListener<PripPublishingJob>
 		pripMetadata.setEvictionDate(creationDate.plusDays(PripMetadata.DEFAULT_EVICTION_DAYS));
 		pripMetadata
 				.setChecksums(getChecksums(publishingJob.getProductFamily(), publishingJob.getKeyObjectStorage()));
-		pripMetadata.setContentDateStart(DateUtils.parse(searchMetadata.getValidityStart()).truncatedTo(ChronoUnit.MILLIS));
-		pripMetadata.setContentDateEnd(DateUtils.parse(searchMetadata.getValidityStop()).truncatedTo(ChronoUnit.MILLIS));
+		
+		// ValidityStart: mandatory field, only optional when plan and report
+		if (! ProductFamily.PLAN_AND_REPORT.equals(publishingJob.getProductFamily()) || null != searchMetadata.getValidityStart()) {
+			pripMetadata.setContentDateStart(DateUtils.parse(searchMetadata.getValidityStart()).truncatedTo(ChronoUnit.MILLIS));
+		}
+		
+		// ValidityStop: mandatory field, only optional when plan and report
+		if (! ProductFamily.PLAN_AND_REPORT.equals(publishingJob.getProductFamily()) || null != searchMetadata.getValidityStop()) {
+			pripMetadata.setContentDateEnd(DateUtils.parse(searchMetadata.getValidityStop()).truncatedTo(ChronoUnit.MILLIS));
+		}
 				
 		Map<String, Object> pripAttributes = mdcToPripMapper.map(publishingJob.getKeyObjectStorage(),
 				searchMetadata.getProductType(), searchMetadata.getAdditionalProperties());		
