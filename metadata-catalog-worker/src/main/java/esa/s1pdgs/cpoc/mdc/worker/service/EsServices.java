@@ -1392,7 +1392,9 @@ public class EsServices {
 	public SearchMetadata productNameQuery(final String productFamily, final String productName)
 			throws MetadataMalformedException, MetadataNotPresentException, IOException {
 		
-		final String index = getIndexForFilename(ProductFamily.valueOf(productFamily), productName);
+		final ProductFamily family = ProductFamily.valueOf(productFamily);
+		
+		final String index = getIndexForFilename(family, productName);
 
 		final Map<String, Object> source = getRequest(index, productName);
 
@@ -1406,17 +1408,19 @@ public class EsServices {
 
 		searchMetadata.setSwathtype((String) source.getOrDefault("swathtype", "UNDEFINED"));
 		
-		// dirty workaround: 
-		if (source.containsKey("startTime") && source.containsKey("stopTime")) {
-			searchMetadata.setValidityStart(getPropertyAsDate(source, "startTime", orThrowMalformed("startTime")));
-			searchMetadata.setValidityStop(getPropertyAsDate(source, "stopTime", orThrowMalformed("stopTime")));
-		}
-		else if (source.containsKey("validityStartTime") && source.containsKey("validityStopTime")) {
-			searchMetadata.setValidityStart(getPropertyAsDate(source, "validityStartTime", orThrowMalformed("validityStartTime")));
-			searchMetadata.setValidityStop(getPropertyAsDate(source, "validityStopTime", orThrowMalformed("validityStopTime")));
-		}
-		else {
-			throw new MetadataMalformedException("start/stop times");
+		if (! ProductFamily.PLAN_AND_REPORT.equals(family) && ! ProductFamily.PLAN_AND_REPORT_ZIP.equals(family)) {
+			// dirty workaround: 
+			if (source.containsKey("startTime") && source.containsKey("stopTime")) {
+				searchMetadata.setValidityStart(getPropertyAsDate(source, "startTime", orThrowMalformed("startTime")));
+				searchMetadata.setValidityStop(getPropertyAsDate(source, "stopTime", orThrowMalformed("stopTime")));
+			}
+			else if (source.containsKey("validityStartTime") && source.containsKey("validityStopTime")) {
+				searchMetadata.setValidityStart(getPropertyAsDate(source, "validityStartTime", orThrowMalformed("validityStartTime")));
+				searchMetadata.setValidityStop(getPropertyAsDate(source, "validityStopTime", orThrowMalformed("validityStopTime")));
+			}
+			else {
+				throw new MetadataMalformedException("start/stop times");
+			}
 		}
 
 		Map<String, Object> coordinates = null;
