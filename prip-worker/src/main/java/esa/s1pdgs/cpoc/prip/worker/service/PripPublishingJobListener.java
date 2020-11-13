@@ -18,6 +18,7 @@ import javax.annotation.PostConstruct;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.util.Strings;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -175,12 +176,12 @@ public class PripPublishingJobListener implements MqiListener<PripPublishingJob>
 				.setChecksums(getChecksums(publishingJob.getProductFamily(), publishingJob.getKeyObjectStorage()));
 		
 		// ValidityStart: mandatory field, only optional when plan and report
-		if (! ProductFamily.PLAN_AND_REPORT_ZIP.equals(publishingJob.getProductFamily()) || null != searchMetadata.getValidityStart()) {
+		if (! ProductFamily.PLAN_AND_REPORT_ZIP.equals(publishingJob.getProductFamily()) || Strings.isNotEmpty(searchMetadata.getValidityStart())) {
 			pripMetadata.setContentDateStart(DateUtils.parse(searchMetadata.getValidityStart()).truncatedTo(ChronoUnit.MILLIS));
 		}
 		
 		// ValidityStop: mandatory field, only optional when plan and report
-		if (! ProductFamily.PLAN_AND_REPORT_ZIP.equals(publishingJob.getProductFamily()) || null != searchMetadata.getValidityStop()) {
+		if (! ProductFamily.PLAN_AND_REPORT_ZIP.equals(publishingJob.getProductFamily()) || Strings.isNotEmpty(searchMetadata.getValidityStop())) {
 			pripMetadata.setContentDateEnd(DateUtils.parse(searchMetadata.getValidityStop()).truncatedTo(ChronoUnit.MILLIS));
 		}
 				
