@@ -88,7 +88,9 @@ public class SppObsPropertiesAdapterTest {
         appDataJob.setCreationDate(Date.from(creationDate));
         AppDataJobProduct product = new AppDataJobProduct();
         product.getMetadata().put("startTime", DateUtils.formatToMetadataDateTimeFormat(LocalDateTime.ofInstant(startDate, ZoneId.of("UTC"))));
+        product.getMetadata().put("productName", "productName");
         appDataJob.setProduct(product);
+
 
         LOG.info("created job {}", appDataJob);
         System.out.println("created job " + appDataJob);
