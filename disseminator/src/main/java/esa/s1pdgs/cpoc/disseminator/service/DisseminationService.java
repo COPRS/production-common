@@ -31,7 +31,7 @@ public class DisseminationService {
 	private static final Logger LOG = LogManager.getLogger(DisseminationService.class);
 	
 	final static List<ProductCategory> SUPPORTED_EVENTS = Arrays.asList(
-			ProductCategory.CATALOG_EVENT, ProductCategory.INGESTION_EVENT, ProductCategory.PRODUCTION_EVENT, ProductCategory.COMPRESSION_JOBS);
+			ProductCategory.CATALOG_EVENT, ProductCategory.INGESTION_EVENT, ProductCategory.PRODUCTION_EVENT, ProductCategory.COMPRESSED_PRODUCTS);
 	
 	private final GenericMqiClient client;
     private final ObsClient obsClient;
