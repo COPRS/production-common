@@ -103,6 +103,7 @@ public enum ProductCategory {
 	        	return ProductCategory.DEBUG;
 			case AUXILIARY_FILE_ZIP:
 			case PLAN_AND_REPORT_ZIP:
+			case SPP_OBS_ZIP:
 			case L0_ACN_ZIP:
 			case L0_BLANK_ZIP:
 			case L0_SEGMENT_ZIP:
