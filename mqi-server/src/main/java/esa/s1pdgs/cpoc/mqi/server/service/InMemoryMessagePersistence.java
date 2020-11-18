@@ -93,19 +93,23 @@ public class InMemoryMessagePersistence<T extends AbstractMessage> implements Me
     }
 
     private boolean messageAlreadyRead(ConsumerRecord<String, T> data) {
-        return messages.stream().anyMatch(
-                m -> m.message.getTopic().equals(data.topic())
-                        && m.message.getPartition() == data.partition()
-                        && m.message.getOffset() == data.offset()
-        );
+        synchronized (messages) {
+            return messages.stream().anyMatch(
+                    m -> m.message.getTopic().equals(data.topic())
+                            && m.message.getPartition() == data.partition()
+                            && m.message.getOffset() == data.offset()
+            );
+        }
     }
 
     @Override
     public List<AppCatMessageDto<T>> next(ProductCategory category, String podName) {
-        return messages.stream()
-                .filter(m -> m.message.getCategory().equals(category) && m.message.getReadingPod().equals(podName))
-                .map(m -> m.message)
-                .collect(toList());
+        synchronized (messages) {
+            return messages.stream()
+                    .filter(m -> m.message.getCategory().equals(category) && m.message.getReadingPod().equals(podName))
+                    .map(m -> m.message)
+                    .collect(toList());
+        }
     }
 
     @Override
@@ -152,7 +156,9 @@ public class InMemoryMessagePersistence<T extends AbstractMessage> implements Me
     }
 
     private Optional<MessageAndAcknowledgement<T>> getInternal(long messageId) {
-        return messages.stream().filter(m -> m.message.getId() == messageId).findFirst();
+        synchronized (messages) {
+            return messages.stream().filter(m -> m.message.getId() == messageId).findFirst();
+        }
     }
 
     private MessageAndAcknowledgement<T> getInternalOrThrow(long messageId) {
@@ -166,18 +172,21 @@ public class InMemoryMessagePersistence<T extends AbstractMessage> implements Me
     }
 
     private void validateMessageSizesForConsumer(Consumption consumption, String topic) {
-        final long countPerTopic = messages.stream().filter(m -> m.message.getTopic().equals(topic)).count();
-
-        //pause consumer to avoid memory leak, resuming is already handled in MessageConsumptionController
-        if (countPerTopic >= messageThresholdHigh && !consumption.isPaused()) {
-            LOG.info("pausing consumer for topic {} ({} messages >= threshold {})", topic, countPerTopic, messageThresholdHigh);
-            consumption.pause();
+        synchronized (messages) {
+            final long countPerTopic = messages.stream().filter(m -> m.message.getTopic().equals(topic)).count();
+            //pause consumer to avoid memory leak, resuming is already handled in MessageConsumptionController
+            if (countPerTopic >= messageThresholdHigh && !consumption.isPaused()) {
+                LOG.info("pausing consumer for topic {} ({} messages >= threshold {})", topic, countPerTopic, messageThresholdHigh);
+                consumption.pause();
+            }
         }
     }
 
     @Override
     public int getNbReadingMessages(String topic, String podName) {
-        return (int) messages.stream().filter(m -> m.message.getTopic().equals(topic) && m.message.getReadingPod().equals(podName)).count();
+        synchronized (messages) {
+            return (int) messages.stream().filter(m -> m.message.getTopic().equals(topic) && m.message.getReadingPod().equals(podName)).count();
+        }
     }
 
     @Override
@@ -190,17 +199,19 @@ public class InMemoryMessagePersistence<T extends AbstractMessage> implements Me
 
     @Override
     public void handlePartitionRevoke(String topic, int partition) {
-        List<MessageAndAcknowledgement<T>> toBeRemoved =
-                messages.stream().filter(
-                        m -> m.message.getTopic().equals(topic) && m.message.getPartition() == partition
-                                && m.message.getState() == MessageState.READ
-                ).collect(toList());
-        messages.removeAll(toBeRemoved);
-        String maxOffset =
-                toBeRemoved.stream()
-                        .max(comparingLong(a -> a.message.getOffset()))
-                        .map(m -> String.valueOf(m.message.getOffset())).orElse("n/a");
-        LOG.debug("removed {} pre-fetched messages up to offset {} for revoked topic {} partition {}", toBeRemoved.size(), maxOffset, topic, partition);
+        synchronized (messages) {
+            List<MessageAndAcknowledgement<T>> toBeRemoved =
+                    messages.stream().filter(
+                            m -> m.message.getTopic().equals(topic) && m.message.getPartition() == partition
+                                    && m.message.getState() == MessageState.READ
+                    ).collect(toList());
+            messages.removeAll(toBeRemoved);
+            String maxOffset =
+                    toBeRemoved.stream()
+                            .max(comparingLong(a -> a.message.getOffset()))
+                            .map(m -> String.valueOf(m.message.getOffset())).orElse("n/a");
+            LOG.debug("removed {} pre-fetched messages up to offset {} for revoked topic {} partition {}", toBeRemoved.size(), maxOffset, topic, partition);
+        }
     }
 
     private static class MessageAndAcknowledgement<T> {
