@@ -72,7 +72,7 @@ public final class GenericMessageListener<T extends AbstractMessage> implements 
         	@SuppressWarnings("unchecked")
         	final ConsumerRecord<String, T> kafkaRecord = (ConsumerRecord<String, T>) message.internalMessage();
         	if(LOGGER.isDebugEnabled()) {
-				LOGGER.debug("Handling message from kafka topic {} partition {} offset {}: {}", kafkaRecord.topic(), kafkaRecord.partition(), kafkaRecord.offset(), message);
+				LOGGER.debug("Handling message from kafka topic {} partition {} offset {}: {}", kafkaRecord.topic(), kafkaRecord.partition(), kafkaRecord.offset(), message.data());
 			} else {
         		LOGGER.info("Handling message from kafka topic {} partition {} offset {}", kafkaRecord.topic(), kafkaRecord.partition(), kafkaRecord.offset());
 			}
