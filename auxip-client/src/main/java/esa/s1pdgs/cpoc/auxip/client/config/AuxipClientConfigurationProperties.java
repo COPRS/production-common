@@ -18,6 +18,11 @@ public class AuxipClientConfigurationProperties {
 		private String user;
 		private String pass;
 		private boolean sslValidation = true;
+		private boolean enableOauth = false;
+		private String oauthAuthUrl;
+		private String oauthClientId;
+		private String oauthClientSecret;
+		
 		private String creationDateAttributeName; // in legacy PRIP instances 'PublicationDate', in cloud PRIP 'creationDate'
 		private String productNameAttrName; // in legacy PRIP instances 'Name', in cloud PRIP 'name'
 		private String idAttrName; // in legacy PRIP instances 'Id', in cloud PRIP 'id'
@@ -29,10 +34,12 @@ public class AuxipClientConfigurationProperties {
 		@Override
 		public String toString() {
 			return "AuxipHostConfiguration [serviceRootUri=" + this.serviceRootUri + ", user=" + this.user
-					+ ", pass=****" + ", creationDateAttributeName=" + this.creationDateAttributeName
-					+ ", productNameAttrName=" + this.productNameAttrName + ", contentLengthAttrName="
-					+ this.contentLengthAttrName + ", idAttrName=" + this.idAttrName + ", useHttpClientDownload="
-					+ useHttpClientDownload + "]";
+					+ ", pass=****" + ", sslValidation=" + this.sslValidation + ", enableOauth=" + this.enableOauth
+					+ ", oauthAuthUrl=" + this.oauthAuthUrl + ", oauthClientId=" + this.oauthClientId
+					+ ", oauthClientSecret=" + this.oauthClientSecret + ", creationDateAttributeName="
+					+ this.creationDateAttributeName + ", productNameAttrName=" + this.productNameAttrName
+					+ ", contentLengthAttrName=" + this.contentLengthAttrName + ", idAttrName=" + this.idAttrName
+					+ ", useHttpClientDownload=" + useHttpClientDownload + "]";
 		}
 
 		// - - - - - - - - - - - - - - - - - -
@@ -107,6 +114,38 @@ public class AuxipClientConfigurationProperties {
 
 		public void setUseHttpClientDownload(final boolean useHttpClientDownload) {
 			this.useHttpClientDownload = useHttpClientDownload;
+		}
+
+		public boolean isEnableOauth() {
+			return this.enableOauth;
+		}
+
+		public void setEnableOauth(boolean enableOauth) {
+			this.enableOauth = enableOauth;
+		}
+
+		public String getOauthAuthUrl() {
+			return this.oauthAuthUrl;
+		}
+
+		public void setOauthAuthUrl(String oauthAuthUrl) {
+			this.oauthAuthUrl = oauthAuthUrl;
+		}
+
+		public String getOauthClientId() {
+			return this.oauthClientId;
+		}
+
+		public void setOauthClientId(String oauthClientId) {
+			this.oauthClientId = oauthClientId;
+		}
+
+		public String getOauthClientSecret() {
+			return this.oauthClientSecret;
+		}
+
+		public void setOauthClientSecret(String oauthClientSecret) {
+			this.oauthClientSecret = oauthClientSecret;
 		}
 	}
 	
