@@ -1,7 +1,10 @@
 package esa.s1pdgs.cpoc.auxip.client.odata;
 
 import java.net.URI;
+import java.nio.charset.StandardCharsets;
 
+import org.apache.commons.codec.binary.Base64;
+import org.apache.http.Header;
 import org.apache.http.HttpHost;
 import org.apache.http.auth.AuthScope;
 import org.apache.http.auth.UsernamePasswordCredentials;
@@ -16,12 +19,14 @@ import org.apache.http.impl.client.BasicAuthCache;
 import org.apache.http.impl.client.BasicCredentialsProvider;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClientBuilder;
+import org.apache.http.message.BasicHeader;
 import org.apache.http.ssl.SSLContextBuilder;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.apache.olingo.client.api.ODataClient;
 import org.apache.olingo.client.core.ODataClientFactory;
 import org.apache.olingo.client.core.http.ProxyWrappingHttpClientFactory;
+import org.apache.olingo.commons.api.http.HttpHeader;
 
 import esa.s1pdgs.cpoc.auxip.client.AuxipClient;
 import esa.s1pdgs.cpoc.auxip.client.AuxipClientFactory;
@@ -108,21 +113,21 @@ public class AuxipOdataClientFactory implements AuxipClientFactory {
 			throw new RuntimeException(e);
 		} 
 	}
-
+	
 	private ODataClient buildOdataClient(final AuxipHostConfiguration hostConfig) {
 		final ODataClient odataClient = ODataClientFactory.getClient();
-		final boolean needsAuthentication = null != hostConfig.getUser() && !hostConfig.getUser().isEmpty();
+				
+		final AuxipOdataHttpClientFactory httpClientFactory = new AuxipOdataHttpClientFactory(hostConfig);
+		
 		final boolean needsProxy = null != this.config.getProxy() && !this.config.getProxy().isEmpty();
-
+		final boolean needsAuthentication = null != hostConfig.getUser() && !hostConfig.getUser().isEmpty();
+		
 		// authentication
-		final AuxipOdataHttpClientFactory httpClientFactory;
-		if (needsAuthentication) {
-			httpClientFactory = new AuxipOdataHttpClientFactory(hostConfig.getUser(), hostConfig.getPass(),
-					hostConfig.isSslValidation());
-		} else {
-			httpClientFactory = new AuxipOdataHttpClientFactory(hostConfig.isSslValidation());
-		}
-
+		if (needsAuthentication) {		
+			// TODO implement OAuth2 header provision
+			httpClientFactory.addHeaderSupplier( () -> basicAuthHeaderFor(hostConfig));
+		} 
+		
 		// proxy
 		ProxyWrappingHttpClientFactory proxyWrappingHttpClientFactory = null;
 		if (needsProxy) {
@@ -144,9 +149,16 @@ public class AuxipOdataClientFactory implements AuxipClientFactory {
 		} else if (null != httpClientFactory) {
 			odataClient.getConfiguration().setHttpClientFactory(httpClientFactory);
 		}
-
+		odataClient.getConfiguration().setHttpUriRequestFactory(httpClientFactory.requestFactory());		
 		
 		return odataClient;
 	}
 	
+	
+	private static final Header basicAuthHeaderFor(final AuxipHostConfiguration hostConfig) {
+		final String auth = hostConfig.getUser() + ":" + hostConfig.getPass();
+		final byte[] encodedAuth = Base64.encodeBase64(auth.getBytes(StandardCharsets.ISO_8859_1));
+
+		return new BasicHeader(HttpHeader.AUTHORIZATION, "Basic " + new String(encodedAuth));
+	}
 }
