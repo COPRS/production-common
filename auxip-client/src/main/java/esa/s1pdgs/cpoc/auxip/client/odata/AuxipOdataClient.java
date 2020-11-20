@@ -14,12 +14,22 @@ import java.util.List;
 import java.util.Objects;
 import java.util.UUID;
 
+import org.apache.commons.io.IOUtils;
 import org.apache.http.HttpEntity;
+import org.apache.http.HttpResponse;
 import org.apache.http.HttpStatus;
+import org.apache.http.client.entity.UrlEncodedFormEntity;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
+import org.apache.http.client.methods.HttpPost;
 import org.apache.http.client.protocol.HttpClientContext;
+import org.apache.http.conn.ssl.NoopHostnameVerifier;
+import org.apache.http.conn.ssl.SSLConnectionSocketFactory;
+import org.apache.http.conn.ssl.TrustSelfSignedStrategy;
 import org.apache.http.impl.client.CloseableHttpClient;
+import org.apache.http.impl.client.HttpClientBuilder;
+import org.apache.http.message.BasicNameValuePair;
+import org.apache.http.ssl.SSLContextBuilder;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.apache.olingo.client.api.ODataClient;
@@ -36,9 +46,14 @@ import org.apache.olingo.client.api.uri.URIBuilder;
 import org.apache.olingo.client.api.uri.URIFilter;
 import org.springframework.lang.NonNull;
 
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ObjectNode;
+
 import esa.s1pdgs.cpoc.auxip.client.AuxipClient;
 import esa.s1pdgs.cpoc.auxip.client.AuxipProductMetadata;
 import esa.s1pdgs.cpoc.auxip.client.config.AuxipClientConfigurationProperties.AuxipHostConfiguration;
+import esa.s1pdgs.cpoc.common.utils.StringUtil;
 
 /**
  * OData implementation of the AUXIP client
@@ -91,6 +106,9 @@ public class AuxipOdataClient implements AuxipClient {
 	@Override
 	public List<AuxipProductMetadata> getMetadata(@NonNull final LocalDateTime from, @NonNull final LocalDateTime to,
 			final Integer pageSize, final Integer offset, final String productNameContains) {
+		// temporary oauth access token retrieval test FIXME remove
+		this.printOauthToken_forTesting();
+		
 		// prepare
 		final URIFilter filters = this.buildFilters(from, to, productNameContains);
 		final URI queryUri = this.buildQueryUri(Collections.singletonList(filters), pageSize, offset);
@@ -154,6 +172,112 @@ public class AuxipOdataClient implements AuxipClient {
 	}
 	
 	// --------------------------------------------------------------------------
+	
+	private void printOauthToken_forTesting() {
+		final String oauthAuthUrl = this.hostConfig.getOauthAuthUrl();
+		final String oauthClientId = this.hostConfig.getOauthClientId();
+		final String oauthClientSecret = this.hostConfig.getOauthClientSecret();
+		final String oauthUser = this.hostConfig.getUser();
+		final String oauthPass = this.hostConfig.getPass();
+
+		if (StringUtil.isBlank(oauthAuthUrl)) {
+			LOG.debug("oauth authorization url missing");
+			return;
+		}
+		if (StringUtil.isBlank(oauthClientId)) {
+			LOG.debug("oauth client ID missing");
+			return;
+		}
+		if (StringUtil.isBlank(oauthClientSecret)) {
+			LOG.debug("oauth client secret missing");
+			return;
+		}
+		if (StringUtil.isBlank(oauthUser)) {
+			LOG.debug("oauth authorization user missing");
+			return;
+		}
+		if (StringUtil.isBlank(oauthPass)) {
+			LOG.debug("oauth authorization password missing");
+			return;
+		}
+
+		final String oauthAccessToken = this.retrieveOauthAccessToken(URI.create(oauthAuthUrl), oauthClientId,
+				oauthClientSecret, oauthUser, oauthPass);
+		
+		LOG.debug("oauth access token: " + oauthAccessToken);
+	}
+	
+	private String retrieveOauthAccessToken(final URI oauthAuthUrl, final String oauthClientId,
+			final String oauthClientSecret, final String oauthUser, final String oauthPass) {
+		final CloseableHttpClient httpClient = this.newOauthAuthorizationClient();
+
+		// TODO @MSc: fehlerhandling wg. nicht vorhandener values einmalig initial machen
+		// TODO @MSc: evetuell extra user/pass verwenden, siehe kommentar torben
+		
+		final List<BasicNameValuePair> data = new ArrayList<BasicNameValuePair>();
+		data.add(new BasicNameValuePair("grant_type", "password"));
+		data.add(new BasicNameValuePair("client_id", oauthClientId));
+		data.add(new BasicNameValuePair("client_secret", oauthClientSecret));
+		data.add(new BasicNameValuePair("username", oauthUser));
+		data.add(new BasicNameValuePair("password", oauthPass));
+
+		ObjectNode token = null;
+		InputStream responseContent = null;
+		try {
+			final HttpPost post = new HttpPost(oauthAuthUrl);
+			post.setEntity(new UrlEncodedFormEntity(data, "UTF-8"));
+			
+			final HttpResponse response = httpClient.execute(post);
+			
+			responseContent = response.getEntity().getContent();
+					
+			token = (ObjectNode) new ObjectMapper().readTree(responseContent);
+			
+		} catch (Exception e) {
+			throw new AuxipOauthException("error retrieving oauth access token from "
+					+ this.hostConfig.getOauthAuthUrl() + ": " + e.getMessage(), e);
+		} finally {
+			IOUtils.closeQuietly(responseContent);
+		}
+		
+		if (null == token) {
+			throw new AuxipOauthException("error retrieving oauth access token from "
+					+ this.hostConfig.getOauthAuthUrl() + ": no result from parsing response to json");
+		}
+
+		final JsonNode tokenNode = token.get("access_token");
+		if (null == tokenNode) {
+			throw new AuxipOauthException("error retrieving oauth access token from "
+					+ this.hostConfig.getOauthAuthUrl() + ": response contains no access_token");
+		}
+
+		final String accessToken = tokenNode.asText();
+		if (StringUtil.isEmpty(accessToken)) {
+			throw new AuxipOauthException("error retrieving oauth access token from "
+					+ this.hostConfig.getOauthAuthUrl() + ": response contains no value for access_token");
+		}
+
+		return accessToken;
+	}
+	
+	private CloseableHttpClient newOauthAuthorizationClient() {		
+		try {
+			final HttpClientBuilder clientBuilder = HttpClientBuilder.create();
+			
+			final SSLContextBuilder builder = new SSLContextBuilder();
+			builder.loadTrustMaterial(new TrustSelfSignedStrategy());			
+			final SSLConnectionSocketFactory sslsf = new SSLConnectionSocketFactory(
+					builder.build(),
+			        NoopHostnameVerifier.INSTANCE
+			);
+			clientBuilder.setSSLSocketFactory(sslsf);
+			
+			return clientBuilder.build();
+		} catch (final Exception e) {
+			// FIXME error handling
+			throw new RuntimeException(e);
+		} 
+	}
 
 	private URIFilter buildFilters(final LocalDateTime from, final LocalDateTime to, final String productNameContains) {
 		final FilterFactory filterFactory = this.odataClient.getFilterFactory();
