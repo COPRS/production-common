@@ -207,13 +207,23 @@ public class AuxipOdataClient implements AuxipClient {
 		LOG.debug("oauth access token: " + oauthAccessToken);
 	}
 	
+	private String retrieveOauthAccessToken() {
+		// TODO @MSc: fehlerhandling wg. nicht vorhandener values einmalig initial machen
+		// TODO @MSc: evetuell extra user/pass verwenden, siehe kommentar torben
+		
+		final String oauthAuthUrl = this.hostConfig.getOauthAuthUrl();
+		final String oauthClientId = this.hostConfig.getOauthClientId();
+		final String oauthClientSecret = this.hostConfig.getOauthClientSecret();
+		final String oauthUser = this.hostConfig.getUser();
+		final String oauthPass = this.hostConfig.getPass();
+
+		return this.retrieveOauthAccessToken(URI.create(oauthAuthUrl), oauthClientId, oauthClientSecret, oauthUser,	oauthPass);
+	}
+	
 	private String retrieveOauthAccessToken(final URI oauthAuthUrl, final String oauthClientId,
 			final String oauthClientSecret, final String oauthUser, final String oauthPass) {
 		final CloseableHttpClient httpClient = this.newOauthAuthorizationClient();
 
-		// TODO @MSc: fehlerhandling wg. nicht vorhandener values einmalig initial machen
-		// TODO @MSc: evetuell extra user/pass verwenden, siehe kommentar torben
-		
 		final List<BasicNameValuePair> data = new ArrayList<BasicNameValuePair>();
 		data.add(new BasicNameValuePair("grant_type", "password"));
 		data.add(new BasicNameValuePair("client_id", oauthClientId));
