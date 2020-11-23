@@ -107,7 +107,11 @@ public class AuxipOdataClient implements AuxipClient {
 	public List<AuxipProductMetadata> getMetadata(@NonNull final LocalDateTime from, @NonNull final LocalDateTime to,
 			final Integer pageSize, final Integer offset, final String productNameContains) {
 		// temporary oauth access token retrieval test FIXME remove
-		this.printOauthToken_forTesting();
+		try {
+			this.printOauthToken_forTesting();
+		} catch (Exception e) {
+			LOG.error("error testing oauth access token retrieval: " + StringUtil.stackTraceToString(e));
+		}
 		
 		// prepare
 		final URIFilter filters = this.buildFilters(from, to, productNameContains);
