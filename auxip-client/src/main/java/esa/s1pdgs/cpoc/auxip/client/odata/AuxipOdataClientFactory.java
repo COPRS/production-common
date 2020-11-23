@@ -9,13 +9,15 @@ import java.util.List;
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.io.IOUtils;
 import org.apache.http.Header;
+import org.apache.http.HttpEntity;
 import org.apache.http.HttpHost;
-import org.apache.http.HttpResponse;
+import org.apache.http.HttpStatus;
 import org.apache.http.auth.AuthScope;
 import org.apache.http.auth.UsernamePasswordCredentials;
 import org.apache.http.client.AuthCache;
 import org.apache.http.client.CredentialsProvider;
 import org.apache.http.client.entity.UrlEncodedFormEntity;
+import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.client.protocol.HttpClientContext;
 import org.apache.http.conn.ssl.NoopHostnameVerifier;
@@ -66,7 +68,7 @@ public class AuxipOdataClientFactory implements AuxipClientFactory {
 	public AuxipClient newAuxipClient(final URI serverUrl) {
 		final AuxipHostConfiguration hostConfig = this.hostConfigFor(serverUrl.toString());
 		final ODataClient odataClient = this.newOdataClient(hostConfig);
-	
+
 		final CredentialsProvider credentialsProvider = new BasicCredentialsProvider();
 		credentialsProvider.setCredentials(
 			AuthScope.ANY,
@@ -76,8 +78,8 @@ public class AuxipOdataClientFactory implements AuxipClientFactory {
 		// preemptive auth
 		final HttpClientContext context = HttpClientContext.create();
 		final AuthCache cache = new BasicAuthCache();
-		
-		cache.put(new HttpHost(serverUrl.getHost(),serverUrl.getPort(),"https"), new BasicScheme());
+
+		cache.put(new HttpHost(serverUrl.getHost(), serverUrl.getPort(), "https"), new BasicScheme());
 		context.setAuthCache(cache);
 		context.setCredentialsProvider(credentialsProvider);
 
@@ -101,16 +103,17 @@ public class AuxipOdataClientFactory implements AuxipClientFactory {
 		throw new IllegalArgumentException(
 				String.format("Could not find configuration for server '%s'", serviceRootUri));
 	}
-	
+
 	private boolean urisEqual(final String serviceRootUri1, final String serviceRootUri2) {
 		return StringUtil.removeTrailing(serviceRootUri1, "/").equals(StringUtil.removeTrailing(serviceRootUri2, "/"));
 	}
-	
-	private CloseableHttpClient newDownloadClient(final AuxipHostConfiguration hostConfig, final CredentialsProvider credentials) {		
+
+	private CloseableHttpClient newDownloadClient(final AuxipHostConfiguration hostConfig,
+			final CredentialsProvider credentials) {
 		try {
 			final HttpClientBuilder clientBuilder = HttpClientBuilder.create();
 			clientBuilder.setDefaultCredentialsProvider(credentials);
-			
+
 			final SSLContextBuilder builder = new SSLContextBuilder();
 			builder.loadTrustMaterial(new TrustSelfSignedStrategy());			
 			final SSLConnectionSocketFactory sslsf = new SSLConnectionSocketFactory(
@@ -118,18 +121,18 @@ public class AuxipOdataClientFactory implements AuxipClientFactory {
 			        NoopHostnameVerifier.INSTANCE
 			);
 			clientBuilder.setSSLSocketFactory(sslsf);
-			
+
 			return clientBuilder.build();
 		} catch (final Exception e) {
 			// FIXME error handling
 			throw new RuntimeException(e);
-		} 
+		}
 	}
-	
+
 	private ODataClient newOdataClient(final AuxipHostConfiguration hostConfig) {
 		final ODataClient odataClient = ODataClientFactory.getClient();
 		final AuxipOdataHttpClientFactory httpClientFactory = new AuxipOdataHttpClientFactory(hostConfig);
-		
+
 		// authentication
 		final String authType = hostConfig.getAuthType();
 		if ("oauth2".equalsIgnoreCase(authType)) {
@@ -143,7 +146,7 @@ public class AuxipOdataClientFactory implements AuxipClientFactory {
 					+ (StringUtil.isEmpty(authType) ? "<empty>" : "'" + authType + "'")
 					+ " the auxip client will be disabled for target host " + hostConfig.getServiceRootUri());
 		}
-		
+
 		// proxy
 		final boolean needsProxy = null != this.config.getProxy() && !this.config.getProxy().isEmpty();
 		ProxyWrappingHttpClientFactory proxyWrappingHttpClientFactory = null;
@@ -166,11 +169,11 @@ public class AuxipOdataClientFactory implements AuxipClientFactory {
 		} else if (null != httpClientFactory) {
 			odataClient.getConfiguration().setHttpClientFactory(httpClientFactory);
 		}
-		odataClient.getConfiguration().setHttpUriRequestFactory(httpClientFactory.requestFactory());		
-		
+		odataClient.getConfiguration().setHttpUriRequestFactory(httpClientFactory.requestFactory());
+
 		return odataClient;
 	}
-	
+
 	private void validateBasicAuthConfig(final AuxipHostConfiguration hostConfig) {
 		if (StringUtil.isBlank(hostConfig.getUser())) {
 			final String msg = "error configuring odata client with basic authentication for auxip target host "
@@ -185,7 +188,7 @@ public class AuxipOdataClientFactory implements AuxipClientFactory {
 		//			throw new AuxipConfigurationException(msg);
 		//		}
 	}
-	
+
 	private void validateOauthConfig(final AuxipHostConfiguration hostConfig) {
 		if (StringUtil.isBlank(hostConfig.getOauthAuthUrl())) {
 			final String msg = "error configuring odata client with oauth2 for auxip target host "
@@ -218,24 +221,24 @@ public class AuxipOdataClientFactory implements AuxipClientFactory {
 			throw new AuxipClientConfigurationException(msg);
 		}
 	}
-	
+
 	private static final Header basicAuthHeaderFor(final AuxipHostConfiguration hostConfig) {
 		final String auth = hostConfig.getUser() + ":" + hostConfig.getPass();
 		final byte[] encodedAuth = Base64.encodeBase64(auth.getBytes(StandardCharsets.ISO_8859_1));
 
 		return new BasicHeader(HttpHeader.AUTHORIZATION, "Basic " + new String(encodedAuth));
 	}
-	
+
 	private Header oauthHeaderFor(final AuxipHostConfiguration hostConfig) {
 		final String accessToken = this.retrieveOauthAccessToken(hostConfig);
 		return new BasicHeader("OAUTH2-ACCESS-TOKEN", accessToken);
 	}
-	
+
 	private String retrieveOauthAccessToken(final AuxipHostConfiguration hostConfig) {
 		return this.retrieveOauthAccessToken(URI.create(hostConfig.getOauthAuthUrl()), hostConfig.getOauthClientId(),
 				hostConfig.getOauthClientSecret(), hostConfig.getUser(), hostConfig.getPass());
 	}
-	
+
 	private String retrieveOauthAccessToken(final URI oauthAuthUrl, final String oauthClientId,
 			final String oauthClientSecret, final String oauthAuthServerUser, final String oauthAuthServerPass) {
 		final CloseableHttpClient httpClient = this.newOauthAuthorizationClient();
@@ -248,24 +251,44 @@ public class AuxipOdataClientFactory implements AuxipClientFactory {
 		data.add(new BasicNameValuePair("password", oauthAuthServerPass));
 
 		ObjectNode token = null;
+		CloseableHttpResponse response = null;
 		InputStream responseContent = null;
 		try {
 			final HttpPost post = new HttpPost(oauthAuthUrl);
 			post.setEntity(new UrlEncodedFormEntity(data, "UTF-8"));
-			
-			final HttpResponse response = httpClient.execute(post);
-			
-			responseContent = response.getEntity().getContent();
-					
+
+			response = httpClient.execute(post);
+
+			if (null == response) {
+				throw new AuxipClientOauthException(
+						"error retrieving oauth access token from " + oauthAuthUrl + ": no response");
+			}
+			if (response.getStatusLine().getStatusCode() != HttpStatus.SC_OK) {
+				throw new AuxipClientOauthException("error retrieving oauth access token from " + oauthAuthUrl
+						+ ": status code " + response.getStatusLine().getStatusCode());
+			}
+
+			final HttpEntity responseEntity = response.getEntity();
+
+			if (null == responseEntity) {
+				throw new AuxipClientOauthException(
+						"error retrieving oauth access token from " + oauthAuthUrl + ": empty response / no entity");
+			}
+
+			responseContent = responseEntity.getContent();
+
 			token = (ObjectNode) new ObjectMapper().readTree(responseContent);
-			
-		} catch (Exception e) {
+
+		} catch (final AuxipClientOauthException e) {
+			throw e;
+		} catch (final Exception e) {
 			throw new AuxipClientOauthException(
 					"error retrieving oauth access token from " + oauthAuthUrl + ": " + e.getMessage(), e);
 		} finally {
 			IOUtils.closeQuietly(responseContent);
+			IOUtils.closeQuietly(response);
 		}
-		
+
 		if (null == token) {
 			throw new AuxipClientOauthException("error retrieving oauth access token from " + oauthAuthUrl
 					+ ": no result from parsing response to json");
@@ -285,24 +308,22 @@ public class AuxipOdataClientFactory implements AuxipClientFactory {
 
 		return accessToken;
 	}
-	
-	private CloseableHttpClient newOauthAuthorizationClient() {		
+
+	private CloseableHttpClient newOauthAuthorizationClient() {
 		try {
 			final HttpClientBuilder clientBuilder = HttpClientBuilder.create();
-			
+
 			final SSLContextBuilder builder = new SSLContextBuilder();
-			builder.loadTrustMaterial(new TrustSelfSignedStrategy());			
-			final SSLConnectionSocketFactory sslsf = new SSLConnectionSocketFactory(
-					builder.build(),
-			        NoopHostnameVerifier.INSTANCE
-			);
+			builder.loadTrustMaterial(new TrustSelfSignedStrategy());
+			final SSLConnectionSocketFactory sslsf = new SSLConnectionSocketFactory(builder.build(),
+					NoopHostnameVerifier.INSTANCE);
 			clientBuilder.setSSLSocketFactory(sslsf);
-			
+
 			return clientBuilder.build();
 		} catch (final Exception e) {
 			// FIXME error handling
 			throw new RuntimeException(e);
 		}
 	}
-	
+
 }
