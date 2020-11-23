@@ -14,22 +14,13 @@ import java.util.List;
 import java.util.Objects;
 import java.util.UUID;
 
-import org.apache.commons.io.IOUtils;
+import org.apache.commons.io.input.NullInputStream;
 import org.apache.http.HttpEntity;
-import org.apache.http.HttpResponse;
 import org.apache.http.HttpStatus;
-import org.apache.http.client.entity.UrlEncodedFormEntity;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
-import org.apache.http.client.methods.HttpPost;
 import org.apache.http.client.protocol.HttpClientContext;
-import org.apache.http.conn.ssl.NoopHostnameVerifier;
-import org.apache.http.conn.ssl.SSLConnectionSocketFactory;
-import org.apache.http.conn.ssl.TrustSelfSignedStrategy;
 import org.apache.http.impl.client.CloseableHttpClient;
-import org.apache.http.impl.client.HttpClientBuilder;
-import org.apache.http.message.BasicNameValuePair;
-import org.apache.http.ssl.SSLContextBuilder;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.apache.olingo.client.api.ODataClient;
@@ -45,10 +36,6 @@ import org.apache.olingo.client.api.uri.FilterFactory;
 import org.apache.olingo.client.api.uri.URIBuilder;
 import org.apache.olingo.client.api.uri.URIFilter;
 import org.springframework.lang.NonNull;
-
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.node.ObjectNode;
 
 import esa.s1pdgs.cpoc.auxip.client.AuxipClient;
 import esa.s1pdgs.cpoc.auxip.client.AuxipProductMetadata;
@@ -66,7 +53,9 @@ public class AuxipOdataClient implements AuxipClient {
 	private final HttpClientContext context;
 	private final AuxipHostConfiguration hostConfig;
 	private final URI rootServiceUrl;
-	
+	private final boolean disabled;
+	private final String disabledMsg;
+
 	private final String entitySetName;
 	private final String creationDateAttrName;
 	private final String productNameAttrName;
@@ -91,6 +80,18 @@ public class AuxipOdataClient implements AuxipClient {
 
 		this.rootServiceUrl = URI.create(
 				Objects.requireNonNull(this.hostConfig.getServiceRootUri(), "the root service URL must not be null!"));
+
+		this.disabled = !"basic".equalsIgnoreCase(hostConfig.getAuthType())
+				&& !"oauth2".equalsIgnoreCase(hostConfig.getAuthType());
+		if (this.disabled) {
+			this.disabledMsg = "auxip client is disabled per authType "
+					+ (StringUtil.isEmpty(hostConfig.getAuthType()) ? "<empty>" : "'" + hostConfig.getAuthType() + "'")
+					+ " for " + this.rootServiceUrl;
+		} else {
+			this.disabledMsg = "auxip client is enabled per authType '" + hostConfig.getAuthType() + "' for "
+					+ this.rootServiceUrl;
+		}
+
 		this.downloadClient = downloadClient;
 		this.context = context;
 	}
@@ -106,17 +107,15 @@ public class AuxipOdataClient implements AuxipClient {
 	@Override
 	public List<AuxipProductMetadata> getMetadata(@NonNull final LocalDateTime from, @NonNull final LocalDateTime to,
 			final Integer pageSize, final Integer offset, final String productNameContains) {
-		// temporary oauth access token retrieval test FIXME remove
-		try {
-			this.printOauthToken_forTesting();
-		} catch (Exception e) {
-			LOG.error("error testing oauth access token retrieval: " + StringUtil.stackTraceToString(e));
+		if (this.disabled) {
+			LOG.info("ignoring metadata request because " + this.disabledMsg);
+			return Collections.emptyList();
 		}
-		
+
 		// prepare
 		final URIFilter filters = this.buildFilters(from, to, productNameContains);
 		final URI queryUri = this.buildQueryUri(Collections.singletonList(filters), pageSize, offset);
-		
+
 		// retrieve and map
 		final ClientEntitySetIterator<ClientEntitySet, ClientEntity> response = this.readEntities(queryUri);
 		final List<AuxipProductMetadata> result = this.mapToMetadata(response);
@@ -124,174 +123,63 @@ public class AuxipOdataClient implements AuxipClient {
 
 		return result;
 	}
-	
+
 	@Override
-	public InputStream read(@NonNull final UUID productMetadataId) {		
+	public InputStream read(@NonNull final UUID productMetadataId) {
+		if (this.disabled) {
+			LOG.info("ignoring download request because " + this.disabledMsg);
+			return new NullInputStream(0);
+		}
+
 		// FIXME trailing slash is mandatory for this to work
 		final URI productDownloadUrl = this.rootServiceUrl
 				.resolve("Products(" + productMetadataId.toString() + ")/$value");
-		
-		LOG.debug("sending download request: " + productDownloadUrl);		
-		if (hostConfig.isUseHttpClientDownload()) {			
-		    final HttpGet httpget = new HttpGet(productDownloadUrl.toString());
-		    try {
-				final CloseableHttpResponse response = downloadClient.execute(httpget, context);
+
+		LOG.debug("sending download request: " + productDownloadUrl);
+		if (this.hostConfig.isUseHttpClientDownload()) {
+			final HttpGet httpget = new HttpGet(productDownloadUrl.toString());
+			try {
+				final CloseableHttpResponse response = this.downloadClient.execute(httpget, this.context);
 				final HttpEntity entity = response.getEntity();
-				
-			    // check if something has been returned and no error occurred
-			    if ((entity == null) || (response.getStatusLine().getStatusCode() != HttpStatus.SC_OK))
-			    {
-			    	throw new RuntimeException(
-			    			String.format("Error on download of %s: %s", productMetadataId, response.getStatusLine())
-			    	);
-			    }				
+
+				// check if something has been returned and no error occurred
+				if ((entity == null) || (response.getStatusLine().getStatusCode() != HttpStatus.SC_OK))
+				{
+					throw new RuntimeException(
+							String.format("Error on download of %s: %s", productMetadataId, response.getStatusLine())
+							);
+				}
 				return new BufferedInputStream(entity.getContent())
 				{
-				  @Override public final void close() throws IOException
-				  {
-				    try
-				    {
-				      super.close();
-				    }
-				    finally
-				    {
-				      response.close();
-				    }
-				  }
+					@Override public final void close() throws IOException
+					{
+						try
+						{
+							super.close();
+						}
+						finally
+						{
+							response.close();
+						}
+					}
 				};
 			} catch (final Exception e) {
 				// TODO error handling
 				throw new RuntimeException(e);
-			}	
+			}
 		}
 		else {
 			final ODataRetrieveResponse<InputStream> response = this.odataClient.getRetrieveRequestFactory()
 					.getMediaRequest(productDownloadUrl).execute();
-			
+
 			LOG.debug("download request (" + productDownloadUrl + ") response status: " + response.getStatusCode() + " - "
 					+ response.getStatusMessage());
-			
+
 			return response.getBody();
 		}
 	}
-	
+
 	// --------------------------------------------------------------------------
-	
-	private void printOauthToken_forTesting() {
-		final String oauthAuthUrl = this.hostConfig.getOauthAuthUrl();
-		final String oauthClientId = this.hostConfig.getOauthClientId();
-		final String oauthClientSecret = this.hostConfig.getOauthClientSecret();
-		final String oauthUser = this.hostConfig.getUser();
-		final String oauthPass = this.hostConfig.getPass();
-
-		if (StringUtil.isBlank(oauthAuthUrl)) {
-			LOG.debug("oauth authorization url missing");
-			return;
-		}
-		if (StringUtil.isBlank(oauthClientId)) {
-			LOG.debug("oauth client ID missing");
-			return;
-		}
-		if (StringUtil.isBlank(oauthClientSecret)) {
-			LOG.debug("oauth client secret missing");
-			return;
-		}
-		if (StringUtil.isBlank(oauthUser)) {
-			LOG.debug("oauth authorization user missing");
-			return;
-		}
-		if (StringUtil.isBlank(oauthPass)) {
-			LOG.debug("oauth authorization password missing");
-			return;
-		}
-
-		final String oauthAccessToken = this.retrieveOauthAccessToken(URI.create(oauthAuthUrl), oauthClientId,
-				oauthClientSecret, oauthUser, oauthPass);
-		
-		LOG.debug("oauth access token: " + oauthAccessToken);
-	}
-	
-	private String retrieveOauthAccessToken() {
-		// TODO @MSc: fehlerhandling wg. nicht vorhandener values einmalig initial machen
-		// TODO @MSc: evetuell extra user/pass verwenden, siehe kommentar torben
-		
-		final String oauthAuthUrl = this.hostConfig.getOauthAuthUrl();
-		final String oauthClientId = this.hostConfig.getOauthClientId();
-		final String oauthClientSecret = this.hostConfig.getOauthClientSecret();
-		final String oauthUser = this.hostConfig.getUser();
-		final String oauthPass = this.hostConfig.getPass();
-
-		return this.retrieveOauthAccessToken(URI.create(oauthAuthUrl), oauthClientId, oauthClientSecret, oauthUser,	oauthPass);
-	}
-	
-	private String retrieveOauthAccessToken(final URI oauthAuthUrl, final String oauthClientId,
-			final String oauthClientSecret, final String oauthUser, final String oauthPass) {
-		final CloseableHttpClient httpClient = this.newOauthAuthorizationClient();
-
-		final List<BasicNameValuePair> data = new ArrayList<BasicNameValuePair>();
-		data.add(new BasicNameValuePair("grant_type", "password"));
-		data.add(new BasicNameValuePair("client_id", oauthClientId));
-		data.add(new BasicNameValuePair("client_secret", oauthClientSecret));
-		data.add(new BasicNameValuePair("username", oauthUser));
-		data.add(new BasicNameValuePair("password", oauthPass));
-
-		ObjectNode token = null;
-		InputStream responseContent = null;
-		try {
-			final HttpPost post = new HttpPost(oauthAuthUrl);
-			post.setEntity(new UrlEncodedFormEntity(data, "UTF-8"));
-			
-			final HttpResponse response = httpClient.execute(post);
-			
-			responseContent = response.getEntity().getContent();
-					
-			token = (ObjectNode) new ObjectMapper().readTree(responseContent);
-			
-		} catch (Exception e) {
-			throw new AuxipOauthException("error retrieving oauth access token from "
-					+ this.hostConfig.getOauthAuthUrl() + ": " + e.getMessage(), e);
-		} finally {
-			IOUtils.closeQuietly(responseContent);
-		}
-		
-		if (null == token) {
-			throw new AuxipOauthException("error retrieving oauth access token from "
-					+ this.hostConfig.getOauthAuthUrl() + ": no result from parsing response to json");
-		}
-
-		final JsonNode tokenNode = token.get("access_token");
-		if (null == tokenNode) {
-			throw new AuxipOauthException("error retrieving oauth access token from "
-					+ this.hostConfig.getOauthAuthUrl() + ": response contains no access_token");
-		}
-
-		final String accessToken = tokenNode.asText();
-		if (StringUtil.isEmpty(accessToken)) {
-			throw new AuxipOauthException("error retrieving oauth access token from "
-					+ this.hostConfig.getOauthAuthUrl() + ": response contains no value for access_token");
-		}
-
-		return accessToken;
-	}
-	
-	private CloseableHttpClient newOauthAuthorizationClient() {		
-		try {
-			final HttpClientBuilder clientBuilder = HttpClientBuilder.create();
-			
-			final SSLContextBuilder builder = new SSLContextBuilder();
-			builder.loadTrustMaterial(new TrustSelfSignedStrategy());			
-			final SSLConnectionSocketFactory sslsf = new SSLConnectionSocketFactory(
-					builder.build(),
-			        NoopHostnameVerifier.INSTANCE
-			);
-			clientBuilder.setSSLSocketFactory(sslsf);
-			
-			return clientBuilder.build();
-		} catch (final Exception e) {
-			// FIXME error handling
-			throw new RuntimeException(e);
-		} 
-	}
 
 	private URIFilter buildFilters(final LocalDateTime from, final LocalDateTime to, final String productNameContains) {
 		final FilterFactory filterFactory = this.odataClient.getFilterFactory();
@@ -343,11 +231,11 @@ public class AuxipOdataClient implements AuxipClient {
 		request.setAccept("application/json");
 		LOG.debug("sending request to PRIP: " + absoluteUri);
 		//LOG.debug("sending request to PRIP: " + request.toString());
-		
+
 		final ODataRetrieveResponse<ClientEntitySetIterator<ClientEntitySet, ClientEntity>> response = request
 				.execute();
 		LOG.debug("metadata search response status: " + response.getStatusCode() + " - " + response.getStatusMessage());
-		
+
 		return response.getBody();
 	}
 
@@ -408,7 +296,7 @@ public class AuxipOdataClient implements AuxipClient {
 						} catch (final Exception e) {
 							metadata.addParsingError(
 									"could not parse creation date attribute '" + this.creationDateAttrName
-											+ "': error parsing date '" + creationDateString + "'; " + e.getMessage());
+									+ "': error parsing date '" + creationDateString + "'; " + e.getMessage());
 						}
 					} else {
 						metadata.addParsingError("could not parse creation date attribute '" + this.creationDateAttrName

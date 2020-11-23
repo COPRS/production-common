@@ -65,10 +65,7 @@ public class AuxipOdataClientFactory implements AuxipClientFactory {
 	@Override
 	public AuxipClient newAuxipClient(final URI serverUrl) {
 		final AuxipHostConfiguration hostConfig = this.hostConfigFor(serverUrl.toString());
-		
-		// TODO @MSc: anhand der config entscheiden ob basic auth oder oauth, entweder hier zentral für beide clients oder beim erstellen jedes clients selber
-		
-		final ODataClient odataClient = this.buildOdataClient(hostConfig);
+		final ODataClient odataClient = this.newOdataClient(hostConfig);
 	
 		final CredentialsProvider credentialsProvider = new BasicCredentialsProvider();
 		credentialsProvider.setCredentials(
@@ -129,27 +126,26 @@ public class AuxipOdataClientFactory implements AuxipClientFactory {
 		} 
 	}
 	
-	private ODataClient buildOdataClient(final AuxipHostConfiguration hostConfig) {
+	private ODataClient newOdataClient(final AuxipHostConfiguration hostConfig) {
 		final ODataClient odataClient = ODataClientFactory.getClient();
-				
 		final AuxipOdataHttpClientFactory httpClientFactory = new AuxipOdataHttpClientFactory(hostConfig);
 		
-		final boolean needsProxy = null != this.config.getProxy() && !this.config.getProxy().isEmpty();
-		final boolean needsAuthentication = null != hostConfig.getUser() && !hostConfig.getUser().isEmpty();
-		final boolean oauth = needsAuthentication && StringUtil.isNotEmpty(hostConfig.getOauthClientId())
-				&& StringUtil.isNotEmpty(hostConfig.getOauthClientSecret())
-				&& StringUtil.isNotEmpty(hostConfig.getOauthAuthUrl());
-		
-		// TODO @MSc:  initiales fehlerhandling wg. nicht vorhandener values hier oder früher
-		
 		// authentication
-		if (oauth) {
+		final String authType = hostConfig.getAuthType();
+		if ("oauth2".equalsIgnoreCase(authType)) {
+			this.validateOauthConfig(hostConfig);
 			httpClientFactory.addHeaderSupplier(() -> this.oauthHeaderFor(hostConfig));
-		} else if (needsAuthentication) {
+		} else if ("basic".equalsIgnoreCase(authType)) {
+			this.validateBasicAuthConfig(hostConfig);
 			httpClientFactory.addHeaderSupplier(() -> basicAuthHeaderFor(hostConfig));
+		} else {
+			LOG.info("because of the configured authType "
+					+ (StringUtil.isEmpty(authType) ? "<empty>" : "'" + authType + "'")
+					+ " the auxip client will be disabled for target host " + hostConfig.getServiceRootUri());
 		}
 		
 		// proxy
+		final boolean needsProxy = null != this.config.getProxy() && !this.config.getProxy().isEmpty();
 		ProxyWrappingHttpClientFactory proxyWrappingHttpClientFactory = null;
 		if (needsProxy) {
 			URI proxyUri = null;
@@ -175,6 +171,53 @@ public class AuxipOdataClientFactory implements AuxipClientFactory {
 		return odataClient;
 	}
 	
+	private void validateBasicAuthConfig(final AuxipHostConfiguration hostConfig) {
+		if (StringUtil.isBlank(hostConfig.getUser())) {
+			final String msg = "error configuring odata client with basic authentication for auxip target host "
+					+ hostConfig.getServiceRootUri() + ": no user configured!";
+			LOG.error(msg);
+			throw new AuxipClientConfigurationException(msg);
+		}
+		//		if (StringUtil.isBlank(hostConfig.getPass())) {
+		//			final String msg = "error configuring odata client with basic authentication for auxip target host "
+		//					+ hostConfig.getServiceRootUri() + ": no password configured!";
+		//			LOG.error(msg);
+		//			throw new AuxipConfigurationException(msg);
+		//		}
+	}
+	
+	private void validateOauthConfig(final AuxipHostConfiguration hostConfig) {
+		if (StringUtil.isBlank(hostConfig.getOauthAuthUrl())) {
+			final String msg = "error configuring odata client with oauth2 for auxip target host "
+					+ hostConfig.getServiceRootUri() + ": no oauth authorization server url configured!";
+			LOG.error(msg);
+			throw new AuxipClientConfigurationException(msg);
+		}
+		if (StringUtil.isBlank(hostConfig.getOauthClientId())) {
+			final String msg = "error configuring odata client with oauth2 for auxip target host "
+					+ hostConfig.getServiceRootUri() + ": no oauth client ID configured!";
+			LOG.error(msg);
+			throw new AuxipClientConfigurationException(msg);
+		}
+		if (StringUtil.isBlank(hostConfig.getOauthClientSecret())) {
+			final String msg = "error configuring odata client with oauth2 for auxip target host "
+					+ hostConfig.getServiceRootUri() + ": no oauth client secret configured!";
+			LOG.error(msg);
+			throw new AuxipClientConfigurationException(msg);
+		}
+		if (StringUtil.isBlank(hostConfig.getUser())) {
+			final String msg = "error configuring odata client with oauth2 for auxip target host "
+					+ hostConfig.getServiceRootUri() + ": no oauth authorization server user configured!";
+			LOG.error(msg);
+			throw new AuxipClientConfigurationException(msg);
+		}
+		if (StringUtil.isBlank(hostConfig.getPass())) {
+			final String msg = "error configuring odata client with oauth2 for auxip target host "
+					+ hostConfig.getServiceRootUri() + ": no oauth authorization server password configured!";
+			LOG.error(msg);
+			throw new AuxipClientConfigurationException(msg);
+		}
+	}
 	
 	private static final Header basicAuthHeaderFor(final AuxipHostConfiguration hostConfig) {
 		final String auth = hostConfig.getUser() + ":" + hostConfig.getPass();
@@ -184,37 +227,25 @@ public class AuxipOdataClientFactory implements AuxipClientFactory {
 	}
 	
 	private Header oauthHeaderFor(final AuxipHostConfiguration hostConfig) {
-		final String accessToken;
-		try {
-			accessToken = this.retrieveOauthAccessToken(hostConfig);
-		} catch (Exception e) {
-			LOG.error("error retrieving oauth access token: " + StringUtil.stackTraceToString(e));
-			throw e;
-		}
-
+		final String accessToken = this.retrieveOauthAccessToken(hostConfig);
 		return new BasicHeader("OAUTH2-ACCESS-TOKEN", accessToken);
 	}
 	
 	private String retrieveOauthAccessToken(final AuxipHostConfiguration hostConfig) {
-		final String oauthAuthUrl = hostConfig.getOauthAuthUrl();
-		final String oauthClientId = hostConfig.getOauthClientId();
-		final String oauthClientSecret = hostConfig.getOauthClientSecret();
-		final String oauthUser = hostConfig.getUser();
-		final String oauthPass = hostConfig.getPass();
-
-		return this.retrieveOauthAccessToken(URI.create(oauthAuthUrl), oauthClientId, oauthClientSecret, oauthUser,	oauthPass);
+		return this.retrieveOauthAccessToken(URI.create(hostConfig.getOauthAuthUrl()), hostConfig.getOauthClientId(),
+				hostConfig.getOauthClientSecret(), hostConfig.getUser(), hostConfig.getPass());
 	}
 	
 	private String retrieveOauthAccessToken(final URI oauthAuthUrl, final String oauthClientId,
-			final String oauthClientSecret, final String oauthUser, final String oauthPass) {
+			final String oauthClientSecret, final String oauthAuthServerUser, final String oauthAuthServerPass) {
 		final CloseableHttpClient httpClient = this.newOauthAuthorizationClient();
 
 		final List<BasicNameValuePair> data = new ArrayList<BasicNameValuePair>();
 		data.add(new BasicNameValuePair("grant_type", "password"));
 		data.add(new BasicNameValuePair("client_id", oauthClientId));
 		data.add(new BasicNameValuePair("client_secret", oauthClientSecret));
-		data.add(new BasicNameValuePair("username", oauthUser));
-		data.add(new BasicNameValuePair("password", oauthPass));
+		data.add(new BasicNameValuePair("username", oauthAuthServerUser));
+		data.add(new BasicNameValuePair("password", oauthAuthServerPass));
 
 		ObjectNode token = null;
 		InputStream responseContent = null;
@@ -229,26 +260,26 @@ public class AuxipOdataClientFactory implements AuxipClientFactory {
 			token = (ObjectNode) new ObjectMapper().readTree(responseContent);
 			
 		} catch (Exception e) {
-			throw new AuxipOauthException(
+			throw new AuxipClientOauthException(
 					"error retrieving oauth access token from " + oauthAuthUrl + ": " + e.getMessage(), e);
 		} finally {
 			IOUtils.closeQuietly(responseContent);
 		}
 		
 		if (null == token) {
-			throw new AuxipOauthException("error retrieving oauth access token from " + oauthAuthUrl
+			throw new AuxipClientOauthException("error retrieving oauth access token from " + oauthAuthUrl
 					+ ": no result from parsing response to json");
 		}
 
 		final JsonNode tokenNode = token.get("access_token");
 		if (null == tokenNode) {
-			throw new AuxipOauthException(
+			throw new AuxipClientOauthException(
 					"error retrieving oauth access token from " + oauthAuthUrl + ": response contains no access_token");
 		}
 
 		final String accessToken = tokenNode.asText();
 		if (StringUtil.isEmpty(accessToken)) {
-			throw new AuxipOauthException("error retrieving oauth access token from " + oauthAuthUrl
+			throw new AuxipClientOauthException("error retrieving oauth access token from " + oauthAuthUrl
 					+ ": response contains no value for access_token");
 		}
 
@@ -271,7 +302,7 @@ public class AuxipOdataClientFactory implements AuxipClientFactory {
 		} catch (final Exception e) {
 			// FIXME error handling
 			throw new RuntimeException(e);
-		} 
+		}
 	}
 	
 }
