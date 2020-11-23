@@ -138,6 +138,20 @@ public class AuxipOdataClient implements AuxipClient {
 		LOG.debug("sending download request: " + productDownloadUrl);
 		if (this.hostConfig.isUseHttpClientDownload()) {
 			final HttpGet httpget = new HttpGet(productDownloadUrl.toString());
+
+			// authentication
+			final String authType = this.hostConfig.getAuthType();
+			if ("oauth2".equalsIgnoreCase(authType)) {
+				httpget.addHeader(AuxipAuthenticationUtil.oauthHeaderFor(this.hostConfig));
+			} else if ("basic".equalsIgnoreCase(authType)) {
+				httpget.addHeader(AuxipAuthenticationUtil.basicAuthHeaderFor(this.hostConfig));
+			} else {
+				LOG.info("download request authentication is disabled per authType "
+						+ (StringUtil.isEmpty(this.hostConfig.getAuthType()) ? "<empty>"
+								: "'" + this.hostConfig.getAuthType() + "'")
+						+ " for " + this.rootServiceUrl);
+			}
+
 			try {
 				final CloseableHttpResponse response = this.downloadClient.execute(httpget, this.context);
 				final HttpEntity entity = response.getEntity();
