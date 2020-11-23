@@ -18,6 +18,7 @@ public class AuxipClientConfigurationProperties {
 		private String user;
 		private String pass;
 		private boolean sslValidation = true;
+		private String authType; // basic|oauth2|disable
 		private String oauthAuthUrl;
 		private String oauthClientId;
 		private String oauthClientSecret;
@@ -33,11 +34,12 @@ public class AuxipClientConfigurationProperties {
 		@Override
 		public String toString() {
 			return "AuxipHostConfiguration [serviceRootUri=" + this.serviceRootUri + ", user=" + this.user
-					+ ", pass=****" + ", sslValidation=" + this.sslValidation + ", oauthAuthUrl=" + this.oauthAuthUrl
-					+ ", oauthClientId=" + this.oauthClientId + ", oauthClientSecret=" + this.oauthClientSecret
-					+ ", creationDateAttributeName=" + this.creationDateAttributeName + ", productNameAttrName="
-					+ this.productNameAttrName + ", contentLengthAttrName=" + this.contentLengthAttrName
-					+ ", idAttrName=" + this.idAttrName + ", useHttpClientDownload=" + useHttpClientDownload + "]";
+					+ ", pass=****" + ", sslValidation=" + this.sslValidation + ", authType=" + this.authType
+					+ ", oauthAuthUrl=" + this.oauthAuthUrl + ", oauthClientId=" + this.oauthClientId
+					+ ", oauthClientSecret=" + this.oauthClientSecret + ", creationDateAttributeName="
+					+ this.creationDateAttributeName + ", productNameAttrName=" + this.productNameAttrName
+					+ ", contentLengthAttrName=" + this.contentLengthAttrName + ", idAttrName=" + this.idAttrName
+					+ ", useHttpClientDownload=" + useHttpClientDownload + "]";
 		}
 
 		// - - - - - - - - - - - - - - - - - -
@@ -136,6 +138,14 @@ public class AuxipClientConfigurationProperties {
 
 		public void setOauthClientSecret(String oauthClientSecret) {
 			this.oauthClientSecret = oauthClientSecret;
+		}
+
+		public String getAuthType() {
+			return this.authType;
+		}
+
+		public void setAuthType(String authType) {
+			this.authType = authType;
 		}
 	}
 	
