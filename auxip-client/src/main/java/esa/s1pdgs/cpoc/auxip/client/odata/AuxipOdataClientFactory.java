@@ -1,15 +1,22 @@
 package esa.s1pdgs.cpoc.auxip.client.odata;
 
+import java.io.InputStream;
 import java.net.URI;
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
+import java.util.List;
 
 import org.apache.commons.codec.binary.Base64;
+import org.apache.commons.io.IOUtils;
 import org.apache.http.Header;
 import org.apache.http.HttpHost;
+import org.apache.http.HttpResponse;
 import org.apache.http.auth.AuthScope;
 import org.apache.http.auth.UsernamePasswordCredentials;
 import org.apache.http.client.AuthCache;
 import org.apache.http.client.CredentialsProvider;
+import org.apache.http.client.entity.UrlEncodedFormEntity;
+import org.apache.http.client.methods.HttpPost;
 import org.apache.http.client.protocol.HttpClientContext;
 import org.apache.http.conn.ssl.NoopHostnameVerifier;
 import org.apache.http.conn.ssl.SSLConnectionSocketFactory;
@@ -20,6 +27,7 @@ import org.apache.http.impl.client.BasicCredentialsProvider;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.message.BasicHeader;
+import org.apache.http.message.BasicNameValuePair;
 import org.apache.http.ssl.SSLContextBuilder;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -27,6 +35,10 @@ import org.apache.olingo.client.api.ODataClient;
 import org.apache.olingo.client.core.ODataClientFactory;
 import org.apache.olingo.client.core.http.ProxyWrappingHttpClientFactory;
 import org.apache.olingo.commons.api.http.HttpHeader;
+
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 
 import esa.s1pdgs.cpoc.auxip.client.AuxipClient;
 import esa.s1pdgs.cpoc.auxip.client.AuxipClientFactory;
@@ -53,6 +65,9 @@ public class AuxipOdataClientFactory implements AuxipClientFactory {
 	@Override
 	public AuxipClient newAuxipClient(final URI serverUrl) {
 		final AuxipHostConfiguration hostConfig = this.hostConfigFor(serverUrl.toString());
+		
+		// TODO @MSc: anhand der config entscheiden ob basic auth oder oauth, entweder hier zentral für beide clients oder beim erstellen jedes clients selber
+		
 		final ODataClient odataClient = this.buildOdataClient(hostConfig);
 	
 		final CredentialsProvider credentialsProvider = new BasicCredentialsProvider();
@@ -121,12 +136,18 @@ public class AuxipOdataClientFactory implements AuxipClientFactory {
 		
 		final boolean needsProxy = null != this.config.getProxy() && !this.config.getProxy().isEmpty();
 		final boolean needsAuthentication = null != hostConfig.getUser() && !hostConfig.getUser().isEmpty();
+		final boolean oauth = needsAuthentication && StringUtil.isNotEmpty(hostConfig.getOauthClientId())
+				&& StringUtil.isNotEmpty(hostConfig.getOauthClientSecret())
+				&& StringUtil.isNotEmpty(hostConfig.getOauthAuthUrl());
+		
+		// TODO @MSc:  initiales fehlerhandling wg. nicht vorhandener values hier oder früher
 		
 		// authentication
-		if (needsAuthentication) {		
-			// TODO implement OAuth2 header provision
-			httpClientFactory.addHeaderSupplier( () -> basicAuthHeaderFor(hostConfig));
-		} 
+		if (oauth) {
+			httpClientFactory.addHeaderSupplier(() -> this.oauthHeaderFor(hostConfig));
+		} else if (needsAuthentication) {
+			httpClientFactory.addHeaderSupplier(() -> basicAuthHeaderFor(hostConfig));
+		}
 		
 		// proxy
 		ProxyWrappingHttpClientFactory proxyWrappingHttpClientFactory = null;
@@ -161,4 +182,96 @@ public class AuxipOdataClientFactory implements AuxipClientFactory {
 
 		return new BasicHeader(HttpHeader.AUTHORIZATION, "Basic " + new String(encodedAuth));
 	}
+	
+	private Header oauthHeaderFor(final AuxipHostConfiguration hostConfig) {
+		final String accessToken;
+		try {
+			accessToken = this.retrieveOauthAccessToken(hostConfig);
+		} catch (Exception e) {
+			LOG.error("error retrieving oauth access token: " + StringUtil.stackTraceToString(e));
+			throw e;
+		}
+
+		return new BasicHeader("OAUTH2-ACCESS-TOKEN", accessToken);
+	}
+	
+	private String retrieveOauthAccessToken(final AuxipHostConfiguration hostConfig) {
+		final String oauthAuthUrl = hostConfig.getOauthAuthUrl();
+		final String oauthClientId = hostConfig.getOauthClientId();
+		final String oauthClientSecret = hostConfig.getOauthClientSecret();
+		final String oauthUser = hostConfig.getUser();
+		final String oauthPass = hostConfig.getPass();
+
+		return this.retrieveOauthAccessToken(URI.create(oauthAuthUrl), oauthClientId, oauthClientSecret, oauthUser,	oauthPass);
+	}
+	
+	private String retrieveOauthAccessToken(final URI oauthAuthUrl, final String oauthClientId,
+			final String oauthClientSecret, final String oauthUser, final String oauthPass) {
+		final CloseableHttpClient httpClient = this.newOauthAuthorizationClient();
+
+		final List<BasicNameValuePair> data = new ArrayList<BasicNameValuePair>();
+		data.add(new BasicNameValuePair("grant_type", "password"));
+		data.add(new BasicNameValuePair("client_id", oauthClientId));
+		data.add(new BasicNameValuePair("client_secret", oauthClientSecret));
+		data.add(new BasicNameValuePair("username", oauthUser));
+		data.add(new BasicNameValuePair("password", oauthPass));
+
+		ObjectNode token = null;
+		InputStream responseContent = null;
+		try {
+			final HttpPost post = new HttpPost(oauthAuthUrl);
+			post.setEntity(new UrlEncodedFormEntity(data, "UTF-8"));
+			
+			final HttpResponse response = httpClient.execute(post);
+			
+			responseContent = response.getEntity().getContent();
+					
+			token = (ObjectNode) new ObjectMapper().readTree(responseContent);
+			
+		} catch (Exception e) {
+			throw new AuxipOauthException(
+					"error retrieving oauth access token from " + oauthAuthUrl + ": " + e.getMessage(), e);
+		} finally {
+			IOUtils.closeQuietly(responseContent);
+		}
+		
+		if (null == token) {
+			throw new AuxipOauthException("error retrieving oauth access token from " + oauthAuthUrl
+					+ ": no result from parsing response to json");
+		}
+
+		final JsonNode tokenNode = token.get("access_token");
+		if (null == tokenNode) {
+			throw new AuxipOauthException(
+					"error retrieving oauth access token from " + oauthAuthUrl + ": response contains no access_token");
+		}
+
+		final String accessToken = tokenNode.asText();
+		if (StringUtil.isEmpty(accessToken)) {
+			throw new AuxipOauthException("error retrieving oauth access token from " + oauthAuthUrl
+					+ ": response contains no value for access_token");
+		}
+
+		return accessToken;
+	}
+	
+	private CloseableHttpClient newOauthAuthorizationClient() {		
+		try {
+			final HttpClientBuilder clientBuilder = HttpClientBuilder.create();
+			
+			final SSLContextBuilder builder = new SSLContextBuilder();
+			builder.loadTrustMaterial(new TrustSelfSignedStrategy());			
+			final SSLConnectionSocketFactory sslsf = new SSLConnectionSocketFactory(
+					builder.build(),
+			        NoopHostnameVerifier.INSTANCE
+			);
+			clientBuilder.setSSLSocketFactory(sslsf);
+			
+			return clientBuilder.build();
+		} catch (final Exception e) {
+			// FIXME error handling
+			throw new RuntimeException(e);
+		} 
+	}
+	
 }
