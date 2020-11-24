@@ -22,6 +22,8 @@ import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.message.BasicHeader;
 import org.apache.http.message.BasicNameValuePair;
 import org.apache.http.ssl.SSLContextBuilder;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.apache.olingo.commons.api.http.HttpHeader;
 
 import com.fasterxml.jackson.databind.JsonNode;
@@ -33,6 +35,8 @@ import esa.s1pdgs.cpoc.common.utils.StringUtil;
 
 public final class AuxipAuthenticationUtil {
 
+	private static final Logger LOG = LogManager.getLogger(AuxipAuthenticationUtil.class);
+
 	public static final Header basicAuthHeaderFor(final AuxipHostConfiguration hostConfig) {
 		final String auth = hostConfig.getUser() + ":" + hostConfig.getPass();
 		final byte[] encodedAuth = Base64.encodeBase64(auth.getBytes(StandardCharsets.ISO_8859_1));
@@ -42,6 +46,7 @@ public final class AuxipAuthenticationUtil {
 
 	public static final Header oauthHeaderFor(final AuxipHostConfiguration hostConfig) {
 		final String accessToken = retrieveOauthAccessToken(hostConfig);
+		LOG.debug("oauth access token: " + accessToken); // TODO @MSc: remove
 		return new BasicHeader("OAUTH2-ACCESS-TOKEN", accessToken);
 	}
 
