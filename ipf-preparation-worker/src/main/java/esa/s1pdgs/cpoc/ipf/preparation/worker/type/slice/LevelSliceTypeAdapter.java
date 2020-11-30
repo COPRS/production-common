@@ -27,15 +27,18 @@ public final class LevelSliceTypeAdapter extends AbstractProductTypeAdapter impl
 	private final MetadataClient metadataClient;
 	private final Map<String, Float> sliceOverlap;
 	private final Map<String, Float> sliceLength;
-
+	private final Map<String,String> timelinessMapping;
+	
 	public LevelSliceTypeAdapter(
 			final MetadataClient metadataClient,
 			final Map<String, Float> sliceOverlap,
-			final Map<String, Float> sliceLength
+			final Map<String, Float> sliceLength,
+			final Map<String,String> timelinessMapping
 	) {
 		this.metadataClient = metadataClient;
 		this.sliceOverlap = sliceOverlap;
 		this.sliceLength = sliceLength;
+		this.timelinessMapping = timelinessMapping;
 	}
 
 	@Override
@@ -99,8 +102,8 @@ public final class LevelSliceTypeAdapter extends AbstractProductTypeAdapter impl
 	}
 
 	@Override
-	public List<AppDataJob> createAppDataJobs(IpfPreparationJob job) {
-		AppDataJob appDataJob = AppDataJob.fromPreparationJob(job);
+	public List<AppDataJob> createAppDataJobs(final IpfPreparationJob job) {
+		final AppDataJob appDataJob = AppDataJob.fromPreparationJob(job);
 		
 		final CatalogEventAdapter eventAdapter = CatalogEventAdapter.of(appDataJob);
 		final LevelSliceProduct product = LevelSliceProduct.of(appDataJob);		
@@ -147,6 +150,25 @@ public final class LevelSliceTypeAdapter extends AbstractProductTypeAdapter impl
 				"Slicing_Flag", 
 				"TRUE"
 		);
+		
+		// S1PRO-2194: evaluate mapped timeliness value. Keep default, if there is no
+		// corresponding mapping configured;
+		final String inputTimeliness = product.getTimeliness(); // is an empty string if not defined
+		
+		final String timelinessInJoborder = timelinessMapping.get(inputTimeliness);
+		if (timelinessInJoborder != null) {
+			LOGGER.debug("Adding 'Timeliness_Category' value '{}' to joborder of job {} (input was: {})", 
+					timelinessInJoborder, job.getId(), inputTimeliness);
+			updateProcParamIfDefined(
+					jobOrder, 
+					"Timeliness_Category", 
+					timelinessInJoborder
+			);
+		}
+		else {
+			LOGGER.trace("Omitting provision of timeliness value {} (no mapping defined in {})",  
+					inputTimeliness, timelinessMapping);
+		}
 	}
 
 	@Override

@@ -120,4 +120,8 @@ public class LevelSliceProduct extends AbstractProduct {
 	public final List<AppDataJobFile> getAcns() {
 		return product.getProductsFor(ACN);
 	}
+	
+	public final String getTimeliness() {
+		return product.getStringValue("timeliness", "");
+	}
 }

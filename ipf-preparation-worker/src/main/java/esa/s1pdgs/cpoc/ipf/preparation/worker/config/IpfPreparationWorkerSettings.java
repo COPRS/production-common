@@ -120,6 +120,8 @@ public class IpfPreparationWorkerSettings {
 	private List<InputWaitingConfig> inputWaiting = new ArrayList<>();
 
 	private Map<ProductCategory, CategoryConfig> productCategories = new LinkedHashMap<>();
+	
+	private Map<String,String> joborderTimelinessCategoryMapping = new LinkedHashMap<>();
 
 	public Map<ProductCategory, CategoryConfig> getProductCategories() {
 		return productCategories;
@@ -534,6 +536,14 @@ public class IpfPreparationWorkerSettings {
 		this.productMode = productMode;
 	}
 
+	public Map<String,String> getJoborderTimelinessCategoryMapping() {
+		return joborderTimelinessCategoryMapping;
+	}
+
+	public void setJoborderTimelinessCategoryMapping(final Map<String,String> joborderTimelinessCategoryMapping) {
+		this.joborderTimelinessCategoryMapping = joborderTimelinessCategoryMapping;
+	}
+	
 	/**
 	 * Display object in JSON format
 	 */
@@ -546,7 +556,6 @@ public class IpfPreparationWorkerSettings {
 				+ "\", typeOverlap: \"" + typeOverlap + "\", typeSliceLength: \"" + typeSliceLength
 				+ "\", mapTypeMeta: \"" + mapTypeMeta + "\", oqcCheck: \"" + oqcCheck + "\", productMode: \""
 				+ productMode + "\", productCategories: \"" + productCategories + "\", inputWaiting: \"" + inputWaiting
-				+ "\"}";
+				+ "\", joborderTimelinessCategoryMapping="+joborderTimelinessCategoryMapping+"}";
 	}
-
 }
