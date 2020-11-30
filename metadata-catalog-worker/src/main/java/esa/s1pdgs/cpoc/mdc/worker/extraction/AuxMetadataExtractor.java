@@ -6,6 +6,7 @@ import java.util.List;
 
 import org.json.JSONObject;
 
+import esa.s1pdgs.cpoc.common.MaskType;
 import esa.s1pdgs.cpoc.common.ProductFamily;
 import esa.s1pdgs.cpoc.common.errors.AbstractCodedException;
 import esa.s1pdgs.cpoc.common.errors.InternalErrorException;
@@ -55,57 +56,23 @@ public final class AuxMetadataExtractor extends AbstractMetadataExtractor {
 			 * to a dedicated elastic search index
 			 */
 			// TODO: Having this logic in the Auxiliary Extract might not be the best place, maybe a new one for masks would be better
-			if (configFileDesc.getProductType().equals("MSK__LAND_")) {			
-				try {					
-					final List<JSONObject> landMasks = new MaskExtractor().extract(metadataFile);
-					logger.info("Uploading {} land mask polygons", landMasks.size());
-					int c=0;
-					for (final JSONObject land : landMasks) {
-						String id = configFileDesc.getProductName() + "/features/" + c;
-						logger.debug("Uploading land mask {}", id);
-						logger.trace("land mask json: {}",land.toString());
-						esServices.createLandmaskGeoMetadata(land, id);
-						logger.debug("Finished uploading land mask {}", id);
-						c++;
-					}
-				} catch (final Exception ex) {
-					logger.error("An error occurred while ingesting land mask documents: {}", LogUtils.toString(ex));
-					throw new InternalErrorException(Exceptions.messageOf(ex), ex);
+
+			MaskType maskType = MaskType.of(configFileDesc.getProductType());
+			try {
+				final List<JSONObject> featureCollection = new MaskExtractor().extract(metadataFile);
+				logger.info("Uploading {} {} polygons", featureCollection.size(), maskType.toString());
+				int featureNumber = 0;
+				for (final JSONObject feature : featureCollection) {
+					String id = configFileDesc.getProductName() + "/features/" + featureNumber;
+					logger.debug("Uploading {} {}", maskType, id);
+					logger.trace("{} json: {}", maskType, feature.toString());
+					esServices.createMaskFootprintData(maskType, feature, id);
+					logger.debug("Finished uploading {} {}", maskType, id);
+					featureNumber++;
 				}
-			} else if (configFileDesc.getProductType().equals("MSK_OCEAN_")) {
-				try {
-					final List<JSONObject> oceanMasks = new MaskExtractor().extract(metadataFile);
-					logger.info("Uploading {} ocean mask polygons", oceanMasks.size());
-					int c=0;
-					for (final JSONObject oceanmask : oceanMasks) {
-						String id = configFileDesc.getProductName() + "/features/" + c;
-						logger.debug("Uploading ocean mask {}", id);
-						logger.trace("oceans mask json: {}",oceanmask.toString());
-						esServices.createOceanMaskGeoMetadata(oceanmask, id);
-						logger.debug("Finished uploading ocean mask {}", id);
-						c++;
-					}
-				} catch (final Exception ex) {
-					logger.error("An error occurred while ingesting ocean mask documents: {}", LogUtils.toString(ex));
-					throw new InternalErrorException(Exceptions.messageOf(ex), ex);
-				}
-			} else if (configFileDesc.getProductType().equals("MSK_OVRPAS")) {
-				try {
-					final List<JSONObject> overpassMasks = new MaskExtractor().extract(metadataFile);
-					logger.info("Uploading {} overpass mask polygons", overpassMasks.size());
-					int c=0;
-					for (final JSONObject overpass : overpassMasks) {
-						String id = configFileDesc.getProductName() + "/features/" + c;
-						logger.debug("Uploading overpass mask {}", id);
-						logger.trace("overpass mask json: {}",overpass.toString());
-						esServices.createOverpassMaskGeoMetadata(overpass, id);
-						logger.debug("Finished uploading overpass mask {}", id);
-						c++;
-					}
-				} catch (final Exception ex) {
-					logger.error("An error occurred while ingesting overpass mask documents: {}", LogUtils.toString(ex));
-					throw new InternalErrorException(Exceptions.messageOf(ex), ex);
-				}
+			} catch (final Exception ex) {
+				logger.error("An error occurred while ingesting {} documents: {}", maskType, LogUtils.toString(ex));
+				throw new InternalErrorException(Exceptions.messageOf(ex), ex);
 			}
 			return obj;
 		}

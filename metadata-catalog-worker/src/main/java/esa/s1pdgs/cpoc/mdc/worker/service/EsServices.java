@@ -49,6 +49,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import esa.s1pdgs.cpoc.common.EdrsSessionFileType;
+import esa.s1pdgs.cpoc.common.MaskType;
 import esa.s1pdgs.cpoc.common.ProductCategory;
 import esa.s1pdgs.cpoc.common.ProductFamily;
 import esa.s1pdgs.cpoc.common.errors.processing.MetadataCreationException;
@@ -218,9 +219,16 @@ public class EsServices {
 		}
 	}
 
-	public void createLandmaskGeoMetadata(final JSONObject product, final String id) throws Exception {
+	public void createMaskFootprintData(final MaskType maskType, final JSONObject product, final String id) throws Exception {
+		final String footprintIndexName;
+		switch (maskType) {
+			case LAND: footprintIndexName = LANDMASK_FOOTPRINT_INDEX_NAME; break;
+			case OCEAN:	footprintIndexName = OCEANMASK_FOOTPRINT_INDEX_NAME; break;
+			case OVERPASS: footprintIndexName = OVERPASSMASK_FOOTPRINT_INDEX_NAME; break;
+			default: throw new IllegalArgumentException(String.format("Unsupported mask type '%s'", maskType));
+		}
 		try {
-			final IndexRequest request = new IndexRequest(LANDMASK_FOOTPRINT_INDEX_NAME).id(id).source(product.toString(),
+			final IndexRequest request = new IndexRequest(footprintIndexName).id(id).source(product.toString(),
 					XContentType.JSON);
 
 			final IndexResponse response = elasticsearchDAO.index(request);
@@ -233,39 +241,7 @@ public class EsServices {
 			throw new Exception(e);
 		}
 	}
-	
-	public void createOceanMaskGeoMetadata(final JSONObject product, final String id) throws Exception {
-		try {
-			final IndexRequest request = new IndexRequest(OCEANMASK_FOOTPRINT_INDEX_NAME).id(id).source(product.toString(),
-					XContentType.JSON);
-
-			final IndexResponse response = elasticsearchDAO.index(request);
-
-			if (response.status() != RestStatus.CREATED) {
-				throw new MetadataCreationException(id, response.status().toString(),
-						response.getResult().toString());
-			}
-		} catch (JSONException | IOException e) {
-			throw new Exception(e);
-		}
-	}
-	
-	public void createOverpassMaskGeoMetadata(final JSONObject product, final String id) throws Exception {
-		try {
-			final IndexRequest request = new IndexRequest(OVERPASSMASK_FOOTPRINT_INDEX_NAME).id(id).source(product.toString(),
-					XContentType.JSON);
-
-			final IndexResponse response = elasticsearchDAO.index(request);
-
-			if (response.status() != RestStatus.CREATED) {
-				throw new MetadataCreationException(id, response.status().toString(),
-						response.getResult().toString());
-			}
-		} catch (JSONException | IOException e) {
-			throw new Exception(e);
-		}
-	}
-	
+		
 	/**
 	 * Refresh the index to ensure new documents can be found. The index is
 	 * extracted from the family and type.
