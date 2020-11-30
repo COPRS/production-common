@@ -34,9 +34,11 @@ public class TestAuxipInboxFilter {
 
 	private final static List<String> PLANS_REPORTS_ZIPS;
 	private final static String MISSION_PLAN_REPORT_ZIP = "S1B_OPER_REP_MP_MP__PDMC_20200303T091119_V20200303T170000_20200326T190000.xml.zip";
-	private final static String FOS_SATELLITE_UNAVAILABLITIY_REPORT_ZIP = "S1A_OPER_REP_SUP__20181208T070000_20181208T111500_0001.EOF.zip";
-	private final static String MANOEUVRE_ACCELERATION_PROFILE_ZIP = "S1A_OPER_REP_MACP_20130712T015902_20130712T050411_0001.TGZ.zip";
-	private final static String FAILURE_MATRICES_ZIP = "S1B_OPER_AM_FAILUR_MPC_20170126T091213_V20170116T220000_99999999T999999.EOF.zip";
+	private final static String FOS_SATELLITE_UNAVAILABLITIY_REPORT_ZIP = "S1A_OPER_REP__SUP___20181208T070000_20181208T111500_0001.EOF.zip";
+	private final static String MANOEUVRE_ACCELERATION_PROFILE_ZIP = "S1A_OPER_REP__MACP__20130712T015902_20130712T050411_0001.TGZ.zip";
+	private final static String FAILURE_MATRICES_ZIP = "S1B_OPER_AM__FAILUR_MPC__20170126T091213_V20170116T220000_99999999T999999.EOF.zip";
+	private final static String STATION_ACQUISITION_REPORT_ZIP = "S1A_OPER_REP_STNACQ_MPS__20200304T192845_V20200304T191631_20200304T192629.EOF.zip";
+	private final static String STATION_ACQUISITION_PLAN_ZIP = "S1B_OPER_MPL_SPMPS__PDMC_20200302T091444_V20200302T170000_20200314T190000.EOF.zip";
 
 	static {
 		PLANS_REPORTS_ZIPS = new ArrayList<>();
@@ -44,6 +46,8 @@ public class TestAuxipInboxFilter {
 		PLANS_REPORTS_ZIPS.add(MANOEUVRE_ACCELERATION_PROFILE_ZIP);
 		PLANS_REPORTS_ZIPS.add(FOS_SATELLITE_UNAVAILABLITIY_REPORT_ZIP);
 		PLANS_REPORTS_ZIPS.add(FAILURE_MATRICES_ZIP);
+		PLANS_REPORTS_ZIPS.add(STATION_ACQUISITION_REPORT_ZIP);
+		PLANS_REPORTS_ZIPS.add(STATION_ACQUISITION_PLAN_ZIP);
 	}
 
 	// --------------------------------------------------------------------------
@@ -54,8 +58,8 @@ public class TestAuxipInboxFilter {
 		for (int i = 0; i < AUX_ZIPS.size(); i++) {
 			final String filename = AUX_ZIPS.get(i);
 			final boolean accepts = TestAuxipInboxFilter.WHITELIST_FILTER_AUX_ZIP.accept(newAuxipInboxEntry(filename));
-			System.out.println(
-					(i + 1) + "/" + AUX_ZIPS.size() + " " + filename + ": " + (accepts ? "accepted" : "not accepted"));
+			System.out.println((i + 1) + "/" + AUX_ZIPS.size() + " " + filename + ":\n    expect: accepted  ->  is: "
+					+ (accepts ? "accepted" : "not accepted"));
 			if (!accepts) {
 				acceptsAll = false;
 			}
@@ -63,15 +67,15 @@ public class TestAuxipInboxFilter {
 		assertTrue(acceptsAll);
 	}
 
-	//@Test
+	@Test
 	public final void testAccept_OnMatchingRegex_ShallReturnTrue_forPlanReportZips() {
 		boolean acceptsAll = true;
 		for (int i = 0; i < PLANS_REPORTS_ZIPS.size(); i++) {
 			final String filename = PLANS_REPORTS_ZIPS.get(i);
 			final boolean accepts = TestAuxipInboxFilter.WHITELIST_FILTER_PLANS_REPORTS_ZIP
 					.accept(newAuxipInboxEntry(filename));
-			System.out.println((i + 1) + "/" + PLANS_REPORTS_ZIPS.size() + " " + filename + ": "
-					+ (accepts ? "accepted" : "not accepted"));
+			System.out.println((i + 1) + "/" + PLANS_REPORTS_ZIPS.size() + " " + filename
+					+ ":\n    expect: accepted  ->  is: " + (accepts ? "accepted" : "not accepted"));
 			if (!accepts) {
 				acceptsAll = false;
 			}
@@ -85,8 +89,23 @@ public class TestAuxipInboxFilter {
 		for (int i = 0; i < AUX_ZIPS.size(); i++) {
 			final String filename = AUX_ZIPS.get(i);
 			final boolean matches = Pattern.matches(AUX_ZIP_REGEX, filename);
-			System.out.println(
-					(i + 1) + "/" + AUX_ZIPS.size() + " " + filename + ": " + (matches ? "matches" : "does not match"));
+			System.out.println((i + 1) + "/" + AUX_ZIPS.size() + " " + filename + ":\n    expect: matches  ->  is: "
+					+ (matches ? "matches" : "does not match"));
+			if (!matches) {
+				matchAll = false;
+			}
+		}
+		assertTrue(matchAll);
+	}
+
+	@Test
+	public final void testPlansReportsRegex() {
+		boolean matchAll = true;
+		for (int i = 0; i < PLANS_REPORTS_ZIPS.size(); i++) {
+			final String filename = PLANS_REPORTS_ZIPS.get(i);
+			final boolean matches = Pattern.matches(PLANS_REPORTS_ZIP_REGEX, filename);
+			System.out.println((i + 1) + "/" + PLANS_REPORTS_ZIPS.size() + " " + filename
+					+ ":\n    expect: matches  ->  is: " + (matches ? "matches" : "does not match"));
 			if (!matches) {
 				matchAll = false;
 			}
@@ -95,18 +114,35 @@ public class TestAuxipInboxFilter {
 	}
 
 	//@Test
-	public final void testPlansReportsRegex() {
-		boolean matchAll = true;
+	public final void testPlansReportsNotMatchAuxRegex() {
+		// making sure the product is not ingested twice
+		boolean matchNone = true;
 		for (int i = 0; i < PLANS_REPORTS_ZIPS.size(); i++) {
 			final String filename = PLANS_REPORTS_ZIPS.get(i);
-			final boolean matches = Pattern.matches(PLANS_REPORTS_ZIP_REGEX, filename);
-			System.out.println((i + 1) + "/" + PLANS_REPORTS_ZIPS.size() + " " + filename + ": "
-					+ (matches ? "matches" : "does not match"));
-			if (!matches) {
-				matchAll = false;
+			final boolean matches = Pattern.matches(AUX_ZIP_REGEX, filename);
+			System.out.println((i + 1) + "/" + PLANS_REPORTS_ZIPS.size() + " " + filename
+					+ ":\n    expect: does not match  ->  is: " + (matches ? "matches" : "does not match"));
+			if (matches) {
+				matchNone = false;
 			}
 		}
-		assertTrue(matchAll);
+		assertTrue(matchNone);
+	}
+
+	@Test
+	public final void testAuxNotMatchPlansReportsRegex() {
+		// making sure the product is not ingested twice
+		boolean matchNone = true;
+		for (int i = 0; i < AUX_ZIPS.size(); i++) {
+			final String filename = AUX_ZIPS.get(i);
+			final boolean matches = Pattern.matches(PLANS_REPORTS_ZIP_REGEX, filename);
+			System.out.println((i + 1) + "/" + AUX_ZIPS.size() + " " + filename
+					+ ":\n    expect: does not match  ->  is: " + (matches ? "matches" : "does not match"));
+			if (matches) {
+				matchNone = false;
+			}
+		}
+		assertTrue(matchNone);
 	}
 
 	// --------------------------------------------------------------------------
