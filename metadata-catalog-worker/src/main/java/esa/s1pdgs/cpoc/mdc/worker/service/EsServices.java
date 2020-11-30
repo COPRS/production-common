@@ -79,6 +79,7 @@ import esa.s1pdgs.cpoc.metadata.model.SearchMetadata;
 public class EsServices {
 
 	private static final String LANDMASK_FOOTPRINT_INDEX_NAME = "landmask";
+	private static final String OCEANMASK_FOOTPRINT_INDEX_NAME = "oceanmask";
 	private static final String OVERPASSMASK_FOOTPRINT_INDEX_NAME = "overpassmask";
 	private static final String REQUIRED_INSTRUMENT_ID_PATTERN = "(aux_pp1|aux_pp2|aux_cal|aux_ins)";
 	static final String REQUIRED_SATELLITE_ID_PATTERN = "(aux_.*)";
@@ -220,6 +221,22 @@ public class EsServices {
 	public void createLandmaskGeoMetadata(final JSONObject product, final String id) throws Exception {
 		try {
 			final IndexRequest request = new IndexRequest(LANDMASK_FOOTPRINT_INDEX_NAME).id(id).source(product.toString(),
+					XContentType.JSON);
+
+			final IndexResponse response = elasticsearchDAO.index(request);
+
+			if (response.status() != RestStatus.CREATED) {
+				throw new MetadataCreationException(id, response.status().toString(),
+						response.getResult().toString());
+			}
+		} catch (JSONException | IOException e) {
+			throw new Exception(e);
+		}
+	}
+	
+	public void createOceanMaskGeoMetadata(final JSONObject product, final String id) throws Exception {
+		try {
+			final IndexRequest request = new IndexRequest(OCEANMASK_FOOTPRINT_INDEX_NAME).id(id).source(product.toString(),
 					XContentType.JSON);
 
 			final IndexResponse response = elasticsearchDAO.index(request);

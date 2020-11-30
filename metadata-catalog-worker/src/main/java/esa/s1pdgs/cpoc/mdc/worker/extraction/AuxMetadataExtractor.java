@@ -16,6 +16,7 @@ import esa.s1pdgs.cpoc.mdc.worker.config.ProcessConfiguration;
 import esa.s1pdgs.cpoc.mdc.worker.extraction.files.FileDescriptorBuilder;
 import esa.s1pdgs.cpoc.mdc.worker.extraction.files.LandMaskExtractor;
 import esa.s1pdgs.cpoc.mdc.worker.extraction.files.MetadataBuilder;
+import esa.s1pdgs.cpoc.mdc.worker.extraction.files.OceanMaskExtractor;
 import esa.s1pdgs.cpoc.mdc.worker.extraction.files.OverpassMaskExtractor;
 import esa.s1pdgs.cpoc.mdc.worker.extraction.model.AuxDescriptor;
 import esa.s1pdgs.cpoc.mdc.worker.service.EsServices;
@@ -71,6 +72,23 @@ public final class AuxMetadataExtractor extends AbstractMetadataExtractor {
 					}
 				} catch (final Exception ex) {
 					logger.error("An error occurred while ingesting land mask documents: {}", LogUtils.toString(ex));
+					throw new InternalErrorException(Exceptions.messageOf(ex), ex);
+				}
+			} else if (configFileDesc.getProductType().equals("MSK_OCEAN_")) {
+				try {
+					final List<JSONObject> oceanMasks = new OceanMaskExtractor().extract(metadataFile);
+					logger.info("Uploading {} ocean mask polygons", oceanMasks.size());
+					int c=0;
+					for (final JSONObject oceanmask : oceanMasks) {
+						String id = configFileDesc.getProductName() + "/features/" + c;
+						logger.debug("Uploading ocean mask {}", id);
+						logger.trace("oceans mask json: {}",oceanmask.toString());
+						esServices.createOceanMaskGeoMetadata(oceanmask, id);
+						logger.debug("Finished uploading ocean mask {}", id);
+						c++;
+					}
+				} catch (final Exception ex) {
+					logger.error("An error occurred while ingesting ocean mask documents: {}", LogUtils.toString(ex));
 					throw new InternalErrorException(Exceptions.messageOf(ex), ex);
 				}
 			} else if (configFileDesc.getProductType().equals("MSK_OVRPAS")) {
