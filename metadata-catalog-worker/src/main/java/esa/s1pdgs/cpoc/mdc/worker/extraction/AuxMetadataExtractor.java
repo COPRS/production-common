@@ -14,10 +14,8 @@ import esa.s1pdgs.cpoc.common.utils.FileUtils;
 import esa.s1pdgs.cpoc.common.utils.LogUtils;
 import esa.s1pdgs.cpoc.mdc.worker.config.ProcessConfiguration;
 import esa.s1pdgs.cpoc.mdc.worker.extraction.files.FileDescriptorBuilder;
-import esa.s1pdgs.cpoc.mdc.worker.extraction.files.LandMaskExtractor;
+import esa.s1pdgs.cpoc.mdc.worker.extraction.files.MaskExtractor;
 import esa.s1pdgs.cpoc.mdc.worker.extraction.files.MetadataBuilder;
-import esa.s1pdgs.cpoc.mdc.worker.extraction.files.OceanMaskExtractor;
-import esa.s1pdgs.cpoc.mdc.worker.extraction.files.OverpassMaskExtractor;
 import esa.s1pdgs.cpoc.mdc.worker.extraction.model.AuxDescriptor;
 import esa.s1pdgs.cpoc.mdc.worker.service.EsServices;
 import esa.s1pdgs.cpoc.mqi.model.queue.CatalogJob;
@@ -59,7 +57,7 @@ public final class AuxMetadataExtractor extends AbstractMetadataExtractor {
 			// TODO: Having this logic in the Auxiliary Extract might not be the best place, maybe a new one for masks would be better
 			if (configFileDesc.getProductType().equals("MSK__LAND_")) {			
 				try {					
-					final List<JSONObject> landMasks = new LandMaskExtractor().extract(metadataFile);
+					final List<JSONObject> landMasks = new MaskExtractor().extract(metadataFile);
 					logger.info("Uploading {} land mask polygons", landMasks.size());
 					int c=0;
 					for (final JSONObject land : landMasks) {
@@ -76,7 +74,7 @@ public final class AuxMetadataExtractor extends AbstractMetadataExtractor {
 				}
 			} else if (configFileDesc.getProductType().equals("MSK_OCEAN_")) {
 				try {
-					final List<JSONObject> oceanMasks = new OceanMaskExtractor().extract(metadataFile);
+					final List<JSONObject> oceanMasks = new MaskExtractor().extract(metadataFile);
 					logger.info("Uploading {} ocean mask polygons", oceanMasks.size());
 					int c=0;
 					for (final JSONObject oceanmask : oceanMasks) {
@@ -93,7 +91,7 @@ public final class AuxMetadataExtractor extends AbstractMetadataExtractor {
 				}
 			} else if (configFileDesc.getProductType().equals("MSK_OVRPAS")) {
 				try {
-					final List<JSONObject> overpassMasks = new OverpassMaskExtractor().extract(metadataFile);
+					final List<JSONObject> overpassMasks = new MaskExtractor().extract(metadataFile);
 					logger.info("Uploading {} overpass mask polygons", overpassMasks.size());
 					int c=0;
 					for (final JSONObject overpass : overpassMasks) {
