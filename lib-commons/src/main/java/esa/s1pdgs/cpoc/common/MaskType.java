@@ -2,7 +2,7 @@ package esa.s1pdgs.cpoc.common;
 
 public enum MaskType {
 	LAND("MSK_LAND_"),
-	OCEAN("MSK_OCEAN"),
+	OCEAN("MSK_OCEAN_"),
 	OVERPASS("MSK_OVRPAS");
 	
 	private String productType;
