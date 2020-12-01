@@ -51,3 +51,4 @@ include:
   - local: ipf-execution-worker/.gitlab-ci.yml
   - local: data-lifecycle-trigger/.gitlab-ci.yml
   - local: data-lifecycle-worker/.gitlab-ci.yml
+  - local: myocean-trigger/.gitlab-ci.yml
