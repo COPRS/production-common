@@ -359,6 +359,6 @@
 		<module>compression-trigger</module>
 		<module>compression-worker</module>
 		<module>xml-tools</module>
-
+		<module>myocean-trigger</module>
 	</modules>
 </project>
