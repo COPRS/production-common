@@ -25,6 +25,7 @@ import org.slf4j.LoggerFactory;
 
 import esa.s1pdgs.cpoc.auxip.client.AuxipClient;
 import esa.s1pdgs.cpoc.auxip.client.AuxipProductMetadata;
+import esa.s1pdgs.cpoc.common.ProductFamily;
 import esa.s1pdgs.cpoc.common.utils.DateUtils;
 import esa.s1pdgs.cpoc.ingestion.trigger.config.AuxipConfiguration;
 import esa.s1pdgs.cpoc.ingestion.trigger.config.ProcessConfiguration;
@@ -40,19 +41,22 @@ public class AuxipInboxAdapter extends AbstractInboxAdapter {
     private final ProcessConfiguration processConfiguration;
     private final AuxipStateRepository repository;
     private final AuxipClient auxipClient;
-
+    private final ProductFamily productFamily;
+    
     public AuxipInboxAdapter(final InboxEntryFactory inboxEntryFactory,
                              final AuxipConfiguration configuration,
                              final ProcessConfiguration processConfiguration,
                              final AuxipClient auxipClient,
                              final URI inboxURL,
                              final String stationName,
+                             final ProductFamily productFamily,
                              final AuxipStateRepository repository) {
         super(inboxEntryFactory, inboxURL, stationName);
         this.configuration = configuration;
         this.repository = repository;
         this.processConfiguration = processConfiguration;
         this.auxipClient = auxipClient;
+        this.productFamily = productFamily;
     }
 
     @Override
@@ -111,19 +115,22 @@ public class AuxipInboxAdapter extends AbstractInboxAdapter {
     }
 
     private AuxipState retrieveState() {
-        Optional<AuxipState> state = repository.findByProcessingPodAndPripUrl(processConfiguration.getHostname(), inboxURL());
+    	final Optional<AuxipState> state = repository.findByProcessingPodAndPripUrlAndProductFamily(
+    			processConfiguration.getHostname(), inboxURL(), productFamily.name());
 
         if (state.isPresent()) {
             return state.get();
         }
 
-        AuxipState newState = new AuxipState();
+        final AuxipState newState = new AuxipState();
         newState.setNextWindowStart(
                 new Date(Instant.from(
                         ZonedDateTime.ofLocal(DateUtils.parse(configuration.getStart()), ZoneId.of("UTC"), ZoneOffset.UTC)).toEpochMilli()));
         newState.setPripUrl(inboxURL());
         newState.setProcessingPod(processConfiguration.getHostname());
+        newState.setProductFamily(productFamily.name());
         repository.save(newState);
+        
         return newState;
     }
 

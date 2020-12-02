@@ -7,6 +7,7 @@ import org.springframework.stereotype.Component;
 
 import esa.s1pdgs.cpoc.auxip.client.AuxipClientFactory;
 import esa.s1pdgs.cpoc.ingestion.trigger.config.AuxipConfiguration;
+import esa.s1pdgs.cpoc.ingestion.trigger.config.InboxConfiguration;
 import esa.s1pdgs.cpoc.ingestion.trigger.config.ProcessConfiguration;
 import esa.s1pdgs.cpoc.ingestion.trigger.inbox.InboxAdapter;
 import esa.s1pdgs.cpoc.ingestion.trigger.inbox.InboxAdapterFactory;
@@ -32,16 +33,18 @@ public class AuxipInboxAdapterFactory implements InboxAdapterFactory {
         this.processConfiguration = processConfiguration;
         this.clientFactory = clientFactory;
     }
-
+    
     @Override
-    public InboxAdapter newInboxAdapter(URI inbox, String stationName) {
-        return new AuxipInboxAdapter(
+    public InboxAdapter newInboxAdapter(final URI inbox, final InboxConfiguration inboxConfig) {
+    	return new AuxipInboxAdapter(
                 inboxEntryFactory,
                 configuration,
                 processConfiguration,
                 clientFactory.newAuxipClient(inbox),
                 inbox,
-                stationName,
+                inboxConfig.getStationName(),
+                inboxConfig.getFamily(),
                 repository);
     }
+
 }

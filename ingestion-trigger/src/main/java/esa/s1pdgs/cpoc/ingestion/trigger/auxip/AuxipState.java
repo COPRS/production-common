@@ -10,67 +10,82 @@ import org.springframework.data.mongodb.core.mapping.Document;
 @Document(collection = "auxipState")
 public class AuxipState {
 
-    @Id
-    private ObjectId id; //necessary for repository.delete(entry)
+	@Id
+	private ObjectId id; //necessary for repository.delete(entry)
 
-    Date nextWindowStart;
-    String processingPod;
-    String pripUrl;
+	private Date nextWindowStart;
+	private String processingPod;
+	private String pripUrl;
+	private String productFamily;
 
-    public ObjectId getId() {
-        return id;
-    }
+	// --------------------------------------------------------------------------
 
-    public void setId(ObjectId id) {
-        this.id = id;
-    }
+	@Override
+	public String toString() {
+		return "AuxipState{" + "nextWindowStart=" + this.nextWindowStart + ", processingPod='" + this.processingPod
+				+ '\'' + ", productFamily='" + this.productFamily + ", pripHost='" + this.pripUrl + '\'' + '}';
+	}
 
-    public String getProcessingPod() {
-        return processingPod;
-    }
+	@Override
+	public boolean equals(Object o) {
+		if (this == o) {
+			return true;
+		}
+		if (o == null || this.getClass() != o.getClass()) {
+			return false;
+		}
+		final AuxipState that = (AuxipState) o;
 
-    public void setProcessingPod(String processingPod) {
-        this.processingPod = processingPod;
-    }
+		return Objects.equals(this.id, that.id) && Objects.equals(this.nextWindowStart, that.nextWindowStart)
+				&& Objects.equals(this.processingPod, that.processingPod) && Objects.equals(this.pripUrl, that.pripUrl)
+				&& Objects.equals(this.productFamily, that.productFamily);
+	}
 
-    public String getPripUrl() {
-        return pripUrl;
-    }
+	@Override
+	public int hashCode() {
+		return Objects.hash(this.id, this.nextWindowStart, this.processingPod, this.pripUrl, this.productFamily);
+	}
 
-    public void setPripUrl(String pripUrl) {
-        this.pripUrl = pripUrl;
-    }
+	// --------------------------------------------------------------------------
 
-    public Date getNextWindowStart() {
-        return nextWindowStart;
-    }
+	public ObjectId getId() {
+		return this.id;
+	}
 
-    public void setNextWindowStart(Date nextWindowStart) {
-        this.nextWindowStart = nextWindowStart;
-    }
+	public void setId(ObjectId id) {
+		this.id = id;
+	}
 
-    @Override
-    public String toString() {
-        return "AuxipState{" +
-                "nextWindowStart=" + nextWindowStart +
-                ", processingPod='" + processingPod + '\'' +
-                ", pripHost='" + pripUrl + '\'' +
-                '}';
-    }
+	public String getProcessingPod() {
+		return this.processingPod;
+	}
 
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        AuxipState that = (AuxipState) o;
-        return Objects.equals(id, that.id) &&
-                Objects.equals(nextWindowStart, that.nextWindowStart) &&
-                Objects.equals(processingPod, that.processingPod) &&
-                Objects.equals(pripUrl, that.pripUrl);
-    }
+	public void setProcessingPod(String processingPod) {
+		this.processingPod = processingPod;
+	}
 
-    @Override
-    public int hashCode() {
-        return Objects.hash(id, nextWindowStart, processingPod, pripUrl);
-    }
+	public String getPripUrl() {
+		return this.pripUrl;
+	}
+
+	public void setPripUrl(String pripUrl) {
+		this.pripUrl = pripUrl;
+	}
+
+	public Date getNextWindowStart() {
+		return this.nextWindowStart;
+	}
+
+	public void setNextWindowStart(Date nextWindowStart) {
+		this.nextWindowStart = nextWindowStart;
+	}
+
+	public String getProductFamily() {
+		return this.productFamily;
+	}
+
+	public void setProductFamily(String productFamily) {
+		this.productFamily = productFamily;
+	}
+
 }

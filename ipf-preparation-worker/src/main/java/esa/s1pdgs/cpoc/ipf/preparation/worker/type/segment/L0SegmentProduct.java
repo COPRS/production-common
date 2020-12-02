@@ -115,7 +115,7 @@ public class L0SegmentProduct extends AbstractProduct {
 	private final List<AppDataJobTaskInputs> overridingInputs = new ArrayList<>();
 	
 	public final void overridingInputs(final List<AppDataJobTaskInputs> overridingInputs) {
-		overridingInputs.addAll(overridingInputs);
+		this.overridingInputs.addAll(overridingInputs);
 	}
 	
 	@Override
