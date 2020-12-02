@@ -360,5 +360,6 @@
 		<module>compression-worker</module>
 		<module>xml-tools</module>
 		<module>dissemination-trigger</module>
+    	<module>dissemination-worker</module>
 	</modules>
 </project>
