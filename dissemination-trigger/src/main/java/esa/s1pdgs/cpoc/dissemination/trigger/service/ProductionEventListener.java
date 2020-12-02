@@ -1,4 +1,4 @@
-package esa.s1pdgs.cpoc.myocean.trigger.service;
+package esa.s1pdgs.cpoc.dissemination.trigger.service;
 
 import java.util.Collections;
 import java.util.List;
@@ -44,8 +44,8 @@ public class ProductionEventListener implements MqiListener<ProductionEvent> {
 
 	@Autowired
 	public ProductionEventListener(final GenericMqiClient mqiClient, final List<MessageFilter> messageFilter,
-			@Value("${myocean-trigger.production-event-listener.polling-interval-ms}") final long pollingIntervalMs,
-			@Value("${myocean-trigger.production-event-listener.polling-initial-delay-ms}") final long pollingInitialDelayMs,
+			@Value("${dissemination-trigger.production-event-listener.polling-interval-ms}") final long pollingIntervalMs,
+			@Value("${dissemination-trigger.production-event-listener.polling-initial-delay-ms}") final long pollingInitialDelayMs,
 			final AppStatus appStatus) {
 		this.mqiClient = mqiClient;
 		this.messageFilter = messageFilter;
@@ -70,7 +70,7 @@ public class ProductionEventListener implements MqiListener<ProductionEvent> {
 		final ProductionEvent productionEvent = inputMessage.getBody();
 
 		final Reporting reporting = ReportingUtils.newReportingBuilder().predecessor(productionEvent.getUid())
-				.newReporting("MyOceanTrigger");
+				.newReporting("DisseminationTrigger");
 
 		reporting.begin(
 				ReportingUtils.newFilenameReportingInputFor(productionEvent.getProductFamily(),

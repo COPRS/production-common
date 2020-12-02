@@ -13,7 +13,7 @@ RUN echo "${VERSION}" >> VERSION
 RUN echo "${BRANCH_TEXT}" >> VERSION
 RUN echo "${COMMIT_ID}" >> VERSION
 
-COPY --from=build /app/myocean-trigger/target/s1pro-core-myocean-trigger-*.jar s1pdgs-myocean-trigger.jar
+COPY --from=build /app/dissemination-trigger/target/s1pro-core-dissemination-trigger-*.jar s1pdgs-dissemination-trigger.jar
 COPY /config/start.sh start.sh
 
 ENTRYPOINT "/app/start.sh"

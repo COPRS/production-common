@@ -1,4 +1,4 @@
-package esa.s1pdgs.cpoc.myocean.trigger;
+package esa.s1pdgs.cpoc.dissemination.trigger;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
