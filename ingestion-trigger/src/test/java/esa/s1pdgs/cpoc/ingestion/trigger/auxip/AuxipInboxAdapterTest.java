@@ -31,6 +31,7 @@ import org.mockito.MockitoAnnotations;
 
 import esa.s1pdgs.cpoc.auxip.client.AuxipClient;
 import esa.s1pdgs.cpoc.auxip.client.AuxipProductMetadata;
+import esa.s1pdgs.cpoc.common.ProductFamily;
 import esa.s1pdgs.cpoc.ingestion.trigger.config.AuxipConfiguration;
 import esa.s1pdgs.cpoc.ingestion.trigger.config.ProcessConfiguration;
 import esa.s1pdgs.cpoc.ingestion.trigger.inbox.AbstractInboxAdapter;
@@ -60,6 +61,7 @@ public class AuxipInboxAdapterTest {
 
     @Test
     public void list() {
+    	final ProductFamily productFamily = ProductFamily.AUXILIARY_FILE_ZIP;
         final LocalDateTime start = LocalDateTime.parse("2020-01-01T01:00:00.000");
 
         final LocalDateTime expectedStart = start.minus(Duration.ofSeconds(24));
@@ -70,7 +72,8 @@ public class AuxipInboxAdapterTest {
         when(auxipConfiguration.getOffsetFromNowSec()).thenReturn(1000);
         when(auxipConfiguration.getTimeWindowOverlapSec()).thenReturn(24);
         when(auxipConfiguration.getTimeWindowSec()).thenReturn(235);
-        when(auxipRepository.findByProcessingPodAndPripUrl("localhost", "https://auxip")).thenReturn(auxipState(start));
+        when(auxipRepository.findByProcessingPodAndPripUrlAndProductFamily("localhost", "https://auxip", productFamily.name()))
+        	.thenReturn(auxipState(start));
         when(auxipClient.getMetadata(eq(expectedStart), eq(expectedStop), eq(3), eq(0)))
                 .thenReturn(metadata("one", "two", "three"));
         when(auxipClient.getMetadata(eq(expectedStart), eq(expectedStop), eq(3), eq(3)))
@@ -87,6 +90,7 @@ public class AuxipInboxAdapterTest {
                 auxipClient,
                 URI.create("https://auxip"),
                 "WILE",
+                productFamily,
                 auxipRepository);
 
 
@@ -99,6 +103,7 @@ public class AuxipInboxAdapterTest {
 
     @Test
     public void listInitialWithNoState() {
+    	final ProductFamily productFamily = ProductFamily.AUXILIARY_FILE_ZIP;
         final LocalDateTime start = LocalDateTime.parse("1978-08-08T14:00:00.000");
 
         final LocalDateTime expectedStart = start.minus(Duration.ofSeconds(24));
@@ -110,7 +115,8 @@ public class AuxipInboxAdapterTest {
         when(auxipConfiguration.getTimeWindowOverlapSec()).thenReturn(24);
         when(auxipConfiguration.getTimeWindowSec()).thenReturn(235);
         when(auxipConfiguration.getStart()).thenReturn("1978-08-08T14:00:00.000Z");
-        when(auxipRepository.findByProcessingPodAndPripUrl("localhost", "https://auxip")).thenReturn(empty());
+        when(auxipRepository.findByProcessingPodAndPripUrlAndProductFamily("localhost", "https://auxip", productFamily.name()))
+        	.thenReturn(empty());
         when(auxipClient.getMetadata(eq(expectedStart), eq(expectedStop), eq(3), eq(0)))
                 .thenReturn(metadata("one", "two", "three"));
         when(auxipClient.getMetadata(eq(expectedStart), eq(expectedStop), eq(3), eq(3)))
@@ -127,6 +133,7 @@ public class AuxipInboxAdapterTest {
                 auxipClient,
                 URI.create("https://auxip"),
                 "WILE",
+                productFamily,
                 auxipRepository);
 
 
@@ -139,6 +146,7 @@ public class AuxipInboxAdapterTest {
 
     @Test
     public void listTimeWindowTooCloseToNow() {
+    	final ProductFamily productFamily = ProductFamily.AUXILIARY_FILE_ZIP;
         final LocalDateTime start = LocalDateTime.now().minus(Duration.ofSeconds(235 + 500));
 
         when(processConfiguration.getHostname()).thenReturn("localhost");
@@ -146,7 +154,8 @@ public class AuxipInboxAdapterTest {
         when(auxipConfiguration.getOffsetFromNowSec()).thenReturn(1000);
         when(auxipConfiguration.getTimeWindowOverlapSec()).thenReturn(24);
         when(auxipConfiguration.getTimeWindowSec()).thenReturn(235);
-        when(auxipRepository.findByProcessingPodAndPripUrl("localhost", "https://auxip")).thenReturn(auxipState(start));
+        when(auxipRepository.findByProcessingPodAndPripUrlAndProductFamily("localhost", "https://auxip", productFamily.name()))
+        	.thenReturn(auxipState(start));
 
         final AuxipInboxAdapter uut = new AuxipInboxAdapter(
                 inboxEntryFactory,
@@ -155,6 +164,7 @@ public class AuxipInboxAdapterTest {
                 auxipClient,
                 URI.create("https://auxip"),
                 "WILE",
+                productFamily,
                 auxipRepository);
 
 
@@ -222,13 +232,14 @@ public class AuxipInboxAdapterTest {
 
     @Test
     public void advanceAfterPublish() {
-
+    	final ProductFamily productFamily = ProductFamily.AUXILIARY_FILE_ZIP;
         final LocalDateTime start = LocalDateTime.parse("1978-08-08T14:00:00.000");
         final LocalDateTime expectedNewStart = start.plus(Duration.ofSeconds(25489584));
 
         when(auxipConfiguration.getTimeWindowSec()).thenReturn(25489584);
         when(processConfiguration.getHostname()).thenReturn("localhost");
-        when(auxipRepository.findByProcessingPodAndPripUrl("localhost", "https://auxip")).thenReturn(auxipState(start));
+        when(auxipRepository.findByProcessingPodAndPripUrlAndProductFamily("localhost", "https://auxip", productFamily.name()))
+        	.thenReturn(auxipState(start));
 
         AuxipInboxAdapter uut = new AuxipInboxAdapter(
                 inboxEntryFactory,
@@ -237,6 +248,7 @@ public class AuxipInboxAdapterTest {
                 auxipClient,
                 URI.create("https://auxip"),
                 "WILE",
+                productFamily,
                 auxipRepository);
 
 
@@ -251,4 +263,5 @@ public class AuxipInboxAdapterTest {
             return auxipState.getNextWindowStart().equals(expected);
         };
     }
+    
 }
