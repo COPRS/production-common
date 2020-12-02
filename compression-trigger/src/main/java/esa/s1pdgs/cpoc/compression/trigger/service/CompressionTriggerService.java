@@ -4,6 +4,7 @@ import static esa.s1pdgs.cpoc.mqi.model.queue.util.CompressionEventUtil.SUFFIX_Z
 import static esa.s1pdgs.cpoc.mqi.model.queue.util.CompressionEventUtil.composeCompressedKeyObjectStorage;
 import static esa.s1pdgs.cpoc.mqi.model.queue.util.CompressionEventUtil.composeCompressedProductFamily;
 import static esa.s1pdgs.cpoc.mqi.model.queue.util.CompressionEventUtil.removeZipSuffix;
+import static esa.s1pdgs.cpoc.mqi.model.queue.util.CompressionEventUtil.removeZipSuffixFromProductFamily;
 
 import java.util.List;
 import java.util.Map;
@@ -57,7 +58,7 @@ public class CompressionTriggerService {
 		if (event.getProductFamily().toString().endsWith(SUFFIX_ZIPPRODUCTFAMILY)) {
 			return new CompressionJob(event.getKeyObjectStorage(), event.getProductFamily(),
 					removeZipSuffix(event.getKeyObjectStorage()),
-					ProductFamily.fromValue(removeZipSuffix(event.getProductFamily().toString())),
+					removeZipSuffixFromProductFamily(event.getProductFamily()),
 					CompressionDirection.UNCOMPRESS);
 		} else {
 			return new CompressionJob(event.getKeyObjectStorage(), event.getProductFamily(),

@@ -2,6 +2,8 @@ package esa.s1pdgs.cpoc.mqi.model.queue.util;
 
 import static org.junit.Assert.assertEquals;
 
+import java.io.File;
+
 import org.junit.Test;
 
 import esa.s1pdgs.cpoc.common.ProductFamily;
@@ -30,6 +32,12 @@ public class CompressionEventUtilTest {
 		assertEquals("foo.bar", CompressionEventUtil.removeZipSuffix("foo.bar.ZIP"));
 		assertEquals("foo.bar", CompressionEventUtil.removeZipSuffix("foo.bar.zip"));
 		assertEquals("foo.bar", CompressionEventUtil.removeZipSuffix("foo.bar"));
+	}
+	
+	@Test
+	public final void testRemoveZipSuffixFromProductFamily() {
+		assertEquals(ProductFamily.L0_ACN, CompressionEventUtil.removeZipSuffixFromProductFamily(ProductFamily.L0_ACN_ZIP));
+		assertEquals(ProductFamily.L1_SLICE, CompressionEventUtil.removeZipSuffixFromProductFamily(ProductFamily.L1_SLICE_ZIP));
 	}
 
 }
