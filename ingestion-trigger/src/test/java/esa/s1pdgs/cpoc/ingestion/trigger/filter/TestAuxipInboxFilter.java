@@ -8,6 +8,7 @@ import java.util.regex.Pattern;
 
 import org.junit.Test;
 
+import esa.s1pdgs.cpoc.common.ProductFamily;
 import esa.s1pdgs.cpoc.ingestion.trigger.entity.InboxEntry;
 
 import static org.junit.Assert.*;
@@ -57,7 +58,8 @@ public class TestAuxipInboxFilter {
 		boolean acceptsAll = true;
 		for (int i = 0; i < AUX_ZIPS.size(); i++) {
 			final String filename = AUX_ZIPS.get(i);
-			final boolean accepts = TestAuxipInboxFilter.WHITELIST_FILTER_AUX_ZIP.accept(newAuxipInboxEntry(filename));
+			final boolean accepts = TestAuxipInboxFilter.WHITELIST_FILTER_AUX_ZIP
+					.accept(newAuxipInboxEntry(filename, ProductFamily.AUXILIARY_FILE_ZIP));
 			System.out.println((i + 1) + "/" + AUX_ZIPS.size() + " " + filename + ":\n    expect: accepted  ->  is: "
 					+ (accepts ? "accepted" : "not accepted"));
 			if (!accepts) {
@@ -73,7 +75,7 @@ public class TestAuxipInboxFilter {
 		for (int i = 0; i < PLANS_REPORTS_ZIPS.size(); i++) {
 			final String filename = PLANS_REPORTS_ZIPS.get(i);
 			final boolean accepts = TestAuxipInboxFilter.WHITELIST_FILTER_PLANS_REPORTS_ZIP
-					.accept(newAuxipInboxEntry(filename));
+					.accept(newAuxipInboxEntry(filename, ProductFamily.PLAN_AND_REPORT_ZIP));
 			System.out.println((i + 1) + "/" + PLANS_REPORTS_ZIPS.size() + " " + filename
 					+ ":\n    expect: accepted  ->  is: " + (accepts ? "accepted" : "not accepted"));
 			if (!accepts) {
@@ -147,9 +149,9 @@ public class TestAuxipInboxFilter {
 
 	// --------------------------------------------------------------------------
 
-	private static InboxEntry newAuxipInboxEntry(final String filename) {
+	private static InboxEntry newAuxipInboxEntry(final String filename, final ProductFamily productFamily) {
 		return new InboxEntry(UUID.randomUUID().toString(), filename, "https://prip.odata/", new Date(), 123456, null,
-				"auxip");
+				"auxip", productFamily.name());
 	}
 
 }

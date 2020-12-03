@@ -41,7 +41,6 @@ public class AuxipInboxAdapter extends AbstractInboxAdapter {
     private final ProcessConfiguration processConfiguration;
     private final AuxipStateRepository repository;
     private final AuxipClient auxipClient;
-    private final ProductFamily productFamily;
     
     public AuxipInboxAdapter(final InboxEntryFactory inboxEntryFactory,
                              final AuxipConfiguration configuration,
@@ -51,12 +50,11 @@ public class AuxipInboxAdapter extends AbstractInboxAdapter {
                              final String stationName,
                              final ProductFamily productFamily,
                              final AuxipStateRepository repository) {
-        super(inboxEntryFactory, inboxURL, stationName);
+        super(inboxEntryFactory, inboxURL, stationName, productFamily);
         this.configuration = configuration;
         this.repository = repository;
         this.processConfiguration = processConfiguration;
         this.auxipClient = auxipClient;
-        this.productFamily = productFamily;
     }
 
     @Override
@@ -103,7 +101,8 @@ public class AuxipInboxAdapter extends AbstractInboxAdapter {
                 new Date(auxipMetadata.getCreationDate().toInstant(ZoneOffset.UTC).toEpochMilli()),
                 auxipMetadata.getContentLength(),
                 processConfiguration.getHostname(),
-                "auxip");
+                "auxip",
+                productFamily.name());
     }
 
     @Override

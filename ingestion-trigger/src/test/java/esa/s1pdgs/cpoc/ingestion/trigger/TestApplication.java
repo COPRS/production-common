@@ -19,6 +19,7 @@ import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit4.SpringRunner;
 
+import esa.s1pdgs.cpoc.common.ProductFamily;
 import esa.s1pdgs.cpoc.ingestion.trigger.config.InboxConfiguration;
 import esa.s1pdgs.cpoc.ingestion.trigger.config.IngestionTriggerConfigurationProperties;
 import esa.s1pdgs.cpoc.ingestion.trigger.entity.InboxEntry;
@@ -70,7 +71,8 @@ public class TestApplication {
 				new Date(),
 				0,
 				"WILE",
-				null
+				null,
+				ProductFamily.EDRS_SESSION
 		);
 
 		final InboxEntry entry2 = factory.newInboxEntry(
@@ -79,7 +81,8 @@ public class TestApplication {
 				new Date(),
 				0,
 				null,
-				null
+				null,
+				ProductFamily.AUXILIARY_FILE
 		);
 
 		repo.save(entry1);

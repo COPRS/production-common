@@ -8,6 +8,7 @@ import java.util.Set;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import esa.s1pdgs.cpoc.common.ProductFamily;
 import esa.s1pdgs.cpoc.ingestion.trigger.config.ProcessConfiguration;
 import esa.s1pdgs.cpoc.ingestion.trigger.entity.InboxEntry;
 import esa.s1pdgs.cpoc.ingestion.trigger.entity.InboxEntryRepository;
@@ -23,12 +24,10 @@ public class IngestionTriggerServiceTransactional {
 		this.repository = repository;
 		this.processConfiguration = processConfiguration;
 	}
-	
-	public Set<InboxEntry> getAllForPath(final String pickupURL, final String stationName) {
-		final List<InboxEntry> result = repository.findByProcessingPodAndPickupURLAndStationName(
-                processConfiguration.getHostname(), pickupURL,
-				stationName
-        );
+
+	public Set<InboxEntry> getAllForPath(final String pickupURL, final String stationName, final ProductFamily productFamily) {
+		final List<InboxEntry> result = repository.findByProcessingPodAndPickupURLAndStationNameAndProductFamily(
+				this.processConfiguration.getHostname(), pickupURL, stationName, productFamily.name());
 		return new HashSet<>(result);
 	}
 	

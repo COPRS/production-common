@@ -12,6 +12,7 @@ import java.util.stream.Stream;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import esa.s1pdgs.cpoc.common.ProductFamily;
 import esa.s1pdgs.cpoc.ingestion.trigger.entity.InboxEntry;
 import esa.s1pdgs.cpoc.ingestion.trigger.filter.InboxFilter;
 
@@ -39,15 +40,18 @@ public abstract class AbstractInboxAdapter implements InboxAdapter {
 	protected final InboxEntryFactory inboxEntryFactory;
 	protected final URI inboxURL;
 	protected final String stationName;
+	protected final ProductFamily productFamily;
 	
 	public AbstractInboxAdapter(
 			final InboxEntryFactory inboxEntryFactory, 
 			final URI inboxURL, 
-			final String stationName
+			final String stationName,
+			final ProductFamily productFamily
 	) {
 		this.inboxEntryFactory = inboxEntryFactory;
 		this.inboxURL = inboxURL;
 		this.stationName = stationName;
+		this.productFamily = productFamily;
 	}
 	
 	protected abstract Stream<EntrySupplier> list() throws IOException;

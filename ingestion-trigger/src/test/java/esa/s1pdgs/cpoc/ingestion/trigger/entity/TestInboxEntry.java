@@ -12,6 +12,7 @@ import java.util.Date;
 import org.junit.Before;
 import org.junit.Test;
 
+import esa.s1pdgs.cpoc.common.ProductFamily;
 import esa.s1pdgs.cpoc.ingestion.trigger.config.ProcessConfiguration;
 import esa.s1pdgs.cpoc.ingestion.trigger.inbox.InboxEntryFactory;
 import esa.s1pdgs.cpoc.ingestion.trigger.inbox.InboxEntryFactoryImpl;
@@ -74,7 +75,8 @@ public class TestInboxEntry {
 				new Date(),
 				0,
 				null,
-				null
+				null,
+				ProductFamily.EDRS_SESSION
 		);
 	}
 }

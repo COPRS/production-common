@@ -26,7 +26,7 @@ public class FilesystemInboxAdapterFactory implements InboxAdapterFactory {
 		if (!inboxDirectory.exists()) {
 			inboxDirectory.mkdirs();
 		}	
-		return new FilesystemInboxAdapter(inboxEntryFactory, inbox, inboxConfig.getStationName());
+		return new FilesystemInboxAdapter(inboxEntryFactory, inbox, inboxConfig.getStationName(), inboxConfig.getFamily());
 	}
 
 }

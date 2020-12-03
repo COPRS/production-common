@@ -12,17 +12,19 @@ import java.util.stream.Stream;
 
 import org.apache.commons.io.FileUtils;
 
+import esa.s1pdgs.cpoc.common.ProductFamily;
 import esa.s1pdgs.cpoc.ingestion.trigger.entity.InboxEntry;
 import esa.s1pdgs.cpoc.ingestion.trigger.inbox.AbstractInboxAdapter;
 import esa.s1pdgs.cpoc.ingestion.trigger.inbox.InboxEntryFactory;
 
-public class FilesystemInboxAdapter extends AbstractInboxAdapter {	
+public class FilesystemInboxAdapter extends AbstractInboxAdapter {
 	public FilesystemInboxAdapter(
 			final InboxEntryFactory inboxEntryFactory, 
 			final URI inboxURL, 	
-			final String stationName
+			final String stationName,
+			final ProductFamily productFamily
 	) {
-		super(inboxEntryFactory, inboxURL, stationName);
+		super(inboxEntryFactory, inboxURL, stationName, productFamily);
 	}
 	
 	@Override
@@ -41,7 +43,8 @@ public class FilesystemInboxAdapter extends AbstractInboxAdapter {
 				lastModified, 
 				size,
 				stationName,
-				"file"
+				"file",
+				productFamily
 		);
 	}
 }

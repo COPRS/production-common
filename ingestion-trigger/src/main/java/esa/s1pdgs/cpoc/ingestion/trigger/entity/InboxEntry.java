@@ -27,12 +27,15 @@ public class InboxEntry {
 	private String stationName;
 	private String processingPod;
 	private String inboxType;
+	private String productFamily;
+
+	// --------------------------------------------------------------------------
 
 	public InboxEntry() {
 	}
 
 	public InboxEntry(final String name, final String relativePath, final String pickupURL, final Date lastModified,
-					  final long size, final String processingPod, final String inboxType) {
+			final long size, final String processingPod, final String inboxType, final String productFamily) {
 		this.name = name;
 		this.relativePath = relativePath;
 		this.pickupURL = pickupURL;
@@ -40,7 +43,48 @@ public class InboxEntry {
 		this.size = size;
 		this.processingPod = processingPod;
 		this.inboxType = inboxType;
+		this.productFamily = productFamily;
 	}
+
+	// --------------------------------------------------------------------------
+
+	@Override
+	public boolean equals(final Object obj) {
+		if (this == obj) {
+			return true;
+		}
+		if (obj == null) {
+			return false;
+		}
+		if (this.getClass() != obj.getClass()) {
+			return false;
+		}
+		// WARNING: Don't take 'id' into account when implementing equals/hashCode
+		// because it's always 0 when created from Inbox
+		final InboxEntry other = (InboxEntry) obj;
+		return Objects.equals(this.name, other.name) && Objects.equals(this.pickupURL, other.pickupURL)
+				&& Objects.equals(this.relativePath, other.relativePath)
+				&& Objects.equals(this.stationName, other.stationName)
+				&& Objects.equals(this.processingPod, other.processingPod)
+				&& Objects.equals(this.productFamily, other.productFamily)
+				&& Objects.equals(this.inboxType, other.inboxType);
+	}
+
+	@Override
+	public int hashCode() {
+		return Objects.hash(this.name, this.pickupURL, this.relativePath, this.stationName, this.processingPod,
+				this.inboxType, this.productFamily);
+	}
+
+	@Override
+	public String toString() {
+		return format(
+				"InboxEntry [name=%s, relativePath=%s, pickupURL=%s, productFamily=%s, lastModified=%s, size=%s, stationName=%s, processingPod=%s, inboxType=%s]",
+				this.name, this.relativePath, this.pickupURL, this.productFamily, this.lastModified, this.size,
+				this.stationName, this.processingPod, this.inboxType);
+	}
+
+	// --------------------------------------------------------------------------
 
 	public String getName() {
 		return name;
@@ -102,36 +146,12 @@ public class InboxEntry {
 		this.inboxType = inboxType;
 	}
 
-	@Override
-	public boolean equals(final Object obj) {
-		if (this == obj) {
-			return true;
-		}
-		if (obj == null) {
-			return false;
-		}
-		if (getClass() != obj.getClass()) {
-			return false;
-		}
-		// WARNING: Don't take 'id' into account when implementing equals/hashCode
-		// because it's always 0 when created from Inbox
-		final InboxEntry other = (InboxEntry) obj;
-		return Objects.equals(name, other.name) && 
-				Objects.equals(pickupURL, other.pickupURL)
-				&& Objects.equals(relativePath, other.relativePath)
-				&& Objects.equals(stationName, other.stationName)
-				&& Objects.equals(processingPod, other.processingPod)
-				&& Objects.equals(inboxType, other.inboxType);
+	public String getProductFamily() {
+		return productFamily;
 	}
 
-	@Override
-	public int hashCode() {
-		return Objects.hash(name, pickupURL, relativePath, stationName, processingPod, inboxType);
+	public void setProductFamily(String productFamily) {
+		this.productFamily = productFamily;
 	}
 
-	@Override
-	public String toString() {
-		return format("InboxEntry [name=%s, relativePath=%s, pickupURL=%s, lastModified=%s, size=%s, stationName=%s, processingPod=%s, inboxType=%s]", name,
-				relativePath, pickupURL, lastModified, size, stationName, processingPod, inboxType);
-	}
 }
