@@ -1,6 +1,5 @@
 package esa.s1pdgs.cpoc.dissemination.trigger.service;
 
-import java.io.File;
 import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
@@ -16,8 +15,10 @@ import org.springframework.stereotype.Service;
 
 import esa.s1pdgs.cpoc.appstatus.AppStatus;
 import esa.s1pdgs.cpoc.common.ProductCategory;
+import esa.s1pdgs.cpoc.common.ProductFamily;
 import esa.s1pdgs.cpoc.common.errors.AbstractCodedException;
 import esa.s1pdgs.cpoc.common.utils.LogUtils;
+import esa.s1pdgs.cpoc.metadata.client.MetadataClient;
 import esa.s1pdgs.cpoc.mqi.client.GenericMqiClient;
 import esa.s1pdgs.cpoc.mqi.client.MessageFilter;
 import esa.s1pdgs.cpoc.mqi.client.MqiConsumer;
@@ -42,17 +43,20 @@ public class CompressionEventListener implements MqiListener<CompressionEvent> {
 
 	private final GenericMqiClient mqiClient;
 	private final List<MessageFilter> messageFilter;
+	private final MetadataClient metadataClient;
 	private final long pollingIntervalMs;
 	private final long pollingInitialDelayMs;
 	private final AppStatus appStatus;
 
 	@Autowired
 	public CompressionEventListener(final GenericMqiClient mqiClient, final List<MessageFilter> messageFilter,
+			final MetadataClient metadataClient,
 			@Value("${dissemination-trigger.event-listener.polling-interval-ms}") final long pollingIntervalMs,
 			@Value("${dissemination-trigger.event-listener.polling-initial-delay-ms}") final long pollingInitialDelayMs,
 			final AppStatus appStatus) {
 		this.mqiClient = mqiClient;
 		this.messageFilter = messageFilter;
+		this.metadataClient = metadataClient;
 		this.pollingIntervalMs = pollingIntervalMs;
 		this.pollingInitialDelayMs = pollingInitialDelayMs;
 		this.appStatus = appStatus;
@@ -81,7 +85,10 @@ public class CompressionEventListener implements MqiListener<CompressionEvent> {
 						compressionEvent.getKeyObjectStorage()),
 				new ReportingMessage("Handling event for %s", compressionEvent.getKeyObjectStorage()));
 
-		LOGGER.info("intersects Ocean Mask: {}", compressionEvent.getKeyObjectStorage());
+		final ProductFamily unzippedProductFamily = CompressionEventUtil
+				.removeZipSuffixFromProductFamily(compressionEvent.getProductFamily());
+		final String unzippedKeyObs = CompressionEventUtil.removeZipSuffix(compressionEvent.getKeyObjectStorage());
+
 		return new MqiMessageEventHandler.Builder<DisseminationJob>(ProductCategory.DISSEMINATION_JOBS)
 				.onSuccess(res -> reporting
 						.end(new ReportingMessage("End Handling event for %s", compressionEvent.getKeyObjectStorage())))
@@ -89,22 +96,15 @@ public class CompressionEventListener implements MqiListener<CompressionEvent> {
 						compressionEvent.getKeyObjectStorage(), LogUtils.toString(e))))
 				.publishMessageProducer(() -> {
 
-					if (intersectsOceanMask(compressionEvent)) {
-						LOGGER.info("skipping job, product does not intersect Ocean Mask: {}",
-								compressionEvent.getKeyObjectStorage());
-						return new MqiPublishingJob<>(Collections.emptyList());
-					} else {
+					if (metadataClient.isIntersectingOceanMask(unzippedProductFamily, unzippedKeyObs)) {
+						LOGGER.info("intersects ocean mask: {}", compressionEvent.getKeyObjectStorage());
 						final DisseminationJob disseminationJob = new DisseminationJob();
 						disseminationJob.setKeyObjectStorage(compressionEvent.getKeyObjectStorage());
 						disseminationJob.setProductFamily(compressionEvent.getProductFamily());
-
 						disseminationJob.addDisseminationSource(compressionEvent.getProductFamily(),
 								compressionEvent.getKeyObjectStorage());
-						disseminationJob.addDisseminationSource(
-								CompressionEventUtil
-										.removeZipSuffixFromProductFamily(compressionEvent.getProductFamily()),
-								CompressionEventUtil.removeZipSuffix(compressionEvent.getKeyObjectStorage()) + "/"
-										+ MANIFEST_SAFE_FILE);
+						disseminationJob.addDisseminationSource(unzippedProductFamily,
+								unzippedKeyObs + "/" + MANIFEST_SAFE_FILE);
 						disseminationJob.setUid(reporting.getUid());
 
 						final GenericPublicationMessageDto<DisseminationJob> outputMessage = new GenericPublicationMessageDto<DisseminationJob>(
@@ -113,13 +113,12 @@ public class CompressionEventListener implements MqiListener<CompressionEvent> {
 						LOGGER.debug("end conversion of CompressionEvent to DisseminationJob, sent message: {}",
 								outputMessage);
 						return new MqiPublishingJob<DisseminationJob>(Collections.singletonList(outputMessage));
+					} else {
+						LOGGER.info("skipping job, product does not intersect ocean mask: {}",
+								compressionEvent.getKeyObjectStorage());
+						return new MqiPublishingJob<>(Collections.emptyList());
 					}
 				}).newResult();
-	}
-
-	private boolean intersectsOceanMask(CompressionEvent compressionEvent) {
-		// TODO Auto-generated method stub
-		return true;
 	}
 
 }

@@ -1790,6 +1790,35 @@ public class EsServices {
 			throw new RuntimeException("Failed to check for overpass coverage", e);
 		}
 	}
+	
+	public boolean isIntersectingOceanMask(final ProductFamily family, final String productName) {
+		try {
+			final GetResponse response = elasticsearchDAO.get(new GetRequest(family.name().toLowerCase(), productName));
+			if (!response.isExists()) {
+				throw new MetadataNotPresentException(productName);
+			}
+
+			final GeoShapeQueryBuilder queryBuilder = QueryBuilders.geoShapeQuery("geometry",
+					extractPolygonFrom(response));
+			queryBuilder.relation(ShapeRelation.INTERSECTS);
+			LOGGER.debug("Using {}", queryBuilder);
+			final SearchSourceBuilder sourceBuilder = new SearchSourceBuilder();
+			sourceBuilder.query(queryBuilder);
+			sourceBuilder.size(SIZE_LIMIT);
+
+			final SearchRequest request = new SearchRequest(OCEANMASK_FOOTPRINT_INDEX_NAME);
+			request.source(sourceBuilder);
+
+			final SearchResponse searchResponse = elasticsearchDAO.search(request);
+			if (isNotEmpty(searchResponse)) {
+				return true; 
+			} else {	
+				return false;
+			}
+		} catch (final Exception e) {
+			throw new RuntimeException("Failed to check for ocean mask intersection", e);
+		}
+	}
 
 	@SuppressWarnings("unchecked")
 	private Geometry extractPolygonFrom(final GetResponse response) {
