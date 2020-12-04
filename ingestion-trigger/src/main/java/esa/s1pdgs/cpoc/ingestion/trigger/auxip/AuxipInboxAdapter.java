@@ -97,7 +97,7 @@ public class AuxipInboxAdapter extends AbstractInboxAdapter {
         return new InboxEntry(
                 auxipMetadata.getId().toString(),
                 auxipMetadata.getProductName(),
-                auxipMetadata.getRootServiceUrl().toString(),
+                inboxURL(),
                 new Date(auxipMetadata.getCreationDate().toInstant(ZoneOffset.UTC).toEpochMilli()),
                 auxipMetadata.getContentLength(),
                 processConfiguration.getHostname(),
