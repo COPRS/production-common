@@ -51,8 +51,8 @@ public class TestInbox {
     	final ProductFamily productFamily = ProductFamily.EDRS_SESSION;
 
         when(processConfiguration.getHostname()).thenReturn("ingestor-01");
-        when(fakeAdapter.read(any())).thenReturn(Arrays.asList(new InboxEntry("foo1", "foo1", "/tmp", new Date(), 10, null, null, productFamily.name()),
-                new InboxEntry("foo2", "foo2", "/tmp", new Date(), 10, null, null, productFamily.name())));
+        when(fakeAdapter.read(any())).thenReturn(Arrays.asList(new InboxEntry("foo1", "foo1", "/tmp", new Date(), 10, null, null, productFamily.name(), "WILE"),
+                new InboxEntry("foo2", "foo2", "/tmp", new Date(), 10, null, null, productFamily.name(), "WILE")));
         when(fakeAdapter.description()).thenReturn("fakeAdapter");
         when(fakeAdapter.inboxURL()).thenReturn("/tmp");
 
@@ -80,16 +80,16 @@ public class TestInbox {
 
         when(processConfiguration.getHostname()).thenReturn("ingestor-01");
         when(fakeAdapter.read(any())).thenReturn(Arrays.asList(
-                new InboxEntry("foo1", "foo1", "/tmp", new Date(), 0, "ingestor-01", null, productFamily.name()),
-                new InboxEntry("foo2", "foo2", "/tmp", new Date(), 0, "ingestor-01", null, productFamily.name())));
+                new InboxEntry("foo1", "foo1", "/tmp", new Date(), 0, "ingestor-01", null, productFamily.name(), "WILE"),
+                new InboxEntry("foo2", "foo2", "/tmp", new Date(), 0, "ingestor-01", null, productFamily.name(), "WILE")));
         when(fakeAdapter.description()).thenReturn("fakeAdapter");
         when(fakeAdapter.inboxURL()).thenReturn("/tmp");
 
 
         when(fakeRepo.findByProcessingPodAndPickupURLAndStationNameAndProductFamily(anyString(), anyString(), anyString(), anyString()))
                 .thenReturn(Arrays.asList(
-                        new InboxEntry("foo2", "foo2", "/tmp", new Date(), 0, "ingestor-01", null, productFamily.name()),
-                        new InboxEntry("foo1", "foo1", "/tmp", new Date(), 0, "ingestor-01", null, productFamily.name())));
+                        new InboxEntry("foo2", "foo2", "/tmp", new Date(), 0, "ingestor-01", null, productFamily.name(), "WILE"),
+                        new InboxEntry("foo1", "foo1", "/tmp", new Date(), 0, "ingestor-01", null, productFamily.name(), "WILE")));
 
         final Inbox uut = new Inbox(
                 fakeAdapter,
@@ -130,11 +130,11 @@ public class TestInbox {
         
         // old entry shall be ignored
         final Optional<InboxEntry> ignored = uut.handleEntry(
-        		new InboxEntry("foo1", "foo1", "/tmp", new Date(0), 1, "ingestor-01", null, productFamily.name())
+        		new InboxEntry("foo1", "foo1", "/tmp", new Date(0), 1, "ingestor-01", null, productFamily.name(), "WILE")
         );
         // new entry shall be accepted
         final Optional<InboxEntry> accepted = uut.handleEntry(
-        		new InboxEntry("foo2", "foo2", "/tmp", new Date(), 1, "ingestor-01", null, productFamily.name())
+        		new InboxEntry("foo2", "foo2", "/tmp", new Date(), 1, "ingestor-01", null, productFamily.name(), "WILE")
         );
         assertFalse(ignored.isPresent());
         assertTrue(accepted.isPresent());

@@ -28,7 +28,7 @@ public class InboxEntryRepositoryTest {
     @Test
     public void findByPickupURL() {
     	final ProductFamily productFamily = ProductFamily.EDRS_SESSION;
-        InboxEntry entry = new InboxEntry("tehName", "tehPath", "tehPickUrl", new Date(), 100, null, "file", productFamily.name());
+        InboxEntry entry = new InboxEntry("tehName", "tehPath", "tehPickUrl", new Date(), 100, null, "file", productFamily.name(), null);
         entry.setProcessingPod("ingestor-01");
         repository.save(entry);
 

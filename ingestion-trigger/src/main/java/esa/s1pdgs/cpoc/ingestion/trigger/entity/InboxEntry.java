@@ -35,7 +35,8 @@ public class InboxEntry {
 	}
 
 	public InboxEntry(final String name, final String relativePath, final String pickupURL, final Date lastModified,
-			final long size, final String processingPod, final String inboxType, final String productFamily) {
+			final long size, final String processingPod, final String inboxType, final String productFamily,
+			final String stationName) {
 		this.name = name;
 		this.relativePath = relativePath;
 		this.pickupURL = pickupURL;
@@ -44,6 +45,7 @@ public class InboxEntry {
 		this.processingPod = processingPod;
 		this.inboxType = inboxType;
 		this.productFamily = productFamily;
+		this.stationName = stationName;
 	}
 
 	// --------------------------------------------------------------------------
@@ -87,7 +89,7 @@ public class InboxEntry {
 	// --------------------------------------------------------------------------
 
 	public String getName() {
-		return name;
+		return this.name;
 	}
 
 	public void setName(final String name) {
@@ -95,7 +97,7 @@ public class InboxEntry {
 	}
 
 	public String getRelativePath() {
-		return relativePath;
+		return this.relativePath;
 	}
 
 	public void setRelativePath(final String relativePath) {
@@ -103,7 +105,7 @@ public class InboxEntry {
 	}
 
 	public String getPickupURL() {
-		return pickupURL;
+		return this.pickupURL;
 	}
 
 	public void setPickupURL(final String pickupURL) {
@@ -111,7 +113,7 @@ public class InboxEntry {
 	}
 
 	public Date getLastModified() {
-		return lastModified;
+		return this.lastModified;
 	}
 
 	public void setLastModified(final Date lastModified) {
@@ -119,27 +121,27 @@ public class InboxEntry {
 	}
 
 	public long getSize() {
-		return size;
+		return this.size;
 	}
 
 	public void setSize(final long size) {
 		this.size = size;
 	}
-	
+
 	public String getStationName() {
-		return stationName;
+		return this.stationName;
 	}
 
 	public void setStationName(final String stationName) {
 		this.stationName = stationName;
 	}
 
-	public String getProcessingPod() { return processingPod; }
+	public String getProcessingPod() { return this.processingPod; }
 
 	public void setProcessingPod(String processingPod) { this.processingPod = processingPod; }
 
 	public String getInboxType() {
-		return inboxType;
+		return this.inboxType;
 	}
 
 	public void setInboxType(String inboxType) {
@@ -147,7 +149,7 @@ public class InboxEntry {
 	}
 
 	public String getProductFamily() {
-		return productFamily;
+		return this.productFamily;
 	}
 
 	public void setProductFamily(String productFamily) {

@@ -151,7 +151,7 @@ public class TestAuxipInboxFilter {
 
 	private static InboxEntry newAuxipInboxEntry(final String filename, final ProductFamily productFamily) {
 		return new InboxEntry(UUID.randomUUID().toString(), filename, "https://prip.odata/", new Date(), 123456, null,
-				"auxip", productFamily.name());
+				"auxip", productFamily.name(), "PRIP");
 	}
 
 }

@@ -102,7 +102,8 @@ public class AuxipInboxAdapter extends AbstractInboxAdapter {
                 auxipMetadata.getContentLength(),
                 processConfiguration.getHostname(),
                 "auxip",
-                productFamily.name());
+                productFamily.name(),
+                stationName);
     }
 
     @Override
