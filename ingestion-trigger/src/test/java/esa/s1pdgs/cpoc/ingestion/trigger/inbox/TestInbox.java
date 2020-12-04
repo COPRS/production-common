@@ -74,7 +74,7 @@ public class TestInbox {
         verify(fakeMessageProducer, times(2)).send(eq("topic"), any());
     }
 
-    //@Test
+    @Test
     public final void testPoll_OnFindingAlreadyStoredProducts_ShallDoNothing() throws IOException {
     	final ProductFamily productFamily = ProductFamily.EDRS_SESSION;
 
