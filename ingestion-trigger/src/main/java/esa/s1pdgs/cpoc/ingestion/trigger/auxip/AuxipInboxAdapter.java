@@ -108,10 +108,16 @@ public class AuxipInboxAdapter extends AbstractInboxAdapter {
 
     @Override
     public void advanceAfterPublish() {
-        AuxipState auxipState = retrieveState();
-        Instant nextStart = auxipState.getNextWindowStart().toInstant().plus(ofSeconds(configuration.getTimeWindowSec()));
-        auxipState.setNextWindowStart(new Date(nextStart.toEpochMilli()));
-        repository.save(auxipState);
+		if (auxipClient.isDisabled()) {
+			LOG.info("won't advance auxip query time window for [" + inboxURL() + ", " + stationName + ", "
+					+ productFamily + "] as the auxip client is disabled");
+		} else {
+			AuxipState auxipState = retrieveState();
+			Instant nextStart = auxipState.getNextWindowStart().toInstant().plus(ofSeconds(configuration.getTimeWindowSec()));
+			auxipState.setNextWindowStart(new Date(nextStart.toEpochMilli()));
+
+			repository.save(auxipState);
+		}
     }
 
     private AuxipState retrieveState() {
