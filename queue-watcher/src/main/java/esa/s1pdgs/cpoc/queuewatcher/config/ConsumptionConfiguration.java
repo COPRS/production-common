@@ -4,39 +4,49 @@ import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
 import org.apache.kafka.clients.consumer.ConsumerConfig;
-import org.apache.kafka.common.serialization.Deserializer;
 import org.apache.kafka.common.serialization.StringDeserializer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.kafka.core.ConsumerFactory;
 import org.springframework.kafka.core.DefaultKafkaConsumerFactory;
 
+import esa.s1pdgs.cpoc.common.utils.StringUtil;
 import esa.s1pdgs.cpoc.message.Acknowledgement;
 import esa.s1pdgs.cpoc.message.Consumption;
-import esa.s1pdgs.cpoc.message.kafka.ConsumptionConfigurationFactory;
 import esa.s1pdgs.cpoc.message.Message;
 import esa.s1pdgs.cpoc.message.MessageConsumer;
 import esa.s1pdgs.cpoc.message.MessageConsumerFactory;
+import esa.s1pdgs.cpoc.message.kafka.ConsumptionConfigurationFactory;
 import esa.s1pdgs.cpoc.message.kafka.KafkaConsumerFactoryProvider;
 
 @Configuration
 public class ConsumptionConfiguration<M> {
 
     private static final Logger LOG = LoggerFactory.getLogger(ConsumptionConfiguration.class);
+    
 
     @Bean
     public MessageConsumerFactory<String> messageConsumerFactory(final ApplicationProperties applicationProperties) {
-        final List<MessageConsumer<String>> consumers
-                = applicationProperties.getKafkaTopics()
-                .stream().map(topic -> consumerFor(topic, applicationProperties))
+    	final List<String> kafkaTopics;
+    	
+    	if (StringUtil.isNotEmpty(applicationProperties.getKafkaTopics())) {
+    		kafkaTopics = Arrays.asList(applicationProperties.getKafkaTopics().split("\\s+"));
+    	}
+    	else {
+    		kafkaTopics = Collections.emptyList();
+    	}
+   	
+        final List<MessageConsumer<String>> consumers = kafkaTopics.stream()
+        		.map(topic -> consumerFor(topic, applicationProperties))
                 .collect(Collectors.toList());
 
         return () -> consumers;
@@ -59,15 +69,15 @@ public class ConsumptionConfiguration<M> {
         return new MessageConsumer<String>() {
 
             @Override
-            public void onMessage(Message<String> message, Acknowledgement acknowledgement, Consumption consumption) {
+            public void onMessage(final Message<String> message, final Acknowledgement acknowledgement, final Consumption consumption) {
                 // do something with received record
                 LOG.debug("Received message from topic {}: {} ", topic, message.data());
 
-                String fileName = properties.getKafkaFolder() + "/kafka-" + topic + ".log";
+                final String fileName = properties.getKafkaFolder() + "/kafka-" + topic + ".log";
 
                 try (final BufferedWriter writer = new BufferedWriter(new FileWriter(new File(fileName), true))) {
                     writer.write(message.data() + "\n");
-                } catch (IOException ex) {
+                } catch (final IOException ex) {
                     LOG.error("An IO error occurred while accessing {}", fileName);
                 }
             }
