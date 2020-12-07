@@ -49,6 +49,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import esa.s1pdgs.cpoc.common.EdrsSessionFileType;
+import esa.s1pdgs.cpoc.common.MaskType;
 import esa.s1pdgs.cpoc.common.ProductCategory;
 import esa.s1pdgs.cpoc.common.ProductFamily;
 import esa.s1pdgs.cpoc.common.errors.processing.MetadataCreationException;
@@ -79,6 +80,7 @@ import esa.s1pdgs.cpoc.metadata.model.SearchMetadata;
 public class EsServices {
 
 	private static final String LANDMASK_FOOTPRINT_INDEX_NAME = "landmask";
+	private static final String OCEANMASK_FOOTPRINT_INDEX_NAME = "oceanmask";
 	private static final String OVERPASSMASK_FOOTPRINT_INDEX_NAME = "overpassmask";
 	private static final String REQUIRED_INSTRUMENT_ID_PATTERN = "(aux_pp1|aux_pp2|aux_cal|aux_ins)";
 	static final String REQUIRED_SATELLITE_ID_PATTERN = "(aux_.*)";
@@ -217,9 +219,16 @@ public class EsServices {
 		}
 	}
 
-	public void createLandmaskGeoMetadata(final JSONObject product, final String id) throws Exception {
+	public void createMaskFootprintData(final MaskType maskType, final JSONObject product, final String id) throws Exception {
+		final String footprintIndexName;
+		switch (maskType) {
+			case LAND: footprintIndexName = LANDMASK_FOOTPRINT_INDEX_NAME; break;
+			case OCEAN:	footprintIndexName = OCEANMASK_FOOTPRINT_INDEX_NAME; break;
+			case OVERPASS: footprintIndexName = OVERPASSMASK_FOOTPRINT_INDEX_NAME; break;
+			default: throw new IllegalArgumentException(String.format("Unsupported mask type '%s'", maskType));
+		}
 		try {
-			final IndexRequest request = new IndexRequest(LANDMASK_FOOTPRINT_INDEX_NAME).id(id).source(product.toString(),
+			final IndexRequest request = new IndexRequest(footprintIndexName).id(id).source(product.toString(),
 					XContentType.JSON);
 
 			final IndexResponse response = elasticsearchDAO.index(request);
@@ -232,23 +241,7 @@ public class EsServices {
 			throw new Exception(e);
 		}
 	}
-	
-	public void createOverpassMaskGeoMetadata(final JSONObject product, final String id) throws Exception {
-		try {
-			final IndexRequest request = new IndexRequest(OVERPASSMASK_FOOTPRINT_INDEX_NAME).id(id).source(product.toString(),
-					XContentType.JSON);
-
-			final IndexResponse response = elasticsearchDAO.index(request);
-
-			if (response.status() != RestStatus.CREATED) {
-				throw new MetadataCreationException(id, response.status().toString(),
-						response.getResult().toString());
-			}
-		} catch (JSONException | IOException e) {
-			throw new Exception(e);
-		}
-	}
-	
+		
 	/**
 	 * Refresh the index to ensure new documents can be found. The index is
 	 * extracted from the family and type.
@@ -1795,6 +1788,35 @@ public class EsServices {
 			return 0;
 		} catch (final Exception e) {
 			throw new RuntimeException("Failed to check for overpass coverage", e);
+		}
+	}
+	
+	public boolean isIntersectingOceanMask(final ProductFamily family, final String productName) {
+		try {
+			final GetResponse response = elasticsearchDAO.get(new GetRequest(family.name().toLowerCase(), productName));
+			if (!response.isExists()) {
+				throw new MetadataNotPresentException(productName);
+			}
+
+			final GeoShapeQueryBuilder queryBuilder = QueryBuilders.geoShapeQuery("geometry",
+					extractPolygonFrom(response));
+			queryBuilder.relation(ShapeRelation.INTERSECTS);
+			LOGGER.debug("Using {}", queryBuilder);
+			final SearchSourceBuilder sourceBuilder = new SearchSourceBuilder();
+			sourceBuilder.query(queryBuilder);
+			sourceBuilder.size(SIZE_LIMIT);
+
+			final SearchRequest request = new SearchRequest(OCEANMASK_FOOTPRINT_INDEX_NAME);
+			request.source(sourceBuilder);
+
+			final SearchResponse searchResponse = elasticsearchDAO.search(request);
+			if (isNotEmpty(searchResponse)) {
+				return true; 
+			} else {	
+				return false;
+			}
+		} catch (final Exception e) {
+			throw new RuntimeException("Failed to check for ocean mask intersection", e);
 		}
 	}
 

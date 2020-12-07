@@ -47,4 +47,10 @@ public interface AuxipClient {
 	 */
 	InputStream read(@NonNull UUID productMetadataId);
 
+	/**
+	 * @return {@code true}, if this client is disabled and won't make queries,<br>
+	 *         {@code false}, if this client is active and will make queries to its configured target host
+	 */
+	boolean isDisabled();
+
 }

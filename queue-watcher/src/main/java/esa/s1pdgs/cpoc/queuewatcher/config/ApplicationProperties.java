@@ -1,8 +1,5 @@
 package esa.s1pdgs.cpoc.queuewatcher.config;
 
-import java.util.Collections;
-import java.util.List;
-
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Configuration;
@@ -22,13 +19,13 @@ public class ApplicationProperties {
 	 * A list of kafka topics that should be observed by the service. Each
 	 * topic will be stored in a file in the kafkaFolder
 	 */
-	private List<String> kafkaTopics = Collections.emptyList();
+	private String kafkaTopics;
 
 	public String getCsvFile() {
 		return csvFile;
 	}
 
-	public void setCsvFile(String csvFile) {
+	public void setCsvFile(final String csvFile) {
 		this.csvFile = csvFile;
 	}
 
@@ -36,15 +33,15 @@ public class ApplicationProperties {
 		return kafkaFolder;
 	}
 
-	public void setKafkaFolder(String kafkaFolder) {
+	public void setKafkaFolder(final String kafkaFolder) {
 		this.kafkaFolder = kafkaFolder;
 	}
 
-	public List<String> getKafkaTopics() {
+	public String getKafkaTopics() {
 		return kafkaTopics;
 	}
 
-	public void setKafkaTopics(List<String> kafkaTopics) {
+	public void setKafkaTopics(final String kafkaTopics) {
 		this.kafkaTopics = kafkaTopics;
 	}
 }

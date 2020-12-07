@@ -19,6 +19,7 @@ import esa.s1pdgs.cpoc.common.MessageState;
 import esa.s1pdgs.cpoc.errorrepo.model.rest.FailedProcessingDto;
 import esa.s1pdgs.cpoc.message.MessageProducer;
 import esa.s1pdgs.cpoc.mqi.model.rest.GenericMessageDto;
+import esa.s1pdgs.cpoc.reqrepo.config.RequestRepositoryConfiguration;
 import esa.s1pdgs.cpoc.reqrepo.repo.FailedProcessingRepo;
 import esa.s1pdgs.cpoc.reqrepo.repo.MqiMessageRepo;
 
@@ -28,18 +29,21 @@ public class RequestRepositoryImpl implements RequestRepository {
 	private final MqiMessageRepo mqiMessageRepository;
 	private final MessageProducer<Object> messageProducer;
 	private final AppStatus status;
+	private final RequestRepositoryConfiguration config;
 
 	@Autowired
 	public RequestRepositoryImpl(
 			final MqiMessageRepo mqiMessageRepository,
 			final FailedProcessingRepo failedProcessingRepo,
 			final MessageProducer<Object> messageProducer,
-			final AppStatus status
+			final AppStatus status,
+			final RequestRepositoryConfiguration config
 	) {
 		this.mqiMessageRepository = mqiMessageRepository;
 		this.failedProcessingRepo = failedProcessingRepo;
 		this.messageProducer = messageProducer;
 		this.status = status;
+		this.config = config;
 	}
 
 	@Override
@@ -110,7 +114,7 @@ public class RequestRepositoryImpl implements RequestRepository {
 	
 	@Override
 	public List<String> getProcessingTypes() {
-		return PROCESSING_TYPES_LIST;
+		return config.getKafkaTopicList();
 	}
 	
 	@Override
@@ -124,7 +128,7 @@ public class RequestRepositoryImpl implements RequestRepository {
 	
 	@Override
 	public List<Processing> getProcessings(final Integer pageSize, final Integer pageNumber, final List<String> processingTypes, final List<MessageState> processingStatus) {	
-		final List<String> topics = processingTypes == null || processingTypes.isEmpty() ? PROCESSING_TYPES_LIST : processingTypes;
+		final List<String> topics = topics(processingTypes);
 		final List<MessageState> states = processingStatus.isEmpty() ? PROCESSING_STATE_LIST : processingStatus;
 
 		// no paging?
@@ -137,10 +141,17 @@ public class RequestRepositoryImpl implements RequestRepository {
 	
 	@Override
 	public long getProcessingsCount(final List<String> processingTypes, final List<MessageState> processingStatus) {
-		final List<String> topics = processingTypes == null || processingTypes.isEmpty() ? PROCESSING_TYPES_LIST : processingTypes;
+		final List<String> topics = topics(processingTypes);
 		final List<MessageState> states = processingStatus.isEmpty() ? PROCESSING_STATE_LIST : processingStatus;
 
 		return mqiMessageRepository.countByStateInAndTopicIn(states, topics);
+	}
+	
+	private final List<String> topics(final List<String> provided) {
+		if (provided == null || provided.isEmpty()) {
+			return getProcessingTypes();
+		}
+		return provided;
 	}
 
 	private void resubmit(final long id, final String predecessorTopic, final Object predecessorDto, final AppStatus status) {

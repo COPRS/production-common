@@ -1,0 +1,98 @@
+package esa.s1pdgs.cpoc.mqi.model.queue;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Objects;
+
+import esa.s1pdgs.cpoc.common.ProductFamily;
+
+public class DisseminationJob extends AbstractMessage {
+	
+	public class DisseminationSource {
+		protected ProductFamily productFamily;
+		protected String keyObjectStorage;
+		
+		public DisseminationSource(ProductFamily productFamily, String keyObjectStorage) {
+			this.productFamily = productFamily;
+			this.keyObjectStorage = keyObjectStorage;
+		}
+
+		@Override
+		public int hashCode() {
+			final int prime = 31;
+			int result = 1;
+			result = prime * result + Objects.hash(keyObjectStorage, productFamily);
+			return result;
+		}
+
+		@Override
+		public boolean equals(Object obj) {
+			if (this == obj)
+				return true;
+			if (!(obj instanceof DisseminationSource))
+				return false;
+			DisseminationSource other = (DisseminationSource) obj;
+			return Objects.equals(keyObjectStorage, other.keyObjectStorage) && productFamily == other.productFamily;
+		}
+
+		@Override
+		public String toString() {
+			return "DisseminationSource [productFamily=" + productFamily + ", keyObjectStorage=" + keyObjectStorage
+					+ "]";
+		}
+		
+	}
+	
+	private List<DisseminationSource> disseminationSources;
+	
+	public DisseminationJob() {
+		super();
+		this.disseminationSources = new ArrayList<>();
+	}
+	
+	public void addDisseminationSource(ProductFamily productFamily, String keyObjectStorage) {
+		this.disseminationSources.add(new DisseminationSource(productFamily, keyObjectStorage));
+	}
+	
+	public List<DisseminationSource> getDisseminationSources() {
+		return this.disseminationSources;
+	}
+	
+	@Override
+	public int hashCode() {
+		return Objects.hash(creationDate, hostname, keyObjectStorage, productFamily, uid,
+				allowedActions, demandType, debug, retryCounter);
+	}
+
+	@Override
+	public boolean equals(final Object obj) {
+		if (this == obj) {
+			return true;
+		}
+		if (obj == null) {
+			return false;
+		}
+		if (getClass() != obj.getClass()) {
+			return false;
+		}
+		final DisseminationJob other = (DisseminationJob) obj;
+		return Objects.equals(creationDate, other.creationDate) 
+				&& Objects.equals(hostname, other.hostname) 
+				&& Objects.equals(keyObjectStorage, other.keyObjectStorage)
+				&& Objects.equals(uid, other.uid)
+				&& productFamily == other.productFamily
+				&& Objects.equals(allowedActions, other.getAllowedActions())
+		        && demandType == other.demandType
+		        && debug == other.debug
+		        && retryCounter == other.retryCounter
+		        && Objects.equals(disseminationSources, other.disseminationSources);
+	}
+
+	@Override
+	public String toString() {
+		return "DisseminationJob [disseminationSources=" + disseminationSources + ", productFamily=" + productFamily
+				+ ", keyObjectStorage=" + keyObjectStorage + ", uid=" + uid + ", creationDate=" + creationDate
+				+ ", hostname=" + hostname + ", allowedActions=" + allowedActions + ", demandType=" + demandType
+				+ ", retryCounter=" + retryCounter + ", debug=" + debug + "]";
+	}
+}

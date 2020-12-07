@@ -67,7 +67,7 @@ public final class Inbox {
 	public final void poll() {
 		try {			
 			final PollingRun pollingRun = PollingRun.newInstance(
-					ingestionTriggerServiceTransactional.getAllForPath(inboxAdapter.inboxURL(), stationName),
+					ingestionTriggerServiceTransactional.getAllForPath(inboxAdapter.inboxURL(), stationName, family),
 					inboxAdapter.read(InboxFilter.ALLOW_ALL)
 			);						
 			// when a product has been removed from the inbox directory, it shall be removed

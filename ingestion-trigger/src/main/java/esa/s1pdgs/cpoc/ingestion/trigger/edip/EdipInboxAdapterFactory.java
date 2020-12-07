@@ -6,6 +6,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import esa.s1pdgs.cpoc.ebip.client.EdipClientFactory;
+import esa.s1pdgs.cpoc.ingestion.trigger.config.InboxConfiguration;
 import esa.s1pdgs.cpoc.ingestion.trigger.inbox.InboxAdapter;
 import esa.s1pdgs.cpoc.ingestion.trigger.inbox.InboxAdapterFactory;
 import esa.s1pdgs.cpoc.ingestion.trigger.inbox.InboxEntryFactory;
@@ -24,8 +25,9 @@ public class EdipInboxAdapterFactory implements InboxAdapterFactory {
 	}
 
 	@Override
-	public InboxAdapter newInboxAdapter(final URI inbox, final String stationName) {
-		return new EdipInboxAdapter(inbox, edipClientFactory.newEdipClient(inbox), inboxEntryFactory, stationName);
+	public InboxAdapter newInboxAdapter(final URI inbox, final InboxConfiguration inboxConfig) {
+		return new EdipInboxAdapter(inbox, edipClientFactory.newEdipClient(inbox), inboxEntryFactory,
+				inboxConfig.getStationName(), inboxConfig.getFamily());
 	}
 
 }

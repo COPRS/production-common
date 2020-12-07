@@ -27,12 +27,16 @@ public class InboxEntry {
 	private String stationName;
 	private String processingPod;
 	private String inboxType;
+	private String productFamily;
+
+	// --------------------------------------------------------------------------
 
 	public InboxEntry() {
 	}
 
 	public InboxEntry(final String name, final String relativePath, final String pickupURL, final Date lastModified,
-					  final long size, final String processingPod, final String inboxType) {
+			final long size, final String processingPod, final String inboxType, final String productFamily,
+			final String stationName) {
 		this.name = name;
 		this.relativePath = relativePath;
 		this.pickupURL = pickupURL;
@@ -40,67 +44,11 @@ public class InboxEntry {
 		this.size = size;
 		this.processingPod = processingPod;
 		this.inboxType = inboxType;
-	}
-
-	public String getName() {
-		return name;
-	}
-
-	public void setName(final String name) {
-		this.name = name;
-	}
-
-	public String getRelativePath() {
-		return relativePath;
-	}
-
-	public void setRelativePath(final String relativePath) {
-		this.relativePath = relativePath;
-	}
-
-	public String getPickupURL() {
-		return pickupURL;
-	}
-
-	public void setPickupURL(final String pickupURL) {
-		this.pickupURL = pickupURL;
-	}
-
-	public Date getLastModified() {
-		return lastModified;
-	}
-
-	public void setLastModified(final Date lastModified) {
-		this.lastModified = lastModified;
-	}
-
-	public long getSize() {
-		return size;
-	}
-
-	public void setSize(final long size) {
-		this.size = size;
-	}
-	
-	public String getStationName() {
-		return stationName;
-	}
-
-	public void setStationName(final String stationName) {
+		this.productFamily = productFamily;
 		this.stationName = stationName;
 	}
 
-	public String getProcessingPod() { return processingPod; }
-
-	public void setProcessingPod(String processingPod) { this.processingPod = processingPod; }
-
-	public String getInboxType() {
-		return inboxType;
-	}
-
-	public void setInboxType(String inboxType) {
-		this.inboxType = inboxType;
-	}
+	// --------------------------------------------------------------------------
 
 	@Override
 	public boolean equals(final Object obj) {
@@ -110,28 +58,102 @@ public class InboxEntry {
 		if (obj == null) {
 			return false;
 		}
-		if (getClass() != obj.getClass()) {
+		if (this.getClass() != obj.getClass()) {
 			return false;
 		}
 		// WARNING: Don't take 'id' into account when implementing equals/hashCode
 		// because it's always 0 when created from Inbox
 		final InboxEntry other = (InboxEntry) obj;
-		return Objects.equals(name, other.name) && 
-				Objects.equals(pickupURL, other.pickupURL)
-				&& Objects.equals(relativePath, other.relativePath)
-				&& Objects.equals(stationName, other.stationName)
-				&& Objects.equals(processingPod, other.processingPod)
-				&& Objects.equals(inboxType, other.inboxType);
+		return Objects.equals(this.name, other.name) && Objects.equals(this.pickupURL, other.pickupURL)
+				&& Objects.equals(this.relativePath, other.relativePath)
+				&& Objects.equals(this.stationName, other.stationName)
+				&& Objects.equals(this.processingPod, other.processingPod)
+				&& Objects.equals(this.productFamily, other.productFamily)
+				&& Objects.equals(this.inboxType, other.inboxType);
 	}
 
 	@Override
 	public int hashCode() {
-		return Objects.hash(name, pickupURL, relativePath, stationName, processingPod, inboxType);
+		return Objects.hash(this.name, this.pickupURL, this.relativePath, this.stationName, this.processingPod,
+				this.inboxType, this.productFamily);
 	}
 
 	@Override
 	public String toString() {
-		return format("InboxEntry [name=%s, relativePath=%s, pickupURL=%s, lastModified=%s, size=%s, stationName=%s, processingPod=%s, inboxType=%s]", name,
-				relativePath, pickupURL, lastModified, size, stationName, processingPod, inboxType);
+		return format(
+				"InboxEntry [name=%s, relativePath=%s, pickupURL=%s, productFamily=%s, lastModified=%s, size=%s, stationName=%s, processingPod=%s, inboxType=%s]",
+				this.name, this.relativePath, this.pickupURL, this.productFamily, this.lastModified, this.size,
+				this.stationName, this.processingPod, this.inboxType);
 	}
+
+	// --------------------------------------------------------------------------
+
+	public String getName() {
+		return this.name;
+	}
+
+	public void setName(final String name) {
+		this.name = name;
+	}
+
+	public String getRelativePath() {
+		return this.relativePath;
+	}
+
+	public void setRelativePath(final String relativePath) {
+		this.relativePath = relativePath;
+	}
+
+	public String getPickupURL() {
+		return this.pickupURL;
+	}
+
+	public void setPickupURL(final String pickupURL) {
+		this.pickupURL = pickupURL;
+	}
+
+	public Date getLastModified() {
+		return this.lastModified;
+	}
+
+	public void setLastModified(final Date lastModified) {
+		this.lastModified = lastModified;
+	}
+
+	public long getSize() {
+		return this.size;
+	}
+
+	public void setSize(final long size) {
+		this.size = size;
+	}
+
+	public String getStationName() {
+		return this.stationName;
+	}
+
+	public void setStationName(final String stationName) {
+		this.stationName = stationName;
+	}
+
+	public String getProcessingPod() { return this.processingPod; }
+
+	public void setProcessingPod(String processingPod) { this.processingPod = processingPod; }
+
+	public String getInboxType() {
+		return this.inboxType;
+	}
+
+	public void setInboxType(String inboxType) {
+		this.inboxType = inboxType;
+	}
+
+	public String getProductFamily() {
+		return this.productFamily;
+	}
+
+	public void setProductFamily(String productFamily) {
+		this.productFamily = productFamily;
+	}
+
 }

@@ -99,6 +99,11 @@ public class AuxipOdataClient implements AuxipClient {
 	// --------------------------------------------------------------------------
 
 	@Override
+	public boolean isDisabled() {
+		return this.disabled;
+	}
+
+	@Override
 	public List<AuxipProductMetadata> getMetadata(@NonNull final LocalDateTime from, @NonNull final LocalDateTime to,
 			final Integer pageSize, final Integer offset) {
 		return this.getMetadata(from, to, pageSize, offset, null);

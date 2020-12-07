@@ -12,13 +12,14 @@ import org.junit.Assert;
 import org.junit.Test;
 import org.xml.sax.SAXException;
 
-public class OverpassMaskExtractorTest {
+import esa.s1pdgs.cpoc.mdc.worker.extraction.files.MaskExtractor;
+
+public class MaskExtractorTest {
 
 	@Test
 	public void extract() throws XPathExpressionException, ParserConfigurationException, SAXException, IOException {
-		OverpassMaskExtractor e = new OverpassMaskExtractor();
+		MaskExtractor e = new MaskExtractor();
 
-		// FIXME: Currently we only have Landmask files. This needs to be updated with an overpass mask file.
 		List<JSONObject> extract = e
 				.extract(new File("src/test/resources/workDir/S1__OPER_MSK__LAND__V20140403T210200_G20190711T113000.EOF"));
 		Assert.assertEquals(175, extract.size());

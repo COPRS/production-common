@@ -7,7 +7,7 @@ variables:
   DOCKER_HOST: tcp://localhost:2375
   MODULE: s1pro-core
   BRANCH: $CI_COMMIT_REF_SLUG
-  VERSION: 2.27.0-SNAPSHOT
+  VERSION: 2.28.0-SNAPSHOT
 
 stages:
   - build
@@ -51,3 +51,4 @@ include:
   - local: ipf-execution-worker/.gitlab-ci.yml
   - local: data-lifecycle-trigger/.gitlab-ci.yml
   - local: data-lifecycle-worker/.gitlab-ci.yml
+  - local: dissemination-trigger/.gitlab-ci.yml

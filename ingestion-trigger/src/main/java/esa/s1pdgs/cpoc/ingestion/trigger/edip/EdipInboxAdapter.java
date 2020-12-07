@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.net.URI;
 import java.util.stream.Stream;
 
+import esa.s1pdgs.cpoc.common.ProductFamily;
 import esa.s1pdgs.cpoc.ebip.client.EdipClient;
 import esa.s1pdgs.cpoc.ebip.client.EdipEntry;
 import esa.s1pdgs.cpoc.ebip.client.EdipEntryFilter;
@@ -21,15 +22,16 @@ public class EdipInboxAdapter extends AbstractInboxAdapter {
 			final URI inboxURL,
 			final EdipClient edipClient,
 			final InboxEntryFactory inboxEntryFactory,
-			final String stationName
+			final String stationName,
+			final ProductFamily productFamily
 	) {
-		super(inboxEntryFactory, inboxURL, stationName);
+		super(inboxEntryFactory, inboxURL, stationName, productFamily);
 		this.edipClient = edipClient;
 	}
 
 	@Override
 	protected Stream<EntrySupplier> list() throws IOException {
-		return edipClient.list(EdipEntryFilter.ALLOW_ALL).stream()
+		return this.edipClient.list(EdipEntryFilter.ALLOW_ALL).stream()
 				.map(p -> new EntrySupplier(p.getPath(), () -> newInboxEntryFor(p)));
 	}
 	
@@ -40,7 +42,8 @@ public class EdipInboxAdapter extends AbstractInboxAdapter {
 				edipEntry.getLastModified(),
 				edipEntry.getSize(),
 				stationName,
-				INBOX_TYPE
+				INBOX_TYPE,
+				productFamily
 				);
 	}
 

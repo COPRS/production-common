@@ -16,6 +16,10 @@ public class CompressionEventUtil {
 		return ProductFamily.fromValue(inputFamily.toString() + SUFFIX_ZIPPRODUCTFAMILY);
 	}
 	
+	public static ProductFamily removeZipSuffixFromProductFamily(final ProductFamily productFamily) {
+		return ProductFamily.fromValue(removeZipSuffix(productFamily.toString()));
+	}
+	
 	public static String removeZipSuffix(final String name) {
 		if (name.toLowerCase().endsWith(SUFFIX_ZIPPPRODUCTFILE)) {
 			return name.substring(0, name.length() - SUFFIX_ZIPPPRODUCTFILE.length());

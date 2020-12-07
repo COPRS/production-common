@@ -121,7 +121,7 @@ public class InboxFactory {
 		
 		return inboxAdapterFactory.newInboxAdapter(
 				new URI(sanitizedUrl), 
-				config.getStationName()
+				config
 		);
 	}
 	
