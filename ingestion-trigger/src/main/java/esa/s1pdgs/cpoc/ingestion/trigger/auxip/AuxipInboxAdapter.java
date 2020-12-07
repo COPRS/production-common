@@ -60,10 +60,9 @@ public class AuxipInboxAdapter extends AbstractInboxAdapter {
     @Override
     protected Stream<EntrySupplier> list() {
         final AuxipState state = retrieveState();
+        final TimeWindow timeWindow = timeWindowFrom(state);
 
-        TimeWindow timeWindow = timeWindowFrom(state);
-
-        if(timeWindow.toCloseTo(LocalDateTime.now().minus(Duration.ofSeconds(configuration.getOffsetFromNowSec())))) {
+        if(isTooCloseToNow(timeWindow)) {
             LOG.info("time window {} is too close to now, skipping", timeWindow);
             return Stream.empty();
         }
@@ -90,6 +89,14 @@ public class AuxipInboxAdapter extends AbstractInboxAdapter {
         return new TimeWindow(start, stop);
 
     }
+    
+    private boolean isTooCloseToNow(final AuxipState state) {
+		return isTooCloseToNow(timeWindowFrom(state));
+	}
+    
+	private boolean isTooCloseToNow(final TimeWindow timeWindow) {
+		return timeWindow.toCloseTo(LocalDateTime.now().minus(Duration.ofSeconds(configuration.getOffsetFromNowSec())));
+	}
 
     private InboxEntry toInboxEntry(final AuxipProductMetadata auxipMetadata) {
         LOG.debug("handling auxip metadata: {} with errors: {}", auxipMetadata, auxipMetadata.getParsingErrors());
@@ -113,6 +120,13 @@ public class AuxipInboxAdapter extends AbstractInboxAdapter {
 					+ productFamily + "] as the auxip client is disabled");
 		} else {
 			AuxipState auxipState = retrieveState();
+			
+			if(isTooCloseToNow(auxipState)) {
+				LOG.debug("omit advancing time window for [" + inboxURL() + ", " + stationName + ", "
+						+ productFamily + "] as it's too close to now");
+				return;
+			}
+			
 			Instant nextStart = auxipState.getNextWindowStart().toInstant().plus(ofSeconds(configuration.getTimeWindowSec()));
 			auxipState.setNextWindowStart(new Date(nextStart.toEpochMilli()));
 
