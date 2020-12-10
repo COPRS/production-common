@@ -124,14 +124,18 @@ public class ApacheFtpEdipClient implements EdipClient {
 			ftpClient.addProtocolCommandListener(
 					new PrintCommandListener(new LogPrintWriter(s -> LOG.debug(s)), true)
 			);
+			ftpClient.setDefaultTimeout(config.getConnectTimeoutSec()*1000);
 			ftpClient.setConnectTimeout(config.getConnectTimeoutSec()*1000);
+			ftpClient.setDataTimeout(config.getConnectTimeoutSec()*1000);
 			connect(ftpClient);
 			return ftpClient;
 		}	
 		else {
 			// FTPS client creation			
 			final FTPSClient ftpsClient = new FTPSClient(config.getSslProtocol(), !config.isExplictFtps());
-			ftpsClient.setConnectTimeout(config.getConnectTimeoutSec());
+			ftpsClient.setDefaultTimeout(config.getConnectTimeoutSec()*1000);
+			ftpsClient.setConnectTimeout(config.getConnectTimeoutSec()*1000);
+			ftpsClient.setDataTimeout(config.getConnectTimeoutSec()*1000);
 			ftpsClient.addProtocolCommandListener(
 					new PrintCommandListener(new LogPrintWriter(s -> LOG.debug(s)), true)
 			);
