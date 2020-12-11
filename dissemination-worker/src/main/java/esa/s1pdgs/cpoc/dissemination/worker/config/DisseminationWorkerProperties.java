@@ -1,6 +1,8 @@
 package esa.s1pdgs.cpoc.dissemination.worker.config;
 
+import java.util.ArrayList;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 
 import org.springframework.boot.context.properties.ConfigurationProperties;
@@ -12,13 +14,15 @@ import org.springframework.context.annotation.Configuration;
 @ConfigurationProperties(prefix = "dissemination-worker")
 public class DisseminationWorkerProperties {
 
-	private Map<String, OutboxConfiguration> outboxes = new LinkedHashMap<>();
+	private Map<String, OutboxConfiguration> outboxes = new LinkedHashMap<>(); // defining outboxes
+	private List<OutboxConnection> outboxConnections = new ArrayList<>(); // connecting incoming jobs with outboxes
 
 	// --------------------------------------------------------------------------
 
 	@Override
 	public String toString() {
-		return "DisseminationWorkerProperties [outboxes=" + this.outboxes + "]";
+		return "DisseminationWorkerProperties [outboxes=" + this.outboxes + ", outboxConnections="
+				+ this.outboxConnections + "]";
 	}
 
 	// --------------------------------------------------------------------------
@@ -29,6 +33,42 @@ public class DisseminationWorkerProperties {
 
 	public void setOutboxes(Map<String, OutboxConfiguration> outboxes) {
 		this.outboxes = outboxes;
+	}
+
+	public List<OutboxConnection> getOutboxConnections() {
+		return this.outboxConnections;
+	}
+
+	public void setOutboxConnections(List<OutboxConnection> outboxConnections) {
+		this.outboxConnections = outboxConnections;
+	}
+
+	// --------------------------------------------------------------------------
+
+	public static class OutboxConnection {
+		private String matchRegex;
+		private String outboxName;
+
+		public String getMatchRegex() {
+			return this.matchRegex;
+		}
+
+		public void setMatchRegex(String matchRegex) {
+			this.matchRegex = matchRegex;
+		}
+
+		public String getOutboxName() {
+			return this.outboxName;
+		}
+
+		public void setOutboxName(String outboxName) {
+			this.outboxName = outboxName;
+		}
+
+		@Override
+		public String toString() {
+			return "OutboxConnection [outboxName=" + this.outboxName + ", matchRegex=" + this.getMatchRegex() + "]";
+		}
 	}
 
 	// --------------------------------------------------------------------------
