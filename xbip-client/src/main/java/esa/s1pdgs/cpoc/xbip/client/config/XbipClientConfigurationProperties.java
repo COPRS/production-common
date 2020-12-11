@@ -18,7 +18,7 @@ public class XbipClientConfigurationProperties {
 		private String pass;
 		private boolean trustSelfSignedCertificate = false;
 		private boolean programmaticRecursion = false;
-		private int connectTimeoutSec = 10;
+		private int connectTimeoutSec = 60;
 		private boolean enablePreemptiveAuthentication = true;
 		
 		public String getServerName() {
