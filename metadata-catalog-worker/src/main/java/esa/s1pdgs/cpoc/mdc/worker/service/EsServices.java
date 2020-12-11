@@ -1733,13 +1733,19 @@ public class EsServices {
 		return r;
 	}
 
-	public int getSeaCoverage(final ProductFamily family, final String productName) {
+	public int getSeaCoverage(final ProductFamily family, final String productName) throws MetadataNotPresentException {
+		
+		GetResponse response;
 		try {
-			final GetResponse response = elasticsearchDAO.get(new GetRequest(family.name().toLowerCase(), productName));
-			if (!response.isExists()) {
-				throw new MetadataNotPresentException(productName);
-			}
-
+			response = elasticsearchDAO.get(new GetRequest(family.name().toLowerCase(), productName));
+		} catch (IOException e) {
+			throw new RuntimeException("Failed to check for sea coverage", e);
+		}
+		if (!response.isExists()) {
+			throw new MetadataNotPresentException(productName);
+		}
+		
+		try {
 			final GeoShapeQueryBuilder queryBuilder = QueryBuilders.geoShapeQuery("geometry",
 					extractPolygonFrom(response));
 			queryBuilder.relation(ShapeRelation.CONTAINS);
@@ -1762,13 +1768,19 @@ public class EsServices {
 		}
 	}
 	
-	public int getOverpassCoverage(final ProductFamily family, final String productName) {
+	public int getOverpassCoverage(final ProductFamily family, final String productName) throws MetadataNotPresentException {
+		
+		GetResponse response;
 		try {
-			final GetResponse response = elasticsearchDAO.get(new GetRequest(family.name().toLowerCase(), productName));
-			if (!response.isExists()) {
-				throw new MetadataNotPresentException(productName);
-			}
+			response = elasticsearchDAO.get(new GetRequest(family.name().toLowerCase(), productName));
+		} catch (IOException e) {
+			throw new RuntimeException("Failed to check for overpass coverage", e);
+		}
+		if (!response.isExists()) {
+			throw new MetadataNotPresentException(productName);
+		}
 
+		try {
 			final GeoShapeQueryBuilder queryBuilder = QueryBuilders.geoShapeQuery("geometry",
 					extractPolygonFrom(response));
 			queryBuilder.relation(ShapeRelation.INTERSECTS);
@@ -1791,13 +1803,19 @@ public class EsServices {
 		}
 	}
 	
-	public boolean isIntersectingOceanMask(final ProductFamily family, final String productName) {
+	public boolean isIntersectingOceanMask(final ProductFamily family, final String productName) throws MetadataNotPresentException {
+		
+		GetResponse response;
 		try {
-			final GetResponse response = elasticsearchDAO.get(new GetRequest(family.name().toLowerCase(), productName));
-			if (!response.isExists()) {
-				throw new MetadataNotPresentException(productName);
-			}
-
+			response = elasticsearchDAO.get(new GetRequest(family.name().toLowerCase(), productName));
+		} catch (IOException e) {
+			throw new RuntimeException("Failed to check for ocean mask intersection", e);
+		}
+		
+		if (!response.isExists()) {
+			throw new MetadataNotPresentException(productName);
+		}
+		try {
 			final GeoShapeQueryBuilder queryBuilder = QueryBuilders.geoShapeQuery("geometry",
 					extractPolygonFrom(response));
 			queryBuilder.relation(ShapeRelation.INTERSECTS);
