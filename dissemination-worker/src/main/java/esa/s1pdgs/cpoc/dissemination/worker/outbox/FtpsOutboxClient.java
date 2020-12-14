@@ -37,7 +37,7 @@ public final class FtpsOutboxClient extends FtpOutboxClient {
 	// --------------------------------------------------------------------------
 
 	@Override
-	public void transfer(final List<ObsObject> obsObjects, final ReportingFactory reportingFactory) throws Exception {
+	public List<String> transfer(final List<ObsObject> obsObjects, final ReportingFactory reportingFactory) throws Exception {
 		final FTPSClient ftpsClient = new FTPSClient("TLS", true);
 
 		// if a keystore is configured, client authentication will be enabled. If it shall not be used, simply don't configure a keystore
@@ -76,7 +76,7 @@ public final class FtpsOutboxClient extends FtpOutboxClient {
 		ftpsClient.execPROT("P");
 		assertPositiveCompletion(ftpsClient);
 
-		this.performTransfer(obsObjects, ftpsClient, reportingFactory);
+		return this.performTransfer(obsObjects, ftpsClient, reportingFactory);
 	}
 
 	static final KeyStore newKeyStore(final InputStream in, final String password) throws Exception {
