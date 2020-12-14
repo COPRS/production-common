@@ -3,6 +3,7 @@ package esa.s1pdgs.cpoc.dissemination.worker.outbox;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Path;
+import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.commons.net.PrintCommandListener;
@@ -38,7 +39,7 @@ public class FtpOutboxClient extends AbstractOutboxClient {
 	// --------------------------------------------------------------------------
 
 	@Override
-	public void transfer(final List<ObsObject> obsObjects, final ReportingFactory reportingFactory) throws Exception {
+	public List<String> transfer(final List<ObsObject> obsObjects, final ReportingFactory reportingFactory)	throws Exception {
 		final FTPClient ftpClient = new FTPClient();
 		ftpClient.addProtocolCommandListener(new PrintCommandListener(new LogPrintWriter(this.logger::debug), true));
 
@@ -47,15 +48,17 @@ public class FtpOutboxClient extends AbstractOutboxClient {
 		ftpClient.connect(this.config.getHostname(), port);
 		assertPositiveCompletion(ftpClient);
 
-		this.performTransfer(obsObjects, ftpClient, reportingFactory);
+		return this.performTransfer(obsObjects, ftpClient, reportingFactory);
 	}
 
-	protected void performTransfer(final List<ObsObject> obsObjects, final FTPClient ftpClient,
+	protected List<String> performTransfer(final List<ObsObject> obsObjects, final FTPClient ftpClient,
 			final ReportingFactory reportingFactory) throws IOException, SdkClientException {
 
 		if (!ftpClient.login(this.config.getUsername(), this.config.getPassword())) {
 			throw new RuntimeException("Could not authenticate user " + this.config.getUsername());
 		}
+
+		final List<String> targetUrls = new ArrayList<>();
 
 		try {
 			ftpClient.setFileType(FTP.BINARY_FILE_TYPE);
@@ -71,6 +74,8 @@ public class FtpOutboxClient extends AbstractOutboxClient {
 
 			for (final ObsObject obsObject : obsObjects) {
 				final Path path = this.evaluatePathFor(obsObject);
+				final String targetUrl = this.config.getProtocol().toString().toLowerCase() + "://"
+						+ this.config.getHostname() + path.toString();
 
 				for (final String entry : this.entries(obsObject)) {
 
@@ -102,6 +107,7 @@ public class FtpOutboxClient extends AbstractOutboxClient {
 						assertPositiveCompletion(ftpClient);
 					}
 				}
+				targetUrls.add(targetUrl);
 			}
 		} finally {
 			try {
@@ -112,6 +118,8 @@ public class FtpOutboxClient extends AbstractOutboxClient {
 				assertPositiveCompletion(ftpClient);
 			}
 		}
+
+		return targetUrls;
 	}
 
 	static void assertPositiveCompletion(final FTPClient client) throws IOException {
