@@ -40,7 +40,14 @@ public class DisseminationJob extends AbstractMessage {
 			return "DisseminationSource [productFamily=" + productFamily + ", keyObjectStorage=" + keyObjectStorage
 					+ "]";
 		}
-		
+
+		public ProductFamily getProductFamily() {
+			return productFamily;
+		}
+
+		public String getKeyObjectStorage() {
+			return keyObjectStorage;
+		}
 	}
 	
 	private List<DisseminationSource> disseminationSources;

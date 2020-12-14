@@ -17,6 +17,9 @@ public class DisseminationWorkerProperties {
 	private Map<String, OutboxConfiguration> outboxes = new LinkedHashMap<>(); // defining outboxes
 	private List<OutboxConnection> outboxConnections = new ArrayList<>(); // connecting incoming jobs with outboxes
 
+	private int maxRetries = 3;
+	private long tempoRetryMs = 1000;
+
 	// --------------------------------------------------------------------------
 
 	@Override
@@ -41,6 +44,22 @@ public class DisseminationWorkerProperties {
 
 	public void setOutboxConnections(List<OutboxConnection> outboxConnections) {
 		this.outboxConnections = outboxConnections;
+	}
+
+	public int getMaxRetries() {
+		return this.maxRetries;
+	}
+
+	public void setMaxRetries(int maxRetries) {
+		this.maxRetries = maxRetries;
+	}
+
+	public long getTempoRetryMs() {
+		return this.tempoRetryMs;
+	}
+
+	public void setTempoRetryMs(long tempoRetryMs) {
+		this.tempoRetryMs = tempoRetryMs;
 	}
 
 	// --------------------------------------------------------------------------
