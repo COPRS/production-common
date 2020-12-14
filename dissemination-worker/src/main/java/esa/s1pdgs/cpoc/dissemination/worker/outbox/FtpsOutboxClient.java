@@ -2,6 +2,7 @@ package esa.s1pdgs.cpoc.dissemination.worker.outbox;
 
 import java.io.InputStream;
 import java.security.KeyStore;
+import java.util.List;
 
 import javax.net.ssl.KeyManager;
 import javax.net.ssl.KeyManagerFactory;
@@ -36,7 +37,7 @@ public final class FtpsOutboxClient extends FtpOutboxClient {
 	// --------------------------------------------------------------------------
 
 	@Override
-	public String transfer(final ObsObject obsObject, final ReportingFactory reportingFactory) throws Exception {
+	public void transfer(final List<ObsObject> obsObjects, final ReportingFactory reportingFactory) throws Exception {
 		final FTPSClient ftpsClient = new FTPSClient("TLS", true);
 
 		// if a keystore is configured, client authentication will be enabled. If it shall not be used, simply don't configure a keystore
@@ -75,7 +76,7 @@ public final class FtpsOutboxClient extends FtpOutboxClient {
 		ftpsClient.execPROT("P");
 		assertPositiveCompletion(ftpsClient);
 
-		return this.performTransfer(obsObject, ftpsClient, reportingFactory);
+		this.performTransfer(obsObjects, ftpsClient, reportingFactory);
 	}
 
 	static final KeyStore newKeyStore(final InputStream in, final String password) throws Exception {

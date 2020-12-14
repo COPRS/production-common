@@ -3,6 +3,7 @@ package esa.s1pdgs.cpoc.dissemination.worker.outbox;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Path;
+import java.util.List;
 
 import org.apache.commons.net.PrintCommandListener;
 import org.apache.commons.net.ftp.FTP;
@@ -37,7 +38,7 @@ public class FtpOutboxClient extends AbstractOutboxClient {
 	// --------------------------------------------------------------------------
 
 	@Override
-	public String transfer(final ObsObject obsObject, final ReportingFactory reportingFactory) throws Exception {
+	public void transfer(final List<ObsObject> obsObjects, final ReportingFactory reportingFactory) throws Exception {
 		final FTPClient ftpClient = new FTPClient();
 		ftpClient.addProtocolCommandListener(new PrintCommandListener(new LogPrintWriter(this.logger::debug), true));
 
@@ -46,11 +47,11 @@ public class FtpOutboxClient extends AbstractOutboxClient {
 		ftpClient.connect(this.config.getHostname(), port);
 		assertPositiveCompletion(ftpClient);
 
-		return this.performTransfer(obsObject, ftpClient, reportingFactory);
+		this.performTransfer(obsObjects, ftpClient, reportingFactory);
 	}
 
-	protected String performTransfer(final ObsObject obsObject, final FTPClient ftpClient, final ReportingFactory reportingFactory)
-			throws IOException, SdkClientException {
+	protected void performTransfer(final List<ObsObject> obsObjects, final FTPClient ftpClient,
+			final ReportingFactory reportingFactory) throws IOException, SdkClientException {
 
 		if (!ftpClient.login(this.config.getUsername(), this.config.getPassword())) {
 			throw new RuntimeException("Could not authenticate user " + this.config.getUsername());
@@ -68,49 +69,45 @@ public class FtpOutboxClient extends AbstractOutboxClient {
 			}
 			assertPositiveCompletion(ftpClient);
 
-			final Path path = this.evaluatePathFor(obsObject);
-			final String retVal = this.config.getProtocol().toString().toLowerCase() + "://" + this.config.getHostname() +
-					path.toString();
+			for (final ObsObject obsObject : obsObjects) {
+				final Path path = this.evaluatePathFor(obsObject);
 
-			for (final String entry : this.entries(obsObject)) {
+				for (final String entry : this.entries(obsObject)) {
 
-				final Path dest = path.resolve(entry);
+					final Path dest = path.resolve(entry);
+					String currentPath = "";
 
-				String currentPath = "";
-
-				final Path parentPath = dest.getParent();
-				if (parentPath == null) {
-					throw new RuntimeException("Invalid destination " + dest);
-				}
-				// create parent directories if required
-				for (final Path pathElement : parentPath) {
-					currentPath = currentPath + "/" + pathElement;
-
-					this.logger.debug("current path is {}", currentPath);
-
-					final boolean directoryExists = ftpClient.changeWorkingDirectory(currentPath);
-					if (directoryExists) {
-						continue;
+					final Path parentPath = dest.getParent();
+					if (parentPath == null) {
+						throw new RuntimeException("Invalid destination " + dest);
 					}
-					this.logger.debug("creating directory {}", currentPath);
-					ftpClient.makeDirectory(currentPath);
-					assertPositiveCompletion(ftpClient);
-				}
+					// create parent directories if required
+					for (final Path pathElement : parentPath) {
+						currentPath = currentPath + "/" + pathElement;
 
-				try (final InputStream in = this.stream(obsObject.getFamily(), entry)) {
-					this.logger.info("Uploading {} to {}", entry, dest);
-					ftpClient.storeFile(dest.toString(), in);
-					assertPositiveCompletion(ftpClient);
+						this.logger.debug("current path is {}", currentPath);
+
+						final boolean directoryExists = ftpClient.changeWorkingDirectory(currentPath);
+						if (directoryExists) {
+							continue;
+						}
+						this.logger.debug("creating directory {}", currentPath);
+						ftpClient.makeDirectory(currentPath);
+						assertPositiveCompletion(ftpClient);
+					}
+
+					try (final InputStream in = this.stream(obsObject.getFamily(), entry)) {
+						this.logger.info("Uploading {} to {}", entry, dest);
+						ftpClient.storeFile(dest.toString(), in);
+						assertPositiveCompletion(ftpClient);
+					}
 				}
 			}
-			return retVal;
-		}
-		finally {
+		} finally {
 			try {
 				ftpClient.logout();
 				assertPositiveCompletion(ftpClient);
-			}
-			finally {
+			} finally {
 				ftpClient.disconnect();
 				assertPositiveCompletion(ftpClient);
 			}

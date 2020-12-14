@@ -1,5 +1,7 @@
 package esa.s1pdgs.cpoc.dissemination.worker.outbox;
 
+import java.util.List;
+
 import esa.s1pdgs.cpoc.dissemination.worker.config.DisseminationWorkerProperties.OutboxConfiguration;
 import esa.s1pdgs.cpoc.dissemination.worker.path.PathEvaluator;
 import esa.s1pdgs.cpoc.obs_sdk.ObsClient;
@@ -21,11 +23,12 @@ public interface OutboxClient {
 
 	public static final OutboxClient NULL = new OutboxClient() {
 		@Override
-		public final String transfer(final ObsObject obsObject, final ReportingFactory reportingFactory) throws Exception {
+		public final void transfer(final List<ObsObject> obsObjects, final ReportingFactory reportingFactory)
+				throws Exception {
 			// do nothing
-			return "";
+			return;
 		}
 	};
 
-	String transfer(ObsObject obsObject, ReportingFactory reportingFactory) throws Exception;
+	void transfer(List<ObsObject> obsObjects, ReportingFactory reportingFactory) throws Exception;
 }
