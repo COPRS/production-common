@@ -86,6 +86,7 @@ public class DisseminationWorkerProperties {
 		private String username = null;
 		private String password = null;
 		private String path = null;
+		private String pathEvaluator = null;
 
 		private String keyFile = null;
 		private String keystoreFile = null;
@@ -115,6 +116,14 @@ public class DisseminationWorkerProperties {
 
 		public void setPath(String path) {
 			this.path = path;
+		}
+
+		public String getPathEvaluator() {
+			return this.pathEvaluator;
+		}
+
+		public void setPathEvaluator(String pathEvaluator) {
+			this.pathEvaluator = pathEvaluator;
 		}
 
 		public String getUsername() {

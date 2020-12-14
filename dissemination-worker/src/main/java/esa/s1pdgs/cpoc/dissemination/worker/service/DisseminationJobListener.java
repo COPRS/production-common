@@ -6,6 +6,7 @@ import org.apache.commons.lang.NotImplementedException;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 
 import esa.s1pdgs.cpoc.appstatus.AppStatus;
 import esa.s1pdgs.cpoc.dissemination.worker.config.DisseminationWorkerProperties;
@@ -19,6 +20,7 @@ import esa.s1pdgs.cpoc.mqi.model.queue.DisseminationJob;
 import esa.s1pdgs.cpoc.mqi.model.rest.GenericMessageDto;
 import esa.s1pdgs.cpoc.obs_sdk.ObsClient;
 
+@Service
 public class DisseminationJobListener implements MqiListener<DisseminationJob> {
 
 	private static final Logger LOG = LogManager.getLogger(DisseminationJobListener.class);
