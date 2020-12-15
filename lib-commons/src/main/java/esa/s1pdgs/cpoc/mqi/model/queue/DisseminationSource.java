@@ -9,6 +9,10 @@ public class DisseminationSource {
 	protected ProductFamily productFamily;
 	protected String keyObjectStorage;
 	
+	public DisseminationSource() {
+		super();
+	}
+	
 	public DisseminationSource(ProductFamily productFamily, String keyObjectStorage) {
 		this.productFamily = productFamily;
 		this.keyObjectStorage = keyObjectStorage;
