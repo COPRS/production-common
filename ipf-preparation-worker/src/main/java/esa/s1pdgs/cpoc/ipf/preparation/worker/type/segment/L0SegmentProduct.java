@@ -13,6 +13,7 @@ import esa.s1pdgs.cpoc.appcatalog.AppDataJobFile;
 import esa.s1pdgs.cpoc.appcatalog.AppDataJobProduct;
 import esa.s1pdgs.cpoc.appcatalog.AppDataJobTaskInputs;
 import esa.s1pdgs.cpoc.appcatalog.util.AppDataJobProductAdapter;
+import esa.s1pdgs.cpoc.common.utils.DateUtils;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.type.AbstractProduct;
 import esa.s1pdgs.cpoc.metadata.model.LevelSegmentMetadata;
 
@@ -22,6 +23,7 @@ public class L0SegmentProduct extends AbstractProduct {
 	private static final String DATATAKE_ID = "datatakeId";
 	private static final String PRODUCT_SENSING_CONSOLIDATION = "productSensingConsolidation";
 	private static final String CONSOLIDATION = "consolidation";
+	private static final String INSERTION_TIME = "insertionTime";
 	
 	public static final List<String> POLARISTATIONS = Arrays.asList("SH","SV","VH","VV","HV","HH");
 
@@ -93,12 +95,48 @@ public class L0SegmentProduct extends AbstractProduct {
 				metadata.getValidityStop(),
 				toMetadataMap(metadata)
 		);
-		if (!res.contains(segment)) {			
-			res.add(segment);
-			product.setProductsFor(metadata.getPolarisation(), res);	
+		if (!res.contains(segment)) {				
+			// Take only latest segment			
+			final List<AppDataJobFile> updated = merge(res, segment, metadata.getPolarisation());			
+			product.setProductsFor(metadata.getPolarisation(), updated);	
 		}
 	}	
 	
+	private final List<AppDataJobFile> merge(
+			final List<AppDataJobFile> existingFiles, 
+			final AppDataJobFile newElement,
+			final String polarisation
+    ) {
+		final List<AppDataJobFile> updated = new ArrayList<>();
+		boolean added = false;
+		for (final AppDataJobFile existing : existingFiles) {			
+			if (isNewerVersionOf(newElement, existing, polarisation)) {
+				updated.add(newElement);
+				added = true;
+			}
+			else {
+				updated.add(existing);
+			}			
+		}	
+		if (!added) {
+			updated.add(newElement);
+		}
+		return updated;
+		
+	}
+		
+	private boolean isNewerVersionOf(
+			final AppDataJobFile newElement, 
+			final AppDataJobFile existing,
+			final String polarisation
+	) {
+		final LevelSegmentMetadata newMeta = toMetadataObject(newElement, polarisation);
+		final LevelSegmentMetadata oldMeta = toMetadataObject(existing, polarisation);
+		
+		return DateUtils.parse(newMeta.getInsertionTime())
+				.isAfter(DateUtils.parse(oldMeta.getInsertionTime()));
+	}
+
 	public final Map<String,List<LevelSegmentMetadata>> segmentsForPolaristions() {
 		final Map<String,List<LevelSegmentMetadata>> result = new HashMap<>();
 		
@@ -128,6 +166,7 @@ public class L0SegmentProduct extends AbstractProduct {
 		result.put(DATATAKE_ID, String.valueOf(metadata.getDatatakeId()));
 		result.put(CONSOLIDATION, String.valueOf(metadata.getConsolidation()));
 		result.put(PRODUCT_SENSING_CONSOLIDATION, String.valueOf(metadata.getProductSensingConsolidation()));
+		result.put(INSERTION_TIME, metadata.getInsertionTime());
 		return result;
 	}
 	
@@ -141,6 +180,7 @@ public class L0SegmentProduct extends AbstractProduct {
 		meta.setProductName(file.getFilename());
 		meta.setValidityStart(file.getStartDate());
 		meta.setValidityStop(file.getEndDate());
+		meta.setInsertionTime(file.getMetadata().get(INSERTION_TIME));
 		return meta;	
 	}
 }
