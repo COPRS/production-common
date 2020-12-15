@@ -1738,7 +1738,7 @@ public class EsServices {
 		GetResponse response;
 		try {
 			response = elasticsearchDAO.get(new GetRequest(family.name().toLowerCase(), productName));
-		} catch (IOException e) {
+		} catch (final IOException e) {
 			throw new RuntimeException("Failed to check for sea coverage", e);
 		}
 		if (!response.isExists()) {
@@ -1773,7 +1773,7 @@ public class EsServices {
 		GetResponse response;
 		try {
 			response = elasticsearchDAO.get(new GetRequest(family.name().toLowerCase(), productName));
-		} catch (IOException e) {
+		} catch (final IOException e) {
 			throw new RuntimeException("Failed to check for overpass coverage", e);
 		}
 		if (!response.isExists()) {
@@ -1808,7 +1808,7 @@ public class EsServices {
 		GetResponse response;
 		try {
 			response = elasticsearchDAO.get(new GetRequest(family.name().toLowerCase(), productName));
-		} catch (IOException e) {
+		} catch (final IOException e) {
 			throw new RuntimeException("Failed to check for ocean mask intersection", e);
 		}
 		
@@ -1913,6 +1913,8 @@ public class EsServices {
 		} else {
 			r.setProductSensingConsolidation("NOT_DEFINED");
 		}
+		// should always be set in esa.s1pdgs.cpoc.mdc.worker.service.MetadataExtractionService
+		r.setInsertionTime(source.get("insertionTime").toString());
 		source.forEach((key, value) -> r.addAdditionalProperty(key, value.toString()));
 		return r;
 	}

@@ -16,7 +16,8 @@ public class LevelSegmentMetadata extends AbstractMetadata {
 
     private String productSensingConsolidation;
     
-
+    private String insertionTime;
+    
 	private String datatakeId;
 
     public LevelSegmentMetadata(final String productName,
@@ -98,6 +99,13 @@ public class LevelSegmentMetadata extends AbstractMetadata {
 		this.productSensingConsolidation = productSensingConsolidation;
 	}
 	
+	public String getInsertionTime() {
+		return insertionTime;
+	}
+
+	public void setInsertionTime(final String insertionTime) {
+		this.insertionTime = insertionTime;
+	}
 
 	public String toJsonString() {
 		final String superToString = super.toAbstractString();
@@ -111,7 +119,7 @@ public class LevelSegmentMetadata extends AbstractMetadata {
     @Override
     public int hashCode() {
         return Objects.hash(super.hashCode(), datatakeId, polarisation,
-                consolidation,productSensingConsolidation);
+                consolidation,productSensingConsolidation, insertionTime);
     }
 
     /**
@@ -130,6 +138,7 @@ public class LevelSegmentMetadata extends AbstractMetadata {
                     && Objects.equals(datatakeId, other.datatakeId)
                     && Objects.equals(polarisation, other.polarisation)
                     && Objects.equals(consolidation, other.consolidation)
+                    && Objects.equals(insertionTime, other.insertionTime)                    
                     && Objects.equals(productSensingConsolidation, other.productSensingConsolidation);
         }
         return ret;
