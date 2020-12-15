@@ -115,6 +115,10 @@ public class L0SegmentProduct extends AbstractProduct {
 				updated.add(newElement);
 				added = true;
 			}
+			else if (isNewerVersionOf(existing, newElement, polarisation)) {
+				updated.add(existing);
+				added = true;
+			}
 			else {
 				updated.add(existing);
 			}			
@@ -122,8 +126,7 @@ public class L0SegmentProduct extends AbstractProduct {
 		if (!added) {
 			updated.add(newElement);
 		}
-		return updated;
-		
+		return updated;		
 	}
 		
 	private boolean isNewerVersionOf(
