@@ -3,8 +3,9 @@ package esa.s1pdgs.cpoc.dissemination.worker.outbox;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Path;
-import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.apache.commons.net.PrintCommandListener;
 import org.apache.commons.net.ftp.FTP;
@@ -39,7 +40,13 @@ public class FtpOutboxClient extends AbstractOutboxClient {
 	// --------------------------------------------------------------------------
 
 	@Override
-	public List<String> transfer(final List<ObsObject> obsObjects, final ReportingFactory reportingFactory)	throws Exception {
+	protected final Path evaluatePathFor(final ObsObject mainFile) {
+		return this.pathEvaluator.outputPath(this.config.getPath(), mainFile);
+	}
+
+	@Override
+	public String transfer(final ObsObject mainFile, final List<ObsObject> obsObjects,
+			final ReportingFactory reportingFactory) throws Exception {
 		final FTPClient ftpClient = new FTPClient();
 		ftpClient.addProtocolCommandListener(new PrintCommandListener(new LogPrintWriter(this.logger::debug), true));
 
@@ -48,17 +55,15 @@ public class FtpOutboxClient extends AbstractOutboxClient {
 		ftpClient.connect(this.config.getHostname(), port);
 		assertPositiveCompletion(ftpClient);
 
-		return this.performTransfer(obsObjects, ftpClient, reportingFactory);
+		return this.performTransfer(mainFile, obsObjects, ftpClient, reportingFactory);
 	}
 
-	protected List<String> performTransfer(final List<ObsObject> obsObjects, final FTPClient ftpClient,
-			final ReportingFactory reportingFactory) throws IOException, SdkClientException {
+	protected String performTransfer(final ObsObject mainFile, final List<ObsObject> filesToTransfer,
+			final FTPClient ftpClient, final ReportingFactory reportingFactory) throws IOException, SdkClientException {
 
 		if (!ftpClient.login(this.config.getUsername(), this.config.getPassword())) {
 			throw new RuntimeException("Could not authenticate user " + this.config.getUsername());
 		}
-
-		final List<String> targetUrls = new ArrayList<>();
 
 		try {
 			ftpClient.setFileType(FTP.BINARY_FILE_TYPE);
@@ -72,43 +77,80 @@ public class FtpOutboxClient extends AbstractOutboxClient {
 			}
 			assertPositiveCompletion(ftpClient);
 
-			for (final ObsObject obsObject : obsObjects) {
-				final Path path = this.evaluatePathFor(obsObject);
-				final String targetUrl = this.config.getProtocol().toString().toLowerCase() + "://"
-						+ this.config.getHostname() + path.toString();
+			final Path outputPath = this.evaluatePathFor(mainFile);
+			final String targetDirectoryUrl = this.config.getProtocol().toString().toLowerCase() + "://"
+					+ this.config.getHostname() + outputPath.toString();
 
-				for (final String entry : this.entries(obsObject)) {
+			Path tempManifestDestinationFilePath = null;
+			final Map<Path, Path> tempToFinalDestFilePaths = new HashMap<>();
 
-					final Path dest = path.resolve(entry);
-					String currentPath = "";
+			for (final ObsObject sourceFile : filesToTransfer) {
+				final String sourceFileKey = sourceFile.getKey();
+				final String outputFilename = this.pathEvaluator.outputFilename(mainFile, sourceFile);
+				final String temporaryOutputFilename = "." + outputFilename;
 
-					final Path parentPath = dest.getParent();
-					if (parentPath == null) {
-						throw new RuntimeException("Invalid destination " + dest);
-					}
-					// create parent directories if required
-					for (final Path pathElement : parentPath) {
-						currentPath = currentPath + "/" + pathElement;
+				final Path finalDestinationFilePath = outputPath.resolve(outputFilename);
+				final Path temporaryDestinationFilePath = outputPath.resolve(temporaryOutputFilename);
 
-						this.logger.debug("current path is {}", currentPath);
-
-						final boolean directoryExists = ftpClient.changeWorkingDirectory(currentPath);
-						if (directoryExists) {
-							continue;
-						}
-						this.logger.debug("creating directory {}", currentPath);
-						ftpClient.makeDirectory(currentPath);
-						assertPositiveCompletion(ftpClient);
-					}
-
-					try (final InputStream in = this.stream(obsObject.getFamily(), entry)) {
-						this.logger.info("Uploading {} to {}", entry, dest);
-						ftpClient.storeFile(dest.toString(), in);
-						assertPositiveCompletion(ftpClient);
-					}
+				String currentPath = "";
+				final Path parentPath = temporaryDestinationFilePath.getParent();
+				if (parentPath == null) {
+					throw new RuntimeException("Invalid destination " + temporaryDestinationFilePath);
 				}
-				targetUrls.add(targetUrl);
+				// create parent directories if required
+				for (final Path pathElement : parentPath) {
+					currentPath = currentPath + "/" + pathElement;
+
+					this.logger.debug("current path is {}", currentPath);
+
+					final boolean directoryExists = ftpClient.changeWorkingDirectory(currentPath);
+					if (directoryExists) {
+						continue;
+					}
+					this.logger.debug("creating directory {}", currentPath);
+					ftpClient.makeDirectory(currentPath);
+					assertPositiveCompletion(ftpClient);
+				}
+
+				try (final InputStream in = this.stream(sourceFile.getFamily(), sourceFileKey)) {
+					this.logger.info("Uploading {} to {}", sourceFileKey, temporaryDestinationFilePath);
+					ftpClient.storeFile(temporaryDestinationFilePath.toString(), in);
+					assertPositiveCompletion(ftpClient);
+				}
+
+				// remember for renaming
+				tempToFinalDestFilePaths.put(temporaryDestinationFilePath, finalDestinationFilePath);
+				if (outputFilename.contains("manifest")) {
+					tempManifestDestinationFilePath = temporaryDestinationFilePath;
+				}
 			}
+
+			// rename temporary files
+			for (final Map.Entry<Path, Path> entry : tempToFinalDestFilePaths.entrySet()) {
+				final String temporaryDestinationFile = entry.getKey().toString();
+				final String finalDestinationFile = entry.getValue().toString();
+
+				if (null != tempManifestDestinationFilePath
+						&& tempManifestDestinationFilePath.toString().equals(temporaryDestinationFile)) {
+					continue;
+				}
+
+				this.logger.info("Renaming {} to {}", temporaryDestinationFile, finalDestinationFile);
+				ftpClient.rename(temporaryDestinationFile, finalDestinationFile);
+				assertPositiveCompletion(ftpClient);
+			}
+			// rename manifest file as the last one, because it indicates we are done
+			if (null != tempManifestDestinationFilePath
+					&& tempToFinalDestFilePaths.containsKey(tempManifestDestinationFilePath)) {
+				final String temporaryDestinationFile = tempManifestDestinationFilePath.toString();
+				final String finalDestinationFile = tempToFinalDestFilePaths.get(tempManifestDestinationFilePath).toString();
+
+				this.logger.info("Renaming {} to {}", temporaryDestinationFile, finalDestinationFile);
+				ftpClient.rename(temporaryDestinationFile, finalDestinationFile);
+				assertPositiveCompletion(ftpClient);
+			}
+
+			return targetDirectoryUrl;
 		} finally {
 			try {
 				ftpClient.logout();
@@ -118,8 +160,6 @@ public class FtpOutboxClient extends AbstractOutboxClient {
 				assertPositiveCompletion(ftpClient);
 			}
 		}
-
-		return targetUrls;
 	}
 
 	static void assertPositiveCompletion(final FTPClient client) throws IOException {

@@ -135,7 +135,9 @@ public class DisseminationJobListener implements MqiListener<DisseminationJob> {
 				.findMatchingOutboxes(job.getKeyObjectStorage());
 
 		// make sure the files already exist in storage
-		final List<ObsObject> existingFiles = this.assertExist(filesToDisseminate);
+		final List<ObsObject> existingFilesToTransfer = this.assertExist(filesToDisseminate);
+
+		final ObsObject mainFile = new ObsObject(job.getProductFamily(), job.getKeyObjectStorage());
 
 		for (final Map.Entry<OutboxConnection, OutboxClient> entry : matchingOutboxes.entrySet()) {
 			final OutboxConnection outboxConnection = entry.getKey();
@@ -144,16 +146,15 @@ public class DisseminationJobListener implements MqiListener<DisseminationJob> {
 
 			reporting.begin(
 					ReportingUtils.newFilenameReportingInputFor(job.getProductFamily(), job.getKeyObjectStorage()),
-					new ReportingMessage("Start dissemination of {} to outbox {}", existingFiles, outboxName));
+					new ReportingMessage("Start dissemination of {} to outbox {}", existingFilesToTransfer, outboxName));
 			try {
-				final List<String> targetUrls = Retries.performWithRetries(
-						() -> outboxClient.transfer(existingFiles, reporting),
-						"Transfer of " + existingFiles + " to " + outboxName, //
+				final String targetDirectoryUrl = Retries.performWithRetries(
+						() -> outboxClient.transfer(mainFile, existingFilesToTransfer, reporting),
+						"Transfer of " + existingFilesToTransfer + " to " + outboxName, //
 						this.config.getMaxRetries(), this.config.getTempoRetryMs());
 
-				final String mainFileUrl = (CollectionUtil.isNotEmpty(targetUrls) ? targetUrls.get(0) : "undefined");
-				reporting.end(new OutboxReportingOutput(mainFileUrl),
-						new ReportingMessage("End dissemination of {} to outbox {}", existingFiles, outboxName));
+				reporting.end(new OutboxReportingOutput(targetDirectoryUrl),
+						new ReportingMessage("End dissemination of {} to outbox {}", existingFilesToTransfer, outboxName));
 			} catch (final Exception e) {
 				final String messageString = this.errorMessageFor(e, outboxName);
 				reporting.error(new ReportingMessage(messageString));
