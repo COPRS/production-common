@@ -20,7 +20,7 @@ public abstract class AbstractOutboxClient implements OutboxClient {
 
 	protected final ObsClient obsClient;
 	protected final OutboxConfiguration config;
-	private final PathEvaluator pathEvaluator;
+	protected final PathEvaluator pathEvaluator;
 
 	// --------------------------------------------------------------------------
 
@@ -55,7 +55,7 @@ public abstract class AbstractOutboxClient implements OutboxClient {
 		this.mkdirLocal(parent);
 	}
 
-	protected final Path evaluatePathFor(final ObsObject obsObject) {
+	protected Path evaluatePathFor(final ObsObject obsObject) {
 		final Path path = this.pathEvaluator.outputPath(this.config.getPath(), obsObject);
 		this.mkdirLocal(path.toFile());
 
