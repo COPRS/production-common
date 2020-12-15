@@ -34,7 +34,7 @@ import esa.s1pdgs.cpoc.mqi.client.MqiListener;
 import esa.s1pdgs.cpoc.mqi.client.MqiMessageEventHandler;
 import esa.s1pdgs.cpoc.mqi.client.MqiPublishingJob;
 import esa.s1pdgs.cpoc.mqi.model.queue.DisseminationJob;
-import esa.s1pdgs.cpoc.mqi.model.queue.DisseminationJob.DisseminationSource;
+import esa.s1pdgs.cpoc.mqi.model.queue.DisseminationSource;
 import esa.s1pdgs.cpoc.mqi.model.rest.GenericMessageDto;
 import esa.s1pdgs.cpoc.obs_sdk.ObsClient;
 import esa.s1pdgs.cpoc.obs_sdk.ObsObject;
