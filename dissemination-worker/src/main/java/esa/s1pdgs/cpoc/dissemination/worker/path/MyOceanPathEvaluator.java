@@ -19,14 +19,13 @@ public class MyOceanPathEvaluator implements PathEvaluator {
 
 	@Override
 	public Path outputPath(final String basePath, final ObsObject obsObject) {
-		final String sourceFilename = getFilename(obsObject);
-
+		//		final String sourceFilename = getFilename(obsObject);
 		//		if (sourceFilename.contains("manifest")) {
 		//			throw new IllegalArgumentException(
 		//					"MyOceanPathEvaluator does not support retrieving output path from manifest file! Use product file instead.");
 		//		}
 
-		final LocalDateTime sensingStart = getSensingStart(sourceFilename);
+		final LocalDateTime sensingStart = getSensingStart(obsObject.getKey());
 		final String year = String.valueOf(sensingStart.getYear());
 		final String month = fixedLengthString(2, '0', String.valueOf(sensingStart.getMonthValue()));
 		final String day = fixedLengthString(2, '0', String.valueOf(sensingStart.getDayOfMonth()));
