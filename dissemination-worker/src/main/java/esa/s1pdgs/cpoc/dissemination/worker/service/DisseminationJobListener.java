@@ -168,8 +168,6 @@ public class DisseminationJobListener implements MqiListener<DisseminationJob> {
 	private Map<OutboxConnection, OutboxClient> findMatchingOutboxes(String obsKey) {
 		final Map<OutboxConnection, OutboxClient> matchingOutboxes = new HashMap<>();
 
-		// TODO: trying to match all obs keys (zip + manifest) instead of only the main file?
-
 		for (final OutboxConnection outboxConnection : CollectionUtil.nullToEmpty(this.config.getOutboxConnections())) {
 			LOG.trace("Checking if product {} matches {}", obsKey, outboxConnection.getMatchRegex());
 			if (obsKey.matches(outboxConnection.getMatchRegex())) {

@@ -12,7 +12,7 @@ import esa.s1pdgs.cpoc.obs_sdk.ObsObject;
 
 public class MyOceanPathEvaluator implements PathEvaluator {
 
-	private static final String PATTERN_STR = "^(S1|AS)(A|B)_(S[1-6]|IW|EW|WV|GP|HK|N[1-6]|EN|IM)_(SLC|GRD|OCN|RAW)(F|H|M|_)_(0|1|2)(A|C|N|S|_)(SH|SV|HH|HV|VV|VH|DH|DV)_([0-9a-z]{15})_([0-9a-z]{15})_([0-9]{6})_([0-9a-z_]{6})\\w{1,}\\.(SAFE)(/.*)?$";
+	private static final String PATTERN_STR = "^(S1|AS)(A|B)_(S[1-6]|IW|EW|WV|GP|HK|N[1-6]|EN|IM)_(SLC|GRD|OCN|RAW)(F|H|M|_)_(0|1|2)(A|C|N|S|_)(SH|SV|HH|HV|VV|VH|DH|DV)_([0-9a-z]{15})_([0-9a-z]{15})_([0-9]{6})_([0-9a-z_]{6})\\w{1,}\\.(SAFE)(\\.zip|/.*)?$";
 	private static final Pattern PATTERN = Pattern.compile(PATTERN_STR, Pattern.CASE_INSENSITIVE);
 
 	// --------------------------------------------------------------------------
@@ -21,10 +21,10 @@ public class MyOceanPathEvaluator implements PathEvaluator {
 	public Path outputPath(final String basePath, final ObsObject obsObject) {
 		final String sourceFilename = getFilename(obsObject);
 
-		if (sourceFilename.contains("manifest")) {
-			throw new IllegalArgumentException(
-					"MyOceanPathEvaluator does not support retrieving output path from manifest file! Use product file instead.");
-		}
+		//		if (sourceFilename.contains("manifest")) {
+		//			throw new IllegalArgumentException(
+		//					"MyOceanPathEvaluator does not support retrieving output path from manifest file! Use product file instead.");
+		//		}
 
 		final LocalDateTime sensingStart = getSensingStart(sourceFilename);
 		final String year = String.valueOf(sensingStart.getYear());
