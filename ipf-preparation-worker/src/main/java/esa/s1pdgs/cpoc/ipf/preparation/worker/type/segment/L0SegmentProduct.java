@@ -6,6 +6,7 @@ import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.function.Predicate;
 
 import esa.s1pdgs.cpoc.appcatalog.AppDataJob;
@@ -133,9 +134,14 @@ public class L0SegmentProduct extends AbstractProduct {
 		final LevelSegmentMetadata newMeta = toMetadataObject(newElement, polarisation);
 		final LevelSegmentMetadata oldMeta = toMetadataObject(existing, polarisation);
 		
-		return DateUtils.parse(newMeta.getInsertionTime())
+		// other elements should already be equal when this method is called
+		return Objects.equals(newMeta.getValidityStart(), oldMeta.getValidityStart()) &&
+				Objects.equals(newMeta.getValidityStop(), oldMeta.getValidityStop()) &&				
+				DateUtils.parse(newMeta.getInsertionTime())
 				.isAfter(DateUtils.parse(oldMeta.getInsertionTime()));
 	}
+	
+
 
 	public final Map<String,List<LevelSegmentMetadata>> segmentsForPolaristions() {
 		final Map<String,List<LevelSegmentMetadata>> result = new HashMap<>();
