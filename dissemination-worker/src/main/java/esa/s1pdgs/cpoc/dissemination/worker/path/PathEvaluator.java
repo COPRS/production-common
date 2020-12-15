@@ -12,6 +12,11 @@ public interface PathEvaluator {
 		public Path outputPath(String basePath, ObsObject obsObject) {
 			return Paths.get(basePath);
 		}
+
+		@Override
+		public String outputFilename(ObsObject mainFile, ObsObject sourceFile) {
+			return Paths.get(sourceFile.getKey()).getFileName().toString();
+		}
 	};
 
 	public static PathEvaluator newInstance(OutboxConfiguration config) {
@@ -21,5 +26,17 @@ public interface PathEvaluator {
 		return NULL;
 	}
 
+	/**
+	 * @param basePath  the output base/root path
+	 * @param obsObject the object for which the output path is sought
+	 * @return the output/destination path for the given object
+	 */
 	Path outputPath(String basePath, ObsObject obsObject);
+
+	/**
+	 * @param mainFile   the main file, which may differ from the source file
+	 * @param sourceFile the object for which the output filename is sought
+	 * @return the output/destination filename for the given source file
+	 */
+	String outputFilename(ObsObject mainFile, ObsObject sourceFile);
 }
