@@ -3,7 +3,6 @@ package esa.s1pdgs.cpoc.dissemination.worker.outbox;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Path;
-import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.commons.net.PrintCommandListener;
@@ -39,7 +38,13 @@ public class FtpOutboxClient extends AbstractOutboxClient {
 	// --------------------------------------------------------------------------
 
 	@Override
-	public List<String> transfer(final List<ObsObject> obsObjects, final ReportingFactory reportingFactory)	throws Exception {
+	protected final Path evaluatePathFor(final ObsObject obsObject) {
+		return this.pathEvaluator.outputPath(this.config.getPath(), obsObject);
+	}
+
+	@Override
+	public String transfer(final ObsObject mainFile, final List<ObsObject> obsObjects,
+			final ReportingFactory reportingFactory) throws Exception {
 		final FTPClient ftpClient = new FTPClient();
 		ftpClient.addProtocolCommandListener(new PrintCommandListener(new LogPrintWriter(this.logger::debug), true));
 
@@ -48,17 +53,15 @@ public class FtpOutboxClient extends AbstractOutboxClient {
 		ftpClient.connect(this.config.getHostname(), port);
 		assertPositiveCompletion(ftpClient);
 
-		return this.performTransfer(obsObjects, ftpClient, reportingFactory);
+		return this.performTransfer(mainFile, obsObjects, ftpClient, reportingFactory);
 	}
 
-	protected List<String> performTransfer(final List<ObsObject> obsObjects, final FTPClient ftpClient,
-			final ReportingFactory reportingFactory) throws IOException, SdkClientException {
+	protected String performTransfer(final ObsObject mainFile, final List<ObsObject> filesToTransfer,
+			final FTPClient ftpClient, final ReportingFactory reportingFactory) throws IOException, SdkClientException {
 
 		if (!ftpClient.login(this.config.getUsername(), this.config.getPassword())) {
 			throw new RuntimeException("Could not authenticate user " + this.config.getUsername());
 		}
-
-		final List<String> targetUrls = new ArrayList<>();
 
 		try {
 			ftpClient.setFileType(FTP.BINARY_FILE_TYPE);
@@ -72,12 +75,14 @@ public class FtpOutboxClient extends AbstractOutboxClient {
 			}
 			assertPositiveCompletion(ftpClient);
 
-			for (final ObsObject obsObject : obsObjects) {
-				final Path path = this.evaluatePathFor(obsObject);
-				final String targetUrl = this.config.getProtocol().toString().toLowerCase() + "://"
-						+ this.config.getHostname() + path.toString();
+			final Path path = this.evaluatePathFor(mainFile);
+			final String targetDirectoryUrl = this.config.getProtocol().toString().toLowerCase() + "://"
+					+ this.config.getHostname() + path.toString();
 
+			for (final ObsObject obsObject : filesToTransfer) {
 				for (final String entry : this.entries(obsObject)) {
+
+					// TODO @MSc: entries nicht aus obs holen, sondern aus obsobjects nehmen + manifest files umbenennen
 
 					final Path dest = path.resolve(entry);
 					String currentPath = "";
@@ -107,8 +112,8 @@ public class FtpOutboxClient extends AbstractOutboxClient {
 						assertPositiveCompletion(ftpClient);
 					}
 				}
-				targetUrls.add(targetUrl);
 			}
+			return targetDirectoryUrl;
 		} finally {
 			try {
 				ftpClient.logout();
@@ -118,8 +123,6 @@ public class FtpOutboxClient extends AbstractOutboxClient {
 				assertPositiveCompletion(ftpClient);
 			}
 		}
-
-		return targetUrls;
 	}
 
 	static void assertPositiveCompletion(final FTPClient client) throws IOException {
