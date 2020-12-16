@@ -6,6 +6,8 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 import javax.annotation.PostConstruct;
 
@@ -30,6 +32,7 @@ import esa.s1pdgs.cpoc.dissemination.worker.outbox.OutboxClient;
 import esa.s1pdgs.cpoc.errorrepo.ErrorRepoAppender;
 import esa.s1pdgs.cpoc.errorrepo.model.rest.FailedProcessingDto;
 import esa.s1pdgs.cpoc.mqi.client.GenericMqiClient;
+import esa.s1pdgs.cpoc.mqi.client.MqiConsumer;
 import esa.s1pdgs.cpoc.mqi.client.MqiListener;
 import esa.s1pdgs.cpoc.mqi.client.MqiMessageEventHandler;
 import esa.s1pdgs.cpoc.mqi.client.MqiPublishingJob;
@@ -94,14 +97,28 @@ public class DisseminationJobListener implements MqiListener<DisseminationJob> {
 			LOG.info("using {} for outbox '{}'", outboxClient, outboxName);
 			this.clientsToOutboxes.put(outboxName, outboxClient);
 		}
+
+		// start mqi consumer
+		if (this.config.getPollingIntervalMs() > 0) {
+			final ExecutorService service = Executors.newFixedThreadPool(1);
+			LOG.info("starting MQI consumer with polling interval " + this.config.getPollingIntervalMs() + " ms");
+			service.execute(new MqiConsumer<>( //
+					this.mqiClient, //
+					ProductCategory.DISSEMINATION_JOBS, //
+					this, //
+					Collections.emptyList(), //
+					this.config.getPollingIntervalMs(), //
+					this.config.getPollingInitialDelayMs(), //
+					this.appStatus));
+		} else {
+			LOG.info("polling interval zero or negative: MQI polling is deactivated");
+		}
 	}
 
 	// --------------------------------------------------------------------------
 
 	@Override
 	public MqiMessageEventHandler onMessage(GenericMessageDto<DisseminationJob> message) throws Exception {
-		LOG.debug("incoming message: " + message);
-
 		final DisseminationJob job = message.getBody();
 		final List<DisseminationSource> filesToDisseminate = job.getDisseminationSources();
 
@@ -197,7 +214,7 @@ public class DisseminationJobListener implements MqiListener<DisseminationJob> {
 	private List<ObsObject> assertExist(final List<DisseminationSource> files) throws InterruptedException {
 		return Retries.performWithRetries(() -> {
 			return this.assertExistInObs(files);
-		}, "assert files exist in OBS: " + files, this.config.getMaxRetries(), this.config.getTempoRetryMs());
+		}, "assert files exist in OBS: " + files, this.config.getObsMaxRetries(), this.config.getObsTempoRetryMs());
 	}
 
 	private List<ObsObject> assertExistInObs(final List<DisseminationSource> files)

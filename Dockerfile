@@ -49,3 +49,4 @@ COPY --from=buildenv /app/prip-frontend/target /app/prip-frontend/target
 COPY --from=buildenv /app/data-lifecycle-trigger/target /app/data-lifecycle-trigger/target
 COPY --from=buildenv /app/data-lifecycle-worker/target /app/data-lifecycle-worker/target
 COPY --from=buildenv /app/dissemination-trigger/target /app/dissemination-trigger/target
+COPY --from=buildenv /app/dissemination-worker/target /app/dissemination-worker/target
