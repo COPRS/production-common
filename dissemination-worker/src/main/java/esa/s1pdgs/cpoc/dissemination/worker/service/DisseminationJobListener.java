@@ -119,8 +119,6 @@ public class DisseminationJobListener implements MqiListener<DisseminationJob> {
 
 	@Override
 	public MqiMessageEventHandler onMessage(GenericMessageDto<DisseminationJob> message) throws Exception {
-		LOG.debug("incoming message: " + message);
-
 		final DisseminationJob job = message.getBody();
 		final List<DisseminationSource> filesToDisseminate = job.getDisseminationSources();
 
@@ -216,7 +214,7 @@ public class DisseminationJobListener implements MqiListener<DisseminationJob> {
 	private List<ObsObject> assertExist(final List<DisseminationSource> files) throws InterruptedException {
 		return Retries.performWithRetries(() -> {
 			return this.assertExistInObs(files);
-		}, "assert files exist in OBS: " + files, this.config.getMaxRetries(), this.config.getTempoRetryMs());
+		}, "assert files exist in OBS: " + files, this.config.getObsMaxRetries(), this.config.getObsTempoRetryMs());
 	}
 
 	private List<ObsObject> assertExistInObs(final List<DisseminationSource> files)

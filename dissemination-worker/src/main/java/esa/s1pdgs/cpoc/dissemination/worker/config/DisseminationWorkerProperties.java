@@ -20,6 +20,9 @@ public class DisseminationWorkerProperties {
 	private int maxRetries = 3;
 	private long tempoRetryMs = 1000;
 
+	private int obsMaxRetries = 100;
+	private long obsTempoRetryMs = 10000;
+
 	private long pollingIntervalMs = 1000;
 	private long pollingInitialDelayMs = 5000;
 
@@ -28,8 +31,8 @@ public class DisseminationWorkerProperties {
 	@Override
 	public String toString() {
 		return "DisseminationWorkerProperties [pollingIntervalMs=" + this.pollingIntervalMs + ", pollingInitialDelayMs="
-				+ this.pollingInitialDelayMs + ", outboxes=" + this.outboxes + ", outboxConnections="
-				+ this.outboxConnections + "]";
+				+ this.pollingInitialDelayMs + ", obsMaxRetries=" + this.obsMaxRetries + ", obsTempoRetryMs="
+				+ this.obsTempoRetryMs + ", outboxes=" + this.outboxes + ", outboxConnections=" + this.outboxConnections + "]";
 	}
 
 	// --------------------------------------------------------------------------
@@ -80,6 +83,22 @@ public class DisseminationWorkerProperties {
 
 	public void setTempoRetryMs(long tempoRetryMs) {
 		this.tempoRetryMs = tempoRetryMs;
+	}
+
+	public int getObsMaxRetries() {
+		return this.obsMaxRetries;
+	}
+
+	public void setObsMaxRetries(int obsMaxRetries) {
+		this.obsMaxRetries = obsMaxRetries;
+	}
+
+	public long getObsTempoRetryMs() {
+		return this.obsTempoRetryMs;
+	}
+
+	public void setObsTempoRetryMs(long obsTempoRetryMs) {
+		this.obsTempoRetryMs = obsTempoRetryMs;
 	}
 
 	// --------------------------------------------------------------------------
