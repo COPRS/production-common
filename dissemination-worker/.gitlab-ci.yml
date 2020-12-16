@@ -3,9 +3,9 @@
 image: docker:latest
 
 variables:
-  MODULE_DISSEMINATION_TRIGGER: s1pro-core-dissemination-worker
+  MODULE_DISSEMINATION_WORKER: s1pro-core-dissemination-worker
 
-dissemination-trigger-build:
+dissemination-worker-build:
   stage: module
   script:
     - cd dissemination-worker
