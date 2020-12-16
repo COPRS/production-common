@@ -37,6 +37,13 @@ public class IngestionTriggerServiceTransactional {
 		return new HashSet<>(result);
 	}
 
+	public Set<InboxEntry> getAllForPath(final String pickupURL, final String stationName) {
+		final List<InboxEntry> result = this.repository.findByProcessingPodAndPickupURLAndStationName(
+				this.processConfiguration.getHostname(), pickupURL, stationName);
+		LOG.debug("listing persisted inbox entries for inbox " + pickupURL + ", station " + stationName + ": " + result);
+		return new HashSet<>(result);
+	}
+
 	public void removeFinished(final Collection<InboxEntry> finishedEntries) {
 		LOG.debug("deleting inbox entries: " + finishedEntries);
 		this.repository.deleteAll(finishedEntries);

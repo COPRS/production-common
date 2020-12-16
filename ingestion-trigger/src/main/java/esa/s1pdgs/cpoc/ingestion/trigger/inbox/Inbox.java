@@ -12,6 +12,7 @@ import org.slf4j.LoggerFactory;
 import esa.s1pdgs.cpoc.common.ProductFamily;
 import esa.s1pdgs.cpoc.common.utils.Exceptions;
 import esa.s1pdgs.cpoc.common.utils.LogUtils;
+import esa.s1pdgs.cpoc.ingestion.trigger.auxip.AuxipInboxAdapter;
 import esa.s1pdgs.cpoc.ingestion.trigger.entity.InboxEntry;
 import esa.s1pdgs.cpoc.ingestion.trigger.filter.InboxFilter;
 import esa.s1pdgs.cpoc.ingestion.trigger.name.ProductNameEvaluator;
@@ -65,11 +66,23 @@ public final class Inbox {
 	}
 	
 	public final void poll() {
-		try {			
-			final PollingRun pollingRun = PollingRun.newInstance(
-					ingestionTriggerServiceTransactional.getAllForPath(inboxAdapter.inboxURL(), stationName, family),
-					inboxAdapter.read(InboxFilter.ALLOW_ALL)
-			);						
+		try {
+			//This is a dirty workaround to support backwards compatibility because product family is new and
+			//existing InboxEntries for xbip etc. (excl. auxip) do not have product family yet
+			//This (else part) can be removed in the future as then all InboxEntries will have product family property
+			final PollingRun pollingRun;
+			if(inboxAdapter instanceof AuxipInboxAdapter) {
+				pollingRun = PollingRun.newInstance(
+						ingestionTriggerServiceTransactional.getAllForPath(inboxAdapter.inboxURL(), stationName, family),
+						inboxAdapter.read(InboxFilter.ALLOW_ALL)
+				);
+			} else {
+				pollingRun = PollingRun.newInstance(
+						ingestionTriggerServiceTransactional.getAllForPath(inboxAdapter.inboxURL(), stationName),
+						inboxAdapter.read(InboxFilter.ALLOW_ALL)
+				);
+			}
+
 			// when a product has been removed from the inbox directory, it shall be removed
 			// from the persistence so it will not be ignored if it occurs again on the inbox
 			ingestionTriggerServiceTransactional.removeFinished(pollingRun.finishedElements());
