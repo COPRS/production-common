@@ -12,6 +12,7 @@ import org.apache.commons.net.ftp.FTP;
 import org.apache.commons.net.ftp.FTPClient;
 import org.apache.commons.net.ftp.FTPReply;
 
+import esa.s1pdgs.cpoc.common.utils.StringUtil;
 import esa.s1pdgs.cpoc.dissemination.worker.config.DisseminationWorkerProperties.OutboxConfiguration;
 import esa.s1pdgs.cpoc.dissemination.worker.path.PathEvaluator;
 import esa.s1pdgs.cpoc.dissemination.worker.util.LogPrintWriter;
@@ -99,7 +100,12 @@ public class FtpOutboxClient extends AbstractOutboxClient {
 				}
 				// create parent directories if required
 				for (final Path pathElement : parentPath) {
-					currentPath = currentPath + "/" + pathElement;
+					if (StringUtil.isEmpty(currentPath)) {
+						// prevent using an absolute path here
+						currentPath = pathElement.toString();
+					} else {
+						currentPath = currentPath + "/" + pathElement;
+					}
 
 					this.logger.debug("current path is {}", currentPath);
 
