@@ -20,15 +20,35 @@ public class DisseminationWorkerProperties {
 	private int maxRetries = 3;
 	private long tempoRetryMs = 1000;
 
+	private long pollingIntervalMs = 1000;
+	private long pollingInitialDelayMs = 5000;
+
 	// --------------------------------------------------------------------------
 
 	@Override
 	public String toString() {
-		return "DisseminationWorkerProperties [outboxes=" + this.outboxes + ", outboxConnections="
+		return "DisseminationWorkerProperties [pollingIntervalMs=" + this.pollingIntervalMs + ", pollingInitialDelayMs="
+				+ this.pollingInitialDelayMs + ", outboxes=" + this.outboxes + ", outboxConnections="
 				+ this.outboxConnections + "]";
 	}
 
 	// --------------------------------------------------------------------------
+
+	public long getPollingIntervalMs() {
+		return this.pollingIntervalMs;
+	}
+
+	public void setPollingIntervalMs(long pollingIntervalMs) {
+		this.pollingIntervalMs = pollingIntervalMs;
+	}
+
+	public long getPollingInitialDelayMs() {
+		return this.pollingInitialDelayMs;
+	}
+
+	public void setPollingInitialDelayMs(long pollingInitialDelayMs) {
+		this.pollingInitialDelayMs = pollingInitialDelayMs;
+	}
 
 	public Map<String, OutboxConfiguration> getOutboxes() {
 		return this.outboxes;
