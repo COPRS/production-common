@@ -119,6 +119,8 @@ public class FtpOutboxClient extends AbstractOutboxClient {
 					this.logger.debug("creating directory {}", currentPath);
 					ftpClient.makeDirectory(currentDirectory);
 					assertPositiveCompletion(ftpClient);
+
+					ftpClient.changeWorkingDirectory(currentDirectory);
 				}
 
 				try (final InputStream in = this.stream(sourceFile.getFamily(), sourceFileKey)) {
