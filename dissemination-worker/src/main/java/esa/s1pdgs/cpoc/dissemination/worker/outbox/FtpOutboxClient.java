@@ -108,12 +108,14 @@ public class FtpOutboxClient extends AbstractOutboxClient {
 						currentPath = currentPath + "/" + currentDirectory;
 					}
 
-					this.logger.debug("current path is {}", currentPath);
+					this.logger.debug("where we are: {}", ftpClient.printWorkingDirectory());
+					this.logger.debug("where we want to go: {}", currentPath);
 
 					final boolean directoryExists = ftpClient.changeWorkingDirectory(currentDirectory);
 					if (directoryExists) {
 						continue;
 					}
+
 					this.logger.debug("creating directory {}", currentPath);
 					ftpClient.makeDirectory(currentDirectory);
 					assertPositiveCompletion(ftpClient);
