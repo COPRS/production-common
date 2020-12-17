@@ -125,7 +125,7 @@ public class FtpOutboxClient extends AbstractOutboxClient {
 
 				try (final InputStream in = this.stream(sourceFile.getFamily(), sourceFileKey)) {
 					this.logger.info("Uploading {} to {}", sourceFileKey, temporaryDestinationFilePath);
-					ftpClient.storeFile(temporaryDestinationFilePath.toString(), in);
+					ftpClient.storeFile(temporaryOutputFilename, in);
 					assertPositiveCompletion(ftpClient);
 				}
 
