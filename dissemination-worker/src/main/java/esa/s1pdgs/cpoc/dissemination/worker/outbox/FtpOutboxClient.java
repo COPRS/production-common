@@ -12,7 +12,6 @@ import org.apache.commons.net.ftp.FTP;
 import org.apache.commons.net.ftp.FTPClient;
 import org.apache.commons.net.ftp.FTPReply;
 
-import esa.s1pdgs.cpoc.common.utils.StringUtil;
 import esa.s1pdgs.cpoc.dissemination.worker.config.DisseminationWorkerProperties.OutboxConfiguration;
 import esa.s1pdgs.cpoc.dissemination.worker.path.PathEvaluator;
 import esa.s1pdgs.cpoc.dissemination.worker.util.LogPrintWriter;
@@ -76,7 +75,10 @@ public class FtpOutboxClient extends AbstractOutboxClient {
 				this.logger.debug("using active mode");
 				ftpClient.enterLocalActiveMode();
 			}
+			// we connect to s1pro-mock-dissemination-svc (k8s service for mock pod),
+			// but initiation of data transfer may come from s1pro-mock-dissemination-ftps (docker image inside pod)
 			ftpClient.setRemoteVerificationEnabled(false);
+
 			assertPositiveCompletion(ftpClient);
 
 			final Path outputPath = this.evaluatePathFor(mainFile);
@@ -94,35 +96,7 @@ public class FtpOutboxClient extends AbstractOutboxClient {
 				final Path finalDestinationFilePath = outputPath.resolve(outputFilename);
 				final Path temporaryDestinationFilePath = outputPath.resolve(temporaryOutputFilename);
 
-				String currentPath = "";
-				final Path parentPath = temporaryDestinationFilePath.getParent();
-				if (parentPath == null) {
-					throw new RuntimeException("Invalid destination " + temporaryDestinationFilePath);
-				}
-				// create parent directories if required
-				for (final Path pathElement : parentPath) {
-					final String currentDirectory = pathElement.toString();
-					if (StringUtil.isEmpty(currentPath)) {
-						// prevent using an absolute path here
-						currentPath = currentDirectory;
-					} else {
-						currentPath = currentPath + "/" + currentDirectory;
-					}
-
-					this.logger.debug("where we are: {}", ftpClient.printWorkingDirectory());
-					this.logger.debug("where we want to go: {}", currentPath);
-
-					final boolean directoryExists = ftpClient.changeWorkingDirectory(currentDirectory);
-					if (directoryExists) {
-						continue;
-					}
-
-					this.logger.debug("creating directory {}", currentPath);
-					ftpClient.makeDirectory(currentDirectory);
-					assertPositiveCompletion(ftpClient);
-
-					ftpClient.changeWorkingDirectory(currentDirectory);
-				}
+				this.changeWorkingDirectory(ftpClient, temporaryDestinationFilePath.getParent());
 
 				try (final InputStream in = this.stream(sourceFile.getFamily(), sourceFileKey)) {
 					this.logger.info("Uploading {} to {}", sourceFileKey, temporaryDestinationFilePath);
@@ -137,30 +111,7 @@ public class FtpOutboxClient extends AbstractOutboxClient {
 				}
 			}
 
-			// rename temporary files
-			for (final Map.Entry<Path, Path> entry : tempToFinalDestFilePaths.entrySet()) {
-				final String temporaryDestinationFile = entry.getKey().toString();
-				final String finalDestinationFile = entry.getValue().toString();
-
-				if (null != tempManifestDestinationFilePath
-						&& tempManifestDestinationFilePath.toString().equals(temporaryDestinationFile)) {
-					continue;
-				}
-
-				this.logger.info("Renaming {} to {}", temporaryDestinationFile, finalDestinationFile);
-				ftpClient.rename(temporaryDestinationFile, finalDestinationFile);
-				assertPositiveCompletion(ftpClient);
-			}
-			// rename manifest file as the last one, because it indicates we are done
-			if (null != tempManifestDestinationFilePath
-					&& tempToFinalDestFilePaths.containsKey(tempManifestDestinationFilePath)) {
-				final String temporaryDestinationFile = tempManifestDestinationFilePath.toString();
-				final String finalDestinationFile = tempToFinalDestFilePaths.get(tempManifestDestinationFilePath).toString();
-
-				this.logger.info("Renaming {} to {}", temporaryDestinationFile, finalDestinationFile);
-				ftpClient.rename(temporaryDestinationFile, finalDestinationFile);
-				assertPositiveCompletion(ftpClient);
-			}
+			this.renameFiles(ftpClient, tempToFinalDestFilePaths, tempManifestDestinationFilePath);
 
 			return targetDirectoryUrl;
 		} finally {
@@ -171,6 +122,64 @@ public class FtpOutboxClient extends AbstractOutboxClient {
 				ftpClient.disconnect();
 				assertPositiveCompletion(ftpClient);
 			}
+		}
+	}
+
+	private void changeWorkingDirectory(final FTPClient ftpClient, final Path targetDirectory) throws IOException {
+		if (targetDirectory == null) {
+			throw new RuntimeException("Invalid destination " + targetDirectory);
+		}
+		// start from ftp root
+		ftpClient.changeWorkingDirectory("/");
+
+		// create parent directories if required
+		for (final Path pathElement : targetDirectory) {
+			final String subDirectory = pathElement.toString();
+
+			this.logger.debug("where we are: {}", ftpClient.printWorkingDirectory());
+			this.logger.debug("where we want to go: {}", subDirectory);
+
+			final boolean directoryExists = ftpClient.changeWorkingDirectory(subDirectory);
+			if (directoryExists) {
+				continue;
+			}
+
+			this.logger.debug("creating directory {}", subDirectory);
+			ftpClient.makeDirectory(subDirectory);
+			assertPositiveCompletion(ftpClient);
+
+			ftpClient.changeWorkingDirectory(subDirectory);
+		}
+	}
+
+	private void renameFiles(final FTPClient ftpClient, final Map<Path, Path> tempToFinalDestFilePaths,
+			final Path tempManifestDestinationFilePath) throws IOException {
+		// rename product files
+		for (final Map.Entry<Path, Path> entry : tempToFinalDestFilePaths.entrySet()) {
+			final String temporaryDestinationFile = entry.getKey().toString();
+			final String finalDestinationFile = entry.getValue().toString();
+
+			if (null != tempManifestDestinationFilePath
+					&& tempManifestDestinationFilePath.toString().equals(temporaryDestinationFile)) {
+				continue; // manifest file comes last
+			}
+
+			this.logger.info("Renaming {} to {}", temporaryDestinationFile, finalDestinationFile);
+			this.changeWorkingDirectory(ftpClient, entry.getKey().getParent());
+			ftpClient.rename(temporaryDestinationFile, finalDestinationFile);
+			assertPositiveCompletion(ftpClient);
+		}
+		// rename manifest file as the last one, because it indicates we are done
+		if (null != tempManifestDestinationFilePath
+				&& tempToFinalDestFilePaths.containsKey(tempManifestDestinationFilePath)) {
+			final String temporaryDestinationFile = tempManifestDestinationFilePath.toString();
+			final String finalDestinationFile = tempToFinalDestFilePaths.get(tempManifestDestinationFilePath)
+					.toString();
+
+			this.logger.info("Renaming {} to {}", temporaryDestinationFile, finalDestinationFile);
+			this.changeWorkingDirectory(ftpClient, tempManifestDestinationFilePath.getParent());
+			ftpClient.rename(temporaryDestinationFile, finalDestinationFile);
+			assertPositiveCompletion(ftpClient);
 		}
 	}
 
