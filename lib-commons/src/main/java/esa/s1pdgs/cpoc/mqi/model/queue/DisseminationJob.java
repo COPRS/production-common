@@ -1,10 +1,12 @@
 package esa.s1pdgs.cpoc.mqi.model.queue;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 
 import esa.s1pdgs.cpoc.common.ProductFamily;
+import esa.s1pdgs.cpoc.mqi.model.control.AllowedAction;
 
 public class DisseminationJob extends AbstractMessage {
 	
@@ -12,6 +14,7 @@ public class DisseminationJob extends AbstractMessage {
 	
 	public DisseminationJob() {
 		super();
+		allowedActions = Collections.singletonList(AllowedAction.RESTART);
 	}
 	
 	public void addDisseminationSource(ProductFamily productFamily, String keyObjectStorage) {
