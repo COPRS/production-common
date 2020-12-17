@@ -100,11 +100,12 @@ public class FtpOutboxClient extends AbstractOutboxClient {
 				}
 				// create parent directories if required
 				for (final Path pathElement : parentPath) {
+					final String currentDirectory = pathElement.toString();
 					if (StringUtil.isEmpty(currentPath)) {
 						// prevent using an absolute path here
-						currentPath = pathElement.toString();
+						currentPath = currentDirectory;
 					} else {
-						currentPath = currentPath + "/" + pathElement;
+						currentPath = currentPath + "/" + currentDirectory;
 					}
 
 					this.logger.debug("current path is {}", currentPath);
@@ -114,7 +115,7 @@ public class FtpOutboxClient extends AbstractOutboxClient {
 						continue;
 					}
 					this.logger.debug("creating directory {}", currentPath);
-					ftpClient.makeDirectory(currentPath);
+					ftpClient.makeDirectory(currentDirectory);
 					assertPositiveCompletion(ftpClient);
 				}
 
