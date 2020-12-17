@@ -156,29 +156,29 @@ public class FtpOutboxClient extends AbstractOutboxClient {
 			final Path tempManifestDestinationFilePath) throws IOException {
 		// rename product files
 		for (final Map.Entry<Path, Path> entry : tempToFinalDestFilePaths.entrySet()) {
-			final String temporaryDestinationFile = entry.getKey().toString();
-			final String finalDestinationFile = entry.getValue().toString();
+			final String temporaryDestinationFilePath = entry.getKey().toString();
+			final String temporaryDestinationFileName = entry.getKey().getFileName().toString();
+			final String finalDestinationFileName = entry.getValue().getFileName().toString();
 
 			if (null != tempManifestDestinationFilePath
-					&& tempManifestDestinationFilePath.toString().equals(temporaryDestinationFile)) {
+					&& tempManifestDestinationFilePath.toString().equals(temporaryDestinationFilePath)) {
 				continue; // manifest file comes last
 			}
 
-			this.logger.info("Renaming {} to {}", temporaryDestinationFile, finalDestinationFile);
+			this.logger.info("Renaming {} to {}", temporaryDestinationFileName, finalDestinationFileName);
 			this.changeWorkingDirectory(ftpClient, entry.getKey().getParent());
-			ftpClient.rename(temporaryDestinationFile, finalDestinationFile);
+			ftpClient.rename(temporaryDestinationFileName, finalDestinationFileName);
 			assertPositiveCompletion(ftpClient);
 		}
 		// rename manifest file as the last one, because it indicates we are done
 		if (null != tempManifestDestinationFilePath
 				&& tempToFinalDestFilePaths.containsKey(tempManifestDestinationFilePath)) {
-			final String temporaryDestinationFile = tempManifestDestinationFilePath.toString();
-			final String finalDestinationFile = tempToFinalDestFilePaths.get(tempManifestDestinationFilePath)
-					.toString();
+			final String temporaryDestinationFileName = tempManifestDestinationFilePath.getFileName().toString();
+			final String finalDestinationFileName = tempToFinalDestFilePaths.get(tempManifestDestinationFilePath).getFileName().toString();
 
-			this.logger.info("Renaming {} to {}", temporaryDestinationFile, finalDestinationFile);
+			this.logger.info("Renaming {} to {}", temporaryDestinationFileName, finalDestinationFileName);
 			this.changeWorkingDirectory(ftpClient, tempManifestDestinationFilePath.getParent());
-			ftpClient.rename(temporaryDestinationFile, finalDestinationFile);
+			ftpClient.rename(temporaryDestinationFileName, finalDestinationFileName);
 			assertPositiveCompletion(ftpClient);
 		}
 	}
