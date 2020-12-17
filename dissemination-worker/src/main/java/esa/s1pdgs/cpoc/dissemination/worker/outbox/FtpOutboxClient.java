@@ -76,6 +76,7 @@ public class FtpOutboxClient extends AbstractOutboxClient {
 				this.logger.debug("using active mode");
 				ftpClient.enterLocalActiveMode();
 			}
+			ftpClient.setRemoteVerificationEnabled(false);
 			assertPositiveCompletion(ftpClient);
 
 			final Path outputPath = this.evaluatePathFor(mainFile);
