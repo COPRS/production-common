@@ -151,9 +151,6 @@ public class DisseminationJobListener implements MqiListener<DisseminationJob> {
 		final Map<OutboxConnection, OutboxClient> matchingOutboxes = this
 				.findMatchingOutboxes(job.getKeyObjectStorage());
 
-		// make sure the files already exist in storage
-		final List<ObsObject> existingFilesToTransfer = this.assertExist(filesToDisseminate);
-
 		final ObsObject mainFile = new ObsObject(job.getProductFamily(), job.getKeyObjectStorage());
 
 		for (final Map.Entry<OutboxConnection, OutboxClient> entry : matchingOutboxes.entrySet()) {
@@ -163,8 +160,9 @@ public class DisseminationJobListener implements MqiListener<DisseminationJob> {
 
 			reporting.begin(
 					ReportingUtils.newFilenameReportingInputFor(job.getProductFamily(), job.getKeyObjectStorage()),
-					new ReportingMessage("Start dissemination of {} to outbox {}", existingFilesToTransfer, outboxName));
+					new ReportingMessage("Start dissemination of {} to outbox {}", filesToDisseminate, outboxName));
 			try {
+				final List<ObsObject> existingFilesToTransfer = this.assertExist(filesToDisseminate);
 				final String targetDirectoryUrl = Retries.performWithRetries(
 						() -> outboxClient.transfer(mainFile, existingFilesToTransfer, reporting),
 						"Transfer of " + existingFilesToTransfer + " to " + outboxName, //
