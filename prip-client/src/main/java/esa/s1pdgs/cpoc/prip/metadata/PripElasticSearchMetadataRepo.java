@@ -285,7 +285,7 @@ public class PripElasticSearchMetadataRepo implements PripMetadataRepository {
 		case INTERSECTS:
 			try {
 				queryBuilder.must(QueryBuilders.geoIntersectionQuery(filter.getFieldName(), convertGeometry(filter.getGeometry())));
-			} catch (IOException e) {
+			} catch (final IOException e) {
 				throw new IllegalArgumentException(
 						String.format("not supported filter function: %s", filter.getFunction().name()));
 			}
@@ -293,7 +293,7 @@ public class PripElasticSearchMetadataRepo implements PripMetadataRepository {
 		case DISJOINTS:
 			try {
 				queryBuilder.must(QueryBuilders.geoDisjointQuery(filter.getFieldName(), convertGeometry(filter.getGeometry())));
-			} catch (IOException e) {
+			} catch (final IOException e) {
 				throw new IllegalArgumentException(
 						String.format("not supported filter function: %s", filter.getFunction().name()));
 			}
@@ -301,7 +301,7 @@ public class PripElasticSearchMetadataRepo implements PripMetadataRepository {
 		case WITHIN:
 			try {
 				queryBuilder.must(QueryBuilders.geoWithinQuery(filter.getFieldName(), convertGeometry(filter.getGeometry())));
-			} catch (IOException e) {
+			} catch (final IOException e) {
 				throw new IllegalArgumentException(
 						String.format("not supported filter function: %s", filter.getFunction().name()));
 			}
@@ -315,7 +315,7 @@ public class PripElasticSearchMetadataRepo implements PripMetadataRepository {
 	private static Geometry convertGeometry(org.locationtech.jts.geom.Geometry input) {
 		if (input instanceof Polygon) {
 			final CoordinatesBuilder coordBuilder = new CoordinatesBuilder();
-			Polygon polygon = (Polygon) input;
+			final Polygon polygon = (Polygon) input;
 			for (final Coordinate coord : polygon.getCoordinates()) {
 				final double lon = coord.x;
 				final double lat = coord.y;
