@@ -53,6 +53,7 @@ import org.slf4j.LoggerFactory;
 import esa.s1pdgs.cpoc.common.utils.CollectionUtil;
 import esa.s1pdgs.cpoc.common.utils.StringUtil;
 import esa.s1pdgs.cpoc.prip.frontend.service.edm.EdmProvider;
+import esa.s1pdgs.cpoc.prip.frontend.service.edm.EntityTypeProperties;
 import esa.s1pdgs.cpoc.prip.frontend.service.mapping.MappingUtil;
 import esa.s1pdgs.cpoc.prip.frontend.service.processor.visitor.ProductsFilterVisitor;
 import esa.s1pdgs.cpoc.prip.frontend.utils.OlingoUtil;
@@ -76,13 +77,14 @@ public class ProductEntityCollectionProcessor implements EntityCollectionProcess
 		SORTABLE_FIELDS = new ArrayList<>();
 		SORTABLE_FIELDS.add(FIELD_NAMES.CREATION_DATE.fieldName());
 		SORTABLE_FIELDS.add(FIELD_NAMES.EVICTION_DATE.fieldName());
-		SORTABLE_FIELDS.add("ContentDate/Start");
-		SORTABLE_FIELDS.add("ContentDate/End");
+		SORTABLE_FIELDS.add(EntityTypeProperties.ContentDate + "/" + EntityTypeProperties.Start);
+		SORTABLE_FIELDS.add(EntityTypeProperties.ContentDate + "/" + EntityTypeProperties.End);
 		SORTABLE_FIELDS.add(FIELD_NAMES.NAME.fieldName());
+		SORTABLE_FIELDS.add(FIELD_NAMES.CONTENT_LENGTH.fieldName());
 		SORTABLE_FIELDS.add(FIELD_NAMES.PRODUCT_FAMILY.fieldName());
 		SORTABLE_FIELDS.add(FIELD_NAMES.PRODUCTION_TYPE.fieldName());
 		SORTABLE_FIELDS.add(FIELD_NAMES.CONTENT_TYPE.fieldName());
-		SORTABLE_FIELDS.add(FIELD_NAMES.CONTENT_LENGTH.fieldName());
+		SORTABLE_FIELDS.add(FIELD_NAMES.ID.fieldName());
 	}
 
 	// --------------------------------------------------------------------------
