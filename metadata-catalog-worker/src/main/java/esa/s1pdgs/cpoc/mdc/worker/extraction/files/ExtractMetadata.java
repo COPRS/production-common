@@ -830,6 +830,7 @@ public class ExtractMetadata {
 				switch(Objects.toString(fieldTypes.get(key), "undefined")) {
 					case "long": result.put(key, intermediate.getLong(key)); break;
 					case "double": result.put(key, intermediate.getDouble(key)); break;
+					case "boolean": result.put(key, intermediate.getBoolean(key)); break;
 					case "string": result.put(key, String.valueOf(intermediate.get(key))); break;
 					case "date": result.put(key, intermediate.getString(key)); break; // date string
 					default: result.put(key, intermediate.get(key)); // best guess
