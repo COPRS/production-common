@@ -5,6 +5,7 @@ import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doReturn;
 
 import java.io.File;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.regex.Pattern;
@@ -113,6 +114,7 @@ public class TestEdrsMetadataExtractor {
 		final ExtractMetadata extract = new ExtractMetadata(
 				extractorConfig.getTypeOverlap(), 
 				extractorConfig.getTypeSliceLength(),
+				Collections.<String,String>emptyMap(),
 				extractorConfig.getPacketStoreTypes(),
 				extractorConfig.getPacketstoreTypeTimelinesses(),
 				extractorConfig.getTimelinessPriorityFromHighToLow(),

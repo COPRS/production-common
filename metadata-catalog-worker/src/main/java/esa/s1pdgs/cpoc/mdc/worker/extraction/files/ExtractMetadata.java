@@ -10,8 +10,10 @@ import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 import javax.xml.bind.JAXBException;
@@ -105,6 +107,11 @@ public class ExtractMetadata {
 	private String xsltDirectory;
 
 	/**
+	 * Type definitions to enforce on field data extracted from XML
+	 */
+	final Map<String, String> fieldTypes;
+	
+	/**
 	 * The XML converter to use
 	 */
 	private final XmlConverter xmlConverter;
@@ -118,12 +125,13 @@ public class ExtractMetadata {
 	 * Constructor
 	 */
 	public ExtractMetadata(final Map<String, Float> typeOverlap, final Map<String, Float> typeSliceLength,
-			final Map<String, String> packetStoreTypes, final Map<String, String> packetStoreTypeTimelinesses,
-			final List<String> timelinessPriorityFromHighToLow, final String xsltDirectory,
-			final XmlConverter xmlConverter) {
+			final Map<String, String> fieldTypes, final Map<String, String> packetStoreTypes,
+			final Map<String, String> packetStoreTypeTimelinesses, final List<String> timelinessPriorityFromHighToLow,
+			final String xsltDirectory, final XmlConverter xmlConverter) {
 		this.transFactory = TransformerFactory.newInstance();
 		this.typeOverlap = typeOverlap;
 		this.typeSliceLength = typeSliceLength;
+		this.fieldTypes = fieldTypes;
 		this.packetStoreTypes = packetStoreTypes;
 		this.packetStoreTypeTimelinesses = packetStoreTypeTimelinesses;
 		this.timelinessPriorityFromHighToLow = timelinessPriorityFromHighToLow;
@@ -814,7 +822,20 @@ public class ExtractMetadata {
 			final ByteArrayOutputStream transformationStream = new ByteArrayOutputStream();
 
 			transformer.transform(new StreamSource(inputXMLFile), new StreamResult(transformationStream));
-			return XML.toJSONObject(transformationStream.toString(Charset.defaultCharset().name()));
+			JSONObject intermediate = XML.toJSONObject(transformationStream.toString(Charset.defaultCharset().name()));
+			JSONObject result = new JSONObject();
+			Iterator<String> keys = intermediate.keys();
+			while(keys.hasNext()) {
+				String key = keys.next();
+				switch(Objects.toString(fieldTypes.get(key), "undefined")) {
+					case "long": result.put(key, intermediate.getLong(key)); break;
+					case "double": result.put(key, intermediate.getDouble(key)); break;
+					case "string": result.put(key, String.valueOf(intermediate.get(key))); break;
+					case "date": result.put(key, intermediate.getString(key)); break; // date string
+					default: result.put(key, intermediate.get(key)); // best guess
+				}			    
+			}
+			return result;
 
 		} catch (IOException | TransformerException | JSONException e) {
 			LOGGER.error("Error while transformation of  input XML file to JSON", e);

@@ -7,6 +7,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import org.junit.Before;
@@ -386,6 +387,7 @@ public class L0SliceMetadataControllerTest extends RestControllerTest {
         l0A.setDatatakeId("datatakeId");
         l0A.setInstrumentConfigurationId(0);
         l0A.setNumberOfSlices(2);
+        l0A.setAdditionalProperties(Collections.<String,String>emptyMap());
 
         // ExpectedResult
         List<L0AcnMetadata> expectedResult =

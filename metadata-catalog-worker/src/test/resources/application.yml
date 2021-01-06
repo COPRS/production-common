@@ -84,6 +84,48 @@ mdextractor:
     SM: 25.0F
     WV: 0.0F
   xslt-directory: config/xsltDir/ # Must contains the last / 
+  # Field Types
+  fieldTypes:
+    absoluteStartOrbit: long
+    coordinates: string
+    creationTime: date
+    cycleNumber: long
+    instrumentConfigurationId: string
+    instrumentShortName: string
+    missionDataTakeId: long
+    operationalMode: string
+    pass: string
+    platformSerialIdentifier: string
+    platformShortName: string
+    polarisationChannels: string
+    processingDate: date
+    processorName: string
+    processorVersion: string
+    productClass: string
+    productComposition: string
+    productConsolidation: string
+    productType: string
+    qualityDataObjectID: string
+    qualityNumOfCorruptedElements: long
+    qualityNumOfElement: long
+    qualityNumOfMissingElements: long
+    qualityNumOfRSCorrectedElements: long
+    qualityNumOfRSCorrectedSymbols: long
+    qualityNumOfRSIncorrigibleElements: long
+    relativeStartOrbit: long
+    safeTimeliness: string
+    segmentStartTime: date
+    site: string
+    sliceNumber: long
+    sliceProductFlag: boolean
+    startTimeANX: double
+    startTime: date
+    stopTimeANX: double
+    stopTime: date
+    swathIdentifier: string
+    totalNumberOfSlice: long
+    validityStartTime: date
+    validityStopTime: date
   packet-store-types:
     S1A-0: Emergency
     S1A-1: Emergency

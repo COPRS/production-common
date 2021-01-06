@@ -9,6 +9,7 @@ import static org.junit.Assert.fail;
 
 import java.io.File;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -94,8 +95,8 @@ public class ExtractMetadataTest {
 
 		final List<String> timelinessPriorityFromHighToLow = Arrays.asList("PT", "NRT", "FAST24");
 
-		extractor = new ExtractMetadata(typeOverlap, typeSliceLength, packetStoreTypes, packetStoreTypesTimelinesses,
-				timelinessPriorityFromHighToLow, "config/xsltDir/", xmlConverter);
+		extractor = new ExtractMetadata(typeOverlap, typeSliceLength, Collections.<String,String>emptyMap(), packetStoreTypes,
+				packetStoreTypesTimelinesses, timelinessPriorityFromHighToLow, "config/xsltDir/", xmlConverter);
 	}
 
 	@Test
@@ -185,7 +186,7 @@ public class ExtractMetadataTest {
 	public void testProcessEOFFile() {
 
 		final JSONObject expectedResult = new JSONObject(
-				"{\"validityStopTime\":\"2017-12-15T20:03:09.000000Z\",\"productClass\":\"OPER\",\"missionid\":\"S1\",\"creationTime\":\"2017-12-08T20:02:13.000000Z\",\"insertionTime\":\"2018-05-31T14:34:17.000000Z\",\"satelliteid\":\"A\",\"validityStartTime\":\"2017-12-08T20:03:09.000000Z\",\"version\":\"0001\",\"productName\":\"S1A_OPER_MPL_ORBPRE_20171208T200309_20171215T200309_0001.EOF\",\"url\":\"S1A_OPER_MPL_ORBPRE_20171208T200309_20171215T200309_0001.EOF\",\"productType\":\"MPL_ORBPRE\",\"productFamily\":\"AUXILIARY_FILE\"}");
+				"{\"productFamily\":\"AUXILIARY_FILE\",\"absolutOrbit\":\"\",\"productClass\":\"OPER\",\"missionId\":\"S1\",\"creationTime\":\"2017-12-08T20:02:13.000000Z\",\"insertionTime\":\"2021-01-06T16:16:56.950000Z\",\"satelliteId\":\"A\",\"processorVersion\":3,\"version\":\"0001\",\"productName\":\"S1A_OPER_MPL_ORBPRE_20171208T200309_20171215T200309_0001.EOF\",\"url\":\"S1A_OPER_MPL_ORBPRE_20171208T200309_20171215T200309_0001.EOF\",\"platformSerialIdentifier\":\"A\",\"validityStopTime\":\"2017-12-15T20:03:09.000000Z\",\"site\":\"FOS\",\"platformShortName\":\"SENTINEL 1\",\"validityStartTime\":\"2017-12-08T20:03:09.000000Z\",\"productType\":\"MPL_ORBPRE\"}");
 
 		final AuxDescriptor descriptor = new AuxDescriptor();
 		descriptor.setExtension(FileExtension.EOF);
@@ -217,7 +218,7 @@ public class ExtractMetadataTest {
 	public void testProcessLandMskFile() {
 
 		final JSONObject expectedResult = new JSONObject(
-				"{\"validityStopTime\":\"9999-12-31T00:00:00.000000Z\",\"productClass\":\"OPER\",\"missionid\":\"S1\",\"creationTime\":\"2019-07-11T11:33:00.000000Z\",\"insertionTime\":\"2018-05-31T14:34:17.000000Z\",\"satelliteid\":\"A\",\"validityStartTime\":\"2014-04-03T21:02:00.000000Z\",\"version\":\"0001\",\"productName\":\"S1A_OPER_MPL_ORBPRE_20171208T200309_20171215T200309_0001.EOF\",\"url\":\"S1__OPER_MSK__LAND__V20140403T210200_G20190711T113000.EOF\",\"productType\":\"MSK__LAND_\",\"productFamily\":\"AUXILIARY_FILE\"}");
+				"{\"productFamily\":\"AUXILIARY_FILE\",\"absolutOrbit\":\"\",\"productClass\":\"OPER\",\"missionId\":\"S1\",\"creationTime\":\"2019-07-11T11:33:00.000000Z\",\"insertionTime\":\"2021-01-06T16:14:09.162000Z\",\"satelliteId\":\"_\",\"processorVersion\":\"S1PRO-004\",\"version\":\"0001\",\"productName\":\"S1__OPER_MSK__LAND__V20140403T210200_G20190711T113000.EOF\",\"url\":\"S1__OPER_MSK__LAND__V20140403T210200_G20190711T113000.EOF\",\"platformSerialIdentifier\":\"_\",\"validityStopTime\":\"9999-12-31T23:59:59.999999Z\",\"site\":\"S1PDGS\",\"platformShortName\":\"S1\",\"validityStartTime\":\"2014-04-03T21:02:00.000000Z\",\"productType\":\"MSK__LAND_\"}");
 
 		final AuxDescriptor descriptor = new AuxDescriptor();
 		descriptor.setExtension(FileExtension.EOF);
@@ -268,7 +269,7 @@ public class ExtractMetadataTest {
 	public void testProcessEOFFileWithoutFile() {
 
 		final JSONObject expectedResult = new JSONObject(
-				"{\"validityStopTime\":\"2017-12-13T13:45:07.000000Z\",\"productClass\":\"OPER\",\"missionid\":\"S1\",\"creationTime\":\"2017-12-13T14:38:38.000000Z\",\"insertionTime\":\"2018-05-31T14:34:18.000000Z\",\"satelliteid\":\"A\",\"validityStartTime\":\"2017-12-13T10:27:37.000000Z\",\"version\":\"0001\",\"productType\":\"AUX_RESORB\",\"productName\":\"S1A_OPER_AUX_RESORB_OPOD_20171213T143838_V20171213T102737_20171213T134507.EOF\",\"url\":\"S1A_OPER_AUX_RESORB_OPOD_20171213T143838_V20171213T102737_20171213T134507.EOF\",\"productFamily\":\"AUXILIARY_FILE\"}");
+				"{\"productFamily\":\"AUXILIARY_FILE\",\"absolutOrbit\":19683,\"productClass\":\"OPER\",\"missionId\":\"S1\",\"creationTime\":\"2017-12-13T14:38:38.000000Z\",\"insertionTime\":\"2021-01-06T16:15:46.186000Z\",\"satelliteId\":\"A\",\"processorVersion\":\"1.4.0\",\"version\":\"0001\",\"productName\":\"S1A_OPER_AUX_RESORB_OPOD_20171213T143838_V20171213T102737_20171213T134507.EOF\",\"url\":\"S1A_OPER_AUX_RESORB_OPOD_20171213T143838_V20171213T102737_20171213T134507.EOF\",\"platformSerialIdentifier\":\"A\",\"validityStopTime\":\"2017-12-13T13:45:07.000000Z\",\"site\":\"OPOD\",\"selectedOrbitFirstAzimuthTimeUtc\":\"2017-12-13T10:27:47.593331Z\",\"platformShortName\":\"Sentinel-1\",\"validityStartTime\":\"2017-12-13T10:27:37.000000Z\",\"productType\":\"AUX_RESORB\"}");
 
 		final AuxDescriptor descriptor = new AuxDescriptor();
 		descriptor.setExtension(FileExtension.EOF);
