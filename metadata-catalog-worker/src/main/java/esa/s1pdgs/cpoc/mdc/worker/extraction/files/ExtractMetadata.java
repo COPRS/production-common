@@ -822,27 +822,30 @@ public class ExtractMetadata {
 			final ByteArrayOutputStream transformationStream = new ByteArrayOutputStream();
 
 			transformer.transform(new StreamSource(inputXMLFile), new StreamResult(transformationStream));
-			JSONObject intermediate = XML.toJSONObject(transformationStream.toString(Charset.defaultCharset().name()));
-			JSONObject result = new JSONObject();
-			Iterator<String> keys = intermediate.keys();
-			while(keys.hasNext()) {
-				String key = keys.next();
-				switch(Objects.toString(fieldTypes.get(key), "undefined")) {
-					case "long": result.put(key, intermediate.getLong(key)); break;
-					case "double": result.put(key, intermediate.getDouble(key)); break;
-					case "boolean": result.put(key, intermediate.getBoolean(key)); break;
-					case "string": result.put(key, String.valueOf(intermediate.get(key))); break;
-					case "date": result.put(key, intermediate.getString(key)); break; // date string
-					default: result.put(key, intermediate.get(key)); // best guess
-				}			    
-			}
-			return result;
+			JSONObject metadata = XML.toJSONObject(transformationStream.toString(Charset.defaultCharset().name()));
+			return enforceFieldTypes(metadata);
 
 		} catch (IOException | TransformerException | JSONException e) {
 			LOGGER.error("Error while transformation of  input XML file to JSON", e);
 			throw new MetadataExtractionException(e);
 		}
-
+	}
+	
+	JSONObject enforceFieldTypes(JSONObject metadata) {
+		JSONObject result = new JSONObject();
+		Iterator<String> keys = metadata.keys();
+		while(keys.hasNext()) {
+			String key = keys.next();
+			switch(Objects.toString(fieldTypes.get(key), "undefined")) {
+				case "long": result.put(key, metadata.getLong(key)); break;
+				case "double": result.put(key, metadata.getDouble(key)); break;
+				case "boolean": result.put(key, metadata.getBoolean(key)); break;
+				case "string": result.put(key, String.valueOf(metadata.get(key))); break;
+				case "date": result.put(key, metadata.getString(key)); break; // date string
+				default: result.put(key, metadata.get(key)); // best guess
+			}			    
+		}
+		return result;
 	}
 
 	/**

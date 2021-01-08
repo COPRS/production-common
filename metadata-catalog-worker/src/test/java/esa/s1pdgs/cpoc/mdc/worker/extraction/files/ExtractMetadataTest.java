@@ -1323,4 +1323,87 @@ public class ExtractMetadataTest {
 		String expected = "81.3179,-81.9895 56.5997,-97.7338 56.0243,-91.2164 79.6240,-62.0955 81.3179,-81.9895";
 		assertEquals(expected, ExtractMetadata.convertCoordinatesToClosedForm(input));
 	}
+	
+	@Test
+	public void testEnforceFieldTypes_WhenLongRequest_ShallReturnLong() {
+		@SuppressWarnings("serial")
+		final String key = "test";
+		final ExtractMetadata uut = new ExtractMetadata(null, null, new HashMap<String,String>() {{ put(key,"long"); }}, null, null, null, null, null);
+		assertEquals(Long.class, uut.enforceFieldTypes(new JSONObject() {{ put(key,1); }}).get(key).getClass());
+		assertEquals(Long.class, uut.enforceFieldTypes(new JSONObject() {{ put(key,1L); }}).get(key).getClass());
+		assertEquals(Long.class, uut.enforceFieldTypes(new JSONObject() {{ put(key,"1"); }}).get(key).getClass());
+	}
+	
+	@Test
+	public void testEnforceFieldTypes_WhenDoubleRequested_ShallReturnDouble() {
+		final String key = "test";
+		@SuppressWarnings("serial")
+		final ExtractMetadata uut = new ExtractMetadata(null, null, new HashMap<String,String>() {{ put(key,"double"); }}, null, null, null, null, null);
+		assertEquals(Double.class, uut.enforceFieldTypes(new JSONObject() {{ put(key,1); }}).get(key).getClass());
+		assertEquals(Double.class, uut.enforceFieldTypes(new JSONObject() {{ put(key,1L); }}).get(key).getClass());
+		assertEquals(Double.class, uut.enforceFieldTypes(new JSONObject() {{ put(key,1.0); }}).get(key).getClass());
+		assertEquals(Double.class, uut.enforceFieldTypes(new JSONObject() {{ put(key,"1"); }}).get(key).getClass());
+		assertEquals(Double.class, uut.enforceFieldTypes(new JSONObject() {{ put(key,"1.0"); }}).get(key).getClass());
+	}
+
+	@Test
+	public void testEnforceFieldTypes_WhenBooleanRequested_ShallReturnBoolean() {
+		final String key = "test";
+		@SuppressWarnings("serial")
+		final ExtractMetadata uut = new ExtractMetadata(null, null, new HashMap<String,String>() {{ put(key,"boolean"); }}, null, null, null, null, null);
+		assertEquals(Boolean.class, uut.enforceFieldTypes(new JSONObject() {{ put(key,true); }}).get(key).getClass());
+		assertEquals(Boolean.class, uut.enforceFieldTypes(new JSONObject() {{ put(key,false); }}).get(key).getClass());
+		assertEquals(Boolean.class, uut.enforceFieldTypes(new JSONObject() {{ put(key,"true"); }}).get(key).getClass());
+		assertEquals(Boolean.class, uut.enforceFieldTypes(new JSONObject() {{ put(key,"false"); }}).get(key).getClass());
+	}
+
+	@Test
+	public void testEnforceFieldTypes_WhenDateRequested_ShallReturnDateString() {
+		final String key = "test";
+		@SuppressWarnings("serial")
+		final ExtractMetadata uut = new ExtractMetadata(null, null, new HashMap<String,String>() {{ put(key,"date"); }}, null, null, null, null, null);
+		assertEquals(String.class, uut.enforceFieldTypes(new JSONObject() {{ put(key,"2020-01-19T03:11:42.000000Z"); }}).get(key).getClass());
+	}
+	
+	@Test
+	public void testEnforceFieldTypes_WhenStringRequested_ShallReturnString() {
+		final String key = "test";
+		@SuppressWarnings("serial")
+		final ExtractMetadata uut = new ExtractMetadata(null, null, new HashMap<String,String>() {{ put(key,"string"); }}, null, null, null, null, null);
+		assertEquals(String.class, uut.enforceFieldTypes(new JSONObject() {{ put(key,1); }}).get(key).getClass());
+		assertEquals(String.class, uut.enforceFieldTypes(new JSONObject() {{ put(key,1L); }}).get(key).getClass());
+		assertEquals(String.class, uut.enforceFieldTypes(new JSONObject() {{ put(key,"1"); }}).get(key).getClass());
+		assertEquals(String.class, uut.enforceFieldTypes(new JSONObject() {{ put(key,1.0); }}).get(key).getClass());
+		assertEquals(String.class, uut.enforceFieldTypes(new JSONObject() {{ put(key,"1.0"); }}).get(key).getClass());
+		assertEquals(String.class, uut.enforceFieldTypes(new JSONObject() {{ put(key,1.1); }}).get(key).getClass());
+		assertEquals(String.class, uut.enforceFieldTypes(new JSONObject() {{ put(key,"1.1"); }}).get(key).getClass());
+		assertEquals(String.class, uut.enforceFieldTypes(new JSONObject() {{ put(key,"1.1.1"); }}).get(key).getClass());
+		assertEquals(String.class, uut.enforceFieldTypes(new JSONObject() {{ put(key,true); }}).get(key).getClass());
+		assertEquals(String.class, uut.enforceFieldTypes(new JSONObject() {{ put(key,"true"); }}).get(key).getClass());
+		assertEquals(String.class, uut.enforceFieldTypes(new JSONObject() {{ put(key,false); }}).get(key).getClass());
+		assertEquals(String.class, uut.enforceFieldTypes(new JSONObject() {{ put(key,"false"); }}).get(key).getClass());
+		assertEquals(String.class, uut.enforceFieldTypes(new JSONObject() {{ put(key,"foobar"); }}).get(key).getClass());
+		assertEquals(String.class, uut.enforceFieldTypes(new JSONObject() {{ put(key,"2020-01-19T03:11:42.000000Z"); }}).get(key).getClass());
+	}
+	
+	@Test
+	public void testEnforceFieldTypes_WhenNotConfigured_ShallPassThru() {
+		final String key = "test";
+		final ExtractMetadata uut = new ExtractMetadata(null, null, Collections.<String,String>emptyMap(), null, null, null, null, null);
+		assertEquals(Integer.class, uut.enforceFieldTypes(new JSONObject() {{ put(key,1); }}).get(key).getClass());
+		assertEquals(Long.class, uut.enforceFieldTypes(new JSONObject() {{ put(key,1L); }}).get(key).getClass());
+		assertEquals(String.class, uut.enforceFieldTypes(new JSONObject() {{ put(key,"1"); }}).get(key).getClass());
+		assertEquals(Double.class, uut.enforceFieldTypes(new JSONObject() {{ put(key,1.0); }}).get(key).getClass());
+		assertEquals(String.class, uut.enforceFieldTypes(new JSONObject() {{ put(key,"1.0"); }}).get(key).getClass());
+		assertEquals(Double.class, uut.enforceFieldTypes(new JSONObject() {{ put(key,1.1); }}).get(key).getClass());
+		assertEquals(String.class, uut.enforceFieldTypes(new JSONObject() {{ put(key,"1.1"); }}).get(key).getClass());
+		assertEquals(String.class, uut.enforceFieldTypes(new JSONObject() {{ put(key,"1.1.1"); }}).get(key).getClass());
+		assertEquals(Boolean.class, uut.enforceFieldTypes(new JSONObject() {{ put(key,true); }}).get(key).getClass());
+		assertEquals(String.class, uut.enforceFieldTypes(new JSONObject() {{ put(key,"true"); }}).get(key).getClass());
+		assertEquals(Boolean.class, uut.enforceFieldTypes(new JSONObject() {{ put(key,false); }}).get(key).getClass());
+		assertEquals(String.class, uut.enforceFieldTypes(new JSONObject() {{ put(key,"false"); }}).get(key).getClass());
+		assertEquals(String.class, uut.enforceFieldTypes(new JSONObject() {{ put(key,"foobar"); }}).get(key).getClass());
+		assertEquals(String.class, uut.enforceFieldTypes(new JSONObject() {{ put(key,"2020-01-19T03:11:42.000000Z"); }}).get(key).getClass());	
+	}
+
 }
