@@ -97,7 +97,6 @@ mdextractor:
     pass: string
     platformSerialIdentifier: string
     platformShortName: string
-    polarisationChannels: string
     processingDate: date
     processorName: string
     processorVersion: string
