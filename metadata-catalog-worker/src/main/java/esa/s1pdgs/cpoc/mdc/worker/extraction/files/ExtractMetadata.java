@@ -836,14 +836,17 @@ public class ExtractMetadata {
 		Iterator<String> keys = metadata.keys();
 		while(keys.hasNext()) {
 			String key = keys.next();
-			switch(Objects.toString(fieldTypes.get(key), "undefined")) {
-				case "long": result.put(key, metadata.getLong(key)); break;
-				case "double": result.put(key, metadata.getDouble(key)); break;
-				case "boolean": result.put(key, metadata.getBoolean(key)); break;
-				case "string": result.put(key, String.valueOf(metadata.get(key))); break;
-				case "date": result.put(key, metadata.getString(key)); break; // date string
-				default: result.put(key, metadata.get(key)); // best guess
-			}			    
+			String type = Objects.toString(fieldTypes.get(key), "undefined");
+			if ("undefined".equals(type) || "string".equals(type) || !"".equals(metadata.get(key))) {
+				switch(type) {
+					case "long": result.put(key, metadata.getLong(key)); break;
+					case "double": result.put(key, metadata.getDouble(key)); break;
+					case "boolean": result.put(key, metadata.getBoolean(key)); break;
+					case "string": result.put(key, String.valueOf(metadata.get(key))); break;
+					case "date": result.put(key, metadata.getString(key)); break; // date string
+					default: result.put(key, metadata.get(key)); // best guess
+				}
+			}
 		}
 		return result;
 	}

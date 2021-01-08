@@ -5,6 +5,7 @@ package esa.s1pdgs.cpoc.mdc.worker.extraction.files;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.fail;
 
 import java.io.File;
@@ -16,6 +17,7 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 import org.json.JSONArray;
+import org.json.JSONException;
 import org.json.JSONObject;
 import org.junit.Before;
 import org.junit.Test;
@@ -186,7 +188,7 @@ public class ExtractMetadataTest {
 	public void testProcessEOFFile() {
 
 		final JSONObject expectedResult = new JSONObject(
-				"{\"productFamily\":\"AUXILIARY_FILE\",\"absolutOrbit\":\"\",\"productClass\":\"OPER\",\"missionId\":\"S1\",\"creationTime\":\"2017-12-08T20:02:13.000000Z\",\"insertionTime\":\"2021-01-06T16:16:56.950000Z\",\"satelliteId\":\"A\",\"processorVersion\":3,\"version\":\"0001\",\"productName\":\"S1A_OPER_MPL_ORBPRE_20171208T200309_20171215T200309_0001.EOF\",\"url\":\"S1A_OPER_MPL_ORBPRE_20171208T200309_20171215T200309_0001.EOF\",\"platformSerialIdentifier\":\"A\",\"validityStopTime\":\"2017-12-15T20:03:09.000000Z\",\"site\":\"FOS\",\"platformShortName\":\"SENTINEL 1\",\"validityStartTime\":\"2017-12-08T20:03:09.000000Z\",\"productType\":\"MPL_ORBPRE\"}");
+				"{\"productFamily\":\"AUXILIARY_FILE\",\"absolutOrbit\":\"\",\"productClass\":\"OPER\",\"missionId\":\"S1\",\"creationTime\":\"2017-12-08T20:02:13.000000Z\",\"insertionTime\":\"2021-01-08T17:09:08.384000Z\",\"satelliteId\":\"A\",\"processorVersion\":3,\"version\":\"0001\",\"productName\":\"S1A_OPER_MPL_ORBPRE_20171208T200309_20171215T200309_0001.EOF\",\"url\":\"S1A_OPER_MPL_ORBPRE_20171208T200309_20171215T200309_0001.EOF\",\"platformSerialIdentifier\":\"A\",\"validityStopTime\":\"2017-12-15T20:03:09.000000Z\",\"site\":\"FOS\",\"platformShortName\":\"SENTINEL 1\",\"validityStartTime\":\"2017-12-08T20:03:09.000000Z\",\"productType\":\"MPL_ORBPRE\"}");
 
 		final AuxDescriptor descriptor = new AuxDescriptor();
 		descriptor.setExtension(FileExtension.EOF);
@@ -218,7 +220,7 @@ public class ExtractMetadataTest {
 	public void testProcessLandMskFile() {
 
 		final JSONObject expectedResult = new JSONObject(
-				"{\"productFamily\":\"AUXILIARY_FILE\",\"absolutOrbit\":\"\",\"productClass\":\"OPER\",\"missionId\":\"S1\",\"creationTime\":\"2019-07-11T11:33:00.000000Z\",\"insertionTime\":\"2021-01-06T16:14:09.162000Z\",\"satelliteId\":\"_\",\"processorVersion\":\"S1PRO-004\",\"version\":\"0001\",\"productName\":\"S1__OPER_MSK__LAND__V20140403T210200_G20190711T113000.EOF\",\"url\":\"S1__OPER_MSK__LAND__V20140403T210200_G20190711T113000.EOF\",\"platformSerialIdentifier\":\"_\",\"validityStopTime\":\"9999-12-31T23:59:59.999999Z\",\"site\":\"S1PDGS\",\"platformShortName\":\"S1\",\"validityStartTime\":\"2014-04-03T21:02:00.000000Z\",\"productType\":\"MSK__LAND_\"}");
+				"{\"productFamily\":\"AUXILIARY_FILE\",\"absolutOrbit\":\"\",\"productClass\":\"OPER\",\"missionId\":\"S1\",\"creationTime\":\"2019-07-11T11:33:00.000000Z\",\"insertionTime\":\"2021-01-08T17:00:08.348000Z\",\"satelliteId\":\"_\",\"processorVersion\":\"S1PRO-004\",\"version\":\"0001\",\"productName\":\"S1__OPER_MSK__LAND__V20140403T210200_G20190711T113000.EOF\",\"url\":\"S1__OPER_MSK__LAND__V20140403T210200_G20190711T113000.EOF\",\"platformSerialIdentifier\":\"_\",\"validityStopTime\":\"9999-12-31T23:59:59.999999Z\",\"site\":\"S1PDGS\",\"platformShortName\":\"S1\",\"validityStartTime\":\"2014-04-03T21:02:00.000000Z\",\"productType\":\"MSK__LAND_\"}");
 
 		final AuxDescriptor descriptor = new AuxDescriptor();
 		descriptor.setExtension(FileExtension.EOF);
@@ -635,7 +637,7 @@ public class ExtractMetadataTest {
 	public void testProcessL0ACNFile() {
 
 		JSONObject expectedResult = new JSONObject(
-				"{\"missionDataTakeId\":137013,\"totalNumberOfSlice\":20,\"sliceCoordinates\":{\"coordinates\":[[[90.3636,18.6541],[84.2062,49.0506],[80.8613,48.7621],[88.0584,18.3765],[90.3636,18.6541]]],\"type\":\"polygon\"},\"insertionTime\":\"2018-05-30T14:27:43\",\"creationTime\":\"2018-05-31T15:43:33\",\"polarisation\":\"DV\",\"absoluteStopOrbit\":19684,\"resolution\":\"_\",\"circulationFlag\":13,\"productName\":\"S1A_IW_RAW__0ADV_20171213T121123_20171213T121947_019684_021735_51B1.SAFE\",\"dataTakeId\":\"021735\",\"productConsolidation\":\"FULL\",\"absoluteStartOrbit\":19684,\"validityStopTime\":\"2017-12-13T12:19:47.264351Z\",\"instrumentConfigurationId\":6,\"relativeStopOrbit\":12,\"relativeStartOrbit\":12,\"startTime\":\"2017-12-13T12:11:23.682488Z\",\"stopTime\":\"2017-12-13T12:19:47.264351Z\",\"productType\":\"IW_RAW__0A\",\"productClass\":\"A\",\"missionId\":\"S1\",\"swathtype\":\"IW\",\"pass\":\"ASCENDING\",\"satelliteId\":\"A\",\"stopTimeANX\":799670.769,\"url\":\"S1A_IW_RAW__0ADV_20171213T121123_20171213T121947_019684_021735_51B1.SAFE/manifest.safe\",\"startTimeANX\":296088.912,\"validityStartTime\":\"2017-12-13T12:11:23.682488Z\",\"sliceNumber\":\"\",\"sliceOverlap\":\"\",\"theoreticalSliceLength\":\"\",\"processMode\":\"FAST\",\"productFamily\":\"L0_ACN\"}");
+				"{\"missionDataTakeId\":137013,\"productFamily\":\"L0_ACN\",\"totalNumberOfSlice\":20,\"theoreticalSliceLength\":\"\",\"sliceCoordinates\":{\"orientation\":\"counterclockwise\",\"coordinates\":[[[90.3636,18.6541],[84.2062,49.0506],[80.8613,48.7621],[88.0584,18.3765],[90.3636,18.6541]]],\"type\":\"polygon\"},\"insertionTime\":\"2021-01-08T17:02:33.291000Z\",\"creationTime\":\"2021-01-08T17:02:33.291000Z\",\"polarisation\":\"DV\",\"sliceNumber\":1,\"absoluteStopOrbit\":19684,\"resolution\":\"_\",\"circulationFlag\":13,\"productName\":\"S1A_IW_RAW__0ADV_20171213T121123_20171213T121947_019684_021735_51B1.SAFE\",\"dataTakeId\":\"021735\",\"productConsolidation\":\"FULL\",\"absoluteStartOrbit\":19684,\"validityStopTime\":\"2017-12-13T12:19:47.264351Z\",\"instrumentConfigurationId\":6,\"relativeStopOrbit\":12,\"relativeStartOrbit\":12,\"startTime\":\"2017-12-13T12:11:23.682488Z\",\"stopTime\":\"2017-12-13T12:19:47.264351Z\",\"productType\":\"IW_RAW__0A\",\"productClass\":\"A\",\"missionId\":\"S1\",\"swathtype\":\"IW\",\"pass\":\"ASCENDING\",\"satelliteId\":\"A\",\"stopTimeANX\":799670.769,\"url\":\"S1A_IW_RAW__0ADV_20171213T121123_20171213T121947_019684_021735_51B1.SAFE\",\"sliceOverlap\":\"\",\"startTimeANX\":296088.912,\"validityStartTime\":\"2017-12-13T12:11:23.682488Z\",\"processMode\":\"NOMINAL\"}");
 
 		OutputFileDescriptor descriptor = new OutputFileDescriptor();
 		descriptor.setExtension(FileExtension.SAFE);
@@ -672,7 +674,7 @@ public class ExtractMetadataTest {
 		}
 
 		expectedResult = new JSONObject(
-				"{\"missionDataTakeId\":146024,\"productFamily\":\"L0_SLICE\",\"totalNumberOfSlice\":1,\"theoreticalSliceLength\":\"\",\"sliceCoordinates\":{\"orientation\":\"counterclockwise\",\"coordinates\":[[[56.2016,-13.3062],[56.1801,-13.2193],[52.4759,-13.8154],[52.4961,-13.9029],[56.2016,-13.3062]]],\"type\":\"polygon\"},\"insertionTime\":\"2019-07-31T14:12:50.250000Z\",\"creationTime\":\"2019-07-31T14:12:50.250000Z\",\"polarisation\":\"DV\",\"sliceNumber\":1,\"absoluteStopOrbit\":20793,\"resolution\":\"_\",\"circulationFlag\":3,\"productName\":\"S1A_EW_RAW__0CDV_20180227T144704_20180227T144706_020793_023A68_401B.SAFE\",\"dataTakeId\":\"023A68\",\"productConsolidation\":\"PARTIAL\",\"absoluteStartOrbit\":20793,\"validityStopTime\":\"2018-02-27T14:47:06.722008Z\",\"instrumentConfigurationId\":6,\"relativeStopOrbit\":71,\"relativeStartOrbit\":71,\"startTime\":\"2018-02-27T14:47:04.973656Z\",\"stopTime\":\"2018-02-27T14:47:06.722008Z\",\"productType\":\"EW_RAW__0C\",\"productClass\":\"C\",\"missionId\":\"S1\",\"swathtype\":\"EW\",\"pass\":\"ASCENDING\",\"satelliteId\":\"B\",\"stopTimeANX\":5691467.842,\"url\":\"S1A_EW_RAW__0CDV_20180227T144704_20180227T144706_020793_023A68_401B.SAFE\",\"sliceOverlap\":\"\",\"startTimeANX\":5689719.49,\"validityStartTime\":\"2018-02-27T14:47:04.973656Z\",\"processMode\":\"NRT\"}");
+				"{\"missionDataTakeId\":146024,\"productFamily\":\"L0_SLICE\",\"totalNumberOfSlice\":1,\"theoreticalSliceLength\":\"\",\"sliceCoordinates\":{\"orientation\":\"counterclockwise\",\"coordinates\":[[[56.2016,-13.3062],[56.1801,-13.2193],[52.4759,-13.8154],[52.4961,-13.9029],[56.2016,-13.3062]]],\"type\":\"polygon\"},\"insertionTime\":\"2021-01-08T17:03:49.782000Z\",\"creationTime\":\"2021-01-08T17:03:49.782000Z\",\"polarisation\":\"DV\",\"sliceNumber\":1,\"absoluteStopOrbit\":20793,\"resolution\":\"_\",\"circulationFlag\":3,\"productName\":\"S1A_EW_RAW__0CDV_20180227T144704_20180227T144706_020793_023A68_401B.SAFE\",\"dataTakeId\":\"023A68\",\"productConsolidation\":\"PARTIAL\",\"absoluteStartOrbit\":20793,\"validityStopTime\":\"2018-02-27T14:47:06.722008Z\",\"instrumentConfigurationId\":6,\"relativeStopOrbit\":71,\"relativeStartOrbit\":71,\"startTime\":\"2018-02-27T14:47:04.973656Z\",\"stopTime\":\"2018-02-27T14:47:06.722008Z\",\"productType\":\"EW_RAW__0S\",\"productClass\":\"C\",\"missionId\":\"S1\",\"swathtype\":\"EW\",\"pass\":\"ASCENDING\",\"satelliteId\":\"A\",\"stopTimeANX\":5691467.842,\"url\":\"S1A_EW_RAW__0CDV_20180227T144704_20180227T144706_020793_023A68_401B.SAFE\",\"sliceOverlap\":\"\",\"startTimeANX\":5689719.49,\"validityStartTime\":\"2018-02-27T14:47:04.973656Z\",\"processMode\":\"NOMINAL\"}");
 
 		descriptor = new OutputFileDescriptor();
 		descriptor.setExtension(FileExtension.SAFE);
@@ -707,7 +709,7 @@ public class ExtractMetadataTest {
 		}
 
 		expectedResult = new JSONObject(
-				"{\"missionDataTakeId\":146024,\"productFamily\":\"L0_SLICE\",\"totalNumberOfSlice\":1,\"theoreticalSliceLength\":\"\",\"sliceCoordinates\":{\"orientation\":\"counterclockwise\",\"coordinates\":[[[56.2016,-13.3062],[56.1801,-13.2193],[52.4759,-13.8154],[52.4961,-13.9029],[56.2016,-13.3062]]],\"type\":\"polygon\"},\"insertionTime\":\"2019-07-31T14:13:49.988000Z\",\"creationTime\":\"2019-07-31T14:13:49.988000Z\",\"polarisation\":\"DV\",\"sliceNumber\":1,\"absoluteStopOrbit\":20793,\"resolution\":\"_\",\"circulationFlag\":3,\"productName\":\"S1A_EW_RAW__0CDV_20180227T144704_20180227T144706_020793_023A68_401B.SAFE\",\"dataTakeId\":\"023A68\",\"productConsolidation\":\"PARTIAL\",\"absoluteStartOrbit\":20793,\"validityStopTime\":\"2018-02-27T14:47:06.722008Z\",\"instrumentConfigurationId\":6,\"relativeStopOrbit\":71,\"relativeStartOrbit\":71,\"startTime\":\"2018-02-27T14:47:04.973656Z\",\"stopTime\":\"2018-02-27T14:47:06.722008Z\",\"productType\":\"EW_RAW__0C\",\"productClass\":\"C\",\"missionId\":\"S1\",\"swathtype\":\"EW\",\"pass\":\"ASCENDING\",\"satelliteId\":\"B\",\"stopTimeANX\":5691467.842,\"url\":\"S1A_EW_RAW__0CDV_20180227T144704_20180227T144706_020793_023A68_401B.SAFE\",\"sliceOverlap\":\"\",\"startTimeANX\":5689719.49,\"validityStartTime\":\"2018-02-27T14:47:04.973656Z\",\"processMode\":\"NRT\"}");
+				"{\"missionDataTakeId\":146024,\"productFamily\":\"L0_SLICE\",\"totalNumberOfSlice\":1,\"theoreticalSliceLength\":\"\",\"sliceCoordinates\":{\"orientation\":\"counterclockwise\",\"coordinates\":[[[56.2016,-13.3062],[56.1801,-13.2193],[52.4759,-13.8154],[52.4961,-13.9029],[56.2016,-13.3062]]],\"type\":\"polygon\"},\"insertionTime\":\"2021-01-08T17:04:55.475000Z\",\"creationTime\":\"2021-01-08T17:04:55.475000Z\",\"polarisation\":\"DV\",\"sliceNumber\":1,\"absoluteStopOrbit\":20793,\"resolution\":\"_\",\"circulationFlag\":3,\"productName\":\"S1A_EW_RAW__0CDV_20180227T144704_20180227T144706_020793_023A68_401B.SAFE\",\"dataTakeId\":\"023A68\",\"productConsolidation\":\"PARTIAL\",\"absoluteStartOrbit\":20793,\"validityStopTime\":\"2018-02-27T14:47:06.722008Z\",\"instrumentConfigurationId\":6,\"relativeStopOrbit\":71,\"relativeStartOrbit\":71,\"startTime\":\"2018-02-27T14:47:04.973656Z\",\"stopTime\":\"2018-02-27T14:47:06.722008Z\",\"productType\":\"EW_RAW__0C\",\"productClass\":\"C\",\"missionId\":\"S1\",\"swathtype\":\"EW\",\"pass\":\"ASCENDING\",\"satelliteId\":\"B\",\"stopTimeANX\":5691467.842,\"url\":\"S1A_EW_RAW__0CDV_20180227T144704_20180227T144706_020793_023A68_401B.SAFE\",\"sliceOverlap\":\"\",\"startTimeANX\":5689719.49,\"validityStartTime\":\"2018-02-27T14:47:04.973656Z\",\"processMode\":\"NOMINAL\"}");
 
 		descriptor = new OutputFileDescriptor();
 		descriptor.setExtension(FileExtension.SAFE);
@@ -1325,85 +1327,109 @@ public class ExtractMetadataTest {
 	}
 	
 	@Test
-	public void testEnforceFieldTypes_WhenLongRequest_ShallReturnLong() {
+	public void testEnforceFieldTypes_WhenLongRequested_ShallReturnLong() {
 		@SuppressWarnings("serial")
-		final String key = "test";
-		final ExtractMetadata uut = new ExtractMetadata(null, null, new HashMap<String,String>() {{ put(key,"long"); }}, null, null, null, null, null);
-		assertEquals(Long.class, uut.enforceFieldTypes(new JSONObject() {{ put(key,1); }}).get(key).getClass());
-		assertEquals(Long.class, uut.enforceFieldTypes(new JSONObject() {{ put(key,1L); }}).get(key).getClass());
-		assertEquals(Long.class, uut.enforceFieldTypes(new JSONObject() {{ put(key,"1"); }}).get(key).getClass());
+		final ExtractMetadata uut = new ExtractMetadata(null, null, new HashMap<String,String>() {{ put("key","long"); }}, null, null, null, null, null);
+		assertEquals(Long.class, uut.enforceFieldTypes(new JSONObject() {{ put("key",1); }}).get("key").getClass());
+		assertEquals(Long.class, uut.enforceFieldTypes(new JSONObject() {{ put("key",1L); }}).get("key").getClass());
+		assertEquals(Long.class, uut.enforceFieldTypes(new JSONObject() {{ put("key","1"); }}).get("key").getClass());
 	}
-	
+
+	@Test(expected = JSONException.class)
+	public void testEnforceFieldTypes_WhenLongRequested_ShallOmitIncompatibleEmptyString() {
+		@SuppressWarnings("serial")
+		final ExtractMetadata uut = new ExtractMetadata(null, null, new HashMap<String,String>() {{ put("key","long"); }}, null, null, null, null, null);
+		uut.enforceFieldTypes(new JSONObject() {{ put("key",""); }}).get("key");
+	}
+
 	@Test
 	public void testEnforceFieldTypes_WhenDoubleRequested_ShallReturnDouble() {
-		final String key = "test";
 		@SuppressWarnings("serial")
-		final ExtractMetadata uut = new ExtractMetadata(null, null, new HashMap<String,String>() {{ put(key,"double"); }}, null, null, null, null, null);
-		assertEquals(Double.class, uut.enforceFieldTypes(new JSONObject() {{ put(key,1); }}).get(key).getClass());
-		assertEquals(Double.class, uut.enforceFieldTypes(new JSONObject() {{ put(key,1L); }}).get(key).getClass());
-		assertEquals(Double.class, uut.enforceFieldTypes(new JSONObject() {{ put(key,1.0); }}).get(key).getClass());
-		assertEquals(Double.class, uut.enforceFieldTypes(new JSONObject() {{ put(key,"1"); }}).get(key).getClass());
-		assertEquals(Double.class, uut.enforceFieldTypes(new JSONObject() {{ put(key,"1.0"); }}).get(key).getClass());
+		final ExtractMetadata uut = new ExtractMetadata(null, null, new HashMap<String,String>() {{ put("key","double"); }}, null, null, null, null, null);
+		assertEquals(Double.class, uut.enforceFieldTypes(new JSONObject() {{ put("key",1); }}).get("key").getClass());
+		assertEquals(Double.class, uut.enforceFieldTypes(new JSONObject() {{ put("key",1L); }}).get("key").getClass());
+		assertEquals(Double.class, uut.enforceFieldTypes(new JSONObject() {{ put("key",1.0); }}).get("key").getClass());
+		assertEquals(Double.class, uut.enforceFieldTypes(new JSONObject() {{ put("key","1"); }}).get("key").getClass());
+		assertEquals(Double.class, uut.enforceFieldTypes(new JSONObject() {{ put("key","1.0"); }}).get("key").getClass());
+	}
+	
+	@Test(expected = JSONException.class)
+	public void testEnforceFieldTypes_WhenDoubleRequested_ShallOmitIncompatibleEmptyString() {
+		@SuppressWarnings("serial")
+		final ExtractMetadata uut = new ExtractMetadata(null, null, new HashMap<String,String>() {{ put("key","double"); }}, null, null, null, null, null);
+		uut.enforceFieldTypes(new JSONObject() {{ put("key",""); }}).get("key");
 	}
 
 	@Test
 	public void testEnforceFieldTypes_WhenBooleanRequested_ShallReturnBoolean() {
-		final String key = "test";
 		@SuppressWarnings("serial")
-		final ExtractMetadata uut = new ExtractMetadata(null, null, new HashMap<String,String>() {{ put(key,"boolean"); }}, null, null, null, null, null);
-		assertEquals(Boolean.class, uut.enforceFieldTypes(new JSONObject() {{ put(key,true); }}).get(key).getClass());
-		assertEquals(Boolean.class, uut.enforceFieldTypes(new JSONObject() {{ put(key,false); }}).get(key).getClass());
-		assertEquals(Boolean.class, uut.enforceFieldTypes(new JSONObject() {{ put(key,"true"); }}).get(key).getClass());
-		assertEquals(Boolean.class, uut.enforceFieldTypes(new JSONObject() {{ put(key,"false"); }}).get(key).getClass());
+		final ExtractMetadata uut = new ExtractMetadata(null, null, new HashMap<String,String>() {{ put("key","boolean"); }}, null, null, null, null, null);
+		assertEquals(Boolean.class, uut.enforceFieldTypes(new JSONObject() {{ put("key",true); }}).get("key").getClass());
+		assertEquals(Boolean.class, uut.enforceFieldTypes(new JSONObject() {{ put("key",false); }}).get("key").getClass());
+		assertEquals(Boolean.class, uut.enforceFieldTypes(new JSONObject() {{ put("key","true"); }}).get("key").getClass());
+		assertEquals(Boolean.class, uut.enforceFieldTypes(new JSONObject() {{ put("key","false"); }}).get("key").getClass());
+	}
+	
+	@Test(expected = JSONException.class)
+	public void testEnforceFieldTypes_WhenBooleanRequested_ShallOmitIncompatibleEmptyString() {
+		@SuppressWarnings("serial")
+		final ExtractMetadata uut = new ExtractMetadata(null, null, new HashMap<String,String>() {{ put("key","boolean"); }}, null, null, null, null, null);
+		uut.enforceFieldTypes(new JSONObject() {{ put("key",""); }}).get("key");
 	}
 
 	@Test
 	public void testEnforceFieldTypes_WhenDateRequested_ShallReturnDateString() {
-		final String key = "test";
 		@SuppressWarnings("serial")
-		final ExtractMetadata uut = new ExtractMetadata(null, null, new HashMap<String,String>() {{ put(key,"date"); }}, null, null, null, null, null);
-		assertEquals(String.class, uut.enforceFieldTypes(new JSONObject() {{ put(key,"2020-01-19T03:11:42.000000Z"); }}).get(key).getClass());
+		final ExtractMetadata uut = new ExtractMetadata(null, null, new HashMap<String,String>() {{ put("key","date"); }}, null, null, null, null, null);
+		assertEquals(String.class, uut.enforceFieldTypes(new JSONObject() {{ put("key","2020-01-19T03:11:42.000000Z"); }}).get("key").getClass());
+	}
+	
+	@Test(expected = JSONException.class)
+	public void testEnforceFieldTypes_WhenDateRequested_ShallOmitIncompatibleEmptyString() {
+		@SuppressWarnings("serial")
+		final ExtractMetadata uut = new ExtractMetadata(null, null, new HashMap<String,String>() {{ put("key","date"); }}, null, null, null, null, null);
+		uut.enforceFieldTypes(new JSONObject() {{ put("key",""); }}).get("key");
 	}
 	
 	@Test
 	public void testEnforceFieldTypes_WhenStringRequested_ShallReturnString() {
-		final String key = "test";
 		@SuppressWarnings("serial")
-		final ExtractMetadata uut = new ExtractMetadata(null, null, new HashMap<String,String>() {{ put(key,"string"); }}, null, null, null, null, null);
-		assertEquals(String.class, uut.enforceFieldTypes(new JSONObject() {{ put(key,1); }}).get(key).getClass());
-		assertEquals(String.class, uut.enforceFieldTypes(new JSONObject() {{ put(key,1L); }}).get(key).getClass());
-		assertEquals(String.class, uut.enforceFieldTypes(new JSONObject() {{ put(key,"1"); }}).get(key).getClass());
-		assertEquals(String.class, uut.enforceFieldTypes(new JSONObject() {{ put(key,1.0); }}).get(key).getClass());
-		assertEquals(String.class, uut.enforceFieldTypes(new JSONObject() {{ put(key,"1.0"); }}).get(key).getClass());
-		assertEquals(String.class, uut.enforceFieldTypes(new JSONObject() {{ put(key,1.1); }}).get(key).getClass());
-		assertEquals(String.class, uut.enforceFieldTypes(new JSONObject() {{ put(key,"1.1"); }}).get(key).getClass());
-		assertEquals(String.class, uut.enforceFieldTypes(new JSONObject() {{ put(key,"1.1.1"); }}).get(key).getClass());
-		assertEquals(String.class, uut.enforceFieldTypes(new JSONObject() {{ put(key,true); }}).get(key).getClass());
-		assertEquals(String.class, uut.enforceFieldTypes(new JSONObject() {{ put(key,"true"); }}).get(key).getClass());
-		assertEquals(String.class, uut.enforceFieldTypes(new JSONObject() {{ put(key,false); }}).get(key).getClass());
-		assertEquals(String.class, uut.enforceFieldTypes(new JSONObject() {{ put(key,"false"); }}).get(key).getClass());
-		assertEquals(String.class, uut.enforceFieldTypes(new JSONObject() {{ put(key,"foobar"); }}).get(key).getClass());
-		assertEquals(String.class, uut.enforceFieldTypes(new JSONObject() {{ put(key,"2020-01-19T03:11:42.000000Z"); }}).get(key).getClass());
+		final ExtractMetadata uut = new ExtractMetadata(null, null, new HashMap<String,String>() {{ put("key","string"); }}, null, null, null, null, null);
+		assertEquals(String.class, uut.enforceFieldTypes(new JSONObject() {{ put("key",1); }}).get("key").getClass());
+		assertEquals(String.class, uut.enforceFieldTypes(new JSONObject() {{ put("key",1L); }}).get("key").getClass());
+		assertEquals(String.class, uut.enforceFieldTypes(new JSONObject() {{ put("key","1"); }}).get("key").getClass());
+		assertEquals(String.class, uut.enforceFieldTypes(new JSONObject() {{ put("key",1.0); }}).get("key").getClass());
+		assertEquals(String.class, uut.enforceFieldTypes(new JSONObject() {{ put("key","1.0"); }}).get("key").getClass());
+		assertEquals(String.class, uut.enforceFieldTypes(new JSONObject() {{ put("key",1.1); }}).get("key").getClass());
+		assertEquals(String.class, uut.enforceFieldTypes(new JSONObject() {{ put("key","1.1"); }}).get("key").getClass());
+		assertEquals(String.class, uut.enforceFieldTypes(new JSONObject() {{ put("key","1.1.1"); }}).get("key").getClass());
+		assertEquals(String.class, uut.enforceFieldTypes(new JSONObject() {{ put("key",true); }}).get("key").getClass());
+		assertEquals(String.class, uut.enforceFieldTypes(new JSONObject() {{ put("key","true"); }}).get("key").getClass());
+		assertEquals(String.class, uut.enforceFieldTypes(new JSONObject() {{ put("key",false); }}).get("key").getClass());
+		assertEquals(String.class, uut.enforceFieldTypes(new JSONObject() {{ put("key","false"); }}).get("key").getClass());
+		assertEquals(String.class, uut.enforceFieldTypes(new JSONObject() {{ put("key","foobar"); }}).get("key").getClass());
+		assertEquals(String.class, uut.enforceFieldTypes(new JSONObject() {{ put("key",""); }}).get("key").getClass());
+		assertEquals(String.class, uut.enforceFieldTypes(new JSONObject() {{ put("key","2020-01-19T03:11:42.000000Z"); }}).get("key").getClass());
 	}
 	
 	@Test
 	public void testEnforceFieldTypes_WhenNotConfigured_ShallPassThru() {
-		final String key = "test";
 		final ExtractMetadata uut = new ExtractMetadata(null, null, Collections.<String,String>emptyMap(), null, null, null, null, null);
-		assertEquals(Integer.class, uut.enforceFieldTypes(new JSONObject() {{ put(key,1); }}).get(key).getClass());
-		assertEquals(Long.class, uut.enforceFieldTypes(new JSONObject() {{ put(key,1L); }}).get(key).getClass());
-		assertEquals(String.class, uut.enforceFieldTypes(new JSONObject() {{ put(key,"1"); }}).get(key).getClass());
-		assertEquals(Double.class, uut.enforceFieldTypes(new JSONObject() {{ put(key,1.0); }}).get(key).getClass());
-		assertEquals(String.class, uut.enforceFieldTypes(new JSONObject() {{ put(key,"1.0"); }}).get(key).getClass());
-		assertEquals(Double.class, uut.enforceFieldTypes(new JSONObject() {{ put(key,1.1); }}).get(key).getClass());
-		assertEquals(String.class, uut.enforceFieldTypes(new JSONObject() {{ put(key,"1.1"); }}).get(key).getClass());
-		assertEquals(String.class, uut.enforceFieldTypes(new JSONObject() {{ put(key,"1.1.1"); }}).get(key).getClass());
-		assertEquals(Boolean.class, uut.enforceFieldTypes(new JSONObject() {{ put(key,true); }}).get(key).getClass());
-		assertEquals(String.class, uut.enforceFieldTypes(new JSONObject() {{ put(key,"true"); }}).get(key).getClass());
-		assertEquals(Boolean.class, uut.enforceFieldTypes(new JSONObject() {{ put(key,false); }}).get(key).getClass());
-		assertEquals(String.class, uut.enforceFieldTypes(new JSONObject() {{ put(key,"false"); }}).get(key).getClass());
-		assertEquals(String.class, uut.enforceFieldTypes(new JSONObject() {{ put(key,"foobar"); }}).get(key).getClass());
-		assertEquals(String.class, uut.enforceFieldTypes(new JSONObject() {{ put(key,"2020-01-19T03:11:42.000000Z"); }}).get(key).getClass());	
+		assertEquals(Integer.class, uut.enforceFieldTypes(new JSONObject() {{ put("key",1); }}).get("key").getClass());
+		assertEquals(Long.class, uut.enforceFieldTypes(new JSONObject() {{ put("key",1L); }}).get("key").getClass());
+		assertEquals(String.class, uut.enforceFieldTypes(new JSONObject() {{ put("key","1"); }}).get("key").getClass());
+		assertEquals(Double.class, uut.enforceFieldTypes(new JSONObject() {{ put("key",1.0); }}).get("key").getClass());
+		assertEquals(String.class, uut.enforceFieldTypes(new JSONObject() {{ put("key","1.0"); }}).get("key").getClass());
+		assertEquals(Double.class, uut.enforceFieldTypes(new JSONObject() {{ put("key",1.1); }}).get("key").getClass());
+		assertEquals(String.class, uut.enforceFieldTypes(new JSONObject() {{ put("key","1.1"); }}).get("key").getClass());
+		assertEquals(String.class, uut.enforceFieldTypes(new JSONObject() {{ put("key","1.1.1"); }}).get("key").getClass());
+		assertEquals(Boolean.class, uut.enforceFieldTypes(new JSONObject() {{ put("key",true); }}).get("key").getClass());
+		assertEquals(String.class, uut.enforceFieldTypes(new JSONObject() {{ put("key","true"); }}).get("key").getClass());
+		assertEquals(Boolean.class, uut.enforceFieldTypes(new JSONObject() {{ put("key",false); }}).get("key").getClass());
+		assertEquals(String.class, uut.enforceFieldTypes(new JSONObject() {{ put("key","false"); }}).get("key").getClass());
+		assertEquals(String.class, uut.enforceFieldTypes(new JSONObject() {{ put("key","foobar"); }}).get("key").getClass());
+		assertEquals(String.class, uut.enforceFieldTypes(new JSONObject() {{ put("key",""); }}).get("key").getClass());
+		assertEquals(String.class, uut.enforceFieldTypes(new JSONObject() {{ put("key","2020-01-19T03:11:42.000000Z"); }}).get("key").getClass());	
 	}
 
 }
