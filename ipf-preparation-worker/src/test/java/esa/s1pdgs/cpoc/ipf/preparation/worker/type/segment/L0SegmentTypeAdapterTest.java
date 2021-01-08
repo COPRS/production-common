@@ -71,7 +71,7 @@ public class L0SegmentTypeAdapterTest {
 	}
 
 	@Test
-	public void testNonRFProductionWithOlderAndNewerFullSegments()
+	public void testNonRFProductionWithOlderAndNewerFullAndPartialSegments()
 			throws MetadataQueryException, IpfPrepWorkerInputsMissingException {
 
 		Instant insertionTime = Instant.now();
@@ -79,37 +79,67 @@ public class L0SegmentTypeAdapterTest {
 		String metadataInsertionTime1 = toMetadataDateFormat(insertionTime);
 		String metadataInsertionTime2 = toMetadataDateFormat(insertionTime.plusSeconds(130));
 
-		metadata_IW_VV_02F9CE_1.setInsertionTime(metadataInsertionTime1);
-		metadata_IW_VV_02F9CE_2.setInsertionTime(metadataInsertionTime2);
+		metadata_IW_VV_02F9CE_1.setInsertionTime(metadataInsertionTime2);
+		metadata_IW_VV_02F9CE_2.setInsertionTime(metadataInsertionTime1);
 		metadata_IW_VH_02F9CE_1.setInsertionTime(metadataInsertionTime2);
 		metadata_IW_VH_02F9CE_2.setInsertionTime(metadataInsertionTime1);
-
-		doReturn(Arrays.asList(metadata_IW_VV_02F9CE_1, metadata_IW_VV_02F9CE_2, metadata_IW_VH_02F9CE_1,
-				metadata_IW_VH_02F9CE_2)).when(metadataClient).getLevelSegments("02F9CE");
 
 		AppDataJob appDataJob1 = new AppDataJob(123L);
 		appDataJob1.setCreationDate(Date.from(insertionTime.plusSeconds(3)));
 		AppDataJobProduct product1 = new AppDataJobProduct();
 		product1.getMetadata().put("startTime", "2021-01-04T09:17:09.187813Z");
-		product1.getMetadata().put("productName", "S1B_IW_RAW__0SVV_20210104T091709_20210104T091833_025002_02F9CE_17E4");
+		product1.getMetadata().put("productName",
+				"S1B_IW_RAW__0SVV_20210104T091709_20210104T091833_025002_02F9CE_4F09.SAFE");
 		product1.getMetadata().put("productType", "IW_RAW__0S");
 		product1.getMetadata().put("dataTakeId", "02F9CE");
 		appDataJob1.setProduct(product1);
+		
+		doReturn(Arrays.asList(metadata_IW_VV_02F9CE_2, metadata_IW_VH_02F9CE_2)).when(metadataClient)
+		.getLevelSegments("02F9CE");
 
 		Product product = uut.mainInputSearch(appDataJob1, null);
 
-	    Map<String, List<AppDataJobFile>> inputs = ((L0SegmentProduct) product).toProduct().getInputs();
-	    
-	    assertEquals(2, inputs.size());
-	    assertNotNull(inputs.get("VV"));
-	    assertNotNull(inputs.get("VH"));
-	    
+		Map<String, List<AppDataJobFile>> inputs = ((L0SegmentProduct) product).toProduct().getInputs();
+
+		assertEquals(2, inputs.size());
+		assertNotNull(inputs.get("VV"));
+		assertNotNull(inputs.get("VH"));
+		assertEquals(1, inputs.get("VV").size());
+		assertEquals(1, inputs.get("VH").size());
+		assertEquals("S1B_IW_RAW__0SVH_20210104T091709_20210104T091825_025002_02F9CE_283E.SAFE",
+				inputs.get("VH").get(0).getFilename());
+		assertEquals("S1B_IW_RAW__0SVV_20210104T091709_20210104T091833_025002_02F9CE_4F09.SAFE",
+				inputs.get("VV").get(0).getFilename());
+
+		try {
+			uut.validateInputSearch(appDataJob1, null);
+			fail("Missing inputs, exception shall be thrown!");
+		} catch (IpfPrepWorkerInputsMissingException missingEx) {
+			//Expected
+		}
+		
+		doReturn(Arrays.asList(metadata_IW_VV_02F9CE_2, metadata_IW_VH_02F9CE_2, metadata_IW_VH_02F9CE_1)).when(metadataClient)
+		.getLevelSegments("02F9CE");
+
+		product = uut.mainInputSearch(appDataJob1, null);
+
+		inputs = ((L0SegmentProduct) product).toProduct().getInputs();
+
+		assertEquals(2, inputs.size());
+		assertNotNull(inputs.get("VV"));
+		assertNotNull(inputs.get("VH"));
+		assertEquals(1, inputs.get("VV").size());
+		assertEquals(1, inputs.get("VH").size());
+		assertEquals("S1B_IW_RAW__0SVH_20210104T091709_20210104T091833_025002_02F9CE_47B0.SAFE",
+				inputs.get("VH").get(0).getFilename());
+		assertEquals("S1B_IW_RAW__0SVV_20210104T091709_20210104T091833_025002_02F9CE_4F09.SAFE",
+				inputs.get("VV").get(0).getFilename());
+
 		try {
 			uut.validateInputSearch(appDataJob1, null);
 		} catch (IpfPrepWorkerInputsMissingException missingEx) {
 			fail("All necessary inputs shall be provided, selection logic have a bug!");
 		}
-
 	}
 
 	private String toMetadataDateFormat(Instant date) {
