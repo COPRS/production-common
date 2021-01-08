@@ -52,21 +52,36 @@ public class L0SegmentTypeAdapterTest {
 			"S1B_IW_RAW__0SVV_20210104T091709_20210104T091833_025002_02F9CE_4F09.SAFE", "IW_RAW__0S",
 			"S1B_IW_RAW__0SVV_20210104T091709_20210104T091833_025002_02F9CE_4F09.SAFE", "2021-01-04T09:17:09.187813Z",
 			"2021-01-04T09:18:33.511574Z", "S1", "B", null, "VV", "FULL", "", "02F9CE");
+	
+	private final LevelSegmentMetadata metadata_IW_VV_02F9CE_PART_1 = new LevelSegmentMetadata(
+			"S1B_IW_RAW__0SVV_20210104T091709_20210104T091825_025002_02F9CE_12AB.SAFE", "IW_RAW__0S",
+			"S1B_IW_RAW__0SVV_20210104T091709_20210104T091825_025002_02F9CE_12AB.SAFE", "2021-01-04T09:17:09.187813Z",
+			"2021-01-04T09:18:25.258812Z", "S1", "B", null, "VV", "PARTIAL", "", "02F9CE");
+	
+	private final LevelSegmentMetadata metadata_IW_VV_02F9CE_PART_2 = new LevelSegmentMetadata(
+			"S1B_IW_RAW__0SVV_20210104T091709_20210104T091800_025002_02F9CE_12AF.SAFE", "IW_RAW__0S",
+			"S1B_IW_RAW__0SVV_20210104T091709_20210104T091800_025002_02F9CE_12AF.SAFE", "2021-01-04T09:17:09.187813Z",
+			"2021-01-04T09:18:00.258812Z", "S1", "B", null, "VV", "PARTIAL", "", "02F9CE");
 
 	private final LevelSegmentMetadata metadata_IW_VH_02F9CE_FULL_1 = new LevelSegmentMetadata(
 			"S1B_IW_RAW__0SVH_20210104T091709_20210104T091833_025002_02F9CE_47B0.SAFE", "IW_RAW__0S",
 			"S1B_IW_RAW__0SVH_20210104T091709_20210104T091833_025002_02F9CE_47B0.SAFE", "2021-01-04T09:17:09.187813Z",
 			"2021-01-04T09:18:33.511574Z", "S1", "B", null, "VH", "FULL", "", "02F9CE");
 
-	private final LevelSegmentMetadata metadata_IW_VH_02F9CE_PART_1 = new LevelSegmentMetadata(
-			"S1B_IW_RAW__0SVH_20210104T091709_20210104T091825_025002_02F9CE_283E.SAFE", "IW_RAW__0S",
-			"S1B_IW_RAW__0SVH_20210104T091709_20210104T091825_025002_02F9CE_283E.SAFE", "2021-01-04T09:17:09.187813Z",
-			"2021-01-04T09:18:25.258812Z", "S1", "B", null, "VH", "PARTIAL", "", "02F9CE");
-
 	private final LevelSegmentMetadata metadata_IW_VH_02F9CE_FULL_2 = new LevelSegmentMetadata(
 			"S1B_IW_RAW__0SVH_20210104T091709_20210104T091833_025002_02F9CE_ABCD.SAFE", "IW_RAW__0S",
 			"S1B_IW_RAW__0SVH_20210104T091709_20210104T091833_025002_02F9CE_ABCD.SAFE", "2021-01-04T09:17:09.187813Z",
 			"2021-01-04T09:18:33.511574Z", "S1", "B", null, "VH", "FULL", "", "02F9CE");
+	
+	private final LevelSegmentMetadata metadata_IW_VH_02F9CE_PART_1 = new LevelSegmentMetadata(
+			"S1B_IW_RAW__0SVH_20210104T091709_20210104T091825_025002_02F9CE_283E.SAFE", "IW_RAW__0S",
+			"S1B_IW_RAW__0SVH_20210104T091709_20210104T091825_025002_02F9CE_283E.SAFE", "2021-01-04T09:17:09.187813Z",
+			"2021-01-04T09:18:25.258812Z", "S1", "B", null, "VH", "PARTIAL", "", "02F9CE");
+	
+	private final LevelSegmentMetadata metadata_IW_VH_02F9CE_PART_2 = new LevelSegmentMetadata(
+			"S1B_IW_RAW__0SVH_20210104T091709_20210104T091800_025002_02F9CE_CDEF.SAFE", "IW_RAW__0S",
+			"S1B_IW_RAW__0SVH_20210104T091709_20210104T091800_025002_02F9CE_CDEF.SAFE", "2021-01-04T09:17:09.187813Z",
+			"2021-01-04T09:18:00.258812Z", "S1", "B", null, "VH", "PARTIAL", "", "02F9CE");
 
 	@Before
 	public void init() {
@@ -150,6 +165,64 @@ public class L0SegmentTypeAdapterTest {
 		} catch (IpfPrepWorkerInputsMissingException missingEx) {
 			fail("All necessary inputs shall be provided, selection logic have a bug!");
 		}
+	}
+	
+	/**
+	 * Scenario 2:
+	 * 
+	 * Non RFC production when only older and newer partial segments are available
+	 * 
+	 * @throws MetadataQueryException
+	 * @throws IpfPrepWorkerInputsMissingException
+	 */
+	@Test
+	public void testNonRFProductionWithOlderAndNewerPartialSegments()
+			throws MetadataQueryException, IpfPrepWorkerInputsMissingException {
+
+		Instant insertionTime = Instant.now();
+
+		String metadataInsertionTime1 = toMetadataDateFormat(insertionTime);
+		String metadataInsertionTime2 = toMetadataDateFormat(insertionTime.plusSeconds(130));
+
+		metadata_IW_VV_02F9CE_PART_1.setInsertionTime(metadataInsertionTime1);
+		metadata_IW_VV_02F9CE_PART_2.setInsertionTime(metadataInsertionTime2);
+		metadata_IW_VH_02F9CE_PART_1.setInsertionTime(metadataInsertionTime1);
+		metadata_IW_VH_02F9CE_PART_2.setInsertionTime(metadataInsertionTime2);
+
+		AppDataJob appDataJob1 = new AppDataJob(123L);
+		appDataJob1.setCreationDate(Date.from(insertionTime.plusSeconds(3)));
+		AppDataJobProduct product1 = new AppDataJobProduct();
+		product1.getMetadata().put("startTime", "2021-01-04T09:17:09.187813Z");
+		product1.getMetadata().put("productName",
+				"S1B_IW_RAW__0SVV_20210104T091709_20210104T091825_025002_02F9CE_12AB.SAFE");
+		product1.getMetadata().put("productType", "IW_RAW__0S");
+		product1.getMetadata().put("dataTakeId", "02F9CE");
+		appDataJob1.setProduct(product1);
+
+		doReturn(Arrays.asList(metadata_IW_VV_02F9CE_PART_1, metadata_IW_VV_02F9CE_PART_2, metadata_IW_VH_02F9CE_PART_1, metadata_IW_VH_02F9CE_PART_2)).when(metadataClient)
+				.getLevelSegments("02F9CE");
+
+		Product product = uut.mainInputSearch(appDataJob1, null);
+
+		Map<String, List<AppDataJobFile>> inputs = ((L0SegmentProduct) product).toProduct().getInputs();
+		
+		assertEquals(2, inputs.size());
+		assertNotNull(inputs.get("VV"));
+		assertNotNull(inputs.get("VH"));
+		assertEquals(1, inputs.get("VV").size());
+		assertEquals(1, inputs.get("VH").size());
+		assertEquals("S1B_IW_RAW__0SVH_20210104T091709_20210104T091800_025002_02F9CE_CDEF.SAFE",
+				inputs.get("VH").get(0).getFilename());
+		assertEquals("S1B_IW_RAW__0SVV_20210104T091709_20210104T091800_025002_02F9CE_12AF.SAFE",
+				inputs.get("VV").get(0).getFilename());
+
+		try {
+			uut.validateInputSearch(appDataJob1, null);
+			fail("Missing inputs, exception shall be thrown!");
+		} catch (IpfPrepWorkerInputsMissingException missingEx) {
+			// Expected
+		}
+
 	}
 
 	/**
