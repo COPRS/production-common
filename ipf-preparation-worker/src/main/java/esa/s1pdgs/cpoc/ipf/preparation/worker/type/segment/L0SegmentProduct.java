@@ -96,7 +96,12 @@ public class L0SegmentProduct extends AbstractProduct {
 				metadata.getValidityStop(),
 				toMetadataMap(metadata)
 		);
-		if (!res.contains(segment)) {				
+		
+		/*
+		 * s1pro-2175:
+		 * For RFC products, the start time can differ for the same datatake, so do not mix them together in the same job!
+		 */
+		if (!res.contains(segment) && product.getStartTime().equals(segment.getStartDate())) {				
 			// Take only latest segment			
 			final List<AppDataJobFile> updated = merge(res, segment, metadata.getPolarisation());			
 			product.setProductsFor(metadata.getPolarisation(), updated);	
@@ -136,12 +141,17 @@ public class L0SegmentProduct extends AbstractProduct {
 	) {
 		final LevelSegmentMetadata newMeta = toMetadataObject(newElement, polarisation);
 		final LevelSegmentMetadata oldMeta = toMetadataObject(existing, polarisation);
-		
-		// other elements should already be equal when this method is called
-		return Objects.equals(newMeta.getValidityStart(), oldMeta.getValidityStart()) &&
-				Objects.equals(newMeta.getValidityStop(), oldMeta.getValidityStop()) &&				
-				DateUtils.parse(newMeta.getInsertionTime())
-				.isAfter(DateUtils.parse(oldMeta.getInsertionTime()));
+
+		/*
+		 * Other elements should already be equal when this method is called
+		 * 
+		 * s1pro-2175:
+		 * for partial segments, the validity stop time can differ, In order to compare
+		 * them with a newer complete product, do not compare the validity stop time
+		 * here!
+		 */
+		return Objects.equals(newMeta.getValidityStart(), oldMeta.getValidityStart())
+				&& DateUtils.parse(newMeta.getInsertionTime()).isAfter(DateUtils.parse(oldMeta.getInsertionTime()));
 	}
 	
 
