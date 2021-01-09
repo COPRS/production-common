@@ -563,6 +563,67 @@ public class L0SegmentTypeAdapterTest {
 		}
 
 	}
+	
+	/**
+	 * Scenario 6:
+	 * 
+	 * RFC production when older and newer complete/full and partial segments are available
+	 * 
+	 * @throws MetadataQueryException
+	 * @throws IpfPrepWorkerInputsMissingException
+	 */
+	@Test
+	public void testRFProductionWithOlderAndNewerFullAndPartialSegments()
+			throws MetadataQueryException, IpfPrepWorkerInputsMissingException {
+
+		Instant insertionTime = Instant.now();
+
+		String metadataInsertionTime1 = toMetadataDateFormat(insertionTime);
+		String metadataInsertionTime2 = toMetadataDateFormat(insertionTime.plusSeconds(130));
+		String metadataInsertionTime3 = toMetadataDateFormat(insertionTime.plusSeconds(180));
+
+		metadata_RF_VV_043734_PART_3.setInsertionTime(metadataInsertionTime1);
+		metadata_RF_VV_043734_FULL_1.setInsertionTime(metadataInsertionTime2);
+		metadata_RF_VV_043734_FULL_2.setInsertionTime(metadataInsertionTime3);
+		metadata_RF_VH_043734_FULL_1.setInsertionTime(metadataInsertionTime1);
+		metadata_RF_VH_043734_PART_2.setInsertionTime(metadataInsertionTime2);
+
+		AppDataJob appDataJob1 = new AppDataJob(123L);
+		appDataJob1.setCreationDate(Date.from(insertionTime.plusSeconds(3)));
+		AppDataJobProduct product1 = new AppDataJobProduct();
+		product1.getMetadata().put("startTime", "2021-01-04T07:19:20.000000Z");
+		product1.getMetadata().put("productName",
+				"S1A_RF_RAW__0SVV_20210104T071920_20210104T071921_035985_043734_75C7.SAFE");
+		product1.getMetadata().put("productType", "RF_RAW__0S");
+		product1.getMetadata().put("dataTakeId", "043734");
+		appDataJob1.setProduct(product1);
+
+		doReturn(Arrays.asList(metadata_RF_VV_043734_PART_3, metadata_RF_VV_043734_FULL_1, metadata_RF_VV_043734_FULL_2, metadata_RF_VH_043734_FULL_1, metadata_RF_VH_043734_PART_2)).when(metadataClient)
+				.getLevelSegments("043734");
+
+		Product product = uut.mainInputSearch(appDataJob1, taskTableAdapter);
+
+		Map<String, List<AppDataJobFile>> inputs = ((L0SegmentProduct) product).toProduct().getInputs();
+
+		assertEquals(2, inputs.size());
+		assertNotNull(inputs.get("VV"));
+		assertNotNull(inputs.get("VH"));
+		assertEquals(1, inputs.get("VV").size());
+		assertEquals(1, inputs.get("VH").size());
+		assertEquals("S1A_RF_RAW__0SVV_20210104T071920_20210104T071922_035985_043734_72C7.SAFE",
+				inputs.get("VV").get(0).getFilename());
+		assertEquals("S1A_RF_RAW__0SVH_20210104T071920_20210104T071921_035985_043734_EE1D.SAFE",
+				inputs.get("VH").get(0).getFilename());
+		
+		try {
+			uut.validateInputSearch(appDataJob1, taskTableAdapter);
+		} catch (IpfPrepWorkerInputsMissingException missingEx) {
+			fail("All necessary inputs shall be provided, selection logic have a bug!");
+		} catch (DiscardedException discardedEx) {
+			fail("All necessary inputs shall be provided, selection logic have a bug!");
+		}
+
+	}
 
 	private String toMetadataDateFormat(Instant date) {
 		return DateUtils.formatToMetadataDateTimeFormat(LocalDateTime.ofInstant(date, ZoneId.of("UTC")));
