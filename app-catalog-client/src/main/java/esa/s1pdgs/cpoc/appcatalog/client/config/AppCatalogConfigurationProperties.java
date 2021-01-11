@@ -27,6 +27,9 @@ public class AppCatalogConfigurationProperties {
      */
     private int tmConnectMs;
 
+    // connection read timeout
+    private int tmReadMs = 60000;
+
 	public String getHostUri() {
 		return hostUri;
 	}
@@ -57,5 +60,13 @@ public class AppCatalogConfigurationProperties {
 
 	public void setTmConnectMs(final int tmConnectMs) {
 		this.tmConnectMs = tmConnectMs;
+	}
+
+	public int getTmReadMs() {
+		return tmReadMs;
+	}
+
+	public void setTmReadMs(int tmReadMs) {
+		this.tmReadMs = tmReadMs;
 	}
 }

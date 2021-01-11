@@ -87,7 +87,7 @@ public class MdcToPripMapper {
 				}
 			}
 		}
-		LOGGER.warn("No matching product type regex found for productname {} with product type {} in set of regex {}",
+		LOGGER.warn("Skipping metadata to attributes mapping for productname {} because product type {} is not matched by product type regexp set {}",
 				productName, productType, mappingConfiguration.keySet());
 		return new LinkedHashMap<>();
 	}

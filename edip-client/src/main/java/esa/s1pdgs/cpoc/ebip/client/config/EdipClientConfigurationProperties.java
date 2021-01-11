@@ -17,7 +17,7 @@ public class EdipClientConfigurationProperties {
 		private String user;
 		private String pass;
 		private boolean trustSelfSignedCertificate = false;
-		private int connectTimeoutSec = 10;
+		private int connectTimeoutSec = 60;
 		private boolean pasv;
 		private String sslProtocol = "TLS";
 		private boolean explictFtps = true;

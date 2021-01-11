@@ -10,8 +10,10 @@ import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 import javax.xml.bind.JAXBException;
@@ -63,7 +65,7 @@ public class ExtractMetadata {
 	private static final String XSLT_S3_AUX_XFDU_XML = "XSLT_S3_AUX_XFDU_XML.xslt";
 	private static final String XSLT_S3_XFDU_XML = "XSLT_S3_XFDU_XML.xslt";
 	private static final String XSLT_S3_IIF_XML = "XSLT_S3_IIF_XML.xslt";
-	
+
 	/**
 	 * Mapping of family to XSLT file name
 	 */
@@ -105,6 +107,11 @@ public class ExtractMetadata {
 	private String xsltDirectory;
 
 	/**
+	 * Type definitions to enforce on field data extracted from XML
+	 */
+	final Map<String, String> fieldTypes;
+	
+	/**
 	 * The XML converter to use
 	 */
 	private final XmlConverter xmlConverter;
@@ -118,12 +125,13 @@ public class ExtractMetadata {
 	 * Constructor
 	 */
 	public ExtractMetadata(final Map<String, Float> typeOverlap, final Map<String, Float> typeSliceLength,
-			final Map<String, String> packetStoreTypes, final Map<String, String> packetStoreTypeTimelinesses,
-			final List<String> timelinessPriorityFromHighToLow, final String xsltDirectory,
-			final XmlConverter xmlConverter) {
+			final Map<String, String> fieldTypes, final Map<String, String> packetStoreTypes,
+			final Map<String, String> packetStoreTypeTimelinesses, final List<String> timelinessPriorityFromHighToLow,
+			final String xsltDirectory, final XmlConverter xmlConverter) {
 		this.transFactory = TransformerFactory.newInstance();
 		this.typeOverlap = typeOverlap;
 		this.typeSliceLength = typeSliceLength;
+		this.fieldTypes = fieldTypes;
 		this.packetStoreTypes = packetStoreTypes;
 		this.packetStoreTypeTimelinesses = packetStoreTypeTimelinesses;
 		this.timelinessPriorityFromHighToLow = timelinessPriorityFromHighToLow;
@@ -285,7 +293,7 @@ public class ExtractMetadata {
 		JSONObject metadataJSONObject = transformXMLWithXSLTToJSON(manifestFile, xsltFile);
 
 		metadataJSONObject = removeEmptyStringElementsFromPolarisationChannelsArray(metadataJSONObject);
-		
+
 		metadataJSONObject = putCommonMetadataToJSON(metadataJSONObject, descriptor);
 
 		try {
@@ -459,7 +467,7 @@ public class ExtractMetadata {
 		LOGGER.debug("extracting metadata for descriptor: {} ", descriptor);
 		JSONObject metadataJSONObject = transformXMLWithXSLTToJSON(manifestFile, xsltFile);
 
-		metadataJSONObject = removeEmptyStringElementsFromPolarisationChannelsArray(metadataJSONObject);		
+		metadataJSONObject = removeEmptyStringElementsFromPolarisationChannelsArray(metadataJSONObject);
 
 		metadataJSONObject = putCommonMetadataToJSON(metadataJSONObject, descriptor);
 
@@ -474,17 +482,19 @@ public class ExtractMetadata {
 			if (metadataJSONObject.has("coordinates") // for use as as-is metadata attribute (PRIP)
 					&& !metadataJSONObject.getString("coordinates").isEmpty()) {
 				metadataJSONObject.put("coordinates",
-								convertCoordinatesToClosedForm(metadataJSONObject.getString("coordinates")));
+						convertCoordinatesToClosedForm(metadataJSONObject.getString("coordinates")));
 			}
 
 			if (ProductFamily.L0_ACN.equals(productFamily) || ProductFamily.L0_SLICE.equals(productFamily)) {
 
-				if (!metadataJSONObject.has("sliceNumber") || "".equals(metadataJSONObject.get("sliceNumber").toString())) {
+				if (!metadataJSONObject.has("sliceNumber")
+						|| "".equals(metadataJSONObject.get("sliceNumber").toString())) {
 					metadataJSONObject.put("sliceNumber", 1);
 				} else if (StringUtils.isEmpty(metadataJSONObject.get("sliceNumber").toString())) {
 					metadataJSONObject.put("sliceNumber", 1);
 				}
-				if (!metadataJSONObject.has("totalNumberOfSlice") || "".equals(metadataJSONObject.get("totalNumberOfSlice").toString())) {				
+				if (!metadataJSONObject.has("totalNumberOfSlice")
+						|| "".equals(metadataJSONObject.get("totalNumberOfSlice").toString())) {
 					if (Arrays.asList("A", "C", "N").contains(descriptor.getProductClass())) {
 						if (metadataJSONObject.has("startTime") && metadataJSONObject.has("stopTime")) {
 							metadataJSONObject.put("totalNumberOfSlice", totalNumberOfSlice(
@@ -640,11 +650,12 @@ public class ExtractMetadata {
 					throw new MetadataMalformedException("creationTime");
 				}
 			}
-			
+
 			if (metadataJSONObject.has("selectedOrbitFirstAzimuthTimeUtc")) {
 				try {
 					metadataJSONObject.put("selectedOrbitFirstAzimuthTimeUtc",
-							DateUtils.convertToMetadataDateTimeFormat(metadataJSONObject.getString("selectedOrbitFirstAzimuthTimeUtc")));
+							DateUtils.convertToMetadataDateTimeFormat(
+									metadataJSONObject.getString("selectedOrbitFirstAzimuthTimeUtc")));
 				} catch (final DateTimeParseException e) {
 					throw new MetadataMalformedException("selectedOrbitFirstAzimuthTimeUtc");
 				}
@@ -652,14 +663,14 @@ public class ExtractMetadata {
 
 			metadataJSONObject.put("productName", descriptor.getProductName());
 
-			if (!metadataJSONObject.has("productClass") || "".equals((String)metadataJSONObject.get("productClass"))) {
+			if (!metadataJSONObject.has("productClass") || "".equals((String) metadataJSONObject.get("productClass"))) {
 				metadataJSONObject.put("productClass", descriptor.getProductClass());
 			}
-			
-			if (!metadataJSONObject.has("productType") || "".equals((String)metadataJSONObject.get("productType"))) {
+
+			if (!metadataJSONObject.has("productType") || "".equals((String) metadataJSONObject.get("productType"))) {
 				metadataJSONObject.put("productType", descriptor.getProductType());
 			}
-			
+
 			metadataJSONObject.put("missionId", descriptor.getMissionId());
 			metadataJSONObject.put("satelliteId", descriptor.getSatelliteId());
 			metadataJSONObject.put("url", descriptor.getKeyObjectStorage());
@@ -725,23 +736,23 @@ public class ExtractMetadata {
 			final String dt = DateUtils.formatToMetadataDateTimeFormat(LocalDateTime.now());
 
 			metadataJSONObject.put("productName", descriptor.getProductName());
-			
-			if (!metadataJSONObject.has("productClass") || "".equals((String)metadataJSONObject.get("productClass"))) {
-				metadataJSONObject.put("productClass", descriptor.getProductClass());			
+
+			if (!metadataJSONObject.has("productClass") || "".equals((String) metadataJSONObject.get("productClass"))) {
+				metadataJSONObject.put("productClass", descriptor.getProductClass());
 			}
-			
-			if (!metadataJSONObject.has("productType") || "".equals((String)metadataJSONObject.get("productType"))) {
+
+			if (!metadataJSONObject.has("productType") || "".equals((String) metadataJSONObject.get("productType"))) {
 				metadataJSONObject.put("productType", descriptor.getProductType());
 			}
-			
+
 			metadataJSONObject.put("resolution", descriptor.getResolution());
 			metadataJSONObject.put("missionId", descriptor.getMissionId());
 			metadataJSONObject.put("satelliteId", descriptor.getSatelliteId());
-			
-			if (!metadataJSONObject.has("swathtype") || "".equals((String)metadataJSONObject.get("swathtype"))) {
+
+			if (!metadataJSONObject.has("swathtype") || "".equals((String) metadataJSONObject.get("swathtype"))) {
 				metadataJSONObject.put("swathtype", descriptor.getSwathtype());
 			}
-			
+
 			metadataJSONObject.put("polarisation", descriptor.getPolarisation());
 			metadataJSONObject.put("dataTakeId", descriptor.getDataTakeId());
 			metadataJSONObject.put("url", descriptor.getKeyObjectStorage());
@@ -759,10 +770,10 @@ public class ExtractMetadata {
 		}
 
 	}
-	
+
 	private JSONObject removeEmptyStringElementsFromPolarisationChannelsArray(final JSONObject metadataJSONObject) {
 		if (metadataJSONObject.has("polarisationChannels")) {
-			JSONArray polarisationChannels = (JSONArray)metadataJSONObject.get("polarisationChannels");
+			JSONArray polarisationChannels = (JSONArray) metadataJSONObject.get("polarisationChannels");
 			int idx = polarisationChannels.length();
 			while (--idx >= 0) {
 				if ("".equals(polarisationChannels.get(idx))) {
@@ -780,15 +791,15 @@ public class ExtractMetadata {
 			throws MetadataExtractionException {
 		try {
 			metadataJSONObject.put("productName", descriptor.getProductName());
-			
-			if (!metadataJSONObject.has("productClass") || "".equals((String)metadataJSONObject.get("productClass"))) {
-				metadataJSONObject.put("productClass", descriptor.getProductClass());			
+
+			if (!metadataJSONObject.has("productClass") || "".equals((String) metadataJSONObject.get("productClass"))) {
+				metadataJSONObject.put("productClass", descriptor.getProductClass());
 			}
-			
-			if (!metadataJSONObject.has("productType") || "".equals((String)metadataJSONObject.get("productType"))) {
+
+			if (!metadataJSONObject.has("productType") || "".equals((String) metadataJSONObject.get("productType"))) {
 				metadataJSONObject.put("productType", descriptor.getProductType());
 			}
-			
+
 			metadataJSONObject.put("missionId", descriptor.getMissionId());
 			metadataJSONObject.put("satelliteId", descriptor.getSatelliteId());
 			metadataJSONObject.put("url", descriptor.getKeyObjectStorage());
@@ -798,7 +809,7 @@ public class ExtractMetadata {
 			metadataJSONObject.put("classId", descriptor.getClassId());
 			// TODO S1PRO-1030 in future it can be DEBUG or REPROCESSING as well
 			metadataJSONObject.put("processMode", "NOMINAL");
-			
+
 			return metadataJSONObject;
 		} catch (final JSONException e) {
 			LOGGER.error("Error while extraction of config file metadata ", e);
@@ -814,13 +825,33 @@ public class ExtractMetadata {
 			final ByteArrayOutputStream transformationStream = new ByteArrayOutputStream();
 
 			transformer.transform(new StreamSource(inputXMLFile), new StreamResult(transformationStream));
-			return XML.toJSONObject(transformationStream.toString(Charset.defaultCharset().name()));
+			JSONObject metadata = XML.toJSONObject(transformationStream.toString(Charset.defaultCharset().name()));
+			return enforceFieldTypes(metadata);
 
 		} catch (IOException | TransformerException | JSONException e) {
 			LOGGER.error("Error while transformation of  input XML file to JSON", e);
 			throw new MetadataExtractionException(e);
 		}
-
+	}
+	
+	JSONObject enforceFieldTypes(JSONObject metadata) {
+		JSONObject result = new JSONObject();
+		Iterator<String> keys = metadata.keys();
+		while(keys.hasNext()) {
+			String key = keys.next();
+			String type = Objects.toString(fieldTypes.get(key), "undefined");
+			if ("undefined".equals(type) || "string".equals(type) || !"".equals(metadata.get(key))) {
+				switch(type) {
+					case "long": result.put(key, metadata.getLong(key)); break;
+					case "double": result.put(key, metadata.getDouble(key)); break;
+					case "boolean": result.put(key, metadata.getBoolean(key)); break;
+					case "string": result.put(key, String.valueOf(metadata.get(key))); break;
+					case "date": result.put(key, metadata.getString(key)); break; // date string
+					default: result.put(key, metadata.get(key)); // best guess
+				}
+			}
+		}
+		return result;
 	}
 
 	/**
@@ -882,17 +913,18 @@ public class ExtractMetadata {
 			throw new MetadataExtractionException(e);
 		}
 	}
-	
+
 	public final static String convertCoordinatesToClosedForm(final String rawCoordinates) {
 		final String[] elements = rawCoordinates.split(" ");
-		return elements[0].equals(elements[elements.length - 1]) ? rawCoordinates : rawCoordinates + " " + elements[0]; 
+		return elements[0].equals(elements[elements.length - 1]) ? rawCoordinates : rawCoordinates + " " + elements[0];
 	}
 
 	/**
 	 * Workaround for Elastic Search to be able to find a date line crossing polygon
-	 * by an intersecting polygon: 
-	 * If all but one of the longitude values are negative, the positive value is shifted by -360°. 
-	 * If all but one of the longitude values are positive, the negative value is shifted by +360°.
+	 * by an intersecting polygon:
+	 * If maximum longitudal width is larger than 180° it is assumed that the polygon is crossing the date line. 
+	 * Then if all but one of the longitude values are negative, the positive value is shifted by -360° or 
+	 * if all but one of the longitude values are positive, the negative value is shifted by +360°.
 	 * 
 	 * @param rawCoordinatesFromManifest
 	 * @return improved raw coordinates
@@ -925,62 +957,83 @@ public class ExtractMetadata {
 
 			final int offset = 360;
 
-			// All negative but one -> decrease one by offset
-			if (aLongitude >= 0 && bLongitude < 0 && cLongitude < 0 && dLongitude < 0) {
-				aLongitude = aLongitude - offset;
-				aPoint[1] = aLongitude.toString();
-				points[0] = String.join(",", aPoint);
-				modified = true;
-			} else if (bLongitude >= 0 && aLongitude < 0 && cLongitude < 0 && dLongitude < 0) {
-				bLongitude = bLongitude - offset;
-				bPoint[1] = bLongitude.toString();
-				points[1] = String.join(",", bPoint);
-				modified = true;
-			} else if (cLongitude >= 0 && aLongitude < 0 && bLongitude < 0 && dLongitude < 0) {
-				cLongitude = cLongitude - offset;
-				cPoint[1] = cLongitude.toString();
-				points[2] = String.join(",", cPoint);
-				modified = true;
-			} else if (dLongitude >= 0 && aLongitude < 0 && bLongitude < 0 && cLongitude < 0) {
-				dLongitude = dLongitude - offset;
-				dPoint[1] = dLongitude.toString();
-				points[3] = String.join(",", dPoint);
-				modified = true;
-			}
+			final Double maxLongitudeDiff = calculateMaxDifference(new Double[] {aLongitude, bLongitude, cLongitude, dLongitude});
+			
+			// Shifting coordinates only if crossing date line but not when crossing 0° meridian
+			if (maxLongitudeDiff > 180.0) {
+				// All negative but one -> decrease one by offset
+				if (aLongitude >= 0 && bLongitude < 0 && cLongitude < 0 && dLongitude < 0) {
+					aLongitude = aLongitude - offset;
+					aPoint[1] = aLongitude.toString();
+					points[0] = String.join(",", aPoint);
+					modified = true;
+				} else if (bLongitude >= 0 && aLongitude < 0 && cLongitude < 0 && dLongitude < 0) {
+					bLongitude = bLongitude - offset;
+					bPoint[1] = bLongitude.toString();
+					points[1] = String.join(",", bPoint);
+					modified = true;
+				} else if (cLongitude >= 0 && aLongitude < 0 && bLongitude < 0 && dLongitude < 0) {
+					cLongitude = cLongitude - offset;
+					cPoint[1] = cLongitude.toString();
+					points[2] = String.join(",", cPoint);
+					modified = true;
+				} else if (dLongitude >= 0 && aLongitude < 0 && bLongitude < 0 && cLongitude < 0) {
+					dLongitude = dLongitude - offset;
+					dPoint[1] = dLongitude.toString();
+					points[3] = String.join(",", dPoint);
+					modified = true;
+				}
 
-			// All positive but one -> increase one by offset
-			if (aLongitude <= 0 && bLongitude > 0 && cLongitude > 0 && dLongitude > 0) {
-				aLongitude = aLongitude + offset;
-				aPoint[1] = aLongitude.toString();
-				points[0] = String.join(",", aPoint);
-				modified = true;
-			} else if (bLongitude <= 0 && aLongitude > 0 && cLongitude > 0 && dLongitude > 0) {
-				bLongitude = bLongitude + offset;
-				bPoint[1] = bLongitude.toString();
-				points[1] = String.join(",", bPoint);
-				modified = true;
-			} else if (cLongitude <= 0 && aLongitude > 0 && bLongitude > 0 && dLongitude > 0) {
-				cLongitude = cLongitude + offset;
-				cPoint[1] = cLongitude.toString();
-				points[2] = String.join(",", cPoint);
-				modified = true;
-			} else if (dLongitude <= 0 && aLongitude > 0 && bLongitude > 0 && cLongitude > 0) {
-				dLongitude = dLongitude + offset;
-				dPoint[1] = dLongitude.toString();
-				points[3] = String.join(",", dPoint);
-				modified = true;
+				// All positive but one -> increase one by offset
+				if (aLongitude <= 0 && bLongitude > 0 && cLongitude > 0 && dLongitude > 0) {
+					aLongitude = aLongitude + offset;
+					aPoint[1] = aLongitude.toString();
+					points[0] = String.join(",", aPoint);
+					modified = true;
+				} else if (bLongitude <= 0 && aLongitude > 0 && cLongitude > 0 && dLongitude > 0) {
+					bLongitude = bLongitude + offset;
+					bPoint[1] = bLongitude.toString();
+					points[1] = String.join(",", bPoint);
+					modified = true;
+				} else if (cLongitude <= 0 && aLongitude > 0 && bLongitude > 0 && dLongitude > 0) {
+					cLongitude = cLongitude + offset;
+					cPoint[1] = cLongitude.toString();
+					points[2] = String.join(",", cPoint);
+					modified = true;
+				} else if (dLongitude <= 0 && aLongitude > 0 && bLongitude > 0 && cLongitude > 0) {
+					dLongitude = dLongitude + offset;
+					dPoint[1] = dLongitude.toString();
+					points[3] = String.join(",", dPoint);
+					modified = true;
+				}
+				improvedRawCoordinatesFromManifest = String.join(" ", points);
 			}
+			
+			if (modified) {
+				LOGGER.info("Maximum longitudal width is " + maxLongitudeDiff + "° -> Assuming that the polygon is crossing the date line -> Shifting from {} to {} ", rawCoordinatesFromManifest,
+						improvedRawCoordinatesFromManifest);
+			}
+		}
 
-			improvedRawCoordinatesFromManifest = String.join(" ", points);
-		}
-		
-		if (modified) {
-			LOGGER.info("coords are crossing date line - shifting from {} to {} ", rawCoordinatesFromManifest, improvedRawCoordinatesFromManifest);
-		}
-		
 		return improvedRawCoordinatesFromManifest;
 	}
-	
+
+	/**
+	 * Calculate maximm difference of an array of values.
+	 * 
+	 * @param values
+	 * @return maxDifference
+	 */
+	protected Double calculateMaxDifference(final Double[] values) {
+		Double max = 0.0;
+		for (int i = 0; i < values.length - 1; i++) {
+			Double d = Math.abs(values[i] - values[i + 1]);
+			if (d > max)
+				max = d;
+		}
+		return max;
+	}
+
 	private JSONObject processCoordinatesforWVL0(final String rawCoordinatesFromManifest) {
 		// Snippet from manifest
 		// -74.8571,-120.3411 -75.4484,-121.9204
@@ -1015,7 +1068,7 @@ public class ExtractMetadata {
 		// Snippet from manifest
 		// 12.378114,48.279240 12.829241,50.603844 11.081389,50.958828
 		// 10.625828,48.649940
-		
+
 		String[] points = improveRawCoordinatesIfDateLineCrossing(rawCoordinatesFromManifest).split(" ");
 
 		if (points.length == 5 && points[0].equals(points[4])) {

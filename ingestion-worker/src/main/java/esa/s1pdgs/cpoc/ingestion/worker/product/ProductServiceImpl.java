@@ -5,9 +5,6 @@ import java.nio.file.Path;
 import java.util.Collections;
 import java.util.List;
 
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-
 import esa.s1pdgs.cpoc.common.ProductFamily;
 import esa.s1pdgs.cpoc.ingestion.worker.inbox.InboxAdapter;
 import esa.s1pdgs.cpoc.ingestion.worker.obs.ObsAdapter;
@@ -16,14 +13,14 @@ import esa.s1pdgs.cpoc.mqi.model.queue.IngestionJob;
 import esa.s1pdgs.cpoc.obs_sdk.ObsClient;
 import esa.s1pdgs.cpoc.report.ReportingFactory;
 
-@Service
 public class ProductServiceImpl implements ProductService {
 
 	private final ObsClient obsClient;
+	private final boolean bufferInput;
 
-	@Autowired
-	public ProductServiceImpl(final ObsClient obsClient) {
+	public ProductServiceImpl(final ObsClient obsClient, final boolean bufferInput) {
 		this.obsClient = obsClient;
+		this.bufferInput = bufferInput;
 	}
 
 	@Override
@@ -57,7 +54,7 @@ public class ProductServiceImpl implements ProductService {
 		return Collections.singletonList(prod);
 	}
 
-	private String obsKeyFor(IngestionJob ingestion) {
+	private String obsKeyFor(final IngestionJob ingestion) {
 		if("auxip".equals(ingestion.getInboxType())) {
 			return ingestion.getRelativePath();
 		}
@@ -70,7 +67,7 @@ public class ProductServiceImpl implements ProductService {
 	}
 
 	private ObsAdapter newObsAdapterFor(final ReportingFactory reportingFactory) {
-		return new ObsAdapter(obsClient, reportingFactory);
+		return new ObsAdapter(obsClient, reportingFactory, bufferInput);
 	}
 
 }

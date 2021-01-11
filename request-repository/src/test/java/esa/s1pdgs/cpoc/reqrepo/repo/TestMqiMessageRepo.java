@@ -30,6 +30,8 @@ import esa.s1pdgs.cpoc.reqrepo.service.RequestRepository;
 @EnableMongoRepositories(basePackageClasses = MqiMessageRepo.class)
 @ActiveProfiles("test")
 public class TestMqiMessageRepo {	
+	private static final List<String> PROCESSING_TYPES_LIST = Arrays.asList("foo","bar");	
+	
     @Autowired
     private MongoOperations ops;
 
@@ -69,7 +71,7 @@ public class TestMqiMessageRepo {
     	}    	
     	final List<MqiMessage> actual = uut.findByStateInAndTopicInOrderByCreationDate(
     			RequestRepository.PROCESSING_STATE_LIST, 
-    			RequestRepository.PROCESSING_TYPES_LIST
+    			PROCESSING_TYPES_LIST
     	);
     	assertEquals(4, actual.size()); 
 
@@ -96,7 +98,7 @@ public class TestMqiMessageRepo {
     	}    	
     	final List<MqiMessage> actual = uut.findByStateInAndTopicInOrderByCreationDate(
     			Collections.singletonList(MessageState.READ), 
-    			RequestRepository.PROCESSING_TYPES_LIST
+    			PROCESSING_TYPES_LIST
     	); 
     	assertEquals(4, actual.size()); 
     	
@@ -123,7 +125,7 @@ public class TestMqiMessageRepo {
     	}    	
     	final List<MqiMessage> actual = uut.findByStateInAndTopicInOrderByCreationDate(
     			Collections.singletonList(MessageState.SEND), 
-    			RequestRepository.PROCESSING_TYPES_LIST
+    			PROCESSING_TYPES_LIST
     	); 
     	assertEquals(0, actual.size());     	
     	uut.deleteAll();
@@ -187,7 +189,7 @@ public class TestMqiMessageRepo {
     	}    	
     	final List<MqiMessage> actual = uut.findByStateInAndTopicIn(
     			RequestRepository.PROCESSING_STATE_LIST, 
-    			RequestRepository.PROCESSING_TYPES_LIST,
+    			PROCESSING_TYPES_LIST,
     			PageRequest.of(0, Integer.MAX_VALUE)
     	).getContent();
     	assertEquals(4, actual.size());
@@ -208,7 +210,7 @@ public class TestMqiMessageRepo {
     	}    	
     	final List<MqiMessage> actual = uut.findByStateInAndTopicIn(
     			Collections.singletonList(MessageState.READ), 
-    			RequestRepository.PROCESSING_TYPES_LIST,
+    			PROCESSING_TYPES_LIST,
     			PageRequest.of(0, 2)
     	).getContent();    
     	assertEquals(2, actual.size()); 
@@ -235,7 +237,7 @@ public class TestMqiMessageRepo {
     	}    	
     	final List<MqiMessage> actual = uut.findByStateInAndTopicIn(
     			Collections.singletonList(MessageState.ACK_KO), 
-    			RequestRepository.PROCESSING_TYPES_LIST,
+    			PROCESSING_TYPES_LIST,
     			PageRequest.of(0, 2, Sort.by(Direction.ASC,"creationDate"))
     	).getContent();    
     	
@@ -254,9 +256,9 @@ public class TestMqiMessageRepo {
     	ops.insert(newMqiMessage(1));    
     	ops.insert(newMqiMessage(2));  
     	ops.insert(newMqiMessage(3));  
-    	assertEquals(3L, uut.countByStateInAndTopicIn(RequestRepository.PROCESSING_STATE_LIST, RequestRepository.PROCESSING_TYPES_LIST));
+    	assertEquals(3L, uut.countByStateInAndTopicIn(RequestRepository.PROCESSING_STATE_LIST, PROCESSING_TYPES_LIST));
     	uut.deleteAll();
-    	assertEquals(0L, uut.countByStateInAndTopicIn(RequestRepository.PROCESSING_STATE_LIST, RequestRepository.PROCESSING_TYPES_LIST));
+    	assertEquals(0L, uut.countByStateInAndTopicIn(RequestRepository.PROCESSING_STATE_LIST, PROCESSING_TYPES_LIST));
     }
     
     @Test

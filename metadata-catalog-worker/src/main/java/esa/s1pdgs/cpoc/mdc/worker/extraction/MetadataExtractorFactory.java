@@ -49,6 +49,7 @@ public class MetadataExtractorFactory {
 		final ExtractMetadata extract = new ExtractMetadata(
 				extractorConfig.getTypeOverlap(), 
 				extractorConfig.getTypeSliceLength(),
+				extractorConfig.getFieldTypes(),
 				extractorConfig.getPacketStoreTypes(),
 				extractorConfig.getPacketstoreTypeTimelinesses(),
 				extractorConfig.getTimelinessPriorityFromHighToLow(),

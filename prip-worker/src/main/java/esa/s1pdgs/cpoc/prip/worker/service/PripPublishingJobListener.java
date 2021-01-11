@@ -1,24 +1,24 @@
 package esa.s1pdgs.cpoc.prip.worker.service;
 
+import static esa.s1pdgs.cpoc.mqi.model.queue.util.CompressionEventUtil.removeZipSuffix;
+
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.UUID;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import java.util.regex.Pattern;
 
 import javax.annotation.PostConstruct;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.util.Strings;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -52,8 +52,6 @@ import esa.s1pdgs.cpoc.prip.model.GeoShapePolygon;
 import esa.s1pdgs.cpoc.prip.model.PripGeoCoordinate;
 import esa.s1pdgs.cpoc.prip.model.PripMetadata;
 import esa.s1pdgs.cpoc.prip.worker.configuration.ApplicationProperties;
-import esa.s1pdgs.cpoc.prip.worker.configuration.ApplicationProperties.MetadataMapping;
-import esa.s1pdgs.cpoc.prip.worker.configuration.ApplicationProperties.ProductTypeRegexp;
 import esa.s1pdgs.cpoc.prip.worker.mapping.MdcToPripMapper;
 import esa.s1pdgs.cpoc.prip.worker.report.PripReportingInput;
 import esa.s1pdgs.cpoc.prip.worker.report.PripReportingOutput;
@@ -176,8 +174,16 @@ public class PripPublishingJobListener implements MqiListener<PripPublishingJob>
 		pripMetadata.setEvictionDate(creationDate.plusDays(PripMetadata.DEFAULT_EVICTION_DAYS));
 		pripMetadata
 				.setChecksums(getChecksums(publishingJob.getProductFamily(), publishingJob.getKeyObjectStorage()));
-		pripMetadata.setContentDateStart(DateUtils.parse(searchMetadata.getValidityStart()).truncatedTo(ChronoUnit.MILLIS));
-		pripMetadata.setContentDateEnd(DateUtils.parse(searchMetadata.getValidityStop()).truncatedTo(ChronoUnit.MILLIS));
+		
+		// ValidityStart: mandatory field, only optional when plan and report
+		if (! ProductFamily.PLAN_AND_REPORT_ZIP.equals(publishingJob.getProductFamily()) || Strings.isNotEmpty(searchMetadata.getValidityStart())) {
+			pripMetadata.setContentDateStart(DateUtils.parse(searchMetadata.getValidityStart()).truncatedTo(ChronoUnit.MILLIS));
+		}
+		
+		// ValidityStop: mandatory field, only optional when plan and report
+		if (! ProductFamily.PLAN_AND_REPORT_ZIP.equals(publishingJob.getProductFamily()) || Strings.isNotEmpty(searchMetadata.getValidityStop())) {
+			pripMetadata.setContentDateEnd(DateUtils.parse(searchMetadata.getValidityStop()).truncatedTo(ChronoUnit.MILLIS));
+		}
 				
 		Map<String, Object> pripAttributes = mdcToPripMapper.map(publishingJob.getKeyObjectStorage(),
 				searchMetadata.getProductType(), searchMetadata.getAdditionalProperties());		
@@ -237,12 +243,4 @@ public class PripPublishingJobListener implements MqiListener<PripPublishingJob>
 		return Arrays.asList(checksum);
 	}
 	
-	static String removeZipSuffix(final String name) {
-		if (name.toLowerCase().endsWith(".zip")) {
-			return name.substring(0, name.length() - ".zip".length());
-		} else if (name.toLowerCase().endsWith("_zip")) {
-			return name.substring(0, name.length() - "_zip".length());
-		}
-		return name;
-	}
 }

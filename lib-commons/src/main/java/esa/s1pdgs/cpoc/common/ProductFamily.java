@@ -8,40 +8,40 @@ import java.util.Objects;
  * @author Cyrielle Gailliard
  */
 public enum ProductFamily {
-    EDRS_SESSION, //
-    AUXILIARY_FILE, //
-    PLAN_AND_REPORT, //
-    BLANK, //
-    INVALID, //
-    GHOST, //
-    SESSION_RETRANSFER, //
-    JOB_ORDER, //
-    L0_ACN, //
-    L0_BLANK, //
-    L0_JOB, //
-    L0_REPORT, //
-    L0_SEGMENT, //
-    L0_SEGMENT_JOB, //
-    L0_SEGMENT_REPORT, //
-    L0_SLICE, //
-    L1_ACN, //
-    L1_REPORT, //
-    L1_SLICE, //
-    L1_JOB, //
-    L2_ACN, //
-    L2_SLICE, //
-    L2_JOB, //
-    L2_REPORT, //
+    EDRS_SESSION, 
+    AUXILIARY_FILE, 
+    PLAN_AND_REPORT, 
+    BLANK, 
+    INVALID, 
+    GHOST, 
+    SESSION_RETRANSFER, 
+    JOB_ORDER, 
+    L0_ACN, 
+    L0_BLANK, 
+    L0_JOB, 
+    L0_REPORT, 
+    L0_SEGMENT, 
+    L0_SEGMENT_JOB, 
+    L0_SEGMENT_REPORT, 
+    L0_SLICE, 
+    L1_ACN, 
+    L1_REPORT, 
+    L1_SLICE, 
+    L1_JOB, 
+    L2_ACN, 
+    L2_SLICE, 
+    L2_JOB, 
+    L2_REPORT, 
     DEBUG, // for debug bucket in obs
     // ZIP Product families
-    AUXILIARY_FILE_ZIP, //
-    L0_ACN_ZIP, //
-    L0_BLANK_ZIP, //
-    L0_SEGMENT_ZIP, //
-    L0_SLICE_ZIP, //
-    L1_ACN_ZIP, //
-    L1_SLICE_ZIP, //
-    L2_ACN_ZIP, //
+    AUXILIARY_FILE_ZIP, 
+    L0_ACN_ZIP, 
+    L0_BLANK_ZIP, 
+    L0_SEGMENT_ZIP, 
+    L0_SLICE_ZIP, 
+    L1_ACN_ZIP, 
+    L1_SLICE_ZIP, 
+    L2_ACN_ZIP, 
     L2_SLICE_ZIP,
     PLAN_AND_REPORT_ZIP,
 

@@ -162,12 +162,14 @@ public class IpfPreparationWorkerConfiguration {
 		}
 		else if (EnumSet.of(ApplicationLevel.L1, ApplicationLevel.L2).contains(processSettings.getLevel())) {
 			final Map<String, Float> sliceOverlap = settings.getTypeOverlap();
-			final Map<String, Float> sliceLength = settings.getTypeSliceLength();
+			final Map<String, Float> sliceLength = settings.getTypeSliceLength();			
+			final Map<String,String> timelinessMapping = settings.getJoborderTimelinessCategoryMapping();
 	
 			return new LevelSliceTypeAdapter(
 					metadataClient, 
 					sliceOverlap, 
-					sliceLength
+					sliceLength,
+					timelinessMapping
 			);			
 		} else if (EnumSet.of(ApplicationLevel.S3_L0, ApplicationLevel.S3_L1, ApplicationLevel.S3_L2).contains(processSettings.getLevel())) {
 			return new S3TypeAdapter(

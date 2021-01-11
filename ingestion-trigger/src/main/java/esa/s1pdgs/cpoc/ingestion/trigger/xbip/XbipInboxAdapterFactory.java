@@ -5,6 +5,7 @@ import java.net.URI;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import esa.s1pdgs.cpoc.ingestion.trigger.config.InboxConfiguration;
 import esa.s1pdgs.cpoc.ingestion.trigger.inbox.InboxAdapter;
 import esa.s1pdgs.cpoc.ingestion.trigger.inbox.InboxAdapterFactory;
 import esa.s1pdgs.cpoc.ingestion.trigger.inbox.InboxEntryFactory;
@@ -23,14 +24,16 @@ public class XbipInboxAdapterFactory implements InboxAdapterFactory {
 		this.inboxEntryFactory = inboxEntryFactory;
 		this.xbipClientFactory = xbipClientFactory;
 	}
-
+	
 	@Override
-	public InboxAdapter newInboxAdapter(final URI inbox, final String stationName) {
+	public InboxAdapter newInboxAdapter(final URI inbox, final InboxConfiguration inboxConfig) {
 		return new XbipInboxAdapter(
 				inbox, 
 				xbipClientFactory.newXbipClient(inbox), 
 				inboxEntryFactory,
-				stationName
+				inboxConfig.getStationName(),
+				inboxConfig.getFamily()
 		);
 	}
+
 }

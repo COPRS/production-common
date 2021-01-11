@@ -295,10 +295,21 @@ public class AuxQuery {
 
 	private List<SearchMetadata> queryAux(final SearchMetadataQuery query) throws MetadataQueryException {
 		final AppDataJobProductAdapter productAdapter = new AppDataJobProductAdapter(job.getProduct());
-
-		return metadataClient.search(query, sanitizeDateString(job.getStartTime()),
-				sanitizeDateString(job.getStopTime()), productAdapter.getSatelliteId(), productAdapter.getInsConfId(),
-				productAdapter.getProcessMode(), polarisationFor(query.getProductType()));
+		
+		// S1PRO-2111: log query attempts to MDC
+		LOGGER.info("Querying product for type '{}' using startTime '{}' and stopTime '{}' using '{}'", 
+				query.getProductType(), job.getStartTime(), job.getStopTime(), 
+				query.getRetrievalMode());
+		
+		return metadataClient.search(
+				query,
+				sanitizeDateString(job.getStartTime()),
+				sanitizeDateString(job.getStopTime()),
+				productAdapter.getSatelliteId(),
+				productAdapter.getInsConfId(),
+				productAdapter.getProcessMode(),
+				polarisationFor(query.getProductType())
+		);
 	}
 
 	// S1PRO-707: only "AUX_ECE" requires to query polarisation

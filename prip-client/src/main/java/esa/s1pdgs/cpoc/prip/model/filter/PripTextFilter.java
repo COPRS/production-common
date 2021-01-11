@@ -39,7 +39,7 @@ public class PripTextFilter extends PripQueryFilter {
 				return EQUALS;
 			}
 
-			throw new IllegalArgumentException(String.format("text filter function not supported: %s", function));
+			throw new PripFilterOperatorException(String.format("text filter function not supported: %s", function));
 		}
 	}
 	

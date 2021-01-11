@@ -1,0 +1,5 @@
+appcatalog:
+  host-uri: http://s1pro-app-catalog-svc:8080                          # URI of the applicative data catalog APIs
+  max-retries: 3                                                 # Nb Max of retry to connect API
+  tempo-retry-ms: 1000                                           # Tempo before a retry to connect API
+  tm-connect-ms: 5000                                            # Timeout of connections to the API

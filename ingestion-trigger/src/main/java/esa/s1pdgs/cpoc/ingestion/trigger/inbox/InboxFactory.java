@@ -2,6 +2,7 @@ package esa.s1pdgs.cpoc.ingestion.trigger.inbox;
 
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.util.Date;
 import java.util.regex.Pattern;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -37,7 +38,7 @@ public class InboxFactory {
 
 	@Autowired
 	public InboxFactory(
-			MessageProducer<IngestionJob> messageProducer, final IngestionTriggerServiceTransactional inboxPollingServiceTransactional,
+			final MessageProducer<IngestionJob> messageProducer, final IngestionTriggerServiceTransactional inboxPollingServiceTransactional,
 			final FilesystemInboxAdapterFactory fileSystemInboxAdapterFactory,
 			final XbipInboxAdapterFactory xbipInboxAdapterFactory,
 			final AuxipInboxAdapterFactory auxipInboxAdapterFactory,
@@ -51,7 +52,16 @@ public class InboxFactory {
 		this.edipInboxAdapterFactory = edipInboxAdapterFactory;
 	}
 	
-
+	static final Date ignoreFilesBeforeDateFor(final InboxConfiguration config, final Date now) {
+		final Date ignoreFilesBeforeDate = config.getIgnoreFilesBeforeDate();
+		
+		// S1PRO-2098: If the configured date is in the future, take the current date as the
+		// reference value
+		if (ignoreFilesBeforeDate.after(now)) {
+			return now;
+		}
+		return ignoreFilesBeforeDate;				
+	}
 	
 	public Inbox newInbox(final InboxConfiguration config) throws URISyntaxException {
 		return new Inbox(
@@ -59,7 +69,7 @@ public class InboxFactory {
 				new JoinedFilter(
 						new BlacklistRegexRelativePathInboxFilter(Pattern.compile(config.getIgnoreRegex())),
 						new WhitelistRegexRelativePathInboxFilter(Pattern.compile(config.getMatchRegex())),
-						new MinimumModificationDateFilter(config.getIgnoreFilesBeforeDate())
+						new MinimumModificationDateFilter(ignoreFilesBeforeDateFor(config, new Date()))
 				),
 				ingestionTriggerServiceTransactional, 
 				messageProducer,
@@ -72,7 +82,7 @@ public class InboxFactory {
 		);
 	}
 	
-	private String normalizeInputUrl(final String configuredUrl) {
+	private final String normalizeInputUrl(final String configuredUrl) {
 		String result = configuredUrl;
 		
 		if (configuredUrl.startsWith("/")) {
@@ -85,7 +95,7 @@ public class InboxFactory {
 	}
 	
 	
-	private InboxAdapterFactory newInboxAdapterFactory(final String type, final String url) {
+	private final InboxAdapterFactory newInboxAdapterFactory(final String type, final String url) {
 		if("prip".equals(type)) {
 			return auxipInboxAdapterFactory;
 		}
@@ -105,13 +115,13 @@ public class InboxFactory {
 		);
 	}
 	
-	private InboxAdapter newInboxAdapter(final InboxConfiguration config) throws URISyntaxException {
+	private final InboxAdapter newInboxAdapter(final InboxConfiguration config) throws URISyntaxException {
 		final String sanitizedUrl = normalizeInputUrl(config.getDirectory());
 		final InboxAdapterFactory inboxAdapterFactory = newInboxAdapterFactory(config.getType(), sanitizedUrl);
 		
 		return inboxAdapterFactory.newInboxAdapter(
 				new URI(sanitizedUrl), 
-				config.getStationName()
+				config
 		);
 	}
 	
@@ -119,8 +129,6 @@ public class InboxFactory {
 		if("prip".equals(config.getType())) {
 			return new AuxipProductNameEvaluator();
 		}
-
-
 		if (config.getFamily() == ProductFamily.EDRS_SESSION 
 				|| config.getFamily() == ProductFamily.SESSION_RETRANSFER) {
 			return new SessionProductNameEvaluator(

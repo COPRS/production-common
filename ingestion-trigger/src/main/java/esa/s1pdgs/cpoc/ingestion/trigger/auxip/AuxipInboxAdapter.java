@@ -25,14 +25,16 @@ import org.slf4j.LoggerFactory;
 
 import esa.s1pdgs.cpoc.auxip.client.AuxipClient;
 import esa.s1pdgs.cpoc.auxip.client.AuxipProductMetadata;
+import esa.s1pdgs.cpoc.common.ProductFamily;
 import esa.s1pdgs.cpoc.common.utils.DateUtils;
 import esa.s1pdgs.cpoc.ingestion.trigger.config.AuxipConfiguration;
 import esa.s1pdgs.cpoc.ingestion.trigger.config.ProcessConfiguration;
 import esa.s1pdgs.cpoc.ingestion.trigger.entity.InboxEntry;
 import esa.s1pdgs.cpoc.ingestion.trigger.inbox.AbstractInboxAdapter;
 import esa.s1pdgs.cpoc.ingestion.trigger.inbox.InboxEntryFactory;
+import esa.s1pdgs.cpoc.ingestion.trigger.inbox.SupportsProductFamily;
 
-public class AuxipInboxAdapter extends AbstractInboxAdapter {
+public class AuxipInboxAdapter extends AbstractInboxAdapter implements SupportsProductFamily {
 
     private static final Logger LOG = LoggerFactory.getLogger(AuxipInboxAdapter.class);
 
@@ -40,15 +42,16 @@ public class AuxipInboxAdapter extends AbstractInboxAdapter {
     private final ProcessConfiguration processConfiguration;
     private final AuxipStateRepository repository;
     private final AuxipClient auxipClient;
-
+    
     public AuxipInboxAdapter(final InboxEntryFactory inboxEntryFactory,
                              final AuxipConfiguration configuration,
                              final ProcessConfiguration processConfiguration,
                              final AuxipClient auxipClient,
                              final URI inboxURL,
                              final String stationName,
+                             final ProductFamily productFamily,
                              final AuxipStateRepository repository) {
-        super(inboxEntryFactory, inboxURL, stationName);
+        super(inboxEntryFactory, inboxURL, stationName, productFamily);
         this.configuration = configuration;
         this.repository = repository;
         this.processConfiguration = processConfiguration;
@@ -58,10 +61,9 @@ public class AuxipInboxAdapter extends AbstractInboxAdapter {
     @Override
     protected Stream<EntrySupplier> list() {
         final AuxipState state = retrieveState();
+        final TimeWindow timeWindow = timeWindowFrom(state);
 
-        TimeWindow timeWindow = timeWindowFrom(state);
-
-        if(timeWindow.toCloseTo(LocalDateTime.now().minus(Duration.ofSeconds(configuration.getOffsetFromNowSec())))) {
+        if(isTooCloseToNow(timeWindow)) {
             LOG.info("time window {} is too close to now, skipping", timeWindow);
             return Stream.empty();
         }
@@ -88,6 +90,14 @@ public class AuxipInboxAdapter extends AbstractInboxAdapter {
         return new TimeWindow(start, stop);
 
     }
+    
+    private boolean isTooCloseToNow(final AuxipState state) {
+		return isTooCloseToNow(timeWindowFrom(state));
+	}
+    
+	private boolean isTooCloseToNow(final TimeWindow timeWindow) {
+		return timeWindow.toCloseTo(LocalDateTime.now().minus(Duration.ofSeconds(configuration.getOffsetFromNowSec())));
+	}
 
     private InboxEntry toInboxEntry(final AuxipProductMetadata auxipMetadata) {
         LOG.debug("handling auxip metadata: {} with errors: {}", auxipMetadata, auxipMetadata.getParsingErrors());
@@ -95,35 +105,53 @@ public class AuxipInboxAdapter extends AbstractInboxAdapter {
         return new InboxEntry(
                 auxipMetadata.getId().toString(),
                 auxipMetadata.getProductName(),
-                auxipMetadata.getRootServiceUrl().toString(),
+                inboxURL(),
                 new Date(auxipMetadata.getCreationDate().toInstant(ZoneOffset.UTC).toEpochMilli()),
                 auxipMetadata.getContentLength(),
                 processConfiguration.getHostname(),
-                "auxip");
+                "auxip",
+                productFamily.name(),
+                stationName);
     }
 
     @Override
     public void advanceAfterPublish() {
-        AuxipState auxipState = retrieveState();
-        Instant nextStart = auxipState.getNextWindowStart().toInstant().plus(ofSeconds(configuration.getTimeWindowSec()));
-        auxipState.setNextWindowStart(new Date(nextStart.toEpochMilli()));
-        repository.save(auxipState);
+		if (auxipClient.isDisabled()) {
+			LOG.info("won't advance auxip query time window for [" + inboxURL() + ", " + stationName + ", "
+					+ productFamily + "] as the auxip client is disabled");
+		} else {
+			AuxipState auxipState = retrieveState();
+			
+			if(isTooCloseToNow(auxipState)) {
+				LOG.debug("omit advancing time window for [" + inboxURL() + ", " + stationName + ", "
+						+ productFamily + "] as it's too close to now");
+				return;
+			}
+			
+			Instant nextStart = auxipState.getNextWindowStart().toInstant().plus(ofSeconds(configuration.getTimeWindowSec()));
+			auxipState.setNextWindowStart(new Date(nextStart.toEpochMilli()));
+
+			repository.save(auxipState);
+		}
     }
 
     private AuxipState retrieveState() {
-        Optional<AuxipState> state = repository.findByProcessingPodAndPripUrl(processConfiguration.getHostname(), inboxURL());
+    	final Optional<AuxipState> state = repository.findByProcessingPodAndPripUrlAndProductFamily(
+    			processConfiguration.getHostname(), inboxURL(), productFamily.name());
 
         if (state.isPresent()) {
             return state.get();
         }
 
-        AuxipState newState = new AuxipState();
+        final AuxipState newState = new AuxipState();
         newState.setNextWindowStart(
                 new Date(Instant.from(
                         ZonedDateTime.ofLocal(DateUtils.parse(configuration.getStart()), ZoneId.of("UTC"), ZoneOffset.UTC)).toEpochMilli()));
         newState.setPripUrl(inboxURL());
         newState.setProcessingPod(processConfiguration.getHostname());
+        newState.setProductFamily(productFamily.name());
         repository.save(newState);
+        
         return newState;
     }
 

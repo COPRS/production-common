@@ -4,12 +4,15 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.util.Strings;
 import org.elasticsearch.action.DocWriteResponse;
 import org.elasticsearch.action.index.IndexRequest;
 import org.elasticsearch.action.index.IndexResponse;
@@ -296,10 +299,14 @@ public class PripElasticSearchMetadataRepo implements PripMetadataRepository {
 		pm.setEvictionDate(
 				DateUtils.parse((String) sourceAsMap.get(PripMetadata.FIELD_NAMES.EVICTION_DATE.fieldName())));
 
-		pm.setContentDateStart(
-				DateUtils.parse((String) sourceAsMap.get(PripMetadata.FIELD_NAMES.CONTENT_DATE_START.fieldName())));
-		pm.setContentDateEnd(
-				DateUtils.parse((String) sourceAsMap.get(PripMetadata.FIELD_NAMES.CONTENT_DATE_END.fieldName())));
+		if (Strings.isNotEmpty((String) sourceAsMap.get(PripMetadata.FIELD_NAMES.CONTENT_DATE_START.fieldName()))) {
+			pm.setContentDateStart(
+					DateUtils.parse((String) sourceAsMap.get(PripMetadata.FIELD_NAMES.CONTENT_DATE_START.fieldName())));
+		}
+		if (Strings.isNotEmpty((String) sourceAsMap.get(PripMetadata.FIELD_NAMES.CONTENT_DATE_END.fieldName()))) {
+			pm.setContentDateEnd(
+					DateUtils.parse((String) sourceAsMap.get(PripMetadata.FIELD_NAMES.CONTENT_DATE_END.fieldName())));
+		}
 
 		final List<Checksum> checksumList = new ArrayList<>();
 		for (final Map<String, Object> c : (List<Map<String, Object>>) sourceAsMap
@@ -312,6 +319,27 @@ public class PripElasticSearchMetadataRepo implements PripMetadataRepository {
 		pm.setChecksums(checksumList);
 
 		pm.setFootprint(this.mapToGeoShapePolygon(sourceAsMap));
+		
+		pm.setAttributes(sourceAsMap.entrySet().stream().filter(p -> p.getKey().startsWith("attr_"))
+				.collect(Collectors.toMap(
+					Entry::getKey,
+					s -> {
+						final String key = s.getKey();
+						final Object value = s.getValue();
+						if (key.endsWith("_date")) {
+							return DateUtils.parse((String)value);
+						} else if (key.endsWith("_double")) {
+							if (value instanceof Long) {
+								return Double.valueOf((Long)value);
+							} else if (value instanceof Integer) {
+								return Double.valueOf((Integer)value);
+							}
+						} else if (key.endsWith("_long") && value instanceof Integer) {
+							return Long.valueOf((Integer)value);
+						}
+						return value;
+					}
+				)));
 
 		LOGGER.debug("hit {}", pm);
 		return pm;

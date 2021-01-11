@@ -1,5 +1,11 @@
 package esa.s1pdgs.cpoc.compression.trigger.service;
 
+import static esa.s1pdgs.cpoc.mqi.model.queue.util.CompressionEventUtil.SUFFIX_ZIPPRODUCTFAMILY;
+import static esa.s1pdgs.cpoc.mqi.model.queue.util.CompressionEventUtil.composeCompressedKeyObjectStorage;
+import static esa.s1pdgs.cpoc.mqi.model.queue.util.CompressionEventUtil.composeCompressedProductFamily;
+import static esa.s1pdgs.cpoc.mqi.model.queue.util.CompressionEventUtil.removeZipSuffix;
+import static esa.s1pdgs.cpoc.mqi.model.queue.util.CompressionEventUtil.removeZipSuffixFromProductFamily;
+
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ExecutorService;
@@ -31,8 +37,6 @@ import esa.s1pdgs.cpoc.mqi.model.queue.ProductionEvent;
 public class CompressionTriggerService {
 
 	private static final Logger LOGGER = LogManager.getLogger(CompressionTriggerService.class);
-	private static final String SUFFIX_ZIPPRODUCTFAMILY = "_ZIP";
-	private static final String SUFFIX_ZIPPPRODUCTFILE = ".zip";
 	
 	private static final CompressionJobMapper<ProductionEvent> PROD_MAPPER = (event, reportingId) -> {
 		CompressionDirection compressionDirection;
@@ -44,8 +48,8 @@ public class CompressionTriggerService {
 		}
 
 		return new CompressionJob(event.getKeyObjectStorage(), event.getProductFamily(),
-				getCompressedKeyObjectStorage(event.getKeyObjectStorage()),
-				getCompressedProductFamily(event.getProductFamily()), compressionDirection);
+				composeCompressedKeyObjectStorage(event.getKeyObjectStorage()),
+				composeCompressedProductFamily(event.getProductFamily()), compressionDirection);
 
 	};
 	
@@ -54,12 +58,12 @@ public class CompressionTriggerService {
 		if (event.getProductFamily().toString().endsWith(SUFFIX_ZIPPRODUCTFAMILY)) {
 			return new CompressionJob(event.getKeyObjectStorage(), event.getProductFamily(),
 					removeZipSuffix(event.getKeyObjectStorage()),
-					ProductFamily.fromValue(removeZipSuffix(event.getProductFamily().toString())),
+					removeZipSuffixFromProductFamily(event.getProductFamily()),
 					CompressionDirection.UNCOMPRESS);
 		} else {
 			return new CompressionJob(event.getKeyObjectStorage(), event.getProductFamily(),
-					getCompressedKeyObjectStorage(event.getKeyObjectStorage()),
-					getCompressedProductFamily(event.getProductFamily()), CompressionDirection.COMPRESS);
+					composeCompressedKeyObjectStorage(event.getKeyObjectStorage()),
+					composeCompressedProductFamily(event.getProductFamily()), CompressionDirection.COMPRESS);
 		}
 
 	};
@@ -130,22 +134,5 @@ public class CompressionTriggerService {
 						cat
 				)
 		);
-	}
-
-	static String getCompressedKeyObjectStorage(final String inputKeyObjectStorage) {
-		return inputKeyObjectStorage + SUFFIX_ZIPPPRODUCTFILE;
-	}
-
-	static ProductFamily getCompressedProductFamily(final ProductFamily inputFamily) {
-		return ProductFamily.fromValue(inputFamily.toString() + SUFFIX_ZIPPRODUCTFAMILY);
-	}
-	
-	static String removeZipSuffix(final String name) {
-		if (name.toLowerCase().endsWith(".zip")) {
-			return name.substring(0, name.length() - ".zip".length());
-		} else if (name.toLowerCase().endsWith("_zip")) {
-			return name.substring(0, name.length() - "_zip".length());
-		}
-		return name;
 	}
 }

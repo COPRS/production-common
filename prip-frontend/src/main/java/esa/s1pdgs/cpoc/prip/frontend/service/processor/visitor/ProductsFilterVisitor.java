@@ -15,6 +15,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -26,6 +27,9 @@ import org.apache.olingo.commons.api.http.HttpStatusCode;
 import org.apache.olingo.commons.core.edm.primitivetype.EdmDateTimeOffset;
 import org.apache.olingo.server.api.ODataApplicationException;
 import org.apache.olingo.server.api.uri.UriResource;
+import org.apache.olingo.server.api.uri.UriResourceLambdaAll;
+import org.apache.olingo.server.api.uri.UriResourceLambdaAny;
+import org.apache.olingo.server.api.uri.UriResourceNavigation;
 import org.apache.olingo.server.api.uri.queryoption.expression.BinaryOperatorKind;
 import org.apache.olingo.server.api.uri.queryoption.expression.Expression;
 import org.apache.olingo.server.api.uri.queryoption.expression.ExpressionVisitException;
@@ -38,12 +42,13 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import esa.s1pdgs.cpoc.common.utils.StringUtil;
+import esa.s1pdgs.cpoc.prip.frontend.service.edm.EdmProvider;
 import esa.s1pdgs.cpoc.prip.model.PripMetadata.FIELD_NAMES;
 import esa.s1pdgs.cpoc.prip.model.filter.PripDateTimeFilter;
 import esa.s1pdgs.cpoc.prip.model.filter.PripQueryFilter;
+import esa.s1pdgs.cpoc.prip.model.filter.PripRangeValueFilter.Operator;
 import esa.s1pdgs.cpoc.prip.model.filter.PripTextFilter;
 import esa.s1pdgs.cpoc.prip.model.filter.PripTextFilter.Function;
-import esa.s1pdgs.cpoc.prip.model.filter.PripRangeValueFilter.Operator;
 
 public class ProductsFilterVisitor implements ExpressionVisitor<Object> {
 
@@ -51,6 +56,7 @@ public class ProductsFilterVisitor implements ExpressionVisitor<Object> {
 
 	private static final Map<String,FIELD_NAMES> PRIP_DATETIME_PROPERTY_FIELD_NAMES;	
 	private static final Map<String,FIELD_NAMES> PRIP_TEXT_PROPERTY_FIELD_NAMES;
+	private static final Map<String,FIELD_NAMES> PRIP_SUPPORTED_PROPERTY_FIELD_NAMES;
 	private static final List<String> PRIP_PRODUCTION_TYPES;
 	private static final List<MethodKind> SUPPORTED_METHODS;
 	
@@ -64,6 +70,10 @@ public class ProductsFilterVisitor implements ExpressionVisitor<Object> {
 		PRIP_TEXT_PROPERTY_FIELD_NAMES.put(Name.name(), FIELD_NAMES.NAME);
 		PRIP_TEXT_PROPERTY_FIELD_NAMES.put(ProductionType.name(), FIELD_NAMES.PRODUCTION_TYPE);
 		
+		PRIP_SUPPORTED_PROPERTY_FIELD_NAMES = new HashMap<>();
+		PRIP_SUPPORTED_PROPERTY_FIELD_NAMES.putAll(PRIP_DATETIME_PROPERTY_FIELD_NAMES);
+		PRIP_SUPPORTED_PROPERTY_FIELD_NAMES.putAll(PRIP_TEXT_PROPERTY_FIELD_NAMES);
+		
 		PRIP_PRODUCTION_TYPES = Arrays.asList(esa.s1pdgs.cpoc.prip.model.ProductionType.values()).stream()
 				.map(v -> v.getName()).collect(Collectors.toList());
 		
@@ -71,14 +81,10 @@ public class ProductsFilterVisitor implements ExpressionVisitor<Object> {
 	}
 	
 	private final List<PripQueryFilter> queryFilters = new ArrayList<>();
-	
-	// --------------------------------------------------------------------------
 
 	public ProductsFilterVisitor() {
 	}
 	
-	// --------------------------------------------------------------------------
-
 	@Override
 	public Object visitBinaryOperator(BinaryOperatorKind operator, Object left, Object right)
 			throws ExpressionVisitException, ODataApplicationException {
@@ -86,7 +92,7 @@ public class ProductsFilterVisitor implements ExpressionVisitor<Object> {
 		final String leftOperand = operandToString(left);
 		final String rightOperand = operandToString(right);
 
-		LOGGER.debug("got left operand: {} operator: {} right operand: {} ", leftOperand, operator, rightOperand);
+		LOGGER.debug("got left operand: {} operator: {} right operand: {}", leftOperand, operator, rightOperand);
 		
 		switch (operator) {
 		case AND:
@@ -166,7 +172,9 @@ public class ProductsFilterVisitor implements ExpressionVisitor<Object> {
 	@Override
 	public Object visitLambdaExpression(String lambdaFunction, String lambdaVariable, Expression expression)
 			throws ExpressionVisitException, ODataApplicationException {
-		throw new UnsupportedOperationException();
+		throw new ODataApplicationException(
+				"Unsupported lambda expression: " + lambdaFunction + " / " + lambdaVariable + " / " + expression,
+				HttpStatusCode.BAD_REQUEST.getStatusCode(), Locale.ROOT);
 	}
 
 	@Override
@@ -176,6 +184,30 @@ public class ProductsFilterVisitor implements ExpressionVisitor<Object> {
 
 	@Override
 	public Object visitMember(Member member) throws ExpressionVisitException, ODataApplicationException {
+		String type = "*";
+		for (UriResource uriResource : member.getResourcePath().getUriResourceParts()) {
+			if (uriResource instanceof UriResourceNavigation) {				
+				UriResourceNavigation uriResourceNavigation = (UriResourceNavigation) uriResource;
+				String typeRepresentation = uriResourceNavigation.getSegmentValue(true);
+				switch(typeRepresentation.substring(typeRepresentation.lastIndexOf(".") + 1)) {
+					case EdmProvider.ET_STRING_ATTRIBUTE_NAME: type = "string"; break;
+					case EdmProvider.ET_INTEGER_ATTRIBUTE_NAME: type = "long"; break;
+					case EdmProvider.ET_DOUBLE_ATTRIBUTE_NAME: type = "double"; break;
+					case EdmProvider.ET_BOOLEAN_ATTRIBUTE_NAME: type = "boolean"; break;
+					case EdmProvider.ET_DATE_ATTRIBUTE_NAME: type = "date"; break;
+					default:
+				}
+			} else if (uriResource instanceof UriResourceLambdaAny) {
+				final AttributesFilterVisitor filterExpressionVisitor = new AttributesFilterVisitor(type);
+				final UriResourceLambdaAny any = (UriResourceLambdaAny) uriResource;
+				any.getExpression().accept(filterExpressionVisitor);
+				final List<PripQueryFilter> filters = filterExpressionVisitor.getFilters();
+				this.queryFilters.addAll(filters);
+			} else if (uriResource instanceof UriResourceLambdaAll) {
+				throw new ODataApplicationException("Unsupported lambda expression on filter expression: all",
+						HttpStatusCode.BAD_REQUEST.getStatusCode(), Locale.ROOT);
+			}
+		}
 		return member;
 	}
 
@@ -204,7 +236,7 @@ public class ProductsFilterVisitor implements ExpressionVisitor<Object> {
 		return acceptedEnumsValues;
 	}
 	
-	public String operandToString(Object operand) {
+	public static String operandToString(Object operand) {
 		String result = "";
 		if (operand instanceof Member) {
 			result = memberText((Member) operand);
@@ -227,7 +259,7 @@ public class ProductsFilterVisitor implements ExpressionVisitor<Object> {
 			Instant instant = Instant.ofEpochMilli(EdmDateTimeOffset.getInstance().valueOfString(datetime, false, 0, 1000, 0, false, Long.class));
 			return LocalDateTime.ofInstant(instant, ZoneOffset.UTC);
 		} catch (EdmPrimitiveTypeException e) {
-			throw new ExpressionVisitException("Invalid or unsupported operand");
+			throw new ExpressionVisitException("Invalid or unsupported date time operand: " + datetime);
 		}
 	}
 	
@@ -235,9 +267,7 @@ public class ProductsFilterVisitor implements ExpressionVisitor<Object> {
 		return this.queryFilters;
 	}
 	
-	// --------------------------------------------------------------------------
-	
-	private String memberText(Member member) {
+	public static String memberText(Member member) {
 		String text = "";
 		List<UriResource> uriResourceParts = member.getResourcePath().getUriResourceParts();
 		for (int idx = 0; idx < uriResourceParts.size(); idx++) {
@@ -247,22 +277,16 @@ public class ProductsFilterVisitor implements ExpressionVisitor<Object> {
 	}
 	
 	private static boolean isDateField(String odataFieldName) {
-		// TODO @MSc: erweitern: wenn es ein 'Attributes' query ist, brauchen wir hier auch noch den type und können dann entscheiden
 		return PRIP_DATETIME_PROPERTY_FIELD_NAMES.containsKey(odataFieldName);
 	}
 
 	private static boolean isTextField(String odataFieldName) {
-		// TODO @MSc: erweitern: wenn es ein 'Attributes' query ist, brauchen wir hier auch noch den type und können dann entscheiden
 		return PRIP_TEXT_PROPERTY_FIELD_NAMES.containsKey(odataFieldName);
 	}
 	
 	private static Optional<String> mapToPripFieldName(String odataFieldName) {
-		// TODO @MSc: erweitern: wenn es ein 'Attributes' query ist, brauchen wir hier auch noch den type
-		// und können dann den PRIP fieldname zusammenbauen: attr_<OData_Bezeichner>_<datentyp>
-		if (PRIP_DATETIME_PROPERTY_FIELD_NAMES.containsKey(odataFieldName)) {
-			return Optional.of(PRIP_DATETIME_PROPERTY_FIELD_NAMES.get(odataFieldName).fieldName());
-		} else if (PRIP_TEXT_PROPERTY_FIELD_NAMES.containsKey(odataFieldName)) {
-			return Optional.of(PRIP_TEXT_PROPERTY_FIELD_NAMES.get(odataFieldName).fieldName());
+		if (PRIP_SUPPORTED_PROPERTY_FIELD_NAMES.containsKey(odataFieldName)) {
+			return Optional.of(PRIP_SUPPORTED_PROPERTY_FIELD_NAMES.get(odataFieldName).fieldName());
 		}
 
 		return Optional.empty();

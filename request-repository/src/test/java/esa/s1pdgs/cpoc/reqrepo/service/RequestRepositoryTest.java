@@ -1,7 +1,11 @@
 package esa.s1pdgs.cpoc.reqrepo.service;
 
-import static org.junit.Assert.*;
-import static org.mockito.Mockito.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 
 import java.util.Arrays;
 import java.util.Collections;
@@ -28,10 +32,16 @@ import esa.s1pdgs.cpoc.message.MessageProducer;
 import esa.s1pdgs.cpoc.mqi.model.queue.AbstractMessage;
 import esa.s1pdgs.cpoc.mqi.model.queue.ProductionEvent;
 import esa.s1pdgs.cpoc.mqi.model.rest.GenericMessageDto;
+import esa.s1pdgs.cpoc.reqrepo.config.RequestRepositoryConfiguration;
 import esa.s1pdgs.cpoc.reqrepo.repo.FailedProcessingRepo;
 import esa.s1pdgs.cpoc.reqrepo.repo.MqiMessageRepo;
 
 public class RequestRepositoryTest {
+	private static final List<String> PROCESSING_TYPES_LIST = Arrays.asList("foo","bar");
+	
+	private final RequestRepositoryConfiguration config = new RequestRepositoryConfiguration("foo bar");
+		
+	
 	@Mock
 	private FailedProcessingRepo failedProcessingRepo;
 	@Mock
@@ -39,7 +49,9 @@ public class RequestRepositoryTest {
 	@Mock
 	private MessageProducer<Object> messageProducer;
 
+	
 	private RequestRepository uut;
+		
 
 	@Before
 	public void setUp() {
@@ -48,7 +60,8 @@ public class RequestRepositoryTest {
 				mqiMessageRepository, 
 				failedProcessingRepo,
                 messageProducer,
-				AppStatus.NULL
+				AppStatus.NULL,
+				config
 		);
 	}
 
@@ -118,15 +131,6 @@ public class RequestRepositoryTest {
 		verify(failedProcessingRepo, times(1)).save(Mockito.any());
 	}
 
-	@Test(expected = IllegalArgumentException.class)
-	public void testSaveFailedProcessing_OnMissingMessage_ShallThrowException() {
-		doReturn(null)
-			.when(failedProcessingRepo)
-			.findById(123);
-		
-		uut.saveFailedProcessing(newFailedProcessingDto(123));
-	}
-
 	@Test
 	public void testRestartAndDeleteFailedProcessing_OnExistingTopicAndRequest_ShallResubmitAndDelete() {	
 		final FailedProcessing fp = newFailedProcessing(123, new ProductionEvent("f","b", ProductFamily.AUXILIARY_FILE)); 
@@ -164,7 +168,7 @@ public class RequestRepositoryTest {
 	
 	@Test
 	public final void testGetProcessingTypes_OnInvocation_ShallReturnProcessingTypes() {
-		assertEquals(RequestRepository.PROCESSING_TYPES_LIST, uut.getProcessingTypes());
+		assertEquals(PROCESSING_TYPES_LIST, uut.getProcessingTypes());
 	}
 	
 	@Test
@@ -196,7 +200,7 @@ public class RequestRepositoryTest {
 			.when(mqiMessageRepository)
 			.findByStateInAndTopicInOrderByCreationDate(
 					Mockito.eq(RequestRepository.PROCESSING_STATE_LIST), 
-					Mockito.eq(RequestRepository.PROCESSING_TYPES_LIST)
+					Mockito.eq(PROCESSING_TYPES_LIST)
 			);
 		
 		final List<Processing> actual = uut.getProcessings(null, 0, Collections.emptyList(), Collections.emptyList());

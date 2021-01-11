@@ -14,6 +14,7 @@ import java.util.List;
 import java.util.Objects;
 import java.util.UUID;
 
+import org.apache.commons.io.input.NullInputStream;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpStatus;
 import org.apache.http.client.methods.CloseableHttpResponse;
@@ -39,6 +40,7 @@ import org.springframework.lang.NonNull;
 import esa.s1pdgs.cpoc.auxip.client.AuxipClient;
 import esa.s1pdgs.cpoc.auxip.client.AuxipProductMetadata;
 import esa.s1pdgs.cpoc.auxip.client.config.AuxipClientConfigurationProperties.AuxipHostConfiguration;
+import esa.s1pdgs.cpoc.common.utils.StringUtil;
 
 /**
  * OData implementation of the AUXIP client
@@ -51,7 +53,9 @@ public class AuxipOdataClient implements AuxipClient {
 	private final HttpClientContext context;
 	private final AuxipHostConfiguration hostConfig;
 	private final URI rootServiceUrl;
-	
+	private final boolean disabled;
+	private final String disabledMsg;
+
 	private final String entitySetName;
 	private final String creationDateAttrName;
 	private final String productNameAttrName;
@@ -76,11 +80,28 @@ public class AuxipOdataClient implements AuxipClient {
 
 		this.rootServiceUrl = URI.create(
 				Objects.requireNonNull(this.hostConfig.getServiceRootUri(), "the root service URL must not be null!"));
+
+		this.disabled = !"basic".equalsIgnoreCase(hostConfig.getAuthType())
+				&& !"oauth2".equalsIgnoreCase(hostConfig.getAuthType());
+		if (this.disabled) {
+			this.disabledMsg = "auxip client is disabled per authType "
+					+ (StringUtil.isEmpty(hostConfig.getAuthType()) ? "<empty>" : "'" + hostConfig.getAuthType() + "'")
+					+ " for " + this.rootServiceUrl;
+		} else {
+			this.disabledMsg = "auxip client is enabled per authType '" + hostConfig.getAuthType() + "' for "
+					+ this.rootServiceUrl;
+		}
+
 		this.downloadClient = downloadClient;
 		this.context = context;
 	}
 
 	// --------------------------------------------------------------------------
+
+	@Override
+	public boolean isDisabled() {
+		return this.disabled;
+	}
 
 	@Override
 	public List<AuxipProductMetadata> getMetadata(@NonNull final LocalDateTime from, @NonNull final LocalDateTime to,
@@ -91,10 +112,15 @@ public class AuxipOdataClient implements AuxipClient {
 	@Override
 	public List<AuxipProductMetadata> getMetadata(@NonNull final LocalDateTime from, @NonNull final LocalDateTime to,
 			final Integer pageSize, final Integer offset, final String productNameContains) {
+		if (this.disabled) {
+			LOG.info("ignoring metadata request because " + this.disabledMsg);
+			return Collections.emptyList();
+		}
+
 		// prepare
 		final URIFilter filters = this.buildFilters(from, to, productNameContains);
 		final URI queryUri = this.buildQueryUri(Collections.singletonList(filters), pageSize, offset);
-		
+
 		// retrieve and map
 		final ClientEntitySetIterator<ClientEntitySet, ClientEntity> response = this.readEntities(queryUri);
 		final List<AuxipProductMetadata> result = this.mapToMetadata(response);
@@ -102,57 +128,76 @@ public class AuxipOdataClient implements AuxipClient {
 
 		return result;
 	}
-	
+
 	@Override
-	public InputStream read(@NonNull final UUID productMetadataId) {		
+	public InputStream read(@NonNull final UUID productMetadataId) {
+		if (this.disabled) {
+			LOG.info("ignoring download request because " + this.disabledMsg);
+			return new NullInputStream(0);
+		}
+
 		// FIXME trailing slash is mandatory for this to work
 		final URI productDownloadUrl = this.rootServiceUrl
 				.resolve("Products(" + productMetadataId.toString() + ")/$value");
-		
-		LOG.debug("sending download request: " + productDownloadUrl);		
-		if (hostConfig.isUseHttpClientDownload()) {			
-		    final HttpGet httpget = new HttpGet(productDownloadUrl.toString());
-		    try {
-				final CloseableHttpResponse response = downloadClient.execute(httpget, context);
+
+		LOG.debug("sending download request: " + productDownloadUrl);
+		if (this.hostConfig.isUseHttpClientDownload()) {
+			final HttpGet httpget = new HttpGet(productDownloadUrl.toString());
+
+			// authentication
+			final String authType = this.hostConfig.getAuthType();
+			if ("oauth2".equalsIgnoreCase(authType)) {
+				httpget.addHeader(AuxipAuthenticationUtil.oauthHeaderFor(this.hostConfig));
+			} else if ("basic".equalsIgnoreCase(authType)) {
+				httpget.addHeader(AuxipAuthenticationUtil.basicAuthHeaderFor(this.hostConfig));
+			} else {
+				LOG.info("download request authentication is disabled per authType "
+						+ (StringUtil.isEmpty(this.hostConfig.getAuthType()) ? "<empty>"
+								: "'" + this.hostConfig.getAuthType() + "'")
+						+ " for " + this.rootServiceUrl);
+			}
+
+			try {
+				final CloseableHttpResponse response = this.downloadClient.execute(httpget, this.context);
 				final HttpEntity entity = response.getEntity();
-				
-			    // check if something has been returned and no error occurred
-			    if ((entity == null) || (response.getStatusLine().getStatusCode() != HttpStatus.SC_OK))
-			    {
-			    	throw new RuntimeException(
-			    			String.format("Error on download of %s: %s", productMetadataId, response.getStatusLine())
-			    	);
-			    }				
+
+				// check if something has been returned and no error occurred
+				if ((entity == null) || (response.getStatusLine().getStatusCode() != HttpStatus.SC_OK))
+				{
+					throw new RuntimeException(
+							String.format("Error on download of %s: %s", productMetadataId, response.getStatusLine())
+							);
+				}
 				return new BufferedInputStream(entity.getContent())
 				{
-				  @Override public final void close() throws IOException
-				  {
-				    try
-				    {
-				      super.close();
-				    }
-				    finally
-				    {
-				      response.close();
-				    }
-				  }
+					@Override public final void close() throws IOException
+					{
+						try
+						{
+							super.close();
+						}
+						finally
+						{
+							response.close();
+						}
+					}
 				};
 			} catch (final Exception e) {
 				// TODO error handling
 				throw new RuntimeException(e);
-			}	
+			}
 		}
 		else {
 			final ODataRetrieveResponse<InputStream> response = this.odataClient.getRetrieveRequestFactory()
 					.getMediaRequest(productDownloadUrl).execute();
-			
+
 			LOG.debug("download request (" + productDownloadUrl + ") response status: " + response.getStatusCode() + " - "
 					+ response.getStatusMessage());
-			
+
 			return response.getBody();
 		}
 	}
-	
+
 	// --------------------------------------------------------------------------
 
 	private URIFilter buildFilters(final LocalDateTime from, final LocalDateTime to, final String productNameContains) {
@@ -205,11 +250,11 @@ public class AuxipOdataClient implements AuxipClient {
 		request.setAccept("application/json");
 		LOG.debug("sending request to PRIP: " + absoluteUri);
 		//LOG.debug("sending request to PRIP: " + request.toString());
-		
+
 		final ODataRetrieveResponse<ClientEntitySetIterator<ClientEntitySet, ClientEntity>> response = request
 				.execute();
 		LOG.debug("metadata search response status: " + response.getStatusCode() + " - " + response.getStatusMessage());
-		
+
 		return response.getBody();
 	}
 
@@ -270,7 +315,7 @@ public class AuxipOdataClient implements AuxipClient {
 						} catch (final Exception e) {
 							metadata.addParsingError(
 									"could not parse creation date attribute '" + this.creationDateAttrName
-											+ "': error parsing date '" + creationDateString + "'; " + e.getMessage());
+									+ "': error parsing date '" + creationDateString + "'; " + e.getMessage());
 						}
 					} else {
 						metadata.addParsingError("could not parse creation date attribute '" + this.creationDateAttrName

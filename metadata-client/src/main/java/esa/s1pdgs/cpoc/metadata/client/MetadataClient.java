@@ -299,6 +299,35 @@ public class MetadataClient {
 	}
 
 	/**
+	 * Queries the products inside a given time interval for the given producttype.
+	 * The time interval is applied on the insertionTime
+	 */
+	public List<SearchMetadata> searchInterval(final ProductFamily productFamily, final String productType,
+			final LocalDateTime intervalStart, final LocalDateTime intervalStop, final String satelliteId)
+			throws MetadataQueryException {
+		final String uri = this.metadataBaseUri + MetadataCatalogRestPath.METADATA.path() + "/"
+				+ productFamily.toString() + "/searchTypeInterval";
+
+		final UriComponentsBuilder builder = UriComponentsBuilder.fromUriString(uri)
+				.queryParam("productType", productType)
+				.queryParam("intervalStart", intervalStart.format(DateUtils.METADATA_DATE_FORMATTER))
+				.queryParam("intervalStop", intervalStop.format(DateUtils.METADATA_DATE_FORMATTER))
+				.queryParam("satelliteId", satelliteId);
+
+		final ResponseEntity<List<SearchMetadata>> response = query(builder.build().toUri(),
+				new ParameterizedTypeReference<List<SearchMetadata>>() {
+				});
+
+		if (response == null || response.getBody() == null) {
+			LOGGER.debug("Metadata query for family '{}' returned no results", productFamily);
+			return new ArrayList<>();
+		} else {
+			LOGGER.info("Metadata query for family '{}' returned {} results", productFamily, numResults(response));
+			return response.getBody();
+		}
+	}
+
+	/**
 	 */
 	public List<SearchMetadata> query(final ProductFamily family, final LocalDateTime intervalStart,
 			final LocalDateTime intervalStop) throws MetadataQueryException {
@@ -446,7 +475,7 @@ public class MetadataClient {
 					throw new MetadataQueryException(e.getMessage(), e);
 				}
 				notAvailableRetries--;
-				LOGGER.debug("Retrying call rest metadata for sea coverage check on  {}", uri);
+				LOGGER.debug("Retrying call rest metadata for overpass coverage check on  {}", uri);
 				response = this.restTemplate.exchange(uri, HttpMethod.GET, null, Integer.class);
 				if (notAvailableRetries <= 0) {
 					LOGGER.trace("Max number of retries reached for {}", productName);
@@ -466,6 +495,52 @@ public class MetadataClient {
 		}
 		LOGGER.debug("Got coverage {}", coverage);
 		return coverage;
+	}
+	
+	public boolean isIntersectingOceanMask(final ProductFamily family, final String productName) throws MetadataQueryException {
+		MetadataCatalogRestPath metadataCatalogRestPath;
+		switch (family) {
+			case L1_SLICE: metadataCatalogRestPath = MetadataCatalogRestPath.L1_SLICE; break;  
+			default: throw new RuntimeException(String.format("ProductFamily %s not supported for ocean mask intersection check", family));
+		}
+		
+		final String uri = this.metadataBaseUri + metadataCatalogRestPath.path() + "/" + family + "/"
+				+ productName + "/isIntersectingOceanMask";
+
+		final String commandDescription = String.format("call rest metadata for ocean mask intersection check on %s", uri);
+
+		final ResponseEntity<Boolean> result = performWithRetries(commandDescription, () -> {
+			int notAvailableRetries = 10;
+			LOGGER.debug(commandDescription);
+			ResponseEntity<Boolean> response = this.restTemplate.exchange(uri, HttpMethod.GET, null, Boolean.class);
+			while (response.getStatusCode() == HttpStatus.NO_CONTENT) {
+				LOGGER.debug("Product not available yet. Waiting...");
+				try {
+					Thread.sleep(this.retryInMillis);
+				} catch (final InterruptedException e) {
+					throw new MetadataQueryException(e.getMessage(), e);
+				}
+				notAvailableRetries--;
+				LOGGER.debug("Retrying call rest metadata for ocean mask intersection check on  {}", uri);
+				response = this.restTemplate.exchange(uri, HttpMethod.GET, null, Boolean.class);
+				if (notAvailableRetries <= 0) {
+					LOGGER.trace("Max number of retries reached for {}", productName);
+					break;
+				}
+			}
+			handleReturnValueErrors(uri, response);
+			return response;
+		});
+
+		if (result == null) {
+			throw new MetadataQueryException("Query for ocean mask intersection returns no result for " + productName);
+		}
+		final Boolean isIntersecting = result.getBody();
+		if (isIntersecting == null) {
+			throw new MetadataQueryException("Query for ocean mask intersection returns no result body for " + productName);
+		}
+		LOGGER.debug("Got intersection {}", isIntersecting);
+		return isIntersecting;
 	}
 
 	/**
@@ -494,7 +569,7 @@ public class MetadataClient {
 					+ " and product type " + productType + " was not successful");
 		}
 	}
-	
+
 	/**
 	 * Execute a command. If the result is null, refresh the index and try again.
 	 * 

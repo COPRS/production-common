@@ -20,7 +20,7 @@ import org.json.JSONTokener;
 import org.w3c.dom.Document;
 import org.xml.sax.SAXException;
 
-public class LandMaskExtractor {
+public class MaskExtractor {
 
 	public List<JSONObject> extract(File eofFile)
 			throws ParserConfigurationException, SAXException, IOException, XPathExpressionException {

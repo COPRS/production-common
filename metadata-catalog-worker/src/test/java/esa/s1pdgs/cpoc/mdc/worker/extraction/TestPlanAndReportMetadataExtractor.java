@@ -172,6 +172,7 @@ public class TestPlanAndReportMetadataExtractor {
 		final ExtractMetadata extract = new ExtractMetadata(
 				extractorConfig.getTypeOverlap(), 
 				extractorConfig.getTypeSliceLength(),
+				Collections.<String,String>emptyMap(),
 				extractorConfig.getPacketStoreTypes(),
 				extractorConfig.getPacketstoreTypeTimelinesses(),
 				extractorConfig.getTimelinessPriorityFromHighToLow(),

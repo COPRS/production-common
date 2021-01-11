@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.net.URI;
 import java.util.stream.Stream;
 
+import esa.s1pdgs.cpoc.common.ProductFamily;
 import esa.s1pdgs.cpoc.ingestion.trigger.entity.InboxEntry;
 import esa.s1pdgs.cpoc.ingestion.trigger.inbox.AbstractInboxAdapter;
 import esa.s1pdgs.cpoc.ingestion.trigger.inbox.InboxEntryFactory;
@@ -21,9 +22,10 @@ public class XbipInboxAdapter extends AbstractInboxAdapter {
 			final URI inboxURL, 
 			final XbipClient xbipClient, 
 			final InboxEntryFactory inboxEntryFactory,
-			final String stationName
+			final String stationName,
+			final ProductFamily productFamily
 	) {
-		super(inboxEntryFactory, inboxURL, stationName);
+		super(inboxEntryFactory, inboxURL, stationName, productFamily);
 		this.xbipClient = xbipClient;
 	}
 	
@@ -40,7 +42,8 @@ public class XbipInboxAdapter extends AbstractInboxAdapter {
 				xbipEntry.getLastModified(), 
 				xbipEntry.getSize(),
 				stationName,
-				INBOX_TYPE
+				INBOX_TYPE,
+				productFamily
 		);
 	}
 }

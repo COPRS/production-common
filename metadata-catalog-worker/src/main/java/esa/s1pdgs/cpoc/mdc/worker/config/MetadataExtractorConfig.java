@@ -26,6 +26,8 @@ public class MetadataExtractorConfig {
 
     private String xsltDirectory;
     
+    private Map<String,String> fieldTypes;
+    
     private Map<String,String> packetStoreTypes;
     private Map<String,String> packetstoreTypeTimelinesses;
     private List<String> timelinessPriorityFromHighToLow;
@@ -78,6 +80,14 @@ public class MetadataExtractorConfig {
         this.xsltDirectory = xsltDirectory;
     }
 
+    public Map<String,String> getFieldTypes() {
+    	return fieldTypes;
+    }
+    
+    public void setFieldTypes(Map<String,String> fieldTypes) {
+    	this.fieldTypes = fieldTypes;
+    }
+    
 	/**
 	 * @return the packetStoreTypes
 	 */

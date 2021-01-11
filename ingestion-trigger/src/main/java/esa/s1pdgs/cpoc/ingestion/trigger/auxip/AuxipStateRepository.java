@@ -6,6 +6,7 @@ import org.springframework.data.mongodb.repository.MongoRepository;
 
 public interface AuxipStateRepository extends MongoRepository<AuxipState, Long> {
 
-    Optional<AuxipState> findByProcessingPodAndPripUrl(final String processingPod, final String pripUrl);
+	Optional<AuxipState> findByProcessingPodAndPripUrlAndProductFamily(final String processingPod, final String pripUrl,
+			final String productFamily);
 
 }

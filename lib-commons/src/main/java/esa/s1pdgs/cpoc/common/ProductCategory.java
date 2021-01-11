@@ -16,6 +16,7 @@ import esa.s1pdgs.cpoc.mqi.model.queue.LtaDownloadEvent;
 import esa.s1pdgs.cpoc.mqi.model.queue.OnDemandEvent;
 import esa.s1pdgs.cpoc.mqi.model.queue.PripPublishingJob;
 import esa.s1pdgs.cpoc.mqi.model.queue.ProductionEvent;
+import esa.s1pdgs.cpoc.mqi.model.queue.DisseminationJob;
 
 /**
  * Group products per category
@@ -41,6 +42,7 @@ public enum ProductCategory {
     CATALOG_JOBS(CatalogJob.class),
     PRODUCTION_EVENT(ProductionEvent.class),
     PRIP_JOBS(PripPublishingJob.class),
+    DISSEMINATION_JOBS(DisseminationJob.class),
     EVICTION_MANAGEMENT_JOBS(EvictionManagementJob.class),
     LTA_DOWNLOAD_EVENT(LtaDownloadEvent.class), 
     ON_DEMAND_EVENT(OnDemandEvent.class),
@@ -102,6 +104,8 @@ public enum ProductCategory {
 	        case DEBUG:
 	        	return ProductCategory.DEBUG;
 			case AUXILIARY_FILE_ZIP:
+			case PLAN_AND_REPORT_ZIP:
+			case SPP_OBS_ZIP:
 			case L0_ACN_ZIP:
 			case L0_BLANK_ZIP:
 			case L0_SEGMENT_ZIP:

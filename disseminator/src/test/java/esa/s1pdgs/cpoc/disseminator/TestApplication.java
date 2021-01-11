@@ -52,6 +52,7 @@ public class TestApplication {
 		final OutboxConfiguration outbox = entry.getValue();		
 		assertEquals(Protocol.FILE, outbox.getProtocol());
 		assertEquals("/tmp/foo/bar", outbox.getPath());
+		assertEquals("/tmp/foo/bar.sh", outbox.getChmodScriptPath());
 		
 		final Map<ProductCategory, List<DisseminationTypeConfiguration>> catConfig = properties.getCategories();
 		assertEquals(1, catConfig.size());			

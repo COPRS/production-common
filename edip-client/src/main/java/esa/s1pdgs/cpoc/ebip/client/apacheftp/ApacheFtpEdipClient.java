@@ -94,7 +94,7 @@ public class ApacheFtpEdipClient implements EdipClient {
 		}
 	}
 	
-	private final FTPClient connectedClient() {
+	private FTPClient connectedClient() {
 		try {
 			final FTPClient ftpClient = newClient();
 			ftpClient.setRemoteVerificationEnabled(false);
@@ -116,24 +116,28 @@ public class ApacheFtpEdipClient implements EdipClient {
 		}
 	}
 	
-	private final FTPClient newClient() throws Exception {	
+	private FTPClient newClient() throws Exception {
 		
 		if (!"ftps".equals(uri.getScheme())) {
 			final FTPClient ftpClient = new FTPClient();
 			
 			ftpClient.addProtocolCommandListener(
-					new PrintCommandListener(new LogPrintWriter(s -> LOG.debug(s)), true)
+					new PrintCommandListener(new LogPrintWriter(LOG::debug), true)
 			);
-			ftpClient.setConnectTimeout(config.getConnectTimeoutSec()*1000);
+			ftpClient.setDefaultTimeout(config.getConnectTimeoutSec() * 1000);
+			ftpClient.setConnectTimeout(config.getConnectTimeoutSec() * 1000);
+			ftpClient.setDataTimeout(config.getConnectTimeoutSec() * 1000);
 			connect(ftpClient);
 			return ftpClient;
 		}	
 		else {
 			// FTPS client creation			
 			final FTPSClient ftpsClient = new FTPSClient(config.getSslProtocol(), !config.isExplictFtps());
-			ftpsClient.setConnectTimeout(config.getConnectTimeoutSec());
+			ftpsClient.setDefaultTimeout(config.getConnectTimeoutSec() * 1000);
+			ftpsClient.setConnectTimeout(config.getConnectTimeoutSec() * 1000);
+			ftpsClient.setDataTimeout(config.getConnectTimeoutSec() * 1000);
 			ftpsClient.addProtocolCommandListener(
-					new PrintCommandListener(new LogPrintWriter(s -> LOG.debug(s)), true)
+					new PrintCommandListener(new LogPrintWriter(LOG::debug), true)
 			);
 			
 			// handle SSL
@@ -193,7 +197,7 @@ public class ApacheFtpEdipClient implements EdipClient {
 		}
 	}
 
-	private final KeyStore newKeyStore(final InputStream inputStream, final String keystorePass) 
+	private KeyStore newKeyStore(final InputStream inputStream, final String keystorePass)
 			throws Exception {
 	    try
 	    {
@@ -207,7 +211,7 @@ public class ApacheFtpEdipClient implements EdipClient {
 	    }
 	}
 
-	private final FTPClient connect(final FTPClient ftpClient) throws SocketException, IOException {
+	private FTPClient connect(final FTPClient ftpClient) throws IOException {
 		if (uri.getPort() == -1) {
 			ftpClient.connect(config.getServerName());
 		}
@@ -218,7 +222,7 @@ public class ApacheFtpEdipClient implements EdipClient {
 		return ftpClient;
 	}
 	
-	private final Optional<List<EdipEntry>> getIfNotDirectory(final FTPClient client, final Path path) throws IOException {
+	private Optional<List<EdipEntry>> getIfNotDirectory(final FTPClient client, final Path path) throws IOException {
 		final List<FTPFile> ftpFile = Arrays.asList(client.listFiles(path.toString()));
 		if (ftpFile.size() == 1 && !ftpFile.get(0).isDirectory()) {
 			return Optional.of(Collections.singletonList(toEdipEntry(path.getParent(), ftpFile.get(0))));
@@ -226,7 +230,7 @@ public class ApacheFtpEdipClient implements EdipClient {
 		return Optional.empty();
 	}
 	
-	private final List<EdipEntry> listRecursively(
+	private List<EdipEntry> listRecursively(
 			final FTPClient client, 
 			final Path path, 
 			final EdipEntryFilter filter
@@ -255,7 +259,7 @@ public class ApacheFtpEdipClient implements EdipClient {
 		return result;
 	}
 	
-	private final EdipEntry toEdipEntry(final Path path, final FTPFile ftpFile) {
+	private EdipEntry toEdipEntry(final Path path, final FTPFile ftpFile) {
 		final Path entryPath = path.resolve(ftpFile.getName());
 
 		return new EdipEntryImpl(
@@ -267,7 +271,7 @@ public class ApacheFtpEdipClient implements EdipClient {
 		);
 	}
 	
-	private final URI toUri(final Path entryPath) {		
+	private URI toUri(final Path entryPath) {
 		return uri.resolve(entryPath.toString());		
 	}
 

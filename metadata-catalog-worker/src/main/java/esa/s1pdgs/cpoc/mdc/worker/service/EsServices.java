@@ -49,6 +49,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import esa.s1pdgs.cpoc.common.EdrsSessionFileType;
+import esa.s1pdgs.cpoc.common.MaskType;
 import esa.s1pdgs.cpoc.common.ProductCategory;
 import esa.s1pdgs.cpoc.common.ProductFamily;
 import esa.s1pdgs.cpoc.common.errors.processing.MetadataCreationException;
@@ -79,6 +80,7 @@ import esa.s1pdgs.cpoc.metadata.model.SearchMetadata;
 public class EsServices {
 
 	private static final String LANDMASK_FOOTPRINT_INDEX_NAME = "landmask";
+	private static final String OCEANMASK_FOOTPRINT_INDEX_NAME = "oceanmask";
 	private static final String OVERPASSMASK_FOOTPRINT_INDEX_NAME = "overpassmask";
 	private static final String REQUIRED_INSTRUMENT_ID_PATTERN = "(aux_pp1|aux_pp2|aux_cal|aux_ins)";
 	static final String REQUIRED_SATELLITE_ID_PATTERN = "(aux_.*)";
@@ -217,9 +219,16 @@ public class EsServices {
 		}
 	}
 
-	public void createLandmaskGeoMetadata(final JSONObject product, final String id) throws Exception {
+	public void createMaskFootprintData(final MaskType maskType, final JSONObject product, final String id) throws Exception {
+		final String footprintIndexName;
+		switch (maskType) {
+			case LAND: footprintIndexName = LANDMASK_FOOTPRINT_INDEX_NAME; break;
+			case OCEAN:	footprintIndexName = OCEANMASK_FOOTPRINT_INDEX_NAME; break;
+			case OVERPASS: footprintIndexName = OVERPASSMASK_FOOTPRINT_INDEX_NAME; break;
+			default: throw new IllegalArgumentException(String.format("Unsupported mask type '%s'", maskType));
+		}
 		try {
-			final IndexRequest request = new IndexRequest(LANDMASK_FOOTPRINT_INDEX_NAME).id(id).source(product.toString(),
+			final IndexRequest request = new IndexRequest(footprintIndexName).id(id).source(product.toString(),
 					XContentType.JSON);
 
 			final IndexResponse response = elasticsearchDAO.index(request);
@@ -232,23 +241,7 @@ public class EsServices {
 			throw new Exception(e);
 		}
 	}
-	
-	public void createOverpassMaskGeoMetadata(final JSONObject product, final String id) throws Exception {
-		try {
-			final IndexRequest request = new IndexRequest(OVERPASSMASK_FOOTPRINT_INDEX_NAME).id(id).source(product.toString(),
-					XContentType.JSON);
-
-			final IndexResponse response = elasticsearchDAO.index(request);
-
-			if (response.status() != RestStatus.CREATED) {
-				throw new MetadataCreationException(id, response.status().toString(),
-						response.getResult().toString());
-			}
-		} catch (JSONException | IOException e) {
-			throw new Exception(e);
-		}
-	}
-	
+		
 	/**
 	 * Refresh the index to ensure new documents can be found. The index is
 	 * extracted from the family and type.
@@ -1283,6 +1276,74 @@ public class EsServices {
 
 		return null;
 	}
+	
+	/**
+	 * Searches for matchings products with an insertionTime inside the given
+	 * interval (lower bound not included), and matching productFamily and productType
+	 */
+	public List<SearchMetadata> intervalTypeQuery(final String startTime, final String stopTime,
+			final ProductFamily productFamily, final String productType, final String satelliteId) throws Exception {
+		final SearchSourceBuilder sourceBuilder = new SearchSourceBuilder();
+		final BoolQueryBuilder queryBuilder = QueryBuilders.boolQuery().must(QueryBuilders
+				.rangeQuery("insertionTime").from(startTime, false).to(stopTime))
+				.must(QueryBuilders.termQuery("satelliteId.keyword", satelliteId))
+				.must(QueryBuilders.regexpQuery("productType.keyword", productType));
+
+		LOGGER.debug("query composed is {}", queryBuilder);
+
+		sourceBuilder.query(queryBuilder);
+		sourceBuilder.size(SIZE_LIMIT);
+		sourceBuilder.sort(new FieldSortBuilder("insertionTime").order(SortOrder.ASC));
+
+		final String index = getIndexForProductFamily(productFamily, productType);
+		final SearchRequest searchRequest = new SearchRequest(index);
+		searchRequest.source(sourceBuilder);
+
+		try {
+			final SearchResponse searchResponse = elasticsearchDAO.search(searchRequest);
+			if (this.isNotEmpty(searchResponse)) {
+				final List<SearchMetadata> r = new ArrayList<>();
+				for (final SearchHit hit : searchResponse.getHits().getHits()) {
+					final Map<String, Object> source = hit.getSourceAsMap();
+					final SearchMetadata local = new SearchMetadata();
+					local.setProductName(source.get("productName").toString());
+					local.setProductType(source.get("productType").toString());
+					local.setMissionId(source.get("missionId").toString());
+					local.setKeyObjectStorage(source.get("url").toString());
+					if (source.containsKey("startTime")) {
+						try {
+							local.setValidityStart(
+									DateUtils.convertToMetadataDateTimeFormat(source.get("startTime").toString()));
+						} catch (final DateTimeParseException e) {
+							throw new MetadataMalformedException("startTime");
+						}
+					}
+					if (source.containsKey("stopTime")) {
+						try {
+							local.setValidityStop(
+									DateUtils.convertToMetadataDateTimeFormat(source.get("stopTime").toString()));
+						} catch (final DateTimeParseException e) {
+							throw new MetadataMalformedException("stopTime");
+						}
+					}
+					if (source.containsKey("insertionTime")) {
+						try {
+							local.setInsertionTime(
+									DateUtils.convertToMetadataDateTimeFormat(source.get("insertionTime").toString()));
+						} catch (final DateTimeParseException e) {
+							throw new MetadataMalformedException("insertionTime");
+						}
+					}
+					r.add(local);
+				}
+				return r;
+			}
+		} catch (final IOException e) {
+			throw new Exception(e.getMessage());
+		}
+
+		return null;
+	}
 
 	public AuxMetadata auxiliaryQuery(final String searchProductType, final String searchProductName) throws IOException, MetadataNotPresentException, MetadataMalformedException {
 
@@ -1324,7 +1385,9 @@ public class EsServices {
 	public SearchMetadata productNameQuery(final String productFamily, final String productName)
 			throws MetadataMalformedException, MetadataNotPresentException, IOException {
 		
-		final String index = getIndexForFilename(ProductFamily.valueOf(productFamily), productName);
+		final ProductFamily family = ProductFamily.valueOf(productFamily);
+		
+		final String index = getIndexForFilename(family, productName);
 
 		final Map<String, Object> source = getRequest(index, productName);
 
@@ -1338,17 +1401,19 @@ public class EsServices {
 
 		searchMetadata.setSwathtype((String) source.getOrDefault("swathtype", "UNDEFINED"));
 		
-		// dirty workaround: 
-		if (source.containsKey("startTime") && source.containsKey("stopTime")) {
-			searchMetadata.setValidityStart(getPropertyAsDate(source, "startTime", orThrowMalformed("startTime")));
-			searchMetadata.setValidityStop(getPropertyAsDate(source, "stopTime", orThrowMalformed("stopTime")));
-		}
-		else if (source.containsKey("validityStartTime") && source.containsKey("validityStopTime")) {
-			searchMetadata.setValidityStart(getPropertyAsDate(source, "validityStartTime", orThrowMalformed("validityStartTime")));
-			searchMetadata.setValidityStop(getPropertyAsDate(source, "validityStopTime", orThrowMalformed("validityStopTime")));
-		}
-		else {
-			throw new MetadataMalformedException("start/stop times");
+		if (! ProductFamily.PLAN_AND_REPORT.equals(family) && ! ProductFamily.PLAN_AND_REPORT_ZIP.equals(family)) {
+			// dirty workaround: 
+			if (source.containsKey("startTime") && source.containsKey("stopTime")) {
+				searchMetadata.setValidityStart(getPropertyAsDate(source, "startTime", orThrowMalformed("startTime")));
+				searchMetadata.setValidityStop(getPropertyAsDate(source, "stopTime", orThrowMalformed("stopTime")));
+			}
+			else if (source.containsKey("validityStartTime") && source.containsKey("validityStopTime")) {
+				searchMetadata.setValidityStart(getPropertyAsDate(source, "validityStartTime", orThrowMalformed("validityStartTime")));
+				searchMetadata.setValidityStop(getPropertyAsDate(source, "validityStopTime", orThrowMalformed("validityStopTime")));
+			}
+			else {
+				throw new MetadataMalformedException("start/stop times");
+			}
 		}
 
 		Map<String, Object> coordinates = null;
@@ -1668,13 +1733,19 @@ public class EsServices {
 		return r;
 	}
 
-	public int getSeaCoverage(final ProductFamily family, final String productName) {
+	public int getSeaCoverage(final ProductFamily family, final String productName) throws MetadataNotPresentException {
+		
+		GetResponse response;
 		try {
-			final GetResponse response = elasticsearchDAO.get(new GetRequest(family.name().toLowerCase(), productName));
-			if (!response.isExists()) {
-				throw new MetadataNotPresentException(productName);
-			}
-
+			response = elasticsearchDAO.get(new GetRequest(family.name().toLowerCase(), productName));
+		} catch (final IOException e) {
+			throw new RuntimeException("Failed to check for sea coverage", e);
+		}
+		if (!response.isExists()) {
+			throw new MetadataNotPresentException(productName);
+		}
+		
+		try {
 			final GeoShapeQueryBuilder queryBuilder = QueryBuilders.geoShapeQuery("geometry",
 					extractPolygonFrom(response));
 			queryBuilder.relation(ShapeRelation.CONTAINS);
@@ -1697,13 +1768,19 @@ public class EsServices {
 		}
 	}
 	
-	public int getOverpassCoverage(final ProductFamily family, final String productName) {
+	public int getOverpassCoverage(final ProductFamily family, final String productName) throws MetadataNotPresentException {
+		
+		GetResponse response;
 		try {
-			final GetResponse response = elasticsearchDAO.get(new GetRequest(family.name().toLowerCase(), productName));
-			if (!response.isExists()) {
-				throw new MetadataNotPresentException(productName);
-			}
+			response = elasticsearchDAO.get(new GetRequest(family.name().toLowerCase(), productName));
+		} catch (final IOException e) {
+			throw new RuntimeException("Failed to check for overpass coverage", e);
+		}
+		if (!response.isExists()) {
+			throw new MetadataNotPresentException(productName);
+		}
 
+		try {
 			final GeoShapeQueryBuilder queryBuilder = QueryBuilders.geoShapeQuery("geometry",
 					extractPolygonFrom(response));
 			queryBuilder.relation(ShapeRelation.INTERSECTS);
@@ -1723,6 +1800,41 @@ public class EsServices {
 			return 0;
 		} catch (final Exception e) {
 			throw new RuntimeException("Failed to check for overpass coverage", e);
+		}
+	}
+	
+	public boolean isIntersectingOceanMask(final ProductFamily family, final String productName) throws MetadataNotPresentException {
+		
+		GetResponse response;
+		try {
+			response = elasticsearchDAO.get(new GetRequest(family.name().toLowerCase(), productName));
+		} catch (final IOException e) {
+			throw new RuntimeException("Failed to check for ocean mask intersection", e);
+		}
+		
+		if (!response.isExists()) {
+			throw new MetadataNotPresentException(productName);
+		}
+		try {
+			final GeoShapeQueryBuilder queryBuilder = QueryBuilders.geoShapeQuery("geometry",
+					extractPolygonFrom(response));
+			queryBuilder.relation(ShapeRelation.INTERSECTS);
+			LOGGER.debug("Using {}", queryBuilder);
+			final SearchSourceBuilder sourceBuilder = new SearchSourceBuilder();
+			sourceBuilder.query(queryBuilder);
+			sourceBuilder.size(SIZE_LIMIT);
+
+			final SearchRequest request = new SearchRequest(OCEANMASK_FOOTPRINT_INDEX_NAME);
+			request.source(sourceBuilder);
+
+			final SearchResponse searchResponse = elasticsearchDAO.search(request);
+			if (isNotEmpty(searchResponse)) {
+				return true; 
+			} else {	
+				return false;
+			}
+		} catch (final Exception e) {
+			throw new RuntimeException("Failed to check for ocean mask intersection", e);
 		}
 	}
 
@@ -1801,6 +1913,8 @@ public class EsServices {
 		} else {
 			r.setProductSensingConsolidation("NOT_DEFINED");
 		}
+		// should always be set in esa.s1pdgs.cpoc.mdc.worker.service.MetadataExtractionService
+		r.setInsertionTime(source.get("insertionTime").toString());
 		source.forEach((key, value) -> r.addAdditionalProperty(key, value.toString()));
 		return r;
 	}

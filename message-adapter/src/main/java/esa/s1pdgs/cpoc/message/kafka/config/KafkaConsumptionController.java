@@ -135,7 +135,7 @@ public class KafkaConsumptionController<M> implements ConsumptionController {
     private MessageListener<String, M> listenerFor(MessageConsumer<M> messageConsumer, Consumption consumption) {
 
         return (AcknowledgingMessageListener<String, M>) (data, acknowledgment)
-                -> messageConsumer.onMessage(new KafkaMessage<>(data.value(), data), new KafkaAcknowledgement(acknowledgment), consumption);
+                -> messageConsumer.onMessage(new KafkaMessage<>(data.value(), data), new KafkaAcknowledgement<>(acknowledgment, data), consumption);
     }
 
     private ConsumerFactory<String, M> consumerFactory(final String topic, final Class<M> dtoClass) {

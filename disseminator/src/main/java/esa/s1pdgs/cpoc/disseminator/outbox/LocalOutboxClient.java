@@ -10,6 +10,7 @@ import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
 
 import org.apache.commons.io.IOUtils;
+import org.apache.logging.log4j.util.Strings;
 
 import esa.s1pdgs.cpoc.disseminator.config.DisseminationProperties.OutboxConfiguration;
 import esa.s1pdgs.cpoc.disseminator.path.PathEvaluater;
@@ -17,7 +18,7 @@ import esa.s1pdgs.cpoc.obs_sdk.ObsClient;
 import esa.s1pdgs.cpoc.obs_sdk.ObsObject;
 import esa.s1pdgs.cpoc.report.ReportingFactory;
 
-public final class LocalOutboxClient extends AbstractOutboxClient {	
+public final class LocalOutboxClient extends AbstractOutboxClient {
 	public static final class Factory implements OutboxClient.Factory {
 		@Override
 		public OutboxClient newClient(final ObsClient obsClient, final OutboxConfiguration config, final PathEvaluater eval) {
@@ -52,6 +53,12 @@ public final class LocalOutboxClient extends AbstractOutboxClient {
 			}
 		}
 		final Path nameWithDot = path.resolve("." + obsObject.getKey());
+		
+		if (!Strings.isEmpty(config.getChmodScriptPath())) {
+			logger.debug("Executing chmod script {} for {}", config.getChmodScriptPath(), nameWithDot);
+			Process process = new ProcessBuilder(config.getChmodScriptPath(), nameWithDot.toFile().getAbsolutePath()).start();
+			process.waitFor();
+		}
 		
 		logger.debug("Moving {} to {}", nameWithDot, finalName);
 		Files.move(nameWithDot, finalName,

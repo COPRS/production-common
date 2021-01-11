@@ -35,7 +35,8 @@ public class SppObsPropertiesAdapter {
 
         Instant actualTimeout = max(timoutFromProductStart, minimalTimeout);
 
-        LOG.debug("OBS processing should wait until {}", actualTimeout);
+        LOG.debug("OBS processing for product {} of job {} should wait until {}",
+                auxResorb.getProductName(), job.getId(), actualTimeout);
 
         return Instant.now().isBefore(actualTimeout);
     }

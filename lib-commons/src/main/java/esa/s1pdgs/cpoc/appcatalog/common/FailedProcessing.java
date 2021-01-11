@@ -21,7 +21,7 @@ public class FailedProcessing extends AbstractRequest {
 		 * order by ascending creation time
 		 */
 		@Override
-		public int compare(FailedProcessing o1, FailedProcessing o2) {
+		public int compare(final FailedProcessing o1, final FailedProcessing o2) {
 			return o1.getCreationDate().compareTo(o2.getCreationDate());
 		}
 	}
@@ -40,10 +40,10 @@ public class FailedProcessing extends AbstractRequest {
 	public FailedProcessing()	{		
 	}
 
-	public FailedProcessing(long id, ProductCategory category, String topic, int partition, long offset, String group,
-			MessageState state, String sendingPod, Date lastSendDate, Date lastAckDate, int nbRetries, Object dto,
-			Date creationDate, String failedPod, Date lastAssignmentDate, Date failureDate, String failureMessage,
-			Object predecessorDto, String predecessorTopic) {
+	public FailedProcessing(final long id, final ProductCategory category, final String topic, final int partition, final long offset, final String group,
+			final MessageState state, final String sendingPod, final Date lastSendDate, final Date lastAckDate, final int nbRetries, final Object dto,
+			final Date creationDate, final String failedPod, final Date lastAssignmentDate, final Date failureDate, final String failureMessage,
+			final Object predecessorDto, final String predecessorTopic) {
 		super(category, topic, partition, offset, group, state, sendingPod, lastSendDate, lastAckDate, nbRetries, dto,
 				creationDate);
 		this.id = id;
@@ -85,7 +85,7 @@ public class FailedProcessing extends AbstractRequest {
 		return id;
 	}
 	
-	public void setId(long id) {
+	public void setId(final long id) {
 		this.id = id;
 	}
 
@@ -93,7 +93,7 @@ public class FailedProcessing extends AbstractRequest {
 		return failedPod;
 	}
 
-	public void setFailedPod(String failedPod) {
+	public void setFailedPod(final String failedPod) {
 		this.failedPod = failedPod;
 	}
 
@@ -102,7 +102,7 @@ public class FailedProcessing extends AbstractRequest {
 		return lastAssignmentDate;
 	}
 
-	public void setLastAssignmentDate(Date lastAssignmentDate) {
+	public void setLastAssignmentDate(final Date lastAssignmentDate) {
 		this.lastAssignmentDate = lastAssignmentDate;
 	}
 
@@ -111,7 +111,7 @@ public class FailedProcessing extends AbstractRequest {
 		return failureDate;
 	}
 
-	public void setFailureDate(Date failureDate) {
+	public void setFailureDate(final Date failureDate) {
 		this.failureDate = failureDate;
 	}
 
@@ -119,7 +119,7 @@ public class FailedProcessing extends AbstractRequest {
 		return failureMessage;
 	}
 
-	public void setFailureMessage(String failureMessage) {
+	public void setFailureMessage(final String failureMessage) {
 		this.failureMessage = failureMessage;
 	}
 	
@@ -185,7 +185,7 @@ public class FailedProcessing extends AbstractRequest {
 	}
 	
 	@Override
-	public boolean equals(java.lang.Object o) {
+	public boolean equals(final java.lang.Object o) {
 		if (this == o) {
 			return true;
 		}
@@ -272,7 +272,7 @@ public class FailedProcessing extends AbstractRequest {
 	 * Convert the given object to string with each line indented by 4 spaces
 	 * (except the first line).
 	 */
-	private final String toIndentedString(java.lang.Object o) {
+	private final String toIndentedString(final java.lang.Object o) {
 		if (o == null) {
 			return "null";
 		}

@@ -25,7 +25,7 @@ public class AppCatalogJobNotFoundException extends AbstractAppDataException {
      * @param id
      */
     public AppCatalogJobNotFoundException(final long jobId) {
-        super(ErrorCode.JOB_NOT_FOUND, "Job not found");
+        super(ErrorCode.JOB_NOT_FOUND, "Job not found " + jobId);
         this.jobId = jobId;
     }
 

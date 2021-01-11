@@ -1,5 +1,7 @@
 package esa.s1pdgs.cpoc.queuewatcher.service;
 
+import static java.lang.String.format;
+
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
@@ -81,6 +83,13 @@ public class QueueWatcherService implements MqiListener<ProductionEvent> {
 	@PostConstruct
 	public void initService() {
 
+		File kafkaFolder = new File(properties.getKafkaFolder());
+		kafkaFolder.mkdir();
+		if(!kafkaFolder.exists()) {
+			LOGGER.error("kafka folder {} has not been created", properties.getKafkaFolder());
+			throw new RuntimeException(format("kafka folder %s has not been created", properties.getKafkaFolder()));
+		}
+
 		final ExecutorService service = Executors.newFixedThreadPool(4);
 		if (auxFilesPollingIntervalMs > 0) {
 			service.execute(newConsumerFor(
@@ -155,17 +164,17 @@ public class QueueWatcherService implements MqiListener<ProductionEvent> {
 		} catch (final IOException e) {
 			LOGGER.error("Error occured while writing to CSV {}", LogUtils.toString(e));
 		}
-		return new MqiPublishingJob<NullMessage>(Collections.emptyList());
+		return new MqiPublishingJob<>(Collections.emptyList());
 	}
 	
-	private final MqiConsumer<ProductionEvent> newConsumerFor(final ProductCategory category, final long interval, final long delay) {
-		return new MqiConsumer<ProductionEvent>(
-				mqiClient, 
-				category, 
+	private MqiConsumer<ProductionEvent> newConsumerFor(final ProductCategory category, final long interval, final long delay) {
+		return new MqiConsumer<>(
+				mqiClient,
+				category,
 				this,
 				messageFilter,
-				interval, 
-				delay, 
+				interval,
+				delay,
 				appStatus
 		);
 	}

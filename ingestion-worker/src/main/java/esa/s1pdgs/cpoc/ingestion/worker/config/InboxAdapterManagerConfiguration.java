@@ -20,6 +20,9 @@ import esa.s1pdgs.cpoc.ingestion.worker.inbox.FilesystemInboxAdapter;
 import esa.s1pdgs.cpoc.ingestion.worker.inbox.InboxAdapter;
 import esa.s1pdgs.cpoc.ingestion.worker.inbox.InboxAdapterManager;
 import esa.s1pdgs.cpoc.ingestion.worker.inbox.XbipInboxAdapter;
+import esa.s1pdgs.cpoc.ingestion.worker.product.ProductService;
+import esa.s1pdgs.cpoc.ingestion.worker.product.ProductServiceImpl;
+import esa.s1pdgs.cpoc.obs_sdk.ObsClient;
 import esa.s1pdgs.cpoc.xbip.client.XbipClientFactory;
 import esa.s1pdgs.cpoc.xbip.client.config.XbipClientConfigurationProperties;
 
@@ -40,9 +43,9 @@ public class InboxAdapterManagerConfiguration {
 			final AuxipClientFactory auxipClientFactory,
 			final EdipClientFactory edipClientFactory,
 			final IngestionWorkerServiceConfigurationProperties properties,
-			AuxipClientConfigurationProperties auxipClientConfigurationProperties,
-			XbipClientConfigurationProperties xbipClientConfigurationProperties,
-			EdipClientConfigurationProperties edipClientConfigurationProperties) {
+			final AuxipClientConfigurationProperties auxipClientConfigurationProperties,
+			final XbipClientConfigurationProperties xbipClientConfigurationProperties,
+			final EdipClientConfigurationProperties edipClientConfigurationProperties) {
 		this.xbipClientFactory = xbipClientFactory;
 		this.auxipClientFactory = auxipClientFactory;
 		this.edipClientFactory = edipClientFactory;
@@ -75,7 +78,12 @@ public class InboxAdapterManagerConfiguration {
 
 		return new InboxAdapterManager(inboxAdapter);
 	}
-
-
-
+	
+	@Bean
+	@Autowired
+	public ProductService productService(
+			final ObsClient obsClient
+	) {
+		return new ProductServiceImpl(obsClient, properties.isBufferInputs());
+	}
 }

@@ -6,6 +6,7 @@ import java.net.URI;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import esa.s1pdgs.cpoc.ingestion.trigger.config.InboxConfiguration;
 import esa.s1pdgs.cpoc.ingestion.trigger.inbox.InboxAdapter;
 import esa.s1pdgs.cpoc.ingestion.trigger.inbox.InboxAdapterFactory;
 import esa.s1pdgs.cpoc.ingestion.trigger.inbox.InboxEntryFactory;
@@ -18,13 +19,14 @@ public class FilesystemInboxAdapterFactory implements InboxAdapterFactory {
 	public FilesystemInboxAdapterFactory(final InboxEntryFactory inboxEntryFactory) {
 		this.inboxEntryFactory = inboxEntryFactory;
 	}
-
+	
 	@Override
-	public InboxAdapter newInboxAdapter(final URI inbox,final String stationName) {
+	public InboxAdapter newInboxAdapter(final URI inbox, final InboxConfiguration inboxConfig) {
 		final File inboxDirectory = new File(inbox.getPath());
 		if (!inboxDirectory.exists()) {
 			inboxDirectory.mkdirs();
 		}	
-		return new FilesystemInboxAdapter(inboxEntryFactory, inbox, stationName);
+		return new FilesystemInboxAdapter(inboxEntryFactory, inbox, inboxConfig.getStationName(), inboxConfig.getFamily());
 	}
+
 }

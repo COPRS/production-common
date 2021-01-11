@@ -15,6 +15,7 @@ dissemination:
   outboxes:
     myLittleOutbox:
       path: /tmp/foo/bar    
+      chmod-script-path: /tmp/foo/bar.sh
   categories:
     auxiliary-files:
       - target: myLittleOutbox

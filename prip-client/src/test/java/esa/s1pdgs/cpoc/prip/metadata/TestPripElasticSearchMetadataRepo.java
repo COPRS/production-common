@@ -10,8 +10,9 @@ import static org.mockito.Mockito.verify;
 import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
-import java.util.Collections;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -41,8 +42,8 @@ import esa.s1pdgs.cpoc.prip.model.PripMetadata;
 import esa.s1pdgs.cpoc.prip.model.PripMetadata.FIELD_NAMES;
 import esa.s1pdgs.cpoc.prip.model.filter.PripDateTimeFilter;
 import esa.s1pdgs.cpoc.prip.model.filter.PripQueryFilter;
-import esa.s1pdgs.cpoc.prip.model.filter.PripTextFilter;
 import esa.s1pdgs.cpoc.prip.model.filter.PripRangeValueFilter.Operator;
+import esa.s1pdgs.cpoc.prip.model.filter.PripTextFilter;
 
 public class TestPripElasticSearchMetadataRepo {
 
@@ -332,6 +333,18 @@ public class TestPripElasticSearchMetadataRepo {
 		pripMetadata.setCreationDate(creationDate);
 		pripMetadata.setEvictionDate(creationDate.plusDays(PripMetadata.DEFAULT_EVICTION_DAYS));
 		pripMetadata.setChecksums(checksums);
+		
+		Map<String,Object> attributes = new LinkedHashMap<>();
+		attributes.put("attr_name1_string", "value1");
+		attributes.put("attr_name2_string", "1");
+		attributes.put("attr_name3_long", 2L);
+		attributes.put("attr_name4_double", 0.4);
+		attributes.put("attr_name5_double", 1.0);
+		attributes.put("attr_name6_boolean", true);
+		attributes.put("attr_name7_boolean", false);
+		attributes.put("attr_name8_date", LocalDateTime.of(2000, 1, 1, 0, 0));
+		
+		pripMetadata.setAttributes(attributes);
 		return pripMetadata;
 	}
 
