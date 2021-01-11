@@ -5,7 +5,6 @@ package esa.s1pdgs.cpoc.mdc.worker.extraction.files;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
 import static org.junit.Assert.fail;
 
 import java.io.File;
@@ -1280,6 +1279,12 @@ public class ExtractMetadataTest {
 		assertEquals(1, extractor.totalNumberOfSlice(startTime, stopTime, sliceType));
 	}
 
+	/**
+	 * One longitude values positive and three negative or three positive and one negative -> false
+	 * Maximum logitude difference larger than 180° -> false
+	 * 
+	 * -> No date line crossing, do nothing
+	 */
 	@Test
 	public void testDoNothing() {
 		String rawCoordinatesInput = "70.0,170.0 70.0,170.0 -70.0,150.0 -70.0,170.0";
@@ -1288,6 +1293,28 @@ public class ExtractMetadataTest {
 		assertEquals(rawCoordinatesExpectedResult, extractor.improveRawCoordinatesIfDateLineCrossing(rawCoordinatesInput));
 	}
 	
+	/**
+	 * Test case from S1PRO-2301
+	 * 
+	 * One longitude values positive and three negative or three positive and one negative -> true
+	 * Maximum logitude difference larger than 180° -> false
+	 * 
+	 * -> No date line crossing, do nothing
+	 */
+	@Test
+	public void testDoNothing2() {
+		String rawCoordinatesInput = "56.1535,2.2002 64.8859,-0.5619 55.8374,-1.7321 56.1535,2.2002";
+		String rawCoordinatesExpectedResult = "56.1535,2.2002 64.8859,-0.5619 55.8374,-1.7321 56.1535,2.2002";
+		
+		assertEquals(rawCoordinatesExpectedResult, extractor.improveRawCoordinatesIfDateLineCrossing(rawCoordinatesInput));
+	}
+	
+	/**
+	 * One longitude values positive and three negative or three positive and one negative -> true
+	 * Maximum logitude difference larger than 180° -> true
+	 * 
+	 * -> Date line crossing, shift the one negative value by +360°
+	 */
 	@Test
 	public void testIncreaseOne() {
 		String rawCoordinatesInput = "70.0,-170.0 70.0,170.0 -70.0,150.0 -70.0,170.0";
@@ -1296,6 +1323,12 @@ public class ExtractMetadataTest {
 		assertEquals(rawCoordinatesExpectedResult, extractor.improveRawCoordinatesIfDateLineCrossing(rawCoordinatesInput));
 	}
 	
+	/**
+	 * One longitude values positive and three negative or three positive and one negative -> true
+	 * Maximum logitude difference larger than 180° -> false
+	 * 
+	 * -> Date line crossing, shift the one positive value by -360°
+	 */
 	@Test
 	public void testDecreaseOne() {
 		String rawCoordinatesInput = "70.0,-170.0 70.0,-170.0 -70.0,150.0 -70.0,-170.0";
@@ -1304,10 +1337,16 @@ public class ExtractMetadataTest {
 		assertEquals(rawCoordinatesExpectedResult, extractor.improveRawCoordinatesIfDateLineCrossing(rawCoordinatesInput));
 	}
 	
+	/**
+	 * One longitude values positive and three negative or three positive and one negative -> true
+	 * Maximum logitude difference larger than 180° -> true
+	 * 
+	 * -> No date line crossing, do nothing
+	 */
 	@Test
-	public void testIncreaseOne2() {
+	public void testDoNothing3() {
 		String rawCoordinatesInput = "12.378114,48.279240 12.829241,50.603844 11.081389,-50.958828 10.625828,48.649940";
-		String rawCoordinatesExpectedResult = "12.378114,48.279240 12.829241,50.603844 11.081389,309.041172 10.625828,48.649940";
+		String rawCoordinatesExpectedResult = "12.378114,48.279240 12.829241,50.603844 11.081389,-50.958828 10.625828,48.649940";
 		
 		assertEquals(rawCoordinatesExpectedResult, extractor.improveRawCoordinatesIfDateLineCrossing(rawCoordinatesInput));
 	}
@@ -1324,6 +1363,12 @@ public class ExtractMetadataTest {
 		String input = "81.3179,-81.9895 56.5997,-97.7338 56.0243,-91.2164 79.6240,-62.0955 81.3179,-81.9895";
 		String expected = "81.3179,-81.9895 56.5997,-97.7338 56.0243,-91.2164 79.6240,-62.0955 81.3179,-81.9895";
 		assertEquals(expected, ExtractMetadata.convertCoordinatesToClosedForm(input));
+	}
+
+	public void testCalculateMaxDifference() {
+		Double[] input = new Double[] {2.2, 22.5, -180.0, 70.0, -180.0, -180.0, 180.5};
+		Double expected = 360.5;
+		assertEquals(expected, extractor.calculateMaxDifference(input));
 	}
 	
 	@Test
@@ -1431,5 +1476,4 @@ public class ExtractMetadataTest {
 		assertEquals(String.class, uut.enforceFieldTypes(new JSONObject() {{ put("key",""); }}).get("key").getClass());
 		assertEquals(String.class, uut.enforceFieldTypes(new JSONObject() {{ put("key","2020-01-19T03:11:42.000000Z"); }}).get("key").getClass());	
 	}
-
 }
