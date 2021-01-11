@@ -32,8 +32,9 @@ import esa.s1pdgs.cpoc.ingestion.trigger.config.ProcessConfiguration;
 import esa.s1pdgs.cpoc.ingestion.trigger.entity.InboxEntry;
 import esa.s1pdgs.cpoc.ingestion.trigger.inbox.AbstractInboxAdapter;
 import esa.s1pdgs.cpoc.ingestion.trigger.inbox.InboxEntryFactory;
+import esa.s1pdgs.cpoc.ingestion.trigger.inbox.SupportsProductFamily;
 
-public class AuxipInboxAdapter extends AbstractInboxAdapter {
+public class AuxipInboxAdapter extends AbstractInboxAdapter implements SupportsProductFamily {
 
     private static final Logger LOG = LoggerFactory.getLogger(AuxipInboxAdapter.class);
 

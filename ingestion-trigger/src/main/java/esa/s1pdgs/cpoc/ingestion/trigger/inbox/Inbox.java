@@ -71,7 +71,7 @@ public final class Inbox {
 			//existing InboxEntries for xbip etc. (excl. auxip) do not have product family yet
 			//This (else part) can be removed in the future as then all InboxEntries will have product family property
 			final PollingRun pollingRun;
-			if(inboxAdapter instanceof AuxipInboxAdapter) {
+			if(inboxAdapter instanceof SupportsProductFamily) {
 				pollingRun = PollingRun.newInstance(
 						ingestionTriggerServiceTransactional.getAllForPath(inboxAdapter.inboxURL(), stationName, family),
 						inboxAdapter.read(InboxFilter.ALLOW_ALL)
