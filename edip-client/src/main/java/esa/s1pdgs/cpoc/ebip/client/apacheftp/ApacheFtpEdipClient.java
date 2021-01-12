@@ -3,7 +3,6 @@ package esa.s1pdgs.cpoc.ebip.client.apacheftp;
 import java.io.BufferedInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.net.SocketException;
 import java.net.URI;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -223,9 +222,14 @@ public class ApacheFtpEdipClient implements EdipClient {
 	}
 	
 	private Optional<List<EdipEntry>> getIfNotDirectory(final FTPClient client, final Path path) throws IOException {
-		final List<FTPFile> ftpFile = Arrays.asList(client.listFiles(path.toString()));
-		if (ftpFile.size() == 1 && !ftpFile.get(0).isDirectory()) {
-			return Optional.of(Collections.singletonList(toEdipEntry(path.getParent(), ftpFile.get(0))));
+		if (null == path) {
+			throw new RuntimeException(String.format("Cannot list path: %s", path));
+		}
+		final List<FTPFile> ftpFiles = Arrays.asList(client.listFiles(path.toString()));
+		FTPFile ftpFile = ftpFiles.size() == 1 ? ftpFiles.get(0) : null;
+		if (null != ftpFile && !ftpFile.isDirectory() && null != path && null != path.getParent()) {
+			EdipEntry edipEntry = toEdipEntry(path.getParent(), ftpFile);
+			return Optional.of(Collections.singletonList(edipEntry));
 		}
 		return Optional.empty();
 	}

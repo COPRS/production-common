@@ -50,7 +50,11 @@ public class MyOceanPathEvaluator implements PathEvaluator {
 	// --------------------------------------------------------------------------
 
 	private static String getFilename(final ObsObject file) {
-		return Paths.get(file.getKey()).getFileName().toString();
+		Path path = Paths.get(file.getKey()).getFileName();
+		if (null == path) {
+			throw new RuntimeException(String.format("Cannot get filename due to corrupt obs object: %s", file));
+		}
+		return path.toString();
 	}
 
 	private static LocalDateTime getSensingStart(final String productName) {

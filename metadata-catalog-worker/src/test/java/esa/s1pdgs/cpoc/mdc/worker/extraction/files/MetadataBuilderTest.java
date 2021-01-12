@@ -285,7 +285,7 @@ public class MetadataBuilderTest {
 
 		try {
 			final MetadataBuilder metadataBuilder = new MetadataBuilder(extractor);
-			final JSONObject dto = metadataBuilder.buildEdrsSessionFileMetadata(descriptor, null);
+			final JSONObject dto = metadataBuilder.buildEdrsSessionFileMetadata(descriptor, new File("/dev/null/foobar"));
 
 			assertNotNull("Metadata should not be null", dto);
 			assertEquals("Metadata are not equals", expectedResult.toString(), dto.toString());

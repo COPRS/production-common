@@ -1,6 +1,6 @@
 package esa.s1pdgs.cpoc.mdc.worker.extraction.xml;
 
-import static org.assertj.core.api.Assertions.fail;
+import static org.junit.Assert.fail;
 import static org.junit.Assert.assertEquals;
 
 import java.io.IOException;
@@ -66,7 +66,7 @@ public class XmlConverterTest {
             assertEquals("Invalid number of raws", 35,
                     fileChannel1.getRawNames().size());
         } catch (IOException | JAXBException e) {
-            fail("Exception raised", e);
+            fail(String.format("Exception raised: %s", e));
         }
     }
 	

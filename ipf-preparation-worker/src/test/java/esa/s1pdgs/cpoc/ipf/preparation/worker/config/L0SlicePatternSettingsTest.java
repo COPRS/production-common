@@ -1,6 +1,6 @@
 package esa.s1pdgs.cpoc.ipf.preparation.worker.config;
 
-import static org.assertj.core.api.Assertions.fail;
+import static org.junit.Assert.fail;
 import static org.junit.Assert.assertEquals;
 
 import java.util.regex.Matcher;
