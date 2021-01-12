@@ -201,8 +201,10 @@ public class L0SegmentTypeAdapterTest {
 				.getLevelSegments("02F9CE");
 
 		Product product = uut.mainInputSearch(appDataJob1, taskTableAdapter);
+		appDataJob1.setProduct(product.toProduct());
+		appDataJob1.setAdditionalInputs(product.overridingInputs());
 
-		Map<String, List<AppDataJobFile>> inputs = ((L0SegmentProduct) product).toProduct().getInputs();
+		Map<String, List<AppDataJobFile>> inputs = appDataJob1.getProduct().getInputs();
 
 		assertEquals(1, inputs.size());
 		assertNotNull(inputs.get("VV"));
@@ -221,8 +223,10 @@ public class L0SegmentTypeAdapterTest {
 				metadata_IW_VH_02F9CE_FULL_1)).when(metadataClient).getLevelSegments("02F9CE");
 
 		product = uut.mainInputSearch(appDataJob1, taskTableAdapter);
+		appDataJob1.setProduct(product.toProduct());
+		appDataJob1.setAdditionalInputs(product.overridingInputs());
 
-		inputs = ((L0SegmentProduct) product).toProduct().getInputs();
+		inputs = appDataJob1.getProduct().getInputs();
 
 		assertEquals(2, inputs.size());
 		assertNotNull(inputs.get("VV"));
@@ -277,8 +281,10 @@ public class L0SegmentTypeAdapterTest {
 				metadata_IW_VH_02F9CE_PART_2)).when(metadataClient).getLevelSegments("02F9CE");
 
 		Product product = uut.mainInputSearch(appDataJob1, taskTableAdapter);
+		appDataJob1.setProduct(product.toProduct());
+		appDataJob1.setAdditionalInputs(product.overridingInputs());
 
-		Map<String, List<AppDataJobFile>> inputs = ((L0SegmentProduct) product).toProduct().getInputs();
+		Map<String, List<AppDataJobFile>> inputs = appDataJob1.getProduct().getInputs();
 
 		assertEquals(2, inputs.size());
 		assertNotNull(inputs.get("VV"));
@@ -336,8 +342,10 @@ public class L0SegmentTypeAdapterTest {
 				.getLevelSegments("02F9CE");
 
 		Product product = uut.mainInputSearch(appDataJob1, taskTableAdapter);
+		appDataJob1.setProduct(product.toProduct());
+		appDataJob1.setAdditionalInputs(product.overridingInputs());
 
-		Map<String, List<AppDataJobFile>> inputs = ((L0SegmentProduct) product).toProduct().getInputs();
+		Map<String, List<AppDataJobFile>> inputs = appDataJob1.getProduct().getInputs();
 
 		assertEquals(2, inputs.size());
 		assertNotNull(inputs.get("VV"));
@@ -361,8 +369,10 @@ public class L0SegmentTypeAdapterTest {
 						.when(metadataClient).getLevelSegments("02F9CE");
 
 		product = uut.mainInputSearch(appDataJob1, taskTableAdapter);
+		appDataJob1.setProduct(product.toProduct());
+		appDataJob1.setAdditionalInputs(product.overridingInputs());
 
-		inputs = ((L0SegmentProduct) product).toProduct().getInputs();
+		inputs = appDataJob1.getProduct().getInputs();
 
 		assertEquals(2, inputs.size());
 		assertNotNull(inputs.get("VV"));
@@ -417,8 +427,10 @@ public class L0SegmentTypeAdapterTest {
 				.getLevelSegments("043734");
 
 		Product product = uut.mainInputSearch(appDataJob1, taskTableAdapter);
+		appDataJob1.setProduct(product.toProduct());
+		appDataJob1.setAdditionalInputs(product.overridingInputs());
 
-		Map<String, List<AppDataJobFile>> inputs = ((L0SegmentProduct) product).toProduct().getInputs();
+		Map<String, List<AppDataJobFile>> inputs = appDataJob1.getProduct().getInputs();
 
 		assertEquals(1, inputs.size());
 		assertNotNull(inputs.get("VV"));
@@ -438,8 +450,10 @@ public class L0SegmentTypeAdapterTest {
 						.when(metadataClient).getLevelSegments("043734");
 
 		product = uut.mainInputSearch(appDataJob1, taskTableAdapter);
+		appDataJob1.setProduct(product.toProduct());
+		appDataJob1.setAdditionalInputs(product.overridingInputs());
 
-		inputs = ((L0SegmentProduct) product).toProduct().getInputs();
+		inputs = appDataJob1.getProduct().getInputs();
 
 		assertEquals(2, inputs.size());
 		assertNotNull(inputs.get("VV"));
@@ -499,8 +513,10 @@ public class L0SegmentTypeAdapterTest {
 				.getLevelSegments("043734");
 
 		Product product = uut.mainInputSearch(appDataJob1, taskTableAdapter);
+		appDataJob1.setProduct(product.toProduct());
+		appDataJob1.setAdditionalInputs(product.overridingInputs());
 
-		Map<String, List<AppDataJobFile>> inputs = ((L0SegmentProduct) product).toProduct().getInputs();
+		Map<String, List<AppDataJobFile>> inputs = appDataJob1.getProduct().getInputs();
 
 		assertEquals(1, inputs.size());
 		assertNotNull(inputs.get("VV"));
@@ -520,8 +536,10 @@ public class L0SegmentTypeAdapterTest {
 						.when(metadataClient).getLevelSegments("043734");
 
 		product = uut.mainInputSearch(appDataJob1, taskTableAdapter);
+		appDataJob1.setProduct(product.toProduct());
+		appDataJob1.setAdditionalInputs(product.overridingInputs());
 
-		inputs = ((L0SegmentProduct) product).toProduct().getInputs();
+		inputs = appDataJob1.getProduct().getInputs();
 
 		assertEquals(1, inputs.size());
 		assertNotNull(inputs.get("VV"));
@@ -541,8 +559,10 @@ public class L0SegmentTypeAdapterTest {
 						.getLevelSegments("043734");
 
 		product = uut.mainInputSearch(appDataJob1, taskTableAdapter);
+		appDataJob1.setProduct(product.toProduct());
+		appDataJob1.setAdditionalInputs(product.overridingInputs());
 
-		inputs = ((L0SegmentProduct) product).toProduct().getInputs();
+		inputs = appDataJob1.getProduct().getInputs();
 
 		assertEquals(2, inputs.size());
 		assertNotNull(inputs.get("VV"));
@@ -553,7 +573,7 @@ public class L0SegmentTypeAdapterTest {
 				inputs.get("VV").get(0).getFilename());
 		assertEquals("S1A_RF_RAW__0SVH_20210104T071910_20210104T071911_035985_043734_4B76.SAFE",
 				inputs.get("VH").get(0).getFilename());
-		
+
 		try {
 			uut.validateInputSearch(appDataJob1, taskTableAdapter);
 		} catch (IpfPrepWorkerInputsMissingException missingEx) {
@@ -563,11 +583,12 @@ public class L0SegmentTypeAdapterTest {
 		}
 
 	}
-	
+
 	/**
 	 * Scenario 6:
 	 * 
-	 * RFC production when older and newer complete/full and partial segments are available
+	 * RFC production when older and newer complete/full and partial segments are
+	 * available
 	 * 
 	 * @throws MetadataQueryException
 	 * @throws IpfPrepWorkerInputsMissingException
@@ -598,12 +619,15 @@ public class L0SegmentTypeAdapterTest {
 		product1.getMetadata().put("dataTakeId", "043734");
 		appDataJob1.setProduct(product1);
 
-		doReturn(Arrays.asList(metadata_RF_VV_043734_PART_3, metadata_RF_VV_043734_FULL_1, metadata_RF_VV_043734_FULL_2, metadata_RF_VH_043734_FULL_1, metadata_RF_VH_043734_PART_2)).when(metadataClient)
-				.getLevelSegments("043734");
+		doReturn(Arrays.asList(metadata_RF_VV_043734_PART_3, metadata_RF_VV_043734_FULL_1, metadata_RF_VV_043734_FULL_2,
+				metadata_RF_VH_043734_FULL_1, metadata_RF_VH_043734_PART_2)).when(metadataClient)
+						.getLevelSegments("043734");
 
 		Product product = uut.mainInputSearch(appDataJob1, taskTableAdapter);
+		appDataJob1.setProduct(product.toProduct());
+		appDataJob1.setAdditionalInputs(product.overridingInputs());
 
-		Map<String, List<AppDataJobFile>> inputs = ((L0SegmentProduct) product).toProduct().getInputs();
+		Map<String, List<AppDataJobFile>> inputs = appDataJob1.getProduct().getInputs();
 
 		assertEquals(2, inputs.size());
 		assertNotNull(inputs.get("VV"));
@@ -614,7 +638,7 @@ public class L0SegmentTypeAdapterTest {
 				inputs.get("VV").get(0).getFilename());
 		assertEquals("S1A_RF_RAW__0SVH_20210104T071920_20210104T071921_035985_043734_EE1D.SAFE",
 				inputs.get("VH").get(0).getFilename());
-		
+
 		try {
 			uut.validateInputSearch(appDataJob1, taskTableAdapter);
 		} catch (IpfPrepWorkerInputsMissingException missingEx) {
