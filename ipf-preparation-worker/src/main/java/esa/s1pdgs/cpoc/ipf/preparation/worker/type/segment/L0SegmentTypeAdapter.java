@@ -62,9 +62,24 @@ public final class L0SegmentTypeAdapter extends AbstractProductTypeAdapter imple
 	public final Optional<AppDataJob> findAssociatedJobFor(final AppCatJobService appCat,
 			final CatalogEventAdapter catEvent, final AppDataJob job) throws AbstractCodedException {
 
-		return appCat.findJobForDatatakeId(catEvent.datatakeId(), catEvent.productType());
+		return withSameStartTime(catEvent, appCat.findJobForDatatakeId(catEvent.datatakeId(), catEvent.productType()));
 	}
-		
+
+	// S1PRO-2175 also check start time to create different jobs for RFC segments with different
+	// start times but same data take id
+	private Optional<AppDataJob> withSameStartTime(CatalogEventAdapter catEvent, Optional<AppDataJob> jobForDatatakeId) {
+		if(!jobForDatatakeId.isPresent()) {
+			return Optional.empty();
+		}
+
+
+		if(jobForDatatakeId.get().getStartTime().equals(catEvent.validityStartTime())) {
+			return  jobForDatatakeId;
+		}
+
+		return Optional.empty();
+	}
+
 	@Override
 	public final Product mainInputSearch(final AppDataJob job, final TaskTableAdapter taskTableAdapter) throws IpfPrepWorkerInputsMissingException {
 		final L0SegmentProduct product = L0SegmentProduct.of(job);
