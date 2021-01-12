@@ -83,14 +83,19 @@ public final class L0SegmentTypeAdapter extends AbstractProductTypeAdapter imple
 	
 	@Override
 	public void validateInputSearch(final AppDataJob job, final TaskTableAdapter taskTableAdapter) throws IpfPrepWorkerInputsMissingException {
-		final L0SegmentProduct product = L0SegmentProduct.of(job);	
-		
+		final L0SegmentProduct product = L0SegmentProduct.of(job);
+
+		//FIXME overriding product generated here are added to the L0SegmentProduct which is actually a copy of the job
+		// the job will never see this, see comment bellow for S1PRO-2175
 		if (product.isRfc()) {
 			handleRfcSegments(product, taskTableAdapter);
 		}
 		else {
 			handleNonRfSegments(job, product, taskTableAdapter);
 		}
+		// S1PRO-2175 set additional inputs to job to avoid auxQuery again for these inputs
+
+		job.setAdditionalInputs(product.overridingInputs());
 	}
 	
 	// S1PRO-1851: Handling of RFC product 

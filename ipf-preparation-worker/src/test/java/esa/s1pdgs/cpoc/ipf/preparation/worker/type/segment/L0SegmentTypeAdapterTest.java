@@ -386,6 +386,7 @@ public class L0SegmentTypeAdapterTest {
 
 		try {
 			uut.validateInputSearch(appDataJob1, taskTableAdapter);
+			assertEquals(2, appDataJob1.getAdditionalInputs().size());
 		} catch (IpfPrepWorkerInputsMissingException missingEx) {
 			fail("All necessary inputs shall be provided, selection logic have a bug!");
 		}
