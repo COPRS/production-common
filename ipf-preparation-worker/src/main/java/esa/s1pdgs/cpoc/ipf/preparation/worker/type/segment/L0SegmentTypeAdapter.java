@@ -70,32 +70,34 @@ public final class L0SegmentTypeAdapter extends AbstractProductTypeAdapter imple
 		final L0SegmentProduct product = L0SegmentProduct.of(job);
 		
 		try {			
-			for (final LevelSegmentMetadata metadata : metadataClient.getLevelSegments(product.getDataTakeId())) {				
+			for (final LevelSegmentMetadata metadata : metadataClient.getLevelSegments(product.getDataTakeId())) {
 				LOGGER.debug("Found {} in MDC for {}", metadata.getProductName(),  product.getProductName());
 				product.addSegmentMetadata(metadata);
 			}
 		}
 		catch (final MetadataQueryException e) {
 			LOGGER.debug("== preSearch: Exception- Missing segment for lastname {}. Trying next time...", product.getProductName());
-		}				
+		}
+
+		// S1PRO-2175 overriding inputs have to be added to the product here as this is the object which will
+		// actually update the job later
+		Map<String, List<LevelSegmentMetadata>> segmentsForPolaristions = product.segmentsForPolaristions();
+		List<LevelSegmentMetadata> inputSegmentData = new ArrayList<>();
+		segmentsForPolaristions.forEach((key, value) -> inputSegmentData.addAll(value));
+		product.overridingInputs(createOverridingInputs(taskTableAdapter, inputSegmentData, Collections.emptyList(), getInputReferences(taskTableAdapter, product.getProductType())));
 		return product;
-	}	
+	}
 	
 	@Override
 	public void validateInputSearch(final AppDataJob job, final TaskTableAdapter taskTableAdapter) throws IpfPrepWorkerInputsMissingException {
 		final L0SegmentProduct product = L0SegmentProduct.of(job);
 
-		//FIXME overriding product generated here are added to the L0SegmentProduct which is actually a copy of the job
-		// the job will never see this, see comment bellow for S1PRO-2175
 		if (product.isRfc()) {
 			handleRfcSegments(product, taskTableAdapter);
 		}
 		else {
 			handleNonRfSegments(job, product, taskTableAdapter);
 		}
-		// S1PRO-2175 set additional inputs to job to avoid auxQuery again for these inputs
-
-		job.setAdditionalInputs(product.overridingInputs());
 	}
 	
 	// S1PRO-1851: Handling of RFC product 
@@ -140,8 +142,6 @@ public final class L0SegmentTypeAdapter extends AbstractProductTypeAdapter imple
 				formatter);
 		product.setStartTime(sensingStart);
 		product.setStopTime(sensingStop);
-
-		product.overridingInputs(createOverridingInputs(taskTableAdapter, segmentsA, segmentsB, getInputReferences(taskTableAdapter, L0SegmentProduct.RFC_TYPE)));
 	}
 
 	private List<AppDataJobTaskInputs> createOverridingInputs(TaskTableAdapter taskTableAdapter, List<LevelSegmentMetadata> segmentsA, List<LevelSegmentMetadata> segmentsB, List<String> references) {
@@ -291,12 +291,6 @@ public final class L0SegmentTypeAdapter extends AbstractProductTypeAdapter imple
 			// Get sensing start and stop
 			sensingStart = getStartSensingDate(segmentsA, AppDataJobProduct.TIME_FORMATTER);
 			sensingStop = getStopSensingDate(segmentsA, AppDataJobProduct.TIME_FORMATTER);
-
-			product.overridingInputs(createOverridingInputs(
-					taskTableAdapter,
-					segmentsA,
-					Collections.emptyList(),
-					getInputReferences(taskTableAdapter, product.getProductType())));
 		} else {
 			final String polA = pols.get(0);
 			final String polB = pols.get(1);
@@ -324,7 +318,6 @@ public final class L0SegmentTypeAdapter extends AbstractProductTypeAdapter imple
 							+ ": " + extractProductSensingConsolidation(segmentsB));
 				}
 				fullCoverage = fullCoverageA && fullCoverageB;
-				product.overridingInputs(createOverridingInputs(taskTableAdapter, segmentsA, segmentsB, getInputReferences(taskTableAdapter, product.getProductType())));
 			} else {
 				fullCoverage = false;
 				missingMetadata.put(product.getProductName(), "Invalid double polarisation " + polA + " - " + polB);
