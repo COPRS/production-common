@@ -79,9 +79,10 @@ import esa.s1pdgs.cpoc.metadata.model.SearchMetadata;
 @Service
 public class EsServices {
 
-	private static final String LANDMASK_FOOTPRINT_INDEX_NAME = "landmask";
-	private static final String OCEANMASK_FOOTPRINT_INDEX_NAME = "oceanmask";
-	private static final String OVERPASSMASK_FOOTPRINT_INDEX_NAME = "overpassmask";
+	private static final String EW_SLC_MASK_FOOTPRINT_INDEX_NAME = "ewslcmask";
+	private static final String LAND_MASK_FOOTPRINT_INDEX_NAME = "landmask";
+	private static final String OCEAN_MASK_FOOTPRINT_INDEX_NAME = "oceanmask";
+	private static final String OVERPASS_MASK_FOOTPRINT_INDEX_NAME = "overpassmask";
 	private static final String REQUIRED_INSTRUMENT_ID_PATTERN = "(aux_pp1|aux_pp2|aux_cal|aux_ins)";
 	static final String REQUIRED_SATELLITE_ID_PATTERN = "(aux_.*)";
 
@@ -222,9 +223,10 @@ public class EsServices {
 	public void createMaskFootprintData(final MaskType maskType, final JSONObject product, final String id) throws Exception {
 		final String footprintIndexName;
 		switch (maskType) {
-			case LAND: footprintIndexName = LANDMASK_FOOTPRINT_INDEX_NAME; break;
-			case OCEAN:	footprintIndexName = OCEANMASK_FOOTPRINT_INDEX_NAME; break;
-			case OVERPASS: footprintIndexName = OVERPASSMASK_FOOTPRINT_INDEX_NAME; break;
+			case EW_SLC: footprintIndexName = EW_SLC_MASK_FOOTPRINT_INDEX_NAME; break;
+			case LAND: footprintIndexName = LAND_MASK_FOOTPRINT_INDEX_NAME; break;
+			case OCEAN:	footprintIndexName = OCEAN_MASK_FOOTPRINT_INDEX_NAME; break;
+			case OVERPASS: footprintIndexName = OVERPASS_MASK_FOOTPRINT_INDEX_NAME; break;
 			default: throw new IllegalArgumentException(String.format("Unsupported mask type '%s'", maskType));
 		}
 		try {
@@ -1754,7 +1756,7 @@ public class EsServices {
 			sourceBuilder.query(queryBuilder);
 			sourceBuilder.size(SIZE_LIMIT);
 
-			final SearchRequest request = new SearchRequest(LANDMASK_FOOTPRINT_INDEX_NAME);
+			final SearchRequest request = new SearchRequest(LAND_MASK_FOOTPRINT_INDEX_NAME);
 			request.source(sourceBuilder);
 
 			final SearchResponse searchResponse = elasticsearchDAO.search(request);
@@ -1765,6 +1767,41 @@ public class EsServices {
 			return 100;
 		} catch (final Exception e) {
 			throw new RuntimeException("Failed to check for sea coverage", e);
+		}
+	}
+	
+	public boolean isIntersectingEwSlcMask(final ProductFamily family, final String productName) throws MetadataNotPresentException {
+		
+		GetResponse response;
+		try {
+			response = elasticsearchDAO.get(new GetRequest(family.name().toLowerCase(), productName));
+		} catch (final IOException e) {
+			throw new RuntimeException("Failed to check for EW SLC mask intersection", e);
+		}
+		
+		if (!response.isExists()) {
+			throw new MetadataNotPresentException(productName);
+		}
+		try {
+			final GeoShapeQueryBuilder queryBuilder = QueryBuilders.geoShapeQuery("geometry",
+					extractPolygonFrom(response));
+			queryBuilder.relation(ShapeRelation.INTERSECTS);
+			LOGGER.debug("Using {}", queryBuilder);
+			final SearchSourceBuilder sourceBuilder = new SearchSourceBuilder();
+			sourceBuilder.query(queryBuilder);
+			sourceBuilder.size(SIZE_LIMIT);
+
+			final SearchRequest request = new SearchRequest(EW_SLC_MASK_FOOTPRINT_INDEX_NAME);
+			request.source(sourceBuilder);
+
+			final SearchResponse searchResponse = elasticsearchDAO.search(request);
+			if (isNotEmpty(searchResponse)) {
+				return true; 
+			} else {	
+				return false;
+			}
+		} catch (final Exception e) {
+			throw new RuntimeException("Failed to check for EW SLC mask intersection", e);
 		}
 	}
 	
@@ -1789,7 +1826,7 @@ public class EsServices {
 			sourceBuilder.query(queryBuilder);
 			sourceBuilder.size(SIZE_LIMIT);
 
-			final SearchRequest request = new SearchRequest(OVERPASSMASK_FOOTPRINT_INDEX_NAME);
+			final SearchRequest request = new SearchRequest(OVERPASS_MASK_FOOTPRINT_INDEX_NAME);
 			request.source(sourceBuilder);
 
 			final SearchResponse searchResponse = elasticsearchDAO.search(request);
@@ -1824,7 +1861,7 @@ public class EsServices {
 			sourceBuilder.query(queryBuilder);
 			sourceBuilder.size(SIZE_LIMIT);
 
-			final SearchRequest request = new SearchRequest(OCEANMASK_FOOTPRINT_INDEX_NAME);
+			final SearchRequest request = new SearchRequest(OCEAN_MASK_FOOTPRINT_INDEX_NAME);
 			request.source(sourceBuilder);
 
 			final SearchResponse searchResponse = elasticsearchDAO.search(request);
