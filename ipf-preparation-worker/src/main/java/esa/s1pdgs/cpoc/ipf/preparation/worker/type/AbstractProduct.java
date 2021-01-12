@@ -17,6 +17,10 @@ public abstract class AbstractProduct implements Product {
 	public final String getProductName() {
 		return product.getProductName();
 	}
+
+	public final String getProductType() {
+		return product.getProductType();
+	}
 	
 	public final String getMissionId() {
 		return product.getMissionId();
