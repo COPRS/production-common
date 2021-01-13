@@ -68,7 +68,7 @@ public class FtpOutboxClient extends AbstractOutboxClient {
 		try {
 			ftpClient.setFileType(FTP.BINARY_FILE_TYPE);
 
-			if (this.config.isFtpPasv()) {
+			if (this.config.isFtpPassiveMode()) {
 				this.logger.debug("using passive mode");
 				ftpClient.enterLocalPassiveMode();
 			} else {

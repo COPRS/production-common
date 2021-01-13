@@ -9,6 +9,8 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Configuration;
 
+import esa.s1pdgs.cpoc.common.utils.StringUtil;
+
 @Configuration
 @EnableConfigurationProperties
 @ConfigurationProperties(prefix = "dissemination-worker")
@@ -140,7 +142,7 @@ public class DisseminationWorkerProperties {
 		private Protocol protocol = Protocol.FTP;
 		private int port = -1; // --> not defined
 		private boolean implicitSsl = true;
-		private boolean ftpPasv = false;
+		private boolean ftpPassiveMode = false;
 		private String username = null;
 		private String password = null;
 		private String path = null;
@@ -272,12 +274,12 @@ public class DisseminationWorkerProperties {
 			this.bufferSize = bufferSize;
 		}
 
-		public boolean isFtpPasv() {
-			return this.ftpPasv;
+		public void setFtpPasv(String ftpPasv) {
+			this.ftpPassiveMode = parseBooleanOrDefault(ftpPasv, false);
 		}
 
-		public void setFtpPasv(boolean ftpPasv) {
-			this.ftpPasv = ftpPasv;
+		public boolean isFtpPassiveMode() {
+			return this.ftpPassiveMode;
 		}
 
 		public boolean isSkipExisting() {
@@ -300,10 +302,25 @@ public class DisseminationWorkerProperties {
 		public String toString() {
 			return "OutboxConfiguration [protocol=" + this.protocol + ", path=" + this.path + ", username="
 					+ this.username + ", password=<NOT_SHOWN>, keyFile=" + this.keyFile + ", hostname=" + this.hostname
-					+ ", port=" + this.port + ", bufferSize=" + this.bufferSize + ", ftpPasv=" + this.ftpPasv
-					+ ", keystoreFile=" + this.keystoreFile + ", keystorePass=<NOT_SHOWN>, truststoreFile="
-					+ this.truststoreFile + ", truststorePass=<NOT_SHOWN>, implicitSsl=" + this.implicitSsl
-					+ ", skipExisting=" + this.skipExisting + ", chmodScriptPath=" + this.chmodScriptPath + "]";
+					+ ", port=" + this.port + ", bufferSize=" + this.bufferSize + ", ftpPassiveMode="
+					+ this.ftpPassiveMode + ", keystoreFile=" + this.keystoreFile
+					+ ", keystorePass=<NOT_SHOWN>, truststoreFile=" + this.truststoreFile
+					+ ", truststorePass=<NOT_SHOWN>, implicitSsl=" + this.implicitSsl + ", skipExisting="
+					+ this.skipExisting + ", chmodScriptPath=" + this.chmodScriptPath + "]";
+		}
+
+		private static boolean parseBooleanOrDefault(String booleanStr, boolean defaultValue) {
+			if (StringUtil.isNotBlank(booleanStr)) {
+				if ("true".equalsIgnoreCase(booleanStr) || "yes".equalsIgnoreCase(booleanStr)
+						|| "on".equalsIgnoreCase(booleanStr) || "1".equals(booleanStr)) {
+					return true;
+				} else if ("false".equalsIgnoreCase(booleanStr) || "no".equalsIgnoreCase(booleanStr)
+						|| "off".equalsIgnoreCase(booleanStr) || "0".equals(booleanStr)) {
+					return false;
+				}
+			}
+
+			return defaultValue;
 		}
 	}
 
