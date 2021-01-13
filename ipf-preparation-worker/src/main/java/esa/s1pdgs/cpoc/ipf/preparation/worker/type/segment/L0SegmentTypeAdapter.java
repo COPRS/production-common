@@ -171,23 +171,35 @@ public final class L0SegmentTypeAdapter extends AbstractProductTypeAdapter imple
 	}
 
 	private List<AppDataJobTaskInputs> createOverridingInputs(TaskTableAdapter taskTableAdapter, List<LevelSegmentMetadata> segmentsA, List<LevelSegmentMetadata> segmentsB, List<String> references, String productType) {
-		final List<AppDataJobTaskInputs> overridingInputs = new ArrayList<>();
-		for (final String reference : references) {
-			final Optional<QueryUtils.TaskAndInput> optionalTask = QueryUtils.getTaskForReference(
-					reference,
-					taskTableAdapter
-			);
-			if (optionalTask.isPresent()) {
-				final QueryUtils.TaskAndInput task = optionalTask.get();
-				final AppDataJobTaskInputs taskInputs = new AppDataJobTaskInputs(
-						task.getName(),
-						task.getVersion(),
-						toInputs(reference, task.getInput(), segmentsA, segmentsB, productType)
-				);
-				overridingInputs.add(taskInputs);
+
+		// FIXME these overriding inputs are added as additional inputs to job later
+		// AuxQuery however expects a full ist of inputs (those with results and those without results yet)
+		// It would perhaps be better to have e.g. a field "preselectedInputs" at the job
+		// and leave additionalInputs empty, as it is used by AuxQuery only
+		List<AppDataJobTaskInputs> appDataJobTaskInputs = QueryUtils.buildInitialInputs(taskTableAdapter);
+
+		for(AppDataJobTaskInputs taskInputs : appDataJobTaskInputs) {
+			List<AppDataJobInput> mergedInputs = new ArrayList<>();
+
+			for(AppDataJobInput input : taskInputs.getInputs()) {
+				String inputReference = input.getTaskTableInputReference();
+				if(references.contains(inputReference)) {
+					mergedInputs.add(
+							new AppDataJobInput(
+									inputReference,
+									input.getFileType(),
+									input.getFileNameType(),
+									input.isMandatory(),
+									toAppDataJobFiles(segmentsA, segmentsB)));
+				} else {
+					mergedInputs.add(input);
+				}
 			}
+
+			taskInputs.setInputs(mergedInputs);
 		}
-		return overridingInputs;
+
+		return appDataJobTaskInputs;
 	}
 
 	private List<String> getInputReferences(final TaskTableAdapter taskTableAdapter, final String forType) {
@@ -228,45 +240,25 @@ public final class L0SegmentTypeAdapter extends AbstractProductTypeAdapter imple
 				.collect(Collectors.toList());
 	}
 
-	private List<AppDataJobInput> toInputs(
-			final String inputReference, 
-			final TaskTableInput input, 
-			final List<LevelSegmentMetadata> segmentsA, 
-			final List<LevelSegmentMetadata> segmentsB,
-			final String productType
-	) {
-		final TaskTableFileNameType fileNameType = input.alternativesOrdered()
-				.filter(a -> a.getFileType().equals(productType))
-				.findAny()
-				.map(TaskTableInputAlternative::getFileNameType).orElse(TaskTableFileNameType.BLANK);
-
+	private List<AppDataJobFile> toAppDataJobFiles(List<LevelSegmentMetadata> segmentsA, List<LevelSegmentMetadata> segmentsB) {
 		final List<AppDataJobFile> files = new ArrayList<>();
 		for (final LevelSegmentMetadata segment : segmentsA) {
 			files.add(new AppDataJobFile(
-					segment.getProductName(), 
-					segment.getKeyObjectStorage(), 
-					segment.getValidityStart(), 
+					segment.getProductName(),
+					segment.getKeyObjectStorage(),
+					segment.getValidityStart(),
 					segment.getValidityStop()
 			));
 		}
 		for (final LevelSegmentMetadata segment : segmentsB) {
 			files.add(new AppDataJobFile(
-					segment.getProductName(), 
-					segment.getKeyObjectStorage(), 
-					segment.getValidityStart(), 
+					segment.getProductName(),
+					segment.getKeyObjectStorage(),
+					segment.getValidityStart(),
 					segment.getValidityStop()
 			));
 		}
-
-		return Collections.singletonList(
-				new AppDataJobInput(
-						inputReference,
-						productType,
-						fileNameType.toString(),
-						input.getMandatory().equals(TaskTableMandatoryEnum.YES),
-						files
-				)
-		);
+		return files;
 	}
 
 	private void handleNonRfSegments(final AppDataJob job, final L0SegmentProduct product, TaskTableAdapter taskTableAdapter)
