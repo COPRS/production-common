@@ -170,7 +170,11 @@ public final class L0SegmentTypeAdapter extends AbstractProductTypeAdapter imple
 		product.setStopTime(sensingStop);
 	}
 
-	private List<AppDataJobTaskInputs> createOverridingInputs(TaskTableAdapter taskTableAdapter, List<LevelSegmentMetadata> segmentsA, List<LevelSegmentMetadata> segmentsB, List<String> references, String productType) {
+	private List<AppDataJobTaskInputs> createOverridingInputs(final TaskTableAdapter taskTableAdapter,
+															  final List<LevelSegmentMetadata> segmentsA,
+															  final List<LevelSegmentMetadata> segmentsB,
+															  final List<String> references,
+															  final String productType) {
 
 		// FIXME these overriding inputs are added as additional inputs to job later
 		// AuxQuery however expects a full ist of inputs (those with results and those without results yet)
@@ -182,13 +186,26 @@ public final class L0SegmentTypeAdapter extends AbstractProductTypeAdapter imple
 			List<AppDataJobInput> mergedInputs = new ArrayList<>();
 
 			for(AppDataJobInput input : taskInputs.getInputs()) {
-				String inputReference = input.getTaskTableInputReference();
-				if(references.contains(inputReference)) {
+
+				final Optional<QueryUtils.TaskAndInput> optionalTask = QueryUtils.getTaskForReference(
+						input.getTaskTableInputReference(),
+						taskTableAdapter
+				);
+
+				final String inputReference = input.getTaskTableInputReference();
+				if(references.contains(inputReference) && optionalTask.isPresent()) {
+
+					final TaskTableFileNameType fileNameType = optionalTask.get().getInput().alternativesOrdered()
+							.filter(a -> a.getFileType().equals(productType))
+							.findAny()
+							.map(TaskTableInputAlternative::getFileNameType).orElse(TaskTableFileNameType.BLANK);
+
+
 					mergedInputs.add(
 							new AppDataJobInput(
 									inputReference,
-									input.getFileType(),
-									input.getFileNameType(),
+									productType,
+									fileNameType.toString(),
 									input.isMandatory(),
 									toAppDataJobFiles(segmentsA, segmentsB)));
 				} else {
