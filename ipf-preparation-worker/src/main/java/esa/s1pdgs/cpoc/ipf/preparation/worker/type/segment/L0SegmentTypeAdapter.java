@@ -104,7 +104,13 @@ public final class L0SegmentTypeAdapter extends AbstractProductTypeAdapter imple
 		Map<String, List<LevelSegmentMetadata>> segmentsForPolaristions = product.segmentsForPolaristions();
 		List<LevelSegmentMetadata> inputSegmentData = new ArrayList<>();
 		segmentsForPolaristions.forEach((key, value) -> inputSegmentData.addAll(value));
-		product.overridingInputs(createOverridingInputs(taskTableAdapter, inputSegmentData, Collections.emptyList(), getInputReferences(taskTableAdapter, product.getProductType())));
+		product.overridingInputs(
+				createOverridingInputs(
+						taskTableAdapter,
+						inputSegmentData,
+						Collections.emptyList(),
+						getInputReferences(taskTableAdapter, product.getProductType()),
+						product.getProductType()));
 		return product;
 	}
 	
@@ -164,7 +170,7 @@ public final class L0SegmentTypeAdapter extends AbstractProductTypeAdapter imple
 		product.setStopTime(sensingStop);
 	}
 
-	private List<AppDataJobTaskInputs> createOverridingInputs(TaskTableAdapter taskTableAdapter, List<LevelSegmentMetadata> segmentsA, List<LevelSegmentMetadata> segmentsB, List<String> references) {
+	private List<AppDataJobTaskInputs> createOverridingInputs(TaskTableAdapter taskTableAdapter, List<LevelSegmentMetadata> segmentsA, List<LevelSegmentMetadata> segmentsB, List<String> references, String productType) {
 		final List<AppDataJobTaskInputs> overridingInputs = new ArrayList<>();
 		for (final String reference : references) {
 			final Optional<QueryUtils.TaskAndInput> optionalTask = QueryUtils.getTaskForReference(
@@ -176,7 +182,7 @@ public final class L0SegmentTypeAdapter extends AbstractProductTypeAdapter imple
 				final AppDataJobTaskInputs taskInputs = new AppDataJobTaskInputs(
 						task.getName(),
 						task.getVersion(),
-						toInputs(reference, task.getInput(), segmentsA, segmentsB)
+						toInputs(reference, task.getInput(), segmentsA, segmentsB, productType)
 				);
 				overridingInputs.add(taskInputs);
 			}
@@ -226,10 +232,11 @@ public final class L0SegmentTypeAdapter extends AbstractProductTypeAdapter imple
 			final String inputReference, 
 			final TaskTableInput input, 
 			final List<LevelSegmentMetadata> segmentsA, 
-			final List<LevelSegmentMetadata> segmentsB
+			final List<LevelSegmentMetadata> segmentsB,
+			final String productType
 	) {
 		final TaskTableFileNameType fileNameType = input.alternativesOrdered()
-				.filter(a -> a.getFileType().equals(L0SegmentProduct.RFC_TYPE))
+				.filter(a -> a.getFileType().equals(productType))
 				.findAny()
 				.map(TaskTableInputAlternative::getFileNameType).orElse(TaskTableFileNameType.BLANK);
 
@@ -254,7 +261,7 @@ public final class L0SegmentTypeAdapter extends AbstractProductTypeAdapter imple
 		return Collections.singletonList(
 				new AppDataJobInput(
 						inputReference,
-						L0SegmentProduct.RFC_TYPE,
+						productType,
 						fileNameType.toString(),
 						input.getMandatory().equals(TaskTableMandatoryEnum.YES),
 						files
