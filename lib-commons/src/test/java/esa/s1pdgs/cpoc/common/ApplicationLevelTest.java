@@ -16,7 +16,7 @@ public class ApplicationLevelTest {
      */
     @Test
     public void testValueOf() {
-        assertEquals(9, ApplicationLevel.values().length);
+        assertEquals(10, ApplicationLevel.values().length);
         assertEquals(ApplicationLevel.L0, ApplicationLevel.valueOf("L0"));
         assertEquals(ApplicationLevel.L1, ApplicationLevel.valueOf("L1"));
         assertEquals(ApplicationLevel.L2, ApplicationLevel.valueOf("L2"));
@@ -25,6 +25,7 @@ public class ApplicationLevelTest {
         assertEquals(ApplicationLevel.S3_L1, ApplicationLevel.valueOf("S3_L1"));
         assertEquals(ApplicationLevel.S3_L2, ApplicationLevel.valueOf("S3_L2"));
         assertEquals(ApplicationLevel.S3_PDU, ApplicationLevel.valueOf("S3_PDU"));
+        assertEquals(ApplicationLevel.SPP_MBU, ApplicationLevel.valueOf("SPP_MBU"));
         assertEquals(ApplicationLevel.SPP_OBS, ApplicationLevel.valueOf("SPP_OBS"));
     }
 }
