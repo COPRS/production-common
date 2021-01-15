@@ -1,6 +1,7 @@
 package esa.s1pdgs.cpoc.common;
 
 public enum MaskType {
+	EW_SLC("MSK_EW_SLC"),
 	LAND("MSK__LAND_"),
     OCEAN("MSK_OCEAN_"),
 	OVERPASS("MSK_OVRPAS");

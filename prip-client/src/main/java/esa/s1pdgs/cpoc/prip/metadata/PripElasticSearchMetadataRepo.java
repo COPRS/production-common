@@ -43,6 +43,8 @@ import esa.s1pdgs.cpoc.prip.model.GeoShapePolygon;
 import esa.s1pdgs.cpoc.prip.model.PripGeoCoordinate;
 import esa.s1pdgs.cpoc.prip.model.PripGeoShape;
 import esa.s1pdgs.cpoc.prip.model.PripMetadata;
+import esa.s1pdgs.cpoc.prip.model.PripSortTerm;
+import esa.s1pdgs.cpoc.prip.model.PripSortTerm.PripSortOrder;
 import esa.s1pdgs.cpoc.prip.model.filter.PripBooleanFilter;
 import esa.s1pdgs.cpoc.prip.model.filter.PripQueryFilter;
 import esa.s1pdgs.cpoc.prip.model.filter.PripRangeValueFilter;
@@ -69,25 +71,25 @@ public class PripElasticSearchMetadataRepo implements PripMetadataRepository {
 
 		LOGGER.info("saving PRIP metadata {}", pripMetadata);
 
-		IndexRequest request = new IndexRequest(ES_INDEX).id(pripMetadata.getName())
+		final IndexRequest request = new IndexRequest(ES_INDEX).id(pripMetadata.getName())
 				.source(pripMetadata.toString(), XContentType.JSON);
 		try {
-			IndexResponse indexResponse = restHighLevelClient.index(request, RequestOptions.DEFAULT);
+			final IndexResponse indexResponse = this.restHighLevelClient.index(request, RequestOptions.DEFAULT);
 
 			if (indexResponse.getResult() == DocWriteResponse.Result.CREATED
 					|| indexResponse.getResult() == DocWriteResponse.Result.UPDATED) {
 				LOGGER.info("saving PRIP metadata successful");
 			} else {
-				ReplicationResponse.ShardInfo shardInfo = indexResponse.getShardInfo();
+				final ReplicationResponse.ShardInfo shardInfo = indexResponse.getShardInfo();
 				if (shardInfo.getFailed() > 0) {
 					LOGGER.error("could not save PRIP metadata");
-					for (ReplicationResponse.ShardInfo.Failure failure : shardInfo.getFailures()) {
-						String reason = failure.reason();
+					for (final ReplicationResponse.ShardInfo.Failure failure : shardInfo.getFailures()) {
+						final String reason = failure.reason();
 						LOGGER.error(reason);
 					}
 				}
 			}
-		} catch (IOException e) {
+		} catch (final IOException e) {
 			LOGGER.error("could not save PRIP metadata", e);
 		}
 	}
@@ -97,25 +99,25 @@ public class PripElasticSearchMetadataRepo implements PripMetadataRepository {
 
 		LOGGER.info("finding PRIP metadata with id {}", id);
 
-		SearchSourceBuilder sourceBuilder = new SearchSourceBuilder();
+		final SearchSourceBuilder sourceBuilder = new SearchSourceBuilder();
 		sourceBuilder.query(QueryBuilders.matchQuery(PripMetadata.FIELD_NAMES.ID.fieldName(), id));
 
-		SearchRequest searchRequest = new SearchRequest(ES_INDEX);
+		final SearchRequest searchRequest = new SearchRequest(ES_INDEX);
 		searchRequest.source(sourceBuilder);
 
 		PripMetadata pripMetadata = null;
 
 		try {
-			SearchResponse searchResponse = restHighLevelClient.search(searchRequest, RequestOptions.DEFAULT);
+			final SearchResponse searchResponse = this.restHighLevelClient.search(searchRequest, RequestOptions.DEFAULT);
 			LOGGER.trace("response {}", searchResponse);
 
 			if (searchResponse.getHits().getHits().length > 0) {
-				pripMetadata = mapSearchHitToPripMetadata(searchResponse.getHits().getHits()[0]);
+				pripMetadata = this.mapSearchHitToPripMetadata(searchResponse.getHits().getHits()[0]);
 			} else {
 				LOGGER.warn("PRIP metadata with id {} not found", id);
 			}
 
-		} catch (IOException e) {
+		} catch (final IOException e) {
 			LOGGER.warn("error while finding PRIP metadata", e);
 		}
 		LOGGER.info("finding PRIP metadata successful");
@@ -123,24 +125,24 @@ public class PripElasticSearchMetadataRepo implements PripMetadataRepository {
 	}
 
 	@Override
-	public List<PripMetadata> findAll(Optional<Integer> top, Optional<Integer> skip) {
+	public List<PripMetadata> findAll(Optional<Integer> top, Optional<Integer> skip, List<PripSortTerm> sortTerms) {
 		LOGGER.info("finding PRIP metadata");
-		return query(null, top, skip);
+		return this.query(null, top, skip, sortTerms);
 	}
 
 	@Override
 	public List<PripMetadata> findWithFilters(List<PripQueryFilter> filters, Optional<Integer> top,
-			Optional<Integer> skip) {
+			Optional<Integer> skip, List<PripSortTerm> sortTerms) {
 		LOGGER.info("finding PRIP metadata with filters {}", filters);
-		
+
 		final BoolQueryBuilder queryBuilder = QueryBuilders.boolQuery();
 		buildQueryWithFilters(filters, queryBuilder);
-		
-		return query(queryBuilder, top, skip);
+
+		return this.query(queryBuilder, top, skip, sortTerms);
 	}
-	
+
 	private static void buildQueryWithFilters(List<? extends PripQueryFilter> filters, BoolQueryBuilder queryBuilder) {
-		for (PripQueryFilter filter : CollectionUtil.nullToEmpty(filters)) {
+		for (final PripQueryFilter filter : CollectionUtil.nullToEmpty(filters)) {
 			if (filter instanceof PripRangeValueFilter) {
 				buildQueryWithRangeValueFilter((PripRangeValueFilter<?>)filter, queryBuilder);
 			}else if (filter instanceof PripTextFilter) {
@@ -152,7 +154,7 @@ public class PripElasticSearchMetadataRepo implements PripMetadataRepository {
 			}
 		}
 	}
-	
+
 	private static void buildQueryWithRangeValueFilter(PripRangeValueFilter<?> filter, BoolQueryBuilder queryBuilder) {
 		switch (filter.getOperator()) {
 		case LT:
@@ -183,15 +185,15 @@ public class PripElasticSearchMetadataRepo implements PripMetadataRepository {
 		switch (filter.getFunction()) {
 		case STARTS_WITH:
 			queryBuilder
-					.must(QueryBuilders.wildcardQuery(filter.getFieldName(), String.format("%s*", filter.getText())));
+			.must(QueryBuilders.wildcardQuery(filter.getFieldName(), String.format("%s*", filter.getText())));
 			break;
 		case ENDS_WITH:
 			queryBuilder
-					.must(QueryBuilders.wildcardQuery(filter.getFieldName(), String.format("*%s", filter.getText())));
+			.must(QueryBuilders.wildcardQuery(filter.getFieldName(), String.format("*%s", filter.getText())));
 			break;
 		case CONTAINS:
 			queryBuilder
-					.must(QueryBuilders.wildcardQuery(filter.getFieldName(), String.format("*%s*", filter.getText())));
+			.must(QueryBuilders.wildcardQuery(filter.getFieldName(), String.format("*%s*", filter.getText())));
 			break;
 		case EQUALS:
 			queryBuilder.must(QueryBuilders.matchQuery(filter.getFieldName(), filter.getText())
@@ -202,7 +204,7 @@ public class PripElasticSearchMetadataRepo implements PripMetadataRepository {
 					String.format("not supported filter function: %s", filter.getFunction().name()));
 		}
 	}
-	
+
 	private static void buildQueryWithBooleanFilter(PripBooleanFilter filter, BoolQueryBuilder queryBuilder) {
 		switch (filter.getFunction()) {
 		case EQUALS:
@@ -217,46 +219,72 @@ public class PripElasticSearchMetadataRepo implements PripMetadataRepository {
 		}
 	}
 
-	private List<PripMetadata> query(BoolQueryBuilder queryBuilder, Optional<Integer> top, Optional<Integer> skip) {
-		SearchSourceBuilder sourceBuilder = new SearchSourceBuilder();
+	private List<PripMetadata> query(BoolQueryBuilder queryBuilder, Optional<Integer> top, Optional<Integer> skip, List<PripSortTerm> sortTerms) {
+		final SearchSourceBuilder sourceBuilder = new SearchSourceBuilder();
+
 		if (queryBuilder != null) {
 			sourceBuilder.query(queryBuilder);
 		}
+
+		// paging
 		if (skip.isPresent() && 0 <= skip.get()) {
 			sourceBuilder.from(skip.get());
 		}
-		if (top.isPresent() && 0 <= top.get() && top.get() <= maxSearchHits) {
+		if (top.isPresent() && 0 <= top.get() && top.get() <= this.maxSearchHits) {
 			sourceBuilder.size(top.get());
 		} else {
-			sourceBuilder.size(maxSearchHits);
+			sourceBuilder.size(this.maxSearchHits);
 		}
-		sourceBuilder.sort(PripMetadata.FIELD_NAMES.CREATION_DATE.fieldName(), SortOrder.ASC);
 
-		SearchRequest searchRequest = new SearchRequest(ES_INDEX);
+		// sorting
+		if (CollectionUtil.isNotEmpty(sortTerms)) {
+			for (final PripSortTerm sortTerm : sortTerms) {
+				final String sortFieldName = sortTerm.getSortFieldName().fieldName();
+				final PripSortOrder sortOrder = sortTerm.getSortOrderOrDefault(PripSortOrder.ASCENDING);
+
+				sourceBuilder.sort(sortFieldName, sortOrderFor( sortOrder.abbreviation()));
+			}
+		} else {
+			// when no sorting is specified, sort by creation date in ascending order
+			sourceBuilder.sort(PripMetadata.FIELD_NAMES.CREATION_DATE.fieldName(), SortOrder.ASC);
+		}
+
+		final SearchRequest searchRequest = new SearchRequest(ES_INDEX);
 		searchRequest.source(sourceBuilder);
 
-		List<PripMetadata> metadata = new ArrayList<>();
+		final List<PripMetadata> metadata = new ArrayList<>();
 
 		LOGGER.debug("search request: {}", searchRequest);
 
 		try {
-			SearchResponse searchResponse = restHighLevelClient.search(searchRequest, RequestOptions.DEFAULT);
+			final SearchResponse searchResponse = this.restHighLevelClient.search(searchRequest, RequestOptions.DEFAULT);
 			LOGGER.debug("response: {}", searchResponse);
 
-			for (SearchHit hit : searchResponse.getHits().getHits()) {
-				metadata.add(mapSearchHitToPripMetadata(hit));
+			for (final SearchHit hit : searchResponse.getHits().getHits()) {
+				metadata.add(this.mapSearchHitToPripMetadata(hit));
 			}
 
-		} catch (IOException e) {
+		} catch (final IOException e) {
 			LOGGER.warn("error while finding PRIP metadata", e);
 		}
 		LOGGER.info("finding PRIP metadata successful, number of hits {}", metadata.size());
 		return metadata;
 	}
 
+	private static SortOrder sortOrderFor(String sortOrder) {
+		if (SortOrder.ASC.name().equalsIgnoreCase(sortOrder) || SortOrder.ASC.toString().equalsIgnoreCase(sortOrder)) {
+			return SortOrder.ASC;
+		}
+		if (SortOrder.DESC.name().equalsIgnoreCase(sortOrder) || SortOrder.DESC.toString().equalsIgnoreCase(sortOrder)) {
+			return SortOrder.DESC;
+		}
+
+		throw new IllegalArgumentException(String.format("sort order not supported: %s", sortOrder));
+	}
+
 	private PripMetadata mapSearchHitToPripMetadata(SearchHit hit) {
-		Map<String, Object> sourceAsMap = hit.getSourceAsMap();
-		PripMetadata pm = new PripMetadata();
+		final Map<String, Object> sourceAsMap = hit.getSourceAsMap();
+		final PripMetadata pm = new PripMetadata();
 
 		pm.setId(UUID.fromString((String) sourceAsMap.get(PripMetadata.FIELD_NAMES.ID.fieldName())));
 		pm.setObsKey((String) sourceAsMap.get(PripMetadata.FIELD_NAMES.OBS_KEY.fieldName()));
@@ -281,15 +309,15 @@ public class PripElasticSearchMetadataRepo implements PripMetadataRepository {
 		}
 
 		final List<Checksum> checksumList = new ArrayList<>();
-		for (Map<String, Object> c : (List<Map<String, Object>>) sourceAsMap
+		for (final Map<String, Object> c : (List<Map<String, Object>>) sourceAsMap
 				.get(PripMetadata.FIELD_NAMES.CHECKSUM.fieldName())) {
-			Checksum checksum = new Checksum();
+			final Checksum checksum = new Checksum();
 			checksum.setAlgorithm((String) c.get(Checksum.FIELD_NAMES.ALGORITHM.fieldName()));
 			checksum.setValue((String) c.get(Checksum.FIELD_NAMES.VALUE.fieldName()));
 			checksumList.add(checksum);
 		}
 		pm.setChecksums(checksumList);
-		
+
 		pm.setFootprint(this.mapToGeoShapePolygon(sourceAsMap));
 		
 		pm.setAttributes(sourceAsMap.entrySet().stream().filter(p -> p.getKey().startsWith("attr_"))
@@ -333,16 +361,16 @@ public class PripElasticSearchMetadataRepo implements PripMetadataRepository {
 			final List<Object> footprintCoordinatesOuterArray = (List<Object>) footprintJson
 					.get(PripGeoShape.FIELD_NAMES.COORDINATES.fieldName());
 			final List<Object> footprintCoordinatesInnerArray = (List<Object>) footprintCoordinatesOuterArray.get(0);
-			
-			
-			List<PripGeoCoordinate> pripGeoCoordinates = new ArrayList<>(); 
+
+
+			final List<PripGeoCoordinate> pripGeoCoordinates = new ArrayList<>();
 			for (final Object coordPair : Objects.requireNonNull(footprintCoordinatesInnerArray)) {
 				final List<Number> coords = (List<Number>) coordPair;
 				final double lon = coords.get(0).doubleValue();
 				final double lat = coords.get(1).doubleValue();
 				pripGeoCoordinates.add(new PripGeoCoordinate(lon, lat));
 			}
-			
+
 			return new GeoShapePolygon(pripGeoCoordinates);
 		}
 
@@ -352,13 +380,13 @@ public class PripElasticSearchMetadataRepo implements PripMetadataRepository {
 	@Override
 	public int countAll() {
 		LOGGER.info("counting PRIP metadata");
-		return count(null);
+		return this.count(null);
 	}
-	
+
 	@Override
 	public int countWithFilters(List<PripQueryFilter> filters) {
 		LOGGER.info("counting PRIP metadata with filters {}", filters);
-		
+
 		final BoolQueryBuilder queryBuilder = QueryBuilders.boolQuery();
 		buildQueryWithFilters(filters, queryBuilder);
 
@@ -367,18 +395,18 @@ public class PripElasticSearchMetadataRepo implements PripMetadataRepository {
 
 	private int count(BoolQueryBuilder queryBuilder) {
 		int count = 0;
-		SearchSourceBuilder searchSourceBuilder = new SearchSourceBuilder();
+		final SearchSourceBuilder searchSourceBuilder = new SearchSourceBuilder();
 		if (queryBuilder != null) {
 			searchSourceBuilder.query(queryBuilder);
 		}
 
-		CountRequest countRequest = new CountRequest(ES_INDEX);
+		final CountRequest countRequest = new CountRequest(ES_INDEX);
 		countRequest.source(searchSourceBuilder);
 
 		try {
-			count = new Long(restHighLevelClient.count(countRequest, RequestOptions.DEFAULT).getCount()).intValue();
+			count = new Long(this.restHighLevelClient.count(countRequest, RequestOptions.DEFAULT).getCount()).intValue();
 			LOGGER.info("counting PRIP metadata successful, number of hits {}", count);
-		} catch (IOException e) {
+		} catch (final IOException e) {
 			LOGGER.error("error while counting PRIP metadata", e);
 		}
 		return count;

@@ -46,6 +46,8 @@ public enum ProductFamily {
     PLAN_AND_REPORT_ZIP,
 
     //SPP types
+    SPP_MBU_JOB,
+    SPP_MBU,
     SPP_OBS_JOB,
     SPP_OBS,
     // SPP compressed types
