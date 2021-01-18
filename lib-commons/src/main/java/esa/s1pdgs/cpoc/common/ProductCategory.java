@@ -32,6 +32,7 @@ public enum ProductCategory {
     LEVEL_REPORTS(LevelReportDto.class), 
     LEVEL_SEGMENTS(ProductionEvent.class),
     SPP_PRODUCTS(ProductionEvent.class),
+    SPP_MBU_PRODUCTS(ProductionEvent.class),
     DEBUG(ProductionEvent.class),
     COMPRESSION_JOBS(CompressionJob.class),
     COMPRESSED_PRODUCTS(CompressionEvent.class),
@@ -99,6 +100,8 @@ public enum ProductCategory {
 	        case L1C:
 	        case L2A:
 	        	return ProductCategory.LEVEL_INPUT;
+	        case SPP_MBU:
+	        	return ProductCategory.SPP_MBU_PRODUCTS;
 	        case SPP_OBS:
 	        	return ProductCategory.SPP_PRODUCTS;
 	        case DEBUG:
