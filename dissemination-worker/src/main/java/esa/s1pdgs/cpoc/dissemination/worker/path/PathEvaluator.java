@@ -27,6 +27,9 @@ public interface PathEvaluator {
 		if ("myocean".equalsIgnoreCase(config.getPathEvaluator())) {
 			return new MyOceanPathEvaluator();
 		}
+		if ("mbu".equalsIgnoreCase(config.getPathEvaluator())) {
+			return new MbuPathEvaluator();
+		}
 		return NULL;
 	}
 
